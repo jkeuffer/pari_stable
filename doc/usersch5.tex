@@ -5,14 +5,15 @@
 %
 % Permission is granted to copy, distribute and/or modify this document
 % under the terms of the GNU General Public License
-\chapter{Technical Reference Guide for Low-Level Functions}
+\chapter{Technical Reference Guide: the basics}
 
-In this chapter, we describe all public low-level functions of the
-PARI library. These essentially include functions for handling all the PARI
-types. Higher level functions, such as arithmetic or transcendental
-functions, are described in Chapter~3 of the GP user's manual. A general
-introduction to the major concepts of PARI programming can be found in
-Chapter~4.
+In the following chapters, we describe all public low-level functions of the
+PARI library. These include specialized functions for handling all the PARI
+types. Simple higher level functions, such as arithmetic or transcendental
+functions, are described in Chapter~3 of the GP user's manual; we will
+eventually see more general or flexible versions in the chapters to come. A
+general introduction to the major concepts of PARI programming can be found
+in Chapter~4, which you should really read first.
 
 Many other undocumented functions can be found throughout the source code.
 These private functions are more efficient than the library wrappers, but
@@ -192,6 +193,10 @@ The types are internally ordered and this simplifies the implementation of
 commutative binary operations (e.g addition, gcd). Avoid using the ordering
 directly, as it may change in the future; use type grouping macros
 instead (\secref{se:typegroup}).
+
+\fun{const char*}{type_name}{long t} given a type number \kbd{t} this routine
+returns a string containing its symbolic name. E.g \kbd{type\_name(\typ{INT})}
+returns \kbd{"\typ{INT}"}. The return value is read-only.
 
 \fun{long}{lg}{GEN x} returns the length of~\kbd{x} in \B-bit words.
 
@@ -773,6 +778,386 @@ first. Mostly for debugging purposes.
 \fun{GEN}{getheap}{} a simple wrapper around \kbd{traverseheap}. Returns  a
 two-component row vector giving the number of objects on the heap and the
 amount of memory they occupy in long words.
+
+\section{Handling user and temp variables}
+Low-level implementation of user / temporary variables is liable to change. We
+describe it nevertheless for completeness. Currently variables are
+implemented by a single array of values divided in 3 zones: 0--\kbd{nvar}
+(user variables), \kbd{max\_avail}--\kbd{MAXVARN} (temporary variables),
+and \kbd{nvar+1}--\kbd{max\_avail-1} (pool of free variable numbers).
+
+\subsec{Low-level}
+
+\fun{void}{pari_var_init}{}: a small part of \kbd{pari\_init}. Resets
+variable counters \kbd{nvar} and \kbd{max\_avail}, notwithstanding existing
+variables! In effect, this even deletes \kbd{x}. Don't use it.
+
+\fun{long}{pari_var_next}{}: returns \kbd{nvar}, the number of the next user
+variable we can create.
+
+\fun{long}{pari_var_next_temp}{} returns \kbd{max\_avail}, the number of the
+next temp variable we can create.
+
+\fun{void}{pari_var_create}{entree *ep} low-level initialization of an
+\kbd{EpVAR}.
+
+\noindent The obsolete function \fun{long}{manage_var}{long n, entree *ep}
+is kept for backward compatibility only. Don't use it.
+
+\subsec{User variables}
+
+\fun{long}{fetch_user_var}{char *s} returns a user variable whose name
+is \kbd{s}, creating it is needed (and using an existing variable otherwise).
+Returns its variable number.
+
+\fun{entree*}{fetch_named_var}{char *s} as \kbd{fetch\_user\_var}, but
+returns an \kbd{entree*} suitable for inclusion in the interpreter hashlists
+of symbols, not a variable number. \kbd{fetch\_user\_var} is a trivial
+wrapper.
+
+\fun{GEN}{fetch_var_value}{long v} returns a shallow copy of the
+current value of the variable numbered $v$. Return \kbd{NULL} for a temporary
+variable.
+
+\fun{void}{delete_named_var}{entree *ep} delete variable created by
+\kbd{fetch\_named\_var}, which must be the last one created. Don't use this:
+if a variable is to be deleted, it should be a temp.
+
+\fun{entree*}{is_entry}{const char *s} returns the \kbd{entree*} associated
+to an identifier \kbd{s} (variable or function), from the interpreter
+hashtables. Return \kbd{NULL} is the identifier is unknown.
+
+\subsec{Temporary variables}
+
+\fun{long}{fetch_var}{void} returns the number of a new temporary variable
+(decreasing \kbd{max\_avail}).
+
+\fun{long}{delete_var}{void} delete latest temp variable created and return
+the number of previous one.
+
+\fun{void}{name_var}{long n, char *s} rename temporary variable number
+\kbd{n} to \kbd{s}; mostly useful for nicer printout. Error when trying to
+rename a user variable: use \kbd{fetch\_named\_var} to get a user variable of
+the right name in the first place.
+
+\section{Adding functions to PARI}
+\subsec{Nota Bene}.
+%
+As mentioned in the \kbd{COPYING} file, modified versions of the PARI package
+can be distributed under the conditions of the GNU General Public License. If
+you do modify PARI, however, it is certainly for a good reason, and we
+would like to know about it, so that everyone can benefit from your changes.
+There is then a good chance that your improvements are incorporated into the
+next release.
+
+We classify changes to PARI into four rough classes, where changes of the
+first three types are almost certain to be accepted. The first type includes
+all improvements to the documentation, in a broad sense. This includes
+correcting typos or inacurracies of course, but also items which are not
+really covered in this document, e.g.~if you happen to write a tutorial,
+or pieces of code exemplifying fine points unduly omitted in the present
+manual.
+
+The second type is to expand or modify the configuration routines and skeleton
+files (the \kbd{Configure} script and anything in the \kbd{config/}
+subdirectory) so that compilation is possible (or easier, or more efficient)
+on an operating system previously not catered for. This includes discovering
+and removing idiosyncrasies in the code that would hinder its portability.
+
+The third type is to modify existing (mathematical) code, either to correct
+bugs, to add new functionalities to existing functions, or to improve their
+efficiency.
+
+Finally the last type is to add new functions to PARI. We explain here how
+to do this, so that in particular the new function can be called from \kbd{gp}.
+
+\subsec{Coding guidelines}.\label{se:coding_guidelines}
+\noindent
+Code your function in a file of its own, using as a guide other functions
+in the PARI sources. One important thing to remember is to clean the stack
+before exiting your main function, since otherwise successive calls to
+the function clutters the stack with unnecessary garbage, and stack
+overflow occurs sooner. Also, if it returns a \kbd{GEN} and you want it
+to be accessible to \kbd{gp}, you have to make sure this \kbd{GEN} is
+suitable for \kbd{gerepileupto} (see \secref{se:garbage}).
+
+If error messages or warnings are to be generated in your function, use
+\kbd{pari\_err} and \kbd{pari\_warn} respectively.
+Recall that \kbd{pari\_err} does not return but ends with a \kbd{longjmp}
+statement. As well, instead of explicit \kbd{printf}~/ \kbd{fprintf}
+statements, use the following encapsulated variants:
+
+\fun{void}{pari_putc}{char c}: write character \kbd{c} to the output stream.
+
+\fun{void}{pari_puts}{char *s}: write \kbd{s} to the output stream.
+
+\fun{void}{pari_printf}{const char *fmt, ...}: write following arguments to the
+output stream, according to the conversion specifications in format \kbd{fmt}
+(see \tet{printf}).
+
+\fun{void}{fprintferr}{char *s}: write \kbd{s} to the error stream
+(this function is in fact much more versatile, see \secref{se:dbg_output}).
+
+\fun{void}{flusherr}{void} flush error stream.
+
+Declare all public functions in an appropriate header file, if you
+want to access them from C. The other functions should be declared
+\kbd{static} in your file.
+
+Your function is now ready to be used in library mode after compilation and
+creation of the library. If possible, compile it as a shared library (see
+the \kbd{Makefile} coming with the \kbd{extgcd} example in the
+distribution). It is however still inaccessible from \kbd{gp}.\smallskip
+
+\subsec{Interlude: parser codes}.
+\label{se:gp.interface}
+A \idx{parser code} is a character string describing all the GP parser
+needs to know about the function prototype. It contains a sequence of the
+following atoms:
+
+\settabs\+\indent&\kbd{Dxxx}\quad&\cr
+\noindent $\bullet$ Syntax requirements, used by functions like
+ \kbd{for}, \kbd{sum}, etc.:
+%
+\+& \kbd{=} & separator \kbd{=} required at this point (between two
+arguments)\cr
+
+\noindent$\bullet$ Mandatory arguments, appearing in the same order as the
+input arguments they describe:
+%
+\+& \kbd{G} & \kbd{GEN}\cr
+\+& \kbd{\&}& \kbd{*GEN}\cr
+\+& \kbd{L} & long {\rm (we implicitly identify \kbd{int} with \kbd{long})}\cr
+\+& \kbd{S} & symbol (i.e.~GP identifier name). Function expects a
+\kbd{*entree}\cr
+\+& \kbd{V} & variable (as \kbd{S}, but rejects builtin function names)\cr
+\+& \kbd{n} & variable, expects a \idx{variable number} (a \kbd{long}, not an
+\kbd{*entree})\cr
+\+& \kbd{r} & raw input (treated as a string without quotes). Quoted %
+ args are copied as strings\cr
+\+&&\quad Stops at first unquoted \kbd{')'} or \kbd{','}. Special chars can
+be quoted using '\kbd{\bs}'\cr
+\+&&\quad Example: \kbd{aa"b\bs n)"c} yields the string \kbd{"aab\bs{n})c"}\cr
+\+& \kbd{s} & expanded string. Example: \kbd{Pi"x"2} yields \kbd{"3.142x2"}\cr
+\+&& Unquoted components can be of any PARI type, converted to string following\cr
+\+&& current output format\cr
+\+& \kbd{I} & closure whose value is ignored, as in \kbd{for} loops,\cr
+\+&&\quad to be processed by \fun{void}{closure_evalvoid}{GEN C}\cr
+\+& \kbd{E} & closure whose value is used, as in \kbd{sum} loops,\cr
+\+&&\quad to be processed by \fun{void}{closure_evalgen}{GEN C}\cr
+
+\noindent A \tev{closure} is a GP function in compiled (bytecode) form. It
+can be efficiently evaluated using the \kbd{closure\_eval}$xxx$ functions.
+
+\noindent$\bullet$ Optional arguments:
+%
+\+& \kbd{s*} & any number of strings, possibly 0 (see \kbd{s})\cr
+\+& \kbd{D\var{xxx}} &  argument has a default value\cr
+
+The \kbd{s*} code is technical and you probably do not need it, but we give
+its description for completeness. It reads all remaining arguments in
+\tev{string context} (see \secref{se:strings}), and sends a
+(\kbd{NULL}-terminated) list of \kbd{GEN*} pointing to these. The automatic
+concatenation rules in string context are implemented so that adjacent strings
+are read as different arguments, as if they had been comma-separated. For
+instance, if the remaining argument sequence is: \kbd{"xx" 1, "yy"}, the
+\kbd{s*} atom sends a \kbd{GEN *g = \obr \&a, \&b, \&c, NULL\cbr}, where
+$a$, $b$, $c$ are \kbd{GEN}s of type \typ{STR} (content \kbd{"xx"}),
+\typ{INT} (equal to $1$) and \typ{STR} (content \kbd{"yy"}).
+
+The format to indicate a default value (atom starts with a \kbd{D}) is
+``\kbd{D\var{value},\var{type},}'', where \var{type} is the code for any
+mandatory atom (previous group), \var{value} is any valid GP expression
+which is converted according to \var{type}, and the ending comma is
+mandatory. For instance \kbd{D0,L,} stands for ``this optional argument is
+converted to a \kbd{long}, and is \kbd{0} by default''. So if the
+user-given argument reads \kbd{1 + 3} at this point, \kbd{4L} is sent to
+the function; and \kbd{0L} if the argument is omitted. The following
+special syntaxes are available:
+
+\settabs\+\indent\indent&\kbd{Dxxx}\quad& optional \kbd{*GEN},&\cr
+\+&\kbd{DG}& optional \kbd{GEN}, & send \kbd{NULL} if argument omitted.\cr
+
+\+&\kbd{D\&}& optional \kbd{*GEN}, send \kbd{NULL} if argument omitted.\cr
+
+\+&\kbd{DV}& optional \kbd{*entree}, send \kbd{NULL} if argument omitted.\cr
+
+\+&\kbd{DI}& optional closure, send \kbd{NULL} if argument omitted.\cr
+
+\+&\kbd{Dn}& optional variable number, $-1$ if omitted.\cr
+
+\noindent$\bullet$ Automatic arguments:
+%
+\+& \kbd{f} &  Fake \kbd{*long}. C function requires a pointer but we
+do not use the resulting \kbd{long}\cr
+\+& \kbd{p} &  real precision (default \kbd{realprecision})\cr
+\+& \kbd{P} &  series precision (default \kbd{seriesprecision},
+ global variable \kbd{precdl} for the library)\cr
+
+\noindent $\bullet$ Return type: \kbd{GEN} by default, otherwise the
+following can appear at the start of the code string:
+%
+\+& \kbd{i} & return \kbd{int}\cr
+\+& \kbd{l} & return \kbd{long}\cr
+\+& \kbd{v} & return \kbd{void}\cr
+
+No more than 8 arguments can be given (syntax requirements and return types
+are not considered as arguments). This is currently hardcoded but can
+trivially be changed by modifying the definition of \kbd{argvec} in
+\kbd{anal.c:identifier()}. This limitation should disappear in future
+versions.
+
+When the function is called under \kbd{gp}, the prototype is scanned and each time
+an atom corresponding to a mandatory argument is met, a user-given argument
+is read (\kbd{gp} outputs an error message it the argument was missing). Each time
+an optional atom is met, a default value is inserted if the user omits the
+argument. The ``automatic'' atoms fill in the argument list transparently,
+supplying the current value of the corresponding variable (or a dummy
+pointer).
+
+For instance, here is how you would code the following prototypes, which
+do not involve default values:
+\bprog
+GEN f(GEN x, GEN y, long prec)   ----> "GGp"
+void f(GEN x, GEN y, long prec)  ----> "vGGp"
+void f(GEN x, long y, long prec) ----> "vGLp"
+long f(GEN x)                    ----> "lG"
+int f(long x)                    ----> "iL"
+@eprog\noindent
+If you want more examples, \kbd{gp} gives you easy access to the parser codes
+associated to all GP functions: just type \kbd{\b{h} \var{function}}. You
+can then compare with the C prototypes as they stand in \kbd{paridecl.h}.
+
+\misctitle{Remark}: If you need to implement complicated control statements
+(probably for some improved summation functions), you need to know
+how the parser implements closures and lexicals and how the evaluator lets
+you deal with them, in particular the \tet{push_lex} and \tet{pop_lex}
+functions. Check their descriptions and adapt the source code in
+\kbd{language/sumiter.c} and \kbd{language/intnum.c}.
+
+\subsec{Integration with \kbd{gp} as a shared module}
+
+In this section we assume that your Operating System is supported by
+\tet{install}. You have written a function in C following the guidelines is
+\secref{se:coding_guidelines}; in case the function returns a \kbd{GEN}, it
+must satisfy \kbd{gerepileupto} assumptions (see \secref{se:garbage}).
+
+You then succeeded in building it as part of a shared library and want to
+finally tell \kbd{gp} about your function. First, find a name for it. It does
+not have to match the one used in library mode, but consistency is nice. It
+has to be a valid GP identifier, i.e.~use only alphabetic characters, digits
+and the underscore character (\kbd{\_}), the first character being
+alphabetic.
+
+Then figure out the correct \idx{parser code} corresponding to the function
+prototype (as explained in~\secref{se:gp.interface}) and write a GP script
+like the following:
+\bprog
+install(libname, code, gpname, library)
+addhelp(gpname, "some help text")
+@eprog
+\noindent(see \secref{se:addhelp} and~\ref{se:install}). The \idx{addhelp}
+part is not mandatory, but very useful if you want others to use your
+module. \kbd{libname} is how the function is named in the library,
+usually the same name as one visible from C.
+
+Read that file from your \kbd{gp} session, for instance from your
+\idx{preferences file} for instance (\secref{se:gprc}), and that's it. You
+can now use the new function \var{gpname} under \kbd{gp}, and we would very
+much like to hear about it! \smallskip
+
+There is a corresponding library interface for this functionnality, letting
+you expand the GP parser/evaluator available in the library with new
+functions from your C source code! You may then
+evaluate a GP expression sequence involving calls to these new function.
+
+\fun{entree *}{install}{void *f, char *gpname, char *code}
+
+\noindent where \kbd{f} is the (address of the) function (cast to
+\kbd{void*}), \kbd{gpname} is the name by which you want to access your
+function from within your GP expressions, and \kbd{code} is as above.
+
+\misctitle{Example}
+A complete description could look like this:
+\bprog
+{
+  install(bnfinit0, "GD0,L,DGp", ClassGroupInit, "libpari.so");
+  addhelp(ClassGroupInit, "ClassGroupInit(P,{flag=0},{data=[]}):
+    compute the necessary data for ...");
+}
+@eprog\noindent which means we have a function \kbd{ClassGroupInit} under
+\kbd{gp}, which calls the library function \kbd{bnfinit0} . The function has
+one mandatory argument, and possibly two more (two \kbd{'D'} in the code),
+plus the current real precision. More precisely, the first argument is a
+\kbd{GEN}, the second one is converted to a \kbd{long} using \kbd{itos}
+(\kbd{0} is passed if it is omitted), and the third one is also a \kbd{GEN},
+but we pass \kbd{NULL} if no argument was supplied by the user. This matches
+the C prototype (from \kbd{paridecl.h}):
+%
+\bprog
+  GEN bnfinit0(GEN P, long flag, GEN data, long prec)
+@eprog\noindent
+This function is in fact coded in \kbd{basemath/buch2.c}, and is in this case
+completely identical to the GP function \kbd{bnfinit} but \kbd{gp} does not
+need to know about this, only that it can be found somewhere in the shared
+library \kbd{libpari.so}.
+
+\misctitle{Important note}: You see in this example that it is the
+function's responsibility to correctly interpret its operands: \kbd{data =
+NULL} is interpreted \emph{by the function} as an empty vector. Note that
+since \kbd{NULL} is never a valid \kbd{GEN} pointer, this trick always
+enables you to distinguish between a default value and actual input: the
+user could explicitly supply an empty vector!
+
+\subsec{Integration by patching \kbd{gp}}
+
+If \tet{install} is not available, and installing Linux or a BSD operating
+system is not an option (why?), you have to hardcode your function in the
+\kbd{gp} binary. Here is what needs to be done:
+
+\item Fetch the complete sources of the PARI distribution.
+
+\item Drop the function source code module in an appropriate directory
+(a priori \kbd{src/modules}), and declare all public functions
+in \kbd{src/headers/paridecl.h}.
+
+\item Choose a help section and add a file
+\kbd{src/functions/\var{section}/\var{gpname}}
+containing the following, keeping the notation above:
+\bprog
+Function:  @com\var{gpname}
+Section:   @com\var{section}
+C-Name:    @com\var{libname}
+Prototype: @com\var{code}
+Help:      @com\var{some help text}
+@eprog\noindent
+(If the help text does not fit on a single line, continuation lines must
+start by a whitespace character.) A GP2C-related \kbd{Description} field
+is also available to improve the code GP2C generates when compiling
+scripts involving your function. See the GP2C documentation for details.
+
+\item Launch \kbd{Configure}, which should pick up your C files and build an
+appropriate \kbd{Makefile}. At this point you can recompile \kbd{gp}, which
+will first rebuild the functions database.
+
+\misctitle{Example} We reuse the \kbd{ClassGroupInit} / \kbd{bnfinit0}
+from the preceding section. Since the C source code is already part
+of PARI, we only need to add a file
+
+ \kbd{functions/number\_fields/ClassGroupInit}
+
+\noindent containing the following:
+\bprog
+Function: ClassGroupInit
+Section: number_fields
+C-Name: bnfinit0
+Prototype: GD0,L,DGp
+Help: ClassGroupInit(P,{flag=0},{tech=[]}): this routine does @com\dots
+@eprog\noindent
+and recompile \kbd{gp}.
+\vfill\eject
+
+\chapter{Arithmetic kernel: Level 0 and 1}
 
 \section{Level 0 kernel (operations on ulongs)}
 
@@ -1988,17 +2373,14 @@ precision \kbd{prec}.
 \fun{GEN}{rdivss}{long x, long y, long prec}, return the quotient x/y as a
 \typ{REAL} of precision \kbd{prec}.
 
-\section{Level 2 kernel (modular arithmetic)}
+\vfill\eject
 
-\noindent These routines implement univariate polynomial arithmetic and
-linear algebra over finite fields, in fact over finite rings of the form
-$(\Z/p\Z)[X]/(T)$, where $p$ is not necessarily prime and $T\in(\Z/p\Z)[X]$ is
-possibly reducible; and finite extensions thereof. All this can be emulated
-with \typ{INTMOD} and \typ{POLMOD} coefficients and using generic routines,
-at a considerable loss of efficiency. Also, specialized routines are
-available that have no obvious generic equivalent.
+\chapter{Level 2 kernel }
 
-\subsec{Naming scheme}. A function name is built in the following way:
+These functions deal with modular arithmetic, linear algebra and polynomials
+where assumptions can be made about the types of the coefficients.
+
+\section{Naming scheme}. A function name is built in the following way:
 $A_1\kbd{\_}\dots\kbd{\_}A_n\var{fun}$ for an operation \var{fun} with $n$
 arguments of class $A_1$,\dots, $A_n$. A class name is given by a base ring
 followed by a number of code letters. Base rings are among
@@ -2097,6 +2479,17 @@ and \kbd{NULL} otherwise).
   \kbd{pow}: exponentiate
 
   \kbd{compo}: composition
+
+
+\section{Modular arithmetic}
+
+\noindent These routines implement univariate polynomial arithmetic and
+linear algebra over finite fields, in fact over finite rings of the form
+$(\Z/p\Z)[X]/(T)$, where $p$ is not necessarily prime and $T\in(\Z/p\Z)[X]$ is
+possibly reducible; and finite extensions thereof. All this can be emulated
+with \typ{INTMOD} and \typ{POLMOD} coefficients and using generic routines,
+at a considerable loss of efficiency. Also, specialized routines are
+available that have no obvious generic equivalent.
 
 \subsec{\kbd{FpC} / \kbd{FpV}, \kbd{FpM}, \kbd{FqM}}. A \kbd{ZV}
 (resp.~a~\kbd{ZM}) is a \typ{VEC} or \typ{COL} (resp.~\typ{MAT}) with
@@ -3783,13 +4176,15 @@ by the integer \kbd{y}.
 \fun{long}{ZX_val}{GEN P} as \kbd{RgX\_val}, but assumes \kbd{P} has \typ{INT}
 coefficients.
 
-\fun{GEN}{ZX_gcd}{GEN x,GEN y} returns a gcd of $x$ and $y$.
+\fun{GEN}{ZX_gcd}{GEN x,GEN y} returns a gcd of the \kbd{ZX} $x$ and $y$.
 
 \fun{GEN}{ZX_gcd_all}{GEN x, GEN y, GEN *pX}. returns a gcd $d$ of $x$ and
 $y$. If \kbd{pX} is not \kbd{NULL}, set $\kbd{*pX}$ to a (non-zero) integer
 multiple of $x/d$. If $x$ and $y$ are both monic, then $d$ is monic and
 \kbd{*pX} is exactly $x/d$. Not memory clean if the gcd is $1$
 (in that case \kbd{*pX} is set to $x$).
+
+\fun{GEN}{QX_gcd}{GEN x,GEN y} returns a gcd of the \kbd{QX} $x$ and $y$.
 
 \fun{GEN}{ZX_to_monic}{GEN q GEN *L} given $q$ a non-zero \kbd{ZX},
 returns a monic integral polynomial $Q$ such that $Q(x) = C q(x/L)$, for some
@@ -3871,10 +4266,6 @@ If \kbd{Pnew} is not \kbd{NULL}, set \kbd{*Pnew} to a non-zero integer
 multiple of $P/d$. If $P$ and $Q$ are both monic, then $d$ is monic and
 \kbd{*Pnew} is exactly $P/d$. Not memory clean if the gcd is $1$
 (in that case \kbd{*Pnew} is set to $P$).
-
-\subsubsec{\kbd{QX}}.
-
-\fun{GEN}{QX_gcd}{GEN x,GEN y} as \kbd{ZX\_gcd}.
 
 \fun{GEN}{QXQ_inv}{GEN A, GEN B} returns the inverse of \kbd{A} modulo \kbd{B}
 where \kbd{A} and \kbd{B} are \kbd{QX}s.
@@ -4175,9 +4566,11 @@ by the scalar \kbd{x}.
 
 \fun{GEN}{RgXQX_rem}{GEN x, GEN y, GEN T, GEN *r}
 
-\section{Operations on general PARI objects}
+\vfill\eject
 
-\subsec{Assignment}
+\chapter{Operations on general PARI objects}
+
+\section{Assignment}
 
 \fun{void}{gaffsg}{long s, GEN x} assigns the \kbd{long}~\kbd{s} into the
 object~\kbd{x}.
@@ -4185,9 +4578,9 @@ object~\kbd{x}.
 \fun{void}{gaffect}{GEN x, GEN y} assigns the object \kbd{x} into the
 object~\kbd{y}. Both \kbd{x} and \kbd{y} must be scalar types.
 
-\subsec{Conversions}
+\section{Conversions}
 
-\subsubsec{Scalars}
+\subsec{Scalars}
 
 \fun{double}{rtodbl}{GEN x} applied to a \typ{REAL}~\kbd{x}, converts \kbd{x}
 into a \kbd{double} if possible.
@@ -4242,7 +4635,7 @@ is often more useful than \kbd{gprec}.
 \emph{words}. Contrary to \kbd{gprec\_w}, this function may never increase
 the precision of~$x$.
 
-\subsubsec{Modular objects}
+\subsec{Modular objects}
 
 \fun{GEN}{gmodulo}{GEN x, GEN y} creates the object \kbd{\key{Mod}(x,y)} on
 the PARI stack, where \kbd{x} and \kbd{y} are either both \typ{INT}s, and the
@@ -4258,7 +4651,7 @@ result is a \typ{INTMOD}, or \kbd{x} is a scalar or a \typ{POL} and \kbd{y} a
 \fun{GEN}{gmodulss}{long x, long y} same as \key{gmodulo} except both
 \kbd{x} and \kbd{y} are \kbd{long}s.
 
-\subsubsec{Between polynomials and coefficient arrays}
+\subsec{Between polynomials and coefficient arrays}
 
 \fun{GEN}{gtopoly}{GEN x, long v} converts or truncates the object~\kbd{x}
 into a \typ{POL} with main variable number~\kbd{v}. A common application
@@ -4339,7 +4732,9 @@ with main variable number~\kbd{v}.
 might be zero), normalizes \kbd{x} correctly in place. Returns~\kbd{x}.
 For internal use.
 
-\subsec{Clean Constructors}\label{se:clean}
+\section{Constructors}
+
+\subsec{Clean constructors}\label{se:clean}
 
 \fun{GEN}{zeropadic}{GEN p, long n} creates a $0$ \typ{PADIC} equal to
 $O(\kbd{p}^\kbd{n})$.
@@ -4456,7 +4851,7 @@ containing \kbd{[x, y]}.
 \fun{GEN}{mkvecsmalln}{long n, ...} returns the \typ{VECSMALL} whose $n$
 coefficients (\kbd{long}) follow.
 
-\subsec{Unclean Constructors}\label{se:unclean}
+\subsec{Unclean constructors}\label{se:unclean}
 
 Contrary to the policy of general PARI functions, the functions in this
 subsection do \emph{not} copy their arguments, nor do they produce an object
@@ -4554,7 +4949,7 @@ scalar matrix whose diagonal is set to shallow copies of the scalar \kbd{x}.
 \fun{GEN}{deg1pol_shallow}{GEN a, GEN b,long v} returns the degree 1
 \typ{POL} $a + b \kbd{pol\_x}(v)$
 
-\subsec{Integer parts}
+\section{Integer parts}
 
 \fun{GEN}{gfloor}{GEN x} creates the floor of~\kbd{x}, i.e.\ the (true)
 integral part.
@@ -4583,7 +4978,7 @@ to a \typ{POL}; if \kbd{x} is a \typ{RFRAC}, this takes the polynomial part.
 \fun{GEN}{gcvtoi}{GEN x, long *e} same as \key{grndtoi} except that
 rounding is replaced by truncation.
 
-\subsec{Valuation and shift}
+\section{Valuation and shift}
 
 \fun{GEN}{gshift[z]}{GEN x, long n[, GEN z]} yields the result of shifting
 (the components of) \kbd{x} left by \kbd{n} (if \kbd{n} is non-negative)
@@ -4602,7 +4997,9 @@ $\kbd{p}^e$ divides~\kbd{x}, when this makes sense.
 \fun{long}{gval}{GEN x, long v} returns the highest power of the variable
 number \kbd{v} dividing the \typ{POL}~\kbd{x}.
 
-\subsec{Comparison operators}
+\section{Comparison operators}
+
+\subsec{Generic}
 
 \fun{long}{gcmp}{GEN x, GEN y} comparison of \kbd{x} with \kbd{y} (returns
 the sign ($-1$, 0 or 1) of $\kbd{x}-\kbd{y}$).
@@ -4625,7 +5022,7 @@ means that \kbd{x - y} was successfully computed and that
 \typ{COL} and an empty \typ{VEC} are not equal but are both equal to
 \kbd{gen\_0}.
 
-\subsubsec{Comparison with a small integer}
+\subsec{Comparison with a small integer}
 
 \fun{int}{isexactzero}{GEN x} returns 1 (true) if \kbd{x} is exactly equal
 to~0 (including \typ{INTMOD}s like \kbd{Mod(0,2)}), and 0~(false) otherwise.
@@ -4671,7 +5068,7 @@ the \kbd{long}~\kbd{s} (converted to \kbd{GEN})
 \fun{long}{gequalgs}{GEN x, long s} returns 1 (true) if \kbd{x} is equal to
 the \kbd{long}~\kbd{s}, 0~otherwise.
 
-\subsubsec{Other related boolean functions}
+\section{Miscellaneous boolean functions}
 
 \fun{int}{isrationalzeroscalar}{GEN g} equivalent to, but faster than,
 \bprog
@@ -4698,7 +5095,7 @@ round to a small integer (suitable for \kbd{itos}). Otherwise, returns 1
 \kbd{x} is a real (not necessarily of type \typ{REAL}), or raises an error if
 \kbd{x} is not embeddable into the complex numbers.
 
-\subsubsec{Obsolete}
+\subsec{Obsolete}
 
 The following less convenient comparison functions and boolean operators were
 used by the historical GP interpreter. They are provided for backward
@@ -4722,9 +5119,9 @@ compatibility only and should not be used:
 
 \fun{GEN}{gnot}{GEN x, GEN y}
 
-\subsec{Sorting}
+\section{Sorting}
 
-\subsubsec{Basic sort}
+\subsec{Basic sort}
 
 \fun{GEN}{sort}{GEN x} sorts the vector \kbd{x} in ascending order using a
 mergesort algorithm, and \kbd{gcmp} as the underlying comparison routine
@@ -4741,7 +5138,7 @@ sorting will be done with respect to the second component,  and when these
 are  equal, with respect to the first,  and when these are equal,  with
 respect to the third.
 
-\subsubsec{Indirect sorting}
+\subsec{Indirect sorting}
 
 \fun{GEN}{indexsort}{GEN x} as \kbd{sort}, but only returns the permutation
 which, applied to \kbd{x}, would sort the vector. The result is a
@@ -4753,7 +5150,7 @@ instead of \kbd{gcmp} as the underlying comparison routine.
 \fun{GEN}{indexvecsort}{GEN x, GEN k}, as \kbd{vecsort}, but only
 returns the permutation that would sort the vector \kbd{x}.
 
-\subsubsec{Generic routines}. The following routines allow to use an
+\subsec{Generic routines}. The following routines allow to use an
 arbitrary comparison function \kbd{int (*cmp)(void* data, GEN x, GEN y)},
 such that \kbd{cmp(data,x,y)} returns a negative result if $x
 < y$, a positive one if $x > y$ and 0 if $x = y$. The \kbd{data} argument is
@@ -4836,43 +5233,7 @@ comparison function:
   int (*cmp_coeff)(GEN,GEN) = (int(*)(GEN,GEN)) data;
 @eprog
 
-\subsec{Generic unary operators}
-
-\fun{GEN}{gneg[z]}{GEN x[, GEN z]} yields $-\kbd{x}$.
-
-\fun{GEN}{gneg_i}{GEN x} shallow function yielding $-\kbd{x}$.
-
-\fun{GEN}{gabs[z]}{GEN x[, GEN z]} yields $|\kbd{x}|$.
-
-\fun{GEN}{gsqr}{GEN x} creates the square of~\kbd{x}.
-
-\fun{GEN}{ginv}{GEN x} creates the inverse of~\kbd{x}.
-
-\subsec{Generic binary operators}
-
-\fun{GEN}{gadd[z]}{GEN x, GEN y[, GEN z]}
-
-\fun{GEN}{gmul[z]}{GEN x, GEN y[, GEN z]}
-
-\fun{GEN}{gdiv[z]}{GEN x, GEN y[, GEN z]}
-
-\fun{GEN}{gaddgs}{GEN x, long s[, GEN z]}
-
-\fun{GEN}{gaddsg}{GEN s, GEN x[, GEN z]}
-
-\fun{GEN}{gsubgs}{GEN x, long s[, GEN z]}
-
-\fun{GEN}{gsubsg}{GEN s, GEN x[, GEN z]}
-
-\fun{GEN}{gmulgs}{GEN x, long s[, GEN z]}
-
-\fun{GEN}{gmulsg}{GEN s, GEN x[, GEN z]}
-
-\fun{GEN}{gdivgs}{GEN x, long s[, GEN z]}
-
-\fun{GEN}{gdivsg}{GEN s, GEN x[, GEN z]}
-
-\subsec{Divisibility, Euclidean division}
+\section{Divisibility, Euclidean division}
 
 \fun{GEN}{gdivexact}{GEN x, GEN y} returns the quotient $\kbd{x} / \kbd{y}$,
 assuming $\kbd{y}$ divides $\kbd{x}$. Not stack clean if $y = 1$
@@ -4941,7 +5302,9 @@ when it exists. \kbd{y} must be of type \typ{INT} (in which case \kbd{x} is
 of type \typ{INT}) or \typ{POL} (in which case \kbd{x} is either a scalar
 type or a \typ{POL}).
 
-\subsec{GCD, content and primitive part}
+\section{GCD, content and primitive part}
+
+\subsec{Generic}
 
 \fun{GEN}{resultant}{GEN x, GEN y} creates the resultant of the \typ{POL}s
 \kbd{x} and~\kbd{y} computed using Sylverster's matrix (inexact inputs), a
@@ -4970,7 +5333,7 @@ and returns the primitive part \kbd{x} / \kbd{c}. A trivial content is set to
 \fun{GEN}{primpart}{GEN x} as above but the content is lost.
 (For efficiency, the content remains on the stack.)
 
-\subsec{GCD, content and primitive part over the rationals}
+\subsec{Over the rationals}
 
 \fun{long}{Q_pval}{GEN x, GEN p} valuation at the \typ{INT} \kbd{p}
 of the \typ{INT} or \typ{FRAC}~\kbd{x}.
@@ -5024,25 +5387,23 @@ as set by \kbd{Q\_remove\_denom}: either a \typ{INT} or \kbd{NULL} representing
 the trivial denominatory $1$. Returns their product (either a \typ{INT} or
 \kbd{NULL}).
 
-\subsec{Complex numbers}
+\section{Generic operators}
 
-\fun{GEN}{imag}{GEN x} returns a copy of the imaginary part of \kbd{x}.
+\subsec{Unary operators}
 
-\fun{GEN}{real}{GEN x} returns a copy of the real part of \kbd{x}. If \kbd{x}
-is a \typ{QUAD}, returns the coefficient of $1$ in the ``canonical'' integral
-basis $(1,\omega)$.
+\fun{GEN}{gneg[z]}{GEN x[, GEN z]} yields $-\kbd{x}$.
 
-The last two functions are not suitable for \tet{gerepileupto}:
+\fun{GEN}{gneg_i}{GEN x} shallow function yielding $-\kbd{x}$.
 
-\fun{GEN}{imag_i}{GEN x} as \kbd{gimag}, returns a pointer to the imaginary
-part.
-\fun{GEN}{real_i}{GEN x} as \kbd{greal}, returns a pointer to the real part.
+\fun{GEN}{gabs[z]}{GEN x[, GEN z]} yields $|\kbd{x}|$.
 
-\fun{GEN}{mulreal}{GEN x, GEN} returns the real part of $xy$;
-$x,y$ have type \typ{INT}, \typ{FRAC}, \typ{REAL} or \typ{COMPLEX}. See also
-\kbd{RgM\_mulreal}.
+\fun{GEN}{gsqr}{GEN x} creates the square of~\kbd{x}.
 
-\subsec{Generic binary operators}. Let ``\op'' be a binary operation among
+\fun{GEN}{ginv}{GEN x} creates the inverse of~\kbd{x}.
+
+\subsec{Binary operators}.
+
+Let ``\op'' be a binary operation among
 
 \op=\key{add}: addition (\kbd{x + y}).
 
@@ -5064,6 +5425,29 @@ to \op\ are as follows:
 \funno{GEN}{g\op gs}{GEN x, long s}
 
 \funno{GEN}{g\op sg}{long s, GEN y}
+
+\fun{GEN}{gadd}{GEN x, GEN y[, GEN z]}
+
+\fun{GEN}{gmul}{GEN x, GEN y[, GEN z]}
+
+\fun{GEN}{gdiv}{GEN x, GEN y[, GEN z]}
+
+\fun{GEN}{gaddgs}{GEN x, long s[, GEN z]}
+
+\fun{GEN}{gaddsg}{GEN s, GEN x[, GEN z]}
+
+\fun{GEN}{gsubgs}{GEN x, long s[, GEN z]}
+
+\fun{GEN}{gsubsg}{GEN s, GEN x[, GEN z]}
+
+\fun{GEN}{gmulgs}{GEN x, long s[, GEN z]}
+
+\fun{GEN}{gmulsg}{GEN s, GEN x[, GEN z]}
+
+\fun{GEN}{gdivgs}{GEN x, long s[, GEN z]}
+
+\fun{GEN}{gdivsg}{GEN s, GEN x[, GEN z]}
+
 
 \fun{GEN}{gpow}{GEN x, GEN y, long l} creates $\kbd{x}^{\kbd{y}}$. If
 \kbd{y} is a \typ{INT}, return \kbd{powgi(x,y)} (the precision \kbd{l} is not
@@ -5090,15 +5474,28 @@ In addition we also have the obsolete forms:
 
 \fun{void}{gdivz}{GEN x, GEN y, GEN z}
 
-\subsec{Miscellaneous functions}
+\vfill\eject
+\chapter{Miscellaneous mathematical functions}
 
-\fun{const char*}{type_name}{long t} given a type number \kbd{t} this routine
-returns a string containing its symbolic name. E.g \kbd{type\_name(\typ{INT})}
-returns \kbd{"\typ{INT}"}. The return value is read-only.
+\section{Complex numbers}
 
-\section{Further type specific functions}
+\fun{GEN}{imag}{GEN x} returns a copy of the imaginary part of \kbd{x}.
 
-\subsec{Polynomial and power series}
+\fun{GEN}{real}{GEN x} returns a copy of the real part of \kbd{x}. If \kbd{x}
+is a \typ{QUAD}, returns the coefficient of $1$ in the ``canonical'' integral
+basis $(1,\omega)$.
+
+The last two functions are shallow, and not suitable for \tet{gerepileupto}:
+
+\fun{GEN}{imag_i}{GEN x} as \kbd{gimag}, returns a pointer to the imaginary
+part.
+\fun{GEN}{real_i}{GEN x} as \kbd{greal}, returns a pointer to the real part.
+
+\fun{GEN}{mulreal}{GEN x, GEN} returns the real part of $xy$;
+$x,y$ have type \typ{INT}, \typ{FRAC}, \typ{REAL} or \typ{COMPLEX}. See also
+\kbd{RgM\_mulreal}.
+
+\section{Polynomial and power series}
 
 \fun{GEN}{derivser}{GEN x} returns the derivative of the \typ{SER} \kbd{x}
 with respect to its main variable.
@@ -5130,237 +5527,7 @@ non-zero remainder in the polynomial remainder sequence if such a sequence
 was computed, and to \kbd{gen\_0} otherwise (e.g. polynomials of degree 0,
 $u,v$ in $\Q[X]$).
 
-\subsec{Vectors and Matrices}
-See~\secref{se:clean} and~\secref{se:unclean} for various useful constructors.
-Coefficients are accessed and set using \tet{gel}, \tet{gcoeff},
-see~\secref{se:accessors}. There are many internal functions to extract or
-manipulate subvectors or submatrices but, like the accessors above, none of
-them are suitable for \tet{gerepileupto}. Worse, there are no type
-verification, nor bound checking, so use at your own risk.
-
-\fun{GEN}{shallowcopy}{GEN x} returns a \typ{GEN} whose components are the
-components of $x$ (no copy is made). The result may now be used to compute in
-place without destroying $x$. This is essentially equivalent to
-\bprog
-  GEN y = cgetg(lg(x), typ(x));
-  for (i = 1; i < lg(x); i++) y[i] = x[i];
-  return y;
-@eprog\noindent
-except that \typ{POLMOD} (resp.~\typ{MAT}) are treated specially since a
-shallow copy of the representative (resp.~all columns) is also made.
-
-\fun{GEN}{shallowtrans}{GEN x} returns the transpose of $x$, \emph{without}
-copying its components, i.~e.,~it returns a \kbd{GEN} whose components are
-(physically) the components of $x$. This is the internal function underlying
-\tet{gtrans}.
-
-\fun{GEN}{shallowconcat}{GEN x, GEN y} concatenate $x$ and $y$, \emph{without}
-copying components, i.~e.,~it returns a \kbd{GEN} whose components are
-(physically) the components of $x$ and $y$.
-
-\fun{GEN}{shallowconcat1}{GEN x}
-$x$ must be \typ{VEC} or \typ{LIST}, concatenate
-its elements from left to right. Shallow version of \kbd{concat1}.
-
-\fun{GEN}{shallowextract}{GEN x, GEN y} extract components
-of the vector or matrix $x$ according to the selection parameter $y$.
-This is the shallow analog of \kbd{extract0(x, y, NULL)}, see \tet{vecextract}.
-\kbdsidx{extract0}
-
-\fun{GEN}{vconcat}{GEN A, GEN B} concatenate vertically the two \typ{MAT} $A$
-and $B$ of compatible dimensions. A \kbd{NULL} pointer is accepted for an
-empty matrix. See \tet{shallowconcat}.
-
-\fun{GEN}{row}{GEN A, long i} return $A[i,]$, the $i$-th row of the \typ{MAT}
-$A$.
-
-\fun{GEN}{row_i}{GEN A, long i, long j1, long j2} return part of the $i$-th
-row of \typ{MAT}~$A$: $A[i,j_1]$, $A[i,j_1+1]\dots,A[i,j_2]$. Assume $j_1
-\leq j_2$.
-
-\fun{GEN}{rowcopy}{GEN A, long i} return the row $A[i,]$ of
-the~\typ{MAT}~$A$. This function is memory clean and suitable for
-\kbd{gerepileupto}. See \kbd{row} for the shallow equivalent.
-
-\fun{GEN}{rowslice}{GEN A, long i1, long i2} return the \typ{MAT}
-formed by the $i_1$-th through $i_2$-th rows of \typ{MAT} $A$. Assume $i_1
-\leq i_2$.
-
-\fun{GEN}{rowpermute}{GEN A, GEN p}, $p$ being a \typ{VECSMALL}
-representing a list $[p_1,\dots,p_n]$ of rows of \typ{MAT} $A$, returns the
-matrix whose rows are $A[p_1,],\dots, A[p_n,]$.
-
-\fun{GEN}{rowslicepermute}{GEN A, GEN p, long x1, long x2}, short for
-\bprog
-  rowslice(rowpermute(A,p), x1, x2)
-@eprog\noindent
-(more efficient).
-
-\fun{GEN}{vecslice}{GEN A, long j1, long j2}, return $A[j_1], \dots,
-A[j_2]$. If $A$ is a \typ{MAT}, these correspond to \emph{columns} of $A$.
-The object returned has the same type as $A$ (\typ{VEC}, \typ{COL} or
-\typ{MAT}). Assume $j_1 \leq j_2$.
-
-\fun{GEN}{vecpermute}{GEN A, GEN p} $p$ is a \typ{VECSMALL} representing
-a list $[p_1,\dots,p_n]$ of indices. Returns a \kbd{GEN} which has the same
-type as $A$ (\typ{VEC}, \typ{COL} or \typ{MAT}), and whose components
-are $A[p_1],\dots,A[p_n]$. If $A$ is a \typ{MAT}, these are the
-\emph{columns} of $A$.
-
-\fun{GEN}{vecslicepermute}{GEN A, GEN p, long y1, long y2} short for
-\bprog
-  vecslice(vecpermute(A,p), y1, y2)
-@eprog\noindent
-(more efficient). Finally, the following convenience routines automate
-trivial loops of the form
-\bprog
-  for (i = 1; i < lg(a); i++) gel(v,i) = f(gel(a,i), gel(b,i))
-@eprog\noindent
-for suitable $f$:
-
-\fun{GEN}{vecinv}{GEN a}. Given a vector $a$,
-returns the vector whose $i$-th component is \kbd{ginv}$(a[i])$.
-
-\fun{GEN}{vecmul}{GEN a, GEN b}. Given $a$ and $b$ two vectors of the same
-length, returns the vector whose $i$-th component is \kbd{gmul}$(a[i], b[i])$.
-
-\fun{GEN}{vecdiv}{GEN a, GEN b}. Given $a$ and $b$ two vectors of the same
-length, returns the vector whose $i$-th component is \kbd{gdiv}$(a[i], b[i])$.
-
-\fun{GEN}{vecpow}{GEN a, GEN n}. Given $n$ a \typ{INT}, returns
-the vector whose $i$-th component is $a[i]^n$.
-
-\fun{GEN}{vecmodii}{GEN a, GEN b}. Assuming $a$ and $b$ are two \kbd{ZV}
-of the same length, returns the vector whose $i$-th component
-is \kbd{modii}$(a[i], b[i])$.
-
-Note that \kbd{vecadd} or \kbd{vecsub} do not exist since \kbd{gadd}
-and \kbd{gsub} have the expected behaviour. On the other hand,
-\kbd{ginv} does not accept vector types, hence \kbd{vecinv}.
-
-\subsec{Low-level vectors and columns functions}
-
-Theses functions handle \typ{VEC} as an abstract container type of
-\kbd{GEN}s. No specific meaning is attached to the content. They accept both
-\typ{VEC} and \typ{COL} as input, but \kbd{col} functions always return
-\typ{COL} and \kbd{vec} functions always return \typ{VEC}.
-
-\misctitle{Note.} All the functions below are shallow.
-
-\fun{GEN}{const_col}{long n, long c} returns a \typ{COL} of \kbd{n} components
-equal to \kbd{c}.
-
-\fun{GEN}{const_vec}{long n, long c} returns a \typ{VEC} of \kbd{n} components
-equal to \kbd{c}.
-
-\fun{int}{vec_isconst}{GEN v} Returns 1 if all the components of \kbd{v} are
-equal, else returns 0.
-
-\fun{int}{vec_is1to1}{GEN v}  Returns 1 if the components of \kbd{v} are
-pair-wise distinct, i.e. if $i\mapsto v[i]$ is a 1-to-1 mapping, else returns
-0.
-
-\fun{GEN}{vec_shorten}{GEN v, long n} shortens the vector \kbd{v} to \kbd{n}
-components.
-
-\fun{GEN}{vec_lengthen}{GEN v, long n} lengthens the vector \kbd{v}
-to \kbd{n} components. The extra components are not initialized.
-
-\subsec{Functions to handle \typ{VECSMALL}}
-
-Theses functions handle \typ{VECSMALL} as an abstract container type
-of small signed integers. No specific meaning is attached to the content.
-
-\fun{GEN}{const_vecsmall}{long n, long c} returns a \typ{VECSMALL}
-of \kbd{n} components equal to \kbd{c}.
-
-\fun{GEN}{vec_to_vecsmall}{GEN z} identical to \kbd{ZV\_to\_zv(z)}.
-
-\fun{GEN}{vecsmall_to_vec}{GEN z} identical to \kbd{zv\_to\_ZV(z)}.
-
-\fun{GEN}{vecsmall_to_col}{GEN z} identical to \kbd{zv\_to\_ZC(z)}.
-
-\fun{GEN}{vecsmall_copy}{GEN x} makes a copy of \kbd{x} on the stack.
-
-\fun{GEN}{vecsmall_shorten}{GEN v, long n} shortens the \typ{VECSMALL} \kbd{v}
-to \kbd{n} components.
-
-\fun{GEN}{vecsmall_lengthen}{GEN v, long n} lengthens the \typ{VECSMALL}
-\kbd{v} to \kbd{n} components. The extra components are not initialized.
-
-\fun{GEN}{vecsmall_indexsort}{GEN x} performs an indirect sort of the
-components of the \typ{VECSMALL} \kbd{x} and return a permutation stored in a
-\typ{VECSMALL}.
-
-\fun{void}{vecsmall_sort}{GEN v} sorts the \typ{VECSMALL} \kbd{v} in place.
-
-\fun{long}{vecsmall_isin}{GEN v, long x} returns the first index $i$
-such that \kbd{v[$i$]} is equal to \kbd{x}. Naive search in linear time, does
-not assume that \kbd{v} is sorted.
-
-\fun{GEN}{vecsmall_uniq}{GEN v} given a \typ{VECSMALL} \kbd{v}, return
-the vector of unique occurrences.
-
-\fun{GEN}{vecsmall_uniq_sorted}{GEN v} same as \kbd{vecsmall\_uniq}, but assumes
- \kbd{v} sorted.
-
-\fun{long}{vecsmall_duplicate}{GEN v} given a \typ{VECSMALL} \kbd{v}, return
-$0$ if there is no duplicates, or the index of the first duplicate
-(\kbd{vecsmall\_duplicate([1,1])} returns $2$).
-
-\fun{long}{vecsmall_duplicate_sorted}{GEN v} same as
-\kbd{vecsmall\_duplicate}, but assume \kbd{v} sorted.
-
-\fun{int}{vecsmall_lexcmp}{GEN x, GEN y} compares two \typ{VECSMALL} lexically.
-
-\fun{int}{vecsmall_prefixcmp}{GEN x, GEN y} truncate the longest \typ{VECSMALL}
-to the length of the shortest and compares them lexicographically.
-
-\fun{GEN}{vecsmall_prepend}{GEN V, long s} prepend \kbd{s} to the \typ{VECSMALL} \kbd{V}.
-
-\fun{GEN}{vecsmall_append}{GEN V, long s} append \kbd{s} to the \typ{VECSMALL} \kbd{V}.
-
-\fun{GEN}{vecsmall_concat}{GEN u, GEN v} concat the \typ{VECSMALL} \kbd{u} and \kbd{v}.
-
-\fun{long}{vecsmall_coincidence}{GEN u, GEN v} returns the numbers of indices where \kbd{u} and \kbd{v} agree.
-
-\fun{long}{vecsmall_pack}{GEN v, long base, long mod} handles the
-\typ{VECSMALL} \kbd{v} as the digit of a number in base \kbd{base} and return
-this number modulo \kbd{mod}. This can be used as an hash function.
-
-\subsec{Functions to handle bits-vectors}
-Theses functions manipulate vectors of bits (stored in \typ{VECSMALL}).
-Bits are numbered from 0.
-
-\fun{GEN}{bitvec_alloc}{long n} allocates a bits-vector suitable for \kbd{n}
-bits.
-
-\fun{GEN}{bitvec_shorten}{GEN bitvec, long n} shortens a bits-vector
-\kbd{bitvec} to \kbd{n} bits.
-
-\fun{long}{bitvec_test}{GEN bitvec, long b} returns the bit of index \kbd{b} of
-\kbd{bitvec}.
-
-\fun{long}{bitvec_test_set}{GEN bitvec, long b} (in place) sets the bit of
-index \kbd{b} of \kbd{bitvec}, returning its old value.
-
-\fun{void}{bitvec_set}{GEN bitvec, long b} (in place) sets the bit of index
-\kbd{b} of \kbd{bitvec}.
-
-\fun{void}{bitvec_clear}{GEN bitvec, long b} (in place) clears the bit of index \kbd{b} of \kbd{bitvec}.
-
-\subsec{Functions to handle vectors of \typ{VECSMALL}}
-Theses functions manipulate vectors of \typ{VECSMALL} (vecvecsmall).
-
-\fun{GEN}{vecvecsmall_sort}{GEN x} sorts lexicographically the components of
-the vector \kbd{x}.
-
-\fun{GEN}{vecvecsmall_indexsort}{GEN x} performs an indirect lexicographic sorting of the components of the vector \kbd{x} and return a permutation stored in a \typ{VECSMALL}.
-
-\fun{long}{vecvecsmall_search}{GEN x, GEN y, long flag} \kbd{x} being a sorted
-vecvecsmall and \kbd{y} a \typ{VECSMALL}, search \kbd{y} inside \kbd{x}. \kbd{fla} has the same meaning as for \kbd{setsearch}.
-
-\subsec{Functions to handle \typ{FFELT}}
+\section{Functions to handle \typ{FFELT}}
 These functions define the public interface of the \typ{FFELT} type to use in
 generic functions.  However, in specific functions, it is better to use the
 functions class \kbd{FpXQ} and/or \kbd{Flxq} as appropriate.
@@ -5488,447 +5655,6 @@ of the primitive root (to speed up \tet{FF_log}).
 polynomial \kbd{f} over the definition field of the \typ{FFELT} \kbd{a}. The
 coefficients of \kbd{f} must be of type \typ{INT}, \typ{INTMOD} or \typ{FFELT}
 and compatible with \kbd{a}.
-
-\section{Handling user and temp variables}
-Low-level implementation of user / temporary variables is liable to change. We
-describe it nevertheless for completeness. Currently variables are
-implemented by a single array of values divided in 3 zones: 0--\kbd{nvar}
-(user variables), \kbd{max\_avail}--\kbd{MAXVARN} (temporary variables),
-and \kbd{nvar+1}--\kbd{max\_avail-1} (pool of free variable numbers).
-
-\subsec{Low-level}
-
-\fun{void}{pari_var_init}{}: a small part of \kbd{pari\_init}. Resets
-variable counters \kbd{nvar} and \kbd{max\_avail}, notwithstanding existing
-variables! In effect, this even deletes \kbd{x}. Don't use it.
-
-\fun{long}{pari_var_next}{}: returns \kbd{nvar}, the number of the next user
-variable we can create.
-
-\fun{long}{pari_var_next_temp}{} returns \kbd{max\_avail}, the number of the
-next temp variable we can create.
-
-\fun{void}{pari_var_create}{entree *ep} low-level initialization of an
-\kbd{EpVAR}.
-
-\noindent The obsolete function \fun{long}{manage_var}{long n, entree *ep}
-is kept for backward compatibility only. Don't use it.
-
-\subsec{User variables}
-
-\fun{long}{fetch_user_var}{char *s} returns a user variable whose name
-is \kbd{s}, creating it is needed (and using an existing variable otherwise).
-Returns its variable number.
-
-\fun{entree*}{fetch_named_var}{char *s} as \kbd{fetch\_user\_var}, but
-returns an \kbd{entree*} suitable for inclusion in the interpreter hashlists
-of symbols, not a variable number. \kbd{fetch\_user\_var} is a trivial
-wrapper.
-
-\fun{GEN}{fetch_var_value}{long v} returns a shallow copy of the
-current value of the variable numbered $v$. Return \kbd{NULL} for a temporary
-variable.
-
-\fun{void}{delete_named_var}{entree *ep} delete variable created by
-\kbd{fetch\_named\_var}, which must be the last one created. Don't use this:
-if a variable is to be deleted, it should be a temp.
-
-\fun{entree*}{is_entry}{const char *s} returns the \kbd{entree*} associated
-to an identifier \kbd{s} (variable or function), from the interpreter
-hashtables. Return \kbd{NULL} is the identifier is unknown.
-
-\subsec{Temporary variables}
-
-\fun{long}{fetch_var}{void} returns the number of a new temporary variable
-(decreasing \kbd{max\_avail}).
-
-\fun{long}{delete_var}{void} delete latest temp variable created and return
-the number of previous one.
-
-\fun{void}{name_var}{long n, char *s} rename temporary variable number
-\kbd{n} to \kbd{s}; mostly useful for nicer printout. Error when trying to
-rename a user variable: use \kbd{fetch\_named\_var} to get a user variable of
-the right name in the first place.
-
-\section{Handling closures}
-
-\fun{void}{closure_disassemble}{GEN C} print the \typ{CLOSURE} \kbd{C} in
-GP assembly format.
-
-\fun{GEN}{closure_callgenall}{GEN C, long n, ...} evaluate the \typ{CLOSURE}
-\kbd{C} with the \kbd{n} arguments (of type \kbd{GEN}) following \kbd{n} in
-the function call. Assumes \kbd{C} has arity $\geq \kbd{n}$.
-
-\fun{GEN}{closure_callgenvec}{GEN C, GEN args} evaluate the \typ{CLOSURE}
-\kbd{C} with the arguments supplied in the vector \kbd{args}. Assumes \kbd{C}
-has arity $\geq \kbd{lg(args)-1}$.
-
-\fun{GEN}{closure_callgen1}{GEN C, GEN x} evaluate the \typ{CLOSURE}
-\kbd{C} with argument \kbd{x}. Assumes \kbd{C} has arity $\geq 1$.
-
-\fun{GEN}{closure_callgen2}{GEN C, GEN x, GEN y} evaluate the \typ{CLOSURE}
-\kbd{C} with argument \kbd{x}, \kbd{y}. Assumes \kbd{C} has arity $\geq 2$.
-
-The following technical functions are used to evaluate \emph{inline}
-closures, after pushing lexical arguments on the evaluator stack.
-
-The control flow statements (break, next and return) will cause the
-evaluation of the closure to be interrupted; this is called below a
-\emph{flow change}. When that occurs, the functions below generally returns
-\kbd{NULL}. The caller can then adopt three positions:
-
-\item raise an exception (\kbd{closure\_evalnobrk}).
-
-\item pass through (by returning NULL itself).
-
-\item handle the flow change (undocumented yet, done by loop statements).
-
-\fun{GEN}{closure_evalgen}{GEN code} evaluates a closure and returns the result.
-
-\fun{GEN}{closure_evalnobrk}{GEN code} as \kbd{closure\_evalgen} but raise
-an exception if a flow change occurs. Meant for pseudo-iterators where
-interrupting the closure is meaningless, e.g.~\kbd{intnum} or \kbd{sumninm}.
-
-\fun{GEN}{closure_evalres}{GEN code} evaluates a closure and returns the result.
-The difference with \kbd{closure\_evalgen} being that, if the flow end by a
-\kbd{return} statement, the result will be the returned value instead of
-\kbd{NULL}.
-
-\fun{void}{closure_evalvoid}{GEN code} evaluates a closure whose return
-value is ignored.
-
-\fun{GEN}{closure_trapgen}{long numerr, GEN code} evaluates closure, while
-trapping error \kbd{numerr}. Return \kbd{(GEN)1L} if error trapped, and the
-result otherwise.
-
-\fun{void}{closure_reset}{void} reinitializes the byte-code evaluator.
-This is used by the error recovery code.
-
-Functions to deal with lexical variables introduced through the prototype
-code 'V':
-
-Such functions need to manually create and delete a lexical variable for
-each code 'V', which will be given a number $-1, -2, \ldots$.
-
-\fun{void}{push_lex}{GEN a} creates a new lexical variable whose initial value
-is $a$ on the top of the stack. This variable get the number $-1$, and the number of the other variables is decreased by one unit.
-
-\fun{void}{pop_lex}{void} deletes topmost lexical variable, increasing the
-number of other variables by one unit.
-
-\fun{GEN}{get_lex}{long vn} get the value of the variable with number \kbd{vn}.
-
-\fun{void}{set_lex}{long vn, GEN x} set the value of the variable with number
-\kbd{vn}.
-
-Functions returning new closures:
-
-\fun{GEN}{closure_deriv}{GEN code} returns a closure corresponding to the
-numerical derivative of the closure \kbd{code}.
-
-\fun{GEN}{genclosure}{entree *ep} creates a closure associated to a PARI
-function.
-
-\section{Defaults}
-
-\fun{int}{pari_is_default}{const char *s} return $1$ if $s$ is the name
-of a default, $0$ otherwise.
-
-\fun{GEN}{setdefault}{const char *s, const char *v, long flag} low-level
-function underlying \kbd{default0}. If $s$ is empty, call all default ѕetting
-functions with empty string argument and flag \tet{d_ACKNOWLEDGE}. Otherwise,
-check whether $s$ corresponds to a default and call the corresponding default
-setting function with arguments $v$ and \fl.
-
-We shall describe these functions below: an non-empty $v$ means that we change
-the value of the default to $v$, possibly after some translation work. The
-flag is one of
-
-\item \tet{d_INITRC} called while reading the \kbd{gprc} (print and return
-nothing, possibly defer until \kbd{gp} actually starts).
-
-\item \tet{d_RETURN} return the current value, as a \typ{INT} if possible, as
-a \typ{STR} otherwise.
-
-\item \tet{d_ACKNOWLEDGE} print the current value.
-
-\item \tet{d_SILENT} print nothing, return \kbd{gnil}.
-
-\noindent Low-level functions called by \kbd{setdefault}:
-
-\fun{GEN}{sd_TeXstyle}{const char *v, long flag}
-
-\fun{GEN}{sd_colors}{const char *v, long flag}
-
-\fun{GEN}{sd_compatible}{const char *v, long flag}
-
-\fun{GEN}{sd_datadir}{const char *v, long flag}
-
-\fun{GEN}{sd_debug}{const char *v, long flag}
-
-\fun{GEN}{sd_debugfiles}{const char *v, long flag}
-
-\fun{GEN}{sd_debugmem}{const char *v, long flag}
-
-\fun{GEN}{sd_echo}{const char *v, long flag}
-
-\fun{GEN}{sd_factor_add_primes}{const char *v, long flag}
-
-\fun{GEN}{sd_factor_proven}{const char *v, long flag}
-
-\fun{GEN}{sd_format}{const char *v, long flag}
-
-\fun{GEN}{sd_graphcolormap}{const char *v, long flag}
-
-\fun{GEN}{sd_graphcolors}{const char *v, long flag}
-
-\fun{GEN}{sd_help}{const char *v, long flag}
-
-\fun{GEN}{sd_histsize}{const char *v, long flag}
-
-\fun{GEN}{sd_lines}{const char *v, long flag}
-
-\fun{GEN}{sd_log}{const char *v, long flag}
-
-\fun{GEN}{sd_logfile}{const char *v, long flag}
-
-\fun{GEN}{sd_new_galois_format}{const char *v, long flag}
-
-\fun{GEN}{sd_output}{const char *v, long flag}
-
-\fun{GEN}{sd_parisize}{const char *v, long flag}
-
-\fun{GEN}{sd_path}{const char *v, long flag}
-
-\fun{GEN}{sd_prettyprinter}{const char *v, long flag}
-
-\fun{GEN}{sd_primelimit}{const char *v, long flag}
-
-\fun{GEN}{sd_prompt}{const char *v, long flag}
-
-\fun{GEN}{sd_prompt_cont}{const char *v, long flag}
-
-\fun{GEN}{sd_psfile}{const char *v, long flag}
-
-\fun{GEN}{sd_realprecision}{const char *v, long flag}
-
-\fun{GEN}{sd_rl}{const char *v, long flag}
-
-\fun{GEN}{sd_secure}{const char *v, long flag}
-
-\fun{GEN}{sd_seriesprecision}{const char *v, long flag}
-
-\fun{GEN}{sd_simplify}{const char *v, long flag}
-
-\fun{GEN}{sd_strictmatch}{const char *v, long flag}
-
-\fun{GEN}{sd_timer}{const char *v, long flag}
-
-
-\section{Hashtables}
-A \tet{hashtable}, or associative array, is a set of pairs $(k,v)$ of keys
-and values. PARI implements general extensible hashtables for fast data
-retrieval, independently of the PARI stack. A hashtable is implemented as a
-table of linked lists, each list containing all entries sharing the same hash
-value. The table length is a prime number, which roughly doubles as the table
-overflows by gaining new entries; both the current number of entries and the
-threshold before the table grows are stored in the table. Finally the table
-remembers the functions used to hash the entries's keys and to test for
-equality two entries hased to the same value.
-
-An entry, or \tet{hashentry}, contains
-
-\item a key/value pair $(k,v)$, both of type \kbd{void*} for maximal
-flexibility,
-
-\item the hash value of the key, for the table hash function. This hash is
-mapped to a table index (by reduction modulo the table length), but it
-contains more information, and is used to bypass costly general equality
-tests if possible,
-
-\item a link pointer to the next entry sharing the same table cell.
-
-\bprog
-typedef struct {
-  void *key, *val;
-  ulong hash; /* hash(key) */
-  struct hashentry *next;
-} hashentry;
-
-typedef struct {
-  ulong len; /* table length */
-  hashentry **table; /* the table */
-  ulong nb, maxnb; /* number of entries stored and max nb before enlarging */
-  ulong pindex; /* prime index */
-  ulong (*hash) (void *k); /* hash function */
-  int (*eq) (void *k1, void *k2); /* equality test */
-} hashtable;
-@eprog\noindent
-
-\fun{hashtable*}{hash_create}{ulong size, ulong (*hash)(void*), int
-(*eq)(void*,void*)}\hfil\break
-creates a hashtable with enough room to contain \kbd{size} entries.
-The functions \kbd{hash} and \kbd{eq} will be used to compute the hash value
-of keys and test keys for equality, respectively.
-
-\fun{void}{hash_insert}{hashtable *h, void *k, void *v} inserts $(k,v)$
-in hashtable $h$. No copy is made: $k$ and $v$ themselves are stored. The
-implementation does not prevent one to insert two entries with equal
-keys $k$, but which of the two is affected by later commands is undefined.
-
-\fun{hashentry*}{hash_search}{hashtable *h, void *k} look for an entry
-with key $k$ in $h$. Return it if it one exists, and \kbd{NULL} if not.
-
-\fun{hashentry*}{hash_remove}{hashtable *h, void *k} deletes an entry $(k,v)$
-with key $k$ from $h$ and return it. (Return \kbd{NULL} if none was found.)
-Only the linking structures are freed, memory associated to $k$ and $v$
-is not reclaimed.
-
-\fun{void}{hash_destroy}{hashtable *h} deletes the hashtable, by removing all
-entries.
-
-Some interesting hash functions are available:
-
-\fun{ulong}{hash_str}{const char *s}
-
-\fun{ulong}{hash_str2}{const char *s} is the historical PARI string hashing
-function and seems to be generally inferior to \kbd{hash\_str}.
-
-\fun{ulong}{hash_GEN}{GEN x}
-
-\section{Character strings}
-
-\fun{char*}{pari_strdup}{const char *s} returns a malloc'ed copy of $s$
-(uses \kbd{pari\_malloc}).
-
-\fun{char*}{pari_strndup}{const char *s, long n} returns a malloc'ed copy of
-at most $n$ chars from $s$ (uses \kbd{pari\_malloc}). If $s$ is longer than
-$n$, only $n$ characters are copied and a terminal null byte is added.
-
-\fun{char*}{stack_strdup}{const char *s} returns a copy of $s$, allocated
-on the PARI stack (uses \kbd{stackmalloc}).
-
-\fun{char*}{itostr}{GEN x} writes the \typ{INT} $x$ to a \tet{stackmalloc}'ed
-string.
-
-\fun{char*}{GENtostr}{GEN x}, using the current default output format
-(\kbd{GP\_DATA->fmt}, which contains the output style and the number of
-significant digits to print), converts $x$ to a malloc'ed string. Simple
-variant of \tet{pari_sprintf}.
-
-\fun{char*}{GENtoTeXstr}{GEN x}, as \kbd{GENtostr}, except that
-\tet{f_TEX} overrides the output format from \kbd{GP\_DATA->fmt}.
-
-\fun{GEN}{strtoGENstr}{const char *s} returns a \typ{STR} with content $s$.
-
-\fun{GEN}{strntoGENstr}{const char *s, long n}
-returns a \typ{STR} containing the first $n$ characters of $s$.
-
-\fun{GEN}{chartoGENstr}{char c} returns a \typ{STR} containing the character
-$c$.
-
-\fun{GEN}{GENtoGENstr}{GEN x} returns a \typ{STR} containing the printed
-form of $x$ (in \tet{raw} format). This is often easier to use that
-\tet{GENtostr} (which returns a malloc-ed \kbd{char*}) since there is no need
-to free the string after use.
-
-\fun{GEN}{GENtoGENstr_nospace}{GEN x} as \kbd{GENtoGENstr}, removing all
-spaces from the output.
-
-\fun{char*}{RgV_to_str}{GEN g, long flag} $g$ being a vector of \kbd{GEN}s,
-returns a malloc'ed string, the concatenation of the \kbd{GENtostr} applied
-to its elements, except that \typ{STR} are printed without enclosing quotes.
-\kbd{flag} determines the output format: \tet{f_RAW}, \tet{f_PRETTYMAT}
-or \tet{f_TEX}.
-
-\fun{GEN}{Str}{GEN g} as \tet{RgV_to_str} with output format \tet{f_RAW},
-but returns a \typ{STR}, not a malloced string.
-
-\fun{GEN}{Strtex}{GEN g} as \tet{RgV_to_str} with output format \tet{f_TEX},
-but returns a \typ{STR}, not a malloced string.
-
-\fun{GEN}{Strexpand}{GEN g} as \tet{RgV_to_str} with output format \tet{f_RAW},
-performing tilde and environment expansion on the result. Returns a
-\typ{STR}, not a malloced string.
-
-\subsec{Obsolete output functions}
-
-These variants of \fun{void}{output}{GEN x}, which prints \kbd{x}, followed by
-a newline and a buffer flush are complicated to use and much less flexible
-than what we saw before or the \tet{pari_printf} variants. They are provided
-for backward compatibility and are scheduled to disappear.
-
-\fun{void}{brute}{GEN x, char format, long dec}
-
-\fun{void}{matbrute}{GEN x, char format, long dec}
-
-\fun{void}{texe}{GEN x, char format, long dec}
-
-\section{Files}
-
-The following routines are trivial wrappers around system functions
-(possibly around one of several functions depending on availability).
-They are usually integrated within PARI's diagnostics system, printing
-messages if \kbd{DEBUGFILES} is high enough.
-
-\fun{int}{pari_is_dir}{const char *name} returns $1$ if \kbd{name} points to
-a directory, $0$ otherwise.
-
-\fun{int}{pari_is_file}{const char *name} returns $1$ if \kbd{name} points to
-a directory, $0$ otherwise.
-
-\fun{int}{file_is_binary}{FILE *f} returns $1$ if the file $f$ is a binary
-file (in the \tet{writebin} sense), $0$ otherwise.
-
-\fun{void}{pari_unlink}{const char *s} deletes the file named $s$. Warn
-if the operation fails.
-
-\fun{char*}{path_expand}{const char *s} perform tilde and environment expanѕion
-on $s$. Returns a \kbd{malloc}'ed buffer.
-
-\subsec{pariFILE}
-
-PARI maintains a linked list of open files, to reclaim ressources
-(file descriptors) on error or interrupts. The corresponding data structure
-is a \kbd{pariFILE}, which is a wrapper around a standard \kbd{FILE*},
-containing further the file name, its type (regular file, pipe, input or
-output file, etc.). The following functions create and manipulate this
-structure; they are integrated within PARI's diagnostics system, printing
-messages if \kbd{DEBUGFILES} is high enough.
-
-\fun{pariFILE*}{pari_fopen}{const char *s, const char *mode} wrapper
-around \kbd{fopen(s, mode)}, return \kbd{NULL} on failure.
-
-\fun{pariFILE*}{pari_fopen_or_fail}{const char *s, const char *mode}
-simple wrapper around \kbd{fopen(s, mode)}; error on failure.
-
-\fun{pariFILE*}{pari_fopengz}{const char *s} opens the file whose name is
-$s$,  and associates a (read-only) \kbd{pariFILE} with it. If $s$ is a
-compressed file (\kbd{.gz} suffix), it is uncompressed on the fly.
-If $s$ cannot be opened, also try to open \kbd{$s$.gz}. Returns \kbd{NULL}
-on failure.
-
-\fun{void}{pari_fclose}{pariFILE *f} closes
-the underlying file descriptor and deletes the \kbd{pariFILE} struct.
-
-\fun{pariFILE*}{pari_safefopen}{const char *s, const char *mode}
-creates a \emph{new} file $s$ (a priori for writing) with \kbd{600}
-permissions. Error if the file already exists. To avoid symlink attacks,
-a symbolic link exists, regardless of where it points to.
-
-\subsec{Temporary files}
-
-PARI has its own idea of the system temp directory derived from from an
-environment variable (\kbd{\$GPTMPDIR}, else \kbd{\$TMPDIR}), or the first
-writable directory among \kbd{/tmp}, \kbd{/var/tmp} and \kbd{.}.
-
-\fun{char*}{pari_unique_dir}{const char *s} creates a ``unique directory''
-and return its name built from the string $s$, the user id and process pid
-(on Unix systems). This directory is itself located in
-
-The name returned is \tet{pari_malloc}'ed.
-
-\fun{char*}{pari_unique_filename}{const char *s}
 
 \section{Transcendental functions}
 
@@ -6144,4 +5870,632 @@ to another format, see \tet{galoisexport}.
 \var{elts} is no \kbd{NULL}, it must be the list of elements of \var{grp}.
 
 
+
+\vfill\eject
+\chapter{Standard data structures}
+
+\section{Character strings}
+
+\subsec{Functions returning a \kbd{char *}}
+
+\fun{char*}{pari_strdup}{const char *s} returns a malloc'ed copy of $s$
+(uses \kbd{pari\_malloc}).
+
+\fun{char*}{pari_strndup}{const char *s, long n} returns a malloc'ed copy of
+at most $n$ chars from $s$ (uses \kbd{pari\_malloc}). If $s$ is longer than
+$n$, only $n$ characters are copied and a terminal null byte is added.
+
+\fun{char*}{stack_strdup}{const char *s} returns a copy of $s$, allocated
+on the PARI stack (uses \kbd{stackmalloc}).
+
+\fun{char*}{itostr}{GEN x} writes the \typ{INT} $x$ to a \tet{stackmalloc}'ed
+string.
+
+\fun{char*}{GENtostr}{GEN x}, using the current default output format
+(\kbd{GP\_DATA->fmt}, which contains the output style and the number of
+significant digits to print), converts $x$ to a malloc'ed string. Simple
+variant of \tet{pari_sprintf}.
+
+\fun{char*}{GENtoTeXstr}{GEN x}, as \kbd{GENtostr}, except that
+\tet{f_TEX} overrides the output format from \kbd{GP\_DATA->fmt}.
+
+\fun{char*}{RgV_to_str}{GEN g, long flag} $g$ being a vector of \kbd{GEN}s,
+returns a malloc'ed string, the concatenation of the \kbd{GENtostr} applied
+to its elements, except that \typ{STR} are printed without enclosing quotes.
+\kbd{flag} determines the output format: \tet{f_RAW}, \tet{f_PRETTYMAT}
+or \tet{f_TEX}.
+
+\subsec{Functions returning a \typ{STR}}
+
+\fun{GEN}{strtoGENstr}{const char *s} returns a \typ{STR} with content $s$.
+
+\fun{GEN}{strntoGENstr}{const char *s, long n}
+returns a \typ{STR} containing the first $n$ characters of $s$.
+
+\fun{GEN}{chartoGENstr}{char c} returns a \typ{STR} containing the character
+$c$.
+
+\fun{GEN}{GENtoGENstr}{GEN x} returns a \typ{STR} containing the printed
+form of $x$ (in \tet{raw} format). This is often easier to use that
+\tet{GENtostr} (which returns a malloc-ed \kbd{char*}) since there is no need
+to free the string after use.
+
+\fun{GEN}{GENtoGENstr_nospace}{GEN x} as \kbd{GENtoGENstr}, removing all
+spaces from the output.
+
+\fun{GEN}{Str}{GEN g} as \tet{RgV_to_str} with output format \tet{f_RAW},
+but returns a \typ{STR}, not a malloced string.
+
+\fun{GEN}{Strtex}{GEN g} as \tet{RgV_to_str} with output format \tet{f_TEX},
+but returns a \typ{STR}, not a malloced string.
+
+\fun{GEN}{Strexpand}{GEN g} as \tet{RgV_to_str} with output format \tet{f_RAW},
+performing tilde and environment expansion on the result. Returns a
+\typ{STR}, not a malloced string.
+
+\subsec{Obsolete output functions}
+
+These variants of \fun{void}{output}{GEN x}, which prints \kbd{x}, followed by
+a newline and a buffer flush are complicated to use and less flexible
+than what we saw above, or than the \tet{pari_printf} variants. They are
+provided for backward compatibility and are scheduled to disappear.
+
+\fun{void}{brute}{GEN x, char format, long dec}
+
+\fun{void}{matbrute}{GEN x, char format, long dec}
+
+\fun{void}{texe}{GEN x, char format, long dec}
+
+\section{Files}
+
+The following routines are trivial wrappers around system functions
+(possibly around one of several functions depending on availability).
+They are usually integrated within PARI's diagnostics system, printing
+messages if \kbd{DEBUGFILES} is high enough.
+
+\fun{int}{pari_is_dir}{const char *name} returns $1$ if \kbd{name} points to
+a directory, $0$ otherwise.
+
+\fun{int}{pari_is_file}{const char *name} returns $1$ if \kbd{name} points to
+a directory, $0$ otherwise.
+
+\fun{int}{file_is_binary}{FILE *f} returns $1$ if the file $f$ is a binary
+file (in the \tet{writebin} sense), $0$ otherwise.
+
+\fun{void}{pari_unlink}{const char *s} deletes the file named $s$. Warn
+if the operation fails.
+
+\fun{char*}{path_expand}{const char *s} perform tilde and environment expanѕion
+on $s$. Returns a \kbd{malloc}'ed buffer.
+
+\subsec{pariFILE}
+
+PARI maintains a linked list of open files, to reclaim ressources
+(file descriptors) on error or interrupts. The corresponding data structure
+is a \kbd{pariFILE}, which is a wrapper around a standard \kbd{FILE*},
+containing further the file name, its type (regular file, pipe, input or
+output file, etc.). The following functions create and manipulate this
+structure; they are integrated within PARI's diagnostics system, printing
+messages if \kbd{DEBUGFILES} is high enough.
+
+\fun{pariFILE*}{pari_fopen}{const char *s, const char *mode} wrapper
+around \kbd{fopen(s, mode)}, return \kbd{NULL} on failure.
+
+\fun{pariFILE*}{pari_fopen_or_fail}{const char *s, const char *mode}
+simple wrapper around \kbd{fopen(s, mode)}; error on failure.
+
+\fun{pariFILE*}{pari_fopengz}{const char *s} opens the file whose name is
+$s$,  and associates a (read-only) \kbd{pariFILE} with it. If $s$ is a
+compressed file (\kbd{.gz} suffix), it is uncompressed on the fly.
+If $s$ cannot be opened, also try to open \kbd{$s$.gz}. Returns \kbd{NULL}
+on failure.
+
+\fun{void}{pari_fclose}{pariFILE *f} closes
+the underlying file descriptor and deletes the \kbd{pariFILE} struct.
+
+\fun{pariFILE*}{pari_safefopen}{const char *s, const char *mode}
+creates a \emph{new} file $s$ (a priori for writing) with \kbd{600}
+permissions. Error if the file already exists. To avoid symlink attacks,
+a symbolic link exists, regardless of where it points to.
+
+\subsec{Temporary files}
+
+PARI has its own idea of the system temp directory derived from from an
+environment variable (\kbd{\$GPTMPDIR}, else \kbd{\$TMPDIR}), or the first
+writable directory among \kbd{/tmp}, \kbd{/var/tmp} and \kbd{.}.
+
+\fun{char*}{pari_unique_dir}{const char *s} creates a ``unique directory''
+and return its name built from the string $s$, the user id and process pid
+(on Unix systems). This directory is itself located in
+
+The name returned is \tet{pari_malloc}'ed.
+
+\fun{char*}{pari_unique_filename}{const char *s}
+
+\section{Hashtables}
+A \tet{hashtable}, or associative array, is a set of pairs $(k,v)$ of keys
+and values. PARI implements general extensible hashtables for fast data
+retrieval, independently of the PARI stack. A hashtable is implemented as a
+table of linked lists, each list containing all entries sharing the same hash
+value. The table length is a prime number, which roughly doubles as the table
+overflows by gaining new entries; both the current number of entries and the
+threshold before the table grows are stored in the table. Finally the table
+remembers the functions used to hash the entries's keys and to test for
+equality two entries hased to the same value.
+
+An entry, or \tet{hashentry}, contains
+
+\item a key/value pair $(k,v)$, both of type \kbd{void*} for maximal
+flexibility,
+
+\item the hash value of the key, for the table hash function. This hash is
+mapped to a table index (by reduction modulo the table length), but it
+contains more information, and is used to bypass costly general equality
+tests if possible,
+
+\item a link pointer to the next entry sharing the same table cell.
+
+\bprog
+typedef struct {
+  void *key, *val;
+  ulong hash; /* hash(key) */
+  struct hashentry *next;
+} hashentry;
+
+typedef struct {
+  ulong len; /* table length */
+  hashentry **table; /* the table */
+  ulong nb, maxnb; /* number of entries stored and max nb before enlarging */
+  ulong pindex; /* prime index */
+  ulong (*hash) (void *k); /* hash function */
+  int (*eq) (void *k1, void *k2); /* equality test */
+} hashtable;
+@eprog\noindent
+
+\fun{hashtable*}{hash_create}{ulong size, ulong (*hash)(void*), int
+(*eq)(void*,void*)}\hfil\break
+creates a hashtable with enough room to contain \kbd{size} entries.
+The functions \kbd{hash} and \kbd{eq} will be used to compute the hash value
+of keys and test keys for equality, respectively.
+
+\fun{void}{hash_insert}{hashtable *h, void *k, void *v} inserts $(k,v)$
+in hashtable $h$. No copy is made: $k$ and $v$ themselves are stored. The
+implementation does not prevent one to insert two entries with equal
+keys $k$, but which of the two is affected by later commands is undefined.
+
+\fun{hashentry*}{hash_search}{hashtable *h, void *k} look for an entry
+with key $k$ in $h$. Return it if it one exists, and \kbd{NULL} if not.
+
+\fun{hashentry*}{hash_remove}{hashtable *h, void *k} deletes an entry $(k,v)$
+with key $k$ from $h$ and return it. (Return \kbd{NULL} if none was found.)
+Only the linking structures are freed, memory associated to $k$ and $v$
+is not reclaimed.
+
+\fun{void}{hash_destroy}{hashtable *h} deletes the hashtable, by removing all
+entries.
+
+Some interesting hash functions are available:
+
+\fun{ulong}{hash_str}{const char *s}
+
+\fun{ulong}{hash_str2}{const char *s} is the historical PARI string hashing
+function and seems to be generally inferior to \kbd{hash\_str}.
+
+\fun{ulong}{hash_GEN}{GEN x}
+
+\section{Vectors and Matrices}
+
+\subsec{Access and extract}
+See~\secref{se:clean} and~\secref{se:unclean} for various useful constructors.
+Coefficients are accessed and set using \tet{gel}, \tet{gcoeff},
+see~\secref{se:accessors}. There are many internal functions to extract or
+manipulate subvectors or submatrices but, like the accessors above, none of
+them are suitable for \tet{gerepileupto}. Worse, there are no type
+verification, nor bound checking, so use at your own risk.
+
+\fun{GEN}{shallowcopy}{GEN x} returns a \typ{GEN} whose components are the
+components of $x$ (no copy is made). The result may now be used to compute in
+place without destroying $x$. This is essentially equivalent to
+\bprog
+  GEN y = cgetg(lg(x), typ(x));
+  for (i = 1; i < lg(x); i++) y[i] = x[i];
+  return y;
+@eprog\noindent
+except that \typ{POLMOD} (resp.~\typ{MAT}) are treated specially since a
+shallow copy of the representative (resp.~all columns) is also made.
+
+\fun{GEN}{shallowtrans}{GEN x} returns the transpose of $x$, \emph{without}
+copying its components, i.~e.,~it returns a \kbd{GEN} whose components are
+(physically) the components of $x$. This is the internal function underlying
+\tet{gtrans}.
+
+\fun{GEN}{shallowconcat}{GEN x, GEN y} concatenate $x$ and $y$, \emph{without}
+copying components, i.~e.,~it returns a \kbd{GEN} whose components are
+(physically) the components of $x$ and $y$.
+
+\fun{GEN}{shallowconcat1}{GEN x}
+$x$ must be \typ{VEC} or \typ{LIST}, concatenate
+its elements from left to right. Shallow version of \kbd{concat1}.
+
+\fun{GEN}{shallowextract}{GEN x, GEN y} extract components
+of the vector or matrix $x$ according to the selection parameter $y$.
+This is the shallow analog of \kbd{extract0(x, y, NULL)}, see \tet{vecextract}.
+\kbdsidx{extract0}
+
+\fun{GEN}{vconcat}{GEN A, GEN B} concatenate vertically the two \typ{MAT} $A$
+and $B$ of compatible dimensions. A \kbd{NULL} pointer is accepted for an
+empty matrix. See \tet{shallowconcat}.
+
+\fun{GEN}{row}{GEN A, long i} return $A[i,]$, the $i$-th row of the \typ{MAT}
+$A$.
+
+\fun{GEN}{row_i}{GEN A, long i, long j1, long j2} return part of the $i$-th
+row of \typ{MAT}~$A$: $A[i,j_1]$, $A[i,j_1+1]\dots,A[i,j_2]$. Assume $j_1
+\leq j_2$.
+
+\fun{GEN}{rowcopy}{GEN A, long i} return the row $A[i,]$ of
+the~\typ{MAT}~$A$. This function is memory clean and suitable for
+\kbd{gerepileupto}. See \kbd{row} for the shallow equivalent.
+
+\fun{GEN}{rowslice}{GEN A, long i1, long i2} return the \typ{MAT}
+formed by the $i_1$-th through $i_2$-th rows of \typ{MAT} $A$. Assume $i_1
+\leq i_2$.
+
+\fun{GEN}{rowpermute}{GEN A, GEN p}, $p$ being a \typ{VECSMALL}
+representing a list $[p_1,\dots,p_n]$ of rows of \typ{MAT} $A$, returns the
+matrix whose rows are $A[p_1,],\dots, A[p_n,]$.
+
+\fun{GEN}{rowslicepermute}{GEN A, GEN p, long x1, long x2}, short for
+\bprog
+  rowslice(rowpermute(A,p), x1, x2)
+@eprog\noindent
+(more efficient).
+
+\fun{GEN}{vecslice}{GEN A, long j1, long j2}, return $A[j_1], \dots,
+A[j_2]$. If $A$ is a \typ{MAT}, these correspond to \emph{columns} of $A$.
+The object returned has the same type as $A$ (\typ{VEC}, \typ{COL} or
+\typ{MAT}). Assume $j_1 \leq j_2$.
+
+\fun{GEN}{vecpermute}{GEN A, GEN p} $p$ is a \typ{VECSMALL} representing
+a list $[p_1,\dots,p_n]$ of indices. Returns a \kbd{GEN} which has the same
+type as $A$ (\typ{VEC}, \typ{COL} or \typ{MAT}), and whose components
+are $A[p_1],\dots,A[p_n]$. If $A$ is a \typ{MAT}, these are the
+\emph{columns} of $A$.
+
+\fun{GEN}{vecslicepermute}{GEN A, GEN p, long y1, long y2} short for
+\bprog
+  vecslice(vecpermute(A,p), y1, y2)
+@eprog\noindent
+(more efficient).
+
+\subsec{Componentwise operations}
+
+The following convenience routines automate trivial loops of the form
+\bprog
+  for (i = 1; i < lg(a); i++) gel(v,i) = f(gel(a,i), gel(b,i))
+@eprog\noindent
+for suitable $f$:
+
+\fun{GEN}{vecinv}{GEN a}. Given a vector $a$,
+returns the vector whose $i$-th component is \kbd{ginv}$(a[i])$.
+
+\fun{GEN}{vecmul}{GEN a, GEN b}. Given $a$ and $b$ two vectors of the same
+length, returns the vector whose $i$-th component is \kbd{gmul}$(a[i], b[i])$.
+
+\fun{GEN}{vecdiv}{GEN a, GEN b}. Given $a$ and $b$ two vectors of the same
+length, returns the vector whose $i$-th component is \kbd{gdiv}$(a[i], b[i])$.
+
+\fun{GEN}{vecpow}{GEN a, GEN n}. Given $n$ a \typ{INT}, returns
+the vector whose $i$-th component is $a[i]^n$.
+
+\fun{GEN}{vecmodii}{GEN a, GEN b}. Assuming $a$ and $b$ are two \kbd{ZV}
+of the same length, returns the vector whose $i$-th component
+is \kbd{modii}$(a[i], b[i])$.
+
+Note that \kbd{vecadd} or \kbd{vecsub} do not exist since \kbd{gadd}
+and \kbd{gsub} have the expected behaviour. On the other hand,
+\kbd{ginv} does not accept vector types, hence \kbd{vecinv}.
+
+\subsec{Low-level vectors and columns functions}
+
+These functions handle \typ{VEC} as an abstract container type of
+\kbd{GEN}s. No specific meaning is attached to the content. They accept both
+\typ{VEC} and \typ{COL} as input, but \kbd{col} functions always return
+\typ{COL} and \kbd{vec} functions always return \typ{VEC}.
+
+\misctitle{Note.} All the functions below are shallow.
+
+\fun{GEN}{const_col}{long n, long c} returns a \typ{COL} of \kbd{n} components
+equal to \kbd{c}.
+
+\fun{GEN}{const_vec}{long n, long c} returns a \typ{VEC} of \kbd{n} components
+equal to \kbd{c}.
+
+\fun{int}{vec_isconst}{GEN v} Returns 1 if all the components of \kbd{v} are
+equal, else returns 0.
+
+\fun{int}{vec_is1to1}{GEN v}  Returns 1 if the components of \kbd{v} are
+pair-wise distinct, i.e. if $i\mapsto v[i]$ is a 1-to-1 mapping, else returns
+0.
+
+\fun{GEN}{vec_shorten}{GEN v, long n} shortens the vector \kbd{v} to \kbd{n}
+components.
+
+\fun{GEN}{vec_lengthen}{GEN v, long n} lengthens the vector \kbd{v}
+to \kbd{n} components. The extra components are not initialized.
+
+\section{Vectors of small integers}
+
+\subsec{\typ{VECSMALL}}
+
+These functions handle \typ{VECSMALL} as an abstract container type
+of small signed integers. No specific meaning is attached to the content.
+
+\fun{GEN}{const_vecsmall}{long n, long c} returns a \typ{VECSMALL}
+of \kbd{n} components equal to \kbd{c}.
+
+\fun{GEN}{vec_to_vecsmall}{GEN z} identical to \kbd{ZV\_to\_zv(z)}.
+
+\fun{GEN}{vecsmall_to_vec}{GEN z} identical to \kbd{zv\_to\_ZV(z)}.
+
+\fun{GEN}{vecsmall_to_col}{GEN z} identical to \kbd{zv\_to\_ZC(z)}.
+
+\fun{GEN}{vecsmall_copy}{GEN x} makes a copy of \kbd{x} on the stack.
+
+\fun{GEN}{vecsmall_shorten}{GEN v, long n} shortens the \typ{VECSMALL} \kbd{v}
+to \kbd{n} components.
+
+\fun{GEN}{vecsmall_lengthen}{GEN v, long n} lengthens the \typ{VECSMALL}
+\kbd{v} to \kbd{n} components. The extra components are not initialized.
+
+\fun{GEN}{vecsmall_indexsort}{GEN x} performs an indirect sort of the
+components of the \typ{VECSMALL} \kbd{x} and return a permutation stored in a
+\typ{VECSMALL}.
+
+\fun{void}{vecsmall_sort}{GEN v} sorts the \typ{VECSMALL} \kbd{v} in place.
+
+\fun{long}{vecsmall_isin}{GEN v, long x} returns the first index $i$
+such that \kbd{v[$i$]} is equal to \kbd{x}. Naive search in linear time, does
+not assume that \kbd{v} is sorted.
+
+\fun{GEN}{vecsmall_uniq}{GEN v} given a \typ{VECSMALL} \kbd{v}, return
+the vector of unique occurrences.
+
+\fun{GEN}{vecsmall_uniq_sorted}{GEN v} same as \kbd{vecsmall\_uniq}, but assumes
+ \kbd{v} sorted.
+
+\fun{long}{vecsmall_duplicate}{GEN v} given a \typ{VECSMALL} \kbd{v}, return
+$0$ if there is no duplicates, or the index of the first duplicate
+(\kbd{vecsmall\_duplicate([1,1])} returns $2$).
+
+\fun{long}{vecsmall_duplicate_sorted}{GEN v} same as
+\kbd{vecsmall\_duplicate}, but assume \kbd{v} sorted.
+
+\fun{int}{vecsmall_lexcmp}{GEN x, GEN y} compares two \typ{VECSMALL} lexically.
+
+\fun{int}{vecsmall_prefixcmp}{GEN x, GEN y} truncate the longest \typ{VECSMALL}
+to the length of the shortest and compares them lexicographically.
+
+\fun{GEN}{vecsmall_prepend}{GEN V, long s} prepend \kbd{s} to the \typ{VECSMALL} \kbd{V}.
+
+\fun{GEN}{vecsmall_append}{GEN V, long s} append \kbd{s} to the \typ{VECSMALL} \kbd{V}.
+
+\fun{GEN}{vecsmall_concat}{GEN u, GEN v} concat the \typ{VECSMALL} \kbd{u} and \kbd{v}.
+
+\fun{long}{vecsmall_coincidence}{GEN u, GEN v} returns the numbers of indices where \kbd{u} and \kbd{v} agree.
+
+\fun{long}{vecsmall_pack}{GEN v, long base, long mod} handles the
+\typ{VECSMALL} \kbd{v} as the digit of a number in base \kbd{base} and return
+this number modulo \kbd{mod}. This can be used as an hash function.
+
+\subsec{Vectors of \typ{VECSMALL}}
+These functions manipulate vectors of \typ{VECSMALL} (vecvecsmall).
+
+\fun{GEN}{vecvecsmall_sort}{GEN x} sorts lexicographically the components of
+the vector \kbd{x}.
+
+\fun{GEN}{vecvecsmall_indexsort}{GEN x} performs an indirect lexicographic sorting of the components of the vector \kbd{x} and return a permutation stored in a \typ{VECSMALL}.
+
+\fun{long}{vecvecsmall_search}{GEN x, GEN y, long flag} \kbd{x} being a sorted
+vecvecsmall and \kbd{y} a \typ{VECSMALL}, search \kbd{y} inside \kbd{x}. \kbd{fla} has the same meaning as for \kbd{setsearch}.
+
+
+\section{Vectors of bits}
+These functions manipulate vectors of bits (stored in \typ{VECSMALL}).
+Bits are numbered from 0.
+
+\fun{GEN}{bitvec_alloc}{long n} allocates a bits-vector suitable for \kbd{n}
+bits.
+
+\fun{GEN}{bitvec_shorten}{GEN bitvec, long n} shortens a bits-vector
+\kbd{bitvec} to \kbd{n} bits.
+
+\fun{long}{bitvec_test}{GEN bitvec, long b} returns the bit of index \kbd{b} of
+\kbd{bitvec}.
+
+\fun{long}{bitvec_test_set}{GEN bitvec, long b} (in place) sets the bit of
+index \kbd{b} of \kbd{bitvec}, returning its old value.
+
+\fun{void}{bitvec_set}{GEN bitvec, long b} (in place) sets the bit of index
+\kbd{b} of \kbd{bitvec}.
+
+\fun{void}{bitvec_clear}{GEN bitvec, long b} (in place) clears the bit of index \kbd{b} of \kbd{bitvec}.
+
+
+\vfill\eject
+\chapter{Functions related to the GP interpreter}
+
+\section{Handling closures}
+
+\fun{void}{closure_disassemble}{GEN C} print the \typ{CLOSURE} \kbd{C} in
+GP assembly format.
+
+\fun{GEN}{closure_callgenall}{GEN C, long n, ...} evaluate the \typ{CLOSURE}
+\kbd{C} with the \kbd{n} arguments (of type \kbd{GEN}) following \kbd{n} in
+the function call. Assumes \kbd{C} has arity $\geq \kbd{n}$.
+
+\fun{GEN}{closure_callgenvec}{GEN C, GEN args} evaluate the \typ{CLOSURE}
+\kbd{C} with the arguments supplied in the vector \kbd{args}. Assumes \kbd{C}
+has arity $\geq \kbd{lg(args)-1}$.
+
+\fun{GEN}{closure_callgen1}{GEN C, GEN x} evaluate the \typ{CLOSURE}
+\kbd{C} with argument \kbd{x}. Assumes \kbd{C} has arity $\geq 1$.
+
+\fun{GEN}{closure_callgen2}{GEN C, GEN x, GEN y} evaluate the \typ{CLOSURE}
+\kbd{C} with argument \kbd{x}, \kbd{y}. Assumes \kbd{C} has arity $\geq 2$.
+
+The following technical functions are used to evaluate \emph{inline}
+closures, after pushing lexical arguments on the evaluator stack.
+
+The control flow statements (break, next and return) will cause the
+evaluation of the closure to be interrupted; this is called below a
+\emph{flow change}. When that occurs, the functions below generally returns
+\kbd{NULL}. The caller can then adopt three positions:
+
+\item raise an exception (\kbd{closure\_evalnobrk}).
+
+\item pass through (by returning NULL itself).
+
+\item handle the flow change (undocumented yet, done by loop statements).
+
+\fun{GEN}{closure_evalgen}{GEN code} evaluates a closure and returns the result.
+
+\fun{GEN}{closure_evalnobrk}{GEN code} as \kbd{closure\_evalgen} but raise
+an exception if a flow change occurs. Meant for pseudo-iterators where
+interrupting the closure is meaningless, e.g.~\kbd{intnum} or \kbd{sumninm}.
+
+\fun{GEN}{closure_evalres}{GEN code} evaluates a closure and returns the result.
+The difference with \kbd{closure\_evalgen} being that, if the flow end by a
+\kbd{return} statement, the result will be the returned value instead of
+\kbd{NULL}.
+
+\fun{void}{closure_evalvoid}{GEN code} evaluates a closure whose return
+value is ignored.
+
+\fun{GEN}{closure_trapgen}{long numerr, GEN code} evaluates closure, while
+trapping error \kbd{numerr}. Return \kbd{(GEN)1L} if error trapped, and the
+result otherwise.
+
+\fun{void}{closure_reset}{void} reinitializes the byte-code evaluator.
+This is used by the error recovery code.
+
+Functions to deal with lexical variables introduced through the prototype
+code 'V':
+
+Such functions need to manually create and delete a lexical variable for
+each code 'V', which will be given a number $-1, -2, \ldots$.
+
+\fun{void}{push_lex}{GEN a} creates a new lexical variable whose initial value
+is $a$ on the top of the stack. This variable get the number $-1$, and the number of the other variables is decreased by one unit.
+
+\fun{void}{pop_lex}{void} deletes topmost lexical variable, increasing the
+number of other variables by one unit.
+
+\fun{GEN}{get_lex}{long vn} get the value of the variable with number \kbd{vn}.
+
+\fun{void}{set_lex}{long vn, GEN x} set the value of the variable with number
+\kbd{vn}.
+
+Functions returning new closures:
+
+\fun{GEN}{closure_deriv}{GEN code} returns a closure corresponding to the
+numerical derivative of the closure \kbd{code}.
+
+\fun{GEN}{genclosure}{entree *ep} creates a closure associated to a PARI
+function.
+
+\section{Defaults}
+
+\fun{int}{pari_is_default}{const char *s} return $1$ if $s$ is the name
+of a default, $0$ otherwise.
+
+\fun{GEN}{setdefault}{const char *s, const char *v, long flag} low-level
+function underlying \kbd{default0}. If $s$ is empty, call all default ѕetting
+functions with empty string argument and flag \tet{d_ACKNOWLEDGE}. Otherwise,
+check whether $s$ corresponds to a default and call the corresponding default
+setting function with arguments $v$ and \fl.
+
+We shall describe these functions below: an non-empty $v$ means that we change
+the value of the default to $v$, possibly after some translation work. The
+flag is one of
+
+\item \tet{d_INITRC} called while reading the \kbd{gprc} (print and return
+nothing, possibly defer until \kbd{gp} actually starts).
+
+\item \tet{d_RETURN} return the current value, as a \typ{INT} if possible, as
+a \typ{STR} otherwise.
+
+\item \tet{d_ACKNOWLEDGE} print the current value.
+
+\item \tet{d_SILENT} print nothing, return \kbd{gnil}.
+
+\noindent Low-level functions called by \kbd{setdefault}:
+
+\fun{GEN}{sd_TeXstyle}{const char *v, long flag}
+
+\fun{GEN}{sd_colors}{const char *v, long flag}
+
+\fun{GEN}{sd_compatible}{const char *v, long flag}
+
+\fun{GEN}{sd_datadir}{const char *v, long flag}
+
+\fun{GEN}{sd_debug}{const char *v, long flag}
+
+\fun{GEN}{sd_debugfiles}{const char *v, long flag}
+
+\fun{GEN}{sd_debugmem}{const char *v, long flag}
+
+\fun{GEN}{sd_echo}{const char *v, long flag}
+
+\fun{GEN}{sd_factor_add_primes}{const char *v, long flag}
+
+\fun{GEN}{sd_factor_proven}{const char *v, long flag}
+
+\fun{GEN}{sd_format}{const char *v, long flag}
+
+\fun{GEN}{sd_graphcolormap}{const char *v, long flag}
+
+\fun{GEN}{sd_graphcolors}{const char *v, long flag}
+
+\fun{GEN}{sd_help}{const char *v, long flag}
+
+\fun{GEN}{sd_histsize}{const char *v, long flag}
+
+\fun{GEN}{sd_lines}{const char *v, long flag}
+
+\fun{GEN}{sd_log}{const char *v, long flag}
+
+\fun{GEN}{sd_logfile}{const char *v, long flag}
+
+\fun{GEN}{sd_new_galois_format}{const char *v, long flag}
+
+\fun{GEN}{sd_output}{const char *v, long flag}
+
+\fun{GEN}{sd_parisize}{const char *v, long flag}
+
+\fun{GEN}{sd_path}{const char *v, long flag}
+
+\fun{GEN}{sd_prettyprinter}{const char *v, long flag}
+
+\fun{GEN}{sd_primelimit}{const char *v, long flag}
+
+\fun{GEN}{sd_prompt}{const char *v, long flag}
+
+\fun{GEN}{sd_prompt_cont}{const char *v, long flag}
+
+\fun{GEN}{sd_psfile}{const char *v, long flag}
+
+\fun{GEN}{sd_realprecision}{const char *v, long flag}
+
+\fun{GEN}{sd_rl}{const char *v, long flag}
+
+\fun{GEN}{sd_secure}{const char *v, long flag}
+
+\fun{GEN}{sd_seriesprecision}{const char *v, long flag}
+
+\fun{GEN}{sd_simplify}{const char *v, long flag}
+
+\fun{GEN}{sd_strictmatch}{const char *v, long flag}
+
+\fun{GEN}{sd_timer}{const char *v, long flag}
 \vfill\eject
