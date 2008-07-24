@@ -695,3 +695,185 @@ gisprime(GEN x, long flag)
 long
 isprime(GEN x) { return BPSW_psp(x) && BPSW_isprime(x); }
 
+/***********************************************************************/
+/**                                                                   **/
+/**                          PRIME NUMBERS                            **/
+/**                                                                   **/
+/***********************************************************************/
+
+/* assume all primes up to 59359 are precomputed */
+GEN
+prime(long n)
+{
+  byteptr p;
+  ulong prime;
+
+  if (n <= 0) pari_err(talker, "n-th prime meaningless if n = %ld",n);
+  if (n < 1000) {
+    p = diffptr;
+    prime = 0;
+  } else if (n < 2000) {
+    n -= 1000; p = diffptr+1000;
+    prime = 7919;
+  } else if (n < 3000) {
+    n -= 2000; p = diffptr+2000;
+    prime = 17389;
+  } else if (n < 4000) {
+    n -= 3000; p = diffptr+3000;
+    prime = 27449;
+  } else if (n < 5000) {
+    n -= 4000; p = diffptr+4000;
+    prime = 37813;
+  } else if (n < 6000) {
+    n -= 5000; p = diffptr+5000;
+    prime = 48611;
+  } else if (n < 10000 || maxprime() < 500000) {
+    n -= 6000; p = diffptr+6000;
+    prime = 59359;
+  } else if (n < 20000) {
+    n -= 10000; p = diffptr+10000;
+    prime = 104729;
+  } else if (n < 30000) {
+    n -= 20000; p = diffptr+20000;
+    prime = 224737;
+  } else if (n < 40000) {
+    n -= 30000; p = diffptr+30000;
+    prime = 350377;
+  } else {
+    n -= 40000; p = diffptr+40000;
+    prime = 479909;
+  }
+  while (n--) NEXT_PRIME_VIADIFF_CHECK(prime,p);
+  return utoipos(prime);
+}
+
+GEN
+primepi(GEN x)
+{
+  pari_sp av = avma;
+  byteptr p = diffptr;
+  ulong prime = 0, res = 0, n;
+  GEN N = typ(x) == t_INT? x: gfloor(x);
+
+  if (typ(N) != t_INT || signe(N) <= 0) pari_err(typeer, "primepi");
+  avma = av; n = itou(N); maxprime_check(n);
+  while (prime <= n) { res++; NEXT_PRIME_VIADIFF(prime,p); }
+  return utoi(res-1);
+}
+
+GEN
+primes(long m)
+{
+  byteptr p = diffptr;
+  ulong prime = 0;
+  long n;
+  GEN y, z;
+
+  n = (m < 0)? 0: m;
+  z = y = cgetg(n+1,t_VEC);
+  while (n--)
+  {
+    NEXT_PRIME_VIADIFF(prime,p);
+    if (!*p) /* use something close to Dusart's bound */
+      pari_err(primer2, (long)(m*( log((double)m*log((double)m))-0.948 )));
+    gel(++z, 0) = utoi(prime);
+  }
+  return y;
+}
+
+/***********************************************************************/
+/**                                                                   **/
+/**                       PRIVATE PRIME TABLE                         **/
+/**                                                                   **/
+/***********************************************************************/
+
+static void
+cleanprimetab(void)
+{
+  long i,j, lp = lg(primetab);
+
+  for (i=j=1; i < lp; i++)
+    if (primetab[i]) primetab[j++] = primetab[i];
+  setlg(primetab,j);
+}
+
+/* p is a single element or a row vector with "primes" to add to primetab.
+ * If p shares a non-trivial factor with another element in primetab, take it
+ * into account. */
+GEN
+addprimes(GEN p)
+{
+  pari_sp av;
+  long i,k,tx,lp;
+  GEN L;
+
+  if (!p) return primetab;
+  tx = typ(p);
+  if (is_vec_t(tx))
+  {
+    for (i=1; i < lg(p); i++) (void)addprimes(gel(p,i));
+    return primetab;
+  }
+  if (tx != t_INT) pari_err(typeer,"addprime");
+  if (is_pm1(p)) return primetab;
+  av = avma; i = signe(p);
+  if (i == 0) pari_err(talker,"can't accept 0 in addprimes");
+  if (i < 0) p = absi(p);
+
+  lp = lg(primetab);
+  L = cgetg(2*lp,t_VEC); k = 1;
+  for (i=1; i < lp; i++)
+  {
+    GEN n = gel(primetab,i), d = gcdii(n, p);
+    if (! is_pm1(d))
+    {
+      if (!equalii(p,d)) gel(L,k++) = d;
+      gel(L,k++) = diviiexact(n,d);
+      gunclone(n); primetab[i] = 0;
+    }
+  }
+  primetab = (GEN) pari_realloc(primetab, (lp+1)*sizeof(long));
+  gel(primetab,i) = gclone(p); setlg(primetab, lp+1);
+  if (k > 1) { cleanprimetab(); setlg(L,k); (void)addprimes(L); }
+  avma = av; return primetab;
+}
+
+static GEN
+removeprime(GEN prime)
+{
+  long i;
+
+  if (typ(prime) != t_INT) pari_err(typeer,"removeprime");
+  for (i=lg(primetab) - 1; i; i--)
+    if (absi_equal(gel(primetab,i), prime))
+    {
+      gunclone(gel(primetab,i)); primetab[i]=0;
+      cleanprimetab(); break;
+    }
+  if (!i) pari_err(talker,"prime %Ps is not in primetable", prime);
+  return primetab;
+}
+
+GEN
+removeprimes(GEN prime)
+{
+  long i,tx;
+
+  if (!prime) return primetab;
+  tx = typ(prime);
+  if (is_vec_t(tx))
+  {
+    if (prime == primetab)
+    {
+      for (i=1; i < lg(prime); i++) gunclone(gel(prime,i));
+      setlg(prime, 1);
+    }
+    else
+    {
+      for (i=1; i < lg(prime); i++) (void)removeprime(gel(prime,i));
+    }
+    return primetab;
+  }
+  return removeprime(prime);
+}
+

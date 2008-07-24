@@ -709,7 +709,6 @@ GEN     znstar(GEN x);
 /* arith2.c */
 
 long    Z_issquarefree(GEN x);
-GEN     addprimes(GEN primes);
 GEN     Z_factor_limit(GEN n, long all);
 long    bigomega(GEN n);
 GEN     boundfact(GEN n, long lim);
@@ -744,10 +743,6 @@ long    moebius(GEN n);
 GEN     numbdiv(GEN n);
 long    omega(GEN n);
 GEN     eulerphi(GEN n);
-GEN     prime(long n);
-GEN     primepi(GEN x);
-GEN     primes(long n);
-GEN     removeprimes(GEN primes);
 GEN     sumdiv(GEN n);
 GEN     sumdivk(GEN n,long k);
 ulong   eulerphiu(ulong n);
@@ -2178,11 +2173,16 @@ GEN     to_Kronecker(GEN P, GEN Q);
 
 long    BPSW_isprime(GEN x);
 long    BPSW_psp(GEN N);
+GEN     addprimes(GEN primes);
 GEN     gisprime(GEN x, long flag);
 GEN     gispseudoprime(GEN x, long flag);
 long    isprime(GEN x);
 long    ispseudoprime(GEN x, long flag);
 long    millerrabin(GEN n, long k);
+GEN     prime(long n);
+GEN     primepi(GEN x);
+GEN     primes(long n);
+GEN     removeprimes(GEN primes);
 int     uisprime(ulong n);
 
 /* random.c */
