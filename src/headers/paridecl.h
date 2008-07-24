@@ -1283,7 +1283,6 @@ char*   itostr(GEN x);
 void    matbrute(GEN g, char format, long dec);
 char*   os_getenv(const char *s);
 void    (*os_signal(int sig, void (*f)(int)))(int);
-void    outbeaut(GEN x);
 void    outbrute(GEN x);
 void    outmat(GEN x);
 void    output(GEN x);
