@@ -32,7 +32,7 @@ install0(char *name, char *code, char *gpname, char *lib)
 
   if (! *lib) lib = DL_DFLT_NAME;
   if (! *gpname) gpname = name;
-  if (lib) lib = expand_tilde(lib);
+  if (lib) lib = path_expand(lib);
 
 #ifndef RTLD_GLOBAL /* OSF1 has dlopen but not RTLD_GLOBAL*/
 #  define RTLD_GLOBAL 0
@@ -75,7 +75,7 @@ install0(char *name, char *code, char *gpname, char *lib)
   if (! *lib) lib = DL_DFLT_NAME;
 #endif
   if (! *gpname) gpname=name;
-  if (lib) lib = expand_tilde(lib);
+  if (lib) lib = path_expand(lib);
 
   handle = LoadLibrary(lib);
   if (!handle)

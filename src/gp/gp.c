@@ -1967,7 +1967,7 @@ tex2mail_output(GEN z, long n)
   /* output */
   gen_output(z, &T);
 
-  /* flush and restore */
+  /* flush and restore, output to logfile */
   prettyp_wait();
   if (o_logfile) {
     pari_outfile = o_logfile;
@@ -1975,8 +1975,10 @@ tex2mail_output(GEN z, long n)
       T.TeXstyle |= TEXSTYLE_BREAK;
       gen_output(z, &T);
       pari_putc('%');
-    } else
-	outbrute(z);
+    } else {
+      T.prettyp = f_RAW;
+      gen_output(z, &T);
+    }
     pari_putc('\n'); pari_flush();
   }
   pari_logfile = o_logfile;

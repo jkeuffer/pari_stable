@@ -5851,6 +5851,19 @@ but returns a \typ{STR}, not a malloced string.
 performing tilde and environment expansion on the result. Returns a
 \typ{STR}, not a malloced string.
 
+\subsec{Obsolete output functions}
+
+These variants of \fun{void}{output}{GEN x}, which prints \kbd{x}, followed by
+a newline and a buffer flush are complicated to use and much less flexible
+than what we saw before or the \tet{pari_printf} variants. They are provided
+for backward compatibility and are scheduled to disappear.
+
+\fun{void}{brute}{GEN x, char format, long dec}
+
+\fun{void}{matbrute}{GEN x, char format, long dec}
+
+\fun{void}{texe}{GEN x, char format, long dec}
+
 \section{Files}
 
 The following routines are trivial wrappers around system functions
@@ -5869,6 +5882,9 @@ file (in the \tet{writebin} sense), $0$ otherwise.
 
 \fun{void}{pari_unlink}{const char *s} deletes the file named $s$. Warn
 if the operation fails.
+
+\fun{char*}{path_expand}{const char *s} perform tilde and environment expanѕion
+on $s$. Returns a \kbd{malloc}'ed buffer.
 
 \subsec{pariFILE}
 

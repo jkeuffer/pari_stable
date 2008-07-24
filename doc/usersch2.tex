@@ -2511,7 +2511,7 @@ get rid of the ones you do not need anymore.
 most that many lines from each result, terminating the last line shown with
 \kbd{[+++]} if further material has been suppressed. The various \kbd{print}
 commands (see \secref{se:gp_program}) are unaffected, so you can always type
-\kbd{print(\%)}, \b{a}, or \b{b} to view the full result. If the actual
+\kbd{print(\%)} or \b{a} to view the full result. If the actual
 screen width cannot be determined, a ``line'' is assumed to be 80 characters
 long.
 
@@ -2544,7 +2544,7 @@ Note that the default value of $0$ (unset) will change to $1$ (set) in the
 next major version.
 
 \subsecidx{output} (default \kbd{1}): there are four possible values: 0
-(=~\var{raw}), 1 (=~\var{prettymatrix}), 2 (=~\var{prettyprint}), or 3
+(=~\var{raw}), 1 (=~\var{prettymatrix}), or 3
 (=~\var{external prettyprint}). This
 means that, independently of the default \kbd{format} for reals which we
 explained above, you can print results in four ways: either in \tev{raw
@@ -2559,17 +2559,14 @@ raw format is that matrices are printed as boxes instead of horizontally.
 This is prettier, but takes more space and cannot be used for input. Column
 vectors are still printed horizontally.
 
-The third format is the \tev{prettyprint format}, or beautified format. This
-format is now obsolete and identical to the \kbd{prettymatrix}.
-
-The fourth format is \tev{external prettyprint}, which pipes
+The third format is \tev{external prettyprint}, which pipes
 all \kbd{gp} output in TeX format to an external prettyprinter, according to the
 value of \tet{prettyprinter}. The default script (\tet{tex2mail}) converts
 its input to readable two-dimensional text.
 
 Independently of the setting of this default, an object can be printed
-in any of the three formats at any time using the commands \b{a}, \b{m}
-and~\b{b} respectively (see below).
+in any of the two formats at any time using the commands \b{a} and \b{m}
+respectively (see below).
 
 \subsecidx{parisize}\label{se:parisize} (default 4M, resp.~8M on a 32-bit,
 resp.~64-bit machine): \kbd{gp}, and in fact any program using the PARI
@@ -2812,9 +2809,6 @@ is ignored by \kbd{gp}.
 in raw format. If the number $n$ is omitted, print the latest computed object
 ($\%$). \label{se:history}
 
-\subsec{\b{b}} $\{n\}$: Same as \b{a}, in prettyprint (i.e.~beautified)
-format.
-
 \subsec{\b{c}}:\sidx{available commands} prints the list of all available
 hardcoded functions under \kbd{gp}, not including operators written as special
 symbols (see \secref{se:operators}). More information can be obtained using
@@ -2851,7 +2845,7 @@ If a \var{logfile} argument is given, change the default logfile name to
 \subsec{\b{m}}: as \b{a}, but using prettymatrix format.
 
 \subsec{\b{o}} $\{n\}$: sets \tet{output} mode to $n$ ($0$: raw, $1$:
-prettymatrix, $2$: prettyprint, $3$: external prettyprint).
+prettymatrix, $3$: external prettyprint).
 
 \subsec{\b{p}} $\{n\}$: sets \tet{realprecision} to $n$ decimal
 digits. Prints its current value if $n$ is omitted.

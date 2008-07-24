@@ -802,7 +802,7 @@ sd_filename(const char *v, long flag, const char *s, char **f)
   {
     char *str, *old = *f;
     long l;
-    char *ev = expand_tilde(v);
+    char *ev = path_expand(v);
     l = strlen(ev) + 256;
     str = (char *) malloc(l);
     do_strftime(ev,str, l-1); pari_free(ev);
@@ -858,7 +858,7 @@ sd_help(const char *v, long flag)
   {
     if (GP_DATA->flags & SECURE) err_secure("help",v);
     if (GP_DATA->help) pari_free((void*)GP_DATA->help);
-    GP_DATA->help = expand_tilde(v);
+    GP_DATA->help = path_expand(v);
   }
   str = GP_DATA->help? GP_DATA->help: "none";
   if (flag == d_RETURN) return strtoGENstr(str);
@@ -874,7 +874,7 @@ sd_datadir(const char *v, long flag)
   if (*v)
   {
     if (pari_datadir) pari_free(pari_datadir);
-    pari_datadir = expand_tilde(v);
+    pari_datadir = path_expand(v);
   }
   str = pari_datadir? pari_datadir: "none";
   if (flag == d_RETURN) return strtoGENstr(str);

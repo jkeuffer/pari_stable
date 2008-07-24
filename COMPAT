@@ -195,6 +195,7 @@ This file lists the incompatible changes between Version 2.x and older versions
     initalg -> nfinit, initalgred -> nfinitred -> initalgred2 -> nfinitred2
     primedec -> idealprimedec
   - rename library function u2toi -> uu32toi.
+  - remove obsolete library functions sor, outbrute, outbeaut
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

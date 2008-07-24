@@ -1635,14 +1635,28 @@ Here \kbd{i} is an \kbd{int}, \kbd{x} a \kbd{GEN} which is not a leaf
 (presumably a vector, or a polynomial) and this would insert the value of its
 $i$-th \kbd{GEN} component: \kbd{gel(x,i)}.
 
-\noindent A simple variant to \kbd{pari\_printf} is
+\noindent Simple but useful variants to \kbd{pari\_printf} are
 
-\fun{void}{output}{GEN x}, which prints \kbd{x}, followed by a newline and a
-buffer flush. This is more or less equivalent to
+\fun{void}{output}{GEN x} prints \kbd{x} in raw format, followed by a
+newline and a buffer flush. This is more or less equivalent to
 \bprog
     pari_printf("%Ps\n", x);
     pari_flush();
 @eprog
+
+\fun{void}{outmat}{GEN x} as above except if $x$ is a \typ{MAT}, in which
+case a multi-line display is used to display the matrix. This is prettier for
+small dimensions, but quickly becomes unreadable and cannot be pasted and
+reused for input. If all entries of $x$ are small integers, you may use the
+recursive features of \kbd{\%Pd} and obtain the same (or better) effect with
+\bprog
+    pari_printf("%Pd\n", x);
+    pari_flush();
+@eprog\noindent
+A variant like \kbd{"\%5Pd"} would improve alignment by imposing
+5 chars for each coefficient. Similarly if all entries are to be converted to
+floats, a format like \kbd{"\%5.1Pf"} could be useful.
+
 
 These functions write on (PARI's idea of) standard output, and must be used
 if you want your functions to interact nicely with \kbd{gp}. In most
@@ -2024,6 +2038,8 @@ output stream, according to the conversion specifications in format \kbd{fmt}
 
 \fun{void}{fprintferr}{char *s}: write \kbd{s} to the error stream
 (this function is in fact much more versatile, see \secref{se:dbg_output}).
+
+\fun{void}{flusherr}{void} flush error stream.
 
 Declare all public functions in an appropriate header file, if you
 want to access them from C. The other functions should be declared

@@ -1641,7 +1641,7 @@ GEN Str(GEN g)    { return Str_fun(g, &bruti); }
 GEN Strtex(GEN g) { return Str_fun(g, &texi); }
 GEN
 Strexpand(GEN g) {
-  char *s = RgV_to_str_fun(g, &bruti), *t = expand_tilde(s);
+  char *s = RgV_to_str_fun(g, &bruti), *t = path_expand(s);
   GEN z = strtoGENstr(t);
   pari_free(t); pari_free(s); return z;
 }
@@ -2916,19 +2916,11 @@ texe(GEN g, char f, long d)
 }
 
 void
-outbrute(GEN g) { brute(g,'g',-1); }
-
-void
 output(GEN x)
-{
-  outbrute(x); pari_putc('\n'); pari_flush();
-}
-
+{ brute(x,'g',-1); pari_putc('\n'); pari_flush(); }
 void
 outmat(GEN x)
-{
-  matbrute(x,'g',-1); pari_putc('\n'); pari_flush();
-}
+{ matbrute(x,'g',-1); pari_putc('\n'); pari_flush(); }
 
 void
 fprintferr(const char* fmt, ...)
@@ -3313,7 +3305,7 @@ pari_is_file(const char *name)
 
 /* expand tildes in filenames, return a malloc'ed buffer */
 static char *
-_expand_tilde(const char *s)
+_path_expand(const char *s)
 {
 #if !defined(UNIX) && !defined(__EMX__)
   return pari_strdup(s);
@@ -3417,9 +3409,9 @@ _expand_env(char *str)
 }
 
 char *
-expand_tilde(const char *s)
+path_expand(const char *s)
 {
-  return _expand_env(_expand_tilde(s));
+  return _expand_env(_path_expand(s));
 }
 
 void
@@ -3467,7 +3459,7 @@ gp_expand_path(gp_path *p)
   {
     char *end = s + strlen(s), *f = end;
     while (f > s && *--f == '/') *f = 0;
-    dirs[i] = expand_tilde(s);
+    dirs[i] = path_expand(s);
     s = end + 1; /* next path component */
   }
   pari_free((void*)v);
@@ -3562,7 +3554,7 @@ switchin(const char *name0)
   char *s, *name;
 
   if (*name0)
-    name = expand_tilde(name0);
+    name = path_expand(name0);
   else
   {
     if (last_filename == NULL)
@@ -3945,7 +3937,7 @@ void warning0(GEN g) { pari_warn(user, g); }
 
 static char *
 wr_check(const char *s) {
-  char *t = expand_tilde(s);
+  char *t = path_expand(s);
   if (GP_DATA->flags & SECURE)
   {
     fprintferr("[secure mode]: about to write to '%s'. OK ? (^C if not)\n",t);

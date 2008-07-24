@@ -465,7 +465,7 @@ check_condition(double beta, double tau, double rho, long d, long delta, long t)
     + rho * t * delta + tau*dim*(dim - 1)/2;
 
   if (DEBUGLEVEL >= 4)
-    fprintferr("delta = %d, t = %d, cond = %lf\n", delta, t, cond);
+    fprintferr("delta = %d, t = %d, cond = %.1lf\n", delta, t, cond);
 
   return (cond <= 0);
 }
