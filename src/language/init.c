@@ -979,25 +979,32 @@ pari_warn(long numerr, ...)
   pari_flush(); pariOut = pariErr;
   pari_flush(); term_color(c_ERR);
 
-  if (gp_function_name)
-    pari_printf("  *** %s: %s", gp_function_name, errmessage[numerr]);
-  else
-    pari_printf("  ***   %s", errmessage[numerr]);
-  switch (numerr)
-  {
-    case warnmem: case warner:
-      pari_putc(' '); ch1=va_arg(ap, char*);
-      pari_vprintf(ch1,ap); pari_puts(".\n");
-      break;
+  if (numerr == user) {
+    GEN g = va_arg(ap, GEN);
+    pari_printf("  ***   user warning: ");
+    print0(g, f_RAW);
+    pari_putc('\n');
+  } else {
+    if (gp_function_name)
+      pari_printf("  *** %s: %s", gp_function_name, errmessage[numerr]);
+    else
+      pari_printf("  ***   %s", errmessage[numerr]);
+    switch (numerr)
+    {
+      case warnmem: case warner:
+        pari_putc(' '); ch1=va_arg(ap, char*);
+        pari_vprintf(ch1,ap); pari_puts(".\n");
+        break;
 
-    case warnprec:
-      pari_vprintf(" in %s; new prec = %ld\n",ap);
-      break;
+      case warnprec:
+        pari_vprintf(" in %s; new prec = %ld\n",ap);
+        break;
 
-    case warnfile:
-      ch1=va_arg(ap, char*);
-      pari_printf(" %s: %s\n", ch1, va_arg(ap, char*));
-      break;
+      case warnfile:
+        ch1=va_arg(ap, char*);
+        pari_printf(" %s: %s\n", ch1, va_arg(ap, char*));
+        break;
+    }
   }
   term_color(c_NONE); va_end(ap);
   pariOut = out;
@@ -1065,7 +1072,7 @@ pari_err(long numerr, ...)
   else if (numerr == user)
   {
     GEN g = va_arg(ap, GEN);
-    pari_printf("  ###   user error: ");
+    pari_printf("  ***   user error: ");
     print0(g, f_RAW);
   }
   else

@@ -3940,6 +3940,7 @@ void printtex(GEN g) { print0(g, f_TEX);       pari_putc('\n'); pari_flush(); }
 void print1  (GEN g) { print0(g, f_RAW);       pari_flush(); }
 
 void error0(GEN g) { pari_err(user, g); }
+void warning0(GEN g) { pari_warn(user, g); }
 
 static char *
 wr_check(const char *s) {

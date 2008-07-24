@@ -1363,6 +1363,7 @@ void    switchout(const char *name);
 void    texe(GEN g, char format, long dec);
 const char* type_name(long t);
 void    pari_vprintf(const char* fmt, va_list args);
+void    warning0(GEN g);
 void    write0(const char *s, GEN g);
 void    write1(const char *s, GEN g);
 void    writebin(const char *name, GEN x);
