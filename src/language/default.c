@@ -795,7 +795,7 @@ GEN
 sd_timer(const char *v, long flag)
 { return sd_gptoggle(v,flag,"timer", CHRONO); }
 
-GEN
+static GEN
 sd_filename(const char *v, long flag, const char *s, char **f)
 {
   if (*v)
@@ -1009,41 +1009,34 @@ default_type gp_default_list[] =
   {NULL,NULL} /* sentinel */
 };
 
-static void
-help_default(void)
-{
-  default_type *dft;
-
-  for (dft=gp_default_list; dft->fun; dft++)
-    ((void (*)(const char*,long)) dft->fun)("", d_ACKNOWLEDGE);
-}
-
 GEN
 setdefault(const char *s, const char *v, long flag)
 {
-  default_type *dft;
+  default_type *dft = gp_default_list;
 
-  if (!*s) { help_default(); return gnil; }
-  for (dft=gp_default_list; dft->fun; dft++)
+  if (!*s) {
+    for (dft = gp_default_list; dft->fun; dft++)
+      ((void (*)(const char*,long)) dft->fun)("", d_ACKNOWLEDGE);
+    return gnil;
+  }
+  for (; dft->fun; dft++)
     if (!strcmp(s,dft->name))
-    {
-      if (flag == d_EXISTS) return gen_1;
       return ((GEN (*)(const char*,long)) dft->fun)(v,flag);
-    }
-  if (flag == d_EXISTS) return gen_0;
   pari_err(talker,"unknown default: %s",s);
   return NULL; /* not reached */
 }
-
-GEN
-gp_default(const char *a, const char *b) { return setdefault(a,b, d_RETURN); }
-
-GEN
-default0(const char *a, const char *b, long flag)
+int
+pari_is_default(const char *s)
 {
-  (void)flag; /* compatibility: to be deleted someday */
-  return setdefault(a,b, d_RETURN);
+  default_type *dft = gp_default_list;
+
+  for (; dft->fun; dft++)
+    if (!strcmp(s,dft->name)) return 1;
+  return 0;
 }
+
+GEN
+default0(const char *a, const char *b) { return setdefault(a,b, d_RETURN); }
 
 gp_data *
 default_gp_data(void)

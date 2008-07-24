@@ -1187,10 +1187,46 @@ GEN     shallowconcat1(GEN x);
 GEN     vconcat(GEN A, GEN B);
 
 /* default.c */
+enum { d_SILENT = 0, d_ACKNOWLEDGE, d_INITRC, d_RETURN };
 
-GEN default0(const char *a, const char *b, long flag);
-GEN gp_default(const char *a, const char *b);
+GEN default0(const char *a, const char *b);
 long getrealprecision(void);
+int pari_is_default(const char *s);
+GEN sd_TeXstyle(const char *v, long flag);
+GEN sd_colors(const char *v, long flag);
+GEN sd_compatible(const char *v, long flag);
+GEN sd_datadir(const char *v, long flag);
+GEN sd_debug(const char *v, long flag);
+GEN sd_debugfiles(const char *v, long flag);
+GEN sd_debugmem(const char *v, long flag);
+GEN sd_echo(const char *v, long flag);
+GEN sd_factor_add_primes(const char *v, long flag);
+GEN sd_factor_proven(const char *v, long flag);
+GEN sd_format(const char *v, long flag);
+GEN sd_graphcolormap(const char *v, long flag);
+GEN sd_graphcolors(const char *v, long flag);
+GEN sd_help(const char *v, long flag);
+GEN sd_histsize(const char *v, long flag);
+GEN sd_lines(const char *v, long flag);
+GEN sd_log(const char *v, long flag);
+GEN sd_logfile(const char *v, long flag);
+GEN sd_new_galois_format(const char *v, long flag);
+GEN sd_output(const char *v, long flag);
+GEN sd_parisize(const char *v, long flag);
+GEN sd_path(const char *v, long flag);
+GEN sd_prettyprinter(const char *v, long flag);
+GEN sd_primelimit(const char *v, long flag);
+GEN sd_prompt(const char *v, long flag);
+GEN sd_prompt_cont(const char *v, long flag);
+GEN sd_psfile(const char *v, long flag);
+GEN sd_realprecision(const char *v, long flag);
+GEN sd_rl(const char *v, long flag);
+GEN sd_secure(const char *v, long flag);
+GEN sd_seriesprecision(const char *v, long flag);
+GEN sd_simplify(const char *v, long flag);
+GEN sd_strictmatch(const char *v, long flag);
+GEN sd_timer(const char *v, long flag);
+GEN setdefault(const char *s, const char *v, long flag);
 long setrealprecision(long n, long *prec);
 
 /* elldata.c */

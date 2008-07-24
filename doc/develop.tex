@@ -305,24 +305,121 @@ the value to the variable.
 a pair whose variable corrsesponds to \kbd{ep} ? If so, where is the
 corresponding value ? (returns an offset on the value stack).
 
-\misctitle{Miscellaneous}
+\subsec{Defaults}
 
-\fun{GEN}{gp_default}{const char *a, const char *b}
+\fun{int}{pari_is_default}{const char *s} return $1$ if $s$ is the name
+of a default, $0$ otherwise.
 
-\fun{GEN}{setdefault}{const char *s, const char *v, long flag}
+\fun{GEN}{setdefault}{const char *s, const char *v, long flag} low-level
+function underlying \kbd{default0}. If $s$ is empty, call all default ѕetting
+functions with empty string argument and flag \tet{d_ACKNOWLEDGE}. Otherwise,
+check whether $s$ corresponds to a default and call the corresponding default
+setting function with arguments $v$ and \fl.
 
-\fun{char*}{os_getenv}{const char *s}
+We shall describe these functions below: an non-empty $v$ means that we change
+the value of the default to $v$, possibly after some translation work. The
+flag is one of
 
-\fun{long}{allocatemoremem}{size_t newsize}
+\item \tet{d_INITRC} called while reading the \kbd{gprc} (print and return
+nothing, possibly defer until \kbd{gp} actually starts).
 
+\item \tet{d_RETURN} return the current value, as a \typ{INT} if possible, as
+a \typ{STR} otherwise.
 
+\item \tet{d_ACKNOWLEDGE} print the current value.
+
+\item \tet{d_SILENT} print nothing, return \kbd{gnil}.
+
+\noindent Low-level functions called by \kbd{setdefault}:
+
+\fun{GEN}{sd_TeXstyle}{const char *v, long flag}
+
+\fun{GEN}{sd_colors}{const char *v, long flag}
+
+\fun{GEN}{sd_compatible}{const char *v, long flag}
+
+\fun{GEN}{sd_datadir}{const char *v, long flag}
+
+\fun{GEN}{sd_debug}{const char *v, long flag}
+
+\fun{GEN}{sd_debugfiles}{const char *v, long flag}
+
+\fun{GEN}{sd_debugmem}{const char *v, long flag}
+
+\fun{GEN}{sd_echo}{const char *v, long flag}
+
+\fun{GEN}{sd_factor_add_primes}{const char *v, long flag}
+
+\fun{GEN}{sd_factor_proven}{const char *v, long flag}
+
+\fun{GEN}{sd_format}{const char *v, long flag}
+
+\fun{GEN}{sd_graphcolormap}{const char *v, long flag}
+
+\fun{GEN}{sd_graphcolors}{const char *v, long flag}
+
+\fun{GEN}{sd_help}{const char *v, long flag}
+
+\fun{GEN}{sd_histsize}{const char *v, long flag}
+
+\fun{GEN}{sd_lines}{const char *v, long flag}
+
+\fun{GEN}{sd_log}{const char *v, long flag}
+
+\fun{GEN}{sd_logfile}{const char *v, long flag}
+
+\fun{GEN}{sd_new_galois_format}{const char *v, long flag}
+
+\fun{GEN}{sd_output}{const char *v, long flag}
+
+\fun{GEN}{sd_parisize}{const char *v, long flag}
+
+\fun{GEN}{sd_path}{const char *v, long flag}
+
+\fun{GEN}{sd_prettyprinter}{const char *v, long flag}
+
+\fun{GEN}{sd_primelimit}{const char *v, long flag}
+
+\fun{GEN}{sd_prompt}{const char *v, long flag}
+
+\fun{GEN}{sd_prompt_cont}{const char *v, long flag}
+
+\fun{GEN}{sd_psfile}{const char *v, long flag}
+
+\fun{GEN}{sd_realprecision}{const char *v, long flag}
+
+\fun{GEN}{sd_rl}{const char *v, long flag}
+
+\fun{GEN}{sd_secure}{const char *v, long flag}
+
+\fun{GEN}{sd_seriesprecision}{const char *v, long flag}
+
+\fun{GEN}{sd_simplify}{const char *v, long flag}
+
+\fun{GEN}{sd_strictmatch}{const char *v, long flag}
+
+\fun{GEN}{sd_timer}{const char *v, long flag}
+
+\subsect{Miscellaneous}
+
+\fun{char*}{os_getenv}{const char *s} either calls \kbd{getenv}, or directly
+return \kbd{NULL} if the \kbd{libc} does not provide it. Use \tet{getenv}.
+
+\fun{sighandler_t}{os_signal}{int sig, pari_sighandler_t fun} after a
+\bprog
+  typedef void (*pari_sighandler_t)(int);
+@eprog\noindent
+(private type, not exported). Installs signal handler \kbd{fun} for
+signal \kbd{sig}, using \tet{sigaction} with flag \tet{SA_NODEFER}. If
+\kbd{sigaction} is not available use \tet{signal}. If even the latter is not
+available, just return \tet{SIG_IGN}. Use \tet{sigaction}.
 
 \chapter{Regression tests, benches}
 
-This chapter documents how to write an automated test module, say \kbd{fun}, so
-that \kbd{make test-fun} executes the statements in the \kbd{fun} module
-and times them, compares the output to a template, and prints an error message
-if they do not match.
+This chapter documents how to write an automated test module, say \kbd{fun},
+so that \kbd{make test-fun} executes the statements in the \kbd{fun} module
+and times them, compares the output to a template, and prints an error
+message if they do not match.
 
 \item Pick a \emph{new} name for your test, say \kbd{fun}, and write down a
 GP script named \kbd{fun}. Make sure it produces some useful ouput and tests

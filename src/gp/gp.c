@@ -653,13 +653,13 @@ aide0(const char *s0, int flag)
       if (*t == '(') {
 	t++; skip_space(t);
 	e = t; skip_alpha(e); *e = '\0'; /* safe: get_sep() made it a copy */
-	if (is_default(t)) { external_help(t, 2); return; }
+	if (pari_is_default(t)) { external_help(t, 2); return; }
       }
     }
   }
   if (!ep)
   {
-    n = is_default(s)? 2: 3;
+    n = pari_is_default(s)? 2: 3;
     if (long_help)
       external_help(s,n);
     else
@@ -918,7 +918,7 @@ escape(char *tch)
     }
 
     case 'c': commands(-1); break;
-    case 'd': (void)setdefault("",NULL,0); break;
+    case 'd': (void)setdefault("",NULL,d_SILENT); break;
     case 'e':
       s = get_sep(s);
       if (!*s) s = (GP_DATA->flags & ECHO)? "0": "1";
