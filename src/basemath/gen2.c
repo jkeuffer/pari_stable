@@ -1648,8 +1648,8 @@ cvtop2(GEN x, GEN y)
       z = cgetg(5, t_PADIC);
       z[1] = evalprecp(d) | evalvalp(v);
       gel(z,2) = p;
-      z[3] = y[3];
-      gel(z,4) = modii(x, gel(z,3)); return z;
+      gel(z,3) = gel(y,3);
+      gel(z,4) = modii(x, gel(y,3)); return z;
 
     case t_INTMOD:
       if (!signe(x[2])) return zeropadic(p, d);
@@ -1665,9 +1665,9 @@ cvtop2(GEN x, GEN y)
       z = cgetg(5, t_PADIC);
       z[1] = evalprecp(d) | evalvalp(v);
       gel(z,2) = p;
-      z[3] = y[3];
-      if (!is_pm1(den)) num = mulii(num, Fp_inv(den, gel(z,3)));
-      gel(z,4) = modii(num, gel(z,3)); return z;
+      gel(z,3) = gel(y,3);
+      if (!is_pm1(den)) num = mulii(num, Fp_inv(den, gel(y,3)));
+      gel(z,4) = modii(num, gel(y,3)); return z;
     }
     case t_COMPLEX: return ctop(x, p, d);
     case t_QUAD:    return qtop(x, p, d);
@@ -1727,7 +1727,6 @@ gcvtop(GEN x, GEN p, long r)
   long i, lx, tx = typ(x);
   GEN y;
 
-  if (is_const_t(tx)) return cvtop(x,p,r);
   switch(tx)
   {
     case t_POL: case t_SER:
@@ -1737,8 +1736,7 @@ gcvtop(GEN x, GEN p, long r)
       for (; i<lx; i++) gel(y,i) = gcvtop(gel(x,i),p,r);
       return y;
   }
-  pari_err(typeer,"gcvtop");
-  return NULL; /* not reached */
+  return cvtop(x,p,r);
 }
 
 long

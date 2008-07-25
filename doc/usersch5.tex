@@ -4588,8 +4588,15 @@ using \kbd{gtofp};
 a \typ{REAL} or \typ{COMPLEX} whose components are \typ{REAL} of length
 \kbd{prec}.
 
-\fun{GEN}{gcvtop}{GEN x, GEN p, long l} converts \kbd{x} into a \typ{PADIC}
-\kbd{p}-adic number of precision~\kbd{l}.
+\fun{GEN}{gcvtop}{GEN x, GEN p, long l} converts $x$ into a \typ{PADIC}
+$p$-adic number of precision~$l$. Works componentwise on recursive objects
+(e.g.~\typ{POL} or \typ{VEC}).
+
+\fun{GEN}{cvtop}{GEN x, GEN p, long l} as \kbd{gcvtop}, assuming that $x$
+is a scalar.
+
+\fun{GEN}{cvtop2}{GEN x, GEN y} $y$ being a $p$-adic, converts the scalar $x$
+to a $p$-adic of the same accuracy. Shallow function.
 
 \fun{GEN}{gprec}{GEN x, long l} returns a copy of $x$ whose precision is
 changed to $l$ digits. The precision change is done recursively on all

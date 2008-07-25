@@ -1469,7 +1469,6 @@ GEN     gsubsg(long x, GEN y);
 
 /* gen2.c */
 
-GEN     gopsg2(GEN (*f)(GEN, GEN), long s, GEN y);
 GEN     gassoc_proto(GEN f(GEN,GEN),GEN,GEN);
 GEN     map_proto_G(GEN f(GEN), GEN x);
 GEN     map_proto_GG(GEN f(GEN,GEN), GEN x, GEN n);
