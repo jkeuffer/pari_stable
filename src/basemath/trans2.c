@@ -206,7 +206,7 @@ gasin(GEN x, long prec)
       y = cgetg(3,t_COMPLEX);
       gel(y,1) = Pi2n(-1, lg(x));
       gel(y,2) = mpach(x);
-      if (sx < 0) { togglesign(y[1]); togglesign(y[2]); }
+      if (sx < 0) { togglesign(gel(y,1)); togglesign(gel(y,2)); }
       return y;
 
     case t_COMPLEX:

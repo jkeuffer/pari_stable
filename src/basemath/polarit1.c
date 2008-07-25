@@ -77,7 +77,6 @@ GEN
 gdeuc(GEN x, GEN y)
 {
   long ty = typ(y), tx, vx = gvar(x), vy = gvar(y);
-  GEN p1;
 
   if (is_scalar_t(ty) || varncmp(vx, vy) < 0) return gdiv(x,y);
   if (ty != t_POL) pari_err(typeer,"euclidean division (poldivrem)");
@@ -96,7 +95,6 @@ GEN
 grem(GEN x, GEN y)
 {
   long ty = typ(y), tx, vx = gvar(x), vy = gvar(y);
-  GEN p1;
 
   if (is_scalar_t(ty) || varncmp(vx, vy) < 0)
   {
