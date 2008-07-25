@@ -141,24 +141,6 @@ gassoc_proto(GEN f(GEN,GEN), GEN x, GEN y)
 }
 /*******************************************************************/
 /*                                                                 */
-/*                OPERATIONS USING SMALL INTEGERS                  */
-/*                                                                 */
-/*******************************************************************/
-
-GEN
-gopsg2(GEN (*f)(GEN, GEN), long s, GEN y)
-{
-  long court_p[] = { evaltyp(t_INT) | _evallg(3),0,0 };
-  affsi(s,court_p); return f(court_p,y);
-}
-
-void
-gopsg2z(GEN (*f)(GEN, GEN), long s, GEN y, GEN z) {
-  pari_sp av=avma; gaffect(f(stoi(s),y), z); avma=av;
-}
-
-/*******************************************************************/
-/*                                                                 */
 /*                    CREATION OF A P-ADIC GEN                     */
 /*                                                                 */
 /*******************************************************************/

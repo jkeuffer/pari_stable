@@ -553,6 +553,24 @@ truedvmdis(GEN x, long y, GEN *z)
   if (z) *z = utoi(r + labs(y));
   return q;
 }
+GEN
+truedvmdsi(long x, GEN y, GEN *z)
+{
+  long q, r;
+  q = sdivsi_rem(x,y,&r);
+  if (r >= 0) {
+    if (z == ONLY_REM) return utoi(r);
+    if (z) *z = utoi(r);
+    return stoi(q);
+  }
+  if (z == ONLY_REM) /* r += sign(y) * y, that is |y| */
+    return subiuspec(y+2,(ulong)-r, lgefint(y)-2);
+  q = q - signe(y);
+  if (!z) return stoi(q);
+
+  *z = subiuspec(y+2,(ulong)-r, lgefint(y)-2);
+  return stoi(q);
+}
 
 /* 2^n = shifti(gen_1, n) */
 GEN

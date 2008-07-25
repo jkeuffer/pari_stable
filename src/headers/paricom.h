@@ -219,10 +219,6 @@ enum {
 #define gdiventz(x,y,z) gopggz(gdivent,(x),(y),(z))
 #define gmodz(x,y,z)    gopggz(gmod,(x),(y),(z))
 
-#define gdiventsg(s,y)  (gopsg2(gdivent,(s),(y)))
-#define gdivsg(s,y)     (gopsg2(gdiv,(s),(y)))
-#define gmodsg(s,y)     (gopsg2(gmod,(s),(y)))
-
 #define gmul2nz(x,s,z)  gopgsz(gmul2n,(x),(s),(z))
 #define gshiftz(x,s,z)  gopgsz(gshift,(x),(s),(z))
 

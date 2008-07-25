@@ -333,10 +333,6 @@ RgXQX_div(GEN x, GEN y, GEN T) { return RgXQX_divrem(x,y,T,NULL); }
 INLINE GEN
 RgXQX_rem(GEN x, GEN y, GEN T) { return RgXQX_divrem(x,y,T,ONLY_REM); }
 INLINE GEN
-gdeuc(GEN x, GEN y) { return poldivrem(x,y,NULL); }
-INLINE GEN
-grem(GEN x, GEN y) { return poldivrem(x,y,ONLY_REM); }
-INLINE GEN
 FpX_div(GEN x, GEN y, GEN p) { return FpX_divrem(x,y,p, NULL); }
 INLINE GEN
 FpX_rem(GEN x, GEN y, GEN p) { return FpX_divrem(x,y,p, ONLY_REM); }
@@ -443,6 +439,8 @@ INLINE GEN
 gmulgs(GEN y, long s) { return gmulsg(s,y); }
 INLINE GEN
 gsubgs(GEN y, long s) { return gaddgs(y, -s); }
+INLINE GEN
+gdivsg(long s, GEN y) { return gdiv(stoi(s), y); }
 
 /* negate in place */
 INLINE void

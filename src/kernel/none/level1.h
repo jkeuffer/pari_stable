@@ -1054,6 +1054,8 @@ truedivii(GEN a,GEN b) { return truedvmdii(a,b,NULL); }
 INLINE GEN
 truedivis(GEN a, long b) { return truedvmdis(a,b,NULL); }
 INLINE GEN
+truedivsi(long a, GEN b) { return truedvmdsi(a,b,NULL); }
+INLINE GEN
 divii(GEN a, GEN b) { return dvmdii(a,b,NULL); }
 INLINE GEN
 remii(GEN a, GEN b) { return dvmdii(a,b,ONLY_REM); }

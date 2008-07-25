@@ -226,8 +226,10 @@ subiuspec(GEN x, ulong s, long nx)
 {
   GEN zd;
   long lz;
-  lz = nx + 2; zd = cgeti(lz);
 
+  if (nx == 1) return utoi(x[0] - s);
+
+  lz = nx + 2; zd = cgeti(lz);
   mpn_sub_1 (LIMBS(zd), (mp_limb_t *)x, nx, s);
   if (! zd[lz - 1]) { --lz; }
 

@@ -615,10 +615,6 @@ GEN     gred_rfrac2(GEN x1, GEN x2);
 GEN     gred_rfrac_simple(GEN n, GEN d);
 GEN     sqr_ser_part(GEN x, long l1, long l2);
 
-/* gen2.c */
-
-void    gopsg2z(GEN (*f) (GEN, GEN), long s, GEN y, GEN z);
-
 /* gen3.c */
 
 GEN     gsubst_expr(GEN pol, GEN from, GEN to);

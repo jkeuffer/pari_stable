@@ -73,6 +73,49 @@ poldivrem(GEN x, GEN y, GEN *pr)
   }
   return RgX_divrem(x, y, pr);
 }
+GEN
+gdeuc(GEN x, GEN y)
+{
+  long ty = typ(y), tx, vx = gvar(x), vy = gvar(y);
+  GEN p1;
+
+  if (is_scalar_t(ty) || varncmp(vx, vy) < 0) return gdiv(x,y);
+  if (ty != t_POL) pari_err(typeer,"euclidean division (poldivrem)");
+  tx = typ(x);
+  if (is_scalar_t(tx) || varncmp(vx, vy) > 0)
+  {
+    if (!signe(y)) pari_err(gdiver);
+    if (!degpol(y)) return gdiv(x, gel(y,2)); /* constant */
+    return gen_0;
+  }
+  if (tx != t_POL) pari_err(typeer,"euclidean division (poldivrem)");
+  if (varncmp(vx, vy) < 0) return gdiv(x,y);
+  return RgX_div(x, y);
+}
+GEN
+grem(GEN x, GEN y)
+{
+  long ty = typ(y), tx, vx = gvar(x), vy = gvar(y);
+  GEN p1;
+
+  if (is_scalar_t(ty) || varncmp(vx, vy) < 0)
+  {
+    if (gcmp0(y)) pari_err(gdiver);
+    return gen_0;
+  }
+  if (ty != t_POL) pari_err(typeer,"euclidean division (poldivrem)");
+  tx = typ(x);
+  if (is_scalar_t(tx) || varncmp(vx, vy) > 0)
+  {
+    if (!signe(y)) pari_err(gdiver);
+    if (!degpol(y)) return zeropol(vy); /* constant */
+    return gcopy(x);
+  }
+  if (tx != t_POL) pari_err(typeer,"euclidean division (poldivrem)");
+
+  if (varncmp(vx, vy) < 0) return zeropol(vx);
+  return RgX_rem(x, y);
+}
 
 /*******************************************************************/
 /*                                                                 */

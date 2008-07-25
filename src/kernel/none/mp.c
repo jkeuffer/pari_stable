@@ -179,13 +179,15 @@ addiispec(GEN x, GEN y, long nx, long ny)
   avma=(pari_sp)zd; return zd;
 }
 
-/* assume x >= y */
+/* assume x >= s */
 INLINE GEN
 subiuspec(GEN x, ulong s, long nx)
 {
   GEN xd, zd = (GEN)avma;
   long lz;
   LOCAL_OVERFLOW;
+
+  if (nx == 1) return utoi(x[0] - s);
 
   lz = nx+2; (void)new_chunk(lz);
   xd = x + nx;

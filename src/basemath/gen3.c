@@ -424,6 +424,13 @@ _quot(GEN x, GEN y)
   return f;
 }
 static GEN
+_quotsg(long x, GEN y)
+{
+  GEN q = gdivsg(x,y), f = gfloor(q);
+  if (gsigne(y) < 0 && !gequal(f,q)) f = gaddgs(f, 1);
+  return f;
+}
+static GEN
 _quotgs(GEN x, long y)
 {
   GEN q = gdivgs(x,y), f = gfloor(q);
@@ -441,6 +448,12 @@ quotgs(GEN x, long y)
 {
   pari_sp av = avma;
   return gerepileupto(av, _quotgs(x, y));
+}
+static GEN
+quotsg(long x, GEN y)
+{
+  pari_sp av = avma;
+  return gerepileupto(av, _quotsg(x, y));
 }
 
 /* assume y a t_REAL, x a t_INT, t_FRAC or t_REAL.
@@ -609,6 +622,24 @@ gmodgs(GEN x, long y)
   pari_err(operf,"%",x,stoi(y));
   return NULL; /* not reached */
 }
+GEN
+gmodsg(long x, GEN y)
+{
+  switch(typ(y))
+  {
+    case t_INT:
+      return modsi(x,y);
+    case t_REAL: case t_FRAC: {
+      pari_sp av = avma;
+      return gerepileupto(av, gaddsg(x, gneg(gmul(_quotsg(x,y),y))));
+    }
+
+    case t_POL:
+      return degpol(y)? stoi(x): gen_0;
+  }
+  pari_err(operf,"%",stoi(x),y);
+  return NULL; /* not reached */
+}
 
 GEN
 gmodulsg(long x, GEN y)
@@ -746,12 +777,24 @@ gdiventgs(GEN x, long y)
     return z;
   }
   switch(tx)
-  { /* equal to, but more efficient than, quotgs(x,y) */
-    case t_INT: return truedivis(x,y);
+  {
+    case t_INT: return truedivis(x,y); /* = quotgs(x,y) */
     case t_REAL: case t_FRAC: return quotgs(x,y);
     case t_POL: return gdivgs(x,y);
   }
   pari_err(operf,"\\",x,stoi(y));
+  return NULL; /* not reached */
+}
+GEN
+gdiventsg(long x, GEN y)
+{
+  switch(typ(y))
+  {
+    case t_INT: return truedivsi(x,y); /* = quotsg(x,y) */
+    case t_REAL: case t_FRAC: return quotsg(x,y);
+    case t_POL: return degpol(y)? gen_0: gdivsg(x,y);
+  }
+  pari_err(operf,"\\",stoi(x),y);
   return NULL; /* not reached */
 }
 
