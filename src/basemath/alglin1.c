@@ -440,7 +440,7 @@ apply0(GEN f, GEN x)
     case t_POL:
       y = init_gen_op(x, tx, &lx, &i);
       for (; i<lx; i++) gel(y,i) = closure_callgen1(f, gel(x,i));
-      return normalizepol_i(y, lx);
+      return normalizepol_lg(y, lx);
     case t_SER:
       y = init_gen_op(x, tx, &lx, &i);
       for (; i<lx; i++) gel(y,i) = closure_callgen1(f, gel(x,i));

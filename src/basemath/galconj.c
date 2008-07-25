@@ -1095,7 +1095,7 @@ vectopol(GEN v, GEN M, GEN den , GEN mod, GEN mod2, long x)
   z[1] = evalsigne(1)|evalvarn(x);
   for (i=2; i<l; i++)
     gel(z,i) = gdiv(centermodii(ZMrow_ZC_mul(M,v,i-1), mod, mod2), den);
-  return normalizepol_i(z, l);
+  return normalizepol_lg(z, l);
 }
 
 /* Polynomial associate to a permutation of the roots. Not stack clean */

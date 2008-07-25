@@ -1025,7 +1025,7 @@ ZqX(GEN P, GEN pk, GEN T, GEN proj)
 
   z = cgetg(l,t_POL); z[1] = P[1];
   for (i=2; i<l; i++) gel(z,i) = nf_to_Zq(gel(P,i),T,pk,pks2,proj);
-  return normalizepol(z);
+  return normalizepol_lg(z, l);
 }
 
 static GEN

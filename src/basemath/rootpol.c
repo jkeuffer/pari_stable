@@ -154,7 +154,7 @@ CX_square_spec(GEN P, long lP)
     if ((i & 1) == 0) t = addCC(t, sqrCC(gel(P,i>>1)));
     gel(s,i+2) = gerepileupto(av, t);
   }
-  return normalizepol_i(s, nn+3);
+  return normalizepol_lg(s, nn+3);
 }
 /* not stack clean */
 static GEN
@@ -165,18 +165,18 @@ RgX_addspec(GEN x, long nx, GEN y, long ny)
   if (nx == ny) {
     z = cgetg(nx+2,t_POL); z[1] = evalsigne(1)|evalvarn(0); t = z+2;
     for (i=0; i < nx; i++) gel(t,i) = gadd(gel(x,i),gel(y,i));
-    return normalizepol_i(z, nx+2);
+    return normalizepol_lg(z, nx+2);
   }
   if (ny < nx) {
     z = cgetg(nx+2,t_POL); z[1] = evalsigne(1)|evalvarn(0); t = z+2;
     for (i=0; i < ny; i++) gel(t,i) = gadd(gel(x,i),gel(y,i));
     for (   ; i < nx; i++) t[i] = x[i];
-    return normalizepol_i(z, nx+2);
+    return normalizepol_lg(z, nx+2);
   } else {
     z = cgetg(ny+2,t_POL); z[1] = evalsigne(1)|evalvarn(0); t = z+2;
     for (i=0; i < nx; i++) gel(t,i) = gadd(gel(x,i),gel(y,i));
     for (   ; i < ny; i++) t[i] = y[i];
-    return normalizepol_i(z, ny+2);
+    return normalizepol_lg(z, ny+2);
   }
 }
 /* nx = lgpol(x) */
@@ -227,7 +227,7 @@ karasquare(GEN P, long nP)
   for (   ; i < N1; i++) gel(t,i) = gen_0;
   t = a+2 + n0; l = lgpol(s1); s1 += 2;
   for (i=0; i < l; i++)  gel(t,i) = gadd(gel(t,i), gel(s1,i));
-  return gerepilecopy(av, normalizepol_i(a, N+2));
+  return gerepilecopy(av, normalizepol_lg(a, N+2));
 }
 /* spec function. nP = lgpol(P) */
 static GEN
@@ -301,7 +301,7 @@ cook_square(GEN P, long nP)
     h += 2;
     for (j=0; j<d; j++) gel(t,j) = gadd(gel(t,j), gel(h,j));
   }
-  return gerepilecopy(av, normalizepol_i(q, 2*n+3));
+  return gerepilecopy(av, normalizepol_lg(q, 2*n+3));
 }
 
 static GEN

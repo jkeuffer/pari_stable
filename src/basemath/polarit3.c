@@ -114,7 +114,7 @@ RgX_to_FpX(GEN x, GEN p)
   long i, l = lg(x);
   GEN z = cgetg(l, t_POL); z[1] = x[1];
   for (i = 2; i < l; i++) gel(z,i) = Rg_to_Fp(gel(x,i), p);
-  return normalizepol_i(z, l);
+  return normalizepol_lg(z, l);
 }
 
 GEN
@@ -141,7 +141,7 @@ RgX_to_FpXQX(GEN x, GEN T, GEN p)
   long i, l = lg(x);
   GEN z = cgetg(l, t_POL); z[1] = x[1];
   for (i = 2; i < l; i++) gel(z,i) = Rg_to_FpXQ(gel(x,i), T,p);
-  return normalizepol_i(z, l);
+  return normalizepol_lg(z, l);
 }
 GEN
 RgX_to_FqX(GEN x, GEN T, GEN p)
@@ -149,7 +149,7 @@ RgX_to_FqX(GEN x, GEN T, GEN p)
   long i, l = lg(x);
   GEN z = cgetg(l, t_POL); z[1] = x[1];
   for (i = 2; i < l; i++) gel(z,i) = simplify_i(Rg_to_FpXQ(gel(x,i), T,p));
-  return normalizepol_i(z, l);
+  return normalizepol_lg(z, l);
 }
 
 /* lg(V) > 1 */
@@ -1349,12 +1349,12 @@ from_Kronecker(GEN z, GEN T)
   for (i=2; i<lx+2; i++, z+= N-2)
   {
     for (j=2; j<N; j++) gel(t,j) = gel(z,j);
-    gel(x,i) = mkpolmod(RgX_rem(normalizepol_i(t,N), T), T);
+    gel(x,i) = mkpolmod(RgX_rem(normalizepol_lg(t,N), T), T);
   }
   N = (l-2) % (N-2) + 2;
   for (j=2; j<N; j++) t[j] = z[j];
-  gel(x,i) = mkpolmod(RgX_rem(normalizepol_i(t,N), T), T);
-  return normalizepol_i(x, i+1);
+  gel(x,i) = mkpolmod(RgX_rem(normalizepol_lg(t,N), T), T);
+  return normalizepol_lg(x, i+1);
 }
 
 /* Kronecker substitution, RgYX -> RgY :
@@ -1724,7 +1724,7 @@ pol_comp(GEN P, GEN u, GEN v)
 			 (i&1)? gmul(t, gsub(u,v)) /*  odd degree */
 			      : gmul(t, gadd(u,v));/* even degree */
   }
-  y[1] = P[1]; return normalizepol_i(y,l);
+  y[1] = P[1]; return normalizepol_lg(y,l);
 }
 
 GEN

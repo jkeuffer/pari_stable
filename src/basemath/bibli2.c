@@ -724,7 +724,7 @@ polrecip(GEN x)
 
   if (typ(x) != t_POL) pari_err(typeer,"polrecip");
   y[1] = x[1]; for (i=2,j=lx-1; i<lx; i++,j--) gel(y,i) = gcopy(gel(x,j));
-  return normalizepol_i(y,lx);
+  return normalizepol_lg(y,lx);
 }
 
 /* as above. Internal (don't copy or normalize) */

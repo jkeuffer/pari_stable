@@ -1127,7 +1127,7 @@ FqX_rand(long d1, long v, GEN T, GEN p)
   long i, d = d1+2, k = degpol(T), w = varn(T);
   GEN y = cgetg(d,t_POL); y[1] = evalsigne(1) | evalvarn(v);
   for (i=2; i<d; i++) gel(y,i) = random_FpX(k, w, p);
-  (void)normalizepol_i(y,d); return y;
+  (void)normalizepol_lg(y,d); return y;
 }
 
 #define set_irred(i) { if ((i)>ir) swap(t[i],t[ir]); ir++;}

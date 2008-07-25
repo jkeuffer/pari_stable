@@ -495,7 +495,7 @@ FpX_to_mod(GEN z, GEN p)
   long i,l = lg(z);
   GEN x = cgetg(l,t_POL); p = icopy(p);
   for (i=2; i<l; i++) gel(x,i) = to_intmod(gel(z,i), p);
-  x[1] = z[1]; return normalizepol_i(x,l);
+  x[1] = z[1]; return normalizepol_lg(x,l);
 }
 
 /* z in Z^n, return z * Mod(1,p), normalized*/

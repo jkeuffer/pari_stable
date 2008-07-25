@@ -1192,7 +1192,7 @@ quad_polmod_mul(GEN P, GEN x, GEN y)
   gel(T,2) = gadd(p2, p1);
   gel(T,3) = gadd(p4, p3);
   gerepilecoeffssp(av,tetpil,T+2,2);
-  return normalizepol_i(T,4);
+  return normalizepol_lg(T,4);
 }
 static int
 is_int1(GEN a) { return  (typ(a) == t_INT && is_pm1(a) && signe(a) == 1); }
@@ -2529,7 +2529,7 @@ gmulsg(long s, GEN y)
       if (!s || !signe(y)) return zeropol(varn(y));
       ly = lg(y); z = cgetg(ly,t_POL); z[1]=y[1];
       for (i=2; i<ly; i++) gel(z,i) = gmulsg(s,gel(y,i));
-      return normalizepol_i(z, ly);
+      return normalizepol_lg(z, ly);
 
     case t_SER:
       if (!s) return zeropol(varn(y));
@@ -2720,7 +2720,7 @@ gmul2n(GEN x, long n)
     case t_POL:
       z = init_gen_op(x, tx, &lx, &i);
       for (; i<lx; i++) gel(z,i) = gmul2n(gel(x,i),n);
-      return normalizepol_i(z, lx); /* needed if char = 2 */
+      return normalizepol_lg(z, lx); /* needed if char = 2 */
     case t_SER:
       z = init_gen_op(x, tx, &lx, &i);
       for (; i<lx; i++) gel(z,i) = gmul2n(gel(x,i),n);

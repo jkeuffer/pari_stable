@@ -919,7 +919,7 @@ split_pol(GEN x, long v, long a, long b)
   l = b-a + 3;
   z = cgetg(l, t_POL); z[1] = x[1];
   for (i = 2; i < l; i++) z[i] = y[i];
-  return normalizepol_i(z, l);
+  return normalizepol_lg(z, l);
 }
 
 /* return (den_a * z) mod (v^ell - num_a/den_a), assuming deg(z) < 2*ell

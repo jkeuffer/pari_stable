@@ -131,7 +131,7 @@ centermod_i(GEN x, GEN p, GEN ps2)
 	av = avma;
 	gel(y,i) = gerepileuptoint(av, centermodii(gel(x,i),p,ps2));
       }
-      return normalizepol_i(y, lx);
+      return normalizepol_lg(y, lx);
 
     case t_COL: lx = lg(x);
       y = cgetg(lx,t_COL);
@@ -2136,7 +2136,7 @@ nextSousResultant(GEN P, GEN Q, GEN Z, GEN s)
   {
     if (degpol(H) == q-1)
     { /* h0 = coeff of degree q-1 = leading coeff */
-      h0 = gel(H,q+1); (void)normalizepol_i(H, q+1);
+      h0 = gel(H,q+1); (void)normalizepol_lg(H, q+1);
       H = addshift(H, RgX_Rg_divexact(RgX_Rg_mul_i(Q, gneg(h0), lQ), q0));
     }
     else
@@ -2158,7 +2158,7 @@ nextSousResultant(GEN P, GEN Q, GEN Z, GEN s)
   A = RgX_Rg_divexact(A, p0);
   if (degpol(H) == q-1)
   {
-    h0 = gel(H,q+1); (void)normalizepol_i(H, q+1); /* destroy old H */
+    h0 = gel(H,q+1); (void)normalizepol_lg(H, q+1); /* destroy old H */
     A = RgX_add(RgX_Rg_mul(addshift(H,A),q0), RgX_Rg_mul_i(Q, gneg(h0), lQ));
   }
   else
@@ -2746,7 +2746,7 @@ RgXQ_inv_inexact(GEN x, GEN y)
   if (!v) pari_err(talker,"non-invertible polynomial in RgXQ_inv");
   z = cgetg(dy+2,t_POL); z[1] = y[1];
   for (i=2; i<dy+2; i++) z[i] = v[dz-i+2];
-  return gerepilecopy(av, normalizepol_i(z, dy+2));
+  return gerepilecopy(av, normalizepol_lg(z, dy+2));
 }
 /* assume typ(x) = typ(y) = t_POL */
 GEN

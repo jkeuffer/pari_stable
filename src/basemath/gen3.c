@@ -1223,7 +1223,7 @@ mod_r(GEN x, long v, GEN T)
       if (varncmp(v, w) < 0) return x;
       lx = lg(x); y = cgetg(lx, t_POL); y[1] = x[1];
       for (i = 2; i < lx; i++) gel(y,i) = mod_r(gel(x,i),v,T);
-      return normalizepol_i(y, lx);
+      return normalizepol_lg(y, lx);
     case t_RFRAC:
       return gdiv(mod_r(gel(x,1),v,T), mod_r(gel(x,2),v,T));
     case t_VEC: case t_COL: case t_MAT:
@@ -1385,7 +1385,7 @@ gsubst(GEN x, long v, GEN y)
     lx = lg(p2);
     z = cgetg(lx,t_POL); z[1] = p2[1];
     for (i=2; i<lx; i++) gel(z,i) = gmodulo(gel(p2,i),p1);
-    return gerepileupto(av, normalizepol_i(z,lx));
+    return gerepileupto(av, normalizepol_lg(z,lx));
   }
 
   switch(tx)
@@ -1401,7 +1401,7 @@ gsubst(GEN x, long v, GEN y)
 	{ /* easy special case */
 	  z = cgetg(lx, t_POL); z[1] = x[1];
 	  for (i=2; i<lx; i++) gel(z,i) = gsubst(gel(x,i),v,y);
-	  return normalizepol_i(z,lx);
+	  return normalizepol_lg(z,lx);
 	}
 	/* general case */
 	av = avma; X = pol_x(vx);
@@ -1678,7 +1678,7 @@ deriv(GEN x, long v)
       lx = lg(x); y = cgetg(lx,t_POL);
       y[1] = x[1];
       for (i=2; i<lx; i++) gel(y,i) = deriv(gel(x,i),v);
-      return normalizepol_i(y,i);
+      return normalizepol_lg(y,i);
 
     case t_SER:
       vx = varn(x);
@@ -2050,7 +2050,7 @@ ground(GEN x)
     case t_POL:
       y = init_gen_op(x, tx, &lx, &i);
       for (; i<lx; i++) gel(y,i) = ground(gel(x,i));
-      return normalizepol_i(y, lx);
+      return normalizepol_lg(y, lx);
     case t_SER:
       y = init_gen_op(x, tx, &lx, &i);
       for (; i<lx; i++) gel(y,i) = ground(gel(x,i));
@@ -2121,7 +2121,7 @@ grndtoi(GEN x, long *e)
 	gel(y,i) = grndtoi(gel(x,i),&e1);
 	if (e1 > *e) *e = e1;
       }
-      return normalizepol_i(y, lx);
+      return normalizepol_lg(y, lx);
     case t_SER:
       y = init_gen_op(x, tx, &lx, &i);
       for (; i<lx; i++)
@@ -2390,12 +2390,12 @@ mkpoln(long n, ...)
 {
   va_list ap;
   GEN x, y;
-  long i;
+  long i, l = n+2;
   va_start(ap,n);
-  x = cgetg(n+2, t_POL); y = x + 2;
+  x = cgetg(l, t_POL); y = x + 2;
   x[1] = evalvarn(0);
   for (i=n-1; i >= 0; i--) gel(y,i) = va_arg(ap, GEN);
-  va_end(ap); return normalizepol(x);
+  va_end(ap); return normalizepol_lg(x, l);
 }
 
 /* return [a_1, ..., a_n] */
@@ -2453,7 +2453,7 @@ deg1pol(GEN x1, GEN x0,long v)
   GEN x = cgetg(4,t_POL);
   x[1] = evalsigne(1) | evalvarn(v);
   gel(x,2) = x0 == gen_0? x0: gcopy(x0); /* gen_0 frequent */
-  gel(x,3) = gcopy(x1); return normalizepol_i(x,4);
+  gel(x,3) = gcopy(x1); return normalizepol_lg(x,4);
 }
 
 /* same, no copy */
@@ -2463,7 +2463,7 @@ deg1pol_shallow(GEN x1, GEN x0,long v)
   GEN x = cgetg(4,t_POL);
   x[1] = evalsigne(1) | evalvarn(v);
   gel(x,2) = x0;
-  gel(x,3) = x1; return normalizepol_i(x,4);
+  gel(x,3) = x1; return normalizepol_lg(x,4);
 }
 
 static GEN
@@ -2496,7 +2496,7 @@ _gtopoly(GEN x, long v, int reverse)
       if (varncmp(gvar(x), v) <= 0)
 	pari_err(talker,"variable must have higher priority in gtopoly");
       if (reverse)
-      { /* cf normalizepol_i */
+      { /* cf normalizepol_lg */
         for (i = lx-1; i>0; i--)
           if (! isrationalzero(gel(x,i))) break;
         if (i == 0) return zeropol(v);
@@ -2804,7 +2804,7 @@ multi_coeff(GEN x, long n, long v, long dx)
   long i, lx = dx+3;
   GEN z = cgetg(lx, t_POL); z[1] = x[1];
   for (i = 2; i < lx; i++) gel(z,i) = polcoeff_i(gel(x,i), n, v);
-  return normalizepol_i(z, lx);
+  return normalizepol_lg(z, lx);
 }
 
 /* assume x a t_POL */
@@ -3148,7 +3148,7 @@ op_ReIm(GEN f(GEN), GEN x)
     case t_POL:
       lx = lg(x); z = cgetg(lx,t_POL); z[1] = x[1];
       for (j=2; j<lx; j++) gel(z,j) = f(gel(x,j));
-      return normalizepol_i(z, lx);
+      return normalizepol_lg(z, lx);
 
     case t_SER:
       lx = lg(x); z = cgetg(lx,t_SER); z[1] = x[1];

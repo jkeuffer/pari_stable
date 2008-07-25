@@ -4646,6 +4646,11 @@ the vector represents a polynomial in the basis $(1,v,v^2,v^3,\dots)$.
 be zero), normalizes \kbd{x} correctly in place and returns~\kbd{x}. For
 internal use.
 
+\fun{GEN}{normalizepol_lg}{GEN x, long l} applies \kbd{normalizepol} to
+\kbd{x}, pretending that \kbd{lg(x)} is $l$, which must be less than
+or equal to \kbd{lg(x)}. If equal, the function is equivalent to
+\kbd{normalizepol(x)}.
+
 The following routines do \emph{not} copy coefficients on the stack (they
 only move pointers around), hence are very fast but not suitable for
 \kbd{gerepile} calls. Recall that an \kbd{RgV} (resp.~an \kbd{RgX}, resp.~an

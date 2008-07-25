@@ -2326,7 +2326,7 @@ nfX_to_FqX(GEN A, GEN nf,GEN modpr)
   long i,l = lg(A);
   GEN B = cgetg(l,t_POL); B[1] = A[1];
   for (i=2; i<l; i++) gel(B,i) = nf_to_Fq(nf,gel(A,i),modpr);
-  return normalizepol_i(B, l);
+  return normalizepol_lg(B, l);
 }
 
 /*******************************************************************/
@@ -2688,7 +2688,7 @@ fix_relative_pol(GEN T, GEN P, int lift)
     }
     gel(Q,i) = c;
   }
-  return normalizepol_i(Q, lP);
+  return normalizepol_lg(Q, lP);
 }
 
 /* determinant of the trace pairing */

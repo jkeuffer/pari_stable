@@ -1823,7 +1823,7 @@ normalizepol_approx(GEN x, long lx)
 }
 
 GEN
-normalizepol_i(GEN x, long lx)
+normalizepol_lg(GEN x, long lx)
 {
   long i, LX = 0;
   GEN KEEP = NULL;
@@ -1857,8 +1857,7 @@ normalizepol_i(GEN x, long lx)
 GEN
 normalizepol(GEN x)
 {
-  if (typ(x)!=t_POL) pari_err(typeer,"normalizepol");
-  return normalizepol_i(x, lg(x));
+  return normalizepol_lg(x, lg(x));
 }
 
 int

@@ -1515,7 +1515,7 @@ GEN     matsize(GEN x);
 GEN     normalize(GEN x);
 GEN     normalizepol(GEN x);
 GEN     normalizepol_approx(GEN x, long lx);
-GEN     normalizepol_i(GEN x, long lx);
+GEN     normalizepol_lg(GEN x, long lx);
 long    RgX_val(GEN x);
 long    RgX_valrem(GEN x, GEN *z);
 long    RgX_valrem_inexact(GEN x, GEN *Z);

@@ -1384,7 +1384,7 @@ pol_mod_xn(GEN P, long n)
   R[1] = evalvarn(0);
   for (j = 0; j < n; j++)
     R[j+2] = (long)polcoeff0(P, j, 0);
-  return normalizepol_i(R, n+2);
+  return normalizepol_lg(R, n+2);
 }
 
 /* compute the values of the twisted partial

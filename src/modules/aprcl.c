@@ -78,7 +78,7 @@ red_cyclop(GEN T, long p)
   d = p-1;
   if (signe(z[d]))
     for (i=0; i<d; i++) z[i] = subii(z[i], z[d]);
-  return normalizepol_i(y, d+2);
+  return normalizepol_lg(y, d+2);
 }
 
 /* x t_VECSMALL, as red_cyclo2n_ip */
@@ -103,7 +103,7 @@ red_cyclo2n_ip(GEN x, long n)
   long i, pow2 = 1<<(n-1);
   for (i = lg(x)-1; i>pow2+1; i--)
     if (signe(x[i])) gel(x,i-pow2) = subii(gel(x,i-pow2), gel(x,i));
-  return normalizepol_i(x, i+1);
+  return normalizepol_lg(x, i+1);
 }
 static GEN
 red_cyclo2n(GEN x, long n) { return red_cyclo2n_ip(shallowcopy(x), n); }

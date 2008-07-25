@@ -834,7 +834,7 @@ FFX_to_FqX(GEN x, GEN T, GEN p)
     y = (typ(y)==t_FFELT)? FF_to_FpXQ(y): Rg_to_FpXQ(y, T,p);
     gel(z,i) = simplify_i(y);
   }
-  return normalizepol_i(z, l);
+  return normalizepol_lg(z, l);
 }
 
 /* Factor P over the field of definition of x */

@@ -418,7 +418,7 @@ root_bound(GEN P0)
   long k, d = degpol(Q);
 
   /* P0 = lP x^d + Q, deg Q < d */
-  Q = normalizepol_i(Q, d+2);
+  Q = normalizepol_lg(Q, d+2);
   for (k=lg(Q)-1; k>1; k--) gel(Q,k) = absi(gel(Q,k));
   k = (long)(cauchy_bound(P0) / LOG2);
   for (  ; k >= 0; k--)

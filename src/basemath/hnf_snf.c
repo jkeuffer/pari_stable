@@ -2137,7 +2137,7 @@ gsmithall_i(GEN x,long all)
       GEN d = leading_term(T);
       while (gcmp0(d) || ( typ(d) == t_REAL && lg(d) == 3
 			   && gexpo(T) - expo(d) > (long)BITS_IN_LONG)) {
-	 T = normalizepol_i(T, lg(T)-1);
+	 T = normalizepol_lg(T, lg(T)-1);
 	 if (!signe(T)) { gcoeff(x,k,k) = T; continue; }
 	 d = leading_term(T);
       }
