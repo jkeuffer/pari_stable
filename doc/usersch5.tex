@@ -5453,10 +5453,6 @@ binary powering.
 \fun{GEN}{powgi}{GEN x, GEN y} creates $\kbd{x}^{\kbd{y}}$, where \kbd{y} is a
 \typ{INT}, using left-shift binary powering.
 
-
-\fun{GEN}{gsubst}{GEN x, long v, GEN y} substitutes the object \kbd{y}
-into~\kbd{x} for the variable number~\kbd{v}.
-
 In addition we also have the obsolete forms:
 
 \fun{void}{gaddz}{GEN x, GEN y, GEN z}
@@ -5466,6 +5462,21 @@ In addition we also have the obsolete forms:
 \fun{void}{gmulz}{GEN x, GEN y, GEN z}
 
 \fun{void}{gdivz}{GEN x, GEN y, GEN z}
+
+\section{Substitution and evaluation}
+
+\fun{GEN}{gsubst}{GEN x, long v, GEN y} substitutes the object \kbd{y}
+into~\kbd{x} for the variable number~\kbd{v}.
+
+\fun{GEN}{poleval}{GEN q, GEN x} evaluates the \typ{POL} or \typ{RFRAC}
+$q$ at $x$. For convenience, a \typ{VEC} or \typ{COL} is also recognized as
+the \typ{POL} \kbd{gtovecrev(q)}.
+
+\fun{GEN}{qfeval}{GEN q, GEN x} evaluates the quadratic form
+$q$ (symmetric matrix) at $x$ (column vector of compatible dimensions).
+
+\fun{GEN}{hqfeval}{GEN q, GEN x} evaluates the Hermitian form $q$
+(a Hermitian complex matrix) at $x$.
 
 \newpage
 \chapter{Miscellaneous mathematical functions}

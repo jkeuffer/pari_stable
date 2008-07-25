@@ -3324,12 +3324,8 @@ geval_gp(GEN x, GEN t)
   pari_err(typeer,"geval");
   return NULL; /* not reached */
 }
-
 GEN
-geval(GEN x)
-{
-  return geval_gp(x,NULL);
-}
+geval(GEN x) { return geval_gp(x,NULL); }
 
 GEN
 simplify_i(GEN x)

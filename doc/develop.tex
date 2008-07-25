@@ -303,7 +303,7 @@ remains a trace of lexical variable names and everything can still be
 unravelled.
 
 \fun{void}{localvars_unpack}{GEN pack} for each pair in \kbd{pack}, assign
-the value to the variable.
+the value to the variable. Used by \tet{geval} in GP.
 
 \fun{long}{localvars_find}{GEN pack, entree *ep} does \kbd{pack} contain
 a pair whose variable corrsesponds to \kbd{ep} ? If so, where is the
