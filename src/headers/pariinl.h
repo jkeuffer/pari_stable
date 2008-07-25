@@ -358,6 +358,9 @@ INLINE int is_pm1(GEN n)
 INLINE int is_bigint(GEN n)
 { long l = lgefint(n); return l > 3 || (l == 3 && (n[2] & HIGHBIT)); }
 
+INLINE int odd(long x) { return x & 1; }
+INLINE int both_odd(long x, long y) { return x & y & 1; }
+
 INLINE int
 isonstack(GEN x) { return ((pari_sp)x >= bot && (pari_sp)x < top); }
 
@@ -412,6 +415,10 @@ INLINE GEN
 pol1_F2x(long sv) { return pol1_Flx(sv); }
 INLINE int
 F2x_cmp1(GEN x) { return Flx_cmp1(x); }
+INLINE GEN
+Flv_copy(GEN x) { return vecsmall_copy(x); }
+INLINE GEN
+Flx_copy(GEN x) { return vecsmall_copy(x); }
 INLINE GEN
 FpX_renormalize(GEN x, long lx)   { return ZX_renormalize(x,lx); }
 INLINE GEN

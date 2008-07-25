@@ -1357,10 +1357,8 @@ to it, and the parts in brackets indicate that there exists also a function
 \fun{void}{gaddz}{GEN x, GEN y, GEN z}
 
 \noindent which assigns its result to the pre-existing object
-\kbd{z}, leaving the stack unchanged. All such functions are obtained using
-macros (see the file \kbd{paricom.h}), hence you can easily extend the list.
-These assignment variants are kept for backward compatibility but are
-inefficient: don't use them.
+\kbd{z}, leaving the stack unchanged. These assignment variants are kept for
+backward compatibility but are inefficient: don't use them.
 
 \subsec{Creation}
 
@@ -3141,6 +3139,8 @@ non-negative coefficients to \kbd{Flx} (by reducing them mod \kbd{p}).
 
 \fun{int}{Flx_cmp1}{GEN x} returns 1 (true) if the \kbd{Flx x} is equal to~1,
 0~(false) otherwise.
+
+\fun{GEN}{Flx_copy}{GEN x} returns a copy of \kbd{x}.
 
 \fun{GEN}{Flx_add}{GEN x, GEN y, ulong p}
 
@@ -5001,9 +5001,9 @@ to~0 (including \typ{INTMOD}s like \kbd{Mod(0,2)}), and 0~(false) otherwise.
 to an integer~0 (excluding \typ{INTMOD}s like \kbd{Mod(0,2)}), and 0~(false)
 otherwise.
 
-\fun{int}{is_pm1}{GEN x}. This quick and dirty macro assumes that \kbd{x} is
-a non-zero \typ{INT}. Under these assumptions, it returns 1 (true) if \kbd{x}
-is equal to $-1$ or $1$, and return 0~(false) otherwise.
+\fun{int}{is_pm1}{GEN x}. assuming that \kbd{x} is a
+\emph{non-zero} \typ{INT}, return 1 (true) if \kbd{x} is equal to $-1$ or
+$1$, and return 0~(false) otherwise.
 
 \fun{int}{gcmp0}{GEN x} returns 1 (true) if \kbd{x} is equal to~0, 0~(false)
 otherwise.

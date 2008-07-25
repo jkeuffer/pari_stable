@@ -562,14 +562,6 @@ ZC_copy(GEN x)
   }
   return y;
 }
-GEN
-Flv_copy(GEN x)
-{
-  long i, lx = lg(x);
-  GEN y = cgetg(lx, t_VECSMALL);
-  for (i=1; i<lx; i++) y[i] = x[i];
-  return y;
-}
 
 GEN
 ZM_copy(GEN x)

@@ -125,9 +125,6 @@ enum {
 
 #define bern(i)       (bernzone + 3 + (i)*bernzone[2])
 
-#define odd(x) ((x) & 1)
-#define both_odd(x,y) ((x)&(y)&1)
-
 #define ONLY_REM ((GEN*)0x1L)
 #define ONLY_DIVIDES ((GEN*)0x2L)
 

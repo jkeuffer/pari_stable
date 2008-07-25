@@ -219,8 +219,8 @@ in (\kbd{long}) \emph{words} (including codewords), the same value of
 \kbd{prec} will yield different results on 32-bit and 64-bit machines. Real
 numbers have two codewords (see~\secref{se:impl}), so the formula for
 computing the bit accuracy is $$ \tet{bit_accuracy}(\kbd{prec}) = (\kbd{prec}
-- 2) * \tet{BITS_IN_LONG}$$ (this is actually the definition of a macro). The
-  corresponding accuracy expressed in decimal digits would be
+- 2) * \tet{BITS_IN_LONG}$$ (this is actually the definition of an inline
+function). The corresponding accuracy expressed in decimal digits would be
 %
 $$ \kbd{bit\_accuracy(prec)} * \log(2) / \log(10).$$
 %
@@ -1136,7 +1136,7 @@ instance the native one or GNU MP, with incompatible internal structures
 
 \fun{long}{mod64}{GEN x} give the residue class of \kbd{x} modulo the
 corresponding power of 2, for \emph{positive}~\kbd{x}. By definition,
-$\kbd{mod}n(x) := \kbd{mod}n(|x|)$ for $x < 0$ (the macros disregard the
+$\kbd{mod}n(x) := \kbd{mod}n(|x|)$ for $x < 0$ (the functions disregard the
 sign), and the result is undefined if $x = 0$. As well,
 
 \fun{ulong}{mod2BIL}{GEN x} returns the least significant word of $|x|$, still
