@@ -1572,7 +1572,6 @@ GEN     gfloor(GEN x);
 GEN     gfloor2n(GEN x, long s);
 GEN     gfrac(GEN x);
 GEN     gge(GEN x, GEN y);
-GEN     ggprecision(GEN x);
 GEN     ggrando(GEN x, long n);
 GEN     ggt(GEN x, GEN y);
 GEN     gimag(GEN x);

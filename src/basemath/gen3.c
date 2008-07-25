@@ -192,14 +192,13 @@ gprecision(GEN x)
 }
 
 GEN
-ggprecision(GEN x)
-{
-  long a = gprecision(x);
+precision0(GEN x, long n)
+{ 
+  long a;
+  if (n) return gprec(x,n);
+  a = gprecision(x);
   return utoipos(a ? prec2ndec(a): LONG_MAX);
 }
-
-GEN
-precision0(GEN x, long n) { return n? gprec(x,n): ggprecision(x); }
 
 /* ABSOLUTE padic precision */
 long
