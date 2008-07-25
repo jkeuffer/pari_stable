@@ -24,19 +24,17 @@ evallg(long x)
   if (x & ~LGBITS) pari_err(errlg);
   return _evallg(x);
 }
-
 INLINE long
 evalvalp(long x)
 {
-  const long v = _evalvalp(x);
+  long v = _evalvalp(x);
   if (v & ~VALPBITS) pari_err(errvalp);
   return v;
 }
-
 INLINE long
 evalexpo(long x)
 {
-  const long v = _evalexpo(x);
+  long v = _evalexpo(x);
   if (v & ~EXPOBITS) pari_err(errexpo);
   return v;
 }
@@ -47,8 +45,7 @@ evalexpo(long x)
  *   z = cgetg(t,a); av = avma; garbage(); ltop = avma;
  *   for (i=1; i<HUGE; i++) gel(z,i) = blah();
  *   stackdummy(av,ltop);
- * loses (av-ltop) words but save a costly gerepile.
- */
+ * loses (av-ltop) words but save a costly gerepile. */
 INLINE void
 stackdummy(pari_sp av, pari_sp ltop) {
   long l = ((GEN)av) - ((GEN)ltop);
@@ -61,22 +58,31 @@ stackdummy(pari_sp av, pari_sp ltop) {
   }
 }
 INLINE void
-fixlg(GEN z, long ly) {
-  long lz = lg(z);
-  if (ly < lz)
-  {
-    setlg(z, ly);
-    stackdummy((pari_sp)(z + lz), (pari_sp)(z + ly));
+fixlg(GEN x, long ly) {
+  long lx = lg(x), l = lx - ly;
+  if (l > 0)
+  { /* stackdummy(x+lx, x+ly) */
+    GEN z = x + ly;
+    z[0] = evaltyp(t_VECSMALL) | evallg(l);
+    setlg(x, ly);
+#ifdef DEBUG
+    { long i; for (i = 1; i < l; i++) z[i] = 0; }
+#endif
   }
 }
 /* update lg(z) before affrr(y, z)  [ to cater for precision loss ]*/
 INLINE void
 affrr_fixlg(GEN y, GEN z) { fixlg(z, lg(y)); affrr(y, z); }
 
+/*******************************************************************/
+/*                                                                 */
+/*                       ALLOCATE ON STACK                         */
+/*                                                                 */
+/*******************************************************************/
 INLINE GEN
 new_chunk(size_t x) /* x is a number of bytes */
 {
-  const GEN z = ((GEN) avma) - x;
+  GEN z = ((GEN) avma) - x;
   if (x > (avma-bot) / sizeof(long)) pari_err(errpile);
 #if defined(_WIN32) || defined(__CYGWIN32__)
   if (win32ctrlc) dowin32ctrlc();
@@ -110,97 +116,47 @@ init_gen_op(GEN x, long tx, long *lx, long *i) {
   return y;
 }
 
-INLINE void
-cgiv(GEN x)
-{
-  pari_sp av = (pari_sp)(x+lg(x));
-  if (isonstack(av)) avma = av;
-}
-
 INLINE GEN
 cgetg(long x, long y)
 {
-  const GEN z = new_chunk((size_t)x);
+  GEN z = new_chunk((size_t)x);
   z[0] = evaltyp(y) | evallg(x);
   return z;
 }
-
 INLINE GEN
 cgeti(long x)
 {
-  const GEN z = new_chunk((size_t)x);
+  GEN z = new_chunk((size_t)x);
   z[0] = evaltyp(t_INT) | evallg(x);
   return z;
 }
 INLINE GEN
 cgetipos(long x)
 {
-  const GEN z = cgeti(x);
+  GEN z = cgeti(x);
   z[1] = evalsigne(1) | evallgefint(x);
   return z;
 }
 INLINE GEN
 cgetineg(long x)
 {
-  const GEN z = cgeti(x);
+  GEN z = cgeti(x);
   z[1] = evalsigne(-1) | evallgefint(x);
   return z;
 }
-
-/* x 2^BIL + y */
-INLINE GEN
-uutoi(ulong x, ulong y)
-{
-  GEN z;
-  if (!x) return utoi(y);
-  z = cgetipos(4); 
-  *int_W_lg(z, 1, 4) = x;
-  *int_W_lg(z, 0, 4) = y; return z;
-}
-/* - (x 2^BIL + y) */
-INLINE GEN
-uutoineg(ulong x, ulong y)
-{
-  GEN z;
-  if (!x) return y? utoineg(y): gen_0;
-  z = cgetineg(4); 
-  *int_W_lg(z, 1, 4) = x;
-  *int_W_lg(z, 0, 4) = y; return z;
-}
-
 INLINE GEN
 cgetr(long x)
 {
-  const GEN z = new_chunk((size_t)x);
+  GEN z = new_chunk((size_t)x);
   z[0] = evaltyp(t_REAL) | evallg(x);
   return z;
 }
-INLINE GEN
-cgetc(long l)
-{
-  GEN u = cgetg(3,t_COMPLEX); gel(u,1) = cgetr(l); gel(u,2) = cgetr(l);
-  return u;
-}
-/* cannot do memcpy because sometimes x and y overlap */
-INLINE GEN
-mpcopy(GEN x)
-{
-  register long lx = lg(x);
-  const GEN y = cgetg_copy(lx, x);
-  while (--lx > 0) y[lx] = x[lx];
-  return y;
-}
-INLINE GEN
-rcopy(GEN x){ return mpcopy(x); }
-INLINE GEN
-icopy(GEN x)
-{
-  register long lx = lgefint(x);
-  const GEN y = cgeti(lx);
-  while (--lx > 0) y[lx] = x[lx];
-  return y;
-}
 
+/*******************************************************************/
+/*                                                                 */
+/*                       GARBAGE COLLECTION                        */
+/*                                                                 */
+/*******************************************************************/
 /* copy integer x as if we had avma = av */
 INLINE GEN
 icopy_av(GEN x, GEN y)
@@ -231,40 +187,57 @@ gerepileuptoint(pari_sp av, GEN q)
   return (GEN)avma;
 }
 
+INLINE void
+cgiv(GEN x)
+{
+  pari_sp av = (pari_sp)(x+lg(x));
+  if (isonstack(av)) avma = av;
+}
+
+/*******************************************************************/
+/*                                                                 */
+/*                     COPY, NEGATION, ABSOLUTE VALUE              */
+/*                                                                 */
+/*******************************************************************/
+/* cannot do memcpy because sometimes x and y overlap */
 INLINE GEN
-mpneg(GEN x) { const GEN y=mpcopy(x); togglesign(y); return y; }
+mpcopy(GEN x)
+{
+  register long lx = lg(x);
+  GEN y = cgetg_copy(lx, x);
+  while (--lx > 0) y[lx] = x[lx];
+  return y;
+}
+INLINE GEN
+icopy(GEN x)
+{
+  register long lx = lgefint(x);
+  GEN y = cgeti(lx);
+  while (--lx > 0) y[lx] = x[lx];
+  return y;
+}
+INLINE GEN rcopy(GEN x) { return mpcopy(x); }
 
 INLINE GEN
 mpabs(GEN x)
 {
-  const GEN y=mpcopy(x);
+  GEN y=mpcopy(x);
   if (signe(x)<0) setsigne(y,1);
   return y;
 }
-INLINE GEN
-absr(GEN x) { return mpabs(x); }
-INLINE GEN
-absi(GEN x) { return mpabs(x); }
-INLINE GEN
-negi(GEN x) { return mpneg(x); }
-INLINE GEN
-negr(GEN x) { return mpneg(x); }
+INLINE GEN absi(GEN x) { return mpabs(x); }
+INLINE GEN absr(GEN x) { return mpabs(x); }
 
-INLINE long
-smodis(GEN x, long y)
-{
-  long rem;
-  const pari_sp av=avma; (void)divis_rem(x,y, &rem); avma=av;
-  return (rem >= 0) ? rem: labs(y) + rem;
-}
+INLINE GEN
+mpneg(GEN x) { GEN y=mpcopy(x); togglesign(y); return y; }
+INLINE GEN negi(GEN x) { return mpneg(x); }
+INLINE GEN negr(GEN x) { return mpneg(x); }
 
-INLINE long
-smodss(long x, long y)
-{
-  long rem = x%y;
-  return (rem >= 0)? rem: labs(y) + rem;
-}
-
+/*******************************************************************/
+/*                                                                 */
+/*                     GEN -> LONG, LONG -> GEN                    */
+/*                                                                 */
+/*******************************************************************/
 /* assume x != 0, return -x as a t_INT */
 INLINE GEN
 utoineg(ulong x) { GEN y = cgetineg(3); y[2] = x; return y; }
@@ -280,22 +253,37 @@ stoi(long x)
   return x > 0? utoipos((ulong)x): utoineg((ulong)-x);
 }
 
+/* x 2^BIL + y */
+INLINE GEN
+uutoi(ulong x, ulong y)
+{
+  GEN z;
+  if (!x) return utoi(y);
+  z = cgetipos(4); 
+  *int_W_lg(z, 1, 4) = x;
+  *int_W_lg(z, 0, 4) = y; return z;
+}
+/* - (x 2^BIL + y) */
+INLINE GEN
+uutoineg(ulong x, ulong y)
+{
+  GEN z;
+  if (!x) return y? utoineg(y): gen_0;
+  z = cgetineg(4); 
+  *int_W_lg(z, 1, 4) = x;
+  *int_W_lg(z, 0, 4) = y; return z;
+}
+
 INLINE long
 itos(GEN x)
 {
-  const long s = signe(x);
+  long s = signe(x);
   long u;
 
   if (!s) return 0;
   u = x[2]; if (lgefint(x) > 3 || u < 0) pari_err(affer2);
   return (s>0) ? u : -u;
 }
-INLINE long
-gtos(GEN x) {
-  if (typ(x) != t_INT) pari_err(talker,"gtos expected an integer, got '%Ps'",x);
-  return itos(x);
-}
-
 /* as itos, but return 0 if too large. Cf is_bigint */
 INLINE long
 itos_or_0(GEN x) {
@@ -303,84 +291,23 @@ itos_or_0(GEN x) {
   if (lgefint(x) != 3 || (n = x[2]) & HIGHBIT) return 0;
   return signe(x) > 0? n: -n;
 }
+INLINE ulong
+itou(GEN x)
+{
+  switch(lgefint(x)) {
+    case 2: return 0;
+    case 3: return x[2];
+    default: pari_err(affer2);
+      return 0; /* not reached */
+  }
+}
+
 /* as itou, but return 0 if too large. Cf is_bigint */
 INLINE ulong
 itou_or_0(GEN x) {
   if (lgefint(x) != 3) return 0;
   return (ulong)x[2];
 }
-
-INLINE GEN
-modss(long x, long y) { return stoi(smodss(x, y)); }
-
-INLINE GEN
-remss(long x, long y) { return stoi(x % y); }
-
-INLINE void
-affii(GEN x, GEN y)
-{
-  long lx;
-
-  if (x==y) return;
-  lx=lgefint(x); if (lg(y)<lx) pari_err(talker,"impossible assignment I-->I");
-
-  while (--lx) y[lx]=x[lx];
-}
-
-INLINE void
-affsi(long s, GEN x)
-{
-  if (!s) x[1] = evalsigne(0) | evallgefint(2);
-  else
-  {
-    if (s > 0) { x[1] = evalsigne( 1) | evallgefint(3); x[2] =  s; }
-    else       { x[1] = evalsigne(-1) | evallgefint(3); x[2] = -s; }
-  }
-}
-
-INLINE void
-affsr(long x, GEN y)
-{
-  long sh, i, ly = lg(y);
-
-  if (!x)
-  {
-    y[1] = evalexpo(-bit_accuracy(ly));
-    return;
-  }
-  if (x < 0) {
-    x = -x; sh = bfffo(x);
-    y[1] = evalsigne(-1) | _evalexpo((BITS_IN_LONG-1)-sh);
-  }
-  else
-  {
-    sh = bfffo(x);
-    y[1] = evalsigne(1) | _evalexpo((BITS_IN_LONG-1)-sh);
-  }
-  y[2] = x<<sh; for (i=3; i<ly; i++) y[i]=0;
-}
-
-INLINE void
-affur(ulong x, GEN y)
-{
-  long sh, i, ly = lg(y);
-
-  if (!x)
-  {
-    y[1] = evalexpo(-bit_accuracy(ly));
-    return;
-  }
-  sh = bfffo(x);
-  y[1] = evalsigne(1) | _evalexpo((BITS_IN_LONG-1)-sh);
-  y[2] = x<<sh; for (i=3; i<ly; i++) y[i] = 0;
-}
-
-INLINE void
-affiz(GEN x, GEN y) { if (typ(y)==t_INT) affii(x,y); else affir(x,y); }
-INLINE void
-affsz(long x, GEN y) { if (typ(y)==t_INT) affsi(x,y); else affsr(x,y); }
-INLINE void
-mpaff(GEN x, GEN y) { if (typ(x)==t_INT) affiz(x, y); else affrr(x,y); }
 
 INLINE GEN
 real_0_bit(long bitprec) { GEN x=cgetr(2); x[1]=evalexpo(bitprec); return x; }
@@ -415,23 +342,11 @@ itor(GEN x, long prec) { GEN z = cgetr(prec); affir(x,z); return z; }
 INLINE GEN
 rtor(GEN x, long prec) { GEN z = cgetr(prec); affrr(x,z); return z; }
 
-/* assume x != 0 and x t_REAL, return an approximation to log2(|x|) */
-INLINE double
-dbllog2r(GEN x)
-{
-  return log2((double)(ulong)x[2]) + (double)(expo(x) - (BITS_IN_LONG-1));
-}
-
-INLINE GEN
-shiftr(GEN x, long n)
-{
-  const long e = evalexpo(expo(x)+n);
-  const GEN y = rcopy(x);
-
-  if (e & ~EXPOBITS) pari_err(errexpo);
-  y[1] = (y[1]&~EXPOBITS) | e; return y;
-}
-
+/*******************************************************************/
+/*                                                                 */
+/*                           COMPARISON                            */
+/*                                                                 */
+/*******************************************************************/
 INLINE int
 cmpir(GEN x, GEN y)
 {
@@ -479,21 +394,28 @@ cmpsi(long x, GEN y)
 
   if (!x) return -signe(y);
 
-  if (x>0)
+  if (x > 0)
   {
     if (signe(y)<=0) return 1;
     if (lgefint(y)>3) return -1;
-    p=y[2]; if (p == (ulong)x) return 0;
+    p = y[2]; if (p == (ulong)x) return 0;
     return p < (ulong)x ? 1 : -1;
   }
 
   if (signe(y)>=0) return -1;
   if (lgefint(y)>3) return 1;
-  p=y[2]; if (p == (ulong)-x) return 0;
+  p = y[2]; if (p == (ulong)-x) return 0;
   return p < (ulong)(-x) ? -1 : 1;
 }
 INLINE int
 cmpis(GEN x, long y) { return -cmpsi(y,x); }
+INLINE int
+mpcmp(GEN x, GEN y)
+{
+  if (typ(x)==t_INT)
+    return (typ(y)==t_INT) ? cmpii(x,y) : cmpir(x,y);
+  return (typ(y)==t_INT) ? -cmpir(y,x) : cmprr(x,y);
+}
 
 /* x == y ? */
 INLINE int
@@ -525,6 +447,11 @@ maxss(long x, long y) { return x>y?x:y; }
 INLINE long
 minss(long x, long y) { return x<y?x:y; }
 
+/*******************************************************************/
+/*                                                                 */
+/*                             ADD / SUB                           */
+/*                                                                 */
+/*******************************************************************/
 INLINE GEN
 subuu(ulong x, ulong y)
 {
@@ -549,7 +476,6 @@ addss(long x, long y)
   }
 }
 INLINE GEN subss(long x, long y) { return addss(-y,x); }
-INLINE void subssz(long x, long y, GEN z) { addssz(x,-y,z); }
 
 INLINE GEN
 subii(GEN x, GEN y)
@@ -574,34 +500,41 @@ addsi(long x, GEN y) { return addsi_sign(x, y, signe(y)); }
 INLINE GEN
 subsi(long x, GEN y) { return addsi_sign(x, y, -signe(y)); }
 
-INLINE GEN
-addri(GEN x, GEN y) { return addir(y,x); }
-INLINE GEN
-addis(GEN x, long s) { return addsi(s,x); }
-INLINE GEN
-addrs(GEN x, long s) { return addsr(s,x); }
-INLINE GEN
-subis(GEN x, long y) { return addsi(-y,x); }
-INLINE GEN
-subrs(GEN x, long y) { return addsr(-y,x); }
+/*******************************************************************/
+/*                                                                 */
+/*                           MOD, REM, DIV                         */
+/*                                                                 */
+/*******************************************************************/
+INLINE int
+mpodd(GEN x) { return signe(x) && mod2(x); }
 
-INLINE long
-vali(GEN x)
-{
-  long i;
-  GEN xp;
+INLINE GEN
+truedivii(GEN a,GEN b) { return truedvmdii(a,b,NULL); }
+INLINE GEN
+truedivis(GEN a, long b) { return truedvmdis(a,b,NULL); }
+INLINE GEN
+truedivsi(long a, GEN b) { return truedvmdsi(a,b,NULL); }
 
-  if (!signe(x)) return -1;
-  xp=int_LSW(x);
-  for (i=0; !*xp; i++) xp=int_nextW(xp);
-  return vals(*xp) + i * BITS_IN_LONG;
-}
+INLINE GEN
+divii(GEN a, GEN b) { return dvmdii(a,b,NULL); }
+INLINE GEN
+remii(GEN a, GEN b) { return dvmdii(a,b,ONLY_REM); }
 
 INLINE GEN
 divss(long x, long y) { return stoi(x / y); }
+INLINE GEN
+modss(long x, long y) { return stoi(smodss(x, y)); }
+INLINE GEN
+remss(long x, long y) { return stoi(x % y); }
+INLINE long
+smodss(long x, long y)
+{
+  long r = x%y;
+  return (r >= 0)? r: labs(y) + r;
+}
 
 INLINE long
-sdivss_rem(long x, long y, long *rem)
+sdivss_rem(long x, long y, long *r)
 {
   long q;
   LOCAL_HIREMAINDER;
@@ -609,51 +542,39 @@ sdivss_rem(long x, long y, long *rem)
   hiremainder = 0; q = divll((ulong)labs(x),(ulong)labs(y));
   if (x < 0) { hiremainder = -((long)hiremainder); q = -q; }
   if (y < 0) q = -q;
-  *rem = hiremainder; return q;
+  *r = hiremainder; return q;
 }
-
 INLINE GEN
-divss_rem(long x, long y, long *rem) { return stoi(sdivss_rem(x,y,rem)); }
-
-INLINE GEN
-dvmdss(long x, long y, GEN *z)
-{
-  long rem;
-  const GEN q = divss_rem(x,y, &rem);
-  *z = stoi(rem); return q;
-}
-
-INLINE long
-dvmdsBIL(long n, long *r) { *r = remsBIL(n); return divsBIL(n); }
-INLINE ulong
-dvmduBIL(ulong n, ulong *r) { *r = remsBIL(n); return divsBIL(n); }
+divss_rem(long x, long y, long *r) { return stoi(sdivss_rem(x,y,r)); }
 
 INLINE ulong
-udivui_rem(ulong x, GEN y, ulong *rem)
+udivui_rem(ulong x, GEN y, ulong *r)
 {
   long q, s = signe(y);
   LOCAL_HIREMAINDER;
 
   if (!s) pari_err(gdiver);
-  if (!x || lgefint(y)>3) { *rem = x; return 0; }
+  if (!x || lgefint(y)>3) { *r = x; return 0; }
   hiremainder=0; q = (long)divll(x, (ulong)y[2]);
   if (s < 0) q = -q;
-  *rem = hiremainder; return q;
+  *r = hiremainder; return q;
 }
 
 INLINE long
-sdivsi_rem(long x, GEN y, long *rem)
+sdivsi_rem(long x, GEN y, long *r)
 {
   long q, s = signe(y);
   LOCAL_HIREMAINDER;
 
   if (!s) pari_err(gdiver);
-  if (!x || lgefint(y)>3 || ((long)y[2]) < 0) { *rem = x; return 0; }
+  if (!x || lgefint(y)>3 || ((long)y[2]) < 0) { *r = x; return 0; }
   hiremainder=0; q = (long)divll(labs(x), (ulong)y[2]);
   if (x < 0) { hiremainder = -((long)hiremainder); q = -q; }
   if (s < 0) q = -q;
-  *rem = hiremainder; return q;
+  *r = hiremainder; return q;
 }
+INLINE GEN
+divsi_rem(long s, GEN y, long *r) { return stoi(sdivsi_rem(s,y,r)); }
 
 INLINE long
 sdivsi(long x, GEN y)
@@ -669,68 +590,45 @@ sdivsi(long x, GEN y)
 }
 
 INLINE GEN
+dvmdss(long x, long y, GEN *z)
+{
+  long r;
+  GEN q = divss_rem(x,y, &r);
+  *z = stoi(r); return q;
+}
+INLINE long
+dvmdsBIL(long n, long *r) { *r = remsBIL(n); return divsBIL(n); }
+INLINE ulong
+dvmduBIL(ulong n, ulong *r) { *r = remsBIL(n); return divsBIL(n); }
+INLINE GEN
+dvmdsi(long x, GEN y, GEN *z)
+{
+  long r;
+  GEN q = divsi_rem(x,y, &r);
+  *z = stoi(r); return q;
+}
+INLINE GEN
+dvmdis(GEN x, long y, GEN *z)
+{
+  long r;
+  GEN q = divis_rem(x,y, &r);
+  *z = stoi(r); return q;
+}
+
+INLINE long
+smodis(GEN x, long y)
+{
+  pari_sp av = avma;
+  long r;
+  (void)divis_rem(x,y, &r); avma = av; return (r >= 0) ? r: labs(y) + r;
+}
+INLINE GEN
+modis(GEN x, long y) { return stoi(smodis(x,y)); }
+INLINE GEN
 modsi(long x, GEN y) {
   long r;
   (void)sdivsi_rem(x, y, &r);
   return (r >= 0)? stoi(r): addsi_sign(r, y, 1);
-}
-
-INLINE GEN
-divsi_rem(long s, GEN y, long *rem) { return stoi(sdivsi_rem(s,y,rem)); }
-
-INLINE GEN
-dvmdsi(long x, GEN y, GEN *z)
-{
-  long rem;
-  const GEN q = divsi_rem(x,y, &rem);
-  *z = stoi(rem); return q;
-}
-
-INLINE GEN
-dvmdis(GEN x, long y, GEN *z)
-{
-  long rem;
-  const GEN q = divis_rem(x,y, &rem);
-  *z = stoi(rem); return q;
-}
-
-INLINE void
-dvmdssz(long x, long y, GEN z, GEN t)
-{
-  long rem;
-  const pari_sp av=avma; affiz(divss_rem(x,y, &rem), z); avma=av;
-  affsi(rem,t);
-}
-
-INLINE void
-dvmdsiz(long x, GEN y, GEN z, GEN t)
-{
-  long rem;
-  const pari_sp av = avma; affiz(divsi_rem(x,y, &rem), z); avma = av;
-  affsi(rem,t);
-}
-
-INLINE void
-dvmdisz(GEN x, long y, GEN z, GEN t)
-{
-  long rem;
-  const pari_sp av=avma; affiz(divis_rem(x,y, &rem),z); avma=av;
-  affsz(rem,t);
-}
-
-INLINE void
-dvmdiiz(GEN x, GEN y, GEN z, GEN t)
-{
-  const pari_sp av=avma;
-  GEN p;
-
-  affiz(dvmdii(x,y,&p),z); affiz(p,t); avma=av;
-}
-
-INLINE GEN
-modis(GEN x, long y)
-{
-  return stoi(smodis(x,y));
 }
 
 INLINE ulong
@@ -743,51 +641,36 @@ umodui(ulong x, GEN y)
 
 INLINE GEN
 remsi(long x, GEN y)
-{
-  long rem; (void)sdivsi_rem(x,y, &rem); return stoi(rem);
-}
-
+{ long r; (void)sdivsi_rem(x,y, &r); return stoi(r); }
 INLINE GEN
 remis(GEN x, long y)
 {
-  long rem;
-  const pari_sp av=avma; (void)divis_rem(x,y, &rem); avma=av;
-  return stoi(rem);
+  pari_sp av = avma;
+  long r;
+  (void)divis_rem(x,y, &r); avma = av; return stoi(r);
 }
 
 INLINE GEN
 rdivis(GEN x, long y, long prec)
 {
   GEN z = cgetr(prec);
-  const pari_sp av = avma;
+  pari_sp av = avma;
   affrr(divrs(itor(x,prec), y),z);
   avma = av; return z;
 }
-
-INLINE void
-divsiz(long x, GEN y, GEN z)
-{
-  long junk;
-  affsi(sdivsi_rem(x,y,&junk), z);
-}
-
-INLINE void
-divssz(long x, long y, GEN z) { affsi(x/y, z); }
-
 INLINE GEN
 rdivsi(long x, GEN y, long prec)
 {
   GEN z = cgetr(prec);
-  const pari_sp av = avma;
+  pari_sp av = avma;
   affrr(divsr(x, itor(y,prec)), z);
   avma = av; return z;
 }
-
 INLINE GEN
 rdivss(long x, long y, long prec)
 {
   GEN z = cgetr(prec);
-  const pari_sp av = avma;
+  pari_sp av = avma;
   affrr(divrs(stor(x, prec), y), z);
   avma = av; return z;
 }
@@ -795,7 +678,7 @@ rdivss(long x, long y, long prec)
 INLINE void
 rdiviiz(GEN x, GEN y, GEN z)
 {
-  const pari_sp av = avma;
+  pari_sp av = avma;
   long prec = lg(z);
   affir(x, z);
   if (!is_bigint(y)) {
@@ -806,12 +689,11 @@ rdiviiz(GEN x, GEN y, GEN z)
     affrr(divrr(z, itor(y,prec)), z);
   avma = av;
 }
-
 INLINE GEN
 rdivii(GEN x, GEN y, long prec)
 {
   GEN z = cgetr(prec);
-  const pari_sp av = avma;
+  pari_sp av = avma;
   affir(x, z);
   if (!is_bigint(y)) {
     affrr(divrs(z, y[2]), z);
@@ -824,36 +706,68 @@ rdivii(GEN x, GEN y, long prec)
 INLINE GEN
 fractor(GEN x, long prec) { return rdivii(gel(x,1), gel(x,2), prec); }
 
-INLINE void
-divrrz(GEN x, GEN y, GEN z)
-{
-  const pari_sp av=avma;
-  affrr(divrr(x,y),z); avma=av;
-}
-
-INLINE void
-remiiz(GEN x, GEN y, GEN z)
-{
-  const pari_sp av=avma;
-  affii(remii(x,y),z); avma=av;
-}
-
 INLINE int
 dvdii(GEN x, GEN y)
 {
-  const pari_sp av=avma;
-  const GEN p1=remii(x,y);
-  avma=av; return p1 == gen_0;
+  pari_sp av=avma;
+  GEN r = remii(x,y);
+  avma = av; return r == gen_0;
 }
+INLINE int
+dvdsi(long x, GEN y)
+{
+  if (!signe(y)) return x == 0;
+  if (lgefint(y) != 3) return 0;
+  return x % y[2] == 0;
+}
+INLINE int
+dvdui(ulong x, GEN y)
+{
+  if (!signe(y)) return x == 0;
+  if (lgefint(y) != 3) return 0;
+  return x % y[2] == 0;
+}
+INLINE int
+dvdis(GEN x, long y)
+{ return y? smodis(x, y) == 0: signe(x) == 0; }
+INLINE int
+dvdiu(GEN x, ulong y)
+{ return y? umodiu(x, y) == 0: signe(x) == 0; }
 
 INLINE int
-mpcmp(GEN x, GEN y)
+dvdisz(GEN x, long y, GEN z)
 {
-  if (typ(x)==t_INT)
-    return (typ(y)==t_INT) ? cmpii(x,y) : cmpir(x,y);
-  return (typ(y)==t_INT) ? -cmpir(y,x) : cmprr(x,y);
+  const pari_sp av = avma;
+  long r;
+  GEN p1 = divis_rem(x,y, &r);
+  avma = av; if (r) return 0;
+  affii(p1,z); return 1;
+}
+INLINE int
+dvdiuz(GEN x, ulong y, GEN z)
+{
+  const pari_sp av = avma;
+  ulong r;
+  GEN p1 = diviu_rem(x,y, &r);
+  avma = av; if (r) return 0;
+  affii(p1,z); return 1;
+}
+INLINE int
+dvdiiz(GEN x, GEN y, GEN z)
+{
+  const pari_sp av=avma;
+  GEN p2;
+  const GEN p1=dvmdii(x,y,&p2);
+
+  if (signe(p2)) { avma=av; return 0; }
+  affii(p1,z); avma=av; return 1;
 }
 
+/*******************************************************************/
+/*                                                                 */
+/*                        MP (INT OR REAL)                         */
+/*                                                                 */
+/*******************************************************************/
 INLINE GEN
 mptrunc(GEN x) { return typ(x)==t_INT? icopy(x): truncr(x); }
 INLINE GEN
@@ -870,7 +784,6 @@ mpadd(GEN x, GEN y)
     return (typ(y)==t_INT) ? addii(x,y) : addir(x,y);
   return (typ(y)==t_INT) ? addir(y,x) : addrr(x,y);
 }
-
 INLINE GEN
 mpsub(GEN x, GEN y)
 {
@@ -878,7 +791,6 @@ mpsub(GEN x, GEN y)
     return (typ(y)==t_INT) ? subii(x,y) : subir(x,y);
   return (typ(y)==t_INT) ? subri(x,y) : subrr(x,y);
 }
-
 INLINE GEN
 mpmul(GEN x, GEN y)
 {
@@ -886,7 +798,6 @@ mpmul(GEN x, GEN y)
     return (typ(y)==t_INT) ? mulii(x,y) : mulir(x,y);
   return (typ(y)==t_INT) ? mulir(y,x) : mulrr(x,y);
 }
-
 INLINE GEN
 mpdiv(GEN x, GEN y)
 {
@@ -895,90 +806,11 @@ mpdiv(GEN x, GEN y)
   return (typ(y)==t_INT) ? divri(x,y) : divrr(x,y);
 }
 
-INLINE int
-dvdiiz(GEN x, GEN y, GEN z)
-{
-  const pari_sp av=avma;
-  GEN p2;
-  const GEN p1=dvmdii(x,y,&p2);
-
-  if (signe(p2)) { avma=av; return 0; }
-  affii(p1,z); avma=av; return 1;
-}
-
-INLINE int
-mpodd(GEN x) { return signe(x) && mod2(x); }
-
-/* assume 0 <= k <= BITS_IN_LONG. Return uniform random 0 <= x < (1<<k) */
-INLINE long
-random_bits(long k) { return pari_rand() >> (BITS_IN_LONG - k); }
-
-INLINE ulong
-itou(GEN x)
-{
-  switch(lgefint(x)) {
-    case 2: return 0;
-    case 3: return x[2];
-    default: pari_err(affer2);
-      return 0; /* not reached */
-  }
-}
-
-INLINE void
-affui(ulong u, GEN x)
-{
-  if (!u) x[1] = evalsigne(0) | evallgefint(2);
-  else  { x[1] = evalsigne(1) | evallgefint(3); x[2] = u; }
-}
-
-INLINE int
-dvdsi(long x, GEN y)
-{
-  if (!signe(y)) return x == 0;
-  if (lgefint(y) != 3) return 0;
-  return x % y[2] == 0;
-}
-
-INLINE int
-dvdui(ulong x, GEN y)
-{
-  if (!signe(y)) return x == 0;
-  if (lgefint(y) != 3) return 0;
-  return x % y[2] == 0;
-}
-
-INLINE int
-dvdis(GEN x, long y)
-{
-  return y? smodis(x, y) == 0: signe(x) == 0;
-}
-
-INLINE int
-dvdiu(GEN x, ulong y)
-{
-  return y? umodiu(x, y) == 0: signe(x) == 0;
-}
-
-INLINE int
-dvdisz(GEN x, long y, GEN z)
-{
-  const pari_sp av = avma;
-  long rem;
-  GEN p1 = divis_rem(x,y, &rem);
-  avma = av; if (rem) return 0;
-  affii(p1,z); return 1;
-}
-
-INLINE int
-dvdiuz(GEN x, ulong y, GEN z)
-{
-  const pari_sp av = avma;
-  ulong rem;
-  GEN p1 = diviu_rem(x,y, &rem);
-  avma = av; if (rem) return 0;
-  affii(p1,z); return 1;
-}
-
+/*******************************************************************/
+/*                                                                 */
+/*                          Z/nZ, n ULONG                          */
+/*                                                                 */
+/*******************************************************************/
 /* same as Fl_add, assume p <= 2^(BIL - 1), so that overflow can't occur */
 INLINE ulong
 Fl_add_noofl(ulong a, ulong b, ulong p)
@@ -1006,12 +838,6 @@ Fl_sub(ulong a, ulong b, ulong p)
 INLINE long
 Fl_center(ulong u, ulong p, ulong ps2) { return (long) (u > ps2)? u - p: u; }
 
-/* assume 0 <= u < p and ps2 = p>>1 */
-INLINE GEN
-Fp_center(GEN u, GEN p, GEN ps2) {
-  return absi_cmp(u,ps2)<=0? icopy(u): subii(u,p);
-}
-
 INLINE ulong
 Fl_mul(ulong a, ulong b, ulong p)
 {
@@ -1033,10 +859,24 @@ Fl_sqr(ulong a, ulong p)
   return hiremainder;
 }
 INLINE ulong
-Fl_div(ulong a, ulong b, ulong p)
-{
-  return Fl_mul(a, Fl_inv(b, p), p);
-}
+Fl_div(ulong a, ulong b, ulong p) { return Fl_mul(a, Fl_inv(b, p), p); }
+
+/*******************************************************************/
+/*                                                                 */
+/*        DEFINED FROM EXISTING ONE EXPLOITING COMMUTATIVITY       */
+/*                                                                 */
+/*******************************************************************/
+INLINE GEN
+addri(GEN x, GEN y) { return addir(y,x); }
+INLINE GEN
+addis(GEN x, long s) { return addsi(s,x); }
+INLINE GEN
+addrs(GEN x, long s) { return addsr(s,x); }
+
+INLINE GEN
+subis(GEN x, long y) { return addsi(-y,x); }
+INLINE GEN
+subrs(GEN x, long y) { return addsr(-y,x); }
 
 INLINE GEN
 mulis(GEN x, long s) { return mulsi(s,x); }
@@ -1049,16 +889,23 @@ mulri(GEN x, GEN s) { return mulir(s,x); }
 INLINE GEN
 mulrs(GEN x, long s) { return mulsr(s,x); }
 
-INLINE GEN
-truedivii(GEN a,GEN b) { return truedvmdii(a,b,NULL); }
-INLINE GEN
-truedivis(GEN a, long b) { return truedvmdis(a,b,NULL); }
-INLINE GEN
-truedivsi(long a, GEN b) { return truedvmdsi(a,b,NULL); }
-INLINE GEN
-divii(GEN a, GEN b) { return dvmdii(a,b,NULL); }
-INLINE GEN
-remii(GEN a, GEN b) { return dvmdii(a,b,ONLY_REM); }
+/*******************************************************************/
+/*                                                                 */
+/*                  VALUATION, EXPONENT, SHIFTS                    */
+/*                                                                 */
+/*******************************************************************/
+INLINE long
+vali(GEN x)
+{
+  long i;
+  GEN xp;
+
+  if (!signe(x)) return -1;
+  xp=int_LSW(x);
+  for (i=0; !*xp; i++) xp=int_nextW(xp);
+  return vals(*xp) + i * BITS_IN_LONG;
+}
+
 
 /* assume x > 0 */
 INLINE long
@@ -1071,6 +918,15 @@ expi(GEN x)
   return lx==2? -(long)HIGHEXPOBIT: bit_accuracy(lx)-(long)bfffo(*int_MSW(x))-1;
 }
 
+INLINE GEN
+shiftr(GEN x, long n)
+{
+  const long e = evalexpo(expo(x)+n);
+  const GEN y = rcopy(x);
+
+  if (e & ~EXPOBITS) pari_err(errexpo);
+  y[1] = (y[1]&~EXPOBITS) | e; return y;
+}
 INLINE GEN
 mpshift(GEN x,long s) { return (typ(x)==t_INT)?shifti(x,s):shiftr(x,s); }
 
@@ -1120,3 +976,200 @@ shiftl(ulong x, ulong y)
 INLINE ulong
 shiftlr(ulong x, ulong y)
 { hiremainder = x<<(BITS_IN_LONG-y); return (x>>y); }
+
+/*******************************************************************/
+/*                                                                 */
+/*                           ASSIGNMENT                            */
+/*                                                                 */
+/*******************************************************************/
+INLINE void
+affii(GEN x, GEN y)
+{
+  long lx;
+
+  if (x==y) return;
+  lx=lgefint(x); if (lg(y)<lx) pari_err(talker,"impossible assignment I-->I");
+
+  while (--lx) y[lx]=x[lx];
+}
+INLINE void
+affsi(long s, GEN x)
+{
+  if (!s) x[1] = evalsigne(0) | evallgefint(2);
+  else
+  {
+    if (s > 0) { x[1] = evalsigne( 1) | evallgefint(3); x[2] =  s; }
+    else       { x[1] = evalsigne(-1) | evallgefint(3); x[2] = -s; }
+  }
+}
+INLINE void
+affui(ulong u, GEN x)
+{
+  if (!u) x[1] = evalsigne(0) | evallgefint(2);
+  else  { x[1] = evalsigne(1) | evallgefint(3); x[2] = u; }
+}
+
+INLINE void
+affsr(long x, GEN y)
+{
+  long sh, i, ly = lg(y);
+
+  if (!x)
+  {
+    y[1] = evalexpo(-bit_accuracy(ly));
+    return;
+  }
+  if (x < 0) {
+    x = -x; sh = bfffo(x);
+    y[1] = evalsigne(-1) | _evalexpo((BITS_IN_LONG-1)-sh);
+  }
+  else
+  {
+    sh = bfffo(x);
+    y[1] = evalsigne(1) | _evalexpo((BITS_IN_LONG-1)-sh);
+  }
+  y[2] = x<<sh; for (i=3; i<ly; i++) y[i]=0;
+}
+
+INLINE void
+affur(ulong x, GEN y)
+{
+  long sh, i, ly = lg(y);
+
+  if (!x)
+  {
+    y[1] = evalexpo(-bit_accuracy(ly));
+    return;
+  }
+  sh = bfffo(x);
+  y[1] = evalsigne(1) | _evalexpo((BITS_IN_LONG-1)-sh);
+  y[2] = x<<sh; for (i=3; i<ly; i++) y[i] = 0;
+}
+
+INLINE void
+affiz(GEN x, GEN y) { if (typ(y)==t_INT) affii(x,y); else affir(x,y); }
+INLINE void
+affsz(long x, GEN y) { if (typ(y)==t_INT) affsi(x,y); else affsr(x,y); }
+INLINE void
+mpaff(GEN x, GEN y) { if (typ(x)==t_INT) affiz(x, y); else affrr(x,y); }
+
+/*******************************************************************/
+/*                                                                 */
+/*                    OPERATION + ASSIGNMENT                       */
+/*                                                                 */
+/*******************************************************************/
+
+INLINE void addiiz(GEN x, GEN y, GEN z)
+{ pari_sp av = avma; affii(addii(x,y),z); avma = av; }
+INLINE void addirz(GEN x, GEN y, GEN z)
+{ pari_sp av = avma; affrr(addir(x,y),z); avma = av; }
+INLINE void addriz(GEN x, GEN y, GEN z)
+{ pari_sp av = avma; affrr(addri(x,y),z); avma = av; }
+INLINE void addrrz(GEN x, GEN y, GEN z)
+{ pari_sp av = avma; affrr(addrr(x,y),z); avma = av; }
+INLINE void addsiz(long s, GEN y, GEN z)
+{ pari_sp av = avma; affii(addsi(s,y),z); avma = av; }
+INLINE void addsrz(long s, GEN y, GEN z)
+{ pari_sp av = avma; affrr(addsr(s,y),z); avma = av; }
+INLINE void addssz(long s, long y, GEN z)
+{ pari_sp av = avma; affii(addss(s,y),z); avma = av; }
+
+INLINE void diviiz(GEN x, GEN y, GEN z)
+{ pari_sp av = avma; affii(divii(x,y),z); avma = av; }
+INLINE void divirz(GEN x, GEN y, GEN z)
+{ pari_sp av = avma; mpaff(divir(x,y),z); avma = av; }
+INLINE void divisz(GEN x, long y, GEN z)
+{ pari_sp av = avma; affii(divis(x,y),z); avma = av; }
+INLINE void divriz(GEN x, GEN y, GEN z)
+{ pari_sp av = avma; affrr(divri(x,y),z); avma = av; }
+INLINE void divrrz(GEN x, GEN y, GEN z)
+{ pari_sp av = avma; affrr(divrr(x,y),z); avma = av; }
+INLINE void divrsz(GEN y, long s, GEN z)
+{ pari_sp av = avma; affrr(divrs(y,s),z); avma = av; }
+INLINE void divsiz(long x, GEN y, GEN z)
+{ long junk; affsi(sdivsi_rem(x,y,&junk), z); }
+INLINE void divsrz(long s, GEN y, GEN z)
+{ pari_sp av = avma; mpaff(divsr(s,y),z); avma = av; }
+INLINE void divssz(long x, long y, GEN z)
+{ affsi(x/y, z); }
+
+INLINE void modisz(GEN y, long s, GEN z)
+{ pari_sp av = avma; affii(modis(y,s),z); avma = av; }
+INLINE void modsiz(long s, GEN y, GEN z)
+{ pari_sp av = avma; affii(modsi(s,y),z); avma = av; }
+INLINE void modssz(long s, long y, GEN z)
+{ pari_sp av = avma; affii(modss(s,y),z); avma = av; }
+
+INLINE void mpaddz(GEN x, GEN y, GEN z)
+{ pari_sp av = avma; mpaff(mpadd(x,y),z); avma = av; }
+INLINE void mpsubz(GEN x, GEN y, GEN z)
+{ pari_sp av = avma; mpaff(mpsub(x,y),z); avma = av; }
+INLINE void mpmulz(GEN x, GEN y, GEN z)
+{ pari_sp av = avma; mpaff(mpmul(x,y),z); avma = av; }
+
+INLINE void muliiz(GEN x, GEN y, GEN z)
+{ pari_sp av = avma; affii(mulii(x,y),z); avma = av; }
+INLINE void mulirz(GEN x, GEN y, GEN z)
+{ pari_sp av = avma; mpaff(mulir(x,y),z); avma = av; }
+INLINE void mulriz(GEN x, GEN y, GEN z)
+{ pari_sp av = avma; mpaff(mulri(x,y),z); avma = av; }
+INLINE void mulrrz(GEN x, GEN y, GEN z)
+{ pari_sp av = avma; affrr(mulrr(x,y),z); avma = av; }
+INLINE void mulsiz(long s, GEN y, GEN z)
+{ pari_sp av = avma; affii(mulsi(s,y),z); avma = av; }
+INLINE void mulsrz(long s, GEN y, GEN z)
+{ pari_sp av = avma; mpaff(mulsr(s,y),z); avma = av; }
+INLINE void mulssz(long s, long y, GEN z)
+{ pari_sp av = avma; affii(mulss(s,y),z); avma = av; }
+
+INLINE void remiiz(GEN x, GEN y, GEN z)
+{ pari_sp av = avma; affii(remii(x,y),z); avma = av; }
+INLINE void remisz(GEN y, long s, GEN z)
+{ pari_sp av = avma; affii(remis(y,s),z); avma = av; }
+INLINE void remsiz(long s, GEN y, GEN z)
+{ pari_sp av = avma; affii(remsi(s,y),z); avma = av; }
+INLINE void remssz(long s, long y, GEN z)
+{ pari_sp av = avma; affii(remss(s,y),z); avma = av; }
+
+INLINE void subiiz(GEN x, GEN y, GEN z)
+{ pari_sp av = avma; affii(subii(x,y),z); avma = av; }
+INLINE void subirz(GEN x, GEN y, GEN z)
+{ pari_sp av = avma; affrr(subir(x,y),z); avma = av; }
+INLINE void subisz(GEN y, long s, GEN z)
+{ pari_sp av = avma; affii(addsi(-s,y),z); avma = av; }
+INLINE void subriz(GEN x, GEN y, GEN z)
+{ pari_sp av = avma; affrr(subri(x,y),z); avma = av; }
+INLINE void subrrz(GEN x, GEN y, GEN z)
+{ pari_sp av = avma; affrr(subrr(x,y),z); avma = av; }
+INLINE void subrsz(GEN y, long s, GEN z)
+{ pari_sp av = avma; affrr(addsr(-s,y),z); avma = av; }
+INLINE void subsiz(long s, GEN y, GEN z)
+{ pari_sp av = avma; affii(subsi(s,y),z); avma = av; }
+INLINE void subsrz(long s, GEN y, GEN z)
+{ pari_sp av = avma; affrr(subsr(s,y),z); avma = av; }
+INLINE void subssz(long x, long y, GEN z) { addssz(x,-y,z); }
+
+INLINE void
+dvmdssz(long x, long y, GEN z, GEN t) {
+  pari_sp av = avma;
+  long r;
+  affii(divss_rem(x,y, &r), z); avma = av; affsi(r,t);
+}
+INLINE void
+dvmdsiz(long x, GEN y, GEN z, GEN t) {
+  pari_sp av = avma;
+  long r;
+  affii(divsi_rem(x,y, &r), z); avma = av; affsi(r,t);
+}
+INLINE void
+dvmdisz(GEN x, long y, GEN z, GEN t) {
+  pari_sp av = avma;
+  long r;
+  affii(divis_rem(x,y, &r),z); avma = av; affsi(r,t);
+}
+INLINE void
+dvmdiiz(GEN x, GEN y, GEN z, GEN t) {
+  pari_sp av = avma;
+  GEN r;
+  affii(dvmdii(x,y,&r),z); affii(r,t); avma=av;
+}

@@ -251,6 +251,8 @@ BA 49- user variables can now be aliased [#790].
    86- Swap the order of the 2 arguments to select(): selection function 
        now comes first [ as in apply() ]
    87- error() messages now prefixed with the customary *** [ used to be ### ]
+   88- dvmdiiz(x, y, z) now expects z to be a t_INT [ to be consistent with
+       all other xxxz functions where xxx includes only i,s,u arguments ]
 
   Added
     1- library function pari_calloc, cgetalloc

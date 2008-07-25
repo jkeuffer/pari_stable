@@ -28,6 +28,12 @@ INLINE GEN
 mkcomplex(GEN x, GEN y) { GEN v = cgetg(3, t_COMPLEX);
   gel(v,1) = x; gel(v,2) = y; return v; }
 INLINE GEN
+cgetc(long l)
+{
+  GEN u = cgetg(3,t_COMPLEX);
+  gel(u,1) = cgetr(l); gel(u,2) = cgetr(l); return u;
+}
+INLINE GEN
 mkquad(GEN n, GEN x, GEN y) { GEN v = cgetg(4, t_QUAD);
   gel(v,1) = n; gel(v,2) = x; gel(v,3) = y; return v; }
 /* vecsmall */
@@ -57,7 +63,7 @@ mkvec4(GEN x, GEN y, GEN z, GEN t) {
   return v; }
 INLINE GEN
 mkvec5(GEN x, GEN y, GEN z, GEN t, GEN u) {
-  GEN v=cgetg(6,t_VEC); gel(v,1) = x; gel(v,2) = y; gel(v,3) = z; 
+  GEN v=cgetg(6,t_VEC); gel(v,1) = x; gel(v,2) = y; gel(v,3) = z;
   gel(v,4) = t; gel(v,5) = u; return v; }
 INLINE GEN
 mkvecs(long x) { GEN v = cgetg(2, t_VEC); gel(v,1) = stoi(x); return v; }
@@ -241,6 +247,11 @@ gtodouble(GEN x)
   }
   return rtodbl(x);
 }
+INLINE long
+gtos(GEN x) {
+  if (typ(x) != t_INT) pari_err(talker,"gtos expected an integer, got '%Ps'",x);
+  return itos(x);
+}
 
 /* Force z to be of type real/complex with floating point components */
 INLINE GEN
@@ -318,6 +329,15 @@ is_vec_t(long t) { return (t == t_VEC || t == t_COL); }
 /*                         MISCELLANEOUS                           */
 /*                                                                 */
 /*******************************************************************/
+/* assume 0 <= k <= BITS_IN_LONG. Return uniform random 0 <= x < (1<<k) */
+INLINE long
+random_bits(long k) { return pari_rand() >> (BITS_IN_LONG - k); }
+
+/* assume x != 0 and x t_REAL, return an approximation to log2(|x|) */
+INLINE double
+dbllog2r(GEN x)
+{ return log2((double)(ulong)x[2]) + (double)(expo(x) - (BITS_IN_LONG-1)); }
+
 /* POLYNOMIALS */
 INLINE GEN
 constant_term(GEN x) { return signe(x)? gel(x,2): gen_0; }
@@ -419,6 +439,10 @@ INLINE GEN
 RgM_inv(GEN a) { return RgM_solve(a, NULL); }
 
 /* ARITHMETIC */
+/* assume 0 <= u < p and ps2 = p>>1 */
+INLINE GEN
+Fp_center(GEN u, GEN p, GEN ps2)
+{ return absi_cmp(u,ps2)<=0? icopy(u): subii(u,p); }
 INLINE GEN
 matpascal(long n) { return matqpascal(n, NULL); }
 INLINE long
@@ -481,6 +505,41 @@ powii(GEN x, GEN n)
   /* should never happen */
   return powgi(x, n); /* overflow unless x = 0, 1, -1 */
 }
+
+/*******************************************************************/
+/*                                                                 */
+/*                             ASSIGNMENTS                         */
+/*                                                                 */
+/*******************************************************************/
+INLINE void mpexpz(GEN x, GEN z)
+{ pari_sp av = avma; gaffect(mpexp(x), z); avma = av; }
+INLINE void mplogz(GEN x, GEN z)
+{ pari_sp av = avma; gaffect(mplog(x), z); avma = av; }
+INLINE void mpcosz(GEN x, GEN z)
+{ pari_sp av = avma; gaffect(mpcos(x), z); avma = av; }
+INLINE void mpsinz(GEN x, GEN z)
+{ pari_sp av = avma; gaffect(mpsin(x), z); avma = av; }
+INLINE void gnegz(GEN x, GEN z)
+{ pari_sp av = avma; gaffect(gneg(x), z); avma = av; }
+INLINE void gabsz(GEN x, long prec, GEN z)
+{ pari_sp av = avma; gaffect(gabs(x,prec), z); avma = av; }
+INLINE void gaddz(GEN x, GEN y, GEN z)
+{ pari_sp av = avma; gaffect(gadd(x,y), z); avma = av; }
+INLINE void gsubz(GEN x, GEN y, GEN z)
+{ pari_sp av = avma; gaffect(gsub(x,y), z); avma = av; }
+INLINE void gmulz(GEN x, GEN y, GEN z)
+{ pari_sp av = avma; gaffect(gmul(x,y), z); avma = av; }
+INLINE void gdivz(GEN x, GEN y, GEN z)
+{ pari_sp av = avma; gaffect(gdiv(x,y), z); avma = av; }
+INLINE void gdiventz(GEN x, GEN y, GEN z)
+{ pari_sp av = avma; gaffect(gdivent(x,y), z); avma = av; }
+INLINE void gmodz(GEN x, GEN y, GEN z)
+{ pari_sp av = avma; gaffect(gmod(x,y), z); avma = av; }
+INLINE void gmul2nz(GEN x, long s, GEN z)
+{ pari_sp av = avma; gaffect(gmul2n(x,s), z); avma = av; }
+INLINE void gshiftz(GEN x, long s, GEN z)
+{ pari_sp av = avma; gaffect(gshift(x,s), z); avma = av; }
+
 /*******************************************************************/
 /*                                                                 */
 /*                    ALGEBRAIC NUMBER THEORY                      */
