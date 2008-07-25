@@ -54,7 +54,7 @@ var2_aux(GEN T, GEN A)
 {
   long a = gvar2(T);
   long b = (typ(A) == t_POL && varn(A) == varn(T))? gvar2(A): gvar(A);
-  if (a < b) a = b;
+  if (varncmp(a, b) > 0) a = b;
   return a;
 }
 static long
@@ -66,9 +66,7 @@ var2_polmod(GEN x) { return var2_aux(gel(x,1), gel(x,2)); }
  * variable of a POLMOD is mute, so we want the next one. */
 static long
 gvar9(GEN x)
-{
-  return (typ(x) == t_POLMOD)? var2_polmod(x): gvar(x);
-}
+{ return (typ(x) == t_POLMOD)? var2_polmod(x): gvar(x); }
 
 /* main variable of the ring over wich x is defined */
 long

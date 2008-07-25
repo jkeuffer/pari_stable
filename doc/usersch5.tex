@@ -236,6 +236,11 @@ the main variable) of~\kbd{x}.
 at all occurs in the composite object~\kbd{x} (the smallest variable number
 which occurs), and \tet{NO_VARIABLE} otherwise.
 
+\fun{long}{gvar2}{GEN x} returns the variable number for the ring over which
+$x$ is defined, e.g. if $x\in \Z[a][b]$ return (the variable number for)
+$a$. Return \tet{NO_VARIABLE} if $x$ has no variable or is not defined over a
+polynomial ring.
+
 \fun{long}{degpol}{GEN x} returns the degree of \typ{POL}~\kbd{x},
 \emph{assuming} its leading coefficient is non-zero (an exact $0$ is
 impossible, but an inexact $0$ is allowed). By convention the degree of an
