@@ -597,7 +597,7 @@ factor(GEN x)
 	    p = cgetg(5, t_POL); gel(p2,i) = p;
 	    p[1] = x[1];
 	    gel(p,2) = gnorm(a);
-	    gel(p,3) = gmul2n(gel(a,1),1); togglesign(p[3]);
+	    gel(p,3) = gmul2n(gel(a,1),1); togglesign(gel(p,3));
 	    gel(p,4) = gen_1;
 	  }
 	  gel(y,1) = gerepile(av,tetpil,p2);

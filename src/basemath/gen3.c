@@ -1051,8 +1051,7 @@ ginv(GEN x)
       z = cgetg(3,t_FRAC);
       gel(z,1) = icopy(gel(x,2));
       gel(z,2) = icopy(gel(x,1));
-      if (s < 0) { togglesign(z[1]); setsigne(z[2],1); }
-      return z;
+      normalize_frac(z); return z;
 
     case t_COMPLEX:
       av=avma;
@@ -1119,7 +1118,7 @@ ginv(GEN x)
     case t_QFI:
       y = gcopy(x);
       if (!equalii(gel(x,1),gel(x,2)) && !equalii(gel(x,1),gel(x,3)))
-	togglesign(y[2]);
+	togglesign(gel(y,2));
       return y;
     case t_MAT:
       y = RgM_inv(x);

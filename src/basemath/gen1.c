@@ -22,8 +22,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "paripriv.h"
 
-#define fix_frac(z) if (signe(z[2])<0) { togglesign(z[1]); setsigne(z[2],1); }
-
 /* assume z[1] was created last */
 #define fix_frac_if_int(z) if (is_pm1(z[2]))\
   z = gerepileupto((pari_sp)(z+3), gel(z,1));
@@ -345,7 +343,7 @@ gred_frac2(GEN x1, GEN x2)
     gel(y,2) = diviiexact(x2,p1);
     gunclone(p1);
   }
-  fix_frac(y); return y;
+  normalize_frac(y); return y;
 }
 
 /********************************************************************/
@@ -2111,7 +2109,7 @@ gdiv(GEN x, GEN y)
       tetpil = avma;
       gel(z,2) = mulii(x2,y1);
       gel(z,1) = mulii(x1,y2);
-      fix_frac(z);
+      normalize_frac(z);
       fix_frac_if_int_GC(z,tetpil);
       return z;
     }
@@ -2216,7 +2214,7 @@ gdiv(GEN x, GEN y)
 	  avma = (pari_sp)z;
 	  gel(z,2) = icopy(gel(y,1));
 	  gel(z,1) = mulii(gel(y,2), x);
-	  fix_frac(z);
+	  normalize_frac(z);
 	  fix_frac_if_int(z);
 	}
 	else
@@ -2224,7 +2222,7 @@ gdiv(GEN x, GEN y)
 	  x = diviiexact(x,p1); tetpil = avma;
 	  gel(z,2) = diviiexact(gel(y,1), p1);
 	  gel(z,1) = mulii(gel(y,2), x);
-	  fix_frac(z);
+	  normalize_frac(z);
 	  fix_frac_if_int_GC(z,tetpil);
 	}
 	return z;
@@ -2299,7 +2297,7 @@ gdiv(GEN x, GEN y)
 	  gel(z,1) = diviiexact(gel(x,1), p1);
 	}
 	gel(z,2) = mulii(gel(x,2),y);
-	fix_frac(z);
+	normalize_frac(z);
 	if (tetpil) fix_frac_if_int_GC(z,tetpil);
 	return z;
 
@@ -2584,7 +2582,7 @@ gdivgs(GEN x, long s)
 	if (signe(x) < 0) setsigne(y, -1);
       }
       gel(z,1) = y;
-      gel(z,2) = stoi(s); fix_frac(z); return z;
+      gel(z,2) = stoi(s); normalize_frac(z); return z;
 
     case t_REAL:
       return divrs(x,s);
@@ -2607,7 +2605,7 @@ gdivgs(GEN x, long s)
 	gel(z,2) = mulsi(s/i, gel(x,2));
 	gel(z,1) = divis(gel(x,1), i);
       }
-      fix_frac(z);
+      normalize_frac(z);
       fix_frac_if_int(z); return z;
 
     case t_COMPLEX: z = cgetg(3, t_COMPLEX);

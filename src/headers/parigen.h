@@ -111,7 +111,6 @@ typedef unsigned long pari_ulong;
 #define signe(x)      ((((long*)(x))[1]) >> SIGNSHIFT)
 #define setsigne(x,s) (((ulong*)(x))[1]=\
 			(((ulong*)(x))[1]&(~SIGNBITS)) | (ulong)evalsigne(s))
-#define togglesign(x) (void)((((GEN)(x))[1] & SIGNBITS) && (((GEN)(x))[1] ^= HIGHBIT))
 
 #define lgefint(x)      ((long)(((ulong*)(x))[1] & LGBITS))
 #define setlgefint(x,s) (((ulong*)(x))[1]=\

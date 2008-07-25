@@ -470,7 +470,7 @@ FindModulus(GEN bnr, GEN dtQ, long *newprec, long prec)
   f   = gmael3(bnr, 2, 1, 1);
 
   /* if cpl < rb, it is not necessary to try another modulus */
-  rb = expi( powgi(mulii(gel(nf,3), ZM_det_triangular(f)), gmul2n(gmael(bnr,5,1), 3)) );
+  rb = expi( powii(mulii(gel(nf,3), ZM_det_triangular(f)), gmul2n(gmael(bnr,5,1), 3)) );
 
   bpr = divcond(bnr);
   nbp = lg(bpr) - 1;

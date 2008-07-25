@@ -368,7 +368,7 @@ mat_ideal_two_elt(GEN nf, GEN x)
     GEN a1, fa = Z_factor_limit(xZ, lim), P = gel(fa,1), E = gel(fa,2);
     long l = lg(P)-1;
 
-    a1 = powgi(gel(P, l), gel(E, l));
+    a1 = powii(gel(P, l), gel(E, l));
     if (cmpis(a1, lim) <= 0)
       a = idealapprfact_i(nf, idealfactor(nf,x), 1);
     else if (equalii(xZ, a1))
@@ -1423,10 +1423,10 @@ idealpowprime(GEN nf, GEN pr, GEN n, GEN *d)
     GEN p = pr_get_p(pr);
     GEN m = divis_rem(n, pr_get_e(pr), &r);
     if (r) m = addis(m,1); /* m = ceil(n/e) */
-    q = powgi(p,m);
+    q = powii(p,m);
     if (s < 0)
     {
-      gen = ZC_Z_divexact(nfpow(nf, pr_get_tau(pr), n), powgi(p, subii(n,m)));
+      gen = ZC_Z_divexact(nfpow(nf, pr_get_tau(pr), n), powii(p, subii(n,m)));
       *d = q;
     }
     else
@@ -1448,7 +1448,7 @@ idealmulpowprime(GEN nf, GEN x, GEN pr, GEN n)
   nf = checknf(nf);
 
   /* inert, special cased for efficiency */
-  if (pr_is_inert(pr)) return RgM_Rg_mul(x, powgi(pr_get_p(pr), n));
+  if (pr_is_inert(pr)) return RgM_Rg_mul(x, powii(pr_get_p(pr), n));
 
   y = idealpowprime(nf, pr, n, &dx);
   x = Q_primitive_part(x, &cx);
@@ -1484,7 +1484,7 @@ idealpow_aux(GEN nf, GEN x, long tx, GEN n)
       return idealhnf_principal(nf,x);
     case id_PRIME: {
       GEN d;
-      if (pr_is_inert(x)) return scalarmat(powgi(gel(x,1), n), N);
+      if (pr_is_inert(x)) return scalarmat(powii(gel(x,1), n), N);
       x = idealpowprime(nf, x, n, &d);
       x = idealhnf_two(nf,x);
       return d? RgM_Rg_div(x, d): x;
@@ -1498,13 +1498,13 @@ idealpow_aux(GEN nf, GEN x, long tx, GEN n)
       alpha = nfpow(nf,alpha,n1);
       m = zk_scalar_or_multable(nf, alpha);
       if (typ(m) == t_INT) {
-        x = gcdii(m, powgi(a,n1));
+        x = gcdii(m, powii(a,n1));
         if (s<0) x = ginv(x);
         if (cx) x = gmul(x, powgi(cx,n));
         x = scalarmat(x, N);
       }
       else {
-        x = ZM_hnfmodid(m, powgi(a,n1));
+        x = ZM_hnfmodid(m, powii(a,n1));
         if (cx) cx = powgi(cx,n);
         if (s<0) {
           GEN xZ = gcoeff(x,1,1);

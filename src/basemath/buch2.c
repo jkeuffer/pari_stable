@@ -877,7 +877,7 @@ get_norm_fact_primes(GEN G, GEN E, GEN C)
     if (!s) continue;
 
     P = gel(G,i); p = pr_get_p(P);
-    N = mulii(N, powgi(p, mulii(gel(P,4), ex)));
+    N = mulii(N, powii(p, mulii(gel(P,4), ex)));
   }
   if (C) N = mulii(N, pr_norm(C));
   return N;
@@ -894,8 +894,8 @@ get_norm_fact(GEN gen, GEN ex, GEN *pd)
     if (signe(ex[i]))
     {
       I = gel(gen,i); e = gel(ex,i); n = ZM_det_triangular(I);
-      ne = powgi(n,e);
-      de = equalii(n, gcoeff(I,1,1))? ne: powgi(gcoeff(I,1,1), e);
+      ne = powii(n,e);
+      de = equalii(n, gcoeff(I,1,1))? ne: powii(gcoeff(I,1,1), e);
       N = mulii(N, ne);
       d = mulii(d, de);
     }

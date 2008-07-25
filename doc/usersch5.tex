@@ -311,9 +311,10 @@ overflow check.
 of the \typ{INT}, hence there is no overflow check for the effective length.
 
 \subsec{Set type-dependent information}.
-Use these macros with extreme care since usually the corresponding
-information is set otherwise, and the components and further codeword fields
-(which are left unchanged) may not be compatible with the new information.
+Use these functions and macros with extreme care since usually the
+corresponding information is set otherwise, and the components and further
+codeword fields (which are left unchanged) may not be compatible with the new
+information.
 
 \fun{void}{settyp}{GEN x, long s} sets the type number of~\kbd{x} to~\kbd{s}.
 
@@ -334,6 +335,10 @@ or~1.
 \fun{void}{togglesign_safe}{GEN *x} sets the $s$ sign of~\kbd{*x} to $-s$, in
 place, unless \kbd{*x} is one of the integer universal constants in which case
 replace \kbd{*x} by its negation (e.g.~replace \kbd{gen\_1} by \kbd{gen\_m1}).
+
+\fun{void}{normalize_frac}{GEN z} assuming $z$ is of the form \kbd{mkfrac(a,b)}
+with $b\neq 0$, make sure that $b > 0$ by changing the sign of $a$ in place if
+needed (use \kbd{togglesign}).
 
 \fun{void}{setexpo}{GEN x, long s} sets the binary exponent of the
 \typ{REAL}~\kbd{x} to \kbd{s}. The value \kbd{s} must be a 24-bit signed
@@ -2329,12 +2334,15 @@ where $x_1$, $x_2$ are the two halves of $x$.
 $(x,y)$ at the prime $p$ (\kbd{NULL} for the place at infinity); $x$ and $y$
 are \typ{INT}s.
 
-\fun{GEN}{powuu}{ulong n, ulong k}, returns $n^k$.
+\fun{GEN}{powii}{GEN x, GEN n}, assumes $x$ and $n$ are \typ{INT}s and
+returns $x^n$.
 
-\fun{GEN}{powiu}{GEN n, ulong k}, assumes $n$ is a \typ{INT} and returns $n^k$.
+\fun{GEN}{powuu}{ulong x, ulong n}, returns $x^n$.
 
-\fun{ulong}{upowuu}{ulong n, ulong k}, returns $n^k$ modulo $2^\B$. This is
-meant to be used for tiny $k$, where in fact $n^k$ fits into an \kbd{ulong}.
+\fun{GEN}{powiu}{GEN x, ulong n}, assumes $x$ is a \typ{INT} and returns $x^n$.
+
+\fun{ulong}{upowuu}{ulong x, ulong n}, returns $x^n$ modulo $2^\B$. This is
+meant to be used for tiny $n$, where in fact $x^n$ fits into an \kbd{ulong}.
 
 \vfill\eject
 

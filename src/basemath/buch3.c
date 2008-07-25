@@ -1540,7 +1540,7 @@ Discrayrel(GEN bnr, GEN H0, long flag)
   P     = S.P;
   e     = S.e; l = lg(e);
   dlk = flrel? idealpow(nf,ideal,clhray)
-	     : powgi(ZM_det_triangular(ideal),clhray);
+	     : powii(ZM_det_triangular(ideal),clhray);
   for (k = 1; k < l; k++)
   {
     GEN pr = gel(P,k), sum = gen_0;
@@ -1555,7 +1555,7 @@ Discrayrel(GEN bnr, GEN H0, long flag)
       sum = addii(sum, clhss);
     }
     dlk = flrel? idealdivpowprime(nf, dlk, pr, sum)
-	       : diviiexact(dlk, powgi(pr_norm(pr),sum));
+	       : diviiexact(dlk, powii(pr_norm(pr),sum));
   }
   l = lg(archp); nz = nf_get_r1(nf) - (l-1);
   for (k = 1; k < l; k++)

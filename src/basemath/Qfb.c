@@ -316,8 +316,8 @@ static GEN
 invraw(GEN x)
 {
   GEN y = gcopy(x);
-  if (typ(y) == t_QFR) togglesign(y[4]);
-  togglesign(y[2]); return y;
+  if (typ(y) == t_QFR) togglesign(gel(y,4));
+  togglesign(gel(y,2)); return y;
 }
 GEN
 powrealraw(GEN x, long n)
@@ -511,7 +511,7 @@ nupow(GEN x, GEN n)
   y = leftright_pow(x, n, (void*)l, &mul_nudupl, &mul_nucomp);
   if (signe(n) < 0
   && !absi_equal(gel(y,1),gel(y,2))
-  && !absi_equal(gel(y,1),gel(y,3))) togglesign(y[2]);
+  && !absi_equal(gel(y,1),gel(y,3))) togglesign(gel(y,2));
   return gerepileupto(av, y);
 }
 

@@ -666,7 +666,7 @@ BPSW_isprime(GEN N)
   if (BPSW_isprime_small(N)) return 1;
   N_1 = subis(N,1); fa = Z_factor_limit(N_1, 1<<19);
   l = lg(gel(fa,1))-1; p = gcoeff(fa,l,1);
-  F = diviiexact(N_1,  powgi(p, gcoeff(fa,l,2)));
+  F = diviiexact(N_1,  powii(p, gcoeff(fa,l,2)));
   P = gel(fa,1);
   /* N-1 = F U, F factored, U possibly composite */
   if (cmpii(gpowgs(F, 3), N) >= 0) /* half-smooth, F >= N^(1/3) */

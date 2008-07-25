@@ -1,3 +1,8 @@
+/*******************************************************************/
+/*                                                                 */
+/*                          CONSTRUCTORS                           */
+/*                                                                 */
+/*******************************************************************/
 INLINE GEN
 mkintmod(GEN x, GEN y) { GEN v = cgetg(3, t_INTMOD);
   gel(v,1) = y; gel(v,2) = x; return v; }
@@ -25,8 +30,7 @@ mkcomplex(GEN x, GEN y) { GEN v = cgetg(3, t_COMPLEX);
 INLINE GEN
 mkquad(GEN n, GEN x, GEN y) { GEN v = cgetg(4, t_QUAD);
   gel(v,1) = n; gel(v,2) = x; gel(v,3) = y; return v; }
-INLINE GEN
-mkvec(GEN x) { GEN v = cgetg(2, t_VEC); gel(v,1) = x; return v; }
+/* vecsmall */
 INLINE GEN
 mkvecsmall(long x) { GEN v = cgetg(2, t_VECSMALL); v[1] = x; return v; }
 INLINE GEN
@@ -38,6 +42,9 @@ mkvecsmall3(long x,long y,long z) { GEN v = cgetg(4, t_VECSMALL);
 INLINE GEN
 mkvecsmall4(long x,long y,long z,long t) { GEN v = cgetg(5, t_VECSMALL);
   v[1]=x; v[2]=y; v[3]=z; v[4]=t; return v; }
+/* vec */
+INLINE GEN
+mkvec(GEN x) { GEN v = cgetg(2, t_VEC); gel(v,1) = x; return v; }
 INLINE GEN
 mkvec2(GEN x, GEN y) {
   GEN v = cgetg(3,t_VEC); gel(v,1) = x; gel(v,2) = y; return v; }
@@ -67,6 +74,7 @@ mkveccopy(GEN x) { GEN v = cgetg(2, t_VEC); gel(v,1) = gcopy(x); return v; }
 INLINE GEN
 mkvec2copy(GEN x, GEN y) {
   GEN v = cgetg(3,t_VEC); gel(v,1) = gcopy(x); gel(v,2) = gcopy(y); return v; }
+/* col */
 INLINE GEN
 mkcol(GEN x) { GEN v = cgetg(2, t_COL); gel(v,1) = x; return v; }
 INLINE GEN
@@ -74,12 +82,14 @@ mkcol2(GEN x, GEN y) {
   GEN v = cgetg(3,t_COL); gel(v,1) = x; gel(v,2) = y; return v; }
 INLINE GEN
 mkcolcopy(GEN x) { GEN v = cgetg(2, t_COL); gel(v,1) = gcopy(x); return v; }
+/* mat */
 INLINE GEN
 mkmat(GEN x) { GEN v = cgetg(2, t_MAT); gel(v,1) = x; return v; }
 INLINE GEN
 mkmat2(GEN x, GEN y) { GEN v=cgetg(3,t_MAT); gel(v,1)=x; gel(v,2)=y; return v; }
 INLINE GEN
 mkmatcopy(GEN x) { GEN v = cgetg(2, t_MAT); gel(v,1) = gcopy(x); return v; }
+/* pol */
 INLINE GEN
 pol_x(long v) {
   GEN p = cgetg(4, t_POL);
@@ -193,7 +203,6 @@ zero_Flm(long m, long n)
   long i; for (i=1; i<=n; i++) gel(y,i) = v;
   return y;
 }
-
 /* matrix(m, n) */
 INLINE GEN
 zeromatcopy(long m, long n)
@@ -202,6 +211,7 @@ zeromatcopy(long m, long n)
   long i; for (i=1; i<=n; i++) gel(y,i) = zerocol(m);
   return y;
 }
+
 /* i-th vector in the standard basis */
 INLINE GEN
 col_ei(long n, long i) { GEN e = zerocol(n); gel(e,i) = gen_1; return e; }
@@ -210,11 +220,11 @@ vec_ei(long n, long i) { GEN e = zerovec(n); gel(e,i) = gen_1; return e; }
 INLINE GEN
 vecsmall_ei(long n, long i) { GEN e = const_vecsmall(n,0); e[i] = 1; return e; }
 
-INLINE GEN
-constant_term(GEN x) { return signe(x)? gel(x,2): gen_0; }
-INLINE GEN
-leading_term(GEN x) { return lg(x) == 2? gen_0: gel(x,lg(x)-1); }
-
+/*******************************************************************/
+/*                                                                 */
+/*                    CONVERSION / ASSIGNMENT                      */
+/*                                                                 */
+/*******************************************************************/
 INLINE GEN gtofp(GEN z, long prec);
 INLINE GEN
 ctofp(GEN x, long prec) { GEN z = cgetg(3,t_COMPLEX);
@@ -278,48 +288,6 @@ affc_fixlg(GEN x, GEN res)
   return res;
 }
 
-/* negate in place, except universal constants */
-INLINE void
-togglesign_safe(GEN *px)
-{
-  if      (*px == gen_1)  *px = gen_m1;
-  else if (*px == gen_m1) *px = gen_1;
-  else if (*px == gen_2)  *px = gen_m2;
-  else if (*px == gen_m2) *px = gen_2;
-  else togglesign(*px);
-}
-
-/*******************************************************************/
-/*                                                                 */
-/*                    ALGEBRAIC NUMBER THEORY                      */
-/*                                                                 */
-/*******************************************************************/
-INLINE GEN pr_get_p(GEN pr)  { return gel(pr,1); }
-INLINE GEN pr_get_gen(GEN pr){ return gel(pr,2); }
-/* .[2] instead of itos works: e and f are small positive integers */
-INLINE long pr_get_e(GEN pr) { return gel(pr,3)[2]; }
-INLINE long pr_get_f(GEN pr) { return gel(pr,4)[2]; }
-INLINE GEN pr_get_tau(GEN pr){ return gel(pr,5); }
-INLINE int
-pr_is_inert(GEN P) { return pr_get_f(P) == lg(pr_get_gen(P))-1; }
-INLINE GEN
-pr_norm(GEN pr) { return powiu(pr_get_p(pr), pr_get_f(pr)); }
-
-/* assume nf a genuine nf */
-INLINE long
-nf_get_degree(GEN nf) { return degpol(gel(nf,1)); }
-INLINE long
-nf_get_r1(GEN nf) { GEN x = gel(nf,2); return itou(gel(x,1)); }
-INLINE long
-nf_get_r2(GEN nf) { GEN x = gel(nf,2); return itou(gel(x,2)); }
-INLINE void
-nf_get_sign(GEN nf, long *r1, long *r2)
-{
-  GEN x = gel(nf,2);
-  *r1 = itou(gel(x,1));
-  *r2 = itou(gel(x,2));
-}
-
 /*******************************************************************/
 /*                                                                 */
 /*                          GEN SUBTYPES                           */
@@ -351,6 +319,11 @@ is_vec_t(long t) { return (t == t_VEC || t == t_COL); }
 /*                                                                 */
 /*******************************************************************/
 /* POLYNOMIALS */
+INLINE GEN
+constant_term(GEN x) { return signe(x)? gel(x,2): gen_0; }
+INLINE GEN
+leading_term(GEN x) { return lg(x) == 2? gen_0: gel(x,lg(x)-1); }
+
 INLINE GEN
 RgX_div(GEN x, GEN y) { return RgX_divrem(x,y,NULL); }
 INLINE GEN
@@ -470,3 +443,74 @@ INLINE GEN
 gmulgs(GEN y, long s) { return gmulsg(s,y); }
 INLINE GEN
 gsubgs(GEN y, long s) { return gaddgs(y, -s); }
+
+/* negate in place */
+INLINE void
+togglesign(GEN x)
+{
+  if (x[1] & SIGNBITS) { x[1] ^= HIGHBIT; }
+}
+/* negate in place, except universal constants */
+INLINE void
+togglesign_safe(GEN *px)
+{
+  if      (*px == gen_1)  *px = gen_m1;
+  else if (*px == gen_m1) *px = gen_1;
+  else if (*px == gen_2)  *px = gen_m2;
+  else if (*px == gen_m2) *px = gen_2;
+  else togglesign(*px);
+}
+
+INLINE void
+normalize_frac(GEN z) {
+  if (signe(z[2]) < 0) { togglesign(gel(z,1)); setsigne(gel(z,2),1); }
+}
+
+
+INLINE GEN
+powii(GEN x, GEN n)
+{
+  long ln = lgefint(n);
+  if (ln == 3) {
+    GEN z;
+    if (signe(n) > 0) return powiu(x, n[2]);
+    z = cgetg(3, t_FRAC);
+    gel(z,1) = gen_1;
+    gel(z,2) = powiu(x, n[2]);
+    return z;
+  }
+  if (ln == 2) return gen_1; /* rare */
+  /* should never happen */
+  return powgi(x, n); /* overflow unless x = 0, 1, -1 */
+}
+/*******************************************************************/
+/*                                                                 */
+/*                    ALGEBRAIC NUMBER THEORY                      */
+/*                                                                 */
+/*******************************************************************/
+INLINE GEN pr_get_p(GEN pr)  { return gel(pr,1); }
+INLINE GEN pr_get_gen(GEN pr){ return gel(pr,2); }
+/* .[2] instead of itos works: e and f are small positive integers */
+INLINE long pr_get_e(GEN pr) { return gel(pr,3)[2]; }
+INLINE long pr_get_f(GEN pr) { return gel(pr,4)[2]; }
+INLINE GEN pr_get_tau(GEN pr){ return gel(pr,5); }
+INLINE int
+pr_is_inert(GEN P) { return pr_get_f(P) == lg(pr_get_gen(P))-1; }
+INLINE GEN
+pr_norm(GEN pr) { return powiu(pr_get_p(pr), pr_get_f(pr)); }
+
+/* assume nf a genuine nf */
+INLINE long
+nf_get_degree(GEN nf) { return degpol(gel(nf,1)); }
+INLINE long
+nf_get_r1(GEN nf) { GEN x = gel(nf,2); return itou(gel(x,1)); }
+INLINE long
+nf_get_r2(GEN nf) { GEN x = gel(nf,2); return itou(gel(x,2)); }
+INLINE void
+nf_get_sign(GEN nf, long *r1, long *r2)
+{
+  GEN x = gel(nf,2);
+  *r1 = itou(gel(x,1));
+  *r2 = itou(gel(x,2));
+}
+

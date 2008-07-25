@@ -2023,7 +2023,7 @@ ellglobalred(GEN E)
   for (k = 1; k < l; k++)
   {
     GEN p = gel(P,k), q = localred(e, p, 0), w = gel(q,3);
-    N = mulii(N, powgi(p, gel(q,1)));
+    N = mulii(N, powii(p, gel(q,1)));
     c = mulii(c, gel(q,4));
     if (!gcmp1(gel(w,1)))
       cumule(&v, &e, gel(w,1), gel(w,2), gel(w,3), gel(w,4));

@@ -700,7 +700,7 @@ ifac_break_limit(GEN n, GEN pairs/*unused*/, GEN here, GEN state)
     N = n;
   else
   {
-    GEN q = powgi(gel(here,0),gel(here,1)); /* primary factor found.*/
+    GEN q = powii(gel(here,0),gel(here,1)); /* primary factor found.*/
     if (DEBUGLEVEL>2) fprintferr("IFAC: Stop: Primary factor: %Ps\n",q);
     N = diviiexact(gel(state,1),q); /* divide unfactored part by q */
   }
