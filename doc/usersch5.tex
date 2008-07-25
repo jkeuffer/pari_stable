@@ -1650,102 +1650,6 @@ of the \typ{INT} or \typ{FRAC}~\kbd{x}.
 \fun{long}{factorial_lval}{ulong n, ulong p} returns $v_p(n!)$, assuming
 $p$ is prime.
 
-\subsec{Factorization}
-
-\fun{GEN}{Z_factor}{GEN n} factors the \typ{INT} \kbd{n}. The ``primes''
-in the factorization are actually strong pseudoprimes.
-
-\fun{int}{is_Z_factor}{GEN f} returns $1$ if $f$ looks like the factorization
-of a positive integer, and $0$ otherwise. Useful for sanity checks but not
-100\% foolproof. Specifically, this routine checks that $f$ is a two-column
-matrix all of whose entries are positive integers.
-
-\fun{long}{Z_issquarefree}{GEN x} returns $1$ if the \typ{INT} \kbd{n}
-is square-free, and $0$ otherwise.
-
-\fun{long}{Z_isfundamental}{GEN x} returns $1$ if the \typ{INT} \kbd{x}
-is a fundamental discriminant, and $0$ otherwise.
-
-\fun{long}{Z_issquare}{GEN n} returns $1$ if \typ{INT} \kbd{n} is
-a square, and $0$ otherwise. This is tested first modulo small prime
-powers, then \kbd{sqrtremi} is called.
-
-\fun{long}{Z_issquareall}{GEN n, GEN *sqrtn} as \kbd{Z\_issquare}. If
-\kbd{n} is indeed a square, set \kbd{sqrtn} to its integer square root.
-
-\fun{long}{Z_isanypower}{GEN x, GEN *ptn} returns the maximal $k\geq 2$  such
-that the \typ{INT} $x = n^k$ is a perfect power, or $0$ if no such $k$ exist;
-in particular \kbd{ispower(1)}, \kbd{ispower(0)}, \kbd{ispower(-1)} all
-return 0. If the return value $k$ is not $0$ (so that $x = n^k$) and
-\kbd{ptn} is not \kbd{NULL}, set \kbd{*ptn} to $n$.
-
-\fun{long}{uissquareall}{ulong n, ulong *sqrtn} as \kbd{Z\_issquareall},
-for an \kbd{ulong} operand \kbd{n}.
-
-\fun{GEN}{Z_factor_until}{GEN n, GEN lim} as \kbd{Z\_factor}, but stop the
-factorization process as soon as the unfactored part is smaller than \kbd{lim}.
-The resulting factorisation matrix only contains the factors found. No other
-assumptions can be made on the remaining factors.
-
-\fun{GEN}{Z_factor_limit}{GEN n, long lim} trial divide $x$ by all primes $p
-< \kbd{lim}$ in the precomputed list of prime numbers and return the
-corresponding factorization matrix. In this case, the last ``prime'' divisor
-in the first column of the factorization matrix may well be a proven
-composite.
-
-If \kbd{lim} is zero, the effect is the same as setting $\kbd{lim} =
-\kbd{maxprime()}$: use all precomputed primes.
-
-\fun{GEN}{boundfact}{GEN x, long lim} as \tet{Z_factor_limit}, applying to
-\typ{INT} or \typ{FRAC} inputs.
-
-\fun{GEN}{core}{GEN n} unique squarefree integer $d$ dividing $n$ such that
-$n/d$ is a square.
-
-\fun{GEN}{core2}{GEN n} return $[d,f]$ with $d$ squarefree and $n = df^2$.
-
-\fun{GEN}{corepartial}{GEN n, long lim} as \kbd{core}, using
-\kbd{boundfact(n,lim)} to partially factor \kbd{n}. The result is not
-necessarily squarefree, but $p^2 \mid n$ implies $p > \kbd{lim}$.
-
-\fun{GEN}{core2partial}{GEN n, long lim} as \kbd{core2}, using
-\kbd{boundfact(n,lim)} to partially factor \kbd{n}. The resulting $d$ is not
-necessarily squarefree, but $p^2 \mid n$ implies $p > \kbd{lim}$.
-
-\subsec{Primality and compositeness tests}
-
-\fun{int}{uisprime}{ulong p}, returns $1$ if \kbd{p} is a prime number and
-$0$ otherwise.
-
-\fun{int}{isprime}{GEN n}, returns $1$ if the \typ{INT} \kbd{n} is a
-(fully proven) prime number and $0$ otherwise.
-
-\fun{long}{isprimeAPRCL}{GEN n}, returns $1$ if the \typ{INT} \kbd{n} is a
-prime number and $0$ otherwise, using only the APRCL test --- not even trial
-division or compositeness tests. The workhorse \kbd{isprime} should be
-faster on average, especially if non-primes are included!
-
-\fun{long}{BPSW_psp}{GEN n}, returns $1$ if the \typ{INT} \kbd{n} is a
-Baillie-Pomerance-Selfridge-Wagstaff pseudoprime, and $0$ otherwise (proven
-composite).
-
-\fun{int}{BPSW_isprime}{GEN x} assuming $x$ is a BPSW-pseudoprime, rigorously
-prove its primality. The function \tet{isprime} is currently implemented
-as
-\bprog
- BPSW_psp(x) && BPSW_isprime(x)
-@eprog
-
-\fun{long}{millerrabin}{GEN n, long k} performs strong Rabin-Miller
-compositeness tests on the \typ{INT} $n$, for $k$ random bases. This function
-also caches square roots of $-1$ that are encountered during the successive
-tests and stops as soon as three distinct square roots have been produced; we
-have in principle factored $n$ at this point, but unfortunately, there is
-currently no way for the factoring machinery to become aware of it. (It is
-highly implausible that hard to find factors would be exhibited in this way,
-though.) This should be slower than \tet{BPSW_psp} for $k\geq 4$ and we would
-expect it to be less reliable.
-
 \subsec{Generic unary operators}. Let ``\op'' be a unary operation among
 
 \op=\key{neg}: negation ($-$\kbd{x}).
@@ -1957,31 +1861,6 @@ and $y$ as if their signs were \kbd{sx} and \kbd{sy}.
 \fun{GEN}{addsi_sign}{long x, GEN y, long sy} add $x$ and the \typ{INT} $y$
 as if its sign was \kbd{sy}.
 
-\subsec{Modulo to longs}. The following variants of \kbd{modii} do not
-clutter the stack:
-
-\fun{long}{smodis}{GEN x, long y} computes the true Euclidean
-remainder of the \typ{INT}~\kbd{x} by the \kbd{long}~\kbd{y}. This is the
-non-negative remainder, not the one whose sign is the sign of \kbd{x}
-as in the \kbd{div} functions.
-
-\fun{long}{smodsi}{long x, GEN y} computes the true Euclidean
-remainder of the \kbd{long}~\kbd{x} by a \typ{INT}~\kbd{y}.
-
-\fun{long}{smodss}{long x, long y} computes the true Euclidean
-remainder of the \kbd{long}~\kbd{x} by a \kbd{long}~\kbd{y}.
-
-\fun{ulong}{umodiu}{GEN x, ulong y} computes the true Euclidean
-remainder of the \typ{INT}~\kbd{x} by the \kbd{ulong}~\kbd{y}.
-
-\fun{ulong}{umodui}{ulong x, GEN y} computes the true Euclidean
-remainder of the \kbd{ulong}~\kbd{x} by the \typ{INT}~\kbd{|y|}.
-
-The routine \tet{smodsi} does not exist, since it would not always be
-defined: for a \emph{negative} \kbd{x}, its result \kbd{x + |y|} would
-in general not fit into a \kbd{long}. Use either \kbd{umodui} or
-\kbd{modsi}.
-
 \subsec{Exact division and divisibility}
 
 \fun{void}{diviiexact}{GEN x, GEN y} returns the Euclidean quotient
@@ -2009,6 +1888,28 @@ that case assign the quotient to \kbd{z}; otherwise they return 0. All
 \fun{int}{dvdiuz}{GEN x, ulong y, GEN z} if \kbd{y} divides \kbd{x}, assigns
 the quotient $|\kbd{x}|/\kbd{y}$ to \kbd{z} and returns 1 (true), otherwise
 returns 0 (false).
+
+\subsec{Division with integral operands and \typ{REAL} result}
+
+\fun{GEN}{rdivii}{GEN x, GEN y, long prec}, assuming $x$ and $y$
+are both of type \typ{INT}, return the quotient $x/y$ as a \typ{REAL} of
+precision \kbd{prec}.
+
+\fun{GEN}{rdiviiz}{GEN x, GEN y, GEN z}, assuming $x$ and $y$
+are both of type \typ{INT}, and $z$ is a \typ{REAL}, 
+assign the quotient $x/y$ to $z$.
+
+\fun{GEN}{rdivis}{GEN x, long y, long prec}, assuming \kbd{x}
+is of type \typ{INT}, return the quotient x/y as a \typ{REAL} of
+precision \kbd{prec}.
+
+\fun{GEN}{rdivsi}{long x, GEN y, long prec}, assuming \kbd{y}
+is of type \typ{INT}, return the quotient x/y as a \typ{REAL} of
+precision \kbd{prec}.
+
+\fun{GEN}{rdivss}{long x, long y, long prec}, return the quotient x/y as a
+\typ{REAL} of precision \kbd{prec}.
+
 
 \subsec{Division with remainder}. The following functions return two objects,
 unless specifically asked for only one of them~--- a quotient and a remainder.
@@ -2075,6 +1976,31 @@ non-negative remainder.
 \fun{GEN}{truedvmdis}{GEN x, long y, GEN *z}, as \kbd{dvmdis} but with a
 non-negative remainder.
 
+\subsec{Modulo to longs}. The following variants of \kbd{modii} do not
+clutter the stack:
+
+\fun{long}{smodis}{GEN x, long y} computes the true Euclidean
+remainder of the \typ{INT}~\kbd{x} by the \kbd{long}~\kbd{y}. This is the
+non-negative remainder, not the one whose sign is the sign of \kbd{x}
+as in the \kbd{div} functions.
+
+\fun{long}{smodsi}{long x, GEN y} computes the true Euclidean
+remainder of the \kbd{long}~\kbd{x} by a \typ{INT}~\kbd{y}.
+
+\fun{long}{smodss}{long x, long y} computes the true Euclidean
+remainder of the \kbd{long}~\kbd{x} by a \kbd{long}~\kbd{y}.
+
+\fun{ulong}{umodiu}{GEN x, ulong y} computes the true Euclidean
+remainder of the \typ{INT}~\kbd{x} by the \kbd{ulong}~\kbd{y}.
+
+\fun{ulong}{umodui}{ulong x, GEN y} computes the true Euclidean
+remainder of the \kbd{ulong}~\kbd{x} by the \typ{INT}~\kbd{|y|}.
+
+The routine \tet{smodsi} does not exist, since it would not always be
+defined: for a \emph{negative} \kbd{x}, its result \kbd{x + |y|} would
+in general not fit into a \kbd{long}. Use either \kbd{umodui} or
+\kbd{modsi}.
+
 \subsec{Square root and remainder}
 
 \fun{GEN}{sqrtremi}{GEN N, GEN *r}, returns the integer square root $S$ of
@@ -2092,47 +2018,144 @@ due to Paul Zimmermann (``Karatsuba Square Root'', INRIA Research Report 3805
 the non-negative \typ{INT}~\kbd{N} (rounded towards 0). This is identical
 to \kbd{sqrtremi(N, NULL)}.
 
-\subsec{Cached constants}
+\subsec{GCD, extended GCD and LCM}
 
-The cached constant is returned at its current precision, which may be larger
-than \kbd{prec}. One should always use the \kbd{mp\var{xxx}} variant:
-\kbd{mppi}, \kbd{mpeuler}, or \kbd{mplog2}.
+\fun{long}{cgcd}{long x, long y} returns the GCD of \kbd{x} and \kbd{y}.
 
-\fun{GEN}{consteuler}{long prec} precomputes Euler-Mascheroni's constant
-at precision \kbd{prec}.
+\fun{ulong}{ugcd}{ulong x, ulong y} returns the GCD of \kbd{x} and \kbd{y}.
 
-\fun{GEN}{constpi}{long prec} precomputes $\pi$ at precision \kbd{prec}.
+\fun{long}{clcm}{long x, long y} returns the LCM of \kbd{x} and \kbd{y},
+provided it fits into a \kbd{long}. Silently overflows otherwise.
 
-\fun{GEN}{constlog2}{long prec} precomputes $\log(2)$ at precision
-\kbd{prec}.
+\fun{GEN}{gcdii}{GEN x, GEN y}, returns the GCD of the \typ{INT}s \kbd{x} and
+\kbd{y}.
 
-\fun{void}{mpbern}{long n, long prec} precomputes the even \idx{Bernoulli}
-numbers $B_0,\dots,B_{2n-2}$ as \typ{REAL}s of precision \kbd{prec}.
+\fun{GEN}{lcmii}{GEN x, GEN y}, returns the LCM of the \typ{INT}s \kbd{x} and
+\kbd{y}.
 
-\fun{GEN}{bern}{long i} is a macro returning the \idx{Bernoulli} number
-$B_{2i}$ at precision \kbd{prec}, assuming that \kbd{mpbern(n, prec)} was
-called previously with $n > i$. The macro does not check whether
-$0 \leq i < n$. If cached Bernoullis were initialized to a larger accuracy
-than desired, use e.g.~\kbd{rtor(bern(i), prec)}.
+\fun{GEN}{bezout}{GEN a,GEN b, GEN *u,GEN *v}, returns the GCD $d$ of
+\typ{INT}s \kbd{a} and \kbd{b} and sets \kbd{u}, \kbd{v} to the Bezout
+coefficients such that $\kbd{au} + \kbd{bv} = d$.
 
-The following functions use cached data if \kbd{prec} is not too large;
-otherwise the newly computed data replaces the old cache.
+\fun{long}{cbezout}{long a,long b, long *u,long *v}, returns the GCD
+$d$ of \kbd{a} and \kbd{b} and sets \kbd{u}, \kbd{v} to the Bezout coefficients
+such that $\kbd{au} + \kbd{bv} = d$.
 
-\fun{GEN}{mppi}{long prec} returns $\pi$ at precision \kbd{prec}.
+\subsec{Factorization}
 
-\fun{GEN}{Pi2n}{long n, long prec} returns $2^n\pi$ at precision \kbd{prec}.
+\fun{GEN}{Z_factor}{GEN n} factors the \typ{INT} \kbd{n}. The ``primes''
+in the factorization are actually strong pseudoprimes.
 
-\fun{GEN}{PiI2}{long n, long prec} returns the complex number $2\pi i$ at
-precision \kbd{prec}.
+\fun{int}{is_Z_factor}{GEN f} returns $1$ if $f$ looks like the factorization
+of a positive integer, and $0$ otherwise. Useful for sanity checks but not
+100\% foolproof. Specifically, this routine checks that $f$ is a two-column
+matrix all of whose entries are positive integers.
 
-\fun{GEN}{PiI2n}{long n, long prec} returns the complex number $2^n\pi i$ at
-precision \kbd{prec}.
+\fun{long}{Z_issquarefree}{GEN x} returns $1$ if the \typ{INT} \kbd{n}
+is square-free, and $0$ otherwise.
 
-\fun{GEN}{mpeuler}{long prec} returns Euler-Mascheroni's constant at
-precision \kbd{prec}.
+\fun{long}{Z_isfundamental}{GEN x} returns $1$ if the \typ{INT} \kbd{x}
+is a fundamental discriminant, and $0$ otherwise.
 
-\fun{GEN}{mplog2}{long prec} returns $\log 2$ at precision \kbd{prec}.
+\fun{long}{Z_issquare}{GEN n} returns $1$ if \typ{INT} \kbd{n} is
+a square, and $0$ otherwise. This is tested first modulo small prime
+powers, then \kbd{sqrtremi} is called.
 
+\fun{long}{Z_issquareall}{GEN n, GEN *sqrtn} as \kbd{Z\_issquare}. If
+\kbd{n} is indeed a square, set \kbd{sqrtn} to its integer square root.
+
+\fun{long}{Z_isanypower}{GEN x, GEN *ptn} returns the maximal $k\geq 2$  such
+that the \typ{INT} $x = n^k$ is a perfect power, or $0$ if no such $k$ exist;
+in particular \kbd{ispower(1)}, \kbd{ispower(0)}, \kbd{ispower(-1)} all
+return 0. If the return value $k$ is not $0$ (so that $x = n^k$) and
+\kbd{ptn} is not \kbd{NULL}, set \kbd{*ptn} to $n$.
+
+\fun{long}{uissquareall}{ulong n, ulong *sqrtn} as \kbd{Z\_issquareall},
+for an \kbd{ulong} operand \kbd{n}.
+
+\fun{GEN}{factoru}{ulong n}, returns the factorization of $n$. The result
+is a $2$-component vector $[P,E]$, where $P$ and $E$ are \typ{VECSMALL}
+containing the prime divisors of $n$, and the $v_p(n)$.
+
+\fun{GEN}{Z_factor_until}{GEN n, GEN lim} as \kbd{Z\_factor}, but stop the
+factorization process as soon as the unfactored part is smaller than \kbd{lim}.
+The resulting factorisation matrix only contains the factors found. No other
+assumptions can be made on the remaining factors.
+
+\fun{GEN}{Z_factor_limit}{GEN n, long lim} trial divide $x$ by all primes $p
+< \kbd{lim}$ in the precomputed list of prime numbers and return the
+corresponding factorization matrix. In this case, the last ``prime'' divisor
+in the first column of the factorization matrix may well be a proven
+composite.
+
+If \kbd{lim} is zero, the effect is the same as setting $\kbd{lim} =
+\kbd{maxprime()}$: use all precomputed primes.
+
+\fun{GEN}{boundfact}{GEN x, long lim} as \tet{Z_factor_limit}, applying to
+\typ{INT} or \typ{FRAC} inputs.
+
+\fun{GEN}{core}{GEN n} unique squarefree integer $d$ dividing $n$ such that
+$n/d$ is a square.
+
+\fun{GEN}{core2}{GEN n} return $[d,f]$ with $d$ squarefree and $n = df^2$.
+
+\fun{GEN}{corepartial}{GEN n, long lim} as \kbd{core}, using
+\kbd{boundfact(n,lim)} to partially factor \kbd{n}. The result is not
+necessarily squarefree, but $p^2 \mid n$ implies $p > \kbd{lim}$.
+
+\fun{GEN}{core2partial}{GEN n, long lim} as \kbd{core2}, using
+\kbd{boundfact(n,lim)} to partially factor \kbd{n}. The resulting $d$ is not
+necessarily squarefree, but $p^2 \mid n$ implies $p > \kbd{lim}$.
+
+\fun{GEN}{factoru_pow}{ulong n}, returns the factorization of $n$. The result
+is a $3$-component vector $[P,E,C]$, where $P$, $E$ and $C$ are
+\typ{VECSMALL} containing the prime divisors of $n$, the $v_p(n)$
+and the $p^{v_p(n)}$.
+
+\fun{GEN}{factor_pn_1}{GEN p, long n} returns the factorization of $p^n-1$,
+where $p$ is prime and $n$ is a positive integer.
+
+\fun{GEN}{factor_Aurifeuille_prime}{GEN p, long n} an Aurifeuillian factor
+of $\phi_n(p)$, assuming $p$ prime and an Aurifeuillian factor exists
+($p \zeta_n$ is a square in $\Q(\zeta_n)$).
+
+\fun{GEN}{factor_Aurifeuille}{GEN a, long d} an Aurifeuillian factor of
+$\phi_n(a)$, assuming $a$ is a non-zero integer and $n > 2$. Returns $1$
+if no Aurifeuillian factor exists.
+
+\subsec{Primality and compositeness tests}
+
+\fun{int}{uisprime}{ulong p}, returns $1$ if \kbd{p} is a prime number and
+$0$ otherwise.
+
+\fun{int}{isprime}{GEN n}, returns $1$ if the \typ{INT} \kbd{n} is a
+(fully proven) prime number and $0$ otherwise.
+
+\fun{long}{isprimeAPRCL}{GEN n}, returns $1$ if the \typ{INT} \kbd{n} is a
+prime number and $0$ otherwise, using only the APRCL test --- not even trial
+division or compositeness tests. The workhorse \kbd{isprime} should be
+faster on average, especially if non-primes are included!
+
+\fun{long}{BPSW_psp}{GEN n}, returns $1$ if the \typ{INT} \kbd{n} is a
+Baillie-Pomerance-Selfridge-Wagstaff pseudoprime, and $0$ otherwise (proven
+composite).
+
+\fun{int}{BPSW_isprime}{GEN x} assuming $x$ is a BPSW-pseudoprime, rigorously
+prove its primality. The function \tet{isprime} is currently implemented
+as
+\bprog
+ BPSW_psp(x) && BPSW_isprime(x)
+@eprog
+
+\fun{long}{millerrabin}{GEN n, long k} performs strong Rabin-Miller
+compositeness tests on the \typ{INT} $n$, for $k$ random bases. This function
+also caches square roots of $-1$ that are encountered during the successive
+tests and stops as soon as three distinct square roots have been produced; we
+have in principle factored $n$ at this point, but unfortunately, there is
+currently no way for the factoring machinery to become aware of it. (It is
+highly implausible that hard to find factors would be exhibited in this way,
+though.) This should be slower than \tet{BPSW_psp} for $k\geq 4$ and we would
+expect it to be less reliable.
 
 \subsec{Pseudo-random integers}
 These routine return pseudo-random integers uniformly distributed in some
@@ -2297,51 +2320,10 @@ where $x_1$, $x_2$ are the two halves of $x$.
 
 \fun{void}{addumului}{ulong a, ulong b, GEN x} return $a + b|X|$.
 
-\fun{long}{cgcd}{long x, long y} returns the GCD of \kbd{x} and \kbd{y}.
-
-\fun{ulong}{ugcd}{ulong x, ulong y} returns the GCD of \kbd{x} and \kbd{y}.
-
-\fun{long}{clcm}{long x, long y} returns the LCM of \kbd{x} and \kbd{y},
-provided it fits into a \kbd{long}. Silently overflows otherwise.
-
-\fun{long}{cbezout}{long a,long b, long *u,long *v}, returns the GCD
-$d$ of \kbd{a} and \kbd{b} and sets \kbd{u}, \kbd{v} to the Bezout coefficients
-such that $\kbd{au} + \kbd{bv} = d$.
-
-\fun{GEN}{bezout}{GEN a,GEN b, GEN *u,GEN *v}, returns the GCD $d$ of
-\typ{INT}s \kbd{a} and \kbd{b} and sets \kbd{u}, \kbd{v} to the Bezout
-coefficients such that $\kbd{au} + \kbd{bv} = d$.
-
-\fun{GEN}{factoru}{ulong n}, returns the factorization of $n$. The result
-is a $2$-component vector $[P,E]$, where $P$ and $E$ are \typ{VECSMALL}
-containing the prime divisors of $n$, and the $v_p(n)$.
-
 \fun{ulong}{eulerphiu}{ulong n}, Euler's totient function of $n$.
 
 \fun{GEN}{divisorsu}{ulong n}, returns the divisors of $n$ in a
 \typ{VECSMALL}, sorted by increasing order.
-
-\fun{GEN}{factoru_pow}{ulong n}, returns the factorization of $n$. The result
-is a $3$-component vector $[P,E,C]$, where $P$, $E$ and $C$ are
-\typ{VECSMALL} containing the prime divisors of $n$, the $v_p(n)$
-and the $p^{v_p(n)}$.
-
-\fun{GEN}{factor_pn_1}{GEN p, long n} returns the factorization of $p^n-1$,
-where $p$ is prime and $n$ is a positive integer.
-
-\fun{GEN}{factor_Aurifeuille_prime}{GEN p, long n} an Aurifeuillian factor
-of $\phi_n(p)$, assuming $p$ prime and an Aurifeuillian factor exists
-($p \zeta_n$ is a square in $\Q(\zeta_n)$).
-
-\fun{GEN}{factor_Aurifeuille}{GEN a, long d} an Aurifeuillian factor of
-$\phi_n(a)$, assuming $a$ is a non-zero integer and $n > 2$. Returns $1$
-if no Aurifeuillian factor exists.
-
-\fun{GEN}{gcdii}{GEN x, GEN y}, returns the GCD of the \typ{INT}s \kbd{x} and
-\kbd{y}.
-
-\fun{GEN}{lcmii}{GEN x, GEN y}, returns the LCM of the \typ{INT}s \kbd{x} and
-\kbd{y}.
 
 \fun{GEN}{hilbertii}{GEN x, GEN y, GEN p}, returns the Hilbert symbol
 $(x,y)$ at the prime $p$ (\kbd{NULL} for the place at infinity); $x$ and $y$
@@ -2353,25 +2335,6 @@ are \typ{INT}s.
 
 \fun{ulong}{upowuu}{ulong n, ulong k}, returns $n^k$ modulo $2^\B$. This is
 meant to be used for tiny $k$, where in fact $n^k$ fits into an \kbd{ulong}.
-
-\fun{GEN}{rdivii}{GEN x, GEN y, long prec}, assuming $x$ and $y$
-are both of type \typ{INT}, return the quotient $x/y$ as a \typ{REAL} of
-precision \kbd{prec}.
-
-\fun{GEN}{rdiviiz}{GEN x, GEN y, GEN z}, assuming $x$ and $y$
-are both of type \typ{INT}, and $z$ is a \typ{REAL}, 
-assign the quotient $x/y$ to $z$.
-
-\fun{GEN}{rdivis}{GEN x, long y, long prec}, assuming \kbd{x}
-is of type \typ{INT}, return the quotient x/y as a \typ{REAL} of
-precision \kbd{prec}.
-
-\fun{GEN}{rdivsi}{long x, GEN y, long prec}, assuming \kbd{y}
-is of type \typ{INT}, return the quotient x/y as a \typ{REAL} of
-precision \kbd{prec}.
-
-\fun{GEN}{rdivss}{long x, long y, long prec}, return the quotient x/y as a
-\typ{REAL} of precision \kbd{prec}.
 
 \vfill\eject
 
@@ -5668,6 +5631,8 @@ decimal digits, not in words as used everywhere else):
 \kbd{realprecision} to $n$, which is returned. As a side effect, set
 \kbd{prec} to the corresponding number of words \kbd{ndec2prec(n)}.
 
+\subsec{Transcendental functions with \typ{REAL} arguments}
+
 In the following routines, $x$ is assumed to be a \typ{REAL} and the result
 is a \typ{REAL} with the largest accuracy which can be deduced from the input:
 The naming scheme is inconsistant here, since we somethimes use the
@@ -5677,7 +5642,6 @@ prefix \kbd{mp} even though \typ{INT} inputs are forbidden:
 
 \fun{GEN}{sqrtnr}{GEN x, long n} returns the $n$-th root of $x$, assuming
 $n\geq 1$.
-
 
 \fun{GEN}{mpcos[z]}{GEN x[, GEN z]} returns $\cos(x)$.
 
@@ -5714,6 +5678,49 @@ to the current accuracy (its sign is $0$).
 with \typ{REAL} components. Assign $x$ to \kbd{res}, first shortening
 the components of \kbd{res} if needed (in a \kbd{gerepile}-safe way). Further
 convert \kbd{res} to a \typ{REAL} if $x$ is a \typ{REAL}.
+
+\subsec{Cached constants}
+
+The cached constant is returned at its current precision, which may be larger
+than \kbd{prec}. One should always use the \kbd{mp\var{xxx}} variant:
+\kbd{mppi}, \kbd{mpeuler}, or \kbd{mplog2}.
+
+\fun{GEN}{consteuler}{long prec} precomputes Euler-Mascheroni's constant
+at precision \kbd{prec}.
+
+\fun{GEN}{constpi}{long prec} precomputes $\pi$ at precision \kbd{prec}.
+
+\fun{GEN}{constlog2}{long prec} precomputes $\log(2)$ at precision
+\kbd{prec}.
+
+\fun{void}{mpbern}{long n, long prec} precomputes the even \idx{Bernoulli}
+numbers $B_0,\dots,B_{2n-2}$ as \typ{REAL}s of precision \kbd{prec}.
+
+\fun{GEN}{bern}{long i} is a macro returning the \idx{Bernoulli} number
+$B_{2i}$ at precision \kbd{prec}, assuming that \kbd{mpbern(n, prec)} was
+called previously with $n > i$. The macro does not check whether
+$0 \leq i < n$. If cached Bernoullis were initialized to a larger accuracy
+than desired, use e.g.~\kbd{rtor(bern(i), prec)}.
+
+The following functions use cached data if \kbd{prec} is not too large;
+otherwise the newly computed data replaces the old cache.
+
+\fun{GEN}{mppi}{long prec} returns $\pi$ at precision \kbd{prec}.
+
+\fun{GEN}{Pi2n}{long n, long prec} returns $2^n\pi$ at precision \kbd{prec}.
+
+\fun{GEN}{PiI2}{long n, long prec} returns the complex number $2\pi i$ at
+precision \kbd{prec}.
+
+\fun{GEN}{PiI2n}{long n, long prec} returns the complex number $2^n\pi i$ at
+precision \kbd{prec}.
+
+\fun{GEN}{mpeuler}{long prec} returns Euler-Mascheroni's constant at
+precision \kbd{prec}.
+
+\fun{GEN}{mplog2}{long prec} returns $\log 2$ at precision \kbd{prec}.
+
+
 
 \section{Permutations }
 
