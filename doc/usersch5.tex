@@ -1844,6 +1844,9 @@ the real number equal to $x$. This is a special case of \kbd{gexpo}.
 \fun{GEN}{truedivis}{GEN x, long y} returns the true Euclidean quotient
 (with non-negative remainder less than $|y|$).
 
+\fun{GEN}{truedivsi}{long x, GEN y} returns the true Euclidean quotient
+(with non-negative remainder less than $|y|$).
+
 \fun{GEN}{centermodii}{GEN x, GEN y, GEN y2}, given
 \typ{INT}s \kbd{x}, \kbd{y}, returns $z$ congruent to \kbd{x} modulo \kbd{y},
 such that $-\kbd{y}/2 \leq z < \kbd{y}/2$. Assumes that \kbd{y2 = shifti(y,
