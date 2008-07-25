@@ -427,7 +427,7 @@ computeth2(GEN om, GEN la, long prec)
 
   p1 = gsub(ellphist(om,res,la,prec), ellphist(om,res,gen_1,prec));
   p2 = imag_i(p1);
-  if (gexpo(real_i(p1))>20 || gexpo(p2)> bit_accuracy(min(prec,lg(p2)))-10)
+  if (gexpo(real_i(p1))>20 || gexpo(p2)> bit_accuracy(minss(prec,lg(p2)))-10)
     return NULL;
   return gexp(p1,prec);
 }
@@ -1501,7 +1501,7 @@ Buchquad(GEN D, double cbach, double cbach2, long prec)
     }
     BQ.PRECREG = 0;
   } else {
-    BQ.PRECREG = max(prec+1, MEDDEFAULTPREC + 2*(expi(BQ.Disc) / BITS_IN_LONG));
+    BQ.PRECREG = maxss(prec+1, MEDDEFAULTPREC + 2*(expi(BQ.Disc)/BITS_IN_LONG));
   }
   if (DEBUGLEVEL) (void)timer2();
   BQ.primfact   = new_chunk(100);
@@ -1539,7 +1539,7 @@ START:
   nreldep = nrelsup = 0;
   LIMC = (ulong)(cbach*LOGD2);
   if (LIMC < cp) { LIMC = cp; cbach = (double)LIMC / LOGD2; }
-  LIMC2 = (ulong)(max(cbach,cbach2)*LOGD2);
+  LIMC2 = (ulong)(maxss(cbach,cbach2)*LOGD2);
   if (LIMC2 < LIMC) LIMC2 = LIMC;
   if (BQ.PRECREG)
   {
@@ -1620,7 +1620,7 @@ MORE:
 
     case fupb_RELAT:
       if (++nrelsup <= 7 || cbach > 1) {
-	need = min(BQ.KC, nrelsup);
+	need = minss(BQ.KC, nrelsup);
 	if (cbach > 1 && nsubFB < 3 && lg(BQ.vperm) > 3) nsubFB++;
 	goto MORE;
       }

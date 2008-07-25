@@ -78,7 +78,7 @@ calc_block(blockdata *B, GEN Z, GEN Y, GEN SB)
       fprintferr("Y = %Ps\n",Y);
     }
   }
-  lnon = min(BIL, r);
+  lnon = minss(BIL, r);
   e    = new_chunk(BIL);
   n    = new_chunk(r);
   non  = new_chunk(lnon);

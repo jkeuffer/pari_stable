@@ -233,6 +233,20 @@ mpneg(GEN x) { GEN y=mpcopy(x); togglesign(y); return y; }
 INLINE GEN negi(GEN x) { return mpneg(x); }
 INLINE GEN negr(GEN x) { return mpneg(x); }
 
+/* negate in place */
+INLINE void
+togglesign(GEN x)
+{ if (x[1] & SIGNBITS) { x[1] ^= HIGHBIT; } }
+/* negate in place, except universal constants */
+INLINE void
+togglesign_safe(GEN *px)
+{
+  if      (*px == gen_1)  *px = gen_m1;
+  else if (*px == gen_m1) *px = gen_1;
+  else if (*px == gen_2)  *px = gen_m2;
+  else if (*px == gen_m2) *px = gen_2;
+  else togglesign(*px);
+}
 /*******************************************************************/
 /*                                                                 */
 /*                     GEN -> LONG, LONG -> GEN                    */

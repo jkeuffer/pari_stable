@@ -141,15 +141,6 @@ enum {
 #  endif
 #endif
 
-#ifdef min
-#  undef min
-#endif
-#ifdef max
-#  undef max
-#endif
-#define min(a,b) ((a)>(b)?(b):(a))
-#define max(a,b) ((a)>(b)?(a):(b))
-
 #define bern(i)       (bernzone + 3 + (i)*bernzone[2])
 
 /* works only for POSITIVE integers */

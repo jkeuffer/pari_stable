@@ -283,7 +283,7 @@ vecsmall_lexcmp(GEN x, GEN y)
 {
   long lx,ly,l,i;
   lx = lg(x);
-  ly = lg(y); l = min(lx,ly);
+  ly = lg(y); l = minss(lx,ly);
   for (i=1; i<l; i++)
     if (x[i] != y[i]) return x[i]<y[i]? -1: 1;
   if (lx == ly) return 0;
@@ -293,7 +293,7 @@ vecsmall_lexcmp(GEN x, GEN y)
 int
 vecsmall_prefixcmp(GEN x, GEN y)
 {
-  long i, lx = lg(x), ly = lg(y), l = min(lx,ly);
+  long i, lx = lg(x), ly = lg(y), l = minss(lx,ly);
   for (i=1; i<l; i++)
     if (x[i] != y[i]) return x[i]<y[i]? -1: 1;
   return 0;
@@ -334,7 +334,7 @@ vecsmall_concat(GEN u, GEN v)
 long
 vecsmall_coincidence(GEN u, GEN v)
 {
-  long i, s = 0, l = min(lg(u),lg(v));
+  long i, s = 0, l = minss(lg(u),lg(v));
   for(i=1; i<l; i++)
     if(u[i] == v[i]) s++;
   return s;

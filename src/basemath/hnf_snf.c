@@ -503,7 +503,7 @@ END2: /* clean up mat: remove everything to the right of the 1s on diagonal */
   if (CO > co)
   { /* treat the rest, N cols at a time (hnflll slow otherwise) */
     const long N = 300;
-    long a, L = CO - co, l = min(L, N); /* L columns to add */
+    long a, L = CO - co, l = minss(L, N); /* L columns to add */
     GEN CC = *ptC, m0 = mat0;
     setlg(CC, CO); /* restore */
     CC += co-1;

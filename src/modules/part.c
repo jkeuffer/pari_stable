@@ -197,7 +197,7 @@ partitr(long n, long pext, long amin, long amax)
 
   if (pext == 2)
   {
-    long a, L1 = max(amin, n-amax), L2 = min(amax, n/pext);
+    long a, L1 = maxss(amin, n-amax), L2 = minss(amax, n/pext);
     if (L1 > L2) return NULL;
     pi = cgetg(L2 - L1 + 2, t_VEC);
     for (a = L1; a <= L2; a++) gel(pi, a-L1+1) = mkvecsmall2(a, n-a);
@@ -205,7 +205,7 @@ partitr(long n, long pext, long amin, long amax)
   else
   {
     pari_sp av = avma;
-    long a, l, L1 = amin, L2 = min(amax, n/pext);
+    long a, l, L1 = amin, L2 = minss(amax, n/pext);
     if (L1 > L2) return NULL;
     pi = cgetg(L2 - L1 + 2, t_VEC); l = 1;
     for (a = L1; a <= L2; a++)

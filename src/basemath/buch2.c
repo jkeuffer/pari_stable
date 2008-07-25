@@ -1810,7 +1810,7 @@ bnfisunit(GEN bnf,GEN x)
       GEN logN = RgV_sum(rx); /* log(Nx), should be ~ 0 */
       if (gexpo(logN) > -20)
       {
-	long p = 2 + max(1, (nf_get_prec(nf)-2) / 2);
+	long p = 2 + maxss(1, (nf_get_prec(nf)-2) / 2);
 	if (typ(logN) != t_REAL || gprecision(rx) > p)
 	  { avma = av; return cgetg(1,t_COL); } /* not a precision problem */
       }
@@ -3117,7 +3117,7 @@ Buchall(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long prec)
     PRECREG = nf_get_prec(nf);
   else
   {
-    PRECREG = max(prec, MEDDEFAULTPREC);
+    PRECREG = maxss(prec, MEDDEFAULTPREC);
     nf = nfinit(P, PRECREG);
     if (lg(nf)==3) { /* P non-monic and nfinit CHANGEd it ? */
       pari_warn(warner,"non-monic polynomial. Change of variables discarded");
@@ -3131,7 +3131,7 @@ Buchall(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long prec)
   if (DEBUGLEVEL) msgtimer("nfinit & rootsof1");
 
   nf_get_sign(nf, &R1, &R2); RU = R1+R2;
-  compute_vecG(nf, &F, min(RU, 9));
+  compute_vecG(nf, &F, minss(RU, 9));
   D = absi(gel(nf,3)); drc = gtodouble(D);
   if (DEBUGLEVEL) fprintferr("R1 = %ld, R2 = %ld\nD = %Ps\n",R1,R2, D);
   LOGD = log(drc); LOGD2 = LOGD*LOGD;
@@ -3156,7 +3156,7 @@ START:
   if (F.subFB) delete_FB(&F);
   LIMC = (long)(cbach*LOGD2);
   if (LIMC < 20) { LIMC = 20; cbach = (double)LIMC / LOGD2; }
-  LIMC2 = max(3 * N, (long)(cbach2*LOGD2));
+  LIMC2 = maxss(3 * N, (long)(cbach2*LOGD2));
   if (LIMC2 < LIMC) LIMC2 = LIMC;
   if (DEBUGLEVEL) { fprintferr("LIMC = %ld, LIMC2 = %ld\n",LIMC,LIMC2); }
 
@@ -3164,7 +3164,7 @@ START:
   fact = (FACT*)stackmalloc((F.KC+1)*sizeof(FACT));
   if (!Res) goto START;
   GRHcheck = NULL;
-  if (!subFBgen(&F, nf, min(lim,LIMC2) + 0.5, minsFB)) goto START;
+  if (!subFBgen(&F, nf, minss(lim,LIMC2) + 0.5, minsFB)) goto START;
   PERM = shallowcopy(F.perm); /* to be restored in case of precision increase */
   av2 = avma;
   init_rel(&cache, &F, RU); /* trivial relations */

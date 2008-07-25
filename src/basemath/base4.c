@@ -593,7 +593,7 @@ idealval(GEN nf, GEN ix, GEN P)
   j = k * e;
   /* 0 <= v_P(ix) <= floor[v_p(Nix) / f] */
   i = i / f;
-  vmax = min(i,j); /* v_P(ix) <= vmax */
+  vmax = minss(i,j); /* v_P(ix) <= vmax */
 
   t0 = gel(P,5);
   if (typ(t0) == t_MAT)
@@ -2255,7 +2255,7 @@ element_mulvecrow(GEN nf, GEN x, GEN m, long i, long lim)
   else
     dx = NULL;
 
-  l = min(lg(m), lim+1); y = cgetg(l, t_VEC);
+  l = minss(lg(m), lim+1); y = cgetg(l, t_VEC);
   for (j=1; j<l; j++)
   {
     GEN t = gmul(x, gcoeff(m,i,j));

@@ -368,7 +368,7 @@ dbllog2(GEN z)
   if (typ(z) != t_COMPLEX) return log2ir(z);
   x = log2ir(gel(z,1));
   y = log2ir(gel(z,2));
-  if (fabs(x-y) > 10) return max(x,y);
+  if (fabs(x-y) > 10) return maxss(x,y);
   return x + 0.5*log2(1 + exp2(2*(y-x)));
 }
 
@@ -767,7 +767,7 @@ dual_modulus(GEN p, double lrho, double tau, long l)
   {
     q = eval_rel_pol(q,bit); v2 = n - degpol(q);
     v = RgX_valrem(q, &q);
-    ll -= max(v, v2); if (ll < 0) ll = 0;
+    ll -= maxss(v, v2); if (ll < 0) ll = 0;
 
     nn = degpol(q); delta_k += v;
     if (!nn) return delta_k;
@@ -1413,13 +1413,13 @@ split_2(GEN p, long bit, GEN ctr, double thickness, GEN *F, GEN *G)
       lrho = (lrmin + lrmax) / 2;
     else
     {
-      double kappa = 2. - log(1. + min(i,n-j)) / log(1. + min(j,n-i));
+      double kappa = 2. - log(1. + minss(i,n-j)) / log(1. + minss(j,n-i));
       if (i+j < n+1) lrho = lrmax * kappa + lrmin;
       else           lrho = lrmin * kappa + lrmax;
       lrho /= 1+kappa;
     }
     aux = (lrmax - lrmin) / (4*(j-i));
-    k = dual_modulus(p, lrho, aux, min(i,n+1-j));
+    k = dual_modulus(p, lrho, aux, minss(i,n+1-j));
     if (k-i < j-k-1 || (k-i == j-k-1 && 2*k > n))
       { lrmax = lrho; j=k+1; radii[j] = lrho - aux; }
     else
@@ -1754,7 +1754,7 @@ mygprecrc_special(GEN x, long prec, long e)
   switch(typ(x))
   {
     case t_REAL:
-      if (!signe(x)) return real_0_bit(min(e, expo(x)));
+      if (!signe(x)) return real_0_bit(minss(e, expo(x)));
       return (prec > lg(x))? rtor(x, prec): x;
     case t_COMPLEX:
       y = cgetg(3,t_COMPLEX);

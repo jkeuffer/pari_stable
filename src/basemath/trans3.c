@@ -727,7 +727,7 @@ incgam0(GEN s, GEN x, GEN g, long prec)
   GEN z;
 
   if (gcmp0(x)) { avma = av; return g? gcopy(g): ggamma(s,prec); }
-  es = gexpo(s); e = max(es, 0);
+  es = gexpo(s); e = maxss(es, 0);
   if (gsigne(real_i(s)) <= 0 || gexpo(x) > e)
     z = incgam2(s,x,prec);
   else

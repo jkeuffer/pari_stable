@@ -1247,14 +1247,14 @@ AGAIN:
     VV = get_V(Tra, M_L, PRK, PRKinv, pk, &a);
     if (first)
     { /* initialize lattice, using few p-adic digits for traces */
-      bgood = (long)(a - max(32, BitPerFactor * r));
-      b = max(bmin, bgood);
+      bgood = (long)(a - maxss(32, BitPerFactor * r));
+      b = maxss(bmin, bgood);
       delta = a - b;
     }
     else
     { /* add more p-adic digits and continue reduction */
       if (a < b) b = a;
-      b = max(b-delta, bmin);
+      b = maxss(b-delta, bmin);
       if (b - delta/2 < bmin) b = bmin; /* near there. Go all the way */
     }
 

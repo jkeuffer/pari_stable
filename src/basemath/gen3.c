@@ -138,7 +138,7 @@ precision(GEN z)
     ey = expo(y);
     e = ey - ex;
     if (!signe(x)) {
-      if (!signe(y)) return prec0( min(ex,ey) );
+      if (!signe(y)) return prec0( minss(ex,ey) );
       if (e <= 0) return prec0(ex);
       lz = nbits2prec(e);
       ly = lg(y); if (lz > ly) lz = ly;
@@ -157,7 +157,7 @@ precision(GEN z)
       long d = divsBIL(e), l = ly-d;
       return (l > lx)? lx + d: ly;
     }
-    return min(lx, ly);
+    return minss(lx, ly);
   }
   return 0;
 }
@@ -1493,7 +1493,7 @@ gsubst(GEN x, long v, GEN y)
 	  for (i=3,jb=ey; jb<=l-2; i++,jb+=ey)
 	  {
 	    if (i < lx) {
-	      for (j=jb+2; j<min(l, jb+ly); j++)
+	      for (j=jb+2; j<minss(l, jb+ly); j++)
 		gel(z,j) = gadd(gel(z,j), gmul(gel(x,i),gel(t,j-jb)));
 	    }
 	    for (j=l-1-jb-ey; j>1; j--)
@@ -1602,14 +1602,14 @@ recip(GEN x)
       for (j=3; j<i+1; j++)
       {
 	av2 = avma; p1 = gel(x,j);
-	for (k = max(3,j+2-mi); k < j; k++)
+	for (k = maxss(3,j+2-mi); k < j; k++)
 	  p1 = gadd(p1, gmul(gel(u,k),gel(x,j-k+2)));
 	p1 = gneg(p1);
 	gel(u,j) = gerepileupto(av2, gadd(gel(u,j), p1));
       }
       av2 = avma;
       p1 = gmulsg(i,gel(x,i+1));
-      for (k = 2; k < min(i,mi); k++)
+      for (k = 2; k < minss(i,mi); k++)
       {
 	p2 = gmul(gel(x,k+1),gel(u,i-k+2));
 	p1 = gadd(p1, gmulsg(k,p2));
@@ -2851,7 +2851,7 @@ _rfraccoeff(GEN x, long n, long v)
 {
   GEN P,Q, p = gel(x,1), q = gel(x,2);
   long vp = gvar(p), vq = gvar(q);
-  if (v < 0) v = min(vp, vq);
+  if (v < 0) v = minss(vp, vq);
   P = (vp == v)? p: swap_vars(p, v);
   Q = (vq == v)? q: swap_vars(q, v);
   if (!RgX_is_monomial(Q)) pari_err(typeer, "polcoeff");

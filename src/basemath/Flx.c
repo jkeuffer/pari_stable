@@ -1002,16 +1002,16 @@ Flx_rem_montgomery(GEN x, GEN mg, GEN T, ulong p)
   long lt=degpol(T); /*We discard the leading term*/
   long lead=lt-1;
   long ld=l-lt+1;
-  long lm=min(ld,lgpol(mg));
+  long lm=minss(ld,lgpol(mg));
   if (l<=lt)
     return vecsmall_copy(x);
   (void)new_chunk(lt);
   z=Flx_recipspec(x+2+lead,ld,ld);             /* z = rec(x)      lz<=ld*/
   z=Flx_mulspec(z+2,mg+2,p,lgpol(z),lm);       /* z = rec(x) * mg lz<=ld+lm*/
-  z=Flx_recipspec(z+2,min(ld,lgpol(z)),ld);    /* z = rec (rec(x) * mg) lz<=ld*/
+  z=Flx_recipspec(z+2,minss(ld,lgpol(z)),ld);  /* z = rec (rec(x) * mg) lz<=ld*/
   z=Flx_mulspec(z+2,T+2,p,lgpol(z),lt);        /* z *= pol        lz<=ld+lt*/
   avma=ltop;
-  z=Flx_subspec(x+2,z+2,p,lt,min(lt,lgpol(z)));/* z = x - z       lz<=lt */
+  z=Flx_subspec(x+2,z+2,p,lt,minss(lt,lgpol(z)));/* z = x - z       lz<=lt */
   z[1]=T[1];
   return z;
 }
@@ -1872,7 +1872,7 @@ FlxX_sub(GEN x, GEN y, ulong p)
   long lx,ly,i,lz;
   GEN z;
   lx = lg(x); ly = lg(y);
-  lz=max(lx,ly);
+  lz=maxss(lx,ly);
   z = cgetg(lz,t_POL);
   if (lx >= ly)
   {
@@ -2182,14 +2182,14 @@ FlxqX_rem_montgomery(GEN x, GEN mg, GEN T, GEN Q, ulong p)
   long lt=degpol(T); /*We discard the leading term*/
   long lead=lt-1;
   long ld=l-lt+1;
-  long lm=min(ld,lgpol(mg));
+  long lm=minss(ld,lgpol(mg));
   if (l<=lt)
     return gcopy(x);
   z=FlxX_recipspec(x+2+lead,ld,ld,vs);         /* z = rec(x)      lz<=ld*/
   z=FlxqX_mulspec(z+2,mg+2,Q,p,lgpol(z),lm);   /* z = rec(x) * mg lz<=ld+lm*/
-  z=FlxX_recipspec(z+2,min(ld,lgpol(z)),ld,vs);/* z = rec (rec(x) * mg) lz<=ld*/
+  z=FlxX_recipspec(z+2,minss(ld,lgpol(z)),ld,vs);/*z= rec (rec(x) * mg) lz<=ld*/
   z=FlxqX_mulspec(z+2,T+2,Q,p,lgpol(z),lt);    /* z*= pol         lz<=ld+lt*/
-  z=FlxX_subspec(x+2,z+2,p,lt,min(lt,lgpol(z)));/*z = x - z       lz<=lt */
+  z=FlxX_subspec(x+2,z+2,p,lt,minss(lt,lgpol(z)));/*z = x - z       lz<=lt */
   z[1]=T[1];
   return gerepileupto(ltop,z);
 }

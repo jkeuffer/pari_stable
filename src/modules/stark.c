@@ -431,7 +431,7 @@ CplxModulus(GEN data, long *newprec, long prec)
     pol = AllStark(data, nf, -1, dprec);
     pr = nbits2nlong( gexpo(pol) );
     if (pr < 0) pr = 0;
-    dprec = max(dprec, pr) + EXTRA_PREC;
+    dprec = maxss(dprec, pr) + EXTRA_PREC;
     if (!gcmp0(leading_term(pol)))
     {
       cpl = QuickNormL2(pol, DEFAULTPREC);
@@ -872,7 +872,7 @@ _data4(GEN arch, long r1, long r2)
   z[1] = q; b = r1 - q;
   z[2] = b;
   z[3] = r2;
-  z[4] = max(b+r2+1, r2+q);
+  z[4] = maxss(b+r2+1, r2+q);
   return z;
 }
 
@@ -1734,14 +1734,14 @@ RecCoeff3(GEN nf, RC_data *d, long prec)
   FP_chk_fun chk = { &chk_reccoeff, &chk_reccoeff_init, NULL, NULL, 0 };
   chk.data = (void*)d;
 
-  d->G = min(-10, -bit_accuracy(prec) >> 4);
-  BIG = max(32, -(d->G << 1));
+  d->G = minss(-10, -bit_accuracy(prec) >> 4);
+  BIG = maxss(32, -(d->G << 1));
   tB  = sqrtnr(real2n(BIG-N,DEFAULTPREC), N-1);
   Bd  = grndtoi(gmin(B, tB), &e);
   if (e > 0) return NULL; /* failure */
   Bd = addis(Bd, 1);
   prec2 = BIGDEFAULTPREC + divsBIL( expi(Bd) );
-  prec2 = max((prec << 1) - 2, prec2);
+  prec2 = maxss((prec << 1) - 2, prec2);
   B2 = sqri(Bd);
   C2 = shifti(B2, BIG<<1);
 
@@ -1800,7 +1800,7 @@ RecCoeff2(GEN nf,  RC_data *d,  long prec)
   GEN vec, M = gmael(nf, 5, 1), beta = d->beta;
   long i, imin, imax, lM = lg(M);
 
-  d->G = min(-20, -bit_accuracy(prec) >> 4);
+  d->G = minss(-20, -bit_accuracy(prec) >> 4);
 
   vec  = shallowconcat(mkvec(gneg(beta)), row(M, d->v));
   imin = (long)bit_accuracy_mul(prec, .225);
@@ -2146,7 +2146,7 @@ init_cScT(ST_t *T, GEN dtcr, long N, long prec)
   T->c = p1[3];
   T->rc1 = T->a + T->c;
   T->rc2 = T->b + T->c;
-  T->r   = max(T->rc2+1, T->rc1); /* >= 2 */
+  T->r   = maxss(T->rc2+1, T->rc1); /* >= 2 */
   ppgamma(T, prec);
   clear_cScT(T, N);
 }
@@ -2420,7 +2420,7 @@ LABDOUB:
     */
     incr_pr = gprecision(polrelnum)-2 - divsBIL( gexpo(polrelnum) );
     if (incr_pr < 0) incr_pr = -incr_pr + EXTRA_PREC;
-    newprec = newprec + max(ADD_PREC, cpt*incr_pr);
+    newprec = newprec + maxss(ADD_PREC, cpt*incr_pr);
     if (DEBUGLEVEL) pari_warn(warnprec, "AllStark", newprec);
 
     nf = nfnewprec_shallow(nf, newprec);

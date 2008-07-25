@@ -307,7 +307,7 @@ time_fun(speed_function_t fun, speed_param *s)
       /* go to a value of reps to make t[i] >= precision */
       reps_d = ceil (1.1 * s->reps
 		     * speed_unittime * speed_precision
-		     / max(t[i], speed_unittime));
+		     / maxss(t[i], speed_unittime));
       if (reps_d > 2e9 || reps_d < 1.0)
 	pari_err(talker, "Fatal error: new reps bad: %.2f\n", reps_d);
 
@@ -336,7 +336,7 @@ add_dat(long size, double d)
 {
   if (ndat == allocdat)
   {
-    allocdat += max(allocdat, 100);
+    allocdat += maxss(allocdat, 100);
     dat = (struct dat_t*) pari_realloc((void*)dat, allocdat * sizeof(dat[0]));
   }
   dat[ndat].size = size;
@@ -460,7 +460,7 @@ Test(tune_param *param)
 	  diag("Stop: since_change (%d)\n", SINCE_CHANGE);
 	break;
       }
-    s.size += max((long)floor(s.size * param->step_factor), 1);
+    s.size += maxss((long)floor(s.size * param->step_factor), 1);
     if (s.size >= param->max_size)
     {
       if (option_trace >= 1)

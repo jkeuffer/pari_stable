@@ -51,11 +51,11 @@ binaire(GEN x)
     }
     case t_REAL:
       ex=expo(x);
-      if (!signe(x)) return const_vec(max(-ex,0), gen_0);
+      if (!signe(x)) return const_vec(maxss(-ex,0), gen_0);
 
       lx=lg(x); y=cgetg(3,t_VEC);
       if (ex > bit_accuracy(lx)) pari_err(precer,"binary");
-      p1 = cgetg(max(ex,0)+2,t_VEC);
+      p1 = cgetg(maxss(ex,0)+2,t_VEC);
       p2 = cgetg(bit_accuracy(lx)-ex,t_VEC);
       gel(y,1) = p1;
       gel(y,2) = p2;
@@ -207,7 +207,7 @@ ibitand(GEN x, GEN y)
 
   if (!signe(x) || !signe(y)) return gen_0;
   lx=lgefint(x); ly=lgefint(y);
-  lout = min(lx,ly); /* > 2 */
+  lout = minss(lx,ly); /* > 2 */
   xp = int_LSW(x);
   yp = int_LSW(y);
   out = cgetipos(lout);
@@ -306,7 +306,7 @@ ibitnegimply(GEN x, GEN y)
 
   lx = lgefint(x); xp = int_LSW(x);
   ly = lgefint(y); yp = int_LSW(y);
-  lin = min(lx,ly);
+  lin = minss(lx,ly);
   out = cgetipos(lx);
   outp = int_LSW(out);
   for (i=2; i<lin; i++)

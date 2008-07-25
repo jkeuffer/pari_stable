@@ -748,7 +748,7 @@ binomialuu(ulong n, ulong k)
 {
   pari_sp ltop=avma;
   GEN z;
-  k = min(k,n-k);
+  k = minss(k,n-k);
   if (!k) return gen_1;
   z=diviiexact(seq_umul(n-k+1, n), seq_umul(2UL, k));
   return gerepileuptoint(ltop,z);
@@ -1060,7 +1060,7 @@ dirmul(GEN x, GEN y)
   dx = dirval(x); lx = lg(x);
   dy = dirval(y); ly = lg(y);
   if (ly-dy < lx-dx) { swap(x,y); lswap(lx,ly); lswap(dx,dy); }
-  lz = min(lx*dy,ly*dx);
+  lz = minss(lx*dy,ly*dx);
   z = zerovec(lz-1);
   for (j=dx; j<lx; j++)
   {
@@ -1095,7 +1095,7 @@ dirdiv(GEN x, GEN y)
   dx = dirval(x); lx = lg(x);
   dy = dirval(y); ly = lg(y);
   if (dy != 1 || ly == 1) pari_err(talker,"not an invertible dirseries in dirdiv");
-  lz = min(lx,ly*dx); p1 = gel(y,1);
+  lz = minss(lx,ly*dx); p1 = gel(y,1);
   if (!gcmp1(p1)) { y = gdiv(y,p1); x = gdiv(x,p1); } else x = shallowcopy(x);
   z = zerovec(lz-1);
   for (j=dx; j<lz; j++)

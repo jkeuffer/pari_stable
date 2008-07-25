@@ -408,22 +408,22 @@ rectline0(long ne, double gx2, double gy2, long relative) /* code = ROt_MV/ROt_L
     { RXcursor(e)=gx2; RYcursor(e)=gy2; }
   x2 = RXcursor(e)*RXscale(e) + RXshift(e);
   y2 = RYcursor(e)*RYscale(e) + RYshift(e);
-  xmin = max(min(x1,x2),0); xmax = min(max(x1,x2),RXsize(e));
-  ymin = max(min(y1,y2),0); ymax = min(max(y1,y2),RYsize(e));
+  xmin = maxss(minss(x1,x2),0); xmax = minss(maxss(x1,x2),RXsize(e));
+  ymin = maxss(minss(y1,y2),0); ymax = minss(maxss(y1,y2),RYsize(e));
   dxy = x1*y2 - y1*x2; dx = x2-x1; dy = y2-y1;
   if (dy)
   {
     if (dx*dy<0)
-      { xmin = max(xmin,(dxy+RYsize(e)*dx)/dy); xmax=min(xmax,dxy/dy); }
+      { xmin = maxss(xmin,(dxy+RYsize(e)*dx)/dy); xmax=minss(xmax,dxy/dy); }
     else
-      { xmin=max(xmin,dxy/dy); xmax=min(xmax,(dxy+RYsize(e)*dx)/dy); }
+      { xmin=maxss(xmin,dxy/dy); xmax=minss(xmax,(dxy+RYsize(e)*dx)/dy); }
   }
   if (dx)
   {
     if (dx*dy<0)
-      { ymin=max(ymin,(RXsize(e)*dy-dxy)/dx); ymax=min(ymax,-dxy/dx); }
+      { ymin=maxss(ymin,(RXsize(e)*dy-dxy)/dx); ymax=minss(ymax,-dxy/dx); }
     else
-      { ymin=max(ymin,-dxy/dx); ymax=min(ymax,(RXsize(e)*dy-dxy)/dx); }
+      { ymin=maxss(ymin,-dxy/dx); ymax=minss(ymax,(RXsize(e)*dy-dxy)/dx); }
   }
   RoLNx1(z) = xmin; RoLNx2(z) = xmax;
   if (dx*dy<0) { RoLNy1(z) = ymax; RoLNy2(z) = ymin; }
@@ -456,7 +456,7 @@ rectticks(PARI_plot *WW, long ne,
   dy = y2 - y1;
   if (dx < 0) dx = -dx;
   if (dy < 0) dy = -dy;
-  dxy1 = max(dx, dy);
+  dxy1 = maxss(dx, dy);
   dx /= WW->hunit;
   dy /= WW->vunit;
   if (dx > 1000 || dy > 1000)
@@ -573,8 +573,8 @@ rectbox0(long ne, double gx2, double gy2, long relative)
   {  xx = gx2; yy = gy2; }
   x2 = xx*RXscale(e) + RXshift(e);
   y2 = yy*RYscale(e) + RYshift(e);
-  xmin = max(min(x1,x2),0); xmax = min(max(x1,x2),RXsize(e));
-  ymin = max(min(y1,y2),0); ymax = min(max(y1,y2),RYsize(e));
+  xmin = maxss(minss(x1,x2),0); xmax = minss(maxss(x1,x2),RXsize(e));
+  ymin = maxss(minss(y1,y2),0); ymax = minss(maxss(y1,y2),RYsize(e));
 
   RoType(z) = ROt_BX;
   RoBXx1(z) = xmin; RoBXy1(z) = ymin;

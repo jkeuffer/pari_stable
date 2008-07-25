@@ -466,28 +466,10 @@ gsubgs(GEN y, long s) { return gaddgs(y, -s); }
 INLINE GEN
 gdivsg(long s, GEN y) { return gdiv(stoi(s), y); }
 
-/* negate in place */
-INLINE void
-togglesign(GEN x)
-{
-  if (x[1] & SIGNBITS) { x[1] ^= HIGHBIT; }
-}
-/* negate in place, except universal constants */
-INLINE void
-togglesign_safe(GEN *px)
-{
-  if      (*px == gen_1)  *px = gen_m1;
-  else if (*px == gen_m1) *px = gen_1;
-  else if (*px == gen_2)  *px = gen_m2;
-  else if (*px == gen_m2) *px = gen_2;
-  else togglesign(*px);
-}
-
 INLINE void
 normalize_frac(GEN z) {
   if (signe(z[2]) < 0) { togglesign(gel(z,1)); setsigne(gel(z,2),1); }
 }
-
 
 INLINE GEN
 powii(GEN x, GEN n)

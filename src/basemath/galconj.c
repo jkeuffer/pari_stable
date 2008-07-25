@@ -325,7 +325,7 @@ galoisborne(GEN T, GEN dn, struct galois_borne *gb)
   /*We use d-1 test, so we must overlift to 2^BITS_IN_LONG*/
   gb->valsol = logint(gmul2n(borneroots,2+BITS_IN_LONG), gb->l,NULL);
   gb->valabs = logint(gmul2n(borneabs,2), gb->l,NULL);
-  gb->valabs = max(gb->valsol, gb->valabs);
+  gb->valabs = maxss(gb->valsol, gb->valabs);
   if (DEBUGLEVEL >= 4)
     fprintferr("GaloisConj:val1=%ld val2=%ld\n", gb->valsol, gb->valabs);
   avma = av2;
@@ -642,7 +642,7 @@ frobeniusliftall(GEN sg, long el, GEN *psi, struct galois_lift *gl,
       }
       else hop++;
     }
-    if (DEBUGLEVEL >= 4 && i % max(N1/20, 1) == 0)
+    if (DEBUGLEVEL >= 4 && i % maxss(N1/20, 1) == 0)
       msgtimer("GaloisConj:Testing %Ps", addis(mulss(Ni,N1),i));
     avma = av;
     if (i == N1-1)
@@ -1189,7 +1189,7 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l)
   nbtest = 0;
   nbmax = 8+(n>>1);
   pp = primepointer = diffptr;
-  p = init_primepointer(n*max(expu(n)-3, 2), 0, &primepointer);
+  p = init_primepointer(n*maxss(expu(n)-3, 2), 0, &primepointer);
   av = avma;
   while (!plift || (nbtest < nbmax && (nbtest <=8 || order < (n>>1)))
                 || (n == 24 && O[6] == 0 && O[4] == 0)

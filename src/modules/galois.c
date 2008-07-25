@@ -774,7 +774,7 @@ moreprec(buildroot *BR)
     GEN ro;
 
     if (d < BIGDEFAULTPREC-2) d = BIGDEFAULTPREC-2;
-    BR->prmax = max(BR->prmax+d, (long)(BR->prmax * 1.2));
+    BR->prmax = maxss(BR->prmax+d, (long)(BR->prmax * 1.2));
     if (DEBUGLEVEL)
       { fprintferr("$$$$$ New prec = %ld\n",BR->prmax); flusherr(); }
     ro = sortroots(cleanroots(BR->p,BR->prmax), gel(BR->r,1));
@@ -802,7 +802,7 @@ sufprec_r(GEN z)
 {
   long p = bit_accuracy( lg(z) );
   /* bit accuracy of fractional part large enough ? */
-  return ( p - expo(z) > max(3*32, 0.2*p) );
+  return ( p - expo(z) > maxss(3*32, 0.2*p) );
 }
 /* typ(z) = t_REAL or t_COMPLEX, return zi = t_INT approximation */
 static long

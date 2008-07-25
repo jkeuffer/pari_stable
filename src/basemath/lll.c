@@ -491,7 +491,7 @@ ZM_lll_norms(GEN x, double DELTA, long flag, GEN *B)
   prec = good_prec(d,DELTA,ETA);
   x = shallowcopy(x);
   U = (flag & LLL_INPLACE)? NULL: matid(n);
-  for (p = min(3,prec); p <= prec; p++)
+  for (p = minss(3,prec); p <= prec; p++)
   {
     GEN m = fplll(&x, &U, B, DELTA, ETA, flag, p);
     if (m) return m;

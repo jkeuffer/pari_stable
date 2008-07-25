@@ -1683,14 +1683,9 @@ functions {\tt void \op sz(long,GEN)}, {\tt void \op iz(GEN,GEN)} and
 
 \subsec{Comparison operators}
 
-\fun{long}{min}{long a, long b}
+\fun{long}{minss}{long x, long y} returns the \kbd{min} of $x$ and $y$.
 
-\fun{long}{max}{long a, long b} These two functions are implemented as macros
-and evaluate twice each of their arguments.
-
-\fun{long}{minss}{long x, long y} safe variant of \kbd{min}.
-
-\fun{long}{maxss}{long x, long y} safe variant of \kbd{max}.
+\fun{long}{maxss}{long x, long y} returns the \kbd{max} of $x$ and $y$.
 
 \fun{int}{mpcmp}{GEN x, GEN y} compares the \typ{INT} or \typ{REAL}~\kbd{x}
 to the \typ{INT} or \typ{REAL}~\kbd{y}. The result is the sign of

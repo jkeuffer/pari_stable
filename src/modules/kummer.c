@@ -109,7 +109,7 @@ reducebetanaive(GEN bnfz, GEN be, GEN ell)
 
   r1 = nf_get_r1(nf);
   b = gmul(gmael(nf,5,1), be);
-  n = max((itos(ell)>>1), 3);
+  n = maxss((itos(ell)>>1), 3);
   z = cgetg(n+1, t_VEC);
   c = gmul(real_i(gel(bnfz,3)), ell);
   c = logarch2arch(c, r1, prec); /* = embeddings of fu^ell */

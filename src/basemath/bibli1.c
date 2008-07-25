@@ -118,7 +118,7 @@ Householder_get_mu(GEN x, GEN L, GEN B, long k, GEN Q, long prec)
   {
     m = gel(L,j); Nx = gel(m,j); /* should set gel(m,j) = gen_1; but need it later */
     invNx = ginv(Nx);
-    for (i=max(j0, j+1); i<=k; i++) gel(m,i) = mpmul(invNx, gel(m,i));
+    for (i=maxss(j0, j+1); i<=k; i++) gel(m,i) = mpmul(invNx, gel(m,i));
   }
   return 1;
 }
@@ -1056,7 +1056,7 @@ init_pslq(pslq_M *M, GEN x, long *PREC)
   }
   if (prec < DEFAULTPREC) prec = DEFAULTPREC;
   *PREC = prec;
-  M->EXP = - bit_accuracy(prec) + max(n, 8);
+  M->EXP = - bit_accuracy(prec) + maxss(n, 8);
   M->flreal = is_zero(imag_i(x), M->EXP, prec);
   if (!M->flreal)
     return lindep(x); /* FIXME */
@@ -1146,7 +1146,7 @@ one_step_gen(pslq_M *M, GEN tabga, long prec)
     if (is_zero(gcoeff(H,i,i), M->EXP, prec)) {
       m = vecabsminind(M->y); return gel(M->B,m);
     }
-  for (i=m+1; i<=n; i++) redall(M, i, min(i-1,m+1));
+  for (i=m+1; i<=n; i++) redall(M, i, minss(i-1,m+1));
 
   if (DEBUGLEVEL>3) M->T->reda += TIMER(&M->T->t);
   if (gexpo(M->A) >= -M->EXP) return ginv(maxnorml2(M));
@@ -1495,7 +1495,7 @@ RESTART:
       if (flit)
       {
 	storeprecdoubles(&Mbarst, &Mbar);
-	for (i=m+1; i<=n; i++) redallbar(&Mbar, i, min(i-1,m+1));
+	for (i=m+1; i<=n; i++) redallbar(&Mbar, i, minss(i-1,m+1));
       }
       else
       {
@@ -1902,7 +1902,7 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
       if (DEBUGLEVEL>1) { fprintferr("\n"); flusherr(); }
       avma=av0; return stoi(s);
   }
-  k = min(s,maxrank);
+  k = minss(s,maxrank);
   r = (maxnorm >= 0) ? ground(dbltor(maxnorm)): BORNE;
 
   L[0] = evaltyp(t_MAT) | evallg(k + 1);

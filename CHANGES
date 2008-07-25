@@ -436,6 +436,7 @@ JD 48- GP function warning()
    38- obsolete library function kerin1. Use kerint or ZM_lll(,0.99,LLL_KER)
    39- header file paritype.h [ split between parigen.h and pariinl.h ]
    40- obsolete library functions sor, outbrute, outbeaut
+   41- dangerous macros max & min [ use maxss & minss ]
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.2 (released 22/12/2007):

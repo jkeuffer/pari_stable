@@ -575,7 +575,7 @@ lexcmp(GEN x, GEN y)
 
   /* tx = ty = t_MAT, or x and y are both vect_t */
   lx = lg(x);
-  ly = lg(y); l = min(lx,ly);
+  ly = lg(y); l = minss(lx,ly);
   for (i=1; i<l; i++)
   {
     fl = lexcmp(gel(x,i),gel(y,i));
@@ -1760,13 +1760,13 @@ gexpo(GEN x)
 
     case t_COMPLEX:
       e = gexpo(gel(x,1));
-      f = gexpo(gel(x,2)); return max(e, f);
+      f = gexpo(gel(x,2)); return maxss(e, f);
 
     case t_QUAD: {
       GEN p = gel(x,1); /* mod = X^2 + {0,1}* X - {D/4, (1-D)/4})*/
       long d = 1 + expi(gel(p,2))/2; /* ~ expo(sqrt(D)) */
       e = gexpo(gel(x,2));
-      f = gexpo(gel(x,3)) + d; return max(e, f);
+      f = gexpo(gel(x,3)) + d; return maxss(e, f);
     }
     case t_POL: case t_SER: case t_VEC: case t_COL: case t_MAT:
       lx = lg(x); f = -(long)HIGHEXPOBIT;

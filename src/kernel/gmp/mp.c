@@ -623,11 +623,11 @@ static GEN
 divrr_with_gmp(GEN x, GEN y)
 {
   long lx=RNLIMBS(x),ly=RNLIMBS(y);
-  long lw=min(lx,ly);
-  long lly=min(lw+1,ly);
+  long lw=minss(lx,ly);
+  long lly=minss(lw+1,ly);
   GEN  w=cgetr(lw+2);
   long lu=lw+lly;
-  long llx=min(lu,lx);
+  long llx=minss(lu,lx);
   mp_limb_t *u=(mp_limb_t *)new_chunk(lu);
   mp_limb_t *z=(mp_limb_t *)new_chunk(lly);
   mp_limb_t *q,*r;
@@ -661,7 +661,7 @@ static GEN
 divri_with_gmp(GEN x, GEN y)
 {
   long llx=RNLIMBS(x),ly=NLIMBS(y);
-  long lly=min(llx+1,ly);
+  long lly=minss(llx+1,ly);
   GEN  w=cgetr(llx+2);
   long lu=llx+lly, ld=ly-lly;
   mp_limb_t *u=(mp_limb_t *)new_chunk(lu);
@@ -739,7 +739,7 @@ divrr(GEN x, GEN y)
   if (ly>=DIVRR_GMP_LIMIT)
     return divrr_with_gmp(x,y);
 
-  lr = min(lx,ly); r = new_chunk(lr);
+  lr = minss(lx,ly); r = new_chunk(lr);
   r1 = r-1;
   r1[1] = 0; for (i=2; i<lr; i++) r1[i]=x[i];
   r1[lr] = (lx>ly)? x[lr]: 0;

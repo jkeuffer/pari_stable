@@ -635,16 +635,16 @@ AGAIN:
     T2 = centermod( ZM_mul(Tra, M_L), pa );
     if (first)
     { /* initialize lattice, using few p-adic digits for traces */
-      double t = gexpo(T2) - max(32, BitPerFactor*r);
+      double t = gexpo(T2) - maxss(32, BitPerFactor*r);
       bgood = (long) (t * LOGp2);
-      b = max(bmin, bgood);
+      b = maxss(bmin, bgood);
       delta = a - b;
     }
     else
     { /* add more p-adic digits and continue reduction */
       long b0 = (long)(gexpo(T2) * LOGp2);
       if (b0 < b) b = b0;
-      b = max(b-delta, bmin);
+      b = maxss(b-delta, bmin);
       if (b - delta/2 < bmin) b = bmin; /* near there. Go all the way */
     }
 

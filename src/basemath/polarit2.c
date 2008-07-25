@@ -1144,7 +1144,7 @@ ggcd(GEN x, GEN y)
       case t_PADIC:
 	if (!equalii(gel(x,2),gel(y,2))) return gen_1;
 	vx = valp(x);
-	vy = valp(y); return gpowgs(gel(y,2), min(vy,vx));
+	vy = valp(y); return gpowgs(gel(y,2), minss(vy,vx));
 
       case t_QUAD:
 	av=avma; p1=gdiv(x,y);
@@ -1292,7 +1292,7 @@ ggcd(GEN x, GEN y)
           return RgX_gcd(x,y);
 	case t_SER:
 	  z = ggcd(content(x), content(y));
-	  return monomialcopy(z, min(valp(y),gval(x,vx)), vx);
+	  return monomialcopy(z, minss(valp(y),gval(x,vx)), vx);
 	case t_RFRAC: return cont_gcd_rfrac(y, x);
       }
       break;
@@ -1301,8 +1301,8 @@ ggcd(GEN x, GEN y)
       z = ggcd(content(x), content(y));
       switch(ty)
       {
-	case t_SER:   return monomialcopy(z, min(valp(x),valp(y)), vx);
-	case t_RFRAC: return monomialcopy(z, min(valp(x),gval(y,vx)), vx);
+	case t_SER:   return monomialcopy(z, minss(valp(x),valp(y)), vx);
+	case t_RFRAC: return monomialcopy(z, minss(valp(x),gval(y,vx)), vx);
       }
       break;
 

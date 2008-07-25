@@ -1502,7 +1502,7 @@ gmul(GEN x, GEN y)
 	p2[i] = !isrationalzero(gel(y,i)); if (p2[i]) miy = i;
 	if (!isrationalzero(gel(x,i))) mix = i;
 	p1 = gen_0; av = avma;
-	for (j=i-mix; j<=min(i,miy); j++)
+	for (j=i-mix; j<=minss(i,miy); j++)
 	  if (p2[j]) p1 = gadd(p1, gmul(gel(y,j),gel(x,i-j)));
 	gel(z,i) = gerepileupto(av,p1);
       }
@@ -1805,7 +1805,7 @@ sqr_ser_part(GEN x, long l1, long l2)
   {
     p2[i] = !isrationalzero(gel(x,i)); if (p2[i]) mi = i;
     p1=gen_0; av=avma; l=((i+1)>>1) - 1;
-    for (j=i-mi; j<=min(l,mi); j++)
+    for (j=i-mi; j<=minss(l,mi); j++)
       if (p2[j] && p2[i-j]) p1 = gadd(p1, gmul(gel(x,j),gel(x,i-j)));
     p1 = gshift(p1,1);
     if ((i&1) == 0 && p2[i>>1])

@@ -2016,7 +2016,7 @@ print_functions_hash(const char *s)
     if (*s++ != '-') m = n;
     else
     {
-      if (*s !='$') m = min(atol(s),m);
+      if (*s !='$') m = minss(atol(s),m);
       if (m<n) pari_err(talker,"invalid range in print_functions_hash");
     }
 

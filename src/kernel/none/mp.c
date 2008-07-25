@@ -595,7 +595,7 @@ divrr(GEN x, GEN y)
     hiremainder=k; r[2]=divll(l,y[2]); return r;
   }
 
-  lr = min(lx,ly); r = new_chunk(lr);
+  lr = minss(lx,ly); r = new_chunk(lr);
   r1 = r-1;
   r1[1] = 0; for (i=2; i<lr; i++) r1[i]=x[i];
   r1[lr] = (lx>ly)? x[lr]: 0;
@@ -1119,7 +1119,7 @@ diviiexact(GEN x, GEN y)
     if (!q) continue;
 
     /* x := x - q * y */
-    (void)mulll(q,y[0]); limj = max(lx - lz, ii+3-ly);
+    (void)mulll(q,y[0]); limj = maxss(lx - lz, ii+3-ly);
     { /* update neither lowest word (could set it to 0) nor highest ones */
       register GEN x0 = x + (ii - 1), y0 = y - 1, xlim = x + limj;
       for (; x0 >= xlim; x0--, y0--)

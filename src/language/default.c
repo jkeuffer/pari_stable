@@ -657,7 +657,7 @@ sd_histsize(const char *v, long flag)
     /* copy relevant history entries */
     g     = (total-1) % sG;
     h = k = (total-1) % sH;
-    kmin = k - min(sH, sG);
+    kmin = k - minss(sH, sG);
     for ( ; k > kmin; k--, g--, h--)
     {
       resH[h] = resG[g];

@@ -221,7 +221,7 @@ new_coords(GEN e, GEN x, GEN *pta, GEN *ptb, int flag, long prec)
 static GEN
 do_agm(GEN *ptx, GEN a1, GEN b1)
 {
-  const long s = signe(b1), l = min(lg(a1), lg(b1)), G = 6 - bit_accuracy(l);
+  const long s = signe(b1), l = minss(lg(a1), lg(b1)), G = 6 - bit_accuracy(l);
   GEN p1, a, b, x;
 
   x = gmul2n(subrr(a1,b1),-2);
@@ -250,7 +250,7 @@ do_padic_agm(GEN *ptx, GEN a1, GEN b1, GEN p)
 
   if (!x) x = gmul2n(gsub(a1,b1),-2);
   if (gcmp0(x)) pari_err(precer,"ellinit");
-  mi = min(precp(a1),precp(b1));
+  mi = minss(precp(a1),precp(b1));
   for(;;)
   {
     GEN d;
@@ -382,7 +382,7 @@ ellinit_real(GEN x, long prec)
   switch(typ(D))
   {
     case t_INT: e = expi(D); break;
-    case t_FRAC:e = max(expi(gel(D,1)), expi(gel(D,2))); break;
+    case t_FRAC:e = maxss(expi(gel(D,1)), expi(gel(D,2))); break;
     default: e = -1; break;
   }
   PREC = prec;
@@ -2582,7 +2582,7 @@ ellap1(GEN e, GEN p)
       }
     }
     /* Baby Step/Giant Step */
-    nb = min(128, s >> 1); /* > 0. Will do nb pts at a time: faster inverse */
+    nb = minss(128, s >> 1); /* > 0. Will do nb pts at a time: faster inverse */
     pts = cgetg(nb+1, t_VEC);
     j = lgefint(p);
     for (i=1; i<=nb; i++)
@@ -3251,7 +3251,7 @@ elllseries(GEN e, GEN s, GEN A, long prec)
 	      fabs(gtodouble(real_i(s))-1.) * log(rtodbl(cga)))
 	    / rtodbl(cgb) + 1);
   if ((long)l < 1) l = 1;
-  v = anell(e, min(l,LGBITS-1));
+  v = anell(e, minss(l,LGBITS-1));
   s2 = ns = NULL; /* gcc -Wall */
   if (!flun) { s2 = gsubsg(2,s); ns = gpow(cg, gsubgs(gmul2n(s,1),2),prec); }
   z = gen_0;

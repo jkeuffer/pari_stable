@@ -372,7 +372,7 @@ FpXQX_mul(GEN x, GEN y, GEN T, GEN p)
 {
   pari_sp ltop=avma;
   GEN z,kx,ky;
-  long vx = min(varn(x),varn(y));
+  long vx = minss(varn(x),varn(y));
   kx= to_Kronecker(x,T);
   ky= to_Kronecker(y,T);
   z = RgX_mulspec(ky+2, kx+2, lgpol(ky), lgpol(kx));
@@ -2064,8 +2064,7 @@ FlxY_to_FlyX(GEN b, long sv)
 {
   long i, n=-1;
   long sw = b[1]&VARNBITS;
-  for(i=2;i<lg(b);i++)
-    n=max(n,lgpol(gel(b,i)));
+  for(i=2;i<lg(b);i++) n = maxss(n,lgpol(gel(b,i)));
   return Flm_to_FlxX(Flm_transpose(FlxX_to_Flm(b,n)),sv,sw);
 }
 
@@ -2267,7 +2266,7 @@ INIT:
       if (degpol(a) < degA || lg(b) < lb) continue; /* p | lc(A)lc(B) */
       if (checksqfree)
       { /* find degree list for generic Euclidean Remainder Sequence */
-	long goal = min(degpol(a), degpol(b)); /* longest possible */
+	long goal = minss(degpol(a), degpol(b)); /* longest possible */
 	for (n=1; n <= goal; n++) dglist[n] = 0;
 	setlg(dglist, 1);
 	for (n=0; n <= dres; n++)
@@ -2457,7 +2456,7 @@ ZX_resultant_all(GEN A, GEN B, GEN dB, ulong bound)
     bound = ZX_ZXY_ResBound(A, B, dB);
     if (bound > 50000)
     {
-      long eA = gexpo(A), eB = gexpo(B), prec = nbits2prec(max(eA,eB));
+      long eA = gexpo(A), eB = gexpo(B), prec = nbits2prec(maxss(eA,eB));
       for(;; prec = (prec-1)<<1)
       {
 	GEN run = real_1(prec);

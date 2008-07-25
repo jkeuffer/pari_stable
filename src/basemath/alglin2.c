@@ -360,7 +360,8 @@ carberkowitz(GEN x, long v)
     for (i = 1; i <= r+1; i++)
     {
       av = avma; t = gmul(gel(C,i), gel(V,1));
-      for (j = 2; j <= min(r,i); j++) t = gadd(t, gmul(gel(C,i+1-j), gel(V,j)));
+      for (j = 2; j <= minss(r,i); j++)
+        t = gadd(t, gmul(gel(C,i+1-j), gel(V,j)));
       gel(Q,i) = gerepileupto(av, t);
     }
     for (i = 1; i <= r+1; i++) V[i] = Q[i];

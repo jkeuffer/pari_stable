@@ -190,7 +190,7 @@ consteuler(long prec)
   b = real_1(l);
   v = real_1(l);
   n = (long)(1+3.591*x); /* z=3.591: z*[ ln(z)-1 ]=1 */
-  n1 = min(n, SQRTVERYBIGINT);
+  n1 = minss(n, SQRTVERYBIGINT);
   if (x < SQRTVERYBIGINT)
   {
     ulong xx = x*x;
@@ -696,7 +696,7 @@ ser_pow(GEN x, GEN n, long prec)
     for (i=1; i<=d; i++)
     {
       av = avma; p1 = gen_0;
-      for (j=1; j<=min(i,mi); j++)
+      for (j=1; j<=minss(i,mi); j++)
       {
 	p2 = gsubgs(gmulgs(alp,j),i);
 	p1 = gadd(p1, gmul(gmul(p2,gel(X,j)),gel(Y,i-j)));
@@ -1407,7 +1407,7 @@ mpexp_basecase(GEN x)
 #ifdef DEBUG
 {
   GEN t = mplog(z), u = divrr(subrr(x, t),x);
-  if (signe(u) && expo(u) > 5-bit_accuracy(min(l,lg(t)))) pari_err(talker,"");
+  if (signe(u) && expo(u) > 5-bit_accuracy(minss(l,lg(t)))) pari_err(talker,"");
 }
 #endif
   return gerepileuptoleaf(av, z); /* NOT affrr, precision often increases */
@@ -1426,7 +1426,7 @@ mpexp(GEN x)
   }
 
   l = lg(x);
-  if (l <= max(EXPNEWTON_LIMIT, 1<<s)) return mpexp_basecase(x);
+  if (l <= maxss(EXPNEWTON_LIMIT, 1<<s)) return mpexp_basecase(x);
   z = cgetr(l); /* room for result */
   x = modlog2(x, &sh);
   if (!x) { avma = (pari_sp)(z+l); return real2n(sh, l); }
@@ -1559,7 +1559,7 @@ serexp(GEN x, long prec)
     for (   ; i<ly; i++)
     {
       av = avma; p1 = gen_0;
-      for (j=ex; j<=min(i,mi); j++)
+      for (j=ex; j<=minss(i,mi); j++)
 	p1 = gadd(p1, gmulgs(gmul(gel(xd,j),gel(yd,i-j)),j));
       gel(yd,i) = gerepileupto(av, gdivgs(p1,i));
     }
@@ -2376,13 +2376,13 @@ gsincos(GEN x, GEN *s, GEN *c, long prec)
       for (i=ex2; i<ly; i++)
       {
 	ii = i-ex; av = avma; p1 = gen_0;
-	for (j=ex; j<=min(ii-2,mi); j++)
+	for (j=ex; j<=minss(ii-2,mi); j++)
 	  p1 = gadd(p1, gmulgs(gmul(gel(y,j-ex+2),gel(ps,ii-j)),j));
 	gel(pc,i) = gerepileupto(av, gdivgs(p1,2-i));
 	if (ii < lx)
 	{
 	  av = avma; p1 = gen_0;
-	  for (j=ex; j<=min(i-ex2,mi); j++)
+	  for (j=ex; j<=minss(i-ex2,mi); j++)
 	    p1 = gadd(p1,gmulgs(gmul(gel(y,j-ex+2),gel(pc,i-j)),j));
 	  p1 = gdivgs(p1,i-2);
 	  gel(ps,i-ex) = gerepileupto(av, gadd(p1,gel(y,i-ex)));
