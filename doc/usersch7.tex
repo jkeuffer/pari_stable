@@ -89,4 +89,20 @@ infinity.
 
 \fun{GEN}{ellinf}{} returns the point at infinity \kbd{[0]}.
 
+\section{Other curves}
+
+The following functions deal with hyperelliptic curves in weighted projective
+space $\P_{(1,d,1)}$, with coordinates $(x,y,z)$ and a model of the form
+$ y^2 = T(x,z)$, where $T$ is homogeneous of degree $2d$, and squarefree.
+Thus the curve is nonsingular of genus $d-1$.
+
+\fun{long}{hyperell_locally_soluble}{GEN T, GEN p} assumes that $T\in\Z[X]$ is
+integral. Returns $1$ if the curve is locally soluble over $\Q_p$, $0$
+otherwise.
+
+\fun{long}{nf_hyperell_locally_soluble}{GEN nf, GEN T, GEN pr} let $K$
+be a number field, associated to \kbd{nf}, \kbd{pr} a \var{prid} associated
+to some maximal ideal $\goth{p}$; assumes that $T\in\Z_K[X]$ is integral.
+Returns $1$ if the curve is locally soluble over $K_{\goth{p}}$.
+
 \vfill\eject

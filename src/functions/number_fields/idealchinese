@@ -10,5 +10,5 @@ Doc: $x$ being a prime ideal factorization
  column integral exponents), $y$ a vector of elements in $\var{nf}$ indexed by
  the ideals in $x$, computes an element $b$ such that
 
- $v_\wp(b - y_\wp) \geq v_\wp(x)$ for all prime ideals in $x$ and $v_\wp(b)\geq 0$
- for all other $\wp$.
+ $v_{\goth{p}}(b - y_{\goth{p}}) \geq v_{\goth{p}}(x)$ for all prime ideals
+ in $x$ and $v_{\goth{p}}(b)\geq 0$ for all other $\goth{p}$.

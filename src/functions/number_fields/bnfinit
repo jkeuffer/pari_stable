@@ -51,11 +51,11 @@ Doc: initializes a
 
  $\var{bnf}[1]$ contains the matrix $W$, i.e.~the matrix in Hermite normal
  form giving relations for the class group on prime ideal generators
- $(\wp_i)_{1\le i\le r}$.
+ $(\goth{p}_i)_{1\le i\le r}$.
 
  $\var{bnf}[2]$ contains the matrix $B$, i.e.~the matrix containing the
- expressions of the prime ideal factorbase in terms of the $\wp_i$. It is an
- $r\times c$ matrix.
+ expressions of the prime ideal factorbase in terms of the $\goth{p}_i$.
+ It is an $r\times c$ matrix.
 
  $\var{bnf}[3]$ contains the complex logarithmic embeddings of the system of
  fundamental units which has been found. It is an $(r_1+r_2)\times(r_1+r_2-1)$
