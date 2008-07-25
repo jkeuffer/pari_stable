@@ -1519,7 +1519,6 @@ GEN     normalizepol_i(GEN x, long lx);
 long    RgX_val(GEN x);
 long    RgX_valrem(GEN x, GEN *z);
 long    RgX_valrem_inexact(GEN x, GEN *Z);
-GEN     pureimag(GEN x);
 GEN     Q_abs(GEN x);
 GEN     quad_disc(GEN x);
 GEN     quadtoc(GEN x, long l);

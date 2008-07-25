@@ -1824,8 +1824,8 @@ polylog(long m, GEN x, long prec)
     if (m&1) sx = gsigne(gsub(gen_1, real_i(x)));
     else     sx = - gsigne(real_i(x));
   }
-  z = pureimag( divri(mppi(l), mpfact(m-1)) );
-  setsigne(z[2], sx);
+  z = divri(mppi(l), mpfact(m-1)); setsigne(z, sx);
+  z = mkcomplex(gen_0, z);
 
   if (m == 2)
   { /* same formula as below, written more efficiently */

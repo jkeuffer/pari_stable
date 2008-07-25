@@ -568,7 +568,7 @@ gash(GEN x, long prec)
       if (sx > 0 || (!sx && sy*sz<=0)) return gerepileupto(av, y);
 
       p1 = mppi(prec); if (sy<0) setsigne(p1,-1);
-      return gerepileupto(av, gsub(pureimag(p1), y));
+      return gerepileupto(av, gsub(mkcomplex(gen_0,p1), y));
     case t_INTMOD: case t_PADIC: pari_err(typeer,"gash");
     default:
       av = avma; if (!(y = toser_i(x))) break;
@@ -1147,7 +1147,7 @@ cxgamma(GEN s0, int dolog, long prec)
 	if (typ(y) == t_COMPLEX)
 	  gel(y,2) = gadd(gel(y,2), z);
 	else
-	  y = gadd(y, pureimag(z));
+	  y = gadd(y, mkcomplex(gen_0,z));
       }
       p1 = gneg(p1);
     }

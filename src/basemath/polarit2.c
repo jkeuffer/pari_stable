@@ -431,7 +431,7 @@ Ipow(long e) {
   {
     case 1: return gi;
     case 2: return gen_m1;
-    case 3: return pureimag(gen_m1);
+    case 3: return mkcomplex(gen_0,gen_m1);
   }
   return gen_1;
 }

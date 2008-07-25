@@ -1475,8 +1475,8 @@ split_1(GEN p, long bit, GEN *F, GEN *G)
   v = cgetg(5,t_VEC);
   gel(v,1) = TWO;
   gel(v,2) = mpneg(TWO);
-  gel(v,3) = pureimag(gel(v,1));
-  gel(v,4) = pureimag(gel(v,2));
+  gel(v,3) = mkcomplex(gen_0, gel(v,1));
+  gel(v,4) = mkcomplex(gen_0, gel(v,2));
   q = mygprec(q,bit2); lthick = 0;
   newq = ctr = NULL; /* -Wall */
   imax = polreal? 3: 4;

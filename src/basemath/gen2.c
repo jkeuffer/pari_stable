@@ -144,7 +144,6 @@ gassoc_proto(GEN f(GEN,GEN), GEN x, GEN y)
 /*                    CREATION OF A P-ADIC GEN                     */
 /*                                                                 */
 /*******************************************************************/
-
 /* y[4] not filled */
 static GEN
 cgetp2(GEN x, long vx)
@@ -161,9 +160,6 @@ cgetp(GEN x)
   GEN y = cgetp2(x, 0);
   gel(y,4) = cgeti(lgefint(x[3])); return y;
 }
-
-GEN
-pureimag(GEN x) { return mkcomplex(gen_0, x); }
 
 /*******************************************************************/
 /*                                                                 */
