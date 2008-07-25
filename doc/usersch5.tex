@@ -177,8 +177,9 @@ words. Returns the smallest word count containing $x$ bytes, i.e
 $\kbd{ceil}(x / \kbd{sizeof(long)})$.
 
 \fun{long}{bit_accuracy}{long x} converts a \typ{REAL} length into a number
-of significant bits. Returns $(x - 2)\B$. The macro
-\tet{bit_accuracy_mul}$(x,y)$ computes the same thing multiplied by $y$.
+of significant bits. Returns $(x - 2)\B$.
+
+\fun{long}{bit_accuracy_mul}{long x, double y} returns $(x - 2)\B \times y$.
 
 \subsec{Read type-dependent information}
 
@@ -191,7 +192,7 @@ whether \kbd{x} is a \typ{INT}, simply check
 @eprog\noindent
 The types are internally ordered and this simplifies the implementation of
 commutative binary operations (e.g addition, gcd). Avoid using the ordering
-directly, as it may change in the future; use type grouping macros
+directly, as it may change in the future; use type grouping functions
 instead (\secref{se:typegroup}).
 
 \fun{const char*}{type_name}{long t} given a type number \kbd{t} this routine
@@ -538,6 +539,8 @@ These are \kbd{double} approximations to useful constants:
 
 \noindent \tet{LOG10_2}: $\log 2 / \log 10$.
 
+\noindent \tet{LOG2_10}: $\log 10 / \log 2$.
+
 \noindent \tet{PI}: $\pi$.
 
 \subsec{PARI version numbers}
@@ -759,8 +762,7 @@ Fatal error if~\kbd{x} not a clone.
 
 \fun{GEN}{gcopy}{GEN x} creates a new copy of the object~\kbd{x} on the stack.
 
-\fun{int}{isonstack}{GEN x} \kbd{true} iff \kbd{x} belongs to the stack. This
-is a macro whose argument is evaluated several times.
+\fun{int}{isonstack}{GEN x} \kbd{true} iff \kbd{x} belongs to the stack.
 
 \fun{void}{copyifstack}{GEN x, GEN y} sets \kbd{y = gcopy(x)} if
 \kbd{x} belongs to the stack, and \kbd{y = x} otherwise. This macro evaluates

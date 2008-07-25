@@ -28,6 +28,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #  endif
 #endif
 
+const double LOG2    = 0.6931471805599453; /* log(2) */
+const double LOG10_2 = 0.3010299956639812; /* log_10(2) */
+const double LOG2_10 = 3.321928094887362;  /* log_2(10) */
+
 GEN     gnil, gen_0, gen_1, gen_m1, gen_2, gen_m2, ghalf, gi;
 THREAD GEN     gpi, geuler, bernzone;
 GEN     primetab; /* private primetable */

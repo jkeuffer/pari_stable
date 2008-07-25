@@ -301,6 +301,30 @@ affc_fixlg(GEN x, GEN res)
 
 /*******************************************************************/
 /*                                                                 */
+/*                          LENGTH CONVERSIONS                     */
+/*                                                                 */
+/*******************************************************************/
+
+INLINE long ndec2nlong(long x)
+{ return 1 + (long)((x)*(LOG2_10/BITS_IN_LONG)); }
+INLINE long ndec2prec(long x)
+{ return 2 + ndec2nlong(x); }
+INLINE long nbits2nlong(long x)
+{ return (x+BITS_IN_LONG-1) >> TWOPOTBITS_IN_LONG; }
+INLINE long nbits2prec(long x)
+{ return (x+3*BITS_IN_LONG-1) >> TWOPOTBITS_IN_LONG; }
+INLINE long nchar2nlong(long x)
+{ return (x+sizeof(long)-1) / sizeof(long); }
+INLINE long bit_accuracy(long x)
+{ return (x-2) * BITS_IN_LONG; }
+INLINE long bit_accuracy_mul(long x, double y)
+{ return (long)((x-2) * (BITS_IN_LONG*y)); }
+INLINE long prec2ndec(long x) { return bit_accuracy_mul(x, LOG10_2); }
+INLINE long divsBIL(long n) { return n >> TWOPOTBITS_IN_LONG; }
+INLINE long remsBIL(long n) { return n & (BITS_IN_LONG-1); }
+
+/*******************************************************************/
+/*                                                                 */
 /*                          GEN SUBTYPES                           */
 /*                                                                 */
 /*******************************************************************/
@@ -329,6 +353,9 @@ is_vec_t(long t) { return (t == t_VEC || t == t_COL); }
 /*                         MISCELLANEOUS                           */
 /*                                                                 */
 /*******************************************************************/
+INLINE int
+isonstack(GEN x) { return ((pari_sp)x >= bot && (pari_sp)x < top); }
+
 /* assume 0 <= k <= BITS_IN_LONG. Return uniform random 0 <= x < (1<<k) */
 INLINE long
 random_bits(long k) { return pari_rand() >> (BITS_IN_LONG - k); }

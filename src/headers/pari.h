@@ -48,6 +48,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "paricast.h"
 #include "paristio.h"
 #include "paricom.h"
+#include "pariold.h"
 #include "parierr.h"
 BEGINEXTERN
 #include "paridecl.h"

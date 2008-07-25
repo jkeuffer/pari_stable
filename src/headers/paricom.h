@@ -74,39 +74,21 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
   }}
 /*=====================================================================*/
 
-#define LOG2   (0.6931471805599453) /* log(2) */
-#define LOG10_2 (0.3010299956639812) /* log_10(2) */
-
+extern const double LOG2, LOG10_2, LOG2_10;
 #ifndef  PI
 #  define PI (3.141592653589)
 #endif
 
-/*3.32~log_2(10)*/
-#define ndec2nlong(x) (1 + (long)((x)*(3.321928094887362/BITS_IN_LONG)))
-#define ndec2prec(x) (3 + (long)((x)*(3.321928094887362/BITS_IN_LONG)))
-#define nbits2prec(x) (((x)+3*BITS_IN_LONG-1) >> TWOPOTBITS_IN_LONG)
-#define nbits2nlong(x) (((x)+BITS_IN_LONG-1) >> TWOPOTBITS_IN_LONG)
-#define nchar2nlong(x) (((x)+sizeof(long)-1) / sizeof(long))
-#define bit_accuracy(x) (((x)-2) * BITS_IN_LONG)
-#define bit_accuracy_mul(x,y) (((x)-2) * (BITS_IN_LONG*(y)))
-#define prec2ndec(x) ((long)bit_accuracy_mul((x), LOG10_2))
-#define GSTR(x) ((char*) (((GEN) (x)) + 1 ))
-#define divsBIL(n) ((n)>> TWOPOTBITS_IN_LONG)
-#define remsBIL(n) ((n) & (BITS_IN_LONG-1))
-
-#include "pariold.h"
-
 /* Common global variables: */
+extern int new_galois_format, factor_add_primes, factor_proven;
 extern ulong DEBUGFILES, DEBUGLEVEL, DEBUGMEM, precdl;
 extern THREAD GEN  bernzone,gpi,geuler;
-extern GEN   primetab;
-extern GEN   gen_m1,gen_1,gen_2,gen_m2,ghalf,gi,gen_0,gnil;
+extern GEN primetab;
+extern GEN gen_m1,gen_1,gen_2,gen_m2,ghalf,gi,gen_0,gnil;
 extern VOLATILE int PARI_SIGINT_block, PARI_SIGINT_pending;
 
 extern const long lontyp[];
 extern void* global_err_data;
-
-extern int new_galois_format, factor_add_primes, factor_proven;
 
 enum manage_var_t {
   manage_var_create,

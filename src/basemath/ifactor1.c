@@ -1125,7 +1125,7 @@ fin:
     flusherr();
   }
 ret:
-  if (!isonstack(X)) gunclone((GEN)X);
+  if (!isonstack((GEN)X)) gunclone((GEN)X);
   avma = av; return res;
 }
 

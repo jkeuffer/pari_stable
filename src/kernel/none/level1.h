@@ -191,7 +191,7 @@ INLINE void
 cgiv(GEN x)
 {
   pari_sp av = (pari_sp)(x+lg(x));
-  if (isonstack(av)) avma = av;
+  if (isonstack((GEN)av)) avma = av;
 }
 
 /*******************************************************************/

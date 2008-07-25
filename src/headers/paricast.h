@@ -29,3 +29,5 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #define gcoeff(a,i,j) (((GEN**)(a))[j][i])
 #define coeff(a,i,j) (((GEN*)(a))[j][i])
+
+#define GSTR(x) ((char*) (((GEN) (x)) + 1 ))
