@@ -57,6 +57,7 @@ GEN  ifpari(GEN g, GEN a, GEN b);
 GEN  andpari(GEN a, GEN b);
 GEN  orpari(GEN a, GEN b);
 void ifpari_void(GEN g, GEN a, GEN b);
+GEN  geval_gp(GEN x, GEN t);
 
 GEN  gadde(GEN *x, GEN y);
 GEN  gadd1e(GEN *x);

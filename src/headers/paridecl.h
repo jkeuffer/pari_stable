@@ -1567,7 +1567,6 @@ GEN     gdivround(GEN x, GEN y);
 int     gdvd(GEN x, GEN y);
 GEN     geq(GEN x, GEN y);
 GEN     geval(GEN x);
-GEN     geval_gp(GEN x, GEN t);
 GEN     gfloor(GEN x);
 GEN     gfloor2n(GEN x, long s);
 GEN     gfrac(GEN x);
