@@ -14,3 +14,5 @@ Doc: initialize tables for integrations from $a$ to $b$ using abcissas
  is $ph(t)$ which goes from $a$ to $b$, and this is not checked. If \fl = 1
  or 2, multiply the reserved table length by $4^{\fl}$, to avoid corresponding
  error.
+ 
+ \synt{intnuminitgen}{void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, long m, long flag, long prec}
