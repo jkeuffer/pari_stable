@@ -92,32 +92,42 @@ easychar(GEN x, long v, GEN *py)
   return NULL; /* not reached */
 }
 
+/* We possibly worked with an "invalid" polynomial p, satisfying
+ * varn(p) > gvar2(p). Fix this. */
+static GEN
+fix_pol(pari_sp av, GEN p)
+{
+  long w = gvar2(p), v = varn(p);
+  if (w == v) pari_err(talker,"incorrect variable in charpoly");
+  if (varncmp(w,v) < 0) p = gerepileupto(av, poleval(p, pol_x(v)));
+  return p;
+}
 GEN
 caract(GEN x, long v)
 {
-  long k, n;
-  pari_sp av=avma;
+  pari_sp av = avma;
   GEN  T, C, x_k, Q;
+  long k, n;
 
   if ((T = easychar(x,v,NULL))) return T;
 
   n = lg(x)-1;
-  if (n == 1) return gerepileupto(av, deg1pol(gen_1, gneg(gcoeff(x,1,1)), v));
+  if (n == 1) return fix_pol(av, deg1pol(gen_1, gneg(gcoeff(x,1,1)), v));
 
   x_k = pol_x(v); /* to be modified in place */
-  T = det(x); C = utoineg(n); Q = pol_x(v);
+  T = scalarpol(det(x), v); C = utoineg(n); Q = pol_x(v);
   for (k=1; k<=n; k++)
   {
     GEN mk = utoineg(k), d;
     gel(x_k,2) = mk;
     d = det(RgM_Rg_add_shallow(x, mk));
-    T = RgX_add(gmul(T, x_k), RgX_Rg_mul(Q, gmul(C, d)));
+    T = RgX_add(RgX_mul(T, x_k), RgX_Rg_mul(Q, gmul(C, d)));
     if (k == n) break;
 
     Q = RgX_mul(Q, x_k);
     C = diviuexact(mulsi(k-n,C), k+1); /* (-1)^k binomial(n,k) */
   }
-  return gerepileupto(av, RgX_Rg_div(T, mpfact(n)));
+  return fix_pol(av, RgX_Rg_div(T, mpfact(n)));
 }
 
 /* assume x square matrice */
@@ -131,7 +141,6 @@ mattrace(GEN x)
   for (i = 2; i < lx; i++) t = gadd(t, gcoeff(x,i,i));
   return t;
 }
-
 /* Using traces: return the characteristic polynomial of x (in variable v).
  * If py != NULL, the adjoint matrix is put there. */
 GEN
@@ -149,18 +158,22 @@ caradj(GEN x, long v, GEN *py)
   if (l == 1) { if (py) *py = cgetg(1,t_MAT); return p; }
   av = avma; t = gerepileupto(av, gneg(mattrace(x)));
   gel(p,l) = t;
-  if (l == 2) { if (py) *py = matid(1); return p; }
+  if (l == 2) {
+    p = fix_pol(av0, p);
+    if (py) *py = matid(1); return p;
+  }
   if (l == 3) {
     GEN a = gcoeff(x,1,1), b = gcoeff(x,1,2);
     GEN c = gcoeff(x,2,1), d = gcoeff(x,2,2);
+    av = avma;
+    gel(p,2) = gerepileupto(av, gsub(gmul(a,d), gmul(b,c)));
+    p = fix_pol(av0, p);
     if (py) {
       y = cgetg(3, t_MAT);
       gel(y,1) = mkcol2(gcopy(d), gneg(c));
       gel(y,2) = mkcol2(gneg(b), gcopy(a));
       *py = y;
     }
-    av = avma;
-    gel(p,2) = gerepileupto(av, gsub(gmul(a,d), gmul(b,c)));
     return p;
   }
   /* l > 3 */
@@ -179,10 +192,8 @@ caradj(GEN x, long v, GEN *py)
   t = gmul(gcoeff(x,1,1),gcoeff(y,1,1));
   for (i=2; i<l; i++) t = gadd(t, gmul(gcoeff(x,1,i),gcoeff(y,i,1)));
   gel(p,2) = gerepileupto(av, gneg(t));
-  i = gvar2(p);
-  if (i == v) pari_err(talker,"incorrect variable in caradj");
-  if (i < v) p = gerepileupto(av0, poleval(p, pol_x(v)));
-  if (py) *py = (l & 1)? gneg(y): gcopy(y);
+  p = fix_pol(av0, p);
+  if (py) *py = (l & 1)? RgM_neg(y): gcopy(y);
   gunclone(y); return p;
 }
 
@@ -309,9 +320,9 @@ carhess(GEN x, long v)
       p4 = gadd(p4, gmul(gmul(p3,gcoeff(H,i,r)), gel(y,i)));
     }
     gel(X_h,2) = gneg(gcoeff(H,r,r));
-    gel(y,r+1) = gsub(gmul(gel(y,r), X_h), p4);
+    gel(y,r+1) = RgX_Rg_sub(RgX_mul(X_h, gel(y,r)), p4);
   }
-  return gerepileupto(av, gel(y,lx));
+  return fix_pol(av, gel(y,lx));
 }
 
 GEN
@@ -366,9 +377,9 @@ carberkowitz(GEN x, long v)
     }
     for (i = 1; i <= r+1; i++) V[i] = Q[i];
   }
-  V = gtopoly(V, v);
-  if (!odd(lx)) V = gneg(V);
-  return gerepileupto(av0, V);
+  V = polrecip_i( RgV_to_RgX(V, v) ); /* not gtopoly: fail if v > gvar(V) */
+  if (!odd(lx)) V = RgX_neg(V);
+  return fix_pol(av0, V);
 }
 
 /*******************************************************************/

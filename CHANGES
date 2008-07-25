@@ -96,6 +96,7 @@ BA 82- changing a function in use caused a crash [#784]
    84- RgX_val would raise a SEGV on t_POLs with exact *non-rational* 0
        leading coeff, e.g. Mod(0,2)*x
    85- SEGV (stack corruption) in idealval(K, rational number, pr) [#808]
+   86- All the charpoly(x,v) variants failed when v > variable(x)
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
