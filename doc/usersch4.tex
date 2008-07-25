@@ -1312,8 +1312,13 @@ unspecified. Note that no copy is made on the pari stack so the returned
 value is not safe for a basic \kbd{gerepile} call. Note that $\kbd{degpol(z)}
 = \kbd{lg(z)} - 3$.
 
-The leading term is not allowed to be an exact $0$ (\emph{unnormalized
-polynomial}). To prevent this, one may use
+The leading term is not allowed to be an exact rational $0$
+(\emph{unnormalized polynomial}), an exact non-rational $0$ (like
+\kbd{Mod(0,2)}) is possible for constant polynomials, and an inexact $0$
+(like \kbd{0.E-28}) is always possible. (The reason for this is that
+an inexact $0$ may not be actually $0$, and gives information on how much
+cancellation occurred; and an exact non-rational $0$ carries information
+about the base ring for the polynomial.) To ensure this, one uses
 
 \fun{GEN}{normalizepol}{GEN x} applied to an unnormalized \typ{POL}~\kbd{x}
 (with all coefficients correctly set except that \kbd{leading\_term(x)} might

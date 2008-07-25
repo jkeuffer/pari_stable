@@ -4644,12 +4644,21 @@ the vector represents a polynomial in the basis $(1,v,v^2,v^3,\dots)$.
 \fun{GEN}{normalizepol}{GEN x} applied to an unnormalized \typ{POL}~\kbd{x}
 (with all coefficients correctly set except that \kbd{leading\_term(x)} might
 be zero), normalizes \kbd{x} correctly in place and returns~\kbd{x}. For
-internal use.
+internal use. Normalizing means deleting all leading \emph{exact} zeroes
+(as per \kbd{isexactzero}), except if the polynomial turns out to be $0$,
+in which case we try to find a coefficient $c$ which is a non-rational zero,
+and return the constant polynomial $c$. (We do this so that information
+about the base ring is not lost.)
 
 \fun{GEN}{normalizepol_lg}{GEN x, long l} applies \kbd{normalizepol} to
 \kbd{x}, pretending that \kbd{lg(x)} is $l$, which must be less than
 or equal to \kbd{lg(x)}. If equal, the function is equivalent to
 \kbd{normalizepol(x)}.
+
+\fun{GEN}{normalizepol_approx}{GEN x, long lx} as \kbd{normalizepol\_lg},
+with the difference that we just delete all leading zeroes (as per
+\kbd{gcmp0}). This rougher normalization is used when we have no other
+choice, for instance before attempting a Euclidean division by $x$.
 
 The following routines do \emph{not} copy coefficients on the stack (they
 only move pointers around), hence are very fast but not suitable for
