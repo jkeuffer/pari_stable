@@ -2635,7 +2635,7 @@ INLINE GEN    ZX_sqr(GEN x);
 INLINE long   Z_issquare(GEN x);
 INLINE GEN    affc_fixlg(GEN x, GEN res);
 INLINE long   bit_accuracy(long x);
-INLINE long   bit_accuracy_mul(long x, double y);
+INLINE double bit_accuracy_mul(long x, double y);
 INLINE GEN    cgetc(long x);
 INLINE GEN    col_ei(long n, long i);
 INLINE GEN    const_col(long n, GEN x);

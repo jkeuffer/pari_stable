@@ -317,9 +317,9 @@ INLINE long nchar2nlong(long x)
 { return (x+sizeof(long)-1) / sizeof(long); }
 INLINE long bit_accuracy(long x)
 { return (x-2) * BITS_IN_LONG; }
-INLINE long bit_accuracy_mul(long x, double y)
-{ return (long)((x-2) * (BITS_IN_LONG*y)); }
-INLINE long prec2ndec(long x) { return bit_accuracy_mul(x, LOG10_2); }
+INLINE double bit_accuracy_mul(long x, double y)
+{ return (x-2) * (BITS_IN_LONG*y); }
+INLINE long prec2ndec(long x) { return (long)bit_accuracy_mul(x, LOG10_2); }
 INLINE long divsBIL(long n) { return n >> TWOPOTBITS_IN_LONG; }
 INLINE long remsBIL(long n) { return n & (BITS_IN_LONG-1); }
 
