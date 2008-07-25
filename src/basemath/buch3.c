@@ -649,7 +649,7 @@ hermiteconstant(long n)
 static long
 isprimitive(GEN nf)
 {
-  long p, i, l, ep, N = degpol(nf[1]);
+  long p, i, l, ep, N = nf_get_degree(nf);
   GEN d,fa;
 
   p = ucoeff(factoru(N), 1,1); /* smallest prime | N */
@@ -688,7 +688,7 @@ regulatorbound(GEN bnf)
   long N, R1, R2, R;
   GEN nf, dK, p1, c1;
 
-  nf = gel(bnf,7); N = degpol(nf[1]);
+  nf = gel(bnf,7); N = nf_get_degree(nf);
   if (!isprimitive(nf)) return dft_bound();
 
   dK = absi(gel(nf,3));
@@ -745,7 +745,7 @@ minimforunits(GEN nf, long BORNE, GEN w)
     if (DEBUGLEVEL>2) fprintferr("   BOUND = %ld\n",BORNE);
     flusherr();
   }
-  r1 = nf_get_r1(nf); n = degpol(nf[1]);
+  r1 = nf_get_r1(nf); n = nf_get_degree(nf);
   minim_alloc(n+1, &q, &x, &y, &z, &v);
   M = gprec_w(gmael(nf,5,1), prec);
   r = Q_from_QR(gmael(nf,5,2), prec);
@@ -960,7 +960,7 @@ lowerboundforregulator_i(GEN bnf)
   GEN vecminim,p1,pol,y;
   GEN units = check_units(bnf,"bnfcertify");
 
-  nf = gel(bnf,7); N = degpol(nf[1]);
+  nf = gel(bnf,7); N = nf_get_degree(nf);
   nf_get_sign(nf, &R1, &R2); RU = R1+R2-1;
   if (!RU) return gen_1;
 
@@ -1101,7 +1101,7 @@ certifybuchall(GEN bnf)
   ulong bound, p;
 
   bnf = checkbnf(bnf); nf = gel(bnf,7);
-  N=degpol(nf[1]); if (N==1) return 1;
+  N=nf_get_degree(nf); if (N==1) return 1;
   nf_get_sign(nf, &R1, &R2);
   funits = check_units(bnf,"bnfcertify");
   testprimes(bnf, zimmertbound(N,R2,absi(gel(nf,3))));
@@ -1427,7 +1427,7 @@ rnfnormgroup(GEN bnr, GEN polrel)
       nfac = lg(fac)-1;
       /* check decomposition of pr has Galois type */
       for (j=2; j<=nfac; j++)
-	if (degpol(fac[j]) != f)
+	if (degpol(gel(fac,j)) != f)
 	  pari_err(talker,"non Galois extension in rnfnormgroup");
       if (oldf < 0) oldf = f; else if (oldf != f) oldf = 0;
       if (f == reldeg) continue; /* reldeg-th powers already included */
@@ -1580,7 +1580,7 @@ bnrdisc(GEN bnr, GEN H, long flag)
   nf = checknf(bnr);
   dkabs = absi(gel(nf,3));
   clhray = itos(gel(D,1)); p1 = powiu(dkabs, clhray);
-  n = clhray * degpol(nf[1]);
+  n = clhray * nf_get_degree(nf);
   R1= clhray * itos(gel(D,2));
   dk = gel(D,3);
   if (((n-R1)&3) == 2) dk = negi(dk); /* (2r2) mod 4 = 2 : r2(relext) is odd */
@@ -1859,7 +1859,7 @@ discrayabslist(GEN bnf, GEN L)
   ID.bnf = bnf = checkbnf(bnf);
   nf = gel(bnf,7);
   h = gmael3(bnf,8,1,1);
-  ID.degk = degpol(nf[1]);
+  ID.degk = nf_get_degree(nf);
   ID.fadk = Z_factor(absi(gel(nf,3)));
   ID.idealrelinit = trivfact();
   V = cgetg(l, t_VEC);
@@ -2011,7 +2011,7 @@ decodemodule(GEN nf, GEN fa)
   nf = checknf(nf);
   if (typ(fa)!=t_MAT || lg(fa)!=3)
     pari_err(talker,"not a factorisation in decodemodule");
-  n = degpol(nf[1]); nn = n*n; id = NULL;
+  n = nf_get_degree(nf); nn = n*n; id = NULL;
   G = gel(fa,1);
   E = gel(fa,2);
   for (k=1; k<lg(G); k++)
@@ -2054,7 +2054,7 @@ discrayabslistarch(GEN bnf, GEN arch, long bound)
 
   bnf = checkbnf(bnf);
   nf = gel(bnf,7); r1 = nf_get_r1(nf);
-  degk = degpol(nf[1]);
+  degk = nf_get_degree(nf);
   fadkabs = Z_factor(absi(gel(nf,3)));
   h = gmael3(bnf,8,1,1);
   U = init_units(bnf);

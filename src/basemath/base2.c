@@ -65,17 +65,18 @@ get_coprimes(GEN a, GEN b)
     if (is_pm1(c)) { k++; continue; }
     for (i=1; i<=k; i++)
     {
-      if (is_pm1(u[i])) continue;
-      d = gcdii(c, gel(u,i));
+      GEN ui = gel(u,i);
+      if (is_pm1(ui)) continue;
+      d = gcdii(c, ui);
       if (d == gen_1) continue;
       c = diviiexact(c, d);
-      gel(u,i) = diviiexact(gel(u,i), d);
+      gel(u,i) = diviiexact(ui, d);
       u = shallowconcat(u, d);
     }
     gel(u,++k) = c;
   }
   for (i = k = 1; i < lg(u); i++)
-    if (!is_pm1(u[i])) u[k++] = u[i];
+    if (!is_pm1(gel(u,i))) gel(u,k++) = gel(u,i);
   setlg(u, k); return u;
 }
 /* allow p = -1 from factorizations */
@@ -1367,7 +1368,7 @@ loop(decomp_t *S, long nv, long Ea, long Fa)
 
     /* nug irreducible mod p */
     w = FpX_factorff_irred(nug, ch_var(S->nu, nv), S->p);
-    if (degpol(w[1]) != 1)
+    if (degpol(gel(w,1)) != 1)
       pari_err(talker, "no root in nilord. Is p = %Ps a prime?", S->p);
 
     for (i = 1; i < lg(w); i++)
@@ -1668,7 +1669,7 @@ errprime(GEN p) { pari_err(talker, "idealprimedec: %Ps is not prime", p); }
 static GEN
 uniformizer(GEN nf, norm_S *S, GEN P, GEN V, GEN p, int ramif)
 {
-  long i, l, f, m = lg(P)-1, N = degpol(nf[1]);
+  long i, l, f, m = lg(P)-1, N = nf_get_degree(nf);
   GEN u, Mv, x, q;
 
   f = N - m; /* we want v_p(Norm(x)) = p^f */
@@ -1737,7 +1738,7 @@ primedec_apply_kummer(GEN nf,GEN u,long e,GEN p)
 static GEN
 pradical(GEN nf, GEN p, GEN *phi)
 {
-  long i,N = degpol(nf[1]);
+  long i, N = nf_get_degree(nf);
   GEN q,m,frob,rad;
 
   /* matrix of Frob: x->x^p over Z_K/p */
@@ -2028,7 +2029,7 @@ modprinit(GEN nf, GEN pr, int zk)
 
   nf = checknf(nf); checkprid(pr);
   f = pr_get_f(pr);
-  N = degpol(nf[1]);
+  N = nf_get_degree(nf);
   prh = idealhnf_two(nf, pr);
   tau = zk? gen_0: anti_uniformizer2(nf, pr);
   p = pr_get_p(pr);
@@ -2187,7 +2188,7 @@ nfreducemodpr_i(GEN x, GEN prh)
   {
     GEN t = gel(prh,i), p1 = remii(gel(x,i), p);
     gel(x,i) = p1;
-    if (signe(p1) && is_pm1(t[i]))
+    if (signe(p1) && is_pm1(gel(t,i)))
     {
       for (j=1; j<i; j++)
 	gel(x,j) = subii(gel(x,j), mulii(p1, gel(t,j)));
@@ -2500,7 +2501,7 @@ rnfdedekind(GEN nf, GEN P, GEN pr)
   if (!z) {
     z = cgetg(4, t_VEC);
     gel(z,1) = gen_1;
-    gel(z,2) = triv_order(degpol(P), degpol(nf[1]));
+    gel(z,2) = triv_order(degpol(P), nf_get_degree(nf));
     gel(z,3) = stoi(v);
   }
   return z;
@@ -2814,7 +2815,7 @@ rnfsimplifybasis(GEN bnf, GEN x)
     pari_err(talker,"not a pseudo-basis in nfsimplifybasis");
   A = gel(x,1);
   I = gel(x,2); l = lg(I);
-  id = matid(degpol(nf[1]));
+  id = matid(nf_get_degree(nf));
   y = cgetg(3, t_VEC);
   Az = cgetg(l, t_MAT); gel(y,1) = Az;
   Iz = cgetg(l, t_VEC); gel(y,2) = Iz;
@@ -2894,7 +2895,7 @@ rnfsteinitz(GEN nf, GEN order)
   GEN Id,A,I,p1,a,b;
 
   nf = checknf(nf);
-  Id = matid(degpol(nf[1]));
+  Id = matid(nf_get_degree(nf));
   order = get_order(nf, order, "rnfsteinitz");
   A = matalgtobasis(nf, gel(order,1));
   I = shallowcopy(gel(order,2)); n=lg(A)-1;
@@ -2945,7 +2946,7 @@ rnfbasis(GEN bnf, GEN order)
   GEN nf, A, I, cl, col, a, id;
 
   bnf = checkbnf(bnf); nf = gel(bnf,7);
-  id = matid(degpol(nf[1]));
+  id = matid(nf_get_degree(nf));
   order = get_order(nf, order, "rnfbasis");
   I = gel(order,2); n = lg(I)-1;
   j=1; while (j<n && gequal(gel(I,j),id)) j++;
@@ -2980,7 +2981,7 @@ rnfhnfbasis(GEN bnf, GEN order)
   GEN nf, A, I, a, id;
 
   bnf = checkbnf(bnf); nf = gel(bnf,7);
-  id = matid(degpol(nf[1]));
+  id = matid(nf_get_degree(nf));
   order = get_order(nf, order, "rnfbasis");
   A = gel(order,1); A = shallowcopy(A);
   I = gel(order,2); n = lg(A)-1;
@@ -3004,7 +3005,7 @@ _rnfisfree(GEN bnf, GEN order)
   bnf = checkbnf(bnf);
   if (gcmp1(gmael3(bnf,8,1,1))) return 1;
 
-  nf = gel(bnf,7); id = matid(degpol(nf[1]));
+  nf = gel(bnf,7); id = matid(nf_get_degree(nf));
   order = get_order(nf, order, "rnfisfree");
   I = gel(order,2); n = lg(I)-1;
   j=1; while (j<=n && gequal(gel(I,j),id)) j++;

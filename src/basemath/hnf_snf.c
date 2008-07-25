@@ -540,20 +540,21 @@ GEN
 mathnfspec(GEN x, GEN *ptperm, GEN *ptdep, GEN *ptB, GEN *ptC)
 {
   long i,j,k,ly,lx = lg(x);
-  GEN p1,p2,z,perm;
-  if (lx == 1) return gcopy(x);
+  GEN z, perm;
+  if (lx == 1) return cgetg(1, t_MAT);
   ly = lg(x[1]);
   z = cgetg(lx,t_MAT);
   perm = cgetg(ly,t_VECSMALL); *ptperm = perm;
   for (i=1; i<ly; i++) perm[i] = i;
   for (i=1; i<lx; i++)
   {
-    p1 = cgetg(ly,t_COL); gel(z,i) = p1;
-    p2 = gel(x,i);
+    GEN C = cgetg(ly,t_COL), D = gel(x,i);
+    gel(z,i) = C;
     for (j=1; j<ly; j++)
     {
-      if (is_bigint(p2[j])) goto TOOLARGE;
-      p1[j] = itos(gel(p2,j));
+      GEN d = gel(D,j);
+      if (is_bigint(d)) goto TOOLARGE;
+      C[j] = itos(d);
     }
   }
   /*  [ dep |     ]

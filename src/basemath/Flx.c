@@ -1692,7 +1692,7 @@ FlxX_renormalize(GEN /*in place*/ x, long lx)
 {
   long i;
   for (i = lx-1; i>1; i--)
-    if (lgpol(x[i])) break;
+    if (lgpol(gel(x,i))) break;
   stackdummy((pari_sp)(x + lg(x)), (pari_sp)(x + i+1));
   setlg(x, i+1); setsigne(x, i!=1); return x;
 }
@@ -1717,7 +1717,7 @@ FlxX_to_ZXX(GEN B)
   long i;
   GEN b=cgetg(lb,t_POL);
   for (i=2; i<lb; i++)
-    if (lgpol(B[i]))
+    if (lgpol(gel(B,i)))
       gel(b,i) = Flx_to_ZX(gel(B,i));
     else
       gel(b,i) = gen_0;

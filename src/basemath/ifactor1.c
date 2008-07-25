@@ -2636,7 +2636,7 @@ ifac_divide(GEN *partial, GEN *where)
     {
       EXPON(*where) = (newexp == 2 ? gen_2 : utoipos(newexp));
       exponent = newexp;
-      if (is_pm1(*scan)) /* factor dissolved completely */
+      if (is_pm1((GEN)*scan)) /* factor dissolved completely */
       {
 	INIT0(scan);
 	if (DEBUGLEVEL >= 4)

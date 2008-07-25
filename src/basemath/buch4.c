@@ -652,7 +652,7 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
   if (drel <= 2) galois = 1;
 
   rnfeq = NULL; /* no reltoabs needed */
-  if (degpol(nf[1]) == 1) { /* over Q */
+  if (nf_get_degree(nf) == 1) { /* over Q */
     polabs = lift(relpol); k = gen_0;
   } else if (galois == 2) { /* needs reltoabs */
     rnfeq = rnfequation2(bnf, relpol);
@@ -779,7 +779,7 @@ rnfisnorm(GEN T, GEN x, long flag)
   setlg(Y, L);
   aux = factorback2(sunitrel, gfloor(Y));
   x = gdiv(mkpolmod(x,nfpol), gnorm(gmodulo(lift_intern(aux), relpol)));
-  if (typ(x) == t_POLMOD && (typ(x[2]) != t_POL || !degpol(x[2])))
+  if (typ(x) == t_POLMOD && (typ(x[2]) != t_POL || !degpol(gel(x,2))))
   {
     x = gel(x,2); /* rational number */
     if (typ(x) == t_POL) x = gel(x,2);

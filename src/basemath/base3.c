@@ -556,7 +556,7 @@ pow_ei_mod_p(GEN nf, long I, GEN n, GEN p)
   GEN y;
 
   if (typ(n) != t_INT) pari_err(talker,"not an integer exponent in nfpow");
-  nf = checknf(nf); N = degpol(nf[1]);
+  nf = checknf(nf); N = nf_get_degree(nf);
   s = signe(n);
   if (s < 0) pari_err(talker,"negative power in pow_ei_mod_p");
   if (!s || I == 1) return scalarcol_shallow(gen_1,N);
@@ -579,7 +579,7 @@ int_elt_val(GEN nf, GEN x, GEN p, GEN b, GEN *newx)
 
   if (typ(mul) == t_INT) return newx? ZV_pvalrem(x, p, newx):ZV_pval(x, p);
 
-  N = degpol(nf[1]);
+  N = nf_get_degree(nf);
   y = cgetg(N+1, t_COL); /* will hold the new x */
   x = shallowcopy(x);
   for(w=0;; w++)
@@ -774,7 +774,7 @@ algtobasis(GEN nf, GEN x)
       switch(typ(x))
       {
         case t_INT:
-        case t_FRAC: return scalarcol(x, degpol(nf[1]));
+        case t_FRAC: return scalarcol(x, nf_get_degree(nf));
         case t_POL:
           av = avma;
           return gerepileupto(av,poltobasis(nf,x));
@@ -789,7 +789,7 @@ algtobasis(GEN nf, GEN x)
       return gcopy(x);
 
     case t_INT:
-    case t_FRAC: return scalarcol(x, degpol(nf[1]));
+    case t_FRAC: return scalarcol(x, nf_get_degree(nf));
   }
   pari_err(typeer,"algtobasis");
   return NULL; /* not reached */
@@ -902,7 +902,7 @@ rnfalgtobasis(GEN rnf,GEN x)
       return gerepileupto(av, poltobasis(rnf, x));
     }
   }
-  return scalarcol(x, degpol(rnf[1]));
+  return scalarcol(x, rnf_get_degree(rnf));
 }
 
 /* Given a and b in nf, gives an algebraic integer y in nf such that a-b.y
@@ -1079,7 +1079,7 @@ nfinvmodideal(GEN nf, GEN x, GEN y)
   pari_sp av = avma;
   GEN a, yZ = gcoeff(y,1,1);
 
-  if (is_pm1(yZ)) return zerocol( degpol(nf[1]) );
+  if (is_pm1(yZ)) return zerocol( nf_get_degree(nf) );
   x = nf_to_scalar_or_basis(nf, x);
   if (typ(x) == t_INT) return gerepileupto(av, Fp_inv(x, yZ));
 
@@ -1102,11 +1102,11 @@ nfpowmodideal(GEN nf,GEN x,GEN k,GEN A)
   long s = signe(k);
   GEN y;
 
-  if (!s) return scalarcol_shallow(gen_1, degpol(nf[1]));
+  if (!s) return scalarcol_shallow(gen_1, nf_get_degree(nf));
   x = nf_to_scalar_or_basis(nf, x);
   if (typ(x) != t_COL) {
     x = Fp_pow(x, k, gcoeff(A,1,1));
-    return scalarcol_shallow(x, degpol(nf[1]));
+    return scalarcol_shallow(x, nf_get_degree(nf));
   }
   if (s < 0) { x = nfinvmodideal(nf, x,A); k = absi(k); }
   for(y = NULL;;)
@@ -1258,7 +1258,7 @@ zprimestar(GEN nf, GEN pr, GEN ep, GEN x, GEN arch)
 
   if(DEBUGLEVEL>3) fprintferr("treating pr^%ld, pr = %Ps\n",e,pr);
   if (f == 1)
-    g = scalarcol_shallow(pgener_Fp(p), degpol(nf[1]));
+    g = scalarcol_shallow(pgener_Fp(p), nf_get_degree(nf));
   else
   {
     GEN T, modpr = zk_to_Fq_init(nf, &pr, &T, &p);
@@ -1806,7 +1806,7 @@ ideallog_sgn(GEN nf, GEN x, GEN sgn, GEN bid)
   cyc = gmael(bid,2,2);
   lcyc = lg(cyc); if (lcyc == 1) return cgetg(1, t_COL);
   av = avma;
-  N = degpol(nf[1]);
+  N = nf_get_degree(nf);
   switch(typ(x))
   {
     case t_INT: case t_FRAC:
@@ -1992,7 +1992,7 @@ Ideallist(GEN bnf, ulong bound, long flag)
 
   nf = checknf(bnf);
   if ((long)bound <= 0) return empty;
-  id = matid(degpol(nf[1]));
+  id = matid(nf_get_degree(nf));
   if (big_id) id = Idealstar(nf,id, istar_flag);
 
   /* z[i] will contain all "objects" of norm i. Depending on flag, this means

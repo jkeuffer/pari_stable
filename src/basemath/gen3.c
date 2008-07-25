@@ -1087,15 +1087,15 @@ ginv(GEN x)
       gel(z,1) = icopy(gel(x,1));
       gel(z,2) = Fp_inv(gel(x,2),gel(x,1)); return z;
 
-    case t_FRAC:
-      s = signe(x[1]); if (!s) pari_err(gdiver);
-      if (is_pm1(x[1]))
-	return s>0? icopy(gel(x,2)): negi(gel(x,2));
+    case t_FRAC: {
+      GEN a = gel(x,1), b = gel(x,2);
+      s = signe(a);
+      if (is_pm1(a)) return s > 0? icopy(b): negi(b);
       z = cgetg(3,t_FRAC);
-      gel(z,1) = icopy(gel(x,2));
-      gel(z,2) = icopy(gel(x,1));
+      gel(z,1) = icopy(b);
+      gel(z,2) = icopy(a);
       normalize_frac(z); return z;
-
+    }
     case t_COMPLEX:
       av=avma;
       p1=cxnorm(x);
@@ -1883,8 +1883,8 @@ integ(GEN x, long v)
       if (varncmp(vx, v) < 0)
 	return gerepileupto(av, swapvar_act(x, vx, v, integ_act, NULL));
 
-      tx = typ(x[1]); i = is_scalar_t(tx)? 0: degpol(x[1]);
-      tx = typ(x[2]); n = is_scalar_t(tx)? 0: degpol(x[2]);
+      tx = typ(x[1]); i = is_scalar_t(tx)? 0: degpol(gel(x,1));
+      tx = typ(x[2]); n = is_scalar_t(tx)? 0: degpol(gel(x,2));
       y = integ(gadd(x, zeroser(v,i+n + 2)), v);
       y = gdiv(gtrunc(gmul(gel(x,2), y)), gel(x,2));
       if (!gequal(deriv(y,v),x)) pari_err(talker,"a log/atan appears in intformal");

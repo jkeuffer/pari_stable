@@ -1897,7 +1897,7 @@ solve_exact_pol(GEN p, long bit)
   for (i=1; i<lg(factors); i++)
   {
     GEN roots_fact = all_roots(gel(factors,i), bit);
-    n = degpol(factors[i]);
+    n = degpol(gel(factors,i));
     m = ex[i];
     for (j=1; j<=n; j++)
       for (k=1; k<=m; k++) v[++iroots] = roots_fact[j];

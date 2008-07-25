@@ -466,7 +466,7 @@ FindModulus(GEN bnr, GEN dtQ, long *newprec, long prec)
   sgp = gel(dtQ,4);
   bnf = gel(bnr,1);
   nf  = gel(bnf,7);
-  N   = degpol(nf[1]);
+  N   = nf_get_degree(nf);
   f   = gmael3(bnr, 2, 1, 1);
 
   /* if cpl < rb, it is not necessary to try another modulus */
@@ -628,7 +628,7 @@ ArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
   cond  = gmael(bnr, 2, 1);
   cond0 = gel(cond,1); condZ = gcoeff(cond0,1,1);
   cond1 = vec01_to_indices(gel(cond,2));
-  N     = degpol(nf[1]);
+  N     = nf_get_degree(nf);
 
   sqrtnc = gsqrt(idealnorm(nf, cond0), prec);
   dc  = idealmul(nf, diff, cond0);
@@ -671,7 +671,7 @@ ArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
 
   for (i = 1; i <= nz; i++)
   {
-    if (is_bigint(cyc[i]))
+    if (is_bigint(gel(cyc,i)))
       pari_err(talker,"conductor too large in ArtinNumber");
     gel(gen,i) = set_sign_mod_divisor(nf, NULL, gel(gen,i), cond,sarch);
     classe = isprincipalray(bnr, gel(gen,i));
@@ -900,7 +900,7 @@ InitChar(GEN bnr, GEN listCR, long prec)
   modul = gmael(bnr, 2, 1);
   Mr    = gmael(bnr, 5, 2);
   dk    = gel(nf,3);
-  N     = degpol(nf[1]);
+  N     = nf_get_degree(nf);
   nf_get_sign(nf, &r1,&r2);
   prec2 = ((prec-2) << 1) + EXTRA_PREC;
   C     = gmul2n(sqrtr_abs(divir(dk, gpowgs(mppi(prec2),N))), -r2);
@@ -1841,7 +1841,7 @@ RecCoeff(GEN nf,  GEN pol,  long v, long prec)
   md = cl/2;
   pol = shallowcopy(pol);
 
-  d.N = degpol(nf[1]);
+  d.N = nf_get_degree(nf);
   d.v = v;
 
   for (j = 1; j <= cl; j++)
@@ -2298,7 +2298,7 @@ AllStark(GEN data,  GEN nf,  long flag,  long newprec)
   LISTray LIST;
 
   nf_get_sign(nf, &r1,&r2);
-  N     = degpol(nf[1]);
+  N     = nf_get_degree(nf);
   cond1 = gmael3(bnr, 2, 1, 2);
   dataCR = gel(data,5);
   vChar = sortChars(dataCR);
@@ -2317,7 +2317,7 @@ LABDOUB:
   Lp = cgetg(cl + 1, t_VEC);
   if (!flag)
   {
-    if (degpol(nf[1]) == 2)
+    if (nf_get_degree(nf) == 2)
       QuadGetST(bnr, &S,&T,dataCR,vChar,newprec);
     else
       GetST(bnr, &S, &T, dataCR, vChar, newprec);
@@ -2591,7 +2591,7 @@ bnrstark(GEN bnr, GEN subgrp, long prec)
   checkbnrgen(bnr);
   bnf = checkbnf(bnr);
   nf  = checknf(bnf);
-  N   = degpol(nf[1]);
+  N   = nf_get_degree(nf);
   if (N == 1) return galoissubcyclo(bnr, subgrp, 0, 0);
 
   /* check the bnf */
@@ -2625,7 +2625,7 @@ bnrstark(GEN bnr, GEN subgrp, long prec)
     for (i = 1; i < l; i++)
     {
       GEN t = gel(M,i);
-      if (is_pm1(cyc[i])) continue;
+      if (is_pm1(gel(cyc,i))) continue;
       M[i] = Mcyc[i]; H = ZM_hnf(shallowconcat(M, Mcyc));
       gel(M,i) = t;
       gel(vec,j++) = bnrstark(bnr, H, prec);
@@ -2660,9 +2660,9 @@ bnrL1(GEN bnr, GEN subgp, long flag, long prec)
   pari_sp av = avma;
 
   checkbnrgen(bnr);
-  bnf  = gel(bnr,1);
-  nf   = gel(bnf,7);
-  N    = degpol(nf[1]);
+  bnf = gel(bnr,1);
+  nf  = gel(bnf,7);
+  N   = nf_get_degree(nf);
 
   if (N == 1) pari_err(talker, "the ground field must be distinct from Q");
   if (flag < 0 || flag > 8) pari_err(flagerr,"bnrL1");

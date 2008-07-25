@@ -409,7 +409,7 @@ ZC_lincomb1(GEN v, GEN X, GEN Y)
 {
   long i, lx = lg(X), m = lgefint(v);
   GEN p1, p2, A = cgetg(lx,t_COL);
-  if (is_bigint_lg(v, m))
+  if (is_bigint(v))
   {
     for (i=1; i<lx; i++)
     {

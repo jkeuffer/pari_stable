@@ -1132,7 +1132,7 @@ testprimes(GEN bnf, GEN BOUND)
   fb = gen_sort(gel(bnf,5), (void*)&cmp_prime_ideal, cmp_nodata);
   pmax = itou(gmael(fb, lg(fb)-1, 1)); /* largest p in factorbase */
   Vbase = get_Vbase(bnf);
-  (void)recover_partFB(&F, Vbase, degpol(nf[1]));
+  (void)recover_partFB(&F, Vbase, nf_get_degree(nf));
   fact = (FACT*)stackmalloc((F.KC+1)*sizeof(FACT));
 
   if (!bound) bound = maxprime();
@@ -1411,7 +1411,7 @@ isprincipalarch(GEN bnf, GEN col, GEN kNx, GEN e, GEN dx, long *pe)
   bnf = checkbnf(bnf); nf = gel(bnf,7); M = gmael(nf,5,1);
   if (!prec) prec = prec_arch(bnf);
   matunit = gel(bnf,3);
-  N = degpol(nf[1]);
+  N = nf_get_degree(nf);
   R1 = nf_get_r1(nf);
   RU = (N + R1)>>1;
   col = cleanarch(col,N,prec); settyp(col, t_COL);
@@ -2072,7 +2072,7 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
   double *y,*z,**q,*v, BOUND;
   pari_sp av;
   long nbsmallnorm, nbfact, j, k, noideal = F->KC, precbound;
-  long N = degpol(nf[1]), R1 = nf_get_r1(nf), prec = nf_get_prec(nf);
+  long N = nf_get_degree(nf), R1 = nf_get_r1(nf), prec = nf_get_prec(nf);
   GEN x, gx, r, M = gmael(nf,5,1), G = gmael(nf,5,2);
   GEN L = const_vecsmall(F->KC, 0), invp = relationrank(cache, L, mod_p);
   REL_t *rel = cache->last;
@@ -2599,7 +2599,7 @@ class_group_gen(GEN nf,GEN W,GEN C,GEN Vbase,long prec, GEN nf0,
 static GEN
 decode_pr_lists(GEN nf, GEN pfc)
 {
-  long i, p, pmax, n = degpol(nf[1]), l = lg(pfc);
+  long i, p, pmax, n = nf_get_degree(nf), l = lg(pfc);
   GEN t, L;
 
   pmax = 0;
@@ -2745,7 +2745,7 @@ get_archclean(GEN nf, GEN x, long prec, int units)
   GEN M = cgetg(la,t_MAT);
 
   if (la == 1) return M;
-  N = degpol(nf[1]);
+  N = nf_get_degree(nf);
   for (k=1; k<la; k++)
   {
     GEN c = get_arch(nf, gel(x,k), prec);
@@ -2912,7 +2912,7 @@ sbnf2bnf(GEN sbnf, long prec)
   l = lg(pfc);
   Vbase = cgetg(l,t_COL);
   L = decode_pr_lists(nf, pfc);
-  n = degpol(nf[1]);
+  n = nf_get_degree(nf);
   for (j=1; j<l; j++) gel(Vbase,j) = decodeprime(gel(pfc,j), L, n);
   W = gel(sbnf,7);
   class_group_gen(nf,W,C,Vbase,prec,NULL, &clgp,&clgp2);

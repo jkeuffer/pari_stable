@@ -463,7 +463,7 @@ init_traces(GEN ff, GEN T, GEN p)
   GEN Frob = FpXQ_matrix_pow(FpXQ_pow(pol_x(varn(T)),p, T,p), N,N, T,p);
   GEN y,p1,p2,Trk,pow,pow1;
 
-  k = degpol(ff[r-1]); /* largest degree in modular factorization */
+  k = degpol(gel(ff,r-1)); /* largest degree in modular factorization */
   pow = cgetg(k+1, t_VEC);
   gel(pow,1) = gen_0; /* dummy */
   gel(pow,2) = Frob;
@@ -484,7 +484,7 @@ init_traces(GEN ff, GEN T, GEN p)
   for (i=2; i<=k; i++)
     gel(Trk,i) = gadd(gel(Trk,i-1), gel(pow1,i));
   y = cgetg(r, t_VEC);
-  for (i=1; i<r; i++) y[i] = Trk[degpol(ff[i])];
+  for (i=1; i<r; i++) y[i] = Trk[degpol(gel(ff,i))];
   return y;
 }
 
@@ -512,7 +512,7 @@ init_primedata(primedata *S)
   long i, j, l, lff = lg(S->ff), v = fetch_var(), N = degpol(S->pol);
   GEN T, p = S->p;
 
-  if (S->lcm == degpol(S->ff[lff-1]))
+  if (S->lcm == degpol(gel(S->ff,lff-1)))
   {
     T = shallowcopy(gel(S->ff,lff-1));
     setvarn(T, v);
@@ -557,8 +557,8 @@ choose_prime(primedata *S, GEN pol, GEN dpol)
     r = lg(ff)-1;
     if (r == N || r >= BIL) continue;
 
-    n = cgetg(r+1, t_VECSMALL); lcm = n[1] = degpol(ff[1]);
-    for (j=2; j<=r; j++) { n[j] = degpol(ff[j]); lcm = clcm(lcm, n[j]); }
+    n = cgetg(r+1, t_VECSMALL); lcm = n[1] = degpol(gel(ff,1));
+    for (j=2; j<=r; j++) { n[j] = degpol(gel(ff,j)); lcm = clcm(lcm, n[j]); }
     if (lcm <= oldlcm) continue; /* false when oldlcm = 0 */
 
     if (DEBUGLEVEL) fprintferr("p = %ld,\tlcm = %ld,\torbits: %Ps\n",p[2],lcm,n);
@@ -653,12 +653,12 @@ compute_data(blockdata *B)
     interp  = gel(DATA,9);
     for (i=1; i<l; i++)
     {
-      if (degpol(interp[i]) > 0) /* do not turn pol_1(0) into gen_1 */
+      if (degpol(gel(interp,i)) > 0) /* do not turn pol_1(0) into gen_1 */
       {
 	p1 = RgX_translate(gel(interp,i), gen_m1);
 	gel(interp,i) = FpXX_red(p1, p);
       }
-      if (degpol(bezoutC[i]) > 0)
+      if (degpol(gel(bezoutC,i)) > 0)
       {
 	p1 = RgX_translate(gel(bezoutC,i), gen_m1);
 	gel(bezoutC,i) = FpXX_red(p1, p);

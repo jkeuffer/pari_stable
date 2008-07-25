@@ -120,7 +120,7 @@ makenfabs(GEN rnf)
   else   M = matid(n);
 
   gel(NF,1) = pol;
-  gel(NF,3) = mulii(powiu(gel(nf,3), degpol(rnf[1])),
+  gel(NF,3) = mulii(powiu(gel(nf,3), rnf_get_degree(rnf)),
 		      idealnorm(nf, gel(rnf,3)));
   gel(NF,7) = RgM_to_RgXV(M,varn(pol));
   gel(NF,8) = RgM_inv(M);
@@ -328,7 +328,7 @@ rnfidealhermite(GEN rnf, GEN x)
   {
     case t_INT: case t_FRAC:
       bas = gel(rnf,7); z = cgetg(3,t_VEC);
-      gel(z,1) = rnfid(degpol(rnf[1]), degpol(nf[1]));
+      gel(z,1) = rnfid(rnf_get_degree(rnf), nf_get_degree(nf));
       gel(z,2) = gmul(x, gel(bas,2)); return z;
 
     case t_VEC:
@@ -347,7 +347,7 @@ prodid(GEN nf, GEN I)
 {
   long i, l = lg(I);
   GEN z;
-  if (l == 1) return matid(degpol(nf[1]));
+  if (l == 1) return matid(nf_get_degree(nf));
   z = gel(I,1);
   for (i=2; i<l; i++) z = idealmul(nf, z, gel(I,i));
   return z;
@@ -370,7 +370,7 @@ rnfidealnormrel(GEN rnf, GEN id)
   pari_sp av = avma;
   GEN z, nf;
   checkrnf(rnf); nf = gel(rnf,10);
-  if (degpol(rnf[1]) == 1) return matid(degpol(nf[1]));
+  if (rnf_get_degree(rnf) == 1) return matid(nf_get_degree(nf));
 
   z = prodid(nf, gel(rnfidealhermite(rnf,id),2));
   return gerepileupto(av, idealmul(nf,z, gel(rnf,4)));
@@ -383,7 +383,7 @@ rnfidealnormabs(GEN rnf, GEN id)
   GEN z;
 
   checkrnf(rnf);
-  if (degpol(rnf[1]) == 1) return gen_1;
+  if (rnf_get_degree(rnf) == 1) return gen_1;
 
   z = prodidnorm( gel(rnfidealhermite(rnf,id),2) );
   return gerepileupto(av, gmul(z, check_and_build_norms(rnf)));
@@ -410,8 +410,8 @@ rnfidealabstorel(GEN rnf, GEN x)
   GEN nf, A, I, z, id, invbas;
 
   checkrnf(rnf); nf = gel(rnf,10); invbas = gel(rnf,8);
-  m = degpol(nf[1]);
-  N = m * degpol(rnf[1]);
+  m = nf_get_degree(nf);
+  N = m * rnf_get_degree(rnf);
   if (lg(x)-1 != N) pari_err(typeer, "rnfidealabstorel");
   if (typ(x) != t_VEC) pari_err(typeer,"rnfidealabstorel");
   A = cgetg(N+1,t_MAT);
@@ -441,7 +441,7 @@ rnfidealup(GEN rnf,GEN x)
   GEN nf, bas, bas2, I;
 
   checkrnf(rnf); nf = gel(rnf,10);
-  n = degpol(rnf[1]);
+  n = rnf_get_degree(rnf);
   bas = gel(rnf,7); bas2 = gel(bas,2);
 
   (void)idealtyp(&x, &I); /* I is junk */

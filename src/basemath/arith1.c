@@ -2992,10 +2992,10 @@ find_order(GEN f, GEN h)
     lim = itos(gel(e,i));
     for (j=1; j<=lim; j++)
     {
-      GEN p1 = diviiexact(h,gel(p,i));
-      fh = powgi(f,p1);
-      if (!is_pm1(fh[1])) break;
-      h = p1;
+      GEN q = diviiexact(h,gel(p,i));
+      fh = powgi(f, q);
+      if (!is_pm1(gel(fh,1))) break;
+      h = q;
     }
   }
   return h;
@@ -3217,7 +3217,7 @@ classno(GEN x)
       }
     }
     ftest = gmul(ftest,fg);
-    if (is_pm1(ftest[1])) pari_err(impl,"classno with too small order");
+    if (is_pm1(gel(ftest,1))) pari_err(impl,"classno with too small order");
     if (low_stack(lim, stack_lim(av2,2))) ftest = gerepileupto(av2,ftest);
   }
 }

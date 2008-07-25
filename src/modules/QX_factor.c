@@ -168,7 +168,7 @@ cmbf(GEN pol, GEN famod, GEN bound, GEN p, long a, long b,
   uGEN trace1   = (uGEN)cgetg(lfamod+1, t_VECSMALL);
   uGEN trace2   = (uGEN)cgetg(lfamod+1, t_VECSMALL);
   GEN ind      = cgetg(lfamod+1, t_VECSMALL);
-  GEN degpol   = cgetg(lfamod+1, t_VECSMALL);
+  GEN deg      = cgetg(lfamod+1, t_VECSMALL);
   GEN degsofar = cgetg(lfamod+1, t_VECSMALL);
   GEN listmod  = cgetg(lfamod+1, t_COL);
   GEN fa       = cgetg(lfamod+1, t_COL);
@@ -190,7 +190,7 @@ cmbf(GEN pol, GEN famod, GEN bound, GEN p, long a, long b,
       GEN T1,T2, P = gel(famod,i);
       long d = degpol(P);
 
-      degpol[i] = d; P += 2;
+      deg[i] = d; P += 2;
       T1 = gel(P,d-1);/* = - S_1 */
       T2 = sqri(T1);
       if (d > 1) T2 = subii(T2, shifti(gel(P,d-2),1));
@@ -216,13 +216,13 @@ nextK:
     fprintferr("\n### K = %d, %Ps combinations\n", K,binomial(utoipos(lfamod), K));
   setlg(ind, K+1); ind[1] = 1;
   Sbound = (ulong) ((K+1)>>1);
-  i = 1; curdeg = degpol[ind[1]];
+  i = 1; curdeg = deg[ind[1]];
   for(;;)
   { /* try all combinations of K factors */
     for (j = i; j < K; j++)
     {
       degsofar[j] = curdeg;
-      ind[j+1] = ind[j]+1; curdeg += degpol[ind[j+1]];
+      ind[j+1] = ind[j]+1; curdeg += deg[ind[j+1]];
     }
     if (curdeg <= klim) /* trial divide */
     {
@@ -295,13 +295,13 @@ nextK:
 	  famod[k] = famod[i];
 	  trace1[k] = trace1[i];
 	  trace2[k] = trace2[i];
-	  degpol[k] = degpol[i]; k++;
+	  deg[k] = deg[i]; k++;
 	}
       }
       lfamod -= K;
       if (lfamod < 11) maxK = lfamod-1;
       if (lfamod < 2*K) goto END;
-      i = 1; curdeg = degpol[ind[1]];
+      i = 1; curdeg = deg[ind[1]];
       bound = factor_bound(pol);
       if (lc) lc = absi(leading_term(pol));
       lcpol = lc? ZX_Z_mul(pol, lc): pol;
@@ -317,7 +317,7 @@ NEXT:
       if (--i == 0) { K++; goto nextK; }
       if (++ind[i] <= lfamod - K + i)
       {
-	curdeg = degsofar[i-1] + degpol[ind[i]];
+	curdeg = degsofar[i-1] + deg[ind[i]];
 	if (curdeg <= klim) break;
       }
     }

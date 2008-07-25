@@ -486,7 +486,8 @@ polgalois(GEN x, long prec)
 	  case 2: avma = av; return galois_res(n,8,-1,3);
 
 	  case 3: avma = av;
-	    return (degpol(p2[1])==2)? galois_res(n,4,1,2): galois_res(n,4,-1,1);
+	    return (degpol(gel(p2,1))==2)? galois_res(n,4,1,2)
+                                         : galois_res(n,4,-1,1);
 
 	  default: pari_err(bugparier,"galois (bug1)");
 	}
@@ -604,7 +605,7 @@ polgalois(GEN x, long prec)
 	      }
 	      prec=(prec<<1)-2; break;
 
-	    case 2: l2=degpol(p2[1]); if (l2>3) l2=6-l2;
+	    case 2: l2=degpol(gel(p2,1)); if (l2>3) l2=6-l2;
 	      switch(l2)
 	      {
 		case 1: f = Z_issquare(ZX_disc(x));
@@ -612,7 +613,7 @@ polgalois(GEN x, long prec)
 		  return f? galois_res(n,60,1,12): galois_res(n,120,-1,14);
 		case 2: f = Z_issquare(ZX_disc(x));
 		  if (f) { avma = av; return galois_res(n,24,1,7); }
-		  p3 = (degpol(p2[1])==2)? gel(p2,2): gel(p2,1);
+		  p3 = (degpol(gel(p2,1))==2)? gel(p2,2): gel(p2,1);
 		  f = Z_issquare(ZX_disc(p3));
 		  avma = av;
 		  return f? galois_res(n,24,-1,6): galois_res(n,48,-1,11);
@@ -623,7 +624,7 @@ polgalois(GEN x, long prec)
 	      }
 	    case 3:
 	      for (l2=1; l2<=3; l2++)
-		if (degpol(p2[l2]) >= 3) p3 = gel(p2,l2);
+		if (degpol(gel(p2,l2)) >= 3) p3 = gel(p2,l2);
 	      if (degpol(p3) == 3)
 	      {
 		f = Z_issquare(ZX_disc(p3)); avma = av;
@@ -659,7 +660,7 @@ polgalois(GEN x, long prec)
 	{
 	  case 1: f = Z_issquare(ZX_disc(x)); avma = av;
 	    return f? galois_res(n,2520,1,6): galois_res(n,5040,-1,7);
-	  case 2: f = degpol(p2[1]); avma = av;
+	  case 2: f = degpol(gel(p2,1)); avma = av;
 	    return (f==7 || f==28)? galois_res(n,168,1,5): galois_res(n,42,-1,4);
 	  case 3: avma = av; return galois_res(n,21,1,3);
 	  case 4: avma = av; return galois_res(n,14,-1,2);
@@ -1209,7 +1210,7 @@ static GEN
 hnffromLLL(GEN nf)
 {
   GEN d, x;
-  x = RgXV_to_RgM(gel(nf,7), degpol(nf[1]));
+  x = RgXV_to_RgM(gel(nf,7), nf_get_degree(nf));
   x = Q_remove_denom(x, &d);
   if (!d) return x; /* power basis */
   return RgM_solve(ZM_hnfmodid(x, d), x);
@@ -1406,7 +1407,7 @@ static int
 is_polbas(GEN x)
 {
   return (typ(x) == t_VEC && lg(x)==3
-	  && typ(x[1])==t_POL && lg(x[2])-1 == degpol(x[1]));
+	  && typ(gel(x,1))==t_POL && lg(gel(x,2))-1 == degpol(gel(x,1)));
 }
 
 void
@@ -2033,7 +2034,7 @@ nf_pm1(GEN y)
 {
   long i,l;
 
-  if (!is_pm1(y[1])) return 0;
+  if (!is_pm1(gel(y,1))) return 0;
   l = lg(y);
   for (i=2; i<l; i++)
     if (signe(y[i])) return 0;
@@ -2064,7 +2065,7 @@ static GEN
 trivroots(GEN nf) {
   GEN y = cgetg(3, t_VEC);
   gel(y,1) = gen_2;
-  gel(y,2) = scalarcol_shallow(gen_m1, degpol(nf[1]));
+  gel(y,2) = scalarcol_shallow(gen_m1, nf_get_degree(nf));
   return y;
 }
 
@@ -2078,7 +2079,7 @@ rootsof1(GEN nf)
   nf = checknf(nf);
   if ( nf_get_r1(nf) ) return trivroots(nf);
 
-  N = degpol(nf[1]); prec = nf_get_prec(nf);
+  N = nf_get_degree(nf); prec = nf_get_prec(nf);
   for (;;)
   {
     GEN R = R_from_QR(gmael(nf,5,2), prec);

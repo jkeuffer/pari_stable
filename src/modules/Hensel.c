@@ -44,17 +44,17 @@ BuildTree(GEN link, GEN V, GEN W, GEN a, GEN T, GEN p)
   for (j=1; j <= 2*k-5; j+=2,i++)
   {
     minp = j;
-    mind = degpol(V[j]);
+    mind = degpol(gel(V,j));
     for (s=j+1; s<i; s++)
-      if (degpol(V[s]) < mind) { minp = s; mind = degpol(V[s]); }
+      if (degpol(gel(V,s)) < mind) { minp = s; mind = degpol(gel(V,s)); }
 
     swap(gel(V,j), gel(V,minp));
     lswap(link[j], link[minp]);
 
     minp = j+1;
-    mind = degpol(V[j+1]);
+    mind = degpol(gel(V,j+1));
     for (s=j+2; s<i; s++)
-      if (degpol(V[s]) < mind) { minp = s; mind = degpol(V[s]); }
+      if (degpol(gel(V,s)) < mind) { minp = s; mind = degpol(gel(V,s)); }
 
     swap(gel(V,j+1), gel(V,minp));
     lswap(link[j+1], link[minp]);

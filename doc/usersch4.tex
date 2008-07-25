@@ -1120,7 +1120,7 @@ code since PARI can be compiled using various multiprecision kernels, for
 instance the native one or GNU MP, with incompatible internal structures
 (for one thing, the mantissa is oriented in different directions).
 
-\noindent The following further functions and macros are available:
+\noindent The following further functions are available:
 
 \fun{int}{mpodd}{GEN x} which is 1 if \kbd{x} is odd, and 0 otherwise.
 
@@ -1139,10 +1139,10 @@ corresponding power of 2, for \emph{positive}~\kbd{x}. By definition,
 $\kbd{mod}n(x) := \kbd{mod}n(|x|)$ for $x < 0$ (the macros disregard the
 sign), and the result is undefined if $x = 0$. As well,
 
-\fun{long}{mod2BIL}{GEN x} returns the least significant word of $|x|$, still
+\fun{ulong}{mod2BIL}{GEN x} returns the least significant word of $|x|$, still
 assuming that $x\neq 0$.
 
-These macros directly access the binary data and are thus much faster than
+These functions directly access the binary data and are thus much faster than
 the generic modulo functions. Besides, they return long integers instead of
 \kbd{GEN}s, so they do not clutter up the stack.
 

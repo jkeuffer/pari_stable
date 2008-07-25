@@ -1177,8 +1177,8 @@ get_sol_abs(struct sol_abs *T, GEN bnf, GEN a, GEN *ptPrimes)
 static long
 get_unit_1(GEN bnf, GEN *unit)
 {
-  GEN v, nf = checknf(bnf);
-  long i, n = degpol(nf[7]);
+  GEN v, nf = gel(bnf,7);
+  long i, n = nf_get_degree(nf);
 
   if (DEBUGLEVEL > 2) fprintferr("looking for a fundamental unit of norm -1\n");
   if (odd(n)) { *unit = gen_m1; return 1; }

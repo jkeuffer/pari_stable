@@ -125,22 +125,6 @@ enum {
 
 #define bern(i)       (bernzone + 3 + (i)*bernzone[2])
 
-/* works only for POSITIVE integers */
-#define mod2BIL(x)  (*int_LSW(x))
-#define mod64(x)  (mod2BIL(x) & 63)
-#define mod32(x)  (mod2BIL(x) & 31)
-#define mod16(x)  (mod2BIL(x) & 15)
-#define mod8(x)   (mod2BIL(x) & 7)
-#define mod4(x)   (mod2BIL(x) & 3)
-#define mod2(x)   (mod2BIL(x) & 1)
-#define is_bigint_lg(n,l) ((l)>3 || ((l)==3 && (((GEN)(n))[2] & HIGHBIT)))
-#define is_pm1_lg(n,l)    ((l)==3 && ((GEN)(n))[2]==1)
-#define is_pm1(n)    is_pm1_lg   (n, lgefint(n))
-#define is_bigint(n) is_bigint_lg(n, lgefint(n))
-
-#define degpol(a) ((long)lg(a)-3)
-#define lgpol(a) ((long)lg(a)-2)
-
 #define odd(x) ((x) & 1)
 #define both_odd(x,y) ((x)&(y)&1)
 

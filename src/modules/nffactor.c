@@ -436,7 +436,7 @@ nf_Mignotte_bound(GEN nf, GEN polbase)
 {
   GEN G = gmael(nf,5,2), lS = leading_term(polbase); /* t_INT */
   GEN p1, C, N2, matGS, binlS, bin;
-  long prec, i, j, d = degpol(polbase), n = degpol(nf[1]), r1 = nf_get_r1(nf);
+  long prec, i, j, d = degpol(polbase), n = nf_get_degree(nf), r1 = nf_get_r1(nf);
 
   binlS = bin = vecbinome(d-1);
   if (!gcmp1(lS)) binlS = gmul(lS, bin);
@@ -499,7 +499,7 @@ static GEN
 nf_Beauzamy_bound(GEN nf, GEN polbase)
 {
   GEN lt,C,run,s, G = gmael(nf,5,2), POL, bin;
-  long i,prec,precnf, d = degpol(polbase), n = degpol(nf[1]);
+  long i,prec,precnf, d = degpol(polbase), n = nf_get_degree(nf);
 
   precnf = gprecision(G);
   prec   = MEDDEFAULTPREC;
@@ -753,7 +753,7 @@ nfcmbf(nfcmbf_t *T, GEN p, long a, long maxK, long klim)
   GEN pk = gpowgs(p,a), pks2 = shifti(pk,-1);
 
   GEN ind      = cgetg(lfamod+1, t_VECSMALL);
-  GEN degpol   = cgetg(lfamod+1, t_VECSMALL);
+  GEN deg      = cgetg(lfamod+1, t_VECSMALL);
   GEN degsofar = cgetg(lfamod+1, t_VECSMALL);
   GEN listmod  = cgetg(lfamod+1, t_COL);
   GEN fa       = cgetg(lfamod+1, t_COL);
@@ -785,7 +785,7 @@ nfcmbf(nfcmbf_t *T, GEN p, long a, long maxK, long klim)
       GEN P = gel(famod,i);
       long d = degpol(P);
 
-      degpol[i] = d; P += 2;
+      deg[i] = d; P += 2;
       t1 = gel(P,d-1);/* = - S_1 */
       t2 = gsqr(t1);
       if (d > 1) t2 = gsub(t2, gmul2n(gel(P,d-2), 1));
@@ -820,13 +820,13 @@ nextK:
   if (DEBUGLEVEL > 3)
     fprintferr("\n### K = %d, %Ps combinations\n", K,binomial(utoipos(lfamod), K));
   setlg(ind, K+1); ind[1] = 1;
-  i = 1; curdeg = degpol[ind[1]];
+  i = 1; curdeg = deg[ind[1]];
   for(;;)
   { /* try all combinations of K factors */
     for (j = i; j < K; j++)
     {
       degsofar[j] = curdeg;
-      ind[j+1] = ind[j]+1; curdeg += degpol[ind[j+1]];
+      ind[j+1] = ind[j]+1; curdeg += deg[ind[j+1]];
     }
     if (curdeg <= klim) /* trial divide */
     {
@@ -893,13 +893,13 @@ nextK:
 	  famod[k] = famod[i];
 	  update_trace(T1, k, i);
 	  update_trace(T2, k, i);
-	  degpol[k] = degpol[i]; k++;
+	  deg[k] = deg[i]; k++;
 	}
       }
       lfamod -= K;
       if (lfamod < 11) maxK = lfamod-1;
       if (lfamod < 2*K) goto END;
-      i = 1; curdeg = degpol[ind[1]];
+      i = 1; curdeg = deg[ind[1]];
 
       if (C2lt) pol = Q_primpart(pol);
       if (lt) lt = absi(leading_term(pol));
@@ -920,7 +920,7 @@ NEXT:
       if (--i == 0) { K++; goto nextK; }
       if (++ind[i] <= lfamod - K + i)
       {
-	curdeg = degsofar[i-1] + degpol[ind[i]];
+	curdeg = degsofar[i-1] + deg[ind[i]];
 	if (curdeg <= klim) break;
       }
     }
@@ -1090,7 +1090,7 @@ static void
 bestlift_init(long a, GEN nf, GEN pr, GEN C, nflift_t *L)
 {
   const double alpha = 0.99; /* LLL parameter */
-  const long d = degpol(nf[1]);
+  const long d = nf_get_degree(nf);
   pari_sp av = avma, av2;
   GEN prk, PRK, B, GSmin, pk;
   pari_timer ti;

@@ -304,7 +304,6 @@ affc_fixlg(GEN x, GEN res)
 /*                          LENGTH CONVERSIONS                     */
 /*                                                                 */
 /*******************************************************************/
-
 INLINE long ndec2nlong(long x)
 { return 1 + (long)((x)*(LOG2_10/BITS_IN_LONG)); }
 INLINE long ndec2prec(long x)
@@ -353,6 +352,12 @@ is_vec_t(long t) { return (t == t_VEC || t == t_COL); }
 /*                         MISCELLANEOUS                           */
 /*                                                                 */
 /*******************************************************************/
+/* works only for POSITIVE integers */
+INLINE int is_pm1(GEN n)
+{ return lgefint(n) == 3 && n[2] == 1; }
+INLINE int is_bigint(GEN n)
+{ long l = lgefint(n); return l > 3 || (l == 3 && (n[2] & HIGHBIT)); }
+
 INLINE int
 isonstack(GEN x) { return ((pari_sp)x >= bot && (pari_sp)x < top); }
 
@@ -370,6 +375,10 @@ INLINE GEN
 constant_term(GEN x) { return signe(x)? gel(x,2): gen_0; }
 INLINE GEN
 leading_term(GEN x) { return lg(x) == 2? gen_0: gel(x,lg(x)-1); }
+INLINE long
+degpol(GEN x) { return lg(x)-3; }
+INLINE long
+lgpol(GEN x) { return lg(x)-2; }
 
 INLINE GEN
 RgX_div(GEN x, GEN y) { return RgX_divrem(x,y,NULL); }
@@ -579,4 +588,7 @@ nf_get_sign(GEN nf, long *r1, long *r2)
   *r1 = itou(gel(x,1));
   *r2 = itou(gel(x,2));
 }
+/* assume rnf a genuine rnf */
+INLINE long
+rnf_get_degree(GEN rnf) { return degpol(gel(rnf,1)); }
 

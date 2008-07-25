@@ -139,8 +139,15 @@ coefficient and return the resulting new polynomial. Shallow function.
 
 \subsec{Extracting info from a \kbd{bnf} structure}
 
-These function expect a true \var{bnf} argument, e.g.~a \var{bnr} will not
+These functions expect a true \var{bnf} argument, e.g.~a \var{bnr} will not
 work.
+
+\subsec{Extracting info from an \kbd{rnf} structure}
+
+These functions expect a true \var{rnf} argument.
+
+\fun{long}{rnf_get_degree}{GEN rnf} returns the \emph{relative} degree of the
+extension.
 
 \subsec{Increasing accuracy}
 

@@ -519,6 +519,13 @@ subsi(long x, GEN y) { return addsi_sign(x, y, -signe(y)); }
 /*                           MOD, REM, DIV                         */
 /*                                                                 */
 /*******************************************************************/
+INLINE ulong mod2BIL(GEN x) { return *int_LSW(x); }
+INLINE long mod64(GEN x) { return mod2BIL(x) & 63; }
+INLINE long mod32(GEN x) { return mod2BIL(x) & 31; }
+INLINE long mod16(GEN x) { return mod2BIL(x) & 15; }
+INLINE long mod8(GEN x)  { return mod2BIL(x) & 7; }
+INLINE long mod4(GEN x)  { return mod2BIL(x) & 3; }
+INLINE long mod2(GEN x)  { return mod2BIL(x) & 1; }
 INLINE int
 mpodd(GEN x) { return signe(x) && mod2(x); }
 

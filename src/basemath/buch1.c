@@ -308,7 +308,7 @@ getallelts(GEN bnr)
   c = gel(G,2);
   g = gel(G,3); lc = lg(c)-1;
   list = cgetg(no+1,t_VEC);
-  gel(list,1) = matid(degpol(nf[1])); /* (1) */
+  gel(list,1) = matid(nf_get_degree(nf)); /* (1) */
   if (!no) return list;
 
   pows = cgetg(lc+1,t_VEC);

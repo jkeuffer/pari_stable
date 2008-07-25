@@ -350,7 +350,7 @@ static int
 build_list_Hecke(primlist *L, GEN nfz, GEN fa, GEN gothf, GEN gell, tau_s *tau)
 {
   GEN listpr, listex, pr, factell;
-  long vp, i, l, ell = itos(gell), degKz = degpol(nfz[1]);
+  long vp, i, l, ell = itos(gell), degKz = nf_get_degree(nfz);
 
   if (!fa) fa = idealfactor(nfz, gothf);
   listpr = gel(fa,1);
@@ -645,7 +645,7 @@ rnfkummersimple(GEN bnr, GEN subgroup, GEN gell, long all)
 
   bnf = gel(bnr,1);
   nf  = gel(bnf,7);
-  degK = degpol(nf[1]);
+  degK = nf_get_degree(nf);
 
   bid = gel(bnr,2);
   ideal= gmael(bid,1,1);
@@ -821,7 +821,7 @@ static GEN
 Stelt(GEN nf, GEN J, GEN polrel)
 {
   long i, l = lg(J);
-  GEN x, A, I, id = matid(degpol(nf[1]));
+  GEN x, A, I, id = matid(nf_get_degree(nf));
 
   A = cgetg(l, t_VEC);
   I = cgetg(l, t_VEC);

@@ -23,11 +23,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "paripriv.h"
 
 /* assume z[1] was created last */
-#define fix_frac_if_int(z) if (is_pm1(z[2]))\
+#define fix_frac_if_int(z) if (is_pm1(gel(z,2)))\
   z = gerepileupto((pari_sp)(z+3), gel(z,1));
 
 /* assume z[1] was created last */
-#define fix_frac_if_int_GC(z,tetpil) { if (is_pm1(z[2]))\
+#define fix_frac_if_int_GC(z,tetpil) { if (is_pm1(gel(z,2)))\
   z = gerepileupto((pari_sp)(z+3), gel(z,1));\
 else\
   gerepilecoeffssp((pari_sp)z, tetpil, z+1, 2); }

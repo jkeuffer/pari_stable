@@ -96,9 +96,9 @@ idealhnf_principal(GEN nf, GEN x)
   {
     case t_COL: break;
     case t_INT:  if (!signe(x)) return cgetg(1,t_MAT);
-      return scalarmat(absi(x), degpol(nf[1]));
+      return scalarmat(absi(x), nf_get_degree(nf));
     case t_FRAC:
-      return scalarmat(Q_abs(x), degpol(nf[1]));
+      return scalarmat(Q_abs(x), nf_get_degree(nf));
     default: pari_err(typeer,"idealhnf");
   }
   x = Q_primitive_part(x, &cx);
@@ -128,7 +128,7 @@ idealhnf_shallow(GEN nf, GEN x)
   if (tx == t_VEC && lx == 3) { x = gel(x,1); tx = typ(x); lx = lg(x); }
   if (tx == t_VEC && lx == 6) return idealhnf_two(nf,x); /* PRIME */
   if (tx == t_MAT) {
-    long nx = lx-1, N = degpol(nf[1]);
+    long nx = lx-1, N = nf_get_degree(nf);
     if (nx == 0) return cgetg(1, t_MAT);
     if (lg(x[1])-1 != N) pari_err(talker,"incorrect dimension in idealhnf");
     if (nx == 1) return idealhnf_principal(nf, gel(x,1));
@@ -346,7 +346,7 @@ static GEN
 mat_ideal_two_elt(GEN nf, GEN x)
 {
   GEN y, a, cx, xZ;
-  long N = degpol(nf[1]);
+  long N = nf_get_degree(nf);
   pari_sp av, tetpil;
 
   if (N == 2) return mkvec2copy(gcoeff(x,1,1), gel(x,2));
@@ -738,7 +738,7 @@ idealaddmultoone(GEN nf, GEN list)
   long N, i, l, nz, tx = typ(list);
   GEN H, U, perm, L;
 
-  nf = checknf(nf); N = degpol(nf[1]);
+  nf = checknf(nf); N = nf_get_degree(nf);
   if (!is_vec_t(tx)) pari_err(talker,"not a vector of ideals in idealaddmultoone");
   l = lg(list);
   L = cgetg(l, t_VEC);
@@ -1140,7 +1140,7 @@ famat_to_nf_moddivisor(GEN nf, GEN g, GEN e, GEN bid)
 {
   GEN t,sarch,module,cyc,fa2;
   long lc;
-  if (lg(g) == 1) return scalarcol_shallow(gen_1, degpol(nf[1])); /* 1 */
+  if (lg(g) == 1) return scalarcol_shallow(gen_1, nf_get_degree(nf)); /* 1 */
   module = gel(bid,1);
   fa2 = gel(bid,4); sarch = gel(fa2,lg(fa2)-1);
   cyc = gmael(bid,2,2); lc = lg(cyc);
@@ -1372,7 +1372,7 @@ idealinv(GEN nf, GEN x)
   switch (tx)
   {
     case id_MAT:
-      if (lg(x)-1 != degpol(nf[1])) pari_err(consister,"idealinv");
+      if (lg(x)-1 != nf_get_degree(nf)) pari_err(consister,"idealinv");
       x = idealinv_HNF(nf,x); break;
     case id_PRINCIPAL: tx = typ(x);
       if (is_const_t(tx)) x = ginv(x);
@@ -1889,7 +1889,7 @@ coprime_part(GEN x, GEN f)
 static GEN
 nf_coprime_part(GEN nf, GEN x, GEN listpr)
 {
-  long v, j, lp = lg(listpr), N = degpol(nf[1]);
+  long v, j, lp = lg(listpr), N = nf_get_degree(nf);
   GEN x1, x2, ex;
 
 #if 0 /*1) via many gcds. Expensive ! */
@@ -1955,7 +1955,7 @@ idealprodprime(GEN nf, GEN L)
   long l = lg(L), i;
   GEN z;
 
-  if (l == 1) return matid(degpol(nf[1]));
+  if (l == 1) return matid(nf_get_degree(nf));
   z = idealhnf_two(nf, gel(L,1));
   for (i=2; i<l; i++) z = idealmul_HNF_two(nf,z, gel(L,i));
   return z;
@@ -1968,7 +1968,7 @@ factorbackprime(GEN nf, GEN L, GEN e)
   long l = lg(L), i;
   GEN z;
 
-  if (l == 1) return matid(degpol(nf[1]));
+  if (l == 1) return matid(nf_get_degree(nf));
   z = idealpow(nf, gel(L,1), gel(e,1));
   for (i=2; i<l; i++)
     if (signe(e[i])) z = idealmulpowprime(nf,z, gel(L,i),gel(e,i));
@@ -2044,7 +2044,7 @@ idealapprfact_i(GEN nf, GEN x, int nored)
     q = nfpow(nf, pi, gel(e,i));
     z = z? nfmul(nf, z, q): q;
   }
-  if (!z) return scalarcol_shallow(gen_1, degpol(nf[1]));
+  if (!z) return scalarcol_shallow(gen_1, nf_get_degree(nf));
   if (nored)
   {
     if (flagden) pari_err(impl,"nored + denominator in idealapprfact");
@@ -2126,7 +2126,7 @@ idealchinese(GEN nf, GEN x, GEN w)
   long ty = typ(w), i, N, r;
   GEN y, L, e, F, s, den;
 
-  nf = checknf(nf); N = degpol(nf[1]);
+  nf = checknf(nf); N = nf_get_degree(nf);
   if (typ(x) != t_MAT || lg(x) != 3)
     pari_err(talker,"not a prime ideal factorization in idealchinese");
   L = gel(x,1); r = lg(L);
@@ -2199,7 +2199,7 @@ idealtwoelt2(GEN nf, GEN x, GEN a)
   if (lg(x) == 1)
   {
     if (typ(a) != t_INT || signe(a)) not_in_ideal();
-    avma = av; return zerocol(degpol(nf[1]));
+    avma = av; return zerocol(nf_get_degree(nf));
   }
   x = Q_primitive_part(x, &cx);
   if (cx) a = gdiv(a, cx);
@@ -2478,7 +2478,7 @@ nfsmith(GEN nf, GEN x)
   pari_sp av, lim;
   GEN z,u,v,w,d,dinv,A,I,J;
 
-  nf = checknf(nf); N = degpol(nf[1]);
+  nf = checknf(nf); N = nf_get_degree(nf);
   if (typ(x)!=t_VEC || lg(x)!=4) pari_err(talker,"not a module in nfsmith");
   A = gel(x,1);
   I = gel(x,2);
@@ -2647,7 +2647,7 @@ nfdetint(GEN nf, GEN x)
   long i, j, k, rg, n, m, m1, cm=0, N;
   pari_sp av = avma, av1, lim;
 
-  nf = checknf(nf); N = degpol(nf[1]);
+  nf = checknf(nf); N = nf_get_degree(nf);
   check_ZKmodule(x, "nfdetint");
   A = gel(x,1);
   I = gel(x,2);
@@ -2752,7 +2752,7 @@ nfhnfmod(GEN nf, GEN x, GEN detmat)
   pari_sp av0=avma, av, lim;
   GEN d0, w, p1, d, u, v, A, I, J, di, unnf;
 
-  nf = checknf(nf); N = degpol(nf[1]);
+  nf = checknf(nf); N = nf_get_degree(nf);
   check_ZKmodule(x, "nfhnfmod");
   A = gel(x,1);
   I = gel(x,2);
