@@ -530,14 +530,13 @@ exponent for a \typ{REAL}.
 \noindent \tet{HIGHVALPBIT}: a power of $2$, one more that the largest possible
 valuation for a \typ{PADIC} or a \typ{SER}.
 
-\subsec{Miscellaneous constants}
+\subsec{$\log 2$, $\pi$}
 
 These are \kbd{double} approximations to useful constants:
 
 \noindent \tet{LOG2}: $\log 2$.
 
-\noindent \tet{L2SL10}: $\log 2 / \log 10$ (obsolete: should disappear or be
-renamed).
+\noindent \tet{LOG10_2}: $\log 2 / \log 10$.
 
 \noindent \tet{PI}: $\pi$.
 
@@ -1460,7 +1459,7 @@ $z$ so that it is no longer than $y$, then assigns $y$ to $z$. This is used
 in the following scenario: room is reserved for the result but, due to
 cancellation, fewer words of accuracy are available than had been
 anticipated; instead of appending meaningless $0$s to the mantissa, we store
-what was actualy computed.
+what was actually computed.
 
 Note that shortening $z$ is not quite straightforward, since \kbd{setlg(z, ly)}
 would leave garbage on the stack, which \kbd{gerepile} might later inspect.
@@ -1834,6 +1833,8 @@ the real number equal to $x$. This is a special case of \kbd{gexpo}.
 
 \fun{GEN}{muliu}{GEN x, ulong y} multiplies \kbd{x} by \kbd{y}.
 
+\fun{void}{addumului}{ulong a, ulong b, GEN x} return $a + b|X|$.
+
 \fun{GEN}{sqri}{GEN x} squares the \typ{INT}~\kbd{x}
 
 \fun{GEN}{sqrs}{long x} returns $x^2$.
@@ -2006,7 +2007,17 @@ defined: for a \emph{negative} \kbd{x}, its result \kbd{x + |y|} would
 in general not fit into a \kbd{long}. Use either \kbd{umodui} or
 \kbd{modsi}.
 
-\subsec{Square root and remainder}
+\subsec{Powering, Square root}
+
+\fun{GEN}{powii}{GEN x, GEN n}, assumes $x$ and $n$ are \typ{INT}s and
+returns $x^n$.
+
+\fun{GEN}{powuu}{ulong x, ulong n}, returns $x^n$.
+
+\fun{GEN}{powiu}{GEN x, ulong n}, assumes $x$ is a \typ{INT} and returns $x^n$.
+
+\fun{ulong}{upowuu}{ulong x, ulong n}, returns $x^n$ modulo $2^\B$. This is
+meant to be used for tiny $n$, where in fact $x^n$ fits into an \kbd{ulong}.
 
 \fun{GEN}{sqrtremi}{GEN N, GEN *r}, returns the integer square root $S$ of
 the non-negative \typ{INT}~\kbd{N} (rounded towards 0) and puts the remainder
@@ -2321,9 +2332,7 @@ divide-and-conquer algorithm. More precisely, return
 $$f( f(x_1,\kbd{NULL}), f(x_2,\kbd{NULL}) ),$$
 where $x_1$, $x_2$ are the two halves of $x$.
 
-\subsec{Miscellaneous functions}
-
-\fun{void}{addumului}{ulong a, ulong b, GEN x} return $a + b|X|$.
+\subsec{Miscellaneous arithmetic functions}
 
 \fun{ulong}{eulerphiu}{ulong n}, Euler's totient function of $n$.
 
@@ -2333,16 +2342,6 @@ where $x_1$, $x_2$ are the two halves of $x$.
 \fun{GEN}{hilbertii}{GEN x, GEN y, GEN p}, returns the Hilbert symbol
 $(x,y)$ at the prime $p$ (\kbd{NULL} for the place at infinity); $x$ and $y$
 are \typ{INT}s.
-
-\fun{GEN}{powii}{GEN x, GEN n}, assumes $x$ and $n$ are \typ{INT}s and
-returns $x^n$.
-
-\fun{GEN}{powuu}{ulong x, ulong n}, returns $x^n$.
-
-\fun{GEN}{powiu}{GEN x, ulong n}, assumes $x$ is a \typ{INT} and returns $x^n$.
-
-\fun{ulong}{upowuu}{ulong x, ulong n}, returns $x^n$ modulo $2^\B$. This is
-meant to be used for tiny $n$, where in fact $x^n$ fits into an \kbd{ulong}.
 
 \vfill\eject
 

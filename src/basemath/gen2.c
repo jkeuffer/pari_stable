@@ -1798,7 +1798,7 @@ gexpo(GEN x)
 long
 sizedigit(GEN x)
 {
-  return gcmp0(x)? 0: (long) ((gexpo(x)+1) * L2SL10) + 1;
+  return gcmp0(x)? 0: (long) ((gexpo(x)+1) * LOG10_2) + 1;
 }
 
 /* normalize series. avma is not updated */

@@ -431,7 +431,7 @@ exponent(const char **pts)
 
 static GEN
 real_0_digits(long n) {
-  long b = (n > 0)? (long)(n/L2SL10): (long)-((-n)/L2SL10 + 1);
+  long b = (n > 0)? (long)(n/LOG10_2): (long)-((-n)/LOG10_2 + 1);
   return real_0_bit(b);
 }
 

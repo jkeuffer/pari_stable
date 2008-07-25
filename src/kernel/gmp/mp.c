@@ -1186,7 +1186,7 @@ int_normalize(GEN x, long known_zero_words)
 ulong *
 convi(GEN x, long *l)
 {
-  long n = nchar2nlong(2 + (long)(NLIMBS(x) * (BITS_IN_LONG * L2SL10)));
+  long n = nchar2nlong(2 + (long)(NLIMBS(x) * (BITS_IN_LONG * LOG10_2)));
   GEN str = cgetg(n+1, t_VECSMALL);
   unsigned char *res = (unsigned char*) GSTR(str);
   long llz = mpn_get_str(res, 10, LIMBS(icopy(x)), NLIMBS(x));

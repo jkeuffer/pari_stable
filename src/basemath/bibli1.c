@@ -699,7 +699,7 @@ lindep2(GEN x, long bit)
       bit = (long)bit_accuracy_mul(bit, 0.8);
   }
   else
-    bit = (long) (bit/L2SL10);
+    bit = (long) (bit/LOG10_2);
   re = real_i(x);
   im = imag_i(x);
   /* independent over R ? */

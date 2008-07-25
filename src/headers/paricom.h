@@ -75,7 +75,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*=====================================================================*/
 
 #define LOG2   (0.6931471805599453) /* log(2) */
-#define L2SL10 (0.3010299956639812) /* log_10(2) */
+#define LOG10_2 (0.3010299956639812) /* log_10(2) */
 
 #ifndef  PI
 #  define PI (3.141592653589)
@@ -89,7 +89,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define nchar2nlong(x) (((x)+sizeof(long)-1) / sizeof(long))
 #define bit_accuracy(x) (((x)-2) * BITS_IN_LONG)
 #define bit_accuracy_mul(x,y) (((x)-2) * (BITS_IN_LONG*(y)))
-#define prec2ndec(x) ((long)bit_accuracy_mul((x), L2SL10))
+#define prec2ndec(x) ((long)bit_accuracy_mul((x), LOG10_2))
 #define GSTR(x) ((char*) (((GEN) (x)) + 1 ))
 #define divsBIL(n) ((n)>> TWOPOTBITS_IN_LONG)
 #define remsBIL(n) ((n) & (BITS_IN_LONG-1))

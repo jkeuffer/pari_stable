@@ -445,7 +445,7 @@ flusherr(void) { pariErr->flush(); }
 
 /* e binary exponent, return exponent in base ten */
 static long
-ex10(long e) { return (long) ((e >= 0)? e*L2SL10: -(-e*L2SL10)-1); }
+ex10(long e) { return (long) ((e >= 0)? e*LOG10_2: -(-e*LOG10_2)-1); }
 
 static char *
 zeros(char *b, long nb) { while (nb-- > 0) *b++ = '0'; *b = 0; return b; }
@@ -545,7 +545,7 @@ real0tostr(long ex, char format, char exp_char, long wanted_dec)
 
   if (format == 'f') {
     long width_frac = wanted_dec;
-    if (width_frac < 0) width_frac = (ex >= 0)? 0: (long)(-ex * L2SL10);
+    if (width_frac < 0) width_frac = (ex >= 0)? 0: (long)(-ex * LOG10_2);
     return real0tostr_width_frac(width_frac);
   } else {
     buf0 = buf = stackmalloc(3 + MAX_EXPO_LEN + 1);

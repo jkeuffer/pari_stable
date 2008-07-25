@@ -48,7 +48,7 @@ rounderror(GEN x)
 {
   pari_sp av = avma;
   long e; (void)grndtoi(x,&e);
-  avma = av; return (long)(e*L2SL10);
+  avma = av; return (long)(e*LOG10_2);
 }
 
 static GEN
