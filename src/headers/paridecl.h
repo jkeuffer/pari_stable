@@ -541,7 +541,6 @@ GEN     caradj(GEN x, long v, GEN *py);
 GEN     carberkowitz(GEN x, long v);
 GEN     carhess(GEN x, long v);
 GEN     charpoly0(GEN x, long v,long flag);
-GEN     conjvec(GEN x,long prec);
 GEN     gnorm(GEN x);
 GEN     gnorml1(GEN x,long prec);
 GEN     gnorml2(GEN x);
@@ -1476,6 +1475,7 @@ GEN     vandermondeinverse(GEN L, GEN T, GEN den, GEN prep);
 
 /* gen1.c */
 
+GEN     conjvec(GEN x,long prec);
 GEN     gadd(GEN x, GEN y);
 GEN     gaddsg(long x, GEN y);
 GEN     gconj(GEN x);

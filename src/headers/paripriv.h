@@ -134,8 +134,6 @@ GEN   red_montgomery(GEN T, GEN N, ulong inv);
 GEN   remiimul(GEN x, GEN sy);
 GEN   sqrispec(GEN x, long nx);
 GEN   subrex01(GEN x);
-GEN   mulcxI(GEN x);
-GEN   mulcxmI(GEN x);
 GEN   modr_safe(GEN x, GEN y);
 ulong *convi(GEN x, long *l);
 
@@ -588,6 +586,8 @@ int     ff_poltype(GEN *x, GEN *p, GEN *pol);
 GEN     gred_frac2(GEN x1, GEN x2);
 GEN     gred_rfrac2(GEN x1, GEN x2);
 GEN     gred_rfrac_simple(GEN n, GEN d);
+GEN     mulcxI(GEN x);
+GEN     mulcxmI(GEN x);
 GEN     sqr_ser_part(GEN x, long l1, long l2);
 
 /* gen3.c */
