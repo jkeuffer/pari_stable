@@ -542,7 +542,6 @@ GEN     carberkowitz(GEN x, long v);
 GEN     carhess(GEN x, long v);
 GEN     charpoly0(GEN x, long v,long flag);
 GEN     conjvec(GEN x,long prec);
-GEN     gconj(GEN x);
 GEN     gnorm(GEN x);
 GEN     gnorml1(GEN x,long prec);
 GEN     gnorml2(GEN x);
@@ -591,46 +590,30 @@ long    isprimeAPRCL(GEN N);
 
 /* Qfb.c */
 
+GEN     Qfb0(GEN x, GEN y, GEN z, GEN d, long prec);
 void    check_quaddisc(GEN x, long *s, long *r, const char *f);
-void    check_quaddisc_real(GEN x, long *r, const char *f);
 void    check_quaddisc_imag(GEN x, long *r, const char *f);
-GEN     qficomp(GEN x, GEN y);
-GEN     qficompraw(GEN x, GEN y);
-GEN     qfbcompraw(GEN x, GEN y);
-GEN     qfrcomp(GEN x, GEN y);
-GEN     qfrcompraw(GEN x, GEN y);
+void    check_quaddisc_real(GEN x, long *r, const char *f);
+long    cornacchia(GEN d, GEN p, GEN *px, GEN *py);
+long    cornacchia2(GEN d, GEN p, GEN *px, GEN *py);
 GEN     nucomp(GEN x, GEN y, GEN l);
 GEN     nudupl(GEN x, GEN l);
 GEN     nupow(GEN x, GEN n);
-GEN     qfipowraw(GEN x, long n);
-GEN     qfbpowraw(GEN x, long n);
-GEN     qfrpowraw(GEN x, long n);
 GEN     primeform(GEN x, GEN p, long prec);
-GEN     Qfb0(GEN x, GEN y, GEN z, GEN d, long prec);
+GEN     primeform_u(GEN x, ulong p);
 GEN     qfb_disc(GEN x);
-GEN     qfisolvep(GEN Q, GEN p);
-GEN     qfrsolvep(GEN Q, GEN p);
+GEN     qfbcompraw(GEN x, GEN y);
+GEN     qfbpowraw(GEN x, long n);
 GEN     qfbred0(GEN x, long flag, GEN D, GEN isqrtD, GEN sqrtD);
 GEN     qfbsolve(GEN Q, GEN n);
 GEN     qfi(GEN x, GEN y, GEN z);
-GEN     qfr(GEN x, GEN y, GEN z, GEN d);
-GEN     quadgen(GEN x);
-GEN     quadpoly(GEN x);
-GEN     quadpoly0(GEN x, long v);
-GEN     redimag(GEN x);
-GEN     redreal(GEN x);
-GEN     redrealnod(GEN x, GEN isqrtD);
-GEN     rhoreal(GEN x);
-GEN     rhorealnod(GEN x, GEN isqrtD);
+GEN     qfi_1(GEN x);
+GEN     qficomp(GEN x, GEN y);
+GEN     qficompraw(GEN x, GEN y);
+GEN     qfipowraw(GEN x, long n);
+GEN     qfisolvep(GEN Q, GEN p);
 GEN     qfisqr(GEN x);
-GEN     qfrsqr(GEN x);
-
-long    cornacchia(GEN d, GEN p, GEN *px, GEN *py);
-long    cornacchia2(GEN d, GEN p, GEN *px, GEN *py);
-GEN     primeform_u(GEN x, ulong p);
-
-void    qfr_data_init(GEN D, long prec, struct qfr_data *S);
-GEN     qfr_to_qfr5(GEN x, long prec);
+GEN     qfr(GEN x, GEN y, GEN z, GEN d);
 GEN     qfr3_comp(GEN x, GEN y, struct qfr_data *S);
 GEN     qfr3_pow(GEN x, GEN n, struct qfr_data *S);
 GEN     qfr3_red(GEN x, struct qfr_data *S);
@@ -642,13 +625,24 @@ GEN     qfr5_pow(GEN x, GEN n, struct qfr_data *S);
 GEN     qfr5_red(GEN x, struct qfr_data *S);
 GEN     qfr5_rho(GEN x, struct qfr_data *S);
 GEN     qfr5_to_qfr(GEN x, GEN d0);
-GEN     qfrpow(GEN x, GEN n);
 GEN     qfr_1(GEN x);
-GEN     qfi_1(GEN x);
+void    qfr_data_init(GEN D, long prec, struct qfr_data *S);
+GEN     qfr_to_qfr5(GEN x, long prec);
+GEN     qfrcomp(GEN x, GEN y);
+GEN     qfrcompraw(GEN x, GEN y);
+GEN     qfrpow(GEN x, GEN n);
+GEN     qfrpowraw(GEN x, long n);
+GEN     qfrsolvep(GEN Q, GEN p);
+GEN     qfrsqr(GEN x);
+GEN     quadgen(GEN x);
+GEN     quadpoly(GEN x);
+GEN     quadpoly0(GEN x, long v);
+GEN     redimag(GEN x);
+GEN     redreal(GEN x);
+GEN     redrealnod(GEN x, GEN isqrtD);
+GEN     rhoreal(GEN x);
+GEN     rhorealnod(GEN x, GEN isqrtD);
         
-GEN     quad_polmod_conj(GEN x, GEN y);
-GEN     quad_polmod_norm(GEN x, GEN y);
-
 /* arith1.c */
 
 ulong   Fl_order(ulong a, ulong o, ulong p);
@@ -1484,14 +1478,18 @@ GEN     vandermondeinverse(GEN L, GEN T, GEN den, GEN prep);
 
 GEN     gadd(GEN x, GEN y);
 GEN     gaddsg(long x, GEN y);
+GEN     gconj(GEN x);
 GEN     gdiv(GEN x, GEN y);
 GEN     gdivgs(GEN x, long s);
+GEN     ginv(GEN x);
 GEN     gmul(GEN x, GEN y);
 GEN     gmul2n(GEN x, long n);
 GEN     gmulsg(long s, GEN y);
 GEN     gsqr(GEN x);
 GEN     gsub(GEN x, GEN y);
 GEN     gsubsg(long x, GEN y);
+GEN     mpinv(GEN b);
+GEN     inv_ser(GEN b);
 
 /* gen2.c */
 
@@ -1600,7 +1598,6 @@ GEN     gge(GEN x, GEN y);
 GEN     ggrando(GEN x, long n);
 GEN     ggt(GEN x, GEN y);
 GEN     gimag(GEN x);
-GEN     ginv(GEN x);
 GEN     gle(GEN x, GEN y);
 GEN     glt(GEN x, GEN y);
 GEN     gmod(GEN x, GEN y);

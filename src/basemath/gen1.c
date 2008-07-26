@@ -346,6 +346,164 @@ gred_frac2(GEN x1, GEN x2)
   normalize_frac(y); return y;
 }
 
+/*******************************************************************/
+/*                                                                 */
+/*                          CONJUGATION                            */
+/*                                                                 */
+/*******************************************************************/
+/* lift( conj(Mod(x, y)) ), assuming degpol(y) = 2, degpol(x) < 2 */
+static GEN
+quad_polmod_conj(GEN x, GEN y)
+{
+  GEN z, u, v, a, b;
+  pari_sp av;
+  if (typ(x) != t_POL || varn(x) != varn(y) || degpol(x) <= 0)
+    return gcopy(x);
+  a = gel(y,4); u = gel(x,3); /*Mod(ux + v, ax^2 + bx + c)*/
+  b = gel(y,3); v = gel(x,2);
+  z = cgetg(4, t_POL); z[1] = x[1]; av = avma;
+  gel(z,2) = gerepileupto(av, gsub(v, gdiv(gmul(u,b), a)));
+  gel(z,3) = gneg(u); return z;
+}
+static GEN
+quad_polmod_norm(GEN x, GEN y)
+{
+  GEN z, u, v, a, b, c;
+  pari_sp av;
+  if (typ(x) != t_POL || varn(x) != varn(y) || degpol(x) <= 0)
+    return gsqr(x);
+  a = gel(y,4); u = gel(x,3); /*Mod(ux + v, ax^2 + bx + c)*/
+  b = gel(y,3); v = gel(x,2);
+  c = gel(y,2); av = avma;
+  z = gmul(u, gsub(gmul(c,u), gmul(b,v)));
+  if (!gcmp1(a)) z = gdiv(z, a);
+  return gerepileupto(av, gadd(z, gsqr(v)));
+}
+
+GEN
+gconj(GEN x)
+{
+  long lx, i, tx = typ(x);
+  GEN z;
+
+  switch(tx)
+  {
+    case t_INT: case t_REAL: case t_INTMOD: case t_FRAC: case t_PADIC:
+      return gcopy(x);
+
+    case t_COMPLEX:
+      z = cgetg(3,t_COMPLEX);
+      gel(z,1) = gcopy(gel(x,1));
+      gel(z,2) = gneg(gel(x,2));
+      break;
+
+    case t_QUAD:
+      z = cgetg(4,t_QUAD);
+      gel(z,1) = ZX_copy(gel(x,1));
+      gel(z,2) = gcmp0(gmael(x,1,3))? gcopy(gel(x,2))
+				    : gadd(gel(x,2), gel(x,3));
+      gel(z,3) = gneg(gel(x,3));
+      break;
+
+    case t_POL: case t_SER: case t_RFRAC: case t_VEC: case t_COL: case t_MAT:
+      z = init_gen_op(x, tx, &lx, &i);
+      for (; i<lx; i++) gel(z,i) = gconj(gel(x,i));
+      break;
+
+    case t_POLMOD:
+    {
+      GEN z, X = gel(x,1);
+      long d = degpol(X);
+      if (d < 2) return gcopy(x);
+      if (d == 2) {
+	z = cgetg(3, t_POLMOD);
+	gel(z,1) = gcopy(X);
+	gel(z,2) = quad_polmod_conj(gel(x,2), X); return z;
+      }
+    }
+    default:
+      pari_err(typeer,"gconj");
+      return NULL; /* not reached */
+  }
+  return z;
+}
+
+GEN
+conjvec(GEN x,long prec)
+{
+  long lx, s, i;
+  GEN z;
+
+  switch(typ(x))
+  {
+    case t_INT: case t_INTMOD: case t_FRAC:
+      return mkcolcopy(x);
+
+    case t_COMPLEX: case t_QUAD:
+      z=cgetg(3,t_COL); gel(z,1) = gcopy(x); gel(z,2) = gconj(x); break;
+
+    case t_VEC: case t_COL:
+      lx = lg(x); z = cgetg(lx,t_MAT);
+      if (lx == 1) return z;
+      gel(z,1) = conjvec(gel(x,1),prec);
+      s = lg(gel(z,1));
+      for (i=2; i<lx; i++)
+      {
+        gel(z,i) = conjvec(gel(x,i),prec);
+        if (lg(gel(z,i)) != s)
+          pari_err(talker,"incompatible field degrees in conjvec");
+      }
+      break;
+
+    case t_POLMOD: {
+      GEN T = gel(x,1), r;
+      pari_sp av;
+
+      lx = lg(T);
+      if (lx <= 3) return cgetg(1,t_COL);
+      x = gel(x,2);
+      for (i=2; i<lx; i++)
+      {
+        GEN c = gel(T,i);
+        switch(typ(c)) {
+	  case t_INTMOD: {
+            GEN p = gel(c,1);
+            T = RgX_to_FpX(T,p); /* left on stack */
+            z = cgetg(lx-2,t_COL);
+            if (typ(x) == t_POL) {
+              x = RgX_to_FpX(x, p);
+              if (varn(x) != varn(T))
+                pari_err(talker,"not a rational polynomial in conjvec");
+              gel(z,1) = x;
+              for (i=2; i<=lx-3; i++) gel(z,i) = FpXQ_pow(gel(z,i-1), p, T, p);
+            } else {
+              x = Rg_to_Fp(x, p);
+              for (i=1; i<=lx-3; i++) gel(z,i) = x;
+            }
+            return z;
+          }
+          case t_INT:
+          case t_FRAC: break;
+          default: pari_err(talker,"not a rational polynomial in conjvec");
+        }
+      }
+      av = avma;
+      if (varn(x) != varn(T))
+        pari_err(talker,"inconsistent variables in conjvec");
+      r = cleanroots(T,prec);
+      z = cgetg(lx-2,t_COL);
+      for (i=1; i<=lx-3; i++) gel(z,i) = poleval(x, gel(r,i));
+      return gerepileupto(av, z);
+    }
+
+    default:
+      pari_err(typeer,"conjvec");
+      return NULL; /* not reached */
+  }
+  return z;
+}
+
+
 /********************************************************************/
 /**                                                                **/
 /**                           ADDITION                             **/
@@ -2737,5 +2895,195 @@ gmul2n(GEN x, long n)
       return gmul(gmul2n(gen_1,n),x);
   }
   pari_err(typeer,"gmul2n");
+  return NULL; /* not reached */
+}
+
+/*******************************************************************/
+/*                                                                 */
+/*                              INVERSE                            */
+/*                                                                 */
+/*******************************************************************/
+GEN
+mpinv(GEN b)
+{
+  long i, l1, l = lg(b), e = expo(b), s = signe(b);
+  GEN x = cgetr(l), a = mpcopy(b);
+  double t;
+
+  a[1] = _evalexpo(0) | evalsigne(1);
+  for (i = 3; i < l; i++) x[i] = 0;
+  t = (((double)HIGHBIT) * HIGHBIT) / (double)(ulong)a[2];
+  if (((ulong)t) & HIGHBIT)
+    x[1] = _evalexpo(0) | evalsigne(1);
+  else {
+    t *= 2;
+    x[1] = _evalexpo(-1) | evalsigne(1);
+  }
+  x[2] = (ulong)t;
+  l1 = 1; l -= 2;
+  while (l1 < l)
+  {
+    l1 <<= 1; if (l1 > l) l1 = l;
+    setlg(a, l1 + 2);
+    setlg(x, l1 + 2);
+    /* TODO: mulrr(a,x) should be a half product (the higher half is known).
+     * mulrr(x, ) already is */
+    affrr(addrr(x, mulrr(x, subsr(1, mulrr(a,x)))), x);
+    avma = (pari_sp)a;
+  }
+  x[1] = evalexpo(expo(x)-e) | evalsigne(s);
+  avma = (pari_sp)x; return x;
+}
+
+GEN
+inv_ser(GEN b)
+{
+  pari_sp av = avma, av2, lim;
+  long i, j, le, l = lg(b), e = valp(b), v = varn(b);
+  GEN E, y, x = cgetg(l, t_SER), a = shallowcopy(b);
+
+  if (!signe(b)) pari_err(gdiver);
+
+  for (j = 3; j < l; j++) gel(x,j) = gen_0;
+  gel(x,2) = ginv(gel(b,2));
+  a[1] = x[1] = _evalvalp(0) | evalvarn(v) | evalsigne(1);
+  E = Newton_exponents(l - 2);
+  av2 = avma; lim = stack_lim(av2, 2);
+  le = lg(E)-1;
+  for (i = le; i > 1; i--) {
+    long l1 = E[i-1], l2 = E[i];
+    setlg(a, l1 + 2);
+    setlg(x, l1 + 2);
+    /* TODO: gmul(a,x) should be a half product (the higher half is known) */
+    y = gadd(x, gmul(x, gsubsg(1, gmul(a,x))));
+    for (j = l2+2; j < l1+2; j++) x[j] = y[j];
+    if (low_stack(lim, stack_lim(av2,2)))
+    {
+      if(DEBUGMEM>1) pari_warn(warnmem,"inv_ser");
+      y = gerepilecopy(av2, x);
+      for (j = 2; j < l1+2; j++) x[j] = y[j];
+    }
+  }
+  x[1] = evalvalp(valp(x)-e) | evalvarn(v) | evalsigne(1);
+  return gerepilecopy(av, x);
+}
+
+GEN
+ginv(GEN x)
+{
+  long s;
+  pari_sp av, tetpil;
+  GEN X, z, y, p1, p2;
+
+  switch(typ(x))
+  {
+    case t_INT:
+      if (is_pm1(x)) return icopy(x);
+      s = signe(x); if (!s) pari_err(gdiver);
+      z = cgetg(3,t_FRAC);
+      gel(z,1) = s<0? gen_m1: gen_1;
+      gel(z,2) = absi(x); return z;
+
+    case t_REAL:
+      return divsr(1,x);
+
+    case t_INTMOD: z=cgetg(3,t_INTMOD);
+      gel(z,1) = icopy(gel(x,1));
+      gel(z,2) = Fp_inv(gel(x,2),gel(x,1)); return z;
+
+    case t_FRAC: {
+      GEN a = gel(x,1), b = gel(x,2);
+      s = signe(a);
+      if (is_pm1(a)) return s > 0? icopy(b): negi(b);
+      z = cgetg(3,t_FRAC);
+      gel(z,1) = icopy(b);
+      gel(z,2) = icopy(a);
+      normalize_frac(z); return z;
+    }
+    case t_COMPLEX:
+      av=avma;
+      p1=cxnorm(x);
+      p2=mkcomplex(gel(x,1), gneg(gel(x,2)));
+      tetpil=avma;
+      return gerepile(av,tetpil,gdiv(p2,p1));
+
+    case t_QUAD:
+      av=avma; p1=gnorm(x); p2=gconj(x); tetpil=avma;
+      return gerepile(av,tetpil,gdiv(p2,p1));
+
+    case t_PADIC: z = cgetg(5,t_PADIC);
+      if (!signe(x[4])) pari_err(gdiver);
+      z[1] = evalprecp(precp(x)) | evalvalp(-valp(x));
+      gel(z,2) = icopy(gel(x,2));
+      gel(z,3) = icopy(gel(x,3));
+      gel(z,4) = Fp_inv(gel(x,4),gel(z,3)); return z;
+
+    case t_POLMOD: z = cgetg(3,t_POLMOD);
+      X = gel(x,1); gel(z,1) = gcopy(X);
+      if (degpol(X) == 2) { /* optimized for speed */
+	av = avma;
+	gel(z,2) = gerepileupto(av, gdiv(quad_polmod_conj(gel(x,2), X),
+				  quad_polmod_norm(gel(x,2), X)) );
+      }
+      else gel(z,2) = ginvmod(gel(x,2), X);
+      return z;
+
+    case t_FFELT: return FF_inv(x);
+    case t_POL: return gred_rfrac_simple(gen_1,x);
+    case t_SER: return gdiv(gen_1,x);
+
+    case t_RFRAC:
+    {
+      GEN n = gel(x,1), d = gel(x,2);
+      pari_sp av = avma, ltop;
+      if (gcmp0(n)) pari_err(gdiver);
+
+      n = simplify_i(n);
+      if (typ(n) != t_POL || varn(n) != varn(d))
+      {
+	if (gcmp1(n)) { avma = av; return gcopy(d); }
+	ltop = avma;
+	z = RgX_Rg_div(d,n);
+      } else {
+	ltop = avma;
+	z = cgetg(3,t_RFRAC);
+	gel(z,1) = gcopy(d);
+	gel(z,2) = gcopy(n);
+      }
+      stackdummy(av, ltop);
+      return z;
+    }
+
+    case t_QFR:
+      av = avma; z = cgetg(5, t_QFR);
+      gel(z,1) = gel(x,1);
+      gel(z,2) = negi( gel(x,2) );
+      gel(z,3) = gel(x,3);
+      gel(z,4) = negr( gel(x,4) );
+      return gerepileupto(av, redreal(z));
+
+    case t_QFI:
+      y = gcopy(x);
+      if (!equalii(gel(x,1),gel(x,2)) && !equalii(gel(x,1),gel(x,3)))
+	togglesign(gel(y,2));
+      return y;
+    case t_MAT:
+      y = RgM_inv(x);
+      if (!y) pari_err(matinv1);
+      return y;
+    case t_VECSMALL:
+    {
+      long i,lx = lg(x);
+      y = cgetg(lx,t_VECSMALL);
+      for (i=1; i<lx; i++)
+      {
+	long xi=x[i];
+	  if (xi<1 || xi>=lx) pari_err(talker,"incorrect permtuation to inverse");
+	y[xi] = i;
+      }
+      return y;
+    }
+  }
+  pari_err(typeer,"inverse");
   return NULL; /* not reached */
 }

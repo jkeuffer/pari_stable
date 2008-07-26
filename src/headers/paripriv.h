@@ -37,7 +37,6 @@ typedef ulong *uGEN;
 /* unused */
 GEN ellheightoo(GEN e, GEN z, long prec);
 void ellprint(GEN e);
-GEN mpinv(GEN b);
 
 /* generic */
 GEN trans_fix_arg(long *prec, GEN *s0, GEN *sig, pari_sp *av, GEN *res);
@@ -594,7 +593,6 @@ GEN     sqr_ser_part(GEN x, long l1, long l2);
 /* gen3.c */
 
 GEN     gsubst_expr(GEN pol, GEN from, GEN to);
-GEN     inv_ser(GEN b);
 GEN     poltoser(GEN x, long v, long prec);
 GEN     qfbeval(GEN q, GEN x, GEN y);
 GEN     rfractoser(GEN x, long v, long prec);
