@@ -672,7 +672,7 @@ gequal(GEN x, GEN y)
 	    && equalii(gel(x,3),gel(y,3));
 
       case t_QUAD:
-	return RgX_equal_var(gel(x,1),gel(y,1))
+	return ZX_equal(gel(x,1),gel(y,1))
 	    && gequal(gel(x,2),gel(y,2))
 	    && gequal(gel(x,3),gel(y,3));
 
@@ -1114,7 +1114,7 @@ gneg(GEN x)
 
     case t_QUAD:
       y=cgetg(4,t_QUAD);
-      gel(y,1) = gcopy(gel(x,1));
+      gel(y,1) = ZX_copy(gel(x,1));
       gel(y,2) = gneg(gel(x,2));
       gel(y,3) = gneg(gel(x,3)); break;
 
@@ -1463,7 +1463,7 @@ gaffect(GEN x, GEN y)
       modiiz(gel(x,4),gel(y,3),gel(y,4));
       setvalp(y,valp(x)); return;
     case t_QUAD:
-      if (! RgX_equal_var(gel(x,1),gel(y,1))) pari_err(operi,"",x,y);
+      if (! ZX_equal(gel(x,1),gel(y,1))) pari_err(operi,"",x,y);
       affii(gel(x,2),gel(y,2));
       affii(gel(x,3),gel(y,3)); return;
     case t_VEC: case t_COL: case t_MAT:

@@ -208,28 +208,6 @@ ulong gcduodd(ulong x, ulong y);
 long  Z_lvalrem_stop(GEN n, ulong p, int *stop);
 long  u_lvalrem_stop(ulong *n, ulong p, int *stop);
 
-/* quadratic forms, quadratic numbers */
-long cornacchia(GEN d, GEN p, GEN *px, GEN *py);
-long cornacchia2(GEN d, GEN p, GEN *px, GEN *py);
-GEN  primeform_u(GEN x, ulong p);
-void qfb_comp(GEN z,GEN x,GEN y);
-GEN  qfr_to_qfr5(GEN x, long prec);
-GEN  qfr3_comp(GEN x, GEN y, GEN D, GEN isqrtD);
-GEN  qfr3_pow(GEN x, GEN n, GEN D, GEN isqrtD);
-GEN  qfr3_red(GEN x, GEN D, GEN isqrtD);
-GEN  qfr3_rho(GEN x, GEN D, GEN isqrtD);
-GEN  qfr3_to_qfr(GEN x, GEN z);
-GEN  qfr5_dist(GEN e, GEN d, long prec);
-GEN  qfr5_comp(GEN x, GEN y, GEN D, GEN sqrtD, GEN isqrtD);
-GEN  qfr5_pow(GEN x, GEN n, GEN D, GEN sqrtD, GEN isqrtD);
-GEN  qfr5_red(GEN x, GEN D, GEN sqrtD, GEN isqrtD);
-GEN  qfr5_rho(GEN x, GEN D, GEN sqrtD, GEN isqrtD);
-GEN  qfr_pow(GEN x, GEN n);
-GEN  qfr_unit(GEN x);
-GEN  qfi_unit(GEN x);
-GEN  quad_polmod_conj(GEN x, GEN y);
-GEN  quad_polmod_norm(GEN x, GEN y);
-
 /* Polynomials */
 /* a) Arithmetic/conversions */
 GEN  addmulXn(GEN x, GEN y, long d);
@@ -463,7 +441,6 @@ GEN     FlxqX_rem_montgomery(GEN x, GEN mg, GEN T, GEN Q, ulong p);
 
 /* Qfb.c */
 
-GEN     powimagraw(GEN x, long n);
 GEN     redimagsl2(GEN q, GEN *U);
 GEN     redrealsl2(GEN V);
 GEN     redrealsl2step(GEN A);

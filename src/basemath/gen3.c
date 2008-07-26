@@ -513,7 +513,7 @@ gmod(GEN x, GEN y)
 	  tetpil=avma; return gerepile(av,tetpil,modii(p1,y));
 
 	case t_QUAD: z=cgetg(4,t_QUAD);
-	  gel(z,1) = gcopy(gel(x,1));
+	  gel(z,1) = ZX_copy(gel(x,1));
 	  gel(z,2) = gmod(gel(x,2),y);
 	  gel(z,3) = gmod(gel(x,3),y); return z;
 
@@ -608,7 +608,7 @@ gmodgs(GEN x, long y)
 			  umodiu(gel(x,2), u), u) );
 
     case t_QUAD: z=cgetg(4,t_QUAD);
-      gel(z,1) = gcopy(gel(x,1));
+      gel(z,1) = ZX_copy(gel(x,1));
       gel(z,2) = gmodgs(gel(x,2),y);
       gel(z,3) = gmodgs(gel(x,3),y); return z;
 
@@ -3015,7 +3015,7 @@ lift0(GEN x, long v)
       return y;
 
     case t_QUAD:
-      y=cgetg(4,t_QUAD); gel(y,1) = gcopy(gel(x,1));
+      y=cgetg(4,t_QUAD); gel(y,1) = ZX_copy(gel(x,1));
       gel(y,2) = lift0(gel(x,2),v);
       gel(y,3) = lift0(gel(x,3),v); return y;
   }
@@ -3098,7 +3098,7 @@ centerlift0(GEN x, long v)
       return y;
 
     case t_QUAD:
-      y=cgetg(4,t_QUAD); gel(y,1) = gcopy(gel(x,1));
+      y=cgetg(4,t_QUAD); gel(y,1) = ZX_copy(gel(x,1));
       gel(y,2) = centerlift0(gel(x,2),v);
       gel(y,3) = centerlift0(gel(x,3),v); return y;
 

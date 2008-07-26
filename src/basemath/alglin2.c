@@ -597,7 +597,7 @@ gconj(GEN x)
 
     case t_QUAD:
       z = cgetg(4,t_QUAD);
-      gel(z,1) = gcopy(gel(x,1));
+      gel(z,1) = ZX_copy(gel(x,1));
       gel(z,2) = gcmp0(gmael(x,1,3))? gcopy(gel(x,2))
 				    : gadd(gel(x,2), gel(x,3));
       gel(z,3) = gneg(gel(x,3));

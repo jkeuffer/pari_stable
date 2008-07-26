@@ -24,7 +24,7 @@ void
 check_quaddisc(GEN x, long *s, long *r, const char *f)
 {
   if (typ(x) != t_INT) pari_err(arither1);
-  *s = signe(x); if (!*s) pari_err(talker,"zero discriminant in %s", f);
+  *s = signe(x);
   if (Z_issquare(x)) pari_err(talker,"square discriminant in %s", f);
   *r = mod4(x); if (*s < 0 && *r) *r = 4 - *r;
   if (*r > 1) pari_err(talker, "discriminant not congruent to 0,1 mod 4 in %s", f);
@@ -160,7 +160,7 @@ qfb_sqr(GEN z, GEN x)
   gel(z,3) = diviiexact(c3,v2);
 }
 /* z <- x * y */
-void
+static void
 qfb_comp(GEN z, GEN x, GEN y)
 {
   GEN s, n, c, d, y1, v1, v2, c3, m, p1, r;
@@ -365,7 +365,7 @@ powimagraw(GEN x, long n)
 }
 
 GEN
-powraw(GEN x, long n)
+qfbpowraw(GEN x, long n)
 { return (typ(x)==t_QFI)? powimagraw(x,n): powrealraw(x,n); }
 
 static long

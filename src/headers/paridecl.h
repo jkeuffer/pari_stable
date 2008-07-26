@@ -602,7 +602,8 @@ GEN     comprealraw(GEN x, GEN y);
 GEN     nucomp(GEN x, GEN y, GEN l);
 GEN     nudupl(GEN x, GEN l);
 GEN     nupow(GEN x, GEN n);
-GEN     powraw(GEN x, long n);
+GEN     powimagraw(GEN x, long n);
+GEN     qfbpowraw(GEN x, long n);
 GEN     powrealraw(GEN x, long n);
 GEN     primeform(GEN x, GEN p, long prec);
 GEN     Qfb0(GEN x, GEN y, GEN z, GEN d, long prec);
@@ -623,6 +624,27 @@ GEN     rhoreal(GEN x);
 GEN     rhorealnod(GEN x, GEN isqrtD);
 GEN     sqcompimag(GEN x);
 GEN     sqcompreal(GEN x);
+
+long    cornacchia(GEN d, GEN p, GEN *px, GEN *py);
+long    cornacchia2(GEN d, GEN p, GEN *px, GEN *py);
+GEN     primeform_u(GEN x, ulong p);
+GEN     qfr_to_qfr5(GEN x, long prec);
+GEN     qfr3_comp(GEN x, GEN y, GEN D, GEN isqrtD);
+GEN     qfr3_pow(GEN x, GEN n, GEN D, GEN isqrtD);
+GEN     qfr3_red(GEN x, GEN D, GEN isqrtD);
+GEN     qfr3_rho(GEN x, GEN D, GEN isqrtD);
+GEN     qfr3_to_qfr(GEN x, GEN z);
+GEN     qfr5_dist(GEN e, GEN d, long prec);
+GEN     qfr5_comp(GEN x, GEN y, GEN D, GEN sqrtD, GEN isqrtD);
+GEN     qfr5_pow(GEN x, GEN n, GEN D, GEN sqrtD, GEN isqrtD);
+GEN     qfr5_red(GEN x, GEN D, GEN sqrtD, GEN isqrtD);
+GEN     qfr5_rho(GEN x, GEN D, GEN sqrtD, GEN isqrtD);
+GEN     qfr_pow(GEN x, GEN n);
+GEN     qfr_unit(GEN x);
+GEN     qfi_unit(GEN x);
+        
+GEN     quad_polmod_conj(GEN x, GEN y);
+GEN     quad_polmod_norm(GEN x, GEN y);
 
 /* arith1.c */
 

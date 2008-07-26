@@ -1046,6 +1046,86 @@ to include the \tet{nf_PARTIALFACT} flag.
 
 \fun{GEN}{discrayabslistlong}{GEN bnf, long bound}
 
+\section{Quadratic number fields and quadratic forms}
+
+\fun{void}{check_quaddisc}{GEN x, long *s, long *mod4, const char *f}
+check whether $x$ is a quadratic discriminant (\typ{INT}, not a square,
+congruent to $0,1$ modulo $4$), and raise an exception otherwise. Set
+\kbd{*s} to the sign of $x$ and \kbd{*mod4} to $x$ modulo $4$ (0 or 1).
+
+\fun{void}{check_quaddisc_real}{GEN x, long *mod4, const char *f} as
+\tet{check_quaddisc}; also check that \kbd{signe(x)} is positive.
+
+\fun{void}{check_quaddisc_imag}{GEN x, long *mod4, const char *f} as
+\tet{check_quaddisc}; also check that \kbd{signe(x)} is negative.
+
+
+\fun{GEN}{compimag}{GEN x, GEN y} compose the two \typ{QFI} $x$ and $y$,
+then reduce the result. This is the same as \kbd{gmul(x,y)}.
+
+\fun{GEN}{compimagraw}{GEN x, GEN y} same as \tet{compimag}, without
+reducing the result.
+
+\fun{GEN}{compreal}{GEN x, GEN y} compose the two \typ{QFR} $x$ and $y$,
+then reduce the result. This is the same as \kbd{gmul(x,y)}.
+
+\fun{GEN}{comprealraw}{GEN x, GEN y} same as \tet{compreal}, without
+reducing the result.
+
+\fun{GEN}{qfbpowraw}{GEN x, long n} compute $x^n$ (pure composition, no
+reduction), for a \typ{QFI} or \typ{QFR} $x$.
+
+\fun{GEN}{powimagraw}{GEN x, long n} as \tet{qfbpowraw}, for a \typ{QFI} $x$.
+
+\fun{GEN}{powrealraw}{GEN x, long n} as \tet{qfbpowraw}, for a \typ{QFR} $x$.
+
+\fun{GEN}{qfbimagsolvep}{GEN Q, GEN p}
+
+\fun{GEN}{qfbrealsolvep}{GEN Q, GEN p}
+
+\fun{GEN}{sqcompimag}{GEN x}
+
+\fun{GEN}{sqcompreal}{GEN x}
+
+
+\fun{long}{cornacchia}{GEN d, GEN p, GEN *px, GEN *py}
+
+\fun{long}{cornacchia2}{GEN d, GEN p, GEN *px, GEN *py}
+
+\fun{GEN}{primeform_u}{GEN x, ulong p}
+
+\fun{GEN}{qfr_to_qfr5}{GEN x, long prec}
+
+\fun{GEN}{qfr3_comp}{GEN x, GEN y, GEN D, GEN isqrtD}
+
+\fun{GEN}{qfr3_pow}{GEN x, GEN n, GEN D, GEN isqrtD}
+
+\fun{GEN}{qfr3_red}{GEN x, GEN D, GEN isqrtD}
+
+\fun{GEN}{qfr3_rho}{GEN x, GEN D, GEN isqrtD}
+
+\fun{GEN}{qfr3_to_qfr}{GEN x, GEN z}
+
+\fun{GEN}{qfr5_dist}{GEN e, GEN d, long prec}
+
+\fun{GEN}{qfr5_comp}{GEN x, GEN y, GEN D, GEN sqrtD, GEN isqrtD}
+
+\fun{GEN}{qfr5_pow}{GEN x, GEN n, GEN D, GEN sqrtD, GEN isqrtD}
+
+\fun{GEN}{qfr5_red}{GEN x, GEN D, GEN sqrtD, GEN isqrtD}
+
+\fun{GEN}{qfr5_rho}{GEN x, GEN D, GEN sqrtD, GEN isqrtD}
+
+\fun{GEN}{qfr_pow}{GEN x, GEN n}
+
+\fun{GEN}{qfr_unit}{GEN x}
+
+\fun{GEN}{qfi_unit}{GEN x}
+
+\fun{GEN}{quad_polmod_conj}{GEN x, GEN y}
+
+\fun{GEN}{quad_polmod_norm}{GEN x, GEN y}
+
 \section{Linear algebra over $\Z$}
 \subsec{Hermite and Smith Normal Forms}
 

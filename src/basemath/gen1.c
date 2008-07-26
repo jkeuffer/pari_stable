@@ -84,14 +84,14 @@ divcR(GEN x, GEN y) {
 static GEN
 addRq(GEN x, GEN y) {
   GEN z = cgetg(4,t_QUAD);
-  gel(z,1) = gcopy(gel(y,1));
+  gel(z,1) = ZX_copy(gel(y,1));
   gel(z,2) = gadd(x, gel(y,2));
   gel(z,3) = gcopy(gel(y,3)); return z;
 }
 static GEN
 mulRq(GEN x, GEN y) {
   GEN z = cgetg(4,t_QUAD);
-  gel(z,1) = gcopy(gel(y,1));
+  gel(z,1) = ZX_copy(gel(y,1));
   gel(z,2) = gmul(x,gel(y,2));
   gel(z,3) = gmul(x,gel(y,3)); return z;
 }
@@ -700,8 +700,8 @@ gadd(GEN x, GEN y)
       if (!equalii(gel(x,2),gel(y,2))) pari_err(operi,"+",x,y);
       return addsub_pp(x,y, addii);
     case t_QUAD: z = cgetg(4,t_QUAD);
-      if (!RgX_equal_var(gel(x,1),gel(y,1))) pari_err(operi,"+",x,y);
-      gel(z,1) = gcopy(gel(x,1));
+      if (!ZX_equal(gel(x,1),gel(y,1))) pari_err(operi,"+",x,y);
+      gel(z,1) = ZX_copy(gel(x,1));
       gel(z,2) = gadd(gel(x,2),gel(y,2));
       gel(z,3) = gadd(gel(x,3),gel(y,3)); return z;
     case t_POLMOD:
@@ -1010,8 +1010,8 @@ gsub(GEN x, GEN y)
       if (!equalii(gel(x,2),gel(y,2))) pari_err(operi,"+",x,y);
       return addsub_pp(x,y, subii);
     case t_QUAD: z = cgetg(4,t_QUAD);
-      if (!RgX_equal_var(gel(x,1),gel(y,1))) pari_err(operi,"+",x,y);
-      gel(z,1) = gcopy(gel(x,1));
+      if (!ZX_equal(gel(x,1),gel(y,1))) pari_err(operi,"+",x,y);
+      gel(z,1) = ZX_copy(gel(x,1));
       gel(z,2) = gsub(gel(x,2),gel(y,2));
       gel(z,3) = gsub(gel(x,3),gel(y,3)); return z;
     case t_POLMOD:
@@ -1362,7 +1362,7 @@ mulqq(GEN x, GEN y) {
   GEN z = cgetg(4,t_QUAD);
   GEN p1, p2, p3, p4, P = gel(x,1), b = gel(P,3), c = gel(P,2);
   pari_sp av, tetpil;
-  if (!RgX_equal_var(P, gel(y,1))) pari_err(operi,"*",x,y);
+  if (!ZX_equal(P, gel(y,1))) pari_err(operi,"*",x,y);
 
   gel(z,1) = gcopy(P); av = avma;
   p2 = gmul(gel(x,2),gel(y,2));
@@ -2122,7 +2122,7 @@ gdiv(GEN x, GEN y)
       return divpp(x, y);
 
     case t_QUAD:
-      if (!RgX_equal_var(gel(x,1),gel(y,1))) pari_err(operi,"/",x,y);
+      if (!ZX_equal(gel(x,1),gel(y,1))) pari_err(operi,"/",x,y);
       av = avma; p1 = quadnorm(y); p2 = mulqq(x, gconj(y)); tetpil = avma;
       return gerepile(av, tetpil, gdiv(p2,p1));
 
@@ -2372,7 +2372,7 @@ gdiv(GEN x, GEN y)
       {
 	case t_INT: case t_INTMOD: case t_FRAC:
 	  z = cgetg(4,t_QUAD);
-	  gel(z,1) = gcopy(gel(x,1));
+	  gel(z,1) = ZX_copy(gel(x,1));
 	  gel(z,2) = gdiv(gel(x,2), y);
 	  gel(z,3) = gdiv(gel(x,3), y); return z;
 	case t_REAL: return divqf(x, y, lg(y));
@@ -2517,7 +2517,7 @@ gmulsg(long s, GEN y)
       av = avma; return gerepileupto(av, mulpp(cvtop2(stoi(s),y), y));
 
     case t_QUAD: z = cgetg(4, t_QUAD);
-      gel(z,1) = gcopy(gel(y,1));
+      gel(z,1) = ZX_copy(gel(y,1));
       gel(z,2) = gmulsg(s,gel(y,2));
       gel(z,3) = gmulsg(s,gel(y,3)); return z;
 
@@ -2617,7 +2617,7 @@ gdivgs(GEN x, long s)
       return gerepileupto(av, divpp(x, cvtop2(stoi(s),x)));
 
     case t_QUAD: z = cgetg(4, t_QUAD);
-      gel(z,1) = gcopy(gel(x,1));
+      gel(z,1) = ZX_copy(gel(x,1));
       gel(z,2) = gdivgs(gel(x,2),s);
       gel(z,3) = gdivgs(gel(x,3),s); return z;
 
@@ -2709,7 +2709,7 @@ gmul2n(GEN x, long n)
       gel(z,2) = shifti(b,k); return z;
 
     case t_QUAD: z = cgetg(4,t_QUAD);
-      gel(z,1) = gcopy(gel(x,1));
+      gel(z,1) = ZX_copy(gel(x,1));
       gel(z,2) = gmul2n(gel(x,2),n);
       gel(z,3) = gmul2n(gel(x,3),n); return z;
 
