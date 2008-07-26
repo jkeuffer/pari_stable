@@ -337,6 +337,7 @@ GEN     RgXX_to_RgM(GEN v, long n);
 GEN     RgXY_swap(GEN x, long n, long w);
 GEN     RgX_RgXQ_compo(GEN f, GEN x, GEN T);
 GEN     RgX_Rg_add(GEN y, GEN x);
+GEN     RgX_Rg_add_shallow(GEN y, GEN x);
 GEN     RgX_Rg_div(GEN y, GEN x);
 GEN     RgX_Rg_divexact(GEN x, GEN y);
 GEN     RgX_Rg_mul(GEN y, GEN x);
