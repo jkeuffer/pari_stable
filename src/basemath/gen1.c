@@ -1509,8 +1509,8 @@ gmul(GEN x, GEN y)
       z -= 2; /* back to normalcy */
       pari_free(p2); return normalize(z);
     }
-    case t_QFI: return compimag(x,y);
-    case t_QFR: return compreal(x,y);
+    case t_QFI: return qficomp(x,y);
+    case t_QFR: return qfrcomp(x,y);
     case t_RFRAC: return mul_rfrac(gel(x,1),gel(x,2), gel(y,1),gel(y,2));
     case t_MAT: return RgM_mul(x, y);
 
@@ -1916,8 +1916,8 @@ gsqr(GEN x)
       gel(z,2) = gsqr(gel(x,2)); return z;
 
     case t_MAT: return RgM_sqr(x);
-    case t_QFR: return sqcompreal(x);
-    case t_QFI: return sqcompimag(x);
+    case t_QFR: return qfrsqr(x);
+    case t_QFI: return qfisqr(x);
     case t_VECSMALL:
       l = lg(x); z = cgetg(l, t_VECSMALL);
       for (i=1; i<l; i++)
@@ -2171,8 +2171,8 @@ gdiv(GEN x, GEN y)
       }
       return div_rfrac(x,y);
 
-    case t_QFI: av = avma; return gerepileupto(av, compimag(x, ginv(y)));
-    case t_QFR: av = avma; return gerepileupto(av, compreal(x, ginv(y)));
+    case t_QFI: av = avma; return gerepileupto(av, qficomp(x, ginv(y)));
+    case t_QFR: av = avma; return gerepileupto(av, qfrcomp(x, ginv(y)));
 
     case t_MAT:
       av = avma; y = RgM_inv(y);

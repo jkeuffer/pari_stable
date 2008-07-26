@@ -78,6 +78,8 @@ struct bb_group
   int (*cmp)(GEN, GEN);
   int (*cmp1)(GEN);
 };
+/* qfr3 / qfr5 */
+struct qfr_data { GEN D, sqrtD, isqrtD; };
 
 /* various flags for nf/bnf routines */
 enum {

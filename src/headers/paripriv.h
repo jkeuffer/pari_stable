@@ -444,8 +444,6 @@ GEN     FlxqX_rem_montgomery(GEN x, GEN mg, GEN T, GEN Q, ulong p);
 GEN     redimagsl2(GEN q, GEN *U);
 GEN     redrealsl2(GEN V);
 GEN     redrealsl2step(GEN A);
-GEN     sqcompimagraw(GEN x);
-GEN     sqcomprealraw(GEN x);
 
 /* alglin1.c */
 

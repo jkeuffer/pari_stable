@@ -324,8 +324,8 @@ puiss0(GEN x)
       y = matid(lx-1);
       for (i=1; i<lx; i++) gcoeff(y,i,i) = puiss0(gcoeff(x,i,i));
       return y;
-    case t_QFR: return qfr_unit(x);
-    case t_QFI: return qfi_unit(x);
+    case t_QFR: return qfr_1(x);
+    case t_QFI: return qfi_1(x);
     case t_VECSMALL: return identity_perm(lg(x) - 1);
   }
   pari_err(typeer,"gpow");
@@ -661,7 +661,7 @@ powgi(GEN x, GEN n)
       if (signe(n) < 0) pari_err(gdiver);
       return gen_0;
 
-    case t_QFR: return qfr_pow(x,n);
+    case t_QFR: return qfrpow(x,n);
     default: {
       pari_sp av = avma;
       y = leftright_pow(x, n, NULL, &_sqr, &_mul);

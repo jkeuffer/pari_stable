@@ -1048,6 +1048,8 @@ to include the \tet{nf_PARTIALFACT} flag.
 
 \section{Quadratic number fields and quadratic forms}
 
+\subsec{Checks}
+
 \fun{void}{check_quaddisc}{GEN x, long *s, long *mod4, const char *f}
 check whether $x$ is a quadratic discriminant (\typ{INT}, not a square,
 congruent to $0,1$ modulo $4$), and raise an exception otherwise. Set
@@ -1059,72 +1061,164 @@ congruent to $0,1$ modulo $4$), and raise an exception otherwise. Set
 \fun{void}{check_quaddisc_imag}{GEN x, long *mod4, const char *f} as
 \tet{check_quaddisc}; also check that \kbd{signe(x)} is negative.
 
+\subsec{\typ{QFI}, \typ{QFR}}
 
-\fun{GEN}{compimag}{GEN x, GEN y} compose the two \typ{QFI} $x$ and $y$,
+\fun{GEN}{qfi}{GEN x, GEN y, GEN z} creates the \typ{QFI} $(x,y,z)$.
+
+\fun{GEN}{qfr}{GEN x, GEN y, GEN z, GEN d} creates the \typ{QFR} $(x,y,z)$
+with distance component $d$.
+
+\fun{GEN}{qfr_1}{GEN q} given a \typ{QFR} $q$, return the unit form $q^0$.
+
+\fun{GEN}{qfi_1}{GEN q} given a \typ{QFI} $q$, return the unit form $q^0$.
+
+\subsubsec{Composition}
+
+\fun{GEN}{qficomp}{GEN x, GEN y} compose the two \typ{QFI} $x$ and $y$,
 then reduce the result. This is the same as \kbd{gmul(x,y)}.
 
-\fun{GEN}{compimagraw}{GEN x, GEN y} same as \tet{compimag}, without
-reducing the result.
-
-\fun{GEN}{compreal}{GEN x, GEN y} compose the two \typ{QFR} $x$ and $y$,
+\fun{GEN}{qfrcomp}{GEN x, GEN y} compose the two \typ{QFR} $x$ and $y$,
 then reduce the result. This is the same as \kbd{gmul(x,y)}.
 
-\fun{GEN}{comprealraw}{GEN x, GEN y} same as \tet{compreal}, without
-reducing the result.
+\fun{GEN}{qfisqr}{GEN x} as \kbd{qficomp(x,y)}.
+
+\fun{GEN}{qfrsqr}{GEN x} as \kbd{qfrcomp(x,y)}.
+
+\noindent Same as above, \emph{without} reducing the result:
+
+\fun{GEN}{qficompraw}{GEN x, GEN y}
+
+\fun{GEN}{qfrcompraw}{GEN x, GEN y}
+
+\fun{GEN}{qfisqrraw}{GEN x}
+
+\fun{GEN}{qfrsqrraw}{GEN x}
+
+\fun{GEN}{qfbcompraw}{GEN x, GEN y} compose two \typ{QFI}s or two \typ{QFR}s,
+without reduce the result.
+
+\subsubsec{Powering}
+
+\fun{GEN}{powgi}{GEN x, GEN n} computes $x^n$ (will work for many more types
+than \typ{QFI} and \typ{QFR}, of course). Reduce the result.
+
+\fun{GEN}{qfrpow}{GEN x, GEN n} computes $x^n$ for a \typ{QFR} $x$, reducing
+along the way. If the distance component is initially $0$, leave it alone;
+otherwise update it.
 
 \fun{GEN}{qfbpowraw}{GEN x, long n} compute $x^n$ (pure composition, no
 reduction), for a \typ{QFI} or \typ{QFR} $x$.
 
-\fun{GEN}{powimagraw}{GEN x, long n} as \tet{qfbpowraw}, for a \typ{QFI} $x$.
+\fun{GEN}{qfipowraw}{GEN x, long n} as \tet{qfbpowraw}, for a \typ{QFI} $x$.
 
-\fun{GEN}{powrealraw}{GEN x, long n} as \tet{qfbpowraw}, for a \typ{QFR} $x$.
+\fun{GEN}{qfrpowraw}{GEN x, long n} as \tet{qfbpowraw}, for a \typ{QFR} $x$.
 
-\fun{GEN}{qfbimagsolvep}{GEN Q, GEN p}
+\subsubsec{Solve, Cornacchia}
 
-\fun{GEN}{qfbrealsolvep}{GEN Q, GEN p}
+The following functions underly \tet{qfbsolve}; $p$ denotes a prime number.
 
-\fun{GEN}{sqcompimag}{GEN x}
+\fun{GEN}{qfisolvep}{GEN Q, GEN p} solves $Q(x,y) = p$ over the integers, for
+a \typ{QFI} $Q$. Return \kbd{gen\_0} if there are no solutions.
 
-\fun{GEN}{sqcompreal}{GEN x}
+\fun{GEN}{qfrsolvep}{GEN Q, GEN p} solves $Q(x,y) = p$ over the integers, for
+a \typ{QFR} $Q$. Return \kbd{gen\_0} if there are no solutions.
 
+\fun{long}{cornacchia}{GEN d, GEN p, GEN *px, GEN *py} solves
+$x^2+ dy^2 = p$ over the integers, where $d > 0$. Return $1$ if there is a
+solution (and store it in \kbd{*x} and \kbd{*y}), $0$ otherwise.
 
-\fun{long}{cornacchia}{GEN d, GEN p, GEN *px, GEN *py}
+\fun{long}{cornacchia2}{GEN d, GEN p, GEN *px, GEN *py} as \kbd{cornacchia},
+for the equation $x^2 + dy^2 = 4p$.
 
-\fun{long}{cornacchia2}{GEN d, GEN p, GEN *px, GEN *py}
+\subsubsec{Prime forms}
 
-\fun{GEN}{primeform_u}{GEN x, ulong p}
+\fun{GEN}{primeform_u}{GEN x, ulong p} \typ{QFI} whose first coefficient
+is the prime $p$.
 
-\fun{GEN}{qfr_to_qfr5}{GEN x, long prec}
+\fun{GEN}{primeform}{GEN x, GEN p, long prec}
 
-\fun{GEN}{qfr3_comp}{GEN x, GEN y, GEN D, GEN isqrtD}
+\subsec{Efficient real quadratic forms} Unfortunately, \typ{QFR}s
+are very inefficient, and are only provided for backward compatibility.
 
-\fun{GEN}{qfr3_pow}{GEN x, GEN n, GEN D, GEN isqrtD}
+\item they do not contain needed quantities, which are thus constantly
+recomputed (the discriminant $D$, $\sqrt{D}$ and its integer part),
 
-\fun{GEN}{qfr3_red}{GEN x, GEN D, GEN isqrtD}
+\item the distance component is stored in logarithmic form, which involves
+computing one extra logarithm per operation. It is much more efficient
+to store to store its exponential, computed from ordinary multiplications and
+divisions (taking exponent overflow into account), and compute its logarithm
+at the very end.
 
-\fun{GEN}{qfr3_rho}{GEN x, GEN D, GEN isqrtD}
+Internally, we have two representations for real quadratic forms:
 
-\fun{GEN}{qfr3_to_qfr}{GEN x, GEN z}
+\item \tet{qfr3}, a container $[a,b,c]$ with at least 3 entries: the three
+coefficients; the idea is to ignore the distance component.
 
-\fun{GEN}{qfr5_dist}{GEN e, GEN d, long prec}
+\item \tet{qfr5}, a container with at least 5 entries $[a,b,c,e,d]$: the
+three coefficients a \typ{REAL} $d$ and a \typ{INT} $e$ coding the distance
+component $2^{Ne} d$, in exponential form, for some large fixed $N$.
 
-\fun{GEN}{qfr5_comp}{GEN x, GEN y, GEN D, GEN sqrtD, GEN isqrtD}
+It is a feature that \kbd{qfr3} and \kbd{qfr5} have no specified length or
+type. It implies that a \kbd{qfr5} or \typ{QFR} will do whenever a \kbd{qfr3}
+is expected. Routines using these objects all require a global context,
+provided by a \kbd{struct qfr\_data *}:
+\bprog
+  struct qfr_data {
+    GEN D;        /* discriminant, t_INT   */
+    GEN sqrtD;    /* sqrt(D), t_REAL       */
+    GEN isqrtD;   /* floor(sqrt(D)), t_INT */
+  };
+@eprog
+\fun{void}{qfr_data_init}{GEN D, long prec, struct qfr_data *S}
+given a discriminant $D > 0$, initialize $S$ for computations at precision 
+\kbd{prec} ($\sqrt{D}$ is computed to that initial accuracy).
 
-\fun{GEN}{qfr5_pow}{GEN x, GEN n, GEN D, GEN sqrtD, GEN isqrtD}
+\noindent All functions below are shallow, and not stack clean.
 
-\fun{GEN}{qfr5_red}{GEN x, GEN D, GEN sqrtD, GEN isqrtD}
+\fun{GEN}{qfr3_comp}{GEN x, GEN y, struct qfr_data *S} compose two
+\kbd{qfr3}, reducing the result.
 
-\fun{GEN}{qfr5_rho}{GEN x, GEN D, GEN sqrtD, GEN isqrtD}
+\fun{GEN}{qfr3_pow}{GEN x, GEN n, struct qfr_data *S} compute $x^n$, reducing
+along the way.
 
-\fun{GEN}{qfr_pow}{GEN x, GEN n}
+\fun{GEN}{qfr3_red}{GEN x, struct qfr_data *S} reduce $x$.
 
-\fun{GEN}{qfr_unit}{GEN x}
+\fun{GEN}{qfr3_rho}{GEN x, struct qfr_data *S} perform one reduction step;
+\kbd{qfr3\_red} just performs reduction steps until we hit a reduced form.
 
-\fun{GEN}{qfi_unit}{GEN x}
+\fun{GEN}{qfr3_to_qfr}{GEN x, GEN d} recover an ordinary \typ{QFR} from the
+\kbd{qfr3} $x$, adding distance component $d$.
 
-\fun{GEN}{quad_polmod_conj}{GEN x, GEN y}
+Before we explain \kbd{qfr5}, recall that it corresponds to an ideal, that
+reduction corresponds to multiplying by a principal ideal, and that the
+distance component is a clever way to keep track of these principal ideals.
+More precisely, reduction consists in a number of reduction steps,
+going from the form $(a,b,c)$ to $\rho(a,b,c) = (c, -b \mod 2c, *)$;
+the distance component is multiplied by (a floating point approximation to)
+$(b + \sqrt{D}) / (b - \sqrt{D})$.
 
-\fun{GEN}{quad_polmod_norm}{GEN x, GEN y}
+\fun{GEN}{qfr5_comp}{GEN x, GEN y, struct qfr_data *S} compose two
+\kbd{qfr5}, reducing the result, and updating the distance component.
+
+\fun{GEN}{qfr5_pow}{GEN x, GEN n, struct qfr_data *S} compute $x^n$, reducing
+along the way.
+
+\fun{GEN}{qfr5_red}{GEN x, struct qfr_data *S} reduce $x$.
+
+\fun{GEN}{qfr5_rho}{GEN x, struct qfr_data *S} perform one reduction step.
+
+\fun{GEN}{qfr5_dist}{GEN e, GEN d, long prec} decode the distance component
+from exponential (\kbd{qfr5}-specific) to logarithmic form (as in a
+\typ{QFR}).
+
+\fun{GEN}{qfr_to_qfr5}{GEN x, long prec} convert a \typ{QFR} to a
+\kbd{qfr5} with initial trivial distance component ($= 1$).
+
+\fun{GEN}{qfr5_to_qfr}{GEN x, GEN d}, assume $x$ is a \kbd{qfr5} and
+$d$ was the original distance component of some \typ{QFR} that we converted
+using \tet{qfr_to_qfr5} to perform efficiently a number of operations.
+Convert $x$ to a \typ{QFR} with the correct (logarithmic) distance component.
+
 
 \section{Linear algebra over $\Z$}
 \subsec{Hermite and Smith Normal Forms}

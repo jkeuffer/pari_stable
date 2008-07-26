@@ -3176,7 +3176,7 @@ classno(GEN x)
   hash  = new_chunk(10000);
   f = sqr_primeform(D, forms[0]);
   p1 = fh = powgi(f, h);
-  for (i=0; i<s; i++, p1 = compimag(p1,f))
+  for (i=0; i<s; i++, p1 = qficomp(p1,f))
   {
     _low(tabla[i], p1[1]);
     _low(tablb[i], p1[2]); count[tabla[i]&255]++;

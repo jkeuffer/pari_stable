@@ -242,7 +242,7 @@ BA 49- user variables can now be aliased [#790].
        when missing.
    82- Rename library functions initell -> ellinit, smallinitell -> smallellinit
        initalg -> nfinit, initalgred -> nfinitred -> initalgred2 -> nfinitred2
-       primedec -> idealprimedec, powraw -> qfbpowraw
+       primedec -> idealprimedec, powraw -> qfbpowraw, compraw -> qfbcompraw
    83- Useless nfinit flags 4, 5 (partial polred) removed.
    84- Split off inline functions unrelated to the kernel from
        src/kernel/level1.h
