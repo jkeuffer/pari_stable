@@ -802,7 +802,7 @@ sufprec_r(GEN z)
 {
   long p = bit_accuracy( lg(z) );
   /* bit accuracy of fractional part large enough ? */
-  return ( p - expo(z) > maxss(3*32, 0.2*p) );
+  return ( p - expo(z) > maxss(3*32, (long)0.2*p) );
 }
 /* typ(z) = t_REAL or t_COMPLEX, return zi = t_INT approximation */
 static long

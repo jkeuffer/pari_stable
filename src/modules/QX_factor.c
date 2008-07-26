@@ -635,7 +635,7 @@ AGAIN:
     T2 = centermod( ZM_mul(Tra, M_L), pa );
     if (first)
     { /* initialize lattice, using few p-adic digits for traces */
-      double t = gexpo(T2) - maxss(32, BitPerFactor*r);
+      double t = gexpo(T2) - maxdd(32.0, BitPerFactor*r);
       bgood = (long) (t * LOGp2);
       b = maxss(bmin, bgood);
       delta = a - b;

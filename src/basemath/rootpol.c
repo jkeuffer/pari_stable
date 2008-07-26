@@ -368,7 +368,7 @@ dbllog2(GEN z)
   if (typ(z) != t_COMPLEX) return log2ir(z);
   x = log2ir(gel(z,1));
   y = log2ir(gel(z,2));
-  if (fabs(x-y) > 10) return maxss(x,y);
+  if (fabs(x-y) > 10) return maxdd(x,y);
   return x + 0.5*log2(1 + exp2(2*(y-x)));
 }
 

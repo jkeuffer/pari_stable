@@ -1247,7 +1247,7 @@ AGAIN:
     VV = get_V(Tra, M_L, PRK, PRKinv, pk, &a);
     if (first)
     { /* initialize lattice, using few p-adic digits for traces */
-      bgood = (long)(a - maxss(32, BitPerFactor * r));
+      bgood = (long)(a - maxss(32, (long)(BitPerFactor * r)));
       b = maxss(bmin, bgood);
       delta = a - b;
     }

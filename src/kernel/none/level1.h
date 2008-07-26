@@ -460,6 +460,10 @@ INLINE long
 maxss(long x, long y) { return x>y?x:y; }
 INLINE long
 minss(long x, long y) { return x<y?x:y; }
+INLINE long
+maxdd(double x, double y) { return x>y?x:y; }
+INLINE double
+mindd(double x, double y) { return x<y?x:y; }
 
 /*******************************************************************/
 /*                                                                 */
