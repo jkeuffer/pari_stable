@@ -654,6 +654,18 @@ RgX_Rg_add(GEN y, GEN x)
   return z;
 }
 GEN
+RgX_Rg_add_shallow(GEN y, GEN x)
+{
+  GEN z;
+  long lz = lg(y), i;
+  if (lz == 2) return scalarpol(x,varn(y));
+  z = cgetg(lz,t_POL); z[1] = y[1];
+  gel(z,2) = gadd(gel(y,2),x);
+  for(i=3; i<lz; i++) gel(z,i) = gel(y,i);
+  if (lz==3) z = normalizepol_lg(z,lz);
+  return z;
+}
+GEN
 RgX_Rg_sub(GEN y, GEN x)
 {
   GEN z;

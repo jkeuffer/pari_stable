@@ -304,23 +304,23 @@ carhess(GEN x, long v)
 {
   pari_sp av;
   long lx, r, i;
-  GEN y, H, X_h;
+  GEN y, H;
 
   if ((H = easychar(x,v,NULL))) return H;
 
   lx = lg(x); av = avma; y = cgetg(lx+1, t_VEC);
   gel(y,1) = pol_1(v); H = hess(x);
-  X_h = pol_x(v);
   for (r = 1; r < lx; r++)
   {
-    GEN p3 = gen_1, p4 = gen_0;
+    GEN z, a = gen_1, b = zeropol(v);
     for (i = r-1; i; i--)
     {
-      p3 = gmul(p3, gcoeff(H,i+1,i));
-      p4 = gadd(p4, gmul(gmul(p3,gcoeff(H,i,r)), gel(y,i)));
+      a = gmul(a, gcoeff(H,i+1,i));
+      b = RgX_add(b, RgX_Rg_mul(gel(y,i), gmul(a,gcoeff(H,i,r))));
     }
-    gel(X_h,2) = gneg(gcoeff(H,r,r));
-    gel(y,r+1) = RgX_Rg_sub(RgX_mul(X_h, gel(y,r)), p4);
+    z = RgX_sub(RgX_shift_shallow(gel(y,r), 1),
+                RgX_Rg_mul(gel(y,r), gcoeff(H,r,r)));
+    gel(y,r+1) = RgX_sub(z, b); /* (X - H[r,r])y[r] - b */
   }
   return fix_pol(av, gel(y,lx));
 }
@@ -378,7 +378,7 @@ carberkowitz(GEN x, long v)
     for (i = 1; i <= r+1; i++) V[i] = Q[i];
   }
   V = polrecip_i( RgV_to_RgX(V, v) ); /* not gtopoly: fail if v > gvar(V) */
-  if (!odd(lx)) V = RgX_neg(V);
+  V = odd(lx)? gcopy(V): RgX_neg(V);
   return fix_pol(av0, V);
 }
 
