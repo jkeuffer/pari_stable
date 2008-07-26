@@ -10,6 +10,7 @@ extgcd(GEN A, GEN B, GEN *U, GEN *V)
 {
   pari_sp av = avma;
   GEN ux = gen_1, vx = gen_0, a = A, b = B;
+
   if (typ(a) != t_INT || typ(b) != t_INT) pari_err(typeer, "extgcd");
   if (signe(a) < 0) { a = negi(a); ux = negi(ux); }
   while (!gcmp0(b))
@@ -17,8 +18,7 @@ extgcd(GEN A, GEN B, GEN *U, GEN *V)
     GEN r, q = dvmdii(a, b, &r), v = vx;
 
     vx = subii(ux, mulii(q, vx));
-    ux = v;
-    a = b; b = r;
+    ux = v; a = b; b = r;
   }
   *U = ux;
   *V = diviiexact( subii(a, mulii(A,ux)), B );
@@ -33,6 +33,6 @@ main()
   printf("x = "); x = gp_read_stream(stdin);
   printf("y = "); y = gp_read_stream(stdin);
   d = extgcd(x, y, &u, &v);
-  pari_printf("gcd = %Ps\nu = %Ps\nv = %Ps\n", d,u,v);
+  pari_printf("gcd = %Ps\nu = %Ps\nv = %Ps\n", d, u, v);
   return 0;
 }

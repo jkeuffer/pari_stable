@@ -1978,12 +1978,37 @@ $$ s_x x + s_y y = \gcd(x,y).$$
 In practice, there is no need to update $s_y$ and $t_y$ since
 $\gcd(x,y)$ and $s_x$ are enough to recover $s_y$. The following program
 is now straightforward. A couple of new functions appear in there, whose
-description can be found in the technical reference manual in Chapter 5.
+description can be found in the technical reference manual in Chapter 5,
+but whose meaning should be clear from their name and the context.
+
+This program can be found in \kbd{examples/extgcd.c} together with a
+proper \kbd{Makefile}. You may ignore the first comment
+\bprog
+/*
+GP;install("extgcd", "GG&&", "gcdex", "./libextgcd.so");
+*/
+@eprog\noindent which instruments the program so that \kbd{gp2c-run extgcd.c}
+can import the \kbd{extgcd()} routine into an instance of the \kbd{gp}
+interpreter (under the name \kbd{gcdex}). See the \kbd{gp2c} manual for
+details.
+\newpage
 
 \bprogfile{../examples/extgcd.c}
 
-Note that, for simplicity, the inner loop does not include any garbage
+\noindent For simplicity, the inner loop does not include any garbage
 collection, hence memory use is quadratic in the size of the inputs instead
-of linear.
+of linear. Here is a better version of that loop:
+\bprog
+  pari_sp av = avma, lim = stack_lim(av,1);
+  ...
+  while (!gcmp0(b))
+  {
+    GEN r, q = dvmdii(a, b, &r), v = vx;
 
+    vx = subii(ux, mulii(q, vx));
+    ux = v; a = b; b = r;
+    if (low_stack(lim, stack_lim(av,1)))
+      gerepileall(av, 4, &a, &b, &ux, &vx);
+  }
+@eprog
 \newpage
