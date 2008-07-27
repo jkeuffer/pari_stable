@@ -2506,7 +2506,7 @@ INLINE long   itos(GEN x);
 INLINE long   itos_or_0(GEN x);
 INLINE ulong  itou(GEN x);
 INLINE ulong  itou_or_0(GEN x);
-INLINE long   maxdd(double x, double y);
+INLINE double maxdd(double x, double y);
 INLINE long   maxss(long x, long y);
 INLINE double mindd(double x, double y);
 INLINE long   minss(long x, long y);
