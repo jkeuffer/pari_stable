@@ -1367,96 +1367,78 @@ Fl_sqrt(ulong a, ulong p)
   return v;
 }
 
-/* Cipolla's algorithm is better when e = v_2(p-1) is "too big".
- * Otherwise, is a constant times worse than the above one.
- * For p = 3 (mod 4), is about 3 times worse, and in average
- * is about 2 or 2.5 times worse.
+/* Cipolla is better than Tonelli-Shanks when e = v_2(p-1) is "too big".
+ * Otherwise, is a constant times worse; for p = 3 (mod 4), is about 3 times worse,
+ * and in average is about 2 or 2.5 times worse. But try both algorithms for
+ * S(n) = (2^n+3)^2-8 with n = 750, 771, 779, 790, 874, 1176, 1728, 2604, etc.
  *
- * But try both algorithms for e.g. S(n)=(2^n+3)^2-8 with
- * n = 750, 771, 779, 790, 874, 1176, 1728, 2604, etc.
- *
- * If X^2 = t^2 - a  is not a square in F_p, then
- *
- *   (t+X)^(p+1) = (t+X)(t-X) = a
- *
- * so we get sqrt(a) in F_p^2 by
- *
- *   sqrt(a) = (t+X)^((p+1)/2)
- *
+ * If X^2 := t^2 - a  is not a square in F_p (so X is in F_p^2), then
+ *   (t+X)^(p+1) = (t-X)(t+X) = a,   hence  sqrt(a) = (t+X)^((p+1)/2)  in F_p^2.
  * If (a|p)=1, then sqrt(a) is in F_p.
- *
  * cf: LNCS 2286, pp 430-434 (2002)  [Gonzalo Tornaria] */
 
+/* compute y^2, y = y[1] + y[2] X */
 static GEN
 sqrt_Cipolla_sqr(void *data, GEN y)
 {
-  GEN u = gel(y,1), v = gel(y,2);
-  GEN p = gel(data,2);
-  GEN n = gel(data,3);
-  GEN u2 = sqri(u);
-  GEN v2 = sqri(v);
-  v = modii(subii(sqri(addii(v,u)), addii(u2,v2)), p);
-  u = modii(addii(u2, mulii(v2,n)), p);
-  return mkvec2(u,v);
+  GEN u = gel(y,1), v = gel(y,2), p = gel(data,2), n = gel(data,3);
+  GEN z, u2 = sqri(u), v2 = sqri(v);
+  v = subii(sqri(addii(v,u)), addii(u2,v2));
+  u = addii(u2, mulii(v2,n));
+  z = cgetg(3, t_VEC); /* NOT mkvec2: must be gerepileupto-able */
+  gel(z,1) = modii(u,p);
+  gel(z,2) = modii(v,p); return z;
 }
-
+/* compute (t+X) y^2 */
 static GEN
 sqrt_Cipolla_msqr(void *data, GEN y)
 {
-  GEN u = gel(y,1), v = gel(y,2);
-  GEN a = gel(data,1);
-  GEN p = gel(data,2);
-  long t= mael(data,4,2);
-  GEN d = addii(u, mulsi(t,v));
-  GEN d2= sqri(d);
-  GEN b = remii(mulii(a,v), p);
-  u = modii(subii(mulsi(t,d2), mulii(b,addii(u,d))), p);
-  v = modii(subii(d2, mulii(b,v)), p);
-  return mkvec2(u,v);
+  GEN u = gel(y,1), v = gel(y,2), a = gel(data,1), p = gel(data,2), gt = gel(data,4);
+  ulong t = gt[2];
+  GEN d = addii(u, mului(t,v)), d2= sqri(d);
+  GEN z, b = remii(mulii(a,v), p);
+  u = subii(mului(t,d2), mulii(b,addii(u,d)));
+  v = subii(d2, mulii(b,v));
+  z = cgetg(3, t_VEC); /* NOT mkvec2: must be gerepileupto-able */
+  gel(z,1) = modii(u,p);
+  gel(z,2) = modii(v,p); return z;
 }
-
+/* assume a reduced mod p [ otherwise correct but inefficient ] */
 static GEN
 sqrt_Cipolla(GEN a, GEN p)
 {
-  pari_sp av = avma, av1;
-  long t;
-  GEN u, v, n;
-  GEN y, data;
+  pari_sp av1;
+  GEN u, v, n, y, pov2;
+  ulong t;
 
   if (kronecker(a, p) < 0) return NULL;
-  /*Avoid multiplying by huge base*/
-  if(cmpii(a,shifti(p,-1)) > 0) a=subii(a,p);
+  pov2 = shifti(p,-1);
+  if (cmpii(a,pov2) > 0) a = subii(a,p); /* center: avoid multiplying by huge base*/
 
   av1 = avma;
   for(t=1; ; t++)
   {
-    n = subsi(t*t, a);
+    n = subsi((long)(t*t), a);
     if (kronecker(n, p) < 0) break;
     avma = av1;
   }
 
-  u = utoipos((ulong)t); v = gen_1; /* u+vX = t+X */
-  y=mkvec2(u,v); data=mkvec4(a,p,n,u);
-  y=leftright_pow_fold(y, shifti(p, -1), data,
-		sqrt_Cipolla_sqr,sqrt_Cipolla_msqr);
-
-  u=gel(y,1); v=gel(y,2);
-
+  /* compute (t+X)^((p-1)/2) =: u+vX */
+  u = utoipos(t);
+  y = leftright_pow_fold(mkvec2(u, gen_1), pov2, mkvec4(a,p,n,u),
+                         sqrt_Cipolla_sqr, sqrt_Cipolla_msqr);
+  u = gel(y,1);
+  v = gel(y,2);
   /* Now u+vX = (t+X)^((p-1)/2); thus
-   *
    *   (u+vX)(t+X) = sqrt(a) + 0 X
-   *
    * Whence,
-   *
    *   sqrt(a) = (u+vt)t - v*a
    *   0       = (u+vt)
-   *
    * Thus a square root is v*a */
 
   v = Fp_mul(v,a, p);
-
-  u = subii(p,v); if (cmpii(v,u) > 0) v = u;
-  return gerepileuptoint(av,v);
+  if (cmpii(v,pov2) > 0) v = subii(p,v);
+  return v;
 }
 
 #define sqrmod(x,p) (remii(sqri(x),p))
@@ -1479,11 +1461,11 @@ Fp_sqrt(GEN a, GEN p)
   }
 
   p1 = addsi(-1,p); e = vali(p1);
+  a = modii(a, p);
 
   /* On average, the algorithm of Cipolla is better than the algorithm of
    * Tonelli and Shanks if and only if e(e-1)>8*log2(n)+20
    * see LNCS 2286 pp 430 [GTL] */
-
   if (e*(e-1) > 20 + 8 * bit_accuracy(lgefint(p)))
   {
     v = sqrt_Cipolla(a,p);
