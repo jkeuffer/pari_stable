@@ -166,6 +166,7 @@ GEN     random_Flx(long d1, long v, ulong p);
 
 /* FpX.c */
 
+GEN     Fp_FpX_sub(GEN x, GEN y, GEN p);
 GEN     Fp_FpXQ_log(GEN a, GEN g, GEN ord, GEN T, GEN p);
 GEN     FpV_inv(GEN x, GEN p);
 GEN     FpV_roots_to_pol(GEN V, GEN p, long v);
@@ -2074,11 +2075,11 @@ GEN     Newton_exponents(long e);
 GEN     ZpX_liftroot(GEN f, GEN a, GEN p, long e);
 GEN     ZpX_liftroots(GEN f, GEN S, GEN q, long e);
 GEN     ZpXQX_liftroot(GEN f, GEN a, GEN T, GEN p, long e);
-long    hensel_lift_accel(long n, long *pmask);
 GEN     ZpX_liftfact(GEN pol, GEN Q, GEN T, GEN p, long e, GEN pe);
 GEN     padicsqrtlift(GEN T, GEN a, GEN p, long e);
 GEN     padicsqrtnlift(GEN a, GEN n, GEN S, GEN p, long e);
 GEN     polhensellift(GEN pol, GEN fct, GEN p, long exp);
+ulong   quadratic_prec_mask(long n);
 
 /* QX_factor.c */
 

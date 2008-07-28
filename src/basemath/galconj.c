@@ -418,49 +418,46 @@ static GEN
 monomorphismratlift(GEN P, GEN S, struct galois_lift *gl, GEN frob)
 {
   pari_sp ltop, lbot;
-  GEN Q = gl->T, p = gl->p, q, qold, qm1, qm1old;
-  GEN W, Pr, Qr, Sr, Wr = gen_0, Qrold, Spow;
-  long e=gl->e, level=1, rt, i, nb, mask;
+  GEN Q = gl->T, p = gl->p, qold = NULL, q = p;
+  GEN Sr, Spow, Wr = NULL, W, Prold = NULL, Pr, Qrold = NULL, Qr;
+  long e = gl->e, level = 1, rt;
+  ulong mask;
   GEN *gptr[2];
+
   if (DEBUGLEVEL == 1) (void)timer2();
   rt = brent_kung_optpow(degpol(Q),1);
-  q = p; qm1 = gen_1; /*during the run, we have p*qm1=q*/
-  nb=hensel_lift_accel(e, &mask);
+  mask = quadratic_prec_mask(e);
   Pr = FpX_red(P,q);
-  Qr = (P==Q)?Pr:FpX_red(Q, q);/*A little speed up for automorphismlift*/
-  W=FpX_FpXQ_compo(ZX_deriv(Pr),S,Qr,q);
-  W=FpXQ_inv(W,Qr,q);
-  qold = p; qm1old=gen_1;
-  Qrold = Qr;
+  Qr = (P==Q)? Pr: FpX_red(Q, q);/*A little speed up for automorphismlift*/
+  W = FpXQ_inv(FpX_FpXQ_compo(ZX_deriv(Pr),S, Qr,q), Qr,q);
   gptr[0] = &S;
   gptr[1] = &Wr;
-  for (i=0; i<nb;i++)
+  for (;;)
   {
-    if (DEBUGLEVEL>=2) { level=(level<<1)-((mask>>i)&1); (void)timer2(); }
-    qm1 = (mask&(1<<i))?sqri(qm1):mulii(qm1, q);
-    q   =  mulii(qm1, p);
+    if (DEBUGLEVEL>=2) { level = (level<<1) - (mask & 1); (void)timer2(); }
+    q = sqri(q);
+    if (mask & 1) q = diviiexact(q, p);
+    mask >>= 1;
     Pr = FpX_red(P, q);
-    Qr = (P==Q)?Pr:FpX_red(Q, q);/*A little speed up for automorphismlift*/
+    Qr = (P==Q)? Pr: FpX_red(Q, q);/*A little speed up for automorphismlift*/
     ltop = avma;
     Sr = S;
     Spow = FpXQ_powers(Sr, rt, Qr, q);
-
-    if (i)
+    if (Wr)
     {
-      W = FpXQ_mul(Wr, FpX_FpXQV_compo(ZX_deriv(Pr),FpXV_red(Spow,qold),Qrold,qold), Qrold, qold);
-      W = FpX_neg(W, qold);
-      W = FpX_Fp_add_shallow(W, gen_2, qold);
-      W = FpXQ_mul(Wr, W, Qrold, qold);
+      W = FpXQ_mul(Wr, FpX_FpXQV_compo(ZX_deriv(Prold),FpXV_red(Spow,qold),Qrold,qold),
+                   Qrold,qold);
+      W = FpXQ_mul(Wr, Fp_FpX_sub(gen_2, W, qold), Qrold,qold);
     }
     Wr = W;
     S = FpXQ_mul(Wr, FpX_FpXQV_compo(Pr, Spow, Qr, q),Qr,q);
-    S = ZX_sub(Sr, S);
     lbot = avma;
-    Wr = gcopy(Wr);
-    S = FpX_red(S, q);
+    S = FpX_sub(Sr, S, q);
+    if (mask == 1) break;
+    Wr = ZX_copy(Wr);
     gerepilemanysp(ltop, lbot, gptr, 2);
-    if (i && i<nb-1 && frob && monoratlift(S,q,qm1old,gl,frob)) return NULL;
-    qold = q; qm1old=qm1; Qrold = Qr;
+    if (qold && frob && monoratlift(S,q,diviiexact(qold,p),gl,frob)) return NULL;
+    qold = q; Prold = Pr; Qrold = Qr;
     if (DEBUGLEVEL >= 2) msgtimer("MonomorphismLift: lift to prec %d",level);
   }
   if (DEBUGLEVEL == 1) msgtimer("monomorphismlift()");

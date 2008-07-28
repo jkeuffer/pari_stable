@@ -277,7 +277,7 @@ JD 12- add an optional argument to quit()
        prime.c, bit.c
    15- new benches: 'galoisinit', 'ispower', 'nffactor', 'subfields',
        'resultant', 'partition', 'aurifeuille', 'nfhilbert'
-   16- library functions Flc_Fl_div, Flc_Fl_div_inplace, Flc_Fl_mul,
+   16- library functions Fp_FpX_sub, Flc_Fl_div, Flc_Fl_div_inplace, Flc_Fl_mul,
    Flc_Fl_mul_inplace, Flm_Fl_mul, Flm_Fl_mul_inplace, Flm_copy, Flm_mul,
    Flm_inage,
    Flv_Fl_mul_inplace, Flv_add, Flv_add_inplace, Flv_copy, Flv_dotproduct,

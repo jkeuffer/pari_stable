@@ -194,19 +194,32 @@ Newton_exponents(long e)
   setlg(E, l); return E;
 }
 
-/* lift accelerator */
-long
-hensel_lift_accel(long n, long *pmask)
+/* Assume n > 0. We want to go to accuracy n, starting from accuracy 1, using
+ * a quadratically convergent algorithm. Goal: 9 -> 1,2,3,5,9 instead of
+ * 1,2,4,8,9 (sequence of accuracies).
+ *
+ * Let a0 = 1, a1 = 2, a2, ... ak = n, the sequence of accuracies. To obtain
+ * it, work backwards:
+ *   a(k) = n, a(i-1) = (a(i) + 1) \ 2,
+ * but we do not want to store a(i) explicitly, even as a t_VECSMALL, since
+ * this would leave an object on the stack. We store a(i) implicitly in a
+ * MASK: let a(0) = 1, if the i-bit of MASK is set, set a(i+1) = 2 a(i) - 1,
+ * and 2a(i) otherwise.
+ *
+ * In fact, we do something a little more complicated to simplify the
+ * function interface and avoid returning k and MASK separately: we return
+ * MASK + 2^(k+1), so the highest bit of the mask indicates the length of the
+ * sequence, and the following ones are as above. */
+ulong
+quadratic_prec_mask(long n)
 {
-  long a, j, mask = 0;
-  for(j=BITS_IN_LONG-1, a=n ;; j--)
+  long a = n, i;
+  ulong mask = 0;
+  for(i = 1;; i++, mask <<= 1)
   {
-    mask |= (a&1)<<j;
-    a = (a+1)>>1;
-    if (a==1) break;
+    mask |= (a&1); a = (a+1)>>1;
+    if (a==1) return mask | (1 << i); 
   }
-  *pmask = mask>>j;
-  return BITS_IN_LONG-j;
 }
 
 /* a = modular factors of f mod (p,T) [possibly T=NULL], lift to precision p^e0
@@ -364,7 +377,7 @@ polhensellift(GEN pol, GEN L, GEN p, long N)
 /*                             rootpadicfast                             */
 /*************************************************************************/
 /* SPEC:
- * p is a t_INT > 1, e >= 0
+ * p is a t_INT > 1, e >= 1
  * f is a ZX with leading term prime to p.
  * a is a simple root mod l for all l|p.
  * Return roots of f mod p^e, as integers (implicitly mod p^e)
@@ -372,62 +385,64 @@ polhensellift(GEN pol, GEN L, GEN p, long N)
 GEN
 ZpX_liftroot(GEN f, GEN a, GEN p, long e)
 {
-  pari_sp ltop=avma;
-  GEN     qold, q, qm1;
-  GEN     W, fr, Wr = gen_0;
-  long    i, nb, mask;
-  qold = q = p; qm1 = gen_1;
-  nb = hensel_lift_accel(e, &mask);
-  fr = FpX_red(f,q);
+  pari_sp av = avma;
+  GEN qold = NULL, q = p, frold = NULL, fr, W, Wr = NULL;
+  ulong mask;
+
   a = modii(a,q);
-  W = FpX_eval(ZX_deriv(fr), a, q);
-  W = Fp_inv(W,q);
-  for(i=0;i<nb;i++)
+  if (e == 1) return a;
+  mask = quadratic_prec_mask(e);
+  fr = FpX_red(f,q);
+  W = Fp_inv(FpX_eval(ZX_deriv(fr), a, q), q); /* 1/f'(a) mod p */
+  for(;;)
   {
-    qm1 = (mask&(1<<i))?sqri(qm1):mulii(qm1, q);
-    q   =  mulii(qm1, p);
-    fr = FpX_red(f,q);
-    if (i)
+    q = sqri(q);
+    if (mask & 1) q = diviiexact(q, p);
+    mask >>= 1;
+    if (Wr)
     {
-      W = Fp_mul(Wr, FpX_eval(ZX_deriv(fr),a,qold), qold);
+      W = Fp_mul(Wr, FpX_eval(ZX_deriv(frold),a,qold), qold);
       W = Fp_mul(Wr, subsi(2,W), qold);
     }
     Wr = W;
-    a = subii(a, mulii(Wr, FpX_eval(fr, a,q)));
-    a = modii(a,q);
+    fr = FpX_red(f,q);
+    a = Fp_sub(a, Fp_mul(Wr, FpX_eval(fr, a,q), q), q);
+    if (mask == 1) return gerepileuptoint(av, a);
     qold = q;
+    frold= fr;
   }
-  return gerepileupto(ltop,a);
 }
 GEN
 ZpXQX_liftroot(GEN f, GEN a, GEN T, GEN p, long e)
 {
-  pari_sp ltop=avma;
-  GEN     qold, q, qm1;
-  GEN     W, fr, Wr = gen_0;
-  long    i, nb, mask;
-  qold = p ;  q = p; qm1 = gen_1;
-  nb=hensel_lift_accel(e, &mask);
-  fr = FpXQX_red(f, T, q);
+  pari_sp av = avma;
+  GEN qold = NULL, q = p, frold = NULL, fr, W, Wr = NULL;
+  ulong mask;
+
   a = Fq_red(a, T, q);
-  W = FqX_eval(RgX_deriv(fr), a, T, q);
-  W = Fq_inv(W,T,q);
-  for(i=0;i<nb;i++)
+  if (e == 1) return a;
+  mask = quadratic_prec_mask(e);
+  fr = FpXQX_red(f, T, q);
+  W = Fq_inv(FqX_eval(RgX_deriv(fr), a, T, q), T, q); /* 1/f'(a) mod (T,p) */
+  for(;;)
   {
-    qm1 = (mask&(1<<i))?sqri(qm1):mulii(qm1, q);
-    q   =  mulii(qm1, p);
-    fr = FpXQX_red(f,T,q);
-    if (i)
+    q = sqri(q);
+    if (mask & 1) q = diviiexact(q, p);
+    mask >>= 1;
+    if (Wr)
     {
-      W = Fq_red(gmul(Wr,FqX_eval(RgX_deriv(fr),a,T,qold)), T, qold);
-      W = Fq_red(gmul(Wr, gadd(gen_2, gneg(W))), T, qold);
+      GEN z;
+      W = Fq_mul(Wr,FqX_eval(RgX_deriv(frold),a,T,qold), T, qold);
+      z = typ(W) == t_INT?subsi(2, W): Rg_RgX_sub(gen_2, W); /* 2 - W */
+      W = Fq_mul(Wr, z, T, qold);
     }
     Wr = W;
-    a = gsub(a, gmul(Wr, FqX_eval(fr, a, T, q)));
-    a = Fq_red(a, T, q);
+    fr = FpXQX_red(f,T,q);
+    a = Fq_sub(a, Fq_mul(Wr, FqX_eval(fr, a, T,q), T,q), T,q);
+    if (mask == 1) return gerepileupto(av, a);
     qold = q;
+    frold= fr;
   }
-  return gerepileupto(ltop,a);
 }
 /* Apply ZpX_liftroot to all roots in S and trace trick.
  * Elements of S must be distinct simple roots mod p for all p|q. */
@@ -459,16 +474,17 @@ padicsqrtlift(GEN T, GEN a, GEN p, long e)
 {
   pari_sp ltop=avma;
   GEN q, W;
-  long i, nb, mask;
+  ulong mask;
 
   if (e == 1) return icopy(a);
-  nb = hensel_lift_accel(e, &mask);
+  mask = quadratic_prec_mask(e);
   W = Fp_inv(modii(shifti(a,1), p), p);
   q = p;
-  for(i=0;;i++)
+  for(;;)
   {
     q = sqri(q);
-    if (mask & (1<<i)) q = diviiexact(q, p);
+    if (mask & 1) q = diviiexact(q, p);
+    mask >>= 1;
     if (lgefint(q) == 3)
     {
       ulong Q = (ulong)q[2];
@@ -477,14 +493,14 @@ padicsqrtlift(GEN T, GEN a, GEN p, long e)
       ulong w = umodiu(W, Q);
       A = Fl_sub(A, Fl_mul(w, Fl_sub(Fl_sqr(A,Q), t, Q), Q), Q);
       a = utoi(A);
-      if (i == nb-1) break;
+      if (mask == 1) break;
       w = Fl_sub(Fl_add(w,w,Q), Fl_mul(Fl_sqr(w,Q), Fl_add(A,A,Q),Q), Q);
       W = utoi(w);
     }
     else
     {
       a = modii(subii(a, mulii(W, subii(Fp_sqr(a,q),T))), q);
-      if (i == nb-1) break;
+      if (mask == 1) break;
       W = subii(shifti(W,1), Fp_mul(Fp_sqr(W,q), shifti(a,1),q));
     }
   }
@@ -497,21 +513,38 @@ padicsqrtnlift(GEN T, GEN n, GEN a, GEN p, long e)
 {
   pari_sp ltop=avma;
   GEN q, W;
-  long i, nb, mask;
+  ulong mask;
 
   if (equalii(n, gen_2)) return padicsqrtlift(T,a,p,e);
-  nb = hensel_lift_accel(e, &mask);
+  if (e == 1) return icopy(a);
+  mask = quadratic_prec_mask(e);
   W = Fp_inv(Fp_mul(n,Fp_pow(a,subis(n,1),p), p), p);
   q = p;
-  for(i=0;;i++)
+  for(;;)
   {
     q = sqri(q);
-    if (mask & (1<<i)) q = diviiexact(q, p);
-    a = modii(subii(a, mulii(W, subii(Fp_pow(a,n,q),T))), q);
-    if (i == nb-1) break;
+    if (mask & 1) q = diviiexact(q, p);
+    mask >>= 1;
+    if (lgefint(q) == 3 && lgefint(n) == 3)
+    {
+      ulong Q = (ulong)q[2], N = (ulong)n[2];
+      ulong A = umodiu(a, Q);
+      ulong t = umodiu(T, Q);
+      ulong w = umodiu(W, Q);
 
-    W = subii(shifti(W,1),
-	      Fp_mul(Fp_sqr(W,q), mulii(n,Fp_pow(a,subis(n,1),q)), q));
+      A = Fl_sub(A, Fl_mul(w, Fl_sub(Fl_powu(A,N,Q), t, Q), Q), Q);
+      a = utoi(A);
+      if (mask == 1) break;
+      w = Fl_sub(Fl_add(w,w,Q),
+                 Fl_mul(Fl_sqr(w,Q), Fl_mul(N,Fl_powu(A, N-1, Q), Q), Q), Q);
+      W = utoi(w);
+    }
+    else
+    {
+      a = modii(subii(a, mulii(W, subii(Fp_pow(a,n,q),T))), q);
+      if (mask == 1) break;
+      W = subii(shifti(W,1), Fp_mul(Fp_sqr(W,q), mulii(n,Fp_pow(a,subis(n,1),q)), q));
+    }
   }
   return gerepileuptoint(ltop,a);
 }

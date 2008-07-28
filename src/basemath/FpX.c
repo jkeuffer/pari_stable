@@ -146,6 +146,25 @@ FpX_sub(GEN x,GEN y,GEN p)
 }
 
 GEN
+Fp_FpX_sub(GEN x, GEN y, GEN p)
+{
+  long ly = lg(y), i;
+  GEN z;
+  if (ly <= 3) {
+    z = cgetg(3, t_POL);
+    x = (ly == 3)? Fp_sub(x, gel(y,2), p): modii(x, p);
+    if (!signe(x)) { avma = (pari_sp)(z + 3); return zeropol(varn(y)); }
+    z[1] = y[1]; gel(z,2) = x; return z;
+  }
+  z = cgetg(ly,t_POL);
+  gel(z,2) = Fp_sub(x, gel(y,2), p);
+  for (i = 3; i < ly; i++) gel(z,i) = Fp_neg(gel(y,i), p);
+  z = ZX_renormalize(z, ly);
+  if (!lgpol(z)) { avma = (pari_sp)(z + ly); return zeropol(varn(x)); }
+  z[1] = y[1]; return z;
+}
+
+GEN
 FpX_mul(GEN x,GEN y,GEN p) { return FpX_red(ZX_mul(x, y), p); }
 
 GEN

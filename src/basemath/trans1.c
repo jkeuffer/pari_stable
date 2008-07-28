@@ -1417,8 +1417,9 @@ GEN
 mpexp(GEN x)
 {
   const long s = 6; /*Initial steps using basecase*/
-  long i, n, mask, p, l, sx = signe(x), sh;
+  long i, p, l, sx = signe(x), sh;
   GEN a, z;
+  ulong mask;
 
   if (!sx) {
     long e = expo(x);
@@ -1430,16 +1431,18 @@ mpexp(GEN x)
   z = cgetr(l); /* room for result */
   x = modlog2(x, &sh);
   if (!x) { avma = (pari_sp)(z+l); return real2n(sh, l); }
-  n = hensel_lift_accel(l-1,&mask);
-  for(i=0, p=1; i<s; i++) { p <<= 1; if (mask&(1<<i)) p--; }
+  mask = quadratic_prec_mask(l-1);
+  for(i=0, p=1; i<s; i++) { p <<= 1; if (mask & 1) p--; mask >>= 1; }
   a = mpexp_basecase(rtor(x, p+2));
   x = addrs(x,1);
   if (lg(x) < l+1) x = rtor(x, l+1);
-  for(i=s; i<n; i++)
+  for(;;)
   {
-    p <<= 1; if (mask&(1<<i)) p--;
+    p <<= 1; if (mask & 1) p--;
+    mask >>= 1;
     setlg(x, p+2); a = rtor(a, p+2);
     a = mulrr(a, subrr(x, logr_abs(a))); /* a := a (x - log(a)) */
+    if (mask == 1) break;
   }
   affrr(a,z);
   if (sh) setexpo(z, expo(z) + sh);

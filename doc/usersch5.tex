@@ -2720,9 +2720,12 @@ between $0$ and $p$ if this is the case for the components of $x$.
 \fun{GEN}{FpX_renormalize}{GEN x, long l}, as \kbd{normalizepol}, where
 $\kbd{l} = \kbd{lg(x)}$, in place.
 
-\fun{GEN}{FpX_sub}{GEN x,GEN y,GEN p} subtracts \kbd{y} from \kbd{x}.
+\fun{GEN}{FpX_sub}{GEN x,GEN y,GEN p} returns $x - y$.
 
-\fun{GEN}{FpX_mul}{GEN x,GEN y,GEN p} multiplies \kbd{x} and \kbd{y}.
+\fun{GEN}{Fp_FpX_sub}{GEN x,GEN y,GEN p} returns $x - y$, where $x$ is
+a \typ{INT} and $y$ an \kbd{FpX}.
+
+\fun{GEN}{FpX_mul}{GEN x,GEN y,GEN p} returns $x y$.
 
 \fun{GEN}{FpX_sqr}{GEN x,GEN p} returns $\kbd{x}^2$.
 
@@ -3598,6 +3601,46 @@ is non-zero in $\F_q$. $B$ is a vector of monic \kbd{FpX} ($T$ \kbd{NULL}) or
 \kbd{FqX}, paіrwise coprime in $\F_q[X]$, whose product is congruent to
 $A/\text{lc}(A)$ in $\F_q[X]$. Lifts the elements of $B$ mod $\kbd{pe} =
 p^e$, such that the congruence now holds mod $(T,p^e)$.
+
+The following technical function returns an optimal sequence of $p$-adic
+accuracies, for a given target:
+\fun{ulong}{quadratic_prec_mask}{long n} we want to reach accuracy
+$n$, starting from accuracy 1, using a quadratically convergent algorithm.
+For instance, to reach $n = 9$, it is better to use accuracies
+$[1,2,3,5,9]$ instead of $[1,2,4,8,9]$. The idea is to essentially double
+the accuracy at each step, while not overshooting in the end.
+
+Let $a_0$ = 1, $a_1 = 2$, $a_2,\ldots, a_k = n$, be the desired sequence of
+accuracies. To obtain it, we work backwards and set
+$$ a_k = n,\quad a_{i-1} = (a_i + 1) \bs 2.$$
+But we do not want to store $a_i$ explicitly, even as a \typ{VECSMALL},
+since this would leave an object on the stack. Instead, we store $a_i$
+implicitly in a bitmask \kbd{MASK}: let $a_0 = 1$, if the $i$-th bit of the
+mask is set, set $a_{i+1} = 2a_i - 1$, and $2a_i$ otherwise; in short the
+bits indicate the places where we do \emph{not} double the accuracy.
+
+In fact, to avoid returning separately the mask and the sequence length
+$k+1$, the function returns $\kbd{MASK} + 2^{k+1}$, so the highest bit of
+the mask indicates the length of the sequence, and the following ones give
+an algorithm to obtain the accuracies. This is much simpler than it sounds,
+here is what it looks like in practice:
+\bprog
+  ulong mask = quadratic_prec_mask(n);
+  long l = 1;
+
+  for(;;) { /* here, the result is known to accuracy l */
+    l = 2*l; if (mask & 1) l--; /* new accuracy l for the iteration */
+    mask >>= 1; /* pop low order bit */
+
+    /* ... lift to the new accuracy ... */
+
+    if (mask == 1) break; /* we are done. At this point l = n */
+  }
+@eprog\noindent We just pop the bits in \kbd{mask} starting from the low
+order bits, stop when \kbd{mask} is $1$ (that last bit corresponds to the
+$2^{k+1}$ that we added to the mask proper). Note that there is nothing
+specific to Hensel lifts in that function: it would work equally well for
+an archimedean Newton iteration.
 
 \subsec{Other $p$-adic functions}
 
