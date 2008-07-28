@@ -260,42 +260,39 @@ minpoly(GEN x, long v)
 GEN
 hess(GEN x)
 {
-  pari_sp av = avma, av2 = avma, lim;
+  pari_sp av = avma, lim;
   long lx = lg(x), m, i, j;
-  GEN p, p1;
 
   if (typ(x) != t_MAT) pari_err(mattype1,"hess");
   if (lx == 1) return cgetg(1,t_MAT);
   if (lg(x[1]) != lx) pari_err(mattype1,"hess");
-  x = shallowcopy(x); lim = stack_lim(av,1);
 
+  x = shallowcopy(x); lim = stack_lim(av,2);
   for (m=2; m<lx-1; m++)
+  {
+    GEN p = NULL;
+    for (i=m+1; i<lx; i++) { p = gcoeff(x,i,m-1); if (!gcmp0(p)) break; }
+    if (i == lx) continue;
+    for (j=m-1; j<lx; j++) swap(gcoeff(x,i,j), gcoeff(x,m,j));
+    swap(gel(x,i), gel(x,m)); p = ginv(p);
+
     for (i=m+1; i<lx; i++)
     {
-      p = gcoeff(x,i,m-1);
-      if (gcmp0(p)) continue;
+      GEN c = gcoeff(x,i,m-1);
+      if (gcmp0(c)) continue;
 
-      for (j=m-1; j<lx; j++) swap(gcoeff(x,i,j), gcoeff(x,m,j));
-      swap(gel(x,i), gel(x,m)); p = ginv(p);
-      for (i=m+1; i<lx; i++)
+      c = gmul(c,p); gcoeff(x,i,m-1) = gen_0;
+      for (j=m; j<lx; j++)
+        gcoeff(x,i,j) = gsub(gcoeff(x,i,j), gmul(c,gcoeff(x,m,j)));
+      for (j=1; j<lx; j++)
+        gcoeff(x,j,m) = gadd(gcoeff(x,j,m), gmul(c,gcoeff(x,j,i)));
+      if (low_stack(lim, stack_lim(av,2)))
       {
-	p1 = gcoeff(x,i,m-1);
-	if (gcmp0(p1)) continue;
-
-	p1 = gmul(p1,p);
-	gcoeff(x,i,m-1) = gen_0;
-	for (j=m; j<lx; j++)
-	  gcoeff(x,i,j) = gsub(gcoeff(x,i,j), gmul(p1,gcoeff(x,m,j)));
-	for (j=1; j<lx; j++)
-	  gcoeff(x,j,m) = gadd(gcoeff(x,j,m), gmul(p1,gcoeff(x,j,i)));
+        if (DEBUGMEM>1) pari_warn(warnmem,"hess, m = %ld", m);
+        x = gerepilecopy(av, x);
       }
-      if (low_stack(lim, stack_lim(av,1)))
-      {
-	if (DEBUGMEM>1) pari_warn(warnmem,"hess, m = %ld", m);
-	x = gerepilecopy(av2, x);
-      }
-      break;
     }
+  }
   return gerepilecopy(av,x);
 }
 
@@ -312,15 +309,17 @@ carhess(GEN x, long v)
   gel(y,1) = pol_1(v); H = hess(x);
   for (r = 1; r < lx; r++)
   {
+    pari_sp av2 = avma;
     GEN z, a = gen_1, b = zeropol(v);
     for (i = r-1; i; i--)
     {
       a = gmul(a, gcoeff(H,i+1,i));
+      if (gcmp0(a)) break;
       b = RgX_add(b, RgX_Rg_mul(gel(y,i), gmul(a,gcoeff(H,i,r))));
     }
     z = RgX_sub(RgX_shift_shallow(gel(y,r), 1),
                 RgX_Rg_mul(gel(y,r), gcoeff(H,r,r)));
-    gel(y,r+1) = RgX_sub(z, b); /* (X - H[r,r])y[r] - b */
+    gel(y,r+1) = gerepileupto(av2, RgX_sub(z, b)); /* (X - H[r,r])y[r] - b */
   }
   return fix_pol(av, gel(y,lx));
 }

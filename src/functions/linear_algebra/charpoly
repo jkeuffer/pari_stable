@@ -17,20 +17,20 @@ Doc:
 
  If $\fl=0$, the method used is essentially the same as for computing the
  adjoint matrix, i.e.~computing the traces of the powers of $A$ (Le Verrier's
- method). Assumes that $n!$ is invertible.
+ method). Assumes that $n!$ is invertible; uses $O(n^4)$ scalar operations.
 
  If $\fl=1$, uses Lagrange interpolation which is usually the slowest method.
- Assumes that $n!$ is invertible.
+ Assumes that $n!$ is invertible; uses $O(n^4)$ scalar operations.
 
  If $\fl=2$, uses the Hessenberg form. Assumes that the base ring is a field.
+ Uses $O(n^3)$ scalar operations, but suffers from coefficient explosion.
 
  If $\fl=3$, uses Berkowitz's division free algorithm, valid over any
- ring (commutative, with unit).
+ ring (commutative, with unit). Uses $O(n^4)$ scalar operations.
 
  In practice one should use the default (Berkowitz) unless the base ring is a
  field where coefficient explosion does not occur, e.g.~a finite field or the
- reals. In which case the Hessenberg form is usually faster. All algorithms
- use $O(n^4)$ scalar operations, if $A$ has dimension $n$.
+ reals. In which case the Hessenberg form should be preferred.
 
 Variant: Also available are \fun{GEN}{caract}{GEN A, long v} ($\fl=1$),
  \fun{GEN}{carhess}{GEN A, long v} ($\fl=2$), \fun{GEN}{carberkowitz}{GEN A,
