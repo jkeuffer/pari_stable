@@ -56,6 +56,7 @@ addsi_sign(long x, GEN y, long sy)
   setsigne(z,sy); return z;
 }
 
+/* return gen_0 when the sign is 0 */
 GEN
 addii_sign(GEN x, long sx, GEN y, long sy)
 {
