@@ -1797,21 +1797,27 @@ depending on the type of the \kbd{z} argument), and neither do
 
 \funno{GEN}{\op si[z]}{long s, GEN x[, GEN z]} applies \op\ to the
 \kbd{long}~\kbd{s} and the \typ{INT}~\kbd{x}.
+ These functions always return the global constant
+\kbd{gen\_0} (not a copy) when the sign of the result is $0$.
 
 \funno{GEN}{\op sr[z]}{long s, GEN x[, GEN z]} applies \op\ to the
 \kbd{long}~\kbd{s} and the \typ{REAL}~\kbd{x}.
 
 \funno{GEN}{\op ss[z]}{long s, long t[, GEN z]} applies \op\ to the longs
-\kbd{s} and~\kbd{t}.
+\kbd{s} and~\kbd{t}. These functions always return the global constant
+\kbd{gen\_0} (not a copy) when the sign of the result is $0$.
 
 \funno{GEN}{\op ii[z]}{GEN x, GEN y[, GEN z]} applies \op\ to the
-\typ{INT}s \kbd{x} and~\kbd{y}.
+\typ{INT}s \kbd{x} and~\kbd{y}. These functions always return the global
+constant \kbd{gen\_0} (not a copy) when the sign of the result is $0$.
 
 \funno{GEN}{\op ir[z]}{GEN x, GEN y[, GEN z]} applies \op\ to the
 \typ{INT} \kbd{x} and the \typ{REAL}~\kbd{y}.
 
 \funno{GEN}{\op is[z]}{GEN x, long s[, GEN z]} applies \op\ to the
-\typ{INT}~\kbd{x} and the \kbd{long}~\kbd{s}.
+\typ{INT}~\kbd{x} and the \kbd{long}~\kbd{s}. These functions always return
+the global constant \kbd{gen\_0} (not a copy) when the sign of the result
+is $0$.
 
 \funno{GEN}{\op ri[z]}{GEN x, GEN y[, GEN z]} applies \op\ to the
 \typ{REAL}~\kbd{x} and the \typ{INT}~\kbd{y}.
