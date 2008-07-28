@@ -1699,142 +1699,9 @@ chinese1_coprime_Z(GEN x) {return gassoc_proto(chinese1_coprime_Z_aux,x,NULL);}
 
 /*********************************************************************/
 /**                                                                 **/
-/**                      OPERATIONS MODULO m                        **/
-/**                                                                 **/
-/*********************************************************************/
-/* Assume m > 0, more efficient if 0 <= a, b < m */
-GEN
-Fp_add(GEN a, GEN b, GEN m)
-{
-  pari_sp av=avma;
-  GEN p = addii(a,b);
-  long s = signe(p);
-  if (!s) { avma = av; return gen_0; }
-  if (s > 0) /* general case */
-  {
-    GEN t = subii(p, m);
-    s = signe(t);
-    if (!s) { avma = av; return gen_0; }
-    if (s < 0) { avma = (pari_sp)p; return p; }
-    if (cmpii(t, m) < 0) return gerepileuptoint(av, t); /* general case ! */
-    p = remii(t, m);
-  }
-  else
-    p = modii(p, m);
-  return gerepileuptoint(av, p);
-}
-GEN
-Fp_sub(GEN a, GEN b, GEN m)
-{
-  pari_sp av=avma;
-  GEN p = subii(a,b);
-  long s = signe(p);
-  if (!s) { avma = av; return gen_0; }
-  if (s > 0)
-  {
-    if (cmpii(p, m) < 0) return p; /* general case ! */
-    p = remii(p, m);
-  }
-  else
-  {
-    GEN t = addii(p, m);
-    if (!s) { avma = av; return gen_0; }
-    if (s > 0) return gerepileuptoint(av, t); /* general case ! */
-    p = modii(t, m);
-  }
-  return gerepileuptoint(av, p);
-}
-GEN
-Fp_neg(GEN b, GEN m)
-{
-  pari_sp av=avma;
-  long s = signe(b);
-  GEN p;
-  if (!s) return gen_0;
-  if (s > 0)
-  {
-    p = subii(m, b);
-    if (signe(p) >= 0) return p; /* general case ! */
-    p = modii(p, m);
-  } else
-    p = remii(negi(b), m);
-  return gerepileuptoint(av, p);
-}
-
-GEN
-Fp_mul(GEN a, GEN b, GEN m)
-{
-  pari_sp av=avma;
-  GEN p; /*HACK: assume modii use <=lg(p)+(lg(m)<<1) space*/
-  (void)new_chunk(lg(a)+lg(b)+(lg(m)<<1));
-  p=mulii(a,b);
-  avma=av;
-  return modii(p,m);
-}
-
-GEN
-Fp_mulu(GEN a, ulong b, GEN m)
-{
-  long l = lgefint(m);
-  if (l == 3)
-  {
-    ulong mm = m[2];
-    return utoi( Fl_mul(umodiu(a, mm), b, mm) );
-  } else {
-    pari_sp av = avma;
-    GEN p; /*HACK: assume modii use <=lg(p)+(lg(m)<<1) space*/
-    (void)new_chunk(lg(a)+1+(l<<1));
-    p = muliu(a,b);
-    avma = av; return modii(p,m);
-  }
-}
-
-GEN
-Fp_sqr(GEN a, GEN m)
-{
-  pari_sp av=avma;
-  GEN p; /*HACK: assume modii use <=lg(p)+(lg(m)<<1) space*/
-  (void)new_chunk((lg(a)+lg(m))<<1);
-  p=sqri(a);
-  avma=av;
-  return modii(p,m);
-}
-
-GEN
-Fp_inv(GEN a, GEN m)
-{
-  GEN res;
-  if (! invmod(a,m,&res)) pari_err(invmoder,"%Ps", gmodulo(res,m));
-  return res;
-}
-
-GEN
-Fp_invsafe(GEN a, GEN m)
-{
-  GEN res;
-  if (! invmod(a,m,&res))
-    return NULL;
-  return res;
-}
-
-GEN
-Fp_div(GEN a, GEN b, GEN m)
-{
-  pari_sp av=avma;
-  GEN p;
-  (void)new_chunk(lg(a)+lg(m)); /*HACK: assume remii use <=lg(p)+lg(m) space*/
-  p=mulii(a,Fp_inv(b,m));
-  avma=av;
-  return remii(p,m);
-}
-
-/*********************************************************************/
-/**                                                                 **/
 /**                    MODULAR EXPONENTIATION                       **/
 /**                                                                 **/
 /*********************************************************************/
-static GEN _remii(GEN x, GEN y) { return remii(x,y); }
-
 /* Montgomery reduction */
 
 typedef struct {
@@ -1862,12 +1729,6 @@ typedef struct {
   GEN (*mulred)(GEN,GEN,GEN);
 } muldata;
 
-/* reduction for multiplication by 2 */
-static GEN
-_redsub(GEN x, GEN N)
-{
-  return (cmpii(x,N) >= 0)? subii(x,N): x;
-}
 /* Montgomery reduction */
 static GEN
 montred(GEN x, GEN N)
@@ -1877,7 +1738,8 @@ montred(GEN x, GEN N)
 /* 2x mod N */
 static GEN
 _muli2red(GEN x, GEN y/* ignored */, GEN N) {
-  (void)y; return _redsub(shifti(x,1), N);
+  GEN z = shifti(x,1);
+  (void)y; return (cmpii(z,N) >= 0)? subii(z,N): z;
 }
 static GEN
 _muli2montred(GEN x, GEN y/* ignored */, GEN N) {
@@ -1976,7 +1838,7 @@ Fp_powu(GEN A, ulong k, GEN N)
   else
   {
     D.mulred = base_is_2? &_muli2red: &_muliired;
-    D.res = &_remii;
+    D.res = &remii;
     D.N = N;
   }
 
@@ -1988,7 +1850,6 @@ Fp_powu(GEN A, ulong k, GEN N)
   }
   return A;
 }
-
 GEN
 Fp_pows(GEN A, long k, GEN N)
 {
@@ -2076,7 +1937,7 @@ Fp_pow(GEN A, GEN k, GEN N)
   else
   {
     D.mulred = base_is_2? &_muli2red: &_muliired;
-    D.res = &_remii;
+    D.res = &remii;
     D.N = N;
   }
 
