@@ -2172,15 +2172,15 @@ as
  BPSW_psp(x) && BPSW_isprime(x)
 @eprog
 
-\fun{long}{millerrabin}{GEN n, long k} performs strong Rabin-Miller
-compositeness tests on the \typ{INT} $n$, for $k$ random bases. This function
-also caches square roots of $-1$ that are encountered during the successive
-tests and stops as soon as three distinct square roots have been produced; we
-have in principle factored $n$ at this point, but unfortunately, there is
-currently no way for the factoring machinery to become aware of it. (It is
-highly implausible that hard to find factors would be exhibited in this way,
-though.) This should be slower than \tet{BPSW_psp} for $k\geq 4$ and we would
-expect it to be less reliable.
+\fun{long}{millerrabin}{GEN n, long k} performs $k$ strong Rabin-Miller
+compositeness tests on the \typ{INT} $n$, using $k$ random bases. This
+function also caches square roots of $-1$ that are encountered during the
+successive tests and stops as soon as three distinct square roots have been
+produced; we have in principle factored $n$ at this point, but
+unfortunately, there is currently no way for the factoring machinery to
+become aware of it. (It is highly implausible that hard to find factors
+would be exhibited in this way, though.) This should be slower than
+\tet{BPSW_psp} for $k\geq 4$ and we would expect it to be less reliable.
 
 \subsec{Pseudo-random integers}
 These routine return pseudo-random integers uniformly distributed in some
@@ -3603,21 +3603,26 @@ $A/\text{lc}(A)$ in $\F_q[X]$. Lifts the elements of $B$ mod $\kbd{pe} =
 p^e$, such that the congruence now holds mod $(T,p^e)$.
 
 The following technical function returns an optimal sequence of $p$-adic
-accuracies, for a given target:
-\fun{ulong}{quadratic_prec_mask}{long n} we want to reach accuracy
-$n$, starting from accuracy 1, using a quadratically convergent algorithm.
-For instance, to reach $n = 9$, it is better to use accuracies
-$[1,2,3,5,9]$ instead of $[1,2,4,8,9]$. The idea is to essentially double
-the accuracy at each step, while not overshooting in the end.
+accuracies, for a given target accuracy:
 
-Let $a_0$ = 1, $a_1 = 2$, $a_2,\ldots, a_k = n$, be the desired sequence of
+\fun{ulong}{quadratic_prec_mask}{long n} we want to reach accuracy
+$n\geq 1$, starting from accuracy 1, using a quadratically convergent,
+self-correcting, algorithm; in other words, from inputs correct to accuracy
+$l$ one iterations outputs a result correct to accuracy $2l$.
+For instance, to reach $n = 9$, we want to use accuracies
+$[1,2,3,5,9]$ instead of $[1,2,4,8,9]$. The idea is to essentially double
+the accuracy at each step, and not overshoot in the end.
+
+Let $a_0$ = 1, $a_1 = 2, \ldots, a_k = n$, be the desired sequence of
 accuracies. To obtain it, we work backwards and set
-$$ a_k = n,\quad a_{i-1} = (a_i + 1) \bs 2.$$
-But we do not want to store $a_i$ explicitly, even as a \typ{VECSMALL},
+$$ a_k = n,\quad a_{i-1} = (a_i + 1)\,\bs\, 2.$$
+This is in essence what the function returns.
+But we do not want to store the $a_i$ explicitly, even as a \typ{VECSMALL},
 since this would leave an object on the stack. Instead, we store $a_i$
 implicitly in a bitmask \kbd{MASK}: let $a_0 = 1$, if the $i$-th bit of the
 mask is set, set $a_{i+1} = 2a_i - 1$, and $2a_i$ otherwise; in short the
-bits indicate the places where we do \emph{not} double the accuracy.
+bits indicate the places where we do ѕomething special and do not quite
+double the accuracy (which would be the straightforward thing to do).
 
 In fact, to avoid returning separately the mask and the sequence length
 $k+1$, the function returns $\kbd{MASK} + 2^{k+1}$, so the highest bit of
@@ -3627,20 +3632,25 @@ here is what it looks like in practice:
 \bprog
   ulong mask = quadratic_prec_mask(n);
   long l = 1;
-
-  for(;;) { /* here, the result is known to accuracy l */
+  while (mask > 1) {            /* here, the result is known to accuracy l */
     l = 2*l; if (mask & 1) l--; /* new accuracy l for the iteration */
-    mask >>= 1; /* pop low order bit */
-
+    mask >>= 1;                 /* pop low order bit */
     /* ... lift to the new accuracy ... */
-
-    if (mask == 1) break; /* we are done. At this point l = n */
   }
+  /* we are done. At this point l = n */
 @eprog\noindent We just pop the bits in \kbd{mask} starting from the low
 order bits, stop when \kbd{mask} is $1$ (that last bit corresponds to the
 $2^{k+1}$ that we added to the mask proper). Note that there is nothing
 specific to Hensel lifts in that function: it would work equally well for
 an archimedean Newton iteration.
+
+Note that in practice, we rather use an infinite loop, and insert an
+\bprog
+  if (mask == 1) break;
+@eprog\noindent in the middle of the loop: the loop body usually includes
+preparations for the next iterations (e.g. lifting Bezout coefficients
+in a quadratic Hensel lift), which are costly and useless in the \emph{last}
+iteration.
 
 \subsec{Other $p$-adic functions}
 
@@ -6503,11 +6513,12 @@ function.
 \fun{int}{pari_is_default}{const char *s} return $1$ if $s$ is the name
 of a default, $0$ otherwise.
 
-\fun{GEN}{setdefault}{const char *s, const char *v, long flag} low-level
-function underlying \kbd{default0}. If $s$ is empty, call all default ѕetting
-functions with empty string argument and flag \tet{d_ACKNOWLEDGE}. Otherwise,
-check whether $s$ corresponds to a default and call the corresponding default
-setting function with arguments $v$ and \fl.
+\fun{GEN}{setdefault}{const char *s, const char *v, long flag} is the
+low-level function underlying \kbd{default0}. If $s$ is empty, call all
+default ѕetting functions with empty string argument and flag
+\tet{d_ACKNOWLEDGE}. Otherwise, check whether $s$ corresponds to a default
+and call the corresponding default setting function with arguments $v$ and
+\fl.
 
 We shall describe these functions below: an non-empty $v$ means that we change
 the value of the default to $v$, possibly after some translation work. The
