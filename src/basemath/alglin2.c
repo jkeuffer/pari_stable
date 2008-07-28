@@ -270,18 +270,18 @@ hess(GEN x)
   x = shallowcopy(x); lim = stack_lim(av,2);
   for (m=2; m<lx-1; m++)
   {
-    GEN p = NULL;
-    for (i=m+1; i<lx; i++) { p = gcoeff(x,i,m-1); if (!gcmp0(p)) break; }
+    GEN t = NULL;
+    for (i=m+1; i<lx; i++) { t = gcoeff(x,i,m-1); if (!gcmp0(t)) break; }
     if (i == lx) continue;
     for (j=m-1; j<lx; j++) swap(gcoeff(x,i,j), gcoeff(x,m,j));
-    swap(gel(x,i), gel(x,m)); p = ginv(p);
+    swap(gel(x,i), gel(x,m)); t = ginv(t);
 
     for (i=m+1; i<lx; i++)
     {
       GEN c = gcoeff(x,i,m-1);
       if (gcmp0(c)) continue;
 
-      c = gmul(c,p); gcoeff(x,i,m-1) = gen_0;
+      c = gmul(c,t); gcoeff(x,i,m-1) = gen_0;
       for (j=m; j<lx; j++)
         gcoeff(x,i,j) = gsub(gcoeff(x,i,j), gmul(c,gcoeff(x,m,j)));
       for (j=1; j<lx; j++)
@@ -291,6 +291,40 @@ hess(GEN x)
         if (DEBUGMEM>1) pari_warn(warnmem,"hess, m = %ld", m);
         x = gerepilecopy(av, x);
       }
+    }
+  }
+  return gerepilecopy(av,x);
+}
+
+GEN
+Flm_hess(GEN x, ulong p)
+{
+  pari_sp av = avma, lim;
+  long lx = lg(x), m, i, j;
+
+  if (typ(x) != t_MAT) pari_err(mattype1,"hess");
+  if (lx == 1) return cgetg(1,t_MAT);
+  if (lg(x[1]) != lx) pari_err(mattype1,"hess");
+
+  x = shallowcopy(x); lim = stack_lim(av,2);
+  for (m=2; m<lx-1; m++)
+  {
+    ulong t = 0;
+    for (i=m+1; i<lx; i++) { t = ucoeff(x,i,m-1); if (t) break; }
+    if (i == lx) continue;
+    for (j=m-1; j<lx; j++) lswap(ucoeff(x,i,j), ucoeff(x,m,j));
+    swap(gel(x,i), gel(x,m)); t = Fl_inv(t, p);
+
+    for (i=m+1; i<lx; i++)
+    {
+      ulong c = ucoeff(x,i,m-1);
+      if (!c) continue;
+
+      c = Fl_mul(c,t,p); ucoeff(x,i,m-1) = 0;
+      for (j=m; j<lx; j++)
+        ucoeff(x,i,j) = Fl_sub(ucoeff(x,i,j), Fl_mul(c,ucoeff(x,m,j), p), p);
+      for (j=1; j<lx; j++)
+        ucoeff(x,j,m) = Fl_add(ucoeff(x,j,m), Fl_mul(c,ucoeff(x,j,i), p), p);
     }
   }
   return gerepilecopy(av,x);
@@ -323,7 +357,39 @@ carhess(GEN x, long v)
   }
   return fix_pol(av, gel(y,lx));
 }
+GEN
+Flm_charpoly(GEN x, long p)
+{
+  pari_sp av;
+  long lx, r, i;
+  GEN y, H;
 
+  lx = lg(x); av = avma; y = cgetg(lx+1, t_VEC);
+  gel(y,1) = pol1_Flx(0); H = Flm_hess(x, p);
+  for (r = 1; r < lx; r++)
+  {
+    pari_sp av2 = avma;
+    ulong a = 1;
+    GEN z, b = zero_Flx(0);
+    for (i = r-1; i; i--)
+    {
+      a = Fl_mul(a, ucoeff(H,i+1,i), p);
+      if (!a) break;
+      b = Flx_add(b, Flx_Fl_mul(gel(y,i), Fl_mul(a,ucoeff(H,i,r),p), p), p);
+    }
+    z = Flx_sub(Flx_shift(gel(y,r), 1),
+                Flx_Fl_mul(gel(y,r), ucoeff(H,r,r), p), p);
+    /* (X - H[r,r])y[r] - b */
+    gel(y,r+1) = gerepileuptoleaf(av2, Flx_sub(z, b, p));
+  }
+  return gerepileuptoleaf(av, gel(y,lx));
+}
+
+/*******************************************************************/
+/*                                                                 */
+/*        CHARACTERISTIC POLYNOMIAL (BERKOWITZ'S ALGORITHM)        */
+/*                                                                 */
+/*******************************************************************/
 GEN
 carberkowitz(GEN x, long v)
 {

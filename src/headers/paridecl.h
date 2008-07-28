@@ -531,6 +531,8 @@ GEN     vecpermute(GEN A, GEN p);
 
 /* alglin2.c */
 
+GEN     Flm_charpoly(GEN x, long p);
+GEN     Flm_hess(GEN x, ulong p);
 GEN     QM_minors_coprime(GEN x, GEN pp);
 GEN     QM_ImZ_hnf(GEN x);
 GEN     QM_ImQ_hnf(GEN x);
