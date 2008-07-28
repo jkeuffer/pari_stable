@@ -2062,7 +2062,6 @@ GEN     rootpadicfast(GEN f, GEN p, long e);
 
 /* Hensel.c */
 
-GEN     Newton_exponents(long e);
 GEN     ZpX_liftroot(GEN f, GEN a, GEN p, long e);
 GEN     ZpX_liftroots(GEN f, GEN S, GEN q, long e);
 GEN     ZpXQX_liftroot(GEN f, GEN a, GEN T, GEN p, long e);

@@ -183,17 +183,6 @@ TreeLift(GEN link, GEN v, GEN w, GEN T, GEN p, long e0, long e1, GEN f, int noin
   RecTreeLift(link, v, w, T, pd, p0, f, lgpol(v), noinv);
 }
 
-/* Successive accuracies for a quadratic lift.
- * Eg 9 --> 9,5,3,2,1 instead of 9,8,4,2,1 */
-GEN
-Newton_exponents(long e)
-{
-  GEN E = cgetg(BITS_IN_LONG, t_VECSMALL);
-  long l = 1; E[l++] = e;
-  while (e > 1) { e = (e+1)>>1; E[l++] = e; }
-  setlg(E, l); return E;
-}
-
 /* Assume n > 0. We want to go to accuracy n, starting from accuracy 1, using
  * a quadratically convergent algorithm. Goal: 9 -> 1,2,3,5,9 instead of
  * 1,2,4,8,9 (sequence of accuracies).
@@ -222,59 +211,62 @@ quadratic_prec_mask(long n)
   }
 }
 
-/* a = modular factors of f mod (p,T) [possibly T=NULL], lift to precision p^e0
+/* Lift to precision p^e0.
+ * a = modular factors of f mod (p,T) [possibly T=NULL]
+ *  OR a TreeLift structure [e, link, v, w]: go on lifting
  * flag = 0: standard.
- * flag = 1: return TreeLift structure
- * flag = 2: a = TreeLift structure, go on lifting, as flag = 1 otherwise */
+ * flag = 1: return TreeLift structure */
 static GEN
 MultiLift(GEN f, GEN a, GEN T, GEN p, long e0, long flag)
 {
-  long l, i, e = e0, k = lg(a) - 1;
+  long i, eold, e, k = lg(a) - 1;
   GEN E, v, w, link;
+  ulong mask;
   pari_timer Ti;
 
-  if (k < 2 || e < 1) pari_err(talker, "MultiLift: bad args");
-  if (e == 1) return a;
-  if (typ(a[1]) == t_INT) flag = 2;
-  else if (flag == 2) flag = 1;
-
-  E = Newton_exponents(e);
-  e = 1;
-  l = lg(E)-1;
+  if (k < 2 || e0 < 1) pari_err(talker, "MultiLift: bad args");
+  if (e0 == 1) return a;
 
   if (DEBUGLEVEL > 3) TIMERstart(&Ti);
-
-  if (flag != 2)
-  {
-    v = cgetg(2*k - 2 + 1, t_VEC);
-    w = cgetg(2*k - 2 + 1, t_VEC);
-    link=cgetg(2*k - 2 + 1, t_VECSMALL);
-    BuildTree(link, v, w, a, T, p);
-    if (DEBUGLEVEL > 3) msgTIMER(&Ti, "building tree");
-  }
-  else
-  {
+  if (typ(a[1]) == t_INT)
+  { /* a = TreeLift structure */
     e = itos(gel(a,1));
     link = gel(a,2);
     v    = gel(a,3);
     w    = gel(a,4);
   }
-
-  for (i = l; i > 1; i--) {
-    if (E[i-1] < e) continue;
-    TreeLift(link, v, w, T, p, E[i], E[i-1], f, (flag == 0) && (i == 2));
-    if (DEBUGLEVEL > 3) msgTIMER(&Ti, "lifting to prec %ld", E[i-1]);
+  else
+  {
+    e = 1;
+    v = cgetg(2*k-2 + 1, t_VEC);
+    w = cgetg(2*k-2 + 1, t_VEC);
+    link=cgetg(2*k-2 + 1, t_VECSMALL);
+    BuildTree(link, v, w, a, T, p);
+    if (DEBUGLEVEL > 3) msgTIMER(&Ti, "building tree");
+  }
+  mask = quadratic_prec_mask(e0);
+  eold = 1;
+  while (mask > 1)
+  {
+    long enew = eold << 1;
+    if (mask & 1) enew--;
+    mask >>= 1;
+    if (enew >= e) { /* mask == 1: last iteration */
+      TreeLift(link, v, w, T, p, eold, enew, f, (flag == 0 && mask == 1));
+      if (DEBUGLEVEL > 3) msgTIMER(&Ti, "lifting to prec %ld", enew);
+    }
+    eold = enew;
   }
 
   if (flag)
-    E = mkvec4(stoi(e0), link, v, w);
+    E = mkvec4(utoipos(e0), link, v, w);
   else
   {
     E = cgetg(k+1, t_VEC);
     for (i = 1; i <= 2*k-2; i++)
     {
       long t = link[i];
-      if (t < 0) E[-t] = v[i];
+      if (t < 0) gel(E,-t) = gel(v,i);
     }
   }
   return E;

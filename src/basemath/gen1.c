@@ -2939,30 +2939,36 @@ GEN
 inv_ser(GEN b)
 {
   pari_sp av = avma, av2, lim;
-  long i, j, le, l = lg(b), e = valp(b), v = varn(b);
-  GEN E, y, x = cgetg(l, t_SER), a = shallowcopy(b);
+  long j, lold, l = lg(b), e = valp(b), v = varn(b);
+  GEN y, x = cgetg(l, t_SER), a = shallowcopy(b);
+  ulong mask;
 
   if (!signe(b)) pari_err(gdiver);
 
   for (j = 3; j < l; j++) gel(x,j) = gen_0;
   gel(x,2) = ginv(gel(b,2));
   a[1] = x[1] = _evalvalp(0) | evalvarn(v) | evalsigne(1);
-  E = Newton_exponents(l - 2);
+  mask = quadratic_prec_mask(l - 2);
   av2 = avma; lim = stack_lim(av2, 2);
-  le = lg(E)-1;
-  for (i = le; i > 1; i--) {
-    long l1 = E[i-1], l2 = E[i];
-    setlg(a, l1 + 2);
-    setlg(x, l1 + 2);
+  lold = 1;
+  while (mask > 1)
+  {
+    long lnew = lold << 1;
+
+    if (mask & 1) lnew--;
+    mask >>= 1;
+    setlg(a, lnew + 2);
+    setlg(x, lnew + 2);
     /* TODO: gmul(a,x) should be a half product (the higher half is known) */
     y = gadd(x, gmul(x, gsubsg(1, gmul(a,x))));
-    for (j = l2+2; j < l1+2; j++) x[j] = y[j];
+    for (j = lold+2; j < lnew+2; j++) x[j] = y[j];
     if (low_stack(lim, stack_lim(av2,2)))
     {
       if(DEBUGMEM>1) pari_warn(warnmem,"inv_ser");
       y = gerepilecopy(av2, x);
-      for (j = 2; j < l1+2; j++) x[j] = y[j];
+      for (j = 2; j < lnew+2; j++) x[j] = y[j];
     }
+    lold = lnew;
   }
   x[1] = evalvalp(valp(x)-e) | evalvarn(v) | evalsigne(1);
   return gerepilecopy(av, x);

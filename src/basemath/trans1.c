@@ -923,8 +923,9 @@ padic_sqrt(GEN x)
 static GEN
 sqrt_ser(GEN b, long prec)
 {
-  long e = valp(b), vx = varn(b), lx, i,j;
-  GEN a, x, E;
+  long e = valp(b), vx = varn(b), lx, lold, j;
+  ulong mask;
+  GEN a, x;
 
   if (!signe(b)) return zeroser(vx, e>>1);
   a = shallowcopy(b);
@@ -935,19 +936,23 @@ sqrt_ser(GEN b, long prec)
     gel(x,2) = gsqrt(gel(a,2), prec);
   for (j = 3; j < lx; j++) gel(x,j) = gen_0;
   setlg(x,3);
-  E = Newton_exponents(lx - 2);
-
-  for (i = lg(E)-1; i > 1; i--)
+  mask = quadratic_prec_mask(lx - 2);
+  lold = 1;
+  while (mask > 1)
   {
-    long l1 = E[i-1], l2 = E[i];
     GEN y, x2 = gmul2n(x,1);
-    setlg(a, l1 + 2);
-    setlg(x, l1 + 2);
-    y = sqr_ser_part(x, l2, l1-1) - l2;
-    for (j = l2+2; j < l1+2; j++) gel(y,j) = gsub(gel(y,j), gel(a,j));
-    y += l2; setvalp(y, l2);
-    y = gsub(x, gdiv(y, x2)); /* = gmul2n(gadd(x, gdiv(a,x)), -1); */
-    for (j = l2+2; j < l1+2; j++) x[j] = y[j];
+    long l = lold << 1;
+    
+    if (mask & 1) l--;
+    mask >>= 1;
+    setlg(a, l + 2);
+    setlg(x, l + 2);
+    y = sqr_ser_part(x, lold, l-1) - lold;
+    for (j = lold+2; j < l+2; j++) gel(y,j) = gsub(gel(y,j), gel(a,j));
+    y += lold; setvalp(y, lold);
+    y = gsub(x, gdiv(y, x2)); /* = gmuloldn(gadd(x, gdiv(a,x)), -1); */
+    for (j = lold+2; j < l+2; j++) x[j] = y[j];
+    lold = l;
   }
   x[1] = evalsigne(1) | evalvarn(vx) | _evalvalp(e >> 1);
   return x;

@@ -920,13 +920,13 @@ Flx_lgrenormalizespec(GEN x, long lx)
 static GEN
 Flx_invmontgomery_newton(GEN T, ulong p)
 {
-  long i, lx, lz, lq, e, l = degpol(T);
-  GEN E, q, y, z, x = const_vecsmall(l+1, 0) + 2;
+  long nold, lx, lz, lq, l = degpol(T);
+  GEN q, y, z, x = const_vecsmall(l+1, 0) + 2;
+  ulong mask = quadratic_prec_mask(l-2); /* assume l > 3 */
   pari_sp av;
 
   y = T+2;
   q = Flx_recipspec(y,l,l+1) + 2;
-  E = Newton_exponents(l-2); /* assume l > 3 */
   av = avma;
   /* We work on _spec_ Flx's, all the l[xzq12] below are lgpol's */
 
@@ -941,26 +941,32 @@ Flx_invmontgomery_newton(GEN T, ulong p)
   }
   else
     lx = 1;
-  for (e = lg(E)-1; e > 1; e--, avma = av)
-  { /* set x -= x(x*q - 1) + O(t^l2), knowing x*q = 1 + O(t^l1) */
-    long l2 = E[e-1] + 1, l1 = E[e] + 1;
+  nold = 1;
+  for (; mask > 1; avma = av)
+  { /* set x -= x(x*q - 1) + O(t^(nnew + 1)), knowing x*q = 1 + O(t^(nold+1)) */
+    long i, lnew, nnew = nold << 1;
 
-    lq = Flx_lgrenormalizespec(q, l2);
+    if (mask & 1) nnew--;
+    mask >>= 1;
+
+    lnew = nnew + 1;
+    lq = Flx_lgrenormalizespec(q, lnew);
     z = Flx_mulspec(x, q, p, lx, lq); /* FIXME: high product */
-    lz = lgpol(z); if (lz > l2) lz = l2;
+    lz = lgpol(z); if (lz > lnew) lz = lnew;
     z += 2;
-    /* subtract 1 [=>first l1-1 words are 0]: renormalize so that z(0) != 0 */
-    for (i = l1-1; i < lz; i++) if (z[i]) break;
-    if (i >= lz) continue; /* z-1 = 0(t^l2) */
+    /* subtract 1 [=>first nold words are 0]: renormalize so that z(0) != 0 */
+    for (i = nold; i < lz; i++) if (z[i]) break;
+    if (i >= lz) continue; /* z-1 = 0(t^(nnew + 1)) */
 
     /* z + i represents (x*q - 1) / t^i */
     z = Flx_mulspec(x, z+i, p, lx, lz-i); /* FIXME: low product */
     lz = lgpol(z); z += 2;
-    if (lz > l2-i) lz = Flx_lgrenormalizespec(z, l2-i);
+    if (lz > lnew-i) lz = Flx_lgrenormalizespec(z, lnew-i);
 
     lx = lz+ i;
     y  = x + i; /* x -= z * t^i, in place */
     for (i = 0; i < lz; i++) y[i] = Fl_neg(z[i], p);
+    nold = nnew;
   }
   x -= 2; setlg(x, lx + 2); x[1] = T[1];
   return Flx_shift(x,1);
