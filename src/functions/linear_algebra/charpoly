@@ -15,9 +15,9 @@ Doc:
  The value of $\fl$ is only significant for matrices. Let $n$ be the dimension
  of $A$.
 
- If $\fl=0$, the method used is essentially the same as for computing the
- adjoint matrix, i.e.~computing the traces of the powers of $A$ (Le Verrier's
- method). Assumes that $n!$ is invertible; uses $O(n^4)$ scalar operations.
+ If $\fl=0$, same method (Le Verrier's) as for computing the adjoint matrix,
+ i.e.~using the traces of the powers of $A$. Assumes that $n!$ is
+ invertible; uses $O(n^4)$ scalar operations.
 
  If $\fl=1$, uses Lagrange interpolation which is usually the slowest method.
  Assumes that $n!$ is invertible; uses $O(n^4)$ scalar operations.
@@ -28,9 +28,11 @@ Doc:
  If $\fl=3$, uses Berkowitz's division free algorithm, valid over any
  ring (commutative, with unit). Uses $O(n^4)$ scalar operations.
 
- In practice one should use the default (Berkowitz) unless the base ring is a
- field where coefficient explosion does not occur, e.g.~a finite field or the
- reals. In which case the Hessenberg form should be preferred.
+ If $\fl=4$, $x$ must be integral. Uses a modular algorithm.
+
+ In practice one should use the default (Berkowitz) unless the base ring is
+ $\Z$ (use $\fl=4$) or a field where coefficient explosion does not occur,
+ e.g.~a finite field or the reals (use $\fl=2$).
 
 Variant: Also available are \fun{GEN}{caract}{GEN A, long v} ($\fl=1$),
  \fun{GEN}{carhess}{GEN A, long v} ($\fl=2$), \fun{GEN}{carberkowitz}{GEN A,

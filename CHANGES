@@ -254,6 +254,7 @@ BA 49- user variables can now be aliased [#790].
    87- error() messages now prefixed with the customary *** [ used to be ### ]
    88- dvmdiiz(x, y, z) now expects z to be a t_INT [ to be consistent with
        all other xxxz functions where xxx includes only i,s,u arguments ]
+   89- improved charpoly(,,2) [ Hessenberg form ]
 
   Added
     1- library function pari_calloc, cgetalloc
@@ -263,7 +264,7 @@ BA 49- user variables can now be aliased [#790].
     5- library functions ZC_ZV_mul, ZM_copy, ZM_neg, ZM_add, ZM_mul, ZM_pow
        ZM_sub, ZM_ZC_mul, ZV_copy, ZV_neg, ZV_neg_inplace ZV_togglesign
        ZXV_Z_mul, ZM_Z_mul, ZV_Z_mul, ZV_isscalar, ZM_Z_divexact,
-       ZC_Z_divexact, ZX_Z_divexact,
+       ZC_Z_divexact, ZX_Z_divexact, ZM_charpoly, Flm_charpoly, Flm_hess
 BA  6- handle numerical derivation as an operation on closure.
     7- Fp_center, FpM_center, FpV_center
 RB  8- GP functions printf, Strprintf
@@ -380,6 +381,7 @@ BA 28- library functions checkgroup, galois_group, cyclicgroup, dicyclicgroup,
        to access components of prime ideals
    47- files src/language/pariinl.c, src/headers/pariinl.h.
 JD 48- GP function warning()
+   49- new flag to charpoly [ integral matrix, modular algorithm ]
 
   Removed
     1- obsolete GP functions printp, printp1. Either replace them by

@@ -56,6 +56,25 @@ ZM_max_lg(GEN x)
   return prec;
 }
 
+GEN
+ZM_supnorm(GEN x)
+{
+  long i, j, h, lx = lg(x);
+  GEN s = gen_0;
+  if (lx == 1) return gen_1;
+  h = lg(x[1]);
+  for (j=1; j<lx; j++)
+  {
+    GEN xj = gel(x,j);
+    for (i=1; i<h; i++)
+    {
+      GEN c = gel(xj,i);
+      if (absi_cmp(c, s) > 0) s = c;
+    }
+  }
+  return absi(s);
+}
+
 /********************************************************************/
 /**                                                                **/
 /**                           MULTIPLICATION                       **/

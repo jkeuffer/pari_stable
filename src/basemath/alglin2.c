@@ -37,6 +37,10 @@ charpoly0(GEN x, long v, long flag)
     case 1: return caract(x,v);
     case 2: return carhess(x,v);
     case 3: return carberkowitz(x,v);
+    case 4:
+      if (typ(x) != t_MAT) pari_err(typeer,"charpoly");
+      RgM_check_ZM(x, "charpoly");
+      x = ZM_charpoly(x); setvarn(x, v); return x;
   }
   pari_err(flagerr,"charpoly"); return NULL; /* not reached */
 }
@@ -383,6 +387,66 @@ Flm_charpoly(GEN x, long p)
     gel(y,r+1) = gerepileuptoleaf(av2, Flx_sub(z, b, p));
   }
   return gerepileuptoleaf(av, gel(y,lx));
+}
+
+/* s = max_k binomial(n,k) (kB^2)^(k/2),  B = |M|oo. Return ceil(log2(s)) */
+static double
+charpoly_bound(GEN M)
+{
+  pari_sp av = avma;
+  GEN s = real_0(3), bin, B2 = itor(sqri(ZM_supnorm(M)), 3);
+  long n = lg(M)-1, k = (n+1)>>1;
+  double d;
+  bin = gen_1;
+  for (k = n; k >= (n+1)>>1; k--)
+  {
+    GEN t = mulri(powrshalf(mulsr(k, B2), k), bin);
+    if (absr_cmp(t, s) > 0) s = t;
+    bin = diviuexact(muliu(bin, k), n-k+1);
+  }
+  d = dbllog2(s); avma = av; return ceil(d);
+}
+
+GEN 
+ZM_charpoly(GEN M)
+{
+  pari_sp av = avma;
+  long l = lg(M), n = l-1, bit;
+  GEN q = NULL, H = NULL, Hp;
+  ulong p;
+  byteptr d;
+  if (!n) return pol_1(0);
+
+  bit = (long)charpoly_bound(M) + 1;
+  if (DEBUGLEVEL>5) {
+    fprintferr("ZM_charpoly: bit-bound 2^%ld\n", bit);
+    (void)timer2();
+  }
+  d = init_modular(&p);
+  for(;;)
+  {
+    NEXT_PRIME_VIADIFF_CHECK(p,d);
+    Hp = Flm_charpoly(ZM_to_Flm(M, p), p);
+    if (!H)
+    {
+      H = ZX_init_CRT(Hp, p, 0);
+      if (DEBUGLEVEL>5)
+        msgtimer("charpoly mod %lu, bound = 2^%ld", p, expu(p));
+      if (expu(p) > bit) break;
+      q = utoipos(p);
+    }
+    else
+    { 
+      GEN qp = muliu(q, p);
+      int stable = ZX_incremental_CRT(&H, Hp, q,qp, p);
+      if (DEBUGLEVEL>5)
+        msgtimer("charpoly mod %lu (stable=%ld), bound = 2^%ld",
+                 p, stable, expi(qp));
+      if (stable && expi(qp) > bit) break;
+      q = qp;
+    }
+  }
+  return gerepilecopy(av, H);
 }
 
 /*******************************************************************/

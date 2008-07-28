@@ -1725,7 +1725,7 @@ padicff2(GEN nf,GEN p,long k)
     Ui= ginv(U); setlg(Ui, ef+1); /* cf ZM_snf_group */
     U = rowslice(U, 1, ef);
     mat = gmul(U, gmul(mulx, Ui));
-    gel(fa,i) = caradj(mat,0,NULL);
+    gel(fa,i) = ZM_charpoly(mat);
   }
   pk = gel(D,1); /* = p^k */
   z = cgetg(l,t_COL); pk = icopy(pk);
