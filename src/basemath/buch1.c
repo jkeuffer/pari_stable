@@ -1550,7 +1550,7 @@ START:
   nreldep = nrelsup = 0;
   LIMC = (ulong)(cbach*LOGD2);
   if (LIMC < cp) { LIMC = cp; cbach = (double)LIMC / LOGD2; }
-  LIMC2 = (ulong)(maxss(cbach,cbach2)*LOGD2);
+  LIMC2 = (ulong)(maxdd(cbach,cbach2)*LOGD2);
   if (LIMC2 < LIMC) LIMC2 = LIMC;
   if (BQ.PRECREG) qfr_data_init(QFR.D, BQ.PRECREG, &QFR);
 
