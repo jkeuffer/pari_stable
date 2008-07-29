@@ -174,13 +174,6 @@ get_bnf(GEN x, long *t)
 	  x = gel(x,1); if (typ(x)!=t_VEC || lg(x)!=11) break;
 	  return x;
       }
-    case t_MAT:
-      if (lg(x)==2)
-	switch(lg(x[1]))
-	{
-	  case 7: case 10:
-	    *t = typ_CLA; return NULL;
-	}
   }
   *t = typ_NULL; return NULL;
 }
@@ -216,13 +209,6 @@ get_nf(GEN x, long *t)
 	case 14: case 20:
 	  *t = typ_ELL; return NULL;
       }break;
-    case t_MAT:
-      if (lg(x)==2)
-	switch(lg(x[1]))
-	{
-	  case 7: case 10:
-	    *t = typ_CLA; return NULL;
-	}
   }
   *t = typ_NULL; return NULL;
 }
@@ -254,13 +240,6 @@ nftyp(GEN x)
 	case 14: case 20:
 	  return typ_ELL;
       }break;
-    case t_MAT:
-      if (lg(x)==2)
-	switch(lg(x[1]))
-	{
-	  case 7: case 10:
-	    return typ_CLA;
-	}
   }
   return typ_NULL;
 }

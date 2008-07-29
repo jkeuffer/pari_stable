@@ -106,7 +106,6 @@ member_zk(GEN x)
   {
     switch(t)
     {
-      case typ_CLA: return gmael(x,1,4);
       case typ_Q:
 	y = cgetg(3,t_VEC);
 	gel(y,1) = gen_1;
@@ -127,10 +126,6 @@ member_disc(GEN x) /* discriminant */
     switch(t)
     {
       case typ_Q  : return quad_disc(x);
-      case typ_CLA:
-	x = gmael(x,1,3);
-	if (typ(x) != t_VEC || lg(x) != 3) break;
-	return gel(x,1);
       case typ_ELL: return gel(x,12);
     }
     member_err("disc");
@@ -146,7 +141,6 @@ member_pol(GEN x) /* polynomial */
   {
     switch(t)
     {
-      case typ_CLA: return gmael(x,1,1);
       case typ_POL: return x;
       case typ_Q  : return gel(x,1);
       case typ_GAL: return gel(x,1);
@@ -182,11 +176,7 @@ GEN
 member_sign(GEN x) /* signature */
 {
   long t; GEN y = get_nf(x,&t);
-  if (!y)
-  {
-    if (t == typ_CLA) return gmael(x,1,2);
-    member_err("sign");
-  }
+  if (!y) member_err("sign");
   return gel(y,2);
 }
 GEN
@@ -271,7 +261,6 @@ member_clgp(GEN x) /* class group (3-component row vector) */
     switch(t)
     {
       case typ_QUA: return mkvec3(gel(x,1), gel(x,2), gel(x,3));
-      case typ_CLA: return gmael(x,1,5);
       case typ_BID: return x = gel(x,2);
     }
     if (typ(x)==t_VEC)
@@ -293,11 +282,7 @@ member_reg(GEN x) /* regulator */
   long t; GEN y = get_bnf(x,&t);
   if (!y)
   {
-    switch(t)
-    {
-      case typ_CLA: return gmael(x,1,6);
-      case typ_QUA: return gel(x,4);
-    }
+    if (t == typ_QUA) return gel(x,4);
     member_err("reg");
   }
   if (t == typ_BNR) pari_err(impl,"ray regulator");
@@ -313,8 +298,6 @@ member_fu(GEN x) /* fundamental units */
   {
     switch(t)
     {
-      case typ_CLA: x = gel(x,1); if (lg(x) < 10) break;
-	return gel(x,9);
       case typ_Q:
 	x = quad_disc(x);
 	return (signe(x)<0)? cgetg(1,t_VEC): quadunit(x);
@@ -343,17 +326,6 @@ member_tu(GEN x)
 	{ y = gen_2; x = gen_m1; }
 	gel(res,1) = y;
 	gel(res,2) = x; return res;
-      case typ_CLA:
-	x = gel(x,1);
-	if (lg(x) > 8)
-	{
-	  y = gel(x,8);
-	  if (typ(y) == t_VEC || lg(y) == 3) 
-          { 
-            gel(res,2) = gcopy(gel(y,2));
-            break;
-          }
-	}
       default: member_err("tu");
 	return NULL; /* not reached */
     }

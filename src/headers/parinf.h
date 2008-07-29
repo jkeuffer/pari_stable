@@ -21,7 +21,6 @@ enum {
   typ_NF,
   typ_BNF,
   typ_BNR,
-  typ_CLA, /* bnfclassunit   */
   typ_ELL, /* elliptic curve */
   typ_QUA, /* quadclassunit  */
   typ_GAL, /* galoisinit     */
