@@ -154,48 +154,6 @@ cgetr(long x)
 
 /*******************************************************************/
 /*                                                                 */
-/*                       GARBAGE COLLECTION                        */
-/*                                                                 */
-/*******************************************************************/
-/* copy integer x as if we had avma = av */
-INLINE GEN
-icopy_av(GEN x, GEN y)
-{
-  register long lx = lgefint(x);
-  register long ly = lx;
-  y -= lx;
-  while (--lx > 0) y[lx]=x[lx];
-  y[0] = evaltyp(t_INT)|evallg(ly);
-  return y;
-}
-INLINE GEN
-gerepileuptoleaf(pari_sp av, GEN q)
-{
-  long i;
-  GEN q0;
-
-  if (!isonstack(q) || (GEN)av==q) { avma = av; return q; }
-  i = lg(q); avma = (pari_sp)(((GEN)av) -  i);
-  q0 = (GEN)avma; while (--i >= 0) q0[i] = q[i];
-  return q0;
-}
-INLINE GEN
-gerepileuptoint(pari_sp av, GEN q)
-{
-  if (!isonstack(q) || (GEN)av==q) { avma = av; return q; }
-  avma = (pari_sp)icopy_av(q, (GEN)av);
-  return (GEN)avma;
-}
-
-INLINE void
-cgiv(GEN x)
-{
-  pari_sp av = (pari_sp)(x+lg(x));
-  if (isonstack((GEN)av)) avma = av;
-}
-
-/*******************************************************************/
-/*                                                                 */
 /*                     COPY, NEGATION, ABSOLUTE VALUE              */
 /*                                                                 */
 /*******************************************************************/

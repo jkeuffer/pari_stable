@@ -264,12 +264,16 @@ gen_Shanks_sqrtn(GEN a, GEN n, GEN q, GEN *zetan, void *E, const struct bb_group
 {
   pari_sp ltop = avma, lim;
   GEN m, u1, u2, z;
+  int is_1;
 
-  if (grp->cmp1(n))
+  if (is_pm1(n))
   {
     if (zetan) *zetan = grp->pow(E,a,gen_0);
     return gcopy(a);
   }
+  is_1 = grp->cmp1(a);
+  if (is_1 && !zetan) return gcopy(a);
+
   m = bezout(n,q,&u1,&u2);
   z = grp->pow(E,a,gen_0);
   lim = stack_lim(ltop,1);
@@ -286,14 +290,13 @@ gen_Shanks_sqrtn(GEN a, GEN n, GEN q, GEN *zetan, void *E, const struct bb_group
       e = Z_pvalrem(q,l,&r);
       y = gen_lgener(l,e,r,&zeta,E,grp);
       if (zetan) z = grp->mul(E,z, grp->pow(E,y,powiu(l,e-j)));
-      do
-      {
-	if (!grp->cmp1(a))
-	{
-	  a = gen_Shanks_sqrtl(a,l,q,e,r,y,zeta,E,grp);
-	  if (!a) { avma = ltop; return NULL;}
-	}
-      } while (--j);
+      if (!is_1) {
+        do
+        {
+          a = gen_Shanks_sqrtl(a,l,q,e,r,y,zeta,E,grp);
+          if (!a) { avma = ltop; return NULL;}
+        } while (--j);
+      }
       if (low_stack(lim, stack_lim(ltop,1)))
       { /* n can have lots of prime factors*/
 	if(DEBUGMEM>1) pari_warn(warnmem,"gen_Shanks_sqrtn");
@@ -308,7 +311,7 @@ gen_Shanks_sqrtn(GEN a, GEN n, GEN q, GEN *zetan, void *E, const struct bb_group
     *zetan = z;
     gerepileall(ltop,2,&a,zetan);
   }
-  else
+  else /* is_1 is 0: a was modified above -> gerepileupto valid */
     a = gerepileupto(ltop, a);
   return a;
 }

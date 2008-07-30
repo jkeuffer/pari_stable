@@ -23,7 +23,8 @@ Doc:
  Assumes that $n!$ is invertible; uses $O(n^4)$ scalar operations.
 
  If $\fl=2$, uses the Hessenberg form. Assumes that the base ring is a field.
- Uses $O(n^3)$ scalar operations, but suffers from coefficient explosion.
+ Uses $O(n^3)$ scalar operations, but suffers from coefficient explosion
+ unless the base field is finite or $\R$.
 
  If $\fl=3$, uses Berkowitz's division free algorithm, valid over any
  ring (commutative, with unit). Uses $O(n^4)$ scalar operations.

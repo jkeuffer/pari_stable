@@ -653,9 +653,12 @@ ZC_hnfremdiv(GEN x, GEN y, GEN *Q)
   if (l == 1) return cgetg(1,t_COL);
   for (i = l-1; i>0; i--)
   {
-    q = negi(diviiround(gel(x,i), gcoeff(y,i,i)));
+    q = diviiround(gel(x,i), gcoeff(y,i,i));
+    if (signe(q)) {
+      togglesign(q);
+      x = ZC_lincomb(gen_1, q, x, gel(y,i));
+    }
     if (Q) gel(*Q, i) = q;
-    if (signe(q)) x = ZC_lincomb(gen_1, q, x, gel(y,i));
   }
   return x;
 }
@@ -675,7 +678,8 @@ ZM_hnfremdiv(GEN x, GEN y, GEN *Q)
     for (i=1; i<lx; i++)
     {
       pari_sp av = avma;
-      gel(R,i) = gerepileupto(av, ZC_hnfrem(gel(x,i),y));
+      GEN z = ZC_hnfrem(gel(x,i),y);
+      gel(R,i) = (avma == av)? ZC_copy(z): gerepileupto(av, z);
     }
   return R;
 }

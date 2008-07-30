@@ -228,6 +228,69 @@ vecsmall_ei(long n, long i) { GEN e = const_vecsmall(n,0); e[i] = 1; return e; }
 
 /*******************************************************************/
 /*                                                                 */
+/*                       GARBAGE COLLECTION                        */
+/*                                                                 */
+/*******************************************************************/
+/* copy integer x as if we had avma = av */
+INLINE GEN
+icopy_av(GEN x, GEN y)
+{
+  long lx = lgefint(x), lq = lx;
+  GEN q = y - lx;
+  while (--lx > 0) q[lx] = x[lx];
+  q[0] = evaltyp(t_INT)|evallg(lq);
+  return q;
+}
+INLINE GEN
+gerepileuptoleaf(pari_sp av, GEN x)
+{
+  long lx;
+  GEN q;
+
+  if (!isonstack(x) || (GEN)av<=x) { avma = av; return x; }
+  lx = lg(x);
+  q = ((GEN)av) - lx;
+  avma = (pari_sp)q;
+  while (--lx >= 0) q[lx] = x[lx];
+  return q;
+}
+INLINE GEN
+gerepileuptoint(pari_sp av, GEN x)
+{
+  if (!isonstack(x) || (GEN)av<=x) { avma = av; return x; }
+  avma = (pari_sp)icopy_av(x, (GEN)av);
+  return (GEN)avma;
+}
+INLINE GEN
+gerepileupto(pari_sp av, GEN x)
+{
+  /* Probably a mistake if av < x, but not necessarily. */
+#if 0
+  pari_warn(warner,"av < x in gerepileupto");
+#endif
+  switch(typ(x))
+  { /* non-default = !is_recursive_t(tq) */
+    case t_INT: return gerepileuptoint(av, x);
+    case t_REAL:
+    case t_LIST:
+    case t_STR:
+    case t_VECSMALL: return gerepileuptoleaf(av,x);
+    default:
+      if (!isonstack(x) || (GEN)av<=x) { avma = av; return x; }
+      /* NB: x+i --> ((long)x) + i*sizeof(long) */
+      return gerepile(av, (pari_sp) (x+lg(x)), x);
+  }
+}
+
+INLINE void
+cgiv(GEN x)
+{
+  pari_sp av = (pari_sp)(x+lg(x));
+  if (isonstack((GEN)av)) avma = av;
+}
+
+/*******************************************************************/
+/*                                                                 */
 /*                    CONVERSION / ASSIGNMENT                      */
 /*                                                                 */
 /*******************************************************************/

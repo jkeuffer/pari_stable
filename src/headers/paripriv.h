@@ -626,7 +626,6 @@ int     uisprime_nosmalldiv(ulong n);
 /* init.c */
 
 void    err_recover(long numerr);
-GEN     gcopy_av(GEN x, GEN *AVMA);
 void    pari_init_defaults(void);
 
 /* nffactor.c */

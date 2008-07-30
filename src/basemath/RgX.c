@@ -105,8 +105,10 @@ RgX_RgXQ_compo(GEN f, GEN x, GEN T)
   GEN y;
 
   if (typ(f) != t_POL) return gcopy(f);
-  l = lg(f)-1; if (l == 1) return zeropol(varn(T));
+  l = lg(f)-1;
+  if (l == 1) return zeropol(varn(T));
   y = gel(f,l);
+  if (l == 2) return scalarpol(y, varn(T));
   limit = stack_lim(av, 1);
   for (l--; l>=2; l--)
   {
