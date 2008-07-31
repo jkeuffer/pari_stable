@@ -1357,28 +1357,72 @@ quad_polmod_mul(GEN P, GEN x, GEN y)
 }
 static int
 is_int1(GEN a) { return  (typ(a) == t_INT && is_pm1(a) && signe(a) == 1); }
-/* Mod(x,P) * Mod(y,P) */
+/* Mod(x,T) * Mod(y,T) */
 static GEN
-mul_polmod_same(GEN P, GEN x, GEN y)
+mul_polmod_same(GEN T, GEN x, GEN y)
 {
-  GEN z = cgetg(3,t_POLMOD);
-  long v = varn(P), lx = lg(x), ly = lg(y);
-  gel(z,1) = gcopy(P);
-  /* x * y mod P optimised */
+  GEN z = cgetg(3,t_POLMOD), a;
+  long v = varn(T), lx = lg(x), ly = lg(y);
+  gel(z,1) = gcopy(T);
+  /* x * y mod T optimised */
   if (typ(x) != t_POL || varn(x) != v || lx <= 3
    || typ(y) != t_POL || varn(y) != v || ly <= 3)
-    gel(z,2) = gmul(x, y);
+    a = gmul(x, y);
   else
   {
-    if (lg(P) == 5 && is_int1(gel(P,4))) /* quadratic fields */
-      gel(z,2) = quad_polmod_mul(P, x, y);
+    if (lg(T) == 5 && is_int1(gel(T,4))) /* quadratic fields */
+      a = quad_polmod_mul(T, x, y);
     else
     {
       pari_sp av = avma;
-      gel(z,2) = gerepileupto(av, RgXQ_mul(x, y, gel(z,1)));
+      GEN p = NULL, X = x, Y = y;
+      if (FpX_poltype(&T, &p) && FpX_poltype(&X, &p) && FpX_poltype(&Y, &p))
+      {
+        if (lgefint(p) == 3)
+        {
+          ulong pp = p[2];
+          a = Flxq_mul(ZX_to_Flx(X, pp), ZX_to_Flx(Y, pp), ZX_to_Flx(T, pp), pp);
+          a = Flx_to_ZX(a);
+        }
+        else
+          a = FpXQ_mul(X, Y, T, p);
+        a = FpX_to_mod(a, p);
+      }
+      else
+        a = RgXQ_mul(x, y, gel(z,1));
+      a = gerepileupto(av, a);
     }
   }
-  return z;
+  gel(z,2) = a; return z;
+}
+static GEN
+sqr_polmod_same(GEN T, GEN x)
+{
+  GEN a, z = cgetg(3,t_POLMOD);
+  gel(z,1) = gcopy(T);
+  if (typ(x) != t_POL || varn(x) != varn(T) || lg(x) <= 3)
+    a = gsqr(x);
+  else
+  {
+    pari_sp av = avma;
+    GEN p = NULL, X = x;
+    if (FpX_poltype(&T, &p) && FpX_poltype(&X, &p))
+    {
+      if (lgefint(p) == 3)
+      {
+        ulong pp = p[2];
+        a = Flxq_sqr(ZX_to_Flx(X, pp), ZX_to_Flx(T, pp), pp);
+        a = Flx_to_ZX(a);
+      }
+      else
+        a = FpXQ_sqr(X, T, p);
+      a = FpX_to_mod(a, p);
+    }
+    else
+      a = RgXQ_sqr(x, gel(z,1));
+    a = gerepileupto(av, a);
+  }
+  gel(z,2) = a; return z;
 }
 /* Mod(x,X) * Mod(y,Y) */
 static GEN
@@ -1890,19 +1934,20 @@ gmul(GEN x, GEN y)
 int
 ff_poltype(GEN *x, GEN *p, GEN *pol)
 {
-  GEN Q, P = *x, pr,p1,p2,y;
+  GEN Q, P = *x, pr,y;
   long i, lx;
 
   if (!signe(P)) return 0;
   lx = lg(P); Q = *pol;
   for (i=2; i<lx; i++)
   {
-    p1 = gel(P,i); if (typ(p1) != t_POLMOD) {Q=NULL;break;}
-    p2 = gel(p1,1);
-    if (Q==NULL) { Q = p2; if (degpol(Q) <= 0) return 0; }
-    else if (p2 != Q)
+    GEN T, c = gel(P,i);
+    if (typ(c) != t_POLMOD) { Q=NULL; break; }
+    T = gel(c,1);
+    if (Q==NULL) { Q = T; if (degpol(Q) <= 0) return 0; }
+    else if (T != Q)
     {
-      if (!RgX_equal_var(p2, Q))
+      if (!RgX_equal_var(T, Q))
       {
 	if (DEBUGMEM) pari_warn(warner,"different modulus in ff_poltype");
 	return 0;
@@ -1917,31 +1962,56 @@ ff_poltype(GEN *x, GEN *p, GEN *pol)
   pr = *p; y = cgetg(lx, t_POL);
   for (i=lx-1; i>1; i--)
   {
-    p1 = gel(P,i);
-    switch(typ(p1))
+    GEN N, c = gel(P,i);
+    switch(typ(c))
     {
       case t_INTMOD: break;
       case t_INT:
-	if (*p) p1 = modii(p1, *p);
-	gel(y,i) = p1; continue;
+	if (*p) c = modii(c, *p);
+	gel(y,i) = c; continue;
       default:
 	return (Q && !pr)? 1: 0;
     }
-    p2 = gel(p1,1);
-    if (pr==NULL) pr = p2;
-    else if (p2 != pr)
+    N = gel(c,1);
+    if (!pr) pr = N;
+    else if (N != pr && !equalii(N, pr))
     {
-      if (!equalii(p2, pr))
-      {
-	if (DEBUGMEM) pari_warn(warner,"different modulus in ff_poltype");
-	return 0;
-      }
-      if (DEBUGMEM > 2) pari_warn(warner,"different pointers in ff_poltype");
+      if (DEBUGMEM) pari_warn(warner,"different modulus in ff_poltype");
+      return 0;
     }
-    y[i] = p1[2];
+    gel(y,i) = gel(c,2);
   }
   y[1] = P[1];
   *x = y; *p = pr; return (Q || pr);
+}
+
+int
+FpX_poltype(GEN *x, GEN *p)
+{
+  long i, lx = lg(*x);
+  GEN pr = *p, P = *x, y = cgetg(lx, t_POL);
+  for (i=lx-1; i>1; i--)
+  {
+    GEN N, c = gel(P,i);
+    switch(typ(c))
+    {
+      case t_INTMOD: break;
+      case t_INT:
+	if (*p) c = modii(c, *p);
+	gel(y,i) = c; continue;
+      default: return 0;
+    }
+    N = gel(c,1);
+    if (!pr) pr = N;
+    else if (N != pr && !equalii(N, pr))
+    {
+      if (DEBUGMEM) pari_warn(warner,"different modulus in FpX_poltype");
+      return 0;
+    }
+    gel(y,i) = gel(c,2);
+  }
+  y[1] = P[1];
+  *x = y; *p = pr; return (pr != NULL);
 }
 
 GEN
@@ -2043,10 +2113,7 @@ gsqr(GEN x)
 	gerepilecoeffssp(av,tetpil,z+2,2); return z;
 
       case t_POLMOD:
-	z=cgetg(3,t_POLMOD); gel(z,1) = gcopy(gel(x,1));
-	av=avma; p1=gsqr(gel(x,2)); tetpil=avma;
-	gel(z,2) = gerepile(av,tetpil, grem(p1,gel(z,1)));
-	return z;
+        return sqr_polmod_same(gel(x,1), gel(x,2));
 
       case t_FFELT: return FF_sqr(x);
     }

@@ -1351,20 +1351,22 @@ Flv_polint(GEN xa, GEN ya, ulong p, long vs)
    They are Flx modulo another Flx called q.
 */
 
-/* Product of y and x in Z/pZ[X]/(pol), as t_VECSMALL. */
+/* Product of y and x in Z/pZ[X]/(T), as t_VECSMALL. */
 GEN
-Flxq_mul(GEN x,GEN y,GEN pol,ulong p)
+Flxq_mul(GEN x,GEN y,GEN T,ulong p)
 {
   GEN z = Flx_mul(x,y,p);
-  return Flx_rem(z,pol,p);
+  if (lg(T) < Flx_INVMONTGOMERY_LIMIT) return Flx_rem(z,T,p);
+  return Flx_rem_montgomery(z, Flx_invmontgomery(T, p), T, p);
 }
 
-/* Square of y in Z/pZ[X]/(pol), as t_VECSMALL. */
+/* Square of y in Z/pZ[X]/(T), as t_VECSMALL. */
 GEN
-Flxq_sqr(GEN y,GEN pol,ulong p)
+Flxq_sqr(GEN y,GEN T,ulong p)
 {
   GEN z = Flx_sqr(y,p);
-  return Flx_rem(z,pol,p);
+  if (lg(T) < Flx_INVMONTGOMERY_LIMIT) return Flx_rem(z,T,p);
+  return Flx_rem_montgomery(z, Flx_invmontgomery(T, p), T, p);
 }
 
 typedef struct {
