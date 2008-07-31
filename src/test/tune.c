@@ -211,7 +211,7 @@ static double speed_Flx_karamul(speed_param *s)
   op = cgetipos(2*lx - 2);                                 \
   for (i=2; i<lx; i++) op[i]      = s->x[i];            \
   for (i=2; i<lx; i++) op[lx-2+i] = s->x[i];            \
-  mod2BIL(s->y) |= 1; /* make sure modulus is odd */
+  *int_LSW(s->y) |= 1; /* make sure modulus is odd */
 static double speed_redc(speed_param *s) {
   ulong inv = (ulong)-invrev(mod2BIL(s->y));
   GEN op; INIT_RED(s, op);
@@ -307,7 +307,7 @@ time_fun(speed_function_t fun, speed_param *s)
       /* go to a value of reps to make t[i] >= precision */
       reps_d = ceil (1.1 * s->reps
 		     * speed_unittime * speed_precision
-		     / maxss(t[i], speed_unittime));
+		     / maxdd(t[i], speed_unittime));
       if (reps_d > 2e9 || reps_d < 1.0)
 	pari_err(talker, "Fatal error: new reps bad: %.2f\n", reps_d);
 
