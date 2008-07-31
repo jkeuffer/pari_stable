@@ -268,6 +268,7 @@ gerepileupto(pari_sp av, GEN x)
 #if 0
   pari_warn(warner,"av < x in gerepileupto");
 #endif
+  if (!isonstack(x) || (GEN)av<=x) { avma = av; return x; }
   switch(typ(x))
   { /* non-default = !is_recursive_t(tq) */
     case t_INT: return gerepileuptoint(av, x);
@@ -276,7 +277,6 @@ gerepileupto(pari_sp av, GEN x)
     case t_STR:
     case t_VECSMALL: return gerepileuptoleaf(av,x);
     default:
-      if (!isonstack(x) || (GEN)av<=x) { avma = av; return x; }
       /* NB: x+i --> ((long)x) + i*sizeof(long) */
       return gerepile(av, (pari_sp) (x+lg(x)), x);
   }
