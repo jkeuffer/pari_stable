@@ -233,10 +233,10 @@ vecsmall_ei(long n, long i) { GEN e = const_vecsmall(n,0); e[i] = 1; return e; }
 /*******************************************************************/
 /* copy integer x as if we had avma = av */
 INLINE GEN
-icopy_av(GEN x, GEN y)
+icopy_avma(GEN x, pari_sp av)
 {
   long lx = lgefint(x), lq = lx;
-  GEN q = y - lx;
+  GEN q = ((GEN)av) - lx;
   while (--lx > 0) q[lx] = x[lx];
   q[0] = evaltyp(t_INT)|evallg(lq);
   return q;
@@ -258,7 +258,7 @@ INLINE GEN
 gerepileuptoint(pari_sp av, GEN x)
 {
   if (!isonstack(x) || (GEN)av<=x) { avma = av; return x; }
-  avma = (pari_sp)icopy_av(x, (GEN)av);
+  avma = (pari_sp)icopy_avma(x, av);
   return (GEN)avma;
 }
 INLINE GEN

@@ -1314,14 +1314,15 @@ shallowcopy(GEN x)
 /* cf cgetg_copy: "allocate" (by updating first codeword only) for subsequent
  * copy of x, as if avma = *AVMA. Assume lg(x) == lx */
 INLINE GEN
-cgetg_copy_av(long lx, GEN x, GEN *AVMA) {
-  *AVMA -= lx;
-  (*AVMA)[0] = x[0] & (TYPBITS|LGBITS); return (*AVMA);
+cgetg_copy_av(long lx, GEN x, pari_sp *AVMA) {
+  GEN z = ((GEN)*AVMA) - lx;
+  z[0] = x[0] & (TYPBITS|LGBITS);
+  *AVMA = (pari_sp)z; return z;
 }
 
 /* copy x as if avma = *AVMA, update *AVMA */
 GEN
-gcopy_av(GEN x, GEN *AVMA)
+gcopy_avma(GEN x, pari_sp *AVMA)
 {
   long i, lx, tx = typ(x);
   GEN y;
@@ -1330,7 +1331,9 @@ gcopy_av(GEN x, GEN *AVMA)
   {
     switch(tx)
     {
-      case t_INT: return *AVMA = icopy_av(x, *AVMA);
+      case t_INT:
+        *AVMA = (pari_sp)icopy_avma(x, *AVMA);
+        return (GEN)*AVMA;
       case t_LIST:
 	y = cgetg_copy_av(3, x, AVMA);
 	listassign(x, y); return y;
@@ -1342,15 +1345,15 @@ gcopy_av(GEN x, GEN *AVMA)
   {
     lx = lg(x); y = cgetg_copy_av(lx, x, AVMA);
     if (lontyp[tx] == 1) i = 1; else { y[1] = x[1]; i = 2; }
-    for (; i<lx; i++) gel(y,i) = gcopy_av(gel(x,i), AVMA);
+    for (; i<lx; i++) gel(y,i) = gcopy_avma(gel(x,i), AVMA);
   }
   return y;
 }
 
-/* [copy_bin/bin_copy:] same as gcopy_av but use NULL to code an exact 0, and
+/* [copy_bin/bin_copy:] same as gcopy_avma but use NULL to code an exact 0, and
  * make shallow copies of t_LISTs */
 static GEN
-gcopy_av0(GEN x, GEN *AVMA)
+gcopy_av0(GEN x, pari_sp *AVMA)
 {
   long i, lx, tx = typ(x);
   GEN y;
@@ -1358,7 +1361,10 @@ gcopy_av0(GEN x, GEN *AVMA)
   if (! is_recursive_t(tx))
   {
     if (is_0INT(x)) return NULL; /* special marker */
-    if (tx == t_INT) return *AVMA = icopy_av(x, *AVMA);
+    if (tx == t_INT) {
+      *AVMA = (pari_sp)icopy_avma(x, *AVMA);
+      return (GEN)*AVMA;
+    }
     lx = lg(x); y = cgetg_copy_av(lx, x, AVMA);
     for (i=1; i<lx; i++) y[i] = x[i];
   }
@@ -1372,10 +1378,10 @@ gcopy_av0(GEN x, GEN *AVMA)
 }
 
 INLINE GEN
-icopy_av_canon(GEN x, GEN AVMA)
+icopy_avma_canon(GEN x, pari_sp AVMA)
 {
   long i, lx = lgefint(x);
-  GEN y = AVMA - lx;
+  GEN y = ((GEN)AVMA) - lx;
   y[0] = evaltyp(t_INT)|evallg(lx); /* kills isclone */
   y[1] = x[1]; x = int_MSW(x);
   for (i=2; i<lx; i++, x = int_precW(x)) y[i] = *x;
@@ -1385,7 +1391,7 @@ icopy_av_canon(GEN x, GEN AVMA)
 /* [copy_bin_canon/bin_copy_canon:] same as gcopy_av0, but copy integers in
  * canonical (native kernel) form and make a full copy of t_LISTs */
 static GEN
-gcopy_av0_canon(GEN x, GEN *AVMA)
+gcopy_av0_canon(GEN x, pari_sp *AVMA)
 {
   long i,lx,tx=typ(x);
   GEN y;
@@ -1395,7 +1401,9 @@ gcopy_av0_canon(GEN x, GEN *AVMA)
     if (is_0INT(x)) return NULL; /* special marker */
     switch(tx)
     {
-      case t_INT: return *AVMA = icopy_av_canon(x, *AVMA);
+      case t_INT: 
+        *AVMA = (pari_sp)icopy_avma_canon(x, *AVMA);
+        return (GEN)*AVMA;
       case t_LIST:
       {
 	GEN y = cgetg_copy_av(3, x, AVMA), z = list_data(x);
@@ -1500,11 +1508,11 @@ gclone(GEN x)
   }
   else
   {
-    GEN AVMA = y + t;
+    pari_sp AVMA = (pari_sp)(y + t);
     lx = lg(x);
     y[0] = x[0];
     if (lontyp[tx] == 1) i = 1; else { y[1] = x[1]; i = 2; }
-    for (; i<lx; i++) gel(y,i) = gcopy_av(gel(x,i), &AVMA);
+    for (; i<lx; i++) gel(y,i) = gcopy_avma(gel(x,i), &AVMA);
   }
   setisclone(y); return y;
 }
@@ -1569,11 +1577,11 @@ copy_bin(GEN x)
 {
   long t = taille0_nolist(x);
   GENbin *p = (GENbin*)pari_malloc(sizeof(GENbin) + t*sizeof(long));
-  GEN AVMA = GENbase(p) + t;
+  pari_sp AVMA = (pari_sp)(GENbase(p) + t);
   p->canon = 0;
   p->len = t;
   p->x   = gcopy_av0(x, &AVMA);
-  p->base= AVMA; return p;
+  p->base= (GEN)AVMA; return p;
 }
 
 /* same, writing t_INT in canonical native form */
@@ -1582,11 +1590,11 @@ copy_bin_canon(GEN x)
 {
   long t = taille0(x);
   GENbin *p = (GENbin*)pari_malloc(sizeof(GENbin) + t*sizeof(long));
-  GEN AVMA = GENbase(p) + t;
+  pari_sp AVMA = (pari_sp)(GENbase(p) + t);
   p->canon = 1;
   p->len = t;
   p->x   = gcopy_av0_canon(x, &AVMA);
-  p->base= AVMA; return p;
+  p->base= (GEN)AVMA; return p;
 }
 
 /* p from copy_bin. Copy p->x back to stack, then destroy p */

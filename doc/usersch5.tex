@@ -685,8 +685,10 @@ length and effective length of the resulting \typ{INT} are equal.
 \fun{GEN}{gerepileuptoleaf}{pari_sp av, GEN q} analogous to (but faster than)
 \kbd{gerepileupto}. Assumes further that \kbd{q} is a leaf, i.e a
 non-recursive type (\kbd{is\_recursive\_t(typ(q))} is non-zero). Contrary to
-\kbd{gerepileuptoint}, \kbd{gerepileuptoleaf} leaves length and effective
-length of a \typ{INT} unchanged.
+\kbd{gerepileuptoint} and \kbd{gerepileupto}, \kbd{gerepileuptoleaf} leaves
+length and effective length of a \typ{INT} unchanged.
+
+\subsec{Garbage collection : advanced use}.
 
 \fun{void}{stackdummy}{pari_sp av, pari_sp ltop} inhibits the memory area
 between \kbd{av} \emph{included} and \kbd{ltop} \emph{excluded} with respect to
@@ -732,9 +734,9 @@ Another natural use in low-level routines is to ``shorten'' an existing
 @eprog\noindent
 or to its last \kbd{n} components:
 \bprog
-  long L = lg(z) - n;
+  long L = lg(z) - n, tz = typ(z);
   stackdummy((pari_sp)(z + L), (pari_sp)z);
-  z += L; setlg(z, L);
+  z += L; z[0] = evaltyp(tz) | evallg(L);
 @eprog
 
 The first scenario (safe shortening an existing \kbd{GEN}) is in fact so
@@ -743,6 +745,18 @@ common, that we provide a function for this:
 \fun{void}{fixlg}{GEN z, long ly} a safe variant of \kbd{setlg(z, ly)}. If
 \kbd{ly} is larger than \kbd{lg(z)} do nothing. Otherwise, shorten $z$ in
 place, using \kbd{stackdummy} to avoid later \kbd{gerepile} problems.
+
+\fun{GEN}{gcopy_avma}{GEN x, pari_sp *AVMA} return a copy of $x$ as from \kbd{gcopy},
+except that we pretend that initially \kbd{avma} is \kbd{*AVMA}, and that \kbd{*AVMA}
+is updated accordingly (so that the total size of $x$ is the difference between the
+two successive values of \kbd{*AVMA}). It is not necessary for \kbd{*AVMA}
+to initially point on the stack: \tet{gclone} is implemented using this mechanism.
+
+\fun{GEN}{icopy_avma}{GEN x, pari_sp av} analogous to \kbd{gcopy\_avma} but simpler:
+assume $x$ is a \typ{INT} and return a copy allocated as if initially we had
+\kbd{avma} equal to \kbd{av}. There is no need to pass a pointer and update the value
+of the second argument: the new (fictitious) \kbd{avma} is just the return value
+(typecast to \kbd{pari\_sp}).
 
 \subsec{Debugging the PARI stack}
 

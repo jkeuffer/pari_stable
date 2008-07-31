@@ -124,8 +124,9 @@ icopy_ef(GEN x, long l)
 GEN
 setloop(GEN a)
 {
-  GEN z0 = (GEN)avma; (void)cgetg(lgefint(a) + 3, t_VECSMALL);
-  return icopy_av(a, z0 - 2); /* two cells of extra space after a */
+  pari_sp av = avma - 2 * sizeof(long);
+  (void)cgetg(lgefint(a) + 3, t_VECSMALL);
+  return icopy_avma(a, av); /* two cells of extra space after a */
 }
 
 /* we had a = setloop(?), then some incloops. Reset a to b */

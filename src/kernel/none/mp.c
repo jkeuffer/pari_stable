@@ -60,8 +60,9 @@ int_normalize(GEN x, long known_zero_words)
 GEN
 setloop(GEN a)
 {
-  GEN z0 = (GEN)avma; (void)cgetg(lgefint(a) + 3, t_VECSMALL);
-  return icopy_av(a, z0); /* two cells of extra space before a */
+  pari_sp av = avma;
+  (void)cgetg(lgefint(a) + 3, t_VECSMALL);
+  return icopy_avma(a, av); /* two cells of extra space before a */
 }
 
 /* we had a = setloop(?), then some incloops. Reset a to b */

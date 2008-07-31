@@ -3090,8 +3090,8 @@ ifac_decomp_break(GEN n, long (*ifac_break)(GEN n,GEN pairs,GEN here,GEN state),
       part = gerepileupto((pari_sp)workspc, part);
     }
     nb++;
-    pairs = icopy_av(VALUE(here), pairs);
-    pairs = icopy_av(EXPON(here), pairs);
+    pairs = icopy_avma(VALUE(here), (pari_sp)pairs);
+    pairs = icopy_avma(EXPON(here), (pari_sp)pairs);
     if (ifac_break && (*ifac_break)(n,pairs,here,state))
     {
       if (DEBUGLEVEL >= 3) fprintferr("IFAC: (Partial fact.)Stop requested.\n");

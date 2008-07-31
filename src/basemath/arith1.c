@@ -1613,8 +1613,8 @@ chinese(GEN x, GEN y)
       Z_chinese_pre(A, B, &C, &U, &d);
       c = Z_chinese_post(a, b, C, U, d);
       if (!c) pari_err(consister,"Z_chinese");
-      gel(z,1) = icopy_av(C, z);
-      gel(z,2) = icopy_av(c, gel(z,1));
+      gel(z,1) = icopy_avma(C, (pari_sp)z);
+      gel(z,2) = icopy_avma(c, (pari_sp)gel(z,1));
       avma = (pari_sp)gel(z,2); return z;
     }
     case t_POL:
@@ -2574,7 +2574,7 @@ bestappr_mod(GEN x, GEN A, GEN B)
       pari_sp av = avma;
       GEN a,b,d, t = cgetg(3, t_FRAC);
       if (! ratlift(gel(x,2), gel(x,1), &a,&b,A,B)) return NULL;
-      if (is_pm1(b)) return icopy_av(a, (GEN)av);
+      if (is_pm1(b)) return icopy_avma(a, av);
       d = gcdii(a,b);
       if (!is_pm1(d)) { avma = av; return NULL; }
       cgiv(d);
