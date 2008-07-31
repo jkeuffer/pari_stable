@@ -934,6 +934,21 @@ FpXQ_minpoly(GEN x, GEN T, GEN p)
 }
 
 GEN
+FpXQ_conjvec(GEN x, GEN T, GEN p)
+{
+  pari_sp av=avma;
+  long i;
+  long n = degpol(T), v = varn(T);
+  GEN M = FpXQ_matrix_pow(FpXQ_pow(pol_x(v),p,T,p),n,n,T,p);
+  GEN z = cgetg(n+1,t_COL);
+  gel(z,1) = RgX_to_RgV(x,n);
+  for (i=2; i<=n; i++) gel(z,i) = FpM_FpC_mul(M,gel(z,i-1),p);
+  gel(z,1) = x;
+  for (i=2; i<=n; i++) gel(z,i) = RgV_to_RgX(gel(z,i),v);
+  return gerepilecopy(av,z);
+}
+
+GEN
 gener_FpXQ(GEN T, GEN p, GEN *po)
 {
   long i, j, vT = varn(T), f = degpol(T);

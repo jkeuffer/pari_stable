@@ -97,6 +97,7 @@ BA 82- changing a function in use caused a crash [#784]
        leading coeff, e.g. Mod(0,2)*x
    85- SEGV (stack corruption) in idealval(K, rational number, pr) [#808]
    86- All the charpoly(x,v) variants failed when v > variable(x)
+BA 87- conjvec did not support FFELTs.
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]

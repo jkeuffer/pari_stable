@@ -3003,6 +3003,9 @@ of \kbd{x}
 
 \fun{GEN}{FpXQ_norm}{GEN x, GEN T, GEN p} returns the norm of \kbd{x}
 
+\fun{GEN}{FpXQ_conjvec}{GEN x, GEN T, GEN p} returns the vector of conjugates
+$[x,x^p,x^{p^2},\ldots,x^{p^{n-1}}]$ where $n$ is the degree of $T$.
+
 \fun{GEN}{gener_FpXQ}{GEN T, GEN p} returns a primitive root modulo
 $(T,p)$. $T$ is an \kbd{FpX} assumed to be irreducible modulo the prime
 $p$.
@@ -3347,6 +3350,9 @@ of \kbd{x}
 
 \fun{GEN}{Flxq_norm}{GEN x, GEN T, ulong p} returns the norm of \kbd{x}
 
+\fun{GEN}{Flxq_conjvec}{GEN x, GEN T, ulong p} returns the vector of conjugates
+$[x,x^p,x^{p^2},\ldots,x^{p^{n-1}}]$ where $n$ is the degree of $T$.
+
 \fun{GEN}{gener_Flxq}{GEN T, ulong p} returns a primitive root modulo
 $(T,p)$. $T$ is an \kbd{Flx} assumed to be irreducible modulo the prime
 $p$.
@@ -3461,6 +3467,9 @@ in variable \kbd{v}, of degree less than~\kbd{d}.
 \fun{GEN}{F2xq_invsafe}{GEN x, GEN T}
 
 \fun{GEN}{F2xq_pow}{GEN x, GEN n, GEN pol}
+
+\fun{GEN}{F2xq_conjvec}{GEN x, GEN T} returns the vector of conjugates
+$[x,x^2,x^{2^2},\ldots,x^{2^{n-1}}]$ where $n$ is the degree of $T$.
 
 \fun{GEN}{F2xq_log}{GEN a, GEN g, GEN ord, GEN T}
 
@@ -5700,6 +5709,10 @@ respect to its definition field.
 
 \fun{GEN}{FF_trace}{GEN a} returns the trace of the \typ{FFELT} \kbd{a} with
 respect to its definition field.
+
+\fun{GEN}{FF_conjvec}{GEN a} returns the vector of conjugates
+$[a,a^p,a^{p^2},\ldots,a^{p^{n-1}}]$ where the \typ{FFELT} \kbd{a} belong to a
+field with $p^n$ elements.
 
 \fun{GEN}{FF_charpoly}{GEN a} returns the characteristic polynomial) of the
 \typ{FFELT} \kbd{a} with respect to its definition field.

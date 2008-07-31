@@ -1589,6 +1589,16 @@ Flxq_minpoly(GEN x, GEN T, ulong p)
 }
 
 GEN
+Flxq_conjvec(GEN x, GEN T, ulong p)
+{
+  long i, l = lgpol(T);
+  GEN z = cgetg(l,t_COL);
+  gel(z,1) = vecsmall_copy(x);
+  for (i=2; i<l; i++) gel(z,i) = Flxq_pow(gel(z,i-1), utoi(p), T, p);
+  return z;
+}
+
+GEN
 gener_Flxq(GEN T, ulong p, GEN *po)
 {
   long i, j, vT = T[1], f = degpol(T);

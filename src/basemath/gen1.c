@@ -442,6 +442,9 @@ conjvec(GEN x,long prec)
     case t_COMPLEX: case t_QUAD:
       z=cgetg(3,t_COL); gel(z,1) = gcopy(x); gel(z,2) = gconj(x); break;
 
+    case t_FFELT:
+      return FF_conjvec(x);
+
     case t_VEC: case t_COL:
       lx = lg(x); z = cgetg(lx,t_MAT);
       if (lx == 1) return z;

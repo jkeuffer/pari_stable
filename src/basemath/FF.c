@@ -65,6 +65,13 @@ _mkFF_i(GEN x, GEN z, GEN r)
   return z;
 }
 
+INLINE GEN
+mkFF_i(GEN x, GEN r)
+{
+  GEN z = cgetg(5,t_FFELT);
+  return _mkFF_i(x,z,r);
+}
+
 /* Return true if x and y are defined in the same field */
 int
 FF_samefield(GEN x, GEN y)
@@ -641,6 +648,32 @@ FF_trace(GEN x)
     r = quicktrace(Flx_to_ZX(gel(x,2)), polsym(Flx_to_ZX(T), degpol(T)-1));
   }
   return gerepileupto(av, modii(r,p));
+}
+
+GEN
+FF_conjvec(GEN x)
+{
+  ulong pp;
+  GEN r,T,p,v;
+  long i,l;
+  pari_sp av;
+  _getFF(x,&T,&p,&pp);
+  av = avma;
+  switch(x[1])
+  {
+  case t_FF_FpXQ:
+    v = FpXQ_conjvec(gel(x,2), T, p);
+    break;
+  case t_FF_F2xq:
+    v = F2xq_conjvec(gel(x,2), T);
+    break;
+  default:
+    v = Flxq_conjvec(gel(x,2), T, pp);
+  }
+  l = lg(v); r = cgetg(l, t_COL);
+  for(i=1; i<l; i++)
+    gel(r,i) = mkFF_i(x, gel(v,i));
+  return gerepilecopy(av, r);
 }
 
 GEN

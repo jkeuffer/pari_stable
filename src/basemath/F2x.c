@@ -518,11 +518,14 @@ F2xq_pow(GEN x, GEN n, GEN pol)
   return gerepileupto(av, y);
 }
 
-static GEN
-_F2xq_pow(void *data, GEN x, GEN n)
+GEN
+F2xq_conjvec(GEN x, GEN T)
 {
-  GEN pol = (GEN) data;
-  return F2xq_pow(x,n, pol);
+  long i, l = F2x_degree(T);
+  GEN z = cgetg(l,t_COL);
+  gel(z,1) = vecsmall_copy(x);
+  for (i=2; i<l; i++) gel(z,i) = F2xq_sqr(gel(z,i-1), T);
+  return z;
 }
 
 GEN
@@ -533,6 +536,13 @@ random_F2x(long d, long vs)
   for (i=2; i<l; i++) y[i] = pari_rand();
   y[l-1] &= (1UL<<(d&(BITS_IN_LONG-1UL)))-1UL;
   return F2x_renormalize(y,l);
+}
+
+static GEN
+_F2xq_pow(void *data, GEN x, GEN n)
+{
+  GEN pol = (GEN) data;
+  return F2xq_pow(x,n, pol);
 }
 
 static GEN
