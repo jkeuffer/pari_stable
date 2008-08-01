@@ -2309,7 +2309,7 @@ div_polmod_same(GEN T, GEN x, GEN y)
   else if (degpol(T) == 2 && is_int1(gel(T,4))) /* quadratic fields */
   {
     a = quad_polmod_mul(T, x, quad_polmod_conj(y, T));
-    a = RgX_div(a, quad_polmod_norm(y, T));
+    a = RgX_Rg_div(a, quad_polmod_norm(y, T));
   }
   else
   {
