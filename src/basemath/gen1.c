@@ -512,31 +512,32 @@ conjvec(GEN x,long prec)
 /**                           ADDITION                             **/
 /**                                                                **/
 /********************************************************************/
-/* x, y compatible PADIC */
+/* x, y compatible PADIC, op = add or sub */
 static GEN
 addsub_pp(GEN x, GEN y, GEN (*op)(GEN,GEN))
 {
   pari_sp av = avma;
   long c,d,e,r,rx,ry;
   GEN u, z, mod, p = gel(x,2);
+  int swap;
 
   (void)new_chunk(5 + lgefint(x[3]) + lgefint(y[3]));
   e = valp(x);
   r = valp(y); d = r-e;
-  if (d < 0) { swap(x,y); e = r; d = -d; }
+  if (d < 0) { swap = 1; swap(x,y); e = r; d = -d; } else swap = 0;
   rx = precp(x);
   ry = precp(y);
   if (d) /* v(x) < v(y) */
   {
     r = d+ry; z = powiu(p,d);
     if (r < rx) mod = mulii(z,gel(y,3)); else { r = rx; mod = gel(x,3); }
-    u = op(gel(x,4), mulii(z,gel(y,4)));
-    u = remii(u, mod);
+    z = mulii(z,gel(y,4));
+    u = swap? op(z, gel(x,4)): op(gel(x,4), z);
   }
   else
   {
     if (ry < rx) { r=ry; mod = gel(y,3); } else { r=rx; mod = gel(x,3); }
-    u = op(gel(x,4), gel(y,4));
+    u = swap? op(gel(y,4), gel(x,4)): op(gel(x,4), gel(y,4));
     if (!signe(u) || (c = Z_pvalrem(u,p,&u)) >= r)
     {
       avma = av; return zeropadic(p, e+r);
@@ -547,8 +548,8 @@ addsub_pp(GEN x, GEN y, GEN (*op)(GEN,GEN))
       r -= c;
       e += c;
     }
-    u = remii(u, mod);
   }
+  u = modii(u, mod);
   avma = av; z = cgetg(5,t_PADIC);
   z[1] = evalprecp(r) | evalvalp(e);
   gel(z,2) = icopy(p);
