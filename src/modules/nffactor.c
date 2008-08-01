@@ -409,6 +409,7 @@ nffactor(GEN nf,GEN pol)
   bad = gel(nf,4); if (den != gen_1) bad = mulii(bad, den);
   (void)nfgcd_all(A, RgX_deriv(A), T, bad, &B);
   if (DEBUGLEVEL>2) msgTIMER(&ti, "squarefree test");
+  if (degpol(B) != dA) B = Q_primpart( QXQX_normalize(B, T) );
   ensure_lt_INT(B);
   y = nfsqff(nf,B,0, den);
   if (DEBUGLEVEL>3) fprintferr("number of factor(s) found: %ld\n", lg(y)-1);
@@ -1523,7 +1524,7 @@ polfnf(GEN a, GEN T)
 
   if (typ(a)!=t_POL || typ(T)!=t_POL) pari_err(typeer,"polfnf");
   T = Q_primpart(T); tmonic = is_pm1(leading_term(T));
-  A = Q_primpart( fix_relative_pol(T,a,1) );
+  A = Q_primpart( QXQX_normalize(fix_relative_pol(T,a,1), T) );
   dA = degpol(A);
   if (dA <= 0)
   {
@@ -1533,6 +1534,7 @@ polfnf(GEN a, GEN T)
   bad = dent = ZX_disc(T);
   if (tmonic) dent = indexpartial(T, dent);
   (void)nfgcd_all(A,RgX_deriv(A), T, dent, &B);
+  if (degpol(B) != dA) B = Q_primpart( QXQX_normalize(B, T) );
   ensure_lt_INT(B);
   y = nfsqff_trager(B, T, dent);
   fact_from_sqff(rep, A, B, y, T, bad);
