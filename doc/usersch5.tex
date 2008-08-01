@@ -3631,7 +3631,7 @@ defines a finite field $\F_q$, either $\F_q = \F_p$ ($T$ is \kbd{NULL})
 or a non-prime finite field ($T$ an \kbd{FpX}). $A$ is a polynomial in 
 $\Z[X]$ ($T$ \kbd{NULL}) or $\Z[X,Y]$, whose leading coefficient 
 is non-zero in $\F_q$. $B$ is a vector of monic \kbd{FpX} ($T$ \kbd{NULL}) or
-\kbd{FqX}, paіrwise coprime in $\F_q[X]$, whose product is congruent to
+\kbd{FqX}, pairwise coprime in $\F_q[X]$, whose product is congruent to
 $A/\text{lc}(A)$ in $\F_q[X]$. Lifts the elements of $B$ mod $\kbd{pe} =
 p^e$, such that the congruence now holds mod $(T,p^e)$.
 
@@ -3654,7 +3654,7 @@ But we do not want to store the $a_i$ explicitly, even as a \typ{VECSMALL},
 since this would leave an object on the stack. Instead, we store $a_i$
 implicitly in a bitmask \kbd{MASK}: let $a_0 = 1$, if the $i$-th bit of the
 mask is set, set $a_{i+1} = 2a_i - 1$, and $2a_i$ otherwise; in short the
-bits indicate the places where we do ѕomething special and do not quite
+bits indicate the places where we do something special and do not quite
 double the accuracy (which would be the straightforward thing to do).
 
 In fact, to avoid returning separately the mask and the sequence length
@@ -6110,7 +6110,7 @@ file (in the \tet{writebin} sense), $0$ otherwise.
 \fun{void}{pari_unlink}{const char *s} deletes the file named $s$. Warn
 if the operation fails.
 
-\fun{char*}{path_expand}{const char *s} perform tilde and environment expanѕion
+\fun{char*}{path_expand}{const char *s} perform tilde and environment expansion
 on $s$. Returns a \kbd{malloc}'ed buffer.
 
 \subsec{pariFILE}
@@ -6555,7 +6555,7 @@ of a default, $0$ otherwise.
 
 \fun{GEN}{setdefault}{const char *s, const char *v, long flag} is the
 low-level function underlying \kbd{default0}. If $s$ is empty, call all
-default ѕetting functions with empty string argument and flag
+default setting functions with empty string argument and flag
 \tet{d_ACKNOWLEDGE}. Otherwise, check whether $s$ corresponds to a default
 and call the corresponding default setting function with arguments $v$ and
 \fl.

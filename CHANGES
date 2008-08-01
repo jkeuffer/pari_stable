@@ -199,7 +199,7 @@ BA 49- user variables can now be aliased [#790].
    65- idealmin now returns a number field element, instead of the associated
        "principal idele"
    66- rename library functions minideal -> idealmin and change prototype
-   67- cleared up the confuѕion caused by PARI "ideles", which were remotely
+   67- cleared up the confusion caused by PARI "ideles", which were remotely
        related to the mathematical notion, and covered two distinct uses. The
        first one (ideal + list of real places) is now called "divisor"; the
        second one (ideal + factorization matrix, which used to be a vector 

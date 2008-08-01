@@ -30,7 +30,7 @@ Doc: computes the prime ideal
  ? p1 = L[1]; p2 = L[2];
  ? [p1.e, p1.f]    \\ the first is unramified of degree 1
  %4 = [1, 1]
- ? [p2.e, p2.f]    \\ the ѕecond is unramified of degree 2
+ ? [p2.e, p2.f]    \\ the second is unramified of degree 2
  %5 = [1, 2]
  ? p1.gen
  %6 = [5, [2, 1, 0]~]

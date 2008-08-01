@@ -337,7 +337,7 @@ as one meaningful object when fully expanded as $\prod g[i]^{e[i]}$,
 linear algebra: the objects stored in a \var{famat} need not be
 operation-compatible, they will not even be compared to each other (with one
 exception: \tet{famat_reduce}). Multiplying two \var{famat}s just
-concatenateѕ their elements and exponents columns. In a context where a
+concatenates their elements and exponents columns. In a context where a
 \var{famat} is expected, an object $x$ which is not of type \typ{MAT} will be
 treated as the factorization $x^1$. The following functions all return
 \var{famat}s:
@@ -481,7 +481,7 @@ in \var{prid} form, return their product.
 \fun{GEN}{idealmul_HNF}{GEN nf, GEN x, GEN y} returns $xy$, assuming
 than \kbd{nf} is a true \var{nf}, $x$ is an integral ideal in HNF and $y$
 is an integral ideal in HNF or precompiled form (see below).
-For maximal speed, the ѕecond ideal $y$ may be given in precompiled form $y =
+For maximal speed, the second ideal $y$ may be given in precompiled form $y =
 [a,b]$, where $a$ is a non-zero \typ{INT} and $b$ is an algebraic integer in
 regular representation (a \typ{MAT} giving the multiplication table by the
 fixed element): very useful when many ideals $x$ are going to be multiplied by
@@ -493,7 +493,7 @@ HNF reduction (modulo $xy\cap \Z$).
 
 \fun{GEN}{idealaddtoone}{GEN nf, GEN A, GEN B} given to coprime integer ideals
 $A$, $B$, returns $[a,b]$ with $a\in A$, $b\in B$, such that $a + b = 1$
-The reѕult is reduced mod $AB$, so $a$, $b$ will be small.
+The result is reduced mod $AB$, so $a$, $b$ will be small.
 
 \fun{GEN}{idealaddtoone_i}{GEN nf, GEN A, GEN B} as \tet{idealaddtoone} except
 that \kbd{nf} must be a true \var{nf}, and only $a$ is returned.
