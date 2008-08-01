@@ -2295,7 +2295,43 @@ divpp(GEN x, GEN y) {
   gel(z,4) = gerepileuptoint(av, remii(mulii(gel(x,4), Fp_inv(gel(y,4), M)), M) );
   return z;
 }
-
+static GEN
+div_polmod_same(GEN T, GEN x, GEN y)
+{
+  long v = varn(T);
+  GEN a, z = cgetg(3, t_POLMOD);
+  gel(z,1) = gcopy(T);
+  if (typ(y) != t_POL || varn(y) != v || lg(y) <= 3)
+    a = gdiv(x, y);
+  else if (typ(x) != t_POL || varn(x) != v || lg(x) <= 3)
+    a = gmul(x, RgXQ_inv(y, T));
+  else if (degpol(T) == 2 && is_int1(gel(T,4))) /* quadratic fields */
+  {
+    a = quad_polmod_mul(T, x, quad_polmod_conj(y, T));
+    a = RgX_div(a, quad_polmod_norm(y, T));
+  }
+  else
+  {
+    GEN p = NULL, X = x, Y = y;
+    if (FpX_poltype(&T, &p) && FpX_poltype(&X, &p) && FpX_poltype(&Y, &p))
+    {
+      if (lgefint(p) == 3)
+      {
+        ulong pp = p[2];
+        X = ZX_to_Flx(X, pp);
+        Y = ZX_to_Flx(Y, pp);
+        T = ZX_to_Flx(T, pp);
+        a = Flxq_mul(X, Flxq_inv(Y,T,pp),T,pp);
+        a = Flx_to_ZX(a);
+      }
+      else
+        a = FpXQ_div(X, Y, T, p);
+      a = FpX_to_mod(a, p);
+    } else
+      a = RgXQ_mul(x, ginvmod(y, gel(z,1)), gel(z,1));
+  }
+  gel(z,2) = a; return z;
+}
 GEN
 gdiv(GEN x, GEN y)
 {
@@ -2358,17 +2394,9 @@ gdiv(GEN x, GEN y)
 
     case t_POLMOD: av = avma;
       if (RgX_equal_var(gel(x,1), gel(y,1)))
-      {
-	GEN X = gel(x,1);
-	x = gel(x,2);
-	y = gel(y,2);
-	if (degpol(X) == 2) { /* optimized for speed */
-	  z = mul_polmod_same(X, x, quad_polmod_conj(y, X));
-	  return gdiv(z, quad_polmod_norm(y, X));
-	}
-	y = ginvmod(y, X);
-	z = mul_polmod_same(X, x, y);
-      } else z = gmul(x, ginv(y));
+        z = div_polmod_same(gel(x,1), gel(x,2), gel(y,2));
+      else
+        z = gmul(x, ginv(y));
       return gerepileupto(av, z);
 
     case t_POL:

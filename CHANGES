@@ -258,7 +258,7 @@ BA 49- user variables can now be aliased [#790].
    89- improved charpoly(,,2) [ Hessenberg form ]
    90- allow Flxq_mul and Flxq_sqr to call Flx_rem_montgomery
    91- t_POLMOD * t_POLMOD with same modulus: if all coefficients are in Z/NZ, call
-       specialized functions FpXQ_mul / Flxq_mul [ same with sqr ]
+       specialized functions FpXQ_mul / Flxq_mul [ same with gsqr and gdiv ]
 
   Added
     1- library function pari_calloc, cgetalloc
