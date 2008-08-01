@@ -245,16 +245,13 @@ partitions(long n, long amax)
 
   /* lift the restriction on the maximum element if amax=0 */
   if (amax == 0) amax = n;
-  if (amax < 0) pari_err(talker,"negative maximum part");
-
+  if (amax < 0) return cgetg(1, t_VEC);
   if (n <= 0) {
     if (n < 0) return cgetg(1, t_VEC);
     pi = cgetg(2, t_VEC);
     gel(pi,1) = cgetg(1, t_VECSMALL);
     return pi;
   }
-
-
   /* the partitions are generated in Abramowitz-Stegun order:
   * first the partitions with 1 element, then those with 2, then
   * those with 3 until 1+1+1+..+1=n, the longest, is created. p is the
