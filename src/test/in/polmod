@@ -1,0 +1,21 @@
+test() = {
+  print(a*b);
+  print(a/b);
+  print(sqr(a));
+  print(a^-1);
+  print(a^3);
+  print(a^0);
+}
+
+T=2*x^2 + x + 1; a = Mod(x+1/2, T); b = Mod(x/3+1, T);
+test();
+
+T=2*x^3 + x + 1; a = Mod(x^2+x+1/2, T); b = Mod(x^2+x/3+1, T);
+test();
+
+modp(p) = {
+  t = T*Mod(1,p);
+  a = Mod((x^2+x+3) * Mod(1,p), t); b = Mod((3*x^2+2*x+5) * Mod(1,p), t);
+}
+modp(17); test();
+modp(18446744073709551629); test();

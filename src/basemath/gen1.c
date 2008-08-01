@@ -1397,7 +1397,7 @@ mul_polmod_same(GEN T, GEN x, GEN y)
   gel(z,2) = a; return z;
 }
 static GEN
-sqr_polmod_same(GEN T, GEN x)
+sqr_polmod(GEN T, GEN x)
 {
   GEN a, z = cgetg(3,t_POLMOD);
   gel(z,1) = gcopy(T);
@@ -2114,7 +2114,7 @@ gsqr(GEN x)
 	gerepilecoeffssp(av,tetpil,z+2,2); return z;
 
       case t_POLMOD:
-        return sqr_polmod_same(gel(x,1), gel(x,2));
+        return sqr_polmod(gel(x,1), gel(x,2));
 
       case t_FFELT: return FF_sqr(x);
     }
@@ -3073,12 +3073,48 @@ inv_ser(GEN b)
   return gerepilecopy(av, x);
 }
 
+static GEN
+inv_polmod(GEN T, GEN x)
+{
+  GEN z = cgetg(3,t_POLMOD), a;
+  gel(z,1) = gcopy(T);
+  if (typ(x) != t_POL || varn(x) != varn(T) || lg(x) <= 3)
+    a = ginv(x);
+  else
+  {
+    pari_sp av = avma;
+    if (lg(T) == 5) /* quadratic fields */
+      a = RgX_Rg_div(quad_polmod_conj(x,T), quad_polmod_norm(x,T));
+    else
+    {
+      GEN p = NULL, X = x;
+      if (FpX_poltype(&T, &p) && FpX_poltype(&X, &p))
+      {
+        if (lgefint(p) == 3)
+        {
+          ulong pp = p[2];
+          a = Flxq_inv(ZX_to_Flx(X, pp), ZX_to_Flx(T, pp), pp);
+          a = Flx_to_ZX(a);
+        }
+        else
+          a = FpXQ_inv(X, T, p);
+        a = FpX_to_mod(a, p);
+        a = gerepileupto(av, a);
+      }
+      else {
+        avma = av;
+        a = RgXQ_inv(x, gel(z,1));
+      }
+    }
+  }
+  gel(z,2) = a; return z;
+}
 GEN
 ginv(GEN x)
 {
   long s;
   pari_sp av, tetpil;
-  GEN X, z, y, p1, p2;
+  GEN z, y, p1, p2;
 
   switch(typ(x))
   {
@@ -3123,16 +3159,7 @@ ginv(GEN x)
       gel(z,3) = icopy(gel(x,3));
       gel(z,4) = Fp_inv(gel(x,4),gel(z,3)); return z;
 
-    case t_POLMOD: z = cgetg(3,t_POLMOD);
-      X = gel(x,1); gel(z,1) = gcopy(X);
-      if (degpol(X) == 2) { /* optimized for speed */
-	av = avma;
-	gel(z,2) = gerepileupto(av, gdiv(quad_polmod_conj(gel(x,2), X),
-				  quad_polmod_norm(gel(x,2), X)) );
-      }
-      else gel(z,2) = ginvmod(gel(x,2), X);
-      return z;
-
+    case t_POLMOD: return inv_polmod(gel(x,1), gel(x,2));
     case t_FFELT: return FF_inv(x);
     case t_POL: return gred_rfrac_simple(gen_1,x);
     case t_SER: return gdiv(gen_1,x);

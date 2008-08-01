@@ -555,6 +555,37 @@ powp(GEN x, GEN n)
   gel(y,4) = Fp_pow(gel(x,4), n, mod);
   return y;
 }
+static GEN
+pow_polmod(GEN x, GEN n)
+{
+  GEN z = cgetg(3, t_POLMOD), a = gel(x,2), T = gel(x,1);
+  gel(z,1) = gcopy(T);
+  if (typ(a) != t_POL || varn(a) != varn(T) || lg(a) <= 3)
+    a = powgi(a, n);
+  else {
+    pari_sp av = avma;
+    GEN p = NULL, X = a;
+    if (FpX_poltype(&T, &p) && FpX_poltype(&X, &p))
+    {
+      if (lgefint(p) == 3)
+      {
+        ulong pp = p[2];
+        a = Flxq_pow(ZX_to_Flx(X, pp), n, ZX_to_Flx(T, pp), pp);
+        a = Flx_to_ZX(a);
+      }
+      else
+        a = FpXQ_pow(X, n, T, p);
+      a = FpX_to_mod(a, p);
+      a = gerepileupto(av, a);
+    }
+    else
+    {
+      avma = av;
+      a = RgXQ_pow(a, n, gel(z,1));
+    }
+  }
+  gel(z,2) = a; return z;
+}
 
 GEN
 gpowgs(GEN x, long n)
@@ -623,6 +654,10 @@ gpowgs(GEN x, long n)
       if (n < 0) y = ginv(y);
       return gerepileupto(av,y);
     }
+    case t_POLMOD: {
+      long N[] = {evaltyp(t_INT) | _evallg(3),0,0};
+      affsi(n,N); return pow_polmod(x, N);
+    }
     case t_POL:
       if (RgX_is_monomial(x)) return pow_monome(x, n);
     default: {
@@ -661,7 +696,8 @@ powgi(GEN x, GEN n)
       if (signe(n) < 0) pari_err(gdiver);
       return gen_0;
 
-    case t_QFR: return qfrpow(x,n);
+    case t_QFR: return qfrpow(x, n);
+    case t_POLMOD: return pow_polmod(x, n);
     default: {
       pari_sp av = avma;
       y = leftright_pow(x, n, NULL, &_sqr, &_mul);
