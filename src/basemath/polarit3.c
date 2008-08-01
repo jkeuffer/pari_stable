@@ -2635,10 +2635,9 @@ ZX_gcd_all(GEN A, GEN B, GEN *Anew)
   if (!signe(A)) { if (Anew) *Anew = zeropol(vA); return ZX_copy(B); }
   if (!signe(B)) { if (Anew) *Anew = pol_1(vA); return ZX_copy(A); }
 
+  n = 1 + minss(degpol(A), degpol(B)); /* > degree(gcd) */
   g = gcdii(leading_term(A), leading_term(B)); /* multiple of lead(gcd) */
   if (is_pm1(g)) g = NULL;
-  if (degpol(A) < degpol(B)) swap(A, B);
-  n = 1 + degpol(B); /* > degree(gcd) */
 
   av = avma; avlim = stack_lim(av, 1);
   H = NULL; d = init_modular(&p);
