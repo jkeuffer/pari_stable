@@ -10,17 +10,18 @@ Description:
  (gen, ?-1):vec        factor($1)
  (int, 0):vec          smallfact($1)
  (gen, small):vec      factor0($1, $2)
-Doc: general factorization function.
- If $x$ is of type integer, rational, polynomial or rational function, the
- result is a two-column matrix, the first column being the irreducibles
- dividing $x$ (prime numbers or polynomials), and the second the exponents.
- If $x$ is a vector or a matrix, the factoring is done componentwise (hence
- the result is a vector or matrix of two-column matrices). By convention,
- $0$ is factored as $0^1$.
+Doc: general factorization function, where $x$ is a 
+ rational (including integers), a complex number with rational
+ real and imaginary parts, or a rational function (including polynomials).
+ The result is a two-column matrix: the first contains the irreducibles
+ dividing $x$ (rational or gaussian primes, irreducible polynomials),
+ and the second the exponents. By convention, $0$ is factored as $0^1$.
 
- If $x$ is of type integer or rational, the factors are \var{pseudoprimes}
- (see \kbd{ispseudoprime}), and in general not rigorously proven primes. In
- fact, any factor which is $\leq 10^{15}$ is a genuine prime number. Use
+ \misctitle{$\Q$ and $\Q(i)$.}
+ The rational or gaussian primes are in fact \var{pseudoprimes}
+ (see \kbd{ispseudoprime}), a priori not rigorously proven primes. In fact,
+ any factor which is $\leq 10^{15}$ (whose norm is $\leq 10^{15}$ for an
+ irrational gaussian prime) is a genuine prime. Use
  \kbd{isprime} to prove primality of other factors, as in
  \bprog
  fa = factor(2^2^7 +1)
@@ -36,15 +37,20 @@ Doc: general factorization function.
  be a proven composite! See \tet{factorint} for more information about the
  algorithms used.
 
+ \misctitle{Rational functions.}
  The polynomials or rational functions to be factored must have scalar
- coefficients. In particular PARI does \emph{not} know how to factor
- multivariate polynomials. See \tet{factormod} and \tet{factorff} for the
- algorithms used over finite fields, \tet{factornf} for the algorithms over
- number fields. Over $\Q$, \idx{van Hoeij}'s method is used, which is able to
- cope with hundreds of modular factors.
+ coefficients. In particular PARI does not know how to factor
+ \emph{multivariate} polynomials. See \tet{factormod} and \tet{factorff} for
+ the algorithms used over finite fields, \tet{factornf} for the algorithms
+ over number fields. Over $\Q$, \idx{van Hoeij}'s method is used, which is
+ able to cope with hundreds of modular factors.
 
- Note that PARI tries to guess in a sensible way over which ring you want
- to factor. Note also that factorization of polynomials is done up to
+ The routine guesses a sensible ring over which you want to factor: the
+ smallest ring containing all coefficients, taking into account quotient
+ structures induced by \typ{INTMOD}s and \typ{POLMOD}s (e.g.~if a coefficient
+ in $\Z/n\Z$ is known, all rational numbers encountered are first mapped to
+ $\Z/n\Z$; different moduli will produce an error).
+ Note that factorization of polynomials is done up to
  multiplication by a constant. In particular, the factors of rational
  polynomials will have integer coefficients, and the content of a polynomial
  or rational function is discarded and not included in the factorization. If
