@@ -1935,7 +1935,7 @@ gmul(GEN x, GEN y)
 int
 ff_poltype(GEN *x, GEN *p, GEN *pol)
 {
-  GEN Q, P = *x, pr,y;
+  GEN Q, P = *x;
   long i, lx;
 
   if (!signe(P)) return 0;
@@ -1956,63 +1956,44 @@ ff_poltype(GEN *x, GEN *p, GEN *pol)
       if (DEBUGMEM > 2) pari_warn(warner,"different pointers in ff_poltype");
     }
   }
-  if (Q) {
-    *x = P = to_Kronecker(P, Q);
-    *pol = Q; lx = lg(P);
-  }
-  pr = *p; y = cgetg(lx, t_POL);
-  for (i=lx-1; i>1; i--)
-  {
-    GEN N, c = gel(P,i);
-    switch(typ(c))
-    {
-      case t_INTMOD: break;
-      case t_INT:
-	if (*p) c = modii(c, *p);
-	gel(y,i) = c; continue;
-      default:
-	return (Q && !pr)? 1: 0;
-    }
-    N = gel(c,1);
-    if (!pr) pr = N;
-    else if (N != pr && !equalii(N, pr))
-    {
-      if (DEBUGMEM) pari_warn(warner,"different modulus in ff_poltype");
-      return 0;
-    }
-    gel(y,i) = gel(c,2);
-  }
-  y[1] = P[1];
-  *x = y; *p = pr; return (Q || pr);
+  if (!Q) return FpX_poltype(x, p);
+  *x = P = to_Kronecker(P, Q);
+  *pol = Q;
+  (void)FpX_poltype(x, p);
+  return 1;
 }
 
 int
-FpX_poltype(GEN *x, GEN *p)
+FpX_poltype(GEN *px, GEN *pp)
 {
-  long i, lx = lg(*x);
-  GEN pr = *p, P = *x, y = cgetg(lx, t_POL);
+  GEN p = *pp, x = *px;
+  long i, lx = lg(x);
+  GEN y = cgetg(lx, t_POL);
+
   for (i=lx-1; i>1; i--)
   {
-    GEN N, c = gel(P,i);
+    GEN c = gel(x,i);
     switch(typ(c))
     {
-      case t_INTMOD: break;
+      case t_INTMOD: {
+        GEN N = gel(c,1);
+        if (!p) p = N;
+        else if (N != p && !equalii(N, p))
+        {
+          if (DEBUGMEM) pari_warn(warner,"different moduli in FpX_poltype");
+          *pp = NULL; return 0;
+        }
+        c = gel(c,2); break;
+      }
       case t_INT:
-	if (*p) c = modii(c, *p);
-	gel(y,i) = c; continue;
+	if (p) c = modii(c, p);
+        break;
       default: return 0;
     }
-    N = gel(c,1);
-    if (!pr) pr = N;
-    else if (N != pr && !equalii(N, pr))
-    {
-      if (DEBUGMEM) pari_warn(warner,"different modulus in FpX_poltype");
-      return 0;
-    }
-    gel(y,i) = gel(c,2);
+    gel(y,i) = c;
   }
-  y[1] = P[1];
-  *x = y; *p = pr; return (pr != NULL);
+  y[1] = x[1];
+  *px = y; *pp = p; return (p != NULL);
 }
 
 GEN
