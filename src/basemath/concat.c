@@ -29,13 +29,21 @@ listconcat(GEN A, GEN B)
   GEN L, z, L1, L2;
 
   if (typ(A) != t_LIST) {
-    L = listcopy(B);
-    (void)listinsert(L, A, 1);
-    return L;
+    L2 = list_data(B);
+    if (!L2) return mklistcopy(A);
+    lx = lg(L2) + 1;
+    z = listcreate();
+    list_data(z) = L = cgetg(lx, t_VEC);
+    for (i = 2; i < lx; i++) gel(L,i) = gcopy(gel(L2,i-1));
+    gel(L,1) = gcopy(A); return z;
   } else if (typ(B) != t_LIST) {
-    L = listcopy(A);
-    (void)listput(L, B, 0);
-    return L;
+    L1 = list_data(A);
+    if (!L1) return mklistcopy(B);
+    lx = lg(L1) + 1;
+    z = listcreate();
+    list_data(z) = L = cgetg(lx, t_VEC);
+    for (i = 1; i < lx-1; i++) gel(L,i) = gcopy(gel(L1,i));
+    gel(L,i) = gcopy(B); return z;
   }
   /* A, B both t_LISTs */
   L1 = list_data(A); if (!L1) return listcopy(B);
@@ -44,12 +52,12 @@ listconcat(GEN A, GEN B)
   l1 = lg(L1);
   lx = l1-1 + lg(L2);
   z = cgetg(3, t_LIST);
-  list_nmax(z) = lx-1;
-  list_data(z) = L = (GEN)pari_malloc(lx * sizeof(long));
+  list_nmax(z) = 0;
+  list_data(z) = L = cgetg(lx, t_VEC);
   L2 -= l1-1;
   for (i=1; i<l1; i++) gel(L,i) = gclone(gel(L1,i));
   for (   ; i<lx; i++) gel(L,i) = gclone(gel(L2,i));
-  L[0] = evaltyp(t_VEC) | evallg(lx); return z;
+  return z;
 }
 
 /* assume A or B is a t_STR */

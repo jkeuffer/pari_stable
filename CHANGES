@@ -98,6 +98,7 @@ BA 82- changing a function in use caused a crash [#784]
    85- SEGV (stack corruption) in idealval(K, rational number, pr) [#808]
    86- All the charpoly(x,v) variants failed when v > variable(x)
 BA 87- conjvec did not support FFELTs.
+   88- memory leak in t_LIST handling
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
@@ -257,8 +258,9 @@ BA 49- user variables can now be aliased [#790].
        all other xxxz functions where xxx includes only i,s,u arguments ]
    89- improved charpoly(,,2) [ Hessenberg form ]
    90- allow Flxq_mul and Flxq_sqr to call Flx_rem_montgomery
-   91- t_POLMOD * t_POLMOD with same modulus: if all coefficients are in Z/NZ, call
-       specialized functions FpXQ_mul / Flxq_mul [ same with gsqr and gdiv ]
+   91- t_POLMOD * t_POLMOD with same modulus: if all coefficients are in Z/NZ,
+       call specialized functions FpXQ_mul / Flxq_mul [ analog with gsqr, gdiv,
+       ginv, powgi ]
 
   Added
     1- library function pari_calloc, cgetalloc

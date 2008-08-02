@@ -139,29 +139,35 @@ the elements are \kbd{v[1]}, \dots, \kbd{v[l-1]}.
 \typ{LIST} is not considered a recursive type, i.e.
 \kbd{is\_recursive\_t(\typ{LIST})} is false. In most cases,
 e.g.~\kbd{gerepile}, this means that the list components are not inspected
-and a shallow copy of the malloced vector is made. \kbd{gcopy}, \kbd{gclone},
-\kbd{copy\_bin\_canon} are exceptions, and make a full copy of the list.
+and a shallow copy of the malloced vector is made. The functions
+\kbd{gclone}, \kbd{copy\_bin\_canon} are exceptions, and make a full copy of
+the list.
 
 The main problem with lists is to avoid memory leaks; in the above setup,
 a statement like \kbd{a = List(1)} would already leak memory, since
 \kbd{List(1)} allocates memory, which is cloned (second allocation) when
-assigned to \kbd{a}; and the original list is lost. So,
-when a \typ{LIST} is created viw \kbd{List} / \kbd{gtolist}, it is
-created entirely on the stack, \emph{not} as described above. Such
-a list is not yet proper and trying to append elements to it fails:
+assigned to \kbd{a}; and the original list is lost. The solution we
+implemented is
+
+\item to create anonymous lists (from \kbd{List}, \kbd{gtolist},
+\kbd{concat} or \kbd{vecsort}) entirely on the stack, \emph{not} as described
+above, and to set \kbd{list\_nmax} to $0$. Such a list is not yet proper and
+trying to append elements to it fails:
 \bprog
 ? listput(List([1,2,3]),1)
   *** listput: store list in variable before appending elements.
 @eprog\noindent
 If we had been malloc'ing memory for the
-\kbd{List([1,2,3])}, it would have leaked already. On the other hand, as soon
-as this is copied, cloned, etc., the copy is a finished list as previously
-described. In particular, assigning a list to a variable (or a component
-thereof) ensures the assigned list is a proper one.
+\kbd{List([1,2,3])}, it would have leaked already.
+
+\item as soon as a list is assigned to a variable (or a component thereof)
+by the GP evaluator, the assigned list is converted to the proper format
+(with \kbd{list\_nmax} set) previously described. 
 
 The following routine is a shortcut for \kbd{gcopy}:
 
-\fun{GEN}{listcopy}{GEN L}: return a full copy of the \typ{LIST}~\kbd{L}.
+\fun{GEN}{listcopy}{GEN L}: return a full copy of the \typ{LIST}~\kbd{L},
+allocated on the \emph{stack} (hence \kbd{list\_nmax} is $0$).
 
 A typical low-level construct:
 \bprog

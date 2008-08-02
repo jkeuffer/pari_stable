@@ -1538,6 +1538,7 @@ void    listpop(GEN L, long index);
 GEN     listput(GEN list, GEN object, long index);
 GEN     listsort(GEN list, long flag);
 GEN     matsize(GEN x);
+GEN     mklistcopy(GEN x);
 GEN     normalize(GEN x);
 GEN     normalizepol(GEN x);
 GEN     normalizepol_approx(GEN x, long lx);

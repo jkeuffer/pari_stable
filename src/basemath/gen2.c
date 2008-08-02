@@ -1986,6 +1986,15 @@ listpop(GEN L, long index)
   for (i=index; i < l; i++) z[i] = z[i+1];
 }
 
+/* return a list with single element x, allocated on stack */
+GEN
+mklistcopy(GEN x)
+{
+  GEN y = listcreate();
+  list_data(y) = mkveccopy(x);
+  return y;
+}
+
 /* return a copy fully allocated on stack. gclone from changevalue is
  * supposed to malloc() it */
 GEN
@@ -2007,9 +2016,7 @@ gtolist(GEN x)
       list_data(y) = list_data(x)? gcopy(list_data(x)): NULL;
       return y;
     default:
-      y = listcreate();
-      list_data(y) = mkveccopy(x);
-      return y;
+      return mklistcopy(x);
   }
 }
 

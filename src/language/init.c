@@ -1229,11 +1229,16 @@ listassign(GEN x, GEN y)
   list_data(y) = list_internal_copy(L, nmax);
 }
 
+/* copy lisst on the PARI stack */
 GEN
 listcopy(GEN x)
 {
-  GEN y = cgetg(3, t_LIST);
-  listassign(x,y); return y;
+  GEN y = listcreate(), L = list_data(x), a;
+  long i, lx;
+  if (!L) return y;
+  lx = lg(L); list_data(y) = a = cgetg(lx, t_VEC);
+  for (i = 1; i < lx; i++) gel(a,i) = gcopy(gel(L,i));
+  return y;
 }
 
 /* x is a t_INT equal to 0 ? tx == t_INT && lx == 2 */
@@ -1254,7 +1259,7 @@ copy_leaf(GEN x, long tx)
     case t_INT:
       lx = lgefint(x);
       y = cgeti(lx); break;
-    case t_LIST: return listcopy(x);
+    case t_LIST: return listcopy(x); /* allocated on the stack */
     default:
       lx = lg(x);
       y = cgetg_copy(lx, x); break;
