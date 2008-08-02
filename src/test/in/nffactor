@@ -35,3 +35,5 @@ lift(nffactor(T,S))
 
 lift(nffactor(nfinit(y^2+1),(x-y)^3*(x^2+y)^4*(x^3-y*x+y)^5))
 
+factor(Mod(y,y^2+1)*x^2 + y)
+nffactor(nfinit(y^2+1),Mod(y,y^2+1)*x^2 + y)

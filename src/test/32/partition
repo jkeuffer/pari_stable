@@ -26,4 +26,5 @@ ll([1, 1, 1, 3, 3]), Vecsmall([1, 1, 2, 2, 3]), Vecsmall([1, 2, 2, 2, 2]), V
 ecsmall([1, 1, 1, 1, 2, 3]), Vecsmall([1, 1, 1, 2, 2, 2]), Vecsmall([1, 1, 1
 , 1, 1, 1, 3]), Vecsmall([1, 1, 1, 1, 1, 2, 2]), Vecsmall([1, 1, 1, 1, 1, 1,
  1, 2]), Vecsmall([1, 1, 1, 1, 1, 1, 1, 1, 1])]
-Total time spent: 46694
+[]
+Total time spent: 97314
