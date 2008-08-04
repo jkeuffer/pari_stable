@@ -418,6 +418,10 @@ INLINE long
 maxss(long x, long y) { return x>y?x:y; }
 INLINE long
 minss(long x, long y) { return x<y?x:y; }
+INLINE long
+minuu(ulong x, ulong y) { return x<y?x:y; }
+INLINE long
+maxuu(ulong x, ulong y) { return x>y?x:y; }
 INLINE double
 maxdd(double x, double y) { return x>y?x:y; }
 INLINE double
