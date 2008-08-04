@@ -1814,14 +1814,14 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
       {
 	gel(res,2) = gerepileupto(av, ZM_zc_mul(u,x));
 	av = avma;
-	gel(res,1) = gerepileupto(av, ground(dbltor(p))); return res;
+	gel(res,1) = gerepileuptoint(av, roundr(dbltor(p))); return res;
       }
       if (p > maxnorm) maxnorm = p;
     }
     else
     {
       pari_sp av2 = avma;
-      gnorme = ground(dbltor(p));
+      gnorme = roundr(dbltor(p));
       if (gcmp(gnorme,BORNE) >= 0) avma = av2;
       else
       {
@@ -1903,7 +1903,7 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
       avma=av0; return stoi(s);
   }
   k = minss(s,maxrank);
-  r = (maxnorm >= 0) ? ground(dbltor(maxnorm)): BORNE;
+  r = (maxnorm >= 0) ? roundr(dbltor(maxnorm)): BORNE;
 
   L[0] = evaltyp(t_MAT) | evallg(k + 1);
   for (j=1; j<=k; j++) gel(L,j) = ZM_zc_mul(u, gel(L,j));
@@ -2047,7 +2047,7 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
 	if ((k <= skipfirst && !signe(y[skipfirst]))
 	 || mpcmp(borne1, gel(y,k)) < 0) fl = 1;
 	else
-	  gel(x,k) = ground( mpneg(gel(z,k)) );
+	  gel(x,k) = mpround( mpneg(gel(z,k)) );
       }
       for(;; step(x,y,inc,k))
       {
