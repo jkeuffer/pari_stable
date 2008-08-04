@@ -1752,7 +1752,7 @@ void    err_leave(void **v);
 GEN     gclone(GEN x);
 GEN     gcopy(GEN x);
 GEN     gcopy_avma(GEN x, pari_sp *AVMA);
-GEN     gcopy_i(GEN x, long lx);
+GEN     gcopy_lg(GEN x, long lx);
 GEN     gerepile(pari_sp ltop, pari_sp lbot, GEN q);
 void    gerepileall(pari_sp av, int n, ...);
 void    gerepileallsp(pari_sp av, pari_sp tetpil, int n, ...);

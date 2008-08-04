@@ -700,21 +700,18 @@ rest is much easier.
 \section{Creation of PARI objects, assignments, conversions}
 
 \subsec{Creation of PARI objects}.\sidx{creation}
-The basic function which creates a PARI object is the function
-\teb{cgetg} whose prototype is:
+The basic function which creates a PARI object is
 
-\kbd{GEN \key{cgetg}(long length, long type)}.
-
-\noindent
-Here \kbd{length} specifies the number of longwords to be allocated to the
-object, and type is the type number of the object, preferably in symbolic
+\fun{GEN}{cgetg}{long l, long t}
+$l$ specifies the number of longwords to be allocated to the
+object, and $t$ is the type of the object, in symbolic
 form (see \secref{se:impl} for the list of these). The precise effect of
 this function is as follows: it first creates on the PARI \emph{stack} a
 chunk of memory of size \kbd{length} longwords, and saves the address of the
 chunk which it will in the end return. If the stack has been used up, a
 message to the effect that ``the PARI stack overflows'' is printed,
 and an error raised. Otherwise, it sets the type and length of the PARI object.
-In effect, it fills its first codeword (\kbd{z[0]} or \kbd{*z}). Many PARI
+In effect, it fills its first codeword (\kbd{z[0]}). Many PARI
 objects also have a second codeword (types \typ{INT}, \typ{REAL},
 \typ{PADIC}, \typ{POL}, and \typ{SER}). In case you want to produce one of
 those from scratch, which should be exceedingly rare, \emph{it is your
@@ -722,12 +719,12 @@ responsibility to fill this second codeword}, either explicitly (using the
 macros described in \secref{se:impl}), or implicitly using an assignment
 statement (using \kbd{gaffect}).
 
-Note that the argument \kbd{length} is predetermined for a number of types:
+Note that the length argument $l$ is predetermined for a number of types:
 3 for types \typ{INTMOD}, \typ{FRAC}, \typ{COMPLEX}, \typ{POLMOD},
 \typ{RFRAC}, 4 for type \typ{QUAD} and \typ{QFI}, and 5 for type \typ{PADIC}
-and \typ{QFR}. However for the sake of efficiency, no checking is done in the
-function \kbd{cgetg}, so disasters will occur if you give an incorrect
-length.
+and \typ{QFR}. However for the sake of efficiency, 
+\kbd{cgetg} does not check this: disasters will occur if you give an incorrect
+length for those types.
 
 \misctitle{Notes}: 1)  The main use of this function is create efficiently
 a constant object, or to prepare for later assignments (see

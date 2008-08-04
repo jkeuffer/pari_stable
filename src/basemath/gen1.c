@@ -2955,6 +2955,10 @@ gmul2n(GEN x, long n)
       gel(z,1) = shifti(a,l);
       gel(z,2) = shifti(b,k); return z;
 
+    case t_COMPLEX: z = cgetg(3,t_COMPLEX);
+      gel(z,1) = gmul2n(gel(x,1),n);
+      gel(z,2) = gmul2n(gel(x,2),n); return z;
+
     case t_QUAD: z = cgetg(4,t_QUAD);
       gel(z,1) = ZX_copy(gel(x,1));
       gel(z,2) = gmul2n(gel(x,2),n);
@@ -2965,16 +2969,16 @@ gmul2n(GEN x, long n)
       gel(z,2) = gmul2n(gel(x,2),n); return z;
 
     case t_POL:
-      z = init_gen_op(x, tx, &lx, &i);
-      for (; i<lx; i++) gel(z,i) = gmul2n(gel(x,i),n);
+      lx = lg(x); z = cgetg_copy(lx,x); z[1] = x[1];
+      for (i=2; i<lx; i++) gel(z,i) = gmul2n(gel(x,i),n);
       return normalizepol_lg(z, lx); /* needed if char = 2 */
     case t_SER:
-      z = init_gen_op(x, tx, &lx, &i);
-      for (; i<lx; i++) gel(z,i) = gmul2n(gel(x,i),n);
+      lx = lg(x); z = cgetg_copy(lx,x); z[1] = x[1];
+      for (i=2; i<lx; i++) gel(z,i) = gmul2n(gel(x,i),n);
       return normalize(z); /* needed if char = 2 */
-    case t_COMPLEX: case t_VEC: case t_COL: case t_MAT:
-      z = init_gen_op(x, tx, &lx, &i);
-      for (; i<lx; i++) gel(z,i) = gmul2n(gel(x,i),n);
+    case t_VEC: case t_COL: case t_MAT:
+      lx = lg(x); z = cgetg_copy(lx,x);
+      for (i=1; i<lx; i++) gel(z,i) = gmul2n(gel(x,i),n);
       return z;
 
     case t_RFRAC: /* int2n wrong if n < 0 */

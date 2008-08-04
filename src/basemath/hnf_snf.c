@@ -1993,7 +1993,7 @@ smithclean(GEN z)
   {
     for (c=1; c<l; c++)
       if (gcmp1(gel(z,c))) break;
-    return gcopy_i(z, c);
+    return gcopy_lg(z, c);
   }
   v=gel(z,2); d=gel(z,3); l = lg(d);
   for (c=1; c<l; c++)
@@ -2001,8 +2001,8 @@ smithclean(GEN z)
 
   y=cgetg(4,t_VEC);
   gel(y,1) = p1 = cgetg(l,t_MAT);
-  for (i=1; i<l; i++) gel(p1,i) = gcopy_i(gel(u,i), c);
-  gel(y,2) = gcopy_i(v, c);
+  for (i=1; i<l; i++) gel(p1,i) = gcopy_lg(gel(u,i), c);
+  gel(y,2) = gcopy_lg(v, c);
   gel(y,3) = p1 = cgetg(c,t_MAT);
   for (i=1; i<c; i++)
   {

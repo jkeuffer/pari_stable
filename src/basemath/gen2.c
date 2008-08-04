@@ -1121,8 +1121,8 @@ gneg(GEN x)
     case t_FFELT: return FF_neg(x);
     case t_POL: return RgX_neg(x);
     case t_SER:
-      y = init_gen_op(x, tx, &lx, &i);
-      for (; i<lx; i++) gel(y,i) = gneg(gel(x,i));
+      lx = lg(x); y = cgetg_copy(lx, x); y[1] = x[1];
+      for (i=2; i<lx; i++) gel(y,i) = gneg(gel(x,i));
       break;
     case t_VEC: return RgV_neg(x);
     case t_COL: return RgC_neg(x);

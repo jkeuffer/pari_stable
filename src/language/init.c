@@ -1284,7 +1284,7 @@ gcopy(GEN x)
 /* as gcopy, but truncate to the first lx components if recursive type
  * [ leaves use their own lg ]. No checks. */
 GEN
-gcopy_i(GEN x, long lx)
+gcopy_lg(GEN x, long lx)
 {
   long tx = typ(x), i;
   GEN y;

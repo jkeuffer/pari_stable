@@ -1856,16 +1856,20 @@ ground(GEN x)
       gel(y,1) = ground(gel(x,1)); return y;
 
     case t_POL:
-      y = init_gen_op(x, tx, &lx, &i);
-      for (; i<lx; i++) gel(y,i) = ground(gel(x,i));
+      lx = lg(x); y = cgetg_copy(lx, x); y[1] = x[1];
+      for (i=2; i<lx; i++) gel(y,i) = ground(gel(x,i));
       return normalizepol_lg(y, lx);
     case t_SER:
-      y = init_gen_op(x, tx, &lx, &i);
-      for (; i<lx; i++) gel(y,i) = ground(gel(x,i));
+      lx = lg(x); y = cgetg_copy(lx, x); y[1] = x[1];
+      for (i=2; i<lx; i++) gel(y,i) = ground(gel(x,i));
       return normalize(y);
-    case t_RFRAC: case t_VEC: case t_COL: case t_MAT:
-      y = init_gen_op(x, tx, &lx, &i);
-      for (; i<lx; i++) gel(y,i) = ground(gel(x,i));
+    case t_RFRAC:
+      y = cgetg(3, t_RFRAC);
+      gel(y,1) = ground(gel(x,1));
+      gel(y,2) = ground(gel(x,2)); return y;
+    case t_VEC: case t_COL: case t_MAT:
+      lx = lg(x); y = cgetg_copy(lx, x);
+      for (i=1; i<lx; i++) gel(y,i) = ground(gel(x,i));
       return y;
   }
   pari_err(typeer,"ground");
@@ -1883,7 +1887,8 @@ grndtoi(GEN x, long *e)
   *e = -(long)HIGHEXPOBIT;
   switch(tx)
   {
-    case t_INT: case t_INTMOD: case t_QUAD: return gcopy(x);
+    case t_INT: return icopy(x);
+    case t_INTMOD: case t_QUAD: return gcopy(x);
     case t_FRAC: return diviiround(gel(x,1), gel(x,2));
     case t_REAL: {
       long ex = expo(x);
@@ -1923,24 +1928,29 @@ grndtoi(GEN x, long *e)
       return y;
 
     case t_POL:
-      y = init_gen_op(x, tx, &lx, &i);
-      for (; i<lx; i++)
+      lx = lg(x); y = cgetg_copy(lx, x); y[1] = x[1];
+      for (i=2; i<lx; i++)
       {
 	gel(y,i) = grndtoi(gel(x,i),&e1);
 	if (e1 > *e) *e = e1;
       }
       return normalizepol_lg(y, lx);
     case t_SER:
-      y = init_gen_op(x, tx, &lx, &i);
-      for (; i<lx; i++)
+      lx = lg(x); y = cgetg_copy(lx, x); y[1] = x[1];
+      for (i=2; i<lx; i++)
       {
 	gel(y,i) = grndtoi(gel(x,i),&e1);
 	if (e1 > *e) *e = e1;
       }
       return normalize(y);
-    case t_RFRAC: case t_VEC: case t_COL: case t_MAT:
-      y = init_gen_op(x, tx, &lx, &i);
-      for (; i<lx; i++)
+    case t_RFRAC:
+      y = cgetg(3,t_RFRAC);
+      gel(y,1) = grndtoi(gel(x,1),&e1); if (e1 > *e) *e = e1;
+      gel(y,2) = grndtoi(gel(x,2),&e1); if (e1 > *e) *e = e1;
+      return y;
+    case t_VEC: case t_COL: case t_MAT:
+      lx = lg(x); y = cgetg(lx, tx);
+      for (i=1; i<lx; i++)
       {
 	gel(y,i) = grndtoi(gel(x,i),&e1);
 	if (e1 > *e) *e = e1;
@@ -2800,11 +2810,13 @@ lift0(GEN x, long v)
 
   switch(tx)
   {
-    case t_INT: case t_REAL:
-      return gcopy(x);
+    case t_INT:
+      return icopy(x);
+    case t_REAL:
+      return mpcopy(x);
 
     case t_INTMOD:
-      return gcopy(gel(x,2));
+      return icopy(gel(x,2));
 
     case t_POLMOD:
       if (v < 0 || v == varn(gel(x,1))) return gcopy(gel(x,2));
@@ -2812,13 +2824,13 @@ lift0(GEN x, long v)
       gel(y,1) = lift0(gel(x,1),v);
       gel(y,2) = lift0(gel(x,2),v); return y;
 
-    case t_FFELT:
+    case t_FRAC: case t_FFELT:
       return gcopy(x);
 
     case t_PADIC:
       return gtrunc(x);
 
-    case t_FRAC: case t_COMPLEX: case t_RFRAC:
+    case t_COMPLEX: case t_RFRAC:
     case t_POL: case t_SER: case t_VEC: case t_COL: case t_MAT:
       y = init_gen_op(x, tx, &lx, &i);
       for (; i<lx; i++) gel(y,i) = lift0(gel(x,i), v);
@@ -2899,9 +2911,9 @@ centerlift0(GEN x, long v)
       y = cgetg(3, t_POLMOD);
       gel(y,1) = centerlift0(gel(x,1),v);
       gel(y,2) = centerlift0(gel(x,2),v); return y;
-
-    case t_POL: case t_SER:
-    case t_FRAC: case t_COMPLEX: case t_RFRAC:
+    case t_FRAC: 
+      return gcopy(x);
+   case t_COMPLEX: case t_POL: case t_SER: case t_RFRAC:
     case t_VEC: case t_COL: case t_MAT:
       y = init_gen_op(x, tx, &lx, &i);
       for (; i<lx; i++) gel(y,i) = centerlift0(gel(x,i),v);
