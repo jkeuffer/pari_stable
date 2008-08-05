@@ -549,7 +549,7 @@ static ulong
 tridiv_bound(GEN n)
 {
   ulong p = maxprime(), l = default_bound(n);
-  return minss(p, l);
+  return minuu(p, l);
 }
 
 static ulong
@@ -560,7 +560,7 @@ utridiv_bound(ulong n)
   {
     ulong p = maxprime(), l;
     l = ((ulong)expu(n) + 1 - 16) << 10;
-    return minss(p, l);
+    return minuu(p, l);
   }
 #endif
   return 1UL<<14;
@@ -615,7 +615,7 @@ ifactor(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
   /* trial division bound */
   p = maxprime();
   if (!all) lim = p; /* smallfact() */
-  else if (all > 1) lim = minss(all, p); /* use supplied limit */
+  else if (all > 1) lim = minuu(all, p); /* use supplied limit */
   else { lim = tridiv_bound(n); if (lim > p) lim = p; }
 
   /* trial division */
