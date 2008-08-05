@@ -3288,8 +3288,12 @@ $\kbd{l} = \kbd{lg(x)}$, in place.
 \fun{GEN}{Flx_shift}{GEN T, long n}, returns \kbd{T} multiplied by
 $\kbd{x}^n$, assuming $n\geq 0$.
 
-\fun{long}{Flx_valuation}{GEN x} returns the valuation of \kbd{x}, i.e. the
+\fun{long}{Flx_val}{GEN x} returns the valuation of \kbd{x}, i.e. the
 multiplicity of the $0$ root.
+
+\fun{long}{Flx_valrem}{GEN x, GEN *Z} as \kbd{RgX\_valrem}, returns the
+valuation of \kbd{x}. In particular, if the valuation is $0$, set \kbd{*Z}
+to $x$, not a copy.
 
 \fun{GEN}{FlxYqQ_pow}{GEN x, GEN n, GEN S, GEN T, ulong p}, as
 \kbd{FpXQYQ\_pow}.

@@ -850,12 +850,26 @@ Flx_divrem(GEN x, GEN y, ulong p, GEN *pr)
 }
 
 long
-Flx_valuation(GEN x)
+Flx_val(GEN x)
 {
   long i, l=lg(x);
   if (l==2)  return LONG_MAX;
-  for (i=2; i<l && x[i]==0; i++);
+  for (i=2; i<l && x[i]==0; i++) /*empty*/;
   return i-2;
+}
+long
+Flx_valrem(GEN x, GEN *Z)
+{
+  long v, i, l=lg(x);
+  GEN y;
+  if (l==2) { *Z = Flx_copy(x); return LONG_MAX; }
+  for (i=2; i<l && x[i]==0; i++) /*empty*/;
+  v = i-2;
+  if (v == 0) { *Z = x; return 0; }
+  l -= v;
+  y = cgetg(l, t_VECSMALL); y[1] = x[1];
+  for (i=2; i<l; i++) y[i] = x[i+v];
+  *Z = y; return v;
 }
 
 GEN

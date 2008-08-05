@@ -99,6 +99,8 @@ BA 82- changing a function in use caused a crash [#784]
    86- All the charpoly(x,v) variants failed when v > variable(x)
 BA 87- conjvec did not support FFELTs.
    88- memory leak in t_LIST handling
+   89- polrootsmod(,1) could return an incomplete result [when 0 was a root
+       or there was a double root], e.g. polrootsmod(x^3 + x^2 + 21*x,23,1)
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]

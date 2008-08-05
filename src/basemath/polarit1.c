@@ -213,24 +213,22 @@ Flx_roots_naive(GEN f, ulong p)
   long d = degpol(f), n = 0;
   ulong s = 1UL, r;
   GEN q, y = cgetg(d + 1, t_VECSMALL);
-  pari_sp av = avma;
+  pari_sp av2, av = avma;
 
-  if (!f[2]) y[++n] = 0;
-  do
+  if (Flx_valrem(f, &f)) { y[++n] = 0; d = degpol(f); }
+  av2 = avma;
+  while (d > 1) /* d = current degree of f */
   {
     q = Flx_div_by_X_x(f, s, p, &r); /* TODO: FFT-type multi-evaluation */
-    if (r) avma = av;
-    else
-    {
-      y[++n] = s;
-      f = q; av = avma;
-    }
-    s++;
+    if (r) avma = av2; else { y[++n] = s; d--; f = q; av2 = avma; }
+    if (++s == p) break;
   }
-  while (n < d-1 && p > s);
-  if (n == d-1 && p != s) /* -f[2]/f[3] */
-    y[++n] = Fl_mul(p - Fl_inv((ulong)f[3], p), (ulong)f[2], p);
-  setlg(y, n+1); return y;
+  if (d == 1)
+  { /* -f[2]/f[3], root of deg 1 polynomial */
+    r = Fl_mul(p - Fl_inv(f[3], p), f[2], p);
+    if (r >= s) y[++n] = r; /* otherwise double root */
+  }
+  avma = av; fixlg(y, n+1); return y;
 }
 
 GEN
