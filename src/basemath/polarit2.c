@@ -1989,6 +1989,20 @@ zero_bezout(GEN y, GEN *U, GEN *V)
   *U=gen_0; *V = ginv(x); return gmul(y,*V);
 }
 
+static int
+must_negate(GEN x)
+{
+  GEN t = leading_term(x);
+  switch(typ(t))
+  {
+    case t_INT: case t_REAL:
+      return (signe(t) < 0);
+    case t_FRAC:
+      return (signe(gel(t,1)) < 0);
+  }
+  return 0;
+}
+
 /* compute U, V s.t Ux + Vy = GCD(x,y) using subresultant */
 GEN
 RgX_extgcd(GEN x, GEN y, GEN *U, GEN *V)
@@ -2012,10 +2026,7 @@ RgX_extgcd(GEN x, GEN y, GEN *U, GEN *V)
     return varncmp(varn(x), varn(y)) < 0? scalar_bezout(x,y,U,V)
 					: scalar_bezout(y,x,V,U);
   dx = degpol(x); dy = degpol(y);
-  if (dx < dy)
-  {
-    pswap(U,V); lswap(dx,dy); swap(x,y);
-  }
+  if (dx < dy) { pswap(U,V); lswap(dx,dy); swap(x,y); }
   if (dy==0) return scalar_bezout(x,y,U,V);
 
   av = avma;
@@ -2054,14 +2065,15 @@ RgX_extgcd(GEN x, GEN y, GEN *U, GEN *V)
 
   vze = RgX_divrem(RgX_sub(v, gmul(uze,x)), y, &p1);
   if (!gcmp0(p1)) pari_warn(warner,"inexact computation in RgX_extgcd");
-  if (cu) uze = gdiv(uze,cu);
-  if (cv) vze = gdiv(vze,cv);
+  if (cu) uze = RgX_Rg_div(uze,cu);
+  if (cv) vze = RgX_Rg_div(vze,cv);
   p1 = ginv(content(v));
+  if (must_negate(v)) p1 = gneg(p1);
 
   tetpil = avma;
-  *U = gmul(uze,p1);
-  *V = gmul(vze,p1);
-  z = gmul(v,p1);
+  *U = RgX_Rg_mul(uze,p1);
+  *V = RgX_Rg_mul(vze,p1);
+  z = RgX_Rg_mul(v,p1);
   gptr[0]=U; gptr[1]=V; gptr[2]=&z;
   gerepilemanysp(av,tetpil,gptr,3); return z;
 }
@@ -2551,16 +2563,7 @@ RgX_gcd(GEN x, GEN y)
     }
     x = RgX_Rg_mul(primpart(v), d);
   }
-  p1 = leading_term(x);
-  switch(typ(p1))
-  {
-    case t_INT: case t_REAL:
-      if (signe(x) < 0) x = RgX_neg(x);
-      break;
-    case t_FRAC:
-      if (signe(gel(x,1)) < 0) x = RgX_neg(x);
-      break;
-  }
+  if (must_negate(x)) x = RgX_neg(x);
   return gerepileupto(av,x);
 }
 

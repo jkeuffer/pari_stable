@@ -263,6 +263,8 @@ BA 49- user variables can now be aliased [#790].
    91- t_POLMOD * t_POLMOD with same modulus: if all coefficients are in Z/NZ,
        call specialized functions FpXQ_mul / Flxq_mul [ analog with gsqr, gdiv,
        ginv, powgi ]
+   92- bezout(): make sure the leading term of the gcd of 2 polynomials is positive
+       (when it makes sense), as was already the case for gcd()
 
   Added
     1- library function pari_calloc, cgetalloc

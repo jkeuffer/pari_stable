@@ -1596,8 +1596,8 @@ chinese(GEN x, GEN y)
 	gel(z,2) = chinese(gel(x,2),gel(y,2));
 	return z;
       }
-      av=avma;
-      d=gbezout(gel(x,1),gel(y,1),&u,&v);
+      av = avma;
+      d = RgX_extgcd(gel(x,1),gel(y,1),&u,&v);
       p2 = gsub(gel(y,2), gel(x,2));
       if (!gcmp0(gmod(p2, d))) break;
       p1 = gdiv(gel(x,1),d);
