@@ -595,7 +595,6 @@ GEN     sqr_ser_part(GEN x, long l1, long l2);
 
 GEN     gsubst_expr(GEN pol, GEN from, GEN to);
 GEN     poltoser(GEN x, long v, long prec);
-GEN     qfbeval(GEN q, GEN x, GEN y);
 GEN     rfractoser(GEN x, long v, long prec);
 
 /* groupid.c */

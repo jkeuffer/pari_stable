@@ -5604,8 +5604,18 @@ the \typ{POL} \kbd{gtovecrev(q)}.
 \fun{GEN}{qfeval}{GEN q, GEN x} evaluates the quadratic form
 $q$ (symmetric matrix) at $x$ (column vector of compatible dimensions).
 
+\fun{GEN}{qfevalb}{GEN q, GEN x, GEN y} evaluates the polar bilinear form
+associated to the quadratic form $q$ (symmetric matrix) at $x$, $y$ (column
+vectors of compatible dimensions).
+
 \fun{GEN}{hqfeval}{GEN q, GEN x} evaluates the Hermitian form $q$
 (a Hermitian complex matrix) at $x$.
+
+\fun{GEN}{qf_apply_RgM}{GEN q, GEN M} $q$ is a symmetric $n\times n$ matrix,
+$M$ an $n\times k$ matrix, return $M' q M$.
+
+\fun{GEN}{qf_apply_ZM}{GEN q, GEN M} as above assuming that $M$ has integer
+entries.
 
 \newpage
 \chapter{Miscellaneous mathematical functions}

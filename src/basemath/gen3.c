@@ -2952,7 +2952,7 @@ centerlift(GEN x)
 
 /*******************************************************************/
 /*                                                                 */
-/*                  PARTIES REELLE ET IMAGINAIRES                  */
+/*                      REAL & IMAGINARY PARTS                     */
 /*                                                                 */
 /*******************************************************************/
 
@@ -3051,6 +3051,48 @@ gimag(GEN x)
       return gcopy(gel(x,3));
   }
   return op_ReIm(gimag,x);
+}
+
+/* return Re(x * y), x and y scalars */
+GEN
+mulreal(GEN x, GEN y)
+{
+  if (typ(x) == t_COMPLEX)
+  {
+    if (typ(y) == t_COMPLEX)
+    {
+      pari_sp av = avma;
+      GEN a = gmul(gel(x,1), gel(y,1));
+      GEN b = gmul(gel(x,2), gel(y,2));
+      return gerepileupto(av, gsub(a, b));
+    }
+    x = gel(x,1);
+  }
+  else
+    if (typ(y) == t_COMPLEX) y = gel(y,1);
+  return gmul(x,y);
+}
+/* Compute Re(x * y), x and y matrices of compatible dimensions
+ * assume scalar entries */
+GEN
+RgM_mulreal(GEN x, GEN y)
+{
+  long i, j, k, l, lx = lg(x), ly = lg(y);
+  GEN z = cgetg(ly,t_MAT);
+  l = (lx == 1)? 1: lg(x[1]);
+  for (j=1; j<ly; j++)
+  {
+    GEN zj = cgetg(l,t_COL), yj = gel(y,j);
+    gel(z,j) = zj;
+    for (i=1; i<l; i++)
+    {
+      pari_sp av = avma;
+      GEN c = mulreal(gcoeff(x,i,1),gel(yj,1));
+      for (k=2; k<lx; k++) c = gadd(c, mulreal(gcoeff(x,i,k),gel(yj,k)));
+      gel(zj, i) = gerepileupto(av, c);
+    }
+  }
+  return z;
 }
 
 /*******************************************************************/
@@ -3216,73 +3258,88 @@ simplify(GEN x)
 /*                EVALUATION OF SOME SIMPLE OBJECTS                */
 /*                                                                 */
 /*******************************************************************/
+/* l = lg(x) = lg(q) > 1. x a ZV, don't use Horner */
 static GEN
-qfeval0_i(GEN q, GEN x, long n)
+qfeval0_Z(GEN q, GEN x, long l)
 {
   long i, j;
-  pari_sp av=avma;
-  GEN res=gen_0;
+  pari_sp av = avma;
+  GEN res;
+  if (l == 2) return gerepileupto(av, gmul(gcoeff(q,1,1), sqri(gel(x,1))));
 
-  for (i=2;i<n;i++)
+  res = gmul(gcoeff(q,2,1), mulii(gel(x,2),gel(x,1))); /* i = 2 */
+  for (i=3;i<l;i++)
     for (j=1;j<i;j++)
       res = gadd(res, gmul(gcoeff(q,i,j), mulii(gel(x,i),gel(x,j))) );
-  res=gshift(res,1);
-  for (i=1;i<n;i++)
-    res = gadd(res, gmul(gcoeff(q,i,i), sqri(gel(x,i))) );
+  res = gshift(res,1);
+  for (i=1;i<l;i++) res = gadd(res, gmul(gcoeff(q,i,i), sqri(gel(x,i))) );
   return gerepileupto(av,res);
 }
-
+/* l = lg(x) = lg(q) > 1. x a RgV, Horner-type evaluation */
 static GEN
-qfeval0(GEN q, GEN x, long n)
+qfeval0(GEN q, GEN x, long l)
 {
   long i, j;
-  pari_sp av=avma;
+  pari_sp av = avma;
   GEN res = gmul(gcoeff(q,1,1), gsqr(gel(x,1)));
-
-  for (i=2; i<n; i++)
+  for (i=2; i<l; i++)
   {
-    GEN l = gel(q,i);
-    GEN sx = gmul(gel(l,1), gel(x,1));
-    for (j=2; j<i; j++)
-      sx = gadd(sx, gmul(gel(l,j),gel(x,j)));
-    sx = gadd(gshift(sx,1), gmul(gel(l,i),gel(x,i)));
-
+    GEN c = gel(q,i), sx = gmul(gel(c,1), gel(x,1));
+    for (j=2; j<i; j++) sx = gadd(sx, gmul(gel(c,j),gel(x,j)));
+    sx = gadd(gshift(sx,1), gmul(gel(c,i),gel(x,i)));
     res = gadd(res, gmul(gel(x,i), sx));
   }
   return gerepileupto(av,res);
 }
-
-/* We assume q is a real symetric matrix */
+/* assume q is a real symetric matrix */
 GEN
 qfeval(GEN q, GEN x)
 {
-  long n=lg(q);
-
-  if (n==1)
-  {
-    if (typ(q) != t_MAT || lg(x) != 1)
-      pari_err(talker,"invalid data in qfeval");
-    return gen_0;
-  }
-  if (typ(q) != t_MAT || lg(q[1]) != n)
-    pari_err(talker,"invalid quadratic form in qfeval");
-  if (typ(x) != t_COL || lg(x) != n)
-    pari_err(talker,"invalid vector in qfeval");
-
-  return qfeval0(q,x,n);
+  long l = lg(q);
+  if (lg(x) != l) pari_err(consister,"qfeval");
+  if (l == 1) return gen_0;
+  return qfeval0(q,x,l);
 }
 
-/* the Horner-type evaluation (mul x 2/3) would force us to use gmul and not
- * mulii (more than 4 x slower for small entries). Not worth it.
- */
+/* l = lg(x) = lg(q) > 1. x a RgV */
 static GEN
-qfbeval0_i(GEN q, GEN x, GEN y, long n)
+hqfeval0(GEN q, GEN x, long l)
+{
+  long i, j;
+  pari_sp av = avma;
+  GEN res, xc;
+  if (l == 2) return gerepileupto(av, gmul(gcoeff(q,1,1), gnorm(gel(x,1))));
+
+  xc = gconj(x);
+  res = mulreal(gcoeff(q,2,1), gmul(gel(x,2),gel(xc,1)));
+  for (i=3;i<l;i++)
+    for (j=1;j<i;j++)
+      res = gadd(res, mulreal(gcoeff(q,i,j), gmul(gel(x,i),gel(xc,j))));
+  res = gshift(res,1);
+  for (i=1;i<l;i++) res = gadd(res, gmul(gcoeff(q,i,i), gnorm(gel(x,i))));
+  return gerepileupto(av,res);
+}
+/* We assume q is a hermitian complex matrix */
+GEN
+hqfeval(GEN q, GEN x)
+{
+  long l = lg(q);
+
+  if (lg(x) != l) pari_err(consister,"hqfeval");
+  if (l==1) return gen_0;
+  if (lg(q[1]) != l) pari_err(talker,"invalid quadratic form in hqfeval");
+  return hqfeval0(q,x,l);
+}
+
+/* Horner-type evaluation (mul x 2/3) would force us to use gmul and not
+ * mulii (more than 4 x slower for small entries). Not worth it. */
+static GEN
+qfevalb0_Z(GEN q, GEN x, GEN y, long l)
 {
   long i, j;
   pari_sp av=avma;
   GEN res = gmul(gcoeff(q,1,1), mulii(gel(x,1),gel(y,1)));
-
-  for (i=2;i<n;i++)
+  for (i=2;i<l;i++)
   {
     if (!signe(x[i]))
     {
@@ -3308,185 +3365,81 @@ qfbeval0_i(GEN q, GEN x, GEN y, long n)
   return gerepileupto(av,res);
 }
 
-#if 0
 static GEN
-qfbeval0(GEN q, GEN x, GEN y, long n)
-{
-  long i, j;
-  pari_sp av=avma;
-  GEN res = gmul(gcoeff(q,1,1), gmul(gel(x,1),gel(y,1)));
-
-  for (i=2;i<n;i++)
-  {
-    for (j=1;j<i;j++)
-    {
-      GEN p1 = gadd(gmul(gel(x,i),gel(y,j)), gmul(gel(x,j),gel(y,i)));
-      res = gadd(res, gmul(gcoeff(q,i,j),p1));
-    }
-    res = gadd(res, gmul(gcoeff(q,i,i), gmul(gel(x,i),gel(y,i))));
-  }
-  return gerepileupto(av,res);
-}
-#else
-static GEN
-qfbeval0(GEN q, GEN x, GEN y, long n)
+qfevalb0(GEN q, GEN x, GEN y, long l)
 {
   long i, j;
   pari_sp av=avma;
   GEN res = gmul(gcoeff(q,1,1), gmul(gel(x,1), gel(y,1)));
 
-  for (i=2; i<n; i++)
+  for (i=2; i<l; i++)
   {
-    GEN l = gel(q,i);
-    GEN sx = gmul(gel(l,1), gel(y,1));
-    GEN sy = gmul(gel(l,1), gel(x,1));
+    GEN c = gel(q,i);
+    GEN sx = gmul(gel(c,1), gel(y,1));
+    GEN sy = gmul(gel(c,1), gel(x,1));
     for (j=2; j<i; j++)
     {
-      sx = gadd(sx, gmul(gel(l,j),gel(y,j)));
-      sy = gadd(sy, gmul(gel(l,j),gel(x,j)));
+      sx = gadd(sx, gmul(gel(c,j),gel(y,j)));
+      sy = gadd(sy, gmul(gel(c,j),gel(x,j)));
     }
-    sx = gadd(sx, gmul(gel(l,i),gel(y,i)));
-
-    sx = gmul(gel(x,i), sx);
-    sy = gmul(gel(y,i), sy);
-    res = gadd(res, gadd(sx,sy));
+    sx = gadd(sx, gmul(gel(c,i),gel(y,i)));
+    res = gadd(res, gadd(gmul(gel(x,i), sx), gmul(gel(y,i), sy)));
   }
   return gerepileupto(av,res);
 }
-#endif
-
-/* We assume q is a real symetric matrix */
+/* assume q is a real symetric matrix */
 GEN
-qfbeval(GEN q, GEN x, GEN y)
+qfevalb(GEN q, GEN x, GEN y)
 {
-  long n=lg(q);
-
-  if (n==1)
-  {
-    if (typ(q) != t_MAT || lg(x) != 1 || lg(y) != 1)
-      pari_err(talker,"invalid data in qfbeval");
-    return gen_0;
-  }
-  if (typ(q) != t_MAT || lg(q[1]) != n)
-    pari_err(talker,"invalid quadratic form in qfbeval");
-  if (typ(x) != t_COL || lg(x) != n || typ(y) != t_COL || lg(y) != n)
-    pari_err(talker,"invalid vector in qfbeval");
-
-  return qfbeval0(q,x,y,n);
+  long l = lg(q);
+  if (lg(x) != l || lg(y) != l) pari_err(consister,"qfevalb");
+  if (l==1) return gen_0;
+  return qfevalb0(q,x,y,l);
 }
 
-/* yield X = M'.q.M, assuming q is symetric.
- * X_ij are X_ji identical, not copies
- * if flag is set, M has integer entries
- */
-GEN
-qf_base_change(GEN q, GEN M, int flag)
+static void
+init_qf_apply(GEN q, GEN M, long *k, long *l)
 {
-  long i,j, k = lg(M), n=lg(q);
-  GEN res = cgetg(k,t_MAT);
-  GEN (*qf)(GEN,GEN,long)  = flag? &qfeval0_i:  &qfeval0;
-  GEN (*qfb)(GEN,GEN,GEN,long) = flag? &qfbeval0_i: &qfbeval0;
+  *l = lg(q); *k = lg(M);
+  if (*l == 1) { if (*k == 1) return; }
+  else         { if (*k != 1 && lg(M[1]) == *l) return; }
+  pari_err(consister,"qf_apply_RgM");
+}
+/* Return X = M'.q.M, assuming q is a symetric matrix and M is a
+ * matrix of compatible dimensions. X_ij are X_ji identical, not copies */
+GEN
+qf_apply_RgM(GEN q, GEN M)
+{
+  long i, j, k, l;
+  GEN res;
 
-  if (n==1)
-  {
-    if (typ(q) != t_MAT || k != 1)
-      pari_err(talker,"invalid data in qf_base_change");
-    return res;
-  }
-  if (typ(M) != t_MAT || k == 1 || lg(M[1]) != n)
-    pari_err(talker,"invalid base change matrix in qf_base_change");
-
-  for (i=1;i<k;i++)
-  {
+  init_qf_apply(q, M, &k, &l); if (l == 1) return cgetg(1, t_MAT);
+  res = cgetg(k,t_MAT);
+  for (i=1; i<k; i++) {
     gel(res,i) = cgetg(k,t_COL);
-    gcoeff(res,i,i) = qf(q,gel(M,i),n);
+    gcoeff(res,i,i) = qfeval0(q,gel(M,i),l);
   }
   for (i=2;i<k;i++)
     for (j=1;j<i;j++)
-      gcoeff(res,i,j)=gcoeff(res,j,i) = qfb(q,gel(M,i),gel(M,j),n);
+      gcoeff(res,i,j) = gcoeff(res,j,i) = qfevalb0(q,gel(M,i),gel(M,j),l);
   return res;
 }
-
-/* return Re(x * y), x and y scalars */
 GEN
-mulreal(GEN x, GEN y)
+qf_apply_ZM(GEN q, GEN M)
 {
-  if (typ(x) == t_COMPLEX)
-  {
-    if (typ(y) == t_COMPLEX)
-    {
-      pari_sp av = avma;
-      GEN a = gmul(gel(x,1), gel(y,1));
-      GEN b = gmul(gel(x,2), gel(y,2));
-      return gerepileupto(av, gsub(a, b));
-    }
-    x = gel(x,1);
+  long i, j, k, l;
+  GEN res;
+
+  init_qf_apply(q, M, &k, &l); if (l == 1) return cgetg(1, t_MAT);
+  res = cgetg(k,t_MAT);
+  for (i=1; i<k; i++) {
+    gel(res,i) = cgetg(k,t_COL);
+    gcoeff(res,i,i) = qfeval0_Z(q,gel(M,i),l);
   }
-  else
-    if (typ(y) == t_COMPLEX) y = gel(y,1);
-  return gmul(x,y);
-}
-
-/* Compute Re(x * y), x and y matrices of compatible dimensions
- * assume scalar entries */
-GEN
-RgM_mulreal(GEN x, GEN y)
-{
-  long i, j, k, l, lx = lg(x), ly = lg(y);
-  GEN z = cgetg(ly,t_MAT);
-  l = (lx == 1)? 1: lg(x[1]);
-  for (j=1; j<ly; j++)
-  {
-    GEN zj = cgetg(l,t_COL), yj = gel(y,j);
-    gel(z,j) = zj;
-    for (i=1; i<l; i++)
-    {
-      pari_sp av = avma;
-      GEN c = mulreal(gcoeff(x,i,1),gel(yj,1));
-      for (k=2; k<lx; k++) c = gadd(c, mulreal(gcoeff(x,i,k),gel(yj,k)));
-      gel(zj, i) = gerepileupto(av, c);
-    }
-  }
-  return z;
-}
-
-static GEN
-hqfeval0(GEN q, GEN x, long n)
-{
-  long i, j;
-  pari_sp av=avma;
-  GEN res=gen_0;
-
-  for (i=2;i<n;i++)
+  for (i=2;i<k;i++)
     for (j=1;j<i;j++)
-    {
-      GEN p1 = gmul(gel(x,i),gconj(gel(x,j)));
-      res = gadd(res, mulreal(gcoeff(q,i,j),p1));
-    }
-  res=gshift(res,1);
-  for (i=1;i<n;i++)
-    res = gadd(res, gmul(gcoeff(q,i,i), gnorm(gel(x,i))) );
-  return gerepileupto(av,res);
-}
-
-/* We assume q is a hermitian complex matrix */
-GEN
-hqfeval(GEN q, GEN x)
-{
-  long n=lg(q);
-
-  if (n==1)
-  {
-    if (typ(q) != t_MAT || lg(x) != 1)
-      pari_err(talker,"invalid data in hqfeval");
-    return gen_0;
-  }
-  if (typ(q) != t_MAT || lg(q[1]) != n)
-    pari_err(talker,"invalid quadratic form in hqfeval");
-  if (typ(x) != t_COL || lg(x) != n)
-    pari_err(talker,"invalid vector in hqfeval");
-
-  return hqfeval0(q,x,n);
+      gcoeff(res,i,j) = gcoeff(res,j,i) = qfevalb0_Z(q,gel(M,i),gel(M,j),l);
+  return res;
 }
 
 GEN

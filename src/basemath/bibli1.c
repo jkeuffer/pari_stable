@@ -1737,7 +1737,7 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
 
   u = lllgramint(a);
   if (lg(u) != n) pari_err(talker,"not a definite form in minim0");
-  a = qf_base_change(a,u,1);
+  a = qf_apply_ZM(a,u);
 
   n--;
   a = mat_to_MP(a, DEFAULTPREC);
@@ -2233,7 +2233,7 @@ fincke_pohst(GEN a, GEN B0, long stockmax, long PREC, FP_chk_fun *CHECK)
     if (DEBUGLEVEL>2) fprintferr("first LLL: prec = %ld\n", prec);
     u = i? lllfp(a, 0.75, LLL_GRAM): ZM_lll(a, 0.75, LLL_GRAM);
     if (lg(u) != lg(a)) return NULL;
-    r = qf_base_change(a,u,1);
+    r = qf_apply_ZM(a,u);
     if (!i) {
       prec = DEFAULTPREC + nbits2nlong(gexpo(r));
       if (prec < PREC) prec = PREC;
