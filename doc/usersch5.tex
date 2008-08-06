@@ -5618,7 +5618,7 @@ to simplify the description:
 respectively (the \kbd{void*} argument provides some arbitrary evaluation
 context).
 
-\fun{GEN}{divide_conquer_assoc}{GEN v, F2 op, void *D}
+\fun{GEN}{divide_conquer_assoc}{GEN v, void *D, F2 op}
 general version of \tet{divide_conquer_prod}. Given two objects
 $x,y$, assume that \kbd{op(D, $x$, $y$)} implements an associative binary
 operator. If $v$ has $k$ entries, return
