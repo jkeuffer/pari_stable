@@ -546,7 +546,7 @@ static GEN _FpX_mul(void *p,GEN a,GEN b){return FpX_mul(a,b,(GEN)p);}
 GEN
 FpXV_prod(GEN V, GEN p)
 {
-  return divide_conquer_assoc(V, &_FpX_mul,(void *)p);
+  return divide_conquer_assoc(V, (void *)p, &_FpX_mul);
 }
 
 GEN

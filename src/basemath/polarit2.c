@@ -790,7 +790,7 @@ leftright_pow_u(GEN x, ulong n, void *data, GEN (*sqr)(void*,GEN),
 }
 
 GEN
-divide_conquer_assoc(GEN x, GEN (*mul)(void *,GEN,GEN),void *data)
+divide_conquer_assoc(GEN x, void *data, GEN (*mul)(void *,GEN,GEN))
 {
   pari_sp ltop, lim;
   long i,k,lx = lg(x);
@@ -823,7 +823,7 @@ _domul(void *data, GEN x, GEN y)
 GEN
 divide_conquer_prod(GEN x, GEN (*mul)(GEN,GEN))
 {
-  return divide_conquer_assoc(x, _domul, (void *)mul);
+  return divide_conquer_assoc(x, (void *)mul, _domul);
 }
 
 static GEN
@@ -870,7 +870,7 @@ gen_factorback(GEN L, GEN e, GEN (*_mul)(void*,GEN,GEN),
     } else {
       if (!is_vec_t(t)) pari_err(talker,"not a factorisation in factorback");
       /* product of the L[i] */
-      return gerepileupto(av, divide_conquer_assoc(L, _mul,data));
+      return gerepileupto(av, divide_conquer_assoc(L, data, _mul));
     }
     p = gel(L,1);
     e = gel(L,2);
@@ -891,7 +891,7 @@ gen_factorback(GEN L, GEN e, GEN (*_mul)(void*,GEN,GEN),
   for (l=1,k=1; k<lx; k++)
     if (signe(e[k])) gel(x,l++) = _pow(data, gel(p,k), gel(e,k));
   x[0] = evaltyp(t_VEC) | _evallg(l);
-  return gerepileupto(av, divide_conquer_assoc(x, _mul,data));
+  return gerepileupto(av, divide_conquer_assoc(x, data, _mul));
 }
 
 GEN

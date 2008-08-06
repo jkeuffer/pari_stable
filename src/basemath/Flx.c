@@ -1277,7 +1277,7 @@ Flv_roots_to_pol(GEN a, ulong p, long vs)
     p2[2] = Fl_neg(a[i],p);
     p2[3] = 1;
   }
-  setlg(p1, k); return divide_conquer_assoc(p1, _Flx_mul,(void *)&p);
+  setlg(p1, k); return divide_conquer_assoc(p1, (void *)&p, _Flx_mul);
 }
 
 GEN
@@ -2396,7 +2396,7 @@ GEN
 FlxqXV_prod(GEN V, GEN T, ulong p)
 {
   struct _FlxqX d; d.p=p; d.T=T;
-  return divide_conquer_assoc(V, &_FlxqX_mul, (void*)&d);
+  return divide_conquer_assoc(V, (void*)&d, &_FlxqX_mul);
 }
 
 GEN

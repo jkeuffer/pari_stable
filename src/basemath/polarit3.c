@@ -774,7 +774,7 @@ FpXQXV_prod(GEN V, GEN T, GEN p)
     struct _FpXQX d;
     d.p=p;
     d.T=T;
-    return divide_conquer_assoc(V, &_FpXQX_mul,(void*)&d);
+    return divide_conquer_assoc(V, (void*)&d, &_FpXQX_mul);
   }
 }
 
