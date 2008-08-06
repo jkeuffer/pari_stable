@@ -164,10 +164,13 @@ If we had been malloc'ing memory for the
 by the GP evaluator, the assigned list is converted to the proper format
 (with \kbd{list\_nmax} set) previously described. 
 
-The following routine is a shortcut for \kbd{gcopy}:
+\fun{GEN}{listcopy}{GEN L} return a full copy of the \typ{LIST}~\kbd{L},
+allocated on the \emph{stack} (hence \kbd{list\_nmax} is $0$). Shortcut for
+\kbd{gcopy}.
 
-\fun{GEN}{listcopy}{GEN L}: return a full copy of the \typ{LIST}~\kbd{L},
-allocated on the \emph{stack} (hence \kbd{list\_nmax} is $0$).
+\fun{GEN}{mklistcopy}{GEN x} returns a list with a single element $x$,
+allocated on the stack. Used to implement most cases of \kbd{gtolist}
+(except vectors and lists).
 
 A typical low-level construct:
 \bprog
