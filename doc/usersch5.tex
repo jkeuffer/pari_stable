@@ -5592,6 +5592,68 @@ In addition we also have the obsolete forms:
 
 \fun{void}{gdivz}{GEN x, GEN y, GEN z}
 
+\section{Generic operators: product, powering, factorback}
+
+\fun{GEN}{divide_conquer_prod}{GEN v, GEN (*mul)(GEN,GEN)} $v$ is a vector of
+objects, which can be ``multiplied'' using the \kbd{mul} function. Return 
+the ``product'' of the $v[i]$ using a product tree: by convention
+return \kbd{gen\_1} if $v$ is the empty vector, a copy of $v[1]$ if it has a
+single entry; and otherwise apply the function recursively on the vector
+(twice smaller)
+
+\kbd{mul}$(v[1],v[2])$, \kbd{mul}$(v[3],v[4])$, \dots
+
+\noindent Only require that \kbd{mul} by an associative binary operator,
+which need not correspond to a true multiplication. \kbd{D} is meant to contain 
+an arbitrary evaluation context, set it to \kbd{NULL} in simple cases where you
+do not need this.
+
+To describe the following functions, we use the following private typedefs
+to simplify the description:
+\bprog
+  typedef (*F1)(void *, GEN);
+  typedef (*F2)(void *, GEN, GEN);
+@eprog
+\noindent They correspond to generic functions with one and two arguments
+respectively (the \kbd{void*} argument provides some arbitrary evaluation
+context).
+
+\fun{GEN}{divide_conquer_assoc}{GEN v, F2 op, void *D}
+general version of \tet{divide_conquer_prod}. Given two objects
+$x,y$, assume that \kbd{op(D, $x$, $y$)} implements an associative binary
+operator. If $v$ has $k$ entries, return
+$$v[1]~\var{op}~v[2]~\var{op}~\ldots ~\var{op}~v[k];$$
+returns \kbd{gen\_1} if $k = 0$ and a copy of $v[1]$ if $k = 1$.
+
+\fun{GEN}{leftright_pow}{GEN x, GEN n, void *D, F1 sqr, F2 mul} $n > 0$ a
+\typ{INT}, returns $x^n$; \kbd{mul(D, $x$, $y$)} implements the multiplication
+in the underlying monoid; \kbd{sqr} is a (presumably optimized) shortcut for
+\kbd{mul(D, $x$, $x$)}. Uses a left-right binary powering algorithm.
+
+\fun{GEN}{leftright_pow_u}{GEN x, ulong n, void *D, F1 sqr, F2 mul} $n > 0$,
+returns $x^n$. See \tet{leftright_pow}.
+
+\fun{GEN}{leftright_pow_fold}{GEN x, GEN n, void *D, F1 sqr, F1 msqr} as
+\tet{leftright_pow}, \kbd{mul} being replaced by \kbd{msqr}, with \kbd{msqr(D,
+$y$)} returning $xy^2$. In particular \kbd{D} must implicitly contain $x$.
+
+\fun{GEN}{leftright_pow_u_fold}{GEN x, ulong n, void *D, F1 sqr, F1 msqr}, see
+the previous \tet{leftright_pow_fold}
+
+\fun{GEN}{gen_factorback}{GEN L, GEN e, F2 mul, F2 pow, void *D} generic form
+of \tet{factorback}. The pair $[L,e]$ is of the form
+
+\item \kbd{[fa, NULL]}, \kbd{fa} a two-column factorization matrix: expand it.
+
+\item  \kbd{[v, NULL]}, $v$ a vector of objects: return their
+product.
+
+\item or \kbd{[v, e]},  $v$ a vector of objects, $e$ a vector of integral
+exponents: return the product of the $v[i]^{e[i]}$. 
+
+\noindent \kbd{mul(D, $x$, $x$)} and \kbd{pow(D, $x$, $n$)}
+return $xy$ and $x^n$ respectively.
+
 \section{Substitution and evaluation}
 
 \fun{GEN}{gsubst}{GEN x, long v, GEN y} substitutes the object \kbd{y}
