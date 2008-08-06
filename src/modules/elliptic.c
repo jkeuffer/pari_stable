@@ -418,18 +418,25 @@ ellinit_real(GEN x, long prec)
   return y;
 }
 
+static GEN
+get_ell(GEN x)
+{
+  switch(typ(x))
+  {
+    case t_STR: return gel(ellsearchcurve(x),2);
+    case t_VEC: if (lg(x) >= 6) return x;
+    /*fall through*/
+    default:
+      checkell5(x); /*ERROR*/
+      return NULL;/*not reached*/
+  }
+}
 GEN
 smallellinit(GEN x)
 {
   pari_sp av = avma;
   GEN y = cgetg(14,t_VEC);
-  switch(typ(x))
-  {
-    case t_STR: x = gel(ellsearchcurve(x),2); break;
-    case t_VEC: break;
-    default: pari_err(typeer,"ellinit");
-  }
-  initsmall(x,y); return gerepilecopy(av,y);
+  initsmall(get_ell(x),y); return gerepilecopy(av,y);
 }
 GEN
 ellinit(GEN x, long prec)
@@ -437,12 +444,7 @@ ellinit(GEN x, long prec)
   pari_sp av = avma;
   long tx;
   GEN p, y;
-  switch(typ(x))
-  {
-    case t_STR: x = gel(ellsearchcurve(x),2); break;
-    case t_VEC: break;
-    default: pari_err(typeer,"ellinit");
-  }
+  x = get_ell(x);
   tx = base_ring(x, &p, &prec);
   y = (tx == t_PADIC)? ellinit_padic(x, p, prec): ellinit_real(x, prec);
   return gerepilecopy(av, y);
