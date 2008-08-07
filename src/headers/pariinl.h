@@ -228,6 +228,371 @@ vecsmall_ei(long n, long i) { GEN e = const_vecsmall(n,0); e[i] = 1; return e; }
 
 /*******************************************************************/
 /*                                                                 */
+/*                        VEC / COL / VECSMALL                     */
+/*                                                                 */
+/*******************************************************************/
+/* shallow*/
+INLINE GEN
+vec_shorten(GEN v, long n)
+{
+  long i;
+  GEN V = cgetg(n+1,t_VEC);
+  for(i=1;i<=n;i++) V[i] = v[i];
+  return V;
+}
+/* shallow*/
+INLINE GEN
+vec_lengthen(GEN v, long n)
+{
+  long i;
+  long l=lg(v);
+  GEN V = cgetg(n+1,t_VEC);
+  for(i=1;i<l;i++) V[i] = v[i];
+  return V;
+}
+/* shallow*/
+INLINE GEN
+vec_setconst(GEN v, GEN x)
+{
+  long i, l = lg(v);
+  for (i = 1; i < l; i++) gel(v,i) = x;
+  return v;
+}
+INLINE GEN
+vecsmall_shorten(GEN v, long n)
+{
+  long i;
+  GEN V = cgetg(n+1,t_VECSMALL);
+  for(i=1;i<=n;i++) V[i] = v[i];
+  return V;
+}
+INLINE GEN
+vecsmall_lengthen(GEN v, long n)
+{
+  long i, l = lg(v);
+  GEN V = cgetg(n+1,t_VECSMALL);
+  for(i=1;i<l;i++) V[i] = v[i];
+  return V;
+}
+
+INLINE GEN
+vec_to_vecsmall(GEN z)
+{
+  long i, l = lg(z);
+  GEN x = cgetg(l, t_VECSMALL);
+  for (i=1; i<l; i++) x[i] = itos(gel(z,i));
+  return x;
+}
+INLINE GEN
+vecsmall_to_vec(GEN z)
+{
+  long i, l = lg(z);
+  GEN x = cgetg(l,t_VEC);
+  for (i=1; i<l; i++) gel(x,i) = stoi(z[i]);
+  return x;
+}
+INLINE GEN
+vecsmall_to_col(GEN z)
+{
+  long i, l = lg(z);
+  GEN x = cgetg(l,t_COL);
+  for (i=1; i<l; i++) gel(x,i) = stoi(z[i]);
+  return x;
+}
+
+INLINE int
+vecsmall_lexcmp(GEN x, GEN y)
+{
+  long lx,ly,l,i;
+  lx = lg(x);
+  ly = lg(y); l = minss(lx,ly);
+  for (i=1; i<l; i++)
+    if (x[i] != y[i]) return x[i]<y[i]? -1: 1;
+  if (lx == ly) return 0;
+  return (lx < ly)? -1 : 1;
+}
+
+INLINE int
+vecsmall_prefixcmp(GEN x, GEN y)
+{
+  long i, lx = lg(x), ly = lg(y), l = minss(lx,ly);
+  for (i=1; i<l; i++)
+    if (x[i] != y[i]) return x[i]<y[i]? -1: 1;
+  return 0;
+}
+
+/*Can be used on t_VEC, but coeffs not gcopy-ed*/
+INLINE GEN
+vecsmall_prepend(GEN V, long s)
+{
+  long i, l2 = lg(V);
+  GEN res = cgetg(l2+1, typ(V));
+  res[1] = s;
+  for (i = 2; i <= l2; ++i) res[i] = V[i - 1];
+  return res;
+}
+
+/*Can be used on t_VEC, but coeffs not gcopy-ed*/
+INLINE GEN
+vecsmall_append(GEN V, long s)
+{
+  long i, l2 = lg(V);
+  GEN res = cgetg(l2+1, typ(V));
+  for (i = 1; i < l2; ++i) res[i] = V[i];
+  res[l2] = s; return res;
+}
+
+INLINE GEN
+vecsmall_concat(GEN u, GEN v)
+{
+  long i, l1 = lg(u)-1, l2 = lg(v)-1;
+  GEN res = cgetg(l1+l2+1, t_VECSMALL);
+  for (i = 1; i <= l1; ++i) res[i]    = u[i];
+  for (i = 1; i <= l2; ++i) res[i+l1] = v[i];
+  return res;
+}
+
+/* return the number of indices where u and v are equal */
+INLINE long
+vecsmall_coincidence(GEN u, GEN v)
+{
+  long i, s = 0, l = minss(lg(u),lg(v));
+  for(i=1; i<l; i++)
+    if(u[i] == v[i]) s++;
+  return s;
+}
+
+/* returns the first index i<=n such that x=v[i] if it exists, 0 otherwise */
+INLINE long
+vecsmall_isin(GEN v, long x)
+{
+  long i, l = lg(v);
+  for (i = 1; i < l; i++)
+    if (v[i] == x) return i;
+  return 0;
+}
+
+INLINE long
+vecsmall_pack(GEN V, long base, long mod)
+{
+  long i, s = 0;
+  for(i=1; i<lg(V); i++) s = (base*s + V[i]) % mod;
+  return s;
+}
+
+/*************************************************************************/
+/**                                                                     **/
+/**               Routines for handling bit vector                      **/
+/**                                                                     **/
+/*************************************************************************/
+
+INLINE GEN
+bitvec_alloc(long n)
+{
+  long l = 1 + divsBIL(n);
+  return const_vecsmall(l,0);
+}
+
+INLINE GEN
+bitvec_shorten(GEN bitvec, long n)
+{
+  long l = 1 + divsBIL(n);
+  return vecsmall_shorten(bitvec,l);
+}
+
+INLINE long
+bitvec_test(GEN bitvec, long b)
+{
+  long r, q = dvmdsBIL(b, &r);
+  return (bitvec[1+q]>>r) & 1L;
+}
+
+INLINE long
+bitvec_test_set(GEN bitvec, long b)
+{
+  long r, q = dvmdsBIL(b, &r);
+  if ((bitvec[1+q]>>r) & 1L) return 1;
+  bitvec[1+q] |= 1L<<r; return 0;
+}
+
+INLINE void
+bitvec_set(GEN bitvec, long b)
+{
+  long r, q = dvmdsBIL(b, &r);
+  bitvec[1+q] |= 1L<<r;
+}
+
+INLINE void
+bitvec_clear(GEN bitvec, long b)
+{
+  long r, q = dvmdsBIL(b, &r);
+  bitvec[1+q] &= ~(1L<<r);
+}
+
+/*******************************************************************/
+/*                                                                 */
+/*                            EXTRACT                              */
+/*                                                                 */
+/*******************************************************************/
+INLINE GEN
+vecslice(GEN A, long y1, long y2)
+{
+  long i,lB = y2 - y1 + 2;
+  GEN B = cgetg(lB, typ(A));
+  for (i=1; i<lB; i++) B[i] = A[y1-1+i];
+  return B;
+}
+INLINE GEN
+vecslicepermute(GEN A, GEN p, long y1, long y2)
+{
+  long i,lB = y2 - y1 + 2;
+  GEN B = cgetg(lB, typ(A));
+  for (i=1; i<lB; i++) B[i] = A[p[y1-1+i]];
+  return B;
+}
+/* rowslice(rowpermute(A,p), x1, x2) */
+INLINE GEN
+rowslicepermute(GEN A, GEN p, long x1, long x2)
+{
+  long i, lB = lg(A);
+  GEN B = cgetg(lB, typ(A));
+  for (i=1; i<lB; i++) gel(B,i) = vecslicepermute(gel(A,i),p,x1,x2);
+  return B;
+}
+INLINE GEN
+rowslice(GEN A, long x1, long x2)
+{
+  long i, lB = lg(A);
+  GEN B = cgetg(lB, typ(A));
+  for (i=1; i<lB; i++) gel(B,i) = vecslice(gel(A,i),x1,x2);
+  return B;
+}
+
+/* A[x0,] */
+INLINE GEN
+row(GEN A, long x0)
+{
+  long i, lB = lg(A);
+  GEN B  = cgetg(lB, t_VEC);
+  for (i=1; i<lB; i++) gel(B, i) = gcoeff(A, x0, i);
+  return B;
+}
+INLINE GEN
+row_Flm(GEN A, long x0)
+{
+  long i, lB = lg(A);
+  GEN B  = cgetg(lB, t_VECSMALL);
+  for (i=1; i<lB; i++) B[i] = coeff(A, x0, i);
+  return B;
+}
+/* A[x0,] */
+INLINE GEN
+rowcopy(GEN A, long x0)
+{
+  long i, lB = lg(A);
+  GEN B  = cgetg(lB, t_VEC);
+  for (i=1; i<lB; i++) gel(B, i) = gcopy(gcoeff(A, x0, i));
+  return B;
+}
+/* A[x0, x1..x2] */
+INLINE GEN
+row_i(GEN A, long x0, long x1, long x2)
+{
+  long i, lB = x2 - x1 + 2;
+  GEN B  = cgetg(lB, t_VEC);
+  for (i=x1; i<=x2; i++) gel(B, i) = gcoeff(A, x0, i);
+  return B;
+}
+
+INLINE GEN
+vecpermute(GEN A, GEN p)
+{
+  long i,lB = lg(p);
+  GEN B = cgetg(lB, typ(A));
+  for (i=1; i<lB; i++) gel(B, i) = gel(A, p[i]);
+  return B;
+}
+INLINE GEN
+rowpermute(GEN A, GEN p)
+{
+  long i, lB = lg(A);
+  GEN B = cgetg(lB, typ(A));
+  for (i=1; i<lB; i++) gel(B, i) = vecpermute(gel(A, i), p);
+  return B;
+}
+INLINE void
+vecselect_p(GEN A, GEN B, GEN p, long init, long lB)
+{
+  long i; setlg(B, lB);
+  for (i=init; i<lB; i++) B[i] = A[p[i]];
+}
+/* B := p . A = row selection according to permutation p. Treat only lower
+ * right corner init x init */
+INLINE void
+rowselect_p(GEN A, GEN B, GEN p, long init)
+{
+  long i, lB = lg(A), lp = lg(p);
+  for (i=1; i<init; i++) setlg(B[i],lp);
+  for (   ; i<lB;   i++) vecselect_p(gel(A,i),gel(B,i),p,init,lp);
+}
+/*******************************************************************/
+/*                                                                 */
+/*                          PERMUTATIONS                           */
+/*                                                                 */
+/*******************************************************************/
+/* identity permutation */
+INLINE GEN
+identity_perm(long n)
+{
+  GEN perm = cgetg(n+1, t_VECSMALL);
+  long i;
+  for (i = 1; i <= n; i++) perm[i] = i;
+  return perm;
+}
+
+/* assume d <= n */
+INLINE GEN
+cyclic_perm(long n, long d)
+{
+  GEN perm = cgetg(n+1, t_VECSMALL);
+  long i;
+  for (i = 1; i <= n-d; i++) perm[i] = i+d;
+  for (     ; i <= n;   i++) perm[i] = i-n+d;
+  return perm;
+}
+
+/* Multiply (compose) two permutations.
+ * Can be used if s is a t_VEC but no copy */
+INLINE GEN
+perm_mul(GEN s, GEN t)
+{
+  GEN u;
+  long i, l = lg(t);
+  u = cgetg(l, typ(s));
+  for (i = 1; i < l; i++) u[i] = s[ t[i] ];
+  return u;
+}
+/* Compute the inverse (reciprocal) of a permutation. */
+INLINE GEN
+perm_inv(GEN x)
+{
+  long i, lx = lg(x);
+  GEN y = cgetg(lx,t_VECSMALL);
+  for (i=1; i<lx; i++) y[ x[i] ] = i;
+  return y;
+}
+/* Return s*t*s^-1 */
+INLINE GEN
+perm_conj(GEN s, GEN t)
+{
+  long i, l = lg(s);
+  GEN v = cgetg(l, t_VECSMALL);
+  for (i = 1; i < l; i++) v[ s[i] ] = s[ t[i] ];
+  return v;
+}
+
+/*******************************************************************/
+/*                                                                 */
 /*                       GARBAGE COLLECTION                        */
 /*                                                                 */
 /*******************************************************************/

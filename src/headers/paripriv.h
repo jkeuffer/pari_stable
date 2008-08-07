@@ -171,7 +171,6 @@ GEN  imagecomplspec(GEN x, long *nlze);
 void rowselect_p(GEN A, GEN B, GEN p, long init);
 GEN  supnorm(GEN L, long prec);
 GEN  znstar_hnf_elts(GEN Z, GEN H);
-GEN  vec_setconst(GEN v, GEN x);
 
 GEN  dim1proj(GEN prh);
 GEN  detcyc(GEN cyc, long *L);
@@ -627,7 +626,6 @@ int     nfissplit(GEN nf, GEN x);
 long    cosets_perm_search(GEN C, GEN p);
 GEN     group_export_GAP(GEN G);
 GEN     group_export_MAGMA(GEN G);
-GEN     perm_conj(GEN s, GEN t);
 GEN     perm_generate(GEN S, GEN H, long o);
 long    perm_relorder(GEN p, GEN S);
 GEN     perm_to_GAP(GEN p);

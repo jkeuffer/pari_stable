@@ -21,17 +21,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**                   Routines for handling VEC/COL                     **/
 /**                                                                     **/
 /*************************************************************************/
-
-/* The functions below are shallow*/
-
-GEN
-vec_setconst(GEN v, GEN x)
-{
-  long i, l = lg(v);
-  for (i = 1; i < l; i++) gel(v,i) = x;
-  return v;
-}
-
 int
 vec_isconst(GEN v)
 {
@@ -45,10 +34,7 @@ vec_isconst(GEN v)
 }
 
 /* Check if all the elements of v are different.
- * Use a quadratic algorithm.
- * It could be done in n*log(n) by sorting.
- */
-
+ * Use a quadratic algorithm. Could be done in n*log(n) by sorting. */
 int
 vec_is1to1(GEN v)
 {
@@ -62,81 +48,13 @@ vec_is1to1(GEN v)
   return 1;
 }
 
-GEN
-vec_shorten(GEN v, long n)
-{
-  long i;
-  GEN V = cgetg(n+1,t_VEC);
-  for(i=1;i<=n;i++) V[i] = v[i];
-  return V;
-}
-
-GEN
-vec_lengthen(GEN v, long n)
-{
-  long i;
-  long l=lg(v);
-  GEN V = cgetg(n+1,t_VEC);
-  for(i=1;i<l;i++) V[i] = v[i];
-  return V;
-}
-
-GEN
-vec_to_vecsmall(GEN z)
-{
-  long i, l = lg(z);
-  GEN x = cgetg(l, t_VECSMALL);
-  for (i=1; i<l; i++) x[i] = itos(gel(z,i));
-  return x;
-}
-
 /*************************************************************************/
 /**                                                                     **/
 /**                   Routines for handling VECSMALL                    **/
 /**                                                                     **/
 /*************************************************************************/
-
-GEN
-vecsmall_to_vec(GEN z)
-{
-  long i, l = lg(z);
-  GEN x = cgetg(l,t_VEC);
-  for (i=1; i<l; i++) gel(x,i) = stoi(z[i]);
-  return x;
-}
-
-GEN
-vecsmall_to_col(GEN z)
-{
-  long i, l = lg(z);
-  GEN x = cgetg(l,t_COL);
-  for (i=1; i<l; i++) gel(x,i) = stoi(z[i]);
-  return x;
-}
-
-GEN
-vecsmall_shorten(GEN v, long n)
-{
-  long i;
-  GEN V = cgetg(n+1,t_VECSMALL);
-  for(i=1;i<=n;i++) V[i] = v[i];
-  return V;
-}
-
-GEN
-vecsmall_lengthen(GEN v, long n)
-{
-  long i;
-  long l=lg(v);
-  GEN V = cgetg(n+1,t_VECSMALL);
-  for(i=1;i<l;i++) V[i] = v[i];
-  return V;
-}
-
 /* Sort v[0]...v[n-1] and put result in w[0]...w[n-1].
- * We accept v==w. w must be allocated.
- */
-
+ * We accept v==w. w must be allocated. */
 static void
 vecsmall_sortspec(GEN v, long n, GEN w)
 {
@@ -173,7 +91,7 @@ vecsmall_sortspec(GEN v, long n, GEN w)
 void
 vecsmall_sort(GEN V)
 {
-  long l=lg(V)-1;
+  long l = lg(V)-1;
   if (l<=1) return;
   vecsmall_sortspec(V+1,l,V+1);
 }
@@ -269,136 +187,6 @@ vecsmall_duplicate(GEN x)
   return r;
 }
 
-int
-vecsmall_lexcmp(GEN x, GEN y)
-{
-  long lx,ly,l,i;
-  lx = lg(x);
-  ly = lg(y); l = minss(lx,ly);
-  for (i=1; i<l; i++)
-    if (x[i] != y[i]) return x[i]<y[i]? -1: 1;
-  if (lx == ly) return 0;
-  return (lx < ly)? -1 : 1;
-}
-
-int
-vecsmall_prefixcmp(GEN x, GEN y)
-{
-  long i, lx = lg(x), ly = lg(y), l = minss(lx,ly);
-  for (i=1; i<l; i++)
-    if (x[i] != y[i]) return x[i]<y[i]? -1: 1;
-  return 0;
-}
-
-/*Can be used on t_VEC, but coeffs not gcopy-ed*/
-GEN
-vecsmall_prepend(GEN V, long s)
-{
-  long i, l2 = lg(V);
-  GEN res = cgetg(l2+1, typ(V));
-  res[1] = s;
-  for (i = 2; i <= l2; ++i) res[i] = V[i - 1];
-  return res;
-}
-
-/*Can be used on t_VEC, but coeffs not gcopy-ed*/
-GEN
-vecsmall_append(GEN V, long s)
-{
-  long i, l2 = lg(V);
-  GEN res = cgetg(l2+1, typ(V));
-  for (i = 1; i < l2; ++i) res[i] = V[i];
-  res[l2] = s; return res;
-}
-
-GEN
-vecsmall_concat(GEN u, GEN v)
-{
-  long i, l1 = lg(u)-1, l2 = lg(v)-1;
-  GEN res = cgetg(l1+l2+1, t_VECSMALL);
-  for (i = 1; i <= l1; ++i) res[i]    = u[i];
-  for (i = 1; i <= l2; ++i) res[i+l1] = v[i];
-  return res;
-}
-
-/* return the number of indices where u and v are equal */
-long
-vecsmall_coincidence(GEN u, GEN v)
-{
-  long i, s = 0, l = minss(lg(u),lg(v));
-  for(i=1; i<l; i++)
-    if(u[i] == v[i]) s++;
-  return s;
-}
-
-/* returns the first index i<=n such that x=v[i] if it exists, 0 otherwise */
-long
-vecsmall_isin(GEN v, long x)
-{
-  long i, l = lg(v);
-  for (i = 1; i < l; i++)
-    if (v[i] == x) return i;
-  return 0;
-}
-
-
-long
-vecsmall_pack(GEN V, long base, long mod)
-{
-  long i, s = 0;
-  for(i=1; i<lg(V); i++) s = (base*s + V[i]) % mod;
-  return s;
-}
-
-/*************************************************************************/
-/**                                                                     **/
-/**               Routines for handling bit vector                      **/
-/**                                                                     **/
-/*************************************************************************/
-
-GEN
-bitvec_alloc(long n)
-{
-  long l = 1 + divsBIL(n);
-  return const_vecsmall(l,0);
-}
-
-GEN
-bitvec_shorten(GEN bitvec, long n)
-{
-  long l = 1 + divsBIL(n);
-  return vecsmall_shorten(bitvec,l);
-}
-
-long
-bitvec_test(GEN bitvec, long b)
-{
-  long r, q = dvmdsBIL(b, &r);
-  return (bitvec[1+q]>>r) & 1L;
-}
-
-long
-bitvec_test_set(GEN bitvec, long b)
-{
-  long r, q = dvmdsBIL(b, &r);
-  if ((bitvec[1+q]>>r) & 1L) return 1;
-  bitvec[1+q] |= 1L<<r; return 0;
-}
-
-void
-bitvec_set(GEN bitvec, long b)
-{
-  long r, q = dvmdsBIL(b, &r);
-  bitvec[1+q] |= 1L<<r;
-}
-
-void
-bitvec_clear(GEN bitvec, long b)
-{
-  long r, q = dvmdsBIL(b, &r);
-  bitvec[1+q] &= ~(1L<<r);
-}
-
 /*************************************************************************/
 /**                                                                     **/
 /**             Routines for handling vectors of VECSMALL               **/
@@ -439,64 +227,12 @@ vecvecsmall_tablesearch(GEN x, GEN y)
  * perm (VECSMALL): a bijection from 1...n to 1...n i-->perm[i]
  * cyc (VEC of VECSMALL): a product of disjoint cycles. */
 
-/* identity permutation */
-GEN
-identity_perm(long n)
-{
-  GEN perm = cgetg(n+1, t_VECSMALL);
-  long i;
-  for (i = 1; i <= n; i++) perm[i] = i;
-  return perm;
-}
-
-/* assume d <= n */
-GEN
-cyclic_perm(long n, long d)
-{
-  GEN perm = cgetg(n+1, t_VECSMALL);
-  long i;
-  for (i = 1; i <= n-d; i++) perm[i] = i+d;
-  for (     ; i <= n;   i++) perm[i] = i-n+d;
-  return perm;
-}
-
-/* Multiply (compose) two permutations.
- * Can be used if s is a t_VEC but no copy */
-GEN
-perm_mul(GEN s, GEN t)
-{
-  GEN u;
-  long i, l = lg(t);
-  u = cgetg(l, typ(s));
-  for (i = 1; i < l; i++) u[i] = s[ t[i] ];
-  return u;
-}
-
 /* Multiply (compose) two permutations, putting the result in the second one. */
 static void
 perm_mul_inplace2(GEN s, GEN t)
 {
   long i, l = lg(s);
   for (i = 1; i < l; i++) t[i] = s[t[i]];
-}
-/* Compute the inverse (reciprocal) of a permutation. */
-GEN
-perm_inv(GEN x)
-{
-  long i, lx = lg(x);
-  GEN y = cgetg(lx,t_VECSMALL);
-  for (i=1; i<lx; i++) y[ x[i] ] = i;
-  return y;
-}
-
-/* Return s*t*s^-1 */
-GEN
-perm_conj(GEN s, GEN t)
-{
-  long i, l = lg(s);
-  GEN v = cgetg(l, t_VECSMALL);
-  for (i = 1; i < l; i++) v[ s[i] ] = s[ t[i] ];
-  return v;
 }
 
 /* Orbits of the subgroup generated by v on {1,..,n} */
