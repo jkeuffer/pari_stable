@@ -112,7 +112,6 @@ GEN  zbrent0(GEN a, GEN b, GEN code, long prec);
 long    loop_break(void);
 
 /* multiprecision */
-GEN   icopy_spec(GEN x, long nx);
 GEN   addrex01(GEN x);
 GEN   cxnorm(GEN x);
 int   lgcdii(ulong* d, ulong* d1, ulong* u, ulong* u1, ulong* v, ulong* v1, ulong vmax);

@@ -60,17 +60,6 @@ ishiftr(GEN x, long s)
 }
 
 GEN
-icopy_spec(GEN x, long nx)
-{
-  GEN z;
-  long i;
-  if (!nx) return gen_0;
-  z = cgetipos(nx+2);
-  for (i=0; i<nx; i++) z[i+2] = x[i];
-  return z;
-}
-
-GEN
 mului(ulong x, GEN y)
 {
   long s = signe(y);
@@ -729,7 +718,7 @@ dbltor(double x)
     }
     else
       z[2] = HIGHBIT | A;
-    z[1] = evalexpo(e) | evalsigne(x<0? -1: 1);
+    z[1] = _evalexpo(e) | evalsigne(x<0? -1: 1);
   }
   return z;
 }
@@ -842,7 +831,7 @@ dbltor(double x)
       z[3] = B;
       z[2] = HIGHBIT | A;
     }
-    z[1] = evalexpo(e) | evalsigne(x<0? -1: 1);
+    z[1] = _evalexpo(e) | evalsigne(x<0? -1: 1);
   }
   return z;
 }
