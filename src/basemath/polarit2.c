@@ -343,15 +343,6 @@ factor0(GEN x,long flag)
 }
 
 GEN
-concat_factor(GEN f, GEN g)
-{
-  if (lg(f) == 1) return g;
-  if (lg(g) == 1) return f;
-  return mkmat2(shallowconcat(gel(f,1), gel(g,1)),
-		shallowconcat(gel(f,2), gel(g,2)));
-}
-
-GEN
 deg1_from_roots(GEN L, long v)
 {
   long i, l = lg(L);
@@ -502,7 +493,7 @@ gauss_factor(GEN x)
   if (j > 1) {
     setlg(P2, j);
     setlg(E2, j);
-    fa = concat_factor(fa, mkmat2(P2,E2));
+    fa = famat_mul_shallow(fa, mkmat2(P2,E2));
   }
   if (!is_pm1(n) || !is_pm1(d))
   {
@@ -535,7 +526,7 @@ gauss_factor(GEN x)
     }
     gel(Fa,1) = P;
     gel(Fa,2) = E;
-    fa = concat_factor(fa, Fa);
+    fa = famat_mul_shallow(fa, Fa);
   }
   fa = sort_factor(fa, (void*)&gauss_cmp, &cmp_nodata);
 
@@ -670,7 +661,7 @@ factor(GEN x)
     case t_RFRAC: {
       GEN a = gel(x,1), b = gel(x,2);
       y = factor(b); gel(y,2) = gneg_i(gel(y,2));
-      if (typ(a)==t_POL && varn(a)==varn(b)) y = concat_factor(factor(a), y);
+      if (typ(a)==t_POL && varn(a)==varn(b)) y = famat_mul_shallow(factor(a), y);
       return gerepilecopy(av, y);
     }
 

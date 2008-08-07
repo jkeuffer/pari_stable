@@ -829,6 +829,15 @@ idealmul_HNF(GEN nf, GEN x, GEN y)
 /* operations on elements in factored form */
 
 GEN
+famat_mul_shallow(GEN f, GEN g)
+{
+  if (lg(f) == 1) return g;
+  if (lg(g) == 1) return f;
+  return mkmat2(shallowconcat(gel(f,1), gel(g,1)),
+		shallowconcat(gel(f,2), gel(g,2)));
+}
+
+GEN
 to_famat(GEN x, GEN y) {
   GEN fa = cgetg(3, t_MAT);
   gel(fa,1) = mkcol(gcopy(x));
@@ -868,7 +877,6 @@ famat_add(GEN f, GEN x)
   return h;
 }
 
-/* cf merge_factor_i */
 GEN
 famat_mul(GEN f, GEN g)
 {

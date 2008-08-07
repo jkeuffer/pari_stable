@@ -1866,7 +1866,7 @@ join_bid(GEN nf, GEN bid1, GEN bid2)
   if (gcmp1(gcoeff(I1,1,1))) return bid2; /* frequent trivial case */
   G1 = gel(bid1,2); G2 = gel(bid2,2);
   fa1= gel(bid1,3); fa2= gel(bid2,3); x = idealmul(nf, I1,I2);
-  fa = concat_factor(fa1, fa2);
+  fa = famat_mul_shallow(fa1, fa2);
 
   lists1 = gel(bid1,4); lx1 = lg(lists1);
   lists2 = gel(bid2,4); lx2 = lg(lists2);

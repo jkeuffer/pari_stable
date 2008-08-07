@@ -1706,7 +1706,7 @@ merge_factor_i(GEN f, GEN g)
 {
   if (lg(f) == 1) return g;
   if (lg(g) == 1) return f;
-  return sort_factor(concat_factor(f,g), (void*)&cmpii, &cmp_nodata);
+  return sort_factor(famat_mul_shallow(f,g), (void*)&cmpii, &cmp_nodata);
 }
 
 /***********************************************************************/

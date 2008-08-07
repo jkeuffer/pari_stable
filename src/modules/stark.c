@@ -647,7 +647,7 @@ ArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
      mu >> 0 at cond1 */
   if (!gcmp1(gcoeff(idg, 1, 1))) {
     GEN P = divcond(bnr);
-    GEN f = concat_factor(idealfactor(nf, idg),
+    GEN f = famat_mul_shallow(idealfactor(nf, idg),
 			  mkmat2(P, zerocol(lg(P)-1)));
     GEN mu = set_sign_mod_divisor(nf, NULL, idealapprfact(nf, f), cond,sarch);
     idh = idealdivexact(nf, mu, idg);

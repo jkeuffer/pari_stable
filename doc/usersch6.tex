@@ -343,9 +343,12 @@ treated as the factorization $x^1$. The following functions all return
 \var{famat}s:
 
 \fun{GEN}{famat_mul}{GEN f, GEN g} $f$, $g$ are \var{famat}, 
-objects whose type is \emph{not} \typ{MAT} (understood as $f^1$ or $g^1$).
+or objects whose type is \emph{not} \typ{MAT} (understood as $f^1$ or $g^1$).
 Returns $fg$. The empty factorization is the neutral element for \var{famat}
 multiplication.
+
+\fun{GEN}{famat_mul_shallow}{GEN f, GEN g} $f$, $g$ are \var{famat}, returns
+$fg$. Shallow function.
 
 \fun{GEN}{famat_pow}{GEN f, GEN n} $n$ is a \typ{INT}. If $f$ is a \typ{MAT},
 assume it is a \var{famat} and return $f^n$ (multiplies the exponent column
@@ -363,8 +366,8 @@ $k$, returns the \var{famat} $x^k$.
 
 Note that it is trivial to break up a \var{famat} into its two constituent
 columns: \kbd{gel(f,1)} and \kbd{gel(f,2)} are the elements and exponents
-respectively. Conversely, \kbd{mkmat2} builds a \var{famat} from two
-\typ{COL}s of the same length.
+respectively. Conversely, \kbd{mkmat2} builds a (shallow) \var{famat} from
+two \typ{COL}s of the same length.
 
 The last two functions makes an assumption about the elements: they must be
 regular algebraic numbers (not \var{famat}s) over a given number field:
@@ -377,14 +380,15 @@ of $f$ and $g$ would be equal.
 This is a simplified form of \tet{nffactorback}, where we do not check the
 user input for consistency.
 
-The description of \kbd{famat\_to\_nf} says that you do not want to use this
+The description of \tet{famat_to_nf} says that you do not want to use this
 function. Then how do we recover genuine number field elements? Well, in 
-most cases, we do not need to, since most of the functions useful in this
+most cases, we do not need to: most of the functions useful in this
 context accept \var{famat}s as inputs, for instance \tet{nfsign},
-\tet{nfsign_arch}, \tet{ideallog} and \tet{bnfisunit}. See also the end of
-\secref{se:Ideal_reduction}.
+\tet{nfsign_arch}, \tet{ideallog} and \tet{bnfisunit}. Otherwise, we can
+generally make good use of a quotient operation (modulo a fixed conductor,
+modulo $\ell$-th powers); see the end of \secref{se:Ideal_reduction}.
 
-\misctitle{Caveat.} on \var{famat} inputs, \kbd{bnfisunit} assumes that
+\misctitle{Caveat.} receiving a \var{famat} input, \kbd{bnfisunit} assumes that
 it is an algebraic integer, since this is expensive to check, and normally
 easy to ensure from the user's side; don't feed it ridiculous inputs.
 

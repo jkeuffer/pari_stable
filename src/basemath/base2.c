@@ -897,7 +897,7 @@ Decomp(decomp_t *S, long flag)
     fprintferr("  leaving Decomp: f1 = %Ps\nf2 = %Ps\ne = %Ps\nde= %Ps\n", f1,f2,e,de);
 
   if (flag)
-    return concat_factor(ZX_monic_factorpadic(f1, p, flag),
+    return famat_mul_shallow(ZX_monic_factorpadic(f1, p, flag),
 			 ZX_monic_factorpadic(f2, p, flag));
   else
   {

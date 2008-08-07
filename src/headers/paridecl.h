@@ -2110,7 +2110,7 @@ GEN     RgXQ_inv(GEN x, GEN y);
 GEN     centermod(GEN x, GEN p);
 GEN     centermod_i(GEN x, GEN p, GEN ps2);
 GEN     centermodii(GEN x, GEN p, GEN po2);
-GEN     concat_factor(GEN f, GEN g);
+GEN     famat_mul_shallow(GEN f, GEN g);
 GEN     content(GEN x);
 GEN     deg1_from_roots(GEN L, long v);
 GEN     divide_conquer_prod(GEN x, GEN (*mul)(GEN,GEN));

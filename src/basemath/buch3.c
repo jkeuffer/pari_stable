@@ -1741,7 +1741,7 @@ factorpow(GEN fa, long n)
 static GEN
 factormul(GEN fa1,GEN fa2)
 {
-  GEN p, pnew, e, enew, v, P, y = concat_factor(fa1,fa2);
+  GEN p, pnew, e, enew, v, P, y = famat_mul_shallow(fa1,fa2);
   long i, c, lx;
 
   p = gel(y,1); v = indexsort(p); lx = lg(p);
