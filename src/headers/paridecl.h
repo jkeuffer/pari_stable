@@ -1901,6 +1901,7 @@ GEN     addir_sign(GEN x, long sx, GEN y, long sy);
 GEN     addrr_sign(GEN x, long sx, GEN y, long sy);
 GEN     addsi_sign(long x, GEN y, long sy);
 GEN     addsr(long x, GEN y);
+GEN     addumului(ulong a, ulong b, GEN Y);
 void    affir(GEN x, GEN y);
 void    affrr(GEN x, GEN y);
 GEN     bezout(GEN a, GEN b, GEN *u, GEN *v);
