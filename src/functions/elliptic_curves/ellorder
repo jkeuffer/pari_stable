@@ -13,3 +13,5 @@ Doc:
  important to supply $o$ since its computation is very expensive and should
  only be done once, using \kbd{o = p+1-ellap(E,p)}, possibly using the
  \tet{seadata} package.
+Variant: The obsolete form \fun{GEN}{orderell}{GEN e, GEN z} should no longer be
+ used.
