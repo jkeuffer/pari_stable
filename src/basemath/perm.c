@@ -115,15 +115,6 @@ vecsmall_to_col(GEN z)
 }
 
 GEN
-vecsmall_copy(GEN x)
-{
-  long i, l = lg(x);
-  GEN z = cgetg(l, t_VECSMALL);
-  for (i=1; i<l; i++) z[i] = x[i];
-  return z;
-}
-
-GEN
 vecsmall_shorten(GEN v, long n)
 {
   long i;

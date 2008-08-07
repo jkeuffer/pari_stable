@@ -3000,7 +3000,7 @@ GEN
 mpinv(GEN b)
 {
   long i, l1, l = lg(b), e = expo(b), s = signe(b);
-  GEN x = cgetr(l), a = mpcopy(b);
+  GEN x = cgetr(l), a = leafcopy(b);
   double t;
 
   a[1] = _evalexpo(0) | evalsigne(1);

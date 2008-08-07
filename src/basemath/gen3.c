@@ -2813,7 +2813,7 @@ lift0(GEN x, long v)
     case t_INT:
       return icopy(x);
     case t_REAL:
-      return mpcopy(x);
+      return leafcopy(x);
 
     case t_INTMOD:
       return icopy(gel(x,2));

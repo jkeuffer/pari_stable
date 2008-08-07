@@ -2228,7 +2228,7 @@ e12(ulong k, long prec)
 	    gel(z,2) = real2n(-1, prec); break;
 
     case 3: gel(z,1) = ginv( gsqrt(gen_2, prec) );
-	    gel(z,2) = mpcopy(gel(z,1)); break;
+	    gel(z,2) = leafcopy(gel(z,1)); break;
   }
   if (sPiov2) swap(gel(z,1), gel(z,2));
   if (sPi) togglesign(gel(z,1));

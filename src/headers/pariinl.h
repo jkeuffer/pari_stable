@@ -606,9 +606,12 @@ pol1_F2x(long sv) { return pol1_Flx(sv); }
 INLINE int
 F2x_cmp1(GEN x) { return Flx_cmp1(x); }
 INLINE GEN
-Flv_copy(GEN x) { return vecsmall_copy(x); }
+Flv_copy(GEN x) { return leafcopy(x); }
 INLINE GEN
-Flx_copy(GEN x) { return vecsmall_copy(x); }
+Flx_copy(GEN x) { return leafcopy(x); }
+INLINE GEN
+vecsmall_copy(GEN x) { return leafcopy(x); }
+
 INLINE GEN
 FpX_renormalize(GEN x, long lx)   { return ZX_renormalize(x,lx); }
 INLINE GEN

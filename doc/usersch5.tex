@@ -1518,9 +1518,11 @@ stack: the length and effective length of the copy are equal.
 
 \fun{GEN}{rcopy}{GEN x} copy the \typ{REAL}~\kbd{x} on the stack.
 
-\fun{GEN}{mpcopy}{GEN x} copy the \typ{INT} or \typ{REAL}~\kbd{x} on the
-stack. Contrary to \kbd{icopy}, \kbd{mpcopy} preserves the original length
-of a \typ{INT}.
+\fun{GEN}{leafcopy}{GEN x} copy the leaf~\kbd{x} on the
+stack (works in particular for \typ{INT}s and \typ{REAL}s).
+Contrary to \kbd{icopy}, \kbd{leafcopy} preserves the original
+length of a \typ{INT}. The obsolete form \fun{GEN}{mpcopy}{GEN x} 
+is still provided for bacward compatibility.
 
 \subsec{Conversions}
 

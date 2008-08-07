@@ -159,7 +159,7 @@ cgetr(long x)
 /*******************************************************************/
 /* cannot do memcpy because sometimes x and y overlap */
 INLINE GEN
-mpcopy(GEN x)
+leafcopy(GEN x)
 {
   register long lx = lg(x);
   GEN y = cgetg_copy(lx, x);
@@ -174,12 +174,13 @@ icopy(GEN x)
   while (--lx > 0) y[lx] = x[lx];
   return y;
 }
-INLINE GEN rcopy(GEN x) { return mpcopy(x); }
+INLINE GEN rcopy(GEN x) { return leafcopy(x); }
+INLINE GEN mpcopy(GEN x) { return leafcopy(x); }
 
 INLINE GEN
 mpabs(GEN x)
 {
-  GEN y=mpcopy(x);
+  GEN y=leafcopy(x);
   if (signe(x)<0) setsigne(y,1);
   return y;
 }
@@ -187,7 +188,7 @@ INLINE GEN absi(GEN x) { return mpabs(x); }
 INLINE GEN absr(GEN x) { return mpabs(x); }
 
 INLINE GEN
-mpneg(GEN x) { GEN y=mpcopy(x); togglesign(y); return y; }
+mpneg(GEN x) { GEN y=leafcopy(x); togglesign(y); return y; }
 INLINE GEN negi(GEN x) { return mpneg(x); }
 INLINE GEN negr(GEN x) { return mpneg(x); }
 
