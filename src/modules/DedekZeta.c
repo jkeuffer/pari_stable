@@ -81,6 +81,7 @@ dirzetak(GEN nf, GEN b)
   z = vecsmall_to_vec(c); pari_free(c); return z;
 }
 
+/* return a t_REAL */
 GEN
 zeta_get_limx(long r1, long r2, long bit)
 {
@@ -91,9 +92,9 @@ zeta_get_limx(long r1, long r2, long bit)
   /* c1 = N 2^(-2r2 / N) */
   c1 = mulrs(powrfrac(real2n(1, DEFAULTPREC), -2*r2, N), N);
 
-  p1 = gpowgs(Pi2n(1, DEFAULTPREC), r - 1);
+  p1 = powru(Pi2n(1, DEFAULTPREC), r - 1);
   p2 = gmul2n(mpmul(powuu(N,r), p1), -r2);
-  c0 = sqrtr( mpdiv(p2, gpowgs(c1, r+1)) );
+  c0 = sqrtr( mpdiv(p2, powru(c1, r+1)) );
 
   A0 = logr_abs( gmul2n(c0, bit) ); p2 = divrr(A0, c1);
   p1 = divrr(mulsr(N*(r+1), logr_abs(p2)), addsr(2*(r+1), gmul2n(A0,2)));
@@ -119,20 +120,20 @@ get_i0(long r1, long r2, GEN B, GEN limx)
   while(imax - imin >= 4)
   {
     long i = (imax + imin) >> 1;
-    GEN t = gpowgs(limx, i);
-    t = gmul(t, gpowgs(mpfactr(i/2, DEFAULTPREC), r1));
-    t = gmul(t, gpowgs(mpfactr(i  , DEFAULTPREC), r2));
-    if (gcmp(t, B) >= 0) imax = i; else imin = i;
+    GEN t = powru(limx, i);
+    if (r1) t = mulrr(t, powru(mpfactr(i/2, DEFAULTPREC), r1));
+    if (r2) t = mulrr(t, powru(mpfactr(i  , DEFAULTPREC), r2));
+    if (mpcmp(t, B) >= 0) imax = i; else imin = i;
   }
   return imax & ~1; /* make it even */
 }
 
-/* assume limx = zeta_get_limx(r1, r2, bit) */
+/* assume limx = zeta_get_limx(r1, r2, bit), a t_REAL */
 long
 zeta_get_i0(long r1, long r2, long bit, GEN limx)
 {
   pari_sp av = avma;
-  GEN B = gmul(sqrtr( gdiv(gpowgs(mppi(DEFAULTPREC), r2-3), limx) ),
+  GEN B = gmul(sqrtr( divrr(powrs(mppi(DEFAULTPREC), r2-3), limx) ),
 	       gmul2n(powuu(5, r1), bit + r2));
   long i0 = get_i0(r1, r2, B, limx);
   if (DEBUGLEVEL>1) { fprintferr("i0 = %ld\n",i0); flusherr(); }
@@ -170,7 +171,7 @@ initzeta(GEN pol, long prec)
 
   av = avma;
   p1 = sqrtr_abs(itor(gel(nf,3), prec));
-  p2 = gmul2n(gpowgs(racpi,N), r2);
+  p2 = gmul2n(powru(racpi,N), r2);
   cst = gerepileuptoleaf(av, divrr(p1,p2));
 
   /* N0, i0 */
@@ -198,7 +199,7 @@ initzeta(GEN pol, long prec)
   for (i=1; i<=i0; i++) gel(aij,i) = cgetg(R,t_VEC);
 
   c_even = real2n(r1, prec);
-  c_odd = gmul(c_even, gpowgs(racpi,r1));
+  c_odd = gmul(c_even, powru(racpi,r1));
   if (r&1) c_odd = gneg_i(c_odd);
   ck_even = cgetg(R,t_VEC); ck_odd = cgetg(r2+2,t_VEC);
   for (k=1; k<R; k++)

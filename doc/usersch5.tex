@@ -1889,6 +1889,8 @@ the real number equal to $x$. This is a special case of \kbd{gexpo}.
 
 \fun{GEN}{sqri}{GEN x} squares the \typ{INT}~\kbd{x}
 
+\fun{GEN}{sqrr}{GEN x} squares the \typ{REAL}~\kbd{x}
+
 \fun{GEN}{sqrs}{long x} returns $x^2$.
 
 \fun{GEN}{sqru}{ulong x} returns $x^2$.
@@ -2072,6 +2074,24 @@ returns $x^n$.
 \fun{GEN}{powuu}{ulong x, ulong n}, returns $x^n$.
 
 \fun{GEN}{powiu}{GEN x, ulong n}, assumes $x$ is a \typ{INT} and returns $x^n$.
+
+\fun{GEN}{powis}{GEN x, long n}, assumes $x$ is a \typ{INT} and returns $x^n$
+(possibly a \typ{FRAC} if $n < 0$).
+
+\fun{GEN}{powrs}{GEN x, long n}, assumes $x$ is a \typ{REAL} and returns $x^n$
+(always a \typ{REAL}, even if $n = 0$).
+
+\fun{GEN}{powru}{GEN x, ulong n}, assumes $x$ is a \typ{REAL} and returns $x^n$
+(always a \typ{REAL}, even if $n = 0$).
+
+\fun{GEN}{powrshalf}{GEN x, long n}, assumes $x$ is a \typ{REAL} and returns
+$x^{n/2}$ (always a \typ{REAL}, even if $n = 0$).
+
+\fun{GEN}{powruhalf}{GEN x, ulong n}, assumes $x$ is a \typ{REAL} and returns
+$x^{n/2}$ (always a \typ{REAL}, even if $n = 0$).
+
+\fun{GEN}{powrfrac}{GEN x, long n, long d}, assumes $x$ is a \typ{REAL} and
+returns $x^{n/d}$ (always a \typ{REAL}, even if $n = 0$).
 
 \fun{ulong}{upowuu}{ulong x, ulong n}, returns $x^n$ modulo $2^\B$. This is
 meant to be used for tiny $n$, where in fact $x^n$ fits into an \kbd{ulong}.

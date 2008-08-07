@@ -400,7 +400,7 @@ charpoly_bound(GEN M)
   bin = gen_1;
   for (k = n; k >= (n+1)>>1; k--)
   {
-    GEN t = mulri(powrshalf(mulsr(k, B2), k), bin);
+    GEN t = mulri(powruhalf(mulur(k, B2), k), bin);
     if (absr_cmp(t, s) > 0) s = t;
     bin = diviuexact(muliu(bin, k), n-k+1);
   }

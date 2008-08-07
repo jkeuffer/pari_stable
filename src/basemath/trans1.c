@@ -298,10 +298,11 @@ puiss0(GEN x)
 
   switch(typ(x))
   {
-    case t_INT: case t_REAL: case t_FRAC: case t_COMPLEX:
+    case t_INT: case t_FRAC: case t_COMPLEX:
     case t_PADIC: case t_QUAD:
       return gen_1;
-
+    case t_REAL:
+      return real_1(lg(x));
     case t_INTMOD:
       y = cgetg(3,t_INTMOD); gel(y,1) = icopy(gel(x,1));
       gel(y,2) = gen_1; return y;
@@ -340,6 +341,10 @@ static GEN
 _sqri(void *data /* ignored */, GEN x) { (void)data; return sqri(x); }
 static GEN
 _muli(void *data /* ignored */, GEN x, GEN y) { (void)data; return mulii(x,y); }
+static GEN
+_sqrr(void *data /* ignored */, GEN x) { (void)data; return sqrr(x); }
+static GEN
+_mulr(void *data /* ignored */, GEN x, GEN y) { (void)data; return mulrr(x,y); }
 
 /* INTEGER POWERING (a^n for integer a != 0 and integer n > 0)
  *
@@ -373,6 +378,25 @@ powiu(GEN a, ulong N)
   s = signe(a);
   if (!s) return gen_0;
   return powiu_sign(a, N, (s < 0 && odd(N))? -1: 1);
+}
+GEN
+powis(GEN x, long n) 
+{
+  long sx = signe(x), s;
+  GEN t, y;
+  if (!sx) {
+    if (n < 0) pari_err(gdiver);
+    return gen_0;
+  }
+  s = (sx < 0 && odd(n))? -1: 1;
+  if (n > 0) return powiu_sign(x, n, s);
+  t = (s > 0)? gen_1: gen_m1;
+  if (is_pm1(x)) return t;
+  /* n < 0, |x| > 1 */
+  y = cgetg(3,t_FRAC);
+  gel(y,1) = t;
+  gel(y,2) = powiu_sign(x, -n, 1); /* force denominator > 0 */
+  return y;
 }
 GEN
 powuu(ulong p, ulong N)
@@ -442,12 +466,36 @@ rpowuu(ulong a, ulong n, long prec)
   return gerepileuptoleaf(av, y);
 }
 
+GEN 
+powrs(GEN x, long n)
+{
+  pari_sp av = avma;
+  GEN y;
+  if (!n) return real_1(lg(x));
+  y = leftright_pow_u(x, (ulong)labs(n), NULL, &_sqrr, &_mulr);
+  if (n < 0) y = ginv(y);
+  return gerepileupto(av,y);
+}
+GEN 
+powru(GEN x, ulong n)
+{
+  if (!n) return real_1(lg(x));
+  return leftright_pow_u(x, n, NULL, &_sqrr, &_mulr);
+}
+
 /* x^(s/2), assume x t_REAL */
 GEN
 powrshalf(GEN x, long s)
 {
-  if (s & 1) return sqrtr(gpowgs(x, s));
-  return gpowgs(x, s>>1);
+  if (s & 1) return sqrtr(powrs(x, s));
+  return powrs(x, s>>1);
+}
+/* x^(s/2), assume x t_REAL */
+GEN
+powruhalf(GEN x, ulong s)
+{
+  if (s & 1) return sqrtr(powru(x, s));
+  return powru(x, s>>1);
 }
 /* x^(n/d), assume x t_REAL, return t_REAL */
 GEN
@@ -456,8 +504,8 @@ powrfrac(GEN x, long n, long d)
   long z;
   if (!n) return real_1(lg(x));
   z = cgcd(n, d); if (z > 1) { n /= z; d /= z; }
-  if (d == 1) return gpowgs(x, n);
-  x = gpowgs(x, n);
+  if (d == 1) return powrs(x, n);
+  x = powrs(x, n);
   if (d == 2) return sqrtr(x);
   return sqrtnr(x, d);
 }
@@ -604,24 +652,8 @@ gpowgs(GEN x, long n)
   if (n ==-1) return ginv(x);
   switch(typ(x))
   {
-    case t_INT:
-    {
-      long sx = signe(x), s;
-      GEN t;
-      if (!sx) {
-	if (n < 0) pari_err(gdiver);
-	return gen_0;
-      }
-      s = (sx < 0 && odd(n))? -1: 1;
-      if (n > 0) return powiu_sign(x, n, s);
-      t = (s > 0)? gen_1: gen_m1;
-      if (is_pm1(x)) return t;
-      /* n < 0, |x| > 1 */
-      y = cgetg(3,t_FRAC);
-      gel(y,1) = t;
-      gel(y,2) = powiu_sign(x, -n, 1); /* force denominator > 0 */
-      return y;
-    }
+    case t_INT: return powis(x,n);
+    case t_REAL: return powrs(x,n);
     case t_INTMOD:
       y = cgetg(3,t_INTMOD); gel(y,1) = icopy(gel(x,1));
       gel(y,2) = Fp_pows(gel(x,2), n, gel(x,1));

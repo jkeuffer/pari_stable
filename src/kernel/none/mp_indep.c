@@ -345,6 +345,18 @@ mulrr(GEN x, GEN y)
 }
 
 GEN
+sqrr(GEN x)
+{
+  long flag, lz, sx = signe(x);
+  GEN z;
+
+  if (!sx) return real_0_bit(2*expo(x));
+  lz = lg(x); z = cgetr(lz);
+  mulrrz_i(z, x,x, lz,0, 1);
+  return z;
+}
+
+GEN
 mulir(GEN x, GEN y)
 {
   long sx = signe(x), sy, lz;

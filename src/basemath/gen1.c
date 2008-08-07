@@ -2039,7 +2039,7 @@ gsqr(GEN x)
     switch(tx)
     {
       case t_INT: return sqri(x);
-      case t_REAL: return mulrr(x,x);
+      case t_REAL: return sqrr(x);
       case t_INTMOD: { GEN X = gel(x,1);
 	z = cgetg(3,t_INTMOD);
 	gel(z,2) = gerepileuptoint((pari_sp)z, remii(sqri(gel(x,2)), X));

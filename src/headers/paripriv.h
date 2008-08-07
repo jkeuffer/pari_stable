@@ -139,8 +139,6 @@ int OK_bern(long nb, long prec);
 
 /* powers */
 GEN    rpowuu(ulong a, ulong n, long prec);
-GEN    powrshalf(GEN x, long s);
-GEN    powrfrac(GEN x, long n, long d);
 ulong  u_pow10(int n);
 
 /* floats */
