@@ -142,8 +142,6 @@ ulong  u_pow10(int n);
 
 /* floats */
 double dabs(double s, double t);
-long   dblexpo(double x);
-ulong  dblmantissa(double x);
 void   dcxlog(double s, double t, double *a, double *b);
 double dnorm(double s, double t);
 double dbllog2(GEN z);

@@ -1911,6 +1911,8 @@ GEN     bezout(GEN a, GEN b, GEN *u, GEN *v);
 long    cbezout(long a,long b,long *uu,long *vv);
 int     cmpii(GEN x, GEN y);
 int     cmprr(GEN x, GEN y);
+long    dblexpo(double x);
+ulong   dblmantissa(double x);
 GEN     dbltor(double x);
 GEN     diviiexact(GEN x, GEN y);
 GEN     diviuexact(GEN x, ulong y);

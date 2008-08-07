@@ -4720,6 +4720,12 @@ into a \kbd{double} if possible.
 \fun{GEN}{dbltor}{double x} converts the \kbd{double} \kbd{x} into a
 \typ{REAL}.
 
+\fun{long}{dblexpo}{double x} returns \kbd{expo(dbltor(x))}, but
+faster and without cluttering the stack.
+
+\fun{ulong}{dblmantissa}{double x} returns the most significant word
+in the mantissa of \kbd{dbltor(x)}.
+
 \fun{double}{gtodouble}{GEN x} if \kbd{x} is a real number (not necessarily
 a~\typ{REAL}), converts \kbd{x} into a \kbd{double} if possible.
 
