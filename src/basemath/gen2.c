@@ -1401,29 +1401,34 @@ gaffsg(long s, GEN x)
 /* x PADIC, Y INT, return lift(x * Mod(1,Y)) */
 GEN
 padic_to_Fp(GEN x, GEN Y) {
-  GEN z;
+  pari_sp av = avma;
+  GEN p = gel(x,2), z;
   long vy, vx = valp(x);
   if (!signe(Y)) pari_err(gdiver);
-  vy = Z_pvalrem(Y,gel(x,2), &z);
+  vy = Z_pvalrem(Y,p, &z);
   if (vx < 0 || !gcmp1(z)) pari_err(operi,"",x, mkintmod(gen_1,Y));
-  if (vx >= vy) return gen_0;
+  if (vx >= vy) { avma = av; return gen_0; }
   z = gel(x,4);
   if (!signe(z) || vy > vx + precp(x)) pari_err(operi,"",x, mkintmod(gen_1,Y));
-  if (vx) z = mulii(z, powiu(gel(x,2),vx));
-  return remii(z, Y);
+  if (vx) z = mulii(z, powiu(p,vx));
+  return gerepileuptoint(av, remii(z, Y));
 }
 ulong
 padic_to_Fl(GEN x, ulong Y) {
-  ulong uz;
-  GEN z;
+  GEN p = gel(x,2);
+  ulong u, z;
   long vy, vx = valp(x);
-  vy = u_pvalrem(Y,gel(x,2), &uz);
-  if (vx < 0 || uz != 1) pari_err(operi,"",x, mkintmodu(1,Y));
+  vy = u_pvalrem(Y,p, &u);
+  if (vx < 0 || u != 1) pari_err(operi,"",x, mkintmodu(1,Y));
+  /* Y = p^vy */
   if (vx >= vy) return 0;
-  z = gel(x,4);
-  if (!signe(z) || vy > vx + precp(x)) pari_err(operi,"",x, mkintmodu(1,Y));
-  if (vx) z = mulii(z, powiu(gel(x,2),vx));
-  return umodiu(z, Y);
+  z = umodiu(gel(x,4), Y);
+  if (!z || vy > vx + precp(x)) pari_err(operi,"",x, mkintmodu(1,Y));
+  if (vx) {
+    ulong pp = p[2];
+    z = Fl_mul(z, upowuu(pp,vx), Y); /* p^vx < p^vy = Y */
+  }
+  return z;
 }
 
 static void

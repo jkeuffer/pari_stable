@@ -2737,7 +2737,11 @@ not necessarily prime.
 \fun{GEN}{Rg_to_Fp}{GEN z, GEN p}, \kbd{z} a scalar which can be mapped to
 $\Z/p\Z$: a \typ{INT}, a \typ{INTMOD} whose modulus is divisible by $p$,
 a \typ{FRAC} whose denominator is coprime to $p$, or a \typ{PADIC} with
-underlying prime $p$. Returns \kbd{lift(z * Mod(1,p))}, normalized.
+underlying prime $\ell$ satisfying $p = \ell^n$ for some $n$ (less than the
+accuracy of the input). Returns \kbd{lift(z * Mod(1,p))}, normalized.
+
+\fun{GEN}{padic_to_Fp}{GEN x, GEN p} special case of \tet{Rg_to_Fp},
+for a $x$ a \typ{PADIC}.
 
 \fun{GEN}{RgX_to_FpX}{GEN z, GEN p}, \kbd{z} a \typ{POL}, returns the
 \kbd{FpX} obtained by applying \kbd{Rg\_to\_Fp} coefficientwise.
@@ -3198,8 +3202,12 @@ variable $v$, then the coefficients by increasing degree. An \kbd{FlxX} is a
 \fun{ulong}{Rg_to_Fl}{GEN z, ulong p}, \kbd{z} which can be mapped to
 $\Z/p\Z$: a \typ{INT}, a \typ{INTMOD} whose modulus is divisible by $p$,
 a \typ{FRAC} whose denominator is coprime to $p$, or a \typ{PADIC} with
-underlying prime $p$. Returns \kbd{lift(z * Mod(1,p))}, normalized, as an
+underlying prime $\ell$ satisfying $p = \ell^n$ for some $n$ (less than the
+accuracy of the input). Returns \kbd{lift(z * Mod(1,p))}, normalized, as an
 \kbd{Fl}.
+
+\fun{ulong}{padic_to_Fl}{GEN x, ulong p} special case of \tet{Rg_to_Fl},
+for a $x$ a \typ{PADIC}.
 
 \fun{GEN}{Flx_red}{GEN z, ulong p} converts from \kbd{zx} with
 non-negative coefficients to \kbd{Flx} (by reducing them mod \kbd{p}).
@@ -4723,8 +4731,9 @@ a \typ{REAL} or \typ{COMPLEX} whose components are \typ{REAL} of length
 \kbd{prec}.
 
 \fun{GEN}{gcvtop}{GEN x, GEN p, long l} converts $x$ into a \typ{PADIC}
-$p$-adic number of precision~$l$. Works componentwise on recursive objects
-(e.g.~\typ{POL} or \typ{VEC}).
+of precision~$l$. Works componentwise on recursive objects,
+e.g.~\typ{POL} or \typ{VEC}. Converting $0$ yields $O(p^l)$; converting a
+non-zero number yield a result well defined modulo $p^{v_p(x) + l}$.
 
 \fun{GEN}{cvtop}{GEN x, GEN p, long l} as \kbd{gcvtop}, assuming that $x$
 is a scalar.

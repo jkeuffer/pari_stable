@@ -126,8 +126,6 @@ GEN   init_remiimul(GEN M);
 GEN   ishiftr_lg(GEN x, long lx, long n);
 GEN   logagmcx(GEN q, long prec);
 GEN   muliispec(GEN x, GEN y, long nx, long ny);
-GEN   padic_to_Fp(GEN x, GEN Y);
-ulong padic_to_Fl(GEN x, ulong p);
 GEN   red_montgomery(GEN T, GEN N, ulong inv);
 GEN   remiimul(GEN x, GEN sy);
 GEN   sqrispec(GEN x, long nx);
