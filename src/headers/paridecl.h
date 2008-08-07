@@ -498,6 +498,7 @@ GEN     det0(GEN a,long flag);
 GEN     det2(GEN a);
 GEN     detint(GEN x);
 GEN     diagonal(GEN x);
+GEN     diagonal_shallow(GEN x);
 GEN     eigen(GEN x, long prec);
 GEN     extract0(GEN x, GEN l1, GEN l2);
 GEN     gauss(GEN a, GEN b);

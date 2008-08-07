@@ -270,7 +270,7 @@ GetPrimChar(GEN chi, GEN bnr, GEN bnrc, long prec)
   condc = gmael(bnrc, 2, 1); if (gequal(cond, condc)) return NULL;
 
   initc = init_get_chic(gmael(bnr, 5, 2));
-  Mrc   = diagonal_i(gmael(bnrc, 5, 2));
+  Mrc   = diagonal_shallow(gmael(bnrc, 5, 2));
   M = bnrsurjection(bnr, bnrc);
   (void)ZM_hnfall(shallowconcat(M, Mrc), &U, 1);
   l = lg(M);
@@ -342,8 +342,8 @@ ComputeKernel(GEN bnrm, GEN bnrn, GEN dtQ)
   pari_sp av = avma;
   GEN Mrm, genm, Mrq, mgq, P;
 
-  Mrm  = diagonal_i(gmael(bnrm, 5, 2));
-  Mrq  = diagonal_i(gel(dtQ,2));
+  Mrm  = diagonal_shallow(gmael(bnrm, 5, 2));
+  Mrq  = diagonal_shallow(gel(dtQ,2));
   genm = gmael(bnrm, 5, 3); l  = lg(genm);
   mgq  = gel(dtQ,3);
   P = cgetg(l, t_MAT);
@@ -396,7 +396,7 @@ GetIndex(GEN pr, GEN bnr, GEN subgroup)
     bnrpr = Buchray(bnf, mkvec2(mpr0, gel(mod,2)), nf_INIT|nf_GEN);
     cycpr = gmael(bnrpr, 5, 2);
     M = ZM_mul(bnrsurjection(bnr, bnrpr), subgroup);
-    subpr = ZM_hnf(shallowconcat(M, diagonal_i(cycpr)));
+    subpr = ZM_hnf(shallowconcat(M, diagonal_shallow(cycpr)));
     /* e = #(bnr/subgroup) / #(bnrpr/subpr) */
     e = itos( diviiexact(ZM_det_triangular(subgroup), ZM_det_triangular(subpr)) );
   }
@@ -2527,7 +2527,7 @@ quadhilbertreal(GEN D, long prec)
   if (DEBUGLEVEL) msgtimer("Compute Cl(k)");
 
   bnr  = Buchray(bnf, gen_1, nf_INIT|nf_GEN);
-  M = diagonal_i(gmael(bnr,5,2));
+  M = diagonal_shallow(gmael(bnr,5,2));
   dtQ = InitQuotient(M);
   nf  = gel(bnf,7);
 
@@ -2597,12 +2597,12 @@ bnrstark(GEN bnr, GEN subgrp, long prec)
   /* check the bnf */
   if (!varn(nf[1])) pari_err(talker, "main variable in bnrstark must not be x");
   if (nf_get_r2(nf)) pari_err(talker, "base field not totally real in bnrstark");
-  Mcyc = diagonal_i(gmael(bnr, 5, 2));
+  Mcyc = diagonal_shallow(gmael(bnr, 5, 2));
   subgrp = get_subgroup(subgrp,Mcyc,"bnrstark");
 
   /* compute bnr(conductor) */
   p1     = bnrconductor(bnr, subgrp, 2);
-  bnr    = gel(p1,2); Mcyc = diagonal_i(gmael(bnr, 5, 2));
+  bnr    = gel(p1,2); Mcyc = diagonal_shallow(gmael(bnr, 5, 2));
   subgrp = gel(p1,3);
   if (gcmp1( ZM_det_triangular(subgrp) )) { avma = av; return pol_x(0); }
 
@@ -2670,7 +2670,7 @@ bnrL1(GEN bnr, GEN subgp, long flag, long prec)
   /* compute bnr(conductor) */
   if (!(flag & 2)) bnr = gel(bnrconductor(bnr, NULL, 2),2);
   cyc  = gmael(bnr, 5, 2);
-  Mcyc = diagonal_i(cyc);
+  Mcyc = diagonal_shallow(cyc);
   subgp = get_subgroup(subgp,Mcyc,"bnrL1");
 
   cl = itou( ZM_det_triangular(subgp) );

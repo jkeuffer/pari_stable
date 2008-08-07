@@ -337,7 +337,7 @@ get_gell(GEN bnr, GEN subgp, long all)
   GEN gell;
   if (all && all != -1) gell = stoi(all);
   else if (subgp)       gell = det(subgp);
-  else                  gell = det(diagonal_i(gmael(bnr,5,2)));
+  else                  gell = det(diagonal_shallow(gmael(bnr,5,2)));
   if (typ(gell) != t_INT) pari_err(arither1);
   return gell;
 }
@@ -869,7 +869,7 @@ invimsubgroup(GEN bnrz, GEN bnr, GEN subgroup, toK_s *T)
   }
   (void)ZM_hnfall(shallowconcat(P, subgroup), &U, 1);
   setlg(U, l); for (j=1; j<l; j++) setlg(U[j], l);
-  return ZM_hnfmodid(shallowconcat(U, diagonal_i(raycycz)), gel(raycycz,1));
+  return ZM_hnfmodid(shallowconcat(U, diagonal_shallow(raycycz)), gel(raycycz,1));
 }
 
 static GEN

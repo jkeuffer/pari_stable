@@ -457,7 +457,7 @@ bnfsunit(GEN bnf,GEN S,long prec)
     gel(M,i) = isprincipal(bnf,p1);
   }
   /* 2) relations from bnf class group */
-  M = shallowconcat(M, diagonal_i(gel(classgp,2)));
+  M = shallowconcat(M, diagonal_shallow(gel(classgp,2)));
 
   /* S class group */
   H = ZM_hnfall(M, &U, 1);

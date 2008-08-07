@@ -170,7 +170,6 @@ GEN extendedgcd(GEN A);
 GEN qfgaussred_positive(GEN a);
 
 /* miscellaneous linear algebra */
-GEN  diagonal_i(GEN x);
 GEN  imagecomplspec(GEN x, long *nlze);
 void rowselect_p(GEN A, GEN B, GEN p, long init);
 GEN  supnorm(GEN L, long prec);

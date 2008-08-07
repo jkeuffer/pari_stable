@@ -1879,7 +1879,7 @@ join_bid(GEN nf, GEN bid1, GEN bid2)
   cyc2 = gel(G2,2); l2 = lg(cyc2);
   gen = (lg(G1)>3 && lg(G2)>3)? gen_1: NULL;
   nbgen = l1+l2-2;
-  cyc = ZM_snf_group(diagonal_i(shallowconcat(cyc1,cyc2)),
+  cyc = ZM_snf_group(diagonal_shallow(shallowconcat(cyc1,cyc2)),
 		 &U, gen? &u1: NULL);
   if (nbgen) {
     GEN U1 = gel(bid1,5), U2 = gel(bid2,5);
@@ -2084,7 +2084,7 @@ join_bid_arch(GEN nf, GEN bid1, GEN arch)
   gel(lists,i) = sarch;
 
   gen = (lg(G1)>3)? gen_1: NULL;
-  cyc = diagonal_i(shallowconcat(gel(G1,2), gel(sarch,1)));
+  cyc = diagonal_shallow(shallowconcat(gel(G1,2), gel(sarch,1)));
   cyc = ZM_snf_group(cyc, &U, gen? &u1: NULL);
   if (gen) gen = shallowconcat(gel(G1,3), gel(sarch,2));
   y = cgetg(6,t_VEC);

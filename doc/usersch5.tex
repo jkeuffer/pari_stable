@@ -5100,6 +5100,9 @@ copy of \kbd{x}. (The name comes from \kbd{RgV\_isscalar}.)
 \fun{GEN}{scalarmat_shallow}{GEN x, long n} creates an $n\times n$
 scalar matrix whose diagonal is set to shallow copies of the scalar \kbd{x}.
 
+\fun{GEN}{diagonal_shallow}{GEN x} returns a diagonal matrix whose diagonal
+is given by the vector $x$. Shallow function.
+
 \fun{GEN}{deg1pol_shallow}{GEN a, GEN b,long v} returns the degree 1
 \typ{POL} $a + b \kbd{pol\_x}(v)$
 

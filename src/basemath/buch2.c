@@ -2649,7 +2649,7 @@ makecycgen(GEN bnf)
 
   if (DEBUGLEVEL) pari_warn(warner,"completing bnf (building cycgen)");
   nf = checknf(bnf);
-  cyc = gmael3(bnf,8,1,2); D = diagonal_i(cyc);
+  cyc = gmael3(bnf,8,1,2); D = diagonal_shallow(cyc);
   gen = gmael3(bnf,8,1,3); GD = gmael(bnf,9,3);
   l = lg(gen); h = cgetg(l, t_VEC);
   for (i=1; i<l; i++)
