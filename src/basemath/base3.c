@@ -1477,7 +1477,7 @@ famat_zlog(GEN nf, GEN g, GEN e, GEN sgn, GEN bid)
         GEN p = pr_get_p(pr), k_1 = subis(k,1);
         long v = Z_pval(EX, p);
         if (cmpui(v, k_1) > 0) v = itos(k_1);
-        if (v) ex = mulii(ex, gpowgs(p, v));
+        if (v) ex = mulii(ex, powiu(p, v));
       }
     }
     x = famat_makecoprime(nf, g, e, pr, prk, EX);

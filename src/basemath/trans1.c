@@ -382,8 +382,10 @@ powiu(GEN a, ulong N)
 GEN
 powis(GEN x, long n) 
 {
-  long sx = signe(x), s;
+  long sx, s;
   GEN t, y;
+  if (!n) return gen_1;
+  sx = signe(x);
   if (!sx) {
     if (n < 0) pari_err(gdiver);
     return gen_0;

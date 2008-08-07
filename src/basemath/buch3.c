@@ -563,7 +563,7 @@ minkowski_bound(GEN D, long N, long r2, long prec)
 {
   pari_sp av = avma;
   GEN c = divrr(mpfactr(N,prec), powuu(N,N));
-  if (r2) c = mulrr(c, gpowgs(divsr(4,mppi(prec)), r2));
+  if (r2) c = mulrr(c, powru(divsr(4,mppi(prec)), r2));
   c = mulrr(c, gsqrt(absi(D),prec));
   return gerepileuptoleaf(av, c);
 }
@@ -639,7 +639,7 @@ hermiteconstant(long n)
     case 8: return utoipos(256);
   }
   av = avma;
-  h  = gpowgs(divsr(2,mppi(DEFAULTPREC)), n);
+  h  = powru(divsr(2,mppi(DEFAULTPREC)), n);
   h1 = gsqr(ggamma(gdivgs(utoipos(n+4),2),DEFAULTPREC));
   return gerepileuptoleaf(av, mulrr(h,h1));
 }
@@ -697,7 +697,7 @@ regulatorbound(GEN bnf)
   if (cmpii(dK,c1) <= 0) return dft_bound();
 
   p1 = gsqr(glog(gdiv(dK,c1),DEFAULTPREC));
-  p1 = divru(gmul2n(gpowgs(divru(mulrs(p1,3),N*(N*N-1)-6*R2),R),R2), N);
+  p1 = divru(gmul2n(powru(divru(mulrs(p1,3),N*(N*N-1)-6*R2),R),R2), N);
   p1 = sqrtr(gdiv(p1, hermiteconstant(R)));
   if (DEBUGLEVEL>1) fprintferr("Mahler bound for regulator: %Ps\n",p1);
   return gmax(p1, dbltor(0.2));

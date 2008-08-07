@@ -347,7 +347,7 @@ mulrr(GEN x, GEN y)
 GEN
 sqrr(GEN x)
 {
-  long flag, lz, sx = signe(x);
+  long lz, sx = signe(x);
   GEN z;
 
   if (!sx) return real_0_bit(2*expo(x));

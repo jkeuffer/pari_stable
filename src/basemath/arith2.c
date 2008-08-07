@@ -1379,7 +1379,7 @@ core2partial(GEN n, long all)
   {
     long e = itos(gel(E,i));
     if (e & 1)  c = mulii(c, gel(P,i));
-    if (e != 1) f = mulii(f, gpowgs(gel(P,i), e >> 1));
+    if (e != 1) f = mulii(f, powiu(gel(P,i), e >> 1));
   }
   return gerepilecopy(av, mkvec2(c,f));
 }

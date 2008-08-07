@@ -98,7 +98,7 @@ zeta_get_limx(long r1, long r2, long bit)
 
   A0 = logr_abs( gmul2n(c0, bit) ); p2 = divrr(A0, c1);
   p1 = divrr(mulsr(N*(r+1), logr_abs(p2)), addsr(2*(r+1), gmul2n(A0,2)));
-  return gerepileuptoleaf(av, divrr(addrs(p1, 1), powrshalf(p2, N)));
+  return gerepileuptoleaf(av, divrr(addrs(p1, 1), powruhalf(p2, N)));
 }
 /* N_0 = floor( C_K / limx ) */
 long

@@ -1544,7 +1544,7 @@ plindep(GEN x)
   }
   if (!p) pari_err(talker,"not a p-adic vector in plindep");
   v = ggval(x,p); pn = powiu(p,prec);
-  if (v != 0) x = gmul(x, gpowgs(p, -v));
+  if (v != 0) x = gmul(x, powis(p, -v));
   x = RgV_to_FpV(x, pn);
 
   a = negi(gel(x,1));

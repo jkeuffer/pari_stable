@@ -669,7 +669,7 @@ BPSW_isprime(GEN N)
   F = diviiexact(N_1,  powii(p, gcoeff(fa,l,2)));
   P = gel(fa,1);
   /* N-1 = F U, F factored, U possibly composite */
-  if (cmpii(gpowgs(F, 3), N) >= 0) /* half-smooth, F >= N^(1/3) */
+  if (cmpii(powiu(F, 3), N) >= 0) /* half-smooth, F >= N^(1/3) */
     res = BLS_test(N, F)
 	  && isprimeSelfridge(mkvec2(N,vecslice(P,1,l-1)));
   else if (BPSW_psp_nosmalldiv(p)) /* smooth */

@@ -530,7 +530,7 @@ nf_Beauzamy_bound(GEN nf, GEN polbase)
   }
   lt = leading_term(polbase);
   s = mulri(s, muliu(sqri(lt), n));
-  C = powrshalf(stor(3,DEFAULTPREC), 3 + 2*d); /* 3^{3/2 + d} */
+  C = powruhalf(stor(3,DEFAULTPREC), 3 + 2*d); /* 3^{3/2 + d} */
   return divrr(mulrr(C, s), mulsr(d, mppi(DEFAULTPREC)));
 }
 
@@ -751,7 +751,7 @@ nfcmbf(nfcmbf_t *T, GEN p, long a, long maxK, long klim)
   long K = 1, cnt = 1, i,j,k, curdeg, lfamod = lg(famod)-1, dnf = degpol(nfpol);
   GEN res = cgetg(3, t_VEC);
   pari_sp av0 = avma;
-  GEN pk = gpowgs(p,a), pks2 = shifti(pk,-1);
+  GEN pk = powiu(p,a), pks2 = shifti(pk,-1);
 
   GEN ind      = cgetg(lfamod+1, t_VECSMALL);
   GEN deg      = cgetg(lfamod+1, t_VECSMALL);
@@ -1227,7 +1227,7 @@ nf_LLL_cmbf(nfcmbf_t *T, GEN p, long k, long rec)
     }
     for (i=1; i<=n0; i++)
     {
-      GEN h, lPpow = lP? gpowgs(lP, tnew): NULL;
+      GEN h, lPpow = lP? powiu(lP, tnew): NULL;
       GEN z = polsym_gen(gel(famod,i), gel(TT,i), tnew, Tpk, pk);
       gel(TT,i) = z;
       h = gel(z,tnew+1);
@@ -1458,7 +1458,7 @@ nf_pick_prime(long ct, GEN nf, GEN polbase, long fl,
     {
       GEN q;
       if (!FqX_is_squarefree(red,aT,ap)) { avma = av2; continue; }
-      q = gpowgs(ap, degpol(aT));
+      q = powiu(ap, degpol(aT));
       anbf = fl? FqX_split_deg1(&fa, red, q, aT, ap)
 	       : FqX_split_by_degree(&fa, red, q, aT, ap);
     }

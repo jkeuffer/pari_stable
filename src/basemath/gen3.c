@@ -2127,9 +2127,9 @@ gtrunc(GEN x)
 	av = avma; y = powiu(gel(x,2),v);
 	return gerepileuptoint(av, mulii(y,gel(x,4)));
       }
-      y=cgetg(3,t_FRAC);
+      y = cgetg(3,t_FRAC);
       gel(y,1) = icopy(gel(x,4));
-      gel(y,2) = gpowgs(gel(x,2),-v);
+      gel(y,2) = powiu(gel(x,2),-v);
       return y;
 
     case t_RFRAC:
@@ -2935,9 +2935,9 @@ centerlift0(GEN x, long v)
 	av = avma; y = powiu(gel(x,2),v);
 	return gerepileuptoint(av, mulii(y,z));
       }
-      y=cgetg(3,t_FRAC);
+      y = cgetg(3,t_FRAC);
       gel(y,1) = centerliftii(gel(x,4), gel(x,3));
-      gel(y,2) = gpowgs(gel(x,2),-v);
+      gel(y,2) = powiu(gel(x,2),-v);
       return y;
   }
   pari_err(typeer,"centerlift");

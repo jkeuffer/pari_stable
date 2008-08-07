@@ -571,13 +571,13 @@ gissquareall(GEN x, GEN *pt)
       {
 	GEN p = gel(P,i), t, b;
 	long e = itos(gel(E,i)), v = Z_pvalrem(a, p, &b);
-	if (v >= e) { gel(L, i) = mkintmod(gen_0, gpowgs(p, e)); continue; }
+	if (v >= e) { gel(L, i) = mkintmod(gen_0, powiu(p, e)); continue; }
 	if (odd(v)) { avma = av; return gen_0; }
 	t = cvtop(b, gel(P,i), e - v);
 	if (gissquare(t) != gen_1) { avma = av; return gen_0; }
 	t = gtrunc(padic_sqrt(t));
-	if (v) t = mulii(t, gpowgs(p, v>>1));
-	gel(L,i) = mkintmod(t, gpowgs(p, e));
+	if (v) t = mulii(t, powiu(p, v>>1));
+	gel(L,i) = mkintmod(t, powiu(p, e));
       }
       *pt = gerepileupto(av, chinese1_coprime_Z(L));
       return gen_1;
@@ -806,15 +806,15 @@ ispower(GEN x, GEN K, GEN *pt)
       {
 	GEN p = gel(P,i), t, b;
 	long e = itos(gel(E,i)), v = Z_pvalrem(a, p, &b);
-	if (v >= e) { gel(L, i) = mkintmod(gen_0, gpowgs(p, e)); continue; }
+	if (v >= e) { gel(L, i) = mkintmod(gen_0, powiu(p, e)); continue; }
 	if (!dvdui(v, K)) { avma = av; return 0; }
 	t = cvtop(b, gel(P,i), e - v);
 	if (!ispower(t, K, pt)) { avma = av; return 0; }
 	if (pt)
 	{
 	  t = gtrunc(*pt);
-	  if (v) t = mulii(t, gpowgs(p, v>>1));
-	  gel(L,i) = mkintmod(t, gpowgs(p, e));
+	  if (v) t = mulii(t, powiu(p, v>>1));
+	  gel(L,i) = mkintmod(t, powiu(p, e));
 	}
       }
       if (pt) *pt = gerepileupto(av, chinese1_coprime_Z(L));
@@ -2021,7 +2021,7 @@ Zp_order(GEN a, GEN p, long e, GEN pe)
     a = Fp_pow(a, op, pe); /* 1 mod p */
   }
   if (is_pm1(a)) return op;
-  return mulii(op, gpowgs(p, e - Z_pval(subis(a,1), p)));
+  return mulii(op, powiu(p, e - Z_pval(subis(a,1), p)));
 }
 
 GEN
@@ -2049,7 +2049,7 @@ znorder(GEN x, GEN o)
       if (l == 2)
 	o = Zp_order(a, p, e, b);
       else {
-	GEN pe = gpowgs(p,e);
+	GEN pe = powiu(p,e);
 	o = lcmii(o, Zp_order(remii(a,pe), p, e, pe));
       }
     }
@@ -3144,7 +3144,7 @@ hclassno2(GEN x)
     if (e)
     {
       GEN p = gel(P,i), t = subis(p, kronecker(D,p));
-      if (e > 1) t = mulii(t, diviiexact(subis(gpowgs(p,e), 1), subis(p,1)));
+      if (e > 1) t = mulii(t, diviiexact(subis(powiu(p,e), 1), subis(p,1)));
       H = mulii(H, addsi(1, t));
     }
   }

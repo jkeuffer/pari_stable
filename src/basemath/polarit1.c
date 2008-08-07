@@ -1388,10 +1388,9 @@ QpX_to_ZX(GEN f)
   if (gcmp0(c)) /*  O(p^n) can occur */
   {
     if (typ(c) != t_PADIC) pari_err(typeer,"QpX_to_ZX");
-    f = gdiv(f, gpowgs(gel(c,2), valp(c)));
+    c = powis(gel(c,2), valp(c));
   }
-  else
-    f = gdiv(f,c);
+  f = RgX_Rg_div(f,c);
   return ZpX_to_ZX(f);
 }
 
@@ -1459,10 +1458,9 @@ QpXQ_to_ZXY(GEN f)
   if (gcmp0(c)) /*  O(p^n) can occur */
   {
     if (typ(c) != t_PADIC) pari_err(typeer,"QpXQ_to_ZXY");
-    f = gdiv(f, gpowgs(gel(c,2), valp(c)));
+    c = powis(gel(c,2), valp(c));
   }
-  else
-    f = gdiv(f,c);
+  f = RgX_Rg_div(f,c);
   for (i=2; i<l; i++)
   {
     GEN t = gel(f,i);

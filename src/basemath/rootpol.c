@@ -1373,9 +1373,9 @@ conformal_mapping(double *radii, GEN ctr, GEN p, long k, long bit,
   FF = conformal_pol(FF,a,bit2);
   GG = conformal_pol(GG,a,bit2);
 
-  a = ginv(gsub(gen_1, gnorm(a)));
-  FF = gmul(FF, gpowgs(a,k));
-  GG = gmul(GG, gpowgs(a,n-k));
+  a = ginv(gsubsg(1, gnorm(a)));
+  FF = RgX_Rg_mul(FF, gpowgs(a,k));
+  GG = RgX_Rg_mul(GG, gpowgs(a,n-k));
 
   *F = mygprec(FF,bit+n);
   *G = mygprec(GG,bit+n); gerepileall(ltop,2, F,G);
@@ -1621,7 +1621,7 @@ root_error(long n, long k, GEN roots_pol, long pari_err, GEN shatzle)
   rho = gabs(mygprec(gel(roots_pol,k),31), DEFAULTPREC);
   if (expo(rho) < 0) rho = real_1(DEFAULTPREC);
   eps = mulrr(rho, shatzle);
-  aux = shiftr(gpowgs(rho,n), pari_err);
+  aux = shiftr(powru(rho,n), pari_err);
 
   for (j=1; j<=2 || (j<=5 && gcmp(rap, dbltor(1.2)) > 0); j++)
   {

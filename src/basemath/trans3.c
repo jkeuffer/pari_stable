@@ -811,8 +811,8 @@ veceint1(GEN C, GEN nmax, long prec)
   }
 
   eC = mpexp(C);
-  e1 = gpowgs(eC, -n);
-  e2 = gpowgs(eC, 10);
+  e1 = powrs(eC, -n);
+  e2 = powrs(eC, 10);
   unr = real_1(prec);
   av1 = avma;
   if(DEBUGLEVEL>1) fprintferr("nstop = %ld\n",nstop);
@@ -1043,7 +1043,7 @@ bernreal_using_zeta(long n, GEN iz, long prec)
   GEN z;
 
   if (!iz) iz = inv_szeta_euler(n, 0., l);
-  z = divrr(mpfactr(n, l), mulrr(gpowgs(Pi2n(1, l), n), iz));
+  z = divrr(mpfactr(n, l), mulrr(powru(Pi2n(1, l), n), iz));
   setexpo(z, expo(z) + 1); /* 2 * n! * zeta(n) / (2Pi)^n */
   if ((n & 3) == 0) setsigne(z, -1);
   return z;
@@ -1102,7 +1102,7 @@ szeta_odd(long k, long prec)
       if ((n>>1)&1) togglesign(p1);
       y = n? addrr(y,p1): p1;
     }
-    y = mulrr(divrr(gpowgs(pi2,k),mpfactr(kk,prec)),y);
+    y = mulrr(divrr(powru(pi2,k),mpfactr(kk,prec)),y);
 
     av2 = avma; limit = stack_lim(av2,1);
     qn = gsqr(q); z = ginv( addrs(q,-1) );
@@ -1136,7 +1136,7 @@ szeta_odd(long k, long prec)
       if ((n>>1)&1) togglesign(p1);
       y = n? addrr(y,p1): p1;
     }
-    y = mulrr(divrr(gpowgs(pi2,k),mpfactr(kk,prec)),y);
+    y = mulrr(divrr(powru(pi2,k),mpfactr(kk,prec)),y);
     y = divru(y,k-1);
     av2 = avma; limit = stack_lim(av2,1);
     qn = q; z=gen_0;
@@ -1202,7 +1202,7 @@ szeta(long k, long prec)
       y = ginv( inv_szeta_euler(k, 0, prec) ); /* would use zeta above */
     else
     {
-      y = mulrr(gpowgs(Pi2n(1, prec), k), single_bern(k, prec));
+      y = mulrr(powru(Pi2n(1, prec), k), single_bern(k, prec));
       y = divrr(y, mpfactr(k,prec));
       y[1] = evalsigne(1) | evalexpo(expo(y)-1);
     }
@@ -1394,15 +1394,16 @@ twistpartialzeta(GEN p, GEN q, long f, long c, GEN va, GEN cff)
 {
   long j, k, lva = lg(va)-1, N = lg(cff)-1;
   pari_sp av, av2, lim;
-  GEN Ax, Cx, Bx, Dx, x = pol_x(0), y = pol_x(fetch_user_var("y")), eta;
-  GEN cyc, psm, rep;
+  GEN Ax, Cx, Bx, Dx, x = pol_x(0), y = pol_x(fetch_user_var("y"));
+  GEN cyc, psm, rep, eta, etaf;
 
   cyc = gdiv(gsubgs(gpowgs(y, c), 1), gsubgs(y, 1));
   psm = polsym(cyc, degpol(cyc) - 1);
-  eta = gmodulo(y, cyc);
+  eta = mkpolmod(y, cyc);
+  etaf = gpowgs(eta,f);
   av = avma;
   Ax  = gsubgs(gpowgs(gaddgs(x, 1), f), 1);
-  Ax  = gdiv(gmul(Ax, gpowgs(eta, f)), gsubsg(1, gpowgs(eta, f)));
+  Ax  = gdiv(gmul(Ax, etaf), gsubsg(1, etaf));
   Ax  = gerepileupto(av, RgX_to_FqX(Ax, cyc, q));
   Cx  = Ax;
   Bx  = gen_1;
@@ -1420,7 +1421,7 @@ twistpartialzeta(GEN p, GEN q, long f, long c, GEN va, GEN cff)
       gerepileall(av, 2, &Cx, &Bx);
     }
   }
-  Bx  = lift(gmul(ginv(gsubsg(1, gpowgs(eta, f))), Bx));
+  Bx  = lift(gmul(ginv(gsubsg(1, etaf)), Bx));
   Bx  = gerepileupto(av, RgX_to_FqX(Bx, cyc, q));
   Cx = lift(gmul(eta, gaddsg(1, x)));
   Dx = pol_1(varn(x));
@@ -1603,17 +1604,18 @@ zetap(GEN s)
 
   if (valp(s) < 0)
     pari_err(talker, "argument must be a p-adic integer");
+  if (!prec) prec = 1;
 
   gp = gel(s,2); p = itou(gp);
   is = gtrunc(s);  /* make s an integer */
 
-  N  = number_of_terms(p, prec? prec:1);
-  q  = gpowgs(gp, prec? prec:1);
+  N  = number_of_terms(p, prec);
+  q  = powiu(gp, prec);
 
   /* initialize the roots of unity for the computation
      of the Teichmuller character (also the values of f and c) */
   if (DEBUGLEVEL > 1) fprintferr("zetap: computing (p-1)th roots of 1\n");
-  vz = init_teich(p, q, prec? prec:1);
+  vz = init_teich(p, q, prec);
   if (p == 2UL) {  f = 4; c = 3; } else { f = (long)p; c = 2; }
 
   /* compute the first N coefficients of the Mahler expansion
@@ -1995,7 +1997,7 @@ gpolylog(long m, GEN x, long prec)
       n = (lg(y)-3 + v) / v;
       a = zeroser(varn(y), lg(y)-2);
       for (i=n; i>=1; i--)
-	a = gmul(y, gadd(a, gpowgs(utoipos(i),-m)));
+	a = gmul(y, gadd(a, powis(utoipos(i),-m)));
       return gerepileupto(av, a);
 
     case t_VEC: case t_COL: case t_MAT:

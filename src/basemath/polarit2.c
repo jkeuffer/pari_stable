@@ -955,7 +955,7 @@ padic_gcd(GEN x, GEN y)
   GEN p = gel(y,2);
   long v = ggval(x,p), w = valp(y);
   if (w < v) v = w;
-  return gpowgs(p, v);
+  return powis(p, v);
 }
 
 /* x,y in Z[i], at least one of which is t_COMPLEX */
@@ -1009,7 +1009,7 @@ zero_gcd(GEN x, long tx)
     case t_FRAC: return gabs(x,0);
     case t_COMPLEX: return c_zero_gcd(x);
     case t_REAL: return gen_1;
-    case t_PADIC: return gpowgs(gel(x,2), valp(x));
+    case t_PADIC: return powis(gel(x,2), valp(x));
     case t_SER: return monomial(gen_1, valp(x), varn(x));
     case t_POLMOD: {
       GEN d = gel(x,2);
@@ -1142,8 +1142,7 @@ ggcd(GEN x, GEN y)
 
       case t_PADIC:
 	if (!equalii(gel(x,2),gel(y,2))) return gen_1;
-	vx = valp(x);
-	vy = valp(y); return gpowgs(gel(y,2), minss(vy,vx));
+        return powis(gel(y,2), minss(valp(x), valp(y)));
 
       case t_QUAD:
 	av=avma; p1=gdiv(x,y);

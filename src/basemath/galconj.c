@@ -317,9 +317,9 @@ galoisborne(GEN T, GEN dn, struct galois_borne *gb)
   M = vandermondeinverse(L, gmul(T, real_1(prec)), den, prep);
   if (DEBUGLEVEL>=4) msgTIMER(&ti,"vandermondeinverse");
   borne = matrixnorm(M, prec);
-  borneroots = supnorm(L, prec);
+  borneroots = supnorm(L, prec); /*t_REAL*/
   n = degpol(T);
-  borneabs = addsr(1, gmulsg(n, gpowgs(borneroots, n)));
+  borneabs = addsr(1, gmulsg(n, powru(borneroots, n)));
   borneroots = addsr(1, gmul(borne, borneroots));
   av2 = avma;
   /*We use d-1 test, so we must overlift to 2^BITS_IN_LONG*/
@@ -577,7 +577,7 @@ frobeniusliftall(GEN sg, long el, GEN *psi, struct galois_lift *gl,
 
   *psi = pf = cgetg(m, t_VECSMALL);
   ltop2 = avma;
-  NN = diviiexact(mpfact(m), mulsi(c, gpowgs(mpfact(d), c)));
+  NN = diviiexact(mpfact(m), mului(c, powiu(mpfact(d), c)));
   if (DEBUGLEVEL >= 4)
     fprintferr("GaloisConj:I will try %Ps permutations\n", NN);
   N1=10000000;

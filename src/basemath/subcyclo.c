@@ -865,7 +865,7 @@ static void
 Aurifeuille_init(GEN a, long n, struct aurifeuille_t *S)
 {
   GEN sqrta = sqrtr_abs(itor(a, 3));
-  GEN bound = ceil_safe(gpowgs(addrs(sqrta,1), eulerphiu(n)));
+  GEN bound = ceil_safe(powru(addrs(sqrta,1), eulerphiu(n)));
   GEN zl = polsubcyclo_start(n, 0, 0, bound, &(S->e), (long*)&(S->l));
   S->le = gel(zl,1);
   S->z  = gel(zl,2);

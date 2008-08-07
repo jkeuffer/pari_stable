@@ -903,7 +903,7 @@ InitChar(GEN bnr, GEN listCR, long prec)
   N     = nf_get_degree(nf);
   nf_get_sign(nf, &r1,&r2);
   prec2 = ((prec-2) << 1) + EXTRA_PREC;
-  C     = gmul2n(sqrtr_abs(divir(dk, gpowgs(mppi(prec2),N))), -r2);
+  C     = gmul2n(sqrtr_abs(divir(dk, powru(mppi(prec2),N))), -r2);
   initc = init_get_chic(Mr);
 
   dbg_block();
@@ -1014,7 +1014,7 @@ CharNewPrec(GEN dataCR, GEN nf, long prec)
   N     =  nf_get_degree(nf);
   prec2 = ((prec - 2)<<1) + EXTRA_PREC;
 
-  C = sqrtr(divir(absi(dk), gpowgs(mppi(prec2), N)));
+  C = sqrtr(divir(absi(dk), powru(mppi(prec2), N)));
 
   l = lg(dataCR);
   for (j = 1; j < l; j++)
@@ -1546,7 +1546,7 @@ ppgamma(ST_t *T, long prec)
     p1 = gsubst(gamdm,0,x2);
     p2 = gsubst(gam,0,x2);
   }
-  cf = gpowgs(sqpi, t);
+  cf = powru(sqpi, t);
   an = gpowgs(gpow(gen_2, gsubsg(1,x), prec), t); /* 2^{t-tx} */
   bn = gpowgs(gam, t+c); /* Gamma(x)^{t+c} */
   cn_evn = gpowgs(p1, s-t); /* Gamma(X)^{s-t} */
@@ -1642,7 +1642,7 @@ GetValue(GEN dtcr, GEN W, GEN S, GEN T, long fl, long prec)
 
   if (fl & 1)
   { /* S(chi) + W(chi).T(chi)) / (C(chi) sqrt(Pi)^{r1 - q}) */
-    cf = gmul(ch_C(dtcr), powrshalf(mppi(prec), b));
+    cf = gmul(ch_C(dtcr), powruhalf(mppi(prec), b));
 
     z = gadd(S, gmul(W, T));
     if (isreal) z = real_i(z);
@@ -1651,7 +1651,7 @@ GetValue(GEN dtcr, GEN W, GEN S, GEN T, long fl, long prec)
   }
   else
   { /* (W(chi).S(conj(chi)) + T(chi)) / (sqrt(Pi)^q 2^{r1 - q}) */
-    cf = gmul2n(powrshalf(mppi(prec), q), b);
+    cf = gmul2n(powruhalf(mppi(prec), q), b);
 
     z = gadd(gmul(W, gconj(S)), gconj(T));
     if (isreal) z = real_i(z);
@@ -2348,7 +2348,7 @@ LABDOUB:
       gel(L1,i) = gerepileupto(av2, p1);
       FreeMat(matan, n);
     }
-    p1 = gmul2n(powrshalf(mppi(newprec), N-2), 1);
+    p1 = gmul2n(powruhalf(mppi(newprec), N-2), 1);
 
     for (i = 1; i <= cl; i++)
     {
@@ -2501,7 +2501,7 @@ makescind(GEN nf, GEN P)
   }
 
   l = perm_order(perm);
-  if (l != 2) perm = gpowgs(perm, l >> 1);
+  if (l != 2) perm = perm_pow(perm, l >> 1);
   /* perm has order two and doesn't belong to Gal(H_k/k) */
   return galoisfixedfield(G, perm, 1, varn(P));
 }

@@ -640,8 +640,8 @@ gprec(GEN x, long l)
       if (!signe(x[4])) return zeropadic(gel(x,2), l+precp(x));
       y=cgetg(5,t_PADIC);
       y[1]=x[1]; setprecp(y,l);
-      gel(y,2) = gcopy(gel(x,2));
-      gel(y,3) = gpowgs(gel(x,2),l);
+      gel(y,2) = icopy(gel(x,2));
+      gel(y,3) = powiu(gel(x,2),l);
       gel(y,4) = modii(gel(x,4), gel(y,3));
       break;
 

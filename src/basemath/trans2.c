@@ -1257,12 +1257,12 @@ gadw(GEN x, long p)
     gel(u, j + 1) = gdivgs(gel(u, j), j);
   for (k = 1; k < n; ++k)
   {
-    gel(u, 1) = gdivgs(gdivgs(gadd(gel(u, 1), gel(u, p)), k), p);
+    gel(u, 1) = gdivgs(gadd(gel(u, 1), gel(u, p)), k*p);
     for (j = 1; j < p; ++j)
       gel(u, j + 1) = gdivgs(gadd(gel(u, j), gel(u, j + 1)), (k*p) + j);
 
     t = gmul(t, gaddgs(x, k-1));
-    s = gadd(s, gmul(gmul(gel(u, 1), gpowgs(gel(x,2), k)), t));
+    s = gadd(s, gmul(gmul(gel(u, 1), powiu(gel(x,2), k)), t));
     if ((k&0xFL)==0) gerepileall(ltop, 3, &u,&s,&t);
   }
 

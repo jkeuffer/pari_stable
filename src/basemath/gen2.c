@@ -1694,7 +1694,7 @@ cvtop(GEN x, GEN p, long d)
       z = cgetg(5, t_PADIC);
       z[1] = evalprecp(d) | evalvalp(v);
       gel(z,2) = icopy(p);
-      gel(z,3) = gpowgs(p, d);
+      gel(z,3) = powiu(p, d);
       gel(z,4) = modii(x, gel(z,3)); return z; /* not memory-clean */
 
     case t_INTMOD:
@@ -1710,7 +1710,7 @@ cvtop(GEN x, GEN p, long d)
       z = cgetg(5, t_PADIC);
       z[1] = evalprecp(d) | evalvalp(v);
       gel(z,2) = icopy(p);
-      gel(z,3) = gpowgs(p, d);
+      gel(z,3) = powiu(p, d);
       if (!is_pm1(den)) num = mulii(num, Fp_inv(den, gel(z,3)));
       gel(z,4) = modii(num, gel(z,3)); return z; /* not memory-clean */
     }

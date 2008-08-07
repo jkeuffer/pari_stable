@@ -1409,11 +1409,11 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
   M = 1000000;
   lp = bit_accuracy(lg(p)) - bfffo(*int_MSW(p));
   if (lp <= 160)
-    bound_bsgs = mulrs(divrs(gpowgs(dbltor(1.048), lp), 9), M);
+    bound_bsgs = mulrs(divrs(powru(dbltor(1.048), lp), 9), M);
   else if (lp <= 192)
-    bound_bsgs = mulrs(divrr(gpowgs(dbltor(1.052), lp), dbltor(16.65)), M);
+    bound_bsgs = mulrs(divrr(powru(dbltor(1.052), lp), dbltor(16.65)), M);
   else if (lp <= 306)
-    bound_bsgs = mulrs(mulrr(gpowgs(dbltor(1.035), lp), dbltor(1.35)), M);
+    bound_bsgs = mulrs(mulrr(powru(dbltor(1.035), lp), dbltor(1.35)), M);
   else bound_bsgs = mulss(50000, M);
   growth_factor = dbltor(1.26);
   product = gen_2;

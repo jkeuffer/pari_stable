@@ -728,7 +728,7 @@ FpXQ_issquare(GEN x, GEN T, GEN p)
   long res;
   if (lg(x) == 2 || equalui(2, p)) return 1;
   av = avma;
-  m = diviiexact(subis(gpowgs(p, degpol(T)), 1), subis(p,1));
+  m = diviiexact(subis(powiu(p, degpol(T)), 1), subis(p,1));
   z = constant_term( FpXQ_pow(x, m, T, p) );
   res = kronecker(z, p) == 1;
   avma = av; return res;

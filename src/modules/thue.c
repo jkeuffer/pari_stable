@@ -51,7 +51,7 @@ distoZ(GEN z)
 static GEN
 myround(GEN x, long dir)
 {
-  GEN eps = gpowgs(stoi(dir > 0? 10: -10), -10);
+  GEN eps = powis(stoi(dir > 0? 10: -10), -10);
   return gmul(x, gadd(gen_1, eps));
 }
 

@@ -3145,7 +3145,7 @@ Buchall(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long prec)
 
   /* resc ~ sqrt(D) w / 2^r1 (2pi)^r2 = hR / Res(zeta_K, s=1) */
   resc = gdiv(mulri(gsqrt(D,DEFAULTPREC), gel(zu,1)),
-	      gmul2n(gpowgs(mppi(DEFAULTPREC), R2), RU));
+	      gmul2n(powru(mppi(DEFAULTPREC), R2), RU));
   av = avma; cache.base = NULL; F.subFB = NULL;
   init_GRHcheck(GRHcheck, N, R1, LOGD);
 

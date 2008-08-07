@@ -131,7 +131,7 @@ Beauzamy_bound(GEN S)
     s = addrr(s, divri(itor(sqri(c), prec), gel(bin,i+1)));
   }
   /* s = [S]_2^2 */
-  C = powrshalf(stor(3,prec), 3 + 2*d); /* 3^{3/2 + d} */
+  C = powruhalf(stor(3,prec), 3 + 2*d); /* 3^{3/2 + d} */
   C = divrr(mulrr(C, s), mulsr(4*d, mppi(prec)));
   lS = absi(leading_term(S));
   return mulir(lS, sqrtr(C));
