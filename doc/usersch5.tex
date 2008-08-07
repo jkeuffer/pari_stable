@@ -6507,6 +6507,9 @@ equal to \kbd{c}.
 \fun{int}{vec_isconst}{GEN v} Returns 1 if all the components of \kbd{v} are
 equal, else returns 0.
 
+\fun{void}{vec_isconst}{GEN v, GEN x} $v$ a pre-existing vector. Set all its
+components to $x$.
+
 \fun{int}{vec_is1to1}{GEN v}  Returns 1 if the components of \kbd{v} are
 pair-wise distinct, i.e. if $i\mapsto v[i]$ is a 1-to-1 mapping, else returns
 0.
