@@ -103,6 +103,7 @@ BA 87- conjvec did not support FFELTs.
        or there was a double root], e.g. polrootsmod(x^3 + x^2 + 21*x,23,1)
 IM 90- lngamma(x) gave incorrect results (off by 2*Pi*I) when real(x) was a 
        negative half-integer.
+   91- trying to write to a binary file and failing leaked a file descriptor
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]

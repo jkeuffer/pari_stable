@@ -3763,18 +3763,21 @@ is_long_ok(FILE *f, long L)
   return (fread(&c,sizeof(long),1, f) == 1 && c == L);
 }
 
-static void
+/* return 1 if valid binary file */
+static int
 check_magic(const char *name, FILE *f)
 {
   if (!is_magic_ok(f))
-    pari_err(talker, "%s is not a GP binary file",name);
-  if (!is_sizeoflong_ok(f))
-    pari_err(talker, "%s not written for a %ld bit architecture",
+    pari_warn(warner, "%s is not a GP binary file",name);
+  else if (!is_sizeoflong_ok(f))
+    pari_warn(warner, "%s not written for a %ld bit architecture",
 	       name, sizeof(long)*8);
-  if (!is_long_ok(f, ENDIAN_CHECK))
-    pari_err(talker, "unexpected endianness in %s",name);
-  if (!is_long_ok(f, BINARY_VERSION))
-    pari_err(talker, "%s written by an incompatible version of GP",name);
+  else if (!is_long_ok(f, ENDIAN_CHECK))
+    pari_warn(warner, "unexpected endianness in %s",name);
+  else if (!is_long_ok(f, BINARY_VERSION))
+    pari_warn(warner, "%s written by an incompatible version of GP",name);
+  else return 1;
+  return 0;
 }
 
 static void
@@ -3799,7 +3802,11 @@ writebin(const char *name, GEN x)
   FILE *f = fopen(name,"r");
   int already = f? 1: 0;
 
-  if (f) { check_magic(name,f); fclose(f); }
+  if (f) {
+    int ok = check_magic(name,f);
+    fclose(f);
+    if (!ok) pari_err(openfiler,"binary output",name);
+  }
   f = fopen(name,"a");
   if (!f) pari_err(openfiler,"binary output",name);
   if (!already) write_magic(f);
@@ -3827,7 +3834,8 @@ readbin(const char *name, FILE *f, int *vector)
   pari_sp av = avma;
   GEN x,y,z;
   int cx,cy;
-  check_magic(name,f); x = y = z = NULL;
+  if (!check_magic(name,f)) return NULL;
+  x = y = z = NULL;
   cx = 0; /* gcc -Wall */
   while ((y = readobj(f, &cy)))
   {
