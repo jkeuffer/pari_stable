@@ -1137,17 +1137,27 @@ cxgamma(GEN s0, int dolog, long prec)
   if (dolog)
   {
     if (funeq)
-    { /* 2 Pi ceil( (2Re(s) - 3)/4 ) */
-      GEN z = mulri(pi2, ceilr(shiftr(subrs(shiftr(sig,1), 3), -2)));
-      /* y --> y + log Pi - log sqrt(2Pi) - log sin(Pi s)
-       *     = y - log( sin(Pi s) / (sqrt(2Pi)/2) ) */
-      y = gsub(y, glog(gdiv(gsin(gmul(pi,s0),prec), shiftr(sqrtpi2,-1)), prec));
+    { /* (recall that s = 1 - s0) */
+
+      /* We compute log(sin(Pi s0)) so that it has branch cuts along
+      * (-oo, 0] and [1, oo).  To do this in a numerically stable way
+      * we must compute the log first then mangle its imaginary part.
+      * The rounding operation below is stable because we're rounding
+      * a number which is already within 1/4 of an integer. */
+
+      /* z = log( sin(Pi s0) / (sqrt(2Pi)/2) ) */
+      GEN z = glog(gdiv(gsin(gmul(pi,s0),prec), shiftr(sqrtpi2,-1)), prec);
+      /* b = (2 Re(s) - 1) / 4 */
+      GEN b = shiftr(subrs(shiftr(sig, 1), 1), -2);
+      y = gsub(y, z);
+      if (gsigne(imag_i(s)) > 0) togglesign(b);
+      /* z = 2Pi round( Im(z)/2Pi - b ) */
+      z = gmul(roundr(gsub(gdiv(imag_i(z), pi2), b)), pi2);
       if (signe(z)) {
-	if (gsigne(imag_i(s)) < 0) togglesign(z);
-	if (typ(y) == t_COMPLEX)
-	  gel(y,2) = gadd(gel(y,2), z);
-	else
-	  y = gadd(y, mkcomplex(gen_0,z));
+        if (typ(y) == t_COMPLEX)
+          gel(y,2) = gadd(gel(y,2), z);
+        else
+          y = gadd(y, mkcomplex(gen_0, z));
       }
       p1 = gneg(p1);
     }
