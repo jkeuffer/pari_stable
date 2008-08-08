@@ -853,7 +853,9 @@ static GEN
 gpreadbin(const char *s, int *vector)
 {
   GEN x = readbin(s,pari_infile, vector);
-  popinfile(); return x;
+  popinfile();
+  if (!x) pari_err(openfiler,"input",s);
+  return x;
 }
 
 static void
@@ -1654,7 +1656,7 @@ GEN
 read0(const char *s)
 {
   switchin(s);
-  if (file_is_binary(pari_infile)) { int junk; return gpreadbin(s, &junk); }
+  if (file_is_binary(pari_infile)) return gpreadbin(s, NULL);
   return gp_main_loop(0);
 }
 /* as read0 but without a main instance of gp running */
@@ -1666,7 +1668,10 @@ read_main(const char *s)
     z = NULL;
   else {
     switchin(s);
-    if (file_is_binary(pari_infile)) { int junk; z = gpreadbin(s, &junk); }
+    if (file_is_binary(pari_infile)) {
+      z = readbin(s,pari_infile, NULL);
+      popinfile();
+    }
     else z = gp_main_loop(gp_RECOVER);
   }
   if (!z) fprintferr("... skipping file '%s'\n", s);

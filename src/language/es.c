@@ -3849,10 +3849,10 @@ readbin(const char *name, FILE *f, int *vector)
       pari_warn(warner,"%ld unnamed objects read. Returning then in a vector",
 	  lg(z)-1);
     x = gerepilecopy(av, z);
-    *vector = 1;
+    if (vector) *vector = 1;
   }
   else
-    *vector = 0;
+    if (vector) *vector = 0;
   return x;
 }
 
