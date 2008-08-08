@@ -1471,10 +1471,10 @@ enum { gp_ISMAIN = 1, gp_RECOVER = 2 };
 /* If there are other buffers open (bufstack != NULL), we are doing an
  * immediate read (with read, extern...) */
 static GEN
-gp_main_loop(const char *name, long flag)
+gp_main_loop(long flag)
 {
-  VOLATILE const long ismain    = flag & gp_ISMAIN;
   VOLATILE const long dorecover = flag & gp_RECOVER;
+  VOLATILE const long ismain    = flag & gp_ISMAIN;
   gp_hist *H  = GP_DATA->hist;
   VOLATILE GEN z = gnil;
   VOLATILE pari_sp av = avma;
@@ -1491,18 +1491,19 @@ gp_main_loop(const char *name, long flag)
       /* recover: jump from error [ > 0 ] or allocatemem [ -1 ] */
       if ((er = setjmp(GP_DATA->env)))
       {
-	char *s = (char*)global_err_data;
-	if (s && *s) fprintferr("%Ps\n", readseq(s));
-	avma = av = top;
-	GP_DATA->fmt->prettyp = outtyp;
-	kill_all_buffers(b);
-	if (ismain)
+        if (ismain && er > 0) {
+          char *s = (char*)global_err_data;
+          if (s && *s) fprintferr("%Ps\n", readseq(s));
+          GP_DATA->fmt->prettyp = outtyp;
           prune_history(H, tloc);
-        else if (er > 0)
-        { /* true error & not from main instance. Abort read */
-          if (name) fprintferr("... skipping file '%s'\n", name);
+        }
+	avma = av = top;
+	kill_all_buffers(b);
+        if (!ismain && er > 0) {
+          /* true error not from main instance. Cleanup then let caller sort
+           * it out */
           (void)popinfile();
-          pop_buffer(); return gnil;
+          pop_buffer(); return NULL;
         }
       }
     }
@@ -1654,15 +1655,21 @@ read0(const char *s)
 {
   switchin(s);
   if (file_is_binary(pari_infile)) { int junk; return gpreadbin(s, &junk); }
-  return gp_main_loop(s, 0);
+  return gp_main_loop(0);
 }
 /* as read0 but without a main instance of gp running */
 static void
 read_main(const char *s)
 {
-  switchin(s);
-  if (file_is_binary(pari_infile)) { int junk; (void)gpreadbin(s, &junk); }
-  else (void)gp_main_loop(s, gp_RECOVER);
+  GEN z;
+  if (setjmp(GP_DATA->env))
+    z = NULL;
+  else {
+    switchin(s);
+    if (file_is_binary(pari_infile)) { int junk; z = gpreadbin(s, &junk); }
+    else z = gp_main_loop(gp_RECOVER);
+  }
+  if (!z) fprintferr("... skipping file '%s'\n", s);
 }
 
 GEN
@@ -1670,7 +1677,7 @@ extern0(const char *s)
 {
   check_secure(s);
   pari_infile = try_pipe(s, mf_IN)->file;
-  return gp_main_loop(NULL, 0);
+  return gp_main_loop(0);
 }
 
 GEN
@@ -1881,7 +1888,7 @@ main(int argc, char **argv)
     if (!pari_logfile) pari_logfile = l;
   }
   grow_kill(A);
-  (void)gp_main_loop(NULL, gp_ISMAIN | gp_RECOVER);
+  (void)gp_main_loop(gp_RECOVER|gp_ISMAIN);
   gp_quit(0); return 0; /* not reached */
 }
 
