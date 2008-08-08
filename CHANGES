@@ -268,6 +268,8 @@ BA 49- user variables can now be aliased [#790].
    93- t_REAL^0 now returns 1.00000 [ was 1 ]
    94- mpcopy, Flv_copy, Flx_copy, vecsmall_copy have all become
        aliases for leafcopy.
+   95- trap(,,foo) was actually equivalent to trap(,foo) changing the global
+       exception handler, which was awkward an unintended
 
   Added
     1- library function pari_calloc, cgetalloc

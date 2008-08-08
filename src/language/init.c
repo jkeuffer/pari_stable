@@ -1170,7 +1170,6 @@ GEN
 trap0(const char *e, GEN r, GEN f)
 {
   long numerr = CATCH_ALL;
-  GEN F;
        if (!strcmp(e,"errpile")) numerr = errpile;
   else if (!strcmp(e,"typeer")) numerr = typeer;
   else if (!strcmp(e,"gdiver")) numerr = gdiver;
@@ -1183,18 +1182,16 @@ trap0(const char *e, GEN r, GEN f)
   else if (*e) pari_err(impl,"this trap keyword");
   /* TO BE CONTINUED */
 
-  if (f && r)
+  if (f)
   { /* explicit recovery text */
     GEN x = closure_trapgen(numerr,f);
-    if (x == (GEN)1L) { gp_function_name = NULL; x = closure_evalgen(r); }
+    if (x == (GEN)1L) { gp_function_name = NULL; x = r? closure_evalgen(r): gnil; }
     return x;
   }
-
-  F = f? f: r; /* define a default handler */
- /* will execute F (break loop if F = NULL), then jump to 'env' */
+  /* define a default handler: execute r (break loop if NULL), then jump to 'env' */
   if (numerr == CATCH_ALL) numerr = noer;
   kill_dft_handler(numerr);
-  dft_handler[numerr] = F? gclone(F): BREAK_LOOP;
+  dft_handler[numerr] = r? gclone(r): BREAK_LOOP;
   return gnil;
 }
 
