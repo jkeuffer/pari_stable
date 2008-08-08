@@ -1473,8 +1473,8 @@ enum { gp_ISMAIN = 1, gp_RECOVER = 2 };
 static GEN
 gp_main_loop(const char *name, long flag)
 {
-  const long ismain = flag & gp_ISMAIN;
-  const long dorecover = flag & gp_RECOVER;
+  VOLATILE long ismain = flag & gp_ISMAIN;
+  VOLATILE long dorecover = flag & gp_RECOVER;
   gp_hist *H  = GP_DATA->hist;
   VOLATILE GEN z = gnil;
   VOLATILE pari_sp av = avma;
@@ -1486,18 +1486,17 @@ gp_main_loop(const char *name, long flag)
     {
       static long tloc, outtyp;
       long er;
-      tloc = H->total;
       outtyp = GP_DATA->fmt->prettyp;
-      recover(0);
+      tloc = H->total; recover(0);
       /* jump from error [ > 0 ] or allocatemem [ -1 ]*/
       if ((er = setjmp(GP_DATA->env)))
       {
 	char *s = (char*)global_err_data;
 	if (s && *s) fprintferr("%Ps\n", readseq(s));
 	avma = av = top;
-	prune_history(H, tloc);
 	GP_DATA->fmt->prettyp = outtyp;
 	kill_all_buffers(b);
+	if (ismain) prune_history(H, tloc);
         if (er > 0 && !ismain)
         { /* true error & not from main instance. Abort read */
           if (name) fprintferr("... skipping file '%s'\n", name);
