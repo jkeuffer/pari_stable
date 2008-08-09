@@ -89,6 +89,23 @@ infinity.
 
 \fun{GEN}{ellinf}{} returns the point at infinity \kbd{[0]}.
 
+\subsec{Point counting}
+
+\fun{GEN}{ellap}{GEN E, GEN p} computes  the  trace  of  Frobenius  $a_p
+= p+1 - #E(\F_p)$  for the elliptic curve $E/\F_p$  and the prime number p. The
+coefficients of the curve may belong to an arbitrary domain that \tet{Rg_to_Fp}
+can handle. The equation must be minimal at $p$.
+
+\fun{GEN}{ellsea}{GEN E, GEN p, long early_abort} available if the \kbd{seadata}
+package is installed. This function returns directly $#E(\F_p)$, by computing it
+modulo $\ell$ for many small $\ell$; it is called by \kbd{ellap}: same conditions
+as above for $E$. The extra flag \kbd{early\_abort}, if set to a non-zero
+value, causes the computation to return \kbd{gen\_0} (an impossible cardinality)
+if one of the small primes $\ell$ divides the curve order. For cryptographic
+applications; where one is usually interested in curves of prime order, this
+efficiently weeds out most uninteresting curves; there is no guarantee that the
+resulting cardinality is prime, only that it has no small prime divisor.
+
 \section{Other curves}
 
 The following functions deal with hyperelliptic curves in weighted projective
