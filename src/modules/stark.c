@@ -2377,7 +2377,7 @@ LABDOUB:
   }
   for (j = 1; j <= h; j++)
     gel(veczeta,j) = gmul2n(gch(gel(veczeta,j), newprec), 1);
-  polrelnum = roots_to_pol_intern(real_1(newprec),veczeta, 0,0);
+  polrelnum = roots_to_pol(veczeta, 0);
   if (DEBUGLEVEL)
   {
     if (DEBUGLEVEL>1) {
@@ -2398,7 +2398,7 @@ LABDOUB:
   {
     for (j = 1; j <= h; j++)
       gel(veczeta,j) = gsubgs(gsqr(gel(veczeta,j)), 2);
-    polrelnum = roots_to_pol_intern(real_1(newprec),veczeta, 0,0);
+    polrelnum = roots_to_pol(veczeta, 0);
     if (DEBUGLEVEL)
     {
       if (DEBUGLEVEL>1) {

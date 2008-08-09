@@ -445,68 +445,6 @@ polcyclo_eval(long n, GEN x)
   }
   return gerepileupto(av, gdiv(yn,yd));
 }
-
-/* compute prod (L*x +/- a[i]) */
-GEN
-roots_to_pol_intern(GEN L, GEN a, long v, int plus)
-{
-  long i,k,lx = lg(a), code;
-  GEN p1,p2;
-  if (lx == 1) return pol_1(v);
-  p1 = cgetg(lx, t_VEC);
-  code = evalsigne(1)|evalvarn(v);
-  for (k=1,i=1; i<lx-1; i+=2)
-  {
-    p2 = cgetg(5,t_POL); gel(p1,k++) = p2;
-    gel(p2,2) = gmul(gel(a,i),gel(a,i+1));
-    gel(p2,3) = gadd(gel(a,i),gel(a,i+1));
-    if (plus == 0) gel(p2,3) = gneg(gel(p2,3));
-    gel(p2,4) = L; p2[1] = code;
-  }
-  if (i < lx)
-  {
-    p2 = cgetg(4,t_POL); gel(p1,k++) = p2;
-    p2[1] = code = evalsigne(1)|evalvarn(v);
-    gel(p2,2) = plus? gel(a,i): gneg(gel(a,i));
-    gel(p2,3) = L;
-  }
-  setlg(p1, k); return divide_conquer_prod(p1, gmul);
-}
-
-GEN
-roots_to_pol(GEN a, long v)
-{
-  return roots_to_pol_intern(gen_1,a,v,0);
-}
-
-/* prod_{i=1..r1} (x - a[i]) prod_{i=1..r2} (x - a[i])(x - conj(a[i]))*/
-GEN
-roots_to_pol_r1r2(GEN a, long r1, long v)
-{
-  long i,k,lx = lg(a), code;
-  GEN p1;
-  if (lx == 1) return pol_1(v);
-  p1 = cgetg(lx, t_VEC);
-  code = evalsigne(1)|evalvarn(v);
-  for (k=1,i=1; i<r1; i+=2)
-  {
-    GEN p2 = cgetg(5,t_POL); gel(p1,k++) = p2;
-    gel(p2,2) = gmul(gel(a,i),gel(a,i+1));
-    gel(p2,3) = gneg(gadd(gel(a,i),gel(a,i+1)));
-    gel(p2,4) = gen_1; p2[1] = code;
-  }
-  if (i < r1+1)
-    gel(p1,k++) = gadd(pol_x(v), gneg(gel(a,i)));
-  for (i=r1+1; i<lx; i++)
-  {
-    GEN p2 = cgetg(5,t_POL); gel(p1,k++) = p2;
-    gel(p2,2) = gnorm(gel(a,i));
-    gel(p2,3) = gneg(gtrace(gel(a,i)));
-    gel(p2,4) = gen_1; p2[1] = code;
-  }
-  setlg(p1, k); return divide_conquer_prod(p1, gmul);
-}
-
 /********************************************************************/
 /**                                                                **/
 /**                  HILBERT & PASCAL MATRICES                     **/

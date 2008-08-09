@@ -1703,7 +1703,7 @@ static GEN
 get_pol(CG_data *d, GEN x)
 {
   long e;
-  GEN g = grndtoi(roots_to_pol_r1r2(x, d->r1, d->v), &e);
+  GEN g = grndtoi(roots_to_pol_r1(x, d->v, d->r1), &e);
   if (e > -5) pari_err(precer, "get_pol");
   return g;
 }

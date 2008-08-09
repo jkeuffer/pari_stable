@@ -780,6 +780,69 @@ leftright_pow_u(GEN x, ulong n, void *data, GEN (*sqr)(void*,GEN),
   return leftright_pow_u_fold(x, n, (void *)&d, leftright_sqr, leftright_msqr);
 }
 
+/*******************************************************************/
+/*                                                                 */
+/*                     ROOTS --> MONIC POLYNOMIAL                  */
+/*                                                                 */
+/*******************************************************************/
+/* return c = x - u, code = c[1] */
+static GEN
+x_u(GEN u, long code)
+{
+  GEN c = cgetg(4,t_POL); c[1] = code;
+  gel(c,2) = gneg(u);
+  gel(c,3) = gen_1; return c;
+}
+/* compute prod (x - a[i]) */
+GEN
+roots_to_pol(GEN a, long v)
+{
+  long i, k, code, lx = lg(a);
+  GEN L;
+  if (lx == 1) return pol_1(v);
+  L = cgetg(lx, t_VEC);
+  code = evalsigne(1)|evalvarn(v);
+  for (k=1,i=1; i<lx-1; i+=2)
+  {
+    GEN u = gel(a,i), v = gel(a,i+1);
+    GEN c = cgetg(5,t_POL); gel(L,k++) = c; c[1] = code;
+    gel(c,2) = gmul(u,v);
+    gel(c,3) = gneg(gadd(u,v));
+    gel(c,4) = gen_1;
+  }
+  if (i < lx) gel(L,k++) = x_u(gel(a,i), code);
+  setlg(L, k); return divide_conquer_prod(L, gmul);
+}
+
+/* prod_{i=1..r1} (x - a[i]) prod_{i=1..r2} (x - a[i])(x - conj(a[i]))*/
+GEN
+roots_to_pol_r1(GEN a, long v, long r1)
+{
+  long i, k, code, lx = lg(a);
+  GEN L;
+  if (lx == 1) return pol_1(v);
+  L = cgetg(lx, t_VEC);
+  code = evalsigne(1)|evalvarn(v);
+  for (k=1,i=1; i<r1; i+=2)
+  {
+    GEN u = gel(a,i), v = gel(a,i+1);
+    GEN c = cgetg(5,t_POL); gel(L,k++) = c; c[1] = code;
+    gel(c,2) = gmul(u,v);
+    gel(c,3) = gneg(gadd(u,v));
+    gel(c,4) = gen_1;
+  }
+  if (i < r1+1) gel(L,k++) = x_u(gel(a,i), code);
+  for (i=r1+1; i<lx; i++)
+  {
+    GEN u = gel(a,i);
+    GEN c = cgetg(5,t_POL); gel(L,k++) = c; c[1] = code;
+    gel(c,2) = gnorm(u);
+    gel(c,3) = gneg(gtrace(u));
+    gel(c,4) = gen_1;
+  }
+  setlg(L, k); return divide_conquer_prod(L, gmul);
+}
+
 GEN
 divide_conquer_assoc(GEN x, void *data, GEN (*mul)(void *,GEN,GEN))
 {
@@ -810,13 +873,15 @@ _domul(void *data, GEN x, GEN y)
   GEN (*mul)(GEN,GEN)=(GEN (*)(GEN,GEN)) data;
   return mul(x,y);
 }
-
 GEN
 divide_conquer_prod(GEN x, GEN (*mul)(GEN,GEN))
-{
-  return divide_conquer_assoc(x, (void *)mul, _domul);
-}
+{ return divide_conquer_assoc(x, (void *)mul, _domul); }
 
+/*******************************************************************/
+/*                                                                 */
+/*                          FACTORBACK                             */
+/*                                                                 */
+/*******************************************************************/
 static GEN
 idmulred(void *nf, GEN x, GEN y) { return idealmulred((GEN) nf, x, y); }
 static GEN

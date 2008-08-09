@@ -190,7 +190,6 @@ quadhilbertimag(GEN D)
   {
     long ex, exmax = 0;
     pari_sp av0 = avma;
-    GEN lead;
     T.sqd = sqrtr_abs(itor(D, prec));
     P = cgetg(h+1,t_VEC);
     for (i=1; i<=h; i++)
@@ -200,10 +199,7 @@ quadhilbertimag(GEN D)
       gel(P,i) = s; ex = gexpo(s); if (ex > 0) exmax += ex;
     }
     if (DEBUGLEVEL>1) msgtimer("roots");
-    /* to avoid integer overflow (1 + 0.) */
-    lead = (exmax < bit_accuracy(prec))? gen_1: real_1(prec);
-
-    P = real_i( roots_to_pol_intern(lead,P,0,0) );
+    P = real_i( roots_to_pol(P,0) );
     P = grndtoi(P,&exmax);
     if (DEBUGLEVEL>1) msgtimer("product, error bits = %ld",exmax);
     if (exmax <= -10) break;

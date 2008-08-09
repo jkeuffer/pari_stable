@@ -241,8 +241,6 @@ GEN initgaloisborne(GEN T, GEN dn, long prec, GEN *pL, GEN *pprep, GEN *pdis);
 GEN logmax_modulus_bound(GEN p);
 GEN polint_i(GEN xa, GEN ya, GEN x, long n, GEN *ptdy);
 GEN quicktrace(GEN x, GEN sym);
-GEN roots_to_pol_intern(GEN L, GEN a, long v, int plus);
-GEN roots_to_pol_r1r2(GEN a, long r1, long v);
 GEN special_pivot(GEN x);
 GEN vandermondeinversemod(GEN L, GEN T, GEN den, GEN mod);
 GEN ZX_monic_factorpadic(GEN f, GEN p, long prec);

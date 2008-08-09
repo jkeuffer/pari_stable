@@ -4920,13 +4920,6 @@ Assumes that \kbd{x} is non-zero.
 \fun{GEN}{deg1pol}{GEN a, GEN b,long v} creates the degree 1 \typ{POL}
 $a + b \kbd{pol\_x}(v)$
 
-\fun{GEN}{deg1_from_roots}{GEN L, long v} given a vector $L$ of scalars,
-returns the vector of monic linear polynomials in variable $v$ whose roots
-are the $L[i]$, i.e. the $x - L[i]$.
-
-\fun{GEN}{roots_from_deg1}{GEN L} given a vector $L$ of monic linear
-polynomials, return their roots, i.e. the $- L[i](0)$.
-
 \fun{GEN}{pol_1}{long v} Returns the constant polynomial $1$ in variable $v$.
 
 \fun{GEN}{pol_x}{long v} Returns the monomial of degree $1$ in variable $v$.
@@ -5116,6 +5109,31 @@ is given by the vector $x$. Shallow function.
 
 \fun{GEN}{deg1pol_shallow}{GEN a, GEN b,long v} returns the degree 1
 \typ{POL} $a + b \kbd{pol\_x}(v)$
+
+\subsec{From roots to polynomials}
+
+\fun{GEN}{deg1_from_roots}{GEN L, long v} given a vector $L$ of scalars,
+returns the vector of monic linear polynomials in variable $v$ whose roots
+are the $L[i]$, i.e. the $x - L[i]$.
+
+\fun{GEN}{roots_from_deg1}{GEN L} given a vector $L$ of monic linear
+polynomials, return their roots, i.e. the $- L[i](0)$.
+
+\fun{GEN}{roots_to_pol}{GEN L, long v} given a vector of scalars $L$,
+returns the monic polynomial in variable $v$ whose roots are the $L[i]$.
+Calls \tet{divide_conquer_prod}, so leaves some garbage on stack, but suitable for
+\kbd{gerepileupto}.
+
+\fun{GEN}{roots_to_pol_r1}{GEN L, long v, long r1} as \kbd{roots\_to\_pol}
+assuming the first $r_1$ roots are ``real'', and the following ones are
+representatives of conjugate pairs of ``complex'' roots. So if $L$ has $r_1 +
+r_2$ elements, we obtain a polynomial of degree $r_1 + 2r_2$. In most
+applications, the roots are indeed real and complex, but the implementation
+assumes only that each ``complex'' root $z$ introduces a quadratic
+factor $X^2 - \kbd{trace}(z) X + \kbd{norm}(z)$. Calls
+\tet{divide_conquer_prod}.
+Calls \tet{divide_conquer_prod}, so leaves some garbage on stack, but suitable for
+\kbd{gerepileupto}.
 
 \section{Integer parts}
 
@@ -5646,10 +5664,10 @@ single entry; and otherwise apply the function recursively on the vector
 
 \kbd{mul}$(v[1],v[2])$, \kbd{mul}$(v[3],v[4])$, \dots
 
-\noindent Only require that \kbd{mul} by an associative binary operator,
-which need not correspond to a true multiplication. \kbd{D} is meant to contain 
+\noindent Only requires that \kbd{mul} is an associative binary operator,
+which need not correspond to a true multiplication. \kbd{D} is meant to encode
 an arbitrary evaluation context, set it to \kbd{NULL} in simple cases where you
-do not need this.
+do not need this. Leaves some garbage on stack, but suitable for \kbd{gerepileupto}.
 
 To describe the following functions, we use the following private typedefs
 to simplify the description:
