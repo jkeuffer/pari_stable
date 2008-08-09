@@ -2136,6 +2136,68 @@ coefficients such that $\kbd{au} + \kbd{bv} = d$.
 $d$ of \kbd{a} and \kbd{b} and sets \kbd{u}, \kbd{v} to the Bezout coefficients
 such that $\kbd{au} + \kbd{bv} = d$.
 
+\subsec{Pure powers}
+
+\fun{long}{Z_issquare}{GEN n} returns $1$ if \typ{INT} \kbd{n} is
+a square, and $0$ otherwise. This is tested first modulo small prime
+powers, then \kbd{sqrtremi} is called.
+
+\fun{long}{Z_issquareall}{GEN n, GEN *sqrtn} as \kbd{Z\_issquare}. If
+\kbd{n} is indeed a square, set \kbd{sqrtn} to its integer square root.
+Uses a fast congruence test mod $64\times 63\times 65\times 11$ before
+computing an integer square root.
+
+\fun{long}{uissquareall}{ulong n, ulong *sqrtn} as \kbd{Z\_issquareall},
+for an \kbd{ulong} operand \kbd{n}.
+
+\fun{long}{Z_isanypower}{GEN x, GEN *ptn} returns the maximal $k\geq 2$  such
+that the \typ{INT} $x = n^k$ is a perfect power, or $0$ if no such $k$ exist;
+in particular \kbd{ispower(1)}, \kbd{ispower(0)}, \kbd{ispower(-1)} all
+return 0. If the return value $k$ is not $0$ (so that $x = n^k$) and
+\kbd{ptn} is not \kbd{NULL}, set \kbd{*ptn} to $n$.
+
+The following low-level functions are called by \tet{Z_isanypower} but can
+be directly useful:
+
+\fun{int}{is_357_power}{GEN x, GEN *ptn, ulong *pmask} tests whether the
+integer $x > 0$ is a $3$-rd, $5$-th or $7$-th power. The bits of \kbd{*mask}
+initially indicate which test is to be performed; 
+bit $0$: $3$-rd,
+bit $1$: $5$-th,
+bit $2$: $7$-th (e.g.~$\kbd{*pmask} = 7$ performs all tests). They are
+updated during the call: if the ``$i$-th power'' bit is set to $0$
+then $x$ is not a $k$-th power. The function returns $0$
+(not a
+$3$-rd,
+$5$-th or
+$7$-th power),
+$3$
+($3$-rd power,
+not a $5$-th or
+$7$-th power),
+$5$
+($5$-th power,
+not a $7$-th power),
+or $7$
+($7$-th power); if an $i$-th power bit is initially set to $0$, we take it
+at face value and assume $x$ is not an $i$-th power without performing any
+test. If the return value $k$ is non-zero, set \kbd{*ptn} to $n$ such that $x
+= n^k$.
+
+\fun{int}{is_pth_power}{GEN x, GEN *ptn, ulong *pminp, ulong cutoff}
+$x > 0$ is an integer and we look for the smallest prime
+$p \geq \max(11,\kbd{*pminp})$ such that $x = n^p$. (The $11$ is due to the
+fact that \tet{is_357_power} and \kbd{issquare} are faster than
+the generic version for $p < 11$.) Fail and return $0$ when the existence
+of $p$ would imply $2^{\kbd{cutoff}} > x^{1/p}$, meaning that a possible $n$
+is so small that it should have been found by trial division; for maximal
+speed, you should start by a round of trial division, but the cut-off may
+also be set to $1$ for a rigorous result without any trial division.
+
+Otherwise returns the smallest suitable prime $p$ and set \kbd{*ptn} to $n$.
+\kbd{*pminp} is updated to $p$, so that we may immediately recall the
+function with the same parameters after setting $x = \kbd{*ptn}$.
+
 \subsec{Factorization}
 
 \fun{GEN}{Z_factor}{GEN n} factors the \typ{INT} \kbd{n}. The ``primes''
@@ -2151,26 +2213,6 @@ is square-free, and $0$ otherwise.
 
 \fun{long}{Z_isfundamental}{GEN x} returns $1$ if the \typ{INT} \kbd{x}
 is a fundamental discriminant, and $0$ otherwise.
-
-\fun{long}{Z_issquare}{GEN n} returns $1$ if \typ{INT} \kbd{n} is
-a square, and $0$ otherwise. This is tested first modulo small prime
-powers, then \kbd{sqrtremi} is called.
-
-\fun{long}{Z_issquareall}{GEN n, GEN *sqrtn} as \kbd{Z\_issquare}. If
-\kbd{n} is indeed a square, set \kbd{sqrtn} to its integer square root.
-
-\fun{long}{Z_isanypower}{GEN x, GEN *ptn} returns the maximal $k\geq 2$  such
-that the \typ{INT} $x = n^k$ is a perfect power, or $0$ if no such $k$ exist;
-in particular \kbd{ispower(1)}, \kbd{ispower(0)}, \kbd{ispower(-1)} all
-return 0. If the return value $k$ is not $0$ (so that $x = n^k$) and
-\kbd{ptn} is not \kbd{NULL}, set \kbd{*ptn} to $n$.
-
-\fun{long}{uissquareall}{ulong n, ulong *sqrtn} as \kbd{Z\_issquareall},
-for an \kbd{ulong} operand \kbd{n}.
-
-\fun{GEN}{factoru}{ulong n}, returns the factorization of $n$. The result
-is a $2$-component vector $[P,E]$, where $P$ and $E$ are \typ{VECSMALL}
-containing the prime divisors of $n$, and the $v_p(n)$.
 
 \fun{GEN}{Z_factor_until}{GEN n, GEN lim} as \kbd{Z\_factor}, but stop the
 factorization process as soon as the unfactored part is smaller than \kbd{lim}.
@@ -2202,11 +2244,6 @@ necessarily squarefree, but $p^2 \mid n$ implies $p > \kbd{lim}$.
 \kbd{boundfact(n,lim)} to partially factor \kbd{n}. The resulting $d$ is not
 necessarily squarefree, but $p^2 \mid n$ implies $p > \kbd{lim}$.
 
-\fun{GEN}{factoru_pow}{ulong n}, returns the factorization of $n$. The result
-is a $3$-component vector $[P,E,C]$, where $P$, $E$ and $C$ are
-\typ{VECSMALL} containing the prime divisors of $n$, the $v_p(n)$
-and the $p^{v_p(n)}$.
-
 \fun{GEN}{factor_pn_1}{GEN p, long n} returns the factorization of $p^n-1$,
 where $p$ is prime and $n$ is a positive integer.
 
@@ -2218,10 +2255,24 @@ of $\phi_n(p)$, assuming $p$ prime and an Aurifeuillian factor exists
 $\phi_n(a)$, assuming $a$ is a non-zero integer and $n > 2$. Returns $1$
 if no Aurifeuillian factor exists.
 
+\fun{GEN}{factoru}{ulong n}, returns the factorization of $n$. The result
+is a $2$-component vector $[P,E]$, where $P$ and $E$ are \typ{VECSMALL}
+containing the prime divisors of $n$, and the $v_p(n)$.
+
+
+\fun{GEN}{factoru_pow}{ulong n}, returns the factorization of $n$. The result
+is a $3$-component vector $[P,E,C]$, where $P$, $E$ and $C$ are
+\typ{VECSMALL} containing the prime divisors of $n$, the $v_p(n)$
+and the $p^{v_p(n)}$.
+
 \subsec{Primality and compositeness tests}
 
 \fun{int}{uisprime}{ulong p}, returns $1$ if \kbd{p} is a prime number and
 $0$ otherwise.
+
+\fun{ulong}{unextprime}{ulong n}, returns the smallest prime $\geq n$. Return
+$0$ if it cannot be represented as an \kbd{ulong} (bigger than $2^{64} - 59$
+or $2^{32} - 5$ depending on the word size).
 
 \fun{int}{isprime}{GEN n}, returns $1$ if the \typ{INT} \kbd{n} is a
 (fully proven) prime number and $0$ otherwise.
