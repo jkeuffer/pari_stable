@@ -709,7 +709,7 @@ GEN     quaddisc(GEN x);
 GEN     quadregulator(GEN x, long prec);
 GEN     quadunit(GEN x);
 GEN     sqrtint(GEN a);
-GEN     seq_umul(ulong a, ulong b);
+GEN     mulu_interval(ulong a, ulong b);
 long    uissquareall(ulong A, ulong *sqrtA);
 GEN     znorder(GEN x, GEN o);
 GEN     znlog(GEN x, GEN g);
@@ -721,6 +721,7 @@ GEN     znstar(GEN x);
 
 long    Z_issquarefree(GEN x);
 GEN     Z_factor_limit(GEN n, long all);
+GEN     Z_factor_until(GEN n, GEN limit);
 long    bigomega(GEN n);
 GEN     boundfact(GEN n, long lim);
 GEN     core(GEN n);
@@ -1727,9 +1728,10 @@ GEN     smithclean(GEN z);
 GEN     gnextprime(GEN n);
 GEN     gprecprime(GEN n);
 int     is_357_power(GEN x, GEN *pt, ulong *mask);
-int     is_odd_power(GEN x, GEN *pt, ulong *curexp, ulong cutoffbits);
+int     is_pth_power(GEN x, GEN *pt, ulong *curexp, ulong cutoffbits);
 GEN     nextprime(GEN n);
 GEN     precprime(GEN n);
+ulong   unextprime(ulong n);
 
 /* init.c */
 

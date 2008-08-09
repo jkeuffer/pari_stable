@@ -1198,7 +1198,7 @@ gammahs(long m, long prec)
   z = sqrtr( mppi(prec) );
   if (m)
   {
-    GEN p1 = seq_umul(ma/2 + 1, ma);
+    GEN p1 = mulu_interval(ma/2 + 1, ma);
     long v = vali(p1);
     p1 = shifti(p1, -v); v -= ma;
     if (m >= 0) z = mulri(z,p1);

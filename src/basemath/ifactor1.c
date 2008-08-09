@@ -58,6 +58,45 @@ static unsigned char prc210_d1[] = {
   2, 6, 6, 4, 2, 4, 6, 2, 6, 4, 2, 4, 2, 10, 2,
 };
 
+/* return 0 for overflow */
+ulong
+unextprime(ulong n)
+{
+  long rc, rc0, rcd, rcn;
+
+  switch(n) {
+    case 0: case 1: case 2: return 2;
+    case 3: return 3;
+    case 4: case 5: return 5;
+    case 6: case 7: return 7;
+  }
+#ifdef LONG_IS_64BIT
+  if (n > (ulong)-59) return 0;
+#else
+  if (n > (ulong)-5) return 0;
+#endif
+  /* here n > 7 */
+  n |= 1; /* make it odd */
+  rc = rc0 = n % 210;
+  /* find next prime residue class mod 210 */
+  for(;;)
+  {
+    rcn = (long)(prc210_no[rc>>1]);
+    if (rcn != NPRC) break;
+    rc += 2; /* cannot wrap since 209 is coprime and rc odd */
+  }
+  if (rc > rc0) n += rc - rc0;
+  /* now find an actual (pseudo)prime */
+  for(;;)
+  {
+    if (uisprime(n)) break;
+    rcd = prc210_d1[rcn];
+    if (++rcn > 47) rcn = 0;
+    n += rcd;
+  }
+  return n;
+}
+
 GEN
 nextprime(GEN n)
 {
@@ -67,13 +106,16 @@ nextprime(GEN n)
   if (typ(n) != t_INT) n = gceil(n);
   if (typ(n) != t_INT) pari_err(arither1);
   if (signe(n) <= 0) { avma = av; return gen_2; }
-  if (lgefint(n) <= 3)
-  { /* check if n <= 7 */
-    ulong k = n[2];
-    if (k <= 2) { avma = av; return gen_2; }
-    if (k == 3) { avma = av; return utoipos(3); }
-    if (k <= 5) { avma = av; return utoipos(5); }
-    if (k <= 7) { avma = av; return utoipos(7); }
+  if (lgefint(n) == 3)
+  {
+    ulong k = unextprime(n[2]);
+    avma = av;
+    if (k) return utoipos(k);
+#ifdef LONG_IS_64BIT
+    return uutoi(1,13);
+#else
+    return uutoi(1,15);
+#endif
   }
   /* here n > 7 */
   if (!mod2(n)) n = addsi(1,n);
@@ -1963,9 +2005,9 @@ is_kth_power(GEN x, ulong n, GEN *pt, byteptr d)
   /* q smallest prime >= n */
 
   /* Modular checks, use small primes q congruent 1 mod n */
-  /* A non n-th powers nevertheless passes the test with proba 1 / n^#checks,
-   * we want this < 1e-6 ~ exp(13.8).
-   * n = 17886697 is smallest such that the prime q = 1 mod n is > 2^32 */
+  /* A non n-th power nevertheless passes the test with proba n^(-#checks),
+   * we want this < 1e-6 ~ exp(-13.8).
+   * n = 17886697 is smallest such that the smallest suitable q is > 2^32 */
   j = (long)(13.8 / log((double)n));
   if (j < 1 && n < 17886697) j = 1;
   for (; j > 0; j--)
@@ -1974,8 +2016,8 @@ is_kth_power(GEN x, ulong n, GEN *pt, byteptr d)
     {
       if (*d0) NEXT_PRIME_VIADIFF(q,d0);
       else {
-	if (init) q += n; else { init = 1; q += (n + 1 - q % n); }
-	while (!uisprime(q)) { q += n; }
+	if (init) q += n; else { init = 1; q += n+1 - q%n; }
+	while (!uisprime(q)) q += n;
 	break;
       }
     } while (q % n != 1);
@@ -1990,7 +2032,7 @@ is_kth_power(GEN x, ulong n, GEN *pt, byteptr d)
     /* n-th power mod q ? */
     if (Fl_powu(residue, (q-1)/n, q) != 1)
     {
-      if (DEBUGLEVEL>5) fprintferr("\t- ruled out\n");
+      if (DEBUGLEVEL>4) fprintferr("\t- ruled out\n");
       avma = av; return 0;
     }
   }
@@ -1998,7 +2040,7 @@ is_kth_power(GEN x, ulong n, GEN *pt, byteptr d)
 
   if (DEBUGLEVEL>4) fprintferr("OddPwrs: passed modular checks\n");
   /* go to the horse's mouth... */
-  y = mpround( sqrtnr(itor(x, nbits2prec((expi(x)+16*n)/n)), n) );
+  y = roundr( sqrtnr(itor(x, nbits2prec((expi(x)+16*n)/n)), n) );
   if (!equalii(powiu(y, n), x)) {
     if (DEBUGLEVEL>4) fprintferr("\tBut it wasn't a pure power.\n");
     avma = av; return 0;
@@ -2008,35 +2050,34 @@ is_kth_power(GEN x, ulong n, GEN *pt, byteptr d)
 }
 
 /* generic version for exponents 11 or larger.  Cut off when x^(1/k) fits
- * into (say) 14 bits, since we would have found it by trial division.
+ * into 'cutoffbits', since we would have found it by trial division.
  * Interface is similar to is_357_power(), but instead of the mask, we keep
  * the current test exponent around.  Everything needed here (primitive roots
  * etc.) is computed from scratch on the fly; compared to the size of numbers
- * under consideration, these word-sized computations take negligible time.
- * Experimentally making the cutoff point caller-configurable... */
+ * under consideration, these word-sized computations take negligible time. */
 int
-is_odd_power(GEN x, GEN *pt, ulong *curexp, ulong cutoffbits)
+is_pth_power(GEN x, GEN *pt, ulong *curexp, ulong cutoffbits)
 {
   long size = expi(x) /* not +1 */;
-  ulong p = 0;
+  ulong p = 11;
   pari_sp av = avma;
-  byteptr d = diffptr;
+  byteptr d = diffptr+5;
 
-  /* cutting off at 1 is safe, but direct root extraction attempts will be
+  /* cutting off at 1 is safe, but direct root extraction attempts are
    * faster when trial division has been used to discover very small
    * bases.  We become competitive at about cutoffbits = 4 */
   if (!cutoffbits) cutoffbits = 1;
   /* prepare for iterating curexp over primes */
   if (*curexp < 11) *curexp = 11;
-  while (p < *curexp) { NEXT_PRIME_VIADIFF(p,d); if (!*d) break; }
-  while (p < *curexp) {  p = itou( nextprime(utoipos(p + 1)) ); }
+  while (p < *curexp) {
+    if (!*d) { p = unextprime(*curexp); break; }
+    NEXT_PRIME_VIADIFF(p,d);
+  }
   *curexp = p;
 
   if (DEBUGLEVEL>4) fprintferr("OddPwrs: examining %Ps\n", x);
   /* check size of x vs. curexp */
-  /* tunable cutoff was 18 initially, but cheap enough to go further (given
-   * the 2^14 minimal cutoff point for trial division) */
-  while (size/p >= cutoffbits /*tunable*/ ) {
+  while (size/p >= cutoffbits) {
     if (DEBUGLEVEL>4) fprintferr("OddPwrs: testing for exponent %ld\n", p);
     /* if found, caller should call us again without changing *curexp */
     if (is_kth_power(x, p, pt, d)) return p;
@@ -2660,6 +2701,21 @@ ifac_divide(GEN *partial, GEN *where)
   return res;
 }
 
+/* found out our integer was factor^exp. Update */
+static void
+update_pow(GEN where, GEN factor, long exp, pari_sp *av)
+{
+  GEN ex = EXPON(where);
+  if (DEBUGLEVEL>3)
+    fprintferr("IFAC: found %Ps =\n\t%Ps ^%ld\n", *where, factor, exp);
+  affii(factor, VALUE(where)); avma = *av;
+  if (ex == gen_1)
+  { EXPON(where) = exp == 2? gen_2: utoipos(exp); *av = avma; }
+  else if (ex == gen_2)
+  { EXPON(where) = utoipos(exp<<1); *av = avma; }
+  else
+    affsi(exp * itos(ex), EXPON(where));
+}
 /* hint == 0 : Use a default strategy
  * hint & 1  : Avoid mpqs(), use ellfacteur() after pollardbrent()
  * hint & 2  : Avoid first-stage ellfacteur() in favour of mpqs()
@@ -2676,9 +2732,8 @@ ifac_divide(GEN *partial, GEN *where)
 static long
 ifac_crack(GEN *partial, GEN *where)
 {
-  long cmp_res, exp1 = 1, hint = get_hint(partial);
-  pari_sp av;
-  GEN factor = NULL, exponent = EXPON(*where);
+  long cmp_res, hint = get_hint(partial);
+  GEN factor, exponent;
 
 #ifdef IFAC_DEBUG
   ifac_check(*partial, *where);
@@ -2690,80 +2745,48 @@ ifac_crack(GEN *partial, GEN *where)
     pari_err(talker, "operand not known composite in ifac_crack");
 #endif
 
-  if (DEBUGLEVEL >= 3) {
+  if (DEBUGLEVEL>2) {
     fprintferr("IFAC: cracking composite\n\t%Ps\n", **where);
-    if (DEBUGLEVEL >= 4) fprintferr("IFAC: checking for pure square\n");
+    if (DEBUGLEVEL>3) fprintferr("IFAC: checking for pure square\n");
   }
-  /* crack squares.  Quite fast due to the initial square residue test */
-  av = avma;
-  while (Z_issquareall(VALUE(*where), &factor))
+  /* MPQS cannot factor prime powers. Look for pure poowers even if MPQS is
+   * blocked by hint: fast and useful in bounded factorization */
   {
-    if (DEBUGLEVEL >= 4)
-      fprintferr("IFAC: found %Ps =\n\t%Ps ^2\n", **where, factor);
-    affii(factor, VALUE(*where)); avma = av; factor = NULL;
-    if (exponent == gen_1)
-      EXPON(*where) = gen_2;
-    else if (exponent == gen_2)
-    { EXPON(*where) = utoipos(4); av = avma; }
-    else
-      affsi(itos(exponent) << 1, EXPON(*where));
-    exponent = EXPON(*where);
-    if (moebius_mode) return 0;	/* no need to carry on */
-    exp1 = 2;
-  } /* while Z_issquareall */
-
-  /* if our composite has become prime, bypass ifac_whoiswho() */
-  if (exp1 > 1 && hint != 15 && ifac_isprime(*where)) return 0;
-
-  /* MPQS cannot factor prime powers. Do this even if MPQS is blocked by hint:
-   * it is useful in bounded factorization */
-  {
-    ulong exp0 = 0, mask = 7;
-    long exp2 = 1;
-    if (DEBUGLEVEL == 4) fprintferr("IFAC: checking for odd power\n");
+    ulong exp0 = 0, exp1 = 1, mask = 7;
+    long good = 0;
+    pari_sp av = avma;
+    /* crack squares. Fast due to the initial square residue test */
+    while (Z_issquareall(VALUE(*where), &factor))
+    {
+      good = 1; /* remember we succeeded once */
+      update_pow(*where, factor, 2, &av);
+      if (moebius_mode) return 0;	/* no need to carry on */
+    }
     /* At debug levels > 4, is_357_power() prints something more informative */
-    av = avma;
+    if (DEBUGLEVEL == 4) fprintferr("IFAC: checking for odd power\n");
     while ( (exp1 = is_357_power(VALUE(*where), &factor, &mask)) )
     {
-      if (exp2 == 1) exp2 = exp1; /* remember this after the loop */
-      if (DEBUGLEVEL >= 4)
-	fprintferr("IFAC: found %Ps =\n\t%Ps ^%ld\n", **where, factor, exp1);
-      affii(factor, VALUE(*where)); avma = av; factor = NULL;
-      if (exponent == gen_1)
-      { EXPON(*where) = utoipos(exp1); av = avma; }
-      else if (exponent == gen_2)
-      { EXPON(*where) = utoipos(exp1<<1); av = avma; }
-      else
-	affsi(exp1 * itos(exponent), EXPON(*where));
-      exponent = EXPON(*where);
+      good = 1; /* remember we succeeded once */
+      update_pow(*where, factor, exp1, &av);
       if (moebius_mode) return 0; /* no need to carry on */
-    } /* while is_357_power */
-
+    }
     /* cutoff at 14 bits as trial division must have found everything below */
-    while ( (exp1 = is_odd_power(VALUE(*where), &factor, &exp0, 15)) )
+    while ( (exp1 = is_pth_power(VALUE(*where), &factor, &exp0, 15)) )
     {
-      if (exp2 == 1) exp2 = exp1; /* remember this after the loop */
-      if (DEBUGLEVEL >= 4)
-	fprintferr("IFAC: found %Ps =\n\t%Ps ^%ld\n", **where, factor, exp1);
-      affii(factor, VALUE(*where)); avma = av; factor = NULL;
-      if (exponent == gen_1)
-      { EXPON(*where) = utoipos(exp1); av = avma; }
-      else if (exponent == gen_2)
-      { EXPON(*where) = utoipos(exp1<<1); av = avma; }
-      else
-	affsi(exp1 * itos(exponent), EXPON(*where));
-      exponent = EXPON(*where);
+      good = 1; /* remember we succeeded once */
+      update_pow(*where, factor, exp1, &av);
       if (moebius_mode) return 0; /* no need to carry on */
-    } /* while is_odd_power */
+    }
 
-    if (exp2 > 1 && hint != 15 && ifac_isprime(*where))
-    { /* Something nice has happened and our composite has become prime */
-      if (DEBUGLEVEL >= 4)
+    if (good && hint != 15 && ifac_isprime(*where))
+    { /* our composite was a prime power */
+      if (DEBUGLEVEL>3)
 	fprintferr("IFAC: factor %Ps\n\tis prime\n", VALUE(*where));
       return 0;	/* bypass subsequent ifac_whoiswho() call */
     }
-  } /* odd power stage */
+  } /* pure power stage */
 
+  factor = NULL;
   if (!(hint & 4))
   { /* pollardbrent() Rho usually gets a first chance */
     if (DEBUGLEVEL >= 4) fprintferr("IFAC: trying Pollard-Brent rho method\n");
@@ -2826,10 +2849,10 @@ ifac_crack(GEN *partial, GEN *where)
 
   /* The two factors are 'factor' and VALUE(*where), find out which is larger */
   cmp_res = cmpii(factor, VALUE(*where));
-  /* mark factor /cofactor 'unknown' */
-  CLASS(*where) = NULL;
+  CLASS(*where) = NULL; /* mark factor /cofactor 'unknown' */
+  exponent = EXPON(*where);
   *where -= 3;
-  CLASS(*where) = NULL;
+  CLASS(*where) = NULL; /* mark factor /cofactor 'unknown' */
   EXPON(*where) = isonstack(exponent)? icopy(exponent): exponent;
   if (cmp_res < 0)
     VALUE(*where) = factor; /* common case */

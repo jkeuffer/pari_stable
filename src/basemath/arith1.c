@@ -978,12 +978,11 @@ Z_isanypower(GEN x, GEN *pty)
     while ( (ex = is_357_power(x, &y, &mask)) ) { k *= ex; x = y; }
     /* cut off at 4 bits which seems to be about optimum;  for primes
      * >> 10^3 the modular checks are no longer competitively fast */
-    while ( (ex = is_odd_power(x, &y, &ex0, 4)) ) { k *= ex; x = y; }
+    while ( (ex = is_pth_power(x, &y, &ex0, 4)) ) { k *= ex; x = y; }
     if (DEBUGLEVEL>4) fprintferr("Z_isanypower: now k=%ld, x=%Ps\n", k, x);
-    do
-    {
-      if (*d) NEXT_PRIME_VIADIFF(p,d);
-      else { p = itou( nextprime(utoipos(p + 1)) ); }
+    do {
+      if (!*d) { p = unextprime(ex0); break; }
+      NEXT_PRIME_VIADIFF(p,d);
     } while (p < ex0);
 
     /* upper bound for log(x) / log(103) */
@@ -995,8 +994,7 @@ Z_isanypower(GEN x, GEN *pty)
         e2 = (long)((expi(x) + 1) / LOG2_103);
         continue; /* if success, retry same p */
       }
-      if (*d) NEXT_PRIME_VIADIFF(p, d);
-      else p = itou( nextprime(utoipos(p + 1)) );
+      if (*d) NEXT_PRIME_VIADIFF(p, d); else p = unextprime(p+1);
     }
   }
 END:
@@ -2245,7 +2243,7 @@ quaddisc(GEN x)
 /* return a * (a+1) * ... * b. Assume a <= b  [ note: factoring out powers of 2
  * first is slower ... ] */
 GEN
-seq_umul(ulong a, ulong b)
+mulu_interval(ulong a, ulong b)
 {
   pari_sp av = avma;
   ulong k, l, N, n = b - a + 1;
@@ -2265,7 +2263,7 @@ seq_umul(ulong a, ulong b)
     l = N - k; if (l <= k) break;
     gel(x,lx++) = muluu(k,l);
   }
-  if (l == k) gel(x,lx++) = utoi(k);
+  if (l == k) gel(x,lx++) = utoipos(k);
   setlg(x, lx);
   return gerepileuptoint(av, divide_conquer_prod(x, mulii));
 }
@@ -2278,7 +2276,7 @@ mpfact(long n)
     if (n < 0) pari_err(talker,"negative argument in factorial function");
     return gen_1;
   }
-  return seq_umul(2UL, (ulong)n);
+  return mulu_interval(2UL, (ulong)n);
 }
 
 /*******************************************************************/

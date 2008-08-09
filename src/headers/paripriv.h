@@ -179,7 +179,6 @@ GEN merge_factor_i(GEN f, GEN g);
 
 /* integer factorization / discrete log */
 GEN   coprime_part(GEN x, GEN f);
-GEN   Z_factor_until(GEN n, GEN limit);
 ulong is_kth_power(GEN x, ulong p, GEN *pt, byteptr d);
 long  ifac_decomp_break(GEN n, long (*B)(GEN,GEN,GEN,GEN), GEN s, long hint);
 long  ifac_moebius(GEN n, long hint);

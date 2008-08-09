@@ -173,7 +173,7 @@ jbesselh(GEN n, GEN z, long prec)
       {
 	av = avma;
 	p1 = gmul(gsqrt(gdiv(z,mppi(prec)),prec),gpowgs(z,k));
-	p1 = gdiv(p1, seq_umul(k+1, 2*k+1)); /* x k! / (2k+1)! */
+	p1 = gdiv(p1, mulu_interval(k+1, 2*k+1)); /* x k! / (2k+1)! */
 	return gerepileupto(av, gmul2n(p1,2*k));
       }
       gz = gexpo(z);

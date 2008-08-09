@@ -1889,6 +1889,9 @@ the real number equal to $x$. This is a special case of \kbd{gexpo}.
 
 \fun{void}{addumului}{ulong a, ulong b, GEN x} return $a + b|X|$.
 
+\fun{GEN}{mulu_interval}{ulong a, ulong b} returns $a(a+1)\cdots b$, assuming
+that $a \leq b$.
+
 \fun{GEN}{sqri}{GEN x} squares the \typ{INT}~\kbd{x}
 
 \fun{GEN}{sqrr}{GEN x} squares the \typ{REAL}~\kbd{x}

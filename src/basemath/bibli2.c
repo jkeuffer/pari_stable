@@ -689,7 +689,7 @@ binomialuu(ulong n, ulong k)
   if (k > n) return gen_0;
   k = minuu(k,n-k);
   if (!k) return gen_1;
-  z=diviiexact(seq_umul(n-k+1, n), seq_umul(2UL, k));
+  z=diviiexact(mulu_interval(n-k+1, n), mulu_interval(2UL, k));
   return gerepileuptoint(ltop,z);
 }
 
