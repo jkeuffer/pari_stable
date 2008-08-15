@@ -2610,15 +2610,6 @@ arbitrary \typ{INT}s and \kbd{ZX}s in the same variable as \kbd{T}).
 
 \subsubsec{Basic operations}
 
-\fun{GEN}{FpC_to_mod}{GEN z, GEN p}, \kbd{z} a \kbd{ZC}. Returns \kbd{Col(z) *
-Mod(1,p)}, a \typ{COL} with \typ{INTMOD} coefficients.
-
-\fun{GEN}{FpV_to_mod}{GEN z, GEN p}, \kbd{z} a \kbd{ZV}. Returns \kbd{Vec(z) *
-Mod(1,p)}, a \typ{VEC} with \typ{INTMOD} coefficients.
-
-\fun{GEN}{FpM_to_mod}{GEN z, GEN p}, \kbd{z} a \kbd{ZM}. Returns \kbd{z *
-Mod(1,p)}, with \typ{INTMOD} coefficients.
-
 \fun{GEN}{FpC_red}{GEN z, GEN p}, \kbd{z} a \kbd{ZC}. Returns \kbd{lift(Col(z) *
 Mod(1,p))}, hence a \typ{COL}.
 
@@ -2839,10 +2830,6 @@ coefficientwise.
 \fun{GEN}{RgC_to_FpC}{GEN z, GEN p}, \kbd{z} a \typ{VEC} or \typ{COL},
 returns the \kbd{FpC} (as a \typ{COL}) obtained by applying \kbd{Rg\_to\_Fp}
 coefficientwise.
-
-\fun{GEN}{FpX_to_mod}{GEN z, GEN p}, \kbd{z} a \kbd{ZX}. Returns \kbd{z *
-Mod(1,p)}, normalized. Hence the returned value has \typ{INTMOD}
-coefficients.
 
 \fun{GEN}{FpX_red}{GEN z, GEN p}, \kbd{z} a \kbd{ZX}, returns \kbd{lift(z *
 Mod(1,p))}, normalized.
@@ -4733,15 +4720,6 @@ coefficients are \kbd{RgX}s (arbitrary \kbd{GEN}s in fact), reduce them to
 \fun{GEN}{RgXQX_red}{GEN z, GEN T} \kbd{z} a \typ{POL} whose
 coefficients are \kbd{RgX}s (arbitrary \kbd{GEN}s in fact), reduce them to
 \kbd{RgXQ}s (applying \kbd{grem} coefficientwise).
-
-\fun{GEN}{RgXQV_to_mod}{GEN V, GEN T} $V$ a vector of \kbd{RgXQ}, which
-are lifted elements of $\Q[X]/(T)$ (number field elements in most
-applications). Return a vector where all non-rational entries are
-converted to \typ{POLMOD}. Used to normalize the output of \kbd{nfroots}.
-
-\fun{GEN}{RgXQXV_to_mod}{GEN V, GEN T} $V$ a vector of polynomials whose
-coefficients are \kbd{RgXQ}. Analogous to \kbd{RgXQV\_to\_mod}.
-Used to normalize the output of \kbd{nffactor}.
 
 \fun{GEN}{RgXQX_mul}{GEN x, GEN y, GEN T}
 
