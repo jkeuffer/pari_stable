@@ -1426,7 +1426,7 @@ closurecmp(void *data, GEN x, GEN y)
   pari_sp av = avma;
   GEN z = closure_callgen2((GEN)data, x,y);
   if (typ(z) != t_INT)
-    pari_err(talker,"incorrect comparison function in vecsort");
+    pari_err(talker,"comparison function must return an integer");
   avma = av; return signe(z);
 }
 
@@ -1466,8 +1466,8 @@ vecsort0(GEN x, GEN k, long flag)
       case t_VEC: case t_COL: k = ZV_to_zv(k); break;
       case t_VECSMALL: break;
       case t_CLOSURE:
-       if (k[1] < 2)
-         pari_err(talker,"incorrect comparison function in vecsort");
+       if (k[1] != 2)
+         pari_err(talker,"comparison function needs exactly 2 arguments");
        E = (void*)k;
        CMP = &closurecmp;
        goto END;
