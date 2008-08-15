@@ -1012,14 +1012,14 @@ RgX_Rg_divexact(GEN x, GEN y) {
   GEN z;
   if (typ(y) == t_INT && is_pm1(y))
     return signe(y) < 0 ? RgX_neg(x): gcopy(x);
-  lx = lg(x); z = cgetg_copy(lx, x); z[1] = x[1];
+  z = cgetg_copy(x, &lx); z[1] = x[1];
   for (i=2; i<lx; i++) gel(z,i) = gdivexact(gel(x,i),y);
   return z;
 }
 GEN
 RgX_Rg_div(GEN x, GEN y) {
-  long i, lx = lg(x);
-  GEN z = cgetg_copy(lx, x); z[1] = x[1];
+  long i, lx;
+  GEN z = cgetg_copy(x, &lx); z[1] = x[1];
   for (i=2; i<lx; i++) gel(z,i) = gdiv(gel(x,i),y);
   return normalizepol_lg(z, lx);
 }

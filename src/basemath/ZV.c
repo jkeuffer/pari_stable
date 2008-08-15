@@ -344,7 +344,7 @@ ZM_Z_mul(GEN X, GEN c)
   h = lg(X[1]);
   if (!signe(c)) return zeromat(h-1, l-1);
   if (is_pm1(c)) return (signe(c) > 0)? ZM_copy(X): ZM_neg(X);
-  A = cgetg_copy(l, X);
+  A = cgetg(l, t_MAT);
   for (j = 1; j < l; j++)
   {
     GEN a = cgetg(h, t_COL), x = gel(X, j);
@@ -616,8 +616,8 @@ ZC_neg(GEN M)
 GEN
 zv_neg(GEN M)
 {
-  long i, l = lg(M);
-  GEN N = cgetg_copy(l, M);
+  long i, l;
+  GEN N = cgetg_copy(M, &l);
   for (i=l-1; i; i--) N[i] = -M[i];
   return N;
 }

@@ -1077,10 +1077,10 @@ factorial_lval(ulong n, ulong p)
 GEN
 gneg(GEN x)
 {
-  long tx=typ(x),lx,i;
+  long lx, i;
   GEN y;
 
-  switch(tx)
+  switch(typ(x))
   {
     case t_INT:
       return signe(x)? negi(x): gen_0;
@@ -1102,8 +1102,13 @@ gneg(GEN x)
       gel(y,1) = gcopy(gel(x,1));
       gel(y,2) = gneg(gel(x,2)); break;
 
-    case t_FRAC: case t_RFRAC:
-      y=cgetg(3,tx);
+    case t_FRAC:
+      y = cgetg(3, t_FRAC);
+      gel(y,1) = negi(gel(x,1));
+      gel(y,2) = icopy(gel(x,2)); break;
+
+    case t_RFRAC:
+      y = cgetg(3, t_RFRAC);
       gel(y,1) = gneg(gel(x,1));
       gel(y,2) = gcopy(gel(x,2)); break;
 
@@ -1121,7 +1126,7 @@ gneg(GEN x)
     case t_FFELT: return FF_neg(x);
     case t_POL: return RgX_neg(x);
     case t_SER:
-      lx = lg(x); y = cgetg_copy(lx, x); y[1] = x[1];
+      y = cgetg_copy(x, &lx); y[1] = x[1];
       for (i=2; i<lx; i++) gel(y,i) = gneg(gel(x,i));
       break;
     case t_VEC: return RgV_neg(x);
@@ -1725,16 +1730,18 @@ cvtop(GEN x, GEN p, long d)
 GEN
 gcvtop(GEN x, GEN p, long r)
 {
-  long i, lx, tx = typ(x);
+  long i, lx;
   GEN y;
 
-  switch(tx)
+  switch(typ(x))
   {
     case t_POL: case t_SER:
+      y = cgetg_copy(x, &lx); y[1] = x[1];
+      for (i=2; i<lx; i++) gel(y,i) = gcvtop(gel(x,i),p,r); 
     case t_POLMOD: case t_RFRAC:
     case t_VEC: case t_COL: case t_MAT:
-      y = init_gen_op(x, tx, &lx, &i);
-      for (; i<lx; i++) gel(y,i) = gcvtop(gel(x,i),p,r);
+      y = cgetg_copy(x, &lx);
+      for (i=1; i<lx; i++) gel(y,i) = gcvtop(gel(x,i),p,r);
       return y;
   }
   return cvtop(x,p,r);
@@ -1767,9 +1774,13 @@ gexpo(GEN x)
       e = gexpo(gel(x,2));
       f = gexpo(gel(x,3)) + d; return maxss(e, f);
     }
-    case t_POL: case t_SER: case t_VEC: case t_COL: case t_MAT:
+    case t_POL: case t_SER:
       lx = lg(x); f = -(long)HIGHEXPOBIT;
-      for (i=lontyp[tx]; i<lx; i++) { e=gexpo(gel(x,i)); if (e>f) f=e; }
+      for (i=2; i<lx; i++) { e=gexpo(gel(x,i)); if (e>f) f=e; }
+      return f;
+    case t_VEC: case t_COL: case t_MAT:
+      lx = lg(x); f = -(long)HIGHEXPOBIT;
+      for (i=1; i<lx; i++) { e=gexpo(gel(x,i)); if (e>f) f=e; }
       return f;
   }
   pari_err(typeer,"gexpo");

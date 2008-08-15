@@ -117,45 +117,49 @@ precrealexact(GEN t, GEN s) {
   l = lg(t);
   return (e > 0)? l + divsBIL(e): l;
 }
+static long
+precCOMPLEX(GEN z)
+{ /* ~ precision(|x| + |y|) */
+  GEN x = gel(z,1), y = gel(z,2);
+  long e, ex, ey, lz, lx, ly;
+  if (typ(x) != t_REAL) {
+    if (typ(y) != t_REAL) return 0;
+    return precrealexact(y, x);
+  }
+  if (typ(y) != t_REAL) return precrealexact(x, y);
+  /* x, y are t_REALs, cf addrr_sign */
+  ex = expo(x);
+  ey = expo(y);
+  e = ey - ex;
+  if (!signe(x)) {
+    if (!signe(y)) return prec0( minss(ex,ey) );
+    if (e <= 0) return prec0(ex);
+    lz = nbits2prec(e);
+    ly = lg(y); if (lz > ly) lz = ly;
+    return lz;
+  }
+  if (!signe(y)) {
+    if (e >= 0) return prec0(ey);
+    lz = nbits2prec(-e);
+    lx = lg(x); if (lz > lx) lz = lx;
+    return lz;
+  }
+  if (e < 0) { swap(x, y); e = -e; }
+  lx = lg(x);
+  ly = lg(y);
+  if (e) {
+    long d = divsBIL(e), l = ly-d;
+    return (l > lx)? lx + d: ly;
+  }
+  return minss(lx, ly);
+}
 long
 precision(GEN z)
 {
-  long tx = typ(z), e, ex, ey, lz, lx, ly;
-
-  if (tx == t_REAL) return precREAL(z);
-  if (tx == t_COMPLEX)
-  { /* ~ precision(|x| + |y|) */
-    GEN x = gel(z,1), y = gel(z,2);
-    if (typ(x) != t_REAL) {
-      if (typ(y) != t_REAL) return 0;
-      return precrealexact(y, x);
-    }
-    if (typ(y) != t_REAL) return precrealexact(x, y);
-    /* x, y are t_REALs, cf addrr_sign */
-    ex = expo(x);
-    ey = expo(y);
-    e = ey - ex;
-    if (!signe(x)) {
-      if (!signe(y)) return prec0( minss(ex,ey) );
-      if (e <= 0) return prec0(ex);
-      lz = nbits2prec(e);
-      ly = lg(y); if (lz > ly) lz = ly;
-      return lz;
-    }
-    if (!signe(y)) {
-      if (e >= 0) return prec0(ey);
-      lz = nbits2prec(-e);
-      lx = lg(x); if (lz > lx) lz = lx;
-      return lz;
-    }
-    if (e < 0) { swap(x, y); e = -e; }
-    lx = lg(x);
-    ly = lg(y);
-    if (e) {
-      long d = divsBIL(e), l = ly-d;
-      return (l > lx)? lx + d: ly;
-    }
-    return minss(lx, ly);
+  switch(typ(z))
+  {
+    case t_REAL: return precREAL(z);
+    case t_COMPLEX: return precCOMPLEX(z);
   }
   return 0;
 }
@@ -163,14 +167,27 @@ precision(GEN z)
 long
 gprecision(GEN x)
 {
-  long tx=typ(x),lx=lg(x),i,k,l;
+  long i, k, l;
 
-  if (is_scalar_t(tx)) return precision(x);
-  switch(tx)
+  switch(typ(x))
   {
-    case t_POL: case t_VEC: case t_COL: case t_MAT:
-      k=LONG_MAX;
-      for (i=lontyp[tx]; i<lx; i++)
+    case t_REAL: return precREAL(x);
+    case t_COMPLEX: return precCOMPLEX(x);
+    case t_INT: case t_INTMOD: case t_FRAC: case t_FFELT:
+    case t_PADIC: case t_QUAD: case t_POLMOD:
+      return 0;
+
+    case t_POL:
+      k = LONG_MAX;
+      for (i=lg(x)-1; i>1; i--)
+      {
+	l = gprecision(gel(x,i));
+	if (l && l<k) k = l;
+      }
+      return (k==LONG_MAX)? 0: k;
+    case t_VEC: case t_COL: case t_MAT:
+      k = LONG_MAX;
+      for (i=lg(x)-1; i>0; i--)
       {
 	l = gprecision(gel(x,i));
 	if (l && l<k) k = l;
@@ -202,9 +219,9 @@ precision0(GEN x, long n)
 long
 padicprec(GEN x, GEN p)
 {
-  long i,s,t,lx=lg(x),tx=typ(x);
+  long i, s, t;
 
-  switch(tx)
+  switch(typ(x))
   {
     case t_INT: case t_FRAC:
       return LONG_MAX;
@@ -217,10 +234,16 @@ padicprec(GEN x, GEN p)
 	pari_err(talker,"not the same prime in padicprec");
       return precp(x)+valp(x);
 
-    case t_POL:
-    case t_COMPLEX: case t_QUAD: case t_POLMOD: case t_SER: case t_RFRAC:
+    case t_POL: case t_SER: 
+      for (s=LONG_MAX, i=lg(x)-1; i>1; i--)
+      {
+	t = padicprec(gel(x,i),p); if (t<s) s = t;
+      }
+      return s;
+
+    case t_COMPLEX: case t_QUAD: case t_POLMOD: case t_RFRAC:
     case t_VEC: case t_COL: case t_MAT:
-      for (s=LONG_MAX, i=lontyp[tx]; i<lx; i++)
+      for (s=LONG_MAX, i=lg(x)-1; i>0; i--)
       {
 	t = padicprec(gel(x,i),p); if (t<s) s = t;
       }
@@ -317,33 +340,31 @@ pollead(GEN x, long v)
 int
 isinexactreal(GEN x)
 {
-  long tx=typ(x),lx,i;
-
-  if (is_const_t(tx))
+  long i;
+  switch(typ(x))
   {
-    switch(tx)
-    {
-      case t_REAL:
-	return 1;
+    case t_REAL: return 1;
+    case t_COMPLEX: return (typ(x[1])==t_REAL || typ(x[2])==t_REAL);
+    case t_INT: case t_INTMOD: case t_FRAC:
+    case t_FFELT: case t_PADIC: case t_QUAD: return 0;
 
-      case t_COMPLEX:
-	return (typ(x[1])==t_REAL || typ(x[2])==t_REAL);
-    }
-    return 0;
-  }
-  switch(tx)
-  {
     case t_QFR: case t_QFI:
       return 0;
 
     case t_RFRAC: case t_POLMOD:
       return isinexactreal(gel(x,1)) || isinexactreal(gel(x,2));
+
+    case t_SER: case t_POL:
+      for (i=lg(x)-1; i>1; i--)
+        if (isinexactreal(gel(x,i))) return 1;
+      return 0;
+
+    case t_VEC: case t_COL: case t_MAT:
+      for (i=lg(x)-1; i>0; i--)
+        if (isinexactreal(gel(x,i))) return 1;
+      return 0;
+    default: return 0;
   }
-  if (is_noncalc_t(tx)) return 0;
-  lx = lg(x);
-  for (i=lontyp[tx]; i<lx; i++)
-    if (isinexactreal(gel(x,i))) return 1;
-  return 0;
 }
 
 /* returns 1 if there's an inexact component in the structure, and
@@ -351,9 +372,9 @@ isinexactreal(GEN x)
 int
 isinexact(GEN x)
 {
-  long tx = typ(x), lx, i;
+  long lx, i;
 
-  switch(tx)
+  switch(typ(x))
   {
     case t_REAL: case t_PADIC: case t_SER:
       return 1;
@@ -362,9 +383,12 @@ isinexact(GEN x)
       return 0;
     case t_COMPLEX: case t_QUAD: case t_RFRAC: case t_POLMOD:
       return isinexact(gel(x,1)) || isinexact(gel(x,2));
-    case t_POL: case t_VEC: case t_COL: case t_MAT:
-      lx = lg(x);
-      for (i=lontyp[tx]; i<lx; i++)
+    case t_POL:
+      for (i=lg(x)-1; i>1; i--)
+	if (isinexact(gel(x,i))) return 1;
+      return 0;
+    case t_VEC: case t_COL: case t_MAT:
+      for (i=lg(x)-1; i>0; i--)
 	if (isinexact(gel(x,i))) return 1;
       return 0;
     case t_LIST:
@@ -1836,10 +1860,10 @@ GEN
 ground(GEN x)
 {
   GEN y;
-  long i, lx, tx=typ(x);
+  long i, lx;
   pari_sp av;
 
-  switch(tx)
+  switch(typ(x))
   {
     case t_INT: return icopy(x);
     case t_INTMOD: case t_QUAD: return gcopy(x);
@@ -1856,11 +1880,11 @@ ground(GEN x)
       gel(y,1) = ground(gel(x,1)); return y;
 
     case t_POL:
-      lx = lg(x); y = cgetg_copy(lx, x); y[1] = x[1];
+      y = cgetg_copy(x, &lx); y[1] = x[1];
       for (i=2; i<lx; i++) gel(y,i) = ground(gel(x,i));
       return normalizepol_lg(y, lx);
     case t_SER:
-      lx = lg(x); y = cgetg_copy(lx, x); y[1] = x[1];
+      y = cgetg_copy(x, &lx); y[1] = x[1];
       for (i=2; i<lx; i++) gel(y,i) = ground(gel(x,i));
       return normalize(y);
     case t_RFRAC:
@@ -1868,7 +1892,7 @@ ground(GEN x)
       gel(y,1) = ground(gel(x,1));
       gel(y,2) = ground(gel(x,2)); return y;
     case t_VEC: case t_COL: case t_MAT:
-      lx = lg(x); y = cgetg_copy(lx, x);
+      y = cgetg_copy(x, &lx);
       for (i=1; i<lx; i++) gel(y,i) = ground(gel(x,i));
       return y;
   }
@@ -1881,11 +1905,11 @@ GEN
 grndtoi(GEN x, long *e)
 {
   GEN y;
-  long i, tx=typ(x), lx, e1;
+  long i, lx, e1;
   pari_sp av;
 
   *e = -(long)HIGHEXPOBIT;
-  switch(tx)
+  switch(typ(x))
   {
     case t_INT: return icopy(x);
     case t_INTMOD: case t_QUAD: return gcopy(x);
@@ -1928,7 +1952,7 @@ grndtoi(GEN x, long *e)
       return y;
 
     case t_POL:
-      lx = lg(x); y = cgetg_copy(lx, x); y[1] = x[1];
+      y = cgetg_copy(x, &lx); y[1] = x[1];
       for (i=2; i<lx; i++)
       {
 	gel(y,i) = grndtoi(gel(x,i),&e1);
@@ -1936,7 +1960,7 @@ grndtoi(GEN x, long *e)
       }
       return normalizepol_lg(y, lx);
     case t_SER:
-      lx = lg(x); y = cgetg_copy(lx, x); y[1] = x[1];
+      y = cgetg_copy(x, &lx); y[1] = x[1];
       for (i=2; i<lx; i++)
       {
 	gel(y,i) = grndtoi(gel(x,i),&e1);
@@ -1949,7 +1973,7 @@ grndtoi(GEN x, long *e)
       gel(y,2) = grndtoi(gel(x,2),&e1); if (e1 > *e) *e = e1;
       return y;
     case t_VEC: case t_COL: case t_MAT:
-      lx = lg(x); y = cgetg(lx, tx);
+      y = cgetg_copy(x, &lx);
       for (i=1; i<lx; i++)
       {
 	gel(y,i) = grndtoi(gel(x,i),&e1);
@@ -2805,10 +2829,10 @@ numer(GEN x)
 GEN
 lift0(GEN x, long v)
 {
-  long lx,tx=typ(x),i;
+  long lx, i;
   GEN y;
 
-  switch(tx)
+  switch(typ(x))
   {
     case t_INT:
       return icopy(x);
@@ -2820,7 +2844,7 @@ lift0(GEN x, long v)
 
     case t_POLMOD:
       if (v < 0 || v == varn(gel(x,1))) return gcopy(gel(x,2));
-      y = cgetg(3,tx);
+      y = cgetg(3, t_POLMOD);
       gel(y,1) = lift0(gel(x,1),v);
       gel(y,2) = lift0(gel(x,2),v); return y;
 
@@ -2830,10 +2854,14 @@ lift0(GEN x, long v)
     case t_PADIC:
       return gtrunc(x);
 
+    case t_POL: case t_SER:
+      y = cgetg_copy(x, &lx); y[1] = x[1];
+      for (i=2; i<lx; i++) gel(y,i) = lift0(gel(x,i), v);
+      return y;
     case t_COMPLEX: case t_RFRAC:
-    case t_POL: case t_SER: case t_VEC: case t_COL: case t_MAT:
-      y = init_gen_op(x, tx, &lx, &i);
-      for (; i<lx; i++) gel(y,i) = lift0(gel(x,i), v);
+    case t_VEC: case t_COL: case t_MAT:
+      y = cgetg_copy(x, &lx);
+      for (i=1; i<lx; i++) gel(y,i) = lift0(gel(x,i), v);
       return y;
 
     case t_QUAD:
@@ -2856,11 +2884,11 @@ lift(GEN x)
 GEN
 lift_intern0(GEN x, long v)
 {
-  long i,lx,tx=typ(x);
+  long i;
 
-  switch(tx)
+  switch(typ(x))
   {
-    case t_INT: case t_REAL:
+    case t_INT: case t_REAL: case t_FRAC:
       return x;
 
     case t_INTMOD:
@@ -2872,11 +2900,13 @@ lift_intern0(GEN x, long v)
       gel(x,2) = lift_intern0(gel(x,2),v);
       return x;
 
-    case t_SER:
-    case t_FRAC: case t_COMPLEX: case t_QUAD: case t_POL:
+    case t_SER: case t_POL:
+      for (i = lg(x)-1; i>=2; i--)
+	gel(x,i) = lift_intern0(gel(x,i),v);
+      return x;
+    case t_COMPLEX: case t_QUAD:
     case t_RFRAC: case t_VEC: case t_COL: case t_MAT:
-      lx = lg(x);
-      for (i = lx-1; i>=lontyp[tx]; i--)
+      for (i = lg(x)-1; i>=1; i--)
 	gel(x,i) = lift_intern0(gel(x,i),v);
       return x;
   }
@@ -2892,14 +2922,14 @@ centerliftii(GEN x, GEN y)
   avma = av; return (i > 0)? subii(x,y): icopy(x);
 }
 
-/* memes conventions pour v que lift */
+/* see lift0 */
 GEN
 centerlift0(GEN x, long v)
 {
-  long i, lx, tx = typ(x);
+  long i, lx;
   GEN y;
 
-  switch(tx)
+  switch(typ(x))
   {
     case t_INT:
       return icopy(x);
@@ -2913,10 +2943,14 @@ centerlift0(GEN x, long v)
       gel(y,2) = centerlift0(gel(x,2),v); return y;
     case t_FRAC: 
       return gcopy(x);
-   case t_COMPLEX: case t_POL: case t_SER: case t_RFRAC:
+   case t_POL: case t_SER:
+      y = cgetg_copy(x, &lx); y[1] = x[1];
+      for (i=2; i<lx; i++) gel(y,i) = centerlift0(gel(x,i),v);
+      return y;
+   case t_COMPLEX: case t_RFRAC:
     case t_VEC: case t_COL: case t_MAT:
-      y = init_gen_op(x, tx, &lx, &i);
-      for (; i<lx; i++) gel(y,i) = centerlift0(gel(x,i),v);
+      y = cgetg_copy(x, &lx);
+      for (i=1; i<lx; i++) gel(y,i) = centerlift0(gel(x,i),v);
       return y;
 
     case t_QUAD:
@@ -2959,19 +2993,19 @@ centerlift(GEN x)
 static GEN
 op_ReIm(GEN f(GEN), GEN x)
 {
-  long lx, i, j, tx = typ(x);
+  long lx, i, j;
   pari_sp av;
   GEN z;
 
-  switch(tx)
+  switch(typ(x))
   {
     case t_POL:
-      lx = lg(x); z = cgetg(lx,t_POL); z[1] = x[1];
+      z = cgetg_copy(x, &lx); z[1] = x[1];
       for (j=2; j<lx; j++) gel(z,j) = f(gel(x,j));
       return normalizepol_lg(z, lx);
 
     case t_SER:
-      lx = lg(x); z = cgetg(lx,t_SER); z[1] = x[1];
+      z = cgetg_copy(x, &lx); z[1] = x[1];
       for (j=2; j<lx; j++) gel(z,j) = f(gel(x,j));
       return normalize(z);
 
@@ -2984,7 +3018,7 @@ op_ReIm(GEN f(GEN), GEN x)
     }
 
     case t_VEC: case t_COL: case t_MAT:
-      lx=lg(x); z=cgetg(lx,tx);
+      z = cgetg_copy(x, &lx);
       for (i=1; i<lx; i++) gel(z,i) = f(gel(x,i));
       return z;
   }
@@ -3177,7 +3211,7 @@ geval_gp(GEN x, GEN t)
       return gerepileupto(av, gdiv(geval_gp(gel(x,1),t), geval_gp(gel(x,2),t)));
 
     case t_QFR: case t_QFI: case t_VEC: case t_COL: case t_MAT:
-      lx=lg(x); y=cgetg(lx, tx);
+      y = cgetg_copy(x, &lx);
       for (i=1; i<lx; i++) gel(y,i) = geval_gp(gel(x,i),t);
       return y;
 
@@ -3194,10 +3228,10 @@ geval(GEN x) { return geval_gp(x,NULL); }
 GEN
 simplify_i(GEN x)
 {
-  long tx = typ(x), i, lx;
+  long i, lx;
   GEN y;
 
-  switch(tx)
+  switch(typ(x))
   {
     case t_INT: case t_REAL: case t_FRAC: case t_FFELT:
     case t_INTMOD: case t_PADIC: case t_QFR: case t_QFI:
@@ -3237,7 +3271,7 @@ simplify_i(GEN x)
       return y;
 
     case t_VEC: case t_COL: case t_MAT:
-      lx = lg(x); y = cgetg(lx,tx);
+      y = cgetg_copy(x, &lx);
       for (i=1; i<lx; i++) gel(y,i) = simplify_i(gel(x,i));
       return y;
   }

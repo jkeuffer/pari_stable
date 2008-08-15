@@ -2562,10 +2562,9 @@ pnqn(GEN x)
 GEN
 bestappr_mod(GEN x, GEN A, GEN B)
 {
-  long i,lx,tx;
+  long i, lx;
   GEN y;
-  tx = typ(x);
-  switch(tx)
+  switch(typ(x))
   {
     case t_INTMOD:
     {
@@ -2579,10 +2578,26 @@ bestappr_mod(GEN x, GEN A, GEN B)
       gel(t,1) = a;
       gel(t,2) = b; return t;
     }
-    case t_COMPLEX: case t_POL: case t_SER: case t_RFRAC:
-    case t_VEC: case t_COL: case t_MAT:
-      y = init_gen_op(x, tx, &lx, &i);
-      for (; i<lx; i++)
+    case t_COMPLEX: {
+        GEN t;
+        y = cgetg(3, t_COMPLEX);
+        t = bestappr_mod(gel(x,1),A,B); if (!t) return NULL;
+        gel(y,1) = t;
+        t = bestappr_mod(gel(x,2),A,B); if (!t) return NULL;
+        gel(y,2) = t; return y;
+      }
+    case t_POL: case t_SER:
+      y = cgetg_copy(x, &lx); y[1] = x[1];
+      for (i=2; i<lx; i++)
+      {
+	GEN t = bestappr_mod(gel(x,i),A,B);
+	if (!t) return NULL;
+	gel(y,i) = t;
+      }
+      return y;
+    case t_RFRAC: case t_VEC: case t_COL: case t_MAT:
+      y = cgetg_copy(x, &lx);
+      for (i=1; i<lx; i++)
       {
 	GEN t = bestappr_mod(gel(x,i),A,B);
 	if (!t) return NULL;
@@ -2598,18 +2613,18 @@ GEN
 bestappr(GEN x, GEN k)
 {
   pari_sp av = avma;
-  long tx = typ(x), tk = typ(k), lx, i;
+  long lx, i;
   GEN p0, p1, p, q0, q1, q, a, y;
 
-  if (tk != t_INT)
+  switch(typ(k))
   {
-    long e;
-    if (tk != t_REAL && tk != t_FRAC)
+    case t_INT: break;
+    case t_REAL: case t_FRAC: k = gcvtoi(k,&i); break;
+    default:
       pari_err(talker,"incorrect bound type in bestappr");
-    k = gcvtoi(k,&e);
   }
   if (signe(k) <= 0) k = gen_1;
-  switch(tx)
+  switch(typ(x))
   {
     case t_INT:
       avma = av; return icopy(x);
@@ -2675,10 +2690,18 @@ bestappr(GEN x, GEN k)
       }
       return gerepileupto(av, gdiv(p1,q1));
    }
-   case t_COMPLEX: case t_POL: case t_SER: case t_RFRAC:
-   case t_VEC: case t_COL: case t_MAT:
-      y = init_gen_op(x, tx, &lx, &i);
-      for (; i<lx; i++) gel(y,i) = bestappr(gel(x,i),k);
+   case t_COMPLEX:
+      y = cgetg(3, t_COMPLEX);
+      gel(y,1) = bestappr(gel(x,1),k);
+      gel(y,2) = bestappr(gel(x,2),k);
+      return y;
+   case t_POL: case t_SER:
+      y = cgetg_copy(x, &lx); y[1] = x[1];
+      for (i=2; i<lx; i++) gel(y,i) = bestappr(gel(x,i),k);
+      return y;
+   case t_RFRAC: case t_VEC: case t_COL: case t_MAT:
+      y = cgetg_copy(x, &lx);
+      for (i=1; i<lx; i++) gel(y,i) = bestappr(gel(x,i),k);
       return y;
   }
   pari_err(typeer,"bestappr");

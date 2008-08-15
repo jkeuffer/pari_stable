@@ -1258,8 +1258,7 @@ copy_leaf(GEN x, long tx)
       y = cgeti(lx); break;
     case t_LIST: return listcopy(x); /* allocated on the stack */
     default:
-      lx = lg(x);
-      y = cgetg_copy(lx, x); break;
+      y = cgetg_copy(x, &lx); break;
   }
   for (i=1; i<lx; i++) y[i] = x[i]; /* no memcpy: avma and x may overlap */
   return y;
@@ -1272,7 +1271,7 @@ gcopy(GEN x)
   GEN y;
 
   if (! is_recursive_t(tx)) return copy_leaf(x, tx);
-  lx = lg(x); y = cgetg_copy(lx, x);
+  y = cgetg_copy(x, &lx);
   if (lontyp[tx] == 1) i = 1; else { y[1] = x[1]; i = 2; }
   for (; i<lx; i++) gel(y,i) = gcopy(gel(x,i));
   return y;
@@ -1296,8 +1295,8 @@ gcopy_lg(GEN x, long lx)
 GEN
 shallowcopy(GEN x)
 {
-  long tx = typ(x), lx = lg(x), i;
-  GEN y = cgetg_copy(lx, x);
+  long tx = typ(x), lx, i;
+  GEN y = cgetg_copy(x, &lx);
 
   switch(tx)
   {

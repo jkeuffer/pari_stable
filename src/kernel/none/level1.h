@@ -102,20 +102,13 @@ new_chunk(size_t x) /* x is a number of bytes */
   return z;
 }
 
-/* cgetg(lg(x), typ(x)), assuming lx = lg(x). Implicit unsetisclone() */
+/* cgetg(lg(x), typ(x)), set *lx. Implicit unsetisclone() */
 INLINE GEN
-cgetg_copy(long lx, GEN x) {
-  GEN y = new_chunk((size_t)lx);
+cgetg_copy(GEN x, long *plx) {
+  GEN y;
+  *plx = lg(x); y = new_chunk((size_t)*plx);
   y[0] = x[0] & (TYPBITS|LGBITS); return y;
 }
-INLINE GEN
-init_gen_op(GEN x, long tx, long *lx, long *i) {
-  GEN y;
-  *lx = lg(x); y = cgetg_copy(*lx, x);
-  if (lontyp[tx] == 1) *i = 1; else { y[1] = x[1]; *i = 2; }
-  return y;
-}
-
 INLINE GEN
 cgetg(long x, long y)
 {
@@ -161,8 +154,8 @@ cgetr(long x)
 INLINE GEN
 leafcopy(GEN x)
 {
-  register long lx = lg(x);
-  GEN y = cgetg_copy(lx, x);
+  long lx;
+  GEN y = cgetg_copy(x, &lx);
   while (--lx > 0) y[lx] = x[lx];
   return y;
 }

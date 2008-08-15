@@ -329,12 +329,12 @@ apply0(GEN f, GEN x)
   if (is_scalar_t(tx)) return closure_callgen1(f, x);
   switch(tx) {
     case t_POL:
-      y = init_gen_op(x, tx, &lx, &i);
-      for (; i<lx; i++) gel(y,i) = closure_callgen1(f, gel(x,i));
+      y = cgetg_copy(x, &lx); y[1] = x[1];
+      for (i=2; i<lx; i++) gel(y,i) = closure_callgen1(f, gel(x,i));
       return normalizepol_lg(y, lx);
     case t_SER:
-      y = init_gen_op(x, tx, &lx, &i);
-      for (; i<lx; i++) gel(y,i) = closure_callgen1(f, gel(x,i));
+      y = cgetg_copy(x, &lx); y[1] = x[1];
+      for (i=2; i<lx; i++) gel(y,i) = closure_callgen1(f, gel(x,i));
       return normalize(y);
     case t_LIST: {
       GEN L;

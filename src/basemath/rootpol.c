@@ -1954,16 +1954,19 @@ tocomplex(GEN x, long l)
 int
 isrealappr(GEN x, long e)
 {
-  long tx=typ(x),lx,i;
-  switch(tx)
+  long i;
+  switch(typ(x))
   {
     case t_INT: case t_REAL: case t_FRAC:
       return 1;
     case t_COMPLEX:
       return (gexpo(gel(x,2)) < e);
-    case t_POL: case t_SER: case t_RFRAC: case t_VEC: case t_COL: case t_MAT:
-      lx = lg(x);
-      for (i=lontyp[tx]; i<lx; i++)
+    case t_POL: case t_SER:
+      for (i=lg(x)-1; i>1; i++)
+	if (! isrealappr(gel(x,i),e)) return 0;
+      return 1;
+    case t_RFRAC: case t_VEC: case t_COL: case t_MAT:
+      for (i=lg(x)-1; i>0; i++)
 	if (! isrealappr(gel(x,i),e)) return 0;
       return 1;
     default: pari_err(typeer,"isrealappr"); return 0;

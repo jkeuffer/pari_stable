@@ -565,15 +565,19 @@ convol(GEN x, GEN y)
 GEN
 gprec(GEN x, long l)
 {
-  long tx = typ(x), lx, i;
+  long lx, i;
   GEN y;
 
   if (l <= 0) pari_err(talker,"precision<=0 in gprec");
-  switch(tx)
+  switch(typ(x))
   {
     case t_REAL:
       return rtor(x, ndec2prec(l));
-
+    case t_COMPLEX:
+      y = cgetg(3, t_COMPLEX);
+      gel(y,1) = gprec(gel(x,1),l);
+      gel(y,2) = gprec(gel(x,2),l);
+      break;
     case t_PADIC:
       if (!signe(x[4])) return zeropadic(gel(x,2), l+precp(x));
       y=cgetg(5,t_PADIC);
@@ -591,11 +595,13 @@ gprec(GEN x, long l)
 	for ( ; i>=lx; i--) gel(y,i) = gen_0;
       for ( ; i>=2; i--) gel(y,i) = gcopy(gel(x,i));
       break;
-
-    case t_COMPLEX: case t_POLMOD: case t_POL: case t_RFRAC:
-    case t_VEC: case t_COL: case t_MAT:
-      y = init_gen_op(x, tx, &lx, &i);
-      for (; i<lx; i++) gel(y,i) = gprec(gel(x,i),l);
+   case t_POL: 
+      y = cgetg_copy(x, &lx); y[1] = x[1];
+      for (i=2; i<lx; i++) gel(y,i) = gprec(gel(x,i),l);
+      break;
+    case t_POLMOD: case t_RFRAC: case t_VEC: case t_COL: case t_MAT:
+      y = cgetg_copy(x, &lx);
+      for (i=1; i<lx; i++) gel(y,i) = gprec(gel(x,i),l);
       break;
     default: y = gcopy(x);
   }
@@ -606,20 +612,28 @@ gprec(GEN x, long l)
 GEN
 gprec_w(GEN x, long pr)
 {
-  long tx = typ(x), lx, i;
+  long lx, i;
   GEN y;
 
-  switch(tx)
+  switch(typ(x))
   {
     case t_REAL:
       if (signe(x)) return rtor(x,pr);
       i = -bit_accuracy(pr);
       if (i < expo(x)) return real_0_bit(i);
       y = cgetr(2); y[1] = x[1]; return y;
-    case t_COMPLEX: case t_POLMOD: case t_POL: case t_RFRAC:
-    case t_VEC: case t_COL: case t_MAT:
-      y = init_gen_op(x, tx, &lx, &i);
-      for (; i<lx; i++) gel(y,i) = gprec_w(gel(x,i),pr);
+    case t_COMPLEX:
+      y = cgetg(3, t_COMPLEX);
+      gel(y,1) = gprec_w(gel(x,1),pr);
+      gel(y,2) = gprec_w(gel(x,2),pr);
+      break;
+   case t_POL: case t_SER:
+      y = cgetg_copy(x, &lx); y[1] = x[1];
+      for (i=2; i<lx; i++) gel(y,i) = gprec_w(gel(x,i),pr);
+      break;
+    case t_POLMOD: case t_RFRAC: case t_VEC: case t_COL: case t_MAT:
+      y = cgetg_copy(x, &lx);
+      for (i=1; i<lx; i++) gel(y,i) = gprec_w(gel(x,i),pr);
       break;
     default: return x;
   }
@@ -631,17 +645,26 @@ gprec_w(GEN x, long pr)
 GEN
 gprec_wtrunc(GEN x, long pr)
 {
-  long tx = typ(x), lx, i;
+  long lx, i;
   GEN y;
 
-  switch(tx)
+  switch(typ(x))
   {
     case t_REAL:
       return (signe(x) && lg(x) > pr)? rtor(x,pr): x;
-    case t_COMPLEX: case t_POLMOD: case t_POL: case t_RFRAC:
-    case t_VEC: case t_COL: case t_MAT:
-      y = init_gen_op(x, tx, &lx, &i);
-      for (; i<lx; i++) gel(y,i) = gprec_wtrunc(gel(x,i),pr);
+    case t_COMPLEX:
+      y = cgetg(3, t_COMPLEX);
+      gel(y,1) = gprec_wtrunc(gel(x,1),pr);
+      gel(y,2) = gprec_wtrunc(gel(x,2),pr);
+      break;
+    case t_POL: 
+    case t_SER: 
+      y = cgetg_copy(x, &lx); y[1] = x[1];
+      for (i=2; i<lx; i++) gel(y,i) = gprec_wtrunc(gel(x,i),pr);
+      break;
+    case t_POLMOD: case t_RFRAC: case t_VEC: case t_COL: case t_MAT:
+      y = cgetg_copy(x, &lx);
+      for (i=1; i<lx; i++) gel(y,i) = gprec_wtrunc(gel(x,i),pr);
       break;
     default: return x;
   }

@@ -235,8 +235,8 @@ ZX_Z_mul(GEN y,GEN x)
 GEN
 ZXV_Z_mul(GEN y, GEN x)
 {
-  long i, l = lg(y);
-  GEN z = cgetg_copy(l, y);
+  long i, l;
+  GEN z = cgetg_copy(y, &l);
   for(i=1; i<l; i++) gel(z,i) = ZX_Z_mul(gel(y,i), x);
   return z;
 }

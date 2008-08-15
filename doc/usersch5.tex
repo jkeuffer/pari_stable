@@ -168,11 +168,18 @@ of type $t$ and length $l$. Sets $z[0]$.
 \fun{GEN}{cgetc}{long prec} allocates a \typ{COMPLEX} whose real and
 imaginary parts are \typ{REAL}s of length \kbd{prec}.
 
-\fun{GEN}{cgetg_copy}{long l, GEN x} fast version of \kbd{cgetg}: assuming
-\kbd{lg(x)} is $l$, allocate a \kbd{GEN} with the same type and length as
-$x$. This is a little faster than \kbd{cgetg} since we may reuse the bitmask
-in $x[0]$ instead of recomputing it, and we do not need to check that $l$
-does not overflow the possibilities of the implementation.
+\fun{GEN}{cgetg_copy}{GEN x, long *lx} fast version of \kbd{cgetg}:
+allocate a \kbd{GEN} with the same type and length as $x$, setting \kbd{*lx}
+to \kbd{lg(x)} as a side-effect. (Only sets the first codeword.) This is
+a little faster than \kbd{cgetg} since we may reuse the bitmask in
+$x[0]$ instead of recomputing it, and we do not need to check that the
+length does not overflow the possibilities of the
+implementation (since an object with that length already exists). Note that
+\kbd{cgetg} with arguments known at compile time, as in
+\bprog
+  cgetg(3, t_INTMOD)
+@eprog\noindent will be even faster since the compiler will directly perform
+all computations and checks.
 
 \subsec{Length conversions}
 

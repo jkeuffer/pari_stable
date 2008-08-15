@@ -751,7 +751,8 @@ compilefunc(entree *ep, long n, int mode)
     ep=is_entry("_void_if");
   else if (is_func_named(x,"my"))
   {
-    GEN vep=cgetg_copy(lg(arg),arg);
+    long lgarg;
+    GEN vep = cgetg_copy(arg, &lgarg);
     if (nb) op_push(OCnewframe,nb);
     for(i=1;i<=nb;i++)
       var_push(NULL,Lmy);
@@ -776,7 +777,8 @@ compilefunc(entree *ep, long n, int mode)
   }
   else if (is_func_named(x,"local"))
   {
-    GEN vep=cgetg_copy(lg(arg),arg);
+    long lgarg;
+    GEN vep = cgetg_copy(arg, &lgarg);
     for (i=1;i<=nb;i++)
     {
       entree *en;
@@ -1496,12 +1498,13 @@ compilenode(long n, int mode, long flag)
       struct codepos pos;
       long i;
       GEN arg=listtogen(x,Flistarg);
-      long nb=lg(arg)-1,nbmvar=numbmvar();
-      GEN vep=cgetg_copy(lg(arg),arg);
+      long nb, lgarg, nbmvar=numbmvar();
+      GEN vep = cgetg_copy(arg, &lgarg);
       GEN text=cgetg(3,t_VEC);
       gel(text,1)=strntoGENstr(tree[x].str,tree[x].len);
       gel(text,2)=strntoGENstr(tree[y].str,tree[y].len);
       getcodepos(&pos);
+      nb = lgarg-1;
       if (nb) op_push(OCgetargs,nb);
       for(i=1;i<=nb;i++)
         var_push(NULL,Lmy);

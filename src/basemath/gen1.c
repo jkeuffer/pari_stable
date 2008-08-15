@@ -383,49 +383,54 @@ quad_polmod_norm(GEN x, GEN y)
 GEN
 gconj(GEN x)
 {
-  long lx, i, tx = typ(x);
-  GEN z;
+  long lx, i;
+  GEN y;
 
-  switch(tx)
+  switch(typ(x))
   {
     case t_INT: case t_REAL: case t_INTMOD: case t_FRAC: case t_PADIC:
       return gcopy(x);
 
     case t_COMPLEX:
-      z = cgetg(3,t_COMPLEX);
-      gel(z,1) = gcopy(gel(x,1));
-      gel(z,2) = gneg(gel(x,2));
+      y = cgetg(3,t_COMPLEX);
+      gel(y,1) = gcopy(gel(x,1));
+      gel(y,2) = gneg(gel(x,2));
       break;
 
     case t_QUAD:
-      z = cgetg(4,t_QUAD);
-      gel(z,1) = ZX_copy(gel(x,1));
-      gel(z,2) = gcmp0(gmael(x,1,3))? gcopy(gel(x,2))
+      y = cgetg(4,t_QUAD);
+      gel(y,1) = ZX_copy(gel(x,1));
+      gel(y,2) = gcmp0(gmael(x,1,3))? gcopy(gel(x,2))
 				    : gadd(gel(x,2), gel(x,3));
-      gel(z,3) = gneg(gel(x,3));
+      gel(y,3) = gneg(gel(x,3));
       break;
 
-    case t_POL: case t_SER: case t_RFRAC: case t_VEC: case t_COL: case t_MAT:
-      z = init_gen_op(x, tx, &lx, &i);
-      for (; i<lx; i++) gel(z,i) = gconj(gel(x,i));
+    case t_POL: case t_SER:
+      y = cgetg_copy(x, &lx); y[1] = x[1];
+      for (i=2; i<lx; i++) gel(y,i) = gconj(gel(x,i));
+      break;
+    
+    case t_RFRAC: case t_VEC: case t_COL: case t_MAT:
+      y = cgetg_copy(x, &lx);
+      for (i=1; i<lx; i++) gel(y,i) = gconj(gel(x,i));
       break;
 
     case t_POLMOD:
     {
-      GEN z, X = gel(x,1);
+      GEN y, X = gel(x,1);
       long d = degpol(X);
       if (d < 2) return gcopy(x);
       if (d == 2) {
-	z = cgetg(3, t_POLMOD);
-	gel(z,1) = gcopy(X);
-	gel(z,2) = quad_polmod_conj(gel(x,2), X); return z;
+	y = cgetg(3, t_POLMOD);
+	gel(y,1) = gcopy(X);
+	gel(y,2) = quad_polmod_conj(gel(x,2), X); return y;
       }
     }
     default:
       pari_err(typeer,"gconj");
       return NULL; /* not reached */
   }
-  return z;
+  return y;
 }
 
 GEN
@@ -2168,8 +2173,8 @@ div_rfrac(GEN x, GEN y)
 
 static GEN
 div_ser_scal(GEN x, GEN y) {
-  long i, lx = lg(x);
-  GEN z = cgetg_copy(lx, x); z[1] = x[1];
+  long i, lx;
+  GEN z = cgetg_copy(x, &lx); z[1] = x[1];
   for (i=2; i<lx; i++) gel(z,i) = gdiv(gel(x,i),y);
   return normalize(z);
 }
@@ -2638,7 +2643,7 @@ gdiv(GEN x, GEN y)
       return gerepileupto(av, gmul(x, y));
   }
   if (is_matvec_t(tx)) {
-    lx = lg(x); z = cgetg_copy(lx, x);
+    z = cgetg_copy(x, &lx);
     for (i=1; i<lx; i++) gel(z,i) = gdiv(gel(x,i),y);
     return z;
   }
@@ -2808,12 +2813,12 @@ gmulsg(long s, GEN y)
 GEN
 gdivgs(GEN x, long s)
 {
-  long tx = typ(x), lx, i;
+  long lx, i;
   pari_sp av;
   GEN z, y, p1;
 
   if (!s) pari_err(gdiver);
-  switch(tx)
+  switch(typ(x))
   {
     case t_INT:
       av = avma; z = divis_rem(x,s,&i);
@@ -2900,9 +2905,13 @@ gdivgs(GEN x, long s)
       }
       return z;
 
-    case t_POL: case t_SER: case t_VEC: case t_COL: case t_MAT:
-      z = init_gen_op(x, tx, &lx, &i);
-      for (; i<lx; i++) gel(z,i) = gdivgs(gel(x,i),s);
+    case t_POL: case t_SER:
+      z = cgetg_copy(x, &lx); z[1] = x[1];
+      for (i=2; i<lx; i++) gel(z,i) = gdivgs(gel(x,i),s);
+      return z;
+    case t_VEC: case t_COL: case t_MAT:
+      z = cgetg_copy(x, &lx);
+      for (i=1; i<lx; i++) gel(z,i) = gdivgs(gel(x,i),s);
       return z;
 
   }
@@ -2914,10 +2923,10 @@ gdivgs(GEN x, long s)
 GEN
 gmul2n(GEN x, long n)
 {
-  long tx = typ(x), lx, i, k, l;
+  long lx, i, k, l;
   GEN z, a, b;
 
-  switch(tx)
+  switch(typ(x))
   {
     case t_INT:
       if (n>=0) return shifti(x,n);
@@ -2969,15 +2978,15 @@ gmul2n(GEN x, long n)
       gel(z,2) = gmul2n(gel(x,2),n); return z;
 
     case t_POL:
-      lx = lg(x); z = cgetg_copy(lx,x); z[1] = x[1];
+      z = cgetg_copy(x, &lx); z[1] = x[1];
       for (i=2; i<lx; i++) gel(z,i) = gmul2n(gel(x,i),n);
       return normalizepol_lg(z, lx); /* needed if char = 2 */
     case t_SER:
-      lx = lg(x); z = cgetg_copy(lx,x); z[1] = x[1];
+      z = cgetg_copy(x, &lx); z[1] = x[1];
       for (i=2; i<lx; i++) gel(z,i) = gmul2n(gel(x,i),n);
       return normalize(z); /* needed if char = 2 */
     case t_VEC: case t_COL: case t_MAT:
-      lx = lg(x); z = cgetg_copy(lx,x);
+      z = cgetg_copy(x, &lx);
       for (i=1; i<lx; i++) gel(z,i) = gmul2n(gel(x,i),n);
       return z;
 
