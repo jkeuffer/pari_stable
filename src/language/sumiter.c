@@ -850,6 +850,17 @@ copyupto(GEN z, GEN t)
   else
     return gcopy(z);
 }
+
+GEN
+vecexpr0(GEN vec, GEN code, GEN pred)
+{
+  if (!is_matvec_t(typ(vec))) pari_err_TYPE("[_|_<-_,_]",vec);
+  if (pred)
+    EXPR_WRAP(code,genselapply((void*)pred,&gp_evalbool,EXPR_ARGUPTO,vec))
+  else
+    EXPR_WRAP(code,genapply(EXPR_ARGUPTO,vec))
+}
+
 GEN
 vecteur(GEN nmax, GEN code)
 {

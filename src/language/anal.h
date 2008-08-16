@@ -24,6 +24,7 @@ BEGINEXTERN
 { GEN z; GEN __E = code; \
   push_lex(gen_0, __E); z = call; pop_lex(1); return z; }
 #define EXPR_ARG __E, &gp_eval
+#define EXPR_ARGUPTO __E, &gp_evalupto
 
 /* to manipulate 'blocs' */
 #define BL_HEAD 4

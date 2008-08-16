@@ -62,7 +62,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 %right ")->" "->"
 %left ';' ','
 %right '=' "+=" "-=" "*=" "/=" "\\/=" "\\=" "%=" ">>=" "<<="
-%left '&' "&&" '|' "||"
+%left '&' "&&" "||"
 %left "===" "==" "!=" '>' ">=" '<' "<="
 %left '+' '-'
 %left '%' "\\/" '\\' '/' '*' ">>" "<<"
@@ -79,7 +79,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 %type <val> matrixelts matrixlines arg listarg definition
 %type <val> funcid memberid
 %type <val> backticks history
-%destructor { pari_discarded++; } seq matrix matrix_index expr lvalue matrixelts matrixlines arg listarg definition funcid memberid backticks history
+%type <val> compr in
+%destructor { pari_discarded++; } seq matrix matrix_index expr lvalue matrixelts matrixlines arg listarg definition funcid memberid backticks history compr in
 %%
 
 sequnused: seq       {$$=$1;}
@@ -119,6 +120,7 @@ expr: KINTEGER %prec INT  {$$=newintnode(&@1);}
     | funcid            {$$=$1;}
     | lvalue %prec LVAL {$$=$1;}
     | matrix            {$$=$1;}
+    | compr             {$$=$1;}
     | definition        {$$=$1;}
     | lvalue '=' expr {$$=newnode(Faffect,$1,$3,&@$);}
     | lvalue "++"     {$$=newopcall(OPpp,$1,-1,&@$);}
@@ -135,7 +137,6 @@ expr: KINTEGER %prec INT  {$$=newintnode(&@1);}
     | '!' expr         {$$=newopcall(OPnb,$2,-1,&@$);}
     | '#' expr         {$$=newopcall(OPlength,$2,-1,&@$);}
     | expr "||"  expr  {$$=newopcall(OPor,$1,$3,&@$);}
-    | expr '|'   expr  {$$=newopcall(OPor,$1,$3,&@$);}
     | expr "&&"  expr  {$$=newopcall(OPand,$1,$3,&@$);}
     | expr '&'   expr  {$$=newopcall(OPand,$1,$3,&@$);}
     | expr "===" expr  {$$=newopcall(OPid,$1,$3,&@$);}
@@ -185,6 +186,13 @@ matrix: '[' ']'             {$$=newnode(Fvec,-1,-1,&@$);}
       | '[' matrixelts ']'  {$$=newnode(Fvec,$2,-1,&@$);}
       | '[' matrixlines ']' {$$=newnode(Fmat,$2,-1,&@$);}
       | '[' error ']'       {$$=-1; YYABORT;}
+;
+
+in: lvalue '<' '-' expr {$$=newnode(Flistarg,$4,$1,&@$);}
+;
+
+compr: '[' expr '|' in ']' {$$=newopcall(OPcompr,$4,$2,&@$);}
+     | '[' expr '|' in ',' expr ']' {$$=newopcall(OPcompr, newnode(Flistarg,$4,$2,&@$),$6,&@$);}
 ;
 
 arg: seq        {$$=$1;}

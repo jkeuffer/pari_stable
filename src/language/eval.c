@@ -1439,6 +1439,21 @@ gp_eval(void *E, GEN x)
   return closure_evalnobrk(code);
 }
 
+GEN
+gp_evalupto(void *E, GEN x)
+{
+  pari_sp av = avma;
+  return copyupto(gp_eval(E,x), (GEN)av);
+}
+
+long
+gp_evalbool(void *E, GEN x)
+{
+  pari_sp av = avma;
+  long res  = !gequal0(gp_eval(E,x));
+  avma = av; return res;
+}
+
 long
 gp_evalvoid(void *E, GEN x)
 {

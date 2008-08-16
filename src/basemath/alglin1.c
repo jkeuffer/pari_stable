@@ -447,6 +447,19 @@ apply0(GEN f, GEN x)
   return genapply((void *) f, gp_call, x);
 }
 
+GEN
+genselapply(void *Epred, long (*pred)(void* E, GEN x), void *Efun, GEN (*fun)(void* E, GEN x), GEN A)
+{
+  GEN y;
+  long i, l = lg(A), nb=1;
+  y = cgetg(l, t_VEC);
+  for (i=1; i<l; i++)
+    if (pred(Epred, gel(A,i)))
+      gel(y,nb++) = fun(Efun, gel(A,i));
+  fixlg(y,nb);
+  return y;
+}
+
 /*******************************************************************/
 /*                                                                 */
 /*                     SCALAR-MATRIX OPERATIONS                    */

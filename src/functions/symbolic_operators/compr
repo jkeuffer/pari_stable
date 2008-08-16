@@ -1,0 +1,9 @@
+Function: [_|_<-_,_]
+Section: programming/internals
+C-Name: vecexpr0
+Prototype: GVEDE
+Help: [a(x)|x<-b,c(x)] = apply(a,select(c,b))
+Wrapper: (,,G,bG)
+Description:
+ (gen,,closure):gen         genapply(${3 cookie}, ${3 wrapper}, $1)
+ (gen,,closure,closure):gen genselapply(${4 cookie}, ${4 wrapper}, ${3 cookie}, ${3 wrapper}, $1)

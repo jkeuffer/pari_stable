@@ -8,7 +8,7 @@ Help: direuler(p=a,b,expr,{c}): Dirichlet Euler product of expression expr
  output only the first c terms.
 Wrapper: (,,G)
 Description:
-  (gen,gen,gen,?gen):gen direuler(${3 cookie}, ${3 wrapper}, $1, $2, $4)
+  (gen,gen,closure,?gen):gen direuler(${3 cookie}, ${3 wrapper}, $1, $2, $4)
 Doc: computes the \idx{Dirichlet series} associated to the \idx{Euler
  product} of expression \var{expr} as $p$ ranges through the primes from $a$
  to $b$. \var{expr} must be a polynomial or rational function in another
