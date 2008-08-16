@@ -269,7 +269,7 @@ transc(GEN (*f)(GEN,long), GEN x, long prec)
       return gerepileupto(av, f(toser_i(x), prec));
 
     case t_VEC: case t_COL: case t_MAT:
-      lx = lg(x); y = cgetg(lx,typ(x));
+      y = cgetg_copy(x, &lx);
       for (i=1; i<lx; i++) gel(y,i) = f(gel(x,i),prec);
       return y;
 
@@ -823,7 +823,7 @@ gpow(GEN x, GEN n, long prec)
   tx = typ(x);
   if (is_matvec_t(tx))
   {
-    lx = lg(x); y = cgetg(lx,tx);
+    y = cgetg_copy(x, &lx);
     for (i=1; i<lx; i++) gel(y,i) = gpow(gel(x,i),n,prec);
     return y;
   }
@@ -999,7 +999,7 @@ sqrt_ser(GEN b, long prec)
 
   if (!signe(b)) return zeroser(vx, e>>1);
   a = shallowcopy(b);
-  lx = lg(b); x = cgetg(lx, t_SER);
+  x = cgetg_copy(b, &lx);
   if (e & 1) pari_err(talker,"2 should divide valuation (= %ld) in sqrtn",e);
   a[1] = x[1] = evalsigne(1) | evalvarn(0) | _evalvalp(0);
   if (gissquareall(gel(a,2), &gel(x,2)) == gen_0)
@@ -1289,7 +1289,7 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
   tx = typ(x);
   if (is_matvec_t(tx))
   {
-    lx = lg(x); y = cgetg(lx,tx);
+    y = cgetg_copy(x, &lx);
     for (i=1; i<lx; i++) gel(y,i) = gsqrtn(gel(x,i),n,NULL,prec);
     return y;
   }

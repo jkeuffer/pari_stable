@@ -1653,7 +1653,7 @@ hnf_solve(GEN A, GEN B)
   GEN C;
 
   if (typ(B) == t_COL) return hnf_invimage(A, B);
-  av = avma; l = lg(B); C = cgetg(l, t_MAT);
+  av = avma; C = cgetg_copy(B, &l);
   for (i = 1; i < l; i++) {
     GEN c = hnf_invimage(A, gel(B,i));
     if (!c) { avma = av; return NULL; }

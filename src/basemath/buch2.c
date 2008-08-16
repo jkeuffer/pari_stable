@@ -1957,7 +1957,7 @@ powFB_fill(RELCACHE_t *cache, GEN M)
     pow = rel->pow; if (pow == old) continue;
     old = pow;
     if (pow->arc) gunclone(pow->arc);
-    Alg = pow->alg; l = lg(Alg); Arc = cgetg(l, t_VEC);
+    Alg = pow->alg; Arc = cgetg_copy(Alg, &l);
     for (i = 1; i < l; i++)
     {
       GEN z, t = gel(Alg,i);
@@ -2651,7 +2651,7 @@ makecycgen(GEN bnf)
   nf = checknf(bnf);
   cyc = gmael3(bnf,8,1,2); D = diagonal_shallow(cyc);
   gen = gmael3(bnf,8,1,3); GD = gmael(bnf,9,3);
-  l = lg(gen); h = cgetg(l, t_VEC);
+  h = cgetg_copy(gen, &l);
   for (i=1; i<l; i++)
   {
     if (cmpiu(gel(cyc,i), 5) < 0)
@@ -2920,7 +2920,7 @@ sbnf2bnf(GEN sbnf, long prec)
   zu = gel(sbnf,10);
   zu = mkvec2(gel(zu,1), nf_to_scalar_or_alg(nf, gel(zu,2)));
 
-  l = lg(fu); FU = cgetg(l, t_VEC);
+  FU = cgetg_copy(fu, &l);
   for (k=1; k < l; k++) gel(FU,k) = coltoliftalg(nf, gel(fu,k));
   res = get_clfu(clgp, get_regulator(A), zu, FU);
   y = buchall_end(nf,res,clgp2,W,gel(sbnf,8),A,C,Vbase);

@@ -345,7 +345,7 @@ poltrace(GEN x, GEN Trq, GEN p)
   long i,l;
   GEN y;
   if (typ(x) == t_INT || varn(x) != 0) return trace(x, Trq, p);
-  l = lg(x); y = cgetg(l,t_POL); y[1]=x[1];
+  y = cgetg_copy(x, &l); y[1] = x[1];
   for (i=2; i<l; i++) gel(y,i) = trace(gel(x,i),Trq,p);
   return y;
 }
@@ -643,7 +643,7 @@ compute_data(blockdata *B)
 
     gel(DATA,5) = TR;
     pol = RgX_translate(gel(DATA,1), gen_m1);
-    l = lg(roo); p1 = cgetg(l, t_VEC);
+    p1 = cgetg_copy(roo, &l);
     for (i=1; i<l; i++) gel(p1,i) = gadd(TR, gel(roo,i));
     roo = p1;
 

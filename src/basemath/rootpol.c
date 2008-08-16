@@ -491,7 +491,7 @@ mygprec(GEN x, long bit)
   switch(typ(x))
   {
     case t_POL:
-      lx = lg(x); y = cgetg(lx, t_POL); y[1] = x[1];
+      y = cgetg_copy(x, &lx); y[1] = x[1];
       for (i=2; i<lx; i++) gel(y,i) = mygprecrc(gel(x,i),prec,e);
       break;
 
@@ -1778,7 +1778,7 @@ mygprec_special(GEN x, long bit)
   switch(typ(x))
   {
     case t_POL:
-      lx = lg(x); y = cgetg(lx,t_POL); y[1] = x[1];
+      y = cgetg_copy(x, &lx); y[1] = x[1];
       for (i=2; i<lx; i++) gel(y,i) = mygprecrc_special(gel(x,i),prec,e);
       break;
 

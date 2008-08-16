@@ -346,7 +346,7 @@ Flx_Fl_mul(GEN y, ulong x, ulong p)
   GEN z;
   long i, l;
   if (!x) return zero_Flx(y[1]);
-  l = lg(y); z = cgetg(l, t_VECSMALL); z[1]=y[1];
+  z = cgetg_copy(y, &l); z[1] = y[1];
   if (HIGHWORD(x | p))
     for(i=2; i<l; i++) z[i] = Fl_mul(y[i], x, p);
   else
@@ -358,7 +358,7 @@ Flx_Fl_mul_to_monic(GEN y, ulong x, ulong p)
 {
   GEN z;
   long i, l;
-  l = lg(y); z = cgetg(l, t_VECSMALL); z[1]=y[1];
+  z = cgetg_copy(y, &l); z[1] = y[1];
   if (HIGHWORD(x | p))
     for(i=2; i<l-1; i++) z[i] = Fl_mul(y[i], x, p);
   else
@@ -1933,12 +1933,12 @@ FlxY_Flx_div(GEN x, GEN y, ulong p)
     ulong t = (ulong)y[2];
     if (t == 1) return x;
     t = Fl_inv(t, p);
-    l = lg(x); z = cgetg(l, t_POL); z[1] = x[1];
+    z = cgetg_copy(x, &l); z[1] = y[1];
     for (i=2; i<l; i++) gel(z,i) = Flx_Fl_mul(gel(x,i),t,p);
   }
   else
   {
-    l = lg(x); z = cgetg(l, t_POL); z[1] = x[1];
+    z = cgetg_copy(x, &l); z[1] = y[1];
     for (i=2; i<l; i++) gel(z,i) = Flx_div(gel(x,i),y,p);
   }
   return z;

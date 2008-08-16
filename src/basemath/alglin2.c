@@ -540,10 +540,10 @@ GEN
 gnorm(GEN x)
 {
   pari_sp av;
-  long lx, i, tx=typ(x);
+  long lx, i;
   GEN y;
 
-  switch(tx)
+  switch(typ(x))
   {
     case t_INT:  return sqri(x);
     case t_REAL: return mulrr(x,x);
@@ -563,7 +563,7 @@ gnorm(GEN x)
       return RgXQ_norm(gel(x,2), gel(x,1));
 
     case t_VEC: case t_COL: case t_MAT:
-      lx=lg(x); y=cgetg(lx,tx);
+      y = cgetg_copy(x, &lx);
       for (i=1; i<lx; i++) gel(y,i) = gnorm(gel(x,i));
       return y;
   }
@@ -728,7 +728,7 @@ gtrace(GEN x)
       return gmul2n(gel(x,2),1);
 
     case t_POL: case t_SER:
-      lx = lg(x); y = cgetg(lx,tx); y[1] = x[1];
+      y = cgetg_copy(x, &lx); y[1] = x[1];
       for (i=2; i<lx; i++) gel(y,i) = gtrace(gel(x,i));
       return y;
 
@@ -749,7 +749,7 @@ gtrace(GEN x)
       return gadd(x, gconj(x));
 
     case t_VEC: case t_COL:
-      lx = lg(x); y = cgetg(lx,tx);
+      y = cgetg_copy(x, &lx);
       for (i=1; i<lx; i++) gel(y,i) = gtrace(gel(x,i));
       return y;
 

@@ -512,7 +512,7 @@ ZC_lincomb(GEN u, GEN v, GEN X, GEN Y)
     else        A = ZC_lincomb_1(v, X, Y);
   }
   else
-  {
+  { /* not cgetg_copy: x may be a t_VEC */
     lx = lg(X); A = cgetg(lx,t_COL); m = lgefint(u)+lgefint(v);
     for (i=1; i<lx; i++)
     {

@@ -1221,7 +1221,7 @@ mul_ser_scal(GEN y, GEN x) {
   long ly, i;
   GEN z;
   if (isrationalzero(x)) return zeropol(varn(y));
-  ly = lg(y); z = cgetg(ly,t_SER); z[1] = y[1];
+  z = cgetg_copy(y, &ly); z[1] = y[1];
   for (i = 2; i < ly; i++) gel(z,i) = gmul(x,gel(y,i));
   return normalize(z);
 }
@@ -1726,7 +1726,7 @@ gmul(GEN x, GEN y)
     case t_MAT: return RgM_mul(x, y);
 
     case t_VECSMALL: /* multiply as permutation. cf perm_mul */
-      l = lg(x); z = cgetg(l, t_VECSMALL);
+      z = cgetg_copy(x, &l);
       if (l != lg(y)) break;
       for (i=1; i<l; i++)
       {
@@ -1838,7 +1838,7 @@ gmul(GEN x, GEN y)
     if (!is_matvec_t(tx))
     {
       if (is_noncalc_t(tx)) pari_err(operf, "*",x,y); /* necessary if ly = 1 */
-      ly = lg(y); z = cgetg(ly,ty);
+      z = cgetg_copy(y, &ly);
       for (i=1; i<ly; i++) gel(z,i) = gmul(x,gel(y,i));
       return z;
     }
@@ -1866,7 +1866,7 @@ gmul(GEN x, GEN y)
   if (is_matvec_t(tx))
   {
     if (is_noncalc_t(ty)) pari_err(operf, "*",x,y); /* necessary if lx = 1 */
-    lx = lg(x); z = cgetg(lx,tx);
+    z = cgetg_copy(x, &lx);
     for (i=1; i<lx; i++) gel(z,i) = gmul(y,gel(x,i));
     return z;
   }
@@ -2134,7 +2134,7 @@ gsqr(GEN x)
     case t_QFR: return qfrsqr(x);
     case t_QFI: return qfisqr(x);
     case t_VECSMALL:
-      l = lg(x); z = cgetg(l, t_VECSMALL);
+      z = cgetg_copy(x, &l);
       for (i=1; i<l; i++)
       {
 	long xi = x[i];
@@ -2779,13 +2779,13 @@ gmulsg(long s, GEN y)
 
     case t_POL:
       if (!s || !signe(y)) return zeropol(varn(y));
-      ly = lg(y); z = cgetg(ly,t_POL); z[1]=y[1];
+      z = cgetg_copy(y, &ly); z[1]=y[1];
       for (i=2; i<ly; i++) gel(z,i) = gmulsg(s,gel(y,i));
       return normalizepol_lg(z, ly);
 
     case t_SER:
       if (!s) return zeropol(varn(y));
-      ly = lg(y); z = cgetg(ly,t_SER); z[1] = y[1];
+      z = cgetg_copy(y, &ly); z[1]=y[1];
       for (i=2; i<ly; i++) gel(z,i) = gmulsg(s,gel(y,i));
       return normalize(z);
 
@@ -2796,7 +2796,7 @@ gmulsg(long s, GEN y)
       return mul_rfrac_scal(gel(y,1), gel(y,2), stoi(s));
 
     case t_VEC: case t_COL: case t_MAT:
-      ly = lg(y); z = cgetg(ly,ty);
+      z = cgetg_copy(y, &ly);
       for (i=1; i<ly; i++) gel(z,i) = gmulsg(s,gel(y,i));
       return z;
   }

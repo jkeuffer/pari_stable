@@ -1706,21 +1706,21 @@ cmp_padic(GEN x, GEN y)
 static GEN
 padicff2(GEN nf,GEN p,long k)
 {
-  GEN z, mat, D, U,fa, pk, dec_p, Ui, mulx;
+  GEN z, mat, D, U, fa, pk, dec_p, Ui, mulx;
   long i, l;
 
   mulx = zk_scalar_or_multable(nf, gmael(nf,8,2)); /* mul by (x mod T) */
   dec_p = idealprimedec(nf,p);
-  l = lg(dec_p); fa = cgetg(l,t_COL);
+  fa = cgetg_copy(dec_p, &l);
   D = NULL; /* -Wall */
   for (i=1; i<l; i++)
   {
     GEN P = gel(dec_p,i);
-    long e = itos(gel(P,3)), ef = e * itos(gel(P,4));
+    long e = pr_get_e(P), ef = e * pr_get_f(P);
     D = ZM_snfall_i(idealpows(nf,P, k*e), &U, NULL, 1);
     Ui= ginv(U); setlg(Ui, ef+1); /* cf ZM_snf_group */
     U = rowslice(U, 1, ef);
-    mat = gmul(U, gmul(mulx, Ui));
+    mat = ZM_mul(U, ZM_mul(mulx, Ui));
     gel(fa,i) = ZM_charpoly(mat);
   }
   pk = gel(D,1); /* = p^k */

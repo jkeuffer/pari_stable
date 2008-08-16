@@ -178,13 +178,13 @@ rnfinitalg(GEN nf, GEN pol, long prec)
 GEN
 rnfelementreltoabs(GEN rnf,GEN x)
 {
-  long i, lx, tx = typ(x);
+  long i, lx;
   GEN z;
 
-  switch(tx)
+  switch(typ(x))
   {
     case t_VEC: case t_COL: case t_MAT:
-      lx = lg(x); z = cgetg(lx,tx);
+      z = cgetg_copy(x, &lx);
       for (i=1; i<lx; i++) gel(z,i) = rnfelementreltoabs(rnf, gel(x,i));
       return z;
 
@@ -213,14 +213,14 @@ GEN
 rnfelementabstorel(GEN rnf,GEN x)
 {
   pari_sp av = avma;
-  long tx, i, lx;
+  long i, lx;
   GEN z;
 
-  checkrnf(rnf); tx = typ(x);
-  switch(tx)
+  checkrnf(rnf);
+  switch(typ(x))
   {
     case t_VEC: case t_COL: case t_MAT:
-      lx = lg(x); z = cgetg(lx,tx);
+      z = cgetg_copy(x, &lx);
       for (i=1; i<lx; i++) gel(z,i) = rnfelementabstorel(rnf,gel(x,i));
       return z;
 
@@ -245,14 +245,14 @@ rnfelementabstorel(GEN rnf,GEN x)
 GEN
 rnfelementup(GEN rnf,GEN x)
 {
-  long i, lx, tx;
+  long i, lx;
   GEN z;
 
-  checkrnf(rnf); tx = typ(x);
-  switch(tx)
+  checkrnf(rnf);
+  switch(typ(x))
   {
     case t_VEC: case t_COL: case t_MAT:
-      lx = lg(x); z = cgetg(lx,tx);
+      z = cgetg_copy(x, &lx);
       for (i=1; i<lx; i++) gel(z,i) = rnfelementup(rnf,gel(x,i));
       return z;
 
@@ -269,14 +269,14 @@ GEN
 rnfelementdown(GEN rnf,GEN x)
 {
   pari_sp av;
-  long i, lx, tx;
+  long i, lx;
   GEN z;
 
-  checkrnf(rnf); tx = typ(x);
-  switch(tx)
+  checkrnf(rnf);
+  switch(typ(x))
   {
     case t_VEC: case t_COL: case t_MAT:
-      lx = lg(x); z = cgetg(lx,tx);
+      z = cgetg_copy(x, &lx);
       for (i=1; i<lx; i++) gel(z,i) = rnfelementdown(rnf,gel(x,i));
       return z;
 

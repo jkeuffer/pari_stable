@@ -30,11 +30,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 GEN
 map_proto_G(GEN f(GEN), GEN x)
 {
-  long tx = typ(x), lx, i;
+  long lx, i;
   GEN y;
-  if (is_matvec_t(tx))
+  if (is_matvec_t(typ(x)))
   {
-    lx = lg(x); y = cgetg(lx,tx);
+    y = cgetg_copy(x, &lx);
     for (i=1; i<lx; i++) gel(y,i) = map_proto_G(f, gel(x,i));
     return y;
   }
@@ -44,11 +44,11 @@ map_proto_G(GEN f(GEN), GEN x)
 GEN
 map_proto_lG(long f(GEN), GEN x)
 {
-  long tx = typ(x), lx, i;
+  long lx, i;
   GEN y;
-  if (is_matvec_t(tx))
+  if (is_matvec_t(typ(x)))
   {
-    lx = lg(x); y = cgetg(lx,tx);
+    y = cgetg_copy(x, &lx);
     for (i=1; i<lx; i++) gel(y,i) = map_proto_lG(f, gel(x,i));
     return y;
   }
@@ -58,18 +58,17 @@ map_proto_lG(long f(GEN), GEN x)
 GEN
 map_proto_GG(GEN f(GEN,GEN), GEN x, GEN n)
 {
-  long l,i,tx = typ(x);
+  long l, i;
   GEN y;
-  if (is_matvec_t(tx))
+  if (is_matvec_t(typ(x)))
   {
-    l=lg(x); y=cgetg(l,tx);
+    y = cgetg_copy(x, &l);
     for (i=1; i<l; i++) gel(y,i) = map_proto_GG(f,gel(x,i),n);
     return y;
   }
-  tx=typ(n);
-  if (is_matvec_t(tx))
+  if (is_matvec_t(typ(n)))
   {
-    l = lg(n); y = cgetg(l,tx);
+    y = cgetg_copy(n, &l);
     for (i=1; i<l; i++) gel(y,i) = map_proto_GG(f,x,gel(n,i));
     return y;
   }
@@ -79,18 +78,17 @@ map_proto_GG(GEN f(GEN,GEN), GEN x, GEN n)
 GEN
 map_proto_lGG(long f(GEN,GEN), GEN x, GEN n)
 {
-  long l,i,tx = typ(x);
+  long l, i;
   GEN y;
-  if (is_matvec_t(tx))
+  if (is_matvec_t(typ(x)))
   {
-    l=lg(x); y=cgetg(l,tx);
+    y = cgetg_copy(x, &l);
     for (i=1; i<l; i++) gel(y,i) = map_proto_lGG(f,gel(x,i),n);
     return y;
   }
-  tx=typ(n);
-  if (is_matvec_t(tx))
+  if (is_matvec_t(typ(n)))
   {
-    l = lg(n); y = cgetg(l,tx);
+    y = cgetg_copy(n, &l);
     for (i=1; i<l; i++) gel(y,i) = map_proto_lGG(f,x,gel(n,i));
     return y;
   }
@@ -100,12 +98,12 @@ map_proto_lGG(long f(GEN,GEN), GEN x, GEN n)
 GEN
 map_proto_lGL(long f(GEN,long), GEN x, long y)
 {
-  long l, i, tx = typ(x);
+  long l, i;
   GEN t;
 
-  if (is_matvec_t(tx))
+  if (is_matvec_t(typ(x)))
   {
-    l=lg(x); t=cgetg(l,tx);
+    t = cgetg_copy(x, &l);
     for (i=1; i<l; i++) gel(t,i) = map_proto_lGL(f,gel(x,i),y);
     return t;
   }
@@ -115,12 +113,12 @@ map_proto_lGL(long f(GEN,long), GEN x, long y)
 GEN
 map_proto_GL(GEN f(GEN,long), GEN x, long y)
 {
-  long l, i, tx = typ(x);
+  long l, i;
   GEN t;
 
-  if (is_matvec_t(tx))
+  if (is_matvec_t(typ(x)))
   {
-    l = lg(x); t = cgetg(l,tx);
+    t = cgetg_copy(x, &l);
     for (i=1; i<l; i++) gel(t,i) = map_proto_GL(f,gel(x,i),y);
     return t;
   }
@@ -1142,10 +1140,10 @@ gneg(GEN x)
 GEN
 gneg_i(GEN x)
 {
-  long tx=typ(x),lx,i;
+  long lx, i;
   GEN y;
 
-  switch(tx)
+  switch(typ(x))
   {
     case t_INT:
       return signe(x)? negi(x): gen_0;
@@ -1156,9 +1154,15 @@ gneg_i(GEN x)
       gel(y,2) = signe(gel(x,2))? subii(gel(y,1),gel(x,2)): gen_0;
       break;
 
-    case t_FRAC: case t_RFRAC:
-      y=cgetg(3,tx); y[2]=x[2];
-      gel(y,1) = gneg_i(gel(x,1)); break;
+    case t_FRAC:
+      y = cgetg(3, t_FRAC);
+      gel(y,1) = negi(gel(x,1));
+      gel(y,2) = gel(x,2); break;
+
+    case t_COMPLEX:
+      y = cgetg(3, t_COMPLEX);
+      gel(y,1) = gneg_i(gel(x,1));
+      gel(y,2) = gneg_i(gel(x,2)); break;
 
     case t_PADIC: y = cgetg(5,t_PADIC); y[2]=x[2]; y[3]=x[3];
       y[1] = evalprecp(precp(x)) | evalvalp(valp(x));
@@ -1173,15 +1177,20 @@ gneg_i(GEN x)
       gel(y,2) = gneg_i(gel(x,2));
       gel(y,3) = gneg_i(gel(x,3)); break;
 
-    case t_COMPLEX: case t_VEC: case t_COL: case t_MAT:
-      lx=lg(x); y=cgetg(lx,tx);
+    case t_VEC: case t_COL: case t_MAT:
+      y = cgetg_copy(x, &lx);
       for (i=1; i<lx; i++) gel(y,i) = gneg_i(gel(x,i));
       break;
 
     case t_POL: case t_SER:
-      lx=lg(x); y=cgetg(lx,tx); y[1]=x[1];
+      y = cgetg_copy(x, &lx); y[1]=x[1];
       for (i=2; i<lx; i++) gel(y,i) = gneg_i(gel(x,i));
       break;
+
+    case t_RFRAC:
+      y = cgetg(3, t_RFRAC);
+      gel(y,1) = gneg_i(gel(x,1));
+      gel(y,2) = gel(x,2); break;
 
     default:
       pari_err(typeer,"negation");
@@ -1224,11 +1233,11 @@ Q_abs(GEN x)
 GEN
 gabs(GEN x, long prec)
 {
-  long tx=typ(x), lx, i;
+  long lx, i;
   pari_sp av, tetpil;
   GEN y,p1;
 
-  switch(tx)
+  switch(typ(x))
   {
     case t_INT: case t_REAL:
       return mpabs(x);
@@ -1267,7 +1276,7 @@ gabs(GEN x, long prec)
      return is_negative(gel(x,2))? gneg(x): gcopy(x);
 
     case t_VEC: case t_COL: case t_MAT:
-      lx = lg(x); y = cgetg(lx,tx);
+      y = cgetg_copy(x, &lx);
       for (i=1; i<lx; i++) gel(y,i) = gabs(gel(x,i),prec);
       return y;
   }

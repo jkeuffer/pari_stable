@@ -2282,7 +2282,7 @@ FqX_to_nfX(GEN A, GEN modpr)
   GEN B;
 
   if (typ(A)!=t_POL) return icopy(A); /* scalar */
-  l = lg(A); B = cgetg(l, t_POL); B[1] = A[1];
+  B = cgetg_copy(A, &l); B[1] = A[1];
   for (i=2; i<l; i++) gel(B,i) = Fq_to_nf(gel(A,i), modpr);
   return B;
 }

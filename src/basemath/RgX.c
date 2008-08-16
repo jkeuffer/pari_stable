@@ -145,7 +145,7 @@ RgXV_unscale(GEN v, GEN h)
   long i, l;
   GEN w;
   if (!h) return v;
-  l = lg(v); w = cgetg(l, typ(v));
+  w = cgetg_copy(v, &l);
   for (i=1; i<l; i++) gel(w,i) = RgX_unscale(gel(v,i), h);
   return w;
 }

@@ -908,7 +908,7 @@ InitChar(GEN bnr, GEN listCR, long prec)
 
   dbg_block();
 
-  l = lg(listCR); dataCR = cgetg(l, t_VEC);
+  dataCR = cgetg_copy(listCR, &l);
   for (i = 1; i < l; i++)
   {
     GEN olddtcr, dtcr = cgetg(9, t_VEC);

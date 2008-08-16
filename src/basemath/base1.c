@@ -682,7 +682,7 @@ fa_galoisapply(GEN nf, GEN fa, GEN aut)
   if (typ(fa) != t_MAT) pari_err(typeer, "galoisapply");
   if (lx == 1) return cgetg(1, t_MAT);
   if (lx != 3) pari_err(typeer, "galoisapply");
-  g = gel(fa,1); lx = lg(g); G = cgetg(lx, t_COL);
+  g = gel(fa,1); G = cgetg_copy(g, &lx);
   for (i = 1; i < lx; i++) gel(G,i) = galoisapply(nf, aut, gel(g,i));
   return mkmat2(g, ZC_copy(gel(fa,2)));
 }
@@ -1206,7 +1206,7 @@ nfbasechange(GEN u, GEN x)
       return RgM_RgC_mul(u, x);
 
     case t_MAT: /* ideal */
-      lx = lg(x); y = cgetg(lx, t_MAT);
+      y = cgetg_copy(x, &lx);
       for (i=1; i<lx; i++) gel(y,i) = RgM_RgC_mul(u, gel(x,i));
       break;
 

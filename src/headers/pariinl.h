@@ -576,8 +576,8 @@ perm_mul(GEN s, GEN t)
 INLINE GEN
 perm_inv(GEN x)
 {
-  long i, lx = lg(x);
-  GEN y = cgetg(lx,t_VECSMALL);
+  long i, lx;
+  GEN y = cgetg_copy(x, &lx);
   for (i=1; i<lx; i++) y[ x[i] ] = i;
   return y;
 }
@@ -585,8 +585,8 @@ perm_inv(GEN x)
 INLINE GEN
 perm_conj(GEN s, GEN t)
 {
-  long i, l = lg(s);
-  GEN v = cgetg(l, t_VECSMALL);
+  long i, l;
+  GEN v = cgetg_copy(s, &l);
   for (i = 1; i < l; i++) v[ s[i] ] = s[ t[i] ];
   return v;
 }

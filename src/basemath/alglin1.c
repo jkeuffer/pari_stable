@@ -341,18 +341,18 @@ apply0(GEN f, GEN x)
       x = list_data(x);
       if (!x) return listcreate();
       L = cgetg(3, t_LIST);
-      lx = lg(x); y = cgetg(lx, t_VEC);
+      y = cgetg_copy(x, &lx);
       for (i = 1; i < lx; i++) gel(y,i) = closure_callgen1(f, gel(x,i));
       list_nmax(L) = lx-1;
       list_data(L) = y; return L;
     }
     case t_MAT:
-      lx = lg(x); y = cgetg(lx, t_MAT);
+      y = cgetg_copy(x, &lx);
       for (i = 1; i < lx; i++) gel(y,i) = apply0(f, gel(x,i));
       return y;
 
     case t_VEC: case t_COL:
-      lx = lg(x); y = cgetg(lx, tx);
+      y = cgetg_copy(x, &lx);
       for (i = 1; i < lx; i++) gel(y,i) = closure_callgen1(f, gel(x,i));
       return y;
   }
@@ -824,7 +824,7 @@ split_realimag(GEN x, long r1, long r2)
 {
   long i,l; GEN y;
   if (typ(x) == t_COL) return split_realimag_col(x,r1,r2);
-  l = lg(x); y = cgetg(l, t_MAT);
+  y = cgetg_copy(x, &l);
   for (i=1; i<l; i++) gel(y,i) = split_realimag_col(gel(x,i), r1, r2);
   return y;
 }
@@ -2355,8 +2355,7 @@ FpM_invimage(GEN m, GEN v, GEN p)
     avma = av; return cgetg(1,t_MAT);
   }
   /* t_MAT */
-
-  l = lg(v); y = cgetg(l, t_MAT);
+  y = cgetg_copy(v, &l);
   for (j=1; j < l; j++)
   {
     c = sFpM_invimage(m,gel(v,j),p);

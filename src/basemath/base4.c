@@ -1169,7 +1169,7 @@ vecmul(GEN x, GEN y)
   long i,lx, tx = typ(x);
   GEN z;
   if (is_scalar_t(tx)) return gmul(x,y);
-  lx = lg(x); z = cgetg(lx,tx);
+  z = cgetg_copy(x, &lx);
   for (i=1; i<lx; i++) gel(z,i) = vecmul(gel(x,i), gel(y,i));
   return z;
 }
@@ -1180,7 +1180,7 @@ vecinv(GEN x)
   long i,lx, tx = typ(x);
   GEN z;
   if (is_scalar_t(tx)) return ginv(x);
-  lx = lg(x); z = cgetg(lx, tx);
+  z = cgetg_copy(x, &lx);
   for (i=1; i<lx; i++) gel(z,i) = vecinv(gel(x,i));
   return z;
 }
@@ -1191,7 +1191,7 @@ vecpow(GEN x, GEN n)
   long i,lx, tx = typ(x);
   GEN z;
   if (is_scalar_t(tx)) return powgi(x,n);
-  lx = lg(x); z = cgetg(lx, tx);
+  z = cgetg_copy(x, &lx);
   for (i=1; i<lx; i++) gel(z,i) = vecpow(gel(x,i), n);
   return z;
 }
@@ -1202,7 +1202,7 @@ vecdiv(GEN x, GEN y)
   long i,lx, tx = typ(x);
   GEN z;
   if (is_scalar_t(tx)) return gdiv(x,y);
-  lx = lg(x); z = cgetg(lx,tx);
+  z = cgetg_copy(x, &lx);
   for (i=1; i<lx; i++) gel(z,i) = vecdiv(gel(x,i), gel(y,i));
   return z;
 }

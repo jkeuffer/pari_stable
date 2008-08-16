@@ -798,21 +798,21 @@ algtobasis(GEN nf, GEN x)
 GEN
 rnfbasistoalg(GEN rnf,GEN x)
 {
-  long lx = lg(x), i;
+  long lx, i;
   pari_sp av = avma;
-  GEN p1, z, nf;
+  GEN z, nf;
 
   checkrnf(rnf);
   switch(typ(x))
   {
     case t_VEC: case t_COL:
-      p1 = cgetg(lx,t_COL); nf = gel(rnf,10);
-      for (i=1; i<lx; i++) gel(p1,i) = nf_to_scalar_or_alg(nf, gel(x,i));
-      p1 = RgV_RgC_mul(gmael(rnf,7,1), p1);
-      return gerepileupto(av, gmodulo(p1,gel(rnf,1)));
+      z = cgetg_copy(x, &lx); nf = gel(rnf,10);
+      for (i=1; i<lx; i++) gel(z,i) = nf_to_scalar_or_alg(nf, gel(x,i));
+      z = RgV_RgC_mul(gmael(rnf,7,1), z);
+      return gerepileupto(av, gmodulo(z,gel(rnf,1)));
 
     case t_MAT:
-      z = cgetg(lx, t_MAT);
+      z = cgetg_copy(x, &lx);
       for (i=1; i<lx; i++) gel(z,i) = rnfbasistoalg(rnf,gel(x,i));
       return z;
 
@@ -830,11 +830,11 @@ rnfbasistoalg(GEN rnf,GEN x)
 GEN
 matbasistoalg(GEN nf,GEN x)
 {
-  long i, j, li, lx = lg(x), tx = typ(x);
-  GEN z = cgetg(lx, tx);
+  long i, j, li, lx;
+  GEN z = cgetg_copy(x, &lx);
 
   if (lx == 1) return z;
-  switch(tx)
+  switch(typ(x))
   {
     case t_VEC: case t_COL:
       for (i=1; i<lx; i++) gel(z,i) = basistoalg(nf, gel(x,i));
@@ -855,11 +855,11 @@ matbasistoalg(GEN nf,GEN x)
 GEN
 matalgtobasis(GEN nf,GEN x)
 {
-  long i, j, li, lx = lg(x), tx = typ(x);
-  GEN z = cgetg(lx, tx);
+  long i, j, li, lx;
+  GEN z = cgetg_copy(x, &lx);
 
   if (lx == 1) return z;
-  switch(tx)
+  switch(typ(x))
   {
     case t_VEC: case t_COL:
       for (i=1; i<lx; i++) gel(z,i) = algtobasis(nf, gel(x,i));
@@ -880,14 +880,14 @@ matalgtobasis(GEN nf,GEN x)
 GEN
 rnfalgtobasis(GEN rnf,GEN x)
 {
-  long tx = typ(x), i, lx;
+  long i, lx;
   GEN z;
 
   checkrnf(rnf);
-  switch(tx)
+  switch(typ(x))
   {
     case t_VEC: case t_COL: case t_MAT:
-      lx = lg(x); z = cgetg(lx,tx);
+      z = cgetg_copy(x, &lx);
       for (i=1; i<lx; i++) gel(z,i) = rnfalgtobasis(rnf,gel(x,i));
       return z;
 
@@ -1234,9 +1234,9 @@ makeprimetoideal(GEN UV, GEN u,GEN mv, GEN x)
 static GEN
 makeprimetoidealvec(GEN nf, GEN UV, GEN u,GEN mv, GEN gen)
 {
-  long i, lx = lg(gen);
-  GEN y = cgetg(lx,t_VEC);
-  for (i=1; i<lx; i++) gel(y,i) = makeprimetoideal(UV,u,mv, gel(gen,i));
+  long i, ly;
+  GEN y = cgetg_copy(gen, &ly);
+  for (i=1; i<ly; i++) gel(y,i) = makeprimetoideal(UV,u,mv, gel(gen,i));
   return y;
 }
 
@@ -1297,7 +1297,7 @@ zprimestar(GEN nf, GEN pr, GEN ep, GEN x, GEN arch)
     prb = (b >= e)? pre: idealpows(nf,pr,b);
     z = zidealij(pra, prb, &U);
     gen = shallowcopy(gel(z,2));
-    l = lg(gen); s = cgetg(l, t_VEC);
+    s = cgetg_copy(gen, &l);
     if(DEBUGLEVEL>3) fprintferr("zidealij done\n");
     for (i = 1; i < l; i++)
     {

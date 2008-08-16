@@ -970,18 +970,20 @@ factorback(GEN fa) { return factorback2(fa, NULL); }
 GEN
 gisirreducible(GEN x)
 {
-  long tx = typ(x), l, i;
+  long l, i;
   pari_sp av = avma;
   GEN y;
 
-  if (is_matvec_t(tx))
+  switch(typ(x))
   {
-    l = lg(x); y = cgetg(l,tx);
-    for (i=1; i<l; i++) gel(y,i) = gisirreducible(gel(x,i));
-    return y;
+    case t_INT: case t_REAL: case t_FRAC: return gen_0;
+    case t_VEC: case t_COL: case t_MAT:
+      y = cgetg_copy(x, &l);
+      for (i=1; i<l; i++) gel(y,i) = gisirreducible(gel(x,i));
+      return y;
+    case t_POL: break;
+    default: pari_err(notpoler,"gisirreducible");
   }
-  if (is_intreal_t(tx) || tx == t_FRAC) return gen_0;
-  if (tx!=t_POL) pari_err(notpoler,"gisirreducible");
   l = lg(x); if (l<=3) return gen_0;
   y = factor(x); avma = av;
   return (lg(gcoeff(y,1,1))==l)?gen_1:gen_0;
@@ -1158,13 +1160,13 @@ ggcd(GEN x, GEN y)
   if (is_noncalc_t(tx) || is_noncalc_t(ty)) pari_err(operf,"g",x,y);
   if (is_matvec_t(ty))
   {
-    l = lg(y); z = cgetg(l,ty);
+    z = cgetg_copy(y, &l);
     for (i=1; i<l; i++) gel(z,i) = ggcd(x,gel(y,i));
     return z;
   }
   if (is_matvec_t(tx))
   {
-    l = lg(x); z = cgetg(l,tx);
+    z = cgetg_copy(x, &l);
     for (i=1; i<l; i++) gel(z,i) = ggcd(gel(x,i),y);
     return z;
   }
@@ -1446,14 +1448,14 @@ glcm(GEN x, GEN y)
   ty = typ(y);
   if (is_matvec_t(ty))
   {
-    l=lg(y); z=cgetg(l,ty);
+    z = cgetg_copy(y, &l);
     for (i=1; i<l; i++) gel(z,i) = glcm(x,gel(y,i));
     return z;
   }
   tx = typ(x);
   if (is_matvec_t(tx))
   {
-    l=lg(x); z=cgetg(l,tx);
+    z = cgetg_copy(x, &l);
     for (i=1; i<l; i++) gel(z,i) = glcm(gel(x,i),y);
     return z;
   }
@@ -1737,12 +1739,12 @@ Q_remove_denom(GEN x, GEN *ptd)
 GEN
 Q_muli_to_int(GEN x, GEN d)
 {
-  long i, l, t = typ(x);
+  long i, l;
   GEN y, xn, xd;
   pari_sp av;
 
   if (typ(d) != t_INT) pari_err(typeer,"Q_muli_to_int");
-  switch (t)
+  switch (typ(x))
   {
     case t_INT:
       return mulii(x,d);
@@ -1754,12 +1756,12 @@ Q_muli_to_int(GEN x, GEN d)
       return gerepileuptoint(av, y);
 
     case t_VEC: case t_COL: case t_MAT:
-      l = lg(x); y = cgetg(l, t);
+      y = cgetg_copy(x, &l);
       for (i=1; i<l; i++) gel(y,i) = Q_muli_to_int(gel(x,i), d);
       return y;
 
     case t_POL:
-      l = lg(x); y = cgetg(l, t_POL); y[1] = x[1];
+      y = cgetg_copy(x, &l); y[1] = x[1];
       for (i=2; i<l; i++) gel(y,i) = Q_muli_to_int(gel(x,i), d);
       return y;
 
@@ -1777,11 +1779,11 @@ Q_muli_to_int(GEN x, GEN d)
 static GEN
 Q_divmuli_to_int(GEN x, GEN d, GEN n)
 {
-  long i, l, t = typ(x);
+  long i, l;
   GEN y, xn, xd;
   pari_sp av;
 
-  switch(t)
+  switch(typ(x))
   {
     case t_INT:
       av = avma; y = diviiexact(x,d);
@@ -1795,12 +1797,12 @@ Q_divmuli_to_int(GEN x, GEN d, GEN n)
       return gerepileuptoint(av, y);
 
     case t_VEC: case t_COL: case t_MAT:
-      l = lg(x); y = cgetg(l, t);
+      y = cgetg_copy(x, &l);
       for (i=1; i<l; i++) gel(y,i) = Q_divmuli_to_int(gel(x,i), d,n);
       return y;
 
     case t_POL:
-      l = lg(x); y = cgetg(l, t_POL); y[1] = x[1];
+      y = cgetg_copy(x, &l); y[1] = x[1];
       for (i=2; i<l; i++) gel(y,i) = Q_divmuli_to_int(gel(x,i), d,n);
       return y;
 

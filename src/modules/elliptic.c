@@ -821,7 +821,7 @@ ordell(GEN e, GEN x, long prec)
   checkell5(e);
   if (is_matvec_t(tx))
   {
-    long lx = lg(x); y = cgetg(lx,tx);
+    long lx; y = cgetg_copy(x, &lx);
     for (i=1; i<lx; i++) gel(y,i) = ordell(e,gel(x,i),prec);
     return y;
   }

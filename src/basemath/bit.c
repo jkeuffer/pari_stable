@@ -87,7 +87,7 @@ binaire(GEN x)
       break;
 
     case t_VEC: case t_COL: case t_MAT:
-      lx=lg(x); y=cgetg(lx,tx);
+      y = cgetg_copy(x, &lx);
       for (i=1; i<lx; i++) gel(y,i) = binaire(gel(x,i));
       break;
     default: pari_err(typeer,"binary");

@@ -87,16 +87,17 @@ fix_be(GEN bnfz, GEN be, GEN u)
 static GEN
 logarch2arch(GEN x, long r1, long prec)
 {
-  long i, lx = lg(x), tx = typ(x);
-  GEN y = cgetg(lx, tx);
-
-  if (tx == t_MAT)
+  long i, lx;
+  GEN y = cgetg_copy(x, &lx);
+  if (typ(x) == t_MAT)
   {
     for (i=1; i<lx; i++) gel(y,i) = logarch2arch(gel(x,i), r1, prec);
-    return y;
   }
-  for (i=1; i<=r1;i++) gel(y,i) = gexp(gel(x,i),prec);
-  for (   ; i<lx; i++) gel(y,i) = gexp(gmul2n(gel(x,i),-1),prec);
+  else
+  {
+    for (i=1; i<=r1;i++) gel(y,i) = gexp(gel(x,i),prec);
+    for (   ; i<lx; i++) gel(y,i) = gexp(gmul2n(gel(x,i),-1),prec);
+  }
   return y;
 }
 

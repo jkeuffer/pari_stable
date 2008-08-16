@@ -107,7 +107,7 @@ jbesselintern(GEN n, GEN z, long flag, long prec)
       return gerepileupto(av, gmul(p2,p1));
 
     case t_VEC: case t_COL: case t_MAT:
-      lz=lg(z); y=cgetg(lz,typ(z));
+      y = cgetg_copy(z, &lz);
       for (i=1; i<lz; i++)
 	gel(y,i) = jbesselintern(n,gel(z,i),flag,prec);
       return y;
@@ -191,7 +191,7 @@ jbesselh(GEN n, GEN z, long prec)
       avma = av; return affc_fixlg(p1, res);
 
     case t_VEC: case t_COL: case t_MAT:
-      lz=lg(z); y=cgetg(lz,typ(z));
+      y = cgetg_copy(z, &lz);
       for (i=1; i<lz; i++) gel(y,i) = jbesselh(n,gel(z,i),prec);
       return y;
 
@@ -450,7 +450,7 @@ kbesselintern(GEN n, GEN z, long flag, long prec)
       return gerepilecopy(av, gprec_wtrunc(p1,prec));
 
     case t_VEC: case t_COL: case t_MAT:
-      lz=lg(z); y=cgetg(lz,typ(z));
+      y = cgetg_copy(z, &lz);
       for (i=1; i<lz; i++) gel(y,i) = kbesselintern(n,gel(z,i),flag,prec);
       return y;
 
@@ -2001,9 +2001,8 @@ gpolylog(long m, GEN x, long prec)
       return gerepileupto(av, a);
 
     case t_VEC: case t_COL: case t_MAT:
-      lx=lg(x); y=cgetg(lx,typ(x));
-      for (i=1; i<lx; i++)
-	gel(y,i) = gpolylog(m,gel(x,i),prec);
+      y = cgetg_copy(x, &lx);
+      for (i=1; i<lx; i++) gel(y,i) = gpolylog(m,gel(x,i),prec);
       return y;
   }
   pari_err(typeer,"gpolylog");

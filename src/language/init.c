@@ -1233,7 +1233,7 @@ listcopy(GEN x)
   GEN y = listcreate(), L = list_data(x), a;
   long i, lx;
   if (!L) return y;
-  lx = lg(L); list_data(y) = a = cgetg(lx, t_VEC);
+  list_data(y) = a = cgetg_copy(L, &lx);
   for (i = 1; i < lx; i++) gel(a,i) = gcopy(gel(L,i));
   return y;
 }
@@ -1295,10 +1295,9 @@ gcopy_lg(GEN x, long lx)
 GEN
 shallowcopy(GEN x)
 {
-  long tx = typ(x), lx, i;
+  long lx, i;
   GEN y = cgetg_copy(x, &lx);
-
-  switch(tx)
+  switch(typ(x))
   {
     case t_POLMOD:
       y[1] = x[1]; gel(y,2) = shallowcopy(gel(x,2));
@@ -1315,10 +1314,19 @@ shallowcopy(GEN x)
 /* cf cgetg_copy: "allocate" (by updating first codeword only) for subsequent
  * copy of x, as if avma = *AVMA. Assume lg(x) == lx */
 INLINE GEN
-cgetg_copy_av(long lx, GEN x, pari_sp *AVMA) {
-  GEN z = ((GEN)*AVMA) - lx;
+cgetg_copy_avma(GEN x, long *plx, pari_sp *AVMA) {
+  GEN z;
+  *plx = lg(x);
+  z = ((GEN)*AVMA) - *plx;
   z[0] = x[0] & (TYPBITS|LGBITS);
   *AVMA = (pari_sp)z; return z;
+}
+INLINE GEN
+cgetlist_avma(pari_sp *AVMA)
+{
+  GEN y = ((GEN)*AVMA) - 3;
+  y[0] = _evallg(3) | evaltyp(t_LIST);
+  *AVMA = (pari_sp)y; return y;
 }
 
 /* copy x as if avma = *AVMA, update *AVMA */
@@ -1336,15 +1344,15 @@ gcopy_avma(GEN x, pari_sp *AVMA)
         *AVMA = (pari_sp)icopy_avma(x, *AVMA);
         return (GEN)*AVMA;
       case t_LIST:
-	y = cgetg_copy_av(3, x, AVMA);
+        y = cgetlist_avma(AVMA);
 	listassign(x, y); return y;
     }
-    lx = lg(x); y = cgetg_copy_av(lx, x, AVMA);
+    y = cgetg_copy_avma(x, &lx, AVMA);
     for (i=1; i<lx; i++) y[i] = x[i];
   }
   else
   {
-    lx = lg(x); y = cgetg_copy_av(lx, x, AVMA);
+    y = cgetg_copy_avma(x, &lx, AVMA);
     if (lontyp[tx] == 1) i = 1; else { y[1] = x[1]; i = 2; }
     for (; i<lx; i++) gel(y,i) = gcopy_avma(gel(x,i), AVMA);
   }
@@ -1366,12 +1374,12 @@ gcopy_av0(GEN x, pari_sp *AVMA)
       *AVMA = (pari_sp)icopy_avma(x, *AVMA);
       return (GEN)*AVMA;
     }
-    lx = lg(x); y = cgetg_copy_av(lx, x, AVMA);
+    y = cgetg_copy_avma(x, &lx, AVMA);
     for (i=1; i<lx; i++) y[i] = x[i];
   }
   else
   {
-    lx = lg(x); y = cgetg_copy_av(lx, x, AVMA);
+    y = cgetg_copy_avma(x, &lx, AVMA);
     if (lontyp[tx] == 1) i = 1; else { y[1] = x[1]; i = 2; }
     for (; i<lx; i++) gel(y,i) = gcopy_av0(gel(x,i), AVMA);
   }
@@ -1407,7 +1415,7 @@ gcopy_av0_canon(GEN x, pari_sp *AVMA)
         return (GEN)*AVMA;
       case t_LIST:
       {
-	GEN y = cgetg_copy_av(3, x, AVMA), z = list_data(x);
+	GEN y = y = cgetlist_avma(AVMA), z = list_data(x);
 	if (z) {
 	  list_data(y) = gcopy_av0_canon(z, AVMA);
 	  list_nmax(y) = lg(z)-1;
@@ -1418,12 +1426,12 @@ gcopy_av0_canon(GEN x, pari_sp *AVMA)
 	return y;
       }
     }
-    lx = lg(x); y = cgetg_copy_av(lx, x, AVMA);
+    y = cgetg_copy_avma(x, &lx, AVMA);
     for (i=1; i<lx; i++) y[i] = x[i];
   }
   else
   {
-    lx = lg(x); y = cgetg_copy_av(lx, x, AVMA);
+    y = cgetg_copy_avma(x, &lx, AVMA);
     if (lontyp[tx] == 1) i = 1; else { y[1] = x[1]; i = 2; }
     for (; i<lx; i++) gel(y,i) = gcopy_av0_canon(gel(x,i), AVMA);
   }

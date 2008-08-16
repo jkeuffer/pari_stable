@@ -596,9 +596,9 @@ gissquare(GEN x)
 {
   pari_sp av;
   GEN p1,a,p;
-  long tx=typ(x),l,i,v;
+  long l, i, v;
 
-  switch(tx)
+  switch(typ(x))
   {
     case t_INT:
       return Z_issquare(x)? gen_1: gen_0;
@@ -688,7 +688,7 @@ gissquare(GEN x)
       avma = av; return a;
 
     case t_VEC: case t_COL: case t_MAT:
-      l=lg(x); p1=cgetg(l,tx);
+      p1 = cgetg_copy(x, &l);
       for (i=1; i<l; i++) gel(p1,i) = gissquare(gel(x,i));
       return p1;
   }
@@ -1616,13 +1616,13 @@ chinese(GEN x, GEN y)
       avma = (pari_sp)gel(z,2); return z;
     }
     case t_POL:
-      lx=lg(x); z = cgetg(lx,t_POL); z[1] = x[1];
+      z = cgetg_copy(x, &lx); z[1] = x[1];
       if (lx != lg(y) || varn(x) != varn(y)) break;
       for (i=2; i<lx; i++) gel(z,i) = chinese(gel(x,i),gel(y,i));
       return z;
 
     case t_VEC: case t_COL: case t_MAT:
-      lx=lg(x); z=cgetg(lx,tx); if (lx!=lg(y)) break;
+      z = cgetg_copy(x, &lx); if (lx!=lg(y)) break;
       for (i=1; i<lx; i++) gel(z,i) = chinese(gel(x,i),gel(y,i));
       return z;
   }
