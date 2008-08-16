@@ -466,13 +466,12 @@ diagonal_shallow(GEN x)
 GEN
 matmuldiagonal(GEN m, GEN d)
 {
-  long j=typ(d),lx=lg(m);
-  GEN y;
+  long j, lx;
+  GEN y = cgetg_copy(m, &lx);
 
   if (typ(m)!=t_MAT) pari_err(typeer,"matmuldiagonal");
-  if (! is_vec_t(j) || lg(d) != lx)
+  if (! is_vec_t(typ(d)) || lg(d) != lx)
     pari_err(talker,"incorrect vector in matmuldiagonal");
-  y = cgetg(lx,t_MAT);
   for (j=1; j<lx; j++) gel(y,j) = RgC_Rg_mul(gel(m,j), gel(d,j));
   return y;
 }

@@ -67,11 +67,10 @@ Zquadpoly(GEN x, long v)
 GEN
 quadpoly0(GEN x, long v)
 {
-  long tx = typ(x);
-  if (is_matvec_t(tx))
+  if (is_matvec_t(typ(x)))
   {
-    long i, l = lg(x);
-    GEN y = cgetg(l, tx);
+    long i, l;
+    GEN y = cgetg_copy(x, &l);
     for (i=1; i<l; i++) gel(y,i) = quadpoly0(gel(x,i),v);
     return y;
   }

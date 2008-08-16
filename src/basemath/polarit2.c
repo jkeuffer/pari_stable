@@ -2650,11 +2650,11 @@ RgX_disc(GEN x) { pari_sp av = avma; return gerepileupto(av, RgX_disc_aux(x)); }
 GEN
 poldisc0(GEN x, long v)
 {
-  long tx = typ(x), i;
+  long i;
   pari_sp av;
   GEN z, D;
 
-  switch(tx)
+  switch(typ(x))
   {
     case t_POL:
       av = avma; i = 0;
@@ -2675,7 +2675,7 @@ poldisc0(GEN x, long v)
       av = avma; return gerepileuptoint(av, qfb_disc(x));
 
     case t_VEC: case t_COL: case t_MAT:
-      i=lg(x); z=cgetg(i,tx);
+      z = cgetg_copy(x, &i);
       for (i--; i; i--) gel(z,i) = poldisc0(gel(x,i), v);
       return z;
   }
