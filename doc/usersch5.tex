@@ -3612,9 +3612,10 @@ Mod(1,p)}, a \typ{VEC} with \typ{INTMOD} coefficients.
 Mod(1,p)}, with \typ{INTMOD} coefficients.
 
 \fun{GEN}{RgXQV_to_mod}{GEN V, GEN T} $V$ a vector of \kbd{RgXQ}, which
-are lifted elements of $\Q[X]/(T)$ (number field elements in most
-applications). Return a vector where all non-rational entries are
-converted to \typ{POLMOD}. Used to normalize the output of \kbd{nfroots}.
+are lifted elements of $R[X]/(T)$ for some base ring $R$ (number field
+elements in most applications). Return a vector where all non-rational
+entries are converted to \typ{POLMOD}. Used to normalize the output of
+\kbd{nfroots}.
 
 \fun{GEN}{RgXQXV_to_mod}{GEN V, GEN T} $V$ a vector of polynomials whose
 coefficients are \kbd{RgXQ}. Analogous to \kbd{RgXQV\_to\_mod}.
