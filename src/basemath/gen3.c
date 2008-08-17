@@ -1975,7 +1975,9 @@ grndtoi(GEN x, long *e)
   return NULL; /* not reached */
 }
 
-/* trunc(x * 2^s) */
+/* trunc(x * 2^s). lindep() sanity checks rely on this function to return a
+ * t_INT or fail when fed a non-t_COMPLEX input; so do not make this one
+ * recursive [ or change the lindep call ] */
 GEN
 gtrunc2n(GEN x, long s)
 {
