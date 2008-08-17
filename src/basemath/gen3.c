@@ -1985,7 +1985,7 @@ gtrunc2n(GEN x, long s)
     case t_INT:
       return shifti(x, s);
     case t_REAL:
-      return ishiftr(x, s);
+      return trunc2nr(x, s);
     case t_COMPLEX:
       z = cgetg(3, t_COMPLEX);
       gel(z,1) = gtrunc2n(gel(x,1), s);

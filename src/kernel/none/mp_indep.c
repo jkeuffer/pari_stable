@@ -49,7 +49,7 @@ affrr(GEN x, GEN y)
 }
 
 GEN
-ishiftr(GEN x, long n)
+trunc2nr(GEN x, long n)
 {
   long ex, lx;
   if (!signe(x)) return gen_0;

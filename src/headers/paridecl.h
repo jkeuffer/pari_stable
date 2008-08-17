@@ -1926,7 +1926,7 @@ GEN     int2n(long n);
 GEN     int2u(ulong n);
 int     invmod(GEN a, GEN b, GEN *res);
 ulong   invrev(ulong b);
-GEN     ishiftr(GEN x, long n);
+GEN     trunc2nr(GEN x, long n);
 GEN     modii(GEN x, GEN y);
 void    modiiz(GEN x, GEN y, GEN z);
 GEN     mulii(GEN x, GEN y);
