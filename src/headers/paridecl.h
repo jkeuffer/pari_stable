@@ -313,14 +313,13 @@ GEN     scalarmat_s(long x, long n);
 
 /* RgX.c */
 
-GEN     Rg_RgX_sub(GEN x, GEN y);
+GEN     QXQV_to_mod(GEN V, GEN T);
+GEN     QXQXV_to_mod(GEN V, GEN T);
 GEN     RgM_to_RgXV(GEN x, long v);
 GEN     RgM_to_RgXX(GEN x, long v,long w);
 GEN     RgV_to_RgX(GEN x, long v);
-int     RgX_is_monomial(GEN x);
 GEN     RgXQC_red(GEN P, GEN T);
 GEN     RgXQV_red(GEN P, GEN T);
-GEN     RgXQV_to_mod(GEN V, GEN T);
 GEN     RgXQX_RgXQ_mul(GEN x, GEN y, GEN T);
 GEN     RgXQX_divrem(GEN x,GEN y,GEN T,GEN *r);
 GEN     RgXQX_mul(GEN x,GEN y,GEN T);
@@ -329,7 +328,6 @@ GEN     RgXQX_pseudorem(GEN x, GEN y, GEN T);
 GEN     RgXQX_red(GEN P, GEN T);
 GEN     RgXQX_sqr(GEN x, GEN T);
 GEN     RgXQX_translate(GEN P, GEN c, GEN T);
-GEN     RgXQXV_to_mod(GEN V, GEN T);
 GEN     RgXQ_matrix_pow(GEN y, long n, long m, GEN P);
 GEN     RgXQ_mul(GEN x,GEN y,GEN T);
 GEN     RgXQ_norm(GEN x, GEN T);
@@ -357,6 +355,7 @@ long    RgX_equal_var(GEN x, GEN y);
 GEN     RgX_get_0(GEN x);
 GEN     RgX_get_1(GEN x);
 GEN     RgX_inflate(GEN x0, long d);
+int     RgX_is_monomial(GEN x);
 int     RgX_is_rational(GEN x);
 GEN     RgX_modXn_shallow(GEN a, long n);
 GEN     RgX_mul(GEN x,GEN y);
@@ -366,8 +365,8 @@ GEN     RgX_neg(GEN x);
 GEN     RgX_pseudodivrem(GEN x, GEN y, GEN *ptr);
 GEN     RgX_pseudorem(GEN x, GEN y);
 GEN     RgX_renormalize(GEN x);
-GEN     RgX_reverse(GEN x);
 GEN     RgX_rescale(GEN P, GEN h);
+GEN     RgX_reverse(GEN x);
 GEN     RgX_shift(GEN a, long n);
 GEN     RgX_shift_shallow(GEN x, long n);
 GEN     RgX_sqr(GEN x);
@@ -376,6 +375,7 @@ GEN     RgX_sub(GEN x, GEN y);
 GEN     RgX_to_RgV(GEN x, long N);
 GEN     RgX_translate(GEN P, GEN c);
 GEN     RgX_unscale(GEN P, GEN h);
+GEN     Rg_RgX_sub(GEN x, GEN y);
 
 /* ZV.c */
 

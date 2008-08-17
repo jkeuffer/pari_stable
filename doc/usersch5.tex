@@ -3644,15 +3644,15 @@ Mod(1,p)}, a \typ{VEC} with \typ{INTMOD} coefficients.
 \fun{GEN}{FpM_to_mod}{GEN z, GEN p}, \kbd{z} a \kbd{ZM}. Returns \kbd{z *
 Mod(1,p)}, with \typ{INTMOD} coefficients.
 
-\fun{GEN}{RgXQV_to_mod}{GEN V, GEN T} $V$ a vector of \kbd{RgXQ}, which
-are lifted representatives of elements of $R[X]/(T)$ for some base ring $R$
-(number field elements in most applications). Return a vector where all
+\fun{GEN}{QXQV_to_mod}{GEN V, GEN T} $V$ a vector of \kbd{QXQ}, which
+are lifted representatives of elements of $\Q[X]/(T)$ (number field elements
+in most applications) and $T$ is in $\Z[X]$. Return a vector where all
 non-rational entries are converted to \typ{POLMOD} modulo $T$; no reduction
 mod $T$ is attempted: the representatives should be already reduced. Used to
 normalize the output of \kbd{nfroots}.
 
-\fun{GEN}{RgXQXV_to_mod}{GEN V, GEN T} $V$ a vector of polynomials whose
-coefficients are \kbd{RgXQ}. Analogous to \kbd{RgXQV\_to\_mod}.
+\fun{GEN}{QXQXV_to_mod}{GEN V, GEN T} $V$ a vector of polynomials whose
+coefficients are \kbd{QXQ}. Analogous to \kbd{QXQV\_to\_mod}.
 Used to normalize the output of \kbd{nffactor}.
 
 The following functions are obsolete and should not be used: they receive a

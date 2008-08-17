@@ -235,7 +235,7 @@ nfroots(GEN nf,GEN pol)
   if (degpol(A) != d) A = Q_primpart( QXQX_normalize(A, T) );
   ensure_lt_INT(A);
   A = nfsqff(nf,A,1, den);
-  A = gerepileupto(av, RgXQV_to_mod(A, T));
+  A = gerepileupto(av, QXQV_to_mod(A, T));
   gen_sort_inplace(A, (void*)&cmp_RgX, &cmp_nodata, NULL);
   return A;
 }
@@ -330,7 +330,7 @@ fact_from_sqff(GEN rep, GEN A, GEN B, GEN y, GEN T, GEN bad)
   { /* not squarefree */
     if (n == 1)
     { /* perfect power, simple ! */
-      y = gerepileupto(av, RgXQXV_to_mod(y, T));
+      y = gerepileupto(av, QXQXV_to_mod(y, T));
       ex = mkcol( utoipos(degpol(A) / degpol(gel(y,1))) );
     }
     else
@@ -365,13 +365,13 @@ fact_from_sqff(GEN rep, GEN A, GEN B, GEN y, GEN T, GEN bad)
         E[j] = e;
       }
       E[1] = degpol(quo) / degpol(gel(y,1));
-      y = gerepileupto(av, RgXQXV_to_mod(y, T));
+      y = gerepileupto(av, QXQXV_to_mod(y, T));
       ex = zc_to_ZC(E); pari_free((void*)E);
     }
   }
   else
   {
-    y = gerepileupto(av, RgXQXV_to_mod(y, T));
+    y = gerepileupto(av, QXQXV_to_mod(y, T));
     ex = const_col(n, gen_1);
   }
   gel(rep,1) = y; settyp(y, t_COL);

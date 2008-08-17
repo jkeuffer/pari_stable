@@ -309,7 +309,7 @@ RgXQX_to_mod(GEN z, GEN T)
 }
 /* Apply RgXQX_to_mod to all entries. Memory-clean ! */
 GEN
-RgXQXV_to_mod(GEN V, GEN T)
+QXQXV_to_mod(GEN V, GEN T)
 {
   long i, l = lg(V);
   GEN z = cgetg(l, t_VEC); T = ZX_copy(T);
@@ -318,7 +318,7 @@ RgXQXV_to_mod(GEN V, GEN T)
 }
 /* Apply RgXQ_to_mod to all entries. Memory-clean ! */
 GEN
-RgXQV_to_mod(GEN V, GEN T)
+QXQV_to_mod(GEN V, GEN T)
 {
   long i, l = lg(V);
   GEN z = cgetg(l, t_VEC); T = ZX_copy(T);
