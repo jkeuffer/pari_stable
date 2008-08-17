@@ -176,7 +176,7 @@ subrex01(GEN x)
   y = cgetr(ly);
   sh = bfffo(u);
   if (sh)
-  { shift_left(y+2, x+k, 0, lx-k-1, 0, sh); }
+    shift_left(y+2, x+k, 0, lx-k-1, 0, sh);
   else
   { for (i = 2; i < lx-k+2; i++) y[i] = x[k-2 + i]; }
   for (i = lx-k+2; i < ly; i++) y[i] = 0;
@@ -235,7 +235,7 @@ addrr_sign(GEN x, long sx, GEN y, long sy)
       const pari_sp av = avma;
       const ulong sh = BITS_IN_LONG-m;
       GEN p1 = x; x = new_chunk(lx + lz + 1);
-      shift_right2(x,p1,2,lx, 0,m,sh);
+      shift_right(x,p1,2,lx, 0,m);
       if (extend) x[lx] = p1[lx-1] << sh;
       avma = av; /* HACK: cgetr(lz) will not overwrite x */
     }

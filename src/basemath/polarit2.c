@@ -103,7 +103,7 @@ centermodii(GEN x, GEN p, GEN po2)
   return y;
 }
 
-long
+static long
 s_centermod(long x, ulong pp, ulong pps2)
 {
   long y = x % (long)pp;

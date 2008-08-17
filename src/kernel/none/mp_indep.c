@@ -49,14 +49,13 @@ affrr(GEN x, GEN y)
 }
 
 GEN
-ishiftr(GEN x, long s)
+ishiftr(GEN x, long n)
 {
-  long ex,lx,n;
+  long ex, lx;
   if (!signe(x)) return gen_0;
-  ex = expo(x) + s; if (ex < 0) return gen_0;
+  ex = expo(x) + n; if (ex < 0) return gen_0;
   lx = lg(x);
-  n=ex - bit_accuracy(lx) + 1;
-  return ishiftr_lg(x, lx, n);
+  return ishiftr_lg(x, lx, ex - bit_accuracy(lx) + 1);
 }
 
 GEN
@@ -141,7 +140,7 @@ mulur_2(ulong x, GEN y, long s)
   z[2]=hiremainder; /* != 0 since y normalized and |x| > 1 */
 
   sh = bfffo(hiremainder); m = BITS_IN_LONG-sh;
-  if (sh) shift_left2(z,z, 2,lx-1, garde,sh,m);
+  if (sh) shift_left(z,z, 2,lx-1, garde,sh);
   z[1] = evalsigne(s) | evalexpo(m+e); return z;
 }
 

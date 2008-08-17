@@ -380,7 +380,7 @@ ishiftr_lg(GEN x, long lx, long n)
     else
     {
       register const ulong sh = BITS_IN_LONG - m;
-      shift_left2(y,x, 2,lx-1, 0,m,sh);
+      shift_left(y,x, 2,lx-1, 0,m);
       i = ((ulong)x[2]) >> sh;
       /* Extend y on the left? */
       if (i) { ly++; y = new_chunk(1); y[2] = i; }

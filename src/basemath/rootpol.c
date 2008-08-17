@@ -507,7 +507,7 @@ pol_to_gaussint(GEN p, long shift)
 {
   long i, l = lg(p);
   GEN q = cgetg(l, t_POL); q[1] = p[1];
-  for (i=2; i<l; i++) gel(q,i) = gfloor2n(gel(p,i), shift);
+  for (i=2; i<l; i++) gel(q,i) = gtrunc2n(gel(p,i), shift);
   return q;
 }
 

@@ -643,7 +643,6 @@ GEN     trivfact(void);
 
 /* polarit2.c */
 
-long    s_centermod(long x, ulong pp, ulong pps2);
 GEN     sylvestermatrix_i(GEN x, GEN y);
 
 /* QX_factor */

@@ -911,13 +911,14 @@ shiftr(GEN x, long n)
 INLINE GEN
 mpshift(GEN x,long s) { return (typ(x)==t_INT)?shifti(x,s):shiftr(x,s); }
 
+/* FIXME: adapt/use mpn_[lr]shift instead */
 /* z2[imin..imax] := z1[imin..imax].f shifted left sh bits
  * (feeding f from the right). Assume sh > 0 */
 INLINE void
-shift_left2(GEN z2, GEN z1, long imin, long imax, ulong f, ulong sh, ulong m)
+shift_left(GEN z2, GEN z1, long imin, long imax, ulong f,  ulong sh)
 {
   GEN sb = z1 + imin, se = z1 + imax, te = z2 + imax;
-  ulong l, k = f >> m;
+  ulong l, m = BITS_IN_LONG - sh, k = f >> m;
   while (se > sb) {
     l     = *se--;
     *te-- = (l << sh) | k;
@@ -928,10 +929,10 @@ shift_left2(GEN z2, GEN z1, long imin, long imax, ulong f, ulong sh, ulong m)
 /* z2[imin..imax] := f.z1[imin..imax-1] shifted right sh bits
  * (feeding f from the left). Assume sh > 0 */
 INLINE void
-shift_right2(GEN z2, GEN z1, long imin, long imax, ulong f, ulong sh, ulong m)
+shift_right(GEN z2, GEN z1, long imin, long imax, ulong f, ulong sh)
 {
   GEN sb = z1 + imin, se = z1 + imax, tb = z2 + imin;
-  ulong k, l = *sb++;
+  ulong k, l = *sb++, m = BITS_IN_LONG - sh;
   *tb++ = (l >> sh) | (f << m);
   while (sb < se) {
     k     = l << m;
@@ -939,14 +940,6 @@ shift_right2(GEN z2, GEN z1, long imin, long imax, ulong f, ulong sh, ulong m)
     *tb++ = (l >> sh) | k;
   }
 }
-/* FIXME: adapt/use mpn_[lr]shift instead */
-INLINE void
-shift_left(GEN z2, GEN z1, long imin, long imax, ulong f,  ulong sh)
-{ shift_left2(z2,z1,imin,imax,f,sh, BITS_IN_LONG - sh); }
-
-INLINE void
-shift_right(GEN z2, GEN z1, long imin, long imax, ulong f, ulong sh)
-{ shift_right2(z2,z1,imin,imax,f,sh, BITS_IN_LONG - sh); }
 
 /* Backward compatibility. Inefficient && unused */
 extern ulong hiremainder;

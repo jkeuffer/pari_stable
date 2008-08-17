@@ -256,7 +256,7 @@ Babai(pari_sp av, long kappa, GEN *pG, GEN *pB, GEN *pU, GEN mu, GEN r, GEN s,
         } else {
           GEN tmp2  = itor(ztmp,prec);
           long expo = expo(tmp2)-bit_accuracy(lg(tmp2));
-          GEN X = shifti(gfloor2n(tmp2, -expo), expo);
+          GEN X = shifti(gtrunc2n(tmp2, -expo), expo);
           pari_sp btop;
 
           for (i=1; i<=n; i++)

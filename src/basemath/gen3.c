@@ -1977,7 +1977,7 @@ grndtoi(GEN x, long *e)
 
 /* floor(x * 2^s) */
 GEN
-gfloor2n(GEN x, long s)
+gtrunc2n(GEN x, long s)
 {
   GEN z;
   switch(typ(x))
@@ -1988,10 +1988,10 @@ gfloor2n(GEN x, long s)
       return ishiftr(x, s);
     case t_COMPLEX:
       z = cgetg(3, t_COMPLEX);
-      gel(z,1) = gfloor2n(gel(x,1), s);
-      gel(z,2) = gfloor2n(gel(x,2), s);
+      gel(z,1) = gtrunc2n(gel(x,1), s);
+      gel(z,2) = gtrunc2n(gel(x,2), s);
       return z;
-    default: pari_err(typeer,"gfloor2n");
+    default: pari_err(typeer,"gtrunc2n");
       return NULL; /* not reached */
   }
 }

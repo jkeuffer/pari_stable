@@ -311,7 +311,7 @@ shifti_spec(GEN x, long lx, long n)
     else
     {
       register const ulong sh = BITS_IN_LONG - m;
-      shift_left2(y,x, 2,lx-1, 0,m,sh);
+      shift_left(y,x, 2,lx-1, 0,m);
       i = ((ulong)x[2]) >> sh;
       /* Extend y on the left? */
       if (i) { ly++; y = new_chunk(1); y[2] = i; }
@@ -363,10 +363,7 @@ truncr(GEN x)
   if (++m == BITS_IN_LONG)
     for (i=2; i<d; i++) y[i]=x[i];
   else
-  {
-    register const ulong sh = BITS_IN_LONG - m;
-    shift_right2(y,x, 2,d,0, sh,m);
-  }
+    shift_right(y,x, 2,d,0, BITS_IN_LONG - m);
   return y;
 }
 
@@ -390,8 +387,7 @@ floorr(GEN x)
   }
   else
   {
-    register const ulong sh = BITS_IN_LONG - m;
-    shift_right2(y,x, 2,d,0, sh,m);
+    shift_right(y,x, 2,d,0, BITS_IN_LONG - m);
     if (x[d-1]<<m == 0)
     {
       i=d; while (i<lx && !x[i]) i++;
@@ -771,8 +767,8 @@ DIVIDE: /* quotient is non-zero */
   { /* normalize so that highbit(y) = 1 (shift left x and y by sh bits)*/
     register const ulong m = BITS_IN_LONG - sh;
     r = new_chunk(ly);
-    shift_left2(r, y,2,ly-1, 0,sh,m); y = r;
-    shift_left2(r1,x,2,lx-1, 0,sh,m);
+    shift_left(r, y,2,ly-1, 0,sh); y = r;
+    shift_left(r1,x,2,lx-1, 0,sh);
     r1[1] = ((ulong)x[2]) >> m;
   }
   else
@@ -1641,7 +1637,7 @@ sqrtremi(GEN N, GEN *r)
     GEN s0, t = new_chunk(ln + 1);
     t[ln] = 0;
     if (sh)
-    { shift_left(t, n, 0,ln-1, 0, (sh << 1)); }
+      shift_left(t, n, 0,ln-1, 0, sh << 1);
     else
       xmpn_copy(t, n, ln);
     S = sqrtispec(t, l2, &R); /* t normalized, 2 * l2 words */
