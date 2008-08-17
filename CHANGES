@@ -339,7 +339,7 @@ JD 12- add an optional argument to quit()
    Z_isanypower,
    RgXQX_translate, RgXQV_to_mod, RgXQXV_to_mod
    21- library function nf_to_scalar_or_basis, nf_to_scalar_or_alg
-   22- library function roundr_safe
+   22- library function roundr_safe, trunc_safe
 BA 23- [ellap] Port of SEA algorithm from the ellsea GP package
 BA 24- new alarm GP function and alarmer error code
    25- library functions chinese_coprime_Z, Z_chinese, Z_chinese_all,

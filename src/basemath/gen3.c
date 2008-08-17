@@ -1902,8 +1902,6 @@ grndtoi(GEN x, long *e)
   switch(typ(x))
   {
     case t_INT: return icopy(x);
-    case t_INTMOD: case t_QUAD: return gcopy(x);
-    case t_FRAC: return diviiround(gel(x,1), gel(x,2));
     case t_REAL: {
       long ex = expo(x);
       GEN t;
@@ -1925,10 +1923,8 @@ grndtoi(GEN x, long *e)
       if (e1 <= 0) { av = avma; e1 = expo(subri(x,y)); avma = av; }
       *e = e1; return y;
     }
-    case t_POLMOD: y = cgetg(3,t_POLMOD);
-      gel(y,1) = gcopy(gel(x,1));
-      gel(y,2) = grndtoi(gel(x,2), e); return y;
-
+    case t_FRAC: return diviiround(gel(x,1), gel(x,2));
+    case t_INTMOD: case t_QUAD: return gcopy(x);
     case t_COMPLEX:
       av = avma; y = cgetg(3, t_COMPLEX);
       gel(y,2) = grndtoi(gel(x,2), e);
@@ -1940,6 +1936,10 @@ grndtoi(GEN x, long *e)
 	gel(y,1) = grndtoi(gel(x,1), &e1);
       if (e1 > *e) *e = e1;
       return y;
+
+    case t_POLMOD: y = cgetg(3,t_POLMOD);
+      gel(y,1) = gcopy(gel(x,1));
+      gel(y,2) = grndtoi(gel(x,2), e); return y;
 
     case t_POL:
       y = cgetg_copy(x, &lx); y[1] = x[1];
@@ -1975,17 +1975,28 @@ grndtoi(GEN x, long *e)
   return NULL; /* not reached */
 }
 
-/* floor(x * 2^s) */
+/* trunc(x * 2^s) */
 GEN
 gtrunc2n(GEN x, long s)
 {
   GEN z;
   switch(typ(x))
   {
-    case t_INT:
-      return shifti(x, s);
-    case t_REAL:
-      return trunc2nr(x, s);
+    case t_INT:  return shifti(x, s);
+    case t_REAL: return trunc2nr(x, s);
+    case t_FRAC: {
+      pari_sp av;
+      GEN a = gel(x,1), b = gel(x,2), q;
+      if (s == 0) return divii(a, b);
+      av = avma;
+      if (s < 0) q = divii(shifti(a, s), b);
+      else {
+        GEN r;
+        q = dvmdii(a, b, &r);
+        q = addii(shifti(q,s), divii(shifti(r,s), b));
+      }
+      return gerepileuptoint(av, q);
+    }
     case t_COMPLEX:
       z = cgetg(3, t_COMPLEX);
       gel(z,1) = gtrunc2n(gel(x,1), s);
@@ -2123,14 +2134,9 @@ gtrunc(GEN x)
 
   switch(typ(x))
   {
-    case t_INT: case t_POL:
-      return gcopy(x);
-
-    case t_REAL:
-      return mptrunc(x);
-
-    case t_FRAC:
-      return divii(gel(x,1),gel(x,2));
+    case t_INT: return icopy(x);
+    case t_REAL: return truncr(x);
+    case t_FRAC: return divii(gel(x,1),gel(x,2));
 
     case t_PADIC:
       if (!signe(x[4])) return gen_0;
@@ -2146,6 +2152,7 @@ gtrunc(GEN x)
       gel(y,2) = powiu(gel(x,2),-v);
       return y;
 
+    case t_POL: return gcopy(x);
     case t_RFRAC:
       return gdeuc(gel(x,1),gel(x,2));
 

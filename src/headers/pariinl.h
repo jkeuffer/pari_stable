@@ -727,6 +727,9 @@ affc_fixlg(GEN x, GEN res)
   return res;
 }
 
+INLINE GEN
+trunc_safe(GEN x) { long e; return gcvtoi(x,&e); }
+
 /*******************************************************************/
 /*                                                                 */
 /*                          LENGTH CONVERSIONS                     */

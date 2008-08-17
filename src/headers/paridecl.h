@@ -2775,6 +2775,7 @@ INLINE GEN    rowslice(GEN A, long x1, long x2);
 INLINE GEN    rowslicepermute(GEN A, GEN p, long x1, long x2);
 INLINE GEN    sqrti(GEN x);
 INLINE long   sturm(GEN x);
+INLINE GEN    trunc_safe(GEN x);
 INLINE GEN    vec_ei(long n, long i);
 INLINE GEN    vec_lengthen(GEN v, long n);
 INLINE GEN    vec_setconst(GEN v, GEN x);

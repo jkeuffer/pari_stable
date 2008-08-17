@@ -1415,29 +1415,24 @@ real_be_honest(struct buch_quad *B)
 static GEN
 gcdreal(GEN a,GEN b)
 {
-  long e;
-  GEN k1,r;
-
   if (!signe(a)) return mpabs(b);
   if (!signe(b)) return mpabs(a);
-
   if (typ(a)==t_INT)
   {
     if (typ(b)==t_INT) return gcdii(a,b);
     a = itor(a, lg(b));
   }
   else if (typ(b)==t_INT)
-  {
     b = itor(b, lg(a));
-  }
   if (expo(a)<-5) return absr(b);
   if (expo(b)<-5) return absr(a);
-  a=absr(a); b=absr(b);
+  a = absr(a); b = absr(b);
   while (expo(b) >= -5  && signe(b))
   {
-    k1 = gcvtoi(divrr(a,b),&e);
+    long e;
+    GEN r, q = gcvtoi(divrr(a,b),&e);
     if (e > 0) return NULL;
-    r=subrr(a,mulir(k1,b)); a=b; b=r;
+    r = subrr(a, mulir(q,b)); a = b; b = r;
   }
   return absr(a);
 }

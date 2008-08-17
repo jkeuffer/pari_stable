@@ -1647,14 +1647,21 @@ two consecutive integers, then it is rounded towards~$+\infty$ (as for
 \tet{roundr}).
 
 \fun{GEN}{ceil_safe}{GEN x}, \kbd{x} being a real number (not necessarily a
-\typ{REAL}) returns an integer which is larger than any possible incarnation
-of \kbd{x}. (Recall that a \typ{REAL} represents an interval of possible
-values.)
+\typ{REAL}) returns the smallest integer which is larger than any possible
+incarnation of \kbd{x}. (Recall that a \typ{REAL} represents an interval of
+possible values.) Note that \kbd{gceil} raises an exception if the input accuracy
+is too low compared to its magnitude.
 
 \fun{GEN}{floor_safe}{GEN x}, \kbd{x} being a real number (not necessarily a
-\typ{REAL}) returns an integer which is smaller than any possible incarnation
-of \kbd{x}. (Recall that a \typ{REAL} represents an interval of possible
-values.)
+\typ{REAL}) returns the largest integer which is smaller than any possible
+incarnation of \kbd{x}. (Recall that a \typ{REAL} represents an interval of
+possible values.) Note that \kbd{gfloor} raises an exception if the input
+accuracy is too low compared to its magnitude.
+
+\fun{GEN}{trunc_safe}{GEN x}, \kbd{x} being a real number (not necessarily a
+\typ{REAL}) returns the integer with the largest absolute value, which is closer
+to $0$ than any possible incarnation of \kbd{x}. (Recall that a \typ{REAL}
+represents an interval of possible values.)
 
 \fun{GEN}{roundr_safe}{GEN x} rounds the \typ{REAL} \kbd{x} to the nearest
 integer (towards~$+\infty$). Complement the mantissa with an infinite number
@@ -5233,10 +5240,12 @@ those between 0 and~\kbd{x}). If \kbd{x} is a \typ{SER}, it is truncated
 to a \typ{POL}; if \kbd{x} is a \typ{RFRAC}, this takes the polynomial part.
 
 \fun{GEN}{gtrunc2n}{GEN x, long n} creates the floor of~$2^n$\kbd{x}, this is
-only implemented for \typ{INT}, \typ{REAL}, and \typ{COMPLEX} of those.
+only implemented for \typ{INT}, \typ{REAL}, \typ{FRAC} and \typ{COMPLEX} of those.
 
-\fun{GEN}{gcvtoi}{GEN x, long *e} same as \key{grndtoi} except that
-rounding is replaced by truncation.
+\fun{GEN}{gcvtoi}{GEN x, long *e} analogous to \key{grndtoi} for
+\typ{REAL} inputs except that rounding is replaced by truncation. Also applies
+componentwise for vector or matrix inputs; otherwise, sets \kbd{*e} to
+\kbd{-HIGHEXPOBIT} (infinite real accuracy) and return \kbd{gtrunc(x)}.
 
 \section{Valuation and shift}
 

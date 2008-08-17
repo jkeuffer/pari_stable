@@ -680,7 +680,7 @@ real_indep(GEN re, GEN im, long bitprec)
 GEN
 lindep2(GEN x, long bit)
 {
-  long tx=typ(x), lx=lg(x), ly, i, j, e;
+  long tx=typ(x), lx=lg(x), ly, i, j;
   pari_sp av = avma;
   GEN re, im, M;
 
@@ -711,8 +711,8 @@ lindep2(GEN x, long bit)
   {
     GEN c = cgetg(ly,t_COL); gel(M,i) = c;
     for (j=1; j<lx; j++) gel(c,j) = (i==j)? gen_1: gen_0;
-    gel(c,lx)           = gcvtoi(gshift(gel(re,i),bit), &e);
-    if (im) gel(c,lx+1) = gcvtoi(gshift(gel(im,i),bit), &e);
+    gel(c,lx)           = gtrunc2n(gel(re,i), bit);
+    if (im) gel(c,lx+1) = gtrunc2n(gel(im,i), bit);
   }
   M = ZM_lll(M, 0.99, LLL_INPLACE);
   M = gel(M,1);
