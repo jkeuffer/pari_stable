@@ -179,6 +179,7 @@ killbloc(GEN x)
 {
   long i, lx;
   GEN v;
+  BLOCK_SIGINT_START;
   switch(typ(x))
   {
     case t_VEC: case t_COL: case t_MAT:
@@ -191,6 +192,7 @@ killbloc(GEN x)
       pari_free(v); break;
   }
   if (isclone(x)) gunclone(x);
+  BLOCK_SIGINT_END;
 }
 
 int
@@ -1495,7 +1497,9 @@ GEN
 gclone(GEN x)
 {
   long i,lx,tx = typ(x), t = taille(x);
-  GEN y = newbloc(t);
+  GEN y;
+  BLOCK_SIGINT_START
+  y = newbloc(t);
   if (!is_recursive_t(tx))
   {
     switch(tx)
@@ -1523,7 +1527,9 @@ gclone(GEN x)
     if (lontyp[tx] == 1) i = 1; else { y[1] = x[1]; i = 2; }
     for (; i<lx; i++) gel(y,i) = gcopy_avma(gel(x,i), &AVMA);
   }
-  setisclone(y); return y;
+  setisclone(y);
+  BLOCK_SIGINT_END
+  return y;
 }
 
 static void

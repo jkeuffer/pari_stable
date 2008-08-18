@@ -104,6 +104,7 @@ BA 87- conjvec did not support FFELTs.
 IM 90- lngamma(x) gave incorrect results (off by 2*Pi*I) when real(x) was a 
        negative half-integer.
    91- trying to write to a binary file and failing leaked a file descriptor
+   92- long-standing stack corruption when <C-C> pressed during gclone [#458]
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
