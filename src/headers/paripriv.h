@@ -122,7 +122,6 @@ ulong xxgcduu(ulong d, ulong d1, int f, ulong* u, ulong* u1, ulong* v, ulong* v1
 GEN   divgunu(GEN x, ulong i);
 GEN   divrunu(GEN x, ulong i);
 GEN   init_remiimul(GEN M);
-GEN   ishiftr_lg(GEN x, long lx, long n);
 GEN   logagmcx(GEN q, long prec);
 GEN   muliispec(GEN x, GEN y, long nx, long ny);
 GEN   red_montgomery(GEN T, GEN N, ulong inv);

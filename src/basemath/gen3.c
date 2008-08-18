@@ -1841,7 +1841,7 @@ roundr_safe(GEN x)
 
   lx = lg(x);
   e1 = expo(t) - bit_accuracy(lx) + 1;
-  y = ishiftr_lg(t, lx, e1);
+  y = trunc2nr_lg(t, lx, e1);
   if (signe(x) < 0) y = addsi(-1,y);
   return gerepileuptoint(av,y);
 }
@@ -1916,7 +1916,7 @@ grndtoi(GEN x, long *e)
       }
       lx = lg(x);
       e1 = e1 - bit_accuracy(lx) + 1;
-      y = ishiftr_lg(t, lx, e1);
+      y = trunc2nr_lg(t, lx, e1);
       if (signe(x) < 0) y = addsi(-1,y);
       y = gerepileuptoint(av,y);
 
@@ -2020,7 +2020,7 @@ gcvtoi(GEN x, long *e)
   {
     ex = expo(x); if (ex < 0) { *e = ex; return gen_0; }
     lx = lg(x); e1 = ex - bit_accuracy(lx) + 1;
-    y = ishiftr_lg(x, lx, e1);
+    y = trunc2nr_lg(x, lx, e1);
     if (e1 <= 0) { pari_sp av = avma; e1 = expo(subri(x,y)); avma = av; }
     *e = e1; return y;
   }

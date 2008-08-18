@@ -357,7 +357,7 @@ shifti(GEN x, long n)
 }
 
 GEN
-ishiftr_lg(GEN x, long lx, long n)
+trunc2nr_lg(GEN x, long lx, long n)
 {
   long ly, i, m, s = signe(x);
   GEN y;
@@ -1155,7 +1155,7 @@ sqrtr_abs(GEN a)
   else
   {
     ulong u;
-    b = (mp_limb_t *) ishiftr_lg(a,l+2,-1);
+    b = (mp_limb_t *) trunc2nr_lg(a,l+2,-1);
     b[1] = ((ulong)a[l+1])<<(BITS_IN_LONG-1);
     b = (mp_limb_t *) new_chunk(l);
     xmpn_zero(b,l+1); /* overwrites the former b[0] */

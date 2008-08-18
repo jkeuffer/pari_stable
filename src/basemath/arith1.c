@@ -2423,7 +2423,7 @@ gboundcf(GEN x, long k)
 	av = avma; lx = lg(x);
 	e = bit_accuracy(lx)-1-expo(x);
 	if (e < 0) pari_err(talker,"integral part not significant in gboundcf");
-	c = ishiftr_lg(x,lx,0);
+	c = trunc2nr_lg(x,lx,0);
 	y = int2n(e);
 	a = Qsfcont(c,y, NULL, k);
 	b = addsi(signe(x), c);

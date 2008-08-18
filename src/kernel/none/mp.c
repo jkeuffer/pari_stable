@@ -344,7 +344,7 @@ shifti(GEN x, long n)
 }
 
 GEN
-ishiftr_lg(GEN x, long lx, long n)
+trunc2nr_lg(GEN x, long lx, long n)
 { /*This is a kludge since x is not an integer*/
   return shifti_spec(x, lx, n);
 }

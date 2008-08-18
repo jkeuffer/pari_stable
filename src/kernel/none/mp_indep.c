@@ -55,7 +55,7 @@ trunc2nr(GEN x, long n)
   if (!signe(x)) return gen_0;
   ex = expo(x) + n; if (ex < 0) return gen_0;
   lx = lg(x);
-  return ishiftr_lg(x, lx, ex - bit_accuracy(lx) + 1);
+  return trunc2nr_lg(x, lx, ex - bit_accuracy(lx) + 1);
 }
 
 GEN

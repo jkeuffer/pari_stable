@@ -1696,6 +1696,10 @@ by~$2^{-\kbd{n}}$.
 \kbd{truncr(shiftr(x,n))}, but faster and without leaving garbage on the stack.
 Called by \tet{gtrunc2n}.
 
+\fun{GEN}{trunc2nr_lg}{GEN x, long lx, long n} given a \typ{REAL} $x$, returns
+\kbd{trunc2nr(x,n)}, pretending that the length of $x$ is \kbd{lx}, which must be
+$\leq \kbd{lg}(x)$.
+
 \misctitle{Low-level} In the following two functions, $s$(ource) and $t$(arget)
 need not be valid \kbd{GEN}s (in practice, they usually point to some part of a
 \typ{REAL} mantissa): they are considered as arrays of words representing some
