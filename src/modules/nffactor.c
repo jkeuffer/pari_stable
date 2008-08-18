@@ -226,7 +226,7 @@ nfroots(GEN nf,GEN pol)
     A = mkpolmod(gneg_i(gel(A,2)), T);
     return gerepilecopy(av, mkvec(A));
   }
-  if (degpol(T) == 1) return gerepileupto(av, nfrootsQ(simplify_i(A)));
+  if (degpol(T) == 1) return gerepileupto(av, nfrootsQ(simplify_shallow(A)));
 
   A = Q_primpart(A);
   den = get_den(&nf, T);
@@ -403,7 +403,7 @@ nffactor(GEN nf,GEN pol)
     gel(rep,1) = mkcol(A);
     gel(rep,2) = mkcol(gen_1); return rep;
   }
-  if (degpol(T) == 1) return gerepileupto(av, QX_factor(simplify_i(A)));
+  if (degpol(T) == 1) return gerepileupto(av, QX_factor(simplify_shallow(A)));
 
   den = get_den(&nf, T);
   bad = gel(nf,4); if (den != gen_1) bad = mulii(bad, den);

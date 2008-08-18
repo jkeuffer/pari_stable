@@ -844,7 +844,7 @@ to_FF_fact(GEN P, GEN E, GEN ff, pari_sp av)
   v = cgetg(nbf,t_COL); gel(y,2) = v;
   for (j=1; j<l; j++)
   {
-    gel(u,j) = simplify_i(gel(P,j)); /* may contain pols of degree 0 */
+    gel(u,j) = simplify_shallow(gel(P,j)); /* may contain pols of degree 0 */
     gel(v,j) = utoi((ulong)E[j]);
   }
   y = gerepilecopy(av, y); u = gel(y,1);
@@ -865,7 +865,7 @@ FFX_to_FqX(GEN x, GEN T, GEN p)
   {
     GEN y = gel(x,i);
     y = (typ(y)==t_FFELT)? FF_to_FpXQ(y): Rg_to_FpXQ(y, T,p);
-    gel(z,i) = simplify_i(y);
+    gel(z,i) = simplify_shallow(y);
   }
   return normalizepol_lg(z, l);
 }

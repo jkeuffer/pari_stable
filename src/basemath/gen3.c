@@ -1065,7 +1065,7 @@ gsubst_expr(GEN expr, GEN from, GEN to)
   long w, v = fetch_var(); /* FIXME: Need fetch_var_low_priority() */
   GEN y;
 
-  from = simplify_i(from);
+  from = simplify_shallow(from);
   switch (typ(from)) {
     case t_RFRAC: /* M= numerator(from) - t * denominator(from) */
       y = gsub(gel(from,1), gmul(pol_x(v), gel(from,2)));
@@ -3137,7 +3137,7 @@ static long
 _egal(GEN x, GEN y)
 {
   pari_sp av = avma;
-  long r = gequal(simplify_i(x), simplify_i(y));
+  long r = gequal(simplify_shallow(x), simplify_shallow(y));
   avma = av; return r;
 }
 
@@ -3225,56 +3225,51 @@ GEN
 geval(GEN x) { return geval_gp(x,NULL); }
 
 GEN
-simplify_i(GEN x)
+simplify_shallow(GEN x)
 {
   long i, lx;
-  GEN y;
+  GEN y, z;
 
   switch(typ(x))
   {
-    case t_INT: case t_REAL: case t_FRAC: case t_FFELT:
-    case t_INTMOD: case t_PADIC: case t_QFR: case t_QFI:
-    case t_LIST: case t_STR: case t_VECSMALL: case t_CLOSURE:
+    case t_INT: case t_REAL: case t_INTMOD: case t_FRAC: case t_FFELT:
+    case t_PADIC: case t_QFR: case t_QFI: case t_LIST: case t_STR: case t_VECSMALL:
+    case t_CLOSURE:
       return x;
-
-    case t_COMPLEX:
-      if (isrationalzero(gel(x,2))) return gel(x,1);
-      return x;
-
-    case t_QUAD:
-      if (isrationalzero(gel(x,3))) return gel(x,2);
-      return x;
+    case t_COMPLEX: return isintzero(gel(x,2))? gel(x,1): x;
+    case t_QUAD:    return isintzero(gel(x,3))? gel(x,2): x;
 
     case t_POLMOD: y = cgetg(3,t_POLMOD);
-      gel(y,1) = simplify_i(gel(x,1));
-      if (typ(y[1]) != t_POL) y[1] = x[1]; /* invalid object otherwise */
-      gel(y,2) = simplify_i(gel(x,2)); return y;
+      z = simplify_shallow(gel(x,1));
+      if (typ(z) != t_POL) z = scalarpol(z, varn(gel(x,1)));
+      gel(y,1) = z; /* z must be a t_POL: invalid object otherwise */
+      gel(y,2) = simplify_shallow(gel(x,2)); return y;
 
     case t_POL:
       lx = lg(x);
       if (lx==2) return gen_0;
-      if (lx==3) return simplify_i(gel(x,2));
+      if (lx==3) return simplify_shallow(gel(x,2));
       y = cgetg(lx,t_POL); y[1] = x[1];
-      for (i=2; i<lx; i++) gel(y,i) = simplify_i(gel(x,i));
+      for (i=2; i<lx; i++) gel(y,i) = simplify_shallow(gel(x,i));
       return y;
 
     case t_SER:
       y = cgetg_copy(x, &lx); y[1] = x[1];
-      for (i=2; i<lx; i++) gel(y,i) = simplify_i(gel(x,i));
+      for (i=2; i<lx; i++) gel(y,i) = simplify_shallow(gel(x,i));
       return y;
 
-    case t_RFRAC: y=cgetg(3,t_RFRAC);
-      gel(y,1) = simplify_i(gel(x,1));
-      gel(y,2) = simplify_i(gel(x,2));
-      if (typ(gel(y,2)) != t_POL) return gdiv(gel(y,1), gel(y,2));
-      return y;
+    case t_RFRAC: y = cgetg(3,t_RFRAC);
+      gel(y,1) = simplify_shallow(gel(x,1));
+      z = simplify_shallow(gel(x,2));
+      if (typ(z) != t_POL) return gdiv(gel(y,1), z);
+      gel(y,2) = z; return y;
 
     case t_VEC: case t_COL: case t_MAT:
       y = cgetg_copy(x, &lx);
-      for (i=1; i<lx; i++) gel(y,i) = simplify_i(gel(x,i));
+      for (i=1; i<lx; i++) gel(y,i) = simplify_shallow(gel(x,i));
       return y;
   }
-  pari_err(typeer,"simplify_i");
+  pari_err(typeer,"simplify_shallow");
   return NULL; /* not reached */
 }
 
@@ -3282,7 +3277,7 @@ GEN
 simplify(GEN x)
 {
   pari_sp av = avma;
-  GEN y = simplify_i(x);
+  GEN y = simplify_shallow(x);
   return av == avma ? gcopy(y): gerepilecopy(av, y);
 }
 

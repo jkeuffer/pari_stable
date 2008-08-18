@@ -825,7 +825,7 @@ fmtnum(outString *S, long lvalue, GEN gvalue, int base, int signvalue,
           }
           return;
       }
-      gvalue = gfloor( simplify_i(gvalue) );
+      gvalue = gfloor( simplify_shallow(gvalue) );
       if (typ(gvalue) != t_INT)
         pari_err(talker,"not a t_INT in integer format conversion: %Ps", gvalue);
     }
@@ -1250,10 +1250,10 @@ nextch:
           {
             pari_sp av = avma;
             if (arg_vector)
-              gvalue = simplify_i( v_get_arg(arg_vector, &index, save_fmt) );
+              gvalue = simplify_shallow( v_get_arg(arg_vector, &index, save_fmt) );
             else {
               if (GENflag)
-                gvalue = simplify_i( va_arg(args, GEN) );
+                gvalue = simplify_shallow( va_arg(args, GEN) );
               else
                 gvalue = dbltor( va_arg(args, double) );
             }

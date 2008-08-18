@@ -1539,7 +1539,7 @@ gp_main_loop(long flag)
       (void)gp_format_time(ti_NOPRINT);
     if (z == gnil) continue;
 
-    if (GP_DATA->flags & SIMPLIFY) z = simplify_i(z);
+    if (GP_DATA->flags & SIMPLIFY) z = simplify_shallow(z);
     z = set_hist_entry(H, z);
     if (! is_silent(b->buf) ) gp_output(z, GP_DATA);
   }

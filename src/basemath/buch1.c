@@ -499,12 +499,11 @@ findquad(GEN a, GEN x, GEN p)
   if (typ(x) == t_POLMOD) x = gel(x,2);
   if (typ(a) == t_POLMOD) a = gel(a,2);
   u = poldivrem(x, a, &v);
-  u = simplify(u); tu = typ(u);
-  v = simplify(v); tv = typ(v);
+  u = simplify_shallow(u); tu = typ(u);
+  v = simplify_shallow(v); tv = typ(v);
   if (!is_scalar_t(tu) || !is_scalar_t(tv))
     pari_err(talker, "incorrect data in findquad");
-  x = v;
-  if (!gcmp0(u)) x = gadd(gmul(u, pol_x(varn(a))), x);
+  x = deg1pol(v, u, varn(a));
   if (typ(x) == t_POL) x = gmodulo(x,p);
   return gerepileupto(av, x);
 }

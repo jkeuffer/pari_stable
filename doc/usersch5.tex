@@ -835,6 +835,13 @@ first. Mostly for debugging purposes.
 two-component row vector giving the number of objects on the heap and the
 amount of memory they occupy in long words.
 
+\subsec{Simplify}
+
+\fun{GEN}{simplify}{GEN x} you should not need that function in library mode.
+One rather uses:
+
+\fun{GEN}{simplify_shallow}{GEN x} shallow, faster, version of \tet{simplify}.
+
 \section{Handling user and temp variables}
 Low-level implementation of user / temporary variables is liable to change. We
 describe it nevertheless for completeness. Currently variables are
@@ -5295,10 +5302,15 @@ means that \kbd{x - y} was successfully computed and that
 
 \fun{int}{isexactzero}{GEN x} returns 1 (true) if \kbd{x} is exactly equal
 to~0 (including \typ{INTMOD}s like \kbd{Mod(0,2)}), and 0~(false) otherwise.
+This includes recursive objects, for instance vectors, whose components are $0$.
 
 \fun{int}{isrationalzero}{GEN x} returns 1 (true) if \kbd{x} is equal
 to an integer~0 (excluding \typ{INTMOD}s like \kbd{Mod(0,2)}), and 0~(false)
-otherwise.
+otherwise. Contrary to \kbd{isintzero}, this includes recursive objects, for
+instance vectors, whose components are $0$.
+
+\fun{int}{isintzero}{GEN x} returns 1 (true) if \kbd{x} is a \typ{INT}
+equal to~0.
 
 \fun{int}{is_pm1}{GEN x}. assuming that \kbd{x} is a
 \emph{non-zero} \typ{INT}, return 1 (true) if \kbd{x} is equal to $-1$ or

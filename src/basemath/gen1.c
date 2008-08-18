@@ -277,9 +277,9 @@ gred_rfrac2_i(GEN n, GEN d)
   GEN y, z;
   long td, tn, v, vd, vn;
 
-  n = simplify_i(n);
+  n = simplify_shallow(n);
   if (isrationalzero(n)) return gcopy(n);
-  d = simplify_i(d);
+  d = simplify_shallow(d);
   td = typ(d);
   if (td != t_POL) return gdiv(n,d);
   tn = typ(n);
@@ -800,7 +800,7 @@ add_rfrac(GEN x, GEN y)
   delta = RgX_gcd(x2,y2);
   if (!degpol(delta))
   {
-    n = simplify_i( gadd(gmul(x1,y2), gmul(y1,x2)) );
+    n = simplify_shallow( gadd(gmul(x1,y2), gmul(y1,x2)) );
     d = RgX_mul(x2, y2);
     return gerepileupto(av, gred_rfrac_simple(n, d));
   }
@@ -809,7 +809,7 @@ add_rfrac(GEN x, GEN y)
   n = gadd(gmul(x1,y2), gmul(y1,x2));
   if (!signe(n))
   {
-    n = simplify_i(n);
+    n = simplify_shallow(n);
     if (isrationalzero(n)) return gerepileupto(av, n);
     return gerepilecopy(av, mkrfrac(n, RgX_mul(gel(x,2),y2)));
   }
@@ -1241,7 +1241,7 @@ mul_rfrac_scal(GEN n, GEN d, GEN x)
       return gerepileupto(av, gdiv(n,d));
   }
   z = gred_rfrac2_i(x, d);
-  n = simplify_i(n);
+  n = simplify_shallow(n);
   if (typ(z) == t_RFRAC)
     z = gred_rfrac_simple(gmul(gel(z,1), n), gel(z,2));
   else
@@ -3173,7 +3173,7 @@ ginv(GEN x)
       pari_sp av = avma, ltop;
       if (gcmp0(n)) pari_err(gdiver);
 
-      n = simplify_i(n);
+      n = simplify_shallow(n);
       if (typ(n) != t_POL || varn(n) != varn(d))
       {
 	if (gcmp1(n)) { avma = av; return gcopy(d); }

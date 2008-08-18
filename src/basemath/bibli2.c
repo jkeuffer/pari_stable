@@ -1681,7 +1681,7 @@ vectoset(GEN x)
   long i, lx = lg(x);
   GEN y = cgetg(lx,t_VEC);
   if (lx == 1) return y;
-  for (i=1; i<lx; i++) gel(y,i) = GENtoGENstr_nospace(simplify_i(gel(x,i)));
+  for (i=1; i<lx; i++) gel(y,i) = GENtoGENstr_nospace(simplify_shallow(gel(x,i)));
   return vecpermute(y, gen_sortspec_uniq(y, lx-1, (void*)&gcmp, cmp_nodata));
 }
 
@@ -1698,7 +1698,7 @@ gtoset(GEN x)
   {
     if (tx != t_LIST) {
       y = cgetg(2,t_VEC); av = avma;
-      gel(y,1) = gerepileupto(av, GENtoGENstr_nospace(simplify_i(x)));
+      gel(y,1) = gerepileupto(av, GENtoGENstr_nospace(simplify_shallow(x)));
       return y;
     }
     x = list_data(x); lx = x? lg(x): 1;
@@ -1726,7 +1726,7 @@ setsearch(GEN x, GEN y, long flag)
 {
   pari_sp av = avma;
   long res;
-  if (typ(y) != t_STR) y = GENtoGENstr_nospace(simplify_i(y));
+  if (typ(y) != t_STR) y = GENtoGENstr_nospace(simplify_shallow(y));
   res = gen_search(x,y,flag,(void*)gcmp,cmp_nodata);
   avma = av; return res;
 }

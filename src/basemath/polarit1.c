@@ -1949,7 +1949,7 @@ to_Fq_fact(GEN P, GEN E, GEN T, GEN p, pari_sp av)
   v = cgetg(nbf,t_COL); gel(y,2) = v;
   for (j=1; j<l; j++)
   {
-    gel(u,j) = simplify_i(gel(P,j)); /* may contain pols of degree 0 */
+    gel(u,j) = simplify_shallow(gel(P,j)); /* may contain pols of degree 0 */
     gel(v,j) = utoi((ulong)E[j]);
   }
   y = gerepilecopy(av, y); u = gel(y,1);
@@ -2279,7 +2279,7 @@ FqX_factor_i(GEN f, GEN T, GEN p)
   d = degpol(f); if (!d) return trivfact();
   T = FpX_normalize(T, p);
   f = FqX_normalize(f, T, p);
-  if (isabsolutepol(f)) return FpX_factorff_i(simplify_i(f), p, T);
+  if (isabsolutepol(f)) return FpX_factorff_i(simplify_shallow(f), p, T);
 
   pg = itos_or_0(p);
   df2  = NULL; /* gcc -Wall */

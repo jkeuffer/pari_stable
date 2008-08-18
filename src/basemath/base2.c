@@ -2705,7 +2705,7 @@ get_d(GEN nf, GEN pol, GEN A)
     {
       GEN c = RgXQX_mul(gel(W,i),gel(W,j), nfT);
       c = RgXQX_rem(c, pol, nfT);
-      c = simplify_i(quicktrace(c,sym));
+      c = simplify_shallow(quicktrace(c,sym));
       gcoeff(T,j,i) = gcoeff(T,i,j) = c;
     }
   return nf_to_scalar_or_basis(nf, det(T));

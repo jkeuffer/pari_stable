@@ -218,6 +218,9 @@ zeromatcopy(long m, long n)
   return y;
 }
 
+INLINE int
+isintzero(GEN x) { return typ(x) == t_INT && !signe(x); }
+
 /* i-th vector in the standard basis */
 INLINE GEN
 col_ei(long n, long i) { GEN e = zerocol(n); gel(e,i) = gen_1; return e; }

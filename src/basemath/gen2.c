@@ -307,9 +307,9 @@ isrationalzero(GEN g)
     case t_INT:
       return !signe(g);
     case t_COMPLEX:
-      return isrationalzero(gel(g,1)) && isrationalzero(gel(g,2));
+      return isintzero(gel(g,1)) && isintzero(gel(g,2));
     case t_QUAD:
-      return isrationalzero(gel(g,2)) && isrationalzero(gel(g,3));
+      return isintzero(gel(g,2)) && isintzero(gel(g,3));
     case t_POLMOD:
       return isrationalzero(gel(g,2));
     case t_POL: return lg(g) == 2;
