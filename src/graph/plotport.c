@@ -1679,7 +1679,7 @@ rectplothrawin(long stringrect, long drawrect, dblPointList *data,
     sprintf(c3,"%.5g",xsml); sprintf(c4,"%.5g",xbig);
 
     rectlinetype(stringrect,-2); /* Frame */
-    current_color[stringrect] = DEFAULT_COLOR;
+    current_color[(ulong)stringrect] = DEFAULT_COLOR;
     put_string(stringrect, lm, 0, c1,
 		RoSTdirRIGHT | RoSTdirHGAP | RoSTdirTOP);
     put_string(stringrect, lm, W.height - bm, c2,
