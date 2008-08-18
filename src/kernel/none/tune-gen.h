@@ -11,6 +11,7 @@ long Flx_POW_MONTGOMERY_LIMIT = __Flx_POW_MONTGOMERY_LIMIT;
 long Flx_SQR_LIMIT            = __Flx_SQR_LIMIT;
 long Flx_MUL_LIMIT            = __Flx_MUL_LIMIT;
 long EXPNEWTON_LIMIT          = __EXPNEWTON_LIMIT;
+long INVNEWTON_LIMIT          = __INVNEWTON_LIMIT;
 long LOGAGM_LIMIT             = __LOGAGM_LIMIT;
 long LOGAGMCX_LIMIT           = __LOGAGMCX_LIMIT;
 long AGM_ATAN_LIMIT           = __AGM_ATAN_LIMIT;

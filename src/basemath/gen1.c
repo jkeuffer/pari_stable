@@ -3008,9 +3008,10 @@ gmul2n(GEN x, long n)
 GEN
 mpinv(GEN b)
 {
-  long i, l1, l = lg(b), e = expo(b), s = signe(b);
-  GEN x = cgetr(l), a = leafcopy(b);
+  long i, lnew, l = lg(b);
+  GEN x = cgetr(l), a = rcopy(b);
   double t;
+  ulong mask = quadratic_prec_mask(l - 2);
 
   a[1] = _evalexpo(0) | evalsigne(1);
   for (i = 3; i < l; i++) x[i] = 0;
@@ -3021,19 +3022,19 @@ mpinv(GEN b)
     t *= 2;
     x[1] = _evalexpo(-1) | evalsigne(1);
   }
-  x[2] = (ulong)t;
-  l1 = 1; l -= 2;
-  while (l1 < l)
+  x[2] = (ulong)t; lnew = 1;
+  while (mask > 1)
   {
-    l1 <<= 1; if (l1 > l) l1 = l;
-    setlg(a, l1 + 2);
-    setlg(x, l1 + 2);
+    lnew <<= 1; if (mask & 1) lnew--;
+    mask >>= 1;
+    setlg(a, lnew + 2);
+    setlg(x, lnew + 2);
     /* TODO: mulrr(a,x) should be a half product (the higher half is known).
      * mulrr(x, ) already is */
     affrr(addrr(x, mulrr(x, subsr(1, mulrr(a,x)))), x);
     avma = (pari_sp)a;
   }
-  x[1] = evalexpo(expo(x)-e) | evalsigne(s);
+  x[1] = (b[1] & SIGNBITS) | evalexpo(expo(x)-expo(b));
   avma = (pari_sp)x; return x;
 }
 
@@ -3043,14 +3044,13 @@ inv_ser(GEN b)
   pari_sp av = avma, av2, lim;
   long j, lold, l = lg(b), e = valp(b), v = varn(b);
   GEN y, x = cgetg(l, t_SER), a = shallowcopy(b);
-  ulong mask;
+  ulong mask = quadratic_prec_mask(l - 2);
 
   if (!signe(b)) pari_err(gdiver);
 
   for (j = 3; j < l; j++) gel(x,j) = gen_0;
   gel(x,2) = ginv(gel(b,2));
   a[1] = x[1] = _evalvalp(0) | evalvarn(v) | evalsigne(1);
-  mask = quadratic_prec_mask(l - 2);
   av2 = avma; lim = stack_lim(av2, 2);
   lold = 1;
   while (mask > 1)
