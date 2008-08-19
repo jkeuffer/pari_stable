@@ -54,8 +54,8 @@ Doc: sorts the vector $x$ in ascending order, using a mergesort method.
  [2 3]
 
  [2 1]
- ? vecsort(v, (x,y)->sign(x-y))            \\@com reverse sort
- ? vecsort(v, (x,y)->sign(abs(y)-abs(x)))  \\@com sort by increasing absolute value
+ ? vecsort(v, (x,y)->sign(y-x))            \\@com reverse sort
+ ? vecsort(v, (x,y)->sign(abs(x)-abs(y)))  \\@com sort by increasing absolute value
  ? cmp(x,y) = my(dx = poldisc(x), dy = poldisc(y)); sign(abs(dx) - abs(dy))
  ? vecsort([x^2+1, x^3-2, x^4+5*x+1], cmp)
  @eprog\noindent
