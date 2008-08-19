@@ -11,8 +11,7 @@ Doc:
  \item the complex embeddings of $z$ if $T$ has rational coefficients,
  i.e.~the $a(r[i])$ where $r = \kbd{polroots}(T)$;
 
- \item the lifted conjugates of $z$ if $T$ has some intmod coefficients;
- i.e.~the $z^{p^i}$ lifted to $\Z[x]$.
+ \item the conjugates of $z$ if $T$ has some intmod coefficients;
 
  \noindent if $z$ is a finite field element, the result is the vector of
  conjugates $[z,z^p,z^{p^2},\ldots,z^{p^{n-1}}]$ where $n=\text{degree}(T)$.

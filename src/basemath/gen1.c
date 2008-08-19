@@ -476,19 +476,20 @@ conjvec(GEN x,long prec)
         switch(typ(c)) {
 	  case t_INTMOD: {
             GEN p = gel(c,1);
+            pari_sp av = avma;
             T = RgX_to_FpX(T,p); /* left on stack */
-            z = cgetg(lx-2,t_COL);
             if (typ(x) == t_POL) {
               x = RgX_to_FpX(x, p);
               if (varn(x) != varn(T))
                 pari_err(talker,"not a rational polynomial in conjvec");
-              gel(z,1) = x;
-              for (i=2; i<=lx-3; i++) gel(z,i) = FpXQ_pow(gel(z,i-1), p, T, p);
+              z = FpXQC_to_mod(FpXQ_conjvec(x, T , p), T, p);
+              return gerepileupto(av, z);
             } else {
+              z = cgetg(lx-2,t_COL);
               x = Rg_to_Fp(x, p);
               for (i=1; i<=lx-3; i++) gel(z,i) = x;
+              return z;
             }
-            return z;
           }
           case t_INT:
           case t_FRAC: break;

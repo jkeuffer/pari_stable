@@ -3671,6 +3671,10 @@ Mod(1,p)}, a \typ{VEC} with \typ{INTMOD} coefficients.
 \fun{GEN}{FpM_to_mod}{GEN z, GEN p}, \kbd{z} a \kbd{ZM}. Returns \kbd{z *
 Mod(1,p)}, with \typ{INTMOD} coefficients.
 
+\fun{GEN}{FpXQC_to_mod}{GEN V, GEN T, GEN p} $V$ being a vector of \kbd{FpXQ},
+convert each entry to \typ{POLMOD} with \typ{INTMOD} coefficients, and return
+a \typ{COL}.
+
 \fun{GEN}{QXQV_to_mod}{GEN V, GEN T} $V$ a vector of \kbd{QXQ}, which
 are lifted representatives of elements of $\Q[X]/(T)$ (number field elements
 in most applications) and $T$ is in $\Z[X]$. Return a vector where all

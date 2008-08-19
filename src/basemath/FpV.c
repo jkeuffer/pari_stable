@@ -532,4 +532,13 @@ FpM_to_mod(GEN z, GEN p)
   return x;
 }
 
-
+/* z in Z^n, return z * Mod(1,p), normalized*/
+GEN
+FpXQC_to_mod(GEN z, GEN T, GEN p)
+{
+  long i,l = lg(z);
+  GEN x = cgetg(l, t_COL); T = FpX_to_mod(T, p);
+  for (i=1; i<l; i++) 
+    gel(x,i) = mkpolmod(FpX_to_mod(gel(z,i), p), T);
+  return x;
+}

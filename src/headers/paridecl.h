@@ -213,6 +213,7 @@ GEN     FpXQ_pow(GEN x, GEN n, GEN T, GEN p);
 GEN     FpXQ_powers(GEN x, long l, GEN T, GEN p);
 GEN     FpXQ_sqr(GEN y, GEN T, GEN p);
 GEN     FpXQ_sqrtn(GEN a, GEN n, GEN T, GEN p, GEN *zetan);
+GEN     FpXQC_to_mod(GEN z, GEN T, GEN p);
 GEN     FpXV_prod(GEN V, GEN p);
 GEN     FqV_inv(GEN x, GEN T, GEN p);
 GEN     gener_FpXQ(GEN T, GEN p, GEN *o);

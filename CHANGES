@@ -177,9 +177,8 @@ BA 32- all LLL variants now use an implementation of NGuyen & Stehle's algorithm
        'print("Total time spent: ",gettime)'
    47- rename library functions discf -> nfdisc, nfdiscf0 -> nfdisc0
    48- arguments of stirling1 / stirling2 are now ulongs [ were longs ]
-BA 49- user variables can now be aliased [#790].
-   50- conjvec(POLMOD of INTMODs) now returns lifted conjugates (10 times
-       faster)
+BA 49- user variables can now be aliased [#790]
+   50- conjvec(POLMOD of INTMODs) was slow
    51- rename polvaluation -> RgX_valrem(x, pz) and no longer accept pz = NULL
        (use RgX_val). Same for ZX_valuation -> ZX_valrem [ & ZX_val ]
        rename poldeflate -> RgX_deflate_max
