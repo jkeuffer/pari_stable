@@ -1673,7 +1673,7 @@ a_posteriori_errors(GEN p, GEN roots_pol, long pari_err)
   if (pari_err > -2) return 0;
   sigma = real2n(-pari_err, 3);
   /*  2 / ((s - 1)^(1/n) - 1) */
-  shatzle = divsr(2, subrs(sqrtnr(subrs(sigma,1),n), 1));
+  shatzle = divur(2, subrs(sqrtnr(subrs(sigma,1),n), 1));
   for (i=1; i<=n; i++)
   {
     x = root_error(n,i,roots_pol,pari_err,shatzle);

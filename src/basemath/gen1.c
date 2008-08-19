@@ -3005,30 +3005,40 @@ gmul2n(GEN x, long n)
 /*                              INVERSE                            */
 /*                                                                 */
 /*******************************************************************/
-GEN
-mpinv(GEN b)
+/* assume y != 0 */
+static GEN
+invr_basecase(GEN y)
 {
-  long i, lnew, l = lg(b);
-  GEN x = cgetr(l), a = rcopy(b);
-  double t;
-  ulong mask = quadratic_prec_mask(l - 2);
+  long ly = lg(y);;
+  GEN z = cgetr(ly);
+  pari_sp av = avma;
+  affrr(divrr(real_1(ly+1), y), z);
+  avma = av; return z;
+}
 
-  a[1] = _evalexpo(0) | evalsigne(1);
-  for (i = 3; i < l; i++) x[i] = 0;
-  t = (((double)HIGHBIT) * HIGHBIT) / (double)(ulong)a[2];
-  if (((ulong)t) & HIGHBIT)
-    x[1] = _evalexpo(0) | evalsigne(1);
-  else {
-    t *= 2;
-    x[1] = _evalexpo(-1) | evalsigne(1);
+GEN
+invr(GEN b)
+{
+  const long s = 6;
+  long i, p, l = lg(b);
+  GEN x, a;
+  ulong mask;
+
+  if (l <= maxss(INVNEWTON_LIMIT, (1<<s) + 2)) {
+    if (l == 2) pari_err(gdiver);
+    return invr_basecase(b);
   }
-  x[2] = (ulong)t; lnew = 1;
+  mask = quadratic_prec_mask(l-2);
+  for(i=0, p=1; i<s; i++) { p <<= 1; if (mask & 1) p--; mask >>= 1; }
+  x = cgetr(l);
+  a = rcopy(b); a[1] = _evalexpo(0) | evalsigne(1);
+  affrr(invr_basecase(rtor(a, p+2)), x);
   while (mask > 1)
   {
-    lnew <<= 1; if (mask & 1) lnew--;
+    p <<= 1; if (mask & 1) p--;
     mask >>= 1;
-    setlg(a, lnew + 2);
-    setlg(x, lnew + 2);
+    setlg(a, p + 2);
+    setlg(x, p + 2);
     /* TODO: mulrr(a,x) should be a half product (the higher half is known).
      * mulrr(x, ) already is */
     affrr(addrr(x, mulrr(x, subsr(1, mulrr(a,x)))), x);
@@ -3128,8 +3138,7 @@ ginv(GEN x)
       gel(z,1) = s<0? gen_m1: gen_1;
       gel(z,2) = absi(x); return z;
 
-    case t_REAL:
-      return divsr(1,x);
+    case t_REAL: return invr(x);
 
     case t_INTMOD: z=cgetg(3,t_INTMOD);
       gel(z,1) = icopy(gel(x,1));

@@ -99,7 +99,7 @@ piold(long prec)
     setlg(p1,l); avma = av2;
     n--; n1-=6;
   }
-  p1 = divsr(53360,p1);
+  p1 = divur(53360,p1);
   return gerepileuptoleaf(av, mulrr(p1,sqrtr_abs(stor(k3,prec))));
 }
 #endif
@@ -1940,7 +1940,7 @@ GEN
 logagmr_abs(GEN q)
 {
   long prec = lg(q), lim, e = expo(q);
-  GEN z, y, Q;
+  GEN z, y, Q, _4ovQ;
   pari_sp av;
 
   if (absrnz_egal2n(q)) return e? mulsr(e, mplog2(prec)): real_0(prec);
@@ -1949,8 +1949,9 @@ logagmr_abs(GEN q)
   Q = rtor(q,prec);
   Q[1] = evalsigne(1) | evalexpo(lim);
 
+  _4ovQ = invr(Q); setexpo(_4ovQ, expo(_4ovQ)+2); /* 4/Q */
   /* Pi / 2agm(1, 4/Q) ~ log(Q), q = Q * 2^(e-lim) */
-  y = divrr(Pi2n(-1, prec), agm1r_abs( divsr(4, Q) ));
+  y = divrr(Pi2n(-1, prec), agm1r_abs(_4ovQ));
   y = addrr(y, mulsr(e - lim, mplog2(prec)));
   affrr_fixlg(y, z); avma = av; return z;
 }

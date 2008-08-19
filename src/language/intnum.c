@@ -361,7 +361,8 @@ inittanhsinh(long m, long prec)
     gel(D.tabwp,k) = cgetr(prec+1); av = avma;
     ct = divr2_ip(addrr(et, ginv(et)));
     st = subrr(et, ct);
-    ext = divsr(2, addrs(mpexp(mulsr(3, st)), 1));
+    ext = invr( addrs(mpexp(mulur(3, st)), 1) );
+    setexpo(ext, expo(ext)+1);
     xp = subsr(1, ext);
     wp = divr2_ip(mulsr(3, mulrr(ct, mulrr(ext, addsr(1, xp)))));
     if (expo(wp) < -D.eps) { nt = k-1; break; }

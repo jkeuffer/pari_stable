@@ -1954,13 +1954,15 @@ the real number equal to $x$. This is a special case of \kbd{gexpo}.
 \fun{GEN}{mulu_interval}{ulong a, ulong b} returns $a(a+1)\cdots b$, assuming
 that $a \leq b$.
 
-\fun{GEN}{sqri}{GEN x} squares the \typ{INT}~\kbd{x}
+\fun{GEN}{sqri}{GEN x} squares the \typ{INT}~$x$.
 
-\fun{GEN}{sqrr}{GEN x} squares the \typ{REAL}~\kbd{x}
+\fun{GEN}{sqrr}{GEN x} squares the \typ{REAL}~$x$.
 
 \fun{GEN}{sqrs}{long x} returns $x^2$.
 
 \fun{GEN}{sqru}{ulong x} returns $x^2$.
+
+\fun{GEN}{invr}{GEN x} returns the inverse of the non-zero \typ{REAL}~$x$.
 
 \fun{GEN}{truedivii}{GEN x, GEN y} returns the true Euclidean quotient
 (with non-negative remainder less than $|y|$).

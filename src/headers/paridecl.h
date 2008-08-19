@@ -1480,7 +1480,7 @@ GEN     gmulsg(long s, GEN y);
 GEN     gsqr(GEN x);
 GEN     gsub(GEN x, GEN y);
 GEN     gsubsg(long x, GEN y);
-GEN     mpinv(GEN b);
+GEN     invr(GEN b);
 GEN     inv_ser(GEN b);
 
 /* gen2.c */
@@ -1914,6 +1914,7 @@ GEN     divrs(GEN x, long y);
 GEN     divru(GEN x, ulong y);
 GEN     divsi(long x, GEN y);
 GEN     divsr(long x, GEN y);
+GEN     divur(ulong x, GEN y);
 GEN     dvmdii(GEN x, GEN y, GEN *z);
 int     equalii(GEN x, GEN y);
 GEN     floorr(GEN x);
@@ -1922,7 +1923,7 @@ GEN     int2n(long n);
 GEN     int2u(ulong n);
 GEN     int_normalize(GEN x, long known_zero_words);
 int     invmod(GEN a, GEN b, GEN *res);
-ulong   invrev(ulong b);
+ulong   invmod2BIL(ulong b);
 GEN     modii(GEN x, GEN y);
 void    modiiz(GEN x, GEN y, GEN z);
 GEN     mulii(GEN x, GEN y);

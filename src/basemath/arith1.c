@@ -1711,7 +1711,7 @@ static void
 init_montdata(GEN N, montdata *s)
 {
   s->N = N;
-  s->inv = (ulong) -invrev(mod2BIL(N));
+  s->inv = (ulong) -invmod2BIL(mod2BIL(N));
 }
 
 GEN
@@ -3107,8 +3107,9 @@ classno2(GEN x)
   p1 = sqrtr(divrr(mulir(d,logd), gmul2n(Pi,1)));
   if (s > 0)
   {
-    p2 = subsr(1, gmul2n(divrr(logr_abs(reg),logd),1));
-    if (cmprr(gsqr(p2), divsr(2,logd)) >= 0) p1 = mulrr(p2,p1);
+    GEN invlogd = invr(logd);
+    p2 = subsr(1, shiftr(mulrr(logr_abs(reg),invlogd),1));
+    if (cmprr(gsqr(p2), shiftr(invlogd,1)) >= 0) p1 = mulrr(p2,p1);
   }
   n = itos_or_0( mptrunc(p1) );
   if (!n) pari_err(talker,"discriminant too large in classno");

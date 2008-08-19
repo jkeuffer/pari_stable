@@ -151,6 +151,11 @@ static double speed_exp(speed_param *s)
 static double speed_expnewton(speed_param *s)
 { enable(s);  mplog2(lg(s->x)+2); TIME_FUN(mpexp(s->x)); }
 
+static double speed_inv(speed_param *s)
+{ disable(s); TIME_FUN(invr(s->x)); }
+static double speed_invnewton(speed_param *s)
+{ enable(s);  TIME_FUN(invr(s->x)); }
+
 static double speed_log(speed_param *s)
 { disable(s); TIME_FUN(mplog(s->x)); }
 static double speed_logagm(speed_param *s)
@@ -213,7 +218,7 @@ static double speed_Flx_karamul(speed_param *s)
   for (i=2; i<lx; i++) op[lx-2+i] = s->x[i];            \
   *int_LSW(s->y) |= 1; /* make sure modulus is odd */
 static double speed_redc(speed_param *s) {
-  ulong inv = (ulong)-invrev(mod2BIL(s->y));
+  ulong inv = (ulong)-invmod2BIL(mod2BIL(s->y));
   GEN op; INIT_RED(s, op);
   TIME_FUN( red_montgomery(op, s->y, inv) ); };
 static double speed_modii(speed_param *s) {
@@ -259,6 +264,7 @@ static tune_param param[] = {
 {0,   var(KARATSUBA_MULR_LIMIT),   t_REAL,4,0, speed_mulrr,speed_karamulrr},
 {PARI,var(MONTGOMERY_LIMIT),       t_INT, 3,0, speed_redc,speed_modii},
 {0,   var(REMIIMUL_LIMIT),         t_INT, 3,0, speed_modii,speed_remiimul},
+{0,   var(INVNEWTON_LIMIT),        t_REAL,66,0, speed_inv,speed_invnewton,0.03},
 {GMP, var(DIVRR_GMP_LIMIT),        t_REAL,4,0, speed_divrr,speed_divrrgmp},
 {0,   var(EXPNEWTON_LIMIT),        t_REAL,66,0, speed_exp,speed_expnewton},
 {0,   var(LOGAGM_LIMIT),           t_REAL,4,0, speed_log,speed_logagm},

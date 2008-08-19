@@ -401,6 +401,7 @@ BA 28- library functions checkgroup, galois_group, cyclicgroup, dicyclicgroup,
    47- files src/language/pariinl.c, src/headers/pariinl.h.
 JD 48- GP function warning()
    49- new flag to charpoly [ integral matrix, modular algorithm ]
+   50- library functions sqrr and invr [ Newton inversion, called by ginv() ]
 
   Removed
     1- obsolete GP functions printp, printp1. Either replace them by

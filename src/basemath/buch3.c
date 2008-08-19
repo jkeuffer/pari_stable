@@ -563,7 +563,7 @@ minkowski_bound(GEN D, long N, long r2, long prec)
 {
   pari_sp av = avma;
   GEN c = divrr(mpfactr(N,prec), powuu(N,N));
-  if (r2) c = mulrr(c, powru(divsr(4,mppi(prec)), r2));
+  if (r2) c = mulrr(c, powru(divur(4,mppi(prec)), r2));
   c = mulrr(c, gsqrt(absi(D),prec));
   return gerepileuptoleaf(av, c);
 }
@@ -639,8 +639,8 @@ hermiteconstant(long n)
     case 8: return utoipos(256);
   }
   av = avma;
-  h  = powru(divsr(2,mppi(DEFAULTPREC)), n);
-  h1 = gsqr(ggamma(gdivgs(utoipos(n+4),2),DEFAULTPREC));
+  h  = powru(divur(2,mppi(DEFAULTPREC)), n);
+  h1 = sqrr(ggamma(gdivgs(utoipos(n+4),2),DEFAULTPREC));
   return gerepileuptoleaf(av, mulrr(h,h1));
 }
 

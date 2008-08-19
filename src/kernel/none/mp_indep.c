@@ -16,7 +16,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /* Find c such that 1=c*b mod 2^BITS_IN_LONG, assuming b odd (unchecked) */
 ulong
-invrev(ulong b)
+invmod2BIL(ulong b)
 {
   static int tab[] = { 0, 0, 0, 8, 0, 8, 0, 0 };
   ulong x = b + tab[b & 7]; /* b^(-1) mod 2^4 */
@@ -404,13 +404,37 @@ GEN
 divir(GEN x, GEN y)
 {
   GEN z;
-  long ly;
+  long ly = lg(y), lx = lgefint(x);
   pari_sp av;
 
-  if (!signe(y)) pari_err(gdiver);
-  if (!signe(x)) return gen_0;
-  ly = lg(y); z = cgetr(ly); av = avma;
+  if (ly == 2) pari_err(gdiver);
+  if (lx == 2) return gen_0;
+  if (lx == 3) {
+    z = divur(x[2], y);
+    if (signe(x) < 0) togglesign(z);
+    return z;
+  }
+  z = cgetr(ly); av = avma;
   affrr(divrr(itor(x, ly+1), y), z);
+  avma = av; return z;
+}
+
+GEN
+divur(ulong x, GEN y)
+{
+  pari_sp av;
+  long ly = lg(y);
+  GEN z;
+
+  if (ly == 2) pari_err(gdiver);
+  if (!x) return gen_0;
+  if (ly > INVNEWTON_LIMIT) {
+    av = avma; z = invr(y);
+    if (x == 1) return z;
+    return gerepileuptoleaf(av, mulur(x, z));
+  }
+  z = cgetr(ly); av = avma;
+  affrr(divrr(utor(x,ly+1), y), z);
   avma = av; return z;
 }
 
@@ -418,12 +442,18 @@ GEN
 divsr(long x, GEN y)
 {
   pari_sp av;
-  long ly;
+  long ly = lg(y);
   GEN z;
 
-  if (!signe(y)) pari_err(gdiver);
+  if (ly == 2) pari_err(gdiver);
   if (!x) return gen_0;
-  ly = lg(y); z = cgetr(ly); av = avma;
+  if (ly > INVNEWTON_LIMIT) {
+    av = avma; z = invr(y);
+    if (x == 1) return z;
+    if (x ==-1) { togglesign(z); return z; }
+    return gerepileuptoleaf(av, mulsr(x, z));
+  }
+  z = cgetr(ly); av = avma;
   affrr(divrr(stor(x,ly+1), y), z);
   avma = av; return z;
 }

@@ -832,8 +832,8 @@ LargeSols(GEN tnf, GEN rhs, GEN ne, GEN *pS)
     c5 = Vecmax(gabs(Delta,Prec));
     c5  = myround(gprec_w(c5,DEFAULTPREC), 1);
     c7  = mulsr(r,c5);
-    c10 = divsr(n,c7); BS.c10 = c10;
-    c13 = divsr(n,c5); BS.c13 = c13;
+    c10 = divur(n,c7); BS.c10 = c10;
+    c13 = divur(n,c5); BS.c13 = c13;
     if (DEBUGLEVEL>1) {
       fprintferr("* real root no %ld/%ld\n", iroot,s);
       fprintferr("  c10 = %Ps\n",c10);

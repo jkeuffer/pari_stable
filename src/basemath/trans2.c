@@ -77,7 +77,7 @@ mpatan(GEN x)
 
   y = cgetr(lp); av0 = avma;
   p1 = rtor(x, l+1); setsigne(p1, 1); /* p1 = |x| */
-  if (inv) p1 = divsr(1, p1);
+  if (inv) p1 = invr(p1);
   e = expo(p1);
   if (e < -100)
     alpha = 1.65149612947 - e; /* log_2(Pi) - e */
@@ -443,7 +443,7 @@ mpsh(GEN x)
   if (!signe(x)) return real_0_bit(ex);
   lx = lg(x); res = cgetr(lx); av = avma;
   if (ex < 1 - BITS_IN_LONG) x = rtor(x, lx + nbits2nlong(-ex)-1);
-  z = mpexp(x); z = addrr(z, divsr(-1,z)); setexpo(z, expo(z)-1);
+  z = mpexp(x); z = subrr(z, invr(z)); setexpo(z, expo(z)-1);
   affrr(z, res); avma = av; return res;
 }
 
@@ -678,7 +678,8 @@ mpath(GEN x)
   long ex = expo(x);
   GEN z;
   if (ex < 1 - BITS_IN_LONG) x = rtor(x, lg(x) + nbits2nlong(-ex)-1);
-  z = logr_abs( addrs(divsr(2,subsr(1,x)), -1) );
+  z = invr( subsr(1,x) ); setexpo(z, expo(z)+1); /* 2/(1-x)*/
+  z = logr_abs( addrs(z,-1) );
   setexpo(z, expo(z)-1); return gerepileuptoleaf(av, z);
 }
 
@@ -686,7 +687,7 @@ GEN
 gath(GEN x, long prec)
 {
   pari_sp av;
-  GEN a, y, p1;
+  GEN a, y, z;
 
   switch(typ(x))
   {
@@ -696,23 +697,24 @@ gath(GEN x, long prec)
 
       y = cgetg(3,t_COMPLEX);
       av = avma;
-      p1 = addrs(divsr(2,addsr(-1,x)),1);
-      if (!signe(p1)) pari_err(talker,"singular argument in atanh");
-      p1 = logr_abs(p1);
-      setexpo(p1, expo(p1)-1);
-      gel(y,1) = gerepileuptoleaf(av, p1);
+      z = invr( subrs(x,1) ); setexpo(z, expo(z)+1); /* 2/(x-1)*/
+      z = addrs(z,1);
+      if (!signe(z)) pari_err(talker,"singular argument in atanh");
+      z = logr_abs(z);
+      setexpo(z, expo(z)-1);
+      gel(y,1) = gerepileuptoleaf(av, z);
       gel(y,2) = Pi2n(-1, lg(x)); return y;
 
     case t_COMPLEX:
-      av = avma; p1 = glog( gaddgs(gdivsg(2,gsubsg(1,x)),-1), prec );
-      return gerepileupto(av, gmul2n(p1,-1));
+      av = avma; z = glog( gaddgs(gdivsg(2,gsubsg(1,x)),-1), prec );
+      return gerepileupto(av, gmul2n(z,-1));
 
     case t_INTMOD: case t_PADIC: pari_err(typeer,"gath");
     default:
       av = avma; if (!(y = toser_i(x))) break;
       if (valp(y) < 0) pari_err(negexper,"gath");
-      p1 = gdiv(derivser(y), gsubsg(1,gsqr(y)));
-      a = integ(p1, varn(y));
+      z = gdiv(derivser(y), gsubsg(1,gsqr(y)));
+      a = integ(z, varn(y));
       if (!valp(y)) a = gadd(a, gath(gel(y,2),prec));
       return gerepileupto(av, a);
   }

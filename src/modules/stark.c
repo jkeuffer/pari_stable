@@ -2022,7 +2022,7 @@ QuadGetST(GEN bnr, GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
   /* loop over conductors */
   for (j = 1; j <= ncond; j++)
   {
-    const GEN c1 = gel(C,j), c2 = divsr(2,c1), cexp = mpexp(gneg(c2));
+    const GEN c1 = gel(C,j), c2 = divur(2,c1), cexp = mpexp(gneg(c2));
     const GEN LChar = gel(vChar,j);
     const long nChar = lg(LChar)-1, NN = N0[j];
     GEN veint1, vcn = cgetg(NN+1, t_VEC);

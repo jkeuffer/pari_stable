@@ -275,7 +275,7 @@ kbessel1(GEN nu, GEN gx, long prec)
     for(;; avma = av1)
     {
       GEN d = real_1(l1);
-      c = divsr(5,q); if (expo(c) >= -1) c = real2n(-1,l1);
+      c = divur(5,q); if (expo(c) >= -1) c = real2n(-1,l1);
       p1 = subsr(1,divrr(r,q)); if (cmprr(c,p1)>0) c = p1;
       togglesign(c);
       affrr(u,e);
@@ -561,7 +561,7 @@ hyperu(GEN a, GEN b, GEN gx, long prec)
     for(;; avma = av1)
     {
       GEN d = real_1(l1), p3 = gadd(q,mb);
-      c = divsr(5,q); if (expo(c)>= -1) c = real2n(-1, l1);
+      c = divur(5,q); if (expo(c)>= -1) c = real2n(-1, l1);
       p1 = subsr(1,divrr(x,q)); if (cmprr(c,p1)>0) c = p1;
       togglesign(c);
       gaffect(u,e);
@@ -585,7 +585,8 @@ hyperu(GEN a, GEN b, GEN gx, long prec)
   }
   else
   {
-    GEN zz = divsr(-1,x), s = gen_1;
+    GEN zz = invr(x), s = gen_1;
+    togglesign(zz); /* -1/x */
     zf = gpow(x,gneg_i(a),l1);
     T = gadd(gadd(P, gmulsg(n-1, S)), sqrs(n-1));
     for (k=n-1; k>=0; k--)
@@ -772,10 +773,10 @@ eint1(GEN x, long prec)
     }
     y  = addrr(S, addrr(mplog(y), mpeuler(l)));
   } else {
-    p1 = divsr(1, y);
+    p1 = invr(y);
     t = S = real_1(l);
     for (i = 1; expo(t) - expo(S) >= -n; i++) {
-      t = mulrr(p1, mulrs(t, i)); S = addrr(S, t);
+      t = mulrr(p1, mulru(t, i)); S = addrr(S, t);
     }
     y  = mulrr(S, mulrr(p1, mpexp(y)));
   }
@@ -806,7 +807,7 @@ veceint1(GEN C, GEN nmax, long prec)
   if (G >= 0) nstop = n;
   else
   {
-    nstop = itos(gceil(divsr(4,C))); /* >= 4 ~ 4 / C */
+    nstop = itos(gceil(divur(4,C))); /* >= 4 ~ 4 / C */
     if (nstop > n) nstop = n;
   }
 

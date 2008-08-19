@@ -6,7 +6,7 @@
 #define __REMIIMUL_LIMIT       139
 #define __DIVRR_GMP_LIMIT       -1 /* unused */
 #define __EXPNEWTON_LIMIT       87
-#define __INVNEWTON_LIMIT     1026
+#define __INVNEWTON_LIMIT      402
 #define __LOGAGM_LIMIT          24
 #define __LOGAGMCX_LIMIT        90
 #define __AGM_ATAN_LIMIT       130
