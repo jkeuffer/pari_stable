@@ -291,6 +291,12 @@ transc(GEN (*f)(GEN,long), GEN x, long prec)
 /*                                                                 */
 /*******************************************************************/
 static GEN
+powr0(GEN x)
+{
+  long lx = lg(x);
+  return lx == 2? mpexp(x): real_1(lx);
+}
+static GEN
 puiss0(GEN x)
 {
   long lx, i;
@@ -302,7 +308,7 @@ puiss0(GEN x)
     case t_PADIC: case t_QUAD:
       return gen_1;
     case t_REAL:
-      return real_1(lg(x));
+      return powr0(x);
     case t_INTMOD:
       y = cgetg(3,t_INTMOD); gel(y,1) = icopy(gel(x,1));
       gel(y,2) = gen_1; return y;
@@ -315,7 +321,7 @@ puiss0(GEN x)
       gel(y,2) = puiss0(gel(x,1)); return y;
 
     case t_RFRAC:
-      x = gel(x,2);
+      return RgX_get_1(gel(x,2));
     case t_POL: case t_SER:
       return RgX_get_1(x);
 
@@ -473,7 +479,7 @@ powrs(GEN x, long n)
 {
   pari_sp av = avma;
   GEN y;
-  if (!n) return real_1(lg(x));
+  if (!n) return powr0(x);
   y = leftright_pow_u(x, (ulong)labs(n), NULL, &_sqrr, &_mulr);
   if (n < 0) y = ginv(y);
   return gerepileupto(av,y);
@@ -481,7 +487,7 @@ powrs(GEN x, long n)
 GEN 
 powru(GEN x, ulong n)
 {
-  if (!n) return real_1(lg(x));
+  if (!n) return powr0(x);
   return leftright_pow_u(x, n, NULL, &_sqrr, &_mulr);
 }
 
@@ -504,7 +510,7 @@ GEN
 powrfrac(GEN x, long n, long d)
 {
   long z;
-  if (!n) return real_1(lg(x));
+  if (!n) return powr0(x);
   z = cgcd(n, d); if (z > 1) { n /= z; d /= z; }
   if (d == 1) return powrs(x, n);
   x = powrs(x, n);
