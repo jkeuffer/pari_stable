@@ -982,6 +982,8 @@ INLINE GEN
 Flx_copy(GEN x) { return leafcopy(x); }
 INLINE GEN
 vecsmall_copy(GEN x) { return leafcopy(x); }
+INLINE int
+Flx_cmp1(GEN x) { return degpol(x)==0 && x[2] == 1; }
 
 INLINE GEN
 FpX_renormalize(GEN x, long lx)   { return ZX_renormalize(x,lx); }

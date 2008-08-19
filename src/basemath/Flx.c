@@ -221,12 +221,6 @@ random_Flx(long d1, long vs, ulong p)
   return Flx_renormalize(y,d);
 }
 
-int
-Flx_cmp1(GEN x)
-{
-  return degpol(x)==0 && x[2]==1;
-}
-
 GEN
 Flx_addspec(GEN x, GEN y, ulong p, long lx, long ly)
 {
