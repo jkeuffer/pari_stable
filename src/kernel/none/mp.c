@@ -1001,7 +1001,7 @@ diviuexact_i(GEN x, ulong y)
   if (y == 1) return icopy(x);
   lx = lgefint(x);
   if (lx == 3) return utoipos((ulong)x[2] / y);
-  yinv = invrev(y);
+  yinv = invmod2BIL(y);
   lz = (y <= (ulong)x[2]) ? lx : lx-1;
   z = new_chunk(lz);
   z0 = z + lz;
@@ -1100,7 +1100,7 @@ diviiexact(GEN x, GEN y)
     x = diviuexact_i(x,(ulong)y[2]); /* x != 0 */
     setsigne(x, (sx+sy)? 1: -1); return x;
   }
-  y0inv = invrev(y[ly-1]);
+  y0inv = invmod2BIL(y[ly-1]);
   i=2; while (i<ly && y[i]==x[i]) i++;
   lz = (i==ly || (ulong)y[i] < (ulong)x[i]) ? lx-ly+3 : lx-ly+2;
   z = new_chunk(lz);

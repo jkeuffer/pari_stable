@@ -1308,6 +1308,9 @@ overflow can occur, etc.
 \fun{int}{both_odd}{ulong x, ulong y} returns 1 if $x$ and $y$ are both odd,
 and 0 otherwise.
 
+\fun{ulong}{invmod2BIL}{ulong x} returns the smallest
+positive representative of $x^{-1}$ modulo $2^\B$, assuming $x$ is odd.
+
 \fun{ulong}{Fl_add}{ulong x, ulong y, ulong m} returns the smallest
 positive representative of $x + y$ modulo $m$.
 
