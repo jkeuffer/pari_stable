@@ -260,7 +260,7 @@ static tune_param param[] = {
 {PARI,var(MONTGOMERY_LIMIT),       t_INT, 3,0, speed_redc,speed_modii},
 {0,   var(REMIIMUL_LIMIT),         t_INT, 3,0, speed_modii,speed_remiimul},
 {GMP, var(DIVRR_GMP_LIMIT),        t_REAL,4,0, speed_divrr,speed_divrrgmp},
-{0,   var(EXPNEWTON_LIMIT),        t_REAL,64,0, speed_exp,speed_expnewton},
+{0,   var(EXPNEWTON_LIMIT),        t_REAL,66,0, speed_exp,speed_expnewton},
 {0,   var(LOGAGM_LIMIT),           t_REAL,4,0, speed_log,speed_logagm},
 {0,   var(LOGAGMCX_LIMIT),         t_REAL,3,0, speed_logcx,speed_logcxagm,0.05},
 {0,   var(AGM_ATAN_LIMIT),         t_REAL,20,0, speed_atan,speed_atanagm,0.05},

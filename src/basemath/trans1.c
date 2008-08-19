@@ -1498,17 +1498,18 @@ GEN
 mpexp(GEN x)
 {
   const long s = 6; /*Initial steps using basecase*/
-  long i, p, l, sx = signe(x), sh;
-  GEN a, z;
+  long i, p, l = lg(x), sh;
+  GEN a, t, z;
   ulong mask;
 
-  if (!sx) {
-    long e = expo(x);
-    return e >= 0? real_0_bit(e): real_1(nbits2prec(-e));
+  if (l <= maxss(EXPNEWTON_LIMIT, (1<<s) + 2))
+  {
+    if (l == 2) {
+      long e = expo(x);
+      return e >= 0? real_0_bit(e): real_1(nbits2prec(-e));
+    }
+    return mpexp_basecase(x);
   }
-
-  l = lg(x);
-  if (l <= maxss(EXPNEWTON_LIMIT, 1<<s)) return mpexp_basecase(x);
   z = cgetr(l); /* room for result */
   x = modlog2(x, &sh);
   if (!x) { avma = (pari_sp)(z+l); return real2n(sh, l); }
@@ -1517,15 +1518,19 @@ mpexp(GEN x)
   a = mpexp_basecase(rtor(x, p+2));
   x = addrs(x,1);
   if (lg(x) < l+1) x = rtor(x, l+1);
+  a = rtor(a, l+1); /*append 0s */
+  t = NULL;
   for(;;)
   {
     p <<= 1; if (mask & 1) p--;
     mask >>= 1;
-    setlg(x, p+2); a = rtor(a, p+2);
-    a = mulrr(a, subrr(x, logr_abs(a))); /* a := a (x - log(a)) */
+    setlg(x, p+2);
+    setlg(a, p+2);
+    t = mulrr(a, subrr(x, logr_abs(a))); /* a (x - log(a)) */
     if (mask == 1) break;
+    affrr(t, a); avma = (pari_sp)a;
   }
-  affrr(a,z);
+  affrr(t,z);
   if (sh) setexpo(z, expo(z) + sh);
   avma = (pari_sp)z; return z;
 }
