@@ -1549,7 +1549,11 @@ stack: the length and effective length of the copy are equal.
 stack (works in particular for \typ{INT}s and \typ{REAL}s).
 Contrary to \kbd{icopy}, \kbd{leafcopy} preserves the original
 length of a \typ{INT}. The obsolete form \fun{GEN}{mpcopy}{GEN x} 
-is still provided for bacward compatibility.
+is still provided for backward compatibility.
+
+This function also works on recursive types, copying them as if they were leaves,
+i.e.~making a shallow copy in that case: the components of the copy point to the
+same data as the component of the source; see also \kbd{shallowcopy}.
 
 \subsec{Conversions}
 
@@ -6514,8 +6518,14 @@ place without destroying $x$. This is essentially equivalent to
   for (i = 1; i < lg(x); i++) y[i] = x[i];
   return y;
 @eprog\noindent
-except that \typ{POLMOD} (resp.~\typ{MAT}) are treated specially since a
-shallow copy of the representative (resp.~all columns) is also made.
+except that \typ{MAT} is treated specially since shallow copies of all columns
+are made. The function also works for non-recursive types, but is useless
+in that case since it makes a deep copy. If $x$ is known to be a \typ{MAT}, you
+may call \tet{RgM_shallowcopy} directly; if $x$ is known not to be a \typ{MAT},
+you may call \tet{leafcopy} directly.
+
+\fun{GEN}{RgM_shallowcopy}{GEN x} returns \kbd{shallowcopy(x)}, where $x$
+is a \typ{MAT}.
 
 \fun{GEN}{shallowtrans}{GEN x} returns the transpose of $x$, \emph{without}
 copying its components, i.~e.,~it returns a \kbd{GEN} whose components are

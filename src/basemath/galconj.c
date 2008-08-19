@@ -30,12 +30,12 @@ galoisconj(GEN nf)
   {
     long w = fetch_user_var("y");
     if (nf) y = gsubst(nf, 0, pol_x(w));
-    else { y = shallowcopy(x); setvarn(y, w); }
+    else { y = leafcopy(x); setvarn(y, w); }
   }
   else
   {
     y = x;
-    x = shallowcopy(x); setvarn(x, 0);
+    x = leafcopy(x); setvarn(x, 0);
   }
   z = nfroots(y, x); lz = lg(z);
   y = cgetg(lz, t_COL);

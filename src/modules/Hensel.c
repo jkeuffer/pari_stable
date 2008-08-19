@@ -355,7 +355,7 @@ polhensellift(GEN pol, GEN L, GEN p, long N)
   if (t != t_INT) pari_err(talker, "incorrect p in polhensellift");
   if (N < 1) pari_err(talker, "not a positive exponent in polhensellift");
 
-  l = lg(L); L = shallowcopy(L);
+  l = lg(L); L = leafcopy(L);
   for (i = 1; i < l; i++)
   {
     if (typ(gel(L,i)) != t_POL)

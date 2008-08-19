@@ -774,7 +774,7 @@ rnflllgram(GEN nf, GEN pol, GEN order,long prec)
   I = gel(order,2); lx = lg(I);
   if (lx < 3) return gcopy(order);
   if (lx-1 != degpol(pol)) pari_err(consister,"rnflllgram");
-  I = shallowcopy(I);
+  I = leafcopy(I);
   H = NULL;
   MPOL = matbasistoalg(nf, M);
   MCS = matid(lx-1); /* dummy for gerepile */

@@ -1032,7 +1032,7 @@ ZV_pval(GEN x, GEN p)
 {
   long i, lx = lg(x), v = 0;
   pari_sp av = avma;
-  GEN y = shallowcopy(x);
+  GEN y = leafcopy(x);
   for(;; v++)
     for (i = 1; i < lx; i++)
     {
@@ -1045,7 +1045,7 @@ ZV_pvalrem(GEN x, GEN p, GEN *px)
 {
   long i, lx = lg(x), v = 0;
   GEN y = cgetg(lx, t_COL);
-  x = shallowcopy(x);
+  x = leafcopy(x);
   for(;; v++)
   {
     for (i = 1; i < lx; i++)

@@ -933,7 +933,7 @@ END:
 
     if (C2lt && lfamod < 2*K) pol = QXQX_normalize(Q_primpart(pol), nfpol);
     setlg(famod, lfamod+1);
-    gel(listmod,cnt) = shallowcopy(famod);
+    gel(listmod,cnt) = leafcopy(famod);
     gel(fa,cnt++) = pol;
   }
   if (DEBUGLEVEL>6) fprintferr("\n");

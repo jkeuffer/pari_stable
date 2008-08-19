@@ -64,10 +64,10 @@ shallowtrans(GEN x)
   switch(tx)
   {
     case t_VEC:
-      y = shallowcopy(x); settyp(y,t_COL); break;
+      y = leafcopy(x); settyp(y,t_COL); break;
 
     case t_COL:
-      y = shallowcopy(x); settyp(y,t_VEC); break;
+      y = leafcopy(x); settyp(y,t_VEC); break;
 
     case t_MAT:
       lx = lg(x); if (lx==1) return cgetg(1,t_MAT);
@@ -710,10 +710,10 @@ init_gauss(GEN a, GEN *b, long *aco, long *li, int *iscol)
     {
       case t_MAT:
 	if (lg(*b) == 1) return 0;
-	*b = shallowcopy(*b);
+	*b = RgM_shallowcopy(*b);
 	break;
       case t_COL: *iscol = 1;
-	*b = mkmat( shallowcopy(*b) );
+	*b = mkmat( leafcopy(*b) );
 	break;
       default: pari_err(typeer,"gauss");
     }
@@ -742,7 +742,7 @@ RgM_solve(GEN a, GEN b)
   GEN p, u;
 
   if (!init_gauss(a, &b, &aco, &li, &iscol)) return cgetg(1, t_MAT);
-  a = shallowcopy(a);
+  a = RgM_shallowcopy(a);
   bco = lg(b)-1;
   inexact = use_maximal_pivot(a);
   if(DEBUGLEVEL>4) fprintferr("Entering gauss with inexact=%ld\n",inexact);
@@ -919,7 +919,7 @@ matid_Flm(long n)
 
 GEN
 Flm_gauss(GEN a, GEN b, ulong p) {
-  return Flm_gauss_sp(shallowcopy(a), shallowcopy(b), p);
+  return Flm_gauss_sp(RgM_shallowcopy(a), shallowcopy(b), p);
 }
 static GEN
 Flm_inv_sp(GEN a, ulong p) {
@@ -927,7 +927,7 @@ Flm_inv_sp(GEN a, ulong p) {
 }
 GEN
 Flm_inv(GEN a, ulong p) {
-  return Flm_inv_sp(shallowcopy(a), p);
+  return Flm_inv_sp(RgM_shallowcopy(a), p);
 }
 
 GEN
@@ -949,7 +949,7 @@ FpM_gauss(GEN a, GEN b, GEN p)
     return gerepileupto(av, u);
   }
   lim = stack_lim(av,1);
-  a = shallowcopy(a);
+  a = RgM_shallowcopy(a);
   bco = lg(b)-1;
   for (i=1; i<=aco; i++)
   {
@@ -1003,7 +1003,7 @@ FqM_gauss(GEN a, GEN b, GEN T, GEN p)
   if (!init_gauss(a, &b, &aco, &li, &iscol)) return cgetg(1, t_MAT);
 
   lim = stack_lim(av,1);
-  a = shallowcopy(a);
+  a = RgM_shallowcopy(a);
   bco = lg(b)-1;
   for (i=1; i<=aco; i++)
   {
@@ -1360,7 +1360,7 @@ keri(GEN x)
 
   av0=avma; m=lg(x[1])-1; r=0;
   pp=cgetg(n+1,t_COL);
-  x=shallowcopy(x); p=gen_1;
+  x = RgM_shallowcopy(x); p=gen_1;
   c=const_vecsmall(m, 0);
   l=cgetg(n+1, t_VECSMALL);
   av = avma; lim = stack_lim(av,1);
@@ -1431,7 +1431,7 @@ deplin(GEN x0)
   GEN D, x, y, c, l, d, ck;
 
   t = typ(x0);
-  if (t == t_MAT) x = shallowcopy(x0);
+  if (t == t_MAT) x = RgM_shallowcopy(x0);
   else
   {
     if (t != t_VEC) pari_err(typeer,"deplin");
@@ -1496,7 +1496,7 @@ gauss_pivot_ker(GEN x0, GEN a, GEN *dd, long *rr)
   n=lg(x0)-1; if (!n) { *dd=NULL; *rr=0; return cgetg(1,t_MAT); }
   m=lg(x0[1])-1; r=0;
 
-  x = shallowcopy(x0);
+  x = RgM_shallowcopy(x0);
   if (a)
   {
     if (n != m) pari_err(consister,"gauss_pivot_ker");
@@ -1565,7 +1565,7 @@ gauss_pivot(GEN x0, GEN *dd, long *rr)
     get_pivot = gauss_get_pivot_NZ;
     for (k=1; k<=n; k++) d0[k] = k;
   }
-  x = shallowcopy(x0);
+  x = RgM_shallowcopy(x0);
   m=lg(x[1])-1; r=0;
   c = const_vecsmall(m, 0);
   d=(GEN)pari_malloc((n+1)*sizeof(long)); av=avma; lim=stack_lim(av,1);
@@ -2003,7 +2003,7 @@ FpM_ker_i(GEN x, GEN p, long deplin)
   }
 
   m=lg(x[1])-1; r=0;
-  x=shallowcopy(x);
+  x = RgM_shallowcopy(x);
   c = const_vecsmall(m, 0);
   d=new_chunk(n+1);
   av=avma; lim=stack_lim(av,1);
@@ -2102,7 +2102,7 @@ Flm_gauss_pivot(GEN x, ulong p, long *rr)
 
   m=lg(x[1])-1; r=0;
   d=cgetg(n+1,t_VECSMALL);
-  x=shallowcopy(x);
+  x = Flm_copy(x);
   c = const_vecsmall(m, 0);
   for (k=1; k<=n; k++)
   {
@@ -2163,7 +2163,7 @@ FpM_gauss_pivot(GEN x, GEN p, GEN *dd, long *rr)
   }
 
   m=lg(x[1])-1; r=0;
-  x=shallowcopy(x);
+  x = RgM_shallowcopy(x);
   c = const_vecsmall(m, 0);
   d=(GEN)pari_malloc((n+1)*sizeof(long)); av=avma; lim=stack_lim(av,1);
   for (k=1; k<=n; k++)
@@ -2210,7 +2210,7 @@ FqM_gauss_pivot(GEN x, GEN T, GEN p, GEN *dd, long *rr)
   n=lg(x)-1; if (!n) { *dd=NULL; *rr=0; return; }
 
   m=lg(x[1])-1; r=0;
-  x=shallowcopy(x);
+  x = RgM_shallowcopy(x);
   c = const_vecsmall(m, 0);
   d=(GEN)pari_malloc((n+1)*sizeof(long)); av=avma; lim=stack_lim(av,1);
   for (k=1; k<=n; k++)
@@ -2419,7 +2419,7 @@ FqM_ker_i(GEN x, GEN T, GEN p, long deplin)
     return gerepileupto(ltop,p1);
   }
   m=lg(x[1])-1; r=0; av0 = avma;
-  x=shallowcopy(x);
+  x = RgM_shallowcopy(x);
   c = const_vecsmall(m, 0);
   d=new_chunk(n+1);
   av=avma; lim=stack_lim(av,1);
@@ -2505,7 +2505,7 @@ FlxqM_ker_i(GEN x, GEN T, ulong p, long deplin)
   vs = mael3(x,1,1,1);
 
   m=lg(x[1])-1; r=0; av0 = avma;
-  x=shallowcopy(x); mun=Fl_to_Flx(p-1,vs);
+  x = RgM_shallowcopy(x); mun=Fl_to_Flx(p-1,vs);
   c = const_vecsmall(m, 0);
   d=new_chunk(n+1);
   av=avma; lim=stack_lim(av,1);
@@ -2651,7 +2651,7 @@ det_simple_gauss(GEN a, int inexact)
   long i,j,k, s = 1, nbco = lg(a)-1;
   GEN p, x = gen_1;
 
-  a = shallowcopy(a);
+  a = RgM_shallowcopy(a);
   for (i=1; i<nbco; i++)
   {
     p=gcoeff(a,i,i); k=i;
@@ -2735,7 +2735,7 @@ det(GEN a)
   if (DEBUGLEVEL > 7) (void)timer2();
 
   av = avma; lim = stack_lim(av,2);
-  a = shallowcopy(a); s = 1;
+  a = RgM_shallowcopy(a); s = 1;
   for (pprec=gen_1,i=1; i<nbco; i++,pprec=p)
   {
     GEN ci, ck, m, p1;

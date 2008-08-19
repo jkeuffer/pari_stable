@@ -3043,7 +3043,7 @@ inv_ser(GEN b)
 {
   pari_sp av = avma, av2, lim;
   long j, lold, l = lg(b), e = valp(b), v = varn(b);
-  GEN y, x = cgetg(l, t_SER), a = shallowcopy(b);
+  GEN y, x = cgetg(l, t_SER), a = leafcopy(b);
   ulong mask = quadratic_prec_mask(l - 2);
 
   if (!signe(b)) pari_err(gdiver);

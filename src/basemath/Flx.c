@@ -131,8 +131,8 @@ FlxC_to_ZXC(GEN x)
 GEN
 FlxM_to_ZXM(GEN z)
 {
-  long i, l = lg(z);
-  GEN x = cgetg(l,t_MAT);
+  long i, l;
+  GEN x = cgetg_copy(z, &l);
   for (i=1; i<l; i++) gel(x,i) = FlxC_to_ZXC(gel(z,i));
   return x;
 }
@@ -1629,7 +1629,7 @@ gener_Flxq(GEN T, ulong p, GEN *po)
     for (i=lg(L)-1; i; i--) L[i] = p_1 / L[i];
   }
   o = factor_pn_1(utoipos(p),f);
-  L2 = shallowcopy( gel(o, 1) );
+  L2 = leafcopy( gel(o, 1) );
   for (i = j = 1; i < lg(L2); i++)
   {
     if (umodui(p_1, gel(L2,i)) == 0) continue;

@@ -205,7 +205,7 @@ RgX_translate(GEN P, GEN c)
   long i, k, n;
 
   if (!signe(P) || gcmp0(c)) return gcopy(P);
-  Q = shallowcopy(P);
+  Q = leafcopy(P);
   R = (GEN*)(Q+2); n = degpol(P);
   lim = stack_lim(av, 2);
   if (gcmp1(c))
@@ -255,7 +255,7 @@ RgXQX_translate(GEN P, GEN c, GEN T)
   long i, k, n;
 
   if (!signe(P) || gcmp0(c)) return gcopy(P);
-  Q = shallowcopy(P);
+  Q = leafcopy(P);
   R = (GEN*)(Q+2); n = degpol(P);
   lim = stack_lim(av, 2);
   for (i=1; i<=n; i++)

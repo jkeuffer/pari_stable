@@ -1228,7 +1228,7 @@ listassign(GEN x, GEN y)
   list_data(y) = list_internal_copy(L, nmax);
 }
 
-/* copy lisst on the PARI stack */
+/* copy list on the PARI stack */
 GEN
 listcopy(GEN x)
 {
@@ -1240,7 +1240,8 @@ listcopy(GEN x)
   return y;
 }
 
-/* x is a t_INT equal to 0 ? tx == t_INT && lx == 2 */
+/* x is a t_INT equal to 0 ? tx == t_INT && lx == 2. Not foolproof
+ * but will catch almost all 0 in practice [ unless lgefint < lg ] */
 #define is_0INT(x) \
     (((x)[0] & (TYPBITS|LGBITS)) == (evaltyp(t_INT)|_evallg(2)))
 
@@ -1249,21 +1250,13 @@ listcopy(GEN x)
 INLINE GEN
 copy_leaf(GEN x, long tx)
 {
-  long i, lx;
-  GEN y;
-
   if (is_0INT(x)) return gen_0; /* very common */
   switch(tx)
   {
-    case t_INT:
-      lx = lgefint(x);
-      y = cgeti(lx); break;
+    case t_INT:  return icopy(x);
     case t_LIST: return listcopy(x); /* allocated on the stack */
-    default:
-      y = cgetg_copy(x, &lx); break;
+    default:     return leafcopy(x);
   }
-  for (i=1; i<lx; i++) y[i] = x[i]; /* no memcpy: avma and x may overlap */
-  return y;
 }
 
 GEN
@@ -1271,7 +1264,6 @@ gcopy(GEN x)
 {
   long tx = typ(x), lx, i;
   GEN y;
-
   if (! is_recursive_t(tx)) return copy_leaf(x, tx);
   y = cgetg_copy(x, &lx);
   if (lontyp[tx] == 1) i = 1; else { y[1] = x[1]; i = 2; }
@@ -1286,30 +1278,10 @@ gcopy_lg(GEN x, long lx)
 {
   long tx = typ(x), i;
   GEN y;
-
   if (! is_recursive_t(tx)) return copy_leaf(x, tx);
-  y = cgetg(lx, tx); /* cgetg_copy would be incorrect if lx < lg(x) */
+  y = cgetg(lx, tx);
   if (lontyp[tx] == 1) i = 1; else { y[1] = x[1]; i = 2; }
   for (; i<lx; i++) gel(y,i) = gcopy(gel(x,i));
-  return y;
-}
-
-GEN
-shallowcopy(GEN x)
-{
-  long lx, i;
-  GEN y = cgetg_copy(x, &lx);
-  switch(typ(x))
-  {
-    case t_POLMOD:
-      y[1] = x[1]; gel(y,2) = shallowcopy(gel(x,2));
-      break;
-    case t_MAT:
-      for (i=lx-1;i;i--) gel(y,i) = shallowcopy(gel(x,i));
-      break;
-    default:
-      for (i=lx-1;i;i--) y[i] = x[i];
-  }
   return y;
 }
 
@@ -1417,7 +1389,7 @@ gcopy_av0_canon(GEN x, pari_sp *AVMA)
         return (GEN)*AVMA;
       case t_LIST:
       {
-	GEN y = y = cgetlist_avma(AVMA), z = list_data(x);
+	GEN y = cgetlist_avma(AVMA), z = list_data(x);
 	if (z) {
 	  list_data(y) = gcopy_av0_canon(z, AVMA);
 	  list_nmax(y) = lg(z)-1;

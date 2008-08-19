@@ -585,56 +585,48 @@ ZC_copy(GEN x)
 GEN
 ZM_copy(GEN x)
 {
-  long i, lx = lg(x);
-  GEN y = cgetg(lx, t_MAT);
-  for (i=1; i<lx; i++) gel(y,i) = ZC_copy(gel(x,i));
-  return y;
-}
-GEN
-Flm_copy(GEN x)
-{
-  long i, lx = lg(x);
-  GEN y = cgetg(lx, t_MAT);
-  for (i=1; i<lx; i++) gel(y,i) = Flv_copy(gel(x,i));
+  long l;
+  GEN y = cgetg_copy(x, &l);
+  while (--l > 0) gel(y,l) = ZC_copy(gel(x,l));
   return y;
 }
 
 void
 ZV_neg_inplace(GEN M)
 {
-  long i;
-  for (i = lg(M)-1; i; i--) gel(M,i) = negi(gel(M,i));
+  long l = lg(M);
+  while (--l > 0) gel(M,l) = negi(gel(M,l));
 }
 GEN
 ZC_neg(GEN M)
 {
-  long i, l = lg(M);
+  long l = lg(M);
   GEN N = cgetg(l, t_COL);
-  for (i = l-1; i ; i--) gel(N,i) = negi(gel(M,i));
+  while (--l > 0) gel(N,l) = negi(gel(M,l));
   return N;
 }
 GEN
 zv_neg(GEN M)
 {
-  long i, l;
+  long l;
   GEN N = cgetg_copy(M, &l);
-  for (i=l-1; i; i--) N[i] = -M[i];
+  while (--l > 0) N[l] = -M[l];
   return N;
 }
 GEN
 ZM_neg(GEN x)
 {
-  long i, lx = lg(x);
-  GEN y = cgetg(lx, t_MAT);
-  for (i=1; i<lx; i++) gel(y,i) = ZC_neg(gel(x,i));
+  long l;
+  GEN y = cgetg_copy(x, &l);
+  while (--l > 0) gel(y,l) = ZC_neg(gel(x,l));
   return y;
 }
 
 void
 ZV_togglesign(GEN M)
 {
-  long i;
-  for (i = lg(M)-1; i; i--) togglesign_safe(&gel(M,i));
+  long l = lg(M);
+  while (--l > 0) togglesign_safe(&gel(M,l));
 }
 
 /********************************************************************/
@@ -693,27 +685,26 @@ ZM_hnfremdiv(GEN x, GEN y, GEN *Q)
 int
 zv_cmp0(GEN V)
 {
-  long i, l = lg(V);
-  for (i = 1; i < l; i++)
-    if (V[i]) return 0;
+  long l = lg(V);
+  while (--l > 0)
+    if (V[l]) return 0;
   return 1;
 }
 
 int
 ZV_cmp0(GEN V)
 {
-  long i, l = lg(V);
-  for (i = 1; i < l; i++)
-    if (signe(V[i])) return 0;
+  long l = lg(V);
+  while (--l > 0)
+    if (signe(V[l])) return 0;
   return 1;
 }
 
 static int
 ZV_equal_lg(GEN V, GEN W, long l)
 {
-  long i;
-  for (i = 1; i < l; i++)
-    if (!equalii(gel(V,i), gel(W,i))) return 0;
+  while (--l > 0)
+    if (!equalii(gel(V,l), gel(W,l))) return 0;
   return 1;
 }
 int
@@ -738,19 +729,19 @@ ZM_equal(GEN A, GEN B)
 int
 zv_equal(GEN V, GEN W)
 {
-  long i, l = lg(V);
+  long l = lg(V);
   if (lg(W) != l) return 0;
-  for (i = 1; i < l; i++)
-    if (V[i] != W[i]) return 0;
+  while (--l > 0)
+    if (V[l] != W[l]) return 0;
   return 1;
 }
 
 int
 ZV_isscalar(GEN x)
 {
-  long lx = lg(x),i;
-  for (i=2; i<lx; i++)
-    if (signe(gel(x, i))) return 0;
+  long l = lg(x);
+  while (--l > 1)
+    if (signe(gel(x, l))) return 0;
   return 1;
 }
 
@@ -787,7 +778,6 @@ ZM_isidentity(GEN x)
   }
   return 1;
 }
-
 
 /********************************************************************/
 /**                                                                **/

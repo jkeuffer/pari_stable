@@ -1274,7 +1274,7 @@ testc2(decomp_t *S, GEN A, long Ea, GEN T, long Et)
 static GEN
 ch_var(GEN x, long v)
 {
-  if (typ(x) == t_POL) { x = shallowcopy(x); setvarn(x, v); }
+  if (typ(x) == t_POL) { x = leafcopy(x); setvarn(x, v); }
   return x;
 }
 
@@ -1589,7 +1589,7 @@ init_norm(norm_S *S, GEN nf, GEN p)
   {
     GEN D, w = Q_remove_denom(gel(nf,7), &D), Dp = sqri(p);
     long i;
-    if (!D) w = shallowcopy(w);
+    if (!D) w = leafcopy(w);
     else {
       GEN w1 = D;
       long v = Z_pval(D, p);
@@ -2183,7 +2183,7 @@ nfreducemodpr_i(GEN x, GEN prh)
   GEN p = gcoeff(prh,1,1);
   long i,j;
 
-  x = shallowcopy(x);
+  x = leafcopy(x);
   for (i=lg(x)-1; i>=2; i--)
   {
     GEN t = gel(prh,i), p1 = remii(gel(x,i), p);
@@ -2543,7 +2543,7 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
   av1 = avma; lim = stack_lim(av1,1);
   for(cmpt=1; ; cmpt++)
   {
-    GEN I0 = shallowcopy(I), W0 = shallowcopy(W);
+    GEN I0 = leafcopy(I), W0 = leafcopy(W);
     GEN Wa, Wainv, Waa, Ip, A, Ainv, MWmod, F, pseudo, G;
 
     if (DEBUGLEVEL>1) fprintferr("    pass no %ld\n",cmpt);
@@ -2898,7 +2898,7 @@ rnfsteinitz(GEN nf, GEN order)
   Id = matid(nf_get_degree(nf));
   order = get_order(nf, order, "rnfsteinitz");
   A = matalgtobasis(nf, gel(order,1));
-  I = shallowcopy(gel(order,2)); n=lg(A)-1;
+  I = leafcopy(gel(order,2)); n=lg(A)-1;
   for (i=1; i<n; i++)
   {
     GEN c1,c2;
@@ -2983,7 +2983,7 @@ rnfhnfbasis(GEN bnf, GEN order)
   bnf = checkbnf(bnf); nf = gel(bnf,7);
   id = matid(nf_get_degree(nf));
   order = get_order(nf, order, "rnfbasis");
-  A = gel(order,1); A = shallowcopy(A);
+  A = gel(order,1); A = RgM_shallowcopy(A);
   I = gel(order,2); n = lg(A)-1;
   for (j=1; j<=n; j++)
   {

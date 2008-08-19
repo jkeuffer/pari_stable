@@ -2783,13 +2783,13 @@ bnfnewprec_shallow(GEN bnf, long prec)
   if (prec != prec1) { mun = gprec_w(mun,prec1); prec = prec1; }
   matal = check_and_build_matal(bnf);
 
-  y = shallowcopy(bnf);
+  y = leafcopy(bnf);
   gel(y,3) = mun;
   gel(y,4) = get_archclean(nf,matal,prec,0);
   if (!gel(y,4)) pari_err(precer,"bnfnewprec");
   gel(y,7) = nf;
   my_class_group_gen(y,prec,nf0, &clgp,&clgp2);
-  res = shallowcopy(gel(bnf,8));
+  res = leafcopy(gel(bnf,8));
   gel(res,1) = clgp;
   gel(res,2) = get_regulator(mun);
   gel(y,8) = res;
@@ -2805,7 +2805,7 @@ bnfnewprec(GEN bnf, long prec)
 GEN
 bnrnewprec_shallow(GEN bnr, long prec)
 {
-  GEN y = shallowcopy(bnr);
+  GEN y = leafcopy(bnr);
   gel(y,1) = bnfnewprec_shallow(gel(bnr,1), prec);
   return y;
 }
@@ -3070,7 +3070,7 @@ shift_embed(GEN G, GEN Gtw, long a, long r1)
 static GEN
 shift_G(GEN G, GEN Gtw, long a, long b, long r1)
 {
-  GEN g = shallowcopy(G);
+  GEN g = RgM_shallowcopy(G);
   if (a != b) shift_embed(g,Gtw,a,r1);
   shift_embed(g,Gtw,b,r1); return g;
 }
@@ -3165,7 +3165,7 @@ START:
   if (!Res) goto START;
   GRHcheck = NULL;
   if (!subFBgen(&F, nf, minss(lim,LIMC2) + 0.5, minsFB)) goto START;
-  PERM = shallowcopy(F.perm); /* to be restored in case of precision increase */
+  PERM = leafcopy(F.perm); /* to be restored in case of precision increase */
   av2 = avma;
   init_rel(&cache, &F, RU); /* trivial relations */
   if (nbrelpid > 0) {

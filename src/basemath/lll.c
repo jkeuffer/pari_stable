@@ -298,7 +298,7 @@ rotate(GEN mu, long kappa2, long kappa, long d)
 {
   long i, j;
   pari_sp av = avma;
-  GEN mutmp = shallowcopy(gel(mu,kappa2));
+  GEN mutmp = leafcopy(gel(mu,kappa2));
   for (i=kappa2; i>kappa; i--)
     for (j=1;j<=d;j++) gmael(mu,i,j) = gmael(mu,i-1,j);
   for (j=1;j<=d;j++)   gmael(mu,kappa,j) = gel(mutmp,j);
@@ -489,7 +489,7 @@ ZM_lll_norms(GEN x, double DELTA, long flag, GEN *B)
   if (n <= 1) return lll_trivial(x, flag);
   d = lg(gel(x,1))-1;
   prec = good_prec(d,DELTA,ETA);
-  x = shallowcopy(x);
+  x = RgM_shallowcopy(x);
   U = (flag & LLL_INPLACE)? NULL: matid(n);
   for (p = minss(3,prec); p <= prec; p++)
   {

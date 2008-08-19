@@ -926,7 +926,7 @@ FpXQV_FpX_Frobenius(GEN V, GEN P, GEN T, GEN p)
   btop=avma;
   gptr[0]=&Mi;
   gptr[1]=&W;
-  W=shallowcopy(V);
+  W = leafcopy(V);
   for(i=3;i<=l;i++)
   {
     long j;
@@ -1208,7 +1208,7 @@ FpX_factorgalois(GEN P, GEN l, long d, long w, GEN MP)
   if (m == 1) return deg1pol_shallow(gen_1, deg1pol_shallow(subis(l,1), gen_0, w), v);
   M = FpM_Frobenius_pow(MP,d,P,l);
 
-  Tl = shallowcopy(P); setvarn(Tl,w);
+  Tl = leafcopy(P); setvarn(Tl,w);
   V = cgetg(m+1,t_VEC);
   gel(V,1) = pol_x(w);
   z = gel(M,2);
@@ -1238,7 +1238,7 @@ Flx_factorgalois(GEN P, ulong l, long d, long w, GEN MP)
   }
   M = Flm_Frobenius_pow(MP,d,P,l);
 
-  Tl = shallowcopy(P); setvarn(Tl,w);
+  Tl = leafcopy(P); setvarn(Tl,w);
   V = cgetg(m+1,t_VEC);
   gel(V,1) = polx_Flx(w);
   z = gel(M,2);
@@ -2144,8 +2144,8 @@ GEN
 FpX_direct_compositum(GEN A, GEN B, GEN p)
 {
   GEN a, b, x;
-  a = shallowcopy(A); setvarn(a, MAXVARN);
-  b = shallowcopy(B); setvarn(b, MAXVARN);
+  a = leafcopy(A); setvarn(a, MAXVARN);
+  b = leafcopy(B); setvarn(b, MAXVARN);
   x = deg1pol_shallow(gen_1, pol_x(MAXVARN), 0); /* x + y */
   return FpX_FpXY_resultant(a, poleval(b,x),p);
 }
@@ -2157,8 +2157,8 @@ FpX_compositum(GEN A, GEN B, GEN p)
 {
   GEN a, b;
   long k;
-  a = shallowcopy(A); setvarn(a, MAXVARN);
-  b = shallowcopy(B); setvarn(b, MAXVARN);
+  a = leafcopy(A); setvarn(a, MAXVARN);
+  b = leafcopy(B); setvarn(b, MAXVARN);
   for (k = 1;; k = next_lambda(k))
   {
     GEN x = deg1pol_shallow(gen_1, gmulsg(k, pol_x(MAXVARN)), 0); /* x + k y */
@@ -2212,7 +2212,7 @@ ZX_ZXY_resultant_all(GEN A, GEN B0, long *lambda, GEN *LERS)
   {
     vY = fetch_var(); delvar = 1;
     B0 = gsubst(B0, MAXVARN, pol_x(vY));
-    A = shallowcopy(A); setvarn(A, vY);
+    A = leafcopy(A); setvarn(A, vY);
   }
   L = pol_x(MAXVARN);
   B0 = Q_remove_denom(B0, &dB);
@@ -2402,8 +2402,8 @@ ZX_caract_sqf(GEN A, GEN B, long *lambda, long v)
   if (varn(A) == 0)
   {
     long v0 = fetch_var(); delvar = 1;
-    A = shallowcopy(A); setvarn(A,v0);
-    B = shallowcopy(B); setvarn(B,v0);
+    A = leafcopy(A); setvarn(A,v0);
+    B = leafcopy(B); setvarn(B,v0);
   }
   B0 = cgetg(4, t_POL);
   B0[1] = evalsigne(1);

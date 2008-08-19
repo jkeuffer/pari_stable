@@ -1058,7 +1058,7 @@ dirdiv(GEN x, GEN y)
   dy = dirval(y); ly = lg(y);
   if (dy != 1 || ly == 1) pari_err(talker,"not an invertible dirseries in dirdiv");
   lz = minss(lx,ly*dx); p1 = gel(y,1);
-  if (!gcmp1(p1)) { y = gdiv(y,p1); x = gdiv(x,p1); } else x = shallowcopy(x);
+  if (!gcmp1(p1)) { y = gdiv(y,p1); x = gdiv(x,p1); } else x = leafcopy(x);
   z = zerovec(lz-1);
   for (j=dx; j<lz; j++)
   {

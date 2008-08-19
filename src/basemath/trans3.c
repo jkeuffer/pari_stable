@@ -2136,7 +2136,7 @@ inteta(GEN q)
     n = degpol(y);
     if (n == 1 || n < (l>>2)) return inteta_pol(y, v, l);
 
-    q = shallowcopy(q); av = avma; lim = stack_lim(av, 3);
+    q = leafcopy(q); av = avma; lim = stack_lim(av, 3);
     setvalp(q, 0);
     y = scalarser(gen_1, varn(q), l+v);
     vps = vqn = 0;

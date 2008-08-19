@@ -514,7 +514,7 @@ init_primedata(primedata *S)
 
   if (S->lcm == degpol(gel(S->ff,lff-1)))
   {
-    T = shallowcopy(gel(S->ff,lff-1));
+    T = leafcopy(gel(S->ff,lff-1));
     setvarn(T, v);
   }
   else
@@ -674,8 +674,8 @@ compute_data(blockdata *B)
     DATA = cgetg(10,t_VEC);
     fk = S->fk;
     gel(DATA,5) = gen_0;
-    gel(DATA,6) = shallowcopy(S->bezoutC);
-    gel(DATA,9) = shallowcopy(S->interp);
+    gel(DATA,6) = leafcopy(S->bezoutC);
+    gel(DATA,9) = leafcopy(S->interp);
   }
   gel(DATA,1) = pol;
   MM = gmul2n(bound_for_coeff(B->d, roo, &maxroot), 1);
@@ -824,7 +824,7 @@ subfields_poldata(GEN T, poldata *PD)
 {
   GEN  nf,L,dis;
 
-  T = shallowcopy(get_nfpol(T, &nf));
+  T = leafcopy(get_nfpol(T, &nf));
   PD->pol = T; setvarn(T, 0);
   if (nf)
   {

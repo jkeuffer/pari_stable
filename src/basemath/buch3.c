@@ -1768,7 +1768,7 @@ factormul(GEN fa1,GEN fa2)
 static long
 get_nz(GEN bnf, GEN ideal, GEN arch, long clhray)
 {
-  GEN arch2 = shallowcopy(arch), mod = mkvec2(ideal, arch2);
+  GEN arch2 = leafcopy(arch), mod = mkvec2(ideal, arch2);
   long nz = 0, l = lg(arch), k, clhss;
   for (k = 1; k < l; k++)
   { /* FIXME: this is wasteful. Use the same algorithm as bnrconductor */
@@ -1984,7 +1984,7 @@ bnrclassnointernarch(GEN B, GEN h, GEN matU)
     /* [ qm   cyc 0 ]
      * [ matU  0  2 ] */
     m = shallowconcat(vconcat(qm, matU), diagonal_shallow(shallowconcat(cyc, _2)));
-    m = ZM_hnf(m); mm = shallowcopy(m);
+    m = ZM_hnf(m); mm = RgM_shallowcopy(m);
     H = cgetg(nbarch+1,t_VECSMALL);
     rowsel = cgetg(nc+r1+1,t_VECSMALL);
     for (k = 0; k < nbarch; k++)

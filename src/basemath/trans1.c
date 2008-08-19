@@ -803,7 +803,7 @@ ser_powfrac(GEN x, GEN q, long prec)
   if (typ(E) != t_INT)
     pari_err(talker,"%Ps should divide valuation (= %ld) in sqrtn",q[2], e);
   e = val_from_i(E);
-  y = shallowcopy(x); setvalp(y, 0);
+  y = leafcopy(x); setvalp(y, 0);
   y = ser_pow(y, q, prec);
   if (typ(y) == t_SER) /* generic case */
     y[1] = evalsigne(1) | evalvalp(e) | evalvarn(varn(x));
@@ -998,7 +998,7 @@ sqrt_ser(GEN b, long prec)
   GEN a, x;
 
   if (!signe(b)) return zeroser(vx, e>>1);
-  a = shallowcopy(b);
+  a = leafcopy(b);
   x = cgetg_copy(b, &lx);
   if (e & 1) pari_err(talker,"2 should divide valuation (= %ld) in sqrtn",e);
   a[1] = x[1] = evalsigne(1) | evalvarn(0) | _evalvalp(0);
@@ -2428,7 +2428,7 @@ gsincos(GEN x, GEN *s, GEN *c, long prec)
       }
       if (!ex)
       {
-	p1 = shallowcopy(y); gel(p1,2) = gen_0;
+	p1 = leafcopy(y); gel(p1,2) = gen_0;
 	gsincos(normalize(p1),&u,&v,prec);
 	gsincos(gel(y,2),&u1,&v1,prec);
 	p1 = gmul(v1,v);

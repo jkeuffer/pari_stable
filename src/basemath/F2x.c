@@ -599,7 +599,7 @@ gener_F2xq(GEN T, GEN *po)
   }
   q = subis(powuu(2,f), 1);
   o = factor_pn_1(gen_2,f);
-  L2 = shallowcopy( gel(o, 1) );
+  L2 = leafcopy( gel(o, 1) );
   for (i = j = 1; i < lg(L2); i++)
   {
     if (equaliu(gel(L2,i),2)) continue;

@@ -2487,7 +2487,7 @@ balanc(GEN x)
   const long RADIX = 1;
   pari_sp av = avma;
   long i, j, sqrdx = (RADIX<<1), n = lg(x);
-  GEN r, c, cof = dbltor(0.95), a = shallowcopy(x);
+  GEN r, c, cof = dbltor(0.95), a = RgM_shallowcopy(x);
 
   for(;;)
   {

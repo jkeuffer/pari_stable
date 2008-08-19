@@ -328,7 +328,7 @@ END:
     if (signe(leading_term(pol)) < 0) pol = gneg_i(pol);
 
     setlg(famod, lfamod+1);
-    gel(listmod,cnt) = shallowcopy(famod);
+    gel(listmod,cnt) = leafcopy(famod);
     gel(fa,cnt++) = pol;
   }
   if (DEBUGLEVEL>6) fprintferr("\n");
@@ -414,7 +414,7 @@ shifteval(GEN Q, long n)
 static GEN
 root_bound(GEN P0)
 {
-  GEN Q = shallowcopy(P0), lP = absi(leading_term(Q)), x,y,z;
+  GEN Q = leafcopy(P0), lP = absi(leading_term(Q)), x,y,z;
   long k, d = degpol(Q);
 
   /* P0 = lP x^d + Q, deg Q < d */

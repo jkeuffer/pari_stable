@@ -983,7 +983,7 @@ compute_polrel(GEN nfz, toK_s *T, GEN be, long g, long ell)
   p1 = to_alg(nfz, nffactorback(nfz, powtaubet, get_reverse(r)));
   num_t = Q_remove_denom(p1, &den_t);
 
-  nfzpol = shallowcopy(gel(nfz,1));
+  nfzpol = leafcopy(gel(nfz,1));
   setvarn(nfzpol, MAXVARN);
   S = cgetg(ell+1, t_VEC); /* Newton sums */
   gel(S,1) = gen_0;

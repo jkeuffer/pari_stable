@@ -609,8 +609,8 @@ factor(GEN x)
 	{
 	  GEN w;
 	  long killv, t1, t2;
-	  x = shallowcopy(x); lx=lg(x);
-	  pol = shallowcopy(pol);
+	  x = leafcopy(x); lx=lg(x);
+	  pol = leafcopy(pol);
 	  v = pari_var_next_temp();
 	  for(i=2; i<lx; i++)
 	  {
@@ -851,7 +851,7 @@ divide_conquer_assoc(GEN x, void *data, GEN (*mul)(void *,GEN,GEN))
 
   if (lx == 1) return gen_1;
   if (lx == 2) return gcopy(gel(x,1));
-  x = shallowcopy(x); k = lx;
+  x = leafcopy(x); k = lx;
   ltop=avma; lim = stack_lim(ltop,1);
   while (k > 2)
   {
@@ -2454,7 +2454,7 @@ RgXQ_caract(GEN x, GEN T, long v)
     return dx? monomial(gen_1, d, v): caract_const(av, gel(x,2), v, d);
 
   x = RgX_neg(x);
-  if (varn(x) == MAXVARN) { setvarn(x, 0); T = shallowcopy(T); setvarn(T, 0); }
+  if (varn(x) == MAXVARN) { setvarn(x, 0); T = leafcopy(T); setvarn(T, 0); }
   gel(x,2) = gadd(gel(x,2), pol_x(MAXVARN));
   ch = resultant_all(T, x, NULL);
   if (v != MAXVARN)

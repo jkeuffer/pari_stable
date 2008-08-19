@@ -253,7 +253,7 @@ nftyp(GEN x)
 /* exchange elements i and j in vector x */
 static GEN
 transroot(GEN x, int i, int j)
-{ x = shallowcopy(x); swap(gel(x,i), gel(x,j)); return x; }
+{ x = leafcopy(x); swap(gel(x,i), gel(x,j)); return x; }
 
 GEN
 tschirnhaus(GEN x)
@@ -264,7 +264,7 @@ tschirnhaus(GEN x)
 
   if (typ(x)!=t_POL) pari_err(notpoler,"tschirnhaus");
   if (lg(x) < 4) pari_err(constpoler,"tschirnhaus");
-  if (v) { u=shallowcopy(x); setvarn(u,0); x=u; }
+  if (v) { u = leafcopy(x); setvarn(u,0); x=u; }
   y[1] = evalsigne(1)|evalvarn(0);
   do
   {
@@ -289,7 +289,7 @@ GEN
 ZX_primitive_to_monic(GEN pol, GEN *ptlc)
 {
   long i,j, n = degpol(pol);
-  GEN lc, fa, P, E, a, POL = shallowcopy(pol);
+  GEN lc, fa, P, E, a, POL = leafcopy(pol);
 
   a = POL + 2; lc = gel(a,n);
   if (signe(lc) < 0) { POL = ZX_neg(POL); a = POL+2; lc = gel(a,n); }
@@ -803,8 +803,8 @@ nfiso0(GEN a, GEN b, long fliso)
 	  { avma=av; return gen_0; }
     }
   }
-  a = shallowcopy(a); setvarn(a,0);
-  b = shallowcopy(b); vb=varn(b);
+  a = leafcopy(a); setvarn(a,0);
+  b = leafcopy(b); vb=varn(b);
   if (nfb)
   {
     if (vb == 0) nfb = gsubst(nfb, 0, pol_x(MAXVARN));
@@ -849,7 +849,7 @@ nfisincl(GEN a, GEN b) { return nfiso0(a,b,0); }
 GEN
 get_roots(GEN x, long r1, long prec)
 {
-  GEN roo = (typ(x)!=t_POL)? shallowcopy(x): cleanroots(x,prec);
+  GEN roo = (typ(x)!=t_POL)? leafcopy(x): cleanroots(x,prec);
   long i, ru = (lg(roo)-1 + r1) >> 1;
 
   for (i=r1+1; i<=ru; i++) gel(roo,i) = gel(roo, (i<<1)-r1);
@@ -919,7 +919,7 @@ get_Tr(GEN mul, GEN x, GEN basden)
 GEN
 get_bas_den(GEN bas)
 {
-  GEN b,d,den, dbas = shallowcopy(bas);
+  GEN b,d,den, dbas = leafcopy(bas);
   long i, l = lg(bas);
   int power = 1;
   den = cgetg(l,t_VEC);
@@ -1211,7 +1211,7 @@ nfbasechange(GEN u, GEN x)
       break;
 
     case t_VEC: /* pr */
-      checkprid(x); y = shallowcopy(x);
+      checkprid(x); y = leafcopy(x);
       gel(y,2) = RgM_RgC_mul(u, gel(y,2));
       gel(y,5) = RgM_RgC_mul(u, gel(y,5));
       break;
@@ -1521,9 +1521,9 @@ nf_get_prec(GEN x)
 GEN
 nfnewprec_shallow(GEN nf, long prec)
 {
-  GEN NF = shallowcopy(nf);
+  GEN NF = leafcopy(nf);
   nffp_t F;
-  gel(NF,5) = shallowcopy(gel(NF,5));
+  gel(NF,5) = leafcopy(gel(NF,5));
   remake_GM(NF, &F, prec);
   gel(NF,6) = F.ro;
   gmael(NF,5,1) = F.M;

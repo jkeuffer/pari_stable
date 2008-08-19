@@ -236,7 +236,7 @@ nfC_nf_mul(GEN nf, GEN v, GEN x)
   tx = typ(x);
   if (tx != t_COL) {
     if (tx == t_INT && is_pm1(x))
-      return signe(x) > 0? shallowcopy(v): gneg(v);
+      return signe(x) > 0? leafcopy(v): gneg(v);
     l = lg(v); y = cgetg(l, t_COL);
     for (i=1; i < l; i++) 
     {
@@ -581,7 +581,7 @@ int_elt_val(GEN nf, GEN x, GEN p, GEN b, GEN *newx)
 
   N = nf_get_degree(nf);
   y = cgetg(N+1, t_COL); /* will hold the new x */
-  x = shallowcopy(x);
+  x = leafcopy(x);
   for(w=0;; w++)
   {
     for (i=1; i<=N; i++)
@@ -1296,7 +1296,7 @@ zprimestar(GEN nf, GEN pr, GEN ep, GEN x, GEN arch)
     if(DEBUGLEVEL>3) fprintferr("  treating a = %ld, b = %ld\n",a,b);
     prb = (b >= e)? pre: idealpows(nf,pr,b);
     z = zidealij(pra, prb, &U);
-    gen = shallowcopy(gel(z,2));
+    gen = leafcopy(gel(z,2));
     s = cgetg_copy(gen, &l);
     if(DEBUGLEVEL>3) fprintferr("zidealij done\n");
     for (i = 1; i < l; i++)
@@ -2024,7 +2024,7 @@ Ideallist(GEN bnf, ulong bound, long flag)
       ulong q, iQ, Q = itou_or_0(pr_norm(pr));
       if (!Q || Q > bound) break;
 
-      z2 = shallowcopy(z);
+      z2 = leafcopy(z);
       q = Q;
       ID.pr = ID.prL = pr;
       for (l=1; Q <= bound; l++, Q *= q) /* add pr^l */

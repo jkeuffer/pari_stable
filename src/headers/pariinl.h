@@ -229,6 +229,10 @@ vec_ei(long n, long i) { GEN e = zerovec(n); gel(e,i) = gen_1; return e; }
 INLINE GEN
 vecsmall_ei(long n, long i) { GEN e = const_vecsmall(n,0); e[i] = 1; return e; }
 
+INLINE GEN
+shallowcopy(GEN x)
+{ return typ(x) == t_MAT ? RgM_shallowcopy(x): leafcopy(x); }
+
 /*******************************************************************/
 /*                                                                 */
 /*                        VEC / COL / VECSMALL                     */
@@ -1046,6 +1050,16 @@ INLINE GEN
 ZM_lll(GEN x, double D, long f) { return ZM_lll_norms(x,D,f,NULL); }
 INLINE GEN
 RgM_inv(GEN a) { return RgM_solve(a, NULL); }
+INLINE GEN
+RgM_shallowcopy(GEN x)
+{
+  long l;
+  GEN y = cgetg_copy(x, &l);
+  while (--l > 0) gel(y,l) = leafcopy(gel(x,l));
+  return y;
+}
+INLINE GEN
+Flm_copy(GEN x) { return RgM_shallowcopy(x); }
 
 /* ARITHMETIC */
 INLINE GEN

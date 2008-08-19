@@ -1224,7 +1224,7 @@ intfuncinitintern(void *E, GEN (*eval)(GEN, void*), GEN tab, long flag)
     else
     {
       long L2;
-      tabwm = shallowcopy(tabwp);
+      tabwm = leafcopy(tabwp);
       L2 = weight(E, eval, tabxm, tabwm);
       if (L > L2) L = L2;
     }
@@ -1787,7 +1787,7 @@ sumnumall(void *E, GEN (*eval)(GEN, void*), GEN a, GEN sig, GEN tab, long flag, 
   {
     if (flag)
     {
-      GEN emp = shallowcopy(tab); TABwm(emp) = TABwp(emp);
+      GEN emp = leafcopy(tab); TABwm(emp) = TABwp(emp);
       S = gmul2n(intninfinf(&D, sgn > 0? &auxsum1: &auxsumalt1, emp, prec),-1);
     }
     else

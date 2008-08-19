@@ -86,7 +86,7 @@ static GEN
 ApplyAllQ(GEN Q, GEN r0, long k)
 {
   pari_sp av = avma;
-  GEN r = shallowcopy(r0);
+  GEN r = leafcopy(r0);
   long j;
   for (j=1; j<k; j++) ApplyQ(gel(Q,j), r);
   return gerepilecopy(av, r);
@@ -156,7 +156,7 @@ GEN
 gram_schmidt(GEN e, GEN *ptB)
 {
   long i,j,lx = lg(e);
-  GEN f = shallowcopy(e), B, iB;
+  GEN f = RgM_shallowcopy(e), B, iB;
 
   B = cgetg(lx, t_VEC);
   iB= cgetg(lx, t_VEC);
@@ -543,7 +543,7 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
   /* bnd-hack is only for the case B = N */
   if (!equalii(B,N)) bnd = 1;
 
-  P = shallowcopy(P0); d = degpol(P);
+  P = leafcopy(P0); d = degpol(P);
   if (d == 0) { avma = av; return cgetg(1, t_VEC); }
   if (d < 0) pari_err(talker, "zero polynomial forbidden");
 
@@ -2117,7 +2117,7 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
     if (++s <= stockmax)
     {
       if (check) gel(norms,s) = norme1;
-      gel(S,s) = shallowcopy(x);
+      gel(S,s) = leafcopy(x);
       if (s == stockmax)
       { /* overflow */
 	long stockmaxnew= (stockall && (stockmax < 10000L || maxnum == -1))

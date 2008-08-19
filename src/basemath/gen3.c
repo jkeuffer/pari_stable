@@ -1310,7 +1310,7 @@ gsubst(GEN x, long v, GEN y)
 	  p2 = ex? gpowgs(y, ex): NULL;
 
 	  av = avma; lim=stack_lim(av,1);
-	  t = shallowcopy(y);
+	  t = leafcopy(y);
 	  if (l < ly) setlg(t, l);
 	  z = scalarser(gel(x,2),varn(y),l-2);
 	  for (i=3,jb=ey; jb<=l-2; i++,jb+=ey)

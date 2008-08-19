@@ -181,7 +181,7 @@ caradj(GEN x, long v, GEN *py)
     return p;
   }
   /* l > 3 */
-  av = avma; y = shallowcopy(x);
+  av = avma; y = RgM_shallowcopy(x);
   for (i = 1; i < l; i++) gcoeff(y,i,i) = gadd(gcoeff(y,i,i), t);
   for (k = 2; k < l-1; k++)
   {
@@ -271,7 +271,7 @@ hess(GEN x)
   if (lx == 1) return cgetg(1,t_MAT);
   if (lg(x[1]) != lx) pari_err(mattype1,"hess");
 
-  x = shallowcopy(x); lim = stack_lim(av,2);
+  x = RgM_shallowcopy(x); lim = stack_lim(av,2);
   for (m=2; m<lx-1; m++)
   {
     GEN t = NULL;
@@ -310,7 +310,7 @@ Flm_hess(GEN x, ulong p)
   if (lx == 1) return cgetg(1,t_MAT);
   if (lg(x[1]) != lx) pari_err(mattype1,"hess");
 
-  x = shallowcopy(x); lim = stack_lim(av,2);
+  x = Flm_copy(x); lim = stack_lim(av,2);
   for (m=2; m<lx-1; m++)
   {
     ulong t = 0;
@@ -824,7 +824,7 @@ gaussred(GEN a, long signature)
   av = avma;
   r = const_vecsmall(n, 1);
   av1= avma; lim = stack_lim(av1,1);
-  a = shallowcopy(a);
+  a = RgM_shallowcopy(a);
   t = n; sp = sn = 0;
   while (t)
   {
@@ -1181,7 +1181,7 @@ GEN
 QM_ImZ_hnf(GEN x)
 {
   pari_sp av = avma;
-  return gerepileupto(av, QM_imZ_hnf_aux( shallowcopy(x) ));
+  return gerepileupto(av, QM_imZ_hnf_aux( RgM_shallowcopy(x) ));
 }
 
 GEN
@@ -1192,7 +1192,7 @@ QM_ImQ_hnf(GEN x)
   GEN c;
 
   n = lg(x); if (n==1) return gcopy(x);
-  m = lg(x[1]); x = shallowcopy(x);
+  m = lg(x[1]); x = RgM_shallowcopy(x);
   c = const_vecsmall(n-1, 0);
   av1 = avma; lim = stack_lim(av1,1);
   for (k=1; k<m; k++)

@@ -1839,7 +1839,7 @@ RecCoeff(GEN nf,  GEN pol,  long v, long prec)
   }
 
   md = cl/2;
-  pol = shallowcopy(pol);
+  pol = leafcopy(pol);
 
   d.N = nf_get_degree(nf);
   d.v = v;

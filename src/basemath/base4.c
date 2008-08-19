@@ -279,7 +279,7 @@ static GEN
 addmul_col(GEN a, long s, GEN b)
 {
   long i,l;
-  if (!s) return a? shallowcopy(a): a;
+  if (!s) return a? leafcopy(a): a;
   if (!a) return gmulsg(s,b);
   l = lg(a);
   for (i=1; i<l; i++)
@@ -292,7 +292,8 @@ static GEN
 addmul_mat(GEN a, long s, GEN b)
 {
   long j,l;
-  if (!s) return a? shallowcopy(a): a; /* copy otherwise next call corrupts a */
+  /* copy otherwise next call corrupts a */
+  if (!s) return a? RgM_shallowcopy(a): a;
   if (!a) return gmulsg(s,b);
   l = lg(a);
   for (j=1; j<l; j++)
@@ -1736,7 +1737,7 @@ computeGtwist(GEN nf, GEN vdir)
   if (!vdir) return RM_round_maxrank(G); /* FIXME: should be part of nf */
   vdir = chk_vdir(nf, vdir);
   l = lg(vdir); lG = lg(G);
-  G = shallowcopy(G);
+  G = RgM_shallowcopy(G);
   r1 = nf_get_r1(nf);
   for (i=1; i<l; i++)
   {
@@ -2157,7 +2158,7 @@ idealchinese(GEN nf, GEN x, GEN w)
     r = i;
   }
   else
-    e = shallowcopy(e); /* do not destroy x[2] */
+    e = leafcopy(e); /* do not destroy x[2] */
   for (i=1; i<r; i++)
     if (signe(e[i]) < 0) gel(e,i) = gen_0;
 
@@ -2424,7 +2425,7 @@ nfhnf(GEN nf, GEN x)
 
   av = avma; lim = stack_lim(av, 2);
   A = matalgtobasis(nf,A);
-  I = shallowcopy(I);
+  I = leafcopy(I);
   J = zerovec(k); def = k+1;
   for (i=m; i>=1; i--)
   {
@@ -2501,9 +2502,9 @@ nfsmith(GEN nf, GEN x)
   if (n > m) pari_err(impl,"nfsmith for non square matrices");
 
   av = avma; lim = stack_lim(av,1);
-  A = shallowcopy(A);
-  I = shallowcopy(I);
-  J = shallowcopy(J);
+  A = RgM_shallowcopy(A);
+  I = leafcopy(I);
+  J = leafcopy(J);
   for (i=n; i>=2; i--)
   {
     do
@@ -2774,7 +2775,7 @@ nfhnfmod(GEN nf, GEN x, GEN detmat)
 
   av = avma; lim = stack_lim(av,2);
   A = matalgtobasis(nf, A);
-  I = shallowcopy(I);
+  I = leafcopy(I);
   def = co; ldef = (li>co)? li-co+1: 1;
   for (i=li-1; i>=ldef; i--)
   {

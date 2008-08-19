@@ -71,7 +71,7 @@ red_cyclop(GEN T, long p)
   if (d <= -2) return T;
 
   /* reduce mod (x^p - 1) */
-  y = shallowcopy(T); z = (GEN*)(y+2);
+  y = leafcopy(T); z = (GEN*)(y+2);
   for (i = 0; i<=d; i++) z[i] = addii(z[i], z[i+p]);
 
   /* reduce mod x^(p-1) + ... + 1 */
@@ -106,7 +106,7 @@ red_cyclo2n_ip(GEN x, long n)
   return normalizepol_lg(x, i+1);
 }
 static GEN
-red_cyclo2n(GEN x, long n) { return red_cyclo2n_ip(shallowcopy(x), n); }
+red_cyclo2n(GEN x, long n) { return red_cyclo2n_ip(leafcopy(x), n); }
 
 /* x a non-zero VECSMALL */
 static GEN

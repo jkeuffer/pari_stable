@@ -775,7 +775,7 @@ hnf_i(GEN A, int remove)
   GEN a;
 
   if (!n) return cgetg(1,t_MAT);
-  av = avma; A = shallowcopy(A);
+  av = avma; A = RgM_shallowcopy(A);
   m = lg(A[1])-1;
 
   lim = stack_lim(av,1);
@@ -869,7 +869,7 @@ ZM_hnfmod_i(GEN x, GEN dm, int flag)
   co = lg(x); if (co == 1) return cgetg(1,t_MAT);
   li = lg(x[1]); dm2 = shifti(dm, -1);
   av = avma; lim = stack_lim(av,1);
-  x = shallowcopy(x);
+  x = RgM_shallowcopy(x);
 
   ldef = 0;
   if (li > co)
@@ -1300,7 +1300,7 @@ extendedgcd(GEN A)
   n = lg(A);
   for (i=1; i<n; i++)
     if (typ(A[i]) != t_INT) pari_err(typeer,"extendedgcd");
-  A = shallowcopy(A);
+  A = leafcopy(A);
   B = matid(n-1);
   lambda = zeromatcopy(n-1,n-1);
   D = const_vec(n, gen_1);
@@ -1357,7 +1357,7 @@ ZM_hnfperm(GEN A, GEN *ptU, GEN *ptperm)
   l = const_vecsmall(n, 0);
   perm = cgetg(m+1, t_VECSMALL);
   av1 = avma; lim = stack_lim(av1,1);
-  A = shallowcopy(A);
+  A = RgM_shallowcopy(A);
   U = ptU? matid(n): NULL;
   /* U base change matrix : A0*U = A all along */
   for (r=0, k=1; k <= n; k++)
@@ -1485,7 +1485,7 @@ ZM_hnfall(GEN A, GEN *ptB, long remove)
   c = const_vecsmall(m, 0);
   h = const_vecsmall(n, m);
   av1 = avma; lim = stack_lim(av1,1);
-  A = shallowcopy(A);
+  A = RgM_shallowcopy(A);
   B = ptB? matid(n): NULL;
   r = n+1;
   for (li=m; li; li--)
@@ -1772,7 +1772,7 @@ ZM_snfall_i(GEN x, GEN *ptU, GEN *ptV, int return_vec)
   U = ptU? gen_1: NULL; /* TRANSPOSE of row transform matrix [act on columns]*/
   V = ptV? gen_1: NULL;
   V0 = NULL;
-  x = shallowcopy(x);
+  x = RgM_shallowcopy(x);
   if (m == n && ZM_ishnf(x))
   {
     mdet = ZM_det_triangular(x);
@@ -2062,7 +2062,7 @@ gsmithall_i(GEN x,long all)
   if (!n) return trivsmith(all);
   if (lg(x[1]) != n+1) pari_err(mattype1,"gsmithall");
   av = avma; lim = stack_lim(av,1);
-  x = shallowcopy(x);
+  x = RgM_shallowcopy(x);
   if (all) { U = matid(n); V = matid(n); }
   for (i=n; i>=2; i--)
   {

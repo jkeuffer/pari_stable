@@ -475,7 +475,7 @@ subgroup_engine(subgp_iter *T)
   }
   else
   { /* not a p-group */
-    GEN cycI = shallowcopy(cyc);
+    GEN cycI = leafcopy(cyc);
     long lsubq;
     for (i=1; i<n; i++)
     {
@@ -522,7 +522,7 @@ get_snf(GEN x, long *N)
       if (!RgM_isdiagonal(x)) return NULL;
       cyc = RgM_diagonal_shallow(x); break;
     case t_VEC: if (lg(x) == 4 && typ(x[2]) == t_VEC) x = gel(x,2);
-    case t_COL: cyc = shallowcopy(x); break;
+    case t_COL: cyc = leafcopy(x); break;
     default: return NULL;
   }
   *N = lg(cyc)-1;

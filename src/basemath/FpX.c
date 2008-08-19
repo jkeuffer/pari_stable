@@ -233,10 +233,10 @@ FpX_divrem(GEN x, GEN y, GEN p, GEN *pr)
     z = Flx_divrem(a,b,pp, pr);
     avma = av0; /* HACK: assume pr last on stack, then z */
     if (!z) return NULL;
-    z = shallowcopy(z);
+    z = leafcopy(z);
     if (pr && pr != ONLY_DIVIDES && pr != ONLY_REM)
     {
-      *pr = shallowcopy(*pr);
+      *pr = leafcopy(*pr);
       *pr = Flx_to_ZX_inplace(*pr);
     }
     return Flx_to_ZX_inplace(z);
@@ -910,8 +910,8 @@ FpXQ_charpoly(GEN x, GEN T, GEN p)
   pari_sp ltop=avma;
   long v=varn(T);
   GEN R;
-  T = shallowcopy(T); setvarn(T, MAXVARN);
-  x = shallowcopy(x); setvarn(x, MAXVARN);
+  T = leafcopy(T); setvarn(T, MAXVARN);
+  x = leafcopy(x); setvarn(x, MAXVARN);
   R = FpX_FpXY_resultant(T, deg1pol_shallow(gen_1,FpX_neg(x,p),v),p);
   return gerepileupto(ltop,R);
 }
@@ -982,7 +982,7 @@ gener_FpXQ(GEN T, GEN p, GEN *po)
   L = gel(Z_factor(L),1);
   for (i=lg(L)-1; i; i--) gel(L,i) = diviiexact(p_1, gel(L,i));
   o = factor_pn_1(p,f);
-  L2 = shallowcopy( gel(o, 1) );
+  L2 = leafcopy( gel(o, 1) );
   for (i = j = 1; i < lg(L2); i++)
   {
     if (remii(p_1, gel(L2,i)) == gen_0) continue;

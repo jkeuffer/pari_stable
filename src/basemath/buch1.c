@@ -308,7 +308,7 @@ getallelts(GEN bnr)
   if (!no) return list;
 
   pows = cgetg(lc+1,t_VEC);
-  c = shallowcopy(c); settyp(c, t_VECSMALL);
+  c = leafcopy(c); settyp(c, t_VECSMALL);
   for (i=1; i<=lc; i++)
   {
     long k = itos(gel(c,i));
@@ -467,7 +467,7 @@ do_compo(GEN x, GEN y)
 {
   long a, i, l = lg(y);
   GEN z;
-  y = shallowcopy(y); /* y := t^deg(y) y(#/t) */
+  y = leafcopy(y); /* y := t^deg(y) y(#/t) */
   for (i = 2; i < l; i++)
     if (signe(y[i])) gel(y,i) = monomial(gel(y,i), l-i-1, MAXVARN);
   for  (a = 0;; a = nexta(a))
