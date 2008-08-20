@@ -760,14 +760,14 @@ static GEN
 nfiso0(GEN a, GEN b, long fliso)
 {
   pari_sp av = avma;
-  long n,m,i,vb,lx;
-  GEN nfa, nfb, p1, y, la, lb;
+  long n, m, i, vb, lx;
+  GEN nfa, nfb, y, la, lb;
 
   a = get_nfpol(a, &nfa);
-  if (!nfa) { a = Q_primpart(a); RgX_check_ZX(a, "nsiso0"); }
   b = get_nfpol(b, &nfb);
+  if (!nfa) { a = Q_primpart(a); RgX_check_ZX(a, "nsiso0"); }
   if (!nfb) { b = Q_primpart(b); RgX_check_ZX(b, "nsiso0"); }
-  if (fliso && nfa && !nfb) { p1=a; a=b; b=p1; p1=nfa; nfa=nfb; nfb=p1; }
+  if (fliso && nfa && !nfb) { swap(a,b); nfb = nfa; nfa = NULL; }
   m = degpol(a);
   n = degpol(b); if (m<=0 || n<=0) pari_err(constpoler,"nfiso or nfincl");
   if (fliso) { if (n!=m) return gen_0; }
@@ -795,16 +795,16 @@ nfiso0(GEN a, GEN b, long fliso)
     }
     else if (expi(da) < 150) /* too expensive otherwise */
     {
-      long q=n/m;
-      GEN fa=Z_factor(da), ex=gel(fa,2);
-      fa=gel(fa,1); lx=lg(fa);
+      GEN fa = Z_factor(da), P = gel(fa,1), E = gel(fa,2);
+      long q = n/m;
+      lx = lg(P);
       for (i=1; i<lx; i++)
-	if (mod2(gel(ex,i)) && !dvdii(db, powiu(gel(fa,i),q)))
+	if (mod2(gel(E,i)) && !dvdii(db, powiu(gel(P,i),q)))
 	  { avma=av; return gen_0; }
     }
   }
   a = leafcopy(a); setvarn(a,0);
-  b = leafcopy(b); vb=varn(b);
+  b = leafcopy(b); vb = varn(b);
   if (nfb)
   {
     if (vb == 0) nfb = gsubst(nfb, 0, pol_x(MAXVARN));
@@ -816,20 +816,22 @@ nfiso0(GEN a, GEN b, long fliso)
     y = gel(polfnf(a,b),1); lx = lg(y);
     for (i=1; i<lx; i++)
     {
-      if (lg(y[i]) != 4) { setlg(y,i); break; }
-      gel(y,i) = gneg_i(lift_intern(gmael(y,i,2)));
+      GEN t = gel(y,i);
+      if (degpol(t) != 1) { setlg(y,i); break; }
+      gel(y,i) = gneg_i(lift_intern(gel(t,2)));
     }
-    y = gen_sort(y, (void*)&gcmp, &gen_cmp_RgX);
-    settyp(y, t_VEC);
     if (vb == 0) (void)delete_var();
+    settyp(y, t_VEC);
+    gen_sort_inplace(y, (void*)&cmp_RgX, &cmp_nodata, NULL);
   }
   lx = lg(y); if (lx==1) { avma=av; return gen_0; }
   for (i=1; i<lx; i++)
   {
-    p1 = gel(y,i);
-    if (typ(p1) == t_POL) setvarn(p1, vb); else p1 = scalarpol(p1, vb);
-    if (lb) p1 = RgX_unscale(p1, lb);
-    gel(y,i) = la? RgX_Rg_div(p1,la): p1;
+    GEN t = gel(y,i);
+    if (typ(t) == t_POL) setvarn(t, vb); else t = scalarpol(t, vb);
+    if (lb) t = RgX_unscale(t, lb);
+    if (la) t = RgX_Rg_div(t, la);
+    gel(y,i) = t;
   }
   return gerepilecopy(av,y);
 }
