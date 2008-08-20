@@ -74,21 +74,6 @@ typedef struct {
 static THREAD stack *err_catch_stack;
 static THREAD GEN *dft_handler;
 
-#define BLOCK_SIGINT_START           \
-{                                    \
-  int block=PARI_SIGINT_block;       \
-  PARI_SIGINT_block = 1;
-
-#define BLOCK_SIGINT_END             \
-  PARI_SIGINT_block = block;         \
-  if (!block && PARI_SIGINT_pending) \
-  {                                  \
-    int sig = PARI_SIGINT_pending;   \
-    PARI_SIGINT_pending = 0;         \
-    raise(sig);                      \
-  }                                  \
-}
-
 void
 push_stack(stack **pts, void *a)
 {
@@ -1469,9 +1454,7 @@ GEN
 gclone(GEN x)
 {
   long i,lx,tx = typ(x), t = taille(x);
-  GEN y;
-  BLOCK_SIGINT_START
-  y = newbloc(t);
+  GEN y = newbloc(t);
   if (!is_recursive_t(tx))
   {
     switch(tx)
@@ -1499,9 +1482,7 @@ gclone(GEN x)
     if (lontyp[tx] == 1) i = 1; else { y[1] = x[1]; i = 2; }
     for (; i<lx; i++) gel(y,i) = gcopy_avma(gel(x,i), &AVMA);
   }
-  setisclone(y);
-  BLOCK_SIGINT_END
-  return y;
+  setisclone(y); return y;
 }
 
 static void

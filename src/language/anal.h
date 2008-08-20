@@ -36,6 +36,21 @@ GEN gp_eval(GEN x, void *dat);
 #define bl_prev(x) (((GEN)x)[-2])
 #define bl_num(x)  (((GEN)x)[-1])
 
+#define BLOCK_SIGINT_START           \
+{                                    \
+  int block=PARI_SIGINT_block;       \
+  PARI_SIGINT_block = 1;
+
+#define BLOCK_SIGINT_END             \
+  PARI_SIGINT_block = block;         \
+  if (!block && PARI_SIGINT_pending) \
+  {                                  \
+    int sig = PARI_SIGINT_pending;   \
+    PARI_SIGINT_pending = 0;         \
+    raise(sig);                      \
+  }                                  \
+}
+
 /* stacks */
 typedef struct stack {
   struct stack *prev;

@@ -214,6 +214,7 @@ void
 changevalue(entree *ep, GEN x)
 {
   var_cell *v = (var_cell*) ep->pvalue;
+  BLOCK_SIGINT_START
   if (v == INITIAL) new_val_cell(ep, x, COPY_VAL);
   else
   {
@@ -221,6 +222,7 @@ changevalue(entree *ep, GEN x)
     if (v->flag == COPY_VAL) killbloc((GEN)ep->value); else v->flag = COPY_VAL;
     ep->value = (void*)x;
   }
+  BLOCK_SIGINT_END
 }
 
 INLINE void
