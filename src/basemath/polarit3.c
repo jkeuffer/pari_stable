@@ -1975,8 +1975,8 @@ FlxX_pseudorem(GEN x, GEN y, ulong p)
 
   if (!signe(y)) pari_err(gdiver);
   (void)new_chunk(2);
-  dx=degpol(x); x = RgX_reverse(x);
-  dy=degpol(y); y = RgX_reverse(y); dz=dx-dy; dp = dz+1;
+  dx=degpol(x); x = RgX_recip(x);
+  dy=degpol(y); y = RgX_recip(y); dz=dx-dy; dp = dz+1;
   av2 = avma; lim = stack_lim(av2,1);
   for (;;)
   {
@@ -1998,7 +1998,7 @@ FlxX_pseudorem(GEN x, GEN y, ulong p)
   lx = dx+3; x -= 2;
   x[0]=evaltyp(t_POL) | evallg(lx);
   x[1]=evalsigne(1) | evalvarn(vx);
-  x = RgX_reverse(x) - 2;
+  x = RgX_recip(x) - 2;
   if (dp)
   { /* multiply by y[0]^dp   [beware dummy vars from FpX_FpXY_resultant] */
     GEN t = Flx_pow(gel(y,0), dp, p);

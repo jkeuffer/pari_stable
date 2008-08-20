@@ -1316,8 +1316,8 @@ RgXQX_pseudorem(GEN x, GEN y, GEN T)
 
   if (!signe(y)) pari_err(gdiver);
   (void)new_chunk(2);
-  dx=degpol(x); x = RgX_reverse(x);
-  dy=degpol(y); y = RgX_reverse(y); dz=dx-dy; p = dz+1;
+  dx=degpol(x); x = RgX_recip(x);
+  dy=degpol(y); y = RgX_recip(y); dz=dx-dy; p = dz+1;
   av2 = avma; lim = stack_lim(av2,1);
   for (;;)
   {
@@ -1344,7 +1344,7 @@ RgXQX_pseudorem(GEN x, GEN y, GEN T)
   lx = dx+3; x -= 2;
   x[0] = evaltyp(t_POL) | evallg(lx);
   x[1] = evalsigne(1) | evalvarn(vx);
-  x = RgX_reverse(x) - 2;
+  x = RgX_recip(x) - 2;
   if (p)
   { /* multiply by y[0]^p   [beware dummy vars from FpX_FpXY_resultant] */
     GEN t = gel(y,0);
@@ -1378,8 +1378,8 @@ RgXQX_pseudodivrem(GEN x, GEN y, GEN T, GEN *ptr)
 
   if (!signe(y)) pari_err(gdiver);
   (void)new_chunk(2);
-  dx=degpol(x); x = RgX_reverse(x);
-  dy=degpol(y); y = RgX_reverse(y); dz=dx-dy; p = dz+1;
+  dx=degpol(x); x = RgX_recip(x);
+  dy=degpol(y); y = RgX_recip(y); dz=dx-dy; p = dz+1;
   lz = dz+3; z = cgetg(lz, t_POL) + 2;
   ypow = new_chunk(dz+1);
   gel(ypow,0) = gen_1;
@@ -1422,13 +1422,13 @@ RgXQX_pseudodivrem(GEN x, GEN y, GEN T, GEN *ptr)
     lx = dx+3; x -= 2;
     x[0] = evaltyp(t_POL) | evallg(lx);
     x[1] = evalsigne(1) | evalvarn(vx);
-    x = RgX_reverse(x) - 2;
+    x = RgX_recip(x) - 2;
   }
 
   z -= 2;
   z[0] = evaltyp(t_POL) | evallg(lz);
   z[1] = evalsigne(1) | evalvarn(vx);
-  z = RgX_reverse(z) - 2;
+  z = RgX_recip(z) - 2;
   c = gel(ypow,p); r = RgX_Rg_mul(x, c);
   if (T && typ(c) == t_POL && varn(c) == varn(T)) r = RgXQX_red(r, T);
   gerepileall(av, 2, &z, &r);
