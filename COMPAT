@@ -136,7 +136,7 @@ This file lists the incompatible changes between Version 2.x and older versions
   - rename gissquarerem -> gissquareall, uissquarerem -> uissquareall,
     Z_issquarerem -> Z_issquareall (analogy with sqrtrem was faulty: we do
     not store a remainder but the square root)
-  - rename assmat -> matcompanion
+  - rename assmat -> matcompanion, polymodrecip -> modreverse
   - removed obsolete undocumented bruteall()
   - %Z is no longer a valid conversion specification for PARI formats,
     since this is now handled as a length modifier. Use %Ps instead.

@@ -1142,38 +1142,38 @@ permtonum(GEN x)
 /********************************************************************/
 /* return y such that Mod(y, charpoly(Mod(a,T)) = Mod(a,T) */
 GEN
-modreverse_i(GEN a, GEN T)
+RgXQ_reverse(GEN a, GEN T)
 {
   pari_sp av = avma;
   long n = degpol(T);
   GEN y;
 
-  if (n <= 0) return gcopy(a);
-  if (n == 1)
+  if (n <= 1) {
+    if (n <= 0) return gcopy(a);
     return gerepileupto(av, gneg(gdiv(gel(T,2), gel(T,3))));
+  }
   if (typ(a) != t_POL || !signe(a))
     pari_err(talker,"reverse polmod does not exist");
 
   y = RgXV_to_RgM(RgXQ_powers(a,n-1,T), n);
   y = RgM_solve(y, col_ei(n, 2));
-  if (!y) pari_err(talker,"reverse polmod does not exist: Mod(%Ps,%Ps)", a,T);
+  if (!y) pari_err(talker,"reverse polmod does not exist: Mod(%Ps, %Ps)", a,T);
   return gerepilecopy(av, RgV_to_RgX(y, varn(T)));
 }
 
 GEN
-polymodrecip(GEN x)
+modreverse(GEN x)
 {
   long v, n;
   GEN T, a, y;
 
   if (typ(x)!=t_POLMOD) pari_err(talker,"not a polmod in modreverse");
-  T = gel(x,1);
+  T = gel(x,1); n = degpol(T); if (n <= 0) return gcopy(x);
   a = gel(x,2);
-  n = degpol(T); if (n <= 0) return gcopy(x);
   v = varn(T);
   y = cgetg(3,t_POLMOD);
   gel(y,1) = (n==1)? gsub(pol_x(v), a): RgXQ_caract(a, T, v);
-  gel(y,2) = modreverse_i(a, T); return y;
+  gel(y,2) = RgXQ_reverse(a, T); return y;
 }
 
 /********************************************************************/

@@ -1048,7 +1048,7 @@ compositum_red(compo_s *C, GEN P, GEN Q)
   C->p = poleval(p, a);
   if (C->p == gen_0) C->p = mkpolmod(zeropol(v),gel(a,1));
   C->q = poleval(q, a);
-  C->rev = modreverse_i(gel(a,2), gel(a,1));
+  C->rev = RgXQ_reverse(gel(a,2), gel(a,1));
   if (DEBUGLEVEL>1) fprintferr("polred(compositum) = %Ps\n",C->R);
 }
 

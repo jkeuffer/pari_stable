@@ -114,7 +114,7 @@ BA  3- builtin-in GP functions can now be used as closures.
        nf.disc could not be factored and addprimes() would have to be used ]
     5- removed undocumented interface FpM_mul(x,y,NULL), and analogously for
        FpV_dotproduct, FpV_dotsquare, FpM_FpC_mul
-    6- [library] rename assmat -> matcompanion
+    6- [library] rename assmat -> matcompanion, polymodrecip -> modreverse
     7- prototype of FpX_center [ add one argument ]
 BA  8- [svn/CVS] number development snapshots according to repository version
     9- delete CVS.txt and replace it with README-subversion
@@ -330,7 +330,7 @@ JD 12- add an optional argument to quit()
    Rg_RgX_sub,
    RgX_equal, RgX_equal_var, RgX_translate, RgX_to_nfX, RgX_type,
    RgX_type_decode, RgX_type_is_composite, RgX_Rg_divexact,
-   RgXQ_norm, RgXQ_pow, RgXQ_caract
+   RgXQ_norm, RgXQ_pow, RgXQ_caract, RgXQ_reverse
    RgV_neg, RgV_add, RgV_sub, RgV_Rg_mul,
    RgC_neg, RgC_add, RgC_sub, RgC_Rg_div, RgC_Rg_mul,
    RgM_neg, RgM_add, RgM_sub, RgM_Rg_div, RgM_Rg_mul, RgM_diagonal,

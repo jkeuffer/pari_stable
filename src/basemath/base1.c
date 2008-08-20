@@ -1333,7 +1333,7 @@ nfpolred(nfbasic_t *T)
   }
   if (!b) return NULL; /* no improvement */
 
-  rev = modreverse_i(b, T->x);
+  rev = RgXQ_reverse(b, T->x);
   if (DEBUGLEVEL>1) fprintferr("xbest = %Ps\n",x);
   
   /* update T */
@@ -1900,7 +1900,7 @@ findmindisc(GEN y, GEN *pa)
 static GEN
 rev(GEN a, GEN x, GEN lead)
 {
-  GEN b = modreverse_i(a, x);
+  GEN b = RgXQ_reverse(a, x);
   if (lead) b = RgX_Rg_div(b, lead);
   return b;
 }

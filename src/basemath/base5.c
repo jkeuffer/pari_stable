@@ -1010,6 +1010,6 @@ rnfpolredabs(GEN nf, GEN relpol, long flag)
   elt = fix_relative_pol(T, elt, 0);
   pol = RgXQ_caract(elt, relpol, varn(relpol));
   pol = lift_if_rational(pol);
-  if (flag & nf_ORIG) pol = mkvec2(pol, mkpolmod(modreverse_i(elt,relpol),pol));
+  if (flag & nf_ORIG) pol = mkvec2(pol, mkpolmod(RgXQ_reverse(elt,relpol),pol));
   return gerepilecopy(av, pol);
 }

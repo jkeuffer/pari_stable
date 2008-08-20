@@ -512,7 +512,7 @@ entree oldfonctions[]={
 {"minim2",23,(void*)minim2,8,"GG","minim2(x,bound)=looks for vectors of square norm <= bound, return the first one and its norm."},
 {"mod",25,(void*)gmodulo,2,"GG","mod(x,y)=creates the integer x modulo y on the PARI stack."},
 {"modp",25,(void*)gmodulo,2,"GG","modp(x,y)=creates the integer x modulo y as a permanent object (on the heap)."},
-{"modreverse",1,(void*)polymodrecip,6,"G","modreverse(x)=reverse polymod of the polymod x, if it exists."},
+{"modreverse",1,(void*)modreverse,6,"G","modreverse(x)=reverse polymod of the polymod x, if it exists."},
 {"modulargcd",2,(void*)QX_gcd,2,"GG","modulargcd(x,y)=gcd of the polynomials x and y using the modular method."},
 {"mu",1,(void*)gmoebius,4,"G","mu(x)=Moebius function of x."},
 {"newtonpoly",2,(void*)newtonpoly,6,"GG","newtonpoly(x,p)=Newton polygon of polynomial x with respect to the prime p."},

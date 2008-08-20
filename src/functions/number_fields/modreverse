@@ -1,6 +1,6 @@
 Function: modreverse
 Section: number_fields
-C-Name: polymodrecip
+C-Name: modreverse
 Prototype: G
 Help: modreverse(z): reverse polmod of the polmod z, if it exists.
 Doc: let $z = \kbd{Mod(A, T)}$ be a polmod, and $Q$ be its minimal

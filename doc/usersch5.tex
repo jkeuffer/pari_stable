@@ -4756,6 +4756,14 @@ have the same variable number and \kbd{RgX\_equal(x,y)} is $1$.
 \fun{GEN}{RgXQ_powers}{GEN x, long n, GEN T} returns $[\kbd{x}^0,
 \dots, \kbd{x}^\kbd{n}]$ as a \typ{VEC} of \kbd{RgXQ}s.
 
+\fun{GEN}{RgXQ_reverse}{GEN f, GEN T} returns a \typ{POL} $g$ of degree $< n
+= \text{deg}~T$ such that $T(x)$ divides $(g \circ f)(x) - x$, by solving a
+linear system. Low-level function underlying \tet{modreverse}: it returns a
+lift of \kbd[modreverse(f,T)]; faster than the high-level function since it
+needs not compute the characteristic polynomial of $f$ mod $T$ (often already
+known in applications). In the trivial case where $n \leq 1$, returns a
+scalar, not a constant \typ{POL}.
+
 \fun{GEN}{RgXQ_matrix_pow}{GEN y, long n, long m, GEN P} returns
 \kbd{RgXQ\_powers(y,m-1,P)}, as a matrix of dimension $n \geq \deg P$.
 
