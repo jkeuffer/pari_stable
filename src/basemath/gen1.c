@@ -3010,7 +3010,7 @@ gmul2n(GEN x, long n)
 static GEN
 invr_basecase(GEN y)
 {
-  long ly = lg(y);;
+  long ly = lg(y);
   GEN z = cgetr(ly);
   pari_sp av = avma;
   affrr(divrr(real_1(ly+1), y), z);
