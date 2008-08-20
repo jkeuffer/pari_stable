@@ -582,6 +582,25 @@ RgX_deriv(GEN x)
   for (i=3; i<lx ; i++) gel(y,i) = gmulsg(i-1,gel(x,i+1));
   y[1] = x[1]; return normalizepol_lg(y,i);
 }
+
+/* return coefficients s.t x = x_0 X^n + ... + x_n */
+GEN
+RgX_recip(GEN x)
+{
+  long lx, i, j;
+  GEN y = cgetg_copy(x, &lx);
+  y[1] = x[1]; for (i=2,j=lx-1; i<lx; i++,j--) gel(y,i) = gcopy(gel(x,j));
+  return normalizepol_lg(y,lx);
+}
+/* shallow version */
+GEN
+RgX_recip_shallow(GEN x)
+{
+  long lx, i, j;
+  GEN y = cgetg_copy(x, &lx);
+  y[1] = x[1]; for (i=2,j=lx-1; i<lx; i++,j--) y[i] = x[j];
+  return y;
+}
 /*******************************************************************/
 /*                                                                 */
 /*                      ADDITION / SUBTRACTION                     */
@@ -1281,17 +1300,6 @@ RgXQX_divrem(GEN x, GEN y, GEN T, GEN *pr)
 /*                        PSEUDO-DIVISION                          */
 /*                                                                 */
 /*******************************************************************/
-/* return coefficients s.t x = x_0 X^n + ... + x_n */
-GEN
-RgX_reverse(GEN x)
-{
-  long i,n = degpol(x);
-  GEN y = cgetg(n+3,t_POL);
-  y[1] = x[1]; x += 2; y += 2;
-  for (i=0; i<=n; i++) y[i] = x[n-i];
-  return y;
-}
-
 INLINE GEN
 rem(GEN c, GEN T)
 {

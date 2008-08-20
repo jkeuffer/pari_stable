@@ -680,22 +680,8 @@ gprec_wtrunc(GEN x, long pr)
 GEN
 polrecip(GEN x)
 {
-  long lx = lg(x), i, j;
-  GEN y = cgetg(lx,t_POL);
-
   if (typ(x) != t_POL) pari_err(typeer,"polrecip");
-  y[1] = x[1]; for (i=2,j=lx-1; i<lx; i++,j--) gel(y,i) = gcopy(gel(x,j));
-  return normalizepol_lg(y,lx);
-}
-
-/* as above. Internal (don't copy or normalize) */
-GEN
-polrecip_i(GEN x)
-{
-  long lx = lg(x), i, j;
-  GEN y = cgetg(lx,t_POL);
-  y[1] = x[1]; for (i=2,j=lx-1; i<lx; i++,j--) y[i] = x[j];
-  return y;
+  return RgX_recip(x);
 }
 
 /*******************************************************************/

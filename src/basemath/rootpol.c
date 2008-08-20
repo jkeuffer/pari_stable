@@ -658,7 +658,7 @@ logmin_modulus(GEN p, double tau)
   double r;
 
   if (gcmp0(gel(p,2))) return -pariINFINITY;
-  r = - logmax_modulus(polrecip_i(p),tau);
+  r = - logmax_modulus(RgX_recip_shallow(p),tau);
   avma = av; return r;
 }
 
@@ -1209,9 +1209,9 @@ optimize_split(GEN p, long k, double delta, long bit,
     split_fromU(p,k,delta,bit,F,G,param,param2);
   else
   {
-    split_fromU(polrecip_i(p),n-k,delta,bit,&FF,&GG,param,param2);
-    *F = polrecip(GG);
-    *G = polrecip(FF);
+    split_fromU(RgX_recip_shallow(p),n-k,delta,bit,&FF,&GG,param,param2);
+    *F = RgX_recip_shallow(GG);
+    *G = RgX_recip_shallow(FF);
   }
 }
 
@@ -1583,13 +1583,13 @@ split_0(GEN p, long bit, GEN *F, GEN *G)
     if (lr < LOG1_9) split_0_1(p, bit, F, G);
     else
     {
-      q = polrecip_i(p);
+      q = RgX_recip_shallow(p);
       lr = logmax_modulus(q,0.05);
       if (lr < LOG1_9)
       {
 	split_0_1(q, bit, F, G);
-	*F = polrecip(*F);
-	*G = polrecip(*G);
+	*F = RgX_recip_shallow(*F);
+	*G = RgX_recip_shallow(*G);
       }
       else
 	split_2(p,bit,NULL, 1.2837,F,G);

@@ -4705,9 +4705,10 @@ coefficients such that $\kbd{*ux} + \kbd{*vy} = d$.
 \fun{GEN}{RgX_renormalize}{GEN x} remove leading terms in \kbd{x} which are
 equal to (necessarily inexact) zeros.
 
-\fun{GEN}{RgX_reverse}{GEN P} returns the reverse of the polynomial
-$P$, i.e. $X^{\deg P} P(1/X)$. Shallow function, not suitable for
-\kbd{gerepileupto}.
+\fun{GEN}{RgX_recip}{GEN P} returns the reverse of the polynomial
+$P$, i.e. $X^{\deg P} P(1/X)$.
+
+\fun{GEN}{RgX_recip_shallow}{GEN P} shallow function of \tet{RgX_recip}.
 
 \fun{GEN}{RgX_deflate}{GEN P, long d} assuming $P$ is a polynomial of the
 form $Q(X^d)$, return $Q$. Shallow function, not suitable for

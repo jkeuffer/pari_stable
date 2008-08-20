@@ -1557,7 +1557,7 @@ pnormalize(GEN f, GEN p, long prec, long n, GEN *plead, long *pprec, int *prev)
     long v = Z_pval(*plead,p), v1 = Z_pval(constant_term(f),p);
     if (v1 < v)
     {
-      *prev = 1; f = polrecip_i(f);
+      *prev = 1; f = RgX_recip_shallow(f);
      /* beware loss of precision from lc(factor), whose valuation is <= v */
       *pprec += v; v = v1;
     }
@@ -1885,7 +1885,7 @@ factorpadic(GEN f,GEN p,long prec)
   for (i=1; i<l; i++)
   {
     GEN t = gel(P,i);
-    if (reverse) t = normalizepol(polrecip_i(t));
+    if (reverse) t = normalizepol(RgX_recip_shallow(t));
     gel(P,i) = ZX_to_ZpX_normalized(t,p,ppow,prec);
   }
   if (!gcmp1(lt)) gel(P,1) = gmul(gel(P,1), lt);

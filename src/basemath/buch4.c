@@ -104,7 +104,7 @@ hyperell_locally_soluble(GEN T,GEN p)
   long res;
   if (typ(T)!=t_POL || typ(p)!=t_INT) pari_err(typeer,"zpsoluble");
   RgX_check_ZX(T, "zpsoluble");
-  res = zpsol(T,p,0,gen_1,gen_0) || zpsol(polrecip_i(T), p, 1, p, gen_0);
+  res = zpsol(T,p,0,gen_1,gen_0) || zpsol(RgX_recip_shallow(T), p, 1, p, gen_0);
   avma = av; return res;
 }
 
@@ -317,7 +317,7 @@ nf_hyperell_locally_soluble(GEN nf,GEN T,GEN pr)
   repr = repres(nf,pr);
   if (zpsolnf(nf,T,pr,0,gen_1,gen_0,repr,zinit)) { avma=av; return 1; }
   p1 = coltoalg(nf, pr_get_gen(pr));
-  if (zpsolnf(nf,polrecip_i(T),pr,1,p1,gen_0,repr,zinit)) { avma=av; return 1; }
+  if (zpsolnf(nf,RgX_recip_shallow(T),pr,1,p1,gen_0,repr,zinit)) { avma=av; return 1; }
 
   avma = av; return 0;
 }

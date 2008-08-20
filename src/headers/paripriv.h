@@ -200,7 +200,6 @@ GEN  lift_if_rational(GEN x);
 GEN  monomial(GEN a, long degpol, long v);
 GEN  monomialcopy(GEN a, long degpol, long v);
 GEN  mulmat_pol(GEN A, GEN x);
-GEN  polrecip_i(GEN x);
 GEN  ser2pol_i(GEN x, long lx);
 GEN  ser2rfrac_i(GEN x);
 GEN  shiftpol_i(GEN x, long v);

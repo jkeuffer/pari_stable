@@ -506,7 +506,7 @@ carberkowitz(GEN x, long v)
     }
     for (i = 1; i <= r+1; i++) V[i] = Q[i];
   }
-  V = polrecip_i( RgV_to_RgX(V, v) ); /* not gtopoly: fail if v > gvar(V) */
+  V = RgX_recip_shallow( RgV_to_RgX(V, v) ); /* not gtopoly: fail if v > gvar(V) */
   V = odd(lx)? gcopy(V): RgX_neg(V);
   return fix_pol(av0, V);
 }
