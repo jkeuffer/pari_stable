@@ -614,7 +614,7 @@ gnorml1(GEN x,long prec)
     case t_INT: case t_REAL:
       return mpabs(x);
     
-    case t_COMPLEX: case t_FRAC: case t_QUAD:
+    case t_FRAC: case t_COMPLEX: case t_QUAD:
       return gabs(x,prec);
 
     case t_POL:
@@ -637,8 +637,8 @@ GEN
 QuickNormL1(GEN x,long prec)
 {
   pari_sp av = avma;
-  long lx,i;
-  GEN p1,p2,s;
+  long lx, i;
+  GEN s;
   switch(typ(x))
   {
     case t_INT: case t_REAL:
@@ -647,29 +647,28 @@ QuickNormL1(GEN x,long prec)
     case t_FRAC:
       return gabs(x,prec);
 
-    case t_INTMOD: case t_PADIC: case t_POLMOD: case t_SER: case t_RFRAC:
-      return gcopy(x);
-
     case t_COMPLEX:
-      p1=gabs(gel(x,1),prec); p2=gabs(gel(x,2),prec);
-      return gerepileupto(av, gadd(p1,p2));
+      s = gadd(gabs(gel(x,1),prec), gabs(gel(x,2),prec));
+      break;
 
     case t_QUAD:
-      p1=gabs(gel(x,2),prec); p2=gabs(gel(x,3),prec);
-      return gerepileupto(av, gadd(p1,p2));
+      s = gadd(gabs(gel(x,2),prec), gabs(gel(x,3),prec));
+      break;
 
     case t_POL:
-      lx=lg(x); s=gen_0;
-      for (i=2; i<lx; i++) s=gadd(s,QuickNormL1(gel(x,i),prec));
-      return gerepileupto(av, s);
+      lx = lg(x); s = gen_0;
+      for (i=2; i<lx; i++) s = gadd(s, QuickNormL1(gel(x,i),prec));
+      break;
 
     case t_VEC: case t_COL: case t_MAT:
-      lx=lg(x); s=gen_0;
-      for (i=1; i<lx; i++) s=gadd(s,QuickNormL1(gel(x,i),prec));
-      return gerepileupto(av, s);
+      lx = lg(x); s = gen_0;
+      for (i=1; i<lx; i++) s = gadd(s, QuickNormL1(gel(x,i),prec));
+      break;
+
+    default: pari_err(typeer,"QuickNormL1");
+      return NULL; /* not reached */
   }
-  pari_err(typeer,"QuickNormL1");
-  return NULL; /* not reached */
+  return gerepileupto(av, s);
 }
 
 /*******************************************************************/
