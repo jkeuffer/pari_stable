@@ -1225,6 +1225,8 @@ check_subgroup(GEN bnr, GEN H, GEN *clhray, int triv_is_NULL, const char *s)
   if (H)
   {
     D = diagonal_shallow(gmael(bnr,5,2));
+    if (typ(H) != t_MAT) pari_err(typeer,"check_subgroup");
+    RgM_check_ZM(H, "check_subgroup");
     H = ZM_hnf(H);
     if (!hnfdivide(H, D)) pari_err(talker,"incorrect subgroup in %s", s);
     h = ZM_det_triangular(H);
