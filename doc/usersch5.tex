@@ -4330,6 +4330,22 @@ entries of $x$ (its determinant if it is indeed triangular).
 \fun{GEN}{gram_matrix}{GEN v} returns the \idx{Gram matrix} $(v_i\cdot v_j)$
 associated to the entries of $v$ (matrix or vector).
 
+\fun{GEN}{RgC_gtofp}{GEN x, GEN prec} returns the \typ{COL} obtained by
+applying \kbd{gtofp(gel(x,i), prec)} to all coefficients of $x$.
+
+\fun{GEN}{RgC_fpnorml2}{GEN x, long prec} returns (a stack-clean variant of)
+\bprog
+  gnorml2( RgC_gtofp(x, prec) )
+@eprog
+
+\fun{GEN}{RgM_gtofp}{GEN x, GEN prec} returns the \typ{MAT} obtained by
+applying \kbd{gtofp(gel(x,i), prec)} to all coefficients of $x$.
+
+\fun{GEN}{RgM_fpnorml2}{GEN x, long prec} returns (a stack-clean variant of)
+\bprog
+  gnorml2( RgM_gtofp(x, prec) )
+@eprog
+
 The following routines check whether matrices or vectors have a special
 shape, using \kbd{gcmp1} and \kbd{gcmp0} to test components. (This makes a
 difference when components are inexact.)
@@ -4694,18 +4710,26 @@ its main variable.
 \fun{GEN}{RgX_gcd}{GEN x, GEN y} returns the GCD of \kbd{x} and \kbd{y},
 assumed to be \typ{POL}s in the same variable.
 
+\fun{GEN}{RgX_extgcd}{GEN x, GEN y, GEN *u, GEN *v} returns
+$d = \text{GCD}(\kbd{x},\kbd{y})$, and sets \kbd{*u}, \kbd{*v} to the Bezout
+coefficients such that $\kbd{*ux} + \kbd{*vy} = d$.
+
 \fun{GEN}{RgX_disc}{GEN x} returns the discriminant of the \typ{POL} \kbd{x}
 with respect to its main variable.
 
 \fun{GEN}{RgX_modXn_shallow}{GEN x, long n} return $\kbd{x \% } t^n$,
 where $n\geq 0$. Shallow function.
 
-\fun{GEN}{RgX_extgcd}{GEN x, GEN y, GEN *u, GEN *v} returns
-$d = \text{GCD}(\kbd{x},\kbd{y})$, and sets \kbd{*u}, \kbd{*v} to the Bezout
-coefficients such that $\kbd{*ux} + \kbd{*vy} = d$.
-
 \fun{GEN}{RgX_renormalize}{GEN x} remove leading terms in \kbd{x} which are
 equal to (necessarily inexact) zeros.
+
+\fun{GEN}{RgX_gtofp}{GEN x, GEN prec} returns the polynomial obtained by
+applying \kbd{gtofp(gel(x,i), prec)} to all coefficients of $x$.
+
+\fun{GEN}{RgX_fpnorml2}{GEN x, long prec} returns (a stack-clean variant of)
+\bprog
+  gnorml2( RgX_gtofp(x, prec) )
+@eprog
 
 \fun{GEN}{RgX_recip}{GEN P} returns the reverse of the polynomial
 $P$, i.e. $X^{\deg P} P(1/X)$.

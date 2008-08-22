@@ -198,27 +198,6 @@ round_safe(GEN q)
     q = ground(q);
   return q;
 }
-static GEN
-to_MP(GEN x, long prec)
-{ return (typ(x) == t_INT && !signe(x))? gen_0: gtofp(x, prec); }
-static GEN
-col_to_MP(GEN x, long prec)
-{
-  long j, l = lg(x);
-  GEN y = cgetg(l, t_COL);
-  for (j=1; j<l; j++) gel(y,j) = to_MP(gel(x,j), prec);
-  return y;
-}
-static GEN
-mat_to_MP(GEN x, long prec)
-{
-  long j, l = lg(x);
-  GEN y;
-  if (typ(x) != t_MAT) return col_to_MP(x, prec);
-  y = cgetg(l, t_MAT);
-  for (j=1; j<l; j++) gel(y,j) = col_to_MP(gel(x,j), prec);
-  return y;
-}
 
 GEN
 gram_matrix(GEN x)
@@ -1064,7 +1043,7 @@ init_pslq(pslq_M *M, GEN x, long *PREC)
     x = real_i(x);
 
   if (DEBUGLEVEL>=3) init_timer(M->T);
-  x = col_to_MP(x, prec); settyp(x,t_VEC);
+  x = RgC_gtofp(x, prec); settyp(x,t_VEC);
   M->n = n;
   M->A = matid(n);
   M->B = matid(n);
@@ -1740,7 +1719,7 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
   a = qf_apply_ZM(a,u);
 
   n--;
-  a = mat_to_MP(a, DEFAULTPREC);
+  a = RgM_gtofp(a, DEFAULTPREC);
   r = qfgaussred_positive(a);
   if (!r) pari_err(precer, "minim0");
   for (j=1; j<=n; j++)

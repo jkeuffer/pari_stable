@@ -434,7 +434,7 @@ CplxModulus(GEN data, long *newprec, long prec)
     dprec = maxss(dprec, pr) + EXTRA_PREC;
     if (!gcmp0(leading_term(pol)))
     {
-      cpl = QuickNormL2(pol, DEFAULTPREC);
+      cpl = RgX_fpnorml2(pol, DEFAULTPREC);
       if (!gcmp0(cpl)) break;
     }
     if (DEBUGLEVEL>1) pari_warn(warnprec, "CplxModulus", dprec);

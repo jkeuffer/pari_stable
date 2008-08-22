@@ -713,6 +713,51 @@ gtofp(GEN z, long prec)
     default: pari_err(typeer,"gtofp"); return NULL; /* not reached */
   }
 }
+
+INLINE GEN
+RgX_gtofp(GEN x, long prec)
+{
+  long l;
+  GEN y = cgetg_copy(x, &l);
+  while (--l > 1) gel(y,l) = gtofp(gel(x,l), prec);
+  y[1] = x[1]; return y;
+}
+INLINE GEN
+RgC_gtofp(GEN x, long prec)
+{
+  long l = lg(x);
+  GEN y = cgetg(l, t_COL);
+  while (--l > 0) gel(y,l) = gtofp(gel(x,l), prec);
+  return y;
+}
+INLINE GEN
+RgM_gtofp(GEN x, long prec)
+{
+  long l;
+  GEN y = cgetg_copy(x, &l);
+  while (--l > 0) gel(y,l) = RgC_gtofp(gel(x,l), prec);
+  return y;
+}
+
+INLINE GEN
+RgX_fpnorml2(GEN x, long prec)
+{
+  pari_sp av = avma;
+  return gerepileupto(av, gnorml2(RgX_gtofp(x, prec)));
+}
+INLINE GEN
+RgC_fpnorml2(GEN x, long prec)
+{
+  pari_sp av = avma;
+  return gerepileupto(av, gnorml2(RgC_gtofp(x, prec)));
+}
+INLINE GEN
+RgM_fpnorml2(GEN x, long prec)
+{
+  pari_sp av = avma;
+  return gerepileupto(av, gnorml2(RgM_gtofp(x, prec)));
+}
+
 /* y a t_REAL */
 INLINE void
 affgr(GEN x, GEN y)

@@ -98,7 +98,7 @@ Mignotte_bound(GEN S)
   long i, d = degpol(S);
   GEN C, N2, t, binlS, lS = leading_term(S), bin = vecbinome(d-1);
 
-  N2 = sqrtr(QuickNormL2(S,DEFAULTPREC));
+  N2 = sqrtr(RgX_fpnorml2(S,DEFAULTPREC));
   binlS = is_pm1(lS)? bin: ZC_Z_mul(bin, lS);
 
   /* i = 0 */

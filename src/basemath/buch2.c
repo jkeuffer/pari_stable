@@ -816,8 +816,8 @@ getfu(GEN nf, GEN *ptA, long force, long *pte, long prec)
   for (j=1; j<RU; j++)
   {
     p1 = gel(y,j); p2 = QXQ_inv(p1, T);
-    if (gcmp(QuickNormL2(p2,DEFAULTPREC),
-	     QuickNormL2(p1,DEFAULTPREC)) < 0)
+    if (gcmp(RgX_fpnorml2(p2,DEFAULTPREC),
+	     RgX_fpnorml2(p1,DEFAULTPREC)) < 0)
     {
       gel(A,j) = gneg(gel(A,j));
       p1 = p2;

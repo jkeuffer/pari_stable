@@ -13,7 +13,7 @@ DE  5- [Solaris] pari.desc won't compile [#715]
     7- memory leaks in pari_close_opts [ freeep(), parser stacks, some
        defaults... ]. FIXME: calls to getpwuid introduce (small) leaks
     8- ZV_Z_mul might not reset clonebit.
-    9- nfeltreducemodpr --> gerepile errors [#716]. Also SEGV for residue 
+    9- nfeltreducemodpr --> gerepile errors [#716]. Also SEGV for residue
        degre > 1 (when p does not divide the index)
 JD 10- write1("/dev/null", foo);1 --> extra newline
 JD 11- is_dir_stat() gave incorrect results on special files (pipes,...)
@@ -101,7 +101,7 @@ BA 87- conjvec did not support FFELTs.
    88- memory leak in t_LIST handling
    89- polrootsmod(,1) could return an incomplete result [when 0 was a root
        or there was a double root], e.g. polrootsmod(x^3 + x^2 + 21*x,23,1)
-IM 90- lngamma(x) gave incorrect results (off by 2*Pi*I) when real(x) was a 
+IM 90- lngamma(x) gave incorrect results (off by 2*Pi*I) when real(x) was a
        negative half-integer.
    91- trying to write to a binary file and failing leaked a file descriptor
    92- long-standing stack corruption when <C-C> pressed during gclone [#458]
@@ -161,16 +161,16 @@ BA 32- all LLL variants now use an implementation of NGuyen & Stehle's algorithm
    37- we used to have Set(1) == Set("1") ( = ["1"] ). Now the latter returns
        ["\"1\""] (the Set whose element evaluate to the character string "1")
    38- plotinit: change the way default arguments are evaluated (omit, instead
-       of interpreting 0 in a special way) 
+       of interpreting 0 in a special way)
    39- nfbasistoalg / nfalgtobasis no longer accept t_VEC/t_COL/t_MAT,
        use matbasistoalg / matalgtobasis, which now also accept t_VEC/t_COL
    40- rename library functions nfhermite -> nfhnf, nfhermitemod -> nfhnfmod
-   41- uniformize factornf and nffactor outputs (+ speed them up for 
+   41- uniformize factornf and nffactor outputs (+ speed them up for
        non-squarefree inputs: compute valuations mod a suitable prime)
    42- treat Mat(t_LIST) as Mat(t_VEC)
-   43- t_POL^0 always returned t_INT 1 [ try to return 1 in coefficient ring ] 
-   44- polresultant(x,y,,0) now chooses the best algorithm by itself 
-       [Ducos, modular, Sylvester], polresultant(x,y,,2) is now a synonym 
+   43- t_POL^0 always returned t_INT 1 [ try to return 1 in coefficient ring ]
+   44- polresultant(x,y,,0) now chooses the best algorithm by itself
+       [Ducos, modular, Sylvester], polresultant(x,y,,2) is now a synonym
        for the default. The change also improves poldisc().
    45- [library] rename subres -> resultant, subresall -> resultant_all.
    46- regression tests in src/test/in/ no longer need to end with
@@ -201,14 +201,14 @@ BA 49- user variables can now be aliased [#790]
    62- the last component in prime ideals "primedec" format is a number field
        element, but no longer necessarily in t_COL form
    63- rename library functions idealhermite -> idealhnf
-   64- no longer allow ideals in *non-square* t_MAT form 
+   64- no longer allow ideals in *non-square* t_MAT form
    65- idealmin now returns a number field element, instead of the associated
        "principal idele"
    66- rename library functions minideal -> idealmin and change prototype
    67- cleared up the confusion caused by PARI "ideles", which were remotely
        related to the mathematical notion, and covered two distinct uses. The
        first one (ideal + list of real places) is now called "divisor"; the
-       second one (ideal + factorization matrix, which used to be a vector 
+       second one (ideal + factorization matrix, which used to be a vector
        of logarithms of complex embeddings) is now called "extended ideal".
    68- rename library functions element_mulmodpr -> nfmulmodpr,
        element_powmodpr -> nfpowmodpr, element_val -> nfval,
@@ -222,7 +222,7 @@ BA 49- user variables can now be aliased [#790]
    70- Rename library functions Z_factor_limit -> Z_factor_until,
        and auxdecomp -> Z_factor_limit
    71- Rename library functions mu -> moebius, gmu -> gmoebius,
-       phi -> eulerphi, gphi -> geulerphi, phiu -> eulerphiu, 
+       phi -> eulerphi, gphi -> geulerphi, phiu -> eulerphiu,
        gener -> znprimroot, ggener -> znprimroot0, racine -> sqrtint,
        regula -> quadregulator, fundunit -> quadunit
    72- Rename library functions BSW_* -> BPSW_*
@@ -256,7 +256,7 @@ BA 49- user variables can now be aliased [#790]
    85- Rename u2toi -> uu32toi [ paste two 32-bit unsigned into a t_INT ]
        Write uutoi for the more natural operation of pasting two ulongs into
        a t_INT.
-   86- Swap the order of the 2 arguments to select(): selection function 
+   86- Swap the order of the 2 arguments to select(): selection function
        now comes first [ as in apply() ]
    87- error() messages now prefixed with the customary *** [ used to be ### ]
    88- dvmdiiz(x, y, z) now expects z to be a t_INT [ to be consistent with
@@ -273,6 +273,11 @@ BA 49- user variables can now be aliased [#790]
        aliases for leafcopy.
    95- trap(,,foo) was actually equivalent to trap(,foo) changing the global
        exception handler, which was awkward an unintended
+   96- norml2(t_POL) now returns the expected (square of) the polynomial L^2 norm.
+       Use x * conj(x) to get back the old behaviour. norml2 now raises an error
+       on t_POLMOD and t_FFELT components; used to add relative norms as in
+        ? norml2([Mod(Mod(1,3)*x,x^2-2), 2])
+        %1 = Mod(2, 3)
 
   Added
     1- library function pari_calloc, cgetalloc
@@ -389,7 +394,7 @@ BA 28- library functions checkgroup, galois_group, cyclicgroup, dicyclicgroup,
    39- public interface to forsubgroup: traversesubgroups()
    40- library function bnfisprincipal0 (with new public flags, see nf_GENMAT)
    41- GP functions nffactorback / idealfactorback
-   42- files src/modules/QX_factor.c, src/modules/Hensel.c, 
+   42- files src/modules/QX_factor.c, src/modules/Hensel.c,
        src/modules/DedekZeta.c
    43- library functions bnrisconductor0, bnrdisc0, bnrconductor0,
        bnrsurjection, ABC_to_bnr, idealred, idealred0 (was ideallllred),
@@ -457,7 +462,7 @@ JD 48- GP function warning()
        ideallistzstar, ideallistzstargen. Use ideallist0.
    35- obsolete library function algdep2. Use algdep0 (same arguments).
    36- obsolete library function Mod0. Use gmodulo.
-   37- obsolete undocumented library function poldvd. Use 
+   37- obsolete undocumented library function poldvd. Use
        RgX_divrem(x,y, ONLY_DIVIDES)
    38- obsolete library function kerin1. Use kerint or ZM_lll(,0.99,LLL_KER)
    39- header file paritype.h [ split between parigen.h and pariinl.h ]
@@ -606,7 +611,7 @@ BA 94- fix compilation problem with g++-4.2 and GMP.
        %1 = Mod(1, 2)*x + (Mod(1, 2)*y) \\ extra parentheses in constant term
        ? % + 0*z
        %2 = Mod(1, 2)*x + Mod(1, 2)*y
-  110- factornf(x^5+(-a+2)*x^4-a*x^3+(3*a-6)*x^2+(5*a-10)*x+(2*a-5), a^2-5) 
+  110- factornf(x^5+(-a+2)*x^4-a*x^3+(3*a-6)*x^2+(5*a-10)*x+(2*a-5), a^2-5)
        --> SEGV  [ not squarefree -> denominators creeping in ] [#708]
   111- problems with isexactzero and t_INTMODs. Mod(0,2)*x*1. -> 0,
        Pol(Mod(0,2))+2 -> 2, (2+0*I)+I*Mod(0,4)->Mod(2,4), Mod(0,2)/x -> 0
@@ -616,10 +621,10 @@ BA 94- fix compilation problem with g++-4.2 and GMP.
        much slower than they should be. Analogous problem in FqM_gauss_pivot.
 BA114- missing GP2C descriptions for Pol and Polrev.
 BA115- zero FFELTs were not considered as exact zeros [#710]
-  116- rare SEGV in gp when recovering from error (dereferencing 
+  116- rare SEGV in gp when recovering from error (dereferencing
        global_err_data equal to BREAK_LOOP)
   117- vecsort(t_LIST) returned a t_VEC
-  118- gp "huge file" + stack overflow --> stack overflow in next 
+  118- gp "huge file" + stack overflow --> stack overflow in next
        interactive command (+ minor memoryleak) [#712]
 
   Changed
@@ -748,7 +753,7 @@ BA 65- vecsmall_uniq(v) no longer assumes that v is sorted
    15- library function RgV_dotproduct, ZV_dotproduct, RgV_dotsquare, ZV_dotsquare, FpV_dotproduct, FpV_dotsquare
    16- library function FpX_Fp_add_shallow
    17- library function Q_pval
-BA 18- new keyword "my" to declare lexically-scopped local variables. 
+BA 18- new keyword "my" to declare lexically-scopped local variables.
    19- new GP function listpop()
    20- library function RgX_inflate, RgX_deflate, Flx_inflate, Flx_deflate, poldeflate
    21- library function Fp_neg, Fp_add, Fp_sub

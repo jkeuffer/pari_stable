@@ -513,9 +513,10 @@ carberkowitz(GEN x, long v)
 
 /*******************************************************************/
 /*                                                                 */
-/*                            NORM                                 */
+/*                            NORMS                                */
 /*                                                                 */
 /*******************************************************************/
+/* x t_COMPLEX */
 GEN
 cxnorm(GEN x) { return gadd(gsqr(gel(x,1)), gsqr(gel(x,2))); }
 /* q t_QUAD */
@@ -555,10 +556,10 @@ gnorm(GEN x)
       return gerepileupto(av, greal(gmul(gconj(x),x)));
 
     case t_FFELT:
-      y=cgetg(3, t_INTMOD);
+      y = cgetg(3, t_INTMOD);
       gel(y,1) = FF_p(x);
-      gel(y,2) = FF_norm(x);
-      return y;
+      gel(y,2) = FF_norm(x); return y;
+
     case t_POLMOD:
       return RgXQ_norm(gel(x,2), gel(x,1));
 
@@ -574,33 +575,40 @@ gnorm(GEN x)
 GEN
 gnorml2(GEN x)
 {
-  pari_sp av,lim;
-  GEN y;
-  long i,tx=typ(x),lx;
+  pari_sp av, lim;
+  long i, lx;
+  GEN s;
 
-  if (! is_matvec_t(tx)) return gnorm(x);
-  lx=lg(x); if (lx==1) return gen_0;
+  switch(typ(x))
+  {
+    case t_INT:  return sqri(x);
+    case t_REAL: return sqrr(x);
+    case t_FRAC: return sqrfrac(x);
+    case t_COMPLEX: av = avma; return gerepileupto(av, cxnorm(x));
+    case t_QUAD:    av = avma; return gerepileupto(av, quadnorm(x));
 
-  av=avma; lim = stack_lim(av,1); y = gnorml2(gel(x,1));
+    case t_POL: lx = lg(x)-1; x++; break;
+
+    case t_VEC:
+    case t_COL:
+    case t_MAT: lx = lg(x); break;
+
+    default: pari_err(typeer,"gnorml2");
+      return NULL; /* not reached */
+  }
+  if (lx == 1) return gen_0;
+  av = avma; lim = stack_lim(av,1);
+  s = gnorml2(gel(x,1));
   for (i=2; i<lx; i++)
   {
-    y = gadd(y, gnorml2(gel(x,i)));
+    s = gadd(s, gnorml2(gel(x,i)));
     if (low_stack(lim, stack_lim(av,1)))
     {
       if (DEBUGMEM>1) pari_warn(warnmem,"gnorml2");
-      y = gerepileupto(av, y);
+      s = gerepileupto(av, s);
     }
   }
-  return gerepileupto(av,y);
-}
-
-GEN
-QuickNormL2(GEN x, long prec)
-{
-  pari_sp av = avma;
-  GEN y = gmul(x, real_1(prec));
-  if (typ(x) == t_POL) *++y = evaltyp(t_VEC) | evallg(lg(x)-1);
-  return gerepileupto(av, gnorml2(y));
+  return gerepileupto(av,s);
 }
 
 GEN
@@ -634,7 +642,7 @@ gnorml1(GEN x,long prec)
 }
 
 GEN
-QuickNormL1(GEN x,long prec)
+QuickNormL1(GEN x)
 {
   pari_sp av = avma;
   long lx, i;
@@ -645,20 +653,20 @@ QuickNormL1(GEN x,long prec)
     case t_FRAC: return absfrac(x);
 
     case t_COMPLEX:
-      s = gadd(gabs(gel(x,1),prec), gabs(gel(x,2),prec));
+      s = gadd(QuickNormL1(gel(x,1)), QuickNormL1(gel(x,2)));
       break;
     case t_QUAD:
-      s = gadd(gabs(gel(x,2),prec), gabs(gel(x,3),prec));
+      s = gadd(QuickNormL1(gel(x,2)), QuickNormL1(gel(x,3)));
       break;
 
     case t_POL:
       lx = lg(x); s = gen_0;
-      for (i=2; i<lx; i++) s = gadd(s, QuickNormL1(gel(x,i),prec));
+      for (i=2; i<lx; i++) s = gadd(s, QuickNormL1(gel(x,i)));
       break;
 
     case t_VEC: case t_COL: case t_MAT:
       lx = lg(x); s = gen_0;
-      for (i=1; i<lx; i++) s = gadd(s, QuickNormL1(gel(x,i),prec));
+      for (i=1; i<lx; i++) s = gadd(s, QuickNormL1(gel(x,i)));
       break;
 
     default: pari_err(typeer,"QuickNormL1");

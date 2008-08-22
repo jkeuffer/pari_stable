@@ -272,7 +272,7 @@ nf_bestlift(GEN elt, GEN bound, nflift_t *L)
     elt = scalarcol(elt, l-1);
   }
   u = ZC_sub(elt, ZM_ZC_mul(L->prk, u));
-  if (bound && gcmp(QuickNormL2(u,DEFAULTPREC), bound) > 0) u = NULL;
+  if (bound && gcmp(RgC_fpnorml2(u,DEFAULTPREC), bound) > 0) u = NULL;
   return u;
 }
 
@@ -453,15 +453,15 @@ nf_Mignotte_bound(GEN nf, GEN polbase)
     matGS = shallowtrans(matGS);
     for (j=1; j <= r1; j++) /* N2[j] = || sigma_j(S) ||_2 */
     {
-      gel(N2,j) = gsqrt( QuickNormL2(gel(matGS,j), DEFAULTPREC), DEFAULTPREC );
+      gel(N2,j) = sqrtr( RgC_fpnorml2(gel(matGS,j), DEFAULTPREC) );
       if (lg(N2[j]) < DEFAULTPREC) goto PRECPB;
     }
     for (   ; j <= n; j+=2)
     {
-      GEN q1 = QuickNormL2(gel(matGS,j  ), DEFAULTPREC);
-      GEN q2 = QuickNormL2(gel(matGS,j+1), DEFAULTPREC);
-      p1 = gmul2n(mpadd(q1, q2), -1);
-      gel(N2,j) = gel(N2,j+1) = gsqrt( p1, DEFAULTPREC );
+      GEN q1 = RgC_fpnorml2(gel(matGS,j  ), DEFAULTPREC);
+      GEN q2 = RgC_fpnorml2(gel(matGS,j+1), DEFAULTPREC);
+      p1 = gmul2n(addrr(q1, q2), -1);
+      gel(N2,j) = gel(N2,j+1) = sqrtr(p1);
       if (lg(N2[j]) < DEFAULTPREC) goto PRECPB;
     }
     if (j > n) break; /* done */
@@ -591,11 +591,11 @@ L2_bound(GEN T, GEN tozk, GEN *ptden)
   T = get_nfpol(T, &nf);
   prec = ZX_max_lg(T) + ZM_max_lg(tozk);
   (void)initgaloisborne(T, den, prec, &L, &prep, NULL);
-  M = vandermondeinverse(L, gmul(T, real_1(prec)), den, prep);
-  if (nf) M = gmul(tozk, M);
+  M = vandermondeinverse(L, RgX_gtofp(T,prec), den, prep);
+  if (nf) M = RgM_mul(tozk, M);
   if (is_pm1(den)) den = NULL;
   *ptden = den;
-  return QuickNormL2(M, DEFAULTPREC);
+  return RgM_fpnorml2(M, DEFAULTPREC);
 }
 
 /* || L ||_p^p in dimension n (L may be a scalar) */
@@ -647,7 +647,7 @@ get_trace(GEN ind, trace_data *T)
   if (K == 1) return s;
 
   /* compute s = S1 u */
-  for (j=2; j<=K; j++) s = gadd(s, gel(T->S1, ind[j]));
+  for (j=2; j<=K; j++) s = ZC_add(s, gel(T->S1, ind[j]));
 
   /* compute v := - round(P^1 S u) */
   l = lg(s);
@@ -667,7 +667,7 @@ get_trace(GEN ind, trace_data *T)
     else
       v[i] = - (long)r;
   }
-  return gadd(s, ZM_zc_mul(T->P1, v));
+  return ZC_add(s, ZM_zc_mul(T->P1, v));
 }
 
 static trace_data *
@@ -839,7 +839,7 @@ nextK:
       if (T1)
       {
 	t = get_trace(ind, T1);
-	if (rtodbl(QuickNormL2(t,DEFAULTPREC)) > Bhigh)
+	if (rtodbl(RgC_fpnorml2(t,DEFAULTPREC)) > Bhigh)
 	{
 	  if (DEBUGLEVEL>6) fprintferr(".");
 	  avma = av; goto NEXT;
@@ -849,7 +849,7 @@ nextK:
       if (T2)
       {
 	t = get_trace(ind, T2);
-	if (rtodbl(QuickNormL2(t,DEFAULTPREC)) > Bhigh)
+	if (rtodbl(RgC_fpnorml2(t,DEFAULTPREC)) > Bhigh)
 	{
 	  if (DEBUGLEVEL>3) fprintferr("|");
 	  avma = av; goto NEXT;

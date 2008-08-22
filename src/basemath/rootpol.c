@@ -2442,17 +2442,17 @@ laguer(GEN pol,long N,GEN y0,long EPS,long PREC)
   for (iter=1; iter<=MAXIT; iter++)
   {
     b = gel(pol,N+2); d = f = gen_0;
-    erre = QuickNormL1(b,PREC);
-    abx  = QuickNormL1(x,PREC);
+    erre = QuickNormL1(b);
+    abx  = QuickNormL1(x);
     for (j=N-1; j>=0; j--)
     {
       f = gadd(gmul(x,f), d);
       d = gadd(gmul(x,d), b);
       b = gadd(gmul(x,b), gel(pol,j+2));
-      erre = gadd(QuickNormL1(b,PREC), gmul(abx,erre));
+      erre = gadd(QuickNormL1(b), gmul(abx,erre));
     }
     erre = gmul2n(erre, EPS);
-    if (gcmp(QuickNormL1(b,PREC),erre)<=0)
+    if (gcmp(QuickNormL1(b),erre)<=0)
     {
       gaffect(x,rac); avma = av1; return rac;
     }
@@ -2467,7 +2467,7 @@ laguer(GEN pol,long N,GEN y0,long EPS,long PREC)
     else
       dx = gmul(gadd(gen_1,abx), gexp(gmulgs(I,iter),PREC));
     x1 = gsub(x,dx);
-    if (gexpo(QuickNormL1(gsub(x,x1),PREC)) < EPS)
+    if (gexpo(QuickNormL1(gsub(x,x1))) < EPS)
     {
       gaffect(x,rac); avma = av1; return rac;
     }
