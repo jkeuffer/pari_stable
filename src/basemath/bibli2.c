@@ -61,8 +61,7 @@ polchebyshev1(long n, long v) /* Assume 4*n < LONG_MAX */
     for (k=1,l=n; l>1; k++,l-=2)
     {
       av = avma;
-      a = muliu(muliu(a, l), l-1);
-      a = diviuexact(diviuexact(a, 4*k), n-k);
+      a = diviiexact(mulii(a, muluu(l, l-1)), muluu(4*k, n-k));
       togglesign(a); a = gerepileuptoint(av, a);
       gel(r--,0) = a;
       gel(r--,0) = gen_0;
@@ -135,8 +134,7 @@ polchebyshev2(long n, long v)
     for (m=1; 2*m<= n; m++)
     {
       av = avma;
-      a = muliu(muliu(a, n-2*m+2), n-2*m+1);
-      a = diviuexact(diviuexact(a, 4*m), n-m+1);
+      a = diviiexact(mulii(a, muluu(n-2*m+2, n-2*m+1)), muluu(4*m, n-m+1));
       togglesign(a); a = gerepileuptoint(av, a);
       gel(r--,0) = a;
       gel(r--,0) = gen_0;
@@ -233,7 +231,7 @@ polhermite(long n, long v)
     for (m=1; 2*m<= n; m++)
     {
       av = avma;
-      a = diviuexact(muliu(muliu(a, n-2*m+2), n-2*m+1), 4*m);
+      a = diviuexact(mulii(a, muluu(n-2*m+2, n-2*m+1)), 4*m);
       togglesign(a);
       gel(r--,0) = gerepileuptoint(av, a);
       gel(r--,0) = gen_0;
@@ -260,17 +258,15 @@ polhermite_eval(long n, GEN x)
       T = gmul(T, x2);
       av = avma;
       a = diviuexact(muliu(a, (n-2*m+2)*(n-2*m+1)), 4*m);
-      togglesign(a);
-      T = gadd(T, a);
+      togglesign(a); T = gadd(T, a);
     }
   else
     for (m=1; 2*m<= n; m++)
     {
       T = gmul(T, x2);
       av = avma;
-      a = diviuexact(muliu(muliu(a, n-2*m+2), n-2*m+1), 4*m);
-      togglesign(a);
-      T = gadd(T, a);
+      a = diviuexact(mulii(a, muluu(n-2*m+2, n-2*m+1)), 4*m);
+      togglesign(a); T = gadd(T, a);
     }
   if (odd(n)) T = gmul(T,x);
   return gerepileupto(av, T);
@@ -311,8 +307,7 @@ pollegendre(long n, long v)
     for (k=1,l=n; l>1; k++,l-=2)
     { /* l = n-2*k+2 */
       av = avma;
-      a = muliu(muliu(a, l), l-1);
-      a = diviuexact(diviuexact(a, 2*k), n+l-1);
+      a = diviiexact(mulii(a, muluu(l, l-1)), muluu(2*k, n+l-1));
       togglesign(a); a = gerepileuptoint(av, a);
       gel(r--,0) = a;
       gel(r--,0) = gen_0;
@@ -351,8 +346,7 @@ pollegendre_eval(long n, GEN x)
     { /* l = n-2*k+2 */
       T = gmul(T, x2);
       av = avma;
-      a = muliu(muliu(a, l), l-1);
-      a = diviuexact(diviuexact(a, 2*k), n+l-1);
+      a = diviiexact(mulii(a, muluu(l, l-1)), muluu(2*k, n+l-1));
       togglesign(a); a = gerepileuptoint(av, a);
       T = gadd(T, a);
     }
@@ -474,7 +468,7 @@ matqpascal(long n, GEN q)
 {
   long i, j, I;
   pari_sp av = avma;
-  GEN m, *qpow = NULL; /* gcc -Wall */
+  GEN m, qpow = NULL; /* gcc -Wall */
 
   if (n < -1) pari_err(talker,"Pascal triangle of negative order in matpascal");
   n++; m = cgetg(n+1,t_MAT);
@@ -482,8 +476,8 @@ matqpascal(long n, GEN q)
   if (q)
   {
     I = (n+1)/2;
-    if (I > 1) { qpow = (GEN*)new_chunk(I+1); qpow[2]=q; }
-    for (j=3; j<=I; j++) qpow[j] = gmul(q, qpow[j-1]);
+    if (I > 1) { qpow = new_chunk(I+1); gel(qpow,2)=q; }
+    for (j=3; j<=I; j++) gel(qpow,j) = gmul(q, gel(qpow,j-1));
   }
   for (i=1; i<=n; i++)
   {
@@ -491,7 +485,8 @@ matqpascal(long n, GEN q)
     if (q)
     {
       for (j=2; j<=I; j++)
-	gcoeff(m,i,j) = gadd(gmul(qpow[j],gcoeff(m,i-1,j)), gcoeff(m,i-1,j-1));
+	gcoeff(m,i,j) = gadd(gmul(gel(qpow,j),gcoeff(m,i-1,j)),
+                             gcoeff(m,i-1,j-1));
     }
     else
     {
@@ -502,58 +497,6 @@ matqpascal(long n, GEN q)
     for (   ; j<=n; j++) gcoeff(m,i,j) = gen_0;
   }
   return gerepilecopy(av, m);
-}
-
-/********************************************************************/
-/**                                                                **/
-/**                  LAPLACE TRANSFORM (OF A SERIES)               **/
-/**                                                                **/
-/********************************************************************/
-
-GEN
-laplace(GEN x)
-{
-  pari_sp av = avma;
-  long i, l = lg(x), e = valp(x);
-  GEN y, t;
-
-  if (typ(x) != t_SER) pari_err(talker,"not a series in laplace");
-  if (e < 0) pari_err(talker,"negative valuation in laplace");
-  y = cgetg(l,t_SER);
-  t = mpfact(e); y[1] = x[1];
-  for (i=2; i<l; i++)
-  {
-    gel(y,i) = gmul(t, gel(x,i));
-    e++; t = mului(e,t);
-  }
-  return gerepilecopy(av,y);
-}
-
-/********************************************************************/
-/**                                                                **/
-/**              CONVOLUTION PRODUCT (OF TWO SERIES)               **/
-/**                                                                **/
-/********************************************************************/
-
-GEN
-convol(GEN x, GEN y)
-{
-  long j, lx, ly, ex, ey, vx = varn(x);
-  GEN z;
-
-  if (typ(x) != t_SER || typ(y) != t_SER) pari_err(talker,"not a series in convol");
-  if (varn(y) != vx) pari_err(talker,"different variables in convol");
-  ex = valp(x); lx = lg(x) + ex; x -= ex;
-  ey = valp(y); ly = lg(y) + ey; y -= ey;
-  /* inputs shifted: x[i] and y[i] now correspond to monomials of same degree */
-  if (ly < lx) lx = ly; /* min length */
-  if (ex < ey) ex = ey; /* max valuation */
-  if (lx - ex < 3) return zeroser(vx, lx-2);
-
-  z = cgetg(lx - ex, t_SER);
-  z[1] = evalvalp(ex) | evalvarn(vx);
-  for (j = ex+2; j<lx; j++) gel(z,j-ex) = gmul(gel(x,j),gel(y,j));
-  return normalize(z);
 }
 
 /******************************************************************/
@@ -595,7 +538,7 @@ gprec(GEN x, long l)
 	for ( ; i>=lx; i--) gel(y,i) = gen_0;
       for ( ; i>=2; i--) gel(y,i) = gcopy(gel(x,i));
       break;
-   case t_POL: 
+   case t_POL:
       y = cgetg_copy(x, &lx); y[1] = x[1];
       for (i=2; i<lx; i++) gel(y,i) = gprec(gel(x,i),l);
       break;
@@ -657,8 +600,8 @@ gprec_wtrunc(GEN x, long pr)
       gel(y,1) = gprec_wtrunc(gel(x,1),pr);
       gel(y,2) = gprec_wtrunc(gel(x,2),pr);
       break;
-    case t_POL: 
-    case t_SER: 
+    case t_POL:
+    case t_SER:
       y = cgetg_copy(x, &lx); y[1] = x[1];
       for (i=2; i<lx; i++) gel(y,i) = gprec_wtrunc(gel(x,i),pr);
       break;
@@ -671,324 +614,60 @@ gprec_wtrunc(GEN x, long pr)
   return y;
 }
 
-/*******************************************************************/
-/**                                                               **/
-/**                     RECIPROCAL POLYNOMIAL                     **/
-/**                                                               **/
-/*******************************************************************/
-/* return coefficients s.t x = x_0 X^n + ... + x_n */
+/********************************************************************/
+/**                                                                **/
+/**                      SERIES TRANSFORMS                         **/
+/**                                                                **/
+/********************************************************************/
+/**                  LAPLACE TRANSFORM (OF A SERIES)               **/
+/********************************************************************/
 GEN
-polrecip(GEN x)
+laplace(GEN x)
 {
-  if (typ(x) != t_POL) pari_err(typeer,"polrecip");
-  return RgX_recip(x);
+  pari_sp av = avma;
+  long i, l = lg(x), e = valp(x);
+  GEN y, t;
+
+  if (typ(x) != t_SER) pari_err(talker,"not a series in laplace");
+  if (e < 0) pari_err(talker,"negative valuation in laplace");
+  y = cgetg(l,t_SER);
+  t = mpfact(e); y[1] = x[1];
+  for (i=2; i<l; i++)
+  {
+    gel(y,i) = gmul(t, gel(x,i));
+    e++; t = mului(e,t);
+  }
+  return gerepilecopy(av,y);
 }
 
-/*******************************************************************/
-/**                                                               **/
-/**                      BINOMIAL COEFFICIENTS                    **/
-/**                                                               **/
-/*******************************************************************/
-
+/********************************************************************/
+/**              CONVOLUTION PRODUCT (OF TWO SERIES)               **/
+/********************************************************************/
 GEN
-binomialuu(ulong n, ulong k)
+convol(GEN x, GEN y)
 {
-  pari_sp ltop=avma;
+  long j, lx, ly, ex, ey, vx = varn(x);
   GEN z;
-  if (k > n) return gen_0;
-  k = minuu(k,n-k);
-  if (!k) return gen_1;
-  z=diviiexact(mulu_interval(n-k+1, n), mulu_interval(2UL, k));
-  return gerepileuptoint(ltop,z);
+
+  if (typ(x) != t_SER || typ(y) != t_SER) pari_err(talker,"not a series in convol");
+  if (varn(y) != vx) pari_err(talker,"different variables in convol");
+  ex = valp(x); lx = lg(x) + ex; x -= ex;
+  ey = valp(y); ly = lg(y) + ey; y -= ey;
+  /* inputs shifted: x[i] and y[i] now correspond to monomials of same degree */
+  if (ly < lx) lx = ly; /* min length */
+  if (ex < ey) ex = ey; /* max valuation */
+  if (lx - ex < 3) return zeroser(vx, lx-2);
+
+  z = cgetg(lx - ex, t_SER);
+  z[1] = evalvalp(ex) | evalvarn(vx);
+  for (j = ex+2; j<lx; j++) gel(z,j-ex) = gmul(gel(x,j),gel(y,j));
+  return normalize(z);
 }
-
-GEN
-binomial(GEN n, long k)
-{
-  long i, prec;
-  pari_sp av;
-  GEN y;
-
-  if (k <= 1)
-  {
-    if (is_noncalc_t(typ(n))) pari_err(typeer,"binomial");
-    if (k < 0) return gen_0;
-    if (k == 0) return gen_1;
-    return gcopy(n);
-  }
-  av = avma;
-  if (typ(n) == t_INT)
-  {
-    if (signe(n) > 0)
-    {
-      GEN z = subis(n,k);
-      if (cmpis(z,k) < 0)
-      {
-	k = itos(z); avma = av;
-	if (k <= 1)
-	{
-	  if (k < 0) return gen_0;
-	  if (k == 0) return gen_1;
-	  return icopy(n);
-	}
-      }
-    }
-    /* k > 1 */
-    if (lgefint(n) == 3 && signe(n) > 0)
-    {
-      y = binomialuu(itou(n),(ulong)k);
-      return gerepileupto(av, y);
-    }
-    else
-    {
-      y = cgetg(k+1,t_VEC);
-      for (i=1; i<=k; i++) gel(y,i) = subis(n,i-1);
-      y = divide_conquer_prod(y,mulii);
-    }
-    y = diviiexact(y, mpfact(k));
-    return gerepileuptoint(av, y);
-  }
-
-  prec = precision(n);
-  if (prec && k > 200 + 0.8*bit_accuracy(prec)) {
-    GEN A = mpfactr(k, prec), B = ggamma(gsubgs(n,k-1), prec);
-    return gerepileupto(av, gdiv(ggamma(gaddgs(n,1), prec), gmul(A,B)));
-  }
-
-  y = cgetg(k+1,t_VEC);
-  for (i=1; i<=k; i++) gel(y,i) = gsubgs(n,i-1);
-  y = divide_conquer_prod(y,gmul);
-  y = gdiv(y, mpfact(k));
-  return gerepileupto(av, y);
-}
-
-/* Assume n >= 1, return bin, bin[k+1] = binomial(n, k) */
-GEN
-vecbinome(long n)
-{
-  long d = (n + 1)/2, k;
-  GEN C = cgetg(n+2, t_VEC) + 1; /* C[k] = binomial(n, k) */
-  gel(C,0) = gen_1;
-  for (k=1; k <= d; k++)
-  {
-    pari_sp av = avma;
-    gel(C,k) = gerepileuptoint(av, diviuexact(mului(n-k+1, gel(C,k-1)), k));
-  }
-  for (   ; k <= n; k++) C[k] = C[n - k];
-  return C - 1;
-}
-/********************************************************************/
-/**                                                                **/
-/**                  STIRLING NUMBERS                              **/
-/**                                                                **/
-/********************************************************************/
-
-/**
-Stirling number of the 2nd kind. The number of ways of partitioning
-a set of n elements into m non-empty subsets.
-*/
-
-GEN
-stirling2(ulong n, ulong m)
-{
-  pari_sp av = avma, lim = stack_lim(av, 2);
-  GEN p1 = gen_0;
-  GEN p2, bmk, kn, mkn;
-  ulong k;
-  if (n==0) return (m == 0)? gen_1: gen_0;
-  if (m>n || m == 0) return gen_0;
-  if (m==n) return gen_1;
-  for (k = 0; k <= ((m-1)>>1); ++k)
-  {
-    bmk = k ? diviuexact(mului(m-k+1, bmk), k) : gen_1;
-    kn  = powuu(k, n); mkn = powuu(m-k, n);
-    p2  = (m&1) ? subii(mkn,kn) : addii(mkn,kn);
-    p2  = mulii(bmk, p2);
-    p1  = (k&1) ? subii(p1, p2) : addii(p1, p2);
-    if (low_stack(lim, stack_lim(av,2)))
-    {
-      if(DEBUGMEM>1) pari_warn(warnmem,"stirling2");
-      gerepileall(av, 2, &p1, &bmk);
-    }
-  }
-  if ((m&1)==0)
-  { /*k=m/2*/
-    bmk = diviuexact(mului(k+1, bmk), k);
-    p2  = mulii(bmk, powuu(k,n));
-    p1  = (k&1) ? subii(p1, p2) : addii(p1, p2);
-  }
-  return gerepileuptoint(av,diviiexact(p1, mpfact(m)));
-}
-
-/**
-Stirling number of the first kind. Up to the sign, the number of
-permutations of n symbols which have exactly m cycles.
-*/
-GEN
-stirling1(ulong n, ulong m)
-{
-  pari_sp ltop=avma;
-  ulong k;
-  GEN p1 = gen_0;
-  if (n<m) return gen_0;
-  else if (n==m) return gen_1;
-  for (k = 0; k <= n-m; ++k)
-  {
-    GEN p2 = mulii(mulii(binomialuu(n-1+k, n-m+k), binomialuu(2*n-m, n-m-k)),
-		  stirling2(n-m+k, k));
-    if(k&1)
-      p1 = subii(p1,p2);
-    else
-      p1 = addii(p1,p2);
-    p1 = gerepileuptoint(ltop, p1);
-  }
-  return p1;
-}
-
-GEN
-stirling(long n, long m, long flag)
-{
-  if (n<0 || m<0)
-    pari_err(talker, "Negative arguments in stirling");
-  switch (flag)
-  {
-    case 1: return stirling1((ulong)n,(ulong)m);
-    case 2: return stirling2((ulong)n,(ulong)m);
-    default: pari_err(flagerr,"stirling");
-  }
-  return NULL; /*NOT REACHED*/
-}
-
-/********************************************************************/
-/**                                                                **/
-/**                  POLYNOMIAL INTERPOLATION                      **/
-/**                                                                **/
-/********************************************************************/
-/* assume n > 1 */
-GEN
-polint_i(GEN xa, GEN ya, GEN x, long n, GEN *ptdy)
-{
-  long i, m, ns = 0, tx = typ(x);
-  pari_sp av = avma, tetpil;
-  GEN y, c, d, dy;
-
-  if (!xa)
-  {
-    xa = cgetg(n+1, t_VEC);
-    for (i=1; i<=n; i++) gel(xa,i) = utoipos(i);
-    xa++;
-  }
-  if (is_scalar_t(tx) && tx != t_INTMOD && tx != t_PADIC && tx != t_POLMOD)
-  {
-    GEN dif = NULL, dift;
-    for (i=0; i<n; i++)
-    {
-      dift = gabs(gsub(x,gel(xa,i)), MEDDEFAULTPREC);
-      if (!dif || gcmp(dift,dif)<0) { ns = i; dif = dift; }
-    }
-  }
-  c = new_chunk(n);
-  d = new_chunk(n); for (i=0; i<n; i++) c[i] = d[i] = ya[i];
-  y = gel(d,ns--);
-  dy = NULL; tetpil = 0; /* gcc -Wall */
-  for (m=1; m<n; m++)
-  {
-    for (i=0; i<n-m; i++)
-    {
-      GEN ho = gsub(gel(xa,i),x);
-      GEN hp = gsub(gel(xa,i+m),x), den = gsub(ho,hp);
-      if (gcmp0(den)) pari_err(talker,"two abcissas are equal in polint");
-      den = gdiv(gsub(gel(c,i+1),gel(d,i)), den);
-      gel(c,i) = gmul(ho,den);
-      gel(d,i) = gmul(hp,den);
-    }
-    dy = (2*(ns+1) < n-m)? gel(c,ns+1): gel(d,ns--);
-    tetpil = avma; y = gadd(y,dy);
-  }
-  if (!ptdy) y = gerepile(av,tetpil,y);
-  else
-  {
-    GEN *gptr[2];
-    *ptdy=gcopy(dy); gptr[0]=&y; gptr[1]=ptdy;
-    gerepilemanysp(av,tetpil,gptr,2);
-  }
-  return y;
-}
-
-GEN
-polint(GEN xa, GEN ya, GEN x, GEN *ptdy)
-{
-  long tx=typ(xa), ty, lx=lg(xa);
-
-  if (ya) ty = typ(ya); else { ya = xa; ty = tx; xa = NULL; }
-
-  if (! is_vec_t(tx) || ! is_vec_t(ty))
-    pari_err(talker,"not vectors in polinterpolate");
-  if (lx != lg(ya))
-    pari_err(talker,"different lengths in polinterpolate");
-  if (lx <= 2)
-  {
-    if (lx == 1) pari_err(talker,"no data in polinterpolate");
-    ya=gcopy(gel(ya,1)); if (ptdy) *ptdy = ya;
-    return ya;
-  }
-  if (!x) x = pol_x(0);
-  return polint_i(xa? xa+1: xa,ya+1,x,lx-1,ptdy);
-}
-
-/* looks if y belongs to the set x and returns the index if yes, 0 if no */
-long
-gen_search(GEN x, GEN y, long flag, void *data, int (*cmp)(void*,GEN,GEN))
-{
-  long lx,j,li,ri,fl, tx = typ(x);
-
-  if (tx==t_VEC) lx = lg(x);
-  else
-  {
-    if (tx!=t_LIST) pari_err(talker,"not a set in setsearch");
-    x = list_data(x); lx = x? lg(x): 1;
-  }
-  if (lx==1) return flag? 1: 0;
-
-  li=1; ri=lx-1;
-  do
-  {
-    j = (ri+li)>>1; fl = cmp(data,gel(x,j),y);
-    if (!fl) return flag? 0: j;
-    if (fl<0) li=j+1; else ri=j-1;
-  } while (ri>=li);
-  if (!flag) return 0;
-  return (fl<0)? j+1: j;
-}
-
-int
-cmp_nodata(void *data, GEN x, GEN y)
-{
-  int (*cmp)(GEN,GEN)=(int (*)(GEN,GEN)) data;
-  return cmp(x,y);
-}
-
-long
-ZV_search(GEN x, GEN y) { return tablesearch(x, y, cmpii); }
-
-GEN
-ZV_indexsort(GEN L) { return gen_indexsort(L, (void*)&cmpii, &cmp_nodata); }
-
-GEN
-ZV_sort(GEN L) { return gen_sort(L, (void*)&cmpii, &cmp_nodata); }
-
-GEN
-ZV_sort_uniq(GEN L) { return gen_sort_uniq(L, (void*)&cmpii, &cmp_nodata); }
 
 /***********************************************************************/
-/*                                                                     */
-/*               OPERATIONS ON DIRICHLET SERIES                        */
-/*                                                                     */
+/*               OPERATIONS ON DIRICHLET SERIES: *, /                  */
+/* (+, -, scalar multiplication are done on the corresponding vectors) */
 /***********************************************************************/
-
-/* Addition, subtraction and scalar multiplication of Dirichlet series
-   are done on the corresponding vectors */
-
 static long
 dirval(GEN x)
 {
@@ -1063,17 +742,194 @@ dirdiv(GEN x, GEN y)
   return gerepilecopy(av,z);
 }
 
-/***********************************************************************/
-/**							              **/
-/**       		     PERMUTATIONS                             **/
-/**								      **/
-/***********************************************************************/
+/*******************************************************************/
+/**                                                               **/
+/**                       COMBINATORICS                           **/
+/**                                                               **/
+/*******************************************************************/
+/**                      BINOMIAL COEFFICIENTS                    **/
+/*******************************************************************/
+GEN
+binomialuu(ulong n, ulong k)
+{
+  pari_sp ltop = avma;
+  GEN z;
+  if (k > n) return gen_0;
+  k = minuu(k,n-k);
+  if (!k) return gen_1;
+  if (k == 1) return utoipos(n);
+  z = diviiexact(mulu_interval(n-k+1, n), mulu_interval(2UL, k));
+  return gerepileuptoint(ltop,z);
+}
 
+GEN
+binomial(GEN n, long k)
+{
+  long i, prec;
+  pari_sp av;
+  GEN y;
+
+  if (k <= 1)
+  {
+    if (is_noncalc_t(typ(n))) pari_err(typeer,"binomial");
+    if (k < 0) return gen_0;
+    if (k == 0) return gen_1;
+    return gcopy(n);
+  }
+  av = avma;
+  if (typ(n) == t_INT)
+  {
+    if (signe(n) > 0)
+    {
+      GEN z = subis(n,k);
+      if (cmpis(z,k) < 0)
+      {
+	k = itos(z); avma = av;
+	if (k <= 1)
+	{
+	  if (k < 0) return gen_0;
+	  if (k == 0) return gen_1;
+	  return icopy(n);
+	}
+      }
+    }
+    /* k > 1 */
+    if (lgefint(n) == 3 && signe(n) > 0)
+    {
+      y = binomialuu(itou(n),(ulong)k);
+      return gerepileupto(av, y);
+    }
+    else
+    {
+      y = cgetg(k+1,t_VEC);
+      for (i=1; i<=k; i++) gel(y,i) = subis(n,i-1);
+      y = divide_conquer_prod(y,mulii);
+    }
+    y = diviiexact(y, mpfact(k));
+    return gerepileuptoint(av, y);
+  }
+
+  prec = precision(n);
+  if (prec && k > 200 + 0.8*bit_accuracy(prec)) {
+    GEN A = mpfactr(k, prec), B = ggamma(gsubgs(n,k-1), prec);
+    return gerepileupto(av, gdiv(ggamma(gaddgs(n,1), prec), gmul(A,B)));
+  }
+
+  y = cgetg(k+1,t_VEC);
+  for (i=1; i<=k; i++) gel(y,i) = gsubgs(n,i-1);
+  y = divide_conquer_prod(y,gmul);
+  y = gdiv(y, mpfact(k));
+  return gerepileupto(av, y);
+}
+
+/* Assume n >= 1, return bin, bin[k+1] = binomial(n, k) */
+GEN
+vecbinome(long n)
+{
+  long d = (n + 1)/2, k;
+  GEN C = cgetg(n+2, t_VEC) + 1; /* C[k] = binomial(n, k) */
+  gel(C,0) = gen_1;
+  gel(C,1) = utoipos(n);
+  for (k=2; k <= d; k++)
+  {
+    pari_sp av = avma;
+    gel(C,k) = gerepileuptoint(av, diviuexact(mului(n-k+1, gel(C,k-1)), k));
+  }
+  for (   ; k <= n; k++) C[k] = C[n - k];
+  return C - 1;
+}
+
+/********************************************************************/
+/**                  STIRLING NUMBERS                              **/
+/********************************************************************/
+/* Stirling number of the 2nd kind. The number of ways of partitioning
+   a set of n elements into m non-empty subsets. */
+GEN
+stirling2(ulong n, ulong m)
+{
+  pari_sp av = avma, lim = stack_lim(av, 2);
+  GEN s, bmk;
+  ulong k;
+  if (n==0) return (m == 0)? gen_1: gen_0;
+  if (m > n || m == 0) return gen_0;
+  if (m==n) return gen_1;
+  /* k = 0 */
+  bmk = gen_1; s  = powuu(m, n);
+  for (k = 1; k <= ((m-1)>>1); ++k)
+  { /* bmk = binomial(m, k) */
+    GEN c, kn, mkn;
+    bmk = diviuexact(mului(m-k+1, bmk), k);
+    kn  = powuu(k, n); mkn = powuu(m-k, n);
+    c = odd(m)? subii(mkn,kn): addii(mkn,kn);
+    c = mulii(bmk, c);
+    s = odd(k)? subii(s, c): addii(s, c);
+    if (low_stack(lim, stack_lim(av,2)))
+    {
+      if(DEBUGMEM>1) pari_warn(warnmem,"stirling2");
+      gerepileall(av, 2, &s, &bmk);
+    }
+  }
+  /* k = m/2 */
+  if (!odd(m))
+  {
+    GEN c;
+    bmk = diviuexact(mului(k+1, bmk), k);
+    c = mulii(bmk, powuu(k,n));
+    s = odd(k)? subii(s, c): addii(s, c);
+  }
+  return gerepileuptoint(av, diviiexact(s, mpfact(m)));
+}
+
+/* Stirling number of the first kind. Up to the sign, the number of
+   permutations of n symbols which have exactly m cycles. */
+GEN
+stirling1(ulong n, ulong m)
+{
+  pari_sp ltop=avma;
+  ulong k;
+  GEN s, t;
+  if (n < m) return gen_0;
+  else if (n==m) return gen_1;
+  /* t = binomial(n-1+k, m-1) * binomial(2n-m, n-m-k) */
+  /* k = n-m > 0 */
+  t = binomialuu(2*n-m-1, m-1);
+  s = mulii(t, stirling2(2*(n-m), n-m));
+  if (odd(n-m)) togglesign(s);
+  for (k = n-m-1; k > 0; --k)
+  {
+    GEN c;
+    t = diviiexact(mulii(t, muluu(n-m+k+1, n+k+1)), muluu(n+k, n-m-k));
+    c = mulii(t, stirling2(n-m+k, k));
+    s = odd(k)? subii(s, c): addii(s, c);
+    if ((k & 0x1f) == 0) {
+      t = gerepileuptoint(ltop, t);
+      s = gerepileuptoint((pari_sp)t, s);
+    }
+  }
+  return gerepileuptoint(ltop, s);
+}
+
+GEN
+stirling(long n, long m, long flag)
+{
+  if (n<0 || m<0) pari_err(talker, "Negative arguments in stirling");
+  switch (flag)
+  {
+    case 1: return stirling1((ulong)n,(ulong)m);
+    case 2: return stirling2((ulong)n,(ulong)m);
+    default: pari_err(flagerr,"stirling");
+  }
+  return NULL; /*NOT REACHED*/
+}
+
+/***********************************************************************/
+/**       		     PERMUTATIONS                             **/
+/***********************************************************************/
 GEN
 numtoperm(long n, GEN x)
 {
   pari_sp av;
-  long i, r;
+  ulong i, r;
   GEN v;
 
   if (n < 0) pari_err(talker,"n too small (%ld) in numtoperm",n);
@@ -1081,10 +937,10 @@ numtoperm(long n, GEN x)
   v = cgetg(n+1, t_VEC);
   v[1] = 1; av = avma;
   if (signe(x) <= 0) x = modii(x, mpfact(n));
-  for (r=2; r<=n; r++)
+  for (r=2; r<=(ulong)n; r++)
   {
-    long a;
-    x = divis_rem(x, r,&a);
+    ulong a;
+    x = diviu_rem(x, r,&a);
     for (i=r; i>=a+2; i--) v[i] = v[i-1];
     v[i] = r;
     if ((r & 0x1f) == 0) x = gerepileuptoint(av, x);
@@ -1114,11 +970,100 @@ permtonum(GEN x)
   {
     lx--; ind = lx;
     while (ind>0 && ary[ind] != last) ind--;
-    res = addis(mulis(res,last), ind);
-    while (ind++<lx) ary[ind-1] = ary[ind];
+    res = addis(muliu(res,last), ind);
+    while (ind++ < lx) ary[ind-1] = ary[ind];
   }
   if (!signe(res)) res = mpfact(n);
   return gerepileuptoint(av, res);
+}
+
+/*******************************************************************/
+/**                                                               **/
+/**                     RECIPROCAL POLYNOMIAL                     **/
+/**                                                               **/
+/*******************************************************************/
+/* return coefficients s.t x = x_0 X^n + ... + x_n */
+GEN
+polrecip(GEN x)
+{
+  if (typ(x) != t_POL) pari_err(typeer,"polrecip");
+  return RgX_recip(x);
+}
+
+/********************************************************************/
+/**                                                                **/
+/**                  POLYNOMIAL INTERPOLATION                      **/
+/**                                                                **/
+/********************************************************************/
+/* X,Y are "spec" GEN vectors with n > 1 components ( at X[0], ... X[n-1] ) */
+GEN
+polint_i(GEN X, GEN Y, GEN x, long n, GEN *ptdy)
+{
+  long i, m, ns = 0;
+  pari_sp av = avma;
+  GEN y, c, d, dy = NULL; /* gcc -Wall */
+
+  if (!X)
+  {
+    X = cgetg(n+1, t_VEC);
+    for (i=1; i<=n; i++) gel(X,i) = utoipos(i);
+    X++;
+  }
+  switch(typ(x)) /* FIXME: should only be done if x,X,Y contain t_REALs */
+  {
+    case t_INT: case t_REAL: case t_FRAC: case t_COMPLEX: case t_QUAD:
+    {
+      GEN D = NULL;
+      for (i=0; i<n; i++)
+      {
+        GEN t = gabs(gsub(x,gel(X,i)), DEFAULTPREC);
+        if (!D || gcmp(t,D) < 0) { ns = i; D = t; }
+      }
+      /* X[ns] is closest to x */
+    }
+  }
+  c = new_chunk(n);
+  d = new_chunk(n); for (i=0; i<n; i++) c[i] = d[i] = Y[i];
+  y = gel(d,ns--);
+  /* divided differences */
+  for (m=1; m<n; m++)
+  {
+    for (i=0; i<n-m; i++)
+    {
+      GEN ho = gsub(gel(X,i),x), hp = gsub(gel(X,i+m),x), den = gsub(ho,hp);
+      if (gcmp0(den)) pari_err(talker,"two abcissas are equal in polint");
+      den = gdiv(gsub(gel(c,i+1),gel(d,i)), den);
+      gel(c,i) = gmul(ho,den);
+      gel(d,i) = gmul(hp,den);
+    }
+    dy = (2*(ns+1) < n-m)? gel(c,ns+1): gel(d,ns--);
+    y = gadd(y,dy);
+  }
+  if (!ptdy) return gerepileupto(av, y);
+  *ptdy = dy;
+  gerepileall(av, 2, &y, ptdy);
+  return y;
+}
+
+GEN
+polint(GEN X, GEN Y, GEN x, GEN *ptdy)
+{
+  long tx=typ(X), ty, lx=lg(X);
+
+  if (Y) ty = typ(Y); else { Y = X; ty = tx; X = NULL; }
+
+  if (! is_vec_t(tx) || ! is_vec_t(ty))
+    pari_err(talker,"not vectors in polinterpolate");
+  if (lx != lg(Y))
+    pari_err(talker,"different lengths in polinterpolate");
+  if (lx <= 2)
+  {
+    if (lx == 1) pari_err(talker,"no data in polinterpolate");
+    Y = gcopy(gel(Y,1)); if (ptdy) *ptdy = Y;
+    return Y;
+  }
+  if (!x) x = pol_x(0);
+  return polint_i(X? X+1: NULL,Y+1,x,lx-1,ptdy);
 }
 
 /********************************************************************/
@@ -1268,7 +1213,7 @@ gen_sortspec(GEN v, long n, void *E, int (*cmp)(void*,GEN,GEN))
   GEN x, y, w;
   switch(n)
   {
-    case 1: 
+    case 1:
       (void)cmp(E,gel(v,1),gel(v,1)); /* check for type error */
       return mkvecsmall(1);
     case 2:
@@ -1495,17 +1440,8 @@ END:
 
 GEN
 indexsort(GEN x) { return gen_indexsort(x, (void*)&gcmp, cmp_nodata); }
-
 GEN
 indexlexsort(GEN x) { return gen_indexsort(x, (void*)&lexcmp, cmp_nodata); }
-
-GEN
-vecsort(GEN x, GEN k)
-{
-  struct veccmp_s v; v.cmp = &gcmp; v.k = k;
-  if (typ(k) != t_VECSMALL) pari_err(typeer,"vecsort");
-  return gen_sort(x, (void*)&v, &veccmp);
-}
 GEN
 indexvecsort(GEN x, GEN k)
 {
@@ -1516,23 +1452,77 @@ indexvecsort(GEN x, GEN k)
 
 GEN
 sort(GEN x) { return gen_sort(x, (void*)gcmp, cmp_nodata); }
-
 GEN
 lexsort(GEN x) { return gen_sort(x, (void*)lexcmp, cmp_nodata); }
+GEN
+vecsort(GEN x, GEN k)
+{
+  struct veccmp_s v; v.cmp = &gcmp; v.k = k;
+  if (typ(k) != t_VECSMALL) pari_err(typeer,"vecsort");
+  return gen_sort(x, (void*)&v, &veccmp);
+}
 
+GEN
+ZV_indexsort(GEN L) { return gen_indexsort(L, (void*)&cmpii, &cmp_nodata); }
+GEN
+ZV_sort(GEN L) { return gen_sort(L, (void*)&cmpii, &cmp_nodata); }
+GEN
+ZV_sort_uniq(GEN L) { return gen_sort_uniq(L, (void*)&cmpii, &cmp_nodata); }
+
+/********************************************************************/
+/**                      SEARCH IN SORTED VECTOR                   **/
+/********************************************************************/
 /* index of x in table T, 0 otherwise */
 long
 tablesearch(GEN T, GEN x, int (*cmp)(GEN,GEN))
 {
-  long l=1,u=lg(T)-1,i,s;
+  long l = 1, u = lg(T)-1, i, s;
 
   while (u>=l)
   {
-    i = (l+u)>>1; s = cmp(x,gel(T,i));
+    i = (l+u)>>1; s = cmp(x, gel(T,i));
     if (!s) return i;
     if (s<0) u=i-1; else l=i+1;
   }
   return 0;
+}
+
+/* looks if x belongs to the set T and returns the index if yes, 0 if no */
+long
+gen_search(GEN T, GEN x, long flag, void *data, int (*cmp)(void*,GEN,GEN))
+{
+  long lx, i, l, u, s;
+
+  switch(typ(T))
+  {
+    case t_VEC: lx = lg(T); break;
+    case t_LIST: T = list_data(T); lx = T? lg(T): 1; break;
+    default: pari_err(talker,"not a set in setsearch");
+      return 0; /*not reached*/
+  }
+  if (lx==1) return flag? 1: 0;
+  l = 1; u = lx-1;
+  do
+  {
+    i = (l+u)>>1; s = cmp(data, x, gel(T,i));
+    if (!s) return flag? 0: i;
+    if (s<0) u=i-1; else l=i+1;
+  } while (u>=l);
+  if (!flag) return 0;
+  return (s<0)? i: i+1;
+}
+
+long
+ZV_search(GEN x, GEN y) { return tablesearch(x, y, cmpii); }
+
+/********************************************************************/
+/**                   COMPARISON FUNCTIONS                         **/
+/********************************************************************/
+int
+cmp_nodata(void *data, GEN x, GEN y)
+{
+  int (*cmp)(GEN,GEN)=(int (*)(GEN,GEN)) data;
+  return cmp(x,y);
 }
 
 /* assume lg(x) = lg(y), x,y in Z^n */
@@ -1592,6 +1582,9 @@ cmp_RgX(GEN x, GEN y)
   return gen_cmp_RgX((void*)&gcmp,x,y);
 }
 
+/********************************************************************/
+/**                   MERGE & SORT FACTORIZATIONS                  **/
+/********************************************************************/
 /* merge fx, fy two factorizations, whose 1st column is sorted in strictly
  * increasing order wrt cmp. Keep 0 exponents. */
 GEN
@@ -1785,4 +1778,3 @@ setminus(GEN x, GEN y)
   if (!setisset(x) || !setisset(y)) pari_err(talker,"not a set in setminus");
   return gen_setminus(x,y,gcmp);
 }
-
