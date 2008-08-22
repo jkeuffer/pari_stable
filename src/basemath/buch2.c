@@ -2173,7 +2173,7 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
 	    Nx = grndtoi(norm_by_embed(R1,xembed), &e);
 	    if (e < 0)
 	    {
-	      setsigne(Nx, 1);
+	      setabssign(Nx);
 	      if (can_factor(F, nf, NULL, gx, Nx, fact)) break;
 	    }
 	    if (DEBUGLEVEL > 1) { fprintferr("."); flusherr(); }
@@ -2409,7 +2409,7 @@ compute_multiple_of_R(GEN A,long RU,long N,GEN *ptL)
   /* R > 0.2 uniformly */
   if (!signe(kR) || expo(kR) < -3) { avma=av; return NULL; }
 
-  setsigne(kR,1);
+  setabssign(kR);
   L = RgM_solve(Im_mdet,NULL); /* Im_mdet^(-1) */
   if (!L) { *ptL = NULL; return kR; }
 
@@ -2733,7 +2733,7 @@ get_regulator(GEN mun)
 
   if (lg(mun) == 1) return gen_1;
   R = det( rowslice(real_i(mun), 1, lg(mun[1])-2) );
-  setsigne(R, 1); return gerepileupto(av, R);
+  setabssign(R); return gerepileuptoleaf(av, R);
 }
 
 /* return corrected archimedian components for elts of x (vector)

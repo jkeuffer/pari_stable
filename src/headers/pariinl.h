@@ -688,6 +688,16 @@ gtos(GEN x) {
   return itos(x);
 }
 
+INLINE GEN
+absfrac(GEN x)
+{
+  GEN y = cgetg(3, t_FRAC);
+  gel(y,1) = absi(gel(x,1));
+  gel(y,2) = icopy(gel(x,2)); return y;
+}
+INLINE GEN
+Q_abs(GEN x) { return (typ(x) == t_INT)? absi(x): absfrac(x); }
+
 /* Force z to be of type real/complex with floating point components */
 INLINE GEN
 gtofp(GEN z, long prec)
@@ -1085,9 +1095,17 @@ gsubgs(GEN y, long s) { return gaddgs(y, -s); }
 INLINE GEN
 gdivsg(long s, GEN y) { return gdiv(stoi(s), y); }
 
+INLINE GEN
+sqrfrac(GEN x)
+{
+  GEN z = cgetg(3,t_FRAC);
+  gel(z,1) = sqri(gel(x,1));
+  gel(z,2) = sqri(gel(x,2)); return z;
+}
+
 INLINE void
 normalize_frac(GEN z) {
-  if (signe(z[2]) < 0) { togglesign(gel(z,1)); setsigne(gel(z,2),1); }
+  if (signe(z[2]) < 0) { togglesign(gel(z,1)); setabssign(gel(z,2)); }
 }
 
 INLINE GEN

@@ -546,8 +546,8 @@ gnorm(GEN x)
   switch(typ(x))
   {
     case t_INT:  return sqri(x);
-    case t_REAL: return mulrr(x,x);
-    case t_FRAC: return gsqr(x);
+    case t_REAL: return sqrr(x);
+    case t_FRAC: return sqrfrac(x);
     case t_COMPLEX: av = avma; return gerepileupto(av, cxnorm(x));
     case t_QUAD:    av = avma; return gerepileupto(av, quadnorm(x));
 
@@ -611,10 +611,10 @@ gnorml1(GEN x,long prec)
   GEN s;
   switch(typ(x))
   {
-    case t_INT: case t_REAL:
-      return mpabs(x);
+    case t_INT: case t_REAL: return mpabs(x);
+    case t_FRAC: return absfrac(x);
     
-    case t_FRAC: case t_COMPLEX: case t_QUAD:
+    case t_COMPLEX: case t_QUAD:
       return gabs(x,prec);
 
     case t_POL:
@@ -641,16 +641,12 @@ QuickNormL1(GEN x,long prec)
   GEN s;
   switch(typ(x))
   {
-    case t_INT: case t_REAL:
-      return mpabs(x);
-    
-    case t_FRAC:
-      return gabs(x,prec);
+    case t_INT: case t_REAL: return mpabs(x);
+    case t_FRAC: return absfrac(x);
 
     case t_COMPLEX:
       s = gadd(gabs(gel(x,1),prec), gabs(gel(x,2),prec));
       break;
-
     case t_QUAD:
       s = gadd(gabs(gel(x,2),prec), gabs(gel(x,3),prec));
       break;
@@ -966,9 +962,9 @@ jacobi(GEN a, long prec)
     /* compute associated rotation in the plane formed by basis vectors number
      * p and q */
     x = divrr(subrr(gel(L,q),gel(L,p)), shiftr(gcoeff(a,p,q),1));
-    y = sqrtr(addrr(unr, mulrr(x,x)));
+    y = sqrtr(addrr(unr, sqrr(x)));
     t = divrr(unr, (signe(x)>0)? addrr(x,y): subrr(x,y));
-    c = sqrtr(addrr(unr,mulrr(t,t)));
+    c = sqrtr(addrr(unr,sqrr(t)));
     s = divrr(t,c);
     u = divrr(t,addrr(unr,c));
 

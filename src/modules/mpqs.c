@@ -2043,7 +2043,7 @@ mpqs_eval_cand(mpqs_handle_t *h, long number_of_cand,
     /* Qx cannot possibly vanish here */
     if (!signe(Qx)) { PRINT_IF_VERBOSE("<+>"); continue; }
     else if (signe(Qx) < 0) {
-      setsigne(Qx, 1);
+      setabssign(Qx);
       mpqs_add_factor(&relations_end, 1, 1); /* i = 1, ei = 1, pi */
     }
 

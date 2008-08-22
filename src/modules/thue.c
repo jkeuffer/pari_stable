@@ -101,11 +101,8 @@ LogHeight(GEN x, long prec)
 
 /* |x|^(1/n), x t_INT */
 static GEN
-absisqrtn(GEN x, long n, long prec) {
-  GEN r = itor(x,prec);
-  if (signe(r) < 0) setsigne(r,1);
-  return sqrtnr(r, n);
-}
+absisqrtn(GEN x, long n, long prec)
+{ GEN r = itor(x,prec); setabssign(r); return sqrtnr(r, n); }
 
 static GEN
 get_emb(GEN x, GEN r, long prec)

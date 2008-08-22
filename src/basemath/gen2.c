@@ -1206,28 +1206,16 @@ gneg_i(GEN x)
 /*                       Error otherwise.                         */
 /*                                                                */
 /******************************************************************/
-
 static int
 is_negative(GEN x) {
   switch(typ(x))
   {
-    case t_INT: case t_REAL: case t_FRAC:
-      if (gsigne(x) < 0) return 1;
+    case t_INT: case t_REAL:
+      return (signe(x) < 0);
+    case t_FRAC:
+      return (signe(gel(x,1)) < 0);
   }
   return 0;
-}
-
-static GEN
-absq(GEN x)
-{
-  GEN y = cgetg(3, t_FRAC);
-  gel(y,1) = absi(gel(x,1));
-  gel(y,2) = icopy(gel(x,2)); return y;
-}
-GEN
-Q_abs(GEN x)
-{
-  return (typ(x) == t_INT)? absi(x): absq(x);
 }
 
 GEN
@@ -1243,7 +1231,7 @@ gabs(GEN x, long prec)
       return mpabs(x);
 
     case t_FRAC:
-      return absq(x);
+      return absfrac(x);
 
     case t_COMPLEX:
       av=avma; p1=cxnorm(x);

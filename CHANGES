@@ -311,8 +311,8 @@ JD 12- add an optional argument to quit()
    ZM_snf_group
    ZM_snfclean, ZMrow_ZC_mul, ZV_ZM_mul, ZV_cmp0, ZV_content, ZV_equal,
    ZV_lincomb, ZXY_max_lg, ZX_copy, ZX_equal, ZX_max_lg, row_Flm, row_zm,
-   togglesign_safe, zero_Flm, zero_Flv, zero_zm, zero_zv, zm_copy, zv_cmp0,
-   zv_copy, zv_equal, bitvec_test_set, ZM_is_identity, RgX_get_0, RgX_get_1,
+   togglesign_safe, setabssign, zero_Flm, zero_Flv, zero_zm, zero_zv, zm_copy,
+   zv_cmp0, zv_copy, zv_equal, bitvec_test_set, ZM_is_identity, RgX_get_0, RgX_get_1,
    resultant, resultant_all, QX_disc, QX_resultant, Z_ZX_sub, ZX_Z_sub,
    zx_renormalize, zv_content, ZM_lll, ZM_lll_norms, lllfp, lllintpartial,
    lllintpartial_inplace, reducemodlll, reducemodinvertible, closemodinvertible,
@@ -326,6 +326,7 @@ JD 12- add an optional argument to quit()
    20- library function galoisinit0, get_nfpol, get_bnfpol, get_prid,
    nf_get_r1, nf_get_r2, nf_get_roots, nf_get_sign, nf_get_prec (was nfgetprec)
    numberofconjugates, mkfraccopy, mkquad, mkvecsmall4, shallowconcat1, concat1,
+   absfrac, sqrfrac
    ZV_prod, ZV_pval, ZV_pvalrem
    zv_prod
    RgX_neg, RgX_add, RgX_add_shallow, RgX_sub, RgX_Rg_add, RgX_Rg_sub,

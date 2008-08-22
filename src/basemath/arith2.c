@@ -603,7 +603,7 @@ ifactor(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
   if (i < 0) STORE(utoineg(1), 1);
   if (is_pm1(n)) return aux_end(NULL,nb);
 
-  n = gclone(n); setsigne(n,1);
+  n = gclone(n); setabssign(n);
   i = vali(n);
   if (i)
   {
@@ -920,7 +920,7 @@ moebius(GEN n)
   if (equaliu(n, 2)) return -1;
   p = mod4(n); if (!p) return 0;
   if (p == 2) { s = -1; n = shifti(n, -1); } else { s = 1; n = icopy(n); }
-  setsigne(n, 1);
+  setabssign(n);
 
   lim = tridiv_bound(n);
   p = 2;
@@ -954,7 +954,7 @@ Z_issquarefree(GEN x)
   if (cmpiu(x, 2) <= 0) return 1;
   p = mod4(x); if (!p) return 0;
   x = (p == 2)? shifti(x, -1): icopy(x);
-  setsigne(x, 1);
+  setabssign(x);
 
   lim = tridiv_bound(x);
   p = 2;
@@ -1003,7 +1003,7 @@ omega(GEN n)
   v = vali(n); nb = v ? 1 : 0;
   n = shifti(n, -v);
   if (is_pm1(n)) return nb;
-  setsigne(n, 1);
+  setabssign(n);
 
   lim = tridiv_bound(n);
   p = 2;
@@ -1035,7 +1035,7 @@ bigomega(GEN n)
   chk_arith(n); if (is_pm1(n)) return 0;
   nb = v = vali(n); n = shifti(n, -v);
   if (is_pm1(n)) { avma = av; return nb; }
-  setsigne(n, 1);
+  setabssign(n);
 
   lim = tridiv_bound(n);
   p = 2;
@@ -1101,7 +1101,7 @@ eulerphi(GEN n)
 
   chk_arith(n);
   if (lgefint(n) == 3) return utoipos(eulerphiu((ulong)n[2]));
-  v = vali(n); n = shifti(n,-v); setsigne(n, 1);
+  v = vali(n); n = shifti(n,-v); setabssign(n);
   m = v > 1 ? int2n(v-1) : gen_1;
   if (is_pm1(n)) return gerepileuptoint(av,m);
 
@@ -1140,7 +1140,7 @@ numbdiv(GEN n)
   ulong p, lim;
 
   chk_arith(n); if (is_pm1(n)) return gen_1;
-  v = vali(n); n = shifti(n,-v); setsigne(n,1);
+  v = vali(n); n = shifti(n,-v); setabssign(n);
   m = utoipos(v+1);
   if (is_pm1(n)) return gerepileuptoint(av,m);
 
@@ -1176,7 +1176,7 @@ sumdiv(GEN n)
   long v;
 
   chk_arith(n); if (is_pm1(n)) return gen_1;
-  v = vali(n); n = shifti(n,-v); setsigne(n,1);
+  v = vali(n); n = shifti(n,-v); setabssign(n);
   m = v ? addsi(-1, int2n(v+1)) : gen_1;
   if (is_pm1(n)) return gerepileuptoint(av,m);
 
@@ -1228,7 +1228,7 @@ sumdivk(GEN n, long k)
   k1 = k; n1 = n;
   if (k < 0)  k = -k;
   if (k == 1) { m = sumdiv(n); goto fin; }
-  v = vali(n); n = shifti(n,-v); setsigne(n,1);
+  v = vali(n); n = shifti(n,-v); setabssign(n);
   m = gen_1;
   while (v--)  m = addsi(1,shifti(m,k));
   if (is_pm1(n)) goto fin;

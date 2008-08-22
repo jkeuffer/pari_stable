@@ -1890,10 +1890,8 @@ polylogD(long m, GEN x, long flag, long prec)
   if (!l) { l = prec; x = gtofp(x,l); }
   p1 = logabs(x);
   k = signe(p1);
-  if (k > 0) { x = ginv(x); fl = !m2; } else fl = 0;
-  /* |x| <= 1 */
-  if (k < 0) setsigne(p1, 1);
-  /* p1 = - log|x| >= 0 */
+  if (k > 0) { x = ginv(x); fl = !m2; } else { setabssign(p1); fl = 0; }
+  /* |x| <= 1, p1 = - log|x| >= 0 */
   p2 = gen_1;
   y = polylog(m,x,l);
   y = m2? real_i(y): imag_i(y);
@@ -1905,7 +1903,7 @@ polylogD(long m, GEN x, long flag, long prec)
   }
   if (m2)
   {
-    if (!flag) p1 = negr( logabs( gsub(gen_1,x) ) ); else p1 = shiftr(p1,-1);
+    if (!flag) p1 = negr( logabs(gsubsg(1,x)) ); else p1 = shiftr(p1,-1);
     p2 = gdivgs(gmul(p2,p1), -m);
     y = gadd(y, p2);
   }

@@ -920,7 +920,7 @@ factor_Aurifeuille(GEN a, long d)
   if (sa < 0)
   { /* negate in place if possible */
     if (A == a) A = icopy(A);
-    setsigne(A,1);
+    setabssign(A);
   }
   if (!Z_issquare(A)) { avma = av; return gen_1; }
 

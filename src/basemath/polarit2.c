@@ -1073,7 +1073,7 @@ zero_gcd(GEN x, long tx)
   switch(tx)
   {
     case t_INT: return absi(x);
-    case t_FRAC: return gabs(x,0);
+    case t_FRAC: return absfrac(x);
     case t_COMPLEX: return c_zero_gcd(x);
     case t_REAL: return gen_1;
     case t_PADIC: return powis(gel(x,2), valp(x));
@@ -1644,7 +1644,7 @@ Q_content(GEN x)
   switch(typ(x))
   {
     case t_INT:  return absi(x);
-    case t_FRAC: return gabs(x,0);
+    case t_FRAC: return absfrac(x);
 
     case t_VEC: case t_COL: case t_MAT:
       l = lg(x); if (l == 1) return gen_1;

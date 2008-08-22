@@ -1541,8 +1541,7 @@ lcmii(GEN x, GEN y)
   if (!signe(x)) return gen_0;
   av = avma;
   p1 = gcdii(x,y); if (!is_pm1(p1)) y = diviiexact(y,p1);
-  p2 = mulii(x,y); if (signe(p2) < 0) setsigne(p2,1);
-  return gerepileuptoint(av, p2);
+  p2 = mulii(x,y); setabssign(p2); return gerepileuptoint(av, p2);
 }
 
 /*********************************************************************/

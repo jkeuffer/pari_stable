@@ -171,24 +171,20 @@ INLINE GEN rcopy(GEN x) { return leafcopy(x); }
 INLINE GEN mpcopy(GEN x) { return leafcopy(x); }
 
 INLINE GEN
-mpabs(GEN x)
-{
-  GEN y=leafcopy(x);
-  if (signe(x)<0) setsigne(y,1);
-  return y;
-}
+mpabs(GEN x) { GEN y = leafcopy(x); setabssign(y); return y; }
 INLINE GEN absi(GEN x) { return mpabs(x); }
 INLINE GEN absr(GEN x) { return mpabs(x); }
 
 INLINE GEN
-mpneg(GEN x) { GEN y=leafcopy(x); togglesign(y); return y; }
+mpneg(GEN x) { GEN y = leafcopy(x); togglesign(y); return y; }
 INLINE GEN negi(GEN x) { return mpneg(x); }
 INLINE GEN negr(GEN x) { return mpneg(x); }
 
 /* negate in place */
 INLINE void
-togglesign(GEN x)
-{ if (x[1] & SIGNBITS) { x[1] ^= HIGHBIT; } }
+togglesign(GEN x) { if (x[1] & SIGNBITS) { x[1] ^= HIGHBIT; } }
+INLINE void
+setabssign(GEN x) { x[1] &= ~HIGHBIT; }
 /* negate in place, except universal constants */
 INLINE void
 togglesign_safe(GEN *px)

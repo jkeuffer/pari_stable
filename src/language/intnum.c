@@ -86,7 +86,7 @@ qrom3(void *dat, GEN (*eval)(GEN,void *), GEN a, GEN b, long prec)
   b = gtofp(b,prec);
   qlint = subrr(b,a); sig = signe(qlint);
   if (!sig)  return gen_0;
-  if (sig < 0) { setsigne(qlint,1); swap(a,b); }
+  if (sig < 0) { setabssign(qlint); swap(a,b); }
 
   s = new_chunk(JMAX+KLOC-1);
   h = new_chunk(JMAX+KLOC-1);
@@ -128,7 +128,7 @@ qrom2(void *dat, GEN (*eval)(GEN,void *), GEN a, GEN b, long prec)
   b = gtofp(b, prec);
   qlint = subrr(b,a); sig = signe(qlint);
   if (!sig)  return gen_0;
-  if (sig < 0) { setsigne(qlint,1); swap(a,b); }
+  if (sig < 0) { setabssign(qlint); swap(a,b); }
 
   s = new_chunk(JMAX+KLOC-1);
   h = new_chunk(JMAX+KLOC-1);

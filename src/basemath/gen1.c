@@ -2051,9 +2051,7 @@ gsqr(GEN x)
 	gel(z,2) = gerepileuptoint((pari_sp)z, remii(sqri(gel(x,2)), X));
 	gel(z,1) = icopy(X); return z;
       }
-      case t_FRAC: z=cgetg(3,t_FRAC);
-	gel(z,1) = sqri(gel(x,1));
-	gel(z,2) = sqri(gel(x,2)); return z;
+      case t_FRAC: return sqrfrac(x);
 
       case t_COMPLEX:
 	if (isrationalzero(gel(x,1))) {
@@ -2827,13 +2825,7 @@ gdivgs(GEN x, long s)
 
       i = cgcd(s, i);
       avma=av; z = cgetg(3,t_FRAC);
-      if (i == 1)
-	y = icopy(x);
-      else
-      {
-	s /= i; y = diviuexact(x, i);
-	if (signe(x) < 0) setsigne(y, -1);
-      }
+      if (i == 1) y = icopy(x); else { s /= i; y = diviuexact(x, i); }
       gel(z,1) = y;
       gel(z,2) = stoi(s); normalize_frac(z); return z;
 

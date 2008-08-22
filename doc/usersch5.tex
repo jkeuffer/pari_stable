@@ -363,11 +363,13 @@ If \kbd{x} is a \typ{INT} or \typ{REAL}, \kbd{s} must be equal to $-1$, 0
 or~1, and if \kbd{x} is a \typ{POL} or \typ{SER}, \kbd{s} must be equal to 0
 or~1.
 
-\fun{void}{togglesign}{GEN x} sets the $s$ sign of~\kbd{x} to $-s$, in place.
+\fun{void}{togglesign}{GEN x} sets the sign $s$ of~\kbd{x} to $-s$, in place.
 
 \fun{void}{togglesign_safe}{GEN *x} sets the $s$ sign of~\kbd{*x} to $-s$, in
 place, unless \kbd{*x} is one of the integer universal constants in which case
 replace \kbd{*x} by its negation (e.g.~replace \kbd{gen\_1} by \kbd{gen\_m1}).
+
+\fun{void}{setabssign}{GEN x} sets the sign $s$ of~\kbd{x} to $|s|$, in place.
 
 \fun{void}{normalize_frac}{GEN z} assuming $z$ is of the form \kbd{mkfrac(a,b)}
 with $b\neq 0$, make sure that $b > 0$ by changing the sign of $a$ in place if
@@ -5863,6 +5865,12 @@ entries.
 
 \newpage
 \chapter{Miscellaneous mathematical functions}
+
+\section{Fractions}
+
+\fun{GEN}{absfrac}{GEN x} returns the absolute value of the \typ{FRAC} $x$.
+
+\fun{GEN}{sqrfrac}{GEN x} returns the square of the \typ{FRAC} $x$.
 
 \section{Complex numbers}
 

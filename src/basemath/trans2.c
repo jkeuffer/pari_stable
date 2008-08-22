@@ -76,7 +76,7 @@ mpatan(GEN x)
   if (e > 0) lp += divsBIL(e);
 
   y = cgetr(lp); av0 = avma;
-  p1 = rtor(x, l+1); setsigne(p1, 1); /* p1 = |x| */
+  p1 = rtor(x, l+1); setabssign(p1); /* p1 = |x| */
   if (inv) p1 = invr(p1);
   e = expo(p1);
   if (e < -100)

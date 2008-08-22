@@ -42,8 +42,8 @@ gcdii(GEN a, GEN b)
   if (!signe(t)) { avma=av; return absi(b); }
 
   a = b; b = t;
-  v = vali(a); a = shifti(a,-v); setsigne(a,1);
-  w = vali(b); b = shifti(b,-w); setsigne(b,1);
+  v = vali(a); a = shifti(a,-v); setabssign(a);
+  w = vali(b); b = shifti(b,-w); setabssign(b);
   if (w < v) v = w;
   switch(absi_cmp(a,b))
   {
