@@ -71,7 +71,7 @@ interp(GEN h, GEN s, long j, long lim, long KLOC)
   e1 = gexpo(ss);
   e2 = gexpo(dss);
   if (e1-e2 <= lim && (j <= 10 || e1 >= -lim)) { avma = av; return NULL; }
-  if (gcmp0(imag_i(ss))) ss = real_i(ss);
+  if (typ(ss) == t_COMPLEX && gcmp0(gel(ss,2))) ss = gel(ss,1);
   return ss;
 }
 
@@ -95,10 +95,10 @@ qrom3(void *dat, GEN (*eval)(GEN,void *), GEN a, GEN b, long prec)
   p1 = eval(a, dat); if (p1 == a) p1 = rcopy(p1);
   p2 = eval(b, dat);
   gel(s,0) = gmul2n(gmul(qlint,gadd(p1,p2)),-1);
-  for (it=1,j=1; j<JMAX; j++, it<<=1)
+  for (it=1,j=1; j<JMAX; j++, it<<=1) /* it = 2^(j-1) */
   {
     pari_sp av, av2;
-    gel(h,j) = shiftr(gel(h,j-1),-2);
+    gel(h,j) = real2n(-2*j, prec); /* 2^(-2j) */
     av = avma; del = divru(qlint,it);
     x = addrr(a, shiftr(del,-1));
     av2 = avma;
@@ -136,10 +136,10 @@ qrom2(void *dat, GEN (*eval)(GEN,void *), GEN a, GEN b, long prec)
 
   p1 = shiftr(addrr(a,b),-1);
   gel(s,0) = gmul(qlint, eval(p1, dat));
-  for (it=1, j=1; j<JMAX; j++, it*=3)
+  for (it=1, j=1; j<JMAX; j++, it*=3) /* it = 3^(j-1) */
   {
     pari_sp av, av2;
-    gel(h,j) = divru(gel(h,j-1), 9);
+    gel(h,j) = divru(gel(h,j-1), 9); /* 3^(-2j) */
     av = avma; del = divru(qlint,3*it); ddel = shiftr(del,1);
     x = addrr(a, shiftr(del,-1));
     av2 = avma;
