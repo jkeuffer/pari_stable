@@ -1,7 +1,7 @@
 allocatemem(30 * 10^6);
 do(i,v)=
 {
-  E = ellinit([0,0,0,v[2],v[3]]);
+  E = ellinit([0,0,0,v[2],v[3]]*Mod(1,v[1]));
   print(i, ": ", ellap(E,v[1]));
 }
 {
