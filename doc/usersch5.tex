@@ -3322,7 +3322,7 @@ Assumes \kbd{p} is prime and \kbd{T} irreducible in $\F_p[X]$.
 Assumes \kbd{p} is prime and \kbd{T} irreducible in $\F_p[X]$.
 
 \subsec{\kbd{Flx}} Let \kbd{p} an understood \kbd{ulong}, assumed to be
-prime, to be given the the function arguments; an \kbd{Fl} is an \kbd{ulong}
+prime, to be given by the function arguments; an \kbd{Fl} is an \kbd{ulong}
 belonging to $[0,\kbd{p}-1]$, an \kbd{Flx}~\kbd{z} is a \typ{VECSMALL}
 representing a polynomial with small integer coefficients. Specifically
 \kbd{z[0]} is the usual codeword, \kbd{z[1] = evalvarn($v$)} for some
@@ -6279,7 +6279,7 @@ small group \var{grp} of domain \var{n} as smalls.
 \fun{long}{group_order}{GEN grp} returns the order of the small group
 \var{grp} (which is the product of the relative orders).
 
-\fun{long}{group_isabelian}{GEN grp} returns $1$ the the small group
+\fun{long}{group_isabelian}{GEN grp} returns $1$ if the small group
 \var{grp} is Abelian, else $0$.
 
 \fun{GEN}{group_abelianHNF}{GEN grp, GEN elts} if \var{grp} is not Abelian,
@@ -6291,18 +6291,20 @@ be the list of elements of \var{grp}.
 returns \kbd{NULL}, else returns its cyclic decomposition. If \var{elts} is no
 \kbd{NULL}, it must be the list of elements of \var{grp}.
 
-\fun{long}{group_isA4S4}{GEN grp} return $1$ if the small group
+\fun{long}{group_isA4S4}{GEN grp} returns $1$ if the small group
 \var{grp} is isomorphic to $A_4$, $2$ if it is isomorphic to $S_4$ and
 $0$ else. This is mainly to deal with the idiosynchrasy of the format.
 
 \fun{GEN}{group_leftcoset}{GEN G, GEN g} where $G$ is a small group and $g$ a
-small of the same domain, the the left coset $gG$ as a vector of small.
+small group of the same domain, returns the left coset $gG$ as a vector of
+permutations.
 
 \fun{GEN}{group_rightcoset}{GEN G, GEN g} where $G$ is a small group and $g$ a
-small of the same domain, the the right coset $Gg$  as a vector of small.
+small group of the same domain, returns the right coset $Gg$  as a vector of
+permutations.
 
 \fun{long}{group_perm_normalize}{GEN G, GEN g} where $G$ is a small group and
-$g$ a small of the same domain, return $1$ if $gGg^-1=G$, else $0$.
+$g$ a small group of the same domain, return $1$ if $gGg^-1=G$, else $0$.
 
 \fun{GEN}{group_quotient}{GEN G, GEN H}, where $G$ is a small group and
 $H$ is a subgroup of $G$, returns the quotient map $G\rightarrow G/H$
