@@ -2482,11 +2482,11 @@ galoisisabelian(GEN gal, long flag)
 {
   pari_sp av = avma;
   GEN S, G = checkgroup(gal,&S);
-  if (!group_isabelian(G)) return gen_0;
+  if (!group_isabelian(G)) { avma=av; return gen_0; }
   switch(flag)
   {
     case 0: return gerepileupto(av, group_abelianHNF(G,S));
-    case 1: return gen_1;
+    case 1: avma=av; return gen_1;
     case 2: return gerepileupto(av, group_abelianSNF(G,S));
     default: pari_err(flagerr,"galoisisabelian");
   }
