@@ -697,6 +697,16 @@ idealadd(GEN nf, GEN x, GEN y)
   return gerepileupto(av,z);
 }
 
+static GEN
+trivial_merge(GEN x)
+{
+  long lx = lg(x);
+  GEN a;
+  if (lx == 1) return NULL;
+  a = gcoeff(x,1,1);
+  if (!is_pm1(a)) return NULL;
+  return scalarcol_shallow(gen_1, lx-1);
+}
 GEN
 idealaddtoone_i(GEN nf, GEN x, GEN y)
 {
@@ -705,8 +715,16 @@ idealaddtoone_i(GEN nf, GEN x, GEN y)
   long ty = idealtyp(&y, &a/*junk*/);
   if (tx != id_MAT) x = idealhnf_shallow(nf, x);
   if (ty != id_MAT) y = idealhnf_shallow(nf, y);
-  a = hnfmerge_get_1(x, y);
-  return reducemodlll(a, idealmul_HNF(nf,x,y));
+  if (lg(x) == 1)
+    a = trivial_merge(y);
+  else if (lg(y) == 1)
+    a = trivial_merge(x);
+  else {
+    a = hnfmerge_get_1(x, y);
+    a = reducemodlll(a, idealmul_HNF(nf,x,y));
+  }
+  if (!a) pari_err(talker, "non coprime ideals in idealaddtoone");
+  return a;
 }
 
 GEN
@@ -2170,6 +2188,7 @@ idealchinese(GEN nf, GEN x, GEN w)
     if (gcmp0(gel(w,i))) continue;
     u = hnfmerge_get_1(idealdivpowprime(nf,F, gel(L,i), gel(e,i)),
 		       idealpow(nf, gel(L,i), gel(e,i)));
+    if (!u) pari_err(talker, "non coprime ideals in idealchinese");
     t = nfmul(nf, u, gel(w,i));
     s = s? gadd(s,t): t;
   }

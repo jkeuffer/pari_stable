@@ -502,11 +502,11 @@ The result is reduced mod $AB$, so $a$, $b$ will be small.
 \fun{GEN}{idealaddtoone_i}{GEN nf, GEN A, GEN B} as \tet{idealaddtoone} except
 that \kbd{nf} must be a true \var{nf}, and only $a$ is returned.
 
-\fun{GEN}{hnfmerge_get_1}{GEN A, GEN B} given two square integral matrices $A$,
-$B$ of the same dimension, in upper HNF, return $a$ in the image of $A$ such
-that $1-a$ is in the image of $B$. (By abuse of notation we denote $1$ the
-column vector $[1,0,\dots,0]$.) If such an $a$ does not exist, raise an error.
-This is the function underlying \tet{idealaddtoone}.
+\fun{GEN}{hnfmerge_get_1}{GEN A, GEN B} given two square upper HNF integral
+matrices $A$, $B$ of the same dimension $n > 0$, return $a$ in the image of
+$A$ such that $1-a$ is in the image of $B$. (By abuse of notation we denote
+$1$ the column vector $[1,0,\dots,0]$.) If such an $a$ does not exist, return
+\kbd{NULL}. This is the function underlying \tet{idealaddtoone}.
 
 \fun{GEN}{idealaddmultoone}{GEN nf, GEN v} given a list of $n$ (globally)
 coprime integer ideals $(v[i])$ returns an $n$-dimensional vector $a$ such that

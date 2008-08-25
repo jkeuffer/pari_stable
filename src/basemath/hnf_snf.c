@@ -713,8 +713,8 @@ ZM_reduce(GEN A, GEN U, long i, long j0)
   }
 }
 
-/* A,B integral ideals in HNF. Return Au in Z^n (v in Z^n not computed), such
- * that Au + Bv = 1 */
+/* A,B square integral in upper HNF, of the same dimension > 0. Return Au
+ * in Z^n (v in Z^n not computed), such that Au + Bv = [1, 0, ..., 0] */
 GEN
 hnfmerge_get_1(GEN A, GEN B)
 {
@@ -725,8 +725,8 @@ hnfmerge_get_1(GEN A, GEN B)
   t = NULL; /* -Wall */
   b = gcoeff(B,1,1); lb = lgefint(b);
   if (!signe(b)) {
-    if (gcmp1(gcoeff(A,1,1))) return scalarcol_shallow(gen_1, l-1);
-    l = 0; /* trigger error */
+    if (!is_pm1(gcoeff(A,1,1))) return NULL;
+    return scalarcol_shallow(gen_1, l-1);
   }
   for (j = 1; j < l; j++)
   {
@@ -761,9 +761,8 @@ hnfmerge_get_1(GEN A, GEN B)
     }
     if (signe(t) && is_pm1(t)) break;
   }
-  if (j >= l) pari_err(talker, "non coprime ideals in hnfmerge");
+  if (j >= l) return NULL;
   return gerepileupto(av, ZM_ZC_mul(A,gel(U,1)));
-
 }
 
 /* Inefficient compared to hnfall. 'remove' = throw away lin.dep columns */

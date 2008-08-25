@@ -1084,6 +1084,7 @@ nfinvmodideal(GEN nf, GEN x, GEN y)
   if (typ(x) == t_INT) return gerepileupto(av, Fp_inv(x, yZ));
 
   a = hnfmerge_get_1(idealhnf_principal(nf,x), y);
+  if (!a) pari_err(talker, "element not invertible in nfinvmodideal");
   return gerepileupto(av, ZC_hnfrem(nfdiv(nf,a,x), y));
 }
 
