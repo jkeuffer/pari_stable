@@ -946,7 +946,7 @@ numtoperm(long n, GEN x)
     if ((r & 0x1f) == 0) x = gerepileuptoint(av, x);
   }
   avma = av;
-  for (i=1; i<=n; i++) gel(v,i) = utoipos(v[i]);
+  for (i=1; i<=(ulong)n; i++) gel(v,i) = utoipos(v[i]);
   return v;
 }
 
