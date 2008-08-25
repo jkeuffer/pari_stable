@@ -5480,7 +5480,7 @@ instead of \kbd{gcmp} as the underlying comparison routine.
 \fun{GEN}{indexvecsort}{GEN x, GEN k}, as \kbd{vecsort}, but only
 returns the permutation that would sort the vector \kbd{x}.
 
-\subsec{Generic routines}. The following routines allow to use an
+\subsec{Generic sort and search}. The following routines allow to use an
 arbitrary comparison function \kbd{int (*cmp)(void* data, GEN x, GEN y)},
 such that \kbd{cmp(data,x,y)} returns a negative result if $x
 < y$, a positive one if $x > y$ and 0 if $x = y$. The \kbd{data} argument is
@@ -5529,6 +5529,8 @@ and the index where \kbd{y} should be inserted otherwise.
 
 \fun{long}{tablesearch}{GEN T, GEN x, int (*cmp)(GEN,GEN)} is a faster
 implementation for the common case \kbd{gen\_search(T,x,0,cmp,cmp\_nodata)}.
+
+\subsec{Further useful comparison functions}
 
 \fun{int}{cmp_nodata}{void *data, GEN x, GEN y}. This function is a hack
 used to pass an existing basic comparison function lacking the \kbd{data}
