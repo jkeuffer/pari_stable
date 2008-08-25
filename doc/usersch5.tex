@@ -636,7 +636,8 @@ allocated: a simple \kbd{avma = oldavma} might be enough. On the other hand,
 beware that this is not permanent independent storage, but part of the stack.
 
 \noindent Objects allocated through these last two functions cannot be
-\kbd{gerepile}'d. They are not valid \kbd{GEN}s since they have no PARI type.
+\kbd{gerepile}'d, since they are not yet valid \kbd{GEN}s: their codewords
+must be filled first.
 
 \fun{GEN}{cgetalloc}{long t, size_t l}, same as \kbd{cgetg(t, l)}, except
 that the result is allocated using \tet{pari_malloc} instead of the PARI
@@ -5893,6 +5894,27 @@ $|x| + |y|$, where we use the ordinary real absolute value. This is still a norm
 of $\R$ vector spaces, which is easier to compute than
 \kbd{gnorml1} and can often be used in its place.
 
+\fun{GEN}{gsupnorm}{GEN x, long prec} The norm of a scalar is its complex modulus,
+the norm of a recursive type is the max of the norms of its components. A
+precision \kbd{prec} must be included for the same reason as in \kbd{gnorml1}.
+
+\fun{void}{gsupnorm_aux}{GEN x, GEN *m, GEN *m2} Low-level function underlying
+\kbd{gsupnorm}, used as follows:
+\bprog
+  GEN m = NULL, m2 = NULL;
+  gsupnorm_aux(x, &m, &m2);
+@eprog
+After the call, the sup norm of $x$ is the min of \kbd{m} and the square root
+of \kbd{m2};  one or both of \kbd{m}, \kbd{m2} may be \kbd{NULL}, in
+which case it must be omitted. You may initially set \kbd{m} and \kbd{m2} to
+non-\kbd{NULL} values, in which case, the above procedure yields the max of
+(the initial) \kbd{m}, the square root of (the initial) \kbd{m2}, and the sup
+norm of $x$.
+
+The strange interface is due to the fact that $|z|^2$ is easier to compute
+than $|z|$ for a \typ{QUAD} or \typ{COMPLEX} $z$: \kbd{m2} is the max of
+those $|z|^2$, and \kbd{m} is the max of the other $|z|$.
+
 \section{Substitution and evaluation}
 
 \fun{GEN}{gsubst}{GEN x, long v, GEN y} substitutes the object \kbd{y}
@@ -6506,7 +6528,7 @@ writable directory among \kbd{/tmp}, \kbd{/var/tmp} and \kbd{.}.
 and return its name built from the string $s$, the user id and process pid
 (on Unix systems). This directory is itself located in
 
-The name returned is \tet{pari_malloc}'ed.
+The name returned is \tet{malloc}'ed.
 
 \fun{char*}{pari_unique_filename}{const char *s}
 

@@ -543,6 +543,8 @@ GEN     charpoly0(GEN x, long v,long flag);
 GEN     gnorm(GEN x);
 GEN     gnorml1(GEN x,long prec);
 GEN     gnorml2(GEN x);
+GEN     gsupnorm(GEN x, long prec);
+void    gsupnorm_aux(GEN x, GEN *m, GEN *msq);
 GEN     gtrace(GEN x);
 GEN     hess(GEN x);
 GEN     intersect(GEN x, GEN y);

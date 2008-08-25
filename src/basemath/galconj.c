@@ -284,23 +284,6 @@ matrixnorm(GEN M, long prec)
   return B;
 }
 
-/* L a t_VEC/t_COL, return ||L||_oo */
-GEN
-supnorm(GEN L, long prec)
-{
-  long i, n = lg(L);
-  GEN z, B;
-
-  if (n == 1) return real_0(prec);
-  B = gabs(gel(L,1), prec);
-  for (i = 2; i < n; i++)
-  {
-    z = gabs(gel(L,i), prec);
-    if (gcmp(z, B) > 0) B = z;
-  }
-  return B;
-}
-
 static GEN
 galoisborne(GEN T, GEN dn, struct galois_borne *gb)
 {
@@ -317,7 +300,7 @@ galoisborne(GEN T, GEN dn, struct galois_borne *gb)
   M = vandermondeinverse(L, gmul(T, real_1(prec)), den, prep);
   if (DEBUGLEVEL>=4) msgTIMER(&ti,"vandermondeinverse");
   borne = matrixnorm(M, prec);
-  borneroots = supnorm(L, prec); /*t_REAL*/
+  borneroots = gsupnorm(L, prec); /*t_REAL*/
   n = degpol(T);
   borneabs = addsr(1, gmulsg(n, powru(borneroots, n)));
   borneroots = addsr(1, gmul(borne, borneroots));
@@ -2482,11 +2465,11 @@ galoisisabelian(GEN gal, long flag)
 {
   pari_sp av = avma;
   GEN S, G = checkgroup(gal,&S);
-  if (!group_isabelian(G)) return gen_0;
+  if (!group_isabelian(G)) { avma=av; return gen_0; }
   switch(flag)
   {
     case 0: return gerepileupto(av, group_abelianHNF(G,S));
-    case 1: return gen_1;
+    case 1: avma=av; return gen_1;
     case 2: return gerepileupto(av, group_abelianSNF(G,S));
     default: pari_err(flagerr,"galoisisabelian");
   }

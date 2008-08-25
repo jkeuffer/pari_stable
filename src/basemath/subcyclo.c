@@ -346,9 +346,8 @@ polsubcyclo_powz(GEN powz, long ex)
 GEN
 polsubcyclo_complex_bound(pari_sp av, GEN V, long prec)
 {
-  GEN pol = roots_to_pol(V,0);
-  GEN vec = RgX_to_RgV(real_i(pol), lg(V));
-  return gerepileuptoint(av, ceil_safe(supnorm(vec,prec)));
+  GEN pol = real_i(roots_to_pol(V,0));
+  return gerepileuptoint(av, ceil_safe(gsupnorm(pol,prec)));
 }
 
 /* Newton sums mod le. if le==NULL, works with complex instead */

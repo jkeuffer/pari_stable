@@ -677,6 +677,47 @@ gnorml1_fake(GEN x)
   return gerepileupto(av, s);
 }
 
+static void
+store(GEN z, GEN *m) { if (!*m || gcmp(z, *m) > 0) *m = z; }
+/* compare |x| to *m or |x|^2 to *msq, whichever is easiest, and update
+ * the pointed value if x is larger */
+void
+gsupnorm_aux(GEN x, GEN *m, GEN *msq)
+{
+  long i, lx;
+  GEN z;
+  switch(typ(x))
+  {
+    case t_COMPLEX: z = cxnorm(x); store(z, msq); return;
+    case t_QUAD:  z = quadnorm(x); store(z, msq); return;
+    case t_INT: case t_REAL: z = mpabs(x); store(z,m); return;
+    case t_FRAC: z = absfrac(x); store(z,m); return;
+
+    case t_POL: lx = lg(x)-1; x++; break;
+
+    case t_VEC:
+    case t_COL:
+    case t_MAT: lx = lg(x); break;
+
+    default: pari_err(typeer,"gsupnorm");
+      return; /* not reached */
+  }
+  for (i=1; i<lx; i++) gsupnorm_aux(gel(x,i), m, msq);
+}
+GEN
+gsupnorm(GEN x, long prec)
+{
+  GEN m = NULL, msq = NULL;
+  pari_sp av = avma;
+  gsupnorm_aux(x, &m, &msq);
+  /* now set m = max (m, sqrt(msq)) */
+  if (msq) {
+    msq = gsqrt(msq, prec);
+    if (!m || gcmp(m, msq) < 0) m = msq;
+  } else if (!m) m = gen_0;
+  return gerepilecopy(av, m);
+}
+
 /*******************************************************************/
 /*                                                                 */
 /*                            TRACES                               */
