@@ -62,5 +62,4 @@ Doc: \sidx{algebraic dependence}
  1.39, which succeeded reliably from precision 265 on, in about 200 as much
  time as the current version.
 
-Variant: Also available is \fun{GEN}{algdep}{GEN x, long k, long prec}
- ($\fl=0$).
+Variant: Also available is \fun{GEN}{algdep}{GEN x, long k} ($\fl=0$).
