@@ -627,12 +627,12 @@ gnorml1(GEN x,long prec)
 
     case t_POL:
       lx = lg(x); s = gen_0;
-      for (i=2; i<lx; i++) s = gadd(s, gabs(gel(x,i),prec));
+      for (i=2; i<lx; i++) s = gadd(s, gnorml1(gel(x,i),prec));
       break;
 
     case t_VEC: case t_COL: case t_MAT:
       lx = lg(x); s = gen_0;
-      for (i=1; i<lx; i++) s = gadd(s, gabs(gel(x,i),prec));
+      for (i=1; i<lx; i++) s = gadd(s, gnorml1(gel(x,i),prec));
       break;
 
     default: pari_err(typeer,"gnorml1");
@@ -640,9 +640,11 @@ gnorml1(GEN x,long prec)
   }
   return gerepileupto(av, s);
 }
-
+/* As gnorml1, except for t_QUAD and t_COMPLEX: |x + wyٍ| := |x| + |y|.
+ * Still a norm of R-vector spaces, and can be cheaply computed without
+ * square roots */
 GEN
-QuickNormL1(GEN x)
+gnorml1_fake(GEN x)
 {
   pari_sp av = avma;
   long lx, i;
@@ -653,23 +655,23 @@ QuickNormL1(GEN x)
     case t_FRAC: return absfrac(x);
 
     case t_COMPLEX:
-      s = gadd(QuickNormL1(gel(x,1)), QuickNormL1(gel(x,2)));
+      s = gadd(gnorml1_fake(gel(x,1)), gnorml1_fake(gel(x,2)));
       break;
     case t_QUAD:
-      s = gadd(QuickNormL1(gel(x,2)), QuickNormL1(gel(x,3)));
+      s = gadd(gnorml1_fake(gel(x,2)), gnorml1_fake(gel(x,3)));
       break;
 
     case t_POL:
       lx = lg(x); s = gen_0;
-      for (i=2; i<lx; i++) s = gadd(s, QuickNormL1(gel(x,i)));
+      for (i=2; i<lx; i++) s = gadd(s, gnorml1_fake(gel(x,i)));
       break;
 
     case t_VEC: case t_COL: case t_MAT:
       lx = lg(x); s = gen_0;
-      for (i=1; i<lx; i++) s = gadd(s, QuickNormL1(gel(x,i)));
+      for (i=1; i<lx; i++) s = gadd(s, gnorml1_fake(gel(x,i)));
       break;
 
-    default: pari_err(typeer,"QuickNormL1");
+    default: pari_err(typeer,"gnorml1_fake");
       return NULL; /* not reached */
   }
   return gerepileupto(av, s);
