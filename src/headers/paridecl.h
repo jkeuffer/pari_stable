@@ -2248,7 +2248,6 @@ GEN     factor_Aurifeuille(GEN p, long n);
 GEN     factor_Aurifeuille_prime(GEN p, long n);
 GEN     galoissubcyclo(GEN N, GEN sg, long flag, long v);
 GEN     polsubcyclo(long n, long d, long v);
-GEN     znstar_small(GEN zn);
 
 /* subfield.c */
 

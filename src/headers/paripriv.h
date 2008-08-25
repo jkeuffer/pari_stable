@@ -168,7 +168,6 @@ GEN qfgaussred_positive(GEN a);
 /* miscellaneous linear algebra */
 GEN  imagecomplspec(GEN x, long *nlze);
 void rowselect_p(GEN A, GEN B, GEN p, long init);
-GEN  znstar_hnf_elts(GEN Z, GEN H);
 
 GEN  dim1proj(GEN prh);
 GEN  detcyc(GEN cyc, long *L);
@@ -673,7 +672,7 @@ GEN     polint_triv(GEN xa, GEN ya);
 GEN     FFT(GEN x, GEN Omega);
 GEN     FFTinit(long k, long prec);
 
-/* polsubcyclo.c */
+/* subcyclo.c */
 
 GEN     bnr_to_znstar(GEN bnr, long *complex);
 GEN     galoiscyclo(long n, long v);
@@ -692,12 +691,14 @@ GEN     znstar_cosets(long n, long phi_n, GEN H);
 GEN     znstar_elts(long n, GEN H);
 GEN     znstar_generate(long n, GEN V);
 GEN     znstar_hnf(GEN Z, GEN M);
+GEN     znstar_hnf_elts(GEN Z, GEN H);
 GEN     znstar_hnf_generators(GEN Z, GEN M);
 GEN     znstar_partial_bits(long n, GEN H, long d);
 GEN     znstar_partial_coset_bits(long n, GEN H, long d, long c);
 void    znstar_partial_coset_bits_inplace(long n, GEN H, GEN bits, long d, long c);
 void    znstar_partial_coset_func(long n, GEN H, void (*func) (void *, long), void *data, long d, long c);
 GEN     znstar_reduce_modulus(GEN H, long n);
+GEN     znstar_small(GEN zn);
 
 /* thue.c */
 
