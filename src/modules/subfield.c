@@ -217,7 +217,7 @@ print_block_system(blockdata *B, GEN Y, GEN SB)
 
   if (DEBUGLEVEL>5) fprintferr("Y = %Ps\n",Y);
   n = new_chunk(N+1);
-  D = cget1(N+1, t_VEC);
+  D = vectrunc_init(N+1);
   t = new_chunk(r+1);
   k = new_chunk(r+1);
   Z = cgetg(r+1, t_VEC);

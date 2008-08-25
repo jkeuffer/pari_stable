@@ -323,7 +323,7 @@ e(ulong t, GEN *globfa)
   E = gel(fa,2); lfa = lg(P);
   nbd = 1;
   for (i=1; i<lfa; i++) { E[i]++; nbd *= E[i]; }
-  Primes = cget1(nbd + 1, t_VECSMALL);
+  Primes = vecsmalltrunc_init(nbd + 1);
   s = gen_2; /* nbd = number of divisors */
   for (k=0; k<nbd; k++)
   {
@@ -337,7 +337,7 @@ e(ulong t, GEN *globfa)
     if (uisprime(++d))
     {
       if (d > 5000000) return gen_0;
-      if (d != 2) appendL(Primes, (GEN)d);
+      if (d != 2) vecsmalltrunc_append(Primes, d);
       s = muliu(s, upowuu(d, 1 + u_lval(t,d)));
     }
   }

@@ -181,6 +181,33 @@ implementation (since an object with that length already exists). Note that
 @eprog\noindent will be even faster since the compiler will directly perform
 all computations and checks.
 
+\fun{GEN}{vectrunc_init}{long l} perform \kbd{cgetg(l,t\_VEC)}, then
+set the length to $1$ and return the result. This is used to  implement
+vectors whose final length is easily bounded at creation time, that we intend
+to fill gradually using:
+
+\fun{void}{vectrunc_append}{GEN x, GEN y} assuming $x$ was allocated using
+\tet{vectrunc_init}, appends $y$ as the last element of $x$, which
+grows in the process. The function is shallow: we append $y$, not a copy;
+it is equivalent to
+\bprog
+  long lx = lg(x); gel(x,lx) = y; setlg(x, lx+1);
+@eprog\noindent
+Beware that the maximal size of $x$ (the $l$ argument to \tet{vectrunc_init})
+is unknown, hence unchecked, and stack corruption will occur if we append
+more than $l-1$ elements to $x$. Use the safer (but slower)
+\kbd{shallowconcat} when $l$ is not easy to bound in advance.
+
+An other possibility is simply to allocate using \kbd{cgetg(l, t)} then fill
+the components as they become available: this time the downside is that we do
+not obtain a correct \kbd{GEN} until the vector is complete. Almost no PARI
+function will be able to operate on it.
+
+\fun{GEN}{vecsmalltrunc_init}{long l}
+
+\fun{void}{vecsmalltrunc_append}{GEN x, long t} analog to the above for a
+\typ{VECSMALL} container.
+
 \subsec{Length conversions}
 
 \fun{long}{ndec2nlong}{long x} converts a number of decimal digits to a number

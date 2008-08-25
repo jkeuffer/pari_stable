@@ -1689,7 +1689,7 @@ a_posteriori_errors(GEN p, GEN roots_pol, long pari_err)
 /**                                                                **/
 /********************************************************************/
 static GEN
-append_clone(GEN r, GEN a) { a = gclone(a); appendL(r, a); return a; }
+append_clone(GEN r, GEN a) { a = gclone(a); vectrunc_append(r, a); return a; }
 
 /* put roots in placeholder roots_pol so that |P - L_1...L_n| < 2^(-bit)|P|
  * returns prod (x-roots_pol[i]) */
@@ -1833,7 +1833,7 @@ all_roots(GEN p, long bit)
   bit2 = bit0; e = 0;
   for (av=avma,i=1;; i++,avma=av)
   {
-    roots_pol = cget1(n+1,t_VEC);
+    roots_pol = vectrunc_init(n+1);
     bit2 += e + (n << i);
     q = gmul(myreal_1(bit2), mygprec(pd,bit2));
     q[1] = evalsigne(1)|evalvarn(0);

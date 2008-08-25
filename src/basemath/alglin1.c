@@ -106,19 +106,6 @@ gtrans(GEN x)
   return y;
 }
 
-/* routines for naive growarrays */
-GEN
-cget1(long l, long t)
-{
-  GEN z = new_chunk(l);
-  z[0] = evaltyp(t) | _evallg(1); return z;
-}
-void
-appendL(GEN x, GEN t)
-{
-  long l = lg(x); gel(x,l) = t; setlg(x, l+1);
-}
-
 /*******************************************************************/
 /*                                                                 */
 /*                           EXTRACTION                            */

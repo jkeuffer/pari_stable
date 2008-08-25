@@ -233,6 +233,26 @@ INLINE GEN
 shallowcopy(GEN x)
 { return typ(x) == t_MAT ? RgM_shallowcopy(x): leafcopy(x); }
 
+/* routines for naive growarrays */
+INLINE GEN
+vectrunc_init(long l)
+{
+  GEN z = new_chunk(l);
+  z[0] = evaltyp(t_VEC) | _evallg(1); return z;
+}
+INLINE void
+vectrunc_append(GEN x, GEN t)
+{ long l = lg(x); gel(x,l) = t; setlg(x, l+1); }
+INLINE GEN
+vecsmalltrunc_init(long l)
+{
+  GEN z = new_chunk(l);
+  z[0] = evaltyp(t_VECSMALL) | _evallg(1); return z;
+}
+INLINE void
+vecsmalltrunc_append(GEN x, long t)
+{ long l = lg(x); x[l] = t; setlg(x, l+1); }
+
 /*******************************************************************/
 /*                                                                 */
 /*                        VEC / COL / VECSMALL                     */

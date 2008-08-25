@@ -1342,23 +1342,19 @@ ComputeCoeff(GEN dtcr, LISTray *R, long n, long deg)
 static void
 deg11(LISTray *R, long p, GEN bnr, GEN pr) {
   GEN z = isprincipalray(bnr, pr);
-  appendL(R->L1, (GEN)p);
-  appendL(R->L1ray, z);
+  vecsmalltrunc_append(R->L1, p);
+  vectrunc_append(R->L1ray, z);
 }
 static void
 deg12(LISTray *R, long p, GEN bnr, GEN Lpr) {
   GEN z = isprincipalray(bnr, gel(Lpr,1));
-  appendL(R->L11, (GEN)p);
-  appendL(R->L11ray, z);
+  vecsmalltrunc_append(R->L11, p);
+  vectrunc_append(R->L11ray, z);
 }
 static void
-deg0(LISTray *R, long p) {
-  appendL(R->L0, (GEN)p);
-}
+deg0(LISTray *R, long p) { vecsmalltrunc_append(R->L0, p); }
 static void
-deg2(LISTray *R, long p) {
-  appendL(R->L2, (GEN)p);
-}
+deg2(LISTray *R, long p) { vecsmalltrunc_append(R->L2, p); }
 
 /* pi(x) <= ?? */
 static long
@@ -1379,10 +1375,10 @@ InitPrimesQuad(GEN bnr, long N0, LISTray *R)
   GEN *gptr[7];
 
   l = 1 + PiBound(N0);
-  R->L0 = cget1(l, t_VECSMALL);
-  R->L2 = cget1(l, t_VECSMALL); R->condZ = condZ;
-  R->L1 = cget1(l, t_VECSMALL); R->L1ray = cget1(l, t_VEC);
-  R->L11= cget1(l, t_VECSMALL); R->L11ray= cget1(l, t_VEC);
+  R->L0 = vecsmalltrunc_init(l);
+  R->L2 = vecsmalltrunc_init(l); R->condZ = condZ;
+  R->L1 = vecsmalltrunc_init(l); R->L1ray = vectrunc_init(l);
+  R->L11= vecsmalltrunc_init(l); R->L11ray= vectrunc_init(l);
   prime = utoipos(2);
   for (p = 2; p <= N0; prime[2] = p) {
     switch (krois(dk, p))
@@ -1432,8 +1428,8 @@ InitPrimes(GEN bnr, long N0, LISTray *R)
 
   R->condZ = condZ; l = PiBound(N0) * N;
   tmpray = cgetg(N+1, t_VEC);
-  R->L1 = cget1(l, t_VECSMALL);
-  R->L1ray = cget1(l, t_VEC);
+  R->L1 = vecsmalltrunc_init(l);
+  R->L1ray = vectrunc_init(l);
   prime = utoipos(2);
   for (p = 2; p <= N0; prime[2] = p)
   {
@@ -1450,14 +1446,14 @@ InitPrimes(GEN bnr, long N0, LISTray *R)
 	gel(tmpray,j) = NULL; continue;
       }
 
-      appendL(R->L1, (GEN)np);
+      vecsmalltrunc_append(R->L1, np);
       gel(tmpray,j) = gclone( isprincipalray(bnr, pr) );
     }
     avma = av;
     for (k = 1; k < j; k++)
     {
       if (!tmpray[k]) continue;
-      appendL(R->L1ray, gcopy(gel(tmpray,k)));
+      vectrunc_append(R->L1ray, ZC_copy(gel(tmpray,k)));
       gunclone(gel(tmpray,k));
     }
     NEXT_PRIME_VIADIFF(p,d);

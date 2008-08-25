@@ -481,7 +481,7 @@ choose_params(GEN P, GEN N, GEN X, GEN B, long *pdelta, long *pt)
 static GEN
 do_exhaustive(GEN P, GEN N, long x, GEN B)
 {
-  GEN tst, sol = cget1(2*x + 2, t_VECSMALL);
+  GEN tst, sol = vecsmalltrunc_init(2*x + 2);
   long j, l;
 
   for (j = -x; j <= x; j++)
@@ -491,7 +491,7 @@ do_exhaustive(GEN P, GEN N, long x, GEN B)
     if (cmpii(tst, B) >= 0) /* We have found a factor of N >= B */
     {
       for (l = 1; l < lg(sol) && j != sol[l]; l++) /*empty*/;
-      if (l == lg(sol)) appendL(sol, (GEN)j);
+      if (l == lg(sol)) vecsmalltrunc_append(sol, j);
     }
   }
   return zv_to_ZV(sol);

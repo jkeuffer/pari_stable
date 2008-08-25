@@ -2120,19 +2120,19 @@ typedef struct {
 } FqX_split_t;
 
 static void
-add(GEN z, GEN g, long d) { appendL(z, mkvec2(utoipos(d), g)); }
+add(GEN z, GEN g, long d) { vectrunc_append(z, mkvec2(utoipos(d), g)); }
 /* return number of roots */
 long
 FqX_split_deg1(GEN *pz, GEN u, GEN q, GEN T, GEN p)
 {
   long dg, N = degpol(u);
-  GEN v, S, g, X, z = cget1(N+1, t_VEC);
+  GEN v, S, g, X, z = vectrunc_init(N+1);
 
   *pz = z;
   if (N == 1) return 1;
   v = X = pol_x(varn(u));
   S = init_spec_FqXQ_pow(X, q, u, T, p);
-  appendL(z, S);
+  vectrunc_append(z, S);
   v = spec_FqXQ_pow(v, S, T, p);
   g = FqX_gcd(gsub(v,X),u, T,p);
   dg = degpol(g);
@@ -2145,13 +2145,13 @@ long
 FqX_split_by_degree(GEN *pz, GEN u, GEN q, GEN T, GEN p)
 {
   long nb = 0, d, dg, N = degpol(u);
-  GEN v, S, g, X, z = cget1(N+1, t_VEC);
+  GEN v, S, g, X, z = vectrunc_init(N+1);
 
   *pz = z;
   if (N == 1) return 1;
   v = X = pol_x(varn(u));
   S = init_spec_FqXQ_pow(X, q, u, T, p);
-  appendL(z, S);
+  vectrunc_append(z, S);
   for (d=1; d <= N>>1; d++)
   {
     v = spec_FqXQ_pow(v, S, T, p);

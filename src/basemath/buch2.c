@@ -920,8 +920,8 @@ get_pr_lists(GEN FB, long N, int list_pr)
     for (i=1; i<l; i++)
     {
       pr = gel(FB,i); p = pr_get_smallp(pr);
-      if (!L[p]) gel(L,p) = cget1(N+1, t_VEC);
-      appendL(gel(L,p), pr);
+      if (!L[p]) gel(L,p) = vectrunc_init(N+1);
+      vectrunc_append(gel(L,p), pr);
     }
     for (p=1; p<=pmax; p++)
       if (L[p]) gen_sort_inplace(gel(L,p), (void*)&cmp_prime_over_p,
@@ -932,8 +932,8 @@ get_pr_lists(GEN FB, long N, int list_pr)
     for (i=1; i<l; i++)
     {
       pr = gel(FB,i); p = pr_get_smallp(pr);
-      if (!L[p]) gel(L,p) = cget1(N+1, t_VECSMALL);
-      appendL(gel(L,p), (GEN)i);
+      if (!L[p]) gel(L,p) = vecsmalltrunc_init(N+1);
+      vecsmalltrunc_append(gel(L,p), i);
     }
   }
   return L;
@@ -2981,7 +2981,7 @@ extract_full_lattice(GEN x)
 
   if (l < 200) return NULL; /* not worth it */
 
-  v = cget1(l, t_VECSMALL);
+  v = vecsmalltrunc_init(l);
   H = ZM_hnf(x);
   h = cgetg(1, t_MAT);
   dj = 1;

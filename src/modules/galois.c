@@ -728,7 +728,7 @@ tschirn(buildroot *BR)
 
   r = gel(BR->r,1);
   preci(r, BR->prmax); /* max accuracy original roots */
-  appendL(BR->r, new_pol(BR->N, r, a));
+  vectrunc_append(BR->r, new_pol(BR->N, r, a));
   fixprec(BR); /* restore accuracy */
 }
 
@@ -779,8 +779,9 @@ moreprec(buildroot *BR)
       { fprintferr("$$$$$ New prec = %ld\n",BR->prmax); flusherr(); }
     ro = sortroots(cleanroots(BR->p,BR->prmax), gel(BR->r,1));
     delete_roots(BR);
-    appendL(BR->r, gclone(ro));
-    for (d = 2; d < l; d++) appendL(BR->r, new_pol(BR->N, ro, gel(BR->coef,d)));
+    vectrunc_append(BR->r, gclone(ro));
+    for (d = 2; d < l; d++)
+      vectrunc_append(BR->r, new_pol(BR->N, ro, gel(BR->coef,d)));
     avma = av;
   }
   fixprec(BR);
@@ -2421,9 +2422,9 @@ galoisbig(GEN pol, long prec)
     BR.pr = (long)(cauchy_bound(pol) / (LOG2 * BITS_IN_LONG)) + prec;
     BR.prmax = BR.pr + BIGDEFAULTPREC-2;
     BR.N = N;
-    BR.r = cget1(N+1, t_VEC);
+    BR.r = vectrunc_init(N+1);
     r = gclone ( cleanroots(BR.p, BR.prmax) );
-    appendL(BR.r, r); preci(r, BR.pr);
+    vectrunc_append(BR.r, r); preci(r, BR.pr);
     switch(N)
     {
       case  8: t = closure8(EVEN, &BR); break;

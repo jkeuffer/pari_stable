@@ -1278,13 +1278,13 @@ zprimestar(GEN nf, GEN pr, GEN ep, GEN x, GEN arch)
     g0 = makeprimetoideal(x,u,v,g);
   }
 
-  list = cget1(e+1, t_VEC);
+  list = vectrunc_init(e+1);
   y = mkvec5(mkvec(addis(powiu(p,f), -1)),
              mkvec(g),
              mkvec(g0),
              mkvec(nfsign_arch(nf,g0,arch)),
              gen_1);
-  appendL(list, y);
+  vectrunc_append(list, y);
   prb = prh;
   for (a = b = 1; a < e; a = b)
   {
@@ -1305,7 +1305,7 @@ zprimestar(GEN nf, GEN pr, GEN ep, GEN x, GEN arch)
       gel(s,i) = nfsign_arch(nf,gel(gen,i),arch);
     }
     y = mkvec5(gel(z,1), gel(z,2), gen, s, U);
-    appendL(list, y);
+    vectrunc_append(list, y);
   }
   return gerepilecopy(av, list);
 }

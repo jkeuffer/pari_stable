@@ -356,11 +356,11 @@ build_list_Hecke(primlist *L, GEN nfz, GEN fa, GEN gothf, GEN gell, tau_s *tau)
   if (!fa) fa = idealfactor(nfz, gothf);
   listpr = gel(fa,1);
   listex = gel(fa,2); l = lg(listpr);
-  L->Sm  = cget1(l,t_VEC);
-  L->Sml1= cget1(l,t_VEC);
-  L->Sml2= cget1(l,t_VEC);
-  L->Sl  = cget1(l+degKz,t_VEC);
-  L->ESml2=cget1(l,t_VECSMALL);
+  L->Sm  = vectrunc_init(l);
+  L->Sml1= vectrunc_init(l);
+  L->Sml2= vectrunc_init(l);
+  L->Sl  = vectrunc_init(l+degKz);
+  L->ESml2=vecsmalltrunc_init(l);
   for (i=1; i<l; i++)
   {
     pr = gel(listpr,i);
@@ -368,7 +368,7 @@ build_list_Hecke(primlist *L, GEN nfz, GEN fa, GEN gothf, GEN gell, tau_s *tau)
     if (!equalii(pr_get_p(pr), gell))
     {
       if (vp != 1) return 1;
-      if (!isconjinprimelist(nfz, L->Sm,pr,tau)) appendL(L->Sm,pr);
+      if (!isconjinprimelist(nfz, L->Sm,pr,tau)) vectrunc_append(L->Sm,pr);
     }
     else
     {
@@ -376,15 +376,15 @@ build_list_Hecke(primlist *L, GEN nfz, GEN fa, GEN gothf, GEN gell, tau_s *tau)
       if (vd > 0) return 4;
       if (vd==0)
       {
-	if (!isconjinprimelist(nfz, L->Sml1,pr,tau)) appendL(L->Sml1, pr);
+	if (!isconjinprimelist(nfz, L->Sml1,pr,tau)) vectrunc_append(L->Sml1, pr);
       }
       else
       {
 	if (vp==1) return 2;
 	if (!isconjinprimelist(nfz, L->Sml2,pr,tau))
 	{
-	  appendL(L->Sml2, pr);
-	  appendL(L->ESml2,(GEN)vp);
+	  vectrunc_append(L->Sml2, pr);
+	  vecsmalltrunc_append(L->ESml2, vp);
 	}
       }
     }
@@ -394,7 +394,7 @@ build_list_Hecke(primlist *L, GEN nfz, GEN fa, GEN gothf, GEN gell, tau_s *tau)
   {
     pr = gel(factell,i);
     if (!idealval(nfz,gothf,pr))
-      if (!isconjinprimelist(nfz, L->Sl,pr,tau)) appendL(L->Sl, pr);
+      if (!isconjinprimelist(nfz, L->Sl,pr,tau)) vectrunc_append(L->Sl, pr);
   }
   return 0; /* OK */
 }
