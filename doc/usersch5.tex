@@ -2058,7 +2058,8 @@ $|\kbd{x}| / \kbd{y}$, assuming $\kbd{y}$ divides
 $\kbd{x}$ and $\kbd{y}$ is non-zero. (Note the absolute value!)
 
 The following routines return 1 (true) if \kbd{y} divides \kbd{x}, and
-0 otherwise. All \kbd{GEN} are assumed to be \typ{INT}s.
+0 otherwise. (Error if $y$ is $0$, even if $x$ is $0$.) All \kbd{GEN} are assumed
+to be \typ{INT}s.
 \fun{int}{dvdii}{GEN x, GEN y}
 \fun{int}{dvdis}{GEN x, long y}
 \fun{int}{dvdiu}{GEN x, ulong y}
@@ -4146,6 +4147,10 @@ of~\kbd{x}.
 
 \fun{long}{ZV_max_lg}{GEN x} returns the effective length of the longest
 entry in $x$.
+
+\fun{int}{ZV_dvd}{GEN x, GEN y} assuming $x$, $y$ are two \kbd{ZV}s of the same
+length, return $1$ if $y[i]$ divides $x[i]$ for all $i$ and $0$ otherwise.
+Error if one of the $y[i]$ is $0$.
 
 \fun{GEN}{ZV_sort}{GEN L} sort the \kbd{ZV} $L$.
 Returns a vector with the same type as $L$.

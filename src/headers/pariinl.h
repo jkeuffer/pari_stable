@@ -1119,6 +1119,17 @@ RgM_shallowcopy(GEN x)
 INLINE GEN
 Flm_copy(GEN x) { return RgM_shallowcopy(x); }
 
+/* divisibility: return 1 if y[i] | x[i] for all i, 0 otherwise. Assume
+ * x,y are ZV of the same length */
+INLINE int
+ZV_dvd(GEN x, GEN y)
+{
+  long i, l = lg(x);
+  for (i=1; i < l; i++)
+    if ( ! dvdii( gel(x,i), gel(y,i) ) ) return 0;
+  return 1;
+}
+
 /* ARITHMETIC */
 INLINE GEN
 matpascal(long n) { return matqpascal(n, NULL); }

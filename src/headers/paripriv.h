@@ -700,10 +700,6 @@ void    znstar_partial_coset_func(long n, GEN H, void (*func) (void *, long), vo
 GEN     znstar_reduce_modulus(GEN H, long n);
 GEN     znstar_small(GEN zn);
 
-/* thue.c */
-
-GEN     bnfisintnormabs(GEN bnf, GEN a);
-
 /* trans1.c */
 
 GEN     constlog2(long prec);

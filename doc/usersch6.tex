@@ -977,6 +977,10 @@ remainder sequence associated to $A(Y)$ and $B(X-kY)$, leading to $C =
 \text{Res}_Y(A(Y), B(Y-kX))$. In particular $a := -h_0/h_1$ is a root of $A$
 in $\Q[X]/(C)$, and $X - ka$ is a root of $B$.
 
+\fun{GEN}{bnfisintnormabs}{GEN bnf, GEN a} as \tet{bnfisintnorm}, but returns a
+complete system of solutions modulo units of the absolute norm equation
+$|\Norm(x)| = |a|$. As fast as \kbd{bnfisintnorm}, but solves simulaneously
+the two equations $\Norm(x) = \pm a$.
 
 \subsec{Obsolete routines}
 

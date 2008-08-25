@@ -2286,6 +2286,7 @@ GEN     zbrent(void *E, GEN (*eval)(GEN,void*), GEN a, GEN b, long prec);
 /* thue.c */
 
 GEN     bnfisintnorm(GEN x, GEN y);
+GEN     bnfisintnormabs(GEN bnf, GEN a);
 GEN     thue(GEN thueres, GEN rhs, GEN ne);
 GEN     thueinit(GEN pol, long flag, long prec);
 
@@ -2659,6 +2660,7 @@ INLINE GEN    RgX_rem(GEN x, GEN y);
 INLINE GEN    ZC_hnfrem(GEN x, GEN y);
 INLINE GEN    ZM_hnfrem(GEN x, GEN y);
 INLINE GEN    ZM_lll(GEN x, double D, long f);
+INLINE int    ZV_dvd(GEN x, GEN y);
 INLINE GEN    ZV_to_zv(GEN x);
 INLINE GEN    ZX_ZXY_resultant(GEN a, GEN b);
 INLINE GEN    ZX_mul(GEN x, GEN y);

@@ -16,11 +16,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "paripriv.h"
 
-/* Thue equation solver. In all the forthcoming remarks, "paper"
- * designs the paper "Thue Equations of High Degree", by Yu. Bilu and
- * G. Hanrot, J. Number Theory (1996). Note that numbering of the constants
- * is that of Hanrot's thesis rather than that of the paper.
- * The last part of the program (bnfisintnorm) was written by K. Belabas. */
+/********************************************************************/
+/**                                                                **/
+/**             THUE EQUATION SOLVER (G. Hanrot)                   **/
+/**                                                                **/
+/********************************************************************/
+/* In all the forthcoming remarks, "paper" designs the paper "Thue Equations of
+ * High Degree", by Yu. Bilu and G. Hanrot, J. Number Theory (1996). The numbering
+ * of the constants corresponds to Hanrot's thesis rather than to the paper */
 
 /* Check whether tnf is a valid structure */
 static int
@@ -968,206 +971,204 @@ thue(GEN tnf, GEN rhs, GEN ne)
   return gerepilecopy(av, SmallSols(S, itos(floorr(x3)), P, rhs));
 }
 
+/********************************************************************/
+/**                                                                **/
+/**                      BNFISINTNORM (K. Belabas)                 **/
+/**                                                                **/
+/********************************************************************/
 struct sol_abs
 {
-  GEN Relations; /* primes above a, expressed on generators of Cl(K) */
-  GEN Partial;   /* list of vectors, Partial[i] = Relations[1..i] * u[1..i] */
-  GEN gen_ord;   /* orders of generators of Cl(K) given in bnf */
+  GEN rel; /* Primes PR[i] above a, expressed on generators of Cl(K) */
+  GEN partrel; /* list of vectors, partrel[i] = rel[1..i] * u[1..i] */
+  GEN cyc;     /* orders of generators of Cl(K) given in bnf */
 
-  long *f;       /* f[i] = f(Primes[i]/p), inertial degree */
-  long *n;       /* a = prod p^{ n_p }. n[i]=n_p if Primes[i] divides p */
-  long *inext;   /* index of first P above next p, 0 if p is last */
-  long *S;       /* S[i] = n[i] - sum_{ 1<=k<=i } f[k]*u[k] */
-  long *u;       /* We want principal ideals I = prod Primes[i]^u[i] */
-  GEN  normsol;  /* lists of copies of the u[] which are solutions */
+  long *f;     /* f[i] = f(PR[i]/p), inertia degree */
+  long *n;     /* a = prod p^{ n_p }. n[i]=n_p if PR[i] divides p */
+  long *next;  /* index of first P above next p, 0 if p is last */
+  long *S;     /* S[i] = n[i] - sum_{ 1<=k<=i } f[k]*u[k] */
+  long *u;     /* We want principal ideals I = prod PR[i]^u[i] */
+  GEN  normsol;/* lists of copies of the u[] which are solutions */
 
-  long Nprimes;  /* length(T->Relations) = #{max ideal above divisors of a} */
+  long nPR;    /* length(T->rel) = #PR */
   long sindex, smax; /* current index in T->normsol; max. index */
 };
 
 /* u[1..i] has been filled. Norm(u) is correct.
- * Check relations in class group then save it.
- */
+ * Check relations in class group then save it. */
 static void
 test_sol(struct sol_abs *T, long i)
 {
-  long k,*sol;
+  long k, l;
+  GEN s;
 
-  if (T->Partial)
-  {
-    pari_sp av=avma;
-    for (k=1; k<lg(T->Partial[1]); k++)
-      if ( signe(modii( gmael(T->Partial,i,k), gel(T->gen_ord,k) )) )
-	{ avma=av; return; }
-    avma=av;
-  }
+  if (T->partrel && !ZV_dvd(gel(T->partrel, i),  T->cyc)) return;
   if (T->sindex == T->smax)
-  {
+  { /* no more room in solution list: enlarge */
     long new_smax = T->smax << 1;
     GEN  new_normsol = new_chunk(new_smax+1);
 
     for (k=1; k<=T->smax; k++) gel(new_normsol,k) = gel(T->normsol,k);
     T->normsol = new_normsol; T->smax = new_smax;
   }
-  sol = cgetg(T->Nprimes+1,t_VECSMALL);
-  gel(T->normsol,++T->sindex) = sol;
-
-  for (k=1; k<=i; k++)       sol[k] = T->u[k];
-  for (   ; k<=T->Nprimes; k++) sol[k] = 0;
+  gel(T->normsol, ++T->sindex) = s = cgetg_copy(T->u, &l);
+  for (k=1; k <= i; k++) s[k] = T->u[k];
+  for (   ; k < l;  k++) s[k] = 0;
   if (DEBUGLEVEL>2)
   {
-    fprintferr("sol = %Ps\n",sol);
-    if (T->Partial) fprintferr("T->Partial = %Ps\n",T->Partial);
+    fprintferr("sol = %Ps\n",s);
+    if (T->partrel) fprintferr("T->partrel = %Ps\n",T->partrel);
     flusherr();
   }
 }
+/* partrel[i] <-- partrel[iー1] + u[i] * rel[i] */
 static void
-fix_Partial(struct sol_abs *T, long i)
+fix_partrel(struct sol_abs *T, long i)
 {
-  long k;
   pari_sp av = avma;
-  for (k=1; k<lg(T->Partial[1]); k++)
-    affii(addii(gmael(T->Partial,i-1,k), mulis(gmael(T->Relations,i,k), T->u[i])),
-	  gmael(T->Partial,i,k));
+  GEN part1 = gel(T->partrel,i);
+  GEN part0 = gel(T->partrel,i-1);
+  GEN rel = gel(T->rel, i);
+  ulong u = T->u[i];
+  long k, l = lg(part1);
+  for (k=1; k < l; k++)
+    affii(addii(gel(part0,k), muliu(gel(rel,k), u)), gel(part1,k));
   avma = av;
 }
 
 /* Recursive loop. Suppose u[1..i] has been filled
- * Find possible solutions u such that, Norm(prod Prime[i]^u[i]) = a, taking
+ * Find possible solutions u such that, Norm(prod PR[i]^u[i]) = a, taking
  * into account:
  *  1) the relations in the class group if need be.
- *  2) the factorization of a.
- */
+ *  2) the factorization of a. */
 static void
 isintnorm_loop(struct sol_abs *T, long i)
 {
   if (T->S[i] == 0) /* sum u[i].f[i] = n[i], do another prime */
   {
-    long k;
-    if (T->inext[i] == 0) { test_sol(T, i); return; }
+    long k, next = T->next[i];
+    if (next == 0) { test_sol(T, i); return; } /* no primes left */
 
-    /* there are some primes left */
-    if (T->Partial) gaffect(gel(T->Partial,i), gel(T->Partial,T->inext[i]-1));
-    for (k=i+1; k < T->inext[i]; k++) T->u[k]=0;
-    i=T->inext[i]-1;
+    /* some primes left */
+    if (T->partrel) gaffect(gel(T->partrel,i), gel(T->partrel, next-1));
+    for (k=i+1; k < next; k++) T->u[k] = 0;
+    i = next-1;
   }
-  else if (i == T->inext[i]-2 || i == T->Nprimes-1)
-  {
-    /* only one Prime left above prime; change prime, fix u[i+1] */
+  else if (i == T->next[i]-2 || i == T->nPR-1)
+  { /* only one Prime left above prime; change prime, fix u[i+1] */
+    long q;
     if (T->S[i] % T->f[i+1]) return;
-    i++; T->u[i] = T->S[i-1] / T->f[i];
-    if (T->Partial) fix_Partial(T,i);
-    if (T->inext[i]==0) { test_sol(T,i); return; }
+    q = T->S[i] / T->f[i+1];
+    i++; T->u[i] = q;
+    if (T->partrel) fix_partrel(T,i);
+    if (T->next[i] == 0) { test_sol(T,i); return; }
   }
 
-  i++; T->u[i]=0;
-  if (T->Partial) gaffect(gel(T->Partial,i-1), gel(T->Partial,i));
-  if (i == T->inext[i-1])
+  i++; T->u[i] = 0;
+  if (T->partrel) gaffect(gel(T->partrel,i-1), gel(T->partrel,i));
+  if (i == T->next[i-1])
   { /* change prime */
-    if (T->inext[i] == i+1 || i == T->Nprimes) /* only one Prime above p */
+    if (T->next[i] == i+1 || i == T->nPR) /* only one Prime above p */
     {
-      T->S[i]=0; T->u[i] = T->n[i] / T->f[i]; /* we already know this is exact */
-      if (T->Partial) fix_Partial(T, i);
+      T->S[i] = 0;
+      T->u[i] = T->n[i] / T->f[i]; /* we already know this is exact */
+      if (T->partrel) fix_partrel(T, i);
     }
     else T->S[i] = T->n[i];
   }
   else T->S[i] = T->S[i-1]; /* same prime, different Prime */
   for(;;)
   {
-    isintnorm_loop(T, i); T->S[i]-=T->f[i]; if (T->S[i]<0) break;
-    if (T->Partial)
-      gaddz(gel(T->Partial,i), gel(T->Relations,i), gel(T->Partial,i));
+    isintnorm_loop(T, i);
+    T->S[i] -= T->f[i]; if (T->S[i] < 0) break;
     T->u[i]++;
+    if (T->partrel) {
+      pari_sp av = avma;
+      gaffect(ZC_add(gel(T->partrel,i), gel(T->rel,i)), gel(T->partrel,i));
+      avma = av;
+    }
   }
 }
 
-static void
-get_sol_abs(struct sol_abs *T, GEN bnf, GEN a, GEN *ptPrimes)
+static int
+get_sol_abs(struct sol_abs *T, GEN bnf, GEN a, GEN *ptPR)
 {
-  GEN dec, fact, primes, Primes, Fact;
-  long *gcdlist, gcd,nprimes,Ngen,i,j;
+  GEN fact = Z_factor(a), P = gel(fact,1), E = gel(fact,2), PR;
+  long N = nf_get_degree(gel(bnf,7)), nP = lg(P)-1, Ngen, max, nPR, i, j;
 
-  *ptPrimes = NULL;
+  max = nP*N; /* upper bound for T->nPR */
+  T->f = new_chunk(max+1);
+  T->n = new_chunk(max+1);
+  T->next = new_chunk(max+1);
+  *ptPR = PR = cgetg(max+1, t_VEC); /* length to be fixed later */
 
-  fact=Z_factor(a); primes=gel(fact,1);
-  nprimes=lg(primes)-1; T->sindex = 0;
-  T->gen_ord = gmael3(bnf,8,1,2); Ngen = lg(T->gen_ord)-1;
-
-  Fact = new_chunk(1+nprimes);
-  gcdlist = new_chunk(1+nprimes);
-
-  T->Nprimes=0;
-  for (i=1; i<=nprimes; i++)
+  nPR = 0;
+  for (i = 1; i <= nP; i++)
   {
-    long ldec;
+    GEN L = idealprimedec(bnf, gel(P,i));
+    long lL = lg(L), gcd, k, v;
+    ulong vn = itou(gel(E,i));
 
-    dec = idealprimedec(bnf,gel(primes,i)); ldec = lg(dec)-1;
-    gcd = itos(gmael(dec,1,4));
-
-    /* check that gcd_{P|p} f_P | n_p */
-    for (j=2; gcd>1 && j<=ldec; j++)
-      gcd = ugcd(gcd, itou(gmael(dec,j,4)));
-
-    gcdlist[i]=gcd;
-
-    if (gcd != 1 && smodis(gmael(fact,2,i),gcd))
+    /* check that gcd_{P | p} f_P  divides  n_p */
+    gcd = pr_get_f(gel(L,1));
+    for (j=2; gcd > 1 && j < lL; j++) gcd = ugcd(gcd, pr_get_f(gel(L,j)));
+    if (gcd > 1 && vn % gcd)
     {
       if (DEBUGLEVEL>2)
-	{ fprintferr("gcd f_P  does not divide n_p\n"); flusherr(); }
-      return;
+      { fprintferr("gcd f_P  does not divide n_p\n"); flusherr(); }
+      return 0;
     }
-    gel(Fact,i) = dec; T->Nprimes += ldec;
-  }
-
-  T->f = new_chunk(1+T->Nprimes); T->u = new_chunk(1+T->Nprimes);
-  T->n = new_chunk(1+T->Nprimes); T->S = new_chunk(1+T->Nprimes);
-  T->inext = new_chunk(1+T->Nprimes);
-  Primes = cgetg(1+T->Nprimes, t_VEC);
-  *ptPrimes = Primes;
-
-  if (Ngen)
-  {
-    T->Partial   = new_chunk(1+T->Nprimes);
-    T->Relations = new_chunk(1+T->Nprimes);
-  }
-  else /* trivial class group, no relations to check */
-    T->Relations = T->Partial = NULL;
-
-  j=0;
-  for (i=1; i<=nprimes; i++)
-  {
-    long k,lim,v, vn=itos(gmael(fact,2,i));
-
-    gcd = gcdlist[i];
-    dec = gel(Fact,i); lim = lg(dec);
-    v = (i==nprimes)? 0: j + lim;
-    for (k=1; k < lim; k++)
+    v = (i==nP)? 0: nPR + lL;
+    for (k = 1; k < lL; k++)
     {
-      j++; Primes[j] = dec[k];
-      T->f[j] = itos(gmael(dec,k,4)) / gcd;
-      T->n[j] = vn / gcd; T->inext[j] = v;
-      if (T->Partial)
-	gel(T->Relations,j) = isprincipal(bnf, gel(Primes,j));
+      GEN pr = gel(L,k);
+      gel(PR, ++nPR) = pr;
+      T->f[nPR] = pr_get_f(pr) / gcd;
+      T->n[nPR] = vn / gcd;
+      T->next[nPR] = v;
     }
   }
-  if (T->Partial)
+  T->nPR = nPR;
+  setlg(PR, nPR + 1);
+
+  T->u = cgetg(nPR+1, t_VECSMALL);
+  T->S = new_chunk(nPR+1);
+  T->cyc = gmael3(bnf,8,1,2);
+  Ngen = lg(T->cyc)-1;
+  if (Ngen == 0)
+    T->rel = T->partrel = NULL; /* trivial Cl(K), no relations to check */
+  else
   {
-    for (i=1; i <= T->Nprimes; i++)
-      if (!gcmp0(gel(T->Relations,i))) break;
-    if (i > T->Nprimes) T->Partial = NULL; /* all ideals dividing a are principal */
-  }
-  if (T->Partial)
-    for (i=0; i<=T->Nprimes; i++) /* T->Partial[0] needs to be initialized */
+    int triv = 1;
+    T->partrel = new_chunk(nPR+1);
+    T->rel = new_chunk(nPR+1);
+    for (i=1; i <= nPR; i++)
     {
-      gel(T->Partial,i)=cgetg(Ngen+1,t_COL);
+      GEN c = isprincipal(bnf, gel(PR,i));
+      gel(T->rel,i) = c;
+      if (triv && !ZV_cmp0(c)) triv = 0; /* non trivial relations in Cl(K)*/
+    }
+    /* triv = 1: all ideals dividing a are principal */
+    if (triv) T->rel = T->partrel = NULL;
+  }
+  if (T->partrel)
+  {
+    long B = ZV_max_lg(T->cyc) + 3;
+    for (i = 0; i <= nPR; i++)
+    { /* T->partrel[0] also needs to be initialized */
+      GEN c = cgetg(Ngen+1, t_COL); gel(T->partrel,i) = c;
       for (j=1; j<=Ngen; j++)
       {
-	GEN z = cgeti(4); z[1] = evalsigne(0)|evallgefint(4);
-	gmael(T->Partial,i,j)=z;
+	GEN z = cgeti(B); gel(c,j) = z;
+        z[1] = evalsigne(0)|evallgefint(B);
       }
     }
-  T->smax=511; T->normsol = new_chunk(T->smax+1);
-  T->S[0]=T->n[1]; T->inext[0]=1; isintnorm_loop(T, 0);
+  }
+  T->smax = 511;
+  T->normsol = new_chunk(T->smax+1);
+  T->S[0] = T->n[1];
+  T->next[0] = 1;
+  T->sindex = 0;
+  isintnorm_loop(T, 0); return 1;
 }
 
 /* Look for unit of norm -1. Return 1 if it exists and set *unit, 0 otherwise */
@@ -1192,29 +1193,22 @@ GEN
 bnfisintnormabs(GEN bnf, GEN a)
 {
   struct sol_abs T;
-  GEN nf, res, x, Primes;
+  GEN nf, res, PR;
   long i;
 
+  if (typ(a) != t_INT) pari_err(typeer,"bnfisintnormabs");
   bnf = checkbnf(bnf); nf = gel(bnf,7);
-  if (typ(a)!=t_INT) pari_err(talker,"expected an integer in bnfisintnorm");
-  if (!signe(a))  return mkvec(gen_0);
+  if (!signe(a)) return mkvec(gen_0);
   if (is_pm1(a)) return mkvec(gen_1);
 
-  get_sol_abs(&T, bnf, absi(a), &Primes);
-
-  res = cget1(T.sindex+1, t_VEC);
+  if (!get_sol_abs(&T, bnf, absi(a), &PR)) return cgetg(1, t_VEC);
+  /* |a| > 1 => T.nPR > 0 */
+  res = cgetg(T.sindex+1, t_VEC);
   for (i=1; i<=T.sindex; i++)
   {
-    x = gel(T.normsol,i);
-    if (!T.Nprimes) x = gen_1;
-    else
-    {
-      x = vecsmall_to_col(x);
-      x = isprincipalfact(bnf, NULL, Primes, x, nf_FORCE | nf_GEN_IF_PRINCIPAL);
-      x = coltoliftalg(nf, x);
-    }
-    /* x solution, up to sign */
-    appendL(res, x);
+    GEN x = vecsmall_to_col( gel(T.normsol,i) );
+    x = isprincipalfact(bnf, NULL, PR, x, nf_FORCE | nf_GEN_IF_PRINCIPAL);
+    gel(res,i) = coltoliftalg(nf, x); /* x solution, up to sign */
   }
   return res;
 }
@@ -1223,25 +1217,30 @@ GEN
 bnfisintnorm(GEN bnf, GEN a)
 {
   pari_sp av = avma;
-  GEN nf = checknf(bnf), T = gel(nf,1);
-  GEN unit = NULL, z, x, res = bnfisintnormabs(bnf, a);
-  long sNx, i, j = 1, l = lg(res), sa = signe(a);
+  GEN nf = checknf(bnf), T = gel(nf,1), unit = NULL;
+  GEN z = bnfisintnormabs(bnf, a);
+  long sNx, i, j, N = degpol(T), l = lg(z), sa = signe(a);
   long norm_1 = 0; /* gcc -Wall */
 
-  z = cgetg(l, t_VEC);
-  for (i=1; i<l; i++)
+  /* update z in place to get correct signs: multiply by unit of norm -1 if
+   * it exists, otherwise delete solution with wrong sign */
+  for (i = j = 1; i < l; i++)
   {
-    x = gel(res,i);
-    sNx = signe(resultant(T, x));
+    GEN x = gel(z,i);
+    int xpol = (typ(x) == t_POL);
+
+    if (xpol) sNx = signe(ZX_resultant(T, Q_primpart(x)));
+    else      sNx = gsigne(x) < 0 && odd(N) ? -1 : 1;
     if (sNx != sa)
     {
       if (! unit) norm_1 = get_unit_1(bnf, &unit);
-      if (norm_1) x = (typ(unit) == t_INT)? gmul(unit,x): RgXQ_mul(unit,x,T);
-      else
+      if (!norm_1)
       {
 	if (DEBUGLEVEL > 2) fprintferr("%Ps eliminated because of sign\n",x);
 	continue;
       }
+      if (xpol) x = (unit == gen_m1)? RgX_neg(x): RgXQ_mul(unit,x,T);
+      else      x = (unit == gen_m1)? gneg(x): RgX_Rg_mul(unit,x);
     }
     gel(z,j++) = x;
   }
