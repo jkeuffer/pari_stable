@@ -366,11 +366,7 @@ mpqs_iterate_primes(ulong *p, byteptr primes_ptr)
   if (*primes_ptr)
     NEXT_PRIME_VIADIFF(prime,primes_ptr);
   else
-  {
-    pari_sp av = avma;
-    prime = itou(nextprime(utoipos(prime + 1)));
-    avma = av;
-  }
+    prime = unextprime(prime+1);
   *p = prime; return primes_ptr;
 }
 
