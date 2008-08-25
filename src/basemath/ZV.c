@@ -44,14 +44,24 @@ RgM_check_ZM(GEN A, const char *s)
 }
 
 long
+ZV_max_lg(GEN x)
+{
+  long i, prec = 2, m = lg(x);
+  for (i=1; i<m; i++) { long l = lgefint(x[i]); if (l > prec) prec = l; }
+  return prec;
+}
+long
 ZM_max_lg(GEN x)
 {
-  long i, j, prec = 0, lx = lg(x);
-
-  for (j=1; j<lx; j++)
+  long i, prec = 2, n = lg(x);
+  if (n != 1)
   {
-    GEN c = gel(x,j);
-    for (i=1; i<lx; i++) { long l = lgefint(c[i]); if (l > prec) prec = l; }
+    long j, m = lg(x[1]);
+    for (j=1; j<n; j++)
+    {
+      GEN c = gel(x,j);
+      for (i=1; i<m; i++) { long l = lgefint(c[i]); if (l > prec) prec = l; }
+    }
   }
   return prec;
 }

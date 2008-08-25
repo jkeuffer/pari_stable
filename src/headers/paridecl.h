@@ -414,6 +414,7 @@ GEN     ZV_content(GEN x);
 GEN     ZV_dotproduct(GEN x,GEN y);
 GEN     ZV_dotsquare(GEN x);
 int     ZV_equal(GEN V, GEN W);
+long    ZV_max_lg(GEN x);
 GEN     ZV_prod(GEN v);
 GEN     ZV_to_Flv(GEN x, ulong p);
 GEN     ZV_to_nv(GEN z);
