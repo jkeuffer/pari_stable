@@ -405,12 +405,9 @@ isrationalzeroscalar(GEN g)
 {
   switch (typ(g))
   {
-    case t_INT:
-      return !signe(g);
-    case t_COMPLEX:
-      return isrationalzeroscalar(gel(g,1)) && isrationalzeroscalar(gel(g,2));
-    case t_QUAD:
-      return isrationalzeroscalar(gel(g,2)) && isrationalzeroscalar(gel(g,3));
+    case t_INT:     return !signe(g);
+    case t_COMPLEX: return isintzero(gel(g,1)) && isintzero(gel(g,2));
+    case t_QUAD:    return isintzero(gel(g,2)) && isintzero(gel(g,3));
   }
   return 0;
 }
