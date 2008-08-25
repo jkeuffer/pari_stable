@@ -532,7 +532,7 @@ GEN     Flm_hess(GEN x, ulong p);
 GEN     QM_minors_coprime(GEN x, GEN pp);
 GEN     QM_ImZ_hnf(GEN x);
 GEN     QM_ImQ_hnf(GEN x);
-GEN     QuickNormL1(GEN x);
+GEN     gnorml1_fake(GEN x);
 GEN     ZM_charpoly(GEN x);
 GEN     adj(GEN x);
 GEN     caract(GEN x, long v);

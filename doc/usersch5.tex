@@ -3322,7 +3322,7 @@ Assumes \kbd{p} is prime and \kbd{T} irreducible in $\F_p[X]$.
 Assumes \kbd{p} is prime and \kbd{T} irreducible in $\F_p[X]$.
 
 \subsec{\kbd{Flx}} Let \kbd{p} an understood \kbd{ulong}, assumed to be
-prime, to be given by the function arguments; an \kbd{Fl} is an \kbd{ulong}
+prime, to be given the the function arguments; an \kbd{Fl} is an \kbd{ulong}
 belonging to $[0,\kbd{p}-1]$, an \kbd{Flx}~\kbd{z} is a \typ{VECSMALL}
 representing a polynomial with small integer coefficients. Specifically
 \kbd{z[0]} is the usual codeword, \kbd{z[1] = evalvarn($v$)} for some
@@ -5400,7 +5400,7 @@ the \kbd{long}~\kbd{s}, 0~otherwise.
 
 \section{Miscellaneous boolean functions}
 
-\fun{int}{isrationalzeroscalar}{GEN g} equivalent to, but faster than,
+\fun{int}{isrationalzeroscalar}{GEN x} equivalent to, but faster than,
 \bprog
   is_scalar_t(typ(x)) && isrationalzero(x)
 @eprog
@@ -5862,6 +5862,35 @@ exponents: return the product of the $v[i]^{e[i]}$.
 \noindent \kbd{mul(D, $x$, $x$)} and \kbd{pow(D, $x$, $n$)}
 return $xy$ and $x^n$ respectively.
 
+\section{Matrix and polynomial norms} This section concerns only standard norms
+of $\R$ and $\C$ vector spaces, not algebraic norms given by the determinant of
+some multiplication operator. We have already seen type-specific functions like
+\tet{ZM_supnorm} or \tet{RgM_fpnorml2} and limit ourselves to generic functions
+assuming nothing about their \kbd{GEN} argument; these functions allow
+the following scalar types: \typ{INT}, \typ{FRAC}, \typ{REAL}, \typ{COMPLEX},
+\typ{QUAD} and are defined recursively (in terms of norms of their components)
+for the following ``container'' types: \typ{POL}, \typ{VEC}, \typ{COL} and
+\typ{MAT}. They raise an error if some other type appears in the argument.
+
+\fun{GEN}{gnorml2}{GEN x} The norm of a scalar is the square of its complex
+modulus, the norm of a recursive type is the sum of the norms of its components.
+For polynomials, vectors or matrices of complex numbers one recovers the
+\emph{square} of the usual $L^2$ norm. In most applications, the missing square
+root computation can be skipped.
+
+\fun{GEN}{gnorml1}{GEN x, long prec} The norm of a scalar is its complex
+modulus, the norm of a recursive type is the sum of the norms of its components.
+For polynomials, vectors or matrices of complex numbers one recovers the
+the usual $L^1$ norm. One must include a real precision \kbd{prec} in case
+the inputs include \typ{COMPLEX} or \typ{QUAD} with exact rational components:
+a square root must be computed and we must choose an accuracy.
+
+\fun{GEN}{gnorml1_fake}{GEN x} as \tet{gnorml1}, except that the norm
+of a \typ{QUAD} $x + wy$ or \typ{COMPLEX} $x + Iy$ is defined as
+$|x| + |y|$, where we use the ordinary real absolute value. This is still a norm
+of $\R$ vector spaces, which is easier to compute than
+\kbd{gnorml1} and can often be used in its place.
+
 \section{Substitution and evaluation}
 
 \fun{GEN}{gsubst}{GEN x, long v, GEN y} substitutes the object \kbd{y}
@@ -6279,7 +6308,7 @@ small group \var{grp} of domain \var{n} as smalls.
 \fun{long}{group_order}{GEN grp} returns the order of the small group
 \var{grp} (which is the product of the relative orders).
 
-\fun{long}{group_isabelian}{GEN grp} returns $1$ if the small group
+\fun{long}{group_isabelian}{GEN grp} returns $1$ the the small group
 \var{grp} is Abelian, else $0$.
 
 \fun{GEN}{group_abelianHNF}{GEN grp, GEN elts} if \var{grp} is not Abelian,
@@ -6291,20 +6320,18 @@ be the list of elements of \var{grp}.
 returns \kbd{NULL}, else returns its cyclic decomposition. If \var{elts} is no
 \kbd{NULL}, it must be the list of elements of \var{grp}.
 
-\fun{long}{group_isA4S4}{GEN grp} returns $1$ if the small group
+\fun{long}{group_isA4S4}{GEN grp} return $1$ if the small group
 \var{grp} is isomorphic to $A_4$, $2$ if it is isomorphic to $S_4$ and
 $0$ else. This is mainly to deal with the idiosynchrasy of the format.
 
 \fun{GEN}{group_leftcoset}{GEN G, GEN g} where $G$ is a small group and $g$ a
-small group of the same domain, returns the left coset $gG$ as a vector of
-permutations.
+small of the same domain, the the left coset $gG$ as a vector of small.
 
 \fun{GEN}{group_rightcoset}{GEN G, GEN g} where $G$ is a small group and $g$ a
-small group of the same domain, returns the right coset $Gg$  as a vector of
-permutations.
+small of the same domain, the the right coset $Gg$  as a vector of small.
 
 \fun{long}{group_perm_normalize}{GEN G, GEN g} where $G$ is a small group and
-$g$ a small group of the same domain, return $1$ if $gGg^-1=G$, else $0$.
+$g$ a small of the same domain, return $1$ if $gGg^-1=G$, else $0$.
 
 \fun{GEN}{group_quotient}{GEN G, GEN H}, where $G$ is a small group and
 $H$ is a subgroup of $G$, returns the quotient map $G\rightarrow G/H$
