@@ -113,7 +113,7 @@ constpi(long prec)
 
   if (gpi && lg(gpi) >= prec) return gpi;
 
-  av = avma; tmppi = newbloc(prec);
+  av = avma; tmppi = newblock(prec);
   *tmppi = evaltyp(t_REAL) | evallg(prec);
   G = - bit_accuracy(prec);
   prec++;
@@ -180,7 +180,7 @@ consteuler(long prec)
 
   if (geuler && lg(geuler) >= prec) return geuler;
 
-  av1 = avma; tmpeuler = newbloc(prec);
+  av1 = avma; tmpeuler = newblock(prec);
   *tmpeuler = evaltyp(t_REAL) | evallg(prec);
 
   prec++;
@@ -1827,7 +1827,7 @@ constlog2(long prec)
 
   if (glog2 && lg(glog2) >= prec) return glog2;
 
-  tmplog2 = newbloc(prec);
+  tmplog2 = newblock(prec);
   *tmplog2 = evaltyp(t_REAL) | evallg(prec);
   av = avma;
   l = prec+1;

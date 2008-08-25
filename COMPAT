@@ -287,7 +287,8 @@ This file lists the incompatible changes between Version 2.x and older versions
 ===============================
 Incompatible changes:
 ---------------------
-  - gsize() renamed to sizedigit()  [conflict with gtk]
+  - gsize() -> gsizeword()  [conflict with gtk]
+    taille2 -> gsizebyte()
   - hnfhavas removed (didn't work properly, hnflll provides an alternative)
   - real zeroes are now coded on 2 words. Beware of constructs like
     t = cgetg(lg(x), t_REAL); gaffect(y, t). If x = 0, so will be t.

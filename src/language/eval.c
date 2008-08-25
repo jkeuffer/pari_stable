@@ -47,7 +47,7 @@ void
 reset_break(void)
 {
   br_status = br_NONE;
-  if (br_res) { killbloc(br_res); br_res = NULL; }
+  if (br_res) { gunclone_deep(br_res); br_res = NULL; }
 }
 
 long
@@ -148,7 +148,7 @@ pop_val(entree *ep)
   var_cell *v = (var_cell*) ep->pvalue;
 
   if (v == INITIAL) return;
-  if (v->flag == COPY_VAL) killbloc((GEN)ep->value);
+  if (v->flag == COPY_VAL) gunclone_deep((GEN)ep->value);
   ep->value  = v->value;
   ep->pvalue = (char*) v->prev;
   ep->valence=v->valence;
@@ -201,7 +201,7 @@ pop_val_if_newer(entree *ep, long loc)
   var_cell *v = (var_cell*) ep->pvalue;
 
   if (v == INITIAL) return 0;
-  if (v->flag == COPY_VAL && !pop_entree_bloc(ep, loc)) return 0;
+  if (v->flag == COPY_VAL && !pop_entree_block(ep, loc)) return 0;
   ep->value = v->value;
   ep->pvalue= (char*) v->prev;
   ep->valence=v->valence;
@@ -218,8 +218,8 @@ changevalue(entree *ep, GEN x)
   if (v == INITIAL) new_val_cell(ep, x, COPY_VAL);
   else
   {
-    x = gclone(x); /* beware: killbloc may destroy old x */
-    if (v->flag == COPY_VAL) killbloc((GEN)ep->value); else v->flag = COPY_VAL;
+    x = gclone(x); /* beware: gunclone_deep may destroy old x */
+    if (v->flag == COPY_VAL) gunclone_deep((GEN)ep->value); else v->flag = COPY_VAL;
     ep->value = (void*)x;
   }
   BLOCK_SIGINT_END
@@ -310,7 +310,7 @@ change_compo(matcomp *c, GEN res)
       pari_err(talker,"incorrect type or length in matrix assignment");
     for (i=1; i<lg(p); i++)
     {
-      GEN p1 = gcoeff(p,c->full_row,i); if (isclone(p1)) killbloc(p1);
+      GEN p1 = gcoeff(p,c->full_row,i); if (isclone(p1)) gunclone_deep(p1);
       gcoeff(p,c->full_row,i) = gclone(gel(res,i));
     }
     return;
@@ -320,7 +320,7 @@ change_compo(matcomp *c, GEN res)
       pari_err(talker,"incorrect type or length in matrix assignment");
 
   res = gclone(res);
-  killbloc(*pt);
+  gunclone_deep(*pt);
   *pt = res;
 }
 
@@ -347,8 +347,8 @@ static void
 changelex(long vn, GEN x)
 {
   struct var_lex *v=var+s_var.n+vn;
-  x = gclone(x); /* beware: killbloc may destroy old x */
-  if (v->flag == COPY_VAL) killbloc(v->value); else v->flag = COPY_VAL;
+  x = gclone(x); /* beware: gunclone_deep may destroy old x */
+  if (v->flag == COPY_VAL) gunclone_deep(v->value); else v->flag = COPY_VAL;
   v->value = x;
 }
 
@@ -376,7 +376,7 @@ INLINE void
 freelex(long vn)
 {
   struct var_lex *v=var+s_var.n+vn;
-  if (v->flag == COPY_VAL) killbloc(v->value);
+  if (v->flag == COPY_VAL) gunclone_deep(v->value);
 }
 
 INLINE void
@@ -411,7 +411,7 @@ void
 set_lex(long vn, GEN x)
 {
   struct var_lex *v=var+s_var.n+vn;
-  if (v->flag == COPY_VAL) { killbloc(v->value); v->flag = PUSH_VAL; }
+  if (v->flag == COPY_VAL) { gunclone_deep(v->value); v->flag = PUSH_VAL; }
   v->value = x;
 }
 

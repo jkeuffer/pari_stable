@@ -840,6 +840,16 @@ Returns the \kbd{GEN} equal to $2^{32} a + b$, \emph{assuming} that
 $a,b < 2^{32}$. This does not depend on \kbd{sizeof(long)}: the behaviour is
 as above on both $32$ and $64$-bit machines.
 
+\subsec{Sizes}
+
+\fun{long}{gsizeword}{GEN x} returns the total number of \B-bit words occupied
+by the tree representing~\kbd{x}.
+
+\fun{long}{gsizebyte}{GEN x} returns the total number of bytes occupied
+by the tree representing~\kbd{x}, i.e.~\kbd{gsizeword(x)} multiplied by
+\kbd{sizeof(long)}. This is normally useless since PARI functions use
+a number of \emph{words} as input for lengths and precisions.
+
 \subsec{Assignments}.
 Firstly, if \kbd{x} and \kbd{y} are both declared as \kbd{GEN} (i.e.~pointers
 to something), the ordinary C assignment \kbd{y = x} makes perfect sense: we

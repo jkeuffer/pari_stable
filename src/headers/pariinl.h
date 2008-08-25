@@ -661,6 +661,9 @@ cgiv(GEN x)
   if (isonstack((GEN)av)) avma = av;
 }
 
+INLINE void
+killblock(GEN x) { return gunclone(x); }
+
 /*******************************************************************/
 /*                                                                 */
 /*                    CONVERSION / ASSIGNMENT                      */

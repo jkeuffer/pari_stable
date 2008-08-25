@@ -2572,7 +2572,7 @@ ellap1(GEN e, GEN p)
     /* look for h s.t f^h = 0 */
     if (!tx)
     { /* first time: initialize */
-      tx = newbloc(3*(s+1));
+      tx = newblock(3*(s+1));
       ty = tx + (s+1);
       ti = ty + (s+1);
     }
@@ -2734,7 +2734,7 @@ FOUND: /* found a point of exponent h on E_u */
     h = closest_lift(A, B, p1p);
     if (!i) break;
   }
-  if (tx) gunclone(tx);
+  if (tx) killblock(tx);
   return gerepileuptoint(av, KRO==1? subii(p1p,h): subii(h,p1p));
 }
 

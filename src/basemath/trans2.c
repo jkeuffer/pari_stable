@@ -748,7 +748,7 @@ mpbern(long nb, long prec)
   if (OK_bern(nb, prec)) return;
   if (nb < 0) nb = 0;
   l = 3 + prec*(nb+1);
-  B = newbloc(l);
+  B = newblock(l);
   B[0] = evaltyp(t_STR) | evallg(l); /* dummy non-recursive type */
   B[1] = nb;
   B[2] = prec;
@@ -790,7 +790,7 @@ mpbern(long nb, long prec)
     set_bern(c0, i, S); /* S = B_2i */
   }
   if (DEBUGLEVEL) msgTIMER(&T, "Bernoulli");
-  if (bernzone) gunclone(bernzone);
+  if (bernzone) killblock(bernzone);
   avma = av; bernzone = B;
 }
 #undef BERN

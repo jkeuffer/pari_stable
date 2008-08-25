@@ -801,13 +801,7 @@ in a call to \kbd{gerepile(...,ltop,...)}.
 \fun{void}{dbg_gerepileupto}{GEN q} outputs the list of all objects on the
 stack that would be inspected in a call to \kbd{gerepileupto(...,q)}.
 
-\subsec{Copies and clones}
-
-\fun{GEN}{gclone}{GEN x} creates a new permanent copy of $x$ on the heap. The
-\emph{clone bit} of the result is set.
-
-\fun{void}{gunclone}{GEN x} delete the clone~$x$ (created by \kbd{gclone}).
-Fatal error if~\kbd{x} not a clone.
+\subsec{Copies}
 
 \fun{GEN}{gcopy}{GEN x} creates a new copy of $x$ on the stack.
 
@@ -827,8 +821,43 @@ its arguments once, contrary to
 \fun{void}{icopyifstack}{GEN x, GEN y} as \kbd{copyifstack} assuming \kbd{x}
 is a \typ{INT}.
 
-\fun{long}{taille}{GEN x} returns the total number of \B-bit words occupied
-by the tree representing~\kbd{x}.
+\subsec{Simplify}
+
+\fun{GEN}{simplify}{GEN x} you should not need that function in library mode.
+One rather uses:
+
+\fun{GEN}{simplify_shallow}{GEN x} shallow, faster, version of \tet{simplify}.
+
+\section{The PARI heap}
+\subsec{Introduction}
+
+It is implemented as a doubly-linked list of \kbd{malloc}'ed blocks of
+memory, equiped with reference counts. Each block has type \kbd{GEN} but need
+not be a valid \kbd{GEN}: it is a chunk of data preceded by a hidden header
+(meaning that we allocate $x$ and return $x + \kbd{header size}$). A
+\tev{clone}, created by \tet{gclone}, is a block which is a valid \kbd{GEN}
+and whose \emph{clone bit} is set.
+
+\subsec{Public interface}
+
+\fun{GEN}{newblock}{size_t n} allocates a block of $n$ \emph{words} (not bytes).
+
+\fun{void}{killblock}{GEN x} deletes the block~$x$ created by \kbd{newblock}.
+Fatal error if $x$ not a block.
+
+\fun{GEN}{gclone}{GEN x} creates a new permanent copy of $x$ on the heap
+(allocated using \kbd{newblock}). The \emph{clone bit} of the result is set.
+
+\fun{void}{gunclone}{GEN x} deletes a clone. In the current implementation,
+this is an alias for \kbd{killblock}, but it is cleaner to kill clones (valid
+\kbd{GEN}s) using this function, and other blocks using \kbd{killblock}.
+
+\fun{void}{gunclone_deep}{GEN x} is only useful in the context of the GP
+interpreter which may replace arbitrary components of container types
+(\typ{VEC}, \typ{COL}, \typ{MAT}, \typ{LIST}) by clones. If $x$ is such
+a container, the function recursively deletes all clones among the components
+of $x$, then unclones $x$. Useless in library mode: simply use
+\kbd{gunclone}.
 
 \fun{void}{traverseheap}{void(*f)(GEN, void *), void *data} this applies
 \kbd{f($x$, data)} to each object $x$ on the PARI heap, most recent
@@ -838,12 +867,30 @@ first. Mostly for debugging purposes.
 two-component row vector giving the number of objects on the heap and the
 amount of memory they occupy in long words.
 
-\subsec{Simplify}
+\subsec{Implementation note} The hidden block header is manipulated using the
+following private functions:
 
-\fun{GEN}{simplify}{GEN x} you should not need that function in library mode.
-One rather uses:
+\fun{void*}{bl_base}{GEN x} returns the pointer that was actually allocated
+by \kbd{malloc} (can be freed).
 
-\fun{GEN}{simplify_shallow}{GEN x} shallow, faster, version of \tet{simplify}.
+\fun{long}{bl_refc}{GEN x} the reference count of $x$: the number of pointers
+to this block. Decremented in \kbd{killblock}, incremented by the private
+function \fun{void}{gclone_refc}{GEN x}; block is freed when the reference
+count reaches $0$.
+
+\fun{long}{bl_num}{GEN x} the index of this block in the list of all blocks
+allocated so far (including freed blocks). Uniquely identifies a block until
+$2^\B$ blocks have been allocated and this wraps around.
+
+\fun{GEN}{bl_next}{GEN x} the block \emph{after} $x$ in the linked list of
+blocks (\kbd{NULL} if $x$ is the last block allocated not yet killed).
+
+\fun{GEN}{bl_prev}{GEN x} the block allocated \emph{before} $x$ (never
+\kbd{NULL}).
+
+We documented the last four routines as functions for clarity (and type
+checking) but they are actually macros yielding valid lvalues. It is allowed
+to write \kbd{bl\_refc(x)++} for instance.
 
 \section{Handling user and temp variables}
 Low-level implementation of user / temporary variables is liable to change. We
@@ -4850,11 +4897,22 @@ by the scalar \kbd{x}.
 
 \section{Assignment}
 
+It is in general easier to use a direction conversion,
+e.g.~\kbd{y = stoi(s)}, than to allocate a target of correct type and
+sufficient size, then assign to it:
+\bprog
+  GEN y = cgeti(3); affsi(s, y);
+@eprog\noindent
+These functions can still be moderately useful in complicated garbage
+collecting scenarios but you will be better off not using them.
+
 \fun{void}{gaffsg}{long s, GEN x} assigns the \kbd{long}~\kbd{s} into the
 object~\kbd{x}.
 
 \fun{void}{gaffect}{GEN x, GEN y} assigns the object \kbd{x} into the
-object~\kbd{y}. Both \kbd{x} and \kbd{y} must be scalar types.
+object~\kbd{y}. Both \kbd{x} and \kbd{y} must be scalar types. Type
+conversions (e.g.~from \typ{INT} to \typ{REAL} or \typ{INTMOD}) occur if
+legitimate.
 
 \section{Conversions}
 

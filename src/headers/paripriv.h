@@ -255,7 +255,7 @@ void   init_dalloc(void);
 double *dalloc(size_t n);
 void   gerepilecoeffs2(pari_sp av, GEN x, int n, GEN y, int o);
 void   minim_alloc(long n, double ***q, GEN *x, double **y,  double **z, double **v);
-int    pop_entree_bloc(entree *ep, long loc);
+int    pop_entree_block(entree *ep, long loc);
 int    pop_val_if_newer(entree *ep, long loc);
 void   gclone_refc(GEN x);
 
@@ -433,7 +433,7 @@ void    vecselect_p(GEN A, GEN B, GEN p, long init, long lB);
 
 /* binary I/O */
 typedef struct GENbin {
-  size_t len; /* taille(x) */
+  size_t len; /* gsizeword(x) */
   GEN x; /* binary copy of x */
   GEN base; /* base address of p->x */
   int canon; /* 1: t_INT in canonical (native kernel) form,

@@ -99,38 +99,38 @@ pop_stack(stack **pts)
 /*                                                                   */
 /*********************************************************************/
 /*#define DEBUG*/
-static THREAD long next_bloc;
-static THREAD GEN cur_bloc=NULL; /* current bloc in bloc list */
+static THREAD long next_block;
+static THREAD GEN cur_block=NULL; /* current block in block list */
 #ifdef DEBUG
 static THREAD long NUM = 0;
 #endif
 
 /* Return x, where:
  * x[-4]: reference count
- * x[-3]: adress of next bloc
- * x[-2]: adress of preceding bloc.
+ * x[-3]: adress of next block
+ * x[-2]: adress of preceding block.
  * x[-1]: number of allocated blocs.
  * x[0..n-1]: malloc-ed memory. */
 GEN
-newbloc(long n)
+newblock(size_t n)
 {
   long *x = (long *) pari_malloc((n + BL_HEAD)*sizeof(long)) + BL_HEAD;
 
   bl_refc(x) = 1;
-  bl_next(x) = 0; /* the NULL address */
-  bl_prev(x) = (long)cur_bloc;
-  bl_num(x)  = next_bloc++;
-  if (cur_bloc) bl_next(cur_bloc) = (long)x;
+  bl_next(x) = NULL;
+  bl_prev(x) = cur_block;
+  bl_num(x)  = next_block++;
+  if (cur_block) bl_next(cur_block) = x;
 #ifdef DEBUG
   fprintferr("+ %ld\n", ++NUM);
 #endif
   if (DEBUGMEM)
   {
-    if (!n) pari_warn(warner,"mallocing NULL object in newbloc");
+    if (!n) pari_warn(warner,"mallocing NULL object in newblock");
     if (DEBUGMEM > 2)
-      fprintferr("new bloc, size %6lu (no %ld): %08lx\n", n, next_bloc-1, x);
+      fprintferr("new block, size %6lu (no %ld): %08lx\n", n, next_block-1, x);
   }
-  return cur_bloc = x;
+  return cur_block = x;
 }
 
 void
@@ -144,12 +144,12 @@ gunclone(GEN x)
   if (bl_next(x)) bl_prev(bl_next(x)) = bl_prev(x);
   else
   {
-    cur_bloc = (GEN)bl_prev(x);
-    next_bloc = bl_num(x);
+    cur_block = bl_prev(x);
+    next_block = bl_num(x);
   }
   if (bl_prev(x)) bl_next(bl_prev(x)) = bl_next(x);
   if (DEBUGMEM > 2)
-    fprintferr("killing bloc (no %ld): %08lx\n", bl_num(x), x);
+    fprintferr("killing block (no %ld): %08lx\n", bl_num(x), x);
   free((void*)bl_base(x)); /* pari_free not needed: we already block */
   BLOCK_SIGINT_END;
 #ifdef DEBUG
@@ -160,7 +160,7 @@ gunclone(GEN x)
 /* Recursively look for clones in the container and kill them. Then kill
  * container if clone. SIGINT could be blocked until it returns */
 void
-killbloc(GEN x)
+gunclone_deep(GEN x)
 {
   long i, lx;
   GEN v;
@@ -169,11 +169,11 @@ killbloc(GEN x)
   {
     case t_VEC: case t_COL: case t_MAT:
       lx = lg(x);
-      for (i=1;i<lx;i++) killbloc(gel(x,i));
+      for (i=1;i<lx;i++) gunclone_deep(gel(x,i));
       break;
     case t_LIST:
       v = list_data(x); lx = v? lg(v): 1;
-      for (i=1;i<lx;i++) killbloc(gel(v,i));
+      for (i=1;i<lx;i++) gunclone_deep(gel(v,i));
       pari_free(v); break;
   }
   if (isclone(x)) gunclone(x);
@@ -181,13 +181,13 @@ killbloc(GEN x)
 }
 
 int
-pop_entree_bloc(entree *ep, long loc)
+pop_entree_block(entree *ep, long loc)
 {
   GEN x = (GEN)ep->value;
   if (bl_num(x) < loc) return 0; /* older */
   if (DEBUGMEM>2)
-    fprintferr("popping %s (bloc no %ld)\n", ep->name, bl_num(x));
-  killbloc(x); return 1;
+    fprintferr("popping %s (block no %ld)\n", ep->name, bl_num(x));
+  gunclone_deep(x); return 1;
 }
 
 /*********************************************************************/
@@ -466,7 +466,7 @@ pari_init_defaults(void)
   if (!pari_datadir) pari_datadir = (char*)GPDATADIR;
   if (pari_datadir) pari_datadir = pari_strdup(pari_datadir);
 
-  next_bloc=0;
+  next_block=0;
   (void)sd_graphcolormap("[\"white\",\"black\",\"blue\",\"violetred\",\"red\",\"green\",\"grey\",\"gainsboro\"]", d_SILENT);
   (void)sd_graphcolors("[4, 5]", d_SILENT);
 }
@@ -734,7 +734,7 @@ pari_close_opts(ulong init_opts)
   pari_close_compiler();
   pari_close_evaluator();
 
-  while (cur_bloc) gunclone(cur_bloc);
+  while (cur_block) killblock(cur_block);
   killallfiles(1);
   free((void*)functions_hash);
   free((void*)funct_old_hash);
@@ -769,7 +769,7 @@ f_getheap(GEN x, void *D)
 {
   struct getheap_t *T = (struct getheap_t*)D;
   T->n++;
-  T->l += taille(x);
+  T->l += gsizeword(x);
 }
 GEN
 getheap(void)
@@ -783,7 +783,7 @@ void
 traverseheap( void(*f)(GEN, void *), void *data )
 {
   GEN x;
-  for (x = cur_bloc; x; x = (GEN)bl_prev(x)) f(x, data);
+  for (x = cur_block; x; x = bl_prev(x)) f(x, data);
 }
 
 /*******************************************************************/
@@ -791,7 +791,7 @@ traverseheap( void(*f)(GEN, void *), void *data )
 /*                         ERROR RECOVERY                          */
 /*                                                                 */
 /*******************************************************************/
-/* if flag = 0: record address of next bloc allocated.
+/* if flag = 0: record address of next block allocated.
  * if flag = 1: (after an error) recover all memory allocated since last call
  */
 void
@@ -802,7 +802,7 @@ recover(int flag)
   entree *ep, *epnext;
   void (*sigfun)(int);
 
-  if (!flag) { listloc = next_bloc; return; }
+  if (!flag) { listloc = next_block; return; }
 
  /* disable recover() and SIGINT. Better: sigint_[block|release] as in
   * readline/rltty.c ? */
@@ -1147,7 +1147,7 @@ static void
 kill_dft_handler(int numerr)
 {
   GEN s = dft_handler[numerr];
-  if (s && s != BREAK_LOOP) gunclone(s);
+  if (s && s != BREAK_LOOP) killblock(s);
   dft_handler[numerr] = NULL;
 }
 
@@ -1437,24 +1437,23 @@ taille0_nolist(GEN x)
 }
 
 long
-taille(GEN x)
+gsizeword(GEN x)
 {
   long i,n,lx, tx = typ(x);
   if (!is_recursive_t(tx))
     return (tx == t_INT)? lgefint(x): lg(x);
   n = lx = lg(x);
-  for (i=lontyp[tx]; i<lx; i++) n += taille(gel(x,i));
+  for (i=lontyp[tx]; i<lx; i++) n += gsizeword(gel(x,i));
   return n;
 }
-
 long
-taille2(GEN x) { return taille(x) * sizeof(long); }
+gsizebyte(GEN x) { return gsizeword(x) * sizeof(long); }
 
 GEN
 gclone(GEN x)
 {
-  long i,lx,tx = typ(x), t = taille(x);
-  GEN y = newbloc(t);
+  long i,lx,tx = typ(x), t = gsizeword(x);
+  GEN y = newblock(t);
   if (!is_recursive_t(tx))
   {
     switch(tx)
@@ -1975,7 +1974,7 @@ geni(void) { return gi; }
  *   char *name    : name (under GP).
  *   ulong valence : used to form arg list, now often handled by code.
  *   void *value   : For PREDEFINED FUNCTIONS: C function to call.
- *                   For USER FUNCTIONS: pointer to defining data (bloc) =
+ *                   For USER FUNCTIONS: pointer to defining data (block) =
  *                    entree*: NULL, list of entree (arguments), NULL
  *                    char*  : function text
  *   long menu     : which help section do we belong to (See below).
@@ -1984,7 +1983,7 @@ geni(void) { return gi; }
  *   char *help    : short help text (init to NULL).
  *   void *args    : For USER FUNCTIONS: default arguments (NULL terminated).
  *                   For VARIABLES: (esp. loop indexes): push_val history.
- *                   (while processing a loop, ep->value may not be a bloc)
+ *                   (while processing a loop, ep->value may not be a block)
  * menu:
  * -----
  *  1: Standard monadic or dyadic OPERATORS

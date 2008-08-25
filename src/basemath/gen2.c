@@ -1924,7 +1924,7 @@ listkill(GEN L)
   if (list_nmax(L)) {
     GEN v = list_data(L);
     long i, l = lg(v);
-    for (i=1; i<l; i++) killbloc(gel(v,i));
+    for (i=1; i<l; i++) gunclone_deep(gel(v,i));
     pari_free(v);
     list_nmax(L) = 0;
     list_data(L) = NULL;
@@ -1957,7 +1957,7 @@ listput(GEN L, GEN x, long index)
     index = l;
     l++;
   } else
-    killbloc( gel(z, index) );
+    gunclone_deep( gel(z, index) );
   z[0] = evaltyp(t_VEC) | evallg(l);
   return gel(z,index) = gclone(x);
 }
@@ -1994,7 +1994,7 @@ listpop(GEN L, long index)
   if (!l) pari_err(talker,"empty list in listpop");
 
   if (!index || index > l) index = l;
-  killbloc( gel(z, index) );
+  gunclone_deep( gel(z, index) );
   z[0] = evaltyp(t_VEC) | evallg(l);
   for (i=index; i < l; i++) z[i] = z[i+1];
 }
@@ -2056,7 +2056,7 @@ listsort(GEN L, long flag)
     }
     if (l != lnew) { /* was shortened */
       for (i=1; i<l; i++)
-	if (gel(v,i)) killbloc(gel(v,i));
+	if (gel(v,i)) gunclone_deep(gel(v,i));
       l = lnew;
     }
   }

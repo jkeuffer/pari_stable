@@ -244,7 +244,7 @@ entree oldfonctions[]={
 {"buchrayinit",2,(void*)buchrayinit,6,"GGp","buchrayinit(bnf,ideal)=same as buchrayinitgen, except that the generators are not explicitly computed."},
 {"buchrayinitgen",2,(void*)buchrayinitgen,6,"GGp","buchrayinitgen(bnf,ideal)=given a big number field as output by buchinitfu (only) and  an ideal or a 2-component row vector formed by an ideal and a list of R1 zeros or ones representing a module, initializes data for computing in the ray class group  corresponding to this module. In particular, the fifth component is the ray class group structure."},
 {"buchreal",97,(void*)buchreal,4,"GD0,G,D0.1,G,D0.1,G,D5,G,p","buchreal(D,...)=compute the structure of the class group and the regulator of the real quadratic field of discriminant D>0 in the wide sense. See manual for the other parameters (which can be omitted)."},
-{"bytesize",10,(void*)taille2,2,"lG","bytesize(x)=number of bytes occupied by the complete tree of the object x."},
+{"bytesize",10,(void*)gsizebyte,2,"lG","bytesize(x)=number of bytes occupied by the complete tree of the object x."},
 {"ceil",1,(void*)gceil,2,"G","ceil(x)=ceiling of x=smallest integer>=x."},
 {"centerlift",1,(void*)centerlift,2,"G","centerlift(x)=centered lift of x. Same as lift except for integermods."},
 {"cf",1,(void*)gcf,4,"Gp","cf(x)=continued fraction expansion of x (x rational,real or rational function)."},

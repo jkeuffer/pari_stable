@@ -599,7 +599,7 @@ ellmult(long nbc, ulong k, GEN *X1, GEN *X2, GEN *XAUX)
 
 /* Auxiliary routines need < (3*nbc+240)*tf words on the PARI stack, in
  * addition to the spc*(tf+1) words occupied by our main table.
- * If stack space is already tight, use the heap & newbloc(). */
+ * If stack space is already tight, use the heap & newblock(). */
 static GEN*
 alloc_scratch(long nbc, long spc, long tf)
 {
@@ -608,7 +608,7 @@ alloc_scratch(long nbc, long spc, long tf)
   if ((long)((GEN)avma - (GEN)bot) < len + (3*nbc + 240)*tf)
   {
     if (DEBUGLEVEL>4) fprintferr("ECM: stack tight, using heap space\n");
-    X = (GEN*)newbloc(len);
+    X = (GEN*)newblock(len);
   } else
     X = (GEN*)new_chunk(len);
   /* hack for X[i] = cgeti(tf). X = current point in B1 phase */
@@ -1167,7 +1167,7 @@ fin:
     flusherr();
   }
 ret:
-  if (!isonstack((GEN)X)) gunclone((GEN)X);
+  if (!isonstack((GEN)X)) killblock((GEN)X);
   avma = av; return res;
 }
 
