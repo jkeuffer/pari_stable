@@ -2476,6 +2476,16 @@ galoisisabelian(GEN gal, long flag)
   return NULL; /* not reached */
 }
 
+long
+galoisisnormal(GEN gal, GEN sub)
+{
+  pari_sp av = avma;
+  GEN S, G = checkgroup(gal, &S), H = checkgroup(sub, &S);
+  long res = group_subgroup_isnormal(G, H);
+  avma = av;
+  return res;
+}
+
 GEN
 galoissubgroups(GEN gal)
 {

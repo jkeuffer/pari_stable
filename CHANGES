@@ -409,6 +409,7 @@ BA 28- library functions checkgroup, galois_group, cyclicgroup, dicyclicgroup,
 JD 48- GP function warning()
    49- new flag to charpoly [ integral matrix, modular algorithm ]
    50- library functions sqrr and invr [ Newton inversion, called by ginv() ]
+BA 51- GP function galoisisnormal().
 
   Removed
     1- obsolete GP functions printp, printp1. Either replace them by

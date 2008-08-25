@@ -6437,7 +6437,10 @@ be the list of elements of \var{grp}.
 returns \kbd{NULL}, else returns its cyclic decomposition. If \var{elts} is no
 \kbd{NULL}, it must be the list of elements of \var{grp}.
 
-\fun{long}{group_isA4S4}{GEN grp} return $1$ if the small group
+\fun{long}{group_subgroup_isnormal}{GEN G, GEN H}, $H$ being a subgroup of the
+small group $G$, returns $1$ if $H$ is normal in $G$, else $0$.
+
+\fun{long}{group_isA4S4}{GEN grp} returns $1$ if the small group
 \var{grp} is isomorphic to $A_4$, $2$ if it is isomorphic to $S_4$ and
 $0$ else. This is mainly to deal with the idiosynchrasy of the format.
 

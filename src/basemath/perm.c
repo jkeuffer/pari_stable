@@ -880,6 +880,19 @@ abelian_group(GEN v)
   return G;
 }
 
+/*return 1 if G is abelian, else 0*/
+long
+group_subgroup_isnormal(GEN G, GEN H)
+{
+  long i;
+  GEN g = gel(G,1);
+  if (lg(gel(H,1))>1 && group_domain(G)!=group_domain(H))
+    pari_err(talker,"not a subgroup in group_subgroup_isnormal");
+  for(i=1; i<lg(g); i++)
+    if (!group_perm_normalize(H, gel(g,i))) return 0;
+  return 1;
+}
+
 GEN
 groupelts_center(GEN S)
 {
