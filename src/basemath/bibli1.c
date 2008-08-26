@@ -699,22 +699,23 @@ lindep2(GEN x, long bit)
   return gerepilecopy(av, M);
 }
 
-#define quazero(x) (gcmp0(x) || (typ(x)==t_REAL && expo(x) < EXP))
+static int
+quazero(GEN x, long EXP)
+{ return gcmp0(x) || (typ(x)==t_REAL && expo(x) < EXP); }
 GEN
 lindep(GEN x)
 {
-  GEN *b,*be,*bn,**m,qzer;
-  GEN c1,c2,c3,px,py,pxy,re,im,p1,p2,r,f,em;
-  long i,j,fl,k, lx = lg(x), tx = typ(x), n = lx-1;
+  GEN b, be, bn, m, qzer, re, im, RE, IM, px, py, pxy;
+  long i,j, fl, lx = lg(x), n = lx-1;
   pari_sp av = avma, lim = stack_lim(av,1), av0, av1;
   long EXP, prec = gprecision(x);
 
   if (!prec) prec = DEFAULTPREC;
   EXP = 2*n - bit_accuracy(prec);
 
-  if (! is_vec_t(tx)) pari_err(typeer,"lindep");
+  if (! is_vec_t(typ(x))) pari_err(typeer,"lindep");
   if (n <= 1) return cgetg(1,t_VEC);
-  x = gmul(x, real_1(prec)); if (tx != t_COL) settyp(x,t_COL);
+  x = RgC_gtofp(x, prec);
   re = real_i(x);
   im = imag_i(x);
   /* independent over R ? */
@@ -723,106 +724,124 @@ lindep(GEN x)
   if (EXP > -10) pari_err(precer,"lindep");
 
   qzer = cgetg(lx, t_VECSMALL);
-  b = (GEN*)matid(n);
-  be= (GEN*)new_chunk(lx);
-  bn= (GEN*)new_chunk(lx);
-  m = (GEN**)new_chunk(lx);
+  b = matid(n);
+  be = cgetg(lx, t_MAT);
+  bn = cgetg(lx, t_COL);
+  m = cgetg(lx, t_VEC); /* vector of columns of increasing length */
   for (i=1; i<=n; i++)
   {
-    bn[i] = cgetr(prec+1);
-    be[i] = cgetg(lx,t_COL);
-    m[i]  = (GEN*)new_chunk(lx);
-    for (j=1; j<i ; j++) m[i][j] = cgetr(prec+1);
-    for (j=1; j<=n; j++) be[i][j]= (long)cgetr(prec+1);
+    GEN cb = cgetg(lx,t_COL), cm = cgetg(i, t_COL);
+    gel(bn,i) = cgetr(prec+1);
+    gel(be,i) = cb;
+    gel(m,i) = cm;
+    for (j=1; j<i ; j++) gel(cm,j) = cgetr(prec+1);
+    for (j=1; j<=n; j++) gel(cb,j) = cgetr(prec+1);
   }
   px = RgV_dotsquare(re);
   py = RgV_dotsquare(im); pxy = RgV_dotproduct(re,im);
-  p1 = mpsub(mpmul(px,py), gsqr(pxy));
-  if (quazero(px)) { re = im; px = py; fl = 1; } else fl = quazero(p1);
+  if (quazero(px,EXP)) { re = im; px = py; fl = 1; }
+  else {
+    GEN u = mpsub(mpmul(px,py), gsqr(pxy));
+    fl = quazero(u,EXP);
+    if (!fl) {
+      RE = RgC_Rg_div(re, u);
+      IM = RgC_Rg_div(im, u);
+    }
+  }
+  if (fl) {
+    RE = RgC_Rg_div(re, px);
+    IM = NULL;
+  }
   av0 = av1 = avma;
-  for (i=1; i<=n; i++)
+  for (i=1; i<=n; i++,avma = av1)
   {
-    p2 = RgV_dotproduct(b[i],re);
-    if (fl) p2 = gmul(gdiv(p2,px),re);
+    GEN bei = gel(be,i);
+    GEN C, d = RgV_dotproduct(gel(b,i), re);
+    if (fl)
+      C = RgC_Rg_mul(RE, d);
     else
     {
-      GEN p5,p6,p7;
-      p5 = RgV_dotproduct(b[i],im);
-      p6 = gdiv(gsub(gmul(py,p2),gmul(pxy,p5)), p1);
-      p7 = gdiv(gsub(gmul(px,p5),gmul(pxy,p2)), p1);
-      p2 = gadd(gmul(p6,re), gmul(p7,im));
+      GEN w, v, u = RgV_dotproduct(gel(b,i), im);
+      v = gsub(gmul(py,d), gmul(pxy,u));
+      w = gsub(gmul(px,u), gmul(pxy,d));
+      C = RgC_add(RgC_Rg_mul(RE,v), RgC_Rg_mul(IM,w));
     }
-    p2 = gsub(b[i],p2);
+    C = RgC_sub(gel(b,i), C);
     for (j=1; j<i; j++)
-      if (qzer[j]) affrr(bn[j], m[i][j]);
+    {
+      GEN mij = gmael(m,i,j);
+      if (qzer[j]) affrr(gel(bn,j), mij);
       else
       {
-	gdivz(RgV_dotproduct(b[i],be[j]),bn[j], m[i][j]);
-	p2 = gsub(p2, gmul(m[i][j],be[j]));
+        GEN u = RgV_dotproduct(gel(b,i), gel(be,j));
+	mpaff(mpdiv(u, gel(bn,j)), mij);
+	C = RgC_sub(C, RgC_Rg_mul(gel(be,j), mij));
       }
-    for (j=1; j<=n; j++) affrr(gel(p2,j), gel(be[i],j));
-    affrr(RgV_dotsquare(be[i]), bn[i]);
-    qzer[i] = quazero(bn[i]); avma = av1;
+    }
+    for (j=1; j<=n; j++) affrr(gel(C,j), gel(bei,j));
+    affrr(RgV_dotsquare(bei), gel(bn,i));
+    qzer[i] = quazero(gel(bn,i),EXP);
   }
   while (qzer[n])
   {
-    long e;
-    if (DEBUGLEVEL>8)
-    {
-      fprintferr("qzer[%ld]=%ld\n",n,qzer[n]);
-      for (k=1; k<=n; k++)
-	for (i=1; i<k; i++) output(m[k][i]);
-    }
-    em=bn[1]; j=1;
+    GEN c1, f, r, em = gel(bn,1);
+    long e, k;
+    j = 1;
     for (i=2; i<n; i++)
     {
-      p1=shiftr(bn[i],i);
-      if (cmprr(p1,em)>0) { em=p1; j=i; }
+      GEN u = shiftr(gel(bn,i),i);
+      if (cmprr(u,em) > 0) { em = u; j = i; }
     }
-    i=j; k=i+1;
-    avma = av1; r = grndtoi(m[k][i], &e);
+    i = j; k = i+1;
+    avma = av1; r = grndtoi(gmael(m,k,i), &e);
     if (e >= 0) pari_err(precer,"lindep");
     togglesign_safe(&r);
-    ZC_lincomb1_inplace(b[k], b[i], r);
-    swap(b[k], b[i]);
+    ZC_lincomb1_inplace(gel(b,k), gel(b,i), r);
+    swap(gel(b,k), gel(b,i));
     av1 = avma;
-    f = addir(r,m[k][i]);
+    f = addir(r, gmael(m,k,i));
     for (j=1; j<i; j++)
       if (!qzer[j])
       {
-	p1 = mpadd(m[k][j], mulir(r,m[i][j]));
-	affrr(m[i][j], m[k][j]);
-	affrr(p1, m[i][j]);
+        GEN mij = gmael(m,i,j), mkj = gmael(m,k,j);
+	GEN u = mpadd(mkj, mulir(r,mij));
+	affrr(mij, mkj);
+	affrr(u,   mij);
       }
-    c1 = addrr(bn[k], mulrr(gsqr(f),bn[i]));
-    if (!quazero(c1))
+    c1 = addrr(gel(bn,k), mulrr(gsqr(f),gel(bn,i)));
+    if (!quazero(c1,EXP))
     {
-      c2 = divrr(mulrr(bn[i],f),c1); affrr(c2, m[k][i]);
-      c3 = divrr(bn[k],c1);
-      mulrrz(c3,bn[i], bn[k]); qzer[k] = quazero(bn[k]);
-      affrr(c1,        bn[i]); qzer[i] = 0;
+      GEN c2 = divrr(mulrr(gel(bn,i),f),c1);
+      GEN c3 = divrr(gel(bn,k),c1);
+      affrr(c2, gmael(m,k,i));
+      mulrrz(c3,gel(bn,i), gel(bn,k));
+      qzer[k] = quazero(gel(bn,k),EXP);
+      affrr(c1, gel(bn,i));
+      qzer[i] = 0;
       for (j=i+2; j<=n; j++)
       {
-	p1 = addrr(mulrr(m[j][k],c3), mulrr(m[j][i],c2));
-	subrrz(m[j][i],mulrr(f,m[j][k]), m[j][k]);
-	affrr(p1, m[j][i]);
+	GEN mjk = gmael(m,j,k), mji = gmael(m,j,i);
+        GEN u = addrr(mulrr(mjk,c3), mulrr(mji,c2));
+	affrr(subrr(mji,mulrr(f,mjk)), mjk);
+	affrr(u, mji);
       }
     }
     else
     {
-      affrr(bn[i], bn[k]); qzer[k] = qzer[i];
-      affrr(c1,    bn[i]); qzer[i] = 1;
-      for (j=i+2; j<=n; j++) affrr(m[j][i], m[j][k]);
+      affrr(gel(bn,i), gel(bn,k));
+      qzer[k] = qzer[i];
+      affrr(c1, gel(bn,i));
+      qzer[i] = 1;
+      for (j=i+2; j<=n; j++) affrr(gmael(m,j,i), gmael(m,j,k));
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
       if(DEBUGMEM>1) pari_warn(warnmem,"lindep");
-      b = (GEN*)gerepilecopy(av0, (GEN)b);
+      b = gerepilecopy(av0, b);
       av1 = avma;
     }
   }
-  p1 = cgetg(lx,t_COL); gel(p1,n) = gen_1; for (i=1; i<n; i++) gel(p1,i) = gen_0;
-  return gerepileupto(av, RgM_solve(shallowtrans((GEN)b),p1));
+  return gerepileupto(av, RgM_solve(shallowtrans(b), col_ei(n,n)));
 }
 
 /* PSLQ Programs */

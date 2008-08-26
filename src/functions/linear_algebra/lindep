@@ -28,7 +28,9 @@ Doc: \sidx{linear dependence}$x$ being a
 
  If $\fl=-1$, uses a variant of the \idx{LLL} algorithm due to Hastad,
  Lagarias and Schnorr (STACS 1986). If the precision is too low, the routine
- may enter an infinite loop.
+ may enter an infinite loop. Faster than the alternatives if it converges,
+ especially when the accuracy is much larger than what is really necessary;
+ usually diverges, though.
 
  If $\fl=-2$, $x$ is allowed to be (and in any case interpreted as) a matrix.
  Returns a non trivial element of the kernel of $x$, or $0$ if $x$ has trivial
@@ -40,8 +42,9 @@ Doc: \sidx{linear dependence}$x$ being a
  whose sup norm is less than $B$.
 
  If $\fl=-4$, uses an experimental 2-level PSLQ, which does not work at all.
- (Should be rewritten.)
+ Don't use it!
 
-Variant: Also available are \fun{GEN}{lindep}{GEN x} ($\fl=0$) and
- \fun{GEN}{deplin}{GEN x} ($\fl=-2$).
+Variant: Also available are \fun{GEN}{lindep}{GEN x} ($\fl=0$)
+ \fun{GEN}{lindep2}{GEN x, long bit} ($\fl\geq 0$, bypasses the check for
+ $p$-adic inputs) and \fun{GEN}{deplin}{GEN x} ($\fl=-2$).
 
