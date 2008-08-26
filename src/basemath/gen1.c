@@ -275,16 +275,14 @@ static GEN
 gred_rfrac2_i(GEN n, GEN d)
 {
   GEN y, z;
-  long td, tn, v, vd, vn;
+  long v, vd, vn;
 
   n = simplify_shallow(n);
   if (isrationalzero(n)) return gcopy(n);
   d = simplify_shallow(d);
-  td = typ(d);
-  if (td != t_POL) return gdiv(n,d);
-  tn = typ(n);
+  if (typ(d) != t_POL) return gdiv(n,d);
   vd = varn(d);
-  if (tn != t_POL)
+  if (typ(n) != t_POL)
   {
     if (varncmp(vd, gvar(n)) >= 0) return gdiv(n,d);
     if (varncmp(vd, gvar2(n)) < 0) return gred_rfrac_simple(n,d);
@@ -308,7 +306,7 @@ gred_rfrac2_i(GEN n, GEN d)
     y = RgX_divrem(n, d, &z);
     if (!signe(z)) { cgiv(z); return v? RgX_mulXn(y, v): y; }
     z = RgX_gcd(d, z);
-    if (degpol(z)) { n = gdeuc(n,z); d = gdeuc(d,z); }
+    if (degpol(z)) { n = RgX_div(n,z); d = RgX_div(d,z); }
   }
   return fix_rfrac(gred_rfrac_simple(n,d), v);
 }
@@ -324,24 +322,25 @@ gred_rfrac2(GEN x1, GEN x2)
 GEN
 gred_frac2(GEN x1, GEN x2)
 {
-  GEN p1, y = dvmdii(x1,x2,&p1);
+  GEN r, y = dvmdii(x1,x2,&r);
   pari_sp av;
 
-  if (p1 == gen_0) return y; /* gen_0 intended */
-  av = avma;
-  p1 = gcdii(x2,p1);
-  if (is_pm1(p1))
+  if (r == gen_0) return y; /* gen_0 intended */
+  av = avma; r = gcdii(x2,r);
+  if (lgefint(r) == 3)
   {
+    ulong rr = r[2];
     avma = av;
-    y = mkfraccopy(x1, x2);
+    if (rr == 1) y = mkfraccopy(x1, x2);
+    y = cgetg(3,t_FRAC);
+    gel(y,1) = diviuexact(x1, rr);
+    gel(y,2) = diviuexact(x2, rr);
   }
   else
-  {
-    p1 = gclone(p1);
-    avma = av; y = cgetg(3,t_FRAC);
-    gel(y,1) = diviiexact(x1,p1);
-    gel(y,2) = diviiexact(x2,p1);
-    gunclone(p1);
+  { /* rare: r left on stack for efficiency */
+    y = cgetg(3,t_FRAC);
+    gel(y,1) = diviiexact(x1,r);
+    gel(y,2) = diviiexact(x2,r);
   }
   normalize_frac(y); return y;
 }
@@ -758,7 +757,7 @@ static GEN
 addsub_frac(GEN x, GEN y, GEN (*op)(GEN,GEN))
 {
   GEN x1 = gel(x,1), x2 = gel(x,2), z = cgetg(3,t_FRAC);
-  GEN y1 = gel(y,1), y2 = gel(y,2), p1, r, n, d, delta;
+  GEN y1 = gel(y,1), y2 = gel(y,2), q, r, n, d, delta;
 
   delta = gcdii(x2,y2);
   if (is_pm1(delta))
@@ -771,19 +770,19 @@ addsub_frac(GEN x, GEN y, GEN (*op)(GEN,GEN))
   n = op(mulii(x1,y2), mulii(y1,x2));
   if (!signe(n)) { avma = (pari_sp)(z+3); return gen_0; }
   d = mulii(x2, y2);
-  p1 = dvmdii(n, delta, &r);
+  q = dvmdii(n, delta, &r);
   if (r == gen_0)
   {
-    if (is_pm1(d)) { avma = (pari_sp)(z+3); return icopy(p1); }
+    if (is_pm1(d)) { avma = (pari_sp)(z+3); return icopy(q); }
     avma = (pari_sp)z;
     gel(z,2) = icopy(d);
-    gel(z,1) = icopy(p1); return z;
+    gel(z,1) = icopy(q); return z;
   }
-  p1 = gcdii(delta, r);
-  if (!is_pm1(p1))
+  r = gcdii(delta, r);
+  if (!is_pm1(r))
   {
-    delta = diviiexact(delta, p1);
-    n     = diviiexact(n, p1);
+    delta = diviiexact(delta, r);
+    n     = diviiexact(n, r);
   }
   d = mulii(d,delta); avma = (pari_sp)z;
   gel(z,1) = icopy(n);
@@ -795,8 +794,8 @@ static GEN
 add_rfrac(GEN x, GEN y)
 {
   pari_sp av = avma;
-  GEN x1 = gel(x,1), x2 = gel(x,2), z = cgetg(3,t_RFRAC);
-  GEN y1 = gel(y,1), y2 = gel(y,2), p1, r, n, d, delta;
+  GEN x1 = gel(x,1), x2 = gel(x,2);
+  GEN y1 = gel(y,1), y2 = gel(y,2), z, q, r, n, d, delta;
 
   delta = RgX_gcd(x2,y2);
   if (!degpol(delta))
@@ -816,19 +815,19 @@ add_rfrac(GEN x, GEN y)
   }
   if (degpol(n) == 0)
     return gerepileupto(av, gred_rfrac_simple(gel(n,2), RgX_mul(gel(x,2),y2)));
-  p1 = RgX_divrem(n, delta, &r); /* we want gcd(n,delta) */
+  q = RgX_divrem(n, delta, &r); /* we want gcd(n,delta) */
   if (isexactzero(r))
   {
     d = RgX_mul(x2, y2);
     /* "constant" denominator ? */
-    z = lg(d) == 3? RgX_Rg_div(p1, gel(d,2)): gred_rfrac_simple(p1, d);
+    z = lg(d) == 3? RgX_Rg_div(q, gel(d,2)): gred_rfrac_simple(q, d);
     return gerepileupto(av, z);
   }
-  p1 = RgX_gcd(delta, r);
-  if (degpol(p1))
+  r = RgX_gcd(delta, r);
+  if (degpol(r))
   {
-    n = RgX_div(n,p1);
-    d = RgX_mul(RgX_mul(x2,y2), RgX_div(delta, p1));
+    n = RgX_div(n, r);
+    d = RgX_mul(RgX_mul(x2,y2), RgX_div(delta, r));
   }
   else
     d = RgX_mul(gel(x,2), y2);

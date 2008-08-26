@@ -2,9 +2,24 @@ Function: bezout
 Section: number_theoretical
 C-Name: vecbezout
 Prototype: GG
-Help: bezout(x,y): gives a 3-dimensional row vector [u,v,d] such that
- d=gcd(x,y) and u*x+v*y=d.
-Doc: finds $u$ and $v$ minimal in a natural sense such that
- $x*u+y*v=\gcd(x,y)$. The arguments must be both integers or both
- polynomials, and the result is a row vector with three components $u$, $v$,
- and $\gcd(x,y)$. \sidx{extended gcd}
+Help: bezout(x,y): returns [u,v,d] such that d=gcd(x,y) and u*x+v*y=d.
+Doc: Returns $[u,v,d]$ such that $d$ is the gcd of $x,y$,
+ $x*u+y*v=\gcd(x,y)$, and $u$ and $v$ minimal in a natural sense.
+ The arguments must be integers or polynomials. \sidx{extended gcd}
+
+ If $x,y$ are polynomials in the same variable and \emph{inexact}
+ coefficients, then compute $u,v,d$ such that $x*u+y*v = d$, where $d$ 
+ approximately divides both and $x$ and $y$; in particular, we do not obtain
+ \kbd{gcd(x,y)} which is \emph{defined} to be a scalar in this case:
+ \bprog
+ ? a = x + 0.0; gcd(a,a)
+ %1 = 1
+
+ ? bezout(a,a)
+ %2 = [0, 1, x + 0.E-28]
+
+ ? bezout(x-Pi,6*x^2-zeta(2))
+ %3 = [-6*x - 18.8495559, 1, 57.5726923]
+ @eprog\noindent For inexact inputs, the output is thus not well defined
+ mathematically, but you obtain explicit polynomials to check whether the
+ approximation is close enough for your needs.

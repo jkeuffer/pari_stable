@@ -1217,15 +1217,12 @@ type for instance
 \section{Polynomials}
 
 First a word of warning: it is essential to understand the difference between
-exact and inexact objects. Compare
+exact and inexact objects. Try
 \bprog
   gcd(x - Pi, x^2 - 6*zeta(2))
-  gcd(x - Pi, x^2 - 6*zeta(2) + 1e-20)
-  gcd(x - Pi, x^2 - 6*zeta(2) + 1e-10)
 @eprog\noindent
-The middle result is a little unexpected. This is because the notion of GCD
-for non-exact polynomials doesn't make much sense. A better quantitative
-approach is to use
+We return a trivial GCD because the notion of GCD for non-exact polynomials
+doesn't make much sense. A better quantitative approach is to use
 \bprog
   polresultant(x - Pi, x^2 - 6*zeta(2))
 @eprog\noindent

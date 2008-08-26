@@ -227,8 +227,7 @@ easymin(GEN x, long v)
   if (!lgpol(dR)) {avma=ltop; return NULL;}
   G=RgX_gcd(R,dR);
   G=RgX_Rg_div(G,leading_term(G));
-  G=gdeuc(R,G);
-  return gerepileupto(ltop,G);
+  return gerepileupto(ltop, RgX_div(R,G));
 }
 
 GEN

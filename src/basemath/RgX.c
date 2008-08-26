@@ -20,11 +20,8 @@ int
 RgX_is_rational(GEN x)
 {
   long i;
-  for (i = lg(x)-1; i>1; i--)
-  {
-    long t = typ(gel(x,i));
-    if (!is_rational_t(t)) return 0;
-  }
+  for (i = lg(x)-1; i > 1; i--)
+    if (!is_rational_t(typ(gel(x,i)))) return 0;
   return 1;
 }
 int

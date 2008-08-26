@@ -734,6 +734,8 @@ BA 65- vecsmall_uniq(v) no longer assumes that v is sorted
        pollegendre and polhermite
    68- ?0 listed all "user-defined identifiers". Restrict to "functions"
    69- use simplify in setsearch() and Set() [#707]
+   70- change gcd(t_POL, t_POL) so that inexact inputs have scalar gcd
+       [ used to compute a "sensible" approximate gcd ]
 
   Added
     1- library functions expu, adduu, subuu

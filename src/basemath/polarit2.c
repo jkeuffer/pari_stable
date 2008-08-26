@@ -2509,41 +2509,50 @@ rnfcharpoly(GEN nf, GEN Q, GEN x, long v)
 /*                  GCD USING SUBRESULTANT                         */
 /*                                                                 */
 /*******************************************************************/
+static int inexact(GEN x, int *simple, int *rational);
 static int
-can_use_modular_gcd(GEN x)
-{
-  long i;
-  for (i = lg(x)-1; i > 1; i--)
-  {
-    long t = typ(gel(x,i));
-    if (!is_rational_t(t)) return 0;
-  }
-  return 1;
-}
-
-static int issimplefield(GEN x);
-static int
-issimplepol(GEN x)
+isinexactall(GEN x, int *simple, int *rational)
 {
   long i, lx = lg(x);
   for (i=2; i<lx; i++)
-    if (issimplefield(gel(x,i))) return 1;
+    if (inexact(gel(x,i), simple, rational)) return 1;
   return 0;
 }
 /* return 1 if coeff explosion is not possible */
 static int
-issimplefield(GEN x)
+inexact(GEN x, int *simple, int *rational)
 {
   switch(typ(x))
   {
-    case t_REAL: case t_INTMOD: case t_PADIC: case t_SER:
-      return 1;
+    case t_INT: case t_FRAC: return 0;
+
+    case t_REAL: case t_PADIC: case t_SER: return 1;
+
+    case t_INTMOD:
+    case t_FFELT:
+      *rational = 0; *simple = 1; return 0;
+
     case t_COMPLEX:
-      return issimplefield(gel(x,1)) || issimplefield(gel(x,2));
+      *rational = 0;
+      return inexact(gel(x,1), simple, rational)
+          || inexact(gel(x,2), simple, rational);
+    case t_QUAD:
+      *rational = *simple = 0;
+      return inexact(gel(x,2), simple, rational)
+          || inexact(gel(x,3), simple, rational);
+
     case t_POLMOD:
-      return issimplepol(gel(x,1));
+      *rational = 0;
+      return isinexactall(gel(x,1), simple, rational);
+    case t_POL:
+      *rational = *simple = 0;
+      return isinexactall(x, simple, rational);
+    case t_RFRAC:
+      *rational = *simple = 0;
+      return inexact(gel(x,1), simple, rational)
+          || inexact(gel(x,2), simple, rational);
   }
-  return 0;
+  *rational = *simple = 0; return 0;
 }
 
 /* x monomial, y t_POL in the same variable */
@@ -2552,8 +2561,7 @@ gcdmonome(GEN x, GEN y)
 {
   long dx = degpol(x), e = RgX_val(y);
   pari_sp av = avma;
-  GEN t = ggcd(leading_term(x), content(y));
-
+  GEN t = ggcd(gel(x,dx+2), content(y)); /* gcd(lc(x), cont(y)) */
   if (dx < e) e = dx;
   return gerepileupto(av, monomialcopy(t, e, varn(x)));
 }
@@ -2565,16 +2573,21 @@ RgX_gcd(GEN x, GEN y)
   long dx, dy;
   pari_sp av, av1, lim;
   GEN d, g, h, p1, p2, u, v;
+  int simple = 0, rational = 1;
 
   if (!signe(y)) return gcopy(x);
   if (!signe(x)) return gcopy(y);
   if (RgX_is_monomial(x)) return gcdmonome(x,y);
   if (RgX_is_monomial(y)) return gcdmonome(y,x);
-  if (can_use_modular_gcd(x) &&
-      can_use_modular_gcd(y)) return QX_gcd(x,y); /* Q[X] */
+  if (isinexactall(x,&simple,&rational) || isinexactall(y,&simple,&rational))
+  {
+    av = avma; u = ggcd(content(x), content(y));
+    return gerepileupto(av, scalarpol(u, varn(x)));
+  }
+  if (rational) return QX_gcd(x,y); /* Q[X] */
 
   av = avma;
-  if (issimplepol(x) || issimplepol(y)) x = RgX_gcd_simple(x,y);
+  if (simple) x = RgX_gcd_simple(x,y);
   else
   {
     dx = lg(x); dy = lg(y);
