@@ -184,7 +184,9 @@ GEN
 RgC_Rg_add(GEN x, GEN y)
 {
   long k, lx = lg(x);
-  GEN z = cgetg(lx, t_COL); gel(z,1) = gadd(y,gel(x,1));
+  GEN z = cgetg(lx, t_COL);
+  if (lx == 1) pari_err(operf,"+",x,y);
+  gel(z,1) = gadd(y,gel(x,1));
   for (k = 2; k < lx; k++) gel(z,k) = gcopy(gel(x,k));
   return z;
 }
