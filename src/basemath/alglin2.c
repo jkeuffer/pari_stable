@@ -1013,7 +1013,7 @@ jacobi(GEN a, long prec)
      * p and q */
     x = divrr(subrr(gel(L,q),gel(L,p)), shiftr(gcoeff(a,p,q),1));
     y = sqrtr(addrr(unr, sqrr(x)));
-    t = divrr(unr, (signe(x)>0)? addrr(x,y): subrr(x,y));
+    t = invr((signe(x)>0)? addrr(x,y): subrr(x,y));
     c = sqrtr(addrr(unr,sqrr(t)));
     s = divrr(t,c);
     u = divrr(t,addrr(unr,c));

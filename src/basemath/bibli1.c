@@ -975,7 +975,7 @@ maxnorml2(pslq_M *M)
     for (j=1; j<n; j++) s = gadd(s, gnorm(gcoeff(M->H,i,j)));
     if (gcmp(ma,s) < 0) ma = s;
   }
-  return sqrtr(gmul(ma, real_1(DEFAULTPREC)));
+  return sqrtr(gtofp(ma, DEFAULTPREC));
 }
 
 static void

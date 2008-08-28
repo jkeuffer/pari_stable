@@ -424,6 +424,12 @@ arch_for_T2(GEN G, GEN x)
 {
   return (typ(x) == t_COL)? gmul(G,x): gmul(gel(G,1),x);
 }
+static GEN
+arch_for_T2_prec(GEN G, GEN x, long prec)
+{
+  return (typ(x) == t_COL)? gmul(G, RgC_gtofp(x,prec))
+                          : gmul(gel(G,1), gtofp(x, prec));
+}
 
 /* return a bound for T_2(P), P | polbase in C[X]
  * NB: Mignotte bound: A | S ==>
@@ -499,7 +505,7 @@ PRECPB:
 static GEN
 nf_Beauzamy_bound(GEN nf, GEN polbase)
 {
-  GEN lt,C,run,s, G = gmael(nf,5,2), POL, bin;
+  GEN lt, C, s, G = gmael(nf,5,2), POL, bin;
   long i,prec,precnf, d = degpol(polbase), n = nf_get_degree(nf);
 
   precnf = gprecision(G);
@@ -509,11 +515,10 @@ nf_Beauzamy_bound(GEN nf, GEN polbase)
   /* compute [POL]_2 */
   for (;;)
   {
-    run= real_1(prec);
     s = real_0(prec);
     for (i=0; i<=d; i++)
     {
-      GEN p1 = gnorml2(arch_for_T2(G, gmul(run, gel(POL,i)))); /* T2(POL[i]) */
+      GEN p1 = gnorml2(arch_for_T2_prec(G, gel(POL,i), prec));
       if (!signe(p1)) continue;
       if (lg(p1) == 3) break;
       /* s += T2(POL[i]) / binomial(d,i) */

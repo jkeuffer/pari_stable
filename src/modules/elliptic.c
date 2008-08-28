@@ -3328,14 +3328,14 @@ hell(GEN e, GEN a, long prec)
 
 /* h' := h_oo(x) + 1/2 log(denom(x)) */
 static GEN
-hells(GEN e, GEN x, long prec)
+hells(GEN e, GEN Q, long prec)
 {
-  GEN b8 = gel(e,9), b6 = gel(e,8), b4 = gel(e,7), b2 = gel(e,6);
+  GEN b8 = gel(e,9), b6 = gel(e,8), b4 = gel(e,7), b2 = gel(e,6), x = gel(Q,1);
   GEN w, z, t, mu, b42, b62;
   long n, lim;
 
-  t = gdiv(real_1(prec), gel(x,1));
-  mu = gmul2n(glog(numer(gel(x,1)),prec),-1);
+  mu = gmul2n(glog(numer(x),prec),-1);
+  t = ginv(gtofp(x, prec));
   b42 = gmul2n(b4,1);
   b62 = gmul2n(b6,1);
   lim = 15 + bit_accuracy(prec);

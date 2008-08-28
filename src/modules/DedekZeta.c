@@ -363,8 +363,8 @@ gzetakall(GEN nfz, GEN s, long flag, long prec2)
   i0 = itos(gmael(nfz,1,3)); N0 = lg(coef)-1;
   bigprec = precision(cst); prec = prec2+1;
 
-  if (ts==t_COMPLEX && gcmp0(imag_i(s))) { s=real_i(s); ts = typ(s); }
-  if (ts==t_REAL && !signe(gfrac(s))) { s=mptrunc(s); ts = t_INT; }
+  if (ts==t_COMPLEX && gcmp0(gel(s,2))) { s = gel(s,1); ts = typ(s); }
+  if (ts==t_REAL && !signe(gfrac(s))) { s = truncr(s); ts = t_INT; }
   if (ts==t_INT)
   {
     sl = itos(s);
@@ -463,11 +463,7 @@ gzetakall(GEN nfz, GEN s, long flag, long prec2)
   else
   {
     GEN Pi = mppi(bigprec);
-    if (ts == t_FRAC)
-      s = gmul(s, real_1(bigprec));
-    else
-      s = gprec_w(s, bigprec);
-
+    s = gtofp(s, bigprec);
     smoinun = gsubgs(s,1);
     unmoins = gneg(smoinun);
     lambd = gdiv(resi,gmul(s,smoinun));

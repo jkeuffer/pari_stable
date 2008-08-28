@@ -2459,8 +2459,7 @@ ZX_resultant_all(GEN A, GEN B, GEN dB, ulong bound)
       long eA = gexpo(A), eB = gexpo(B), prec = nbits2prec(maxss(eA,eB));
       for(;; prec = (prec-1)<<1)
       {
-	GEN run = real_1(prec);
-	GEN R = resultant(gmul(A, run), gmul(B, run));
+	GEN R = resultant(RgX_gtofp(A, prec), RgX_gtofp(B, prec));
 	bound = gexpo(R) + 1;
 	if (!gcmp0(R)) break;
       }

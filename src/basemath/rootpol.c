@@ -1731,7 +1731,7 @@ cauchy_bound(GEN p)
 {
   pari_sp av = avma;
   long i, n = degpol(p), prec = DEFAULTPREC;
-  GEN lc, y, q = gmul(p, real_1(prec));
+  GEN lc, y, q = RgX_gtofp(p, prec);
   double L = 0, Lmax = -pariINFINITY;
 
   if (n <= 0) pari_err(constpoler,"cauchy_bound");
@@ -2284,8 +2284,7 @@ roots2(GEN T, long PREC)
   if (!N) return cgetg(1,t_COL);
   if (N==1)
   {
-    p1 = gmul(real_1(PREC),gel(pol,3));
-    p2 = gneg_i(gdiv(gel(pol,2),p1));
+    p2 = gneg_i(gdiv(gel(pol,2), gtofp(gel(pol,3), PREC)));
     return gerepilecopy(av,p2);
   }
   EPS = 12 - bit_accuracy(PREC); /* 2^EPS is "zero" */
