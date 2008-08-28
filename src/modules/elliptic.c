@@ -3759,16 +3759,19 @@ _orderell(GEN e, GEN p)
 GEN
 ellorder(GEN e, GEN z, GEN o)
 {
-  GEN j = gel(e,13);
-  long t;
-  checksmallell(e); checkellpt(z); t = typ(j);
-  if (t == t_INTMOD)
+  GEN j;
+  checksmallell(e); checkellpt(z);
+  j = gel(e,13);
+  switch(typ(j))
   {
-    pari_sp av = avma;
-    if (!o) { GEN p = gel(j,1); o = subii(addis(p,1), ellap(e,p)); }
-    return gerepileuptoint(av, gen_eltorder(z, o, (void*)e, &ellFp));
+    case t_INTMOD: {
+      pari_sp av = avma;
+      if (!o) { GEN p = gel(j,1); o = subii(addis(p,1), ellap(e,p)); }
+      return gerepileuptoint(av, gen_eltorder(z, o, (void*)e, &ellFp));
+    }
+    case t_INT: case t_FRAC: break;
+    default: pari_err(impl,"orderell for nonrational elliptic curves");
   }
-  if (!is_rational_t(t)) pari_err(impl,"orderell for nonrational elliptic curves");
   return utoi( _orderell(e, z) );
 }
 GEN
