@@ -34,38 +34,36 @@ no_prec_pb(GEN x)
 static int
 FindApplyQ(GEN x, GEN mu, GEN B, long k, GEN Q, long prec)
 {
-  long i, lx = lg(x)-1, lv = lx - (k-1);
-  GEN v, beta, Nx, x2, x1, xd = x + (k-1);
+  long i, lx = lg(x)-1;
+  GEN x2, x1, xd = x + (k-1);
 
   x1 = gel(xd,1);
   x2 = gsqr(x1);
   if (k < lx)
   {
-    for (i=2; i<=lv; i++) x2 = mpadd(x2, gsqr(gel(xd,i)));
-    Nx = gsqrt(x2, prec);
-    if (signe(x1) < 0) setsigne(Nx, -1);
-    v = cgetg(lv+1, t_VEC);
+    long lv = lx - (k-1) + 1;
+    GEN beta, Nx, v = cgetg(lv, t_VEC);
+    for (i=2; i<lv; i++) {
+      x2 = mpadd(x2, gsqr(gel(xd,i)));
+      gel(v,i) = gel(xd,i);
+    }
+    if (!signe(x2)) return 0;
+    Nx = gsqrt(x2, prec); if (signe(x1) < 0) setsigne(Nx, -1);
     gel(v,1) = mpadd(x1, Nx);
-    for (i=2; i<=lv; i++) v[i] = xd[i];
-    if (gcmp0(x2)) return 0;
 
-    if (gcmp0(x1))
-      beta = mpmul(x2, real_1(prec)); /* make sure typ(beta) != t_INT */
+    if (!signe(x1))
+      beta = gtofp(x2, prec); /* make sure typ(beta) != t_INT */
     else
       beta = mpadd(x2, mpmul(Nx,x1));
-    gel(Q,k) = mkvec2(ginv(beta), v);
+    gel(Q,k) = mkvec2(invr(beta), v);
 
-    gcoeff(mu,k,k) = mpneg(Nx);
+    togglesign(Nx);
+    gcoeff(mu,k,k) = Nx;
   }
   else
     gcoeff(mu,k,k) = gel(x,k);
-  if (B)
-  {
-    gel(B,k) = x2;
-    for (i=1; i<k; i++) gcoeff(mu,k,i) = gel(x,i);
-  }
-  else
-    for (i=1; i<k; i++) gcoeff(mu,i,k) = gel(x,i);
+  gel(B,k) = x2;
+  for (i=1; i<k; i++) gcoeff(mu,k,i) = gel(x,i);
   return no_prec_pb(x2);
 }
 
@@ -81,7 +79,6 @@ ApplyQ(GEN Q, GEN r)
   s = mpmul(beta, s);
   for (i=1; i<l; i++) gel(rd,i) = mpsub(gel(rd,i), mpmul(s, gel(v,i)));
 }
-
 static GEN
 ApplyAllQ(GEN Q, GEN r0, long k)
 {
@@ -91,7 +88,6 @@ ApplyAllQ(GEN Q, GEN r0, long k)
   for (j=1; j<k; j++) ApplyQ(gel(Q,j), r);
   return gerepilecopy(av, r);
 }
-
 /* compute B[k] = | x[k] |^2, update mu(k, 1..k-1) using Householder matrices
  * (Q = Householder(x[1..k-1]) in factored form) */
 static int
@@ -100,46 +96,27 @@ incrementalQ(GEN x, GEN L, GEN B, GEN Q, long k, long prec)
   GEN r = ApplyAllQ(Q, gel(x,k), k);
   return FindApplyQ(r, L, B, k, Q, prec);
 }
-
-/* Q vector of Householder matrices orthogonalizing x[1..j0].
- * Q[i] = 0 means not computed yet */
-static int
-Householder_get_mu(GEN x, GEN L, GEN B, long k, GEN Q, long prec)
-{
-  GEN Nx, invNx, m;
-  long i, j, j0;
-  if (!Q) Q = zerovec(k);
-  for (j=1; j<=k; j++)
-    if (typ(Q[j]) == t_INT) break;
-  j0 = j;
-  for (   ; j<=k; j++)
-    if (! incrementalQ(x, L, B, Q, j, prec)) return 0;
-  for (j=1; j<k; j++)
-  {
-    m = gel(L,j); Nx = gel(m,j); /* should set gel(m,j) = gen_1; but need it later */
-    invNx = ginv(Nx);
-    for (i=maxss(j0, j+1); i<=k; i++) gel(m,i) = mpmul(invNx, gel(m,i));
-  }
-  return 1;
-}
-
 GEN
 Q_from_QR(GEN x, long prec)
 {
   long j, k = lg(x)-1;
-  GEN L, B = zerovec(k);
-  L = zeromatcopy(k,k);
-  if (!Householder_get_mu(x, L, B, k, NULL, prec)) return NULL;
+  GEN B = cgetg(k+1, t_VEC), Q = cgetg(k+1, t_VEC), L = zeromatcopy(k,k);
+  for (j=1; j<=k; j++)
+    if (! incrementalQ(x, L, B, Q, j, prec)) return NULL;
+  for (j=1; j<k; j++)
+  { /* should set gel(m,j) = gen_1; but need it later */
+    GEN m = gel(L,j), invNx = ginv(gel(m,j));
+    long i;
+    for (i=j+1; i<=k; i++) gel(m,i) = gmul(invNx, gel(m,i));
+  }
   for (j=1; j<=k; j++) gcoeff(L,j,j) = gel(B,j);
   return shallowtrans(L);
 }
-
 GEN
 R_from_QR(GEN x, long prec)
 {
   long j, k = lg(x)-1;
-  GEN L, B = zerovec(k), Q = cgetg(k+1, t_VEC);
-  L = zeromatcopy(k,k);
+  GEN B = cgetg(k+1, t_VEC), Q = cgetg(k+1, t_VEC), L = zeromatcopy(k,k);
   for (j=1; j<=k; j++)
     if (!incrementalQ(x, L, B, Q, j, prec)) return NULL;
   return shallowtrans(L);
