@@ -721,7 +721,7 @@ idealaddtoone_i(GEN nf, GEN x, GEN y)
     a = trivial_merge(x);
   else {
     a = hnfmerge_get_1(x, y);
-    a = reducemodlll(a, idealmul_HNF(nf,x,y));
+    if (a) a = reducemodlll(a, idealmul_HNF(nf,x,y));
   }
   if (!a) pari_err(talker, "non coprime ideals in idealaddtoone");
   return a;
