@@ -908,8 +908,8 @@ gaussred(GEN a, long signature)
 	al = row(a, l);
 	for (i=1; i<=n; i++) if (r[i])
 	{
-	  gcoeff(a,k,i) = gmul(gcoeff(a,k,i), p);
-	  gcoeff(a,l,i) = gmul(gcoeff(a,l,i), p);
+	  gcoeff(a,k,i) = gmul(gcoeff(a,k,i), invp);
+	  gcoeff(a,l,i) = gmul(gcoeff(a,l,i), invp);
 	} else {
 	  gcoeff(a,k,i) = gen_0;
 	  gcoeff(a,l,i) = gen_0;

@@ -106,6 +106,7 @@ IM 90- lngamma(x) gave incorrect results (off by 2*Pi*I) when real(x) was a
    91- trying to write to a binary file and failing leaked a file descriptor
    92- long-standing stack corruption when <C-C> pressed during gclone [#458]
    93- idealaddtoone had problems with 0 ideals [#829]
+   94- wrong results in qfgaussred() [only totally real case was correct]
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
