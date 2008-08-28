@@ -33,10 +33,15 @@ nfmaxord_check_args(nfmaxord_t *S, GEN T, long flag, GEN fa)
   if (typ(T)!=t_POL) pari_err(notpoler,"nfmaxord");
   if (degpol(T) <= 0) pari_err(constpoler,"nfmaxord");
 
-  dT = fa? factorback(fa): ZX_disc(T);
-  if (!signe(dT)) pari_err(talker,"reducible polynomial in nfmaxord");
+  if (fa) {
+    if (typ(fa) != t_MAT) pari_err(typeer,"nfmaxord");
+    dT = factorback(fa); 
+    if (!signe(dT)) pari_err(talker,"reducible polynomial in nfmaxord");
+  } else {
+    dT = ZX_disc(T);
+    fa = Z_factor_limit(absi(dT), (flag & nf_PARTIALFACT) == 0);
+  }
   S->dT = dT;
-  if (!fa) fa = Z_factor_limit(absi(dT), (flag & nf_PARTIALFACT) == 0);
   S->dTP = gel(fa,1);
   S->dTE = vec_to_vecsmall(gel(fa,2));
   if (DEBUGLEVEL) msgtimer("disc. factorisation");
