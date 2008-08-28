@@ -947,7 +947,7 @@ ZX_squff(GEN f, GEN *ex)
   {
     W = ZX_gcd_all(T,V, &T); dW = degpol(W);
     /* W = prod P^e, e > k; V = prod P^e, e >= k */
-    if (dW != degpol(V)) { gel(P,i) = RgX_div(V,W); e[i] = k; i++; }
+    if (dW != degpol(V)) { gel(P,i) = Q_primpart(RgX_div(V,W)); e[i] = k; i++; }
     if (dW <= 0) break;
     V = W;
   }
