@@ -1669,7 +1669,11 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
   int stockall = 0;
 
   if (!BORNE) BORNE = gen_0;
-  else BORNE = gfloor(BORNE);
+  else
+  {
+    BORNE = gfloor(BORNE);
+    if (typ(BORNE) != t_INT) pari_err(typeer, "minim0");
+  }
   if (!STOCKMAX) stockall = 1;
   else if (typ(STOCKMAX) != t_INT) pari_err(typeer, "minim0");
   if (typ(a) != t_MAT) pari_err(typeer,"minim0");
