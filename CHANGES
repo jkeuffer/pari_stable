@@ -116,302 +116,312 @@ BA  3- builtin-in GP functions can now be used as closures.
        nf.disc could not be factored and addprimes() would have to be used ]
     5- removed undocumented interface FpM_mul(x,y,NULL), and analogously for
        FpV_dotproduct, FpV_dotsquare, FpM_FpC_mul
-    6- [library] rename assmat -> matcompanion, polymodrecip -> modreverse
-    7- prototype of FpX_center [ add one argument ]
-BA  8- [svn/CVS] number development snapshots according to repository version
-    9- delete CVS.txt and replace it with README-subversion
-   10- syntax errors are no longer trapped
-   11- quadray no longer allows an (optional) 3rd argument
-   12- 'format' was updated after each 'realprecision' change. Don't update
+    6- [library] major names cleanup; rename *lots* of functions:
+       BSW_* -> BPSW_*
+       Z_factor_limit -> Z_factor_until, auxdecomp -> Z_factor_limit
+       assmat -> matcompanion
+       derivpol -> RgX_deriv
+       discf -> nfdisc, nfdiscf0 -> nfdisc0
+       element_div -> nfdiv, element_divmodpr -> nfdivmodpr,
+       element_mul -> nfmul, element_mulmodpr -> nfmulmodpr,
+       element_pow -> nfpow, element_powmodpr -> nfpowmodpr,
+       element_reduce -> nfreduce, element_val -> nfval
+       factorback0 -> factorback2
+       factorpadic4 -> factorpadic, factorpadic2 now static
+       fundunit -> quadunit
+       gener -> znprimroot, ggener -> znprimroot0
+       hil0 -> hilbert, hilii -> hilbertii [ delete useless hil() ]
+       ideal_two_elt* -> idealtwoelt*,
+       idealhermite -> idealhnf
+       initalg -> nfinit, initalgred -> nfinitred, initalgred2 -> nfinitred2
+       initell -> ellinit, smallinitell -> smallellinit
+       isfundamental -> Z_isfundamental
+       ismonome -> RgX_is_monomial
+       isunit -> bnfisunit
+       matrixqz -> QM_minors_coprime
+       matrixqz2 -> QM_ImZ_hnf
+       matrixqz3 -> QM_ImQ_hnf
+       minideal -> idealmin and change prototype
+       mu -> moebius, gmu -> gmoebius,
+       nfhermite -> nfhnf, nfhermitemod -> nfhnfmod
+       phi -> eulerphi, gphi -> geulerphi, phiu -> eulerphiu,
+       poldeflate -> RgX_deflate_max
+       polymodrecip -> modreverse
+       powraw -> qfbpowraw, compraw -> qfbcompraw
+       primedec -> idealprimedec
+       racine -> sqrtint,
+       regula -> quadregulator
+       rename cmp_ZV -> ZV_cmp
+       smith2 -> smithall, gsmith2 -> gsmithall
+       srgcd -> RgX_gcd
+       subfields0 -> nfsubfields,
+       subres -> resultant, subresall -> resultant_all.
+       torsell -> elltors and document it
+       zideallog -> ideallog
+       pariputc -> pari_putc, pariputs -> pari_puts, pariflush -> pari_flush,
+       gpmalloc -> pari_malloc, gprealloc -> pari_realloc, gpfree -> pari_free
+    7- polvaluation -> RgX_valrem(x, pz) and no longer accept pz = NULL
+       (use RgX_val). Same for ZX_valuation -> ZX_valrem [ & ZX_val ]
+    8- rename u2toi -> uu32toi [ paste two 32-bit unsigned into a t_INT ]
+       Write uutoi for the more natural operation of pasting two ulongs into
+       a t_INT.
+    9- prototype of FpX_center [ add one argument ]
+BA 10- [svn/CVS] number development snapshots according to repository version
+   11- delete CVS.txt and replace it with README-subversion
+   12- syntax errors are no longer trapped
+   13- quadray no longer allows an (optional) 3rd argument
+   14- 'format' was updated after each 'realprecision' change. Don't update
        if 'format' is Xm.-1 (show all significant digits).
-   13- the algorithm used to round t_REAL for output
-   14- the "minimum field width" component of the 'format' default is now
+   15- the algorithm used to round t_REAL for output
+   16- the "minimum field width" component of the 'format' default is now
        ignored (was used only for integers in 'prettyprint' output mode and
        defaulted to 0 [no effect]). Use printf !
-   15- %Z is no longer a valid conversion specification for PARI formats,
+   17- %Z is no longer a valid conversion specification for PARI formats,
        since this is now handled as a length modifier. Use %Ps instead
        (P stands for PARI).
-   16- remove the (ugly) prettyprint engine ('output' = 2), render as matbrute.
+   18- remove the (ugly) prettyprint engine ('output' = 2), render as matbrute.
        printp / printp1 now act as print/print1
-   17- pariprintf renamed to pari_printf, %Z conversion disappeared (use %Ps)
-   18- rename pariputc -> pari_putc, pariputs -> pari_puts, pariflush ->
-       pari_flush, gpmalloc -> pari_malloc, gprealloc -> pari_realloc,
-       gpfree -> pari_free
-   19- check for small prime divisors in ispower [ large speedup ]
-   20- rename cmp_ZV -> ZV_cmp
-   21- rename derivpol -> RgX_deriv
-   22- the conversion style 'g' of the 'format' default now printfs in style
+   19- pariprintf renamed to pari_printf, %Z conversion disappeared (use %Ps)
+   20- check for small prime divisors in ispower [ large speedup ]
+   21- the conversion style 'g' of the 'format' default now printfs in style
        'f' if the decimal exponent is < -4 ( was: if the binary exponent
        is < -32 ), in order to conform to standard printf specifications.
-   23- [GMP kernel] enable GMP exact division
-   24- matdetint: use less memory + faster finish
-   25- change the default algorithm for mathnf(a) [ much faster ], flag 0 is
+   22- [GMP kernel] enable GMP exact division
+   23- matdetint: use less memory + faster finish
+   24- change the default algorithm for mathnf(a) [ much faster ], flag 0 is
        no longer deprecated
-   26- rename smith2 -> smithall, gsmith2 -> gsmithall
-   27- rename torsell -> elltors and document it
-   28- library/GP function galoisinit() now returns NULL/0 on failure
+   25- library/GP function galoisinit() now returns NULL/0 on failure
        (used to raise an exception)
-   29- allow nfgaloisconj(t_POL, 1) [ cf C-4 ], never resort to nfgaloisconj(,2)
+   26- allow nfgaloisconj(t_POL, 1) [ cf C-4 ], never resort to nfgaloisconj(,2)
        [ slow, unreliable ] with default flag = 0
-   30- [library]: factorpadic4 -> factorpadic, factorpadic2 now static
-   31- [library]: gsub now implemented directly when typ(x) = typ(y)
-BA 32- all LLL variants now use an implementation of NGuyen & Stehle's algorithm
-   33- [library]: the "prec" parameter of floating point LLLs has disappeared
-   34- Vecrev(x) now equivalent to extract(Vec(x), "-1..1") [was only for t_POL]
-   35- allow t_COMPLEX as well as t_QUAD in ellpow
-   36- [library] rename isfundamental -> Z_isfundamental
-   37- we used to have Set(1) == Set("1") ( = ["1"] ). Now the latter returns
+   27- [library]: gsub now implemented directly when typ(x) = typ(y)
+BA 28- all LLL variants now use an implementation of NGuyen & Stehle's algorithm
+   29- [library]: the "prec" parameter of floating point LLLs has disappeared
+   30- Vecrev(x) now equivalent to extract(Vec(x), "-1..1") [was only for t_POL]
+   31- allow t_COMPLEX as well as t_QUAD in ellpow
+   32- we used to have Set(1) == Set("1") ( = ["1"] ). Now the latter returns
        ["\"1\""] (the Set whose element evaluate to the character string "1")
-   38- plotinit: change the way default arguments are evaluated (omit, instead
+   33- plotinit: change the way default arguments are evaluated (omit, instead
        of interpreting 0 in a special way)
-   39- nfbasistoalg / nfalgtobasis no longer accept t_VEC/t_COL/t_MAT,
+   34- nfbasistoalg / nfalgtobasis no longer accept t_VEC/t_COL/t_MAT,
        use matbasistoalg / matalgtobasis, which now also accept t_VEC/t_COL
-   40- rename library functions nfhermite -> nfhnf, nfhermitemod -> nfhnfmod
-   41- uniformize factornf and nffactor outputs (+ speed them up for
+   35- uniformize factornf and nffactor outputs (+ speed them up for
        non-squarefree inputs: compute valuations mod a suitable prime)
-   42- treat Mat(t_LIST) as Mat(t_VEC)
-   43- t_POL^0 always returned t_INT 1 [ try to return 1 in coefficient ring ]
-   44- polresultant(x,y,,0) now chooses the best algorithm by itself
+   36- treat Mat(t_LIST) as Mat(t_VEC)
+   37- t_POL^0 always returned t_INT 1 [ try to return 1 in coefficient ring ]
+   38- polresultant(x,y,,0) now chooses the best algorithm by itself
        [Ducos, modular, Sylvester], polresultant(x,y,,2) is now a synonym
        for the default. The change also improves poldisc().
-   45- [library] rename subres -> resultant, subresall -> resultant_all.
-   46- regression tests in src/test/in/ no longer need to end with
+   39- regression tests in src/test/in/ no longer need to end with
        'print("Total time spent: ",gettime)'
-   47- rename library functions discf -> nfdisc, nfdiscf0 -> nfdisc0
-   48- arguments of stirling1 / stirling2 are now ulongs [ were longs ]
-BA 49- user variables can now be aliased [#790]
-   50- conjvec(POLMOD of INTMODs) was slow
-   51- rename polvaluation -> RgX_valrem(x, pz) and no longer accept pz = NULL
-       (use RgX_val). Same for ZX_valuation -> ZX_valrem [ & ZX_val ]
-       rename poldeflate -> RgX_deflate_max
-   52- rename matrixqz2 -> QM_ImZ_hnf, matrixqz3 -> QM_ImQ_hnf, matrixqz ->
-       QM_minors_coprime
-   53- bnfcertify can now handle Zimmert/Minkowski bounds > 2^31
-   54- moved misc/dico.new to src/whatnow + integrate it in the
+   40- arguments of stirling1 / stirling2 are now ulongs [ were longs ]
+BA 41- user variables can now be aliased [#790]
+   42- conjvec(POLMOD of INTMODs) was slow
+   43- bnfcertify can now handle Zimmert/Minkowski bounds > 2^31
+   44- moved misc/dico.new to src/whatnow + integrate it in the
        description system [ new script desc/whatnow ]
-   55- bittest(x, n) no longer accepts t_VEC arguments n
-   56- rename library functions hil0->hilbert, hilii->hilbertii
-       [ delete useless hil() ]
-   57- split library function disable_dbg() -> dbg_block() / dbg_release()
-   58- rename library functions srgcd -> RgX_gcd
-   59- rename library functions ismonome -> RgX_is_monomial
-   60- make the semantics of substpol more precise and less surprising:
+   45- bittest(x, n) no longer accepts t_VEC arguments n
+   46- split library function disable_dbg() -> dbg_block() / dbg_release()
+   47- make the semantics of substpol more precise and less surprising:
        substpol((x^2+x+1)/(x^2+x-1),x^2,x^3) -> (x^3 + x + 1)/(x^3 + x - 1)
        [ was: (x^6 - x^3 - 2*x - 1)/(x^6 - 3*x^3 + 1)  ]
-   61- deprecated flag '2' for bnfinit [ don't compute units ] is now ignored
+   48- deprecated flag '2' for bnfinit [ don't compute units ] is now ignored
        ==> bnfunit becomes totally useless.
-   62- the last component in prime ideals "primedec" format is a number field
+   49- the last component in prime ideals "primedec" format is a number field
        element, but no longer necessarily in t_COL form
-   63- rename library functions idealhermite -> idealhnf
-   64- no longer allow ideals in *non-square* t_MAT form
-   65- idealmin now returns a number field element, instead of the associated
+   50- no longer allow ideals in *non-square* t_MAT form
+   51- idealmin now returns a number field element, instead of the associated
        "principal idele"
-   66- rename library functions minideal -> idealmin and change prototype
-   67- cleared up the confusion caused by PARI "ideles", which were remotely
+   52- cleared up the confusion caused by PARI "ideles", which were remotely
        related to the mathematical notion, and covered two distinct uses. The
        first one (ideal + list of real places) is now called "divisor"; the
        second one (ideal + factorization matrix, which used to be a vector
        of logarithms of complex embeddings) is now called "extended ideal".
-   68- rename library functions element_mulmodpr -> nfmulmodpr,
-       element_powmodpr -> nfpowmodpr, element_val -> nfval,
-       element_divmodpr -> nfdivmodpr,
-       element_mul -> nfmul, element_pow -> nfpow, element_div -> nfdiv,
-       element_reduce -> nfreduce.
-   69- Allow Scalar + t_COL: x + y returns [ y[1]+x, y[2],... ]. Consistent
+   53- Allow Scalar + t_COL: x + y returns [ y[1]+x, y[2],... ]. Consistent
        with RgC_Rg_add and RgV_isscalar, and allows linear algebra over number
        fields with less rigid data types (can mix freely t_COL, t_INT
        and t_FRAC, instead of converting everything to t_COL).
-   70- Rename library functions Z_factor_limit -> Z_factor_until,
-       and auxdecomp -> Z_factor_limit
-   71- Rename library functions mu -> moebius, gmu -> gmoebius,
-       phi -> eulerphi, gphi -> geulerphi, phiu -> eulerphiu,
-       gener -> znprimroot, ggener -> znprimroot0, racine -> sqrtint,
-       regula -> quadregulator, fundunit -> quadunit
-   72- Rename library functions BSW_* -> BPSW_*
-   73- Functions quadunit(), quadregulator(), and factor() no longer apply
+   54- Functions quadunit(), quadregulator(), and factor() no longer apply
        componentwise to vector / matrix arguments. Use apply()
-   74- [libpari] removed obsolete 'prec' argument from prototypes of idealmul0,
+   55- [libpari] removed obsolete 'prec' argument from prototypes of idealmul0,
        idealmulred, idealpow0, idealpowred, ideallllred, algdep, algdep0,
        lindep, lindep0
-   75- Rename library functions ideal_two_elt* -> idealtwoelt*,
-       factorback0 -> factorback2, subfields0 -> nfsubfields,
-       zideallog -> ideallog, isunit -> bnfisunit
-   76- factorback() no longer accepts an optional 3rd argument (nf). Use
+   56- factorback() no longer accepts an optional 3rd argument (nf). Use
        idealfactorback(). See also nffactorback().
-   77- Extend polhensellift to work over unramified extensions of Q_p
+   57- Extend polhensellift to work over unramified extensions of Q_p
        [ was Q_p only ]
-   78- [libpari] changed prototypes of bnrdisc, bnrconductor, bnrisconductor
-   79- slightly change the matrices used in idealmin (round them): the elements
+   58- [libpari] changed prototypes of bnrdisc, bnrconductor, bnrisconductor
+   59- slightly change the matrices used in idealmin (round them): the elements
        returned are a little different.
-   80- no longer export private library function incgam2. Remove it also
+   60- no longer export private library function incgam2. Remove it also
        under GP when compatible = 3. Like incgam1 (suppressed), 1.39.15 doc
        stated it was provided "for debugging only".
-   81- addhelp: TABs are now treated properly (would overflow line without
+   61- addhelp: TABs are now treated properly (would overflow line without
        wrapping) and \n are no longer ignored. No longer add a trailing '.'
        when missing.
-   82- Rename library functions initell -> ellinit, smallinitell -> smallellinit
-       initalg -> nfinit, initalgred -> nfinitred -> initalgred2 -> nfinitred2
-       primedec -> idealprimedec, powraw -> qfbpowraw, compraw -> qfbcompraw
-   83- Useless nfinit flags 4, 5 (partial polred) removed.
-   84- Split off inline functions unrelated to the kernel from
+   62- Useless nfinit flags 4, 5 (partial polred) removed.
+   63- Split off inline functions unrelated to the kernel from
        src/kernel/level1.h
-   85- Rename u2toi -> uu32toi [ paste two 32-bit unsigned into a t_INT ]
-       Write uutoi for the more natural operation of pasting two ulongs into
-       a t_INT.
-   86- Swap the order of the 2 arguments to select(): selection function
+   64- Swap the order of the 2 arguments to select(): selection function
        now comes first [ as in apply() ]
-   87- error() messages now prefixed with the customary *** [ used to be ### ]
-   88- dvmdiiz(x, y, z) now expects z to be a t_INT [ to be consistent with
+   65- error() messages now prefixed with the customary *** [ used to be ### ]
+   66- dvmdiiz(x, y, z) now expects z to be a t_INT [ to be consistent with
        all other xxxz functions where xxx includes only i,s,u arguments ]
-   89- improved charpoly(,,2) [ Hessenberg form ]
-   90- allow Flxq_mul and Flxq_sqr to call Flx_rem_montgomery
-   91- t_POLMOD * t_POLMOD with same modulus: if all coefficients are in Z/NZ,
+   67- improved charpoly(,,2) [ Hessenberg form ]
+   68- allow Flxq_mul and Flxq_sqr to call Flx_rem_montgomery
+   69- t_POLMOD * t_POLMOD with same modulus: if all coefficients are in Z/NZ,
        call specialized functions FpXQ_mul / Flxq_mul [ analog with gsqr, gdiv,
        ginv, powgi ]
-   92- bezout(): make sure the leading term of the gcd of 2 polynomials is positive
+   70- bezout(): make sure the leading term of the gcd of 2 polynomials is positive
        (when it makes sense), as was already the case for gcd()
-   93- t_REAL^0 now returns 1.00000 [ was 1 ]
-   94- mpcopy, Flv_copy, Flx_copy, vecsmall_copy have all become
+   71- t_REAL^0 now returns 1.00000 [ was 1 ]
+   72- mpcopy, Flv_copy, Flx_copy, vecsmall_copy have all become
        aliases for leafcopy.
-   95- trap(,,foo) was actually equivalent to trap(,foo) changing the global
+   73- trap(,,foo) was actually equivalent to trap(,foo) changing the global
        exception handler, which was awkward an unintended
-   96- norml2(t_POL) now returns the expected (square of) the polynomial L^2 norm.
+   74- norml2(t_POL) now returns the expected (square of) the standard L^2 norm.
        Use x * conj(x) to get back the old behaviour. norml2 now raises an error
        on t_POLMOD and t_FFELT components; used to add relative norms as in
         ? norml2([Mod(Mod(1,3)*x,x^2-2), 2])
         %1 = Mod(2, 3)
 
   Added
-    1- library function pari_calloc, cgetalloc
-    2- [libpari] public generic hashtables
-    3- library function FpM_FpC_mul_FpX
-    4- library function shallowextract
-    5- library functions ZC_ZV_mul, ZM_copy, ZM_neg, ZM_add, ZM_mul, ZM_pow
-       ZM_sub, ZM_ZC_mul, ZV_copy, ZV_neg, ZV_neg_inplace ZV_togglesign
-       ZXV_Z_mul, ZM_Z_mul, ZV_Z_mul, ZV_isscalar, ZM_Z_divexact,
-       ZC_Z_divexact, ZX_Z_divexact, ZM_charpoly, Flm_charpoly, Flm_hess
-BA  6- handle numerical derivation as an operation on closure.
-    7- Fp_center, FpM_center, FpV_center
-RB  8- GP functions printf, Strprintf
-BA  9- library function ZV_indexsort
-   10- library functions pari_printf, pari_fprintf, pari_sprintf, pari_vfprintf,
-       pari_vprintf, pari_vsprintf
-BA 11- docpdf and install-doc-pdf targets (toplevel Makefile)
-JD 12- add an optional argument to quit()
-   13- library function FqX_roots(), FpX_factorff()
-   14- files src/basemath/ RgV.c, FpV.c, ZX.c, ZV.c, concat.c, lll.c, hnf_snf.c
-       prime.c, bit.c
-   15- new benches: 'galoisinit', 'ispower', 'nffactor', 'subfields',
-       'resultant', 'partition', 'aurifeuille', 'nfhilbert', 'polmod',
-       'combinat'
-   16- library functions Fp_FpX_sub, Flc_Fl_div, Flc_Fl_div_inplace, Flc_Fl_mul,
-   Flc_Fl_mul_inplace, Flm_Fl_mul, Flm_Fl_mul_inplace, Flm_copy, Flm_mul,
-   Flm_inage,
-   Flv_Fl_mul_inplace, Flv_add, Flv_add_inplace, Flv_copy, Flv_dotproduct,
-   Flv_sub, Flv_sub_inplace, Fp_mulu, FpV_inv, FpXQ_inv, FqV_inv, RgM_check_ZM,
-   RgM_det_trianguar, RgM_isdiagonal, RgV_check_ZV, RgXQX_pseudorem,
-   RgX_check_ZX, RgX_check_ZXY, RgX_pseudodivrem, RgX_pseudorem, RgX_recip,
-   RgX_recip_shallow,
-   ZC_hnfrem, ZC_hnfremdiv, ZM_det_triangular, ZM_detmult, ZM_equal, ZM_hnf,
-   ZM_hnfall, ZM_hnfcenter, ZM_hnflll, ZM_hnfmod, ZM_hnfmodid, ZM_hnfmodidpart,
-   ZM_hnfrem, ZM_hnfremdiv, ZM_hnfperm, ZM_snf, ZM_snfall, ZM_snfall_i,
-   ZM_snf_group
-   ZM_snfclean, ZMrow_ZC_mul, ZV_ZM_mul, ZV_cmp0, ZV_content, ZV_equal,
-   ZV_lincomb, ZXY_max_lg, ZX_copy, ZX_equal, ZX_max_lg, row_Flm, row_zm,
-   togglesign_safe, setabssign, zero_Flm, zero_Flv, zero_zm, zero_zv, zm_copy,
-   zv_cmp0, zv_copy, zv_equal, bitvec_test_set, ZM_is_identity, RgX_get_0, RgX_get_1,
-   resultant, resultant_all, QX_disc, QX_resultant, Z_ZX_sub, ZX_Z_sub,
-   zx_renormalize, zv_content, ZM_lll, ZM_lll_norms, lllfp, lllintpartial,
-   lllintpartial_inplace, reducemodlll, reducemodinvertible, closemodinvertible,
-   RgC_RgM_mul, RgC_RgV_mul, RgM_RgC_mul, RgM_RgV_mul, RgM_mul, RgM_sqr,
-   RgV_RgM_mul, RgV_RgC_mul, RgV_add, RgV_neg, RgV_sub, ZM_max_lg, RgC_Rg_add
-   RgV_sum, RgV_sumpart, RgV_sumpart2
-   17- universal constant gen_m2, for symmetry
-   18- GP function version() [ current version number ]
-   19- library functions scalar_ZX, scalar_ZX_shallow, FpXY_eval, FpXY_evalx,
-   FpXY_evaly, Fl_order, init_primepointer, Flx_nbfact_by_degree
-   20- library function galoisinit0, get_nfpol, get_bnfpol, get_prid,
-   nf_get_r1, nf_get_r2, nf_get_roots, nf_get_sign, nf_get_prec (was nfgetprec)
-   numberofconjugates, mkfraccopy, mkquad, mkvecsmall4, shallowconcat1, concat1,
-   absfrac, sqrfrac
-   ZV_prod, ZV_pval, ZV_pvalrem
-   zv_prod
-   RgX_neg, RgX_add, RgX_add_shallow, RgX_sub, RgX_Rg_add, RgX_Rg_sub,
-   Rg_RgX_sub,
-   RgX_equal, RgX_equal_var, RgX_translate, RgX_to_nfX, RgX_type,
-   RgX_type_decode, RgX_type_is_composite, RgX_Rg_divexact,
-   RgXQ_norm, RgXQ_pow, RgXQ_caract, RgXQ_reverse
-   RgV_neg, RgV_add, RgV_sub, RgV_Rg_mul,
-   RgC_neg, RgC_add, RgC_sub, RgC_Rg_div, RgC_Rg_mul,
-   RgM_neg, RgM_add, RgM_sub, RgM_Rg_div, RgM_Rg_mul, RgM_diagonal,
-   RgM_diagonal_shallow, RgM_inv, RgM_solve,
-   FF_sub, ZC_lincomb1_inplace, ZC_z_mul,
-   Z_isanypower,
-   RgXQX_translate, RgXQV_to_mod, RgXQXV_to_mod
-   21- library function nf_to_scalar_or_basis, nf_to_scalar_or_alg
-   22- library function roundr_safe, trunc_safe
-BA 23- [ellap] Port of SEA algorithm from the ellsea GP package
-BA 24- new alarm GP function and alarmer error code
-   25- library functions chinese_coprime_Z, Z_chinese, Z_chinese_all,
+    1- new benches: galoisinit, ispower, nffactor, subfields, resultant,
+       partition, aurifeuille, nfhilbert, polmod, combinat, polcyclo, ideal,
+       polred, qf
+    2- split up some large monolithic files: new files
+       src/basemath/ RgV.c, FpV.c, ZX.c, ZV.c, concat.c, lll.c, hnf_snf.c
+         prime.c, bit.c
+       src/modules/ QX_factor.c, Hensel.c, DedekZeta.c
+    3- split off module of general inline functions: src/headers/pariinl.h.
+    4- Write or rename / document many convenience library functions:
+       pari_calloc, cgetalloc
+       mkfraccopy, mkquad, mkvecsmall4, absfrac, sqrfrac, mul_content, mul_denom
+       roundr_safe, trunc_safe
+       shallowextract, shallowconcat1, concat1,
+       BPSW_psp & BPSW_isprime
+       Z_isanypower, chinese_coprime_Z, Z_chinese, Z_chinese_all,
        Z_chinese_coprime, Z_chinese_post, Z_chinese_pre, Z_incremental_CRT,
        Z_init_CRT, ZM_incremental_CRT, ZM_init_CRT, ZX_incremental_CRT,
-       ZX_init_CRT, RgX_disc, quad_disc, qfb_disc, deg1pol, deg1pol_shallow
+       ZX_init_CRT,
+       ZX_to_monic, ZX_primitive_to_monic, ZX_squff,
+       ZX_gcd_all, nfgcd, nfgcd_all,
+       RgX_disc, quad_disc, qfb_disc,
        ZpX_liftfact, ZpX_gcd, ZpX_reduced_resultant, ZpX_reduced_resultant_fast
-RM 26- partitions()
-   27- library functions nf_to_Fq_init, nf_to_Fq, Fq_to_nf, zkmodprinit,
-       zk_to_Fq_init, zk_to_Fq, nfM_to_FqM, FqM_to_nfM, nfX_to_FqX, FqX_to_nfX
-       ZX_squff, ZX_gcd_all, nfgcd, nfgcd_all, RgXQX_pseudodivrem,
-       ZX_to_monic, ZX_primitive_to_monic
-       Flx_roots_naive, zk_multable, zk_scalar_or_multable
-BA 28- library functions checkgroup, galois_group, cyclicgroup, dicyclicgroup,
+       Fp_center, FpM_center, FpV_center
+       FpM_FpC_mul_FpX
+       FqX_roots, FpX_factorff
+       ZC_ZV_mul, ZM_is_identity, ZM_copy, ZM_neg, ZM_add, ZM_mul, ZM_pow
+       ZM_max_lg, ZM_sub, ZM_ZC_mul, ZXV_Z_mul, ZM_Z_mul, ZV_Z_mul, ZV_isscalar,
+       ZV_copy, ZV_neg, ZV_neg_inplace ZV_togglesign, ZV_indexsort
+       ZMrow_ZC_mul, ZV_ZM_mul, ZV_cmp0, ZV_content, ZV_equal,
+       ZC_lincomb, ZC_lincomb1_inplace, ZC_z_mul,
+       ZV_prod, ZV_pval, ZV_pvalrem zv_prod
+       ZM_Z_divexact, ZC_Z_divexact, ZX_Z_divexact,
+       ZM_charpoly, Flm_charpoly, Flm_hess
+       Z_ZX_sub, ZX_Z_sub, Fp_FpX_sub,
+       Flc_Fl_div, Flc_Fl_div_inplace, Flc_Fl_mul, Flc_Fl_mul_inplace,
+       Flm_Fl_mul, Flm_Fl_mul_inplace, Flm_copy, Flm_mul, Flm_inage,
+       Flv_Fl_mul_inplace, Flv_add, Flv_add_inplace, Flv_copy, Flv_dotproduct,
+       Flv_sub, Flv_sub_inplace,
+       Fl_order, Flx_nbfact_by_degree, Flx_roots_naive,
+       FF_sub,
+       Fp_mulu,
+       FpV_inv, FpXQ_inv, FqV_inv,
+       FpXY_eval, FpXY_evalx, FpXY_evaly,
+       Flx_Fl_mul_to_monic, FlxqX_Flxq_mul_to_monic,
+       FpX_Fp_mul_to_monic, FqX_Fq_mul_to_monic
+       RgM_check_ZM, RgM_det_trianguar, RgM_isdiagonal,
+       RgV_check_ZV, RgV_neg, RgV_add, RgV_sub, RgV_Rg_mul,
+       RgC_neg, RgC_add, RgC_sub, RgC_Rg_div, RgC_Rg_mul,
+       RgM_neg, RgM_add, RgM_sub, RgM_Rg_div, RgM_Rg_mul,
+       RgC_RgM_mul, RgC_RgV_mul, RgM_RgC_mul, RgM_RgV_mul, RgM_mul, RgM_sqr,
+       RgV_RgM_mul, RgV_RgC_mul, RgV_add, RgV_neg, RgV_sub, RgC_Rg_add
+       RgM_diagonal, RgM_diagonal_shallow, RgM_inv, RgM_solve,
+       RgM_mulreal, mulreal
+       RgV_sum, RgV_sumpart, RgV_sumpart2
+       RgX_neg, RgX_add, RgX_add_shallow, RgX_sub, RgX_Rg_add, RgX_Rg_sub,
+       Rg_RgX_sub, RgX_equal, RgX_equal_var, RgX_translate, RgX_to_nfX,
+       RgX_type, RgX_type_decode, RgX_type_is_composite, RgX_Rg_divexact,
+       RgXQ_norm, RgXQ_pow, RgXQ_caract, RgXQ_reverse
+       RgXQX_translate, RgXQV_to_mod, RgXQXV_to_mod
+       RgXQX_pseudorem, RgXQX_pseudodivrem,
+       RgX_check_ZX, RgX_check_ZXY, RgX_pseudodivrem, RgX_pseudorem,
+       RgX_recip, RgX_recip_shallow,
+       ZC_hnfrem, ZC_hnfremdiv, ZM_det_triangular, ZM_detmult, ZM_equal, ZM_hnf,
+       ZM_hnfall, ZM_hnfcenter, ZM_hnflll, ZM_hnfmod, ZM_hnfmodid,
+       ZM_hnfmodidpart, ZM_hnfrem, ZM_hnfremdiv, ZM_hnfperm, ZM_snf, ZM_snfall,
+       ZM_snfall_i, ZM_snf_group, ZM_snfclean
+       ZM_lll, ZM_lll_norms, hnfmerge_get_1,
+       ZXY_max_lg, ZX_copy, ZX_equal, ZX_max_lg, row_Flm, row_zm,
+       scalar_ZX, scalar_ZX_shallow, deg1pol, deg1pol_shallow
+       togglesign_safe, setabssign,
+       zero_Flm, zero_Flv, zero_zm, zero_zv, zm_copy, zv_cmp0, zv_copy,
+       zv_equal, zv_content, zx_renormalize, 
+       identity_perm, cyclic_perm, perm_mul, perm_commute, perm_inv, perm_pow,
+       cyc_pow_perm, cyc_pow, perm_cycles, perm_order, vecperm_orbits
+       bitvec_test_set,
+       RgX_get_0, RgX_get_1,
+       resultant, resultant_all, QX_disc, QX_resultant,
+       lllfp, lllintpartial, lllintpartial_inplace, reducemodlll,
+       reducemodinvertible, closemodinvertible,
+       init_primepointer,
+       galoisinit0, get_nfpol, get_bnfpol, get_prid,
+       nf_get_r1, nf_get_r2, nf_get_roots, nf_get_sign,
+       nf_get_prec (was nfgetprec), nf_to_scalar_or_basis, nf_to_scalar_or_alg
+       nf_to_Fq_init, nf_to_Fq, Fq_to_nf, zkmodprinit, zk_to_Fq_init, zk_to_Fq,
+       nfM_to_FqM, FqM_to_nfM, nfX_to_FqX, FqX_to_nfX
+       zk_multable, zk_scalar_or_multable, multable, tablemul, tablemul_ei,
+       tablemul_ei_ej, tablemulvec, tablesqr, ei_multable.
+       nfordmax, nfarchstar (was zarchstar), nfadd, nfsign,
+       nfsign_arch, nfsign_units, nfsign_from_logarch, Buchquad, Buchall,
+       Idealstar, idealaddtoone_i, idealcoprimefact,
+       nfinvmodideal, nfpowmodideal, idealsqr, nfpow_u
+       numberofconjugates, 
+       bnrisconductor0, bnrdisc0, bnrconductor0,
+       bnrsurjection, ABC_to_bnr, idealred, idealred0 (was ideallllred),
+       idealred_elt, idealred_elt0
+       ellinit_padic, ellinit_real, ellinf, ell_is_inf, ell_is_padic,
+       ell_is_real, checkerr_real, checkell_padic, checksmallell, checkell5,
+       checkellpt
+       trueeta, exp_Ir, roots_from_deg1, deg1_from_roots
+    5- [libpari] public generic hashtables
+    6- library functions sqrr and invr [ Newton inversion, called by ginv() ]
+BA  7- library functions checkgroup, galois_group, cyclicgroup, dicyclicgroup,
        abelian_group, group_domain, group_elts, group_order, group_isabelian,
        group_abelianHNF, group_abelianSNF, group_isA4S4, group_leftcoset,
        group_rightcoset, group_perm_normalize, group_quotient, quotient_perm,
        quotient_group, quotient_subgroup_lift, group_subgroups,
        groupelts_abelian_group, groupelts_center, group_export, group_ident
-   28- library functions identity_perm, cyclic_perm, perm_mul, perm_commute,
-       perm_inv, perm_pow, cyc_pow_perm, cyc_pow, perm_cycles, perm_order,
-       vecperm_orbits
-   29- New chapters in Libpari Guide: usersch6.tex, usersch7.tex
-   30- library functions mulreal & RgM_mulreal
-   31- library functions Flx_Fl_mul_to_monic, FlxqX_Flxq_mul_to_monic,
-       FpX_Fp_mul_to_monic, FqX_Fq_mul_to_monic
-   32- library function dbg_pari_heap
-   33- library function  nfordmax, nfarchstar (was zarchstar), nfsign,
-       nfsign_arch, nfsign_units, nfsign_from_logarch, Buchquad, Buchall,
-       Idealstar, idealaddtoone_i, idealcoprimefact, hnfmerge_get_1,
-       nfinvmodideal, nfpowmodideal, idealsqr, nfpow_u
-   34- function bnfcompress() [ to create a "small bnf" from a true
+    8- library functions pr_get_p, pr_get_gen, pr_get_e, pr_get_f, pr_get_tau
+       to access components of prime ideals
+BA  9- handle numerical derivation as an operation on closure.
+RB 10- GP functions printf, Strprintf
+   11- pari_printf, pari_fprintf, pari_sprintf, pari_vfprintf, pari_vprintf,
+       pari_vsprintf
+BA 12- docpdf and install-doc-pdf targets (toplevel Makefile)
+JD 13- add an optional argument to quit()
+   14- universal constant gen_m2, for symmetry
+   15- GP function version() [ current version number ]
+BA 16- [ellap] Port of SEA algorithm from the ellsea GP package
+BA 17- new alarm GP function and alarmer error code
+RM 18- partitions()
+   19- New chapters in Libpari Guide: usersch6.tex, usersch7.tex
+   20- library function dbg_pari_heap
+   21- function bnfcompress() [ to create a "small bnf" from a true
        bnf, to be recoved using bnfinit ]. More consistent than old
        bnfnit(,3) / bnfmake.
-   35- library functions mul_content, mul_denom
-   36- a concept of "extended ideal" [I, t], where t is an algebraic number
+   22- a concept of "extended ideal" [I, t], where t is an algebraic number
        (possibly in factored form). The pair represents the ideal I x (t)
        In applications the norm of I stays bounded for a given base field,
        and t keeps track of the "principal part" of the ideal (usually in
        factored form to avoid coefficient explosion).
-   37- nfadd, multable, tablemul, tablemul_ei, tablemul_ei_ej,
-       tablemulvec, tablesqr, ei_multable.
-   38- library functions BPSW_psp & BPSW_isprime
-   39- public interface to forsubgroup: traversesubgroups()
-   40- library function bnfisprincipal0 (with new public flags, see nf_GENMAT)
-   41- GP functions nffactorback / idealfactorback
-   42- files src/modules/QX_factor.c, src/modules/Hensel.c,
-       src/modules/DedekZeta.c
-   43- library functions bnrisconductor0, bnrdisc0, bnrconductor0,
-       bnrsurjection, ABC_to_bnr, idealred, idealred0 (was ideallllred),
-       idealred_elt, idealred_elt0
-   44- library functions trueeta, exp_Ir, roots_from_deg1, deg1_from_roots
-   45- library functions ellinit_padic, ellinit_real, ellinf, ell_is_inf,
-       ell_is_padic, ell_is_real, checkerr_real, checkell_padic, checksmallell,
-       checkell5, checkellpt
-   46- library functions pr_get_p, pr_get_gen, pr_get_e, pr_get_f, pr_get_tau
-       to access components of prime ideals
-   47- files src/language/pariinl.c, src/headers/pariinl.h.
-JD 48- GP function warning()
-   49- new flag to charpoly [ integral matrix, modular algorithm ]
-   50- library functions sqrr and invr [ Newton inversion, called by ginv() ]
-BA 51- GP function galoisisnormal().
+   23- public interface to forsubgroup: traversesubgroups()
+   24- library function bnfisprincipal0 (with new public flags, see nf_GENMAT)
+   25- GP functions nffactorback / idealfactorback
+JD 26- GP function warning()
+   27- new flag to charpoly [ integral matrix, modular algorithm ]
+BA 28- GP function galoisisnormal().
 
   Removed
     1- obsolete GP functions printp, printp1. Either replace them by
