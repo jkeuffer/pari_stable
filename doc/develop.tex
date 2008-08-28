@@ -136,9 +136,7 @@ as needed.
 either \kbd{v} is \kbd{NULL} (empty list) or \kbd{l = lg(v)} is defined, and
 the elements are \kbd{v[1]}, \dots, \kbd{v[l-1]}.
 
-\typ{LIST} is not considered a recursive type, i.e.
-\kbd{is\_recursive\_t(\typ{LIST})} is false. In most cases,
-e.g.~\kbd{gerepile}, this means that the list components are not inspected
+In most \kbd{gerepile} scenarios, the list components are not inspected
 and a shallow copy of the malloced vector is made. The functions
 \kbd{gclone}, \kbd{copy\_bin\_canon} are exceptions, and make a full copy of
 the list.

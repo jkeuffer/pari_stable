@@ -11,5 +11,8 @@ List([[3, 2, 3], 2])
 List([Vecsmall([1, 2, 3]), 2])
 3
   *** listpop: empty list in listpop.
-[68, 497]
-Total time spent: 108
+
+[List([0])]
+
+[70, 514]
+Total time spent: 68

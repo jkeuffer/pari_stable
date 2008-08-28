@@ -1189,7 +1189,7 @@ trap0(const char *e, GEN r, GEN f)
 /*                                                                 */
 /*******************************************************************/
 /* lontyp[tx] = 0 (non recursive type) or number of codewords for type tx */
-const  long lontyp[] = { 0,0,0,1,1,2,1,2,1,1, 2,2,0,1,1,1,1,1,1,1, 0,0,0,2 };
+const  long lontyp[] = { 0,0,0,1,1,2,1,2,1,1, 2,2,0,1,1,1,1,1,1,1, 2,0,0,2 };
 
 static GEN
 list_internal_copy(GEN z, long nmax)
@@ -1217,11 +1217,8 @@ listassign(GEN x, GEN y)
 GEN
 listcopy(GEN x)
 {
-  GEN y = listcreate(), L = list_data(x), a;
-  long i, lx;
-  if (!L) return y;
-  list_data(y) = a = cgetg_copy(L, &lx);
-  for (i = 1; i < lx; i++) gel(a,i) = gcopy(gel(L,i));
+  GEN y = listcreate(), L = list_data(x);
+  if (L) list_data(y) = gcopy(L);
   return y;
 }
 
@@ -1229,27 +1226,20 @@ listcopy(GEN x)
  * but will catch almost all 0 in practice [ unless lgefint < lg ] */
 #define is_0INT(x) \
     (((x)[0] & (TYPBITS|LGBITS)) == (evaltyp(t_INT)|_evallg(2)))
-
-/* assume x is non-recursive. For efficiency return gen_0 instead of a copy
- * for a 0 t_INT */
-INLINE GEN
-copy_leaf(GEN x, long tx)
-{
-  if (is_0INT(x)) return gen_0; /* very common */
-  switch(tx)
-  {
-    case t_INT:  return icopy(x);
-    case t_LIST: return listcopy(x); /* allocated on the stack */
-    default:     return leafcopy(x);
-  }
-}
-
 GEN
 gcopy(GEN x)
 {
   long tx = typ(x), lx, i;
   GEN y;
-  if (! is_recursive_t(tx)) return copy_leaf(x, tx);
+  switch(tx)
+  { /* non recursive types */
+    case t_INT: return is_0INT(x)? gen_0: icopy(x);
+    case t_REAL:
+    case t_STR:
+    case t_VECSMALL: return leafcopy(x);
+    /* one more special case */
+    case t_LIST: return listcopy(x);
+  }
   y = cgetg_copy(x, &lx);
   if (lontyp[tx] == 1) i = 1; else { y[1] = x[1]; i = 2; }
   for (; i<lx; i++) gel(y,i) = gcopy(gel(x,i));
@@ -1263,7 +1253,15 @@ gcopy_lg(GEN x, long lx)
 {
   long tx = typ(x), i;
   GEN y;
-  if (! is_recursive_t(tx)) return copy_leaf(x, tx);
+  switch(tx)
+  { /* non recursive types */
+    case t_INT: return is_0INT(x)? gen_0: icopy(x);
+    case t_REAL:
+    case t_STR:
+    case t_VECSMALL: return leafcopy(x);
+    /* one more special case */
+    case t_LIST: return listcopy(x);
+  }
   y = cgetg(lx, tx);
   if (lontyp[tx] == 1) i = 1; else { y[1] = x[1]; i = 2; }
   for (; i<lx; i++) gel(y,i) = gcopy(gel(x,i));
@@ -1271,7 +1269,7 @@ gcopy_lg(GEN x, long lx)
 }
 
 /* cf cgetg_copy: "allocate" (by updating first codeword only) for subsequent
- * copy of x, as if avma = *AVMA. Assume lg(x) == lx */
+ * copy of x, as if avma = *AVMA */
 INLINE GEN
 cgetg_copy_avma(GEN x, long *plx, pari_sp *AVMA) {
   GEN z;
@@ -1295,25 +1293,27 @@ gcopy_avma(GEN x, pari_sp *AVMA)
   long i, lx, tx = typ(x);
   GEN y;
 
-  if (! is_recursive_t(tx))
-  {
-    switch(tx)
-    {
-      case t_INT:
-        *AVMA = (pari_sp)icopy_avma(x, *AVMA);
-        return (GEN)*AVMA;
-      case t_LIST:
-        y = cgetlist_avma(AVMA);
-	listassign(x, y); return y;
-    }
-    y = cgetg_copy_avma(x, &lx, AVMA);
-    for (i=1; i<lx; i++) y[i] = x[i];
-  }
-  else
-  {
-    y = cgetg_copy_avma(x, &lx, AVMA);
-    if (lontyp[tx] == 1) i = 1; else { y[1] = x[1]; i = 2; }
-    for (; i<lx; i++) gel(y,i) = gcopy_avma(gel(x,i), AVMA);
+  switch(typ(x))
+  { /* non recursive types */
+    case t_INT:
+      *AVMA = (pari_sp)icopy_avma(x, *AVMA);
+      return (GEN)*AVMA;
+    case t_REAL:
+    case t_STR:
+    case t_VECSMALL:
+      y = cgetg_copy_avma(x, &lx, AVMA);
+      for (i=1; i<lx; i++) y[i] = x[i];
+      break;
+
+    /* one more special case */
+    case t_LIST:
+      y = cgetlist_avma(AVMA);
+      listassign(x, y); return y;
+
+    default:
+      y = cgetg_copy_avma(x, &lx, AVMA);
+      if (lontyp[tx] == 1) i = 1; else { y[1] = x[1]; i = 2; }
+      for (; i<lx; i++) gel(y,i) = gcopy_avma(gel(x,i), AVMA);
   }
   return y;
 }
@@ -1326,21 +1326,24 @@ gcopy_av0(GEN x, pari_sp *AVMA)
   long i, lx, tx = typ(x);
   GEN y;
 
-  if (! is_recursive_t(tx))
-  {
-    if (is_0INT(x)) return NULL; /* special marker */
-    if (tx == t_INT) {
+  switch(tx)
+  { /* non recursive types */
+    case t_INT:
+      if (is_0INT(x)) return NULL; /* special marker */
       *AVMA = (pari_sp)icopy_avma(x, *AVMA);
       return (GEN)*AVMA;
-    }
-    y = cgetg_copy_avma(x, &lx, AVMA);
-    for (i=1; i<lx; i++) y[i] = x[i];
-  }
-  else
-  {
-    y = cgetg_copy_avma(x, &lx, AVMA);
-    if (lontyp[tx] == 1) i = 1; else { y[1] = x[1]; i = 2; }
-    for (; i<lx; i++) gel(y,i) = gcopy_av0(gel(x,i), AVMA);
+    case t_REAL:
+    case t_STR:
+    case t_VECSMALL:
+    /* one more special case */
+    case t_LIST:
+      y = cgetg_copy_avma(x, &lx, AVMA);
+      for (i=1; i<lx; i++) y[i] = x[i];
+      break;
+    default:
+      y = cgetg_copy_avma(x, &lx, AVMA);
+      if (lontyp[tx] == 1) i = 1; else { y[1] = x[1]; i = 2; }
+      for (; i<lx; i++) gel(y,i) = gcopy_av0(gel(x,i), AVMA);
   }
   return y;
 }
@@ -1361,40 +1364,41 @@ icopy_avma_canon(GEN x, pari_sp AVMA)
 static GEN
 gcopy_av0_canon(GEN x, pari_sp *AVMA)
 {
-  long i,lx,tx=typ(x);
+  long i, lx, tx = typ(x);
   GEN y;
 
-  if (! is_recursive_t(tx))
-  {
-    if (is_0INT(x)) return NULL; /* special marker */
-    switch(tx)
+  if (is_0INT(x)) return NULL; /* special marker */
+  switch(tx)
+  { /* non recursive types */
+    case t_INT:
+      *AVMA = (pari_sp)icopy_avma_canon(x, *AVMA);
+      return (GEN)*AVMA;
+    case t_REAL:
+    case t_STR:
+    case t_VECSMALL:
+      y = cgetg_copy_avma(x, &lx, AVMA);
+      for (i=1; i<lx; i++) y[i] = x[i];
+      break;
+
+    /* one more special case */
+    case t_LIST:
     {
-      case t_INT: 
-        *AVMA = (pari_sp)icopy_avma_canon(x, *AVMA);
-        return (GEN)*AVMA;
-      case t_LIST:
-      {
-	GEN y = cgetlist_avma(AVMA), z = list_data(x);
-	if (z) {
-	  list_data(y) = gcopy_av0_canon(z, AVMA);
-	  list_nmax(y) = lg(z)-1;
-	} else {
-	  list_data(y) = NULL;
-	  list_nmax(y) = 0;
-	}
-	return y;
+      GEN y = cgetlist_avma(AVMA), z = list_data(x);
+      if (z) {
+        list_data(y) = gcopy_av0_canon(z, AVMA);
+        list_nmax(y) = lg(z)-1;
+      } else {
+        list_data(y) = NULL;
+        list_nmax(y) = 0;
       }
+      return y;
     }
-    y = cgetg_copy_avma(x, &lx, AVMA);
-    for (i=1; i<lx; i++) y[i] = x[i];
+    default:
+      y = cgetg_copy_avma(x, &lx, AVMA);
+      if (lontyp[tx] == 1) i = 1; else { y[1] = x[1]; i = 2; }
+      for (; i<lx; i++) gel(y,i) = gcopy_av0_canon(gel(x,i), AVMA);
   }
-  else
-  {
-    y = cgetg_copy_avma(x, &lx, AVMA);
-    if (lontyp[tx] == 1) i = 1; else { y[1] = x[1]; i = 2; }
-    for (; i<lx; i++) gel(y,i) = gcopy_av0_canon(gel(x,i), AVMA);
-  }
-  return y;
+return y;
 }
 
 /* [copy_bin/bin_copy:] size (number of words) required for gcopy_av0(x) */
@@ -1402,23 +1406,25 @@ static long
 taille0(GEN x)
 {
   long i,n,lx, tx = typ(x);
-  if (!is_recursive_t(tx))
-  {
-    if (is_0INT(x)) return 0;
-    switch(tx)
+  if (is_0INT(x)) return 0;
+  switch(tx)
+  { /* non recursive types */
+    case t_INT: return lgefint(x);
+    case t_REAL:
+    case t_STR:
+    case t_VECSMALL: return lg(x);
+
+    /* one more special case */
+    case t_LIST:
     {
-      case t_INT: return lgefint(x);
-      case t_LIST:
-      {
-	GEN L = list_data(x);
-	return L? 3 + taille0(L): 3;
-      }
-      default: return lg(x);
+      GEN L = list_data(x);
+      return L? 3 + taille0(L): 3;
     }
+    default:
+      n = lx = lg(x);
+      for (i=lontyp[tx]; i<lx; i++) n += taille0(gel(x,i));
+      return n;
   }
-  n = lx = lg(x);
-  for (i=lontyp[tx]; i<lx; i++) n += taille0(gel(x,i));
-  return n;
 }
 
 /* [copy_bin/bin_copy:] size (number of words) required for gcopy_av0(x) */
@@ -1426,25 +1432,40 @@ static long
 taille0_nolist(GEN x)
 {
   long i,n,lx, tx = typ(x);
-  if (!is_recursive_t(tx))
-  {
-    if (is_0INT(x)) return 0;
-    return (tx == t_INT)? lgefint(x): lg(x);
+  switch(tx)
+  { /* non recursive types */
+    case t_INT:
+      lx = lgefint(x);
+      return lx == 2? 0: lx;
+    case t_REAL:
+    case t_STR:
+    case t_VECSMALL:
+    case t_LIST:
+      return lg(x);
+    default:
+      n = lx = lg(x);
+      for (i=lontyp[tx]; i<lx; i++) n += taille0_nolist(gel(x,i));
+      return n;
   }
-  n = lx = lg(x);
-  for (i=lontyp[tx]; i<lx; i++) n += taille0_nolist(gel(x,i));
-  return n;
 }
 
 long
 gsizeword(GEN x)
 {
   long i,n,lx, tx = typ(x);
-  if (!is_recursive_t(tx))
-    return (tx == t_INT)? lgefint(x): lg(x);
-  n = lx = lg(x);
-  for (i=lontyp[tx]; i<lx; i++) n += gsizeword(gel(x,i));
-  return n;
+  switch(tx)
+  { /* non recursive types */
+    case t_INT: return lgefint(x);
+    case t_REAL:
+    case t_STR:
+    case t_VECSMALL: return lg(x);
+
+    case t_LIST: return 3;
+    default:
+      n = lx = lg(x);
+      for (i=lontyp[tx]; i<lx; i++) n += gsizeword(gel(x,i));
+      return n;
+  }
 }
 long
 gsizebyte(GEN x) { return gsizeword(x) * sizeof(long); }
@@ -1454,32 +1475,32 @@ gclone(GEN x)
 {
   long i,lx,tx = typ(x), t = gsizeword(x);
   GEN y = newblock(t);
-  if (!is_recursive_t(tx))
-  {
-    switch(tx)
-    {
-      case t_INT:
-	lx = lgefint(x);
-	y[0] = evaltyp(t_INT)|evallg(lx);
-	for (i=1; i<lx; i++) y[i] = x[i];
-	break;
-      case t_LIST:
-	y[0] = evaltyp(t_LIST)|_evallg(3);
-	listassign(x, y);
-	break;
-      default:
-	lx = lg(x);
-	for (i=0; i<lx; i++) y[i] = x[i];
-	break;
+  switch(tx)
+  { /* non recursive types */
+    case t_INT:
+      lx = lgefint(x);
+      y[0] = evaltyp(t_INT)|evallg(lx);
+      for (i=1; i<lx; i++) y[i] = x[i];
+      break;
+    case t_REAL:
+    case t_STR:
+    case t_VECSMALL:
+      lx = lg(x);
+      for (i=0; i<lx; i++) y[i] = x[i];
+      break;
+
+    /* one more special case */
+    case t_LIST:
+      y[0] = evaltyp(t_LIST)|_evallg(3);
+      listassign(x, y);
+      break;
+    default: {
+      pari_sp AVMA = (pari_sp)(y + t);
+      lx = lg(x);
+      y[0] = x[0];
+      if (lontyp[tx] == 1) i = 1; else { y[1] = x[1]; i = 2; }
+      for (; i<lx; i++) gel(y,i) = gcopy_avma(gel(x,i), &AVMA);
     }
-  }
-  else
-  {
-    pari_sp AVMA = (pari_sp)(y + t);
-    lx = lg(x);
-    y[0] = x[0];
-    if (lontyp[tx] == 1) i = 1; else { y[1] = x[1]; i = 2; }
-    for (; i<lx; i++) gel(y,i) = gcopy_avma(gel(x,i), &AVMA);
   }
   setisclone(y); return y;
 }
@@ -1488,7 +1509,7 @@ static void
 shiftaddress(GEN x, long dec)
 {
   long i, lx, tx = typ(x);
-  if (is_recursive_t(tx))
+  if (is_recursive_t(tx) && tx != t_LIST)
   {
     lx = lg(x);
     for (i=lontyp[tx]; i<lx; i++) {
@@ -1506,15 +1527,23 @@ static void
 shiftaddress_canon(GEN x, long dec)
 {
   long i, lx, tx = typ(x);
-  if (!is_recursive_t(tx))
-  {
-    if (tx == t_INT) {
+  switch(tx)
+  { /* non recursive types */
+    case t_INT: {
       GEN y;
       lx = lgefint(x); if (lx <= 3) return;
       y = x + 2;
       x = int_MSW(x);  if (x == y) return;
       while (x > y) { lswap(*x, *y); x = int_precW(x); y++; }
-    } else if (tx == t_LIST) {
+      break;
+    }
+    case t_REAL:
+    case t_STR:
+    case t_VECSMALL:
+      break;
+
+    /* one more special case */
+    case t_LIST: {
       GEN Lx = list_data(x);
       if (Lx) {
 	pari_sp av = avma;
@@ -1523,18 +1552,16 @@ shiftaddress_canon(GEN x, long dec)
 	list_data(x) = list_internal_copy(L, lg(L)); avma = av;
       }
     }
-  }
-  else
-  {
-    lx = lg(x);
-    for (i=lontyp[tx]; i<lx; i++) {
-      if (!x[i]) gel(x,i) = gen_0;
-      else
-      {
-	x[i] += dec;
-	shiftaddress_canon(gel(x,i), dec);
+    default:
+      lx = lg(x);
+      for (i=lontyp[tx]; i<lx; i++) {
+        if (!x[i]) gel(x,i) = gen_0;
+        else
+        {
+          x[i] += dec;
+          shiftaddress_canon(gel(x,i), dec);
+        }
       }
-    }
   }
 }
 

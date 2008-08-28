@@ -665,7 +665,6 @@ gerepileupto(pari_sp av, GEN x)
   { /* non-default = !is_recursive_t(tq) */
     case t_INT: return gerepileuptoint(av, x);
     case t_REAL:
-    case t_LIST:
     case t_STR:
     case t_VECSMALL: return gerepileuptoleaf(av,x);
     default:

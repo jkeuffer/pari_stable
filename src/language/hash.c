@@ -174,30 +174,30 @@ hash_GEN(GEN x)
 {
   ulong h = x[0];
   long tx = typ(x), lx, i;
-  if (!is_recursive_t(tx))
-  {
-    switch(tx)
-    {
-      case t_INT:
-        lx = lgefint(x);
-        h &= TYPBITS;
-        for (i = 1; i < lx; i++) h = compound(h, (ulong)x[i]);
-        return h;
-      case t_LIST:
-        x = list_data(x);
-        if (x) break;
-        return h;
-      default:
-        lx = lg(x);
-        for (i = 1; i < lx; i++) h = compound(h, (ulong)x[i]);
-        return h;
-    }
+  switch(tx)
+  { /* non recursive types */
+    case t_INT:
+      lx = lgefint(x);
+      h &= TYPBITS;
+      for (i = 1; i < lx; i++) h = compound(h, (ulong)x[i]);
+      return h;
+    case t_REAL:
+    case t_STR:
+    case t_VECSMALL:
+      lx = lg(x);
+      for (i = 1; i < lx; i++) h = compound(h, (ulong)x[i]);
+      return h;
+    /* one more special case */
+    case t_LIST:
+      x = list_data(x);
+      if (!x) return h;
+      /* fall through */
+    default:
+      if (lontyp[tx] == 2) { h = compound(h, x[1]); i = 2; } else i = 1;
+      lx = lg(x);
+      for (; i < lx; i++) h = compound(h, hash_GEN(gel(x,i)));
+      return h;
   }
-  /* including lontyp = 0 from t_LIST */
-  if (lontyp[tx] == 2) { h = compound(h, x[1]); i = 2; } else i = 1;
-  lx = lg(x);
-  for (; i < lx; i++) h = compound(h, hash_GEN(gel(x,i)));
-  return h;
 }
 
 /* djb's hash */
