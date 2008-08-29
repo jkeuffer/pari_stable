@@ -460,6 +460,12 @@ myreal_1(long bit)
   if (bit < 0) bit = 0;
   return real_1(nbits2prec(bit));
 }
+static GEN
+RgX_gtofp_bit(GEN q, long bit)
+{
+  if (bit < 0) bit = 0;
+  return RgX_gtofp(q, nbits2prec(bit));
+}
 
 static GEN
 mygprecrc(GEN x, long prec, long e)
@@ -616,7 +622,7 @@ logmax_modulus(GEN p, double tau)
   bit = (long) ((double) n*log2(1./tau2)+3*log2((double) n))+1;
   gunr = myreal_1(bit+2*n);
   aux = gdiv(gunr, gel(p,2+n));
-  q = gmul(aux,p); gel(q,2+n) = gunr;
+  q = RgX_Rg_mul(p, aux); gel(q,2+n) = gunr;
   e = findpower(q);
   homothetie2n(q,e);
   affsi(e, r);
@@ -666,16 +672,15 @@ logmin_modulus(GEN p, double tau)
 static double
 logmodulus(GEN p, long k, double tau)
 {
-  GEN q, gunr;
+  GEN q;
   long i, kk = k, imax, n = degpol(p), nn, bit, e;
   pari_sp av, ltop=avma;
   double r, tau2 = tau/6;
 
   bit = (long)(n * (2. + log2(3.*n/tau2)));
-  gunr = myreal_1(bit);
   av = avma;
   q = gprec_w(p, nbits2prec(bit));
-  q = gmul(gunr, q);
+  q = RgX_gtofp_bit(q, bit);
   e = newton_polygon(q,k);
   r = (double)e;
   homothetie2n(q,e);
@@ -690,7 +695,7 @@ logmodulus(GEN p, long k, double tau)
     q = gerepileupto(av, graeffe(q));
     e = newton_polygon(q,kk);
     r += e / exp2((double)i);
-    q = gmul(gunr, q);
+    q = RgX_gtofp_bit(q, bit);
     homothetie2n(q,e);
 
     tau2 *= 1.5; if (tau2 > 1.) tau2 = 1.;
@@ -729,7 +734,7 @@ logpre_modulus(GEN p, long k, double tau, double lrmin, double lrmax)
     aux = 2*aux + 2*tau2;
     tau2 *= 1.5;
     bit = (long)(n*(2. + aux / LOG2 - log2(1-exp(-tau2))));
-    q = gmul(myreal_1(bit),q);
+    q = RgX_gtofp_bit(q, bit);
   }
   aux = exp2((double)imax);
   aux = logmodulus(q,k, aux*tau/3.) / aux;
@@ -1835,7 +1840,7 @@ all_roots(GEN p, long bit)
   {
     roots_pol = vectrunc_init(n+1);
     bit2 += e + (n << i);
-    q = gmul(myreal_1(bit2), mygprec(pd,bit2));
+    q = RgX_gtofp_bit(mygprec(pd,bit2), bit2);
     q[1] = evalsigne(1)|evalvarn(0);
     m = split_complete(q,bit2,roots_pol);
     roots_pol = fix_roots(roots_pol, &m, h, bit2);
