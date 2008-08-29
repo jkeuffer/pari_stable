@@ -590,7 +590,7 @@ pl831(GEN N, GEN p)
     if (!equalii(g,N)) return 0;
   }
 }
-/* Assume N is a strong BPSW pseudoprime
+/* Assume N is a strong BPSW pseudoprime, Pocklington-Lehmer primality proof.
  *
  * flag 0: return gen_1 (prime), gen_0 (composite)
  * flag 1: return gen_0 (composite), gen_1 (small prime), matrix (large prime)
@@ -598,9 +598,9 @@ pl831(GEN N, GEN p)
  * The matrix has 3 columns, [a,b,c] with
  * a[i] prime factor of N-1,
  * b[i] witness for a[i] as in pl831
- * c[i] plisprime(a[i]) */
+ * c[i] isprimePL(a[i]) */
 static GEN
-plisprime(GEN N, long flag)
+isprimePL(GEN N, long flag)
 {
   pari_sp ltop = avma;
   long i, l, t = typ(N);
@@ -644,16 +644,16 @@ plisprime(GEN N, long flag)
     {
       if (BPSW_isprime_small(p)) r = gen_1;
       else if (expi(p) > 250)   r = isprimeAPRCL(p)? gen_2: gen_0;
-      else                      r = plisprime(p,flag);
+      else                      r = isprimePL(p,flag);
     }
     gmael(C,3,i) = r;
-    if (r == gen_0) pari_err(talker,"False prime number %Ps in plisprime", p);
+    if (r == gen_0) pari_err(talker,"False prime number %Ps in isprimePL", p);
   }
   if (!flag) { avma = ltop; return gen_1; }
   return gerepileupto(ltop,C);
 }
 static long
-isprimeSelfridge(GEN x) { return (plisprime(x,0)==gen_1); }
+isprimeSelfridge(GEN x) { return (isprimePL(x,0)==gen_1); }
 
 /* assume x a BPSW pseudoprime */
 long
@@ -685,7 +685,7 @@ gisprime(GEN x, long flag)
   switch (flag)
   {
     case 0: return map_proto_lG(isprime,x);
-    case 1: return map_proto_GL(plisprime,x,1);
+    case 1: return map_proto_GL(isprimePL,x,1);
     case 2: return map_proto_lG(isprimeAPRCL,x);
   }
   pari_err(flagerr,"gisprime");
