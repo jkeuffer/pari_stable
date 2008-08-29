@@ -2080,37 +2080,42 @@ static GEN zrhqr(GEN a,long PREC);
 static GEN
 rootsold(GEN x, long prec)
 {
-  long i, j, f, real, exact, fr, deg, ln;
-  pari_sp av=avma, av0, av1, av2, av3;
-  long exc,expmin,m,deg0,k,ti,h,ii,e;
-  GEN y,xc,xd0,xd,xdabs,p1,p2,p3,p4,p5,p6,p7;
-  GEN p11,p12,p1r,p1i,pa,pax,pb,pp,pq,ps, pi;
+  pari_sp av = avma, av0, av1;
+  const long expmin = 12 - bit_accuracy(prec);
+  long i, j, real, exact, m, deg, deg0, k, h, e;
+  GEN y,xc,xd0,xd,xdabs,p2,p7,p11,p12,pa,pax,pb,pp,pq,ps, pi;
+  ulong mask0;
 
-  if (typ(x)!=t_POL) pari_err(typeer,"rootsold");
-  deg0 = degpol(x); expmin = 12 - bit_accuracy(prec);
+  if (typ(x) != t_POL) pari_err(typeer,"rootsold");
+  deg0 = degpol(x);
   if (!signe(x)) pari_err(zeropoler,"rootsold");
   y = cgetg(deg0+1,t_COL); if (!deg0) return y;
   for (i=1; i<=deg0; i++)
   {
-    p1 = cgetc(prec); gel(y,i) = p1;
-    for (j=3; j<prec; j++) (gel(p1,2))[j] = (gel(p1,1))[j] = 0;
+    GEN z = cgetc(prec), a = gel(z,1), b = gel(z,2);
+    gel(y,i) = z; for (j=3; j<prec; j++) a[j] = b[j] = 0;
   }
-  real=1; exact=1;
+  real = exact = 1;
   for (i=2; i<=deg0+2; i++)
   {
-    ti = typ(x[i]);
-    if (ti==t_REAL) exact = 0;
-    else if (ti==t_QUAD)
+    GEN aux = gel(x,i);
+    switch(typ(aux))
     {
-      p2 = gmael3(x,i,1,2);
-      if (gsigne(p2) > 0) real = 0;
-    } else if (ti != t_INT && ti != t_FRAC) real = 0;
+      case t_INT: case t_FRAC: break;
+      case t_REAL: exact = 0; break;
+      case t_QUAD:
+        p2 = gmael(aux,1,2);
+        if (signe(p2) > 0) real = 0;
+        break;
+      default: real = 0;
+    }
   }
   av1 = avma;
   k = RgX_valrem_inexact(x, &pax);
   for (i = 1; i <= k; i++) gaffsg(0,gel(y,i));
   if (k == deg0) return y;
 
+  mask0 = quadratic_prec_mask(prec-2);
   pi = mppi(DEFAULTPREC);
   p2 = mkcomplex(pi, divru(pi,10)); /* Pi * (1+I/10) */
   p11 = cgetg(4,t_POL); p11[1] = x[1];
@@ -2140,52 +2145,47 @@ rootsold(GEN x, long prec)
     deg = degpol(ps); if (!deg) continue;
 
     /* roots of exact order m */
-    e = gexpo(ps) - gexpo(leading_term(ps));
-    if (e < 0) e = 0; if (ps!=pax) xd0 = RgX_deriv(ps);
+    e = gexpo(ps) - gexpo(leading_term(ps)); if (e < 0) e = 0;
+    if (ps != pax) xd0 = RgX_deriv(ps);
     xdabs = cgetg(deg+2,t_POL); xdabs[1] = xd0[1];
     for (i=2; i<deg+2; i++)
     {
-      av3 = avma; p3 = gel(xd0,i);
-      gel(xdabs,i) = gerepileupto(av3, gadd(gabs(real_i(p3),prec),
-				     gabs(imag_i(p3),prec)));
+      pari_sp av3 = avma;
+      GEN aux = gel(xd0,i);
+      gel(xdabs,i) = gerepileupto(av3, gadd(gabs(real_i(aux),prec),
+				            gabs(imag_i(aux),prec)));
     }
-    av0 = avma; xc = gcopy(ps); xd = gcopy(xd0); av2 = avma;
+    av0 = avma; xc = ps; xd = xd0;
     for (i=1; i<=deg; i++)
     {
+      pari_sp av2 = avma;
+      GEN z;
       if (i == deg)
       {
-	p1 = gel(y,k+m*i);
-	gdivz(gneg_i(gel(xc,2)),gel(xc,3), p1);
-	p1r = gel(p1,1);
-	p1i = gel(p1,2);
+	z = gel(y,k+m*i);
+	gdivz(gneg_i(gel(xc,2)),gel(xc,3), z);
       }
       else
       {
-	p3 = gshift(p2,e);
-	p4 = poleval(xc,p3);
-	p5 = gnorm(p4);
-	exc = 0;
-	while (exc >= -20)
+	GEN p3 = gshift(p2,e);
+	GEN p4 = poleval(xc,p3);
+	GEN p5 = gnorm(p4);
+        long ln;
+        ulong mask;
+        for(;;)
 	{
-	  p7 = gneg_i(gdiv(p4, poleval(xd,p3)));
-	  av3 = avma;
-	  exc = gcmp0(p5)? -32: expo(gnorm(p7))-expo(gnorm(p3));
-	  avma = av3;
+	  GEN p7 = gneg_i(gdiv(p4, poleval(xd,p3)));
+	  long exc = gcmp0(p5)? -32: expo(gnorm(p7)) - expo(gnorm(p3));
+          if (exc < -20) break;
 	  for (j=1; j<=10; j++)
 	  {
-	    GEN p8, p9, p10;
-	    p8 = gadd(p3,p7);
-	    p9 = poleval(xc,p8);
-	    p10= gnorm(p9);
-	    if (exc < -20 || cmprr(p10,p5) < 0)
+	    GEN p8 = gadd(p3,p7), p9 = poleval(xc,p8), p10 = gnorm(p9);
+	    if (cmprr(p10,p5) < 0)
 	    {
-	      GEN *gptr[3];
-	      p3=p8; p4=p9; p5=p10;
-	      gptr[0]=&p3; gptr[1]=&p4; gptr[2]=&p5;
-	      gerepilemanysp(av2,av3,gptr,3);
+	      p3 = p8; p4 = p9; p5 = p10;
 	      break;
 	    }
-	    gshiftz(p7,-2,p7); avma = av3;
+	    p7 = gshift(p7,-2);
 	  }
 	  if (j > 10)
 	  {
@@ -2194,64 +2194,60 @@ rootsold(GEN x, long prec)
 	    avma = av; return roots2(x,prec);
 	  }
 	}
-	p1 = gel(y,k+m*i);
-	p1r = gel(p1,1); setlg(p1r, 3);
-	p1i = gel(p1,2); setlg(p1i, 3); gaffect(p3, p1); avma = av2;
-	for (ln = 4; ln <= prec; ln = (ln<<1)-2)
+	z = gel(y,k+m*i);
+	setlg(gel(z,1), 3);
+	setlg(gel(z,2), 3); gaffect(p3, z); avma = av2;
+        ln = 1; mask = mask0;
+        while (mask > 1)
 	{
-	  setlg(p1r,ln); if (!signe(p1r)) gel(p1,1) = gen_0;
-	  setlg(p1i,ln); if (!signe(p1i)) gel(p1,2) = gen_0;
-	  p6 = gsub(p1, gdiv(poleval(xc,p1), poleval(xd,p1)));
-	  gel(p1,1) = p1r;
-	  gel(p1,2) = p1i; gaffect(p6, p1); avma = av2;
+          GEN p6;
+          ln <<= 1; if (mask & 1) ln--;
+          mask >>= 1;
+	  setlg(gel(z,1), ln+2);
+	  setlg(gel(z,2), ln+2); p6 = signe(gel(z,2))? z: gel(z,1);
+	  p6 = gsub(z, gdiv(poleval(xc,p6), poleval(xd,p6)));
+	  gaffect(p6, z); avma = av2;
 	}
       }
-      setlg(p1r,prec);
-      setlg(p1i,prec); p7 = gcopy(p1);
-      p1r = gel(p7,1); setlg(p1r,prec+1);
-      p1i = gel(p7,2); setlg(p1i,prec+1);
-      for (ii=1; ii<=5; ii++)
+      p7 = gtofp(z, prec+1);
+      for (j=1; j<=5; j++)
       {
-	if (typ(p7) == t_COMPLEX)
-	{
-	  if (!signe(gel(p7,1))) gel(p7,1) = gen_0;
-	  if (!signe(gel(p7,2))) gel(p7,2) = gen_0;
-	}
+	if (typ(p7) == t_COMPLEX && !signe(gel(p7,2))) p7 = gel(p7,1);
 	p7 = gsub(p7, gdiv(poleval(ps,p7), poleval(xd0,p7)));
       }
-      gaffect(p7, p1);
-      p6 = gdiv(poleval(ps,p7), poleval(xdabs,gabs(p7,prec)));
-      if (gexpo(p6) >= expmin)
+      gaffect(p7, z);
+      if (gexpo(poleval(ps,p7)) - gexpo(poleval(xdabs,gabs(p7,prec))) >= expmin)
       {
 	if (DEBUGLEVEL) pari_warn(warner,"error in rootsold(): using roots2()");
 	avma = av; return roots2(x,prec);
       }
       avma = av2;
-      if (expo(p1[2]) < expmin && real)
+      if (expo(z[2]) < expmin && real)
       {
-	gaffsg(0, gel(p1,2));
-	for (j=1; j<m; j++) gaffect(p1, gel(y, k+(i-1)*m+j));
-	gel(p11,2) = gneg(gel(p1,1));
-	xc = gerepileupto(av0, RgX_div(xc,p11));
+	affsr(0, gel(z,2));
+	for (j=1; j<m; j++) gaffect(z, gel(y, k+(i-1)*m+j));
+	gel(p11,2) = gneg(gel(z,1));
+	xc = RgX_div(xc,p11);
       }
       else
       {
-	for (j=1; j<m; j++) gaffect(p1, gel(y, k+(i-1)*m+j));
+	for (j=1; j<m; j++) gaffect(z, gel(y, k+(i-1)*m+j));
 	if (real)
 	{
-	  p1 = gconj(p1);
-	  for (j=1; j<=m; j++) gaffect(p1, gel(y, k+i*m+j));
+	  z = gconj(z);
+	  for (j=1; j<=m; j++) gaffect(z, gel(y, k+i*m+j));
 	  i++;
-	  gel(p12,2) = gnorm(p1);
-	  gel(p12,3) = gmulsg(-2,gel(p1,1));
-	  xc = gerepileupto(av0, RgX_div(xc,p12));
+	  gel(p12,2) = gnorm(z);
+	  gel(p12,3) = gmulsg(-2,gel(z,1));
+	  xc = RgX_div(xc,p12);
 	}
 	else
 	{
-	  gel(p11,2) = gneg(p1);
-	  xc = gerepileupto(av0, RgX_div(xc,p11));
+	  gel(p11,2) = gneg(z);
+	  xc = RgX_div(xc,p11);
 	}
       }
+      xc = gerepileupto(av0, xc);
       xd = RgX_deriv(xc); av2 = avma;
     }
     k += deg*m;
@@ -2259,17 +2255,17 @@ rootsold(GEN x, long prec)
   avma = av1;
   for (j=2; j<=deg0; j++)
   {
-    p1 = gel(y,j);
-    fr = !gcmp0(gel(p1,2));
+    GEN z = gel(y,j);
+    long f, fr = !gcmp0(gel(z,2));
     for (k=j-1; k>=1; k--)
     {
-      p2 = gel(y,k);
-      f = !gcmp0(gel(p2,2));
+      GEN t = gel(y,k);
+      f = !gcmp0(gel(t,2));
       if (!f && fr) break;
-      if (f == fr && gcmp(gel(p2,1),gel(p1,1)) <= 0) break;
+      if (f == fr && gcmp(gel(t,1),gel(z,1)) <= 0) break;
       y[k+1] = y[k];
     }
-    gel(y,k+1) = p1;
+    gel(y,k+1) = z;
   }
   return y;
 }
