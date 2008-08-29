@@ -147,13 +147,16 @@ mulur_2(ulong x, GEN y, long s)
 INLINE GEN
 mul0r(GEN x)
 {
-  long l = lg(x), e;
-  if (l > 2) return real_0(l);
-  e = expo(x);
-  return real_0_bit(e < 0? (e<<1): 0);
+  long l = lg(x), e = expo(x);
+  e = (l > 2)? -bit_accuracy(l) + e: (e < 0? (e<<1): 0);
+  return real_0_bit(e);
 }
+/* lg(x) > 2 */
 INLINE GEN
-div0r(long l) { return real_0(l); }
+div0r(GEN x) {
+  long l = lg(x), e = expo(x);
+  return real_0_bit(-bit_accuracy(l) + e);
+}
 
 GEN
 mulsr(long x, GEN y)
@@ -419,7 +422,7 @@ divir(GEN x, GEN y)
   pari_sp av;
 
   if (ly == 2) pari_err(gdiver);
-  if (lx == 2) return div0r(ly);
+  if (lx == 2) return div0r(y);
   if (lx == 3) {
     z = divur(x[2], y);
     if (signe(x) < 0) togglesign(z);
@@ -438,7 +441,7 @@ divur(ulong x, GEN y)
   GEN z;
 
   if (ly == 2) pari_err(gdiver);
-  if (!x) return div0r(ly);
+  if (!x) return div0r(y);
   if (ly > INVNEWTON_LIMIT) {
     av = avma; z = invr(y);
     if (x == 1) return z;
@@ -457,7 +460,7 @@ divsr(long x, GEN y)
   GEN z;
 
   if (ly == 2) pari_err(gdiver);
-  if (!x) return div0r(ly);
+  if (!x) return div0r(y);
   if (ly > INVNEWTON_LIMIT) {
     av = avma; z = invr(y);
     if (x == 1) return z;
