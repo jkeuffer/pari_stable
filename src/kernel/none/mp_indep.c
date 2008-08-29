@@ -144,12 +144,23 @@ mulur_2(ulong x, GEN y, long s)
   z[1] = evalsigne(s) | evalexpo(m+e); return z;
 }
 
+INLINE GEN
+mul0r(GEN x)
+{
+  long l = lg(x), e;
+  if (l > 2) return real_0(l);
+  e = expo(x);
+  return real_0_bit(e < 0? (e<<1): 0);
+}
+INLINE GEN
+div0r(long l) { return real_0(l); }
+
 GEN
 mulsr(long x, GEN y)
 {
   long s;
 
-  if (!x) return gen_0;
+  if (!x) return mul0r(y);
   s = signe(y);
   if (!s)
   {
@@ -169,7 +180,7 @@ mulur(ulong x, GEN y)
 {
   long s;
 
-  if (!x) return gen_0;
+  if (!x) return mul0r(y);
   s = signe(y);
   if (!s) return real_0_bit( expo(y) + expu(x) );
   if (x==1) return rcopy(y);
@@ -350,7 +361,7 @@ mulir(GEN x, GEN y)
   long sx = signe(x), sy, lz;
   GEN z;
 
-  if (!sx) return gen_0;
+  if (!sx) return mul0r(y);
   if (lgefint(x) == 3) {
     z = mulur((ulong)x[2], y); if (sx < 0) togglesign(z); return z;
   }
@@ -408,7 +419,7 @@ divir(GEN x, GEN y)
   pari_sp av;
 
   if (ly == 2) pari_err(gdiver);
-  if (lx == 2) return gen_0;
+  if (lx == 2) return div0r(ly);
   if (lx == 3) {
     z = divur(x[2], y);
     if (signe(x) < 0) togglesign(z);
@@ -427,7 +438,7 @@ divur(ulong x, GEN y)
   GEN z;
 
   if (ly == 2) pari_err(gdiver);
-  if (!x) return gen_0;
+  if (!x) return div0r(ly);
   if (ly > INVNEWTON_LIMIT) {
     av = avma; z = invr(y);
     if (x == 1) return z;
@@ -446,7 +457,7 @@ divsr(long x, GEN y)
   GEN z;
 
   if (ly == 2) pari_err(gdiver);
-  if (!x) return gen_0;
+  if (!x) return div0r(ly);
   if (ly > INVNEWTON_LIMIT) {
     av = avma; z = invr(y);
     if (x == 1) return z;

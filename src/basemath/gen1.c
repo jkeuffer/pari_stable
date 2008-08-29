@@ -62,23 +62,28 @@ addRc(GEN x, GEN y) {
 static GEN
 mulRc(GEN x, GEN y) {
   GEN z = cgetg(3,t_COMPLEX);
+  gel(z,1) = isintzero(gel(y,1))? gen_0: gmul(x,gel(y,1));
+  gel(z,2) = gmul(x,gel(y,2)); return z;
+}
+/* for INTMODs: can't simplify when Re(x) = gen_0 */
+static GEN
+mulRc_direct(GEN x, GEN y) {
+  GEN z = cgetg(3,t_COMPLEX);
   gel(z,1) = gmul(x,gel(y,1));
   gel(z,2) = gmul(x,gel(y,2)); return z;
 }
 static GEN
 divRc(GEN x, GEN y) {
-  GEN a, b, N, z = cgetg(3,t_COMPLEX);
-  pari_sp tetpil, av = avma;
-  a = gmul(x, gel(y,1));
-  b = gmul(x, gel(y,2)); if(!gcmp0(b)) b = gneg_i(b);
-  N = cxnorm(y); tetpil = avma;
-  gel(z,1) = gdiv(a, N);
-  gel(z,2) = gdiv(b, N); gerepilecoeffssp(av,tetpil,z+1,2); return z;
+  GEN t = gdiv(x, cxnorm(y)), mt = gneg(t); /* left on stack for efficiency */
+  GEN z = cgetg(3,t_COMPLEX);
+  gel(z,1) = isintzero(gel(y,1))? gen_0: gmul(t, gel(y,1));
+  gel(z,2) = gmul(mt, gel(y,2));
+  return z;
 }
 static GEN
 divcR(GEN x, GEN y) {
   GEN z = cgetg(3,t_COMPLEX);
-  gel(z,1) = gdiv(gel(x,1), y);
+  gel(z,1) = isintzero(gel(x,1))? gen_0: gdiv(gel(x,1), y);
   gel(z,2) = gdiv(gel(x,2), y); return z;
 }
 static GEN
@@ -855,7 +860,7 @@ gadd(GEN x, GEN y)
     case t_FRAC: return addsub_frac(x,y,addii);
     case t_COMPLEX: z = cgetg(3,t_COMPLEX);
       gel(z,2) = gadd(gel(x,2),gel(y,2));
-      if (isrationalzero(gel(z,2)))
+      if (isintzero(gel(z,2)))
       {
 	avma = (pari_sp)(z+3);
 	return gadd(gel(x,1),gel(y,1));
@@ -1165,7 +1170,7 @@ gsub(GEN x, GEN y)
     case t_FRAC: return addsub_frac(x,y, subii);
     case t_COMPLEX: z = cgetg(3,t_COMPLEX);
       gel(z,2) = gsub(gel(x,2),gel(y,2));
-      if (isrationalzero(gel(z,2)))
+      if (isintzero(gel(z,2)))
       {
 	avma = (pari_sp)(z+3);
 	return gsub(gel(x,1),gel(y,1));
@@ -1494,15 +1499,37 @@ did_add(GEN x, GEN y, GEN *z)
   }
   *z = gadd(x,y); return 1;
 }
+/* x * I * y, x t_COMPLEX with non-intzero real part, y non-intzero "scalar" */
+static GEN
+mulcIR(GEN x, GEN y)
+{
+  GEN z = cgetg(3,t_COMPLEX);
+  pari_sp av = avma;
+  gel(z,1) = gerepileupto(av, gneg(gmul(y,gel(x,2))));
+  gel(z,2) = gmul(y, gel(x,1));
+  return z;
+
+}
 /* x,y COMPLEX */
 static GEN
 mulcc(GEN x, GEN y)
 {
   GEN xr = gel(x,1), xi = gel(x,2);
   GEN yr = gel(y,1), yi = gel(y,2);
-  GEN p1, p2, p3, p4, z = cgetg(3,t_COMPLEX);
-  pari_sp tetpil, av = avma;
+  GEN p1, p2, p3, p4, z;
+  pari_sp tetpil, av;
 
+  if (isintzero(xr))
+  {
+    if (isintzero(yr)) {
+      av = avma;
+      return gerepileupto(av, gneg(gmul(xi,yi)));
+    }
+    return mulcIR(y, xi);
+  }
+  if (isintzero(yr)) return mulcIR(x, yi);
+
+  z = cgetg(3,t_COMPLEX); av = avma;
   /* 3M method avoiding catastrophic cancellation */
   if (did_add(xr, xi, &p3))
   {
@@ -1544,7 +1571,7 @@ mulcc(GEN x, GEN y)
   gel(z,1) = gadd(p1,p2);
   gel(z,2) = gadd(p3,p4);
 
-  if (isrationalzero(gel(z,2)))
+  if (isintzero(gel(z,2)))
   {
     cgiv(gel(z,2));
     return gerepileupto((pari_sp)(z+3), gel(z,1));
@@ -1601,10 +1628,10 @@ mulcxI(GEN x)
     case t_INT: case t_REAL: case t_FRAC:
       return mkcomplex(gen_0, x);
     case t_COMPLEX:
-      if (isrationalzero(gel(x,1))) return gneg(gel(x,2));
+      if (isintzero(gel(x,1))) return gneg(gel(x,2));
       z = cgetg(3,t_COMPLEX);
       gel(z,1) = gneg(gel(x,2));
-      z[2] = x[1]; return z;
+      gel(z,2) = gel(x,1); return z;
     default:
       return gmul(gi, x);
   }
@@ -1618,9 +1645,9 @@ mulcxmI(GEN x)
     case t_INT: case t_REAL: case t_FRAC:
       return mkcomplex(gen_0, gneg(x));
     case t_COMPLEX:
-      if (isrationalzero(gel(x,1))) return gel(x,2);
+      if (isintzero(gel(x,1))) return gel(x,2);
       z = cgetg(3,t_COMPLEX);
-      z[1] = x[2];
+      gel(z,1) = gel(x,2);
       gel(z,2) = gneg(gel(x,1)); return z;
     default:
       return gmul(mkcomplex(gen_0, gen_m1), x);
@@ -1746,7 +1773,7 @@ gmul(GEN x, GEN y)
     case t_INT:
       switch(ty)
       {
-	case t_REAL: return mulir(x,y);
+	case t_REAL: return signe(x)? mulir(x,y): gen_0;
 	case t_INTMOD:
 	  z = cgetg(3, t_INTMOD);
 	  return mul_intmod_same(z, gel(y,1), gel(y,2), modii(x, gel(y,1)));
@@ -1768,7 +1795,7 @@ gmul(GEN x, GEN y)
 	    fix_frac_if_int_GC(z,tetpil);
 	  }
 	  return z;
-	case t_COMPLEX: return mulRc(x, y);
+	case t_COMPLEX: return signe(x)? mulRc(x, y): gen_0;
 	case t_PADIC: return signe(x)? mulTp(x, y): gen_0;
 	case t_QUAD: return mulRq(x,y);
 	case t_FFELT: return FF_Z_mul(y,x);
@@ -1793,7 +1820,7 @@ gmul(GEN x, GEN y)
 	  z = cgetg(3, t_INTMOD); p1 = Fp_mul(gel(y,1), gel(x,2), X);
 	  return div_intmod_same(z, X, p1, remii(gel(y,2), X));
 	}
-	case t_COMPLEX: return mulRc(x, y);
+	case t_COMPLEX: return mulRc_direct(x,y);
 	case t_PADIC: { GEN X = gel(x,1);
 	  z = cgetg(3, t_INTMOD);
 	  return mul_intmod_same(z, X, gel(x,2), padic_to_Fp(y, X));
@@ -2052,7 +2079,7 @@ gsqr(GEN x)
       case t_FRAC: return sqrfrac(x);
 
       case t_COMPLEX:
-	if (isrationalzero(gel(x,1))) {
+	if (isintzero(gel(x,1))) {
 	  av = avma;
 	  return gerepileupto(av, gneg(gsqr(gel(x,2))));
 	}
@@ -2369,7 +2396,17 @@ gdiv(GEN x, GEN y)
       return z;
     }
     case t_COMPLEX:
-      av=avma; p1 = cxnorm(y); p2 = mulcc(x, gconj(y)); tetpil = avma;
+      if (isintzero(gel(y,1)))
+      {
+        y = gel(y,2);
+        if (isintzero(gel(x,1))) return gdiv(gel(x,2), y);
+        z = cgetg(3,t_COMPLEX);
+        gel(z,1) = gdiv(gel(x,2), y);
+        av = avma;
+        gel(z,2) = gerepileupto(av, gneg(gdiv(gel(x,1), y)));
+        return z;
+      }
+      av = avma; p1 = cxnorm(y); p2 = mulcc(x, gconj(y)); tetpil = avma;
       return gerepile(av, tetpil, gdiv(p2,p1));
 
     case t_PADIC:
@@ -2516,8 +2553,8 @@ gdiv(GEN x, GEN y)
 	  return Z_FF_div(gel(x,2),y);
 
 	case t_COMPLEX:
-	  av = avma; p1 = cxnorm(y); p2 = mulRc(x, gconj(y)); tetpil = avma;
-	  return gerepile(av,tetpil, gdiv(p2,p1));
+	  av = avma;
+	  return gerepileupto(av, mulRc_direct(gdiv(x,cxnorm(y)), gconj(y)));
 
 	case t_QUAD:
 	  av = avma; p1 = quadnorm(y); p2 = gmul(x,gconj(y)); tetpil = avma;
@@ -2590,7 +2627,8 @@ gdiv(GEN x, GEN y)
     case t_COMPLEX:
       switch(ty)
       {
-	case t_INT: case t_REAL: case t_INTMOD: case t_FRAC: return divcR(x,y);
+	case t_INT: case t_REAL: case t_FRAC: return divcR(x,y);
+        case t_INTMOD: return mulRc_direct(ginv(y), x);
 	case t_PADIC:
 	  return Zp_nosquare_m1(gel(y,2))? divcR(x,y): divTp(x, y);
 	case t_QUAD:
@@ -3149,7 +3187,7 @@ ginv(GEN x)
       p1=cxnorm(x);
       p2=mkcomplex(gel(x,1), gneg(gel(x,2)));
       tetpil=avma;
-      return gerepile(av,tetpil,gdiv(p2,p1));
+      return gerepile(av,tetpil,divcR(p2,p1));
 
     case t_QUAD:
       av=avma; p1=gnorm(x); p2=gconj(x); tetpil=avma;

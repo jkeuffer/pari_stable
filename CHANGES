@@ -284,6 +284,15 @@ BA 41- user variables can now be aliased [#790]
        on t_POLMOD and t_FFELT components; used to add relative norms as in
         ? norml2([Mod(Mod(1,3)*x,x^2-2), 2])
         %1 = Mod(2, 3)
+   75- [library] kernel functions involving a t_INT and a t_REAL now return a
+       t_REAL, e.g. divsr(0, x) or mulir(gen_0,x) return real_0(...) [ used
+       to return gen_0 ] ==> much better control of object types when writing
+       kernel code. Generic functions (gmul, gdiv), as called from gp still
+       return a result as precise as possible given the input: 0 * 1. --> gen_0
+   76- [library] cleanup t_COMPLEX arithmetic to take advantage of real parts
+       equal to a t_INT 0. Imaginary parts equal to 0 should never be created by
+       our generic functions (so no need to cater for them specially: they
+       will be very rare, produced by ad hoc routines).
 
   Added
     1- new benches: galoisinit, ispower, nffactor, subfields, resultant,
