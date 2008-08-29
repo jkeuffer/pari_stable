@@ -372,7 +372,7 @@ base_ring(GEN x, GEN *pp, long *prec)
 GEN
 ellinit_real(GEN x, long prec)
 {
-  GEN y, D, R, T, w, a1, b1, x1, u2, q, pi, pi2, tau, w1, w2;
+  GEN y, D, R, T, w, a1, b1, x1, u2, q, pi2, w1, w2;
   long PREC, e;
   
   y = cgetg(20,t_VEC); initsmall(x,y);
@@ -395,19 +395,27 @@ ellinit_real(GEN x, long prec)
   (void)new_coords(y, NULL, &a1, &b1, 0, 0);
   u2 = do_agm(&x1,a1,b1); /* 1/4M */
 
-  w = addsr(1, ginv(gmul2n(mulrr(u2,x1),1)));
-  q = sqrtr( addrs(gsqr(w),-1) );
-  if (signe(real_i(w)) > 0)
-    q = ginv(gadd(w, q));
-  else
-    q = gsub(w, q);
-  if (gexpo(q) >= 0) q = ginv(q);
-  pi = mppi(prec); pi2 = gmul2n(pi,1);
-  tau = mulcxmI( gdiv(glog(q,prec),pi2) );
-
-  w1 = gmul(pi2, sqrtr(mpneg(u2)));
-  w2 = gneg(gmul(w1,tau));
-  if (signe(b1) >= 0) w1= gmul2n(mpabs(gel(w2,1)), 1);
+  pi2 = Pi2n(1, prec);
+  w1 = gmul(pi2, sqrtr(negr(u2)));
+  w = addsr(1, invr(shiftr(mulrr(u2,x1),1)));
+  q = sqrtr( subrs(sqrr(w), 1) ); /* real or pure imaginary */
+  /* same formula, split in two branches for efficiency */
+  if (typ(q) == t_REAL) {
+    GEN t;
+    q = (signe(w) > 0)? addrr(w, q): subrr(w, q);
+    t = divrr(logr_abs(q), pi2);
+    /* if |q| > 1, we should have replaced it by 1/q. Instead, we change
+     * the sign of log(q) */
+    if (expo(q) >= 0) setsigne(t, -1);
+    /* w2 = w1 I log(q/2Pi), |q| < 1 */
+    w2 = mkcomplex((signe(q) < 0)? negr(shiftr(w1,-1)): gen_0, mulrr(w1,t));
+  } else {
+    /* FIXME: I believe this can't happen */
+    q = mkcomplex(w, (signe(w) > 0)? q: negr(q));
+    if (gexpo(q) >= 0) q = ginv(q);
+    w2 = gmul(w1, mulcxI(gdiv(glog(q,prec), pi2)));
+  }
+  if (signe(b1) >= 0) w1 = gmul2n(mpabs(gel(w2,1)), 1);
 
   gel(y,15) = w1;
   gel(y,16) = w2;
@@ -1095,17 +1103,17 @@ set_gamma(SL2_red *T)
   b = c = gen_0;
   for(;;)
   {
-    GEN m, p1, n = ground(real_i(t));
+    GEN m, n = ground(real_i(t));
     if (signe(n))
     { /* apply T^n */
-      n = negi(n); t = gadd(t,n);
+      togglesign_safe(&n); t = gadd(t,n);
       a = addii(a, mulii(n,c));
       b = addii(b, mulii(n,d));
     }
     m = cxnorm(t); if (gcmp(m,run) > 0) break;
     t = gneg_i(gdiv(gconj(t), m)); /* apply S */
-    p1 = negi(c); c = a; a = p1;
-    p1 = negi(d); d = b; b = p1;
+    togglesign_safe(&c); swap(a,c);
+    togglesign_safe(&d); swap(b,d);
   }
   T->a = a; T->b = b;
   T->c = c; T->d = d;
@@ -1244,7 +1252,7 @@ elleta(GEN om, long prec)
     /* E2 := u^2 E2 + 6iuc/pi = E_2(tau) */
     E2 = gadd(gmul(gsqr(u), E2), mulcxI(gdiv(gmul(mului(6,T.c), u), pi)));
   }
-  y2 = gdiv(gmul(E2, gsqr(pi)), gmulsg(3, T.w2));
+  y2 = gdiv(gmul(E2, sqrr(pi)), gmulsg(3, T.w2));
   if (T.swap)
   {
     y1 = y2;
