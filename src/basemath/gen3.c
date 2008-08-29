@@ -1998,8 +1998,12 @@ gtrunc2n(GEN x, long s)
     }
     case t_COMPLEX:
       z = cgetg(3, t_COMPLEX);
-      gel(z,1) = gtrunc2n(gel(x,1), s);
       gel(z,2) = gtrunc2n(gel(x,2), s);
+      if (!signe(gel(z,2))) {
+        avma = (pari_sp)(z + 3);
+        return gtrunc2n(gel(x,1), s);
+      }
+      gel(z,1) = gtrunc2n(gel(x,1), s);
       return z;
     default: pari_err(typeer,"gtrunc2n");
       return NULL; /* not reached */
