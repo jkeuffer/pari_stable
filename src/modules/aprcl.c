@@ -940,6 +940,7 @@ aprcl(GEN N)
   Red R;
   Cache **pC;
 
+  if (typ(N) != t_INT) pari_err(arither1);
   if (cmpis(N,12) <= 0)
     switch(itos(N))
     {
