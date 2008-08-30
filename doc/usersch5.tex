@@ -15,16 +15,18 @@ eventually see more general or flexible versions in the chapters to come. A
 general introduction to the major concepts of PARI programming can be found
 in Chapter~4, which you should really read first.
 
-Many other undocumented functions can be found throughout the source code.
-These private functions are more efficient than the library wrappers, but
-sloppier on argument checking and damage control. Use them at your own risk!
+We shall now study specialized functions, more efficient than the library
+wrappers, but sloppier on argument checking and damage control; besides
+speed, their main advantage is to give finer control about the inner
+workings of generic routines, offering more options to the programmer.
 
 \misctitle{Important advice}: generic routines eventually call lower level
 functions. Optimize your algorithms first, not overhead and conversion costs
-between PARI routines. For generic operations, use generic routines first,
-don't waste time looking for the most specialized one available unless you
-identify a genuine bottleneck. The PARI source code is part of the
-documentation; look for inspiration there.\smallskip
+between PARI routines. For generic operations, use generic routines first;
+do not waste time looking for the most specialized one available unless you
+identify a genuine bottleneck, or you need some special behaviour the generic
+routine does not offer. The PARI source code is part of the documentation;
+look for inspiration there.\smallskip
 
 The type \kbd{long} denotes a \tet{BITS_IN_LONG}-bit signed long integer (32
 or 64 bits). The type \tet{ulong} is defined as \kbd{unsigned long}. The word
@@ -33,11 +35,12 @@ or 64 bits). The type \tet{ulong} is defined as \kbd{unsigned long}. The word
 \kbdsidx{BIL}
 
 We shall often refer to the notion of \tev{shallow} function, which means that
-some components of the result may point to components of the input (which is
-more efficient than a deep copy). Such outputs are not suitable for
-\kbd{gerepileupto} and particular care must be taken when garbage collecting
-objects which have been input to shallow functions: in general corresponding
-outputs also become invalid and should no longer be accessed.
+some components of the result may point to components of the input, which is
+more efficient than a \emph{deep} copy (full recursive copy of the object
+tree). Such outputs are not suitable for \kbd{gerepileupto} and particular
+care must be taken when garbage collecting objects which have been input to
+shallow functions: corresponding outputs also become invalid and should no
+longer be accessed.
 
 \section{Initializing the library}
 
@@ -1628,7 +1631,7 @@ stack: the length and effective length of the copy are equal.
 \fun{GEN}{leafcopy}{GEN x} copy the leaf~\kbd{x} on the
 stack (works in particular for \typ{INT}s and \typ{REAL}s).
 Contrary to \kbd{icopy}, \kbd{leafcopy} preserves the original
-length of a \typ{INT}. The obsolete form \fun{GEN}{mpcopy}{GEN x} 
+length of a \typ{INT}. The obsolete form \fun{GEN}{mpcopy}{GEN x}
 is still provided for backward compatibility.
 
 This function also works on recursive types, copying them as if they were leaves,
@@ -1711,10 +1714,10 @@ to the \typ{REAL}~\kbd{x} (i.e.~the \kbd{ceil} function).
 \typ{REAL}~\kbd{x} (i.e.~the \kbd{floor} function).
 
 \fun{GEN}{roundr}{GEN x} rounds the \typ{REAL} \kbd{x} to the nearest integer
-(towards~$+\infty$).
+(towards~$+\infty$ in case of tie).
 
 \fun{GEN}{truncr}{GEN x} truncates the \typ{REAL}~\kbd{x} (not the same as
-\kbd{floorr} if \kbd{x} is and negative).
+\kbd{floorr} if \kbd{x} is negative).
 
 The following four function are analogous, but can also treat the trivial
 case when the argument is a \typ{INT}:
@@ -1784,7 +1787,7 @@ Called by \tet{gtrunc2n}.
 \kbd{trunc2nr(x,n)}, pretending that the length of $x$ is \kbd{lx}, which must be
 $\leq \kbd{lg}(x)$.
 
-\misctitle{Low-level} In the following two functions, $s$(ource) and $t$(arget)
+\misctitle{Low-level.} In the following two functions, $s$(ource) and $t$(arget)
 need not be valid \kbd{GEN}s (in practice, they usually point to some part of a
 \typ{REAL} mantissa): they are considered as arrays of words representing some
 mantissa, and we shift globally $s$ by $n > 0$ bits, storing the result in
@@ -1794,10 +1797,14 @@ overlaps are not allowed. The word $f$ is concatenated to $s$ to supply extra
 bits.
 
 \fun{void}{shift_left}{GEN t, GEN s, long m, long M, ulong f, ulong n}
-shift $s[m], s[m+1],\ldots s[M], f$ left by $n$ bits.
+shifts the mantissa
+$$s[m], s[m+1],\ldots s[M], f$$
+left by $n$ bits.
 
 \fun{void}{shift_right}{GEN t, GEN s, long m, long M, ulong f, ulong n}
-shift $f, s[m], s[m+1],\ldots s[M]$ right by $n$ bits.
+shifts the mantissa
+$$f, s[m], s[m+1],\ldots s[M]$$
+right by $n$ bits.
 
 \subsec{Valuations}
 \fun{long}{Z_pvalrem}{GEN x, GEN p, GEN *r} applied to \typ{INT}s
@@ -1843,10 +1850,11 @@ $p$ is prime.
 
 \subsec{Generic unary operators}. Let ``\op'' be a unary operation among
 
-\op=\key{neg}: negation ($-$\kbd{x}).
+\item \key{neg}: negation ($-x$).
 
+\item \key{abs}: absolute value ($|x|$).
 
-\op=\key{abs}: absolute value ($|\kbd{x}|$).
+\item \key{sqr}: square ($x^2$).
 
 \noindent The names and prototypes of the low-level functions corresponding
 to \op\ are as follows. The result is of the same type as~\kbd{x}.
@@ -1860,13 +1868,11 @@ to \op\ are as follows. The result is of the same type as~\kbd{x}.
 \funno{GEN}{\op r}{GEN x} creates the result of \op\ applied to the
 \typ{REAL}~\kbd{x}.
 
-\funno{GEN}{mp\op z}{GEN x, GEN z} assigns the result of applying \op\ to the
-\typ{INT} or \typ{REAL}~\kbd{x} into the \typ{INT} or \typ{REAL}~\kbd{z}.
+\noindent Some miscellaneous routines:
 
-\misctitle{Remark:} it has not been considered useful to include
-functions {\tt void \op sz(long,GEN)}, {\tt void \op iz(GEN,GEN)} and
-{\tt void \op rz(GEN, GEN)}.
-\smallskip
+\fun{GEN}{sqrs}{long x} returns $x^2$.
+
+\fun{GEN}{sqru}{ulong x} returns $x^2$.
 
 \subsec{Comparison operators}
 
@@ -1940,40 +1946,66 @@ and~\kbd{y}. The result is $1$ if $|\kbd{x}| = |\kbd{y}|$, $0$ otherwise.
 \fun{int}{absr_cmp}{GEN x, GEN y} compares the \typ{REAL}s \kbd{x} and~\kbd{y}.
 The result is the sign of $|\kbd{x}| - |\kbd{y}|$.
 
-\subsec{Generic binary operators}. Let ``\op'' be a binary operation among
+\subsec{Generic binary operators}.\label{se:genbinop} The operators in this
+section have arguments of C-type \kbd{GEN}, \kbd{long}, and \kbd{ulong}, and
+only \typ{INT} and \typ{REAL} \kbd{GEN}s are allowed. We say an argument is a
+real type if it is a \typ{REAL} \kbd{GEN}, and an integer type otherwise. The
+result is always a \typ{REAL} unless both \kbd{x} and \kbd{y} are integer
+types.
 
-\op=\key{add}: addition (\kbd{x + y}). The result is a \typ{REAL} unless both
-\kbd{x} and \kbd{y} are integer types (\typ{INT}, \kbd{long} or \kbd{ulong}).
+Let ``\op'' be a binary operation among
 
-\op=\key{sub}: subtraction (\kbd{x - y}). The result is a \typ{REAL} unless both
-\kbd{x} and \kbd{y} are integer types.
+\item \key{add}: addition (\kbd{x + y}).
 
-\op=\key{mul}: multiplication (\kbd{x * y}). The result is a \typ{REAL}
-unless both \kbd{x} and \kbd{y} are integer types, \emph{or} if
-\kbd{x} or \kbd{y} is an exact $0$.
+\item \key{sub}: subtraction (\kbd{x - y}).
 
-\op=\key{div}: division (\kbd{x / y}). In the case where \kbd{x} and \kbd{y}
+\item \key{mul}: multiplication (\kbd{x * y}).
+
+\item \key{div}: division (\kbd{x / y}). In the case where \kbd{x} and \kbd{y}
 are both integer types, the result is the Euclidean quotient, where the
 remainder has the same sign as the dividend~\kbd{x}. It is the ordinary
-division otherwise. If one of \kbd{x} or \kbd{y} is a \typ{REAL}, the result
-is a \typ{REAL} unless \kbd{x} is an exact $0$. A division-by-$0$ error
-occurs if \kbd{y} is equal to $0$.
+division otherwise. A division-by-$0$ error occurs if \kbd{y} is equal to
+$0$.
 
-\op=\key{rem}: remainder (``\kbd{x \% y}''). This operation is defined only
-when \kbd{x} and \kbd{y} are integer types. The result is the Euclidean
+The last two generic operations are defined only when arguments have integer
+types; and the result is a \typ{INT}:
+
+\item \key{rem}: remainder (``\kbd{x \% y}''). The result is the Euclidean
 remainder corresponding to \kbd{div},~i.e. its sign is that of the
-dividend~\kbd{x}. The result is always a \typ{INT}.
+dividend~\kbd{x}.
 
-\op=\key{mod}: true remainder (\kbd{x \% y}). This operation is defined only
-when \kbd{x} and \kbd{y} are longs or \typ{INT}s. The result is the true
+\item \key{mod}: true remainder (\kbd{x \% y}). The result is the true
 Euclidean remainder, i.e.~non-negative and less than the absolute value
 of~\kbd{y}.
 
-\noindent The names and prototypes of the low-level functions corresponding
+\misctitle{Important technical note} The rules given above fixing the output
+type (to \typ{REAL} unless both inputs are integer types) are subtly
+incompatible with the general rules obeyed by PARI's generic functions, such
+as \kbd{gmul} or \kbd{gdiv} for instance: the latter return a result
+containing as much information as could be deduced from the inputs, so it is
+not true that if $x$ is a \typ{INT} and $y$ a \typ{REAL}, then
+\kbd{gmul(x,y)} is always the same as \kbd{mulir(x,y)}. The exception
+is $x = 0$, in that cas we can deduce that the result is an exact $0$,
+so \kbd{gmul} returns \kbd{gen\_0}, while \kbd{mulir} returns a
+\typ{REAL} $0$. Specifically, the one resulting from the conversion of
+\kbd{gen\_0} to a \typ{REAL} of precision \kbd{precision(y)}, multiplied by
+$y$; this determines the exponent of the real $0$ we obtain.
+
+The names and prototypes of the low-level functions corresponding
 to \op\ are as follows. In this section, the \kbd{z} argument in the
 \kbd{z}-functions must be of type \typ{INT} when no \kbd{r} or \kbd{mp}
 appears in the argument code (no \typ{REAL} operand is involved, only integer
 types), and of type \typ{REAL} otherwise.
+
+The reason for the discrepancy between the two rules is that we use the two
+sets of functions in different contexts: generic functions allow to write
+high-level code forgetting about types, letting PARI return results which are
+sensible and as simple as possible; type specific functions are used in
+kernel programming, where we do care about types and need to maintain strict
+consistency: it is much easier to compute the types of results when they are
+determined from the types of the inputs only (without taking into account
+further arithmetic properties, like being non-0).
+\smallskip
 
 \funno{GEN}{mp\op[z]}{GEN x, GEN y[, GEN z]} applies \op\ to
 the \typ{INT} or \typ{REAL} \kbd{x} and~\kbd{y}. The function
@@ -2033,14 +2065,6 @@ the real number equal to $x$. This is a special case of \kbd{gexpo}.
 
 \fun{GEN}{mulu_interval}{ulong a, ulong b} returns $a(a+1)\cdots b$, assuming
 that $a \leq b$.
-
-\fun{GEN}{sqri}{GEN x} squares the \typ{INT}~$x$.
-
-\fun{GEN}{sqrr}{GEN x} squares the \typ{REAL}~$x$.
-
-\fun{GEN}{sqrs}{long x} returns $x^2$.
-
-\fun{GEN}{sqru}{ulong x} returns $x^2$.
 
 \fun{GEN}{invr}{GEN x} returns the inverse of the non-zero \typ{REAL}~$x$.
 
@@ -2109,7 +2133,7 @@ are both of type \typ{INT}, return the quotient $x/y$ as a \typ{REAL} of
 precision \kbd{prec}.
 
 \fun{GEN}{rdiviiz}{GEN x, GEN y, GEN z}, assuming $x$ and $y$
-are both of type \typ{INT}, and $z$ is a \typ{REAL}, 
+are both of type \typ{INT}, and $z$ is a \typ{REAL},
 assign the quotient $x/y$ to $z$.
 
 \fun{GEN}{rdivis}{GEN x, long y, long prec}, assuming \kbd{x}
@@ -2228,8 +2252,11 @@ returns $x^n$.
 \fun{GEN}{powis}{GEN x, long n}, assumes $x$ is a \typ{INT} and returns $x^n$
 (possibly a \typ{FRAC} if $n < 0$).
 
-\fun{GEN}{powrs}{GEN x, long n}, assumes $x$ is a \typ{REAL} and returns $x^n$
-(always a \typ{REAL}, even if $n = 0$).
+\fun{GEN}{powrs}{GEN x, long n}, assumes $x$ is a \typ{REAL} and returns
+$x^n$. This is considered as a sequence of \kbd{mulrr}, possibly empty:
+as such the result has type \typ{REAL}, even if $n = 0$.
+Note that the generic function \kbd{gpowgs(x,0)} would return \kbd{gen\_1},
+see the technical note in \secref{se:genbinop}.
 
 \fun{GEN}{powru}{GEN x, ulong n}, assumes $x$ is a \typ{REAL} and returns $x^n$
 (always a \typ{REAL}, even if $n = 0$).
@@ -2309,7 +2336,7 @@ be directly useful:
 
 \fun{int}{is_357_power}{GEN x, GEN *ptn, ulong *pmask} tests whether the
 integer $x > 0$ is a $3$-rd, $5$-th or $7$-th power. The bits of \kbd{*mask}
-initially indicate which test is to be performed; 
+initially indicate which test is to be performed;
 bit $0$: $3$-rd,
 bit $1$: $5$-th,
 bit $2$: $7$-th (e.g.~$\kbd{*pmask} = 7$ performs all tests). They are
@@ -3883,10 +3910,10 @@ $S[i]$ mod $p$.
 roots in the unramified extension of $\Q_p$ with residue field $\F_p[Y]/(T)$.
 
 \fun{GEN}{ZpX_liftfact}{GEN A, GEN B, GEN T, GEN p, long e, GEN pe} is
-the routine underlying \tet{polhensellift}. Here, $p$ is prime, $T(Y)$ 
+the routine underlying \tet{polhensellift}. Here, $p$ is prime, $T(Y)$
 defines a finite field $\F_q$, either $\F_q = \F_p$ ($T$ is \kbd{NULL})
-or a non-prime finite field ($T$ an \kbd{FpX}). $A$ is a polynomial in 
-$\Z[X]$ ($T$ \kbd{NULL}) or $\Z[X,Y]$, whose leading coefficient 
+or a non-prime finite field ($T$ an \kbd{FpX}). $A$ is a polynomial in
+$\Z[X]$ ($T$ \kbd{NULL}) or $\Z[X,Y]$, whose leading coefficient
 is non-zero in $\F_q$. $B$ is a vector of monic \kbd{FpX} ($T$ \kbd{NULL}) or
 \kbd{FqX}, pairwise coprime in $\F_q[X]$, whose product is congruent to
 $A/\text{lc}(A)$ in $\F_q[X]$. Lifts the elements of $B$ mod $\kbd{pe} =
@@ -3946,13 +3973,13 @@ iteration.
 
 \fun{GEN}{ZpX_gcd}{GEN f,GEN g, GEN pm} $f$ a monic \kbd{ZX}, $g$ a \kbd{ZX},
 $\kbd{pm} = p^m$ a prime power. There is a unique integer $r\geq 0$
-and a monic $h\in \Q_p[X]$ such that 
+and a monic $h\in \Q_p[X]$ such that
 $$p^rh\Z_p[X] + p^m\Z_p[X] = f\Z_p[X] + g\Z_p[X] + p^m\Z_p[X].$$
 Return the $0$ polynomial if $r\geq m$ and a monic $h\in\Z[1/p][X]$ otherwise
 (whose valuation at $p$ is $> -m$).
 
 \fun{GEN}{ZpX_reduced_resultant}{GEN f, GEN g, GEN pm} $f$ a monic
-\kbd{ZX}, $g$ a \kbd{ZX}, $\kbd{pm} = p^m$ a prime power. The $p$-adic 
+\kbd{ZX}, $g$ a \kbd{ZX}, $\kbd{pm} = p^m$ a prime power. The $p$-adic
 \emph{reduced resultant}\varsidx{resultant (reduced)} of $f$ and $g$ is
 $0$ if $f$, $g$ not coprime in $\Z_p[X]$, and otherwise the generator of the
 form $p^d$ of
@@ -3960,7 +3987,7 @@ $$ (f\Z_p[X] + g\Z_p[X])\cap \Z_p. $$
 Return the reduced resultant modulo $p^m$.
 
 \fun{GEN}{ZpX_reduced_resultant_fast}{GEN f, GEN g, GEN p, long M} $f$
-a monic \kbd{ZX}, $g$ a \kbd{ZX}, $p$ a prime. Returns the 
+a monic \kbd{ZX}, $g$ a \kbd{ZX}, $p$ a prime. Returns the
 the $p$-adic reduced resultant of $f$ and $g$ modulo $p^M$. This function
 computes resultants for a sequence of increasing $p$-adic accuracies
 (up to $M$ $p$-adic digits), returning as soon as it obtains a non-zero
@@ -5878,13 +5905,43 @@ to \op\ are as follows:
 \fun{GEN}{gpow}{GEN x, GEN y, long l} creates $\kbd{x}^{\kbd{y}}$. If
 \kbd{y} is a \typ{INT}, return \kbd{powgi(x,y)} (the precision \kbd{l} is not
 taken into account). Otherwise, the result is $\exp(\kbd{y}*\log(\kbd{x}))$
-computed to precision~\kbd{l}.
+where exact arguments are converted to floats of precision~\kbd{l} in case of
+need; if there is no need, for instance if $x$ is a \typ{REAL}, $l$ is
+ignored. Indeed, if $x$ is a \typ{REAL}, the accuracy of $\log x$ is
+determined from the accuracy of $x$, it is no problem to multiply by $y$,
+even if it is an exact type, and the accuracy of the exponential is
+determined, exactly as in the case of the initial $\log x$.
 
 \fun{GEN}{gpowgs}{GEN x, long n} creates $\kbd{x}^{\kbd{n}}$ using
-binary powering.
+binary powering. To treat the special case $n ٍ= 0$, we consider
+\kbd{gpowgs} as a series of \kbd{gmul}, so we follow the rule of returning
+result which is as exact as possible given the input. More precisely,
+we return
+\item \kbd{gen\_1} if $x$ has type \typ{INT}, \typ{REAL},  \typ{FRAC}, or
+\typ{PADIC}
+
+\item \kbd{Mod(1,N)} if $x$ is a \typ{INTMOD} modulo $N$.
+
+\item \kbd{gen\_1} for \typ{COMPLEX}, \typ{QUAD} unless one component
+is a \typ{INTMOD}, in which cas we return \kbd{Mod(1, N)} for a suitable
+$N$ (the gcd of the moduli that appear).
+
+\item \kbd{FF\_1}$(x)$ for a \typ{FFELT}.
+
+\item \kbd{RgX\_get\_1}$(x)$ for a \typ{POL}.
+
+\item \kbd{qfi\_1}$(x)$ and \kbd{qfr\_1}$(x)$ for \typ{QFI} and \typ{QFR}.
+
+\item the identity permutation for \typ{VECSMALL}.
+
+\item etc. Of course, the only practical use of this routine for $n = 0$ is
+to obtain the multiplicative neutral element in the base ring (or to treat
+marginal cases that should be special cased anyway if there is the slightest
+doubt about what the result should be).
 
 \fun{GEN}{powgi}{GEN x, GEN y} creates $\kbd{x}^{\kbd{y}}$, where \kbd{y} is a
-\typ{INT}, using left-shift binary powering.
+\typ{INT}, using left-shift binary powering. The case where $y = 0$
+(as all cases where $y$ is small) is handled by \kbd{gpowgs(x, 0)}.
 
 In addition we also have the obsolete forms:
 
@@ -5899,7 +5956,7 @@ In addition we also have the obsolete forms:
 \section{Generic operators: product, powering, factorback}
 
 \fun{GEN}{divide_conquer_prod}{GEN v, GEN (*mul)(GEN,GEN)} $v$ is a vector of
-objects, which can be ``multiplied'' using the \kbd{mul} function. Return 
+objects, which can be ``multiplied'' using the \kbd{mul} function. Return
 the ``product'' of the $v[i]$ using a product tree: by convention
 return \kbd{gen\_1} if $v$ is the empty vector, a copy of $v[1]$ if it has a
 single entry; and otherwise apply the function recursively on the vector
@@ -5953,7 +6010,7 @@ of \tet{factorback}. The pair $[L,e]$ is of the form
 product.
 
 \item or \kbd{[v, e]},  $v$ a vector of objects, $e$ a vector of integral
-exponents: return the product of the $v[i]^{e[i]}$. 
+exponents: return the product of the $v[i]^{e[i]}$.
 
 \noindent \kbd{mul(D, $x$, $x$)} and \kbd{pow(D, $x$, $n$)}
 return $xy$ and $x^n$ respectively.
