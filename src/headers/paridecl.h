@@ -2520,6 +2520,7 @@ INLINE GEN    mpneg(GEN x);
 INLINE int    mpodd(GEN x);
 INLINE GEN    mpround(GEN x);
 INLINE GEN    mpshift(GEN x,long s);
+INLINE GEN    mpsqr(GEN x);
 INLINE GEN    mpsub(GEN x, GEN y);
 INLINE void   mpsubz(GEN x, GEN y, GEN z);
 INLINE GEN    mptrunc(GEN x);

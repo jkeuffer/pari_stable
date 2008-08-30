@@ -274,22 +274,21 @@ BA 41- user variables can now be aliased [#790]
        ginv, powgi ]
    70- bezout(): make sure the leading term of the gcd of 2 polynomials is positive
        (when it makes sense), as was already the case for gcd()
-   71- t_REAL^0 now returns 1.00000 [ was 1 ]
-   72- mpcopy, Flv_copy, Flx_copy, vecsmall_copy have all become
+   71- mpcopy, Flv_copy, Flx_copy, vecsmall_copy have all become
        aliases for leafcopy.
-   73- trap(,,foo) was actually equivalent to trap(,foo) changing the global
+   72- trap(,,foo) was actually equivalent to trap(,foo) changing the global
        exception handler, which was awkward an unintended
-   74- norml2(t_POL) now returns the expected (square of) the standard L^2 norm.
+   73- norml2(t_POL) now returns the expected (square of) the standard L^2 norm.
        Use x * conj(x) to get back the old behaviour. norml2 now raises an error
        on t_POLMOD and t_FFELT components; used to add relative norms as in
         ? norml2([Mod(Mod(1,3)*x,x^2-2), 2])
         %1 = Mod(2, 3)
-   75- [library] kernel functions involving a t_INT and a t_REAL now return a
+   74- [library] kernel functions involving a t_INT and a t_REAL now return a
        t_REAL, e.g. divsr(0, x) or mulir(gen_0,x) return real_0(...) [ used
        to return gen_0 ] ==> much better control of object types when writing
        kernel code. Generic functions (gmul, gdiv), as called from gp still
        return a result as precise as possible given the input: 0 * 1. --> gen_0
-   76- [library] cleanup t_COMPLEX arithmetic to take advantage of real parts
+   75- [library] cleanup t_COMPLEX arithmetic to take advantage of real parts
        equal to a t_INT 0. Imaginary parts equal to 0 should never be created by
        our generic functions (so no need to cater for them specially: they
        will be very rare, produced by ad hoc routines).

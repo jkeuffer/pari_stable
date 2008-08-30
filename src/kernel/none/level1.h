@@ -776,6 +776,8 @@ mpmul(GEN x, GEN y)
   return (typ(y)==t_INT) ? mulir(y,x) : mulrr(x,y);
 }
 INLINE GEN
+mpsqr(GEN x) { return (typ(x)==t_INT) ? sqri(x) : sqrr(x); }
+INLINE GEN
 mpdiv(GEN x, GEN y)
 {
   if (typ(x)==t_INT)

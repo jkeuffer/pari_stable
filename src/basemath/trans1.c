@@ -296,21 +296,30 @@ powr0(GEN x)
   long lx = lg(x);
   return lx == 2? mpexp(x): real_1(lx);
 }
+/* to be called by the generic function gpowgs(x,s) when s = 0 */
 static GEN
-puiss0(GEN x)
+gpowg0(GEN x)
 {
   long lx, i;
   GEN y;
 
   switch(typ(x))
   {
-    case t_INT: case t_FRAC: case t_COMPLEX:
-    case t_PADIC: case t_QUAD:
+    case t_INT: case t_REAL: case t_FRAC: case t_PADIC:
       return gen_1;
-    case t_REAL:
-      return powr0(x);
+
+    case t_QUAD: x--; /*fall through*/
+    case t_COMPLEX: {
+      pari_sp av = avma;
+      GEN a = gpowg0(gel(x,1));
+      GEN b = gpowg0(gel(x,2));
+      if (a == gen_1) return b;
+      if (b == gen_1) return a;
+      return gerepileupto(av, gmul(a,b));
+    }
     case t_INTMOD:
-      y = cgetg(3,t_INTMOD); gel(y,1) = icopy(gel(x,1));
+      y = cgetg(3,t_INTMOD);
+      gel(y,1) = icopy(gel(x,1));
       gel(y,2) = gen_1; return y;
 
     case t_FFELT: return FF_1(x);
@@ -318,7 +327,7 @@ puiss0(GEN x)
     case t_POLMOD:
       y = cgetg(3,t_POLMOD);
       gel(y,1) = gcopy(gel(x,1));
-      gel(y,2) = puiss0(gel(x,1)); return y;
+      gel(y,2) = RgX_get_1(gel(x,1)); return y;
 
     case t_RFRAC:
       return RgX_get_1(gel(x,2));
@@ -329,7 +338,7 @@ puiss0(GEN x)
       lx=lg(x); if (lx==1) return cgetg(1,t_MAT);
       if (lx != lg(x[1])) pari_err(mattype1,"gpow");
       y = matid(lx-1);
-      for (i=1; i<lx; i++) gcoeff(y,i,i) = puiss0(gcoeff(x,i,i));
+      for (i=1; i<lx; i++) gcoeff(y,i,i) = gpowg0(gcoeff(x,i,i));
       return y;
     case t_QFR: return qfr_1(x);
     case t_QFI: return qfi_1(x);
@@ -650,7 +659,7 @@ gpowgs(GEN x, long n)
   pari_sp av;
   GEN y;
 
-  if (n == 0) return puiss0(x);
+  if (n == 0) return gpowg0(x);
   if (n == 1)
     switch (typ(x)) {
       case t_QFI: return redimag(x);

@@ -201,6 +201,11 @@ This file lists the incompatible changes between Version 2.x and older versions
     primedec -> idealprimedec, powraw -> qfbpowraw, compraw -> qfbcompraw
   - rename library function u2toi -> uu32toi.
   - remove obsolete library functions sor, outbrute, outbeaut
+  - basic kernel functions involving a t_INT and a t_REAL now return a
+    t_REAL, e.g. divsr(0, x) or mulir(gen_0,x) return real_0(...) [ used
+    to return gen_0 ] ==> much better control of object types when writing
+    kernel code. Generic functions (gmul, gdiv), as called from gp still
+    return a result as precise as possible given the input: 0 * 1. --> gen_0
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
