@@ -125,17 +125,11 @@ The \var{library} function \kbd{foo}, as defined at the beginning of this
 section, is seen to have two mandatory arguments, $x$ and \fl: no function
 seen in the present chapter has been implemented so as to accept a variable
 number of arguments, so all arguments are mandatory when programming with the
-library (often, variants are provided corresponding to the various flag
-values). We include an \kbd{= default value} token in the prototype to signal
-how a missing argument should be encoded. Most of the time, it will be a
-\kbd{NULL} pointer, or -1 for a variable number.
-
-The \tet{entree} type is used by the library to implement iterators (loops,
-sums, integrals, etc.) when a formal variable has to successively assume a
-number of values in a given set. When programming with the library, it is
-easier and much more efficient to code loops and the like directly. Hence
-this type is not documented, although it does appear in a few library
-function prototypes below. See \secref{se:sums} for more details.
+library (usually, variants are provided corresponding to the various flag values).
+We include an \kbd{= default value} token in the prototype to signal how a missing
+argument should be encoded. Most of the time, it will be a \kbd{NULL} pointer, or
+-1 for a variable number. Refer to the \emphn{User's Guide to the PARI library}
+for general background and details.
 
 \section{Standard monadic or dyadic operators}
 
@@ -156,17 +150,26 @@ The library syntax is \fun{GEN}{gadd}{GEN x, GEN y} for $x$ \kbd{+} $y$,
 
 \subseckbd{*}: The expression $x$ \kbd{*} $y$ is the \idx{product} of $x$
 and $y$. Among the prominent impossibilities are multiplication between
-vector/matrices of incompatible sizes, between an intmod and a real
-number. Note that because of vector and matrix operations, \kbd{*} is not
-necessarily commutative. Note also that since multiplication between two
-column or two row vectors is not allowed, to obtain the \idx{scalar product}
-of two vectors of the same length, you must multiply a line vector by a
-column vector, if necessary by transposing one of the vectors (using
-the operator \kbd{\til} or the function \kbd{mattranspose}, see
-\secref{se:linear_algebra}).
+vector/matrices of incompatible sizes, between a \typ{INTMOD} or \typ{PADIC}
+Restricted to scalars, \kbd{*} is commutative; because of vector and matrix
+operations, it is not commutative in general.
 
-If $x$ and $y$ are binary quadratic forms, compose them. See also
-\kbd{qfbnucomp} and \kbd{qfbnupow}.
+Multiplication between two \typ{VEC}s or two \typ{COL}s is not
+allowed; to take the \idx{scalar product} of two vectors of the same length,
+transpose one of the vectors (using the operator \kbd{\til} or the function
+\kbd{mattranspose}, see \secref{se:linear_algebra}) and multiply a line vector
+by a column vector:
+\bprog
+? a = [1,2,3];
+? a * a
+  *** _*_: forbidden multiplication t_VEC * t_VEC.
+? a * a~
+%2 = 14
+@eprog
+
+If $x,y$ are binary quadratic forms, compose them; see also
+\kbd{qfbnucomp} and \kbd{qfbnupow}. If $x,y$ are \typ{VECSMALL} of the same
+length, understand them as permutations and compose them.
 
 The library syntax is \fun{GEN}{gmul}{GEN x, GEN y} for $x$ \kbd{*} $y$.
 Also available is \fun{GEN}{gsqr}{GEN x} for $x$ \kbd{*} $x$.

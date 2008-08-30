@@ -106,8 +106,8 @@ This has been chosen so that the computations are very fast, and gives
 already 12 decimals more accuracy than conventional double precision floating
 point operations. The precise value depends on a technical reason: if your
 machine supports 64-bit integers (the standard C library can handle integers
-up to $2^{64}$), the default precision is 38 decimals, and 28 otherwise. As
-the latter is probably the case, we will assume it henceforth. Of course, you
+up to $2^{64}$), the default precision is 38 decimals, and 28 otherwise.
+For definiteness, we will assume the latter henceforth. Of course, you
 can extend the precision (almost) as much as you like as we will see in a
 moment.
 
@@ -624,8 +624,7 @@ will not do. Unless you want to cheat \kbd{gp} into believing that \kbd{9}
 is prime, but you had better know what you are doing in this case: most
 computations will yield a wrong result.
 
-Apart
-from the usual arithmetic operations, you can apply a number of
+Apart from the usual arithmetic operations, you can apply a number of
 transcendental functions. For example, type \kbd{n = 569 + O(7\pow 8)}, then
 \kbd{s~=~sqrt(n)}, you obtain one of the square roots of \kbd{n}; to check
 this, type \kbd{s\pow 2 - n}). Type now \kbd{s = log(n)}, then \kbd{e =
@@ -960,14 +959,14 @@ correct. PARI gives you as much as it can, and since 6 mantissa words
 would have given you only 57 digits, it uses 7. But why does it give so
 precise a result? Well, it is the same reason as before. When $x$ is close
 to 1, $\cos(x)$ is close to $1-x^2/2$, hence the precision is going to be
-approximately the same as this quantity, which will be $1-0.5*10^{-30}$ where
-$0.5*10^{-30}$ is considered with 28 significant digit accuracy, hence the
+approximately the same as when computing this quantity, here $1-0.5*10^{-30}$
+where $0.5*10^{-30}$ is considered with 28 significant digit accuracy. Hence the
 result will have approximately $28+30=58$ significant digits.
 
 Unfortunately, this philosophy cannot go too far. For example, when you
 type \kbd{cos(0)}, \kbd{gp} should give you exactly 1. Since it is reasonable for
 a program to assume that a transcendental function never gives you an exact
-result, \kbd{gp} gives you $1.000\dots$ to one more mantissa word than the current
+result, \kbd{gp} gives you $1.000\dots$ with as many mantissa word as the current
 precision.
 \medskip
 Let's see some more transcendental functions at work. Type
@@ -1881,7 +1880,7 @@ represented by binary quadratic forms $(a,b,c)$, this time indefinite. However,
 the Archimedean valuations of the number field start to come into play, hence
 in fact quadratic forms with positive discriminant will be represented as a
 quadruplet $(a,b,c,d)$ where the quadratic form itself is $ax^2+bxy+cy^2$
-with $a$, $b$ and $c$ integral, and $d\in \R$ is a ``distance'' 
+with $a$, $b$ and $c$ integral, and $d\in \R$ is a ``distance''
 component, as defined by Shanks and Lenstra.
 
 To create such forms, one uses the same function as for definite ones, but

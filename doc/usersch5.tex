@@ -2649,12 +2649,13 @@ $(x,y)$ at the prime $p$ (\kbd{NULL} for the place at infinity); $x$ and $y$
 are \typ{INT}s.
 
 \newpage
-\chapter{Level 2 kernel }
+\chapter{Level 2 kernel}
 
 These functions deal with modular arithmetic, linear algebra and polynomials
 where assumptions can be made about the types of the coefficients.
 
-\section{Naming scheme}. A function name is built in the following way:
+\section{Naming scheme}.\label{se:level2names}
+A function name is built in the following way:
 $A_1\kbd{\_}\dots\kbd{\_}A_n\var{fun}$ for an operation \var{fun} with $n$
 arguments of class $A_1$,\dots, $A_n$. A class name is given by a base ring
 followed by a number of code letters. Base rings are among

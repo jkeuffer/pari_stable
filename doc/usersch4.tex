@@ -141,24 +141,24 @@ functions. For example \kbd{gadd}$(x,y)$ assumes that $x$ and $y$ are
 of the basic operators and functions, many other variants are available. We
 give some examples for \kbd{gadd}, but the same is true for all the basic
 operators, as well as for some simple common functions (a complete list
-is given in Chapter~5):
+is given in Chapter~6):
 
 \fun{GEN}{gaddgs}{GEN x, long y}
 
 \fun{GEN}{gaddsg}{long x, GEN y}
 
-\noindent In the following three, \kbd{z} is a preexisting \kbd{GEN} and the
+\noindent In the following one, \kbd{z} is a preexisting \kbd{GEN} and the
 result of the corresponding operation is put into~\kbd{z}. The size of the PARI
 stack does not change:
 
 \fun{void}{gaddz}{GEN x, GEN y, GEN z}
 
-\fun{void}{gaddgsz}{GEN x, long y, GEN z}
-
-\fun{void}{gaddsgz}{GEN x, GEN y, GEN z}
-
-\noindent There are also low level functions which are special cases of the
-above:
+\noindent (This last form is inefficient in general and deprecated outside of PARI
+kernel programming.) Low level kernel functions implement these operators for
+specialized arguments and are also available: Level 0 deals with operations at the
+word level (\kbd{long}s and \kbd{ulong}s), Level 1 with \typ{INT} and \typ{REAL}
+and Level 2 with the rest (modular arithmetic, polynomial arithmetic and linear
+algebra). Here are some examples of Level $1$ functions:
 
 \fun{GEN}{addii}{GEN x, GEN y}: here $x$ and $y$ are \kbd{GEN}s of type
 \typ{INT} (this is not checked).
@@ -171,21 +171,35 @@ There also exist functions \teb{addir}, \teb{addri}, \teb{mpadd} (whose
 two arguments can be of type \typ{INT} or \typ{REAL}), \teb{addis} (to add a
 \typ{INT} and a \kbd{long}) and so on.
 
-All these specialized functions are of course more efficient than the general
-purpose ones, but note the hidden danger here: the types of the objects
-involved, if they are themselves results of a previous computation, are not
-completely predetermined. For instance the multiplication of a \typ{REAL} by
-a \typ{INT} \emph{usually} gives a \typ{REAL} result, except when the integer
-is~0, in which case according to the PARI philosophy the result is the exact
-integer~0. Hence if afterwards you call a function which specifically needs a
-\typ{REAL} argument, you are in trouble.
+The Level $1$ names are self-explanatory once you know that {\bf i} stands for a
+\typ{INT}, {\bf r} for a \typ{REAL}, {\bf mp} for i or r, {\bf s} for a signed C
+long integer, {\bf u} for an unsigned C long integer; finally the suffix {\bf z}
+means that the result is not created on the PARI stack but assigned to a
+preexisting GEN object passed as an extra argument. Chapter 6 gives a description
+of these low-level functions.
 
-The names are self-explanatory once you know that {\bf i} stands for a
-\typ{INT}, {\bf r} for a \typ{REAL}, {\bf mp} for i or r, {\bf s} for a
-signed C long integer, {\bf u} for an unsigned C long integer; finally the
-suffix {\bf z} means that the result is not created on the PARI stack but
-assigned to a preexisting GEN object passed as an extra argument. For
-completeness, Chapter 5 gives a description of these low-level functions.
+Level $2$ names are more complicated, see \secref{se:level2names} for all the
+gory details, and we content ourselves with a simple example used to implement
+\typ{INTMOD} arithmetic:
+
+\fun{GEN}{Fp_add}{GEN x, GEN y, GEN m}: returns the sum of $x$ and $y$
+modulo $m$. Here $x, y, m$ are \typ{INT}s (this is not checked). The operation
+is more efficient if the inputs $x$, $y$ are reduced modulo $m$, but this is not a
+necessary condition.
+
+\misctitle{Important Note.} These specialized functions are of course more
+efficient than the generic ones, but note the hidden danger here: the types of the
+objects involved (which is not checked) must be severely controlled, e.g.~using
+\kbd{addii} on a \typ{FRAC} argument will cause disasters. Type mismatchs may
+corrupt the PARI stack, though in most cases they will just immediately overflow
+the stack. Because of this, the PARI philosophy of giving a result which is as
+exact as possible, enforced for generic functions like \kbd{gadd} or \kbd{gmul},
+is dropped in kernel routines of Level $1$, where it is replaced by the much
+simpler rule: the result is a \typ{INT} if and only if all arguments
+are integer types (\typ{INT} but also C \kbd{long} and \kbd{ulong}) and a
+\typ{REAL} otherwise. For instance, multiplying a \typ{REAL} by a \typ{INT}
+always yields a \typ{REAL} is you use \kbd{mulir}, where \kbd{gmul} returns the
+\typ{INT} \kbd{gen\_0} if the integer is $0$.
 
 \subsec{Portability: 32-bit / 64-bit architectures}.
 
@@ -876,15 +890,19 @@ convenience, vector or matrices of scalar types are also allowed.
 This copies the whole structure of \kbd{x} into \kbd{y} so many conditions
 must be met for the assignment to be possible. For instance it is allowed to
 assign a \typ{INT} into a \typ{REAL}, but the converse is forbidden. For
-that, you must use the truncation or rounding function of your choice (see
-section 3.2). It can also happen that \kbd{y} is not large enough or does not
-have the proper tree structure to receive the object \kbd{x}. For instance,
-let \kbd{y} the zero integer with length equal to 2; then \kbd{y} is too
-small to accommodate any non-zero \typ{INT}. In general common sense tells
-you what is possible, keeping in mind the PARI philosophy which says that if
-it makes sense it is valid. For instance, the assignment of an imprecise
-object into a precise one does \emph{not} make sense. However, a change in
-precision of imprecise objects is allowed.
+that, you must use the truncation or rounding function of your choice,
+e.g.\kbd{mpfloor}.
+
+It can also happen that \kbd{y} is not large enough or does not have the proper
+tree structure to receive the object \kbd{x}. For instance, let \kbd{y} the zero
+integer with length equal to 2; then \kbd{y} is too small to accommodate any
+non-zero \typ{INT}. In general common sense tells you what is possible, keeping in
+mind the PARI philosophy which says that if it makes sense it is valid. For
+instance, the assignment of an imprecise object into a precise one does \emph{not}
+make sense. However, a change in precision of imprecise objects is allowed, even
+if it \emph{increases} its accuracy: we complement the ``mantissa'' with
+infinitely many $0$ digits in this case. (Mantissa between quotes, because this
+is not resticted to \typ{REAL}s, it also applies for $p$-adics for instance.)
 
 All functions ending in ``\kbd{z}'' such as \teb{gaddz}
 (see~\secref{se:low_level}) implicitly use this function. In fact what they
@@ -893,15 +911,14 @@ required operation, \teb{gaffect} the result to the last operand, then
 restore the initial \kbd{avma}.
 
 You can assign ordinary C long integers into a PARI object (not necessarily
-of type \typ{INT}). Use the function \teb{gaffsg} with the following
-syntax:
+of type \typ{INT}) using
 
 \fun{void}{gaffsg}{long s, GEN y}
 
 \misctitle{Note}: due to the requirements mentioned above, it is usually
 a bad idea to use \tet{gaffect} statements. There is one exception: for simple
 objects (e.g.~leaves) whose size is controlled, they can be easier to use than
-gerepile, and about as efficient.
+\kbd{gerepile}, and about as efficient.
 
 \misctitle{Coercion}. It is often useful to coerce an inexact object to a
 given precision. For instance at the beginning of a routine where precision
