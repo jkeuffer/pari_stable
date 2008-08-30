@@ -5,6 +5,7 @@ Prototype: GG
 Help: x/y: quotient of x and y.
 Description:
  (0, mp):small			($2, 0)/*for side effect*/
+ (1, real):real			invr($2)
  (#small, real):real		divsr($1, $2)
  (small, real):mp		divsr($1, $2)
  (real, small):real		divrs($1, $2)
