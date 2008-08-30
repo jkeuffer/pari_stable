@@ -949,7 +949,7 @@ static long
 eval_sign(GEN M, GEN x, long k)
 {
   long i, l = lg(x);
-  GEN z = mpmul(gcoeff(M,k,1), gel(x,1));
+  GEN z = gel(x,1); /* times M[k,1], which is 1 */
   for (i = 2; i < l; i++)
     z = mpadd(z, mpmul(gcoeff(M,k,i), gel(x,i)));
   if (lg(z) < DEFAULTPREC) pari_err(precer,"nfsign_arch");

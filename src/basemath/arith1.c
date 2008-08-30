@@ -2678,8 +2678,8 @@ bestappr(GEN x, GEN k)
 	  p = addii(mulii(a,p0), p1); p1=p0; p0=p;
 	  q = addii(mulii(a,q0), q1); q1=q0; q0=q;
 	  /* compare |y-p0/q0|, |y-p1/q1| */
-	  if (absr_cmp(mpmul(q1, mpsub(mulir(q0,y), p0)),
-		       mpmul(q0, mpsub(mulir(q1,y), p1))) < 0)
+	  if (absr_cmp(mulir(q1, subri(mulir(q0,y), p0)),
+		       mulir(q0, subri(mulir(q1,y), p1))) < 0)
 		       { p1 = p0; q1 = q0; }
 	  break;
 	}

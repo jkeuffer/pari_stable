@@ -486,13 +486,10 @@ PRECPB:
   p1 = gnorml2(N2); if (gcmp(C, p1) < 0) C = p1;
   for (i = 1; i < d; i++)
   {
-    GEN s = gen_0;
-    for (j = 1; j <= n; j++)
-    {
-      p1 = mpadd( mpmul(gel(bin,i), gel(N2,j)), gel(binlS,i+1) );
-      s = mpadd(s, gsqr(p1));
-    }
-    if (gcmp(C, s) < 0) C = s;
+    GEN B = gel(bin,i), L = gel(binlS,i+1);
+    GEN s = addri(mulir(B, gel(N2,1)),  L); /* j=1 */
+    for (j = 2; j <= n; j++) s = addrr(s, sqrr(addri(mulir(B, gel(N2,j)), L)));
+    if (mpcmp(C, s) < 0) C = s;
   }
   return C;
 }
@@ -702,7 +699,7 @@ init_trace(trace_data *T, GEN S, nflift_t *L, GEN q)
     GEN c = gel(T->dPinvS,j);
     pari_sp av = avma;
     T->PinvSdbl[j] = t;
-    for (i=1; i < h; i++) t[i] = rtodbl(mpmul(invd, gel(c,i)));
+    for (i=1; i < h; i++) t[i] = rtodbl(mulir(invd, gel(c,i)));
     avma = av;
   }
 

@@ -1423,7 +1423,7 @@ isprincipalarch(GEN bnf, GEN col, GEN kNx, GEN e, GEN dx, long *pe)
     if (!u && z) return NULL;
     if (u) col = RgC_add(col, RgM_RgC_mul(matunit, u));
   }
-  s = divrs(mpmul(e, glog(kNx,prec)), N);
+  s = divrs(mulir(e, glog(kNx,prec)), N);
   for (i=1; i<=R1; i++) gel(col,i) = gexp(gadd(s, gel(col,i)),prec);
   for (   ; i<=RU; i++) gel(col,i) = gexp(gadd(s, gmul2n(gel(col,i),-1)),prec);
   /* d.alpha such that x = alpha \prod gj^ej */

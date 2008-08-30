@@ -96,6 +96,7 @@ incrementalQ(GEN x, GEN L, GEN B, GEN Q, long k, long prec)
   GEN r = ApplyAllQ(Q, gel(x,k), k);
   return FindApplyQ(r, L, B, k, Q, prec);
 }
+/* x a square t_MAT with t_INT / t_REAL entries and maximal rank */
 GEN
 Q_from_QR(GEN x, long prec)
 {
@@ -1985,8 +1986,8 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
   normax1 = gen_0;
   norme1 = BORNE ? BORNE: gsqr(gcoeff(q,1,1));
   borne1 = mpadd(norme1,eps);
-  if (!BORNE) borne2 = mpsub(norme1,eps);
-  else        borne2 = mpmul(norme1,alpha);
+  if (!BORNE) borne2 = subrr(norme1,eps);
+  else        borne2 = mulrr(norme1,alpha);
   if (DEBUGLEVEL>2)
     fprintferr("smallvectors looking for norm < %Ps\n",gprec_w(borne1,3));
 
@@ -2074,7 +2075,7 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
 	if (!check(data,x)) { checkcnt++ ; continue; /* main */}
 	if (DEBUGLEVEL>4) fprintferr("New bound: %Ps", norme1);
 	borne1 = mpadd(norme1, eps);
-	borne2 = mpmul(borne1, alpha);
+	borne2 = mulrr(borne1, alpha);
 	s = 0; checkcnt = 0;
       }
     }
@@ -2124,7 +2125,7 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
 	  {
 	    norme1 = gel(norms, per[i-1]);
 	    borne1 = mpadd(norme1, eps);
-	    borne2 = mpmul(borne1, alpha);
+	    borne2 = mulrr(borne1, alpha);
 	    checkcnt = 0;
 	  }
 	}

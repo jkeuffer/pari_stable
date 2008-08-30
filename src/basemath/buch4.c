@@ -514,9 +514,8 @@ bnfsunit(GEN bnf,GEN S,long prec)
   sreg = mpmul(sreg,card);
   for (i=1; i<ls; i++)
   {
-    GEN p = gel(S,i);
-    if (typ(p) == t_VEC) p = gel(p,1);
-    sreg = mpmul(sreg,glog(p,prec));
+    GEN p = pr_get_p( gel(S,i) );
+    sreg = mpmul(sreg, logr_abs(itor(p,prec)));
   }
   gel(res,4) = sreg;
   return gerepilecopy(av,res);

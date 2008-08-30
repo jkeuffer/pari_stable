@@ -2078,7 +2078,7 @@ get_cS_cT(ST_t *T, long n)
   Z[1] = 0; /* unused */
 
   csurn = divru(T->c1, n);
-  nsurc = ginv(csurn);
+  nsurc = invr(csurn);
   lncsurn = logr_abs(csurn);
 
   gel(Z,2) = lncsurn; /* r >= 2 */
@@ -2116,7 +2116,7 @@ get_cS_cT(ST_t *T, long n)
       if (signe(B[j])) s = addrr(s, mulrr(gel(Z,j), gel(B,j)));
       if (signe(A[j])) t = addrr(t, mulrr(gel(Z,j), gel(A,j)));
     }
-  s = mpadd(s, T->b? mpmul(csurn, gel(T->powracpi,T->b)): csurn);
+  s = addrr(s, T->b? mulrr(csurn, gel(T->powracpi,T->b)): csurn);
   gel(T->cS,n) = gclone(s);
   gel(T->cT,n) = gclone(t); avma = av;
 }
