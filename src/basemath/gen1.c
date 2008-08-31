@@ -2764,11 +2764,11 @@ gdiv(GEN x, GEN y)
 GEN
 gmulsg(long s, GEN y)
 {
-  long ty = typ(y), ly, i;
+  long ly, i;
   pari_sp av;
   GEN z;
 
-  switch(ty)
+  switch(typ(y))
   {
     case t_INT:  return mulsi(s,y);
     case t_REAL: return mulsr(s,y);
