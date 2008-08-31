@@ -30,21 +30,22 @@ no_prec_pb(GEN x)
   return (typ(x) != t_REAL || lg(x) >  3
 			   || expo(x) < BITS_IN_LONG/2);
 }
-/* zero x[1..k-1], fill mu */
+/* zero x[1..k-1], fill L = (mu_{i,j}). Return 0 if precision problem
+ * [obtained a 0 vector], 1 otherwise */
 static int
-FindApplyQ(GEN x, GEN mu, GEN B, long k, GEN Q, long prec)
+FindApplyQ(GEN x, GEN L, GEN B, long k, GEN Q, long prec)
 {
   long i, lx = lg(x)-1;
   GEN x2, x1, xd = x + (k-1);
 
   x1 = gel(xd,1);
-  x2 = gsqr(x1);
+  x2 = mpsqr(x1);
   if (k < lx)
   {
     long lv = lx - (k-1) + 1;
     GEN beta, Nx, v = cgetg(lv, t_VEC);
     for (i=2; i<lv; i++) {
-      x2 = mpadd(x2, gsqr(gel(xd,i)));
+      x2 = mpadd(x2, mpsqr(gel(xd,i)));
       gel(v,i) = gel(xd,i);
     }
     if (!signe(x2)) return 0;
@@ -58,12 +59,12 @@ FindApplyQ(GEN x, GEN mu, GEN B, long k, GEN Q, long prec)
     gel(Q,k) = mkvec2(invr(beta), v);
 
     togglesign(Nx);
-    gcoeff(mu,k,k) = Nx;
+    gcoeff(L,k,k) = Nx;
   }
   else
-    gcoeff(mu,k,k) = gel(x,k);
+    gcoeff(L,k,k) = gel(x,k);
   gel(B,k) = x2;
-  for (i=1; i<k; i++) gcoeff(mu,k,i) = gel(x,i);
+  for (i=1; i<k; i++) gcoeff(L,k,i) = gel(x,i);
   return no_prec_pb(x2);
 }
 
@@ -106,9 +107,9 @@ Q_from_QR(GEN x, long prec)
     if (! incrementalQ(x, L, B, Q, j, prec)) return NULL;
   for (j=1; j<k; j++)
   { /* should set gel(m,j) = gen_1; but need it later */
-    GEN m = gel(L,j), invNx = ginv(gel(m,j));
+    GEN m = gel(L,j), invNx = invr(gel(m,j));
     long i;
-    for (i=j+1; i<=k; i++) gel(m,i) = gmul(invNx, gel(m,i));
+    for (i=j+1; i<=k; i++) gel(m,i) = mpmul(invNx, gel(m,i));
   }
   for (j=1; j<=k; j++) gcoeff(L,j,j) = gel(B,j);
   return shallowtrans(L);
@@ -719,7 +720,7 @@ lindep(GEN x)
   py = RgV_dotsquare(im); pxy = RgV_dotproduct(re,im);
   if (quazero(px,EXP)) { re = im; px = py; fl = 1; }
   else {
-    GEN u = mpsub(mpmul(px,py), gsqr(pxy));
+    GEN u = mpsub(mpmul(px,py), mpsqr(pxy));
     fl = quazero(u,EXP);
     if (!fl) {
       RE = RgC_Rg_div(re, u);
@@ -786,7 +787,7 @@ lindep(GEN x)
 	affrr(mij, mkj);
 	affrr(u,   mij);
       }
-    c1 = addrr(gel(bn,k), mulrr(gsqr(f),gel(bn,i)));
+    c1 = addrr(gel(bn,k), mulrr(sqrr(f),gel(bn,i)));
     if (!quazero(c1,EXP))
     {
       GEN c2 = divrr(mulrr(gel(bn,i),f),c1);
@@ -1984,7 +1985,7 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
   eps = real2n(-epsbit, 3);
   alpha = dbltor(0.95);
   normax1 = gen_0;
-  norme1 = BORNE ? BORNE: gsqr(gcoeff(q,1,1));
+  norme1 = BORNE ? BORNE: mpsqr(gcoeff(q,1,1));
   borne1 = mpadd(norme1,eps);
   if (!BORNE) borne2 = subrr(norme1,eps);
   else        borne2 = mulrr(norme1,alpha);
@@ -2020,7 +2021,7 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
 	  p1 = mpadd(p1, mpmul(gcoeff(q,k,j),gel(x,j)));
 	gel(z,k) = gerepileuptoleaf(av1,p1);
 
-	av1 = avma; p1 = gsqr(mpadd(gel(x,k+1),gel(z,k+1)));
+	av1 = avma; p1 = mpsqr(mpadd(gel(x,k+1),gel(z,k+1)));
 	p1 = mpadd(gel(y,k+1), mpmul(p1,gel(v,k+1)));
 	gel(y,k) = gerepileuptoleaf(av1, p1);
 	/* skip the [x_1,...,x_skipfirst,0,...,0] */
@@ -2034,14 +2035,14 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
 	if (!fl)
 	{
 	  av1 = avma;
-	  p1 = mpmul(gel(v,k), gsqr(mpadd(gel(x,k), gel(z,k))));
+	  p1 = mpmul(gel(v,k), mpsqr(mpadd(gel(x,k), gel(z,k))));
 	  i = mpcmp(mpsub(mpadd(p1,gel(y,k)), borne1), gmul2n(p1,-epsbit));
 	  avma = av1; if (i <= 0) break;
 
 	  step(x,y,inc,k);
 
 	  av1 = avma; /* same as above */
-	  p1 = mpmul(gel(v,k), gsqr(mpadd(gel(x,k), gel(z,k))));
+	  p1 = mpmul(gel(v,k), mpsqr(mpadd(gel(x,k), gel(z,k))));
 	  i = mpcmp(mpsub(mpadd(p1,gel(y,k)), borne1), gmul2n(p1,-epsbit));
 	  avma = av1; if (i <= 0) break;
 	}
@@ -2063,7 +2064,7 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
     while (k > 1);
     if (!signe(x[1]) && !signe(y[1])) continue; /* exclude 0 */
 
-    av1 = avma; p1 = gsqr(mpadd(gel(x,1),gel(z,1)));
+    av1 = avma; p1 = mpsqr(mpadd(gel(x,1),gel(z,1)));
     norme1 = mpadd(gel(y,1), mpmul(p1, gel(v,1)));
     if (mpcmp(norme1,borne1) > 0) { avma=av1; continue; /* main */ }
 
