@@ -686,7 +686,7 @@ init_trace(trace_data *T, GEN S, nflift_t *L, GEN q)
   S1 = gdivround(S, q);
   if (gcmp0(S1)) return NULL;
 
-  invd = ginv(itor(L->den, DEFAULTPREC));
+  invd = invr(itor(L->den, DEFAULTPREC));
 
   T->dPinvS = ZM_mul(L->iprk, S);
   l = lg(S);
@@ -699,7 +699,7 @@ init_trace(trace_data *T, GEN S, nflift_t *L, GEN q)
     GEN c = gel(T->dPinvS,j);
     pari_sp av = avma;
     T->PinvSdbl[j] = t;
-    for (i=1; i < h; i++) t[i] = rtodbl(mulir(invd, gel(c,i)));
+    for (i=1; i < h; i++) t[i] = rtodbl(mulri(invd, gel(c,i)));
     avma = av;
   }
 
