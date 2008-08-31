@@ -2259,7 +2259,7 @@ trueeta(GEN x, long prec)
   }
   Nmod24 = umodiu(N, 24);
   if (Nmod24) m = gmul(m, e12(Nmod24, prec));
-  q24 = gexp(gdivgs(gmul(Pi2n(1,prec), mulcxI(x)), 24),prec); /* e(x/24) */
+  q24 = gexp(gmul(divrs(Pi2n(1,prec),24), mulcxI(x)), prec); /* e(x/24) */
   m = gmul(q24, m);
   if (24 * gexpo(q24) >= -bit_accuracy(prec))
     m = gmul(m, inteta( gpowgs(q24,24) ));
@@ -2298,38 +2298,25 @@ jell(GEN x, long prec)
 GEN
 weberf2(GEN x, long prec)
 {
-  pari_sp av=avma, tetpil;
-  GEN p1,p2;
-
-  p1=gsqrt(gen_2,prec);
-  p2=gdiv(trueeta(gmul2n(x,1),prec),trueeta(x,prec));
-  tetpil=avma;
-  return gerepile(av,tetpil,gmul(p1,p2));
+  pari_sp av = avma;
+  GEN a = sqrtr(real2n(1, prec));
+  GEN b = gdiv(trueeta(gmul2n(x,1),prec), trueeta(x,prec));
+  return gerepileupto(av, gmul(a,b));
 }
-
 GEN
 weberf1(GEN x, long prec)
 {
-  pari_sp av=avma, tetpil;
-  GEN p1,p2;
-
-  p1=trueeta(gmul2n(x,-1),prec); p2=trueeta(x,prec);
-  tetpil=avma;
-  return gerepile(av,tetpil,gdiv(p1,p2));
+  pari_sp av = avma;
+  return gerepileupto(av, gdiv(trueeta(gmul2n(x,-1),prec), trueeta(x,prec)));
 }
-
 GEN
 weberf(GEN x, long prec)
 {
-  pari_sp av = avma, tetpil;
-  GEN p1, p2;
-
-  p1 = gdiv(trueeta(gmul2n(gaddgs(x,1),-1),prec),trueeta(x,prec));
-  p2 = exp_Ir(divrs(mppi(prec),-24));
-  tetpil = avma;
-  return gerepile(av,tetpil, gmul(p1,p2));
+  pari_sp av = avma;
+  GEN a = gdiv(trueeta(gmul2n(gaddgs(x,1),-1),prec),trueeta(x,prec));
+  GEN b = exp_Ir(divrs(mppi(prec),-24));
+  return gerepileupto(av, gmul(a,b));
 }
-
 GEN
 weber0(GEN x, long flag,long prec)
 {
