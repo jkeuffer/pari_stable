@@ -746,14 +746,14 @@ divrr(GEN x, GEN y)
   r1[lr] = (lx>ly)? x[lr]: 0;
   y0 = y[2]; y1 = y[3];
   for (i=0; i<lr-1; i++)
-  { /* r1 = r + (i-1) */
-    ulong k,qp;
+  { /* r1 = r + (i-1), OK up to r1[2] (accesses at most r[lr]) */
+    ulong k, qp;
     LOCAL_HIREMAINDER;
     LOCAL_OVERFLOW;
 
     if ((ulong)r1[1] == y0)
     {
-      qp = ULONG_MAX; k=addll(y0,r1[2]);
+      qp = ULONG_MAX; k = addll(y0,r1[2]);
     }
     else
     {
@@ -767,13 +767,20 @@ divrr(GEN x, GEN y)
       hiremainder = r1[1]; overflow = 0;
       qp = divll(r1[2],y0); k = hiremainder;
     }
+    j = lr-i+1;
     if (!overflow)
     {
-      long k3 = subll(mulll(qp,y1), r1[3]);
-      long k4 = subllx(hiremainder,k);
+      long k3, k4;
+      k3 = mulll(qp,y1);
+      if (j == 3) /* i = lr - 2 maximal, r1[3] undefined -> 0 */
+        k4 = subll(hiremainder,k);
+      else
+      {
+        k3 = subll(k3, r1[3]);
+        k4 = subllx(hiremainder,k);
+      }
       while (!overflow && k4) { qp--; k3=subll(k3,y1); k4=subllx(k4,y0); }
     }
-    j = lr-i+1;
     if (j<ly) (void)mulll(qp,y[j]); else { hiremainder = 0 ; j = ly; }
     for (j--; j>1; j--)
     {
@@ -812,7 +819,7 @@ divrr(GEN x, GEN y)
   if (r[0] == 0) e--;
   else if (r[0] == 1) { shift_right(r,r, 2,lr, 1,1); }
   else { /* possible only when rounding up to 0x2 0x0 ... */
-    r[2] = HIGHBIT; e++;
+    r[2] = (long)HIGHBIT; e++;
   }
   r[0] = evaltyp(t_REAL)|evallg(lr);
   r[1] = evalsigne(sx) | evalexpo(e);
