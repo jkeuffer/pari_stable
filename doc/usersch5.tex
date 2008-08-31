@@ -1859,14 +1859,22 @@ $p$ is prime.
 \noindent The names and prototypes of the low-level functions corresponding
 to \op\ are as follows. The result is of the same type as~\kbd{x}.
 
-\funno{GEN}{mp\op}{GEN x} creates the result of \op\ applied to the
-\typ{INT} or \typ{REAL}~\kbd{x}.
-
 \funno{GEN}{\op i}{GEN x} creates the result of \op\ applied to the
 \typ{INT}~\kbd{x}.
 
 \funno{GEN}{\op r}{GEN x} creates the result of \op\ applied to the
 \typ{REAL}~\kbd{x}.
+
+\funno{GEN}{mp\op}{GEN x} creates the result of \op\ applied to the
+\typ{INT} or \typ{REAL}~\kbd{x}.
+
+\noindent Complete list of available functions:
+
+\fun{GEN}{absi}{GEN x}, \fun{GEN}{absr}{GEN x}, \fun{GEN}{mpabs}{GEN x}
+
+\fun{GEN}{negi}{GEN x}, \fun{GEN}{negr}{GEN x}, \fun{GEN}{mpneg}{GEN x}
+
+\fun{GEN}{sqri}{GEN x}, \fun{GEN}{sqrr}{GEN x}, \fun{GEN}{mpsqr}{GEN x}
 
 \noindent Some miscellaneous routines:
 
@@ -1876,17 +1884,20 @@ to \op\ are as follows. The result is of the same type as~\kbd{x}.
 
 \subsec{Comparison operators}
 
-\fun{long}{minss}{long x, long y} returns the \kbd{min} of $x$ and $y$.
+\fun{long}{minss}{long x, long y}
 
-\fun{long}{maxss}{long x, long y} returns the \kbd{max} of $x$ and $y$.
-
-\fun{ulong}{minuu}{ulong x, ulong y} returns the \kbd{min} of $x$ and $y$.
-
-\fun{ulong}{maxuu}{ulong x, ulong y} returns the \kbd{max} of $x$ and $y$.
+\fun{ulong}{minuu}{ulong x, ulong y}
 
 \fun{double}{mindd}{double x, double y} returns the \kbd{min} of $x$ and $y$.
 
+
+\fun{long}{maxss}{long x, long y}
+
+\fun{ulong}{maxuu}{ulong x, ulong y}
+
 \fun{double}{maxdd}{double x, double y} returns the \kbd{max} of $x$ and $y$.
+
+\smallskip
 
 \fun{int}{mpcmp}{GEN x, GEN y} compares the \typ{INT} or \typ{REAL}~\kbd{x}
 to the \typ{INT} or \typ{REAL}~\kbd{y}. The result is the sign of
@@ -1991,12 +2002,6 @@ so \kbd{gmul} returns \kbd{gen\_0}, while \kbd{mulir} returns a
 \kbd{gen\_0} to a \typ{REAL} of precision \kbd{precision(y)}, multiplied by
 $y$; this determines the exponent of the real $0$ we obtain.
 
-The names and prototypes of the low-level functions corresponding
-to \op\ are as follows. In this section, the \kbd{z} argument in the
-\kbd{z}-functions must be of type \typ{INT} when no \kbd{r} or \kbd{mp}
-appears in the argument code (no \typ{REAL} operand is involved, only integer
-types), and of type \typ{REAL} otherwise.
-
 The reason for the discrepancy between the two rules is that we use the two
 sets of functions in different contexts: generic functions allow to write
 high-level code forgetting about types, letting PARI return results which are
@@ -2006,6 +2011,12 @@ consistency: it is much easier to compute the types of results when they are
 determined from the types of the inputs only (without taking into account
 further arithmetic properties, like being non-0).
 \smallskip
+
+The names and prototypes of the low-level functions corresponding
+to \op\ are as follows. In this section, the \kbd{z} argument in the
+\kbd{z}-functions must be of type \typ{INT} when no \kbd{r} or \kbd{mp}
+appears in the argument code (no \typ{REAL} operand is involved, only integer
+types), and of type \typ{REAL} otherwise.
 
 \funno{GEN}{mp\op[z]}{GEN x, GEN y[, GEN z]} applies \op\ to
 the \typ{INT} or \typ{REAL} \kbd{x} and~\kbd{y}. The function
@@ -2064,7 +2075,7 @@ the real number equal to $x$. This is a special case of \kbd{gexpo}.
 \fun{void}{addumului}{ulong a, ulong b, GEN x} return $a + b|X|$.
 
 \fun{GEN}{mulu_interval}{ulong a, ulong b} returns $a(a+1)\cdots b$, assuming
-that $a \leq b$.
+that $a \leq b$. Very inefficient when $a = 0$.
 
 \fun{GEN}{invr}{GEN x} returns the inverse of the non-zero \typ{REAL}~$x$.
 
@@ -2105,23 +2116,27 @@ algorithm (Jebelean-Krandick bidirectional exact division is not
 implemented).
 
 \fun{void}{diviuexact}{GEN x, ulong y} returns the Euclidean quotient
-$|\kbd{x}| / \kbd{y}$, assuming $\kbd{y}$ divides
-$\kbd{x}$ and $\kbd{y}$ is non-zero. (Note the absolute value!)
+$\kbd{x} / \kbd{y}$, assuming $\kbd{y}$ divides
+$\kbd{x}$ and $\kbd{y}$ is non-zero.
 
 The following routines return 1 (true) if \kbd{y} divides \kbd{x}, and
 0 otherwise. (Error if $y$ is $0$, even if $x$ is $0$.) All \kbd{GEN} are assumed
-to be \typ{INT}s.
-\fun{int}{dvdii}{GEN x, GEN y}
-\fun{int}{dvdis}{GEN x, long y}
-\fun{int}{dvdiu}{GEN x, ulong y}
-\fun{int}{dvdsi}{long x, GEN y}
-\fun{int}{dvdui}{ulong x, GEN y}
+to be \typ{INT}s:
+
+\fun{int}{dvdii}{GEN x, GEN y},
+\fun{int}{dvdis}{GEN x, long y},
+\fun{int}{dvdiu}{GEN x, ulong y},
+
+\fun{int}{dvdsi}{long x, GEN y},
+\fun{int}{dvdui}{ulong x, GEN y}.
 
 The following routines return 1 (true) if \kbd{y} divides \kbd{x}, and in
 that case assign the quotient to \kbd{z}; otherwise they return 0. All
-\kbd{GEN} are assumed to be \typ{INT}s.
-\fun{int}{dvdiiz}{GEN x, GEN y, GEN z}
-\fun{int}{dvdisz}{GEN x, long y, GEN z}
+\kbd{GEN} are assumed to be \typ{INT}s:
+
+\fun{int}{dvdiiz}{GEN x, GEN y, GEN z},
+\fun{int}{dvdisz}{GEN x, long y, GEN z}.
+
 \fun{int}{dvdiuz}{GEN x, ulong y, GEN z} if \kbd{y} divides \kbd{x}, assigns
 the quotient $|\kbd{x}|/\kbd{y}$ to \kbd{z} and returns 1 (true), otherwise
 returns 0 (false).
@@ -2223,9 +2238,6 @@ remainder of the \typ{INT}~\kbd{x} by the \kbd{long}~\kbd{y}. This is the
 non-negative remainder, not the one whose sign is the sign of \kbd{x}
 as in the \kbd{div} functions.
 
-\fun{long}{smodsi}{long x, GEN y} computes the true Euclidean
-remainder of the \kbd{long}~\kbd{x} by a \typ{INT}~\kbd{y}.
-
 \fun{long}{smodss}{long x, long y} computes the true Euclidean
 remainder of the \kbd{long}~\kbd{x} by a \kbd{long}~\kbd{y}.
 
@@ -2236,9 +2248,9 @@ remainder of the \typ{INT}~\kbd{x} by the \kbd{ulong}~\kbd{y}.
 remainder of the \kbd{ulong}~\kbd{x} by the \typ{INT}~\kbd{|y|}.
 
 The routine \tet{smodsi} does not exist, since it would not always be
-defined: for a \emph{negative} \kbd{x}, its result \kbd{x + |y|} would
-in general not fit into a \kbd{long}. Use either \kbd{umodui} or
-\kbd{modsi}.
+defined: for a \emph{negative} \kbd{x}, if the quotient is $\pm1$, the result
+\kbd{x + |y|} would in general not fit into a \kbd{long}. Use either
+\kbd{umodui} or \kbd{modsi}.
 
 \subsec{Powering, Square root}
 
@@ -5914,7 +5926,7 @@ even if it is an exact type, and the accuracy of the exponential is
 determined, exactly as in the case of the initial $\log x$.
 
 \fun{GEN}{gpowgs}{GEN x, long n} creates $\kbd{x}^{\kbd{n}}$ using
-binary powering. To treat the special case $n ٍ= 0$, we consider
+binary powering. To treat the special case $n = 0$, we consider
 \kbd{gpowgs} as a series of \kbd{gmul}, so we follow the rule of returning
 result which is as exact as possible given the input. More precisely,
 we return
