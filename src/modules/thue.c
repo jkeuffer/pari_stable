@@ -1020,7 +1020,7 @@ test_sol(struct sol_abs *T, long i)
     flusherr();
   }
 }
-/* partrel[i] <-- partrel[iー1] + u[i] * rel[i] */
+/* partrel[i] <-- partrel[i-1] + u[i] * rel[i] */
 static void
 fix_partrel(struct sol_abs *T, long i)
 {

@@ -639,7 +639,7 @@ gnorml1(GEN x,long prec)
   }
   return gerepileupto(av, s);
 }
-/* As gnorml1, except for t_QUAD and t_COMPLEX: |x + wyٍ| := |x| + |y|.
+/* As gnorml1, except for t_QUAD and t_COMPLEX: |x + wy| := |x| + |y|
  * Still a norm of R-vector spaces, and can be cheaply computed without
  * square roots */
 GEN
