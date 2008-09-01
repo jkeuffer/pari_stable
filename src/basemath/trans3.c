@@ -261,7 +261,7 @@ kbessel1(GEN nu, GEN gx, long prec)
     u=cgetr(l1); v=cgetr(l1); e=cgetr(l1); f=cgetr(l1);
     av1 = avma;
     zf = sqrtr(divru(pitemp,n2));
-    zz = ginv(stor(n2<<2, prec));
+    zz = invr(stor(n2<<2, prec));
     s=gen_1; t=gen_0;
     for (k=n2,k2=2*n2-1; k > 0; k--,k2-=2)
     {
@@ -884,7 +884,7 @@ gerfc(GEN x, long prec)
   }
   if (!signe(x)) return real_1(prec);
   av = avma; sqrtpi = sqrtr(mppi(lg(x)));
-  z = incgam0(ghalf, gsqr(x), sqrtpi, prec);
+  z = incgam0(ghalf, sqrr(x), sqrtpi, prec);
   z = divrr(z, sqrtpi);
   if (signe(x) < 0) z = subsr(2,z);
   return gerepileupto(av,z);
@@ -1016,7 +1016,7 @@ inv_szeta_euler(long n, double lba, long prec)
   maxprime_check(lim);
 
   prec++;
-  z = gsub(gen_1, real2n(-n, prec));
+  z = subir(gen_1, real2n(-n, prec));
   for (p = 3; p <= lim;)
   {
     long l = prec + 1 - (long)floor(A * log(p));
@@ -1106,11 +1106,11 @@ szeta_odd(long k, long prec)
     y = mulrr(divrr(powru(pi2,k),mpfactr(kk,prec)),y);
 
     av2 = avma; limit = stack_lim(av2,1);
-    qn = gsqr(q); z = ginv( addrs(q,-1) );
+    qn = sqrr(q); z = invr( addrs(q,-1) );
     for (n=2; ; n++)
     {
       long ep1, l;
-      p1 = ginv( mulir(powuu(n,k),addrs(qn,-1)) );
+      p1 = invr( mulir(powuu(n,k),addrs(qn,-1)) );
 
       z = addrr(z,p1); if ((ep1 = expo(p1)) < li) break;
       l = prec+1 + nbits2nlong(ep1);
@@ -1144,7 +1144,7 @@ szeta_odd(long k, long prec)
     for (n=1; ; n++)
     {
       long ep1, l;
-      p1 = mulir(powuu(n,k),gsqr(addrs(qn,-1)));
+      p1 = mulir(powuu(n,k),sqrr(addrs(qn,-1)));
       p1 = divrr(addrs(mulrr(qn,addsr(1,mulsr(n<<1,p2))),-1),p1);
 
       z = addrr(z,p1); if ((ep1 = expo(p1)) < li) break;
@@ -1200,7 +1200,7 @@ szeta(long k, long prec)
   {
     if (!OK_bern(k >> 1, prec)
 	&& (k * (log(k) - 2.83) > bit_accuracy_mul(prec, LOG2)))
-      y = ginv( inv_szeta_euler(k, 0, prec) ); /* would use zeta above */
+      y = invr( inv_szeta_euler(k, 0, prec) ); /* would use zeta above */
     else
     {
       y = mulrr(powru(Pi2n(1, prec), k), single_bern(k, prec));
@@ -1211,7 +1211,7 @@ szeta(long k, long prec)
   }
   /* k > 1 odd */
   if (k * log(k) > bit_accuracy_mul(prec, LOG2)) /* heuristic */
-    return gerepileuptoleaf(av, ginv( inv_szeta_euler(k, 0, prec) ));
+    return gerepileuptoleaf(av, invr( inv_szeta_euler(k, 0, prec) ));
   return szeta_odd(k, prec);
 }
 
@@ -1839,7 +1839,7 @@ polylog(long m, GEN x, long prec)
       p1 = gsub(glog(x,l), z);
     p1 = gmul2n(gsqr(p1), -1); /* = (log(-x))^2 / 2 */
 
-    p1 = gadd(p1, divru(gsqr(mppi(l)), 6));
+    p1 = gadd(p1, divru(sqrr(mppi(l)), 6));
     p1 = gneg_i(p1);
   }
   else
@@ -2203,7 +2203,7 @@ eta(GEN x, long prec)
 
 /* sqrt(3)/2 */
 static GEN
-sqrt32(long prec) { GEN z = sqrtr(stor(3, prec)); setexpo(z, -1); return z; }
+sqrt32(long prec) { GEN z = sqrtr_abs(stor(3,prec)); setexpo(z, -1); return z; }
 
 /* exp(i x), x = k pi/12, assume 0 <= k < 24 */
 static GEN
@@ -2220,13 +2220,13 @@ e12(ulong k, long prec)
     case 0: gel(z,1) = icopy(gen_1); gel(z,2) = gen_0; break;
     case 1: t = gmul2n(addrs(sqrt32(prec), 1), -1);
       gel(z,1) = sqrtr(t);
-      gel(z,2) = gmul2n(ginv(gel(z,1)), -2); break;
+      gel(z,2) = gmul2n(invr(gel(z,1)), -2); break;
 
     case 2: gel(z,1) = sqrt32(prec);
 	    gel(z,2) = real2n(-1, prec); break;
 
-    case 3: gel(z,1) = ginv( gsqrt(gen_2, prec) );
-	    gel(z,2) = leafcopy(gel(z,1)); break;
+    case 3: gel(z,1) = sqrtr_abs(real2n(-1,prec));
+	    gel(z,2) = rcopy(gel(z,1)); break;
   }
   if (sPiov2) swap(gel(z,1), gel(z,2));
   if (sPi) togglesign(gel(z,1));

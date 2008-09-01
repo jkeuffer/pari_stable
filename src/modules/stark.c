@@ -2613,7 +2613,7 @@ bnrstark(GEN bnr, GEN subgrp, long prec)
   data  = FindModulus(bnr, dtQ, &newprec, prec);
   if (!data)
   {
-    GEN vec, H, cyc = gel(dtQ,2), U = gel(dtQ,3), M = ginv(U);
+    GEN vec, H, cyc = gel(dtQ,2), U = gel(dtQ,3), M = RgM_inv(U);
     long i, j = 1, l = lg(M);
 
     /* M = indep. generators of Cl_f/subgp, restrict to cyclic components */

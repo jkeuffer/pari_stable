@@ -262,7 +262,7 @@ inithue(GEN P, GEN bnf, long flag, long prec)
 
 typedef struct {
   GEN c10, c11, c13, c15, bak, NE, ALH, Ind, hal, MatFU, ro, Hmu;
-  GEN delta, lambda, errdelta;
+  GEN delta, lambda, inverrdelta;
   long r, iroot, deg;
 } baker_s;
 
@@ -321,8 +321,8 @@ Baker(baker_s *BS)
 static GEN
 errnum(GEN x, GEN d)
 {
-  GEN dx = mulir(d, x);
-  return mpabs(subri(dx, ground(dx)));
+  GEN dx = mulir(d, x), D = subri(dx, roundr(dx));
+  setabssign(D); return D;
 }
 
 /* Try to reduce the bound through continued fractions; see paper. */
@@ -331,7 +331,7 @@ CF_1stPass(GEN *B0, GEN kappa, baker_s *BS)
 {
   GEN a, b, q, ql, qd, l0, denbound = mulri(*B0, kappa);
 
-  if (gcmp(gmul(dbltor(0.1),gsqr(denbound)), ginv(BS->errdelta)) > 0)
+  if (cmprr(mulrr(dbltor(0.1),sqrr(denbound)), BS->inverrdelta) > 0)
     return -1;
 
   q = denom( bestappr(BS->delta, denbound) );
@@ -358,7 +358,7 @@ get_B0Bx(baker_s *BS, GEN l0, GEN *B0, GEN *Bx)
 {
   GEN t = divrr(mulir(BS->Ind, BS->c15), l0);
   *B0 = divrr(mulir(BS->Ind, mplog(t)), BS->c13);
-  *Bx = gpow(mulsr(2,t), ginv(utoipos(BS->deg)), DEFAULTPREC);
+  *Bx = sqrtnr(shiftr(t,1), BS->deg);
 }
 
 static int
@@ -375,21 +375,21 @@ LLL_1stPass(GEN *pB0, GEN kappa, baker_s *BS, GEN *pBx)
   if (cmpri(B0, BS->Ind) > 0)
   {
     gcoeff(lllmat, 1, 1) = grndtoi(divri(B0, BS->Ind), &e);
-    triv = mulsr(2, gsqr(B0));
+    triv = mulsr(2, sqrr(B0));
   }
   else
-    triv = addir(sqri(BS->Ind), gsqr(B0));
+    triv = addir(sqri(BS->Ind), sqrr(B0));
 
-  gcoeff(lllmat, 3, 1) = ground(gneg(gmul(C, BS->lambda)));
-  gcoeff(lllmat, 3, 2) = ground(gneg(gmul(C, BS->delta)));
+  gcoeff(lllmat, 3, 1) = roundr(negr(mulir(C, BS->lambda)));
+  gcoeff(lllmat, 3, 2) = roundr(negr(mulir(C, BS->delta)));
   gcoeff(lllmat, 3, 3) = C;
-  lllmat = gmul(lllmat, lllint(lllmat));
+  lllmat = ZM_lll(lllmat, 0.99, LLL_IM|LLL_INPLACE);
 
   l0 = gnorml2(gel(lllmat,1));
   l0 = subrr(divir(l0, dbltor(1.8262)), triv); /* delta = 0.99 */
   if (signe(l0) <= 0) return 0;
 
-  l1 = shiftr(addri(mulsr(2, B0), BS->Ind), -1);
+  l1 = shiftr(addri(shiftr(B0,1), BS->Ind), -1);
   l0 = divri(subrr(sqrtr(l0), l1), C);
 
   if (signe(l0) <= 0) return 0;
@@ -618,10 +618,11 @@ thueinit(GEN pol, long flag, long prec)
   }
   else
   {
-    GEN c0 = gen_1, ro = roots(pol, DEFAULTPREC);
+    GEN c0, ro = roots(pol, DEFAULTPREC);
     if (!ZX_isirreducible(pol)) pari_err(redpoler,"thueinit");
-    for (k=1; k<lg(ro); k++) c0 = gmul(c0, imag_i(gel(ro,k)));
-    c0 = ginv( mpabs(c0) );
+    c0 = imag_i(gel(ro,1));
+    for (k=2; k<lg(ro); k++) c0 = mulrr(c0, imag_i(gel(ro,k)));
+    c0 = invr( absr(c0) );
     tnf = mkvec2(pol, c0);
   }
   return gerepilecopy(av,tnf);
@@ -631,15 +632,15 @@ static void
 init_get_B(long i1, long i2, GEN Delta, GEN Lambda, GEN eps5, baker_s *BS,
 	   long prec)
 {
-  GEN delta, lambda, errdelta;
+  GEN delta, lambda, inverrdelta;
   if (BS->r > 1)
   {
     delta = divrr(gel(Delta,i2),gel(Delta,i1));
     lambda = gdiv(gsub(gmul(gel(Delta,i2),gel(Lambda,i1)),
 		       gmul(gel(Delta,i1),gel(Lambda,i2))),
 		  gel(Delta,i1));
-    errdelta = mulrr(addsr(1,delta),
-		     divrr(eps5, subrr(mpabs(gel(Delta,i1)),eps5)));
+    inverrdelta = divrr(subrr(mpabs(gel(Delta,i1)),eps5),
+                        mulrr(addsr(1,delta),eps5));
   }
   else
   { /* r == 1, single fundamental unit (i1 = s = t = 1) */
@@ -654,12 +655,12 @@ init_get_B(long i1, long i2, GEN Delta, GEN Lambda, GEN eps5, baker_s *BS,
 	      gdiv(gel(BS->NE,3), gel(BS->NE,2)));
     lambda = divrr(garg(p1,prec), Pi2);
 
-    errdelta = ginv(gmul2n(gabs(gel(fu,2),prec), bit_accuracy(prec)-1));
+    inverrdelta = shiftr(gabs(gel(fu,2),prec), bit_accuracy(prec)-1);
   }
-  if (DEBUGLEVEL>1) fprintferr("  errdelta = %Ps\n",errdelta);
+  if (DEBUGLEVEL>1) fprintferr("  inverrdelta = %Ps\n",inverrdelta);
   BS->delta = delta;
   BS->lambda = lambda;
-  BS->errdelta = errdelta;
+  BS->inverrdelta = inverrdelta;
 }
 
 static GEN

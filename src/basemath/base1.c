@@ -1051,7 +1051,7 @@ make_M(nffp_t *F, int trunc)
     for (j=2; j<n; j++)
     {
       d = gel(den,j); if (!d) continue;
-      m = gel(M,j); affir(d,rd); invd = ginv(rd);
+      m = gel(M,j); affir(d,rd); invd = invr(rd);
       for (i=1; i<l; i++) gel(m,i) = gmul(gel(m,i), invd);
     }
   }

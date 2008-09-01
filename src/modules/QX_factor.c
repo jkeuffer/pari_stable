@@ -81,7 +81,7 @@ two_factor_bound(GEN x)
   {
     c = gel(x,i); if (!signe(c)) continue;
     affir(c, r);
-    z = addrr(z, mulrr(gsqr(r), invbin[i]));
+    z = addrr(z, mulrr(sqrr(r), invbin[i]));
   }
   z = shiftr(sqrtr(z), n);
   z = divrr(z, dbltor(pow((double)n, 0.75)));

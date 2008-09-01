@@ -1716,7 +1716,7 @@ init_montdata(GEN N, montdata *s)
 GEN
 init_remiimul(GEN M)
 {
-  GEN iM = ginv( itor(M, lgefint(M) + 1) ); /* 1. / M */
+  GEN iM = invr( itor(M, lgefint(M) + 1) ); /* 1. / M */
   return mkvec2(M, iM);
 }
 
@@ -2668,10 +2668,10 @@ bestappr(GEN x, GEN k)
       p1 = gen_1; a = p0 = floorr(x); q1 = gen_0; q0 = gen_1;
       while (cmpii(q0,k) <= 0)
       {
-	x = mpsub(x,a); /* 0 <= x < 1 */
+	x = subri(x,a); /* 0 <= x < 1 */
 	if (!signe(x)) { p1 = p0; q1 = q0; break; }
 
-	x = ginv(x); /* > 1 */
+	x = invr(x); /* > 1 */
 	if (cmprr(x,kr) > 0)
 	{ /* next partial quotient will overflow limits */
 	  a = divii(subii(k, q1), q0);
@@ -2683,7 +2683,7 @@ bestappr(GEN x, GEN k)
 		       { p1 = p0; q1 = q0; }
 	  break;
 	}
-	a = mptrunc(x); /* mptrunc(x) may raise precer */
+	a = truncr(x); /* truncr(x) may raise precer */
 	p = addii(mulii(a,p0), p1); p1=p0; p0=p;
 	q = addii(mulii(a,q0), q1); q1=q0; q0=q;
       }
@@ -2810,7 +2810,7 @@ quadregulator(GEN x, long prec)
       gerepileall(av2,3, &reg,&u,&v);
     }
   }
-  reg = gsqr(reg); setexpo(reg,expo(reg)-1);
+  reg = sqrr(reg); setexpo(reg,expo(reg)-1);
   if (fl) reg = mulrr(reg, divri(addir(u1,rsqd),v));
   y = logr_abs(divri(reg,v));
   if (rexp)
@@ -2975,7 +2975,7 @@ two_rank(GEN x)
 }
 
 static GEN
-sqr_primeform(GEN x, long f) { return redimag(gsqr(primeform_u(x, f))); }
+sqr_primeform(GEN x, long f) { return redimag(qfisqr(primeform_u(x, f))); }
 
 #define MAXFORM 11
 #define _low(to, x) { GEN __x = (GEN)(x); to = signe(__x)?mod2BIL(__x):0; }
@@ -3108,13 +3108,13 @@ classno2(GEN x)
   {
     GEN invlogd = invr(logd);
     p2 = subsr(1, shiftr(mulrr(logr_abs(reg),invlogd),1));
-    if (cmprr(gsqr(p2), shiftr(invlogd,1)) >= 0) p1 = mulrr(p2,p1);
+    if (cmprr(sqrr(p2), shiftr(invlogd,1)) >= 0) p1 = mulrr(p2,p1);
   }
   n = itos_or_0( mptrunc(p1) );
   if (!n) pari_err(talker,"discriminant too large in classno");
 
   p4 = divri(Pi,d);
-  p7 = ginv(sqrtr_abs(Pi));
+  p7 = invr(sqrtr_abs(Pi));
   p1 = sqrtr_abs(dr);
   S = gen_0;
   half = real2n(-1, prec);

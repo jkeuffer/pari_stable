@@ -1173,6 +1173,28 @@ gsubgs(GEN y, long s) { return gaddgs(y, -s); }
 INLINE GEN
 gdivsg(long s, GEN y) { return gdiv(stoi(s), y); }
 
+/* x t_COMPLEX */
+INLINE GEN
+cxnorm(GEN x) { return gadd(gsqr(gel(x,1)), gsqr(gel(x,2))); }
+/* q t_QUAD */
+INLINE GEN
+quadnorm(GEN q)
+{
+  GEN X = gel(q,1), b = gel(X,3), c = gel(X,2);
+  GEN z, u = gel(q,3), v = gel(q,2);
+  if (typ(u) == t_INT && typ(v) == t_INT) /* generic case */
+  {
+    z = signe(b)? mulii(v, addii(u,v)): sqri(v);
+    return addii(z, mulii(c, sqri(u)));
+  }
+  else
+  {
+    z = signe(b)? gmul(v, gadd(u,v)): gsqr(v);
+    return gadd(z, gmul(c, gsqr(u)));
+  }
+}
+
+
 INLINE GEN
 sqrfrac(GEN x)
 {

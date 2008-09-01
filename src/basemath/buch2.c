@@ -1331,7 +1331,7 @@ init_red_mod_units(GEN bnf, long prec)
     for (i=1; i<RU; i++)
     {
       gel(p1,i) = real_i(gcoeff(matunit,i,j));
-      s1 = mpadd(s1, gsqr(gel(p1,i)));
+      s1 = mpadd(s1, mpsqr(gel(p1,i)));
     }
     gel(p1,RU) = gen_0; if (mpcmp(s1,s) > 0) s = s1;
   }
@@ -1873,7 +1873,7 @@ nfsign_from_logarch(GEN LA, GEN invpi, GEN archp)
 GEN
 nfsign_units(GEN bnf, GEN archp, int add_zu)
 {
-  GEN y, A = gel(bnf,3), invpi = ginv( mppi(DEFAULTPREC) );
+  GEN y, A = gel(bnf,3), invpi = invr( mppi(DEFAULTPREC) );
   long j = 1, RU = lg(A);
 
   if (!archp) archp = identity_perm( nf_get_r1(gel(bnf,7)) );
@@ -2523,7 +2523,7 @@ class_group_gen(GEN nf,GEN W,GEN C,GEN Vbase,long prec, GEN nf0,
   if (DEBUGLEVEL)
     { fprintferr("\n#### Computing class group generators\n"); (void)timer2(); }
   D = ZM_snfall(W,&U,&V); /* UWV = D, D diagonal, G = g Ui (G=new gens, g=old) */
-  Ui = ginv(U);
+  Ui = RgM_inv(U);
   lo0 = lo = lg(D);
  /* we could set lo = lg(cyc) and truncate all matrices below
   *   setlg_col(D && U && Y, lo) + setlg(D && V && X && Ui, lo)

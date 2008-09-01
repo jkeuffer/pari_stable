@@ -939,7 +939,7 @@ sumalt(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
   e1 = addsr(3, sqrtr(stor(8,prec)));
   N = (long)(0.4*(bit_accuracy(prec) + 7));
   d = powrs(e1,N);
-  d = shiftr(addrr(d, ginv(d)),-1);
+  d = shiftr(addrr(d, invr(d)),-1);
   az = gen_m1; c = d;
   s = gen_0;
   for (k=0; ; k++)
@@ -999,7 +999,7 @@ sumpos(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
   e1 = addsr(3, sqrtr(stor(8,prec)));
   N = (long)(0.4*(bit_accuracy(prec) + 7));
   d = powrs(e1,N);
-  d = shiftr(addrr(d, ginv(d)),-1);
+  d = shiftr(addrr(d, invr(d)),-1);
   az = gen_m1; c = d;
   s = gen_0;
 

@@ -132,11 +132,11 @@ constpi(long prec)
     b = mulrr(A,B);
     affrr(a, A);
     affrr(sqrtr_abs(b), B); avma = av3;
-    y = gsqr(B_A); setexpo(y, expo(y) + i - 2);
+    y = sqrr(B_A); setexpo(y, expo(y) + i - 2);
     affrr(subrr(C, y), C); avma = av2;
   }
   setexpo(C, expo(C)+2);
-  affrr(divrr(gsqr(addrr(A,B)), C), tmppi);
+  affrr(divrr(sqrr(addrr(A,B)), C), tmppi);
   if (gpi) gunclone(gpi);
   avma = av;  return gpi = tmppi;
 }
@@ -456,7 +456,7 @@ _rpowuu_sqr(void *data, GEN x)
   sr_muldata *D = (sr_muldata *)data;
   if (typ(x) == t_INT && lgefint(x) >= D->prec)
   { /* switch to t_REAL */
-    D->sqr   = &gsqr;
+    D->sqr   = &sqrr;
     D->mulug = &mulur; x = itor(x, D->prec);
   }
   return D->sqr(x);
@@ -490,7 +490,7 @@ powrs(GEN x, long n)
   GEN y;
   if (!n) return powr0(x);
   y = leftright_pow_u(x, (ulong)labs(n), NULL, &_sqrr, &_mulr);
-  if (n < 0) y = ginv(y);
+  if (n < 0) y = invr(y);
   return gerepileupto(av,y);
 }
 GEN 
@@ -1047,7 +1047,7 @@ GEN
 gsqrt(GEN x, long prec)
 {
   pari_sp av;
-  GEN y, p1, p2;
+  GEN y, p1;
 
   switch(typ(x))
   {
@@ -1063,9 +1063,9 @@ gsqrt(GEN x, long prec)
       if (isrationalzero(gel(x,2))) return gsqrt(gel(x,1), prec);
       y = cgetg(3,t_COMPLEX); av = avma;
 
-      p1 = gsqr(gel(x,1));
-      p2 = gsqr(gel(x,2)); p1 = gsqrt(gadd(p1,p2), prec);
-      if (gcmp0(p1)) { gel(y,1) = gel(y,2) = sqrtr(p1); return y; }
+      p1 = gsqrt(cxnorm(x), prec);
+      if (typ(p1) == t_INTMOD) pari_err(impl,"sqrt(complex of t_INTMODs)");
+      if (!signe(p1)) { gel(y,1) = gel(y,2) = sqrtr(p1); return y; }
       if (gsigne(gel(x,1)) < 0)
       {
 	p1 = sqrtr( gmul2n(gsub(p1,gel(x,1)), -1) );
@@ -1489,7 +1489,7 @@ mpexp_basecase(GEN x)
   y = modlog2(x, &sh);
   if (!y) { avma = av; return real2n(sh, l); }
   z = addsr(1, exp1r_abs(y));
-  if (signe(y) < 0) z = ginv(z);
+  if (signe(y) < 0) z = invr(z);
   if (sh) {
     setexpo(z, expo(z)+sh);
     if (lg(z) > l) z = rtor(z, l); /* spurious precision increase */
@@ -1593,7 +1593,7 @@ cos_p(GEN x)
   if (k & 1) k--;
   for (y=gen_1; k; k-=2)
   {
-    GEN t = gdiv(gmul(y,x2), mulss(k, k-1));
+    GEN t = gdiv(gmul(y,x2), muluu(k, k-1));
     y = gsubsg(1, t);
   }
   return gerepileupto(av, y);
@@ -1612,7 +1612,7 @@ sin_p(GEN x)
   if (k & 1) k--;
   for (y=gen_1; k; k-=2)
   {
-    GEN t = gdiv(gmul(y,x2), mulss(k, k+1));
+    GEN t = gdiv(gmul(y,x2), muluu(k, k+1));
     y = gsubsg(1, t);
   }
   return gerepileupto(av, gmul(y, x));
@@ -1921,7 +1921,7 @@ logr_abs(GEN X)
   k |= 1;
   if (k >= 3)
   {
-    GEN S, T, y2 = gsqr(y), unr = real_1(L);
+    GEN S, T, y2 = sqrr(y), unr = real_1(L);
     pari_sp av = avma;
     long s = 0, incs = (long)d, l1 = nbits2prec((long)d);
     S = x;
@@ -2127,7 +2127,7 @@ mpsc1(GEN x, long *ptmod8)
 
   b = bit_accuracy(l);
   if (b + (a<<1) <= 0) {
-    y = gsqr(x); y[1] = evalsigne(-1)|evalexpo(expo(y)-1);
+    y = sqrr(x); y[1] = evalsigne(-1)|evalexpo(expo(y)-1);
     return y;
   }
 
@@ -2167,7 +2167,7 @@ mpsc1(GEN x, long *ptmod8)
   * error bounded by 1/6(n+1) <= 1/12. Finally, we want
   * 2n (-1/log(2) - log_2 |Y| + log_2(2n+2)) >= b  */
   x = rtor(x, L); x[1] = evalsigne(1) | evalexpo(-e);
-  x2 = gsqr(x);
+  x2 = sqrr(x);
   if (n == 1) p2 = x2;
   else
   {
@@ -2262,7 +2262,7 @@ gcos(GEN x, long prec)
       i = precision(x); if (!i) i = prec;
       y = cgetc(i); av = avma;
       r = gexp(gel(x,2),prec);
-      v1 = gmul2n(addrr(ginv(r),r), -1); /* = cos(I*Im(x)) */
+      v1 = gmul2n(addrr(invr(r),r), -1); /* = cos(I*Im(x)) */
       u1 = subrr(v1, r); /* = - I*sin(I*Im(x)) */
       gsincos(gel(x,1),&u,&v,prec);
       affrr_fixlg(gmul(v1,v), gel(y,1));
@@ -2327,7 +2327,7 @@ gsin(GEN x, long prec)
       i = precision(x); if (!i) i = prec;
       y = cgetc(i); av = avma;
       r = gexp(gel(x,2),prec);
-      v1 = gmul2n(addrr(ginv(r),r), -1); /* = cos(I*Im(x)) */
+      v1 = gmul2n(addrr(invr(r),r), -1); /* = cos(I*Im(x)) */
       u1 = subrr(r, v1); /* = I*sin(I*Im(x)) */
       gsincos(gel(x,1),&u,&v,prec);
       affrr_fixlg(gmul(v1,u), gel(y,1));
@@ -2423,7 +2423,7 @@ gsincos(GEN x, GEN *s, GEN *c, long prec)
       ps = cgetc(i); *s = ps;
       pc = cgetc(i); *c = pc; av = avma;
       r = gexp(gel(x,2),prec);
-      v1 = gmul2n(addrr(ginv(r),r), -1); /* = cos(I*Im(x)) */
+      v1 = gmul2n(addrr(invr(r),r), -1); /* = cos(I*Im(x)) */
       u1 = subrr(r, v1); /* = I*sin(I*Im(x)) */
       gsincos(gel(x,1), &u,&v, prec);
       affrr_fixlg(mulrr(v1,u), gel(ps,1));

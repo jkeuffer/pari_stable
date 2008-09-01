@@ -359,7 +359,7 @@ inittanhsinh(long m, long prec)
   {
     gel(D.tabxp,k) = cgetr(prec+1);
     gel(D.tabwp,k) = cgetr(prec+1); av = avma;
-    ct = divr2_ip(addrr(et, ginv(et)));
+    ct = divr2_ip(addrr(et, invr(et)));
     st = subrr(et, ct);
     ext = invr( addrs(mpexp(mulur(3, st)), 1) );
     setexpo(ext, expo(ext)+1);
@@ -391,10 +391,10 @@ initsinhsinh(long m, long prec)
   {
     gel(D.tabxp,k) = cgetr(prec+1);
     gel(D.tabwp,k) = cgetr(prec+1); av = avma;
-    ct = divr2_ip(addrr(et, ginv(et)));
+    ct = divr2_ip(addrr(et, invr(et)));
     st = subrr(et, ct);
     ext = mpexp(st);
-    exu = ginv(ext);
+    exu = invr(ext);
     xp = divr2_ip(subrr(ext, exu));
     wp = divr2_ip(mulrr(ct, addrr(ext, exu)));
     if (expo(wp) - 2*expo(xp) < -D.eps) { nt = k-1; break; }
@@ -423,7 +423,7 @@ initsinh(long m, long prec)
   {
     gel(D.tabxp,k) = cgetr(prec+1);
     gel(D.tabwp,k) = cgetr(prec+1); av = avma;
-    eti = ginv(et);
+    eti = invr(et);
     xp = subrr(et, eti);
     wp = addrr(et, eti);
     if (cmprs(xp, (long)(LOG2*(expo(wp)+D.eps) + 1)) > 0) { nt = k-1; break; }
@@ -453,11 +453,11 @@ initexpsinh(long m, long prec)
   {
     GEN t;
     et = mulrr(et, ex);
-    eti = ginv(et); t = addrr(et, eti);
+    eti = invr(et); t = addrr(et, eti);
     xp = mpexp(subrr(et, eti));
     gel(D.tabxp,k) = xp;
     gel(D.tabwp,k) = mulrr(xp, t);
-    gel(D.tabxm,k) = ginv(xp);
+    gel(D.tabxm,k) = invr(xp);
     gel(D.tabwm,k) = mulrr(gel(D.tabxm,k), t);
     if (expo(D.tabxm[k]) < -D.eps) { nt = k-1; break; }
   }
@@ -484,7 +484,7 @@ initexpexp(long m, long prec)
     gel(D.tabwp,k) = cgetr(prec+1);
     gel(D.tabxm,k) = cgetr(prec+1);
     gel(D.tabwm,k) = cgetr(prec+1); av = avma;
-    eti = ginv(et); kh = mulsr(k,h);
+    eti = invr(et); kh = mulsr(k,h);
     xp = mpexp(subrr(kh, et));
     xm = mpexp(negr(addrr(kh, eti)));
     wp = mulrr(xp, addsr(1, et));
@@ -519,20 +519,20 @@ initnumsine(long m, long prec)
     gel(D.tabwp,k) = cgetr(prec+1);
     gel(D.tabxm,k) = cgetr(prec+1);
     gel(D.tabwm,k) = cgetr(prec+1); av = avma;
-    eti = ginv(et); /* exp(-kh) */
+    eti = invr(et); /* exp(-kh) */
     ct = divr2_ip(addrr(et, eti));
     st = divr2_ip(subrr(et, eti));
-    extp = mpexp(st);  extp1 = subsr(1, extp); extp2 = ginv(extp1);
-    extm = ginv(extp); extm1 = subsr(1, extm); extm2 = ginv(extm1);
+    extp = mpexp(st);  extp1 = subsr(1, extp); extp2 = invr(extp1);
+    extm = invr(extp); extm1 = subsr(1, extm); extm2 = invr(extm1);
     kpi = mulsr(k, pi);
     kct = mulsr(k, ct);
     setexpo(extm1, expo(extm1) + D.m);
     setexpo(extp1, expo(extp1) + D.m);
     xp = mulrr(kpi, extm2);
-    wp = mulrr(subrr(extm1, mulrr(kct, extm)), mulrr(pi, gsqr(extm2)));
+    wp = mulrr(subrr(extm1, mulrr(kct, extm)), mulrr(pi, sqrr(extm2)));
     xm = mulrr(negr(kpi), extp2);
-    wm = mulrr(addrr(extp1, mulrr(kct, extp)), mulrr(pi, gsqr(extp2)));
-    if (expo(wm) < -D.eps && expo(extm) + D.m + expi(stoi(10 * k)) < -D.eps) { nt = k-1; break; }
+    wm = mulrr(addrr(extp1, mulrr(kct, extp)), mulrr(pi, sqrr(extp2)));
+    if (expo(wm) < -D.eps && expo(extm) + D.m + expu(10 * k) < -D.eps) { nt = k-1; break; }
     affrr(xp, gel(D.tabxp,k));
     affrr(wp, gel(D.tabwp,k));
     affrr(xm, gel(D.tabxm,k));

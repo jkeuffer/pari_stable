@@ -2062,75 +2062,71 @@ sqr_ser_part(GEN x, long l1, long l2)
 GEN
 gsqr(GEN x)
 {
-  long tx=typ(x), i, l;
+  long i, l;
   pari_sp av, tetpil;
   GEN z, p1, p2, p3, p4;
 
-  if (is_scalar_t(tx))
-    switch(tx)
-    {
-      case t_INT: return sqri(x);
-      case t_REAL: return sqrr(x);
-      case t_INTMOD: { GEN X = gel(x,1);
-	z = cgetg(3,t_INTMOD);
-	gel(z,2) = gerepileuptoint((pari_sp)z, remii(sqri(gel(x,2)), X));
-	gel(z,1) = icopy(X); return z;
-      }
-      case t_FRAC: return sqrfrac(x);
-
-      case t_COMPLEX:
-	if (isintzero(gel(x,1))) {
-	  av = avma;
-	  return gerepileupto(av, gneg(gsqr(gel(x,2))));
-	}
-	z = cgetg(3,t_COMPLEX); av = avma;
-	p1 = gadd(gel(x,1),gel(x,2));
-	p2 = gsub(gel(x,1), gel(x,2));
-	p3 = gmul(gel(x,1),gel(x,2));
-	tetpil = avma;
-	gel(z,1) = gmul(p1,p2);
-	gel(z,2) = gshift(p3,1); gerepilecoeffssp(av,tetpil,z+1,2); return z;
-
-      case t_PADIC:
-	z = cgetg(5,t_PADIC);
-	i = (equaliu(gel(x,2), 2) && signe(x[4]))? 1: 0;
-	if (i && precp(x) == 1) i = 2; /* (1 + O(2))^2 = 1 + O(2^3) */
-	z[1] = evalprecp(precp(x)+i) | evalvalp(valp(x) << 1);
-	gel(z,2) = icopy(gel(x,2));
-	gel(z,3) = shifti(gel(x,3), i); av = avma;
-	gel(z,4) = gerepileuptoint(av, remii(sqri(gel(x,4)), gel(z,3)));
-	return z;
-
-      case t_QUAD: z = cgetg(4,t_QUAD);
-	p1 = gel(x,1);
-	gel(z,1) = gcopy(p1); av = avma;
-	p2 = gsqr(gel(x,2));
-	p3 = gsqr(gel(x,3));
-	p4 = gmul(gneg_i(gel(p1,2)),p3);
-
-	if (gcmp0(gel(p1,3)))
-	{
-	  tetpil = avma;
-	  gel(z,2) = gerepile(av,tetpil,gadd(p4,p2));
-	  av = avma;
-	  p2 = gmul(gel(x,2),gel(x,3)); tetpil = avma;
-	  gel(z,3) = gerepile(av,tetpil,gmul2n(p2,1)); return z;
-	}
-
-	p1 = gmul2n(gmul(gel(x,2),gel(x,3)), 1);
-	tetpil = avma;
-	gel(z,2) = gadd(p2,p4);
-	gel(z,3) = gadd(p1,p3);
-	gerepilecoeffssp(av,tetpil,z+2,2); return z;
-
-      case t_POLMOD:
-        return sqr_polmod(gel(x,1), gel(x,2));
-
-      case t_FFELT: return FF_sqr(x);
-    }
-
-  switch(tx)
+  switch(typ(x))
   {
+    case t_INT: return sqri(x);
+    case t_REAL: return sqrr(x);
+    case t_INTMOD: { GEN X = gel(x,1);
+      z = cgetg(3,t_INTMOD);
+      gel(z,2) = gerepileuptoint((pari_sp)z, remii(sqri(gel(x,2)), X));
+      gel(z,1) = icopy(X); return z;
+    }
+    case t_FRAC: return sqrfrac(x);
+
+    case t_COMPLEX:
+      if (isintzero(gel(x,1))) {
+        av = avma;
+        return gerepileupto(av, gneg(gsqr(gel(x,2))));
+      }
+      z = cgetg(3,t_COMPLEX); av = avma;
+      p1 = gadd(gel(x,1),gel(x,2));
+      p2 = gsub(gel(x,1), gel(x,2));
+      p3 = gmul(gel(x,1),gel(x,2));
+      tetpil = avma;
+      gel(z,1) = gmul(p1,p2);
+      gel(z,2) = gshift(p3,1); gerepilecoeffssp(av,tetpil,z+1,2); return z;
+
+    case t_PADIC:
+      z = cgetg(5,t_PADIC);
+      i = (equaliu(gel(x,2), 2) && signe(x[4]))? 1: 0;
+      if (i && precp(x) == 1) i = 2; /* (1 + O(2))^2 = 1 + O(2^3) */
+      z[1] = evalprecp(precp(x)+i) | evalvalp(valp(x) << 1);
+      gel(z,2) = icopy(gel(x,2));
+      gel(z,3) = shifti(gel(x,3), i); av = avma;
+      gel(z,4) = gerepileuptoint(av, remii(sqri(gel(x,4)), gel(z,3)));
+      return z;
+
+    case t_QUAD: z = cgetg(4,t_QUAD);
+      p1 = gel(x,1);
+      gel(z,1) = gcopy(p1); av = avma;
+      p2 = gsqr(gel(x,2));
+      p3 = gsqr(gel(x,3));
+      p4 = gmul(gneg_i(gel(p1,2)),p3);
+
+      if (gcmp0(gel(p1,3)))
+      {
+        tetpil = avma;
+        gel(z,2) = gerepile(av,tetpil,gadd(p4,p2));
+        av = avma;
+        p2 = gmul(gel(x,2),gel(x,3)); tetpil = avma;
+        gel(z,3) = gerepile(av,tetpil,gmul2n(p2,1)); return z;
+      }
+
+      p1 = gmul2n(gmul(gel(x,2),gel(x,3)), 1);
+      tetpil = avma;
+      gel(z,2) = gadd(p2,p4);
+      gel(z,3) = gadd(p1,p3);
+      gerepilecoeffssp(av,tetpil,z+2,2); return z;
+
+    case t_POLMOD:
+      return sqr_polmod(gel(x,1), gel(x,2));
+
+    case t_FFELT: return FF_sqr(x);
+
     case t_POL:
     {
       GEN a = x, p = NULL, pol = NULL;

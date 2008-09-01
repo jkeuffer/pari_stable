@@ -710,9 +710,9 @@ qfr5_rho(GEN x, struct qfr_data *S)
   if (sb) {
     GEN t = subii(sqri(b), S->D);
     if (sb < 0)
-      t = divir(t, gsqr(subir(b,S->sqrtD)));
+      t = divir(t, sqrr(subir(b,S->sqrtD)));
     else
-      t = divri(gsqr(addir(b,S->sqrtD)), t);
+      t = divri(sqrr(addir(b,S->sqrtD)), t);
     /* t = (b + sqrt(D)) / (b - sqrt(D)), evaluated stably */
     gel(y,5) = mulrr(t, gel(y,5)); fix_expo(y);
   }
@@ -890,7 +890,7 @@ qfr5_comp(GEN x, GEN y, struct qfr_data *S)
   if (x == y)
   {
     gel(z,4) = shifti(gel(x,4),1);
-    gel(z,5) = gsqr(gel(x,5));
+    gel(z,5) = sqrr(gel(x,5));
   }
   else
   {

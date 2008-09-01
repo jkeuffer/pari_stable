@@ -404,7 +404,7 @@ Monomial(GEN r, PERM bb, long nbv)
       if (!absr_cmp(gel(n,1), gel(c,1))
        && !absr_cmp(gel(n,2), gel(c,2))
        && signe(c[2]) != signe(n[2]))
-	c = mpadd(gsqr(gel(c,1)), gsqr(gel(c,2)));
+	c = addrr(sqrr(gel(c,1)), sqrr(gel(c,2)));
       else
 	c = gmul(c,n);
     }

@@ -1115,8 +1115,8 @@ bestlift_init(long a, GEN nf, GEN pr, GEN C, nflift_t *L)
     {
       GEN s = gen_0;
       for (j=1; j<=d; j++)
-        s = gadd(s, gdiv( gsqr(gcoeff(S,i,j)), gel(B,j)));
-      if (gcmp(s, smax) > 0) smax = s;
+        s = mpadd(s, mpdiv( mpsqr(gcoeff(S,i,j)), gel(B,j)));
+      if (mpcmp(s, smax) > 0) smax = s;
     }
     GSmin = ginv(gmul2n(smax, 2));
     if (gcmp(GSmin, C) >= 0) break;

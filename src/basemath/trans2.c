@@ -402,7 +402,7 @@ mpch(GEN x)
     return e >= 0? real_0_bit(e): real_1(nbits2prec(-e));
   }
   av = avma;
-  z = mpexp(x); z = addrr(z, ginv(z)); setexpo(z, expo(z)-1);
+  z = mpexp(x); z = addrr(z, invr(z)); setexpo(z, expo(z)-1);
   return gerepileuptoleaf(av, z);
 }
 

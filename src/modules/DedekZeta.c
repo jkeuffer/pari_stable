@@ -187,8 +187,8 @@ initzeta(GEN pol, long prec)
   (void)switch_stack(zone,1);
   tabcstn  = cgetg(N0+1,t_VEC);
   tabcstni = cgetg(N0+1,t_VEC);
-  p1 = ginv(cst);
-  for (i=1; i<=N0; i++) gel(tabcstni,i) = gel(tabcstn,i) = mulsr(i,p1);
+  p1 = invr(cst);
+  for (i=1; i<=N0; i++) gel(tabcstni,i) = gel(tabcstn,i) = mulur(i,p1);
   (void)switch_stack(zone,0);
 
   /********** compute a(i,j) **********/
@@ -264,7 +264,7 @@ initzeta(GEN pol, long prec)
   gel(nfz,1) = p1;
   gel(nfz,2) = resi;
   gel(nfz,5) = cst;
-  gel(nfz,6) = glog(cst,prec);
+  gel(nfz,6) = logr_abs(cst);
   gel(nfz,7) = aij;
 
   /************* Calcul du nombre d'ideaux de norme donnee *************/

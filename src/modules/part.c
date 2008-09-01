@@ -46,9 +46,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 static GEN
 psi(GEN c, ulong q, long prec)
 {
-  GEN a = divru(c, q), ea = mpexp(a), invea = ginv(ea);
-  GEN cha = shiftr(mpadd(ea, invea), -1);  /* ch(a) */
-  GEN sha = shiftr(mpsub(ea, invea), -1);  /* sh(a) */
+  GEN a = divru(c, q), ea = mpexp(a), invea = invr(ea);
+  GEN cha = shiftr(addrr(ea, invea), -1);  /* ch(a) */
+  GEN sha = shiftr(subrr(ea, invea), -1);  /* sh(a) */
   return mulrr(sqrtr(stor(q,prec)), subrr(mulrr(a,cha), sha));
 }
 
@@ -114,7 +114,7 @@ L(GEN n, ulong q, long bitprec)
     hn += nmodq; if (hn >= q) hn -= q;
     if (ugcd(q, h) > 1) continue;
     r = gsubgs(g(q,h), hn << 1);
-    t = gcmp0(r)? addrs(res, 1): addrr(res, mpcos(gmul(pi_q,r)));
+    t = isintzero(r)? addrs(res, 1): addrr(res, mpcos(gmul(pi_q,r)));
     affrr(t, res);
   }
   return res;
@@ -144,7 +144,7 @@ pinit(GEN n, GEN *c, GEN *d, ulong prec)
   pisqrt2d3 = mulrr(Pi, sqrtr( divru(stor(2, prec), 3) ));
   pi2sqrt2  = mulrr(Pi, sqrtr( stor(8, prec) ));
   *c = mulrr(pisqrt2d3, sqrtb);
-  *d = ginv( mulrr(pi2sqrt2, mulrr(b,sqrtb)) );
+  *d = invr( mulrr(pi2sqrt2, mulrr(b,sqrtb)) );
 }
 
 /* part(n) = round(sum(q=1,5 + 0.24*sqrt(n), L(n,q)*Psi(n,q))) */

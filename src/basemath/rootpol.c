@@ -926,9 +926,9 @@ isreal(GEN p)
 /* x non complex */
 static GEN
 abs_update_r(GEN x, double *mu) {
-  GEN y = gabs(gprec_w(x, DEFAULTPREC), DEFAULTPREC);
+  GEN y = gtofp(x, DEFAULTPREC);
   double ly = dblogr(y); if (ly < *mu) *mu = ly;
-  return y;
+  setabssign(y); return y;
 }
 /* return |x|, low accuracy. Set *mu = min(log(y), *mu) */
 static GEN
@@ -941,9 +941,9 @@ abs_update(GEN x, double *mu) {
   if (gcmp0(xr)) return abs_update_r(yr,mu);
   if (gcmp0(yr)) return abs_update_r(xr,mu);
   /* have to treat 0 specially: 0E-10 + 1e-20 = 0E-10 */
-  xr = gprec_w(xr, DEFAULTPREC);
-  yr = gprec_w(yr, DEFAULTPREC);
-  y = gsqrt(gadd(gsqr(xr), gsqr(yr)), DEFAULTPREC);
+  xr = gtofp(xr, DEFAULTPREC);
+  yr = gtofp(yr, DEFAULTPREC);
+  y = sqrtr(addrr(sqrr(xr), sqrr(yr)));
   ly = dblogr(y); if (ly < *mu) *mu = ly;
   return y;
 }
@@ -1328,7 +1328,7 @@ update_radius(long n, double *radii, double lrho, double *par, double *par2)
   for (i=1; i<=n; i++)
   {
     radii[i] -= lrho;
-    t = fabs(rtodbl( ginv(subsr(1, dblexp(radii[i]))) ));
+    t = fabs(rtodbl( invr(subsr(1, dblexp(radii[i]))) ));
     param += t; if (t > 1.) param2 += log2(t);
   }
   *par = param; *par2 = param2;
@@ -1355,7 +1355,7 @@ conformal_mapping(double *radii, GEN ctr, GEN p, long k, long bit,
     if (radii[i] != UNDEF) /* update array radii */
     {
       pari_sp av2 = avma;
-      GEN t, r = dblexp(radii[i]), r2 = gsqr(r);
+      GEN t, r = dblexp(radii[i]), r2 = sqrr(r);
       /* 2(r^2 - 1) / (r^2 - 3(r-1)) */
       t = divrr(shiftr((subrs(r2,1)),1), subrr(r2, mulsr(3,subrs(r,1))));
       radii[i] = dblogr(addsr(1,t)) / 2;
@@ -1370,7 +1370,7 @@ conformal_mapping(double *radii, GEN ctr, GEN p, long k, long bit,
   gerepileall(av,2, &q,&R);
 
   optimize_split(q,k,delta,bit2,&FF,&GG,param,param2);
-  bit2 += n; R = ginv(R);
+  bit2 += n; R = invr(R);
   FF = scalepol(FF,R,bit2);
   GG = scalepol(GG,R,bit2);
 
@@ -1378,9 +1378,9 @@ conformal_mapping(double *radii, GEN ctr, GEN p, long k, long bit,
   FF = conformal_pol(FF,a,bit2);
   GG = conformal_pol(GG,a,bit2);
 
-  a = ginv(gsubsg(1, gnorm(a)));
-  FF = RgX_Rg_mul(FF, gpowgs(a,k));
-  GG = RgX_Rg_mul(GG, gpowgs(a,n-k));
+  a = invr(subsr(1, gnorm(a)));
+  FF = RgX_Rg_mul(FF, powrs(a,k));
+  GG = RgX_Rg_mul(GG, powrs(a,n-k));
 
   *F = mygprec(FF,bit+n);
   *G = mygprec(GG,bit+n); gerepileall(ltop,2, F,G);
@@ -1454,7 +1454,7 @@ split_2(GEN p, long bit, GEN ctr, double thickness, GEN *F, GEN *G)
     optimize_split(q, k, delta, bit2, &FF, &GG, param, param2);
   }
   bit  += n;
-  bit2 += n; R = ginv(mygprec(R,bit2));
+  bit2 += n; R = invr(mygprec(R,bit2));
   *F = mygprec(scalepol(FF,R,bit2), bit);
   *G = mygprec(scalepol(GG,R,bit2), bit);
 }
@@ -1479,7 +1479,7 @@ split_1(GEN p, long bit, GEN *F, GEN *G)
   TWO = myreal_1(bit2); setexpo(TWO,1);
   v = cgetg(5,t_VEC);
   gel(v,1) = TWO;
-  gel(v,2) = mpneg(TWO);
+  gel(v,2) = negr(TWO);
   gel(v,3) = mkcomplex(gen_0, gel(v,1));
   gel(v,4) = mkcomplex(gen_0, gel(v,2));
   q = mygprec(q,bit2); lthick = 0;
@@ -1503,7 +1503,7 @@ split_1(GEN p, long bit, GEN *F, GEN *G)
   FF = RgX_translate(FF,r);
   GG = RgX_translate(GG,r);
 
-  gr = ginv(gr); bit2 = bit - ep + gexpo(FF)+gexpo(GG);
+  gr = invr(gr); bit2 = bit - ep + gexpo(FF)+gexpo(GG);
   *F = scalepol(FF,gr,bit2);
   *G = scalepol(GG,gr,bit2);
 }
