@@ -1730,23 +1730,45 @@ split_complete(GEN p, long bit, GEN roots_pol)
   return gerepileupto(ltop, gmul(m1,m2));
 }
 
+static GEN
+quickabs(GEN x)
+{
+  const long prec = DEFAULTPREC;
+  GEN y;
+  switch(typ(x))
+  {
+    case t_INT: y = itor(x, prec); setabssign(y); return y;
+    case t_REAL: y = rtor(x, prec); setabssign(y); return y;
+    case t_FRAC: y = fractor(x, prec); setabssign(y); return y;
+    case t_COMPLEX: {
+      GEN a = gel(x,1), b = gel(x,2);
+      /* avoid problem with 0, e.g. x = 0 + I*1e-100. We don't want |x| = 0. */
+      if (isintzero(a)) return cxcompotor(b, prec);
+      if (isintzero(b)) return cxcompotor(a, prec);
+      a = cxcompotor(a, prec); 
+      b = cxcompotor(b, prec); return sqrtr(addrr(sqrr(a), sqrr(b)));
+    }
+    default: pari_err(typeer,"quickabs");
+      return NULL;/*not reached*/
+  }
+
+}
+
 /* bound the log of the largest root of p */
 double
 cauchy_bound(GEN p)
 {
   pari_sp av = avma;
-  long i, n = degpol(p), prec = DEFAULTPREC;
-  GEN lc, y, q = RgX_gtofp(p, prec);
-  double L = 0, Lmax = -pariINFINITY;
+  long i, n = degpol(p);
+  GEN invlc;
+  double Lmax = -pariINFINITY;
 
   if (n <= 0) pari_err(constpoler,"cauchy_bound");
-
-  lc = gabs(gel(q,n+2),prec); /* leading coefficient */
-  lc = ginv(lc);
-  for (i=0; i<n; i++)
+  invlc = invr( quickabs(gel(p,n+2)) ); /* 1 / |lc(p)| */
+  for (i = 0; i < n; i++)
   {
-    y = gel(q,i+2); if (gcmp0(y)) continue;
-    L = dblogr(gmul(gabs(y,prec), lc)) / (n-i);
+    GEN y = gel(p,i+2); if (gcmp0(y)) continue;
+    double L = dblogr(mulrr(quickabs(y), invlc)) / (n-i);
     if (L > Lmax) Lmax = L;
   }
   avma = av; return Lmax + LOG2;

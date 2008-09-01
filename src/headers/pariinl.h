@@ -690,20 +690,20 @@ killblock(GEN x) { return gunclone(x); }
 /*******************************************************************/
 /* z is a type which may be a t_COMPLEX component (not a t_QUAD) */
 INLINE GEN
-cxcompotofp(GEN z, long prec)
+cxcompotor(GEN z, long prec)
 {
   switch(typ(z))
   {
     case t_INT:  return itor(z, prec);
     case t_FRAC: return fractor(z, prec);
     case t_REAL: return rtor(z, prec);
-    default: pari_err(typeer,"cxcompotofp"); return NULL; /* not reached */
+    default: pari_err(typeer,"cxcompotor"); return NULL; /* not reached */
   }
 }
 INLINE GEN
 cxtofp(GEN x, long prec) { GEN z = cgetg(3,t_COMPLEX);
-  gel(z,1) = cxcompotofp(gel(x,1),prec);
-  gel(z,2) = cxcompotofp(gel(x,2),prec); return z;
+  gel(z,1) = cxcompotor(gel(x,1),prec);
+  gel(z,2) = cxcompotor(gel(x,2),prec); return z;
 }
 
 INLINE double
@@ -741,7 +741,7 @@ gtofp(GEN z, long prec)
     case t_INT:  return itor(z, prec);
     case t_FRAC: return fractor(z, prec);
     case t_REAL: return rtor(z, prec);
-    case t_COMPLEX: return isintzero(gel(z,2))? cxcompotofp(gel(z,1), prec)
+    case t_COMPLEX: return isintzero(gel(z,2))? cxcompotor(gel(z,1), prec)
                                               : cxtofp(z, prec);
     case t_QUAD: return quadtofp(z, prec);
     default: pari_err(typeer,"gtofp"); return NULL; /* not reached */
@@ -1000,6 +1000,22 @@ INLINE int
 is_scalar_t(long t) { return (t < t_POL); }
 INLINE int
 is_vec_t(long t) { return (t == t_VEC || t == t_COL); }
+
+/*******************************************************************/
+/*                                                                 */
+/*                         TRANSCENDENTAL                          */
+/*                                                                 */
+/*******************************************************************/
+INLINE GEN
+sqrtr(GEN x) {
+  long s = signe(x);
+  GEN y;
+  if (s == 0) return real_0_bit(expo(x) >> 1);
+  if (s >= 0) return sqrtr_abs(x);
+  y = cgetg(3,t_COMPLEX);
+  gel(y,2) = sqrtr_abs(x);
+  gel(y,1) = gen_0; return y;
+}
 
 /*******************************************************************/
 /*                                                                 */

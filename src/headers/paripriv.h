@@ -147,10 +147,6 @@ ulong  usqrtsafe(ulong a);
 /* "abs" routines for t_REAL ( disregard sign ) */
 int absrnz_egal1(GEN x);
 int absrnz_egal2n(GEN x);
-GEN exp1r_abs(GEN x);
-GEN logagmr_abs(GEN q);
-GEN logr_abs(GEN x);
-GEN sqrtr_abs(GEN x);
 
 /* hnf */
 GEN hnfadd(GEN m,GEN p,GEN* ptdep,GEN* ptA,GEN* ptC,GEN extramat,GEN extraC);

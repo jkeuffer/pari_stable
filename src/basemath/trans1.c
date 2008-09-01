@@ -900,19 +900,6 @@ gpow(GEN x, GEN n, long prec)
 /**                        RACINE CARREE                           **/
 /**                                                                **/
 /********************************************************************/
-
-GEN
-sqrtr(GEN x) {
-  long s = signe(x);
-  GEN y;
-  if (typ(x) != t_REAL) pari_err(typeer,"sqrtr");
-  if (s == 0) return real_0_bit(expo(x) >> 1);
-  if (s >= 0) return sqrtr_abs(x);
-  y = cgetg(3,t_COMPLEX);
-  gel(y,2) = sqrtr_abs(x);
-  gel(y,1) = gen_0; return y;
-}
-
 /* assume x unit, precp(x) = pp > 3 */
 static GEN
 sqrt_2adic(GEN x, long pp)

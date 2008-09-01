@@ -1585,7 +1585,7 @@ quadtofp(GEN x, long prec)
   GEN z, Q, u = gel(x,2), v = gel(x,3);
   pari_sp av;
   if (prec < 3) prec = 3;
-  if (isintzero(v)) return gtofp(u, prec);
+  if (isintzero(v)) return cxcompotor(u, prec);
   av = avma; Q = gel(x,1);
   z = itor(quad_disc(x), prec);
   if (signe(gel(Q,2)) < 0) /* Q[2] = -D/4 or (1-D)/4 */
