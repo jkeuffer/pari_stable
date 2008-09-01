@@ -372,7 +372,7 @@ base_ring(GEN x, GEN *pp, long *prec)
 GEN
 ellinit_real(GEN x, long prec)
 {
-  GEN y, D, R, T, w, a1, b1, x1, u2, q, pi2, w1, w2;
+  GEN y, D, R, T, w, a1, b1, x1, u2, q, pi2, aw1, w1, w2;
   long PREC, e;
   
   y = cgetg(20,t_VEC); initsmall(x,y);
@@ -396,33 +396,42 @@ ellinit_real(GEN x, long prec)
   u2 = do_agm(&x1,a1,b1); /* 1/4M */
 
   pi2 = Pi2n(1, prec);
-  w1 = gmul(pi2, sqrtr(negr(u2)));
+  aw1 = mulrr(pi2, sqrtr_abs(u2));
+  w1 = (signe(u2) < 0)? aw1: mkcomplex(gen_0,aw1);
   w = addsr(1, invr(shiftr(mulrr(u2,x1),1)));
   q = sqrtr( subrs(sqrr(w), 1) ); /* real or pure imaginary */
   /* same formula, split in two branches for efficiency */
   if (typ(q) == t_REAL) {
-    GEN t;
+    GEN t, aw1t, aux;
     q = (signe(w) > 0)? addrr(w, q): subrr(w, q);
-    t = divrr(logr_abs(q), pi2);
     /* if |q| > 1, we should have replaced it by 1/q. Instead, we change
      * the sign of log(q) */
-    if (expo(q) >= 0) setsigne(t, -1);
-    /* w2 = w1 I log(q/2Pi), |q| < 1 */
-    w2 = mkcomplex((signe(q) < 0)? negr(shiftr(w1,-1)): gen_0, mulrr(w1,t));
-  } else {
-    /* FIXME: I believe this can't happen */
-    q = mkcomplex(w, (signe(w) > 0)? q: negr(q));
-    if (gexpo(q) >= 0) q = ginv(q);
-    w2 = gmul(w1, mulcxI(gdiv(glog(q,prec), pi2)));
+    t = divrr(logr_abs(q), pi2); setsigne(t, -1);
+    /* t = log|q|/2Pi, |q|<1 */
+    /* w2 = w1 I log(q)/2Pi = I w1 t [- w1/2 if q < 0] */
+    aw1t = mulrr(aw1,t); /* < 0 */
+    aux = (signe(q) < 0)? negr(shiftr(aw1,-1)): gen_0;
+    if (typ(w1) == t_COMPLEX)
+      w2 = mkcomplex(negr(aw1t), aux);
+    else
+      w2 = mkcomplex(aux, aw1t);
+  } else { /* FIXME: I believe this can't happen */
+    GEN t;
+    if (signe(w) < 0) togglesign(q);
+    q = mkcomplex(w, q);
+    t = mulcxI(gdiv(glog(q,prec), pi2));
+    /* we want -t to belong to Poincare's half plane */
+    if (signe(gel(t,2)) > 0) t = gneg(t);
+    w2 = gmul(w1, t);
   }
-  if (signe(b1) >= 0) w1 = gmul2n(mpabs(gel(w2,1)), 1);
+  if (typ(w1) == t_COMPLEX) w1 = shiftr(gel(w2,1), 1);
 
-  gel(y,15) = w1;
+  gel(y,15) = w1; /* > 0 */
   gel(y,16) = w2;
   T = elleta(mkvec2(w1,w2), prec);
   gel(y,17) = gel(T,1);
   gel(y,18) = gel(T,2);
-  gel(y,19) = mpabs(gmul(w1, gel(w2,2)));
+  gel(y,19) = absr(mulrr(w1, gel(w2,2)));
   return y;
 }
 
