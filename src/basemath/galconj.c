@@ -312,7 +312,7 @@ galoisborne(GEN T, GEN dn, struct galois_borne *gb)
   if (DEBUGLEVEL >= 4)
     fprintferr("GaloisConj:val1=%ld val2=%ld\n", gb->valsol, gb->valabs);
   avma = av2;
-  gb->bornesol = gerepileuptoint(ltop, ceil_safe(mulrs(borneroots,2)));
+  gb->bornesol = gerepileuptoint(ltop, ceil_safe(shiftr(borneroots,1)));
   if (DEBUGLEVEL >= 9)
     fprintferr("GaloisConj: Bound %Ps\n",borneroots);
   gb->ladicsol = powiu(gb->l, gb->valsol);

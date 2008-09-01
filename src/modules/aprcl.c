@@ -349,11 +349,9 @@ static ulong
 compt(GEN N)
 {
   pari_sp av0 = avma;
-  ulong C, t;
+  double Cd = 100 * rtodbl(logr_abs(itor(N,DEFAULTPREC))) / log(10.);
+  ulong t, C = ceil(Cd);
   GEN B;
-
-  B = mulsr(100, divrr(glog(N,DEFAULTPREC), dbltor(log(10.))));
-  C = itos( gceil(B) );
   avma = av0;
   /* C < [200*log_10 e(t)] ==> return t. For e(t) < 10^529, N < 10^1058 */
   if (C <    540) return        6;

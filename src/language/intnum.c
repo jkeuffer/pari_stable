@@ -364,7 +364,7 @@ inittanhsinh(long m, long prec)
     ext = invr( addrs(mpexp(mulur(3, st)), 1) );
     setexpo(ext, expo(ext)+1);
     xp = subsr(1, ext);
-    wp = divr2_ip(mulsr(3, mulrr(ct, mulrr(ext, addsr(1, xp)))));
+    wp = divr2_ip(mulur(3, mulrr(ct, mulrr(ext, addsr(1, xp)))));
     if (expo(wp) < -D.eps) { nt = k-1; break; }
     affrr(xp, gel(D.tabxp,k));
     affrr(wp, gel(D.tabwp,k)); et = gerepileuptoleaf(av, mulrr(et, ex));
@@ -484,7 +484,7 @@ initexpexp(long m, long prec)
     gel(D.tabwp,k) = cgetr(prec+1);
     gel(D.tabxm,k) = cgetr(prec+1);
     gel(D.tabwm,k) = cgetr(prec+1); av = avma;
-    eti = invr(et); kh = mulsr(k,h);
+    eti = invr(et); kh = mulur(k,h);
     xp = mpexp(subrr(kh, et));
     xm = mpexp(negr(addrr(kh, eti)));
     wp = mulrr(xp, addsr(1, et));
@@ -524,8 +524,8 @@ initnumsine(long m, long prec)
     st = divr2_ip(subrr(et, eti));
     extp = mpexp(st);  extp1 = subsr(1, extp); extp2 = invr(extp1);
     extm = invr(extp); extm1 = subsr(1, extm); extm2 = invr(extm1);
-    kpi = mulsr(k, pi);
-    kct = mulsr(k, ct);
+    kpi = mulur(k, pi);
+    kct = mulur(k, ct);
     setexpo(extm1, expo(extm1) + D.m);
     setexpo(extp1, expo(extp1) + D.m);
     xp = mulrr(kpi, extm2);
@@ -1163,8 +1163,8 @@ intnuminitgen(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, long m,
   for (k = 1; k <= lim; k++)
   {
     int finb;
-    ab = mulsr(k, hpr);
-    tmpxw = ffprime(E, eval, ab, mulsr(k, hnpr), eps, h, precl);
+    ab = mulur(k, hpr);
+    tmpxw = ffprime(E, eval, ab, mulur(k, hnpr), eps, h, precl);
     tmpxwmodp = ffmodify(tmpxw, ab, flag);
     D.tabxp[k] = tmpxwmodp[1];
     D.tabwp[k] = tmpxwmodp[2];

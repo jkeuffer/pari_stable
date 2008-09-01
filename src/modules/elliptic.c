@@ -3526,7 +3526,7 @@ ellheight0(GEN e, GEN a, long flag, long prec)
       if (n >= 3*n2) { u = n2; v = 3; } else { u = n; v = 8; }
     }
     /* z -= u log(p) / v */
-    z = gadd(z, divrs(mulsr(-u, glog(p,prec)), v));
+    z = gsub(z, divru(mulur(u, logr_abs(itor(p,prec))), v));
   }
   return gerepileupto(av, gmul2n(z, 1));
 }

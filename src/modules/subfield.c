@@ -699,8 +699,8 @@ compute_data(blockdata *B)
   }
   gel(DATA,3) = roots_from_deg1(fhk);
 
-  p1 = mulsr(N, powruhalf(stor(N-1,DEFAULTPREC), N-1));
-  p2 = powrs(maxroot, B->size + N*(N-1)/2);
+  p1 = mulur(N, powruhalf(stor(N-1,DEFAULTPREC), N-1));
+  p2 = powru(maxroot, B->size + N*(N-1)/2);
   p1 = divrr(mulrr(p1,p2), gsqrt(B->PD->dis,DEFAULTPREC));
   gel(DATA,7) = mulii(shifti(ceil_safe(p1), 1), B->PD->den);
 

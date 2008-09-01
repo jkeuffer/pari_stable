@@ -526,7 +526,7 @@ FBgen(FB_t *F, GEN nf, long N, long C2, long C1, GRHcheck_t *S)
 	SB += nb * B;
       }
     }
-    a = a? divri(mulir(a,Res),b): divru(mulsr(p-1,Res),p);
+    a = a? divri(mulir(a,Res),b): divru(mulur(p-1,Res),p);
     affrr(a, Res);
     avma = av1;
     if (l == N+1) continue; /* p inert */
@@ -1423,7 +1423,7 @@ isprincipalarch(GEN bnf, GEN col, GEN kNx, GEN e, GEN dx, long *pe)
     if (!u && z) return NULL;
     if (u) col = RgC_add(col, RgM_RgC_mul(matunit, u));
   }
-  s = divrs(mulir(e, glog(kNx,prec)), N);
+  s = divru(mulir(e, glog(kNx,prec)), N);
   for (i=1; i<=R1; i++) gel(col,i) = gexp(gadd(s, gel(col,i)),prec);
   for (   ; i<=RU; i++) gel(col,i) = gexp(gadd(s, gmul2n(gel(col,i),-1)),prec);
   /* d.alpha such that x = alpha \prod gj^ej */
@@ -2405,7 +2405,7 @@ compute_multiple_of_R(GEN A,long RU,long N,GEN *ptL)
   Im_mdet = vecpermute(mdet,v);
   /* integral multiple of R: the cols we picked form a Q-basis, they have an
    * index in the full lattice. Last column is T */
-  kR = divrs(det2(Im_mdet), N);
+  kR = divru(det2(Im_mdet), N);
   /* R > 0.2 uniformly */
   if (!signe(kR) || expo(kR) < -3) { avma=av; return NULL; }
 

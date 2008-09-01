@@ -83,13 +83,13 @@ piold(long prec)
   while (n)
   {
     if (n < CBRTVERYBIGINT) /* p3 = n1(n1-2)(n1-4) / n^3 */
-      p3 = divru(mulsr(n1-4,mulsr(n1*(n1-2),p1)),n*n*n);
+      p3 = divru(mulur(n1-4,mulur(n1*(n1-2),p1)),n*n*n);
     else
     {
       if (n1 < SQRTVERYBIGINT)
-	p3 = divru(divru(mulsr(n1-4,mulsr(n1*(n1-2),p1)),n*n),n);
+	p3 = divru(divru(mulur(n1-4,mulur(n1*(n1-2),p1)),n*n),n);
       else
-	p3 = divru(divru(divru(mulsr(n1-4,mulsr(n1,mulsr(n1-2,p1))),n),n),n);
+	p3 = divru(divru(divru(mulur(n1-4,mulur(n1,mulur(n1-2,p1))),n),n),n);
     }
     p3 = divru(divru(p3,100100025), 327843840);
     subisz(p2,k1,p2);

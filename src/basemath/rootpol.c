@@ -1357,7 +1357,7 @@ conformal_mapping(double *radii, GEN ctr, GEN p, long k, long bit,
       pari_sp av2 = avma;
       GEN t, r = dblexp(radii[i]), r2 = sqrr(r);
       /* 2(r^2 - 1) / (r^2 - 3(r-1)) */
-      t = divrr(shiftr((subrs(r2,1)),1), subrr(r2, mulsr(3,subrs(r,1))));
+      t = divrr(shiftr((subrs(r2,1)),1), subrr(r2, mulur(3,subrs(r,1))));
       radii[i] = dblogr(addsr(1,t)) / 2;
       avma = av2;
     }
@@ -1379,8 +1379,8 @@ conformal_mapping(double *radii, GEN ctr, GEN p, long k, long bit,
   GG = conformal_pol(GG,a,bit2);
 
   a = invr(subsr(1, gnorm(a)));
-  FF = RgX_Rg_mul(FF, powrs(a,k));
-  GG = RgX_Rg_mul(GG, powrs(a,n-k));
+  FF = RgX_Rg_mul(FF, powru(a,k));
+  GG = RgX_Rg_mul(GG, powru(a,n-k));
 
   *F = mygprec(FF,bit+n);
   *G = mygprec(GG,bit+n); gerepileall(ltop,2, F,G);

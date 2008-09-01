@@ -74,7 +74,7 @@ two_factor_bound(GEN x)
   for (i=0,j=n; j >= i; i++,j--)
   {
     invbin[i] = invbin[j] = z;
-    z = divru(mulrs(z, i+1), n-i);
+    z = divru(mulru(z, i+1), n-i);
   }
   z = invbin[0]; /* = 1 */
   for (i=0; i<=n; i++)
@@ -132,7 +132,7 @@ Beauzamy_bound(GEN S)
   }
   /* s = [S]_2^2 */
   C = powruhalf(stor(3,prec), 3 + 2*d); /* 3^{3/2 + d} */
-  C = divrr(mulrr(C, s), mulsr(4*d, mppi(prec)));
+  C = divrr(mulrr(C, s), mulur(4*d, mppi(prec)));
   lS = absi(leading_term(S));
   return mulir(lS, sqrtr(C));
 }

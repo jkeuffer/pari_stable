@@ -169,7 +169,7 @@ T_A_Matrices(GEN MatFU, long r, GEN *eps5, long prec)
   eps3 = myround(eps3, 1);
 
   if (DEBUGLEVEL>1) fprintferr("epsilon_3 -> %Ps\n",eps3);
-  *eps5 = mulsr(r, eps3); return A;
+  *eps5 = mulur(r, eps3); return A;
 }
 
 /* Performs basic computations concerning the equation.
@@ -194,7 +194,7 @@ inithue(GEN P, GEN bnf, long flag, long prec)
     bnf = bnfinit0(P,1,NULL,DEFAULTPREC);
     if (flag) (void)certifybuchall(bnf);
     else
-      Ind = gfloor(mulrs(gmael(bnf, 8, 2), 5));
+      Ind = floorr(mulru(gmael(bnf, 8, 2), 5));
   }
 
   nf_get_sign(checknf(bnf), &s, &t);
@@ -296,7 +296,7 @@ Baker(baker_s *BS)
   hb0 = gmax(hb0, gdiv(tmp, BS->bak));
   c9 = gmul(c9,hb0);
   /* Multiply c9 by the "constant" factor */
-  c9 = gmul(c9, gmul(mulri(mulsr(18,mppi(prec)), int2n(5*(4+r))),
+  c9 = gmul(c9, gmul(mulri(mulur(18,mppi(prec)), int2n(5*(4+r))),
 		     gmul(gmul(mpfact(r+3), powiu(muliu(BS->bak,r+2), r+3)),
 			  glog(muliu(BS->bak,2*(r+2)),prec))));
   c9 = gprec_w(myround(c9, 1), DEFAULTPREC);
@@ -375,7 +375,7 @@ LLL_1stPass(GEN *pB0, GEN kappa, baker_s *BS, GEN *pBx)
   if (cmpri(B0, BS->Ind) > 0)
   {
     gcoeff(lllmat, 1, 1) = grndtoi(divri(B0, BS->Ind), &e);
-    triv = mulsr(2, sqrr(B0));
+    triv = shiftr(sqrr(B0), 1);
   }
   else
     triv = addir(sqri(BS->Ind), sqrr(B0));
@@ -801,13 +801,13 @@ LargeSols(GEN tnf, GEN rhs, GEN ne, GEN *pS)
   if (t) x0 = gmul(x0, absisqrtn(rhs, n, Prec));
   tmp = divrr(c1,c2);
   c3 = mulrr(dbltor(1.39), tmp);
-  c4 = mulsr(n-1, c3);
-  x1 = gmax(x0, sqrtnr(mulsr(2,tmp),n));
+  c4 = mulur(n-1, c3);
+  x1 = gmax(x0, sqrtnr(shiftr(tmp,1),n));
 
   Vect = cgetg(r+1,t_COL); for (i=1; i<=r; i++) gel(Vect,i) = gen_1;
   Vect = gmul(gabs(A,DEFAULTPREC), Vect);
   c14 = mulrr(c4, Vecmax(Vect));
-  x2 = gmax(x1, sqrtnr(mulsr(10,c14), n));
+  x2 = gmax(x1, sqrtnr(mulur(10,c14), n));
   if (DEBUGLEVEL>1) {
     fprintferr("x1 -> %Ps\n",x1);
     fprintferr("x2 -> %Ps\n",x2);
@@ -819,7 +819,7 @@ LargeSols(GEN tnf, GEN rhs, GEN ne, GEN *pS)
   for (i=1; i<=s; i++) gel(vecdP,i) = poleval(dP, gel(ro,i));
 
   zp1 = dbltor(0.01);
-  x3 = gmax(x2, sqrtnr(mulsr(2,divrr(c14,zp1)),n));
+  x3 = gmax(x2, sqrtnr(shiftr(divrr(c14,zp1),1),n));
 
   b = cgetg(r+1,t_COL);
   for (iroot=1; iroot<=s; iroot++)
@@ -832,7 +832,7 @@ LargeSols(GEN tnf, GEN rhs, GEN ne, GEN *pS)
 
     c5 = Vecmax(gabs(Delta,Prec));
     c5  = myround(gprec_w(c5,DEFAULTPREC), 1);
-    c7  = mulsr(r,c5);
+    c7  = mulur(r,c5);
     c10 = divur(n,c7); BS.c10 = c10;
     c13 = divur(n,c5); BS.c13 = c13;
     if (DEBUGLEVEL>1) {
@@ -871,9 +871,9 @@ LargeSols(GEN tnf, GEN rhs, GEN ne, GEN *pS)
 
       c6 = addrr(dbltor(0.1), Vecmax(gabs(Lambda,DEFAULTPREC)));
       c6 = myround(c6, 1);
-      c8 = addrr(dbltor(1.23), mulsr(r,c6));
-      c11= mulrr(mulsr(2,c3) , mpexp(divrr(mulsr(n,c8),c7)));
-      c15= mulrr(mulsr(2,c14), mpexp(divrr(mulsr(n,c6),c5)));
+      c8 = addrr(dbltor(1.23), mulur(r,c6));
+      c11= mulrr(shiftr(c3,1) , mpexp(divrr(mulur(n,c8),c7)));
+      c15= mulrr(shiftr(c14,1), mpexp(divrr(mulur(n,c6),c5)));
 
       if (DEBUGLEVEL>1) {
 	fprintferr("  c6  = %Ps\n",c6);

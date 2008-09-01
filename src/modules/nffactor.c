@@ -533,7 +533,7 @@ nf_Beauzamy_bound(GEN nf, GEN polbase)
   lt = leading_term(polbase);
   s = mulri(s, muliu(sqri(lt), n));
   C = powruhalf(stor(3,DEFAULTPREC), 3 + 2*d); /* 3^{3/2 + d} */
-  return divrr(mulrr(C, s), mulsr(d, mppi(DEFAULTPREC)));
+  return divrr(mulrr(C, s), mulur(d, mppi(DEFAULTPREC)));
 }
 
 static GEN
@@ -1185,7 +1185,7 @@ nf_LLL_cmbf(nfcmbf_t *T, GEN p, long k, long rec)
  /* Lattice: (S PRK), small vector (vS vP). To find k bound for the image,
   * write S = S1 q + S0, P = P1 q + P0
   * |S1 vS + P1 vP|^2 <= Bhigh for all (vS,vP) assoc. to true factors */
-  Btra = mulrr(ZC, mulsr(dP*dP, normlp(Br, 2, dnf)));
+  Btra = mulrr(ZC, mulur(dP*dP, normlp(Br, 2, dnf)));
   Bhigh = get_Bhigh(n0, dnf);
   C = (long)ceil(sqrt(Bhigh/n0)) + 1; /* C^2 n0 ~ Bhigh */
   Bnorm = dbltor( n0 * C * C + Bhigh );
@@ -1204,7 +1204,7 @@ nf_LLL_cmbf(nfcmbf_t *T, GEN p, long k, long rec)
     int first = 1;
 
     /* bound for f . S_k(genuine factor) = ZC * bound for T_2(S_tnew) */
-    Btra = mulrr(ZC, mulsr(dP*dP, normlp(Br, 2*tnew, dnf)));
+    Btra = mulrr(ZC, mulur(dP*dP, normlp(Br, 2*tnew, dnf)));
     bmin = logint(ceil_safe(sqrtr(Btra)), gen_2, NULL);
     if (DEBUGLEVEL>2)
       fprintferr("\nLLL_cmbf: %ld potential factors (tmax = %ld, bmin = %ld)\n",
@@ -1608,7 +1608,7 @@ nfsqff(GEN nf, GEN pol, long fl, GEN den)
   else    C0 = nf_factor_bound(nf, polbase); /* bound for T_2(Q_i), Q | P */
   T.bound = mulrr(T.ZC, C0); /* bound for |Q_i|^2 in Z^n on chosen Z-basis */
 
-  N2 = mulsr(dpol*dpol, normlp(T.Br, 4, n)); /* bound for T_2(lt * S_2) */
+  N2 = mulur(dpol*dpol, normlp(T.Br, 4, n)); /* bound for T_2(lt * S_2) */
   T.BS_2 = mulrr(T.ZC, N2); /* bound for |S_2|^2 on chosen Z-basis */
 
   if (DEBUGLEVEL>2) {

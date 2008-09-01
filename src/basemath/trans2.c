@@ -779,7 +779,7 @@ mpbern(long nb, long prec)
 
     for (;;)
     {
-      S = divru(mulrs(S, n*m), d1*d2);
+      S = divru(mulru(S, n*m), d1*d2);
       if (d1 == 1) break;
       n += 4; m += 2; d1--; d2 -= 2;
       S = addrr(BERN(d1), S);

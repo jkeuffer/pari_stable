@@ -938,7 +938,7 @@ sumalt(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
   if (typ(a) != t_INT) pari_err(talker,"non integral index in sumalt");
   e1 = addsr(3, sqrtr(stor(8,prec)));
   N = (long)(0.4*(bit_accuracy(prec) + 7));
-  d = powrs(e1,N);
+  d = powru(e1,N);
   d = shiftr(addrr(d, invr(d)),-1);
   az = gen_m1; c = d;
   s = gen_0;
@@ -998,7 +998,7 @@ sumpos(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
   a = subis(a,1); reel = cgetr(prec);
   e1 = addsr(3, sqrtr(stor(8,prec)));
   N = (long)(0.4*(bit_accuracy(prec) + 7));
-  d = powrs(e1,N);
+  d = powru(e1,N);
   d = shiftr(addrr(d, invr(d)),-1);
   az = gen_m1; c = d;
   s = gen_0;

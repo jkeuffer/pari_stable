@@ -697,7 +697,7 @@ regulatorbound(GEN bnf)
   if (cmpii(dK,c1) <= 0) return dft_bound();
 
   p1 = sqrr(glog(gdiv(dK,c1),DEFAULTPREC));
-  p1 = divru(gmul2n(powru(divru(mulrs(p1,3),N*(N*N-1)-6*R2),R),R2), N);
+  p1 = divru(gmul2n(powru(divru(mulru(p1,3),N*(N*N-1)-6*R2),R),R2), N);
   p1 = sqrtr(gdiv(p1, hermiteconstant(R)));
   if (DEBUGLEVEL>1) fprintferr("Mahler bound for regulator: %Ps\n",p1);
   return gmax(p1, dbltor(0.2));
@@ -842,7 +842,7 @@ compute_M0(GEN M_star,long N)
 	u = gen_1;
 	v = gmul2n(addrr(p5,p4),-1);
 	w = gmul2n(subrr(p5,p4),-1);
-	M0_pro=gmul2n(mulsr(m1,addrr(sqrr(logr_abs(v)),sqrr(logr_abs(w)))), -2);
+	M0_pro=gmul2n(mulur(m1,addrr(sqrr(logr_abs(v)),sqrr(logr_abs(w)))), -2);
 	if (DEBUGLEVEL>2)
 	{
 	  fprintferr("[ %ld, %ld, %ld ]: %Ps\n",n1,n2,n3,gprec_w(M0_pro,3));
@@ -861,11 +861,13 @@ compute_M0(GEN M_star,long N)
 	r = roots(pol, DEFAULTPREC); lr = lg(r);
 	for (i=1; i<lr; i++)
 	{
+          GEN n2S;
 	  S = real_i(gel(r,i));
 	  if (is_complex(gel(r,i), bitprec) || signe(S) <= 0) continue;
 
-	  p4 = subrr(M_star, mulsr(n2,S));
-	  P = divrr(mulrr(mulsr(n2,S),p4), subrs(mulrr(M_star,p4),k*k));
+          n2S = mulur(n2,S);
+	  p4 = subrr(M_star, n2S);
+	  P = divrr(mulrr(n2S,p4), subrs(mulrr(M_star,p4),k*k));
 	  p5 = subrr(sqrr(S), gmul2n(P,2));
 	  if (gsigne(p5) < 0) continue;
 
@@ -875,8 +877,8 @@ compute_M0(GEN M_star,long N)
 
 	  u = gmul2n(addrr(S,p6),-1);
 	  w = gpow(P, gdivgs(utoineg(n2),k), 0);
-	  p6 = mulsr(n2, addrr(sqrr(logr_abs(u)), sqrr(logr_abs(v))));
-	  M0_pro = gmul2n(addrr(p6, mulsr(k, sqrr(logr_abs(w)))),-2);
+	  p6 = mulur(n2, addrr(sqrr(logr_abs(u)), sqrr(logr_abs(v))));
+	  M0_pro = gmul2n(addrr(p6, mulur(k, sqrr(logr_abs(w)))),-2);
 	  if (DEBUGLEVEL>2)
 	  {
 	    fprintferr("[ %ld, %ld, %ld ]: %Ps\n",n1,n2,n3,gprec_w(M0_pro,3));
@@ -931,9 +933,9 @@ compute_M0(GEN M_star,long N)
 	       || !is_zero(gsubst(p8,vx,u), bitprec)
 	       || !is_zero(gsubst(p9,vx,u), bitprec)) continue;
 
-	      M0_pro =              mulsr(n1, sqrr(logr_abs(u)));
-	      M0_pro = gadd(M0_pro, mulsr(n2, sqrr(logr_abs(v))));
-	      M0_pro = gadd(M0_pro, mulsr(n3, sqrr(logr_abs(w))));
+	      M0_pro =              mulur(n1, sqrr(logr_abs(u)));
+	      M0_pro = gadd(M0_pro, mulur(n2, sqrr(logr_abs(v))));
+	      M0_pro = gadd(M0_pro, mulur(n3, sqrr(logr_abs(w))));
 	      M0_pro = gmul2n(M0_pro,-2);
 	      if (DEBUGLEVEL>2)
 	      {
@@ -992,7 +994,7 @@ lowerboundforregulator_i(GEN bnf)
   }
   M0 = compute_M0(bound, N);
   if (DEBUGLEVEL>1) { fprintferr("M0 = %Ps\n",gprec_w(M0,3)); flusherr(); }
-  M = gmul2n(divrs(gdiv(powrs(M0,RU),hermiteconstant(RU)),N),R2);
+  M = gmul2n(divru(gdiv(powrs(M0,RU),hermiteconstant(RU)),N),R2);
   if (cmprr(M, dbltor(0.04)) < 0) return NULL;
   M = sqrtr(M);
   if (DEBUGLEVEL>1)

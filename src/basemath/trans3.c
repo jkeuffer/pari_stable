@@ -282,7 +282,7 @@ kbessel1(GEN nu, GEN gx, long prec)
       affrr(v,f); av2 = avma;
       for (k=1;; k++, avma=av2)
       {
-	GEN w = addrr(gmul2n(mulsr(2*k-1,u), -1), mulrr(subrs(q,k),v));
+	GEN w = addrr(gmul2n(mulur(2*k-1,u), -1), mulrr(subrs(q,k),v));
 	w = addrr(w, mulrr(nu, subrr(u,gmul2n(v,1))));
 	divrsz(mulrr(q,v),k,u);
 	divrsz(w,k,v);
@@ -340,7 +340,7 @@ _kbessel1(long n, GEN z, long flag, long m, long prec)
   if (flag <= 1)
   {
     gel(H,2) = s = real_1(prec);
-    for (k=2; k<=m+n; k++) gel(H,k+1) = s = divru(addsr(1,mulsr(k,s)),k);
+    for (k=2; k<=m+n; k++) gel(H,k+1) = s = divru(addsr(1,mulur(k,s)),k);
   }
   else
   {
@@ -614,7 +614,7 @@ incgam2_0(GEN x, GEN expx)
     n = (long)(1+m*m/mx);
     z = divsr(-n, addsr(n<<1,x));
     for (i=n-1; i >= 1; i--)
-      z = divsr(-i, addrr(addsr(i<<1,x), mulsr(i,z))); /* -1 / (2 + z + x/i) */
+      z = divsr(-i, addrr(addsr(i<<1,x), mulur(i,z))); /* -1 / (2 + z + x/i) */
     return divrr(addrr(real_1(l),z), mulrr(expx, x));
   }
   else
@@ -792,8 +792,8 @@ veceint1(GEN C, GEN nmax, long prec)
 
   if (!nmax) return eint1(C,prec);
   if (typ(nmax) != t_INT) pari_err(typeer,"veceint1");
-
-  if (signe(nmax)<=0) return cgetg(1,t_VEC);
+  n = itos(nmax);
+  if (n <= 0) return cgetg(1,t_VEC);
   if (DEBUGLEVEL>1) fprintferr("Entering veceint1:\n");
   if (typ(C) != t_REAL || lg(C) > prec) {
     C = gtofp(C, prec);
@@ -801,7 +801,7 @@ veceint1(GEN C, GEN nmax, long prec)
   }
   if (signe(C) <= 0) pari_err(talker,"negative or zero constant in veceint1");
 
-  n = itos(nmax); y = cgetg(n+1,t_VEC);
+  y = cgetg(n+1,t_VEC);
   for(i=1; i<=n; i++) gel(y,i) = cgetr(prec);
   av = avma; G = expo(C);
   if (G >= 0) nstop = n;
@@ -813,7 +813,7 @@ veceint1(GEN C, GEN nmax, long prec)
 
   eC = mpexp(C);
   e1 = powrs(eC, -n);
-  e2 = powrs(eC, 10);
+  e2 = powru(eC, 10);
   unr = real_1(prec);
   av1 = avma;
   if(DEBUGLEVEL>1) fprintferr("nstop = %ld\n",nstop);
@@ -821,7 +821,7 @@ veceint1(GEN C, GEN nmax, long prec)
 
   G = -bit_accuracy(prec);
   F0 = gel(y,n); chkpoint = n;
-  affrr(eint1(mulsr(n,C),prec), F0);
+  affrr(eint1(mulur(n,C),prec), F0);
   nmin = n;
   for(;;)
   {
@@ -852,7 +852,7 @@ veceint1(GEN C, GEN nmax, long prec)
 	add = mulrr(den, gel(D,k));
 	if (expo(add) < G) { affrr(F,gel(y,n)); break; }
 	F = addrr(F,add); k++;
-	den = mulrs(divrs(den, k), -a);
+	den = mulrs(divru(den, k), -a);
         /* den = prod(i=1,k, -a/i)*/
       }
     }
@@ -864,7 +864,7 @@ END:
   affrr(eC, e1);
   for(i=1;; i++)
   { /* e1 = exp(iC) */
-    affrr(incgam2_0(mulsr(i,C), e1), gel(y,i));
+    affrr(incgam2_0(mulur(i,C), e1), gel(y,i));
     if (i == nstop) break;
     affrr(mulrr(e1, eC), e1); avma = av1;
   }
@@ -1078,8 +1078,8 @@ bernfrac_using_zeta(long n)
 static GEN
 next_bin(GEN y, long n, long k)
 {
-  y = divru(mulrs(y, n-k+2), k-1);
-  return divru(mulrs(y, n-k+1), k);
+  y = divru(mulru(y, n-k+2), k-1);
+  return divru(mulru(y, n-k+1), k);
 }
 
 /* assume k > 1 odd */
@@ -1133,7 +1133,7 @@ szeta_odd(long k, long prec)
       p1 = mulrr(bernreal(kk-n,prec),bernreal(n,prec));
       if (n) binom = next_bin(binom,kk,n);
       p1 = mulrr(binom,p1);
-      p1 = mulsr(kk-(n<<1),p1);
+      p1 = mulur(kk-(n<<1),p1);
       if ((n>>1)&1) togglesign(p1);
       y = n? addrr(y,p1): p1;
     }
@@ -1145,7 +1145,7 @@ szeta_odd(long k, long prec)
     {
       long ep1, l;
       p1 = mulir(powuu(n,k),sqrr(addrs(qn,-1)));
-      p1 = divrr(addrs(mulrr(qn,addsr(1,mulsr(n<<1,p2))),-1),p1);
+      p1 = divrr(addrs(mulrr(qn,addsr(1,mulur(n<<1,p2))),-1),p1);
 
       z = addrr(z,p1); if ((ep1 = expo(p1)) < li) break;
       l = prec+1 + nbits2nlong(ep1);
@@ -2259,7 +2259,7 @@ trueeta(GEN x, long prec)
   }
   Nmod24 = umodiu(N, 24);
   if (Nmod24) m = gmul(m, e12(Nmod24, prec));
-  q24 = gexp(gmul(divrs(Pi2n(1,prec),24), mulcxI(x)), prec); /* e(x/24) */
+  q24 = gexp(gmul(divru(Pi2n(-2,prec),3), mulcxI(x)), prec); /* e(x/24) */
   m = gmul(q24, m);
   if (24 * gexpo(q24) >= -bit_accuracy(prec))
     m = gmul(m, inteta( gpowgs(q24,24) ));
@@ -2314,7 +2314,7 @@ weberf(GEN x, long prec)
 {
   pari_sp av = avma;
   GEN a = gdiv(trueeta(gmul2n(gaddgs(x,1),-1),prec),trueeta(x,prec));
-  GEN b = exp_Ir(divrs(mppi(prec),-24));
+  GEN b = exp_Ir(divrs(Pi2n(-3,prec),-3)); /* e(-1/24)*/
   return gerepileupto(av, gmul(a,b));
 }
 GEN
