@@ -1252,7 +1252,7 @@ gabs(GEN x, long prec)
 
     case t_QUAD:
       av = avma;
-      return gerepileuptoleaf(av, gabs(quadtoc(x, prec), prec));
+      return gerepileuptoleaf(av, gabs(quadtofp(x, prec), prec));
 
     case t_POL:
       lx = lg(x); if (lx<=2) return gcopy(x);
@@ -1564,10 +1564,10 @@ gaffect(GEN x, GEN y)
 	  pari_err(operf,"",x,y);
 
 	case t_REAL:
-	  av = avma; affgr(quadtoc(x,lg(y)), y); avma = av; break;
+	  av = avma; affgr(quadtofp(x,lg(y)), y); avma = av; break;
 	case t_COMPLEX:
 	  ly = precision(y); if (!ly) pari_err(operf,"",x,y);
-	  av = avma; gaffect(quadtoc(x,ly), y); avma = av; break;
+	  av = avma; gaffect(quadtofp(x,ly), y); avma = av; break;
 	default: pari_err(operf,"",x,y);
       }
     default: pari_err(operf,"",x,y);
@@ -1579,36 +1579,24 @@ gaffect(GEN x, GEN y)
 /*           CONVERSION QUAD --> REAL, COMPLEX OR P-ADIC           */
 /*                                                                 */
 /*******************************************************************/
-/* x a t_QUAD, return the associated discriminant */
 GEN
-quad_disc(GEN x)
-{
-  GEN Q = gel(x,1), b = gel(Q,3), c = gel(Q,2), c4;
-  if (is_pm1(b))
-  {
-    pari_sp av = avma; (void)new_chunk(lgefint(c) + 1);
-    c4 = shifti(c,2); avma = av; return subsi(1, c4);
-  }
-  c4 = shifti(c,2); togglesign_safe(&c4); return c4;
-}
-
-GEN
-quadtoc(GEN x, long prec)
+quadtofp(GEN x, long prec)
 {
   GEN z, Q, u = gel(x,2), v = gel(x,3);
   pari_sp av;
   if (prec < 3) prec = 3;
-  if (gcmp0(v)) return gtofp(u, prec);
+  if (isintzero(v)) return gtofp(u, prec);
   av = avma; Q = gel(x,1);
-  /* should be sqri(Q[3]), but is 0,1 ! see quadpoly */
   z = itor(quad_disc(x), prec);
-  z = gsub(sqrtr(z), gel(Q,3));
   if (signe(gel(Q,2)) < 0) /* Q[2] = -D/4 or (1-D)/4 */
+  {
+    z = subri(sqrtr(z), gel(Q,3));
     setexpo(z, expo(z)-1);
+  }
   else
   {
-    gel(z,1) = gmul2n(gel(z,1),-1);
-    setexpo(z[2], expo(z[2])-1);
+    z = sqrtr_abs(z); setexpo(z, expo(z)-1);
+    z = mkcomplex(gmul2n(negi(gel(Q,3)),-1), z);
   }/* z = (-b + sqrt(D)) / 2 */
   return gerepileupto(av, gadd(u, gmul(v,z)));
 }

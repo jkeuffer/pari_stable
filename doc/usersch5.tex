@@ -5021,14 +5021,20 @@ a~\typ{INT}), converts \kbd{x} into a \kbd{long} if possible.
 \fun{GEN}{fractor}{GEN x, long l} applied to a \typ{FRAC}~\kbd{x}, converts
 \kbd{x} into a \typ{REAL} of length \kbd{prec}.
 
-\fun{GEN}{quadtoc}{GEN x, long l} applied to a \typ{QUAD}~\kbd{x}, converts
+\fun{GEN}{quadtofp}{GEN x, long l} applied to a \typ{QUAD}~\kbd{x}, converts
 \kbd{x} into a \typ{REAL} or \typ{COMPLEX} depending on the sign of the
-discriminant of~\kbd{x}, to precision \hbox{\kbd{l} \B-bit} words.% forbid
-line brk at hyphen here [GN]
+discriminant of~\kbd{x}, to precision \hbox{\kbd{l} \B-bit} words.
+% forbid line brk at hyphen here [GN]
 
-\fun{GEN}{ctofp}{GEN x, long prec} converts the \typ{COMPLEX}~\kbd{x} to a
-a complex whose real and imaginary parts are \typ{REAL} of length \kbd{prec},
-using \kbd{gtofp};
+\fun{GEN}{cxtofp}{GEN x, long prec} converts the \typ{COMPLEX}~\kbd{x} to a
+a complex whose real and imaginary parts are \typ{REAL} of length \kbd{prec}
+(special case of~\kbd{gtofp}.
+
+\fun{GEN}{cxcompotofp}{GEN x, long prec} converts the
+\typ{INT}, \typ{REAL} or \typ{FRAC} $x$ to a \typ{REAL} of length \kbd{prec}.
+These are all the real types which may occur as components of a
+\typ{COMPLEX}; special case of~\kbd{gtofp} (introduced so that the latter is
+not recursive and can thus be inlined).
 
 \fun{GEN}{gtofp}{GEN x, long prec} converts the complex number~\kbd{x}
 (\typ{INT}, \typ{REAL}, \typ{FRAC}, \typ{QUAD} or \typ{COMPLEX}) to either
@@ -6130,6 +6136,20 @@ part.
 $x,y$ have type \typ{INT}, \typ{FRAC}, \typ{REAL} or \typ{COMPLEX}. See also
 \kbd{RgM\_mulreal}.
 
+\fun{GEN}{cxnorm}{GEN x} norm of the \typ{COMPLEX} $x$ (modulus squared).
+
+\section{Quadratic numbers and binary quadratic forms}
+
+\fun{GEN}{quad_disc}{GEN x} returns the discriminant of the \typ{QUAD} $x$.
+
+\fun{GEN}{quadnorm}{GEN x} norm of the \typ{QUAD} $x$.
+
+\fun{GEN}{qfb_disc}{GEN x} returns the discriminant of the \typ{QFI}
+or \typ{QFR} \kbd{x}.
+
+\fun{GEN}{qfb_disc3}{GEN x, GEN y, GEN z} returns $y^2 - 4xz$ assuming all
+inputs are \typ{INT}s. Not stack-clean.
+
 \section{Polynomial and power series}
 
 \fun{GEN}{derivser}{GEN x} returns the derivative of the \typ{SER} \kbd{x}
@@ -6140,12 +6160,6 @@ the coefficient of the term of degree \kbd{n} in the main variable.
 
 \fun{long}{degree}{GEN x} returns \kbd{poldegree(x, -1)}, the degree of
 \kbd{x} with respect to its main variable.
-
-\fun{GEN}{quad_disc}{GEN x} returns the discriminant of the \typ{QUAD}
-\kbd{x}.
-
-\fun{GEN}{qfb_disc}{GEN x} returns the discriminant of the \typ{QFI}
-or \typ{QFR} \kbd{x}.
 
 \fun{GEN}{resultant}{GEN x,GEN y} resultant of \kbd{x} and \kbd{y}, with respect
 to the main variable of highest priority. Uses either

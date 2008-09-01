@@ -1949,7 +1949,7 @@ static GEN
 tocomplex(GEN x, long l)
 {
   GEN y;
-  if (typ(x) == t_COMPLEX) return ctofp(x, l);
+  if (typ(x) == t_COMPLEX) return cxtofp(x, l);
   y = cgetg(3,t_COMPLEX);
   gel(y,1) = gtofp(x, l);
   gel(y,2) = real_0(l); return y;

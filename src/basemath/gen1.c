@@ -104,19 +104,19 @@ static GEN
 addqf(GEN x, GEN y, long prec) { pari_sp av = avma;
   long i = gexpo(x) - gexpo(y);
   if (i > 0) prec += divsBIL( i );
-  return gerepileupto(av, gadd(y, quadtoc(x, prec)));
+  return gerepileupto(av, gadd(y, quadtofp(x, prec)));
 }
 static GEN
 mulqf(GEN x, GEN y, long prec) { pari_sp av = avma;
-  return gerepileupto(av, gmul(y, quadtoc(x, prec)));
+  return gerepileupto(av, gmul(y, quadtofp(x, prec)));
 }
 static GEN
 divqf(GEN x, GEN y, long prec) { pari_sp av = avma;
-  return gerepileupto(av, gdiv(quadtoc(x,prec), y));
+  return gerepileupto(av, gdiv(quadtofp(x,prec), y));
 }
 static GEN
 divfq(GEN x, GEN y, long prec) { pari_sp av = avma;
-  return gerepileupto(av, gdiv(x, quadtoc(y,prec)));
+  return gerepileupto(av, gdiv(x, quadtofp(y,prec)));
 }
 /* y PADIC, x + y by converting x to padic */
 static GEN

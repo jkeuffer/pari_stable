@@ -34,7 +34,7 @@ trans_fix_arg(long *prec, GEN *s0, GEN *sig, pari_sp *av, GEN *res)
   *res = cgetc(l); *av = avma;
   if (typ(s) == t_COMPLEX)
   { /* s = sig + i t */
-    s = ctofp(s, l+1);
+    s = cxtofp(s, l+1);
     *sig = gel(s,1);
   }
   else /* real number */
@@ -373,7 +373,7 @@ garg(GEN x, long prec)
 
     case t_QUAD:
       av = avma;
-      return gerepileuptoleaf(av, garg(quadtoc(x, prec), prec));
+      return gerepileuptoleaf(av, garg(quadtofp(x, prec), prec));
 
     case t_COMPLEX:
       return cxarg(gel(x,1),gel(x,2),prec);

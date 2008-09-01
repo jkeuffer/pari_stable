@@ -93,12 +93,6 @@ quadgen(GEN x)
 /**                      BINARY QUADRATIC FORMS                       **/
 /**                                                                   **/
 /***********************************************************************/
-
-static GEN
-qfb_disc0(GEN x, GEN y, GEN z) { return subii(sqri(y), shifti(mulii(x,z),2)); }
-GEN
-qfb_disc(GEN x) { return qfb_disc0(gel(x,1), gel(x,2), gel(x,3)); }
-
 GEN
 qfi(GEN x, GEN y, GEN z)
 {
@@ -125,7 +119,7 @@ Qfb0(GEN x, GEN y, GEN z, GEN d, long prec)
   pari_sp av = avma;
   long s;
   if (typ(x)!=t_INT || typ(y)!=t_INT || typ(z)!=t_INT) pari_err(typeer,"Qfb");
-  s = signe(qfb_disc0(x,y,z)); avma = av;
+  s = signe(qfb_disc3(x,y,z)); avma = av;
   if (!s) pari_err(talker,"zero discriminant in Qfb");
   if (s < 0) return qfi(x, y, z);
 
@@ -1169,7 +1163,7 @@ redrealsl2step(GEN A)
   GEN a = gel(V,1);
   GEN b = gel(V,2);
   GEN c = gel(V,3);
-  GEN d = qfb_disc0(a,b,c);
+  GEN d = qfb_disc3(a,b,c);
   GEN rd = sqrti(d);
   GEN ac = mpabs(c);
   GEN r = addii(b, gmax(rd, ac));
@@ -1193,7 +1187,7 @@ redrealsl2(GEN V)
   GEN a = gel(V,1);
   GEN b = gel(V,2);
   GEN c = gel(V,3);
-  GEN d = qfb_disc0(a,b,c);
+  GEN d = qfb_disc3(a,b,c);
   GEN rd = sqrti(d);
   btop = avma; st_lim = stack_lim(btop, 1);
   u1 = v2 = gen_1; v1 = u2 = gen_0;

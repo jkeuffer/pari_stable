@@ -113,11 +113,9 @@ long    loop_break(void);
 
 /* multiprecision */
 GEN   addrex01(GEN x);
-GEN   cxnorm(GEN x);
 int   lgcdii(ulong* d, ulong* d1, ulong* u, ulong* u1, ulong* v, ulong* v1, ulong vmax);
 ulong rgcduu(ulong d, ulong d1, ulong vmax, ulong* u, ulong* u1, ulong* v, ulong* v1, long *s);
 ulong xgcduu(ulong d, ulong d1, int f, ulong* v, ulong* v1, long *s);
-GEN   quadnorm(GEN x);
 ulong xxgcduu(ulong d, ulong d1, int f, ulong* u, ulong* u1, ulong* v, ulong* v1, long *s);
 GEN   divgunu(GEN x, ulong i);
 GEN   divrunu(GEN x, ulong i);

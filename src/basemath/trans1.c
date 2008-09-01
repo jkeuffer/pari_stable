@@ -262,7 +262,7 @@ transc(GEN (*f)(GEN,long), GEN x, long prec)
       return gerepile(av,tetpil,f(p1,prec));
 
     case t_QUAD:
-      p1 = quadtoc(x, prec); tetpil = avma;
+      p1 = quadtofp(x, prec); tetpil = avma;
       return gerepile(av,tetpil,f(p1,prec));
 
     case t_POL: case t_RFRAC:
@@ -1355,7 +1355,7 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
     return y;
 
   case t_QUAD:
-    return gsqrtn(quadtoc(x, prec), n, zetan, prec);
+    return gsqrtn(quadtofp(x, prec), n, zetan, prec);
 
   default:
     av = avma; if (!(y = toser_i(x))) break;
@@ -2432,7 +2432,7 @@ gsincos(GEN x, GEN *s, GEN *c, long prec)
       affrr_fixlg(mulrr(u1,u), gel(pc,2)); togglesign(gel(pc,2)); return;
 
     case t_QUAD:
-      av = avma; gsincos(quadtoc(x, prec), s, c, prec);
+      av = avma; gsincos(quadtofp(x, prec), s, c, prec);
       gerepileall(av, 2, s, c); return;
 
     default:

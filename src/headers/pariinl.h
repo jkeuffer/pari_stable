@@ -688,12 +688,24 @@ killblock(GEN x) { return gunclone(x); }
 /*                    CONVERSION / ASSIGNMENT                      */
 /*                                                                 */
 /*******************************************************************/
-INLINE GEN gtofp(GEN z, long prec);
+/* z is a type which may be a t_COMPLEX component (not a t_QUAD) */
 INLINE GEN
-ctofp(GEN x, long prec) { GEN z = cgetg(3,t_COMPLEX);
-  gel(z,1) = gtofp(gel(x,1),prec);
-  gel(z,2) = gtofp(gel(x,2),prec); return z;
+cxcompotofp(GEN z, long prec)
+{
+  switch(typ(z))
+  {
+    case t_INT:  return itor(z, prec);
+    case t_FRAC: return fractor(z, prec);
+    case t_REAL: return rtor(z, prec);
+    default: pari_err(typeer,"cxcompotofp"); return NULL; /* not reached */
+  }
 }
+INLINE GEN
+cxtofp(GEN x, long prec) { GEN z = cgetg(3,t_COMPLEX);
+  gel(z,1) = cxcompotofp(gel(x,1),prec);
+  gel(z,2) = cxcompotofp(gel(x,2),prec); return z;
+}
+
 INLINE double
 gtodouble(GEN x)
 {
@@ -729,9 +741,9 @@ gtofp(GEN z, long prec)
     case t_INT:  return itor(z, prec);
     case t_FRAC: return fractor(z, prec);
     case t_REAL: return rtor(z, prec);
-    case t_COMPLEX: return isrationalzero(gel(z,2))? gtofp(gel(z,1), prec)
-                                                   : ctofp(z, prec);
-    case t_QUAD: return quadtoc(z, prec);
+    case t_COMPLEX: return isintzero(gel(z,2))? cxcompotofp(gel(z,1), prec)
+                                              : cxtofp(z, prec);
+    case t_QUAD: return quadtofp(z, prec);
     default: pari_err(typeer,"gtofp"); return NULL; /* not reached */
   }
 }
@@ -789,7 +801,7 @@ affgr(GEN x, GEN y)
     case t_INT:  affir(x,y); break;
     case t_REAL: affrr(x,y); break;
     case t_FRAC: rdiviiz(gel(x,1),gel(x,2), y); break;
-    case t_QUAD: av = avma; affgr(quadtoc(x,lg(y)), y); avma = av; break;
+    case t_QUAD: av = avma; affgr(quadtofp(x,lg(y)), y); avma = av; break;
     default: pari_err(operf,"",x,y);
   }
 }
@@ -1193,7 +1205,22 @@ quadnorm(GEN q)
     return gadd(z, gmul(c, gsqr(u)));
   }
 }
-
+/* x a t_QUAD, return the associated discriminant */
+INLINE GEN
+quad_disc(GEN x)
+{
+  GEN Q = gel(x,1), b = gel(Q,3), c = gel(Q,2), c4;
+  if (is_pm1(b))
+  {
+    pari_sp av = avma; (void)new_chunk(lgefint(c) + 1);
+    c4 = shifti(c,2); avma = av; return subsi(1, c4);
+  }
+  c4 = shifti(c,2); togglesign_safe(&c4); return c4;
+}
+INLINE GEN
+qfb_disc3(GEN x, GEN y, GEN z) { return subii(sqri(y), shifti(mulii(x,z),2)); }
+INLINE GEN
+qfb_disc(GEN x) { return qfb_disc3(gel(x,1), gel(x,2), gel(x,3)); }
 
 INLINE GEN
 sqrfrac(GEN x)
