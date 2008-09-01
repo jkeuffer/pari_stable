@@ -741,8 +741,17 @@ gtofp(GEN z, long prec)
     case t_INT:  return itor(z, prec);
     case t_FRAC: return fractor(z, prec);
     case t_REAL: return rtor(z, prec);
-    case t_COMPLEX: return isintzero(gel(z,2))? cxcompotor(gel(z,1), prec)
-                                              : cxtofp(z, prec);
+    case t_COMPLEX: {
+      GEN a = gel(z,1), b = gel(z,2);
+      if (isintzero(b)) return cxcompotor(a, prec);
+      if (isintzero(a)) {
+        GEN y = cgetg(3, t_COMPLEX);
+        b = cxcompotor(b, prec);
+        gel(y,1) = real_0_bit(expo(b) - bit_accuracy(prec));
+        gel(y,2) = b; return y;
+      }
+      return cxtofp(z, prec);
+    }
     case t_QUAD: return quadtofp(z, prec);
     default: pari_err(typeer,"gtofp"); return NULL; /* not reached */
   }

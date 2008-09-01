@@ -29,7 +29,10 @@ JD 12- read() would block on pipes
 BA 17- [from 2.4.2] use of pointers in recursive expressions [#717]
 BA 18- [from 2.4.2] trap() did not restore evaluator states [#722]
    19- simplifications missed when adding t_RFRAC [#721]
-   20- gtofp(1 + 0*I) should not return 1. + 0.*I but 1.
+   20- gtofp(1 + 0*I, prec) should not return 1. + 0.*I but 1.
+       gtofp(0 + (tiny real) * I, prec) should make sure the real part is
+       converted to a zero of sufficiently small exponent (otherwise the
+       modulus of the result is zero, because 1E-100 + 0E-28 = 0E-28)
    21- factor(500501^36): impossible assignment I-->S
    22- quadray(-7,6) [or other "impossible conductors"] --> oo loop [#725]
    23- acosh([Pol(1)]) -> gerepile error [#728] (same asin, asinh)

@@ -5038,8 +5038,13 @@ not recursive and can thus be inlined).
 
 \fun{GEN}{gtofp}{GEN x, long prec} converts the complex number~\kbd{x}
 (\typ{INT}, \typ{REAL}, \typ{FRAC}, \typ{QUAD} or \typ{COMPLEX}) to either
-a \typ{REAL} or \typ{COMPLEX} whose components are \typ{REAL} of length
-\kbd{prec}.
+a \typ{REAL} or \typ{COMPLEX} whose components are \typ{REAL} of precision
+\kbd{prec}; not necessarily of \emph{length} \kbd{prec}: a real $0$ may be
+given as \kbd{real\_0(...)}). If the result is a \typ{COMPLEX} extra care is
+taken so that its modulus really has accuracy \kbd{prec}: there is a problem
+if the real part of the input is an exact $0$; indeed, converting it to
+\kbd{real\_0(prec)} would be wrong if the imaginary part is tiny, since the
+modulus would then become equal to $0$, as in $1.E-100 + 0.E-28 = 0.E-28$.
 
 \fun{GEN}{gcvtop}{GEN x, GEN p, long l} converts $x$ into a \typ{PADIC}
 of precision~$l$. Works componentwise on recursive objects,
