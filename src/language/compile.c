@@ -331,15 +331,13 @@ detag(long n)
 }
 
 /* return type for GP functions */
-enum ret_type { RET_GEN, RET_INT, RET_LONG, RET_VOID };
-
-static enum ret_type
-get_ret_type(const char **p)
+static op_code
+get_ret_type(const char **p, long arity, Gtype *t)
 {
-  if (**p == 'v') { (*p)++; return RET_VOID; }
-  else if (**p == 'i') { (*p)++; return RET_INT;  }
-  else if (**p == 'l') { (*p)++; return RET_LONG; }
-  else return RET_GEN;
+  if (**p == 'v') { (*p)++; *t=Gvoid; return OCcallvoid; }
+  else if (**p == 'i') { (*p)++; *t=Gsmall; return OCcallint; }
+  else if (**p == 'l') { (*p)++; *t=Gsmall; return OCcalllong; }
+  else { *t=Ggen; return arity==2?OCcallgen2:OCcallgen; }
 }
 
 /*supported types:
@@ -733,7 +731,8 @@ compilefunc(entree *ep, long n, int mode)
   long i,j;
   long x=tree[n].x;
   long y=tree[n].y;
-  enum ret_type ret;
+  op_code ret_op;
+  Gtype ret_typ;
   char const *p,*q;
   char c;
   const char *flags = NULL;
@@ -861,7 +860,7 @@ compilefunc(entree *ep, long n, int mode)
   if (!ep->value)
     compile_err("unknown function",tree[n].str);
   nbopcodes = s_opcode.n;
-  ret=get_ret_type(&p);
+  ret_op = get_ret_type(&p, ep->arity, &ret_typ);
   i=0; j=1;
   if (*p)
   {
@@ -1134,33 +1133,13 @@ compilefunc(entree *ep, long n, int mode)
   }
   if (j<=nb)
     compile_err("too many arguments",tree[arg[j]].str);
-  switch (ret)
+  op_push(ret_op, (long) ep);
+  if (ret_op==OCcallgen && nbpointers==0 && s_opcode.n>nbopcodes+128)
   {
-  case RET_GEN:
-    if (ep->arity==2)
-      op_push(OCcallgen2, (long) ep);
-    else
-      op_push(OCcallgen, (long) ep);
-    if (nbpointers==0 && s_opcode.n>nbopcodes+128)
-    {
-      op_insert(nbopcodes,OCavma,0);
-      op_push(OCgerepile,0);
-    }
-    compilecast(n,Ggen,mode);
-    break;
-  case RET_INT:
-    op_push(OCcallint, (long) ep);
-    compilecast(n,Gsmall,mode);
-    break;
-  case RET_LONG:
-    op_push(OCcalllong, (long) ep);
-    compilecast(n,Gsmall,mode);
-    break;
-  case RET_VOID:
-    op_push(OCcallvoid, (long) ep);
-    compilecast(n,Gvoid,mode);
-    break;
+    op_insert(nbopcodes,OCavma,0);
+    op_push(OCgerepile,0);
   }
+  compilecast(n,ret_typ,mode);
   if (nbpointers) op_push(OCendptr,nbpointers);
   avma=ltop;
 }
@@ -1175,7 +1154,8 @@ genclosure(entree *ep)
   long index=ep->arity;
   long arity=0, maskarg=0, maskarg0=0, stop=0;
   PPproto mod;
-  enum ret_type ret=get_ret_type(&code);
+  Gtype ret_typ;
+  op_code ret_op=get_ret_type(&code,ep->arity,&ret_typ);
   p=code;
   while ((mod=parseproto(&p,&c,NULL))!=PPend)
   {
@@ -1322,27 +1302,8 @@ genclosure(entree *ep)
     index--;
     q = p;
   }
-  switch (ret)
-  {
-  case RET_GEN:
-    if (ep->arity==2)
-      op_push(OCcallgen2, (long) ep);
-    else
-      op_push(OCcallgen, (long) ep);
-    break;
-  case RET_INT:
-    op_push(OCcallint, (long) ep);
-    op_push(OCstoi,0);
-    break;
-  case RET_LONG:
-    op_push(OCcalllong, (long) ep);
-    op_push(OCstoi,0);
-    break;
-  case RET_VOID:
-    op_push(OCcallvoid, (long) ep);
-    op_push(OCpushlong, (long) gnil);
-    break;
-  }
+  op_push(ret_op, (long) ep);
+  compilecast(-1, ret_typ, Ggen);
   return getfunction(&pos,nb+arity,0,strtoGENstr(ep->name));
 }
 
