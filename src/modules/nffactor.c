@@ -216,7 +216,7 @@ nfroots(GEN nf,GEN pol)
 
   if (!nf) return nfrootsQ(pol);
   T = get_nfpol(nf, &nf);
-  A = fix_relative_pol(T,pol,1);
+  A = rnf_fix_pol(T,pol,1);
   d = degpol(A);
   if (d < 0) pari_err(zeropoler, "nfroots");
   if (d == 0) return cgetg(1,t_VEC);
@@ -247,7 +247,7 @@ nfissplit(GEN nf, GEN x)
   pari_sp av = avma;
   long l;
   nf = checknf(nf);
-  x = fix_relative_pol(gel(nf,1), x, 1);
+  x = rnf_fix_pol(gel(nf,1), x, 1);
   if (typ(x) != t_POL) pari_err(typeer, "nfissplit");
   l = lg(nfsqff(nf, x, 2, gen_1));
   avma = av; return l != 1;
@@ -389,7 +389,7 @@ nffactor(GEN nf,GEN pol)
 
   if (DEBUGLEVEL>2) { TIMERstart(&ti); fprintferr("\nEntering nffactor:\n"); }
   T = get_nfpol(nf, &nf);
-  A = fix_relative_pol(T,pol,1);
+  A = rnf_fix_pol(T,pol,1);
   dA = degpol(A);
   if (dA <= 0) {
     avma = (pari_sp)(rep + 3);
@@ -1526,7 +1526,7 @@ polfnf(GEN a, GEN T)
 
   if (typ(a)!=t_POL || typ(T)!=t_POL) pari_err(typeer,"polfnf");
   T = Q_primpart(T); tmonic = is_pm1(leading_term(T));
-  A = Q_primpart( QXQX_normalize(fix_relative_pol(T,a,1), T) );
+  A = Q_primpart( QXQX_normalize(rnf_fix_pol(T,a,1), T) );
   dA = degpol(A);
   if (dA <= 0)
   {

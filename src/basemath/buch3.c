@@ -1382,7 +1382,7 @@ rnfnormgroup(GEN bnr, GEN polrel)
 
   checkbnr(bnr); bnf=gel(bnr,1); raycl=gel(bnr,5);
   nf=gel(bnf,7); cnd=gmael3(bnr,2,1,1);
-  polrel = fix_relative_pol(gel(nf,1),polrel,1);
+  polrel = rnf_fix_pol(gel(nf,1),polrel,1);
   if (!gcmp1(leading_term(polrel)))
     pari_err(impl,"rnfnormgroup for non-monic polynomials");
 

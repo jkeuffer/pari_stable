@@ -831,7 +831,7 @@ void    checkmodpr(GEN modpr);
 GEN     compositum(GEN P, GEN Q);
 GEN     compositum2(GEN P, GEN Q);
 GEN     nfdisc(GEN x);
-GEN     fix_relative_pol(GEN nf, GEN x, int lift);
+GEN     rnf_fix_pol(GEN nf, GEN x, int lift);
 GEN     indexpartial(GEN P, GEN DP);
 GEN     nf_to_Fq_init(GEN nf, GEN *pr, GEN *T, GEN *p);
 GEN     nf_to_Fq(GEN nf, GEN x, GEN modpr);

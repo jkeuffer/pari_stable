@@ -977,6 +977,25 @@ remainder sequence associated to $A(Y)$ and $B(X-kY)$, leading to $C =
 \text{Res}_Y(A(Y), B(Y-kX))$. In particular $a := -h_0/h_1$ is a root of $A$
 in $\Q[X]/(C)$, and $X - ka$ is a root of $B$.
 
+\fun{GEN}{rnf_fix_pol}{GEN T, GEN B, int lift} check whether $B$ is a
+polynomials with coefficients in the number field defined by the absolute
+equation $T(y) = 0$, where $T$ is a \kbd{ZX} and returned a cleaned up version of
+$B$. This means that $B$ is a \typ{POL} whose coefficients are \typ{INT},
+\typ{FRAC}, \typ{POL} in the variable $y$ with rational coefficients, or
+\typ{POLMOD} modulo $T$ which lift to a rational \typ{POL} as above. The cleanup
+consists in the following improvements:
+
+\item \typ{POL} coefficients are reduced modulo $T$.
+
+\item \typ{POL} and \typ{POLMOD} coefficients belonging to the base field are
+converted to rationals.
+
+\item if \kbd{lift} is non-zero, lift all \typ{POLMOD}, otherwise convert all
+\typ{POL} to \typ{POLMOD}s modulo $T$.
+
+\noindent For instance, \kbd{rnfequationall} applies \tet{rnf_fix_pol} to its
+argument $B$ (with \kbd{lift} equal to $1$).
+
 \fun{GEN}{bnfisintnormabs}{GEN bnf, GEN a} as \tet{bnfisintnorm}, but returns a
 complete system of solutions modulo units of the absolute norm equation
 $|\Norm(x)| = |a|$. As fast as \kbd{bnfisintnorm}, but solves simulaneously

@@ -2499,7 +2499,7 @@ rnfdedekind(GEN nf, GEN P, GEN pr)
   long v;
   GEN z;
   nf = checknf(nf);
-  P = fix_relative_pol(gel(nf,1), P, 0);
+  P = rnf_fix_pol(gel(nf,1), P, 0);
   v = nfval(nf, RgX_disc(P), pr);
   P = lift_intern(P);
   avma = av; z = rnfdedekind_i(nf, P, pr, v);
@@ -2665,7 +2665,7 @@ check_pol(GEN *px, long v)
 /* check whether P is a polynomials with coeffs in the number field defined
  * by the absolute equation T(y) = 0 */
 GEN
-fix_relative_pol(GEN T, GEN P, int lift)
+rnf_fix_pol(GEN T, GEN P, int lift)
 {
   long i, vT = varn(T), lP = lg(P);
   GEN Q = cgetg(lP, t_POL);
@@ -2728,7 +2728,7 @@ rnfallbase(GEN nf, GEN *ppol, GEN *pD, GEN *pd, GEN *pf)
   GEN A, nfT, P, id, I, z, d, D, disc, pol = *ppol;
 
   nf = checknf(nf); nfT = gel(nf,1);
-  pol = fix_relative_pol(nfT,pol,0);
+  pol = rnf_fix_pol(nfT,pol,0);
   if (!gcmp1(leading_term(pol)))
     pari_err(impl,"non-monic relative polynomials");
 
