@@ -1134,7 +1134,7 @@ compilefunc(entree *ep, long n, int mode)
   if (j<=nb)
     compile_err("too many arguments",tree[arg[j]].str);
   op_push(ret_op, (long) ep);
-  if (ret_op==OCcallgen && nbpointers==0 && s_opcode.n>nbopcodes+128)
+  if (ret_typ==Ggen && nbpointers==0 && s_opcode.n>nbopcodes+128)
   {
     op_insert(nbopcodes,OCavma,0);
     op_push(OCgerepile,0);
