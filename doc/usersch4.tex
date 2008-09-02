@@ -1610,6 +1610,13 @@ It has the following syntax:\label{se:gp_read_str}
 \noindent
 Note that \kbd{gp}'s metacommands are not recognized.
 
+\misctitle{Note.} The obsolete form
+
+\fun{GEN}{readseq}{char *t}
+
+still exists for backward compatibility (assumes filtered input, without
+spaces or comments). Don't use it.
+
 To read a \kbd{GEN} from a file, you can use the simpler interface
 
 \fun{GEN}{gp_read_stream}{FILE *file}
