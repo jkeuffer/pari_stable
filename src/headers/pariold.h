@@ -97,9 +97,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define gegal gequal
 #define gegalgs gequalgs
 #define gegalsg gequalsg
-#define zero  (long)gen_0
-#define un    (long)gen_1
-#define deux  (long)gen_2
 #define gzero gen_0
 #define gun   gen_1
 #define gdeux gen_2
@@ -107,8 +104,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define realzero_bit real_0_bit
 #define realun real_1
 #define realmun real_m1
-#define err pari_err /* move to e.g paritr.h ? */
-#define init pari_init
 #define gen2str GENtostr
 #define gpui gpow
 #define gpuigs gpowgs
@@ -183,6 +178,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
   STMT_START {pari_sp _av=avma;mpaff(mpabs(x),y);avma=_av;} STMT_END
 #define absrz(x,z)  mpabsz((x),(z))
 #define negrz(x,z)  mpnegz((x),(z))
+
+/* Following deprecated for a long time now. Or really, really bad, e.g
+ * un, init, er. */
+#ifdef PARI_OLD_NAMES
+#define err pari_err
+#define init pari_init
+
+#define zero  (long)gen_0
+#define un    (long)gen_1
+#define deux  (long)gen_2
+#define lhalf (long)ghalf
 
 /* removed GEN subtypes */
 #define t_FRACN  t_FRAC
@@ -372,16 +378,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define ltrans  (long)gtrans
 #define ltrunc  (long)gtrunc
 #define lutoi   (long)utoi
-
-#define lhalf   (long)ghalf
-
-#ifdef lround /* in some Mac header */
-#  undef lround
-#endif
 #define lround  (long)ground
-
-#ifdef ldiv /* predefined macro on some AIX versions --GN1997Jan27 */
-#  undef ldiv
-#endif
 #define ldiv    (long)gdiv
-
+#endif
