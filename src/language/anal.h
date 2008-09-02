@@ -62,8 +62,9 @@ void *pop_stack(stack **pts);
 
 /* functions */
 void   changevalue(entree *ep, GEN val);
-entree *do_alias(entree *ep);
-entree *is_entry_intern(const char *s, entree **table, long *hash);
+entree* do_alias(entree *ep);
+void    freeep(entree *ep);
+entree* is_entry_intern(const char *s, entree **table, long *hash);
 long   is_keyword_char(char c);
 void   reset_break(void);
 long   did_break(void);
