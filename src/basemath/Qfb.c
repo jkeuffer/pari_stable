@@ -997,7 +997,7 @@ primeform_u(GEN x, ulong p)
   } else {
     b = Fl_sqrt(umodiu(x,p), p); if (b == ~0UL) pari_err(sqrter5);
     /* mod(b) != mod2(x) ? */
-    if ((b & 1) != (s & 1)) b = p - b;
+    if ((b ^ s) & 1) b = p - b;
     c = diviuexact(shifti(subii(sqru(b), x), -2), p);
   }
   gel(y,3) = gerepileuptoint(av, c);
