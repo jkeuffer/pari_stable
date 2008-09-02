@@ -1571,7 +1571,7 @@ break_loop(long numerr)
   VOLATILE int go_on = 0;
 
   term_color(c_ERR); pari_putc('\n');
-  errcontext("Break loop (type 'break' or Control-d to go back to GP)", NULL, NULL);
+  print_errcontext("Break loop (type 'break' or Control-d to go back to GP)", NULL, NULL);
   term_color(c_NONE);
   if (numerr == siginter)
     pari_puts("[type <Return> in empty line to continue]\n");

@@ -15,7 +15,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /*******************************************************************/
 /*                                                                 */
-/*                INITIALIZING THE SYSTEM, ERRORS                  */
+/*        INITIALIZING THE SYSTEM, ERRORS, STACK MANAGEMENT        */
 /*                                                                 */
 /*******************************************************************/
 #include <string.h>
@@ -50,7 +50,7 @@ entree  **varentries;
 
 THREAD pari_sp bot, top, avma;
 size_t memused;
-void    *global_err_data = NULL;
+void   *global_err_data = NULL;
 
 static growarray MODULES, OLDMODULES;
 const long functions_tblsz = 135; /* size of functions_hash */
@@ -73,6 +73,7 @@ typedef struct {
 
 static THREAD stack *err_catch_stack;
 static THREAD GEN *dft_handler;
+static void reset_traps(void);
 
 void
 push_stack(stack **pts, void *a)
@@ -95,7 +96,7 @@ pop_stack(stack **pts)
 
 /*********************************************************************/
 /*                                                                   */
-/*                               BLOCS                               */
+/*                       BLOCKS & CLONES                             */
 /*                                                                   */
 /*********************************************************************/
 /*#define DEBUG*/
@@ -193,12 +194,12 @@ pop_entree_block(entree *ep, long loc)
 /*********************************************************************/
 /*                                                                   */
 /*                       C STACK SIZE CONTROL                        */
-/*                (avoid core dump on deep recursion)                */
+/*                                                                   */
 /*********************************************************************/
+/* Avoid core dump on deep recursion. Adapted Perl code by Dominic Dunlop */
 THREAD void *PARI_stack_limit = NULL;
 
 #ifdef STACK_CHECK
-/* adapted from Perl code written by Dominic Dunlop */
 
 #  ifdef __EMX__				/* Emulate */
 void
@@ -213,10 +214,9 @@ pari_stackcheck_init(void *stack_base)
 #include <sys/time.h>
 #include <sys/resource.h>
 
-/* Set PARI_stack_limit to (a little above) the lowest safe address that can
- * be used on the stack. Leave PARI_stack_limit at its initial value (NULL)
- * to show no check should be made [init failed]. Assume stack grows downward.
- */
+/* Set PARI_stack_limit to (a little above) the lowest safe address that can be
+ * used on the stack. Leave PARI_stack_limit at its initial value (NULL) to
+ * show no check should be made [init failed]. Assume stack grows downward. */
 void
 pari_stackcheck_init(void *stack_base)
 {
@@ -241,15 +241,8 @@ pari_stackcheck_init(void *stack_base)
 #endif /* STACK_CHECK */
 
 /*********************************************************************/
-/*                                                                   */
-/*                       SYSTEM INITIALIZATION                       */
-/*                                                                   */
+/*                       MALLOC/FREE WRAPPERS                        */
 /*********************************************************************/
-static int try_to_recover = 0;
-VOLATILE int PARI_SIGINT_block  = 0, PARI_SIGINT_pending = 0;
-static GEN universal_constants;
-static void pari_sighandler(int sig);
-
 void
 pari_free(void *pointer)
 {
@@ -257,7 +250,6 @@ pari_free(void *pointer)
   free(pointer);
   BLOCK_SIGINT_END;
 }
-
 void*
 pari_malloc(size_t size)
 {
@@ -273,7 +265,6 @@ pari_malloc(size_t size)
   if (DEBUGMEM) pari_warn(warner,"mallocing NULL object");
   return NULL;
 }
-
 void*
 pari_realloc(void *pointer, size_t size)
 {
@@ -286,14 +277,12 @@ pari_realloc(void *pointer, size_t size)
   if (!tmp) pari_err(memer);
   return tmp;
 }
-
 void*
 pari_calloc(size_t size)
 {
   void *t = pari_malloc(size);
   memset(t, 0, size); return t;
 }
-
 GEN
 cgetalloc(long t, size_t l)
 {
@@ -301,19 +290,69 @@ cgetalloc(long t, size_t l)
   x[0] = evaltyp(t) | evallg(l); return x;
 }
 
-static void
-dflt_sigint_fun(void) { pari_err(talker, "user interrupt"); }
-
-static void
-pari_handle_SIGINT(void)
+/*******************************************************************/
+/*                         GROWARRAYS                              */
+/*******************************************************************/
+/* pari stack is a priori not available. Don't use it */
+void
+grow_append(growarray A, void *e)
 {
-#ifdef _WIN32
-  if (++win32ctrlc >= 5) _exit(3);
-#else
-  sigint_fun();
-#endif
+  if (A->n == A->len-1)
+  {
+    A->len <<= 1;
+    A->v = (void**)pari_realloc(A->v, A->len * sizeof(void*));
+  }
+  A->v[A->n++] = e;
+}
+void
+grow_copy(growarray A, growarray B)
+{
+  long i;
+  if (!A) { grow_init(B); return; }
+  B->len = A->len;
+  B->n = A->n;
+  B->v = (void**)pari_malloc(B->len * sizeof(void*));
+  for (i = 0; i < A->n; i++) B->v[i] = A->v[i];
+}
+void
+grow_init(growarray A)
+{
+  A->len = 4;
+  A->n   = 0;
+  A->v   = (void**)pari_malloc(A->len * sizeof(void*));
+}
+void
+grow_kill(growarray A) { pari_free(A->v); }
+
+/*******************************************************************/
+/*                         HEAP TRAVERSAL                          */
+/*******************************************************************/
+struct getheap_t { long n, l; };
+static void
+f_getheap(GEN x, void *D)
+{
+  struct getheap_t *T = (struct getheap_t*)D;
+  T->n++;
+  T->l += gsizeword(x);
+}
+GEN
+getheap(void)
+{
+  struct getheap_t T = { 0, 0 };
+  traverseheap(&f_getheap, &T);
+  return mkvec2s(T.n, T.l + BL_HEAD * T.n);
 }
 
+void
+traverseheap( void(*f)(GEN, void *), void *data )
+{
+  GEN x;
+  for (x = cur_block; x; x = bl_prev(x)) f(x, data);
+}
+
+/*********************************************************************/
+/*                          DAEMON / FORK                            */
+/*********************************************************************/
 #if defined(HAS_WAITPID) && defined(HAS_SETSID)
 #  include <sys/wait.h>
 /* Properly fork a process, detaching from main process group without creating
@@ -344,6 +383,42 @@ pari_daemon(void)
   return 0;
 }
 #endif
+
+/*********************************************************************/
+/*                                                                   */
+/*                       SYSTEM INITIALIZATION                       */
+/*                                                                   */
+/*********************************************************************/
+static int try_to_recover = 0;
+VOLATILE int PARI_SIGINT_block  = 0, PARI_SIGINT_pending = 0;
+static GEN universal_constants;
+static void pari_sighandler(int sig);
+
+/*********************************************************************/
+/*                         SIGNAL HANDLERS                           */
+/*********************************************************************/
+static void
+dflt_sigint_fun(void) { pari_err(talker, "user interrupt"); }
+
+#if defined(_WIN32) || defined(__CYGWIN32__)
+int win32ctrlc = 0;
+void
+dowin32ctrlc(void)
+{
+  win32ctrlc = 0;
+  sigint_fun();
+}
+#endif
+
+static void
+pari_handle_SIGINT(void)
+{
+#ifdef _WIN32
+  if (++win32ctrlc >= 5) _exit(3);
+#else
+  sigint_fun();
+#endif
+}
 
 static void
 pari_sighandler(int sig)
@@ -402,116 +477,6 @@ pari_sighandler(int sig)
   pari_err(bugparier,msg);
 }
 
-#if defined(_WIN32) || defined(__CYGWIN32__)
-int win32ctrlc = 0;
-
-void
-dowin32ctrlc(void)
-{
-  win32ctrlc = 0;
-  sigint_fun();
-}
-#endif
-
-/* Initialize hashtable */
-static void
-init_hashtable(entree **table, long tblsz)
-{
-  entree *ep, *EP, *last;
-  long i;
-
-  for (i = 0; i < tblsz; i++)
-  {
-    last = NULL; ep = table[i]; table[i] = NULL;
-    for ( ; ep; ep = EP)
-    {
-      EP = ep->next;
-      switch(EpVALENCE(ep))
-      {
-	case EpVAR: case EpINSTALL: /* keep this one */
-	  if (last)
-	    last->next = ep;
-	  else
-	    table[i] = ep;
-	  last = ep; last->next = NULL;
-	  break;
-	default: freeep(ep);
-      }
-    }
-  }
-}
-
-void
-pari_init_defaults(void)
-{
-  initout(1);
-
-#ifdef LONG_IS_64BIT
-  precreal = 4;
-#else
-  precreal = 5;
-#endif
-
-  precdl = 16;
-  compatible = NONE;
-  DEBUGFILES = DEBUGLEVEL = DEBUGMEM = 0;
-  disable_color = 1;
-  logstyle = logstyle_none;
-
-  current_psfile = pari_strdup("pari.ps");
-  current_logfile= pari_strdup("pari.log");
-  pari_logfile = NULL;
-
-  pari_datadir = os_getenv("GP_DATA_DIR");
-  if (!pari_datadir) pari_datadir = (char*)GPDATADIR;
-  if (pari_datadir) pari_datadir = pari_strdup(pari_datadir);
-
-  next_block=0;
-  (void)sd_graphcolormap("[\"white\",\"black\",\"blue\",\"violetred\",\"red\",\"green\",\"grey\",\"gainsboro\"]", d_SILENT);
-  (void)sd_graphcolors("[4, 5]", d_SILENT);
-}
-
-/* pari stack is a priori not available. Don't use it */
-void
-grow_append(growarray A, void *e)
-{
-  if (A->n == A->len-1)
-  {
-    A->len <<= 1;
-    A->v = (void**)pari_realloc(A->v, A->len * sizeof(void*));
-  }
-  A->v[A->n++] = e;
-}
-void
-grow_copy(growarray A, growarray B)
-{
-  long i;
-  if (!A) { grow_init(B); return; }
-  B->len = A->len;
-  B->n = A->n;
-  B->v = (void**)pari_malloc(B->len * sizeof(void*));
-  for (i = 0; i < A->n; i++) B->v[i] = A->v[i];
-}
-void
-grow_init(growarray A)
-{
-  A->len = 4;
-  A->n   = 0;
-  A->v   = (void**)pari_malloc(A->len * sizeof(void*));
-}
-void
-grow_kill(growarray A) { pari_free(A->v); }
-
-/* Load modules in A in hashtable hash. */
-static int
-gp_init_entrees(growarray A, entree **hash)
-{
-  long i;
-  init_hashtable(hash, functions_tblsz);
-  for (i = 0; i < A->n; i++) pari_fill_hashtable(hash, (entree*)A->v[i]);
-  return (hash == functions_hash);
-}
-
 void
 pari_sig_init(void (*f)(int))
 {
@@ -535,14 +500,9 @@ pari_sig_init(void (*f)(int))
 #endif
 }
 
-static void
-reset_traps(void)
-{
-  long i;
-  if (DEBUGLEVEL) pari_warn(warner,"Resetting all traps");
-  for (i=0; i <= noer; i++) dft_handler[i] = NULL;
-}
-
+/*********************************************************************/
+/*                      STACK AND UNIVERSAL CONSTANTS                */
+/*********************************************************************/
 static void
 init_universal_constants(void)
 {
@@ -583,7 +543,6 @@ fix_size(size_t a)
   if (b < 1024) b = 1024;
   return b;
 }
-
 static size_t
 init_stack(size_t size)
 {
@@ -611,6 +570,45 @@ init_stack(size_t size)
   memused = 0; return s;
 }
 
+/*********************************************************************/
+/*                           INIT DEFAULTS                           */
+/*********************************************************************/
+void
+pari_init_defaults(void)
+{
+  initout(1);
+
+#ifdef LONG_IS_64BIT
+  precreal = 4;
+#else
+  precreal = 5;
+#endif
+
+  precdl = 16;
+  compatible = NONE;
+  DEBUGFILES = DEBUGLEVEL = DEBUGMEM = 0;
+  disable_color = 1;
+  logstyle = logstyle_none;
+
+  current_psfile = pari_strdup("pari.ps");
+  current_logfile= pari_strdup("pari.log");
+  pari_logfile = NULL;
+
+  pari_datadir = os_getenv("GP_DATA_DIR");
+  if (!pari_datadir) pari_datadir = (char*)GPDATADIR;
+  if (pari_datadir) pari_datadir = pari_strdup(pari_datadir);
+
+  next_block=0;
+  (void)sd_graphcolormap("[\"white\",\"black\",\"blue\",\"violetred\",\"red\",\"green\",\"grey\",\"gainsboro\"]", d_SILENT);
+  (void)sd_graphcolors("[4, 5]", d_SILENT);
+}
+
+/*********************************************************************/
+/*                   FUNCTION HASHTABLES, MODULES                    */
+/*********************************************************************/
+growarray *pari_get_modules(void) { return &MODULES; }
+growarray *pari_get_oldmodules(void) { return &OLDMODULES; }
+
 static entree **
 init_fun_hash(void) {
   entree **H = (entree **) pari_malloc(sizeof(entree*)*functions_tblsz);
@@ -619,15 +617,52 @@ init_fun_hash(void) {
   return H;
 }
 
-growarray *pari_get_modules(void) { return &MODULES; }
-growarray *pari_get_oldmodules(void) { return &OLDMODULES; }
-
+/* Initialize hashtable */
+static void
+init_hashtable(entree **table, long tblsz)
+{
+  long i;
+  for (i = 0; i < tblsz; i++)
+  {
+    entree *last = NULL, *ep = table[i];
+    table[i] = NULL;
+    while (ep)
+    {
+      entree *EP = ep->next;
+      switch(EpVALENCE(ep))
+      {
+	case EpVAR: case EpINSTALL:
+        /* keep: attach it to last entree seen */
+	  if (last)
+	    last->next = ep;
+	  else
+	    table[i] = ep;
+          ep->next = NULL; last = ep;
+	  break;
+	default: freeep(ep);
+      }
+      ep = EP;
+    }
+  }
+}
+/* Load in hashtable hash the modules contained in A */
+static int
+gp_init_entrees(growarray A, entree **hash)
+{
+  long i;
+  init_hashtable(hash, functions_tblsz);
+  for (i = 0; i < A->n; i++) pari_fill_hashtable(hash, (entree*)A->v[i]);
+  return (hash == functions_hash);
+}
 int
 gp_init_functions(void)
 {
   return gp_init_entrees(new_fun_set? MODULES: OLDMODULES, functions_hash);
 }
 
+/*********************************************************************/
+/*                       LIBPARI INIT / CLOSE                        */
+/*********************************************************************/
 void
 pari_thread_init(size_t parisize)
 {
@@ -635,7 +670,6 @@ pari_thread_init(size_t parisize)
   pari_init_floats();
   pari_init_seadata();
 }
-
 void
 pari_thread_close(void)
 {
@@ -702,9 +736,7 @@ pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts)
 
 void
 pari_init(size_t parisize, ulong maxprime)
-{
-  pari_init_opts(parisize, maxprime, INIT_JMPm | INIT_SIGm | INIT_DFTm);
-}
+{ pari_init_opts(parisize, maxprime, INIT_JMPm | INIT_SIGm | INIT_DFTm); }
 
 void
 pari_close_opts(ulong init_opts)
@@ -719,9 +751,9 @@ pari_close_opts(ulong init_opts)
   {
     entree *ep = functions_hash[i];
     while (ep) {
-      entree *epn = ep->next;
+      entree *EP = ep->next;
       if (!EpSTATIC(ep)) { freeep(ep); free(ep); }
-      ep = epn;
+      ep = EP;
     }
   }
   free((void*)varentries);
@@ -756,61 +788,33 @@ pari_close_opts(ulong init_opts)
 
 void
 pari_close(void)
-{
-  pari_close_opts(INIT_JMPm | INIT_SIGm | INIT_DFTm);
-}
-
-struct getheap_t { long n, l; };
-static void
-f_getheap(GEN x, void *D)
-{
-  struct getheap_t *T = (struct getheap_t*)D;
-  T->n++;
-  T->l += gsizeword(x);
-}
-GEN
-getheap(void)
-{
-  struct getheap_t T = { 0, 0 };
-  traverseheap(&f_getheap, &T);
-  return mkvec2s(T.n, T.l + BL_HEAD * T.n);
-}
-
-void
-traverseheap( void(*f)(GEN, void *), void *data )
-{
-  GEN x;
-  for (x = cur_block; x; x = bl_prev(x)) f(x, data);
-}
+{ pari_close_opts(INIT_JMPm | INIT_SIGm | INIT_DFTm); }
 
 /*******************************************************************/
 /*                                                                 */
 /*                         ERROR RECOVERY                          */
 /*                                                                 */
 /*******************************************************************/
-/* if flag = 0: record address of next block allocated.
- * if flag = 1: (after an error) recover all memory allocated since last call
- */
+/* IF flag = 0: record address of next block allocated.
+ * ELSE (after an error) recover all memory allocated since last call */
 void
 recover(int flag)
 {
   static long listloc;
-  long n;
-  entree *ep, *epnext;
-  void (*sigfun)(int);
+  long i;
 
   if (!flag) { listloc = next_block; return; }
 
- /* disable recover() and SIGINT. Better: sigint_[block|release] as in
-  * readline/rltty.c ? */
- if (DEBUGMEM>2) fprintferr("entering recover(), loc = %ld\n", listloc);
-  try_to_recover=0;
-  sigfun = os_signal(SIGINT, SIG_IGN);
-
-  for (n = 0; n < functions_tblsz; n++)
-    for (ep = functions_hash[n]; ep; ep = epnext)
+  /* disable recover() and SIGINT */
+  try_to_recover = 0;
+  BLOCK_SIGINT_START
+  if (DEBUGMEM>2) fprintferr("entering recover(), loc = %ld\n", listloc);
+  for (i = 0; i < functions_tblsz; i++)
+  {
+    entree *ep = functions_hash[i];
+    while (ep)
     {
-      epnext = ep->next;
+      entree *EP = ep->next;
       switch(EpVALENCE(ep))
       {
 	case EpVAR:
@@ -818,56 +822,23 @@ recover(int flag)
 	  break;
 	case EpNEW: break;
       }
+      ep = EP;
     }
+  }
   parser_reset();
   compiler_reset();
   closure_reset();
   if (DEBUGMEM>2) fprintferr("leaving recover()\n");
-  try_to_recover=1;
-  (void)os_signal(SIGINT, sigfun);
+  BLOCK_SIGINT_END
+  try_to_recover = 1;
 }
 
-static THREAD long dbg = -1;
-void
-dbg_block() { if (DEBUGLEVEL) { dbg = DEBUGLEVEL; DEBUGLEVEL = 0; } }
-void
-dbg_release() { if (dbg >= 0) { DEBUGLEVEL = dbg; dbg = -1; } }
-
-#define MAX_PAST 25
-#define STR_LEN 20
-/* Outputs a beautiful error message (not \n terminated)
- *   msg is errmessage to print.
- *   s points to the offending chars.
- *   entry tells how much we can go back from s[0].
- */
-void
-errcontext(const char *msg, const char *s, const char *entry)
+static void
+reset_traps(void)
 {
-  long past = (s-entry);
-  char str[STR_LEN + 2];
-  char *buf, *t, *pre;
-
-  if (!s || !entry) { print_prefixed_text(msg,"  ***   ",NULL); return; }
-
-  t = buf = (char*)pari_malloc(strlen(msg) + MAX_PAST + 5 + 2 * 16);
-  sprintf(t,"%s: ", msg);
-  if (past <= 0) past = 0;
-  else
-  {
-    t += strlen(t);
-    if (past > MAX_PAST) { past=MAX_PAST; strcpy(t, "..."); t += 3; }
-    strcpy(t, term_get_color(c_OUTPUT));
-    t += strlen(t);
-    strncpy(t, s - past, past); t[past] = 0;
-  }
-
-  t = str; if (!past) *t++ = ' ';
-  strncpy(t, s, STR_LEN); t[STR_LEN] = 0;
-  pre = (char*)pari_malloc(2 * 16 + 1);
-  strcpy(pre, term_get_color(c_ERR));
-  strcat(pre, "  ***   ");
-  print_prefixed_text(buf, pre, str);
-  pari_free(buf); pari_free(pre);
+  long i;
+  if (DEBUGLEVEL) pari_warn(warner,"Resetting all traps");
+  for (i=0; i <= noer; i++) dft_handler[i] = NULL;
 }
 
 void *
@@ -928,12 +899,6 @@ err_clean(void)
   while (err_catch_stack)
     pop_catch_cell(&err_catch_stack);
   gp_function_name = NULL;
-}
-
-static int
-is_warn(long num)
-{
-  return num == warner || num == warnmem || num == warnfile || num == warnprec;
 }
 
 void
@@ -1002,6 +967,8 @@ pari_warn(long numerr, ...)
 #define HAS_CONTEXT(num) (num < talker)
 #define SYNTAX_ERROR(num) (num < openfiler)
 
+static int
+is_warn(long num) { return num >= warner && num <= warnmem; }
 void
 pari_err(long numerr, ...)
 {
@@ -1040,7 +1007,7 @@ pari_err(long numerr, ...)
     switch (numerr)
     {
       case obsoler:
-	errcontext(s,NULL,NULL);
+	print_errcontext(s,NULL,NULL);
 	ch1 = va_arg(ap,char *);
 	whatnow_new_syntax(ch1, va_arg(ap,int));
 	break;
@@ -1048,13 +1015,13 @@ pari_err(long numerr, ...)
       case openfiler:
 	sprintf(s+strlen(s), "%s file", va_arg(ap,char*));
 	ch1 = va_arg(ap,char *);
-	errcontext(s,ch1,ch1); break;
+	print_errcontext(s,ch1,ch1); break;
 
       case talker2:
 	strcat(s,va_arg(ap, char*)); /* fall through */
       default:
 	ch1 = va_arg(ap,char *);
-	errcontext(s,ch1,va_arg(ap,char *));
+	print_errcontext(s,ch1,va_arg(ap,char *));
     }
   }
   else if (numerr == user)
@@ -1147,8 +1114,6 @@ kill_dft_handler(int numerr)
   if (s && s != BREAK_LOOP) killblock(s);
   dft_handler[numerr] = NULL;
 }
-
-
 /* Try f (trapping error e), recover using r (break_loop, if NULL) */
 GEN
 trap0(const char *e, GEN r, GEN f)
@@ -1169,10 +1134,13 @@ trap0(const char *e, GEN r, GEN f)
   if (f)
   { /* explicit recovery text */
     GEN x = closure_trapgen(numerr,f);
-    if (x == (GEN)1L) { gp_function_name = NULL; x = r? closure_evalgen(r): gnil; }
+    if (x == (GEN)1L) {
+      gp_function_name = NULL;
+      x = r? closure_evalgen(r): gnil;
+    }
     return x;
   }
-  /* define a default handler: execute r (break loop if NULL), then jump to 'env' */
+  /* define a default handler: eval r (break loop if NULL), then longjmp */
   if (numerr == CATCH_ALL) numerr = noer;
   kill_dft_handler(numerr);
   dft_handler[numerr] = r? gclone(r): BREAK_LOOP;

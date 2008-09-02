@@ -21,8 +21,8 @@ enum {
 
 /* NO CONTEXT now */
 
-  talker, flagerr, warner, warnprec, warnfile,
-  bugparier, impl, archer, warnmem, precer,
+  warner, warnprec, warnfile, warnmem, talker,
+  flagerr, bugparier, impl, archer, precer,
 
   siginter, alarmer, typeer, consister, user,
 

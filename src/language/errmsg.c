@@ -29,24 +29,25 @@ const char *errmessage[]=
 
 /* NO CONTEXT NOW */
 
-/* talker */
-  "",
-/* flagerr */
-  "invalid flag",
 /* warner */
   "Warning:",
 /* warnprec */
   "Warning: increasing prec",
 /* warnfile */
   "Warning: failed to",
+/* warnmem */
+  "collecting garbage in",
+
+/* talker */
+  "",
+/* flagerr */
+  "invalid flag",
 /* bugparier */
   "bug in",
 /* impl */
   "sorry,",
 /* archer */
   "sorry, not yet available on this system",
-/* warnmem */
-  "collecting garbage in",
 /* precer */
   "precision too low",
 /* siginter */

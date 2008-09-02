@@ -1535,6 +1535,48 @@ print_prefixed_text(const char *s, const char *prefix, const char *str)
   }
 }
 
+#define STR_LEN 20
+#define MAX_TERM_COLOR 16
+/* Outputs a beautiful error message (not \n terminated)
+ *   msg is errmessage to print.
+ *   s points to the offending chars.
+ *   entry tells how much we can go back from s[0] */
+void
+print_errcontext(const char *msg, const char *s, const char *entry)
+{
+  const long MAX_PAST = 25;
+  long past = s - entry, lmsg;
+  char str[STR_LEN + 1 + 1], pre[MAX_TERM_COLOR + 8 + 1];
+  char *buf, *t;
+
+  if (!s || !entry) { print_prefixed_text(msg,"  ***   ",NULL); return; }
+
+  /* message + context */
+  lmsg = strlen(msg);
+  /* msg + past + ': ' + '...' + term_get_color + \0 */
+  t = buf = (char*)pari_malloc(lmsg + MAX_PAST + 2 + 3 + MAX_TERM_COLOR + 1);
+  strncpy(t, msg, lmsg); t += lmsg;
+  strcpy(t, ": "); t += 2;
+  if (past <= 0) past = 0;
+  else
+  {
+    if (past > MAX_PAST) { past = MAX_PAST; strcpy(t, "..."); t += 3; }
+    strcpy(t, term_get_color(c_OUTPUT));
+    t += strlen(t);
+    strncpy(t, s - past, past); t[past] = 0;
+  }
+
+  /* suffix (past arrow) */
+  t = str; if (!past) *t++ = ' ';
+  strncpy(t, s, STR_LEN); t[STR_LEN] = 0;
+  /* prefix '***' */
+  strcpy(pre, term_get_color(c_ERR));
+  strcat(pre, "  ***   ");
+  /* now print */
+  print_prefixed_text(buf, pre, str);
+  pari_free(buf);
+}
+
 /********************************************************************/
 /**                                                                **/
 /**                    GEN <---> CHARACTER STRINGS                 **/

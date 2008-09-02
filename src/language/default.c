@@ -600,6 +600,12 @@ sd_secure(const char *v, long flag)
   return sd_gptoggle(v,flag,"secure", SECURE);
 }
 
+static THREAD long dbg = -1;
+void
+dbg_block() { if (DEBUGLEVEL) { dbg = DEBUGLEVEL; DEBUGLEVEL = 0; } }
+void
+dbg_release() { if (dbg >= 0) { DEBUGLEVEL = dbg; dbg = -1; } }
+
 GEN
 sd_debug(const char *v, long flag)
 { return sd_ulong(v,flag,"debug",&DEBUGLEVEL, 0,20,NULL); }
