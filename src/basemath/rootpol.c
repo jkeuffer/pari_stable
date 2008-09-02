@@ -1767,8 +1767,10 @@ cauchy_bound(GEN p)
   invlc = invr( quickabs(gel(p,n+2)) ); /* 1 / |lc(p)| */
   for (i = 0; i < n; i++)
   {
-    GEN y = gel(p,i+2); if (gcmp0(y)) continue;
-    double L = dblogr(mulrr(quickabs(y), invlc)) / (n-i);
+    GEN y = gel(p,i+2);
+    double L;
+    if (gcmp0(y)) continue;
+    L = dblogr(mulrr(quickabs(y), invlc)) / (n-i);
     if (L > Lmax) Lmax = L;
   }
   avma = av; return Lmax + LOG2;
