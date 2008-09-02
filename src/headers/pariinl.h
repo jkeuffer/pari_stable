@@ -1025,6 +1025,9 @@ sqrtr(GEN x) {
   gel(y,2) = sqrtr_abs(x);
   gel(y,1) = gen_0; return y;
 }
+/* x^(1/n) */
+INLINE GEN
+sqrtnr(GEN x, long n) { return mpexp(divrs(mplog(x), n)); }
 
 /*******************************************************************/
 /*                                                                 */

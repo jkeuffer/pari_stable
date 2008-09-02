@@ -29,7 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 # define CBRTVERYBIGINT  1291
 #endif
 
-static THREAD GEN glog2;
+static THREAD GEN geuler, glog2, gpi;
 void
 pari_init_floats(void)
 {
@@ -1266,14 +1266,6 @@ padic_sqrtn(GEN x, GEN n, GEN *zetan)
   return gerepile(av,tetpil,x);
 }
 
-/* x^(1/n) */
-GEN
-sqrtnr(GEN x, long n)
-{
-  if (typ(x) != t_REAL) pari_err(typeer,"sqrtnr");
-  return mpexp(divrs(mplog(x), n));
-}
-
 GEN
 gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
 {
@@ -1837,6 +1829,25 @@ constlog2(long prec)
 GEN
 mplog2(long prec) { return rtor(constlog2(prec), prec); }
 
+static GEN
+logagmr_abs(GEN q)
+{
+  long prec = lg(q), lim, e = expo(q);
+  GEN z, y, Q, _4ovQ;
+  pari_sp av;
+
+  if (absrnz_egal2n(q)) return e? mulsr(e, mplog2(prec)): real_0(prec);
+  z = cgetr(prec); av = avma; prec++;
+  lim = bit_accuracy(prec) >> 1;
+  Q = rtor(q,prec);
+  Q[1] = evalsigne(1) | evalexpo(lim);
+
+  _4ovQ = invr(Q); setexpo(_4ovQ, expo(_4ovQ)+2); /* 4/Q */
+  /* Pi / 2agm(1, 4/Q) ~ log(Q), q = Q * 2^(e-lim) */
+  y = divrr(Pi2n(-1, prec), agm1r_abs(_4ovQ));
+  y = addrr(y, mulsr(e - lim, mplog2(prec)));
+  affrr_fixlg(y, z); avma = av; return z;
+}
 /*return log(|x|), assuming x != 0 */
 GEN
 logr_abs(GEN X)
@@ -1930,26 +1941,6 @@ logr_abs(GEN X)
   setexpo(y, expo(y)+m+1);
   if (EX) y = addrr(y, mulsr(EX, mplog2(l+1)));
   affrr_fixlg(y, z); avma = ltop; return z;
-}
-
-GEN
-logagmr_abs(GEN q)
-{
-  long prec = lg(q), lim, e = expo(q);
-  GEN z, y, Q, _4ovQ;
-  pari_sp av;
-
-  if (absrnz_egal2n(q)) return e? mulsr(e, mplog2(prec)): real_0(prec);
-  z = cgetr(prec); av = avma; prec++;
-  lim = bit_accuracy(prec) >> 1;
-  Q = rtor(q,prec);
-  Q[1] = evalsigne(1) | evalexpo(lim);
-
-  _4ovQ = invr(Q); setexpo(_4ovQ, expo(_4ovQ)+2); /* 4/Q */
-  /* Pi / 2agm(1, 4/Q) ~ log(Q), q = Q * 2^(e-lim) */
-  y = divrr(Pi2n(-1, prec), agm1r_abs(_4ovQ));
-  y = addrr(y, mulsr(e - lim, mplog2(prec)));
-  affrr_fixlg(y, z); avma = av; return z;
 }
 
 /* assume Im(q) != 0 */

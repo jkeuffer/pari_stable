@@ -6329,14 +6329,15 @@ decimal digits, not in words as used everywhere else):
 \subsec{Transcendental functions with \typ{REAL} arguments}
 
 In the following routines, $x$ is assumed to be a \typ{REAL} and the result
-is a \typ{REAL} with the largest accuracy which can be deduced from the input:
-The naming scheme is inconsistant here, since we somethimes use the
-prefix \kbd{mp} even though \typ{INT} inputs are forbidden:
+is a \typ{REAL} (sometimes a \typ{COMPLEX} with \typ{REAL} components), with
+the largest accuracy which can be deduced from the input. The naming scheme
+is inconsistant here, since we somethimes use the prefix \kbd{mp} even though
+\typ{INT} inputs are forbidden:
 
 \fun{GEN}{sqrtr}{GEN x} returns the square root of $x$.
 
 \fun{GEN}{sqrtnr}{GEN x, long n} returns the $n$-th root of $x$, assuming
-$n\geq 1$.
+$n\geq 1$ and $x > 0$. Not stack clean.
 
 \fun{GEN}{mpcos[z]}{GEN x[, GEN z]} returns $\cos(x)$.
 
@@ -6344,7 +6345,7 @@ $n\geq 1$.
 
 \fun{GEN}{mplog[z]}{GEN x[, GEN z]} returns $\log(x)$. We must have $x > 0$
 since the result must be a \typ{REAL}. Use \kbd{glog} for the general case,
-where you want such computations as $\log(-1) = i$.
+where you want such computations as $\log(-1) = I$.
 
 \fun{GEN}{mpexp[z]}{GEN x[, GEN z]} returns $\exp(x)$.
 
@@ -6354,6 +6355,14 @@ $|x|$ is very small.
 
 \fun{GEN}{szeta}{long s, long prec} returns the value of Riemann's zeta
 function at the (possibly negative) integer $s\neq 1$, in relative accuracy \kbd{prec}.
+
+\noindent Useful low-level functions which \emph{disregard} the sign of $x$:
+
+\fun{GEN}{sqrtr_abs}{GEN x} returns $\sqrt{|x|}$ assuming $x\neq 0$.
+
+\fun{GEN}{exp1r_abs}{GEN x} returns $\exp(|x|) - 1$, assuming $x \neq 0$.
+
+\fun{GEN}{logr_abs}{GEN x} returns $\log(|x|)$, assuming $x \neq 0$.
 
 \noindent A few variants on sin and cos:
 
