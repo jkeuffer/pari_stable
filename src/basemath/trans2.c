@@ -89,21 +89,12 @@ mpatan(GEN x)
   else
   {
     double fi = alpha-2;
-#if 0
-    const double gama = 1.; /* optimize this */
-    if (delta >= gama*fi*fi)
-    {
-      n = (long)(1+sqrt(gama*delta));
-      m = (long)(1+sqrt(delta/gama) - fi);
-    }
-#else
     if (delta >= fi*fi)
     {
       double t = 1 + sqrt(delta);
       n = (long)t;
       m = (long)(t - fi);
     }
-#endif
     else
     {
       n = (long)(1+beta/fi);
@@ -114,11 +105,11 @@ mpatan(GEN x)
   p2 = rtor(p1, l2); av = avma;
   for (i=1; i<=m; i++)
   {
-    p5 = addsr(1, mulrr(p2,p2)); setlg(p5,l2);
+    p5 = addsr(1, sqrr(p2)); setlg(p5,l2);
     p5 = addsr(1, sqrtr_abs(p5)); setlg(p5,l2);
     affrr(divrr(p2,p5), p2); avma = av;
   }
-  p3 = mulrr(p2,p2); l1 = 4;
+  p3 = sqrr(p2); l1 = 4;
   unr = real_1(l2); setlg(unr,4);
   p4 = cgetr(l2); setlg(p4,4);
   affrr(divru(unr,2*n+1), p4);
@@ -175,7 +166,7 @@ gatan(GEN x, long prec)
 static GEN
 mpasin(GEN x) {
   pari_sp av = avma;
-  GEN z, a = sqrtr(subsr(1, mulrr(x,x)));
+  GEN z, a = sqrtr(subsr(1, sqrr(x)));
   if (lg(x) > AGM_ATAN_LIMIT)
   {
     z = logagmcx(mkcomplex(a,x), lg(x));
@@ -249,7 +240,7 @@ static GEN
 mpacos(GEN x)
 {
   pari_sp av = avma;
-  GEN z, a = sqrtr(subsr(1, mulrr(x,x)));
+  GEN z, a = sqrtr(subsr(1, sqrr(x)));
   if (lg(x) > AGM_ATAN_LIMIT)
   {
     z = logagmcx(mkcomplex(x,a), lg(x));
@@ -536,7 +527,7 @@ mpash(GEN x)
 
   res = cgetr(lx); av = avma;
   if (ex < 1 - BITS_IN_LONG) x = rtor(x, lx + nbits2nlong(-ex)-1);
-  z = logr_abs( addrr_sign(x,1, sqrtr( addrs(mulrr(x,x), 1) ), 1) );
+  z = logr_abs( addrr_sign(x,1, sqrtr_abs( addrs(sqrr(x), 1) ), 1) );
   if (signe(x) < 0) togglesign(z);
   affrr(z, res); avma = av; return res;
 }
@@ -601,7 +592,7 @@ mpach(GEN x)
   pari_sp av = avma;
   GEN z;
   if (absrnz_egal1(x)) return real_0_bit(- (bit_accuracy(lg(x)) >> 1));
-  z = logr_abs( addrr_sign(x, 1, sqrtr( subrs(mulrr(x,x), 1) ), 1) );
+  z = logr_abs( addrr_sign(x, 1, sqrtr( subrs(sqrr(x), 1) ), 1) );
   return gerepileuptoleaf(av, z);
 }
 
@@ -805,36 +796,6 @@ bernreal(long n, long prec)
   n >>= 1; mpbern(n+1,prec); B=cgetr(prec);
   affrr(bern(n),B); return B;
 }
-
-#if 0
-/* k > 0 */
-static GEN
-bernfracspec(long k)
-{
-  ulong n, K = k+1;
-  pari_sp av, lim;
-  GEN s, c, N, b;
-
-  c = N = utoipos(K); s = gen_1; b = gen_0;
-  av = avma; lim = stack_lim(av,2);
-  for (n=2; ; n++) /* n <= k+1 */
-  {
-    c = diviiexact(muliu(c,k+2-n), utoipos(n));
-    if (n & 1) setsigne(c, 1); else setsigne(c, -1);
-    /* c = (-1)^(n-1) binomial(k+1, n),  s = 1^k + ... + (n-1)^k */
-
-    b = gadd(b, gdivgs(mulii(c,s), n));
-    if (n == K) return gerepileupto(av, b);
-
-    gel(N,2) = n; s = addii(s, powiu(N,k));
-    if (low_stack(lim, stack_lim(av,2)))
-    {
-      if (DEBUGMEM>1) pari_warn(warnmem,"bernfrac");
-      gerepileall(av,3, &c,&b,&s);
-    }
-  }
-}
-#endif
 
 static GEN
 B2(void){ GEN z = cgetg(3, t_FRAC);

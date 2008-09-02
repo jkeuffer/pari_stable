@@ -1633,7 +1633,7 @@ mulcxI(GEN x)
       gel(z,1) = gneg(gel(x,2));
       gel(z,2) = gel(x,1); return z;
     default:
-      return gmul(gi, x);
+      return gmul(gen_I(), x);
   }
 }
 GEN

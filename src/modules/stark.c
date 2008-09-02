@@ -726,7 +726,7 @@ ArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
   }
 
   classe = isprincipalray(bnr, idh);
-  z = gpowgs(gneg_i(gi), lg(cond1)-1);
+  z = powIs(- (lg(cond1)-1));
 
   for (ic = 1; ic <= nChar; ic++)
   {

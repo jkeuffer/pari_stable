@@ -15,34 +15,15 @@ PARI library. All of them are in the \idx{heap} and \emph{not} on the PARI
 \bprog
 t_INT: gen_0, gen_1, gen_m1, gen_2, gen_m2
 t_FRAC: ghalf
-t_COMPLEX: gi
 @eprog
 \noindent Only polynomials in the variables \kbd{0} and \kbd{MAXVARN} are
 defined initially. Use \kbd{fetch\_var()} (see \secref{se:fetch_var}) to
 create new ones.
 
-The use of \kbd{gi} is deprecated: using \tet{mkcomplex} or \tet{mulcxI}
-is likely to be much more efficient. Besides, the name is far too short,
-polluting the namespace.
-
 \noindent The other objects are not initialized by default:
 
 \tet{bern}(i). This is the $2i$-th Bernoulli number ($B_0=1$, $B_2=1/6$,
 $B_4=-1/30$, etc\dots). To initialize them, use \tet{mpbern}.
-
-\tet{geuler}. This is Euler's constant. It is initialized by the first call
-to \tet{mpeuler}.
-
-\tet{gpi}. This is the number $\pi$.  It is initialized by the first call to
-\tet{mppi}.
-
-The use of both \tet{geuler} and \tet{gpi} is deprecated since it is always
-possible that some library function increases the precision of the constant
-\emph{after} you've computed it, hence modifying the computation accuracy
-without your asking for it and increasing your running times for no good
-reason. You should always use \tet{mpeuler} and \tet{mppi} (note that only
-the first call will actually compute the constant, unless a higher precision
-is required).
 
 In addition, some single or double-precision real numbers (like \kbd{PI}) are
 predefined, and their list is in the file \kbd{paricom.h}.

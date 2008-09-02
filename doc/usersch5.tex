@@ -2282,6 +2282,9 @@ $x^{n/2}$ (always a \typ{REAL}, even if $n = 0$).
 \fun{GEN}{powrfrac}{GEN x, long n, long d}, assumes $x$ is a \typ{REAL} and
 returns $x^{n/d}$ (always a \typ{REAL}, even if $n = 0$).
 
+\fun{GEN}{powIs}{long n} returns $I^n\in\{1,I,-1,-I\}$ (\typ{INT} for even $n$,
+\typ{COMPLEX} otherwise).
+
 \fun{ulong}{upowuu}{ulong x, ulong n}, returns $x^n$ modulo $2^\B$. This is
 meant to be used for tiny $n$, where in fact $x^n$ fits into an \kbd{ulong}.
 
@@ -4988,6 +4991,9 @@ object~\kbd{x}.
 object~\kbd{y}. Both \kbd{x} and \kbd{y} must be scalar types. Type
 conversions (e.g.~from \typ{INT} to \typ{REAL} or \typ{INTMOD}) occur if
 legitimate.
+
+\fun{int}{is_universal_constant}{GEN x} returns $1$ if $x$ is a global PARI constant
+you should never assign to (such as \kbd{gen\_1}), and $0$ otherwise.
 
 \section{Conversions}
 

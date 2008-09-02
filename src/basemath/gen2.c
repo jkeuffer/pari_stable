@@ -1488,15 +1488,12 @@ gaffect(GEN x, GEN y)
       switch(ty)
       {
 	case t_REAL:
-	  if (y ==  gpi) croak("gpi");
-	  if (y==geuler) croak("geuler");
 	  affir(x,y); break;
 
 	case t_INTMOD:
 	  modiiz(x,gel(y,1),gel(y,2)); break;
 
 	case t_COMPLEX:
-	  if (y == gi) croak("gi");
 	  gaffect(x,gel(y,1)); gaffsg(0,gel(y,2)); break;
 
 	case t_PADIC:

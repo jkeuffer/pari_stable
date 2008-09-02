@@ -417,17 +417,6 @@ gauss_normal(GEN x)
 }
 
 static GEN
-Ipow(long e) {
-  switch(e & 3)
-  {
-    case 1: return gi;
-    case 2: return gen_m1;
-    case 3: return mkcomplex(gen_0,gen_m1);
-  }
-  return gen_1;
-}
-
-static GEN
 gauss_factor(GEN x)
 {
   pari_sp av = avma;
@@ -530,7 +519,7 @@ gauss_factor(GEN x)
   }
   fa = sort_factor(fa, (void*)&gauss_cmp, &cmp_nodata);
 
-  y = gmul(y, Ipow(exp));
+  y = gmul(y, powIs(exp));
   if (!gcmp1(y)) {
     gel(fa,1) = shallowconcat(mkcol(y), gel(fa,1));
     gel(fa,2) = shallowconcat(gen_1,    gel(fa,2));
@@ -637,7 +626,7 @@ factor(GEN x)
 	    case t_POLMOD:
 	      if (killv) (void)delete_var();
 	      return gerepileupto(av,p1);
-	    case t_COMPLEX: w = gi; break;
+	    case t_COMPLEX: w = gen_I(); break;
 	    case t_QUAD: w = mkquad(pol,gen_0,gen_1);
 	      break;
 	    default: pari_err(impl,"factor of general polynomial");

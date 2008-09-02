@@ -28,6 +28,8 @@ INLINE GEN
 mkcomplex(GEN x, GEN y) { GEN v = cgetg(3, t_COMPLEX);
   gel(v,1) = x; gel(v,2) = y; return v; }
 INLINE GEN
+gen_I(void) { return mkcomplex(gen_0, gen_1); }
+INLINE GEN
 cgetc(long l)
 {
   GEN u = cgetg(3,t_COMPLEX);
@@ -683,6 +685,9 @@ cgiv(GEN x)
 INLINE void
 killblock(GEN x) { return gunclone(x); }
 
+INLINE int
+is_universal_constant(GEN x) { return (x >= gen_0 && x <= ghalf); }
+
 /*******************************************************************/
 /*                                                                 */
 /*                    CONVERSION / ASSIGNMENT                      */
@@ -1278,6 +1283,16 @@ powii(GEN x, GEN n)
   if (ln == 2) return gen_1; /* rare */
   /* should never happen */
   return powgi(x, n); /* overflow unless x = 0, 1, -1 */
+}
+INLINE GEN
+powIs(long n) {
+  switch(n & 3)
+  {
+    case 1: return mkcomplex(gen_0,gen_1);
+    case 2: return gen_m1;
+    case 3: return mkcomplex(gen_0,gen_m1);
+  }
+  return gen_1;
 }
 
 /*******************************************************************/

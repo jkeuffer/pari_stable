@@ -1,6 +1,6 @@
 Function: I
 Section: transcendental
-C-Name: geni
+C-Name: gen_I
 Prototype:
 Help: I=I(): square root of -1.
 Description:

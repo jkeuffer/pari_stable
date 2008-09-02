@@ -372,7 +372,7 @@ entree oldfonctions[]={
 {"hilbp",20,(void*) hilbert,4,"lGG","hilbp(x,y)=Hilbert symbol of x,y (where x or y is integermod or p-adic)."},
 {"hvector",22,(void*)vecteur,9,"GVE","hvector(n,X,expr)=row vector with n components of expression expr, the variable X ranging from 1 to n."},
 {"hyperu",3,(void*)hyperu,3,"GGGp","hyperu(a,b,x)=U-confluent hypergeometric function."},
-{"i",0,(void*)geni,2,"","i=i()=square root of -1."},
+{"i",0,(void*)gen_I,2,"","i=i()=square root of -1."},
 {"idealadd",3,(void*)idealadd,6,"GGG","idealadd(nf,x,y)=sum of two ideals x and y in the number field defined by nf."},
 {"idealaddmultone",2,(void*)idealaddmultoone,6,"GG","idealaddone(nf,x,y)=when the sum of two ideals x and y in the number field K defined by nf is equal to Z_K, gives a two-component vector [a,b] such that a is in x, b is in y and a+b=1."},
 {"idealaddone",3,(void*)idealaddtoone,6,"GGG","idealaddmultone(nf,list)=when the sum of the ideals in the number field K defined by nf and given in the vector list is equal to Z_K, gives a vector of elements of the corresponding ideals who sum to 1."},

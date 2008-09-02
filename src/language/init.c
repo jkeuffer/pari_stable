@@ -32,8 +32,8 @@ const double LOG2    = 0.6931471805599453; /* log(2) */
 const double LOG10_2 = 0.3010299956639812; /* log_10(2) */
 const double LOG2_10 = 3.321928094887362;  /* log_2(10) */
 
-GEN     gnil, gen_0, gen_1, gen_m1, gen_2, gen_m2, ghalf, gi;
-THREAD GEN     gpi, geuler, bernzone;
+GEN     gnil, gen_0, gen_1, gen_m1, gen_2, gen_m2, ghalf;
+THREAD GEN    bernzone;
 GEN     primetab; /* private primetable */
 byteptr diffptr;
 FILE    *pari_outfile, *pari_errfile, *pari_logfile, *pari_infile;
@@ -548,8 +548,8 @@ init_universal_constants(void)
 {
   /* 2 (gnil) + 2 (gen_0)
    * + 3 (gen_1) + 3 (gen_m1) + 3 (gen_2) + 3 (gen_m2)
-   * + 3 (half) + 3 (gi) */
-  GEN p = universal_constants = (long*) pari_malloc(22*sizeof(long));
+   * + 3 (half) */
+  GEN p = universal_constants = (long*) pari_malloc(19*sizeof(long));
   gen_0 = p; p+=2; gnil = p; p+=2;
   gen_0[0] = gnil[0] = evaltyp(t_INT) | _evallg(2);
   gen_0[1] = gnil[1] = evallgefint(2);
@@ -570,13 +570,10 @@ init_universal_constants(void)
   gen_m2[1] = evalsigne(-1) | evallgefint(3);
   gen_m2[2] = 2;
 
-  ghalf = p; p+=3; gi = p; p+=3;
+  ghalf = p;
   ghalf[0] = evaltyp(t_FRAC) | _evallg(3);
   gel(ghalf,1) = gen_1;
   gel(ghalf,2) = gen_2;
-  gi[0] = evaltyp(t_COMPLEX) | _evallg(3);
-  gel(gi,1) = gen_0;
-  gel(gi,2) = gen_1;
 }
 
 static size_t
@@ -1991,9 +1988,6 @@ pari_version(void) {
   gel(v,2) = utoi(minor);
   gel(v,3) = utoi(patch); return v;
 }
-
-GEN
-geni(void) { return gi; }
 
 /* List of GP functions:
  * ---------------------

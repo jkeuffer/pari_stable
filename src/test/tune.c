@@ -162,11 +162,11 @@ static double speed_logagm(speed_param *s)
 { enable(s);  TIME_FUN(mplog(s->x)); }
 
 static double speed_logcx(speed_param *s)
-{ GEN z; setexpo(s->x,0); z = gadd(gen_1, gmul(gi, s->x));
+{ GEN z; setexpo(s->x,0); z = mkcomplex(gen_1, s->x);
   glog(z,s->size);
   disable(s); TIME_FUN(glog(z,s->size)); }
 static double speed_logcxagm(speed_param *s)
-{ GEN z; setexpo(s->x,0); z = gadd(gen_1, gmul(gi, s->x));
+{ GEN z; setexpo(s->x,0); z = mkcomplex(gen_1, s->x);
   glog(z,s->size);
   enable(s); TIME_FUN(glog(z,s->size)); }
 

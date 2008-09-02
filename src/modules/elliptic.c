@@ -992,7 +992,7 @@ powell(GEN e, GEN z, GEN n)
     }
     case t_COMPLEX: {
       GEN a = gel(n,1), b = gel(n,2);
-      return gerepileupto(av, ellpow_CM_aux(e,z,a,b,gi));
+      return gerepileupto(av, ellpow_CM_aux(e,z,a,b, gen_I()));
     }
   }
   pari_err(typeer,"powell (non integral, non CM exponent)");

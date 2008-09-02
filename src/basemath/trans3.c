@@ -250,7 +250,7 @@ kbessel1(GEN nu, GEN gx, long prec)
   else lnew = l;
   y = cgetr(l); l1=lnew+1;
   av = avma; x = gtofp(gx, lnew); nu = gtofp(nu, lnew);
-  nu2 = gmul2n(mulrr(nu,nu), 2); togglesign(nu2);
+  nu2 = gmul2n(sqrr(nu), 2); togglesign(nu2);
   n = (long) (bit_accuracy_mul(l,LOG2) + PI*sqrt(gtodouble(gnorm(nu)))) / 2;
   n2 = n<<1; pitemp=mppi(l1);
   r = gmul2n(x,1);

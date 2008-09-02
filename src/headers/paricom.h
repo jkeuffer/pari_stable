@@ -82,9 +82,9 @@ extern const double LOG2, LOG10_2, LOG2_10;
 /* Common global variables: */
 extern int new_galois_format, factor_add_primes, factor_proven;
 extern ulong DEBUGFILES, DEBUGLEVEL, DEBUGMEM, precdl;
-extern THREAD GEN  bernzone,gpi,geuler;
+extern THREAD GEN  bernzone;
 extern GEN primetab;
-extern GEN gen_m1,gen_1,gen_2,gen_m2,ghalf,gi,gen_0,gnil;
+extern GEN gen_m1,gen_1,gen_2,gen_m2,ghalf,gen_0,gnil;
 extern VOLATILE int PARI_SIGINT_block, PARI_SIGINT_pending;
 
 extern const long lontyp[];

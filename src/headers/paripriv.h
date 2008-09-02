@@ -269,7 +269,6 @@ void    grow_kill(growarray A);
 
 /* Interfaces (GP, etc.) */
 void  errcontext(const char *msg, const char *s, const char *entry);
-GEN   geni(void);
 void* get_stack(double fraction, long min);
 void  init_graph(void);
 void  free_graph(void);

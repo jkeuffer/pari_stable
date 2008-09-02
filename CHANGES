@@ -494,6 +494,8 @@ BA 28- GP function galoisisnormal().
    39- header file paritype.h [ split between parigen.h and pariinl.h ]
    40- obsolete library functions sor, outbrute, outbeaut
    41- dangerous macros max & min [ use maxss/minss, maxuu/minuu, maxdd/mindd ]
+   42- deprecated global constants gi, geuler, gpi. Use mulcxI/mkcomplex/gen_I(),
+       mpeuler() and mppi().
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.2 (released 22/12/2007):
