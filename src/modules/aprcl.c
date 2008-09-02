@@ -350,7 +350,7 @@ compt(GEN N)
 {
   pari_sp av0 = avma;
   double Cd = 100 * rtodbl(logr_abs(itor(N,DEFAULTPREC))) / log(10.);
-  ulong t, C = ceil(Cd);
+  ulong t, C = (ulong)ceil(Cd);
   GEN B;
   avma = av0;
   /* C < [200*log_10 e(t)] ==> return t. For e(t) < 10^529, N < 10^1058 */
