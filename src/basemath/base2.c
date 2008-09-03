@@ -91,6 +91,21 @@ safe_Z_pvalrem(GEN x, GEN p, GEN *z)
   if (signe(p) < 0) { *z = absi(x); return 1; }
   return Z_pvalrem(x, p, z);
 }
+/* denominator of diagonal. All denominators are powers of a given integer */
+static GEN
+diag_denom(GEN M)
+{
+  GEN d = gen_1;
+  long j, l = lg(M);
+  for (j=1; j<l; j++)
+  {
+    GEN t = gcoeff(M,j,j);
+    if (typ(t) == t_INT) continue;
+    t = gel(t,2);
+    if (absi_cmp(t,d) > 0) d = t;
+  }
+  return d;
+}
 static void
 allbase_from_ordmax(nfmaxord_t *S, GEN ordmax, GEN P, GEN f)
 {
@@ -100,12 +115,7 @@ allbase_from_ordmax(nfmaxord_t *S, GEN ordmax, GEN P, GEN f)
   {
     GEN M, db, b = gel(ordmax,i);
     if (b == gen_1) continue;
-    db = gen_1;
-    for (j=1; j<=n; j++)
-    {
-      GEN t = denom(gcoeff(b,j,j));
-      if (absi_cmp(t,db) > 0) db = t;
-    }
+    db = diag_denom(b);
     if (db == gen_1) continue;
 
     /* db = denom(b), (da,db) = 1. Compute da Im(b) + db Im(a) */
@@ -536,21 +546,23 @@ nfmaxord(nfmaxord_t *S, GEN T, long flag, GEN fa)
   ordmax = cgetg(1, t_VEC);
   for (i=1; i<lP; i++)
   {
+    VOLATILE pari_sp av;
     if (E[i] == 1) { ordmax = shallowconcat(ordmax, gen_1); continue; }
-
+    av = avma;
     CATCH(invmoder) { /* caught false prime, update factorization */
       GEN x = (GEN)global_err_data;
-      GEN N, u, p = gcdii(gel(x,1), gel(x,2));
+      GEN N, p = gcdii(gel(x,1), gel(x,2)), u = diviiexact(gel(x,1),p);
       long l;
       if (DEBUGLEVEL) pari_warn(warner,"impossible inverse: %Ps", x);
+      gerepileall(av, 2, &p, &u);
 
-      u = get_coprimes(p, diviiexact(gel(x,1),p));
+      u = get_coprimes(p, u); l = lg(u);
       /* no small factors, but often a prime power */
-      l = lg(u);
-      for (k = 1; k < l; k++) gel(u,k) = gcoeff(Z_factor_limit(gel(u,k), 2),1,1);
-
-      P[i] = u[1];
+      for (k = 1; k < l; k++)
+        gel(u,k) = gcoeff(Z_factor_limit(gel(u,k), 2),1,1);
+      gel(P,i) = gel(u,1);
       P = shallowconcat(P, vecslice(u, 2, l-1));
+      av = avma;
       N = S->dT; E[i] = Z_pvalrem(N, gel(P,i), &N);
       for (k=lP, lP=lg(P); k < lP; k++) E[k] = Z_pvalrem(N, gel(P,k), &N);
     } RETRY {
