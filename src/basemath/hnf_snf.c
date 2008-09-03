@@ -679,7 +679,7 @@ ZC_elem(GEN aj, GEN ak, GEN A, GEN U, long j, long k)
   }
 
   if (!is_pm1(d)) { aj = diviiexact(aj, d); ak = diviiexact(ak, d); }
-  p1 = gel(A,k); aj = negi(aj);
+  p1 = gel(A,k); aj = negi(aj); /* NOT togglesign */
   gel(A,k) = ZC_lincomb(u,v, gel(A,j),p1);
   gel(A,j) = ZC_lincomb(aj,ak, p1,gel(A,j));
   if (U)
@@ -707,7 +707,7 @@ ZM_reduce(GEN A, GEN U, long i, long j0)
     GEN q = truedivii(gcoeff(A,i,j), d);
     if (!signe(q)) continue;
 
-    q = negi(q);
+    togglesign(q);
     ZC_lincomb1_inplace(gel(A,j), gel(A,j0), q);
     if (U) ZC_lincomb1_inplace(gel(U,j), gel(U,j0), q);
   }
@@ -754,9 +754,9 @@ hnfmerge_get_1(GEN A, GEN B)
       t = gcoeff(C,1,1);
     else
     {
-      GEN u,v;
-      t = bezout(b, gcoeff(C,1,1), &u, &v); /* >= 0 */
-      if (signe(v) && !gcmp1(v)) gel(U,1) = ZC_Z_mul(gel(U,1), v);
+      GEN u;
+      t = bezout(gcoeff(C,1,1), b, &u, NULL); /* >= 0 */
+      if (signe(u) && !gcmp1(u)) gel(U,1) = ZC_Z_mul(gel(U,1), u);
       gcoeff(C,1,1) = t;
     }
     if (signe(t) && is_pm1(t)) break;
@@ -825,8 +825,6 @@ ZM_hnf(GEN x) { return lg(x) > 8? ZM_hnfall(x, NULL, 1): hnf_i(x, 1); }
 static GEN
 ZC_Cei(long n, long i, GEN c) { GEN e = zerocol(n); gel(e,i) = c; return e; }
 
-enum { hnf_MODID = 1, hnf_PART = 2 };
-
 /* u*z[1..k] mod b, in place */
 static void
 FpV_Fp_mul_part_ip(GEN z, GEN u, GEN p, long k)
@@ -857,13 +855,14 @@ FpV_red_part_ip(GEN z, GEN p, long k)
  * flag & hnf_PART: don't reduce once diagonal is known; */
 
 /* x a ZM, dm a t_INT */
-static GEN
-ZM_hnfmod_i(GEN x, GEN dm, int flag)
+GEN
+ZM_hnfmodall(GEN x, GEN dm, long flag)
 {
   pari_sp av0 = avma, av, lim;
-  const int modid = (flag & hnf_MODID);
+  const long modid = (flag & hnf_MODID);
+  const long center = (flag & hnf_CENTER);
   long li, co, i, j, k, def, ldef, ldm;
-  GEN a, b, p1, p2, u, v, dm2;
+  GEN a, b, p1, p2, u, dm2;
 
   co = lg(x); if (co == 1) return cgetg(1,t_MAT);
   li = lg(x[1]); dm2 = shifti(dm, -1);
@@ -923,7 +922,7 @@ ZM_hnfmod_i(GEN x, GEN dm, int flag)
     for (i = li-1; i > 0; i--)
     { /* check that dm*Id \subset L + add up missing dm*Id components */
       GEN d, c;
-      d = bezout(gcoeff(x,i,i),dm, &u,&v);
+      d = bezout(gcoeff(x,i,i),dm, &u,NULL);
       gcoeff(x,i,i) = d;
       if (is_pm1(d))
       {
@@ -956,7 +955,7 @@ ZM_hnfmod_i(GEN x, GEN dm, int flag)
     b = dm;
     for (i = li-1; i > 0; i--)
     {
-      GEN d = bezout(gcoeff(x,i,i),b, &u,&v);
+      GEN d = bezout(gcoeff(x,i,i),b, &u,NULL);
       gcoeff(x,i,i) = d;
       FpV_Fp_mul_part_ip(gel(x,i), u, b, i-1);
       if (i > 1) b = diviiexact(b,d);
@@ -979,7 +978,10 @@ ZM_hnfmod_i(GEN x, GEN dm, int flag)
     ldm = lgefint(dm[i]);
     for (j = i+1; j < li; j++)
     {
-      b = negi(truedivii(gcoeff(x,i,j), diag));
+      b = gcoeff(x,i,j);
+      b = center? diviiround(b,diag): truedivii(b, diag);
+      if (!signe(b)) continue;
+      togglesign(b);
       ZC_lincomb1_inplace(gel(x,j), gel(x,i),b);
       p1 = gel(x,j);
       for (k=1; k<i; k++)
@@ -994,11 +996,9 @@ ZM_hnfmod_i(GEN x, GEN dm, int flag)
   return gerepilecopy(av0, x);
 }
 GEN
-ZM_hnfmod(GEN x, GEN d) { return ZM_hnfmod_i(x,d,0); }
+ZM_hnfmod(GEN x, GEN d) { return ZM_hnfmodall(x,d,0); }
 GEN
-ZM_hnfmodid(GEN x, GEN d) { return ZM_hnfmod_i(x,d,hnf_MODID); }
-GEN
-ZM_hnfmodidpart(GEN x, GEN d) { return ZM_hnfmod_i(x, d, hnf_MODID|hnf_PART); }
+ZM_hnfmodid(GEN x, GEN d) { return ZM_hnfmodall(x,d,hnf_MODID); }
 
 static GEN
 allhnfmod(GEN x, GEN dm, int flag)
@@ -1006,7 +1006,7 @@ allhnfmod(GEN x, GEN dm, int flag)
   if (typ(dm)!=t_INT) pari_err(typeer,"allhnfmod");
   if (typ(x)!=t_MAT) pari_err(typeer,"allhnfmod");
   RgM_check_ZM(x, "allhnfmod");
-  return signe(dm)? ZM_hnfmod_i(x, dm, flag): ZM_hnf(x);
+  return signe(dm)? ZM_hnfmodall(x, dm, flag): ZM_hnf(x);
 }
 GEN
 hnfmod(GEN x, GEN d) { return allhnfmod(x, d, 0); }
@@ -1381,7 +1381,7 @@ ZM_hnfperm(GEN A, GEN *ptU, GEN *ptperm)
 	q = truedivii(gcoeff(A,t,j1),d);
 	if (!signe(q)) continue;
 
-	q = negi(q);
+	togglesign(q);
 	ZC_lincomb1_inplace(gel(A,j1), gel(A,j), q);
 	if (U) ZC_lincomb1_inplace(gel(U,j1), gel(U,j), q);
       }
@@ -1409,7 +1409,7 @@ ZM_hnfperm(GEN A, GEN *ptU, GEN *ptperm)
 	q = truedivii(gcoeff(A,t,j),p);
 	if (!signe(q)) continue;
 
-	q = negi(q);
+	togglesign(q);
 	ZC_lincomb1_inplace(gel(A,j), gel(A,k), q);
 	if (U) ZC_lincomb1_inplace(gel(U,j), gel(U,k), q);
       }
@@ -1915,7 +1915,7 @@ ZM_snfall_i(GEN x, GEN *ptU, GEN *ptV, int return_vec)
     if (signe(gcoeff(x,k,k)) < 0)
     {
       if (V) ZV_togglesign(gel(V,k));
-      gcoeff(x,k,k) = negi(gcoeff(x,k,k));
+      togglesign(gcoeff(x,k,k));
     }
 THEEND:
   if (return_vec)

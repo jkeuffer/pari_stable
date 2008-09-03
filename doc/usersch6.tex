@@ -238,7 +238,7 @@ true Euclidean division.
 closest to $x / y$. Functionnally identical to \kbd{ground( nfdiv(nf,x,y) )}.
 
 \fun{GEN}{nfdivrem}{GEN nf, GEN a, GEN b} returns the vector $[q,r]$, where
-to 
+to
 \bprog
   q = nfdiveuc(nf, a,b);
   r = nfadd(nf, a,nfmul(nf,q,gneg(b)));    \\ or r = nfmod(nf,a,b);
@@ -273,7 +273,7 @@ or a \kbd{ZV} of the correct dimension.
 $v$ of elements of $K$ in \typ{INT}, \typ{FRAC} or \typ{COL} form, multiply
 it by the element $x$ (arbitrary form). This is faster than multiplying
 coordinatewise since pre-computations related to $x$ (computing the
-multiplication table) are done only once. The components of the result 
+multiplication table) are done only once. The components of the result
 are in most cases \typ{COL}s but are allowed to be \typ{INT}s or \typ{FRAC}s.
 
 \fun{GEN}{zk_multable}{GEN nf, GEN x} given a \kbd{ZC} $x$ (implicitly
@@ -319,7 +319,7 @@ in the algebra, returns the $x\cdot v[i]$.
 
 Computational algebraic theory performs extensively linear
 algebra on $\Z$-modules with a natural multiplicative structure ($K^*$,
-fractional ideals in $K$, $\Z_K^*$, ideal class group), thereby raising 
+fractional ideals in $K$, $\Z_K^*$, ideal class group), thereby raising
 elements to horrendously large powers. A seemingly inocuous elementary linear
 algebra operation like $C_i\leftarrow C_i - 10000 C_1$ involves raising
 entries in $C_1$ to the $10000$-th power. Understandably, it is often more
@@ -342,7 +342,7 @@ concatenates their elements and exponents columns. In a context where a
 treated as the factorization $x^1$. The following functions all return
 \var{famat}s:
 
-\fun{GEN}{famat_mul}{GEN f, GEN g} $f$, $g$ are \var{famat}, 
+\fun{GEN}{famat_mul}{GEN f, GEN g} $f$, $g$ are \var{famat},
 or objects whose type is \emph{not} \typ{MAT} (understood as $f^1$ or $g^1$).
 Returns $fg$. The empty factorization is the neutral element for \var{famat}
 multiplication.
@@ -381,7 +381,7 @@ This is a simplified form of \tet{nffactorback}, where we do not check the
 user input for consistency.
 
 The description of \tet{famat_to_nf} says that you do not want to use this
-function. Then how do we recover genuine number field elements? Well, in 
+function. Then how do we recover genuine number field elements? Well, in
 most cases, we do not need to: most of the functions useful in this
 context accept \var{famat}s as inputs, for instance \tet{nfsign},
 \tet{nfsign_arch}, \tet{ideallog} and \tet{bnfisunit}. Otherwise, we can
@@ -525,7 +525,7 @@ allow $0$ exponents in the factorization. Returns an algebraic number
 $\alpha$ such that $v(x) = v(\alpha)$ for all valuations associated to the
 prime ideal decomposition of $x$, and $v(\alpha) \geq 0$ at all others.
 
-\fun{GEN}{idealcoprime}{GEN nf, GEN x, GEN y}. Given 2 integral ideals $x$ and 
+\fun{GEN}{idealcoprime}{GEN nf, GEN x, GEN y}. Given 2 integral ideals $x$ and
 $y$, returns an algebraic number $\alpha$ such that
 $\alpha x$ is an integral ideal coprime to $y$.
 
@@ -662,10 +662,10 @@ $n$ with ones exactly at the positions $p[1], p[2], \ldots$
 
 
 \fun{GEN}{nfsign}{GEN nf,GEN x} $x$ being a number field element and \kbd{nf}
-any form of number field, return the $0-1$-vector giving the signs of the 
+any form of number field, return the $0-1$-vector giving the signs of the
 $r_1$ real embeddings of $x$, as a \typ{VECSMALL}. Linear algebra functions
 like \tet{F2v_add_inplace} then allow keeping track of signs in series of
-multiplications. 
+multiplications.
 
 If $x$ is a \typ{VEC} of number field elements, return the matrix whose
 colums are the signs of the $x[i]$.
@@ -756,7 +756,7 @@ $x\in\Z_K$.
 \subsec{Computing in the class group}
 
 We compute with arbitrary ideal representatives (in any of the various
-formats seen above), and call 
+formats seen above), and call
 
 \fun{GEN}{bnfisprincipal0}{GEN bnf, GEN x, long flag}. The \kbd{bnf}
 structure already contains informations about the class group in the form
@@ -817,7 +817,7 @@ or \kbd{NULL} (omitted). Make sure to include \tet{nf_GENMAT} in \kbd{flag}!
 \fun{GEN}{isprincipalfact_or_fail}{GEN bnf, GEN C, GEN L, GEN f} is
 for delicate cases, where we must be more clever than \kbd{nf\_FORCE}
 (it is used when trying to increase the accuracy of a \var{bnf}, for
-instance). If performs 
+instance). If performs
 \bprog
   isprincipalfact(bnf,C, L, f, nf_GENMAT);
 @eprog\noindent
@@ -866,7 +866,7 @@ useless in practice. If \kbd{bnr} is associated to some modulus $f$, returns a
 ``small'' ideal in the same class as $x$ in the ray class group modulo $f$.
 The reason why this is useless is that using extended ideals with principal
 part in a computation, there is a simple way to reduce them: simply reduce
-the generator of the principal part in $(\Z_K/f)^*$. 
+the generator of the principal part in $(\Z_K/f)^*$.
 
 \fun{GEN}{famat_to_nf_moddivisor}{GEN nf, GEN g, GEN e, GEN bid}
 given a true \var{nf} associated to a number field $K$, a \var{bid} structure
@@ -895,7 +895,7 @@ solve it one prime divisor of $f$ at a time. Let $v$ the valuation
 associated to a maximal ideal \kbd{pr} and assume $v(f) = k > 0$:
 
 \fun{GEN}{famat_makecoprime}{GEN nf, GEN g, GEN e, GEN pr, GEN prk, GEN expo}
-returns an element in $(\Z_K/\kbd{pr}^k)^*$ congruent to the product 
+returns an element in $(\Z_K/\kbd{pr}^k)^*$ congruent to the product
 $\prod g[i]^{e[i]}$, assumed to be globally coprime to $f$. As above,
 \kbd{expo} is any positive multiple of the exponent of $(\Z_K/\kbd{pr}^k)^*$,
 for instance $(Nv-1)p^{k-1}$, if $p$ is the underlying rational prime. You
@@ -1199,7 +1199,7 @@ provided by a \kbd{struct qfr\_data *}:
   };
 @eprog
 \fun{void}{qfr_data_init}{GEN D, long prec, struct qfr_data *S}
-given a discriminant $D > 0$, initialize $S$ for computations at precision 
+given a discriminant $D > 0$, initialize $S$ for computations at precision
 \kbd{prec} ($\sqrt{D}$ is computed to that initial accuracy).
 
 \noindent All functions below are shallow, and not stack clean.
@@ -1251,9 +1251,9 @@ Convert $x$ to a \typ{QFR} with the correct (logarithmic) distance component.
 \section{Linear algebra over $\Z$}
 \subsec{Hermite and Smith Normal Forms}
 
-\fun{GEN}{ZM_hnf}{GEN x} returns the Hermite Normal Form of the \kbd{ZM} $x$
-(removing $0$ columns), using the \tet{ZM_hnfall} algorithm. If you want the
-true HNF, use \kbd{ZM\_hnfall(x, NULL, 0)}.
+\fun{GEN}{ZM_hnf}{GEN x} returns the upper triangular Hermite Normal Form of the
+\kbd{ZM} $x$ (removing $0$ columns), using the \tet{ZM_hnfall} algorithm. If you
+want the true HNF, use \kbd{ZM\_hnfall(x, NULL, 0)}.
 
 \fun{GEN}{ZM_hnfmod}{GEN x, GEN d} returns the HNF of the \kbd{ZM} $x$
 (removing $0$ columns), assuming the \typ{INT} $d$ is a multiple of the
@@ -1263,18 +1263,28 @@ memory) if the dimension is large, $> 50$ say.
 \fun{GEN}{ZM_hnfmodid}{GEN x, GEN d} returns the HNF of the matrix $(x \mid d
 \text{Id})$ (removing $0$ columns), for a \kbd{ZM} $x$ and a \typ{INT} $d$.
 
-\fun{GEN}{ZM_hnfmodidpart}{GEN x, GEN d} as \tet{ZM_hnfmodid}, but return as
-soon as the diagonal is known, saving time. Hence the entries to the right of
-the pivots need not be reduced, i.e.~they may be large or negative.
+\fun{GEN}{ZM_hnfmodall}{GEN x, GEN d, long flag} low-level function underlying the
+\kbd{ZM\_hnfmod} variants. If \kbd{flag} is $0$, calls \kbd{ZM\_hnfmod(x,d)};
+\kbd{flag} is an or-ed conbination of:
 
-\fun{GEN}{ZM_hnfall}{GEN x, GEN *U, long remove} returns the HNF $H$ of the
-\kbd{ZM} $x$; if $U$ is not \kbd{NULL}, set if to the matrix $U$ such that
-$x U = H$. If $\kbd{remove} = 0$, $H$ is the true HNF, including $0$
-columns; if $\kbd{remove} = 1$, delete the $0$ columns from $H$ but do not
-update $U$ accordingly (so that the integer kernel may still be recovered):
-we no longer have $x U = H$;
-if $\kbd{remove} = 2$, remove $0$ columns from $H$ and update $U$ so that
-$x U = H$. The matrix $U$ is square and invertible unless $\kbd{remove} = 2$.
+\item \tet{hnf_MODID} call \kbd{ZM\_hnfmodid} instead of \kbd{ZM\_hnfmod},
+
+\item \tet{hnf_PART} return as soon as we obtain an upper triangular matrix,
+saving time. The pivots are non-negative and give the diagonal of the true HNF,
+but the entries to the right of the pivots need not be reduced, i.e.~they may be
+large or negative.
+
+\item \tet{hnf_CENTER} returns the centered HNF, where the entries to the right of
+a pivot $p$ are centered residues in $[-p/2, p/2[$, hence smallest possible in
+absolute value, but possibly negative.
+
+\fun{GEN}{ZM_hnfall}{GEN x, GEN *U, long remove} returns the upper triangular HNF
+$H$ of the \kbd{ZM} $x$; if $U$ is not \kbd{NULL}, set if to the matrix $U$ such
+that $x U = H$. If $\kbd{remove} = 0$, $H$ is the true HNF, including $0$ columns;
+if $\kbd{remove} = 1$, delete the $0$ columns from $H$ but do not update $U$
+accordingly (so that the integer kernel may still be recovered): we no longer have
+$x U = H$; if $\kbd{remove} = 2$, remove $0$ columns from $H$ and update $U$ so
+that $x U = H$. The matrix $U$ is square and invertible unless $\kbd{remove} = 2$.
 
 This routine uses a naive algorithm which is potentially exponential in the
 dimension (due to coefficient explosion) but is fast in practice, although it
@@ -1313,7 +1323,7 @@ $B$ a \kbd{ZM}, $t$ an integer, such that $C := tA^{-1}B$ is integral.
 Return $C$.
 
 \fun{GEN}{hnf_solve}{GEN A, GEN B} $A$ an upper triangular \kbd{ZM},
-$B$ a \kbd{ZM} or \kbd{ZC}. Return $A^{-1}B$ if it is integral, and \kbd{NULL} 
+$B$ a \kbd{ZM} or \kbd{ZC}. Return $A^{-1}B$ if it is integral, and \kbd{NULL}
 if it is not.
 
 \fun{GEN}{hnf_invimage}{GEN A, GEN b} $A$ an upper triangular \kbd{ZM},
@@ -1420,7 +1430,7 @@ $[H, U, P]$. Normally useless in library mode.
 \kbd{ZM\_smithall(x, \&U, \&V)} and returns $[U,V,D]$. Normally useless in
 library mode.
 
-\noindent Some related functions over $K[X]$, $K$ a field: 
+\noindent Some related functions over $K[X]$, $K$ a field:
 
 \fun{GEN}{gsmith}{GEN A} the input matrix must be square, returns the
 elementary divisors.

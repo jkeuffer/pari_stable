@@ -112,6 +112,9 @@ enum {
   LLL_INPLACE    = 0x400
 };
 
+/* HNF */
+enum { hnf_MODID = 1, hnf_PART = 2, hnf_CENTER = 4 };
+
 /* for minim */
 enum {
   min_ALL       = 0,

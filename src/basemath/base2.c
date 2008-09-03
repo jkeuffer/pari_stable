@@ -111,6 +111,7 @@ allbase_from_ordmax(nfmaxord_t *S, GEN ordmax, GEN P, GEN f)
 {
   GEN a = NULL, da = NULL, index, P2, E2, D;
   long n = degpol(f), lP = lg(P), i, j, k;
+  int centered = 0;
   for (i=1; i<lP; i++)
   {
     GEN M, db, b = gel(ordmax,i);
@@ -134,7 +135,8 @@ allbase_from_ordmax(nfmaxord_t *S, GEN ordmax, GEN P, GEN f)
       for (  ; j<=n;     j++) gel(M,j) = ZC_Z_mul(gel(a,j), db);
       for (  ; j<=2*n-k; j++) gel(M,j) = ZC_Z_mul(gel(b,j+k-n), da);
       da = mulii(da,db);
-      a = ZM_hnfmodid(M, da);
+      a = ZM_hnfmodall(M, da, hnf_MODID|hnf_CENTER);
+      centered = 1;
     }
     if (DEBUGLEVEL>5) fprintferr("Result for prime %Ps is:\n%Ps\n",P[i],b);
   }
@@ -142,7 +144,8 @@ allbase_from_ordmax(nfmaxord_t *S, GEN ordmax, GEN P, GEN f)
   {
     index = diviiexact(da, gcoeff(a,1,1));
     for (j=2; j<=n; j++) index = mulii(index, diviiexact(da, gcoeff(a,j,j)));
-    a = RgM_Rg_div(ZM_hnfcenter(a), da);
+    if (!centered) a = ZM_hnfcenter(a);
+    a = RgM_Rg_div(a, da);
   }
   else
   {
@@ -697,7 +700,7 @@ ZpX_sylvester_hnf(GEN f1, GEN f2, GEN pm)
     if (j == n) break;
     h = FpX_rem(RgX_shift_shallow(h, 1), f1, pm);
   }
-  return ZM_hnfmodidpart(a, pm);
+  return ZM_hnfmodall(a, pm, hnf_MODID|hnf_PART);
 }
 
 /* polynomial gcd mod p^m (assumes f1 monic) */

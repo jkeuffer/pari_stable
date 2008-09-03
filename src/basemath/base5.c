@@ -116,7 +116,7 @@ makenfabs(GEN rnf)
   M = modulereltoabs(rnf, gel(rnf,7));
   n = degpol(pol);
   M = RgXV_to_RgM(Q_remove_denom(M, &d), n);
-  if (d) M = RgM_Rg_div(ZM_hnfcenter(ZM_hnfmodid(M, d)), d);
+  if (d) M = RgM_Rg_div(ZM_hnfmodall(M, d, hnf_MODID|hnf_CENTER), d);
   else   M = matid(n);
 
   gel(NF,1) = pol;

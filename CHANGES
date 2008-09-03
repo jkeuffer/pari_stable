@@ -363,7 +363,7 @@ BA 41- user variables can now be aliased [#790]
        RgX_recip, RgX_recip_shallow,
        ZC_hnfrem, ZC_hnfremdiv, ZM_det_triangular, ZM_detmult, ZM_equal, ZM_hnf,
        ZM_hnfall, ZM_hnfcenter, ZM_hnflll, ZM_hnfmod, ZM_hnfmodid,
-       ZM_hnfmodidpart, ZM_hnfrem, ZM_hnfremdiv, ZM_hnfperm, ZM_snf, ZM_snfall,
+       ZM_hnfmodall, ZM_hnfrem, ZM_hnfremdiv, ZM_hnfperm, ZM_snf, ZM_snfall,
        ZM_snfall_i, ZM_snf_group, ZM_snfclean
        ZM_lll, ZM_lll_norms, hnfmerge_get_1,
        ZXY_max_lg, ZX_copy, ZX_equal, ZX_max_lg, row_Flm, row_zm,
