@@ -657,7 +657,7 @@ polgalois(GEN x, long prec)
 static GEN
 ZC_galoisapply(GEN nf, GEN x, GEN s, GEN T)
 {
-  return algtobasis(nf, RgX_RgXQ_compo(coltoliftalg(nf,x), s, T));
+  return algtobasis(nf, RgX_RgXQ_eval(coltoliftalg(nf,x), s, T));
 }
 
 static GEN
@@ -1338,7 +1338,7 @@ nfpolred(nfbasic_t *T)
   
   /* update T */
   a = T->bas;
-  for (i=1; i<=n; i++) gel(a,i) = RgX_RgXQ_compo(gel(a,i), rev, x);
+  for (i=1; i<=n; i++) gel(a,i) = RgX_RgXQ_eval(gel(a,i), rev, x);
   mat = RgXV_to_RgM(Q_remove_denom(a, &d), n);
   mat = d? RgM_Rg_div(ZM_hnfmodid(mat,d), d): matid(n);
 

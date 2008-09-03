@@ -95,7 +95,7 @@ RgX_get_0(GEN x)
 
 /* evaluate f(x) mod T */
 GEN
-RgX_RgXQ_compo(GEN f, GEN x, GEN T)
+RgX_RgXQ_eval(GEN f, GEN x, GEN T)
 {
   pari_sp av = avma, limit;
   long l;
@@ -112,7 +112,7 @@ RgX_RgXQ_compo(GEN f, GEN x, GEN T)
     y = grem(gadd(gmul(y,x), gel(f,l)), T);
     if (low_stack(limit,stack_lim(av,1)))
     {
-      if (DEBUGMEM > 1) pari_warn(warnmem, "RgX_RgXQ_compo");
+      if (DEBUGMEM > 1) pari_warn(warnmem, "RgX_RgXQ_eval");
       y = gerepileupto(av, y);
     }
   }

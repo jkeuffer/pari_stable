@@ -212,7 +212,7 @@ spec_compo_powers(GEN P, GEN V, long a, long n, GEN p)
  * V as output by FpXQ_powers(x,l,T,p). For optimal performance, l is as given
  * by brent_kung_optpow */
 GEN
-FpX_FpXQV_compo(GEN P, GEN V, GEN T, GEN p)
+FpX_FpXQV_eval(GEN P, GEN V, GEN T, GEN p)
 {
   pari_sp av = avma;
   long l = lg(V)-1, d = degpol(P);
@@ -224,7 +224,7 @@ FpX_FpXQV_compo(GEN P, GEN V, GEN T, GEN p)
     z = spec_compo_powers(P,V,0,d,p);
     return gerepileupto(av, z);
   }
-  if (l<=1) pari_err(talker,"powers is only [] or [1] in FpX_FpXQV_compo");
+  if (l<=1) pari_err(talker,"powers is only [] or [1] in FpX_FpXQV_eval");
   d -= l;
   z = spec_compo_powers(P,V,d+1,l-1,p);
   while (d >= l-1)
@@ -238,21 +238,21 @@ FpX_FpXQV_compo(GEN P, GEN V, GEN T, GEN p)
   if (DEBUGLEVEL>=8)
   {
     long cnt = 1 + (degpol(P) - l) / (l-1);
-    fprintferr("FpX_FpXQV_compo: %ld FpXQ_mul [%ld]\n", cnt, l-1);
+    fprintferr("FpX_FpXQV_eval: %ld FpXQ_mul [%ld]\n", cnt, l-1);
   }
   return gerepileupto(av, z);
 }
 
 /* Q in Z[X] and x in Fp[X]/(T). Return a lift of Q(x) */
 GEN
-FpX_FpXQ_compo(GEN Q, GEN x, GEN T, GEN p)
+FpX_FpXQ_eval(GEN Q, GEN x, GEN T, GEN p)
 {
   pari_sp av = avma;
   GEN z;
   long d = degpol(Q), rtd;
   if (d < 0) return zeropol(varn(Q));
   rtd = (long) sqrt((double)d);
-  z = FpX_FpXQV_compo(Q, FpXQ_powers(x,rtd,T,p), T,p);
+  z = FpX_FpXQV_eval(Q, FpXQ_powers(x,rtd,T,p), T,p);
   return gerepileupto(av, z);
 }
 
@@ -1190,7 +1190,7 @@ FpX_ffisom(GEN P,GEN Q,GEN l)
   GEN SP, SQ, R;
   FpX_ffintersect(P,Q,degpol(P),l,&SP,&SQ,NULL,NULL);
   R = FpXQ_ffisom_inv(SP,P,l);
-  return gerepileupto(av, FpX_FpXQ_compo(R,SQ,Q,l));
+  return gerepileupto(av, FpX_FpXQ_eval(R,SQ,Q,l));
 }
 
 /* Let l be a prime number, P a ZX irreducible modulo l, MP the matrix of the

@@ -391,7 +391,7 @@ embedding(GEN g, GEN DATA, primedata *S, GEN den, GEN listdelta)
   gp = RgX_deriv(g); av = avma;
   w0 = chinese_retrieve_pol(DATA, S, listdelta);
   w0_Q = centermod(gmul(w0,den), p);
-  h0 = FpXQ_inv(FpX_FpXQ_compo(gp,w0, T,p), T,p); /* = 1/g'(w0) mod (T,p) */
+  h0 = FpXQ_inv(FpX_FpXQ_eval(gp,w0, T,p), T,p); /* = 1/g'(w0) mod (T,p) */
   wpow = NULL; q = sqri(p);
   for(;;)
   {/* Given g,w0,h0 in Z[x], s.t. h0.g'(w0) = 1 and g(w0) = 0 mod (T,p), find
@@ -401,8 +401,8 @@ embedding(GEN g, GEN DATA, primedata *S, GEN den, GEN listdelta)
       fprintferr("lifting embedding mod p^k = %Ps^%ld\n",S->p, Z_pval(q,S->p));
 
     /* w1 := w0 - h0 g(w0) mod (T,q) */
-    if (wpow) a = FpX_FpXQV_compo(g,wpow, T,q);
-    else      a = FpX_FpXQ_compo(g,w0, T,q); /* first time */
+    if (wpow) a = FpX_FpXQV_eval(g,wpow, T,q);
+    else      a = FpX_FpXQ_eval(g,w0, T,q); /* first time */
     /* now, a = 0 (p) */
     a = gmul(gneg(h0), ZX_Z_divexact(a, p));
     w1 = gadd(w0, gmul(p, FpX_rem(a, T,p)));
@@ -411,12 +411,12 @@ embedding(GEN g, GEN DATA, primedata *S, GEN den, GEN listdelta)
     if (ZX_equal(w1_Q, w0_Q))
     {
       GEN G = is_pm1(den)? g: RgX_rescale(g,den);
-      if (gcmp0(RgX_RgXQ_compo(G, w1_Q, T))) break;
+      if (gcmp0(RgX_RgXQ_eval(G, w1_Q, T))) break;
     }
     else if (cmpii(q,maxp) > 0)
     {
       GEN G = is_pm1(den)? g: RgX_rescale(g,den);
-      if (gcmp0(RgX_RgXQ_compo(G, w1_Q, T))) break;
+      if (gcmp0(RgX_RgXQ_eval(G, w1_Q, T))) break;
       if (DEBUGLEVEL) fprintferr("coeff too big for embedding\n");
       return NULL;
     }
@@ -425,7 +425,7 @@ embedding(GEN g, GEN DATA, primedata *S, GEN den, GEN listdelta)
     wpow = FpXQ_powers(w1, rt, T, q2);
     /* h0 := h0 * (2 - h0 g'(w1)) mod (T,q)
      *     = h0 + h0 * (1 - h0 g'(w1)) */
-    a = gmul(gneg(h0), FpX_FpXQV_compo(gp, FpXV_red(wpow,q),T,q));
+    a = gmul(gneg(h0), FpX_FpXQV_eval(gp, FpXV_red(wpow,q),T,q));
     a = ZX_Z_add(FpX_rem(a, T,q), gen_1); /* 1 - h0 g'(w1) = 0 (p) */
     a = gmul(h0, ZX_Z_divexact(a, p));
     h0 = gadd(h0, gmul(p, FpX_rem(a, T,p)));

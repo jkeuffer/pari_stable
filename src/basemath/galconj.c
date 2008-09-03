@@ -412,7 +412,7 @@ monomorphismratlift(GEN P, GEN S, struct galois_lift *gl, GEN frob)
   mask = quadratic_prec_mask(e);
   Pr = FpX_red(P,q);
   Qr = (P==Q)? Pr: FpX_red(Q, q);/*A little speed up for automorphismlift*/
-  W = FpXQ_inv(FpX_FpXQ_compo(ZX_deriv(Pr),S, Qr,q), Qr,q);
+  W = FpXQ_inv(FpX_FpXQ_eval(ZX_deriv(Pr),S, Qr,q), Qr,q);
   gptr[0] = &S;
   gptr[1] = &Wr;
   for (;;)
@@ -428,12 +428,12 @@ monomorphismratlift(GEN P, GEN S, struct galois_lift *gl, GEN frob)
     Spow = FpXQ_powers(Sr, rt, Qr, q);
     if (Wr)
     {
-      W = FpXQ_mul(Wr, FpX_FpXQV_compo(ZX_deriv(Prold),FpXV_red(Spow,qold),Qrold,qold),
+      W = FpXQ_mul(Wr, FpX_FpXQV_eval(ZX_deriv(Prold),FpXV_red(Spow,qold),Qrold,qold),
                    Qrold,qold);
       W = FpXQ_mul(Wr, Fp_FpX_sub(gen_2, W, qold), Qrold,qold);
     }
     Wr = W;
-    S = FpXQ_mul(Wr, FpX_FpXQV_compo(Pr, Spow, Qr, q),Qr,q);
+    S = FpXQ_mul(Wr, FpX_FpXQV_eval(Pr, Spow, Qr, q),Qr,q);
     lbot = avma;
     S = FpX_sub(Sr, S, q);
     if (mask == 1) break;
@@ -500,7 +500,7 @@ inittestlift(GEN plift, GEN Tmod, struct galois_lift *gl,
     autpow = FpXQ_powers(plift,nautpow,gl->TQ,gl->Q);
     ltop = avma;
     for (i = 3; i <= gt->f; i++)
-      gel(gt->pauto,i) = FpX_FpXQV_compo(gel(gt->pauto,i-1),autpow,gl->TQ,gl->Q);
+      gel(gt->pauto,i) = FpX_FpXQV_eval(gel(gt->pauto,i-1),autpow,gl->TQ,gl->Q);
     /*Somewhat paranoid with memory, but this function use a lot of stack.*/
     gerepilecoeffssp(av, ltop, gt->pauto + 3, gt->f-2);
     if (DEBUGLEVEL >= 1) msgtimer("frobenius power");
@@ -929,7 +929,7 @@ sympol_aut_evalmod(GEN sym, long g, GEN sigma, GEN Tp, GEN p)
   s = zeropol(varn(sigma));
   for(i=1; i<=g;i++)
   {
-    if (i > 1) f = FpX_FpXQV_compo(f,pows,Tp,p);
+    if (i > 1) f = FpX_FpXQV_eval(f,pows,Tp,p);
     for(j=1; j<lg(v); j++)
       s = FpX_add(s, FpX_Fp_mul(FpXQ_pow(f,gel(w,j),Tp,p),gel(v,j),p),p);
   }
@@ -1583,7 +1583,7 @@ s4galoisgen(struct galois_lift *gl)
   }
   for (i = 1; i < lg(isom); i++)
     for (j = 1; j < lg(isom); j++)
-      gmael(misom,i,j) = FpX_FpXQ_compo(gel(isominv,i),gel(isom,j),
+      gmael(misom,i,j) = FpX_FpXQ_eval(gel(isominv,i),gel(isom,j),
  				        gel(Tmod,j),p);
   liftpow = cgetg(24, t_VEC);
   av = avma;
@@ -1905,7 +1905,7 @@ galoisgenfixedfield(GEN Tp, GEN Pmod, GEN V, GEN ip, struct galois_borne *gb, GE
     gel(PG,2) = mkvecsmall(2);
     tau = deg1pol_shallow(gen_m1, negi(gel(P,3)), x);
     tau = RgX_to_FpX(tau, ip);
-    tau = FpX_FpXQ_compo(gel(Pmod,gp), tau,Pp,ip);
+    tau = FpX_FpXQ_eval(gel(Pmod,gp), tau,Pp,ip);
     tau = FpX_gcd(Pp, tau,ip);
     tau = FpX_normalize(tau, ip);
     for (g = 1; g <= gp; g++)
@@ -1941,7 +1941,7 @@ galoisgenfixedfield(GEN Tp, GEN Pmod, GEN V, GEN ip, struct galois_borne *gb, GE
       pari_sp btop=avma;
       tau = permtopol(gmael(PG,1,j), PL, PM, Pden, mod, mod2, x);
       tau = RgX_to_FpX(tau, ip);
-      tau = FpX_FpXQ_compo(gel(Pmod,gp), tau,Pp,ip);
+      tau = FpX_FpXQ_eval(gel(Pmod,gp), tau,Pp,ip);
       tau = FpX_gcd(Pp, tau,ip);
       tau = FpX_normalize(tau, ip);
       for (g = 1; g < lg(Pmod); g++)

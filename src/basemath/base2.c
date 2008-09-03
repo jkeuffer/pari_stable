@@ -776,7 +776,7 @@ compmod(GEN f, GEN g, GEN T, GEN p, GEN SCAL)
   if (dg) D = mul_content(D, powiu(dg, degpol(f)));
   q = D ? mulii(p, D): p;
   if (dg) f = FpX_rescale(f, dg, q);
-  z = FpX_FpXQ_compo(f, g, T, q);
+  z = FpX_FpXQ_eval(f, g, T, q);
   if (!D) {
     if (SCAL) z = RgX_Rg_mul(z, SCAL);
     return z;
@@ -887,7 +887,7 @@ Decomp(decomp_t *S, long flag)
   if (!dt) dt = gen_1;
   de = powiu(dt, degpol(a));
   pr = mulii(p, de);
-  e = FpX_FpXQ_compo(FpX_rescale(a, dt, pr), th, S->f, pr);
+  e = FpX_FpXQ_eval(FpX_rescale(a, dt, pr), th, S->f, pr);
   update_den(&e, &de, NULL);
 
   pk = p; k = 1;
@@ -1486,7 +1486,7 @@ nilord(decomp_t *S, GEN dred, long mf, long flag)
       if (!update_phi(S, &l, flag)) break;
     }
     if (!pia) break;
-    oE = Ea; opa = RgX_RgXQ_compo(pia, S->phi, S->f);
+    oE = Ea; opa = RgX_RgXQ_eval(pia, S->phi, S->f);
     if (La > 1)
     { /* change phi such that nu = pia */
       S->phi = gadd(S->phi, opa);

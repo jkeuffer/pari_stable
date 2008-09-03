@@ -3303,10 +3303,10 @@ $p$.
 \kbd{FpXQ\_powers}$(x, n-1, T, p)$, but returns the powers as a an
 $m\times n$ matrix. Usually, we have $m = n = \deg T$.
 
-\fun{GEN}{FpX_FpXQ_compo}{GEN f,GEN x,GEN T,GEN p} returns
+\fun{GEN}{FpX_FpXQ_eval}{GEN f,GEN x,GEN T,GEN p} returns
 $\kbd{f}(\kbd{x})$.
 
-\fun{GEN}{FpX_FpXQV_compo}{GEN f,GEN V,GEN T,GEN p} returns
+\fun{GEN}{FpX_FpXQV_eval}{GEN f,GEN V,GEN T,GEN p} returns
 $\kbd{f}(\kbd{x})$, assuming that \kbd{V} was computed by
 $\kbd{FpXQ\_powers}(\kbd{x}, n, \kbd{T}, \kbd{p})$.
 
@@ -4928,7 +4928,7 @@ scalar, not a constant \typ{POL}.
 \fun{GEN}{RgXQ_caract}{GEN x, GEN T, long v} returns the characteristic
 polynomial of \kbd{Mod(x, T)}, in variable $v$.
 
-\fun{GEN}{RgX_RgXQ_compo}{GEN f,GEN x,GEN T} returns
+\fun{GEN}{RgX_RgXQ_eval}{GEN f,GEN x,GEN T} returns
 $\kbd{f}(\kbd{x})$ modulo $T$.
 
 \fun{GEN}{RgX_translate}{GEN P, GEN c} assume $c$ is a scalar or
