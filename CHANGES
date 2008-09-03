@@ -300,7 +300,7 @@ BA 41- user variables can now be aliased [#790]
 
   Added
     1- new benches: galoisinit, ispower, nffactor, subfields, resultant,
-       partition, aurifeuille, nfhilbert, polmod, combinat, polcyclo, ideal,
+       partition, aurifeuille, nfhilbert, polmod, combinat, subcyclo, ideal,
        polred, qf
     2- split up some large monolithic files: new files
        src/basemath/ RgV.c, FpV.c, ZX.c, ZV.c, concat.c, lll.c, hnf_snf.c
