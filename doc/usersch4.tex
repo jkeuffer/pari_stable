@@ -27,18 +27,20 @@ the PARI library. See the installation guide or the Appendix to the
 include files. A sample Makefile is presented in Appendix~A, and a more
 elaborate one in \kbd{examples/Makefile}. The best way to understand how
 programming is done is to work through a complete example. We will write such
-a program in \secref{se:prog}. Before doing this, a few explanations are in
+a program in~\secref{se:prog}. Before doing this, a few explanations are in
 order.
 
 First, one must explain to the outside world what kind of objects and
 routines we are going to use. This is done with the directive
 
 \bprog
-#include <pari.h>
+#include <pari/pari.h>
 @eprog
 \noindent
-In particular, this header defines the fundamental type for all PARI objects:
-the type \teb{GEN}, which is simply a pointer to \kbd{long}.
+(This assumes that PARI headers have been properly installed in a standard
+place, such as \kbd{/usr/local/include}.) In particular, this defines the
+fundamental type for all PARI objects: the type \teb{GEN}, which is simply a
+pointer to \kbd{long}.
 
 Before any PARI routine is called, one must initialize the system, and in
 particular the PARI stack which is both a scratchboard and a repository for
@@ -80,7 +82,8 @@ garbage collecting purposes, usually destroying them when returning.
 
 $\bullet$ a table of primes (in fact of \emph{differences} between
 consecutive primes), called \teb{diffptr}, of type \kbd{byteptr}
-(pointer to \kbd{unsigned char}). Its use is described in appendix~B.
+(pointer to \kbd{unsigned char}). Its use is described in
+\secref{se:primetable} below.
 
 $\bullet$ access to all the built-in functions of the PARI library.
 These are declared to the outside world when you include \kbd{pari.h}, but
@@ -1928,8 +1931,7 @@ the code should be straightforward to copy and adapt to your needs.
 goes through the same subgroups as \tet{forsubgroup(H = G, B,)}, calling
 \tet{fun(H, E)} for each subgroup $H$.
 
-\item \tet{forprime}, for which we refer you to Appendix B (the section about
-PARI's private prime table)
+\item \tet{forprime}, for which we refer you to the next subsection.
 
 \item \tet{forvec}, for which we provide a convenient iterator. To
 initialize the analog of \kbd{forvec(X = v, ..., flag)}, call
@@ -1956,6 +1958,77 @@ enumerated, and you can expect to run over more than $10^9$ tuples per
 minute. If speed is critical and you know that all integers involved are
 non-negative and going to remain less than $2^{32}$ or $2^{64}$, write a
 simple direct backtracking algorithm using $C$ \kbd{long}s.
+
+\subsec{Iterating over primes}
+
+After \kbd{pari\_init(size, maxprime)} is called, a ``prime table'' is
+initialized with the successive \emph{differences} of primes up to (possibly
+just a little beyond) \kbd{maxprime}. The prime table occupies roughly
+$\kbd{maxprime}/\log(\kbd{maxprime})$ bytes in memory, so be sensible when
+choosing \kbd{maxprime}; it is $500000$ by default under \kbd{gp}. In any
+case, the implementation requires that $\tet{maxprime} < 2^{\B} - 2048$,
+whatever memory is available. If you need more primes, use \tet{nextprime}.
+
+\noindent Some convenience functions:
+
+\fun{ulong}{maxprime}{} the largest prime computable using our prime table.
+
+\fun{void}{maxprime_check}{ulong B} raise an error if \kbd{maxprime()} is $< B$.
+
+After the following initializations (the names $p$ and \var{ptr} are
+arbitrary of course)
+\bprog
+byteptr ptr = diffptr;
+ulong p = 0;
+@eprog
+\noindent calling the macro \tet{NEXT_PRIME_VIADIFF_CHECK}$(p, \var{ptr})$
+repeatedly will assign the successive prime numbers to $p$. Overrunning the
+prime table boundary will raise the error \tet{primer1}, which will just
+print the error message:
+
+\kbd{*** not enough precomputed primes}
+
+\noindent then abort the computation. The alternative macro
+\tet{NEXT_PRIME_VIADIFF} operates in the same way, but will omit that check,
+and is slightly faster. It should be used in the following way:
+%
+\bprog
+byteptr ptr = diffptr;
+ulong p = 0;
+
+if (maxprime() < goal) pari_err(primer1); /*@Ccom not enough primes */
+while (p <= goal) /*@Ccom run through all primes up to \kbd{goal} */
+{
+  NEXT_PRIME_VIADIFF(p, ptr);
+  ...
+}
+@eprog\noindent
+Here, we use the general error handling function \kbd{pari\_err} (see
+\secref{se:err}), with the codeword \kbd{primer1}, raising the ``not enough
+primes'' error. This could be rewritten as
+\bprog
+maxprime_check(goal);
+while (p <= goal) /*@Ccom run through all primes up to \kbd{goal} */
+{
+  NEXT_PRIME_VIADIFF(p, ptr);
+  ...
+}
+@eprog
+
+\fun{bytepr}{initprimes}{ulong maxprime} computes a prime table (of all prime
+differences for $p < maxp$) on the fly. You may assign it to \kbd{diffptr} or
+to a similar variable of your own. Beware that before changing \kbd{diffptr},
+you must free the (\kbd{malloc}ed) precomputed table first; and then all
+pointers into the old table will become invalid.
+
+PARI currently guarantees that the first 6547 primes, up to and including
+65557, are present in the table, even if you set \kbd{maxprime} to zero.
+in the \kbd{pari\_init} call.
+
+\fun{ulong}{init_primepointer}{ulong a, ulong p, byteptr *ptr}
+assume \kbd{*ptr} is inside of a \kbd{diffptr} containing the succesive
+differences between primes, and $p$ is the current prime (up to \kbd{*ptr}
+excluded). Returns return the smallest prime $\geq a$, and update \kbd{ptr}.
 
 \subsec{Numerical analysis}
 
