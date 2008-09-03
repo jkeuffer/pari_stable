@@ -7,7 +7,7 @@ PERL  = $perl
 
 MACROS= paricfg.tex parimacro.tex
 USERS_TEX=\$(MACROS) appa.tex users.tex usersch1.tex usersch2.tex usersch3.tex
-PARI_TEX=\$(MACROS) libpari.tex appb.tex appc.tex appd.tex usersch4.tex usersch5.tex usersch6.tex usersch7.tex
+PARI_TEX=\$(MACROS) libpari.tex appb.tex appd.tex usersch4.tex usersch5.tex usersch6.tex usersch7.tex
 
 doc all: develop.dvi libpari.dvi users.dvi refcard.ps tutorial.dvi
 docps: develop.ps libpari.ps refcard.ps tutorial.ps users.ps INSTALL.ps
@@ -120,7 +120,7 @@ dumbpod: appa.dumbpod usersch1.dumbpod usersch2.dumbpod usersch3.dumbpod
 
 manpages: dumbpod appa.3 usersch1.3 usersch2.3 usersch3.3
 
-html: dumbpod appa.html appb.html appc.html appd.html usersch1.html usersch2.html usersch3.html
+html: dumbpod appa.html appb.html appd.html usersch1.html usersch2.html usersch3.html
 
 .dumbpod.3:
 	pod2man --section=3 --center="PARI/GP Manual, part \$*" --release=$version.$patch --lax \$*.dumbpod > tmp_man && mv tmp_man \$*.3
