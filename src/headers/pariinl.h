@@ -590,14 +590,13 @@ cyclic_perm(long n, long d)
   return perm;
 }
 
-/* Multiply (compose) two permutations.
- * Can be used if s is a t_VEC but no copy */
+/* Multiply (compose) two permutations */
 INLINE GEN
 perm_mul(GEN s, GEN t)
 {
   GEN u;
   long i, l = lg(t);
-  u = cgetg(l, typ(s));
+  u = cgetg(l, t_VECSMALL);
   for (i = 1; i < l; i++) u[i] = s[ t[i] ];
   return u;
 }

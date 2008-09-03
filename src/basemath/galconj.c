@@ -697,7 +697,7 @@ galois_test_perm(struct galois_test *td, GEN pf)
 {
   pari_sp av = avma;
   long i, j, n = lg(td->L)-1;
-  GEN V, P = perm_mul(td->L, pf);
+  GEN V, P = vecpermute(td->L, pf);
   for (i = 1; i < n; i++)
   {
     long ord = td->order[i];
