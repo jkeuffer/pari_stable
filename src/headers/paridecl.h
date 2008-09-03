@@ -1672,6 +1672,7 @@ GEN     uu32toi(ulong a, ulong b);
 /* groupid.c */
 
 long    group_ident(GEN G, GEN S);
+long    group_ident_trans(GEN G, GEN S);
 
 /* hash.c */
 

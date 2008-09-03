@@ -572,14 +572,6 @@ GEN     gsubst_expr(GEN pol, GEN from, GEN to);
 GEN     poltoser(GEN x, long v, long prec);
 GEN     rfractoser(GEN x, long v, long prec);
 
-/* groupid.c */
-
-long    group_ident_i(GEN G, GEN S);
-long    group_ident_trans(GEN G, GEN S);
-long    groupelts_sumorders(GEN S);
-GEN     vecgroup_idxlist(GEN L, long order);
-long    vecgroup_sumorders(GEN L);
-
 /* ifactor1.c */
 
 GEN     ellfacteur(GEN n, int insist);

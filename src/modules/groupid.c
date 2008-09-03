@@ -16,7 +16,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "paripriv.h"
 
-long
+static long
 groupelts_sumorders(GEN S)
 {
   long i, s = 0;
@@ -24,7 +24,7 @@ groupelts_sumorders(GEN S)
   return s;
 }
 
-long
+static long
 vecgroup_sumorders(GEN L)
 {
   long i, s = 0;
@@ -76,7 +76,7 @@ indexgroupcentre(GEN G, GEN Z, const long *good, const long *bad)
   return 0;
 }
 
-GEN
+static GEN
 vecgroup_idxlist(GEN L, long order)
 {
   pari_sp ltop=avma;
@@ -97,7 +97,7 @@ vecgroup_idxlist(GEN L, long order)
  * Ulrich Besche, Bettina Eick and Eamonn O'Brien.
  */
 
-long
+static long
 group_ident_i(GEN G, GEN S)
 {
   long n = group_order(G);
