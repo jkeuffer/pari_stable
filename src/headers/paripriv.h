@@ -642,7 +642,6 @@ long    logint(GEN B, GEN y, GEN *ptq);
 
 /* FpX.c */
 
-GEN     FpXQ_sqrtl(GEN a, GEN l, GEN T, GEN p, GEN q, long e, GEN r, GEN y, GEN m);
 GEN     FpX_gcd_check(GEN x, GEN y, GEN p);
 
 /* polarit3.c */
