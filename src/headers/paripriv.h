@@ -535,10 +535,6 @@ void    writenamedGEN(GEN x, const char *s, FILE *f);
 
 /* galconj.c */
 
-GEN     fixedfieldfactmod(GEN Sp, GEN p, GEN Tmod);
-GEN     fixedfieldinclusion(GEN O, GEN PL);
-GEN     fixedfieldorbits(GEN O, GEN L);
-GEN     fixedfieldsympol(GEN O, GEN mod, GEN l, GEN p, long v);
 GEN     galoiscosets(GEN O, GEN perm);
 long    intheadlong(GEN x, GEN mod);
 long    isomborne(GEN P, GEN den, GEN p);
@@ -547,8 +543,6 @@ GEN     matheadlong(GEN W, GEN mod);
 GEN     matrixnorm(GEN M, long prec);
 GEN     monomorphismlift(GEN P, GEN S, GEN Q, GEN p, long e);
 long    polheadlong(GEN P, long n, GEN mod);
-GEN     sympol_aut_evalmod(GEN sym, long g, GEN sigma, GEN Tp, GEN p);
-GEN     sympol_eval(GEN v, GEN NS);
 GEN     vandermondeinverseprep(GEN L);
 
 /* galois.c */

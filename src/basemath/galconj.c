@@ -903,7 +903,7 @@ sympol_eval_newtonsum(long e, GEN O, GEN mod)
   return PL;
 }
 
-GEN
+static GEN
 sympol_eval(GEN v, GEN NS)
 {
   pari_sp av = avma;
@@ -917,7 +917,7 @@ sympol_eval(GEN v, GEN NS)
 /* Let sigma be an automorphism of L (as a polynomial with rational coefs)
  * Let 'sym' be a symmetric polynomial defining alpha in L.
  * We have alpha = sym(x,sigma(x),,,sigma^(g-1)(x)). Compute alpha mod p */
-GEN
+static GEN
 sympol_aut_evalmod(GEN sym, long g, GEN sigma, GEN Tp, GEN p)
 {
   pari_sp ltop=avma;
@@ -939,7 +939,7 @@ sympol_aut_evalmod(GEN sym, long g, GEN sigma, GEN Tp, GEN p)
 /* Let Sp be as computed with sympol_aut_evalmod
  * Let Tmod be the factorisation of T mod p.
  * Return the factorisation of the minimal polynomial of S mod p w.r.t. Tmod */
-GEN
+static GEN
 fixedfieldfactmod(GEN Sp, GEN p, GEN Tmod)
 {
   long i, l = lg(Tmod);
@@ -996,7 +996,7 @@ sympol_is1to1_lg(GEN NS, long n)
  * l | mod and p two prime numbers. Return a vector [sym,s,P] where:
  * sym is a sympol, s is the set of images of sym on O and
  * P is the polynomial with roots s. */
-GEN
+static GEN
 fixedfieldsympol(GEN O, GEN mod, GEN l, GEN p, long v)
 {
   pari_sp ltop=avma;
@@ -1021,7 +1021,7 @@ fixedfieldsympol(GEN O, GEN mod, GEN l, GEN p, long v)
 
 /* Let O a set of orbits as indices and L the corresponding roots.
  * Return the set of orbits as roots. */
-GEN
+static GEN
 fixedfieldorbits(GEN O, GEN L)
 {
   GEN S = cgetg(lg(O), t_MAT);
@@ -1030,7 +1030,7 @@ fixedfieldorbits(GEN O, GEN L)
   return S;
 }
 
-GEN
+static GEN
 fixedfieldinclusion(GEN O, GEN PL)
 {
   long i, j, f = lg(O)-1, g = lg(O[1])-1;
