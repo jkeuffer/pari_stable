@@ -41,3 +41,5 @@ do(w) =
   bnrstark(bnrinit(bnf, mod, 1), 0);
 }			
 for(i = 1, #v, print(v[i]": "do(v[i]))); 
+
+\\ quadray(31897,1)
