@@ -20,8 +20,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**                           GALOIS CONJUGATES        		        **/
 /**									**/
 /*************************************************************************/
-GEN
-galoisconj(GEN nf)
+static GEN
+galoisconj1(GEN nf)
 {
   GEN x = get_nfpol(nf, &nf), y, z;
   long i, lz, v = varn(x);
@@ -136,7 +136,6 @@ galoisconj2(GEN nf, long prec)
 /*************************************************************************/
 /**									**/
 /**                           GALOISCONJ4             		        **/
-/**									**/
 /**                                                                     **/
 /*************************************************************************/
 /*DEBUGLEVEL:
@@ -2135,7 +2134,7 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
 /* T: polynomial or nf, den multiple of common denominator of solutions or
  * NULL (unknown). If T is nf, and den unknown, use den = denom(nf.zk) */
 static GEN
-galoisconj4(GEN T, GEN den, long flag)
+galoisconj4_main(GEN T, GEN den, long flag)
 {
   pari_sp ltop = avma;
   GEN nf, G, L, M, aut;
@@ -2245,25 +2244,36 @@ numberofconjugates(GEN T, long pinit)
   if (DEBUGLEVEL >= 2) fprintferr("NumberOfConjugates:c=%ld,p=%ld\n", c, p);
   avma = av; return c;
 }
+static GEN
+galoisconj4(GEN nf, GEN d)
+{
+  pari_sp av = avma;
+  GEN G, T;
+  G = galoisconj4_main(nf, d, 0);
+  if (typ(G) != t_INT) return G; /* Success */
+  avma = av; T = get_nfpol(nf, &nf);
+  G = cgetg(2, t_COL); gel(G,1) = pol_x(varn(T)); return G; /* Fail */
+
+}
+
+/* d multipllicative bound for the automorphism's denominators */
+GEN
+galoisconj(GEN nf, GEN d)
+{
+  pari_sp av = avma;
+  GEN G = galoisconj4_main(nf, d, 0);
+  if (typ(G) != t_INT) return G; /* Success */
+  avma = av; return galoisconj1(nf);
+}
 
 GEN
 galoisconj0(GEN nf, long flag, GEN d, long prec)
 {
-  pari_sp av = avma;
-  GEN G, T;
-
-  switch(flag)
-  {
-    case 1: return galoisconj(nf);
+  switch(flag) {
+    case 0: return galoisconj(nf, d);
+    case 1: return galoisconj1(nf);
     case 2: return galoisconj2(nf, prec);
-    case 4:
-    case 0:
-      G = galoisconj4(nf, d, 0);
-      if (typ(G) != t_INT) return G; /* Success */
-      avma = av;
-      if (flag == 0) return galoisconj(nf);
-      T = get_nfpol(nf, &nf);
-      G = cgetg(2, t_COL); gel(G,1) = pol_x(varn(T)); return G;
+    case 4: return galoisconj4(nf, d);
   }
   pari_err(flagerr, "nfgaloisconj");
   return NULL; /*not reached*/
@@ -2296,7 +2306,7 @@ checkgal(GEN gal)
 GEN
 galoisinit(GEN nf, GEN den)
 {
-  GEN G = galoisconj4(nf, den, 1);
+  GEN G = galoisconj4_main(nf, den, 1);
   return (typ(G) == t_INT)? gen_0: G;
 }
 

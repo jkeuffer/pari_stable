@@ -342,7 +342,7 @@ entree oldfonctions[]={
 {"frac",1,(void*)gfrac,2,"G","frac(x)=fractional part of x=x-floor(x)."},
 {"galois",1,(void*)polgalois,6,"Gp","galois(x)=Galois group of the polynomial x (see manual for group coding)."},
 {"galoisapply",3,(void*)galoisapply,6,"GGG","galoisapply(nf,aut,x)=Apply the Galois automorphism sigma (polynomial or polymod) to the object x (element or ideal) in the number field nf."},
-{"galoisconj",1,(void*)galoisconj,6,"G","galoisconj(nf)=list of conjugates of a root of the polynomial x=nf[1] in the same number field, using p-adics, LLL on integral basis (not always complete)."},
+{"galoisconj",1,(void*)galoisconj,6,"GDG","galoisconj(nf)=list of conjugates of a root of the polynomial x=nf[1] in the same number field, using p-adics, LLL on integral basis (not always complete)."},
 {"galoisconj1",0,(void*)suppressed,6,"G","galoisconj1(nf)=list of conjugates of a root of the polynomial x=nf[1] in the same number field nf, using complex numbers, LLL on integral basis (not always complete)."},
 {"galoisconjforce",0,(void*)suppressed,6,"G","galoisconjforce(nf)=list of conjugates of a root of the polynomial x=nf[1] in the Galois number field nf, using p-adics, LLL on integral basis. Guaranteed to be complete if the field is Galois, otherwise there is an infinite loop."},
 {"gamh",1,(void*)ggamd,3,"Gp","gamh(x)=gamma of x+1/2 (x integer)."},

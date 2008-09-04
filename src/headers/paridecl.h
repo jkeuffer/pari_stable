@@ -1452,7 +1452,7 @@ int     is_Z_factor(GEN f);
 GEN     checkgal(GEN gal);
 GEN     checkgroup(GEN g, GEN *S);
 GEN     galois_group(GEN gal);
-GEN     galoisconj(GEN nf);
+GEN     galoisconj(GEN nf, GEN d);
 GEN     galoisconj0(GEN nf, long flag, GEN d, long prec);
 GEN     galoisexport(GEN gal, long format);
 GEN     galoisfixedfield(GEN gal, GEN v, long flag, long y);

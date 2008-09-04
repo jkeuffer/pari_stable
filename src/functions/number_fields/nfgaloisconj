@@ -15,9 +15,10 @@ Doc: $\var{nf}$ being a number field as output by \kbd{nfinit}, computes the
  $\var{nf}$ can simply be a polynomial.
 
  If no flags or $\fl=0$, use a combination of flag $4$ and $1$ and the result
- is always complete,
+ is always complete. There is no point whatsoever in using the other flags.
 
- If $\fl=1$, use \kbd{nfroots}.
+ If $\fl=1$, use \kbd{nfroots}: a little slow, but guaranteed to work in
+ polynomial time.
 
  If $\fl=2$ (OBSOLETE), use complex approximations to the roots and an integral
  \idx{LLL}. The result is not guaranteed to be complete: some
@@ -26,7 +27,8 @@ Doc: $\var{nf}$ being a number field as output by \kbd{nfinit}, computes the
  and increasing the default precision may help. This variant is slow and
  unreliable: don't use it.
 
- If $\fl=4$, use \kbd{galoisinit}. If the field is Galois with weakly
+ If $\fl=4$, use \kbd{galoisinit}: very fast, but only applies to (most) Galois
+ fields. If the field is Galois with weakly
  super-solvable Galois group (see \tet{galoisinit}), return the complete list
  of automorphisms, else only the identity element. If present, $d$ is assumed to
  be a multiple of the least common denominator of the conjugates expressed as
@@ -47,9 +49,6 @@ Doc: $\var{nf}$ being a number field as output by \kbd{nfinit}, computes the
  rnfgaloisconj(K, x^4 - y*x^3 - 3*x^2 + y*x + 1)  \\ K-automorphisms of L
  @eprog
 
-Variant:
- \fun{long}{numberofconjugates}{GEN T, long pinit} returns a quick
- multiple for the number of  $\Q$-automorphism of the (integral, monic)
- \typ{POL} $T$, from modular factorizations, starting from prime \kbd{pinit}
- (you can set it to $2$). This upper bounds almost always coincides with the
- number of conjugates.
+Variant: Use directly
+ \fun{GEN}{galoisconj}{GEN nf, GEN d}, corresponding to $\fl = 0$, the others
+ only have historical interest.

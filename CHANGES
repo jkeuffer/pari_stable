@@ -300,6 +300,8 @@ BA 41- user variables can now be aliased [#790]
    76- kill(z) no longer destroys user variable, only resets them to their
        "undefined" value (as z = 'z would). It would be largely obsoleted
         were there any other means of deleting addhelp information from a symbol
+   77- [library] prototype of galoisconj [ add one argument ], and made it
+       correspond to the default nfgaloisconj flag
 
   Added
     1- new benches: galoisinit, ispower, nffactor, subfields, resultant,

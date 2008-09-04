@@ -962,7 +962,7 @@ return the associated \var{bnr}, and set $H$ to the associated subgroup. If
 \kbd{addgen} is $1$, make sure that if the \var{bnr} needed to be computed,
 then it contains generators.
 
-\subsec{Miscellaneous routines}
+\subsec{Relative equations, Galois conjugates}
 
 \fun{GEN}{rnfequationall}{GEN A, GEN B, long *pk, GEN *pLPRS} $A$ is either an
 \var{nf} type (corresponding to a number field $K$) or an irreducible \kbd{ZX}
@@ -995,6 +995,15 @@ converted to rationals.
 
 \noindent For instance, \kbd{rnfequationall} applies \tet{rnf_fix_pol} to its
 argument $B$ (with \kbd{lift} equal to $1$).
+
+\fun{long}{numberofconjugates}{GEN T, long pinit} returns a quick
+multiple for the number of  $\Q$-automorphism of the (integral, monic)
+\typ{POL} $T$, from modular factorizations, starting from prime \kbd{pinit}
+(you can set it to $2$). This upper bounds often coincides with the
+actual number of conjugates. Of course, you should use \tet{nfgaloisconj}
+to be sure.
+
+\subsec{Miscellaneous routines}
 
 \fun{GEN}{bnfisintnormabs}{GEN bnf, GEN a} as \tet{bnfisintnorm}, but returns a
 complete system of solutions modulo units of the absolute norm equation

@@ -210,6 +210,7 @@ This file lists the incompatible changes between Version 2.x and older versions
     return a result as precise as possible given the input: 0 * 1. --> gen_0
   - deprecated global constants gi; use mulcxI, gen_I() or mkcomplex().
   - deprecated global constants geuler & gpi; use mpeuler() & mppi().
+  - changed prototype of galoisconj: galoisconj(x) -> galoisconj(x,NULL)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
