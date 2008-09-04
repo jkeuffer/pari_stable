@@ -327,6 +327,7 @@ BA 41- user variables can now be aliased [#790]
        RgX_disc, quad_disc, qfb_disc,
        ZpX_liftfact, ZpX_gcd, ZpX_reduced_resultant, ZpX_reduced_resultant_fast
        Fp_center, FpM_center, FpV_center
+       Fp_ratlift, FpM_ratlift, FpX_ratlift
        FpM_FpC_mul_FpX
        FqX_roots, FpX_factorff
        ZC_ZV_mul, ZM_is_identity, ZM_copy, ZM_neg, ZM_add, ZM_mul, ZM_pow

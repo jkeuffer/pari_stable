@@ -2569,7 +2569,7 @@ bestappr_mod(GEN x, GEN A, GEN B)
     {
       pari_sp av = avma;
       GEN a,b,d, t = cgetg(3, t_FRAC);
-      if (! ratlift(gel(x,2), gel(x,1), &a,&b,A,B)) return NULL;
+      if (! ratlift(gel(x,2), gel(x,1), A,B, &a,&b)) return NULL;
       if (is_pm1(b)) return icopy_avma(a, av);
       d = gcdii(a,b);
       if (!is_pm1(d)) { avma = av; return NULL; }

@@ -375,7 +375,7 @@ poltopermtest(GEN f, struct galois_lift *gl, GEN pf)
 static long
 monoratlift(GEN S, GEN q, GEN qm1old,struct galois_lift *gl, GEN frob)
 {
-  GEN tlift = polratlift(S,q,qm1old,qm1old,gl->den);
+  GEN tlift = FpX_ratlift(S,q,qm1old,qm1old,gl->den);
   if (tlift)
   {
     pari_sp ltop = avma;

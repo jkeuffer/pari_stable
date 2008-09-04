@@ -3897,6 +3897,46 @@ The original \kbd{*H} is destroyed.
 
 \fun{int}{ZX_incremental_CRT}{GEN *H, GEN Hp, GEN q, GEN qp, ulong p}
 
+\subsec{Rational reconstruction}
+
+\fun{int}{Fp_ratlift}{GEN x, GEN m, GEN amax, GEN bmax, GEN *a, GEN *b}
+Assume that $0 \leq x < m$, $\kbd{amax} \geq 0$, and $\kbd{bmax} > 0$ are
+\typ{INT}s, and that $2 \kbd{amax} \kbd{bmax} < m$. Attempts to recognize
+$x$ as a rational $a/b$, i.e. to find \typ{INT}s $a$ and $b$ such that
+
+\item $a \equiv b x$ modulo $m$,
+
+\item $|a| \leq \kbd{amax}$, $0 < b \leq \kbd{bmax}$,
+
+\item $\gcd(m,b) = \gcd(a,b)$.
+
+\noindent If unsuccessful, the routine returns $0$ and leaves $a$, $b$
+unchanged; otherwise it returns $1$ and sets $a$, $b$.
+
+In almost all applications, we actually know that a solution exists, as well
+as a non-zero multiple $B$ of $b$, and $m = p^\ell$ is a prime power, for a
+prime $p$ chosen coprime to $B$ hence to $b$. Under the single assumption
+$\gcd(m,b) = 1$, if a solution $a,b$ exists satisfying the three conditions
+above, then it is unique.
+
+\fun{int}{ratlift}{GEN x, GEN m, GEN amax, GEN bmax, GEN *a, GEN *b}
+call \tet{Fp_ratlift} after explicitly checking all preconditions.
+
+\fun{GEN}{FpM_ratlift}{GEN M, GEN m, GEN amax, GEN bmax, GEN denom}
+given an \kbd{FpM} modulo $m$ with reduced or \kbd{Fp\_center}-ed entries,
+reconstructs a matrix with rational coefficients by applying \kbd{Fp\_ratlift}
+to all entries. Assume that all preconditions for \kbd{Fp\_ratlift} are
+satisfied, as well $\gcd(m,b) = 1$ (so that the solution is unique if it
+exists). Return \kbd{NULL} if the reconstruction fails, and the rational
+matrix otherwise. If \kbd{denom} is not \kbd{NULL} check further that all
+denominators divide \kbd{denom}.
+
+The functions is not stack clean if one coefficients of $M$ is negative
+(centered residues), but still suitable for \kbd{gerepileupto}.
+
+\fun{GEN}{FpX_ratlift}{GEN P, GEN m, GEN amax, GEN bmax, GEN denom} as
+\kbd{FpM\_ratlift}, for an \kbd{FpX} $P$.
+
 \subsec{Hensel lifts}
 
 \fun{GEN}{padicsqrtlift}{GEN a, GEN S, GEN p, long e} returns a \typ{INT}

@@ -1884,7 +1884,7 @@ GEN     member_zkst(GEN bid);
 /* mp.c */
 
 ulong   Fl_inv(ulong x, ulong p);
-int     Fp_ratlift(GEN x, GEN m, GEN *a, GEN *b, GEN amax, GEN bmax);
+int     Fp_ratlift(GEN x, GEN m, GEN amax, GEN bmax, GEN *a, GEN *b);
 int     absi_cmp(GEN x, GEN y);
 int     absi_equal(GEN x, GEN y);
 int     absr_cmp(GEN x, GEN y);
@@ -1936,7 +1936,7 @@ GEN     mulss(long x, long y);
 GEN     mului(ulong x, GEN y);
 GEN     mulur(ulong x, GEN y);
 GEN     muluu(ulong x, ulong y);
-int     ratlift(GEN x, GEN m, GEN *a, GEN *b, GEN amax, GEN bmax);
+int     ratlift(GEN x, GEN m, GEN amax, GEN bmax, GEN *a, GEN *b);
 GEN     remi2n(GEN x, long n);
 double  rtodbl(GEN x);
 GEN     shifti(GEN x, long n);
@@ -1958,6 +1958,8 @@ long    vals(ulong x);
 
 /* nffactor.c */
 
+GEN     FpM_ratlift(GEN M, GEN mod, GEN amax, GEN bmax, GEN denom);
+GEN     FpX_ratlift(GEN P, GEN mod, GEN amax, GEN bmax, GEN denom);
 GEN     nffactor(GEN nf,GEN x);
 GEN     nffactormod(GEN nf,GEN pol,GEN pr);
 GEN     nfgcd(GEN P, GEN Q, GEN nf, GEN den);

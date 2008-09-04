@@ -50,7 +50,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /* #define DEBUG_RATLIFT */
 
 int
-ratlift(GEN x, GEN m, GEN *a, GEN *b, GEN amax, GEN bmax)
+ratlift(GEN x, GEN m, GEN amax, GEN bmax, GEN *a, GEN *b)
 {
   pari_sp av = avma;
   if ((typ(x) | typ(m) | typ(amax) | typ(bmax)) != t_INT) pari_err(arither1);
@@ -65,7 +65,7 @@ ratlift(GEN x, GEN m, GEN *a, GEN *b, GEN amax, GEN bmax)
    * but let's leave this up to the caller */
   if (signe(x) < 0 || cmpii(x,m) >= 0)
     pari_err(talker, "ratlift: must have 0 <= x < m, found\n\tx=%Ps\n\tm=%Ps\n", x,m);
-  avma = av; return Fp_ratlift(x, m, a, b, amax, bmax);
+  avma = av; return Fp_ratlift(x, m, amax, bmax, a, b);
 }
 
 static ulong
@@ -94,7 +94,7 @@ get_vmax(GEN r, long lb, long lbb)
 
 /* Assume x,m,amax >= 0,bmax > 0 are t_INTs, 0 <= x < m, 2 amax * bmax < m */
 int
-Fp_ratlift(GEN x, GEN m, GEN *a, GEN *b, GEN amax, GEN bmax)
+Fp_ratlift(GEN x, GEN m, GEN amax, GEN bmax, GEN *a, GEN *b)
 {
   GEN d, d1, v, v1, q, r;
   pari_sp av = avma, av1, lim;
@@ -104,23 +104,12 @@ Fp_ratlift(GEN x, GEN m, GEN *a, GEN *b, GEN amax, GEN bmax)
   int lhmres;             /* Lehmer stage return value */
 
   /* special cases x=0 and/or amax=0 */
-  if (!signe(x))
-  {
-    if (a) *a = gen_0;
-    if (b) *b = gen_1;
-    return 1;
-  }
-  else if (!signe(amax))
-    return 0;
+  if (!signe(x)) { *a = gen_0; *b = gen_1; return 1; }
+  if (!signe(amax)) return 0;
   /* assert: m > x > 0, amax > 0 */
 
   /* check whether a=x, b=1 is a solution */
-  if (cmpii(x,amax) <= 0)
-  {
-    if (a) *a = icopy(x);
-    if (b) *b = gen_1;
-    return 1;
-  }
+  if (cmpii(x,amax) <= 0) { *a = icopy(x); *b = gen_1; return 1; }
 
   /* There is no special case for single-word numbers since this is
    * mainly meant to be used with large moduli. */
@@ -214,19 +203,14 @@ Fp_ratlift(GEN x, GEN m, GEN *a, GEN *b, GEN amax, GEN bmax)
 	avma = av;
 	if (cmpii(d,amax) > 0) return 0; /* done, not found */
         /* done, found */
-        if (a) { *a = icopy(d); setsigne(*a,-s); }
-        if (b) *b = icopy(v);
-        return 1;
+        *a = icopy(d); setsigne(*a,-s);
+        *b = icopy(v); return 1;
       }
       if (cmpii(d1,amax) <= 0)
       { /* done, found */
 	avma = av;
-	if (a)
-	{
-	  if (signe(d1)) { *a = icopy(d1); setsigne(*a,s); } else *a = gen_0;
-	}
-	if (b) *b = icopy(v1);
-	return 1;
+        if (signe(d1)) { *a = icopy(d1); setsigne(*a,s); } else *a = gen_0;
+	*b = icopy(v1); return 1;
       }
     } /* lhmres != 0 */
 
@@ -246,12 +230,8 @@ Fp_ratlift(GEN x, GEN m, GEN *a, GEN *b, GEN amax, GEN bmax)
       if (cmpii(d1,amax) <= 0) /* done, found */
       {
 	avma = av;
-	if (a)
-	{
-	  if (signe(d1)) { *a = icopy(d1); setsigne(*a,s); } else *a = gen_0;
-	}
-	if (b) *b = icopy(v1);
-	return 1;
+	if (signe(d1)) { *a = icopy(d1); setsigne(*a,s); } else *a = gen_0;
+	*b = icopy(v1); return 1;
       }
     }
 
@@ -315,26 +295,18 @@ Fp_ratlift(GEN x, GEN m, GEN *a, GEN *b, GEN amax, GEN bmax)
       avma = av;
       if (cmpii(d,amax) > 0) return 0; /* done, not found */
       /* done, found */
-      if (a) { *a = icopy(d); setsigne(*a,-s); }
-      if (b) *b = icopy(v);
-      return 1;
+      *a = icopy(d); setsigne(*a,-s);
+      *b = icopy(v); return 1;
     }
     if (cmpii(d1,amax) <= 0)
     { /* done, found */
       avma = av;
-      if (a)
-      {
-	if (signe(d1)) { *a = icopy(d1); setsigne(*a,s); } else *a = gen_0;
-      }
-      if (b) *b = icopy(v1);
-      return 1;
+      if (signe(d1)) { *a = icopy(d1); setsigne(*a,s); } else *a = gen_0;
+      *b = icopy(v1); return 1;
     }
   } /* while */
 
-  /* get here when we have run into d1 == 0 before returning... in fact,
-   * this cannot happen.
-   */
-  pari_err(talker, "ratlift failed to catch d1 == 0\n");
-  /* NOTREACHED */
-  return 0;
+  /* We have run into d1 == 0 before returning. This cannot happen */
+  pari_err(bugparier, "ratlift failed to catch d1 == 0\n");
+  return 0; /* NOTREACHED */
 }

@@ -54,17 +54,79 @@ typedef struct
   GEN dn;
 } nfcmbf_t;
 
+/*******************************************************************/
+/*              RATIONAL RECONSTRUCTION (use ratlift)              */
+/*******************************************************************/
+/* NOT stack clean. a, b stay on the stack */
+static GEN
+lift_to_frac(GEN t, GEN mod, GEN amax, GEN bmax, GEN denom)
+{
+  GEN a, b;
+  if (signe(t) < 0) t = addii(t, mod); /* in case t is a centerlift */
+  if (!Fp_ratlift(t, mod, amax,bmax, &a,&b)
+     || (denom && !dvdii(denom,b))
+     || !is_pm1(gcdii(a,b))) return NULL;
+  if (is_pm1(b)) { cgiv(b); return a; }
+  return mkfrac(a, b);
+}
+
+/* Compute rational lifting for all the components of M modulo mod.
+ * Assume all Fp_ratlift preconditions are met; we allow centerlifts but in
+ * that case are no longer stack clean. If one component fails, return NULL.
+ * If denom != NULL, check that the denominators divide denom.
+ *
+ * We suppose gcd(mod, denom) = 1, then a and b are coprime; so we can use
+ * mkfrac rather than gdiv */
+GEN
+FpM_ratlift(GEN M, GEN mod, GEN amax, GEN bmax, GEN denom)
+{
+  pari_sp av = avma;
+  long i, j, h, l = lg(M);
+  GEN a, N = cgetg_copy(M, &l);
+  if (l == 1) return N;
+  h = lg(gel(M,1));
+  for (j = 1; j < l; ++j)
+  {
+    gel(N,j) = cgetg(h, t_COL);
+    for (i = 1; i < h; ++i)
+    {
+      a = lift_to_frac(gcoeff(M,i,j), mod, amax,bmax,denom);
+      if (!a) { avma = av; return NULL; }
+      gcoeff(N,i,j) = a;
+    }
+  }
+  return N;
+}
+GEN
+FpX_ratlift(GEN P, GEN mod, GEN amax, GEN bmax, GEN denom)
+{
+  pari_sp ltop = avma;
+  long j, l;
+  GEN a, Q = cgetg_copy(P, &l);
+  Q[1] = P[1];
+  for (j = 2; j < l; ++j)
+  {
+    a = lift_to_frac(gel(P,j), mod, amax,bmax,denom);
+    if (!a) { avma = ltop; return NULL; }
+    gel(Q,j) = a;
+  }
+  return Q;
+}
+
+/*******************************************************************/
+/*              GCD in K[X], K NUMBER FIELD                        */
+/*******************************************************************/
 /* P,Q in Z[X,Y], T in Z[Y] irreducible. compute GCD in Q[Y]/(T)[X].
  *
- * We essentially follow M. Encarnacion "On a modular Algorithm for computing
- * GCDs of polynomials over number fields" (ISSAC'94).
+ * M. Encarnacion "On a modular Algorithm for computing GCDs of polynomials
+ * over number fields" (ISSAC'94).
  *
  * We procede as follows
  *  1:compute the gcd modulo primes discarding bad primes as they are detected.
- *  2:reconstruct the result via matratlift, stoping as soon as we get weird
+ *  2:reconstruct the result via FpM_ratlift, stoping as soon as we get weird
  *    denominators.
- *  3:if matratlift succeeds, try the full division.
- * Suppose accuracy is insufficient to get the result right: matratlift will
+ *  3:if FpM_ratlift succeeds, try the full division.
+ * Suppose accuracy is insufficient to get the result right: FpM_ratlift will
  * rarely succeed, and even if it does the polynomial we get has sensible
  * coefficients, so the full division will not be too costly.
  *
@@ -121,7 +183,7 @@ nfgcd_all(GEN P, GEN Q, GEN T, GEN den, GEN *Pnew)
     M = FpM_red(M, mod);
     /* I suspect it must be better to take amax > bmax*/
     bo = sqrti(shifti(mod, -1));
-    if ((sol = matratlift(M, mod, bo, bo, den)) == NULL) continue;
+    if ((sol = FpM_ratlift(M, mod, bo, bo, den)) == NULL) continue;
     sol = RgM_to_RgXX(sol,vP,vT);
     dsol = Q_primpart(sol);
 
@@ -140,6 +202,9 @@ GEN
 nfgcd(GEN P, GEN Q, GEN T, GEN den)
 { return nfgcd_all(P,Q,T,den,NULL); }
 
+/*******************************************************************/
+/*             FACTOR OVER (Z_K/pr)[X] --> FqX_factor              */
+/*******************************************************************/
 GEN
 nffactormod(GEN nf, GEN x, GEN pr)
 {
@@ -166,6 +231,9 @@ nffactormod(GEN nf, GEN x, GEN pr)
   return gerepilecopy(av, rep);
 }
 
+/*******************************************************************/
+/*               MAIN ROUTINES nfroots / nffactor                  */
+/*******************************************************************/
 static GEN
 QXQX_normalize(GEN P, GEN T)
 {
