@@ -2,38 +2,10 @@ Function: kill
 Section: programming/specific
 C-Name: kill0
 Prototype: vS
-Help: kill(s): kills the present value of the variable or function s.
- Returns new value or 0.
-Doc: kills the present value of the variable, alias or user-defined
- function $s$. The corresponding identifier
- can now be used to name any GP object (variable or function). This is the
- only way to replace a variable by a function having the same name (or the
- other way round), as in the following example:
-
- \bprog
- ? f = 1
- %1 = 1
- ? f(x) = 0
- ***   unused characters: f(x)=0
- ^----
- ? kill(f)
- ? f(x) = 0
- ? f()
- %2 = 0
- @eprog
-
- When you kill a variable, all objects that used it become invalid. You
- can still display them, even though the killed variable will be printed in a
- funny way. For example:
-
- \bprog
- ? a^2 + 1
- %1 = a^2 + 1
- ? kill(a)
- ? %1
- %2 = #<1>^2 + 1
- @eprog
-
- If you simply want to restore a variable to its ``undefined'' value
- (monomial of degree one), use the \idx{quote} operator: \kbd{a = 'a}.
- Predefined symbols (\kbd{x} and GP function names) cannot be killed.
+Help: kill(s): restores a variable to its ``undefined'' value and kill
+ associated help messages. Mostly obsolete.
+Doc: restores a variable to its ``undefined'' value (monomial of degree one),
+ and deletes any help messages associated to $s$ using \kbd{addhelp}.
+ For the first use, you should simply use the \idx{quote} operator:
+ \kbd{a = 'a}. The second use, although limited, is what keeps this function
+ from being completely obsolete.
