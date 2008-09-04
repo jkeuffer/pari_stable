@@ -1068,14 +1068,23 @@ check_meta(char *buf)
 /*                              GPRC                                */
 /*                                                                  */
 /********************************************************************/
+/* LOCATE GPRC */
+
 #if defined(UNIX) || defined(__EMX__)
 #  include <pwd.h>
+static char *
+get_pw_dir()
+{
+  struct passwd *p = getpwuid(geteuid());
+  return p? p->pw_dir: NULL;
+}
+#else
+static char *
+get_pw_dir() { return NULL; }
 #endif
 
 static int get_line_from_file(const char *prompt, filtre_t *F, FILE *file);
 #define err_gprc(s,t,u) { fprintferr("\n"); pari_err(talker2,s,t,u); }
-
-/* LOCATE GPRC */
 
 /* return $HOME or the closest we can find */
 static const char *
@@ -1090,13 +1099,8 @@ get_home(int *free_it)
     sprintf(buf, "%s%s",drv,pth);
     *free_it = 1; return buf;
   }
-#if defined(__EMX__) || defined(UNIX)
-  {
-    struct passwd *p = getpwuid(geteuid());
-    if (p) return p->pw_dir;
-  }
-#endif
-  return ".";
+  pth = get_pw_dir();
+  return pth? pth: ".";
 }
 
 static FILE *
