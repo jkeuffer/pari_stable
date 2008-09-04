@@ -2988,7 +2988,6 @@ static pariFILE *last_file = NULL;
 #if defined(UNIX) || defined(__EMX__)
 #  include <fcntl.h>
 #  include <sys/stat.h>
-#  include <pwd.h>
 #  ifdef __EMX__
 #    include <process.h>
 #  endif
@@ -3288,6 +3287,42 @@ os_getenv(const char *s)
 #endif
 }
 
+#if defined(UNIX) || defined(__EMX__)
+#  include <pwd.h>
+/* user = "": use current uid */
+char *
+pari_get_homedir(const char *user)
+{ 
+  struct passwd *p;
+  char *dir = NULL;
+
+  if (!*user)
+  {
+    if (homedir) dir = homedir;
+    else
+    {
+      p = getpwuid(geteuid());
+      if (p)
+      {
+        dir = p->pw_dir;
+        homedir = pari_strdup(dir); /* cache result */
+      }
+    }
+  }
+  else
+  {
+    p = getpwnam(user);
+    if (p) dir = p->pw_dir;
+  }
+  /* warn, but don't kill session on startup (when expanding path) */
+  if (!dir) pari_warn(warner,"can't expand ~%s", user? user: "");
+  return dir;
+}
+#else
+char *
+pari_get_homedir(const char *user) { return NULL; }
+#endif
+
 /*******************************************************************/
 /**                                                               **/
 /**                   GP STANDARD INPUT AND OUTPUT                **/
@@ -3349,51 +3384,25 @@ pari_is_file(const char *name)
 static char *
 _path_expand(const char *s)
 {
-#if !defined(UNIX) && !defined(__EMX__)
-  return pari_strdup(s);
-#else
-  struct passwd *p;
-  const char *u;
-  char *ret, *dir = NULL, *user = NULL;
-  int len;
+  const char *t;
+  char *ret, *dir = NULL;
 
   if (*s != '~') return pari_strdup(s);
-  s++; u = s; /* skip ~ */
-  if (!*s || *s == '/')
-  {
-    if (homedir) dir = homedir;
-    else
-    {
-      p = getpwuid(geteuid());
-      if (p)
-      {
-        dir = p->pw_dir;
-        homedir = pari_strdup(dir);
-      }
-    }
-  }
+  s++; /* skip ~ */
+  t = s; while (*t && *t != '/') t++;
+  if (t == s)
+    dir = pari_get_homedir("");
   else
   {
-    while (*u && *u != '/') u++;
-    len = u-s; user = (char*)pari_malloc(len+1);
-    (void)strncpy(user,s,len);
-    user[len] = 0;
-    p = getpwnam(user);
-    if (p) dir = p->pw_dir;
+    size_t len = t - s;
+    char *user = (char*)pari_malloc(len+1);
+    (void)strncpy(user,s,len); user[len] = 0;
+    dir = pari_get_homedir(user);
+    free(user);
   }
-  if (!dir)
-  { /* don't kill session on startup (when expanding path) */
-    pari_warn(warner,"can't expand ~%s", user? user: "");
-    ret =  pari_strdup(s);
-  }
-  else
-  {
-    ret = (char*)pari_malloc(strlen(dir) + strlen(u) + 1);
-    sprintf(ret,"%s%s",dir,u);
-  }
-  if (user) free(user);
-  return ret;
-#endif
+  if (!dir) return pari_strdup(s);
+  ret = (char*)pari_malloc(strlen(dir) + strlen(t) + 1);
+  sprintf(ret,"%s%s",dir,t); return ret;
 }
 
 /* expand environment variables in str, return a malloc'ed buffer

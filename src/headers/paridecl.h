@@ -1345,6 +1345,7 @@ pariFILE* pari_fopen(const char *s, const char *mode);
 pariFILE* pari_fopen_or_fail(const char *s, const char *mode);
 pariFILE* pari_fopengz(const char *s);
 void    pari_fprintf(FILE *file, const char *fmt, ...);
+char*   pari_get_homedir(const char *user);
 int     pari_is_dir(const char *name);
 int     pari_is_file(const char *name);
 void    pari_printf(const char *fmt, ...);

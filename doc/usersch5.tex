@@ -6740,6 +6740,12 @@ if the operation fails.
 \fun{char*}{path_expand}{const char *s} perform tilde and environment expansion
 on $s$. Returns a \kbd{malloc}'ed buffer.
 
+\fun{char*}{pari_get_homedir}{const char *user} expands \kbd{\til user}
+constructs, returning the home directory of user \kbd{user}, or \kbd{NULL} if
+it could not be determined (in particular if the operating system has no such
+concept). The return value may point to static area and may be overwritten
+by subsequent system calls: use immediately or \kbd{strdup} it.
+
 \subsec{pariFILE}
 
 PARI maintains a linked list of open files, to reclaim ressources
