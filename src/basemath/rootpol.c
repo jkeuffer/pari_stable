@@ -917,10 +917,10 @@ FFT(GEN x, GEN Omega)
 static int
 isreal(GEN p)
 {
-  long n=degpol(p),i=0;
-
-  while (i<=n && typ(p[i+2])!=t_COMPLEX) i++;
-  return (i>n);
+  long i;
+  for (i = lg(p)-1; i > 1; i--)
+    if (typ(p[i]) == t_COMPLEX) return 0;
+  return 1;
 }
 
 /* x non complex */
@@ -1977,29 +1977,6 @@ tocomplex(GEN x, long l)
   y = cgetg(3,t_COMPLEX);
   gel(y,1) = gtofp(x, l);
   gel(y,2) = real_0(l); return y;
-}
-
-/* Check if x is approximately real with precision e */
-int
-isrealappr(GEN x, long e)
-{
-  long i;
-  switch(typ(x))
-  {
-    case t_INT: case t_REAL: case t_FRAC:
-      return 1;
-    case t_COMPLEX:
-      return (gexpo(gel(x,2)) < e);
-    case t_POL: case t_SER:
-      for (i=lg(x)-1; i>1; i++)
-	if (! isrealappr(gel(x,i),e)) return 0;
-      return 1;
-    case t_RFRAC: case t_VEC: case t_COL: case t_MAT:
-      for (i=lg(x)-1; i>0; i++)
-	if (! isrealappr(gel(x,i),e)) return 0;
-      return 1;
-    default: pari_err(typeer,"isrealappr"); return 0;
-  }
 }
 
 /* x,y are t_COMPLEX */

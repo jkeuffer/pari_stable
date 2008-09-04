@@ -345,16 +345,15 @@ isinexactreal(GEN x)
   {
     case t_REAL: return 1;
     case t_COMPLEX: return (typ(x[1])==t_REAL || typ(x[2])==t_REAL);
-    case t_INT: case t_INTMOD: case t_FRAC:
-    case t_FFELT: case t_PADIC: case t_QUAD: return 0;
 
-    case t_QFR: case t_QFI:
-      return 0;
+    case t_INT: case t_INTMOD: case t_FRAC:
+    case t_FFELT: case t_PADIC: case t_QUAD:
+    case t_QFR: case t_QFI: return 0;
 
     case t_RFRAC: case t_POLMOD:
       return isinexactreal(gel(x,1)) || isinexactreal(gel(x,2));
 
-    case t_SER: case t_POL:
+    case t_POL: case t_SER:
       for (i=lg(x)-1; i>1; i--)
         if (isinexactreal(gel(x,i))) return 1;
       return 0;
@@ -364,6 +363,33 @@ isinexactreal(GEN x)
         if (isinexactreal(gel(x,i))) return 1;
       return 0;
     default: return 0;
+  }
+}
+/* Check if x is approximately real with precision e */
+int
+isrealappr(GEN x, long e)
+{
+  long i;
+  switch(typ(x))
+  {
+    case t_INT: case t_REAL: case t_FRAC:
+      return 1;
+    case t_COMPLEX:
+      return (gexpo(gel(x,2)) < e);
+
+    case t_POL: case t_SER:
+      for (i=lg(x)-1; i>1; i--)
+	if (! isrealappr(gel(x,i),e)) return 0;
+      return 1;
+
+    case t_RFRAC: case t_POLMOD:
+      return isrealappr(gel(x,1),e) && isrealappr(gel(x,2),e);
+
+    case t_VEC: case t_COL: case t_MAT:
+      for (i=lg(x)-1; i>0; i--)
+	if (! isrealappr(gel(x,i),e)) return 0;
+      return 1;
+    default: pari_err(typeer,"isrealappr"); return 0;
   }
 }
 

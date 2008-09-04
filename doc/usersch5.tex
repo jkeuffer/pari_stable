@@ -5599,12 +5599,16 @@ the \kbd{long}~\kbd{s}, 0~otherwise.
   is_scalar_t(typ(x)) && isrationalzero(x)
 @eprog
 
-\fun{int}{isinexact}{GEN x} returns 1 (true) if \kbd{x} has an inexact
+\fun{int}{isinexact}{GEN x} returns 1 (true) if $x$ has an inexact
 component, and 0 (false) otherwise.
 
-\fun{int}{isinexactreal}{GEN x} return 1 if \kbd{x} has an inexact
+\fun{int}{isinexactreal}{GEN x} return 1 if $x$ has an inexact
 \typ{REAL} component, and 0  otherwise.
 
+\fun{int}{isrealappr}{GEN x, long e} applies (recursively) to complex inputs;
+returns $1$ if $x$ is approximately real to the bit accuracy $e$, and 0
+otherwise. This means that any \typ{COMPLEX} component must have imaginary part
+$t$ satisfying $\kbd{gexpo}(t) < e$.
 
 \fun{int}{isint}{GEN x, GEN *n} returns 0 (false) if \kbd{x} does not round
 to an integer. Otherwise, returns 1 (true) and set \kbd{n} to the rounded
