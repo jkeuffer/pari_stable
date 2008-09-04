@@ -290,13 +290,6 @@ allocgroup(long n, long card)
   return gr;
 }
 
-#ifdef UNIX
-#  include <fcntl.h>
-#endif
-#ifndef O_RDONLY
-#  define O_RDONLY 0
-#endif
-
 static pariFILE *
 galopen(const char *pre, long n, long n1, long n2)
 {
