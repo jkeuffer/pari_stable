@@ -1884,6 +1884,7 @@ GEN     member_zkst(GEN bid);
 /* mp.c */
 
 ulong   Fl_inv(ulong x, ulong p);
+int     Fp_ratlift(GEN x, GEN m, GEN *a, GEN *b, GEN amax, GEN bmax);
 int     absi_cmp(GEN x, GEN y);
 int     absi_equal(GEN x, GEN y);
 int     absr_cmp(GEN x, GEN y);
