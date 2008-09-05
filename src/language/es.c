@@ -2987,7 +2987,7 @@ static pariFILE *last_tmp_file = NULL;
 static pariFILE *last_file = NULL;
 #if defined(UNIX) || defined(__EMX__)
 #  include <fcntl.h>
-#  include <sys/stat.h>
+#  include <sys/stat.h> /* for open */
 #  ifdef __EMX__
 #    include <process.h>
 #  endif
@@ -3076,6 +3076,7 @@ pari_fopen(const char *s, const char *mode)
   return f? pari_open_file(f, s, mode): NULL;
 }
 
+/* FIXME: HAS_FDOPEN & allow standard open() flags */
 #ifdef UNIX
 /* open tmpfile s (a priori for writing) avoiding symlink attacks */
 pariFILE *
@@ -3287,8 +3288,10 @@ os_getenv(const char *s)
 #endif
 }
 
+/* FIXME: HAS_GETPWUID */
 #if defined(UNIX) || defined(__EMX__)
-#  include <pwd.h>
+#include <pwd.h>
+#include <sys/types.h>
 /* user = "": use current uid */
 char *
 pari_get_homedir(const char *user)
@@ -4114,6 +4117,7 @@ unix_shell(void)
 static int
 pari_is_rwx(const char *s)
 {
+/* FIXME: HAS_ACCESS */
 #if defined(UNIX) || defined (__EMX__)
   return access(s, R_OK | W_OK | X_OK) == 0;
 #else
@@ -4124,7 +4128,6 @@ pari_is_rwx(const char *s)
 #if defined(UNIX) || defined (__EMX__)
 #include <sys/types.h>
 #include <sys/stat.h>
-
 static int
 pari_file_exists(const char *s)
 {
