@@ -386,7 +386,8 @@ BA 41- user variables can now be aliased [#790]
        reducemodinvertible, closemodinvertible,
        init_primepointer,
        galoisinit0, get_nfpol, get_bnfpol, get_prid,
-       nf_get_r1, nf_get_r2, nf_get_roots, nf_get_sign,
+       nf_get_r1, nf_get_r2, nf_get_roots, nf_get_sign, nf_get_M, nf_get_G,
+       nf_get_Tr, nf_get_TrInv, nf_get_disc, nf_get_index, nf_get_pol, nf_get_zk
        nf_get_prec (was nfgetprec), nf_to_scalar_or_basis, nf_to_scalar_or_alg
        nf_to_Fq_init, nf_to_Fq, Fq_to_nf, zkmodprinit, zk_to_Fq_init, zk_to_Fq,
        nfM_to_FqM, FqM_to_nfM, nfX_to_FqX, FqX_to_nfX

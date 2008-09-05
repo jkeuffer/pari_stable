@@ -1345,12 +1345,29 @@ INLINE GEN
 pr_norm(GEN pr) { return powiu(pr_get_p(pr), pr_get_f(pr)); }
 
 /* assume nf a genuine nf */
+INLINE GEN
+nf_get_pol(GEN nf) { return gel(nf,1); }
 INLINE long
-nf_get_degree(GEN nf) { return degpol(gel(nf,1)); }
+nf_get_degree(GEN nf) { return degpol( nf_get_pol(nf) ); }
 INLINE long
 nf_get_r1(GEN nf) { GEN x = gel(nf,2); return itou(gel(x,1)); }
 INLINE long
 nf_get_r2(GEN nf) { GEN x = gel(nf,2); return itou(gel(x,2)); }
+INLINE GEN
+nf_get_disc(GEN nf) { return gel(nf,3); }
+INLINE GEN
+nf_get_index(GEN nf) { return gel(nf,4); }
+INLINE GEN
+nf_get_M(GEN nf) { return gmael(nf,5,1); }
+INLINE GEN
+nf_get_G(GEN nf) { return gmael(nf,5,2); }
+INLINE GEN
+nf_get_Tr(GEN nf) { return gmael(nf,5,4); }
+INLINE GEN
+nf_get_TrInv(GEN nf) { return gmael(nf,5,5); }
+INLINE GEN
+nf_get_zk(GEN nf) { return gel(nf,7); }
+
 INLINE void
 nf_get_sign(GEN nf, long *r1, long *r2)
 {

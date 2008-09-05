@@ -238,7 +238,7 @@ nfC_nf_mul(GEN nf, GEN v, GEN x)
     if (tx == t_INT && is_pm1(x))
       return signe(x) > 0? leafcopy(v): gneg(v);
     l = lg(v); y = cgetg(l, t_COL);
-    for (i=1; i < l; i++) 
+    for (i=1; i < l; i++)
     {
       GEN c = gel(v,i);
       if (typ(c) != t_COL) c = gmul(c, x); else c = RgC_Rg_mul(c, x);
@@ -250,7 +250,7 @@ nfC_nf_mul(GEN nf, GEN v, GEN x)
     x = Q_remove_denom(x, &dx);
     x = zk_multable(nf, x);
     l = lg(v); y = cgetg(l, t_COL);
-    for (i=1; i < l; i++) 
+    for (i=1; i < l; i++)
     {
       GEN c = gel(v,i);
       if (typ(c)!=t_COL) c = RgC_Rg_mul(gel(x,1), c); else c = RgM_RgC_mul(x,c);
@@ -284,7 +284,7 @@ nfinv(GEN nf, GEN x)
   pari_sp av = avma;
   GEN T, z;
 
-  nf = checknf(nf); T = gel(nf,1);
+  nf = checknf(nf); T = nf_get_pol(nf);
   x = nf_to_scalar_or_alg(nf, x);
   if (typ(x) == t_POL)
     z = poltobasis(nf, QXQ_inv(x, T));
@@ -301,7 +301,7 @@ nfdiv(GEN nf, GEN x, GEN y)
   pari_sp av = avma;
   GEN T, z;
 
-  nf = checknf(nf); T = gel(nf,1);
+  nf = checknf(nf); T = nf_get_pol(nf);
   y = nf_to_scalar_or_alg(nf, y);
   if (typ(y) != t_POL) {
     x = nf_to_scalar_or_basis(nf, x);
@@ -448,7 +448,7 @@ tablesqr(GEN TAB, GEN x)
 {
   long i, j, k, N;
   GEN s, v;
-  
+
   if (typ(x) != t_COL) return gsqr(x);
   N = lg(x)-1;
   v = cgetg(N+1,t_COL);
@@ -497,7 +497,7 @@ nfpow(GEN nf, GEN z, GEN n)
   GEN x, cx, T;
 
   if (typ(n)!=t_INT) pari_err(talker,"not an integer exponent in nfpow");
-  nf = checknf(nf); T = gel(nf,1); N = degpol(T);
+  nf = checknf(nf); T = nf_get_pol(nf); N = degpol(T);
   s = signe(n); if (!s) return scalarcol_shallow(gen_1,N);
   x = nf_to_scalar_or_basis(nf, z);
   if (typ(x) != t_COL) { GEN y = zerocol(N); gel(y,1) = powgi(x,n); return y; }
@@ -519,7 +519,7 @@ nfpow_u(GEN nf, GEN z, ulong n)
   long N;
   GEN x, cx, T;
 
-  nf = checknf(nf); T = gel(nf,1); N = degpol(T);
+  nf = checknf(nf); T = nf_get_pol(nf); N = degpol(T);
   if (!n) return scalarcol_shallow(gen_1,N);
   x = nf_to_scalar_or_basis(nf, z);
   if (typ(x) != t_COL) { GEN y = zerocol(N); gel(y,1) = powiu(x,n); return y; }
@@ -623,7 +623,7 @@ nfval(GEN nf, GEN x, GEN pr)
 GEN
 coltoalg(GEN nf, GEN x)
 {
-  return mkpolmod( coltoliftalg(nf, x), gel(nf,1) );
+  return mkpolmod( coltoliftalg(nf, x), nf_get_pol(nf) );
 }
 
 GEN
@@ -639,18 +639,18 @@ basistoalg(GEN nf, GEN x)
       return gerepilecopy(av, coltoalg(nf, x));
     }
     case t_POLMOD:
-      if (!RgX_equal_var(gel(nf,1),gel(x,1)))
+      if (!RgX_equal_var(nf_get_pol(nf),gel(x,1)))
 	pari_err(talker,"not the same number field in basistoalg");
       return gcopy(x);
     case t_POL:
-      T = gel(nf,1);
+      T = nf_get_pol(nf);
       if (varn(T) != varn(x)) pari_err(consister,"basistoalg");
       z = cgetg(3,t_POLMOD);
       gel(z,1) = gcopy(T);
       gel(z,2) = RgX_rem(x, T); return z;
     case t_INT:
     case t_FRAC:
-      T = gel(nf,1);
+      T = nf_get_pol(nf);
       z = cgetg(3,t_POLMOD);
       gel(z,1) = gcopy(T);
       gel(z,2) = gcopy(x); return z;
@@ -674,7 +674,7 @@ nf_to_scalar_or_basis(GEN nf, GEN x)
       /* fall through */
     case t_POL:
     {
-      GEN T = gel(nf,1);
+      GEN T = nf_get_pol(nf);
       long l = lg(x);
       if (varn(x) != varn(T))
         pari_err(talker,"incompatible variables in nf_to_scalar_or_basis");
@@ -684,7 +684,7 @@ nf_to_scalar_or_basis(GEN nf, GEN x)
       return poltobasis(nf,x);
     }
     case t_COL:
-      if (lg(x) != lg(gel(nf,7))) break;
+      if (lg(x) != lg(nf_get_zk(nf))) break;
       return RgV_isscalar(x)? gel(x,1): x;
   }
   pari_err(typeer,"nf_to_scalar_or_basis");
@@ -716,7 +716,7 @@ nf_to_scalar_or_alg(GEN nf, GEN x)
       /* fall through */
     case t_POL:
     {
-      GEN T = gel(nf,1);
+      GEN T = nf_get_pol(nf);
       long l = lg(x);
       if (varn(x) != varn(T))
         pari_err(talker,"incompatible variables in nf_to_scalar_or_alg");
@@ -726,7 +726,7 @@ nf_to_scalar_or_alg(GEN nf, GEN x)
       return x;
     }
     case t_COL:
-      if (lg(x) != lg(gel(nf,7))) break;
+      if (lg(x) != lg(nf_get_zk(nf))) break;
       return RgV_isscalar(x)? gel(x,1): coltoliftalg(nf, x);
   }
   pari_err(typeer,"nf_to_scalar_or_alg");
@@ -752,7 +752,7 @@ mulmat_pol(GEN A, GEN x)
 GEN
 poltobasis(GEN nf, GEN x)
 {
-  GEN P = gel(nf,1);
+  GEN P = nf_get_pol(nf);
   if (varn(x) != varn(P))
     pari_err(talker, "incompatible variables in poltobasis");
   if (degpol(x) >= degpol(P)) x = RgX_rem(x,P);
@@ -768,7 +768,7 @@ algtobasis(GEN nf, GEN x)
   switch(typ(x))
   {
     case t_POLMOD:
-      if (!RgX_equal_var(gel(nf,1),gel(x,1)))
+      if (!RgX_equal_var(nf_get_pol(nf),gel(x,1)))
 	pari_err(talker,"not the same number field in algtobasis");
       x = gel(x,2);
       switch(typ(x))
@@ -1013,7 +1013,7 @@ nfsign_arch(GEN nf, GEN x, GEN arch)
       s = signe(gel(x,1));
       avma = av; return const_vecsmall(n, (s < 0)? 1: 0);
   }
-  x = Q_primpart(x); M = gmael(nf,5,1);
+  x = Q_primpart(x); M = nf_get_M(nf);
   for (i = 1; i <= n; i++) V[i] = (eval_sign(M, x, archp[i]) < 0)? 1: 0;
   avma = (pari_sp)V; return V;
 }
@@ -1392,7 +1392,7 @@ nfarchstar(GEN nf, GEN x, GEN archp)
     }
     else
     {
-      GEN bas = gmael(nf,5,1);
+      GEN bas = nf_get_M(nf);
       if (lg(bas[1]) > lg(archp)) bas = rowpermute(bas, archp);
       gen = cgetg(nba+1,t_VEC);
       gel(gen,1) = gZ;

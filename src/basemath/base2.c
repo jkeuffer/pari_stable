@@ -1591,13 +1591,13 @@ get_norm(norm_S *S, GEN a)
 static void
 init_norm(norm_S *S, GEN nf, GEN p)
 {
-  GEN T = gel(nf,1);
+  GEN T = nf_get_pol(nf);
   long N = degpol(T);
 
   S->M = NULL;
   if (typ(nf[5]) == t_VEC) /* beware dummy nf from padicff */
   {
-    GEN M = gmael(nf,5,1);
+    GEN M = nf_get_M(nf);
     long ex = gexpo(M) + gexpo(mului(8 * N, p));
     if (N * ex <= bit_accuracy(gprecision(M)))
     { /* enough prec to use norm_by_embed */
@@ -1607,7 +1607,7 @@ init_norm(norm_S *S, GEN nf, GEN p)
   }
   if (!S->M)
   {
-    GEN D, w = Q_remove_denom(gel(nf,7), &D), Dp = sqri(p);
+    GEN D, w = Q_remove_denom(nf_get_zk(nf), &D), Dp = sqri(p);
     long i;
     if (!D) w = leafcopy(w);
     else {
@@ -1730,7 +1730,7 @@ mk_pr(GEN p, GEN u, long e, long f, GEN t)
 GEN
 primedec_apply_kummer(GEN nf,GEN u,long e,GEN p)
 {
-  GEN t, T = gel(nf,1);
+  GEN t, T = nf_get_pol(nf);
   long f = degpol(u), N = degpol(T);
 
   if (f == N) /* inert */
@@ -1824,7 +1824,7 @@ get_pr(GEN nf, norm_S *S, GEN p, GEN P, GEN V, int ramif)
 static GEN
 primedec_aux(GEN nf, GEN p)
 {
-  GEN E, F, L, Ip, H, phi, mat1, f, g, h, p1, UN, T = gel(nf,1);
+  GEN E, F, L, Ip, H, phi, mat1, f, g, h, p1, UN, T = nf_get_pol(nf);
   long i, k, c, iL, N;
 
   F = FpX_factor(T, p);
@@ -1832,7 +1832,7 @@ primedec_aux(GEN nf, GEN p)
   F = gel(F,1);
 
   k = lg(F); if (k == 1) errprime(p);
-  if (signe(modii(gel(nf,4),p))) /* p doesn't divide index */
+  if ( !dvdii(nf_get_index(nf),p) ) /* p doesn't divide index */
   {
     L = cgetg(k,t_VEC);
     for (i=1; i<k; i++)
@@ -1916,7 +1916,7 @@ primedec_aux(GEN nf, GEN p)
 {
   GEN Lpr = cgetg(iL, t_VEC);
   GEN LV = get_LV(nf, L,p,N);
-  int ramif = dvdii(gel(nf,3), p);
+  int ramif = dvdii(nf_get_disc(nf), p);
   norm_S S; init_norm(&S, nf, p);
   for (i=1; i<iL; i++)
     gel(Lpr,i) = get_pr(nf, &S, p, gel(L,i), gel(LV,i), ramif);
@@ -2072,10 +2072,10 @@ modprinit(GEN nf, GEN pr, int zk)
       gel(ffproj,i) = gneg(gel(prh,i));
   }
   ffproj = rowpermute(ffproj, c);
-  if (! dvdii(gel(nf,4), p))
+  if (! dvdii(nf_get_index(nf), p))
   {
-    GEN basis = gel(nf,7);
-    if (N == f) T = gel(nf,1); /* pr inert */
+    GEN basis = nf_get_zk(nf);
+    if (N == f) T = nf_get_pol(nf); /* pr inert */
     else
     {
       T = RgV_RgC_mul(Q_primpart(basis), pr_get_gen(pr));
@@ -2237,7 +2237,7 @@ Rg_to_ff(GEN nf, GEN x, GEN modpr)
       break;
     case t_COL:
       x = Q_remove_denom(x, &den);
-      if (lg(x) == lg(gel(nf,7))) break;
+      if (lg(x) == lg(nf_get_zk(nf))) break;
     default: pari_err(typeer,"Rg_to_ff");
   }
   if (den)
@@ -2427,7 +2427,7 @@ rnfelementid_powmod(GEN multab, long h, GEN n, GEN T, GEN p)
   return gerepilecopy(av, y);
 }
 
-/* Relative Dedekind criterion over nf, applied to the order defined by a
+/* Relative Dedekind criterion over (true) nf, applied to the order defined by a
  * root of irreducible polynomial P, modulo the prime ideal pr. Assume
  * vdisc = v_pr( disc(P) ).
  * Return NULL if nf[X]/P is pr-maximal. Otherwise, return [flag, O, v]:
@@ -2437,22 +2437,17 @@ rnfelementid_powmod(GEN multab, long h, GEN n, GEN T, GEN p)
 static GEN
 rnfdedekind_i(GEN nf, GEN P, GEN pr, long vdisc)
 {
-  long vt, r, d, n, m, i, j;
   pari_sp av = avma;
-  GEN Prd, A, I, p, tau, g, matid;
-  GEN modpr, h, k, base, nfT, T, gzk, hzk, prinvp, X, pal;
+  GEN Ppr, A, I, p, tau, g, matid, h, k, base, T, gzk, hzk, prinvp, X, pal;
+  GEN nfT = nf_get_pol(nf), modpr = nf_to_Fq_init(nf,&pr, &T, &p);
+  long n = degpol(nfT), m = degpol(P), vt, r, d, i, j;
 
-  nf = checknf(nf); nfT = gel(nf,1);
-  modpr = nf_to_Fq_init(nf,&pr, &T, &p);
-  n = degpol(nfT);
-  m = degpol(P);
-
-  Prd = nfX_to_FqX(P, nf, modpr);
-  A = gel(FqX_factor(Prd,T,p),1);
+  Ppr = nfX_to_FqX(P, nf, modpr);
+  A = gel(FqX_factor(Ppr,T,p),1);
   r = lg(A); if (r < 2) pari_err(constpoler,"rnfdedekind");
   g = gel(A,1);
   for (i=2; i<r; i++) g = FqX_mul(g, gel(A,i), T, p);
-  h = FqX_div(Prd,g, T, p);
+  h = FqX_div(Ppr,g, T, p);
   gzk = FqX_to_nfX(g, modpr);
   hzk = FqX_to_nfX(h, modpr);
 
@@ -2482,7 +2477,7 @@ rnfdedekind_i(GEN nf, GEN P, GEN pr, long vdisc)
     gel(I,j) = matid;
   }
   X = pol_x(varn(P));
-  pal = FqX_div(Prd,k, T,p);
+  pal = FqX_div(Ppr,k, T,p);
   pal = FqX_to_nfX(pal, modpr);
   for (   ; j<=m+d; j++)
   {
@@ -2514,7 +2509,7 @@ rnfdedekind(GEN nf, GEN P, GEN pr)
   long v;
   GEN z;
   nf = checknf(nf);
-  P = rnf_fix_pol(gel(nf,1), P, 0);
+  P = rnf_fix_pol(nf_get_pol(nf), P, 0);
   v = nfval(nf, RgX_disc(P), pr);
   P = lift_intern(P);
   avma = av; z = rnfdedekind_i(nf, P, pr, v);
@@ -2527,7 +2522,7 @@ rnfdedekind(GEN nf, GEN P, GEN pr)
   return z;
 }
 
-/* return NULL if power order if pr-maximal */
+/* nf a true nf. Return NULL if power order if pr-maximal */
 static GEN
 rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
 {
@@ -2536,7 +2531,7 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
   GEN q, q1, p, T, modpr, W, I, MW, C, p1;
   GEN Tauinv, Tau, prhinv, pip, nfT, id, rnfId;
 
-  if (DEBUGLEVEL>1) fprintferr(" treating %Ps\n",pr);
+  if (DEBUGLEVEL>1) fprintferr(" treating %Ps^%ld\n", pr, vdisc);
   modpr = nf_to_Fq_init(nf,&pr,&T,&p);
   p1 = rnfdedekind_i(nf, pol, modpr, vdisc);
   if (!p1) { avma = av; return NULL; }
@@ -2546,7 +2541,7 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
   I = gmael(p1,2,2);
 
   pip = coltoalg(nf, pr_get_gen(pr));
-  nfT = gel(nf,1);
+  nfT = nf_get_pol(nf);
   n = degpol(pol); vpol = varn(pol);
   q = T? powiu(p,degpol(T)): p;
   q1 = q; while (cmpiu(q1,n) < 0) q1 = mulii(q1,q);
@@ -2717,7 +2712,7 @@ get_d(GEN nf, GEN pol, GEN A)
 {
   long i, j, n = degpol(pol);
   GEN W = RgM_to_RgXV(lift_intern(matbasistoalg(nf,A)), varn(pol));
-  GEN T, nfT = gel(nf,1), sym = polsym_gen(pol, NULL, n-1, nfT, NULL);
+  GEN T, nfT = nf_get_pol(nf), sym = polsym_gen(pol, NULL, n-1, nfT, NULL);
   T = cgetg(n+1,t_MAT);
   for (j=1; j<=n; j++) gel(T,j) = cgetg(n+1,t_COL);
   for (j=1; j<=n; j++)
@@ -2739,10 +2734,10 @@ get_d(GEN nf, GEN pol, GEN A)
 GEN
 rnfallbase(GEN nf, GEN *ppol, GEN *pD, GEN *pd, GEN *pf)
 {
-  long i, n, N, l, *ep;
-  GEN A, nfT, P, id, I, z, d, D, disc, pol = *ppol;
+  long i, n, N, l;
+  GEN A, nfT, fa, E, P, id, I, z, d, D, disc, pol = *ppol;
 
-  nf = checknf(nf); nfT = gel(nf,1);
+  nf = checknf(nf); nfT = nf_get_pol(nf);
   pol = rnf_fix_pol(nfT,pol,0);
   if (!gcmp1(leading_term(pol)))
     pari_err(impl,"non-monic relative polynomials");
@@ -2750,28 +2745,18 @@ rnfallbase(GEN nf, GEN *ppol, GEN *pD, GEN *pd, GEN *pf)
   N = degpol(nfT);
   n = degpol(pol);
   disc = RgX_disc(pol); pol = lift(pol);
-  P = idealfactor(nf, disc);
-  ep= (long*)P[2];
-  P = gel(P,1); l = lg(P);
-  for (i=1; i < l; i++) ep[i] = itos(gel(ep,i));
-  if (DEBUGLEVEL>1)
-  {
-    fprintferr("Ideals to consider:\n");
-    for (i=1; i < l; i++)
-      if (ep[i]>1) fprintferr("%Ps^%ld\n",P[i],ep[i]);
-    flusherr();
-  }
+  fa = idealfactor(nf, disc);
+  P = gel(fa,1); l = lg(P);
+  E = gel(fa,2);
   id = matid(N); z = NULL;
   for (i=1; i < l; i++)
-    if (ep[i] > 1)
-    {
-      GEN y = rnfordmax(nf, pol, gel(P,i), ep[i]);
-      z = rnfjoinmodules(nf, z, y);
-    }
+  {
+    long e = itos(gel(E,i));
+    if (e > 1) z = rnfjoinmodules(nf, z, rnfordmax(nf, pol, gel(P,i), e));
+  }
   if (!z) z = triv_order(n, N);
-  A = gel(z,1);
+  A = gel(z,1); d = get_d(nf, pol, A);
   I = gel(z,2);
-  d = get_d(nf, pol, A);
 
   i=1; while (i<=n && gequal(gel(I,i), id)) i++;
   if (i > n) { D = gen_1; if (pf) *pf = gen_1; }

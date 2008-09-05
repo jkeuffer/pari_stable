@@ -1339,7 +1339,7 @@ idealnorm(GEN nf, GEN x)
     case id_MAT: return RgM_det_triangular(x);
   }
   /* id_PRINCIPAL */
-  nf = checknf(nf); T = gel(nf,1); av = avma;
+  nf = checknf(nf); T = nf_get_pol(nf); av = avma;
   x = nf_to_scalar_or_alg(nf, x);
   x = (typ(x) == t_POL)? RgXQ_norm(x, T): gpowgs(x, degpol(T));
   tx = typ(x);
@@ -1413,7 +1413,7 @@ idealinv(GEN nf, GEN x)
 	if (typ(x) != t_POL) { x = ginv(x); break; }
 	if (varn(x) != varn(nf[1]))
 	  pari_err(talker,"incompatible variables in idealinv");
-	x = QXQ_inv(x,gel(nf,1));
+	x = QXQ_inv(x,nf_get_pol(nf));
       }
       x = idealhnf_principal(nf,x); break;
     case id_PRIME:
@@ -1500,7 +1500,7 @@ idealdivpowprime(GEN nf, GEN x, GEN pr, GEN n)
 static GEN
 idealpow_aux(GEN nf, GEN x, long tx, GEN n)
 {
-  GEN T = gel(nf,1), m, cx, n1, a, alpha;
+  GEN T = nf_get_pol(nf), m, cx, n1, a, alpha;
   long N = degpol(T), s = signe(n);
   if (!s) return matid(N);
   switch(tx)
@@ -1614,7 +1614,7 @@ isideal(GEN nf,GEN x)
   pari_sp av;
   GEN T;
 
-  nf = checknf(nf); T = gel(nf,1); lx = lg(x);
+  nf = checknf(nf); T = nf_get_pol(nf); lx = lg(x);
   if (tx==t_VEC && lx==3) { x = gel(x,1); tx = typ(x); lx = lg(x); }
   switch(tx)
   {
@@ -1815,7 +1815,7 @@ idealred0(GEN nf, GEN I, GEN vdir)
   GEN J, aI, y, x, T, b, c1, c, pol;
 
   nf = checknf(nf);
-  pol = gel(nf,1); N = degpol(pol);
+  pol = nf_get_pol(nf); N = degpol(pol);
   T = x = c = c1 = NULL;
   switch (idealtyp(&I,&aI))
   {

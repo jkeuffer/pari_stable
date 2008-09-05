@@ -790,7 +790,7 @@ GEN     get_bnfpol(GEN x, GEN *bnf, GEN *nf);
 GEN     get_nf(GEN x, long *t);
 GEN     get_nfpol(GEN x, GEN *nf);
 GEN     get_prid(GEN x);
-GEN     nf_get_roots(GEN nf);
+GEN     nf_get_allroots(GEN nf);
 long    nf_get_prec(GEN x);
 GEN     nfinit(GEN x, long prec);
 GEN     nfinit0(GEN x, long flag, long prec);
@@ -2611,10 +2611,18 @@ INLINE long   vali(GEN x);
 
 /* pariinl.h */
 
+INLINE GEN    nf_get_M(GEN nf);
+INLINE GEN    nf_get_G(GEN nf);
+INLINE GEN    nf_get_Tr(GEN nf);
+INLINE GEN    nf_get_TrInv(GEN nf);
 INLINE long   nf_get_degree(GEN nf);
+INLINE GEN    nf_get_disc(GEN nf);
+INLINE GEN    nf_get_index(GEN nf);
+INLINE GEN    nf_get_pol(GEN nf);
 INLINE long   nf_get_r1(GEN nf);
 INLINE long   nf_get_r2(GEN nf);
 INLINE void   nf_get_sign(GEN nf, long *r1, long *r2);
+INLINE GEN    nf_get_zk(GEN nf);
 INLINE long   pr_get_e(GEN pr);
 INLINE long   pr_get_f(GEN pr);
 INLINE GEN    pr_get_gen(GEN pr);

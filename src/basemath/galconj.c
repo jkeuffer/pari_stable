@@ -109,8 +109,8 @@ galoisconj2(GEN nf, long prec)
   /* accuracy in decimal digits */
   prec = (long)bit_accuracy_mul(nf_get_prec(nf), LOG10_2 * 0.75);
   nbauto = 1;
-  polr = nf_get_roots(nf);
-  p2 = gmael(nf, 5, 1);
+  polr = nf_get_allroots(nf);
+  p2 = nf_get_M(nf);
   w = cgetg(n + 2, t_VEC);
   for (i = 1; i <= n; i++) gel(w,i) = gcoeff(p2, 1, i);
   for (i = 2; i <= n && nbauto < nbmax; i++)
@@ -2144,7 +2144,7 @@ galoisconj4_main(GEN T, GEN den, long flag)
 
   T = get_nfpol(T, &nf); n = degpol(T);
   if (nf)
-  { if (!den) den = Q_denom(gel(nf,7)); }
+  { if (!den) den = Q_denom(nf_get_zk(nf)); }
   else
   {
     if (n <= 0) pari_err(constpoler, "galoisinit");

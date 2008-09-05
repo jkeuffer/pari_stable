@@ -139,7 +139,7 @@ GEN
 checknfelt_mod(GEN nf, GEN x, const char *s)
 {
   GEN T = gel(x,1), a = gel(x,2);
-  if (!RgX_equal_var(T, gel(nf,1)))
+  if (!RgX_equal_var(T, nf_get_pol(nf)))
     pari_err(talker, "incompatible modulus in %s:\n  mod = %Ps,\n  nf  = %Ps",
 	     s, a, T);
   return a;
@@ -694,7 +694,7 @@ galoisapply(GEN nf, GEN aut, GEN x)
   long lx, j, N;
   GEN y, T;
 
-  nf = checknf(nf); T = gel(nf,1);
+  nf = checknf(nf); T = nf_get_pol(nf);
   if (typ(aut)==t_POL) aut = gmodulo(aut,T);
   else
   {
@@ -743,7 +743,7 @@ get_bnfpol(GEN x, GEN *bnf, GEN *nf)
 {
   *bnf = checkbnf_i(x);
   *nf  = checknf_i(x);
-  if (*nf) x = gel(*nf, 1);
+  if (*nf) x = nf_get_pol(*nf);
   if (typ(x) != t_POL) pari_err(typeer,"get_bnfpol");
   return x;
 }
@@ -752,7 +752,7 @@ GEN
 get_nfpol(GEN x, GEN *nf)
 {
   if (typ(x) == t_POL) { *nf = NULL; return x; }
-  *nf = checknf(x); return gel(*nf,1);
+  *nf = checknf(x); return nf_get_pol(*nf);
 }
 
 /* if fliso test for isomorphism, for inclusion otherwise. */
@@ -859,7 +859,7 @@ get_roots(GEN x, long r1, long prec)
 }
 
 GEN
-nf_get_roots(GEN nf)
+nf_get_allroots(GEN nf)
 {
   long i, j, n, r1, r2;
   GEN ro = gel(nf,6), v;
@@ -1108,10 +1108,10 @@ make_M_G(nffp_t *F, int trunc)
 void
 remake_GM(GEN nf, nffp_t *F, long prec)
 {
-  F->x  = gel(nf,1);
+  F->x  = nf_get_pol(nf);
   F->ro = NULL;
   F->r1 = nf_get_r1(nf);
-  F->basden = get_bas_den(gel(nf,7));
+  F->basden = get_bas_den(nf_get_zk(nf));
   F->extraprec = -1;
   F->prec = prec; make_M_G(F, 1);
 }
@@ -1191,7 +1191,7 @@ static GEN
 hnffromLLL(GEN nf)
 {
   GEN d, x;
-  x = RgXV_to_RgM(gel(nf,7), nf_get_degree(nf));
+  x = RgXV_to_RgM(nf_get_zk(nf), nf_get_degree(nf));
   x = Q_remove_denom(x, &d);
   if (!d) return x; /* power basis */
   return RgM_solve(ZM_hnfmodid(x, d), x);
@@ -1435,10 +1435,10 @@ nfbasic_init(GEN x, long flag, GEN fa, nfbasic_t *T)
   else
   { /* nf, bnf, bnr */
     GEN nf = checknf(x);
-    x     = gel(nf,1);
-    dK    = gel(nf,3);
-    index = gel(nf,4);
-    bas   = gel(nf,7);
+    x     = nf_get_pol(nf);
+    dK    = nf_get_disc(nf);
+    index = nf_get_index(nf);
+    bas   = nf_get_zk(nf);
     dx = NULL;
     r1 = nf_get_r1(nf);
   }
@@ -2063,7 +2063,7 @@ rootsof1(GEN nf)
   N = nf_get_degree(nf); prec = nf_get_prec(nf);
   for (;;)
   {
-    GEN R = R_from_QR(gmael(nf,5,2), prec);
+    GEN R = R_from_QR(nf_get_G(nf), prec);
     if (R)
     {
       y = fincke_pohst(mkvec(R), utoipos(N), 1000, 0, NULL);

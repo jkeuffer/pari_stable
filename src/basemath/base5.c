@@ -80,11 +80,11 @@ static GEN
 modulereltoabs(GEN rnf, GEN x)
 {
   GEN W = gel(x,1), I = gel(x,2), nf = gel(rnf,10), rnfeq = gel(rnf,11);
-  GEN M, basnf, cobasnf, T = gel(nf,1), polabs = gel(rnfeq,1);
+  GEN M, basnf, cobasnf, T = nf_get_pol(nf), polabs = gel(rnfeq,1);
   long i, j, k, n = lg(W)-1, m = degpol(T);
 
   M = cgetg(n*m+1, t_VEC);
-  basnf = lift_intern( gsubst(gel(nf,7), varn(T), gel(rnfeq,2)) );
+  basnf = lift_intern( gsubst(nf_get_zk(nf), varn(T), gel(rnfeq,2)) );
   basnf = Q_primitive_part(basnf, &cobasnf); /* remove denom. --> faster */
   for (k=i=1; i<=n; i++)
   {
@@ -120,8 +120,8 @@ makenfabs(GEN rnf)
   else   M = matid(n);
 
   gel(NF,1) = pol;
-  gel(NF,3) = mulii(powiu(gel(nf,3), rnf_get_degree(rnf)),
-		      idealnorm(nf, gel(rnf,3)));
+  gel(NF,3) = mulii(powiu(nf_get_disc(nf), rnf_get_degree(rnf)),
+		    idealnorm(nf, gel(rnf,3)));
   gel(NF,7) = RgM_to_RgXV(M,varn(pol));
   gel(NF,8) = RgM_inv(M);
   gel(NF,9) = get_mul_table(pol, gel(NF,7), gel(NF,8));
@@ -232,7 +232,7 @@ rnfelementabstorel(GEN rnf,GEN x)
     {
       GEN k, T, pol, rnfeq = gel(rnf,11), nf = gel(rnf,10);
       k = gel(rnfeq,3);
-      T = gel(nf,1);
+      T = nf_get_pol(nf);
       pol = gel(rnf,1);
       return gerepileupto(av, eltabstorel(x, T, pol, k));
     }
@@ -562,7 +562,7 @@ initmat(long l)
 static GEN
 nftocomplex(GEN nf, GEN x)
 {
-  GEN M = gmael(nf,5,1);
+  GEN M = nf_get_M(nf);
   x = nf_to_scalar_or_basis(nf,x);
   if (typ(x) != t_COL) return const_col(lg(M[1])-1, x);
   return RgM_RgC_mul(M, x);
@@ -620,13 +620,13 @@ findmin(GEN nf, GEN x, GEN muf)
 {
   pari_sp av = avma;
   long e;
-  GEN cx, y, m, M = gmael(nf,5,1);
+  GEN cx, y, m, M = nf_get_M(nf);
 
   x = Q_primitive_part(x, &cx);
   if (gcmp1(gcoeff(x,1,1))) y = M;
   else
   {
-    GEN G = gmael(nf,5,2);
+    GEN G = nf_get_G(nf);
     m = lllfp(RgM_mul(G,x), 0.75, 0);
     if (typ(m) != t_MAT)
     {
@@ -862,7 +862,7 @@ rnfpolred(GEN nf, GEN pol, long prec)
   bnf = nf; nf = checknf(bnf);
   bnf = (nf == bnf)? NULL: checkbnf(bnf);
   if (degpol(pol) <= 1) { w = cgetg(2, t_VEC); gel(w,1) = pol_x(v); return w; }
-  nfpol = gel(nf,1);
+  nfpol = nf_get_pol(nf);
 
   id = rnfpseudobasis(nf,pol);
   if (bnf && gcmp1(gmael3(bnf,8,1,1))) /* if bnf is principal */
@@ -896,7 +896,7 @@ rnfpolred(GEN nf, GEN pol, long prec)
     newpol = RgXQX_red(RgXQ_caract(lift_intern(p1), pol, v), nfpol);
     newpol = Q_primpart(newpol);
 
-    (void)nfgcd_all(newpol, RgX_deriv(newpol), nfpol, gel(nf,4), &newpol);
+    (void)nfgcd_all(newpol, RgX_deriv(newpol), nfpol, nf_get_index(nf), &newpol);
     L = leading_term(newpol);
     gel(w,j) = (typ(L) == t_POL)? RgXQX_div(newpol, L, nfpol)
                                 : RgX_Rg_div(newpol, L);
@@ -917,9 +917,9 @@ powers(long N, long v)
 static GEN
 makebasis(GEN nf, GEN pol, GEN rnfeq)
 {
-  GEN T = gel(nf,1), TAB = gel(nf,9), W, I, polabs, a, a0, B, ZK, p1, den, A, d;
+  GEN T = nf_get_pol(nf), TAB = gel(nf,9), W, I, polabs, a, B, ZK, p1, den, A;
   pari_sp av = avma;
-  long n, N, m, i, j, k;
+  long i, j, k, N = degpol(pol), n = degpol(T), nN = n*N;
 
   polabs= gel(rnfeq,1); /* in Z[X], L = Q[X] / polabs, and pol | polabs */
   a     = gel(rnfeq,2); a = lift_intern(a); /* root of T in Q[X]/polabs */
@@ -927,25 +927,23 @@ makebasis(GEN nf, GEN pol, GEN rnfeq)
   W = gel(p1,1);
   I = gel(p1,2);
   if (DEBUGLEVEL>1) fprintferr("relative basis computed\n");
-  N = degpol(pol);
-  n = degpol(T); m = n*N;
 
-  a0 = Q_remove_denom(a, &den); /* a = a0/den */
-  /* K = Q(a), A[i+1] = a^i as an elt of L = Q[X] / polabs */
-  A = RgXQ_powers(a0, n-1, polabs);
+  /* K = Q(a), den*a integral; A[i+1] = (den*a)^i in L = Q[X] / polabs */
+  A = RgXQ_powers(Q_remove_denom(a, &den), n-1, polabs);
   if (den)
   { /* restore denominators */
-    gel(A,2) = a; d = den;
+    GEN d = den;
+    gel(A,2) = a;
     for (i=3; i<=n; i++) {
       d = mulii(d,den);
       gel(A,i) = RgX_Rg_div(gel(A,i), d);
     }
   }
   /* ZK = integer basis of K, as elements of L */
-  ZK = RgV_RgM_mul(A, RgXV_to_RgM(gel(nf,7),n));
+  ZK = RgV_RgM_mul(A, RgXV_to_RgM(nf_get_zk(nf),n));
 
-  W = gmul(powers(N, varn(pol)), W); /* vector of nfX */
-  B = cgetg(m+1, t_MAT);
+  W = RgV_RgM_mul(powers(N, varn(pol)), W); /* vector of nfX */
+  B = cgetg(nN+1, t_MAT);
   for(i=k=1; i<=N; i++)
   {
     GEN w = gel(W,i), id = gel(I,i);
@@ -953,12 +951,12 @@ makebasis(GEN nf, GEN pol, GEN rnfeq)
     for(j=1; j<=n; j++)
     {
       p1 = grem(RgV_dotproduct(ZK, gel(w,j)), polabs);
-      gel(B,k++) = RgX_to_RgV(p1, m);
+      gel(B,k++) = RgX_to_RgV(p1, nN);
     }
   }
   B = Q_remove_denom(B, &den);
   if (den) { B = ZM_hnfmodid(B, den); B = RgM_Rg_div(B, den); }
-  else B = matid(m);
+  else B = matid(nN);
   return gerepilecopy(av, mkvec2(polabs, B));
 }
 
@@ -976,7 +974,7 @@ rnfpolredabs(GEN nf, GEN relpol, long flag)
   if (typ(relpol)!=t_POL) pari_err(typeer,"rnfpolredabs");
   nf = checknf(nf);
   if (DEBUGLEVEL>1) (void)timer2();
-  T = gel(nf,1);
+  T = nf_get_pol(nf);
   relpol = rnf_fix_pol(T, relpol, 0);
   if ((flag & nf_ADDZK) && !(flag & nf_ABSOLUTE))
     pari_err(impl,"this combination of flags in rnfpolredabs");
