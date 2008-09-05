@@ -1401,6 +1401,7 @@ static int
 is_interactive(void)
 {
   ulong f = GP_DATA->flags;
+/* FIXME: HAS_ISATTY */
 #if defined(UNIX) || defined(__EMX__) || defined(_WIN32)
   return (pari_infile == stdin && !(f & TEXMACS)
 			  && (f & EMACS || isatty(fileno(stdin))));
@@ -1692,6 +1693,7 @@ input0(void)
 void
 system0(const char *s)
 {
+/*FIXME: HAS_SYSTEM */
 #if defined(UNIX) || defined(__EMX__) || defined(_WIN32)
   check_secure(s); system(s);
 #else
