@@ -4200,6 +4200,9 @@ name of the caller).
 zero, and $0$ otherwise.
 
 \fun{int}{ZV_cmp}{GEN x, GEN y} compare two \kbd{ZV}, which we assume have
+the same length (lexicographic order, comparing absolute values).
+
+\fun{int}{ZV_abscmp}{GEN x, GEN y} compare two \kbd{ZV}, which we assume have
 the same length (lexicographic order).
 
 \fun{int}{ZV_equal}{GEN x, GEN y} returns $1$ if the two \kbd{ZV} are equal

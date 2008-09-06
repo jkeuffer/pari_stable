@@ -410,29 +410,30 @@ GEN     ZM_zc_mul(GEN x, GEN y);
 GEN     ZM_zm_mul(GEN x, GEN y);
 GEN     ZMrow_ZC_mul(GEN x, GEN y, long i);
 GEN     ZV_ZM_mul(GEN x, GEN y);
+int     ZV_abscmp(GEN x, GEN y);
+int     ZV_cmp(GEN x, GEN y);
+int     ZV_cmp0(GEN V);
 GEN     ZV_content(GEN x);
 GEN     ZV_dotproduct(GEN x,GEN y);
 GEN     ZV_dotsquare(GEN x);
 int     ZV_equal(GEN V, GEN W);
+int     ZV_isscalar(GEN x);
 long    ZV_max_lg(GEN x);
+void    ZV_neg_inplace(GEN M);
 GEN     ZV_prod(GEN v);
 GEN     ZV_to_Flv(GEN x, ulong p);
 GEN     ZV_to_nv(GEN z);
 void    ZV_togglesign(GEN M);
 GEN     zm_to_ZM(GEN z);
+int     zv_cmp0(GEN V);
+long    zv_content(GEN x);
 int     zv_equal(GEN V, GEN W);
 GEN     zv_neg(GEN x);
 long    zv_prod(GEN v);
 int     ZM_ishnf(GEN x);
 int     ZM_isidentity(GEN x);
-int     ZV_cmp(GEN x, GEN y);
-int     ZV_cmp0(GEN V);
-int     zv_cmp0(GEN V);
-int     ZV_isscalar(GEN x);
-long    zv_content(GEN x);
 void    RgM_check_ZM(GEN A, const char *s);
 void    RgV_check_ZV(GEN A, const char *s);
-void    ZV_neg_inplace(GEN M);
 
 /* ZX.c */
 

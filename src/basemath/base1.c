@@ -1304,17 +1304,13 @@ set_LLL_basis(nfbasic_t *T, GEN *pro, double DELTA)
 /* current best: ZX x of discriminant *dx, is ZX y better than x ?
  * (if so update *dx) */
 static int
-ZX_is_better(GEN y,GEN a, GEN x,GEN b, GEN *dx)
+ZX_is_better(GEN y, GEN x, GEN *dx)
 {
   GEN d = ZX_disc(y);
   long cmp = absi_cmp(d, *dx);
   if (cmp < 0) { *dx = d; return 1; }
-  if (cmp > 0) return 0;
-
-  cmp = cmp_abs_ZX(y, x);
-  if (cmp < 0) return 1;
-  if (cmp > 0) return 0;
-  return ZV_cmp(a, b) < 0;
+  if (cmp == 0) return cmp_abs_ZX(y, x) < 0;
+  return 0;
 }
 
 static GEN polred_aux(GEN x, GEN a, long orig);
@@ -1331,9 +1327,9 @@ nfpolred(nfbasic_t *T)
   a = gel(z,1);
   y = gel(z,2);
   for (i = 1; i < lg(y); i++) {
-    GEN yi = gel(y,i), ai = gel(a,i);
+    GEN yi = gel(y,i);
     if (degpol(yi) < n) continue;
-    if (ZX_is_better(yi, ai, x, b, &dx)) { x = yi; b = ai; }
+    if (ZX_is_better(yi,x,&dx)) { x = yi; b = gel(a,i); }
   }
   if (!b) return NULL; /* no improvement */
 
@@ -1560,24 +1556,34 @@ nfnewprec(GEN nf, long prec)
 /**                           POLRED                               **/
 /**                                                                **/
 /********************************************************************/
-/* remove duplicate polynomials in y, updating a (same indexes), in place */
+/* Remove duplicate polynomials in P, updating A (same indices), in place
+ * among elements having the same characteristic pol, choose the smallest
+ * according to ZV_abscmp */
 static void
-remove_duplicates(GEN y, GEN a)
+remove_duplicates(GEN P, GEN A)
 {
-  long k, i, l = lg(y);
+  long k, i, l = lg(P);
   pari_sp av = avma;
-  GEN z;
+  GEN x, a;
 
   if (l < 2) return;
-  z = mkmat2(y, a); (void)sort_factor_pol(z, cmpii);
-  for  (k=1, i=2; i<l; i++)
-    if (!ZX_equal(gel(y,i), gel(y,k)))
+  (void)sort_factor_pol(mkmat2(P, A), cmpii);
+  x = gel(P,1); a = gel(A,1);
+  for  (k=1,i=2; i<l; i++)
+    if (ZX_equal(gel(P,i), x))
     {
-      k++;
-      a[k] = a[i];
-      y[k] = y[i];
+      if (ZV_abscmp(gel(A,i), a) < 0) a = gel(A,i);
     }
-  l = k+1; setlg(a,l); setlg(y,l);
+    else
+    {
+      gel(A,k) = a;
+      gel(P,k) = x;
+      k++;
+      x = gel(P,i); a = gel(A,i);
+    }
+  gel(A,k) = a;
+  gel(P,k) = x;
+  l = k+1; setlg(A,l); setlg(P,l);
   avma = av;
 }
 
@@ -1898,8 +1904,8 @@ findmindisc(GEN y, GEN *pa)
   dx = ZX_disc(x);
   for (i = 2; i < l; i++)
   {
-    GEN yi = gel(y,i), ai = gel(a,i);
-    if (ZX_is_better(yi,ai, x,b, &dx)) { x = yi; b = ai; }
+    GEN yi = gel(y,i);
+    if (ZX_is_better(yi,x,&dx)) { x = yi; b = gel(a,i); }
   }
   *pa = b; return x;
 }
