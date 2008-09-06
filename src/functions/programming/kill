@@ -7,5 +7,4 @@ Help: kill(s): restores a variable to its ``undefined'' value and kill
 Doc: restores a variable to its ``undefined'' value (monomial of degree one),
  and deletes any help messages associated to $s$ using \kbd{addhelp}.
  For the first use, you should simply use the \idx{quote} operator:
- \kbd{a = 'a}. The second use, although limited, is what keeps this function
- from being completely obsolete.
+ \kbd{a = 'a}. More generally, deletes aliases and installed functions.
