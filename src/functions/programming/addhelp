@@ -9,6 +9,9 @@ Doc: changes the help
  defined, its definition will still be printed before the message \var{str}.
  It is recommended that you document global variables and user functions in
  this way. Of course \kbd{gp} will not protest if you skip this.
+ It is possible to attach a help text to an alias, but it will never be
+ shown: aliases are expanded by the \kbd{?} help operator and we get the help of
+ the functions the alias points to.
 
  Nothing prevents you from modifying the help of built-in PARI
- functions. (But if you do, we would like to hear why you needed to do it!)
+ functions. But if you do, we would like to hear why you needed to do it!
