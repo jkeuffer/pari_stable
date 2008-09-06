@@ -343,6 +343,7 @@ install(void *f, char *name, char *code)
 void
 kill0(entree *ep)
 {
+  entree *EP = initial_value(ep);
   if (EpSTATIC(ep)) pari_err(talker,"can't kill that");
   freeep(ep);
   switch(EpVALENCE(ep))
@@ -351,10 +352,10 @@ kill0(entree *ep)
     case EpALIAS:
     case EpINSTALL:
       ep->valence = EpNEW;
-      init_initial_value(ep);
+      init_initial_value(EP);
       break;
   }
-  ep->value   = initial_value(ep);
+  ep->value   = EP;
   ep->pvalue  = NULL;
 }
 
