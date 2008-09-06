@@ -170,7 +170,7 @@ freeep(entree *ep)
       while (ep->pvalue!=INITIAL) pop_val(ep);
       break;
     case EpALIAS:
-      gunclone((GEN)ep->value); ep->value=NULL; break;
+      killblock((GEN)ep->value); ep->value=NULL; break;
   }
 }
 
