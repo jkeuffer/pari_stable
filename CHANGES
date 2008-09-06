@@ -298,8 +298,7 @@ BA 41- user variables can now be aliased [#790]
        our generic functions (so no need to cater for them specially: they
        will be very rare, produced by ad hoc routines).
    76- kill(z) no longer destroys user variable, only resets them to their
-       "undefined" value (as z = 'z would). It would be largely obsoleted
-        were there any other means of deleting addhelp information from a symbol
+       "undefined" value (as z = 'z would).
    77- [library] prototype of galoisconj [ add one argument ], and made it
        correspond to the default nfgaloisconj flag
 
