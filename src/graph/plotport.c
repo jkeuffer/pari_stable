@@ -1808,16 +1808,15 @@ init_output(long flags)
 }
 
 static GEN
-ploth0(long stringrect,long drawrect,GEN a,GEN b,GEN code,
-       long prec,ulong flags,long testpoints)
+ploth0(GEN a,GEN b,GEN code, long prec,ulong flags,long testpoints)
 {
   PARI_plot *output = init_output(flags);
   dblPointList *pl=rectplothin(a,b, code, prec, flags,testpoints);
-  return rectplothrawin(stringrect,drawrect, pl, flags, output);
+  return rectplothrawin(STRINGRECT,DRAWRECT, pl, flags, output);
 }
 
 static GEN
-plothraw0(long stringrect, long drawrect, GEN listx, GEN listy, long flags)
+plothraw0(GEN listx, GEN listy, long flags)
 {
   PARI_plot *output = init_output(flags);
   long data[] = {evaltyp(t_VEC) | _evallg(3), 0, 0};
@@ -1827,61 +1826,39 @@ plothraw0(long stringrect, long drawrect, GEN listx, GEN listy, long flags)
   gel(data,2) = listy;
   pl=gtodblList(data,PLOT_PARAMETRIC|(flags&PLOT_COMPLEX));
   if (!pl) return cgetg(1,t_VEC);
-  return rectplothrawin(stringrect,drawrect,pl,flags | PLOT_PARAMETRIC,output);
+  return rectplothrawin(STRINGRECT,DRAWRECT,pl,flags | PLOT_PARAMETRIC,output);
 }
 
 GEN
 plothraw(GEN listx, GEN listy, long flags)
 {
   if (flags <= 1) flags = flags? 0: PLOT_POINTS;
-  return plothraw0(STRINGRECT, DRAWRECT, listx, listy, flags);
+  return plothraw0(listx, listy, flags);
 }
 
 GEN
 ploth(GEN a, GEN b, GEN code, long prec,long flags,long numpoints)
-{
-  return ploth0(STRINGRECT, DRAWRECT, a,b,code,prec,flags,numpoints);
-}
-
+{ return ploth0(a,b,code,prec,flags,numpoints); }
 GEN
 ploth2(GEN a, GEN b, GEN code, long prec)
-{
-  return ploth0(STRINGRECT, DRAWRECT, a,b,code,prec,PLOT_PARAMETRIC,0);
-}
-
+{ return ploth0(a,b,code,prec,PLOT_PARAMETRIC,0); }
 GEN
 plothmult(GEN a, GEN b, GEN code, long prec)
-{
-  return ploth0(STRINGRECT, DRAWRECT, a,b,code,prec,0,0);
-}
+{ return ploth0(a,b,code,prec,0,0); }
 
 GEN
 postplothraw(GEN listx, GEN listy, long flags)
-{
-  flags = flags? 0: PLOT_POINTS;
-  return plothraw0(STRINGRECT, DRAWRECT, listx, listy, flags|PLOT_POSTSCRIPT);
-}
-
+{ return plothraw0(listx, listy, flags? PLOT_POSTSCRIPT
+                                      : PLOT_POINTS|PLOT_POSTSCRIPT); }
 GEN
 postploth(GEN a, GEN b, GEN code, long prec,long flags, long numpoints)
-{
-  return ploth0(STRINGRECT,DRAWRECT,a,b,code,prec,flags|PLOT_POSTSCRIPT,
-		numpoints);
-}
-
+{ return ploth0(a,b,code,prec,flags|PLOT_POSTSCRIPT, numpoints); }
 GEN
 postploth2(GEN a, GEN b, GEN code, long prec, long numpoints)
-{
-  return ploth0(STRINGRECT,DRAWRECT,a,b,code,prec,
-		PLOT_PARAMETRIC|PLOT_POSTSCRIPT,numpoints);
-}
+{ return ploth0(a,b,code,prec, PLOT_PARAMETRIC|PLOT_POSTSCRIPT,numpoints); }
 
 GEN
-plothsizes(void)
-{
-  return plothsizes_flag(0);
-}
-
+plothsizes(void) { return plothsizes_flag(0); }
 GEN
 plothsizes_flag(long flag)
 {
