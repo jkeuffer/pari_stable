@@ -2775,8 +2775,7 @@ bnfnewprec_shallow(GEN bnf, long prec)
   funits = matalgtobasis(nf0, check_units(bnf,"bnfnewprec"));
 
   prec1 = prec;
-  if (r2 > 1 || r1 != 0)
-    prec += nbits2nlong( gexpo(funits) );
+  if (r1 + r2 > 1) prec += 1 << (gexpo(gel(bnf,3)) + 1 - TWOPOTBITS_IN_LONG);
   nf = nfnewprec_shallow(nf0,prec);
   mun = get_archclean(nf,funits,prec,1);
   if (!mun) pari_err(precer,"bnfnewprec");
