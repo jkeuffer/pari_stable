@@ -898,60 +898,65 @@ closure_eval(GEN C)
 #define ARGS st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4],st[sp+5],st[sp+6],st[sp+7]
     case OCcallgen:
       {
+        const char *old_name=gp_function_name;
         entree *ep=(entree*)operand;
         GEN res;
         sp-=ep->arity;
         gp_function_name=ep->name;
         res = ((GEN (*)(ANYARG))ep->value)(ARGS);
         if (br_status) goto endeval;
-        gp_function_name=NULL;
+        gp_function_name=old_name;
         gel(st,sp++)=res;
         break;
       }
     case OCcallgen2:
       {
+        const char *old_name=gp_function_name;
         entree *ep=(entree*)operand;
         GEN res;
         sp-=ep->arity;
         gp_function_name=ep->name;
         res = ((GEN (*)(GEN,GEN))ep->value)(gel(st,sp),gel(st,sp+1));
         if (br_status) goto endeval;
-        gp_function_name=NULL;
+        gp_function_name=old_name;
         gel(st,sp++)=res;
         break;
       }
     case OCcalllong:
       {
+        const char *old_name=gp_function_name;
         entree *ep=(entree*)operand;
         long res;
         sp-=ep->arity;
         gp_function_name=ep->name;
         res = ((long (*)(ANYARG))ep->value)(ARGS);
         if (br_status) goto endeval;
-        gp_function_name=NULL;
+        gp_function_name=old_name;
         st[sp++] = res;
         break;
       }
     case OCcallint:
       {
+        const char *old_name=gp_function_name;
         entree *ep=(entree*)operand;
         long res;
         sp-=ep->arity;
         gp_function_name=ep->name;
         res = ((int (*)(ANYARG))ep->value)(ARGS);
         if (br_status) goto endeval;
-        gp_function_name=NULL;
+        gp_function_name=old_name;
         st[sp++] = res;
         break;
       }
     case OCcallvoid:
       {
+        const char *old_name=gp_function_name;
         entree *ep=(entree*)operand;
         sp-=ep->arity;
         gp_function_name=ep->name;
         ((void (*)(ANYARG))ep->value)(ARGS);
         if (br_status) goto endeval;
-        gp_function_name=NULL;
+        gp_function_name=old_name;
         break;
       }
 #undef ARGS
