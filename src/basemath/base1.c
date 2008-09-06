@@ -1304,13 +1304,17 @@ set_LLL_basis(nfbasic_t *T, GEN *pro, double DELTA)
 /* current best: ZX x of discriminant *dx, is ZX y better than x ?
  * (if so update *dx) */
 static int
-ZX_is_better(GEN y, GEN x, GEN *dx)
+ZX_is_better(GEN y,GEN a, GEN x,GEN b, GEN *dx)
 {
   GEN d = ZX_disc(y);
   long cmp = absi_cmp(d, *dx);
   if (cmp < 0) { *dx = d; return 1; }
-  if (cmp == 0 && cmp_abs_ZX(y, x) < 0) return 1;
-  return 0;
+  if (cmp > 0) return 0;
+
+  cmp = cmp_abs_ZX(y, x);
+  if (cmp < 0) return 1;
+  if (cmp > 0) return 0;
+  return ZV_cmp(a, b) < 0;
 }
 
 static GEN polred_aux(GEN x, GEN a, long orig);
@@ -1327,9 +1331,9 @@ nfpolred(nfbasic_t *T)
   a = gel(z,1);
   y = gel(z,2);
   for (i = 1; i < lg(y); i++) {
-    GEN yi = gel(y,i);
+    GEN yi = gel(y,i), ai = gel(a,i);
     if (degpol(yi) < n) continue;
-    if (ZX_is_better(yi, x, &dx)) { x = yi; b = gel(a,i); }
+    if (ZX_is_better(yi, ai, x, b, &dx)) { x = yi; b = ai; }
   }
   if (!b) return NULL; /* no improvement */
 
@@ -1893,7 +1897,10 @@ findmindisc(GEN y, GEN *pa)
   if (l == 2) { *pa = b; return x; }
   dx = ZX_disc(x);
   for (i = 2; i < l; i++)
-    if (ZX_is_better(gel(y,i), x, &dx)) { x = gel(y,i); b = gel(a,i); }
+  {
+    GEN yi = gel(y,i), ai = gel(a,i);
+    if (ZX_is_better(yi,ai, x,b, &dx)) { x = yi; b = ai; }
+  }
   *pa = b; return x;
 }
 
