@@ -1556,8 +1556,8 @@ nfnewprec(GEN nf, long prec)
 /**                           POLRED                               **/
 /**                                                                **/
 /********************************************************************/
-/* Remove duplicate polynomials in P, updating A (same indices), in place
- * among elements having the same characteristic pol, choose the smallest
+/* Remove duplicate polynomials in P, updating A (same indices), in place.
+ * Among elements having the same characteristic pol, choose the smallest
  * according to ZV_abscmp */
 static void
 remove_duplicates(GEN P, GEN A)
