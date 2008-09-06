@@ -345,7 +345,15 @@ kill0(entree *ep)
 {
   if (EpSTATIC(ep)) pari_err(talker,"can't kill that");
   freeep(ep);
-  if (EpVALENCE(ep) != EpNEW) ep->valence = EpVAR;
+  switch(EpVALENCE(ep))
+  {
+    case EpNEW: break;
+    case EpALIAS:
+    case EpINSTALL:
+      ep->valence = EpNEW;
+      init_initial_value(ep);
+      break;
+  }
   ep->value   = initial_value(ep);
   ep->pvalue  = NULL;
 }
