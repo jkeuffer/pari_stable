@@ -16,11 +16,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 BEGINEXTERN
 
 #define PLOT_NAME_LEN 20
-#define NUMRECT 18
-
-INLINE long
-DTOL(double t) { return (long)(t + 0.5); }
-
 typedef struct PARI_plot {
   long width;
   long height;
@@ -34,13 +29,6 @@ typedef struct PARI_plot {
 
 extern PARI_plot pari_plot, pari_psplot;
 extern PARI_plot *pari_plot_engine;
-
-#define w_height (pari_plot_engine->height)
-#define w_width (pari_plot_engine->width)
-#define f_height (pari_plot_engine->fheight)
-#define f_width (pari_plot_engine->fwidth)
-#define h_unit (pari_plot_engine->hunit)
-#define v_unit (pari_plot_engine->vunit)
 
 typedef struct dblPointList{
   double *d;                   /* data */
@@ -59,8 +47,8 @@ typedef struct PariRect {
   double cursorx,cursory;
   double xscale,yscale;
   double xshift,yshift;
-  long has_graph;	   /* xy-ranges of this rectangle should be used
-			      for interactive operations.  */
+  long has_graph; /* xy-ranges of this rectangle should be used
+		     for interactive operations.  */
 } PariRect;
 
 /* The structures below are "subclasses" of RectObj. */
@@ -210,7 +198,6 @@ struct plot_eng {
 #define RoPTSsize(rop) (RoPTS(rop)->size)
 
 #define PL_POINTS 1
-#define GOODRECT(r) (0 <= r && r < NUMRECT)
 
 #define PLOT_PARAMETRIC   0x00001
 #define PLOT_RECURSIVE    0x00002
@@ -234,16 +221,15 @@ struct plot_eng {
 #define RECT_CP_SE        0x4
 #define RECT_CP_NE        0x6
 
-#define TICKS_CLOCKW	1		/* Draw in clockwise direction */
-#define TICKS_ACLOCKW	2		/* Draw in anticlockwise direction */
-#define TICKS_ENDSTOO	4		/* Draw at endspoints if needed */
-#define TICKS_NODOUBLE	8		/* Do not draw double-length ticks */
+#define TICKS_CLOCKW	1	/* Draw in clockwise direction */
+#define TICKS_ACLOCKW	2	/* Draw in anticlockwise direction */
+#define TICKS_ENDSTOO	4	/* Draw at endspoints if needed */
+#define TICKS_NODOUBLE	8	/* Do not draw double-length ticks */
 
 /* Not implemented yet */
-#define TICKS_COORD	16		/* Output [x,y,l,isdbl] for each tick */
-#define TICKS_RELATIVE	32		/* x,y-coordinates are relative */
+#define TICKS_COORD	16	/* Output [x,y,l,isdbl] for each tick */
+#define TICKS_RELATIVE	32	/* x,y-coordinates are relative */
 
-extern PariRect  **rectgraph;
 extern long  rectpoint_itype;
 extern long  rectline_itype;
 

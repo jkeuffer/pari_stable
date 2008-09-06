@@ -25,31 +25,29 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 void postdraw0(long *w, long *x, long *y, long lw, long scale);
 static void PARI_get_psplot(void);
 
+#define NUMRECT 18
+
 /* no need for THREAD: OK to share this */
 static hashtable *rgb_colors = NULL;
+PariRect *rectgraph[NUMRECT];
 
 /* no need for THREAD: gp-specific */
 static long current_color[NUMRECT];
 
-PariRect **rectgraph = NULL;
 PARI_plot pari_plot, pari_psplot;
 PARI_plot *pari_plot_engine = &pari_plot;
-long  rectpoint_itype = 0;
-long  rectline_itype  = 0;
+long rectpoint_itype = 0, rectline_itype  = 0;
 
-#define STRINGRECT (NUMRECT-2)
-#define DRAWRECT (NUMRECT-1)
+const long STRINGRECT = NUMRECT-2, DRAWRECT = NUMRECT-1;
 
-#define PLOTH_NUMPOINTS 1000
-#define PARAM_NUMPOINTS 1500
-#define RECUR_NUMPOINTS 8
+const long PLOTH_NUMPOINTS = 1000, PARAM_NUMPOINTS = 1500, RECUR_NUMPOINTS = 8;
+const long RECUR_MAXDEPTH = 10, PARAMR_MAXDEPTH = 10;
+const double RECUR_PREC = 0.001;
 
-#define RECUR_MAXDEPTH 10
-#define RECUR_PREC 0.001
-#define PARAMR_MAXDEPTH 10
+const long DEFAULT_COLOR = 1, AXIS_COLOR = 2;
 
-#define DEFAULT_COLOR 1
-#define AXIS_COLOR 2
+INLINE long
+DTOL(double t) { return (long)(t + 0.5); }
 
 /********************************************************************/
 /**                                                                **/
@@ -58,18 +56,23 @@ long  rectline_itype  = 0;
 /********************************************************************/
 #define ISCR 64
 #define JSCR 22
-#define BLANK ' '
-#define ZERO1 ','
-#define ZERO2 '-'
-#define ZERO3 '`'
-#define PICTZERO(j) ((j) % 3 ? ((j) % 3 == 2 ? ZERO3 : ZERO2) : ZERO1)
-#define YY '|'
-#define XX_UPPER '\''
-#define XX_LOWER '.'
-#define FF1 '_'
-#define FF2 'x'
-#define FF3 '"'
-#define PICT(j) ((j) % 3 ? ((j) % 3 == 2 ? FF3 : FF2) : FF1)
+const char BLANK = ' ', YY = '|', XX_UPPER = '\'', XX_LOWER = '.';
+static char
+PICT(long j) {
+  switch(j%3) {
+    case 0:  return '_';
+    case 1:  return 'x';
+    default: return '"';
+  }
+}
+static char
+PICTZERO(long j) {
+  switch(j%3) {
+    case 0:  return ',';
+    case 1:  return '-';
+    default: return '`';
+  }
+}
 
 static char *
 dsprintf9(double d, char *buf)
@@ -198,12 +201,9 @@ void
 init_graph(void)
 {
   long n;
-
-  rectgraph = (PariRect**) pari_malloc(sizeof(PariRect*)*NUMRECT);
   for (n=0; n<NUMRECT; n++)
   {
     PariRect *e = (PariRect*) pari_malloc(sizeof(PariRect));
-
     e->head = e->tail = NULL;
     e->sizex = e->sizey = 0;
     current_color[n] = DEFAULT_COLOR;
@@ -215,17 +215,12 @@ void
 free_graph(void)
 {
   int i;
-
-  if (!rectgraph)
-      return;
   for (i=0; i<NUMRECT; i++)
   {
-    PariRect *e=rectgraph[i];
-
+    PariRect *e = rectgraph[i];
     if (RHead(e)) killrect(i);
     pari_free((void *)e);
   }
-  pari_free((void *)rectgraph);
   if (rgb_colors)
   {
     free((void*)rgb_colors->table);
@@ -238,11 +233,11 @@ free_graph(void)
 static PariRect *
 check_rect(long ne)
 {
-  if (!GOODRECT(ne))
-    pari_err(talker,
-	"incorrect rectwindow number in graphic function (%ld not in [0, %ld])",
-	ne, NUMRECT-1);
-  return rectgraph[ne];
+  if (ne >= 0 && ne < NUMRECT) return rectgraph[ne];
+  pari_err(talker,
+           "incorrect rectwindow number in graphic function (%ld not in [0, %ld])",
+           ne, NUMRECT-1);
+  return NULL; /*not reached*/
 }
 
 static PariRect *
@@ -898,10 +893,7 @@ rectcopy(long source, long dest, long xoff, long yoff)
   RoNext(tail) = NULL; RTail(d) = tail;
 }
 
-#define CLIPLINE_NONEMPTY	1
-#define CLIPLINE_CLIP_1		2
-#define CLIPLINE_CLIP_2		4
-
+enum {CLIPLINE_NONEMPTY = 1, CLIPLINE_CLIP_1 = 2, CLIPLINE_CLIP_2 = 4};
 /* A simpler way is to clip by 4 half-planes */
 static int
 clipline(double xmin, double xmax, double ymin, double ymax,
