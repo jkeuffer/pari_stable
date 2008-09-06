@@ -1187,10 +1187,6 @@ listcopy(GEN x)
   return y;
 }
 
-/* x is a t_INT equal to 0 ? tx == t_INT && lx == 2. Not foolproof
- * but will catch almost all 0 in practice [ unless lgefint < lg ] */
-#define is_0INT(x) \
-    (((x)[0] & (TYPBITS|LGBITS)) == (evaltyp(t_INT)|_evallg(2)))
 GEN
 gcopy(GEN x)
 {
@@ -1198,7 +1194,7 @@ gcopy(GEN x)
   GEN y;
   switch(tx)
   { /* non recursive types */
-    case t_INT: return is_0INT(x)? gen_0: icopy(x);
+    case t_INT: return signe(x)? icopy(x): gen_0;
     case t_REAL:
     case t_STR:
     case t_VECSMALL: return leafcopy(x);
@@ -1220,7 +1216,7 @@ gcopy_lg(GEN x, long lx)
   GEN y;
   switch(tx)
   { /* non recursive types */
-    case t_INT: return is_0INT(x)? gen_0: icopy(x);
+    case t_INT: return signe(x)? icopy(x): gen_0;
     case t_REAL:
     case t_STR:
     case t_VECSMALL: return leafcopy(x);
@@ -1294,7 +1290,7 @@ gcopy_av0(GEN x, pari_sp *AVMA)
   switch(tx)
   { /* non recursive types */
     case t_INT:
-      if (is_0INT(x)) return NULL; /* special marker */
+      if (!signe(x)) return NULL; /* special marker */
       *AVMA = (pari_sp)icopy_avma(x, *AVMA);
       return (GEN)*AVMA;
     case t_REAL:
@@ -1332,10 +1328,10 @@ gcopy_av0_canon(GEN x, pari_sp *AVMA)
   long i, lx, tx = typ(x);
   GEN y;
 
-  if (is_0INT(x)) return NULL; /* special marker */
   switch(tx)
   { /* non recursive types */
     case t_INT:
+      if (!signe(x)) return NULL; /* special marker */
       *AVMA = (pari_sp)icopy_avma_canon(x, *AVMA);
       return (GEN)*AVMA;
     case t_REAL:
@@ -1371,10 +1367,9 @@ static long
 taille0(GEN x)
 {
   long i,n,lx, tx = typ(x);
-  if (is_0INT(x)) return 0;
   switch(tx)
   { /* non recursive types */
-    case t_INT: return lgefint(x);
+    case t_INT: return signe(x)? lgefint(x): 0;
     case t_REAL:
     case t_STR:
     case t_VECSMALL: return lg(x);

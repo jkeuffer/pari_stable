@@ -43,3 +43,5 @@ do(w) =
 for(i = 1, #v, print(v[i]": "do(v[i]))); 
 
 \\ quadray(31897,1)
+
+bnrstark(bnrinit(bnfinit(quadpoly(40,y)),120,1),matdiagonal([1,1,2,2]))
