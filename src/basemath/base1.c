@@ -1626,7 +1626,7 @@ polred_aux(GEN x, GEN a, long orig)
     gel(y,i) = ch;
     gel(b,i) = ai;
   }
-  remove_duplicates(y,b);
+  (void)sort_factor_pol(mkmat2(y, b), cmpii);
   if (!orig) return y;
   settyp(y, t_COL); return mkmat2(b, y);
 }
