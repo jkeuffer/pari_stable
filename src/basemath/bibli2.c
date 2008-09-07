@@ -1725,8 +1725,7 @@ setunion(GEN x, GEN y)
   pari_sp av = avma;
   long i, j, k, lx = lg(x), ly = lg(y);
   GEN z = cgetg(lx + ly - 1, t_VEC);
-  if (typ(x) != t_VEC || typ(y) != t_VEC)
-    pari_err(talker,"not a set in setunion");
+  if (typ(x) != t_VEC || typ(y) != t_VEC) pari_err(typeer,"setunion");
   i = j = k = 1;
   while (i<lx && j<ly)
   {
@@ -1749,15 +1748,18 @@ setunion(GEN x, GEN y)
 GEN
 setintersect(GEN x, GEN y)
 {
-  long i, c = 1, lx = lg(x);
+  long ix = 1, iy = 1, iz = 1, lx = lg(x), ly = lg(y);
   pari_sp av = avma;
   GEN z = cgetg(lx,t_VEC);
-
-  if (!setisset(x) || !setisset(y))
-    pari_err(talker,"not a set in setintersect");
-  for (i=1; i<lx; i++)
-    if (gen_search(y, gel(x,i), 0, (void*)gcmp, cmp_nodata)) z[c++] = x[i];
-  setlg(z,c); return gerepilecopy(av,z);
+  if (!is_vec_t(typ(x)) || !is_vec_t(typ(y))) pari_err(typeer, "setintersect");
+  while (ix < lx && iy < ly)
+  {
+    int c = gcmp(gel(x,ix), gel(y,iy));
+    if      (c < 0) ix++;
+    else if (c > 0) iy++;
+    else { gel(z, iz++) = gel(x,ix); ix++; iy++; }
+  }
+  setlg(z,iz); return gerepilecopy(av,z);
 }
 
 GEN
@@ -1784,6 +1786,6 @@ gen_setminus(GEN A, GEN B, int (*cmp)(GEN,GEN))
 GEN
 setminus(GEN x, GEN y)
 {
-  if (!setisset(x) || !setisset(y)) pari_err(talker,"not a set in setminus");
+  if (!is_vec_t(typ(x)) || !is_vec_t(typ(y))) pari_err(typeer,"setminus");
   return gen_setminus(x,y,gcmp);
 }

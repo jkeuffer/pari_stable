@@ -5,4 +5,7 @@ Prototype: GG
 Help: setunion(x,y): union of the sets x and y.
 Description:
  (vec, vec):vec	setunion($1, $2)
-Doc: union of the two sets $x$ and $y$.
+Doc: union of the two sets $x$ and $y$ (see \kbd{setisset}).
+ The function also works if both $x$ and $y$ are vectors of stricly increasing
+ entries, according to \kbd{<}); in that case we return a vector of strictly
+ increasing entries, not a set. Otherwise, the result is undefined.
