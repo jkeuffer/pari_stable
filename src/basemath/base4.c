@@ -2755,19 +2755,34 @@ static void
 nfcleanmod(GEN nf, GEN x, long lim, GEN D)
 {
   long i;
-  GEN DQ = gcoeff(D,1,1), dD;
-  D = Q_remove_denom(D, &dD); /* inefficient unless dD = 1: we don't use it */
+  GEN DZ, DZ2, dD;
+  D = Q_remove_denom(D, &dD);
+  if (dD) x = RgC_Rg_mul(x, dD);
+  DZ = gcoeff(D,1,1);
+  DZ2 = shifti(DZ,-1);
   for (i=1; i<=lim; i++) {
     GEN c = gel(x,i);
     c = nf_to_scalar_or_basis(nf, c);
-    if (typ(c) != t_COL)
-      c = gmod(c, DQ);
-    else
+    switch(typ(c)) /* c = centermod(c, D) */
     {
-      GEN dc;
-      c = Q_remove_denom(c, &dc);
-      if (dc) D = ZM_Z_mul(D, dc); /* hopefully rare */
-      c = ZC_hnfrem(c, D);
+      case t_INT:
+        if (!signe(c)) break;
+        c = centermodii(c, DZ, DZ2);
+        if (dD) c = gred_frac2(c,dD);
+        break;
+      case t_FRAC: {
+        GEN dc = gel(c,2), nc = gel(c,1), N = mulii(DZ, dc);
+        c = centermodii(nc, N, shifti(N,-1));
+        c = gred_frac2(c, dD ? mulii(dc,dD): dc);
+        break;
+      }
+      case t_COL: {
+        GEN dc;
+        c = Q_remove_denom(c, &dc);
+        c = ZC_hnfrem(c, dc? ZM_Z_mul(D,dc): D);
+        if (dD) c = RgC_Rg_div(c, dD);
+        break;
+      }
     }
     gel(x,i) = c;
   }
