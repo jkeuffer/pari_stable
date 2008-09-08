@@ -98,13 +98,12 @@ function or closure. This is zero for inline closures.
 
 \item \kbd{z[3]} points to a \typ{VECSMALL} which hold the operands of the opcodes.
 
-\item \kbd{z[4]} points to a \typ{VEC} which hold to the data referenced by the
+\item \kbd{z[4]} points to a \typ{VEC} which hold the data referenced by the
 \kbd{pushgen} opcodes, which can be \typ{CLOSURE}, and in particular
 inline closures.
 
-\item \kbd{s[4]} points to extra data that link the compiled code to the source code. This is used for error reporting and debugging. The exact format is
-in flux. Inline closures source code is stored in the parent function or
-true closure.
+\item \kbd{z[5]} points to a \typ{VEC} which hold extra data needed for
+error-reporting and debugging. See \secref{se:dbgclosure} for details.
 
 Additionnally, for functions and true closures,
 
@@ -118,6 +117,26 @@ Additionnally, for true closure,
 
 \item \kbd{z[7]} points to a \typ{VEC} which hold the values of all lexical
 variables defined in the scope the closure was defined.
+
+\subsec{Debugging information in closure}\label{se:dbgclosure}
+
+Every \typ{CLOSURE} object \kbd{z} has a component \kbd{dbg=z[5]}
+which which hold extra data needed for error-reporting and debugging.
+The object \kbd{dbg} is a \typ{VEC} with $3$ components:
+
+\kbd{dbg[1]} is a \typ{VECSMALL} of the same length than \kbd{z[3]}. For each
+opcode, it holds the position of the corresponding GP source code in the string
+stored in the second component of \kbd{z[6]} for function or true closures.
+For inline closures, the string of the parent function or true closure is used
+instead.
+
+\kbd{dbg[2]} is a \typ{VECSMALL} that lists opcodes index where new lexical
+local variables are created. The value $0$ denotes the position before the
+first offset and variables created by the prototype code 'V'.
+
+\kbd{dbg[3]} is a \typ{VEC} of \typ{VECSMALL}s that give the list of
+\kbd{entree*} of the lexical local variables created at a given index in
+\kbd{dbg[2]}.
 
 \section{The type \typ{LIST}}\kbdsidx{t_LIST}\sidx{list} This type needs to go
 through various hoops to support GP's inconvenient memory model. Don't

@@ -2654,7 +2654,7 @@ bruti_intern(GEN g, pariout_t *T, outString *S, int addsign)
         str_puts(S,"{\""); str_puts(S,GSTR(gel(g,2)));
         str_puts(S,"\","); wr_vecsmall(T,S,gel(g,3));
         str_putc(S,',');   bruti(gel(g,4),T,S);
-        str_putc(S,',');   wr_vecsmall(T,S,gel(g,5));
+        str_putc(S,',');   bruti(gel(g,5),T,S);
         str_putc(S,'}');
       }
       break;

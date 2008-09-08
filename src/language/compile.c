@@ -70,22 +70,31 @@ struct vars_s
   entree *ep;
 };
 
-static THREAD gp2c_stack s_opcode, s_operand, s_dbginfo, s_data, s_lvar;
+struct frame_s
+{
+  long pc;
+  GEN frame;
+};
+
+static THREAD gp2c_stack s_opcode, s_operand, s_data, s_lvar;
+static THREAD gp2c_stack s_dbginfo, s_frame;
 static THREAD char *opcode;
 static THREAD long *operand;
-static THREAD const char **dbginfo, *dbgstart;
 static THREAD GEN *data;
 static THREAD long offset;
 static THREAD struct vars_s *localvars;
+static THREAD const char **dbginfo, *dbgstart;
+static THREAD struct frame_s *frames;
 
 void
 pari_init_compiler(void)
 {
   stack_init(&s_opcode,sizeof(*opcode),(void **)&opcode);
   stack_init(&s_operand,sizeof(*operand),(void **)&operand);
-  stack_init(&s_dbginfo,sizeof(*dbginfo),(void **)&dbginfo);
   stack_init(&s_data,sizeof(*data),(void **)&data);
   stack_init(&s_lvar,sizeof(*localvars),(void **)&localvars);
+  stack_init(&s_dbginfo,sizeof(*dbginfo),(void **)&dbginfo);
+  stack_init(&s_frame,sizeof(*frames),(void **)&frames);
   offset=-1;
 }
 void
@@ -99,7 +108,7 @@ pari_close_compiler(void)
 
 struct codepos
 {
-  long opcode, data, localvars;
+  long opcode, data, localvars, frames;
   long offset;
   const char *dbgstart;
 };
@@ -112,6 +121,7 @@ getcodepos(struct codepos *pos)
   pos->offset=offset;
   pos->localvars=s_lvar.n;
   pos->dbgstart=dbgstart;
+  pos->frames=s_frame.n;
   offset=s_data.n-1;
 }
 
@@ -131,14 +141,22 @@ getfunction(struct codepos *pos, long arity, long nbmvar, GEN text)
 {
   long lop =s_opcode.n+1-pos->opcode;
   long ldat=s_data.n+1-pos->data;
+  long lfram=s_frame.n+1-pos->frames;
   GEN cl=cgetg(nbmvar?8:(text?7:6),t_CLOSURE);
+  GEN frpc, fram, dbg;
   char *s;
   long i;
   cl[1] = arity;
   gel(cl,2) = cgetg(nchar2nlong(lop)+1, t_STR);
   gel(cl,3) = cgetg(lop,  t_VECSMALL);
   gel(cl,4) = cgetg(ldat, t_VEC);
-  gel(cl,5) = cgetg(lop,  t_VECSMALL);
+  gel(cl,5) = cgetg(4,  t_VEC);
+  dbg = cgetg(lop,  t_VECSMALL);
+  frpc = cgetg(lfram,  t_VECSMALL);
+  fram = cgetg(lfram,  t_VEC);
+  gmael(cl,5,1) = dbg;
+  gmael(cl,5,2) = frpc;
+  gmael(cl,5,3) = fram;
   if (text) gel(cl,6) = text;
   if (nbmvar) gel(cl,7) = zerovec(nbmvar);
   s=GSTR(gel(cl,2))-1;
@@ -146,7 +164,7 @@ getfunction(struct codepos *pos, long arity, long nbmvar, GEN text)
   {
     s[i] = opcode[i+pos->opcode-1];
     mael(cl, 3, i) = operand[i+pos->opcode-1];
-    mael(cl, 5, i) = dbginfo[i+pos->opcode-1]-dbgstart;
+    dbg[i] = dbginfo[i+pos->opcode-1]-dbgstart;
   }
   s[i]=0;
   s_opcode.n=pos->opcode;
@@ -159,6 +177,14 @@ getfunction(struct codepos *pos, long arity, long nbmvar, GEN text)
   }
   s_data.n=pos->data;
   s_lvar.n=pos->localvars;
+  for(i=1;i<lfram;i++)
+  {
+    long j=i+pos->frames-1;
+    frpc[i] = frames[j].pc-pos->opcode+1;
+    gel(fram, i) = gcopy(frames[j].frame);
+    gunclone(frames[j].frame);
+  }
+  s_frame.n=pos->frames;
   offset=pos->offset;
   dbgstart=pos->dbgstart;
   return cl;
@@ -221,6 +247,14 @@ var_push(entree *ep, Ltype type)
   localvars[n].type = type;
 }
 
+static void
+frame_push(GEN x)
+{
+  long n=stack_new(&s_frame);
+  frames[n].pc = s_opcode.n-1;
+  frames[n].frame = gclone(x);
+}
+
 static GEN
 pack_localvars(void)
 {
@@ -236,6 +270,29 @@ pack_localvars(void)
     e[i]=(long)localvars[i-1].ep;
   }
   return pack;
+}
+
+void
+closure_context(GEN C, long lpc)
+{
+  char *code=GSTR(gel(C,2))-1;
+  GEN oper=gel(C,3);
+  GEN frpc=gmael(C,5,2);
+  GEN fram=gmael(C,5,3);
+  long pc, j=1;
+  for(pc=0; pc<=lpc; pc++)
+  {
+    if (pc>0 && (code[pc]==OClocalvar || code[pc]==OClocalvar0))
+      var_push((entree*)oper[pc],Llocal);
+    if (j<lg(frpc) && pc==frpc[j])
+    {
+      long k;
+      GEN e = gel(fram,j);
+      for(k=1; k<lg(e); k++)
+        var_push((entree*)e[k], Lmy);
+      j++;
+    }
+  }
 }
 
 void
@@ -784,24 +841,29 @@ compilefunc(entree *ep, long n, int mode)
   {
     long lgarg;
     GEN vep = cgetg_copy(arg, &lgarg);
-    if (nb) op_push_loc(OCnewframe,nb,str);
-    for(i=1;i<=nb;i++)
-      var_push(NULL,Lmy);
-    for (i=1;i<=nb;i++)
+    
+    if (nb)
     {
-      long a=arg[i];
-      if (tree[a].f==Faffect)
+      for(i=1;i<=nb;i++)
       {
-        if (!is_node_zero(tree[a].y))
+        long a=arg[i];
+        vep[i]=(long)getvar(tree[a].f==Faffect?tree[a].x:a);
+        var_push(NULL,Lmy);
+      }
+      checkdups(arg,vep);
+      op_push_loc(OCnewframe,nb,str);
+      frame_push(vep);
+      for (i=1;i<=nb;i++)
+      {
+        long a=arg[i];
+        if (tree[a].f==Faffect && !is_node_zero(tree[a].y))
         {
           compilenode(tree[a].y,Ggen,0);
           op_push(OCstorelex,-nb+i-1,a);
         }
-        a=tree[a].x;
+        localvars[s_lvar.n-nb+i-1].ep=(entree*)vep[i];
       }
-      vep[i]=(long)(localvars[s_lvar.n-nb+i-1].ep=getvar(a));
     }
-    checkdups(arg,vep);
     compilecast(n,Gvoid,mode);
     avma=ltop;
     return;
@@ -986,11 +1048,17 @@ compilefunc(entree *ep, long n, int mode)
             int type=c=='I'?Gvoid:Ggen;
             long flag=c=='I'?0:FLreturn;
             getcodepos(&pos);
-            for(i=0;i<lev;i++)
+            if (lev)
             {
-              if (!ev[i])
-                compile_err("missing variable name", tree[a].str-1);
-              var_push(ev[i],Lmy);
+              GEN vep=cgetg(lev+1,t_VECSMALL);
+              for(i=0;i<lev;i++)
+              {
+                if (!ev[i])
+                  compile_err("missing variable name", tree[a].str-1);
+                var_push(ev[i],Lmy);
+                vep[i+1]=(long)ev[i];
+              }
+              frame_push(vep);
             }
             if (tree[a].f==Fnoarg)
               compilecast(a,Gvoid,type);
@@ -1501,24 +1569,31 @@ compilenode(long n, int mode, long flag)
       getcodepos(&pos);
       dbgstart=tree[y].str;
       nb = lgarg-1;
-      if (nb) op_push(OCgetargs,nb,y);
-      for(i=1;i<=nb;i++)
-        var_push(NULL,Lmy);
-      for (i=1;i<=nb;i++)
+      if (nb)
       {
-        long a=arg[i];
-        if (tree[a].f==Faffect)
+        for(i=1;i<=nb;i++)
         {
-          struct codepos lpos;
-          getcodepos(&lpos);
-          compilenode(tree[a].y,Ggen,0);
-          op_push(OCpushgen, data_push(getclosure(&lpos)),a);
-          op_push(OCdefaultarg,-nb+i-1,a);
-          a=tree[a].x;
+          long a=arg[i];
+          vep[i]=(long)getvar(tree[a].f==Faffect?tree[a].x:a);
+          var_push(NULL,Lmy);
         }
-        vep[i]=(long)(localvars[s_lvar.n-nb+i-1].ep=getvar(a));
+        checkdups(arg,vep);
+        op_push(OCgetargs,nb,y);
+        frame_push(vep);
+        for (i=1;i<=nb;i++)
+        {
+          long a=arg[i];
+          if (tree[a].f==Faffect)
+          {
+            struct codepos lpos;
+            getcodepos(&lpos);
+            compilenode(tree[a].y,Ggen,0);
+            op_push(OCpushgen, data_push(getclosure(&lpos)),a);
+            op_push(OCdefaultarg,-nb+i-1,a);
+          }
+          localvars[s_lvar.n-nb+i-1].ep=(entree*)vep[i];
+        }
       }
-      checkdups(arg,vep);
       if (y>=0 && tree[y].f!=Fnoarg)
         compilenode(y,Ggen,FLreturn);
       else
