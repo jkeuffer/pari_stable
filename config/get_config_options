@@ -28,6 +28,7 @@ while test $# -gt 0; do
      if test -r "$initfile"; then
        . $initfile
        if test ! -d $objdir; then mkdir $objdir; fi
+       . $config_dir/get_tests # in case the test set have been changed
        . $config_dir/extract_files
        exit 0
      else
