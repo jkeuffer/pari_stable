@@ -69,10 +69,11 @@ enlarging \kbd{A} if necessary.
 \section{The type \typ{CLOSURE}}\kbdsidx{t_CLOSURE}\sidx{closure}
 This type holds closures and functions in compiled form, so is deeply
 linked to the internals of the GP compiler and evaluator.
-The length of this type can be $5$, $6$ or $7$ depending whether the
+The length of this type can be $6$, $7$ or $8$ depending whether the
 object is an ``inline closure'', a ``function'' or a ``true closure''.
 
-A function is a regular GP function.
+A function is a regular GP function. The GP input line is treated as a
+function of arity $0$.
 
 A true closure is a GP function defined in a non-empty lexical context.
 
@@ -101,9 +102,13 @@ function or closure. This is zero for inline closures.
 \kbd{pushgen} opcodes, which can be \typ{CLOSURE}, and in particular
 inline closures.
 
+\item \kbd{s[4]} points to extra data that link the compiled code to the source code. This is used for error reporting and debugging. The exact format is
+in flux. Inline closures source code is stored in the parent function or
+true closure.
+
 Additionnally, for functions and true closures,
 
-\item \kbd{z[5]} points to a \typ{VEC} with two components which are \typ{STR}.
+\item \kbd{z[6]} points to a \typ{VEC} with two components which are \typ{STR}.
 The first one displays the list of arguments of the closure without the
 enclosing parentheses, the second one the GP code of the function at the
 right of the \kbd{->} token. They are used to display the closure, either in
@@ -111,7 +116,7 @@ implicit or explicit form.
 
 Additionnally, for true closure,
 
-\item \kbd{z[6]} points to a \typ{VEC} which hold the values of all lexical
+\item \kbd{z[7]} points to a \typ{VEC} which hold the values of all lexical
 variables defined in the scope the closure was defined.
 
 \section{The type \typ{LIST}}\kbdsidx{t_LIST}\sidx{list} This type needs to go

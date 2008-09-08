@@ -70,9 +70,10 @@ struct vars_s
   entree *ep;
 };
 
-static THREAD gp2c_stack s_opcode, s_operand, s_data, s_lvar;
+static THREAD gp2c_stack s_opcode, s_operand, s_dbginfo, s_data, s_lvar;
 static THREAD char *opcode;
 static THREAD long *operand;
+static THREAD const char **dbginfo, *dbgstart;
 static THREAD GEN *data;
 static THREAD long offset;
 static THREAD struct vars_s *localvars;
@@ -82,6 +83,7 @@ pari_init_compiler(void)
 {
   stack_init(&s_opcode,sizeof(*opcode),(void **)&opcode);
   stack_init(&s_operand,sizeof(*operand),(void **)&operand);
+  stack_init(&s_dbginfo,sizeof(*dbginfo),(void **)&dbginfo);
   stack_init(&s_data,sizeof(*data),(void **)&data);
   stack_init(&s_lvar,sizeof(*localvars),(void **)&localvars);
   offset=-1;
@@ -99,6 +101,7 @@ struct codepos
 {
   long opcode, data, localvars;
   long offset;
+  const char *dbgstart;
 };
 
 static void
@@ -108,6 +111,7 @@ getcodepos(struct codepos *pos)
   pos->data=s_data.n;
   pos->offset=offset;
   pos->localvars=s_lvar.n;
+  pos->dbgstart=dbgstart;
   offset=s_data.n-1;
 }
 
@@ -116,6 +120,7 @@ compiler_reset(void)
 {
   s_opcode.n=0;
   s_operand.n=0;
+  s_dbginfo.n=0;
   s_data.n=0;
   s_lvar.n=0;
   offset=-1;
@@ -126,24 +131,27 @@ getfunction(struct codepos *pos, long arity, long nbmvar, GEN text)
 {
   long lop =s_opcode.n+1-pos->opcode;
   long ldat=s_data.n+1-pos->data;
-  GEN cl=cgetg(nbmvar?7:(text?6:5),t_CLOSURE);
+  GEN cl=cgetg(nbmvar?8:(text?7:6),t_CLOSURE);
   char *s;
   long i;
   cl[1] = arity;
   gel(cl,2) = cgetg(nchar2nlong(lop)+1, t_STR);
   gel(cl,3) = cgetg(lop,  t_VECSMALL);
   gel(cl,4) = cgetg(ldat, t_VEC);
-  if (text) gel(cl,5) = text;
-  if (nbmvar) gel(cl,6) = zerovec(nbmvar);
+  gel(cl,5) = cgetg(lop,  t_VECSMALL);
+  if (text) gel(cl,6) = text;
+  if (nbmvar) gel(cl,7) = zerovec(nbmvar);
   s=GSTR(gel(cl,2))-1;
   for(i=1;i<lop;i++)
   {
     s[i] = opcode[i+pos->opcode-1];
     mael(cl, 3, i) = operand[i+pos->opcode-1];
+    mael(cl, 5, i) = dbginfo[i+pos->opcode-1]-dbgstart;
   }
   s[i]=0;
   s_opcode.n=pos->opcode;
   s_operand.n=pos->opcode;
+  s_dbginfo.n=pos->opcode;
   for(i=1;i<ldat;i++)
   {
     gmael(cl, 4, i) = gcopy(data[i+pos->data-1]);
@@ -152,6 +160,7 @@ getfunction(struct codepos *pos, long arity, long nbmvar, GEN text)
   s_data.n=pos->data;
   s_lvar.n=pos->localvars;
   offset=pos->offset;
+  dbgstart=pos->dbgstart;
   return cl;
 }
 
@@ -162,27 +171,38 @@ getclosure(struct codepos *pos)
 }
 
 static void
-op_push(op_code o, long x)
+op_push_loc(op_code o, long x, const char *loc)
 {
   long n=stack_new(&s_opcode);
   long m=stack_new(&s_operand);
+  long d=stack_new(&s_dbginfo);
   opcode[n]=o;
   operand[m]=x;
+  dbginfo[d]=loc;
 }
 
 static void
-op_insert(long k, op_code o, long x)
+op_push(op_code o, long x, long n)
+{
+  return op_push_loc(o,x,tree[n].str);
+}
+
+static void
+op_insert_loc(long k, op_code o, long x, const char *loc)
 {
   long i;
   long n=stack_new(&s_opcode);
   (void) stack_new(&s_operand);
+  (void) stack_new(&s_dbginfo);
   for (i=n-1; i>=k; i--)
   {
     opcode[i+1] = opcode[i];
     operand[i+1]= operand[i];
+    dbginfo[i+1]= dbginfo[i];
   }
   opcode[k]  = o;
   operand[k] = x;
+  dbginfo[k] = loc;
 }
 
 static long
@@ -351,19 +371,19 @@ compilecast(long n, int type, int mode)
   switch (mode)
   {
   case Gsmall:
-    if (type==Ggen)        op_push(OCitos,-1);
-    else if (type==Gvoid)  op_push(OCpushlong,0);
+    if (type==Ggen)        op_push(OCitos,-1,n);
+    else if (type==Gvoid)  op_push(OCpushlong,0,n);
     else compile_err("this should be a small integer",tree[n].str);
     break;
   case Ggen:
-    if (type==Gsmall)      op_push(OCstoi,0);
-    else if (type==Gvoid)  op_push(OCpushlong,(long)gnil);
+    if (type==Gsmall)      op_push(OCstoi,0,n);
+    else if (type==Gvoid)  op_push(OCpushlong,(long)gnil,n);
     break;
   case Gvoid:
-    op_push(OCpop, 1);
+    op_push(OCpop, 1,n);
     break;
   case Gvar:
-    if (type==Ggen)        op_push(OCvarn,-1);
+    if (type==Ggen)        op_push(OCvarn,-1,n);
     else compile_varer1(tree[n].str);
      break;
   default:
@@ -532,26 +552,26 @@ compilelvalue(long n)
       compilelvalue(tree[x].x);
       compilenode(tree[tree[x].y].x,Gsmall,0);
       compilenode(yx,Gsmall,0);
-      op_push(OCcompo2ptr,0);
+      op_push(OCcompo2ptr,0,y);
       return;
     }
     compilelvalue(x);
     compilenode(yx,Gsmall,0);
     if (f==Fmatrix && yy==-1)
-      op_push(OCcompo1ptr,0);
+      op_push(OCcompo1ptr,0,y);
     else
     {
       switch(f)
       {
       case Fmatrix:
         compilenode(yy,Gsmall,0);
-        op_push(OCcompo2ptr,0);
+        op_push(OCcompo2ptr,0,y);
         break;
       case FmatrixR:
-        op_push(OCcompoCptr,0);
+        op_push(OCcompoCptr,0,y);
         break;
       case FmatrixL:
-        op_push(OCcompoLptr,0);
+        op_push(OCcompoLptr,0,y);
         break;
       }
     }
@@ -570,21 +590,21 @@ compilefacteurmat(long n, int mode)
   compilenode(yx,Gsmall,0);
   if (f==Fmatrix && yy==-1)
   {
-    op_push(OCcompo1,mode);
+    op_push(OCcompo1,mode,y);
     return;
   }
   switch(f)
   {
   case Fmatrix:
     compilenode(yy,Gsmall,0);
-    op_push(OCcompo2,mode);
+    op_push(OCcompo2,mode,y);
     return;
   case FmatrixR:
-    op_push(OCcompoC,0);
+    op_push(OCcompoC,0,y);
     compilecast(n,Gvec,mode);
     return;
   case FmatrixL:
-    op_push(OCcompoL,0);
+    op_push(OCcompoL,0,y);
     compilecast(n,Gvec,mode);
     return;
   default:
@@ -599,13 +619,13 @@ compilesmall(long n, long x, long mode)
   {
     GEN stog[]={gen_m2, gen_m1, gen_0, gen_1, gen_2};
     if (x>=-2 && x<=2)
-      op_push(OCpushlong, (long) stog[x+2]);
+      op_push(OCpushlong, (long) stog[x+2], n);
     else
-      op_push(OCpushstoi, x);
+      op_push(OCpushstoi, x, n);
   }
   else
   {
-    op_push(OCpushlong, x);
+    op_push(OCpushlong, x, n);
     compilecast(n,Gsmall,mode);
   }
 }
@@ -618,11 +638,11 @@ compilevec(long n, long mode, op_code op)
   long i;
   GEN arg=listtogen(x,Fmatrixelts);
   long l=lg(arg);
-  op_push(op,l);
+  op_push(op,l,n);
   for (i=1;i<l;i++)
   {
     compilenode(arg[i],Ggen,FLnocopy);
-    op_push(OCstackgen,i);
+    op_push(OCstackgen,i,n);
   }
   avma=ltop;
   compilecast(n,Gvec,mode);
@@ -636,9 +656,9 @@ compilemat(long n, long mode)
   long i,j;
   GEN line=listtogen(x,Fmatrixlines);
   long lglin = lg(line), lgcol=0;
-  op_push(OCpushlong, lglin);
+  op_push(OCpushlong, lglin,n);
   if (lglin==1)
-    op_push(OCmat,1);
+    op_push(OCmat,1,n);
   for(i=1;i<lglin;i++)
   {
     GEN col=listtogen(line[i],Fmatrixelts);
@@ -646,7 +666,7 @@ compilemat(long n, long mode)
     if (i==1)
     {
       lgcol=l;
-      op_push(OCmat,lgcol);
+      op_push(OCmat,lgcol,n);
     }
     else if (l!=lgcol)
       compile_err("matrix must be rectangular",tree[line[i]].str);
@@ -655,7 +675,7 @@ compilemat(long n, long mode)
     {
       k-=lglin;
       compilenode(col[j], Ggen,0);
-      op_push(OCstackgen,k);
+      op_push(OCstackgen,k,n);
     }
   }
   avma=ltop;
@@ -706,8 +726,8 @@ compilecall(long n, int mode)
     if (tree[arg[j]].f!=Fnoarg)
       compilenode(arg[j], Ggen,0);
     else
-      op_push(OCpushlong,0);
-  op_push(OCcalluser, nb);
+      op_push(OCpushlong,0,n);
+  op_push(OCcalluser,nb,n);
   compilecast(n,Ggen,mode);
   avma=ltop;
   return;
@@ -718,9 +738,9 @@ compileuserfunc(entree *ep, long n, int mode)
 {
   long vn=getmvar(ep);
   if (vn)
-    op_push(OCpushlex,vn);
+    op_push(OCpushlex,vn,n);
   else
-    op_push(OCpushdyn,(long)ep);
+    op_push(OCpushdyn,(long)ep,n);
   compilecall(n, mode);
 }
 
@@ -736,12 +756,24 @@ compilefunc(entree *ep, long n, int mode)
   char const *p,*q;
   char c;
   const char *flags = NULL;
+  const char *str;
   PPproto mod;
   GEN arg=listtogen(y,Flistarg);
   long lnc=first_safe_arg(arg);
   long nbpointers=0, nbopcodes;
   long nb=lg(arg)-1, lev=0;
   entree *ev[8];
+  if (x>=OPnboperator)
+    str=tree[x].str;
+  else
+  {
+    if (nb==2)
+      str=tree[arg[1]].str+tree[arg[1]].len;
+    else if (nb==1)
+      str=tree[arg[1]].str;
+    else
+      str=tree[n].str;
+  }
   if (tree[n].f==Faffect)
   {
     nb=2; lnc=2; arg=mkvecsmall2(x,y);
@@ -752,7 +784,7 @@ compilefunc(entree *ep, long n, int mode)
   {
     long lgarg;
     GEN vep = cgetg_copy(arg, &lgarg);
-    if (nb) op_push(OCnewframe,nb);
+    if (nb) op_push_loc(OCnewframe,nb,str);
     for(i=1;i<=nb;i++)
       var_push(NULL,Lmy);
     for (i=1;i<=nb;i++)
@@ -763,7 +795,7 @@ compilefunc(entree *ep, long n, int mode)
         if (!is_node_zero(tree[a].y))
         {
           compilenode(tree[a].y,Ggen,0);
-          op_push(OCstorelex,-nb+i-1);
+          op_push(OCstorelex,-nb+i-1,a);
         }
         a=tree[a].x;
       }
@@ -793,7 +825,7 @@ compilefunc(entree *ep, long n, int mode)
         a=tree[a].x;
       }
       vep[i] = (long) (en = getvar(a));
-      op_push(op,vep[i]);
+      op_push(op,vep[i],a);
       var_push(en,Llocal);
     }
     checkdups(arg,vep);
@@ -814,13 +846,13 @@ compilefunc(entree *ep, long n, int mode)
         compilenode(tree[a].y,Ggen,0);
         a=tree[a].x;
         en=(long)getvar(a);
-        op_push(OCstoredyn,en);
+        op_push(OCstoredyn,en,a);
       }
       else
       {
         en=(long)getvar(a);
-        op_push(OCpushdyn,en);
-        op_push(OCpop,1);
+        op_push(OCpushdyn,en,a);
+        op_push(OCpop,1,a);
       }
     }
     compilecast(n,Gvoid,mode);
@@ -898,13 +930,13 @@ compilefunc(entree *ep, long n, int mode)
             if (tree[arg[j]].f==Fconst && tree[arg[j]].x==CSTstr)
             {
               GEN str=strntoGENexp(tree[arg[j]].str,tree[arg[j]].len);
-              op_push(OCpushlong, eval_mnemonic(str, flags));
+              op_push(OCpushlong, eval_mnemonic(str, flags),n);
               j++;
             } else
             {
               compilenode(arg[j++],Ggen,0);
-              op_push(OCpushlong,(long)flags);
-              op_push(OCcallgen2,(long)is_entry("_eval_mnemonic"));
+              op_push(OCpushlong,(long)flags,n);
+              op_push(OCcallgen2,(long)is_entry("_eval_mnemonic"),n);
             }
             break;
           }
@@ -930,18 +962,18 @@ compilefunc(entree *ep, long n, int mode)
             if (tree[a].f==Fentry)
             {
               if (vn)
-                op_push(OCsimpleptrlex, vn);
+                op_push(OCsimpleptrlex, vn,n);
               else
-                op_push(OCsimpleptrdyn, (long) ep);
+                op_push(OCsimpleptrdyn, (long)ep,n);
             }
             else
             {
               if (vn)
-                op_push(OCnewptrlex, vn);
+                op_push(OCnewptrlex, vn,n);
               else
-                op_push(OCnewptrdyn, (long) ep);
+                op_push(OCnewptrdyn, (long)ep,n);
               compilelvalue(a);
-              op_push(OCpushptr, 0);
+              op_push(OCpushptr, 0,n);
             }
             nbpointers++;
             break;
@@ -964,7 +996,7 @@ compilefunc(entree *ep, long n, int mode)
               compilecast(a,Gvoid,type);
             else
               compilenode(a,type,flag);
-            op_push(OCpushgen, data_push(getclosure(&pos)));
+            op_push(OCpushgen, data_push(getclosure(&pos)),a);
             break;
           }
         case 'V':
@@ -974,8 +1006,9 @@ compilefunc(entree *ep, long n, int mode)
           }
         case 'S':
           {
-            entree *ep = getsymbol(arg[j++]);
-            op_push(OCpushlong, (long)ep);
+            long a = arg[j++];
+            entree *ep = getsymbol(a);
+            op_push(OCpushlong, (long)ep,a);
             break;
           }
         case '=':
@@ -995,13 +1028,13 @@ compilefunc(entree *ep, long n, int mode)
             long a=arg[j++];
             if (tree[a].f==Fentry)
             {
-              op_push(OCpushgen, data_push(strntoGENstr(tree[tree[a].x].str,tree[tree[a].x].len)));
-              op_push(OCtostr, -1);
+              op_push(OCpushgen, data_push(strntoGENstr(tree[tree[a].x].str,tree[tree[a].x].len)),n);
+              op_push(OCtostr, -1,n);
             }
             else
             {
               compilenode(a,Ggen,FLnocopy);
-              op_push(OCtostr, -1);
+              op_push(OCtostr, -1,n);
             }
             break;
           }
@@ -1012,17 +1045,17 @@ compilefunc(entree *ep, long n, int mode)
             if (nb==1)
             {
               compilenode(g[1], Ggen,0);
-              op_push(OCtostr, -1);
+              op_push(OCtostr, -1,n);
             } else
             {
-              op_push(OCvec, nb+1);
+              op_push(OCvec, nb+1,n);
               for(l=1; l<=nb; l++)
               {
                 compilenode(g[l], Ggen,0);
-                op_push(OCstackgen,l);
+                op_push(OCstackgen,l,n);
               }
-              op_push(OCcallgen,(long)is_entry("Str"));
-              op_push(OCtostr, -1);
+              op_push(OCcallgen,(long)is_entry("Str"),n);
+              op_push(OCtostr, -1,n);
             }
             break;
           }
@@ -1035,18 +1068,18 @@ compilefunc(entree *ep, long n, int mode)
         switch(c)
         {
         case 'p':
-          op_push(OCprecreal,0);
+          op_push(OCprecreal,0,n);
           break;
         case 'P':
-          op_push(OCprecdl,0);
+          op_push(OCprecdl,0,n);
           break;
         case 'C':
-          op_push(OCpushgen,data_push(pack_localvars()));
+          op_push(OCpushgen,data_push(pack_localvars()),n);
           break;
         case 'f':
           {
             static long foo;
-            op_push(OCpushlong,(long)&foo);
+            op_push(OCpushlong,(long)&foo,n);
             break;
           }
         }
@@ -1059,10 +1092,10 @@ compilefunc(entree *ep, long n, int mode)
         case '&':
         case 'E':
         case 'I':
-          op_push(OCpushlong,0);
+          op_push(OCpushlong,0,n);
           break;
         case 'n':
-          op_push(OCpushlong,-1);
+          op_push(OCpushlong,-1,n);
           break;
         case 'V':
           ev[lev++] = NULL;
@@ -1077,17 +1110,17 @@ compilefunc(entree *ep, long n, int mode)
         switch(c)
         {
         case 'G':
-          op_push(OCpushgen,data_push(strntoGENstr(q+1,p-4-q)));
-          op_push(OCcallgen,(long)is_entry("_geval"));
+          op_push(OCpushgen,data_push(strntoGENstr(q+1,p-4-q)),n);
+          op_push(OCcallgen,(long)is_entry("_geval"),n);
           break;
         case 'L':
         case 'M':
-          op_push(OCpushlong,strtol(q+1,NULL,10));
+          op_push(OCpushlong,strtol(q+1,NULL,10),n);
           break;
         case 'r':
         case 's':
           if (q[1]=='"' && q[2]=='"')
-            op_push(OCpushlong,(long)"");
+            op_push(OCpushlong,(long)"",n);
           else
             compile_err("function prototype not supported",tree[n].str);
           break;
@@ -1109,12 +1142,12 @@ compilefunc(entree *ep, long n, int mode)
               gel(g,k)=cattovec(arg[j+k-1],OPcat);
               l1+=lg(g[k])-1;
             }
-            op_push(OCvec, l1+1);
+            op_push(OCvec, l1+1,n);
             for(m=1,k=1;k<=n;k++)
               for(l=1;l<lg(g[k]);l++,m++)
               {
                 compilenode(mael(g,k,l),Ggen,0);
-                op_push(OCstackgen,m);
+                op_push(OCstackgen,m,n);
               }
             j=nb+1;
             break;
@@ -1133,19 +1166,19 @@ compilefunc(entree *ep, long n, int mode)
   }
   if (j<=nb)
     compile_err("too many arguments",tree[arg[j]].str);
-  op_push(ret_op, (long) ep);
+  op_push_loc(ret_op, (long) ep, str);
   if (ret_typ==Ggen && nbpointers==0 && s_opcode.n>nbopcodes+128)
   {
-    op_insert(nbopcodes,OCavma,0);
-    op_push(OCgerepile,0);
+    op_insert_loc(nbopcodes,OCavma,0,str);
+    op_push_loc(OCgerepile,0,str);
   }
   compilecast(n,ret_typ,mode);
-  if (nbpointers) op_push(OCendptr,nbpointers);
+  if (nbpointers) op_push_loc(OCendptr,nbpointers, str);
   avma=ltop;
 }
 
-GEN
-genclosure(entree *ep)
+static GEN
+genclosure(long n, entree *ep)
 {
   struct codepos pos;
   long nb=0;
@@ -1189,8 +1222,9 @@ genclosure(entree *ep)
   if (*code==0 || (EpSTATIC(ep) && maskarg==0))
     return gen_0;
   getcodepos(&pos);
-  if (maskarg)  op_push(OCcheckargs,maskarg);
-  if (maskarg0) op_push(OCcheckargs0,maskarg0);
+  dbgstart=tree[n].str;
+  if (maskarg)  op_push(OCcheckargs,maskarg,n);
+  if (maskarg0) op_push(OCcheckargs0,maskarg0,n);
   p=code;
   while ((mod=parseproto(&p,&c,NULL))!=PPend)
   {
@@ -1200,19 +1234,19 @@ genclosure(entree *ep)
       switch(c)
       {
       case 'p':
-        op_push(OCprecreal,0);
+        op_push(OCprecreal,0,n);
         break;
       case 'P':
-        op_push(OCprecdl,0);
+        op_push(OCprecdl,0,n);
         break;
       case 'C':
         break;
-        op_push(OCpushgen,data_push(pack_localvars()));
+        op_push(OCpushgen,data_push(pack_localvars()),n);
         break;
       case 'f':
         {
           static long foo;
-          op_push(OCpushlong,(long)&foo);
+          op_push(OCpushlong,(long)&foo,n);
           break;
         }
       }
@@ -1232,10 +1266,10 @@ genclosure(entree *ep)
         break;
       case 'M':
       case 'L':
-        op_push(OCitos,-index);
+        op_push(OCitos,-index,n);
         break;
       case 'n':
-        op_push(OCvarn,-index);
+        op_push(OCvarn,-index,n);
         break;
       case '&': case '*':
       case 'I':
@@ -1246,7 +1280,7 @@ genclosure(entree *ep)
         return NULL;
       case 'r':
       case 's':
-        op_push(OCtostr,-index);
+        op_push(OCtostr,-index,n);
         break;
       }
       break;
@@ -1262,7 +1296,7 @@ genclosure(entree *ep)
       case 'V':
         break;
       case 'n':
-        op_push(OCvarn,-index);
+        op_push(OCvarn,-index,n);
         break;
       default:
         pari_err(talker,"Unknown prototype code `D%c' for `%s'",c,ep->name);
@@ -1275,12 +1309,12 @@ genclosure(entree *ep)
         return NULL;
       case 'L':
       case 'M':
-        op_push(OCpushlong,strtol(q+1,NULL,10));
-        op_push(OCdefaultitos,-index);
+        op_push(OCpushlong,strtol(q+1,NULL,10),n);
+        op_push(OCdefaultitos,-index,n);
         break;
       case 'r':
       case 's':
-        op_push(OCtostr,-index);
+        op_push(OCtostr,-index,n);
         break;
       default:
         pari_err(talker,
@@ -1302,8 +1336,8 @@ genclosure(entree *ep)
     index--;
     q = p;
   }
-  op_push(ret_op, (long) ep);
-  compilecast(-1, ret_typ, Ggen);
+  op_push(ret_op, (long) ep, n);
+  compilecast(n, ret_typ, Ggen);
   return getfunction(&pos,nb+arity,0,strtoGENstr(ep->name));
 }
 
@@ -1313,14 +1347,14 @@ closurefunc(entree *ep, long n, long mode)
   pari_sp ltop=avma;
   GEN C;
   if (!ep->value) compile_err("unknown function",tree[n].str);
-  C = genclosure(ep);
+  C = genclosure(n, ep);
   if (!C) compile_err("sorry, closure not implemented",tree[n].str);
   if (C==gen_0)
   {
     compilefunc(ep,n,mode);
     return;
   }
-  op_push(OCpushgen, data_push(C));
+  op_push(OCpushgen, data_push(C), n);
   avma=ltop;
 }
 
@@ -1343,7 +1377,7 @@ compilenode(long n, int mode, long flag)
   case Ffacteurmat:
     compilefacteurmat(n,mode);
     if (mode==Ggen && !(flag&FLnocopy))
-      op_push(OCcopy,0);
+      op_push(OCcopy,0,n);
     break;
   case Faffect:
     x = detag(x);
@@ -1353,17 +1387,17 @@ compilenode(long n, int mode, long flag)
       long vn=getmvar(ep);
       compilenode(y,Ggen,FLnocopy);
       if (vn)
-        op_push(OCstorelex,vn);
+        op_push(OCstorelex,vn,n);
       else
-        op_push(OCstoredyn,(long)ep);
+        op_push(OCstoredyn,(long)ep,n);
       if (mode!=Gvoid)
       {
         if (vn)
-          op_push(OCpushlex,vn);
+          op_push(OCpushlex,vn,n);
         else
-          op_push(OCpushdyn,(long)ep);
+          op_push(OCpushdyn,(long)ep,n);
         if (!(flag&FLnocopy))
-          op_push(OCcopyifclone,0);
+          op_push(OCcopyifclone,0,n);
         compilecast(n,Ggen,mode);
       }
     }
@@ -1383,20 +1417,20 @@ compilenode(long n, int mode, long flag)
       switch(tree[n].x)
       {
       case CSTreal:
-        op_push(OCpushreal, data_push(strntoGENstr(tree[n].str,tree[n].len)));
+        op_push(OCpushreal, data_push(strntoGENstr(tree[n].str,tree[n].len)),n);
         break;
       case CSTint:
-        op_push(OCpushgen,  data_push(strtoi((char*)tree[n].str)));
+        op_push(OCpushgen,  data_push(strtoi((char*)tree[n].str)),n);
         compilecast(n,Ggen, mode);
         break;
       case CSTstr:
-        op_push(OCpushgen,  data_push(strntoGENexp(tree[n].str,tree[n].len)));
+        op_push(OCpushgen,  data_push(strntoGENexp(tree[n].str,tree[n].len)),n);
         break;
       case CSTquote:
         {
           entree *ep = fetch_entry(tree[n].str+1,tree[n].len-1);
           if (EpSTATIC(ep)) compile_varer1(tree[n].str+1);
-          op_push(OCpushvar, (long)ep);
+          op_push(OCpushvar, (long)ep,n);
           compilecast(n,Ggen, mode);
           break;
         }
@@ -1424,16 +1458,16 @@ compilenode(long n, int mode, long flag)
       long vn=getmvar(ep);
       if (vn)
       {
-        op_push(OCpushlex,(long)vn);
+        op_push(OCpushlex,(long)vn,n);
         if (flag&FLreturn)
-          op_push(OCcopyifclone,0);
+          op_push(OCcopyifclone,0,n);
         compilecast(n,Ggen,mode);
       }
       else if (ep->valence==EpVAR || ep->valence==EpNEW)
       {
-        op_push(OCpushdyn,(long)ep);
+        op_push(OCpushdyn,(long)ep,n);
         if (!(flag&FLnocopy))
-          op_push(OCcopyifclone,0);
+          op_push(OCcopyifclone,0,n);
         compilecast(n,Ggen,mode);
       }
       else
@@ -1465,8 +1499,9 @@ compilenode(long n, int mode, long flag)
       gel(text,1)=strntoGENstr(tree[x].str,tree[x].len);
       gel(text,2)=strntoGENstr(tree[y].str,tree[y].len);
       getcodepos(&pos);
+      dbgstart=tree[y].str;
       nb = lgarg-1;
-      if (nb) op_push(OCgetargs,nb);
+      if (nb) op_push(OCgetargs,nb,y);
       for(i=1;i<=nb;i++)
         var_push(NULL,Lmy);
       for (i=1;i<=nb;i++)
@@ -1477,8 +1512,8 @@ compilenode(long n, int mode, long flag)
           struct codepos lpos;
           getcodepos(&lpos);
           compilenode(tree[a].y,Ggen,0);
-          op_push(OCpushgen, data_push(getclosure(&lpos)));
-          op_push(OCdefaultarg,-nb+i-1);
+          op_push(OCpushgen, data_push(getclosure(&lpos)),a);
+          op_push(OCdefaultarg,-nb+i-1,a);
           a=tree[a].x;
         }
         vep[i]=(long)(localvars[s_lvar.n-nb+i-1].ep=getvar(a));
@@ -1488,8 +1523,8 @@ compilenode(long n, int mode, long flag)
         compilenode(y,Ggen,FLreturn);
       else
         compilecast(n,Gvoid,Ggen);
-      op_push(OCpushgen, data_push(getfunction(&pos,nb,nbmvar,text)));
-      if(nbmvar) op_push(OCsaveframe,0);
+      op_push(OCpushgen, data_push(getfunction(&pos,nb,nbmvar,text)),n);
+      if(nbmvar) op_push(OCsaveframe,0,n);
       avma=ltop;
       break;
     }
@@ -1509,8 +1544,9 @@ gp_closure(long n)
 {
   struct codepos pos;
   getcodepos(&pos);
+  dbgstart=tree[n].str;
   compilenode(n,Ggen,FLreturn);
-  return getclosure(&pos);
+  return getfunction(&pos,0,0,strntoGENstr(tree[n].str,tree[n].len));
 }
 
 GEN
@@ -1519,32 +1555,34 @@ closure_deriv(GEN G)
   pari_sp ltop=avma;
   long i;
   struct codepos pos;
+  const char *code;
   GEN text;
   long arity=G[1];
-  getcodepos(&pos);
-  op_push(OCgetargs, arity);
-  op_push(OCpushgen,data_push(G));
-  op_push(OCvec,arity+1);
-  for (i=1;i<=arity;i++)
+  if (typ(gel(G,6))==t_STR)
   {
-    op_push(OCpushlex,i-arity-1);
-    op_push(OCstackgen,i);
-  }
-  op_push(OCprecreal,0);
-  op_push(OCcallgen,(long)is_entry("_derivnum"));
-  if (typ(gel(G,5))==t_STR)
-  {
-    char *code=GSTR(gel(G,5));
+    code = GSTR(gel(G,6));
     text = cgetg(1+nchar2nlong(2+strlen(code)),t_STR);
     sprintf(GSTR(text),"%s'",code);
   }
   else
   {
-    char *code=GSTR(gmael(G,5,2));
+    code = GSTR(gmael(G,6,2));
     text = cgetg(3, t_VEC);
-    gel(text,1) = gcopy(gmael(G,5,1));
+    gel(text,1) = gcopy(gmael(G,6,1));
     gel(text,2) = cgetg(1+nchar2nlong(4+strlen(code)),t_STR);
     sprintf(GSTR(gel(text,2)),"(%s)'",code);
   }
+  getcodepos(&pos);
+  dbgstart=code;
+  op_push_loc(OCgetargs, arity,code);
+  op_push_loc(OCpushgen,data_push(G),code);
+  op_push_loc(OCvec,arity+1,code);
+  for (i=1;i<=arity;i++)
+  {
+    op_push_loc(OCpushlex,i-arity-1,code);
+    op_push_loc(OCstackgen,i,code);
+  }
+  op_push_loc(OCprecreal,0,code);
+  op_push_loc(OCcallgen,(long)is_entry("_derivnum"),code);
   return gerepilecopy(ltop, getfunction(&pos,arity,0,text));
 }

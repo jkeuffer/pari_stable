@@ -548,9 +548,9 @@ closure_eval(GEN C)
   long saved_rp=rp;
   long pc, j, nbmvar=0, nblvar=0;
   if (isclone(C)) ++bl_refc(C);
-  if (lg(C)==7)
+  if (lg(C)==8)
   {
-    GEN z=gel(C,6);
+    GEN z=gel(C,7);
     long l=lg(z)-1;
     stack_alloc(&s_var,l);
     s_var.n+=l;
@@ -1007,9 +1007,9 @@ closure_eval(GEN C)
     case OCsaveframe:
       {
         GEN cl=gcopy(gel(st,sp-1));
-        if (lg(cl)==7)
+        if (lg(cl)==8)
         {
-          GEN v=gel(cl,6);
+          GEN v=gel(cl,7);
           long l=lg(v)-1;
           for(j=1;j<=l;j++)
             gel(v,j)=gcopy(var[s_var.n-j].value);

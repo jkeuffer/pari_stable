@@ -64,7 +64,7 @@ Vecsmall([815394335184717944, 4549279032150680234, 6773728374826070157, -237
 , 4582267480000687864, -7629613429408037667, 4813661187837882458, -776313336
 5088963398, 63, 3001673639903682625])
 ? getstack
-88
+152
 ? if(3<2,print("bof"),print("ok"));
 ok
 ? kill(y);print(x+y);
@@ -131,6 +131,6 @@ og(p)/log(q))));
 3
 ? kill(addii)
 ? getheap
-[24, 1752]
+[24, 1788]
 ? print("Total time spent: ",gettime);
-Total time spent: 12
+Total time spent: 8

@@ -1192,7 +1192,6 @@ long    nf_hyperell_locally_soluble(GEN nf,GEN pol,GEN p);
 /* compile.c */
 
 GEN  closure_deriv(GEN G);
-GEN  genclosure(entree *ep);
 long localvars_find(GEN pack, entree *ep);
 void localvars_unpack(GEN pack);
 

@@ -1986,12 +1986,13 @@ dbg(GEN x, long nb, long bl)
       blancs(bl); pari_puts("code = "); dbg(gel(x,2),nb,bl);
       blancs(bl); pari_puts("operand = "); dbg(gel(x,3),nb,bl);
       blancs(bl); pari_puts("data = "); dbg(gel(x,4),nb,bl);
-      if (lg(x)>=6)
+      blancs(bl); pari_puts("debug = "); dbg(gel(x,5),nb,bl);
+      if (lg(x)>=7)
       {
-        blancs(bl); pari_puts("text = "); dbg(gel(x,5),nb,bl);
-        if (lg(x)>=7)
+        blancs(bl); pari_puts("text = "); dbg(gel(x,6),nb,bl);
+        if (lg(x)>=8)
         {
-          blancs(bl); pari_puts("frame = "); dbg(gel(x,6),nb,bl);
+          blancs(bl); pari_puts("frame = "); dbg(gel(x,7),nb,bl);
         }
       }
       break;
@@ -2638,21 +2639,23 @@ bruti_intern(GEN g, pariout_t *T, outString *S, int addsign)
       quote_string(S, GSTR(g)); break;
 
     case t_CLOSURE:
-      if (lg(g)>=6)
+      if (lg(g)>=7)
       {
-        if (typ(g[5])==t_STR)
-          str_puts(S, GSTR(gel(g,5)));
+        if (typ(g[6])==t_STR)
+          str_puts(S, GSTR(gel(g,6)));
         else
         {
-          str_putc(S,'(');   str_puts(S,GSTR(gmael(g,5,1)));
-          str_puts(S,")->"); str_puts(S,GSTR(gmael(g,5,2)));
+          str_putc(S,'(');   str_puts(S,GSTR(gmael(g,6,1)));
+          str_puts(S,")->"); str_puts(S,GSTR(gmael(g,6,2)));
         }
       }
       else
       {
         str_puts(S,"{\""); str_puts(S,GSTR(gel(g,2)));
         str_puts(S,"\","); wr_vecsmall(T,S,gel(g,3));
-        str_putc(S,',');   bruti(gel(g,4),T,S); str_putc(S,'}');
+        str_putc(S,',');   bruti(gel(g,4),T,S);
+        str_putc(S,',');   wr_vecsmall(T,S,gel(g,5));
+        str_putc(S,'}');
       }
       break;
 
@@ -2871,19 +2874,20 @@ texi_sign(GEN g, pariout_t *T, outString *S, int addsign)
     case t_CLOSURE:
       if (lg(g)>=6)
       {
-        if (typ(g[5])==t_STR)
-          str_puts(S, GSTR(gel(g,5)));
+        if (typ(g[6])==t_STR)
+          str_puts(S, GSTR(gel(g,6)));
         else
         {
-          str_putc(S,'(');          str_puts(S,GSTR(gmael(g,5,1)));
-          str_puts(S,")\\mapsto "); str_puts(S,GSTR(gmael(g,5,2)));
+          str_putc(S,'(');          str_puts(S,GSTR(gmael(g,6,1)));
+          str_puts(S,")\\mapsto "); str_puts(S,GSTR(gmael(g,6,2)));
         }
       }
       else
       {
         str_puts(S,"\\{\""); str_puts(S,GSTR(gel(g,2)));
         str_puts(S,"\","); texi(gel(g,3),T,S);
-        str_putc(S,',');   texi(gel(g,4),T,S); str_puts(S,"\\}");
+        str_putc(S,',');   texi(gel(g,4),T,S);
+        str_putc(S,',');   texi(gel(g,5),T,S); str_puts(S,"\\}");
       }
       break;
 
