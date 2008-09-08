@@ -876,6 +876,30 @@ matalgtobasis(GEN nf,GEN x)
   }
   return z;
 }
+GEN
+RgM_nf_to_scalar_or_basis(GEN nf,GEN x)
+{
+  long i, j, li, lx;
+  GEN z = cgetg_copy(x, &lx);
+
+  if (lx == 1) return z;
+  li = lg(x[1]);
+  for (j=1; j<lx; j++)
+  {
+    GEN c = cgetg(li,t_COL), xj = gel(x,j);
+    gel(z,j) = c;
+    for (i=1; i<li; i++) gel(c,i) = nf_to_scalar_or_basis(nf, gel(xj,i));
+  }
+  return z;
+}
+GEN
+RgC_nf_to_scalar_or_basis(GEN nf,GEN x)
+{
+  long i, lx = lg(x);
+  GEN z = cgetg(lx, t_COL);
+  for (i=1; i<lx; i++) gel(z,i) = nf_to_scalar_or_basis(nf, gel(x,i));
+  return z;
+}
 
 GEN
 rnfalgtobasis(GEN rnf,GEN x)

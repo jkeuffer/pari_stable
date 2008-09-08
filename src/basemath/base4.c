@@ -2272,26 +2272,6 @@ idealcoprime(GEN nf, GEN x, GEN y)
  * I=[a_1,...,a_k] is a row vector of k fractional ideals given in HNF.
  * A is an n x k matrix (same k) such that if A_j is the j-th column of A then
  * M=a_1 A_1+...+a_k A_k. We say that [A,I] is a pseudo-basis if k=n */
-static GEN
-element_mulvecrow(GEN nf, GEN x, GEN m, long i, long lim)
-{
-  long l, j;
-  GEN y, dx;
-  x = nf_to_scalar_or_basis(nf, x);
-  if (typ(x) == t_COL)
-    x = zk_multable(nf, Q_remove_denom(x, &dx));
-  else
-    dx = NULL;
-
-  l = minss(lg(m), lim+1); y = cgetg(l, t_VEC);
-  for (j=1; j<l; j++)
-  {
-    GEN t = gmul(x, gcoeff(m,i,j));
-    if (dx) t = gdiv(t, dx);
-    gel(y,j) = t;
-  }
-  return y;
-}
 
 /* Given an element x and an ideal I in HNF, gives an r such that x-r is in H
  * and r is small */
@@ -2334,10 +2314,49 @@ colcomb(GEN nf, GEN u, GEN v, GEN A, GEN B)
     z = u==gen_1? A: nfC_nf_mul(nf,A,u);
     if (!gcmp0(v)) z = RgC_add(z, nfC_nf_mul(nf,B,v));
   }
-  return z;
+  return RgC_nf_to_scalar_or_basis(nf, z);
+}
+/* A + v B */
+static GEN
+colcomb1(GEN nf, GEN v, GEN A, GEN B)
+{
+  if (gcmp0(v)) return A;
+  return RgC_nf_to_scalar_or_basis(nf, RgC_add(A, nfC_nf_mul(nf,B,v)));
 }
 
-/* u Z[s,] + v Z[t,] */
+/* return m[i,1..lim] * x */
+static GEN
+element_mulvecrow(GEN nf, GEN x, GEN m, long i, long lim)
+{
+  long j, l = minss(lg(m), lim+1);
+  GEN dx, y = cgetg(l, t_VEC);
+  x = nf_to_scalar_or_basis(nf, x);
+  if (typ(x) == t_COL)
+  {
+    x = zk_multable(nf, Q_remove_denom(x, &dx));
+    for (j=1; j<l; j++)
+    {
+      GEN t = gcoeff(m,i,j);
+      if (!isintzero(t)) 
+      {
+        if (typ(t) == t_COL)
+          t = RgM_RgC_mul(x, t);
+        else
+          t = RgC_Rg_mul(gel(x,1), t);
+        if (dx) t = gdiv(t, dx);
+        t = nf_to_scalar_or_basis(nf,t);
+      }
+      gel(y,j) = t;
+    }
+  }
+  else
+  {
+    for (j=1; j<l; j++) gel(y,j) = gmul(x, gcoeff(m,i,j)); 
+  }
+  return y;
+}
+
+/* u Z[s,] + v Z[t,], limitied to the first lim entries */
 static GEN
 rowcomb(GEN nf, GEN u, GEN v, long s, long t, GEN Z, long lim)
 {
@@ -2391,7 +2410,7 @@ nfbezout(GEN nf,GEN a,GEN b, GEN A,GEN B, GEN *pu,GEN *pv,GEN *pw,GEN *pdi)
     w = B;
     v = gen_0;
     if (a == gen_1)
-      u = col_ei(lg(B)-1, 1);
+      u = gen_1;
     else
     {
       u = nfinv(nf, a);
@@ -2466,8 +2485,8 @@ nfhnf(GEN nf, GEN x)
 
       S0 = gel(A,def);
       d = nfbezout(nf, gen_1,b, gel(I,def),gel(I,j), &u,&v,&w,&di);
-      S = colcomb(nf, u,v, S0,T0);
-      T = colcomb(nf, gen_1,gneg(b), T0,S0);
+      S = colcomb(nf, u,v, S0,T0);     gel(S,i) = gen_1;
+      T = colcomb1(nf,gneg(b), T0,S0); gel(T,i) = gen_0;
       gel(A,def) = S; gel(A,j) = T;
       gel(I,def) = d; gel(I,j) = w;
     }
@@ -2477,7 +2496,7 @@ nfhnf(GEN nf, GEN x)
     for (j=def+1; j<=k; j++)
     {
       GEN c = element_close(nf,gcoeff(A,i,j), idealmul(nf,d,gel(J,j)));
-      gel(A,j) = colcomb(nf, gen_1,gneg(c), gel(A,j),gel(A,def));
+      gel(A,j) = colcomb1(nf, gneg(c), gel(A,j),gel(A,def));
     }
     if (low_stack(lim, stack_lim(av1,2)))
     {
@@ -2521,7 +2540,7 @@ nfsmith(GEN nf, GEN x)
   if (n > m) pari_err(impl,"nfsmith for non square matrices");
 
   av = avma; lim = stack_lim(av,1);
-  A = RgM_shallowcopy(A);
+  A = RgM_nf_to_scalar_or_basis(nf, A);
   I = leafcopy(I);
   J = leafcopy(J);
   for (i=n; i>=2; i--)
@@ -2793,7 +2812,7 @@ nfhnfmod(GEN nf, GEN x, GEN detmat)
 {
   long li, co, i, j, def, ldef, N;
   pari_sp av0=avma, av, lim;
-  GEN d0, w, p1, d, u, v, A, I, J, di, unnf;
+  GEN d0, w, p1, d, u, v, A, I, J, di;
 
   nf = checknf(nf); N = nf_get_degree(nf);
   check_ZKmodule(x, "nfhnfmod");
@@ -2802,13 +2821,12 @@ nfhnfmod(GEN nf, GEN x, GEN detmat)
   co = lg(A); if (co==1) return cgetg(1,t_MAT);
 
   li = lg(A[1]);
-  unnf = scalarcol_shallow(gen_1,N);
   detmat = Q_remove_denom(detmat, NULL);
   if (typ(detmat)!=t_MAT) pari_err(typeer,"nfhnfmod");
   RgM_check_ZM(detmat, "nfhnfmod");
 
   av = avma; lim = stack_lim(av,2);
-  A = matalgtobasis(nf, A);
+  A = RgM_nf_to_scalar_or_basis(nf, A);
   I = leafcopy(I);
   def = co; ldef = (li>co)? li-co+1: 1;
   for (i=li-1; i>=ldef; i--)
@@ -2847,13 +2865,13 @@ nfhnfmod(GEN nf, GEN x, GEN detmat)
   for (i=li-1; i>=1; i--)
   {
     d = nfbezout(nf, gen_1,gcoeff(A,i,i), d0,gel(I,i), &u,&v,&w,&di);
-    p1 = nfC_nf_mul(nf,gel(A,i),v);
+    p1 = RgC_nf_to_scalar_or_basis(nf, nfC_nf_mul(nf,gel(A,i),v));
     if (i > 1)
     {
       d0 = idealmul(nf,d0,di);
       nfcleanmod(nf, p1, i, d0);
     }
-    gel(A,i) = p1; gel(p1,i) = unnf;
+    gel(A,i) = p1; gel(p1,i) = gen_1;
     gel(I,i) = d;
   }
   J = cgetg(li,t_VEC); gel(J,1) = gen_0;
@@ -2864,7 +2882,7 @@ nfhnfmod(GEN nf, GEN x, GEN detmat)
     for (j=i+1; j<li; j++)
     {
       GEN c = element_close(nf, gcoeff(A,i,j), idealmul(nf,d,gel(J,j)));
-      gel(A,j) = colcomb(nf, gen_1,gneg(c), gel(A,j),gel(A,i));
+      gel(A,j) = colcomb1(nf, gneg(c), gel(A,j),gel(A,i));
     }
     if (low_stack(lim, stack_lim(av,2)))
     {

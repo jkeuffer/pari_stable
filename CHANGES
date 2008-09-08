@@ -304,6 +304,9 @@ BA 41- user variables can now be aliased [#790]
    78- allow ordinary sorted vectors in set* functions [ sets are still t_VECs
        of t_STR, but if components can be directly compared, ordinary vectors
        are simpler and faster ]
+   79- allow arbitrary nf entries in relative matrices; nfhnf and nfhnfmod
+       return matrices whose entries may be t_INT or t_FRAC besides the 
+       traditionnal nfalgtobasis form
 
   Added
     1- new benches: galoisinit, ispower, nffactor, subfields, resultant,

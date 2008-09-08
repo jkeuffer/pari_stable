@@ -651,10 +651,8 @@ define the relative extension $L/K$.
 output by \kbd{rnfinit}, associated to the extension $L/K$. The \var{nf}
 associated to be base field $K$ is \kbd{rnf.nf}.
 
-\item A \emph{relative matrix} is a matrix whose entries are elements of $K$,
-always expressed as column vectors on the integral basis \kbd{rnf.nf.zk}.
-(This is an interface bug: elements of $K$ in arbitrary form should be allowed.
-Most functions can in fact handle them.) Hence it is a matrix of vectors.
+\item A \emph{relative matrix} is a matrix whose entries are elements of $K$, in
+any form.
 
 \item An \tev{ideal list} is a row vector of fractional ideals of the number
 field $\var{nf}$, in HNF form. (This is an interface bug: ideals in arbitrary
