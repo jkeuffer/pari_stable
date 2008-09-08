@@ -13,3 +13,7 @@ Doc:
  lexicographic ordering. The components of $x$ are put in canonical form (type
  \typ{STR}) so as to be easily sorted. To recover an ordinary \kbd{GEN} from
  such an element, you can apply \tet{eval} to it.
+
+ Note that most set functions also accept ordinary vectors, provided their
+ components can be compared with \kbd{<}. Sets as created by this function
+ are only useful when e.g. polynomial or vector entries are involved.

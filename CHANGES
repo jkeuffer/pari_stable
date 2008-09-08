@@ -301,6 +301,9 @@ BA 41- user variables can now be aliased [#790]
        "undefined" value (as z = 'z would).
    77- [library] prototype of galoisconj [ add one argument ], and made it
        correspond to the default nfgaloisconj flag
+   78- allow ordinary sorted vectors in set* functions [ sets are still t_VECs
+       of t_STR, but if components can be directly compared, ordinary vectors
+       are simpler and faster ]
 
   Added
     1- new benches: galoisinit, ispower, nffactor, subfields, resultant,

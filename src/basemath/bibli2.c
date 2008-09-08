@@ -1491,15 +1491,8 @@ tablesearch(GEN T, GEN x, int (*cmp)(GEN,GEN))
 long
 gen_search(GEN T, GEN x, long flag, void *data, int (*cmp)(void*,GEN,GEN))
 {
-  long lx, i, l, u, s;
+  long lx = lg(T), i, l, u, s;
 
-  switch(typ(T))
-  {
-    case t_VEC: lx = lg(T); break;
-    case t_LIST: T = list_data(T); lx = T? lg(T): 1; break;
-    default: pari_err(talker,"not a set in setsearch");
-      return 0; /*not reached*/
-  }
   if (lx==1) return flag? 1: 0;
   l = 1; u = lx-1;
   do
@@ -1710,12 +1703,22 @@ setisset(GEN x)
 }
 
 long
-setsearch(GEN x, GEN y, long flag)
+setsearch(GEN T, GEN y, long flag)
 {
   pari_sp av = avma;
-  long res;
-  if (typ(y) != t_STR) y = GENtoGENstr_nospace(simplify_shallow(y));
-  res = gen_search(x,y,flag,(void*)gcmp,cmp_nodata);
+  long lx, res;
+
+  switch(typ(T))
+  {
+    case t_VEC: lx = lg(T); break;
+    case t_LIST: T = list_data(T); lx = T? lg(T): 1; break;
+    default: pari_err(talker,"not a set in setsearch");
+      return 0; /*not reached*/
+  }
+  if (lx==1) return flag? 1: 0;
+  if (typ(y) != t_STR && typ(gel(T,1)) == t_STR)
+    y = GENtoGENstr_nospace(simplify_shallow(y));
+  res = gen_search(T,y,flag,(void*)gcmp,cmp_nodata);
   avma = av; return res;
 }
 
@@ -1751,7 +1754,7 @@ setintersect(GEN x, GEN y)
   long ix = 1, iy = 1, iz = 1, lx = lg(x), ly = lg(y);
   pari_sp av = avma;
   GEN z = cgetg(lx,t_VEC);
-  if (!is_vec_t(typ(x)) || !is_vec_t(typ(y))) pari_err(typeer, "setintersect");
+  if (typ(x) != t_VEC || typ(y) != t_VEC) pari_err(typeer, "setintersect");
   while (ix < lx && iy < ly)
   {
     int c = gcmp(gel(x,ix), gel(y,iy));
@@ -1766,19 +1769,16 @@ GEN
 gen_setminus(GEN A, GEN B, int (*cmp)(GEN,GEN))
 {
   pari_sp ltop = avma;
-  long i, j, k, find;
-  GEN  diff = cgetg(lg(A),t_VEC);
-  for(i=j=k=1; i < lg(A); i++)
-  {
-    for(find=0; j < lg(B); j++)
+  long i = 1, j = 1, k = 1, lx = lg(A), ly = lg(B);
+  GEN  diff = cgetg(lx,t_VEC);
+  while (i < lx && j < ly)
+    switch ( cmp(gel(A,i),gel(B,j)) )
     {
-      int s = cmp(gel(A,i),gel(B,j));
-      if (s < 0)  break ;
-      if (s > 0)  continue;
-      find=1;
+      case -1: gel(diff,k++) = gel(A,i++); break;
+      case 1: j++; break;
+      case 0: i++; break;
     }
-    if (!find) diff[k++] = A[i];
-  }
+  while (i < lx) gel(diff,k++) = gel(A,i++);
   setlg(diff,k);
   return gerepilecopy(ltop,diff);
 }
@@ -1786,6 +1786,6 @@ gen_setminus(GEN A, GEN B, int (*cmp)(GEN,GEN))
 GEN
 setminus(GEN x, GEN y)
 {
-  if (!is_vec_t(typ(x)) || !is_vec_t(typ(y))) pari_err(typeer,"setminus");
+  if (typ(x) != t_VEC || typ(y) != t_VEC) pari_err(typeer,"setminus");
   return gen_setminus(x,y,gcmp);
 }
