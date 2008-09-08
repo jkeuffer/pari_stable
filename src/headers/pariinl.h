@@ -844,23 +844,26 @@ trunc_safe(GEN x) { long e; return gcvtoi(x,&e); }
 /*                          LENGTH CONVERSIONS                     */
 /*                                                                 */
 /*******************************************************************/
-INLINE long ndec2nlong(long x)
-{ return 1 + (long)((x)*(LOG2_10/BITS_IN_LONG)); }
-INLINE long ndec2prec(long x)
-{ return 2 + ndec2nlong(x); }
-INLINE long nbits2nlong(long x)
-{ return (x+BITS_IN_LONG-1) >> TWOPOTBITS_IN_LONG; }
-INLINE long nbits2prec(long x)
-{ return (x+3*BITS_IN_LONG-1) >> TWOPOTBITS_IN_LONG; }
-INLINE long nchar2nlong(long x)
-{ return (x+sizeof(long)-1) / sizeof(long); }
-INLINE long bit_accuracy(long x)
-{ return (x-2) * BITS_IN_LONG; }
-INLINE double bit_accuracy_mul(long x, double y)
-{ return (x-2) * (BITS_IN_LONG*y); }
-INLINE long prec2ndec(long x) { return (long)bit_accuracy_mul(x, LOG10_2); }
-INLINE long divsBIL(long n) { return n >> TWOPOTBITS_IN_LONG; }
-INLINE long remsBIL(long n) { return n & (BITS_IN_LONG-1); }
+INLINE long
+ndec2nlong(long x) { return 1 + (long)((x)*(LOG2_10/BITS_IN_LONG)); }
+INLINE long
+ndec2prec(long x) { return 2 + ndec2nlong(x); }
+INLINE long
+nbits2nlong(long x) { return (x+BITS_IN_LONG-1) >> TWOPOTBITS_IN_LONG; }
+INLINE long
+nbits2prec(long x) { return (x+3*BITS_IN_LONG-1) >> TWOPOTBITS_IN_LONG; }
+INLINE long
+nchar2nlong(long x) { return (x+sizeof(long)-1) / sizeof(long); }
+INLINE long
+bit_accuracy(long x) { return (x-2) * BITS_IN_LONG; }
+INLINE double
+bit_accuracy_mul(long x, double y) { return (x-2) * (BITS_IN_LONG*y); }
+INLINE long
+prec2ndec(long x) { return (long)bit_accuracy_mul(x, LOG10_2); }
+INLINE long
+divsBIL(long n) { return n >> TWOPOTBITS_IN_LONG; }
+INLINE long
+remsBIL(long n) { return n & (BITS_IN_LONG-1); }
 
 /*********************************************************************/
 /**                                                                 **/
