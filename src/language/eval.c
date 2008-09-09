@@ -336,12 +336,19 @@ struct var_lex
   GEN value;
 };
 
+struct trace
+{
+  long *pc;
+  GEN closure;
+};
+
 static THREAD long sp, rp;
 static THREAD long *st;
 static THREAD gp_pointer *ptrs;
 static THREAD entree **lvars;
 static THREAD struct var_lex *var;
-static THREAD gp2c_stack s_st, s_ptrs, s_var, s_lvars;
+static THREAD struct trace *trace;
+static THREAD gp2c_stack s_st, s_ptrs, s_var, s_lvars, s_trace;
 
 static void
 changelex(long vn, GEN x)
@@ -435,6 +442,7 @@ pari_init_evaluator(void)
   s_ptrs.n=s_ptrs.alloc;
   stack_init(&s_var,sizeof(*var),(void**)&var);
   stack_init(&s_lvars,sizeof(*lvars),(void**)&lvars);
+  stack_init(&s_trace,sizeof(*trace),(void**)&trace);
 }
 void
 pari_close_evaluator(void)
@@ -443,6 +451,7 @@ pari_close_evaluator(void)
   stack_delete(&s_ptrs);
   stack_delete(&s_var);
   stack_delete(&s_lvars);
+  stack_delete(&s_trace);
 }
 
 static gp_pointer *
@@ -547,7 +556,10 @@ closure_eval(GEN C)
   long saved_sp=sp-C[1];
   long saved_rp=rp;
   long pc, j, nbmvar=0, nblvar=0;
+  long tr = stack_new(&s_trace);
   if (isclone(C)) ++bl_refc(C);
+  trace[tr].pc = &pc;
+  trace[tr].closure = C;
   if (lg(C)==8)
   {
     GEN z=gel(C,7);
@@ -1077,6 +1089,7 @@ endeval:
     sp = saved_sp;
     rp = saved_rp;
   }
+  s_trace.n--;
   restore_vars(nbmvar, nblvar);
   if (isclone(C)) gunclone(C);
 }
@@ -1098,6 +1111,7 @@ closure_trapgen(long numerr, GEN C)
   long saved_rp=rp;
   long saved_mvar=s_var.n;
   long saved_lvar=s_lvars.n;
+  long saved_tr=s_trace.n;
   VOLATILE GEN x;
   CATCH(numerr) { x = (GEN)1L; }
   TRY { x = closure_evalgen(C); } ENDCATCH;
@@ -1107,6 +1121,7 @@ closure_trapgen(long numerr, GEN C)
     long nblvar=s_lvars.n-saved_lvar;
     sp=saved_sp;
     rp=saved_rp;
+    s_trace.n=saved_tr;
     restore_vars(nbmvar, nblvar);
     avma=av;
   }
@@ -1184,7 +1199,7 @@ closure_callgenall(GEN C, long n, ...)
 }
 
 void
-closure_reset(void) {sp=0; rp=0;}
+closure_reset(void) {sp=0; rp=0; s_trace.n=0;}
 
 INLINE const char *
 disassemble_cast(long mode)
