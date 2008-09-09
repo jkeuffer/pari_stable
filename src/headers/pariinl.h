@@ -409,6 +409,31 @@ vecsmall_pack(GEN V, long base, long mod)
   return s;
 }
 
+INLINE int
+ZV_isscalar(GEN x)
+{
+  long l = lg(x);
+  while (--l > 1)
+    if (signe(gel(x, l))) return 0;
+  return 1;
+}
+INLINE int
+QV_isscalar(GEN x)
+{
+  long lx = lg(x),i;
+  for (i=2; i<lx; i++)
+    if (!isintzero(gel(x, i))) return 0;
+  return 1;
+}
+INLINE int
+RgV_isscalar(GEN x)
+{
+  long lx = lg(x),i;
+  for (i=2; i<lx; i++)
+    if (!gcmp0(gel(x, i))) return 0;
+  return 1;
+}
+
 /*************************************************************************/
 /**                                                                     **/
 /**               Routines for handling bit vector                      **/

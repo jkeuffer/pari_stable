@@ -4524,8 +4524,11 @@ except possibly the first one. The name comes from vectors expressed on a
 standard polynomial basis $1,T,\dots, T^{n-1}$, or on \kbd{nf.zk} (whose
 first element is $1$).
 
+\fun{int}{QV_isscalar}{GEN x} as \kbd{RgV\_isscalar}, assuming $x$ is a
+\kbd{QV} (\typ{INT} and \typ{FRAC} entries only).
+
 \fun{int}{ZV_isscalar}{GEN x} as \kbd{RgV\_isscalar}, assuming $x$ is a
-\kbd{ZV}.
+\kbd{ZV} (\typ{INT} entries only).
 
 \fun{int}{RgM_isscalar}{GEN x, GEN s} return 1 if $x$ is the scalar matrix
 equalt to $s$ times the identity, and 0 otherwise. If $s$ is \kbd{NULL}, test

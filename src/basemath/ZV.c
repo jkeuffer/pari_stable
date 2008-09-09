@@ -731,15 +731,6 @@ zv_equal(GEN V, GEN W)
   return 1;
 }
 
-int
-ZV_isscalar(GEN x)
-{
-  long l = lg(x);
-  while (--l > 1)
-    if (signe(gel(x, l))) return 0;
-  return 1;
-}
-
 /* check whether x is upper trinagular with positive diagonal coeffs */
 int
 ZM_ishnf(GEN x)

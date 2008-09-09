@@ -257,7 +257,7 @@ nfC_nf_mul(GEN nf, GEN v, GEN x)
         c = RgC_Rg_mul(gel(x,1), c);
       else {
         c = RgM_RgC_mul(x,c);
-        if (RgV_isscalar(c)) c = gel(c,1);
+        if (QV_isscalar(c)) c = gel(c,1);
       }
       gel(y,i) = c;
     }
@@ -690,7 +690,7 @@ nf_to_scalar_or_basis(GEN nf, GEN x)
     }
     case t_COL:
       if (lg(x) != lg(nf_get_zk(nf))) break;
-      return RgV_isscalar(x)? gel(x,1): x;
+      return QV_isscalar(x)? gel(x,1): x;
   }
   pari_err(typeer,"nf_to_scalar_or_basis");
   return NULL; /* not reached */
@@ -732,7 +732,7 @@ nf_to_scalar_or_alg(GEN nf, GEN x)
     }
     case t_COL:
       if (lg(x) != lg(nf_get_zk(nf))) break;
-      return RgV_isscalar(x)? gel(x,1): coltoliftalg(nf, x);
+      return QV_isscalar(x)? gel(x,1): coltoliftalg(nf, x);
   }
   pari_err(typeer,"nf_to_scalar_or_alg");
   return NULL; /* not reached */
