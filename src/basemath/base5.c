@@ -299,12 +299,6 @@ rnfelementdown(GEN rnf,GEN x)
   }
 }
 
-static GEN
-rnfid(long n, long m)
-{
-  return matid_intern(n, col_ei(m,1), zerocol(m));
-}
-
 /* x est exprime sur la base relative */
 static GEN
 rnfprincipaltohermite(GEN rnf,GEN x)
@@ -328,7 +322,7 @@ rnfidealhermite(GEN rnf, GEN x)
   {
     case t_INT: case t_FRAC:
       bas = gel(rnf,7); z = cgetg(3,t_VEC);
-      gel(z,1) = rnfid(rnf_get_degree(rnf), nf_get_degree(nf));
+      gel(z,1) = matid(rnf_get_degree(rnf));
       gel(z,2) = gmul(x, gel(bas,2)); return z;
 
     case t_VEC:
@@ -847,8 +841,10 @@ PRECPB:
   if (H) h = gmul(H, h);
   if (DEBUGLEVEL) fprintferr("\n");
   y = cgetg(3,t_VEC);
-  gel(y,1) = mkvec2(matalgtobasis(nf,MPOL), gcopy(I));
-  gel(y,2) = matalgtobasis(nf,h); return gerepileupto(av, y);
+  MPOL = nfM_to_scalar_or_basis(nf,MPOL);
+  h = nfM_to_scalar_or_basis(nf,h);
+  gel(y,1) = mkvec2(MPOL, gcopy(I));
+  gel(y,2) = h; return gerepileupto(av, y);
 }
 
 GEN

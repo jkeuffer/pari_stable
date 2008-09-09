@@ -2636,7 +2636,8 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
 
     pseudo = rnfjoinmodules_i(nf, G,prhinv, rnfId,I);
     /* express W in terms of the power basis */
-    W = matalgtobasis(nf, RgM_mul(Wa, matbasistoalg(nf,gel(pseudo,1))));
+    W = RgM_mul(Wa, matbasistoalg(nf,gel(pseudo,1)));
+    W = nfM_to_scalar_or_basis(nf, W);
     I = gel(pseudo,2);
     /* restore the HNF property W[i,i] = 1. NB: Wa upper triangular, with
      * Wa[i,i] = Tau[i] */
@@ -2781,8 +2782,8 @@ rnfpseudobasis(GEN nf, GEN pol)
 {
   pari_sp av = avma;
   GEN D, d, y = cgetg(5, t_VEC), z = rnfallbase(nf,&pol, &D, &d, NULL);
-  y[1] = z[1];
-  y[2] = z[2];
+  gel(y,1) = gel(z,1);
+  gel(y,2) = gel(z,2);
   gel(y,3) = D;
   gel(y,4) = d; return gerepilecopy(av, y);
 }
@@ -2902,7 +2903,7 @@ rnfsteinitz(GEN nf, GEN order)
   nf = checknf(nf);
   Id = matid(nf_get_degree(nf));
   order = get_order(nf, order, "rnfsteinitz");
-  A = matalgtobasis(nf, gel(order,1));
+  A = nfM_to_scalar_or_basis(nf, gel(order,1));
   I = leafcopy(gel(order,2)); n=lg(A)-1;
   for (i=1; i<n; i++)
   {

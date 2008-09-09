@@ -2314,14 +2314,14 @@ colcomb(GEN nf, GEN u, GEN v, GEN A, GEN B)
     z = u==gen_1? A: nfC_nf_mul(nf,A,u);
     if (!gcmp0(v)) z = RgC_add(z, nfC_nf_mul(nf,B,v));
   }
-  return RgC_nf_to_scalar_or_basis(nf, z);
+  return nfC_to_scalar_or_basis(nf, z);
 }
 /* A + v B */
 static GEN
 colcomb1(GEN nf, GEN v, GEN A, GEN B)
 {
   if (gcmp0(v)) return A;
-  return RgC_nf_to_scalar_or_basis(nf, RgC_add(A, nfC_nf_mul(nf,B,v)));
+  return nfC_to_scalar_or_basis(nf, RgC_add(A, nfC_nf_mul(nf,B,v)));
 }
 
 /* return m[i,1..lim] * x */
@@ -2462,7 +2462,7 @@ nfhnf(GEN nf, GEN x)
   if (k < m) pari_err(talker,"not a matrix of maximal rank in nfhnf");
 
   av = avma; lim = stack_lim(av, 2);
-  A = matalgtobasis(nf,A);
+  A = nfM_to_scalar_or_basis(nf,A);
   I = leafcopy(I);
   J = zerovec(k); def = k+1;
   for (i=m; i>=1; i--)
@@ -2540,7 +2540,7 @@ nfsmith(GEN nf, GEN x)
   if (n > m) pari_err(impl,"nfsmith for non square matrices");
 
   av = avma; lim = stack_lim(av,1);
-  A = RgM_nf_to_scalar_or_basis(nf, A);
+  A = nfM_to_scalar_or_basis(nf, A);
   I = leafcopy(I);
   J = leafcopy(J);
   for (i=n; i>=2; i--)
@@ -2826,7 +2826,7 @@ nfhnfmod(GEN nf, GEN x, GEN detmat)
   RgM_check_ZM(detmat, "nfhnfmod");
 
   av = avma; lim = stack_lim(av,2);
-  A = RgM_nf_to_scalar_or_basis(nf, A);
+  A = nfM_to_scalar_or_basis(nf, A);
   I = leafcopy(I);
   def = co; ldef = (li>co)? li-co+1: 1;
   for (i=li-1; i>=ldef; i--)
@@ -2865,7 +2865,7 @@ nfhnfmod(GEN nf, GEN x, GEN detmat)
   for (i=li-1; i>=1; i--)
   {
     d = nfbezout(nf, gen_1,gcoeff(A,i,i), d0,gel(I,i), &u,&v,&w,&di);
-    p1 = RgC_nf_to_scalar_or_basis(nf, nfC_nf_mul(nf,gel(A,i),v));
+    p1 = nfC_to_scalar_or_basis(nf, nfC_nf_mul(nf,gel(A,i),v));
     if (i > 1)
     {
       d0 = idealmul(nf,d0,di);

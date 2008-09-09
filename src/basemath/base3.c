@@ -253,7 +253,12 @@ nfC_nf_mul(GEN nf, GEN v, GEN x)
     for (i=1; i < l; i++)
     {
       GEN c = gel(v,i);
-      if (typ(c)!=t_COL) c = RgC_Rg_mul(gel(x,1), c); else c = RgM_RgC_mul(x,c);
+      if (typ(c)!=t_COL)
+        c = RgC_Rg_mul(gel(x,1), c);
+      else {
+        c = RgM_RgC_mul(x,c);
+        if (RgV_isscalar(c)) c = gel(c,1);
+      }
       gel(y,i) = c;
     }
   }
@@ -877,7 +882,7 @@ matalgtobasis(GEN nf,GEN x)
   return z;
 }
 GEN
-RgM_nf_to_scalar_or_basis(GEN nf,GEN x)
+nfM_to_scalar_or_basis(GEN nf,GEN x)
 {
   long i, j, li, lx;
   GEN z = cgetg_copy(x, &lx);
@@ -893,7 +898,7 @@ RgM_nf_to_scalar_or_basis(GEN nf,GEN x)
   return z;
 }
 GEN
-RgC_nf_to_scalar_or_basis(GEN nf,GEN x)
+nfC_to_scalar_or_basis(GEN nf,GEN x)
 {
   long i, lx = lg(x);
   GEN z = cgetg(lx, t_COL);

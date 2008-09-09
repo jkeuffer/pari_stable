@@ -417,7 +417,6 @@ GEN     redrealsl2step(GEN A);
 
 /* alglin1.c */
 
-GEN     matid_intern(long n,GEN myun,GEN myzero);
 void    vecselect_p(GEN A, GEN B, GEN p, long init, long lB);
 /* anal.c */
 

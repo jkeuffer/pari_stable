@@ -457,13 +457,10 @@ scalarmat_s(long x, long n) {
   fill_scalmat(y, stoi(x), gen_0, n); return y;
 }
 GEN
-matid_intern(long n, GEN _1, GEN _0) {
+matid(long n) {
   GEN y = cgetg(n+1, t_MAT);
-  fill_scalmat(y, _1, _0, n); return y;
+  fill_scalmat(y, gen_1, gen_0, n); return y;
 }
-GEN
-matid(long n) { return matid_intern(n, gen_1, gen_0); }
-
 static void
 fill_scalcol(GEN y, GEN t, long n)
 {
