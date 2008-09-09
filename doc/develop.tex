@@ -39,27 +39,29 @@ Possibly, even implementation choices ! Way to go.
 
 \section{GP2C arrays}
 
-A \teb{GP2C array} is generic way to manage stacks of data that need
-to grow dynamically.
-
+A \teb{GP2C array} is a generic way to manage stacks of data that need
+to grow dynamically. It allocates memory using \kbd{pari\_malloc}, and is
+independant of the PARI stack; it even works before the \kbd{pari\_init} call.
 
 \subsec{Initialization}
 
-Let suppose we want to create a stack of objects of type \kbd{foo}.
-We proceed as follow:
+To create a stack of objects of type \kbd{foo}, we proceed as follows:
 \bprog
 foo *t_foo;
 gp2c_stack s_foo;
-stack_init(&s_foo,sizeof(*t_foo),(void**)t_foo);
-@eprog
+stack_init(&s_foo, sizeof(*t_foo), (void**)t_foo);
+@eprog\noindent Think of \kbd{s\_foo} as the controlling interface, and
+\kbd{t\_foo} as the (dynamic) array tied to it. The value of \kbd{t\_foo}
+may be changed as you add more elements.
 
 \subsec{Adding elements}
-The following function push an element on the stack.
+The following function pushes an element on the stack.
 \bprog
-void push_foo(foo o_foo)
+/* access globals t_foo and s_foo */
+void push_foo(foo x)
 {
   long n = stack_new(&s_foo);
-  t_foo[n]=o_foo;
+  t_foo[n] = x;
 }
 @eprog
 
@@ -68,19 +70,19 @@ void push_foo(foo o_foo)
 Elements are accessed naturally through the \kbd{t\_foo} pointer.
 For example this function swaps two elements:
 \bprog
-void swapfoo(long n, long m)
+void swapfoo(long a, long b)
 {
-  if (n>s_foo.n || m>s_foo.n)
-    pari_err(bugparier,"swapfoo");
-  foo o_foo=t_foo[n];
-  t_foo[n]=t_foo[m];
-  t_foo[m]=o_foo;
+  foo x;
+  if (a > s_foo.n || b > s_foo.n) pari_err(bugparier,"swapfoo");
+  x        = t_foo[a];
+  t_foo[a] = t_foo[b];
+  t_foo[b] = x;
 }
 @eprog
 
 \subsec{Public interface}
-Let \kbd{s} a GP2C stack and \kbd{data} the data linked to it. The following
-public field are defined:
+Let \kbd{s} be a GP2C stack and \kbd{data} the data linked to it. The following
+public fields are defined:
 
 \item \kbd{s.alloc} is the number of elements allocated for \kbd{data}.
 
@@ -91,28 +93,30 @@ holds.
 \fun{void}{stack_init}{gp2c_stack *s, size_t size, void **data} links the GP2C
 array \kbd{s} to the data pointer \kbd{*data}, where \kbd{size} is the size of
 data element. The pointer \kbd{*data} is set to \kbd{NULL}, \kbd{s->n} and
-\kbd{s->alloc} are set to $0$.
+\kbd{s->alloc} are set to $0$: the array is empty.
 
-\fun{void}{stack_alloc}{gp2c_stack *s, long nb} make sure that $\kbd{s.alloc}\geq\kbd{s.n}+nb$ eventually reallocating \kbd{data}.
+\fun{void}{stack_alloc}{gp2c_stack *s, long nb} makes room for \kbd{nb} more
+elements, i.e.~makes sure that $\kbd{s.alloc}\geq\kbd{s.n} + \kbd{nb}$, possibly
+reallocating \kbd{data}.
 
-\fun{long}{stack_new}{gp2c_stack *s} increase \kbd{s.n} by one unit,
-eventually reallocating \kbd{data}, and return \kbd{s.n-1}.
+\fun{long}{stack_new}{gp2c_stack *s} increases \kbd{s.n} by one unit,
+possibly reallocating \kbd{data}, and returns $\kbd{s.n}-1$.
 
-The following construction is incorrect because \kbd{stack\_new} can change the
-value of \kbd{t\_foo}:
+\misctitle{Caveat.} The following construction is incorrect because
+\kbd{stack\_new} can change the value of \kbd{t\_foo}:
 \bprog
-t_foo[stack_new(&s_foo)]=o_foo;
+t_foo[ stack_new(&s_foo) ] = x;
 @eprog
 
-\fun{void}{stack_delete}{gp2c_stack *s} free  \kbd{data} and reset the stack
-to the state after \kbd{stack\_init} (\kbd{s->n} and \kbd{s->alloc} are set to
-$0$).
+\fun{void}{stack_delete}{gp2c_stack *s} frees \kbd{data} and resets the stack
+to the state immediately following \kbd{stack\_init} (\kbd{s->n} and
+\kbd{s->alloc} are set to $0$).
 
-\fun{void **}{stack_base}{gp2c_stack *s} return \kbd{data}, casted to a
+\fun{void **}{stack_base}{gp2c_stack *s} returns \kbd{data}, typecast to a
 \kbd{void **}.
 
 \fun{void *}{stack_pushp}{gp2c_stack *s, void *u} This function assumes that
-\kbd{*data} is of pointer type. Push the element \kbd{u} on the stack \kbd{s}.
+\kbd{*data} is of pointer type. Pushes the element \kbd{u} on the stack \kbd{s}.
 
 \section{The type \typ{CLOSURE}}\kbdsidx{t_CLOSURE}\sidx{closure}
 This type holds closures and functions in compiled form, so is deeply
