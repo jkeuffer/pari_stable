@@ -250,21 +250,6 @@ int    pop_entree_block(entree *ep, long loc);
 int    pop_val_if_newer(entree *ep, long loc);
 void   gclone_refc(GEN x);
 
-/* naive grow-arrays */
-typedef struct {
-  void **v;
-  long len; /* len cells allocated */
-  long n; /* first n cells occupied */
-} __pari_growarray;
-typedef __pari_growarray growarray[1];
-
-growarray *pari_get_modules(void);
-growarray *pari_get_oldmodules(void);
-void    grow_append(growarray A, void *e);
-void    grow_copy(growarray A, growarray B);
-void    grow_init(growarray A);
-void    grow_kill(growarray A);
-
 /* Interfaces (GP, etc.) */
 void  print_errcontext(const char *msg, const char *s, const char *entry);
 void* get_stack(double fraction, long min);

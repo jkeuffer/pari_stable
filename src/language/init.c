@@ -52,7 +52,8 @@ THREAD pari_sp bot, top, avma;
 size_t memused;
 void   *global_err_data = NULL;
 
-static growarray MODULES, OLDMODULES;
+static void ** MODULES, ** OLDMODULES;
+static gp2c_stack s_MODULES, s_OLDMODULES;
 const long functions_tblsz = 135; /* size of functions_hash */
 entree **functions_hash, **funct_old_hash;
 
@@ -289,40 +290,6 @@ cgetalloc(long t, size_t l)
   GEN x = (GEN)pari_malloc(l * sizeof(long));
   x[0] = evaltyp(t) | evallg(l); return x;
 }
-
-/*******************************************************************/
-/*                         GROWARRAYS                              */
-/*******************************************************************/
-/* pari stack is a priori not available. Don't use it */
-void
-grow_append(growarray A, void *e)
-{
-  if (A->n == A->len-1)
-  {
-    A->len <<= 1;
-    A->v = (void**)pari_realloc(A->v, A->len * sizeof(void*));
-  }
-  A->v[A->n++] = e;
-}
-void
-grow_copy(growarray A, growarray B)
-{
-  long i;
-  if (!A) { grow_init(B); return; }
-  B->len = A->len;
-  B->n = A->n;
-  B->v = (void**)pari_malloc(B->len * sizeof(void*));
-  for (i = 0; i < A->n; i++) B->v[i] = A->v[i];
-}
-void
-grow_init(growarray A)
-{
-  A->len = 4;
-  A->n   = 0;
-  A->v   = (void**)pari_malloc(A->len * sizeof(void*));
-}
-void
-grow_kill(growarray A) { pari_free(A->v); }
 
 /*******************************************************************/
 /*                         HEAP TRAVERSAL                          */
@@ -606,8 +573,8 @@ pari_init_defaults(void)
 /*********************************************************************/
 /*                   FUNCTION HASHTABLES, MODULES                    */
 /*********************************************************************/
-growarray *pari_get_modules(void) { return &MODULES; }
-growarray *pari_get_oldmodules(void) { return &OLDMODULES; }
+gp2c_stack *pari_get_modules(void) { return &s_MODULES; }
+gp2c_stack *pari_get_oldmodules(void) { return &s_OLDMODULES; }
 
 static entree **
 init_fun_hash(void) {
@@ -647,17 +614,18 @@ init_hashtable(entree **table, long tblsz)
 }
 /* Load in hashtable hash the modules contained in A */
 static int
-gp_init_entrees(growarray A, entree **hash)
+gp_init_entrees(gp2c_stack *p_A, entree **hash)
 {
   long i;
+  entree **v = (entree **)stack_base(p_A);
   init_hashtable(hash, functions_tblsz);
-  for (i = 0; i < A->n; i++) pari_fill_hashtable(hash, (entree*)A->v[i]);
+  for (i = 0; i < p_A->n; i++) pari_fill_hashtable(hash, v[i]);
   return (hash == functions_hash);
 }
 int
 gp_init_functions(void)
 {
-  return gp_init_entrees(new_fun_set? MODULES: OLDMODULES, functions_hash);
+  return gp_init_entrees(new_fun_set? &s_MODULES: &s_OLDMODULES, functions_hash);
 }
 
 /*********************************************************************/
@@ -719,8 +687,10 @@ pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts)
 
   pari_fill_hashtable(funct_old_hash, oldfonctions);
 
-  grow_init(MODULES);    grow_append(MODULES, functions_basic);
-  grow_init(OLDMODULES); grow_append(OLDMODULES, oldfonctions);
+  stack_init(&s_MODULES, sizeof(*MODULES),(void**)&MODULES);
+  stack_pushp(&s_MODULES,functions_basic);
+  stack_init(&s_OLDMODULES, sizeof(*OLDMODULES),(void**)&OLDMODULES);
+  stack_pushp(&s_OLDMODULES,oldfonctions);
   pari_fill_hashtable(functions_hash,
 		      new_fun_set? functions_basic:oldfonctions);
 
@@ -772,8 +742,8 @@ pari_close_opts(ulong init_opts)
   free((void*)diffptr);
   free(current_logfile);
   free(current_psfile);
-  grow_kill(MODULES);
-  grow_kill(OLDMODULES);
+  stack_delete(&s_MODULES);
+  stack_delete(&s_OLDMODULES);
   if (pari_datadir) free(pari_datadir);
   if (init_opts&INIT_DFTm)
   { /* delete GP_DATA */

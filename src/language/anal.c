@@ -1222,3 +1222,11 @@ stack_delete(gp2c_stack *s)
   void **sdat = stack_base(s);
   if (*sdat) free(*sdat);
 }
+
+void
+stack_pushp(gp2c_stack *s, void *u)
+{
+  long n = stack_new(s);
+  void **sdat =(void**) *stack_base(s);
+  sdat[n] = u;
+}

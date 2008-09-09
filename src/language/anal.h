@@ -192,5 +192,9 @@ void stack_alloc(gp2c_stack *s, long nb);
 void stack_init(gp2c_stack *s, size_t size, void **data);
 long stack_new(gp2c_stack *s);
 void stack_delete(gp2c_stack *s);
+void stack_pushp(gp2c_stack *s, void *u);
+
+gp2c_stack *pari_get_modules(void);
+gp2c_stack *pari_get_oldmodules(void);
 
 ENDEXTERN

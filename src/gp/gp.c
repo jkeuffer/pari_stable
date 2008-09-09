@@ -130,7 +130,8 @@ parse_texmacs_command(tm_cmd *c, const char *ch)
 {
   long l = strlen(ch);
   char *t, *s = (char*)ch, *send = s+l-1;
-  growarray A;
+  char **A;
+  gp2c_stack s_A;
 
   if (*s != DATA_BEGIN || *send-- != DATA_END)
     pari_err(talker, "missing DATA_[BEGIN | END] in TeXmacs command");
@@ -142,7 +143,7 @@ parse_texmacs_command(tm_cmd *c, const char *ch)
   s++; t = s;
   skip_alpha(s);
   c->cmd = pari_strndup(t, s - t);
-  grow_init(A);
+  stack_init(&s_A,sizeof(*A),(void**)&A);
   for (c->n = 0; s <= send; c->n++)
   {
     char *u = (char*)pari_malloc(strlen(s) + 1);
@@ -154,9 +155,9 @@ parse_texmacs_command(tm_cmd *c, const char *ch)
       while (isdigit((int)*s)) s++;
       strncpy(u, t, s - t); u[s-t] = 0;
     }
-    grow_append(A, (void*)u);
+    stack_pushp(&s_A, u);
   }
-  c->v = (char**)A->v;
+  c->v = A;
 }
 
 static void
@@ -1237,7 +1238,7 @@ filtered_buffer(filtre_t *F)
 }
 
 static void
-gp_initrc(growarray A, char *path)
+gp_initrc(gp2c_stack *p_A, char *path)
 {
   char *nexts,*s,*t;
   FILE *file = gprc_get(path);
@@ -1281,7 +1282,7 @@ gp_initrc(growarray A, char *path)
 	s += 4;
 	t = (char*)pari_malloc(strlen(s) + 1);
 	if (*s == '"') (void)readstring(s, t); else strcpy(t,s);
-	grow_append(A, t);
+	stack_pushp(p_A,t);
       }
       else
       { /* set default */
@@ -1743,7 +1744,7 @@ init_trivial_stack(void)
 }
 
 static void
-read_opt(growarray A, long argc, char **argv)
+read_opt(gp2c_stack *p_A, long argc, char **argv)
 {
   char *b = NULL, *p = NULL, *s = NULL;
   long i = 1, initrc = 1;
@@ -1797,14 +1798,14 @@ read_opt(growarray A, long argc, char **argv)
   if (GP_DATA->flags & TEST) init80col();
   if (initrc)
   {
-    gp_initrc(A, argv[0]);
+    gp_initrc(p_A, argv[0]);
     if (setjmp(GP_DATA->env))
     {
       puts("### Errors on startup, exiting...\n\n");
       exit(1);
     }
   }
-  for ( ; i < argc; i++) grow_append(A, pari_strdup(argv[i]));
+  for ( ; i < argc; i++) stack_pushp(p_A, pari_strdup(argv[i]));
 
   /* override the values from gprc */
   testuint(p, &(GP_DATA->primelimit));
@@ -1825,7 +1826,8 @@ int
 main(int argc, char **argv)
 {
 #endif
-  growarray A, *newfun, *oldfun;
+  void **A;
+  gp2c_stack s_A, *newfun, *oldfun;
   long i;
 
   GP_DATA = default_gp_data();
@@ -1843,18 +1845,18 @@ main(int argc, char **argv)
   argc = ccommand(&argv);
 #endif
   pari_init_defaults();
-  grow_init(A);
-  read_opt(A, argc,argv);
+  stack_init(&s_A,sizeof(*A),(void**)&A);
+  read_opt(&s_A, argc,argv);
 
   pari_init_opts(top-bot, GP_DATA->primelimit, INIT_SIGm);
 #ifdef SIGALRM
   (void)os_signal(SIGALRM,gp_alarm_handler);
 #endif
   newfun = pari_get_modules();
-  grow_append(*newfun, functions_gp);
-  grow_append(*newfun, functions_highlevel);
+  stack_pushp(newfun, functions_gp);
+  stack_pushp(newfun, functions_highlevel);
   oldfun = pari_get_oldmodules();
-  grow_append(*oldfun, functions_oldgp);
+  stack_pushp(oldfun, functions_oldgp);
   if (new_fun_set)
   {
     pari_add_module(functions_gp);
@@ -1873,19 +1875,19 @@ main(int argc, char **argv)
   gp_expand_path(GP_DATA->path);
 
   if (!(GP_DATA->flags & QUIET)) gp_head();
-  if (A->n)
+  if (s_A.n)
   {
     ulong f = GP_DATA->flags;
     FILE *l = pari_logfile;
     long i;
     GP_DATA->flags &= ~(CHRONO|ECHO); pari_logfile = NULL;
-    for (i = 0; i < A->n;  pari_free(A->v[i]),i++) read_main((char*)A->v[i]);
+    for (i = 0; i < s_A.n;  pari_free(A[i]),i++) read_main((char*)A[i]);
     GP_DATA->flags = f;
     /* Reading one of the input files above can set pari_logfile.
      * Don't restore in that case. */
     if (!pari_logfile) pari_logfile = l;
   }
-  grow_kill(A);
+  stack_delete(&s_A);
   (void)gp_main_loop(gp_RECOVER|gp_ISMAIN);
   gp_quit(0); return 0; /* not reached */
 }

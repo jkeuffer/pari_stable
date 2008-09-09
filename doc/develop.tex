@@ -37,35 +37,6 @@ Hopefully, this will eventually document everything that we burried in
 \kbd{paripriv.h} or even more private header files like \kbd{anal.h}.
 Possibly, even implementation choices ! Way to go.
 
-\section{Growarrays}
-
-A \teb{growarray} is a container type, wich enlarges itself as one appends
-elements to it. It has the following fields, accessed as \kbd{A->v},
-\kbd{A->len}, \kbd{A->n}:
-
-  \kbd{void **v}: an array of values, possibly from $0$ to
-$\kbd{len}-1$, the ones from $0$ to $\kbd{n}-1$ being occupied. This array
-is allocated using \kbd{malloc}, not on the PARI stack.
-
-  \kbd{long len}: the number of cells allocated in \kbd{v}.
-
-  \kbd{long n}: the number of occupied cells.
-
-\noindent These containers are used when initializing the library, before the
-PARI stack is available, hence allocate memory using \kbd{malloc}, not on
-the stack. They are manipulated with the following functions.
-
-\fun{void}{grow_init}{growarray A} initialize the \kbd{growarray} \kbd{A}.
-
-\fun{void}{grow_append}{growarray A, void *e} append \kbd{e} to \kbd{A},
-enlarging \kbd{A} if necessary.
-
-\fun{void}{grow_copy}{growarray A, growarray B} creates a copy \kbd{B} of
-\kbd{A}. Do not initialize \kbd{B} first (memory leak otherwise). If
-\kbd{A} is \kbd{NULL}, this has the same effect as \kbd{grow\_init(B)}.
-
-\fun{void}{grow_kill}{growarray A} frees \kbd{A}
-
 \section{The type \typ{CLOSURE}}\kbdsidx{t_CLOSURE}\sidx{closure}
 This type holds closures and functions in compiled form, so is deeply
 linked to the internals of the GP compiler and evaluator.
