@@ -2438,7 +2438,7 @@ static GEN
 rnfdedekind_i(GEN nf, GEN P, GEN pr, long vdisc)
 {
   pari_sp av = avma;
-  GEN Ppr, A, I, p, tau, g, h, k, base, T, gzk, hzk, prinvp, X, pal;
+  GEN Ppr, A, I, p, tau, g, h, k, base, T, gzk, hzk, prinvp, pal;
   GEN nfT = nf_get_pol(nf), modpr = nf_to_Fq_init(nf,&pr, &T, &p);
   long m = degpol(P), vt, r, d, i, j;
 
@@ -2475,14 +2475,13 @@ rnfdedekind_i(GEN nf, GEN P, GEN pr, long vdisc)
     gel(A,j) = col_ei(m, j);
     gel(I,j) = p;
   }
-  X = pol_x(varn(P));
   pal = FqX_div(Ppr,k, T,p);
   pal = FqX_to_nfX(pal, modpr);
   for (   ; j<=m+d; j++)
   {
     gel(A,j) = RgX_to_RgV(pal,m);
     gel(I,j) = prinvp;
-    pal = RgXQX_rem(RgXQX_mul(pal,X,nfT),P,nfT);
+    if (j < m+d) pal = RgXQX_rem(RgX_shift(pal,1),P,nfT);
   }
   /* the modulus is integral */
   base = nfhnfmod(nf,base, ZM_Z_mul(idealpows(nf, prinvp, d), powiu(p, m-d)));
