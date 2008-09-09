@@ -871,8 +871,8 @@ GEN     zkmodprinit(GEN nf, GEN pr);
 /* base3.c */
 
 GEN     Idealstar(GEN nf, GEN x,long flun);
-GEN     nfC_to_scalar_or_basis(GEN nf,GEN x);
-GEN     nfM_to_scalar_or_basis(GEN nf,GEN x);
+GEN     RgC_to_nfC(GEN nf,GEN x);
+GEN     RgM_to_nfM(GEN nf,GEN x);
 GEN     RgX_to_nfX(GEN nf,GEN pol);
 GEN     algtobasis(GEN nf, GEN x);
 GEN     basistoalg(GEN nf, GEN x);

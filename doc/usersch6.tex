@@ -160,20 +160,6 @@ the above Trace matrix.
 \fun{long}{nf_get_prec}{GEN nf} returns the precision (in words) to which the
 \var{nf} was computed.
 
-\fun{GEN}{nf_to_scalar_or_basis}{GEN nf, GEN x} let $x$ be a number field
-element. If it is a rational scalar, i.e.~can be represented by a \typ{INT}
-or \typ{FRAC}, return the latter. Otherwise returns its basis representation
-(\tet{nfalgtobasis}). Shallow function.
-
-\fun{GEN}{nf_to_scalar_or_alg}{GEN nf, GEN x} let $x$ be a number field
-element. If it is a rational scalar, i.e.~can be represented by a \typ{INT}
-or \typ{FRAC}, return the latter. Otherwise returns its lifted \typ{POLMOD}
-representation (lifted \tet{nfbasistoalg}). Shallow function.
-
-\fun{GEN}{RgX_to_nfX}{GEN nf, GEN x} let $x$ be a polynomial whose coefficients
-are number field elements; apply \kbd{nf\_to\_scalar\_or\_basis} to each
-coefficient and return the resulting new polynomial. Shallow function.
-
 \subsec{Extracting info from a \kbd{bnf} structure}
 
 These functions expect a true \var{bnf} argument, e.g.~a \var{bnr} will not
@@ -286,6 +272,29 @@ to
   q = nfdiveuc(nf, a,b);
   r = nfadd(nf, a, nfmul(nf,q, gneg(b)));
 @eprog
+
+\fun{GEN}{nf_to_scalar_or_basis}{GEN nf, GEN x} let $x$ be a number field
+element. If it is a rational scalar, i.e.~can be represented by a \typ{INT}
+or \typ{FRAC}, return the latter. Otherwise returns its basis representation
+(\tet{nfalgtobasis}). Shallow function.
+
+\fun{GEN}{nf_to_scalar_or_alg}{GEN nf, GEN x} let $x$ be a number field
+element. If it is a rational scalar, i.e.~can be represented by a \typ{INT}
+or \typ{FRAC}, return the latter. Otherwise returns its lifted \typ{POLMOD}
+representation (lifted \tet{nfbasistoalg}). Shallow function.
+
+\fun{GEN}{RgX_to_nfX}{GEN nf, GEN x} let $x$ be a \typ{POL} whose coefficients
+are number field elements; apply \kbd{nf\_to\_scalar\_or\_basis} to each
+coefficient and return the resulting new polynomial. Shallow function.
+
+\fun{GEN}{RgM_to_nfM}{GEN nf, GEN x} let $x$ be a \typ{MAT} whose coefficients
+are number field elements; apply \kbd{nf\_to\_scalar\_or\_basis} to each
+coefficient and return the resulting new matrix. Shallow function.
+
+\fun{GEN}{RgC_to_nfC}{GEN nf, GEN x} let $x$ be a \typ{COL} or
+\typ{VEC} whose coefficients
+are number field elements; apply \kbd{nf\_to\_scalar\_or\_basis} to each
+coefficient and return the resulting new \typ{COL}. Shallow function.
 
 \misctitle{Unsafe routines.} The following routines assume that their \kbd{nf}
 argument is a true \var{nf} (e.g.~a \var{bnf} is not allowed) and their

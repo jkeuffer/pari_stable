@@ -882,7 +882,7 @@ matalgtobasis(GEN nf,GEN x)
   return z;
 }
 GEN
-nfM_to_scalar_or_basis(GEN nf,GEN x)
+RgM_to_nfM(GEN nf,GEN x)
 {
   long i, j, li, lx;
   GEN z = cgetg_copy(x, &lx);
@@ -898,7 +898,7 @@ nfM_to_scalar_or_basis(GEN nf,GEN x)
   return z;
 }
 GEN
-nfC_to_scalar_or_basis(GEN nf,GEN x)
+RgC_to_nfC(GEN nf,GEN x)
 {
   long i, lx = lg(x);
   GEN z = cgetg(lx, t_COL);

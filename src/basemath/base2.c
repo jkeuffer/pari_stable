@@ -2637,7 +2637,7 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
     pseudo = rnfjoinmodules_i(nf, G,prhinv, rnfId,I);
     /* express W in terms of the power basis */
     W = RgM_mul(Wa, matbasistoalg(nf,gel(pseudo,1)));
-    W = nfM_to_scalar_or_basis(nf, W);
+    W = RgM_to_nfM(nf, W);
     I = gel(pseudo,2);
     /* restore the HNF property W[i,i] = 1. NB: Wa upper triangular, with
      * Wa[i,i] = Tau[i] */
@@ -2903,7 +2903,7 @@ rnfsteinitz(GEN nf, GEN order)
   nf = checknf(nf);
   Id = matid(nf_get_degree(nf));
   order = get_order(nf, order, "rnfsteinitz");
-  A = nfM_to_scalar_or_basis(nf, gel(order,1));
+  A = RgM_to_nfM(nf, gel(order,1));
   I = leafcopy(gel(order,2)); n=lg(A)-1;
   for (i=1; i<n; i++)
   {

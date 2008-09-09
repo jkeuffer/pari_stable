@@ -365,7 +365,8 @@ BA 41- user variables can now be aliased [#790]
        RgM_mulreal, mulreal
        RgV_sum, RgV_sumpart, RgV_sumpart2
        RgX_neg, RgX_add, RgX_add_shallow, RgX_sub, RgX_Rg_add, RgX_Rg_sub,
-       Rg_RgX_sub, RgX_equal, RgX_equal_var, RgX_translate, RgX_to_nfX,
+       Rg_RgX_sub, RgX_equal, RgX_equal_var, RgX_translate,
+       RgX_to_nfX, RgM_to_nfM, RgC_to_nfC,
        RgX_type, RgX_type_decode, RgX_type_is_composite, RgX_Rg_divexact,
        RgXQ_norm, RgXQ_pow, RgXQ_caract, RgXQ_reverse
        RgXQX_translate, RgXQV_to_mod, RgXQXV_to_mod
