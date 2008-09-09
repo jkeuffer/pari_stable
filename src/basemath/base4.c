@@ -1230,12 +1230,23 @@ vecdiv(GEN x, GEN y)
 static GEN
 idealmulelt(GEN nf, GEN x, GEN v)
 {
+  long i, lx;
   GEN cx;
   if (lg(v) == 1) return cgetg(1, t_MAT);
   x = nf_to_scalar_or_basis(nf,x);
-  if (typ(x) != t_COL) return gcmp0(x)? cgetg(1,t_MAT): RgM_Rg_mul(v, Q_abs(x));
+  if (typ(x) != t_COL)
+    return isintzero(x)? cgetg(1,t_MAT): RgM_Rg_mul(v, Q_abs(x));
   x = nfC_nf_mul(nf, v, x);
   x = Q_primitive_part(x, &cx);
+  settyp(x, t_MAT); lx = lg(x);
+  /* x may contain scalars (at most 1 since the ideal is non-0)*/
+  for (i=1; i<lx; i++)
+    if (typ(gel(x,i)) == t_INT)
+    {
+      if (i > 1) swap(gel(x,1), gel(x,i)); /* help HNF */
+      gel(x,1) = scalarcol_shallow(gel(x,1), lx-1);
+      break;
+    }
   x = ZM_hnfmod(x, ZM_detmult(x));
   return cx? ZM_Q_mul(x,cx): x;
 }
