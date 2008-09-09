@@ -617,7 +617,7 @@ static int
 gp_init_entrees(gp2c_stack *p_A, entree **hash)
 {
   long i;
-  entree **v = (entree **)stack_base(p_A);
+  entree **v = (entree **)*stack_base(p_A);
   init_hashtable(hash, functions_tblsz);
   for (i = 0; i < p_A->n; i++) pari_fill_hashtable(hash, v[i]);
   return (hash == functions_hash);
