@@ -80,15 +80,40 @@ void swapfoo(long a, long b)
 }
 @eprog
 
+\subsec{Stack of stacks}
+Changing the address of \kbd{t\_foo} is not supported in general, 
+however changing both the address of \kbd{t\_foo} and \kbd{s\_foo}
+is supported as long as the offset \kbd{\&t\_foo-\&s\_foo} do not change.
+This allow to create stacks of stacks as follow:
+
+\bprog
+struct foo_s
+{
+  foo t_foo;
+  gp2c_stack s_foo;
+} tt_foo;
+gp2c_stack st_foo;
+stack_init(&st_foo, sizeof(*tt_foo), (void**)&tt_foo);
+long new_stack(void)
+{
+  long n = stack_new(&st_foo);
+  struct foo_s *st = tt_foo+n;
+  stack_init(&st->s_foo, sizeof(*st->t_foo), (void**)&st->t_foo);
+  return n;
+}
+@eprog
+When a reallocation of \kbd{tt\_foo} occurs, the offset between the components
+\kbd{.t\_foo} and \kbd{.s\_foo} does not change.
+
 \subsec{Public interface}
 Let \kbd{s} be a GP2C stack and \kbd{data} the data linked to it. The following
 public fields are defined:
 
 \item \kbd{s.alloc} is the number of elements allocated for \kbd{data}.
 
-\item \kbd{s.n} is the number of elements in the stack.
-\kbd{s.n} can be changed as long as $0\leq\kbd{s.n}\leq\kbd{s.alloc}$
-holds.
+\item \kbd{s.n} is the number of elements in the stack and \kbd{data[s.n-1]} is
+the topmost element of the stack.  \kbd{s.n} can be changed as long as
+$0\leq\kbd{s.n}\leq\kbd{s.alloc}$ holds. 
 
 \fun{void}{stack_init}{gp2c_stack *s, size_t size, void **data} links the GP2C
 array \kbd{s} to the data pointer \kbd{*data}, where \kbd{size} is the size of
@@ -112,11 +137,11 @@ t_foo[ stack_new(&s_foo) ] = x;
 to the state immediately following \kbd{stack\_init} (\kbd{s->n} and
 \kbd{s->alloc} are set to $0$).
 
-\fun{void **}{stack_base}{gp2c_stack *s} returns \kbd{data}, typecast to a
-\kbd{void **}.
-
 \fun{void *}{stack_pushp}{gp2c_stack *s, void *u} This function assumes that
 \kbd{*data} is of pointer type. Pushes the element \kbd{u} on the stack \kbd{s}.
+
+\fun{void **}{stack_base}{gp2c_stack *s} returns the address of \kbd{data},
+typecast to a \kbd{void **}.
 
 \section{The type \typ{CLOSURE}}\kbdsidx{t_CLOSURE}\sidx{closure}
 This type holds closures and functions in compiled form, so is deeply
