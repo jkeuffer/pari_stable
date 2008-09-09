@@ -630,7 +630,7 @@ pow_polmod(GEN x, GEN n)
   else {
     pari_sp av = avma;
     GEN p = NULL, X = a;
-    if (FpX_poltype(&T, &p) && FpX_poltype(&X, &p))
+    if (is_FpX(&T, &p) && is_FpX(&X, &p))
     {
       if (lgefint(p) == 3)
       {

@@ -308,6 +308,8 @@ BA 41- user variables can now be aliased [#790]
        return matrices whose entries may be t_INT or t_FRAC besides the 
        traditionnal nfalgtobasis form. Allow ideals in arbitrary form [was:
        necessarily HNF]
+   80- linear algebra routines: determines first whether we are over Z/NZ
+       then call specialized FpM_* routines if possible [fixes #376]
 
   Added
     1- new benches: galoisinit, ispower, nffactor, subfields, resultant,

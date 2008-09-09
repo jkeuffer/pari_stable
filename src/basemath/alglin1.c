@@ -680,7 +680,6 @@ _Fl_add(uGEN b, long k, long i, ulong p)
 static int
 init_gauss(GEN a, GEN *b, long *aco, long *li, int *iscol)
 {
-  if (typ(a)!=t_MAT) pari_err(mattype1,"gauss");
   *aco = lg(a) - 1;
   if (!*aco) /* a empty */
   {
@@ -711,6 +710,26 @@ init_gauss(GEN a, GEN *b, long *aco, long *li, int *iscol)
   return 1;
 }
 
+static int
+is_modular_solve(GEN a, GEN b, GEN *u)
+{
+  GEN p = NULL;
+  if (!is_FpM(&a, &p)) return 0;
+  if (!b)
+    a = FpM_inv(a,p);
+  else
+  {
+    switch(typ(b))
+    {
+      case t_COL: if (!is_FpC(&b, &p)) return 0; break;
+      case t_MAT: if (!is_FpM(&b, &p)) return 0; break;
+      default: return 0;
+    }
+    a = FpM_gauss(a,b,p);
+  }
+  *u = a? FpM_to_mod(a, p): NULL;
+  return 1;
+}
 /* Gaussan Elimination. Compute a^(-1)*b
  * b is a matrix or column vector, NULL meaning: take the identity matrix
  * If a and b are empty, the result is the empty matrix.
@@ -728,6 +747,9 @@ RgM_solve(GEN a, GEN b)
   int inexact, iscol;
   GEN p, u;
 
+  if (is_modular_solve(a,b,&u)) return gerepileupto(av, u);
+
+  avma = av;
   if (!init_gauss(a, &b, &aco, &li, &iscol)) return cgetg(1, t_MAT);
   a = RgM_shallowcopy(a);
   bco = lg(b)-1;
@@ -829,7 +851,9 @@ RgM_solve_realimag(GEN M, GEN y)
 GEN
 gauss(GEN a, GEN b)
 {
-  GEN z = RgM_solve(a,b);
+  GEN z;
+  if (typ(a)!=t_MAT) pari_err(mattype1,"gauss");
+  z = RgM_solve(a,b);
   if (!z) pari_err(matinv1);
   return z;
 }
@@ -1534,7 +1558,6 @@ gauss_pivot(GEN x0, GEN *dd, long *rr)
   pari_sp av, lim;
   long (*get_pivot)(GEN,GEN,GEN,long);
 
-  if (typ(x0)!=t_MAT) pari_err(typeer,"gauss_pivot");
   n=lg(x0)-1; if (!n) { *dd=NULL; *rr=0; return; }
 
   d0 = cgetg(n+1, t_VECSMALL);
@@ -1610,7 +1633,13 @@ ker0(GEN x, GEN a)
   return gerepileupto(av,y);
 }
 GEN
-ker(GEN x) { return ker0(x,NULL); }
+ker(GEN x) {
+  pari_sp av = avma;
+  GEN X = x, p = NULL;
+  if (is_FpM(&x, &p))
+    return gerepileupto(av, FpM_to_mod(FpM_ker(x, p), p));
+  avma = av; return ker0(X,NULL);
+}
 GEN
 matker0(GEN x,long flag) { return flag? keri(x): ker(x); }
 
@@ -1618,19 +1647,22 @@ GEN
 image(GEN x)
 {
   pari_sp av = avma;
-  GEN d,y;
-  long j,k,r;
+  GEN d, y, p = NULL, X = x;
+  long j, k, r;
 
-  gauss_pivot(x,&d,&r);
+  if (typ(x)!=t_MAT) pari_err(typeer,"image");
+  if (is_FpM(&x, &p))
+    return gerepileupto(av, FpM_to_mod(FpM_image(x, p), p));
+  gauss_pivot(X,&d,&r);
 
   /* r = dim ker(x) */
-  if (!r) { avma=av; if (d) pari_free(d); return gcopy(x); }
+  if (!r) { avma=av; if (d) pari_free(d); return gcopy(X); }
 
   /* r = dim Im(x) */
-  r = lg(x)-1 - r; avma=av;
+  r = lg(X)-1 - r; avma=av;
   y=cgetg(r+1,t_MAT);
   for (j=k=1; j<=r; k++)
-    if (d[k]) gel(y,j++) = gcopy(gel(x,k));
+    if (d[k]) gel(y,j++) = gcopy(gel(X,k));
   pari_free(d); return y;
 }
 
@@ -1641,6 +1673,7 @@ imagecompl(GEN x)
   GEN d,y;
   long j,i,r;
 
+  if (typ(x)!=t_MAT) pari_err(typeer,"imagecompl");
   gauss_pivot(x,&d,&r);
   avma=av; y=cgetg(r+1,t_VEC);
   for (i=j=1; j<=r; i++)
@@ -1656,6 +1689,7 @@ imagecomplspec(GEN x, long *nlze)
   GEN d,y;
   long i,j,k,l,r;
 
+  if (typ(x)!=t_MAT) pari_err(typeer,"imagecompl");
   x = shallowtrans(x); l = lg(x);
   gauss_pivot(x,&d,&r);
   avma=av; y = cgetg(l,t_VECSMALL);
@@ -1747,11 +1781,15 @@ GEN
 suppl(GEN x)
 {
   pari_sp av = avma;
-  GEN d;
+  GEN d, X = x, p = NULL;
   long r;
 
-  gauss_pivot(x,&d,&r);
-  avma = av; return get_suppl(x,d,r);
+  if (typ(x)!=t_MAT) pari_err(typeer,"suppl");
+  if (is_FpM(&x, &p))
+    return gerepileupto(av, FpM_to_mod(FpM_suppl(x, p), p));
+
+  gauss_pivot(X,&d,&r);
+  avma = av; return get_suppl(X,d,r);
 }
 
 static void FpM_gauss_pivot(GEN x, GEN p, GEN *dd, long *rr);
@@ -1814,13 +1852,16 @@ rank(GEN x)
 {
   pari_sp av = avma;
   long r;
-  GEN d;
+  GEN X = x, p = NULL, d;
 
-  gauss_pivot(x,&d,&r);
+  if (typ(x)!=t_MAT) pari_err(typeer,"rank");
+  if (is_FpM(&x, &p)) { r = FpM_rank(x, p); avma = av; return r; }
+  avma = av;
+  gauss_pivot(X,&d,&r);
   /* yield r = dim ker(x) */
 
-  avma=av; if (d) pari_free(d);
-  return lg(x)-1 - r;
+  avma = av; if (d) pari_free(d);
+  return lg(X)-1 - r;
 }
 
 GEN
@@ -1872,9 +1913,11 @@ GEN
 indexrank(GEN x) {
   pari_sp av = avma;
   long r;
-  GEN d;
-  gauss_pivot(x,&d,&r); avma = av;
-  return indexrank0(lg(x)-1, r, d);
+  GEN d, X = x, p = NULL;
+  if (typ(x)!=t_MAT) pari_err(typeer,"indexrank");
+  if (is_FpM(&x, &p)) return gerepileupto(av, FpM_indexrank(x, p));
+  gauss_pivot(X,&d,&r); avma = av;
+  return indexrank0(lg(X)-1, r, d);
 }
 
 GEN

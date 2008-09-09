@@ -534,7 +534,9 @@ GEN     polgaloisnamesbig(long n, long k);
 /* gen1.c */
 
 int     ff_poltype(GEN *x, GEN *p, GEN *pol);
-int     FpX_poltype(GEN *x, GEN *p);
+int     is_FpC(GEN *x, GEN *p);
+int     is_FpM(GEN *x, GEN *p);
+int     is_FpX(GEN *x, GEN *p);
 GEN     gred_frac2(GEN x1, GEN x2);
 GEN     gred_rfrac2(GEN x1, GEN x2);
 GEN     gred_rfrac_simple(GEN n, GEN d);

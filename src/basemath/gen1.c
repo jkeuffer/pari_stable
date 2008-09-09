@@ -1386,7 +1386,7 @@ mul_polmod_same(GEN T, GEN x, GEN y)
     {
       pari_sp av = avma;
       GEN p = NULL, X = x, Y = y;
-      if (FpX_poltype(&T, &p) && FpX_poltype(&X, &p) && FpX_poltype(&Y, &p))
+      if (is_FpX(&T, &p) && is_FpX(&X, &p) && is_FpX(&Y, &p))
       {
         if (lgefint(p) == 3)
         {
@@ -1416,7 +1416,7 @@ sqr_polmod(GEN T, GEN x)
   {
     pari_sp av = avma;
     GEN p = NULL, X = x;
-    if (FpX_poltype(&T, &p) && FpX_poltype(&X, &p))
+    if (is_FpX(&T, &p) && is_FpX(&X, &p))
     {
       if (lgefint(p) == 3)
       {
@@ -1987,19 +1987,19 @@ ff_poltype(GEN *x, GEN *p, GEN *pol)
       if (DEBUGMEM > 2) pari_warn(warner,"different pointers in ff_poltype");
     }
   }
-  if (!Q) return FpX_poltype(x, p);
+  if (!Q) return is_FpX(x, p);
   *x = P = to_Kronecker(P, Q);
   *pol = Q;
-  (void)FpX_poltype(x, p);
+  (void)is_FpX(x, p);
   return 1;
 }
 
 int
-FpX_poltype(GEN *px, GEN *pp)
+is_FpX(GEN *px, GEN *pp)
 {
   GEN p = *pp, x = *px;
-  long i, lx = lg(x);
-  GEN y = cgetg(lx, t_POL);
+  long i, lx;
+  GEN y = cgetg_copy(x, &lx);
 
   for (i=lx-1; i>1; i--)
   {
@@ -2011,7 +2011,7 @@ FpX_poltype(GEN *px, GEN *pp)
         if (!p) p = N;
         else if (N != p && !equalii(N, p))
         {
-          if (DEBUGMEM) pari_warn(warner,"different moduli in FpX_poltype");
+          if (DEBUGMEM) pari_warn(warner,"different moduli in is_FpX");
           *pp = NULL; return 0;
         }
         c = gel(c,2); break;
@@ -2025,6 +2025,50 @@ FpX_poltype(GEN *px, GEN *pp)
   }
   y[1] = x[1];
   *px = y; *pp = p; return (p != NULL);
+}
+int
+is_FpC(GEN *px, GEN *pp)
+{
+  GEN p = *pp, x = *px;
+  long i, hx;
+  GEN y = cgetg_copy(x, &hx);
+  for (i=hx-1; i>0; i--)
+  {
+    GEN c = gel(x,i);
+    switch(typ(c))
+    {
+      case t_INTMOD: {
+        GEN N = gel(c,1);
+        if (!p) p = N;
+        else if (N != p && !equalii(N, p))
+        {
+          if (DEBUGMEM) pari_warn(warner,"different moduli in is_FpM");
+          *pp = NULL; return 0;
+        }
+        c = gel(c,2); break;
+      }
+      case t_INT:
+        if (p) c = modii(c, p);
+        break;
+      default: return 0;
+    }
+    gel(y,i) = c;
+  }
+  *px = y; *pp = p; return (p != NULL);
+}
+int
+is_FpM(GEN *px, GEN *pp)
+{
+  GEN x = *px;
+  long j, lx;
+  GEN y = cgetg_copy(x, &lx);
+  for (j=lx-1; j>0; j--)
+  {
+    GEN xj = gel(x,j);
+    if (!is_FpC(&xj, pp)) return 0;
+    gel(y,j) = xj;
+  }
+  *px = y; return (*pp != NULL);
 }
 
 GEN
@@ -2326,7 +2370,7 @@ div_polmod_same(GEN T, GEN x, GEN y)
   {
     pari_sp av = avma;
     GEN p = NULL, X = x, Y = y;
-    if (FpX_poltype(&T, &p) && FpX_poltype(&X, &p) && FpX_poltype(&Y, &p))
+    if (is_FpX(&T, &p) && is_FpX(&X, &p) && is_FpX(&Y, &p))
     {
       if (lgefint(p) == 3)
       {
@@ -3126,7 +3170,7 @@ inv_polmod(GEN T, GEN x)
     else
     {
       GEN p = NULL, X = x;
-      if (FpX_poltype(&T, &p) && FpX_poltype(&X, &p))
+      if (is_FpX(&T, &p) && is_FpX(&X, &p))
       {
         if (lgefint(p) == 3)
         {
