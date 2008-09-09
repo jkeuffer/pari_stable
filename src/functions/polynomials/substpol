@@ -21,7 +21,7 @@ Doc: replace the ``variable'' $y$ by the argument $z$ in the ``polynomial''
  ? substpol(x^4 + x^2 + 1, (x+1)^2, y)
  %3 = (-4*y - 6)*x + (y^2 + 3*y - 3)
  @eprog
-Variant: Also available is 
- \fun{GEN}{gdeflate}{GEN T, long v, long d} which attempts to write $T(x)$ in
- the form $t(x^d)$, where $x=$\kbd{pol\_x}$(v)$, and returns \kbd{NULL} if the
- substitution fails (for instance in the example \kbd{\%2} above).
+Variant: Further, \fun{GEN}{gdeflate}{GEN T, long v, long d} attempts to
+ write $T(x)$ in the form $t(x^d)$, where $x=$\kbd{pol\_x}$(v)$, and returns
+ \kbd{NULL} if the substitution fails (for instance in the example \kbd{\%2}
+ above).

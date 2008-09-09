@@ -13,5 +13,5 @@ Doc: finds the smallest pseudoprime (see
  the result is prime, use \kbd{isprime}.
  The function accepts vector/matrices arguments, and is then applied
  componentwise.
-Variant: For a scalar $x$, the variant
+Variant: For a scalar $x$,
  \fun{long}{nextprime}{GEN n} is also available.

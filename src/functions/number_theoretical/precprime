@@ -13,5 +13,4 @@ Doc: finds the largest pseudoprime (see
  the result is prime, use \kbd{isprime}.
  The function accepts vector/matrices arguments, and is then applied
  componentwise.
-Variant: For a scalar $x$, the variant
- \fun{long}{precprime}{GEN n} is also available.
+Variant: For a scalar $x$, \fun{long}{precprime}{GEN n} is also available.

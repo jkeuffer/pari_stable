@@ -18,7 +18,8 @@ Doc: \var{bnr} being the
  If $\fl=0$, outputs only $v_1$. In that case, \var{bnr} need not contain the
  ray class group generators, i.e.~it may be created with \kbd{bnrinit}$(,,0)$
  If $x$ is not coprime to the modulus of \var{bnr} the result is undefined.
-Variant: Instead the above  hardcoded  numerical flags,  one should rather use 
+Variant: Instead of hardcoded  numerical flags,  one should rather
+ use 
  \fun{GEN}{isprincipalray}{GEN bnf, GEN x} for $\kbd{flag} = 0$, and if you
  want generators:
  \bprog

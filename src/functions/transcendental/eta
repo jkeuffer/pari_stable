@@ -13,4 +13,5 @@ Doc: \idx{Dedekind}'s $\eta$ function, without the
 
  If $\fl=1$ and $x$ can be converted to a complex number (i.e.~is not a power
  series), computes the true $\eta$ function, including the leading $q^{1/24}$.
-Variant: Also available is \fun{GEN}{trueeta}{GEN x, long prec} ($\fl=1$).
+Variant:
+ Also available is \fun{GEN}{trueeta}{GEN x, long prec} ($\fl=1$).
