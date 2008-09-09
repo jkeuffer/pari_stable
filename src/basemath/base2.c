@@ -2438,9 +2438,9 @@ static GEN
 rnfdedekind_i(GEN nf, GEN P, GEN pr, long vdisc)
 {
   pari_sp av = avma;
-  GEN Ppr, A, I, p, tau, g, matid, h, k, base, T, gzk, hzk, prinvp, X, pal;
+  GEN Ppr, A, I, p, tau, g, h, k, base, T, gzk, hzk, prinvp, X, pal;
   GEN nfT = nf_get_pol(nf), modpr = nf_to_Fq_init(nf,&pr, &T, &p);
-  long n = degpol(nfT), m = degpol(P), vt, r, d, i, j;
+  long m = degpol(P), vt, r, d, i, j;
 
   Ppr = nfX_to_FqX(P, nf, modpr);
   A = gel(FqX_factor(Ppr,T,p),1);
@@ -2469,12 +2469,11 @@ rnfdedekind_i(GEN nf, GEN P, GEN pr, long vdisc)
   I = cgetg(m+d+1,t_VEC); base = mkvec2(A, I);
  /* base[2] temporarily multiplied by p, for the final nfhnfmod,
   * which requires integral ideals */
-  matid = scalarmat(p, n);
   prinvp = pidealprimeinv(nf,pr); /* again multiplied by p */
   for (j=1; j<=m; j++)
   {
     gel(A,j) = col_ei(m, j);
-    gel(I,j) = matid;
+    gel(I,j) = p;
   }
   X = pol_x(varn(P));
   pal = FqX_div(Ppr,k, T,p);
@@ -2496,9 +2495,9 @@ rnfdedekind_i(GEN nf, GEN P, GEN pr, long vdisc)
 static GEN
 triv_order(long n, long m)
 {
-  GEN z = cgetg(3, t_VEC), id = matid(m);
+  GEN z = cgetg(3, t_VEC);
   gel(z,1) = matid(n);
-  gel(z,2) = const_vec(n, id); return z;
+  gel(z,2) = const_vec(n, gen_1); return z;
 }
 
 /* FIXME: is it really necessary to export this routine ? */
@@ -2522,6 +2521,16 @@ rnfdedekind(GEN nf, GEN P, GEN pr)
   return z;
 }
 
+static int
+ideal_is1(GEN x) {
+  switch(typ(x))
+  {
+    case t_INT: return is_pm1(x);
+    case t_MAT: return RgM_isidentity(x);
+  }
+  return 0;
+}
+
 /* nf a true nf. Return NULL if power order if pr-maximal */
 static GEN
 rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
@@ -2529,7 +2538,7 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
   pari_sp av = avma, av1, lim;
   long i, j, k, n, vpol, cmpt, sep;
   GEN q, q1, p, T, modpr, W, I, MW, C, p1;
-  GEN Tauinv, Tau, prhinv, pip, nfT, id, rnfId;
+  GEN Tauinv, Tau, prhinv, pip, nfT, rnfId;
 
   if (DEBUGLEVEL>1) fprintferr(" treating %Ps^%ld\n", pr, vdisc);
   modpr = nf_to_Fq_init(nf,&pr,&T,&p);
@@ -2546,7 +2555,6 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
   q = T? powiu(p,degpol(T)): p;
   q1 = q; while (cmpiu(q1,n) < 0) q1 = mulii(q1,q);
   rnfId = matid(n);
-  id    = matid(degpol(nfT));
 
   prhinv = idealinv(nf, pr);
   C = cgetg(n+1, t_MAT);
@@ -2566,7 +2574,7 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
     {
       GEN tau, tauinv;
       long v1, v2;
-      if (gequal(gel(I,j),id)) { gel(Tau,j) = gel(Tauinv,j) = gen_1; continue; }
+      if (ideal_is1(gel(I,j))) { gel(Tau,j) = gel(Tauinv,j) = gen_1; continue; }
 
       p1 = idealtwoelt(nf,gel(I,j));
       v1 = nfval(nf,gel(p1,1),pr);
@@ -2736,7 +2744,7 @@ GEN
 rnfallbase(GEN nf, GEN *ppol, GEN *pD, GEN *pd, GEN *pf)
 {
   long i, n, N, l;
-  GEN A, nfT, fa, E, P, id, I, z, d, D, disc, pol = *ppol;
+  GEN A, nfT, fa, E, P, I, z, d, D, disc, pol = *ppol;
 
   nf = checknf(nf); nfT = nf_get_pol(nf);
   pol = rnf_fix_pol(nfT,pol,0);
@@ -2749,7 +2757,7 @@ rnfallbase(GEN nf, GEN *ppol, GEN *pD, GEN *pd, GEN *pf)
   fa = idealfactor(nf, disc);
   P = gel(fa,1); l = lg(P);
   E = gel(fa,2);
-  id = matid(N); z = NULL;
+  z = NULL;
   for (i=1; i < l; i++)
   {
     long e = itos(gel(E,i));
@@ -2759,7 +2767,7 @@ rnfallbase(GEN nf, GEN *ppol, GEN *pD, GEN *pd, GEN *pf)
   A = gel(z,1); d = get_d(nf, pol, A);
   I = gel(z,2);
 
-  i=1; while (i<=n && gequal(gel(I,i), id)) i++;
+  i=1; while (i<=n && ideal_is1(gel(I,i))) i++;
   if (i > n) { D = gen_1; if (pf) *pf = gen_1; }
   else
   {
@@ -2814,30 +2822,33 @@ rnfsimplifybasis(GEN bnf, GEN x)
 {
   pari_sp av = avma;
   long i, l;
-  GEN y, id, Az, Iz, nf, A, I;
+  GEN y, Az, Iz, nf, A, I;
 
   bnf = checkbnf(bnf); nf = gel(bnf,7);
   if (typ(x) != t_VEC || lg(x) < 3)
     pari_err(talker,"not a pseudo-basis in nfsimplifybasis");
   A = gel(x,1);
   I = gel(x,2); l = lg(I);
-  id = matid(nf_get_degree(nf));
   y = cgetg(3, t_VEC);
   Az = cgetg(l, t_MAT); gel(y,1) = Az;
   Iz = cgetg(l, t_VEC); gel(y,2) = Iz;
   for (i = 1; i < l; i++)
   {
     GEN c, d;
-    if (RgM_isidentity(gel(I,i))) { gel(Iz,i) = id; Az[i] = A[i]; continue; }
+    if (ideal_is1(gel(I,i))) {
+      gel(Iz,i) = gen_1;
+      gel(Az,i) = gel(A,i);
+      continue;
+    }
 
     gel(Iz,i) = Q_primitive_part(gel(I,i), &c);
     gel(Az,i) = c? RgC_Rg_mul(gel(A,i),c): gel(A,i);
-    if (c && ZM_isidentity(gel(Iz,i))) continue;
+    if (c && ideal_is1(gel(Iz,i))) continue;
 
     d = gen_if_principal(bnf, gel(Iz,i));
     if (d)
     {
-      gel(Iz,i) = id;
+      gel(Iz,i) = gen_1;
       gel(Az,i) = nfC_nf_mul(nf, gel(Az,i), d);
     }
   }
@@ -2891,7 +2902,7 @@ nfidealdet1(GEN nf, GEN a, GEN b, GEN *px, GEN *py, GEN *pz, GEN *pt)
 
 /* given a pseudo-basis of an order in HNF [A,I] (or [A,I,D,d]), gives an
  * n x n matrix (not in HNF) of a pseudo-basis and an ideal vector
- * [id,id,...,id,I] such that order = nf[7]^(n-1) x I.
+ * [1,1,...,1,I] such that order = nf[7]^(n-1) x I.
  * Uses the approximation theorem ==> slow. */
 GEN
 rnfsteinitz(GEN nf, GEN order)
@@ -2908,12 +2919,12 @@ rnfsteinitz(GEN nf, GEN order)
   for (i=1; i<n; i++)
   {
     GEN c1,c2;
-    a = gel(I,i); if (gequal(a,Id)) continue;
+    a = gel(I,i); if (ideal_is1(a)) continue;
 
     c1 = gel(A,i);
     c2 = gel(A,i+1);
     b = gel(I,i+1);
-    if (gequal(b,Id))
+    if (ideal_is1(b))
     {
       gel(A,i) = c2;
       gel(A,i+1) = gneg(c1);
@@ -2949,13 +2960,12 @@ rnfbasis(GEN bnf, GEN order)
 {
   pari_sp av = avma;
   long j, n;
-  GEN nf, A, I, cl, col, a, id;
+  GEN nf, A, I, cl, col, a;
 
   bnf = checkbnf(bnf); nf = gel(bnf,7);
-  id = matid(nf_get_degree(nf));
   order = get_order(nf, order, "rnfbasis");
   I = gel(order,2); n = lg(I)-1;
-  j=1; while (j<n && gequal(gel(I,j),id)) j++;
+  j=1; while (j<n && ideal_is1(gel(I,j))) j++;
   if (j<n)
   {
     order = rnfsteinitz(nf,order);
@@ -2984,17 +2994,15 @@ rnfhnfbasis(GEN bnf, GEN order)
 {
   pari_sp av = avma;
   long j, n;
-  GEN nf, A, I, a, id;
+  GEN nf, A, I, a;
 
   bnf = checkbnf(bnf); nf = gel(bnf,7);
-  id = matid(nf_get_degree(nf));
   order = get_order(nf, order, "rnfbasis");
   A = gel(order,1); A = RgM_shallowcopy(A);
   I = gel(order,2); n = lg(A)-1;
   for (j=1; j<=n; j++)
   {
-    if (gequal(gel(I,j),id)) continue;
-
+    if (ideal_is1(gel(I,j))) continue;
     a = gen_if_principal(bnf, gel(I,j));
     if (!a) { avma = av; return gen_0; }
     gel(A,j) = nfC_nf_mul(nf, gel(A,j), a);
@@ -3003,31 +3011,30 @@ rnfhnfbasis(GEN bnf, GEN order)
 }
 
 static long
-_rnfisfree(GEN bnf, GEN order)
+rnfisfree_aux(GEN bnf, GEN order)
 {
   long n, j;
-  GEN nf, p1, id, I;
+  GEN nf, P, I;
 
   bnf = checkbnf(bnf);
   if (gcmp1(gmael3(bnf,8,1,1))) return 1;
-
-  nf = gel(bnf,7); id = matid(nf_get_degree(nf));
+  nf = gel(bnf,7);
   order = get_order(nf, order, "rnfisfree");
   I = gel(order,2); n = lg(I)-1;
-  j=1; while (j<=n && gequal(gel(I,j),id)) j++;
+  j=1; while (j<=n && ideal_is1(gel(I,j))) j++;
   if (j>n) return 1;
 
-  p1 = gel(I,j);
+  P = gel(I,j);
   for (j++; j<=n; j++)
-    if (!gequal(gel(I,j),id)) p1 = idealmul(nf,p1,gel(I,j));
-  return gcmp0( isprincipal(bnf,p1) );
+    if (!ideal_is1(gel(I,j))) P = idealmul(nf,P,gel(I,j));
+  return gcmp0( isprincipal(bnf,P) );
 }
 
 long
 rnfisfree(GEN bnf, GEN order)
 {
   pari_sp av = avma;
-  long n = _rnfisfree(bnf, order);
+  long n = rnfisfree_aux(bnf, order);
   avma = av; return n;
 }
 

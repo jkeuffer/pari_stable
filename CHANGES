@@ -306,7 +306,8 @@ BA 41- user variables can now be aliased [#790]
        are simpler and faster ]
    79- allow arbitrary nf entries in relative matrices; nfhnf and nfhnfmod
        return matrices whose entries may be t_INT or t_FRAC besides the 
-       traditionnal nfalgtobasis form
+       traditionnal nfalgtobasis form. Allow ideals in arbitrary form [was:
+       necessarily HNF]
 
   Added
     1- new benches: galoisinit, ispower, nffactor, subfields, resultant,

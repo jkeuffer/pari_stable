@@ -88,18 +88,27 @@ modulereltoabs(GEN rnf, GEN x)
   basnf = Q_primitive_part(basnf, &cobasnf); /* remove denom. --> faster */
   for (k=i=1; i<=n; i++)
   {
-    GEN c0, w = gel(W,i), id = gel(I,i);
+    GEN c0, cid, w = gel(W,i), id = gel(I,i);
 
-    if (lg(id) == 1) continue;
+    if (lg(id) == 1) continue; /* must be a t_MAT */
+    id = Q_primitive_part(id, &cid);
     w = Q_primitive_part(eltreltoabs(rnfeq,w), &c0);
-    c0 = mul_content(c0, cobasnf);
-    for (j=1; j<=m; j++)
-    {
-      GEN c, z = Q_primitive_part(gmul(basnf,gel(id,j)), &c);
-      z = RgX_rem(gmul(w, RgX_rem(z,polabs)), polabs);
-      c = mul_content(c, c0); if (c) z = RgX_Rg_mul(z, c);
-      gel(M,k++) = z;
-    }
+    c0 = mul_content(c0, mul_content(cid,cobasnf));
+    if (typ(id) == t_INT)
+      for (j=1; j<=m; j++)
+      {
+        GEN z = RgX_rem(gmul(w, gel(basnf,j)), polabs);
+        if (c0) z = RgX_Rg_mul(z, c0);
+        gel(M,k++) = z;
+      }
+    else
+      for (j=1; j<=m; j++)
+      {
+        GEN c, z = Q_primitive_part(gmul(basnf,gel(id,j)), &c);
+        z = RgX_rem(gmul(w, z), polabs);
+        c = mul_content(c, c0); if (c) z = RgX_Rg_mul(z, c);
+        gel(M,k++) = z;
+      }
   }
   setlg(M, k); return M;
 }
@@ -401,7 +410,7 @@ rnfidealabstorel(GEN rnf, GEN x)
 {
   long N, m, j;
   pari_sp av = avma;
-  GEN nf, A, I, z, id, invbas;
+  GEN nf, A, I, z, invbas;
 
   checkrnf(rnf); nf = gel(rnf,10); invbas = gel(rnf,8);
   m = nf_get_degree(nf);
@@ -409,12 +418,12 @@ rnfidealabstorel(GEN rnf, GEN x)
   if (lg(x)-1 != N) pari_err(typeer, "rnfidealabstorel");
   if (typ(x) != t_VEC) pari_err(typeer,"rnfidealabstorel");
   A = cgetg(N+1,t_MAT);
-  I = cgetg(N+1,t_VEC); z = mkvec2(A,I); id = matid(m);
+  I = cgetg(N+1,t_VEC); z = mkvec2(A,I);
   for (j=1; j<=N; j++)
   {
     GEN t = lift_intern( rnfelementabstorel(rnf, gel(x,j)) );
     gel(A,j) = mulmat_pol(invbas, t);
-    gel(I,j) = id;
+    gel(I,j) = gen_1;
   }
   return gerepileupto(av, nfhnf(nf,z));
 }
@@ -759,7 +768,7 @@ rnflllgram(GEN nf, GEN pol, GEN order,long prec)
 {
   pari_sp av = avma, lim = stack_lim(av,2);
   long j, k, l, kmax, r1, lx, count = 0;
-  GEN M, I, h, H, mth, MC, MPOL, MCS, B, mu, y;
+  GEN M, I, h, H, mth, MC, MPOL, MCS, B, mu;
   const long alpha = 10, MAX_COUNT = 4;
 
   nf = checknf(nf); r1 = nf_get_r1(nf);
@@ -840,11 +849,9 @@ PRECPB:
   MPOL = gmul(MPOL,h);
   if (H) h = gmul(H, h);
   if (DEBUGLEVEL) fprintferr("\n");
-  y = cgetg(3,t_VEC);
   MPOL = RgM_to_nfM(nf,MPOL);
   h = RgM_to_nfM(nf,h);
-  gel(y,1) = mkvec2(MPOL, gcopy(I));
-  gel(y,2) = h; return gerepileupto(av, y);
+  return gerepilecopy(av, mkvec2(mkvec2(MPOL,I), h));
 }
 
 GEN
@@ -863,14 +870,14 @@ rnfpolred(GEN nf, GEN pol, long prec)
   id = rnfpseudobasis(nf,pol);
   if (bnf && gcmp1(gmael3(bnf,8,1,1))) /* if bnf is principal */
   {
-    GEN newI, newO, zk = matid(degpol(nfpol));
+    GEN newI, newO;
     O = gel(id,1);
     I = gel(id,2); n = lg(I)-1;
     newI = cgetg(n+1,t_VEC);
     newO = cgetg(n+1,t_MAT);
     for (j=1; j<=n; j++)
     {
-      gel(newI,j) = zk; al = gen_if_principal(bnf,gel(I,j));
+      gel(newI,j) = gen_1; al = gen_if_principal(bnf,gel(I,j));
       gel(newO,j) = nfC_nf_mul(nf, gel(O,j), al);
     }
     id = mkvec2(newO, newI);
@@ -943,11 +950,23 @@ makebasis(GEN nf, GEN pol, GEN rnfeq)
   for(i=k=1; i<=N; i++)
   {
     GEN w = gel(W,i), id = gel(I,i);
-    w = typ(w) == t_COL? tablemulvec(TAB, w, id): RgM_Rg_mul(id,w);
-    for(j=1; j<=n; j++)
+    if (typ(id) == t_MAT)
     {
-      p1 = grem(RgV_dotproduct(ZK, gel(w,j)), polabs);
-      gel(B,k++) = RgX_to_RgV(p1, nN);
+      w = typ(w) == t_COL? tablemulvec(TAB, w, id): RgM_Rg_mul(id,w);
+      for(j=1; j<=n; j++)
+      {
+        p1 = grem(RgV_dotproduct(ZK, gel(w,j)), polabs);
+        gel(B,k++) = RgX_to_RgV(p1, nN);
+      }
+    }
+    else
+    { /* scalar */
+      if (typ(id) != t_INT || !is_pm1(id)) w = gmul(w, id);
+      for(j=1; j<=n; j++)
+      {
+        p1 = grem(gmul(gel(ZK,j), w), polabs);
+        gel(B,k++) = RgX_to_RgV(p1, nN);
+      }
     }
   }
   B = Q_remove_denom(B, &den);
