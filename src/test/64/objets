@@ -117,6 +117,8 @@ O(x^12)
 ? length(divisors(1000))
 16
 ? Mod(10873,49649)^-1
+  ***   at: Mod(10873,49649)^-1
+                            ^---
   *** _^_: impossible inverse modulo: Mod(131, 49649).
 ? getheap
 [59, 785]
