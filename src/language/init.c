@@ -868,7 +868,6 @@ err_clean(void)
 {
   while (err_catch_stack)
     pop_catch_cell(&err_catch_stack);
-  gp_function_name = NULL;
 }
 
 void
@@ -908,6 +907,7 @@ pari_warn(long numerr, ...)
     print0(g, f_RAW);
     pari_putc('\n');
   } else {
+    const char *gp_function_name = closure_func_err();
     if (gp_function_name)
       pari_printf("  *** %s: %s", gp_function_name, errmessage[numerr]);
     else
@@ -1002,6 +1002,7 @@ pari_err(long numerr, ...)
   }
   else
   {
+    const char *gp_function_name = closure_func_err();
     if (gp_function_name)
       pari_printf("  *** %s: %s", gp_function_name, errmessage[numerr]);
     else
@@ -1056,7 +1057,6 @@ pari_err(long numerr, ...)
     pariErr->puts("  [hint] you can increase GP stack with allocatemem()\n");
   }
   pariOut = out;
-  gp_function_name=NULL;
   if (default_exception_handler && !SYNTAX_ERROR(numerr))
   {
     if (dft_handler[numerr])
@@ -1105,7 +1105,6 @@ trap0(const char *e, GEN r, GEN f)
   { /* explicit recovery text */
     GEN x = closure_trapgen(numerr,f);
     if (x == (GEN)1L) {
-      gp_function_name = NULL;
       x = r? closure_evalgen(r): gnil;
     }
     return x;

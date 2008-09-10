@@ -17,7 +17,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "anal.h"
 #include "opcode.h"
 
-THREAD const char *gp_function_name=NULL;
 /********************************************************************/
 /*                                                                  */
 /*         break/next/return/allocatemem handling                   */
@@ -94,6 +93,7 @@ allocatemem0(GEN z)
     newsize = itou(z);
     if (signe(z) < 0) pari_err(talker,"negative size in allocatemem");
   }
+  closure_reset();
   (void)allocatemoremem(newsize);
   global_err_data = NULL;
   longjmp(GP_DATA->env, -1);
@@ -546,6 +546,20 @@ closure_castlong(long z, long mode)
   }
 }
 
+const char *closure_func_err(void)
+{
+  long fun=s_trace.n-1, pc;
+  const char *code;
+  GEN C, oper;
+  if (fun < 0) return NULL;
+  pc = *trace[fun].pc; C  = trace[fun].closure;
+  code = GSTR(gel(C,2))-1; oper = gel(C,3);
+  if (code[pc]==OCcallgen || code[pc]==OCcallgen2 ||
+      code[pc]==OCcallint || code[pc]==OCcalllong || code[pc]==OCcallvoid)
+    return ((entree*)oper[pc])->name;
+  return NULL;
+}
+
 static void
 closure_eval(GEN C)
 {
@@ -910,65 +924,50 @@ closure_eval(GEN C)
 #define ARGS st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4],st[sp+5],st[sp+6],st[sp+7]
     case OCcallgen:
       {
-        const char *old_name=gp_function_name;
         entree *ep=(entree*)operand;
         GEN res;
         sp-=ep->arity;
-        gp_function_name=ep->name;
         res = ((GEN (*)(ANYARG))ep->value)(ARGS);
         if (br_status) goto endeval;
-        gp_function_name=old_name;
         gel(st,sp++)=res;
         break;
       }
     case OCcallgen2:
       {
-        const char *old_name=gp_function_name;
         entree *ep=(entree*)operand;
         GEN res;
         sp-=ep->arity;
-        gp_function_name=ep->name;
         res = ((GEN (*)(GEN,GEN))ep->value)(gel(st,sp),gel(st,sp+1));
         if (br_status) goto endeval;
-        gp_function_name=old_name;
         gel(st,sp++)=res;
         break;
       }
     case OCcalllong:
       {
-        const char *old_name=gp_function_name;
         entree *ep=(entree*)operand;
         long res;
         sp-=ep->arity;
-        gp_function_name=ep->name;
         res = ((long (*)(ANYARG))ep->value)(ARGS);
         if (br_status) goto endeval;
-        gp_function_name=old_name;
         st[sp++] = res;
         break;
       }
     case OCcallint:
       {
-        const char *old_name=gp_function_name;
         entree *ep=(entree*)operand;
         long res;
         sp-=ep->arity;
-        gp_function_name=ep->name;
         res = ((int (*)(ANYARG))ep->value)(ARGS);
         if (br_status) goto endeval;
-        gp_function_name=old_name;
         st[sp++] = res;
         break;
       }
     case OCcallvoid:
       {
-        const char *old_name=gp_function_name;
         entree *ep=(entree*)operand;
         sp-=ep->arity;
-        gp_function_name=ep->name;
         ((void (*)(ANYARG))ep->value)(ARGS);
         if (br_status) goto endeval;
-        gp_function_name=old_name;
         break;
       }
 #undef ARGS

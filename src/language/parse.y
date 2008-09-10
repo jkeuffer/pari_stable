@@ -114,7 +114,6 @@ pari_eval_str(char *lex, int strict)
   parser_reset();
   compiler_reset();
   reset_break();
-  gp_function_name=NULL;
   res=closure_evalres(code);
   if (!res) return gnil;
   return res;

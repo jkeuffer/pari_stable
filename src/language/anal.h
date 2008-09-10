@@ -73,7 +73,6 @@ void   pari_fill_hashtable(entree **table, entree *ep);
 void compile_err(const char *msg, const char *str);
 void compile_varer1(const char *str);
 
-extern THREAD const char *gp_function_name;
 extern int  (*whatnow_fun)(const char *, int);
 extern void (*sigint_fun)(void);
 extern void *foreignHandler;
@@ -177,6 +176,7 @@ GEN  pari_eval_str(char *lex, int strict);
 void parser_reset(void);
 void compiler_reset(void);
 void closure_context(GEN C, long lpc);
+const char * closure_func_err(void);
 GEN  gp_closure(long n);
 long eval_mnemonic(GEN str, const char *tmplate);
 
