@@ -1484,7 +1484,7 @@ print_prefixed_text(const char *s, const char *prefix, const char *str)
   const long prelen = prefix? strlen_real(prefix): 0;
   const long W = term_width(), ls = strlen(s);
   long linelen = prelen;
-  char *word = stackmalloc(ls + 3);
+  char *word = pari_malloc(ls + 3);
 
   if (prefix) pari_puts(prefix);
   for(;;)
@@ -1533,6 +1533,7 @@ print_prefixed_text(const char *s, const char *prefix, const char *str)
     pari_putc('^');
     for (i=0; i<len; i++) pari_putc('-');
   }
+  pari_free(word);
 }
 
 #define STR_LEN 20

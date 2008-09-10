@@ -997,12 +997,14 @@ pari_err(long numerr, ...)
   else if (numerr == user)
   {
     GEN g = va_arg(ap, GEN);
+    closure_err("at");
     pari_printf("  ***   user error: ");
     print0(g, f_RAW);
   }
   else
   {
     const char *gp_function_name = closure_func_err();
+    closure_err("at");
     if (gp_function_name)
       pari_printf("  *** %s: %s", gp_function_name, errmessage[numerr]);
     else

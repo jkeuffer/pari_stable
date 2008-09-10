@@ -560,6 +560,32 @@ const char *closure_func_err(void)
   return NULL;
 }
 
+void
+closure_err(const char *err)
+{
+  long i;
+  const char *base=NULL;
+  long fun=s_trace.n-1;
+  if (fun < 0) return; /*e.g. when called by GP simplify */
+  while (lg(trace[fun].closure)==6) fun--;
+  for (i=fun;i<s_trace.n; i++)
+    closure_context(trace[i].closure,*trace[i].pc);
+  for (i=maxss(0,s_trace.n-20); i<s_trace.n; i++)
+  {
+    GEN C=trace[i].closure;
+    if (lg(C)>=7)
+    {
+      if (typ(gel(C,6))==t_VEC)
+        base = GSTR(gmael(C,6,2));
+      else
+        base = GSTR(gel(C,6));
+    }
+    if (i==s_trace.n-1 || lg(trace[i+1].closure)>=7)
+      print_errcontext(err,base+mael3(C,5,1,*trace[i].pc),base);
+    pari_putc('\n');
+  }
+}
+
 static void
 closure_eval(GEN C)
 {

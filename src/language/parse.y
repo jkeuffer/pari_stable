@@ -112,7 +112,6 @@ pari_eval_str(char *lex, int strict)
   avma=ltop;
   code=gp_closure(s_node.n-1);
   parser_reset();
-  compiler_reset();
   reset_break();
   res=closure_evalres(code);
   if (!res) return gnil;
