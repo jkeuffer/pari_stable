@@ -1087,6 +1087,22 @@ INLINE double
 dbllog2r(GEN x)
 { return log2((double)(ulong)x[2]) + (double)(expo(x) - (BITS_IN_LONG-1)); }
 
+INLINE GEN
+mul_content(GEN cx, GEN cy)
+{
+  if (!cx) return cy;
+  if (!cy) return cx;
+  return gmul(cx,cy);
+}
+INLINE GEN
+mul_denom(GEN dx, GEN dy)
+{
+  if (!dx) return dy;
+  if (!dy) return dx;
+  return mulii(dx,dy);
+}
+
+
 /* POLYNOMIALS */
 INLINE GEN
 constant_term(GEN x) { return signe(x)? gel(x,2): gen_0; }

@@ -981,21 +981,6 @@ extideal_HNF_mul(GEN nf, GEN x, GEN y)
 }
 
 GEN
-mul_content(GEN cx, GEN cy)
-{
-  if (!cx) return cy;
-  if (!cy) return cx;
-  return gmul(cx,cy);
-}
-GEN
-mul_denom(GEN dx, GEN dy)
-{
-  if (!dx) return dy;
-  if (!dy) return dx;
-  return mulii(dx,dy);
-}
-
-GEN
 famat_to_nf(GEN nf, GEN f)
 {
   GEN t, x, e;
