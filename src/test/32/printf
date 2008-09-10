@@ -160,12 +160,16 @@
 %-20.10g for 4/3 : 1.333333333         |
 %20.13e for 4/3  :   1.3333333333333 e0|
 %e for 4/3       : 1.3333333333333333333333333333333333333 e0|
+  ***   at: printf("%missing arg
+            ^--------------------
   *** printf: invalid conversion or specification m in format `%missing argument to format
 '.
+  ***   at: printf("%d missing a
+            ^--------------------
   *** printf: missing arg 1 for printf format '%d missing argument to format
 '.
 %-20.10g for aa : [1.000000000         ,2.000000000         ]
 1.0000000000000000000000000000000000000 E38
 0.99999999999999999999999999999999999999770976478687585326332384035105970783
 05024613172747796087832576
-Total time spent: 12
+Total time spent: 24

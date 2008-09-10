@@ -10,9 +10,11 @@ List([[1, 2, 3], 2])
 List([[3, 2, 3], 2])
 List([Vecsmall([1, 2, 3]), 2])
 3
+  ***   at: ...;listput(L,1);listpop(L);listpop(L)
+                                        ^----------
   *** listpop: empty list in listpop.
 
 [List([0])]
 
 [70, 514]
-Total time spent: 68
+Total time spent: 76

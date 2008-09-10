@@ -1,4 +1,4 @@
-  *** allocatemem: Warning: new stack size = 50000000 (47.684 Mbytes).
+  ***   Warning: new stack size = 50000000 (47.684 Mbytes).
 ? test(2,20)
 [a^2 + a + 1, a^19 + a^18 + a^17 + a^15 + a^14 + a^13 + a^12 + a^8 + a^7 + a
 ^6 + a^4 + a^2 + 1, 0, 0, 0, 0, 0, a^19 + a^16 + a^15 + a^11 + a^8 + a^5 + a
@@ -75,4 +75,4 @@ a^5 + 2*a^4 + 6*a^3 + 2)*x + 1, 1], [0, 0, 0, a, 1, 0, 2*a, 4, 6*a^2, a, 4,
 ? getheap
 [13, 6635]
 ? print("Total time spent: ",gettime);
-Total time spent: 1284
+Total time spent: 1444

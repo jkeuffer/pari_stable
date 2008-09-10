@@ -1,5 +1,5 @@
 ? allocatemem(20*10^6);
-  *** allocatemem: Warning: new stack size = 20000000 (19.073 Mbytes).
+  ***   Warning: new stack size = 20000000 (19.073 Mbytes).
 ? gettime;oo=[1];
 ? \p96
    realprecision = 96 significant digits
@@ -84,4 +84,4 @@
 ? a-b
 -1.390671162 E-308
 ? print("Total time spent: ",gettime);
-Total time spent: 48291
+Total time spent: 43858
