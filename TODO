@@ -70,8 +70,6 @@ Unless specified otherwise, examples assume 32bit machine and default precision
 
 ***************************  MISCELLANEOUS    ****************************
 
-3  write more specialized benches
-
 2  switch to autoconf
 
 ***************************   ALGORITHMS      ****************************
