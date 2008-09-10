@@ -727,8 +727,8 @@ is_modular_solve(GEN a, GEN b, GEN *u)
     }
     a = FpM_gauss(a,b,p);
   }
-  *u = a? FpM_to_mod(a, p): NULL;
-  return 1;
+  if (a) a = (typ(b) == t_COL)? FpC_to_mod(a, p): FpM_to_mod(a, p);
+  *u = a; return 1;
 }
 /* Gaussan Elimination. Compute a^(-1)*b
  * b is a matrix or column vector, NULL meaning: take the identity matrix
