@@ -549,7 +549,7 @@ closure_castlong(long z, long mode)
 static void
 closure_eval(GEN C)
 {
-  char *code=GSTR(gel(C,2))-1;
+  const char *code=GSTR(gel(C,2))-1;
   GEN oper=gel(C,3);
   GEN data=gel(C,4);
   long loper=lg(oper);
