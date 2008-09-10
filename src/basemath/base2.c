@@ -2437,7 +2437,6 @@ rnfelementid_powmod(GEN multab, long h, GEN n, GEN T, GEN p)
 static GEN
 rnfdedekind_i(GEN nf, GEN P, GEN pr, long vdisc)
 {
-  pari_sp av = avma;
   GEN Ppr, A, I, p, tau, g, h, k, base, T, gzk, hzk, prinvp, pal;
   GEN nfT = nf_get_pol(nf), modpr = nf_to_Fq_init(nf,&pr, &T, &p);
   long m = degpol(P), vt, r, d, i, j;
@@ -2487,7 +2486,7 @@ rnfdedekind_i(GEN nf, GEN P, GEN pr, long vdisc)
   base = nfhnfmod(nf,base, ZM_Z_mul(idealpows(nf, prinvp, d), powiu(p, m-d)));
   gel(base,2) = gdiv(gel(base,2), p); /* cancel the factor p */
   vt = vdisc - 2*d;
-  return gerepilecopy(av, mkvec3(vt < 2? gen_1: gen_0, base, stoi(vt)));
+  return mkvec3(vt < 2? gen_1: gen_0, base, stoi(vt));
 }
 
 /* [L:K] = n, [K:Q] = m */
@@ -2510,11 +2509,15 @@ rnfdedekind(GEN nf, GEN P, GEN pr)
   P = rnf_fix_pol(nf_get_pol(nf), P, 0);
   v = nfval(nf, RgX_disc(P), pr);
   P = lift_intern(P);
-  avma = av; z = rnfdedekind_i(nf, P, pr, v);
-  if (!z) {
+  z = rnfdedekind_i(nf, P, pr, v);
+  if (z)
+    z = gerepilecopy(av, z);
+  else {
+    long d = degpol(P);
+    avma = av;
     z = cgetg(4, t_VEC);
     gel(z,1) = gen_1;
-    gel(z,2) = triv_order(degpol(P), nf_get_degree(nf));
+    gel(z,2) = triv_order(d, nf_get_degree(nf));
     gel(z,3) = stoi(v);
   }
   return z;
@@ -2541,12 +2544,14 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
 
   if (DEBUGLEVEL>1) fprintferr(" treating %Ps^%ld\n", pr, vdisc);
   modpr = nf_to_Fq_init(nf,&pr,&T,&p);
+  av1 = avma;
   p1 = rnfdedekind_i(nf, pol, modpr, vdisc);
   if (!p1) { avma = av; return NULL; }
   if (gcmp1(gel(p1,1))) return gerepilecopy(av,gel(p1,2));
   sep = itos(gel(p1,3));
   W = gmael(p1,2,1);
   I = gmael(p1,2,2);
+  gerepileall(av1, 2, &W, &I);
 
   pip = coltoalg(nf, pr_get_gen(pr));
   nfT = nf_get_pol(nf);
