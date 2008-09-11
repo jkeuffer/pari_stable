@@ -1484,7 +1484,7 @@ print_prefixed_text(const char *s, const char *prefix, const char *str)
   const long prelen = prefix? strlen_real(prefix): 0;
   const long W = term_width(), ls = strlen(s);
   long linelen = prelen;
-  char *word = pari_malloc(ls + 3);
+  char *word = (char*)pari_malloc(ls + 3);
 
   if (prefix) pari_puts(prefix);
   for(;;)
