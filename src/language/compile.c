@@ -1108,22 +1108,23 @@ compilefunc(entree *ep, long n, int mode)
           }
         case 's':
           {
-            GEN g = cattovec(arg[j++], OPcat);
+            long a = arg[j++];
+            GEN g = cattovec(a, OPcat);
             long l, nb = lg(g)-1;
             if (nb==1)
             {
               compilenode(g[1], Ggen,0);
-              op_push(OCtostr, -1,n);
+              op_push(OCtostr, -1, a);
             } else
             {
-              op_push(OCvec, nb+1,n);
+              op_push(OCvec, nb+1, a);
               for(l=1; l<=nb; l++)
               {
                 compilenode(g[l], Ggen,0);
-                op_push(OCstackgen,l,n);
+                op_push(OCstackgen,l, a);
               }
-              op_push(OCcallgen,(long)is_entry("Str"),n);
-              op_push(OCtostr, -1,n);
+              op_push(OCcallgen,(long)is_entry("Str"), a);
+              op_push(OCtostr, -1, a);
             }
             break;
           }
@@ -1210,12 +1211,12 @@ compilefunc(entree *ep, long n, int mode)
               gel(g,k)=cattovec(arg[j+k-1],OPcat);
               l1+=lg(g[k])-1;
             }
-            op_push(OCvec, l1+1,n);
+            op_push_loc(OCvec, l1+1, str);
             for(m=1,k=1;k<=n;k++)
               for(l=1;l<lg(g[k]);l++,m++)
               {
                 compilenode(mael(g,k,l),Ggen,0);
-                op_push(OCstackgen,m,n);
+                op_push(OCstackgen,m,mael(g,k,l));
               }
             j=nb+1;
             break;
