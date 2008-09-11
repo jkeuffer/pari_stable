@@ -1263,7 +1263,7 @@ RgXQX_divrem(GEN x, GEN y, GEN T, GEN *pr)
     p1 = gel(x,i);
     for (j=0; j<=i && j<=dz; j++)
       p1 = gsub(p1, gmul(gel(z,j),gel(y,i-j)));
-    tetpil=avma; p1 = grem(p1, T); if (signe(p1)) { sx = 1; break; }
+    tetpil=avma; p1 = grem(p1, T); if (!gcmp0(p1)) { sx = 1; break; }
     if (!i) break;
     avma=av;
   }
