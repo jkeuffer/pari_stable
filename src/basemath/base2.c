@@ -2632,7 +2632,7 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
       p1 = gel(A,j);
       for (i=1; i<=n; i++) gel(p1,i) = gmul(pip, gel(p1,i));
     }
-    Ainv = lift_intern(ginv(A));
+    Ainv = lift_intern(RgM_inv(A));
     A    = lift_intern(A);
     for (k=1; k<=n; k++)
       for (j=1; j<=n; j++)
