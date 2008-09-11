@@ -353,34 +353,59 @@ be restated for every function.
 
 \section{Transcendental functions}\label{se:trans}
 
+Since the values of transcendental functions cannot be exactly represented,
+these functions will always return an inexact object: a real number,
+a complex number, a $p$-adic number or a power series.  All these objects
+have a certain finite precision.
+
 As a general rule, which of course in some cases may have exceptions,
 transcendental functions operate in the following way:
 
-\item If the argument is either an integer, a real, a rational, a complex
-or a quadratic number, it is, if necessary, first converted to a real (or
-complex) number using the current \idx{precision} held in the default
-\kbd{realprecision}. Note that only exact arguments are converted, while
-inexact arguments such as reals are not.
+\item If the argument is either a real number or an inexact complex number
+(like \kbd{1.0 + I} or \kbd{Pi*I} but not \kbd{2 - 3*I}), then the
+computation is done with the precision of the argument.
+In the example below, we see that changing the precision to $50$ digits does
+not matter, because $x$ only had a precision of $19$ digits.
+\bprog
+? \p 15
+   realprecision = 19 significant digits (15 digits displayed)
+? x = Pi/4
+%1 = 0.785398163397448
+? \p 50
+   realprecision = 57 significant digits (50 digits displayed)
+? sin(x)
+%2 = 0.7071067811865475244
+@eprog
 
-In GP this is transparent to the user, but when programming in library
-mode, care must be taken to supply a meaningful parameter \var{prec} as the
-last argument of the function if the first argument is an exact object.
-This parameter is ignored if the argument is inexact.
+Note that even if the argument is real, the result may be complex
+(e.g.~$\text{acos}(2.0)$ or $\text{acosh}(0.0)$).
+Note also that the principal branch is always chosen.
 
-   Note that in library mode the precision argument \var{prec} is a word
-count including codewords, i.e.~represents the length in words of a real
-number, while under \kbd{gp} the precision (which is changed by the metacommand
-\b{p} or using \kbd{default(realprecision,...)}) is the number of significant
-decimal digits.
+\item If the argument is either an integer, a rational, an exact complex
+number or a quadratic number, it is first converted to a real
+or complex number using the current \idx{precision} held in the default
+\kbd{realprecision}.  This precision (the number of decimal digits) can be
+changed using \b{p} or \kbd{default(realprecision,...)}).
+After this conversion, the computation proceeds as above for real or complex
+arguments.
 
-Note that some accuracies attainable on 32-bit machines cannot be attained
+In library mode, the \kbd{realprecision} does not matter; instead the
+precision is taken from the \kbd{prec} parameter which every transcendental
+function has.  As in \kbd{gp}, this \kbd{prec} is not used when the
+argument to a function is already inexact.
+Note that the argument \var{prec} stands for the length in words of a real
+number, including codewords.
+
+Some accuracies attainable on 32-bit machines cannot be attained
 on 64-bit machines for parity reasons. For example the default \kbd{gp} accuracy
 is 28 decimal digits on 32-bit machines, corresponding to \var{prec} having
-the value 5, but this cannot be attained on 64-bit machines.\smallskip
+the value 5, but this cannot be attained on 64-bit machines.
 
-After possible conversion, the function is computed. Note that even if the
-argument is real, the result may be complex (e.g.~$\text{acos}(2.0)$ or
-$\text{acosh}(0.0)$). Note also that the principal branch is always chosen.
+\item If the argument is a polmod (representing an algebraic number),
+then the function is evaluated for every possible complex embedding of that
+algebraic number.  A column vector of results is returned, with one component
+for each complex embedding.  Therefore, the number of components equals
+the degree of the polynomial defining the number field.
 
 \item If the argument is an intmod or a $p$-adic, at present only a
 few functions like \kbd{sqrt} (square root), \kbd{sqr} (square), \kbd{log},
@@ -394,7 +419,7 @@ same result as $\kbd{sqr}(x)$ since the two operands are known to be
 \emph{identical}. The same statement holds true for $p$-adics raised to the
 power $n$, where $v_p(n) > 0$.
 
-\misctitle{Remark:} note that if we wanted to be strictly consistent with
+\misctitle{Remark:} if we wanted to be strictly consistent with
 the PARI philosophy, we should have $x*y = (4 \mod 8)$ and $\kbd{sqr}(x) =
 (4 \mod 32)$ when both $x$ and $y$ are congruent to $2$ modulo $4$.
 However, since intmod is an exact object, PARI assumes that the modulus
@@ -402,7 +427,7 @@ must not change, and the result is hence $(0\, \mod\, 4)$ in both cases. On
 the other hand, $p$-adics are not exact objects, hence are treated
 differently.
 
-\item If the argument is a polynomial, power series or rational function,
+\item If the argument is a polynomial, a power series or a rational function,
 it is, if necessary, first converted to a power series using the current
 precision held in the variable \tet{precdl}. Under \kbd{gp} this again is
 transparent to the user. When programming in library mode, however, the
