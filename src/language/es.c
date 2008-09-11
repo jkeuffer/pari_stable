@@ -3710,7 +3710,7 @@ wrGEN(GEN x, FILE *f)
   {
     wr_long((long)p->x,f);
     wr_long((long)p->base,f);
-    _lfwrite(GENbase(p), L,f);
+    _lfwrite(GENbinbase(p), L,f);
   }
   pari_free((void*)p);
 }
@@ -3761,7 +3761,7 @@ rdGEN(FILE *f)
   p->x    = (GEN)rd_long(f);
   p->base = (GEN)rd_long(f);
   p->canon= 1;
-  _lfread(GENbase(p), L,f);
+  _lfread(GENbinbase(p), L,f);
   return bin_copy(p);
 }
 

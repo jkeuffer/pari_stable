@@ -403,21 +403,6 @@ GEN     redrealsl2step(GEN A);
 /* alglin1.c */
 
 void    vecselect_p(GEN A, GEN B, GEN p, long init, long lB);
-/* anal.c */
-
-/* binary I/O */
-typedef struct GENbin {
-  size_t len; /* gsizeword(x) */
-  GEN x; /* binary copy of x */
-  GEN base; /* base address of p->x */
-  int canon; /* 1: t_INT in canonical (native kernel) form,
-		0: t_INT according to current kernel */
-} GENbin;
-#define GENbase(p) ((GEN)(p + 1))
-
-GENbin* copy_bin(GEN x);
-GENbin* copy_bin_canon(GEN x);
-GEN bin_copy(GENbin *p);
 
 /* arith1.c */
 

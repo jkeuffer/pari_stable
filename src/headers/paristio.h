@@ -22,6 +22,15 @@ typedef struct {
 typedef unsigned char *byteptr;
 typedef ulong pari_sp;
 
+/* binary I/O */
+typedef struct GENbin {
+  size_t len; /* gsizeword(x) */
+  GEN x; /* binary copy of x */
+  GEN base; /* base address of p->x */
+  int canon; /* 1: t_INT in canonical (native kernel) form,
+		0: t_INT according to current kernel */
+} GENbin;
+
 typedef struct stackzone
 {
   pari_sp zonetop, bot, top, avma;

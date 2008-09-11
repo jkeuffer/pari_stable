@@ -674,6 +674,39 @@ that the result is allocated using \tet{pari_malloc} instead of the PARI
 stack. The resulting \kbd{GEN} is now impervious to garbage collecting
 routines, but should be freed using \tet{pari_free}.
 
+\subsec{Stack)independant binary objects}
+
+\fun{GENbin*}{copy_bin}{GEN x} copies $x$ into a malloc'ed structure suitable
+for stack-independant binary transmission or storage. The object obtained
+is architecture independant provided, \kbd{sizeof(long)} remains the same
+on all PARI instances involved, as well as the multiprecision kernel (either
+native or GMP).
+
+\fun{GENbin*}{copy_bin_canon}{GEN x} as \kbd{copy\_bin}, ensuring furthermore
+that the binary object is independant of the multiprecision kernel. Slower
+than \kbd{copy\_bin}.
+
+\fun{GEN}{bin_copy}{GENbin *p} assuming $p$ was created by \kbd{copy\_bin(x)}
+(not necessarily by the same PARI instance: transmission or external storage
+may be involved), restores $x$ on the PARI stack.
+
+\noindent The routine \kbd{bin\_copy} transparently encapsulate the following
+functions:
+
+\fun{GEN}{GENbinbase}{GENbin *p} the \kbd{GEN} data actually stored in $p$.
+All addresses are stored as offsets with respect to a common reference point,
+so the resulting \kbd{GEN} is unusable unless it is a non-recursive type;
+private low-level routines must be called first to restore absolute adresses.
+
+\fun{void}{shiftaddress}{GEN x, long dec} converts relative adresses to
+absolute ones.
+
+\fun{void}{shiftaddress_canon}{GEN x, long dec} converts relative adresses to
+absolute ones, and converts leaves from a canonical form to the one
+specific to the multiprecision kernel in use. The \kbd{GENbin} type stores
+whether leaves are stored in canonical form, so \kbd{bin\_copy} can call
+the right variant.
+
 \subsec{Garbage collection}.
 See \secref{se:garbage} for a detailed explanation and many examples.
 

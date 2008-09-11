@@ -1401,6 +1401,32 @@ gsizeword(GEN x)
 long
 gsizebyte(GEN x) { return gsizeword(x) * sizeof(long); }
 
+/* return a clone of x structured as a gcopy */
+GENbin*
+copy_bin(GEN x)
+{
+  long t = taille0_nolist(x);
+  GENbin *p = (GENbin*)pari_malloc(sizeof(GENbin) + t*sizeof(long));
+  pari_sp AVMA = (pari_sp)(GENbinbase(p) + t);
+  p->canon = 0;
+  p->len = t;
+  p->x   = gcopy_av0(x, &AVMA);
+  p->base= (GEN)AVMA; return p;
+}
+
+/* same, writing t_INT in canonical native form */
+GENbin*
+copy_bin_canon(GEN x)
+{
+  long t = taille0(x);
+  GENbin *p = (GENbin*)pari_malloc(sizeof(GENbin) + t*sizeof(long));
+  pari_sp AVMA = (pari_sp)(GENbinbase(p) + t);
+  p->canon = 1;
+  p->len = t;
+  p->x   = gcopy_av0_canon(x, &AVMA);
+  p->base= (GEN)AVMA; return p;
+}
+
 GEN
 gclone(GEN x)
 {
@@ -1436,7 +1462,7 @@ gclone(GEN x)
   setisclone(y); return y;
 }
 
-static void
+void
 shiftaddress(GEN x, long dec)
 {
   long i, lx, tx = typ(x);
@@ -1454,7 +1480,7 @@ shiftaddress(GEN x, long dec)
   }
 }
 
-static void
+void
 shiftaddress_canon(GEN x, long dec)
 {
   long i, lx, tx = typ(x);
@@ -1496,112 +1522,11 @@ shiftaddress_canon(GEN x, long dec)
   }
 }
 
-/* return a clone of x structured as a gcopy */
-GENbin*
-copy_bin(GEN x)
-{
-  long t = taille0_nolist(x);
-  GENbin *p = (GENbin*)pari_malloc(sizeof(GENbin) + t*sizeof(long));
-  pari_sp AVMA = (pari_sp)(GENbase(p) + t);
-  p->canon = 0;
-  p->len = t;
-  p->x   = gcopy_av0(x, &AVMA);
-  p->base= (GEN)AVMA; return p;
-}
-
-/* same, writing t_INT in canonical native form */
-GENbin*
-copy_bin_canon(GEN x)
-{
-  long t = taille0(x);
-  GENbin *p = (GENbin*)pari_malloc(sizeof(GENbin) + t*sizeof(long));
-  pari_sp AVMA = (pari_sp)(GENbase(p) + t);
-  p->canon = 1;
-  p->len = t;
-  p->x   = gcopy_av0_canon(x, &AVMA);
-  p->base= (GEN)AVMA; return p;
-}
-
-/* p from copy_bin. Copy p->x back to stack, then destroy p */
-GEN
-bin_copy(GENbin *p)
-{
-  GEN x, y, base;
-  long dx, len;
-
-  x   = p->x; if (!x) { pari_free(p); return gen_0; }
-  len = p->len;
-  base= p->base; dx = x - base;
-  y = (GEN)memcpy((void*)new_chunk(len), (void*)GENbase(p), len*sizeof(long));
-  y += dx;
-  if (p->canon)
-    shiftaddress_canon(y, (y-x)*sizeof(long));
-  else
-    shiftaddress(y, (y-x)*sizeof(long));
-  pari_free(p); return y;
-}
-
 /*******************************************************************/
 /*                                                                 */
 /*                         STACK MANAGEMENT                        */
 /*                                                                 */
 /*******************************************************************/
-/* gerepileupto(av, gcopy(x)) */
-GEN
-gerepilecopy(pari_sp av, GEN x)
-{
-  GENbin *p = copy_bin(x);
-  avma = av; return bin_copy(p);
-}
-
-/* Takes an array of pointers to GENs, of length n. Copies all
- * objects to contiguous locations and cleans up the stack between
- * av and avma. */
-void
-gerepilemany(pari_sp av, GEN* gptr[], int n)
-{
-  GENbin **l = (GENbin**)pari_malloc(n*sizeof(GENbin*));
-  int i;
-  for (i=0; i<n; i++) l[i] = copy_bin(*(gptr[i]));
-  avma = av;
-  for (i=0; i<n; i++) *(gptr[i]) = bin_copy(l[i]);
-  pari_free(l);
-}
-
-void
-gerepileall(pari_sp av, int n, ...)
-{
-  GENbin **l = (GENbin**)pari_malloc(n*sizeof(GENbin*));
-  GEN **gptr  = (GEN**)  pari_malloc(n*sizeof(GEN*));
-  int i;
-  va_list a; va_start(a, n);
-
-  for (i=0; i<n; i++) { gptr[i] = va_arg(a,GEN*); l[i] = copy_bin(*(gptr[i])); }
-  avma = av;
-  for (--i; i>=0; i--) *(gptr[i]) = bin_copy(l[i]);
-  pari_free(l); pari_free(gptr);
-}
-
-void
-gerepilecoeffs(pari_sp av, GEN x, int n)
-{
-  int i;
-  for (i=0; i<n; i++) gel(x,i) = (GEN)copy_bin(gel(x,i));
-  avma = av;
-  for (i=0; i<n; i++) gel(x,i) = bin_copy((GENbin*)x[i]);
-}
-
-void
-gerepilecoeffs2(pari_sp av, GEN x, int n, GEN y, int o)
-{
-  int i;
-  for (i=0; i<n; i++) gel(x,i) = (GEN)copy_bin(gel(x,i));
-  for (i=0; i<o; i++) gel(y,i) = (GEN)copy_bin(gel(y,i));
-  avma = av;
-  for (i=0; i<n; i++) gel(x,i) = bin_copy((GENbin*)x[i]);
-  for (i=0; i<o; i++) gel(y,i) = bin_copy((GENbin*)y[i]);
-}
-
 INLINE void
 dec_gerepile(pari_sp *x, pari_sp av0, pari_sp av, pari_sp tetpil, size_t dec)
 {

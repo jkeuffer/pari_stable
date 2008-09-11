@@ -699,6 +699,93 @@ gerepileupto(pari_sp av, GEN x)
   }
 }
 
+/* gerepileupto(av, gcopy(x)) */
+INLINE GEN
+gerepilecopy(pari_sp av, GEN x)
+{
+  GENbin *p = copy_bin(x);
+  avma = av; return bin_copy(p);
+}
+
+/* Takes an array of pointers to GENs, of length n. Copies all
+ * objects to contiguous locations and cleans up the stack between
+ * av and avma. */
+INLINE void
+gerepilemany(pari_sp av, GEN* gptr[], int n)
+{
+  int i;
+  for (i=0; i<n; i++) *gptr[i] = (GEN)copy_bin(*gptr[i]);
+  avma = av;
+  for (i=0; i<n; i++) *gptr[i] = bin_copy((GENbin*)*gptr[i]);
+}
+
+INLINE void
+gerepileall(pari_sp av, int n, ...)
+{
+  int i;
+  va_list a; va_start(a, n);
+  if (n < 10)
+  {
+    GEN *gptr[10];
+    for (i=0; i<n; i++)
+    { gptr[i] = va_arg(a,GEN*); *gptr[i] = (GEN)copy_bin(*gptr[i]); }
+    avma = av;
+    for (--i; i>=0; i--) *gptr[i] = bin_copy((GENbin*)*gptr[i]);
+  
+  }
+  else
+  {
+    GEN **gptr = (GEN**)  pari_malloc(n*sizeof(GEN*));
+    for (i=0; i<n; i++)
+    { gptr[i] = va_arg(a,GEN*); *gptr[i] = (GEN)copy_bin(*gptr[i]); }
+    avma = av;
+    for (--i; i>=0; i--) *gptr[i] = bin_copy((GENbin*)*gptr[i]);
+    pari_free(gptr);
+  }
+}
+
+INLINE void
+gerepilecoeffs(pari_sp av, GEN x, int n)
+{
+  int i;
+  for (i=0; i<n; i++) gel(x,i) = (GEN)copy_bin(gel(x,i));
+  avma = av;
+  for (i=0; i<n; i++) gel(x,i) = bin_copy((GENbin*)x[i]);
+}
+
+INLINE void
+gerepilecoeffs2(pari_sp av, GEN x, int n, GEN y, int o)
+{
+  int i;
+  for (i=0; i<n; i++) gel(x,i) = (GEN)copy_bin(gel(x,i));
+  for (i=0; i<o; i++) gel(y,i) = (GEN)copy_bin(gel(y,i));
+  avma = av;
+  for (i=0; i<n; i++) gel(x,i) = bin_copy((GENbin*)x[i]);
+  for (i=0; i<o; i++) gel(y,i) = bin_copy((GENbin*)y[i]);
+}
+
+/* p from copy_bin. Copy p->x back to stack, then destroy p */
+INLINE GEN
+bin_copy(GENbin *p)
+{
+  GEN x, y, base;
+  long dx, len;
+
+  x   = p->x; if (!x) { pari_free(p); return gen_0; }
+  len = p->len;
+  base= p->base; dx = x - base;
+  y = (GEN)memcpy((void*)new_chunk(len), (void*)GENbinbase(p), len*sizeof(long));
+  y += dx;
+  if (p->canon)
+    shiftaddress_canon(y, (y-x)*sizeof(long));
+  else
+    shiftaddress(y, (y-x)*sizeof(long));
+  pari_free(p); return y;
+}
+
+INLINE GEN 
+GENbinbase(GENbin *p) { return (GEN)(p + 1); }
+
 INLINE void
 cgiv(GEN x)
 {
