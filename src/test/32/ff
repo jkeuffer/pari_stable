@@ -73,6 +73,6 @@ a^5 + 2*a^4 + 6*a^3 + 2)*x + 1, 1], [0, 0, 0, a, 1, 0, 2*a, 4, 6*a^2, a, 4,
 ? ffprimroot(ffgen((x+1)*Mod(1,2)))
 1
 ? getheap
-[13, 6635]
+[13, 6609]
 ? print("Total time spent: ",gettime);
-Total time spent: 1444
+Total time spent: 1284

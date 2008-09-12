@@ -1081,6 +1081,6 @@ x^15 - 15*x^11 + 75*x^7 - x^5 - 125*x^3 + 5*x + 1
 ? sizebyte(%)
 288
 ? getheap
-[178, 106159]
+[177, 106129]
 ? print("Total time spent: ",gettime);
-Total time spent: 140
+Total time spent: 168
