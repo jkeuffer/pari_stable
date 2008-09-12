@@ -31,16 +31,18 @@ a program in~\secref{se:prog}. Before doing this, a few explanations are in
 order.
 
 First, one must explain to the outside world what kind of objects and
-routines we are going to use. This is done with the directive
+routines we are going to use. This is done\footnote{*}{This assumes that PARI
+headers are installed in a directory which belongs to your compiler's search
+path for header files. You might need to add flags like
+\kbd{-I/usr/local/include} or modify \tet{C_INCLUDE_PATH}.}
+with the directive
 
 \bprog
 #include <pari/pari.h>
 @eprog
 \noindent
-(This assumes that PARI headers have been properly installed in a standard
-place, such as \kbd{/usr/local/include}.) In particular, this defines the
-fundamental type for all PARI objects: the type \teb{GEN}, which is simply a
-pointer to \kbd{long}.
+In particular, this defines the fundamental type for all PARI objects: the
+type \teb{GEN}, which is simply a pointer to \kbd{long}.
 
 Before any PARI routine is called, one must initialize the system, and in
 particular the PARI stack which is both a scratchboard and a repository for
@@ -91,6 +93,24 @@ need the above things to function properly. So if you forget the call to
 \tet{pari_init}, you will get a fatal error when running your program.
 
 \section{Important technical notes}
+
+\subsec{Backward compatibility}. The PARI function names evolved over time,
+and deprecated functions are eventually deleted.  The file \kbd{pariold.h}
+contains macros implementing a weak form of backward compatibility.
+In particular, whenever the name of a documented function changes, a
+\kbd{\#define} is added to this file so that the old name expands to the new
+one (provided the prototype didn't change also).
+
+This file is included by \kbd{pari.h}, but a large section is commented out
+by default. Define \tet{PARI_OLD_NAMES} before including \kbd{pari.h} to
+pollute your namespace with lots of obsolete names like
+\kbd{un}\footnote{*}{For \kbd{(long)gen\_1}. Since 2004 and version 2.2.9,
+typecasts are completely unnecessary in PARI programs.}: that might enable
+you to compile old programs without having to modify them. The preferred way
+to do that is to add \kbd{-DPARI\_OLD\_NAMES} to your compiler \kbd{CFLAGS},
+so that you don't need to modify the program files themselves.
+
+Of course, it's better to fix the program if you can!
 
 \subsec{Types}.
 
