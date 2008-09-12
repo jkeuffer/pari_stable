@@ -322,7 +322,13 @@ localvars_find(GEN pack, entree *ep)
   return 0;
 }
 
-enum FLflag {FLnocopy=1, FLreturn=2};
+/*
+ Flags for copy optimisation:
+ -- FLreturn: The result must survive the closure.
+ -- FLnouser: The result will not be part of a user variable.
+ -- FLnocopy: The result will never be updated nor part of a user variable.
+*/
+enum FLflag {FLnocopy=1, FLreturn=2, FLnouser=4};
 
 static void compilenode(long n, int mode, long flag);
 
@@ -972,7 +978,7 @@ compilefunc(entree *ep, long n, int mode)
         switch(c)
         {
         case 'G':
-          compilenode(arg[j],Ggen,j>=lnc?FLnocopy:0);
+          compilenode(arg[j],Ggen,j>=lnc?FLnocopy:FLnouser);
           j++;
           break;
         case 'W':
@@ -1464,7 +1470,7 @@ compilenode(long n, int mode, long flag)
           op_push(OCpushlex,vn,n);
         else
           op_push(OCpushdyn,(long)ep,n);
-        if (!(flag&FLnocopy))
+        if (!(flag&(FLnocopy|FLnouser)))
           op_push(OCcopyifclone,0,n);
         compilecast(n,Ggen,mode);
       }
@@ -1534,7 +1540,7 @@ compilenode(long n, int mode, long flag)
       else if (ep->valence==EpVAR || ep->valence==EpNEW)
       {
         op_push(OCpushdyn,(long)ep,n);
-        if (!(flag&FLnocopy))
+        if (!(flag&(FLnocopy|FLnouser)))
           op_push(OCcopyifclone,0,n);
         compilecast(n,Ggen,mode);
       }

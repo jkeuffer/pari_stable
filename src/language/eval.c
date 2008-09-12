@@ -175,8 +175,8 @@ freeep(entree *ep)
 }
 
 INLINE void
-copyvalue(entree *ep, GEN x) {
-  new_val_cell(ep, x, typ(x) >= t_VEC ? COPY_VAL: PUSH_VAL);
+pushvalue(entree *ep, GEN x) {
+  new_val_cell(ep, x, PUSH_VAL);
 }
 
 INLINE void
@@ -223,6 +223,18 @@ changevalue(entree *ep, GEN x)
     ep->value = (void*)x;
   }
   BLOCK_SIGINT_END
+}
+
+INLINE GEN
+copyvalue(entree *ep)
+{
+  var_cell *v = (var_cell*) ep->pvalue;
+  if (v && v->flag != COPY_VAL)
+  {
+    ep->value = (void*) gclone((GEN)ep->value);
+    v->flag = COPY_VAL;
+  }
+  return ep->value;
 }
 
 INLINE void
@@ -681,7 +693,7 @@ closure_eval(GEN C)
         ep = (entree*) operand;
         checkvalue(ep);
         g->sp = -1;
-        g->x = (GEN) ep->value;
+        g->x = copyvalue(ep);
         g->vn=0;
         g->ep=NULL;
         C=&g->c;
@@ -938,7 +950,7 @@ closure_eval(GEN C)
       j=stack_new(&s_lvars);
       lvars[j]=ep;
       nblvar++;
-      copyvalue(ep,gel(st,--sp));
+      pushvalue(ep,gel(st,--sp));
       break;
     case OClocalvar0:
       ep=(entree *)operand;
