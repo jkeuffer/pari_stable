@@ -4,4 +4,4 @@ rnfidealup(rnfinit(nf,x),[;])
 nf=nfinit(quadpoly(1129,y));ord=rnfpseudobasis(nf,quadray(1129,1));rnfsteinitz(nf,ord)
 rnflllgram(nf,x^3+2,rnfpseudobasis(nf,x^3+2))
 rnfpseudobasis(nfinit(quadpoly(17,y)),x^11-11*x^10+31*x^9-26*x^8+36*x^7+7*x^6+15*x^5-27*x^4+26*x^3+20*x^2-33*x+42)
-
+rnfconductor(bnfinit(y),x^4+x^3-71*x^2+72*x+5184)

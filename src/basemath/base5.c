@@ -357,13 +357,13 @@ prodid(GEN nf, GEN I)
 }
 
 static GEN
-prodidnorm(GEN I)
+prodidnorm(GEN nf, GEN I)
 {
   long i, l = lg(I);
   GEN z;
   if (l == 1) return gen_1;
-  z = RgM_det_triangular(gel(I,1));
-  for (i=2; i<l; i++) z = gmul(z, RgM_det_triangular(gel(I,i)));
+  z = idealnorm(nf, gel(I,1));
+  for (i=2; i<l; i++) z = gmul(z, idealnorm(nf, gel(I,i)));
   return z;
 }
 
@@ -383,12 +383,12 @@ GEN
 rnfidealnormabs(GEN rnf, GEN id)
 {
   pari_sp av = avma;
-  GEN z;
+  GEN z, nf;
 
   checkrnf(rnf);
   if (rnf_get_degree(rnf) == 1) return gen_1;
-
-  z = prodidnorm( gel(rnfidealhermite(rnf,id),2) );
+  nf = gel(rnf,10);
+  z = prodidnorm(nf, gel(rnfidealhermite(rnf,id),2));
   return gerepileupto(av, gmul(z, check_and_build_norms(rnf)));
 }
 
