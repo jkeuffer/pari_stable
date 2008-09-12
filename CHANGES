@@ -310,6 +310,9 @@ BA 41- user variables can now be aliased [#790]
        necessarily HNF]
    80- linear algebra routines: determines first whether we are over Z/NZ
        then call specialized FpM_* routines if possible [fixes #376]
+   81- [library] commented out a large section of pariold.h. Define
+       PARI_OLD_NAMES to recover compatibility macros for old friends like
+       'un' and 'lstoi'
 
   Added
     1- new benches: galoisinit, ispower, nffactor, subfields, resultant,

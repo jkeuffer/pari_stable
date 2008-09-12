@@ -211,6 +211,8 @@ This file lists the incompatible changes between Version 2.x and older versions
   - deprecated global constants gi; use mulcxI, gen_I() or mkcomplex().
   - deprecated global constants geuler & gpi; use mpeuler() & mppi().
   - changed prototype of galoisconj: galoisconj(x) -> galoisconj(x,NULL)
+  - commented out a large section of pariold.h. Define PARI_OLD_NAMES to
+    recover compatibility macros for old friends like 'un' and 'lstoi'
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
