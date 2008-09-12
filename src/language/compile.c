@@ -787,7 +787,6 @@ compilecall(long n, int mode)
   op_push(OCcalluser,nb,n);
   compilecast(n,Ggen,mode);
   avma=ltop;
-  return;
 }
 
 static void
