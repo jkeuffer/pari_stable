@@ -1447,7 +1447,7 @@ compilenode(long n, int mode, long flag)
     compilefacteurmat(n,mode);
     if (mode==Ggen && !(flag&FLnocopy))
       op_push(OCcopy,0,n);
-    break;
+    return;
   case Faffect:
     x = detag(x);
     if (tree[x].f==Fentry)
@@ -1472,7 +1472,7 @@ compilenode(long n, int mode, long flag)
     }
     else
       compilefunc(is_entry("_=_"),n,mode);
-    break;
+    return;
   case Fconst:
     {
       pari_sp ltop=avma;
@@ -1520,7 +1520,7 @@ compilenode(long n, int mode, long flag)
     return;
   case Frefarg:
     compile_err("unexpected &",tree[n].str);
-    break;
+    return;
   case Fentry:
     {
       entree *ep=getentry(n);
@@ -1541,7 +1541,7 @@ compilenode(long n, int mode, long flag)
       }
       else
         closurefunc(ep,n,mode);
-      break;
+      return;
     }
   case Ffunction:
     {
@@ -1602,7 +1602,7 @@ compilenode(long n, int mode, long flag)
       op_push(OCpushgen, data_push(getfunction(&pos,nb,nbmvar,text)),n);
       if(nbmvar) op_push(OCsaveframe,0,n);
       avma=ltop;
-      break;
+      return;
     }
   case Ftag:
     compilenode(x, mode,0);
