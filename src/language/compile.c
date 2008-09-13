@@ -782,6 +782,7 @@ compilecall(long n, int mode)
 {
   pari_sp ltop=avma;
   long j;
+  long x=tree[n].x;
   long y=tree[n].y;
   GEN arg=listtogen(y,Flistarg);
   long nb=lg(arg)-1;
@@ -790,7 +791,7 @@ compilecall(long n, int mode)
       compilenode(arg[j], Ggen,0);
     else
       op_push(OCpushlong,0,n);
-  op_push(OCcalluser,nb,n);
+  op_push(OCcalluser,nb,x);
   compilecast(n,Ggen,mode);
   avma=ltop;
 }
@@ -1232,7 +1233,7 @@ compilefunc(entree *ep, long n, int mode)
         }
         break;
       default:
-        pari_err(bugparier,"PPproto %d in gencallfunc",mod);
+        pari_err(bugparier,"PPproto %d in compilefunc",mod);
       }
       i++;
       q=p;
