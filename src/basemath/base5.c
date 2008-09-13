@@ -859,7 +859,7 @@ rnfpolred(GEN nf, GEN pol, long prec)
 {
   pari_sp av = avma;
   long i, j, n, v = varn(pol);
-  GEN id, al, w, I, O, bnf, nfpol;
+  GEN id, w, I, O, bnf, nfpol;
 
   if (typ(pol)!=t_POL) pari_err(typeer,"rnfpolred");
   bnf = nf; nf = checknf(bnf);
@@ -877,7 +877,8 @@ rnfpolred(GEN nf, GEN pol, long prec)
     newO = cgetg(n+1,t_MAT);
     for (j=1; j<=n; j++)
     {
-      gel(newI,j) = gen_1; al = gen_if_principal(bnf,gel(I,j));
+      GEN al = gen_if_principal(bnf,gel(I,j));
+      gel(newI,j) = gen_1; 
       gel(newO,j) = nfC_nf_mul(nf, gel(O,j), al);
     }
     id = mkvec2(newO, newI);
@@ -890,13 +891,15 @@ rnfpolred(GEN nf, GEN pol, long prec)
   pol = lift(pol);
   for (j=1; j<=n; j++)
   {
-    GEN p1, newpol, L;
-
-    p1 = gel(I,j); al = gmul(gcoeff(p1,1,1),gel(O,j));
-    p1 = coltoalg(nf,gel(al,n));
-    for (i=n-1; i; i--)
-      p1 = gadd(coltoalg(nf,gel(al,i)), gmul(pol_x(v),p1));
-    newpol = RgXQX_red(RgXQ_caract(lift_intern(p1), pol, v), nfpol);
+    GEN newpol, L, a, Ij = gel(I,j);
+    a = RgC_Rg_mul(gel(O,j), (typ(Ij) == t_MAT)? gcoeff(Ij,1,1): Ij);
+    for (i=n; i; i--)
+    {
+      GEN c = gel(a,i);
+      if (typ(c) == t_COL) gel(a,i) = coltoliftalg(nf, c);
+    }
+    a = RgV_to_RgX(a, v);
+    newpol = RgXQX_red(RgXQ_caract(a, pol, v), nfpol);
     newpol = Q_primpart(newpol);
 
     (void)nfgcd_all(newpol, RgX_deriv(newpol), nfpol, nf_get_index(nf), &newpol);
