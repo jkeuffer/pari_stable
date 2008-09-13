@@ -502,8 +502,6 @@ RgM_diagonal(GEN m)
 {
   long i, lx = lg(m);
   GEN y = cgetg(lx,t_VEC);
-
-  if (typ(m)!=t_MAT) pari_err(typeer,"RgM_diagonal");
   for (i=1; i<lx; i++) gel(y,i) = gcopy(gcoeff(m,i,i));
   return y;
 }
@@ -1361,24 +1359,22 @@ gauss_get_pivot_max(GEN x, GEN x0, GEN c, long i0)
   return approx_0(p, r)? i: k;
 }
 
-/* x has INTEGER coefficients */
+/* x has INTEGER coefficients. Gauss-Bareiss */
 GEN
 keri(GEN x)
 {
-  pari_sp av, av0, tetpil, lim;
-  GEN c,l,y,p,pp;
-  long i,j,k,r,t,n,m;
+  pari_sp av, av0, lim;
+  GEN c, l, y, p, pp;
+  long i, j, k, r, t, n, m;
 
-  if (typ(x)!=t_MAT) pari_err(typeer,"keri");
-  n=lg(x)-1; if (!n) return cgetg(1,t_MAT);
-
-  av0=avma; m=lg(x[1])-1; r=0;
-  pp=cgetg(n+1,t_COL);
-  x = RgM_shallowcopy(x); p=gen_1;
-  c=const_vecsmall(m, 0);
-  l=cgetg(n+1, t_VECSMALL);
+  n = lg(x)-1; if (!n) return cgetg(1,t_MAT);
+  av0 = avma; m = lg(x[1])-1;
+  pp = cgetg(n+1,t_COL);
+  x = RgM_shallowcopy(x);
+  c = const_vecsmall(m, 0);
+  l = cgetg(n+1, t_VECSMALL);
   av = avma; lim = stack_lim(av,1);
-  for (k=1; k<=n; k++)
+  for (r=0, p=gen_1, k=1; k<=n; k++)
   {
     j = 1;
     while ( j <= m && (c[j] || !signe(gcoeff(x,j,k))) ) j++;
@@ -1392,16 +1388,15 @@ keri(GEN x)
     else
     {
       GEN p0 = p;
-      c[j]=k; l[k]=j; p = gcoeff(x,j,k);
-
+      c[j] = k; l[k] = j; p = gcoeff(x,j,k);
       for (t=1; t<=m; t++)
 	if (t!=j)
 	{
-	  GEN q=gcoeff(x,t,k), p1;
+	  GEN q = gcoeff(x,t,k);
 	  for (i=k+1; i<=n; i++)
 	  {
 	    pari_sp av1 = avma;
-	    p1 = subii(mulii(p,gcoeff(x,t,i)), mulii(q,gcoeff(x,j,i)));
+	    GEN p1 = subii(mulii(p,gcoeff(x,t,i)), mulii(q,gcoeff(x,j,i)));
 	    gcoeff(x,t,i) = gerepileuptoint(av1, diviiexact(p1,p0));
 	  }
 	  if (low_stack(lim, stack_lim(av,1)))
@@ -1415,10 +1410,10 @@ keri(GEN x)
 	}
     }
   }
-  if (!r) { avma=av0; y=cgetg(1,t_MAT); return y; }
+  if (!r) { avma = av0; y = cgetg(1,t_MAT); return y; }
 
   /* non trivial kernel */
-  tetpil=avma; y=cgetg(r+1,t_MAT);
+  y = cgetg(r+1,t_MAT);
   for (j=k=1; j<=r; j++,k++)
   {
     p = cgetg(n+1, t_COL);
@@ -1426,15 +1421,15 @@ keri(GEN x)
     for (i=1; i<k; i++)
       if (l[i])
       {
-	c=gcoeff(x,l[i],k);
-	gel(p,i) = gcopy(c); gunclone(c);
+	c = gcoeff(x,l[i],k);
+	gel(p,i) = icopy(c); gunclone(c);
       }
       else
 	gel(p,i) = gen_0;
     gel(p,k) = negi(gel(pp,k)); gunclone(gel(pp,k));
     for (i=k+1; i<=n; i++) gel(p,i) = gen_0;
   }
-  return gerepile(av0,tetpil,y);
+  return gerepileupto(av0, y);
 }
 
 GEN
@@ -1506,10 +1501,8 @@ gauss_pivot_ker(GEN x0, GEN a, GEN *dd, long *rr)
   long i, j, k, r, t, n, m;
   long (*get_pivot)(GEN,GEN,GEN,long);
 
-  if (typ(x0)!=t_MAT) pari_err(typeer,"gauss_pivot");
   n=lg(x0)-1; if (!n) { *dd=NULL; *rr=0; return cgetg(1,t_MAT); }
   m=lg(x0[1])-1; r=0;
-
   x = RgM_shallowcopy(x0);
   if (a)
   {
@@ -1609,7 +1602,7 @@ gauss_pivot(GEN x0, GEN *dd, long *rr)
 
 /* compute ker(x - aI) */
 static GEN
-ker0(GEN x, GEN a)
+ker_aux(GEN x, GEN a)
 {
   pari_sp av = avma;
   GEN d,y;
@@ -1641,10 +1634,16 @@ ker(GEN x) {
   GEN X = x, p = NULL;
   if (is_FpM(&x, &p))
     return gerepileupto(av, FpM_to_mod(FpM_ker(x, p), p));
-  avma = av; return ker0(X,NULL);
+  avma = av; return ker_aux(X,NULL);
 }
 GEN
-matker0(GEN x,long flag) { return flag? keri(x): ker(x); }
+matker0(GEN x,long flag)
+{
+  if (typ(x)!=t_MAT) pari_err(typeer,"matker");
+  if (!flag) return ker(x);
+  RgM_check_ZM(x, "keri");
+  return keri(x);
+}
 
 GEN
 image(GEN x)
@@ -1653,7 +1652,7 @@ image(GEN x)
   GEN d, y, p = NULL, X = x;
   long j, k, r;
 
-  if (typ(x)!=t_MAT) pari_err(typeer,"image");
+  if (typ(x)!=t_MAT) pari_err(typeer,"matimage");
   if (is_FpM(&x, &p))
     return gerepileupto(av, FpM_to_mod(FpM_image(x, p), p));
   gauss_pivot(X,&d,&r);
@@ -2023,7 +2022,6 @@ FpM_ker_i(GEN x, GEN p, long deplin)
   GEN y, c, d;
   long i, j, k, r, t, n, m;
 
-  if (typ(x)!=t_MAT) pari_err(typeer,"FpM_ker");
   n=lg(x)-1; if (!n) return cgetg(1,t_MAT);
   if (lgefint(p) == 3)
   {
@@ -2239,9 +2237,7 @@ FqM_gauss_pivot(GEN x, GEN T, GEN p, GEN *dd, long *rr)
   GEN c, d;
   long i, j, k, r, t, n, m;
 
-  if (typ(x)!=t_MAT) pari_err(typeer,"FqM_gauss_pivot");
   n=lg(x)-1; if (!n) { *dd=NULL; *rr=0; return; }
-
   m=lg(x[1])-1; r=0;
   x = RgM_shallowcopy(x);
   c = const_vecsmall(m, 0);
@@ -2438,8 +2434,6 @@ FqM_ker_i(GEN x, GEN T, GEN p, long deplin)
   long i, j, k, r, t, n, m;
 
   if (!T) return FpM_ker_i(x,p,deplin);
-
-  if (typ(x)!=t_MAT) pari_err(typeer,"FqM_ker");
   n=lg(x)-1; if (!n) return cgetg(1,t_MAT);
 
   if (lgefint(p)==3)
@@ -2533,7 +2527,6 @@ FlxqM_ker_i(GEN x, GEN T, ulong p, long deplin)
   long i, j, k, r, t, n, m;
   long vs;
 
-  if (typ(x)!=t_MAT) pari_err(typeer,"FlxqM_ker");
   n=lg(x)-1; if (!n) return cgetg(1,t_MAT);
   vs = mael3(x,1,1,1);
 
@@ -2638,7 +2631,7 @@ eigen(GEN x, long prec)
   for(;;)
   {
     r3 = grndtoi(r2, &e); if (e < ex) r2 = r3;
-    ssesp = ker0(x,r2); l = lg(ssesp);
+    ssesp = ker_aux(x,r2); l = lg(ssesp);
     if (l == 1 || ly + (l-1) > n)
       pari_err(talker2, "missing eigenspace. Compute the matrix to higher accuracy, then restart eigen at the current precision",NULL,NULL);
     for (i=1; i<l; ) y[ly++]=ssesp[i++]; /* done with this eigenspace */
