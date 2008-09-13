@@ -626,6 +626,7 @@ closure_err()
         next_label = pari_strdup("in anonymous function");
     }
   }
+  closure_reset(); /* necessary for errors in break_loop() */
 }
 
 static void
