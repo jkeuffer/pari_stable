@@ -3,5 +3,6 @@ rnfpolredabs(nfinit(quadpoly(5,y)),x^7-14*x^5+56*x^3-56*x+22)
 \\ rnfpolred(nfinit(quadpoly(904,y)),quadray(904,1))
 rnfpolredabs(nfinit(quadpoly(29,y)),quadray(29,17))
 rnfpolredabs(nfinit(y^3-y-1),x^3-x-1)
+rnfpolred(nfinit(quadpoly(1129,y)),quadray(1129,1));
 
 nfinit(Pol([256,-2560,5120,6400,-60320,6976,116320,72560,-456615,270630,-129362]));
