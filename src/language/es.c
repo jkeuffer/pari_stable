@@ -1529,6 +1529,7 @@ print_prefixed_text(const char *s, const char *prefix, const char *str)
     pari_puts(str); if (!len || str[len-1] != '\n') pari_putc('\n');
     if (space) { linelen++; len--; }
     term_color(c_ERR);
+    if (prefix) { pari_puts(prefix); linelen -= prelen; }
     for (i=0; i<linelen; i++) pari_putc(' ');
     pari_putc('^');
     for (i=0; i<len; i++) pari_putc('-');

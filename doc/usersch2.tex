@@ -1932,8 +1932,8 @@ vector; \kbd{histlast(10)} returns the last $10$ history entries:
 
 \section{Errors and error recovery}
 
-\subsec{Errors}. Your input program is first compiled to some more efficient
-bytecode, then the latter is evaluated, calling appropriate functions from
+\subsec{Errors}. Your input program is first compiled to a more efficient
+bytecode; then the latter is evaluated, calling appropriate functions from
 the PARI library. Accordingly, there are two kind of errors: syntax errors
 occuring during the compilation phase, and runtime errors produced by
 functions in the PARI library. Both kinds are fatal to your computation:
@@ -1941,60 +1941,94 @@ functions in the PARI library. Both kinds are fatal to your computation:
 modified while evaluating the erroneous command, close open files, reclaim
 unused memory, etc.), and output its usual prompt.
 
-When reporting a \emph{syntax error}, \kbd{gp} tries to give meaningful
-context by copying the sentence it was trying to read (whitespace and
-comments stripped out), indicating an error with a little caret like in
+When reporting a \emph{syntax error}, \kbd{gp} gives meaningful
+context by copying (part of) the expression it was trying to compile,
+indicating where the error with a little caret, as in
 \bprog
-? factor(x^2 - 1
-  ***   syntax error, unexpected $end, expecting ',' or ')': factor(x^2-1
-                                                                        ^-
+? factor()
+  ***   too few arguments: factor()
+  ***                             ^-
+? 1+
+  ***   syntax error, unexpected $end: 1+
+  ***                                   ^-
 @eprog\noindent
 possibly enlarged to a full arrow given enough trailing context
 \bprog
-? if (isprime(p+, do_something_nice())
-  ***   syntax error, unexpected ',': if(isprime(p+,do_something_nice()))
-                                                   ^--------------------
+? if (isprime(1+, do_something())
+  ***   syntax error, unexpected ',': if(isprime(1+,do_something()))
+  ***                                              ^----------------
 @eprog\noindent
-Error messages may be mysterious, because \kbd{gp} cannot guess what
+These error messages may be mysterious, because \kbd{gp} cannot guess what
 you were trying to do, and the error usually occurs once \kbd{gp} has been
-sidetracked. Let us have a look at the two messages above.
+sidetracked. The first error is straightforward: \kbd{factor} has one
+mandatory argument, which is missing there.
 
-The first error is a missing parenthesis, but from \kbd{gp}'s point of view,
+The next two are simple typos involving an ill-formed addition
+\kbd{1 + } missing its second operand. The error messages differ
+because the parsing context is slightly different: in the first
+case we reach the end of input (\kbd{\$end}) while still expecting a token,
+and in the second one, we received an unexpected token (the comma).
+
+Here is a more complicated one:
+\bprog
+? factor(x
+  ***   syntax error, unexpected $end, expecting )-> or ',' or ')': factor(x
+  ***                                                                      ^-
+@eprog\noindent
+The error is a missing parenthesis, but from \kbd{gp}'s point of view,
 you might as well have intended to give further arguments to \kbd{factor}
 (this is possible and useful, see the description of the function). In fact
 \kbd{gp} expected either a closing parenthesis, or a second argument
-separated from the first by a comma. And this is exactly what the error
+separated from the first by a comma. And this is essentially what the error
 message says: we reached the end  of the input (\kbd{\$end}) while expecting
 a \kbd{')'} or a \kbd{','}.
 
-The second error is a simple typo: \kbd{isprime(p+} instead of
-\kbd{isprime(p)}. What triggered the error was not the missing parenthesis,
-but the ill-formed addition \kbd{p+} without a second operand. This is
-detected when we read the ensuing comma, and \kbd{gp} stops at this point.
+Actually, a third possibility is mentionned in the error message \kbd{)->},
+which could never be valid in the above context, but a subexpression like
+\kbd{(x)->sin(x)}, defining an inline closure would be valid, and the parser is
+not clever enough to rule that out, so we get the same message as in
+\bprog
+? (x
+  ***   syntax error, unexpected $end, expecting )-> or ',' or ')': (x
+  ***                                                                ^-
+@eprog\noindent
+where all three proposed continuations would be valid.
 
-\emph{Runtime errors} from the evaluator are more annoying because they occur
-at a point where meaningful context no longer exists:
+\emph{Runtime errors} from the evaluator are nicer because they answer a
+correctly worded query, otherwise the bytecode compiler would have protested
+first; here is a slightly pathological case:
 \bprog
 ? if (siN(x) < eps, do_something())
-  ***   function 'siN' not yet defined.
+  ***   at: if(siN(x)<eps,do_someth
+  ***          ^--------------------
+  ***   not a function: `siN'.
 @eprog\noindent (no arrow!) The code is syntactically correct and compiled
-correctly, even though the \kbd{siN} function, a typo for \kbd{sin}, is not
+correctly, even though the \kbd{siN} function, a typo for \kbd{sin}, was not
 defined at this point. When trying to evaluate the bytecode, however, it
-turned out that \kbd{siN} was still undefined so we cannot evaluate the
-function call \kbd{siN(x)}. The original input lines are long lost at this
-point, however, so we cannot give any meaningful context.
+turned out that \kbd{siN} is still undefined so we cannot evaluate the
+function call \kbd{siN(x)}.
 
-Runtime errors from the library will usually be clearer since, by
-definition, they answer a correctly worded query where all terms have a
-proper definition (otherwise the evaluator would have protested first). Also
-they have more mathematical content, which should be easier to grasp than a
-parser's logic. For instance:
+\emph{Library runtime errors} are even nicer because they have more
+mathematical content, which is easier to grasp than a parser's logic:
 \bprog
 ? 1/0
   *** _/_: division by zero
 @eprog\noindent telling us that a runtime error occured while evaluating the
 binary \kbd{/} operator (the \kbd{\_} surrounding the operator are
-placeholders).
+placeholders). Better context is provided if the error occurs deep in the 
+call chain:
+\bprog
+? f(x) = 1/x;
+? g(N) = for(i = -N, N, f(i));
+? g(10)
+  ***   at: g(10)
+  ***       ^-----
+  ***   at: for(i=-N,N,f(i))
+  ***                  ^-----
+  ***   at: 1/x
+  ***        ^--
+  *** _/_: division by zero
+@eprog
 
 \subsec{Error recovery}.\sidx{error recovery}\label{se:errorrec}
 
