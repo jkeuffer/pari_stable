@@ -558,7 +558,8 @@ closure_castlong(long z, long mode)
   }
 }
 
-const char *closure_func_err(void)
+const char *
+closure_func_err(void)
 {
   long fun=s_trace.n-1, pc;
   const char *code;
@@ -573,28 +574,57 @@ const char *closure_func_err(void)
 }
 
 void
-closure_err(const char *err)
+closure_err()
 {
-  long i;
-  const char *base=NULL;
-  long fun=s_trace.n-1;
-  if (fun < 0) return; /*e.g. when called by GP simplify */
+  const char *base = NULL;
+  const long lastfun = s_trace.n - 1;
+  char *next_label = NULL;
+  long i, fun = lastfun;
+  if (fun < 0) return; /*e.g. when called by gp_main_loop's simplify */
   while (lg(trace[fun].closure)==6) fun--;
-  for (i=fun;i<s_trace.n; i++)
-    closure_context(trace[i].closure,*trace[i].pc);
-  for (i=maxss(0,s_trace.n-20); i<s_trace.n; i++)
+  for (i=fun; i<=lastfun; i++)
+    closure_context(trace[i].closure, *trace[i].pc);
+  for (i = maxss(0, lastfun - 19); i <= lastfun; i++)
   {
-    GEN C=trace[i].closure;
-    if (lg(C)>=7)
+    GEN C = trace[i].closure;
+    if (lg(C) >= 7)
     {
-      if (typ(gel(C,6))==t_VEC)
-        base = GSTR(gmael(C,6,2));
-      else
-        base = GSTR(gel(C,6));
+      GEN code = gel(C,6);
+      if (typ(code)==t_VEC) code = gel(code,2);
+      base = GSTR(code);
     }
-    if (i==s_trace.n-1 || lg(trace[i+1].closure)>=7)
-      print_errcontext(err,base+mael3(C,5,1,*trace[i].pc),base);
-    pari_putc('\n');
+    if (i==lastfun || lg(trace[i+1].closure)>=7)
+    {
+      const char *s = base + mael3(C,5,1,*trace[i].pc);
+      int member = (*s == '.');
+      if (next_label) {
+        print_errcontext(next_label, s, base);
+        free(next_label);
+      }
+      else
+        print_errcontext(i == 0? "at top-level": "[...] at", s, base);
+      pari_putc('\n');
+      if (i == lastfun) break;
+      if (member) s++;
+      if (is_keyword_char(*s))
+      {
+        const char *v, *t = s+1;
+        char *u;
+        while (is_keyword_char(*t)) t++;
+        if (*t == '.') {
+          member = 1; s = t; t++;
+          while (is_keyword_char(*t)) t++;
+        }
+        next_label = pari_malloc(t - s + 32);
+        sprintf(next_label, "in %sfunction ", member? "member ": "");
+        u = next_label + strlen(next_label);
+        v = s;
+        while (v < t) { *u++ = *v++; }
+        *u++ = 0;
+      }
+      else
+        next_label = pari_strdup("in anonymous function");
+    }
   }
 }
 
