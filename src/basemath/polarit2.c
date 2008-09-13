@@ -1619,6 +1619,8 @@ primitive_part(GEN x, GEN *ptc)
   if (ptc) *ptc = c;
   return x;
 }
+GEN
+primpart(GEN x) { return primitive_part(x, NULL); }
 
 /* NOT MEMORY CLEAN
  * As content(), but over Q. Treats polynomial as elts of Q[x1,...xn], instead
@@ -1657,23 +1659,6 @@ Q_content(GEN x)
   pari_err(typeer,"Q_content");
   return NULL; /* not reached */
 }
-
-GEN
-Q_primitive_part(GEN x, GEN *ptc)
-{
-  pari_sp av = avma;
-  GEN c = Q_content(x);
-  if (gcmp1(c)) { avma = av; c = NULL; }
-  else if (!gcmp0(c)) x = Q_div_to_int(x,c);
-  if (ptc) *ptc = c;
-  return x;
-}
-
-GEN
-primpart(GEN x) { return primitive_part(x, NULL); }
-
-GEN
-Q_primpart(GEN x) { return Q_primitive_part(x, NULL); }
 
 /* NOT MEMORY CLEAN (because of t_FRAC).
  * As denom(), but over Q. Treats polynomial as elts of Q[x1,...xn], instead
@@ -1764,7 +1749,7 @@ Q_muli_to_int(GEN x, GEN d)
   return NULL; /* not reached */
 }
 
-/* return x * n/d. x: rational; d,n,result: integral. n = NULL represents 1 */
+/* return x * n/d. x: rational; d,n,result: integral; d,n coprime */
 static GEN
 Q_divmuli_to_int(GEN x, GEN d, GEN n)
 {
@@ -1776,8 +1761,7 @@ Q_divmuli_to_int(GEN x, GEN d, GEN n)
   {
     case t_INT:
       av = avma; y = diviiexact(x,d);
-      if (n) y = gerepileuptoint(av, mulii(y,n));
-      return y;
+      return gerepileuptoint(av, mulii(y,n));
 
     case t_FRAC:
       xn = gel(x,1);
@@ -1805,19 +1789,58 @@ Q_divmuli_to_int(GEN x, GEN d, GEN n)
   return NULL; /* not reached */
 }
 
+/* return x / d. x: rational; d,result: integral. */
+static GEN
+Q_divi_to_int(GEN x, GEN d)
+{
+  long i, l;
+  GEN y;
+
+  switch(typ(x))
+  {
+    case t_INT:
+      return diviiexact(x,d);
+
+    case t_VEC: case t_COL: case t_MAT:
+      y = cgetg_copy(x, &l);
+      for (i=1; i<l; i++) gel(y,i) = Q_divi_to_int(gel(x,i), d);
+      return y;
+
+    case t_POL:
+      y = cgetg_copy(x, &l); y[1] = x[1];
+      for (i=2; i<l; i++) gel(y,i) = Q_divi_to_int(gel(x,i), d);
+      return y;
+
+    case t_POLMOD:
+      y = cgetg(3, t_POLMOD);
+      gel(y,1) = gcopy(gel(x,1));
+      gel(y,2) = Q_divi_to_int(gel(x,2), d);
+      return y;
+  }
+  pari_err(typeer,"Q_divi_to_int");
+  return NULL; /* not reached */
+}
+/* c t_FRAC */
+static GEN
+Q_divq_to_int(GEN x, GEN c)
+{
+  GEN n = gel(c,1), d = gel(c,2);
+  if (is_pm1(n)) {
+    GEN y = Q_muli_to_int(x,d);
+    if (signe(n) < 0) y = gneg(y);
+    return y;
+  }
+  return Q_divmuli_to_int(x, n,d);
+}
+
 /* return y = x / c, assuming x,c rational, and y integral */
 GEN
 Q_div_to_int(GEN x, GEN c)
 {
-  GEN d, n;
   switch(typ(c))
   {
-    case t_INT:
-      return Q_divmuli_to_int(x, c, NULL);
-    case t_FRAC:
-      n = gel(c,1);
-      d = gel(c,2); if (gcmp1(n)) return Q_muli_to_int(x,d);
-      return Q_divmuli_to_int(x, n,d);
+    case t_INT:  return Q_divi_to_int(x, c);
+    case t_FRAC: return Q_divq_to_int(x, c);
   }
   pari_err(typeer,"Q_div_to_int");
   return NULL; /* not reached */
@@ -1829,8 +1852,7 @@ Q_mul_to_int(GEN x, GEN c)
   GEN d, n;
   switch(typ(c))
   {
-    case t_INT:
-      return Q_muli_to_int(x, c);
+    case t_INT: return Q_muli_to_int(x, c);
     case t_FRAC:
       n = gel(c,1);
       d = gel(c,2);
@@ -1839,6 +1861,23 @@ Q_mul_to_int(GEN x, GEN c)
   pari_err(typeer,"Q_mul_to_int");
   return NULL; /* not reached */
 }
+
+GEN
+Q_primitive_part(GEN x, GEN *ptc)
+{
+  pari_sp av = avma;
+  GEN c = Q_content(x);
+  if (typ(c) == t_INT)
+  {
+    if (is_pm1(c)) { avma = av; c = NULL; }
+    else if (signe(c)) x = Q_divi_to_int(x, c);
+  }
+  else x = Q_divq_to_int(x, c);
+  if (ptc) *ptc = c;
+  return x;
+}
+GEN
+Q_primpart(GEN x) { return Q_primitive_part(x, NULL); }
 
 /*******************************************************************/
 /*                                                                 */
