@@ -355,23 +355,16 @@ apply0(GEN f, GEN x)
 GEN
 gtomat(GEN x)
 {
-  long tx,lx,i;
+  long lx, i;
   GEN y;
 
   if (!x) return cgetg(1, t_MAT);
-  tx = typ(x);
-  if (tx == t_LIST) {
-    x = list_data(x);
-    if (!x) return cgetg(1, t_MAT);
-    tx = t_VEC;
-  }
-  if (! is_matvec_t(tx))
+  switch(typ(x))
   {
-    y = cgetg(2,t_MAT); gel(y,1) = mkcolcopy(x);
-    return y;
-  }
-  switch(tx)
-  {
+    case t_LIST:
+      x = list_data(x);
+      if (!x) return cgetg(1, t_MAT);
+      /* fall through */
     case t_VEC: {
       lx=lg(x); y=cgetg(lx,t_MAT);
       if (lx == 1) break;
@@ -407,8 +400,18 @@ gtomat(GEN x)
 	}
       }
       y = mkmatcopy(x); break;
-    default: /* case t_MAT: */
+    case t_MAT:
       y = gcopy(x); break;
+    case t_QFI: case t_QFR: {
+      GEN b;
+      y = cgetg(3,t_MAT); b = gmul2n(gel(x,2),-1);
+      gel(y,1) = mkcol2(icopy(gel(x,1)), b);
+      gel(y,2) = mkcol2(b, icopy(gel(x,3)));
+      break;
+    }
+    default:
+      y = cgetg(2,t_MAT); gel(y,1) = mkcolcopy(x);
+      break;
   }
   return y;
 }

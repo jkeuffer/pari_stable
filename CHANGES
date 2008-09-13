@@ -313,6 +313,7 @@ BA 41- user variables can now be aliased [#790]
    81- [library] commented out a large section of pariold.h. Define
        PARI_OLD_NAMES to recover compatibility macros for old friends like
        'un' and 'lstoi'
+   82- Mat(t_QFI or t_QFR) now returns the associated 2x2 symmetric matrix
 
   Added
     1- new benches: galoisinit, ispower, nffactor, subfields, resultant,
