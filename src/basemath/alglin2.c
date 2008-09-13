@@ -1170,8 +1170,9 @@ QM_imZ_hnf_aux(GEN A)
   n = lg(A);
   if (n == 1) return cgetg(1,t_MAT);
   if (n == 2) {
-    A = Q_primpart(A);
-    if ( ZV_cmp0(gel(A,1)) ) A = cgetg(1,t_MAT);
+    GEN c;
+    A = Q_primitive_part(A, &c);
+    if (!c) A = ZM_copy(A); else if ( isintzero(c) ) A = cgetg(1,t_MAT);
     return A;
   }
   m = lg(A[1]);
