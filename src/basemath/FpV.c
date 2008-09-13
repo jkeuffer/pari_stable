@@ -493,7 +493,8 @@ GEN
 FpX_to_mod(GEN z, GEN p)
 {
   long i,l = lg(z);
-  GEN x = cgetg(l,t_POL); p = icopy(p);
+  GEN x = cgetg(l,t_POL);
+  if (l >2) p = icopy(p);
   for (i=2; i<l; i++) gel(x,i) = to_intmod(gel(z,i), p);
   x[1] = z[1]; return normalizepol_lg(x,l);
 }
@@ -503,7 +504,9 @@ GEN
 FpV_to_mod(GEN z, GEN p)
 {
   long i,l = lg(z);
-  GEN x = cgetg(l, t_VEC); p = icopy(p);
+  GEN x = cgetg(l, t_VEC);
+  if (l == 1) return x;
+  p = icopy(p);
   for (i=1; i<l; i++) gel(x,i) = to_intmod(gel(z,i), p);
   return x;
 }
@@ -511,8 +514,10 @@ FpV_to_mod(GEN z, GEN p)
 GEN
 FpC_to_mod(GEN z, GEN p)
 {
-  long i,l = lg(z);
-  GEN x = cgetg(l, t_COL); p = icopy(p);
+  long i, l = lg(z);
+  GEN x = cgetg(l, t_COL); 
+  if (l == 1) return x;
+  p = icopy(p);
   for (i=1; i<l; i++) gel(x,i) = to_intmod(gel(z,i), p);
   return x;
 }
@@ -520,8 +525,10 @@ FpC_to_mod(GEN z, GEN p)
 GEN
 FpM_to_mod(GEN z, GEN p)
 {
-  long i,j,l = lg(z), m = lg(gel(z,1));
+  long i, j, m, l = lg(z);
   GEN  x = cgetg(l,t_MAT), y, zi;
+  if (l == 1) return x;
+  m = lg(gel(z,1));
   p = icopy(p);
   for (i=1; i<l; i++)
   {
