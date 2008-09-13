@@ -234,7 +234,7 @@ copyvalue(entree *ep)
     ep->value = (void*) gclone((GEN)ep->value);
     v->flag = COPY_VAL;
   }
-  return ep->value;
+  return (GEN) ep->value;
 }
 
 INLINE void
