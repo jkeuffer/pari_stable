@@ -595,8 +595,9 @@ closure_err()
     }
     if (i==lastfun || lg(trace[i+1].closure)>=7)
     {
-      const char *s = base + mael3(C,5,1,*trace[i].pc);
-      int member = (*s == '.');
+      long offset = mael3(C,5,1,*trace[i].pc);
+      const char *s = base + offset;
+      int member = offset>0 && (s[-1] == '.');
       if (next_label) {
         print_errcontext(next_label, s, base);
         free(next_label);
@@ -606,16 +607,11 @@ closure_err()
       pari_putc('\n');
       if (i == lastfun) break;
 
-      if (member) s++;
       if (is_keyword_char(*s))
       {
         const char *v, *t = s+1;
         char *u;
         while (is_keyword_char(*t)) t++;
-        if (*t == '.') {
-          member = 1; s = t; t++;
-          while (is_keyword_char(*t)) t++;
-        }
         next_label = (char*)pari_malloc(t - s + 32);
         sprintf(next_label, "in %sfunction ", member? "member ": "");
         u = next_label + strlen(next_label);
@@ -627,7 +623,6 @@ closure_err()
         next_label = pari_strdup("in anonymous function");
     }
   }
-  closure_reset(); /* necessary for errors in break_loop() */
 }
 
 static void
