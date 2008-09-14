@@ -1,0 +1,17 @@
+f(x) = 1/x;
+g(N) = for(i = -N, N, f(i));
+g(10)
+print();
+
+\p38
+f=tan;
+f(Pi/2)
+print();
+
+(tan)(Pi/2)
+print();
+
+a.foo=1/(1+a^2);
+g(x)=[x.foo];
+g(I)
+print();

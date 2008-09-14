@@ -1,0 +1,30 @@
+  ***   at top-level: g(10)
+  ***                 ^-----
+  ***   in function g: for(i=-N,N,f(i))
+  ***                             ^-----
+  ***   in function f: 1/x
+  ***                   ^--
+  *** _/_: division by zero
+
+   realprecision = 38 significant digits
+  ***   at top-level: f(Pi/2)
+  ***                 ^-------
+  ***   in function f: tan
+  ***                  ^---
+  *** tan: can't compute tan(Pi/2 + kPi).
+
+  ***   at top-level: (tan)(Pi/2)
+  ***                  ^----------
+  ***   in function tan: tan
+  ***                    ^---
+  *** tan: can't compute tan(Pi/2 + kPi).
+
+  ***   at top-level: g(I)
+  ***                 ^----
+  ***   in function g: [x.foo]
+  ***                     ^----
+  ***   in member function foo: 1/(1+a^2)
+  ***                            ^--------
+  *** _/_: division by zero
+
+Total time spent: 16
