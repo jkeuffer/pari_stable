@@ -557,7 +557,7 @@ find_isogenous_from_Atkin(GEN a4, GEN a6, long q, GEN meqn, GEN g, GEN p)
 {
   pari_sp ltop = avma, btop;
   GEN Roots, gprime, u1;
-  long vx = 0, vJ = MAXVARN;
+  long k, vx = 0, vJ = MAXVARN;
   GEN E4 = Fp_div(a4, stoi(-3), p);
   GEN E6 = Fp_mul(a6, shifti(p, -1), p);
   GEN E42 = Fp_sqr(E4, p);
@@ -576,14 +576,17 @@ find_isogenous_from_Atkin(GEN a4, GEN a6, long q, GEN meqn, GEN g, GEN p)
 
   GEN Dxxg = FpXY_evaly(Dxx, g, p, vJ);
   GEN DJJg = FpX_deriv(DJg, p);
-  long k;
-  if (!signe(dx) || !signe(E4))
-  {
+
+  GEN a = Fp_mul(dJ, Fp_mul(g, E6, p), p);
+  GEN b = Fp_mul(E4, dx, p);
+  if (!signe(a) || !signe(b))
+  { /* TODO: understand what this means and use the information */
     if (DEBUGLEVEL)
       fprintferr("find_isogenous_from_Atkin: division by zero at prime %ld", q);
     avma = ltop; return NULL;
   }
-  gprime = Fp_div(Fp_mul(dJ, Fp_mul(g, E6, p), p), Fp_mul(E4, dx, p), p);
+  gprime = Fp_div(a, b, p);
+
   u1 = compute_u(gprime, Dxxg, DxJg, DJJg, j, pJ, px, 1, E4, E6, p);
   Roots = FpX_roots(FpXY_evaly(meqn, g, p, vJ), p);
   btop = avma;
