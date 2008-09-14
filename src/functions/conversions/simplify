@@ -12,10 +12,12 @@ Doc:
  This function is especially useful before using arithmetic functions,
  which expect integer arguments:
  \bprog
- ? x = 1 + y - y
- %1 = 1
- ? divisors(x)
- *** divisors: not an integer argument in an arithmetic function
+ ? x = 2 + y - y
+ %1 = 2
+ ? isprime(x)
+   ***   at top-level: isprime(x)
+   ***                 ^----------
+   *** isprime: not an integer argument in an arithmetic function
  ? type(x)
  %2 = "t_POL"
  ? type(simplify(x))

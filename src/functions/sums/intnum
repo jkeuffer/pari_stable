@@ -31,7 +31,9 @@ Doc: numerical integration
  exponentially fast at infinity:
  \bprog
  ? intnum(x=0,+oo, exp(-x))
- *** exp: exponent (expo) overflow
+   ***   at top-level: intnum(x=0,+oo,exp(-
+   ***                 ^--------------------
+   *** exp: exponent (expo) overflow
  @eprog\noindent
  We shall see in a moment how to avoid the last problem, after describing
  the last argument \var{tab}, which is both optional and technical. The
@@ -85,7 +87,9 @@ Doc: numerical integration
  \bprog
  ? oo = [1];
  ? intnum(x=0, +oo, exp(-2*x))
- *** exp: exponent (expo) overflow
+   ***   at top-level: intnum(x=0,+oo,exp(-
+   ***                 ^--------------------
+   *** exp: exponent (expo) overflow
  ? intnum(x=0, [+oo, 2], exp(-2*x))
  %1 = 0.5000000000000000000000000000 \\@com OK!
  ? intnum(x=0, [+oo, 4], exp(-2*x))

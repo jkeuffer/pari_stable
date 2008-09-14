@@ -40,5 +40,7 @@ Doc:
  transform an object containing variables of higher priority than~$v$.
  \bprog
  ? Pol(x + y, y)
- *** Pol: variable must have higher priority in gtopoly.
+   ***   at top-level: Pol(x+y,y)
+   ***                 ^----------
+   *** Pol: variable must have higher priority in gtopoly.
  @eprog

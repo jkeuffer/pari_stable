@@ -17,8 +17,10 @@ Doc: \idx{infinite sum} of expression
 
  \bprog
  ? \p28
- ? suminf(i = 1, -(-1)^i / i)
- *** suminf: user interrupt after 10min, 20,100 ms.
+ ? suminf(i = 1, -(-1)^i / i)   \\@com Had to hit <C-C>
+   ***   at top-level: suminf(i=1,-(-1)^i/i)
+   ***                                ^------
+   *** suminf: user interrupt after 10min, 20,100 ms.
  ? sumalt(i = 1, -(-1)^i / i) - log(2)
  time = 0 ms.
  %1 = -2.524354897 E-29

@@ -20,7 +20,9 @@ Doc: creates a column vector with two components, the first being the Euclidean
  ? (1/2) % 3
  %2 = 2
  ? divrem(Mod(2,9), 3)[2]
- ***   forbidden division t_INTMOD \ t_INT.
+  ***   at top-level: divrem(Mod(2,9),3)[2
+  ***                 ^--------------------
+  ***   forbidden division t_INTMOD \ t_INT.
  ? Mod(2,9) % 6
  %3 = Mod(2,3)
  @eprog

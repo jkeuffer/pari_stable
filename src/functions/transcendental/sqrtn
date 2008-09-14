@@ -19,7 +19,9 @@ Doc: principal branch of the $n$th root of $x$,
  ? sqrtn(Mod(2,7), 2, &z); z
  %2 = Mod(6, 7)
  ? sqrtn(Mod(2,7), 3)
- *** sqrtn: nth-root does not exist in gsqrtn.
+   ***   at top-level: sqrtn(Mod(2,7),3)
+   ***                 ^-----------------
+   *** sqrtn: nth-root does not exist in gsqrtn.
  ? sqrtn(Mod(2,7), 3,  &z)
  %2 = 0
  ? z

@@ -109,15 +109,15 @@ Doc: numerical summation of \var{expr}, the variable $X$ taking integer values
  time = 10 ms.
  %2 = -2.78... E-308 \\@com also fast and perfect
  ? sumnum(n=1,2, 2^(-n)) - 1
- *** sumnum: precision too low in mpsc1 \\@com nonsense
+ %3 = -1.321115060 E320 + 0.E311*I \\@com nonsense
  ? sumnum(n=1, [2,log(2)], 2^(-n), /*omitted*/, 1) - 1 \\@com of real type
  time = 5,860 ms.
- %3 = -1.5... E-236 \\@com slow and lost $70$ decimals
+ %4 = -1.5... E-236 \\@com slow and lost $70$ decimals
  ? m = intnumstep()
- %4 = 9
+ %5 = 9
  ? sumnum(n=1,[2,log(2)], 2^(-n), m+1, 1) - 1
  time = 11,770 ms.
- %5 = -1.9... E-305 \\@com now perfect, but slow.
+ %6 = -1.9... E-305 \\@com now perfect, but slow.
  @eprog
 
  \synt{sumnum}{void *E, GEN (*eval)(GEN,void*), GEN a,GEN sig,GEN tab,long flag, long prec}.

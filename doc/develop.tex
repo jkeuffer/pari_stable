@@ -253,8 +253,9 @@ implemented is
 above, and to set \kbd{list\_nmax} to $0$. Such a list is not yet proper and
 trying to append elements to it fails:
 \bprog
-? listput(List([1,2,3]),1)
-  *** listput: store list in variable before appending elements.
+? listput(List(),1)
+  ***   variable name expected: listput(List(),1)
+  ***                                   ^----------------
 @eprog\noindent
 If we had been malloc'ing memory for the
 \kbd{List([1,2,3])}, it would have leaked already.

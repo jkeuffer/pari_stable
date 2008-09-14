@@ -162,6 +162,8 @@ by a column vector:
 \bprog
 ? a = [1,2,3];
 ? a * a
+  ***   at top-level: a*a
+  ***                  ^--
   *** _*_: forbidden multiplication t_VEC * t_VEC.
 ? a * a~
 %2 = 14
@@ -217,20 +219,20 @@ The library syntax is \fun{GEN}{gdivround}{GEN x, GEN y}
 for $x$ \b{/} $y$.
 
 \subseckbd{\%}: The expression \kbd{$x$ \% $y$} evaluates to the modular
-\idx{Euclidean remainder} of $x$ and $y$, which we now define. If $y$ is an
-integer, this is the smallest non-negative integer congruent to $x$ modulo
-$y$. If $y$ is a polynomial, this is the polynomial of smallest degree
-congruent to $x$ modulo $y$. When $y$ is a non-integral real number,
- \kbd{$x$\%$y$} is defined as \kbd{$x$ - ($x$\bs$y$)*$y$}. This
-coincides with the definition for $y$ integer if and only if $x$ is an
-integer, but still belongs to $[0, |y|[$. For instance:
+\idx{Euclidean remainder} of $x$ and $y$, which we now define. When $x$ or $y$
+is a non-integral real number, \kbd{$x$\%$y$} is defined as \kbd{$x$ -
+($x$\bs$y$)*$y$}. Otherwise, if $y$ is an integer, this is the smallest
+non-negative integer congruent to $x$ modulo $y$. (This actually coincides with
+the previous definition if and only if $x$ is an integer.) If $y$ is a
+polynomial, this is the polynomial of smallest degree congruent to $x$ modulo
+$y$. For instance:
 \bprog
 ? (1/2) % 3
 %1 = 2
 ? 0.5 % 3
-  ***   forbidden division t_REAL % t_INT.
+%2 = 0.5000000000000000000000000000
 ? (1/2) % 3.0
-%2 = 1/2
+%3 = 1/2
 @eprog
 Note that when $y$ is an integer and $x$ a polynomial, $y$ is first promoted
 to a polynomial of degree $0$. When $x$ is a vector or matrix, the operator
@@ -264,22 +266,24 @@ integer modulo a prime or a $p$-adic number, return a solution $y$ of
 $y^q=x^p$ if it exists. Currently, $q$ must not have large prime factors.
 Beware that
 \bprog
-    ? Mod(7,19)^(1/2)
-    %1 = Mod(11, 19) /* is any square root */
-    ? sqrt(Mod(7,19))
-    %2 = Mod(8, 19)  /* is the smallest square root */
-    ? Mod(7,19)^(3/5)
-    %3 = Mod(1, 19)
-    ? %3^(5/3)
-    %4 = Mod(1, 19)  /* Mod(7,19) is just another cubic root */
+? Mod(7,19)^(1/2)
+%1 = Mod(11, 19) /* is any square root */
+? sqrt(Mod(7,19))
+%2 = Mod(8, 19)  /* is the smallest square root */
+? Mod(7,19)^(3/5)
+%3 = Mod(1, 19)
+? %3^(5/3)
+%4 = Mod(1, 19)  /* Mod(7,19) is just another cubic root */
 @eprog
 
 If the exponent is a negative integer, an \idx{inverse} must be computed.
 For non-invertible \typ{INTMOD}, this will fail and implicitly exhibit a
 non trivial factor of the modulus:
 \bprog
-    ? Mod(4,6)^(-1)
-      ***   impossible inverse modulo: Mod(2, 6).
+? Mod(4,6)^(-1)
+  ***   at top-level: Mod(4,6)^(-1)
+  ***                         ^-----
+  *** _^_: impossible inverse modulo: Mod(2, 6).
 @eprog\noindent
 (Here, a factor 2 is obtained directly. In general, take the gcd of the
 representative and the modulus.) This is most useful when performing
@@ -290,12 +294,15 @@ is discovered and the computation may be restarted modulo $d$ or $N/d$.
 For non-invertible \typ{POLMOD}, this will fail without exhibiting a
 factor.
 \bprog
-    ? Mod(x^2, x^3-x)^(-1)
-      ***   non-invertible polynomial in RgXQ_inv.
-
-    ? a = Mod(3,4)*y^3 + Mod(1,4); b = y^6+y^5+y^4+y^3+y^2+y+1;
-    ? Mod(a, b)^(-1);
-      ***   non-invertible polynomial in RgXQ_inv.
+? Mod(x^2, x^3-x)^(-1)
+  ***   at top-level: Mod(x^2,x^3-x)^(-1)
+  ***                               ^-----
+  *** _^_: non-invertible polynomial in RgXQ_inv.
+? a = Mod(3,4)*y^3 + Mod(1,4); b = y^6+y^5+y^4+y^3+y^2+y+1;
+? Mod(a, b)^(-1);
+  ***   at top-level: Mod(a,b)^(-1)
+  ***                         ^-----
+  *** _^_: impossible inverse modulo: Mod(0, 4).
 @eprog\noindent
 In fact the latter polynomial is invertible, but the algorithm used
 (subresultant) assumes the base ring is a domain. If it is not the case,
@@ -303,15 +310,14 @@ as here for $\Z/4\Z$, a result will be correct but chances are an error
 will occur first. In this specific case, one should work with $2$-adics.
 In general, one can try the following approach
 \bprog
-    ? inversemod(a, b) =
-    { my(m);
-      m = polsylvestermatrix(polrecip(a), polrecip(b));
-      m = matinverseimage(m, matid(#m)[,1]);
-      Polrev( vecextract(m, Str("..", poldegree(b))), variable(b) )
-    }
-    ? inversemod(a,b)
-    %2 = Mod(2,4)*y^5 + Mod(3,4)*y^3 + Mod(1,4)*y^2 + Mod(3,4)*y + Mod(2,4)
-
+? inversemod(a, b) =
+{ my(m);
+  m = polsylvestermatrix(polrecip(a), polrecip(b));
+  m = matinverseimage(m, matid(#m)[,1]);
+  Polrev( vecextract(m, Str("..", poldegree(b))), variable(b) )
+}
+? inversemod(a,b)
+%2 = Mod(2,4)*y^5 + Mod(3,4)*y^3 + Mod(1,4)*y^2 + Mod(3,4)*y + Mod(2,4)
 @eprog\noindent
 This is not guaranteed to work either since it must invert pivots. See
 \secref{se:linear_algebra}.

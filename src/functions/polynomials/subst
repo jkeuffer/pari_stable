@@ -18,7 +18,9 @@ Doc: replace the simple variable $y$ by the argument $z$ in the ``polynomial''
  [0 1]
 
  ? subst(1, x, Mat([0,1]))
- ***   forbidden substitution by a non square matrix
+   ***   at top-level: subst(1,x,Mat([0,1])
+   ***                 ^--------------------
+   *** subst: forbidden substitution by a non square matrix.
  @eprog\noindent
  If $x$ is a power series, $z$ must be either a polynomial, a power
  series, or a rational function.

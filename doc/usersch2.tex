@@ -103,7 +103,9 @@ point you can type \kbd{Ctrl-C} (that is press simultaneously the
 control given back to you at the \kbd{gp} prompt, together with a message
 like
 \bprog
-  *** gcd: user interrupt after 840 ms.
+  ***   at top-level: gcd(a,b)
+  ***                 ^--------
+  *** gcd: user interrupt after 236 ms.
 @eprog\noindent
 telling you how much time ellapsed since the last command was typed in and
 in which GP function the computation was aborted. It does not mean that that
@@ -575,37 +577,34 @@ in the \typ{POL} section about variables remains valid; a constructor
 non-intuitive behaviour: if $k$ significant terms are requested, an inexact
 zero is counted as significant, even if it is the coefficient of lowest
 degree. This means that useful higher order terms may be disregarded.
-If the series precision is insufficient, errors may occur (mostly division by
-$0$), which could have been avoided by a better global understanding of the
-computation:
-\bprog
-    ? A = 1/(y + 0.); B = 1. + O(y);
-    ? B * denominator(A)
-    %2 = 0.E-28 + O(y)
-    ? A/B
-    ***   division by zero
-    ? A*B
-    ***   Warning: normalizing a series with 0 leading term.
-    ***   division by zero
-    ? A*(1/B)
-    ***   Warning: normalizing a series with 0 leading term.
-    %3 = 1.000000000000000000000000000*y^-1 + O(1)
-@eprog\noindent
+
 If a series with a zero leading coefficient must be inverted, then as a
 desperation measure that coefficient is discarded, and a warning is issued:
 \bprog
-    ? C = 0. + y + O(y^2);
-    ? 1/C
-    ***   Warning: normalizing a series with 0 leading term.
-    %2 = y^-1 + O(1)
+? C = 0. + y + O(y^2);
+? 1/C
+  *** _/_: Warning: normalizing a series with 0 leading term.
+%2 = y^-1 + O(1)
 @eprog\noindent
 The last output could be construed as a bug since it is a priori impossible
 to deduce such a result from the input ($0.$ represents any sufficiently
 small real number). But it was thought more useful to try and go on with an
 approximate computation than to raise an early exception.
 
-In the \kbd{A*(1/B)} example above, the denominator of \kbd{A} was converted
-to a power series, then inverted, exhibiting this behaviour.
+If the series precision is insufficient, errors may occur (mostly division
+by $0$), which could have been avoided by a better global understanding of
+the computation:
+\bprog
+? A = 1/(y + 0.); B = 1. + O(y);
+? B * denominator(A)
+%2 = 0.E-28 + O(y)
+? A/B
+  *** _/_: Warning: normalizing a series with 0 leading term.
+%3 = 1.000000000000000000000000000*y^-1 + O(1)
+? A*B
+  *** _*_: Warning: normalizing a series with 0 leading term.
+%4 = 1.000000000000000000000000000*y^-1 + O(1)
+@eprog
 
 \subsec{Rational functions}\sidx{rational function}
 (\tet{t_RFRAC}): as for fractions, all rational
@@ -910,7 +909,7 @@ lvalue, raise an error.
 \bprog
 ? x + 1 = 1
   ***   unused characters: x+1=1
-                              ^--
+  ***                         ^--
 @eprog
 \leavevmode
 \kbd{\var{op}=}, where \var{op} is any binary operator
@@ -1002,14 +1001,14 @@ always evaluates to the above monomial of degree~$1$, independently of
 assignments made since then (e.g. \kbd{t = 1}).
 %
 \bprog
-  ? t^2 + 1
-  %1 = t^2 + 1
-  ? t = 2; t^2 + 1
-  %2 = 5
-  ? %1
-  %3 = t^2 + 1
-  ? eval(%1)
-  %4 = 5
+? t^2 + 1
+%1 = t^2 + 1
+? t = 2; t^2 + 1
+%2 = 5
+? %1
+%3 = t^2 + 1
+? eval(%1)
+%4 = 5
 @eprog\noindent
 In the above, \kbd{t} is initially a free variable, later bound to $2$. We
 see that assigning a value to a variable does not affect previous expressions
@@ -1019,13 +1018,15 @@ preferable to leave alone your ``polynomial variables'', never assigning
 values to them, and to use \kbd{subst} and its more powerful variants rather
 than \kbd{eval}. You will avoid the following kind of problems:
 \bprog
-  ? p = t^2 + 1; subst(p, t, 2)
-  %1 = 5
-  ? t = 2;
-  ? subst(p, t, 3)    \\@com \kbd{t} is no longer free: it evaluates to 2
-    ***   variable name expected.
-  ? subst(p, 't, 3)   \\ OK
-  %3 = 10
+? p = t^2 + 1; subst(p, t, 2)
+%1 = 5
+? t = 2;
+? subst(p, t, 3)    \\@com \kbd{t} is no longer free: it evaluates to 2
+  ***   at top-level: subst(p,t,3)
+  ***                         ^----
+  ***   variable name expected.
+? subst(p, 't, 3)   \\ OK
+%3 = 10
 @eprog\noindent
 A statement like \kbd{x = 'x} in effect restores \kbd{x} as a free variable.
 
@@ -1387,7 +1388,7 @@ variable name for different parameters of your function:
 \bprog
 ? f(x,x) = 1
   ***   variable declared twice: f(x,x)=1
-                                     ^----
+  ***                                ^----
 @eprog
 
 \misctitle{Finishing touch}.
@@ -1448,7 +1449,8 @@ available:
 ? g(9)
 %4 = 1
 ? g(9, &e)  \\@com pointers are not implemented for user functions
-  ***   unexpected &.
+  ***   unexpected &: g(9,&e)
+  ***                     ^---
 @eprog
 
 \subsec{Function call, Default arguments}
@@ -1620,9 +1622,14 @@ x_k^{n_k}$ in P is given by {\tt v[$n_1$+1][\dots][$n_k$+1]}.
 The operating system automatically limits the \idx{recursion depth}:
 \sidx{deep recursion}
 \bprog
-? dive(n) = if (n, dive(n-1))
-? dive(20000);
-  ***   deep recursion
+? dive(n) = dive(n+1)
+? dive(0);
+  ***   [...] at: dive(n+1)
+  ***             ^---------
+  ***   in function dive: dive(n+1)
+  ***                     ^---------
+  \\@com (last 2 lines repeated 19 times)
+  ***   deep recursion.
 @eprog\noindent
 There is no way to increase the recursion limit (which may be different on
 your machine) from within \kbd{gp}. To increase it before launching \kbd{gp},
@@ -1999,8 +2006,8 @@ correctly worded query, otherwise the bytecode compiler would have protested
 first; here is a slightly pathological case:
 \bprog
 ? if (siN(x) < eps, do_something())
-  ***   at: if(siN(x)<eps,do_someth
-  ***          ^--------------------
+  ***   at top-level: if(siN(x)<eps,do_someth
+  ***                    ^--------------------
   ***   not a function: `siN'.
 @eprog\noindent (no arrow!) The code is syntactically correct and compiled
 correctly, even though the \kbd{siN} function, a typo for \kbd{sin}, was not
@@ -2012,21 +2019,23 @@ function call \kbd{siN(x)}.
 mathematical content, which is easier to grasp than a parser's logic:
 \bprog
 ? 1/0
+  ***   at top-level: 1/0
+  ***                  ^--
   *** _/_: division by zero
 @eprog\noindent telling us that a runtime error occured while evaluating the
 binary \kbd{/} operator (the \kbd{\_} surrounding the operator are
-placeholders). Better context is provided if the error occurs deep in the 
+placeholders). More context is provided if the error occurs deep in the
 call chain:
 \bprog
 ? f(x) = 1/x;
 ? g(N) = for(i = -N, N, f(i));
 ? g(10)
-  ***   at: g(10)
-  ***       ^-----
-  ***   at: for(i=-N,N,f(i))
-  ***                  ^-----
-  ***   at: 1/x
-  ***        ^--
+  ***   at top-level: g(10)
+  ***                 ^-----
+  ***   in function g: for(i=-N,N,f(i))
+  ***                             ^-----
+  ***   in function f: 1/x
+  ***                   ^--
   *** _/_: division by zero
 @eprog
 
@@ -2094,16 +2103,13 @@ hit \kbd{C-c}, type in your modifications, then let the computation go on as
 explained above. A break loop looks like this:
 \bprog
 ? v = 0; 1/v
+  ***   at top-level: v=0;1/v
+  ***                      ^--
   *** _/_: division by zero
   ***   Break loop (type 'break' or Control-d to go back to GP)
 break>
 @eprog
-\noindent So the standard error message\footnote{*}{Unfortunately, we
-can never have context for runtime errors since the code was first
-successfully compiled into bytecode,
-then run. When the error occurs, we have nothing but the bytecode at our
-disposal, which is not easy to understand.} is printed first.
-The
+\noindent So the standard error message is printed first. The
 \kbd{break>} at the bottom is a prompt, and hitting \kbd{v} then
 \kbd{<Return>}, we see:
 \bprog
@@ -2114,19 +2120,22 @@ break> v
 only the name of a variable, of course. There is no special set of commands
 becoming available during a break loop, as they would in most debuggers.
 
-Unfortunately, lexically-scoped variables are inaccessible to the evaluator
-during the break loop:
+Even lexically-scoped variables are accessible to the evaluator during the
+break loop:
 \bprog
 ? for(v = -2, 2, print(1/v))
 -1/2
 -1
+  ***   at top-level: for(v=-2,2,print(1/v))
+  ***                                   ^----
   *** _/_: division by zero
   ***   Break loop (type 'break' or Control-d to go back to GP)
 break> v
-v
+0
 @eprog\noindent
-Since loop indices are automatically lexically scoped, they no longer exist
-when the break loop is run.
+Even though loop indices are automatically lexically scoped and no longer
+exist when the break loop is run, enough debugging information is retained in
+the bytecode to reconstruct the evaluation context.
 
 \misctitle{Important Note:} upon startup, this mechanism is \emph{off}, a
 runtime error will send you back to the prompt. Type \kbd{trap()} (or include
@@ -2800,10 +2809,9 @@ advisable to enclose it within double quotes, as for GP strings (e.g
 Note that extended help is much more powerful than the short help, since
 it knows about operators as well: you can type \kbd{??~*} or
 \kbd{??~\&\&}, whereas a single \kbd{?} would just yield a not too helpful
-
-\kbd{*** unknown identifier.}
-
-\noindent message. Also, you can ask for extended help on section
+\bprog
+&&: unknown identifier.}
+@eprog\noindent message. Also, you can ask for extended help on section
 number~$n$ in Chapter~3, just by typing \kbd{??~$n$} (where \kbd{?$n$} would
 yield merely a list of functions). Finally, a few key concepts in \kbd{gp} are
 documented in this way: metacommands (e.g \kbd{??~"??"}), defaults (e.g
@@ -2919,7 +2927,7 @@ explained in Chapter~4, but its knowledge is not necessary for a \kbd{gp} user.
 \subsec{\b{um}}: prints the definitions of all user-defined member functions.
 
 \subsec{\b{v}}: prints the \idx{version number} and implementation architecture
-(680x0, Sparc, Alpha, other) of the \kbd{gp} executable you are using. 
+(680x0, Sparc, Alpha, other) of the \kbd{gp} executable you are using.
 
 \subsec{\b{w}} $\{n\}$ $\{$\var{filename}$\}$: writes the object number
 $n$ ( $\%n$ ) into the named file, in raw format. If the number $n$ is

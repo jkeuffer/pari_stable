@@ -29,6 +29,8 @@ Doc: if $B$ is omitted, finds the best rational approximation to $x\in\R$
  such $a/b$ exists for at least one component of $x$), returns $-1$.
  \bprog
  ? bestappr(Mod(18526731858, 11^10), 10^10, 10^10)
+  ***   at top-level: bestappr(Mod(1852673
+  ***                 ^--------------------
   *** bestappr: ratlift: must have 2*amax*bmax < m, found
         amax=10000000000
         bmax=10000000000

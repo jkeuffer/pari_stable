@@ -18,8 +18,10 @@ Doc: \var{bnf} being the number field data
  Note that \var{bnf} need not contain the fundamental unit explicitly:
  \bprog
  ? setrand(1); bnf = bnfinit(x^2-x-100000);
- *** bnfinit: Warning: insufficient precision for fundamental units, not given.
+   *** bnfinit: Warning: insufficient precision for fundamental units, not given.
  ? bnf.fu
+   ***   at top-level: bnf.fu
+   ***                     ^--
    *** _.fu: missing units in .fu.
  ? u = [119836165644250789990462835950022871665178127611316131167, \
         379554884019013781006303254896369154068336082609238336]~;

@@ -31,6 +31,8 @@ Doc: let $z = \kbd{Mod(A, T)}$ be a polmod, and $Q$ be its minimal
  \bprog
  ? u = Mod(-x^3 + 9*x, x^4 - 10*x^2 + 1)
  ? modreverse(u)
+   ***   at top-level: modreverse(u)
+   ***                 ^-------------
    *** modreverse: reverse polmod does not exist: Mod(-x^3+9*x, x^4-10*x^2+1).
  ? minpoly(u)
  %6 = x^2 - 8

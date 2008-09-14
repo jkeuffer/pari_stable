@@ -22,7 +22,6 @@ Doc: solves the equation
  @eprog
  Hence, the only solution is $x = 1$, $y = 1$ and the result is
  unconditional. On the other hand:
-
  \bprog
  ? tnf = thueinit(x^3-2*x^2+3*x-17);
  ? thue(tnf, -15)

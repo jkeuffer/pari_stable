@@ -17,7 +17,9 @@ Doc:
  %4 = [0, 0]  \\ an alternative syntax for the same query
  ? Ej  = ellinit([0,0,0,0,1]); z = [-1,0];
  ? ellpow(Ej, z, I)
-    *** ellpow: not a complex multiplication in powell.
+   ***   at top-level: ellpow(Ej,z,I)
+   ***                 ^--------------
+   *** ellpow: not a complex multiplication in powell.
  ? ellpow(Ej, z, 1+quadgen(-3))
  %6 = [1 - w, 0]
  @eprog

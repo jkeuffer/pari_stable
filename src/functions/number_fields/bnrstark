@@ -36,14 +36,15 @@ Doc: \var{bnr} being as output by \kbd{bnrinit(,,1)}, finds a relative equation
  the compositum herself.
 
  Even if it exists, the auxiliary conductor may be so large that later
- computations become unfeasible (and of course, Stark's conjecture may simply
- be wrong). In case of difficulties, one should try and come back to
- \tet{rnfkummer}:
+ computations become unfeasible. (And of course, Stark's conjecture may simply
+ be wrong.) In case of difficulties, try \tet{rnfkummer}:
  \bprog
  ? bnr = bnrinit(bnfinit(y^8-12*y^6+36*y^4-36*y^2+9,1), 2, 1);
  ? bnrstark(bnr)
-  *** bnrstark: need 3919350809720744 coefficients in initzeta.
-  *** Computation impossible.
+   ***   at top-level: bnrstark(bnr)
+   ***                 ^-------------
+   *** bnrstark: need 3919350809720744 coefficients in initzeta.
+   *** Computation impossible.
  ? lift( rnfkummer(bnr) )
  time = 24 ms.
  %2 = x^2 + (1/3*y^6 - 11/3*y^4 + 8*y^2 - 5)

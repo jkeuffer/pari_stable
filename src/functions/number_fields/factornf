@@ -21,7 +21,11 @@ Doc: factorization of the univariate polynomial $x$
  ? factornf(x^2 + Mod(y, y^2+1), y^2+1);
  ? factornf(x^2 + y, y^2+1); \\@com these two are OK
  ? factornf(x^2 + Mod(z,z^2+1), y^2+1)
- *** factornf: inconsistent data in rnf function.
+   ***   at top-level: factornf(x^2+Mod(z,z
+   ***                 ^--------------------
+   *** factornf: inconsistent data in rnf function.
  ? factornf(x^2 + z, y^2+1)
- *** factornf: incorrect variable in rnf function.
+   ***   at top-level: factornf(x^2+z,y^2+1
+   ***                 ^--------------------
+   *** factornf: incorrect variable in rnf function.
  @eprog
