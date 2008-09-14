@@ -513,8 +513,8 @@ mall([1, 1])]]], [1, -12, 0, 0; 0, 0, 1, 0; 0, 0, 0, 1]], [1], mat([1, -3, -
 ? cf2([1,3,5,7,9],(exp(1)-1)/(exp(1)+1))
 [0, 6, 10, 42, 30]
 ? changevar(x+y,[z,t])
-  ***   at: changevar(x+y,[z,t])
-            ^--------------------
+  ***   at top-level: changevar(x+y,[z,t])
+  ***                 ^--------------------
   *** changevar: this function no longer exists.
 ? char([1,2;3,4],z)
 z^2 - 5*z - 2
@@ -839,8 +839,8 @@ x^5 + 3021*x^4 - 786303*x^3 - 6826636057*x^2 - 546603588746*x + 385389051407
 [x^8 - x^7 + x^5 - x^4 + x^3 - x + 1 1]
 
 ? factpol2(x^15-1,0)
-  ***   at: factpol2(x^15-1,0)
-            ^------------------
+  ***   at top-level: factpol2(x^15-1,0)
+  ***                 ^------------------
   *** factpol2: this function no longer exists.
 ? fibo(100)
 354224848179261915075
@@ -969,8 +969,8 @@ Vecsmall([-72517083, -151420179, 358197028, -1563977934, 610394226, -2103189
  168, 420, 360, 1785, 658, 2542; 84, 140, 360, 315, 1582, 588, 2266; 70, 120
 , 315, 280, 1421, 532, 2046; 60, 105, 280, 252, 1290, 486, 1866]]
 ? hermitehavas(amat)
-  ***   at: hermitehavas(amat)
-            ^------------------
+  ***   at top-level: hermitehavas(amat)
+  ***                 ^------------------
   *** hermitehavas: this function no longer exists.
 ? hermitemod(amat,detint(amat))
 
@@ -1352,12 +1352,12 @@ ok
 ? incgam(2,1)
 0.73575888234288464319104754032292173491
 ? incgam1(2,1)
-  ***   at: incgam1(2,1)
-            ^------------
+  ***   at top-level: incgam1(2,1)
+  ***                 ^------------
   *** incgam1: this function no longer exists.
 ? incgam2(2,1)
-  ***   at: incgam2(2,1)
-            ^------------
+  ***   at top-level: incgam2(2,1)
+  ***                 ^------------
   *** incgam2: this function no longer exists.
 ? incgam3(2,1)
 0.26424111765711535680895245967707826509
@@ -1532,8 +1532,8 @@ x
 [0 1 -1]
 
 ? kerint2(matrix(4,6,x,y,2520/(x+y)))
-  ***   at: kerint2(matrix(4,6,x
-            ^--------------------
+  ***   at top-level: kerint2(matrix(4,6,x
+  ***                 ^--------------------
   *** kerint2: this function no longer exists.
 ? f(u)=u+1;
 ? print(f(5));kill(f);
@@ -1620,8 +1620,8 @@ x
 [-60 -105 280 252 -486 471 1290]
 
 ? lll1(m)
-  ***   at: lll1(m)
-            ^-------
+  ***   at top-level: lll1(m)
+  ***                 ^-------
   *** lll1: this function no longer exists.
 ? lllgram(m)
 
@@ -1640,8 +1640,8 @@ x
 [0 1 4 -18 4 -7 4]
 
 ? lllgram1(m)
-  ***   at: lllgram1(m)
-            ^-----------
+  ***   at top-level: lllgram1(m)
+  ***                 ^-----------
   *** lllgram1: this function no longer exists.
 ? lllgramint(m)
 
@@ -1714,8 +1714,8 @@ x
  0; 1, 0, 0, 0, 0, 0, 0; 0, 1, 0, 0, 0, 0, 0; 0, 0, 1, 0, 0, 0, 0; 0, 0, 0, 
 1, 0, 0, 0; 0, 0, 0, 0, 1, 0, 0; 0, 0, 0, 0, 0, 1, 0; 0, 0, 0, 0, 0, 0, 1]]
 ? lllrat(m)
-  ***   at: lllrat(m)
-            ^---------
+  ***   at top-level: lllrat(m)
+  ***                 ^---------
   *** lllrat: this function no longer exists.
 ? \precision=96
    realprecision = 96 significant digits
@@ -1943,8 +1943,8 @@ mod(2, 7)
 ? modp(-12,7)
 mod(2, 7)
 ? mod(10873,49649)^-1
-  ***   at: mod(10873,49649)^-1
-                            ^---
+  ***   at top-level: mod(10873,49649)^-1
+  ***                                 ^---
   *** _^_: impossible inverse modulo: mod(131, 49649).
 ? modreverse(mod(x^2+1,x^3-x-1))
 mod(x^2 - 3*x + 2, x^3 - 5*x^2 + 8*x - 5)
@@ -2329,8 +2329,8 @@ qfr(3, 16, -7, 1.5000000000000000000000000000000000000)
 2.0947125472611012942448228460655286535
 ? kill(y);print(x+y);reorder([x,y]);print(x+y);
 x + y
-  ***   at: kill(y);print(x+y);reorder([x,y]);print
-                               ^--------------------
+  ***   at top-level: kill(y);print(x+y);reorder([x,y]);print
+  ***                                    ^--------------------
   *** reorder: this function no longer exists.
 ? resultant(x^3-1,x^3+1)
 8
@@ -2712,4 +2712,4 @@ mod(391, 3120), mod(2081, 3120)]]
 ? getheap()
 [605, 114016]
 ? print("Total time spent: ",gettime);
-Total time spent: 364
+Total time spent: 368

@@ -12,11 +12,11 @@
 [8, 5]
 [4, 2]
 [14, 1]
-  ***   at: do(x^48+688253440*x^
-            ^--------------------
-  ***   at: galoisidentify(galoi
-            ^--------------------
+  ***   at top-level: do(x^48+688253440*x^
+  ***                 ^--------------------
+  ***   in function do: galoisidentify(galoi
+  ***                   ^--------------------
   *** galoisidentify: Not a Galois field in a Galois related function.
 [x]~
 [-x, x]~
-Total time spent: 19445
+Total time spent: 17009
