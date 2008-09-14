@@ -605,6 +605,7 @@ closure_err()
         print_errcontext(i == 0? "at top-level": "[...] at", s, base);
       pari_putc('\n');
       if (i == lastfun) break;
+
       if (member) s++;
       if (is_keyword_char(*s))
       {
@@ -615,7 +616,7 @@ closure_err()
           member = 1; s = t; t++;
           while (is_keyword_char(*t)) t++;
         }
-        next_label = pari_malloc(t - s + 32);
+        next_label = (char*)pari_malloc(t - s + 32);
         sprintf(next_label, "in %sfunction ", member? "member ": "");
         u = next_label + strlen(next_label);
         v = s;
