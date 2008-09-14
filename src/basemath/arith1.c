@@ -496,7 +496,7 @@ polissquareall(GEN x, GEN *pt)
   else
   {
     x = RgX_Rg_div(x,a);
-    y = gtrunc(gsqrt(greffe(x,2+l,1),0));
+    y = gtrunc(gsqrt(RgX_to_ser(x,2+l),0));
     if (!RgX_equal(gsqr(y), x)) { avma = av; return 0; }
     if (!pt) { avma = av; return 1; }
     if (!gcmp1(a))
@@ -729,7 +729,7 @@ polispower(GEN x, GEN K, GEN *pt)
   if (degpol(x))
   {
     x = RgX_Rg_div(x,a);
-    y = gtrunc(gsqrtn(greffe(x,lg(x),1), K, NULL, 0)); av2 = avma;
+    y = gtrunc(gsqrtn(RgX_to_ser(x,lg(x)), K, NULL, 0)); av2 = avma;
     if (!RgX_equal(powgi(y, K), x)) { avma = av; return 0; }
   }
   else y = pol_1(varn(x));

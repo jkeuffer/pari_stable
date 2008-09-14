@@ -202,28 +202,14 @@ matsize(GEN x)
 /*                  Conversion t_POL --> t_SER                     */
 /*                                                                 */
 /*******************************************************************/
-/* enlarge/truncate t_POL x to a t_SER with lg l */
-GEN
-greffe(GEN x, long l, long use_stack)
+static GEN
+greffe_aux(GEN x, long l, long lx, long v)
 {
-  long i, lx = lg(x);
-  GEN y;
-
-  if (typ(x)!=t_POL) pari_err(notpoler,"greffe");
-  if (l <= 2) pari_err(talker, "l <= 2 in greffe");
-
-  /* optimed version of RgX_valrem + normalize */
-  i = 2; while (i<lx && isexactzero(gel(x,i))) i++;
-  i -= 2; /* = RgX_val(x) */
-
-  if (use_stack) y = cgetg(l,t_SER);
-  else
-  {
-    y = (GEN) pari_malloc(l*sizeof(long));
-    y[0] = evaltyp(t_SER) | evallg(l);
-  }
-  y[1] = x[1]; setvalp(y, i);
-  x += i; lx -= i;
+  GEN y = cgetg(l,t_SER);
+  long i;
+  if (l <= 2) pari_err(talker, "l <= 2 in RgX_to_ser");
+  y[1] = x[1]; setvalp(y, v);
+  x += v; lx -= v;
   if (lx > l) {
     for (i = 2; i < l; i++) gel(y,i) = gel(x,i);
   } else {
@@ -232,7 +218,32 @@ greffe(GEN x, long l, long use_stack)
   }
   return y;
 }
-
+/* enlarge/truncate t_POL x to a t_SER with lg l */
+GEN
+RgX_to_ser(GEN x, long l)
+{
+  long i, lx = lg(x);
+  /* analogous to RgX_valrem + normalize */
+  i = 2; while (i<lx && isexactzero(gel(x,i))) i++;
+  return greffe_aux(x, l, lx, i - 2);
+}
+GEN
+RgX_to_ser_inexact(GEN x, long l)
+{
+  long i, lx = lg(x);
+  int first = 1;
+  /* analogous to RgX_valrem + normalize */
+  i = 2;
+  while (i<lx && gcmp0(gel(x,i))) {
+    if (first && !isexactzero(gel(x,i))) 
+    {
+      pari_warn(warner,"normalizing a series with 0 leading term");
+      first = 0;
+    }
+    i++;
+  }
+  return greffe_aux(x, l, lx, i - 2);
+}
 /*******************************************************************/
 /*                                                                 */
 /*                 CONVERSION GEN --> long                         */

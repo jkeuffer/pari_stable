@@ -1058,8 +1058,9 @@ gadd(GEN x, GEN y)
 	  i = lg(y) + valp(y) - RgX_val(x);
 	  if (i < 3) return gcopy(y);
 
-	  p1 = greffe(x,i,0); y = gadd(p1,y);
-	  pari_free(p1); return y;
+	  p1 = RgX_to_ser(x,i); y = gadd(p1,y);
+          settyp(p1, t_VECSMALL); /* p1 left on stack */
+	  return y;
 
 	case t_RFRAC: return add_rfrac_scal(y, x);
       }
@@ -1079,10 +1080,10 @@ gadd(GEN x, GEN y)
 	av = avma;
 	/* take advantage of y = t^n ! */
 	if (degpol(d))
-	  y = gdiv(n, greffe(d,l,1));
+	  y = gdiv(n, RgX_to_ser_inexact(d,l));
 	else {
 	  y = gdiv(n, gel(d,2));
-	  if (gvar(y) == vy) y = greffe(y,l,1); else y = scalarser(y, vy, l);
+	  if (gvar(y) == vy) y = RgX_to_ser(y,l); else y = scalarser(y, vy, l);
 	}
 	setvalp(y, valp(y) - vd);
 	return gerepileupto(av, gadd(y, x));
@@ -1938,8 +1939,9 @@ gmul(GEN x, GEN y)
 	  avma = av;
 	  /* take advantage of x = t^n ! */
 	  if (degpol(x)) {
-	    p1 = greffe(x,lg(y),0);
-	    p2 = gmul(p1,y); pari_free(p1);
+	    p1 = RgX_to_ser(x,lg(y));
+	    p2 = gmul(p1,y);
+            settyp(p1, t_VECSMALL); /* p1 left on stack */
 	  } else
 	    p2 = mul_ser_scal(y, gel(x,2));
 	  setvalp(p2, valp(p2) + vn);
@@ -2752,9 +2754,10 @@ gdiv(GEN x, GEN y)
 	case t_SER:
 	  if (lg(y) == 2)
 	    return zeroser(vx, RgX_val(x) - valp(y));
-	  p1 = greffe(x,lg(y),0);
+	  p1 = RgX_to_ser(x,lg(y));
 	  p2 = div_ser(p1, y, vx);
-	  pari_free(p1); return p2;
+          settyp(p1, t_VECSMALL); /* p1 left on stack */
+	  return p2;
 
 	case t_RFRAC:
 	{
@@ -2773,9 +2776,10 @@ gdiv(GEN x, GEN y)
 	case t_POL:
 	  if (lg(x) == 2)
 	    return zeroser(vx, valp(x) - RgX_val(y));
-	  p1 = greffe(y,lg(x),0);
+	  p1 = RgX_to_ser_inexact(y,lg(x));
 	  p2 = div_ser(x, p1, vx);
-	  pari_free(p1); return p2;
+          settyp(p1, t_VECSMALL); /* p1 left on stack */
+	  return p2;
 	case t_RFRAC:
 	  av = avma;
 	  return gerepileupto(av, gdiv(gmul(x,gel(y,2)), gel(y,1)));
@@ -2787,8 +2791,8 @@ gdiv(GEN x, GEN y)
       {
 	case t_POL: return div_rfrac_pol(gel(x,1),gel(x,2), y);
 	case t_SER:
-	  av = avma;
-	  return gerepileupto(av, gdiv(gel(x,1), gmul(gel(x,2),y)));
+	  av = avma; z = RgX_to_ser_inexact(gel(x,2), lg(y));
+	  return gerepileupto(av, gdiv(gel(x,1), gmul(z,y)));
       }
       break;
   }

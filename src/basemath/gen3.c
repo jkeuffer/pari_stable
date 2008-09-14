@@ -2456,7 +2456,7 @@ poltoser(GEN x, long v, long prec)
   if (is_scalar_t(tx) || varncmp(vx, v) > 0) return scalarser(x, v, prec);
   if (varncmp(vx, v) < 0) return coefstoser(x, v, prec);
   if (!lgpol(x)) return zeroser(v, prec);
-  y = greffe(x, prec+2, 1);
+  y = RgX_to_ser(x, prec+2);
   setvarn(y, v); return y;
 }
 

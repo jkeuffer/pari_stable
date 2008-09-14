@@ -112,6 +112,7 @@ IM 90- lngamma(x) gave incorrect results (off by 2*Pi*I) when real(x) was a
    94- wrong results in qfgaussred() [only totally real case was correct]
    95- uninitialized memory read in divrr (both kernels), would only affect
        the last bit of the result, but could cause SEGV on empty stack.
+   96- After A=1/(y + 0.); B=1. + O(y); all of A*B, A/B, B/A caused an error
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
@@ -135,6 +136,7 @@ BA  3- builtin-in GP functions can now be used as closures.
        factorpadic4 -> factorpadic, factorpadic2 now static
        fundunit -> quadunit
        gener -> znprimroot, ggener -> znprimroot0
+       greffe -> RgX_to_ser (+ change prototype)
        hil0 -> hilbert, hilii -> hilbertii [ delete useless hil() ]
        ideal_two_elt* -> idealtwoelt*,
        idealhermite -> idealhnf
