@@ -925,6 +925,7 @@ find_trace(GEN a4, GEN a6, ulong ell, GEN p, long *ptr_kt, long EARLY_ABORT)
     break;
   case MTAtkin:
     tr = find_trace_Atkin(ell, r, p);
+    if (lg(tr)==1) pari_err(talker,"not a prime number");
     kt = 1;
     break;
   default: /* case MTpathological: */
