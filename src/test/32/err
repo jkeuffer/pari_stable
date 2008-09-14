@@ -6,18 +6,17 @@
   ***                   ^--
   *** _/_: division by zero
 
-   realprecision = 38 significant digits
-  ***   at top-level: f(Pi/2)
-  ***                 ^-------
-  ***   in function f: tan
-  ***                  ^---
-  *** tan: can't compute tan(Pi/2 + kPi).
+  ***   at top-level: f(Mat(0),Col(0))
+  ***                 ^----------------
+  ***   in function f: matsolve
+  ***                  ^--------
+  *** matsolve: non invertible matrix in gauss
 
-  ***   at top-level: (tan)(Pi/2)
-  ***                  ^----------
-  ***   in function tan: tan
-  ***                    ^---
-  *** tan: can't compute tan(Pi/2 + kPi).
+  ***   at top-level: (matsolve)(Mat(0),Col
+  ***                  ^--------------------
+  ***   in function matsolve: matsolve
+  ***                         ^--------
+  *** matsolve: non invertible matrix in gauss
 
   ***   at top-level: g(I)
   ***                 ^----
@@ -27,4 +26,4 @@
   ***                            ^--------
   *** _/_: division by zero
 
-Total time spent: 16
+Total time spent: 12

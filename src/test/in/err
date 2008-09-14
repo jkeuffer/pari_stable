@@ -3,12 +3,11 @@ g(N) = for(i = -N, N, f(i));
 g(10)
 print();
 
-\p38
-f=tan;
-f(Pi/2)
+f=matsolve;
+f(Mat(0), Col(0))
 print();
 
-(tan)(Pi/2)
+(matsolve)(Mat(0), Col(0))
 print();
 
 a.foo=1/(1+a^2);
