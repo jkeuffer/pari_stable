@@ -14,8 +14,6 @@
 
   ***   at top-level: (matsolve)(Mat(0),Col
   ***                  ^--------------------
-  ***   in function matsolve: matsolve
-  ***                         ^--------
   *** matsolve: non invertible matrix in gauss
 
   ***   at top-level: g(I)
@@ -26,4 +24,8 @@
   ***                            ^--------
   *** _/_: division by zero
 
-Total time spent: 12
+  ***   at top-level: (x->1/x)(0)
+  ***                  ^----------
+  *** _/_: division by zero
+
+Total time spent: 16
