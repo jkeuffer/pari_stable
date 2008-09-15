@@ -1795,7 +1795,7 @@ idealred_elt0(GEN nf, GEN I, GEN vdir)
     G0 = vdir; /* assumed ZM */
   else
     G0 = computeGtwist(nf, vdir);
-  u = lllint(ZM_mul(G0, I));
+  u = ZM_lll(ZM_mul(G0, I), 0.99, LLL_IM);
   return ZM_ZC_mul(I, gel(u,1)); /* small elt in I */
 }
 GEN
@@ -1884,7 +1884,7 @@ idealmin(GEN nf, GEN x, GEN vdir)
     case id_MAT: if (lg(x) == 1) return gen_0;
   }
   x = Q_remove_denom(x, &dx);
-  y = lllint( ZM_mul(computeGtwist(nf,vdir), x) );
+  y = ZM_lll(ZM_mul(computeGtwist(nf,vdir), x), 0.99, LLL_IM);
   y = ZM_ZC_mul(x, gel(y,1));
   if (dx) y = RgC_Rg_div(y, dx);
   return gerepileupto(av, y);
