@@ -20,6 +20,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #define tree pari_tree
 
+enum COflags {COsafelex=1, COsafedyn=2};
+
 /***************************************************************************
  **                                                                       **
  **                           String constant expansion                   **
@@ -325,10 +327,22 @@ localvars_find(GEN pack, entree *ep)
 /*
  Flags for copy optimisation:
  -- FLreturn: The result must survive the closure.
- -- FLnouser: The result will not be part of a user variable.
  -- FLnocopy: The result will never be updated nor part of a user variable.
+ -- FLnocopylex: The result will never be updated nor part of dynamic variable.
 */
-enum FLflag {FLnocopy=1, FLreturn=2, FLnouser=4};
+enum FLflag {FLreturn=1, FLnocopy=2, FLnocopylex=4};
+
+static void
+copyifclone(long n, long mode, long flag, long mask)
+{
+  if (mode==Ggen && !(flag&mask))
+  {
+    op_push(OCcopyifclone,0,n);
+    if (!(flag&FLreturn) && DEBUGLEVEL)
+      pari_warn(warner,"compiler generate copy for `%.*s'",
+                       tree[n].len,tree[n].str);
+  }
+}
 
 static void compilenode(long n, int mode, long flag);
 
@@ -553,31 +567,10 @@ listtogen(long n, long f)
 }
 
 static long
-arg_is_safe(long a)
-{
-  if (a<0) return 1;
-  switch (tree[a].f)
-  {
-  case FmatrixL: case FmatrixR:
-  case Ftag:
-    return arg_is_safe(tree[a].x);
-  case Fconst: case Fsmall: case Fnoarg:
-    return 1;
-  case Ffacteurmat:
-  case Fmatrix:
-    return arg_is_safe(tree[a].x) && arg_is_safe(tree[a].y);
-  case Fentry:
-    return 1;
-  default:
-    return 0;
-  }
-}
-
-static long
-first_safe_arg(GEN arg)
+first_safe_arg(GEN arg, long mask)
 {
   long lnc, l=lg(arg);
-  for (lnc=l-1; lnc>0 && arg_is_safe(arg[lnc]); lnc--);
+  for (lnc=l-1; lnc>0 && (tree[arg[lnc]].flags&mask)==mask; lnc--);
   return lnc;
 }
 
@@ -737,7 +730,7 @@ compilemat(long n, long mode)
     for(j=1;j<lgcol;j++)
     {
       k-=lglin;
-      compilenode(col[j], Ggen,0);
+      compilenode(col[j], Ggen, FLnocopy);
       op_push(OCstackgen,k,n);
     }
   }
@@ -786,9 +779,10 @@ compilecall(long n, int mode)
   long y=tree[n].y;
   GEN arg=listtogen(y,Flistarg);
   long nb=lg(arg)-1;
+  long lnc=first_safe_arg(arg, COsafelex);
   for (j=1;j<=nb;j++)
     if (tree[arg[j]].f!=Fnoarg)
-      compilenode(arg[j], Ggen,0);
+      compilenode(arg[j], Ggen,j>=lnc?FLnocopylex:0);
     else
       op_push(OCpushlong,0,n);
   op_push(OCcalluser,nb,x);
@@ -822,7 +816,8 @@ compilefunc(entree *ep, long n, int mode)
   const char *str;
   PPproto mod;
   GEN arg=listtogen(y,Flistarg);
-  long lnc=first_safe_arg(arg);
+  long lnc=first_safe_arg(arg, COsafelex|COsafedyn);
+  long lnl=first_safe_arg(arg, COsafelex);
   long nbpointers=0, nbopcodes;
   long nb=lg(arg)-1, lev=0;
   entree *ev[8];
@@ -839,7 +834,7 @@ compilefunc(entree *ep, long n, int mode)
   }
   if (tree[n].f==Faffect)
   {
-    nb=2; lnc=2; arg=mkvecsmall2(x,y);
+    nb=2; lnc=2; lnl=2; arg=mkvecsmall2(x,y);
   }
   else if (is_func_named(x,"if") && mode==Gvoid)
     ep=is_entry("_void_if");
@@ -865,7 +860,7 @@ compilefunc(entree *ep, long n, int mode)
         long a=arg[i];
         if (tree[a].f==Faffect && !is_node_zero(tree[a].y))
         {
-          compilenode(tree[a].y,Ggen,0);
+          compilenode(tree[a].y,Ggen,FLnocopy);
           op_push(OCstorelex,-nb+i-1,a);
         }
         localvars[s_lvar.n-nb+i-1].ep=(entree*)vep[i];
@@ -939,7 +934,8 @@ compilefunc(entree *ep, long n, int mode)
     {
       arg = listtogen(tree[arg[1]].y,Flistarg);
       nb  = lg(arg)-1;
-      lnc = first_safe_arg(arg);
+      lnc = first_safe_arg(arg,COsafelex|COsafedyn);
+      lnl = first_safe_arg(arg,COsafelex);
     }
   }
   else if (x==OPn && tree[y].f==Fsmall)
@@ -982,7 +978,7 @@ compilefunc(entree *ep, long n, int mode)
         switch(c)
         {
         case 'G':
-          compilenode(arg[j],Ggen,j>=lnc?FLnocopy:FLnouser);
+          compilenode(arg[j],Ggen,j>=lnl?(j>=lnc?FLnocopy:FLnocopylex):0);
           j++;
           break;
         case 'W':
@@ -1097,7 +1093,7 @@ compilefunc(entree *ep, long n, int mode)
               compile_err("expected character: '=' instead of",
                   tree[arg[j]].str+tree[arg[j]].len);
             ev[lev++] = getvar(x);
-            compilenode(y,Ggen,0);
+            compilenode(y,Ggen,FLnocopy);
             j++;
           }
           break;
@@ -1123,14 +1119,14 @@ compilefunc(entree *ep, long n, int mode)
             long l, nb = lg(g)-1;
             if (nb==1)
             {
-              compilenode(g[1], Ggen,0);
+              compilenode(g[1], Ggen, FLnocopy);
               op_push(OCtostr, -1, a);
             } else
             {
               op_push(OCvec, nb+1, a);
               for(l=1; l<=nb; l++)
               {
-                compilenode(g[l], Ggen,0);
+                compilenode(g[l], Ggen, FLnocopy);
                 op_push(OCstackgen,l, a);
               }
               op_push(OCcallgen,(long)is_entry("Str"), a);
@@ -1225,7 +1221,7 @@ compilefunc(entree *ep, long n, int mode)
             for(m=1,k=1;k<=n;k++)
               for(l=1;l<lg(g[k]);l++,m++)
               {
-                compilenode(mael(g,k,l),Ggen,0);
+                compilenode(mael(g,k,l),Ggen,FLnocopy);
                 op_push(OCstackgen,m,mael(g,k,l));
               }
             j=nb+1;
@@ -1471,11 +1467,15 @@ compilenode(long n, int mode, long flag)
       if (mode!=Gvoid)
       {
         if (vn)
+        {
           op_push(OCpushlex,vn,n);
+          copyifclone(n,mode,flag,FLnocopy|FLnocopylex);
+        }
         else
+        {
           op_push(OCpushdyn,(long)ep,n);
-        if (!(flag&(FLnocopy|FLnouser)))
-          op_push(OCcopyifclone,0,n);
+          copyifclone(n,mode,flag,FLnocopy);
+        }
         compilecast(n,Ggen,mode);
       }
     }
@@ -1537,15 +1537,13 @@ compilenode(long n, int mode, long flag)
       if (vn)
       {
         op_push(OCpushlex,(long)vn,n);
-        if (flag&FLreturn)
-          op_push(OCcopyifclone,0,n);
+        copyifclone(n,mode,flag,FLnocopy|FLnocopylex);
         compilecast(n,Ggen,mode);
       }
       else if (ep->valence==EpVAR || ep->valence==EpNEW)
       {
         op_push(OCpushdyn,(long)ep,n);
-        if (!(flag&(FLnocopy|FLnouser)))
-          op_push(OCcopyifclone,0,n);
+        copyifclone(n,mode,flag,FLnocopy);
         compilecast(n,Ggen,mode);
       }
       else
@@ -1614,7 +1612,7 @@ compilenode(long n, int mode, long flag)
       return;
     }
   case Ftag:
-    compilenode(x, mode,0);
+    compilenode(x, mode,flag);
     return;
   case Fnoarg:
     compilecast(n,Gvoid,mode);
@@ -1671,3 +1669,258 @@ closure_deriv(GEN G)
   op_push_loc(OCcallgen,(long)is_entry("_derivnum"),code);
   return gerepilecopy(ltop, getfunction(&pos,arity,0,text));
 }
+
+static long
+vec_optimize(GEN arg)
+{
+  long fl = COsafelex|COsafedyn;
+  long i;
+  for (i=1; i<lg(arg); i++)
+  {
+    optimizenode(arg[i]);
+    fl &= tree[arg[i]].flags;
+  }
+  return fl;
+}
+
+static void
+optimizevec(long n)
+{
+  pari_sp ltop=avma;
+  long x = tree[n].x;
+  GEN  arg = listtogen(x, Fmatrixelts);
+  tree[n].flags = vec_optimize(arg);
+  avma = ltop;
+}
+
+static void
+optimizemat(long n)
+{
+  pari_sp ltop = avma;
+  long x = tree[n].x;
+  long i;
+  GEN line = listtogen(x,Fmatrixlines);
+  long fl = COsafelex|COsafedyn;
+  for(i=1;i<lg(line);i++)
+  {
+    GEN col=listtogen(line[i],Fmatrixelts);
+    fl &= vec_optimize(col);
+  }
+  avma=ltop; tree[n].flags=fl;
+}
+
+static void
+optimizefacteurmat(long n)
+{
+  long x=tree[n].x;
+  long y=tree[n].y;
+  long yx=tree[y].x;
+  long yy=tree[y].y;
+  long f=tree[y].f;
+  long fl;
+  optimizenode(x);
+  optimizenode(yx);
+  fl=tree[x].flags&tree[yx].flags;
+  if (f==Fmatrix && yy>=0)
+  {
+    optimizenode(yy);
+    fl&=tree[yy].flags;
+  }
+  tree[n].flags=fl;
+}
+
+
+static void
+optimizefunc(entree *ep, long n)
+{
+  pari_sp av=avma;
+  long j;
+  long x=tree[n].x;
+  long y=tree[n].y;
+  Gtype t;
+  PPproto mod;
+  long fl=COsafelex|COsafedyn;
+  const char *p=ep->code, *q;
+  char c;
+  GEN arg = listtogen(y,Flistarg);
+  long nb=lg(arg)-1;
+  if (!p)
+    fl=0;
+  else
+    (void) get_ret_type(&p, 2, &t);
+  if (p && *p)
+  {
+    j=1; q=p;
+    while((mod=parseproto(&p,&c,tree[n].str))!=PPend)
+    {
+      if (j<=nb && tree[arg[j]].f!=Fnoarg
+          && (mod==PPdefault || mod==PPdefaultmulti))
+        mod=PPstd;
+      switch(mod)
+      {
+      case PPstd:
+        if (j>nb) compile_err("too few arguments", tree[n].str+tree[n].len-1);
+        if (tree[arg[j]].f==Fnoarg && c!='I' && c!='E')
+          compile_err("missing mandatory argument", tree[arg[j]].str);
+        switch(c)
+        {
+        case 'G':
+        case 'n':
+        case 'M':
+        case 'L':
+          optimizenode(arg[j]);
+          fl&=tree[arg[j++]].flags;
+          break;
+        case 'I':
+        case 'E':
+          optimizenode(arg[j]);
+          tree[arg[j++]].flags=COsafelex|COsafedyn;
+          break;
+        case '&': case '*':
+          {
+            long a=arg[j];
+            if (c=='&')
+            {
+              if (tree[a].f!=Frefarg)
+                compile_err("expected character: '&'", tree[a].str);
+              a=tree[a].x;
+            }
+            optimizenode(a);
+            tree[arg[j++]].flags=COsafelex|COsafedyn;
+            fl=0;
+            break;
+          }
+        case 'W':
+          optimizenode(arg[j++]);
+          fl=0;
+          break;
+        case 'S':
+        case 'V':
+        case 'r':
+          tree[arg[j++]].flags=COsafelex|COsafedyn;
+          break;
+        case '=':
+          {
+            long y=tree[arg[j++]].y;
+            optimizenode(y);
+            fl&=tree[y].flags;
+          }
+          break;
+        case 's':
+          fl &= vec_optimize(cattovec(arg[j++], OPcat));
+          break;
+        default:
+          pari_err(talker,"Unknown prototype code `%c' for `%.*s'",c,
+              tree[x].len, tree[x].str);
+        }
+        break;
+      case PPauto:
+        break;
+      case PPdefault:
+      case PPdefaultmulti:
+        if (j<=nb) optimizenode(arg[j++]);
+        break;
+      case PPstar:
+        switch(c)
+        {
+        case 's':
+          {
+            long n=nb+1-j;
+            long k;
+            for(k=1;k<=n;k++)
+              fl &= vec_optimize(cattovec(arg[j+k-1],OPcat));
+            j=nb+1;
+            break;
+          }
+        default:
+          pari_err(talker,"Unknown prototype code `%c*' for `%.*s'",c,
+              tree[x].len, tree[x].str);
+        }
+        break;
+      default:
+        pari_err(bugparier,"PPproto %d in compilefunc",mod);
+      }
+      q=p;
+    }
+  }
+  else vec_optimize(arg);
+  avma=av; tree[n].flags=fl;
+}
+
+static void
+optimizecall(long n)
+{
+  pari_sp av=avma;
+  long x=tree[n].x;
+  long y=tree[n].y;
+  GEN arg=listtogen(y,Flistarg);
+  optimizenode(x);
+  tree[n].flags = COsafelex&tree[x].flags&vec_optimize(arg);
+  avma=av;
+}
+
+void
+optimizenode(long n)
+{
+  long x,y;
+  if (n<0)
+    pari_err(bugparier,"optimizenode");
+  x=tree[n].x;
+  y=tree[n].y;
+
+  switch(tree[n].f)
+  {
+  case Fseq:
+    if (tree[x].f!=Fnoarg)
+      optimizenode(x);
+    optimizenode(y);
+    tree[n].flags=tree[x].flags&tree[y].flags;
+    return;
+  case Ffacteurmat:
+    optimizefacteurmat(n);
+    break;
+  case Faffect:
+    optimizenode(x);
+    optimizenode(y);
+    tree[n].flags=0;
+    break;
+  case Fnoarg:
+  case Fsmall:
+  case Fconst:
+  case Fentry:
+    tree[n].flags=COsafelex|COsafedyn;
+    return;
+  case Fvec:
+    optimizevec(n);
+    return;
+  case Fmat:
+    optimizemat(n);
+    return;
+  case Frefarg:
+    compile_err("unexpected &",tree[n].str);
+    return;
+  case Ffunction:
+    {
+      entree *ep=getfunc(n);
+      if (EpVALENCE(ep)==EpVAR || EpVALENCE(ep)==EpNEW)
+        optimizecall(n);
+      else
+        optimizefunc(ep,n);
+      return;
+    }
+  case Fcall:
+    optimizecall(n);
+    return;
+  case Flambda:
+    optimizenode(y);
+    tree[n].flags=COsafelex|COsafedyn;
+    return;
+  case Ftag:
+    optimizenode(x);
+    tree[n].flags=tree[x].flags;
+    return;
+  default:
+    pari_err(bugparier,"optimizenode");
+  }
+}
+

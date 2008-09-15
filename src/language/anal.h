@@ -173,6 +173,7 @@ void pari_init_compiler(void);
 void pari_init_evaluator(void);
 GEN  pari_eval_str(char *lex, int strict);
 void parser_reset(void);
+void optimizenode(long n);
 void compiler_reset(void);
 void closure_context(GEN C, long lpc);
 void closure_err();

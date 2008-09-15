@@ -176,7 +176,7 @@ freeep(entree *ep)
 
 INLINE void
 pushvalue(entree *ep, GEN x) {
-  new_val_cell(ep, x, PUSH_VAL);
+  new_val_cell(ep, x, COPY_VAL);
 }
 
 INLINE void

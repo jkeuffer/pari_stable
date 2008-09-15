@@ -37,6 +37,7 @@ typedef struct node_s
   long y;            /*node right child*/
   const char *str;   /*text start      */
   size_t len;        /*text length     */
+  long flags;        /*flags from the copy optimizer*/
 } node;
 
 typedef enum {CSTstr, CSTquote, CSTint, CSTreal, CSTmember, CSTentry} CSTtype;

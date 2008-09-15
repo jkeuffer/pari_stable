@@ -56,6 +56,7 @@ pari_init_parser(void)
     pari_tree[i].y    = -1;
     pari_tree[i].str  = opname[i];
     pari_tree[i].len  = strlen(opname[i]);
+    pari_tree[i].flags= 0;
   }
   avma=ltop;
 }
@@ -110,6 +111,7 @@ pari_eval_str(char *lex, int strict)
       compile_err(GSTR(pari_lasterror),lex-1);
   }
   avma=ltop;
+  optimizenode(s_node.n-1);
   code=gp_closure(s_node.n-1);
   parser_reset();
   reset_break();
@@ -127,6 +129,7 @@ newnode(Ffunc f, long x, long y, struct node_loc *loc)
   pari_tree[n].y=y;
   pari_tree[n].str=loc->start;
   pari_tree[n].len=loc->end-loc->start;
+  pari_tree[n].flags=0;
   return n;
 }
 
