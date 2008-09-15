@@ -649,7 +649,6 @@ GEN     znstar_small(GEN zn);
 
 /* trans1.c */
 
-GEN     constlog2(long prec);
 GEN     padic_sqrt(GEN x);
 GEN     padic_sqrtn(GEN x, GEN n, GEN *zetan);
 GEN     padic_sqrtn_ram(GEN x, long e);
