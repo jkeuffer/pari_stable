@@ -811,7 +811,7 @@ static void
 compilefunc(entree *ep, long n, int mode)
 {
   pari_sp ltop=avma;
-  long i,j;
+  long j;
   long x=tree[n].x;
   long y=tree[n].y;
   op_code ret_op;
@@ -850,6 +850,7 @@ compilefunc(entree *ep, long n, int mode)
     
     if (nb)
     {
+      long i;
       for(i=1;i<=nb;i++)
       {
         long a=arg[i];
@@ -877,6 +878,7 @@ compilefunc(entree *ep, long n, int mode)
   else if (is_func_named(x,"local"))
   {
     long lgarg;
+    long i;
     GEN vep = cgetg_copy(arg, &lgarg);
     for (i=1;i<=nb;i++)
     {
@@ -904,6 +906,7 @@ compilefunc(entree *ep, long n, int mode)
   /*We generate dummy code for global() for backward compatibility*/
   else if (is_func_named(x,"global"))
   {
+    long i;
     pari_warn(warner,"global(...) is deprecated");
     for (i=1;i<=nb;i++)
     {
@@ -961,7 +964,7 @@ compilefunc(entree *ep, long n, int mode)
     compile_err("unknown function",tree[n].str);
   nbopcodes = s_opcode.n;
   ret_op = get_ret_type(&p, ep->arity, &ret_typ);
-  i=0; j=1;
+  j=1;
   if (*p)
   {
     q=p;
@@ -1056,6 +1059,7 @@ compilefunc(entree *ep, long n, int mode)
             getcodepos(&pos);
             if (lev)
             {
+              long i;
               GEN vep=cgetg(lev+1,t_VECSMALL);
               for(i=0;i<lev;i++)
               {
@@ -1094,7 +1098,7 @@ compilefunc(entree *ep, long n, int mode)
                   tree[arg[j]].str+tree[arg[j]].len);
             ev[lev++] = getvar(x);
             compilenode(y,Ggen,0);
-            i++; j++;
+            j++;
           }
           break;
         case 'r':
@@ -1235,7 +1239,6 @@ compilefunc(entree *ep, long n, int mode)
       default:
         pari_err(bugparier,"PPproto %d in compilefunc",mod);
       }
-      i++;
       q=p;
     }
   }
@@ -1566,7 +1569,6 @@ compilenode(long n, int mode, long flag)
     {
       pari_sp ltop=avma;
       struct codepos pos;
-      long i;
       GEN arg=listtogen(x,Flistarg);
       long nb, lgarg, nbmvar=numbmvar();
       GEN vep = cgetg_copy(arg, &lgarg);
@@ -1578,6 +1580,7 @@ compilenode(long n, int mode, long flag)
       nb = lgarg-1;
       if (nb)
       {
+        long i;
         for(i=1;i<=nb;i++)
         {
           long a=arg[i];
