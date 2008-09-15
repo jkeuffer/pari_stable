@@ -631,7 +631,7 @@ for dir in basemath modules language gp graph graphdyn systems; do
     cflags="$cflags \$(DLCFLAGS)"
     ;;
   whatnow)
-    depend="$src/gp/whatnow.h"
+    depend="$ANAL_H $src/gp/whatnow.h"
     ;;
   init)
     depend="$ANAL_H $src/language/init.h"
