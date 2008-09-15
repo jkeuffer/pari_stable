@@ -884,7 +884,7 @@ static GEN
 find_trace(GEN a4, GEN a6, ulong ell, GEN p, long *ptr_kt, long EARLY_ABORT)
 {
   pari_sp ltop = avma;
-  GEN  g, meqn, meqnj, tr = NULL; /* needed by MTElkies */
+  GEN  g, meqn, meqnj, tr, tr2;
   char meqntype;
   long k = 1, kt, r;
   enum mod_type mt;
@@ -911,12 +911,14 @@ find_trace(GEN a4, GEN a6, ulong ell, GEN p, long *ptr_kt, long EARLY_ABORT)
   switch (mt)
   {
   case MTone_root:
-    tr = find_trace_one_root(ell, p);
+    tr2 = find_trace_one_root(ell, p);
     kt = k = 1;
     /* FIXME: why do we really always take k = 1 even if ell small ? */
-    /* fall through */
+    tr = find_trace_Elkies_power(a4,a6,ell, k, meqn,meqntype, g, tr2, p, EARLY_ABORT);
+    if (!tr) tr = tr2;
+    break;
   case MTElkies:
-    tr = find_trace_Elkies_power(a4,a6,ell, k, meqn,meqntype, g, tr, p, EARLY_ABORT);
+    tr = find_trace_Elkies_power(a4,a6,ell, k, meqn,meqntype, g, NULL, p, EARLY_ABORT);
     if (!tr) { avma = ltop; return NULL; }
     break;
   case MTroots:
