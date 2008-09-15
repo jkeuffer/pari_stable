@@ -495,12 +495,6 @@ strtor(const char *s, long prec)
   return gerepileuptoleaf(av, itor(y, prec));
 }
 
-/* inline is_keyword_char(). Not worth a static array. */
-#define is_key(c) (isalnum((int)(c)) || (c)=='_')
-
-long
-is_keyword_char(char c) { return is_key(c); }
-
 static void
 skipdigits(char **lex) {
   while (isdigit((int)**lex)) ++*lex;
@@ -575,8 +569,7 @@ pari_lex(union token_value *yylval, struct node_loc *yylloc, char **lex)
   }
   if (isalpha((int)**lex))
   {
-    while (is_key(**lex))
-      ++*lex;
+    while (is_keyword_char(**lex)) ++*lex;
     yylloc->end=*lex;
     return KENTRY;
   }
