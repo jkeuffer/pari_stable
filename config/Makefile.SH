@@ -279,8 +279,11 @@ paricfg.h: ../CHANGES
 kerntest\$(_O): $src/test/kerntest.c
 	\$(CC) -c \$(CFLAGS) -I$src/language \$(CPPFLAGS) -o \$@ $src/test/kerntest.c
 
-kerntest: $KERNOBJS kerntest\$(_O)
-	\$(CC) \$(CFLAGS) \$(CPPFLAGS) -o \$@ $KERNOBJS kerntest\$(_O) \$(STA_LIBS)
+dummy\$(_O): $src/test/dummy.c
+	\$(CC) -c \$(CFLAGS) \$(CPPFLAGS) -o \$@ $src/test/dummy.c
+
+kerntest: $KERNOBJS dummy\$(_O) kerntest\$(_O)
+	\$(CC) \$(CFLAGS) \$(CPPFLAGS) -o \$@ $KERNOBJS dummy\$(_O) kerntest\$(_O) \$(STA_LIBS)
 
 mpinl\$(_O): .headers parilvl0.h parilvl1.h $knone/mpinl.c
 	\$(CC) -c \$(CFLAGS) \$(CPPFLAGS) \$(DLCFLAGS) -o mpinl\$(_O) $knone/mpinl.c

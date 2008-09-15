@@ -1,10 +1,11 @@
 #include "pari.h"
-#include "anal.h"
 
 GEN   gen_0, gen_1, gen_m1, gen_2, gen_m2;
 pari_sp top, bot, avma;
 size_t memused = 0;
 ulong  DEBUGLEVEL,DEBUGMEM = 0;
+const double LOG10_2 = 0.;
+const long lontyp[] = {0};
 
 void specinit()
 {
@@ -17,19 +18,6 @@ void specinit()
   gen_2 = utoipos(2);
   gen_m2= utoineg(2);
 }
-
-GEN powuu(ulong p, ulong N) { return 0; }
-void gerepileall(pari_sp av, int n, ...){}
-void pari_err(long x, ...) { exit (0); }
-void pari_warn(long x, ...) { exit (0); }
-void gerepilemanysp(pari_sp av, pari_sp tetpil, GEN* gptr[], int n){}
-void gerepilemany(pari_sp av, GEN* gptr[], int n){}
-GEN gcopy(GEN x){return x;}
-GEN quadtofp(GEN x, long prec){return x;}
-ulong pari_rand() {return 0;}
-GEN ceilr(GEN x){return x;}
-GEN roundr(GEN x){return x;}
-const long lontyp[] = {0};
 
 void sorstring(ulong x)
 {
