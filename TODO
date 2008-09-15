@@ -138,11 +138,6 @@ Misc:
 
 4  remove all dependencies on types ordering [if (typ(x) < t_POL) ...]
 
-3  remove global variables gpi, geuler: their precision is unpredictable
-   (at least as much as requested in last const[pi|euler](), possibly much
-   more). Explicit call to mp[pi|euler] should be required. Will break
-   existing code...
-
 3  rename library functions following GP names
 
 3  introduce "special" types for objects which are really containers and
