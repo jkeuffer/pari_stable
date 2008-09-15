@@ -763,7 +763,7 @@ qflllgram0(GEN x, long flag)
   if (typ(x) != t_MAT) pari_err(typeer,"qflllgram");
   switch(flag)
   {
-    case 0: RgM_check_ZM(x,"qflllgram"); return lllgram(x);
+    case 0: return lllgram(x);
     case 1: RgM_check_ZM(x,"qflllgram"); return lllgramint(x);
     case 4: RgM_check_ZM(x,"qflllgram"); return lllgramkerim(x);
     case 5: return lllgramkerimgen(x);
