@@ -1744,11 +1744,14 @@ init_trivial_stack(void)
   avma = top = bot + s;
 }
 
-static void
+static const long DEFAULT_SIZE = 1000000;
+
+static size_t
 read_opt(gp2c_stack *p_A, long argc, char **argv)
 {
   char *b = NULL, *p = NULL, *s = NULL;
   long i = 1, initrc = 1;
+  ulong size = DEFAULT_SIZE;
 
   (void)&p; (void)&b; (void)&s; /* -Wall gcc-2.95 */
 
@@ -1810,9 +1813,10 @@ read_opt(gp2c_stack *p_A, long argc, char **argv)
 
   /* override the values from gprc */
   testuint(p, &(GP_DATA->primelimit));
-  testuint(s, (ulong*)&top);
+  testuint(s, &size);
   if (GP_DATA->flags & (EMACS|TEXMACS|TEST)) disable_color = 1;
   pari_outfile = stdout;
+  return size;
 }
 
 #ifdef WINCE
@@ -1829,27 +1833,20 @@ main(int argc, char **argv)
 #endif
   void **A;
   gp2c_stack s_A, *newfun, *oldfun;
-  long i;
+  size_t size;
 
   GP_DATA = default_gp_data();
-
-  for (i=0; i<c_LAST; i++) gp_colors[i] = c_NONE;
-  bot = (pari_sp)0;
-  top = (pari_sp)(1000000*sizeof(long));
-
   if (setjmp(GP_DATA->env))
   {
     puts("### Errors on startup, exiting...\n\n");
     exit(1);
   }
-#ifdef __MWERKS__
-  argc = ccommand(&argv);
-#endif
+
   pari_init_defaults();
   stack_init(&s_A,sizeof(*A),(void**)&A);
-  read_opt(&s_A, argc,argv);
-
-  pari_init_opts(top-bot, GP_DATA->primelimit, INIT_SIGm);
+  pari_init_stack(DEFAULT_SIZE*sizeof(long));
+  size = read_opt(&s_A, argc,argv);
+  pari_init_opts(size*sizeof(long), GP_DATA->primelimit, INIT_SIGm);
 #ifdef SIGALRM
   (void)os_signal(SIGALRM,gp_alarm_handler);
 #endif

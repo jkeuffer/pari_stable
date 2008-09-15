@@ -557,6 +557,7 @@ int     uisprime_nosmalldiv(ulong n);
 
 void    err_recover(long numerr);
 void    pari_init_defaults(void);
+size_t  pari_init_stack(size_t size);
 
 /* nffactor.c */
 
