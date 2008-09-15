@@ -695,7 +695,7 @@ aide0(const char *s0, int flag)
       if (!ep->help) { aide_print(s, "installed function"); return; }
       long_help=0; break;
 
-    case EpNEW: 
+    case EpNEW:
       if (!ep->help) {
         aide_print(s, "new identifier (no valence assigned)"); return;
       };
@@ -1561,19 +1561,20 @@ break_loop(long numerr)
   static FILE *oldinfile = NULL;
   filtre_t F;
   Buffer *b = filtered_buffer(&F);
-  VOLATILE int go_on = 0;
+  int go_on = 0;
 
   term_color(c_ERR); pari_putc('\n');
   print_errcontext("Break loop (type 'break' or Control-d to go back to GP)", NULL, NULL);
   term_color(c_NONE);
   if (numerr == siginter)
     pari_puts("[type <Return> in empty line to continue]\n");
+  else
+    closure_reset();
   oldinfile = pari_infile;
   pari_infile = stdin;
   for(;;)
   {
     GEN x;
-    if (setjmp(b->env)) pari_putc('\n');
     if (! gp_read_line(&F, BREAK_LOOP_PROMPT))
     {
       if (popinfile()) break;
@@ -1594,7 +1595,7 @@ break_loop(long numerr)
     term_color(c_OUTPUT); gen_output(x, GP_DATA->fmt);
     term_color(c_NONE); pari_putc('\n');
   }
-  b = NULL; pari_infile = oldinfile;
+  pari_infile = oldinfile;
   pop_buffer(); return go_on;
 }
 
