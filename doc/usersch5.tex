@@ -5248,11 +5248,17 @@ $\kbd{P}(u,v)$ (a \typ{POL} with \typ{POL} coefficients) to
 $P(\kbd{pol\_x[w]},u)$, assuming \kbd{n} is an upper bound for
 $\deg_v(\kbd{P})$.
 
-\fun{GEN}{RgX_to_ser}{GEN x, long l, int use_stack} applied to a
-\typ{POL}~\kbd{x}, creates a \typ{SER} of length~\kbd{l} starting
-with~\kbd{x}, but without actually copying the coefficients, just the
-pointers. If \kbd{use\_stack} is $0$, this is created through malloc, and
-must be freed after use. Intended for internal use only.
+\fun{GEN}{RgX_to_ser}{GEN x, long l} applied to a \typ{POL}~\kbd{x}, creates
+a \emph{shallow} \typ{SER} of length~$l\geq 2$ starting with~\kbd{x}.
+Unless the polynomial is an exact zero, the coefficient of lowest degree
+$T^d$ of the result is not an exact zero (as per \kbd{isexactzero}). The 
+remainder is $O(T^{d+l})$.
+
+\fun{GEN}{RgX_to_ser_inexact}{GEN x, long l} applied to a \typ{POL}~\kbd{x},
+creates a \emph{shallow} \typ{SER} of length~\kbd{l} starting with~\kbd{x}.
+Unless the polynomial is zero, the coefficient of lowest degree
+$T^d$ of the result is not zero (as per \kbd{gcmp0}). The 
+remainder is $O(T^{d+l})$.
 
 \fun{GEN}{gtoser}{GEN x, long v} converts the object~\kbd{x} into a \typ{SER}
 with main variable number~\kbd{v}.
