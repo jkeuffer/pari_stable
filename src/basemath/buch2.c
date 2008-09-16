@@ -2253,13 +2253,18 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN L_jid, long *pjid, FACT *fact)
   {
     REL_t *rel = cache->last;
     GEN P;
-    if (L_jid && jlist < lg(L_jid))
+    if (L_jid)
     {
       if (++cptlist > 3)
       {
 	jid = L_jid[jlist];
 	jlist++;
-	cptlist = 0;
+        if (jlist >= lg(L_jid))
+        {
+          if (DEBUGLEVEL) msgtimer("for remaining ideals");
+          return 1;
+        }
+ 	cptlist = 0;
       }
       if (!jid) jid = 1;
     }
@@ -2295,12 +2300,12 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN L_jid, long *pjid, FACT *fact)
       if (already_known(cache, rel))
       { /* forget it */
 	if (DEBUGLEVEL>1) dbg_cancelrel(jid,j,rel->R);
-	pari_free((void*)rel->R); rel--;
 	if (++cptzer > MAXRELSUP)
 	{
-	  if (L_jid) { cptzer = 0; L_jid = NULL; break; } /* second chance */
-	  *pjid = jid; return 0;
+	   if (DEBUGLEVEL==1) dbg_cancelrel(jid,j,rel->R);
+           cptzer=0;
 	}
+	pari_free((void*)rel->R); rel--;
 	continue;
       }
       rel->m = gclone(m);
@@ -2440,7 +2445,7 @@ bestappr_noer(GEN x, GEN k)
  *
  * Output: *ptkR = R, *ptU = basis of fundamental units (in terms lambda) */
 static int
-compute_R(GEN lambda, GEN z, GEN *ptL, GEN *ptkR)
+compute_R(GEN lambda, GEN z, GEN *ptL, GEN *ptkR, double *ptr_c)
 {
   pari_sp av = avma;
   long r;
@@ -2476,7 +2481,7 @@ compute_R(GEN lambda, GEN z, GEN *ptL, GEN *ptkR)
     fprintferr("\n ***** check = %f\n",c);
   }
   if (c < 0.55) { avma = av; return fupb_BACH; }
-  if (c < 0.75 || c > 1.3) { avma = av; return fupb_RELAT; }
+  if (c < 0.75 || c > 1.3) { avma = av; *ptr_c = c; return fupb_RELAT; }
   *ptkR = R; *ptL = L; return fupb_NONE;
 }
 
@@ -3098,8 +3103,8 @@ Buchall(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long prec)
 {
   pari_sp av0 = avma, av, av2;
   long PRECREG, N, R1, R2, RU, LIMC, LIMC2, lim, zc, i, jid;
-  long nreldep, sfb_trials, need, precdouble = 0, precadd = 0;
-  double drc, LOGD, LOGD2;
+  long nreldep, sfb_trials, need, old_need = -1, precdouble = 0, precadd = 0;
+  double drc, LOGD, LOGD2, check;
   GEN fu, zu, nf, D, A, W, R, Res, z, h, L_jid, PERM;
   GEN res, L, resc, B, C, C0, lambda, dep, clg1, clg2, Vbase;
   const char *precpb = NULL;
@@ -3181,12 +3186,6 @@ START:
     if (DEBUGLEVEL) fprintferr("\n#### Looking for random relations\n");
 MORE:
     pre_allocate(&cache, need); cache.end = cache.last + need;
-    if (++nreldep > MAXRELSUP) {
-      if (++sfb_trials <= SFB_MAX)
-	F.sfb_chg = sfb_INCREASE;
-      else if (cbach < 4)
-	goto START;
-    }
     if (F.sfb_chg) {
       if (!subFB_change(&F, nf, L_jid)) goto START;
       jid = nreldep = 0;
@@ -3238,9 +3237,10 @@ PRECPB:
     need = lg(dep)>1? lg(dep[1])-1: lg(B[1])-1;
     if (need)
     { /* dependent rows */
+      if (need == old_need) F.sfb_chg = sfb_CHANGE;
+      old_need = need;
       if (need > 5)
       {
-        if (need > 20 && !first) F.sfb_chg = sfb_CHANGE;
         L_jid = vecslice(F.perm, 1, need);
         vecsmall_sort(L_jid); jid = 0;
       }
@@ -3262,9 +3262,10 @@ PRECPB:
   if (DEBUGLEVEL) fprintferr("\n#### Tentative class number: %Ps\n", h);
 
   z = mulrr(Res, resc); /* ~ hR if enough relations, a multiple otherwise */
-  switch (compute_R(lambda, divir(h,z), &L, &R))
+  switch (compute_R(lambda, divir(h,z), &L, &R, &check))
   {
-    case fupb_RELAT: goto MORE; /* not enough relations */
+    case fupb_RELAT:
+      goto MORE; /* not enough relations */
     case fupb_PRECI: /* prec problem unless we cheat on Bach constant */
       if ((precdouble&7) < 7 || cbach>2) { precpb = "compute_R"; goto PRECPB; }
     /* fall through */
