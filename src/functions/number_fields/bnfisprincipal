@@ -34,7 +34,7 @@ Doc: $\var{bnf}$ being the \sidx{principal ideal}
  ? P = idealprimedec(K,3)[1]; \\ a prime ideal above 3
  ? v = bnfisprincipal(K, P)
  %5 = [[2]~, [3/4, 1/4]~]
- ? idealmul(K, v[2], factorback(K.gen, v[1], K))
+ ? idealmul(K, v[2], idealfactorback(K, K.gen, v[1]))
  %6 =
  [3 0]
 
