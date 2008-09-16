@@ -1089,9 +1089,6 @@ compilefunc(entree *ep, long n, int mode)
           {
             long x=tree[arg[j]].x;
             long y=tree[arg[j]].y;
-            if (tree[arg[j]].f!=Faffect)
-              compile_err("expected character: '=' instead of",
-                  tree[arg[j]].str+tree[arg[j]].len);
             ev[lev++] = getvar(x);
             compilenode(y,Ggen,FLnocopy);
             j++;
@@ -1801,7 +1798,10 @@ optimizefunc(entree *ep, long n)
           break;
         case '=':
           {
-            long y=tree[arg[j++]].y;
+            long a=arg[j++], y=tree[a].y;
+            if (tree[a].f!=Faffect)
+              compile_err("expected character: '=' instead of",
+                  tree[a].str+tree[a].len);
             optimizenode(y);
             fl&=tree[y].flags;
           }
