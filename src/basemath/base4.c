@@ -1789,6 +1789,7 @@ RM_round_maxrank(GEN G0)
 GEN
 idealred_elt0(GEN nf, GEN I, GEN vdir)
 {
+  pari_sp av = avma;
   GEN u, G0;
 
   if (vdir && typ(vdir) == t_MAT)
@@ -1796,7 +1797,8 @@ idealred_elt0(GEN nf, GEN I, GEN vdir)
   else
     G0 = computeGtwist(nf, vdir);
   u = ZM_lll(ZM_mul(G0, I), 0.99, LLL_IM);
-  return ZM_ZC_mul(I, gel(u,1)); /* small elt in I */
+  u = ZM_ZC_mul(I, gel(u,1)); /* small elt in I */
+  return gerepileupto(av, u);
 }
 GEN
 idealred_elt(GEN nf, GEN I) { return idealred_elt0(nf, I, NULL); }

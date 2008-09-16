@@ -999,6 +999,7 @@ SPLIT(FB_t *F, GEN nf, GEN x, GEN Vbase, FACT *fact)
   GEN vdir, z, ex, y, x0, Nx = ZM_det_triangular(x);
   long nbtest_lim, nbtest, bou, i, ru, lgsub;
   int flag = (gexpo(gcoeff(x,1,1)) < 100);
+  pari_sp av2;
 
   /* try without reduction if x is small.
    * N.B can_factor destroys its NI argument */
@@ -1012,7 +1013,8 @@ SPLIT(FB_t *F, GEN nf, GEN x, GEN Vbase, FACT *fact)
   ru = lg(nf[6]);
   vdir = cgetg(ru,t_VECSMALL);
   for (i=2; i<ru; i++) vdir[i]=0;
-  for (i=1; i<ru; i++)
+  av2 = avma;
+  for (i=1; i<ru; i++, avma = av2)
   {
     vdir[i] = 10;
     y = idealred_elt0(nf,x,vdir);
