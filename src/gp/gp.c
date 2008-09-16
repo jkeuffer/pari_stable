@@ -828,7 +828,7 @@ License, and comes WITHOUT ANY WARRANTY WHATSOEVER.");
   pari_puts("\nType ? for help, \\q to quit.\n");
   print_text("Type ?12 for how to get moral (and possibly technical) support.");
   pari_printf("\nparisize = %lu, primelimit = %lu\n",
-              top-bot, GP_DATA->primelimit);
+              top - bot, GP_DATA->primelimit);
 }
 
 /********************************************************************/
@@ -1744,14 +1744,13 @@ init_trivial_stack(void)
   avma = top = bot + s;
 }
 
-static const long DEFAULT_SIZE = 1000000;
-
+/* return what is to become parisize */
 static size_t
 read_opt(gp2c_stack *p_A, long argc, char **argv)
 {
   char *b = NULL, *p = NULL, *s = NULL;
   long i = 1, initrc = 1;
-  ulong size = DEFAULT_SIZE;
+  size_t size;
 
   (void)&p; (void)&b; (void)&s; /* -Wall gcc-2.95 */
 
@@ -1813,7 +1812,8 @@ read_opt(gp2c_stack *p_A, long argc, char **argv)
 
   /* override the values from gprc */
   testuint(p, &(GP_DATA->primelimit));
-  testuint(s, &size);
+  size = top - bot;
+  testuint(s, (ulong*)&size);
   if (GP_DATA->flags & (EMACS|TEXMACS|TEST)) disable_color = 1;
   pari_outfile = stdout;
   return size;
@@ -1844,9 +1844,9 @@ main(int argc, char **argv)
 
   pari_init_defaults();
   stack_init(&s_A,sizeof(*A),(void**)&A);
-  pari_init_stack(DEFAULT_SIZE*sizeof(long));
+  pari_init_stack(1000000*sizeof(long));
   size = read_opt(&s_A, argc,argv);
-  pari_init_opts(size*sizeof(long), GP_DATA->primelimit, INIT_SIGm);
+  pari_init_opts(size, GP_DATA->primelimit, INIT_SIGm);
 #ifdef SIGALRM
   (void)os_signal(SIGALRM,gp_alarm_handler);
 #endif

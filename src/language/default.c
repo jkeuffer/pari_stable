@@ -762,12 +762,13 @@ sd_output(const char *v, long flag)
 GEN
 sd_parisize(const char *v, long flag)
 {
-  ulong oldn = top-bot, n = oldn;
+  ulong size = top - bot, n = size;
   GEN r = sd_ulong(v,flag,"parisize",&n, 10000,LONG_MAX,NULL);
-  if (n != oldn)
-  {
-    if (!bot) top = (pari_sp)n; /* no stack allocated yet */
-    if (flag != d_INITRC) allocatemem0(r);
+  if (n != size) {
+    if (flag == d_INITRC)
+      pari_init_stack(n);
+    else
+      allocatemem0(r);
   }
   return r;
 }

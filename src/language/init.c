@@ -510,29 +510,27 @@ fix_size(size_t a)
   if (b < 1024) b = 1024;
   return b;
 }
-size_t
+void
 pari_init_stack(size_t size)
 {
   size_t s = fix_size(size), old = top - bot;
   if (old != s) {
-    pari_free((void*)bot);
+    if (old) pari_free((void*)bot);
     BLOCK_SIGINT_START;
-    bot = (pari_sp)malloc(s); /* NOT pari_malloc, memer would be deadly */
-    if (!bot)
-      for (s = old;; s>>=1)
-      {
-        char buf[128];
-        if (!s) pari_err(memer); /* no way out. Die */
-        /* must use sprintf: pari stack is currently dead */
-        sprintf(buf, "not enough memory, new stack %lu", (ulong)s);
-        pari_warn(warner, buf, s);
-        bot = (pari_sp)malloc(s);
-        if (bot) break;
-      }
+    for (;; s>>=1)
+    {
+      char buf[128];
+      bot = (pari_sp)malloc(s); /* NOT pari_malloc, memer would be deadly */
+      if (bot) break;
+      if (!s) pari_err(memer); /* no way out. Die */
+      /* must use sprintf: pari stack is currently dead */
+      sprintf(buf, "not enough memory, new stack %lu", (ulong)s);
+      pari_warn(warner, buf, s);
+    }
     BLOCK_SIGINT_END;
   }
   avma = top = bot+s;
-  memused = 0; return s;
+  memused = 0;
 }
 
 /*********************************************************************/
@@ -568,6 +566,7 @@ pari_init_defaults(void)
   for (i=0; i<c_LAST; i++) gp_colors[i] = c_NONE;
   (void)sd_graphcolormap("[\"white\",\"black\",\"blue\",\"violetred\",\"red\",\"green\",\"grey\",\"gainsboro\"]", d_SILENT);
   (void)sd_graphcolors("[4, 5]", d_SILENT);
+  top = bot = 0;
 }
 
 /*********************************************************************/
@@ -634,7 +633,7 @@ gp_init_functions(void)
 void
 pari_thread_init(size_t parisize)
 {
-  (void)pari_init_stack(parisize);
+  pari_init_stack(parisize);
   pari_init_floats();
   pari_init_seadata();
 }
@@ -665,8 +664,7 @@ pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts)
     exit(1);
   }
   if ((init_opts&INIT_SIGm)) pari_sig_init(pari_sighandler);
-  bot = top = 0;
-  (void)pari_init_stack(parisize);
+  pari_init_stack(parisize);
   diffptr = initprimes(maxprime);
   init_universal_constants();
   if (pari_kernel_init()) pari_err(talker,"Cannot initialize kernel");
@@ -1655,7 +1653,8 @@ allocatemoremem(size_t newsize)
 {
   size_t s;
   if (!newsize) newsize = (top - bot) << 1;
-  s = pari_init_stack(newsize);
+  pari_init_stack(newsize);
+  s = top - bot;
   pari_warn(warner,"new stack size = %lu (%.3f Mbytes)", s, s/1048576.);
   return s;
 }
