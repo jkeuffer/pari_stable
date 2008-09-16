@@ -3186,6 +3186,13 @@ START:
     if (DEBUGLEVEL) fprintferr("\n#### Looking for random relations\n");
 MORE:
     pre_allocate(&cache, need); cache.end = cache.last + need;
+    if (++nreldep > MAXRELSUP) {
+      if (++sfb_trials <= SFB_MAX)
+       F.sfb_chg = sfb_INCREASE;
+      else if (cbach < 2)
+       goto START;
+    }
+
     if (F.sfb_chg) {
       if (!subFB_change(&F, nf, L_jid)) goto START;
       jid = nreldep = 0;
@@ -3238,6 +3245,7 @@ PRECPB:
     if (need)
     { /* dependent rows */
       if (need == old_need) F.sfb_chg = sfb_CHANGE;
+      /* don't reset nreldep, done after subFB change */
       old_need = need;
       if (need > 5)
       {
