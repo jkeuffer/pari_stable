@@ -913,11 +913,13 @@ find_trace(GEN a4, GEN a6, ulong ell, GEN p, long *ptr_kt, long EARLY_ABORT)
   case MTone_root:
     tr2 = find_trace_one_root(ell, p);
     kt = k = 1;
-    /* FIXME: why do we really always take k = 1 even if ell small ? */
+    /* Must take k = 1 because we can't apply Hensel: no guarantee that a
+     * root mod ell^2 exists */
     tr = find_trace_Elkies_power(a4,a6,ell, k, meqn,meqntype, g, tr2, p, EARLY_ABORT);
     if (!tr) tr = tr2;
     break;
   case MTElkies:
+    /* Contrary to MTone_root, may look mod higher powers of ell */
     tr = find_trace_Elkies_power(a4,a6,ell, k, meqn,meqntype, g, NULL, p, EARLY_ABORT);
     if (!tr) { avma = ltop; return NULL; }
     break;
