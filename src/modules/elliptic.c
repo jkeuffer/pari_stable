@@ -3038,8 +3038,17 @@ static GEN
 ap_bad_red(GEN e, GEN p)
 {
   pari_sp av = avma;
-  GEN c6 = Rg_to_Fp(gel(e,11), p);
-  long s = kronecker(c6, p);
+  GEN c6 = gel(e,11);
+  long s;
+  if (equaliu(p, 2))
+  {
+    long c;
+    if (!signe(c6)) return gen_0;
+    c = mod8(c6);
+    return (c == 3 || c == 5)? gen_m1: gen_1;
+  }
+  c6 = Rg_to_Fp(c6, p);
+  s = kronecker(c6, p);
   if (mod4(p) == 3) s = -s;
   avma = av; return stoi(s);
 }
