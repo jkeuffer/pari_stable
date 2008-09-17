@@ -107,7 +107,7 @@ typedef struct FB_t {
   GEN vecG, G0;
 } FB_t;
 
-enum { sfb_UNSUITABLE = -1, sfb_CHANGE = 1, sfb_INCREASE = 2 };
+enum { sfb_CHANGE = 1, sfb_INCREASE = 2 };
 
 typedef struct REL_t {
   GEN R; /* relation vector as t_VECSMALL */
@@ -281,26 +281,22 @@ subFBgen(FB_t *F, GEN nf, double PROD, long minsFB)
 static int
 subFB_change(FB_t *F, GEN nf, GEN L_jid)
 {
-  GEN yes, D = gel(nf,3);
-  long i, iyes, minsFB, chg = F->sfb_chg, lv = F->KC + 1, l = lg(F->subFB)-1;
+  long i, iyes, minsFB, lv = F->KC + 1, l = lg(F->subFB)-1;
   pari_sp av = avma;
+  GEN yes;
 
-  switch (chg)
+  switch (F->sfb_chg)
   {
     case sfb_INCREASE: minsFB = l + 1; break;
     default: minsFB = l; break;
   }
 
-  if (DEBUGLEVEL) fprintferr("*** Changing sub factor base\n");
   yes = cgetg(minsFB+1, t_VECSMALL); iyes = 1;
   if (L_jid)
   {
     for (i = 1; i < lg(L_jid); i++)
     {
-      long t = L_jid[i];
-      if (!ok_subFB(F, t, D)) continue;
-
-      yes[iyes++] = t;
+      yes[iyes++] = L_jid[i];
       if (iyes > minsFB) break;
     }
   }
@@ -309,26 +305,24 @@ subFB_change(FB_t *F, GEN nf, GEN L_jid)
   {
     for ( ; i < lv; i++)
     {
-      long t = F->perm[i];
-      if (!ok_subFB(F, t, D)) continue;
-
-      yes[iyes++] = t;
+      yes[iyes++] = F->perm[i];
       if (iyes > minsFB) break;
     }
     if (i == lv) return 0;
   }
   if (zv_equal(F->subFB, yes))
   {
-    if (chg != sfb_UNSUITABLE) F->sfb_chg = 0;
+    if (DEBUGLEVEL) fprintferr("*** NOT Changing sub factor base\n");
     F->newpow = 0;
   }
   else
   {
+    if (DEBUGLEVEL) fprintferr("*** Changing sub factor base\n");
     gunclone(F->subFB);
     F->subFB = gclone(yes);
-    F->sfb_chg = 0;
     F->newpow = 1;
   }
+  F->sfb_chg = 0;
   avma = av; return 1;
 }
 
@@ -364,7 +358,7 @@ powFBgen(FB_t *F, RELCACHE_t *cache, GEN nf)
 {
   const long a = 1<<RANDOM_BITS;
   pari_sp av = avma;
-  long i, j, c = 1, n = lg(F->subFB);
+  long i, j, n = lg(F->subFB);
   GEN Id2, Alg, Ord;
   powFB_t *old = F->pow, *New;
 
@@ -408,9 +402,9 @@ powFBgen(FB_t *F, RELCACHE_t *cache, GEN nf)
       cache->last = rel;
     }
     /* trouble with subFB: include ideal even though it's principal */
-    if (j == 1 && F->sfb_chg == sfb_UNSUITABLE) j = 2;
+    if (j == 1) j = 2;
     setlg(id2, j);
-    setlg(alg, j); Ord[i] = j; if (c < 64) c *= j;
+    setlg(alg, j); Ord[i] = j;
     if (DEBUGLEVEL>1) fprintferr("\n");
   }
   New->prev = old;
@@ -418,8 +412,7 @@ powFBgen(FB_t *F, RELCACHE_t *cache, GEN nf)
   New->ord = gclone(Ord);
   New->alg = gclone(Alg); avma = av;
   if (DEBUGLEVEL) msgtimer("powFBgen");
-  /* if c too small we'd better change the subFB soon */
-  F->sfb_chg = (c < 6)? sfb_UNSUITABLE: 0;
+  F->sfb_chg = 0;
   F->newpow = 0;
 }
 
@@ -1925,10 +1918,10 @@ red_ideal(GEN *ideal, GEN G0, GEN G, long prec)
 static GEN
 get_log_embed(REL_t *rel, GEN M, long RU, long R1, long prec)
 {
-  GEN arch, C;
+  GEN arch, C, z = rel->m;
   long i;
-  if (!rel->m) return zerocol(RU);
-  arch = RgM_RgC_mul(M, rel->m);
+  if (!z) return zerocol(RU);
+  arch = typ(z) == t_COL? RgM_RgC_mul(M, z): RgC_Rg_mul(gel(M,1), z);
   if (rel->ex)
   {
     GEN t, ex = rel->ex, x = NULL;
@@ -2385,6 +2378,16 @@ be_honest(FB_t *F, GEN nf, FACT *fact)
   F->KCZ = KCZ0; avma = av; return 1;
 }
 
+static GEN
+remove_0_cols(GEN A)
+{
+  long l = lg(A), i, k = 1;
+  GEN B = cgetg(l, t_MAT);
+  for (i = 1; i < l; i++)
+    if (gexpo(gel(A,i)) >= -2) gel(B, k++) = gel(A,i);
+  setlg(B, k); return B;
+}
+
 /* A = complex logarithmic embeddings of units (u_j) found so far */
 static GEN
 compute_multiple_of_R(GEN A,long RU,long N,GEN *ptL)
@@ -2400,16 +2403,18 @@ compute_multiple_of_R(GEN A,long RU,long N,GEN *ptL)
   }
   if (DEBUGLEVEL) fprintferr("\n#### Computing regulator multiple\n");
   xreal = real_i(A); /* = (log |sigma_i(u_j)|) */
+  mdet = remove_0_cols(xreal);
+  if (lg(mdet) < RU) { avma = av; return NULL; }
   T = cgetg(RU+1,t_COL);
   for (i=1; i<=R1; i++) gel(T,i) = gen_1;
   for (   ; i<=RU; i++) gel(T,i) = gen_2;
-  mdet = shallowconcat(xreal,T); /* det(Span(mdet)) = N * R */
+  mdet = shallowconcat(mdet,T); /* det(Span(mdet)) = N * R */
 
   i = gprecision(mdet); /* truncate to avoid "near dependent" vectors */
   mdet2 = (i <= 4)? mdet: gprec_w(mdet,i-1);
   v = gel(indexrank(mdet2),2); /* list of independent column indices */
   /* check we have full rank for units */
-  if (lg(v) != RU+1) { avma=av; return NULL; }
+  if (lg(v) != RU+1) { avma = av; return NULL; }
 
   Im_mdet = vecpermute(mdet,v);
   /* integral multiple of R: the cols we picked form a Q-basis, they have an
@@ -2419,7 +2424,7 @@ compute_multiple_of_R(GEN A,long RU,long N,GEN *ptL)
   if (!signe(kR) || expo(kR) < -3) { avma=av; return NULL; }
 
   setabssign(kR);
-  L = RgM_solve(Im_mdet,NULL); /* Im_mdet^(-1) */
+  L = RgM_inv(Im_mdet);
   if (!L) { *ptL = NULL; return kR; }
 
   L = RgM_mul(rowslice(L, 1, RU-1), xreal); /* approximate rational entries */
@@ -3191,12 +3196,9 @@ START:
 MORE:
     pre_allocate(&cache, need); cache.end = cache.last + need;
     if (++nreldep > MAXRELSUP) {
-      if (++sfb_trials <= SFB_MAX)
-       F.sfb_chg = sfb_INCREASE;
-      else if (cbach < 2)
-       goto START;
+      if (++sfb_trials > SFB_MAX && cbach < 2) goto START;
+      F.sfb_chg = sfb_INCREASE;
     }
-
     if (F.sfb_chg) {
       if (!subFB_change(&F, nf, L_jid)) goto START;
       jid = nreldep = 0;
@@ -3290,7 +3292,7 @@ PRECPB:
     if (F.newpow) powFBgen(&F, NULL, nf);
     if (F.sfb_chg) {
       if (!subFB_change(&F, nf, L_jid)) goto START;
-      powFBgen(&F, NULL, nf);
+      if (F.newpow) powFBgen(&F, NULL, nf);
     }
     if (!be_honest(&F, nf, fact)) goto START;
   }
