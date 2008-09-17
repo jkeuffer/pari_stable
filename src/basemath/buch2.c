@@ -320,14 +320,16 @@ subFB_change(FB_t *F, GEN nf, GEN L_jid)
   if (zv_equal(F->subFB, yes))
   {
     if (chg != sfb_UNSUITABLE) F->sfb_chg = 0;
+    F->newpow = 0;
   }
   else
   {
     gunclone(F->subFB);
     F->subFB = gclone(yes);
     F->sfb_chg = 0;
+    F->newpow = 1;
   }
-  F->newpow = 1; avma = av; return 1;
+  avma = av; return 1;
 }
 
 static GEN
