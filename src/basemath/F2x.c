@@ -42,8 +42,7 @@ polx_F2x(long sv) { return mkvecsmall2(sv, 2); }
 INLINE long
 F2x_degree_lg(GEN x, long l)
 {
-  if (l==2) return -1;
-  else return ((l-3)<<TWOPOTBITS_IN_LONG)+BITS_IN_LONG-1-bfffo(x[l-1]);
+  return (l==2)?-1:bit_accuracy(l)-bfffo(x[l-1])-1;
 }
 
 long
@@ -55,15 +54,15 @@ F2x_degree(GEN x)
 INLINE ulong
 F2x_get_coeff(GEN x,long v)
 {
-   ulong u=(ulong)x[2+(v>>TWOPOTBITS_IN_LONG)];
-   return (u>>(v&(BITS_IN_LONG-1)))&1UL;
+   ulong u=(ulong)x[2+divsBIL(v)];
+   return (u>>remsBIL(v))&1UL;
 }
 
 INLINE void
 F2x_set_coeff(GEN x,long v)
 {
-   ulong* u=(ulong*)&x[2+(v>>TWOPOTBITS_IN_LONG)];
-   *u^=1UL<<(v&(BITS_IN_LONG-1UL));
+   ulong* u=(ulong*)&x[2+divsBIL(v)];
+   *u^=1UL<<remsBIL(v);
 }
 
 GEN
@@ -95,8 +94,8 @@ F2x_to_Flx(GEN x)
 GEN
 ZX_to_F2x(GEN x)
 {
-  long l=(lgpol(x)+BITS_IN_LONG-1)>>TWOPOTBITS_IN_LONG;
-  GEN z=cgetg(2+l,t_VECSMALL);
+  long l=nbits2prec(lgpol(x));
+  GEN z=cgetg(l,t_VECSMALL);
   long i,j,k;
   z[1]=((ulong)x[1])&VARNBITS;
   for(i=2, k=1,j=BITS_IN_LONG;i<lg(x);i++,j++)
@@ -108,14 +107,14 @@ ZX_to_F2x(GEN x)
     if (mpodd(gel(x,i)))
       z[k]|=1UL<<j;
   }
-  return F2x_renormalize(z,2+l);
+  return F2x_renormalize(z,l);
 }
 
 GEN
 Flx_to_F2x(GEN x)
 {
-  long l=(lgpol(x)+BITS_IN_LONG-1)>>TWOPOTBITS_IN_LONG;
-  GEN z=cgetg(2+l,t_VECSMALL);
+  long l=nbits2prec(lgpol(x));
+  GEN z=cgetg(l,t_VECSMALL);
   long i,j,k;
   z[1]=x[1];
   for(i=2, k=1,j=BITS_IN_LONG;i<lg(x);i++,j++)
@@ -125,9 +124,9 @@ Flx_to_F2x(GEN x)
       j=0; k++; z[k]=0;
     }
     if (x[i])
-      z[k]|=(1<<j);
+      z[k]|=1UL<<j;
   }
-  return F2x_renormalize(z,2+l);
+  return F2x_renormalize(z,l);
 }
 
 GEN
@@ -337,8 +336,7 @@ F2x_sqr(GEN x)
 INLINE void
 F2x_addshiftip(GEN x, GEN y, ulong d)
 {
-  ulong dl=d>>TWOPOTBITS_IN_LONG;
-  ulong db=d&(BITS_IN_LONG-1UL);
+  ulong db, dl=dvmduBIL(d, &db);
   long i;
   if (db)
   {
@@ -531,10 +529,10 @@ F2xq_conjvec(GEN x, GEN T)
 GEN
 random_F2x(long d, long vs)
 {
-  long i, l = 3 + (d>>TWOPOTBITS_IN_LONG);
+  long i, l = nbits2prec(d+1);
   GEN y = cgetg(l,t_VECSMALL); y[1] = vs;
   for (i=2; i<l; i++) y[i] = pari_rand();
-  y[l-1] &= (1UL<<(d&(BITS_IN_LONG-1UL)))-1UL;
+  y[l-1] &= (1UL<<remsBIL(d))-1UL;
   return F2x_renormalize(y,l);
 }
 
