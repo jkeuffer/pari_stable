@@ -559,6 +559,15 @@ row_i(GEN A, long x0, long x1, long x2)
 }
 
 INLINE GEN
+vecreverse(GEN A)
+{
+  long i,l = lg(A);
+  GEN B = cgetg(l, typ(A));
+  for (i=1; i<l; i++) gel(B, i) = gel(A, l-i);
+  return B;
+}
+
+INLINE GEN
 vecpermute(GEN A, GEN p)
 {
   long i,lB = lg(p);
