@@ -3212,8 +3212,7 @@ geval_gp(GEN x, GEN t)
   switch(tx)
   {
     case t_STR:
-      if (t) localvars_unpack(t);
-      return gp_read_str(GSTR(x));
+      return localvars_read_str(GSTR(x),t);
 
     case t_POLMOD:
       av = avma;

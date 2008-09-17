@@ -297,14 +297,23 @@ closure_context(GEN C, long lpc)
   }
 }
 
-void
-localvars_unpack(GEN pack)
+GEN
+localvars_read_str(const char *x, GEN pack)
 {
-  GEN t=gel(pack,1);
-  GEN e=gel(pack,2);
-  long i;
-  for(i=1;i<lg(t);i++)
-    var_push((entree*)e[i],(Ltype)t[i]);
+  GEN res;
+  long l=0;
+  if (pack)
+  {
+    GEN t=gel(pack,1);
+    GEN e=gel(pack,2);
+    long i;
+    l=lg(t)-1;
+    for(i=1;i<=l;i++)
+      var_push((entree*)e[i],(Ltype)t[i]);
+  }
+  res = gp_read_str(x);
+  s_lvar.n -= l;
+  return res;
 }
 
 long

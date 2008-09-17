@@ -223,7 +223,7 @@ readseq(char *t)
 
 /* filtered readseq = remove blanks and comments */
 GEN
-gp_read_str(char *s)
+gp_read_str(const char *s)
 {
   char *t = filtre(s, (compatible == OLDALL));
   GEN x = readseq(t);
