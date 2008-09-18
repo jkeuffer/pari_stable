@@ -605,7 +605,7 @@ polequal(GEN x, GEN y)
   lx = lg(x); ly = lg(y);
   while (lx > ly) if (!gcmp0(gel(x,--lx))) return 0;
   while (ly > lx) if (!gcmp0(gel(y,--ly))) return 0;
-  for (; lx >= 2; lx--) if (!gequal(gel(x,lx), gel(y,lx))) return 0;
+  for (lx--; lx >= 2; lx--) if (!gequal(gel(x,lx), gel(y,lx))) return 0;
   return 1;
 }
 
