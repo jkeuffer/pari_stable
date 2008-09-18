@@ -775,7 +775,7 @@ primes(long m)
   {
     NEXT_PRIME_VIADIFF(prime,p);
     if (!*p) /* use something close to Dusart's bound */
-      pari_err(primer2, (long)(m*( log((double)m*log((double)m))-0.948 )));
+      maxprime_check((ulong)(m*( log((double)m*log((double)m))-0.948 )));
     gel(++z, 0) = utoi(prime);
   }
   return y;
