@@ -52,7 +52,7 @@ enum {
 
 /* trans.c */
 
-  infprecer, negexper, sqrter5,
+  negexper, sqrter5,
 
 /* PAS D'ERREUR */
 

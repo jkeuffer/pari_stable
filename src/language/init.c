@@ -1016,8 +1016,7 @@ pari_err(long numerr, ...)
       case impl:
 	pari_printf(" %s is not yet implemented.", va_arg(ap, char*)); break;
 
-      case typeer: case mattype1:
-      case infprecer: case negexper:
+      case typeer: case mattype1: case negexper:
       case constpoler: case notpoler: case redpoler:
       case zeropoler: case consister: case flagerr: case precer:
 	pari_printf(" in %s.",va_arg(ap, char*)); break;

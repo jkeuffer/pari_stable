@@ -117,8 +117,6 @@ const char *errmessage[]=
 
   /*  TRANS.C  */
 
-/* infprecer */
-  "infinite precision",
 /* negexper */
   "negative exponent",
 /* sqrter5 */

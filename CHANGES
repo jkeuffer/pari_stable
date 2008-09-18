@@ -474,7 +474,7 @@ BA 28- GP function galoisisnormal().
     7- obsolete optional argument to quadhilbert(D < 0)
     8- unused undocumented library functions os_open/os_read/os_close
     9- obsolete README.DOS and README.WIN
-   10- cant_deflate, elliper1, lllger3, varer1, obsoler error codes
+   10- cant_deflate, elliper1, lllger3, varer1, obsoler, infprecer error codes
    11- obsolete library function bruteall
    12- useless undocumented library function gkrogs (use krois)
    13- obsolete library functions roots2 and rootsold are no longer public
