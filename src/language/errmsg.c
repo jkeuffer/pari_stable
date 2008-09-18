@@ -20,7 +20,7 @@ const char *errmessage[]=
 /* talker2 */
   "",
 /* openfiler */
-  "error opening ",
+  "",
 
 /* warner */
   "Warning:",

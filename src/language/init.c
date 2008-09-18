@@ -933,14 +933,13 @@ pari_warn(long numerr, ...)
 }
 
 #define HAS_CONTEXT(num) (num < talker)
-#define SYNTAX_ERROR(num) (num < openfiler)
+#define SYNTAX_ERROR(num) (num == talker2)
 
 static int
 is_warn(long num) { return num >= warner && num <= warnmem; }
 void
 pari_err(long numerr, ...)
 {
-  char s[128], *ch1;
   PariOUT *out = pariOut;
   va_list ap;
 
@@ -969,22 +968,11 @@ pari_err(long numerr, ...)
   pariOut = pariErr;
   term_color(c_ERR);
 
-  if (HAS_CONTEXT(numerr))
+  if (numerr == talker2)
   {
-    strcpy(s, errmessage[numerr]);
-    switch (numerr)
-    {
-      case openfiler:
-	sprintf(s+strlen(s), "%s file", va_arg(ap,char*));
-	ch1 = va_arg(ap,char *);
-	print_errcontext(s,ch1,ch1); break;
-
-      case talker2:
-	strcat(s,va_arg(ap, char*)); /* fall through */
-      default:
-	ch1 = va_arg(ap,char *);
-	print_errcontext(s,ch1,va_arg(ap,char *));
-    }
+    const char *msg = va_arg(ap, char*);
+    const char *s = va_arg(ap,char *);
+    print_errcontext(msg,s,va_arg(ap,char *));
   }
   else if (numerr == user)
   {
@@ -1003,10 +991,15 @@ pari_err(long numerr, ...)
       pari_printf("  ***   %s", errmessage[numerr]);
     switch (numerr)
     {
-      case talker: case siginter: case alarmer: case invmoder:
-	ch1=va_arg(ap, char*);
+      case talker: case siginter: case alarmer: case invmoder: {
+	const char *ch1 = va_arg(ap, char*);
 	pari_vprintf(ch1,ap); pari_putc('.'); break;
-
+      }
+      case openfiler: {
+	const char *type = va_arg(ap, char*);
+	pari_printf("error opening %s file: `%s'.", type, va_arg(ap,char*));
+        break;
+      }
       case notfuncer:
       {
         GEN fun = va_arg(ap, GEN);
@@ -1021,8 +1014,7 @@ pari_err(long numerr, ...)
       }
 
       case impl:
-	ch1=va_arg(ap, char*);
-	pari_printf(" %s is not yet implemented.",ch1); break;
+	pari_printf(" %s is not yet implemented.", va_arg(ap, char*)); break;
 
       case typeer: case mattype1:
       case infprecer: case negexper:
