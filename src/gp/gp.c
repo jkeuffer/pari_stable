@@ -603,7 +603,7 @@ cut_trailing_garbage(char *s)
   {
     if (c == '\\' && ! *s++) return; /* gobble next char, return if none. */
     else
-      if (!is_keyword_char(c)) { s[-1] = 0; return; }
+      if (!is_keyword_char(c) && c != '@') { s[-1] = 0; return; }
   }
 }
 
