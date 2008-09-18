@@ -470,7 +470,7 @@ compilecast(long n, int type, int mode)
     break;
   case Gvar:
     if (type==Ggen)        op_push(OCvarn,-1,n);
-    else compile_varer1(tree[n].str);
+    else compile_varerr(tree[n].str);
      break;
   default:
     pari_err(bugparier,"compilecast, type unknown %ld",mode);
@@ -493,7 +493,7 @@ getsymbol(long n)
 {
   n = detag(n);
   if (tree[n].f!=Fentry)
-    compile_varer1(tree[n].str);
+    compile_varerr(tree[n].str);
   return get_entree(n);
 }
 
@@ -516,7 +516,7 @@ getvar(long n)
 {
   entree *ep = getentry(n);
   if (EpSTATIC(do_alias(ep)))
-    compile_varer1(tree[n].str);
+    compile_varerr(tree[n].str);
   return ep;
 }
 
@@ -1494,7 +1494,7 @@ compilenode(long n, int mode, long flag)
       if (tree[n].x!=CSTquote)
       {
         if (mode==Gvoid) return;
-        if (mode==Gvar) compile_varer1(tree[n].str);
+        if (mode==Gvar) compile_varerr(tree[n].str);
       }
       if (mode==Gsmall)
         compile_err("this should be a small integer", tree[n].str);
@@ -1513,7 +1513,7 @@ compilenode(long n, int mode, long flag)
       case CSTquote:
         {
           entree *ep = fetch_entry(tree[n].str+1,tree[n].len-1);
-          if (EpSTATIC(ep)) compile_varer1(tree[n].str+1);
+          if (EpSTATIC(ep)) compile_varerr(tree[n].str+1);
           op_push(OCpushvar, (long)ep,n);
           compilecast(n,Ggen, mode);
           break;

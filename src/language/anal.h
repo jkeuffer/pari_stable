@@ -70,7 +70,7 @@ long   did_break(void);
 void   pari_fill_hashtable(entree **table, entree *ep);
 
 void compile_err(const char *msg, const char *str);
-void compile_varer1(const char *str);
+void compile_varerr(const char *str);
 
 extern int  (*whatnow_fun)(const char *, int);
 extern void (*sigint_fun)(void);

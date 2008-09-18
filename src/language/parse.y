@@ -81,9 +81,9 @@ compile_err(const char *msg, const char *str)
 }
 
 void
-compile_varer1(const char *str)
+compile_varerr(const char *str)
 {
-  pari_err(varer1, str, pari_lex_start);
+  pari_err(talker2, "variable name expected", str, pari_lex_start);
 }
 
 void

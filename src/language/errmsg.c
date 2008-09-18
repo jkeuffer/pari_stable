@@ -17,8 +17,6 @@ const char *errmessage[]=
 {
 /* force error into non-0 */
   "",
-/* varer1 */
-  "variable name expected",
 /* obsoler */
   "obsolete function",
 /* talker2 */
@@ -26,8 +24,6 @@ const char *errmessage[]=
 
 /* openfiler */
   "error opening ",
-
-/* NO CONTEXT NOW */
 
 /* warner */
   "Warning:",
