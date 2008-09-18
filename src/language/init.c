@@ -1031,12 +1031,19 @@ pari_err(long numerr, ...)
         const char *f, *op = va_arg(ap, const char*);
 	GEN x = va_arg(ap, GEN);
 	GEN y = va_arg(ap, GEN);
-	     if (*op == '+') f = "addition";
-	else if (*op == '*') f = "multiplication";
-	else if (*op == '/' || *op == '%' || *op == '\\') f = "division";
-	else if (*op == 'g') { op = ","; f = "gcd"; }
-	else { op = "-->"; f = "assignment"; }
-	pari_printf(" %s %s %s %s.",f,type_name(typ(x)),op,type_name(typ(y)));
+        switch(*op)
+        {
+          case '+': f = "addition"; break;
+          case '-':
+            pari_printf(" negation - %s.",type_name(typ(x)));
+            f = NULL; break;
+          case '*': f = "multiplication"; break;
+          case '/': case '%': case '\\': f = "division"; break;
+          case 'g': op = ","; f = "gcd"; break;
+          default: op = "-->"; f = "assignment"; break;
+        }
+        if (f)
+          pari_printf(" %s %s %s %s.",f,type_name(typ(x)),op,type_name(typ(y)));
 	break;
       }
 

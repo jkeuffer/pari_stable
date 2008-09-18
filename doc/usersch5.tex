@@ -1963,6 +1963,13 @@ $\kbd{x}-\kbd{y}$.
 \fun{int}{equalii}{GEN x, GEN y} compares the \typ{INT}s \kbd{x} and~\kbd{y}.
 The result is $1$ if $\kbd{x} = \kbd{y}$, $0$ otherwise.
 
+\fun{int}{equalrr}{GEN x, GEN y} compares the \typ{REAL}s \kbd{x} and~\kbd{y}.
+The result is $1$ if $\kbd{x} = \kbd{y}$, $0$ otherwise. Equality is decided
+according to the following rules: all real zeroes are equal, and
+different from a non-zero real; two non-zero reals are equal if all their
+digits conincide up to the length of the shortest of the two, and the
+remaining words in the mantissa of the longest are all $0$.
+
 \fun{int}{equalsi}{long s, GEN x}
 
 \fun{int}{equalis}{GEN x, long s} compare the \typ{INT} \kbd{x} and
@@ -4553,10 +4560,10 @@ The following routines check whether matrices or vectors have a special
 shape, using \kbd{gcmp1} and \kbd{gcmp0} to test components. (This makes a
 difference when components are inexact.)
 
-\fun{int}{RgV_isscalar}{GEN x} return 1 if $x$ all the entries of $x$ are $0$
-except possibly the first one. The name comes from vectors expressed on a
-standard polynomial basis $1,T,\dots, T^{n-1}$, or on \kbd{nf.zk} (whose
-first element is $1$).
+\fun{int}{RgV_isscalar}{GEN x} return 1 if all the entries of $x$ are $0$
+(as per \kbd{gcmp0}), except possibly the first one. The name comes from
+vectors expressing polynomials on the standard basis $1,T,\dots, T^{n-1}$, or
+on \kbd{nf.zk} (whose first element is $1$).
 
 \fun{int}{QV_isscalar}{GEN x} as \kbd{RgV\_isscalar}, assuming $x$ is a
 \kbd{QV} (\typ{INT} and \typ{FRAC} entries only).
@@ -4824,6 +4831,9 @@ is defined, to the proper accuracy (e.g. \kbd{0}, \kbd{Mod(0,3)},
 \fun{GEN}{RgX_get_1}{GEN x} returns $1$ in the base ring over which $x$
 is defined, to the proper accuracy (e.g. \kbd{0}, \kbd{Mod(0,3)},
 
+\fun{int}{RgX_isscalar}{GEN x} return 1 if $x$ all the coefficients of
+$x$ of degree $> 0$ are $0$ (as per \kbd{gcmp0}).
+
 \fun{GEN}{RgX_add}{GEN x,GEN y} adds \kbd{x} and \kbd{y}.
 
 \fun{GEN}{RgX_sub}{GEN x,GEN y} subtracts \kbd{x} and \kbd{y}.
@@ -4973,9 +4983,12 @@ rational coefficients (\typ{INT} and \typ{FRAC}), and 0 otherwise.
 \fun{int}{RgX_is_monomial}{GEN x} returns 1 (true) if \kbd{x} is a non-zero
 monomial in its main variable, 0~otherwise.
 
-\fun{long}{RgX_equal}{GEN x, GEN y} returns $1$ if $x$ and $y$ have the same
-degree and their coefficients are equal (as per \tet{gequal}). Variable
-numbers are not checked.
+\fun{long}{RgX_equal}{GEN x, GEN y} returns $1$ if the \typ{POL}s $x$ and $y$
+have the same \kbd{degpol} and their coefficients are equal (as per
+\tet{gequal}). Variable numbers are not checked. Note that this is more
+stringent than \kbd{gequal(x,y)}, which only checks whether $x - y$ satisfies
+\kbd{gcmp0}; in particular, they may have different apparent degrees provided
+the extra leading terms are $0$.
 
 \fun{long}{RgX_equal_var}{GEN x, GEN y} returns $1$ if $x$ and $y$
 have the same variable number and \kbd{RgX\_equal(x,y)} is $1$.
@@ -5251,13 +5264,13 @@ $\deg_v(\kbd{P})$.
 \fun{GEN}{RgX_to_ser}{GEN x, long l} applied to a \typ{POL}~\kbd{x}, creates
 a \emph{shallow} \typ{SER} of length~$l\geq 2$ starting with~\kbd{x}.
 Unless the polynomial is an exact zero, the coefficient of lowest degree
-$T^d$ of the result is not an exact zero (as per \kbd{isexactzero}). The 
+$T^d$ of the result is not an exact zero (as per \kbd{isexactzero}). The
 remainder is $O(T^{d+l})$.
 
 \fun{GEN}{RgX_to_ser_inexact}{GEN x, long l} applied to a \typ{POL}~\kbd{x},
 creates a \emph{shallow} \typ{SER} of length~\kbd{l} starting with~\kbd{x}.
 Unless the polynomial is zero, the coefficient of lowest degree
-$T^d$ of the result is not zero (as per \kbd{gcmp0}). The 
+$T^d$ of the result is not zero (as per \kbd{gcmp0}). The
 remainder is $O(T^{d+l})$.
 
 \fun{GEN}{gtoser}{GEN x, long v} converts the object~\kbd{x} into a \typ{SER}
@@ -6688,7 +6701,7 @@ to another format, see \tet{galoisexport}.
 \fun{long}{group_ident_trans}{GEN grp, GEN elts} returns the index of the
 regular representation of the small group \var{grp} in the GAP4 Transitive
 Group library, see \tet{polgalois}. If \var{elts} is no \kbd{NULL}, it must be
-the list of elements of \var{grp}. 
+the list of elements of \var{grp}.
 
 \newpage
 \chapter{Standard data structures}

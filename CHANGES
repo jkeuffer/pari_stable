@@ -114,6 +114,7 @@ IM 90- lngamma(x) gave incorrect results (off by 2*Pi*I) when real(x) was a
        the last bit of the result, but could cause SEGV on empty stack.
    96- After A=1/(y + 0.); B=1. + O(y); all of A*B, A/B, B/A caused an error
    97- wrong result in ellap(E, 2) if bad reduction
+   98- 0.*x+1 == 1 --> 1 but 0.*x^2+x == x  --> 0 [ latter is now 1 ]
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]

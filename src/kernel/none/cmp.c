@@ -29,7 +29,6 @@ equalii(GEN x, GEN y)
   if ((x[1] & (LGBITS|SIGNBITS)) != (y[1] & (LGBITS|SIGNBITS))) return 0;
   return absi_equal_lg(x, y, lgefint(x));
 }
-#undef MASK
 
 int
 cmpii(GEN x, GEN y)
@@ -48,6 +47,31 @@ cmpii(GEN x, GEN y)
     return absi_cmp_lg(x, y, lx);
   else
     return -absi_cmp_lg(x, y, lx);
+}
+
+int
+equalrr(GEN x, GEN y)
+{
+  long lx, ly, i;
+
+  if (!signe(x)) return signe(y) == 0; /* all zeroes are equal */
+  if (x[1] != y[1]) return 0; /* includes signe(y) = 0 */
+
+  lx = lg(x);
+  ly = lg(y);
+  if (lx < ly)
+  {
+    i=2; while (i<lx && x[i]==y[i]) i++;
+    if (i<lx) return 0;
+    for (; i < ly; i++) if (y[i]) return 0;
+  }
+  else
+  {
+    i=2; while (i<ly && x[i]==y[i]) i++;
+    if (i<ly) return 0;
+    for (; i < lx; i++) if (x[i]) return 0;
+  }
+  return 1;
 }
 
 int

@@ -433,6 +433,14 @@ RgV_isscalar(GEN x)
     if (!gcmp0(gel(x, i))) return 0;
   return 1;
 }
+INLINE int
+RgX_isscalar(GEN x)
+{
+  long i;
+  for (i=lg(x)-1; i>2; i--)
+    if (!gcmp0(gel(x, i))) return 0;
+  return 1;
+}
 
 /*************************************************************************/
 /**                                                                     **/

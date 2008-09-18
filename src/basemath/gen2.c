@@ -596,42 +596,32 @@ lexcmp(GEN x, GEN y)
 /*                returns 1 if x == y, 0 otherwise               */
 /*                                                               */
 /*****************************************************************/
-#define MASK(x) (((ulong)(x)) & (TYPBITS | LGBITS))
-
 /* x,y t_POL */
 static int
-polegal(GEN x, GEN y)
+polequal(GEN x, GEN y)
 {
-  long i, lx;
-
-  while (lg(x) == 3) { x = gel(x,2); if (typ(x) != t_POL) break; }
-  while (lg(y) == 3) { y = gel(y,2); if (typ(y) != t_POL) break; }
-  if (MASK(x[0]) != MASK(y[0]))
-    return (typ(x) == t_POL || typ(y) == t_POL)? 0: gequal(x, y);
-  /* same typ, lg */
-  if (typ(x) != t_POL) return gequal(x, y);
-  /* typ = t_POL, non-constant or 0 */
-  lx = lg(x); if (lx == 2) return 1; /* 0 in two different vars are = */
+  long lx, ly;
   if (x[1] != y[1]) return 0;
-  for (i = 2; i < lx; i++)
-    if (!gequal(gel(x,i),gel(y,i))) return 0;
+  lx = lg(x); ly = lg(y);
+  while (lx > ly) if (!gcmp0(gel(x,--lx))) return 0;
+  while (ly > lx) if (!gcmp0(gel(y,--ly))) return 0;
+  for (; lx >= 2; lx--) if (!gequal(gel(x,lx), gel(y,lx))) return 0;
   return 1;
 }
 
 /* typ(x) = typ(y) = t_VEC/COL/MAT */
 static int
-vecegal(GEN x, GEN y)
+vecequal(GEN x, GEN y)
 {
   long i;
-  if (MASK(x[0]) != MASK(y[0])) return 0;
-
+  if ((x[0] ^ y[0]) & (TYPBITS|LGBITS)) return 0;
   for (i = lg(x)-1; i; i--)
     if (! gequal(gel(x,i),gel(y,i)) ) return 0;
   return 1;
 }
 
 static int
-gegal_try(GEN x, GEN y)
+gequal_try(GEN x, GEN y)
 {
   int i;
   CATCH(CATCH_ALL) {
@@ -646,19 +636,20 @@ int
 gequal(GEN x, GEN y)
 {
   pari_sp av;
-  long tx;
+  long tx, ty;
   long i;
 
   if (x == y) return 1;
   tx = typ(x);
-  if (tx==typ(y))
+  ty = typ(y);
+  if (tx == ty)
     switch(tx)
     {
       case t_INT:
 	return equalii(x,y);
 
       case t_REAL:
-	return cmprr(x,y) == 0;
+	return equalrr(x,y);
 
       case t_FRAC: case t_INTMOD:
 	return equalii(gel(x,2), gel(y,2)) && equalii(gel(x,1), gel(y,1));
@@ -668,7 +659,7 @@ gequal(GEN x, GEN y)
       case t_POLMOD:
 	return gequal(gel(x,2),gel(y,2)) && RgX_equal_var(gel(x,1),gel(y,1));
       case t_POL:
-	return polegal(x,y);
+	return polequal(x,y);
 
       case t_FFELT:
 	return FF_equal(x,y);
@@ -692,15 +683,14 @@ gequal(GEN x, GEN y)
       case t_STR:
 	return !strcmp(GSTR(x),GSTR(y));
       case t_VEC: case t_COL: case t_MAT:
-	return vecegal(x,y);
+	return vecequal(x,y);
       case t_VECSMALL:
         return zv_equal(x,y);
     }
   (void)&av; /* emulate volatile */
-  av = avma; i = gegal_try(x, y);
+  av = avma; i = gequal_try(x, y);
   avma = av; return i;
 }
-#undef MASK
 
 int
 gequalsg(long s, GEN x)
@@ -1096,25 +1086,25 @@ gneg(GEN x)
     case t_REAL:
       return mpneg(x);
 
+    case t_INTMOD: y=cgetg(3,t_INTMOD);
+      gel(y,1) = icopy(gel(x,1));
+      gel(y,2) = signe(gel(x,2))? subii(gel(y,1),gel(x,2)): gen_0;
+      break;
+
+    case t_FRAC:
+      y = cgetg(3, t_FRAC);
+      gel(y,1) = negi(gel(x,1));
+      gel(y,2) = icopy(gel(x,2)); break;
+
     case t_COMPLEX:
       y=cgetg(3, t_COMPLEX);
       gel(y,1) = gneg(gel(x,1));
       gel(y,2) = gneg(gel(x,2));
       break;
 
-    case t_INTMOD: y=cgetg(3,t_INTMOD);
-      gel(y,1) = icopy(gel(x,1));
-      gel(y,2) = signe(gel(x,2))? subii(gel(y,1),gel(x,2)): gen_0;
-      break;
-
     case t_POLMOD: y=cgetg(3,t_POLMOD);
       gel(y,1) = gcopy(gel(x,1));
       gel(y,2) = gneg(gel(x,2)); break;
-
-    case t_FRAC:
-      y = cgetg(3, t_FRAC);
-      gel(y,1) = negi(gel(x,1));
-      gel(y,2) = icopy(gel(x,2)); break;
 
     case t_RFRAC:
       y = cgetg(3, t_RFRAC);
@@ -1122,7 +1112,7 @@ gneg(GEN x)
       gel(y,2) = gcopy(gel(x,2)); break;
 
     case t_PADIC:
-      y=cgetp2(x,valp(x));
+      y = cgetp2(x,valp(x));
       gel(y,4) = subii(gel(x,3),gel(x,4));
       break;
 
@@ -1142,7 +1132,7 @@ gneg(GEN x)
     case t_COL: return RgC_neg(x);
     case t_MAT: return RgM_neg(x);
     default:
-      pari_err(typeer,"negation");
+      pari_err(operf,"-",x,NULL);
       return NULL; /* not reached */
   }
   return y;
@@ -1161,7 +1151,8 @@ gneg_i(GEN x)
     case t_REAL:
       return mpneg(x);
 
-    case t_INTMOD: y=cgetg(3,t_INTMOD); y[1]=x[1];
+    case t_INTMOD: y=cgetg(3,t_INTMOD);
+      gel(y,1) = gel(x,1);
       gel(y,2) = signe(gel(x,2))? subii(gel(y,1),gel(x,2)): gen_0;
       break;
 
@@ -1175,16 +1166,20 @@ gneg_i(GEN x)
       gel(y,1) = gneg_i(gel(x,1));
       gel(y,2) = gneg_i(gel(x,2)); break;
 
-    case t_PADIC: y = cgetg(5,t_PADIC); y[2]=x[2]; y[3]=x[3];
+    case t_PADIC: y = cgetg(5,t_PADIC);
       y[1] = evalprecp(precp(x)) | evalvalp(valp(x));
+      gel(y,2) = gel(x,2);
+      gel(y,3) = gel(x,3);
       gel(y,4) = subii(gel(x,3),gel(x,4)); break;
 
-    case t_POLMOD: y=cgetg(3,t_POLMOD); y[1]=x[1];
+    case t_POLMOD: y=cgetg(3,t_POLMOD);
+      gel(y,1) = gel(x,1);
       gel(y,2) = gneg_i(gel(x,2)); break;
 
     case t_FFELT: return FF_neg_i(x);
 
-    case t_QUAD: y=cgetg(4,t_QUAD); y[1]=x[1];
+    case t_QUAD: y=cgetg(4,t_QUAD);
+      gel(y,1) = gel(x,1);
       gel(y,2) = gneg_i(gel(x,2));
       gel(y,3) = gneg_i(gel(x,3)); break;
 
@@ -1204,7 +1199,7 @@ gneg_i(GEN x)
       gel(y,2) = gel(x,2); break;
 
     default:
-      pari_err(typeer,"negation");
+      pari_err(operf,"-",x,NULL);
       return NULL; /* not reached */
   }
   return y;
