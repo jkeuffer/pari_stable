@@ -15,12 +15,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 enum {
 /* Force errors into non-0 */
-  obsoler = 1, talker2, /* syntax errors */
+  talker2 = 1, /* syntax errors */
 
   openfiler,
 
   warner, warnprec, warnfile, warnmem, talker,
-  flagerr, bugparier, impl, archer, precer,
+  flagerr, bugparier, impl, archer, notfuncer,
+  
+  precer,
 
   siginter, alarmer, typeer, consister, user,
 

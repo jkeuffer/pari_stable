@@ -17,11 +17,8 @@ const char *errmessage[]=
 {
 /* force error into non-0 */
   "",
-/* obsoler */
-  "obsolete function",
 /* talker2 */
   "",
-
 /* openfiler */
   "error opening ",
 
@@ -44,6 +41,9 @@ const char *errmessage[]=
   "sorry,",
 /* archer */
   "sorry, not yet available on this system",
+/* notfuncer */
+  "not a function in function call",
+
 /* precer */
   "precision too low",
 /* siginter */

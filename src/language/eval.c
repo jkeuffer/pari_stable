@@ -1058,20 +1058,7 @@ closure_eval(GEN C)
         GEN fun = gel(st,sp-1-n);
         long arity;
         GEN z;
-        if (typ(fun)!=t_CLOSURE)
-        {
-          if (typ(fun) == t_POL && lg(fun) == 4
-              && gel(fun,2)==gen_0 && gel(fun,3)==gen_1)
-          {
-            int w;
-            ep = varentries[varn(fun)];
-            if (whatnow_fun && (w = whatnow_fun(ep->name,1)))
-              pari_err(obsoler, ep->name, w);
-            else
-              pari_err(talker,"not a function: `%s'",ep->name);
-          }
-          pari_err(talker,"not a function in function call");
-        }
+        if (typ(fun)!=t_CLOSURE) pari_err(notfuncer, fun);
         arity=fun[1];
         if (n>arity)
           pari_err(talker,"too many parameters in user-defined function call");

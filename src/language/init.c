@@ -974,12 +974,6 @@ pari_err(long numerr, ...)
     strcpy(s, errmessage[numerr]);
     switch (numerr)
     {
-      case obsoler:
-	print_errcontext(s,NULL,NULL);
-	ch1 = va_arg(ap,char *);
-	whatnow_new_syntax(ch1, va_arg(ap,int));
-	break;
-
       case openfiler:
 	sprintf(s+strlen(s), "%s file", va_arg(ap,char*));
 	ch1 = va_arg(ap,char *);
@@ -1012,6 +1006,19 @@ pari_err(long numerr, ...)
       case talker: case siginter: case alarmer: case invmoder:
 	ch1=va_arg(ap, char*);
 	pari_vprintf(ch1,ap); pari_putc('.'); break;
+
+      case notfuncer:
+      {
+        GEN fun = va_arg(ap, GEN);
+        if (gcmpX(fun))
+        {
+          entree *ep = varentries[varn(fun)];
+          const char *s = ep->name;
+          int w;
+          if (whatnow_fun && (w = whatnow_fun(s,1))) whatnow_new_syntax(s, w);
+        }
+        break;
+      }
 
       case impl:
 	ch1=va_arg(ap, char*);
@@ -1079,7 +1086,7 @@ void
 whatnow_new_syntax(const char *f, long n)
 {
   term_color(c_NONE);
-  print_text("\nFor full compatibility with GP 1.39.15, type \"default(compatible,3)\", or set \"compatible = 3\" in your GPRC file.");
+  print_text("\nA function with that name existed in GP-1.39.15; to run in backward compatibility mode, type \"default(compatible,3)\", or set \"compatible = 3\" in your GPRC file.");
   pari_putc('\n');
   (void)whatnow_fun(f, -n);
 }
