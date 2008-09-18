@@ -650,13 +650,11 @@ _Fl_submul(uGEN b, long k, long i, ulong m, ulong p)
 {
   b[i] %= p;
   b[k] = Fl_sub(b[k], Fl_mul(m, b[i], p), p);
-  if (b[k] & MASK) b[k] %= p;
 }
 static void /* same m = 1 */
 _Fl_sub(uGEN b, long k, long i, ulong p)
 {
   b[k] = Fl_sub(b[k], b[i], p);
-  if (b[k] & MASK) b[k] %= p;
 }
 static void /* assume m < p && SMALL_ULONG(p) && (! (b[i] & b[k] & MASK)) */
 _Fl_addmul_OK(uGEN b, long k, long i, ulong m, ulong p)
@@ -669,13 +667,11 @@ _Fl_addmul(uGEN b, long k, long i, ulong m, ulong p)
 {
   b[i] %= p;
   b[k] = Fl_add(b[k], Fl_mul(m, b[i], p), p);
-  if (b[k] & MASK) b[k] %= p;
 }
 static void /* same m = 1 */
 _Fl_add(uGEN b, long k, long i, ulong p)
 {
   b[k] = Fl_add(b[k], b[i], p);
-  if (b[k] & MASK) b[k] %= p;
 }
 
 static int
