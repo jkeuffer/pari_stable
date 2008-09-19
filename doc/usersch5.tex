@@ -7171,6 +7171,8 @@ index \kbd{b} of \kbd{bitvec}, returning its old value.
 
 \section{Handling closures}
 
+\subsec{Functions to evaluate \typ{CLOSURE}}
+
 \fun{void}{closure_disassemble}{GEN C} print the \typ{CLOSURE} \kbd{C} in
 GP assembly format.
 
@@ -7196,13 +7198,14 @@ evaluation of the closure to be interrupted; this is called below a
 \emph{flow change}. When that occurs, the functions below generally returns
 \kbd{NULL}. The caller can then adopt three positions:
 
-\item raise an exception (\kbd{closure\_evalnobrk}).
+\item raises an exception (\kbd{closure\_evalnobrk}).
 
-\item pass through (by returning NULL itself).
+\item passes through (by returning NULL itself).
 
-\item handle the flow change (undocumented yet, done by loop statements).
+\item handles the flow change.
 
-\fun{GEN}{closure_evalgen}{GEN code} evaluates a closure and returns the result.
+\fun{GEN}{closure_evalgen}{GEN code} evaluates a closure and returns the result,
+or \kbd{NULL} if a flow change occured.
 
 \fun{GEN}{closure_evalnobrk}{GEN code} as \kbd{closure\_evalgen} but raise
 an exception if a flow change occurs. Meant for pseudo-iterators where
@@ -7214,20 +7217,28 @@ The difference with \kbd{closure\_evalgen} being that, if the flow end by a
 \kbd{NULL}.
 
 \fun{void}{closure_evalvoid}{GEN code} evaluates a closure whose return
-value is ignored.
+value is ignored. The caller has to deal with eventual flow changes by
+calling \kbd{loop\_break}.
 
 \fun{GEN}{closure_trapgen}{long numerr, GEN code} evaluates closure, while
 trapping error \kbd{numerr}. Return \kbd{(GEN)1L} if error trapped, and the
-result otherwise.
+result otherwise, or \kbd{NULL} if a flow change occured.
 
 \fun{void}{closure_reset}{void} reinitializes the byte-code evaluator.
 This is used by the error recovery code.
 
-Functions to deal with lexical variables introduced through the prototype
-code 'V':
+\subsec{Functions to handle control flow changes}
 
-Such functions need to manually create and delete a lexical variable for
-each code 'V', which will be given a number $-1, -2, \ldots$.
+\fun{long}{did_break}{void} returns a non-zero value is a flow change is
+pending.
+
+\fun{long}{loop_break}{void} processes an eventual flow changes inside an iterator. If this function return $1$, the iterator should stop.
+
+\subsec{Functions to deal with lexical local variables}\label{se:pushlex}
+
+Function using the prototype code 'V' need to manually create and delete a
+lexical variable for each code 'V', which will be given a number $-1, -2,
+\ldots$.
 
 \fun{void}{push_lex}{GEN a} creates a new lexical variable whose initial value
 is $a$ on the top of the stack. This variable get the number $-1$, and the number of the other variables is decreased by one unit.
@@ -7240,7 +7251,7 @@ number of other variables by one unit.
 \fun{void}{set_lex}{long vn, GEN x} set the value of the variable with number
 \kbd{vn}.
 
-Functions returning new closures:
+\subsec{Functions returning new closures}
 
 \fun{GEN}{closure_deriv}{GEN code} returns a closure corresponding to the
 numerical derivative of the closure \kbd{code}.
