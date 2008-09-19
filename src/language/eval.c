@@ -42,7 +42,7 @@ loop_break(void)
   return 0;
 }
 
-void
+static void
 reset_break(void)
 {
   br_status = br_NONE;
@@ -1277,7 +1277,7 @@ closure_callgenall(GEN C, long n, ...)
 }
 
 void
-closure_reset(void) {sp=0; rp=0; s_trace.n=0;}
+closure_reset(void) {sp=0; rp=0; s_trace.n=0; reset_break();}
 
 INLINE const char *
 disassemble_cast(long mode)

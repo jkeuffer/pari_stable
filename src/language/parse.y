@@ -114,7 +114,6 @@ pari_eval_str(char *lex, int strict)
   optimizenode(s_node.n-1);
   code=gp_closure(s_node.n-1);
   parser_reset();
-  reset_break();
   res=closure_evalres(code);
   if (!res) return gnil;
   return res;
