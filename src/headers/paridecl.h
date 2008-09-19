@@ -219,9 +219,6 @@ GEN     gener_FpXQ(GEN T, GEN p, GEN *o);
 
 /* FpV.c */
 
-GEN     F2m_F2c_mul(GEN x, GEN y);
-ulong   F2v_sum(GEN x);
-void    F2v_add_inplace(GEN x, GEN y);
 GEN     Flc_Fl_div(GEN x, ulong y, ulong p);
 void    Flc_Fl_div_inplace(GEN x, ulong y, ulong p);
 GEN     Flc_Fl_mul(GEN x, ulong y, ulong p);
