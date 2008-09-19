@@ -474,55 +474,6 @@ RgX_isscalar(GEN x)
   return 1;
 }
 
-/*************************************************************************/
-/**                                                                     **/
-/**               Routines for handling bit vector                      **/
-/**                                                                     **/
-/*************************************************************************/
-
-INLINE GEN
-bitvec_alloc(long n)
-{
-  long l = 1 + divsBIL(n);
-  return const_vecsmall(l,0);
-}
-
-INLINE GEN
-bitvec_shorten(GEN bitvec, long n)
-{
-  long l = 1 + divsBIL(n);
-  return vecsmall_shorten(bitvec,l);
-}
-
-INLINE long
-bitvec_test(GEN bitvec, long b)
-{
-  long r, q = dvmdsBIL(b, &r);
-  return (bitvec[1+q]>>r) & 1L;
-}
-
-INLINE long
-bitvec_test_set(GEN bitvec, long b)
-{
-  long r, q = dvmdsBIL(b, &r);
-  if ((bitvec[1+q]>>r) & 1L) return 1;
-  bitvec[1+q] |= 1L<<r; return 0;
-}
-
-INLINE void
-bitvec_set(GEN bitvec, long b)
-{
-  long r, q = dvmdsBIL(b, &r);
-  bitvec[1+q] |= 1L<<r;
-}
-
-INLINE void
-bitvec_clear(GEN bitvec, long b)
-{
-  long r, q = dvmdsBIL(b, &r);
-  bitvec[1+q] &= ~(1L<<r);
-}
-
 /*******************************************************************/
 /*                                                                 */
 /*                            EXTRACT                              */

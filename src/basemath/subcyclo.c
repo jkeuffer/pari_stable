@@ -66,7 +66,7 @@ void
 znstar_partial_coset_bits_inplace(long n, GEN H, GEN bits, long d, long c)
 {
   pari_sp av = avma;
-  znstar_partial_coset_func(n,H, (void (*)(void *,long)) &bitvec_set,
+  znstar_partial_coset_func(n,H, (void (*)(void *,long)) &F2v_set,
       (void *) bits, d, c);
   avma = av;
 }
@@ -80,7 +80,7 @@ znstar_coset_bits_inplace(long n, GEN H, GEN bits, long c)
 GEN
 znstar_partial_coset_bits(long n, GEN H, long d, long c)
 {
-  GEN bits = bitvec_alloc(n);
+  GEN bits = zero_F2v(n);
   znstar_partial_coset_bits_inplace(n,H,bits,d,c);
   return bits;
 }
@@ -122,7 +122,7 @@ znstar_generate(long n, GEN V)
   {
     ulong v = (ulong)V[i], g = v;
     long o = 0;
-    while (!bitvec_test(bits, (long)g)) { g = Fl_mul(g, v, (ulong)n); o++; }
+    while (!F2v_coeff(bits, (long)g)) { g = Fl_mul(g, v, (ulong)n); o++; }
     if (!o) continue;
     r++;
     gen[r] = v;
@@ -184,7 +184,7 @@ znstar_conductor(long n, GEN H)
       for (j = 1; j < p; j++)
       {
 	z += q;
-	if (!bitvec_test(gel(H,3),z) && ugcd(z,n)==1)
+	if (!F2v_coeff(gel(H,3),z) && ugcd(z,n)==1)
 	  break;
       }
       if ( j < p )
@@ -216,10 +216,10 @@ znstar_cosets(long n, long phi_n, GEN H)
   long    index  = phi_n/card;
   GEN     cosets = cgetg(index+1,t_VECSMALL);
   pari_sp ltop = avma;
-  GEN     bits   = bitvec_alloc(n);
+  GEN     bits   = zero_F2v(n);
   for (k = 1; k <= index; k++)
   {
-    for (c++ ; bitvec_test(bits,c) || ugcd(c,n)!=1; c++);
+    for (c++ ; F2v_coeff(bits,c) || ugcd(c,n)!=1; c++);
     cosets[k]=c;
     znstar_coset_bits_inplace(n, H, bits, c);
   }
@@ -644,11 +644,11 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
   {
     fprintferr("Subcyclo: elements:");
     for (i=1;i<n;i++)
-      if (bitvec_test(gel(H,3),i)) fprintferr(" %ld",i);
+      if (F2v_coeff(gel(H,3),i)) fprintferr(" %ld",i);
     fprintferr("\n");
   }
   /* field is real iff z -> conj(z) = z^-1 = z^(n-1) is in H */
-  complex = !bitvec_test(gel(H,3),n-1);
+  complex = !F2v_coeff(gel(H,3),n-1);
   if (DEBUGLEVEL >= 6) fprintferr("Subcyclo: complex=%ld\n",complex);
   if (DEBUGLEVEL >= 1) (void)timer2();
   cnd = znstar_conductor(n,H);

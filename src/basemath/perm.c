@@ -240,13 +240,13 @@ static GEN
 vecperm_orbits_i(GEN v, long n)
 {
   long mj = 1, k, l, m;
-  GEN cy, cycle = cgetg(n+1, t_VEC), bit = bitvec_alloc(n);
+  GEN cy, cycle = cgetg(n+1, t_VEC), bit = zero_F2v(n);
   for (k = 1, l = 1; k <= n;)
   {
-    for (  ; bitvec_test(bit,mj); mj++) /*empty*/;
+    for (  ; F2v_coeff(bit,mj); mj++) /*empty*/;
     cy = cgetg(n+1, t_VECSMALL);
     m = 1; k++; cy[m++] = mj;
-    bitvec_set(bit, mj++);
+    F2v_set(bit, mj++);
     for(;;)
     {
       long o, mold = m;
@@ -254,11 +254,12 @@ vecperm_orbits_i(GEN v, long n)
       {
         GEN vo = gel(v,o);
         long p;
-	for (p = 1; p < m; p++)	/* m increases! */
-	{
-	  long j = vo[ cy[p] ];
-	  if (!bitvec_test_set(bit,j)) cy[m++] = j;
-	}
+        for (p = 1; p < m; p++) /* m increases! */
+        {
+          long j = vo[ cy[p] ];
+          if (!F2v_coeff(bit,j)) cy[m++] = j;
+          F2v_set(bit,j);
+        }
       }
       if (m == mold) break;
       k += m - mold;
@@ -547,20 +548,20 @@ group_quotient(GEN G, GEN H)
   long n = group_domain(G), o = group_order(H);
   GEN elt = vecvecsmall_sort(group_elts(G,n));
   long le = lg(elt)-1;
-  GEN used = bitvec_alloc(le+1);
+  GEN used = zero_F2v(le+1);
   long l = le/o;
   p2 = cgetg(l+1, t_VEC);
   p3 = cgetg(le+1, t_VEC);
   for (i = 1, k = 1; i <= l; ++i)
   {
     GEN V;
-    while(bitvec_test(used,a)) a++;
+    while(F2v_coeff(used,a)) a++;
     V = group_leftcoset(H,gel(elt,a));
     p2[i] = V[1];
     for(j=1;j<lg(V);j++)
     {
       long b=vecvecsmall_tablesearch(elt,gel(V,j));
-      bitvec_set(used,b);
+      F2v_set(used,b);
     }
     for (j = 1; j <= o; j++)
       gel(p3,k++) = vecsmall_append(gel(V,j),i);
@@ -898,20 +899,20 @@ groupelts_center(GEN S)
 {
   pari_sp ltop = avma;
   long i, j, n = lg(S)-1, l = n;
-  GEN V, elts = bitvec_alloc(n+1);
+  GEN V, elts = zero_F2v(n+1);
   for(i=1; i<=n; i++)
   {
-    if (bitvec_test(elts,i)) { l--;  continue; }
+    if (F2v_coeff(elts,i)) { l--;  continue; }
     for(j=1; j<=n; j++)
       if (!perm_commute(gel(S,i),gel(S,j)))
       {
-	bitvec_set(elts,i);
-	bitvec_set(elts,j); l--; break;
+	F2v_set(elts,i);
+	F2v_set(elts,j); l--; break;
       }
   }
   V = cgetg(l+1,t_VEC);
   for (i=1, j=1; i<=n ;i++)
-    if (!bitvec_test(elts,i)) gel(V,j++) = vecsmall_copy(gel(S,i));
+    if (!F2v_coeff(elts,i)) gel(V,j++) = vecsmall_copy(gel(S,i));
   return gerepileupto(ltop,V);
 }
 

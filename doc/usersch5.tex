@@ -7190,27 +7190,6 @@ the vector \kbd{x}.
 vecvecsmall and \kbd{y} a \typ{VECSMALL}, search \kbd{y} inside \kbd{x}. \kbd{fla} has the same meaning as for \kbd{setsearch}.
 
 
-\section{Vectors of bits}
-These functions manipulate vectors of bits (stored in \typ{VECSMALL}).
-Bits are numbered from 0.
-
-\fun{GEN}{bitvec_alloc}{long n} allocates a bits-vector suitable for \kbd{n}
-bits.
-
-\fun{GEN}{bitvec_shorten}{GEN bitvec, long n} shortens a bits-vector
-\kbd{bitvec} to \kbd{n} bits.
-
-\fun{long}{bitvec_test}{GEN bitvec, long b} returns the bit of index \kbd{b} of
-\kbd{bitvec}.
-
-\fun{long}{bitvec_test_set}{GEN bitvec, long b} (in place) sets the bit of
-index \kbd{b} of \kbd{bitvec}, returning its old value.
-
-\fun{void}{bitvec_set}{GEN bitvec, long b} (in place) sets the bit of index
-\kbd{b} of \kbd{bitvec}.
-
-\fun{void}{bitvec_clear}{GEN bitvec, long b} (in place) clears the bit of index \kbd{b} of \kbd{bitvec}.
-
 \newpage
 \chapter{Functions related to the GP interpreter}
 
