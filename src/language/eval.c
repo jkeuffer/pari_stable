@@ -613,6 +613,7 @@ closure_err()
   for (; i <= lastfun; i++)
   {
     GEN C = trace[i].closure;
+    long pc = *trace[i].pc;
     if (lg(C) >= 7)
     {
       GEN code = gel(C,6);
@@ -621,7 +622,7 @@ closure_err()
     }
     if (i==lastfun || lg(trace[i+1].closure)>=7)
     {
-      long offset = mael3(C,5,1,*trace[i].pc);
+      long offset = pc ? mael3(C,5,1,pc):0;
       const char *s = base + offset;
       int member = offset>0 && (s[-1] == '.');
       /* avoid "in function foo: foo" */
@@ -641,6 +642,17 @@ closure_err()
   }
 }
 
+INLINE void
+trace_push(long *pc, GEN C)
+{
+  long tr;
+  BLOCK_SIGINT_START
+  tr = stack_new(&s_trace);
+  trace[tr].pc = pc;
+  trace[tr].closure = C;
+  BLOCK_SIGINT_END
+}
+
 static void
 closure_eval(GEN C)
 {
@@ -650,11 +662,10 @@ closure_eval(GEN C)
   long loper=lg(oper);
   long saved_sp=sp-C[1];
   long saved_rp=rp;
-  long pc, j, nbmvar=0, nblvar=0;
-  long tr = stack_new(&s_trace);
+  long j, nbmvar=0, nblvar=0;
+  long pc = 0; /* pc need to be defined after a ^C */
   if (isclone(C)) ++bl_refc(C);
-  trace[tr].pc = &pc;
-  trace[tr].closure = C;
+  trace_push(&pc, C);
   if (lg(C)==8)
   {
     GEN z=gel(C,7);
