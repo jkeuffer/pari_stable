@@ -52,14 +52,14 @@ F2x_degree(GEN x)
 }
 
 INLINE ulong
-F2x_get_coeff(GEN x,long v)
+F2x_coeff(GEN x,long v)
 {
    ulong u=(ulong)x[2+divsBIL(v)];
    return (u>>remsBIL(v))&1UL;
 }
 
 INLINE void
-F2x_set_coeff(GEN x,long v)
+F2x_set(GEN x,long v)
 {
    ulong* u=(ulong*)&x[2+divsBIL(v)];
    *u^=1UL<<remsBIL(v);
@@ -399,7 +399,7 @@ F2x_divrem(GEN x, GEN y, GEN *pr)
   x = vecsmall_copy(x);
   while (dx>=dy)
   {
-    F2x_set_coeff(z,dx-dy);
+    F2x_set(z,dx-dy);
     F2x_addshiftip(x,y,dx-dy);
     if (x[lx-1]==0) lx--;
     dx = F2x_degree_lg(x,lx);
@@ -621,3 +621,88 @@ gener_F2xq(GEN T, GEN *po)
   }
   return g;
 }
+/***********************************************************************/
+/**                                                                   **/
+/**                             F2v                                   **/
+/**                                                                   **/
+/***********************************************************************/
+/* F2v objects are defined as follows:
+   An F2v is a t_VECSMALL:
+   v[0] = codeword
+   v[1] = number of components
+   x[2] = a_0...a_31 x[3] = a_32..a_63, etc.  on 32bit
+   x[2] = a_0...a_63 x[3] = a_64..a_127, etc. on 64bit
+
+   where the a_i are bits.
+*/
+
+GEN
+F2c_to_ZC(GEN x)
+{
+  long l=x[1]+1;
+  GEN  z=cgetg(l, t_COL);
+  long i,j,k;
+  for (i=2,k=1; i<lg(x); i++)
+    for (j=0; j<BITS_IN_LONG && k<l; j++,k++)
+      gel(z,k)=(x[i]&(1UL<<j))?gen_1:gen_0;
+  return z;
+}
+
+GEN
+F2m_to_ZM(GEN z)
+{
+  long i, l = lg(z);
+  GEN x = cgetg(l,t_MAT);
+  for (i=1; i<l; i++) gel(x,i) = F2c_to_ZC(gel(z,i));
+  return x;
+}
+
+GEN
+ZV_to_F2v(GEN x)
+{
+  long l = lg(x)-1;
+  GEN z = cgetg(nbits2prec(l), t_VECSMALL);
+  long i,j,k;
+  z[1] = l;
+  for(i=1, k=1,j=BITS_IN_LONG;i<=l;i++,j++)
+  {
+    if (j==BITS_IN_LONG)
+    {
+      j=0; k++; z[k]=0;
+    }
+    if (mpodd(gel(x,i)))
+      z[k]|=1UL<<j;
+  }
+  return z;
+}
+
+GEN
+ZM_to_F2m(GEN x)
+{
+  long j, l = lg(x);
+  GEN y = cgetg(l,t_MAT);
+  if (l == 1) return y;
+  for (j=1; j<l; j++) gel(y,j) = ZV_to_F2v(gel(x,j));
+  return y;
+}
+
+void
+F2v_add_inplace(GEN x, GEN y)
+{
+  long n = lg(x)-1;
+  long r = n&7L, q = n-r, i = 1;
+  for (; i < q; i += 8)
+  {
+    x[  i] ^= y[  i]; x[1+i] ^= y[1+i]; x[2+i] ^= y[2+i]; x[3+i] ^= y[3+i];
+    x[4+i] ^= y[4+i]; x[5+i] ^= y[5+i]; x[6+i] ^= y[6+i]; x[7+i] ^= y[7+i];
+  }
+  switch (r)
+  {
+    case 7: x[i] ^= y[i]; i++; case 6: x[i] ^= y[i]; i++;
+    case 5: x[i] ^= y[i]; i++; case 4: x[i] ^= y[i]; i++;
+    case 3: x[i] ^= y[i]; i++; case 2: x[i] ^= y[i]; i++;
+    case 1: x[i] ^= y[i]; i++;
+  }
+}
+
+

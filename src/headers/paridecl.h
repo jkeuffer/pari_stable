@@ -43,6 +43,9 @@ GEN     isprincipalgenforce(GEN bnf,GEN x);
 
 /* F2x.c */
 
+GEN     F2c_to_ZC(GEN x);
+void    F2v_add_inplace(GEN x, GEN y);
+GEN     F2m_to_ZM(GEN z);
 GEN     F2x_1_add(GEN y);
 GEN     F2x_add(GEN x, GEN y);
 long    F2x_degree(GEN x);
@@ -65,6 +68,8 @@ GEN     F2xq_pow(GEN x, GEN n, GEN pol);
 GEN     F2xq_sqr(GEN x,GEN pol);
 GEN     F2xq_sqrtn(GEN a, GEN n, GEN T, GEN *zeta);
 GEN     Flx_to_F2x(GEN x);
+GEN     ZM_to_F2m(GEN x);
+GEN     ZV_to_F2v(GEN x);
 GEN     ZX_to_F2x(GEN x);
 GEN     gener_F2xq(GEN T, GEN *po);
 GEN     polx_F2x(long sv);
@@ -457,6 +462,9 @@ GEN     zx_to_ZX(GEN z);
 
 /* alglin1.c */
 
+GEN     F2m_deplin(GEN x);
+GEN     F2m_ker(GEN x);
+GEN     F2m_ker_sp(GEN x, long deplin);
 GEN     Flm_deplin(GEN x, ulong p);
 GEN     Flm_gauss(GEN a, GEN b, ulong p);
 GEN     Flm_image(GEN x, ulong p);
@@ -2630,6 +2638,10 @@ INLINE int    pr_is_inert(GEN P);
 INLINE GEN    pr_norm(GEN pr);
 INLINE long   rnf_get_degree(GEN rnf);
 
+INLINE ulong  F2m_coeff(GEN x, long a, long b);
+INLINE void   F2m_set(GEN x, long a, long b);
+INLINE ulong  F2v_coeff(GEN x,long v);
+INLINE void   F2v_set(GEN x,long v);
 INLINE int    F2x_cmp1(GEN x);
 INLINE GEN    F2x_div(GEN x, GEN y);
 INLINE GEN    F2x_renormalize(GEN x, long lx);
@@ -2856,6 +2868,8 @@ INLINE GEN    vecsmalltrunc_init(long l);
 INLINE void   vectrunc_append(GEN x, GEN t);
 INLINE GEN    vectrunc_init(long l);
 INLINE GEN    zc_to_ZC(GEN x);
+INLINE GEN    zero_F2m_copy(long n, long m);
+INLINE GEN    zero_F2v(long m);
 INLINE GEN    zero_F2x(long sv);
 INLINE GEN    zero_Flm(long m, long n);
 INLINE GEN    zero_Flv(long n);

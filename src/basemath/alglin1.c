@@ -1935,6 +1935,60 @@ FpM_indexrank(GEN x, GEN p) {
 
 /* in place, destroy x */
 GEN
+F2m_ker_sp(GEN x, long deplin)
+{
+  GEN y, c, d;
+  long i, j, k, r, m, n;
+
+  n = lg(x)-1;
+  m = mael(x,1,1); r=0;
+
+  c = const_vecsmall(m, 0);
+  d = new_chunk(n+1);
+  for (k=1; k<=n; k++)
+  {
+    for (j=1; j<=m; j++)
+      if (!c[j] && F2m_coeff(x,j,k))
+        break;
+    if (j > m)
+    {
+      if (deplin) {
+	GEN c = zero_F2v(n);
+	for (i=1; i<k; i++)
+          if (F2m_coeff(x, d[i], k))
+            F2v_set(c, i);
+        F2v_set(c, k);
+	return c;
+      }
+      r++; d[k] = 0;
+    }
+    else
+    {
+      c[j] = k; d[k] = j;
+      for (i=k+1; i<=n; i++)
+	if (F2m_coeff(x,j,i))
+        {
+          F2v_add_inplace(gel(x,i), gel(x,k));
+          F2m_set(x,j,i);
+        }
+    }
+  }
+  if (deplin) return NULL;
+
+  y = zero_F2m_copy(n,r);
+  for (j=k=1; j<=r; j++,k++)
+  {
+    GEN C = gel(y,j); while (d[k]) k++;
+    for (i=1; i<k; i++)
+      if (d[i] && F2m_coeff(x,d[i],k))
+	F2v_set(C,i);
+    F2v_set(C, k);
+  }
+  return y;
+}
+
+/* in place, destroy x */
+GEN
 Flm_ker_sp(GEN x, ulong p, long deplin)
 {
   GEN y, c, d;
@@ -2114,6 +2168,10 @@ FpM_ker(GEN x, GEN p) { return FpM_ker_i(x, p, 0); }
 GEN
 FpM_deplin(GEN x, GEN p) { return FpM_ker_i(x, p, 1); }
 /* not memory clean */
+GEN
+F2m_ker(GEN x) { return F2m_ker_sp(F2m_copy(x), 0); }
+GEN
+F2m_deplin(GEN x) { return F2m_ker_sp(F2m_copy(x), 1); }
 GEN
 Flm_ker(GEN x, ulong p) { return Flm_ker_sp(Flm_copy(x), p, 0); }
 GEN

@@ -211,6 +211,38 @@ zero_Flm(long m, long n)
   long i; for (i=1; i<=n; i++) gel(y,i) = v;
   return y;
 }
+
+INLINE GEN
+zero_F2v(long m)
+{
+  long l = nbits2nlong(m);
+  GEN v  = const_vecsmall(l+1, 0);
+  v[1] = m;
+  return v;
+}
+
+INLINE GEN
+zero_F2m(long m, long n)
+{
+  long i;
+  GEN M = cgetg(n+1, t_MAT);
+  GEN v = zero_F2v(m);
+  for (i = 1; i <= n; i++)
+    gel(M,i) = v;
+  return M;
+}
+
+
+INLINE GEN
+zero_F2m_copy(long m, long n)
+{
+  long i;
+  GEN M = cgetg(n+1, t_MAT);
+  for (i = 1; i <= n; i++)
+    gel(M,i)= zero_F2v(m);
+  return M;
+}
+
 /* matrix(m, n) */
 INLINE GEN
 zeromatcopy(long m, long n)
@@ -1328,6 +1360,9 @@ RgM_shallowcopy(GEN x)
   return y;
 }
 INLINE GEN
+F2m_copy(GEN x) { return RgM_shallowcopy(x); }
+
+INLINE GEN
 Flm_copy(GEN x) { return RgM_shallowcopy(x); }
 
 /* divisibility: return 1 if y[i] | x[i] for all i, 0 otherwise. Assume
@@ -1339,6 +1374,34 @@ ZV_dvd(GEN x, GEN y)
   for (i=1; i < l; i++)
     if ( ! dvdii( gel(x,i), gel(y,i) ) ) return 0;
   return 1;
+}
+
+/* F2v */
+
+INLINE ulong
+F2v_coeff(GEN x,long v)
+{
+   ulong u=(ulong)x[2+divsBIL(v-1)];
+   return (u>>remsBIL(v-1))&1UL;
+}
+
+INLINE void
+F2v_set(GEN x,long v)
+{
+   ulong* u=(ulong*)&x[2+divsBIL(v-1)];
+   *u|=1UL<<remsBIL(v-1);
+}
+
+INLINE ulong
+F2m_coeff(GEN x, long a, long b)
+{
+  return F2v_coeff(gel(x,b), a);
+}
+
+INLINE void
+F2m_set(GEN x, long a, long b)
+{
+  F2v_set(gel(x,b), a);
 }
 
 /* ARITHMETIC */

@@ -458,7 +458,10 @@ RM 18- partitions()
    25- GP functions nffactorback / idealfactorback
 JD 26- GP function warning()
    27- new flag to charpoly [ integral matrix, modular algorithm ]
-BA 28- GP function galoisisnormal().
+BA 28- GP function galoisisnormal()
+BA 29- F2x functions family for polynomials over GF(2) and 
+BA 30- t_FFELT subtype_FF_F2xq for GF(2^n)
+BA 31- F2v/F2m functions family and F2m_ker for linear algebra over GF(2)
 
   Removed
     1- obsolete GP functions printp, printp1. Either replace them by
