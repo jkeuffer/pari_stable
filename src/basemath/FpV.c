@@ -94,7 +94,10 @@ Flv_add(GEN x, GEN y, ulong p)
 {
   long i, l = lg(x);
   GEN z = cgetg(l, t_VECSMALL);
-  for (i = 1; i < l; i++) z[i] = Fl_add(x[i], y[i], p);
+  if (p==2)
+    for (i = 1; i < l; i++) z[i] = x[i]^y[i];
+  else
+    for (i = 1; i < l; i++) z[i] = Fl_add(x[i], y[i], p);
   return z;
 }
 
@@ -102,19 +105,21 @@ void
 Flv_add_inplace(GEN x, GEN y, ulong p)
 {
   long i, l = lg(x);
-  for (i = 1; i < l; i++) x[i] = Fl_add(x[i], y[i], p);
+  if (p==2)
+    for (i = 1; i < l; i++) x[i] ^= y[i];
+  else
+    for (i = 1; i < l; i++) x[i] = Fl_add(x[i], y[i], p);
 }
-void
-F2v_add_inplace(GEN x, GEN y)
+
+ulong
+Flv_sum(GEN x, ulong p)
 {
   long i, l = lg(x);
-  for (i = 1; i < l; i++) x[i] ^= y[i];
-}
-ulong
-F2v_sum(GEN x)
-{
-  long i, l = lg(x), s = 0;
-  for (i = 1; i < l; i++) s ^= x[i];
+  ulong s = 0;
+  if (p==2)
+    for (i = 1; i < l; i++) s ^= x[i];
+  else
+    for (i = 1; i < l; i++) s = Fl_add(s, x[i], p);
   return s;
 }
 
@@ -256,17 +261,17 @@ Flmrow_Flc_mul(GEN x, GEN y, ulong p, long lx, long i)
   return c;
 }
 
-GEN
-F2m_F2c_mul(GEN x, GEN y)
+static GEN
+Flm_Flc_mul_i_2(GEN x, GEN y, long lx, long l)
 {
-  long j, l = lg(y);
+  long i,j;
   GEN z = NULL;
 
-  if (l == 1) return cgetg(1, t_VECSMALL);
-  for (j=1; j<l; j++)
+  for (j=1; j<lx; j++)
   {
     if (!y[j]) continue;
-    if (!z) z = Flv_copy(gel(x,j)); else F2v_add_inplace(z, gel(x,j));
+    if (!z) z = Flv_copy(gel(x,j));
+    else for (i = 1; i < l; i++) z[i] ^= coeff(x,i,j);
   }
   if (!z) z = const_vecsmall(l-1, 0);
   return z;
@@ -403,7 +408,9 @@ Flm_Flc_mul(GEN x, GEN y, ulong p)
   /* if (lx != lg(y)) pari_err(operi,"*",x,y); */
   if (lx==1) return cgetg(1,t_VECSMALL);
   l = lg(x[1]);
-  if (SMALL_ULONG(p))
+  if (p==2)
+    return Flm_Flc_mul_i_2(x, y, lx, l);
+  else if (SMALL_ULONG(p))
     return Flm_Flc_mul_i_SMALL(x, y, lx, l, p);
   else
     return Flm_Flc_mul_i(x, y, lx, l, p);

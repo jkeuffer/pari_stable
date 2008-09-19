@@ -2963,9 +2963,6 @@ the \kbd{Flv} \kbd{x} by $\kbd{x}/\kbd{y}$.
 \fun{void}{Flv_add_inplace}{GEN x, GEN y, ulong p} replaces
 $x$ by $x+y$.
 
-\fun{void}{F2v_add_inplace}{GEN x, GEN y} as \kbd{Flv\_add\_inplace} for
-$p = 2$.
-
 \fun{GEN}{Flv_sub}{GEN x, GEN y, ulong p} subtracts \kbd{y} to \kbd{x}.
 
 \fun{void}{Flv_sub_inplace}{GEN x, GEN y, ulong p} replaces
@@ -2974,8 +2971,7 @@ $x$ by $x-y$.
 \fun{ulong}{Flv_dotproduct}{GEN x, GEN y, ulong p} returns the scalar product
 of \kbd{x} and \kbd{y}
 
-\fun{ulong}{F2v_sum}{GEN x} $x$ being a \typ{VECSMALL} with 0/1 entries,
-returns the sum of the entries modulo $2$.
+\fun{ulong}{Flv_sum}{GEN x, ulong p} returns the sums of the components of $x$.
 
 \fun{GEN}{zero_Flm}{long m, long n} creates a \kbd{Flm} with \kbd{m} x \kbd{n}
 components set to $0$. Note that the result allocates a

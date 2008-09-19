@@ -1028,7 +1028,8 @@ nfsign_arch(GEN nf, GEN x, GEN arch)
     GEN g = gel(x,1), e = gel(x,2);
     V = const_vecsmall(n, 0);
     for (i=1; i<lg(g); i++)
-      if (mpodd(gel(e,i))) F2v_add_inplace(V, nfsign_arch(nf,gel(g,i),archp));
+      if (mpodd(gel(e,i)))
+        Flv_add_inplace(V, nfsign_arch(nf,gel(g,i),archp), 2);
     avma = (pari_sp)V; return V;
   }
   av = avma; V = cgetg(n+1,t_VECSMALL);
@@ -1093,8 +1094,8 @@ set_sign_mod_divisor(GEN nf, GEN x, GEN y, GEN divisor, GEN sarch)
 
   archp = vec01_to_indices(gel(divisor,2));
   s = nfsign_arch(nf, y, archp);
-  if (x) F2v_add_inplace(s, nfsign_arch(nf, x, archp));
-  s = F2m_F2c_mul(gel(sarch,3), s);
+  if (x) Flv_add_inplace(s, nfsign_arch(nf, x, archp), 2);
+  s = Flm_Flc_mul(gel(sarch,3), s, 2);
   for (i=1; i<nba; i++)
     if (s[i]) y = nfmul(nf,y,gel(gen,i));
   return y;
@@ -1463,7 +1464,7 @@ zlog_pk(GEN nf, GEN a0, GEN y, GEN pr, GEN prk, GEN list, GEN *psigne)
       GEN t = modii(negi(gel(e,i)), gel(cyc,i));
       gel(++y,0) = negi(t); if (!signe(t)) continue;
 
-      if (mod2(t)) F2v_add_inplace(*psigne, gel(s,i));
+      if (mod2(t)) Flv_add_inplace(*psigne, gel(s,i), 2);
       if (j != llist) a = elt_mulpow_modideal(nf, a, gel(gen,i), t, prk);
     }
   }
@@ -1477,7 +1478,7 @@ zlog_add_sign(GEN y0, GEN sgn, GEN lists)
   long i;
   if (!sgn) return;
   y = y0 + lg(y0);
-  s = F2m_F2c_mul(gmael(lists, lg(lists)-1, 3), sgn);
+  s = Flm_Flc_mul(gmael(lists, lg(lists)-1, 3), sgn, 2);
   for (i = lg(s)-1; i > 0; i--) gel(--y,0) = s[i]? gen_1: gen_0;
 }
 
@@ -1999,8 +2000,8 @@ static GEN
 zlog_unitsarch(GEN sgnU, GEN bid)
 {
   GEN lists = gel(bid,4), arch = gmael(bid,1,2);
-  return F2m_F2c_mul(gmael(lists, lg(lists)-1, 3),
-	             rowpermute(sgnU, vec01_to_indices(arch)));
+  return Flm_Flc_mul(gmael(lists, lg(lists)-1, 3),
+	             rowpermute(sgnU, vec01_to_indices(arch)), 2);
 }
 
 /*  flag & nf_GEN : generators, otherwise no

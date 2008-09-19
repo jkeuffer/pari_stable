@@ -53,7 +53,7 @@ buchnarrow(GEN bnf)
   for (j=1; j<=ngen; j++)
   {
     GEN z = nfsign_from_logarch(gel(GD,j), invpi, archp);
-    gel(logs,j) = zc_to_ZC( F2m_F2c_mul(v, z) );
+    gel(logs,j) = zc_to_ZC( Flm_Flc_mul(v, z, 2) );
   }
   /* [ cyc  0 ]
    * [ logs 2 ] = relation matrix for Cl_f */

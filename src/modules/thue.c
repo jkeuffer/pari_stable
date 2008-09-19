@@ -1183,7 +1183,7 @@ get_unit_1(GEN bnf, GEN *unit)
   if (odd(n)) { *unit = gen_m1; return 1; }
   v = nfsign_units(bnf, NULL, 0);
   for (i = 1; i < lg(v); i++)
-    if ( F2v_sum( gel(v,i) ) ) {
+    if ( Flv_sum( gel(v,i), 2) ) {
       GEN fu = check_units(bnf, "bnfisintnorm");
       *unit = gel(fu,i); return 1;
     }
