@@ -595,7 +595,7 @@ get_next_label(const char *s, int member, char **next_fun)
 }
 
 void
-closure_err()
+closure_err(void)
 {
   const char *base = NULL;
   const long lastfun = s_trace.n - 1;
@@ -613,7 +613,8 @@ closure_err()
   for (; i <= lastfun; i++)
   {
     GEN C = trace[i].closure;
-    long pc = *trace[i].pc;
+    /* After a SIGINT, pc can be slightly off:  0<=pc<=lg() */
+    long pc = minss(*trace[i].pc, lg(mael(C,5,1))-1);
     if (lg(C) >= 7)
     {
       GEN code = gel(C,6);
