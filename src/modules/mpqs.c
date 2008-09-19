@@ -2406,157 +2406,30 @@ mpqs_combine_large_primes(mpqs_handle_t *h,
 
 /*********************************************************************/
 /**                                                                 **/
-/**                    GAUSS-LANCZOS ELIMINATION                    **/
+/**                    FROM RELATIONS TO DIVISORS                   **/
 /**                                                                 **/
 /*********************************************************************/
 
-#ifdef LONG_IS_64BIT
-
-#define MPQS_GAUSS_BITS 64
-static unsigned long mpqs_mask_bit[]  =
-{
-  0x8000000000000000UL, 0x4000000000000000UL,
-  0x2000000000000000UL, 0x1000000000000000UL,
-  0x0800000000000000UL, 0x0400000000000000UL,
-  0x0200000000000000UL, 0x0100000000000000UL,
-  0x0080000000000000UL, 0x0040000000000000UL,
-  0x0020000000000000UL, 0x0010000000000000UL,
-  0x0008000000000000UL, 0x0004000000000000UL,
-  0x0002000000000000UL, 0x0001000000000000UL,
-  0x0000800000000000UL, 0x0000400000000000UL,
-  0x0000200000000000UL, 0x0000100000000000UL,
-  0x0000080000000000UL, 0x0000040000000000UL,
-  0x0000020000000000UL, 0x0000010000000000UL,
-  0x0000008000000000UL, 0x0000004000000000UL,
-  0x0000002000000000UL, 0x0000001000000000UL,
-  0x0000000800000000UL, 0x0000000400000000UL,
-  0x0000000200000000UL, 0x0000000100000000UL,
-  0x0000000080000000UL, 0x0000000040000000UL,
-  0x0000000020000000UL, 0x0000000010000000UL,
-  0x0000000008000000UL, 0x0000000004000000UL,
-  0x0000000002000000UL, 0x0000000001000000UL,
-  0x0000000000800000UL, 0x0000000000400000UL,
-  0x0000000000200000UL, 0x0000000000100000UL,
-  0x0000000000080000UL, 0x0000000000040000UL,
-  0x0000000000020000UL, 0x0000000000010000UL,
-  0x0000000000008000UL, 0x0000000000004000UL,
-  0x0000000000002000UL, 0x0000000000001000UL,
-  0x0000000000000800UL, 0x0000000000000400UL,
-  0x0000000000000200UL, 0x0000000000000100UL,
-  0x0000000000000080UL, 0x0000000000000040UL,
-  0x0000000000000020UL, 0x0000000000000010UL,
-  0x0000000000000008UL, 0x0000000000000004UL,
-  0x0000000000000002UL, 0x0000000000000001UL
-};
-
-#else
-
-#define MPQS_GAUSS_BITS 32
-static unsigned long mpqs_mask_bit[]  =
-{
-  0x80000000UL, 0x40000000UL, 0x20000000UL, 0x10000000UL,
-  0x08000000UL, 0x04000000UL, 0x02000000UL, 0x01000000UL,
-  0x00800000UL, 0x00400000UL, 0x00200000UL, 0x00100000UL,
-  0x00080000UL, 0x00040000UL, 0x00020000UL, 0x00010000UL,
-  0x00008000UL, 0x00004000UL, 0x00002000UL, 0x00001000UL,
-  0x00000800UL, 0x00000400UL, 0x00000200UL, 0x00000100UL,
-  0x00000080UL, 0x00000040UL, 0x00000020UL, 0x00000010UL,
-  0x00000008UL, 0x00000004UL, 0x00000002UL, 0x00000001UL
-};
-
-#endif
-
-static F2_matrix
-F2_create_matrix(long rows, long cols)
-{
-  F2_matrix m;
-  long i, j, words = cols / MPQS_GAUSS_BITS;
-  if (cols % MPQS_GAUSS_BITS) words++;
-  m = (F2_row *) pari_malloc(rows * sizeof(F2_row));
-  for (i = 0; i < rows; i++)
-  {
-    m[i] = (ulong *) pari_malloc(words * sizeof(ulong));
-    for (j = 0; j < words; j++) m[i][j] = 0UL;
-  }
-  return m;
-}
-
-static void
-F2_destroy_matrix(F2_matrix m, long rows)
-{
-  long i;
-  for (i = 0; i < rows; i++) pari_free(m[i]);
-  pari_free(m);
-}
-
-static ulong
-F2_get_bit(F2_matrix m, long i, long j)
-{
-  return m[i][j / MPQS_GAUSS_BITS] & mpqs_mask_bit[j % MPQS_GAUSS_BITS];
-}
-static void
-F2_set_bit(F2_matrix m, long i, long j)
-{
-  m[i][j / MPQS_GAUSS_BITS] |= mpqs_mask_bit[j % MPQS_GAUSS_BITS];
-}
-#if 0
-static void
-F2_clear_bit(F2_matrix m, long i, long j)
-{
-  m[i][j / MPQS_GAUSS_BITS] &= ~mpqs_mask_bit[j % MPQS_GAUSS_BITS];
-}
-#endif
-
-/* output an F2_matrix in PARI format */
-static void
-F2_print_matrix(F2_matrix m, long rows, long cols)
-{
-  long i, j;
-  fprintferr("\n[");
-  for (i = 0; i < rows; i++)
-  {
-    for (j = 0; j < cols - 1; j++)
-      fprintferr( F2_get_bit(m, i, j)? "1, ": "0, " );
-    fprintferr( F2_get_bit(m, i, j)? "1": "0" );
-    if (i != rows - 1) fprintferr("; ");
-  }
-  fprintferr("]\n");
-}
-
-/* x ^= y : row addition over F_2 */
-static void
-F2_add_rows(F2_row y, F2_row x, long k, long n)
-{
-  long i, q, r;
-  n = n - k;
-  r = n % 8; q = n - r + k; i = 0 + k;
-  for (; i < q; i += 8)
-  {
-    x[  i] ^= y[  i]; x[1+i] ^= y[1+i]; x[2+i] ^= y[2+i]; x[3+i] ^= y[3+i];
-    x[4+i] ^= y[4+i]; x[5+i] ^= y[5+i]; x[6+i] ^= y[6+i]; x[7+i] ^= y[7+i];
-  }
-  switch (r)
-  {
-    case 7: x[i] ^= y[i]; i++;
-    case 6: x[i] ^= y[i]; i++;
-    case 5: x[i] ^= y[i]; i++;
-    case 4: x[i] ^= y[i]; i++;
-    case 3: x[i] ^= y[i]; i++;
-    case 2: x[i] ^= y[i]; i++;
-    case 1: x[i] ^= y[i]; i++;
-  }
-}
-
-/* create and read an F2_matrix from a relation file FREL (opened by caller).
+/* create and read an F2m from a relation file FREL (opened by caller).
  * Also record the position of each relation in the file for later use
  * rows = size_of_FB+1, cols = rel */
-static F2_matrix
-F2_read_matrix(FILE *FREL, long rows, long cols, long *fpos)
+static GEN
+stream_read_F2m(FILE *FREL, long rows, long cols, long *fpos)
 {
-  F2_matrix m = F2_create_matrix(rows, cols);
   long i = 0, e, p;
   char buf[MPQS_STRING_LENGTH], *s;
-
+  GEN m;
+  long space = 2*((nbits2nlong(rows)+3)*cols+1);
+  if ((long)((GEN)avma - (GEN)bot) < space)
+  {
+    pari_sp av = avma;
+    m = gclone(zero_F2m(rows, cols));
+    if (DEBUGLEVEL>=4)
+      fprintferr("MPQS: allocating %ld words for Gauss\n",space);
+    avma = av;
+  }
+  else
+    m = zero_F2m_copy(rows, cols);
   if ((fpos[0] = ftell(FREL)) < 0)
     pari_err(talker, "ftell error on full relations file");
   while (fgets(buf, MPQS_STRING_LENGTH, FREL))
@@ -2568,7 +2441,7 @@ F2_read_matrix(FILE *FREL, long rows, long cols, long *fpos)
       e = atol(s); if (!e) break;
       s = strtok(NULL, " \n");
       p = atol(s);
-      if (e & 1) F2_set_bit(m, p - 1, i);
+      if (e & 1) F2m_set(m, p, i+1);
       s = strtok(NULL, " \n");
     }
     i++;
@@ -2583,57 +2456,6 @@ F2_read_matrix(FILE *FREL, long rows, long cols, long *fpos)
   }
   return m;
 }
-
-/* compute the kernel of an F2_matrix over F_2, m = rows, n = cols */
-static F2_matrix
-mpqs_kernel(F2_matrix x, long m, long n, long *rank)
-{
-  pari_sp av = avma;
-  GEN c, d;
-  long k, i, j, t, r = 0;
-  F2_matrix ker_x;
-  long words = n / MPQS_GAUSS_BITS;
-  if (n % MPQS_GAUSS_BITS) words++;
-
-  d = new_chunk(n);
-  c = new_chunk(m);
-  for (k = 0; k < m; k++) c[k] = -1;
-
-  for (k = 0; k < n; k++)
-  {
-    j = 0;
-    while (j < m && (c[j] >= 0 || F2_get_bit(x, j, k) == 0)) j++;
-
-    if (j == m)
-    { /* no pivot found in column k: it's a kernel vector */
-      d[k] = -1; r++;
-    }
-    else
-    {
-      d[k] = j; /* the pivot in column k is at row j */
-      c[j] = k; /* a pivot at position j was found in column k */
-      for (t = 0; t < m; t++)
-	if (t != j && F2_get_bit(x, t, k))
-	  F2_add_rows(x[j], x[t], k / MPQS_GAUSS_BITS, words);
-    }
-  }
-
-  ker_x = F2_create_matrix(n, r);
-  for (j = k = 0; j < r; j++, k++)
-  {
-    while (d[k] != -1) k++;
-    for (i = 0; i < k; i++)
-      if (d[i] != -1 && F2_get_bit(x, d[i], k)) F2_set_bit(ker_x, i, j);
-    F2_set_bit(ker_x, k, j);
-  }
-  *rank = r; avma = av; return ker_x;
-}
-
-/*********************************************************************/
-/**                                                                 **/
-/**                    FROM RELATIONS TO DIVISORS                   **/
-/**                                                                 **/
-/*********************************************************************/
 
 /* NB: overwrites rel */
 static GEN
@@ -2712,28 +2534,25 @@ mpqs_solve_linear_system(mpqs_handle_t *h, pariFILE *pFREL, long rel)
   long *fpos, *ei;
   long i, j, H_cols, H_rows;
   long res_last, res_next, res_size, res_max;
-  F2_matrix m, ker_m;
+  GEN  m, ker_m;
   long done, rank;
   char buf[MPQS_STRING_LENGTH];
 
   fpos = (long *) pari_malloc(rel * sizeof(long));
 
-  m = F2_read_matrix(FREL, h->size_of_FB+1, rel, fpos);
+  m = stream_read_F2m(FREL, h->size_of_FB+1, rel, fpos);
   if (DEBUGLEVEL >= 7)
-  {
-    fprintferr("\\\\ MATRIX READ BY MPQS\nFREL=");
-    F2_print_matrix(m, h->size_of_FB+1, rel);
-    fprintferr("\n");
-  }
+    fprintferr("\\\\ MATRIX READ BY MPQS\nFREL=%Ps\n",m);
 
-  ker_m = mpqs_kernel(m, h->size_of_FB+1, rel, &rank);
+  ker_m = F2m_ker_sp(m,0); rank = lg(ker_m)-1;
+  if (isclone(m)) gunclone(m);
+
   if (DEBUGLEVEL >= 4)
   {
     if (DEBUGLEVEL >= 7)
     {
-      fprintferr("\\\\ KERNEL COMPUTED BY MPQS\nKERNEL=");
-      F2_print_matrix(ker_m, rel, rank);
-      fprintferr("\n");
+      fprintferr("\\\\ KERNEL COMPUTED BY MPQS\n");
+      fprintferr("KERNEL=%Ps\n",ker_m);
     }
     fprintferr("MPQS: Gauss done: kernel has rank %ld, taking gcds...\n", rank);
   }
@@ -2745,8 +2564,6 @@ mpqs_solve_linear_system(mpqs_handle_t *h, pariFILE *pFREL, long rel)
   { /* trivial kernel. Fail gracefully: main loop may look for more relations */
     if (DEBUGLEVEL >= 3)
       pari_warn(warner, "MPQS: no solutions found from linear system solver");
-    F2_destroy_matrix(m, h->size_of_FB+1);
-    F2_destroy_matrix(ker_m, rel);
     pari_free(fpos); /* ei not yet allocated */
     avma = av; return NULL; /* no factors found */
   }
@@ -2772,17 +2589,17 @@ mpqs_solve_linear_system(mpqs_handle_t *h, pariFILE *pFREL, long rel)
 
   ei = (long *) pari_malloc((h->size_of_FB + 2) * sizeof(long));
 
-  for (i = 0; i < H_cols; i++)
+  for (i = 1; i <= H_cols; i++)
   { /* loop over kernel basis */
     X = Y_prod = gen_1;
     memset((void *)ei, 0, (h->size_of_FB + 2) * sizeof(long));
 
     av3 = avma; lim3 = stack_lim(av3,1);
-    for (j = 0; j < H_rows; j++)
+    for (j = 1; j <= H_rows; j++)
     {
-      if (F2_get_bit(ker_m, j, i))
+      if (F2m_coeff(ker_m, j, i))
 	Y_prod = mpqs_add_relation(Y_prod, N, ei,
-				   mpqs_get_relation(buf, fpos[j], FREL));
+				   mpqs_get_relation(buf, fpos[j-1], FREL));
       if (low_stack(lim3, stack_lim(av3,1)))
       {
 	if(DEBUGMEM>1) pari_warn(warnmem,"[1]: mpqs_solve_linear_system");
@@ -2943,8 +2760,6 @@ mpqs_solve_linear_system(mpqs_handle_t *h, pariFILE *pFREL, long rel)
     }
   } /* for (loop over kernel basis) */
 
-  F2_destroy_matrix(m, h->size_of_FB+1);
-  F2_destroy_matrix(ker_m, rel);
   pari_free(ei); pari_free(fpos);
   if (res_next < 3) { avma = av; return NULL; } /* no factors found */
 

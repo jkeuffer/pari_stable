@@ -340,10 +340,6 @@ typedef struct mpqs_handle {
 
 } mpqs_handle_t;
 
-/* -- for Gauss/Lanczos */
-typedef ulong *F2_row;
-typedef F2_row *F2_matrix;
-
 /* -- sizing table entries */
 
 /* The "tolerance" is explained below apropos of mpqs_set_sieve_threshold().
