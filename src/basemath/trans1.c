@@ -308,7 +308,7 @@ gpowg0(GEN x)
     case t_INT: case t_REAL: case t_FRAC: case t_PADIC:
       return gen_1;
 
-    case t_QUAD: x--; /*fall through*/
+    case t_QUAD: x++; /*fall through*/
     case t_COMPLEX: {
       pari_sp av = avma;
       GEN a = gpowg0(gel(x,1));
