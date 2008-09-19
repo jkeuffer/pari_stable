@@ -632,7 +632,7 @@ quadray(GEN D, GEN f, long prec)
       pari_err(talker,"not a polynomial of degree 2 in quadray");
     D = gel(nf,3);
   }
-  bnr = bnrinit0(bnf,f,1);
+  bnr = Buchray(bnf, f, nf_INIT|nf_GEN);
   if (gcmp1(gmael(bnr,5,1))) { avma = av; return pol_x(0); }
   if (signe(D) > 0)
     y = bnrstark(bnr,NULL,prec);

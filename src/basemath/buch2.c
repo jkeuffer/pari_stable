@@ -2954,8 +2954,8 @@ bnfinit0(GEN P, long flag, GEN data, long prec)
     switch(lx)
     {
       case 4: nbrelpid = itos(gel(data,3));
-      case 3: c2 = gtodouble( gel(data,2));
-      case 2: c1  = gtodouble( gel(data,1));
+      case 3: c2 = gtodouble(gel(data,2));
+      case 2: c1 = gtodouble(gel(data,1));
     }
   }
   switch(flag)

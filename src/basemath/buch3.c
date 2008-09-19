@@ -370,7 +370,7 @@ Buchray(GEN bnf, GEN module, long flag)
   const long do_init = flag & nf_INIT;
   pari_sp av = avma;
 
-  bnf = checkbnf(bnf); nf = checknf(bnf);
+  bnf = checkbnf(bnf); nf = gel(bnf,7);
   funits = check_units(bnf, "Buchray"); RU = lg(funits);
   El = Gen = NULL; /* gcc -Wall */
   bigres = gel(bnf,8);
