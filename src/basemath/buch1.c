@@ -622,7 +622,7 @@ quadray(GEN D, GEN f, long prec)
       pari_err(talker,"quadray needs a fundamental discriminant");
     if (v == NO_VARIABLE) v = fetch_user_var("y");
     pol = quadpoly0(D, v);
-    bnf = bnfinit0(pol, 1, NULL, prec);
+    bnf = Buchall(pol, nf_FORCE, prec);
   }
   else
   {

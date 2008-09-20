@@ -640,7 +640,7 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
   GEN y = cgetg(9, t_VEC);
 
   T = get_bnfpol(T, &bnf, &nf); vbas = varn(T);
-  if (!bnf) bnf = bnfinit0(nf? nf: T, 1, NULL, DEFAULTPREC);
+  if (!bnf) bnf = Buchall(nf? nf: T, nf_FORCE, DEFAULTPREC);
   if (!nf) nf = checknf(bnf);
 
   relpol = get_bnfpol(relpol, &bnfabs, &nfabs);
@@ -663,7 +663,7 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
     polabs = rnfequationall(bnf, relpol, &sk, NULL);
     k = stoi(sk);
   }
-  if (!bnfabs || !gcmp0(k)) bnfabs = bnfinit0(polabs, 1, NULL, nf_get_prec(nf));
+  if (!bnfabs || !gcmp0(k)) bnfabs = Buchall(polabs, nf_FORCE, nf_get_prec(nf));
   if (!nfabs) nfabs = checknf(bnfabs);
 
   if (galois < 0 || galois > 2) pari_err(flagerr, "rnfisnorminit");

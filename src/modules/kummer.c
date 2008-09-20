@@ -1108,7 +1108,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   /* step 3 */
   if (DEBUGLEVEL>2) fprintferr("Step 3\n");
   /* could factor disc(R) using th. 2.1.6. */
-  bnfz = bnfinit0(COMPO.R,1,NULL,prec);
+  bnfz = Buchall(COMPO.R, nf_FORCE, prec);
   if (DEBUGLEVEL) msgTIMER(&t, "[rnfkummer] bnfinit(Kz)");
   cycgen = check_and_build_cycgen(bnfz);
   nfz = gel(bnfz,7);

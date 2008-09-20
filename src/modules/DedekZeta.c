@@ -156,7 +156,7 @@ initzeta(GEN pol, long prec)
   if (bnf && nf_get_prec(bnf) >= prec)
     bnf = gcopy(bnf);
   else
-    bnf = bnfinit0(pol, 2, NULL, prec);
+    bnf = Buchall(pol, 0, prec);
   prec = (prec<<1) - 2;
   Pi = mppi(prec); racpi = sqrtr(Pi);
 

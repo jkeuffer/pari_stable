@@ -236,7 +236,7 @@ GEN ZX_monic_factorpadic(GEN f, GEN p, long prec);
 
 enum { t_FF_FpXQ = 0, t_FF_Flxq = 1, t_FF_F2xq = 2 };
 
-/* for Buchall */
+/* for Buchall_param */
 enum { fupb_NONE, fupb_RELAT, fupb_LARGE, fupb_PRECI, fupb_BACH };
 
 /* Allocation / gerepile */

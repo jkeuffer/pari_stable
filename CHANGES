@@ -318,6 +318,8 @@ BA 41- user variables can now be aliased [#790]
        PARI_OLD_NAMES to recover compatibility macros for old friends like
        'un' and 'lstoi'
    82- Mat(t_QFI or t_QFR) now returns the associated 2x2 symmetric matrix
+   83- [library] rename Buchall -> Buchall_param and export a new Buchall
+       with a simplified interface.
 
   Added
     1- new benches: galoisinit, ispower, nffactor, subfields, resultant,

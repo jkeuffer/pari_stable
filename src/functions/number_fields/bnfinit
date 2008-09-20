@@ -8,10 +8,9 @@ Help: bnfinit(P,{flag=0},{tech=[]}): compute the necessary data for future
  0: default, 1: insist on having fundamental units.
  See manual for details about tech.
 Description:
- (gen):bnf:prec	bnfinit0($1, 0, NULL, prec)
- (gen, 0):bnf:prec	bnfinit0($1, 0, NULL, prec)
- (gen, 1):bnf:prec	bnfinit0($1, 1, NULL, prec)
- (gen, 2):bnf:prec	bnfinit0($1, 2, NULL, prec)
+ (gen):bnf:prec	Buchall($1, 0, prec)
+ (gen, 0):bnf:prec	Buchall($1, 0, prec)
+ (gen, 1):bnf:prec	Buchall($1, nf_FORCE, prec)
  (gen, ?small, ?gen):bnf:prec	bnfinit0($1, $2, $3, prec)
 Doc: initializes a
  \var{bnf} structure. Used in programs such as \kbd{bnfisprincipal},
@@ -95,8 +94,9 @@ Doc: initializes a
  those corresponding to the relations in $W$ and $B$ (when the \kbd{bnf}
  internal precision needs to be increased).
 Variant:
- \fun{GEN}{Buchall}{GEN P, double c1, double c2, long nbrelpid, long flag,
- long prec} gives direct access to the technical parameters; \kbd{flag}
- is either $0$ (default) or \tet{nf_FORCE} (insist on finding fundamental
- units).
-
+ Also available is \fun{GEN}{Buchall}{GEN P, long flag, long prec},
+ corresponding to \kbd{tech = NULL}, where
+ \kbd{flag} is either $0$ (default) or \tet{nf_FORCE} (insist on finding
+ fundamental units). \fun{GEN}{Buchall_param}{GEN P, double c1, double c2,
+ long nbrelpid, long flag, long prec} gives direct access to the technical
+ parameters.

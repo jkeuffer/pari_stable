@@ -214,6 +214,8 @@ This file lists the incompatible changes between Version 2.x and older versions
   - commented out a large section of pariold.h. Define PARI_OLD_NAMES to
     recover compatibility macros for old friends like 'un' and 'lstoi'
   - rename greffe -> RgX_to_ser and remove the "use_pari_stack" flag
+  - rename Buchall -> Buchall_param and export a new Buchall with a
+    simplified interface.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

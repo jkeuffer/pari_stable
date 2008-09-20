@@ -2514,7 +2514,7 @@ quadhilbertreal(GEN D, long prec)
   (void)&prec; /* prevent longjmp clobbering it */
   if (DEBUGLEVEL) (void)timer2();
   dbg_block();
-  bnf = bnfinit0(quadpoly0(D, fetch_user_var("y")), 1, NULL, prec);
+  bnf = Buchall(quadpoly0(D, fetch_user_var("y")), nf_FORCE, prec);
   dbg_release();
   cyc = gmael3(bnf,8, 1, 2);
   if (lg(cyc) == 1) { avma = av; return pol_x(0); }

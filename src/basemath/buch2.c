@@ -2722,7 +2722,7 @@ makematal(GEN bnf)
     j--; /* will retry the same element in next loop */
     if (DEBUGLEVEL) pari_warn(warnprec,"makematal",prec);
     nf = nfnewprec_shallow(nf,prec);
-    bnf = bnfinit0(nf,1,NULL,prec); setrand(c);
+    bnf = Buchall(nf, nf_FORCE, prec); setrand(c);
   }
   if (DEBUGLEVEL>1) fprintferr("\n");
   return ma;
@@ -2940,11 +2940,14 @@ sbnf2bnf(GEN sbnf, long prec)
   y[10] = sbnf[12]; return gerepilecopy(av,y);
 }
 
+static const double BNF_C1 = 0.3, BNF_C2 = 0.3;
+static const long BNF_RELPID = 4;
+
 GEN
 bnfinit0(GEN P, long flag, GEN data, long prec)
 {
-  double c1 = 0.3, c2 = 0.3;
-  long fl, nbrelpid = 4;
+  double c1 = BNF_C1, c2 = BNF_C2;
+  long fl, relpid = BNF_RELPID;
 
   if (typ(P) == t_VEC && lg(P) == 13) return sbnf2bnf(P, prec); /* sbnf */
   if (data)
@@ -2953,7 +2956,7 @@ bnfinit0(GEN P, long flag, GEN data, long prec)
     if (typ(data) != t_VEC || lx > 5) pari_err(typeer,"bnfinit");
     switch(lx)
     {
-      case 4: nbrelpid = itos(gel(data,3));
+      case 4: relpid = itos(gel(data,3));
       case 3: c2 = gtodouble(gel(data,2));
       case 2: c1 = gtodouble(gel(data,1));
     }
@@ -2966,9 +2969,12 @@ bnfinit0(GEN P, long flag, GEN data, long prec)
     default: pari_err(flagerr,"bnfinit");
       return NULL; /* not reached */
   }
-  return Buchall(P, c1, c2, nbrelpid, fl, prec);
+  return Buchall_param(P, c1, c2, relpid, fl, prec);
 }
-
+GEN
+Buchall(GEN P, long flag, long prec)
+{ return Buchall_param(P, BNF_C1, BNF_C2, BNF_RELPID, flag, prec); }
+ 
 static GEN
 Buchall_deg1(GEN nf)
 {
@@ -3108,7 +3114,7 @@ compute_vecG(GEN nf, FB_t *F, long n)
 }
 
 GEN
-Buchall(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long prec)
+Buchall_param(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long prec)
 {
   pari_sp av0 = avma, av, av2;
   long PRECREG, N, R1, R2, RU, LIMC, LIMC2, lim, zc, i, jid;
@@ -3216,7 +3222,7 @@ PRECPB:
     else           PRECREG = (PRECREG<<1)-2;
     if (DEBUGLEVEL)
     {
-      char str[64]; sprintf(str,"Buchall (%s)",precpb);
+      char str[64]; sprintf(str,"Buchall_param (%s)",precpb);
       pari_warn(warnprec,str,PRECREG);
     }
     nf = gclone( nfnewprec_shallow(nf, PRECREG) );
