@@ -481,7 +481,7 @@ BA 31- F2v/F2m functions family and F2m_ker for linear algebra over GF(2)
     8- unused undocumented library functions os_open/os_read/os_close
     9- obsolete README.DOS and README.WIN
    10- cant_deflate, elliper1, lllger3, varer1, obsoler, infprecer, errlg,
-       errexpo, errvalp, rtodber, affer2 error codes
+       errexpo, errvalp, rtodber, affer2, primer2 error codes
    11- obsolete library function bruteall
    12- useless undocumented library function gkrogs (use krois)
    13- obsolete library functions roots2 and rootsold are no longer public
