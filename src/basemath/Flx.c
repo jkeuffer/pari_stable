@@ -1927,12 +1927,12 @@ FlxY_Flx_div(GEN x, GEN y, ulong p)
     ulong t = (ulong)y[2];
     if (t == 1) return x;
     t = Fl_inv(t, p);
-    z = cgetg_copy(x, &l); z[1] = y[1];
+    z = cgetg_copy(x, &l); z[1] = x[1];
     for (i=2; i<l; i++) gel(z,i) = Flx_Fl_mul(gel(x,i),t,p);
   }
   else
   {
-    z = cgetg_copy(x, &l); z[1] = y[1];
+    z = cgetg_copy(x, &l); z[1] = x[1];
     for (i=2; i<l; i++) gel(z,i) = Flx_div(gel(x,i),y,p);
   }
   return z;
