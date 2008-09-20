@@ -58,7 +58,7 @@ galoisconj2pol(GEN x, long prec)
   n = degpol(x);
   if (n <= 0) return cgetg(1, t_VEC);
   RgX_check_ZX(x, "galoisconj2pol");
-  if (!ZX_isirreducible(x)) pari_err(redpoler, "galoisconj2pol");
+  if (!ZX_is_irred(x)) pari_err(redpoler, "galoisconj2pol");
 
   nbmax = numberofconjugates(x, 2);
   polr = cleanroots(x, prec);

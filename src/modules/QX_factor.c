@@ -1009,7 +1009,7 @@ QX_factor(GEN x)
 }
 
 long
-ZX_isirreducible(GEN x)
+ZX_is_irred(GEN x)
 {
   pari_sp av = avma;
   long l = lg(x);

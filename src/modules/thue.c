@@ -619,7 +619,7 @@ thueinit(GEN pol, long flag, long prec)
   else
   {
     GEN c0, ro = roots(pol, DEFAULTPREC);
-    if (!ZX_isirreducible(pol)) pari_err(redpoler,"thueinit");
+    if (!ZX_is_irred(pol)) pari_err(redpoler,"thueinit");
     c0 = imag_i(gel(ro,1));
     for (k=2; k<lg(ro); k++) c0 = mulrr(c0, imag_i(gel(ro,k)));
     c0 = invr( absr(c0) );
