@@ -1364,7 +1364,9 @@ GEN
 Flxq_mul(GEN x,GEN y,GEN T,ulong p)
 {
   GEN z = Flx_mul(x,y,p);
-  if (lg(T) < Flx_INVMONTGOMERY_LIMIT) return Flx_rem(z,T,p);
+  long lT = lg(T);
+  if (lT > lg(z)) return z;
+  if (lT < Flx_INVMONTGOMERY_LIMIT) return Flx_rem(z,T,p);
   return Flx_rem_montgomery(z, Flx_invmontgomery(T, p), T, p);
 }
 
@@ -1373,7 +1375,9 @@ GEN
 Flxq_sqr(GEN y,GEN T,ulong p)
 {
   GEN z = Flx_sqr(y,p);
-  if (lg(T) < Flx_INVMONTGOMERY_LIMIT) return Flx_rem(z,T,p);
+  long lT = lg(T);
+  if (lT > lg(z)) return z;
+  if (lT < Flx_INVMONTGOMERY_LIMIT) return Flx_rem(z,T,p);
   return Flx_rem_montgomery(z, Flx_invmontgomery(T, p), T, p);
 }
 
@@ -1382,7 +1386,6 @@ typedef struct {
   GEN mg;
   ulong p;
 } Flxq_muldata;
-
 
 static GEN
 _sqr_montgomery(void *data, GEN x)
