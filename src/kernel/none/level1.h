@@ -21,21 +21,21 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 INLINE long
 evallg(long x)
 {
-  if (x & ~LGBITS) pari_err(errlg);
+  if (x & ~LGBITS) pari_err(overflower,"lg()");
   return _evallg(x);
 }
 INLINE long
 evalvalp(long x)
 {
   long v = _evalvalp(x);
-  if (v & ~VALPBITS) pari_err(errvalp);
+  if (v & ~VALPBITS) pari_err(overflower,"valp()");
   return v;
 }
 INLINE long
 evalexpo(long x)
 {
   long v = _evalexpo(x);
-  if (v & ~EXPOBITS) pari_err(errexpo);
+  if (v & ~EXPOBITS) pari_err(overflower,"expo()");
   return v;
 }
 
@@ -243,7 +243,9 @@ itos(GEN x)
   long u;
 
   if (!s) return 0;
-  u = x[2]; if (lgefint(x) > 3 || u < 0) pari_err(affer2);
+  u = x[2]; 
+  if (lgefint(x) > 3 || u < 0)
+    pari_err(overflower,"t_INT-->long assignment");
   return (s>0) ? u : -u;
 }
 /* as itos, but return 0 if too large. Cf is_bigint */
@@ -259,7 +261,8 @@ itou(GEN x)
   switch(lgefint(x)) {
     case 2: return 0;
     case 3: return x[2];
-    default: pari_err(affer2);
+    default:
+      pari_err(overflower,"t_INT-->ulong assignment");
       return 0; /* not reached */
   }
 }
@@ -903,7 +906,7 @@ shiftr(GEN x, long n)
   const long e = evalexpo(expo(x)+n);
   const GEN y = rcopy(x);
 
-  if (e & ~EXPOBITS) pari_err(errexpo);
+  if (e & ~EXPOBITS) pari_err(overflower,"expo()");
   y[1] = (y[1]&~EXPOBITS) | e; return y;
 }
 INLINE GEN
@@ -957,12 +960,9 @@ shiftlr(ulong x, ulong y)
 INLINE void
 affii(GEN x, GEN y)
 {
-  long lx;
-
-  if (x==y) return;
-  lx=lgefint(x); if (lg(y)<lx) pari_err(talker,"impossible assignment I-->I");
-
-  while (--lx) y[lx]=x[lx];
+  long lx = lgefint(x);
+  if (lg(y)<lx) pari_err(overflower,"t_INT-->t_INT assignment");
+  while (--lx) y[lx] = x[lx];
 }
 INLINE void
 affsi(long s, GEN x)

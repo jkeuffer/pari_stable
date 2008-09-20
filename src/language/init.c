@@ -1000,6 +1000,9 @@ pari_err(long numerr, ...)
 	pari_printf("error opening %s file: `%s'.", type, va_arg(ap,char*));
         break;
       }
+      case overflower:
+        pari_printf("overflow in %s.", va_arg(ap, char*));
+        break;
       case notfuncer:
       {
         GEN fun = va_arg(ap, GEN);

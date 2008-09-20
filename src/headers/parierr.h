@@ -28,9 +28,7 @@ enum {
 
 /* mp.s ou mp.c */
 
-  affer2,
-
-  errpile, errlg, errexpo, errvalp, rtodber,
+  errpile, overflower,
 
 /* alglin.c */
 

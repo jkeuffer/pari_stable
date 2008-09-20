@@ -72,6 +72,10 @@ Doc: tries to
 
  \kbd{invmoder}: impossible inverse modulo
 
+ \kbd{overflower}: all forms of arithmetic overflow, including length
+ or exponent overflow (when a larger value is supplied than the
+ implementation can handle).
+
  \kbd{siginter}: SIGINT received (usually from Control-C)
 
  \kbd{talker}: miscellaneous error

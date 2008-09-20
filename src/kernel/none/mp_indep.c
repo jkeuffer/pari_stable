@@ -783,7 +783,7 @@ rtodbl(GEN x)
   /* start by rounding to closest */
   a = (x[2] & (HIGHBIT-1)) + 0x400;
   if (a & HIGHBIT) { ex++; a=0; }
-  if (ex >= exp_mid) pari_err(rtodber);
+  if (ex >= exp_mid) pari_err("t_REAL->double conversion");
   fi.i = ((ex + exp_mid) << mant_len) | (a >> expo_len);
   if (s<0) fi.i |= HIGHBIT;
   return fi.f;
@@ -902,7 +902,7 @@ rtodbl(GEN x)
     if (a & HIGHBIT) { ex++; a=0; }
   }
   else b = 0;
-  if (ex >= exp_mid) pari_err(rtodber);
+  if (ex >= exp_mid) pari_err(overflower,"t_REAL->double conversion");
   ex += exp_mid;
   k = (a >> expo_len) | (ex << shift);
   if (s<0) k |= HIGHBIT;

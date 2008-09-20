@@ -1029,12 +1029,10 @@ possible_traces(GEN compile, GEN mask, GEN *P)
     GEN c = gel(C,i), t;
     Pfinal = mulii(Pfinal, gel(c,1));
     t = mulss(lfinal, lg(gel(c,2))-1);
-    if (lgefint(t) > 3) pari_err(errlg);
-    lfinal = t[2];
+    lfinal = itos(t);
   }
   Pfinal = gerepileuptoint(av, Pfinal);
   lP = lgefint(Pfinal); lfinal++;
-  if (lfinal <= 0) pari_err(errlg);
   /* allocate room for final result */
   V = cgetg(lfinal, t_VEC);
   for (i = 1; i < lfinal; i++) gel(V,i) = cgeti(lP);

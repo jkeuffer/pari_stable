@@ -59,18 +59,10 @@ const char *errmessage[]=
 
   /*  MP.S  */
 
-/* affer2 */
-  "impossible assignment I-->S",
 /* errpile */
   "the PARI stack overflows !",
-/* errlg */
-  "length (lg) overflow",
-/* errexpo */
-  "exponent (expo) overflow",
-/* errvalp */
-  "valuation (valp) overflow",
-/* rtodber */
-  "overflow in R->dbl conversion",
+/* overflower */
+  "",
 
   /*  ALGLIN.C  */
 
