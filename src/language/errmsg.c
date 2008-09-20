@@ -78,7 +78,7 @@ const char *errmessage[]=
 /* primer1 */
   "not enough precomputed primes",
 /* invmoder*/
-  "impossible inverse modulo: ",
+  "",
 
   /*  BASE.C  */
 

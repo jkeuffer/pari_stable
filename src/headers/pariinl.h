@@ -1084,7 +1084,7 @@ INLINE GEN
 Fp_inv(GEN a, GEN m)
 {
   GEN res;
-  if (! invmod(a,m,&res)) pari_err(invmoder,"%Ps", gmodulo(res,m));
+  if (! invmod(a,m,&res)) pari_err(invmoder, gmodulo(res,m));
   return res;
 }
 INLINE GEN

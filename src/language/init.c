@@ -851,6 +851,7 @@ err_leave(void **pv)
 static cell *
 err_seek(long n)
 {
+  if (n == siginter) return NULL;
   while (err_catch_stack)
   {
     cell *t = (cell*)err_catch_stack->value;
@@ -952,13 +953,17 @@ pari_err(long numerr, ...)
     cell *trapped = NULL;
     if ( (trapped = err_seek(numerr)) )
     {
-      jmp_buf *e = trapped->penv;
-      if (numerr == invmoder)
+      switch(numerr)
       {
-	(void)va_arg(ap, char*); /* junk 1st arg */
-	global_err_data = (void*)va_arg(ap, GEN);
+        case invmoder:
+          global_err_data = (void*)va_arg(ap, GEN);
+          break;
+        case siginter:
+        case alarmer:
+          global_err_data = (char*)va_arg(ap, char*);
+          break;
       }
-      longjmp(*e, numerr);
+      longjmp(*(trapped->penv), numerr);
     }
   }
   /* make sure pari_err msg starts at the beginning of line */
@@ -991,10 +996,13 @@ pari_err(long numerr, ...)
       pari_printf("  ***   %s", errmessage[numerr]);
     switch (numerr)
     {
-      case talker: case siginter: case alarmer: case invmoder: {
+      case talker: case siginter: case alarmer: {
 	const char *ch1 = va_arg(ap, char*);
 	pari_vprintf(ch1,ap); pari_putc('.'); break;
       }
+      case invmoder: 
+	pari_printf("impossible inverse modulo: %Ps.", va_arg(ap, GEN));
+        break;
       case openfiler: {
 	const char *type = va_arg(ap, char*);
 	pari_printf("error opening %s file: `%s'.", type, va_arg(ap,char*));

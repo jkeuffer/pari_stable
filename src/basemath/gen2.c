@@ -625,7 +625,14 @@ gequal_try(GEN x, GEN y)
 {
   int i;
   CATCH(CATCH_ALL) {
-    CATCH_RELEASE(); return 0;
+    CATCH_RELEASE();
+    switch(pari_errno)
+    {
+      case errpile:
+      case memer: pari_err(pari_errno);
+      case alarmer: pari_err(pari_errno, global_err_data);
+    }
+    return 0;
   } TRY {
     i = gcmp0(gadd(x, gneg_i(y)));
   } ENDCATCH;

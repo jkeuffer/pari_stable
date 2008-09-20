@@ -116,6 +116,8 @@ IM 90- lngamma(x) gave incorrect results (off by 2*Pi*I) when real(x) was a
    97- wrong result in ellap(E, 2) if bad reduction
    98- 0.*x+1 == 1 --> 1 but 0.*x^2+x == x  --> 0 [ latter is now 1 ]
    99- ffinit(2,30) --> division by 0 [typo in FlxY_Flx_div], [#859]
+  100- when unexpected exception/signal raiѕed (^C, stack overflow, out of
+       memory), == would cancel it and silently return wrong value [#329]
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
@@ -321,6 +323,7 @@ BA 41- user variables can now be aliased [#790]
    82- Mat(t_QFI or t_QFR) now returns the associated 2x2 symmetric matrix
    83- [library] rename Buchall -> Buchall_param and export a new Buchall
        with a simplified interface.
+   84- [library] SIGINT is no longer trap-able
 
   Added
     1- new benches: galoisinit, ispower, nffactor, subfields, resultant,
