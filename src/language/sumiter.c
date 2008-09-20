@@ -147,7 +147,7 @@ prime_loop_init(GEN ga, GEN gb, ulong *a, ulong *b, ulong *p)
   if (lgefint(ga)>3 || lgefint(gb)>3)
   {
     if (cmpii(ga, gb) > 0) return NULL;
-    pari_err(primer1);
+    pari_err(primer1, 0);
   }
   *a = itou(ga);
   *b = itou(gb); if (*a > *b) return NULL;

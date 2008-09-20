@@ -132,4 +132,4 @@ enum {
 #define NEXT_PRIME_VIADIFF(p,d)	 STMT_START \
   { while (*(d) == DIFFPTR_SKIP) (p) += *(d)++; (p) += *(d)++; } STMT_END
 #define NEXT_PRIME_VIADIFF_CHECK(p,d)  STMT_START \
-  { if (!*(d)) pari_err(primer1); NEXT_PRIME_VIADIFF(p,d); } STMT_END
+  { if (!*(d)) pari_err(primer1,0); NEXT_PRIME_VIADIFF(p,d); } STMT_END

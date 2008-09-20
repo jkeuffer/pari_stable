@@ -1017,15 +1017,15 @@ pari_err(long numerr, ...)
       }
 
       case impl:
-	pari_printf(" %s is not yet implemented.", va_arg(ap, char*)); break;
-
+	pari_printf("sorry, %s is not yet implemented.", va_arg(ap, char*));
+        break;
       case typeer: case mattype1: case negexper:
       case constpoler: case notpoler: case redpoler:
       case zeropoler: case consister: case flagerr: case precer:
 	pari_printf(" in %s.",va_arg(ap, char*)); break;
 
       case bugparier:
-	pari_printf(" %s, please report",va_arg(ap, char*)); break;
+	pari_printf("bug in %s, please report",va_arg(ap, char*)); break;
 
       case operi: case operf:
       {
@@ -1048,9 +1048,11 @@ pari_err(long numerr, ...)
 	break;
       }
 
-      case primer2:
-	pari_printf("%lu.", va_arg(ap, ulong));
+      case primer1: {
+        ulong c = va_arg(ap, ulong);
+	if (c) pari_printf("need primelimit ~ %lu.", c);
 	break;
+      }
     }
   }
   term_color(c_NONE); va_end(ap);

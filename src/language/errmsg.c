@@ -36,9 +36,9 @@ const char *errmessage[]=
 /* flagerr */
   "invalid flag",
 /* bugparier */
-  "bug in",
+  "",
 /* impl */
-  "sorry,",
+  "",
 /* archer */
   "sorry, not yet available on this system",
 /* notfuncer */
@@ -77,8 +77,6 @@ const char *errmessage[]=
   "not an integer argument in an arithmetic function",
 /* primer1 */
   "not enough precomputed primes",
-/* primer2 */
-  "not enough precomputed primes, need primelimit ~ ",
 /* invmoder*/
   "impossible inverse modulo: ",
 

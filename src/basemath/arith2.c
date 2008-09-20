@@ -493,7 +493,7 @@ maxprime(void) { return _maxprime; }
 void
 maxprime_check(ulong c)
 {
-  if (_maxprime < c) pari_err(primer2, c);
+  if (_maxprime < c) pari_err(primer1, c);
 }
 
 /* assume ptr is the address of a diffptr containing the succesive
