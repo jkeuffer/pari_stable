@@ -2071,6 +2071,7 @@ ulong   quadratic_prec_mask(long n);
 
 GEN     QX_factor(GEN x);
 GEN     ZX_factor(GEN x);
+long    ZX_is_irred(GEN x);
 GEN     ZX_squff(GEN f, GEN *ex);
 
 /* polarit2.c */
@@ -2092,7 +2093,6 @@ GEN     RgX_gcd(GEN x, GEN y);
 long    RgX_type(GEN x, GEN *ptp, GEN *ptpol, long *ptpa);
 void    RgX_type_decode(long x, long *t1, long *t2);
 int     RgX_type_is_composite(long t);
-long    ZX_isirreducible(GEN x);
 GEN     centermod(GEN x, GEN p);
 GEN     centermod_i(GEN x, GEN p, GEN ps2);
 GEN     centermodii(GEN x, GEN p, GEN po2);

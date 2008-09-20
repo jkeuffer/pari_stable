@@ -978,17 +978,6 @@ gisirreducible(GEN x)
   return (lg(gcoeff(y,1,1))==l)?gen_1:gen_0;
 }
 
-long
-ZX_isirreducible(GEN x)
-{
-  pari_sp av = avma;
-  long l = lg(x);
-  GEN y;
-  if (l <= 3) return 0;
-  y = gel(ZX_factor(x), 1); avma = av;
-  return (lg(y) == 2);
-}
-
 /*******************************************************************/
 /*                                                                 */
 /*                         GENERIC GCD                             */

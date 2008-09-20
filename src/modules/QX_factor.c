@@ -1008,6 +1008,20 @@ QX_factor(GEN x)
   return gerepileupto(av, ZX_factor_i(Q_primpart(x)));
 }
 
+long
+ZX_isirreducible(GEN x)
+{
+  pari_sp av = avma;
+  long l = lg(x);
+  GEN y;
+  if (l <= 3) return 0; /* degree < 1 */
+  if (l == 4) return 1; /* degree 1 */
+  if (ZX_val(x)) return 0;
+  if (!ZX_is_squarefree(x)) return 0;
+  y = ZX_DDF(x); avma = av;
+  return (lg(y) == 2);
+}
+
 GEN
 nfrootsQ(GEN x)
 {
