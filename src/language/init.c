@@ -887,11 +887,22 @@ err_recover(long numerr)
 }
 
 static void
-err_init_msg()
+err_init()
 {
-  const char *gp_function_name = closure_func_err();
+  /* make sure pari_err msg starts at the beginning of line */
+  if (!pari_last_was_newline()) pari_putc('\n');
+  pariOut->flush();
+  pariErr->flush();
+  pariOut = pariErr;
+  term_color(c_ERR);
+}
+
+static void
+err_init_msg(int numerr)
+{
+  const char *gp_function_name;
   pari_puts("  *** ");
-  if (gp_function_name)
+  if (numerr != user && (gp_function_name = closure_func_err()))
     pari_printf("%s: ", gp_function_name);
   else
     pari_puts("  ");
@@ -906,42 +917,37 @@ pari_warn(int numerr, ...)
 
   va_start(ap,numerr);
 
-  if (!pari_last_was_newline())
-    pari_putc('\n'); /* make sure pari_err msg starts at the beginning of line */
-  pari_flush(); pariOut = pariErr;
-  pari_flush(); term_color(c_ERR);
+  err_init();
+  err_init_msg(numerr);
+  switch (numerr)
+  {
+    case user:
+      pari_puts("user warning: ");
+      print0(va_arg(ap, GEN), f_RAW);
+      break;
 
-  if (numerr == user) {
-    GEN g = va_arg(ap, GEN);
-    pari_puts("  ***   user warning: ");
-    print0(g, f_RAW);
-    pari_putc('\n');
-  } else {
-    err_init_msg();
-    switch (numerr)
-    {
-      case warnmem:
-        pari_puts("collecting garbage in "); ch1=va_arg(ap, char*);
-        pari_vprintf(ch1,ap); pari_puts(".\n");
-        break;
-      
-      case warner:
-        pari_puts("Warning: "); ch1=va_arg(ap, char*);
-        pari_vprintf(ch1,ap); pari_puts(".\n");
-        break;
+    case warnmem:
+      pari_puts("collecting garbage in "); ch1=va_arg(ap, char*);
+      pari_vprintf(ch1,ap); pari_putc('.');
+      break;
+    
+    case warner:
+      pari_puts("Warning: "); ch1=va_arg(ap, char*);
+      pari_vprintf(ch1,ap); pari_putc('.');
+      break;
 
-      case warnprec:
-        pari_vprintf("Warning: increasing prec in %s; new prec = %ld\n",ap);
-        break;
+    case warnprec:
+      pari_vprintf("Warning: increasing prec in %s; new prec = %ld",ap);
+      break;
 
-      case warnfile:
-        pari_puts("Warning: failed to "),
-        ch1=va_arg(ap, char*);
-        pari_printf("%s: %s\n", ch1, va_arg(ap, char*));
-        break;
-    }
+    case warnfile:
+      pari_puts("Warning: failed to "),
+      ch1 = va_arg(ap, char*);
+      pari_printf("%s: %s", ch1, va_arg(ap, char*));
+      break;
   }
   term_color(c_NONE); va_end(ap);
+  pari_putc('\n');
   pariOut = out;
   flusherr();
 }
@@ -972,13 +978,7 @@ pari_err(int numerr, ...)
       longjmp(*(trapped->penv), numerr);
     }
   }
-  /* make sure pari_err msg starts at the beginning of line */
-  if (!pari_last_was_newline()) pari_putc('\n');
-  pariOut->flush();
-  pariErr->flush();
-  pariOut = pariErr;
-  term_color(c_ERR);
-
+  err_init();
   if (numerr == talker2)
   {
     const char *msg = va_arg(ap, char*);
@@ -988,7 +988,7 @@ pari_err(int numerr, ...)
   else
   {
     closure_err();
-    err_init_msg(); pari_puts(errmessage[numerr]);
+    err_init_msg(numerr); pari_puts(errmessage[numerr]);
     switch (numerr)
     {
       case talker: case siginter: case alarmer: {
