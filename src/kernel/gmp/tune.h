@@ -13,6 +13,7 @@
 #define __INVMOD_GMP_LIMIT      46
 #define __Flx_MUL_LIMIT            100
 #define __Flx_SQR_LIMIT            200
+#define __Flx_MULQ_MONTGOMERY_LIMIT 180
 #define __Flx_INVMONTGOMERY_LIMIT  400
 #define __Flx_POW_MONTGOMERY_LIMIT 100
 #define __RgX_MUL_LIMIT         10

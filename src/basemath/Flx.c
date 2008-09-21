@@ -1366,7 +1366,7 @@ Flxq_mul(GEN x,GEN y,GEN T,ulong p)
   GEN z = Flx_mul(x,y,p);
   long lT = lg(T);
   if (lT > lg(z)) return z;
-  if (lT < Flx_INVMONTGOMERY_LIMIT) return Flx_rem(z,T,p);
+  if (lT < Flx_MULQ_MONTGOMERY_LIMIT) return Flx_rem(z,T,p);
   return Flx_rem_montgomery(z, Flx_invmontgomery(T, p), T, p);
 }
 
@@ -1377,7 +1377,7 @@ Flxq_sqr(GEN y,GEN T,ulong p)
   GEN z = Flx_sqr(y,p);
   long lT = lg(T);
   if (lT > lg(z)) return z;
-  if (lT < Flx_INVMONTGOMERY_LIMIT) return Flx_rem(z,T,p);
+  if (lT < Flx_MULQ_MONTGOMERY_LIMIT) return Flx_rem(z,T,p);
   return Flx_rem_montgomery(z, Flx_invmontgomery(T, p), T, p);
 }
 

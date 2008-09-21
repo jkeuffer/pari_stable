@@ -9,6 +9,7 @@ extern long REMIIMUL_LIMIT;
 extern long INVMOD_GMP_LIMIT;
 extern long DIVRR_GMP_LIMIT;
 extern long Flx_INVMONTGOMERY_LIMIT;
+extern long Flx_MULQ_MONTGOMERY_LIMIT;
 extern long Flx_POW_MONTGOMERY_LIMIT;
 extern long EXPNEWTON_LIMIT;
 extern long INVNEWTON_LIMIT;
@@ -32,6 +33,7 @@ extern long RgX_MUL_LIMIT;
 #  define LOGAGM_LIMIT             __LOGAGM_LIMIT
 #  define LOGAGMCX_LIMIT           __LOGAGMCX_LIMIT
 #  define AGM_ATAN_LIMIT           __AGM_ATAN_LIMIT
+#  define Flx_MULQ_MONTGOMERY_LIMIT __Flx_MULQ_MONTGOMERY_LIMIT
 #  define Flx_INVMONTGOMERY_LIMIT  __Flx_INVMONTGOMERY_LIMIT
 #  define Flx_POW_MONTGOMERY_LIMIT __Flx_POW_MONTGOMERY_LIMIT
 #  define Flx_SQR_LIMIT            __Flx_SQR_LIMIT
