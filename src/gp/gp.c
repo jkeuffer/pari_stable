@@ -1762,7 +1762,7 @@ read_opt(gp2c_stack *p_A, long argc, char **argv)
 	GP_DATA->flags |= QUIET; break;
       case 't':
 	if (strncmp(t,"est",3)) usage(argv[0]); /* obsolete */
-	GP_DATA->flags |= TEST; /* fall through */
+	GP_DATA->flags |= TEST; break;
       case 'f':
 	initrc = 0; break;
       case '-':
@@ -1773,7 +1773,7 @@ read_opt(gp2c_stack *p_A, long argc, char **argv)
 	}
 	if (strcmp(t, "texmacs") == 0) { GP_DATA->flags |= TEXMACS; break; }
 	if (strcmp(t, "emacs") == 0) { GP_DATA->flags |= EMACS; break; }
-	if (strcmp(t, "test") == 0) { GP_DATA->flags |= TEST; initrc = 0; break; }
+	if (strcmp(t, "test") == 0) { GP_DATA->flags |= TEST; break; }
 	if (strcmp(t, "quiet") == 0) { GP_DATA->flags |= QUIET; break; }
 	if (strcmp(t, "fast") == 0) { initrc = 0; break; }
 	if (strncmp(t, "primelimit",10) == 0) {p = read_arg_equal(&i,t+10,argc,argv); break; }
@@ -1784,8 +1784,10 @@ read_opt(gp2c_stack *p_A, long argc, char **argv)
     }
   }
   if (GP_DATA->flags & TEXMACS) tm_start_output();
-  if (GP_DATA->flags & TEST) init80col();
-  if (initrc)
+  if (GP_DATA->flags & TEST) {
+    GP_DATA->flags &= ~BREAKLOOP;
+    init80col();
+  } else if (initrc)
   {
     gp_initrc(p_A, argv[0]);
     if (setjmp(GP_DATA->env))
