@@ -14,94 +14,55 @@ with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 const char *errmessage[]=
-{
-/* force error into non-0 */
-  "",
-/* talker2 */
-  "",
-/* bugparier */
-  "",
-/* siginter */
-  "",
+{ "", /* force error into non-0 */
 
-/* alarmer */
-  "",
-/* openfiler */
-  "",
+  "", /* talker2 */
+  "", /* bugparier */
+  "", /* siginter */
 
-/* talker */
-  "",
-/* flagerr */
-  "invalid flag",
-/* impl */
-  "",
-/* archer */
-  "sorry, not yet available on this system",
-/* notfuncer */
-  "not a function in function call",
+  "", /* alarmer */
+  "", /* openfiler */
 
-/* precer */
-  "precision too low",
-/* typeer */
-  "incorrect type",
-/* consister */
-  "inconsistent data",
-/* user */
-  "",
+  "", /* talker */
+  "invalid flag", /* flagerr */
+  "", /* impl */
+  "sorry, not yet available on this system", /* archer */
+  "not a function in function call", /* notfuncer */
 
-/* errpile */
-  "the PARI stack overflows !",
-/* overflower */
-  "",
+  "precision too low", /* precer */
+  "incorrect type", /* typeer */
+  "inconsistent data", /* consister */
+  "", /* user */
+
+  "the PARI stack overflows !", /* errpile */
+  "", /* overflower */
 
   /*  ALGLIN.C  */
-
-/* matinv1 */
-  "non invertible matrix in gauss",
-/* mattype1 */
-  "not a square matrix",
+  "non invertible matrix in gauss", /* matinv1 */
+  "not a square matrix", /* mattype1 */
 
   /*  ARITH.C  */
-
-/* arither1 */
-  "not an integer argument in an arithmetic function",
-/* primer1 */
-  "not enough precomputed primes",
-/* invmoder*/
-  "",
+  "not an integer argument in an arithmetic function", /* arither1 */
+  "not enough precomputed primes", /* primer1 */
+  "", /* invmoder*/
 
   /*  BASE.C  */
-
-/* constpoler */
-  "constant polynomial",
-/* notpoler */
-  "not a polynomial",
-/* redpoler */
-  "reducible polynomial",
-/* zeropoler */
-  "zero polynomial",
+  "constant polynomial", /* constpoler */
+  "not a polynomial", /* notpoler */
+  "reducible polynomial", /* redpoler */
+  "zero polynomial", /* zeropoler */
 
   /*  GEN.C */
-
-/* operi */
-  "impossible",
-/* operf */
-  "forbidden",
-/* gdiver */
-  "division by zero",
+  "", /* operi */
+  "", /* operf */
+  "division by zero", /* gdiver */
 
   /*  INIT.C  */
-
-/* memer */
-  "not enough memory",
+  "not enough memory", /* memer */
 
   /*  TRANS.C  */
+  "negative exponent", /* negexper */
+  "non quadratic residue in gsqrt", /* sqrter5 */
 
-/* negexper */
-  "negative exponent",
-/* sqrter5 */
-  "non quadratic residue in gsqrt",
-
-/* noer */
-  "what's going on ?"
+  "what's going on ?" /* noer */
 };
