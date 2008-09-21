@@ -1783,6 +1783,7 @@ read_opt(gp2c_stack *p_A, long argc, char **argv)
 	usage(argv[0]);
     }
   }
+  if (GP_DATA->flags & EMACS) GP_DATA->flags &= ~BREAKLOOP;
   if (GP_DATA->flags & TEXMACS) tm_start_output();
   if (GP_DATA->flags & TEST) {
     GP_DATA->flags &= ~BREAKLOOP;
@@ -1829,6 +1830,7 @@ main(int argc, char **argv)
     puts("### Errors on startup, exiting...\n\n");
     exit(1);
   }
+  if (!is_interactive()) GP_DATA->flags &= ~BREAKLOOP;
 
   pari_init_defaults();
   stack_init(&s_A,sizeof(*A),(void**)&A);
