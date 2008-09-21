@@ -985,13 +985,6 @@ pari_err(int numerr, ...)
     const char *s = va_arg(ap,char *);
     print_errcontext(msg,s,va_arg(ap,char *));
   }
-  else if (numerr == user)
-  {
-    GEN g = va_arg(ap, GEN);
-    closure_err();
-    pari_puts("  ***   user error: ");
-    print0(g, f_RAW);
-  }
   else
   {
     closure_err();
@@ -1002,6 +995,10 @@ pari_err(int numerr, ...)
 	const char *ch1 = va_arg(ap, char*);
 	pari_vprintf(ch1,ap); pari_putc('.'); break;
       }
+      case user:
+        pari_puts("user error: ");
+        print0(va_arg(ap, GEN), f_RAW);
+        break;
       case invmoder: 
 	pari_printf("impossible inverse modulo: %Ps.", va_arg(ap, GEN));
         break;
@@ -1042,6 +1039,7 @@ pari_err(int numerr, ...)
         const char *f, *op = va_arg(ap, const char*);
 	GEN x = va_arg(ap, GEN);
 	GEN y = va_arg(ap, GEN);
+        pari_puts(numerr == operi? "impossible": "forbidden");
         switch(*op)
         {
           case '+': f = "addition"; break;
@@ -1114,7 +1112,6 @@ trap0(const char *e, GEN r, GEN f)
   else if (!strcmp(e,"gdiver")) numerr = gdiver;
   else if (!strcmp(e,"invmoder")) numerr = invmoder;
   else if (!strcmp(e,"archer")) numerr = archer;
-  else if (!strcmp(e,"siginter")) numerr = siginter;
   else if (!strcmp(e,"alarmer")) numerr = alarmer;
   else if (!strcmp(e,"talker")) numerr = talker;
   else if (!strcmp(e,"user")) numerr = user;
