@@ -835,10 +835,6 @@ x^5 + 3021*x^4 - 786303*x^3 - 6826636057*x^2 - 546603588746*x + 385389051407
 
 [x^8 - x^7 + x^5 - x^4 + x^3 - x + 1 1]
 
-? factpol2(x^15-1,0)
-  ***   at top-level: factpol2(x^15-1,0)
-  ***                 ^------------------
-  *** factpol2: this function no longer exists.
 ? fibo(100)
 354224848179261915075
 ? floor(-1/2)
@@ -965,10 +961,6 @@ Vecsmall([-72517083, -151420179, 358197028, -1563977934, 610394226, -2103189
 0, 280, 630, 504, 2415, 876, 3395; 140, 210, 504, 420, 2050, 749, 2901; 105,
  168, 420, 360, 1785, 658, 2542; 84, 140, 360, 315, 1582, 588, 2266; 70, 120
 , 315, 280, 1421, 532, 2046; 60, 105, 280, 252, 1290, 486, 1866]]
-? hermitehavas(amat)
-  ***   at top-level: hermitehavas(amat)
-  ***                 ^------------------
-  *** hermitehavas: this function no longer exists.
 ? hermitemod(amat,detint(amat))
 
 [420 0 0 0 210 168 175]
@@ -1348,14 +1340,6 @@ ok
 
 ? incgam(2,1)
 0.73575888234288464319104754032292173491
-? incgam1(2,1)
-  ***   at top-level: incgam1(2,1)
-  ***                 ^------------
-  *** incgam1: this function no longer exists.
-? incgam2(2,1)
-  ***   at top-level: incgam2(2,1)
-  ***                 ^------------
-  *** incgam2: this function no longer exists.
 ? incgam3(2,1)
 0.26424111765711535680895245967707826509
 ? incgam4(4,1,6)
@@ -1528,10 +1512,6 @@ x
 
 [0 1 -1]
 
-? kerint2(matrix(4,6,x,y,2520/(x+y)))
-  ***   at top-level: kerint2(matrix(4,6,x
-  ***                 ^--------------------
-  *** kerint2: this function no longer exists.
 ? f(u)=u+1;
 ? print(f(5));kill(f);
 6
@@ -1616,10 +1596,6 @@ x
 
 [-60 -105 280 252 -486 471 1290]
 
-? lll1(m)
-  ***   at top-level: lll1(m)
-  ***                 ^-------
-  *** lll1: this function no longer exists.
 ? lllgram(m)
 
 [1 1 27 -27 69 0 141]
@@ -1636,10 +1612,6 @@ x
 
 [0 1 4 -18 4 -7 4]
 
-? lllgram1(m)
-  ***   at top-level: lllgram1(m)
-  ***                 ^-----------
-  *** lllgram1: this function no longer exists.
 ? lllgramint(m)
 
 [1 1 27 -27 69 0 141]
@@ -1710,10 +1682,6 @@ x
 , 0, 0, 0, 0, 0; 0, 0, 0, 0, 0, 0, 0; 0, 0, 0, 0, 0, 0, 0; 0, 0, 0, 0, 0, 0,
  0; 1, 0, 0, 0, 0, 0, 0; 0, 1, 0, 0, 0, 0, 0; 0, 0, 1, 0, 0, 0, 0; 0, 0, 0, 
 1, 0, 0, 0; 0, 0, 0, 0, 1, 0, 0; 0, 0, 0, 0, 0, 1, 0; 0, 0, 0, 0, 0, 0, 1]]
-? lllrat(m)
-  ***   at top-level: lllrat(m)
-  ***                 ^---------
-  *** lllrat: this function no longer exists.
 ? \precision=96
    realprecision = 96 significant digits
 ? ln(2)
@@ -2324,11 +2292,8 @@ qfr(3, 16, -7, 1.5000000000000000000000000000000000000)
 [1036, 4, 1]
 ? regula(17)
 2.0947125472611012942448228460655286535
-? kill(y);print(x+y);reorder([x,y]);print(x+y);
+? kill(y);print(x+y);
 x + y
-  ***   at top-level: kill(y);print(x+y);reorder([x,y]);print
-  ***                                    ^--------------------
-  *** reorder: this function no longer exists.
 ? resultant(x^3-1,x^3+1)
 8
 ? resultant2(x^3-1.,x^3+1.)
