@@ -851,7 +851,7 @@ err_leave(void **pv)
 static cell *
 err_seek(long n)
 {
-  if (n == siginter) return NULL;
+  if (n <= siginter) return NULL;
   while (err_catch_stack)
   {
     cell *t = (cell*)err_catch_stack->value;
@@ -886,8 +886,19 @@ err_recover(long numerr)
   longjmp(GP_DATA->env, numerr);
 }
 
+static void
+err_init_msg()
+{
+  const char *gp_function_name = closure_func_err();
+  pari_puts("  *** ");
+  if (gp_function_name)
+    pari_printf("%s: ", gp_function_name);
+  else
+    pari_puts("  ");
+}
+
 void
-pari_warn(long numerr, ...)
+pari_warn(int numerr, ...)
 {
   char *ch1;
   PariOUT *out = pariOut;
@@ -902,29 +913,31 @@ pari_warn(long numerr, ...)
 
   if (numerr == user) {
     GEN g = va_arg(ap, GEN);
-    pari_printf("  ***   user warning: ");
+    pari_puts("  ***   user warning: ");
     print0(g, f_RAW);
     pari_putc('\n');
   } else {
-    const char *gp_function_name = closure_func_err();
-    if (gp_function_name)
-      pari_printf("  *** %s: %s", gp_function_name, errmessage[numerr]);
-    else
-      pari_printf("  ***   %s", errmessage[numerr]);
+    err_init_msg();
     switch (numerr)
     {
-      case warnmem: case warner:
-        pari_putc(' '); ch1=va_arg(ap, char*);
+      case warnmem:
+        pari_puts("collecting garbage in "); ch1=va_arg(ap, char*);
+        pari_vprintf(ch1,ap); pari_puts(".\n");
+        break;
+      
+      case warner:
+        pari_puts("Warning: "); ch1=va_arg(ap, char*);
         pari_vprintf(ch1,ap); pari_puts(".\n");
         break;
 
       case warnprec:
-        pari_vprintf(" in %s; new prec = %ld\n",ap);
+        pari_vprintf("Warning: increasing prec in %s; new prec = %ld\n",ap);
         break;
 
       case warnfile:
+        pari_puts("Warning: failed to "),
         ch1=va_arg(ap, char*);
-        pari_printf(" %s: %s\n", ch1, va_arg(ap, char*));
+        pari_printf("%s: %s\n", ch1, va_arg(ap, char*));
         break;
     }
   }
@@ -933,24 +946,18 @@ pari_warn(long numerr, ...)
   flusherr();
 }
 
-#define HAS_CONTEXT(num) (num < talker)
-#define SYNTAX_ERROR(num) (num == talker2)
-
-static int
-is_warn(long num) { return num >= warner && num <= warnmem; }
 void
-pari_err(long numerr, ...)
+pari_err(int numerr, ...)
 {
   PariOUT *out = pariOut;
   va_list ap;
 
   va_start(ap,numerr);
-  if (is_warn(numerr)) pari_err(talker,"use pari_warn for warnings");
 
   global_err_data = NULL;
-  if (err_catch_stack && !SYNTAX_ERROR(numerr))
+  if (err_catch_stack)
   {
-    cell *trapped = NULL;
+    cell *trapped;
     if ( (trapped = err_seek(numerr)) )
     {
       switch(numerr)
@@ -958,7 +965,6 @@ pari_err(long numerr, ...)
         case invmoder:
           global_err_data = (void*)va_arg(ap, GEN);
           break;
-        case siginter:
         case alarmer:
           global_err_data = (char*)va_arg(ap, char*);
           break;
@@ -983,17 +989,13 @@ pari_err(long numerr, ...)
   {
     GEN g = va_arg(ap, GEN);
     closure_err();
-    pari_printf("  ***   user error: ");
+    pari_puts("  ***   user error: ");
     print0(g, f_RAW);
   }
   else
   {
-    const char *gp_function_name = closure_func_err();
     closure_err();
-    if (gp_function_name)
-      pari_printf("  *** %s: %s", gp_function_name, errmessage[numerr]);
-    else
-      pari_printf("  ***   %s", errmessage[numerr]);
+    err_init_msg(); pari_puts(errmessage[numerr]);
     switch (numerr)
     {
       case talker: case siginter: case alarmer: {
@@ -1075,7 +1077,7 @@ pari_err(long numerr, ...)
     pariErr->puts("  [hint] you can increase GP stack with allocatemem()\n");
   }
   pariOut = out;
-  if (default_exception_handler && !SYNTAX_ERROR(numerr))
+  if (default_exception_handler && numerr != talker2)
   {
     if (dft_handler[numerr])
       global_err_data = (void *) dft_handler[numerr];

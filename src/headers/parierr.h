@@ -15,27 +15,20 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 enum {
 /* Force errors into non-0 */
-  talker2 = 1, /* syntax errors */
+  talker2 = 1, bugparier, siginter, /* untrappable errors */
 
-  openfiler,
+  alarmer, openfiler,
 
-  warner, warnprec, warnfile, warnmem, talker,
-  flagerr, bugparier, impl, archer, notfuncer,
+  talker, flagerr, impl, archer, notfuncer,
   
-  precer,
-
-  siginter, alarmer, typeer, consister, user,
-
-/* mp.s ou mp.c */
+  precer, typeer, consister, user,
 
   errpile, overflower,
 
 /* alglin.c */
-
   matinv1, mattype1,
 
 /* arith.c  */
-
   arither1, primer1, invmoder,
 
 /* base.c   */
@@ -45,14 +38,13 @@ enum {
   operi, operf, gdiver,
 
 /* init.c */
-
   memer,
 
 /* trans.c */
-
   negexper, sqrter5,
 
-/* PAS D'ERREUR */
-
+/* NO ERROR */
   noer
-};
+}; 
+
+enum { warner, warnprec, warnfile, warnmem };

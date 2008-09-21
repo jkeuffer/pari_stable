@@ -19,24 +19,20 @@ const char *errmessage[]=
   "",
 /* talker2 */
   "",
-/* openfiler */
+/* bugparier */
+  "",
+/* siginter */
   "",
 
-/* warner */
-  "Warning:",
-/* warnprec */
-  "Warning: increasing prec",
-/* warnfile */
-  "Warning: failed to",
-/* warnmem */
-  "collecting garbage in",
+/* alarmer */
+  "",
+/* openfiler */
+  "",
 
 /* talker */
   "",
 /* flagerr */
   "invalid flag",
-/* bugparier */
-  "",
 /* impl */
   "",
 /* archer */
@@ -46,18 +42,12 @@ const char *errmessage[]=
 
 /* precer */
   "precision too low",
-/* siginter */
-  "",
-/* alarmer */
-  "",
 /* typeer */
   "incorrect type",
 /* consister */
   "inconsistent data",
 /* user */
   "",
-
-  /*  MP.S  */
 
 /* errpile */
   "the PARI stack overflows !",

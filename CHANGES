@@ -181,7 +181,7 @@ BA  3- builtin-in GP functions can now be used as closures.
     9- prototype of FpX_center [ add one argument ]
 BA 10- [svn/CVS] number development snapshots according to repository version
    11- delete CVS.txt and replace it with README-subversion
-   12- syntax errors are no longer trapped
+   12- syntax errors, SIGINT and "PARI bugs" are no longer trapped
    13- quadray no longer allows an (optional) 3rd argument
    14- 'format' was updated after each 'realprecision' change. Don't update
        if 'format' is Xm.-1 (show all significant digits).
@@ -324,7 +324,6 @@ BA 41- user variables can now be aliased [#790]
    82- Mat(t_QFI or t_QFR) now returns the associated 2x2 symmetric matrix
    83- [library] rename Buchall -> Buchall_param and export a new Buchall
        with a simplified interface.
-   84- [library] SIGINT is no longer trap-able
 
   Added
     1- new benches: galoisinit, ispower, nffactor, subfields, resultant,
