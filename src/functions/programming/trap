@@ -2,18 +2,15 @@ Function: trap
 Section: programming/specific
 C-Name: trap0
 Prototype: D"",r,DEDE
-Help: trap({e}, {rec}, {seq}): try to execute seq, trapping runtime error e (all
+Help: trap({e}, {rec}, seq): try to execute seq, trapping runtime error e (all
  of them if e ommitted); sequence rec is executed if the error occurs and
- is the result of the command. When seq is omitted, define rec as a default
- handler for error e (a break loop will be started if rec omitted). If rec
- is the empty string "" pop out the last default handler.
+ is the result of the command.
 Doc: tries to
  evaluate \var{seq}, trapping runtime error $e$, that is effectively preventing
  it from aborting computations in the usual way; the recovery sequence
  \var{rec} is executed if the error occurs and the evaluation of \var{rec}
  becomes the result of the command. If $e$ is omitted, all exceptions are
- trapped. Note in particular that hitting \kbd{\pow C} (Control-C) raises an
- exception. See \secref{se:errorrec} for an introduction to error recovery
+ trapped. See \secref{se:errorrec} for an introduction to error recovery
  under \kbd{gp}.
 
  \bprog
@@ -33,32 +30,11 @@ Doc: tries to
  %1 = 0
  @eprog
 
- If \var{seq} is omitted, defines \var{rec} as a default action when
- catching exception $e$, provided no other trap as above intercepts it first.
- The error message is printed, as well as the result of the evaluation of
- \var{rec}, and control is given back to the \kbd{gp} prompt. In particular,
- current computation is then lost.
-
- For instance, the following error handler prints the list of all user
- variables, then stores in the file \kbd{crash} their names and
- values:\kbdsidx{writebin}
- \bprog
- ? trap(, print(variable()); writebin("crash"))
- @eprog
-
- If no recovery code is given (\var{rec} is omitted) a \tev{break loop} will
- be started, see \secref{se:breakloop}. In particular, typing \kbd{trap()}
- by itself installs a default error handler, that will start a break
- loop whenever an exception is raised.
-
- If \var{rec} is the empty string \kbd{""} the default handler (for that error
- if $e$ is present) is disabled.
-
  \misctitle{Note:} The interface is currently not adequate for trapping
  individual exceptions. In the current version \vers, the following keywords
  are recognized, but the name list will be expanded and changed in the
  future (all library mode errors can be trapped: it's a matter of defining
- the keywords to \kbd{gp}, and there are currently far too many useless ones):
+ the keywords to \kbd{gp}):
 
  \kbd{accurer}: accuracy problem
 

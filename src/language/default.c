@@ -634,6 +634,10 @@ sd_debugmem(const char *v, long flag)
 { return sd_ulong(v,flag,"debugmem",&DEBUGMEM, 0,20,NULL); }
 
 GEN
+sd_breakloop(const char *v, long flag)
+{ return sd_gptoggle(v,flag,"breakloop", BREAKLOOP); }
+
+GEN
 sd_echo(const char *v, long flag)
 { return sd_gptoggle(v,flag,"echo", ECHO); }
 
@@ -979,6 +983,7 @@ expand_prompt(const char *prompt, filtre_t *F)
 
 default_type gp_default_list[] =
 {
+  {"breakloop",(void*)sd_breakloop},
   {"colors",(void*)sd_colors},
   {"compatible",(void*)sd_compatible},
   {"datadir",(void*)sd_datadir},
@@ -1056,9 +1061,9 @@ default_gp_data(void)
   static pari_timer __T;
 
 #ifdef READLINE
-  D->flags = (STRICTMATCH | SIMPLIFY | USE_READLINE);
+  D->flags = (BREAKLOOP | STRICTMATCH | SIMPLIFY | USE_READLINE);
 #else
-  D->flags = (STRICTMATCH | SIMPLIFY);
+  D->flags = (BREAKLOOP | STRICTMATCH | SIMPLIFY);
 #endif
   D->primelimit = 500000;
   D->lim_lines = 0;

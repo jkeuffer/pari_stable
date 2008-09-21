@@ -2070,30 +2070,28 @@ different modes we now describe.
 \subsec{Break loop}.\label{se:breakloop}
 
 A \tev{break loop} is a special debugging mode that you enter whenever a
-runtime error occurs, freezing the \kbd{gp} state, and preventing cleanup
-until you get out of the loop. By runtime error, we mean an error from
-the library, a user error (from \tet{error}), or user interrupts like
-\kbd{C-c} (Control-C), but \emph{not} syntax errors. When a break loop
-starts, a prompt is issued (\kbd{break>}). You can type in a \kbd{gp}
-command, which is evaluated when you hit the \kbd{<Return>} key, and the
-result is printed as during the main \kbd{gp} loop, except that no history of
-results is kept. Then the break loop prompt reappears and you can type
-further commands as long as you do not exit the loop. If you are using
-readline, the history of commands is kept, and line editing is available as
-usual. If you type in a command that results in an error, you are sent back
-to the break loop prompt (errors do \var{not} terminate the loop).
+user interrupt (\kbd{Control-C}) or runtime error occurs, freezing the
+\kbd{gp} state, and preventing cleanup until you get out of the loop. By
+runtime error, we mean an error from the library or a user error (from
+\tet{error}), but \emph{not} syntax errors. When a break loop starts, a
+prompt is issued (\kbd{break>}). You can type in a \kbd{gp} command, which is
+evaluated when you hit the \kbd{<Return>} key, and the result is printed as
+during the main \kbd{gp} loop, except that no history of results is kept.
+Then the break loop prompt reappears and you can type further commands as
+long as you do not exit the loop. If you are using readline, the history of
+commands is kept, and line editing is available as usual. If you type in a
+command that results in an error, you are sent back to the break loop prompt
+(errors do \var{not} terminate the loop).
 
 To get out of a break loop, you can use \tet{next}, \tet{break},
-\tet{return}, or \kbd{C-d} (\kbd{EOF}), any of which will let \kbd{gp} perform its
-usual cleanup, and send you back to the \kbd{gp} prompt. If the error is not fatal,
+\tet{return}, or \kbd{C-d} (\kbd{EOF}), any of which will let \kbd{gp}
+perform its usual cleanup, and send you back to the \kbd{gp} prompt. If the
+break loop was started by a user interrupt (and not by an error),
 inputing an empty line, i.e hitting the \kbd{<Return>} key at the
 \kbd{break>} prompt, will continue the temporarily interrupted computation.
 An empty line has no effect in case of a fatal error, to ensure you do not
 get out of the loop prematurely, thus losing most debugging data during the
-cleanup (since user variables will be restored to their former values).
-
-In current version \vers, an error is non-fatal if and only if it was
-initiated by a \kbd{C-c} typed by the user.
+cleanup (in particular, user variables are restored to their former values).
 
 Break loops are useful as a debugging tool. You may inspect the values of
 \kbd{gp} variables to understand why an error occurred, or change
@@ -2115,10 +2113,10 @@ break>
 \bprog
 break> v
 0
-@eprog
-\noindent explaining the problem. We could have typed any \kbd{gp} command, not
-only the name of a variable, of course. There is no special set of commands
-becoming available during a break loop, as they would in most debuggers.
+@eprog\noindent explaining the problem. We could have typed any \kbd{gp}
+command, not only the name of a variable, of course. There is no special set
+of commands becoming available during a break loop, as they would in most
+debuggers.
 
 Even lexically-scoped variables are accessible to the evaluator during the
 break loop:
@@ -2137,43 +2135,14 @@ Even though loop indices are automatically lexically scoped and no longer
 exist when the break loop is run, enough debugging information is retained in
 the bytecode to reconstruct the evaluation context.
 
-\misctitle{Important Note:} upon startup, this mechanism is \emph{off}, a
-runtime error will send you back to the prompt. Type \kbd{trap()} (or include
-it in a script) to start trapping errors in this way.
+\misctitle{Note:} if you do not like this behaviour, you may disable it by
+setting the default \tet{breakloop} to 0 in for \kbd{gprc}. A runtime error
+will send you back to the prompt.
 
 \misctitle{Technical Note:} When you enter a break loop due to a PARI stack
 overflow, the PARI stack is reset so that you can run commands (otherwise the
 stack would immediately overflow again). Still, as explained above, you do
 not lose the value of any \kbd{gp} variable in the process.
-
-\subsec{Error handlers}. The break loop described above is a (sophisticated)
-example of an \tev{error handler}: a function that is executed whenever a
-runtime error occurs, supposedly to try and recover. The break loop is quite
-a satisfactory error handler, but it may not be adequate for some purposes,
-for instance when \kbd{gp} runs in non-interactive mode, detached from a
-terminal.
-
-So, you can define a different error handler, to be used in place of the
-break loop. This is the purpose of the \emph{second} argument of \kbd{trap}:
-to specify an error handler. (We will discuss the first argument at the very
-end.) For instance:
-\bprog
-  ? trap(, writebin("crash"))  \\@ note the comma: arg1 is omitted
-@eprog
-\noindent After that, whenever an error occurs, the list of all user
-variables is printed, and they are all saved in binary format in file
-\kbd{crash}, ready for inspection. Of course break loops are no longer
-available: the new handler has replaced the default one.
-
-Besides user-defined handlers as above, there are two special handlers you
-can use in \kbd{trap}, which are
-
-$\bullet$ \kbd{trap(, "")} (do-nothing handler): to disable the trapping
-mechanism and let errors propagate, which is the default situation on
-startup.
-
-$\bullet$  \kbd{trap(, )} (omitted argument, default handler): to trap errors
-by a break loop.
 
 \subsec{Protecting code}. Finally \kbd{trap} can define a temporary handler
 used within the scope of a code fragment, protecting it from errors, by
@@ -2192,9 +2161,8 @@ For instance one could define a fault tolerant inversion function as follows:
 -1
 oo
 1
-@eprog
-\noindent Protected codes can be nested without adverse effect, the last trap
-seen being the first to spring.
+@eprog\noindent Protected codes can be nested without adverse effect, the
+last trap seen being the first to spring.
 
 \subsec{Trapping specific exceptions}. We have not yet seen the use of the
 first argument of trap, which has been omitted in all previous examples. It

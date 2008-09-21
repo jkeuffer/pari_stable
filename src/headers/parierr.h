@@ -15,7 +15,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 enum {
 /* Force errors into non-0 */
-  talker2 = 1, bugparier, siginter, /* untrappable errors */
+  talker2 = 1, bugparier, /* untrappable errors */
 
   alarmer, openfiler,
 

@@ -18,7 +18,6 @@ const char *errmessage[]=
 
   "", /* talker2 */
   "", /* bugparier */
-  "", /* siginter */
 
   "", /* alarmer */
   "", /* openfiler */

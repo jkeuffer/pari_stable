@@ -73,8 +73,6 @@ typedef struct {
 } cell;
 
 static THREAD stack *err_catch_stack;
-static THREAD GEN *dft_handler;
-static void reset_traps(void);
 
 void
 push_stack(stack **pts, void *a)
@@ -694,8 +692,6 @@ pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts)
 
   whatnow_fun = NULL;
   sigint_fun = dflt_sigint_fun;
-  dft_handler = (GEN*) pari_malloc((noer + 1) *sizeof(GEN));
-  reset_traps();
   default_exception_handler = NULL;
 
   pari_var_init();
@@ -735,7 +731,6 @@ pari_close_opts(ulong init_opts)
   killallfiles(1);
   free((void*)functions_hash);
   free((void*)funct_old_hash);
-  free((void*)dft_handler);
   free((void*)bot);
   free((void*)diffptr);
   free(current_logfile);
@@ -801,14 +796,6 @@ recover(int flag)
   try_to_recover = 1;
 }
 
-static void
-reset_traps(void)
-{
-  long i;
-  if (DEBUGLEVEL) pari_warn(warner,"Resetting all traps");
-  for (i=0; i <= noer; i++) dft_handler[i] = NULL;
-}
-
 void *
 err_catch(long errnum, jmp_buf *penv)
 {
@@ -843,7 +830,6 @@ err_leave(void **pv)
     pop_catch_cell(&err_catch_stack);
     if (t == (cell*)(*pv)) return;
   }
-  reset_traps();
 }
 
 /* Get last (most recent) handler for error n (or generic noer) killing all
@@ -851,7 +837,7 @@ err_leave(void **pv)
 static cell *
 err_seek(long n)
 {
-  if (n <= siginter) return NULL;
+  if (n <= bugparier) return NULL;
   while (err_catch_stack)
   {
     cell *t = (cell*)err_catch_stack->value;
@@ -951,6 +937,21 @@ pari_warn(int numerr, ...)
   pariOut = out;
   flusherr();
 }
+void
+pari_sigint(const char *s)
+{
+  PariOUT *out = pariOut;
+  err_init();
+  closure_err();
+  err_init_msg(talker);
+  pari_puts(s); pari_putc('.');
+  term_color(c_NONE);
+  pariOut = out;
+  if (default_exception_handler && default_exception_handler(-1)) {
+    flusherr(); return;
+  }
+  err_recover(talker);
+}
 
 void
 pari_err(int numerr, ...)
@@ -991,7 +992,7 @@ pari_err(int numerr, ...)
     err_init_msg(numerr); pari_puts(errmessage[numerr]);
     switch (numerr)
     {
-      case talker: case siginter: case alarmer: {
+      case talker: case alarmer: {
 	const char *ch1 = va_arg(ap, char*);
 	pari_vprintf(ch1,ap); pari_putc('.'); break;
       }
@@ -1075,14 +1076,9 @@ pari_err(int numerr, ...)
     pariErr->puts("  [hint] you can increase GP stack with allocatemem()\n");
   }
   pariOut = out;
-  if (default_exception_handler && numerr != talker2)
-  {
-    if (dft_handler[numerr])
-      global_err_data = (void *) dft_handler[numerr];
-    else
-      global_err_data = (void *) dft_handler[noer];
-    if (default_exception_handler(numerr)) { flusherr(); return; }
-  }
+  if (numerr != talker2 
+    && default_exception_handler
+    && default_exception_handler(numerr)) { flusherr(); return; }
   err_recover(numerr);
 }
 
@@ -1095,18 +1091,12 @@ whatnow_new_syntax(const char *f, long n)
   (void)whatnow_fun(f, -n);
 }
 
-static void
-kill_dft_handler(int numerr)
-{
-  GEN s = dft_handler[numerr];
-  if (s && s != BREAK_LOOP) killblock(s);
-  dft_handler[numerr] = NULL;
-}
 /* Try f (trapping error e), recover using r (break_loop, if NULL) */
 GEN
 trap0(const char *e, GEN r, GEN f)
 {
   long numerr = CATCH_ALL;
+  GEN x;
        if (!strcmp(e,"errpile")) numerr = errpile;
   else if (!strcmp(e,"typeer")) numerr = typeer;
   else if (!strcmp(e,"gdiver")) numerr = gdiver;
@@ -1116,21 +1106,16 @@ trap0(const char *e, GEN r, GEN f)
   else if (!strcmp(e,"talker")) numerr = talker;
   else if (!strcmp(e,"user")) numerr = user;
   else if (*e) pari_err(impl,"this trap keyword");
-  /* TO BE CONTINUED */
+  /* TODO: complete the list */
 
-  if (f)
-  { /* explicit recovery text */
-    GEN x = closure_trapgen(numerr,f);
-    if (x == (GEN)1L) {
-      x = r? closure_evalgen(r): gnil;
-    }
-    return x;
+  if (!f) {
+    pari_warn(warner,"default handlers are no longer supported --> ignored");
+    return gnil;
   }
-  /* define a default handler: eval r (break loop if NULL), then longjmp */
-  if (numerr == CATCH_ALL) numerr = noer;
-  kill_dft_handler(numerr);
-  dft_handler[numerr] = r? gclone(r): BREAK_LOOP;
-  return gnil;
+  /* explicit recovery text */
+  x = closure_trapgen(numerr,f);
+  if (x == (GEN)1L) x = r? closure_evalgen(r): gnil;
+  return x;
 }
 
 /*******************************************************************/

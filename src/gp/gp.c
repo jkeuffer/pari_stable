@@ -1546,7 +1546,7 @@ gp_main_loop(long flag)
 void
 gp_sigint_fun(void) {
   if (GP_DATA->flags & TEXMACS) tm_start_output();
-  pari_err(siginter, gp_format_time(ti_INTERRUPT));
+  pari_sigint(gp_format_time(ti_INTERRUPT));
 }
 
 void
@@ -1556,7 +1556,7 @@ gp_alarm_fun(void) {
 }
 
 int
-break_loop(long numerr)
+break_loop(int sigint)
 {
   static FILE *oldinfile = NULL;
   filtre_t F;
@@ -1566,7 +1566,7 @@ break_loop(long numerr)
   term_color(c_ERR); pari_putc('\n');
   print_errcontext("Break loop (type 'break' or Control-d to go back to GP)", NULL, NULL);
   term_color(c_NONE);
-  if (numerr == siginter)
+  if (sigint)
     pari_puts("[type <Return> in empty line to continue]\n");
   else
     closure_reset();
@@ -1585,7 +1585,7 @@ break_loop(long numerr)
 #endif
     if (check_meta(b->buf))
     { /* break loop initiated by ^C? Empty input --> continue computation */
-      if (numerr == siginter && *(b->buf) == 0) { go_on=1; break; }
+      if (sigint && *(b->buf) == 0) { go_on=1; break; }
       continue;
     }
     x = readseq(b->buf);
@@ -1599,27 +1599,13 @@ break_loop(long numerr)
   pop_buffer(); return go_on;
 }
 
+/* numerr < 0: from SIGINT */
 int
 gp_exception_handler(long numerr)
 {
-  GEN s = (GEN)global_err_data;
-  if (!s) return 0;
-  global_err_data = NULL;
-  if (s!=BREAK_LOOP)
-  {
-    /* prevent infinite recursion in case s raises an exception */
-    static int recovering = 0;
-    if (recovering)
-      recovering = 0;
-    else
-    {
-      recovering = 1;
-      fprintferr("\n%Ps\n", closure_evalgen(s));
-      recovering = 0; return 0;
-    }
-  }
   if (numerr == errpile) { var_make_safe(); avma = top; }
-  return break_loop(numerr);
+  if (GP_DATA->flags & BREAKLOOP) return break_loop(numerr < 0);
+  return 0;
 }
 
 static void
@@ -1878,8 +1864,8 @@ main(int argc, char **argv)
     ulong f = GP_DATA->flags;
     FILE *l = pari_logfile;
     long i;
-    GP_DATA->flags &= ~(CHRONO|ECHO); pari_logfile = NULL;
-    for (i = 0; i < s_A.n;  pari_free(A[i]),i++) read_main((char*)A[i]);
+    GP_DATA->flags &= ~(CHRONO|ECHO|BREAKLOOP); pari_logfile = NULL;
+    for (i = 0; i < s_A.n; pari_free(A[i]),i++) read_main((char*)A[i]);
     GP_DATA->flags = f;
     /* Reading one of the input files above can set pari_logfile.
      * Don't restore in that case. */

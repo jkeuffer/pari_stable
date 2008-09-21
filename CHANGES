@@ -324,6 +324,9 @@ BA 41- user variables can now be aliased [#790]
    82- Mat(t_QFI or t_QFR) now returns the associated 2x2 symmetric matrix
    83- [library] rename Buchall -> Buchall_param and export a new Buchall
        with a simplified interface.
+   84- trap() no longer allows installing default error handlers. 
+   85- GP's break loop is now *enabled* by default [ set breakloop = 0 in your
+       gprc to disable it ]
 
   Added
     1- new benches: galoisinit, ispower, nffactor, subfields, resultant,
@@ -484,7 +487,7 @@ BA 31- F2v/F2m functions family and F2m_ker for linear algebra over GF(2)
     8- unused undocumented library functions os_open/os_read/os_close
     9- obsolete README.DOS and README.WIN
    10- cant_deflate, elliper1, lllger3, varer1, obsoler, infprecer, errlg,
-       errexpo, errvalp, rtodber, affer2, primer2 error codes
+       errexpo, errvalp, rtodber, affer2, primer2, siginter error codes
    11- obsolete library function bruteall
    12- useless undocumented library function gkrogs (use krois)
    13- obsolete library functions roots2 and rootsold are no longer public
