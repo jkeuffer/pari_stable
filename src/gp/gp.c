@@ -1402,13 +1402,8 @@ static int
 is_interactive(void)
 {
   ulong f = GP_DATA->flags;
-/* FIXME: HAS_ISATTY */
-#if defined(UNIX) || defined(__EMX__) || defined(_WIN32)
   return (pari_infile == stdin && !(f & TEXMACS)
-			  && (f & EMACS || isatty(fileno(stdin))));
-#else
-  return (pari_infile == stdin && !(f & TEXMACS));
-#endif
+			       && (f & EMACS || pari_stdin_isatty()));
 }
 
 /* return 0 if no line could be read (EOF) */
@@ -1830,7 +1825,7 @@ main(int argc, char **argv)
     puts("### Errors on startup, exiting...\n\n");
     exit(1);
   }
-  if (!is_interactive()) GP_DATA->flags &= ~BREAKLOOP;
+  if (!pari_stdin_isatty()) GP_DATA->flags &= ~BREAKLOOP;
 
   pari_init_defaults();
   stack_init(&s_A,sizeof(*A),(void**)&A);

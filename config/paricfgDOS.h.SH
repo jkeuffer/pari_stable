@@ -55,6 +55,10 @@ cat > $file << EOT
 #  define CPPFunction_defined
 #endif
 
+#if defined(__EMX__) || defined(_WIN32)
+#  define HAS_ISATTY
+#endif
+
 /* No exp2, log2 in libc */
 #define NOEXP2
 

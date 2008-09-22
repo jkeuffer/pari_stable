@@ -6844,6 +6844,9 @@ it could not be determined (in particular if the operating system has no such
 concept). The return value may point to static area and may be overwritten
 by subsequent system calls: use immediately or \kbd{strdup} it.
 
+\fun{int}{pari_stdin_isatty}{void} returns $1$ if our standard input
+\kbd{stdin} is attached to a terminal. Trivial wrapper around \kbd{isatty}.
+
 \subsec{pariFILE}
 
 PARI maintains a linked list of open files, to reclaim ressources

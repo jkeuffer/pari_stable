@@ -1362,6 +1362,7 @@ char*   pari_unique_filename(const char *s);
 void    pari_unlink(const char *s);
 void    pari_putc(char c);
 void    pari_puts(const char *s);
+int     pari_stdin_isatty(void);
 void    pari_vfprintf(FILE *file, const char *fmt, va_list ap);
 void    pari_vprintf(const char *fmt, va_list ap);
 char*   pari_vsprintf(const char *fmt, va_list ap);

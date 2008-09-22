@@ -3389,6 +3389,16 @@ pari_is_file(const char *name)
 #endif
 }
 
+int
+pari_stdin_isatty(void)
+{
+#ifdef HAS_ISATTY
+  return isatty( fileno(stdin) );
+#else
+  return 1;
+#endif
+}
+
 /* expand tildes in filenames, return a malloc'ed buffer */
 static char *
 _path_expand(const char *s)
