@@ -1279,11 +1279,8 @@ for (i = 1, 3,
 When we leave the loops, the values of \kbd{x}, \kbd{y}, \kbd{i}, \kbd{j}
 are the same as before they were started.
 
-Note that lexical scoping has the unfortunate side effect of making break
-loops (see \secref{se:breakloop}) almost useless: break loops are run outside
-of the relevant scopes and are unable to access all lexically scoped
-variables. On the other hand, \tet{eval} is just as powerful as before: it is
-evaluated in the given scope, and can access values of lexical variables:
+Note that \tet{eval} is evaluated in the given scope, and can access values
+of lexical variables:
 \bprog
 ? x = 1;
 ? my(x = 0); eval("x")
@@ -2309,6 +2306,9 @@ to all filenames\sidx{filename}. \label{se:envir}
 
 We shall now describe all the available defaults, specifying each time
 whether time and/or environment expansion is performed.
+
+\subsecidx{breakloop} (default \kbd{1} if interactive, \kbd{0} otherwise):
+if true, enables the ``break loop'' debugging mode, see \secref{se:breakloop}.
 
 \subsecidx{colors} (default \kbd{""}): this default is only usable if
 \kbd{gp}\label{se:colors}
