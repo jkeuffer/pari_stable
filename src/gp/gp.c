@@ -1399,6 +1399,9 @@ get_line_from_file(const char *PROMPT, filtre_t *F, FILE *file)
 }
 
 static int
+OK_breakloop(void) { return (GP_DATA->flags & EMACS) || pari_stdin_isatty(); }
+
+static int
 is_interactive(void)
 {
   ulong f = GP_DATA->flags;
@@ -1598,9 +1601,8 @@ break_loop(int sigint)
 int
 gp_exception_handler(long numerr)
 {
-  ulong f = GP_DATA->flags;
   if (numerr == errpile) { var_make_safe(); avma = top; }
-  if ((f & BREAKLOOP) && ((f & EMACS) || pari_stdin_isatty()))
+  if ((GP_DATA->flags & BREAKLOOP) && OK_breakloop())
     return break_loop(numerr < 0);
   return 0;
 }
@@ -1732,6 +1734,7 @@ static size_t
 read_opt(gp2c_stack *p_A, long argc, char **argv)
 {
   char *b = NULL, *p = NULL, *s = NULL;
+  ulong f = GP_DATA->flags;
   long i = 1, initrc = 1;
   size_t size;
 
@@ -1754,12 +1757,12 @@ read_opt(gp2c_stack *p_A, long argc, char **argv)
 
       case 'e':
 	if (strncmp(t,"macs",4)) usage(argv[0]); /* obsolete */
-	GP_DATA->flags |= EMACS; break;
+	f |= EMACS; break;
       case 'q':
-	GP_DATA->flags |= QUIET; break;
+	f |= QUIET; break;
       case 't':
 	if (strncmp(t,"est",3)) usage(argv[0]); /* obsolete */
-	GP_DATA->flags |= TEST; break;
+	f |= TEST; break;
       case 'f':
 	initrc = 0; break;
       case '-':
@@ -1768,10 +1771,10 @@ read_opt(gp2c_stack *p_A, long argc, char **argv)
 	  init_trivial_stack(); print_version();
 	  pari_free((void*)bot); exit(0);
 	}
-	if (strcmp(t, "texmacs") == 0) { GP_DATA->flags |= TEXMACS; break; }
-	if (strcmp(t, "emacs") == 0) { GP_DATA->flags |= EMACS; break; }
-	if (strcmp(t, "test") == 0) { GP_DATA->flags |= TEST; break; }
-	if (strcmp(t, "quiet") == 0) { GP_DATA->flags |= QUIET; break; }
+	if (strcmp(t, "texmacs") == 0) { f |= TEXMACS; break; }
+	if (strcmp(t, "emacs") == 0) { f |= EMACS; break; }
+	if (strcmp(t, "test") == 0) { f |= TEST; break; }
+	if (strcmp(t, "quiet") == 0) { f |= QUIET; break; }
 	if (strcmp(t, "fast") == 0) { initrc = 0; break; }
 	if (strncmp(t, "primelimit",10) == 0) {p = read_arg_equal(&i,t+10,argc,argv); break; }
 	if (strncmp(t, "stacksize",9) == 0) {s = read_arg_equal(&i,t+9,argc,argv); break; }
@@ -1780,9 +1783,10 @@ read_opt(gp2c_stack *p_A, long argc, char **argv)
 	usage(argv[0]);
     }
   }
-  if (GP_DATA->flags & EMACS) GP_DATA->flags &= ~BREAKLOOP;
-  if (GP_DATA->flags & TEXMACS) tm_start_output();
-  if (GP_DATA->flags & TEST) {
+  if (!OK_breakloop()) f &= ~BREAKLOOP;
+  if (f & TEXMACS) tm_start_output();
+  GP_DATA->flags = f;
+  if (f & TEST) {
     GP_DATA->flags &= ~BREAKLOOP;
     init80col();
   } else if (initrc)
@@ -1827,8 +1831,6 @@ main(int argc, char **argv)
     puts("### Errors on startup, exiting...\n\n");
     exit(1);
   }
-  if (!pari_stdin_isatty()) GP_DATA->flags &= ~BREAKLOOP;
-
   pari_init_defaults();
   stack_init(&s_A,sizeof(*A),(void**)&A);
   pari_init_stack(1000000*sizeof(long));
