@@ -2134,7 +2134,9 @@ the bytecode to reconstruct the evaluation context.
 
 \misctitle{Note:} if you do not like this behaviour, you may disable it by
 setting the default \tet{breakloop} to 0 in for \kbd{gprc}. A runtime error
-will send you back to the prompt.
+will send you back to the prompt. Note that the break loop is automatically
+disabled when running \kbd{gp} in non interactive mode, i.e.~when the
+program's standard input is not attached to a terminal.
 
 \misctitle{Technical Note:} When you enter a break loop due to a PARI stack
 overflow, the PARI stack is reset so that you can run commands (otherwise the

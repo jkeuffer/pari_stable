@@ -1598,8 +1598,10 @@ break_loop(int sigint)
 int
 gp_exception_handler(long numerr)
 {
+  ulong f = GP_DATA->flags;
   if (numerr == errpile) { var_make_safe(); avma = top; }
-  if (GP_DATA->flags & BREAKLOOP) return break_loop(numerr < 0);
+  if ((f & BREAKLOOP) && ((f & EMACS) || pari_stdin_isatty()))
+    return break_loop(numerr < 0);
   return 0;
 }
 
