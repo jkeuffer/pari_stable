@@ -1214,6 +1214,7 @@ GEN default0(const char *a, const char *b);
 long getrealprecision(void);
 int pari_is_default(const char *s);
 GEN sd_TeXstyle(const char *v, long flag);
+GEN sd_breakloop(const char *v, long flag);
 GEN sd_colors(const char *v, long flag);
 GEN sd_compatible(const char *v, long flag);
 GEN sd_datadir(const char *v, long flag);
