@@ -625,6 +625,22 @@ gp_init_functions(void)
   return gp_init_entrees(new_fun_set? &s_MODULES: &s_OLDMODULES, functions_hash);
 }
 
+static void
+pari_init_functions()
+{
+  funct_old_hash = init_fun_hash();
+  functions_hash = init_fun_hash();
+
+  pari_fill_hashtable(funct_old_hash, oldfonctions);
+
+  stack_init(&s_MODULES, sizeof(*MODULES),(void**)&MODULES);
+  stack_pushp(&s_MODULES,functions_basic);
+  stack_init(&s_OLDMODULES, sizeof(*OLDMODULES),(void**)&OLDMODULES);
+  stack_pushp(&s_OLDMODULES,oldfonctions);
+  pari_fill_hashtable(functions_hash,
+		      new_fun_set? functions_basic:oldfonctions);
+}
+
 /*********************************************************************/
 /*                       LIBPARI INIT / CLOSE                        */
 /*********************************************************************/
@@ -670,26 +686,12 @@ pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts)
   pari_init_compiler();
   pari_init_evaluator();
 
-  varentries = (entree**) pari_malloc((MAXVARN+1)*sizeof(entree*));
-  for (u=0; u <= MAXVARN; u++) varentries[u] = NULL;
+  primetab = cgetalloc(t_VEC, 1);
+  varentries = (entree**) pari_calloc((MAXVARN+1)*sizeof(entree*));
   pari_init_floats();
   pari_init_seadata();
 
-  primetab = (GEN) pari_malloc(1 * sizeof(long));
-  primetab[0] = evaltyp(t_VEC) | _evallg(1);
-
-  funct_old_hash = init_fun_hash();
-  functions_hash = init_fun_hash();
-
-  pari_fill_hashtable(funct_old_hash, oldfonctions);
-
-  stack_init(&s_MODULES, sizeof(*MODULES),(void**)&MODULES);
-  stack_pushp(&s_MODULES,functions_basic);
-  stack_init(&s_OLDMODULES, sizeof(*OLDMODULES),(void**)&OLDMODULES);
-  stack_pushp(&s_OLDMODULES,oldfonctions);
-  pari_fill_hashtable(functions_hash,
-		      new_fun_set? functions_basic:oldfonctions);
-
+  pari_init_functions();
   whatnow_fun = NULL;
   sigint_fun = dflt_sigint_fun;
   default_exception_handler = NULL;
