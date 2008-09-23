@@ -3018,12 +3018,12 @@ coefficients are given by the bits of remaining words by increasing indices.
 
 \fun{ulong}{F2v_coeff}{GEN x, long i} returns the coefficient $i$ of $x$.
 
-\fun{ulong}{F2v_set}{GEN x, long i} sets the coefficient $i$ of $x$ to $1$.
+\fun{void}{F2v_set}{GEN x, long i} sets the coefficient $i$ of $x$ to $1$.
 
 \fun{ulong}{F2m_coeff}{GEN x, long i, long j} returns the coefficient $(i,j)$
 of $x$.
 
-\fun{ulong}{F2m_set}{GEN x, long i, long j} sets the coefficient $(i,j)$ of $x$
+\fun{void}{F2m_set}{GEN x, long i, long j} sets the coefficient $(i,j)$ of $x$
 to $1$.
 
 \fun{GEN}{zero_F2v}{long n} creates a \kbd{F2v} with \kbd{n} components set to
@@ -3045,7 +3045,8 @@ all columns.
 
 \fun{GEN}{ZM_to_F2m}{GEN x}
 
-\fun{void}{F2v_add_inplace}{GEN x, GEN y} replaces $x$ by $x+y$.
+\fun{void}{F2v_add_inplace}{GEN x, GEN y} replaces $x$ by $x+y$. It is
+allowable for $y$ to be shorter than $x$.
 
 \fun{GEN}{F2m_deplin}{GEN x}
 
