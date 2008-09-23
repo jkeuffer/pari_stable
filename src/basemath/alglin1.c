@@ -2076,13 +2076,21 @@ FpM_ker_i(GEN x, GEN p, long deplin)
   if (lgefint(p) == 3)
   {
     ulong pp = (ulong)p[2];
-    y = ZM_to_Flm(x, pp);
-    y = Flm_ker_sp(y, pp, deplin);
-    if (!y) return y;
-    y = deplin? Flc_to_ZC(y): Flm_to_ZM(y);
-    return gerepileupto(av0, y);
+    if (pp==2)
+    {
+      y = ZM_to_F2m(x);
+      y = F2m_ker_sp(y, deplin);
+      if (!y) return y;
+      y = deplin? F2c_to_ZC(y): F2m_to_ZM(y);
+      return gerepileupto(av0, y);
+    } else {
+      y = ZM_to_Flm(x, pp);
+      y = Flm_ker_sp(y, pp, deplin);
+      if (!y) return y;
+      y = deplin? Flc_to_ZC(y): Flm_to_ZM(y);
+      return gerepileupto(av0, y);
+    }
   }
-
   m=lg(x[1])-1; r=0;
   x = RgM_shallowcopy(x);
   c = const_vecsmall(m, 0);
