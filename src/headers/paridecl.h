@@ -44,8 +44,8 @@ GEN     isprincipalgenforce(GEN bnf,GEN x);
 /* F2x.c */
 
 GEN     F2c_to_ZC(GEN x);
-void    F2v_add_inplace(GEN x, GEN y);
 GEN     F2m_to_ZM(GEN z);
+void    F2v_add_inplace(GEN x, GEN y);
 GEN     F2x_1_add(GEN y);
 GEN     F2x_add(GEN x, GEN y);
 long    F2x_degree(GEN x);
