@@ -1559,7 +1559,7 @@ break_loop(int sigint)
   static FILE *oldinfile = NULL;
   filtre_t F;
   Buffer *b = filtered_buffer(&F);
-  int cnt = 0;
+  int go_on = sigint, cnt = 0;
 
   term_color(c_ERR); pari_putc('\n');
   if (sigint)
@@ -1579,7 +1579,7 @@ break_loop(int sigint)
     GEN x;
     if (! gp_read_line(&F, BREAK_LOOP_PROMPT))
     {
-      if (popinfile()) break;
+      if (popinfile()) { go_on = 0; break; }
       continue;
     }
     /* Empty input --> continue computation
@@ -1600,7 +1600,7 @@ break_loop(int sigint)
     term_color(c_NONE); pari_putc('\n');
   }
   pari_infile = oldinfile;
-  pop_buffer(); return sigint;
+  pop_buffer(); return go_on;
 }
 
 /* numerr < 0: from SIGINT */
