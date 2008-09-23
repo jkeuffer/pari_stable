@@ -1409,12 +1409,15 @@ is_interactive(void)
 			       && (f & EMACS || pari_stdin_isatty()));
 }
 
+static int reading_line = 0;
+
 /* return 0 if no line could be read (EOF) */
 static int
 gp_read_line(filtre_t *F, const char *PROMPT)
 {
   Buffer *b = (Buffer*)F->buf;
   int res;
+  reading_line = 1;
   F->downcase = (compatible == OLDALL);
   if (b->len > 100000) fix_buffer(b, 100000);
   if (is_interactive())
@@ -1434,6 +1437,7 @@ gp_read_line(filtre_t *F, const char *PROMPT)
   }
   else
     res = get_line_from_file(DFT_PROMPT,F,pari_infile);
+  reading_line = 0;
   return res;
 }
 
@@ -1607,6 +1611,7 @@ break_loop(int sigint)
 int
 gp_exception_handler(long numerr)
 {
+  if (reading_line) { reading_line = 0; return 0; }
   if (numerr == errpile) { var_make_safe(); avma = top; }
   if ((GP_DATA->flags & BREAKLOOP) && OK_breakloop())
     return break_loop(numerr < 0);
