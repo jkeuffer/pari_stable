@@ -235,8 +235,12 @@ nfC_nf_mul(GEN nf, GEN v, GEN x)
   x = nf_to_scalar_or_basis(nf, x);
   tx = typ(x);
   if (tx != t_COL) {
-    if (tx == t_INT && is_pm1(x))
-      return signe(x) > 0? leafcopy(v): gneg(v);
+    if (tx == t_INT)
+    {
+      long s = signe(x);
+      if (!s) return zerocol(lg(v)-1);
+      if (is_pm1(x)) return s > 0? leafcopy(v): gneg(v);
+    }
     l = lg(v); y = cgetg(l, t_COL);
     for (i=1; i < l; i++)
     {
@@ -253,9 +257,9 @@ nfC_nf_mul(GEN nf, GEN v, GEN x)
     for (i=1; i < l; i++)
     {
       GEN c = gel(v,i);
-      if (typ(c)!=t_COL)
-        c = RgC_Rg_mul(gel(x,1), c);
-      else {
+      if (typ(c)!=t_COL) {
+        if (!isintzero(c)) c = RgC_Rg_mul(gel(x,1), c);
+      } else {
         c = RgM_RgC_mul(x,c);
         if (QV_isscalar(c)) c = gel(c,1);
       }

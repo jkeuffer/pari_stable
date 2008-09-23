@@ -2771,7 +2771,7 @@ rnfallbase(GEN nf, GEN *ppol, GEN *pD, GEN *pd, GEN *pf)
   A = gel(z,1); d = get_d(nf, pol, A);
   I = gel(z,2);
 
-  i=1; while (i<=n && ideal_is1(gel(I,i))) i++;
+  i=1; while (i<=n && ideal_is1(gel(I,i))) { gel(I,i) = gen_1; i++; }
   if (i > n) { D = gen_1; if (pf) *pf = gen_1; }
   else
   {
@@ -2793,11 +2793,8 @@ GEN
 rnfpseudobasis(GEN nf, GEN pol)
 {
   pari_sp av = avma;
-  GEN D, d, y = cgetg(5, t_VEC), z = rnfallbase(nf,&pol, &D, &d, NULL);
-  gel(y,1) = gel(z,1);
-  gel(y,2) = gel(z,2);
-  gel(y,3) = D;
-  gel(y,4) = d; return gerepilecopy(av, y);
+  GEN D, d, z = rnfallbase(nf,&pol, &D, &d, NULL);
+  return gerepilecopy(av, mkvec4(gel(z,1), gel(z,2), D, d));
 }
 
 GEN
@@ -2906,24 +2903,24 @@ nfidealdet1(GEN nf, GEN a, GEN b, GEN *px, GEN *py, GEN *pz, GEN *pt)
 
 /* given a pseudo-basis of an order in HNF [A,I] (or [A,I,D,d]), gives an
  * n x n matrix (not in HNF) of a pseudo-basis and an ideal vector
- * [1,1,...,1,I] such that order = nf[7]^(n-1) x I.
+ * [1,1,...,1,I] such that order = Z_K^(n-1) x I.
  * Uses the approximation theorem ==> slow. */
 GEN
 rnfsteinitz(GEN nf, GEN order)
 {
   pari_sp av = avma;
-  long i,n,l;
-  GEN Id,A,I,p1,a,b;
+  long i, n, l;
+  GEN A, I, p1;
 
   nf = checknf(nf);
-  Id = matid(nf_get_degree(nf));
   order = get_order(nf, order, "rnfsteinitz");
   A = RgM_to_nfM(nf, gel(order,1));
   I = leafcopy(gel(order,2)); n=lg(A)-1;
   for (i=1; i<n; i++)
   {
-    GEN c1,c2;
-    a = gel(I,i); if (ideal_is1(a)) continue;
+    GEN c1, c2, b, a = gel(I,i);
+    gel(I,i) = gen_1;
+    if (ideal_is1(a)) continue;
 
     c1 = gel(A,i);
     c2 = gel(A,i+1);
@@ -2932,7 +2929,6 @@ rnfsteinitz(GEN nf, GEN order)
     {
       gel(A,i) = c2;
       gel(A,i+1) = gneg(c1);
-      gel(I,i) = b;
       gel(I,i+1) = a;
     }
     else
@@ -2945,7 +2941,6 @@ rnfsteinitz(GEN nf, GEN order)
       gerepileall(av2, 2, &x,&y);
       gel(A,i) = x;
       gel(A,i+1) = y;
-      gel(I,i) = Id;
       gel(I,i+1) = Q_primitive_part(idealmul(nf,a,b), &p1);
       if (p1) gel(A,i+1) = nfC_nf_mul(nf, gel(A,i+1), p1);
     }
@@ -2953,7 +2948,7 @@ rnfsteinitz(GEN nf, GEN order)
   l = lg(order);
   p1 = cgetg(l,t_VEC);
   gel(p1,1) = A;
-  gel(p1,2) = I; for (i=3; i<l; i++) p1[i]=order[i];
+  gel(p1,2) = I; for (i=3; i<l; i++) gel(p1,i) = gel(order,i);
   return gerepilecopy(av, p1);
 }
 
