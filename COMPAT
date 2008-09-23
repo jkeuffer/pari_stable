@@ -222,6 +222,7 @@ This file lists the incompatible changes between Version 2.x and older versions
   - rename greffe -> RgX_to_ser and remove the "use_pari_stack" flag
   - rename Buchall -> Buchall_param and export a new Buchall with a
     simplified interface.
+  - the bitvec family function was replaced by the new F2v family functions.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

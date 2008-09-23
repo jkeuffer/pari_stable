@@ -473,6 +473,8 @@ BA 28- GP function galoisisnormal()
 BA 29- F2x functions family for polynomials over GF(2) and 
 BA 30- t_FFELT subtype_FF_F2xq for GF(2^n)
 BA 31- F2v/F2m functions family and F2m_ker for linear algebra over GF(2)
+BA 32- extra debugging data in t_CLOSURE and debugging facility.
+BA 33- compile-time copy optimizer
 
   Removed
     1- obsolete GP functions printp, printp1. Either replace them by
@@ -533,8 +535,9 @@ BA 31- F2v/F2m functions family and F2m_ker for linear algebra over GF(2)
    39- header file paritype.h [ split between parigen.h and pariinl.h ]
    40- obsolete library functions sor, outbrute, outbeaut
    41- dangerous macros max & min [ use maxss/minss, maxuu/minuu, maxdd/mindd ]
-   42- deprecated global constants gi, geuler, gpi. Use mulcxI/mkcomplex/gen_I(),
-       mpeuler() and mppi().
+   42- deprecated global constants gi, geuler, gpi. Use
+       mulcxI/mkcomplex/gen_I(), mpeuler() and mppi().
+BA 43- bitvec family function. Use F2v instead.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.2 (released 22/12/2007):
