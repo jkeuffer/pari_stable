@@ -1134,13 +1134,13 @@ long
 FpX_split_Berlekamp(GEN *t, GEN p)
 {
   GEN u = *t, a,b,po2,vker;
-  long d, i, ir, L, la, lb, vu = varn(u);
+  long d, i, ir, L, la, lb, vu = varn(u), sv = evalvarn(vu);
   long l = lg(u);
   ulong ps = itou_or_0(p);
   if (ps)
   {
     vker = Flx_Berlekamp_ker(ZX_to_Flx(u,ps),ps);
-    vker = Flm_to_FlxV(vker, u[1]);
+    vker = Flm_to_FlxV(vker, sv);
   }
   else
   {
@@ -1157,7 +1157,7 @@ FpX_split_Berlekamp(GEN *t, GEN p)
     if (ps)
     {
       GEN pol = const_vecsmall(l-2,0);
-      pol[1] = u[1];
+      pol[1] = sv;
       pol[2] = random_Fl(ps); /*Assume vker[1]=1*/
       for (i=2; i<=d; i++)
 	Flx_addmul_inplace(pol, gel(vker,i), random_Fl(ps), ps);
