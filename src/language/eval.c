@@ -49,9 +49,6 @@ reset_break(void)
   if (br_res) { gunclone_deep(br_res); br_res = NULL; }
 }
 
-long
-did_break(void) { return br_status; }
-
 GEN
 return0(GEN x)
 {

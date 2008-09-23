@@ -64,7 +64,6 @@ void   changevalue(entree *ep, GEN val);
 entree* do_alias(entree *ep);
 void    freeep(entree *ep);
 entree* is_entry_intern(const char *s, entree **table, long *hash);
-long   did_break(void);
 void   pari_fill_hashtable(entree **table, entree *ep);
 
 void compile_err(const char *msg, const char *str);

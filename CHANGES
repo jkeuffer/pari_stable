@@ -326,7 +326,9 @@ BA 41- user variables can now be aliased [#790]
        with a simplified interface.
    84- trap() no longer allows installing default error handlers. 
    85- GP's break loop is now *enabled* by default [ set breakloop = 0 in your
-       gprc to disable it ]
+       gprc to disable it ], and no longer controlled by trap(). To get out
+       of a break loop, hit Return three times (next, return, break are no
+       longer accepted)
 
   Added
     1- new benches: galoisinit, ispower, nffactor, subfields, resultant,

@@ -1559,10 +1559,14 @@ break_loop(int sigint)
   static FILE *oldinfile = NULL;
   filtre_t F;
   Buffer *b = filtered_buffer(&F);
-  int go_on = 0;
+  int cnt = 0;
 
   term_color(c_ERR); pari_putc('\n');
-  print_errcontext("Break loop (type 'break' or Control-d to go back to GP)", NULL, NULL);
+  if (sigint)
+    print_errcontext("Break loop: type <Return> or Control-d to continue",
+                     NULL, NULL);
+  else
+    print_errcontext("Break loop: type <Return> three times, or Control-d, to go back to GP)", NULL, NULL);
   term_color(c_NONE);
   if (sigint)
     pari_puts("[type <Return> in empty line to continue]\n");
@@ -1578,23 +1582,25 @@ break_loop(int sigint)
       if (popinfile()) break;
       continue;
     }
+    /* Empty input --> continue computation
+     * - if break loop initiated by ^C (will continue)
+     * - or 3 consecutive empty inputs (will abort) */
+    if (*(b->buf)) cnt = 0; else if (++cnt >= 3 || sigint) break;
 #if defined(_WIN32) || defined(__CYGWIN32__)
     win32ctrlc = 0;
 #endif
     if (check_meta(b->buf))
-    { /* break loop initiated by ^C? Empty input --> continue computation */
-      if (sigint && *(b->buf) == 0) { go_on=1; break; }
+    {
       continue;
     }
     x = readseq(b->buf);
-    if (did_break()) break;
     if (x == gnil || is_silent(b->buf)) continue;
 
     term_color(c_OUTPUT); gen_output(x, GP_DATA->fmt);
     term_color(c_NONE); pari_putc('\n');
   }
   pari_infile = oldinfile;
-  pop_buffer(); return go_on;
+  pop_buffer(); return sigint;
 }
 
 /* numerr < 0: from SIGINT */
