@@ -3018,9 +3018,14 @@ coefficients are given by the bits of remaining words by increasing indices.
 
 \fun{ulong}{F2v_coeff}{GEN x, long i} returns the coefficient $i$ of $x$.
 
+\fun{void}{F2v_flip}{GEN x, long i} adds $1$ to the coefficient $i$ of $x$.
+
 \fun{void}{F2v_set}{GEN x, long i} sets the coefficient $i$ of $x$ to $1$.
 
 \fun{ulong}{F2m_coeff}{GEN x, long i, long j} returns the coefficient $(i,j)$
+of $x$.
+
+\fun{void}{F2m_flip}{GEN x, long i, long j} adds $1$ to the coefficient $(i,j)$
 of $x$.
 
 \fun{void}{F2m_set}{GEN x, long i, long j} sets the coefficient $(i,j)$ of $x$
@@ -3852,6 +3857,10 @@ $[x,x^2,x^{2^2},\ldots,x^{2^{n-1}}]$ where $n$ is the degree of $T$.
 
 \fun{GEN}{gener_F2xq}{GEN T, GEN *po}
 
+\fun{GEN}{F2xq_powers}{GEN x, long n, GEN T}
+
+\fun{GEN}{F2xq_matrix_pow}{GEN x, long m, long n, GEN T}
+
 \subsec{Functions returning objects with \typ{INTMOD} coefficients}
 
 Those functions are mostly needed for interface reasons: \typ{INTMOD}s should
@@ -4223,7 +4232,7 @@ Multiply a multiprecision object by a single-precision one.
 
 \fun{GEN}{ZC_z_mul}{GEN x, long y}
 
-\subsubsec{Miscellaneous}
+\subsubsec{Miscellaneous involving Fl}
 
 \fun{GEN}{Fl_to_Flx}{ulong x, long evx} converts a \kbd{unsigned long} to a
 scalar \kbd{Flx}. Assume that \kbd{evx = evalvarn(vx)} for some variable
@@ -4264,6 +4273,15 @@ an \kbd{Flm} with \kbd{n} rows (repeated calls to \kbd{Flx\_to\_Flv}).
 
 \fun{GEN}{Fly_to_FlxY}{GEN a, long sv} convert coefficients of \kbd{a} to
 constant \kbd{Flx} in variable $v$.
+
+\subsubsec{Miscellaneous involving F2}
+
+\fun{GEN}{F2x_to_F2v}{GEN x, long n} converts from \kbd{F2x} to \kbd{F2v}
+with \kbd{n} components (assumed larger than the number of coefficients of
+\kbd{x}).
+
+\fun{GEN}{F2xV_to_F2m}{GEN v, long n} \kbd{F2x\_to\_F2v} to each polynomials
+to get an \kbd{F2m} with \kbd{n} rows.
 
 \section{Integral, rational and generic linear algebra}
 \subsec{\kbd{ZC} / \kbd{ZV}, \kbd{ZM}}. A \kbd{ZV} (resp.~a~\kbd{ZM},

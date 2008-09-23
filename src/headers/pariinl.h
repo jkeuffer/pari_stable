@@ -1343,17 +1343,21 @@ F2v_set(GEN x,long v)
    *u|=1UL<<remsBIL(v-1);
 }
 
-INLINE ulong
-F2m_coeff(GEN x, long a, long b)
+INLINE void
+F2v_flip(GEN x,long v)
 {
-  return F2v_coeff(gel(x,b), a);
+   ulong* u=(ulong*)&x[2+divsBIL(v-1)];
+   *u^=1UL<<remsBIL(v-1);
 }
 
+INLINE ulong
+F2m_coeff(GEN x, long a, long b) { return F2v_coeff(gel(x,b), a); }
+
 INLINE void
-F2m_set(GEN x, long a, long b)
-{
-  F2v_set(gel(x,b), a);
-}
+F2m_set(GEN x, long a, long b) { F2v_set(gel(x,b), a); } 
+
+INLINE void
+F2m_flip(GEN x, long a, long b) { F2v_flip(gel(x,b), a); }
 
 /* ARITHMETIC */
 INLINE GEN

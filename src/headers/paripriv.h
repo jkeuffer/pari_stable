@@ -575,6 +575,7 @@ GEN     quotient_subgroup_lift(GEN C, GEN H, GEN S);
 
 /* polarit1.c */
 
+GEN     F2x_Berlekamp_ker(GEN u);
 GEN     Flx_Berlekamp_ker(GEN u, ulong p);
 GEN     FpX_Berlekamp_ker(GEN u, GEN p);
 GEN     FpX_factcantor(GEN f, GEN pp, long flag);

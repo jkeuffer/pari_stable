@@ -495,6 +495,24 @@ FpX_Berlekamp_ker(GEN u, GEN p)
 }
 
 GEN
+F2x_Berlekamp_ker(GEN u)
+{
+  pari_sp ltop=avma;
+  long j,N = F2x_degree(u);
+  GEN Q, XP;
+  pari_timer T;
+  TIMERstart(&T);
+  XP = F2xq_sqr(polx_F2x(u[1]),u);
+  Q  = F2xq_matrix_pow(XP,N,N,u);
+  for (j=1; j<=N; j++)
+    F2m_flip(Q,j,j);
+  if(DEBUGLEVEL>=9) msgTIMER(&T,"Berlekamp matrix");
+  Q = F2m_ker_sp(Q,0);
+  if(DEBUGLEVEL>=9) msgTIMER(&T,"kernel");
+  return gerepileupto(ltop,Q);
+}
+
+GEN
 Flx_Berlekamp_ker(GEN u, ulong l)
 {
   pari_sp ltop=avma;
@@ -1137,7 +1155,9 @@ FpX_split_Berlekamp(GEN *t, GEN p)
   long d, i, ir, L, la, lb, vu = varn(u), sv = evalvarn(vu);
   long l = lg(u);
   ulong ps = itou_or_0(p);
-  if (ps)
+  if (ps==2)
+    vker = F2x_Berlekamp_ker(ZX_to_F2x(u));
+  else if (ps)
   {
     vker = Flx_Berlekamp_ker(ZX_to_Flx(u,ps),ps);
     vker = Flm_to_FlxV(vker, sv);
@@ -1154,8 +1174,18 @@ FpX_split_Berlekamp(GEN *t, GEN p)
   for (L=1; L<d; )
   {
     GEN polt;
-    if (ps)
+    if (ps==2)
     {
+      long lb = nbits2prec(l-2);
+      GEN pol = const_vecsmall(lb-1,0);
+      pol[1] = sv;
+      pol[2] = random_Fl(2); /*Assume vker[1]=1*/
+      for (i=2; i<=d; i++)
+        if (random_Fl(2))
+          F2v_add_inplace(pol, gel(vker,i));
+      (void)F2x_renormalize(pol,lb);
+      polt = F2x_to_ZX(pol);
+    } else if (ps) {
       GEN pol = const_vecsmall(l-2,0);
       pol[1] = sv;
       pol[2] = random_Fl(ps); /*Assume vker[1]=1*/
@@ -1164,9 +1194,7 @@ FpX_split_Berlekamp(GEN *t, GEN p)
       (void)Flx_renormalize(pol,l-1);
 
       polt = Flx_to_ZX(pol);
-    }
-    else
-    {
+    } else {
       GEN pol = scalar_ZX_shallow(randomi(p), vu);
       for (i=2; i<=d; i++)
 	pol = ZX_add(pol, ZX_Z_mul(gel(vker,i), randomi(p)));

@@ -130,6 +130,18 @@ Flx_to_F2x(GEN x)
 }
 
 GEN
+F2x_to_F2v(GEN x, long N)
+{
+  long i, l = lg(x);
+  long n = nbits2prec(N);
+  GEN z = cgetg(n,t_VECSMALL);
+  z[1] = N;
+  for (i=2; i<l ; i++) z[i]=x[i];
+  for (   ; i<n; i++) z[i]=0;
+  return z;
+}
+
+GEN
 F2x_add(GEN x, GEN y)
 {
   long i,lz;
@@ -516,6 +528,33 @@ F2xq_pow(GEN x, GEN n, GEN pol)
   return gerepileupto(av, y);
 }
 
+/* generates the list of powers of x of degree 0,1,2,...,l*/
+GEN
+F2xq_powers(GEN x, long l, GEN T)
+{
+  GEN V = cgetg(l+2,t_VEC);
+  long i, v = T[1];
+  gel(V,1) = pol1_F2x(v);  if (l==0) return V;
+  gel(V,2) = vecsmall_copy(x); if (l==1) return V;
+  gel(V,3) = F2xq_sqr(x,T);
+  if ((degpol(x)<<1) < degpol(T)) {
+    for(i = 4; i < l+2; i++)
+      gel(V,i) = F2xq_mul(gel(V,i-1),x,T);
+  } else {
+    for(i = 4; i < l+2; i++) {
+      gel(V,i) = (i&1)? F2xq_sqr(gel(V, (i+1)>>1),T)
+		      : F2xq_mul(gel(V, i-1),x,T);
+    }
+  }
+  return V;
+}
+
+GEN
+F2xq_matrix_pow(GEN y, long n, long m, GEN P)
+{
+  return F2xV_to_F2m(F2xq_powers(y,m-1,P),n);
+}
+
 GEN
 F2xq_conjvec(GEN x, GEN T)
 {
@@ -704,4 +743,20 @@ F2v_add_inplace(GEN x, GEN y)
     case 3: x[i] ^= y[i]; i++; case 2: x[i] ^= y[i]; i++;
     case 1: x[i] ^= y[i]; i++;
   }
+}
+
+/***********************************************************************/
+/**                                                                   **/
+/**                               F2xV                                **/
+/**                                                                   **/
+/***********************************************************************/
+/* F2xV are t_VEC with F2x coefficients. */
+
+GEN
+F2xV_to_F2m(GEN v, long n)
+{
+  long j, N = lg(v);
+  GEN y = cgetg(N, t_MAT);
+  for (j=1; j<N; j++) gel(y,j) = F2x_to_F2v(gel(v,j), n);
+  return y;
 }
