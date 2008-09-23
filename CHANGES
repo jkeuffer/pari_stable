@@ -118,6 +118,7 @@ IM 90- lngamma(x) gave incorrect results (off by 2*Pi*I) when real(x) was a
    99- ffinit(2,30) --> division by 0 [typo in FlxY_Flx_div], [#859]
   100- when unexpected exception/signal raiѕed (^C, stack overflow, out of
        memory), == would cancel it and silently return wrong value [#329]
+  101- reading recently freed memory in popinfile()
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]

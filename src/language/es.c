@@ -3131,14 +3131,14 @@ check_filtre(filtre_t *T)
 int
 popinfile(void)
 {
-  pariFILE *f;
-  for (f = last_tmp_file; f; f = f->prev)
+  pariFILE *f = last_tmp_file, *g;
+  while (f)
   {
     if (f->type & mf_IN) break;
     pari_warn(warner, "I/O: leaked file descriptor (%d): %s", f->type, f->name);
-    pari_fclose(f);
+    g = f; f = f->prev; pari_fclose(g);
   }
-  last_tmp_file = f; if (!last_tmp_file) return -1;
+  last_tmp_file = f; if (!f) return -1;
   pari_fclose(last_tmp_file);
   for (f = last_tmp_file; f; f = f->prev)
     if (f->type & mf_IN) { pari_infile = f->file; return 0; }
