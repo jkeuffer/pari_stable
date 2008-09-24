@@ -39,10 +39,10 @@ dflt=${dlftincludedir:-$prefix/include}; . ./myread; includedir=$ans
 echo $n ..."manual pages ? $c"
 dflt=${dfltmandir:-$dfltman}; . ./myread; mandir=$ans
 
-echo $n ..."other system-dependant data ? $c"
+echo $n ..."other system-dependent data ? $c"
 dflt=${dfltsysdatadir:-$prefix/lib/pari}; . ./myread; sysdatadir=$ans
 
-echo $n ..."other system-independant data ? $c"
+echo $n ..."other system-independent data ? $c"
 dflt=${dfltdatadir:-$dfltdata}; . ./myread; datadir=$ans
 
 for i in prefix share_prefix bindir libdir includedir mandir sysdatadir datadir ; do
