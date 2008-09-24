@@ -2463,7 +2463,7 @@ compute_R(GEN lambda, GEN z, GEN *ptL, GEN *ptkR, double *ptr_c)
 
   if (DEBUGLEVEL) { fprintferr("\n#### Computing check\n"); flusherr(); }
   D = gmul2n(mpmul(*ptkR,z), 1); /* bound for denom(lambda) */
-  if (expo(D) < 0 && rtodbl(D) < 0.95) return fupb_BACH;
+  if (expo(D) < 0 && rtodbl(D) < 0.95) return fupb_PRECI;
   lambda = bestappr_noer(lambda,D);
   if (!lambda)
   {
@@ -2489,8 +2489,8 @@ compute_R(GEN lambda, GEN z, GEN *ptL, GEN *ptkR, double *ptr_c)
     fprintferr("\n#### Tentative regulator : %Ps\n", gprec_w(R,3));
     fprintferr("\n ***** check = %f\n",c);
   }
-  if (c < 0.55) { avma = av; return fupb_BACH; }
-  if (c < 0.75 || c > 1.3) { avma = av; *ptr_c = c; return fupb_RELAT; }
+  if (c < 0.75) { avma = av; return fupb_PRECI; }
+  if (c > 1.3) { avma = av; *ptr_c = c; return fupb_RELAT; }
   *ptkR = R; *ptL = L; return fupb_NONE;
 }
 
@@ -3262,11 +3262,8 @@ PRECPB:
       if (need == old_need) F.sfb_chg = sfb_CHANGE;
       /* don't reset nreldep, done after subFB change */
       old_need = need;
-      if (need > 5)
-      {
-        L_jid = vecslice(F.perm, 1, need);
-        vecsmall_sort(L_jid); jid = 0;
-      }
+      L_jid = vecslice(F.perm, 1, need);
+      vecsmall_sort(L_jid); jid = 0;
       goto MORE;
     }
   }
@@ -3291,8 +3288,7 @@ PRECPB:
       goto MORE; /* not enough relations */
     case fupb_PRECI: /* prec problem unless we cheat on Bach constant */
       if ((precdouble&7) < 7 || cbach>2) { precpb = "compute_R"; goto PRECPB; }
-    /* fall through */
-    case fupb_BACH: goto START;
+      goto START;
   }
   /* DONE */
 
