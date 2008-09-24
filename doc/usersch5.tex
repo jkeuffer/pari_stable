@@ -6037,7 +6037,7 @@ as set by \kbd{Q\_remove\_denom}: either a \typ{INT} or \kbd{NULL} representing
 the trivial denominatory $1$. Returns their product (either a \typ{INT} or
 \kbd{NULL}).
 
-\section{Generic operators}
+\section{Generic arithmetic operators}
 
 \subsec{Unary operators}
 
@@ -6063,10 +6063,6 @@ Let ``\op'' be a binary operation among
 
 \op=\key{div}: division (\kbd{x / y}).
 
-\op=\key{max}: maximum (\kbd{max(x, y)})
-
-\op=\key{min}: minimum (\kbd{min(x, y)})
-
 \noindent The names and prototypes of the functions corresponding
 to \op\ are as follows:
 
@@ -6076,27 +6072,19 @@ to \op\ are as follows:
 
 \funno{GEN}{g\op sg}{long s, GEN y}
 
-\fun{GEN}{gadd}{GEN x, GEN y[, GEN z]}
+\noindent Explicitly
 
-\fun{GEN}{gmul}{GEN x, GEN y[, GEN z]}
+\fun{GEN}{gadd}{GEN x, GEN y}, \fun{GEN}{gaddgs}{GEN x, long s},
+\fun{GEN}{gaddsg}{GEN s, GEN x}
 
-\fun{GEN}{gdiv}{GEN x, GEN y[, GEN z]}
+\fun{GEN}{gmul}{GEN x, GEN y}, \fun{GEN}{gmulgs}{GEN x, long s},
+\fun{GEN}{gmulsg}{GEN s, GEN x}
 
-\fun{GEN}{gaddgs}{GEN x, long s[, GEN z]}
+\fun{GEN}{gsub}{GEN x, GEN y}, \fun{GEN}{gsubgs}{GEN x, long s},
+\fun{GEN}{gsubsg}{GEN s, GEN x}
 
-\fun{GEN}{gaddsg}{GEN s, GEN x[, GEN z]}
-
-\fun{GEN}{gsubgs}{GEN x, long s[, GEN z]}
-
-\fun{GEN}{gsubsg}{GEN s, GEN x[, GEN z]}
-
-\fun{GEN}{gmulgs}{GEN x, long s[, GEN z]}
-
-\fun{GEN}{gmulsg}{GEN s, GEN x[, GEN z]}
-
-\fun{GEN}{gdivgs}{GEN x, long s[, GEN z]}
-
-\fun{GEN}{gdivsg}{GEN s, GEN x[, GEN z]}
+\fun{GEN}{gdiv}{GEN x, GEN y}, \fun{GEN}{gdivgs}{GEN x, long s},
+\fun{GEN}{gdivsg}{GEN s, GEN x}
 
 
 \fun{GEN}{gpow}{GEN x, GEN y, long l} creates $\kbd{x}^{\kbd{y}}$. If
