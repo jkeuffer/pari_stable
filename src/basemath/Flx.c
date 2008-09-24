@@ -930,7 +930,7 @@ Flx_invmontgomery_newton(GEN T, ulong p)
 {
   long nold, lx, lz, lq, l = degpol(T);
   GEN q, y, z, x = const_vecsmall(l+1, 0) + 2;
-  ulong mask = quadratic_prec_mask(l-2); /* assume l > 3 */
+  ulong mask = quadratic_prec_mask(l-2); /* assume l > 2 */
   pari_sp av;
 
   y = T+2;
@@ -964,6 +964,7 @@ Flx_invmontgomery_newton(GEN T, ulong p)
     z += 2;
     /* subtract 1 [=>first nold words are 0]: renormalize so that z(0) != 0 */
     for (i = nold; i < lz; i++) if (z[i]) break;
+    nold = nnew;
     if (i >= lz) continue; /* z-1 = 0(t^(nnew + 1)) */
 
     /* z + i represents (x*q - 1) / t^i */
@@ -974,7 +975,6 @@ Flx_invmontgomery_newton(GEN T, ulong p)
     lx = lz+ i;
     y  = x + i; /* x -= z * t^i, in place */
     for (i = 0; i < lz; i++) y[i] = Fl_neg(z[i], p);
-    nold = nnew;
   }
   x -= 2; setlg(x, lx + 2); x[1] = T[1];
   return Flx_shift(x,1);
