@@ -39,7 +39,7 @@ byteptr diffptr;
 FILE    *pari_outfile, *pari_errfile, *pari_logfile, *pari_infile;
 char    *current_logfile, *current_psfile, *pari_datadir;
 long    gp_colors[c_LAST];
-int     disable_color;
+int     disable_color, disable_exception_handler = 0;
 ulong   DEBUGFILES, DEBUGLEVEL, DEBUGMEM;
 ulong   compatible, precreal, precdl, logstyle;
 gp_data *GP_DATA;
@@ -949,8 +949,11 @@ pari_sigint(const char *s)
   pari_puts(s); pari_putc('.');
   term_color(c_NONE);
   pariOut = out;
-  if (default_exception_handler && default_exception_handler(-1)) {
-    flusherr(); return;
+  if (default_exception_handler) {
+    if (disable_exception_handler)
+      disable_exception_handler = 0;
+    else
+      if (default_exception_handler(-1)) { flusherr(); return; }
   }
   err_recover(talker);
 }
@@ -1078,9 +1081,13 @@ pari_err(int numerr, ...)
     pariErr->puts("  [hint] you can increase GP stack with allocatemem()\n");
   }
   pariOut = out;
-  if (numerr != talker2 
-    && default_exception_handler
-    && default_exception_handler(numerr)) { flusherr(); return; }
+  if (numerr != talker2 && default_exception_handler)
+  {
+    if (disable_exception_handler)
+      disable_exception_handler = 0;
+    else
+      if (default_exception_handler(numerr)) { flusherr(); return; }
+  }
   err_recover(numerr);
 }
 

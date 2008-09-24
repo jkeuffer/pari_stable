@@ -77,6 +77,7 @@ extern char foreignExprSwitch;
 extern entree * (*foreignAutoload)(const char*, long len);
 extern void (*foreignFuncFree)(entree *);
 extern int (*default_exception_handler)(long);
+extern int disable_exception_handler;
 
 extern const long functions_tblsz;  /* hashcodes table size */
 /* Variables containing the list of PARI functions */

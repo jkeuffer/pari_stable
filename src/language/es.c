@@ -46,10 +46,12 @@ hit_return(void)
 {
   int c;
   if (GP_DATA->flags & (EMACS|TEXMACS)) return;
+  disable_exception_handler = 1;
   pari_puts("---- (type RETURN to continue) ----");
-  /* if called from a readline callback, may be in a funny TTY mode,  */
+  /* if called from a readline callback, may be in a funny TTY mode */
   do c = fgetc(stdin); while (c >= 0 && c != '\n' && c != '\r');
   pari_putc('\n');
+  disable_exception_handler = 0;
 }
 
 /********************************************************************/
