@@ -54,7 +54,9 @@ computed objects. This is done with a call to the function
 with, and the second is the upper limit on a precomputed prime number table;
 \kbd{size} should not reasonably be taken below $500000$ but you may set
 $\tet{maxprime} = 0$, although the system still needs to precompute all
-primes up to about $2^{16}$.
+primes up to about $2^{16}$. For lower-level variants allowing finer
+control, e.g.~preventing PARI from installings its own error or signal
+handlers, see~\secref{se:pari_init_tech}.
 
 \noindent We have now at our disposal:
 
@@ -1781,7 +1783,7 @@ from the stream \tet{pari_infile}, which you can change using
 \var{in}-files.
 
 Note that these functions are quite complicated, maintaining stacks of files
-in allow smooth error recovery and \kbd{gp} interaction. You will be better
+to allow smooth error recovery and \kbd{gp} interaction. You will be better
 off not using them.
 
 \subsec{Errors}.\sidx{error}\kbdsidx{talker}

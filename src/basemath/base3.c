@@ -1386,7 +1386,7 @@ archstar_full_rk(GEN x, GEN bas, GEN v, GEN gen)
       }
       avma = av1; if (Flm_deplin(mat, 2)) continue;
 
-      /* c independant of previous sign vectors */
+      /* c independent of previous sign vectors */
       if (!x) a = zc_to_ZC(lambda);
       else
       {

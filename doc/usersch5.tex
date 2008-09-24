@@ -58,7 +58,7 @@ initialization.
 \fun{void}{pari_close}{void} stop using the library (assuming it was
 initialized with \kbd{pari\_init}) and frees all allocated objects.
 
-\subsec{Technical functions}
+\subsec{Technical functions}\label{se:pari_init_tech}
 
 \fun{void}{pari_init_opts}{size_t size, ulong maxprime, ulong opts} as
 \kbd{pari\_init}, more flexible. \kbd{opts} is a mask of flags
@@ -674,16 +674,16 @@ that the result is allocated using \tet{pari_malloc} instead of the PARI
 stack. The resulting \kbd{GEN} is now impervious to garbage collecting
 routines, but should be freed using \tet{pari_free}.
 
-\subsec{Stack)independant binary objects}
+\subsec{Stack)independent binary objects}
 
 \fun{GENbin*}{copy_bin}{GEN x} copies $x$ into a malloc'ed structure suitable
-for stack-independant binary transmission or storage. The object obtained
-is architecture independant provided, \kbd{sizeof(long)} remains the same
+for stack-independent binary transmission or storage. The object obtained
+is architecture independent provided, \kbd{sizeof(long)} remains the same
 on all PARI instances involved, as well as the multiprecision kernel (either
 native or GMP).
 
 \fun{GENbin*}{copy_bin_canon}{GEN x} as \kbd{copy\_bin}, ensuring furthermore
-that the binary object is independant of the multiprecision kernel. Slower
+that the binary object is independent of the multiprecision kernel. Slower
 than \kbd{copy\_bin}.
 
 \fun{GEN}{bin_copy}{GENbin *p} assuming $p$ was created by \kbd{copy\_bin(x)}
@@ -1711,7 +1711,7 @@ and return the latter.
 into a \typ{INT} and return the latter.
 
 \fun{GEN}{utoineg}{ulong s} converts the \emph{non-zero} \kbd{ulong}~\kbd{s}
-into a \typ{INT} and return the latter.
+into the \typ{INT} $-s$ and return the latter.
 
 \fun{GEN}{utor}{ulong s, long prec} converts the \kbd{ulong}~\kbd{s} into a
 \typ{REAL} of length \kbd{prec} and return the latter. Assumes that
@@ -6051,7 +6051,7 @@ the trivial denominatory $1$. Returns their product (either a \typ{INT} or
 
 \fun{GEN}{ginv}{GEN x} creates the inverse of~\kbd{x}.
 
-\subsec{Binary operators}.
+\subsec{Binary operators}
 
 Let ``\op'' be a binary operation among
 

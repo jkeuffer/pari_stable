@@ -41,7 +41,7 @@ Possibly, even implementation choices ! Way to go.
 
 A \teb{GP2C array} is a generic way to manage stacks of data that need
 to grow dynamically. It allocates memory using \kbd{pari\_malloc}, and is
-independant of the PARI stack; it even works before the \kbd{pari\_init} call.
+independent of the PARI stack; it even works before the \kbd{pari\_init} call.
 
 \subsec{Initialization}
 
@@ -447,7 +447,7 @@ adequately a set of routines.
 Try to break your script into independent easily reproduceable tests, this way
 regressions are easier to debug; e.g. include \kbd{setrand(1)} statement before
 a randomized computation. The expected output may be different on 32-bit and
-64-bit machines but should otherwise be platform-independant. If possible, the
+64-bit machines but should otherwise be platform-independent. If possible, the
 output shouldn't even depend on \kbd{sizeof(long)}; using a \kbd{realprecision}
 that exists on both 32-bit and 64-bit architectures, e.g. \kbd{\bs p 38} is a
 good first step.
