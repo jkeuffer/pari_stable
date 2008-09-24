@@ -37,12 +37,19 @@ is_identifier(const char *s)
   return *s? 0: 1;
 }
 
+
+static void
+msg(const char *s)
+{
+  term_color(c_HELP);
+  print_text(s); pari_putc('\n');
+  term_color(c_NONE);
+}
 /* If flag = 0 (default): check if s existed in 1.39.15 and print verbosely
  * the answer.
  * If flag > 0: silently return n+1 if function changed, 0 otherwise.
  *   (where n is the index of s in whatnowlist).
- * If flag < 0: -flag-1 is the index in whatnowlist
- */
+ * If flag < 0: -flag-1 is the index in whatnowlist */
 int
 whatnow(const char *s, int flag)
 {
@@ -54,11 +61,11 @@ whatnow(const char *s, int flag)
   if (flag < 0) { n = -flag; flag = 0; }
   else
   {
-    if (flag && strlen(s)==1) return 0; /* special case "i" and "o" */
+    if (flag && s[0] && !s[1]) return 0; /* special case "i" and "o" */
     if (!is_identifier(s) || !is_entry_intern(s,funct_old_hash,NULL))
     {
-      if (flag) return 0;
-      pari_err(talker,"as far as I can recall, this function never existed");
+      if (!flag) msg("As far as I can recall, this function never existed");
+      return 0;
     }
     n = 0;
     do
@@ -66,7 +73,7 @@ whatnow(const char *s, int flag)
     while (def && strcmp(def,s));
     if (!def)
     {
-      int m=0;
+      int m = 0;
       do
 	def = (functions_oldgp[m++]).name;
       while (def && strcmp(def,s));
@@ -74,27 +81,26 @@ whatnow(const char *s, int flag)
     }
   }
 
-  wp=whatnowlist[n-1]; def=wp.name;
+  wp = whatnowlist[n-1]; def = wp.name;
   if (def == SAME)
   {
-    if (flag) return 0;
-    pari_err(talker,"this function did not change");
+    if (!flag) msg("This function did not change");
+    return 0;
   }
   if (flag) return n;
 
   if (def == REMOV)
-    pari_err(talker,"this function was suppressed");
-  if (!strcmp(def,"x*y"))
   {
-    pari_printf("  %s is now called *.\n\n",s);
-    pari_printf("    %s%s ===> %s%s\n\n",s,wp.oldarg,wp.name,wp.newarg);
-    return 1;
+    msg("This function was suppressed");
+    return 0;
   }
-  ep = is_entry(wp.name);
-  if (!ep) pari_err(bugparier,"whatnow");
+  if (!strcmp(def,"x*y")) ep = NULL;
+  else {
+    ep = is_entry(wp.name);
+    if (!ep) pari_err(bugparier,"whatnow");
+  }
   pari_puts("New syntax: "); term_color(c_ERR);
-  pari_printf("%s%s ===> %s%s\n\n",s,wp.oldarg,wp.name,wp.newarg);
-  term_color(c_HELP);
-  print_text(ep->help); pari_putc('\n');
+  pari_printf("%s%s ===> %s%s\n\n", s, wp.oldarg, wp.name, wp.newarg);
+  if (ep) msg(ep->help);
   term_color(c_NONE); return 1;
 }
