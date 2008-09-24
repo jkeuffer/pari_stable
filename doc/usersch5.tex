@@ -735,10 +735,13 @@ otherwise.
 instead of updating its address through a pointer.
 
 \fun{void}{gerepilemany}{pari_sp av, GEN* g[], int n} alternative interface
-to \kbd{gerepileall}
+to \kbd{gerepileall}. The preserved \kbd{GEN}s are the elements of the array
+\kbd{g} of length $n$: \kbd{g[0]}, \kbd{g[1]}, \dots,
+\kbd{g[$n$-1]}. Obsolete: no more efficient than \kbd{gerepileall},
+error-prone, and clumsy (need to declare an extre \kbd{GEN *g}).
 
 \fun{void}{gerepilemanysp}{pari_sp av, pari_sp ltop, GEN* g[], int n}
-alternative interface to \kbd{gerepileallsp}.
+alternative interface to \kbd{gerepileallsp}. Obsolete.
 
 \fun{void}{gerepilecoeffs}{pari_sp av, GEN x, int n} cleans up the stack
 from \kbd{av} on, preserving \kbd{x[0]}, \dots, \kbd{x[n-1]} (which are

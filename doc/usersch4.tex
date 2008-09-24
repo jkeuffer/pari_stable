@@ -347,7 +347,8 @@ concrete examples in the next subsection.
 \noindent$\bullet$
 First, PARI routines do their own garbage collecting, which means that
 whenever a documented function from the library returns, only its result(s)
-have been added to the stack (non-documented ones may not do this). In
+have been added to the stack, possibly up to a very small overhead
+(non-documented ones may not do this). In
 particular, a PARI function that does not return a \kbd{GEN} does not clutter
 the stack. Thus, if your computation is small enough (e.g.~you call few PARI
 routines, or most of them return \kbd{long} integers), then you do not need
@@ -370,7 +371,7 @@ garbage ...
 avma = av; /*@Ccom restore it */
 @eprog
 \noindent All objects created in the \kbd{garbage} zone will eventually
-be overwritten: they should not be accessed anymore once \kbd{avma} has been
+be overwritten: they should no longer be accessed \kbd{avma} has been
 restored.
 
 \noindent$\bullet$
@@ -387,14 +388,12 @@ equivalent to the above where the initial \kbd{av} is computed from \kbd{z}.
 \noindent$\bullet$
 Unfortunately life is not so simple, and sometimes you will want
 to give back accumulated garbage \emph{during} a computation without losing
-recent data. For this you need the \kbd{gerepile} function (or one of its
-simpler variants described hereafter):
+recent data. We shall start with the lowest level function to get a feel for
+the underlying mechanisms, we shall describe simpler variants later:
 
-\fun{GEN}{gerepile}{pari_sp ltop, pari_sp lbot, GEN q}
-
-\noindent
-This function cleans up the stack between \kbd{ltop} and \kbd{lbot}, where
-$\kbd{lbot} < \kbd{ltop}$, and returns the updated object \kbd{q}. This means:
+\fun{GEN}{gerepile}{pari_sp ltop, pari_sp lbot, GEN q}. This function cleans
+up the stack between \kbd{ltop} and \kbd{lbot}, where $\kbd{lbot} <
+\kbd{ltop}$, and returns the updated object \kbd{q}. This means:
 
 1) we translate (copy) all the objects in the interval
 $[\kbd{avma}, \kbd{lbot}[$, so that its right extremity abuts the address
@@ -438,9 +437,10 @@ As stated above, no component of the remaining objects (in particular
 this is checked within \kbd{gerepile}. But beware as well that the addresses
 of the objects in the translated zone change after a call to \kbd{gerepile},
 so you must not access any pointer which previously pointed into the zone
-below \kbd{ltop}. If you need to recover more than one object, use one of the
-\kbd{gerepilemany} functions below.
+below \kbd{ltop}. If you need to recover more than one object, use the
+\kbd{gerepileall} function below.
 
+\misctitle{Remark}.
 As a consequence of the preceding explanation, if a PARI object is to be
 relocated by \hbox{gerepile} then, apart from universal objects, the chunks
 of memory used by its components should be in consecutive memory locations.
@@ -458,9 +458,12 @@ you allow objects to become disconnected.
 \bprog
   ltop = avma; garbage(); lbot = avma; q = anything();
   return gerepile(ltop, lbot, q); /*@Ccom returns the updated q */
-@eprog
-
-\noindent Beware that
+@eprog\noindent or directly
+\bprog
+  ltop = avma; garbage(); lbot = avma;
+  return gerepile(ltop, lbot, anything());
+@eprog\noindent
+Beware that
 \bprog
   ltop = avma; garbage();
   return gerepile(ltop, avma, anything())
@@ -473,59 +476,47 @@ call, so the result belongs to the garbage zone and the \kbd{gerepile}
 statement becomes equivalent to \kbd{avma = ltop}. Thus we return a
 pointer to random garbage.
 
-\noindent$\bullet$ A simple variant is
+\subsec{Variants}
 
-\fun{GEN}{gerepileupto}{pari_sp ltop, GEN q}
+\fun{GEN}{gerepileupto}{pari_sp ltop, GEN q}. Cleans the stack between
+\kbd{ltop} and the \emph{connected} object \kbd{q} and returns \kbd{q}
+updated. For this to work, \kbd{q} must have been created \emph{before} all
+its components, otherwise they would belong to the garbage zone! Unless
+mentioned otherwise, documented PARI functions guarantee this.
 
-\noindent which cleans the stack between \kbd{ltop} and the \emph{connected}
-object \kbd{q} and returns \kbd{q} updated. For this to work, \kbd{q} must
-have been created \emph{before} all its components, otherwise they would
-belong to the garbage zone! Unless mentioned otherwise, documented PARI
-functions guarantee this.
+\fun{GEN}{gerepilecopy}{pari_sp ltop, GEN x}. Functionally equivalent to,
+but more efficient than
+\bprog
+  gerepileupto(ltop, gcopy(x))
+@eprog\noindent In this case, the \kbd{GEN} parameter \kbd{x} need not
+satisfy any property before the garbage collection: it may be disconnected,
+components created before the root, and so on. Of course, this is about
+twice slower than either \tet{gerepileupto} or \tet{gerepile}, because
+\kbd{x} has to be copied to a clean stack zone first. This function is a
+special case of \tet{gerepileall} below, where $n=1$.
 
-\noindent$\bullet$ Another variant (a special case of \tet{gerepileall}
-below, where $n=1$) is
+\fun{void}{gerepileall}{pari_sp ltop, int n, ...}.
+To cope with complicated cases where many objects have to be preserved. The
+routine expects $n$ further arguments, which are the \emph{addresses} of
+the \kbd{GEN}s you want to preserve:
+\bprog
+  pari_sp ltop = avma;
+  ...; y = ...; ... x = ...; ...;
+  gerepileall(ltop, 2, &x, &y);
+@eprog\noindent
+It cleans up the most recent part of the
+stack (between \kbd{ltop} and \kbd{avma}), updating all the \kbd{GEN}s added
+to the argument list. A copy is done just before the cleaning to preserve
+them, so they do not need to be connected before the call. With
+\kbd{gerepilecopy}, this is the most robust of the \kbd{gerepile} functions
+(the less prone to user error), hence the slowest.
 
-\fun{GEN}{gerepilecopy}{pari_sp ltop, GEN x}
-
-\noindent which is functionally equivalent to \kbd{gerepileupto(ltop,
-gcopy(x))} but more efficient. In this case, the \kbd{GEN} parameter \kbd{x}
-need not satisfy any property before the garbage collection (it may be
-disconnected, components created before the root and so on). Of course, this
-is less efficient than either \tet{gerepileupto} or \tet{gerepile}, because
-\kbd{x} has to be copied to a clean stack zone first.
-
-\noindent$\bullet$
-To cope with complicated cases where many objects have to be
-preserved, you can use
-
-\fun{void}{gerepileall}{pari_sp ltop, int n, ...}
-
-\noindent where the routine expects $n$ further arguments, which are the
-\emph{addresses} of the \kbd{GEN}s you want to preserve. It cleans up the most
-recent part of the stack (between \kbd{ltop} and \kbd{avma}), updating all
-the \kbd{GEN}s added to the argument list. A copy is done just before the
-cleaning to preserve them, so they do not need to be connected before the
-call. With \kbd{gerepilecopy}, this is the most robust of the \kbd{gerepile}
-functions (the less prone to user error), hence the slowest.
-
-An alternative syntax, obsolete but kept for backward compatibility, is
-given by
-
-\fun{void}{gerepilemany}{pari_sp ltop, GEN *gptr[], int n}
-
-\noindent which works exactly as above, except that the preserved \kbd{GEN}s
-are the elements of the array \kbd{gptr} (of length $n$): \kbd{gptr[0]},
-\kbd{gptr[1]}, \dots, \kbd{gptr[$n$-1]}.
-
-\noindent$\bullet$ More efficient, but tricky to use is
-
-\fun{void}{gerepilemanysp}{pari_sp ltop, pari_sp lbot, GEN *gptr[], int n}
-
-\noindent which cleans the stack between \kbd{lbot} and \kbd{ltop} and
-updates the \kbd{GEN}s pointed at by the elements of \kbd{gptr} without doing
-any copying. This is subject to the same restrictions as \kbd{gerepile}, the
-only difference being that more than one address gets updated.
+\fun{void}{gerepileallsp}{pari_sp ltop, pari_sp lbot, int n, ...}.
+More efficient, but trickier than \kbd{gerepileall}. Cleans the stack between
+\kbd{lbot} and \kbd{ltop} and updates the \kbd{GEN}s pointed at by the
+elements of \kbd{gptr} without any further copying. This is subject to the
+same restrictions as \kbd{gerepile}, the only difference being that more than
+one address gets updated.
 
 \subsec{Examples}.
 
@@ -573,8 +564,7 @@ is guaranteed to return an object suitable for \kbd{gerepileupto}:
   ltop = avma;
   z = gerepileupto(ltop, gadd(gsqr(x), gsqr(y)));
 @eprog\noindent
-Make sure you understand exactly what has happened before you go on (use the
-figure from the preceding section).
+Make sure you understand exactly what has happened before you go on!
 
 \misctitle{Remark on assignments and gerepile}: When the tree structure and
 the size of the PARI objects which will appear in a computation are under
@@ -603,9 +593,8 @@ For example suppose we want to write a function of two \kbd{GEN} variables
 %
 \bprog
   p1 = gsqr(x); p2 = gadd(p1, y);
-  p3 = gsqr(y); p4 = gadd(p3, x); z = cgetg(3, t_VEC);
-  gel(z, 1) = p2;
-  gel(z, 2) = p4;
+  p3 = gsqr(y); p4 = gadd(p3, x);
+  z = mkvec2(p2, p4);  /* not suitable for gerepileupto! */
 @eprog\noindent
 This leaves a dirty stack containing (in this order) \kbd{z}, \kbd{p4},
 \kbd{p3}, \kbd{p2}, \kbd{p1}. The garbage here consists of \kbd{p1} and
@@ -628,8 +617,19 @@ well. Beware that
 @eprog\noindent
 is a disaster since \kbd{p1} and \kbd{p3} are created before
 \kbd{z}, so the call to \kbd{gerepileupto} overwrites them, leaving
-\kbd{gel(z, 1)} and \kbd{gel(z, 2)} pointing at random data! On the other
-hand
+\kbd{gel(z, 1)} and \kbd{gel(z, 2)} pointing at random data! The following
+does work:
+\bprog
+  ltop = avma; p1 = gsqr(x); p3 = gsqr(y);
+  lbot = avma; z = mkvec2(gadd(p1,y), gadd(p3,x));
+  z = gerepile(ltop,lbot,z);
+@eprog\noindent but is very subtly wrong in the sense that
+\kbd{z = gerepileupto(ltop, z)} would \emph{not} work. The reason being
+that \kbd{mkvec2} creates the root \kbd{z} of the vector \emph{after}
+its arguments have been evaluated, creating the components of \kbd{z}
+too early; \kbd{gerepile} does not care, but the created \kbd{z} is a time
+bomb which will explode on any later \kbd{gerepileupto}.
+On the other hand
 \bprog
   ltop = avma; z = cgetg(3, t_VEC);
   gel(z, 1) = gadd(gsqr(x), y);
@@ -721,7 +721,7 @@ First, \kbd{gerepile} has turned out to be a flexible and fast garbage
 collector for number-theoretic computations, which compares favorably with
 more sophisticated methods used in other systems. Our benchmarks indicate
 that the price paid for using \kbd{gerepile} and \kbd{gerepile}-related
-copies, when properly used, is usually less than 1 percent of the total
+copies, when properly used, is usually less than 1\% of the total
 running time, which is quite acceptable!
 
 Second, it is of course harder on the programmer, and quite error-prone
