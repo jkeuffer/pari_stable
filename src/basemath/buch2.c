@@ -2268,10 +2268,8 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN L_jid, long *pjid, FACT *fact)
             return 1;
           }
           if (DEBUGLEVEL)
-          {
             pari_warn(warner, "Cycled through ideal list & no relation. Back to random");
-            L_jid = NULL; jid = 1;
-          }
+          L_jid = NULL; jid = 1;
         }
  	cptlist = 0;
       }
