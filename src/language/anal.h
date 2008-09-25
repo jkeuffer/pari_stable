@@ -69,15 +69,11 @@ void   pari_fill_hashtable(entree **table, entree *ep);
 void compile_err(const char *msg, const char *str);
 void compile_varerr(const char *str);
 
-extern int  (*whatnow_fun)(const char *, int);
-extern void (*sigint_fun)(void);
 extern void *foreignHandler;
 extern GEN  (*foreignExprHandler)(char*);
 extern char foreignExprSwitch;
 extern entree * (*foreignAutoload)(const char*, long len);
 extern void (*foreignFuncFree)(entree *);
-extern int (*default_exception_handler)(long);
-extern int disable_exception_handler;
 
 extern const long functions_tblsz;  /* hashcodes table size */
 /* Variables containing the list of PARI functions */

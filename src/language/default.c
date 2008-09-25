@@ -593,10 +593,7 @@ GEN
 sd_secure(const char *v, long flag)
 {
   if (*v && (GP_DATA->flags & SECURE))
-  {
-    fprintferr("[secure mode]: Do you want to modify the 'secure' flag? (^C if not)\n");
-    hit_return();
-  }
+    pari_ask_confirm("[secure mode]: About to modify the 'secure' flag");
   return sd_gptoggle(v,flag,"secure", SECURE);
 }
 
@@ -819,8 +816,9 @@ sd_filename(const char *v, long flag, const char *s, char **f)
     do_strftime(ev,str, l-1); pari_free(ev);
     if (GP_DATA->flags & SECURE)
     {
-      fprintferr("[secure mode]: about to change %s to '%s'. OK ? (^C if not)\n",s, str);
-      hit_return();
+      char *msg=pari_sprintf("[secure mode]: About to change %s to '%s'",s,str);
+      pari_ask_confirm(msg);
+      pari_free(msg);
     }
     *f = pari_strdup(str); pari_free(str); pari_free(old);
   }

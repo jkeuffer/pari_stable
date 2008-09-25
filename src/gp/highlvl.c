@@ -103,8 +103,9 @@ gpinstall(char *s, char *code, char *gpname, char *lib)
 {
   if (GP_DATA->flags & SECURE)
   {
-    fprintferr("[secure mode]: about to install '%s'. OK ? (^C if not)\n",s);
-    hit_return();
+    char *msg = pari_sprintf("[secure mode]: about to install '%s'", s);
+    pari_ask_confirm(msg);
+    pari_free(msg);
   }
   install0(s, code, gpname, lib);
 }

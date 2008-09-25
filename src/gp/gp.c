@@ -216,6 +216,28 @@ kill_all_buffers(Buffer *B)
 /**                             HELP                               **/
 /**                                                                **/
 /********************************************************************/
+static int disable_exception_handler = 0;
+
+static void
+hit_return(void)
+{
+  int c;
+  if (GP_DATA->flags & (EMACS|TEXMACS)) return;
+  disable_exception_handler = 1;
+  pari_puts("---- (type RETURN to continue) ----");
+  /* if called from a readline callback, may be in a funny TTY mode */
+  do c = fgetc(stdin); while (c >= 0 && c != '\n' && c != '\r');
+  pari_putc('\n');
+  disable_exception_handler = 0;
+}
+void
+gp_ask_confirm(const char *s)
+{
+  fprintferr(s);
+  fprintferr(". OK ? (^C if not)\n");
+  hit_return();
+}
+
 static int
 has_ext_help(void)
 {
@@ -665,11 +687,10 @@ aide0(const char *s0, int flag)
       external_help(s,n);
     else
     {
-      if (n == 2) { aide_print(s,"default"); return; }
-      n = whatnow(s,1);
-      if (!n) { aide_print(s,"unknown identifier"); return; }
-      aide_print(s, "obsolete function");
-      whatnow_new_syntax(s, n);
+      if (n == 2)
+        aide_print(s,"default");
+      else if (!cb_pari_whatnow(s,1))
+        aide_print(s,"unknown identifier");
     }
     return;
   }
@@ -1409,15 +1430,13 @@ is_interactive(void)
 			       && (f & EMACS || pari_stdin_isatty()));
 }
 
-static int reading_line = 0;
-
 /* return 0 if no line could be read (EOF) */
 static int
 gp_read_line(filtre_t *F, const char *PROMPT)
 {
   Buffer *b = (Buffer*)F->buf;
   int res;
-  reading_line = 1;
+  disable_exception_handler = 1;
   F->downcase = (compatible == OLDALL);
   if (b->len > 100000) fix_buffer(b, 100000);
   if (is_interactive())
@@ -1437,7 +1456,7 @@ gp_read_line(filtre_t *F, const char *PROMPT)
   }
   else
     res = get_line_from_file(DFT_PROMPT,F,pari_infile);
-  reading_line = 0;
+  disable_exception_handler = 0;
   return res;
 }
 
@@ -1609,9 +1628,9 @@ break_loop(int sigint)
 
 /* numerr < 0: from SIGINT */
 int
-gp_exception_handler(long numerr)
+gp_handle_exception(long numerr)
 {
-  if (reading_line) { reading_line = 0; return 0; }
+  if (disable_exception_handler) { disable_exception_handler = 0; return 0; }
   if (numerr == errpile) { var_make_safe(); avma = top; }
   if ((GP_DATA->flags & BREAKLOOP) && OK_breakloop())
     return break_loop(numerr < 0);
@@ -1867,9 +1886,10 @@ main(int argc, char **argv)
 #ifdef READLINE
   init_readline();
 #endif
-  whatnow_fun = whatnow;
-  sigint_fun = gp_sigint_fun;
-  default_exception_handler = gp_exception_handler;
+  cb_pari_whatnow = whatnow;
+  cb_pari_sigint = gp_sigint_fun;
+  cb_pari_handle_exception = gp_handle_exception;
+  cb_pari_ask_confirm = gp_ask_confirm;
   gp_expand_path(GP_DATA->path);
 
   if (!(GP_DATA->flags & QUIET)) gp_head();

@@ -255,7 +255,6 @@ void  print_errcontext(const char *msg, const char *s, const char *entry);
 void* get_stack(double fraction, long min);
 void  init_graph(void);
 void  free_graph(void);
-void  hit_return(void);
 void  initout(int initerr);
 void  init80col(void);
 int   pari_kernel_init(void);

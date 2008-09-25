@@ -150,6 +150,47 @@ it adds to the default set via the call
   pari_add_module(functions_highlevel);
 @eprog
 
+\subsec{Public callbacks}
+
+The \kbd{gp} calculator associates elaborate functions (for instance the
+break loop handler) to the following callbacks, and so can you:
+
+\doc{cb_pari_ask_confirm}{void (*cb_pari_ask_confirm)(const char *s)}
+initialized to \kbd{NULL}. Called with argument $s$ whenever PARI wants
+confirmation for action $s$, for instance in \tet{secure} mode.
+
+\doc{cb_pari_handle_exception}{extern int (*cb_pari_handle_exception)(long)}
+initialized to \kbd{NULL}. If not \kbd{NULL} called with argument $-1$
+on \kbd{SIGINT}, and argument \kbd{err} on error \kbd{err}. If it returns a
+non-zero value, the error or signal handler returns, in effect further
+ignoring the error or signal, otherwise it raises a fatal error.
+
+\doc{cb_pari_sigint}{void (*cb_pari_sigint)(void)}.
+Function called when \kbd{SIGINT} is raised. By default, raises
+\bprog
+  pari_err(talker, "user interrupt");
+@eprog
+
+\doc{cb_pari_whatnow}{int (*cb_pari_whatnow)(const char *s, int flag)}
+initialized to \kbd{NULL}. If not \kbd{NULL}, must check whether
+$s$ existed in older versions of \kbd{pari} (the \kbd{gp} callback 
+checks agains \kbd{pari-1.39.15}).
+
+\item $\fl = 0$: should print verbosely the answer, including help text if
+available.
+
+\item $\fl = 1$: must return $0$ if the function did not change, and a
+non-$0$ result otherwise. May print a help message.
+
+\mistitle{Utility function:}
+
+\fun{void}{pari_ask_confirm}{const char *s} raise an error if the 
+associated callback \tet{cb_pari_ask_confirm} is \kbd{NULL}. Otherwise
+calls
+\bprog
+  cb_pari_ask_confirm(s);
+@eprog
+
 \section{Handling \kbd{GEN}s}
 \noindent Almost all these functions are either macros or inlined. Unless
 mentioned otherwise, they do not evaluate their arguments twice. Most of them

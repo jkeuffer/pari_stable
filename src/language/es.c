@@ -42,16 +42,11 @@ static void texi(GEN g, pariout_t *T, outString *S)
 { texi_sign(g,T,S,1); }
 
 void
-hit_return(void)
+pari_ask_confirm(const char *s)
 {
-  int c;
-  if (GP_DATA->flags & (EMACS|TEXMACS)) return;
-  disable_exception_handler = 1;
-  pari_puts("---- (type RETURN to continue) ----");
-  /* if called from a readline callback, may be in a funny TTY mode */
-  do c = fgetc(stdin); while (c >= 0 && c != '\n' && c != '\r');
-  pari_putc('\n');
-  disable_exception_handler = 0;
+  if (!cb_pari_ask_confirm)
+    pari_err(talker,"Can't ask for confirmation. Please define cb_pari_ask_confirm()");
+  cb_pari_ask_confirm(s);
 }
 
 /********************************************************************/
@@ -4020,8 +4015,9 @@ wr_check(const char *s) {
   char *t = path_expand(s);
   if (GP_DATA->flags & SECURE)
   {
-    fprintferr("[secure mode]: about to write to '%s'. OK ? (^C if not)\n",t);
-    hit_return();
+    char *msg = pari_sprintf("[secure mode]: about to write to '%s'",t);
+    pari_ask_confirm(msg);
+    pari_free(msg);
   }
   return t;
 }

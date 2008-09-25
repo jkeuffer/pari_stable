@@ -39,7 +39,7 @@ byteptr diffptr;
 FILE    *pari_outfile, *pari_errfile, *pari_logfile, *pari_infile;
 char    *current_logfile, *current_psfile, *pari_datadir;
 long    gp_colors[c_LAST];
-int     disable_color, disable_exception_handler = 0;
+int     disable_color;
 ulong   DEBUGFILES, DEBUGLEVEL, DEBUGMEM;
 ulong   compatible, precreal, precdl, logstyle;
 gp_data *GP_DATA;
@@ -63,9 +63,10 @@ GEN  (*foreignExprHandler)(char*);    /* Handler for foreign expressions.*/
 entree* (*foreignAutoload)(const char*, long len); /* Autoloader         */
 void (*foreignFuncFree)(entree *);    /* How to free external entree.    */
 
-int  (*default_exception_handler)(long);
-int  (*whatnow_fun)(const char *, int);
-void (*sigint_fun)(void);
+void (*cb_pari_ask_confirm)(const char *);
+int  (*cb_pari_handle_exception)(long);
+int  (*cb_pari_whatnow)(const char *, int);
+void (*cb_pari_sigint)(void);
 
 typedef struct {
   jmp_buf *penv;
@@ -371,7 +372,7 @@ void
 dowin32ctrlc(void)
 {
   win32ctrlc = 0;
-  sigint_fun();
+  cb_pari_sigint();
 }
 #endif
 
@@ -381,7 +382,7 @@ pari_handle_SIGINT(void)
 #ifdef _WIN32
   if (++win32ctrlc >= 5) _exit(3);
 #else
-  sigint_fun();
+  cb_pari_sigint();
 #endif
 }
 
@@ -692,9 +693,9 @@ pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts)
   pari_init_seadata();
 
   pari_init_functions();
-  whatnow_fun = NULL;
-  sigint_fun = dflt_sigint_fun;
-  default_exception_handler = NULL;
+  cb_pari_whatnow = NULL;
+  cb_pari_sigint = dflt_sigint_fun;
+  cb_pari_handle_exception = NULL;
 
   pari_var_init();
   try_to_recover = 1;
@@ -949,12 +950,8 @@ pari_sigint(const char *s)
   pari_puts(s); pari_putc('.');
   term_color(c_NONE);
   pariOut = out;
-  if (default_exception_handler) {
-    if (disable_exception_handler)
-      disable_exception_handler = 0;
-    else
-      if (default_exception_handler(-1)) { flusherr(); return; }
-  }
+  if (cb_pari_handle_exception &&
+      cb_pari_handle_exception(-1)) { flusherr(); return; }
   err_recover(talker);
 }
 
@@ -1023,8 +1020,7 @@ pari_err(int numerr, ...)
         {
           entree *ep = varentries[varn(fun)];
           const char *s = ep->name;
-          int w;
-          if (whatnow_fun && (w = whatnow_fun(s,1))) whatnow_new_syntax(s, w);
+          if (cb_pari_whatnow) cb_pari_whatnow(s,1);
         }
         break;
       }
@@ -1081,23 +1077,10 @@ pari_err(int numerr, ...)
     pariErr->puts("  [hint] you can increase GP stack with allocatemem()\n");
   }
   pariOut = out;
-  if (numerr != talker2 && default_exception_handler)
-  {
-    if (disable_exception_handler)
-      disable_exception_handler = 0;
-    else
-      if (default_exception_handler(numerr)) { flusherr(); return; }
-  }
+  if (numerr != talker2
+      && cb_pari_handle_exception
+      && cb_pari_handle_exception(numerr)) { flusherr(); return; }
   err_recover(numerr);
-}
-
-void
-whatnow_new_syntax(const char *f, long n)
-{
-  term_color(c_NONE);
-  print_text("\nA function with that name existed in GP-1.39.15; to run in backward compatibility mode, type \"default(compatible,3)\", or set \"compatible = 3\" in your GPRC file.");
-  pari_putc('\n');
-  (void)whatnow_fun(f, -n);
 }
 
 /* Try f (trapping error e), recover using r (break_loop, if NULL) */

@@ -89,6 +89,10 @@ extern VOLATILE int PARI_SIGINT_block, PARI_SIGINT_pending;
 
 extern const long lontyp[];
 extern void* global_err_data;
+extern void (*cb_pari_ask_confirm)(const char *);
+extern int  (*cb_pari_whatnow)(const char *, int);
+extern void (*cb_pari_sigint)(void);
+extern int (*cb_pari_handle_exception)(long);
 
 enum manage_var_t {
   manage_var_create,
