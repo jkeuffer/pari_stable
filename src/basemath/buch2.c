@@ -2233,6 +2233,7 @@ remove_content(GEN I)
   return I;
 }
 
+/* return 0 if no relation found, 1 otherwise */
 static int
 rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN L_jid, long *pjid, FACT *fact)
 {
@@ -2240,7 +2241,11 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN L_jid, long *pjid, FACT *fact)
   long i, j, cptlist = 0, cptzer = 0;
   pari_sp av, av1;
   GEN ideal, Nideal, m, ex = cgetg(lgsub, t_VECSMALL);
+  REL_t *rel0 = cache->last;
+  const long maxcptlist = 3;
 
+  /* will compute L_jid[i] * (random product from subFB); at most
+     maxcptlist times for each i */
   if (DEBUGLEVEL) {
     long d = cache->end - cache->last;
     fprintferr("\n(more relations needed: %ld)\n", d > 0? d: 1);
@@ -2252,14 +2257,21 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN L_jid, long *pjid, FACT *fact)
     GEN P;
     if (L_jid)
     {
-      if (++cptlist > 3)
+      if (++cptlist > maxcptlist)
       {
 	jid = L_jid[jlist];
-	jlist++;
-        if (jlist >= lg(L_jid))
-        {
-          if (DEBUGLEVEL) msgtimer("for remaining ideals");
-          return 1;
+        if (++jlist >= lg(L_jid))
+        { /* at least 1 relation found ? */
+          if (rel > rel0)
+          {
+            if (DEBUGLEVEL) msgtimer("for remaining ideals");
+            return 1;
+          }
+          if (DEBUGLEVEL)
+          {
+            pari_warn(warner, "Cycled through ideal list & no relation. Back to random");
+            L_jid = NULL; jid = 1;
+          }
         }
  	cptlist = 0;
       }
