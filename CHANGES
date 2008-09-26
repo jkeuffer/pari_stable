@@ -119,7 +119,7 @@ IM 90- lngamma(x) gave incorrect results (off by 2*Pi*I) when real(x) was a
   100- when unexpected exception/signal raised (^C, stack overflow, out of
        memory), == would cancel it and silently return wrong value [#329]
   101- reading recently freed memory in popinfile()
-BA102- factormod and matker: faster linear algebra over F2.
+  102- contfrac(1,[],-1) ==> SEGV [#865]
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
@@ -331,6 +331,7 @@ BA 41- user variables can now be aliased [#790]
        gprc to disable it ], and no longer controlled by trap(). To get out
        of a break loop, hit Return three times (next, return, break are no
        longer accepted)
+BA 86- factormod and matker: faster linear algebra over F2.
 
   Added
     1- new benches: galoisinit, ispower, nffactor, subfields, resultant,

@@ -2514,6 +2514,7 @@ contfrac0(GEN x, GEN b, long nmax)
   tb = typ(b);
   if (tb == t_INT) return gboundcf(x,itos(b));
   if (! is_vec_t(tb)) pari_err(typeer,"contfrac0");
+  if (nmax < 0) pari_err(talker, "negative nmax in contfrac0");
   return sfcont2(b,x,nmax);
 }
 
