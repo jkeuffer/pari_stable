@@ -1621,6 +1621,7 @@ KerChar(GEN chi, GEN cyc)
   long i, l = lg(cyc);
   GEN m, U, d1;
 
+  if (typ(chi) != t_VEC) pari_err(typeer,"KerChar");
   if (lg(chi) != l) pari_err(talker,"incorrect character length in KerChar");
   if (l == 1) return NULL; /* trivial subgroup */
   d1 = gel(cyc,1); m = cgetg(l+1,t_MAT);
