@@ -73,7 +73,9 @@ typedef struct {
   long flag;
 } cell;
 
-static THREAD stack *err_catch_stack;
+static THREAD gp2c_stack s_ERR_CATCH;
+static THREAD cell *ERR_CATCH;
+const long CATCH_ALL = 1;
 
 void
 push_stack(stack **pts, void *a)
@@ -672,7 +674,7 @@ pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts)
     pari_init_defaults();
   }
 
-  err_catch_stack=NULL;
+  stack_init(&s_ERR_CATCH, sizeof(cell), (void**)&ERR_CATCH);
   if ((init_opts&INIT_JMPm) && setjmp(GP_DATA->env))
   {
     fprintferr("  ***   Error in the PARI system. End of program.\n");
@@ -799,41 +801,22 @@ recover(int flag)
   try_to_recover = 1;
 }
 
-void *
+long
 err_catch(long errnum, jmp_buf *penv)
 {
-  cell *v;
-  /* for fear of infinite recursion... */
+  long n;
+  /* for fear of infinite recursion */
   if (errnum == memer) pari_err(talker, "can't trap memory errors");
   if (errnum == CATCH_ALL) errnum = noer;
-  if (errnum > noer) pari_err(talker, "no such error number: %ld", errnum);
-  v = (cell*)pari_malloc(sizeof(cell));
-  v->penv  = penv;
-  v->flag = errnum;
-  push_stack(&err_catch_stack, (void*)v);
-  return (void*)v;
+  else if (errnum > noer) pari_err(talker, "no such error number: %ld", errnum);
+  n = stack_new(&s_ERR_CATCH);
+  ERR_CATCH[n].flag = errnum;
+  ERR_CATCH[n].penv = penv; return n;
 }
 
-static void
-pop_catch_cell(stack **s)
-{
-  cell *c = (cell*)pop_stack(s);
-  if (c) pari_free(c);
-}
-
-/* reset traps younger than v (included).
- * Note the address of v is passed instead because we do not want compiler
- * to put v into a register (could be clobbered by longjmp) */
+/* delete traps younger than n (included) */
 void
-err_leave(void **pv)
-{
-  while (err_catch_stack)
-  {
-    cell *t = (cell*)err_catch_stack->value;
-    pop_catch_cell(&err_catch_stack);
-    if (t == (cell*)(*pv)) return;
-  }
-}
+err_leave(long n) { if (n >= 0) s_ERR_CATCH.n = n; }
 
 /* Get last (most recent) handler for error n (or generic noer) killing all
  * more recent non-applicable handlers (now obsolete) */
@@ -841,21 +824,12 @@ static cell *
 err_seek(long n)
 {
   if (n <= bugparier) return NULL;
-  while (err_catch_stack)
+  for( ; s_ERR_CATCH.n; s_ERR_CATCH.n--)
   {
-    cell *t = (cell*)err_catch_stack->value;
+    cell *t = &ERR_CATCH[ s_ERR_CATCH.n-1 ];
     if (t->flag == n || t->flag == noer) return t;
-    pop_catch_cell(&err_catch_stack);
   }
   return NULL;
-}
-
-/* untrapped error: kill all error handlers */
-static void
-err_clean(void)
-{
-  while (err_catch_stack)
-    pop_catch_cell(&err_catch_stack);
 }
 
 void
@@ -864,7 +838,7 @@ err_recover(long numerr)
   initout(0);
   dbg_release();
   killallfiles(0);
-  err_clean();
+  s_ERR_CATCH.n = 0; /* untrapped error: kill all error handlers */
 
   if (pariErr->die) pariErr->die();    /* Caller wants to catch exceptions? */
   global_err_data = NULL;
@@ -964,7 +938,7 @@ pari_err(int numerr, ...)
   va_start(ap,numerr);
 
   global_err_data = NULL;
-  if (err_catch_stack)
+  if (s_ERR_CATCH.n)
   {
     cell *trapped;
     if ( (trapped = err_seek(numerr)) )

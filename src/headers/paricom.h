@@ -40,39 +40,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
  * [ any exception if numer == CATCH_ALL ].
  * RETRY = as TRY, but execute 'recovery', then 'code' again [still catching] */
 #define CATCH(err) {         \
-  VOLATILE long __err = err; \
+  VOLATILE long __err = err, __catcherr = -1; \
   int pari_errno;            \
   jmp_buf __env;             \
-  void *__catcherr = NULL;   \
   if ((pari_errno = setjmp(__env)))
 
-#define RETRY { __catcherr = err_catch(__err, &__env); {
+#define RETRY { __catcherr = err_catch(__err, &__env);
 #define TRY else RETRY
 
-/* Take address of __catcher to prevent compiler from putting it into a register
- * (could be clobbered by longjmp otherwise) */
-#define CATCH_RELEASE() err_leave(&__catcherr)
-#define ENDCATCH }} CATCH_RELEASE(); }
-
-#define CATCH_ALL -1
-/*=====================================================================*/
-/* VOLATILE int errorN;
- * CATCH_ERR(errorN) {
- *   code
- * } ENDCATCH_ERR
- * executes 'code', setting errorN to the number of exception thrown;
- * errorN is 0 if no error was thrown. */
-
-#define CATCH_ERR(__err) {  \
-  jmp_buf __env;            \
-  __err = setjmp(__env);    \
-  if (!__err) {		    \
-    void *__catcherr = err_catch(CATCH_ALL, &__env);
-
-#define ENDCATCH_ERR	    \
-    CATCH_RELEASE();	    \
-  }}
-/*=====================================================================*/
+#define CATCH_RELEASE() err_leave(__catcherr)
+#define ENDCATCH } CATCH_RELEASE(); }
+extern const long CATCH_ALL;
 
 extern const double LOG2, LOG10_2, LOG2_10;
 #ifndef  PI
