@@ -50,15 +50,6 @@ GEN gp_eval(GEN x, void *dat);
 }
 void pari_sigint(const char *s);
 
-/* stacks */
-typedef struct stack {
-  struct stack *prev;
-  void *value;
-} stack;
-
-void push_stack(stack **pts, void *a);
-void *pop_stack(stack **pts);
-
 /* functions */
 void   changevalue(entree *ep, GEN val);
 entree* do_alias(entree *ep);

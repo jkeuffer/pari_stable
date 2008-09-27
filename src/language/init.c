@@ -77,25 +77,6 @@ static THREAD gp2c_stack s_ERR_CATCH;
 static THREAD cell *ERR_CATCH;
 const long CATCH_ALL = 1;
 
-void
-push_stack(stack **pts, void *a)
-{
-  stack *v = (stack*) pari_malloc(sizeof(stack));
-  v->value = a;
-  v->prev  = *pts; *pts = v;
-}
-
-void *
-pop_stack(stack **pts)
-{
-  stack *s = *pts, *v;
-  void *a;
-  if (!s) return NULL; /* initial value */
-  v = s->prev; *pts = v;
-  a = s->value; pari_free((void*)s);
-  return a;
-}
-
 /*********************************************************************/
 /*                                                                   */
 /*                       BLOCKS & CLONES                             */

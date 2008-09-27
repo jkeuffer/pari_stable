@@ -190,23 +190,22 @@ handle_texmacs_command(const char *s) { pari_err(talker, "readline not available
 /**                          BUFFERS                              **/
 /**                                                               **/
 /*******************************************************************/
-#define current_buffer (bufstack?((Buffer*)(bufstack->value)):NULL)
-static stack *bufstack = NULL;
+static Buffer **bufstack;
+static gp2c_stack s_bufstack;
 
 static void
 pop_buffer(void)
 {
-  Buffer *b = (Buffer*) pop_stack(&bufstack);
-  delete_buffer(b);
+  if (s_bufstack.n)
+    delete_buffer( bufstack[ --s_bufstack.n ] );
 }
 
 /* kill all buffers until B is met or nothing is left */
 static void
 kill_all_buffers(Buffer *B)
 {
-  for(;;) {
-    Buffer *b = current_buffer;
-    if (b == B || !b) break;
+  while (s_bufstack.n) {
+    if (bufstack[ s_bufstack.n-1 ] == B) break;
     pop_buffer();
   }
 }
@@ -1254,7 +1253,7 @@ filtered_buffer(filtre_t *F)
 {
   Buffer *b = new_buffer();
   init_filtre(F, b);
-  push_stack(&bufstack, (void*)b);
+  stack_pushp(&s_bufstack, (void*)b);
   return b;
 }
 
@@ -1484,8 +1483,6 @@ is_silent(char *s) { return s[strlen(s) - 1] == ';'; }
 
 enum { gp_ISMAIN = 1, gp_RECOVER = 2 };
 
-/* If there are other buffers open (bufstack != NULL), we are doing an
- * immediate read (with read, extern...) */
 static GEN
 gp_main_loop(long flag)
 {
@@ -1866,6 +1863,7 @@ main(int argc, char **argv)
   }
   pari_init_defaults();
   stack_init(&s_A,sizeof(*A),(void**)&A);
+  stack_init(&s_bufstack, sizeof(Buffer*), (void**)&bufstack);
   pari_init_stack(1000000*sizeof(long));
   size = read_opt(&s_A, argc,argv);
   pari_init_opts(size, GP_DATA->primelimit, INIT_SIGm);
