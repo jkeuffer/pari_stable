@@ -2259,7 +2259,7 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN L_jid, long *pjid, FACT *fact)
       {
 	jid = L_jid[jlist];
         if (++jlist >= lg(L_jid))
-        { /* at least 1 relation found ? */
+        {
           if (DEBUGLEVEL) msgtimer("for remaining ideals");
           return;
         }
@@ -2269,7 +2269,15 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN L_jid, long *pjid, FACT *fact)
     }
     else
     {
-      if (jid == F->KC) jid = 1; else jid++;
+      if (++jid > F->KC)
+      {
+        jid = 1;
+        if (++cptlist > maxcptlist)
+        {
+          if (DEBUGLEVEL) msgtimer("for remaining ideals");
+          return;
+        }
+      }
     }
     avma = av;
     ideal = P = idealhnf_two(nf, gel(F->LP,jid));
