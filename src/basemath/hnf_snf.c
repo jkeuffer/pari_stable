@@ -590,12 +590,16 @@ hnfadd_i(GEN H, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, /* cf hnfspec */
        GEN extramat,GEN extraC)
 {
   GEN matb, extratop, Cnew, permpro, B = *ptB, C = *ptC, dep = *ptdep;
-  long i;
-  long lH = lg(H)-1;
-  long lB = lg(B)-1;
-  long li = lg(perm)-1, lig = li - lB;
-  long co = lg(C)-1,    col = co - lB;
-  long nlze = lH? lg(dep[1])-1: lg(B[1])-1;
+  long i, lH, lB, li, lig, co, col, nlze;
+
+  if (lg(extramat) == 1) return H;
+  co = lg(C)-1;
+  lH = lg(H)-1;
+  lB = lg(B)-1;
+  li = lg(perm)-1;
+  lig = li - lB;
+  col = co - lB;
+  nlze = lH? lg(dep[1])-1: lg(B[1])-1;
 
  /*               col    co
   *       [ 0 |dep |     ]

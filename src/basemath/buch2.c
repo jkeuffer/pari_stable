@@ -2233,15 +2233,13 @@ remove_content(GEN I)
   return I;
 }
 
-/* return 0 if no relation found, 1 otherwise */
-static int
+static void
 rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN L_jid, long *pjid, FACT *fact)
 {
   long nbG = lg(F->vecG)-1, lgsub = lg(F->subFB), jlist = 1, jid = *pjid;
   long i, j, cptlist = 0, cptzer = 0;
   pari_sp av, av1;
   GEN ideal, Nideal, m, ex = cgetg(lgsub, t_VECSMALL);
-  REL_t *rel0 = cache->last;
   const long maxcptlist = 3;
 
   /* will compute L_jid[i] * (random product from subFB); at most
@@ -2262,14 +2260,8 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN L_jid, long *pjid, FACT *fact)
 	jid = L_jid[jlist];
         if (++jlist >= lg(L_jid))
         { /* at least 1 relation found ? */
-          if (rel > rel0)
-          {
-            if (DEBUGLEVEL) msgtimer("for remaining ideals");
-            return 1;
-          }
-          if (DEBUGLEVEL)
-            pari_warn(warner, "Cycled through ideal list & no relation. Back to random");
-          L_jid = NULL; jid = 1;
+          if (DEBUGLEVEL) msgtimer("for remaining ideals");
+          return;
         }
  	cptlist = 0;
       }
@@ -2323,7 +2315,7 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN L_jid, long *pjid, FACT *fact)
       if (rel < cache->end) { cptzer = 0; break; }
       /* We have found enough. Return */
       avma = av; *pjid = jid;
-      return 1;
+      return;
     }
   }
 }
@@ -3223,7 +3215,7 @@ MORE:
       jid = nreldep = 0;
     }
     if (F.newpow) powFBgen(&F, &cache, nf);
-    if (!F.sfb_chg && !rnd_rel(&cache,&F, nf, L_jid, &jid, fact)) goto START;
+    if (!F.sfb_chg) rnd_rel(&cache,&F, nf, L_jid, &jid, fact);
     L_jid = NULL;
   }
 PRECPB:
@@ -3248,12 +3240,12 @@ PRECPB:
   }
   { /* Reduce relation matrices */
     long l = cache.last - cache.chk + 1, j;
-    GEN M = gmael(nf, 5, 1), mat = cgetg(l, t_VEC), emb = cgetg(l, t_MAT);
+    GEN M = nf_get_M(nf), mat = cgetg(l, t_VEC), emb = cgetg(l, t_MAT);
     int first = (W == NULL); /* never reduced before */
     REL_t *rel;
 
     if (F.pow && !F.pow->arc) powFB_fill(&cache, M);
-    for (j=1,rel = cache.chk + 1; rel <= cache.last; rel++,j++)
+    for (j=1,rel = cache.chk + 1; j < l; rel++,j++)
     {
       gel(mat,j) = rel->R;
       gel(emb,j) = get_log_embed(rel, M, RU, R1, PRECREG);
