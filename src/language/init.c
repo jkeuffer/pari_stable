@@ -223,56 +223,6 @@ pari_stackcheck_init(void *stack_base)
 }
 #endif /* STACK_CHECK */
 
-/*********************************************************************/
-/*                       MALLOC/FREE WRAPPERS                        */
-/*********************************************************************/
-void
-pari_free(void *pointer)
-{
-  BLOCK_SIGINT_START;
-  free(pointer);
-  BLOCK_SIGINT_END;
-}
-void*
-pari_malloc(size_t size)
-{
-  if (size)
-  {
-    char *tmp;
-    BLOCK_SIGINT_START;
-    tmp = (char*)malloc(size);
-    BLOCK_SIGINT_END;
-    if (!tmp) pari_err(memer);
-    return tmp;
-  }
-  if (DEBUGMEM) pari_warn(warner,"mallocing NULL object");
-  return NULL;
-}
-void*
-pari_realloc(void *pointer, size_t size)
-{
-  char *tmp;
-
-  BLOCK_SIGINT_START;
-  if (!pointer) tmp = (char *) malloc(size);
-  else tmp = (char *) realloc(pointer,size);
-  BLOCK_SIGINT_END;
-  if (!tmp) pari_err(memer);
-  return tmp;
-}
-void*
-pari_calloc(size_t size)
-{
-  void *t = pari_malloc(size);
-  memset(t, 0, size); return t;
-}
-GEN
-cgetalloc(long t, size_t l)
-{
-  GEN x = (GEN)pari_malloc(l * sizeof(long));
-  x[0] = evaltyp(t) | evallg(l); return x;
-}
-
 /*******************************************************************/
 /*                         HEAP TRAVERSAL                          */
 /*******************************************************************/

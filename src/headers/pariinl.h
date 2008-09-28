@@ -644,6 +644,71 @@ perm_conj(GEN s, GEN t)
   return v;
 }
 
+/*********************************************************************/
+/*                       MALLOC/FREE WRAPPERS                        */
+/*********************************************************************/
+#define BLOCK_SIGINT_START           \
+{                                    \
+  int block=PARI_SIGINT_block;       \
+  PARI_SIGINT_block = 1;
+
+#define BLOCK_SIGINT_END             \
+  PARI_SIGINT_block = block;         \
+  if (!block && PARI_SIGINT_pending) \
+  {                                  \
+    int sig = PARI_SIGINT_pending;   \
+    PARI_SIGINT_pending = 0;         \
+    raise(sig);                      \
+  }                                  \
+}
+
+INLINE void
+pari_free(void *pointer)
+{
+  BLOCK_SIGINT_START;
+  free(pointer);
+  BLOCK_SIGINT_END;
+}
+INLINE void*
+pari_malloc(size_t size)
+{
+  if (size)
+  {
+    char *tmp;
+    BLOCK_SIGINT_START;
+    tmp = (char*)malloc(size);
+    BLOCK_SIGINT_END;
+    if (!tmp) pari_err(memer);
+    return tmp;
+  }
+  if (DEBUGMEM) pari_warn(warner,"mallocing NULL object");
+  return NULL;
+}
+INLINE void*
+pari_realloc(void *pointer, size_t size)
+{
+  char *tmp;
+
+  BLOCK_SIGINT_START;
+  if (!pointer) tmp = (char *) malloc(size);
+  else tmp = (char *) realloc(pointer,size);
+  BLOCK_SIGINT_END;
+  if (!tmp) pari_err(memer);
+  return tmp;
+}
+INLINE void*
+pari_calloc(size_t size)
+{
+  void *t = pari_malloc(size);
+  memset(t, 0, size); return t;
+}
+INLINE GEN
+cgetalloc(long t, size_t l)
+{
+  GEN x = (GEN)pari_malloc(l * sizeof(long));
+  x[0] = evaltyp(t) | evallg(l); return x;
+}
+
 /*******************************************************************/
 /*                                                                 */
 /*                       GARBAGE COLLECTION                        */
