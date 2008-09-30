@@ -382,7 +382,9 @@ nfhilbert(GEN nf, GEN a, GEN b)
   GEN S, sa, sb;
 
   nf = checknf(nf);
- /* local solutions in real completions ? [ error in nfsign if arg is 0 ]*/
+  a = nf_to_scalar_or_basis(nf, a);
+  b = nf_to_scalar_or_basis(nf, b);
+  /* local solutions in real completions ? [ error in nfsign if arg is 0 ]*/
   sa = nfsign(nf, a);
   sb = nfsign(nf, b); l = lg(sa);
   for (i=1; i<l; i++)
