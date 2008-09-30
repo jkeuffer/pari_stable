@@ -357,7 +357,7 @@ static THREAD gp_pointer *ptrs;
 static THREAD entree **lvars;
 static THREAD struct var_lex *var;
 static THREAD struct trace *trace;
-static THREAD gp2c_stack s_st, s_ptrs, s_var, s_lvars, s_trace;
+static THREAD pari_stack s_st, s_ptrs, s_var, s_lvars, s_trace;
 
 static void
 changelex(long vn, GEN x)

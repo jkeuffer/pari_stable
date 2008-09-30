@@ -158,17 +158,17 @@ typedef struct
   long n;
   long alloc;
   size_t size;
-} gp2c_stack;
+} pari_stack;
 
-void **stack_base(gp2c_stack *s);
-void stack_alloc(gp2c_stack *s, long nb);
-void stack_init(gp2c_stack *s, size_t size, void **data);
-long stack_new(gp2c_stack *s);
-void stack_delete(gp2c_stack *s);
-void stack_pushp(gp2c_stack *s, void *u);
+void **stack_base(pari_stack *s);
+void stack_alloc(pari_stack *s, long nb);
+void stack_init(pari_stack *s, size_t size, void **data);
+long stack_new(pari_stack *s);
+void stack_delete(pari_stack *s);
+void stack_pushp(pari_stack *s, void *u);
 
-gp2c_stack *pari_get_modules(void);
-gp2c_stack *pari_get_oldmodules(void);
+pari_stack *pari_get_modules(void);
+pari_stack *pari_get_oldmodules(void);
 
 INLINE long
 is_keyword_char(char c) { return (isalnum((int)c) || c=='_'); }

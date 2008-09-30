@@ -48,7 +48,7 @@ independent of the PARI stack; it even works before the \kbd{pari\_init} call.
 To create a stack of objects of type \kbd{foo}, we proceed as follows:
 \bprog
 foo *t_foo;
-gp2c_stack s_foo;
+pari_stack s_foo;
 stack_init(&s_foo, sizeof(*t_foo), (void**)t_foo);
 @eprog\noindent Think of \kbd{s\_foo} as the controlling interface, and
 \kbd{t\_foo} as the (dynamic) array tied to it. The value of \kbd{t\_foo}
@@ -90,9 +90,9 @@ This allow to create stacks of stacks as follow:
 struct foo_s
 {
   foo t_foo;
-  gp2c_stack s_foo;
+  pari_stack s_foo;
 } tt_foo;
-gp2c_stack st_foo;
+pari_stack st_foo;
 stack_init(&st_foo, sizeof(*tt_foo), (void**)&tt_foo);
 long new_stack(void)
 {
@@ -115,16 +115,16 @@ public fields are defined:
 the topmost element of the stack.  \kbd{s.n} can be changed as long as
 $0\leq\kbd{s.n}\leq\kbd{s.alloc}$ holds. 
 
-\fun{void}{stack_init}{gp2c_stack *s, size_t size, void **data} links the GP2C
+\fun{void}{stack_init}{pari_stack *s, size_t size, void **data} links the GP2C
 array \kbd{s} to the data pointer \kbd{*data}, where \kbd{size} is the size of
 data element. The pointer \kbd{*data} is set to \kbd{NULL}, \kbd{s->n} and
 \kbd{s->alloc} are set to $0$: the array is empty.
 
-\fun{void}{stack_alloc}{gp2c_stack *s, long nb} makes room for \kbd{nb} more
+\fun{void}{stack_alloc}{pari_stack *s, long nb} makes room for \kbd{nb} more
 elements, i.e.~makes sure that $\kbd{s.alloc}\geq\kbd{s.n} + \kbd{nb}$, possibly
 reallocating \kbd{data}.
 
-\fun{long}{stack_new}{gp2c_stack *s} increases \kbd{s.n} by one unit,
+\fun{long}{stack_new}{pari_stack *s} increases \kbd{s.n} by one unit,
 possibly reallocating \kbd{data}, and returns $\kbd{s.n}-1$.
 
 \misctitle{Caveat.} The following construction is incorrect because
@@ -133,14 +133,14 @@ possibly reallocating \kbd{data}, and returns $\kbd{s.n}-1$.
 t_foo[ stack_new(&s_foo) ] = x;
 @eprog
 
-\fun{void}{stack_delete}{gp2c_stack *s} frees \kbd{data} and resets the stack
+\fun{void}{stack_delete}{pari_stack *s} frees \kbd{data} and resets the stack
 to the state immediately following \kbd{stack\_init} (\kbd{s->n} and
 \kbd{s->alloc} are set to $0$).
 
-\fun{void *}{stack_pushp}{gp2c_stack *s, void *u} This function assumes that
+\fun{void *}{stack_pushp}{pari_stack *s, void *u} This function assumes that
 \kbd{*data} is of pointer type. Pushes the element \kbd{u} on the stack \kbd{s}.
 
-\fun{void **}{stack_base}{gp2c_stack *s} returns the address of \kbd{data},
+\fun{void **}{stack_base}{pari_stack *s} returns the address of \kbd{data},
 typecast to a \kbd{void **}.
 
 \section{The type \typ{CLOSURE}}\kbdsidx{t_CLOSURE}\sidx{closure}

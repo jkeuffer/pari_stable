@@ -53,7 +53,7 @@ size_t memused;
 void   *global_err_data = NULL;
 
 static void ** MODULES, ** OLDMODULES;
-static gp2c_stack s_MODULES, s_OLDMODULES;
+static pari_stack s_MODULES, s_OLDMODULES;
 const long functions_tblsz = 135; /* size of functions_hash */
 entree **functions_hash, **funct_old_hash;
 
@@ -73,7 +73,7 @@ typedef struct {
   long flag;
 } cell;
 
-static THREAD gp2c_stack s_ERR_CATCH;
+static THREAD pari_stack s_ERR_CATCH;
 static THREAD cell *ERR_CATCH;
 const long CATCH_ALL = 1;
 
@@ -504,8 +504,8 @@ pari_init_defaults(void)
 /*********************************************************************/
 /*                   FUNCTION HASHTABLES, MODULES                    */
 /*********************************************************************/
-gp2c_stack *pari_get_modules(void) { return &s_MODULES; }
-gp2c_stack *pari_get_oldmodules(void) { return &s_OLDMODULES; }
+pari_stack *pari_get_modules(void) { return &s_MODULES; }
+pari_stack *pari_get_oldmodules(void) { return &s_OLDMODULES; }
 
 static entree **
 init_fun_hash(void) {
@@ -545,7 +545,7 @@ init_hashtable(entree **table, long tblsz)
 }
 /* Load in hashtable hash the modules contained in A */
 static int
-gp_init_entrees(gp2c_stack *p_A, entree **hash)
+gp_init_entrees(pari_stack *p_A, entree **hash)
 {
   long i;
   entree **v = (entree **)*stack_base(p_A);

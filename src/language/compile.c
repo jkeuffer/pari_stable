@@ -78,8 +78,8 @@ struct frame_s
   GEN frame;
 };
 
-static THREAD gp2c_stack s_opcode, s_operand, s_data, s_lvar;
-static THREAD gp2c_stack s_dbginfo, s_frame;
+static THREAD pari_stack s_opcode, s_operand, s_data, s_lvar;
+static THREAD pari_stack s_dbginfo, s_frame;
 static THREAD char *opcode;
 static THREAD long *operand;
 static THREAD GEN *data;

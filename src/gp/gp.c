@@ -131,7 +131,7 @@ parse_texmacs_command(tm_cmd *c, const char *ch)
   long l = strlen(ch);
   char *t, *s = (char*)ch, *send = s+l-1;
   char **A;
-  gp2c_stack s_A;
+  pari_stack s_A;
 
   if (*s != DATA_BEGIN || *send-- != DATA_END)
     pari_err(talker, "missing DATA_[BEGIN | END] in TeXmacs command");
@@ -191,7 +191,7 @@ handle_texmacs_command(const char *s) { pari_err(talker, "readline not available
 /**                                                               **/
 /*******************************************************************/
 static Buffer **bufstack;
-static gp2c_stack s_bufstack;
+static pari_stack s_bufstack;
 
 static void
 pop_buffer(void)
@@ -1258,7 +1258,7 @@ filtered_buffer(filtre_t *F)
 }
 
 static void
-gp_initrc(gp2c_stack *p_A, char *path)
+gp_initrc(pari_stack *p_A, char *path)
 {
   char *nexts,*s,*t;
   FILE *file = gprc_get(path);
@@ -1761,7 +1761,7 @@ init_trivial_stack(void)
 
 /* return what is to become parisize */
 static size_t
-read_opt(gp2c_stack *p_A, long argc, char **argv)
+read_opt(pari_stack *p_A, long argc, char **argv)
 {
   char *b = NULL, *p = NULL, *s = NULL;
   ulong f = GP_DATA->flags;
@@ -1852,7 +1852,7 @@ main(int argc, char **argv)
 {
 #endif
   void **A;
-  gp2c_stack s_A, *newfun, *oldfun;
+  pari_stack s_A, *newfun, *oldfun;
   size_t size;
 
   GP_DATA = default_gp_data();

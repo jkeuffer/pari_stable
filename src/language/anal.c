@@ -1173,13 +1173,13 @@ print_all_user_fun(int member)
 /********************************************************************/
 
 void **
-stack_base(gp2c_stack *s)
+stack_base(pari_stack *s)
 {
   return (void **) ((char *)s+s->offset);
 }
 
 void
-stack_init(gp2c_stack *s, size_t size, void **data)
+stack_init(pari_stack *s, size_t size, void **data)
 {
   s->offset=(char *)data-(char *)s;
   *data=NULL;
@@ -1189,7 +1189,7 @@ stack_init(gp2c_stack *s, size_t size, void **data)
 }
 
 void
-stack_alloc(gp2c_stack *s, long nb)
+stack_alloc(pari_stack *s, long nb)
 {
   void **sdat = stack_base(s);
   if (s->n+nb <= s->alloc) return;
@@ -1203,21 +1203,21 @@ stack_alloc(gp2c_stack *s, long nb)
 }
 
 long
-stack_new(gp2c_stack *s)
+stack_new(pari_stack *s)
 {
   stack_alloc(s, 1);
   return s->n++;
 }
 
 void
-stack_delete(gp2c_stack *s)
+stack_delete(pari_stack *s)
 {
   void **sdat = stack_base(s);
   if (*sdat) free(*sdat);
 }
 
 void
-stack_pushp(gp2c_stack *s, void *u)
+stack_pushp(pari_stack *s, void *u)
 {
   long n = stack_new(s);
   void **sdat =(void**) *stack_base(s);
