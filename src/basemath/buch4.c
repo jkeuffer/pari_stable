@@ -641,6 +641,7 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
   GEN prod, S1, S2, gen, cyc, bnf, nf, nfabs, rnfeq, bnfabs, res, k, polabs;
   GEN y = cgetg(9, t_VEC);
 
+  if (galois < 0 || galois > 2) pari_err(flagerr, "rnfisnorminit");
   T = get_bnfpol(T, &bnf, &nf); vbas = varn(T);
   if (!bnf) bnf = Buchall(nf? nf: T, nf_FORCE, DEFAULTPREC);
   if (!nf) nf = checknf(bnf);
@@ -668,7 +669,6 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
   if (!bnfabs || !gcmp0(k)) bnfabs = Buchall(polabs, nf_FORCE, nf_get_prec(nf));
   if (!nfabs) nfabs = checknf(bnfabs);
 
-  if (galois < 0 || galois > 2) pari_err(flagerr, "rnfisnorminit");
   if (galois == 2)
   {
     GEN P = rnfeq? pol_up(rnfeq, relpol, vbas): relpol;
