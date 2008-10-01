@@ -893,7 +893,7 @@ compilefunc(entree *ep, long n, int mode)
       {
         if (!is_node_zero(tree[a].y))
         {
-          compilenode(tree[a].y,Ggen,0);
+          compilenode(tree[a].y,Ggen,FLnocopy);
           op=OClocalvar;
         }
         a=tree[a].x;
@@ -1780,6 +1780,7 @@ optimizefunc(entree *ep, long n)
         case 'I':
         case 'E':
           optimizenode(arg[j]);
+          fl&=tree[arg[j]].flags;
           tree[arg[j++]].flags=COsafelex|COsafedyn;
           break;
         case '&': case '*':
