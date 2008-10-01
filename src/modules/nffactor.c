@@ -1106,7 +1106,9 @@ ZqX_normalize(GEN P, GEN lt, nflift_t *L)
   return ZqX(R, L->pk, L->Tpk, L->ZqProj);
 }
 
-/* We want to be able to reconstruct x, |x|^2 < C, from x mod pr^k */
+/* k allowing to reconstruct x, |x|^2 < C, from x mod pr^k */
+/* return log [  2sqrt(C/d) * ( (3/2)sqrt(gamma) )^(d-1) ] ^d / log N(pr)
+ * cf. Belabas relative van Hoeij algorithm, lemma 3.12 */
 static double
 bestlift_bound(GEN C, long d, double alpha, GEN Npr)
 {
@@ -1418,7 +1420,7 @@ nf_combine_factors(nfcmbf_t *T, GEN polred, GEN p, long a, long klim)
 
 static GEN
 nf_DDF_roots(GEN pol, GEN polred, GEN nfpol, GEN ltdn, GEN init_fa, long nbf,
-	     long fl, nflift_t *L)
+ 	     long fl, nflift_t *L)
 {
   GEN z, Cltdnx_r, C2ltdnpol, C = L->topowden;
   GEN Cltdn  = mul_content(C, ltdn);
@@ -1455,12 +1457,18 @@ nf_DDF_roots(GEN pol, GEN polred, GEN nfpol, GEN ltdn, GEN init_fa, long nbf,
   return z;
 }
 
+/* Select a prime ideal for which polbase factors
+ * return the number of factors or roots mod pr,
+ * according to flag (see nfsqff below)
+ * ct: number of attempts to find best
+ * Fa: factors found mod pr
+ * Tp: polynomial defining Fq/Fp */
 static long
 nf_pick_prime(long ct, GEN nf, GEN polbase, long fl,
 	      GEN *lt, GEN *Fa, GEN *pr, GEN *Tp)
 {
   GEN nfpol = gel(nf,1), dk, bad;
-  long maxf, n = degpol(nfpol), dpol = degpol(polbase), nbf = 0;
+  long minf, n = degpol(nfpol), dpol = degpol(polbase), nbf = 0;
   byteptr pt = diffptr;
   ulong pp = 0;
 
@@ -1470,18 +1478,18 @@ nf_pick_prime(long ct, GEN nf, GEN polbase, long fl,
   bad = mulii(dk,gel(nf,4)); if (*lt) bad = mulii(bad, *lt);
 
   /* FIXME: slow factorization of large polynomials over large Fq */
-  maxf = 1;
+  minf = 1;
   if (ct > 1) {
     if (dpol > 100) /* tough */
     {
-      if (n >= 20) maxf = 4;
+      if (n >= 20) minf = 4;
     }
     else
     {
-      if (n >= 15) maxf = 4;
+      if (n >= 15) minf = 4;
     }
   }
-
+  /* selecting prime such that pol has the smallest number of factors, five attempts */
   for (ct = 5;;)
   {
     GEN aT, apr, ap, modpr, red;
@@ -1491,13 +1499,14 @@ nf_pick_prime(long ct, GEN nf, GEN polbase, long fl,
     GEN list, r = NULL, fa = NULL;
     pari_sp av2 = avma;
     if (DEBUGLEVEL>3) TIMERstart(&ti_pr);
+    /* first step : select prime of high inertia degree */
     for (;;)
     {
       NEXT_PRIME_VIADIFF_CHECK(pp, pt);
       if (! umodiu(bad,pp)) continue;
       ap = utoipos(pp);
       list = gel(FpX_factor(nfpol, ap),1);
-      if (maxf == 1)
+      if (minf == 1)
       { /* deg.1 factors are best */
 	r = gel(list,1);
 	if (degpol(r) == 1) break;
@@ -1508,14 +1517,14 @@ nf_pick_prime(long ct, GEN nf, GEN polbase, long fl,
 	for (i = lg(list)-1; i > 0; i--)
 	{
 	  r = gel(list,i); dr = degpol(r);
-	  if (dr <= maxf) break;
+	  if (dr <= minf) break;
 	}
 	if (i > 0) break;
       }
       avma = av2;
     }
     apr = primedec_apply_kummer(nf,r,1,ap);
-
+    /* second step : evaluate factorisation mod apr */
     modpr = zk_to_Fq_init(nf,&apr,&aT,&ap);
     red = nfX_to_FqX(polbase, nf, modpr);
     if (!aT)

@@ -921,7 +921,7 @@ ZX_DDF(GEN x)
     {
       GEN L2 = cgetg(1,t_VEC);
       for (i=1; i < lg(L); i++)
-	L2 = shallowconcat(L2, DDF(RgX_inflate(gel(L,i), v[k]), 0));
+      	L2 = shallowconcat(L2, DDF(RgX_inflate(gel(L,i), v[k]), 0));
       L = L2;
     }
   }
