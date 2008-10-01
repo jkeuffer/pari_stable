@@ -474,6 +474,56 @@ RgX_isscalar(GEN x)
   return 1;
 }
 
+/********************************************************************/
+/**                                                                **/
+/**            Dynamic arrays implementation                       **/
+/**                                                                **/
+/********************************************************************/
+void **
+stack_base(pari_stack *s) { return (void **) ((char *)s+s->offset); }
+
+void
+stack_init(pari_stack *s, size_t size, void **data)
+{
+  s->offset = (char *)data-(char *)s;
+  *data = NULL;
+  s->n = 0;
+  s->alloc = 0;
+  s->size = size;
+}
+
+void
+stack_alloc(pari_stack *s, long nb)
+{
+  void **sdat = stack_base(s);
+  if (s->n+nb <= s->alloc) return;
+  if (!s->alloc)
+    s->alloc = nb;
+  else
+  {
+    while (s->n+nb > s->alloc) s->alloc <<= 1;
+  }
+  *sdat = pari_realloc(*sdat,s->alloc*s->size);
+}
+
+long
+stack_new(pari_stack *s) { stack_alloc(s, 1); return s->n++; }
+
+void
+stack_delete(pari_stack *s)
+{
+  void **sdat = stack_base(s);
+  if (*sdat) free(*sdat);
+}
+
+void
+stack_pushp(pari_stack *s, void *u)
+{
+  long n = stack_new(s);
+  void **sdat =(void**) *stack_base(s);
+  sdat[n] = u;
+}
+
 /*******************************************************************/
 /*                                                                 */
 /*                            EXTRACT                              */

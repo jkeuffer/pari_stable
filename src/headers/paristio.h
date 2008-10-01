@@ -83,6 +83,13 @@ typedef struct hashtable {
   int (*eq) (void *k1, void *k2); /* equality test */
 } hashtable;
 
+typedef struct {
+  long offset;
+  long n;
+  long alloc;
+  size_t size;
+} pari_stack;
+
 /* Common global variables: */
 
 extern PariOUT *pariOut, *pariErr;

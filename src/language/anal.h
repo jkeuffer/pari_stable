@@ -152,21 +152,6 @@ const char * closure_func_err(void);
 GEN  gp_closure(long n);
 long eval_mnemonic(GEN str, const char *tmplate);
 
-typedef struct
-{
-  long offset;
-  long n;
-  long alloc;
-  size_t size;
-} pari_stack;
-
-void **stack_base(pari_stack *s);
-void stack_alloc(pari_stack *s, long nb);
-void stack_init(pari_stack *s, size_t size, void **data);
-long stack_new(pari_stack *s);
-void stack_delete(pari_stack *s);
-void stack_pushp(pari_stack *s, void *u);
-
 pari_stack *pari_get_modules(void);
 pari_stack *pari_get_oldmodules(void);
 
