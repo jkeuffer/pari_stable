@@ -2559,7 +2559,6 @@ gcotan(GEN x, long prec)
         gel(z,2) = gerepileupto(av, gneg(ginv(gth(gel(x,2),prec))));
         return z;
       }
-        return 
       av = avma;
       gsincos(x,&s,&c,prec);
       return gerepileupto(av, gdiv(c,s));
