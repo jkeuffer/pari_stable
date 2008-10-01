@@ -98,24 +98,24 @@ BuildTree(GEN link, GEN V, GEN W, GEN a, GEN T, GEN p)
 /* au + bv = 1 (p0), ab = f (p0). Lift mod p1 = p0 pd (<= p0^2).
  * If noinv is set, don't lift the inverses u and v */
 static void
-HenselLift(GEN V, GEN W, long j, GEN f, GEN T, GEN pd, GEN p0, int noinv)
+HenselLift(GEN V, GEN W, long j, GEN f, GEN Td, GEN T1, GEN pd, GEN p0, GEN p1, int noinv)
 {
   pari_sp av = avma;
-  long space = lg(f) * (lgefint(pd) + lgefint(p0));
+  long space = lg(f) * lgefint(p1);
   GEN a2,b2,g,z,s,t;
   GEN a = gel(V,j), b = gel(V,j+1);
   GEN u = gel(W,j), v = gel(W,j+1);
 
-  if (T) space *= lg(T);
+  if (T1) space *= lg(T1);
 
   (void)new_chunk(space); /* HACK */
   g = RgX_sub(f, RgX_mul(a,b));
-  if (T) g = FpXQX_red(g, T, mulii(p0,pd));
+  if (T1) g = FpXQX_red(g, T1, p1);
   g = RgX_Rg_divexact(g, p0);
-  if (T)
+  if (Td)
   {
-    z = FpXQX_mul(v,g, T,pd);
-    t = FpXQX_divrem(z,a, T,pd, &s);
+    z = FpXQX_mul(v,g, Td,pd);
+    t = FpXQX_divrem(z,a, Td,pd, &s);
   }
   else
   {
@@ -124,7 +124,7 @@ HenselLift(GEN V, GEN W, long j, GEN f, GEN T, GEN pd, GEN p0, int noinv)
     t = FpX_divrem(z,a, pd, &s);
   }
   t = RgX_add(RgX_mul(u,g), RgX_mul(t,b));
-  t = T? FpXQX_red(t, T, pd): FpX_red(t, pd);
+  t = Td? FpXQX_red(t, Td, pd): FpX_red(t, pd);
   t = RgX_Rg_mul(t,p0);
   s = RgX_Rg_mul(s,p0);
   avma = av;
@@ -139,12 +139,12 @@ HenselLift(GEN V, GEN W, long j, GEN f, GEN T, GEN pd, GEN p0, int noinv)
   g = RgX_add(RgX_mul(u,a2), RgX_mul(v,b2));
   g = Rg_RgX_sub(gen_1, g);
 
-  if (T) g = FpXQX_red(g, T, mulii(p0,pd));
+  if (T1) g = FpXQX_red(g, T1, p1);
   g = RgX_Rg_divexact(g, p0);
-  if (T)
+  if (Td)
   {
-    z = FpXQX_mul(v,g, T,pd);
-    t = FpXQX_divrem(z,a, T,pd, &s);
+    z = FpXQX_mul(v,g, Td,pd);
+    t = FpXQX_divrem(z,a, Td,pd, &s);
   }
   else
   {
@@ -153,7 +153,7 @@ HenselLift(GEN V, GEN W, long j, GEN f, GEN T, GEN pd, GEN p0, int noinv)
     t = FpX_divrem(z,a, pd, &s);
   }
   t = RgX_add(RgX_mul(u,g), RgX_mul(t,b));
-  t = T? FpXQX_red(t, T, pd): FpX_red(t, pd);
+  t = Td? FpXQX_red(t, Td, pd): FpX_red(t, pd);
   t = RgX_Rg_mul(t,p0);
   s = RgX_Rg_mul(s,p0);
   avma = av;
@@ -165,22 +165,14 @@ HenselLift(GEN V, GEN W, long j, GEN f, GEN T, GEN pd, GEN p0, int noinv)
 /* v list of factors, w list of inverses.  f = v[j] v[j+1]
  * Lift v[j] and v[j+1] mod p0 pd (possibly mod T), then all their divisors */
 static void
-RecTreeLift(GEN link, GEN v, GEN w, GEN T, GEN pd, GEN p0, GEN f, long j, int noinv)
+RecTreeLift(GEN link, GEN v, GEN w, GEN Td, GEN T1, GEN pd, GEN p0, GEN p1, 
+            GEN f, long j, int noinv)
 {
   if (j < 0) return;
 
-  HenselLift(v, w, j, f, T, pd, p0, noinv);
-  RecTreeLift(link, v, w, T, pd, p0, gel(v,j)  , link[j  ], noinv);
-  RecTreeLift(link, v, w, T, pd, p0, gel(v,j+1), link[j+1], noinv);
-}
-
-/* lift from p^{e0} to p^{e1} */
-static void
-TreeLift(GEN link, GEN v, GEN w, GEN T, GEN p, long e0, long e1, GEN f, int noinv)
-{
-  GEN p0 = powiu(p, e0);
-  GEN pd = powiu(p, e1-e0);
-  RecTreeLift(link, v, w, T, pd, p0, f, lgpol(v), noinv);
+  HenselLift(v, w, j, f, Td,T1, pd, p0,p1, noinv);
+  RecTreeLift(link, v, w, Td,T1, pd, p0,p1, gel(v,j)  , link[j  ], noinv);
+  RecTreeLift(link, v, w, Td,T1, pd, p0,p1, gel(v,j+1), link[j+1], noinv);
 }
 
 /* Assume n > 0. We want to go to accuracy n, starting from accuracy 1, using
@@ -220,7 +212,7 @@ static GEN
 MultiLift(GEN f, GEN a, GEN T, GEN p, long e0, long flag)
 {
   long i, eold, e, k = lg(a) - 1;
-  GEN E, v, w, link;
+  GEN E, v, w, link, penew, Tnew;
   ulong mask;
   pari_timer Ti;
 
@@ -246,13 +238,29 @@ MultiLift(GEN f, GEN a, GEN T, GEN p, long e0, long flag)
   }
   mask = quadratic_prec_mask(e0);
   eold = 1;
+  penew = NULL;
+  Tnew = NULL;
   while (mask > 1)
   {
     long enew = eold << 1;
     if (mask & 1) enew--;
     mask >>= 1;
     if (enew >= e) { /* mask == 1: last iteration */
-      TreeLift(link, v, w, T, p, eold, enew, f, (flag == 0 && mask == 1));
+      GEN peold = penew? penew: powiu(p, eold);
+      GEN Td = NULL, pd;
+      long d = enew - eold; /* = eold or eold-1 */
+      /* lift from p^eold to p^enew */
+      pd = (d == eold)? peold: diviiexact(peold, p); /* p^d */
+      penew = mulii(peold,pd);
+      if (T) {
+        if (Tnew)
+          Td = (d == eold)? Tnew: FpX_red(Tnew,pd);
+        else
+          Td = FpX_red(T, peold);
+        Tnew = FpX_red(T, penew);
+      }
+      RecTreeLift(link, v, w, Td, Tnew, pd, peold, penew, f, lgpol(v),
+                  (flag == 0 && mask == 1));
       if (DEBUGLEVEL > 3) msgTIMER(&Ti, "lifting to prec %ld", enew);
     }
     eold = enew;
