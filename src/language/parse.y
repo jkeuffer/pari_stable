@@ -36,7 +36,7 @@ static void pari_error(YYLTYPE *yylloc, char **lex, const char *s)
   pari_lasterror=strtoGENstr(s);
 }
 
-static THREAD gp2c_stack s_node;
+static THREAD pari_stack s_node;
 THREAD node *pari_tree;
 
 void
