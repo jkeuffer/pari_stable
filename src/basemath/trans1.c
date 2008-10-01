@@ -2501,15 +2501,16 @@ gtan(GEN x, long prec)
   {
     case t_REAL: return mptan(x);
 
-    case t_COMPLEX:
+    case t_COMPLEX: {
       if (isintzero(gel(x,1))) {
         GEN z = cgetg(3, t_COMPLEX);
         gel(z,1) = gen_0;
         gel(z,2) = gth(gel(x,2),prec); return z;
       }
-      av = avma; gsincos(x,&s,&c,prec);
-      return gerepileupto(av, gdiv(s,c));
-
+      av = avma; y = mulcxmI(gth(mulcxI(x), prec)); /* tan x = -I th(I x) */
+      gel(y,1) = gcopy(gel(y,1));
+      return gerepileupto(av, y);
+    }
     case t_INT: case t_FRAC:
       y = cgetr(prec); av = avma;
       affrr_fixlg(mptan(tofp_safe(x,prec)), y); avma = av; return y;
