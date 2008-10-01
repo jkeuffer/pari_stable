@@ -406,7 +406,10 @@ gch(GEN x, long prec)
   switch(typ(x))
   {
     case t_REAL: return mpch(x);
-    case t_COMPLEX: case t_PADIC:
+    case t_COMPLEX:
+      if (isintzero(gel(x,1))) return gcos(gel(x,2),prec);
+      /* fall through */
+    case t_PADIC:
       av = avma; p1 = gexp(x,prec); p1 = gadd(p1, ginv(p1));
       return gerepileupto(av, gmul2n(p1,-1));
     case t_INTMOD: pari_err(typeer,"gch");
@@ -447,7 +450,14 @@ gsh(GEN x, long prec)
   switch(typ(x))
   {
     case t_REAL: return mpsh(x);
-    case t_COMPLEX: case t_PADIC:
+    case t_COMPLEX:
+      if (isintzero(gel(x,1))) {
+        GEN z = cgetg(3, t_COMPLEX);
+        gel(z,1) = gen_0;
+        gel(z,2) = gsin(gel(x,2),prec); return z;
+      }
+      /* fall through */
+    case t_PADIC:
       av = avma; p1 = gexp(x,prec); p1 = gsub(p1, ginv(p1));
       return gerepileupto(av, gmul2n(p1,-1));
     case t_INTMOD:
@@ -496,7 +506,14 @@ gth(GEN x, long prec)
   switch(typ(x))
   {
     case t_REAL: return mpth(x);
-    case t_COMPLEX: case t_PADIC:
+    case t_COMPLEX:
+      if (isintzero(gel(x,1))) {
+        GEN z = cgetg(3, t_COMPLEX);
+        gel(z,1) = gen_0;
+        gel(z,2) = gtan(gel(x,2),prec); return z;
+      }
+      /* fall through */
+    case t_PADIC:
       av = avma;
       t = gexp(gmul2n(x,1),prec);
       t = gdivsg(-2, gaddgs(t,1));

@@ -2236,6 +2236,7 @@ gcos(GEN x, long prec)
       return mpcos(x);
 
     case t_COMPLEX:
+      if (isintzero(gel(x,1))) return gch(gel(x,2), prec);
       i = precision(x); if (!i) i = prec;
       y = cgetc(i); av = avma;
       r = gexp(gel(x,2),prec);
@@ -2301,6 +2302,11 @@ gsin(GEN x, long prec)
       return mpsin(x);
 
     case t_COMPLEX:
+      if (isintzero(gel(x,1))) {
+        GEN z = cgetg(3, t_COMPLEX);
+        gel(z,1) = gen_0;
+        gel(z,2) = gsh(gel(x,2),prec); return z;
+      }
       i = precision(x); if (!i) i = prec;
       y = cgetc(i); av = avma;
       r = gexp(gel(x,2),prec);
@@ -2496,6 +2502,11 @@ gtan(GEN x, long prec)
     case t_REAL: return mptan(x);
 
     case t_COMPLEX:
+      if (isintzero(gel(x,1))) {
+        GEN z = cgetg(3, t_COMPLEX);
+        gel(z,1) = gen_0;
+        gel(z,2) = gth(gel(x,2),prec); return z;
+      }
       av = avma; gsincos(x,&s,&c,prec);
       return gerepileupto(av, gdiv(s,c));
 
@@ -2541,7 +2552,16 @@ gcotan(GEN x, long prec)
       return mpcotan(x);
 
     case t_COMPLEX:
-      av = avma; gsincos(x,&s,&c,prec);
+      if (isintzero(gel(x,1))) {
+        GEN z = cgetg(3, t_COMPLEX);
+        gel(z,1) = gen_0;
+        av = avma;
+        gel(z,2) = gerepileupto(av, gneg(ginv(gth(gel(x,2),prec))));
+        return z;
+      }
+        return 
+      av = avma;
+      gsincos(x,&s,&c,prec);
       return gerepileupto(av, gdiv(c,s));
 
     case t_INT: case t_FRAC:

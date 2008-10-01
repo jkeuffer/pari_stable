@@ -308,6 +308,7 @@ BA 41- user variables can now be aliased [#790]
        equal to a t_INT 0. Imaginary parts equal to 0 should never be created by
        our generic functions (so no need to cater for them specially: they
        will be very rare, produced by ad hoc routines).
+       Special case trigonometric functions on pure imaginary arguments.
    76- kill(z) no longer destroys user variable, only resets them to their
        "undefined" value (as z = 'z would).
    77- [library] prototype of galoisconj [ add one argument ], and made it
