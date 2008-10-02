@@ -3290,13 +3290,14 @@ ginv(GEN x)
       return y;
     case t_VECSMALL:
     {
-      long i,lx = lg(x);
-      y = cgetg(lx,t_VECSMALL);
-      for (i=1; i<lx; i++)
+      long i, lx = lg(x)-1;
+      y = const_vecsmall(lx,0);
+      for (i=1; i<=lx; i++)
       {
-	long xi=x[i];
-	  if (xi<1 || xi>=lx) pari_err(talker,"incorrect permtuation to inverse");
-	y[xi] = i;
+        long xi = x[i];
+        if (xi<1 || xi>lx || y[xi])
+          pari_err(talker,"incorrect permutation to inverse");
+        y[xi] = i;
       }
       return y;
     }
