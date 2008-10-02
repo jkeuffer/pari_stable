@@ -536,14 +536,21 @@ getmvar(entree *ep)
 }
 
 static long
-numbmvar(void)
+ctxmvar(void)
 {
-  long i;
-  long n=0;
+  pari_sp av=avma;
+  long i, n=0;
+  GEN ctx;
   for(i=s_lvar.n-1;i>=0;i--)
     if(localvars[i].type==Lmy)
       n++;
-  return n;
+  if (n==0) return 0;
+  ctx = cgetg(n+1,t_VECSMALL);
+  for(n=0, i=s_lvar.n-1;i>=0;i--)
+    if(localvars[i].type==Lmy)
+      ctx[++n]=(long)localvars[i].ep;
+  frame_push(ctx);
+  avma=av; return n;
 }
 
 INLINE int
@@ -1574,13 +1581,14 @@ compilenode(long n, int mode, long flag)
       pari_sp ltop=avma;
       struct codepos pos;
       GEN arg=listtogen(x,Flistarg);
-      long nb, lgarg, nbmvar=numbmvar();
+      long nb, lgarg, nbmvar;
       GEN vep = cgetg_copy(arg, &lgarg);
       GEN text=cgetg(3,t_VEC);
       gel(text,1)=strntoGENstr(tree[x].str,tree[x].len);
       gel(text,2)=strntoGENstr(tree[y].str,tree[y].len);
       getcodepos(&pos);
       dbgstart=tree[y].str;
+      nbmvar=ctxmvar();
       nb = lgarg-1;
       if (nb)
       {
