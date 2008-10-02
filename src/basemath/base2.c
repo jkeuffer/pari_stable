@@ -2260,8 +2260,7 @@ GEN
 nfreducemodpr(GEN nf, GEN x, GEN modpr)
 {
   pari_sp av = avma;
-  nf = checknf(nf);
-  checkmodpr(modpr);
+  nf = checknf(nf); checkmodpr(modpr);
   return gerepileupto(av, algtobasis(nf, Fq_to_nf(Rg_to_ff(nf,x,modpr),modpr)));
 }
 
