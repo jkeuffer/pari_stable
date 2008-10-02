@@ -2616,10 +2616,9 @@ GEN
 nfmulmodpr(GEN nf, GEN x, GEN y, GEN modpr)
 {
   pari_sp av = avma;
-  GEN z, p, pr, T;
+  GEN z, p, pr = modpr, T;
 
-  nf = checknf(nf);
-  modpr = nf_to_Fq_init(nf,&pr,&T,&p);
+  nf = checknf(nf); modpr = nf_to_Fq_init(nf,&pr,&T,&p);
   z = Fq_to_nf(Fq_mul(nf_to_Fq(nf,x,modpr), nf_to_Fq(nf,y,modpr),T,p), modpr);
   return gerepileupto(av, algtobasis(nf, Fq_to_nf(z,modpr)));
 }
@@ -2633,26 +2632,24 @@ nfdivmodpr(GEN nf, GEN x, GEN y, GEN modpr)
 }
 
 GEN
-nfpowmodpr(GEN nf,GEN x,GEN k,GEN pr)
+nfpowmodpr(GEN nf, GEN x, GEN k, GEN modpr)
 {
   pari_sp av=avma;
-  GEN z,T,p,modpr;
+  GEN z, T, p, pr = modpr;
 
-  nf = checknf(nf);
-  modpr = nf_to_Fq_init(nf,&pr,&T,&p);
+  nf = checknf(nf); modpr = nf_to_Fq_init(nf,&pr,&T,&p);
   z = nf_to_Fq(nf,x,modpr);
   z = Fq_pow(z,k,T,p);
   return gerepileupto(av, algtobasis(nf, Fq_to_nf(z,modpr)));
 }
 
 GEN
-nfkermodpr(GEN nf, GEN x, GEN pr)
+nfkermodpr(GEN nf, GEN x, GEN modpr)
 {
   pari_sp av = avma;
-  GEN T,p,modpr;
+  GEN T, p, pr = modpr;
 
-  nf = checknf(nf);
-  modpr = nf_to_Fq_init(nf, &pr,&T,&p);
+  nf = checknf(nf); modpr = nf_to_Fq_init(nf, &pr,&T,&p);
   if (typ(x)!=t_MAT) pari_err(typeer,"nfkermodpr");
   x = nfM_to_FqM(x, nf, modpr);
   return gerepilecopy(av, FqM_to_nfM(FqM_ker(x,T,p), modpr));
