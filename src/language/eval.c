@@ -1094,14 +1094,15 @@ closure_eval(GEN C)
       break;
     case OCsaveframe:
       {
-        GEN cl=gcopy(gel(st,sp-1));
-        if (lg(cl)==8)
+        GEN cl = (operand?gcopy:shallowcopy)(gel(st,sp-1));
+        long l = lg(gel(cl,7));
+        GEN  v = cgetg(l, t_VEC);
+        for(j=1; j<l; j++)
         {
-          GEN v=gel(cl,7);
-          long l=lg(v)-1;
-          for(j=1;j<=l;j++)
-            gel(v,j)=gcopy(var[s_var.n-j].value);
+          GEN val = var[s_var.n-j].value;
+          gel(v,j) = operand?gcopy(val):val;
         }
+        gel(cl,7) = v;
         gel(st,sp-1) = cl;
       }
       break;
@@ -1487,7 +1488,7 @@ closure_disassemble(GEN C)
       pari_printf("newframe\t%ld\n",operand);
       break;
     case OCsaveframe:
-      pari_printf("saveframe\n");
+      pari_printf("saveframe\t%ld\n", operand);
       break;
     case OCpop:
       pari_printf("pop\t\t%ld\n",operand);
