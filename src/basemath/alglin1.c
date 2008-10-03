@@ -1554,10 +1554,10 @@ gauss_pivot(GEN x0, GEN *dd, long *rr)
 
   d0 = cgetg(n+1, t_VECSMALL);
   if (use_maximal_pivot(x0))
-  { /* put exact columns first, then largest inexact ones */
+  { /* put exact columns first, then inexact ones by increasing exponent */
     get_pivot = gauss_get_pivot_max;
     for (k=1; k<=n; k++)
-      d0[k] = isinexactreal(gel(x0,k))? -gexpo(gel(x0,k))
+      d0[k] = isinexactreal(gel(x0,k))? gexpo(gel(x0,k))
 				      : -(long)HIGHEXPOBIT;
     d0 = vecsmall_indexsort(d0);
     x0 = vecpermute(x0, d0);
