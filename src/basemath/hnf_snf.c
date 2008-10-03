@@ -510,7 +510,10 @@ END2: /* clean up mat: remove everything to the right of the 1s on diagonal */
     m0 += co-1;
     for (a = l;;)
     {
-      GEN MAT = cgetg(l + 1, t_MAT), emb = cgetg(l + 1, t_MAT);
+      GEN MAT, emb;
+      gerepileall(av, 4, &H,&C,ptB,ptdep);
+      MAT = cgetg(l + 1, t_MAT);
+      emb = cgetg(l + 1, t_MAT);
       for (j = 1 ; j <= l; j++)
       {
 	MAT[j] = m0[j];
@@ -521,7 +524,6 @@ END2: /* clean up mat: remove everything to the right of the 1s on diagonal */
       CC += l;
       m0 += l;
       a += l; if (a > L) { l = L - (a - l); a = L; }
-      gerepileall(av, 4, &H,&C,ptB,ptdep);
     }
   }
   *ptC = C; return H;
