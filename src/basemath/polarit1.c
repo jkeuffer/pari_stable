@@ -2227,6 +2227,7 @@ static GEN
 FqX_roots_i(GEN f, GEN T, GEN p)
 {
   GEN R;
+  f = FqX_normalize(f, T, p);
   (void)FqX_split_deg1(&R, f, powiu(p, degpol(T)), T, p);
   return roots_from_deg1(FqX_split_roots(R, T, p, NULL));
 }

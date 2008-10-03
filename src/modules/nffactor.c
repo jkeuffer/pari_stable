@@ -1475,7 +1475,7 @@ nf_pick_prime(long ct, GEN nf, GEN polbase, long fl,
   *lt  = leading_term(polbase); /* t_INT */
   if (gcmp1(*lt)) *lt = NULL;
   dk = absi(gel(nf,3));
-  bad = mulii(dk,gel(nf,4)); if (*lt) bad = mulii(bad, *lt);
+  bad = mulii(dk,gel(nf,4));
 
   /* FIXME: slow factorization of large polynomials over large Fq */
   minf = 1;
@@ -1494,16 +1494,17 @@ nf_pick_prime(long ct, GEN nf, GEN polbase, long fl,
   {
     GEN aT, apr, ap, modpr, red;
     long anbf;
-    pari_timer ti_pr;
-
+    ulong ltp = 0;
     GEN list, r = NULL, fa = NULL;
     pari_sp av2 = avma;
+    pari_timer ti_pr;
     if (DEBUGLEVEL>3) TIMERstart(&ti_pr);
     /* first step : select prime of high inertia degree */
     for (;;)
     {
       NEXT_PRIME_VIADIFF_CHECK(pp, pt);
       if (! umodiu(bad,pp)) continue;
+      if (*lt) { ltp = umodiu(*lt, pp); if (!ltp) continue; }
       ap = utoipos(pp);
       list = gel(FpX_factor(nfpol, ap),1);
       if (minf == 1)
@@ -1526,16 +1527,19 @@ nf_pick_prime(long ct, GEN nf, GEN polbase, long fl,
     apr = primedec_apply_kummer(nf,r,1,ap);
     /* second step : evaluate factorisation mod apr */
     modpr = zk_to_Fq_init(nf,&apr,&aT,&ap);
+
     red = nfX_to_FqX(polbase, nf, modpr);
     if (!aT)
     { /* degree 1 */
       red = ZX_to_Flx(red, pp);
+      if (ltp) red = Flx_normalize(red, pp);
       if (!Flx_is_squarefree(red, pp)) { avma = av2; continue; }
       anbf = fl? Flx_nbroots(red, pp): Flx_nbfact(red, pp);
     }
     else
     {
       GEN q;
+      if (ltp) red = FqX_normalize(red, aT,ap);
       if (!FqX_is_squarefree(red,aT,ap)) { avma = av2; continue; }
       q = powiu(ap, degpol(aT));
       anbf = fl? FqX_split_deg1(&fa, red, q, aT, ap)
