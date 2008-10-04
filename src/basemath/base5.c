@@ -910,14 +910,6 @@ rnfpolred(GEN nf, GEN pol, long prec)
   return gerepilecopy(av,w);
 }
 
-static GEN
-powers(long N, long v)
-{
-  GEN L = cgetg(N+1,t_VEC);
-  long i;
-  for (i=1; i<=N; i++) gel(L,i) = monomial(gen_1, i-1, v);
-  return L;
-}
 /* Let K = Q[X]/T = nf. Given a relative polynomial pol in K[X], L = K[X]/(pol),
  * compute a pseudo-basis for Z_L, then an absolute basis */
 static GEN
@@ -948,7 +940,7 @@ makebasis(GEN nf, GEN pol, GEN rnfeq)
   /* ZK = integer basis of K, as elements of L */
   ZK = RgV_RgM_mul(A, RgXV_to_RgM(nf_get_zk(nf),n));
 
-  W = RgV_RgM_mul(powers(N, varn(pol)), W); /* vector of nfX */
+  W = RgV_RgM_mul(pol_x_powers(N, varn(pol)), W); /* vector of nfX */
   B = cgetg(nN+1, t_MAT);
   for(i=k=1; i<=N; i++)
   {

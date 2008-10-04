@@ -1313,37 +1313,35 @@ ZX_is_better(GEN y, GEN x, GEN *dx)
   return 0;
 }
 
-static GEN polred_aux(GEN x, GEN a, long orig);
+static GEN polred_aux(GEN x, GEN a, long flag);
 /* Seek a simpler, polynomial pol defining the same number field as
  * x (assumed to be monic at this point) */
 static GEN
 nfpolred(nfbasic_t *T)
 {
-  GEN x = T->x, dx = T->dx, a = T->bas, b = NULL, y, z, mat, d, rev;
+  GEN x = T->x, dx = T->dx, a = T->bas, z, d, rev;
   long i, n = degpol(x), v = varn(x);
 
   if (n == 1) { T->x = deg1pol_shallow(gen_1, gen_m1, v); return pol_1(v); }
-  z = polred_aux(x, a, 1);
-  a = gel(z,1);
-  y = gel(z,2);
-  for (i = 1; i < lg(y); i++) {
-    GEN yi = gel(y,i);
-    if (degpol(yi) < n) continue;
-    if (ZX_is_better(yi,x,&dx)) { x = yi; b = gel(a,i); }
-  }
-  if (!b) return NULL; /* no improvement */
+  z = polred_aux(x, a, nf_ORIG | nf_RED);
+  if (typ(z) != t_VEC || !ZX_is_better(gel(z,1),x,&dx))
+    return NULL; /* no improvement */
 
-  rev = RgXQ_reverse(b, T->x);
-  if (DEBUGLEVEL>1) fprintferr("xbest = %Ps\n",x);
+  rev = RgXQ_reverse(gel(z,2), x);
+  x = gel(z,1); if (DEBUGLEVEL>1) fprintferr("xbest = %Ps\n",x);
   
   /* update T */
-  a = T->bas;
   for (i=1; i<=n; i++) gel(a,i) = RgX_RgXQ_eval(gel(a,i), rev, x);
-  mat = RgXV_to_RgM(Q_remove_denom(a, &d), n);
-  mat = d? RgM_Rg_div(ZM_hnfmodid(mat,d), d): matid(n);
-
+  a = Q_remove_denom(a, &d);
+  if (!d)
+    T->bas = pol_x_powers(n, v);
+  else
+  {
+    GEN M = RgXV_to_RgM(a, n);
+    M = RgM_Rg_div(ZM_hnfmodid(M,d), d);
+    T->bas = RgM_to_RgXV(M, v);
+  }
   (void)Z_issquareall(diviiexact(dx,T->dK), &(T->index));
-  T->bas= RgM_to_RgXV(mat, v);
   T->dx = dx;
   T->x  = x; return rev;
 }
@@ -1610,18 +1608,24 @@ ZX_canon_neg(GEN z)
   return 0;
 }
 static GEN
-polred_aux(GEN x, GEN a, long orig)
+polred_aux(GEN x, GEN a, long flag)
 {
   long i, v = varn(x), l = lg(a);
-  GEN ch, y = cgetg(l,t_VEC), b = cgetg(l, t_COL);
+  GEN y = cgetg(l,t_VEC), b = cgetg(l, t_COL);
+  const long orig = flag & nf_ORIG;
+  const long nfred = flag & nf_RED;
 
-  for (i=1; i<l; i++)
+  gel(y,1) = deg1pol_shallow(gen_1, gen_m1, v);
+  gel(b,1) = gen_1;
+  for (i=2; i<l; i++)
   {
-    GEN ai = gel(a,i);
+    GEN ch, d, ai = gel(a,i);
     if (DEBUGLEVEL>2) { fprintferr("i = %ld\n",i); flusherr(); }
     ch = ZX_caract(x, ai, v);
-    (void)ZX_gcd_all(ch, ZX_deriv(ch), &ch);
+    d = ZX_gcd_all(ch, ZX_deriv(ch), &ch);
     if (ZX_canon_neg(ch) && orig) ai = RgX_neg(ai);
+    if (nfred && !degpol(d)) return mkvec2(ch, ai);
+
     if (DEBUGLEVEL>3) fprintferr("polred: generator %Ps\n", ch);
     gel(y,i) = ch;
     gel(b,i) = ai;

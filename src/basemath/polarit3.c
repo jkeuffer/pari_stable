@@ -447,6 +447,14 @@ monomialcopy(GEN a, long d, long v)
   }
   return P;
 }
+GEN
+pol_x_powers(long N, long v)
+{
+  GEN L = cgetg(N+1,t_VEC);
+  long i;
+  for (i=1; i<=N; i++) gel(L,i) = monomial(gen_1, i-1, v);
+  return L;
+}
 
 GEN
 FpXQX_gcd(GEN P, GEN Q, GEN T, GEN p)
