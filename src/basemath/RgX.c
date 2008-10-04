@@ -118,6 +118,25 @@ RgX_RgXQ_eval(GEN f, GEN x, GEN T)
   }
   return gerepileupto(av, y);
 }
+GEN
+RgX_RgXQV_eval(GEN P, GEN V)
+{
+  GEN z = scalar_ZX_shallow(gel(P,2), varn(P)); /* V[1] = 1 */
+  long i, n = degpol(P);
+  for (i=1; i<=n; i++) z = RgX_add(z, RgX_Rg_mul(gel(V,i+1),gel(P,2+i)));
+  return z;
+}
+GEN
+QX_ZXQV_eval(GEN P, GEN V, GEN dV)
+{
+  long i, n = degpol(P);
+  GEN z, dz, dP;
+  P = Q_remove_denom(P, &dP);
+  z = scalar_ZX_shallow(mulii(dV, gel(P,2)), varn(P)); /* V[1] = dV */
+  for (i=1; i<=n; i++) z = ZX_add(z, ZX_Z_mul(gel(V,i+1),gel(P,2+i)));
+  dz = mul_denom(dP, dV);
+  return dz? RgX_Rg_div(z, dz): z;
+}
 
 /* Return P(h * x), not memory clean */
 GEN

@@ -1044,11 +1044,12 @@ compositum_red(compo_s *C, GEN P, GEN Q)
   /* reduce R */
   z = polredabs0(a, nf_ORIG|nf_PARTIALFACT);
   C->R = gel(z,1);
-  a    = gel(z,2);
-  C->p = poleval(p, a);
-  if (C->p == gen_0) C->p = mkpolmod(zeropol(v),gel(a,1));
-  C->q = poleval(q, a);
-  C->rev = RgXQ_reverse(gel(a,2), gel(a,1));
+  a    = lift_intern( gel(z,2) );
+  p = RgX_RgXQ_eval(p, a, C->R); if (p == gen_0) p = zeropol(v);
+  C->p = mkpolmod(p, C->R);
+  q = RgX_RgXQ_eval(q, a, C->R);
+  C->q = mkpolmod(q, C->R);
+  C->rev = QXQ_reverse(a, C->R);
   if (DEBUGLEVEL>1) fprintferr("polred(compositum) = %Ps\n",C->R);
 }
 

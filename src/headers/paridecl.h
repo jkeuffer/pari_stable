@@ -317,6 +317,7 @@ GEN     scalarmat_s(long x, long n);
 
 /* RgX.c */
 
+GEN     QX_ZXQV_eval(GEN P, GEN V, GEN dV);
 GEN     QXQ_powers(GEN a, long n, GEN T);
 GEN     QXQV_to_mod(GEN V, GEN T);
 GEN     QXQXV_to_mod(GEN V, GEN T);
@@ -344,6 +345,7 @@ GEN     RgXV_unscale(GEN v, GEN h);
 GEN     RgXX_to_RgM(GEN v, long n);
 GEN     RgXY_swap(GEN x, long n, long w);
 GEN     RgX_RgXQ_eval(GEN f, GEN x, GEN T);
+GEN     RgX_RgXQV_eval(GEN P, GEN V);
 GEN     RgX_Rg_add(GEN y, GEN x);
 GEN     RgX_Rg_add_shallow(GEN y, GEN x);
 GEN     RgX_Rg_div(GEN y, GEN x);
@@ -1051,6 +1053,7 @@ GEN     zncoppersmith(GEN P0, GEN N, GEN X, GEN B) ;
 
 /* bibli2.c */
 
+GEN     QXQ_reverse(GEN a, GEN T);
 GEN     binomial(GEN x, long k);
 GEN     binomialuu(ulong n, ulong k);
 int     cmp_nodata(void *data, GEN x, GEN y);

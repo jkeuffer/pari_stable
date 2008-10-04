@@ -1091,6 +1091,25 @@ RgXQ_reverse(GEN a, GEN T)
   if (!y) pari_err(talker,"reverse polmod does not exist: Mod(%Ps, %Ps)", a,T);
   return gerepilecopy(av, RgV_to_RgX(y, varn(T)));
 }
+GEN
+QXQ_reverse(GEN a, GEN T)
+{
+  pari_sp av = avma;
+  long n = degpol(T);
+  GEN y;
+
+  if (n <= 1) {
+    if (n <= 0) return gcopy(a);
+    return gerepileupto(av, gneg(gdiv(gel(T,2), gel(T,3))));
+  }
+  if (typ(a) != t_POL || !signe(a))
+    pari_err(talker,"reverse polmod does not exist");
+
+  y = RgXV_to_RgM(QXQ_powers(a,n-1,T), n);
+  y = RgM_solve(y, col_ei(n, 2));
+  if (!y) pari_err(talker,"reverse polmod does not exist: Mod(%Ps, %Ps)", a,T);
+  return gerepilecopy(av, RgV_to_RgX(y, varn(T)));
+}
 
 GEN
 modreverse(GEN x)
