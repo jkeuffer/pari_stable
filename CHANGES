@@ -339,6 +339,7 @@ BA 41- user variables can now be aliased [#790]
        of a break loop, hit Return three times (next, return, break are no
        longer accepted)
 BA 86- factormod and matker: faster linear algebra over F2.
+   87- remove duplicate polynomials in polred output [#874]
 
   Added
     1- new benches: galoisinit, ispower, nffactor, subfields, resultant,

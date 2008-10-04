@@ -1632,8 +1632,8 @@ polred_aux(GEN x, GEN a, long flag)
     gel(y,i) = ch;
     gel(b,i) = ai;
   }
+  if (!orig) return gen_sort_uniq(y, (void*)cmpii, &gen_cmp_RgX);
   (void)sort_factor_pol(mkmat2(y, b), cmpii);
-  if (!orig) return y;
   settyp(y, t_COL); return mkmat2(b, y);
 }
 
