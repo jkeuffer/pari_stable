@@ -4863,6 +4863,9 @@ Meant to be used to precompute powers of algebraic integers in $\Q[t]/(T)$.
 The current implementation does not require $x$ to be a \kbd{QX}: any
 polynomial to which \kbd{Q\_remove\_denom} can be applied is fine.
 
+\fun{GEN}{QXQ_reverse}{GEN f, GEN T} as \kbd{RgXQ\_reverse}, assuming $f$
+is a \kbd{QX}.
+
 \subsec{\kbd{zx}}.
 
 \fun{GEN}{zero_zx}{long sv} returns a zero \kbd{zx} in variable $v$.
@@ -5135,6 +5138,14 @@ polynomial of \kbd{Mod(x, T)}, in variable $v$.
 
 \fun{GEN}{RgX_RgXQ_eval}{GEN f,GEN x,GEN T} returns
 $\kbd{f}(\kbd{x})$ modulo $T$.
+
+\fun{GEN}{RgX_RgXQV_eval}{GEN f, GEN V} as \kbd{RgX\_RgXQ\_eval(f, x, T)},
+assuming $V$ was output by \kbd{RgXQ\_powers(x, n, T)}, with $n\geq \deg f$.
+
+\fun{GEN}{QX_ZXQV_eval}{GEN f, GEN nV, GEN dV} as \kbd{RgX\_RgXQV\_eval},
+except that $f$ is assumed to be a \kbd{QX}, $V$ is given implicitely 
+by a numerator \kbd{nV} (\kbd{ZV}) and denominator \kbd{dV} (a positive
+\typ{INT} or \kbd{NULL} for trivial denominator).
 
 \fun{GEN}{RgX_translate}{GEN P, GEN c} assume $c$ is a scalar or
 a polynomials whose main variable has lower priority than the main variable
@@ -5428,6 +5439,9 @@ $a + b \kbd{pol\_x}(v)$
 \fun{GEN}{pol_1}{long v} Returns the constant polynomial $1$ in variable $v$.
 
 \fun{GEN}{pol_x}{long v} Returns the monomial of degree $1$ in variable $v$.
+
+\fun{GEN}{pol_x_powers}{long N, long v} returns the powers of 
+\kbd{pol\_x(v)}, of degree $0$ to $N$, in a vector with $N+1$ components.
 
 \fun{GEN}{zerocol}{long n} creates a \typ{COL} with \kbd{n} components set to
 \kbd{gen\_0}.
