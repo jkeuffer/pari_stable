@@ -1522,6 +1522,25 @@ RgXQ_powers(GEN x, long l, GEN T)
   return V;
 }
 
+/* a in K = Q[X]/(T), returns [a^0, ..., a^n] */
+GEN
+QXQ_powers(GEN a, long n, GEN T)
+{
+  GEN den, v = RgXQ_powers(Q_remove_denom(a, &den), n, T);
+  /* den*a integral; v[i+1] = (den*a)^i in K */
+  if (den)
+  { /* restore denominators */
+    GEN d = den;
+    long i;
+    gel(v,2) = a;
+    for (i=3; i<=n+1; i++) {
+      d = mulii(d,den);
+      gel(v,i) = RgX_Rg_div(gel(v,i), d);
+    }
+  }
+  return v;
+}
+
 GEN
 RgXQ_matrix_pow(GEN y, long n, long m, GEN P)
 {

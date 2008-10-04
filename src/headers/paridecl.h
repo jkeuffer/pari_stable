@@ -317,6 +317,7 @@ GEN     scalarmat_s(long x, long n);
 
 /* RgX.c */
 
+GEN     QXQ_powers(GEN a, long n, GEN T);
 GEN     QXQV_to_mod(GEN V, GEN T);
 GEN     QXQXV_to_mod(GEN V, GEN T);
 GEN     RgM_to_RgXV(GEN x, long v);

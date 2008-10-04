@@ -1313,13 +1313,34 @@ ZX_is_better(GEN y, GEN x, GEN *dx)
   return 0;
 }
 
+GEN
+RgX_RgXQV_eval(GEN P, GEN V)
+{
+  GEN z = scalar_ZX_shallow(gel(P,2), varn(P)); /* V[1] = 1 */
+  long i, n = degpol(P);
+  for (i=1; i<=n; i++) z = RgX_add(z, RgX_Rg_mul(gel(V,i+1),gel(P,2+i)));
+  return z;
+}
+
+static GEN
+ZX_ZXQV_eval(GEN P, GEN V, GEN dV)
+{
+  long i, n = degpol(P);
+  GEN z, dz, dP;
+  P = Q_remove_denom(P, &dP);
+  z = scalar_ZX_shallow(mulii(dV, gel(P,2)), varn(P)); /* V[1] = dV */
+  for (i=1; i<=n; i++) z = ZX_add(z, ZX_Z_mul(gel(V,i+1),gel(P,2+i)));
+  dz = mul_denom(dP, dV);
+  return dz? RgX_Rg_div(z, dz): z;
+}
+
 static GEN polred_aux(GEN x, GEN a, long flag);
 /* Seek a simpler, polynomial pol defining the same number field as
  * x (assumed to be monic at this point) */
 static GEN
 nfpolred(nfbasic_t *T)
 {
-  GEN x = T->x, dx = T->dx, a = T->bas, z, d, rev;
+  GEN x = T->x, dx = T->dx, a = T->bas, z, d, rev, pow, dpow;
   long i, n = degpol(x), v = varn(x);
 
   if (n == 1) { T->x = deg1pol_shallow(gen_1, gen_m1, v); return pol_1(v); }
@@ -1331,7 +1352,9 @@ nfpolred(nfbasic_t *T)
   x = gel(z,1); if (DEBUGLEVEL>1) fprintferr("xbest = %Ps\n",x);
   
   /* update T */
-  for (i=1; i<=n; i++) gel(a,i) = RgX_RgXQ_eval(gel(a,i), rev, x);
+  pow = QXQ_powers(rev, n-1, x);
+  pow = Q_remove_denom(pow, &dpow);
+  for (i=2; i<=n; i++) gel(a,i) = ZX_ZXQV_eval(gel(a,i), pow, dpow);
   a = Q_remove_denom(a, &d);
   if (!d)
     T->bas = pol_x_powers(n, v);

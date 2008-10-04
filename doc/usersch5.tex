@@ -4856,6 +4856,13 @@ multiple of $P/d$. If $P$ and $Q$ are both monic, then $d$ is monic and
 \fun{GEN}{QXQ_inv}{GEN A, GEN B} returns the inverse of \kbd{A} modulo \kbd{B}
 where \kbd{A} and \kbd{B} are \kbd{QX}s.
 
+\fun{GEN}{QXQ_powers}{GEN x, long n, GEN T} returns $[\kbd{x}^0, \dots,
+\kbd{x}^\kbd{n}]$ as \kbd{RgXQ\_powers} would, but in a more efficient way when
+$x$ has a huge integer denominator (we start by removing that denominator).
+Meant to be used to precompute powers of algebraic integers in $\Q[t]/(T)$.
+The current implementation does not require $x$ to be a \kbd{QX}: any
+polynomial to which \kbd{Q\_remove\_denom} can be applied is fine.
+
 \subsec{\kbd{zx}}.
 
 \fun{GEN}{zero_zx}{long sv} returns a zero \kbd{zx} in variable $v$.

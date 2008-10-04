@@ -926,17 +926,7 @@ makebasis(GEN nf, GEN pol, GEN rnfeq)
   I = gel(p1,2);
   if (DEBUGLEVEL>1) fprintferr("relative basis computed\n");
 
-  /* K = Q(a), den*a integral; A[i+1] = (den*a)^i in L = Q[X] / polabs */
-  A = RgXQ_powers(Q_remove_denom(a, &den), n-1, polabs);
-  if (den)
-  { /* restore denominators */
-    GEN d = den;
-    gel(A,2) = a;
-    for (i=3; i<=n; i++) {
-      d = mulii(d,den);
-      gel(A,i) = RgX_Rg_div(gel(A,i), d);
-    }
-  }
+  A = QXQ_powers(a, n-1, polabs);
   /* ZK = integer basis of K, as elements of L */
   ZK = RgV_RgM_mul(A, RgXV_to_RgM(nf_get_zk(nf),n));
 
