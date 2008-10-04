@@ -456,6 +456,7 @@ int     ZX_equal(GEN V, GEN W);
 long    ZX_max_lg(GEN x);
 GEN     ZX_neg(GEN x);
 GEN     ZX_renormalize(GEN x, long lx);
+GEN     ZX_rescale(GEN P, GEN h);
 GEN     ZX_sub(GEN x, GEN y);
 long    ZX_val(GEN x);
 long    ZX_valrem(GEN x, GEN *Z);
@@ -2221,6 +2222,7 @@ long    brent_kung_optpow(long d, long n);
 GEN     ffinit(GEN p, long n, long v);
 GEN     from_Kronecker(GEN z, GEN pol);
 GEN     init_Fq(GEN p, long n, long v);
+GEN     pol_x_powers(long N, long v);
 GEN     to_Kronecker(GEN P, GEN Q);
 
 /* prime.c */

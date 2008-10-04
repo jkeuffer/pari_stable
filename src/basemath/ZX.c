@@ -292,3 +292,20 @@ ZX_valrem(GEN x, GEN *Z)
   *Z = RgX_shift_shallow(x, -vx);
   return vx;
 }
+
+/* Return h^degpol(P) P(x / h), not memory clean. h integer, P ZX */
+GEN
+ZX_rescale(GEN P, GEN h)
+{
+  long i, l = lg(P);
+  GEN Q = cgetg(l,t_POL), hi = h;
+  Q[l-1] = P[l-1];
+  for (i=l-2; i>=2; i--)
+  {
+    gel(Q,i) = mulii(gel(P,i), hi);
+    if (i == 2) break;
+    hi = mulii(hi,h);
+  }
+  Q[1] = P[1]; return Q;
+}
+
