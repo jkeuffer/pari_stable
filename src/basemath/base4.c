@@ -584,11 +584,12 @@ idealval(GEN nf, GEN ix, GEN P)
   nf = checknf(nf);
   N = lg(ix)-1; if (!N) pari_err(talker,"zero ideal in idealval");
   ix = Q_primitive_part(ix, &cx);
+  f = pr_get_f(P);
+  if (f == N) { v = cx? Q_pval(cx,p): 0; avma = av; return v; }
   i = val_norm(ix,p, &k);
   if (!i) { v = cx? pr_get_e(P) * Q_pval(cx,p): 0; avma = av; return v; }
 
   e = pr_get_e(P);
-  f = pr_get_f(P);
   vd = cx? e * Q_pval(cx,p): 0;
   /* 0 <= ceil[v_P(ix) / e] <= v_p(ix \cap Z) --> v_P <= e * v_p */
   j = k * e;
@@ -596,13 +597,13 @@ idealval(GEN nf, GEN ix, GEN P)
   i = i / f;
   vmax = minss(i,j); /* v_P(ix) <= vmax */
 
-  t0 = gel(P,5);
+  t0 = pr_get_tau(P);
   if (typ(t0) == t_MAT)
   { /* t0 given by a multiplication table */
     mul = t0;
     do_mul = 0;
   }
-  else
+  else /* always a t_COL since f < N, never a t_INT */
   {
     mul = cgetg(N+1,t_MAT);
     gel(mul,1) = t0;
