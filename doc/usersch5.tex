@@ -5141,11 +5141,13 @@ $\kbd{f}(\kbd{x})$ modulo $T$.
 
 \fun{GEN}{RgX_RgXQV_eval}{GEN f, GEN V} as \kbd{RgX\_RgXQ\_eval(f, x, T)},
 assuming $V$ was output by \kbd{RgXQ\_powers(x, n, T)}, with $n\geq \deg f$.
+Not memory clean, but suitable for \kbd{gerepileupto}.
 
 \fun{GEN}{QX_ZXQV_eval}{GEN f, GEN nV, GEN dV} as \kbd{RgX\_RgXQV\_eval},
 except that $f$ is assumed to be a \kbd{QX}, $V$ is given implicitely 
 by a numerator \kbd{nV} (\kbd{ZV}) and denominator \kbd{dV} (a positive
-\typ{INT} or \kbd{NULL} for trivial denominator).
+\typ{INT} or \kbd{NULL} for trivial denominator). Not memory clean, but
+suitable for \kbd{gerepileupto}.
 
 \fun{GEN}{RgX_translate}{GEN P, GEN c} assume $c$ is a scalar or
 a polynomials whose main variable has lower priority than the main variable
