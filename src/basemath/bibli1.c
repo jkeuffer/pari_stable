@@ -1971,32 +1971,25 @@ step(GEN x, GEN y, GEN inc, long k)
 static GEN
 smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
 {
-  long N = lg(q), n = N-1, i, j, k, s, epsbit, prec, checkcnt = 1;
+  long N = lg(q), n = N-1, i, j, k, s, stockmax, checkcnt = 1;
+  const long epsbit = bit_accuracy( gprecision(q) ) >> 1;
   pari_sp av, av1, lim;
   GEN inc, S, x, y, z, v,  eps, p1, alpha, norms;
   GEN norme1, normax1, borne1, borne2;
   GEN (*check)(void *,GEN) = CHECK? CHECK->f: NULL;
   void *data = CHECK? CHECK->data: NULL;
-  long stockmax, skipfirst = CHECK? CHECK->skipfirst: 0;
-  int stockall = (maxnum < 0);
+  const long skipfirst = CHECK? CHECK->skipfirst: 0;
+  const int stockall = (maxnum == -1);
 
-  prec = gprecision(q);
-  epsbit = bit_accuracy(prec) >> 1;
   eps = real2n(-epsbit, 3);
   alpha = dbltor(0.95);
   normax1 = gen_0;
-  norme1 = BORNE ? BORNE: mpsqr(gcoeff(q,1,1));
-  borne1 = mpadd(norme1,eps);
-  if (!BORNE) borne2 = subrr(norme1,eps);
-  else        borne2 = mulrr(norme1,alpha);
-  if (DEBUGLEVEL>2)
-    fprintferr("smallvectors looking for norm < %Ps\n",gprec_w(borne1,3));
 
   v = cgetg(N,t_VEC);
   inc = const_vecsmall(n, 1);
 
   av = avma; lim = stack_lim(av,2);
-  stockmax = stockall? 200: maxnum;
+  stockmax = stockall? 2000: maxnum;
   if (check) norms = cgetg(stockmax+1,t_VEC);
   S = cgetg(stockmax+1,t_VEC);
   x = cgetg(N,t_COL);
@@ -2006,6 +1999,16 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
     gel(v,i) = gcoeff(q,i,i);
     gel(x,i) = gel(y,i) = gel(z,i) = gen_0;
   }
+  if (BORNE) {
+    norme1 = BORNE;
+    borne2 = mulrr(norme1,alpha);
+  } else {
+    norme1 = mpsqr(gel(v,1));
+    borne2 = subrr(norme1,eps);
+  }
+  borne1 = mpadd(norme1,eps);
+  if (DEBUGLEVEL>2)
+    fprintferr("smallvectors looking for norm < %Ps\n",gprec_w(borne1,3));
 
   gel(x,n) = gen_0; s = 0; k = n;
   for(;; step(x,y,inc,k)) /* main */
@@ -2099,52 +2102,57 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
     {
       if (check) gel(norms,s) = norme1;
       gel(S,s) = leafcopy(x);
-      if (s == stockmax)
-      { /* overflow */
-	long stockmaxnew= (stockall && (stockmax < 10000L || maxnum == -1))
-			  ? stockmax<<1 : stockmax;
-	GEN Snew = cgetg(stockmaxnew + 1, t_VEC);
-	if (check)
-	{
-	  pari_sp av2 = avma;
-	  GEN per = indexsort(norms);
-	  if (DEBUGLEVEL>2) fprintferr("sorting...\n");
-	  for (j = 0, i = 1; i <= s; i++)
-	  { /* let N be the minimal norm so far for x satisfying 'check'. Keep
-	     * all elements of norm N */
-	    long k = per[i];
-	    norme1 = gel(norms,k);
-	    if (j  && mpcmp(norme1, borne1) > 0) break;
-	    if (j  || check(data,gel(S,k)))
-	    {
-	      if (!j) borne1 = mpadd(norme1,eps);
-	      Snew[++j] = S[k];
-	    }
-	  }
-	  s = j; avma = av2;
-	  if (s)
-	  {
-	    norme1 = gel(norms, per[i-1]);
-	    borne1 = mpadd(norme1, eps);
-	    borne2 = mulrr(borne1, alpha);
-	    checkcnt = 0;
-	  }
-	}
-	else
-	{
-	  if (!stockall && BORNE) goto END;
-	  for (i = 1; i <= s; i++) Snew[i] = S[i];
-	}
-	if (stockmax != stockmaxnew)
-	{
-	  stockmax = stockmaxnew;
-	  norms = cgetg(stockmax+1, t_VEC);
-	  for (i = 1; i <= s; i++) gel(norms,i) = norme1;
-	  Snew = clonefill(Snew, s, stockmax);
-	  if (isclone(S)) gunclone(S);
-	  S = Snew;
-	}
+      if (s != stockmax) continue;
+      /* overflow */
+      if (check)
+      {
+        pari_sp av2 = avma;
+        long imin, imax;
+        GEN per = indexsort(norms);
+        if (DEBUGLEVEL>2) fprintferr("sorting... [%ld elts]\n",s);
+        /* let N be the minimal norm so far for x satisfying 'check'. Keep
+         * all elements of norm N */
+        for (i = 1; i <= s; i++)
+        {
+          long k = per[i];
+          if (check(data,gel(S,k))) {
+            norme1 = gel(norms,k);
+            borne1 = mpadd(norme1,eps);
+            break;
+          }
+        }
+        imin = i;
+        for (j = 0; i <= s; i++)
+          if (mpcmp(gel(norms,per[i]), borne1) > 0) break;
+        imax = i;
+        for (i=imin, s=0; i < imax; i++) gel(S,++s) = gel(S,per[i]);
+        avma = av2;
+        if (s)
+        {
+          borne1 = mpadd(norme1, eps);
+          borne2 = mulrr(borne1, alpha);
+          checkcnt = 0;
+        }
+        if (!stockall) continue;
+        if (s > stockmax/2) stockmax <<= 1;
       }
+      else
+      {
+        if (!stockall && BORNE) goto END;
+        if (!stockall) continue;
+
+        stockmax <<= 1;
+      }
+
+      {
+        GEN Snew = cgetg(stockmax + 1, t_VEC);
+        for (i = 1; i <= s; i++) gel(Snew,i) = gel(S,i);
+        Snew = clonefill(Snew, s, stockmax);
+        if (isclone(S)) gunclone(S);
+        S = Snew;
+      }
+      norms = cgetg(stockmax+1, t_VEC);
+      for (i = 1; i <= s; i++) gel(norms,i) = norme1;
     }
   }
 END:
