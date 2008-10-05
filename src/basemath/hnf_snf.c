@@ -114,13 +114,13 @@ hnffinal(GEN matgen,GEN perm,GEN* ptdep,GEN* ptB,GEN* ptC)
   {
     GEN Di = gel(dep,i), Hi = gel(H,i);
     GEN h = gel(Hi,i); /* H[i,i] */
-    if ( (diagH1[i] = gcmp1(h)) ) { h = NULL; s++; }
+    if ( (diagH1[i] = is_pm1(h)) ) { h = NULL; s++; }
     for (j=col+1; j<co; j++)
     {
       GEN z = gel(B,j-col);
-      p1 = gel(z,i+nlze); if (!signe(p1)) continue;
-
-      if (h) p1 = gdivent(p1,h);
+      p1 = gel(z,i+nlze);
+      if (h) p1 = truedivii(p1,h);
+      if (!signe(p1)) continue;
       for (k=1; k<=nlze; k++) gel(z,k) = subii(gel(z,k), mulii(p1, gel(Di,k)));
       for (   ; k<=lig;  k++) gel(z,k) = subii(gel(z,k), mulii(p1, gel(Hi,k-nlze)));
       gel(Cnew,j) = gsub(gel(Cnew,j), gmul(p1, gel(Cnew,i+zc)));
