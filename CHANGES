@@ -341,6 +341,7 @@ BA 41- user variables can now be aliased [#790]
        longer accepted)
 BA 86- factormod and matker: faster linear algebra over F2.
    87- remove duplicate polynomials in polred output [#874]
+   88- let forvec(X = v,...) respect the type of v (t_VEC or t_COL)
 
   Added
     1- new benches: galoisinit, ispower, nffactor, subfields, resultant,

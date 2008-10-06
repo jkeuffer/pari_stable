@@ -381,13 +381,13 @@ forvec_start(GEN x, long flag, GEN *gd, GEN (**next)(GEN,GEN))
   long i, tx = typ(x), l = lg(x), t = t_INT;
   forvec_data *d;
   if (!is_vec_t(tx)) pari_err(talker,"not a vector in forvec");
-  if (l == 1) { *next = &forvec_dummy; return cgetg(1, t_VEC); }
+  if (l == 1) { *next = &forvec_dummy; return cgetg(1, tx); }
   *gd = cgetg(sizeof(forvec_data)/sizeof(long) + 1, t_VECSMALL) + 1;
   d = (forvec_data*) *gd;
   d->n = l - 1;
-  d->a = (GEN*)cgetg(l,t_VEC);
-  d->m = (GEN*)cgetg(l,t_VEC);
-  d->M = (GEN*)cgetg(l,t_VEC);
+  d->a = (GEN*)cgetg(l,tx);
+  d->m = (GEN*)cgetg(l,tx);
+  d->M = (GEN*)cgetg(l,tx);
   for (i = 1; i < l; i++)
   {
     GEN a, e = gel(x,i), m = gel(e,1), M = gel(e,2);
