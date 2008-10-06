@@ -8,4 +8,5 @@ d(-385*y - 251, y^2 - y - 7)*x^5 + Mod(695*y + 2955, y^2 - y - 7)*x^4 + Mod(
 x^3 + Mod(y^2 - 2, y^3 - y - 1)*x^2 + Mod(-y + 1, y^3 - y - 1)*x + Mod(y - 1
 , y^3 - y - 1)
   *** nfinit: Warning: non-monic polynomial. Result of the form [nf,c].
-Total time spent: 6156
+x^2 - 3646554366
+Total time spent: 2210
