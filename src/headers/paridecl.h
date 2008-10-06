@@ -2531,6 +2531,7 @@ INLINE GEN    mpceil(GEN x);
 INLINE int    mpcmp(GEN x, GEN y);
 INLINE GEN    mpcopy(GEN x);
 INLINE GEN    mpdiv(GEN x, GEN y);
+INLINE long   mpexpo(GEN x);
 INLINE GEN    mpfloor(GEN x);
 INLINE GEN    mpmul(GEN x, GEN y);
 INLINE void   mpmulz(GEN x, GEN y, GEN z);

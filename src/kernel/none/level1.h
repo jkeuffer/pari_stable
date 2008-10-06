@@ -757,6 +757,9 @@ mpceil(GEN x) { return typ(x)==t_INT? icopy(x): ceilr(x); }
 INLINE GEN
 mpround(GEN x) { return typ(x) == t_INT? icopy(x): roundr(x); }
 
+INLINE long
+mpexpo(GEN x) { return typ(x) == t_INT? expi(x): expo(x); }
+
 INLINE GEN
 mpadd(GEN x, GEN y)
 {

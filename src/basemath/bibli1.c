@@ -1962,6 +1962,12 @@ step(GEN x, GEN y, GEN inc, long k)
     inc[k] = (i > 0)? -1-i: 1-i;
   }
 }
+static GEN
+add_fudge(GEN x, long epsbit)
+{ return mpadd(x, real2n(mpexpo(x) - epsbit, 3)); }
+static GEN
+sub_fudge(GEN x, long epsbit)
+{ return mpsub(x, real2n(mpexpo(x) - epsbit, 3)); }
 /* q is the Gauss reduction of the quadratic form */
 /* general program for positive definit quadratic forms (real coeffs).
  * Enumerate vectors whose norm is less than BORNE, minimal vectors
@@ -1974,14 +1980,13 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
   long N = lg(q), n = N-1, i, j, k, s, stockmax, checkcnt = 1;
   const long epsbit = bit_accuracy( gprecision(q) ) >> 1;
   pari_sp av, av1, lim;
-  GEN inc, S, x, y, z, v,  eps, p1, alpha, norms;
+  GEN inc, S, x, y, z, v, p1, alpha, norms;
   GEN norme1, normax1, borne1, borne2;
   GEN (*check)(void *,GEN) = CHECK? CHECK->f: NULL;
   void *data = CHECK? CHECK->data: NULL;
   const long skipfirst = CHECK? CHECK->skipfirst: 0;
   const int stockall = (maxnum == -1);
 
-  eps = real2n(-epsbit, 3);
   alpha = dbltor(0.95);
   normax1 = gen_0;
 
@@ -2004,9 +2009,9 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
     borne2 = mulrr(norme1,alpha);
   } else {
     norme1 = mpsqr(gel(v,1));
-    borne2 = subrr(norme1,eps);
+    borne2 = sub_fudge(norme1,epsbit);
   }
-  borne1 = mpadd(norme1,eps);
+  borne1 = add_fudge(norme1,epsbit);
   if (DEBUGLEVEL>2)
     fprintferr("smallvectors looking for norm < %Ps\n",gprec_w(borne1,3));
 
@@ -2078,7 +2083,7 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
       {
 	if (!check(data,x)) { checkcnt++ ; continue; /* main */}
 	if (DEBUGLEVEL>4) fprintferr("New bound: %Ps", norme1);
-	borne1 = mpadd(norme1, eps);
+	borne1 = add_fudge(norme1, epsbit);
 	borne2 = mulrr(borne1, alpha);
 	s = 0; checkcnt = 0;
       }
@@ -2089,8 +2094,8 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
       {
 	if (mpcmp(norme1, borne2) < 0)
 	{
-	  borne1 = mpadd(norme1, eps);
-	  borne2 = mpsub(norme1, eps);
+	  borne1 = add_fudge(norme1, epsbit);
+	  borne2 = sub_fudge(norme1, epsbit);
 	  s = 0;
 	}
       }
@@ -2117,7 +2122,7 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
           long k = per[i];
           if (check(data,gel(S,k))) {
             norme1 = gel(norms,k);
-            borne1 = mpadd(norme1,eps);
+            borne1 = add_fudge(norme1,epsbit);
             break;
           }
         }
@@ -2129,7 +2134,7 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
         avma = av2;
         if (s)
         {
-          borne1 = mpadd(norme1, eps);
+          borne1 = add_fudge(norme1, epsbit);
           borne2 = mulrr(borne1, alpha);
           checkcnt = 0;
         }
@@ -2171,7 +2176,7 @@ END:
       if (j && mpcmp(norme1, borne1) > 0) break;
       if ((p = check(data,gel(S,t))))
       {
-	if (!j) borne1 = mpadd(norme1,eps);
+	if (!j) borne1 = add_fudge(norme1,epsbit);
 	j++; gel(pols,j) = p; alph[j]=S[t];
       }
     }
@@ -2188,8 +2193,7 @@ END:
   }
   else
     S = cgetg(1,t_MAT);
-  if (!BORNE) normax1 = mpsub(borne1, eps);
-  return mkvec3(utoi(s<<1), normax1, S);
+  return mkvec3(utoi(s<<1), borne1, S);
 }
 
 /* solve q(x) = x~.a.x <= bound, a > 0.

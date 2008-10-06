@@ -316,6 +316,9 @@ to the \typ{INT}~\kbd{x}. This is a special case of \kbd{gexpo}.
 \fun{long}{expo}{GEN x} returns the binary exponent of the
 \typ{REAL}~\kbd{x}.
 
+\fun{long}{mpexpo}{GEN x} returns the binary exponent of the \typ{INT}
+or \typ{REAL}~\kbd{x}.
+
 \fun{long}{gexpo}{GEN x} same as \kbd{expo}, but also valid when \kbd{x}
 is not a \typ{REAL} (returns the largest exponent found among the components
 of \kbd{x}). When \kbd{x} is an exact~0, this returns
