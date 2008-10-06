@@ -1753,7 +1753,6 @@ gexpo(GEN x)
       return expi(x);
 
     case t_FRAC:
-      if (!signe(x[1])) return -(long)HIGHEXPOBIT;
       return expi(gel(x,1)) - expi(gel(x,2));
 
     case t_REAL:
