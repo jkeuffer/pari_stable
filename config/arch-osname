@@ -18,10 +18,10 @@ if test -n "$myuname"; then
 	    esac;;
   netbsd|freebsd|os2)
             arch=`uname -m`
-            if test -z "$arch"; then arch=${HOSTTYPE:-ix86}; fi
+            if test -z "$arch"; then arch=ix86; fi
             ;;
   cygwin*)  arch=`uname -m`
-            if test -z "$arch"; then arch=${HOSTTYPE:-ix86}; fi
+            if test -z "$arch"; then arch=ix86; fi
             osname=cygwin;;
   ultrix)   arch=mips;;
   nextstep) arch=`file /bin/sh | sed 's/.*(for architecture \(.*\))/\1/'`;;

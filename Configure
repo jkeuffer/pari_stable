@@ -53,22 +53,32 @@ if test -z "$zcat" -a -n "$gzip"; then zcat="$gzip -dc"; fi
 ####################### CONFIGURE - ARCHITECTURE ############################
 . ./get_archos # arch, osname
 ####################### CONFIGURE - COMPILATION #############################
-. ./get_cc            # $_cc_list (includes 'optimization'), extraflag
-. ./get_double_format # doubleformat, sizeof_long
-. ./get_kernel        # asmarch, pretty
-. ./get_dlcflags      # _dl_list, DLCFLAGS, update CFLAGS
-. ./get_ld   # $_ld_list
-. ./get_dlld # $_dlld_list
-. ./get_perl # $_perl_list
+# $_cc_list (includes 'optimization'), extraflag
+. ./get_cc
+# doubleformat, sizeof_long
+. ./get_double_format
+# asmarch, pretty
+. ./get_kernel
+# _dl_list, DLCFLAGS, update CFLAGS
+. ./get_dlcflags
+# $_ld_list
+. ./get_ld
+# $_dlld_list
+. ./get_dlld
+# $_perl_list
+. ./get_perl
 ####################### CONFIGURE - LIBC ####################################
 . ./get_libc # $_has_list, DL_LIBS
 ####################### CONFIGURE - LIBRARIES ###############################
 # Looking for libraries: gmp, X11, fltk, Qt, readline
 echo Checking for optional libraries and headers...
-. ./get_libpth # initialize
-. ./get_gmp  # $_gmp_list
-. ./get_graphic_lib # $_graphic_list
-. ./get_readline # $_readline_list (includes 'readline')
+. ./get_libpth
+# $_gmp_list
+. ./get_gmp
+# $_graphic_list
+. ./get_graphic_lib
+# $_readline_list (includes 'readline')
+. ./get_readline
 #############################################################################
 case $kernlvl1 in
 gmp) libpari_base=pari-gmp;;
