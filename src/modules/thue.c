@@ -1218,7 +1218,7 @@ GEN
 bnfisintnorm(GEN bnf, GEN a)
 {
   pari_sp av = avma;
-  GEN nf = checknf(bnf), T = gel(nf,1), unit = NULL;
+  GEN nf = checknf(bnf), T = nf_get_pol(nf), unit = NULL;
   GEN z = bnfisintnormabs(bnf, a);
   long sNx, i, j, N = degpol(T), l = lg(z), sa = signe(a);
   long norm_1 = 0; /* gcc -Wall */

@@ -279,7 +279,7 @@ GEN
 nfroots(GEN nf,GEN pol)
 {
   pari_sp av = avma;
-  GEN A, T, den;
+  GEN A, T, den, f;
   long d;
 
   if (!nf) return nfrootsQ(pol);
@@ -298,8 +298,8 @@ nfroots(GEN nf,GEN pol)
 
   A = Q_primpart(A);
   den = get_den(&nf, T);
-  (void)nfgcd_all(A, RgX_deriv(A), T,
-                  den == gen_1? gel(nf,4): mulii(gel(nf,4), den), &A);
+  f = nf_get_index(nf);
+  (void)nfgcd_all(A, RgX_deriv(A), T, den == gen_1? f: mulii(f, den), &A);
   if (degpol(A) != d) A = Q_primpart( QXQX_normalize(A, T) );
   ensure_lt_INT(A);
   A = nfsqff(nf,A,1, den);
@@ -315,7 +315,7 @@ nfissplit(GEN nf, GEN x)
   pari_sp av = avma;
   long l;
   nf = checknf(nf);
-  x = rnf_fix_pol(gel(nf,1), x, 1);
+  x = rnf_fix_pol(nf_get_pol(nf), x, 1);
   if (typ(x) != t_POL) pari_err(typeer, "nfissplit");
   l = lg(nfsqff(nf, x, 2, gen_1));
   avma = av; return l != 1;
@@ -474,7 +474,7 @@ nffactor(GEN nf,GEN pol)
   if (degpol(T) == 1) return gerepileupto(av, QX_factor(simplify_shallow(A)));
 
   den = get_den(&nf, T);
-  bad = gel(nf,4); if (den != gen_1) bad = mulii(bad, den);
+  bad = nf_get_index(nf); if (den != gen_1) bad = mulii(bad, den);
   (void)nfgcd_all(A, RgX_deriv(A), T, bad, &B);
   if (DEBUGLEVEL>2) msgTIMER(&ti, "squarefree test");
   if (degpol(B) != dA) B = Q_primpart( QXQX_normalize(B, T) );
@@ -509,7 +509,7 @@ arch_for_T2_prec(GEN G, GEN x, long prec)
 static GEN
 nf_Mignotte_bound(GEN nf, GEN polbase)
 {
-  GEN G = gmael(nf,5,2), lS = leading_term(polbase); /* t_INT */
+  GEN G = nf_get_G(nf), lS = leading_term(polbase); /* t_INT */
   GEN p1, C, N2, matGS, binlS, bin;
   long prec, i, j, d = degpol(polbase), n = nf_get_degree(nf), r1 = nf_get_r1(nf);
 
@@ -570,7 +570,7 @@ PRECPB:
 static GEN
 nf_Beauzamy_bound(GEN nf, GEN polbase)
 {
-  GEN lt, C, s, G = gmael(nf,5,2), POL, bin;
+  GEN lt, C, s, G = nf_get_G(nf), POL, bin;
   long i,prec,precnf, d = degpol(polbase), n = nf_get_degree(nf);
 
   precnf = gprecision(G);
@@ -817,7 +817,7 @@ nfcmbf(nfcmbf_t *T, GEN p, long a, long maxK, long klim)
 {
   GEN pol = T->pol, nf = T->nf, famod = T->fact, dn = T->dn;
   GEN bound = T->bound;
-  GEN nfpol = gel(nf,1);
+  GEN nfpol = nf_get_pol(nf);
   long K = 1, cnt = 1, i,j,k, curdeg, lfamod = lg(famod)-1, dnf = degpol(nfpol);
   GEN res = cgetg(3, t_VEC);
   pari_sp av0 = avma;
@@ -1026,7 +1026,7 @@ static GEN
 nf_chk_factors(nfcmbf_t *T, GEN P, GEN M_L, GEN famod, GEN pk)
 {
   GEN nf = T->nf, bound = T->bound;
-  GEN nfT = gel(nf,1);
+  GEN nfT = nf_get_pol(nf);
   long i, r;
   GEN pol = P, list, piv, y;
   GEN C2ltpol, C = T->L->topowden, Tpk = T->L->Tpk;
@@ -1201,7 +1201,7 @@ bestlift_init(long a, GEN nf, GEN pr, GEN C, nflift_t *L)
   L->iprk = ZM_inv(PRK, pk);
   L->GSmin= GSmin;
   L->prkHNF = prk;
-  init_proj(L, gel(nf,1), pr_get_p(pr));
+  init_proj(L, nf_get_pol(nf), pr_get_p(pr));
 }
 
 /* Let X = Tra * M_L, Y = bestlift(X) return V s.t Y = X - PRK V
@@ -1236,7 +1236,7 @@ nf_LLL_cmbf(nfcmbf_t *T, GEN p, long k, long rec)
 
   GEN famod = T->fact, nf = T->nf, ZC = T->ZC, Br = T->Br;
   GEN Pbase = T->polbase, P = T->pol, dn = T->dn;
-  GEN nfT = gel(nf,1);
+  GEN nfT = nf_get_pol(nf);
   GEN Btra;
   long dnf = degpol(nfT), dP = degpol(P);
 
@@ -1467,15 +1467,15 @@ static long
 nf_pick_prime(long ct, GEN nf, GEN polbase, long fl,
 	      GEN *lt, GEN *Fa, GEN *pr, GEN *Tp)
 {
-  GEN nfpol = gel(nf,1), dk, bad;
+  GEN nfpol = nf_get_pol(nf), dk, bad;
   long minf, n = degpol(nfpol), dpol = degpol(polbase), nbf = 0;
   byteptr pt = diffptr;
   ulong pp = 0;
 
   *lt  = leading_term(polbase); /* t_INT */
   if (gcmp1(*lt)) *lt = NULL;
-  dk = absi(gel(nf,3));
-  bad = mulii(dk,gel(nf,4));
+  dk = absi(nf_get_disc(nf));
+  bad = mulii(dk, nf_get_index(nf));
 
   /* FIXME: slow factorization of large polynomials over large Fq */
   minf = 1;
@@ -1636,7 +1636,7 @@ nfsqff(GEN nf, GEN pol, long fl, GEN den)
 {
   long n, nbf, dpol = degpol(pol);
   GEN pr, C0, polbase, init_fa = NULL;
-  GEN N2, res, polred, lt, nfpol = gel(nf,1);
+  GEN N2, res, polred, lt, nfpol = nf_get_pol(nf);
   nfcmbf_t T;
   nflift_t L;
   pari_timer ti, ti_tot;
@@ -1650,7 +1650,7 @@ nfsqff(GEN nf, GEN pol, long fl, GEN den)
   {
     GEN z;
     if (DEBUGLEVEL>2) fprintferr("Using Trager's method\n");
-    z = nfsqff_trager(Q_primpart(pol), nfpol, mulii(den,gel(nf,4)));
+    z = nfsqff_trager(Q_primpart(pol), nfpol, mulii(den, nf_get_index(nf)));
     if (fl) {
       long i, l = lg(z);
       for (i = 1; i < l; i++)
@@ -1680,7 +1680,7 @@ nfsqff(GEN nf, GEN pol, long fl, GEN den)
     fprintferr("Prime ideal chosen: %Ps\n", pr);
   }
   L.tozk = gel(nf,8);
-  L.topow= Q_remove_denom(gel(nf,7), &L.topowden);
+  L.topow= Q_remove_denom(nf_get_zk(nf), &L.topowden);
   T.dn = den; /* override */
   T.ZC = L2_bound(nf, L.tozk, &(T.dn));
   T.Br = nf_root_bounds(pol, nf); if (lt) T.Br = gmul(T.Br, lt);

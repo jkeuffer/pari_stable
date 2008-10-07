@@ -247,7 +247,7 @@ getallrootsof1(GEN bnf)
 static GEN
 get_lambda(GEN bnr)
 {
-  GEN bnf = gel(bnr,1), nf = gel(bnf,7), pol = gel(nf,1), f = gmael3(bnr,2,1,1);
+  GEN bnf = gel(bnr,1), nf = gel(bnf,7), pol = nf_get_pol(nf), f = gmael3(bnr,2,1,1);
   GEN labas, lamodf, u;
   long a, b, f2, i, lu, v = varn(pol);
 
@@ -343,7 +343,7 @@ getallelts(GEN bnr)
 static GEN
 findbezk(GEN nf, GEN x)
 {
-  GEN a,b, M = gmael(nf,5,1), u = gcoeff(M,1,2);
+  GEN a,b, M = nf_get_M(nf), u = gcoeff(M,1,2);
   long ea, eb;
 
   /* u t_COMPLEX generator of nf.zk, write x ~ a + b u, a,b in Z */
@@ -520,7 +520,7 @@ findquad_pol(GEN p, GEN a, GEN x)
 static GEN
 compocyclo(GEN nf, long m, long d)
 {
-  GEN sb,a,b,s,p1,p2,p3,res,polL,polLK,nfL, D = gel(nf,3);
+  GEN sb,a,b,s,p1,p2,p3,res,polL,polLK,nfL, D = nf_get_disc(nf);
   long ell,vx;
 
   p1 = quadhilbertimag(D);
@@ -549,7 +549,7 @@ compocyclo(GEN nf, long m, long d)
   sb= gneg(gadd(b, truecoeff(polLK,1))); /* s(b) = Tr(b) - b */
   s = gadd(pol_x(vx), gsub(sb, b)); /* s(t) = t + s(b) - b */
   p3 = gmul(p3, galoisapplypol(nfL, s, p3));
-  return findquad_pol(gel(nf,1), a, p3);
+  return findquad_pol(nf_get_pol(nf), a, p3);
 }
 
 /* I integral ideal in HNF. (x) = I, x small in Z ? */
@@ -565,7 +565,7 @@ isZ(GEN I)
 static GEN
 treatspecialsigma(GEN bnr)
 {
-  GEN f = gmael3(bnr,2,1,1), nf = gmael(bnr,1,7), D = gel(nf,3), p1, p2, tryf;
+  GEN f = gmael3(bnr,2,1,1), nf = gmael(bnr,1,7), D = nf_get_disc(nf), p1, p2, tryf;
   long Ds, fl, i = isZ(f);
 
   if (i == 1) return quadhilbertimag(D); /* f = 1 */
@@ -630,7 +630,7 @@ quadray(GEN D, GEN f, long prec)
     bnf = checkbnf(D); nf = gel(bnf,7);
     if (nf_get_degree(nf) != 2)
       pari_err(talker,"not a polynomial of degree 2 in quadray");
-    D = gel(nf,3);
+    D = nf_get_disc(nf);
   }
   bnr = Buchray(bnf, f, nf_INIT|nf_GEN);
   if (gcmp1(gmael(bnr,5,1))) { avma = av; return pol_x(0); }

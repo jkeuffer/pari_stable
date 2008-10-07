@@ -2496,7 +2496,7 @@ rnfcharpoly(GEN nf, GEN Q, GEN x, long v)
   GEN T;
 
   if (v < 0) v = 0;
-  nf = checknf(nf); T = gel(nf,1); vT = varn(T);
+  nf = checknf(nf); T = nf_get_pol(nf); vT = varn(T);
   Q = rnf_fix_pol(T,Q,0);
   if (tx == t_POLMOD) {
     GEN M = gel(x,1);

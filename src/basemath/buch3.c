@@ -44,7 +44,7 @@ buchnarrow(GEN bnf)
   p1 = cgetg(ngen+r1-t + 1,t_COL);
   for (i=1; i<=ngen; i++) p1[i] = gen[i];
   gen = p1;
-  v = archstar_full_rk(NULL, gmael(nf,5,1), v, gen + (ngen - t));
+  v = archstar_full_rk(NULL, nf_get_M(nf), v, gen + (ngen - t));
   v = rowslice(v, t+1, r1);
 
   logs = cgetg(ngen+1,t_MAT);
@@ -657,7 +657,7 @@ isprimitive(GEN nf)
 
   /* N = [L:Q] = product of primes >= p, same is true for [L:K]
    * d_L = t d_K^[L:K] --> check that some q^p divides d_L */
-  d = absi(gel(nf,3));
+  d = absi(nf_get_disc(nf));
   fa = gel(Z_factor_limit(d,0),2); /* list of v_q(d_L). Don't check large primes */
   if (mod2(d)) i = 1;
   else
@@ -691,7 +691,7 @@ regulatorbound(GEN bnf)
   nf = gel(bnf,7); N = nf_get_degree(nf);
   if (!isprimitive(nf)) return dft_bound();
 
-  dK = absi(gel(nf,3));
+  dK = absi(nf_get_disc(nf));
   nf_get_sign(nf, &R1, &R2); R = R1+R2-1;
   c1 = (!R2 && N<12)? int2n(N & (~1UL)): powuu(N,N);
   if (cmpii(dK,c1) <= 0) return dft_bound();
@@ -747,8 +747,8 @@ minimforunits(GEN nf, long BORNE, GEN w)
   }
   r1 = nf_get_r1(nf); n = nf_get_degree(nf);
   minim_alloc(n+1, &q, &x, &y, &z, &v);
-  M = gprec_w(gmael(nf,5,1), prec);
-  r = Q_from_QR(gmael(nf,5,2), prec);
+  M = gprec_w(nf_get_M(nf), prec);
+  r = Q_from_QR(nf_get_G(nf), prec);
   for (j=1; j<=n; j++)
   {
     v[j] = gtodouble(gcoeff(r,j,j));
@@ -966,7 +966,7 @@ lowerboundforregulator_i(GEN bnf)
   nf_get_sign(nf, &R1, &R2); RU = R1+R2-1;
   if (!RU) return gen_1;
 
-  G = gmael(nf,5,2);
+  G = nf_get_G(nf);
   units = matalgtobasis(bnf,units);
   minunit = gnorml2(RgM_RgC_mul(G, gel(units,1))); /* T2(units[1]) */
   for (i=2; i<=RU; i++)
@@ -1106,7 +1106,7 @@ certifybuchall(GEN bnf)
   N=nf_get_degree(nf); if (N==1) return 1;
   nf_get_sign(nf, &R1, &R2);
   funits = check_units(bnf,"bnfcertify");
-  testprimes(bnf, zimmertbound(N,R2,absi(gel(nf,3))));
+  testprimes(bnf, zimmertbound(N,R2,absi(nf_get_disc(nf))));
   reg = gmael(bnf,8,2);
   cyc = gmael3(bnf,8,1,2); nbgen = lg(cyc)-1;
   gen = gmael3(bnf,8,1,3); zu = gmael(bnf,8,4);
@@ -1382,7 +1382,7 @@ rnfnormgroup(GEN bnr, GEN polrel)
 
   checkbnr(bnr); bnf=gel(bnr,1); raycl=gel(bnr,5);
   nf=gel(bnf,7); cnd=gmael3(bnr,2,1,1);
-  polrel = rnf_fix_pol(gel(nf,1),polrel,1);
+  polrel = rnf_fix_pol(nf_get_pol(nf),polrel,1);
   if (!gcmp1(leading_term(polrel)))
     pari_err(impl,"rnfnormgroup for non-monic polynomials");
 
@@ -1399,8 +1399,8 @@ rnfnormgroup(GEN bnr, GEN polrel)
     pari_err(talker,"not an Abelian extension in rnfnormgroup?");
   if (!k) return gerepilecopy(av, group);
 
-  discnf = gel(nf,3);
-  index  = gel(nf,4);
+  discnf = nf_get_disc(nf);
+  index  = nf_get_index(nf);
   for (p=0 ;;)
   {
     long oldf = -1, lfa;
@@ -1582,7 +1582,7 @@ bnrdisc(GEN bnr, GEN H, long flag)
   if ((flag & rnf_REL) || D == gen_0) return D;
 
   nf = checknf(bnr);
-  dkabs = absi(gel(nf,3));
+  dkabs = absi(nf_get_disc(nf));
   clhray = itos(gel(D,1)); p1 = powiu(dkabs, clhray);
   n = clhray * nf_get_degree(nf);
   R1= clhray * itos(gel(D,2));
@@ -1865,7 +1865,7 @@ discrayabslist(GEN bnf, GEN L)
   nf = gel(bnf,7);
   h = gmael3(bnf,8,1,1);
   ID.degk = nf_get_degree(nf);
-  ID.fadk = Z_factor(absi(gel(nf,3)));
+  ID.fadk = Z_factor(absi(nf_get_disc(nf)));
   ID.idealrelinit = trivfact();
   V = cgetg(l, t_VEC);
   D = cgetg(l, t_VEC);
@@ -2060,7 +2060,7 @@ discrayabslistarch(GEN bnf, GEN arch, long bound)
   bnf = checkbnf(bnf);
   nf = gel(bnf,7); r1 = nf_get_r1(nf);
   degk = nf_get_degree(nf);
-  fadkabs = Z_factor(absi(gel(nf,3)));
+  fadkabs = Z_factor(absi(nf_get_disc(nf)));
   h = gmael3(bnf,8,1,1);
   U = init_units(bnf);
   sgnU = nfsign_units(bnf, NULL, 1);

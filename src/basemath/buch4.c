@@ -268,7 +268,7 @@ static GEN
 repres(GEN nf, GEN pr)
 {
   long i, j, k, f = pr_get_f(pr), p, pf, pi;
-  GEN fond, rep, bas = gel(nf,7);
+  GEN fond, rep, bas = nf_get_zk(nf);
 
   fond = cgetg(f+1, t_VEC);
   gel(fond,1) = gel(bas,1);
@@ -286,7 +286,7 @@ repres(GEN nf, GEN pr)
     for (j=1; j<p; j++)
       for (k=1; k<=pi; k++)
 	gel(rep, j*pi+k) = gadd(gel(rep,k),gmulsg(j,gel(fond,i+1)));
-  return gmodulo(rep,gel(nf,1));
+  return gmodulo(rep, nf_get_pol(nf));
 }
 
 /* = 1 if equation y^2 = z^deg(T) * T(x/z) has a pr-adic rational solution
@@ -686,7 +686,7 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
   }
   if (!galois)
   {
-    GEN Ndiscrel = diviiexact(gel(nfabs,3), powiu(gel(nf,3), drel));
+    GEN Ndiscrel = diviiexact(gel(nfabs,3), powiu(nf_get_disc(nf), drel));
     fa_pr_append(nf,bnfabs,absi(Ndiscrel), &prod,&S1,&S2);
   }
 
@@ -728,7 +728,7 @@ rnfisnorm(GEN T, GEN x, long flag)
   if (gcmp_1(x) && odd(drel)) { avma = av; return mkvec2(gen_m1, gen_1); }
 
   /* build set T of ideals involved in the solutions */
-  nfpol = gel(nf,1);
+  nfpol = nf_get_pol(nf);
   prod = gel(T,5);
   S1   = gel(T,6);
   S2   = gel(T,7);

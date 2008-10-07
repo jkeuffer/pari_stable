@@ -470,7 +470,7 @@ FindModulus(GEN bnr, GEN dtQ, long *newprec, long prec)
   f   = gmael3(bnr, 2, 1, 1);
 
   /* if cpl < rb, it is not necessary to try another modulus */
-  rb = expi( powii(mulii(gel(nf,3), ZM_det_triangular(f)), gmul2n(gmael(bnr,5,1), 3)) );
+  rb = expi( powii(mulii(nf_get_disc(nf), ZM_det_triangular(f)), gmul2n(gmael(bnr,5,1), 3)) );
 
   bpr = divcond(bnr);
   nbp = lg(bpr) - 1;
@@ -623,8 +623,8 @@ ArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
   nChar = ic;
 
   nf    = gmael(bnr, 1, 7);
-  diff  = gmael(nf, 5, 5);
-  T     = gmael(nf, 5, 4);
+  diff  = nf_get_TrInv(nf);
+  T     = nf_get_Tr(nf);
   cond  = gmael(bnr, 2, 1);
   cond0 = gel(cond,1); condZ = gcoeff(cond0,1,1);
   cond1 = vec01_to_indices(gel(cond,2));
@@ -899,7 +899,7 @@ InitChar(GEN bnr, GEN listCR, long prec)
 
   modul = gmael(bnr, 2, 1);
   Mr    = gmael(bnr, 5, 2);
-  dk    = gel(nf,3);
+  dk    = nf_get_disc(nf);
   N     = nf_get_degree(nf);
   nf_get_sign(nf, &r1,&r2);
   prec2 = ((prec-2) << 1) + EXTRA_PREC;
@@ -1010,7 +1010,7 @@ CharNewPrec(GEN dataCR, GEN nf, long prec)
   GEN dk, C, p1;
   long N, l, j, prec2;
 
-  dk    =  gel(nf,3);
+  dk    =  nf_get_disc(nf);
   N     =  nf_get_degree(nf);
   prec2 = ((prec - 2)<<1) + EXTRA_PREC;
 
@@ -1370,7 +1370,7 @@ InitPrimesQuad(GEN bnr, long N0, LISTray *R)
   pari_sp av = avma;
   GEN bnf = gel(bnr,1), cond = gmael3(bnr,2,1,1);
   long p,i,l, condZ = itos(gcoeff(cond,1,1)), contZ = itos(content(cond));
-  GEN prime, Lpr, nf = checknf(bnf), dk = gel(nf,3);
+  GEN prime, Lpr, nf = checknf(bnf), dk = nf_get_disc(nf);
   byteptr d = diffptr + 1;
   GEN *gptr[7];
 
@@ -1793,7 +1793,7 @@ static GEN
 RecCoeff2(GEN nf,  RC_data *d,  long prec)
 {
   pari_sp av;
-  GEN vec, M = gmael(nf, 5, 1), beta = d->beta;
+  GEN vec, M = nf_get_M(nf), beta = d->beta;
   long i, imin, imax, lM = lg(M);
 
   d->G = minss(-20, -bit_accuracy(prec) >> 4);
@@ -2461,7 +2461,7 @@ pol_quad_conj(GEN x, GEN y)
 static GEN
 makescind(GEN nf, GEN P)
 {
-  GEN Pp, p, perm, pol, G, L, a, roo, nfpol = gel(nf,1);
+  GEN Pp, p, perm, pol, G, L, a, roo, nfpol = nf_get_pol(nf);
   long i, k, l, is_P;
 
   P = lift_intern(P);

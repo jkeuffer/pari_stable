@@ -231,7 +231,7 @@ ok_subFB(FB_t *F, long t, GEN D)
 static int
 subFBgen(FB_t *F, GEN nf, double PROD, long minsFB)
 {
-  GEN y, perm, yes, no, D = gel(nf,3);
+  GEN y, perm, yes, no, D = nf_get_disc(nf);
   long i, j, k, iyes, ino, lv = F->KC + 1;
   double prod;
   pari_sp av;
@@ -669,7 +669,7 @@ can_factor(FB_t *F, GEN nf, GEN I, GEN m, GEN N, FACT *fact)
 static long
 factorgen(FB_t *F, GEN nf, GEN I, GEN NI, GEN m, FACT *fact)
 {
-  GEN T = gel(nf,1);
+  GEN T = nf_get_pol(nf);
   GEN Nm = absi( ZX_QX_resultant(T, coltoliftalg(nf,m)) ); /* |Nm| */
   GEN N  = diviiexact(Nm, NI); /* N(m / I) */
   return can_factor(F, nf, I, m, N, fact);
@@ -766,7 +766,7 @@ expgexpo(GEN x)
 static GEN
 getfu(GEN nf, GEN *ptA, long force, long *pte, long prec)
 {
-  GEN p1, p2, u, y, matep, A, vec, T = gel(nf,1), M = gmael(nf,5,1);
+  GEN p1, p2, u, y, matep, A, vec, T = nf_get_pol(nf), M = nf_get_M(nf);
   long e, i, j, R1, RU, N = degpol(T);
 
   if (DEBUGLEVEL) fprintferr("\n#### Computing fundamental units\n");
@@ -1114,13 +1114,14 @@ testprimes(GEN bnf, GEN BOUND)
   pari_sp av0 = avma, av;
   ulong p, pmax, bound = itou_or_0(BOUND);
   FACT *fact;
-  GEN nf = gel(bnf,7), f = gel(nf,4), dK = gel(nf,3), Vbase, fb, gp;
+  GEN nf = gel(bnf,7), f = nf_get_index(nf), dK = nf_get_disc(nf);
+  GEN Vbase, fb, gp;
   byteptr d = diffptr + 1;
   FB_t F;
 
   if (!is_pm1(f))
   {
-    GEN D = gmael(nf,5,5), L;
+    GEN D = nf_get_TrInv(nf), L;
     if (DEBUGLEVEL>1) fprintferr("**** Testing Different = %Ps\n",D);
     L = bnfisprincipal0(bnf, D, nf_FORCE);
     if (DEBUGLEVEL>1) fprintferr("     is %Ps\n", L);
@@ -1208,7 +1209,7 @@ get_arch(GEN nf,GEN x,long prec)
   x = nf_to_scalar_or_basis(nf,x);
   RU = lg(nf[6]) - 1;
   if (typ(x) != t_COL) return zerovec(RU);
-  x = RgM_RgC_mul(gmael(nf,5,1), Q_primpart(x));
+  x = RgM_RgC_mul(nf_get_M(nf), Q_primpart(x));
   v = cgetg(RU+1,t_VEC); R1 = nf_get_r1(nf);
   for (i=1; i<=R1; i++) gel(v,i) = mylog(gel(x,i),prec);
   for (   ; i<=RU; i++) gel(v,i) = gmul2n(mylog(gel(x,i),prec),1);
@@ -1297,7 +1298,7 @@ get_arch_real(GEN nf, GEN x, GEN *emb, long prec)
   RU = lg(nf[6])-1;
   R1 = nf_get_r1(nf);
   if (typ(x) != t_COL) return scalar_get_arch_real(R1, RU, x, emb, prec);
-  x = RgM_RgC_mul(gmael(nf,5,1), x);
+  x = RgM_RgC_mul(nf_get_M(nf), x);
   v = cgetg(RU+1,t_COL);
   for (i=1; i<=R1; i++)
   {
@@ -1405,7 +1406,7 @@ isprincipalarch(GEN bnf, GEN col, GEN kNx, GEN e, GEN dx, long *pe)
 {
   GEN nf, x, matunit, s, M;
   long N, R1, RU, i, prec = gprecision(col);
-  bnf = checkbnf(bnf); nf = gel(bnf,7); M = gmael(nf,5,1);
+  bnf = checkbnf(bnf); nf = gel(bnf,7); M = nf_get_M(nf);
   if (!prec) prec = prec_arch(bnf);
   matunit = gel(bnf,3);
   N = nf_get_degree(nf);
@@ -1695,7 +1696,7 @@ isprincipalfact(GEN bnf, GEN C, GEN P, GEN e, long flag)
 
   if (gen)
   {
-    Cext = (flag & nf_GENMAT)? cgetg(1, t_MAT): mkpolmod(gen_1,gel(nf,1));
+    Cext = (flag & nf_GENMAT)? cgetg(1, t_MAT): mkpolmod(gen_1,nf_get_pol(nf));
     C0 = mkvec2(C, Cext);
     id = expandext(nf, C0, P, e);
   } else {
@@ -1842,7 +1843,7 @@ bnfisunit(GEN bnf,GEN x)
   e = umodiu(roundr(divrr(p1, pi2_sur_w)), n);
   if (n > 2)
   {
-    GEN ro = RgV_dotproduct(row(gmael(nf,5,1), 1), z);
+    GEN ro = RgV_dotproduct(row(nf_get_M(nf), 1), z);
     GEN p2 = roundr(divrr(garg(ro, prec), pi2_sur_w));
     e *= Fl_inv(umodiu(p2,n), n);
     e %= n;
@@ -2070,7 +2071,7 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
   pari_sp av;
   long nbsmallnorm, nbfact, j, k, noideal = F->KC, precbound;
   long N = nf_get_degree(nf), R1 = nf_get_r1(nf), prec = nf_get_prec(nf);
-  GEN x, gx, r, M = gmael(nf,5,1), G = gmael(nf,5,2);
+  GEN x, gx, r, M = nf_get_M(nf), G = nf_get_G(nf);
   GEN L = const_vecsmall(F->KC, 0), invp = relationrank(cache, L, mod_p);
   REL_t *rel = cache->last;
 
@@ -2883,12 +2884,12 @@ buchall_end(GEN nf,GEN res, GEN clg2, GEN W, GEN B, GEN A, GEN C,GEN Vbase)
 static GEN
 bnftosbnf(GEN bnf)
 {
-  GEN y = cgetg(13,t_VEC), nf  = gel(bnf,7), T = gel(nf,1), res = gel(bnf,8);
+  GEN y = cgetg(13,t_VEC), nf  = gel(bnf,7), T = nf_get_pol(nf), res = gel(bnf,8);
 
   gel(y,1) = T;
   gel(y,2) = gmael(nf,2,1);
-  gel(y,3) = gel(nf,3);
-  gel(y,4) = gel(nf,7);
+  gel(y,3) = nf_get_disc(nf);
+  gel(y,4) = nf_get_zk(nf);
   gel(y,5) = gel(nf,6);
   gel(y,6) = gen_0; /* FIXME: unused */
   gel(y,7) = gel(bnf,1);
@@ -2924,7 +2925,7 @@ sbnf2bnf(GEN sbnf, long prec)
   fu = gel(sbnf,11);
   if (prec > gprecision(ro)) ro = get_roots(T.x,T.r1,prec);
   nf = nfbasic_to_nf(&T, ro, prec);
-  bas = gel(nf,7);
+  bas = nf_get_zk(nf);
 
   A = get_archclean(nf, fu, prec, 1);
   if (!A) pari_err(precer, "bnfmake");
@@ -3110,7 +3111,7 @@ shift_G(GEN G, GEN Gtw, long a, long b, long r1)
 static void
 compute_vecG(GEN nf, FB_t *F, long n)
 {
-  GEN G0, Gtw0, vecG, G = gmael(nf,5,2);
+  GEN G0, Gtw0, vecG, G = nf_get_G(nf);
   long e, i, j, ind, r1 = nf_get_r1(nf), r = lg(G)-1;
   if (n == 1) { F->G0 = G0 = ground(G); F->vecG = mkvec( G0 ); return; }
   for (e = 32;;)
@@ -3164,7 +3165,7 @@ Buchall_param(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long
 
   nf_get_sign(nf, &R1, &R2); RU = R1+R2;
   compute_vecG(nf, &F, minss(RU, 9));
-  D = absi(gel(nf,3)); drc = gtodouble(D);
+  D = absi(nf_get_disc(nf)); drc = gtodouble(D);
   if (DEBUGLEVEL) fprintferr("R1 = %ld, R2 = %ld\nD = %Ps\n",R1,R2, D);
   LOGD = log(drc); LOGD2 = LOGD*LOGD;
   lim = (long) (exp(-N + R2 * log(4/PI)) * sqrt(2*PI*N*drc));

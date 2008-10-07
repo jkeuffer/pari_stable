@@ -109,7 +109,7 @@ reducebetanaive(GEN bnfz, GEN be, GEN ell)
   GEN z, p1, p2, nmax, b, c, nf = checknf(bnfz);
 
   r1 = nf_get_r1(nf);
-  b = gmul(gmael(nf,5,1), be);
+  b = gmul(nf_get_M(nf), be);
   n = maxss((itos(ell)>>1), 3);
   z = cgetg(n+1, t_VEC);
   c = gmul(real_i(gel(bnfz,3)), ell);
@@ -232,7 +232,7 @@ tauofalg(GEN x, GEN U) {
 static tau_s *
 get_tau(tau_s *tau, GEN nf, GEN U)
 {
-  GEN bas = gel(nf,7), Uzk;
+  GEN bas = nf_get_zk(nf), Uzk;
   long i, l = lg(bas);
   Uzk = cgetg(l, t_MAT);
   for (i=1; i<l; i++)
@@ -677,7 +677,7 @@ rnfkummersimple(GEN bnr, GEN subgroup, GEN gell, long all)
   vecWB = shallowconcat(vecW, vecBp);
 
   prec = DEFAULTPREC +
-    nbits2nlong(((degK-1) * (gexpo(vecWB) + gexpo(gmael(nf,5,1)))));
+    nbits2nlong(((degK-1) * (gexpo(vecWB) + gexpo(nf_get_M(nf)))));
   if (nf_get_prec(nf) < prec) nf = nfnewprec_shallow(nf, prec);
   msign = nfsign(nf, vecWB);
   arch = ZV_to_zv(arch);
@@ -1076,7 +1076,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   checkbnrgen(bnr);
   bnf = gel(bnr,1);
   nf  = gel(bnf,7);
-  polnf = gel(nf,1); vnf = varn(polnf);
+  polnf = nf_get_pol(nf); vnf = varn(polnf);
   if (!vnf) pari_err(talker,"main variable in kummer must not be x");
   wk = gmael3(bnf,8,4,1);
   /* step 7 */
@@ -1290,7 +1290,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
             continue;
           } else {
             GEN P0 = Q_primpart(lift(P));
-            GEN g = nfgcd(P0, RgX_deriv(P0), polnf, gel(nf,4));
+            GEN g = nfgcd(P0, RgX_deriv(P0), polnf, nf_get_index(nf));
             if (degpol(g)) continue;
             H = rnfnormgroup(bnr, P);
             if (!ZM_equal(subgroup,H) && !bnrisconductor(bnr,H)) continue;

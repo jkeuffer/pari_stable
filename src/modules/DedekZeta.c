@@ -22,7 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 static GEN
 dirzetak0(GEN nf, long N0)
 {
-  GEN vect, c, c2, pol = gel(nf,1), index = gel(nf,4);
+  GEN vect, c, c2, pol = nf_get_pol(nf), index = nf_get_index(nf);
   pari_sp av = avma;
   long i, k, limk, lx;
   ulong q, p;
@@ -143,7 +143,7 @@ zeta_get_i0(long r1, long r2, long bit, GEN limx)
 GEN
 initzeta(GEN pol, long prec)
 {
-  GEN nfz, nf, gr1, gr2, gru, p1, p2, cst, coef, bnf = checkbnf_i(pol);
+  GEN nfz, nf, gr2, gru, p1, p2, cst, coef, bnf = checkbnf_i(pol);
   GEN limx, resi,zet,C,coeflog,racpi,aij,tabj,colzero, tabcstn, tabcstni;
   GEN c_even, ck_even, c_odd, ck_odd, serie_even, serie_odd, serie_exp, Pi;
   long N0, i0, r1, r2, r, R, N, i, j, k, n, bit = bit_accuracy(prec) + 6;
@@ -163,14 +163,13 @@ initzeta(GEN pol, long prec)
   /* class number & regulator */
   nf = gel(bnf,7); N = nf_get_degree(nf);
   nf_get_sign(nf, &r1, &r2);
-  gr1 = gmael(nf,2,1);
   gr2 = gmael(nf,2,2);
   r = r1 + r2; R = r+2;
   av = avma; p1 = gel(bnf,8); p2 = mpmul(shifti(gmael(p1,1,1),r1), gel(p1,2));
   resi = gerepileupto(av, gdiv(p2, gmael(p1,4,1))); /* hr 2^r1 / w*/
 
   av = avma;
-  p1 = sqrtr_abs(itor(gel(nf,3), prec));
+  p1 = sqrtr_abs(itor(nf_get_disc(nf), prec));
   p2 = gmul2n(powru(racpi,N), r2);
   cst = gerepileuptoleaf(av, divrr(p1,p2));
 
