@@ -22,9 +22,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**                                                               **/
 /*******************************************************************/
 #ifdef LONG_IS_64BIT
-# define SQRTVERYBIGINT 3037000500   /* ceil(sqrt(LONG_MAX)) */
+static const long SQRTVERYBIGINT = 3037000500;   /* ceil(sqrt(LONG_MAX)) */
 #else
-# define SQRTVERYBIGINT 46341
+static const long SQRTVERYBIGINT = 46341;
 #endif
 
 /* Tchebichev polynomial: T0=1; T1=X; T(n)=2*X*T(n-1)-T(n-2)
