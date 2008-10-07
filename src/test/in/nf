@@ -1,0 +1,6 @@
+\p38
+setrand(1429412696);bnfinit(x^2+29051222508*x-12).clgp
+bnfinit(x^8 + 12*x^6 + 30*x^4 + 24*x^2 + 4).reg
+bnfinit(x^4 - 3*x^2 + 49).reg
+
+nfinit(factor(polzagier(9,5))[2,1],2);

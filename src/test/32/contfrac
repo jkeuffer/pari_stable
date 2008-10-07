@@ -1,0 +1,4 @@
+  ***   at top-level: contfrac(1,[],-1)
+  ***                 ^-----------------
+  *** contfrac: negative nmax in contfrac0.
+Total time spent: 8
