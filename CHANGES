@@ -344,9 +344,7 @@ BA 86- factormod and matker: faster linear algebra over F2.
    88- let forvec(X = v,...) respect the type of v (t_VEC or t_COL)
 
   Added
-    1- new benches: galoisinit, ispower, nffactor, subfields, resultant,
-       partition, aurifeuille, nfhilbert, polmod, combinat, subcyclo, ideal,
-       polred, qf, charpoly, err
+    1- many new benches (make test-all)
     2- split up some large monolithic files: new files
        src/basemath/ RgV.c, FpV.c, ZX.c, ZV.c, concat.c, lll.c, hnf_snf.c
          prime.c, bit.c
