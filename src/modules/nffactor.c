@@ -1240,7 +1240,7 @@ nf_LLL_cmbf(nfcmbf_t *T, GEN p, long k, long rec)
   GEN Btra;
   long dnf = degpol(nfT), dP = degpol(P);
 
-  double BitPerFactor = 0.5; /* nb bits / modular factor */
+  double BitPerFactor = 0.4; /* nb bits / modular factor */
   long i, C, tmax, n0;
   GEN lP, Bnorm, Tra, T2, TT, CM_L, m, list, ZERO;
   double Bhigh;
