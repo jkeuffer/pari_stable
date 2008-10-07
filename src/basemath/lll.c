@@ -130,7 +130,7 @@ mu, r, s updated in place (affrr).
 */
 static long
 Babai(pari_sp av, long kappa, GEN *pG, GEN *pB, GEN *pU, GEN mu, GEN r, GEN s,
-      long a, long zeros, long maxG, long n, GEN eta, GEN etaplus1, long prec)
+      long a, long zeros, long maxG, long n, GEN eta, GEN halfplus1, long prec)
 {
   pari_sp lim = stack_lim(av,2);
   GEN B = *pB, G = *pG, U = *pU, tmp, rtmp, ztmp;
@@ -187,7 +187,7 @@ Babai(pari_sp av, long kappa, GEN *pG, GEN *pB, GEN *pU, GEN mu, GEN r, GEN s,
 
       test = 1;
       /* we consider separately the case |X| = 1 */
-      if (absr_cmp(tmp, etaplus1) <= 0)
+      if (absr_cmp(tmp, halfplus1) <= 0)
       {
         if (signe(tmp) > 0) { /* in this case, X = 1 */
           pari_sp btop = avma;
@@ -237,7 +237,7 @@ Babai(pari_sp av, long kappa, GEN *pG, GEN *pB, GEN *pU, GEN mu, GEN r, GEN s,
       if (lgefint(ztmp) == 3)
       {
         pari_sp btop = avma;
-        ulong xx = ztmp[2]; /* X is stored in a long signed int */
+        ulong xx = ztmp[2]; /* X fits in an ulong */
         if (signe(ztmp) > 0) /* = xx */
         {
           for (k=zeros+1; k<j; k++)
@@ -286,9 +286,8 @@ Babai(pari_sp av, long kappa, GEN *pG, GEN *pB, GEN *pU, GEN mu, GEN r, GEN s,
           for (i=kappa+1; i<=maxG; i++)
             gmael(G,i,kappa) = addmulu(gmael(G,i,kappa), gmael(G,i,j), xx);
         }
-        continue;
       }
-      ztmp = roundr_safe(tmp);
+      else
       {
         GEN tmp2  = itor(ztmp,prec);
         long expo = expo(tmp2)-bit_accuracy(prec);
@@ -359,7 +358,7 @@ fplll(GEN *ptrB, GEN *ptrU, GEN *ptrr, double DELTA, double ETA, long flag, long
   pari_sp av, av2, lim;
   long kappa, kappa2, d, n, i, j, zeros, kappamax, maxG, bab;
   GEN G, mu, r, s, tmp, SPtmp, alpha;
-  GEN delta = dbltor(DELTA), eta = dbltor(ETA), etaplus1 = dbltor(ETA+1);
+  GEN delta = dbltor(DELTA), eta = dbltor(ETA), halfplus1 = dbltor(1.5);
   const long triangular = 0;
   pari_timer T;
   GEN B = *ptrB, U;
@@ -431,7 +430,7 @@ fplll(GEN *ptrB, GEN *ptrU, GEN *ptrr, double DELTA, double ETA, long flag, long
     /* Step3: Call to the Babai algorithm, mu,r,s updated in place */
     bab = Babai(av, kappa, &G,&B,&U, mu,r,s, alpha[kappa], zeros, maxG,
       gram? 0 : ((triangular && kappamax <= n) ? kappamax: n),
-      eta, etaplus1, prec);
+      eta, halfplus1, prec);
     if (bab) {*ptrB=(gram?G:B); *ptrU=U; return NULL; }
 
     av2 = avma;
