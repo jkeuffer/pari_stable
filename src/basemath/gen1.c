@@ -926,7 +926,10 @@ gadd(GEN x, GEN y)
       if (lg(y) != lg(x)) pari_err(operi,"+",x,y);
       return RgC_add(x,y);
     case t_MAT:
-      if (lg(y) != lg(x)) pari_err(operi,"+",x,y);
+      lx = lg(x);
+      if (lg(y) != lx) pari_err(operi,"+",x,y);
+      if (lx == 1) return cgetg(1, t_MAT);
+      if (lg(y[1]) != lg(x[1])) pari_err(operi,"+",x,y);
       return RgM_add(x,y);
 
     default: pari_err(operf,"+",x,y);
@@ -1153,7 +1156,7 @@ gsubsg(long x, GEN y)
 GEN
 gsub(GEN x, GEN y)
 {
-  long tx = typ(x), ty = typ(y), vx, vy;
+  long tx = typ(x), ty = typ(y), lx, vx, vy;
   pari_sp av;
   GEN z, p1;
   if (tx == ty) switch(tx) /* shortcut to generic case */
@@ -1206,7 +1209,9 @@ gsub(GEN x, GEN y)
       if (lg(y) != lg(x)) pari_err(operi,"+",x,y);
       return RgC_sub(x,y);
     case t_MAT:
-      if (lg(y) != lg(x)) pari_err(operi,"+",x,y);
+      if (lg(y) != lx) pari_err(operi,"+",x,y);
+      if (lx == 1) return cgetg(1, t_MAT);
+      if (lg(y[1]) != lg(x[1])) pari_err(operi,"+",x,y);
       return RgM_sub(x,y);
     case t_RFRAC: case t_SER: break;
 
