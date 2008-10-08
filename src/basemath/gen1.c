@@ -1209,6 +1209,7 @@ gsub(GEN x, GEN y)
       if (lg(y) != lg(x)) pari_err(operi,"+",x,y);
       return RgC_sub(x,y);
     case t_MAT:
+      lx = lg(x);
       if (lg(y) != lx) pari_err(operi,"+",x,y);
       if (lx == 1) return cgetg(1, t_MAT);
       if (lg(y[1]) != lg(x[1])) pari_err(operi,"+",x,y);
