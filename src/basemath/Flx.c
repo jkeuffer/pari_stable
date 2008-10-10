@@ -1148,7 +1148,7 @@ Flx_resultant(GEN a, GEN b, ulong p)
 
     if (both_odd(da,db)) res = p - res;
     if (lb != 1) res = Fl_mul(res, Fl_powu(lb, da - dc, p), p);
-    if (++cnt == 4) { cnt = 0; avma = av; }
+    if (++cnt == 100) { cnt = 0; c = gerepileuptoleaf(av, c); }
     da = db; /* = degpol(a) */
     db = dc; /* = degpol(b) */
   }
