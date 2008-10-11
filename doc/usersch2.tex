@@ -177,7 +177,7 @@ expressions in the \var{seq} are discarded after the execution of the
 In addition, the value of the \var{seq} is printed if the line does not end
 with a semicolon \kbd{;}.
 
-\subsec{The gp history}.
+\subsec{The gp history of results}.
 
 This is not to be confused with the history of your \emph{commands},
 maintained by \kbd{readline}. The \kbd{gp} history contains the \emph{results}
@@ -271,12 +271,12 @@ The following types are provided for convenience, not for speed:
 \typ{RFRAC}. Indeed, they always perform a reduction of some kind after
 each basic operation, even though it is usually more efficient to perform
 a single reduction at the end of some complex computation. For instance,
-in a convolution product $\sum_{i+j = n} x_i y_j$ in $\Z/N\Z$ (common
-when multiplying polynomials!), it is wasteful to perform $n$ reductions
-modulo $N$. In short, basic individual operations on these types are fast,
-but recursive objects with such components could be handled more efficiently:
-programming with libpari will save large constant factors here, compared to
-GP.
+in a convolution product $\sum_{i+j = n} x_i y_j$ in $\Z/N\Z$ --- common
+when multiplying polynomials! ---, it is quite wasteful to perform $n$
+reductions modulo $N$. In short, basic individual operations on these types
+are fast, but recursive objects with such components could be handled more
+efficiently: programming with libpari will save large constant factors here,
+compared to GP.
 
 \subsec{Integers} \sidx{integer}
 (\tet{t_INT}): after an (optional) leading \kbd{+} or \kbd{-}, type in the
@@ -642,15 +642,51 @@ $x[k]=\var{expr}$).
 the components line by line, the components being separated by commas
 ``\kbd{,}'', the lines by semicolons ``\kbd{;}'', and everything enclosed in
 brackets ``\kbd{[}$\,$'' and ``$\,$\kbd{]}'', e.g. \kbd{[x,y; z,t; u,v]}.
-\kbd{[ ; ]} yields the empty ($0 \times 0$) matrix.
-The function \tet{Mat} can be used
-to transform any object into a matrix (see Chapter 3).
+\kbd{[;]} yields an empty ($0 \times 0$) matrix. The function \tet{Mat}
+transforms any object into a matrix, and \tet{matrix} creates matrices
+whose $(i,j)$-th entry is described by a function $f(i,j)$:
+\bprog
+? Mat(1)
+%1 =
+[1]
+? matrix(2,2, i,j, 2*i+j)
+%2 =
+[3 4]
 
-Note that although the internal representation is essentially the same (only
-the type number is different), a row vector of column vectors is \emph{not} a
-matrix; for example, multiplication will not work in the same way. It is
-easy to go from one representation to the other using \tet{Vec} / \tet{Mat},
-though:
+[5 6]
+@eprog
+
+If \kbd{M} is a matrix, \kbd{M[i,j]} refers to its $(i,j)$-th entry, 
+\kbd{M[i,]} to its $i$-th row, and
+\kbd{M[,j]} to its $j$-th column; but \kbd{M[i]} is meaningless and triggers
+an error. You can assign a result to \kbd{M[i,j]}, \kbd{M[i,]} or
+\kbd{M[,j]}; provided that the expression is a row or column vector of the
+right dimension in the later two cases. This process is recursive, so if
+\kbd{M}
+is a matrix of matrices of \dots, an expression such as \kbd{M[1,1][,3][4] =
+1} is perfectly valid (and actually identical to \kbd{M[1,1][4,3] = 1}),
+assuming that all matrices along the way have compatible dimensions.
+
+\misctitle{Technical note (design flaw).} Matrices are internally represented
+as a vector of columns. All matrices with $0$ columns are thus represented
+by the same object (internally, an empty vector), and there is no way to
+distinguish between them. Thus it is not possible to create or represent
+matrices with zero columns and an actual nonzero number of rows.
+The empty matrix \kbd{[;]} is handled as though it had an arbitrary number of
+rows, exactly as many as needed for the current computation to make sense:
+\bprog
+? [1,2,3; 4,5,6] * [;]
+%1 = [;]
+@eprog\noindent
+The empty matrix on the first line is understood as a $3\times 0$ matrix, and
+the result as a $2\times 0$ matrix. On the other hand, it is possible to
+create matrices with a given positive number of columns, each of which has
+zero rows, e.g.~using \kbd{Mat} as above or using the \kbd{matrix} function.
+
+Note that although the internal representation is essentially the same, a row
+vector of column vectors is \emph{not} a matrix; for example, multiplication
+will not work in the same way. It is easy to go from one representation to
+the other using \tet{Vec} / \tet{Mat}, though:
 \bprog
 ? [1,2,3;4,5,6]
 %1 =
@@ -665,20 +701,7 @@ though:
 [1 2 3]
 
 [4 5 6]
-@eprog\noindent
-It is possible to create matrices  with a given positive number
-of columns, each of which has zero rows (e.g.~using \kbd{Mat} as above or using
-the \kbd{matrix} function). It is not possible to create or represent matrices
-with zero columns and a nonzero number of rows.
-
-If $x$ is a matrix, $x[m,n]$ refers to its $(m,n)$ entry; you can assign a
-result to $x[m,n]$, but \emph{not} to $x[m]$. If you want to assign an
-expression to the $m$-th column of a matrix $x$, use $x[,m]=\var{expr}$
-instead. Similarly, use $x[m,]=\var{expr}$ to assign an expression to the
-$m$-th row of $x$. This process is recursive, so if $x$ is a matrix of
-matrices of \dots, an expression such as \kbd{x[1,1][,3][4] = 1} is perfectly
-valid (and actually identical to \kbd{x[1,1][4,3] = 1}), assuming that all
-matrices along the way have compatible dimensions.
+@eprog
 
 \subsec{Lists} (\tet{t_LIST}):\sidx{list} lists can be input
 directly, as in \kbd{List([1,2,3,4])}; but in most cases, one creates
