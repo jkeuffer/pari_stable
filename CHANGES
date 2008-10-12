@@ -127,6 +127,7 @@ BA105- Vecsmall([1,1])^-1 returned garbage
   106- was not handling nffactor(*huge degree* nf, *non-monic* t_POL) properly
        --> wrong result and possible memory corruption [#870]
   107- polredabs: excessive stack usage [#872]
+  108- besselj(0., 0) --> error [#880]
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]

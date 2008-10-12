@@ -76,19 +76,24 @@ bessel_get_lim(double B, double L)
 static GEN
 jbesselintern(GEN n, GEN z, long flag, long prec)
 {
-  long i, lz, lim, k, ki, precnew;
+  long i, lz, ki;
   pari_sp av = avma;
-  double B, L;
-  GEN p1, p2, y;
+  GEN y;
 
   switch(typ(z))
   {
     case t_INT: case t_FRAC: case t_QUAD:
     case t_REAL: case t_COMPLEX:
-      i = precision(z); if (i) prec = i;
-      p2 = gdiv(gpow(gmul2n(z,-1),n,prec), ggamma(gaddgs(n,1),prec));
-      if (gcmp0(z)) return gerepilecopy(av, p2);
+    {
+      int flz0 = gcmp0(z);
+      long lim, k, precnew;
+      GEN p1, p2;
+      double B, L;
 
+      i = precision(z); if (i) prec = i;
+      if (flz0 && gcmp0(n)) return real_1(prec);
+      p2 = gdiv(gpow(gmul2n(z,-1),n,prec), ggamma(gaddgs(n,1),prec));
+      if (flz0) return gerepileupto(av, p2);
       L = 1.3591409 * gtodouble(gabs(gtofp(z,3),prec));
       precnew = prec;
       if (L >= 1.0) precnew += 1 + (long)(L/(1.3591409*LOG2*BITS_IN_LONG));
@@ -105,6 +110,7 @@ jbesselintern(GEN n, GEN z, long flag, long prec)
       lim = bessel_get_lim(B, L);
       p1 = gprec_wtrunc(_jbessel(n,z,flag,lim), prec);
       return gerepileupto(av, gmul(p2,p1));
+    }
 
     case t_VEC: case t_COL: case t_MAT:
       y = cgetg_copy(z, &lz);
