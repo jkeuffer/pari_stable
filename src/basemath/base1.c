@@ -1642,7 +1642,7 @@ Polred(GEN x, long flag, GEN fa)
 {
   pari_sp av = avma;
   GEN ro = NULL, y;
-  nfbasic_t T; nfbasic_init(x, flag, fa, &T);
+  nfbasic_t T; nfbasic_init(x, flag & nf_PARTIALFACT, fa, &T);
   if (T.lead) pari_err(impl,"polred for non-monic polynomials");
   set_LLL_basis(&T, &ro, 0.99);
   y = polred_aux(T.x, T.bas, flag & nf_ORIG);
@@ -1916,34 +1916,31 @@ findmindisc(GEN y, GEN *pa)
   *pa = b; return x;
 }
 
-static GEN
-rev(GEN a, GEN x, GEN lead)
-{
-  GEN b = QXQ_reverse(a, x);
-  if (lead) b = RgX_Rg_div(b, lead);
-  return b;
-}
 /* z "small" minimal polynomial of Mod(a,x), deg z = deg x */
 static GEN
 store(GEN x, GEN z, GEN a, nfbasic_t *T, long flag, GEN u)
 {
-  GEN y, b = NULL;
+  GEN y, b;
 
   if (u) a = RgV_RgC_mul(T->bas, ZM_ZC_mul(u, a));
+  if (flag & (nf_ORIG|nf_ADDZK))
+  {
+    b = QXQ_reverse(a, x);
+    if (T->lead) b = RgX_Rg_div(b, T->lead);
+  }
+  else
+    b = NULL;
+
   if (flag & nf_RAW)
     y = mkvec2(z, a);
-  else if (flag & nf_ORIG) { /* store phi(b mod z). */
-    b = rev(a, x, T->lead);
+  else if (flag & nf_ORIG) /* store phi(b mod z). */
     y = mkvec2(z, mkpolmod(b,z));
-  }
   else
     y = z;
   if (flag & nf_ADDZK)
   { /* append integral basis for number field Q[X]/(z) to result */
     long n = degpol(x);
-    GEN t; 
-    if (!b) b = rev(a, x, T->lead);
-    t = RgV_RgM_mul(RgXQ_powers(b, n-1, z), RgXV_to_RgM(T->bas,n));
+    GEN t = RgV_RgM_mul(RgXQ_powers(b, n-1, z), RgXV_to_RgM(T->bas,n));
     y = mkvec2(y, t);
   }
   return y;
