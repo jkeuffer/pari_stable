@@ -63,7 +63,7 @@ sub geterrs
   open(A,$f);
   while (<A>)
   {
-    if (m,^/(\*\s*\w+\s*\*)/,)
+    if (m,/(\*\s*\w+\s*\*)/,)
     {
       $e = $pat = $1;
       $e =~ s/\W*(\w+)\W*/$1/;
