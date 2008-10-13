@@ -20,9 +20,21 @@ Doc: finds polynomials with reasonably
  stored in the \tet{addprimes} table.
 
  2: gives also elements. The result is a two-column matrix, the first column
- giving the elements defining these subfields, the second giving the
+ giving primitive elements defining these subfields, the second giving the
  corresponding minimal polynomials.
+ \bprog
+ ? M = polred(x^4 + 8, 2)
+ %1 =
+ [1 x - 1]
 
+ [1/2*x^2 x^2 + 2]
+
+ [1/4*x^3 x^4 + 2]
+
+ [x x^4 + 8]
+ ? minpoly(Mod(M[2,1], x^4+8))
+ %2 = x^2 + 2
+ @eprog\noindent
  If $fa$ is given, it is assumed that it is the two-column matrix of the
  factorization of the discriminant of the polynomial $x$.
 Variant: Also available is \fun{GEN}{polred}{GEN x} ($\fl = 0$). The function
