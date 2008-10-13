@@ -8,7 +8,6 @@ setrand(1);as=matrix(3,3,j,k,vectorv(5,l,random\10^8));
 nfpol=x^5-5*x^3+5*x+25; nf=nfinit(nfpol)
 nfinit(nfpol,2)
 nfinit(nfpol,3)
-nfinit(nfpol,4)
 nf3=nfinit(x^6+108);
 nf4=nfinit(x^3-10*x+8)
 setrand(1);bnf2=bnfinit(y^3-y-1);nf2=bnf2[7];

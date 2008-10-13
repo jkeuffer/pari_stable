@@ -1320,7 +1320,7 @@ static GEN polred_aux(nfbasic_t *T, GEN *pro, long flag);
 static GEN
 nfpolred(nfbasic_t *T, GEN *pro)
 {
-  GEN x = T->x, dx = T->dx, a, z, d, rev, pow, dpow;
+  GEN x = T->x, dx = T->dx, a, z, rev, pow, dpow;
   long i, n = degpol(x), v = varn(x);
 
   if (n == 1) {
@@ -1339,20 +1339,9 @@ nfpolred(nfbasic_t *T, GEN *pro)
   pow = Q_remove_denom(pow, &dpow);
   a = T->bas;
   for (i=2; i<=n; i++) gel(a,i) = QX_ZXQV_eval(gel(a,i), pow, dpow);
-  a = Q_remove_denom(a, &d);
-  if (!d)
-    T->bas = pol_x_powers(n, v);
-  else
-  {
-    GEN M = RgXV_to_RgM(a, n);
-    M = RgM_Rg_div(ZM_hnfmodid(M,d), d);
-    T->bas = RgM_to_RgXV(M, v);
-  }
   (void)Z_issquareall(diviiexact(dx,T->dK), &(T->index));
-  T->dx = dx;
-  T->x  = x;
-  set_LLL_basis(T, pro, 0.99); /* changed T.x */
-  return rev;
+  T->basden = NULL; /* recompute */
+  T->dx = dx; T->x = x; *pro = NULL; return rev;
 }
 
 /* let bas a t_VEC of QX giving a Z-basis of O_K. Return the index of the
@@ -1561,6 +1550,66 @@ nfnewprec(GEN nf, long prec)
 /**                           POLRED                               **/
 /**                                                                **/
 /********************************************************************/
+GEN
+T2_from_embed_norm(GEN x, long r1)
+{
+  GEN p = RgV_sumpart(x, r1);
+  GEN q = RgV_sumpart2(x,r1+1, lg(x)-1);
+  if (q != gen_0) p = gadd(p, gmul2n(q,1));
+  return p;
+}
+GEN
+T2_from_embed(GEN x, long r1) { return T2_from_embed_norm(gnorm(x), r1); }
+
+typedef struct {
+  long r1, v, prec;
+  GEN ZKembed; /* embeddings of fincke-pohst-reduced Zk basis */
+  GEN u; /* matrix giving fincke-pohst-reduced Zk basis */
+  GEN M; /* embeddings of initial (LLL-reduced) Zk basis */
+  GEN bound; /* T2 norm of the polynomial defining nf */
+} CG_data;
+
+/* characteristic pol of x (given by embeddings) */
+static GEN
+get_pol(CG_data *d, GEN x)
+{
+  long e;
+  GEN g = grndtoi(roots_to_pol_r1(x, d->v, d->r1), &e);
+  if (e > -5) pari_err(precer, "get_pol");
+  return g;
+}
+
+/* characteristic pol of x (given as vector on (w_i)) */
+static GEN
+get_polchar(CG_data *d, GEN x)
+{ return get_pol(d, RgM_RgC_mul(d->ZKembed,x)); }
+
+/* return a defining polynomial for Q(w_i) */
+static GEN
+get_polmin_w(CG_data *d, long k)
+{
+  GEN g = get_pol(d, gel(d->ZKembed,k));
+  (void)ZX_gcd_all(g, ZX_deriv(g), &g);
+  return g;
+}
+
+/* does x generate the correct field ? */
+static GEN
+chk_gen(void *data, GEN x)
+{
+  pari_sp av = avma, av1;
+  GEN h, g = get_polchar((CG_data*)data,x);
+  av1 = avma;
+  h = ZX_gcd(g, ZX_deriv(g));
+  if (degpol(h)) { avma = av; return NULL; }
+  if (DEBUGLEVEL>3) fprintferr("  generator: %Ps\n",g);
+  avma = av1; return gerepileupto(av, g);
+}
+
+static long
+chk_gen_prec(long N, long bit)
+{ return nbits2prec(10 + (long)log2((double)N) + bit); }
+
 /* Remove duplicate polynomials in P, updating A (same indices), in place.
  * Among elements having the same characteristic pol, choose the smallest
  * according to ZV_abscmp */
@@ -1614,30 +1663,45 @@ ZX_canon_neg(GEN z)
   }
   return 0;
 }
+static long
+polred_init(nfbasic_t *T, nffp_t *F, CG_data *d)
+{
+  long e, prec, n = degpol(T->x);
+  GEN ro;
+  set_LLL_basis(T, &ro, 0.9999);
+  /* || polchar ||_oo < 2^e */
+  e = n * (long)(cauchy_bound(T->x) / LOG2 + log2((double)n)) + 1;
+  prec = chk_gen_prec(n, e);
+  get_nf_fp_compo(T, F, ro, prec);
+  d->v = varn(T->x);
+  d->r1= T->r1; return prec;
+}
 static GEN
 polred_aux(nfbasic_t *T, GEN *pro, long flag)
 {
-  GEN a, b, y, x = T->x;
-  long i, l, v = varn(x);
+  GEN b, y, x = T->x;
+  long i, prec, v = varn(x), l = lg(T->bas);
   const long orig = flag & nf_ORIG;
   const long nfred = flag & nf_RED;
+  nffp_t F;
+  CG_data d;
 
-  set_LLL_basis(T, pro, 0.99);
-  a = T->bas; l = lg(a);
+  prec = polred_init(T, &F, &d);
+  *pro = F.ro;
+  d.ZKembed = F.M;
+
   y = cgetg(l, t_VEC);
   b = cgetg(l, t_COL);
   gel(y,1) = deg1pol_shallow(gen_1, gen_m1, v);
   gel(b,1) = gen_1;
-  for (i=2; i<l; i++)
+  for (i = 2; i < l; i++)
   {
-    GEN ch, d, ai = gel(a,i);
-    if (DEBUGLEVEL>2) { fprintferr("i = %ld\n",i); flusherr(); }
-    ch = ZX_caract(x, ai, v);
-    d = ZX_gcd_all(ch, ZX_deriv(ch), &ch);
+    GEN ch, ai = gel(T->bas,i);
+    ch = get_polmin_w(&d, i);
     if (ZX_canon_neg(ch) && orig) ai = RgX_neg(ai);
-    if (nfred && !degpol(d)) return mkvec2(ch, ai);
-
+    if (nfred && degpol(ch) == l-1) return mkvec2(ch, ai);
     if (DEBUGLEVEL>3) fprintferr("polred: generator %Ps\n", ch);
+    if (T->lead && orig) ai = RgX_unscale(ai, T->lead);
     gel(y,i) = ch;
     gel(b,i) = ai;
   }
@@ -1650,22 +1714,18 @@ GEN
 Polred(GEN x, long flag, GEN fa)
 {
   pari_sp av = avma;
-  GEN ro, y;
+  GEN ro;
   nfbasic_t T; nfbasic_init(x, flag & nf_PARTIALFACT, fa, &T);
-  if (T.lead) pari_err(impl,"polred for non-monic polynomials");
-  y = polred_aux(&T, &ro, flag & nf_ORIG);
-  return gerepilecopy(av, y);
+  return gerepilecopy(av, polred_aux(&T, &ro, flag & nf_ORIG));
 }
 
 /* FIXME: backward compatibility */
-#define red_PARTIAL 1
-#define red_ORIG    2
 GEN
 polred0(GEN x, long flag, GEN fa)
 {
   long fl = 0;
-  if (flag & red_PARTIAL) fl |= nf_PARTIALFACT;
-  if (flag & red_ORIG)    fl |= nf_ORIG;
+  if (flag & 1) fl |= nf_PARTIALFACT;
+  if (flag & 2) fl |= nf_ORIG;
   return Polred(x, fl, fa);
 }
 
@@ -1679,90 +1739,27 @@ ordred(GEN x)
   if (!gcmp1(leading_term(x))) pari_err(impl,"ordred");
   if (!signe(x)) return gcopy(x);
   y = mkvec2(x, matid(degpol(x)));
-  return gerepileupto(av, polred(y));
+  return gerepileupto(av, Polred(y, 0, NULL));
 }
 
 GEN
-polred(GEN x) { return polred0(x, 0, NULL); }
+polred(GEN x) { return Polred(x, 0, NULL); }
 GEN
-smallpolred(GEN x) { return polred0(x, red_PARTIAL, NULL); }
+smallpolred(GEN x) { return Polred(x, nf_PARTIALFACT, NULL); }
 GEN
-factoredpolred(GEN x, GEN fa) { return polred0(x, 0, fa); }
+factoredpolred(GEN x, GEN fa) { return Polred(x, 0, fa); }
 GEN
-polred2(GEN x) { return polred0(x, red_ORIG, NULL); }
+polred2(GEN x) { return Polred(x, nf_ORIG, NULL); }
 GEN
-smallpolred2(GEN x) { return polred0(x, red_PARTIAL|red_ORIG, NULL); }
+smallpolred2(GEN x) { return Polred(x, nf_PARTIALFACT|nf_ORIG, NULL); }
 GEN
-factoredpolred2(GEN x, GEN fa) { return polred0(x, red_PARTIAL, fa); }
+factoredpolred2(GEN x, GEN fa) { return Polred(x, nf_PARTIALFACT, fa); }
 
 /********************************************************************/
 /**                                                                **/
 /**                           POLREDABS                            **/
 /**                                                                **/
 /********************************************************************/
-
-GEN
-T2_from_embed_norm(GEN x, long r1)
-{
-  GEN p = RgV_sumpart(x, r1);
-  GEN q = RgV_sumpart2(x,r1+1, lg(x)-1);
-  if (q != gen_0) p = gadd(p, gmul2n(q,1));
-  return p;
-}
-
-GEN
-T2_from_embed(GEN x, long r1)
-{
-  return T2_from_embed_norm(gnorm(x), r1);
-}
-
-typedef struct {
-  long r1, v, prec;
-  GEN ZKembed; /* embeddings of fincke-pohst-reduced Zk basis */
-  GEN u; /* matrix giving fincke-pohst-reduced Zk basis */
-  GEN M; /* embeddings of initial (LLL-reduced) Zk basis */
-  GEN bound; /* T2 norm of the polynomial defining nf */
-} CG_data;
-
-/* characteristic pol of x (given by embeddings) */
-static GEN
-get_pol(CG_data *d, GEN x)
-{
-  long e;
-  GEN g = grndtoi(roots_to_pol_r1(x, d->v, d->r1), &e);
-  if (e > -5) pari_err(precer, "get_pol");
-  return g;
-}
-
-/* characteristic pol of x (given as vector on (w_i)) */
-static GEN
-get_polchar(CG_data *d, GEN x)
-{
-  return get_pol(d, RgM_RgC_mul(d->ZKembed,x));
-}
-
-/* return a defining polynomial for Q(w_i) */
-static GEN
-get_polmin_w(CG_data *d, long k)
-{
-  GEN g = get_pol(d, gel(d->ZKembed,k));
-  (void)ZX_gcd_all(g, ZX_deriv(g), &g);
-  return g;
-}
-
-/* does x generate the correct field ? */
-static GEN
-chk_gen(void *data, GEN x)
-{
-  pari_sp av = avma, av1;
-  GEN h, g = get_polchar((CG_data*)data,x);
-  av1 = avma;
-  h = ZX_gcd(g, ZX_deriv(g));
-  if (degpol(h)) { avma = av; return NULL; }
-  if (DEBUGLEVEL>3) fprintferr("  generator: %Ps\n",g);
-  avma = av1; return gerepileupto(av, g);
-}
-
 /* set V[k] := matrix of multiplication by nk.zk[k] */
 static GEN
 set_mulid(GEN V, GEN M, GEN Mi, long r1, long r2, long N, long k)
@@ -1778,12 +1775,6 @@ set_mulid(GEN V, GEN M, GEN Mi, long r1, long r2, long N, long k)
     if (e > -5) return NULL;
   }
   gel(V,k) = Mk; return Mk;
-}
-
-static long
-chk_gen_prec(long N, long bit)
-{
-  return nbits2prec(10 + (long)log2((double)N) + bit);
 }
 
 /* U = base change matrix, R = Cholesky form of the quadratic form [matrix
@@ -1956,20 +1947,13 @@ store(GEN x, GEN z, GEN a, nfbasic_t *T, long flag, GEN u)
 static GEN
 polredabs_aux(nfbasic_t *T, GEN *u)
 {
-  long prec, e, n = degpol(T->x);
-  GEN v, ro;
+  long prec;
+  GEN v;
   FP_chk_fun chk = { &chk_gen, &chk_gen_init, NULL, NULL, 0 };
   nffp_t F;
   CG_data d; chk.data = (void*)&d;
 
-  set_LLL_basis(T, &ro, 0.9999);
-  /* || polchar ||_oo < 2^e */
-  e = n * (long)(cauchy_bound(T->x) / LOG2 + log2((double)n)) + 1;
-  prec = chk_gen_prec(n, e);
-  get_nf_fp_compo(T, &F, ro, prec);
-
-  d.v = varn(T->x);
-  d.r1= T->r1;
+  prec = polred_init(T, &F, &d);
   d.bound = T2_from_embed(F.ro, T->r1);
   for (;;)
   {
