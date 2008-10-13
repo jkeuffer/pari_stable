@@ -1246,6 +1246,7 @@ nftohnfbasis(GEN nf, GEN x)
   return gerepilecopy(av, nfbasechange(u, x));
 }
 
+/* set *pro to roots of T->x */
 static GEN
 get_red_G(nfbasic_t *T, GEN *pro)
 {
@@ -1256,7 +1257,7 @@ get_red_G(nfbasic_t *T, GEN *pro)
 
   extraprec = (long) (0.25 * n / (sizeof(long) / 4));
   prec = DEFAULTPREC + extraprec;
-  nffp_init(&F, T, *pro, prec);
+  nffp_init(&F, T, NULL, prec);
   av = avma;
   for (i=1; ; i++)
   {
@@ -1276,13 +1277,12 @@ get_red_G(nfbasic_t *T, GEN *pro)
     F.ro = NULL;
     if (DEBUGLEVEL) pari_warn(warnprec,"get_red_G", prec);
   }
-  *pro = F.ro;
   if (u0) u = RgM_mul(u0,u);
-  return u;
+  *pro = F.ro; return u;
 }
 
 /* Compute an LLL-reduced basis for the integer basis of nf(T).
- * *pro = roots of x, computed to precision prec [or NULL -> recompute] */
+ * set *pro = roots of x if computed [NULL if not computed] */
 static void
 set_LLL_basis(nfbasic_t *T, GEN *pro, double DELTA)
 {
@@ -1293,6 +1293,7 @@ set_LLL_basis(nfbasic_t *T, GEN *pro, double DELTA)
     if (!basden) basden = get_bas_den(B);
     u = ZM_lll(make_Tr(T->x,basden), DELTA, LLL_GRAM|LLL_KEEP_FIRST|LLL_IM);
     B = gerepileupto(av, RgV_RgM_mul(B, u));
+    *pro = NULL;
   }
   else
     B = RgV_RgM_mul(B, get_red_G(T, pro));
@@ -1313,17 +1314,20 @@ ZX_is_better(GEN y, GEN x, GEN *dx)
   return 0;
 }
 
-static GEN polred_aux(GEN x, GEN a, long flag);
+static GEN polred_aux(nfbasic_t *T, GEN *pro, long flag);
 /* Seek a simpler, polynomial pol defining the same number field as
  * x (assumed to be monic at this point) */
 static GEN
-nfpolred(nfbasic_t *T)
+nfpolred(nfbasic_t *T, GEN *pro)
 {
-  GEN x = T->x, dx = T->dx, a = T->bas, z, d, rev, pow, dpow;
+  GEN x = T->x, dx = T->dx, a, z, d, rev, pow, dpow;
   long i, n = degpol(x), v = varn(x);
 
-  if (n == 1) { T->x = deg1pol_shallow(gen_1, gen_m1, v); return pol_1(v); }
-  z = polred_aux(x, a, nf_ORIG | nf_RED);
+  if (n == 1) {
+    T->x = deg1pol_shallow(gen_1, gen_m1, v);
+    *pro = NULL; return pol_1(v);
+  }
+  z = polred_aux(T, pro, nf_ORIG | nf_RED);
   if (typ(z) != t_VEC || !ZX_is_better(gel(z,1),x,&dx))
     return NULL; /* no improvement */
 
@@ -1333,6 +1337,7 @@ nfpolred(nfbasic_t *T)
   /* update T */
   pow = QXQ_powers(rev, n-1, x);
   pow = Q_remove_denom(pow, &dpow);
+  a = T->bas;
   for (i=2; i<=n; i++) gel(a,i) = QX_ZXQV_eval(gel(a,i), pow, dpow);
   a = Q_remove_denom(a, &d);
   if (!d)
@@ -1345,7 +1350,9 @@ nfpolred(nfbasic_t *T)
   }
   (void)Z_issquareall(diviiexact(dx,T->dK), &(T->index));
   T->dx = dx;
-  T->x  = x; return rev;
+  T->x  = x;
+  set_LLL_basis(T, pro, 0.99); /* changed T.x */
+  return rev;
 }
 
 /* let bas a t_VEC of QX giving a Z-basis of O_K. Return the index of the
@@ -1460,13 +1467,11 @@ GEN
 nfinitall(GEN x, long flag, long prec)
 {
   const pari_sp av = avma;
-  GEN nf, rev = NULL, ro = NULL;
+  GEN nf;
   nfbasic_t T;
 
   nfbasic_init(x, flag, NULL, &T);
   nfbasic_add_disc(&T); /* more expensive after set_LLL_basis */
-  set_LLL_basis(&T, &ro, 0.99);
-
   if (T.lead && !(flag & nf_RED))
   {
     pari_warn(warner,"non-monic polynomial. Result of the form [nf,c]");
@@ -1474,19 +1479,19 @@ nfinitall(GEN x, long flag, long prec)
   }
   if (flag & nf_RED)
   {
-    rev = nfpolred(&T);
+    GEN ro, rev = nfpolred(&T, &ro);
     if (DEBUGLEVEL) msgtimer("polred");
-    if (rev) { ro = NULL; set_LLL_basis(&T, &ro, 0.99); } /* changed T.x */
+    nf = nfbasic_to_nf(&T, ro, prec);
     if (flag & nf_ORIG)
     {
       if (!rev) rev = pol_x(varn(T.x)); /* no improvement */
       if (T.lead) rev = RgX_Rg_div(rev, T.lead);
-      rev = mkpolmod(rev, T.x);
+      nf = mkvec2(nf, mkpolmod(rev, T.x));
     }
+  } else {
+    GEN ro; set_LLL_basis(&T, &ro, 0.99);
+    nf = nfbasic_to_nf(&T, ro, prec);
   }
-
-  nf = nfbasic_to_nf(&T, ro, prec);
-  if (flag & nf_ORIG) nf = mkvec2(nf, rev);
   return gerepilecopy(av, nf);
 }
 
@@ -1610,13 +1615,17 @@ ZX_canon_neg(GEN z)
   return 0;
 }
 static GEN
-polred_aux(GEN x, GEN a, long flag)
+polred_aux(nfbasic_t *T, GEN *pro, long flag)
 {
-  long i, v = varn(x), l = lg(a);
-  GEN y = cgetg(l,t_VEC), b = cgetg(l, t_COL);
+  GEN a, b, y, x = T->x;
+  long i, l, v = varn(x);
   const long orig = flag & nf_ORIG;
   const long nfred = flag & nf_RED;
 
+  set_LLL_basis(T, pro, 0.99);
+  a = T->bas; l = lg(a);
+  y = cgetg(l, t_VEC);
+  b = cgetg(l, t_COL);
   gel(y,1) = deg1pol_shallow(gen_1, gen_m1, v);
   gel(b,1) = gen_1;
   for (i=2; i<l; i++)
@@ -1641,11 +1650,10 @@ GEN
 Polred(GEN x, long flag, GEN fa)
 {
   pari_sp av = avma;
-  GEN ro = NULL, y;
+  GEN ro, y;
   nfbasic_t T; nfbasic_init(x, flag & nf_PARTIALFACT, fa, &T);
   if (T.lead) pari_err(impl,"polred for non-monic polynomials");
-  set_LLL_basis(&T, &ro, 0.99);
-  y = polred_aux(T.x, T.bas, flag & nf_ORIG);
+  y = polred_aux(&T, &ro, flag & nf_ORIG);
   return gerepilecopy(av, y);
 }
 
@@ -1949,13 +1957,12 @@ static GEN
 polredabs_aux(nfbasic_t *T, GEN *u)
 {
   long prec, e, n = degpol(T->x);
-  GEN v, ro = NULL;
+  GEN v, ro;
   FP_chk_fun chk = { &chk_gen, &chk_gen_init, NULL, NULL, 0 };
   nffp_t F;
   CG_data d; chk.data = (void*)&d;
 
   set_LLL_basis(T, &ro, 0.9999);
-
   /* || polchar ||_oo < 2^e */
   e = n * (long)(cauchy_bound(T->x) / LOG2 + log2((double)n)) + 1;
   prec = chk_gen_prec(n, e);
