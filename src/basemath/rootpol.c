@@ -1754,7 +1754,7 @@ quickabs(GEN x)
 
 }
 
-/* bound the log of the largest root of p */
+/* bound ln |largest root of p| */
 double
 cauchy_bound(GEN p)
 {
