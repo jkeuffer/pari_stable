@@ -34,7 +34,16 @@ RgM_zc_mul_i(GEN x, GEN y, long c, long l)
   {
     av = avma; s = gmulgs(gcoeff(x,i,1),y[1]);
     for (j=2; j<c; j++)
-       if (y[j]) s = gadd(s, gmulgs(gcoeff(x,i,j),y[j]));
+    {
+      long t = y[j];
+      switch(t)
+      {
+        case  0: break;
+        case  1: s = gadd(s, gcoeff(x,i,j)); break;
+        case -1: s = gsub(s, gcoeff(x,i,j)); break;
+        default: s = gadd(s, gmulgs(gcoeff(x,i,j), t)); break;
+      }
+    }
     gel(z,i) = gerepileupto(av,s);
   }
   return z;
