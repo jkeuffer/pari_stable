@@ -2077,7 +2077,7 @@ rootsof1(GEN nf)
     GEN R = R_from_QR(nf_get_G(nf), prec);
     if (R)
     {
-      y = fincke_pohst(mkvec(R), utoipos(N), 1000, 0, NULL);
+      y = fincke_pohst(mkvec(R), utoipos(N), N * N, 0, NULL);
       if (y) break;
     }
     prec = (prec<<1)-2;
