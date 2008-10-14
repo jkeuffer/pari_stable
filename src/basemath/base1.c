@@ -1298,7 +1298,7 @@ set_LLL_basis(nfbasic_t *T, GEN *pro, double DELTA)
   else
     B = RgV_RgM_mul(B, get_red_G(T, pro));
   T->bas = B;
-  T->basden = NULL; /* recompute */
+  T->basden = get_bas_den(B);
   if (DEBUGLEVEL) msgtimer("LLL basis");
 }
 
@@ -1340,7 +1340,7 @@ nfpolred(nfbasic_t *T, GEN *pro)
   a = T->bas;
   for (i=2; i<=n; i++) gel(a,i) = QX_ZXQV_eval(gel(a,i), pow, dpow);
   (void)Z_issquareall(diviiexact(dx,T->dK), &(T->index));
-  T->basden = NULL; /* recompute */
+  T->basden = get_bas_den(a);
   T->dx = dx; T->x = x; *pro = NULL; return rev;
 }
 
@@ -1575,8 +1575,7 @@ get_pol(CG_data *d, GEN x)
 {
   long e;
   GEN g = grndtoi(roots_to_pol_r1(x, d->v, d->r1), &e);
-  if (e > -5) pari_err(precer, "get_pol");
-  return g;
+  return (e > -5)? NULL: g;
 }
 
 /* characteristic pol of x (given as vector on (w_i)) */
@@ -1589,7 +1588,7 @@ static GEN
 get_polmin_w(CG_data *d, long k)
 {
   GEN g = get_pol(d, gel(d->ZKembed,k));
-  (void)ZX_gcd_all(g, ZX_deriv(g), &g);
+  if (g) (void)ZX_gcd_all(g, ZX_deriv(g), &g);
   return g;
 }
 
@@ -1599,6 +1598,7 @@ chk_gen(void *data, GEN x)
 {
   pari_sp av = avma, av1;
   GEN h, g = get_polchar((CG_data*)data,x);
+  if (!g) pari_err(precer,"chk_gen");
   av1 = avma;
   h = ZX_gcd(g, ZX_deriv(g));
   if (degpol(h)) { avma = av; return NULL; }
@@ -1667,10 +1667,12 @@ static long
 polred_init(nfbasic_t *T, nffp_t *F, CG_data *d)
 {
   long e, prec, n = degpol(T->x);
+  double log2rho;
   GEN ro;
   set_LLL_basis(T, &ro, 0.9999);
-  /* || polchar ||_oo < 2^e */
-  e = n * (long)(cauchy_bound(T->x) / LOG2 + log2((double)n)) + 1;
+  /* || polchar ||_oo < 2^e ~ 2 (n * rho)^n, rho = max modulus of root */
+  log2rho = ro ? (double)gexpo(ro): cauchy_bound(T->x) / LOG2;
+  e = n * (long)(log2rho + log2((double)n)) + 1;
   prec = chk_gen_prec(n, e);
   get_nf_fp_compo(T, F, ro, prec);
   d->v = varn(T->x);
@@ -1698,6 +1700,8 @@ polred_aux(nfbasic_t *T, GEN *pro, long flag)
   {
     GEN ch, ai = gel(T->bas,i);
     ch = get_polmin_w(&d, i);
+    /* if accuracy too low, compute algebraically */
+    if (!ch) ch = ZX_caract(x, ai, v);
     if (ZX_canon_neg(ch) && orig) ai = RgX_neg(ai);
     if (nfred && degpol(ch) == l-1) return mkvec2(ch, ai);
     if (DEBUGLEVEL>3) fprintferr("polred: generator %Ps\n", ch);
@@ -1795,7 +1799,7 @@ chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
   S = cgetg(N+1, t_VECSMALL);
   for (i = 1; i <= N; i++)
   {
-    P = get_polmin_w(d, i);
+    P = get_polmin_w(d, i); if (!P) pari_err(precer,"chk_gen_init");
     S[i] = degpol(P);
     if (S[i] == N)
     { /* primitive element */
@@ -1835,7 +1839,7 @@ chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
     {
       for (j = 1; j <= N; j++) x[j] = (long)random_Fl(7) - 3;
       e = RgM_zc_mul(d->ZKembed, x);
-      P = get_pol(d, e);
+      P = get_pol(d, e); if (!P) pari_err(precer, "chk_gen_init");
       if (!ZX_is_squarefree(P)) continue;
       if (DEBUGLEVEL>2) fprintferr("chk_gen_init: generator %Ps\n",P);
       B = T2_from_embed(e, r1);
