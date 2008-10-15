@@ -934,11 +934,10 @@ Flx_invmontgomery_newton(GEN T, ulong p)
   pari_sp av;
 
   y = T+2;
-  q = Flx_recipspec(y,l,l+1) + 2;
+  q = Flx_recipspec(y,l+1,l+1) + 2;
   av = avma;
   /* We work on _spec_ Flx's, all the l[xzq12] below are lgpol's */
 
-  q[0] = y[l];
   /* initialize */
   x[0] = Fl_inv(q[0], p);
   if (q[1])
