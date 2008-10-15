@@ -743,17 +743,17 @@ Z_factor_until(GEN n, GEN limit)
 GEN
 boundfact(GEN n, long lim)
 {
-  GEN p1, p2;
-  pari_sp av = avma;
-
   if (lim <= 1) lim = 0;
   switch(typ(n))
   {
     case t_INT: return Z_factor_limit(n,lim);
-    case t_FRAC:
-      p1 = Z_factor_limit(gel(n,1),lim);
-      p2 = Z_factor_limit(gel(n,2),lim); gel(p2,2) = gneg_i(gel(p2,2));
-      return gerepilecopy(av, merge_factor_i(p1,p2));
+    case t_FRAC: {
+      pari_sp av = avma;
+      GEN a = Z_factor_limit(gel(n,1),lim);
+      GEN b = Z_factor_limit(gel(n,2),lim);
+      gel(b,2) = ZC_neg(gel(b,2));
+      return gerepilecopy(av, merge_factor_i(a,b));
+    }
   }
   pari_err(arither1);
   return NULL; /* not reached */
