@@ -2,16 +2,25 @@ Function: eta
 Section: transcendental
 C-Name: eta0
 Prototype: GD0,L,p
-Help: eta(x,{flag=0}): if flag=0, eta function without the q^(1/24),
- otherwise eta of the complex number x in the upper half plane intelligently
- computed using SL(2,Z) transformations.
-Doc: \idx{Dedekind}'s $\eta$ function, without the
- $q^{1/24}$. This means the following: if $x$ is a complex number with positive
- imaginary part, the result is $\prod_{n=1}^\infty(1-q^n)$, where
- $q=e^{2i\pi x}$. If $x$ is a power series (or can be converted to a power
- series) with positive valuation, the result is $\prod_{n=1}^\infty(1-x^n)$.
+Help: eta(z,{flag=0}): if flag=0, returns prod(n=1,oo, 1-q^n), where
+ q = exp(2 i Pi z) if z is a complex scalar (belonging to the upper half plane);
+ q = z if z is a p-adic number or can be converted to a power series.
+ If flag is non-zero, the function only applies to complex scalars and returns
+ the true eta function, with the factor q^(1/24) included.
+ 
+Doc: Variants of \idx{Dedekind}'s $\eta$ function.
+ If $\fl = 0$, return $\prod_{n=1}^\infty(1-q^n)$, where $q$ depends on $x$
+ in the following way:
 
- If $\fl=1$ and $x$ can be converted to a complex number (i.e.~is not a power
- series), computes the true $\eta$ function, including the leading $q^{1/24}$.
+ \item $q = e^{2i\pi x}$ if $x$ is a \emph{complex number} (which must then
+ have positive imaginary part); notice that the factor $q^{1/24}$ is
+ missing!
+
+ \item $q = x$ if $x$ is a \typ{PADIC}, or can be converted to a 
+ \emph{power series} (which must then have positive valuation).
+
+ If $\fl$ is non-zero, $x$ is converted to a complex number and we return the
+ true $\eta$ function, $q^{1/24}\prod_{n=1}^\infty(1-q^n)$,
+ where $q = e^{2i\pi x}$.
 Variant:
  Also available is \fun{GEN}{trueeta}{GEN x, long prec} ($\fl=1$).
