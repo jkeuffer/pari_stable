@@ -1,15 +1,14 @@
 Function: factor
 Section: number_theoretical
-C-Name: factor0
-Prototype: GD-1,L,
+C-Name: gp_factor0
+Prototype: GDG
 Help: factor(x,{lim}): factorization of x. lim is optional and can be set
  whenever x is of (possibly recursive) rational type. If lim is set return
  partial factorization, using primes up to lim (up to primelimit if lim=0).
 Description:
  (int, ?-1):vec        Z_factor($1)
  (gen, ?-1):vec        factor($1)
- (int, small):vec      Z_factor_limit($1, $2)
- (gen, small):vec      factor0($1, $2)
+ (gen, gen):vec        factor0($1, $2)
 Doc: general factorization function, where $x$ is a 
  rational (including integers), a complex number with rational
  real and imaginary parts, or a rational function (including polynomials).
@@ -18,24 +17,84 @@ Doc: general factorization function, where $x$ is a
  and the second the exponents. By convention, $0$ is factored as $0^1$.
 
  \misctitle{$\Q$ and $\Q(i)$.}
+ See \tet{factorint} for more information about the algorithms used.
  The rational or gaussian primes are in fact \var{pseudoprimes}
  (see \kbd{ispseudoprime}), a priori not rigorously proven primes. In fact,
  any factor which is $\leq 10^{15}$ (whose norm is $\leq 10^{15}$ for an
  irrational gaussian prime) is a genuine prime. Use
  \kbd{isprime} to prove primality of other factors, as in
  \bprog
- fa = factor(2^2^7 +1)
- isprime( fa[,1] )
+ ? fa = factor(2^2^7 + 1)
+ %1 =
+ [59649589127497217 1]
+
+ [5704689200685129054721 1]
+
+ ? isprime( fa[,1] )
+ %2 = [1, 1]~   \\ both entries are proven primes
  @eprog\noindent
  Another possibility is to set the global default \tet{factor_proven}, which
  will perform a rigorous primality proof for each pseudoprime factor.
 
- An argument \var{lim} can be added, meaning that we look only for prime
- factors $p < \var{lim}$, or up to \kbd{primelimit}, whichever is lowest
- (except when $\var{lim}=0$ where the effect is identical to setting
- $\var{lim}=\kbd{primelimit}$). In this case, the remaining part may actually
- be a proven composite! See \tet{factorint} for more information about the
- algorithms used.
+ A \typ{INT} argument \var{lim} can be added, meaning that we look only for
+ prime factors $p < \var{lim}$, or up to \kbd{primelimit}, whichever is lowest,
+ except when $\var{lim}=0$ where the effect is identical to setting
+ $\var{lim}=\kbd{primelimit}$. In this case, all but the last factor
+ are proven primes, but the remaining factor may actually be a proven composite!
+ The routine prints a warning if \kbd{primelimit}
+ is lower than \var{lim} since in that case, it does not guarantee that there
+ exists no other $p < \var{lim}$ dividing $x$ than the ones output.
+ Otherwise, if the remaining factor is less than \var{lim}, then it is a prime.
+ \bprog
+ ? factor(2^2^7 +1, 10^5)
+ %3 =
+ [340282366920938463463374607431768211457 1]
+ @eprog\noindent
+ This routine uses trial division and perfect power tests, and should not be
+ used for huge values
+ of \var{lim} (at most $10^9$, say): \kbd{factorint(, 1 + 8)} will in general
+ be faster. The latter does not guarantee that all small prime factors are
+ found, but it also finds larger factors, and in a much more efficient way.
+ \bprog
+ ? F = (2^2^7 + 1) * 1009 * 100003; factor(F, 10^5)  \\ fast, incomplete
+ time = 0 ms.
+ %4 =
+ [1009 1]
+
+ [34029257539194609161727850866999116450334371 1]
+
+ ? default(primelimit,10^9)
+ time = 4,360 ms.
+ %5 = 1000000000
+ ? factor(F, 10^9)    \\ very slow
+ time = 6,120 ms.
+ %6 =
+ [1009 1]
+
+ [100003 1]
+
+ [340282366920938463463374607431768211457 1]
+
+ ? factorint(F, 1+8)  \\ much faster, all small primes were found
+ time = 40 ms.
+ %7 =
+ [1009 1]
+
+ [100003 1]
+
+ [340282366920938463463374607431768211457 1]
+
+ ? factorint(F)   \\ complete factorisation
+ time = 260 ms.
+ %8 =
+ [1009 1]
+
+ [100003 1]
+
+ [59649589127497217 1]
+
+ [5704689200685129054721 1]
+ @eprog
 
  \misctitle{Rational functions.}
  The polynomials or rational functions to be factored must have scalar
@@ -55,7 +114,6 @@ Doc: general factorization function, where $x$ is a
  polynomials will have integer coefficients, and the content of a polynomial
  or rational function is discarded and not included in the factorization. If
  needed, you can always ask for the content explicitly:
-
  \bprog
  ? factor(t^2 + 5/2*t + 1)
  %1 =
@@ -67,5 +125,7 @@ Doc: general factorization function, where $x$ is a
  %2 = 1/2
  @eprog\noindent
  See also \tet{nffactor}.
-Variant: Also available are \fun{GEN}{factor}{GEN x} and
- \fun{GEN}{boundfact}{GEN x, long lim}
+Variant: This function should only be used by the \kbd{gp} interface. Use
+ directly \fun{GEN}{factor}{GEN x} or \fun{GEN}{boundfact}{GEN x, long lim}.
+ The obsolete function \fun{GEN}{factor0}{GEN x, long lim} is kept for
+ backward compatibility.

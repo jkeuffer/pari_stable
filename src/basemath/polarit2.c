@@ -342,6 +342,26 @@ factor0(GEN x,long flag)
   return (flag<0)? factor(x): boundfact(x,flag);
 }
 
+/* only present for interface with GP */
+GEN
+gp_factor0(GEN x, GEN flag)
+{
+  long B = 0;
+  if (!flag) return factor(x);
+  if (typ(flag) != t_INT) pari_err(typeer,"factor");
+  if (signe(flag) > 0)
+  {
+    ulong p = maxprime();
+    B = flag[2];
+    if (is_bigint(flag) || B > (long)p)
+    {
+      pari_warn(warner, "Bound too large in factor(,lim); using primelimit");
+      B = p;
+    }
+  }
+  return boundfact(x, B);
+}
+
 GEN
 deg1_from_roots(GEN L, long v)
 {

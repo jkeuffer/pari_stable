@@ -129,6 +129,7 @@ BA105- Vecsmall([1,1])^-1 returned garbage
   107- polredabs: excessive stack usage [#872]
   108- besselj(0., 0) --> error [#880]
   109- polred didn't accept non-monic inputs
+  110- factor(..., 10^100) ==> "overflow in t_INT-->long conversion" [#855]
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]

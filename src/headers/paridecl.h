@@ -2121,6 +2121,7 @@ GEN     ginvmod(GEN x, GEN y);
 GEN     gisirreducible(GEN x);
 GEN     glcm(GEN x, GEN y);
 GEN     glcm0(GEN x, GEN y);
+GEN     gp_factor0(GEN x, GEN flag);
 GEN     idealfactorback(GEN nf, GEN L, GEN e, int red);
 GEN     leftright_pow(GEN,GEN,void*,GEN (*sqr)(void*,GEN),GEN (*mul)(void*,GEN,GEN));
 GEN     leftright_pow_fold(GEN x, GEN n, void *data, GEN (*sqr)(void*,GEN), GEN (*msqr)(void*,GEN));
