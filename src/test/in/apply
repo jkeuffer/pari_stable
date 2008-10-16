@@ -1,0 +1,5 @@
+apply(x->x^2, [1,2,3,4])
+apply(x->x^2, [1,2;3,4])
+apply(x->x^2, 4*x^2 + 3*x+ 2)
+apply(x->x^2, List([1,2,3,4]))
+L = List([Mod(1,3), Mod(2,4)]); apply(lift, L)
