@@ -1679,7 +1679,7 @@ imagecompl(GEN x)
   if (d) pari_free(d); return y;
 }
 
-/* for hnfspec: imagecompl(trans(x)) + image(trans(x)) */
+/* permutation giving imagecompl(x') | image(x'), x' = transpose of x */
 GEN
 imagecomplspec(GEN x, long *nlze)
 {
@@ -1687,7 +1687,6 @@ imagecomplspec(GEN x, long *nlze)
   GEN d,y;
   long i,j,k,l,r;
 
-  if (typ(x)!=t_MAT) pari_err(typeer,"imagecompl");
   x = shallowtrans(x); l = lg(x);
   gauss_pivot(x,&d,&r);
   avma=av; y = cgetg(l,t_VECSMALL);
