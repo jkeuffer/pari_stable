@@ -265,7 +265,7 @@ hnfspec_i(GEN mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
   i = lig = li-1; col = co-1; lk0 = k0;
   T = (k0 || (lg(C) > 1 && lg(C[1]) > 1))? matid(col): NULL;
   /* Look for lines with a single non-0 entry, equal to 1 in absolute value */
-  while (i > lk0)
+  while (i > lk0 && col)
     switch( count(mat,perm[i],col,&n) )
     {
       case 0: /* move zero lines between k0+1 and lk0 */
@@ -301,7 +301,7 @@ hnfspec_i(GEN mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
    * operations in T. Leave the rows 1..lk0 alone [up to k0, coefficient
    * explosion, between k0+1 and lk0, row is 0] */
   s = 0;
-  while (lig > lk0 && s < (long)(HIGHBIT>>1))
+  while (lig > lk0 && col && s < (long)(HIGHBIT>>1))
   {
     for (i=lig; i>lk0; i--)
       if (count(mat,perm[i],col,&n) > 0) break;
@@ -344,7 +344,7 @@ hnfspec_i(GEN mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
     for (s=0, i=lk0+1; i<=lig; i++) absmax(s, matj[i]);
     vmax[j] = s;
   }
-  while (lig > lk0)
+  while (lig > lk0 && col)
   {
     for (i=lig; i>lk0; i--)
       if ( (n = count2(mat,perm[i],col)) ) break;
@@ -439,8 +439,13 @@ END2: /* clean up mat: remove everything to the right of the 1s on diagonal */
     for (i=1; i<=k0; i++) p2[i] = z[i]; /* top k0 rows */
     for (   ; i<lnz; i++) p2[i] = t[i]; /* other non-0 rows */
   }
-  permpro = imagecomplspec(extramat, &nr); /* lnz = lg(permpro) */
-
+  if (!col) {
+    permpro = identity_perm(lnz);
+    nr = lnz;
+  }
+  else
+    permpro = imagecomplspec(extramat, &nr);
+  /* lnz = lg(permpro) */
   if (nlze)
   { /* put the nlze 0 rows (trivial generators) at the top */
     p1 = new_chunk(lk0+1);
