@@ -965,7 +965,7 @@ pari_err(int numerr, ...)
 
       case primer1: {
         ulong c = va_arg(ap, ulong);
-	if (c) pari_printf("need primelimit ~ %lu.", c);
+	if (c) pari_printf(", need primelimit ~ %lu.", c);
 	break;
       }
     }
