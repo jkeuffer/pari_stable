@@ -111,7 +111,7 @@ static int
 mpqs_set_parameters(mpqs_handle_t *h)
 {
   long i;
-  mpqs_parameterset_t *P;
+  const mpqs_parameterset_t *P;
   double mb;
 
   h->digit_size_kN = decimal_len(h->kN);
@@ -376,7 +376,7 @@ static void
 mpqs_find_k(mpqs_handle_t *h)
 {
   pari_sp av = avma;
-  mpqs_multiplier_t *cand_k;
+  const mpqs_multiplier_t *cand_k;
   long best_i = -1 /* never best */, k, N_mod_4 = mod4(h->N);
   ulong p;
   GEN kN;

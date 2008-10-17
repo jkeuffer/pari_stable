@@ -170,7 +170,7 @@ typedef struct mpqs_multiplier {
   mpqs_uint32_t kp[MPQS_MAX_OMEGA_K]; /* prime factors of k, if any */
 } mpqs_multiplier_t;
 
-static mpqs_multiplier_t cand_multipliers[] = {
+static const mpqs_multiplier_t cand_multipliers[] = {
   {  1, 0, {  0,  0} },
   {  3, 1, {  3,  0} },
   {  5, 1, {  5,  0} },
@@ -387,7 +387,7 @@ typedef struct mpqs_parameterset {
 
 /* indexed by size of kN in decimal digits, subscript 0 corresponding to
  * 9 (or fewer) digits */
-static mpqs_parameterset_t mpqs_parameters[] =
+static const mpqs_parameterset_t mpqs_parameters[] =
 { /*       tol lp_scl     M   szFB  oA pmx1 1st  sti */
   {  /*9*/ 0.8,   1,    900,    20,  3,   5, 70,  8},
   { /*10*/ 0.8,   1,    900,    21,  3,   5, 70,  8},
