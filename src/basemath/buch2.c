@@ -2390,12 +2390,26 @@ be_honest(FB_t *F, GEN nf, FACT *fact)
 }
 
 static GEN
-remove_0_cols(GEN A)
+remove_0_cols(GEN A, int *precpb)
 {
-  long l = lg(A), i, k = 1;
-  GEN B = cgetg(l, t_MAT);
-  for (i = 1; i < l; i++)
-    if (gexpo(gel(A,i)) >= -2) gel(B, k++) = gel(A,i);
+  long l = lg(A), h, i, j, k;
+  GEN B;
+  *precpb = 0;
+  if (l == 1) return A;
+  h = lg(gel(A,1));;
+  B = cgetg(l, t_MAT);
+  for (i = k = 1; i < l; i++)
+  {
+    GEN Ai = gel(A,i);
+    int non0 = 0;
+    for (j = 1; j < h; j++)
+    {
+      GEN c = gel(Ai,j);
+      if (gexpo(c) >= -2)
+      { if (gcmp0(c)) *precpb = 1; else non0 = 1; }
+    }
+    if (non0) gel(B, k++) = Ai;
+  }
   setlg(B, k); return B;
 }
 
@@ -2405,6 +2419,7 @@ compute_multiple_of_R(GEN A,long RU,long N,GEN *ptL)
 {
   GEN T,v,mdet,mdet2,Im_mdet,kR,xreal,L;
   long i, R1 = 2*RU - N;
+  int precpb;
   pari_sp av = avma;
 
   if (RU == 1)
@@ -2414,7 +2429,9 @@ compute_multiple_of_R(GEN A,long RU,long N,GEN *ptL)
   }
   if (DEBUGLEVEL) fprintferr("\n#### Computing regulator multiple\n");
   xreal = real_i(A); /* = (log |sigma_i(u_j)|) */
-  mdet = remove_0_cols(xreal);
+  mdet = remove_0_cols(xreal, &precpb);
+  /* will cause precision to increase on later failure, but we may succeed! */
+  *ptL = precpb? NULL: gen_1;
   if (lg(mdet) < RU) { avma = av; return NULL; }
   T = cgetg(RU+1,t_COL);
   for (i=1; i<=R1; i++) gel(T,i) = gen_1;
@@ -3049,10 +3066,9 @@ extract_full_lattice(GEN x)
 }
 
 static void
-init_rel(RELCACHE_t *cache, FB_t *F, long RU)
+init_rel(RELCACHE_t *cache, FB_t *F, long add_need)
 {
-  const long RELSUP = 5;
-  const long n = F->KC + RU-1 + RELSUP; /* expected # of needed relations */
+  const long n = F->KC + add_need; /* expected # of needed relations */
   long i, j, k, p;
   GEN c, P;
   REL_t *rel;
@@ -3137,7 +3153,7 @@ Buchall_param(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long
   GEN fu, zu, nf, D, A, W, R, Res, z, h, L_jid, PERM;
   GEN res, L, resc, B, C, C0, lambda, dep, clg1, clg2, Vbase;
   const char *precpb = NULL;
-  const long minsFB = 3;
+  const long minsFB = 3, RELSUP = 5;
   int FIRST = 1;
   RELCACHE_t cache;
   FB_t F;
@@ -3200,7 +3216,7 @@ START:
   if (!subFBgen(&F, nf, minss(lim,LIMC2) + 0.5, minsFB)) goto START;
   PERM = leafcopy(F.perm); /* to be restored in case of precision increase */
   av2 = avma;
-  init_rel(&cache, &F, RU); /* trivial relations */
+  init_rel(&cache, &F, RELSUP + RU-1); /* trivial relations */
   if (nbrelpid > 0) {
     small_norm(&cache, &F, nf, nbrelpid, LOGD, LIMC2, fact);
     avma = av2;
@@ -3249,7 +3265,7 @@ PRECPB:
   }
   { /* Reduce relation matrices */
     long l = cache.last - cache.chk + 1, j;
-    GEN M = nf_get_M(nf), mat = cgetg(l, t_VEC), emb = cgetg(l, t_MAT);
+    GEN M = nf_get_M(nf), mat = cgetg(l, t_MAT), emb = cgetg(l, t_MAT);
     int first = (W == NULL); /* never reduced before */
     REL_t *rel;
 
@@ -3270,11 +3286,11 @@ PRECPB:
     need = lg(dep)>1? lg(dep[1])-1: lg(B[1])-1;
     if (need)
     { /* dependent rows */
-      if (need == old_need) F.sfb_chg = sfb_CHANGE;
-      /* don't reset nreldep, done after subFB change */
-      old_need = need;
       L_jid = vecslice(F.perm, 1, need);
       vecsmall_sort(L_jid); jid = 0;
+      need += RU - 1; /* need more columns for units */
+      if (need == old_need) F.sfb_chg = sfb_CHANGE;
+      old_need = need;
       goto MORE;
     }
   }
@@ -3282,12 +3298,12 @@ PRECPB:
   zc = (cache.last - cache.base) - (lg(B)-1) - (lg(W)-1);
   A = vecslice(C, 1, zc); /* cols corresponding to units */
   R = compute_multiple_of_R(A, RU, N, &lambda);
+  if (!lambda) { precpb = "bestappr"; goto PRECPB; }
   if (!R)
   { /* not full rank for units */
     if (DEBUGLEVEL) fprintferr("regulator is zero.\n");
     goto MORE;
   }
-  if (!lambda) { precpb = "bestappr"; goto PRECPB; }
 
   h = ZM_det_triangular(W);
   if (DEBUGLEVEL) fprintferr("\n#### Tentative class number: %Ps\n", h);
