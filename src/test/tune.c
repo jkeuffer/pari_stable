@@ -200,11 +200,9 @@ static double speed_Flx_karasqr(speed_param *s)
 { ulong p = DFLT_mod; enable(s); TIME_FUN(Flx_sqr(s->x, p)); }
 
 static double speed_Flx_inv(speed_param *s)
-{ ulong p = DFLT_mod; disable(s);
-  TIME_FUN(Flx_invmontgomery(s->x, p)); }
+{ ulong p = DFLT_mod; disable(s); TIME_FUN(Flx_invmontgomery(s->x, p)); }
 static double speed_Flx_invnewton(speed_param *s)
-{ ulong p = DFLT_mod; enable(s);
-  TIME_FUN(Flx_invmontgomery(s->x, p)); }
+{ ulong p = DFLT_mod; enable(s); TIME_FUN(Flx_invmontgomery(s->x, p)); }
 
 static double speed_Flx_mul(speed_param *s)
 { ulong p = DFLT_mod; disable(s); TIME_FUN(Flx_mul(s->x, s->y, p)); }
@@ -213,11 +211,11 @@ static double speed_Flx_karamul(speed_param *s)
 
 static double speed_Flxq_mul(speed_param *s)
 { ulong p = DFLT_mod;
-  GEN T = rand_NFlx(degpol(s->x)); disable(s);
-  TIME_FUN(Flxq_mul(s->x, s->y, T, p)); }
+  GEN T = rand_NFlx(degpol(s->x));
+  disable(s); TIME_FUN(Flxq_mul(s->x, s->y, T, p)); }
 static double speed_Flxq_mul_mg(speed_param *s)
 { ulong p = DFLT_mod;
-  GEN T = rand_NFlx(degpol(s->x)); disable(s);
+  GEN T = rand_NFlx(degpol(s->x));
   enable(s); TIME_FUN(Flxq_mul(s->x, s->y, T, p)); }
 
 #define INIT_RED(s, op)                                 \
