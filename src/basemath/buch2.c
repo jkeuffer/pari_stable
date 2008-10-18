@@ -669,10 +669,12 @@ can_factor(FB_t *F, GEN nf, GEN I, GEN m, GEN N, FACT *fact)
 static long
 factorgen(FB_t *F, GEN nf, GEN I, GEN NI, GEN m, FACT *fact)
 {
-  GEN T = nf_get_pol(nf);
-  GEN Nm = absi( ZX_QX_resultant(T, coltoliftalg(nf,m)) ); /* |Nm| */
-  GEN N  = diviiexact(Nm, NI); /* N(m / I) */
-  return can_factor(F, nf, I, m, N, fact);
+  long e, r1 = nf_get_r1(nf);
+  GEN M = nf_get_M(nf);
+  GEN N = divri(norm_by_embed(r1, RgM_RgC_mul(M,m)), NI); /* ~ N(m/I) */
+  N = grndtoi(N, &e);
+  if (e > -1) return 0;
+  return can_factor(F, nf, I, m, absi(N), fact);
 }
 
 /*  FUNDAMENTAL UNITS */
