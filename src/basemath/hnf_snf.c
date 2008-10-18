@@ -232,7 +232,7 @@ hnfspec_i(GEN mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
 {
   pari_sp av, lim;
   long co, n, s, nlze, lnz, nr, i, j, k, lk0, col, lig, *p;
-  GEN matj, mat;
+  GEN mat;
   GEN p1, p2, matb, matbnew, vmax, matt, T, extramat, B, C, H, dep, permpro;
   const long li = lg(perm); /* = lg(mat0[1]) */
   const long CO = lg(mat0);
@@ -255,11 +255,10 @@ hnfspec_i(GEN mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
   mat = cgetg(co, t_MAT);
   for (j = 1; j < co; j++)
   {
-    matj = col_dup(li, gel(mat0,j));
+    GEN matj = col_dup(li, gel(mat0,j));
     p1 = cgetg(k0+1,t_COL); gel(matt,j) = p1; gel(mat,j) = matj;
     for (i=1; i<=k0; i++) gel(p1,i) = stoi(matj[perm[i]]);
   }
-  vmax = cgetg(co,t_VECSMALL);
   av = avma; lim = stack_lim(av,1);
 
   i = lig = li-1; col = co-1; lk0 = k0;
@@ -290,11 +289,7 @@ hnfspec_i(GEN mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
 
       default: i--;
     }
-  if (DEBUGLEVEL>5)
-  {
-    fprintferr("    after phase1:\n");
-    p_mat(mat,perm,0);
-  }
+  if (DEBUGLEVEL>5) { fprintferr("    after phase1:\n"); p_mat(mat,perm,0); }
 
 #define absmax(s,z) {long _z; _z = labs(z); if (_z > s) s = _z;}
   /* Get rid of all lines containing only 0 and +/- 1, keeping track of column
@@ -318,8 +313,8 @@ hnfspec_i(GEN mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
     }
     for (j=1; j<col; j++)
     {
+      GEN matj = gel(mat,j);
       long t;
-      matj = gel(mat,j);
       if (! (t = matj[perm[lig]]) ) continue;
       if (t == 1) {
 	for (i=lk0+1; i<=lig; i++) absmax(s, matj[perm[i]] -= p[perm[i]]);
@@ -338,9 +333,10 @@ hnfspec_i(GEN mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
   }
   /* As above with lines containing a +/- 1 (no other assumption).
    * Stop when single precision becomes dangerous */
+  vmax = cgetg(co,t_VECSMALL);
   for (j=1; j<=col; j++)
   {
-    matj = gel(mat,j);
+    GEN matj = gel(mat,j);
     for (s=0, i=lk0+1; i<=lig; i++) absmax(s, matj[i]);
     vmax[j] = s;
   }
@@ -361,8 +357,8 @@ hnfspec_i(GEN mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
     }
     for (j=1; j<col; j++)
     {
+      GEN matj = gel(mat,j);
       long t;
-      matj = gel(mat,j);
       if (! (t = matj[perm[lig]]) ) continue;
       if (vmax[col] && (ulong)labs(t) >= (HIGHBIT-vmax[j]) / vmax[col])
 	goto END2;
@@ -375,7 +371,7 @@ hnfspec_i(GEN mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
     if (low_stack(lim, stack_lim(av,1)))
     {
       if(DEBUGMEM>1) pari_warn(warnmem,"hnfspec[2]");
-      if (T) T = gerepilecopy(av,T); else avma = av;
+      gerepileall(av, T? 2: 1, &vmax, &T);
     }
   }
 
@@ -384,8 +380,9 @@ END2: /* clean up mat: remove everything to the right of the 1s on diagonal */
   matb = cgetg(co,t_MAT); /* bottom part (complement of matt) */
   for (j=1; j<co; j++)
   {
+    GEN matj = gel(mat,j);
     p1 = cgetg(li-k0,t_COL); gel(matb,j) = p1;
-    p1 -= k0; matj = gel(mat,j);
+    p1 -= k0;
     for (i=k0+1; i<li; i++) gel(p1,i) = stoi(matj[perm[i]]);
   }
   if (DEBUGLEVEL>5)
