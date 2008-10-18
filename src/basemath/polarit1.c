@@ -1746,7 +1746,7 @@ padicff2(GEN nf,GEN p,long k)
     GEN P = gel(dec_p,i);
     long e = pr_get_e(P), ef = e * pr_get_f(P);
     D = ZM_snfall_i(idealpows(nf,P, k*e), &U, NULL, 1);
-    Ui= ginv(U); setlg(Ui, ef+1); /* cf ZM_snf_group */
+    Ui= ZM_inv(U, gen_1); setlg(Ui, ef+1); /* cf ZM_snf_group */
     U = rowslice(U, 1, ef);
     mat = ZM_mul(U, ZM_mul(mulx, Ui));
     gel(fa,i) = ZM_charpoly(mat);
