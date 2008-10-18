@@ -780,15 +780,15 @@ nfiso0(GEN a, GEN b, long fliso)
     if (fliso)
     {
       if (!ZV_equal(gel(nfa,2),gel(nfb,2))
-       || !equalii(gel(nfa,3),gel(nfb,3))) return gen_0;
+       || !equalii(nf_get_disc(nfa), nf_get_disc(nfb))) return gen_0;
     }
     else
-      if (!dvdii(gel(nfb,3), powiu(gel(nfa,3),n/m))) return gen_0;
+      if (!dvdii(nf_get_disc(nfb), powiu(nf_get_disc(nfa), n/m))) return gen_0;
   }
   else
   {
-    GEN da = nfa? gel(nfa,3): ZX_disc(a);
-    GEN db = nfb? gel(nfb,3): ZX_disc(b);
+    GEN da = nfa? nf_get_disc(nfa): ZX_disc(a);
+    GEN db = nfb? nf_get_disc(nfb): ZX_disc(b);
     if (fliso)
     {
       if (gissquare(gdiv(da,db)) == gen_0) { avma=av; return gen_0; }

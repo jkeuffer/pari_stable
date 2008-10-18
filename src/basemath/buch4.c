@@ -672,7 +672,7 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
   if (galois == 2)
   {
     GEN P = rnfeq? pol_up(rnfeq, relpol, vbas): relpol;
-    galois = nfissplit(gsubst(nfabs, varn(nfabs[1]), pol_x(vbas)), P);
+    galois = nfissplit(gsubst(nfabs, varn(nf_get_pol(nfabs)), pol_x(vbas)), P);
   }
 
   prod = gen_1; S1 = S2 = cgetg(1, t_VEC);
@@ -686,7 +686,7 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
   }
   if (!galois)
   {
-    GEN Ndiscrel = diviiexact(gel(nfabs,3), powiu(nf_get_disc(nf), drel));
+    GEN Ndiscrel = diviiexact(nf_get_disc(nfabs), powiu(nf_get_disc(nf), drel));
     fa_pr_append(nf,bnfabs,absi(Ndiscrel), &prod,&S1,&S2);
   }
 

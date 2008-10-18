@@ -1747,7 +1747,7 @@ static GEN
 computeGtwist(GEN nf, GEN vdir)
 {
   long i, j, k, l, lG, v, r1;
-  GEN G = gmael(nf,5,2);
+  GEN G = nf_get_G(nf);
 
   if (!vdir) return RM_round_maxrank(G); /* FIXME: should be part of nf */
   vdir = chk_vdir(nf, vdir);

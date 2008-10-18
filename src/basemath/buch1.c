@@ -280,7 +280,12 @@ get_lambda(GEN bnr)
   return NULL;
 }
 
-#define to_approx(nf,a) (gel(gmul(gmael((nf),5,1), (a)),1))
+static GEN
+to_approx(GEN nf, GEN a)
+{
+  GEN M = nf_get_M(nf);
+  return gadd(gel(a,1), gmul(gcoeff(M,1,2),gel(a,2)));
+}
 /* Z-basis for a (over C) */
 static GEN
 get_om(GEN nf, GEN a) {

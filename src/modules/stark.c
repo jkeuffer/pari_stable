@@ -1744,7 +1744,7 @@ RecCoeff3(GEN nf, RC_data *d, long prec)
 LABrcf: ct++;
   beta2 = gprec_w(beta, prec2);
   nf2 = nfnewprec_shallow(nf, prec2);
-  d->M = M = gmael(nf2, 5, 1);
+  d->M = M = nf_get_M(nf2);
 
   A = cgetg(N+2, t_MAT);
   for (i = 1; i <= N+1; i++) gel(A,i) = cgetg(N+2, t_COL);

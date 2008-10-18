@@ -853,10 +853,11 @@ invimsubgroup(GEN bnrz, GEN bnr, GEN subgroup, toK_s *T)
 {
   long l, j;
   GEN P,raycycz,rayclgpz,raygenz,U,polrel,StZk;
-  GEN nf = checknf(bnr), nfz = checknf(bnrz), polz = gel(nfz,1);
+  GEN nf = checknf(bnr), nfz = checknf(bnrz);
+  GEN polz = nf_get_pol(nfz), zkz = nf_get_zk(nfz);
 
   polrel = polrelKzK(T, pol_x(varn(polz)));
-  StZk = Stelt(nf, gel(nfz,7), polrel);
+  StZk = Stelt(nf, zkz, polrel);
   rayclgpz = gel(bnrz,5);
   raycycz = gel(rayclgpz,2); l = lg(raycycz);
   raygenz = gel(rayclgpz,3);
@@ -864,7 +865,7 @@ invimsubgroup(GEN bnrz, GEN bnr, GEN subgroup, toK_s *T)
   for (j=1; j<l; j++)
   {
     GEN g, id = idealhnf_shallow(nfz, gel(raygenz,j));
-    g = Stelt(nf, gmul(gel(nfz,7), id), polrel);
+    g = Stelt(nf, RgV_RgM_mul(zkz, id), polrel);
     g = idealdiv(nf, g, StZk); /* N_{Kz/K}(gen[j]) */
     gel(P,j) = isprincipalray(bnr, g);
   }
@@ -939,7 +940,7 @@ to_alg(GEN nfz, GEN v)
 {
   GEN z;
   if (typ(v) != t_COL) return v;
-  z = gmul(gel(nfz,7), v);
+  z = gmul(nf_get_zk(nfz), v);
   if (typ(z) == t_POL) setvarn(z, MAXVARN);
   return z;
 }
@@ -983,7 +984,7 @@ compute_polrel(GEN nfz, toK_s *T, GEN be, long g, long ell)
   p1 = to_alg(nfz, nffactorback(nfz, powtaubet, get_reverse(r)));
   num_t = Q_remove_denom(p1, &den_t);
 
-  nfzpol = leafcopy(gel(nfz,1));
+  nfzpol = leafcopy(nf_get_pol(nfz));
   setvarn(nfzpol, MAXVARN);
   S = cgetg(ell+1, t_VEC); /* Newton sums */
   gel(S,1) = gen_0;
