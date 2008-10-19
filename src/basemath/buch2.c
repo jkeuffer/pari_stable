@@ -2415,20 +2415,31 @@ remove_0_cols(GEN A, int *precpb)
   setlg(B, k); return B;
 }
 
+static long
+compute_multiple_of_R_pivot(GEN x, GEN x0/*unused*/, GEN c)
+{
+  long i, k = 0, ex = - (long)HIGHEXPOBIT, lx = lg(x);
+  (void)x0;
+  for (i=1; i<lx; i++)
+    if (!c[i] && !gcmp0(gel(x,i)))
+    {
+      long e = gexpo(gel(x,i));
+      if (e > ex) { ex = e; k = i; }
+    }
+  return (k && ex > -10)? k: lx;
+}
+
 /* A = complex logarithmic embeddings of units (u_j) found so far */
 static GEN
-compute_multiple_of_R(GEN A,long RU,long N,GEN *ptL)
+compute_multiple_of_R(GEN A, long RU, long N, GEN *ptL)
 {
-  GEN T,v,mdet,mdet2,Im_mdet,kR,xreal,L;
-  long i, R1 = 2*RU - N;
+  GEN T, d, mdet, Im_mdet, kR, xreal, L;
+  long i, j, r, rk, R1 = 2*RU - N;
   int precpb;
   pari_sp av = avma;
 
-  if (RU == 1)
-  {
-    *ptL = zeromat(0, lg(A)-1);
-    return gen_1;
-  }
+  if (RU == 1) { *ptL = zeromat(0, lg(A)-1); return gen_1; }
+
   if (DEBUGLEVEL) fprintferr("\n#### Computing regulator multiple\n");
   xreal = real_i(A); /* = (log |sigma_i(u_j)|) */
   mdet = remove_0_cols(xreal, &precpb);
@@ -2440,13 +2451,15 @@ compute_multiple_of_R(GEN A,long RU,long N,GEN *ptL)
   for (   ; i<=RU; i++) gel(T,i) = gen_2;
   mdet = shallowconcat(T, mdet); /* det(Span(mdet)) = N * R */
 
-  i = gprecision(mdet); /* truncate to avoid "near dependent" vectors */
-  mdet2 = (i <= 4)? mdet: gprec_w(mdet,i-1);
-  v = gel(indexrank(mdet2),2); /* list of independent column indices */
-  /* check we have full rank for units */
-  if (lg(v) != RU+1) { avma = av; return NULL; }
+  /* could be using indexrank(), but need custom "get_pivot" function */
+  d = RgM_pivots(mdet, &r, &compute_multiple_of_R_pivot);
+  rk = lg(mdet)-1 - r; /* # of independent columns */
+  if (rk != RU) { avma = av; return NULL; } /* full rank for units ? */
 
-  Im_mdet = vecpermute(mdet,v);
+  Im_mdet = cgetg(rk+1, t_MAT); /* extract independent columns */
+  for (i=j=1; i<=rk; j++)
+    if (d[j]) gel(Im_mdet,i++) = gel(mdet,j);
+
   /* integral multiple of R: the cols we picked form a Q-basis, they have an
    * index in the full lattice. First column is T */
   kR = divru(det2(Im_mdet), N);

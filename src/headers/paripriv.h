@@ -400,7 +400,8 @@ GEN     redrealsl2(GEN V);
 GEN     redrealsl2step(GEN A);
 
 /* alglin1.c */
-
+typedef long (*pivot_fun)(GEN,GEN,GEN);
+GEN RgM_pivots(GEN x0, long *rr, pivot_fun pivot);
 void    vecselect_p(GEN A, GEN B, GEN p, long init, long lB);
 
 /* arith1.c */
