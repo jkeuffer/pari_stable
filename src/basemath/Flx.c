@@ -1428,9 +1428,8 @@ Flxq_pow(GEN x, GEN n, GEN pol, ulong p)
   D.pol = pol;
   D.p   = p;
   /* not tuned*/
-  if (pol[2] && degpol(pol) >= Flx_POW_MONTGOMERY_LIMIT)
+  if (degpol(pol) >= Flx_POW_MONTGOMERY_LIMIT)
   {
-    /* We do not handle polynomials multiple of x yet */
     D.mg  = Flx_invmontgomery(pol,p);
     y = leftright_pow(x, n, (void*)&D, &_sqr_montgomery, &_mul_montgomery);
   }
