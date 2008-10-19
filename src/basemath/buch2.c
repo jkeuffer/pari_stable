@@ -2438,7 +2438,7 @@ compute_multiple_of_R(GEN A,long RU,long N,GEN *ptL)
   T = cgetg(RU+1,t_COL);
   for (i=1; i<=R1; i++) gel(T,i) = gen_1;
   for (   ; i<=RU; i++) gel(T,i) = gen_2;
-  mdet = shallowconcat(mdet,T); /* det(Span(mdet)) = N * R */
+  mdet = shallowconcat(T, mdet); /* det(Span(mdet)) = N * R */
 
   i = gprecision(mdet); /* truncate to avoid "near dependent" vectors */
   mdet2 = (i <= 4)? mdet: gprec_w(mdet,i-1);
@@ -2448,7 +2448,7 @@ compute_multiple_of_R(GEN A,long RU,long N,GEN *ptL)
 
   Im_mdet = vecpermute(mdet,v);
   /* integral multiple of R: the cols we picked form a Q-basis, they have an
-   * index in the full lattice. Last column is T */
+   * index in the full lattice. First column is T */
   kR = divru(det2(Im_mdet), N);
   /* R > 0.2 uniformly */
   if (!signe(kR) || expo(kR) < -3) { avma=av; return NULL; }
@@ -2457,7 +2457,7 @@ compute_multiple_of_R(GEN A,long RU,long N,GEN *ptL)
   L = RgM_inv(Im_mdet);
   if (!L) { *ptL = NULL; return kR; }
 
-  L = RgM_mul(rowslice(L, 1, RU-1), xreal); /* approximate rational entries */
+  L = RgM_mul(rowslice(L, 2, RU), xreal); /* approximate rational entries */
   gerepileall(av,2, &L, &kR);
   *ptL = L; return kR;
 }
