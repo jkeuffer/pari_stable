@@ -1558,21 +1558,21 @@ gauss_pivot(GEN x0, long *rr)
   pari_sp av, lim;
   long (*get_pivot)(GEN,GEN,GEN,long);
 
-  n=lg(x0)-1; if (!n) { *rr=0; return NULL; }
+  n = lg(x0)-1; if (!n) { *rr = 0; return NULL; }
 
   get_pivot = use_maximal_pivot(x0)? &gauss_get_pivot_max: &gauss_get_pivot_NZ;
   d = cgetg(n+1, t_VECSMALL);
   x = RgM_shallowcopy(x0);
-  m=lg(x[1])-1; r=0;
+  m = lg(x[1])-1; r = 0;
   c = const_vecsmall(m, 0);
-  av=avma; lim=stack_lim(av,1);
+  av = avma; lim = stack_lim(av,1);
   for (k=1; k<=n; k++)
   {
     j = get_pivot(gel(x,k), gel(x0,k), c, 1);
-    if (j>m) { r++; d[k]=0; }
+    if (j > m) { r++; d[k] = 0; }
     else
     {
-      c[j]=k; d[k]=j; p = gdiv(gen_m1, gcoeff(x,j,k));
+      c[j] = k; d[k] = j; p = gdiv(gen_m1, gcoeff(x,j,k));
       for (i=k+1; i<=n; i++) gcoeff(x,j,i) = gmul(p,gcoeff(x,j,i));
 
       for (t=1; t<=m; t++)
@@ -1580,13 +1580,13 @@ gauss_pivot(GEN x0, long *rr)
 	{
 	  p = gcoeff(x,t,k); gcoeff(x,t,k) = gen_0;
 	  for (i=k+1; i<=n; i++)
-	    gcoeff(x,t,i) = gadd(gcoeff(x,t,i), gmul(p,gcoeff(x,j,i)));
+	    gcoeff(x,t,i) = gadd(gcoeff(x,t,i), gmul(p, gcoeff(x,j,i)));
 	  if (low_stack(lim, stack_lim(av,1))) gerepile_gauss(x,k,t,av,j,c);
 	}
       for (i=k; i<=n; i++) gcoeff(x,j,i) = gen_0; /* dummy */
     }
   }
-  *rr=r; return d;
+  *rr = r; return d;
 }
 
 /* compute ker(x - aI) */
@@ -1663,7 +1663,7 @@ imagecompl(GEN x)
   long j,i,r;
 
   if (typ(x)!=t_MAT) pari_err(typeer,"imagecompl");
-  (void)new_chunk(lg(x) * 3);
+  (void)new_chunk(lg(x) * 3); /* HACK */
   d = gauss_pivot(x,&r);
   avma = av; y = cgetg(r+1,t_VEC);
   for (i=j=1; j<=r; i++)
@@ -2238,9 +2238,9 @@ FpM_gauss_pivot(GEN x, GEN p, long *rr)
 {
   pari_sp av, lim;
   GEN c, d;
-  long i, j, k, r, t, m, n=lg(x)-1;
+  long i, j, k, r, t, m, n = lg(x)-1;
 
-  if (!n) { *rr=0; return NULL; }
+  if (!n) { *rr = 0; return NULL; }
   if (lgefint(p) == 3)
   {
     ulong pp = (ulong)p[2];
