@@ -651,21 +651,17 @@ nf_root_bounds(GEN P, GEN T)
 /* return B such that if x in O_K, K = Z[X]/(T), then the L2-norm of the
  * coordinates of the numerator of x [on the power, resp. integral, basis if T
  * is a polynomial, resp. an nf] is  <= B T_2(x)
- * *ptden = multiplicative bound for denom(x) */
+ * den = multiplicative bound for denom(x) */
 static GEN
-L2_bound(GEN T, GEN tozk, GEN *ptden)
+L2_bound(GEN nf, GEN den)
 {
-  GEN nf, M, L, prep, den = *ptden;
+  GEN M, L, prep, T = nf_get_pol(nf), tozk = gel(nf,8);
   long prec;
 
-  T = get_nfpol(T, &nf);
   prec = ZX_max_lg(T) + ZM_max_lg(tozk);
   (void)initgaloisborne(T, den, prec, &L, &prep, NULL);
   M = vandermondeinverse(L, RgX_gtofp(T,prec), den, prep);
-  if (nf) M = RgM_mul(tozk, M);
-  if (is_pm1(den)) den = NULL;
-  *ptden = den;
-  return RgM_fpnorml2(M, DEFAULTPREC);
+  return RgM_fpnorml2(RgM_mul(tozk,M), DEFAULTPREC);
 }
 
 /* || L ||_p^p in dimension n (L may be a scalar) */
@@ -1194,7 +1190,7 @@ bestlift_init(long a, GEN nf, GEN pr, GEN C, nflift_t *L)
 
   for (;; avma = av, a<<=1)
   {
-    if (DEBUGLEVEL>2) fprintferr("exponent: %ld\n",a);
+    if (DEBUGLEVEL>2) fprintferr("exponent %ld\n",a);
     prk = idealpows(nf, pr, a);
     av2 = avma;
     pk = gcoeff(prk,1,1);
@@ -1705,8 +1701,8 @@ nfsqff(GEN nf, GEN pol, long fl, GEN den)
   }
   L.tozk = gel(nf,8);
   L.topow= Q_remove_denom(nf_get_zk(nf), &L.topowden);
-  T.dn = den; /* override */
-  T.ZC = L2_bound(nf, L.tozk, &(T.dn));
+  T.ZC = L2_bound(nf, den);
+  T.dn = is_pm1(den)? NULL: den;
   T.Br = nf_root_bounds(pol, nf); if (lt) T.Br = gmul(T.Br, lt);
 
   if (fl) C0 = normlp(T.Br, 2, n);
@@ -1829,19 +1825,20 @@ nf_pick_prime_for_units(GEN nf, prklift_t *P, long nbguessed)
   P->L->p = ap;
   P->L->Tp = aT;
   P->L->tozk = gel(nf,8);
-  P->L->topow = Q_remove_denom(gel(nf,7), &(P->L->topowden));
+  P->L->topow = Q_remove_denom(nf_get_zk(nf), &(P->L->topowden));
 }
 
 /* *Heuristic* exponent k such that the fundamental domain of pr^k
  * should contain the ball of radius C */
 double
-mybestlift_bound(GEN C, long d, double alpha, GEN Npr)
+mybestlift_bound(GEN C, long d, GEN Npr)
 {
+  C = gtofp(C,DEFAULTPREC);
+#if 0
+  const double alpha = 0.99; /* LLL parameter */
   const double y = 1 / (alpha - 0.25); /* = 2 if alpha = 3/4 */
   double t;
-  C = gtofp(C,DEFAULTPREC);
   t = rtodbl(mplog(gmul2n(divru(C,d), 4))) * 0.5 + (d-1) * log(1.5 * sqrt(y));
-#if 0
   return ceil((t * d) / log(gtodouble(Npr))); /* proved upper bound */
   return ceil(d * log( gtodouble(C)) / log(gtodouble(Npr)));
 #endif
@@ -1856,12 +1853,8 @@ nfcyclo_root(GEN nf, long n_cyclo, prklift_t *P, GEN C0)
 {
   pari_sp av = avma;
   GEN init_fa = NULL; /* factors mod pr */
-  GEN nfpol = nf_get_pol(nf), pol, z;
-  long deg, nbf;
-
-  pol = polcyclo(n_cyclo, fetch_var());
-  deg = degpol(pol); /* = eulerphi(n_cyclo) */
-  if (DEBUGLEVEL>5) fprintferr("   splitting phi_%d in Fq, q=%Zs\n", n_cyclo, P->q);
+  GEN z, nfpol = nf_get_pol(nf), pol = polcyclo(n_cyclo, MAXVARN);
+  long nbf, deg = degpol(pol); /* = eulerphi(n_cyclo) */
   if (P->L->Tp)
     nbf = FqX_split_deg1(&init_fa, pol, P->q, P->L->Tp, P->L->p);
   else
@@ -1909,11 +1902,11 @@ guess_roots(GEN nf)
       fprintferr("p=%Ps; gcf(f(P/p))=%ld; nbroots | %Ps",p, gcdf, nbroots);
     /* if same result go on else reset the stop counter [c] */
     if (old && equalii(nbroots,old))
-    { if (lgefint(nbroots) == 3 && ++c > nfdegree + 20) break; }
+    { if (!is_bigint(nbroots) && ++c > nfdegree + 20) break; }
     else
       c = 0;
   }
-  if (DEBUGLEVEL>2) fprintferr("%ld loops\n",l);
+  if (DEBUGLEVEL>5) fprintferr("%ld loops\n",l);
   return itos(nbroots);
 }
 
@@ -1921,68 +1914,54 @@ guess_roots(GEN nf)
 GEN
 rootsof1_nffactor(GEN nf)
 {
-  const double alpha = 0.99; /* LLL parameter */
   prklift_t P;
   nflift_t L;
-  GEN C0, den, z, prim_root;
-  pari_timer ti, ti_tot;
-  long p, nbguessed, nbroots, nfdegree = nf_get_degree(nf);
-  byteptr d = diffptr;
+  GEN fa, LP, LE, C0, z, prim_root;
+  pari_timer ti;
+  long i, l, nbguessed, nbroots, nfdegree = nf_get_degree(nf);
   pari_sp av = avma;
 
-  P.L = &L;
-
-  /* to sieve possible values of n-th roots */
-  if (DEBUGLEVEL>2) { TIMERstart(&ti); TIMERstart(&ti_tot); }
+  if (DEBUGLEVEL>2) TIMERstart(&ti);
 
   /* Step 1 : guess number of roots and discard trivial case 2 */
-  nbguessed = guess_roots(nf);
+  nbguessed = nf_get_r1(nf) == 0? guess_roots(nf): 2;
   if (DEBUGLEVEL>2)
     msgTIMER(&ti, "guessing roots of unity [guess = %ld]", nbguessed);
   if (nbguessed==2) { avma = av; return mkvec2(gen_2, gen_m1); }
 
   /* Step 2 : choose a prime ideal for local lifting */
-  nf_pick_prime_for_units(nf, &P, nbguessed);
-  if (DEBUGLEVEL>3) msgTIMER(&ti, "choosing prime:  %Zs", P.L->p);
+  P.L = &L; nf_pick_prime_for_units(nf, &P, nbguessed);
+  if (DEBUGLEVEL>2) msgTIMER(&ti, "choosing prime %Ps", P.L->p);
 
   /* Step 3 : compute a reduced pr^k allowing lifting of local solutions */
   /* evaluate maximum L2 norm of a root of unity in nf */
-  den = gen_1;
-  C0 = gmulsg(nfdegree, L2_bound(nf, gel(nf,8), &den/*dummy*/));
+  C0 = gmulsg(nfdegree, L2_bound(nf, gen_1));
 
-  if (DEBUGLEVEL>3)
-    fprintferr("lift and reduce pr^k\n  -> GSmin wanted : %Zs\n",C0);
   /* lift and reduce P */
-  
-  bestlift_init((long)mybestlift_bound(C0, nfdegree, alpha, P.q),
+  if (DEBUGLEVEL>2)
+    fprintferr("Lift pr^k; GSmin wanted: %Ps\n",C0);
+  bestlift_init((long)mybestlift_bound(C0, nfdegree, P.q),
                 nf, P.pr, C0, P.L);
+  if (DEBUGLEVEL>2) TIMERstart(&ti);
 
-  /* Step 4 : actual computation of roots.
-   * try all primes dividing [nbguessed]. */
-  nbroots = 2;
-  prim_root = gen_m1;
-  
-  /* for all divisor d of nfdegree, if p=d+1 is prime one has
-   * to find the exponent of p */
-  if (maxprime() < nbguessed) pari_err(primer1);
+  /* Step 4 : actual computation of roots */
+  nbroots = 2; prim_root = gen_m1;
   /* find all prime power factors of nbguessed and for these find
-   * the corresponding roots of unity
-   */
-  for(p=0; p<nbguessed;)
+   * the corresponding roots of unity */
+  fa = factoru(nbguessed);
+  LP = gel(fa,1); l = lg(LP);
+  LE = gel(fa,2);
+  for (i = 1; i < l; i++)
   {
-    long n, k;
-    NEXT_PRIME_VIADIFF(p,d);
-    for (k = u_lval(nbguessed, p); k>0; k--)
-    {
-      if (!k) continue;
-      /* find p^k-th roots */
-      n = upowuu(p,k);
+    long k, p = LP[i];
+    for (k = LE[i]; k > 0; k--)
+    { /* find p^k-th roots */
+      long n = upowuu(p,k);
       if (n==2) continue; /* no need to test second roots ! */
-      if (DEBUGLEVEL>3) fprintferr(" trying to find %ld-th roots of unity..\n", n);
       z = nfcyclo_root(nf,n,&P,C0);
       if (DEBUGLEVEL>2) msgTIMER(&ti, "for factoring Phi_%ld^%ld", p,k);
       if (z) {
-        if (DEBUGLEVEL>3) fprintferr(" %ld-th root of unity found.\n", n);
+        if (DEBUGLEVEL>2) fprintferr("  %ld-th root of unity found.\n", n);
         if (p==2) { nbroots = n; prim_root = z; }
         else { nbroots *= n; prim_root = nfmul(nf,prim_root,z); }
         break;
@@ -1991,6 +1970,5 @@ rootsof1_nffactor(GEN nf)
         pari_warn(warner,"Wrong guess of roots of unity. Try divisors.");
     }
   }
-  if (DEBUGLEVEL>2) msgTIMER(&ti_tot, "finding roots of unity");
-  return mkvec2(utoi(nbroots), prim_root);
+  return gerepilecopy(av, mkvec2(utoi(nbroots), prim_root));
 }
