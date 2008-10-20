@@ -1459,23 +1459,46 @@ liftpol(GEN pol, GEN q)
   return y;
 }
 
+GEN
+nf_deg1_prime(GEN nf)
+{
+  GEN bad = mulii(nf_get_disc(nf), nf_get_index(nf));
+  GEN T = nf_get_pol(nf), p, z;
+  long degnf = degpol(T);
+  byteptr pt = diffptr;
+  ulong pp = 0;
+
+  for(;;)
+  {
+    pari_sp av = avma;
+    NEXT_PRIME_VIADIFF_CHECK(pp, pt);
+    if (pp < degnf || umodiu(bad, pp) == 0) continue;
+    p = utoipos(pp);
+    z = FpX_roots(FpX_red(T, p), p);
+    if (lg(z) > 1) break;
+    avma = av;
+  }
+  z = deg1pol_shallow(gen_1, negi(gel(z,1)), varn(T));
+  return primedec_apply_kummer(nf, z, 1, p);
+}
+
 static int
 rnf_is_abelian(GEN nf, GEN pol)
 {
   GEN modpr, pr, T, pp, ro, nfL, C, z, a, sig, eq = rnfequation2(nf,pol);
-  long i, j, l, v = varn(nf[1]);
+  long i, j, l, v = varn(nf_get_pol(nf));
   ulong p, k, ka;
 
   C = gel(eq,1); setvarn(C, v);
   a = lift_intern(gel(eq,2)); setvarn(a, v); /* root of nf[1] */
-  z = nfrootsall_and_pr(C, liftpol(pol, a));
+  z = nfroots_split(C, liftpol(pol, a));
   if (!z) return 0;
   ro = gel(z,1); l = lg(ro)-1;
   /* small groups are abelian, as are groups of prime order */
   if (l < 6 || uisprime(l)) return 1;
 
-  pr = gel(z,2);
-  nfL = gel(z,3);
+  nfL = gel(z,2);
+  pr = nf_deg1_prime(nfL);
   modpr = nf_to_Fq_init(nfL, &pr, &T, &pp);
   p = itou(pp);
   k = umodiu(gel(eq,3), p);

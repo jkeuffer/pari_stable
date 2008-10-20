@@ -23,20 +23,20 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 static GEN nfsqff(GEN nf,GEN pol,long fl,GEN den);
 
-/* FIXME: neither nfcmbf nor LLL_cmbf can handle the non-nf case */
-/* for nf_bestlift: reconstruction of algebraic integers known mod \wp^k */
+/* for nf_bestlift: reconstruction of algebraic integers known mod P^k,
+ * P maximal ideal above p */
 typedef struct {
-  long k;    /* input known mod \wp^k */
-  GEN p, pk;    /* p^k */
+  long k;    /* input known mod P^k */
+  GEN p, pk; /* p^k */
   GEN den;   /* denom(prk^-1) = p^k [ assume pr unramified ] */
-  GEN prk;   /* |.|^2 LLL-reduced basis (b_i) of \wp^k  (NOT T2-reduced) */
-  GEN prkHNF;/* HNF basis of \wp^k */
+  GEN prk;   /* |.|^2 LLL-reduced basis (b_i) of P^k  (NOT T2-reduced) */
+  GEN prkHNF;/* HNF basis of P^k */
   GEN iprk;  /* den * prk^-1 */
   GEN GSmin; /* min |b_i^*|^2 */
 
   GEN Tp; /* Tpk mod p */
   GEN Tpk;
-  GEN ZqProj;/* projector to Zp / \wp^k = Z/p^k[X] / Tpk */
+  GEN ZqProj;/* projector to Zp / P^k = Z/p^k[X] / Tpk */
 
   GEN tozk;
   GEN topow;
@@ -1159,6 +1159,27 @@ init_proj(nflift_t *L, GEN nfT, GEN p)
   }
 }
 
+/* Square of the radius of largest ball inscript in PRK's fundamental domain,
+ *   whose orthogonalized vector's norms are the Bi
+ * Rmax ^2 =  min 1/4T_i where T_i = sum ( s_ij^2 / B_j) */
+static GEN
+max_radius(GEN PRK, GEN B)
+{
+  GEN S, smax = gen_0;
+  pari_sp av = avma;
+  long i, j, d = lg(PRK)-1;
+
+  S = RgM_inv( get_R(PRK) ); if (!S) pari_err(precer,"max_radius");
+  for (i=1; i<=d; i++)
+  {
+    GEN s = gen_0;
+    for (j=1; j<=d; j++)
+      s = mpadd(s, mpdiv( mpsqr(gcoeff(S,i,j)), gel(B,j)));
+    if (mpcmp(s, smax) > 0) smax = s;
+  }
+  return gerepileupto(av, ginv(gmul2n(smax, 2)));
+}
+
 static void
 bestlift_init(long a, GEN nf, GEN pr, GEN C, nflift_t *L)
 {
@@ -1173,22 +1194,12 @@ bestlift_init(long a, GEN nf, GEN pr, GEN C, nflift_t *L)
 
   for (;; avma = av, a<<=1)
   {
-    GEN S, smax = gen_0;
-    long i, j;
     if (DEBUGLEVEL>2) fprintferr("exponent: %ld\n",a);
     prk = idealpows(nf, pr, a);
     av2 = avma;
     pk = gcoeff(prk,1,1);
     PRK = ZM_lll_norms(prk, alpha, LLL_INPLACE, &B);
-    S = RgM_inv( get_R(PRK) ); if (!S) continue;
-    for (i=1; i<=d; i++)
-    {
-      GEN s = gen_0;
-      for (j=1; j<=d; j++)
-        s = mpadd(s, mpdiv( mpsqr(gcoeff(S,i,j)), gel(B,j)));
-      if (mpcmp(s, smax) > 0) smax = s;
-    }
-    GSmin = ginv(gmul2n(smax, 2));
+    GSmin = max_radius(PRK, B);
     if (gcmp(GSmin, C) >= 0) break;
   }
   gerepileall(av2, 2, &PRK, &GSmin);
@@ -1457,78 +1468,91 @@ nf_DDF_roots(GEN pol, GEN polred, GEN nfpol, GEN ltdn, GEN init_fa, long nbf,
   return z;
 }
 
-/* Select a prime ideal for which polbase factors
- * return the number of factors or roots mod pr,
- * according to flag (see nfsqff below)
- * ct: number of attempts to find best
- * Fa: factors found mod pr
- * Tp: polynomial defining Fq/Fp */
+/* returns a factor of T in Fp of degree >= minf, NULL if none exist */
+static GEN
+get_good_factor(GEN T, GEN p, long minf)
+{
+  pari_sp av = avma;
+  GEN r, list = gel(FpX_factor(T,p), 1);
+  if (minf == 1)
+  { /* deg.1 factors are best */
+    r = gel(list,1);
+    if (degpol(r) == 1) return r;
+  }
+  else
+  { /* otherwise, pick factor of largish degree */
+    long i, dr;
+    for (i = lg(list)-1; i > 0; i--)
+    {
+      r = gel(list,i); dr = degpol(r);
+      if (dr <= minf) return r;
+    }
+  }
+  avma = av; return NULL; /* failure */
+}
+
+/* Optimization problem: factorization of polynomials over large Fq is slow,
+ * BUT bestlift correspondingly faster.
+ * Return minimal residue degree to be considered when picking a prime ideal */
+static long
+get_minf(long nfdeg, long dpol)
+{
+  long minf = 1;
+  if (dpol > 100) /* tough */
+  { if (nfdeg >= 20) minf = 4; }
+  else
+  { if (nfdeg >= 15) minf = 4; }
+  return minf;
+}
+
+/* Select a prime ideal pr over which to factor polbase.
+ * Return the number of factors (or roots, according to flag fl) mod pr,
+ * Input:
+ *   ct: number of attempts to find best
+ * Set:
+ *   lt: leading term of polbase (t_INT or NULL [ for 1 ])
+ *   pr: a suitable maximal ideal
+ *   Fa: factors found mod pr
+ *   Tp: polynomial defining Fq/Fp */
 static long
 nf_pick_prime(long ct, GEN nf, GEN polbase, long fl,
 	      GEN *lt, GEN *Fa, GEN *pr, GEN *Tp)
 {
-  GEN nfpol = nf_get_pol(nf), dk, bad;
-  long minf, n = degpol(nfpol), dpol = degpol(polbase), nbf = 0;
+  GEN nfpol = nf_get_pol(nf), bad = mulii(nf_get_disc(nf), nf_get_index(nf));
+  long minf, nfdeg = degpol(nfpol), dpol = degpol(polbase), nbf = 0;
   byteptr pt = diffptr;
   ulong pp = 0;
+  pari_timer ti_pr;
 
+  if (DEBUGLEVEL>3) TIMERstart(&ti_pr);
   *lt  = leading_term(polbase); /* t_INT */
   if (gcmp1(*lt)) *lt = NULL;
-  dk = absi(nf_get_disc(nf));
-  bad = mulii(dk, nf_get_index(nf));
+  *pr = NULL;
+  *Fa = NULL;
+  *Tp = NULL;
 
-  /* FIXME: slow factorization of large polynomials over large Fq */
-  minf = 1;
-  if (ct > 1) {
-    if (dpol > 100) /* tough */
-    {
-      if (n >= 20) minf = 4;
-    }
-    else
-    {
-      if (n >= 15) minf = 4;
-    }
-  }
-  /* selecting prime such that pol has the smallest number of factors, five attempts */
-  for (ct = 5;;)
+  minf = get_minf(nfdeg, dpol);
+  /* select pr such that pol has the smallest number of factors, ct attempts */
+  for (;;)
   {
-    GEN aT, apr, ap, modpr, red;
+    GEN aT, apr, ap, amodpr, red, r, fa = NULL;
     long anbf;
     ulong ltp = 0;
-    GEN list, r = NULL, fa = NULL;
     pari_sp av2 = avma;
-    pari_timer ti_pr;
-    if (DEBUGLEVEL>3) TIMERstart(&ti_pr);
-    /* first step : select prime of high inertia degree */
-    for (;;)
-    {
-      NEXT_PRIME_VIADIFF_CHECK(pp, pt);
-      if (! umodiu(bad,pp)) continue;
-      if (*lt) { ltp = umodiu(*lt, pp); if (!ltp) continue; }
-      ap = utoipos(pp);
-      list = gel(FpX_factor(nfpol, ap),1);
-      if (minf == 1)
-      { /* deg.1 factors are best */
-	r = gel(list,1);
-	if (degpol(r) == 1) break;
-      }
-      else
-      { /* otherwise, pick factor of largish degree */
-	long i, dr;
-	for (i = lg(list)-1; i > 0; i--)
-	{
-	  r = gel(list,i); dr = degpol(r);
-	  if (dr <= minf) break;
-	}
-	if (i > 0) break;
-      }
-      avma = av2;
-    }
-    apr = primedec_apply_kummer(nf,r,1,ap);
-    /* second step : evaluate factorisation mod apr */
-    modpr = zk_to_Fq_init(nf,&apr,&aT,&ap);
 
-    red = nfX_to_FqX(polbase, nf, modpr);
+    /* first step : select prime of high inertia degree */
+    NEXT_PRIME_VIADIFF_CHECK(pp, pt);
+    if (! umodiu(bad,pp)) continue;
+    if (*lt) { ltp = umodiu(*lt, pp); if (!ltp) continue; }
+    ap = utoipos(pp);
+    r = get_good_factor(nfpol, ap, minf);
+    if (!r) continue;
+   
+    apr = primedec_apply_kummer(nf,r,1,ap);
+    amodpr = zk_to_Fq_init(nf,&apr,&aT,&ap);
+
+    /* second step : evaluate factorisation mod apr */
+    red = nfX_to_FqX(polbase, nf, amodpr);
     if (!aT)
     { /* degree 1 */
       red = ZX_to_Flx(red, pp);
@@ -1740,13 +1764,233 @@ nfsqff(GEN nf, GEN pol, long fl, GEN den)
 
 /* assume pol monic in nf.zk[X] */
 GEN
-nfrootsall_and_pr(GEN nf, GEN pol)
+nfroots_split(GEN nf, GEN pol)
 {
-  GEN J1,J2, pr, T = get_nfpol(nf,&nf), den = get_den(&nf, T);
+  GEN T = get_nfpol(nf,&nf), den = get_den(&nf, T);
   pari_sp av = avma;
   GEN z = gerepilecopy(av, nfsqff(nf, pol, 2, den));
-  if (lg(z) == 1) return NULL;
-  (void)nf_pick_prime(1, nf, RgX_to_nfX(nf, pol), 2,
-		      &J1, &J2, &pr, &T);
-  return mkvec3(z, pr, nf);
+  return (lg(z) == 1)? NULL: mkvec2(z, nf);
+}
+
+/*******************************************************************/
+/*                                                                 */
+/*              Roots of unity in a number field                   */
+/*     (alternative to nfrootsof1 using factorization in K[X])     */
+/*                                                                 */
+/*******************************************************************/
+/* Code adapted from nffactor. Structure of the algorithm; only step 1 is
+ * specific to roots of unity.
+ *
+ * [Step 1]: guess roots via ramification. If trivial output this.
+ * [Step 2]: select prime [p] unramified and ideal [pr] above
+ * [Step 3]: evaluate the maximal exponent [k] such that the fondamental domain
+ *           of a LLL-reduction of [prk] = pr^k contains a ball of radius larger
+ *           than the norm of any root of unity.
+ * [Step 3]: select a heuristic exponent,
+ *           LLL reduce prk=pr^k and verify the exponent is sufficient,
+ *           otherwise try a larger one.
+ * [Step 4]: factor the cyclotomic polynomial mod [pr],
+ *           Hensel lift to pr^k and find the representative in the ball
+ *           If there is it is a primitive root */
+
+typedef struct {
+  GEN q;
+  GEN modpr;
+  GEN pr;
+  nflift_t *L;
+} prklift_t;
+
+/* FIXME: check that all primes dividing n are ramified ! */
+
+/* Choose prime ideal unramified with "large" inertia degree */
+static void
+nf_pick_prime_for_units(GEN nf, prklift_t *P, long nbguessed)
+{
+  GEN nfpol = nf_get_pol(nf), bad = mulii(nf_get_disc(nf), nf_get_index(nf));
+  GEN aT, amodpr, apr, ap = NULL, r = NULL;
+  long minf, nfdeg = degpol(nfpol);
+  byteptr pt = diffptr;
+  ulong pp = 0;
+  
+  minf = get_minf(nfdeg, nbguessed);
+  for (;;)
+  {
+    NEXT_PRIME_VIADIFF_CHECK(pp, pt);
+    if (! umodiu(bad,pp)) continue;
+    ap = utoipos(pp);
+    r = get_good_factor(nfpol, ap, minf);
+    if (r) break;
+  }
+  apr = primedec_apply_kummer(nf,r,1,ap);
+  amodpr = zk_to_Fq_init(nf,&apr,&aT,&ap);
+  P->pr = apr;
+  P->q = pr_norm(apr);
+  P->modpr = amodpr;
+  P->L->p = ap;
+  P->L->Tp = aT;
+  P->L->tozk = gel(nf,8);
+  P->L->topow = Q_remove_denom(gel(nf,7), &(P->L->topowden));
+}
+
+/* *Heuristic* exponent k such that the fundamental domain of pr^k
+ * should contain the ball of radius C */
+double
+mybestlift_bound(GEN C, long d, double alpha, GEN Npr)
+{
+  const double y = 1 / (alpha - 0.25); /* = 2 if alpha = 3/4 */
+  double t;
+  C = gtofp(C,DEFAULTPREC);
+  t = rtodbl(mplog(gmul2n(divru(C,d), 4))) * 0.5 + (d-1) * log(1.5 * sqrt(y));
+#if 0
+  return ceil((t * d) / log(gtodouble(Npr))); /* proved upper bound */
+  return ceil(d * log( gtodouble(C)) / log(gtodouble(Npr)));
+#endif
+  /* TODO: make experiments ! */
+  return ceil(log(gtodouble(C)) / 0.2) + 3;
+}
+
+/* Returns the roots of the n_cyclo-th cyclotomic polynomial
+ * if it splits, NULL otherwise */
+static GEN
+nfcyclo_root(GEN nf, long n_cyclo, prklift_t *P, GEN C0)
+{
+  pari_sp av = avma;
+  GEN init_fa = NULL; /* factors mod pr */
+  GEN nfpol = nf_get_pol(nf), pol, z;
+  long deg, nbf;
+
+  pol = polcyclo(n_cyclo, fetch_var());
+  deg = degpol(pol); /* = eulerphi(n_cyclo) */
+  if (DEBUGLEVEL>5) fprintferr("   splitting phi_%d in Fq, q=%Zs\n", n_cyclo, P->q);
+  if (P->L->Tp)
+    nbf = FqX_split_deg1(&init_fa, pol, P->q, P->L->Tp, P->L->p);
+  else
+  {
+    ulong p = itou(P->L->p);
+    nbf = Flx_nbroots(ZX_to_Flx(pol,p), p);
+  }
+  if (nbf != deg) return NULL; /* no roots in residue field */
+  z = nf_DDF_roots(pol, pol, nfpol, gen_1, init_fa, nbf, 2/*fl*/, P->L);
+  if (lg(z) == 1) { avma = av; return NULL; } /* no roots */
+  return gel(z,1);
+}
+
+/* Guesses the number of roots of unity in number field [nf].
+ * Computes gcd of N(P)-1 for some primes. The value returned is a proven
+ * multiple of the correct value. */
+long
+guess_roots(GEN nf)
+{
+  long c = 0, nfdegree = nf_get_degree(nf), l;
+  ulong p = 0;
+  byteptr pt = diffptr;
+  GEN T = nf_get_pol(nf), nbroots = NULL;
+
+  /* result must be stationnary (counter c) for at least nfdegree+20 loops */
+  for (l=1;; l++)
+  {
+    GEN old, Tp, F, pf_1;
+    long i, nb, gcdf = 0;
+
+    NEXT_PRIME_VIADIFF_CHECK(p,pt);
+    Tp = ZX_to_Flx(T,p);
+    if (!Flx_is_squarefree(Tp, p)) continue;
+    F = Flx_nbfact_by_degree(Tp, &nb, p);
+    /* the gcd of the p^f - 1 is p^(gcd of the f's) - 1 */
+    for (i = 1; i <= nfdegree; i++)
+      if (F[i]) {
+        gcdf = gcdf? cgcd(gcdf, i): i;
+        if (gcdf == 1) break;
+      }
+    pf_1 = subis(powuu(p, gcdf), 1);
+    old = nbroots;
+    nbroots = nbroots? gcdii(pf_1, nbroots): pf_1;
+    if (DEBUGLEVEL>5)
+      fprintferr("p=%Ps; gcf(f(P/p))=%ld; nbroots | %Ps",p, gcdf, nbroots);
+    /* if same result go on else reset the stop counter [c] */
+    if (old && equalii(nbroots,old))
+    { if (lgefint(nbroots) == 3 && ++c > nfdegree + 20) break; }
+    else
+      c = 0;
+  }
+  if (DEBUGLEVEL>2) fprintferr("%ld loops\n",l);
+  return itos(nbroots);
+}
+
+/* Number of roots of unity in number field [nf]. */
+GEN
+rootsof1_nffactor(GEN nf)
+{
+  const double alpha = 0.99; /* LLL parameter */
+  prklift_t P;
+  nflift_t L;
+  GEN C0, den, z, prim_root;
+  pari_timer ti, ti_tot;
+  long p, nbguessed, nbroots, nfdegree = nf_get_degree(nf);
+  byteptr d = diffptr;
+  pari_sp av = avma;
+
+  P.L = &L;
+
+  /* to sieve possible values of n-th roots */
+  if (DEBUGLEVEL>2) { TIMERstart(&ti); TIMERstart(&ti_tot); }
+
+  /* Step 1 : guess number of roots and discard trivial case 2 */
+  nbguessed = guess_roots(nf);
+  if (DEBUGLEVEL>2)
+    msgTIMER(&ti, "guessing roots of unity [guess = %ld]", nbguessed);
+  if (nbguessed==2) { avma = av; return mkvec2(gen_2, gen_m1); }
+
+  /* Step 2 : choose a prime ideal for local lifting */
+  nf_pick_prime_for_units(nf, &P, nbguessed);
+  if (DEBUGLEVEL>3) msgTIMER(&ti, "choosing prime:  %Zs", P.L->p);
+
+  /* Step 3 : compute a reduced pr^k allowing lifting of local solutions */
+  /* evaluate maximum L2 norm of a root of unity in nf */
+  den = gen_1;
+  C0 = gmulsg(nfdegree, L2_bound(nf, gel(nf,8), &den/*dummy*/));
+
+  if (DEBUGLEVEL>3)
+    fprintferr("lift and reduce pr^k\n  -> GSmin wanted : %Zs\n",C0);
+  /* lift and reduce P */
+  
+  bestlift_init((long)mybestlift_bound(C0, nfdegree, alpha, P.q),
+                nf, P.pr, C0, P.L);
+
+  /* Step 4 : actual computation of roots.
+   * try all primes dividing [nbguessed]. */
+  nbroots = 2;
+  prim_root = gen_m1;
+  
+  /* for all divisor d of nfdegree, if p=d+1 is prime one has
+   * to find the exponent of p */
+  if (maxprime() < nbguessed) pari_err(primer1);
+  /* find all prime power factors of nbguessed and for these find
+   * the corresponding roots of unity
+   */
+  for(p=0; p<nbguessed;)
+  {
+    long n, k;
+    NEXT_PRIME_VIADIFF(p,d);
+    for (k = u_lval(nbguessed, p); k>0; k--)
+    {
+      if (!k) continue;
+      /* find p^k-th roots */
+      n = upowuu(p,k);
+      if (n==2) continue; /* no need to test second roots ! */
+      if (DEBUGLEVEL>3) fprintferr(" trying to find %ld-th roots of unity..\n", n);
+      z = nfcyclo_root(nf,n,&P,C0);
+      if (DEBUGLEVEL>2) msgTIMER(&ti, "for factoring Phi_%ld^%ld", p,k);
+      if (z) {
+        if (DEBUGLEVEL>3) fprintferr(" %ld-th root of unity found.\n", n);
+        if (p==2) { nbroots = n; prim_root = z; }
+        else { nbroots *= n; prim_root = nfmul(nf,prim_root,z); }
+        break;
+      }
+      if (DEBUGLEVEL)
+        pari_warn(warner,"Wrong guess of roots of unity. Try divisors.");
+    }
+  }
+  if (DEBUGLEVEL>2) msgTIMER(&ti_tot, "finding roots of unity");
+  return mkvec2(utoi(nbroots), prim_root);
 }
