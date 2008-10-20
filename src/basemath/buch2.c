@@ -2391,11 +2391,20 @@ be_honest(FB_t *F, GEN nf, FACT *fact)
   F->KCZ = KCZ0; avma = av; return 1;
 }
 
+/* A t_MAT of complex floats, in fact reals. Extract a submatrix B
+ * whose columns are definitely non-0, i.e. gexpo(A[j]) >= -2, renormalized
+ * so that gexpo(B[i]) ~ 1. Set (*pE)[i] to e >= 0 such that A[j] = B[i]*2^e.
+ * The indexing sets (i vs j) are not the same for A and B since 0 columns
+ * are deleted.
+ *
+ * If possible precision problem (t_REAL 0 with large exponent), set
+ * *precpb to 1 */
 static GEN
-remove_0_cols(GEN A, int *precpb)
+renormalize_cols(GEN A, GEN *pE, int *precpb)
 {
   long l = lg(A), h, i, j, k;
-  GEN B;
+  GEN B, E;
+  *pE = E = cgetg(l, t_VECSMALL);
   *precpb = 0;
   if (l == 1) return A;
   h = lg(gel(A,1));;
@@ -2403,16 +2412,28 @@ remove_0_cols(GEN A, int *precpb)
   for (i = k = 1; i < l; i++)
   {
     GEN Ai = gel(A,i);
+    long maxe = 0;
     int non0 = 0;
     for (j = 1; j < h; j++)
     {
       GEN c = gel(Ai,j);
-      if (gexpo(c) >= -2)
-      { if (gcmp0(c)) *precpb = 1; else non0 = 1; }
+      long e = gexpo(c);
+      if (e >= -2)
+      {
+        if (gcmp0(c)) *precpb = 1;
+        else {
+          non0 = 1;
+          if (e > maxe) maxe = e;
+        }
+      }
     }
-    if (non0) gel(B, k++) = Ai;
+    E[k] = 0;
+    if (non0) {
+      if (maxe > 0) { E[k] = maxe; Ai = gmul2n(Ai, -maxe); }
+      gel(B, k++) = Ai;
+    }
   }
-  setlg(B, k); return B;
+  setlg(B, k); setlg(E, k); return B;
 }
 
 static long
@@ -2429,12 +2450,21 @@ compute_multiple_of_R_pivot(GEN x, GEN x0/*unused*/, GEN c)
   return (k && ex > -10)? k: lx;
 }
 
+/* x[i,] *= 2^e. In place. */
+static void
+row_mul2n(GEN x, long i, long e)
+{
+  long j, l = lg(x);
+  if (!e) return;
+  for (j = 1; j < l; j++) gcoeff(x,i,j) = gmul2n(gcoeff(x,i,j), e);
+}
+
 /* A = complex logarithmic embeddings of units (u_j) found so far */
 static GEN
 compute_multiple_of_R(GEN A, long RU, long N, GEN *ptL)
 {
-  GEN T, d, mdet, Im_mdet, kR, xreal, L;
-  long i, j, r, rk, R1 = 2*RU - N;
+  GEN T, d, mdet, Im_mdet, Im_expo, kR, xreal, xexpo, L;
+  long i, j, r, e, R1 = 2*RU - N;
   int precpb;
   pari_sp av = avma;
 
@@ -2442,7 +2472,7 @@ compute_multiple_of_R(GEN A, long RU, long N, GEN *ptL)
 
   if (DEBUGLEVEL) fprintferr("\n#### Computing regulator multiple\n");
   xreal = real_i(A); /* = (log |sigma_i(u_j)|) */
-  mdet = remove_0_cols(xreal, &precpb);
+  mdet = renormalize_cols(xreal, &xexpo, &precpb);
   /* will cause precision to increase on later failure, but we may succeed! */
   *ptL = precpb? NULL: gen_1;
   if (lg(mdet) < RU) { avma = av; return NULL; }
@@ -2453,16 +2483,26 @@ compute_multiple_of_R(GEN A, long RU, long N, GEN *ptL)
 
   /* could be using indexrank(), but need custom "get_pivot" function */
   d = RgM_pivots(mdet, &r, &compute_multiple_of_R_pivot);
-  rk = lg(mdet)-1 - r; /* # of independent columns */
-  if (rk != RU) { avma = av; return NULL; } /* full rank for units ? */
+  /* # of independent columns == unit rank ? */
+  if (lg(mdet)-1 - r != RU) { avma = av; return NULL; }
 
-  Im_mdet = cgetg(rk+1, t_MAT); /* extract independent columns */
-  for (i=j=1; i<=rk; j++)
-    if (d[j]) gel(Im_mdet,i++) = gel(mdet,j);
+  Im_mdet = cgetg(RU+1, t_MAT); /* extract independent columns */
+  Im_expo = cgetg(RU+1, t_VECSMALL); /* ... and exponents (from renormalize) */
+  /* N.B: d[1] = 1, corresponding to T above */
+  gel(Im_mdet, 1) = T;
+  Im_expo[1] = 0;
+  e = 0;
+  for (i = j = 2; i <= RU; j++)
+    if (d[j]) {
+      gel(Im_mdet, i) = gel(mdet,j);
+      Im_expo[i] = xexpo[j-1];
+      e += xexpo[j-1]; i++;
+    }
 
   /* integral multiple of R: the cols we picked form a Q-basis, they have an
    * index in the full lattice. First column is T */
   kR = divru(det2(Im_mdet), N);
+  if (e) setexpo(kR, expo(kR)+e);
   /* R > 0.2 uniformly */
   if (!signe(kR) || expo(kR) < -3) { avma=av; return NULL; }
 
@@ -2470,7 +2510,10 @@ compute_multiple_of_R(GEN A, long RU, long N, GEN *ptL)
   L = RgM_inv(Im_mdet);
   if (!L) { *ptL = NULL; return kR; }
 
-  L = RgM_mul(rowslice(L, 2, RU), xreal); /* approximate rational entries */
+  /* restore exponents, i = 1 corresponds to T */
+  for (i = 2; i <= RU; i++) row_mul2n(L, i, -Im_expo[i]);
+  L = rowslice(L, 2, RU); /* remove first line */
+  L = RgM_mul(L, xreal); /* approximate rational entries */
   gerepileall(av,2, &L, &kR);
   *ptL = L; return kR;
 }
