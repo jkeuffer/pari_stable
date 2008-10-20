@@ -823,7 +823,6 @@ GEN     polredabs(GEN x);
 GEN     polredabs0(GEN x, long flag);
 GEN     polredabs2(GEN x);
 GEN     polredabsall(GEN x, long flun);
-GEN     rootsof1(GEN x);
 GEN     smallpolred(GEN x);
 GEN     smallpolred2(GEN x);
 GEN     tschirnhaus(GEN x);
@@ -1981,6 +1980,8 @@ GEN     nfgcd(GEN P, GEN Q, GEN nf, GEN den);
 GEN     nfgcd_all(GEN P, GEN Q, GEN T, GEN den, GEN *Pnew);
 GEN     nfroots(GEN nf,GEN pol);
 GEN     polfnf(GEN a, GEN t);
+GEN     rootsof1(GEN x);
+GEN     rootsof1_kannan(GEN nf);
 
 /* part.c */
 

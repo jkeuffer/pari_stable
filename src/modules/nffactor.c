@@ -658,8 +658,8 @@ L2_bound(GEN nf, GEN den)
   GEN M, L, prep, T = nf_get_pol(nf), tozk = gel(nf,8);
   long prec;
 
-  prec = ZX_max_lg(T) + ZM_max_lg(tozk);
-  (void)initgaloisborne(T, den, prec, &L, &prep, NULL);
+  prec = ZX_max_lg(T) + ZM_max_lg(tozk) - 2;
+  (void)initgaloisborne(nf, den, prec, &L, &prep, NULL);
   M = vandermondeinverse(L, RgX_gtofp(T,prec), den, prep);
   return RgM_fpnorml2(RgM_mul(tozk,M), DEFAULTPREC);
 }
@@ -1188,7 +1188,7 @@ bestlift_init(long a, GEN nf, GEN pr, GEN C, nflift_t *L)
   TIMERstart(&ti);
   if (!a) a = (long)bestlift_bound(C, d, alpha, pr_norm(pr));
 
-  for (;; avma = av, a<<=1)
+  for (;; avma = av, a += (a==1)? 1: (a>>1)) /* roughly a *= 1.5 */
   {
     if (DEBUGLEVEL>2) fprintferr("exponent %ld\n",a);
     prk = idealpows(nf, pr, a);
@@ -1871,13 +1871,14 @@ nfcyclo_root(GEN nf, long n_cyclo, prklift_t *P, GEN C0)
 /* Guesses the number of roots of unity in number field [nf].
  * Computes gcd of N(P)-1 for some primes. The value returned is a proven
  * multiple of the correct value. */
-long
+static long
 guess_roots(GEN nf)
 {
   long c = 0, nfdegree = nf_get_degree(nf), l;
   ulong p = 0;
   byteptr pt = diffptr;
   GEN T = nf_get_pol(nf), nbroots = NULL;
+  pari_sp av = avma;
 
   /* result must be stationnary (counter c) for at least nfdegree+20 loops */
   for (l=1;; l++)
@@ -1907,68 +1908,128 @@ guess_roots(GEN nf)
       c = 0;
   }
   if (DEBUGLEVEL>5) fprintferr("%ld loops\n",l);
-  return itos(nbroots);
+  avma = av; return itos(nbroots);
 }
 
+static GEN
+trivroots() { return mkvec2(gen_2, gen_m1); }
 /* Number of roots of unity in number field [nf]. */
 GEN
-rootsof1_nffactor(GEN nf)
+rootsof1(GEN nf)
 {
   prklift_t P;
   nflift_t L;
   GEN fa, LP, LE, C0, z, prim_root;
   pari_timer ti;
-  long i, l, nbguessed, nbroots, nfdegree = nf_get_degree(nf);
-  pari_sp av = avma;
+  long i, l, nbguessed, nbroots, nfdegree;
+  pari_sp av;
 
-  if (DEBUGLEVEL>2) TIMERstart(&ti);
+  if (nf_get_r1(nf)) return trivroots();
 
   /* Step 1 : guess number of roots and discard trivial case 2 */
-  nbguessed = nf_get_r1(nf) == 0? guess_roots(nf): 2;
+  if (DEBUGLEVEL>2) TIMERstart(&ti);
+  nbguessed = guess_roots(nf);
   if (DEBUGLEVEL>2)
-    msgTIMER(&ti, "guessing roots of unity [guess = %ld]", nbguessed);
-  if (nbguessed==2) { avma = av; return mkvec2(gen_2, gen_m1); }
+    msgTIMER(&ti, "guessing roots of 1 [guess = %ld]", nbguessed);
+  if (nbguessed==2) return trivroots();
 
   /* Step 2 : choose a prime ideal for local lifting */
+  av = avma;
   P.L = &L; nf_pick_prime_for_units(nf, &P, nbguessed);
   if (DEBUGLEVEL>2) msgTIMER(&ti, "choosing prime %Ps", P.L->p);
 
   /* Step 3 : compute a reduced pr^k allowing lifting of local solutions */
   /* evaluate maximum L2 norm of a root of unity in nf */
+  nfdegree = nf_get_degree(nf);
   C0 = gmulsg(nfdegree, L2_bound(nf, gen_1));
-
-  /* lift and reduce P */
-  if (DEBUGLEVEL>2)
-    fprintferr("Lift pr^k; GSmin wanted: %Ps\n",C0);
+  /* lift and reduce pr^k */
+  if (DEBUGLEVEL>2) fprintferr("Lift pr^k; GSmin wanted: %Ps\n",C0);
   bestlift_init((long)mybestlift_bound(C0, nfdegree, P.q),
                 nf, P.pr, C0, P.L);
   if (DEBUGLEVEL>2) TIMERstart(&ti);
 
   /* Step 4 : actual computation of roots */
   nbroots = 2; prim_root = gen_m1;
-  /* find all prime power factors of nbguessed and for these find
-   * the corresponding roots of unity */
   fa = factoru(nbguessed);
   LP = gel(fa,1); l = lg(LP);
   LE = gel(fa,2);
   for (i = 1; i < l; i++)
-  {
+  { /* for all prime power factors of nbguessed, find a p^k-th root of unity */
     long k, p = LP[i];
     for (k = LE[i]; k > 0; k--)
     { /* find p^k-th roots */
-      long n = upowuu(p,k);
-      if (n==2) continue; /* no need to test second roots ! */
-      z = nfcyclo_root(nf,n,&P,C0);
+      long pk = upowuu(p,k);
+      if (pk==2) continue; /* no need to test second roots ! */
+      z = nfcyclo_root(nf,pk,&P,C0);
       if (DEBUGLEVEL>2) msgTIMER(&ti, "for factoring Phi_%ld^%ld", p,k);
       if (z) {
-        if (DEBUGLEVEL>2) fprintferr("  %ld-th root of unity found.\n", n);
-        if (p==2) { nbroots = n; prim_root = z; }
-        else { nbroots *= n; prim_root = nfmul(nf,prim_root,z); }
+        if (DEBUGLEVEL>2) fprintferr("  %ld-th root of unity found.\n", pk);
+        if (p==2) { nbroots = pk; prim_root = z; }
+        else     { nbroots *= pk; prim_root = nfmul(nf, prim_root,z); }
         break;
       }
-      if (DEBUGLEVEL)
-        pari_warn(warner,"Wrong guess of roots of unity. Try divisors.");
+      if (DEBUGLEVEL) pari_warn(warner,"rootsof1: wrong guess.");
     }
   }
   return gerepilecopy(av, mkvec2(utoi(nbroots), prim_root));
+}
+
+static long
+nf_pm1(GEN y) {
+  GEN z = gel(y,1);
+  return (is_pm1(z) && ZV_isscalar(y))? signe(z): 0;
+}
+static GEN
+is_primitive_root(GEN nf, GEN fa, GEN x, long w)
+{
+  GEN y, exp = utoipos(2), pp = gel(fa,1);
+  long i,p, l = lg(pp);
+
+  for (i=1; i<l; i++)
+  {
+    p = itos(gel(pp,i));
+    exp[2] = w / p; y = nfpow(nf,x,exp);
+    if (nf_pm1(y) > 0) /* y = 1 */
+    {
+      if (p!=2 || !gcmp1(gcoeff(fa,i,2))) return NULL;
+      x = gneg_i(x);
+    }
+  }
+  return x;
+}
+GEN
+rootsof1_kannan(GEN nf)
+{
+  pari_sp av = avma;
+  long N, k, i, ws, prec;
+  GEN z, y, d, list, w;
+
+  nf = checknf(nf);
+  if ( nf_get_r1(nf) ) return trivroots();
+
+  N = nf_get_degree(nf); prec = nf_get_prec(nf);
+  for (;;)
+  {
+    GEN R = R_from_QR(nf_get_G(nf), prec);
+    if (R)
+    {
+      y = fincke_pohst(mkvec(R), utoipos(N), N * N, 0, NULL);
+      if (y) break;
+    }
+    prec = (prec<<1)-2;
+    if (DEBUGLEVEL) pari_warn(warnprec,"rootsof1",prec);
+    nf = nfnewprec_shallow(nf,prec);
+  }
+  if (itos(ground(gel(y,2))) != N) pari_err(bugparier,"rootsof1 (bug1)");
+  w = gel(y,1); ws = itos(w);
+  if (ws == 2) { avma = av; return trivroots(); }
+
+  d = Z_factor(w); list = gel(y,3); k = lg(list);
+  for (i=1; i<k; i++)
+  {
+    z = is_primitive_root(nf, d, gel(list,i), ws);
+    if (z) return gerepilecopy(av, mkvec2(w, z));
+  }
+  pari_err(bugparier,"rootsof1");
+  return NULL; /* not reached */
 }

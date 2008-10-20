@@ -3191,7 +3191,7 @@ Buchall_param(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long
   N = degpol(P);
   if (N <= 1) return gerepilecopy(av0, Buchall_deg1(nf));
   zu = rootsof1(nf);
-  gel(zu,2) = coltoliftalg(nf, gel(zu,2));
+  gel(zu,2) = nf_to_scalar_or_alg(nf, gel(zu,2));
   if (DEBUGLEVEL) msgtimer("nfinit & rootsof1");
 
   nf_get_sign(nf, &R1, &R2); RU = R1+R2;

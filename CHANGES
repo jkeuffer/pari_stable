@@ -348,6 +348,9 @@ BA 86- factormod and matker: faster linear algebra over F2.
    88- let forvec(X = v,...) respect the type of v (t_VEC or t_COL)
    89- polred: compute characteristic polynomials as in polredabs [ using
        complex embeddings, not ZX_caract ]
+PMo90- algorithm for nfrootsof1 now defaults to nffactor: generically a little
+       slower than qfminim, but safer and sometimes much faster (e.g. 1mn
+       against a few hours)
 
   Added
     1- many new benches (make test-all)

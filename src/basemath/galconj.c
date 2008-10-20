@@ -241,11 +241,31 @@ vandermondeinverse(GEN L, GEN T, GEN den, GEN prep)
 GEN
 initgaloisborne(GEN T, GEN dn, long prec, GEN *ptL, GEN *ptprep, GEN *ptdis)
 {
-  GEN L, prep, den;
+  GEN L, prep, den, nf;
   pari_timer ti;
 
   if (DEBUGLEVEL>=4) (void)TIMER(&ti);
-  L = cleanroots(T, prec);
+  T = get_nfpol(T, &nf);
+  if (nf)
+  {
+    GEN r = gel(nf,6);
+    long r1,r2;
+    nf_get_sign(nf, &r1, &r2);
+    if (!r2) L = r;
+    else
+    {
+      long i,j, N = r1+2*r2;
+      L = cgetg(N + 1, t_VEC);
+      for (i = 1; i <= r1; i++) gel(L,i) = gel(r,i);
+      for (j = i; j <= N; i++)
+      {
+        gel(L,j++) = gel(r,i);
+        gel(L,j++) = gconj(gel(r,i));
+      }
+    }
+  }
+  else
+    L = cleanroots(T, prec);
   if (DEBUGLEVEL>=4) msgTIMER(&ti,"roots");
   prep = vandermondeinverseprep(L);
   if (!dn)
