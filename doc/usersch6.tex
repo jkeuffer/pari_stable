@@ -151,6 +151,9 @@ standard Euclidean form on $K\otimes \R$, i.e.~$T_2(v)
 = \sum_{\sigma} |\sigma(v)|^2$, where $\sigma$ runs through all $n$ complex
 embeddings of $K$.
 
+\fun{GEN}{nf_get_roundG}{GEN nf} returns a rescaled version of $G$, rounded
+to nearest integers, specifically \tet{RM_round_maxrank}$(G)$.
+
 \fun{GEN}{nf_get_Tr}{GEN nf} returns the matrix of the Trace quadratic form
 on the basis $(w_1,\ldots,w_n)$: its $(i,j)$ entry is $\text{Tr} w_i w_j$.
 
@@ -899,9 +902,7 @@ then
 $$||x||_v^2 = {}^t (G_v X) \cdot G_v X.$$
 (This is a kind of Cholesky decomposition.) This function
 returns a rescaled copy of $G_v$, rounded to nearest integers, specifically
-\tet{RM_round_maxrank}$(G_v)$. Also accept $v = \kbd{NULL}$, for a
-non-twisted version, where all entries are equal to $0$; we then obtain a
-rounded version of \tet{nf_get_G}$(\var{nf})$.
+\tet{RM_round_maxrank}$(G_v)$.
 Suitable for \kbd{gerepileupto}, but does not collect garbage.
 
 \fun{GEN}{nf_get_Gtwist1}{GEN nf, long i}. Simple special case. Returns the
@@ -926,14 +927,10 @@ the dimension of $x$ is $> 1$.
 In the interpretation where $x$ defines an integral ideal on a fixed $\Z_K$
 basis whose first element is $1$, this means that $a$ is not rational.
 
-\fun{GEN}{idealred_elt0}{GEN nf, GEN x, GEN v} is a simple wrapper around
-\bprog
-  G = nf_get_Gtwist(nf, v);
-  a = idealpseudomin(x,G);
-@eprog\noindent and returns $a$ (after cleaning up garbage).
-
 \fun{GEN}{idealred_elt}{GEN nf, GEN x} shortcut for
-\kbd{idealred\_elt0(nf,x,NULL)}.
+\bprog
+  idealpseudomin(x, nf_get_roundG(nf))
+@eprog
 
 \subsec{Ideal reduction, high level} \label{se:Ideal_reduction}
 
@@ -944,7 +941,8 @@ class. The public GP function is of course available
 the primitive part of $x/(a)$, as an ideal in HNF. What ``small'' means
 depends on the parameter $v$, see the GP description. More precisely,
 $a$ is returned by \kbd{idealpseudomin}$(x,G)$, where $G$
-is \tet{nf_get_Gtwist}$(\var{nf}, v)$.
+is \tet{nf_get_Gtwist}$(\var{nf}, v)$ for $v\neq \kbd{NULL}$
+and \tet{nf_get_roundG}$(\var{nf})$ otherwise.
 
 \noindent Usually one sets $v = \kbd{NULL}$ to obtain an element of small $T_2$
 norm in $x$:

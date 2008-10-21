@@ -248,7 +248,7 @@ initgaloisborne(GEN T, GEN dn, long prec, GEN *ptL, GEN *ptprep, GEN *ptdis)
   T = get_nfpol(T, &nf);
   if (nf)
   {
-    GEN r = gel(nf,6);
+    GEN r = nf_get_roots(nf);
     long r1,r2;
     nf_get_sign(nf, &r1, &r2);
     if (!r2) L = r;

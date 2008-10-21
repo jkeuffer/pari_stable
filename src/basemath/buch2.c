@@ -1001,7 +1001,7 @@ SPLIT(FB_t *F, GEN nf, GEN x, GEN Vbase, FACT *fact)
   if (gexpo(gcoeff(x,1,1)) < 100 &&
       can_factor(F, nf, x, NULL, icopy(Nx), fact)) return NULL;
 
-  y = idealpseudomin_nonscalar(x, nf_get_Gtwist(nf,NULL));
+  y = idealpseudomin_nonscalar(x, nf_get_roundG(nf));
   if (factorgen(F, nf, x, Nx, y, fact)) return y;
 
   /* reduce in various directions */
@@ -1033,7 +1033,7 @@ SPLIT(FB_t *F, GEN nf, GEN x, GEN Vbase, FACT *fact)
       ex[i] = random_bits(RANDOM_BITS);
       if (ex[i])
       { /* avoid prec pb: don't let id become too large as lgsub increases */
-	if (id != x0) id = idealred0(nf,id,NULL);
+	if (id != x0) id = idealred(nf,id);
 	z[1] = Vbase[i];
 	id = extideal_HNF_mul(nf, id, idealpowred(nf,z,utoipos(ex[i])));
       }
@@ -1624,7 +1624,7 @@ expand(GEN nf, GEN C, GEN P, GEN e)
       gel(e,i) = ei;
     }
   }
-  if (id != C) id = idealred0(nf, id, NULL);
+  if (id != C) id = idealred(nf, id);
   if (done) return id;
   return idealmulred(nf, id, idealsqr(nf, expand(nf,id,P,e)));
 }
@@ -1648,7 +1648,7 @@ expandext(GEN nf, GEN C, GEN P, GEN e)
   if (A == gel(C,1))
     A = C;
   else
-    A = idealred0(nf, mkvec2(A, gel(C,2)), NULL);
+    A = idealred(nf, mkvec2(A, gel(C,2)));
   if (done) return A;
   return idealmulred(nf, A, idealsqr(nf, expand(nf,A,P,e)));
 }
@@ -2574,7 +2574,7 @@ inverse_if_smaller(GEN nf, GEN I)
   J = gel(I1,1); J = Q_remove_denom(J, NULL); gel(I1,1) = J;
   d = ZM_det_triangular(J); if (cmpii(d,dmin) < 0) {I=I1; dmin=d;}
   /* try reducing (often _increases_ the norm) */
-  I1 = idealred0(nf,I1,NULL);
+  I1 = idealred(nf,I1);
   J = gel(I1,1);
   d = ZM_det_triangular(J); if (cmpii(d,dmin) < 0) I=I1;
   return I;
@@ -2636,7 +2636,7 @@ class_group_gen(GEN nf,GEN W,GEN C,GEN Vbase,long prec, GEN nf0,
       {
 	z[1]=Vbase[i]; 
 	I = extideal_HNF_mul(nf0, I, idealpowred(nf0,z,p1));
-	I = idealred0(nf0,I,NULL);
+	I = idealred(nf0,I);
       }
     }
     J = inverse_if_smaller(nf0, I);
@@ -2948,7 +2948,7 @@ bnftosbnf(GEN bnf)
   gel(y,2) = gmael(nf,2,1);
   gel(y,3) = nf_get_disc(nf);
   gel(y,4) = nf_get_zk(nf);
-  gel(y,5) = gel(nf,6);
+  gel(y,5) = nf_get_roots(nf);
   gel(y,6) = gen_0; /* FIXME: unused */
   gel(y,7) = gel(bnf,1);
   gel(y,8) = gel(bnf,2);

@@ -1571,10 +1571,10 @@ idealpows(GEN nf, GEN ideal, long e)
 
 static GEN
 _idealmulred(GEN nf, GEN x, GEN y)
-{ return idealred0(nf,idealmul(nf,x,y), NULL); }
+{ return idealred(nf,idealmul(nf,x,y)); }
 static GEN
 _idealsqrred(GEN nf, GEN x)
-{ return idealred0(nf,idealsqr(nf,x), NULL); }
+{ return idealred(nf,idealsqr(nf,x)); }
 static GEN
 _mul(void *data, GEN x, GEN y) { return _idealmulred((GEN)data,x,y); }
 static GEN
@@ -1593,7 +1593,7 @@ idealpowred(GEN nf, GEN x, GEN n)
   y = leftright_pow(x, n, (void*)nf, &_sqr, &_mul);
 
   if (s < 0) y = idealinv(nf,y);
-  if (s < 0 || is_pm1(n)) y = idealred0(nf,y,NULL);
+  if (s < 0 || is_pm1(n)) y = idealred(nf,y);
   return gerepileupto(av,y);
 }
 
@@ -1734,7 +1734,8 @@ chk_vdir(GEN nf, GEN vdir)
 {
   long i, t, l = lg(vdir);
   GEN v;
-  if (l != lg(nf[6])) pari_err(talker, "incorrect vector length in idealred");
+  if (l != lg(nf_get_roots(nf)))
+    pari_err(talker, "incorrect vector length in idealred");
   t = typ(vdir);
   if (t == t_VECSMALL) return vdir;
   if (t != t_VEC) pari_err(typeer, "idealred");
@@ -1763,12 +1764,10 @@ GEN
 nf_get_Gtwist(GEN nf, GEN vdir)
 {
   long i, l, v, r1;
-  GEN G = nf_get_G(nf);
-
-  if (!vdir) return RM_round_maxrank(G); /* FIXME: should be part of nf */
+  GEN G;
 
   vdir = chk_vdir(nf, vdir);
-  G = RgM_shallowcopy(G);
+  G = RgM_shallowcopy(nf_get_G(nf));
   r1 = nf_get_r1(nf);
   l = lg(vdir);
   for (i=1; i<l; i++)
@@ -1781,8 +1780,8 @@ nf_get_Gtwist(GEN nf, GEN vdir)
 GEN
 nf_get_Gtwist1(GEN nf, long i)
 {
-  long r1 = nf_get_r1(nf);
   GEN G = RgM_shallowcopy( nf_get_G(nf) );
+  long r1 = nf_get_r1(nf);
   twistG(G, r1, i, 10);
   return RM_round_maxrank(G);
 }
@@ -1802,22 +1801,12 @@ RM_round_maxrank(GEN G0)
   }
 }
 
-/* assume I in NxN integral matrix form, not necessarily HNF */
-GEN
-idealred_elt0(GEN nf, GEN I, GEN vdir)
-{
-  pari_sp av = avma;
-  GEN G0 = (vdir && typ(vdir) == t_MAT)? vdir: nf_get_Gtwist(nf, vdir);
-  GEN u = idealpseudomin(I, G0);
-  return gerepileupto(av, u);
-}
-
 GEN
 idealred0(GEN nf, GEN I, GEN vdir)
 {
   pari_sp av = avma;
   long N, i;
-  GEN J, aI, y, x, T, b, c1, c, pol;
+  GEN G, J, aI, y, x, T, b, c1, c, pol;
 
   nf = checknf(nf);
   pol = nf_get_pol(nf); N = degpol(pol);
@@ -1839,7 +1828,14 @@ idealred0(GEN nf, GEN I, GEN vdir)
     case id_MAT:
       I = Q_primitive_part(I, &c1);
   }
-  y = idealred_elt0(nf, I, vdir);
+  if (!vdir)
+    G = nf_get_roundG(nf);
+  else if (typ(vdir) == t_MAT)
+    G = vdir;
+  else 
+    G = nf_get_Gtwist(nf, vdir);
+  y = idealpseudomin(I, G);
+
   if (ZV_isscalar(y))
   { /* already reduced */
     if (!aI) return gerepilecopy(av, I);
@@ -1893,7 +1889,7 @@ idealmin(GEN nf, GEN x, GEN vdir)
     case id_MAT: if (lg(x) == 1) return gen_0;
   }
   x = Q_remove_denom(x, &dx);
-  y = idealpseudomin(x, nf_get_Gtwist(nf,vdir));
+  y = idealpseudomin(x, vdir? nf_get_Gtwist(nf,vdir): nf_get_roundG(nf));
   if (dx) y = RgC_Rg_div(y, dx);
   return gerepileupto(av, y);
 }

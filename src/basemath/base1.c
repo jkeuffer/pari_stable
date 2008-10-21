@@ -862,7 +862,7 @@ GEN
 nf_get_allroots(GEN nf)
 {
   long i, j, n, r1, r2;
-  GEN ro = gel(nf,6), v;
+  GEN ro = nf_get_roots(nf), v;
   nf_get_sign(nf, &r1,&r2);
   n = r1 + (r2<<1);
   v = cgetg(n+1, t_VEC);
@@ -1180,7 +1180,7 @@ nfbasic_to_nf(nfbasic_t *T, GEN ro, long prec)
   }
   else
     D = RgM_Rg_mul(idealinv(nf, A), dA);
-  gel(mat,3) = gen_0; /* FIXME: was gram matrix of current mat[2]. Useless */
+  gel(mat,3) = RM_round_maxrank(F.G);
   gel(mat,4) = Tr;
   gel(mat,5) = D;
   if (DEBUGLEVEL) msgtimer("matrices");
@@ -1509,7 +1509,7 @@ nfinit0(GEN x, long flag,long prec)
 long
 nf_get_prec(GEN x)
 {
-  GEN nf = checknf(x), ro = gel(nf,6);
+  GEN nf = checknf(x), ro = nf_get_roots(nf);
   return (typ(ro)==t_VEC)? precision(gel(ro,1)): DEFAULTPREC;
 }
 

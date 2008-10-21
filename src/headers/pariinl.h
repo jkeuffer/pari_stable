@@ -1643,9 +1643,13 @@ nf_get_M(GEN nf) { return gmael(nf,5,1); }
 INLINE GEN
 nf_get_G(GEN nf) { return gmael(nf,5,2); }
 INLINE GEN
+nf_get_roundG(GEN nf) { return gmael(nf,5,3); }
+INLINE GEN
 nf_get_Tr(GEN nf) { return gmael(nf,5,4); }
 INLINE GEN
 nf_get_TrInv(GEN nf) { return gmael(nf,5,5); }
+INLINE GEN
+nf_get_roots(GEN nf) { return gel(nf,6); }
 INLINE GEN
 nf_get_zk(GEN nf) { return gel(nf,7); }
 
@@ -1677,7 +1681,12 @@ idealpseudomin_nonscalar(GEN I, GEN G)
   if (ZV_isscalar(m) && lg(u) > 2) m = ZM_ZC_mul(I, gel(u,2));
   return m;
 }
+
 INLINE GEN
-idealred_elt(GEN nf, GEN I) { return idealred_elt0(nf, I, NULL); }
+idealred_elt(GEN nf, GEN I) {
+  pari_sp av = avma;
+  GEN u = idealpseudomin(I, nf_get_roundG(nf));
+  return gerepileupto(av, u);
+}
 INLINE GEN
 idealred(GEN nf, GEN I) { return idealred0(nf, I, NULL); }

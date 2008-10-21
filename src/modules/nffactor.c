@@ -632,7 +632,7 @@ nf_root_bounds(GEN P, GEN T)
   prec = ZXY_max_lg(P) + 1;
   l = lg(P);
   if (nf && nf_get_prec(nf) >= prec)
-    R = gel(nf,6);
+    R = nf_get_roots(nf);
   else
     R = cleanroots(T, prec);
   lR = lg(R);

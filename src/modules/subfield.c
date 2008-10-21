@@ -829,7 +829,7 @@ subfields_poldata(GEN T, poldata *PD)
   if (nf)
   {
     PD->den = Q_denom(nf_get_zk(nf));
-    PD->roo = gel(nf,6);
+    PD->roo = nf_get_roots(nf);
     PD->dis = mulii(absi(nf_get_disc(nf)), sqri(nf_get_index(nf)));
   }
   else

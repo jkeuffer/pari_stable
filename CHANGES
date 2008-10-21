@@ -351,6 +351,8 @@ BA 86- factormod and matker: faster linear algebra over F2.
 PMo90- algorithm for nfrootsof1 now defaults to nffactor: generically a little
        slower than qfminim, but safer and sometimes much faster (e.g. 1mn
        against a few hours)
+   91- added a new component nf_get_roundG to the nf structure [ to speed up
+       ideal reductions ]
 
   Added
     1- many new benches (make test-all)
@@ -434,7 +436,8 @@ PMo90- algorithm for nfrootsof1 now defaults to nffactor: generically a little
        reducemodinvertible, closemodinvertible,
        init_primepointer,
        galoisinit0, get_nfpol, get_bnfpol, get_prid,
-       nf_get_r1, nf_get_r2, nf_get_roots, nf_get_sign, nf_get_M, nf_get_G,
+       nf_get_r1, nf_get_r2, nf_get_roots, nf_get_sign, nf_get_roots,
+       nf_get_M, nf_get_G, nf_get_roundG,
        nf_get_Tr, nf_get_TrInv, nf_get_disc, nf_get_index, nf_get_pol, nf_get_zk
        nf_get_prec (was nfgetprec), nf_to_scalar_or_basis, nf_to_scalar_or_alg
        nf_to_Fq_init, nf_to_Fq, Fq_to_nf, zkmodprinit, zk_to_Fq_init, zk_to_Fq,
