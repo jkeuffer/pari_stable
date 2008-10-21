@@ -1830,7 +1830,7 @@ nf_pick_prime_for_units(GEN nf, prklift_t *P, long nbguessed)
 
 /* *Heuristic* exponent k such that the fundamental domain of pr^k
  * should contain the ball of radius C */
-double
+static double
 mybestlift_bound(GEN C, long d, GEN Npr)
 {
   C = gtofp(C,DEFAULTPREC);
