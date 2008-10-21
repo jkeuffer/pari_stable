@@ -1466,13 +1466,12 @@ nf_deg1_prime(GEN nf)
   GEN T = nf_get_pol(nf), p, z;
   long degnf = degpol(T);
   byteptr pt = diffptr;
-  ulong pp = 0;
-
+  ulong pp = init_primepointer(degnf, 0, &pt);
   for(;;)
   {
     pari_sp av = avma;
     NEXT_PRIME_VIADIFF_CHECK(pp, pt);
-    if (pp < degnf || umodiu(bad, pp) == 0) continue;
+    if (umodiu(bad, pp) == 0) continue;
     p = utoipos(pp);
     z = FpX_roots(FpX_red(T, p), p);
     if (lg(z) > 1) break;
