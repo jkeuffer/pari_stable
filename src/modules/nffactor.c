@@ -1875,8 +1875,8 @@ static long
 guess_roots(GEN nf)
 {
   long c = 0, nfdegree = nf_get_degree(nf), l;
-  ulong p = 0;
-  byteptr pt = diffptr;
+  ulong p = 2;
+  byteptr pt = diffptr+1;
   GEN T = nf_get_pol(nf), nbroots = NULL;
   pari_sp av = avma;
 
@@ -1900,7 +1900,7 @@ guess_roots(GEN nf)
     old = nbroots;
     nbroots = nbroots? gcdii(pf_1, nbroots): pf_1;
     if (DEBUGLEVEL>5)
-      fprintferr("p=%Ps; gcf(f(P/p))=%ld; nbroots | %Ps",p, gcdf, nbroots);
+      fprintferr("p=%ld; gcf(f(P/p))=%ld; nbroots | %Ps",p, gcdf, nbroots);
     /* if same result go on else reset the stop counter [c] */
     if (old && equalii(nbroots,old))
     { if (!is_bigint(nbroots) && ++c > nfdegree + 20) break; }
