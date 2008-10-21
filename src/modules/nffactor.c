@@ -1945,6 +1945,7 @@ rootsof1(GEN nf)
     if (p == 2)
     { /* check that 2 | n and v_p(disc K) >= n/2 */
       if (!odd(nfdegree) && vali(disc) >= nfdegree / 2) continue;
+      if (LE[i] == 1) continue;
     }
     else
     { /* check that p-1 | n and v_p(disc K) >= (p-2) n/(p-1) */
@@ -1989,7 +1990,7 @@ rootsof1(GEN nf)
         else     { nbroots *= pk; prim_root = nfmul(nf, prim_root,z); }
         break;
       }
-      if (DEBUGLEVEL) pari_warn(warner,"rootsof1: wrong guess.");
+      if (DEBUGLEVEL) pari_warn(warner,"rootsof1: wrong guess");
     }
   }
   return gerepilecopy(av, mkvec2(utoi(nbroots), prim_root));

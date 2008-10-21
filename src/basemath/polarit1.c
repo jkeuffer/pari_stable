@@ -2157,7 +2157,7 @@ FqX_split_deg1(GEN *pz, GEN u, GEN q, GEN T, GEN p)
   GEN v, S, g, X, z = vectrunc_init(N+1);
 
   *pz = z;
-  if (N == 1) { vectrunc_append(z, u); return 1; }
+  if (N == 1) return 1;
   v = X = pol_x(varn(u));
   S = init_spec_FqXQ_pow(X, q, u, T, p);
   vectrunc_append(z, S);
