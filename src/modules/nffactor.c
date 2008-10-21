@@ -1464,13 +1464,13 @@ nf_DDF_roots(GEN pol, GEN polred, GEN nfpol, GEN ltdn, GEN init_fa, long nbf,
   return z;
 }
 
-/* returns a factor of T in Fp of degree >= minf, NULL if none exist */
+/* returns a factor of T in Fp of degree <= maxf, NULL if none exist */
 static GEN
-get_good_factor(GEN T, GEN p, long minf)
+get_good_factor(GEN T, GEN p, long maxf)
 {
   pari_sp av = avma;
   GEN r, list = gel(FpX_factor(T,p), 1);
-  if (minf == 1)
+  if (maxf == 1)
   { /* deg.1 factors are best */
     r = gel(list,1);
     if (degpol(r) == 1) return r;
@@ -1481,7 +1481,7 @@ get_good_factor(GEN T, GEN p, long minf)
     for (i = lg(list)-1; i > 0; i--)
     {
       r = gel(list,i); dr = degpol(r);
-      if (dr <= minf) return r;
+      if (dr <= maxf) return r;
     }
   }
   avma = av; return NULL; /* failure */
@@ -1489,16 +1489,15 @@ get_good_factor(GEN T, GEN p, long minf)
 
 /* Optimization problem: factorization of polynomials over large Fq is slow,
  * BUT bestlift correspondingly faster.
- * Return minimal residue degree to be considered when picking a prime ideal */
+ * Return maximal residue degree to be considered when picking a prime ideal */
 static long
-get_minf(long nfdeg, long dpol)
+get_maxf(long nfdeg)
 {
-  long minf = 1;
-  if (dpol > 100) /* tough */
-  { if (nfdeg >= 20) minf = 4; }
-  else
-  { if (nfdeg >= 15) minf = 4; }
-  return minf;
+  long maxf = 1;
+  if      (nfdeg >= 45) maxf =16;
+  else if (nfdeg >= 30) maxf = 8;
+  else if (nfdeg >= 15) maxf = 4;
+  return maxf;
 }
 
 /* Select a prime ideal pr over which to factor polbase.
@@ -1515,7 +1514,7 @@ nf_pick_prime(long ct, GEN nf, GEN polbase, long fl,
 	      GEN *lt, GEN *Fa, GEN *pr, GEN *Tp)
 {
   GEN nfpol = nf_get_pol(nf), bad = mulii(nf_get_disc(nf), nf_get_index(nf));
-  long minf, nfdeg = degpol(nfpol), dpol = degpol(polbase), nbf = 0;
+  long maxf, nfdeg = degpol(nfpol), dpol = degpol(polbase), nbf = 0;
   byteptr pt = diffptr;
   ulong pp = 0;
   pari_timer ti_pr;
@@ -1527,7 +1526,7 @@ nf_pick_prime(long ct, GEN nf, GEN polbase, long fl,
   *Fa = NULL;
   *Tp = NULL;
 
-  minf = get_minf(nfdeg, dpol);
+  maxf = get_maxf(nfdeg);
   /* select pr such that pol has the smallest number of factors, ct attempts */
   for (;;)
   {
@@ -1541,7 +1540,7 @@ nf_pick_prime(long ct, GEN nf, GEN polbase, long fl,
     if (! umodiu(bad,pp)) continue;
     if (*lt) { ltp = umodiu(*lt, pp); if (!ltp) continue; }
     ap = utoipos(pp);
-    r = get_good_factor(nfpol, ap, minf);
+    r = get_good_factor(nfpol, ap, maxf);
     if (!r) continue;
    
     apr = primedec_apply_kummer(nf,r,1,ap);
@@ -1800,21 +1799,21 @@ typedef struct {
 
 /* Choose prime ideal unramified with "large" inertia degree */
 static void
-nf_pick_prime_for_units(GEN nf, prklift_t *P, long nbguessed)
+nf_pick_prime_for_units(GEN nf, prklift_t *P)
 {
   GEN nfpol = nf_get_pol(nf), bad = mulii(nf_get_disc(nf), nf_get_index(nf));
   GEN aT, amodpr, apr, ap = NULL, r = NULL;
-  long minf, nfdeg = degpol(nfpol);
+  long maxf, nfdeg = degpol(nfpol);
   byteptr pt = diffptr;
   ulong pp = 0;
   
-  minf = get_minf(nfdeg, nbguessed);
+  maxf = get_maxf(nfdeg);
   for (;;)
   {
     NEXT_PRIME_VIADIFF_CHECK(pp, pt);
     if (! umodiu(bad,pp)) continue;
     ap = utoipos(pp);
-    r = get_good_factor(nfpol, ap, minf);
+    r = get_good_factor(nfpol, ap, maxf);
     if (r) break;
   }
   apr = primedec_apply_kummer(nf,r,1,ap);
@@ -1961,8 +1960,10 @@ rootsof1(GEN nf)
 
   /* Step 2 : choose a prime ideal for local lifting */
   av = avma;
-  P.L = &L; nf_pick_prime_for_units(nf, &P, nbguessed);
-  if (DEBUGLEVEL>2) msgTIMER(&ti, "choosing prime %Ps", P.L->p);
+  P.L = &L; nf_pick_prime_for_units(nf, &P);
+  if (DEBUGLEVEL>2)
+    msgTIMER(&ti, "choosing prime %Ps, degree %ld",
+             P.L->p, P.L->Tp? degpol(P.L->Tp): 1);
 
   /* Step 3 : compute a reduced pr^k allowing lifting of local solutions */
   /* evaluate maximum L2 norm of a root of unity in nf */
