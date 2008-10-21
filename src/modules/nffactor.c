@@ -1919,7 +1919,7 @@ rootsof1(GEN nf)
 {
   prklift_t P;
   nflift_t L;
-  GEN fa, LP, LE, C0, z, prim_root;
+  GEN fa, LP, LE, C0, z, prim_root, disc;
   pari_timer ti;
   long i, l, nbguessed, nbroots, nfdegree;
   pari_sp av;
@@ -1931,7 +1931,32 @@ rootsof1(GEN nf)
   nbguessed = guess_roots(nf);
   if (DEBUGLEVEL>2)
     msgTIMER(&ti, "guessing roots of 1 [guess = %ld]", nbguessed);
-  if (nbguessed==2) return trivroots();
+  if (nbguessed == 2) return trivroots();
+
+  nfdegree = nf_get_degree(nf);
+  fa = factoru(nbguessed);
+  LP = gel(fa,1); l = lg(LP);
+  LE = gel(fa,2);
+  disc = nf_get_disc(nf);
+  for (i = 1; i < l; i++)
+  {
+    long p = LP[i];
+    /* Cheap test: can Q(zeta_{2p}) be a subset of K ? */
+    if (p == 2)
+    { /* check that 2 | n and v_p(disc K) >= n/2 */
+      if (!odd(nfdegree) && vali(disc) >= nfdegree / 2) continue;
+    }
+    else
+    { /* check that p-1 | n and v_p(disc K) >= (p-2) n/(p-1) */
+      long v = Z_lval(disc, p);
+      if (nfdegree % (p-1) == 0 && v >= nfdegree/(p-1) * (p-2)) continue;
+    }
+    nbguessed /= upowuu(p, LE[i]);
+    LE[i] = 0;
+  }
+  if (DEBUGLEVEL>2)
+    msgTIMER(&ti, "adding ramification conditions [guess = %ld]", nbguessed);
+  if (nbguessed == 2) return trivroots();
 
   /* Step 2 : choose a prime ideal for local lifting */
   av = avma;
@@ -1940,7 +1965,6 @@ rootsof1(GEN nf)
 
   /* Step 3 : compute a reduced pr^k allowing lifting of local solutions */
   /* evaluate maximum L2 norm of a root of unity in nf */
-  nfdegree = nf_get_degree(nf);
   C0 = gmulsg(nfdegree, L2_bound(nf, gen_1));
   /* lift and reduce pr^k */
   if (DEBUGLEVEL>2) fprintferr("Lift pr^k; GSmin wanted: %Ps\n",C0);
@@ -1950,9 +1974,6 @@ rootsof1(GEN nf)
 
   /* Step 4 : actual computation of roots */
   nbroots = 2; prim_root = gen_m1;
-  fa = factoru(nbguessed);
-  LP = gel(fa,1); l = lg(LP);
-  LE = gel(fa,2);
   for (i = 1; i < l; i++)
   { /* for all prime power factors of nbguessed, find a p^k-th root of unity */
     long k, p = LP[i];
