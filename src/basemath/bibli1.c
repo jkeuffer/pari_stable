@@ -2013,9 +2013,8 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
   }
   borne1 = add_fudge(norme1,epsbit);
   if (DEBUGLEVEL>2)
-    fprintferr("smallvectors looking for norm < %Ps\n",gprec_w(borne1,3));
-
-  gel(x,n) = gen_0; s = 0; k = n;
+    fprintferr("smallvectors looking for norm < %P.4G\n",borne1);
+  s = 0; k = n;
   for(;; step(x,y,inc,k)) /* main */
   {
     do
@@ -2023,20 +2022,20 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
       int fl = 0;
       if (k > 1)
       {
-	k--;
-	av1 = avma; p1 = mpmul(gcoeff(q,k,k+1),gel(x,k+1));
-	for (j=k+2; j<N; j++)
-	  p1 = mpadd(p1, mpmul(gcoeff(q,k,j),gel(x,j)));
-	gel(z,k) = gerepileuptoleaf(av1,p1);
+        long l = k-1;
+	av1 = avma; p1 = mpmul(gcoeff(q,l,k),gel(x,k));
+	for (j=k+1; j<N; j++) p1 = mpadd(p1, mpmul(gcoeff(q,l,j),gel(x,j)));
+	gel(z,l) = gerepileuptoleaf(av1,p1);
 
-	av1 = avma; p1 = mpsqr(mpadd(gel(x,k+1),gel(z,k+1)));
-	p1 = mpadd(gel(y,k+1), mpmul(p1,gel(v,k+1)));
-	gel(y,k) = gerepileuptoleaf(av1, p1);
+	av1 = avma; p1 = mpsqr(mpadd(gel(x,k),gel(z,k)));
+	p1 = mpadd(gel(y,k), mpmul(p1,gel(v,k)));
+	gel(y,l) = gerepileuptoleaf(av1, p1);
 	/* skip the [x_1,...,x_skipfirst,0,...,0] */
 	if ((k <= skipfirst && !signe(y[skipfirst]))
-	 || mpcmp(borne1, gel(y,k)) < 0) fl = 1;
+	 || mpcmp(borne1, gel(y,l)) < 0) fl = 1;
 	else
-	  gel(x,k) = mpround( mpneg(gel(z,k)) );
+	  gel(x,l) = mpround( mpneg(gel(z,l)) );
+        k = l;
       }
       for(;; step(x,y,inc,k))
       {

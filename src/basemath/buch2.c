@@ -2057,6 +2057,19 @@ relationrank(RELCACHE_t *cache, GEN L, ulong p)
   return invp;
 }
 
+INLINE void
+step(GEN x, double *y, GEN inc, long k)
+{
+  if (!y[k])
+    x[k]++; /* leading coeff > 0 */
+  else
+  {
+    long i = inc[k];
+    x[k] += i;
+    inc[k] = (i > 0)? -1-i: 1-i;
+  }
+}
+
 static void
 small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
 	   double LOGD, double LIMC2, FACT *fact)
@@ -2064,7 +2077,7 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
   const long BMULT = 8;
   const ulong mod_p = 27449UL;
   const long maxtry_DEP  = 20, maxtry_FACT = 500;
-  double *y,*z,**q,*v, BOUND;
+  double *y, *z, **q, *v, BOUND;
   pari_sp av;
   long nbsmallnorm, nbfact, j, k, noideal = F->KC, precbound;
   long N = nf_get_degree(nf), R1 = nf_get_r1(nf), prec = nf_get_prec(nf);
@@ -2091,6 +2104,7 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
   for (av = avma; noideal; noideal--, avma = av)
   {
     long nbrelideal = 0, dependent = 0, try_factor = 0;
+    GEN inc = const_vecsmall(N, 1);
     GEN IDEAL, ideal;
     pari_sp av2;
 
@@ -2130,52 +2144,54 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
       fprintferr("BOUND = %.4g\n",BOUND); flusherr();
     }
     BOUND *= 1 + 1e-6;
-    k = N; y[N] = z[N] = 0; x[N] = (long)sqrt(BOUND/v[N]);
-    for (av2 = avma;; x[1]--, avma = av2)
+    k = N; y[N] = z[N] = 0; x[N] = 0;
+    for (av2 = avma;; avma = av2, step(x,y,inc,k))
     {
-      for(;;) /* look for primitive element of small norm, cf minim00 */
-      {
+      do
+      { /* look for primitive element of small norm, cf minim00 */
 	double p;
-	if (k>1)
+	if (k > 1)
 	{
 	  long l = k-1;
 	  z[l] = 0;
 	  for (j=k; j<=N; j++) z[l] += q[l][j]*x[j];
 	  p = (double)x[k] + z[k];
 	  y[l] = y[k] + p*p*v[k];
-	  x[l] = (long)floor(sqrt((BOUND-y[l])/v[l])-z[l]);
+	  x[l] = (long)floor(-z[l] + 0.5);
 	  k = l;
 	}
-	for(;;)
+	for(;; step(x,y,inc,k))
 	{
 	  p = (double)x[k] + z[k];
 	  if (y[k] + p*p*v[k] <= BOUND) break;
-	  k++; x[k]--;
+          inc[k] = 1;
+	  if (++k > N) goto ENDIDEAL;
 	}
-	if (k != 1) continue;
+      } while (k > 1);
 
-	/* element complete */
-	if (y[1]<=1e-6) goto ENDIDEAL; /* skip all scalars: [*,0...0] */
-	if (zv_content(x)==1) /* primitive */
-	{
-	  gx = ZM_zc_mul(IDEAL,x);
-	  if (!ZV_isscalar(gx))
-	  {
-	    GEN Nx, xembed = RgM_RgC_mul(M, gx);
-	    long e;
-	    nbsmallnorm++;
-	    if (++try_factor > maxtry_FACT) goto ENDIDEAL;
-	    Nx = grndtoi(norm_by_embed(R1,xembed), &e);
-	    if (e < 0)
-	    {
-	      setabssign(Nx);
-	      if (can_factor(F, nf, NULL, gx, Nx, fact)) break;
-	    }
-	    if (DEBUGLEVEL > 1) { fprintferr("."); flusherr(); }
-	  }
-	}
-	x[1]--;
+      /* element complete */
+      if (zv_content(x) !=1) continue; /* not primitive */
+      gx = ZM_zc_mul(IDEAL,x);
+      if (ZV_isscalar(gx)) continue;
+
+      {
+        GEN Nx, xembed = RgM_RgC_mul(M, gx);
+        long e;
+        nbsmallnorm++;
+        if (++try_factor > maxtry_FACT) goto ENDIDEAL;
+        Nx = grndtoi(norm_by_embed(R1,xembed), &e);
+        if (e >= 0) {
+          if (DEBUGLEVEL > 1) { fprintferr("+"); flusherr(); }
+          continue; 
+        }
+        setabssign(Nx);
+        if (!can_factor(F, nf, NULL, gx, Nx, fact)) {
+          if (DEBUGLEVEL > 1) { fprintferr("."); flusherr(); }
+          continue;
+        }
       }
+
+      /* smooth element */
       set_fact(++rel, F, fact);
       /* make sure we get maximal rank first, then allow all relations */
       if (rel - cache->base > 1 && rel - cache->base <= F->KC
