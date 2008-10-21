@@ -1660,3 +1660,24 @@ nf_get_sign(GEN nf, long *r1, long *r2)
 INLINE long
 rnf_get_degree(GEN rnf) { return degpol(gel(rnf,1)); }
 
+/* I integral (not necessarіly HNF), G ZM, rounded Cholesky form of a weighted
+ * T2 matrix. Return m in I with T2(m) small */
+INLINE GEN
+idealpseudomin(GEN I, GEN G)
+{
+  GEN u = ZM_lll(ZM_mul(G, I), 0.99, LLL_IM);
+  return ZM_ZC_mul(I, gel(u,1));
+}
+/* I, G as in idealpseudomin. Return an irrational m in I with T2(m) small */
+INLINE GEN
+idealpseudomin_nonscalar(GEN I, GEN G)
+{
+  GEN u = ZM_lll(ZM_mul(G, I), 0.99, LLL_IM);
+  GEN m = ZM_ZC_mul(I, gel(u,1));
+  if (ZV_isscalar(m) && lg(u) > 2) m = ZM_ZC_mul(I, gel(u,2));
+  return m;
+}
+INLINE GEN
+idealred_elt(GEN nf, GEN I) { return idealred_elt0(nf, I, NULL); }
+INLINE GEN
+idealred(GEN nf, GEN I) { return idealred0(nf, I, NULL); }

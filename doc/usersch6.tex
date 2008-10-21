@@ -879,33 +879,85 @@ may decide to increase the accuracy using \tet{bnfnewprec} (and keep the
 resulting \kbd{bnf}!), or avoid the computation altogether. In any case the
 decision can be taken at the place where it is most likely to be correct.
 
-\subsec{Ideal reduction}\label{se:Ideal_reduction}
+\subsec{Ideal reduction, low level}
+
+In the following routines \var{nf} is a true \kbd{nf}, associated to a number
+field $K$ of degree $n$:
+
+\fun{GEN}{nf_get_Gtwist}{GEN nf, GEN v} assuming $v$ is a \typ{VECSMALL}
+with $r_1+r_2$ entries, let
+$$|| x ||_v^2 = \sum_{i=1}^{r_1+r_2} 2^{v_i}\varepsilon_i|\sigma_i(x)|^2,$$
+where as usual the $\sigma_i$ are the (real and) complex embeddings and
+$\varepsilon_i = 1$, resp.~$2$, for a real, resp.~complex place.
+This is a twisted variant of the $T_2$ quadratic form, the standard Euclidean
+form on $K\otimes \R$. In applications, only the relative size of the $v_i$
+will matter.
+
+Let $G_v\in M_n(\R)$ be a square matrix such that if $x\in K$ is represented by
+the column vector $X$ in terms of the fixed $\Z$-basis of $\Z_K$ in \var{nf},
+then
+$$||x||_v^2 = {}^t (G_v X) \cdot G_v X.$$
+(This is a kind of Cholesky decomposition.) This function
+returns a rescaled copy of $G_v$, rounded to nearest integers, specifically
+\tet{RM_round_maxrank}$(G_v)$. Also accept $v = \kbd{NULL}$, for a
+non-twisted version, where all entries are equal to $0$; we then obtain a
+rounded version of \tet{nf_get_G}$(\var{nf})$.
+Suitable for \kbd{gerepileupto}, but does not collect garbage.
+
+\fun{GEN}{nf_get_Gtwist1}{GEN nf, long i}. Simple special case. Returns the
+twisted $G$ matrix associated to the vector $v$ whose entries are all $0$
+except the $i$-th one, which is equal to $10$.
+
+\fun{GEN}{idealpseudomin}{GEN x, GEN G}. Let $x$, $G$ be two \kbd{ZM}s,
+such that the product $Gx$ is well-defined. This returns a ``small'' integral
+linear combinations of the columns of $x$, given by the LLL-algorithm applied
+to the lattice $G x$. Suitable for \kbd{gerepileupto}, but does not collect
+garbage.
+
+In applications, $x$ is an integral ideal, $G$ approximates a Cholesky form for
+the $T_2$ quadratic form as returned by \tet{nf_get_Gtwist}, and we return 
+a small element $a$ in the lattice $(x,T_2)$. This is used to implement
+\tet{idealred}.
+
+\fun{GEN}{idealpseudomin_nonscalar}{GEN x, GEN G}. As \tet{idealpseudomin},
+but we insist of returning a non-scalar $a$ (\kbd{ZV\_isscalar} is false), if
+the dimension of $x$ is $> 1$.
+
+In the interpretation where $x$ defines an integral ideal on a fixed $\Z_K$
+basis whose first element is $1$, this means that $a$ is not rational.
+
+\fun{GEN}{idealred_elt0}{GEN nf, GEN x, GEN v} is a simple wrapper around
+\bprog
+  G = nf_get_Gtwist(nf, v);
+  a = idealpseudomin(x,G);
+@eprog\noindent and returns $a$ (after cleaning up garbage).
+
+\fun{GEN}{idealred_elt}{GEN nf, GEN x} shortcut for
+\kbd{idealred\_elt0(nf,x,NULL)}.
+
+\subsec{Ideal reduction, high level} \label{se:Ideal_reduction}
 
 Given an ideal $x$ this means finding a ``simpler'' ideal in the same ideal
 class. The public GP function is of course available
 
 \fun{GEN}{idealred0}{GEN nf, GEN x, GEN v} finds a small $a\in x$ and returns
-the primitive part of $x/(a)$ (which is an ideal in HNF). What ``small'' means
-depends on the parameter $v$, see the GP description.
+the primitive part of $x/(a)$, as an ideal in HNF. What ``small'' means
+depends on the parameter $v$, see the GP description. More precisely,
+$a$ is returned by \kbd{idealpseudomin}$(x,G)$, where $G$
+is \tet{nf_get_Gtwist}$(\var{nf}, v)$.
 
-\fun{GEN}{idealred}{GEN nf, GEN x} is shortcut for \kbd{idealred0(nf,x,NULL)},
-since $v$ is better left omitted in practice.
+\noindent Usually one sets $v = \kbd{NULL}$ to obtain an element of small $T_2$
+norm in $x$:
 
-These two functions remain a little complicated to use: in order not to lose
+\fun{GEN}{idealred}{GEN nf, GEN x} is a shortcut for \kbd{idealred0(nf,x,NULL)}.
+
+The function \kbd{idealred} remains complicated to use: in order not to lose
 information $x$ must be an extended ideal, otherwise the value of $a$ is lost.
-There is a subtelty here: the principal ideal $(a)$ is easy to recover, but
-$a$ itself is an instance of the principal ideal problem which is very
-difficult given only an \var{nf} (once a \var{bnf} structure is available,
-\tet{bnfisprincipal0} will recover it).
-
-\fun{GEN}{idealred_elt0}{GEN nf, GEN x, GEN v} analog to \kbd{idealred0},
-returning only the algebraic number $a$ (instead of a rational multiple
-of the quotient $x/(a)$). This function is called within \kbd{idealred0}.
-\kbd{nf} must be a true \var{nf} (not a \var{bnf} for instance) and the
-ideal $x$ must be integral, in HNF.
-
-\fun{GEN}{idealred_elt}{GEN nf, GEN x} shortcut for
-\kbd{idealred\_elt0(nf,x,NULL)}.
+There is a subtelty here: the principal ideal $(a)$ is easy to recover, but $a$
+itself is an instance of the principal ideal problem which is very difficult
+given only an \var{nf} (once a \var{bnf} structure is available,
+\tet{bnfisprincipal0} will recover it). It is in general simpler to use
+directly \tet{idealred_elt}.
 
 \fun{GEN}{idealmoddivisor}{GEN bnr, GEN x} A proof-of-concept implementation,
 useless in practice. If \kbd{bnr} is associated to some modulus $f$, returns a
@@ -1626,6 +1678,16 @@ the columns of $y$, which is close to $x$.
 
 \fun{GEN}{reducemodlll}{GEN x,GEN y} LLL-reduce the \kbd{ZM} $y$ and call
 \kbd{reducemodinvertible} to find a small representative of $x$ mod $y \Z^n$.
+Suitable for \kbd{gerepileupto}, but does not collect garbage.
+
+\subsec{Miscellaneous}
+
+\fun{GEN}{RM_round_maxrank}{GEN G} given a matrix $G$ with real floating
+point entries and independant columns, let $G_e$ be the
+rescaled matrix $2^e G$ rounded to nearest integers, for $e \geq 0$.
+Finds a small $e$ such that the rank of $G_e$ is equal to the rank of $G$
+(its number of columns) and return $G_e$. This is useful as a preconditioning
+step to speed up LLL reductions, see \tet{nf_get_Gtwist}.
 Suitable for \kbd{gerepileupto}, but does not collect garbage.
 
 \newpage

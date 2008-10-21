@@ -149,7 +149,7 @@ idealmoddivisor_aux(GEN nf, GEN x, GEN divisor, GEN sarch)
   pari_sp av = avma;
   GEN a,A,D,G, f = gel(divisor,1);
 
-  if ( gcmp1(gcoeff(f,1,1)) ) /* f = 1 */
+  if ( is_pm1(gcoeff(f,1,1)) ) /* f = 1 */
   {
     G = idealred_elt(nf, x);
     D = idealred_elt(nf, idealdiv(nf,G,x));

@@ -665,7 +665,7 @@ can_factor(FB_t *F, GEN nf, GEN I, GEN m, GEN N, FACT *fact)
   return is_pm1(N) || divide_p(F, itos(N), 1, nf, I, m, fact);
 }
 
-/* can we factor m/I ? [m in I from pseudomin], NI = norm I */
+/* can we factor m/I ? [m in I from idealpseudomin_nonscalar], NI = norm I */
 static long
 factorgen(FB_t *F, GEN nf, GEN I, GEN NI, GEN m, FACT *fact)
 {
@@ -993,30 +993,28 @@ Vbase_to_FB(FB_t *F, GEN pr)
 static GEN
 SPLIT(FB_t *F, GEN nf, GEN x, GEN Vbase, FACT *fact)
 {
-  GEN vdir, z, ex, y, x0, Nx = ZM_det_triangular(x);
-  long nbtest_lim, nbtest, bou, i, ru, lgsub;
-  int flag = (gexpo(gcoeff(x,1,1)) < 100);
-  pari_sp av2;
+  GEN vecG, z, ex, y, x0, Nx = ZM_det_triangular(x);
+  long nbtest_lim, nbtest, i, j, ru, lgsub;
 
   /* try without reduction if x is small.
    * N.B can_factor destroys its NI argument */
-  if (flag && can_factor(F, nf, x, NULL, icopy(Nx), fact)) return NULL;
+  if (gexpo(gcoeff(x,1,1)) < 100 &&
+      can_factor(F, nf, x, NULL, icopy(Nx), fact)) return NULL;
 
-  /* if reduction fails (y scalar), do not retry can_factor */
-  y = idealred_elt(nf,x);
-  if ((!flag || !ZV_isscalar(y)) && factorgen(F, nf, x, Nx, y, fact)) return y;
+  y = idealpseudomin_nonscalar(x, nf_get_Gtwist(nf,NULL));
+  if (factorgen(F, nf, x, Nx, y, fact)) return y;
 
   /* reduce in various directions */
   ru = lg(nf[6]);
-  vdir = cgetg(ru,t_VECSMALL);
-  for (i=2; i<ru; i++) vdir[i]=0;
-  av2 = avma;
-  for (i=1; i<ru; i++, avma = av2)
+  vecG = cgetg(ru, t_VEC);
+  for (j=1; j<ru; j++)
   {
-    vdir[i] = 10;
-    y = idealred_elt0(nf,x,vdir);
+    pari_sp av;
+    gel(vecG,j) = nf_get_Gtwist1(nf, j);
+    av = avma;
+    y = idealpseudomin_nonscalar(x, gel(vecG,j));
     if (factorgen(F, nf, x, Nx, y, fact)) return y;
-    vdir[i] = 0;
+    avma = av;
   }
 
   /* tough case, multiply by random products */
@@ -1043,18 +1041,15 @@ SPLIT(FB_t *F, GEN nf, GEN x, GEN Vbase, FACT *fact)
     if (id == x0) continue;
 
     I = gel(id,1); NI = ZM_det_triangular(I);
-    for (i=1; i<ru; i++) vdir[i] = random_bits(RANDOM_BITS);
-    for (bou=1; bou<ru; bou++)
+    for (j=1; j<ru; j++)
     {
-      y = idealred_elt0(nf, I, vdir);
+      y = idealpseudomin_nonscalar(I, gel(vecG,j));
       if (factorgen(F, nf, I, NI, y, fact))
       {
 	for (i=1; i<lgsub; i++)
 	  if (ex[i]) add_to_fact(Vbase_to_FB(F,gel(Vbase,i)), ex[i], fact);
 	return famat_mul(gel(id,2), y);
       }
-      for (i=1; i<ru; i++) vdir[i] = 0;
-      vdir[bou] = 10;
     }
     avma = av;
     if (++nbtest > nbtest_lim)
@@ -2215,24 +2210,12 @@ END:
   }
 }
 
-/* I assumed to be integral, G the Cholesky form of a weighted T2 matrix.
- * Return an irrational m in I with T2(m) small */
-static GEN
-pseudomin(GEN I, GEN G)
-{
-  GEN m, u = ZM_lll(ZM_mul(G, I), 0.99, LLL_IM);
-  m = ZM_ZC_mul(I, gel(u,1));
-  if (ZV_isscalar(m) && lg(u) > 2) m = ZM_ZC_mul(I, gel(u,2));
-  if (DEBUGLEVEL>5) fprintferr("\nm = %Ps\n",m);
-  return m;
-}
-
 /* I integral ideal in HNF form */
 static GEN
 remove_content(GEN I)
 {
   long N = lg(I)-1;
-  if (!gcmp1(gcoeff(I,N,N))) I = Q_primpart(I);
+  if (!is_pm1(gcoeff(I,N,N))) I = Q_primpart(I);
   return I;
 }
 
@@ -2298,7 +2281,7 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN L_jid, long *pjid, FACT *fact)
     if (DEBUGLEVEL>1) fprintferr("(%ld)", jid);
     for (av1 = avma, j = 1; j <= nbG; j++, avma = av1)
     { /* reduce along various directions */
-      m = pseudomin(ideal, gel(F->vecG,j));
+      m = idealpseudomin_nonscalar(ideal, gel(F->vecG,j));
       if (!factorgen(F,nf,ideal,Nideal,m,fact))
       {
 	if (DEBUGLEVEL>1) { fprintferr("."); flusherr(); }
@@ -2370,7 +2353,7 @@ be_honest(FB_t *F, GEN nf, FACT *fact)
         Nideal = ZM_det_triangular(ideal);
 	for (av1 = avma, k = 1; k <= nbG; k++, avma = av1)
 	{
-	  m = pseudomin(ideal, gel(F->vecG,k));
+	  m = idealpseudomin_nonscalar(ideal, gel(F->vecG,k));
 	  if (factorgen(F,nf,ideal,Nideal, m,fact)) break;
 	}
 	avma = av2; if (k < ru) break;

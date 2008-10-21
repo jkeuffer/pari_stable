@@ -1743,31 +1743,47 @@ chk_vdir(GEN nf, GEN vdir)
   return v;
 }
 
-static GEN
-computeGtwist(GEN nf, GEN vdir)
+static void
+twistG(GEN G, long r1, long i, long v)
 {
-  long i, j, k, l, lG, v, r1;
+  long j, lG = lg(G);
+  if (i <= r1) {
+    for (j=1; j<lG; j++) gcoeff(G,i,j) = gmul2n(gcoeff(G,i,j), v);
+  } else {
+    long k = (i<<1) - r1;
+    for (j=1; j<lG; j++)
+    {
+      gcoeff(G,k-1,j) = gmul2n(gcoeff(G,k-1,j), v);
+      gcoeff(G,k  ,j) = gmul2n(gcoeff(G,k  ,j), v);
+    }
+  }
+}
+
+GEN
+nf_get_Gtwist(GEN nf, GEN vdir)
+{
+  long i, l, v, r1;
   GEN G = nf_get_G(nf);
 
   if (!vdir) return RM_round_maxrank(G); /* FIXME: should be part of nf */
+
   vdir = chk_vdir(nf, vdir);
-  l = lg(vdir); lG = lg(G);
   G = RgM_shallowcopy(G);
   r1 = nf_get_r1(nf);
+  l = lg(vdir);
   for (i=1; i<l; i++)
   {
     v = vdir[i]; if (!v) continue;
-    if (i <= r1) {
-      for (j=1; j<lG; j++) gcoeff(G,i,j) = gmul2n(gcoeff(G,i,j), v);
-    } else {
-      k = (i<<1) - r1;
-      for (j=1; j<lG; j++)
-      {
-	gcoeff(G,k-1,j) = gmul2n(gcoeff(G,k-1,j), v);
-	gcoeff(G,k  ,j) = gmul2n(gcoeff(G,k  ,j), v);
-      }
-    }
+    twistG(G, r1, i, v);
   }
+  return RM_round_maxrank(G);
+}
+GEN
+nf_get_Gtwist1(GEN nf, long i)
+{
+  long r1 = nf_get_r1(nf);
+  GEN G = RgM_shallowcopy( nf_get_G(nf) );
+  twistG(G, r1, i, 10);
   return RM_round_maxrank(G);
 }
 
@@ -1786,25 +1802,15 @@ RM_round_maxrank(GEN G0)
   }
 }
 
-/* assume I in NxN matrix form (not necessarily HNF) */
+/* assume I in NxN integral matrix form, not necessarily HNF */
 GEN
 idealred_elt0(GEN nf, GEN I, GEN vdir)
 {
   pari_sp av = avma;
-  GEN u, G0;
-
-  if (vdir && typ(vdir) == t_MAT)
-    G0 = vdir; /* assumed ZM */
-  else
-    G0 = computeGtwist(nf, vdir);
-  u = ZM_lll(ZM_mul(G0, I), 0.99, LLL_IM);
-  u = ZM_ZC_mul(I, gel(u,1)); /* small elt in I */
+  GEN G0 = (vdir && typ(vdir) == t_MAT)? vdir: nf_get_Gtwist(nf, vdir);
+  GEN u = idealpseudomin(I, G0);
   return gerepileupto(av, u);
 }
-GEN
-idealred_elt(GEN nf, GEN I) { return idealred_elt0(nf, I, NULL); }
-GEN
-idealred(GEN nf, GEN I) { return idealred0(nf, I, NULL); }
 
 GEN
 idealred0(GEN nf, GEN I, GEN vdir)
@@ -1887,8 +1893,7 @@ idealmin(GEN nf, GEN x, GEN vdir)
     case id_MAT: if (lg(x) == 1) return gen_0;
   }
   x = Q_remove_denom(x, &dx);
-  y = ZM_lll(ZM_mul(computeGtwist(nf,vdir), x), 0.99, LLL_IM);
-  y = ZM_ZC_mul(x, gel(y,1));
+  y = idealpseudomin(x, nf_get_Gtwist(nf,vdir));
   if (dx) y = RgC_Rg_div(y, dx);
   return gerepileupto(av, y);
 }

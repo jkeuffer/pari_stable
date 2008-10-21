@@ -188,7 +188,7 @@ reducebeta(GEN bnfz, GEN be, GEN ell)
   be = reduce_mod_Qell(nf, be, ell);
   /* reduce l-th root */
   z = idealsqrtn(nf, be, ell, 0);
-  if (typ(z) == t_MAT && !gcmp1(gcoeff(z,1,1)))
+  if (typ(z) == t_MAT && !is_pm1(gcoeff(z,1,1)))
   {
     z = idealred_elt(nf, z);
     be = nfdiv(nf, be, nfpow(nf, z, ell));

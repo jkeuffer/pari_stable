@@ -442,7 +442,6 @@ GEN     extideal_HNF_mul(GEN nf, GEN x, GEN y);
 GEN     factor_norm(GEN x);
 GEN     factorbackprime(GEN nf, GEN L, GEN e);
 long    val_norm(GEN x, GEN p, long *vz);
-GEN     RM_round_maxrank(GEN G);
 
 /* base5.c */
 
