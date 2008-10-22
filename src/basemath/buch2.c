@@ -142,7 +142,7 @@ dbg_rel(long s, GEN col)
   flusherr();
 }
 static void
-dbg_newrel(RELCACHE_t *cache, long jid, long jdir)
+dbg_newrel(RELCACHE_t *cache)
 {
   fprintferr("\n++++ cglob = %ld: new relation (need %ld)",
 	     cache->last - cache->base, cache->end - cache->base);
@@ -400,6 +400,7 @@ powFBgen(FB_t *F, RELCACHE_t *cache, GEN nf)
       rel->ex = NULL;
       rel->pow = New;
       cache->last = rel;
+      if (DEBUGLEVEL) dbg_newrel(cache);
     }
     /* trouble with subFB: include ideal even though it's principal */
     if (j == 1) j = 2;
@@ -2320,7 +2321,7 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN L_jid, long *pjid, FACT *fact)
       rel->m = gclone(m);
       rel->ex = gclone(ex);
       rel->pow = F->pow; cache->last = rel;
-      if (DEBUGLEVEL) dbg_newrel(cache, jid, j);
+      if (DEBUGLEVEL) dbg_newrel(cache);
       /* Need more, try next prime ideal */
       if (rel < cache->end) { cptzer = 0; break; }
       /* We have found enough. Return */
