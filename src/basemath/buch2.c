@@ -1905,15 +1905,6 @@ signunits(GEN bnf)
   avma = av; return S;
 }
 
-/* LLL-reduce ideal and return Cholesky for T2 | ideal */
-static GEN
-red_ideal(GEN *ideal, GEN G0, GEN G, long prec)
-{
-  GEN u = ZM_lll(ZM_mul(G0, *ideal), 0.99, LLL_IM);
-  *ideal = ZM_mul(*ideal,u); /* approximate LLL reduction */
-  return Q_from_QR(RgM_mul(G, *ideal), prec);
-}
-
 static GEN
 get_log_embed(REL_t *rel, GEN M, long RU, long R1, long prec)
 {
@@ -2080,16 +2071,15 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
   const long maxtry_DEP  = 20, maxtry_FACT = 500;
   double *y, *z, **q, *v, BOUND;
   pari_sp av;
-  long nbsmallnorm, nbfact, j, k, noideal = F->KC, precbound;
+  long nbsmallnorm, nbfact, precbound, noideal = F->KC;
   long N = nf_get_degree(nf), R1 = nf_get_r1(nf), prec = nf_get_prec(nf);
-  GEN x, gx, r, M = nf_get_M(nf), G = nf_get_G(nf);
+  GEN x, M = nf_get_M(nf), G = nf_get_G(nf);
   GEN L = const_vecsmall(F->KC, 0), invp = relationrank(cache, L, mod_p);
   REL_t *rel = cache->last;
 
   if (DEBUGLEVEL)
     fprintferr("\n#### Looking for %ld relations (small norms)\n",
 	       cache->end - cache->base);
-  gx = NULL; /* gcc -Wall */
   nbsmallnorm = nbfact = 0;
 
  /* LLL reduction produces v0 in I such that
@@ -2104,21 +2094,19 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
   minim_alloc(N+1, &q, &x, &y, &z, &v);
   for (av = avma; noideal; noideal--, avma = av)
   {
-    long nbrelideal = 0, dependent = 0, try_factor = 0;
-    GEN inc = const_vecsmall(N, 1);
-    GEN IDEAL, ideal;
+    long j, k, nbrelideal = 0, dependent = 0, try_factor = 0;
+    GEN IDEAL, ideal, r, u, gx, inc = const_vecsmall(N, 1);
     pari_sp av2;
 
     ideal = gel(F->LP,noideal);
     if (DEBUGLEVEL>1)
       fprintferr("\n*** Ideal no %ld: [%Ps, %Ps, %Ps, %Ps]\n",
 		 noideal, ideal[1], ideal[2], ideal[3], ideal[4]);
-#if 1 /* slower but seems to find more relations this way... */
+    /* Preliminary LLL-reduction */
     IDEAL = ZM_lll(idealhnf_two(nf,ideal), 0.75, LLL_INPLACE);
-#else
-    IDEAL = idealhnf_two(nf,ideal);
-#endif
-    r = red_ideal(&IDEAL, F->G0, G, prec);
+    u = ZM_lll(ZM_mul(F->G0, IDEAL), 0.99, LLL_IM);
+    IDEAL = ZM_mul(IDEAL,u); /* approximate T2-LLL reduction */
+    r = Q_from_QR(RgM_mul(G, IDEAL), prec); /* Cholesky for T2 | ideal */
     if (!r) pari_err(bugparier, "small_norm (precision too low)");
 
     for (k=1; k<=N; k++)
@@ -2128,13 +2116,12 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
       if (DEBUGLEVEL>3) fprintferr("v[%ld]=%.4g ",k,v[k]);
     }
 
-#if 1 /* larger BOUND than alternative, but finds more intersting vectors */
     BOUND = v[2] + v[1] * q[1][2] * q[1][2];
+#if 1 /* larger BOUND than alternative, but finds more intersting vectors */
     if (BOUND < v[1]) BOUND = v[1];
     BOUND *= 2;
     if (BOUND > v[1] * BMULT) BOUND = v[1] * BMULT;
 #else
-    BOUND = v[2] + v[1] * q[1][2] * q[1][2];
     if (BOUND > v[1]) BOUND = v[1];
     BOUND *= BMULT;
 #endif
