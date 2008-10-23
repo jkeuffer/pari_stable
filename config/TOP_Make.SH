@@ -18,6 +18,8 @@ cat > $file << EOT
 #
 SHELL = $make_sh
 VERS = pari-$version.$patch $__status__
+SVN=svn+ssh://kb@pari.math.u-bordeaux.fr/home/svn/pari
+TAG=release-$VersionMajor-$VersionMinor-$patch
 
 dft target::
 	@echo "Possible targets are:"
@@ -63,8 +65,10 @@ clean:: cleandoc cleanobj
 
 distrib:
 	$config_dir/settar \$(VERS) $__status__
+
 tag:
-	@echo cvs tag release-$VersionMajor-$VersionMinor-$patch
+	@echo svn copy \$(SVN)/trunk \$(SVN)/tags/\$(TAG)
+
 alpha: tag
 	$config_dir/settar \$(VERS) alpha
 beta: tag
