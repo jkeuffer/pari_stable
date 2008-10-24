@@ -5,3 +5,9 @@ Prototype: L
 Help: primes(x): returns the vector of the first x primes.
 Doc: creates a row vector whose components
  are the first $x$ prime numbers, which must be among the precalculated primes.
+ \bprog
+ ? primes(10)           \\ the first 10 primes
+ %1 = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29]
+ ? primes(primepi(10))  \\ the primes up to 10
+ %2 = [2, 3, 5, 7]
+ @eprog
