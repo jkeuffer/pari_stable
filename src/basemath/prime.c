@@ -755,7 +755,8 @@ primepi(GEN x)
   ulong prime = 0, res = 0, n;
   GEN N = typ(x) == t_INT? x: gfloor(x);
 
-  if (typ(N) != t_INT || signe(N) <= 0) pari_err(typeer, "primepi");
+  if (typ(N) != t_INT) pari_err(typeer, "primepi");
+  if (signe(N) <= 0) return gen_0;
   avma = av; n = itou(N); maxprime_check(n);
   while (prime <= n) { res++; NEXT_PRIME_VIADIFF(prime,p); }
   return utoi(res-1);
@@ -766,17 +767,16 @@ primes(long m)
 {
   byteptr p = diffptr;
   ulong prime = 0;
-  long n;
+  long n = (m < 0)? 0: m;
   GEN y, z;
 
-  n = (m < 0)? 0: m;
   z = y = cgetg(n+1,t_VEC);
   while (n--)
   {
     NEXT_PRIME_VIADIFF(prime,p);
     if (!*p) /* use something close to Dusart's bound */
       maxprime_check((ulong)(m*( log((double)m*log((double)m))-0.948 )));
-    gel(++z, 0) = utoi(prime);
+    gel(++z, 0) = utoipos(prime);
   }
   return y;
 }
