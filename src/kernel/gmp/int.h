@@ -17,7 +17,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define int_MSW(x) ((x)+lgefint((x))-1)
 /*x being a t_INT, return a pointer to the most significant word of x.*/
 
-#define int_LSW(x) (x+2)
+#define int_LSW(x) ((x)+2)
 /*x being a t_INT, return a pointer to the least significant word of x.*/
 
 #define int_precW(x) ((x)-1)
