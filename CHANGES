@@ -131,6 +131,8 @@ BA105- Vecsmall([1,1])^-1 returned garbage
   109- polred didn't accept non-monic inputs
   110- factor(..., 10^100) ==> "overflow in t_INT-->long conversion" [#855]
 IZ111- missing `const's in groupid.c cause massive copying to stack.
+  112- [native kernel only] int_normalize() didn't treat properly inputs
+       of lgefint 2
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
