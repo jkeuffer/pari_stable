@@ -1,20 +1,20 @@
 Function: elllog
 Section: elliptic_curves
 C-Name: elllog
-Prototype: GGGG
-Help: elllog(E,P,G,o): return the discrete logarithm of the point P of
- the elliptic curve E in base G, which must be of order o.
-Doc: discrete logarithm of the point $P$ of the elliptic curve $E$ in base $G$,
- which must be of order $o$. The function assume that $P$ is a multiple of
- $G$. 
+Prototype: GGGDG
+Help: elllog(E,P,G,{o}): return the discrete logarithm of the point P of
+ the elliptic curve E in base G. If present, o must be the order of G.
+Doc: discrete logarithm of the point $P$ of the elliptic curve $E$ in base $G$.
+ If present, $o$ must be the order of $G$. The function assume that $P$ is a
+ multiple of $G$.
  \bprog
  ? a = ffgen(ffinit(2,8),'a);
  ? E = ellinit([a,1,0,0,1]);  \\ over F_{2^8}
  ? x = a^3; y = ellordinate(E,x)[1];
  ? P = [x,y]; G = ellpow(E, P, 113);
- ? [ellpow(E, P, 242), ellpow(E, P, 242/2), ellpow(E, P, 242/11)]
- %4 = [[0], [0, 1], [a^7 + a^6 + a^4 + a, a^6 + a^5 + a^3]]
- ? e = elllog(E,P,G,242)  \\ the above proved that P has order 242
+ ? ellorder(E, G, 242);
+ %4 = 242
+ ? e = elllog(E, P, G, 242)
  %5 = 15
  ? ellpow(E,G,e) == P
  %6 = 1

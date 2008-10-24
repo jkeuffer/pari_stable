@@ -374,7 +374,7 @@ ellinit_real(GEN x, long prec)
 {
   GEN y, D, R, T, w, a1, b1, x1, u2, q, pi2, aw1, w1, w2;
   long PREC, e;
-  
+
   y = cgetg(20,t_VEC); initsmall(x,y);
   if (!prec) { set_dummy(y); return y; }
 
@@ -952,8 +952,6 @@ static GEN
 _sqr(void *e, GEN x) { return addell((GEN)e, x, x); }
 static GEN
 _mul(void *e, GEN x, GEN y) { return addell((GEN)e, x, y); }
-static GEN
-_pow(void*e, GEN P, GEN n) { return powell((GEN)e, P, n); }
 
 /* [n] z, n integral */
 static GEN
@@ -1000,37 +998,6 @@ powell(GEN e, GEN z, GEN n)
   pari_err(typeer,"powell (non integral, non CM exponent)");
   return NULL; /* not reached */
 }
-
-static GEN
-topol(GEN x)
-{
-  switch(typ(x))
-  {
-    case t_INTMOD: return gel(x,2);
-    case t_POLMOD: return gtovec(gel(x,2));
-    case t_FFELT:  return gtovec(FF_to_FpXQ(x));
-  }
-  return x;
-}
-
-static int
-_cmp(GEN x, GEN y)
-{
-  pari_sp av;
-  int r;
-  if (ell_is_inf(x)) return !ell_is_inf(y);
-  if (ell_is_inf(y)) return -1;
-  av = avma;
-  r = lexcmp(topol(gel(x,1)), topol(gel(y,1)));
-  if (!r) r = lexcmp(topol(gel(x,2)), topol(gel(y,2)));
-  avma = av; return r;
-}
-
-static const struct bb_group ell_group={_mul,_pow,NULL,_cmp,ell_is_inf};
-
-GEN
-elllog(GEN E, GEN a, GEN g, GEN ord)
-{ return gen_PH_log(a,g,ord, (void*)E,&ell_group,NULL); }
 
 /********************************************************************/
 /**                                                                **/
@@ -3788,18 +3755,54 @@ tors(GEN e, long k, GEN p, GEN q, GEN v)
 }
 
 static GEN
-_addFp(void *E, GEN x, GEN y)
-{
-  return addell((GEN)E,x,y);
-}
+_pow(void *E, GEN x, GEN n) { return ellpow_Z((GEN)E,x,n); }
 
 static GEN
-_powFp(void *E, GEN x, GEN n)
+topol(GEN x)
 {
-  return ellpow_Z((GEN)E,x,n);
+  switch(typ(x))
+  {
+    case t_INTMOD: return gel(x,2);
+    case t_POLMOD: return gtovec(gel(x,2));
+    case t_FFELT:  return gtovec(FF_to_FpXQ(x));
+  }
+  return x;
 }
 
-const static struct bb_group ellFp={_addFp,_powFp,NULL,NULL,ell_is_inf};
+static int
+_cmp(GEN x, GEN y)
+{
+  pari_sp av;
+  int r;
+  if (ell_is_inf(x)) return !ell_is_inf(y);
+  if (ell_is_inf(y)) return -1;
+  av = avma;
+  r = lexcmp(topol(gel(x,1)), topol(gel(y,1)));
+  if (!r) r = lexcmp(topol(gel(x,2)), topol(gel(y,2)));
+  avma = av; return r;
+}
+
+static const struct bb_group ell_group={_mul,_pow,NULL,_cmp,ell_is_inf};
+
+GEN
+elllog(GEN e, GEN a, GEN g, GEN o)
+{
+  pari_sp av = avma;
+  GEN j;
+  checksmallell(e); checkellpt(a); checkellpt(g);
+  j = gel(e,13);
+  switch(typ(j))
+  {
+    case t_INTMOD:
+      if (!o) { GEN p = gel(j,1); o = subii(addis(p,1), ellap(e,p)); }
+      break;
+    case t_FFELT:
+      if (!o) pari_err(talker,"curve order required over a finite field");
+      break;
+    default: pari_err(impl,"elllog over infinite fields");
+  }
+  return gerepileupto(av, gen_PH_log(a,g,o, (void*)e,&ell_group,NULL));
+}
 
 /* assume e is defined over Q (use Mazur's theorem) */
 static long
@@ -3815,24 +3818,29 @@ _orderell(GEN e, GEN p)
   }
   avma = av; return 0;
 }
+
 GEN
 ellorder(GEN e, GEN z, GEN o)
 {
+  pari_sp av = avma;
   GEN j;
   checksmallell(e); checkellpt(z);
   j = gel(e,13);
   switch(typ(j))
   {
-    case t_INTMOD: {
-      pari_sp av = avma;
+    case t_INTMOD:
       if (!o) { GEN p = gel(j,1); o = subii(addis(p,1), ellap(e,p)); }
-      return gerepileuptoint(av, gen_eltorder(z, o, (void*)e, &ellFp));
-    }
-    case t_INT: case t_FRAC: break;
+      break;
+    case t_FFELT:
+      if (!o) pari_err(talker,"curve order required over a finite field");
+      break;
+    case t_INT: case t_FRAC:
+      return utoi( _orderell(e, z) );
     default: pari_err(impl,"orderell for nonrational elliptic curves");
   }
-  return utoi( _orderell(e, z) );
+  return gerepileuptoint(av, gen_eltorder(z, o, (void*)e, &ell_group));
 }
+
 GEN
 orderell(GEN e, GEN z) { return ellorder(e,z,NULL); }
 
