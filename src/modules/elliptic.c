@@ -952,6 +952,8 @@ static GEN
 _sqr(void *e, GEN x) { return addell((GEN)e, x, x); }
 static GEN
 _mul(void *e, GEN x, GEN y) { return addell((GEN)e, x, y); }
+static GEN
+_pow(void*e, GEN P, GEN n) { return powell((GEN)e, P, n); }
 
 /* [n] z, n integral */
 static GEN
@@ -998,6 +1000,37 @@ powell(GEN e, GEN z, GEN n)
   pari_err(typeer,"powell (non integral, non CM exponent)");
   return NULL; /* not reached */
 }
+
+static GEN
+topol(GEN x)
+{
+  switch(typ(x))
+  {
+    case t_INTMOD: return gel(x,2);
+    case t_POLMOD: return gtovec(gel(x,2));
+    case t_FFELT:  return gtovec(FF_to_FpXQ(x));
+  }
+  return x;
+}
+
+static int
+_cmp(GEN x, GEN y)
+{
+  pari_sp av;
+  int r;
+  if (ell_is_inf(x)) return !ell_is_inf(y);
+  if (ell_is_inf(y)) return -1;
+  av = avma;
+  r = lexcmp(topol(gel(x,1)), topol(gel(y,1)));
+  if (!r) r = lexcmp(topol(gel(x,2)), topol(gel(y,2)));
+  avma = av; return r;
+}
+
+static const struct bb_group ell_group={_mul,_pow,NULL,_cmp,ell_is_inf};
+
+GEN
+elllog(GEN E, GEN a, GEN g, GEN ord)
+{ return gen_PH_log(a,g,ord, (void*)E,&ell_group,NULL); }
 
 /********************************************************************/
 /**                                                                **/

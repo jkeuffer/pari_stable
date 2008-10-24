@@ -499,6 +499,7 @@ BA 30- t_FFELT subtype_FF_F2xq for GF(2^n)
 BA 31- F2v/F2m functions family and F2m_ker for linear algebra over GF(2)
 BA 32- extra debugging data in t_CLOSURE and debugging facility.
 BA 33- compile-time copy optimizer
+BA 34- elliptic discrete logarithm function elllog()
 
   Removed
     1- obsolete GP functions printp, printp1. Either replace them by
