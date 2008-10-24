@@ -1177,7 +1177,7 @@ sqrtr_abs(GEN a)
   avma = (pari_sp)res; return res;
 }
 
-/* Normalize a non-negative integer.  */
+/* Normalize a non-negative integer */
 GEN
 int_normalize(GEN x, long known_zero_words)
 {
