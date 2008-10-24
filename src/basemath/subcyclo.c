@@ -780,6 +780,7 @@ struct aurifeuille_t {
 static GEN
 factor_Aurifeuille_aux(GEN A, long Astar, long n, struct aurifeuille_t *S)
 {
+  pari_sp av;
   GEN z = S->z, le = S->le;
   GEN f, a, b, s;
   long j, e = S->e;
@@ -802,12 +803,14 @@ factor_Aurifeuille_aux(GEN A, long Astar, long n, struct aurifeuille_t *S)
         a = addsi(-1,i);
         b = subsi(-1,i);
       }
+      av = avma;
       s = z; f = subii(a, s);
       for (j=3;j<n;j+=2)
       {
         s = Fp_mul(z2, s, le);
         if (ugcd(j,m)==1)
           f = Fp_mul(f, subii((j & 3) == 1? a: b, s), le);
+        if ((j & 0x1ff) == 1) gerepileall(av, 2, &s, &f);
       }
     }
     else
@@ -821,7 +824,7 @@ factor_Aurifeuille_aux(GEN A, long Astar, long n, struct aurifeuille_t *S)
       b = Fp_mul(a, i, le);
       ma = Fp_neg(a, le);
       mb = Fp_neg(b, le);
-
+      av = avma;
       s = z; f = subii(a, s);
       for (j=3;j<n;j+=2)
       {
@@ -833,6 +836,7 @@ factor_Aurifeuille_aux(GEN A, long Astar, long n, struct aurifeuille_t *S)
           else              t = (kross(j, Astar) < 0)? mb: b;
           f = Fp_mul(f, subii(t, s), le);
         }
+        if ((j & 0x1ff) == 1) gerepileall(av, 2, &s, &f);
       }
     }
   }
@@ -849,12 +853,14 @@ factor_Aurifeuille_aux(GEN A, long Astar, long n, struct aurifeuille_t *S)
     g = Fl_sqrt(umodiu(A,l), l);
     a = padicsqrtlift(A, utoipos(g), utoipos(l), e);
     b = negi(a);
+    av = avma;
     s = z; f = subii(a, s);
     for(j=2;j<n;j++)
     {
       s = Fp_mul(z,s,le);
       if (ugcd(j,n)==1)
 	f = Fp_mul(f, subii(kross(j,Astar)==1? a: b, s), le);
+      if ((j & 0x1ff) == 1) gerepileall(av, 2, &s, &f);
     }
   }
   return f;
