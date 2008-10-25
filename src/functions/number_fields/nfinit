@@ -38,18 +38,19 @@ Doc: \var{pol} being a non-constant,
  $\var{nf}[4]$ contains the index of $\var{nf}[1]$ (\kbd{\var{nf}.index}),
  i.e.~$[\Z_K : \Z[\theta]]$, where $\theta$ is any root of $\var{nf}[1]$.
 
- $\var{nf}[5]$ is a vector containing 7 matrices $M$, $G$, $T2$, $T$,
+ $\var{nf}[5]$ is a vector containing 7 matrices $M$, $G$, \var{roundG}, $T$,
  $MD$, $TI$, $MDI$ useful for certain computations in the number field $K$.
 
  \quad\item $M$ is the $(r1+r2)\times n$ matrix whose columns represent
  the numerical values of the conjugates of the elements of the integral
  basis.
 
- \quad\item $G$ is such that $T2 = {}^t G G$, where $T2$ is the quadratic
- form $T_2(x) = \sum |\sigma(x)|^2$, $\sigma$ running over the embeddings of
- $K$ into $\C$.
+ \quad\item $G$ is an $n\times n$ matrix such that $T2 = {}^t G G$,
+ where $T2$ is the quadratic form $T_2(x) = \sum |\sigma(x)|^2$, $\sigma$
+ running over the embeddings of $K$ into $\C$.
 
- \quad\item The $T2$ component is deprecated and currently unused.
+ \quad\item \var{roundG} is a rescaled copy of $G$, rounded to nearest
+ integers.
 
  \quad\item $T$ is the $n\times n$ matrix whose coefficients are
  $\text{Tr}(\omega_i\omega_j)$ where the $\omega_i$ are the elements of the
