@@ -827,7 +827,7 @@ fmtnum(outString *S, long lvalue, GEN gvalue, int base, int signvalue,
         pari_err(talker,"not a t_INT in integer format conversion: %Ps", gvalue);
     }
     s = signe(gvalue);
-    if (!s) { lbuf = 1; buf = zerotostr(); goto END; }
+    if (!s) { lbuf = 1; buf = zerotostr(); signvalue = 0; goto END; }
 
     uvalue = gvalue;
     if (signvalue < 0)
