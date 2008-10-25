@@ -2069,7 +2069,7 @@ modprinit(GEN nf, GEN pr, int zk)
     x = gcoeff(prh, i,i);
     if (!is_pm1(x)) { c[k] = i; gel(ffproj,i) = col_ei(N, i); k++; }
     else
-      gel(ffproj,i) = gneg(gel(prh,i));
+      gel(ffproj,i) = ZC_neg(gel(prh,i));
   }
   ffproj = rowpermute(ffproj, c);
   if (! dvdii(nf_get_index(nf), p))
@@ -2134,7 +2134,7 @@ modprinit(GEN nf, GEN pr, int zk)
   mul = FpM_mul(ffproj, mul, p);
 
   pow = get_powers(mul, p);
-  T = RgV_to_RgX(FpM_deplin(pow, p), varn(nf[1]));
+  T = RgV_to_RgX(FpM_deplin(pow, p), nf_get_varn(nf));
   nfproj = cgetg(f+1, t_MAT);
   for (i=1; i<=f; i++) gel(nfproj,i) = lift_to_zk(gel(pow,i), c, N);
   nfproj = coltoliftalg(nf, nfproj);
@@ -2740,7 +2740,7 @@ get_d(GEN nf, GEN pol, GEN A)
 
 /* nf = base field K
  * pol= monic polynomial, coefficients in Z_K, defining a relative
- *   extension L = K[X]/(pol). One MUST have varn(pol) << varn(nf[1]).
+ *   extension L = K[X]/(pol). One MUST have varn(pol) << nf_get_varn(nf).
  * Returns a pseudo-basis [A,I] of Z_L, set (D,d) to the relative
  * discriminant, and f to the index-ideal */
 GEN

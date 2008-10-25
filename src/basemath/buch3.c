@@ -1485,7 +1485,7 @@ static int
 rnf_is_abelian(GEN nf, GEN pol)
 {
   GEN modpr, pr, T, pp, ro, nfL, C, z, a, sig, eq = rnfequation2(nf,pol);
-  long i, j, l, v = varn(nf_get_pol(nf));
+  long i, j, l, v = nf_get_varn(nf);
   ulong p, k, ka;
 
   C = gel(eq,1); setvarn(C, v);

@@ -213,7 +213,7 @@ nffactormod(GEN nf, GEN x, GEN pr)
   GEN F, E, rep, xrd, modpr, T, p;
 
   nf = checknf(nf);
-  vn = varn(nf[1]);
+  vn = nf_get_varn(nf);
   if (typ(x)!=t_POL) pari_err(typeer,"nffactormod");
   if (varncmp(vx,vn) >= 0)
     pari_err(talker,"polynomial variable must have highest priority in nffactormod");
@@ -260,7 +260,7 @@ get_den(GEN *nf, GEN T)
     if (is_pm1(D)) return gen_1;
     fa = Z_factor_limit(D, 0);
     P = gel(fa,1); q = gel(P, lg(P)-1);
-    if (!BPSW_psp(q)) den = q; /* *nf[3] may be incorrect */
+    if (!BPSW_psp(q)) den = q; /* nf_get_disc(nf) may be incorrect */
   }
   return den;
 }

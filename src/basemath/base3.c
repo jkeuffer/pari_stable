@@ -24,7 +24,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*******************************************************************/
 /*                                                                 */
 /*                OPERATIONS OVER NUMBER FIELD ELEMENTS.           */
-/*  represented as column vectors over the integral basis nf[7]    */
+/*     represented as column vectors over the integral basis       */
 /*                                                                 */
 /*******************************************************************/
 static GEN

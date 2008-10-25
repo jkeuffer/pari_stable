@@ -1622,6 +1622,8 @@ INLINE GEN
 pr_norm(GEN pr) { return powiu(pr_get_p(pr), pr_get_f(pr)); }
 
 /* assume nf a genuine nf */
+INLINE long
+nf_get_varn(GEN nf) { return varn(gel(nf,1)); }
 INLINE GEN
 nf_get_pol(GEN nf) { return gel(nf,1); }
 INLINE long

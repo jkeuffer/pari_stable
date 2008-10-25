@@ -2591,7 +2591,8 @@ bnrstark(GEN bnr, GEN subgrp, long prec)
   if (N == 1) return galoissubcyclo(bnr, subgrp, 0, 0);
 
   /* check the bnf */
-  if (!varn(nf[1])) pari_err(talker, "main variable in bnrstark must not be x");
+  if (!nf_get_varn(nf))
+    pari_err(talker, "main variable in bnrstark must not be x");
   if (nf_get_r2(nf)) pari_err(talker, "base field not totally real in bnrstark");
   Mcyc = diagonal_shallow(gmael(bnr, 5, 2));
   subgrp = get_subgroup(subgrp,Mcyc,"bnrstark");

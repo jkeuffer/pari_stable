@@ -672,7 +672,7 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
   if (galois == 2)
   {
     GEN P = rnfeq? pol_up(rnfeq, relpol, vbas): relpol;
-    galois = nfissplit(gsubst(nfabs, varn(nf_get_pol(nfabs)), pol_x(vbas)), P);
+    galois = nfissplit(gsubst(nfabs, nf_get_varn(nfabs), pol_x(vbas)), P);
   }
 
   prod = gen_1; S1 = S2 = cgetg(1, t_VEC);

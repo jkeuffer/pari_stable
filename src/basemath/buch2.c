@@ -840,7 +840,6 @@ init_units(GEN BNF)
   {
     pari_sp av = avma;
     GEN nf = gel(bnf,7), A = gel(bnf,3);
-    if (lg(res)==6 && lg(res[5])==lg(nf[6])-1) return gcopy(gel(res,5));
     funits = gerepilecopy(av, getfu(nf, &A, nf_FORCE, &l, 0));
   } 
   else
@@ -1006,7 +1005,7 @@ SPLIT(FB_t *F, GEN nf, GEN x, GEN Vbase, FACT *fact)
   if (factorgen(F, nf, x, Nx, y, fact)) return y;
 
   /* reduce in various directions */
-  ru = lg(nf[6]);
+  ru = lg(nf_get_roots(nf));
   vecG = cgetg(ru, t_VEC);
   for (j=1; j<ru; j++)
   {
@@ -1195,22 +1194,24 @@ mylog(GEN x, long prec)
   if (gcmp0(x)) pari_err(precer,"get_arch");
   return glog(x,prec);
 }
+static GEN
+triv_arch(GEN nf) { return zerovec(lg(nf_get_roots(nf))-1); }
 
 /* Get archimedean components: [e_i Log( sigma_i(X) )], where X = primpart(x),
  * and e_i = 1 (resp 2.) for i <= R1 (resp. > R1) */
 static GEN
-get_arch(GEN nf,GEN x,long prec)
+get_arch(GEN nf, GEN x, long prec)
 {
-  long i, R1, RU;
+  long i, l, R1;
   GEN v;
   if (typ(x) == t_MAT) return famat_to_arch(nf,x,prec);
   x = nf_to_scalar_or_basis(nf,x);
-  RU = lg(nf[6]) - 1;
-  if (typ(x) != t_COL) return zerovec(RU);
+  if (typ(x) != t_COL) return triv_arch(nf);
   x = RgM_RgC_mul(nf_get_M(nf), Q_primpart(x));
-  v = cgetg(RU+1,t_VEC); R1 = nf_get_r1(nf);
+  l = lg(x);
+  v = cgetg(l,t_VEC); R1 = nf_get_r1(nf);
   for (i=1; i<=R1; i++) gel(v,i) = mylog(gel(x,i),prec);
-  for (   ; i<=RU; i++) gel(v,i) = gmul2n(mylog(gel(x,i),prec),1);
+  for (   ; i < l; i++) gel(v,i) = gmul2n(mylog(gel(x,i),prec),1);
   return v;
 }
 static GEN
@@ -1220,7 +1221,7 @@ famat_to_arch(GEN nf, GEN fa, long prec)
   long i,l;
 
   if (typ(fa) != t_MAT) return get_arch(nf, fa, prec);
-  if (lg(fa) == 1) return zerovec(lg(nf[6])-1);
+  if (lg(fa) == 1) return triv_arch(nf);
   g = gel(fa,1);
   e = gel(fa,2); l = lg(e);
   for (i=1; i<l; i++)
@@ -1232,7 +1233,7 @@ famat_to_arch(GEN nf, GEN fa, long prec)
     t = RgV_Rg_mul(t, gel(e,i));
     y = y? RgV_add(y,t): t;
   }
-  return y ? y: zerovec(lg(nf[6])-1);
+  return y ? y: triv_arch(nf);
 }
 
 static GEN
@@ -1257,26 +1258,21 @@ famat_get_arch_real(GEN nf,GEN x,GEN *emb,long prec)
 }
 
 static GEN
-scalar_get_arch_real(long R1, long RU, GEN u, GEN *emb, long prec)
+scalar_get_arch_real(GEN nf, GEN u, GEN *emb)
 {
-  GEN v, x, p1;
-  long i, s;
+  GEN v, logu;
+  long i, s = signe(u), RU = lg(nf_get_roots(nf))-1, R1 = nf_get_r1(nf);
 
-  s = gsigne(u);
   if (!s) pari_err(talker,"0 in get_arch_real");
-  x = cgetg(RU+1, t_COL);
-  for (i=1; i<=RU; i++) gel(x,i) = u;
-
   v = cgetg(RU+1, t_COL);
-  if (s < 0) u = gneg(u);
-  p1 = glog(u,prec);
-  for (i=1; i<=R1; i++) gel(v,i) = p1;
+  logu = logr_abs(u);
+  for (i=1; i<=R1; i++) gel(v,i) = logu;
   if (i <= RU)
   {
-    p1 = gmul2n(p1,1);
-    for (   ; i<=RU; i++) gel(v,i) = p1;
+    GEN logu2 = shiftr(logu,1);
+    for (   ; i<=RU; i++) gel(v,i) = logu2;
   }
-  *emb = x; return v;
+  *emb = const_col(RU, u); return v;
 }
 
 static int
@@ -1288,22 +1284,22 @@ low_prec(GEN x) { return gcmp0(x) || (typ(x) == t_REAL && lg(x) == 3); }
 GEN
 get_arch_real(GEN nf, GEN x, GEN *emb, long prec)
 {
-  long i, RU, R1;
+  long i, lx, R1;
   GEN v, t;
 
   if (typ(x) == t_MAT) return famat_get_arch_real(nf,x,emb,prec);
   x = nf_to_scalar_or_basis(nf,x);
-  RU = lg(nf[6])-1;
+  if (typ(x) != t_COL) return scalar_get_arch_real(nf, gtofp(x,prec), emb);
   R1 = nf_get_r1(nf);
-  if (typ(x) != t_COL) return scalar_get_arch_real(R1, RU, x, emb, prec);
   x = RgM_RgC_mul(nf_get_M(nf), x);
-  v = cgetg(RU+1,t_COL);
+  lx = lg(x);
+  v = cgetg(lx,t_COL);
   for (i=1; i<=R1; i++)
   {
     t = gabs(gel(x,i),prec); if (low_prec(t)) return NULL;
     gel(v,i) = glog(t,prec);
   }
-  for (   ; i<=RU; i++)
+  for (   ; i< lx; i++)
   {
     t = gnorm(gel(x,i)); if (low_prec(t)) return NULL;
     gel(v,i) = glog(t,prec);
@@ -2323,7 +2319,7 @@ static int
 be_honest(FB_t *F, GEN nf, FACT *fact)
 {
   GEN P, ideal, Nideal, m;
-  long ex, i, j, J, k, iz, nbtest, ru;
+  long ex, i, j, J, k, iz, nbtest;
   long nbG = lg(F->vecG)-1, lgsub = lg(F->subFB), KCZ0 = F->KCZ;
   pari_sp av;
 
@@ -2331,7 +2327,6 @@ be_honest(FB_t *F, GEN nf, FACT *fact)
     fprintferr("Be honest for %ld primes from %ld to %ld\n", F->KCZ2 - F->KCZ,
 	       F->FB[ F->KCZ+1 ], F->FB[ F->KCZ2 ]);
   }
-  ru = lg(nf[6]);
   av = avma;
   for (iz=F->KCZ+1; iz<=F->KCZ2; iz++, avma = av)
   {
@@ -2360,7 +2355,7 @@ be_honest(FB_t *F, GEN nf, FACT *fact)
 	  m = idealpseudomin_nonscalar(ideal, gel(F->vecG,k));
 	  if (factorgen(F,nf,ideal,Nideal, m,fact)) break;
 	}
-	avma = av2; if (k < ru) break;
+	avma = av2; if (k <= nbG) break;
 	if (++nbtest > 50)
 	{
 	  pari_warn(warner,"be_honest() failure on prime %Ps\n", P[j]);

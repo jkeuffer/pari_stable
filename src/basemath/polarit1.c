@@ -1730,7 +1730,7 @@ cmp_padic(GEN x, GEN y)
 /*   Using Buchmann--Lenstra   */
 /*******************************/
 
-/* factor T = nf[1] in Zp to precision k */
+/* factor T = nf_get_pol(nf) in Zp to precision k */
 static GEN
 padicff2(GEN nf,GEN p,long k)
 {

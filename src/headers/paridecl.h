@@ -2650,6 +2650,7 @@ INLINE long   nf_get_r2(GEN nf);
 INLINE GEN    nf_get_roots(GEN nf);
 INLINE GEN    nf_get_roundG(GEN nf);
 INLINE void   nf_get_sign(GEN nf, long *r1, long *r2);
+INLINE long   nf_get_varn(GEN nf);
 INLINE GEN    nf_get_zk(GEN nf);
 INLINE long   pr_get_e(GEN pr);
 INLINE long   pr_get_f(GEN pr);

@@ -1408,7 +1408,7 @@ idealinv(GEN nf, GEN x)
 	  case t_POLMOD: x = gel(x,2); break;
 	}
 	if (typ(x) != t_POL) { x = ginv(x); break; }
-	if (varn(x) != varn(nf[1]))
+	if (varn(x) != nf_get_varn(nf))
 	  pari_err(talker,"incompatible variables in idealinv");
 	x = QXQ_inv(x,nf_get_pol(nf));
       }

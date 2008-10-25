@@ -542,7 +542,7 @@ compocyclo(GEN nf, long m, long d)
   /* nf = K = Q(a), L = K(b) quadratic extension = Q(t) */
   polLK = quadpoly(stoi(ell)); /* relative polynomial */
   res = rnfequation2(nf, polLK);
-  vx = varn(nf[1]);
+  vx = nf_get_varn(nf);
   polL = gsubst(gel(res,1),0,pol_x(vx)); /* = charpoly(t) */
   a = gsubst(lift(gel(res,2)), 0,pol_x(vx));
   b = gsub(pol_x(vx), gmul(gel(res,3), a));
