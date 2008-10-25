@@ -358,18 +358,15 @@ Z_mod2BIL_ZX(GEN x, long bs, long d, long v)
   for (i=0, offset=0; i <= d; i++, offset += bs)
   {
     pari_sp av = avma;
-    long j, lz = minss(bs, lm-offset);
-    GEN z = cgetipos(2+lz);
-    for (j=0; j<lz; j++) *int_W(z,j) = *int_W(x,j+offset);
-    z = int_normalize(z,0);
-    if (carry) z = addis(z,1);
-    if (lgefint(z) == 3+bs) { carry = 1; avma = av; z = gen_0;}
+    long lz = minss(bs, lm-offset);
+    GEN z = adduispec_offset(carry, x, offset, lz);
+    if (lgefint(z) == 3+bs) { carry = 1; z = gen_0;}
     else
     {
       carry = (lgefint(z) == 2+bs && (HIGHBIT & *int_W(z,bs-1)));
-      if (carry) z = (sx==-1)? subii(s1,z): subii(z,s1);
+      if (carry) 
+        z = gerepileuptoint(av, (sx==-1)? subii(s1,z): subii(z,s1));
       else if (sx==-1) togglesign(z);
-      z = gerepileuptoint(av, z);
     }
     gel(pol,i+2) = z;
   }

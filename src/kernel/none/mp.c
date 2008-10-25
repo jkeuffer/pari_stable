@@ -148,6 +148,15 @@ adduispec(ulong s, GEN x, long nx)
   avma=(pari_sp)zd; return zd;
 }
 
+GEN
+adduispec_offset(ulong s, GEN x, long offset, long nx)
+{
+  GEN xd = x+lgefint(x)-nx-offset;
+  while (nx && *xd==0) {xd++; nx--;}
+  if (!nx) return utoi(s);
+  return adduispec(s,xd,nx);
+}
+
 static GEN
 addiispec(GEN x, GEN y, long nx, long ny)
 {

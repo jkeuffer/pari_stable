@@ -202,6 +202,15 @@ adduispec(ulong s, GEN x, long nx)
   return zd;
 }
 
+GEN
+adduispec_offset(ulong s, GEN x, long offset, long nx)
+{
+  GEN xd=x+2+offset;
+  while (nx && *(xd+nx-1)==0) nx--;
+  if (!nx) return utoi(s);
+  return adduispec(s,xd,nx);
+}
+
 INLINE GEN
 addiispec(GEN x, GEN y, long nx, long ny)
 {
