@@ -356,6 +356,7 @@ PMo90- algorithm for nfrootsof1 now defaults to nffactor: generically a little
    91- added a new component nf_get_roundG to the nf structure [ to speed up
        ideal reductions ]
 BA 92- make test-xxx: trap SIGINT in benching script to exit on <C-C>
+   93- removed optional flag to rnfconductor, use rnfisabelian.
 
   Added
     1- many new benches (make test-all)
@@ -503,6 +504,7 @@ BA 32- extra debugging data in t_CLOSURE and debugging facility.
 BA 33- compile-time copy optimizer
 BA 34- elliptic discrete logarithm function elllog()
 BA 35- direct implementation of ZX_mul, ZX_sqr using Kronecker's trick + mulii
+   36- rnfisabelian GP function
 
   Removed
     1- obsolete GP functions printp, printp1. Either replace them by

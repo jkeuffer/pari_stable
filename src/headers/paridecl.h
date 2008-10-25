@@ -1188,6 +1188,7 @@ GEN     idealmoddivisor(GEN bnr, GEN x);
 GEN     isprincipalray(GEN bnf, GEN x);
 GEN     isprincipalraygen(GEN bnf, GEN x);
 GEN     rnfconductor(GEN bnf, GEN polrel, long flag);
+long    rnfisabelian(GEN nf, GEN pol);
 GEN     rnfnormgroup(GEN bnr, GEN polrel);
 GEN     subgrouplist0(GEN bnr, GEN indexbound, long all);
 

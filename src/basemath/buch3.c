@@ -1481,8 +1481,8 @@ nf_deg1_prime(GEN nf)
   return primedec_apply_kummer(nf, z, 1, p);
 }
 
-static int
-rnf_is_abelian(GEN nf, GEN pol)
+long
+rnfisabelian(GEN nf, GEN pol)
 {
   GEN modpr, pr, T, pp, ro, nfL, C, z, a, sig, eq = rnfequation2(nf,pol);
   long i, j, l, v = nf_get_varn(nf);
@@ -1532,7 +1532,8 @@ rnfconductor(GEN bnf, GEN polrel, long flag)
   if (typ(polrel) != t_POL) pari_err(typeer,"rnfconductor");
   den = Q_denom( RgX_to_nfX(nf, polrel) );
   if (!is_pm1(den)) polrel = RgX_rescale(polrel, den);
-  if (flag && !rnf_is_abelian(nf, polrel)) { avma = av; return gen_0; }
+  if (flag)
+    pari_warn(warner,"Deprecatd 'flag' argument in rnfconductor. Use rnfisabelian");
 
   (void)rnfallbase(nf,&polrel, &D, NULL, NULL);
   module = mkvec2(D, const_vec(nf_get_r1(nf), gen_1));
