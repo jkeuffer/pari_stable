@@ -309,3 +309,106 @@ ZX_rescale(GEN P, GEN h)
   Q[1] = P[1]; return Q;
 }
 
+/*Eval x in 2^(k*BIL) in linear time*/
+static GEN
+ZX_eval2BIL(GEN x, long k)
+{
+  long i,j, l = lgpol(x), lz = k*l;
+  GEN pz = cgetipos(2+lz);
+  GEN nz = cgetipos(2+lz);
+  for(i=0; i < lz; i++)
+  {
+    *int_W(pz,i) = 0UL;
+    *int_W(nz,i) = 0UL;
+  }
+  for(i=0; i<l; i++)
+  {
+    GEN c = gel(x,2+i);
+    long lc = lgefint(c)-2;
+    if (signe(c)==0) continue;
+    if (signe(c) > 0)
+      for (j=0; j<lc; j++) *int_W(pz,j+k*i) = *int_W(c,j);
+    else
+      for (j=0; j<lc; j++) *int_W(nz,j+k*i) = *int_W(c,j);
+  }
+  pz = int_normalize(pz,0);
+  nz = int_normalize(nz,0); return subii(pz,nz);
+}
+
+static long
+ZX_expi(GEN x)
+{
+  long i, m = 0;
+  for(i = 2; i < lg(x); i++)
+  {
+    long e = expi(gel(x,i));
+    if (e > m) m = e;
+  }
+  return m;
+}
+
+static GEN
+Z_mod2BIL_ZX(GEN x, long bs, long d, long v)
+{
+  long i, offset, lm = lgefint(x)-2, l = d+3, sx = signe(x);
+  GEN s1 = int2n(bs*BITS_IN_LONG), pol = cgetg(l, t_POL);
+  int carry = 0;
+
+  pol[1] = evalsigne(1)|evalvarn(v);
+  for (i=0, offset=0; i <= d; i++, offset += bs)
+  {
+    pari_sp av = avma;
+    long j, lz = minss(bs, lm-offset);
+    GEN z = cgetipos(2+lz);
+    for (j=0; j<lz; j++) *int_W(z,j) = *int_W(x,j+offset);
+    z = int_normalize(z,0);
+    if (carry) z = addis(z,1);
+    if (lgefint(z) == 3+bs) { carry = 1; avma = av; z = gen_0;}
+    else
+    {
+      carry = (lgefint(z) == 2+bs && (HIGHBIT & *int_W(z,bs-1)));
+      if (carry) z = (sx==-1)? subii(s1,z): subii(z,s1);
+      else if (sx==-1) togglesign(z);
+      z = gerepileuptoint(av, z);
+    }
+    gel(pol,i+2) = z;
+  }
+  return ZX_renormalize(pol,l);
+}
+
+static GEN
+ZX_sqr_sqri(GEN x)
+{
+  pari_sp av = avma;
+  long e = 2*ZX_expi(x) + expu(degpol(x)) + 3;
+  long N = divsBIL(e)+1;
+  GEN  z = sqri(ZX_eval2BIL(x,N));
+  return gerepileupto(av, Z_mod2BIL_ZX(z, N, degpol(x)*2, varn(x)));
+}
+
+static GEN
+ZX_mul_mulii(GEN x,GEN y)
+{
+  pari_sp av = avma;
+  long e = ZX_expi(x) + ZX_expi(y) + expu(degpol(x)) + 3;
+  long N = divsBIL(e)+1;
+  GEN  z = mulii(ZX_eval2BIL(x,N), ZX_eval2BIL(y,N));
+  return gerepileupto(av, Z_mod2BIL_ZX(z, N, degpol(x)+degpol(y), varn(x)));
+}
+
+GEN
+ZX_sqr(GEN x)
+{
+  long dx = degpol(x);
+  if (dx<=0) return dx < 0? ZX_copy(x): ZX_Z_mul(x, gel(x,2));
+  return ZX_sqr_sqri(x);
+}
+
+GEN
+ZX_mul(GEN x, GEN y)
+{
+  long dx, dy;
+  dx = degpol(x); if (dx<=0) return dx < 0? ZX_copy(x): ZX_Z_mul(y, gel(x,2));
+  dy = degpol(y); if (dy<=0) return dy < 0? ZX_copy(y): ZX_Z_mul(x, gel(y,2));
+  return ZX_mul_mulii(x,y);
+}

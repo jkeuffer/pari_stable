@@ -502,6 +502,7 @@ BA 31- F2v/F2m functions family and F2m_ker for linear algebra over GF(2)
 BA 32- extra debugging data in t_CLOSURE and debugging facility.
 BA 33- compile-time copy optimizer
 BA 34- elliptic discrete logarithm function elllog()
+BA 35- direct implementation of ZX_mul, ZX_sqr using Kronecker's trick + mulii
 
   Removed
     1- obsolete GP functions printp, printp1. Either replace them by

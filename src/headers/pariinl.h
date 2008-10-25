@@ -1366,10 +1366,6 @@ INLINE GEN
 F2x_renormalize(GEN x, long lx)   { return Flx_renormalize(x,lx); }
 
 INLINE GEN
-ZX_mul(GEN x, GEN y) { return RgX_mul(x, y); }
-INLINE GEN
-ZX_sqr(GEN x) { return RgX_sqr(x); }
-INLINE GEN
 ZX_ZXY_resultant(GEN a, GEN b) { return ZX_ZXY_rnfequation(a,b,NULL); }
 INLINE long
 sturm(GEN x) { return sturmpart(x, NULL, NULL); }
