@@ -1186,7 +1186,7 @@ confusing concepts. Skip to the last subsection for practical advice, if the
 next discussion does not make sense to you. After learning about user
 functions, study the example in \secref{se:bewarescope} then come back.
 
-\subsec{Definitions}.
+\misctitle{Definitions}. % rather not make it a section to allow for ??my
 
 A \emph{scope} is an enclosing context where names and values are associated.
 A user's function body, the body of a loop, an individual command line, all
@@ -1666,9 +1666,9 @@ the process available stack space (increase \tet{stacksize}).
 %4 = 9
 @eprog
 \noindent If we do not need \kbd{g} elsewhere, we should use an anonymous
-function here, \kbd{calc(x->x\^2, 3)}. Here is a variation:
+function here, \kbd{calc(x->x\pow 2, 3)}. Here is a variation:
 \bprog
-? funs = [cos, sin, tan, x->x\^3+1]; \\@com an array of functions
+? funs = [cos, sin, tan, x->x^3+1]; \\@com an array of functions
 ? call(i, x) = funs[i](x)
 @eprog\noindent
 evaluates the appropriate function on argument \kbd{x},

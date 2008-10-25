@@ -65,7 +65,8 @@ COL             @Row and column vectors@2
 MAT             @Matrices@2
 LIST            @Lists@2
 STR             @Strings@2
-local           @User defined functions@2
+local           @Variables and Scope@2
+my              @Variables and Scope@2
 user defined    @User defined functions@2
 user defined function @User defined functions@2
 member function @Member functions@2
