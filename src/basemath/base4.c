@@ -355,7 +355,7 @@ mat_ideal_two_elt(GEN nf, GEN x)
   y = cgetg(3,t_VEC); av = avma;
   x = Q_primitive_part(x, &cx);
   xZ = gcoeff(x,1,1);
-  if (gcmp1(xZ))
+  if (is_pm1(xZ))
   {
     gel(y,1) = cx? gerepilecopy(av,cx): gen_1;
     gel(y,2) = scalarcol_shallow(gen_0, N); return y;
@@ -364,10 +364,10 @@ mat_ideal_two_elt(GEN nf, GEN x)
     a = get_random_a(nf, x, xZ);
   else
   {
-    long FB[] = { _evallg(15+1) | evaltyp(t_VECSMALL), 
+    const long FB[] = { _evallg(15+1) | evaltyp(t_VECSMALL), 
       2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47
     };
-    GEN P, E, a1 = Z_smoothen(xZ, FB, &P, &E);
+    GEN P, E, a1 = Z_smoothen(xZ, (GEN)FB, &P, &E);
     if (!a1) /* factors completely */
       a = idealapprfact_i(nf, idealfactor(nf,x), 1);
     else if (lg(P) == 1) /* no small factors */
@@ -392,8 +392,16 @@ mat_ideal_two_elt(GEN nf, GEN x)
   {
     a = centermod(a, xZ);
     tetpil = avma;
-    gel(y,1) = gmul(xZ, cx);
-    gel(y,2) = RgC_Rg_mul(a, cx);
+    if (typ(cx) == t_INT)
+    {
+      gel(y,1) = mulii(xZ, cx);
+      gel(y,2) = ZC_Z_mul(a, cx);
+    }
+    else
+    {
+      gel(y,1) = gmul(xZ, cx);
+      gel(y,2) = RgC_Rg_mul(a, cx);
+    }
   }
   else
   {
