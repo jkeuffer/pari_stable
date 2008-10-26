@@ -735,6 +735,7 @@ GEN     znstar(GEN x);
 long    Z_issquarefree(GEN x);
 GEN     Z_factor_limit(GEN n, long all);
 GEN     Z_factor_until(GEN n, GEN limit);
+GEN     Z_smoothen(GEN N, GEN L, GEN *pP, GEN *pe);
 long    bigomega(GEN n);
 GEN     boundfact(GEN n, long lim);
 GEN     core(GEN n);

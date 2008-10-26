@@ -371,6 +371,7 @@ BA 92- make test-xxx: trap SIGINT in benching script to exit on <C-C>
        roundr_safe, trunc_safe
        shallowextract, shallowconcat1, concat1,
        BPSW_psp & BPSW_isprime
+       Z_smoothen
        Z_isanypower, chinese_coprime_Z, Z_chinese, Z_chinese_all,
        Z_chinese_coprime, Z_chinese_post, Z_chinese_pre, Z_incremental_CRT,
        Z_init_CRT, ZM_incremental_CRT, ZM_init_CRT, ZX_incremental_CRT,

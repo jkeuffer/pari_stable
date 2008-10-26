@@ -758,6 +758,22 @@ boundfact(GEN n, long lim)
   pari_err(arither1);
   return NULL; /* not reached */
 }
+
+/* NOT memory clean */
+GEN
+Z_smoothen(GEN N, GEN L, GEN *pP, GEN *pe)
+{
+  long i, j, l = lg(L);
+  GEN e = new_chunk(l), P = new_chunk(l);
+  for (i = j = 1; i < l; i++)
+  {
+    ulong p = (ulong)L[i];
+    long v = Z_lvalrem(N, p, &N);
+    if (v) { P[j] = p; e[j] = v; j++; if (is_pm1(N)) { N = NULL; break; } }
+  }
+  P[0] = evaltyp(t_VECSMALL) | evallg(j); *pP = P;
+  e[0] = evaltyp(t_VECSMALL) | evallg(j); *pe = e; return N;
+}
 /***********************************************************************/
 /**                                                                   **/
 /**                    SIMPLE FACTORISATIONS                          **/

@@ -353,28 +353,26 @@ mat_ideal_two_elt(GEN nf, GEN x)
   if (N == 2) return mkvec2copy(gcoeff(x,1,1), gel(x,2));
 
   y = cgetg(3,t_VEC); av = avma;
-  x = Q_primitive_part(x, &cx); if (!cx) cx = gen_1;
+  x = Q_primitive_part(x, &cx);
   xZ = gcoeff(x,1,1);
   if (gcmp1(xZ))
   {
-    cx = gerepilecopy(av,cx);
-    gel(y,1) = cx;
+    gel(y,1) = cx? gerepilecopy(av,cx): gen_1;
     gel(y,2) = scalarcol_shallow(gen_0, N); return y;
   }
   if (N < 6)
     a = get_random_a(nf, x, xZ);
   else
   {
-    const long lim = 47;
-    GEN a1, fa = Z_factor_limit(xZ, lim), P = gel(fa,1), E = gel(fa,2);
-    long l = lg(P)-1;
-
-    a1 = powii(gel(P, l), gel(E, l));
-    if (cmpis(a1, lim) <= 0)
+    long FB[] = { _evallg(15+1) | evaltyp(t_VECSMALL), 
+      2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47
+    };
+    GEN P, E, a1 = Z_smoothen(xZ, FB, &P, &E);
+    if (!a1) /* factors completely */
       a = idealapprfact_i(nf, idealfactor(nf,x), 1);
-    else if (equalii(xZ, a1))
+    else if (lg(P) == 1) /* no small factors */
       a = get_random_a(nf, x, xZ);
-    else
+    else /* general case */
     {
       GEN A0, A1, a0, u0, u1, v0, v1, pi0, pi1, t, u;
       a0 = diviiexact(xZ, a1);
@@ -390,10 +388,19 @@ mat_ideal_two_elt(GEN nf, GEN x)
       a = nfmuli(nf, centermod(u, xZ), centermod(t, xZ));
     }
   }
-  a = centermod(a, xZ);
-  tetpil = avma;
-  gel(y,1) = gmul(xZ, cx);
-  gel(y,2) = RgC_Rg_mul(a, cx);
+  if (cx)
+  {
+    a = centermod(a, xZ);
+    tetpil = avma;
+    gel(y,1) = gmul(xZ, cx);
+    gel(y,2) = RgC_Rg_mul(a, cx);
+  }
+  else
+  {
+    tetpil = avma;
+    gel(y,1) = icopy(xZ);
+    gel(y,2) = centermod(a, xZ);
+  }
   gerepilecoeffssp(av,tetpil,y+1,2); return y;
 }
 

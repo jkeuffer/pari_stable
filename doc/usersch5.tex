@@ -2496,7 +2496,7 @@ factorization process as soon as the unfactored part is smaller than \kbd{lim}.
 The resulting factorisation matrix only contains the factors found. No other
 assumptions can be made on the remaining factors.
 
-\fun{GEN}{Z_factor_limit}{GEN n, long lim} trial divide $x$ by all primes $p
+\fun{GEN}{Z_factor_limit}{GEN n, long lim} trial divide $n$ by all primes $p
 < \kbd{lim}$ in the precomputed list of prime numbers and return the
 corresponding factorization matrix. In this case, the last ``prime'' divisor
 in the first column of the factorization matrix may well be a proven
@@ -2507,6 +2507,13 @@ If \kbd{lim} is $\leq 1$, the effect is the same as setting $\kbd{lim} =
 
 \fun{GEN}{boundfact}{GEN x, long lim} as \tet{Z_factor_limit}, applying to
 \typ{INT} or \typ{FRAC} inputs.
+
+\fun{GEN}{Z_smoothen}{GEN n, GEN L, GEN *pP, GEN *pE} given a \typ{VECSMALL}
+$L$ containing a list of small primes and a \typ{INT} $n$, trial divide
+$n$ by the elements of $L$ and return the cofactor. Return \kbd{NULL} if the
+cofactor is $\pm 1$. \kbd{*P} and \kbd{*E} contain the list of prime divisors
+found and their exponents, as \typ{VECSMALL}s. Neither memory-clean, nor
+suitable for \tet{gerepileupto}.
 
 \fun{GEN}{core}{GEN n} unique squarefree integer $d$ dividing $n$ such that
 $n/d$ is a square.
