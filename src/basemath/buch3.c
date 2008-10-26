@@ -170,7 +170,7 @@ idealmoddivisor_aux(GEN nf, GEN x, GEN divisor, GEN sarch)
 GEN
 idealmoddivisor(GEN bnr, GEN x)
 {
-  GEN bid = gel(bnr,2), fa2 = gel(bid,4);
+  GEN bid = bnr_get_bid(bnr), fa2 = gel(bid,4);
   GEN divisor = gel(bid,1);
   GEN sarch = gel(fa2,lg(fa2)-1);
   return idealmoddivisor_aux(checknf(bnr), x, divisor, sarch);
@@ -348,7 +348,7 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
 static GEN
 get_dataunit(GEN bnf, GEN bid)
 {
-  GEN D, cyc = gmael(bid,2,2), U = init_units(bnf), nf = gel(bnf,7);
+  GEN D, cyc = gmael(bid,2,2), U = init_units(bnf), nf = bnf_get_nf(bnf);
   long i, l;
   zlog_S S; init_zlog_bid(&S, bid);
   D = nfsign_units(bnf, S.archp, 1); l = lg(D);
@@ -370,7 +370,7 @@ Buchray(GEN bnf, GEN module, long flag)
   const long do_init = flag & nf_INIT;
   pari_sp av = avma;
 
-  bnf = checkbnf(bnf); nf = gel(bnf,7);
+  bnf = checkbnf(bnf); nf = bnf_get_nf(bnf);
   funits = check_units(bnf, "Buchray"); RU = lg(funits);
   El = Gen = NULL; /* gcc -Wall */
   bigres = gel(bnf,8);
@@ -486,7 +486,7 @@ bnrclassno(GEN bnf,GEN ideal)
   GEN nf, h, D, bigres, bid, cycbid;
   pari_sp av = avma;
 
-  bnf = checkbnf(bnf); nf = gel(bnf,7);
+  bnf = checkbnf(bnf); nf = bnf_get_nf(bnf);
   bigres = gel(bnf,8); h = gmael(bigres,1,1); /* class number */
   bid = Idealstar(nf,ideal,nf_INIT);
   cycbid = gmael(bid,2,2);
@@ -508,8 +508,8 @@ bnrisprincipal(GEN bnr, GEN x, long flag)
   ex = cgetg(c,t_COL);
   if (c == 1 && !(flag & nf_GEN)) return ex;
 
-  bnf = gel(bnr,1); nf = gel(bnf,7);
-  bid = gel(bnr,2);
+  bnf = bnr_get_bnf(bnr); nf = bnf_get_nf(bnf);
+  bid = bnr_get_bid(bnr);
   El  = gel(bnr,3);
   U   = gel(bnr,4);
 
@@ -688,7 +688,7 @@ regulatorbound(GEN bnf)
   long N, R1, R2, R;
   GEN nf, dK, p1, c1;
 
-  nf = gel(bnf,7); N = nf_get_degree(nf);
+  nf = bnf_get_nf(bnf); N = nf_get_degree(nf);
   if (!isprimitive(nf)) return dft_bound();
 
   dK = absi(nf_get_disc(nf));
@@ -962,7 +962,7 @@ lowerboundforregulator_i(GEN bnf)
   GEN vecminim,p1,pol,y;
   GEN units = check_units(bnf,"bnfcertify");
 
-  nf = gel(bnf,7); N = nf_get_degree(nf);
+  nf = bnf_get_nf(bnf); N = nf_get_degree(nf);
   nf_get_sign(nf, &R1, &R2); RU = R1+R2-1;
   if (!RU) return gen_1;
 
@@ -1022,7 +1022,7 @@ primecertify(GEN bnf, GEN beta, ulong p, GEN bad)
   ulong q;
 
   ord = NULL; /* gcc -Wall */
-  nbcol = 0; nf = gel(bnf,7);
+  nbcol = 0; nf = bnf_get_nf(bnf);
   lb = lg(beta)-1; mat = cgetg(1,t_MAT); q = 1UL;
   for(;;)
   {
@@ -1102,7 +1102,7 @@ certifybuchall(GEN bnf)
   byteptr delta = diffptr;
   ulong bound, p;
 
-  bnf = checkbnf(bnf); nf = gel(bnf,7);
+  bnf = checkbnf(bnf); nf = bnf_get_nf(bnf);
   N=nf_get_degree(nf); if (N==1) return 1;
   nf_get_sign(nf, &R1, &R2);
   funits = check_units(bnf,"bnfcertify");
@@ -1292,10 +1292,10 @@ bnrconductor(GEN bnr, GEN H0, long flag)
   zlog_S S;
 
   if (flag) checkbnrgen(bnr); else checkbnr(bnr);
-  bnf = gel(bnr,1);
-  bid = gel(bnr,2); init_zlog_bid(&S, bid);
+  bnf = bnr_get_bnf(bnr);
+  bid = bnr_get_bid(bnr); init_zlog_bid(&S, bid);
   clhray = gmael(bnr,5,1);
-  nf = gel(bnf,7);
+  nf = bnf_get_nf(bnf);
   H = check_subgroup(bnr, H0, &clhray, 1, "conductor");
 
   archp = S.archp;
@@ -1348,10 +1348,10 @@ bnrisconductor(GEN bnr, GEN H0)
   zlog_S S;
 
   checkbnr(bnr);
-  bnf = gel(bnr,1);
-  bid = gel(bnr,2); init_zlog_bid(&S, bid);
+  bnf = bnr_get_bnf(bnr);
+  bid = bnr_get_bid(bnr); init_zlog_bid(&S, bid);
   clhray = gmael(bnr,5,1);
-  nf = gel(bnf,7);
+  nf = bnf_get_nf(bnf);
   H = check_subgroup(bnr, H0, &clhray, 1, "conductor");
 
   archp = S.archp;
@@ -1380,8 +1380,8 @@ rnfnormgroup(GEN bnr, GEN polrel)
   byteptr d = diffptr;
   ulong p;
 
-  checkbnr(bnr); bnf=gel(bnr,1); raycl=gel(bnr,5);
-  nf=gel(bnf,7); cnd=gmael3(bnr,2,1,1);
+  checkbnr(bnr); bnf = bnr_get_bnf(bnr); raycl=gel(bnr,5);
+  nf = bnf_get_nf(bnf); cnd = gel(bnr_get_mod(bnr), 1);
   polrel = rnf_fix_pol(nf_get_pol(nf),polrel,1);
   if (!gcmp1(leading_term(polrel)))
     pari_err(impl,"rnfnormgroup for non-monic polynomials");
@@ -1528,7 +1528,7 @@ rnfconductor(GEN bnf, GEN polrel, long flag)
   pari_sp av = avma;
   GEN nf, module, bnr, group, den, D;
 
-  bnf = checkbnf(bnf); nf = gel(bnf,7);
+  bnf = checkbnf(bnf); nf = bnf_get_nf(bnf);
   if (typ(polrel) != t_POL) pari_err(typeer,"rnfconductor");
   den = Q_denom( RgX_to_nfX(nf, polrel) );
   if (!is_pm1(den)) polrel = RgX_rescale(polrel, den);
@@ -1557,10 +1557,10 @@ Discrayrel(GEN bnr, GEN H0, long flag)
   zlog_S S;
 
   checkbnr(bnr);
-  bnf = gel(bnr,1);
-  bid = gel(bnr,2); init_zlog_bid(&S, bid);
+  bnf = bnr_get_bnf(bnr);
+  bid = bnr_get_bid(bnr); init_zlog_bid(&S, bid);
   clhray = gmael(bnr,5,1);
-  nf = gel(bnf,7);
+  nf = bnf_get_nf(bnf);
   ideal= gmael(bid,1,1);
   H0 = H = check_subgroup(bnr, H0, &clhray, 0, "bnrdiscray");
   archp = S.archp;
@@ -1885,7 +1885,7 @@ discrayabslist(GEN bnf, GEN L)
   chk_listBU(L, "discrayabslist");
   if (l == 1) return cgetg(1, t_VEC);
   ID.bnf = bnf = checkbnf(bnf);
-  nf = gel(bnf,7);
+  nf = bnf_get_nf(bnf);
   h = gmael3(bnf,8,1,1);
   ID.degk = nf_get_degree(nf);
   ID.fadk = Z_factor(absi(nf_get_disc(nf)));
@@ -2081,7 +2081,7 @@ discrayabslistarch(GEN bnf, GEN arch, long bound)
   res = discall = NULL; /* -Wall */
 
   bnf = checkbnf(bnf);
-  nf = gel(bnf,7); r1 = nf_get_r1(nf);
+  nf = bnf_get_nf(bnf); r1 = nf_get_r1(nf);
   degk = nf_get_degree(nf);
   fadkabs = Z_factor(absi(nf_get_disc(nf)));
   h = gmael3(bnf,8,1,1);
@@ -2285,11 +2285,11 @@ subgroup_conductor_ok(GEN H, GEN L)
 static GEN
 conductor_elts(GEN bnr)
 {
-  GEN e, L, nf = gmael(bnr,1,7);
+  GEN e, L, nf = bnf_get_nf( bnr_get_bnf(bnr) );
   long le, la, i, k;
   zlog_S S;
 
-  init_zlog_bid(&S, gel(bnr,2));
+  init_zlog_bid(&S, bnr_get_bid(bnr));
   e = S.e; le = lg(e); la = lg(S.archp);
   L = cgetg(le + la - 1, t_VEC);
   i = 1;

@@ -161,7 +161,7 @@ initzeta(GEN pol, long prec)
   Pi = mppi(prec); racpi = sqrtr(Pi);
 
   /* class number & regulator */
-  nf = gel(bnf,7); N = nf_get_degree(nf);
+  nf = bnf_get_nf(bnf); N = nf_get_degree(nf);
   nf_get_sign(nf, &r1, &r2);
   gr2 = gmael(nf,2,2);
   r = r1 + r2; R = r+2;

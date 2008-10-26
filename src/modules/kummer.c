@@ -644,11 +644,11 @@ rnfkummersimple(GEN bnr, GEN subgroup, GEN gell, long all)
   GEN res=NULL,u,M,K,y,vecMsup,vecW,vecWB,vecBp,msign;
   primlist L;
 
-  bnf = gel(bnr,1);
-  nf  = gel(bnf,7);
+  bnf = bnr_get_bnf(bnr);
+  nf  = bnf_get_nf(bnf);
   degK = nf_get_degree(nf);
 
-  bid = gel(bnr,2);
+  bid = bnr_get_bid(bnr);
   ideal= gmael(bid,1,1);
   arch = gmael(bid,1,2); /* this is the conductor */
   ell = itos(gell);
@@ -1075,8 +1075,8 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
 
   if (DEBUGLEVEL) TIMERstart(&t);
   checkbnrgen(bnr);
-  bnf = gel(bnr,1);
-  nf  = gel(bnf,7);
+  bnf = bnr_get_bnf(bnr);
+  nf  = bnf_get_nf(bnf);
   polnf = nf_get_pol(nf); vnf = varn(polnf);
   if (!vnf) pari_err(talker,"main variable in kummer must not be x");
   wk = gmael3(bnf,8,4,1);
@@ -1092,7 +1092,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   if (!umodiu(wk,ell)) return rnfkummersimple(bnr, subgroup, gell, all);
 
   if (all == -1) all = 0;
-  bid = gel(bnr,2);
+  bid = bnr_get_bid(bnr);
   ideal = gmael(bid,1,1);
   /* step 1 of alg 5.3.5. */
   if (DEBUGLEVEL>2) fprintferr("Step 1\n");

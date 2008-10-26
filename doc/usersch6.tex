@@ -171,6 +171,22 @@ the above Trace matrix.
 These functions expect a true \var{bnf} argument, e.g.~a \var{bnr} will not
 work.
 
+\fun{GEN}{bnf_get_nf}{GEN bnf} returns the underlying \var{nf}.
+
+\subsec{Extracting info from a \kbd{bnf} structure}
+
+These functions expect a true \var{bnr} argument.
+
+\fun{GEN}{bnr_get_bnf}{GEN bnr} returns the underlying \var{bnf}.
+
+\fun{GEN}{bnr_get_nf}{GEN bnr} returns the underlying \var{nf}.
+
+\fun{GEN}{bnr_get_bid}{GEN bnr} returns the \var{bid} associated
+to the \var{bnr} modulus.
+
+\fun{GEN}{bnr_get_mod}{GEN bnr} returns the modulus associated
+to the \var{bnr}.
+
 \subsec{Extracting info from an \kbd{rnf} structure}
 
 These functions expect a true \var{rnf} argument.

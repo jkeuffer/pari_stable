@@ -30,27 +30,27 @@ checkrnf(GEN rnf)
 }
 
 GEN
-checkbnf_i(GEN bnf)
+checkbnf_i(GEN X)
 {
-  if (typ(bnf) == t_VEC)
-    switch (lg(bnf))
+  if (typ(X) == t_VEC)
+    switch (lg(X))
     {
-      case 11: return bnf;
-      case 7:  return checkbnf_i(gel(bnf,1));
+      case 11: return X;
+      case 7:  return checkbnf_i(bnr_get_bnf(X));
     }
   return NULL;
 }
 
 GEN
-checknf_i(GEN nf)
+checknf_i(GEN X)
 {
-  if (typ(nf)==t_VEC)
-    switch(lg(nf))
+  if (typ(X)==t_VEC)
+    switch(lg(X))
     {
-      case 10: return nf;
-      case 11: return checknf_i(gel(nf,7));
-      case 7:  return checknf_i(gel(nf,1));
-      case 3: if (typ(nf[2]) == t_POLMOD) return checknf_i(gel(nf,1));
+      case 10: return X;
+      case 11: return checknf_i(bnf_get_nf(X));
+      case 7:  return checknf_i(bnr_get_bnf(X));
+      case 3: if (typ(gel(X,2)) == t_POLMOD) return checknf_i(gel(X,1));
     }
   return NULL;
 }
@@ -84,7 +84,7 @@ checkbnr(GEN bnr)
 {
   if (typ(bnr)!=t_VEC || lg(bnr)!=7)
     pari_err(talker,"incorrect bigray field");
-  (void)checkbnf(gel(bnr,1));
+  (void)checkbnf(bnr_get_bnf(bnr));
 }
 
 void

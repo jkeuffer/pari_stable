@@ -66,7 +66,7 @@ suppressed(void) {pari_err(talker,"this function no longer exists");}
 
 #define CLASSUNIT(flag) \
   pari_sp av = avma; \
-  GEN bnf = B_CALL(flag), nf = gel(bnf,7), x; \
+  GEN bnf = B_CALL(flag), nf = bnf_get_nf(bnf), x; \
   x = mkvec4(gel(nf,1), gel(nf,2), mkvec2(gel(nf,3), gel(nf,4)), gel(nf,7));\
   return gerepilecopy(av, mkmat(shallowconcat(x, gel(bnf,8))));
 

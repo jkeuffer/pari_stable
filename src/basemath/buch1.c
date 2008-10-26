@@ -247,8 +247,8 @@ getallrootsof1(GEN bnf)
 static GEN
 get_lambda(GEN bnr)
 {
-  GEN bnf = gel(bnr,1), nf = gel(bnf,7), pol = nf_get_pol(nf), f = gmael3(bnr,2,1,1);
-  GEN labas, lamodf, u;
+  GEN bnf = bnr_get_bnf(bnr), nf = bnf_get_nf(bnf), pol = nf_get_pol(nf);
+  GEN f = gel(bnr_get_mod(bnr), 1), labas, lamodf, u;
   long a, b, f2, i, lu, v = varn(pol);
 
   f2 = 2 * itos(gcoeff(f,1,1));
@@ -440,9 +440,8 @@ computeP2(GEN bnr, long prec)
 {
   long clrayno, i, first = 1;
   pari_sp av=avma, av2;
-  GEN listray,P0,P,f,lanum, la = get_lambda(bnr), nf = checknf(bnr);
-
-  f = gmael3(bnr,2,1,1);
+  GEN listray, P0, P, lanum, la = get_lambda(bnr);
+  GEN nf = bnr_get_nf(bnr), f = gel(bnr_get_mod(bnr), 1);
   listray = getallelts(bnr);
   clrayno = lg(listray)-1; av2 = avma;
 PRECPB:
@@ -570,7 +569,8 @@ isZ(GEN I)
 static GEN
 treatspecialsigma(GEN bnr)
 {
-  GEN f = gmael3(bnr,2,1,1), nf = gmael(bnr,1,7), D = nf_get_disc(nf), p1, p2, tryf;
+  GEN f = gel(bnr_get_mod(bnr), 1), nf = bnr_get_nf(bnr), D = nf_get_disc(nf);
+  GEN p1, p2, tryf;
   long Ds, fl, i = isZ(f);
 
   if (i == 1) return quadhilbertimag(D); /* f = 1 */
@@ -632,7 +632,7 @@ quadray(GEN D, GEN f, long prec)
   else
   {
     GEN nf;
-    bnf = checkbnf(D); nf = gel(bnf,7);
+    bnf = checkbnf(D); nf = bnf_get_nf(bnf);
     if (nf_get_degree(nf) != 2)
       pari_err(talker,"not a polynomial of degree 2 in quadray");
     D = nf_get_disc(nf);

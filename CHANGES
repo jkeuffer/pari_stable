@@ -441,6 +441,7 @@ BA 92- make test-xxx: trap SIGINT in benching script to exit on <C-C>
        reducemodinvertible, closemodinvertible,
        init_primepointer,
        galoisinit0, get_nfpol, get_bnfpol, get_prid,
+       bnf_get_nf, bnr_get_bnf, bnr_get_bid, bnr_get_mod, bnr_get_nf
        nf_get_r1, nf_get_r2, nf_get_roots, nf_get_sign, nf_get_roots,
        nf_get_M, nf_get_G, nf_get_roundG,
        nf_get_Tr, nf_get_TrInv, nf_get_disc, nf_get_index, nf_get_pol, nf_get_zk

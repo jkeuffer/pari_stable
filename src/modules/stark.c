@@ -243,13 +243,13 @@ get_Char(GEN chi, GEN initc, GEN U, long prec)
 
 /* prime divisors of conductor */
 static GEN
-divcond(GEN bnr) { GEN bid = gel(bnr,2); return gmael(bid,3,1); }
+divcond(GEN bnr) { GEN bid = bnr_get_bid(bnr); return gmael(bid,3,1); }
 
 /* vector of prime ideals dividing bnr but not bnrc */
 static GEN
 get_prdiff(GEN bnr, GEN condc)
 {
-  GEN prdiff, M = gel(condc,1), D = divcond(bnr), nf = gmael(bnr, 1, 7);
+  GEN prdiff, M = gel(condc,1), D = divcond(bnr), nf = bnr_get_nf(bnr);
   long nd, i, l  = lg(D);
   prdiff = cgetg(l, t_COL);
   for (nd=1, i=1; i < l; i++)
@@ -266,8 +266,8 @@ GetPrimChar(GEN chi, GEN bnr, GEN bnrc, long prec)
   pari_sp av = avma;
   GEN U, M, cond, condc, initc, Mrc;
 
-  cond  = gmael(bnr,  2, 1);
-  condc = gmael(bnrc, 2, 1); if (gequal(cond, condc)) return NULL;
+  cond  = bnr_get_mod(bnr);
+  condc = bnr_get_mod(bnrc); if (gequal(cond, condc)) return NULL;
 
   initc = init_get_chic(gmael(bnr, 5, 2));
   Mrc   = diagonal_shallow(gmael(bnrc, 5, 2));
@@ -379,8 +379,8 @@ GetIndex(GEN pr, GEN bnr, GEN subgroup)
   GEN bnf, mod, mod0, bnrpr, subpr, M, dtQ, p1;
   GEN cycpr, cycQ;
 
-  bnf  = gel(bnr,1);
-  mod  = gmael(bnr, 2, 1);
+  bnf  = bnr_get_bnf(bnr);
+  mod  = bnr_get_mod(bnr);
   mod0 = gel(mod,1);
 
   v = idealval(bnf, mod0, pr);
@@ -464,10 +464,10 @@ FindModulus(GEN bnr, GEN dtQ, long *newprec, long prec)
   GEN candD, bpr, indpr, sgp, p2;
 
   sgp = gel(dtQ,4);
-  bnf = gel(bnr,1);
-  nf  = gel(bnf,7);
+  bnf = bnr_get_bnf(bnr);
+  nf  = bnf_get_nf(bnf);
   N   = nf_get_degree(nf);
-  f   = gmael3(bnr, 2, 1, 1);
+  f   = gel(bnr_get_mod(bnr), 1);
 
   /* if cpl < rb, it is not necessary to try another modulus */
   rb = expi( powii(mulii(nf_get_disc(nf), ZM_det_triangular(f)), gmul2n(gmael(bnr,5,1), 3)) );
@@ -622,10 +622,10 @@ ArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
   if (!ic) return W;
   nChar = ic;
 
-  nf    = gmael(bnr, 1, 7);
+  nf    = bnr_get_nf(bnr);
   diff  = nf_get_TrInv(nf);
   T     = nf_get_Tr(nf);
-  cond  = gmael(bnr, 2, 1);
+  cond  = bnr_get_mod(bnr);
   cond0 = gel(cond,1); condZ = gcoeff(cond0,1,1);
   cond1 = vec01_to_indices(gel(cond,2));
   N     = nf_get_degree(nf);
@@ -777,7 +777,7 @@ bnrrootnumber(GEN bnr, GEN chi, long flag, long prec)
 
   checkbnr(bnr);
   cyc = gmael(bnr, 5, 2);
-  cond = gmael(bnr, 2, 1);
+  cond = bnr_get_mod(bnr);
   l    = lg(cyc);
 
   if (typ(chi) != t_VEC || lg(chi) != l)
@@ -798,7 +798,7 @@ bnrrootnumber(GEN bnr, GEN chi, long flag, long prec)
   }
   else
   {
-    bnrc = Buchray(gel(bnr,1), condc, nf_INIT|nf_GEN);
+    bnrc = Buchray(bnr_get_bnf(bnr), condc, nf_INIT|nf_GEN);
     CHI = GetPrimChar(chi, bnr, bnrc, prec);
   }
   return gerepilecopy(av, SingleArtinNumber(bnrc, CHI, prec));
@@ -897,7 +897,7 @@ InitChar(GEN bnr, GEN listCR, long prec)
   long N, r1, r2, prec2, i, j, l;
   pari_sp av = avma;
 
-  modul = gmael(bnr, 2, 1);
+  modul = bnr_get_mod(bnr);
   Mr    = gmael(bnr, 5, 2);
   dk    = nf_get_disc(nf);
   N     = nf_get_degree(nf);
@@ -1368,7 +1368,7 @@ static void
 InitPrimesQuad(GEN bnr, long N0, LISTray *R)
 {
   pari_sp av = avma;
-  GEN bnf = gel(bnr,1), cond = gmael3(bnr,2,1,1);
+  GEN bnf = bnr_get_bnf(bnr), cond = gel(bnr_get_mod(bnr), 1);
   long p,i,l, condZ = itos(gcoeff(cond,1,1)), contZ = itos(content(cond));
   GEN prime, Lpr, nf = checknf(bnf), dk = nf_get_disc(nf);
   byteptr d = diffptr + 1;
@@ -1421,7 +1421,7 @@ InitPrimesQuad(GEN bnr, long N0, LISTray *R)
 static void
 InitPrimes(GEN bnr, long N0, LISTray *R)
 {
-  GEN bnf = gel(bnr,1), cond = gmael3(bnr,2,1,1);
+  GEN bnf = bnr_get_bnf(bnr), cond = gel(bnr_get_mod(bnr), 1);
   long np,p,j,k,l, condZ = itos(gcoeff(cond,1,1)), N = lg(cond)-1;
   GEN tmpray, tabpr, prime, pr, nf = checknf(bnf);
   byteptr d = diffptr + 1;
@@ -2263,7 +2263,7 @@ GenusField(GEN bnf)
   GEN disc, pol, div, d;
 
   hk   = itos(gmael3(bnf, 8, 1, 1));
-  disc = gmael(bnf, 7, 3);
+  disc = nf_get_disc(bnf_get_nf(bnf));
 
   if (mod4(disc) == 0) disc = shifti(disc, -2);
   div = divisors(disc);
@@ -2295,7 +2295,7 @@ AllStark(GEN data,  GEN nf,  long flag,  long newprec)
 
   nf_get_sign(nf, &r1,&r2);
   N     = nf_get_degree(nf);
-  cond1 = gmael3(bnr, 2, 1, 2);
+  cond1 = gel(bnr_get_mod(bnr), 2);
   dataCR = gel(data,5);
   vChar = sortChars(dataCR);
 
@@ -2525,7 +2525,7 @@ quadhilbertreal(GEN D, long prec)
   bnr  = Buchray(bnf, gen_1, nf_INIT|nf_GEN);
   M = diagonal_shallow(gmael(bnr,5,2));
   dtQ = InitQuotient(M);
-  nf  = gel(bnf,7);
+  nf  = bnf_get_nf(bnf);
 
   for(;;) {
     VOLATILE GEN pol = NULL;
@@ -2604,7 +2604,7 @@ bnrstark(GEN bnr, GEN subgrp, long prec)
   if (gcmp1( ZM_det_triangular(subgrp) )) { avma = av; return pol_x(0); }
 
   /* check the class field */
-  if (!gcmp0(gmael3(bnr, 2, 1, 2)))
+  if (!gcmp0(gel(bnr_get_mod(bnr), 2)))
     pari_err(talker, "class field not totally real in bnrstark");
 
   if (DEBUGLEVEL) (void)timer2();
@@ -2657,8 +2657,8 @@ bnrL1(GEN bnr, GEN subgp, long flag, long prec)
   pari_sp av = avma;
 
   checkbnrgen(bnr);
-  bnf = gel(bnr,1);
-  nf  = gel(bnf,7);
+  bnf = bnr_get_bnf(bnr);
+  nf  = bnf_get_nf(bnf);
   N   = nf_get_degree(nf);
 
   if (N == 1) pari_err(talker, "the ground field must be distinct from Q");

@@ -1093,8 +1093,9 @@ isintnorm_loop(struct sol_abs *T, long i)
 static int
 get_sol_abs(struct sol_abs *T, GEN bnf, GEN a, GEN *ptPR)
 {
+  GEN nf = bnf_get_nf(bnf);
   GEN fact = Z_factor(a), P = gel(fact,1), E = gel(fact,2), PR;
-  long N = nf_get_degree(gel(bnf,7)), nP = lg(P)-1, Ngen, max, nPR, i, j;
+  long N = nf_get_degree(nf), nP = lg(P)-1, Ngen, max, nPR, i, j;
 
   max = nP*N; /* upper bound for T->nPR */
   T->f = new_chunk(max+1);
@@ -1105,7 +1106,7 @@ get_sol_abs(struct sol_abs *T, GEN bnf, GEN a, GEN *ptPR)
   nPR = 0;
   for (i = 1; i <= nP; i++)
   {
-    GEN L = idealprimedec(bnf, gel(P,i));
+    GEN L = idealprimedec(nf, gel(P,i));
     long lL = lg(L), gcd, k, v;
     ulong vn = itou(gel(E,i));
 
@@ -1176,7 +1177,7 @@ get_sol_abs(struct sol_abs *T, GEN bnf, GEN a, GEN *ptPR)
 static long
 get_unit_1(GEN bnf, GEN *unit)
 {
-  GEN v, nf = gel(bnf,7);
+  GEN v, nf = bnf_get_nf(bnf);
   long i, n = nf_get_degree(nf);
 
   if (DEBUGLEVEL > 2) fprintferr("looking for a fundamental unit of norm -1\n");
@@ -1198,7 +1199,7 @@ bnfisintnormabs(GEN bnf, GEN a)
   long i;
 
   if (typ(a) != t_INT) pari_err(typeer,"bnfisintnormabs");
-  bnf = checkbnf(bnf); nf = gel(bnf,7);
+  bnf = checkbnf(bnf); nf = bnf_get_nf(bnf);
   if (!signe(a)) return mkvec(gen_0);
   if (is_pm1(a)) return mkvec(gen_1);
 

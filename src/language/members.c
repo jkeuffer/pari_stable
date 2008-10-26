@@ -333,7 +333,7 @@ member_tu(GEN x)
   else
   {
     if (t == typ_BNR) pari_err(impl,"ray torsion units");
-    x = gel(bnf,7);
+    x = bnf_get_nf(bnf);
     y = gel(bnf,8);
     if (typ(y) == t_VEC && lg(y) > 5) y = gel(y,4);
     else

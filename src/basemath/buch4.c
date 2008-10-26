@@ -437,7 +437,7 @@ bnfsunit(GEN bnf,GEN S,long prec)
   GEN sunit,card,sreg,res,pow;
 
   if (typ(S) != t_VEC) pari_err(typeer,"bnfsunit");
-  bnf = checkbnf(bnf); nf=gel(bnf,7);
+  bnf = checkbnf(bnf); nf = bnf_get_nf(bnf);
   classgp=gmael(bnf,8,1);
   gen = gel(classgp,3);
 

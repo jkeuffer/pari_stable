@@ -839,7 +839,7 @@ init_units(GEN BNF)
   if (lg(res) == 5)
   {
     pari_sp av = avma;
-    GEN nf = gel(bnf,7), A = gel(bnf,3);
+    GEN nf = bnf_get_nf(bnf), A = gel(bnf,3);
     funits = gerepilecopy(av, getfu(nf, &A, nf_FORCE, &l, 0));
   } 
   else
@@ -1111,7 +1111,7 @@ testprimes(GEN bnf, GEN BOUND)
   pari_sp av0 = avma, av;
   ulong p, pmax, bound = itou_or_0(BOUND);
   FACT *fact;
-  GEN nf = gel(bnf,7), f = nf_get_index(nf), dK = nf_get_disc(nf);
+  GEN nf = bnf_get_nf(bnf), f = nf_get_index(nf), dK = nf_get_disc(nf);
   GEN Vbase, fb, gp;
   byteptr d = diffptr + 1;
   FB_t F;
@@ -1400,7 +1400,7 @@ isprincipalarch(GEN bnf, GEN col, GEN kNx, GEN e, GEN dx, long *pe)
 {
   GEN nf, x, matunit, s, M;
   long N, R1, RU, i, prec = gprecision(col);
-  bnf = checkbnf(bnf); nf = gel(bnf,7); M = nf_get_M(nf);
+  bnf = checkbnf(bnf); nf = bnf_get_nf(bnf); M = nf_get_M(nf);
   if (!prec) prec = prec_arch(bnf);
   matunit = gel(bnf,3);
   N = nf_get_degree(nf);
@@ -1449,7 +1449,7 @@ isprincipalall(GEN bnf, GEN x, long *ptprec, long flag)
   GEN W    = gel(bnf,1);
   GEN B    = gel(bnf,2);
   GEN WB_C = gel(bnf,4);
-  GEN nf   = gel(bnf,7);
+  GEN nf   = bnf_get_nf(bnf);
   GEN clg2 = gel(bnf,9);
   FB_t F;
   GEN Vbase = get_Vbase(bnf);
@@ -1536,7 +1536,7 @@ isprincipalall(GEN bnf, GEN x, long *ptprec, long flag)
 static GEN
 triv_gen(GEN bnf, GEN x, long flag)
 {
-  GEN y, nf = gel(bnf,7);
+  GEN y, nf = bnf_get_nf(bnf);
   long c;
   if (flag & nf_GEN_IF_PRINCIPAL) return algtobasis(nf,x);
   c = lg(mael3(bnf,8,1,2)) - 1;
@@ -1562,7 +1562,7 @@ bnfisprincipal0(GEN bnf,GEN x,long flag)
     case id_PRIME:
       if (pr_is_inert(x))
         return gerepileupto(av, triv_gen(bnf, gel(x,1), flag));
-      x = idealhnf_two(gel(bnf,7), x);
+      x = idealhnf_two(bnf_get_nf(bnf), x);
       break;
     case id_MAT:
       if (lg(x)==1) pari_err(talker,"zero ideal in isprincipal");
@@ -1738,7 +1738,7 @@ isprincipalfact_or_fail(GEN bnf, GEN C, GEN P, GEN e)
   const long flag = nf_GENMAT|nf_FORCE;
   long prec;
   pari_sp av = avma;
-  GEN u, y, id, C0, Cext, nf = gel(bnf,7);
+  GEN u, y, id, C0, Cext, nf = bnf_get_nf(bnf);
 
   Cext = cgetg(1, t_MAT);
   C0 = mkvec2(C, Cext);
@@ -1764,8 +1764,7 @@ bnfisunit(GEN bnf,GEN x)
   pari_sp av = avma;
   GEN tu, p1, v, rlog, logunit, ex, nf, z, pi2_sur_w, emb;
 
-  bnf = checkbnf(bnf);
-  nf = gel(bnf,7);
+  bnf = checkbnf(bnf); nf = bnf_get_nf(bnf);
   logunit = gel(bnf,3); RU = lg(logunit);
   tu = gmael(bnf,8,4);
   n = itou(gel(tu,1)); /* # { roots of 1 } */
@@ -1868,7 +1867,7 @@ nfsign_units(GEN bnf, GEN archp, int add_zu)
   GEN y, A = gel(bnf,3), invpi = invr( mppi(DEFAULTPREC) );
   long j = 1, RU = lg(A);
 
-  if (!archp) archp = identity_perm( nf_get_r1(gel(bnf,7)) );
+  if (!archp) archp = identity_perm( nf_get_r1(bnf_get_nf(bnf)) );
   if (add_zu) { RU++; A--; }
   y = cgetg(RU,t_MAT);
   if (add_zu)
@@ -1889,8 +1888,8 @@ signunits(GEN bnf)
   GEN S, y, nf;
   long i, j, r1, r2;
 
-  bnf = checkbnf(bnf);
-  nf = gel(bnf,7); nf_get_sign(nf, &r1,&r2);
+  bnf = checkbnf(bnf); nf = bnf_get_nf(bnf);
+  nf_get_sign(nf, &r1,&r2);
   S = zeromatcopy(r1, r1+r2-1); av = avma;
   y = nfsign_units(bnf, NULL, 0);
   for (j = 1; j < lg(y); j++)
@@ -2760,7 +2759,7 @@ makematal(GEN bnf)
   W   = gel(bnf,1);
   B   = gel(bnf,2);
   WB_C= gel(bnf,4);
-  nf  = gel(bnf,7);
+  nf  = bnf_get_nf(bnf);
   lW=lg(W)-1; lma=lW+lg(B);
   pFB = get_Vbase(bnf);
   ma = cgetg(lma,t_MAT);
@@ -2843,14 +2842,14 @@ get_archclean(GEN nf, GEN x, long prec, int units)
 static void
 my_class_group_gen(GEN bnf, long prec, GEN nf0, GEN *ptcl, GEN *ptcl2)
 {
-  GEN W=gel(bnf,1), C=gel(bnf,4), nf=gel(bnf,7);
+  GEN W = gel(bnf,1), C = gel(bnf,4), nf = bnf_get_nf(bnf);
   class_group_gen(nf,W,C,get_Vbase(bnf),prec,nf0, ptcl,ptcl2);
 }
 
 GEN
 bnfnewprec_shallow(GEN bnf, long prec)
 {
-  GEN nf0 = gel(bnf,7), nf, res, funits, mun, matal, clgp, clgp2, y;
+  GEN nf0 = bnf_get_nf(bnf), nf, res, funits, mun, matal, clgp, clgp2, y;
   long r1, r2, prec1;
 
   nf_get_sign(nf0, &r1, &r2);
@@ -2889,8 +2888,10 @@ bnfnewprec(GEN bnf, long prec)
 GEN
 bnrnewprec_shallow(GEN bnr, long prec)
 {
-  GEN y = leafcopy(bnr);
-  gel(y,1) = bnfnewprec_shallow(gel(bnr,1), prec);
+  GEN y = cgetg(7,t_VEC);
+  long i;
+  gel(y,1) = bnfnewprec_shallow(bnr_get_bnf(bnr), prec);
+  for (i=2; i<7; i++) gel(y,i) = gel(bnr,i);
   return y;
 }
 GEN
@@ -2899,7 +2900,7 @@ bnrnewprec(GEN bnr, long prec)
   GEN y = cgetg(7,t_VEC);
   long i;
   checkbnr(bnr);
-  gel(y,1) = bnfnewprec(gel(bnr,1),prec);
+  gel(y,1) = bnfnewprec(bnr_get_bnf(bnr), prec);
   for (i=2; i<7; i++) gel(y,i) = gcopy(gel(bnr,i));
   return y;
 }
@@ -2941,7 +2942,8 @@ buchall_end(GEN nf,GEN res, GEN clg2, GEN W, GEN B, GEN A, GEN C,GEN Vbase)
 static GEN
 bnftosbnf(GEN bnf)
 {
-  GEN y = cgetg(13,t_VEC), nf  = gel(bnf,7), T = nf_get_pol(nf), res = gel(bnf,8);
+  GEN nf = bnf_get_nf(bnf), T = nf_get_pol(nf), res = gel(bnf,8);
+  GEN y = cgetg(13,t_VEC);
 
   gel(y,1) = T;
   gel(y,2) = gmael(nf,2,1);

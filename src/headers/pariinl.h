@@ -1650,7 +1650,6 @@ INLINE GEN
 nf_get_roots(GEN nf) { return gel(nf,6); }
 INLINE GEN
 nf_get_zk(GEN nf) { return gel(nf,7); }
-
 INLINE void
 nf_get_sign(GEN nf, long *r1, long *r2)
 {
@@ -1658,6 +1657,18 @@ nf_get_sign(GEN nf, long *r1, long *r2)
   *r1 = itou(gel(x,1));
   *r2 = itou(gel(x,2));
 }
+
+INLINE GEN
+bnf_get_nf(GEN bnf) { return gel(bnf,7); }
+INLINE GEN
+bnr_get_bnf(GEN bnr) { return gel(bnr,1); }
+INLINE GEN
+bnr_get_bid(GEN bnr) { return gel(bnr,2); }
+INLINE GEN
+bnr_get_mod(GEN bnr) { return gmael(bnr,2,1); }
+INLINE GEN
+bnr_get_nf(GEN bnr) { return gmael(bnr,1,7); }
+
 /* assume rnf a genuine rnf */
 INLINE long
 rnf_get_degree(GEN rnf) { return degpol(gel(rnf,1)); }

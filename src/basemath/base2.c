@@ -2824,7 +2824,7 @@ rnfsimplifybasis(GEN bnf, GEN x)
   long i, l;
   GEN y, Az, Iz, nf, A, I;
 
-  bnf = checkbnf(bnf); nf = gel(bnf,7);
+  bnf = checkbnf(bnf); nf = bnf_get_nf(bnf);
   if (typ(x) != t_VEC || lg(x) < 3)
     pari_err(talker,"not a pseudo-basis in nfsimplifybasis");
   A = gel(x,1);
@@ -2960,7 +2960,7 @@ rnfbasis(GEN bnf, GEN order)
   long j, n;
   GEN nf, A, I, cl, col, a;
 
-  bnf = checkbnf(bnf); nf = gel(bnf,7);
+  bnf = checkbnf(bnf); nf = bnf_get_nf(bnf);
   order = get_order(nf, order, "rnfbasis");
   I = gel(order,2); n = lg(I)-1;
   j=1; while (j<n && ideal_is1(gel(I,j))) j++;
@@ -2994,7 +2994,7 @@ rnfhnfbasis(GEN bnf, GEN order)
   long j, n;
   GEN nf, A, I, a;
 
-  bnf = checkbnf(bnf); nf = gel(bnf,7);
+  bnf = checkbnf(bnf); nf = bnf_get_nf(bnf);
   order = get_order(nf, order, "rnfbasis");
   A = gel(order,1); A = RgM_shallowcopy(A);
   I = gel(order,2); n = lg(A)-1;
@@ -3016,7 +3016,7 @@ rnfisfree_aux(GEN bnf, GEN order)
 
   bnf = checkbnf(bnf);
   if (gcmp1(gmael3(bnf,8,1,1))) return 1;
-  nf = gel(bnf,7);
+  nf = bnf_get_nf(bnf);
   order = get_order(nf, order, "rnfisfree");
   I = gel(order,2); n = lg(I)-1;
   j=1; while (j<=n && ideal_is1(gel(I,j))) j++;

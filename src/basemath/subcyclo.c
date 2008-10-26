@@ -540,17 +540,17 @@ galoiscyclo(long n, long v)
 GEN
 bnr_to_znstar(GEN bnr, long *complex)
 {
-  GEN zk, gen, cond, v;
+  GEN zk, gen, cond, v, bid;
   long l2, i;
-  checkbnrgen(bnr);
-  if (degpol(gmael3(bnr,1,7,1))!=1)
+  checkbnrgen(bnr); bid = bnr_get_bid(bnr);
+  if (nf_get_degree(bnr_get_nf(bnr)) != 1)
     pari_err(talker,"bnr must be over Q in bnr_to_znstar");
   zk = gel(bnr,5);
   gen = gel(zk,3);
   /* cond is the finite part of the conductor,
    * complex is the infinite part*/
-  cond = gcoeff(gmael3(bnr,2,1,1), 1, 1);
-  *complex = signe(gmael4(bnr,2,1,2,1));
+  cond = gcoeff(gmael(bid,1,1), 1, 1);
+  *complex = signe(gmael3(bid,1,2,1));
   l2 = lg(gen);
   v = cgetg(l2, t_VEC);
   for (i = 1; i < l2; ++i)
