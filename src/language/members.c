@@ -25,10 +25,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define is_bigell(x) (typ(x) == t_VEC && lg(x)>=20)
 
 static void
-member_err(const char *s)
-{
-  pari_err(typeer,s);
-}
+member_err(const char *s) { pari_err(typeer,s); }
 
 GEN
 member_e(GEN x)
@@ -50,13 +47,11 @@ GEN
 member_p(GEN x)
 {
   long t; (void)get_nf(x,&t);
-  if (t == typ_GAL)
-    return gmael(x,2,1);
+  if (t == typ_GAL) return gmael(x,2,1);
   switch(typ(x)) {
     case t_VEC:
-      x = get_prid(x);
-      if (!x) member_err("p");
-      return gel(x,1);
+      x = get_prid(x); if (!x) member_err("p");
+      return pr_get_p(x);
     case t_PADIC:
       return gel(x,2);
     case t_FFELT:
@@ -71,7 +66,7 @@ member_bid(GEN x)
 {
   long t; (void)get_nf(x,&t);
   switch(t) {
-    case typ_BNR: return gel(x,2);
+    case typ_BNR: return bnr_get_bid(x);
     case typ_BID: return x;
   }
   member_err("bid");
@@ -91,7 +86,7 @@ member_nf(GEN x)
 {
   long t; GEN y = get_nf(x,&t);
   if (!y) {
-    if (typ(x)==t_VEC && lg(x) == 13) return gel(x,10);
+    if (t == typ_RNF) return gel(x,10);
     member_err("nf");
   }
   return y;
@@ -110,11 +105,12 @@ member_zk(GEN x)
 	y = cgetg(3,t_VEC);
 	gel(y,1) = gen_1;
 	gel(y,2) = pol_x(varn(x[1])); return y;
+      case typ_RNF:
+        return gel(x,7);
     }
-    if (typ(x)==t_VEC && lg(x) == 13) return gel(x,7);
     member_err("zk");
   }
-  return gel(y,7);
+  return nf_get_zk(y);
 }
 
 GEN
@@ -130,7 +126,7 @@ member_disc(GEN x) /* discriminant */
     }
     member_err("disc");
   }
-  return gel(y,3);
+  return nf_get_disc(y);
 }
 
 GEN
@@ -144,13 +140,13 @@ member_pol(GEN x) /* polynomial */
       case typ_POL: return x;
       case typ_Q  : return gel(x,1);
       case typ_GAL: return gel(x,1);
+      case typ_RNF: return gmael(x,11,1);
     }
     if (typ(x)==t_POLMOD) return gel(x,2);
     if (typ(x)==t_FFELT) return FF_to_FpXQ(x);
-    if (typ(x)==t_VEC && lg(x) == 13) return gmael(x,11,1);
     member_err("pol");
   }
-  return gel(y,1);
+  return nf_get_pol(y);
 }
 
 GEN
@@ -159,7 +155,7 @@ member_mod(GEN x) /* modulus */
   long t; (void)get_nf(x,&t);
   switch(t) {
     case typ_GAL: return gmael(x,2,3);
-    case typ_BNR: x = gel(x,2); /* fall through */
+    case typ_BNR: return bnr_get_mod(x);
     case typ_BID: return gel(x,1);
   }
   switch(typ(x))
@@ -189,7 +185,7 @@ member_index(GEN x)
 {
   long t; GEN y = get_nf(x,&t);
   if (!y) member_err("index");
-  return gel(y,4);
+  return nf_get_index(y);
 }
 
 /* x assumed to be output by get_nf: ie a t_VEC with length 11 */
@@ -240,7 +236,7 @@ member_roots(GEN x) /* roots */
     if (t == typ_GAL) return gel(x,3);
     member_err("roots");
   }
-  return gel(y,6);
+  return nf_get_roots(y);
 }
 
 /* assume x output by get_bnf: ie a t_VEC with length 10 */
@@ -261,7 +257,7 @@ member_clgp(GEN x) /* class group (3-component row vector) */
     switch(t)
     {
       case typ_QUA: return mkvec3(gel(x,1), gel(x,2), gel(x,3));
-      case typ_BID: return x = gel(x,2);
+      case typ_BID: return gel(x,2);
     }
     if (typ(x)==t_VEC)
       switch(lg(x))
@@ -360,19 +356,20 @@ member_tufu(GEN x) /*  concatenation of tu and fu, w is lost */
   return concat(gel(member_tu(x),2), fuc);
 }
 
+/* structure of (Z_K/m)^*, where x is an idealstarinit (with or without gen)
+ * or a bnrinit (with or without gen) */
 GEN
-member_zkst(GEN bid)
-/* structure of (Z_K/m)^*, where bid is an idealstarinit (with or without gen)
-   or a bnrinit (with or without gen) */
+member_zkst(GEN x)
 {
-  if (typ(bid)==t_VEC)
-    switch(lg(bid))
-    {
-      case 6: return gel(bid,2);   /* idealstarinit */
-      case 7: bid = gel(bid,2); /* bnrinit */
-	if (typ(bid) == t_VEC && lg(bid) > 2)
-	  return gel(bid,2);
+  long t; (void)get_nf(x,&t);
+  switch(t)
+  {
+    case typ_BID: return gel(x,2);
+    case typ_BNR: {
+      GEN bid = bnr_get_bid(x);
+      if (typ(bid) == t_VEC && lg(bid) > 2) return gel(bid,2);
     }
+  }
   member_err("zkst");
   return NULL; /* not reached */
 }
@@ -380,36 +377,36 @@ member_zkst(GEN bid)
 GEN
 member_no(GEN clg) /* number of elements of a group (of type clgp) */
 {
+  pari_sp av = avma;
   clg = member_clgp(clg);
-  if (typ(clg)!=t_VEC  || (lg(clg)!=3 && lg(clg)!=4))
-    member_err("no");
-  return gel(clg,1);
+  if (typ(clg)!=t_VEC || (lg(clg)!=3 && lg(clg)!=4)) member_err("no");
+  avma = av; return gel(clg,1);
 }
 
 GEN
 member_cyc(GEN clg) /* cyclic decomposition (SNF) of a group (of type clgp) */
 {
+  pari_sp av = avma;
   clg = member_clgp(clg);
-  if (typ(clg)!=t_VEC  || (lg(clg)!=3 && lg(clg)!=4))
-    member_err("cyc");
-  return gel(clg,2);
+  if (typ(clg)!=t_VEC || (lg(clg)!=3 && lg(clg)!=4)) member_err("cyc");
+  avma = av; return gel(clg,2);
 }
 
 /* SNF generators of a group (of type clgp), or generators of a prime
- * ideal
- */
+ * ideal */
 GEN
 member_gen(GEN x)
 {
+  pari_sp av;
   long t;
   GEN y = get_prid(x);
   if (y) return mkvec2copy(gel(y,1), gel(y,2));
   (void)get_nf(x,&t);
-  if (t == typ_GAL)
-    return gel(x,7);
+  if (t == typ_GAL) return gel(x,7);
+  av = avma;
   x = member_clgp(x);
-  if (typ(x)!=t_VEC || lg(x)!=4)
-    member_err("gen");
+  if (typ(x)!=t_VEC || lg(x)!=4) member_err("gen");
+  avma = av;
   if (typ(x[1]) == t_COL) return gel(x,2); /* from bnfisprincipal */
   return gel(x,3);
 }
@@ -417,8 +414,7 @@ GEN
 member_group(GEN x)
 {
   long t; (void)get_nf(x,&t);
-  if (t == typ_GAL)
-    return gel(x,6);
+  if (t == typ_GAL) return gel(x,6);
   member_err("group");
   return NULL; /* not reached */
 }
@@ -426,8 +422,7 @@ GEN
 member_orders(GEN x)
 {
   long t; (void)get_nf(x,&t);
-  if (t == typ_GAL)
-    return gel(x,8);
+  if (t == typ_GAL) return gel(x,8);
   member_err("orders");
   return NULL; /* not reached */
 }

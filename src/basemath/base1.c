@@ -171,8 +171,16 @@ get_bnf(GEN x, long *t)
 	case 10: *t = typ_NF; return NULL;
 	case 11: *t = typ_BNF; return x;
 	case 7 : *t = typ_BNR;
-	  x = gel(x,1); if (typ(x)!=t_VEC || lg(x)!=11) break;
+	  x = bnr_get_bnf(x); if (typ(x)!=t_VEC || lg(x)!=11) break;
 	  return x;
+	case 9 :
+	  x = gel(x,2);
+	  if (typ(x) == t_VEC && lg(x) == 4) *t = typ_GAL;
+	  return NULL;
+	case 13: 
+          *t = typ_RNF; return NULL;
+	case 14: case 20:
+	  *t = typ_ELL; return NULL;
       }
   }
   *t = typ_NULL; return NULL;
@@ -193,11 +201,11 @@ get_nf(GEN x, long *t)
 	  return get_nf(gel(x,1),t);
 	case 10: *t = typ_NF; return x;
 	case 11: *t = typ_BNF;
-	  x = gel(x,7); if (typ(x)!=t_VEC || lg(x)!=10) break;
+	  x = bnf_get_nf(x); if (typ(x)!=t_VEC || lg(x)!=10) break;
 	  return x;
 	case 7 : *t = typ_BNR;
-	  x = gel(x,1); if (typ(x)!=t_VEC || lg(x)!=11) break;
-	  x = gel(x,7); if (typ(x)!=t_VEC || lg(x)!=10) break;
+	  x = bnr_get_bnf(x); if (typ(x)!=t_VEC || lg(x)!=11) break;
+	  x = bnf_get_nf(x);  if (typ(x)!=t_VEC || lg(x)!=10) break;
 	  return x;
 	case 6 :
 	  if (typ(x[1]) != t_VEC || typ(x[3]) != t_MAT) break;
@@ -206,6 +214,8 @@ get_nf(GEN x, long *t)
 	  x = gel(x,2);
 	  if (typ(x) == t_VEC && lg(x) == 4) *t = typ_GAL;
 	  return NULL;
+	case 13: 
+          *t = typ_RNF; return NULL;
 	case 14: case 20:
 	  *t = typ_ELL; return NULL;
       }break;
@@ -225,11 +235,11 @@ nftyp(GEN x)
       {
 	case 10: return typ_NF;
 	case 11:
-	  x = gel(x,7); if (typ(x)!=t_VEC || lg(x)!=10) break;
+	  x = bnf_get_nf(x); if (typ(x)!=t_VEC || lg(x)!=10) break;
 	  return typ_BNF;
 	case 7 :
-	  x = gel(x,1); if (typ(x)!=t_VEC || lg(x)!=11) break;
-	  x = gel(x,7); if (typ(x)!=t_VEC || lg(x)!=10) break;
+	  x = bnr_get_bnf(x); if (typ(x)!=t_VEC || lg(x)!=11) break;
+	  x = bnf_get_nf(x);  if (typ(x)!=t_VEC || lg(x)!=10) break;
 	  return typ_BNR;
 	case 6 :
 	  if (typ(x[1]) != t_VEC || typ(x[3]) != t_MAT) break;

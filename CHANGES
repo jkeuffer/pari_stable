@@ -133,6 +133,7 @@ BA105- Vecsmall([1,1])^-1 returned garbage
 IZ111- missing `const's in groupid.c cause massive copying to stack.
   112- [native kernel only] int_normalize() didn't treat properly inputs
        of lgefint 2
+  113- gerepile errors in quadclassunit(13).gen or .cyc
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]

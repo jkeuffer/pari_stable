@@ -24,7 +24,8 @@ enum {
   typ_ELL, /* elliptic curve */
   typ_QUA, /* quadclassunit  */
   typ_GAL, /* galoisinit     */
-  typ_BID
+  typ_BID,
+  typ_RNF
 };
 
 /* idealtyp */
