@@ -428,12 +428,12 @@ Flx_shiftip(pari_sp av, GEN x, long v)
   return y;
 }
 
-INLINE long
+INLINE ulong
 maxlenghtcoeffpol(ulong p, long n)
 {
   pari_sp ltop = avma;
   GEN z = muliu(sqru(p-1), n);
-  avma = ltop; return lgefint(z)-2;
+  avma = ltop; return itou_or_0(z);
 }
 
 INLINE ulong
@@ -492,6 +492,44 @@ Flx_mulspec_mulii(GEN a, GEN b, ulong p, long na, long nb)
   return Flx_red_lg_i(z,lgefint(z),p);
 }
 
+static GEN
+Flx_to_int_halfspec(GEN a, long na)
+{
+  long j;
+  long n = (na+1)>>1UL;
+  GEN V = cgetipos(2+n);
+  GEN w;
+  for (w = int_LSW(V), j=0; j+1<na; j+=2, w=int_nextW(w))
+    *w = a[j]|(a[j+1]<<BITS_IN_HALFULONG);
+  if (j<na)
+    *w = a[j];
+  return V;
+}
+
+/*Do not renormalize. */
+static GEN
+int_to_Flx_half(GEN z, ulong p)
+{
+  long i;
+  long lx = (lgefint(z)-2)*2+2;
+  GEN w, x = cgetg(lx, t_VECSMALL);
+  for (w = int_LSW(z), i=2; i<lx; i+=2, w=int_nextW(w))
+  {
+    x[i]   = LOWWORD((ulong)*w)%p;
+    x[i+1] = HIGHWORD((ulong)*w)%p;
+  }
+  return x;
+}
+
+static GEN
+Flx_mulspec_halfmulii(GEN a, GEN b, ulong p, long na, long nb)
+{
+  GEN A = Flx_to_int_halfspec(a,na);
+  GEN B = Flx_to_int_halfspec(b,nb);
+  GEN z = mulii(A,B);
+  return int_to_Flx_half(z,p);
+}
+
 /* fast product (Karatsuba) of polynomials a,b. These are not real GENs, a+2,
  * b+2 were sent instead. na, nb = number of terms of a, b.
  * Only c, c0, c1, c2 are genuine GEN.
@@ -500,6 +538,7 @@ GEN
 Flx_mulspec(GEN a, GEN b, ulong p, long na, long nb)
 {
   GEN a0,c,c0;
+  ulong maxlen;
   long n0, n0a, i, v = 0;
   pari_sp av;
 
@@ -509,8 +548,14 @@ Flx_mulspec(GEN a, GEN b, ulong p, long na, long nb)
   if (!nb) return zero_Flx(0);
 
   av = avma;
-  if (na>30 && maxlenghtcoeffpol(p,nb)==1)
-    return Flx_shiftip(av,Flx_mulspec_mulii(a,b,p,na,nb), v);
+  maxlen = maxlenghtcoeffpol(p,nb);
+  if (maxlen)
+  {
+    if (nb>10 && HIGHWORD(maxlen)==0)
+      return Flx_shiftip(av,Flx_mulspec_halfmulii(a,b,p,na,nb), v);
+    if (na>30)
+      return Flx_shiftip(av,Flx_mulspec_mulii(a,b,p,na,nb), v);
+  }
   if (nb < Flx_MUL_LIMIT)
     return Flx_shiftip(av,Flx_mulspec_basecase(a,b,p,na,nb), v);
   i=(na>>1); n0=na-i; na=i;
@@ -620,17 +665,31 @@ Flx_sqrspec_sqri(GEN a, ulong p, long na)
   return Flx_red_lg_i(z,lgefint(z),p);
 }
 
+static GEN
+Flx_sqrspec_halfsqri(GEN a, ulong p, long na)
+{
+  GEN z = sqri(Flx_to_int_halfspec(a,na));
+  return int_to_Flx_half(z,p);
+}
+
 GEN
 Flx_sqrspec(GEN a, ulong p, long na)
 {
   GEN a0,c,c0,c1;
   long n0, n0a, i, v = 0;
+  ulong maxlen;
   pari_sp av;
 
   while (na && !a[0]) { a++; na--; v += 2; }
   av = avma;
-  if (na > 30 && maxlenghtcoeffpol(p,na)==1)
-    return Flx_shiftip(av, Flx_sqrspec_sqri(a,p,na), v);
+  maxlen = maxlenghtcoeffpol(p,na);
+  if (maxlen)
+  {
+    if (na > 10 && HIGHWORD(maxlen)==0)
+      return Flx_shiftip(av, Flx_sqrspec_halfsqri(a,p,na), v);
+    if (na > 30)
+      return Flx_shiftip(av, Flx_sqrspec_sqri(a,p,na), v);
+  }
   if (na < Flx_SQR_LIMIT)
     return Flx_shiftip(av, Flx_sqrspec_basecase(a,p,na), v);
   i=(na>>1); n0=na-i; na=i;
