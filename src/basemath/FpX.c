@@ -713,8 +713,8 @@ FpXQ_powers(GEN x, long l, GEN T, GEN p)
       gel(V,i) = FpXQ_mul(gel(V,i-1),x,T,p);
   } else { /* use squarings if degree(x) is large */
     for(i = 4; i < l+2; i++)
-      gel(V,i) = (i&1)? FpXQ_sqr(gel(V, (i+1)>>1),T,p)
-		      : FpXQ_mul(gel(V, i-1),x,T,p);
+      gel(V,i) = odd(i)? FpXQ_sqr(gel(V, (i+1)>>1),T,p)
+		       : FpXQ_mul(gel(V, i-1),x,T,p);
   }
   return V;
 }
