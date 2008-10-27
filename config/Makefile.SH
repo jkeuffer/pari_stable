@@ -526,7 +526,7 @@ fi
 cat >> $file << EOT
 $src/language/parse.h: $src/language/parse.y 
 	\$(BISON) -d $src/language/parse.y -o $src/language/parse.c
-$src/language/parse.c: $src/language/parse.h
+$src/language/parse.c: $src/language/parse.h $src/language/parsec.h
 	@:
 EOT
 
