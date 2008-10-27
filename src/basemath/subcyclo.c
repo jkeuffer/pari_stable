@@ -776,20 +776,43 @@ struct aurifeuille_t {
  * sigma_j(g) / g =  (j|A)  if j = 1 (4)
  *                  (-j|A)i if j = 3 (4)
  *   */
-/* factor Phi_n(A), Astar: A* = squarefree kernel of A */
+/* factor Phi_n(A), Astar: A* = squarefree kernel of A, P = odd prime divisors
+ * of n */
 static GEN
-factor_Aurifeuille_aux(GEN A, long Astar, long n, struct aurifeuille_t *S)
+factor_Aurifeuille_aux(GEN A, long Astar, long n, GEN P,
+                       struct aurifeuille_t *S)
 {
   pari_sp av;
-  GEN z = S->z, le = S->le;
-  GEN f, a, b, s;
-  long j, e = S->e;
+  GEN f, a, b, s, powers, z = S->z, le = S->le;
+  long j, k, maxjump, lastj, e = S->e;
   ulong l = S->l;
+  char *invertible;
 
   if ((n & 7) == 4)
   { /* A^* even */
     long m = n>>2;
     GEN i = Fp_powu(z, m, le), z2 = Fp_sqr(z, le);
+
+    invertible = stackmalloc(n); /* even indices unused */
+    for (j = 1; j < n; j+=2) invertible[j] = 1;
+    for (k = 1; k < lg(P); k++)
+    {
+      long p = P[k];
+      for (j = p; j < n; j += 2*p) invertible[j] = 0;
+    }
+    lastj = 2; maxjump = 1;
+    for (j= 3; j < n; j+=2)
+      if (invertible[j]) {
+        long jump = j - lastj;
+        if (jump > maxjump) maxjump = jump;
+        lastj = j;
+      }
+    powers = cgetg(maxjump+1, t_VEC); /* powers[k] = z^k, odd indices unused */
+    gel(powers,2) = z2;
+    for (k = 4; k <= maxjump; k+=2)
+      gel(powers,k) = odd(k>>1)? Fp_mul(gel(powers, k-2), z2, le)
+                               : Fp_sqr(gel(powers, k>>1), le);
+
     if (Astar == 2)
     { /* important special case (includes A=2), split for efficiency */
       if (!equalis(A, 2))
@@ -804,14 +827,15 @@ factor_Aurifeuille_aux(GEN A, long Astar, long n, struct aurifeuille_t *S)
         b = subsi(-1,i);
       }
       av = avma;
-      s = z; f = subii(a, s);
-      for (j=3;j<n;j+=2)
-      {
-        s = Fp_mul(z2, s, le);
-        if (ugcd(j,m)==1)
+      s = z; f = subii(a, s); lastj = 1;
+      for (j = 3, k = 0; j < n; j+=2)
+        if (invertible[j])
+        {
+          s = Fp_mul(gel(powers, j-lastj), s, le); /* z^j */
+          lastj = j;
           f = Fp_mul(f, subii((j & 3) == 1? a: b, s), le);
-        if ((j & 0x1ff) == 1) gerepileall(av, 2, &s, &f);
-      }
+          if (++k == 0x1ff) { gerepileall(av, 2, &s, &f); k = 0; }
+        }
     }
     else
     {
@@ -825,19 +849,18 @@ factor_Aurifeuille_aux(GEN A, long Astar, long n, struct aurifeuille_t *S)
       ma = Fp_neg(a, le);
       mb = Fp_neg(b, le);
       av = avma;
-      s = z; f = subii(a, s);
-      for (j=3;j<n;j+=2)
-      {
-        s = Fp_mul(z2, s, le); /* z^j */
-        if (ugcd(j,m)==1)
+      s = z; f = subii(a, s); lastj = 1;
+      for (j = 3, k = 0; j<n; j+=2)
+        if (invertible[j])
         {
           GEN t;
           if ((j & 3) == 1) t = (kross(j, Astar) < 0)? ma: a;
           else              t = (kross(j, Astar) < 0)? mb: b;
+          s = Fp_mul(gel(powers, j-lastj), s, le); /* z^j */
+          lastj = j;
           f = Fp_mul(f, subii(t, s), le);
+          if (++k == 0x1ff) { gerepileall(av, 2, &s, &f); k = 0; }
         }
-        if ((j & 0x1ff) == 1) gerepileall(av, 2, &s, &f);
-      }
     }
   }
   else /* A^* odd */
@@ -853,15 +876,36 @@ factor_Aurifeuille_aux(GEN A, long Astar, long n, struct aurifeuille_t *S)
     g = Fl_sqrt(umodiu(A,l), l);
     a = padicsqrtlift(A, utoipos(g), utoipos(l), e);
     b = negi(a);
-    av = avma;
-    s = z; f = subii(a, s);
-    for(j=2;j<n;j++)
+
+    invertible = stackmalloc(n);
+    for (j = 1; j < n; j++) invertible[j] = 1;
+    for (k = 1; k < lg(P); k++)
     {
-      s = Fp_mul(z,s,le);
-      if (ugcd(j,n)==1)
-	f = Fp_mul(f, subii(kross(j,Astar)==1? a: b, s), le);
-      if ((j & 0x1ff) == 1) gerepileall(av, 2, &s, &f);
+      long p = P[k];
+      for (j = p; j < n; j += p) invertible[j] = 0;
     }
+    lastj = 2; maxjump = 1;
+    for (j= 3; j < n; j++)
+      if (invertible[j]) {
+        long jump = j - lastj;
+        if (jump > maxjump) maxjump = jump;
+        lastj = j;
+      }
+    powers = cgetg(maxjump+1, t_VEC); /* powers[k] = z^k */
+    gel(powers,1) = z;
+    for (k = 2; k <= maxjump; k++)
+      gel(powers,k) = odd(k)? Fp_mul(gel(powers, k-1), z, le)
+                            : Fp_sqr(gel(powers, k>>1), le);
+    av = avma;
+    s = z; f = subii(a, s); lastj = 1;
+    for(j = 2, k = 0; j < n; j++)
+      if (invertible[j])
+      {
+        s = Fp_mul(gel(powers, j-lastj), s, le);
+        lastj = j;
+        f = Fp_mul(f, subii(kross(j,Astar)==1? a: b, s), le);
+        if (++k == 0x1ff) { gerepileall(av, 2, &s, &f); k = 0; }
+      }
   }
   return f;
 }
@@ -881,8 +925,9 @@ factor_Aurifeuille_prime(GEN p, long n)
 {
   pari_sp av = avma;
   struct aurifeuille_t S;
+  long pp = itos(p);
   Aurifeuille_init(p, n, &S);
-  return gerepileuptoint(av, factor_Aurifeuille_aux(p, itos(p), n, &S));
+  return gerepileuptoint(av, factor_Aurifeuille_aux(p,pp,n,mkvecsmall(pp), &S));
 }
 
 /* an algebraic factor of Phi_d(a), a != 0 */
@@ -934,5 +979,5 @@ factor_Aurifeuille(GEN a, long d)
   if (D != d) { a = powiu(a, d/D); d = D; }
 
   Aurifeuille_init(a, d, &S);
-  return gerepileuptoint(av, factor_Aurifeuille_aux(a, astar, d, &S));
+  return gerepileuptoint(av, factor_Aurifeuille_aux(a, astar, d, P, &S));
 }
