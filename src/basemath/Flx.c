@@ -645,18 +645,6 @@ Flx_sqrspec_basecase(GEN x, ulong p, long nx)
   z -= 2; return z;
 }
 
-#if 0
-/* used only by Flx_sqrspec #if 0 code.*/
-static GEN
-Flx_2_mul(GEN x, ulong p)
-{
-  long i, l = lg(x);
-  GEN z = cgetg(l, t_VECSMALL);
-  for (i=2; i<l; i++) z[i] = Fl_add(x[i], x[i], p);
-  z[1] = x[1]; return z;
-}
-#endif
-
 static GEN
 Flx_sqrspec_sqri(GEN a, ulong p, long na)
 {
@@ -700,14 +688,10 @@ Flx_sqrspec(GEN a, ulong p, long na)
   if (p == 2) n0 *= 2;
   else
   {
-#if 0
-    c1 = Flx_2_mul(Flx_mulspec(a0,a,p, na,n0a), p);
-#else
     GEN  t = Flx_addspec(a0,a,p,na,n0a);
     t = Flx_sqr(t,p);
     c1= Flx_add(c0,c, p);
     c1= Flx_sub(t, c1, p);
-#endif
     c0 = Flx_addshift(c0,c1,p,n0);
   }
   c0 = Flx_addshift(c0,c,p,n0);
