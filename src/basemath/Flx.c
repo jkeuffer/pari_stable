@@ -506,7 +506,6 @@ Flx_to_int_halfspec(GEN a, long na)
   return V;
 }
 
-/*Do not renormalize. */
 static GEN
 int_to_Flx_half(GEN z, ulong p)
 {
@@ -518,7 +517,7 @@ int_to_Flx_half(GEN z, ulong p)
     x[i]   = LOWWORD((ulong)*w)%p;
     x[i+1] = HIGHWORD((ulong)*w)%p;
   }
-  return x;
+  return Flx_renormalize(x, lx);
 }
 
 static GEN
