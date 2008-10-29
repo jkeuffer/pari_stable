@@ -348,7 +348,7 @@ copyifclone(long n, long mode, long flag, long mask)
   {
     op_push(OCcopyifclone,0,n);
     if (!(flag&FLreturn) && DEBUGLEVEL)
-      pari_warn(warner,"compiler generate copy for `%.*s'",
+      pari_warn(warner,"compiler generates copy for `%.*s'",
                        tree[n].len,tree[n].str);
   }
 }
