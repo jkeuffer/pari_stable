@@ -605,9 +605,9 @@ closure_err(void)
     closure_context(trace[i].closure, *trace[i].pc);
 
   i = maxss(0, lastfun - 19);
+  if (i > 0) while (lg(trace[i].closure)==6) i--;
   next_label = pari_strdup(i == 0? "at top-level": "[...] at");
   next_fun = next_label;
-  if (i > 0) while (lg(trace[i].closure)==6) i--;
   for (; i <= lastfun; i++)
   {
     GEN C = trace[i].closure;
