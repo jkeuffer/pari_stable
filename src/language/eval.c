@@ -607,11 +607,10 @@ closure_err(void)
   i = maxss(0, lastfun - 19);
   next_label = pari_strdup(i == 0? "at top-level": "[...] at");
   next_fun = next_label;
+  if (i > 0) while (lg(trace[i].closure)==6) i--;
   for (; i <= lastfun; i++)
   {
     GEN C = trace[i].closure;
-    /* After a SIGINT, pc can be slightly off:  0<=pc<=lg() */
-    long pc = minss(*trace[i].pc, lg(mael(C,5,1))-1);
     if (lg(C) >= 7)
     {
       GEN code = gel(C,6);
@@ -620,7 +619,9 @@ closure_err(void)
     }
     if (i==lastfun || lg(trace[i+1].closure)>=7)
     {
-      long offset = pc ? mael3(C,5,1,pc):0;
+      /* After a SIGINT, pc can be slightly off: ensure 0 <= pc < lg() */
+      long pc = minss(*trace[i].pc, lg(mael(C,5,1))-1);
+      long offset = pc? mael3(C,5,1,pc): 0;
       const char *s = base + offset;
       int member = offset>0 && (s[-1] == '.');
       /* avoid "in function foo: foo" */
