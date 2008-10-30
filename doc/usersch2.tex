@@ -2693,6 +2693,11 @@ actually gives you 9 digits ($9 < \log_{10}(2^{32}) < 10$):
       realprecision = 9 significant digits (2 digits displayed)
 @eprog
 
+\subsecidx{recover} (default \kbd{1}): this is a toggle, which can be either 1
+(on) or 0 (off). If you change this to $0$, any error becomes fatal and
+causes the gp interpreter to exit immediately. Can be useful in batch job
+scripts.
+
 \subsecidx{secure} (default \kbd{0}): this is a toggle which can be either 1
 (on) or 0 (off). If on, the \tet{system} and \tet{extern} command are
 disabled. These two commands are potentially dangerous when you execute

@@ -593,6 +593,13 @@ pari_thread_close(void)
   pari_close_seadata();
 }
 
+static void
+pari_exit()
+{
+  fprintferr("  ***   Error in the PARI system. End of program.\n");
+  exit(1);
+}
+
 /* initialize PARI data. Initialize [new|old]fun to NULL for default set. */
 void
 pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts)
@@ -606,11 +613,7 @@ pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts)
   }
 
   stack_init(&s_ERR_CATCH, sizeof(cell), (void**)&ERR_CATCH);
-  if ((init_opts&INIT_JMPm) && setjmp(GP_DATA->env))
-  {
-    fprintferr("  ***   Error in the PARI system. End of program.\n");
-    exit(1);
-  }
+  if ((init_opts&INIT_JMPm) && setjmp(GP_DATA->env)) pari_exit();
   if ((init_opts&INIT_SIGm)) pari_sig_init(pari_sighandler);
   pari_init_stack(parisize);
   diffptr = initprimes(maxprime);
@@ -703,6 +706,7 @@ recover(int flag)
   long i;
 
   if (!flag) { listloc = next_block; return; }
+  if (!(GP_DATA->flags & RECOVER)) pari_exit();
 
   /* disable recover() and SIGINT */
   try_to_recover = 0;

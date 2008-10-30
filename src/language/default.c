@@ -639,6 +639,10 @@ sd_echo(const char *v, long flag)
 { return sd_gptoggle(v,flag,"echo", ECHO); }
 
 GEN
+sd_recover(const char *v, long flag)
+{ return sd_gptoggle(v,flag,"rechover", RECOVER); }
+
+GEN
 sd_lines(const char *v, long flag)
 { return sd_ulong(v,flag,"lines",&(GP_DATA->lim_lines), 0,LONG_MAX,NULL); }
 
@@ -1010,6 +1014,7 @@ default_type gp_default_list[] =
   {"psfile",(void*)sd_psfile},
   {"realprecision",(void*)sd_realprecision},
   {"readline",(void*)sd_rl},
+  {"recover",(void*)sd_recover},
   {"secure",(void*)sd_secure},
   {"seriesprecision",(void*)sd_seriesprecision},
   {"simplify",(void*)sd_simplify},
@@ -1058,11 +1063,12 @@ default_gp_data(void)
   static gp_path __PATH;
   static pari_timer __T;
 
+  D->flags = (
+    BREAKLOOP | STRICTMATCH | SIMPLIFY | RECOVER
 #ifdef READLINE
-  D->flags = (BREAKLOOP | STRICTMATCH | SIMPLIFY | USE_READLINE);
-#else
-  D->flags = (BREAKLOOP | STRICTMATCH | SIMPLIFY);
+    | USE_READLINE
 #endif
+  );
   D->primelimit = 500000;
   D->lim_lines = 0;
   D->T    = &__T;
