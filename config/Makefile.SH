@@ -526,7 +526,7 @@ fi
 cat >> $file << EOT
 $src/language/parse.h: $src/language/parse.y 
 	\$(BISON) -d $src/language/parse.y -o $src/language/parse.c
-$src/language/parse.c: $src/language/parse.h $src/language/parsec.h
+$src/language/parse.c: $src/language/parse.h
 	@:
 EOT
 
@@ -644,7 +644,7 @@ for dir in basemath modules language gp graph graphdyn systems; do
     cflags="$cflags \$(DLCFLAGS)"
     ;;
   parse)
-    depend="$ANAL_H $src/language/parse.h $src/language/tree.h"
+    depend="$ANAL_H $src/language/parse.h $src/language/parsec.h $src/language/tree.h"
     cflags="$cflags \$(DLCFLAGS)"
     ;;
   compile)
