@@ -90,7 +90,7 @@ GEN
 pari_eval_str(char *lex, int strict)
 {
   pari_sp ltop=avma;
-  GEN code, res;
+  GEN code;
   pari_lex_start = lex;
   pari_unused_chars=NULL;
   pari_once=1;
@@ -106,9 +106,7 @@ pari_eval_str(char *lex, int strict)
   optimizenode(s_node.n-1);
   code=gp_closure(s_node.n-1);
   parser_reset();
-  res=closure_evalres(code);
-  if (!res) return gnil;
-  return res;
+  return closure_evalres(code);
 }
 
 static long
