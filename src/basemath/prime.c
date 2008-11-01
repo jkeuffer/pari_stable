@@ -747,19 +747,24 @@ prime(long n)
   return utoipos(prime);
 }
 
+ulong
+uprimepi(ulong n)
+{
+  byteptr p = diffptr+1;
+  ulong prime = 2, res = 1;
+  maxprime_check(n);
+  while (prime <= n) { res++; NEXT_PRIME_VIADIFF(prime,p); }
+  return res-1;
+}
+
 GEN
 primepi(GEN x)
 {
   pari_sp av = avma;
-  byteptr p = diffptr;
-  ulong prime = 0, res = 0, n;
   GEN N = typ(x) == t_INT? x: gfloor(x);
-
   if (typ(N) != t_INT) pari_err(typeer, "primepi");
   if (signe(N) <= 0) return gen_0;
-  avma = av; n = itou(N); maxprime_check(n);
-  while (prime <= n) { res++; NEXT_PRIME_VIADIFF(prime,p); }
-  return utoi(res-1);
+  avma = av; return utoi(uprimepi(itou(N)));
 }
 
 GEN

@@ -2253,6 +2253,7 @@ GEN     primepi(GEN x);
 GEN     primes(long n);
 GEN     removeprimes(GEN primes);
 int     uisprime(ulong n);
+ulong   uprimepi(ulong n);
 
 /* random.c */
 
