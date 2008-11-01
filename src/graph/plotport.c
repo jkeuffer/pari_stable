@@ -1340,12 +1340,13 @@ rectplothin(GEN a, GEN b, GEN code, long prec, ulong flags,
   x = gtofp(a, prec);
   if (typ(code) == t_CLOSURE) push_lex(x);
   av2=avma; t=READ_EXPR(code,x); tx=typ(t);
+  /* nc = nb of curves; nl = nb of coord. lists */
   if (!is_matvec_t(tx) && !cplx)
   {
     xsml = gtodouble(a);
     xbig = gtodouble(b);
     ysml = ybig = gtodouble(t);
-    nc=1; nl=2; /* nc = nb of curves; nl = nb of coord. lists */
+    nc=1; nl=2;
     if (param) pari_warn(warner,"flag PLOT_PARAMETRIC ignored");
     single_c=1; param=0;
   }
@@ -1357,7 +1358,13 @@ rectplothin(GEN a, GEN b, GEN code, long prec, ulong flags,
     } else {
       nl = lg(t)-1;
       if (!nl) { avma=av; return 0; }
-      if (param && !cplx) nc=nl/2; else { nc=nl; if (!cplx) nl++; }
+      if (param && !cplx) {
+        nc = nl/2;
+        if (odd(nl))
+          pari_err(talker, "parametric plot requires an even number of components");
+      } else {
+        nc = nl; if (!cplx) nl++;
+      }
     }
     if (recur && nc > 1) pari_err(talker,"multi-curves cannot be plot recursively");
     single_c=0;
