@@ -2031,7 +2031,7 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
 	p1 = mpadd(gel(y,k), mpmul(p1,gel(v,k)));
 	gel(y,l) = gerepileuptoleaf(av1, p1);
 	/* skip the [x_1,...,x_skipfirst,0,...,0] */
-	if ((k <= skipfirst && !signe(y[skipfirst]))
+	if ((l <= skipfirst && !signe(y[skipfirst]))
 	 || mpcmp(borne1, gel(y,l)) < 0) fl = 1;
 	else
 	  gel(x,l) = mpround( mpneg(gel(z,l)) );
