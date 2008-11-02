@@ -40,14 +40,26 @@ pari_init_seadata(void) { modular_eqn = NULL; }
 void
 pari_close_seadata(void) { if (modular_eqn) gunclone(modular_eqn); }
 
-static int
-get_seadata(void)
+static GEN
+get_seadata(ulong ell)
 {
-  char *s = pari_sprintf("%s/seadata/sea0", pari_datadir);
+  pari_sp av=avma;
+  GEN eqn;
+  char *s = pari_sprintf("%s/seadata/sea%ld", pari_datadir, ell);
   pariFILE *F = pari_fopengz(s);
-  free(s); if (!F) return 0;
-  modular_eqn = gclone(gp_readvec_stream(F->file));
-  pari_fclose(F); return 1;
+  free(s); if (!F) return NULL;
+  if (ell==0)
+  {
+    eqn = gp_readvec_stream(F->file);
+    pari_fclose(F);
+    modular_eqn = gclone(eqn);
+    avma=av;
+    return gen_0;
+  } else {
+    eqn = gp_read_stream(F->file);
+    pari_fclose(F);
+    return eqn;
+  }
 }
 
 /*Builds the modular equation corresponding to the vector list */
@@ -62,16 +74,15 @@ list_to_pol(GEN list)
 }
 
 static GEN
-get_modular_eqn(long ell, char *type)
+get_modular_eqn(ulong ell, char *type)
 {
-  long i;
-  for (i=1; i<lg(modular_eqn); i++)
-    if (equalis(gmael(modular_eqn, i, 1), ell))
-    {
-      *type = *GSTR(gmael(modular_eqn, i, 2));
-      return list_to_pol(gmael(modular_eqn, i, 3));
-    }
-  return NULL;
+  GEN eqn;
+  long idx = uprimepi(ell)-1;
+  if (idx<lg(modular_eqn))
+    eqn = gel(modular_eqn, idx);
+  else eqn = get_seadata(ell);
+  *type = *GSTR(gel(eqn, 2));
+  return list_to_pol(gel(eqn, 3));
 }
 
 /*Gives the first precS terms of the Weierstrass series related to */
@@ -1385,7 +1396,7 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
   long ell = 2;
   byteptr primepointer = diffptr + 1;
 
-  if (!modular_eqn && !get_seadata()) return NULL;
+  if (!modular_eqn && !get_seadata(0)) return NULL;
   /*First compute the trace modulo 2 */
   switch(FpX_nbroots(mkpoln(4, gen_1, gen_0, a4, a6), p))
   {
