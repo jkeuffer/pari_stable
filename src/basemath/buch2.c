@@ -2061,13 +2061,13 @@ static void
 small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
 	   double LOGD, double LIMC2, FACT *fact)
 {
+  const long N = nf_get_degree(nf), R1 = nf_get_r1(nf), prec = nf_get_prec(nf);
   const long BMULT = 8;
   const ulong mod_p = 27449UL;
   const long maxtry_DEP  = 20, maxtry_FACT = 500;
   double *y, *z, **q, *v, BOUND;
   pari_sp av;
   long nbsmallnorm, nbfact, precbound, noideal = F->KC;
-  long N = nf_get_degree(nf), R1 = nf_get_r1(nf), prec = nf_get_prec(nf);
   GEN x, M = nf_get_M(nf), G = nf_get_G(nf);
   GEN L = const_vecsmall(F->KC, 0), invp = relationrank(cache, L, mod_p);
   REL_t *rel = cache->last;
@@ -2089,7 +2089,7 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
   minim_alloc(N+1, &q, &x, &y, &z, &v);
   for (av = avma; noideal; noideal--, avma = av)
   {
-    long j, k, nbrelideal = 0, dependent = 0, try_factor = 0;
+    long j, k, skipfirst, nbrelideal = 0, dependent = 0, try_factor = 0;
     GEN IDEAL, ideal, r, u, gx, inc = const_vecsmall(N, 1);
     pari_sp av2;
 
@@ -2104,22 +2104,15 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
     r = Q_from_QR(RgM_mul(G, IDEAL), prec); /* Cholesky for T2 | ideal */
     if (!r) pari_err(bugparier, "small_norm (precision too low)");
 
+    skipfirst = ZV_isscalar(gel(IDEAL,1))? 1: 0; /* 1 probable */
     for (k=1; k<=N; k++)
     {
       v[k] = gtodouble(gcoeff(r,k,k));
       for (j=1; j<k; j++) q[j][k] = gtodouble(gcoeff(r,j,k));
       if (DEBUGLEVEL>3) fprintferr("v[%ld]=%.4g ",k,v[k]);
     }
-
-    BOUND = v[2] + v[1] * q[1][2] * q[1][2];
-#if 1 /* larger BOUND than alternative, but finds more intersting vectors */
-    if (BOUND < v[1]) BOUND = v[1];
-    BOUND *= 2;
-    if (BOUND > v[1] * BMULT) BOUND = v[1] * BMULT;
-#else
-    if (BOUND > v[1]) BOUND = v[1];
+    BOUND = maxdd(v[1], v[2] + v[1]*q[1][2]*q[1][2]);
     BOUND *= BMULT;
-#endif
     /* BOUND at most BMULT x smallest known vector */
     if (DEBUGLEVEL>1)
     {
@@ -2132,6 +2125,7 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
     {
       do
       { /* look for primitive element of small norm, cf minim00 */
+        int fl = 0;
 	double p;
 	if (k > 1)
 	{
@@ -2140,14 +2134,23 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
 	  for (j=k; j<=N; j++) z[l] += q[l][j]*x[j];
 	  p = (double)x[k] + z[k];
 	  y[l] = y[k] + p*p*v[k];
+          if (l <= skipfirst && !y[1]) fl = 1;
 	  x[l] = (long)floor(-z[l] + 0.5);
 	  k = l;
 	}
 	for(;; step(x,y,inc,k))
 	{
-	  p = (double)x[k] + z[k];
-	  if (y[k] + p*p*v[k] <= BOUND) break;
-          inc[k] = 1;
+          if (!fl)
+          {
+            p = (double)x[k] + z[k];
+            if (y[k] + p*p*v[k] <= BOUND) break;
+
+            step(x,y,inc,k);
+
+            p = (double)x[k] + z[k];
+            if (y[k] + p*p*v[k] <= BOUND) break;
+          }
+          fl = 0; inc[k] = 1;
 	  if (++k > N) goto ENDIDEAL;
 	}
       } while (k > 1);
