@@ -2431,7 +2431,7 @@ compute_multiple_of_R_pivot(GEN x, GEN x0/*unused*/, GEN c)
       long e = gexpo(gel(x,i));
       if (e > ex) { ex = e; k = i; }
     }
-  return (k && ex > -10)? k: lx;
+  return (k && ex > -32)? k: lx;
 }
 
 /* x[i,] *= 2^e. In place. */
