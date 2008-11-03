@@ -206,6 +206,13 @@ GEN
 gred_rfrac_simple(GEN n, GEN d)
 {
   GEN c, cn, cd, z;
+  long dd = degpol(d);
+
+  if (dd <= 0)
+  {
+    if (dd < 0) pari_err(gdiver);
+    return scalarpol(gdiv(n, gel(d,2)), varn(d));
+  }
 
   cd = content(d);
   cn = (typ(n) == t_POL && varn(n) == varn(d))? content(n): n;

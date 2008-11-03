@@ -136,6 +136,8 @@ IZ111- missing `const's in groupid.c cause massive copying to stack.
   113- gerepile errors in quadclassunit(13).gen or .cyc
   114- from_Kronecker & FpXQX_from_Kronecker returned polynomials with invalid
        first codeword [ unused bits not reset to 0 ]
+  115- gred_rfrac_simple(n,d) [ basic constructor for t_RFRAC n/d ] did not
+       cater for d = constant polynomial
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
