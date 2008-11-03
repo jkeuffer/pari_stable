@@ -2026,7 +2026,8 @@ FlxqX_from_Kronecker(GEN z, GEN T, ulong p)
   GEN x, t = cgetg(N,t_VECSMALL);
   t[1] = T[1];
   l = lg(z); lx = (l-2) / (N-2);
-  x = cgetg(lx+3,t_POL); x[1]=z[1];
+  x = cgetg(lx+3,t_POL);
+  x[1] = z[1];
   for (i=2; i<lx+2; i++)
   {
     for (j=2; j<N; j++) t[j] = z[j];

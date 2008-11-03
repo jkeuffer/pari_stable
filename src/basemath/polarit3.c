@@ -340,6 +340,7 @@ FpXQX_from_Kronecker(GEN Z, GEN T, GEN p)
   t[1] = T[1] & VARNBITS;
   l = lg(z); lx = (l-2) / (N-2);
   x = cgetg(lx+3,t_POL);
+  x[1] = evalvarn(0);
   for (i=2; i<lx+2; i++)
   {
     for (j=2; j<N; j++) t[j] = z[j];
@@ -1343,7 +1344,7 @@ FqX_normalize(GEN z, GEN T, GEN p)
   return FqX_Fq_mul(z, Fq_inv(p1,T,p), T,p);
 }
 
-/* z in R[X,Y] representing an elt in R[X,Y] mod T(Y) in Kronecker form,
+/* z in R[Y] representing an elt in R[X,Y] mod T(Y) in Kronecker form,
  * i.e subst(lift(z), x, y^(2deg(z)-1)). Recover the "real" z, with
  * normalized coefficients */
 GEN
@@ -1353,6 +1354,7 @@ from_Kronecker(GEN z, GEN T)
   GEN x, t = cgetg(N,t_POL);
   t[1] = T[1] & VARNBITS;
   lx = (l-2) / (N-2); x = cgetg(lx+3,t_POL);
+  x[1] = evalvarn(0);
   T = gcopy(T);
   for (i=2; i<lx+2; i++, z+= N-2)
   {
