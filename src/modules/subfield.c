@@ -347,7 +347,7 @@ poltrace(GEN x, GEN Trq, GEN p)
   if (typ(x) == t_INT || varn(x) != 0) return trace(x, Trq, p);
   y = cgetg_copy(x, &l); y[1] = x[1];
   for (i=2; i<l; i++) gel(y,i) = trace(gel(x,i),Trq,p);
-  return y;
+  return normalizepol_lg(y, l);
 }
 
 /* Find h in Fp[X] such that h(a[i]) = listdelta[i] for all modular factors
@@ -358,7 +358,7 @@ poltrace(GEN x, GEN Trq, GEN p)
 static GEN
 chinese_retrieve_pol(GEN DATA, primedata *S, GEN listdelta)
 {
-  GEN interp, bezoutC, h, pol = FpX_red(gel(DATA,1), S->p);
+  GEN interp, bezoutC, h, p = S->p, pol = FpX_red(gel(DATA,1), p);
   long i, l;
   interp = gel(DATA,9);
   bezoutC= gel(DATA,6);
@@ -366,12 +366,12 @@ chinese_retrieve_pol(GEN DATA, primedata *S, GEN listdelta)
   h = NULL; l = lg(interp);
   for (i=1; i<l; i++)
   { /* h(firstroot[i]) = listdelta[i] */
-    GEN t = FqX_Fq_mul(gel(interp,i), gel(listdelta,i), S->T,S->p);
-    t = poltrace(t, gel(S->Trk,i), S->p);
-    t = gmul(t, gel(bezoutC,i));
-    h = h? gadd(h,t): t;
+    GEN t = FqX_Fq_mul(gel(interp,i), gel(listdelta,i), S->T, p);
+    t = poltrace(t, gel(S->Trk,i), p);
+    t = FpX_mul(t, gel(bezoutC,i), p);
+    h = h? FpX_add(h,t,p): t;
   }
-  return FpX_rem(FpX_red(h, S->p), pol, S->p);
+  return FpX_rem(h, pol, p);
 }
 
 /* g in Z[X] potentially defines a subfield of Q[X]/f. It is a subfield iff A
