@@ -1896,12 +1896,10 @@ main(int argc, char **argv)
   if (!(GP_DATA->flags & QUIET)) gp_head();
   if (s_A.n)
   {
-    ulong f = GP_DATA->flags;
     FILE *l = pari_logfile;
     long i;
-    GP_DATA->flags &= ~(CHRONO|ECHO|BREAKLOOP); pari_logfile = NULL;
+    pari_logfile = NULL;
     for (i = 0; i < s_A.n; pari_free(A[i]),i++) read_main((char*)A[i]);
-    GP_DATA->flags = f;
     /* Reading one of the input files above can set pari_logfile.
      * Don't restore in that case. */
     if (!pari_logfile) pari_logfile = l;
