@@ -138,6 +138,8 @@ IZ111- missing `const's in groupid.c cause massive copying to stack.
        first codeword [ unused bits not reset to 0 ]
   115- gred_rfrac_simple(n,d) [ basic constructor for t_RFRAC n/d ] did not
        cater for d = constant polynomial
+  116- RgX_extgcd created invalid objects in trivial cases [ gen_0 used by
+       RgX-only routines ]
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]

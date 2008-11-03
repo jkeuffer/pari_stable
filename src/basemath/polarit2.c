@@ -1972,10 +1972,54 @@ RgX_simpletype(GEN x)
   return T;
 }
 
+/* x an RgX, y a scalar */
 static GEN
 scalar_res(GEN x, GEN y, GEN *U, GEN *V)
 {
-  *V=gpowgs(y,degpol(x)-1); *U=gen_0; return gmul(y,*V);
+  *V = gpowgs(y,degpol(x)-1);
+  *U = gen_0; return gmul(y, *V);
+}
+
+static int
+subres_step(GEN *u, GEN *v, GEN *g, GEN *h, GEN *uze, GEN *um1,
+            long *dr, long *signh)
+{
+  GEN u0, c, r, q = RgX_pseudodivrem(*u,*v, &r);
+  long du, dv, degq;
+
+  *dr = lg(r); if (*dr == 2) return 0;
+  du = degpol(*u);
+  dv = degpol(*v);
+  degq = du - dv;
+  if (*um1 == gen_1)
+    u0 = gpowgs(gel(*v,dv+2),degq+1);
+  else if (*um1 == gen_0)
+    u0 = gen_0;
+  else /* except in those 2 cases, um1 is an RgX */
+    u0 = RgX_Rg_mul(*um1, gpowgs(gel(*v,dv+2),degq+1));
+
+  if (*uze == gen_0) /* except in that case, uze is an RgX */
+    u0 = scalarpol(u0, varn(*u)); /* now an RgX */
+  else
+    u0 = gsub(u0, gmul(q,*uze));
+
+  *um1 = *uze;
+  *uze = u0; /* uze <- lead(v)^(degq + 1) * um1 - q * uze */
+
+  *u = *v; c = *g; *g  = leading_term(*u);
+  switch(degq)
+  {
+    case 0: break;
+    case 1:
+      c = gmul(*h,c); *h = *g; break;
+    default:
+      c = gmul(gpowgs(*h,degq), c);
+      *h = gdivexact(gpowgs(*g,degq), gpowgs(*h,degq-1));
+  }
+  *v  = RgX_Rg_divexact(r,c);
+  *uze= RgX_Rg_divexact(*uze,c);
+  if (both_odd(du, dv)) *signh = -*signh;
+  return (*dr > 3);
 }
 
 /* compute U, V s.t Ux + Vy = resultant(x,y) */
@@ -1983,8 +2027,8 @@ GEN
 subresext(GEN x, GEN y, GEN *U, GEN *V)
 {
   pari_sp av, av2, tetpil, lim;
-  long dx, dy, signh, tx = typ(x), ty = typ(y);
-  GEN z, g, h, p1, cu, cv, u, v, um1, uze, vze;
+  long dx, dy, dr, dv, signh, tx = typ(x), ty = typ(y);
+  GEN r, z, g, h, p1, cu, cv, u, v, um1, uze, vze;
   GEN *gptr[3];
 
   if (!is_extscalar_t(tx) || !is_extscalar_t(ty)) pari_err(typeer,"subresext");
@@ -2015,45 +2059,26 @@ subresext(GEN x, GEN y, GEN *U, GEN *V)
   um1 = gen_1; uze = gen_0;
   for(;;)
   {
-    GEN r, q = RgX_pseudodivrem(u,v, &r);
-    long du, dv, degq, dr = lg(r);
-    if (dr == 2) { *U = *V = gen_0; avma = av; return gen_0; }
-
-    du = degpol(u); dv = degpol(v); degq = du-dv;
-    /* lead(v)^(degq + 1) * um1 - q * uze */
-    p1 = gsub(gmul(gpowgs(gel(v,dv+2),degq+1),um1), gmul(q,uze));
-    um1 = uze; uze = p1;
-    u = v; p1 = g; g = leading_term(u);
-    switch(degq)
-    {
-      case 0: break;
-      case 1: p1 = gmul(h,p1); h = g; break;
-      default:
-	p1 = gmul(gpowgs(h,degq),p1);
-	h = gdivexact(gpowgs(g,degq), gpowgs(h,degq-1));
-    }
-    if (both_odd(du, dv)) signh = -signh;
-    v  = RgX_Rg_divexact(r,p1);
-    uze= RgX_Rg_divexact(uze,p1);
-    if (dr == 3) {
-      z = gel(v,2);
-      if (dv > 1)
-      { /* z = gdivexact(gpowgs(z,dv), gpowgs(h,dv-1)); */
-	p1 = gpowgs(gdiv(z,h),dv-1);
-	z = gmul(z,p1); uze = gmul(uze,p1);
-      }
-      break;
-    }
+    if (!subres_step(&u, &v, &g, &h, &uze, &um1, &signh, &dr)) break;
     if (low_stack(lim,stack_lim(av2,1)))
     {
       if(DEBUGMEM>1) pari_warn(warnmem,"subresext, dr = %ld",dr);
       gerepileall(av2,6, &u,&v,&g,&h,&uze,&um1);
     }
   }
-  if (signh < 0) { z = gneg_i(z); uze = gneg_i(uze); }
-  p1 = gsub(z, gmul(uze,x));
-  vze = RgX_divrem(p1, y, &p1);
-  if (!gcmp0(p1)) pari_warn(warner,"inexact computation in subresext");
+  /* uze an RgX */
+  if (dr == 2) { *U = *V = gen_0; avma = av; return gen_0; }
+  z = gel(v,2); dv = degpol(v);
+  if (dv > 1)
+  { /* z = gdivexact(gpowgs(z,dv), gpowgs(h,dv-1)); */
+    p1 = gpowgs(gdiv(z,h),dv-1);
+    z = gmul(z,p1);
+    uze = RgX_Rg_mul(uze, p1);
+  }
+  if (signh < 0) { z = gneg_i(z); uze = RgX_neg(uze); }
+
+  vze = RgX_divrem(Rg_RgX_sub(z, RgX_mul(uze,x)), y, &r);
+  if (signe(r)) pari_warn(warner,"inexact computation in subresext");
   /* uze ppart(x) + vze ppart(y) = z = resultant(ppart(x), ppart(y)), */
   p1 = gen_1;
   if (cu) p1 = gmul(p1, gpowgs(cu,dy));
@@ -2063,11 +2088,12 @@ subresext(GEN x, GEN y, GEN *U, GEN *V)
 
   tetpil = avma;
   z = gmul(z,p1);
-  *U = gmul(uze,cu);
-  *V = gmul(vze,cv);
-  gptr[0]=&z; gptr[1]=U; gptr[2]=V;
-  gerepilemanysp(av,tetpil,gptr,3);
-  return z;
+  *U = RgX_Rg_mul(uze,cu);
+  *V = RgX_Rg_mul(vze,cv);
+  gptr[0] = &z;
+  gptr[1] = U;
+  gptr[2] = V;
+  gerepilemanysp(av,tetpil,gptr,3); return z;
 }
 
 static GEN
@@ -2102,7 +2128,8 @@ GEN
 RgX_extgcd(GEN x, GEN y, GEN *U, GEN *V)
 {
   pari_sp av, av2, tetpil, lim;
-  long dx, dy, tx = typ(x), ty = typ(y);
+  long dr, signh; /* junk */
+  long dx, dy, vx, tx = typ(x), ty = typ(y);
   GEN z, g, h, p1, cu, cv, u, v, um1, uze, vze, *gptr[3];
 
   if (!is_extscalar_t(tx) || !is_extscalar_t(ty)) pari_err(typeer,"RgX_gcd");
@@ -2116,9 +2143,10 @@ RgX_extgcd(GEN x, GEN y, GEN *U, GEN *V)
     return scalar_bezout(y,x,V,U);
   }
   if (ty != t_POL) return scalar_bezout(x,y,U,V);
-  if (varn(x) != varn(y))
-    return varncmp(varn(x), varn(y)) < 0? scalar_bezout(x,y,U,V)
-					: scalar_bezout(y,x,V,U);
+  vx = varn(x);
+  if (vx != varn(y))
+    return varncmp(vx, varn(y)) < 0? scalar_bezout(x,y,U,V)
+				   : scalar_bezout(y,x,V,U);
   dx = degpol(x); dy = degpol(y);
   if (dx < dy) { pswap(U,V); lswap(dx,dy); swap(x,y); }
   if (dy==0) return scalar_bezout(x,y,U,V);
@@ -2130,45 +2158,35 @@ RgX_extgcd(GEN x, GEN y, GEN *U, GEN *V)
   um1 = gen_1; uze = gen_0;
   for(;;)
   {
-    GEN r, q = RgX_pseudodivrem(u,v, &r);
-    long du, dv, degq, dr = lg(r);
-    if (dr == 2) break;
-
-    du = degpol(u); dv = degpol(v); degq = du-dv;
-    p1 = gsub(gmul(gpowgs(gel(v,dv+2),degq+1),um1), gmul(q,uze));
-    um1 = uze; uze = p1;
-    u = v; p1 = g; g  = leading_term(u);
-    switch(degq)
-    {
-      case 0: break;
-      case 1:
-	p1 = gmul(h,p1); h = g; break;
-      default:
-	p1 = gmul(gpowgs(h,degq), p1);
-	h = gdiv(gpowgs(g,degq), gpowgs(h,degq-1));
-    }
-    v  = RgX_Rg_divexact(r,p1);
-    uze= RgX_Rg_divexact(uze,p1);
-    if (dr==3) break;
+    if (!subres_step(&u, &v, &g, &h, &uze, &um1, &signh, &dr)) break;
     if (low_stack(lim,stack_lim(av2,1)))
     {
       if(DEBUGMEM>1) pari_warn(warnmem,"RgX_extgcd, dr = %ld",dr);
       gerepileall(av2,6,&u,&v,&g,&h,&uze,&um1);
     }
   }
-
-  vze = RgX_divrem(RgX_sub(v, gmul(uze,x)), y, &p1);
-  if (!gcmp0(p1)) pari_warn(warner,"inexact computation in RgX_extgcd");
-  if (cu) uze = RgX_Rg_div(uze,cu);
-  if (cv) vze = RgX_Rg_div(vze,cv);
-  p1 = ginv(content(v));
+  if (uze != gen_0) {
+    GEN r;
+    vze = RgX_divrem(RgX_sub(v, RgX_mul(uze,x)), y, &r);
+    if (signe(r)) pari_warn(warner,"inexact computation in RgX_extgcd");
+    if (cu) uze = RgX_Rg_div(uze,cu);
+    if (cv) vze = RgX_Rg_div(vze,cv);
+    p1 = ginv(content(v));
+  }
+  else /* y | x */
+  { 
+    vze = pol_1(vx);
+    uze = zeropol(vx);
+    p1 = gen_1;
+  }
   if (must_negate(v)) p1 = gneg(p1);
-
   tetpil = avma;
+  z = RgX_Rg_mul(v,p1);
   *U = RgX_Rg_mul(uze,p1);
   *V = RgX_Rg_mul(vze,p1);
-  z = RgX_Rg_mul(v,p1);
-  gptr[0]=U; gptr[1]=V; gptr[2]=&z;
+  gptr[0] = &z;
+  gptr[1] = U;
+  gptr[2] = V;
   gerepilemanysp(av,tetpil,gptr,3); return z;
 }
 
