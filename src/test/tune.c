@@ -209,14 +209,14 @@ static double speed_Flx_mul(speed_param *s)
 static double speed_Flx_karamul(speed_param *s)
 { ulong p = DFLT_mod; enable(s); TIME_FUN(Flx_mul(s->x, s->y, p)); }
 
-static double speed_Flxq_mul(speed_param *s)
+static double speed_Flx_rem(speed_param *s)
 { ulong p = DFLT_mod;
-  GEN T = rand_NFlx(degpol(s->x));
-  disable(s); TIME_FUN(Flxq_mul(s->x, s->y, T, p)); }
-static double speed_Flxq_mul_mg(speed_param *s)
+  GEN x = rand_NFlx((degpol(s->x)-1)*2); disable(s);
+  TIME_FUN(Flx_rem(x, s->x, p)); }
+static double speed_Flx_rem_mg(speed_param *s)
 { ulong p = DFLT_mod;
-  GEN T = rand_NFlx(degpol(s->x));
-  enable(s); TIME_FUN(Flxq_mul(s->x, s->y, T, p)); }
+  GEN x = rand_NFlx((degpol(s->x)-1)*2); enable(s);
+  TIME_FUN(Flx_rem(x, s->x, p)); }
 
 #define INIT_RED(s, op)                                 \
   long i, lx = lg(s->x);                                \
@@ -284,7 +284,7 @@ static tune_param param[] = {
 				   speed_Flx_inv,speed_Flx_invnewton,0.3},
 {0,  var(Flx_POW_MONTGOMERY_LIMIT),t_NFlx,1,0,
 				   speed_Flxq_pow_redc,speed_Flxq_pow_mod},
-{0,   var(Flx_MULQ_MONTGOMERY_LIMIT), t_NFlx, 10,0, speed_Flxq_mul,speed_Flxq_mul_mg,0.1},
+{0,  var(Flx_REM_MONTGOMERY_LIMIT),t_NFlx,10,0, speed_Flx_rem,speed_Flx_rem_mg,0.1},
 {0,  var(RgX_MUL_LIMIT),          t_FpX, 4,0, speed_RgX_mul,speed_RgX_karamul},
 {0,  var(RgX_SQR_LIMIT),          t_FpX, 4,0, speed_RgX_sqr,speed_RgX_karasqr},
 };

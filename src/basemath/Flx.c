@@ -720,8 +720,8 @@ Flx_pow(GEN x, long n, ulong p)
 }
 
 /* separate from Flx_divrem for maximal speed. */
-GEN
-Flx_rem(GEN x, GEN y, ulong p)
+static GEN
+Flx_rem_basecase(GEN x, GEN y, ulong p)
 {
   pari_sp av;
   GEN z, c;
@@ -785,6 +785,21 @@ Flx_rem(GEN x, GEN y, ulong p)
   i = dy-1; while (i>=0 && !c[i]) i--;
   avma=av;
   return Flx_renormalize(c-2, i+3);
+}
+
+GEN
+Flx_rem(GEN x, GEN y, ulong p)
+{
+  long dy = degpol(y), dx = degpol(x);
+  if (dy > dx) return Flx_copy(x);
+  if (lg(y) <= Flx_REM_MONTGOMERY_LIMIT || dx>2*dy-2)
+    return Flx_rem_basecase(x,y,p);
+  else
+  {
+    pari_sp av=avma;
+    GEN mg = Flx_invmontgomery(y, p);
+    return gerepileupto(av, Flx_rem_montgomery(x, mg, y, p));
+  }
 }
 
 /* as FpX_divrem but working only on ulong types.
@@ -1066,7 +1081,7 @@ Flx_rem_montgomery(GEN x, GEN mg, GEN T, ulong p)
   z=Flx_mulspec(z+2,T+2,p,lgpol(z),lt);        /* z *= pol        lz<=ld+lt*/
   avma=ltop;
   z=Flx_subspec(x+2,z+2,p,lt,minss(lt,lgpol(z)));/* z = x - z       lz<=lt */
-  z[1]=T[1];
+  z[1]=x[1];
   return z;
 }
 
@@ -1403,22 +1418,14 @@ Flv_polint(GEN xa, GEN ya, ulong p, long vs)
 GEN
 Flxq_mul(GEN x,GEN y,GEN T,ulong p)
 {
-  GEN z = Flx_mul(x,y,p);
-  long lT = lg(T);
-  if (lT > lg(z)) return z;
-  if (lT < Flx_MULQ_MONTGOMERY_LIMIT) return Flx_rem(z,T,p);
-  return Flx_rem_montgomery(z, Flx_invmontgomery(T, p), T, p);
+  return Flx_rem(Flx_mul(x,y,p),T,p);
 }
 
 /* Square of y in Z/pZ[X]/(T), as t_VECSMALL. */
 GEN
-Flxq_sqr(GEN y,GEN T,ulong p)
+Flxq_sqr(GEN x,GEN T,ulong p)
 {
-  GEN z = Flx_sqr(y,p);
-  long lT = lg(T);
-  if (lT > lg(z)) return z;
-  if (lT < Flx_MULQ_MONTGOMERY_LIMIT) return Flx_rem(z,T,p);
-  return Flx_rem_montgomery(z, Flx_invmontgomery(T, p), T, p);
+  return Flx_rem(Flx_sqr(x,p),T,p);
 }
 
 typedef struct {
