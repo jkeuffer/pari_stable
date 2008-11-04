@@ -1982,7 +1982,7 @@ scalar_res(GEN x, GEN y, GEN *U, GEN *V)
 
 static int
 subres_step(GEN *u, GEN *v, GEN *g, GEN *h, GEN *uze, GEN *um1,
-            long *dr, long *signh)
+            long *signh, long *dr)
 {
   GEN u0, c, r, q = RgX_pseudodivrem(*u,*v, &r);
   long du, dv, degq;
