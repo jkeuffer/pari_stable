@@ -2095,17 +2095,17 @@ init_spec_FqXQ_pow(GEN X, GEN q, GEN u, GEN T, GEN p)
   gel(S,1) = x;
   if ((degpol(x)<<1) < degpol(T)) {
     for (i=2; i < n; i++)
-      gel(S,i) = FqX_rem(gmul(gel(S,i-1), x), u, T,p);
+      gel(S,i) = FqX_rem(FqX_mul(gel(S,i-1), x, T,p), u, T,p);
   } else {
     for (i=2; i < n; i++)
-      gel(S,i) = (i&1)? FqX_rem(gmul(gel(S,i-1), x), u, T,p)
-		      : FqX_rem(gsqr(gel(S,i>>1)), u, T,p);
+      gel(S,i) = (i&1)? FqX_rem(FqX_mul(gel(S,i-1), x, T,p), u, T,p)
+		      : FqX_rem(FqX_sqr(gel(S,i>>1), T,p), u, T,p);
   }
   for (i=1; i < n; i++) gel(S,i) = to_Kronecker(gel(S,i), T);
   return S;
 }
 
-/* compute x^q, S is as above */
+/* compute x^q, x an FqX. S is as above (vector of FpX, Kronecker forms) */
 static GEN
 spec_FqXQ_pow(GEN x, GEN S, GEN T, GEN p)
 {
@@ -2114,11 +2114,21 @@ spec_FqXQ_pow(GEN x, GEN S, GEN T, GEN p)
   long i, dx = degpol(x);
 
   for (i = 1; i <= dx; i++)
-  {
-    GEN d, c = gel(x0,i);
-    if (gcmp0(c)) continue;
-    d = gel(S,i); if (!gcmp1(c)) d = gmul(c,d);
-    z = gadd(z, d);
+  { /* NB: variables are inconsistant in there. Coefficients of x must be
+     * treated as if they had the same variable as S */
+    GEN d = gel(S,i), c = gel(x0,i);
+    if (!signe(c)) continue;
+    if (typ(c) == t_INT)
+    {
+      if (is_pm1(c)) { if (signe(c) < 0) d = FpX_neg(d,p); }
+      else d = FpX_Fp_mul(d, c, p);
+    }
+    else /* FpX */
+    {
+      if (!degpol(c)) d = FpX_Fp_mul(d, gel(c,2), p);
+      else d = FpX_mul(d, c, p);
+    }
+    z = FpX_add(z, d, p);
     if (low_stack(lim, stack_lim(av,1)))
     {
       if(DEBUGMEM>1) pari_warn(warnmem,"spec_FqXQ_pow");
