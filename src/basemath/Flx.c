@@ -192,23 +192,13 @@ Flx_renormalize(GEN /*in place*/ x, long lx)
   setlg(x, i+1); return x;
 }
 
-/*Do not renormalize. Must not use z[0],z[1]*/
-static GEN
-Flx_red_lg_i(GEN z, long l, ulong p)
-{
-  long i;
-  ulong *y=(ulong *)z;
-  GEN x = cgetg(l, t_VECSMALL);
-  for (i=2; i<l; i++) x[i] = y[i]%p;
-  return x;
-}
-
 GEN
 Flx_red(GEN z, ulong p)
 {
-  long l = lg(z);
-  GEN x = Flx_red_lg_i(z,l,p);
+  long i, l = lg(z);
+  GEN x = cgetg(l, t_VECSMALL);
   x[1] = z[1];
+  for (i=2; i<l; i++) x[i] = ((ulong) z[i])%p;
   return Flx_renormalize(x,l);
 }
 
@@ -485,11 +475,20 @@ Flx_mulspec_basecase(GEN x, GEN y, ulong p, long nx, long ny)
   z -= 2; return z;
 }
 
+static GEN
+int_to_Flx(GEN z, ulong p)
+{
+  long i, l = lgefint(z);
+  GEN x = cgetg(l, t_VECSMALL);
+  for (i=2; i<l; i++) x[i] = ((ulong) z[i])%p;
+  return Flx_renormalize(x, l);
+}
+
 INLINE GEN
 Flx_mulspec_mulii(GEN a, GEN b, ulong p, long na, long nb)
 {
   GEN z=muliispec(a,b,na,nb);
-  return Flx_red_lg_i(z,lgefint(z),p);
+  return int_to_Flx(z,p);
 }
 
 static GEN
@@ -649,7 +648,7 @@ static GEN
 Flx_sqrspec_sqri(GEN a, ulong p, long na)
 {
   GEN z=sqrispec(a,na);
-  return Flx_red_lg_i(z,lgefint(z),p);
+  return int_to_Flx(z,p);
 }
 
 static GEN
