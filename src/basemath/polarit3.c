@@ -2718,6 +2718,7 @@ QXQ_inv(GEN A, GEN B)
   for(;;)
   {
     GEN a, b, qp, Up, Vp;
+    int stable;
 
     NEXT_PRIME_VIADIFF_CHECK(p,d);
     a = ZX_to_Flx(A, p);
@@ -2733,8 +2734,9 @@ QXQ_inv(GEN A, GEN B)
     }
     if (DEBUGLEVEL>5) msgtimer("QXQ_inv: mod %ld (bound 2^%ld)", p,expi(q));
     qp = muliu(q,p);
-    if (ZX_incremental_CRT(&U, Up, q,qp, p) &&
-        ZX_incremental_CRT(&V, Vp, q,qp, p))
+    stable = ZX_incremental_CRT(&U, Up, q,qp, p);
+    stable&= ZX_incremental_CRT(&V, Vp, q,qp, p);
+    if (stable)
     { /* all stable: check divisibility */
       GEN res = ZX_add(ZX_mul(A,U), ZX_mul(B,V));
       if (degpol(res) == 0) {
