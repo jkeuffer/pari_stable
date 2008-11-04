@@ -2189,7 +2189,6 @@ gsqr(GEN x)
     case t_POL:
     {
       GEN a = x, p = NULL, pol = NULL;
-      long vx = varn(x);
       av = avma;
       if (ff_poltype(&x,&p,&pol))
       {
@@ -2199,7 +2198,7 @@ gsqr(GEN x)
 	z = gerepileupto(av, z);
       }
       else { avma = av; z = RgX_sqr(a); }
-      setvarn(z, vx); return z;
+      return z;
     }
 
     case t_SER:

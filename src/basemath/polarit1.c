@@ -2126,7 +2126,7 @@ spec_FqXQ_pow(GEN x, GEN S, GEN T, GEN p)
     }
   }
   z = FpXQX_from_Kronecker(z, T, p);
-  setvarn(z, varn(x)); return gerepileupto(av, z);
+  return gerepileupto(av, z);
 }
 
 static long

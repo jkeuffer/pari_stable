@@ -337,10 +337,10 @@ FpXQX_from_Kronecker(GEN Z, GEN T, GEN p)
 {
   long i,j,lx,l, N = (degpol(T)<<1) + 1;
   GEN x, t = cgetg(N,t_POL), z = FpX_red(Z, p);
-  t[1] = T[1] & VARNBITS;
+  t[1] = T[1];
   l = lg(z); lx = (l-2) / (N-2);
   x = cgetg(lx+3,t_POL);
-  x[1] = evalvarn(0);
+  x[1] = z[1];
   for (i=2; i<lx+2; i++)
   {
     for (j=2; j<N; j++) t[j] = z[j];
@@ -371,27 +371,21 @@ FpXQX_red(GEN z, GEN T, GEN p)
 GEN
 FpXQX_mul(GEN x, GEN y, GEN T, GEN p)
 {
-  pari_sp ltop=avma;
-  GEN z,kx,ky;
-  long vx = minss(varn(x),varn(y));
-  kx= to_Kronecker(x,T);
-  ky= to_Kronecker(y,T);
-  z = RgX_mulspec(ky+2, kx+2, lgpol(ky), lgpol(kx));
-  z = FpXQX_from_Kronecker(z,T,p);
-  setvarn(z,vx);/*RgX_mulspec and FpXQX_from_Kronecker are not varn-clean*/
-  return gerepileupto(ltop,z);
+  pari_sp av = avma;
+  GEN z, kx, ky;
+  kx = to_Kronecker(x,T);
+  ky = to_Kronecker(y,T);
+  z = FpXQX_from_Kronecker(ZX_mul(ky,kx), T, p);
+  return gerepileupto(av, z);
 }
 GEN
 FpXQX_sqr(GEN x, GEN T, GEN p)
 {
-  pari_sp ltop=avma;
-  GEN z,kx;
-  long vx=varn(x);
+  pari_sp av = avma;
+  GEN z, kx;
   kx= to_Kronecker(x,T);
-  z = RgX_sqrspec(kx+2, lgpol(kx));
-  z = FpXQX_from_Kronecker(z,T,p);
-  setvarn(z,vx);/*RgX_mulspec and FpXQX_from_Kronecker are nor varn-clean*/
-  return gerepileupto(ltop,z);
+  z = FpXQX_from_Kronecker(ZX_sqr(kx), T, p);
+  return gerepileupto(av, z);
 }
 
 GEN
@@ -574,7 +568,6 @@ FpXYQQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p)
 
 typedef struct {
   GEN T, p, S;
-  long v;
 } kronecker_muldata;
 
 static GEN
@@ -582,7 +575,6 @@ FpXQYQ_red(void *data, GEN x)
 {
   kronecker_muldata *D = (kronecker_muldata*)data;
   GEN t = FpXQX_from_Kronecker(x, D->T,D->p);
-  setvarn(t, D->v);
   t = FpXQX_divrem(t, D->S,D->T,D->p, ONLY_REM);
   return to_Kronecker(t,D->T);
 }
@@ -615,14 +607,11 @@ FpXQYQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p)
   }
   else
   {
-    long v = varn(x);
     D.S = S;
     D.T = T;
     D.p = p;
-    D.v = v;
     y = leftright_pow(to_Kronecker(x,T), n, (void*)&D, &FpXQYQ_sqr, &FpXQYQ_mul);
     y = FpXQX_from_Kronecker(y, T,p);
-    setvarn(y, v);
   }
   return gerepileupto(ltop, y);
 }
@@ -1352,9 +1341,9 @@ from_Kronecker(GEN z, GEN T)
 {
   long i,j,lx,l = lg(z), N = (degpol(T)<<1) + 1;
   GEN x, t = cgetg(N,t_POL);
-  t[1] = T[1] & VARNBITS;
+  t[1] = T[1];
   lx = (l-2) / (N-2); x = cgetg(lx+3,t_POL);
-  x[1] = evalvarn(0);
+  x[1] = z[1];
   T = gcopy(T);
   for (i=2; i<lx+2; i++, z+= N-2)
   {
@@ -1370,7 +1359,7 @@ from_Kronecker(GEN z, GEN T)
 /* Kronecker substitution, RgYX -> RgY :
  * Q a RgY of degree n, P(X) = sum P_i * X^i, where the deg P_i are t_POLMOD
  * mod Q or RgY of degree < n.
- * Lift the P_i which are t_POLMOD, then return P( Y^(2n-1) ) */
+ * Lift the P_i which are t_POLMOD, then return subst(P( Y^(2n-1) ), Y,X) */
 GEN
 to_Kronecker(GEN P, GEN Q)
 {
@@ -1394,7 +1383,7 @@ to_Kronecker(GEN P, GEN Q)
     if (i == lx-1) break;
     for (   ; j < N; j++) gel(y,k++) = gen_0;
   }
-  y[1] = Q[1]; setlg(y, k); return y;
+  y[1] = P[1]; setlg(y, k); return y;
 }
 
 /*******************************************************************/
