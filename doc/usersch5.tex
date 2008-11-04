@@ -4778,6 +4778,8 @@ multiple of $x/d$. If $x$ and $y$ are both monic, then $d$ is monic and
 \kbd{*pX} is exactly $x/d$. Not memory clean if the gcd is $1$
 (in that case \kbd{*pX} is set to $x$).
 
+\fun{GEN}{ZX_content}{GEN x} returns the content of the \kbd{ZX} $x$.
+
 \fun{GEN}{QX_gcd}{GEN x,GEN y} returns a gcd of the \kbd{QX} $x$ and $y$.
 
 \fun{GEN}{ZX_to_monic}{GEN q GEN *L} given $q$ a non-zero \kbd{ZX},
@@ -4865,8 +4867,14 @@ multiple of $P/d$. If $P$ and $Q$ are both monic, then $d$ is monic and
 \kbd{*Pnew} is exactly $P/d$. Not memory clean if the gcd is $1$
 (in that case \kbd{*Pnew} is set to $P$).
 
-\fun{GEN}{QXQ_inv}{GEN A, GEN B} returns the inverse of \kbd{A} modulo \kbd{B}
-where \kbd{A} and \kbd{B} are \kbd{QX}s.
+\fun{GEN}{QXQ_inv}{GEN A, GEN B} returns the inverse of $A$ modulo $B$
+where $A$ is a \kbd{QX} and $B$ is a \kbd{ZX}. Should you need this for 
+a \kbd{QX} $B$, just use 
+\bprog
+  QXQ_inv(A, Q_primpart(B));
+@prog\noindent But in all cases where modular arithmetic modulo $B$ is
+desired, it is much more efficient to replace $B$ by \kbd{Q\_primpart$(B)$}
+once and for all.
 
 \fun{GEN}{QXQ_powers}{GEN x, long n, GEN T} returns $[\kbd{x}^0, \dots,
 \kbd{x}^\kbd{n}]$ as \kbd{RgXQ\_powers} would, but in a more efficient way when

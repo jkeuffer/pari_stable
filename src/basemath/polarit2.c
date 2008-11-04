@@ -1637,7 +1637,7 @@ primpart(GEN x) { return primitive_part(x, NULL); }
 GEN
 Q_content(GEN x)
 {
-  long i, l = lg(x);
+  long i, l;
   GEN d;
   pari_sp av;
 
@@ -1659,14 +1659,29 @@ Q_content(GEN x)
     case t_POL:
       l = lg(x); if (l == 2) return gen_0;
       av = avma; d = Q_content(gel(x,2));
-      for (i=3; i<l; i++)
-	d = Q_gcd(d, Q_content(gel(x,i)));
+      for (i=3; i<l; i++) d = Q_gcd(d, Q_content(gel(x,i)));
       return gerepileupto(av, d);
     case t_POLMOD: return Q_content(gel(x,2));
     case t_COMPLEX: return Q_gcd(Q_content(gel(x,1)), Q_content(gel(x,2)));
   }
   pari_err(typeer,"Q_content");
   return NULL; /* not reached */
+}
+
+GEN
+ZX_content(GEN x)
+{
+  long i, l = lg(x);
+  GEN d;
+  pari_sp av;
+
+  if (l == 2) return gen_0;
+  d = gel(x,2);
+  if (l == 3) return absi(d);
+  av = avma;
+  for (i=3; !is_pm1(d) && i<l; i++) d = gcdii(d, gel(x,i));
+  if (signe(d) < 0) d = absi(d);
+  return gerepileuptoint(av, d);
 }
 
 /* NOT MEMORY CLEAN (because of t_FRAC).

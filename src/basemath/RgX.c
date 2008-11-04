@@ -1028,10 +1028,23 @@ RgX_sqrspec(GEN a, long na)
   c0 = addmulXncopy(c0,c,n0);
   return shiftpol_ip(gerepileupto(av,c0), v);
 }
+
+int
+is_ZX(GEN x)
+{
+  long i, l = lg(x);
+  for (i=2; i<l; i++)
+    if (typ(gel(x,i))!=t_INT)
+      return 0;
+  return 1;
+}
+
 GEN
 RgX_mul(GEN x,GEN y)
 {
-  GEN z = RgX_mulspec(y+2, x+2, lgpol(y), lgpol(x));
+  GEN z;
+  if (is_ZX(x) && is_ZX(y)) return ZX_mul(x,y);
+  z = RgX_mulspec(y+2, x+2, lgpol(y), lgpol(x));
   setvarn(z,varn(x)); return z;
 }
 GEN

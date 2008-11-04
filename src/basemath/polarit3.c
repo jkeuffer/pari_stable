@@ -2699,30 +2699,26 @@ QX_gcd(GEN A0, GEN B0)
   return gerepileupto(av, gmul(_gcd(a,b), ZX_gcd(A, B)));
 }
 
-/* lift(1 / Mod(A,B)). B0 a t_POL, A0 a scalar or a t_POL. Rational coeffs */
+/* lift(1 / Mod(A,B)). B a ZX, A a scalar or a QX */
 GEN
-QXQ_inv(GEN A0, GEN B0)
+QXQ_inv(GEN A, GEN B)
 {
-  GEN a,b,D,A,B,q,qp,Up,Vp,U,V,res;
-  long stable;
+  GEN D, cU, q, U, V;
   ulong p;
   pari_sp av2, av = avma, avlim = stack_lim(av, 1);
   byteptr d;
 
-  if (typ(B0) != t_POL) pari_err(notpoler,"QXQ_inv");
-  if (typ(A0) != t_POL)
-  {
-    if (is_scalar_t(typ(A0))) return scalarpol(ginv(A0), varn(B0));
-    pari_err(notpoler,"QXQ_inv");
-  }
-  if (degpol(A0) < 15) return RgXQ_inv(A0,B0);
-  A = Q_primitive_part(A0, &D);
-  B = Q_primpart(B0);
+  if (is_scalar_t(typ(A))) return scalarpol(ginv(A), varn(B));
+  /* A a QX, B a ZX */
+  if (degpol(A) < 15) return RgXQ_inv(A,B);
+  A = Q_primitive_part(A, &D);
   /* A, B in Z[X] */
   av2 = avma; U = NULL;
   d = init_modular(&p);
   for(;;)
   {
+    GEN a, b, qp, Up, Vp;
+
     NEXT_PRIME_VIADIFF_CHECK(p,d);
     a = ZX_to_Flx(A, p);
     b = ZX_to_Flx(B, p);
@@ -2731,18 +2727,21 @@ QXQ_inv(GEN A0, GEN B0)
 
     if (!U)
     { /* First time */
-      U = ZX_init_CRT(Up,p,varn(A0));
-      V = ZX_init_CRT(Vp,p,varn(A0));
+      U = ZX_init_CRT(Up,p,varn(A));
+      V = ZX_init_CRT(Vp,p,varn(A));
       q = utoipos(p); continue;
     }
     if (DEBUGLEVEL>5) msgtimer("QXQ_inv: mod %ld (bound 2^%ld)", p,expi(q));
     qp = muliu(q,p);
-    stable  = ZX_incremental_CRT(&U, Up, q,qp, p);
-    stable &= ZX_incremental_CRT(&V, Vp, q,qp, p);
-    if (stable)
+    if (ZX_incremental_CRT(&U, Up, q,qp, p) &&
+        ZX_incremental_CRT(&V, Vp, q,qp, p))
     { /* all stable: check divisibility */
-      res = gadd(gmul(A,U), gmul(B,V));
-      if (degpol(res) == 0) break; /* DONE */
+      GEN res = ZX_add(ZX_mul(A,U), ZX_mul(B,V));
+      if (degpol(res) == 0) {
+        res = gel(res,2);
+        D = D? gmul(D, res): res;
+        break;
+      } /* DONE */
       if (DEBUGLEVEL) fprintferr("QXQ_inv: char 0 check failed");
     }
     q = qp;
@@ -2752,8 +2751,9 @@ QXQ_inv(GEN A0, GEN B0)
       gerepileall(av2, 3, &q,&U,&V);
     }
   }
-  D = D? gmul(D,res): res;
-  return gerepileupto(av, gdiv(U,D));
+  cU = ZX_content(U);
+  if (!is_pm1(cU)) { U = Q_div_to_int(U, cU); D = gdiv(D, cU); }
+  return gerepileupto(av, RgX_Rg_div(U, D));
 }
 
 /************************************************************************
