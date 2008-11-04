@@ -1868,32 +1868,27 @@ FlxX_swap(GEN x, long n, long ws)
   return FlxX_renormalize(y,ly);
 }
 
-/*Fix me should be  zxX_to_Kronecker since it does not use l*/
 GEN
-FlxX_to_Kronecker_spec(GEN P, long lp, GEN Q)
-{
-  /* P(X) = sum Mod(.,Q(Y)) * X^i, lift then set X := Y^(2n-1) */
-  long i,j,k,l;
-  long N = (degpol(Q)<<1) + 1;
-  GEN p1;
-  GEN y = cgetg((N-2)*lp + 2, t_VECSMALL)+2;
+zxX_to_Kronecker_spec(GEN P, long lp, GEN Q)
+{ /* P(X) = sum Pi(Y) * X^i, return P( Y^(2n-1) ) */
+  long i, j, k, l, N = (degpol(Q)<<1) + 1;
+  GEN y = cgetg((N-2)*lp + 2, t_VECSMALL) + 2;
   for (k=i=0; i<lp; i++)
   {
-    p1 = gel(P,i);
-    l = lg(p1);
-    for (j=2; j < l; j++) y[k++] = p1[j];
+    GEN c = gel(P,i);
+    l = lg(c);
+    for (j=2; j < l; j++) y[k++] = c[j];
     if (i == lp-1) break;
     for (   ; j < N; j++) y[k++] = 0;
   }
-  y-=2;
-  setlg(y, k+2); return y;
+  y -= 2;
+  y[1] = P[1]; setlg(y, k+2); return y;
 }
 
-/*Fix me should be  zxX_to_Kronecker since it does not use l*/
 GEN
-FlxX_to_Kronecker(GEN P, GEN Q)
+zxX_to_Kronecker(GEN P, GEN Q)
 {
-  GEN z = FlxX_to_Kronecker_spec(P+2, lg(P)-2, Q);
+  GEN z = zxX_to_Kronecker_spec(P+2, lg(P)-2, Q);
   z[1] = P[1]; return z;
 }
 
@@ -2019,7 +2014,7 @@ FlxX_recipspec(GEN x, long l, long n, long vs)
 
 /*Not stack clean.*/
 GEN
-FlxqX_from_Kronecker(GEN z, GEN T, ulong p)
+Kronecker_to_FlxqX(GEN z, GEN T, ulong p)
 {
   long i,j,lx,l, N = (degpol(T)<<1) + 1;
   GEN x, t = cgetg(N,t_VECSMALL);
@@ -2054,10 +2049,10 @@ FlxqX_mulspec(GEN x, GEN y, GEN T, ulong p, long lx, long ly)
 {
   pari_sp ltop=avma;
   GEN z,kx,ky;
-  kx= FlxX_to_Kronecker_spec(x,lx,T);
-  ky= FlxX_to_Kronecker_spec(y,ly,T);
+  kx= zxX_to_Kronecker_spec(x,lx,T);
+  ky= zxX_to_Kronecker_spec(y,ly,T);
   z = Flx_mul(ky, kx, p);
-  z = FlxqX_from_Kronecker(z,T,p);
+  z = Kronecker_to_FlxqX(z,T,p);
   return gerepileupto(ltop,z);
 }
 
@@ -2066,10 +2061,10 @@ FlxqX_mul(GEN x, GEN y, GEN T, ulong p)
 {
   pari_sp ltop=avma;
   GEN z,kx,ky;
-  kx= FlxX_to_Kronecker(x,T);
-  ky= FlxX_to_Kronecker(y,T);
+  kx= zxX_to_Kronecker(x,T);
+  ky= zxX_to_Kronecker(y,T);
   z = Flx_mul(ky, kx, p);
-  z = FlxqX_from_Kronecker(z,T,p);
+  z = Kronecker_to_FlxqX(z,T,p);
   return gerepileupto(ltop,z);
 }
 
@@ -2078,9 +2073,9 @@ FlxqX_sqr(GEN x, GEN T, ulong p)
 {
   pari_sp ltop=avma;
   GEN z,kx;
-  kx= FlxX_to_Kronecker(x,T);
+  kx= zxX_to_Kronecker(x,T);
   z = Flx_sqr(kx, p);
-  z = FlxqX_from_Kronecker(z,T,p);
+  z = Kronecker_to_FlxqX(z,T,p);
   return gerepileupto(ltop,z);
 }
 
@@ -2360,9 +2355,9 @@ static GEN
 FlxqXQ_red(void *data, GEN x)
 {
   FlxqX_kronecker_muldata *D = (FlxqX_kronecker_muldata*)data;
-  GEN t = FlxqX_from_Kronecker(x, D->T,D->p);
+  GEN t = Kronecker_to_FlxqX(x, D->T,D->p);
   t = FlxqX_divrem(t, D->S,D->T,D->p, ONLY_REM);
-  return FlxX_to_Kronecker(t,D->T);
+  return zxX_to_Kronecker(t,D->T);
 }
 static GEN
 FlxqXQ_mul(void *data, GEN x, GEN y) {
@@ -2378,9 +2373,9 @@ static GEN
 FlxqXQ_red_montgomery(void *data, GEN x)
 {
   FlxqX_kronecker_muldata *D = (FlxqX_kronecker_muldata*)data;
-  GEN t = FlxqX_from_Kronecker(x, D->T,D->p);
+  GEN t = Kronecker_to_FlxqX(x, D->T,D->p);
   t = FlxqX_rem_montgomery(t, D->S,D->mg,D->T,D->p);
-  return FlxX_to_Kronecker(t,D->T);
+  return zxX_to_Kronecker(t,D->T);
 }
 static GEN
 FlxqXQ_mul_montgomery(void *data, GEN x, GEN y) {
@@ -2409,16 +2404,16 @@ FlxqXQ_pow(GEN x, GEN n, GEN S, GEN T, ulong p)
   {
     /* We do not handle polynomials multiple of x yet */
     D.mg  = FlxqX_invmontgomery(S,T,p);
-    y = leftright_pow(FlxX_to_Kronecker(x,T), n,
+    y = leftright_pow(zxX_to_Kronecker(x,T), n,
 	(void*)&D, &FlxqXQ_sqr_montgomery, &FlxqXQ_mul_montgomery);
-    y = leftright_pow(FlxX_to_Kronecker(x,T), n,
+    y = leftright_pow(zxX_to_Kronecker(x,T), n,
 	(void*)&D, &FlxqXQ_sqr, &FlxqXQ_mul);
   }
   else
 #endif
-    y = leftright_pow(FlxX_to_Kronecker(x,T), n,
+    y = leftright_pow(zxX_to_Kronecker(x,T), n,
 	(void*)&D, &FlxqXQ_sqr, &FlxqXQ_mul);
-  y = FlxqX_from_Kronecker(y, T,p);
+  y = Kronecker_to_FlxqX(y, T,p);
   return gerepileupto(av0, y);
 }
 

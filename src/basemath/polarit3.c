@@ -333,7 +333,7 @@ FpXX_add(GEN x, GEN y, GEN p)
 /*******************************************************************/
 /*Not malloc nor warn-clean.*/
 GEN
-FpXQX_from_Kronecker(GEN Z, GEN T, GEN p)
+Kronecker_to_FpXQX(GEN Z, GEN T, GEN p)
 {
   long i,j,lx,l, N = (degpol(T)<<1) + 1;
   GEN x, t = cgetg(N,t_POL), z = FpX_red(Z, p);
@@ -375,7 +375,7 @@ FpXQX_mul(GEN x, GEN y, GEN T, GEN p)
   GEN z, kx, ky;
   kx = to_Kronecker(x,T);
   ky = to_Kronecker(y,T);
-  z = FpXQX_from_Kronecker(ZX_mul(ky,kx), T, p);
+  z = Kronecker_to_FpXQX(ZX_mul(ky,kx), T, p);
   return gerepileupto(av, z);
 }
 GEN
@@ -384,7 +384,7 @@ FpXQX_sqr(GEN x, GEN T, GEN p)
   pari_sp av = avma;
   GEN z, kx;
   kx= to_Kronecker(x,T);
-  z = FpXQX_from_Kronecker(ZX_sqr(kx), T, p);
+  z = Kronecker_to_FpXQX(ZX_sqr(kx), T, p);
   return gerepileupto(av, z);
 }
 
@@ -574,7 +574,7 @@ static GEN
 FpXQYQ_red(void *data, GEN x)
 {
   kronecker_muldata *D = (kronecker_muldata*)data;
-  GEN t = FpXQX_from_Kronecker(x, D->T,D->p);
+  GEN t = Kronecker_to_FpXQX(x, D->T,D->p);
   t = FpXQX_divrem(t, D->S,D->T,D->p, ONLY_REM);
   return to_Kronecker(t,D->T);
 }
@@ -611,7 +611,7 @@ FpXQYQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p)
     D.T = T;
     D.p = p;
     y = leftright_pow(to_Kronecker(x,T), n, (void*)&D, &FpXQYQ_sqr, &FpXQYQ_mul);
-    y = FpXQX_from_Kronecker(y, T,p);
+    y = Kronecker_to_FpXQX(y, T,p);
   }
   return gerepileupto(ltop, y);
 }
