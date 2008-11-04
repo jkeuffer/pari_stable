@@ -896,6 +896,30 @@ ordell(GEN e, GEN x, long prec)
   return gerepileupto(av,y);
 }
 
+GEN
+ellrandom(GEN e)
+{
+  GEN x, y, j;
+  pari_sp av = avma;
+  checksmallell(e);
+  j = gel(e,13);
+  switch(typ(j))
+  {
+    case t_INTMOD:
+    case t_FFELT:
+      for (;; avma = av)
+      {
+        x = genrand(j);
+        y = ordell(e, x, 0);
+        if (lg(y) > 1) break;
+      }
+      return gerepilecopy(av, mkvec2(x, gel(y,1)));
+    default:
+      pari_err(impl,"random point on elliptic curve over an infinite field");
+  }
+  return NULL; /* not reached */
+}
+
 /* n t_QUAD or t_COMPLEX, z != [0] */
 static GEN
 ellpow_CM(GEN e, GEN z, GEN n)

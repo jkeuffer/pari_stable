@@ -957,3 +957,22 @@ fflog(GEN x, GEN g, GEN o)
   if (typ(x)!=t_FFELT || typ(g)!=t_FFELT) pari_err(typeer,"fflog");
   return FF_log(x,g,o);
 }
+
+GEN
+ffrandom(GEN ff)
+{
+  ulong pp;
+  GEN r, T, p, z = _initFF(ff,&T,&p,&pp);
+  switch(ff[1])
+  {
+  case t_FF_FpXQ:
+    r = random_FpX(degpol(T), varn(T), p);
+    break;
+  case t_FF_F2xq:
+    r = random_F2x(F2x_degree(T), T[1]);
+    break;
+  default:
+    r = random_Flx(degpol(T), T[1], pp);
+  }
+  return _mkFF(ff,z,r);
+}

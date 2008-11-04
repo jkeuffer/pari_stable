@@ -515,6 +515,8 @@ BA 34- elliptic discrete logarithm function elllog()
 BA 35- direct implementation of ZX_mul, ZX_sqr using Kronecker's trick + mulii
    36- rnfisabelian GP function
    37- default 'recover'
+   38- more possibilities to draw "random" elements in natural sets using
+       random(), e.g. finite fields, elliptic curve over finite field.
 
   Removed
     1- obsolete GP functions printp, printp1. Either replace them by

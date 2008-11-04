@@ -1,0 +1,13 @@
+ff(p,f) = ffgen(ffinit(p,f), 'a);
+doell(a)= {
+  my(e, P);
+  e = ellinit([1,1,3,4,5]*a);
+  P = random(e); [P, ellisoncurve(e,P)];
+}
+doff(p,f)=my(a = ff(p,f)); print(random(a)); doell(a);
+
+setrand(1);
+random(Mod(1,3))
+doff(2,3)
+doff(precprime(2^32), 3)
+doff(nextprime(2^64), 3)

@@ -1304,6 +1304,7 @@ GEN     elllocalred(GEN e, GEN p1);
 GEN     elllog(GEN e, GEN a, GEN g, GEN o);
 GEN     ellminimalmodel(GEN E, GEN *ptv);
 GEN     ellorder(GEN e, GEN p, GEN o);
+GEN     ellrandom(GEN e);
 long    ellrootno(GEN e, GEN p);
 GEN     ellsigma(GEN om, GEN z, long flag, long prec);
 GEN     elltaniyama(GEN e, long prec);
@@ -1467,6 +1468,7 @@ GEN     ffgen(GEN T, long v);
 GEN     fflog(GEN x, GEN g, GEN o);
 GEN     fforder(GEN x, GEN o);
 GEN     ffprimroot(GEN x, GEN *o);
+GEN     ffrandom(GEN ff);
 int     is_Z_factor(GEN f);
 
 /* galconj.c */

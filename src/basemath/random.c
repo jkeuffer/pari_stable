@@ -164,7 +164,20 @@ randomi(GEN N)
 GEN
 genrand(GEN N)
 {
+  GEN z;
   if (!N) return utoi( random_bits(31) );
-  if (typ(N)!=t_INT || signe(N)<=0) pari_err(talker,"invalid bound in random");
-  return randomi(N);
+  switch(typ(N))
+  {
+    case t_INT:
+      if (signe(N)<=0) pari_err(talker,"invalid bound in random");
+      return randomi(N);
+    case t_INTMOD: 
+      z = cgetg(3, t_INTMOD);
+      gel(z,1) = icopy(gel(N,1));
+      gel(z,2) = randomi(gel(N,1)); return z;
+    case t_FFELT: 
+      return ffrandom(N);
+    case t_VEC:
+      return ellrandom(N);
+  }
 }
