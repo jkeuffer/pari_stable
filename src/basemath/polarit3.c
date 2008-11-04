@@ -1337,7 +1337,7 @@ FqX_normalize(GEN z, GEN T, GEN p)
  * i.e subst(lift(z), x, y^(2deg(z)-1)). Recover the "real" z, with
  * normalized coefficients */
 GEN
-from_Kronecker(GEN z, GEN T)
+Kronecker_to_mod(GEN z, GEN T)
 {
   long i,j,lx,l = lg(z), N = (degpol(T)<<1) + 1;
   GEN x, t = cgetg(N,t_POL);

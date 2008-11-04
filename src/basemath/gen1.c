@@ -2194,7 +2194,7 @@ gsqr(GEN x)
       {
 	z = ZX_sqr(x);
 	if (p) z = FpX_to_mod(z,p);
-	if (pol) z = from_Kronecker(z,pol);
+	if (pol) z = Kronecker_to_mod(z,pol);
 	z = gerepileupto(av, z);
       }
       else { avma = av; z = RgX_sqr(a); }
