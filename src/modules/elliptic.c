@@ -3069,6 +3069,7 @@ ap_bad_red(GEN e, GEN p)
     long c;
     if (!signe(c6)) return gen_0;
     c = mod8(c6);
+    if (!odd(c)) return gen_0;
     return (c == 3 || c == 5)? gen_m1: gen_1;
   }
   c6 = Rg_to_Fp(c6, p);
