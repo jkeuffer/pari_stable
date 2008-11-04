@@ -179,5 +179,8 @@ genrand(GEN N)
       return ffrandom(N);
     case t_VEC:
       return ellrandom(N);
+    default:
+      pari_err(typeer,"genrand");
+      return NULL;/*not reached*/
   }
 }
