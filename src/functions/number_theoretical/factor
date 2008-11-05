@@ -8,7 +8,7 @@ Help: factor(x,{lim}): factorization of x. lim is optional and can be set
 Description:
  (int, ?-1):vec        Z_factor($1)
  (gen, ?-1):vec        factor($1)
- (gen, gen):vec        factor0($1, $2)
+ (gen, small):vec      factor0($1, $2)
 Doc: general factorization function, where $x$ is a 
  rational (including integers), a complex number with rational
  real and imaginary parts, or a rational function (including polynomials).
