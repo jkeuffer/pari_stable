@@ -16,24 +16,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "paripriv.h"
 
-int
-RgX_is_rational(GEN x)
-{
-  long i;
-  for (i = lg(x)-1; i > 1; i--)
-    if (!is_rational_t(typ(gel(x,i)))) return 0;
-  return 1;
-}
-int
-RgX_is_monomial(GEN x)
-{
-  long i;
-  if (!signe(x)) return 0;
-  for (i=lg(x)-2; i>1; i--)
-    if (!isexactzero(gel(x,i))) return 0;
-  return 1;
-}
-
 long
 RgX_equal(GEN x, GEN y)
 {
@@ -1029,31 +1011,17 @@ RgX_sqrspec(GEN a, long na)
   return shiftpol_ip(gerepileupto(av,c0), v);
 }
 
-static int
-is_ZX(GEN x)
-{
-  long i, l = lg(x);
-  for (i=2; i<l; i++)
-    if (typ(gel(x,i))!=t_INT)
-      return 0;
-  return 1;
-}
-
 GEN
 RgX_mul(GEN x, GEN y)
 {
-  GEN z;
-  if (is_ZX(x) && is_ZX(y)) return ZX_mul(x,y);
-  z = RgX_mulspec(y+2, x+2, lgpol(y), lgpol(x));
+  GEN z = RgX_mulspec(y+2, x+2, lgpol(y), lgpol(x));
   setvarn(z,varn(x)); return z;
 }
 
 GEN
 RgX_sqr(GEN x)
 {
-  GEN z;
-  if (is_ZX(x)) return ZX_sqr(x);
-  z = RgX_sqrspec(x+2, lgpol(x));
+  GEN z = RgX_sqrspec(x+2, lgpol(x));
   setvarn(z,varn(x)); return z;
 }
 

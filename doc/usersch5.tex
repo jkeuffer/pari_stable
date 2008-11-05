@@ -5112,8 +5112,11 @@ on the stack. Suitable but inefficient for \kbd{gerepileupto}.)
 \fun{GEN}{RgXV_unscale}{GEN v, GEN h} apply \kbd{RgX\_unscale} to a vector
 of \kbd{RgX}.
 
-\fun{int}{RgX_is_rational}{GEN P} return 1 is the \kbd{RgX}~\kbd{P} hasonly
+\fun{int}{RgX_is_rational}{GEN P} return 1 is the \kbd{RgX}~$P$ has only
 rational coefficients (\typ{INT} and \typ{FRAC}), and 0 otherwise.
+
+\fun{int}{RgX_is_ZX}{GEN P} return 1 is the \kbd{RgX}~$P$ has only
+\typ{INT} coefficients, and 0 otherwise.
 
 \fun{int}{RgX_is_monomial}{GEN x} returns 1 (true) if \kbd{x} is a non-zero
 monomial in its main variable, 0~otherwise.

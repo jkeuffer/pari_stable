@@ -474,6 +474,32 @@ RgX_isscalar(GEN x)
   return 1;
 }
 
+INLINE int
+RgX_is_rational(GEN x)
+{
+  long i;
+  for (i = lg(x)-1; i > 1; i--)
+    if (!is_rational_t(typ(gel(x,i)))) return 0;
+  return 1;
+}
+INLINE int
+RgX_is_ZX(GEN x)
+{
+  long i;
+  for (i = lg(x)-1; i > 1; i--)
+    if (typ(gel(x,i)) != t_INT) return 0;
+  return 1;
+}
+INLINE int
+RgX_is_monomial(GEN x)
+{
+  long i;
+  if (!signe(x)) return 0;
+  for (i=lg(x)-2; i>1; i--)
+    if (!isexactzero(gel(x,i))) return 0;
+  return 1;
+}
+
 /********************************************************************/
 /**                                                                **/
 /**            Dynamic arrays implementation                       **/
