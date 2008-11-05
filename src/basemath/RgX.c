@@ -1029,7 +1029,7 @@ RgX_sqrspec(GEN a, long na)
   return shiftpol_ip(gerepileupto(av,c0), v);
 }
 
-int
+static int
 is_ZX(GEN x)
 {
   long i, l = lg(x);
@@ -1040,17 +1040,20 @@ is_ZX(GEN x)
 }
 
 GEN
-RgX_mul(GEN x,GEN y)
+RgX_mul(GEN x, GEN y)
 {
   GEN z;
   if (is_ZX(x) && is_ZX(y)) return ZX_mul(x,y);
   z = RgX_mulspec(y+2, x+2, lgpol(y), lgpol(x));
   setvarn(z,varn(x)); return z;
 }
+
 GEN
 RgX_sqr(GEN x)
 {
-  GEN z = RgX_sqrspec(x+2, lgpol(x));
+  GEN z;
+  if (is_ZX(x)) return ZX_sqr(x);
+  z = RgX_sqrspec(x+2, lgpol(x));
   setvarn(z,varn(x)); return z;
 }
 
