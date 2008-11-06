@@ -40,7 +40,10 @@ dirzetak0(GEN nf, ulong N)
     NEXT_PRIME_VIADIFF(p, d);
     court[2] = p;
     if (umodiu(index, p)) /* court does not divide index */
-      { vect = gel(FpX_degfact(pol,court),1); lx = lg(vect); }
+    { 
+      vect = gel(FpX_degfact(pol,court),1);
+      lx = lg(vect);
+    }
     else
     {
       GEN P = idealprimedec(nf,court); lx = lg(P); vect = cgetg(lx,t_VECSMALL);
@@ -50,7 +53,7 @@ dirzetak0(GEN nf, ulong N)
       for (i=1; i<lx; i++)
       {
         GEN NP = powiu(court, vect[i]); /* Norm P[i] */
-        ulong qn, q, k;
+        ulong qn, q;
 
         if (cmpiu(NP, N) > 0) break;
         qn = q = (ulong)NP[2];
@@ -58,8 +61,9 @@ dirzetak0(GEN nf, ulong N)
         /* c2[i] <- c[i] + sum_{k = 1}^{v_q(i)} c[i/q^k] for all i <= N */
         while (qn <= (ulong)N)
         {
+          ulong k, k2; /* k2 = k*qn */
           LOCAL_HIREMAINDER;
-          for (k = N/qn; k > 0; k--) c2[k*qn] += c[k];
+          for (k = N/qn, k2 = k*qn; k > 0; k--, k2 -=qn) c2[k2] += c[k];
           qn = mulll(qn, q); if (hiremainder) break;
         }
         swap(c, c2);
@@ -67,10 +71,10 @@ dirzetak0(GEN nf, ulong N)
     else /* p > sqrt(N): much simpler */
       for (i=1; i<lx; i++)
       {
-        ulong k;
+        ulong k, k2; /* k2 = k*p */
         if (vect[i] > 1) break;
         /* c2[i] <- c[i] + sum_{k = 1}^{v_q(i)} c[i/q^k] for all i <= N */
-        for (k = N/p; k > 0; k--) c[k*p] += c[k];
+        for (k = N/p, k2 = k*p; k > 0; k--, k2 -= p) c[k2] += c[k];
       }
   }
   pari_free(c2); return c;
