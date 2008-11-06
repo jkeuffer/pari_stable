@@ -20,49 +20,58 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "paripriv.h"
 static GEN
-dirzetak0(GEN nf, long N0)
+dirzetak0(GEN nf, ulong N)
 {
   GEN vect, c, c2, pol = nf_get_pol(nf), index = nf_get_index(nf);
   pari_sp av = avma;
-  long i, k, limk, lx;
-  ulong q, p;
+  const ulong SQRTN = (ulong)(sqrt(N) + 1e-3);
+  ulong i, p, lx;
   byteptr d = diffptr;
   long court[] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3),0};
 
-  (void)evallg(N0+1);
-  c  = cgetalloc(t_VECSMALL, N0+1);
-  c2 = cgetalloc(t_VECSMALL, N0+1);
-  c2[1] = c[1] = 1; for (i=2; i<=N0; i++) c[i] = 0;
+  (void)evallg(N+1);
+  c  = cgetalloc(t_VECSMALL, N+1);
+  c2 = cgetalloc(t_VECSMALL, N+1);
+  c2[1] = c[1] = 1; for (i=2; i<=N; i++) c[i] = 0;
 
-  maxprime_check((ulong)N0);
-  court[2] = 0;
-  while (court[2] <= N0)
+  maxprime_check(N);
+  for (p = 0; p <= N; avma = av)
   {
-    NEXT_PRIME_VIADIFF(court[2], d);
-    if (umodiu(index, court[2])) /* court does not divide index */
+    NEXT_PRIME_VIADIFF(p, d);
+    court[2] = p;
+    if (umodiu(index, p)) /* court does not divide index */
       { vect = gel(FpX_degfact(pol,court),1); lx = lg(vect); }
     else
     {
-      GEN p1 = idealprimedec(nf,court); lx = lg(p1); vect = cgetg(lx,t_VECSMALL);
-      for (i=1; i<lx; i++) vect[i] = itou( gmael(p1,i,4) );
+      GEN P = idealprimedec(nf,court); lx = lg(P); vect = cgetg(lx,t_VECSMALL);
+      for (i=1; i<lx; i++) vect[i] = pr_get_f(gel(P,i));
     }
-    for (i=1; i<lx; i++)
-    {
-      GEN N = powiu(court, vect[i]); /* N = court^f */
-      if (cmpiu(N, N0) > 0) break;
-
-      q = p = (ulong)N[2]; limk = N0/q;
-      for (k=2; k <= N0; k++) c2[k] = c[k];
-      while (q <= (ulong)N0)
+    if (p <= SQRTN)
+      for (i=1; i<lx; i++)
       {
-	LOCAL_HIREMAINDER;
-	for (k=1; k<=limk; k++) c2[k*q] += c[k];
-	q = mulll(q, p); if (hiremainder) break;
-	limk /= p;
+        GEN NP = powiu(court, vect[i]); /* Norm P[i] */
+        ulong qn, q, k;
+
+        if (cmpiu(NP, N) > 0) break;
+        qn = q = (ulong)NP[2];
+        memcpy(c2 + 2, c + 2, (N-1)*sizeof(long));
+        /* c2[i] <- c[i] + sum_{k = 1}^{v_q(i)} c[i/q^k] for all i <= N */
+        while (qn <= (ulong)N)
+        {
+          LOCAL_HIREMAINDER;
+          for (k = N/qn; k > 0; k--) c2[k*qn] += c[k];
+          qn = mulll(qn, q); if (hiremainder) break;
+        }
+        swap(c, c2);
       }
-      N = c; c = c2; c2 = N;
-    }
-    avma = av;
+    else /* p > sqrt(N): much simpler */
+      for (i=1; i<lx; i++)
+      {
+        ulong k;
+        if (vect[i] > 1) break;
+        /* c2[i] <- c[i] + sum_{k = 1}^{v_q(i)} c[i/q^k] for all i <= N */
+        for (k = N/p; k > 0; k--) c[k*p] += c[k];
+      }
   }
   pari_free(c2); return c;
 }
