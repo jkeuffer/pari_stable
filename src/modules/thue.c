@@ -197,7 +197,7 @@ inithue(GEN P, GEN bnf, long flag, long prec)
       Ind = floorr(mulru(bnf_get_reg(bnf), 5));
   }
 
-  nf_get_sign(checknf(bnf), &s, &t);
+  nf_get_sign(bnf_get_nf(bnf), &s, &t);
   prec_roots = prec;
   for(;;)
   {
@@ -777,7 +777,7 @@ LargeSols(GEN tnf, GEN rhs, GEN ne, GEN *pS)
   }
   if (lg(ne)==1) return NULL;
 
-  nf_get_sign(checknf(bnf), &s, &t);
+  nf_get_sign(bnf_get_nf(bnf), &s, &t);
   BS.r = r = s+t-1;
   P      = gel(tnf,1); n = degpol(P);
   ro     = gel(tnf,3);

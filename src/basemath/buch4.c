@@ -590,7 +590,7 @@ bnfissunit(GEN bnf,GEN bnfS,GEN x)
   GEN v, w, nf;
 
   bnf = checkbnf(bnf);
-  nf = checknf(bnf);
+  nf = bnf_get_nf(bnf);
   if (typ(bnfS)!=t_VEC || lg(bnfS)!=7) pari_err(typeer,"bnfissunit");
   x = nf_to_scalar_or_alg(nf,x);
   v = NULL;
@@ -644,7 +644,7 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
   if (galois < 0 || galois > 2) pari_err(flagerr, "rnfisnorminit");
   T = get_bnfpol(T, &bnf, &nf); vbas = varn(T);
   if (!bnf) bnf = Buchall(nf? nf: T, nf_FORCE, DEFAULTPREC);
-  if (!nf) nf = checknf(bnf);
+  if (!nf) nf = bnf_get_nf(bnf);
 
   relpol = get_bnfpol(relpol, &bnfabs, &nfabs);
   if (!gcmp1(leading_term(relpol))) pari_err(impl,"non monic relative equation");
@@ -667,7 +667,7 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
     k = stoi(sk);
   }
   if (!bnfabs || !gcmp0(k)) bnfabs = Buchall(polabs, nf_FORCE, nf_get_prec(nf));
-  if (!nfabs) nfabs = checknf(bnfabs);
+  if (!nfabs) nfabs = bnf_get_nf(bnfabs);
 
   if (galois == 2)
   {
@@ -720,7 +720,7 @@ rnfisnorm(GEN T, GEN x, long flag)
   drel = degpol(relpol);
   bnf = checkbnf(bnf);
   rel = checkbnf(rel);
-  nf = checknf(bnf);
+  nf = bnf_get_nf(bnf);
   x = nf_to_scalar_or_alg(nf,x);
   if (gcmp0(x)) { avma = av; return mkvec2(gen_0, gen_1); }
   if (gcmp1(x)) { avma = av; return mkvec2(gen_1, gen_1); }

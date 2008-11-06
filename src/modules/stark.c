@@ -892,7 +892,7 @@ _data4(GEN arch, long r1, long r2)
 static GEN
 InitChar(GEN bnr, GEN listCR, long prec)
 {
-  GEN bnf = checkbnf(bnr), nf = checknf(bnf);
+  GEN bnf = checkbnf(bnr), nf = bnf_get_nf(bnf);
   GEN modul, dk, C, dataCR, chi, cond, Mr, initc;
   long N, r1, r2, prec2, i, j, l;
   pari_sp av = avma;
@@ -1370,7 +1370,7 @@ InitPrimesQuad(GEN bnr, long N0, LISTray *R)
   pari_sp av = avma;
   GEN bnf = bnr_get_bnf(bnr), cond = gel(bnr_get_mod(bnr), 1);
   long p,i,l, condZ = itos(gcoeff(cond,1,1)), contZ = itos(content(cond));
-  GEN prime, Lpr, nf = checknf(bnf), dk = nf_get_disc(nf);
+  GEN prime, Lpr, nf = bnf_get_nf(bnf), dk = nf_get_disc(nf);
   byteptr d = diffptr + 1;
   GEN *gptr[7];
 
@@ -1423,7 +1423,7 @@ InitPrimes(GEN bnr, long N0, LISTray *R)
 {
   GEN bnf = bnr_get_bnf(bnr), cond = gel(bnr_get_mod(bnr), 1);
   long np,p,j,k,l, condZ = itos(gcoeff(cond,1,1)), N = lg(cond)-1;
-  GEN tmpray, tabpr, prime, pr, nf = checknf(bnf);
+  GEN tmpray, tabpr, prime, pr, nf = bnf_get_nf(bnf);
   byteptr d = diffptr + 1;
 
   R->condZ = condZ; l = PiBound(N0) * N;
@@ -1663,7 +1663,7 @@ GetValue(GEN dtcr, GEN W, GEN S, GEN T, long fl, long prec)
 static GEN
 GetValue1(GEN bnr, long flag, long prec)
 {
-  GEN bnf = checkbnf(bnr), nf = checknf(bnf);
+  GEN bnf = checkbnf(bnr), nf = bnf_get_nf(bnf);
   GEN h, R, w, c, diff;
   long i, l, r, r1, r2;
   pari_sp av = avma;
@@ -2586,7 +2586,7 @@ bnrstark(GEN bnr, GEN subgrp, long prec)
   /* check the bnr */
   checkbnrgen(bnr);
   bnf = checkbnf(bnr);
-  nf  = checknf(bnf);
+  nf  = bnf_get_nf(bnf);
   N   = nf_get_degree(nf);
   if (N == 1) return galoissubcyclo(bnr, subgrp, 0, 0);
 

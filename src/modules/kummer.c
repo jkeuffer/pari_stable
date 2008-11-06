@@ -80,7 +80,7 @@ ok_sign(GEN X, GEN msign, GEN arch)
 static GEN
 fix_be(GEN bnfz, GEN be, GEN u)
 {
-  GEN nf = checknf(bnfz), fu = gmael(bnfz,8,5);
+  GEN nf = bnf_get_nf(bnfz), fu = gmael(bnfz,8,5);
   return nfmul(nf, be, nffactorback(nf, fu, u));
 }
 
@@ -106,7 +106,7 @@ static GEN
 reducebetanaive(GEN bnfz, GEN be, GEN ell)
 {
   long i, k, n, ru, r1, prec = nf_get_prec(bnfz);
-  GEN z, p1, p2, nmax, b, c, nf = checknf(bnfz);
+  GEN z, p1, p2, nmax, b, c, nf = bnf_get_nf(bnfz);
 
   r1 = nf_get_r1(nf);
   b = gmul(nf_get_M(nf), be);
@@ -181,7 +181,7 @@ static GEN
 reducebeta(GEN bnfz, GEN be, GEN ell)
 {
   long j,ru, prec = nf_get_prec(bnfz);
-  GEN emb,z,u,matunit, nf = checknf(bnfz);
+  GEN emb,z,u,matunit, nf = bnf_get_nf(bnfz);
 
   if (DEBUGLEVEL>1) fprintferr("reducing beta = %Ps\n",be);
   /* reduce mod Q^ell */
@@ -793,7 +793,7 @@ FOUND:  X = Flm_Flc_mul(K, y, ell);
 static GEN
 isvirtualunit(GEN bnf, GEN v, GEN cycgen, GEN cyc, GEN gell, long rc)
 {
-  GEN L, b, eps, y, q, nf = checknf(bnf);
+  GEN L, b, eps, y, q, nf = bnf_get_nf(bnf);
   GEN w = idealsqrtn(nf, v, gell, 1);
   long i, l = lg(cycgen);
 

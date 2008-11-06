@@ -229,7 +229,7 @@ quadhilbert(GEN D, long prec)
 static GEN
 getallrootsof1(GEN bnf)
 {
-  GEN T, u, nf = checknf(bnf), tu;
+  GEN T, u, nf = bnf_get_nf(bnf), tu;
   long i, n = itos(gmael3(bnf,8,4,1));
 
   if (n == 2) {
