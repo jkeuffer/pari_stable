@@ -194,7 +194,7 @@ inithue(GEN P, GEN bnf, long flag, long prec)
     bnf = Buchall(P, nf_FORCE, DEFAULTPREC);
     if (flag) (void)certifybuchall(bnf);
     else
-      Ind = floorr(mulru(gmael(bnf, 8, 2), 5));
+      Ind = floorr(mulru(bnf_get_reg(bnf), 5));
   }
 
   nf_get_sign(checknf(bnf), &s, &t);
@@ -772,8 +772,7 @@ LargeSols(GEN tnf, GEN rhs, GEN ne, GEN *pS)
   if (!ne)
   {
     ne = bnfisintnorm(bnf, rhs);
-    if (!gcmp1(gmael(tnf, 7, 7)) &&
-	!gcmp1(gmael3(bnf, 8, 1, 1)) && !is_pm1(rhs))
+    if (!gcmp1(gmael(tnf, 7, 7)) && !is_pm1(bnf_get_no(bnf)) && !is_pm1(rhs))
       pari_warn(warner, "Non trivial conditional class group.\n  *** May miss solutions of the norm equation");
   }
   if (lg(ne)==1) return NULL;
@@ -1134,7 +1133,7 @@ get_sol_abs(struct sol_abs *T, GEN bnf, GEN a, GEN *ptPR)
 
   T->u = cgetg(nPR+1, t_VECSMALL);
   T->S = new_chunk(nPR+1);
-  T->cyc = gmael3(bnf,8,1,2);
+  T->cyc = bnf_get_cyc(bnf);
   Ngen = lg(T->cyc)-1;
   if (Ngen == 0)
     T->rel = T->partrel = NULL; /* trivial Cl(K), no relations to check */

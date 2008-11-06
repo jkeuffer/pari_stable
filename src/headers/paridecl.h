@@ -2638,7 +2638,12 @@ INLINE long   vali(GEN x);
 
 /* pariinl.h */
 
+INLINE GEN    bnf_get_clgp(GEN bnf);
+INLINE GEN    bnf_get_cyc(GEN bnf);
+INLINE GEN    bnf_get_gen(GEN bnf);
 INLINE GEN    bnf_get_nf(GEN bnf);
+INLINE GEN    bnf_get_no(GEN bnf);
+INLINE GEN    bnf_get_reg(GEN bnf);
 INLINE GEN    bnr_get_bnf(GEN bnr);
 INLINE GEN    bnr_get_bid(GEN bnr);
 INLINE GEN    bnr_get_mod(GEN bnr);

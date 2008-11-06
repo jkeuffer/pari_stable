@@ -1687,6 +1687,16 @@ nf_get_sign(GEN nf, long *r1, long *r2)
 INLINE GEN
 bnf_get_nf(GEN bnf) { return gel(bnf,7); }
 INLINE GEN
+bnf_get_clgp(GEN bnf) { return gmael(bnf,8,1); }
+INLINE GEN
+bnf_get_no(GEN bnf) { return gmael3(bnf,8,1,1); }
+INLINE GEN
+bnf_get_cyc(GEN bnf) { return gmael3(bnf,8,1,2); }
+INLINE GEN
+bnf_get_gen(GEN bnf) { return gmael3(bnf,8,1,3); }
+INLINE GEN
+bnf_get_reg(GEN bnf) { return gmael(bnf,8,2); }
+INLINE GEN
 bnr_get_bnf(GEN bnr) { return gel(bnr,1); }
 INLINE GEN
 bnr_get_bid(GEN bnr) { return gel(bnr,2); }

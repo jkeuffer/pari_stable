@@ -1669,8 +1669,8 @@ GetValue1(GEN bnr, long flag, long prec)
   pari_sp av = avma;
 
   nf_get_sign(nf, &r1,&r2);
-  h = gmael3(bnf, 8, 1, 1);
-  R = gmael(bnf, 8, 2);
+  h = bnf_get_no(bnf);
+  R = bnf_get_reg(bnf);
   w = gmael3(bnf, 8, 4, 1);
 
   c = gneg_i(gdiv(mpmul(h, R), w));
@@ -2262,7 +2262,7 @@ GenusField(GEN bnf)
   pari_sp av = avma;
   GEN disc, pol, div, d;
 
-  hk   = itos(gmael3(bnf, 8, 1, 1));
+  hk   = itos(bnf_get_no(bnf));
   disc = nf_get_disc(bnf_get_nf(bnf));
 
   if (mod4(disc) == 0) disc = shifti(disc, -2);
@@ -2516,7 +2516,7 @@ quadhilbertreal(GEN D, long prec)
   dbg_block();
   bnf = Buchall(quadpoly0(D, fetch_user_var("y")), nf_FORCE, prec);
   dbg_release();
-  cyc = gmael3(bnf,8, 1, 2);
+  cyc = bnf_get_cyc(bnf);
   if (lg(cyc) == 1) { avma = av; return pol_x(0); }
   /* if the exponent of the class group is 2, use Genus Theory */
   if (equaliu(gel(cyc,1), 2)) return gerepileupto(av, GenusField(bnf));

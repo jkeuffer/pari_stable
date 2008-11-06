@@ -25,20 +25,20 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 GEN
 buchnarrow(GEN bnf)
 {
-  GEN nf, cyc, gen, GD, v, invpi, logs, p1, p2, R, basecl, met, u1, archp, clgp;
+  GEN nf, cyc, gen, GD, v, invpi, logs, p1, p2, R, basecl, met, u1, archp;
   long r1, i, j, ngen, t, lo, c;
   pari_sp av = avma;
 
   bnf = checkbnf(bnf);
-  nf = checknf(bnf); r1 = nf_get_r1(nf);
-  clgp = gmael(bnf,8,1);
-  if (!r1) return gcopy(clgp);
+  nf = bnf_get_nf(bnf); r1 = nf_get_r1(nf);
+  
+  if (!r1) return gcopy( bnf_get_clgp(bnf) );
 
-  cyc = gel(clgp,2);
-  gen = gel(clgp,3);
+  cyc = bnf_get_cyc(bnf);
+  gen = bnf_get_gen(bnf);
   v = Flm_image(nfsign_units(bnf,NULL,1), 2);
   t = lg(v)-1;
-  if (t == r1) { avma = av; return gcopy(clgp); }
+  if (t == r1) { avma = av; return gcopy( bnf_get_clgp(bnf) ); }
 
   ngen = lg(gen)-1;
   p1 = cgetg(ngen+r1-t + 1,t_COL);
@@ -83,7 +83,7 @@ buchnarrow(GEN bnf)
     }
     gel(basecl,j) = p2;
   }
-  return gerepilecopy(av, mkvec3(shifti(gel(clgp,1), r1-t), met,basecl));
+  return gerepilecopy(av, mkvec3(shifti(bnf_get_no(bnf), r1-t), met,basecl));
 }
 
 /********************************************************************/
@@ -364,7 +364,7 @@ GEN
 Buchray(GEN bnf, GEN module, long flag)
 {
   GEN nf, cyc, gen, Gen, u, clg, logs, p1, h, met, u1, u2, U, cycgen;
-  GEN bigres, bid, cycbid, genbid, x, y, funits, H, El;
+  GEN bid, cycbid, genbid, x, y, funits, H, El;
   long RU, Ri, j, ngen, lh;
   const long add_gen = flag & nf_GEN;
   const long do_init = flag & nf_INIT;
@@ -373,9 +373,8 @@ Buchray(GEN bnf, GEN module, long flag)
   bnf = checkbnf(bnf); nf = bnf_get_nf(bnf);
   funits = check_units(bnf, "Buchray"); RU = lg(funits);
   El = Gen = NULL; /* gcc -Wall */
-  bigres = gel(bnf,8);
-  cyc = gmael(bigres,1,2);
-  gen = gmael(bigres,1,3); ngen = lg(cyc)-1;
+  cyc = bnf_get_cyc(bnf);
+  gen = bnf_get_gen(bnf); ngen = lg(cyc)-1;
 
   bid = Idealstar(nf,module, nf_GEN|nf_INIT);
   cycbid = gmael(bid,2,2);
@@ -404,7 +403,7 @@ Buchray(GEN bnf, GEN module, long flag)
   {
     clg = cgetg(add_gen? 4: 3,t_VEC);
     if (add_gen) gel(clg,3) = Gen;
-    gel(clg,1) = gmael(bigres,1,1);
+    gel(clg,1) = bnf_get_no(bnf);
     gel(clg,2) = cyc;
     if (!do_init) return gerepilecopy(av,clg);
     y = cgetg(7,t_VEC);
@@ -483,11 +482,11 @@ bnrinit0(GEN bnf, GEN ideal, long flag)
 GEN
 bnrclassno(GEN bnf,GEN ideal)
 {
-  GEN nf, h, D, bigres, bid, cycbid;
+  GEN nf, h, D, bid, cycbid;
   pari_sp av = avma;
 
   bnf = checkbnf(bnf); nf = bnf_get_nf(bnf);
-  bigres = gel(bnf,8); h = gmael(bigres,1,1); /* class number */
+  h = bnf_get_no(bnf); /* class number */
   bid = Idealstar(nf,ideal,nf_INIT);
   cycbid = gmael(bid,2,2);
   if (lg(cycbid) == 1) { avma = av; return icopy(h); }
@@ -1107,9 +1106,9 @@ certifybuchall(GEN bnf)
   nf_get_sign(nf, &R1, &R2);
   funits = check_units(bnf,"bnfcertify");
   testprimes(bnf, zimmertbound(N,R2,absi(nf_get_disc(nf))));
-  reg = gmael(bnf,8,2);
-  cyc = gmael3(bnf,8,1,2); nbgen = lg(cyc)-1;
-  gen = gmael3(bnf,8,1,3); zu = gmael(bnf,8,4);
+  reg = bnf_get_reg(bnf);
+  cyc = bnf_get_cyc(bnf); nbgen = lg(cyc)-1;
+  gen = bnf_get_gen(bnf); zu = gmael(bnf,8,4);
   bound = itou_or_0( ground(gdiv(reg, lowerboundforregulator(bnf))) );
   if (!bound) pari_err(talker,"sorry, too many primes to check");
   maxprime_check(bound);
@@ -1702,7 +1701,7 @@ bnrclassnolist(GEN bnf,GEN L)
 
   chk_listBU(L, "bnrclassnolist");
   if (l == 1) return cgetg(1, t_VEC);
-  bnf = checkbnf(bnf); h = gmael3(bnf,8,1,1);
+  bnf = checkbnf(bnf); h = bnf_get_no(bnf);
   V = cgetg(l,t_VEC);
   for (i = 1; i < l; i++)
   {
@@ -1886,7 +1885,7 @@ discrayabslist(GEN bnf, GEN L)
   if (l == 1) return cgetg(1, t_VEC);
   ID.bnf = bnf = checkbnf(bnf);
   nf = bnf_get_nf(bnf);
-  h = gmael3(bnf,8,1,1);
+  h = bnf_get_no(bnf);
   ID.degk = nf_get_degree(nf);
   ID.fadk = Z_factor(absi(nf_get_disc(nf)));
   ID.idealrelinit = trivfact();
@@ -2084,7 +2083,7 @@ discrayabslistarch(GEN bnf, GEN arch, long bound)
   nf = bnf_get_nf(bnf); r1 = nf_get_r1(nf);
   degk = nf_get_degree(nf);
   fadkabs = Z_factor(absi(nf_get_disc(nf)));
-  h = gmael3(bnf,8,1,1);
+  h = bnf_get_no(bnf);
   U = init_units(bnf);
   sgnU = nfsign_units(bnf, NULL, 1);
 

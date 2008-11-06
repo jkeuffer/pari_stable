@@ -1457,8 +1457,8 @@ isprincipalall(GEN bnf, GEN x, long *ptprec, long flag)
   FACT *fact;
 
   U = gel(clg2,1);
-  cyc = gmael3(bnf,8,1,2); c = lg(cyc)-1;
-  gen = gmael3(bnf,8,1,3);
+  cyc = bnf_get_cyc(bnf); c = lg(cyc)-1;
+  gen = bnf_get_gen(bnf);
   ex = cgetg(c+1,t_COL);
   if (c == 0 && !(flag & (nf_GEN|nf_GENMAT|nf_GEN_IF_PRINCIPAL))) return ex;
 
@@ -1539,7 +1539,7 @@ triv_gen(GEN bnf, GEN x, long flag)
   GEN y, nf = bnf_get_nf(bnf);
   long c;
   if (flag & nf_GEN_IF_PRINCIPAL) return algtobasis(nf,x);
-  c = lg(mael3(bnf,8,1,2)) - 1;
+  c = lg(bnf_get_cyc(bnf)) - 1;
   if (!(flag & (nf_GEN|nf_GENMAT))) return zerocol(c);
   y = cgetg(3,t_VEC);
   gel(y,1) = zerocol(c);
@@ -2732,9 +2732,9 @@ makecycgen(GEN bnf)
   long e,i,l;
 
   if (DEBUGLEVEL) pari_warn(warner,"completing bnf (building cycgen)");
-  nf = checknf(bnf);
-  cyc = gmael3(bnf,8,1,2); D = diagonal_shallow(cyc);
-  gen = gmael3(bnf,8,1,3); GD = gmael(bnf,9,3);
+  nf = bnf_get_nf(bnf);
+  cyc = bnf_get_cyc(bnf); D = diagonal_shallow(cyc);
+  gen = bnf_get_gen(bnf); GD = gmael(bnf,9,3);
   h = cgetg_copy(gen, &l);
   for (i=1; i<l; i++)
   {
@@ -3134,7 +3134,7 @@ init_rel(RELCACHE_t *cache, FB_t *F, long add_need)
     rel->ex = NULL;
     rel->m  = NULL;
     rel->pow= NULL; /* = F->pow */
-    for (j = lg(P)-1; j; j--) c[j] = itos(gmael(P,j,3));
+    for (j = lg(P)-1; j; j--) c[j] = pr_get_e(gel(P,j));
     rel++;
   }
   cache->last = rel - 1;

@@ -639,7 +639,7 @@ rnfkummersimple(GEN bnr, GEN subgroup, GEN gell, long all)
   long firstpass = all<0;
 
   GEN bnf,nf,bid,ideal,arch,cycgen;
-  GEN clgp,cyc;
+  GEN cyc;
   GEN Sp,listprSp,matP;
   GEN res=NULL,u,M,K,y,vecMsup,vecW,vecWB,vecBp,msign;
   primlist L;
@@ -660,8 +660,7 @@ rnfkummersimple(GEN bnr, GEN subgroup, GEN gell, long all)
   listprSp = shallowconcat(L.Sml2, L.Sl); lSl2 = lg(listprSp)-1;
 
   cycgen = check_and_build_cycgen(bnf);
-  clgp = gmael(bnf,8,1);
-  cyc = gel(clgp,2); rc = prank(cyc, ell);
+  cyc = bnf_get_cyc(bnf); rc = prank(cyc, ell);
 
   vecW = get_Selmer(bnf, cycgen, rc);
   u = get_u(cyc, rc, gell);
@@ -1060,7 +1059,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   long ell, i, j, m, d, dK, dc, rc, ru, rv, g, mginv, degK, degKz, vnf;
   long lSp, lSml2, lSl2, lW;
   GEN polnf,bnf,nf,bnfz,nfz,bid,ideal,cycgen,gell,p1,p2,wk,U,vselmer;
-  GEN clgp,cyc,gen;
+  GEN cyc,gen;
   GEN Q,idealz,gothf;
   GEN res=NULL,u,M,K,y,vecMsup,vecW,vecWA,vecWB,vecB,vecC,vecAp,vecBp;
   GEN matP,Sp,listprSp,Tc,Tv,P;
@@ -1113,10 +1112,9 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   bnfz = Buchall(COMPO.R, nf_FORCE, prec);
   if (DEBUGLEVEL) msgTIMER(&t, "[rnfkummer] bnfinit(Kz)");
   cycgen = check_and_build_cycgen(bnfz);
-  nfz = gel(bnfz,7);
-  clgp = gmael(bnfz,8,1);
-  cyc = gel(clgp,2); rc = prank(cyc,ell);
-  gen = gel(clgp,3);
+  nfz = bnf_get_nf(bnfz);
+  cyc = bnf_get_cyc(bnfz); rc = prank(cyc,ell);
+  gen = bnf_get_gen(bnfz);
   u = get_u(cyc, rc, gell);
 
   vselmer = get_Selmer(bnfz, cycgen, rc);

@@ -433,19 +433,19 @@ bnfsunit(GEN bnf,GEN S,long prec)
 {
   pari_sp av = avma;
   long i,j,ls;
-  GEN p1,nf,classgp,gen,M,U,H;
+  GEN p1,nf,gen,M,U,H;
   GEN sunit,card,sreg,res,pow;
 
   if (typ(S) != t_VEC) pari_err(typeer,"bnfsunit");
-  bnf = checkbnf(bnf); nf = bnf_get_nf(bnf);
-  classgp=gmael(bnf,8,1);
-  gen = gel(classgp,3);
+  bnf = checkbnf(bnf);
+  nf = bnf_get_nf(bnf);
+  gen = bnf_get_gen(bnf);
 
-  sreg = gmael(bnf,8,2);
+  sreg = bnf_get_reg(bnf);
   res=cgetg(7,t_VEC);
   gel(res,1) = gel(res,2) = gel(res,3) = cgetg(1,t_VEC);
   gel(res,4) = sreg;
-  gel(res,5) = classgp;
+  gel(res,5) = bnf_get_clgp(bnf);
   gel(res,6) = S; ls=lg(S);
 
  /* M = relation matrix for the S class group (in terms of the class group
@@ -459,7 +459,7 @@ bnfsunit(GEN bnf,GEN S,long prec)
     gel(M,i) = isprincipal(bnf,p1);
   }
   /* 2) relations from bnf class group */
-  M = shallowconcat(M, diagonal_shallow(gel(classgp,2)));
+  M = shallowconcat(M, diagonal_shallow(bnf_get_cyc(bnf)));
 
   /* S class group */
   H = ZM_hnfall(M, &U, 1);
@@ -638,7 +638,7 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
 {
   pari_sp av = avma;
   long i, l, drel, vbas;
-  GEN prod, S1, S2, gen, cyc, bnf, nf, nfabs, rnfeq, bnfabs, res, k, polabs;
+  GEN prod, S1, S2, gen, cyc, bnf, nf, nfabs, rnfeq, bnfabs, k, polabs;
   GEN y = cgetg(9, t_VEC);
 
   if (galois < 0 || galois > 2) pari_err(flagerr, "rnfisnorminit");
@@ -676,9 +676,8 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
   }
 
   prod = gen_1; S1 = S2 = cgetg(1, t_VEC);
-  res = gmael(bnfabs,8,1);
-  cyc = gel(res,2);
-  gen = gel(res,3); l = lg(cyc);
+  cyc = bnf_get_cyc(bnfabs);
+  gen = bnf_get_gen(bnfabs); l = lg(cyc);
   for(i=1; i<l; i++)
   {
     if (ugcd(umodiu(gel(cyc,i), drel), drel) == 1) break;
