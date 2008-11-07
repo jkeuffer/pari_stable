@@ -271,7 +271,7 @@ Flx_subspec(GEN x, GEN y, ulong p, long lx, long ly)
   {
     lz = ly+2; z = cgetg(lz, t_VECSMALL)+2;
     for (i=0; i<lx; i++) z[i] = Fl_sub(x[i],y[i],p);
-    for (   ; i<ly; i++) z[i] = y[i]? (long)(p - y[i]): y[i];
+    for (   ; i<ly; i++) z[i] = Fl_neg(y[i],p);
   }
  return Flx_renormalize(z-2, lz);
 }
