@@ -1527,36 +1527,29 @@ maxord_i(GEN p, GEN f, long mf, GEN w, long flag)
   S.chi = f; return Decomp(&S, flag);
 }
 
-/* DP = multiple of disc(P) or NULL
- * Return a multiple of the denominator of an algebraic integer (in Q[X]/(P))
+/* DT = multiple of disc(T) or NULL
+ * Return a multiple of the denominator of an algebraic integer (in Q[X]/(T))
  * when expressed in terms of the power basis */
 GEN
-indexpartial(GEN P, GEN DP)
+indexpartial(GEN T, GEN DT)
 {
   pari_sp av = avma;
   long i, nb;
-  GEN fa, res = gen_1, dP = ZX_deriv(P);
-  pari_timer T;
+  GEN fa, E, P, res = gen_1, dT = ZX_deriv(T);
 
-  if(DEBUGLEVEL>=5) (void)TIMER(&T);
-  if (!DP) DP = ZX_disc(P);
-  DP = absi(DP);
-  if(DEBUGLEVEL>=5) msgTIMER(&T,"IndexPartial: discriminant");
-  fa = Z_factor_limit(DP, 0);
-  if(DEBUGLEVEL>=5) msgTIMER(&T,"IndexPartial: factorization");
-  nb = lg(fa[1])-1;
+  if (!DT) DT = ZX_disc(T);
+  DT = absi(DT);
+  fa = Z_factor_limit(DT, 0);
+  P = gel(fa,1);
+  E = gel(fa,2); nb = lg(P)-1;
   for (i = 1; i <= nb; i++)
   {
-    long E = itos(gmael(fa,2,i)), e = E >> 1;
-    GEN p = gmael(fa,1,i), q = p;
+    long e = itou(E[i]), e2 = e >> 1;
+    GEN p = gel(P,i), q = p;
     if (i == nb)
-      q = powiu(p, (odd(E) && !BPSW_psp(p))? e+1: e);
-    else if (e >= 2)
-    {
-      if(DEBUGLEVEL>=5) fprintferr("IndexPartial: factor %Ps^%ld ",p,E);
-      q = ZpX_reduced_resultant_fast(P, dP, p, e);
-      if(DEBUGLEVEL>=5) { fprintferr("--> %Ps : ",q); msgTIMER(&T,""); }
-    }
+      q = powiu(p, (odd(e) && !BPSW_psp(p))? e2+1: e2);
+    else if (e2 >= 2)
+      q = ZpX_reduced_resultant_fast(T, dT, p, e2);
     res = mulii(res, q);
   }
   return gerepileuptoint(av,res);
@@ -3015,7 +3008,7 @@ rnfisfree_aux(GEN bnf, GEN order)
   GEN nf, P, I;
 
   bnf = checkbnf(bnf);
-  if (gcmp1(gmael3(bnf,8,1,1))) return 1;
+  if (is_pm1( bnf_get_no(bnf) )) return 1;
   nf = bnf_get_nf(bnf);
   order = get_order(nf, order, "rnfisfree");
   I = gel(order,2); n = lg(I)-1;
