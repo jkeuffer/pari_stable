@@ -1544,7 +1544,7 @@ indexpartial(GEN T, GEN DT)
   E = gel(fa,2); nb = lg(P)-1;
   for (i = 1; i <= nb; i++)
   {
-    long e = itou(E[i]), e2 = e >> 1;
+    long e = itou(gel(E,i)), e2 = e >> 1;
     GEN p = gel(P,i), q = p;
     if (i == nb)
       q = powiu(p, (odd(e) && !BPSW_psp(p))? e2+1: e2);
