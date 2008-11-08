@@ -868,7 +868,7 @@ rnfpolred(GEN nf, GEN pol, long prec)
   nfpol = nf_get_pol(nf);
 
   id = rnfpseudobasis(nf,pol);
-  if (bnf && gcmp1(gmael3(bnf,8,1,1))) /* if bnf is principal */
+  if (bnf && is_pm1( bnf_get_no(bnf) )) /* if bnf is principal */
   {
     GEN newI, newO;
     O = gel(id,1);
