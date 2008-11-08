@@ -1923,6 +1923,7 @@ rootsof1(GEN nf)
   long i, l, nbguessed, nbroots, nfdegree;
   pari_sp av;
 
+  nf = checknf(nf);
   if (nf_get_r1(nf)) return trivroots();
 
   /* Step 1 : guess number of roots and discard trivial case 2 */
