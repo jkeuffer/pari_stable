@@ -422,10 +422,10 @@ countf(GEN LP)
 {
   long i, nP = lg(LP)-1, maxf = pr_get_f(gel(LP, nP));
   GEN nbf = const_vecsmall(maxf, 0);
-  nbf[maxf]++
+  nbf[maxf] = 1;
   for (i = 1; i < nP; i++)
   {
-    ulong f = pr_get_f( gel(LP,i) );
+    long f = pr_get_f( gel(LP,i) );
     nbf[f]++;
   }
   return nbf;
