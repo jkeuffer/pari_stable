@@ -338,7 +338,7 @@ get_gell(GEN bnr, GEN subgp, long all)
   GEN gell;
   if (all && all != -1) gell = stoi(all);
   else if (subgp)       gell = det(subgp);
-  else                  gell = det(diagonal_shallow(gmael(bnr,5,2)));
+  else                  gell = det(diagonal_shallow(bnr_get_cyc(bnr)));
   if (typ(gell) != t_INT) pari_err(arither1);
   return gell;
 }
@@ -709,7 +709,7 @@ rnfkummersimple(GEN bnr, GEN subgroup, GEN gell, long all)
   {
     ncyc = dK;
     mat = Flm_init(dK, ncyc);
-    if (all == -1) matgrp = Flm_init(lg(gmael(bnr,5,2)), ncyc+1);
+    if (all == -1) matgrp = Flm_init(lg(bnr_get_cyc(bnr)), ncyc+1);
     rk = 0;
   }
   xell = monomial(gen_1, ell, 0);

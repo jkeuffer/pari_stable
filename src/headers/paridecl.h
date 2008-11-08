@@ -2645,6 +2645,7 @@ INLINE GEN    bnf_get_nf(GEN bnf);
 INLINE GEN    bnf_get_no(GEN bnf);
 INLINE GEN    bnf_get_reg(GEN bnf);
 INLINE GEN    bnr_get_bnf(GEN bnr);
+INLINE GEN    bnr_get_cyc(GEN bnr);
 INLINE GEN    bnr_get_bid(GEN bnr);
 INLINE GEN    bnr_get_mod(GEN bnr);
 INLINE GEN    bnr_get_nf(GEN bnr);

@@ -1704,6 +1704,8 @@ INLINE GEN
 bnr_get_mod(GEN bnr) { return gmael(bnr,2,1); }
 INLINE GEN
 bnr_get_nf(GEN bnr) { return gmael(bnr,1,7); }
+INLINE GEN
+bnr_get_cyc(GEN bnr) { return gmael(bnr,5,2); }
 
 /* assume rnf a genuine rnf */
 INLINE long

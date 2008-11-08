@@ -269,8 +269,8 @@ GetPrimChar(GEN chi, GEN bnr, GEN bnrc, long prec)
   cond  = bnr_get_mod(bnr);
   condc = bnr_get_mod(bnrc); if (gequal(cond, condc)) return NULL;
 
-  initc = init_get_chic(gmael(bnr, 5, 2));
-  Mrc   = diagonal_shallow(gmael(bnrc, 5, 2));
+  initc = init_get_chic(bnr_get_cyc(bnr));
+  Mrc   = diagonal_shallow(bnr_get_cyc(bnrc));
   M = bnrsurjection(bnr, bnrc);
   (void)ZM_hnfall(shallowconcat(M, Mrc), &U, 1);
   l = lg(M);
@@ -338,18 +338,11 @@ ComputeKernel0(GEN P, GEN DA, GEN DB)
 static GEN
 ComputeKernel(GEN bnrm, GEN bnrn, GEN dtQ)
 {
-  long i, l;
   pari_sp av = avma;
-  GEN Mrm, genm, Mrq, mgq, P;
-
-  Mrm  = diagonal_shallow(gmael(bnrm, 5, 2));
+  GEN Mrm, Mrq, P;
+  Mrm  = diagonal_shallow(bnr_get_cyc(bnrm));
   Mrq  = diagonal_shallow(gel(dtQ,2));
-  genm = gmael(bnrm, 5, 3); l  = lg(genm);
-  mgq  = gel(dtQ,3);
-  P = cgetg(l, t_MAT);
-  for (i = 1; i < l; i++)
-    gel(P,i) = ZM_ZC_mul(mgq, isprincipalray(bnrn, gel(genm,i)));
-
+  P = ZM_mul(gel(dtQ,3), bnrsurjection(bnrm, bnrn));
   return gerepileupto(av, ComputeKernel0(P, Mrm, Mrq));
 }
 
@@ -394,7 +387,7 @@ GetIndex(GEN pr, GEN bnr, GEN subgroup)
   { /* part of mod coprime to pr */
     GEN mpr0 = idealdivpowprime(bnf, mod0, pr, utoipos(v));
     bnrpr = Buchray(bnf, mkvec2(mpr0, gel(mod,2)), nf_INIT|nf_GEN);
-    cycpr = gmael(bnrpr, 5, 2);
+    cycpr = bnr_get_cyc(bnrpr);
     M = ZM_mul(bnrsurjection(bnr, bnrpr), subgroup);
     subpr = ZM_hnf(shallowconcat(M, diagonal_shallow(cycpr)));
     /* e = #(bnr/subgroup) / #(bnrpr/subpr) */
@@ -776,7 +769,7 @@ bnrrootnumber(GEN bnr, GEN chi, long flag, long prec)
   if (flag < 0 || flag > 1) pari_err(flagerr,"bnrrootnumber");
 
   checkbnr(bnr);
-  cyc = gmael(bnr, 5, 2);
+  cyc = bnr_get_cyc(bnr);
   cond = bnr_get_mod(bnr);
   l    = lg(cyc);
 
@@ -893,18 +886,17 @@ static GEN
 InitChar(GEN bnr, GEN listCR, long prec)
 {
   GEN bnf = checkbnf(bnr), nf = bnf_get_nf(bnf);
-  GEN modul, dk, C, dataCR, chi, cond, Mr, initc;
+  GEN modul, dk, C, dataCR, chi, cond, initc;
   long N, r1, r2, prec2, i, j, l;
   pari_sp av = avma;
 
   modul = bnr_get_mod(bnr);
-  Mr    = gmael(bnr, 5, 2);
   dk    = nf_get_disc(nf);
   N     = nf_get_degree(nf);
   nf_get_sign(nf, &r1,&r2);
   prec2 = ((prec-2) << 1) + EXTRA_PREC;
   C     = gmul2n(sqrtr_abs(divir(dk, powru(mppi(prec2),N))), -r2);
-  initc = init_get_chic(Mr);
+  initc = init_get_chic( bnr_get_cyc(bnr) );
 
   dbg_block();
 
@@ -968,7 +960,7 @@ get_listCR(GEN bnr, GEN dtQ)
 
   Surj = gel(dtQ,3);
   MrD  = gel(dtQ,2);
-  Mr   = gmael(bnr, 5, 2);
+  Mr   = bnr_get_cyc(bnr);
   hD   = itos(gel(dtQ,1));
   h    = hD >> 1;
 
@@ -2523,7 +2515,7 @@ quadhilbertreal(GEN D, long prec)
   if (DEBUGLEVEL) msgtimer("Compute Cl(k)");
 
   bnr  = Buchray(bnf, gen_1, nf_INIT|nf_GEN);
-  M = diagonal_shallow(gmael(bnr,5,2));
+  M = diagonal_shallow(bnr_get_cyc(bnr));
   dtQ = InitQuotient(M);
   nf  = bnf_get_nf(bnf);
 
@@ -2594,12 +2586,12 @@ bnrstark(GEN bnr, GEN subgrp, long prec)
   if (!nf_get_varn(nf))
     pari_err(talker, "main variable in bnrstark must not be x");
   if (nf_get_r2(nf)) pari_err(talker, "base field not totally real in bnrstark");
-  Mcyc = diagonal_shallow(gmael(bnr, 5, 2));
+  Mcyc = diagonal_shallow(bnr_get_cyc(bnr));
   subgrp = get_subgroup(subgrp,Mcyc,"bnrstark");
 
   /* compute bnr(conductor) */
   p1     = bnrconductor(bnr, subgrp, 2);
-  bnr    = gel(p1,2); Mcyc = diagonal_shallow(gmael(bnr, 5, 2));
+  bnr    = gel(p1,2); Mcyc = diagonal_shallow(bnr_get_cyc(bnr));
   subgrp = gel(p1,3);
   if (gcmp1( ZM_det_triangular(subgrp) )) { avma = av; return pol_x(0); }
 
@@ -2623,7 +2615,7 @@ bnrstark(GEN bnr, GEN subgrp, long prec)
     {
       GEN t = gel(M,i);
       if (is_pm1(gel(cyc,i))) continue;
-      M[i] = Mcyc[i]; H = ZM_hnf(shallowconcat(M, Mcyc));
+      gel(M,i) = gel(Mcyc,i); H = ZM_hnf(shallowconcat(M, Mcyc));
       gel(M,i) = t;
       gel(vec,j++) = bnrstark(bnr, H, prec);
     }
@@ -2651,7 +2643,7 @@ bnrstark(GEN bnr, GEN subgrp, long prec)
 GEN
 bnrL1(GEN bnr, GEN subgp, long flag, long prec)
 {
-  GEN bnf, nf, cyc, Mcyc, L1, lchi, clchi, allCR, listCR, dataCR;
+  GEN bnf, nf, cyc, L1, lchi, clchi, allCR, listCR, dataCR;
   GEN W, S, T, indCR, invCR, Qt, vChar;
   long N, cl, i, j, nc, a;
   pari_sp av = avma;
@@ -2666,9 +2658,8 @@ bnrL1(GEN bnr, GEN subgp, long flag, long prec)
 
   /* compute bnr(conductor) */
   if (!(flag & 2)) bnr = gel(bnrconductor(bnr, NULL, 2),2);
-  cyc  = gmael(bnr, 5, 2);
-  Mcyc = diagonal_shallow(cyc);
-  subgp = get_subgroup(subgp,Mcyc,"bnrL1");
+  cyc  = bnr_get_cyc(bnr);
+  subgp = get_subgroup(subgp, diagonal_shallow(cyc), "bnrL1");
 
   cl = itou( ZM_det_triangular(subgp) );
   Qt = InitQuotient(subgp);

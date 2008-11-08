@@ -1180,7 +1180,7 @@ bnrsurjection(GEN bnr1, GEN bnr2)
 static GEN
 imageofgroup(GEN bnr, GEN bnr2, GEN H)
 {
-  GEN H2, Delta = diagonal_shallow(gmael(bnr2,5,2)); /* SNF structure of Cl_n */
+  GEN H2, Delta = diagonal_shallow( bnr_get_cyc(bnr2) ); /* SNF of Cl_n */
 
   if (!H) return Delta;
   H2 = ZM_mul(bnrsurjection(bnr, bnr2), H);
@@ -1225,7 +1225,7 @@ check_subgroup(GEN bnr, GEN H, GEN *clhray, int triv_is_NULL, const char *s)
   if (H && gcmp0(H)) H = NULL;
   if (H)
   {
-    D = diagonal_shallow(gmael(bnr,5,2));
+    D = diagonal_shallow(bnr_get_cyc(bnr));
     if (typ(H) != t_MAT) pari_err(typeer,"check_subgroup");
     RgM_check_ZM(H, "check_subgroup");
     H = ZM_hnf(H);
@@ -1233,7 +1233,7 @@ check_subgroup(GEN bnr, GEN H, GEN *clhray, int triv_is_NULL, const char *s)
     h = ZM_det_triangular(H);
     if (equalii(h, *clhray)) H = NULL; else *clhray = h;
   }
-  if (!H && !triv_is_NULL) H = D? D: diagonal_shallow(gmael(bnr,5,2));
+  if (!H && !triv_is_NULL) H = D? D: diagonal_shallow(bnr_get_cyc(bnr));
   return H;
 }
 
@@ -1329,7 +1329,7 @@ bnrconductor(GEN bnr, GEN H0, long flag)
   if (iscond0 && iscondinf)
   {
     bnr2 = bnr;
-    if (!H) H = diagonal_shallow(gmael(bnr,5,2));
+    if (!H) H = diagonal_shallow(bnr_get_cyc(bnr));
   }
   else
   {
@@ -1665,7 +1665,7 @@ GEN
 bnrconductorofchar(GEN bnr, GEN chi)
 {
   pari_sp av = avma; checkbnr(bnr);
-  return gerepileupto(av, bnrconductor(bnr, KerChar(chi, gmael(bnr,5,2)), 0));
+  return gerepileupto(av, bnrconductor(bnr, KerChar(chi, bnr_get_cyc(bnr)), 0));
 }
 
 /* t = [bid,U], h = #Cl(K) */
@@ -2309,7 +2309,7 @@ subgrouplist_cond_sub(GEN bnr, GEN C, GEN bound)
   long l, i, j;
   GEN D, Mr, U, T, subgrp, L;
 
-  Mr = diagonal_shallow(gmael(bnr, 5, 2));
+  Mr = diagonal_shallow(bnr_get_cyc(bnr));
   D = ZM_snfall_i(hnf_solve(C, Mr), &U, NULL, 1);
   T = ZM_mul(C, RgM_inv(U));
   L = conductor_elts(bnr);
@@ -2328,7 +2328,7 @@ static GEN
 subgroupcond(GEN bnr, GEN indexbound)
 {
   pari_sp av = avma;
-  GEN li = subgroupcondlist(gmael(bnr,5,2), indexbound, conductor_elts(bnr));
+  GEN li = subgroupcondlist(bnr_get_cyc(bnr), indexbound, conductor_elts(bnr));
   if (indexbound && typ(indexbound) != t_VEC)
   { /* sort by increasing index if not single value */
     long i, l = lg(li);
@@ -2348,7 +2348,7 @@ subgrouplist0(GEN bnr, GEN indexbound, long all)
   {
     checkbnr(bnr);
     if (!all) return subgroupcond(bnr,indexbound);
-    bnr = gmael(bnr,5,2);
+    bnr = bnr_get_cyc(bnr);
   }
   return subgrouplist(bnr,indexbound);
 }
