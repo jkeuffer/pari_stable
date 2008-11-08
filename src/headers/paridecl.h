@@ -2637,7 +2637,11 @@ INLINE GEN    uutoineg(ulong x, ulong y);
 INLINE long   vali(GEN x);
 
 /* pariinl.h */
-
+INLINE GEN    bid_get_arch(GEN bid);
+INLINE GEN    bid_get_cyc(GEN bid);
+INLINE GEN    bid_get_gen(GEN bid);
+INLINE GEN    bid_get_ideal(GEN bid);
+INLINE GEN    bid_get_mod(GEN bid);
 INLINE GEN    bnf_get_clgp(GEN bnf);
 INLINE GEN    bnf_get_cyc(GEN bnf);
 INLINE GEN    bnf_get_gen(GEN bnf);

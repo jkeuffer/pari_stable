@@ -214,10 +214,11 @@ quadhilbert(GEN D, long prec)
 {
   if (typ(D) != t_INT)
   {
-    D = checkbnf(D);
-    if (degpol(gmael(D,7,1)) != 2)
+    GEN nf;
+    D = checkbnf(D); nf = bnf_get_nf(D);
+    if (nf_get_degree(nf) != 2)
       pari_err(talker,"not a polynomial of degree 2 in quadhilbert");
-    D = gmael(D,7,3);
+    D = nf_get_disc(nf);
   }
   else if (!Z_isfundamental(D))
     pari_err(talker,"quadhilbert needs a fundamental discriminant");

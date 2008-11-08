@@ -406,7 +406,7 @@ logall(GEN nf, GEN vec, long lW, long mginv, long ell, GEN pr, long ex)
   GEN m, M, bid = Idealstar(nf, idealpows(nf, pr, ex), nf_INIT);
   long ellrank, i, l = lg(vec);
 
-  ellrank = prank(gmael(bid,2,2), ell);
+  ellrank = prank(bid_get_cyc(bid), ell);
   M = cgetg(l,t_MAT);
   for (i=1; i<l; i++)
   {
@@ -649,8 +649,8 @@ rnfkummersimple(GEN bnr, GEN subgroup, GEN gell, long all)
   degK = nf_get_degree(nf);
 
   bid = bnr_get_bid(bnr);
-  ideal= gmael(bid,1,1);
-  arch = gmael(bid,1,2); /* this is the conductor */
+  ideal= bid_get_ideal(bid);
+  arch = bid_get_arch(bid); /* this is the conductor */
   ell = itos(gell);
   i = build_list_Hecke(&L, nf, gel(bid,3), ideal, gell, NULL);
   if (i) return no_sol(all,i);
@@ -1092,7 +1092,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
 
   if (all == -1) all = 0;
   bid = bnr_get_bid(bnr);
-  ideal = gmael(bid,1,1);
+  ideal = bid_get_ideal(bid);
   /* step 1 of alg 5.3.5. */
   if (DEBUGLEVEL>2) fprintferr("Step 1\n");
   compositum_red(&COMPO, polnf, polcyclo(ell,vnf));

@@ -231,7 +231,7 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
   basecl = compute_fact(nf,u1,gen);
 
   module = gel(bid,1);
-  cyc = gmael(bid,2,2); EX = gel(cyc,1); /* exponent of (O/f)^* */
+  cyc = bid_get_cyc(bid); EX = gel(cyc,1); /* exponent of (O/f)^* */
   f   = gel(module,1); fZ = gcoeff(f,1,1);
   fa  = gel(bid,3);
   fa2 = gel(bid,4); sarch = gel(fa2, lg(fa2)-1);
@@ -348,7 +348,7 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
 static GEN
 get_dataunit(GEN bnf, GEN bid)
 {
-  GEN D, cyc = gmael(bid,2,2), U = init_units(bnf), nf = bnf_get_nf(bnf);
+  GEN D, cyc = bid_get_cyc(bid), U = init_units(bnf), nf = bnf_get_nf(bnf);
   long i, l;
   zlog_S S; init_zlog_bid(&S, bid);
   D = nfsign_units(bnf, S.archp, 1); l = lg(D);
@@ -377,11 +377,11 @@ Buchray(GEN bnf, GEN module, long flag)
   gen = bnf_get_gen(bnf); ngen = lg(cyc)-1;
 
   bid = Idealstar(nf,module, nf_GEN|nf_INIT);
-  cycbid = gmael(bid,2,2);
-  genbid = gmael(bid,2,3);
+  cycbid = bid_get_cyc(bid);
+  genbid = bid_get_gen(bid);
   Ri = lg(cycbid)-1; lh = ngen+Ri;
 
-  x = gmael(bid,1,1);
+  x = bid_get_ideal(bid);
   if (Ri || add_gen || do_init)
   {
     GEN fx = gel(bid,3);
@@ -488,7 +488,7 @@ bnrclassno(GEN bnf,GEN ideal)
   bnf = checkbnf(bnf); nf = bnf_get_nf(bnf);
   h = bnf_get_no(bnf); /* class number */
   bid = Idealstar(nf,ideal,nf_INIT);
-  cycbid = gmael(bid,2,2);
+  cycbid = bid_get_cyc(bid);
   if (lg(cycbid) == 1) { avma = av; return icopy(h); }
   D = get_dataunit(bnf, bid); /* (Z_K/f)^* / units ~ Z^n / D */
   return gerepileuptoint(av, mulii(h, ZM_det_triangular(ZM_hnf(D))));
@@ -1319,7 +1319,7 @@ bnrconductor(GEN bnr, GEN H0, long flag)
       if (archp[k]) archp[j++] = archp[k];
     setlg(archp, j);
   }
-  ideal = iscond0? gmael(bid,1,1): factorbackprime(nf, S.P, e2);
+  ideal = iscond0? bid_get_ideal(bid): factorbackprime(nf, S.P, e2);
   mod = mkvec2(ideal, indices_to_vec01(archp, nf_get_r1(nf)));
   if (!flag) return gerepilecopy(av, mod);
 
@@ -1557,7 +1557,7 @@ Discrayrel(GEN bnr, GEN H0, long flag)
   bid = bnr_get_bid(bnr); init_zlog_bid(&S, bid);
   clhray = bnr_get_no(bnr);
   nf = bnf_get_nf(bnf);
-  ideal= gmael(bid,1,1);
+  ideal= bid_get_ideal(bid);
   H0 = H = check_subgroup(bnr, H0, &clhray, 0, "bnrdiscray");
   archp = S.archp;
   P     = S.P;
@@ -1669,7 +1669,7 @@ bnrconductorofchar(GEN bnr, GEN chi)
 static GEN
 get_classno(GEN t, GEN h)
 {
-  GEN bid = gel(t,1), cyc = gmael(bid,2,2);
+  GEN bid = gel(t,1), cyc = bid_get_cyc(bid);
   GEN m = shallowconcat(gel(t,2), diagonal_shallow(cyc));
   return mulii(h, ZM_det_triangular(ZM_hnf(m)));
 }
@@ -1935,7 +1935,7 @@ static GEN
 zsimp(GEN bid, GEN embunit)
 {
   GEN empty = cgetg(1, t_VECSMALL);
-  return mkvec4(mkmat2(empty,empty), gmael(bid,2,2), gel(bid,5), embunit);
+  return mkvec4(mkmat2(empty,empty), bid_get_cyc(bid), gel(bid,5), embunit);
 }
 
 /* fa a vecsmall factorization, append p^e */
@@ -1954,8 +1954,8 @@ zsimpjoin(GEN b, GEN bid, GEN embunit, long prcode, long e)
   GEN fa, U, U1, U2, cyc1, cyc2, cyc;
 
   fa = gel(b,1);
-  U1 = gel(b,3);   cyc1 = gel(b,2);       l1 = lg(cyc1);
-  U2 = gel(bid,5); cyc2 = gmael(bid,2,2); l2 = lg(cyc2);
+  U1 = gel(b,3);   cyc1 = gel(b,2);         l1 = lg(cyc1);
+  U2 = gel(bid,5); cyc2 = bid_get_cyc(bid); l2 = lg(cyc2);
   nbgen = l1+l2-2;
   if (nbgen)
   {

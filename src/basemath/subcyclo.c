@@ -549,8 +549,8 @@ bnr_to_znstar(GEN bnr, long *complex)
   gen = gel(zk,3);
   /* cond is the finite part of the conductor,
    * complex is the infinite part*/
-  cond = gcoeff(gmael(bid,1,1), 1, 1);
-  *complex = signe(gmael3(bid,1,2,1));
+  cond = gcoeff(bid_get_ideal(bid), 1, 1);
+  *complex = signe(gel(bid_get_arch(bid), 1));
   l2 = lg(gen);
   v = cgetg(l2, t_VEC);
   for (i = 1; i < l2; ++i)

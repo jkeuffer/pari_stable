@@ -1171,7 +1171,7 @@ famat_to_nf_moddivisor(GEN nf, GEN g, GEN e, GEN bid)
   if (lg(g) == 1) return scalarcol_shallow(gen_1, nf_get_degree(nf)); /* 1 */
   module = gel(bid,1);
   fa2 = gel(bid,4); sarch = gel(fa2,lg(fa2)-1);
-  cyc = gmael(bid,2,2); lc = lg(cyc);
+  cyc = bid_get_cyc(bid); lc = lg(cyc);
   t = NULL;
   if (lc != 1)
   {

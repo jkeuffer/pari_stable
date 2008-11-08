@@ -224,6 +224,25 @@ These functions expect a true \var{rnf} argument.
 \fun{long}{rnf_get_degree}{GEN rnf} returns the \emph{relative} degree of the
 extension.
 
+\subsec{Extracting info from a \kbd{bid} structure}
+
+These functions expect a true \var{bid} argument, associated to a modulus $I$
+in a number field $K$.
+
+\fun{GEN}{bid_get_mod}{GEN bid} returns the modulus associated to the \var{bid}.
+
+\fun{GEN}{bid_get_ideal}{GEN bid} return the finite part of the \var{bid}
+modulus (an integer ideal).
+
+\fun{GEN}{bid_get_arch}{GEN bid} return the archimedean part of the \var{bid}
+modulus (a vector of real places).
+
+\fun{GEN}{bid_get_cyc}{GEN bid} returns the elementary divisors
+of the group $(\Z_K/I)^*$ (cyclic components) $[d_1,\ldots, d_k]$, where $d_k
+\mid \ldots \mid d_1$.
+
+\fun{GEN}{bid_get_gen}{GEN bid} returns the generators of $(\Z_K/I)^*$ contained in \var{bid}.
+
 \subsec{Increasing accuracy}
 
 \fun{GEN}{nfnewprec}{GEN x, long prec}. Raise an exception if \kbd{x}

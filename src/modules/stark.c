@@ -551,7 +551,7 @@ FindModulus(GEN bnr, GEN dtQ, long *newprec, long prec)
 	    gel(p2,4) = InitQuotient(ImC);
 	    if (DEBUGLEVEL>1)
 	      fprintferr("\nTrying modulus = %Ps and subgroup = %Ps\n",
-			 gmael(bnrm, 2, 1), D);
+			 bnr_get_mod(bnrm), D);
 	    cpl = CplxModulus(p2, &pr, prec);
 	    if (oldcpl < 0 || cpl < oldcpl)
 	    {

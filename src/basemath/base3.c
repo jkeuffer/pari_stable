@@ -1489,8 +1489,9 @@ zlog_add_sign(GEN y0, GEN sgn, GEN lists)
 static GEN
 famat_zlog(GEN nf, GEN g, GEN e, GEN sgn, GEN bid)
 {
-  GEN vp = gmael(bid, 3,1), ep = gmael(bid, 3,2), arch = gmael(bid,1,2);
-  GEN cyc = gmael(bid,2,2), lists = gel(bid,4), U = gel(bid,5);
+  GEN vp = gmael(bid, 3,1), ep = gmael(bid, 3,2), mod = bid_get_mod(bid);
+  GEN arch = gel(mod,2);
+  GEN cyc = bid_get_cyc(bid), lists = gel(bid,4), U = gel(bid,5);
   GEN y0, x, y, EX = gel(cyc,1);
   long i, l;
 
@@ -1501,7 +1502,7 @@ famat_zlog(GEN nf, GEN g, GEN e, GEN sgn, GEN bid)
   {
     GEN pr = gel(vp,i), prk, ex;
     if (l == 2) {
-      prk = gmael(bid,1,1);
+      prk = gel(mod,1);
       ex = EX;
     } else { /* try to improve EX: should be group exponent mod prf, not f */
       GEN k = gel(ep,i);
@@ -1838,7 +1839,7 @@ ideallog_sgn(GEN nf, GEN x, GEN sgn, GEN bid)
   int ok = 0;
 
   nf = checknf(nf); checkbid(bid);
-  cyc = gmael(bid,2,2);
+  cyc = bid_get_cyc(bid);
   lcyc = lg(cyc); if (lcyc == 1) return cgetg(1, t_COL);
   av = avma;
   N = nf_get_degree(nf);

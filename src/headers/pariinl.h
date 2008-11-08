@@ -1696,6 +1696,7 @@ INLINE GEN
 bnf_get_gen(GEN bnf) { return gmael3(bnf,8,1,3); }
 INLINE GEN
 bnf_get_reg(GEN bnf) { return gmael(bnf,8,2); }
+
 INLINE GEN
 bnr_get_bnf(GEN bnr) { return gel(bnr,1); }
 INLINE GEN
@@ -1717,6 +1718,17 @@ bnr_get_gen_check(GEN bnr) {
     pari_err(talker,"missing bnr generators: please use bnrinit(,,1)");
   return gel(G,3);
 }
+
+INLINE GEN
+bid_get_mod(GEN bid) { return gel(bid,1); }
+INLINE GEN
+bid_get_ideal(GEN bid) { return gmael(bid,1,1); }
+INLINE GEN
+bid_get_arch(GEN bid) { return gmael(bid,1,2); }
+INLINE GEN
+bid_get_cyc(GEN bid) { return gmael(bid,2,2); }
+INLINE GEN
+bid_get_gen(GEN bid) { return gmael(bid,2,3); }
 
 /* assume rnf a genuine rnf */
 INLINE long

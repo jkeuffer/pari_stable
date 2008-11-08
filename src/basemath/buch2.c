@@ -420,14 +420,12 @@ powFBgen(FB_t *F, RELCACHE_t *cache, GEN nf)
 static GEN
 countf(GEN LP)
 {
-  long i, l = lg(LP);
-  GEN Pmaxf = gel(LP, l-1);
-  GEN nbf = const_vecsmall(itou(gel(Pmaxf,4)), 0);
-
-  for (i = 1; i < l; i++)
+  long i, nP = lg(LP)-1, maxf = pr_get_f(gel(LP, nP));
+  GEN nbf = const_vecsmall(maxf, 0);
+  nbf[maxf]++
+  for (i = 1; i < nP; i++)
   {
-    GEN P = gel(LP,i);
-    ulong f = itou(gel(P,4));
+    ulong f = pr_get_f( gel(LP,i) );
     nbf[f]++;
   }
   return nbf;
@@ -1125,7 +1123,7 @@ testprimes(GEN bnf, GEN BOUND)
   }
   /* sort factorbase for tablesearch */
   fb = gen_sort(gel(bnf,5), (void*)&cmp_prime_ideal, cmp_nodata);
-  pmax = itou(gmael(fb, lg(fb)-1, 1)); /* largest p in factorbase */
+  pmax = itou( pr_get_p(gel(fb, lg(fb)-1)) ); /* largest p in factorbase */
   Vbase = get_Vbase(bnf);
   (void)recover_partFB(&F, Vbase, nf_get_degree(nf));
   fact = (FACT*)stackmalloc((F.KC+1)*sizeof(FACT));
@@ -2336,7 +2334,7 @@ be_honest(FB_t *F, GEN nf, FACT *fact)
     if (DEBUGLEVEL>1) fprintferr("%ld ", p);
     P = F->LV[p]; J = lg(P);
     /* all P|p in FB + last is unramified --> check all but last */
-    if (isclone(P) && itou(gmael(P,J-1,3)) == 1UL /* e = 1 */) J--;
+    if (isclone(P) && pr_get_e(gel(P,J-1)) == 1) J--;
 
     for (j=1; j<J; j++)
     {
