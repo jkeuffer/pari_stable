@@ -420,21 +420,23 @@ RgXX_to_RgM(GEN v, long n)
 GEN
 RgXY_swap(GEN x, long n, long w)
 {
-  long j, lx = lg(x), ly = n+3;
-  long v=varn(x);
+  long j, lx = lg(x), ly = n+3, v = varn(x);
   GEN y = cgetg(ly, t_POL);
-  y[1]=evalsigne(1) | evalvarn(v);
+  y[1] = evalsigne(1) | evalvarn(v);
   for (j=2; j<ly; j++)
   {
     long k;
-    GEN p1=cgetg(lx,t_POL);
-    p1[1] = evalsigne(1) | evalvarn(w);
+    GEN a = cgetg(lx,t_POL);
+    a[1] = evalsigne(1) | evalvarn(w);
     for (k=2; k<lx; k++)
-      if (j < lg(x[k]))
-	gel(p1,k) = gmael(x,k,j);
+    {
+      GEN xk = gel(x,k);
+      if (j < lg(xk))
+	gel(a,k) = gel(xk,j);
       else
-	gel(p1,k) = gen_0;
-    gel(y,j) = normalizepol_lg(p1,lx);
+	gel(a,k) = gen_0;
+    }
+    gel(y,j) = normalizepol_lg(a,lx);
   }
   return normalizepol_lg(y,ly);
 }
