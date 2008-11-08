@@ -1633,6 +1633,35 @@ INLINE void gshiftz(GEN x, long s, GEN z)
 
 /*******************************************************************/
 /*                                                                 */
+/*                       ELLIPTIC CURVES                           */
+/*                                                                 */
+/*******************************************************************/
+INLINE GEN ell_get_a1(GEN e) { return gel(e,1); }
+INLINE GEN ell_get_a2(GEN e) { return gel(e,2); }
+INLINE GEN ell_get_a3(GEN e) { return gel(e,3); }
+INLINE GEN ell_get_a4(GEN e) { return gel(e,4); }
+INLINE GEN ell_get_a6(GEN e) { return gel(e,5); }
+INLINE GEN ell_get_b2(GEN e) { return gel(e,6); }
+INLINE GEN ell_get_b4(GEN e) { return gel(e,7); }
+INLINE GEN ell_get_b6(GEN e) { return gel(e,8); }
+INLINE GEN ell_get_b8(GEN e) { return gel(e,9); }
+INLINE GEN ell_get_c4(GEN e) { return gel(e,10); }
+INLINE GEN ell_get_c6(GEN e) { return gel(e,11); }
+INLINE GEN ell_get_disc(GEN e) { return gel(e,12); }
+INLINE GEN ell_get_j(GEN e) { return gel(e,13); }
+INLINE GEN ell_get_roots(GEN e) { return gel(e,14); }
+
+INLINE int
+ell_is_inf(GEN z) { return lg(z) < 3; }
+INLINE int
+ell_is_padic(GEN x) { return lg(x) == 20 && typ(gel(x,19)) == t_INT; }
+INLINE int
+ell_is_real(GEN x) { return lg(x) == 20 && typ(gel(x,19)) != t_INT; }
+INLINE GEN
+ellinf() { return mkvec(gen_0); }
+
+/*******************************************************************/
+/*                                                                 */
 /*                    ALGEBRAIC NUMBER THEORY                      */
 /*                                                                 */
 /*******************************************************************/

@@ -2101,7 +2101,7 @@ init_spec_FqXQ_pow(GEN X, GEN q, GEN u, GEN T, GEN p)
       gel(S,i) = (i&1)? FqX_rem(FqX_mul(gel(S,i-1), x, T,p), u, T,p)
 		      : FqX_rem(FqX_sqr(gel(S,i>>1), T,p), u, T,p);
   }
-  for (i=1; i < n; i++) gel(S,i) = to_Kronecker(gel(S,i), T);
+  for (i=1; i < n; i++) gel(S,i) = mod_to_Kronecker(gel(S,i), T);
   return S;
 }
 

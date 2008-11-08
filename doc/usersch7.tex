@@ -58,6 +58,39 @@ of accuracy $e$ (via \kbd{cvtop}). Shallow function.
 \fun{GEN}{ellinit_real}{GEN x, long prec} initializes an \var{ell} over
 $\R$. Shallow function.
 
+\subsec{Extracting info from an \kbd{ell} structure}
+
+These functions expect either a \kbd{smallell} or an \kbd{ell} argument.
+Both $p$-adic adic and real curves are supported in the latter case.
+
+\fun{GEN}{ell_get_a1}{GEN e}
+
+\fun{GEN}{ell_get_a2}{GEN e}
+
+\fun{GEN}{ell_get_a3}{GEN e}
+
+\fun{GEN}{ell_get_a4}{GEN e}
+
+\fun{GEN}{ell_get_a6}{GEN e}
+
+\fun{GEN}{ell_get_b2}{GEN e}
+
+\fun{GEN}{ell_get_b4}{GEN e}
+
+\fun{GEN}{ell_get_b6}{GEN e}
+
+\fun{GEN}{ell_get_b8}{GEN e}
+
+\fun{GEN}{ell_get_c4}{GEN e}
+
+\fun{GEN}{ell_get_c6}{GEN e}
+
+\fun{GEN}{ell_get_disc}{GEN e}
+
+\fun{GEN}{ell_get_j}{GEN e}
+
+\fun{GEN}{ell_get_roots}{GEN e}
+
 \subsec{Type checking}
 
 \fun{void}{checkell}{GEN e} raise an error unless $e$ is a \var{ell}.

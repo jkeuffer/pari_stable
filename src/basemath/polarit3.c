@@ -373,8 +373,8 @@ FpXQX_mul(GEN x, GEN y, GEN T, GEN p)
 {
   pari_sp av = avma;
   GEN z, kx, ky;
-  kx = to_Kronecker(x,T);
-  ky = to_Kronecker(y,T);
+  kx = mod_to_Kronecker(x,T);
+  ky = mod_to_Kronecker(y,T);
   z = Kronecker_to_FpXQX(ZX_mul(ky,kx), T, p);
   return gerepileupto(av, z);
 }
@@ -383,7 +383,7 @@ FpXQX_sqr(GEN x, GEN T, GEN p)
 {
   pari_sp av = avma;
   GEN z, kx;
-  kx= to_Kronecker(x,T);
+  kx= mod_to_Kronecker(x,T);
   z = Kronecker_to_FpXQX(ZX_sqr(kx), T, p);
   return gerepileupto(av, z);
 }
@@ -576,7 +576,7 @@ FpXQYQ_red(void *data, GEN x)
   kronecker_muldata *D = (kronecker_muldata*)data;
   GEN t = Kronecker_to_FpXQX(x, D->T,D->p);
   t = FpXQX_divrem(t, D->S,D->T,D->p, ONLY_REM);
-  return to_Kronecker(t,D->T);
+  return mod_to_Kronecker(t,D->T);
 }
 static GEN
 FpXQYQ_mul(void *data, GEN x, GEN y) {
@@ -610,7 +610,7 @@ FpXQYQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p)
     D.S = S;
     D.T = T;
     D.p = p;
-    y = leftright_pow(to_Kronecker(x,T), n, (void*)&D, &FpXQYQ_sqr, &FpXQYQ_mul);
+    y = leftright_pow(mod_to_Kronecker(x,T), n, (void*)&D, &FpXQYQ_sqr, &FpXQYQ_mul);
     y = Kronecker_to_FpXQX(y, T,p);
   }
   return gerepileupto(ltop, y);
@@ -1361,7 +1361,7 @@ Kronecker_to_mod(GEN z, GEN T)
  * mod Q or RgY of degree < n.
  * Lift the P_i which are t_POLMOD, then return subst(P( Y^(2n-1) ), Y,X) */
 GEN
-to_Kronecker(GEN P, GEN Q)
+mod_to_Kronecker(GEN P, GEN Q)
 {
   long i, k, lx = lg(P), N = (degpol(Q)<<1) + 1, vQ = varn(Q);
   GEN y = cgetg((N-2)*(lx-2) + 2, t_POL);

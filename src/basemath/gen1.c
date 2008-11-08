@@ -2004,7 +2004,7 @@ ff_poltype(GEN *x, GEN *p, GEN *pol)
     }
   }
   if (!Q) return is_FpX(x, p);
-  *x = P = to_Kronecker(P, Q);
+  *x = P = mod_to_Kronecker(P, Q);
   *pol = Q;
   (void)is_FpX(x, p);
   return 1;

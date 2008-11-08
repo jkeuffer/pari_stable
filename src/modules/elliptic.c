@@ -21,66 +21,44 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "paripriv.h"
 
-int
-ell_is_inf(GEN z) { return lg(z) < 3; }
-int
-ell_is_padic(GEN x) { return lg(x) == 20 && typ(gel(x,19)) == t_INT; }
-int
-ell_is_real(GEN x) { return lg(x) == 20 && typ(gel(x,19)) != t_INT; }
-GEN
-ellinf() { return mkvec(gen_0); }
-
 void
 checkellpt(GEN z)
-{
-  if (typ(z)!=t_VEC || lg(z) > 3) pari_err(talker, "not a point in ellxxx");
-}
+{ if (typ(z)!=t_VEC || lg(z) > 3) pari_err(talker, "not a point in ellxxx"); }
 void
 checkell5(GEN e)
-{
-  if (typ(e)!=t_VEC || lg(e) < 6)
-    pari_err(talker, "not an elliptic curve (ell5) in ellxxx");
-}
+{ if (typ(e)!=t_VEC || lg(e) < 6)
+    pari_err(talker, "not an elliptic curve (ell5) in ellxxx"); }
 void
 checksmallell(GEN e)
-{
-  if (typ(e)!=t_VEC || lg(e) < 14)
-    pari_err(talker, "not an elliptic curve (smallell) in ellxxx");
-}
+{ if (typ(e)!=t_VEC || lg(e) < 14)
+    pari_err(talker, "not an elliptic curve (smallell) in ellxxx"); }
 void
 checkell(GEN e)
-{
-  if (typ(e)!=t_VEC || lg(e) < 20)
-    pari_err(talker, "not an elliptic curve (ell) in ellxxx");
-}
+{ if (typ(e)!=t_VEC || lg(e) < 20)
+    pari_err(talker, "not an elliptic curve (ell) in ellxxx"); }
 void
 checkell_real(GEN e)
-{
-  if (typ(e)!=t_VEC || !ell_is_real(e))
-    pari_err(talker, "not an elliptic curve over R in ellxxx");
-}
+{ if (typ(e)!=t_VEC || !ell_is_real(e))
+    pari_err(talker, "not an elliptic curve over R in ellxxx"); }
 void
 checkell_padic(GEN e)
-{
-  if (typ(e)!=t_VEC || !ell_is_real(e))
-    pari_err(talker, "not an elliptic curve over R in ellxxx");
-}
-
+{ if (typ(e)!=t_VEC || !ell_is_real(e))
+    pari_err(talker, "not an elliptic curve over R in ellxxx"); }
 static void
 checkch(GEN z)
-{
-  if (typ(z)!=t_VEC || lg(z) != 5)
-    pari_err(talker,"not a coordinate change in ellxxx");
-}
+{ if (typ(z)!=t_VEC || lg(z) != 5)
+    pari_err(talker,"not a coordinate change in ellxxx"); }
+
+INLINE GEN ell_realroot(GEN e) { return gmael(e,14,1); }
 
 /* 4 X^3 + b2 X^2 + 2b4 X + b6 */
 static GEN
 RHSpol(GEN e)
 {
   GEN z = cgetg(6, t_POL); z[1] = evalsigne(1);
-  z[2] = e[8];
-  gel(z,3) = gmul2n(gel(e,7),1);
-  z[4] = e[6];
+  gel(z,2) = ell_get_b6(e);
+  gel(z,3) = gmul2n(ell_get_b4(e),1);
+  gel(z,4) = ell_get_b2(e);
   gel(z,5) = utoipos(4); return z;
 }
 
@@ -89,9 +67,9 @@ static GEN
 ellRHS(GEN e, GEN x)
 {
   GEN z;
-  z = gadd(gel(e,2),x);
-  z = gadd(gel(e,4), gmul(x,z));
-  z = gadd(gel(e,5), gmul(x,z));
+  z = gadd(ell_get_a2(e),x);
+  z = gadd(ell_get_a4(e), gmul(x,z));
+  z = gadd(ell_get_a6(e), gmul(x,z));
   return z;
 }
 
@@ -99,13 +77,17 @@ ellRHS(GEN e, GEN x)
 static GEN
 ellLHS0(GEN e, GEN x)
 {
-  return gcmp0(gel(e,1))? gel(e,3): gadd(gel(e,3), gmul(x,gel(e,1)));
+  GEN a1 = ell_get_a1(e);
+  GEN a3 = ell_get_a3(e);
+  return gcmp0(a1)? a3: gadd(a3, gmul(x,a1));
 }
 
 static GEN
 ellLHS0_i(GEN e, GEN x)
 {
-  return signe(e[1])? addii(gel(e,3), mulii(x, gel(e,1))): gel(e,3);
+  GEN a1 = ell_get_a1(e);
+  GEN a3 = ell_get_a3(e);
+  return signe(a1)? addii(a3, mulii(x, a1)): a3;
 }
 
 /* y^2 + a1 xy + a3 y */
@@ -186,7 +168,7 @@ ellprint(GEN e)
 static GEN
 new_coords(GEN e, GEN x, GEN *pta, GEN *ptb, int flag, long prec)
 {
-  GEN a, b, p1, p2, w, e1 = gmael(e,14,1), b2 = gel(e,6);
+  GEN b2 = ell_get_b2(e), e1 = ell_realroot(e), a, b, p1, p2, w;
   long ty = typ(e1);
 
   p2 = gmul2n(gadd(gmulsg(12,e1), b2), -2); /* = (12 e1 + b2) / 4 */
@@ -194,7 +176,7 @@ new_coords(GEN e, GEN x, GEN *pta, GEN *ptb, int flag, long prec)
     w = gel(e,18);
   else
   {
-    GEN b4 = gel(e,7);
+    GEN b4 = ell_get_b4(e);
     if (!is_const_t(ty)) pari_err(typeer,"zell");
 
     /* w^2 = 2b4 + 2b2 e1 + 12 e1^2 = 4(e1-e2)(e1-e3) */
@@ -272,13 +254,14 @@ GEN
 ellinit_padic(GEN x, GEN p, long prec)
 {
   GEN y, b2, b4, c4, c6, p1, w, pv, a1, b1, x1, u2, q, e0, e1;
+  GEN j = ell_get_j(x);
   long i, alpha;
 
   y = cgetg(20,t_VEC); initsmall(x,y);
   /* convert now, not before initsmall: better accuracy */
   for (i=1; i<=13; i++)
     if (typ(gel(y,i)) != t_PADIC) gel(y,i) = cvtop(gel(y,i), p, prec);
-  if (gcmp0(gel(y,13)) || valp(gel(y,13)) >= 0) /* p | j */
+  if (gcmp0(j) || valp(j) >= 0) /* p | j */
     pari_err(talker,"valuation of j must be negative in p-adic ellinit");
   if (equaliu(p,2))
   {
@@ -288,10 +271,10 @@ ellinit_padic(GEN x, GEN p, long prec)
   else
     pv = p;
 
-  b2 = gel(y,6);
-  b4 = gel(y,7);
-  c4 = gel(y,10);
-  c6 = gel(y,11); alpha = valp(c4) >> 1;
+  b2 = ell_get_b2(y);
+  b4 = ell_get_b4(y);
+  c4 = ell_get_c4(y);
+  c6 = ell_get_c6(y); alpha = valp(c4) >> 1;
   setvalp(c4,0);
   setvalp(c6,0);
   e1 = gdiv(c6, gmulsg(6,c4));
@@ -495,47 +478,51 @@ init_ch(void) {
 static GEN
 coordch4(GEN e, GEN u, GEN r, GEN s, GEN t)
 {
+  GEN a1 = ell_get_a1(e);
+  GEN a2 = ell_get_a2(e);
+  GEN b4 = ell_get_b4(e);
+  GEN b6 = ell_get_b6(e);
   GEN R, y, p1, p2, v, v2, v3, v4, v6, r2, b2r, rx3 = gmulsg(3,r);
   long i, lx = lg(e);
 
   y = cgetg(lx,t_VEC);
   v = ginv(u); v2 = gsqr(v); v3 = gmul(v,v2); v4 = gsqr(v2); v6 = gsqr(v3);
   /* A1 = (a1 + 2s) / u */
-  gel(y,1) = gmul(v,gadd(gel(e,1),gmul2n(s,1)));
+  gel(y,1) = gmul(v,gadd(a1,gmul2n(s,1)));
   /* A2 = (a2 + 3r - (a1 s + s^2)) / u^2 */
-  gel(y,2) = gmul(v2,gsub(gadd(gel(e,2),rx3),gmul(s,gadd(gel(e,1),s))));
+  gel(y,2) = gmul(v2,gsub(gadd(a2,rx3),gmul(s,gadd(a1,s))));
   p2 = ellLHS0(e,r);
   p1 = gadd(gmul2n(t,1), p2);
   /* A3 = (2t + a1 r + a3) / u^3 */
   gel(y,3) = gmul(v3,p1);
-  p1 = gsub(gel(e,4),gadd(gmul(t,gel(e,1)),gmul(s,p1)));
+  p1 = gsub(ell_get_a4(e),gadd(gmul(t,a1),gmul(s,p1)));
   /* A4 = (a4 - (a1 t + s (2t + a1 r + a3)) + 2a2 r + 3r^2) / u^4 */
-  gel(y,4) = gmul(v4,gadd(p1,gmul(r,gadd(gmul2n(gel(e,2),1),rx3))));
+  gel(y,4) = gmul(v4,gadd(p1,gmul(r,gadd(gmul2n(a2,1),rx3))));
   /* A6 = (r^3 + a2 r^2 + a4 r + a6 - t(t + a1 r + a3)) / u^6 */
   gel(y,5) = gmul(v6,gsub(ellRHS(e,r), gmul(t,gadd(t, p2))));
   if (lx == 6) return y;
   if (lx < 14) pari_err(talker,"not an elliptic curve in coordch");
 
   /* B2 = (b2 + 12r) / u^2 */
-  gel(y,6) = gmul(v2,gadd(gel(e,6),gmul2n(rx3,2)));
-  b2r = gmul(r, gel(e,6));
+  gel(y,6) = gmul(v2,gadd(ell_get_b2(e),gmul2n(rx3,2)));
+  b2r = gmul(r, ell_get_b2(e));
   r2 = gsqr(r);
   /* B4 = (b4 + b2 r + 6r^2) / u^4 */
-  gel(y,7) = gmul(v4,gadd(gel(e,7),gadd(b2r, gmulsg(6,r2))));
+  gel(y,7) = gmul(v4,gadd(b4,gadd(b2r, gmulsg(6,r2))));
   /* B6 = (b6 + 2b4 r + 2b2 r^2 + 4r^3) / u^6 */
-  gel(y,8) = gmul(v6,gadd(gel(e,8),gmul(r,gadd(gmul2n(gel(e,7),1),
+  gel(y,8) = gmul(v6,gadd(b6,gmul(r,gadd(gmul2n(b4,1),
 					    gadd(b2r,gmul2n(r2,2))))));
   /* B8 = (b8 + 3b6r + 3b4 r^2 + b2 r^3 + 3r^4) / u^8 */
-  p1 = gadd(gmulsg(3,gel(e,7)),gadd(b2r, gmulsg(3,r2)));
+  p1 = gadd(gmulsg(3,b4),gadd(b2r, gmulsg(3,r2)));
   gel(y,9) = gmul(gsqr(v4),
-	      gadd(gel(e,9), gmul(r,gadd(gmulsg(3,gel(e,8)), gmul(r,p1)))));
-  gel(y,10) = gmul(v4,gel(e,10));
-  gel(y,11) = gmul(v6,gel(e,11));
-  gel(y,12) = gmul(gsqr(v6),gel(e,12));
-  gel(y,13) = gel(e,13);
+	      gadd(ell_get_b8(e), gmul(r,gadd(gmulsg(3,b6), gmul(r,p1)))));
+  gel(y,10) = gmul(v4,ell_get_c4(e));
+  gel(y,11) = gmul(v6,ell_get_c6(e));
+  gel(y,12) = gmul(gsqr(v6),ell_get_disc(e));
+  gel(y,13) = ell_get_j(e);
   if (lx == 14) return y;
   if (lx < 20) pari_err(talker,"not an elliptic curve in coordch");
-  R = gel(e,14);
+  R = ell_get_roots(e);
   if (typ(R) != t_COL) set_dummy(y);
   else if (typ(e[1])==t_PADIC)
   {
@@ -794,15 +781,15 @@ addell(GEN e, GEN z1, GEN z2)
     }
     p2 = d_ellLHS(e,z1);
     if (gcmp0(p2)) { avma = av; return ellinf(); }
-    p1 = gadd(gsub(gel(e,4),gmul(gel(e,1),y1)),
-	      gmul(x1,gadd(gmul2n(gel(e,2),1),gmulsg(3,x1))));
+    p1 = gadd(gsub(ell_get_a4(e),gmul(ell_get_a1(e),y1)),
+	      gmul(x1,gadd(gmul2n(ell_get_a2(e),1),gmulsg(3,x1))));
   }
   else {
     p1 = gsub(y2,y1);
     p2 = gsub(x2,x1);
   }
   p1 = gdiv(p1,p2);
-  x = gsub(gmul(p1,gadd(p1,gel(e,1))), gadd(gadd(x1,x2),gel(e,2)));
+  x = gsub(gmul(p1,gadd(p1,ell_get_a1(e))), gadd(gadd(x1,x2),ell_get_a2(e)));
   y = gadd(gadd(y1, ellLHS0(e,x)), gmul(p1,gsub(x,x1)));
   tetpil = avma; p1 = cgetg(3,t_VEC);
   gel(p1,1) = gcopy(x);
@@ -815,7 +802,7 @@ invell(GEN e, GEN z)
   GEN t;
   if (ell_is_inf(z)) return z;
   t = cgetg(3,t_VEC);
-  t[1] = z[1];
+  gel(t,1) = gel(z,1);
   gel(t,2) = gneg_i(gadd(gel(z,2), ellLHS0(e,gel(z,1))));
   return t;
 }
@@ -902,7 +889,7 @@ ellrandom(GEN e)
   GEN x, y, j;
   pari_sp av = avma;
   checksmallell(e);
-  j = gel(e,13);
+  j = ell_get_j(e);
   switch(typ(j))
   {
     case t_INTMOD:
@@ -934,7 +921,7 @@ ellpow_CM(GEN e, GEN z, GEN n)
   vn = (ln-4)>>2;
   z1 = weipell(e, ln);
   z2 = gsubst(z1, 0, monomial(n, 1, 0));
-  b2ov12 = gdivgs(gel(e,6), 12); /* x - b2/12 */
+  b2ov12 = gdivgs(ell_get_b2(e), 12); /* x - b2/12 */
   grdx = gadd(gel(z,1), b2ov12);
   p0 = gen_0; p1 = gen_1;
   q0 = gen_1; q1 = gen_0;
@@ -1043,7 +1030,7 @@ zell(GEN e, GEN z, long prec)
   GEN t, u, p1, p2, a, b, x1, u2, D;
 
   checkell_real(e); checkellpt(z);
-  D = gel(e,12);
+  D = ell_get_disc(e);
   ty = typ(D); if (ty == t_INTMOD) pari_err(typeer,"zell");
   if (ell_is_inf(z)) return (ty==t_PADIC)? gen_1: gen_0;
 
@@ -1177,7 +1164,7 @@ get_periods(GEN e, SL2_red *T)
   if (is_vec_t(tx))
     switch(lg(e))
     {
-      case  3: T->w1 = gel(e,1);  T->w2 = gel(e,2); red_modSL2(T); return 1;
+      case  3: T->w1 = ell_get_a1(e);  T->w2 = ell_get_a2(e); red_modSL2(T); return 1;
       case 20: T->w1 = gel(e,15); T->w2 = gel(e,16);red_modSL2(T); return 1;
     }
   return 0;
@@ -1358,9 +1345,8 @@ weipellnumall(SL2_red *T, GEN z, long flall, long prec)
     if (gexpo(qn) <= - bit_accuracy(prec) - 5 - toadd) break;
     if (low_stack(lim, stack_lim(av1,1)))
     {
-      GEN *gptr[3]; gptr[0]=&y; gptr[1]=&qn; gptr[2]=&yp;
       if(DEBUGMEM>1) pari_warn(warnmem,"weipellnum");
-      gerepilemany(av1,gptr,flall?3:2);
+      gerepileall(av1, flall? 3: 2, &y, &qn, &yp);
     }
   }
 
@@ -1512,7 +1498,7 @@ pointell(GEN e, GEN z, long prec)
   checkell_real(e); (void)get_periods(e, &T);
   v = weipellnumall(&T,z,1,prec);
   if (!v) { avma = av; return ellinf(); }
-  gel(v,1) = gsub(gel(v,1), gdivgs(gel(e,6),12));
+  gel(v,1) = gsub(gel(v,1), gdivgs(ell_get_b2(e),12));
   gel(v,2) = gsub(gel(v,2), gmul2n(ellLHS0(e,gel(v,1)),-1));
   return gerepilecopy(av, v);
 }
@@ -1560,8 +1546,8 @@ weipell(GEN e, long PREC)
 {
   GEN c4, c6;
   checksmallell(e);
-  c4 = gel(e,10);
-  c6 = gel(e,11); return _weipell(c4,c6,PREC);
+  c4 = ell_get_c4(e);
+  c6 = ell_get_c6(e); return _weipell(c4,c6,PREC);
 }
 
 GEN
@@ -1667,10 +1653,10 @@ localred_p(GEN e, GEN p, int minim)
   GEN p2, v = init_ch();
   GEN c4, c6, D, tri;
 
-  c4 = gel(e,10);
-  c6 = gel(e,11);
-  D  = gel(e,12);
-  nuj = gcmp0(gel(e,13))? 0: - Q_pval(gel(e,13), p);
+  c4 = ell_get_c4(e);
+  c6 = ell_get_c6(e);
+  D  = ell_get_disc(e);
+  nuj = gcmp0(ell_get_j(e))? 0: - Q_pval(ell_get_j(e), p);
   nuD = Z_pval(D, p);
   k = (nuj > 0 ? nuD - nuj : nuD) / 12;
   if (k <= 0)
@@ -1682,11 +1668,11 @@ localred_p(GEN e, GEN p, int minim)
     GEN pk = powiu(p,k), p2k = sqri(pk), p4k = sqri(p2k), p6k = mulii(p4k,p2k);
     GEN r, s, t;
 
-    s = negi(gel(e,1));
+    s = negi(ell_get_a1(e));
     if (mpodd(s)) s = addii(s, pk);
     s = shifti(s, -1);
 
-    r = subii(gel(e,2), mulii(s, addii(gel(e,1), s))); /* a_2' */
+    r = subii(ell_get_a2(e), mulii(s, addii(ell_get_a1(e), s))); /* a_2' */
     switch(umodiu(r, 3))
     {
       default: break; /* 0 */
@@ -1807,7 +1793,7 @@ localred_23(GEN e, long p)
   long theroot, p2, p3, p4, p5, p6, a21, a42, a63, a32, a64;
   GEN v;
 
-  nuD = Z_lval(gel(e,12), (ulong)p);
+  nuD = Z_lval(ell_get_disc(e), (ulong)p);
   v = init_ch();
   if (p == 2) { p2 = 4; p3 = 8;  p4 = 16; p5 = 32; p6 = 64;}
   else        { p2 = 9; p3 = 27; p4 = 81; p5 =243; p6 =729; }
@@ -1816,9 +1802,9 @@ localred_23(GEN e, long p)
   {
     if (!nuD) return localred_result(0, 1, 1, v);
 	/* I0   */
-    if (umodiu(gel(e,6), p)) /* p \nmid b2 */
+    if (umodiu(ell_get_b2(e), p)) /* p \nmid b2 */
     {
-      if (umodiu(negi(gel(e,11)), p == 2 ? 8 : 3) == 1)
+      if (umodiu(negi(ell_get_c6(e)), p == 2 ? 8 : 3) == 1)
 	c = nuD;
       else
 	c = 2 - (nuD & 1);
@@ -1827,29 +1813,29 @@ localred_23(GEN e, long p)
 	/* Inu  */
     if (p == 2)
     {
-      r = umodiu(gel(e,4), 2);
-      s = umodiu(gel(e,2), 2);
-      t = umodiu(gel(e,5), 2);
+      r = umodiu(ell_get_a4(e), 2);
+      s = umodiu(ell_get_a2(e), 2);
+      t = umodiu(ell_get_a6(e), 2);
       if (r) { t = (s + t) & 1; s = (s + 1) & 1; }
     }
     else /* p == 3 */
     {
-      r = - umodiu(gel(e,8), 3);
-      s = umodiu(gel(e,1), 3);
-      t = umodiu(gel(e,3), 3);
+      r = - umodiu(ell_get_b6(e), 3);
+      s = umodiu(ell_get_a1(e), 3);
+      t = umodiu(ell_get_a3(e), 3);
       if (s) { t  = (t + r*s) % 3; if (t < 0) t += 3; }
     }
     /* p | (a1, a2, a3, a4, a6) */
     if (r || s || t) cumule(&v, &e, gen_1, stoi(r), stoi(s), stoi(t));
-    if (umodiu(gel(e,5), p2))
+    if (umodiu(ell_get_a6(e), p2))
       return localred_result(nuD, 2, 1, v);
 	/* II   */
-    if (umodiu(gel(e,9), p3))
+    if (umodiu(ell_get_b8(e), p3))
       return localred_result(nuD - 1, 3, 2, v);
 	/* III  */
-    if (umodiu(gel(e,8), p3))
+    if (umodiu(ell_get_b6(e), p3))
     {
-      if (umodiu(gel(e,8), (p==2)? 32: 27) == (ulong)p2)
+      if (umodiu(ell_get_b6(e), (p==2)? 32: 27) == (ulong)p2)
 	c = 3;
       else
 	c = 1;
@@ -1857,12 +1843,12 @@ localred_23(GEN e, long p)
     }
 	/* IV   */
 
-    if (umodiu(gel(e,5), p3))
-      cumule(&v, &e, gen_1, gen_0, gen_0, p == 2? gen_2: modis(gel(e,3), 9));
+    if (umodiu(ell_get_a6(e), p3))
+      cumule(&v, &e, gen_1, gen_0, gen_0, p == 2? gen_2: modis(ell_get_a3(e), 9));
 	/* p | a1, a2; p^2  | a3, a4; p^3 | a6 */
-    a21 = aux(gel(e,2), p2, p);
-    a42 = aux(gel(e,4), p3, p2);
-    a63 = aux(gel(e,5), p4, p3);
+    a21 = aux(ell_get_a2(e), p2, p);
+    a42 = aux(ell_get_a4(e), p3, p2);
+    a63 = aux(ell_get_a6(e), p4, p3);
     switch (numroots3(a21, a42, a63, p, &theroot))
     {
       case 3:
@@ -1885,8 +1871,8 @@ localred_23(GEN e, long p)
 	p2k = utoipos(p4);
 	for(;;)
 	{
-	  be =  aux2(gel(e,3), p, pk);
-	  ga = -aux2(gel(e,5), p, p2k);
+	  be =  aux2(ell_get_a3(e), p, pk);
+	  ga = -aux2(ell_get_a6(e), p, p2k);
 	  al = 1;
 	  if (numroots2(al, be, ga, p, &theroot) == 2) break;
 	  if (theroot) cumule(&v, &e, gen_1, gen_0, gen_0, mulsi(theroot,pk));
@@ -1895,8 +1881,8 @@ localred_23(GEN e, long p)
 	  p2k = mului(p, p2k); nu++;
 
 	  al = a21;
-	  be = aux2(gel(e,4), p, pk);
-	  ga = aux2(gel(e,5), p, p2k);
+	  be = aux2(ell_get_a4(e), p, pk);
+	  ga = aux2(ell_get_a6(e), p, p2k);
 	  if (numroots2(al, be, ga, p, &theroot) == 2) break;
 	  if (theroot) cumule(&v, &e, gen_1, mulsi(theroot, pk1), gen_0, gen_0);
 	  p2k = mului(p, p2k); nu++;
@@ -1910,8 +1896,8 @@ localred_23(GEN e, long p)
       case 1: /* Inu* */
 	if (theroot) cumule(&v, &e, gen_1, stoi(theroot*p), gen_0, gen_0);
 	    /* p | a1; p^2  | a2, a3; p^3 | a4; p^4 | a6 */
-	a32 = aux(gel(e,3), p3, p2);
-	a64 = aux(gel(e,5), p5, p4);
+	a32 = aux(ell_get_a3(e), p3, p2);
+	a64 = aux(ell_get_a6(e), p5, p4);
 	if (numroots2(1, a32, -a64, p, &theroot) == 2)
 	{
 	  if (p == 2)
@@ -1923,11 +1909,11 @@ localred_23(GEN e, long p)
 	    /* IV*  */
 	if (theroot) cumule(&v, &e, gen_1, gen_0, gen_0, stoi(theroot*p2));
 	    /* p | a1; p^2 | a2; p^3 | a3, a4; p^5 | a6 */
-	if (umodiu(gel(e,4), p4))
+	if (umodiu(ell_get_a4(e), p4))
 	  return localred_result(nuD - 7, -3, 2, v);
 	    /* III* */
 
-	if (umodiu(gel(e,5), p6))
+	if (umodiu(ell_get_a6(e), p6))
 	  return localred_result(nuD - 8, -2, 1, v);
 	    /* II*  */
 	cumule(&v, &e, utoipos(p), gen_0, gen_0, gen_0); /* not minimal */
@@ -1956,7 +1942,7 @@ elllocalred(GEN e, GEN p)
 {
   pari_sp av = avma;
   checksmallell(e);
-  if (typ(e[12]) != t_INT)
+  if (typ(ell_get_disc(e)) != t_INT)
     pari_err(talker,"not an integral curve in elllocalred");
   if (typ(p) != t_INT || signe(p) <= 0) pari_err(typeer,"elllocalred");
   return gerepileupto(av, localred(e, p, 0));
@@ -1972,12 +1958,13 @@ ellintegralmodel(GEN e)
   L = cgetg(1, t_VEC);
   for (i = 1; i < 6; i++)
   {
-    a[i] = e[i]; u = gel(a,i);
-    switch(typ(u))
+    GEN c = gel(e,i);
+    gel(a,i) = c;
+    switch(typ(c))
     {
       case t_INT: break;
       case t_FRAC: /* partial factorization */
-	L = shallowconcat(L, gel(Z_factor_limit(gel(u,2), 0),1));
+	L = shallowconcat(L, gel(Z_factor_limit(gel(c,2), 0),1));
 	break;
       default: pari_err(talker, "not a rational curve in ellintegralmodel");
     }
@@ -2009,7 +1996,7 @@ ellintegralmodel(GEN e)
 static void
 standard_model(GEN e, GEN *pv)
 {
-  GEN a1 = gel(e,1), a2 = gel(e,2);
+  GEN a1 = ell_get_a1(e), a2 = ell_get_a2(e);
   GEN r, t, s = truedivis(a1, -2);
   r = truedivis(addis(subii(a2, mulii(s,addii(s,a1))), 1), -3);
   t = truedivis(ellLHS0_i(e,r), -2);
@@ -2027,8 +2014,8 @@ ellminimalmodel(GEN E, GEN *ptv)
   e = ell_to_small(E);
   if (v0) e = _coordch(e, v0);
   v = init_ch();
-  c4 = gel(e,10);
-  c6 = gel(e,11);
+  c4 = ell_get_c4(e);
+  c6 = ell_get_c6(e);
   P = gel(Z_factor(gcdii(c4,c6)),1);
   l = lg(P);
   for (k = 1; k < l; k++)
@@ -2064,9 +2051,9 @@ ellglobalred(GEN E)
   e = ell_to_small(E);
   if (v0) e = _coordch(e, v0);
   v = init_ch();
-  c4 = gel(e,10);
-  c6 = gel(e,11);
-  D  = gel(e,12);
+  c4 = ell_get_c4(e);
+  c6 = ell_get_c6(e);
+  D  = ell_get_disc(e);
   P = gel(Z_factor(gcdii(c4,c6)),1);
   l = lg(P);
   for (k = 1; k < l; k++) (long)Z_pvalrem(D, gel(P,k), &D);
@@ -2101,7 +2088,7 @@ neron(GEN e, long p, long* ptkod)
 
   nv = localred_23(e,p);
   *ptkod = kod = itos(gel(nv,2));
-  c4=gel(e,10); c6=gel(e,11); d=gel(e,12);
+  c4=ell_get_c4(e); c6=ell_get_c6(e); d=ell_get_disc(e);
   v4 = gcmp0(c4) ? 12 : Z_lval(c4,p);
   v6 = gcmp0(c6) ? 12 : Z_lval(c6,p);
   vd = Z_lval(d,p); avma = av;
@@ -2196,7 +2183,7 @@ static void
 val_init(GEN e, long p, long pk,
 	 long *v4, long *u, long *v6, long *v, long *vd, long *d1)
 {
-  GEN c4 = gel(e,10), c6 = gel(e,11), D = gel(e,12);
+  GEN c4 = ell_get_c4(e), c6 = ell_get_c6(e), D = ell_get_disc(e);
   pari_sp av = avma;
   *v4 = val_aux(c4, p,pk, u);
   *v6 = val_aux(c6, p,pk, v);
@@ -2212,7 +2199,7 @@ ellrootno_2(GEN e)
   if (!vd) return 1;
   n2 = neron(e,2,&kod);
   if (kod>=5)
-    return odd(umodiu(gel(e,2),2) + umodiu(gel(e,3),2)) ? 1 : -1;
+    return odd(umodiu(ell_get_a2(e),2) + umodiu(ell_get_a3(e),2)) ? 1 : -1;
   if (kod<-9) return (n2==2) ? -kross(-1,v) : -1;
   x1 = u+v+v;
   switch(kod)
@@ -2337,10 +2324,10 @@ ellrootno_p(GEN e, GEN p, ulong ex)
   long ep,z;
 
   if (!ex) return 1;
-  if (ex == 1) return -kronecker(negi(gel(e,11)),p);
-  j=gel(e,13);
+  if (ex == 1) return -kronecker(negi(ell_get_c6(e)),p);
+  j=ell_get_j(e);
   if (!gcmp0(j) && Q_pval(j,p) < 0) return krosi(-1,p);
-  ep = 12 / ugcd(12, Z_pval(gel(e,12),p));
+  ep = 12 / ugcd(12, Z_pval(ell_get_disc(e),p));
   if (ep==4) z = 2; else z = (ep&1) ? 3 : 1;
   return krosi(-z, p);
 }
@@ -2397,11 +2384,11 @@ ellrootno(GEN e, GEN p)
 static long
 a2(GEN e)
 { /* solve y(1 + a1x + a3) = x (1 + a2 + a4) + a6 */
-  ulong a1 = Rg_to_Fl(gel(e,1), 2);
-  ulong a2 = Rg_to_Fl(gel(e,2), 2);
-  ulong a3 = Rg_to_Fl(gel(e,3), 2);
-  ulong a4 = Rg_to_Fl(gel(e,4), 2);
-  ulong a6 = Rg_to_Fl(gel(e,5), 2);
+  ulong a1 = Rg_to_Fl(ell_get_a1(e), 2);
+  ulong a2 = Rg_to_Fl(ell_get_a2(e), 2);
+  ulong a3 = Rg_to_Fl(ell_get_a3(e), 2);
+  ulong a4 = Rg_to_Fl(ell_get_a4(e), 2);
+  ulong a6 = Rg_to_Fl(ell_get_a6(e), 2);
   long N = 1; /* oo */
   if (!a3) N ++; /* x = 0, y=0 or 1 */
   else if (!a6) N += 2; /* x = 0, y arbitrary */
@@ -2417,9 +2404,9 @@ ap_jacobi(GEN e, ulong p)
   else
   {
     ulong i;
-    ulong e6 = Rg_to_Fl(gel(e,6), p);
-    ulong e72= Rg_to_Fl(gel(e,7), p) << 1;
-    ulong e8 = Rg_to_Fl(gel(e,8), p);
+    ulong e6 = Rg_to_Fl(ell_get_b2(e), p);
+    ulong e72= Rg_to_Fl(ell_get_b4(e), p) << 1;
+    ulong e8 = Rg_to_Fl(ell_get_b6(e), p);
     long s = krouu(e8, p) + krouu((e8 + e72 + e6 + 4) % p, p); /* i = 0,1 */
     if (p < 757UL)
       for (i=2; i<p; i++)
@@ -2570,8 +2557,8 @@ ellap1(GEN e, GEN p)
   ty = ti = NULL; /* gcc -Wall */
 
   if (DEBUGLEVEL) (void)timer2();
-  c4 = Rg_to_Fp(gdivgs(gel(e,10),  -48), p);
-  c6 = Rg_to_Fp(gdivgs(gel(e,11), -864), p);
+  c4 = Rg_to_Fp(gdivgs(ell_get_c4(e),  -48), p);
+  c6 = Rg_to_Fp(gdivgs(ell_get_c6(e), -864), p);
   /* once #E(Fp) is know mod B >= pordmin, it is completely determined */
   pordmin = addis(sqrti(gmul2n(p,4)), 1); /* ceil( 4sqrt(p) ) */
   p1p = addsi(1, p);
@@ -2878,8 +2865,8 @@ ellap2(GEN e, ulong p)
   multiple *table = NULL;
 
   av = avma;
-  c4 = Rg_to_Fl(gdivgs(gel(e,10),  -48), p);
-  c6 = Rg_to_Fl(gdivgs(gel(e,11), -864), p);
+  c4 = Rg_to_Fl(gdivgs(ell_get_c4(e),  -48), p);
+  c6 = Rg_to_Fl(gdivgs(ell_get_c6(e), -864), p);
   pordmin = (long)(1 + 4*sqrt((float)p));
   p1p = p+1;
   p2p = p1p << 1;
@@ -2992,7 +2979,7 @@ ap_j0(GEN E,GEN p)
   if (umodiu(p,3) != 1) return gen_0;
   (void)cornacchia2(utoipos(27),p, &a,&b);
   if (umodiu(a, 3) == 1) a = negi(a);
-  d = Rg_to_Fp(gmulgs(gel(E,11), 8), p);
+  d = Rg_to_Fp(gmulgs(ell_get_c6(E), 8), p);
   e = diviuexact(shifti(p,-1), 3); /* (p-1) / 6 */
   return centermod(mulii(a, Fp_pow(d, e, p)), p);
 }
@@ -3005,7 +2992,7 @@ ap_j1728(GEN E,GEN p)
   if (Mod4(a)==0) a = b;
   if (Mod2(a)==1) a = shifti(a,1);
   if (Mod8(a)==6) a = negi(a);
-  d = Rg_to_Fp(gmulgs(gel(E,10), -27), p);
+  d = Rg_to_Fp(gmulgs(ell_get_c4(E), -27), p);
   e = shifti(p,-2); /* (p-1) / 4 */
   return centermod(mulii(a, Fp_pow(d, e, p)), p);
 }
@@ -3062,7 +3049,7 @@ static GEN
 ap_bad_red(GEN e, GEN p)
 {
   pari_sp av = avma;
-  GEN c6 = gel(e,11);
+  GEN c6 = ell_get_c6(e);
   long s;
   if (equaliu(p, 2))
   {
@@ -3084,15 +3071,16 @@ static GEN
 CM_ellap(GEN E, GEN p)
 {
   pari_sp av = avma;
-  GEN C4E, C6E, jn, jd, a, t, u;
+  GEN C4E, C6E, j, jn, jd, a, t, u;
 
 #define CHECK(CM,J,C6B) a = ec_ap_cm(J,C6B,C6E,CM,jd,jn,p); if (a) goto DONE;
-  C4E = Rg_to_Fp(gel(E,10), p);
+  C4E = Rg_to_Fp(ell_get_c4(E), p);
   if (!signe(C4E)) { a = ap_j0(E,p); goto DONE;}
-  C6E = Rg_to_Fp(gel(E,11), p);
+  C6E = Rg_to_Fp(ell_get_c6(E), p);
   if (!signe(C6E)) { a = ap_j1728(E,p); goto DONE;}
-  jn = Rg_to_Fp(numer(gel(E,13)), p);
-  jd = Rg_to_Fp(denom(gel(E,13)), p); /* j = jn/jd */
+  j = ell_get_j(E);
+  jn = Rg_to_Fp(numer(j), p);
+  jd = Rg_to_Fp(denom(j), p); /* j = jn/jd */
   CHECK(-7,  utoineg(3375),      utoipos(1323));
   CHECK(-8,  utoipos(8000),      utoineg(1792));
   CHECK(-12, utoipos(54000),     utoineg(19008));
@@ -3117,8 +3105,10 @@ static GEN
 easy_ap(GEN E, GEN p)
 {
   pari_sp av = avma;
-  if (!signe(Rg_to_Fp(gel(E,12), p))) { avma = av; return ap_bad_red(E,p); }
-  if (cmpiu(p, 99) < 0) { avma = av; return stoi(ap_jacobi(E, itou(p))); }
+  GEN D = Rg_to_Fp(ell_get_disc(E), p);
+  avma = av;
+  if (!signe(D)) return ap_bad_red(E,p);
+  if (cmpiu(p, 99) < 0) return stoi(ap_jacobi(E, itou(p)));
   return CM_ellap(E, p);
 }
 
@@ -3161,15 +3151,17 @@ static void
 checkell_int(GEN e)
 {
   checksmallell(e);
-  if (typ(e[1]) != t_INT || typ(e[2]) != t_INT || typ(e[3]) != t_INT
-   || typ(e[4]) != t_INT || typ(e[5]) != t_INT)
-    pari_err(talker,"not an integral model");
+  if (typ(ell_get_a1(e)) != t_INT ||
+      typ(ell_get_a2(e)) != t_INT ||
+      typ(ell_get_a3(e)) != t_INT ||
+      typ(ell_get_a4(e)) != t_INT ||
+      typ(ell_get_a6(e)) != t_INT) pari_err(talker,"not an integral model");
 }
 
 GEN
 anell(GEN e, long n0)
 {
-  long tab[4]={0,1,1,-1}; /* p prime; (-1/p) = tab[p&3]. tab[0] not used */
+  const long tab[4]={0,1,1,-1}; /* p prime; (-1/p) = tab[p&3]. tab[0] unused */
   ulong p, m, SQRTn, n = (ulong)n0;
   GEN an, D, c6;
 
@@ -3177,8 +3169,8 @@ anell(GEN e, long n0)
   if (n0 <= 0) return cgetg(1,t_VEC);
   if (n >= LGBITS) pari_err(impl,"anell for n >= %lu", LGBITS);
   SQRTn = (ulong)sqrt(n);
-  c6= gel(e,11);
-  D = gel(e,12);
+  c6= ell_get_c6(e);
+  D = ell_get_disc(e);
 
   an = cgetg(n+1,t_VEC); gel(an,1) = gen_1;
   for (p=2; p <= n; p++) gel(an,p) = NULL;
@@ -3241,8 +3233,8 @@ akell(GEN e, GEN n)
   if (typ(n) != t_INT) pari_err(typeer,"akell");
   if (signe(n)<= 0) return gen_0;
   if (gcmp1(n)) return gen_1;
-  c6= gel(e,11);
-  D = gel(e,12);
+  c6= ell_get_c6(e);
+  D = ell_get_disc(e);
   if (typ(D) != t_INT) pari_err(talker,"not an integral model in akell");
   u = coprime_part(n, D);
   s = 1;
@@ -3372,7 +3364,7 @@ hell(GEN e, GEN a, long prec)
   }
   p1 = gmul(gsqr(gdiv(gmul2n(y,1), d_ellLHS(e,a))), pi2surw);
   p1 = gsqr(gsqr(gdiv(p1, gsqr(gsqr(denom(gel(a,1)))))));
-  p1 = gdiv(gmul(p1,q), gel(e,12));
+  p1 = gdiv(gmul(p1,q), ell_get_disc(e));
   p1 = gmul2n(glog(gabs(p1,prec),prec), -5);
   return gerepileupto(av, gneg(p1));
 }
@@ -3381,8 +3373,11 @@ hell(GEN e, GEN a, long prec)
 static GEN
 hells(GEN e, GEN Q, long prec)
 {
-  GEN b8 = gel(e,9), b6 = gel(e,8), b4 = gel(e,7), b2 = gel(e,6), x = gel(Q,1);
-  GEN w, z, t, mu, b42, b62;
+  GEN b2 = ell_get_b2(e);
+  GEN b4 = ell_get_b4(e);
+  GEN b6 = ell_get_b6(e);
+  GEN b8 = ell_get_b8(e);
+  GEN x = gel(Q,1), w, z, t, mu, b42, b62;
   long n, lim;
 
   mu = gmul2n(glog(numer(x),prec),-1);
@@ -3409,8 +3404,8 @@ hell2(GEN e, GEN x, long prec)
   pari_sp av = avma;
 
   if (ell_is_inf(x)) return gen_0;
-  D = gel(e,12);
-  ro= gel(e,14);
+  D = ell_get_disc(e);
+  ro= ell_get_roots(e);
   e3 = (gsigne(D) < 0)? gel(ro,1): gel(ro,3);
   v = init_ch(); gel(v,2) = addis(gfloor(e3),-1);
   return gerepileupto(av, hells(_coordch(e,v), ellchangepoint(x,v), prec));
@@ -3464,7 +3459,7 @@ exphellagm(GEN e, GEN z, int flag, long prec)
 static GEN
 exp4hellagm(GEN e, GEN z, long prec)
 {
-  GEN e1 = gmael(e,14,1), x = gel(z,1);
+  GEN e1 = ell_realroot(e), x = gel(z,1);
   if (gcmp(x, e1) < 0) /* z not on neutral component */
   {
     GEN eh = exphellagm(e, addell(e, z,z), 0, prec);
@@ -3480,7 +3475,7 @@ ellheightoo(GEN e, GEN z, long prec)
   GEN e1, h, x = gel(z,1);
   pari_sp av = avma;
   checksmallell(e);
-  e1 = gmael(e,14,1);
+  e1 = ell_realroot(e);
   if (gcmp(x, e1) < 0) /* z not on neutral component */
   {
     GEN eh = exphellagm(e, addell(e, z,z), 0, prec);
@@ -3530,23 +3525,23 @@ ellheight0(GEN e, GEN a, long flag, long prec)
   x = gel(a,1);
   y = gel(a,2);
   psi3 = numer( /* b8 + 3x b6 + 3x^2 b4 + x^3 b2 + 3 x^4 */
-     gadd(gel(e,9), gmul(x,
-     gadd(gmulsg(3,gel(e,8)), gmul(x,
-     gadd(gmulsg(3,gel(e,7)), gmul(x, gadd(gel(e,6), gmulsg(3,x)))))))) );
+     gadd(ell_get_b8(e), gmul(x,
+     gadd(gmulsg(3,ell_get_b6(e)), gmul(x,
+     gadd(gmulsg(3,ell_get_b4(e)), gmul(x, gadd(ell_get_b2(e), gmulsg(3,x)))))))) );
   if (!signe(psi3)) { avma=av; return gen_0; }
 
   phi2 = numer( /* a4 + 2a2 x + 3x^2 - y a1*/
-    gsub(gadd(gel(e,4),gmul(x,gadd(shifti(gel(e,2),1),gmulsg(3,x)))),
-	 gmul(gel(e,1),y)) );
+    gsub(gadd(ell_get_a4(e),gmul(x,gadd(shifti(ell_get_a2(e),1),gmulsg(3,x)))),
+	 gmul(ell_get_a1(e),y)) );
   Lp = gel(Z_factor(gcdii(psi2,phi2)),1);
   lx = lg(Lp);
   for (i=1; i<lx; i++)
   {
     GEN p = gel(Lp,i);
     long u, v, n, n2;
-    if (signe(remii(gel(e,10),p)))
+    if (signe(remii(ell_get_c4(e),p)))
     { /* p \nmid c4 */
-      long N = Z_pval(gel(e,12),p);
+      long N = Z_pval(ell_get_disc(e),p);
       if (!N) continue;
       n2 = Z_pval(psi2,p); n = n2<<1;
       if (n > N) n = N;
@@ -3669,8 +3664,8 @@ elltaniyama(GEN e, long prec)
   {
     if (n != 2)
     {
-      s3 = gmul(gel(e,6),gel(X,n));
-      if (!n) s3 = gadd(s3, gel(e,7));
+      s3 = gmul(ell_get_b2(e),gel(X,n));
+      if (!n) s3 = gadd(s3, ell_get_b4(e));
       s2 = gen_0;
       for (m=-2; m<=n+1; m++)
 	s2 = gadd(s2,gmulsg(m*(n+m),gmul(gel(X,m),gel(C,n-m))));
@@ -3689,8 +3684,8 @@ elltaniyama(GEN e, long prec)
     {
       setlg(x, 9); gel(x,8) = pol_x(MAXVARN);
       w = derivser(x); setvalp(w,-2); /* 4v^3 + b2 x^2 + 2b4 x + b6 */
-      s1 = gadd(gel(e,8), gmul(x, gadd(gmul2n(gel(e,7),1),
-					gmul(x,gadd(gel(e,6),gmul2n(x,2))))));
+      s1 = gadd(ell_get_b6(e), gmul(x, gadd(gmul2n(ell_get_b4(e),1),
+					gmul(x,gadd(ell_get_b2(e),gmul2n(x,2))))));
       setlg(x, prec+3);
       s2 = gsub(s1, gmul(c,gsqr(w)));
       s2 = gel(s2,2);
@@ -3815,7 +3810,7 @@ elllog(GEN e, GEN a, GEN g, GEN o)
   pari_sp av = avma;
   GEN j;
   checksmallell(e); checkellpt(a); checkellpt(g);
-  j = gel(e,13);
+  j = ell_get_j(e);
   switch(typ(j))
   {
     case t_INTMOD:
@@ -3850,7 +3845,7 @@ ellorder(GEN e, GEN z, GEN o)
   pari_sp av = avma;
   GEN j;
   checksmallell(e); checkellpt(z);
-  j = gel(e,13);
+  j = ell_get_j(e);
   switch(typ(j))
   {
     case t_INTMOD:
@@ -3932,7 +3927,7 @@ nagelllutz(GEN e)
     GEN x = gel(lr,i), y = gmul2n(gneg(ellLHS0(e,x)), -1);
     gel(r,++t) = mkvec2(x, y);
   }
-  ld = Z_factor(gmul2n(absi(gel(e,12)), 4));
+  ld = Z_factor(gmul2n(absi(ell_get_disc(e)), 4));
   p1 = gel(ld,2); k = lg(p1);
   for (i=1; i<k; i++) gel(p1,i) = shifti(gel(p1,i), -1);
   ld = divisors(ld);
@@ -3992,7 +3987,7 @@ torsbound(GEN e)
   long m, b, bold, p = 2;
   pari_sp av = avma;
   byteptr diff = diffptr+1;
-  GEN D = gel(e,12);
+  GEN D = ell_get_disc(e);
   long n = bit_accuracy(lgefint(D)) >> 3;
   /* n = number of primes to try ~ 1 prime every 8 bits in D */
   b = bold = 5040; /* = 2^4 * 3^2 * 5 * 7 */
@@ -4049,7 +4044,7 @@ elltors(GEN e)
   B = torsbound(e); /* #E_tor | B */
   if (B == 1) { avma = av; return tors(e,1,NULL,NULL, v); }
 
-  pr = DEFAULTPREC + ((lgefint(gel(e,12))-2) >> 1); /* pr >= size of sqrt(D) */
+  pr = DEFAULTPREC + ((lgefint(ell_get_disc(e))-2) >> 1); /* pr >= size of sqrt(D) */
   w1 = gel(e,15);
   prec = precision(w1);
   if (prec < pr) pari_err(precer, "elltors");
