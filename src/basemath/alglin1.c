@@ -509,13 +509,13 @@ static int
 use_maximal_pivot(GEN x)
 {
   int res = 0;
-  long i, j, ly, lx = lg(x);
+  long i, j, hx, lx = lg(x);
   if (lx == 1) return 0;
-  ly = lg(x[1]);
-  for (i=1; i<lx; i++)
-    for (j=1; j<ly; j++)
+  hx = lg(x[1]);
+  for (j=1; j<lx; j++)
+    for (i=1; i<hx; i++)
     {
-      GEN c = gmael(x,i,j);
+      GEN c = gcoeff(x,i,j);
       if (!is_scalar_t(typ(c))) return 0;
       if (precision(c)) res = 1;
     }
