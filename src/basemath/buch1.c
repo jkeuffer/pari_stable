@@ -299,15 +299,13 @@ get_om(GEN nf, GEN a) {
 static GEN
 getallelts(GEN bnr)
 {
-  GEN nf, G, C, c, g, list, pows, gk;
+  GEN nf, C, c, g, list, pows, gk;
   long lc, i, j, no;
 
-  nf = checknf(bnr);
-  G = gel(bnr,5);
-
-  no = itos(gel(G,1));
-  c = gel(G,2);
-  g = gel(G,3); lc = lg(c)-1;
+  nf = bnr_get_nf(bnr);
+  no = itos( bnr_get_no(bnr) );
+  c = bnr_get_cyc(bnr);
+  g = bnr_get_gen(bnr); lc = lg(c)-1;
   list = cgetg(no+1,t_VEC);
   gel(list,1) = matid(nf_get_degree(nf)); /* (1) */
   if (!no) return list;
@@ -638,7 +636,7 @@ quadray(GEN D, GEN f, long prec)
     D = nf_get_disc(nf);
   }
   bnr = Buchray(bnf, f, nf_INIT|nf_GEN);
-  if (gcmp1(gmael(bnr,5,1))) { avma = av; return pol_x(0); }
+  if (is_pm1(bnr_get_no(bnr))) { avma = av; return pol_x(0); }
   if (signe(D) > 0)
     y = bnrstark(bnr,NULL,prec);
   else

@@ -499,11 +499,11 @@ bnrisprincipal(GEN bnr, GEN x, long flag)
 {
   long i, j, c;
   pari_sp av = avma;
-  GEN bnf, nf, bid, U, El, ep, L, beta, idep, ex, rayclass, divray, genray;
+  GEN bnf, nf, bid, U, El, ep, L, beta, idep, ex, divray, genray;
   GEN alpha;
 
-  checkbnr(bnr); rayclass = gel(bnr,5);
-  divray = gel(rayclass,2); c = lg(divray);
+  checkbnr(bnr);
+  divray = bnr_get_cyc(bnr); c = lg(divray);
   ex = cgetg(c,t_COL);
   if (c == 1 && !(flag & nf_GEN)) return ex;
 
@@ -527,11 +527,8 @@ bnrisprincipal(GEN bnr, GEN x, long flag)
   if (!(flag & nf_GEN)) return gerepileupto(av, ex);
 
   /* compute generator */
-  if (lg(rayclass)<=3)
-    pari_err(talker,"please apply bnrinit(,,1) and not bnrinit(,,0)");
-
-  genray = gel(rayclass,3);
-  L = isprincipalfact(bnf, x, genray, gneg(ex),
+  genray = bnr_get_gen_check(bnr);
+  L = isprincipalfact(bnf, x, genray, ZC_neg(ex),
                       nf_GENMAT|nf_GEN_IF_PRINCIPAL|nf_FORCE);
   if (L == gen_0) pari_err(bugparier,"isprincipalray");
   alpha = nffactorback(nf, L, NULL);
@@ -1169,7 +1166,7 @@ GEN
 bnrsurjection(GEN bnr1, GEN bnr2)
 {
   long l, i;
-  GEN M, gen = gmael(bnr1, 5, 3);
+  GEN M, gen = bnr_get_gen(bnr1);
   l = lg(gen); M = cgetg(l, t_MAT);
   for (i = 1; i < l; i++) gel(M,i) = isprincipalray(bnr2, gel(gen,i));
   return M;
@@ -1241,7 +1238,7 @@ check_subgroup(GEN bnr, GEN H, GEN *clhray, int triv_is_NULL, const char *s)
 static GEN
 ideallog_to_bnr(GEN bnr, GEN z)
 {
-  GEN rayclass = gel(bnr,5), U = gel(bnr,4), divray = gel(rayclass,2);
+  GEN U = gel(bnr,4), divray = bnr_get_cyc(bnr);
   long j, l, lU, lz;
   int col;
 
@@ -1293,7 +1290,7 @@ bnrconductor(GEN bnr, GEN H0, long flag)
   if (flag) checkbnrgen(bnr); else checkbnr(bnr);
   bnf = bnr_get_bnf(bnr);
   bid = bnr_get_bid(bnr); init_zlog_bid(&S, bid);
-  clhray = gmael(bnr,5,1);
+  clhray = bnr_get_no(bnr);
   nf = bnf_get_nf(bnf);
   H = check_subgroup(bnr, H0, &clhray, 1, "conductor");
 
@@ -1349,7 +1346,7 @@ bnrisconductor(GEN bnr, GEN H0)
   checkbnr(bnr);
   bnf = bnr_get_bnf(bnr);
   bid = bnr_get_bid(bnr); init_zlog_bid(&S, bid);
-  clhray = gmael(bnr,5,1);
+  clhray = bnr_get_no(bnr);
   nf = bnf_get_nf(bnf);
   H = check_subgroup(bnr, H0, &clhray, 1, "conductor");
 
@@ -1374,12 +1371,12 @@ rnfnormgroup(GEN bnr, GEN polrel)
 {
   long i, j, reldeg, nfac, k;
   pari_sp av = avma;
-  GEN bnf,index,discnf,nf,raycl,group,detgroup,fa,greldeg;
+  GEN bnf, index, discnf, nf, group, detgroup, fa, greldeg;
   GEN famo, fac, col, cnd;
   byteptr d = diffptr;
   ulong p;
 
-  checkbnr(bnr); bnf = bnr_get_bnf(bnr); raycl=gel(bnr,5);
+  checkbnr(bnr); bnf = bnr_get_bnf(bnr);
   nf = bnf_get_nf(bnf); cnd = gel(bnr_get_mod(bnr), 1);
   polrel = rnf_fix_pol(nf_get_pol(nf),polrel,1);
   if (!gcmp1(leading_term(polrel)))
@@ -1388,7 +1385,7 @@ rnfnormgroup(GEN bnr, GEN polrel)
   reldeg = degpol(polrel);
   /* reldeg-th powers are in norm group */
   greldeg = utoipos(reldeg);
-  group = FpC_red(gel(raycl,2), greldeg);
+  group = FpC_red(bnr_get_cyc(bnr), greldeg);
   for (i=1; i<lg(group); i++)
     if (!signe(gel(group,i))) gel(group,i) = greldeg;
   detgroup = detcyc(group, &i/*junk*/);
@@ -1558,7 +1555,7 @@ Discrayrel(GEN bnr, GEN H0, long flag)
   checkbnr(bnr);
   bnf = bnr_get_bnf(bnr);
   bid = bnr_get_bid(bnr); init_zlog_bid(&S, bid);
-  clhray = gmael(bnr,5,1);
+  clhray = bnr_get_no(bnr);
   nf = bnf_get_nf(bnf);
   ideal= gmael(bid,1,1);
   H0 = H = check_subgroup(bnr, H0, &clhray, 0, "bnrdiscray");
