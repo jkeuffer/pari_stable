@@ -497,7 +497,7 @@ idealfactor(GEN nf, GEN x)
 	GEN P = idealprimedec(nf, gel(c1,i)), E = gel(c2,i), z;
 	long lP = lg(P);
 	z = cgetg(lP, t_COL);
-	for (j = 1; j < lP; j++) gel(z,j) = mulii(gmael(P,j,3), E);
+	for (j = 1; j < lP; j++) gel(z,j) = mului(pr_get_e(gel(P,j)), E);
         gel(c1,i) = P;
         gel(c2,i) = z;
       }
