@@ -2575,7 +2575,7 @@ bnrstark(GEN bnr, GEN subgrp, long prec)
   GEN bnf, p1, Mcyc, nf, data, dtQ;
 
   /* check the bnr */
-  checkbnrgen(bnr);
+  checkbnr(bnr);
   bnf = checkbnf(bnr);
   nf  = bnf_get_nf(bnf);
   N   = nf_get_degree(nf);
@@ -2647,7 +2647,7 @@ bnrL1(GEN bnr, GEN subgp, long flag, long prec)
   long N, cl, i, j, nc, a;
   pari_sp av = avma;
 
-  checkbnrgen(bnr);
+  checkbnr(bnr);
   bnf = bnr_get_bnf(bnr);
   nf  = bnf_get_nf(bnf);
   N   = nf_get_degree(nf);

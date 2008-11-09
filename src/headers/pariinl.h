@@ -1743,9 +1743,9 @@ bnr_get_no(GEN bnr) { return gmael(bnr,5,1); }
 INLINE GEN
 bnr_get_cyc(GEN bnr) { return gmael(bnr,5,2); }
 INLINE GEN
-bnr_get_gen(GEN bnr) { return gmael(bnr,5,3); }
+bnr_get_gen_nocheck(GEN bnr) { return gmael(bnr,5,3); }
 INLINE GEN
-bnr_get_gen_check(GEN bnr) {
+bnr_get_gen(GEN bnr) {
   GEN G = gel(bnr,5);
   if (lg(G) !=  4)
     pari_err(talker,"missing bnr generators: please use bnrinit(,,1)");

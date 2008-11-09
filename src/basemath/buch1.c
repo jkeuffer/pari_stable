@@ -306,7 +306,7 @@ getallelts(GEN bnr)
   nf = bnr_get_nf(bnr);
   no = itos( bnr_get_no(bnr) );
   c = bnr_get_cyc(bnr);
-  g = bnr_get_gen(bnr); lc = lg(c)-1;
+  g = bnr_get_gen_nocheck(bnr); lc = lg(c)-1;
   list = cgetg(no+1,t_VEC);
   gel(list,1) = matid(nf_get_degree(nf)); /* (1) */
   if (!no) return list;

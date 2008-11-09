@@ -544,7 +544,7 @@ bnr_to_znstar(GEN bnr, long *complex)
   long l2, i;
   checkbnr(bnr);
   bid = bnr_get_bid(bnr);
-  gen = bnr_get_gen_check(bnr);
+  gen = bnr_get_gen(bnr);
   if (nf_get_degree(bnr_get_nf(bnr)) != 1)
     pari_err(talker,"bnr must be over Q in bnr_to_znstar");
   /* cond is the finite part of the conductor,

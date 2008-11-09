@@ -527,7 +527,7 @@ bnrisprincipal(GEN bnr, GEN x, long flag)
   if (!(flag & nf_GEN)) return gerepileupto(av, ex);
 
   /* compute generator */
-  genray = bnr_get_gen_check(bnr);
+  genray = bnr_get_gen(bnr);
   L = isprincipalfact(bnf, x, genray, ZC_neg(ex),
                       nf_GENMAT|nf_GEN_IF_PRINCIPAL|nf_FORCE);
   if (L == gen_0) pari_err(bugparier,"isprincipalray");
@@ -1160,8 +1160,8 @@ certifybuchall(GEN bnf)
 /*        RAY CLASS FIELDS: CONDUCTORS AND DISCRIMINANTS           */
 /*                                                                 */
 /*******************************************************************/
-/* Let bnr1, bnr2 be such that mod(bnr2) | mod(bnr1), compute the
-   matrix of the surjective map Cl(bnr1) ->> Cl(bnr2) */
+/* Let bnr1 with generators, bnr2 be such that mod(bnr2) | mod(bnr1), compute
+ * the matrix of the surjective map Cl(bnr1) ->> Cl(bnr2) */
 GEN
 bnrsurjection(GEN bnr1, GEN bnr2)
 {
@@ -1173,7 +1173,7 @@ bnrsurjection(GEN bnr1, GEN bnr2)
 }
 
 /* s: <gen> = Cl_f --> Cl_f2 --> 0, H subgroup of Cl_f (generators given as
- * HNF on [gen]). Return subgroup s(H) in Cl_f2 */
+ * HNF on [gen]). Return subgroup s(H) in Cl_f2. bnr must include generators */
 static GEN
 imageofgroup(GEN bnr, GEN bnr2, GEN H)
 {
@@ -1287,7 +1287,7 @@ bnrconductor(GEN bnr, GEN H0, long flag)
   int iscond0 = 1, iscondinf = 1;
   zlog_S S;
 
-  if (flag) checkbnrgen(bnr); else checkbnr(bnr);
+  checkbnr(bnr);
   bnf = bnr_get_bnf(bnr);
   bid = bnr_get_bid(bnr); init_zlog_bid(&S, bid);
   clhray = bnr_get_no(bnr);

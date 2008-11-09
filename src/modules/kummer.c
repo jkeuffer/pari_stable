@@ -1073,7 +1073,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   long firstpass = all<0;
 
   if (DEBUGLEVEL) TIMERstart(&t);
-  checkbnrgen(bnr);
+  checkbnr(bnr);
   bnf = bnr_get_bnf(bnr);
   nf  = bnf_get_nf(bnf);
   polnf = nf_get_pol(nf); vnf = varn(polnf);
