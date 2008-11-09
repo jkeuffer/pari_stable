@@ -20,8 +20,8 @@ Doc: \var{bnr} being the
  If $x$ is not coprime to the modulus of \var{bnr} the result is undefined.
 Variant: Instead of hardcoded  numerical flags,  one should rather
  use 
- \fun{GEN}{isprincipalray}{GEN bnf, GEN x} for $\kbd{flag} = 0$, and if you
+ \fun{GEN}{isprincipalray}{GEN bnr, GEN x} for $\kbd{flag} = 0$, and if you
  want generators:
  \bprog
-   bnrisprincipal(bnf, x, nf_GEN)
+   bnrisprincipal(bnr, x, nf_GEN)
  @eprog
