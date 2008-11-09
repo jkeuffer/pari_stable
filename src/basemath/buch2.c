@@ -1760,7 +1760,7 @@ bnfisunit(GEN bnf,GEN x)
 {
   long tx = typ(x), i, R1, RU, e, n, prec;
   pari_sp av = avma;
-  GEN p1, v, rlog, logunit, ex, nf, z, pi2_sur_w, emb;
+  GEN p1, v, rlog, logunit, ex, nf, pi2_sur_w, emb;
 
   bnf = checkbnf(bnf); nf = bnf_get_nf(bnf);
   logunit = gel(bnf,3); RU = lg(logunit);
