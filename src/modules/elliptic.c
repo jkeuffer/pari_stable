@@ -253,14 +253,14 @@ do_padic_agm(GEN *ptx, GEN a1, GEN b1, GEN p)
 GEN
 ellinit_padic(GEN x, GEN p, long prec)
 {
-  GEN y, b2, b4, c4, c6, p1, w, pv, a1, b1, x1, u2, q, e0, e1;
-  GEN j = ell_get_j(x);
+  GEN y, j, b2, b4, c4, c6, p1, w, pv, a1, b1, x1, u2, q, e0, e1;
   long i, alpha;
 
   y = cgetg(20,t_VEC); initsmall(x,y);
   /* convert now, not before initsmall: better accuracy */
   for (i=1; i<=13; i++)
     if (typ(gel(y,i)) != t_PADIC) gel(y,i) = cvtop(gel(y,i), p, prec);
+  j = ell_get_j(y);
   if (gcmp0(j) || valp(j) >= 0) /* p | j */
     pari_err(talker,"valuation of j must be negative in p-adic ellinit");
   if (equaliu(p,2))
