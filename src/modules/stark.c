@@ -1656,16 +1656,15 @@ static GEN
 GetValue1(GEN bnr, long flag, long prec)
 {
   GEN bnf = checkbnf(bnr), nf = bnf_get_nf(bnf);
-  GEN h, R, w, c, diff;
+  GEN h, R, c, diff;
   long i, l, r, r1, r2;
   pari_sp av = avma;
 
   nf_get_sign(nf, &r1,&r2);
   h = bnf_get_no(bnf);
   R = bnf_get_reg(bnf);
-  w = gmael3(bnf, 8, 4, 1);
-
-  c = gneg_i(gdiv(mpmul(h, R), w));
+  
+  c = gneg_i(gdivgs(mpmul(h, R), bnf_get_tuN(bnf)));
   r = r1 + r2 - 1;
 
   if (flag)

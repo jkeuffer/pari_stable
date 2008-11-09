@@ -309,37 +309,24 @@ member_fu(GEN x) /* fundamental units */
 GEN
 member_tu(GEN x)
 {
-  long t; GEN y, bnf = get_bnf(x,&t), res = cgetg(3,t_VEC);
+  long t; GEN bnf = get_bnf(x,&t), res = cgetg(3,t_VEC);
   if (!bnf)
   {
-    switch(t)
-    {
-      case typ_Q:
-	y = quad_disc(x);
-	if (signe(y)<0 && cmpiu(y,4)<=0) /* |y| <= 4 */
-	  y = stoi((itos(y) == -4)? 4: 6);
-	else
-	{ y = gen_2; x = gen_m1; }
-	gel(res,1) = y;
-	gel(res,2) = x; return res;
-      default: member_err("tu");
-	return NULL; /* not reached */
-    }
+    GEN y;
+    if (t != typ_Q) member_err("tu");
+    y = quad_disc(x);
+    if (signe(y) > 0 || cmpiu(y,4) > 0) return mkvec2(gen_m1, gen_2);
+
+    gel(res,1) = utoipos((itos(y) == -4)? 4: 6);
+    gel(res,2) = gcopy(x);
   }
   else
   {
     if (t == typ_BNR) pari_err(impl,"ray torsion units");
-    x = bnf_get_nf(bnf);
-    y = gel(bnf,8);
-    if (typ(y) == t_VEC && lg(y) > 5) y = gel(y,4);
-    else
-    {
-      y = rootsof1(x);
-      gel(y,2) = gmul(gel(x,7), gel(y,2));
-    }
-    gel(res,2) = basistoalg(bnf, gel(y,2));
+    gel(res,1) = utoipos( bnf_get_tuN(bnf) );
+    gel(res,2) = basistoalg(bnf, bnf_get_tuU(bnf));
   }
-  gel(res,1) = gcopy(gel(y,1)); return res;
+  return res;
 }
 
 GEN

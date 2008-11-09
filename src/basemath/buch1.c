@@ -231,14 +231,14 @@ static GEN
 getallrootsof1(GEN bnf)
 {
   GEN T, u, nf = bnf_get_nf(bnf), tu;
-  long i, n = itos(gmael3(bnf,8,4,1));
+  long i, n = bnf_get_tuN(bnf);
 
   if (n == 2) {
     long N = nf_get_degree(nf);
     return mkvec2(scalarcol_shallow(gen_m1, N),
 		  scalarcol_shallow(gen_1, N));
   }
-  tu = poltobasis(nf, gmael3(bnf,8,4,2));
+  tu = poltobasis(nf, bnf_get_tuU(bnf));
   T = zk_multable(nf, tu);
   u = cgetg(n+1, t_VEC); gel(u,1) = tu;
   for (i=2; i <= n; i++) gel(u,i) = ZM_ZC_mul(T, gel(u,i-1));

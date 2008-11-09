@@ -1760,13 +1760,11 @@ bnfisunit(GEN bnf,GEN x)
 {
   long tx = typ(x), i, R1, RU, e, n, prec;
   pari_sp av = avma;
-  GEN tu, p1, v, rlog, logunit, ex, nf, z, pi2_sur_w, emb;
+  GEN p1, v, rlog, logunit, ex, nf, z, pi2_sur_w, emb;
 
   bnf = checkbnf(bnf); nf = bnf_get_nf(bnf);
   logunit = gel(bnf,3); RU = lg(logunit);
-  tu = gmael(bnf,8,4);
-  n = itou(gel(tu,1)); /* # { roots of 1 } */
-  z = algtobasis(nf, gel(tu,2)); /* primitive root of 1 */
+  n = bnf_get_tuN(bnf); /* # { roots of 1 } */
   if (tx == t_MAT)
   { /* famat, assumed integral */
     if (lg(x) != 3 || lg(x[1]) != lg(x[2]))
@@ -1834,6 +1832,7 @@ bnfisunit(GEN bnf,GEN x)
   e = umodiu(roundr(divrr(p1, pi2_sur_w)), n);
   if (n > 2)
   {
+    GEN z = algtobasis(nf, bnf_get_tuU(bnf)); /* primitive root of 1 */
     GEN ro = RgV_dotproduct(row(nf_get_M(nf), 1), z);
     GEN p2 = roundr(divrr(garg(ro, prec), pi2_sur_w));
     e *= Fl_inv(umodiu(p2,n), n);
@@ -1870,9 +1869,9 @@ nfsign_units(GEN bnf, GEN archp, int add_zu)
   y = cgetg(RU,t_MAT);
   if (add_zu)
   {
-    GEN w = gmael3(bnf,8,4,1);
-    gel(y, j++) = equaliu(w,2)? const_vecsmall(lg(archp)-1, 1)
-                              : cgetg(1, t_VECSMALL);
+    long w = bnf_get_tuN(bnf);
+    gel(y, j++) = (w == 2)? const_vecsmall(lg(archp)-1, 1)
+                          : cgetg(1, t_VECSMALL);
   }
   for ( ; j < RU; j++) gel(y,j) = nfsign_from_logarch(gel(A,j), invpi, archp);
   return y;

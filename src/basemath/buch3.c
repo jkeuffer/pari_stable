@@ -725,7 +725,7 @@ is_unit(GEN M, long r1, GEN x)
 
 /* FIXME: should use smallvectors */
 static GEN
-minimforunits(GEN nf, long BORNE, GEN w)
+minimforunits(GEN nf, long BORNE, ulong w)
 {
   const long prec = MEDDEFAULTPREC;
   long n, i, j, k, s, *x, r1, cnt = 0;
@@ -785,7 +785,7 @@ minimforunits(GEN nf, long BORNE, GEN w)
     if (norme > normax) normax = norme;
     if (is_unit(M,r1, x)
     && (norme > 2*n  /* exclude roots of unity */
-	|| !ZV_isscalar(nfpow(nf, zc_to_ZC(x), w))))
+	|| !ZV_isscalar(nfpow_u(nf, zc_to_ZC(x), w))))
     {
       if (norme < normin) normin = norme;
       if (DEBUGLEVEL>=2) { fprintferr("*"); flusherr(); }
@@ -972,7 +972,7 @@ lowerboundforregulator_i(GEN bnf)
   }
   if (gexpo(minunit) > 30) return NULL;
 
-  vecminim = minimforunits(nf, itos(gceil(minunit)), gmael3(bnf,8,4,1));
+  vecminim = minimforunits(nf, itos(gceil(minunit)), bnf_get_tuN(bnf));
   if (!vecminim) return NULL;
   bound = gel(vecminim,3);
   if (DEBUGLEVEL>1)

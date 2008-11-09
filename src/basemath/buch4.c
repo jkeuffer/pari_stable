@@ -711,7 +711,7 @@ rnfisnorm(GEN T, GEN x, long flag)
 {
   pari_sp av = avma;
   GEN bnf, rel, relpol, theta, nfpol;
-  GEN nf, aux, H, U, Y, M, A, bnfS, sunitrel, futu, tu, w, prod, S1, S2;
+  GEN nf, aux, H, U, Y, M, A, bnfS, sunitrel, futu, prod, S1, S2;
   long L, i, drel, itu;
 
   if (typ(T) != t_VEC || lg(T) != 9)
@@ -751,9 +751,7 @@ rnfisnorm(GEN T, GEN x, long flag)
   fa_pr_append(nf,rel,idealnorm(nf,x), &prod,&S1,&S2);
 
   /* computation on T-units */
-  w  = gmael3(rel,8,4,1);
-  tu = gmael3(rel,8,4,2);
-  futu = shallowconcat(check_units(rel,"rnfisnorm"), tu);
+  futu = shallowconcat(check_units(rel,"rnfisnorm"), bnf_get_tuU(rel));
   bnfS = bnfsunit(bnf,S1,3);
   sunitrel = shallowconcat(futu, gel(bnfsunit(rel,S2,3), 1));
 
@@ -771,7 +769,7 @@ rnfisnorm(GEN T, GEN x, long flag)
     gel(u,itu) = lift_intern(gel(u,itu)); /* lift root of 1 part */
     gel(M,i) = u;
   }
-  aux = zerocol(lg(A)-1); gel(aux,itu) = w;
+  aux = zerocol(lg(A)-1); gel(aux,itu) = utoipos( bnf_get_tuN(rel) );
   gel(M,L) = aux;
   H = ZM_hnfall(M, &U, 2);
   Y = RgM_RgC_mul(U, inverseimage(H,A));

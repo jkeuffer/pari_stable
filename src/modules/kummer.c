@@ -471,7 +471,7 @@ compute_beta(GEN X, GEN vecWB, GEN ell, GEN bnfz)
 static GEN
 get_Selmer(GEN bnf, GEN cycgen, long rc)
 {
-  GEN fu = check_units(bnf,"rnfkummer"), tu = gmael3(bnf,8,4,2);
+  GEN fu = check_units(bnf,"rnfkummer"), tu = bnf_get_tuU(bnf);
   GEN units = matalgtobasis(bnf,shallowconcat(fu,tu));
   return shallowconcat(units, vecslice(cycgen,1,rc));
 }
@@ -1058,7 +1058,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
 {
   long ell, i, j, m, d, dK, dc, rc, ru, rv, g, mginv, degK, degKz, vnf;
   long lSp, lSml2, lSl2, lW;
-  GEN polnf,bnf,nf,bnfz,nfz,bid,ideal,cycgen,gell,p1,p2,wk,U,vselmer;
+  GEN polnf,bnf,nf,bnfz,nfz,bid,ideal,cycgen,gell,p1,p2,U,vselmer;
   GEN cyc,gen;
   GEN Q,idealz,gothf;
   GEN res=NULL,u,M,K,y,vecMsup,vecW,vecWA,vecWB,vecB,vecC,vecAp,vecBp;
@@ -1078,7 +1078,6 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   nf  = bnf_get_nf(bnf);
   polnf = nf_get_pol(nf); vnf = varn(polnf);
   if (!vnf) pari_err(talker,"main variable in kummer must not be x");
-  wk = gmael3(bnf,8,4,1);
   /* step 7 */
   p1 = bnrconductor(bnr, subgroup, 2);
   if (DEBUGLEVEL) msgTIMER(&t, "[rnfkummer] conductor");
@@ -1088,7 +1087,8 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   ell = itos(gell);
   if (ell == 1) return pol_x(vnf);
   if (!uisprime(ell)) pari_err(impl,"kummer for composite relative degree");
-  if (!umodiu(wk,ell)) return rnfkummersimple(bnr, subgroup, gell, all);
+  if (bnf_get_tuN(bnf) % ell == 0)
+    return rnfkummersimple(bnr, subgroup, gell, all);
 
   if (all == -1) all = 0;
   bid = bnr_get_bid(bnr);
