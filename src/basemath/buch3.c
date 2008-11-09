@@ -364,7 +364,7 @@ GEN
 Buchray(GEN bnf, GEN module, long flag)
 {
   GEN nf, cyc, gen, Gen, u, clg, logs, p1, h, met, u1, u2, U, cycgen;
-  GEN bid, cycbid, genbid, x, y, funits, H, El;
+  GEN bid, cycbid, genbid, y, funits, H, El;
   long RU, Ri, j, ngen, lh;
   const long add_gen = flag & nf_GEN;
   const long do_init = flag & nf_INIT;
@@ -380,8 +380,6 @@ Buchray(GEN bnf, GEN module, long flag)
   cycbid = bid_get_cyc(bid);
   genbid = bid_get_gen(bid);
   Ri = lg(cycbid)-1; lh = ngen+Ri;
-
-  x = bid_get_ideal(bid);
   if (Ri || add_gen || do_init)
   {
     GEN fx = gel(bid,3);
@@ -396,8 +394,8 @@ Buchray(GEN bnf, GEN module, long flag)
   if (add_gen)
   {
     Gen = cgetg(lh+1,t_VEC);
-    for (j=1; j<=ngen; j++) gel(Gen,j) = idealmul(nf,gel(El,j),gel(gen,j));
-    for (   ; j<=lh; j++)   Gen[j] = genbid[j - ngen];
+    for (j=1; j<=ngen; j++) gel(Gen,j) = idealmul(nf, gel(El,j), gel(gen,j));
+    for (   ; j<=lh; j++)   gel(Gen,j) = gel(genbid, j-ngen);
   }
   if (!Ri)
   {
