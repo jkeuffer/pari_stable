@@ -499,13 +499,11 @@ bnrisprincipal(GEN bnr, GEN x, long flag)
 {
   long i, j, c;
   pari_sp av = avma;
-  GEN bnf, nf, bid, U, El, ep, L, beta, idep, ex, divray, genray;
-  GEN alpha;
+  GEN bnf, nf, bid, U, El, ep, L, beta, idep, ex, divray, alpha;
 
   checkbnr(bnr);
   divray = bnr_get_cyc(bnr); c = lg(divray);
-  ex = cgetg(c,t_COL);
-  if (c == 1 && !(flag & nf_GEN)) return ex;
+  if (c == 1 && !(flag & nf_GEN)) return cgetg(1,t_COL);
 
   bnf = bnr_get_bnf(bnr); nf = bnf_get_nf(bnf);
   bid = bnr_get_bid(bnr);
@@ -527,8 +525,7 @@ bnrisprincipal(GEN bnr, GEN x, long flag)
   if (!(flag & nf_GEN)) return gerepileupto(av, ex);
 
   /* compute generator */
-  genray = bnr_get_gen(bnr);
-  L = isprincipalfact(bnf, x, genray, ZC_neg(ex),
+  L = isprincipalfact(bnf, x, bnr_get_gen(bnr), ZC_neg(ex),
                       nf_GENMAT|nf_GEN_IF_PRINCIPAL|nf_FORCE);
   if (L == gen_0) pari_err(bugparier,"isprincipalray");
   alpha = nffactorback(nf, L, NULL);
