@@ -87,6 +87,7 @@ allocatemem0(GEN z)
   ulong newsize;
   if (!z) newsize = 0;
   else {
+    if (typ(z) != t_INT) pari_err(typeer,"allocatemem");
     newsize = itou(z);
     if (signe(z) < 0) pari_err(talker,"negative size in allocatemem");
   }
