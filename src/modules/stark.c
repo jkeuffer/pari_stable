@@ -578,7 +578,7 @@ FindModulus(GEN bnr, GEN dtQ, long *newprec, long prec)
 END:
   if (DEBUGLEVEL>1)
     fprintferr("No, we're done!\nModulus = %Ps and subgroup = %Ps\n",
-	       gmael3(rep, 1, 2, 1), gel(rep,2));
+	       bnr_get_mod(gel(rep,1)), gel(rep,2));
   gel(rep,5) = InitChar(gel(rep,1), gel(rep,5), *newprec);
   return gerepilecopy(av, rep);
 }
