@@ -141,6 +141,7 @@ IZ111- missing `const's in groupid.c cause massive copying to stack.
   116- RgX_extgcd created invalid objects in trivial cases [ gen_0 used by
        RgX-only routines ]
 BA117- Fix detection for ppc64 running in 32bit mode.
+  118- Fp_div used remii instead of modii: Mod(3,5)-1/3 -> Mod(0, 5) [#893]
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
