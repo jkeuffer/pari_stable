@@ -455,12 +455,12 @@ monomorphismratlift(GEN P, GEN S, struct galois_lift *gl, GEN frob)
     S = FpXQ_mul(Wr, FpX_FpXQV_eval(Pr, Spow, Qr, q),Qr,q);
     lbot = avma;
     S = FpX_sub(Sr, S, q);
+    if (DEBUGLEVEL >= 2) msgtimer("MonomorphismLift: lift to prec %d",level);
     if (mask == 1) break;
     Wr = ZX_copy(Wr);
     gerepilemanysp(ltop, lbot, gptr, 2);
     if (qold && frob && monoratlift(S,q,diviiexact(qold,p),gl,frob)) return NULL;
     qold = q; Prold = Pr; Qrold = Qr;
-    if (DEBUGLEVEL >= 2) msgtimer("MonomorphismLift: lift to prec %d",level);
   }
   if (DEBUGLEVEL == 1) msgtimer("monomorphismlift()");
   return S;
