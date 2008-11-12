@@ -25,7 +25,7 @@ case "$arch" in
            8) asmarch=hppa64;           pretty='PA-RISC2.0';;
            esac;;
   alpha)         asmarch=$arch;         pretty=Alpha ;;
-  ppc)  case "$sizeof_long" in   
+  ppc|ppc64)  case "$sizeof_long" in   
         4) asmarch=ppc;;
         8) asmarch=ppc64;;
         esac;                           pretty='PowerPC' ;; 
