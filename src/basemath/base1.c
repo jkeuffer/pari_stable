@@ -289,9 +289,6 @@ tschirnhaus(GEN x)
   avma=av2; return gerepileupto(av,u);
 }
 
-static int
-cmp_abs_ZX(GEN x, GEN y) { return gen_cmp_RgX((void*)&absi_cmp, x, y); }
-
 /* Assume pol != 0 in Z[X]. Find C, L in Z such that POL = C pol(x/L) monic
  * in Z[X]. Return POL and set *ptlc = L. Wasteful (but correct) if pol is not
  * primitive: better if caller used Q_primpart already. No GC. */
@@ -1312,6 +1309,8 @@ set_LLL_basis(nfbasic_t *T, GEN *pro, double DELTA)
   if (DEBUGLEVEL) msgtimer("LLL basis");
 }
 
+static int
+cmp_abs_ZX(GEN x, GEN y) { return gen_cmp_RgX((void*)&absi_cmp, x, y); }
 /* current best: ZX x of discriminant *dx, is ZX y better than x ?
  * (if so update *dx) */
 static int
