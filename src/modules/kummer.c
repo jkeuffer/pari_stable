@@ -149,8 +149,7 @@ reduce_mod_Qell(GEN bnfz, GEN be, GEN gell)
   {
     fa = factor(c);
     gel(fa,2) = FpC_red(gel(fa,2), gell);
-    c = factorback(fa);
-    be = gmul(be, c);
+    be = ZC_Z_mul(be, factorback(fa));
   }
   return be;
 }
@@ -1053,6 +1052,33 @@ compositum_red(compo_s *C, GEN P, GEN Q)
   if (DEBUGLEVEL>1) fprintferr("polred(compositum) = %Ps\n",C->R);
 }
 
+/* replace P->C^(-deg P) P(xC) for the largest integer C such that coefficients
+ * remain algebraic integers. Lift *rational* coefficients */
+static void
+nfX_Z_normalize(GEN nf, GEN P)
+{
+  long i, l;
+  GEN C, Cj, PZ = cgetg_copy(P, &l);
+  PZ[1] = P[1];
+  for (i = 2; i < l; i++) /* minor variation on RgX_to_nfX (create PZ) */
+  {
+    GEN z = nf_to_scalar_or_basis(nf, gel(P,i));
+    if (typ(z) == t_INT)
+      gel(PZ,i) = gel(P,i) = z;
+    else
+      gel(PZ,i) = ZV_content(z);
+  }
+  (void)ZX_Z_normalize(PZ, &C);
+
+  if (!C) return;
+  Cj = C;
+  for (i = l-2; i > 1; i--)
+  {
+    if (i != l-2) Cj = mulii(Cj, C);
+    gel(P,i) = gdiv(gel(P,i), Cj);
+  }
+}
+
 static GEN
 _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
 {
@@ -1280,7 +1306,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
           }
           be = compute_beta(X, vecWB, gell, bnfz);
           P = compute_polrel(nfz, &T, be, g, ell);
-          P = lift_if_rational(P);
+          nfX_Z_normalize(nf, P);
           if (DEBUGLEVEL>1) fprintferr("polrel(beta) = %Ps\n", P);
           if (!all) {
             H = rnfnormgroup(bnr, P);

@@ -827,6 +827,7 @@ GEN     polredabsall(GEN x, long flun);
 GEN     smallpolred(GEN x);
 GEN     smallpolred2(GEN x);
 GEN     tschirnhaus(GEN x);
+GEN     ZX_Z_normalize(GEN pol, GEN *ptk);
 GEN     ZX_to_monic(GEN pol, GEN *lead);
 GEN     ZX_primitive_to_monic(GEN pol, GEN *lead);
 

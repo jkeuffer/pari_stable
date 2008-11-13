@@ -289,6 +289,48 @@ tschirnhaus(GEN x)
   avma=av2; return gerepileupto(av,u);
 }
 
+/* Assume pol in Z[X], monic, of degree n > 1. Find L in Z such that
+ * POL = L^(-n) pol(L x) is monic in Z[X]. Return POL and set *ptk = L.
+ * No GC. */
+GEN
+ZX_Z_normalize(GEN pol, GEN *ptk)
+{
+  long i,j, n = degpol(pol); /* > 0 */
+  GEN k, fa, P, E, a, POL = leafcopy(pol);
+
+  a = POL + 2; k = gel(a,n-1); /* a[i] = coeff of degree i */
+  for (i = n-2; i > 0; i--)
+  {
+    if (is_pm1(k)) { if (ptk) *ptk = NULL; return pol; }
+    k = gcdii(k, gel(a,i));
+  }
+  fa = Z_factor(k); k = gen_1;
+  P = gel(fa,1);
+  E = gel(fa,2);
+  for (i = lg(P)-1; i > 0; i--)
+  {
+    GEN p = gel(P,i), pv, pvj;
+    long vmin = itos(gel(E,i));
+    /* find v_p(k) = min floor( v_p(a[i]) / (n-i)) */
+    for (j=n-1; j>=0; j--)
+    {
+      long v;
+      if (!signe(a[j])) continue;
+      v = Z_pval(gel(a,j), p) / (n - j);
+      if (v < vmin) vmin = v;
+    }
+    if (!vmin) continue;
+    pvj = pv = powiu(p,vmin); k = mulii(k, pv);
+    /* a[j] /= p^(v*(n-j)) */
+    for (j=n-1; j>=0; j--)
+    {
+      if (j < n-1) pvj = mulii(pvj, pv);
+      gel(a,j) = diviiexact(gel(a,j), pvj);
+    }
+  }
+  if (ptk) *ptk = k; return POL;
+}
+
 /* Assume pol != 0 in Z[X]. Find C, L in Z such that POL = C pol(x/L) monic
  * in Z[X]. Return POL and set *ptlc = L. Wasteful (but correct) if pol is not
  * primitive: better if caller used Q_primpart already. No GC. */
