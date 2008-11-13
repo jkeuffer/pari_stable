@@ -705,8 +705,8 @@ nf_to_scalar_or_basis(GEN nf, GEN x)
 GEN
 RgX_to_nfX(GEN nf, GEN x)
 {
-  long i, l = lg(x);
-  GEN y = cgetg(l,t_POL); y[1] = x[1];
+  long i, l;
+  GEN y = cgetg_copy(x, &l); y[1] = x[1];
   for (i=2; i<l; i++) gel(y,i) = nf_to_scalar_or_basis(nf, gel(x,i));
   return y;
 }
