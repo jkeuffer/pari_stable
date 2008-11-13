@@ -1413,9 +1413,9 @@ rnfnormgroup(GEN bnr, GEN polrel)
       /* if pr (probably) ramified, we have to use all (non-ram) P | pr */
       if (idealval(nf,cnd,pr)) { oldf = 0; continue; }
       modpr = zk_to_Fq_init(nf, &pr, &T, &pp); /* T = NULL */
+      polr = nfX_to_FqX(polrel, nf, modpr); /* in Fp[X] */
       if (!FpX_is_squarefree(polr, pp)) { oldf = 0; continue; }
 
-      polr = nfX_to_FqX(polrel, nf, modpr); /* in Fp[X] */
       famo = FpX_factor(polr, pp);
       fac = gel(famo,1); f = degpol(gel(fac,1));
       nfac = lg(fac)-1;
