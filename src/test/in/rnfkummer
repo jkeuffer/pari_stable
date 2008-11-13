@@ -38,3 +38,4 @@ setrand(1); for(i=1,10,rnfkummer(bnrinit(bnfinit(quadpoly(2540,y)),9,1),[3,1;0,1
 
 do(quadpoly(689,y), 2, Mat(2))
 
+do(y^8-76*y^6+1425*y^4-5776*y^2+5776, 5, matdiagonal([2,1]))

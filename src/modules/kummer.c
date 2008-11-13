@@ -142,14 +142,15 @@ reducebetanaive(GEN bnfz, GEN be, GEN ell)
 static GEN
 reduce_mod_Qell(GEN bnfz, GEN be, GEN gell)
 {
-  GEN c, fa;
+  GEN c;
   be = nf_to_scalar_or_basis(bnfz, be);
   be = Q_primitive_part(be, &c);
   if (c)
   {
-    fa = factor(c);
+    GEN d, fa = factor(c);
     gel(fa,2) = FpC_red(gel(fa,2), gell);
-    be = ZC_Z_mul(be, factorback(fa));
+    d = factorback(fa);
+    be = typ(be) == t_INT? mulii(be,d): ZC_Z_mul(be, d);
   }
   return be;
 }
