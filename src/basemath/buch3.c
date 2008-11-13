@@ -1410,14 +1410,13 @@ rnfnormgroup(GEN bnr, GEN polrel)
 
       /* primes of degree 1 are enough, and simpler */
       if (pr_get_f(pr) > 1) break;
-
-      modpr = zk_to_Fq_init(nf, &pr, &T, &pp);
-      polr = nfX_to_FqX(polrel, nf, modpr);
       /* if pr (probably) ramified, we have to use all (non-ram) P | pr */
       if (idealval(nf,cnd,pr)) { oldf = 0; continue; }
-      if (!FqX_is_squarefree(polr, T,pp)) { oldf = 0; continue; }
+      modpr = zk_to_Fq_init(nf, &pr, &T, &pp); /* T = NULL */
+      if (!FpX_is_squarefree(polr, pp)) { oldf = 0; continue; }
 
-      famo = FqX_factor(polr, T, pp);
+      polr = nfX_to_FqX(polrel, nf, modpr); /* in Fp[X] */
+      famo = FpX_factor(polr, pp);
       fac = gel(famo,1); f = degpol(gel(fac,1));
       nfac = lg(fac)-1;
       /* check decomposition of pr has Galois type */
