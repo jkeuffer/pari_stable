@@ -2625,7 +2625,7 @@ GEN
 ZX_gcd_all(GEN A, GEN B, GEN *Anew)
 {
   GEN R, a, b, q, qp, H, Hp, g;
-  long m, n, vA = varn(A);
+  long m, n, valX, vA = varn(A);
   ulong p;
   pari_sp ltop = avma, av, avlim;
   byteptr d;
@@ -2637,6 +2637,7 @@ ZX_gcd_all(GEN A, GEN B, GEN *Anew)
   g = gcdii(leading_term(A), leading_term(B)); /* multiple of lead(gcd) */
   if (is_pm1(g)) g = NULL;
 
+  valX = minss(ZX_valrem(A, &A), ZX_valrem(B, &B));
   av = avma; avlim = stack_lim(av, 1);
   H = NULL; d = init_modular(&p);
   for(;;)
@@ -2648,7 +2649,7 @@ ZX_gcd_all(GEN A, GEN B, GEN *Anew)
     m = degpol(Hp);
     if (m == 0) { /* coprime. DONE */
       avma = ltop; if (Anew) *Anew = A;
-      return pol_1(vA);
+      return monomial(gen_1, valX, vA);
     }
     if (m > n) continue; /* p | Res(A/G, B/G). Discard */
 
@@ -2681,7 +2682,7 @@ ZX_gcd_all(GEN A, GEN B, GEN *Anew)
     else
       R = RgX_pseudorem(A, H);
     if (signe(R)) continue;
-    return H;
+    return valX ? RgX_shift(H, valX): H;
   }
 }
 GEN
