@@ -4771,6 +4771,7 @@ by the integer \kbd{y}.
 coefficients.
 
 \fun{GEN}{ZX_gcd}{GEN x,GEN y} returns a gcd of the \kbd{ZX} $x$ and $y$.
+Not memory-clean, but suitable for \kbd{gerepileupto}.
 
 \fun{GEN}{ZX_gcd_all}{GEN x, GEN y, GEN *pX}. returns a gcd $d$ of $x$ and
 $y$. If \kbd{pX} is not \kbd{NULL}, set $\kbd{*pX}$ to a (non-zero) integer
