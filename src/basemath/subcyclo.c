@@ -790,8 +790,7 @@ factor_Aurifeuille_aux(GEN A, long Astar, long n, GEN P,
 
   if ((n & 7) == 4)
   { /* A^* even */
-    long m = n>>2;
-    GEN i = Fp_powu(z, m, le), z2 = Fp_sqr(z, le);
+    GEN i = Fp_powu(z, n>>2, le), z2 = Fp_sqr(z, le);
 
     invertible = stackmalloc(n); /* even indices unused */
     for (j = 1; j < n; j+=2) invertible[j] = 1;
@@ -800,7 +799,7 @@ factor_Aurifeuille_aux(GEN A, long Astar, long n, GEN P,
       long p = P[k];
       for (j = p; j < n; j += 2*p) invertible[j] = 0;
     }
-    lastj = 2; maxjump = 1;
+    lastj = 1; maxjump = 2;
     for (j= 3; j < n; j+=2)
       if (invertible[j]) {
         long jump = j - lastj;
