@@ -1356,9 +1356,7 @@ RgXQX_pseudorem(GEN x, GEN y, GEN T)
   { /* multiply by y[0]^p   [beware dummy vars from FpX_FpXY_resultant] */
     GEN t = gel(y,0);
     if (T && typ(t) == t_POL && varn(t) == varn(T))
-    { /* assume p fairly small */
-      for (i=1; i<p; i++) t = RgXQ_mul(t, gel(y,0), T);
-    }
+      t = RgXQ_u_pow(gel(y,0), p, T);
     else
       t = gpowgs(t, p);
     for (i=2; i<lx; i++)
