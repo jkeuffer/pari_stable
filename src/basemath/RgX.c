@@ -1320,23 +1320,33 @@ RgXQX_pseudorem(GEN x, GEN y, GEN T)
 {
   long vx = varn(x), dx, dy, dz, i, lx, p;
   pari_sp av = avma, av2, lim;
+  GEN y_lead;
 
   if (!signe(y)) pari_err(gdiver);
+  dy = degpol(y); y_lead = gel(y,dy+2);
+  /* if monic, no point in using pseudo-division */
+  if (gcmp1(y_lead)) return T? RgXQX_rem(x, y, T): RgX_rem(x, y);
   (void)new_chunk(2);
-  dx=degpol(x); x = RgX_recip_shallow(x)+2;
-  dy=degpol(y); y = RgX_recip_shallow(y)+2; dz=dx-dy; p = dz+1;
+  dx = degpol(x);
+  x = RgX_recip_shallow(x)+2;
+  y = RgX_recip_shallow(y)+2;
+  /* pay attention to sparse divisors */
+  for (i = 1; i <= dy; i++)
+    if (isexactzero(gel(y,i))) gel(y,i) = NULL;
+  dz = dx-dy; p = dz+1;
   av2 = avma; lim = stack_lim(av2,1);
   for (;;)
   {
     gel(x,0) = gneg(gel(x,0)); p--;
     for (i=1; i<=dy; i++)
     {
-      GEN c = gadd(gmul(gel(y,0), gel(x,i)), gmul(gel(x,0),gel(y,i)));
+      GEN c = gmul(y_lead, gel(x,i)); 
+      if (gel(y,i)) c = gadd(c, gmul(gel(x,0),gel(y,i)));
       gel(x,i) = rem(c, T);
     }
     for (   ; i<=dx; i++)
     {
-      GEN c = gmul(gel(y,0), gel(x,i));
+      GEN c = gmul(y_lead, gel(x,i));
       gel(x,i) = rem(c, T);
     }
     do { x++; dx--; } while (dx >= 0 && gcmp0(gel(x,0)));
@@ -1354,9 +1364,9 @@ RgXQX_pseudorem(GEN x, GEN y, GEN T)
   x = RgX_recip_shallow(x);
   if (p)
   { /* multiply by y[0]^p   [beware dummy vars from FpX_FpXY_resultant] */
-    GEN t = gel(y,0);
+    GEN t = y_lead;
     if (T && typ(t) == t_POL && varn(t) == varn(T))
-      t = RgXQ_u_pow(gel(y,0), p, T);
+      t = RgXQ_u_pow(t, p, T);
     else
       t = gpowgs(t, p);
     for (i=2; i<lx; i++)
@@ -1379,35 +1389,42 @@ RgXQX_pseudodivrem(GEN x, GEN y, GEN T, GEN *ptr)
 {
   long vx = varn(x), dx, dy, dz, i, iz, lx, lz, p;
   pari_sp av = avma, av2, lim;
-  GEN c, z, r, ypow;
+  GEN z, r, ypow, y_lead;
 
   if (!signe(y)) pari_err(gdiver);
+  dy = degpol(y); y_lead = gel(y,dy+2);
+  if (gcmp1(y_lead)) return T? RgXQX_divrem(x,y, T, ptr): RgX_divrem(x,y, ptr);
   (void)new_chunk(2);
-  dx=degpol(x); x = RgX_recip_shallow(x)+2;
-  dy=degpol(y); y = RgX_recip_shallow(y)+2; dz=dx-dy; p = dz+1;
+  dx = degpol(x);
+  x = RgX_recip_shallow(x)+2;
+  y = RgX_recip_shallow(y)+2;
+  /* pay attention to sparse divisors */
+  for (i = 1; i <= dy; i++)
+    if (isexactzero(gel(y,i))) gel(y,i) = NULL;
+  dz = dx-dy; p = dz+1;
   lz = dz+3; z = cgetg(lz, t_POL) + 2;
   ypow = new_chunk(dz+1);
   gel(ypow,0) = gen_1;
-  gel(ypow,1) = gel(y,0);
+  gel(ypow,1) = y_lead;
   for (i=2; i<=dz; i++)
   {
-    c = gmul(gel(ypow,i-1), gel(y,0));
+    GEN c = gmul(gel(ypow,i-1), y_lead);
     gel(ypow,i) = rem(c,T);
   }
   av2 = avma; lim = stack_lim(av2,1);
   for (iz=0;;)
   {
     p--;
-    c = gmul(gel(x,0), gel(ypow,p));
-    gel(z,iz++) = rem(c,T);
+    gel(z,iz++) = rem(gmul(gel(x,0), gel(ypow,p)), T);
     for (i=1; i<=dy; i++)
     {
-      c = gsub(gmul(gel(y,0), gel(x,i)), gmul(gel(x,0),gel(y,i)));
-      gel(x,i) = rem(c,T);
+      GEN c = gmul(y_lead, gel(x,i)); 
+      if (gel(y,i)) c = gsub(c, gmul(gel(x,0),gel(y,i)));
+      gel(x,i) = rem(c, T);
     }
     for (   ; i<=dx; i++)
     {
-      c = gmul(gel(y,0), gel(x,i));
+      GEN c = gmul(y_lead, gel(x,i));
       gel(x,i) = rem(c,T);
     }
     x++; dx--;
@@ -1434,8 +1451,12 @@ RgXQX_pseudodivrem(GEN x, GEN y, GEN T, GEN *ptr)
   z[0] = evaltyp(t_POL) | evallg(lz);
   z[1] = evalsigne(1) | evalvarn(vx);
   z = RgX_recip_shallow(z);
-  c = gel(ypow,p); r = RgX_Rg_mul(x, c);
-  if (T && typ(c) == t_POL && varn(c) == varn(T)) r = RgXQX_red(r, T);
+  r = x;
+  if (p)
+  {
+    GEN c = gel(ypow,p); r = RgX_Rg_mul(r, c);
+    if (T && typ(c) == t_POL && varn(c) == varn(T)) r = RgXQX_red(r, T);
+  }
   gerepileall(av, 2, &z, &r);
   *ptr = r; return z;
 }
