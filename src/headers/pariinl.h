@@ -1726,9 +1726,19 @@ bnf_get_gen(GEN bnf) { return gmael3(bnf,8,1,3); }
 INLINE GEN
 bnf_get_reg(GEN bnf) { return gmael(bnf,8,2); }
 INLINE GEN
+bnf_get_logfu(GEN bnf) { return gel(bnf,3); }
+INLINE GEN
 bnf_get_tuU(GEN bnf) { return gmael3(bnf,8,4,2); }
 INLINE long
 bnf_get_tuN(GEN bnf) { return gmael3(bnf,8,4,1)[2]; }
+INLINE GEN
+bnf_get_fu(GEN bnf) {
+  GEN G = gel(bnf,8);
+  if (lg(G) !=  6) pari_err(talker,"missing units in bnf");
+  return gel(G,5);
+}
+INLINE GEN
+bnf_get_fu_nocheck(GEN bnf) { return gmael(bnf,8,5); }
 
 INLINE GEN
 bnr_get_bnf(GEN bnr) { return gel(bnr,1); }

@@ -1104,9 +1104,8 @@ to_Fp_simple(GEN nf, GEN x, GEN pr)
   {
     case t_COL: return nf_to_Fp_simple(x,modpr,p);
     case t_MAT: return famat_to_Fp_simple(nf,x,modpr,p);
-    default: pari_err(impl,"generic conversion to finite field");
+    default: return Rg_to_Fp(x, p);
   }
-  return NULL;
 }
 
 /* Compute A = prod g[i]^e[i] mod pr^k, assuming (A, pr) = 1.

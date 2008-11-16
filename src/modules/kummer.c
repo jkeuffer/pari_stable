@@ -103,7 +103,7 @@ logarch2arch(GEN x, long r1, long prec)
 
 /* multiply be by ell-th powers of units as to find small L2-norm for new be */
 static GEN
-reducebetanaive(GEN bnfz, GEN be, GEN ell)
+reducebetanaive(GEN bnfz, GEN be, GEN ell, GEN elllogfu)
 {
   long i, k, n, ru, r1, prec = nf_get_prec(bnfz);
   GEN z, p1, p2, nmax, b, c, nf = bnf_get_nf(bnfz);
@@ -112,8 +112,7 @@ reducebetanaive(GEN bnfz, GEN be, GEN ell)
   b = gmul(nf_get_M(nf), be);
   n = maxss((itos(ell)>>1), 3);
   z = cgetg(n+1, t_VEC);
-  c = gmul(real_i(gel(bnfz,3)), ell);
-  c = logarch2arch(c, r1, prec); /* = embeddings of fu^ell */
+  c = logarch2arch(elllogfu, r1, prec); /* = embeddings of fu^ell */
   c = gprec_w(gnorm(c), DEFAULTPREC);
   b = gprec_w(gnorm(b), DEFAULTPREC); /* need little precision */
   gel(z,1) = shallowconcat(c, vecinv(c));
@@ -181,7 +180,7 @@ static GEN
 reducebeta(GEN bnfz, GEN be, GEN ell)
 {
   long j,ru, prec = nf_get_prec(bnfz);
-  GEN emb,z,u,matunit, nf = bnf_get_nf(bnfz);
+  GEN emb, z, u, elllogfu, nf = bnf_get_nf(bnfz);
 
   if (DEBUGLEVEL>1) fprintferr("reducing beta = %Ps\n",be);
   /* reduce mod Q^ell */
@@ -197,7 +196,6 @@ reducebeta(GEN bnfz, GEN be, GEN ell)
   }
   if (DEBUGLEVEL>1) fprintferr("beta reduced via ell-th root = %Ps\n",be);
 
-  matunit = gmul(real_i(gel(bnfz,3)), ell); /* log. embeddings of fu^ell */
   for (;;)
   {
     z = get_arch_real(nf, be, &emb, prec);
@@ -206,7 +204,9 @@ reducebeta(GEN bnfz, GEN be, GEN ell)
     if (DEBUGLEVEL) pari_warn(warnprec,"reducebeta",prec);
     nf = nfnewprec_shallow(nf,prec);
   }
-  z = shallowconcat(matunit, z);
+  /* log. embeddings of fu^ell */
+  elllogfu = RgM_Rg_mul(real_i(bnf_get_logfu(bnfz)), ell);
+  z = shallowconcat(elllogfu, z);
   u = lll(z);
   if (lg(u) == lg(z))
   {
@@ -221,7 +221,7 @@ reducebeta(GEN bnfz, GEN be, GEN ell)
     }
   }
   if (DEBUGLEVEL>1) fprintferr("beta LLL-reduced mod U^l = %Ps\n",be);
-  return reducebetanaive(bnfz, be, ell);
+  return reducebetanaive(bnfz, be, ell, elllogfu);
 }
 
 static GEN

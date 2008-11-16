@@ -2641,6 +2641,8 @@ INLINE GEN    bid_get_ideal(GEN bid);
 INLINE GEN    bid_get_mod(GEN bid);
 INLINE GEN    bnf_get_clgp(GEN bnf);
 INLINE GEN    bnf_get_cyc(GEN bnf);
+INLINE GEN    bnf_get_fu(GEN bnf);
+INLINE GEN    bnf_get_fu_nocheck(GEN bnf);
 INLINE GEN    bnf_get_gen(GEN bnf);
 INLINE GEN    bnf_get_nf(GEN bnf);
 INLINE GEN    bnf_get_no(GEN bnf);

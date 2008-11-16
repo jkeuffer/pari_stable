@@ -837,17 +837,14 @@ init_units(GEN BNF)
   if (lg(res) == 5)
   {
     pari_sp av = avma;
-    GEN nf = bnf_get_nf(bnf), A = gel(bnf,3);
+    GEN nf = bnf_get_nf(bnf), A = bnf_get_logfu(bnf);
     funits = gerepilecopy(av, getfu(nf, &A, nf_FORCE, &l, 0));
   } 
   else
-  {
-    if (lg(res) != 6) pari_err(talker,"incorrect big number field");
-    funits = gel(res,5);
-  }
+    funits = bnf_get_fu(bnf);
   l = lg(funits) + 1;
-  v = cgetg(l, t_VEC); gel(v,1) = gmael(res, 4, 2);
-  for (i = 2; i < l; i++) v[i] = funits[i-1];
+  v = cgetg(l, t_VEC); gel(v,1) = bnf_get_tuU(bnf);
+  for (i = 2; i < l; i++) gel(v,i) = gel(funits,i-1);
   return v;
 }
 
@@ -1309,8 +1306,8 @@ get_arch_real(GEN nf, GEN x, GEN *emb, long prec)
 GEN
 init_red_mod_units(GEN bnf, long prec)
 {
-  GEN s = gen_0, p1,s1,mat, matunit = gel(bnf,3);
-  long i,j, RU = lg(matunit);
+  GEN s = gen_0, p1,s1,mat, logfu = bnf_get_logfu(bnf);
+  long i,j, RU = lg(logfu);
 
   if (RU == 1) return NULL;
   mat = cgetg(RU,t_MAT);
@@ -1320,7 +1317,7 @@ init_red_mod_units(GEN bnf, long prec)
     s1 = gen_0;
     for (i=1; i<RU; i++)
     {
-      gel(p1,i) = real_i(gcoeff(matunit,i,j));
+      gel(p1,i) = real_i(gcoeff(logfu,i,j));
       s1 = mpadd(s1, mpsqr(gel(p1,i)));
     }
     gel(p1,RU) = gen_0; if (mpcmp(s1,s) > 0) s = s1;
@@ -1396,11 +1393,11 @@ prec_arch(GEN bnf)
 GEN
 isprincipalarch(GEN bnf, GEN col, GEN kNx, GEN e, GEN dx, long *pe)
 {
-  GEN nf, x, matunit, s, M;
+  GEN nf, x, logfu, s, M;
   long N, R1, RU, i, prec = gprecision(col);
   bnf = checkbnf(bnf); nf = bnf_get_nf(bnf); M = nf_get_M(nf);
   if (!prec) prec = prec_arch(bnf);
-  matunit = gel(bnf,3);
+  logfu = bnf_get_logfu(bnf);
   N = nf_get_degree(nf);
   R1 = nf_get_r1(nf);
   RU = (N + R1)>>1;
@@ -1411,7 +1408,7 @@ isprincipalarch(GEN bnf, GEN col, GEN kNx, GEN e, GEN dx, long *pe)
     GEN u, z = init_red_mod_units(bnf,prec);
     u = red_mod_units(col,z,prec);
     if (!u && z) return NULL;
-    if (u) col = RgC_add(col, RgM_RgC_mul(matunit, u));
+    if (u) col = RgC_add(col, RgM_RgC_mul(logfu, u));
   }
   s = divru(mulir(e, glog(kNx,prec)), N);
   for (i=1; i<=R1; i++) gel(col,i) = gexp(gadd(s, gel(col,i)),prec);
@@ -1763,7 +1760,7 @@ bnfisunit(GEN bnf,GEN x)
   GEN p1, v, rlog, logunit, ex, nf, pi2_sur_w, emb;
 
   bnf = checkbnf(bnf); nf = bnf_get_nf(bnf);
-  logunit = gel(bnf,3); RU = lg(logunit);
+  logunit = bnf_get_logfu(bnf); RU = lg(logunit);
   n = bnf_get_tuN(bnf); /* # { roots of 1 } */
   if (tx == t_MAT)
   { /* famat, assumed integral */
@@ -1861,7 +1858,7 @@ nfsign_from_logarch(GEN LA, GEN invpi, GEN archp)
 GEN
 nfsign_units(GEN bnf, GEN archp, int add_zu)
 {
-  GEN y, A = gel(bnf,3), invpi = invr( mppi(DEFAULTPREC) );
+  GEN y, A = bnf_get_logfu(bnf), invpi = invr( mppi(DEFAULTPREC) );
   long j = 1, RU = lg(A);
 
   if (!archp) archp = identity_perm( nf_get_r1(bnf_get_nf(bnf)) );
@@ -2857,7 +2854,7 @@ bnfnewprec_shallow(GEN bnf, long prec)
 
   prec1 = prec;
   if (r1 + r2 > 1) {
-    long e = gexpo(gel(bnf,3)) + 1 - TWOPOTBITS_IN_LONG;
+    long e = gexpo(bnf_get_logfu(bnf)) + 1 - TWOPOTBITS_IN_LONG;
     if (e >= 0) prec += 1 << e;
   }
   nf = nfnewprec_shallow(nf0,prec);
