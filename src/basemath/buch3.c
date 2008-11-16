@@ -946,7 +946,7 @@ compute_M0(GEN M_star,long N)
 }
 
 static GEN
-lowerboundforregulator_i(GEN bnf)
+lowerboundforregulator(GEN bnf)
 {
   long N,R1,R2,RU,i;
   GEN nf,M0,M,G,bound,minunit,newminunit;
@@ -993,13 +993,14 @@ lowerboundforregulator_i(GEN bnf)
   return M;
 }
 
+/* upper bound for the index of bnf.fu in the full unit group */
 static GEN
-lowerboundforregulator(GEN bnf)
+bound_unit_index(GEN bnf)
 {
   pari_sp av = avma;
-  GEN x = lowerboundforregulator_i(bnf);
+  GEN x = lowerboundforregulator(bnf);
   if (!x) { avma = av; x = regulatorbound(bnf); }
-  return x;
+  return gerepileuptoint(av, ground(gdiv(bnf_get_reg(bnf), x)));
 }
 
 /* Compute a square matrix of rank #beta associated to a family
@@ -1064,7 +1065,7 @@ struct check_pr {
   GEN fu;
   GEN cyc;
   GEN cycgen;
-  GEN bad;
+  GEN bad; /* p | bad <--> p | some element occurring in cycgen */
 } check_pr;
 
 static void
@@ -1092,65 +1093,68 @@ check_prime(ulong p, GEN bnf, struct check_pr *S)
   primecertify(bnf,beta,p,S->bad); avma = av;
 }
 
-long
-certifybuchall(GEN bnf)
+static void
+init_bad(struct check_pr *S, GEN nf, GEN gen)
 {
-  pari_sp av = avma;
-  long nbgen, i, N, R1, R2;
-  GEN bad, nf, reg, funits, gen, cycgen, cyc;
-  byteptr delta = diffptr;
-  ulong bound, p;
-  struct check_pr S;
+  long i, l = lg(gen);
+  GEN bad = gen_1;
 
-  bnf = checkbnf(bnf); nf = bnf_get_nf(bnf);
-  N=nf_get_degree(nf); if (N==1) return 1;
-  nf_get_sign(nf, &R1, &R2);
-  funits = check_units(bnf,"bnfcertify");
-  testprimes(bnf, zimmertbound(N,R2,absi(nf_get_disc(nf))));
-  reg = bnf_get_reg(bnf);
-  cyc = bnf_get_cyc(bnf); nbgen = lg(cyc)-1;
-  gen = bnf_get_gen(bnf);
-  bound = itou_or_0( ground(gdiv(reg, lowerboundforregulator(bnf))) );
-  if (!bound) pari_err(talker,"sorry, too many primes to check");
-  maxprime_check(bound);
-  if (DEBUGLEVEL>1)
+  for (i=1; i < l; i++)
+    bad = lcmii(bad, gcoeff(gel(gen,i),1,1));
+  for (i = 1; i < l; i++)
   {
-    fprintferr("\nPHASE 2: are all primes good ?\n\n");
-    fprintferr("  Testing primes <= B (= %lu)\n\n",bound); flusherr();
-  }
-  cycgen = check_and_build_cycgen(bnf);
-  for (bad=gen_1,i=1; i<=nbgen; i++)
-    bad = lcmii(bad, gcoeff(gen[i],1,1));
-  for (i=1; i<=nbgen; i++)
-  {
-    GEN p1 = gel(cycgen,i);
+    GEN c = gel(S->cycgen,i);
     long j;
-    if (typ(p1) == t_MAT)
+    if (typ(c) == t_MAT)
     {
-      GEN h, g = gel(p1,1);
+      GEN g = gel(c,1);
       for (j = 1; j < lg(g); j++)
       {
-	h = idealhnf_shallow(nf, gel(g,j));
+	GEN h = idealhnf_shallow(nf, gel(g,j));
 	bad = lcmii(bad, gcoeff(h,1,1));
       }
     }
   }
-  /* p | bad <--> p | some element occurring in cycgen[i]  */
+  S->bad = bad;
+}
 
-  funits = matalgtobasis(nf, funits);
+long
+certifybuchall(GEN bnf)
+{
+  pari_sp av = avma;
+  long i, N;
+  GEN nf, cyc, B;
+  byteptr delta = diffptr + 1;
+  ulong bound, p;
+  struct check_pr S;
+
+  bnf = checkbnf(bnf);
+  nf = bnf_get_nf(bnf);
+  N = nf_get_degree(nf); if (N==1) return 1;
+  
+  cyc = bnf_get_cyc(bnf);
   S.w = bnf_get_tuN(bnf);
   S.mu = nf_to_scalar_or_basis(nf, bnf_get_tuU(bnf));
-  S.fu= funits;
+  S.fu= matalgtobasis(nf, check_units(bnf,"bnfcertify"));
   S.cyc = cyc;
-  S.cycgen = cycgen;
-  S.bad = bad;
+  S.cycgen = check_and_build_cycgen(bnf);
+  init_bad(&S, nf, bnf_get_gen(bnf));
 
-  for (p = *delta++; p <= bound; ) {
+  testprimes(bnf, zimmertbound(N, nf_get_r2(nf), absi(nf_get_disc(nf))));
+  B = bound_unit_index(bnf);
+  if (DEBUGLEVEL>1)
+  {
+    fprintferr("\nPHASE 2: are all primes good ?\n\n");
+    fprintferr("  Testing primes <= %Ps\n\n", B); flusherr();
+  }
+  bound = itou_or_0(B);
+  if (!bound) pari_err(talker,"sorry, too many primes to check");
+  maxprime_check(bound);
+  for (p = 2; p <= bound; ) {
     check_prime(p,bnf, &S);
     NEXT_PRIME_VIADIFF(p, delta);
   }
-
-  if (nbgen)
+  if (lg(cyc) > 1)
   {
     GEN f = Z_factor(gel(cyc,1)), P = gel(f,1);
     long l = lg(P);
