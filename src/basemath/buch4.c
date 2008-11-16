@@ -275,7 +275,7 @@ repres(GEN nf, GEN pr)
   if (f > 1) {
     GEN mat = idealhnf_two(nf,pr);
     for (i = k = 2; k <= f; i++)
-      if (!is_pm1(gmael(mat,i,i))) gel(fond,k++) = gel(bas,i);
+      if (!is_pm1(gcoeff(mat,i,i))) gel(fond,k++) = gel(bas,i);
   }
 
   p = itos(pr_get_p(pr));
@@ -680,8 +680,9 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
   gen = bnf_get_gen(bnfabs); l = lg(cyc);
   for(i=1; i<l; i++)
   {
+    GEN g = gel(gen,i);
     if (ugcd(umodiu(gel(cyc,i), drel), drel) == 1) break;
-    fa_pr_append(nf,bnfabs,gmael3(gen,i,1,1),&prod,&S1,&S2);
+    fa_pr_append(nf,bnfabs,gcoeff(g,1,1),&prod,&S1,&S2);
   }
   if (!galois)
   {
