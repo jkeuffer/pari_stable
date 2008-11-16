@@ -1555,6 +1555,8 @@ compilenode(long n, int mode, long flag)
       }
       else if (ep->valence==EpVAR || ep->valence==EpNEW)
       {
+        if (DEBUGLEVEL && mode==Gvoid)
+          pari_warn(warner,"statement with no effect: `%s'",ep->name);
         op_push(OCpushdyn,(long)ep,n);
         copyifclone(n,mode,flag,FLnocopy);
         compilecast(n,Ggen,mode);
