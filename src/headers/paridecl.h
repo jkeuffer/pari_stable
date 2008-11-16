@@ -1179,7 +1179,7 @@ long    bnrisconductor(GEN bnr, GEN H);
 GEN     bnrisprincipal(GEN bnf, GEN x,long flag);
 GEN     bnrsurjection(GEN bnr1, GEN bnr2);
 GEN     buchnarrow(GEN bignf);
-long    certifybuchall(GEN bnf);
+long    bnfcertify(GEN bnf);
 GEN     decodemodule(GEN nf, GEN fa);
 GEN     discrayabslist(GEN bnf,GEN listes);
 GEN     discrayabslistarch(GEN bnf, GEN arch, long bound);

@@ -192,7 +192,7 @@ inithue(GEN P, GEN bnf, long flag, long prec)
   {
     if (!gcmp1(leading_term(P))) pari_err(talker,"non-monic polynomial in thue");
     bnf = Buchall(P, nf_FORCE, DEFAULTPREC);
-    if (flag) (void)certifybuchall(bnf);
+    if (flag) (void)bnfcertify(bnf);
     else
       Ind = floorr(mulru(bnf_get_reg(bnf), 5));
   }

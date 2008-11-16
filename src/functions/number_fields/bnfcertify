@@ -1,6 +1,6 @@
 Function: bnfcertify
 Section: number_fields
-C-Name: certifybuchall
+C-Name: bnfcertify
 Prototype: lG
 Help: bnfcertify(bnf): certify the correctness (i.e. remove the GRH) of the
  bnf data output by bnfinit.

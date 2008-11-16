@@ -155,6 +155,7 @@ BA  3- builtin-in GP functions can now be used as closures.
        BSW_* -> BPSW_*
        Z_factor_limit -> Z_factor_until, auxdecomp -> Z_factor_limit
        assmat -> matcompanion
+       certifybuchall -> bnfcertify
        derivpol -> RgX_deriv
        discf -> nfdisc, nfdiscf0 -> nfdisc0
        element_div -> nfdiv, element_divmodpr -> nfdivmodpr,

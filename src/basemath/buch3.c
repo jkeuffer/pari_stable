@@ -1119,7 +1119,7 @@ init_bad(struct check_pr *S, GEN nf, GEN gen)
 }
 
 long
-certifybuchall(GEN bnf)
+bnfcertify(GEN bnf)
 {
   pari_sp av = avma;
   long i, N;
