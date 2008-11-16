@@ -1002,8 +1002,8 @@ lowerboundforregulator(GEN bnf)
   return x;
 }
 
-/* Compute a square matrix of rank length(beta) associated to a family
- * (P_i), 1<=i<=length(beta), of primes s.t. N(P_i) = 1 mod p, and
+/* Compute a square matrix of rank #beta associated to a family
+ * (P_i), 1<=i<=#beta, of primes s.t. N(P_i) = 1 mod p, and
  * (P_i,beta[j]) = 1 for all i,j */
 static void
 primecertify(GEN bnf, GEN beta, ulong p, GEN bad)
@@ -1025,14 +1025,13 @@ primecertify(GEN bnf, GEN beta, ulong p, GEN bad)
     g = NULL;
     for (i=1; i<=nbqq; i++)
     {
-      GEN mat1, Q = gel(LQ,i); if (!gcmp1(gel(Q,4))) break;
+      GEN mat1, Q = gel(LQ,i);
+      
+      if (pr_get_f(Q) != 1) break;
       /* Q has degree 1 */
       if (!g)
       {
-	GEN Podd;
 	ord = Z_factor( utoipos(q-1) );
-	Podd = gel(ord,1);
-	Podd = vecslice(Podd, 2, lg(Podd)-1); /* remove 2 */
 	g = pgener_Fp_local(gq, gel(ord,1)); /* primitive root */
       }
       modpr = zkmodprinit(nf, Q);
@@ -1059,29 +1058,38 @@ primecertify(GEN bnf, GEN beta, ulong p, GEN bad)
   }
 }
 
+struct check_pr {
+  long w; /* #mu(K) */
+  GEN mu; /* generator of mu(K) */
+  GEN fu;
+  GEN cyc;
+  GEN cycgen;
+  GEN bad;
+} check_pr;
+
 static void
-check_prime(ulong p, GEN bnf, GEN cyc, GEN cycgen, GEN fu, GEN mu, GEN bad)
+check_prime(ulong p, GEN bnf, struct check_pr *S)
 {
   pari_sp av = avma;
-  long i,b, lc = lg(cyc), w = itos(gel(mu,1)), lf = lg(fu);
+  long i,b, lc = lg(S->cyc), lf = lg(S->fu);
   GEN beta = cgetg(lf+lc, t_VEC);
 
   if (DEBUGLEVEL>1) fprintferr("  *** testing p = %lu\n",p);
   for (b=1; b<lc; b++)
   {
-    if (umodiu(gel(cyc,b), p)) break; /* p \nmid cyc[b] */
+    if (umodiu(gel(S->cyc,b), p)) break; /* p \nmid cyc[b] */
     if (b==1 && DEBUGLEVEL>2) fprintferr("     p divides h(K)\n");
-    beta[b] = cycgen[b];
+    gel(beta,b) = gel(S->cycgen,b);
   }
-  if (w % p == 0)
+  if (S->w % p == 0)
   {
     if (DEBUGLEVEL>2) fprintferr("     p divides w(K)\n");
-    beta[b++] = mu[2];
+    gel(beta,b++) = S->mu;
   }
-  for (i=1; i<lf; i++) beta[b++] = fu[i];
+  for (i=1; i<lf; i++) gel(beta,b++) = gel(S->fu,i);
   setlg(beta, b); /* beta = [cycgen[i] if p|cyc[i], tu if p|w, fu] */
   if (DEBUGLEVEL>3) {fprintferr("     Beta list = %Ps\n",beta); flusherr();}
-  primecertify(bnf,beta,p,bad); avma = av;
+  primecertify(bnf,beta,p,S->bad); avma = av;
 }
 
 long
@@ -1089,9 +1097,10 @@ certifybuchall(GEN bnf)
 {
   pari_sp av = avma;
   long nbgen, i, N, R1, R2;
-  GEN bad, nf, reg, zu, funits, gen, cycgen, cyc;
+  GEN bad, nf, reg, funits, gen, cycgen, cyc;
   byteptr delta = diffptr;
   ulong bound, p;
+  struct check_pr S;
 
   bnf = checkbnf(bnf); nf = bnf_get_nf(bnf);
   N=nf_get_degree(nf); if (N==1) return 1;
@@ -1100,7 +1109,7 @@ certifybuchall(GEN bnf)
   testprimes(bnf, zimmertbound(N,R2,absi(nf_get_disc(nf))));
   reg = bnf_get_reg(bnf);
   cyc = bnf_get_cyc(bnf); nbgen = lg(cyc)-1;
-  gen = bnf_get_gen(bnf); zu = gmael(bnf,8,4);
+  gen = bnf_get_gen(bnf);
   bound = itou_or_0( ground(gdiv(reg, lowerboundforregulator(bnf))) );
   if (!bound) pari_err(talker,"sorry, too many primes to check");
   maxprime_check(bound);
@@ -1129,22 +1138,27 @@ certifybuchall(GEN bnf)
   /* p | bad <--> p | some element occurring in cycgen[i]  */
 
   funits = matalgtobasis(nf, funits);
-  zu = mkvec2(gel(zu,1), algtobasis(nf, gel(zu,2)));
+  S.w = bnf_get_tuN(bnf);
+  S.mu = nf_to_scalar_or_basis(nf, bnf_get_tuU(bnf));
+  S.fu= funits;
+  S.cyc = cyc;
+  S.cycgen = cycgen;
+  S.bad = bad;
 
   for (p = *delta++; p <= bound; ) {
-    check_prime(p,bnf,cyc,cycgen,funits,zu,bad);
+    check_prime(p,bnf, &S);
     NEXT_PRIME_VIADIFF(p, delta);
   }
 
   if (nbgen)
   {
-    GEN f = Z_factor(gel(cyc,1)), f1 = gel(f,1);
-    long nbf1 = lg(f1);
+    GEN f = Z_factor(gel(cyc,1)), P = gel(f,1);
+    long l = lg(P);
     if (DEBUGLEVEL>1) { fprintferr("  Testing primes | h(K)\n\n"); flusherr(); }
-    for (i=1; i<nbf1; i++)
+    for (i=1; i<l; i++)
     {
-      p = itou(gel(f1,i));
-      if (p > bound) check_prime(p,bnf,cyc,cycgen,funits,zu,bad);
+      p = itou(gel(P,i));
+      if (p > bound) check_prime(p,bnf, &S);
     }
   }
   avma = av; return 1;
