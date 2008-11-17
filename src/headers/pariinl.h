@@ -1733,21 +1733,12 @@ INLINE long
 bnf_get_tuN(GEN bnf) { return gmael3(bnf,8,4,1)[2]; }
 INLINE GEN
 bnf_get_fu(GEN bnf) {
-  GEN G = gel(bnf,8);
-  if (lg(G) !=  6) pari_err(talker,"missing units in bnf");
-  return gel(G,5);
+  GEN fu = bnf_get_fu_nocheck(bnf);
+  if (typ(fu) == t_MAT) pari_err(talker,"missing units in bnf");
+  return fu;
 }
 INLINE GEN
 bnf_get_fu_nocheck(GEN bnf) { return gmael(bnf,8,5); }
-INLINE GEN
-bnf_get_fu_error(GEN bnf, const char *f)
-{
-  GEN G = gel(bnf,8), fu;
-  if (lg(G) < 6) pari_err(talker,"missing units in %s", f);
-  fu = gel(G,5);
-  if (lg(fu) != lg(bnf_get_logfu(bnf))) pari_err(consister, f);
-  return gel(G,5);
-}
 
 INLINE GEN
 bnr_get_bnf(GEN bnr) { return gel(bnr,1); }
@@ -1770,13 +1761,6 @@ bnr_get_gen(GEN bnr) {
     pari_err(talker,"missing bnr generators: please use bnrinit(,,1)");
   return gel(G,3);
 }
-INLINE GEN
-bnr_get_gen_error(GEN bnr, const char *f)
-{
-  GEN G = gel(bnr,5);
-  if (lg(G) !=  4) pari_err(talker,"missing bnr generators in %s", f);
-  return gel(G,3);
-}
 
 INLINE GEN
 bid_get_mod(GEN bid) { return gel(bid,1); }
@@ -1792,13 +1776,6 @@ INLINE GEN
 bid_get_gen(GEN bid) {
   GEN G = gel(bid, 2);
   if (lg(G) != 4) pari_err(talker,"missing bid generators. Use idealstar(,,2)");
-  return gel(G,3);
-}
-INLINE GEN
-bid_get_gen_error(GEN bid, const char *f)
-{
-  GEN G = gel(bid, 2);
-  if (lg(G) != 4) pari_err(talker,"missing bid generators in %s", f);
   return gel(G,3);
 }
 
