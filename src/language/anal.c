@@ -209,16 +209,8 @@ find:
 GEN
 readseq(char *t)
 {
-  pari_sp av = top - avma;
-  GEN z;
-
-  if (foreignExprHandler && *t == foreignExprSwitch)
-    return (*foreignExprHandler)(t);
-
-  z = pari_eval_str(t,0);
-  av = top - av; /* safer than recording av = avma: f() may call allocatemem */
-  if (isclone(z)) { avma = av; return gcopy(z); }
-  return gerepileupto(av, z);
+  pari_sp av = avma;
+  return gerepileupto(av, closure_evalres(pari_compile_str(t,0)));
 }
 
 /* filtered readseq = remove blanks and comments */

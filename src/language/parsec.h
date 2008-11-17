@@ -107,13 +107,6 @@ pari_compile_str(char *lex, int strict)
   return code;
 }
 
-GEN
-pari_eval_str(char *lex, int strict)
-{
-  GEN code=pari_compile_str(lex, strict);
-  return closure_evalres(code);
-}
-
 static long
 newnode(Ffunc f, long x, long y, struct node_loc *loc)
 {

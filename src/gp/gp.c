@@ -1538,7 +1538,7 @@ gp_main_loop(long flag)
       TIMERstart(GP_DATA->T);
       pari_set_last_newline(1);
     }
-    z = pari_eval_str(b->buf, GP_DATA->flags & STRICTMATCH);
+    z = closure_evalres(pari_compile_str(b->buf, GP_DATA->flags & STRICTMATCH));
     if (! ismain) continue;
     alarm(0);
 
