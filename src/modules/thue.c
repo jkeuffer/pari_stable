@@ -763,7 +763,7 @@ static GEN
 LargeSols(GEN tnf, GEN rhs, GEN ne, GEN *pS)
 {
   GEN Vect, P, ro, bnf, MatFU, A, csts, dP, vecdP, Bx;
-  GEN c1,c2,c3,c4,c10,c11,c13,c14,c15, x0, x1, x2, x3, b, zp1, tmp, eps5, Ind;
+  GEN c1,c2,c3,c4,c11,c14,c15, x0, x1, x2, x3, b, zp1, tmp, eps5, Ind;
   long iroot, ine, n, i, r, upb, bi1, Prec, prec, s,t;
   baker_s BS;
   pari_sp av = avma;
@@ -803,8 +803,7 @@ LargeSols(GEN tnf, GEN rhs, GEN ne, GEN *pS)
   c4 = mulur(n-1, c3);
   x1 = gmax(x0, sqrtnr(shiftr(tmp,1),n));
 
-  Vect = cgetg(r+1,t_COL); for (i=1; i<=r; i++) gel(Vect,i) = gen_1;
-  Vect = gmul(gabs(A,DEFAULTPREC), Vect);
+  Vect = gmul(gabs(A,DEFAULTPREC), const_vec(r, gen_1));
   c14 = mulrr(c4, Vecmax(Vect));
   x2 = gmax(x1, sqrtnr(mulur(10,c14), n));
   if (DEBUGLEVEL>1) {
@@ -813,8 +812,7 @@ LargeSols(GEN tnf, GEN rhs, GEN ne, GEN *pS)
     fprintferr("c14 = %Ps\n",c14);
   }
 
-  dP = ZX_deriv(P);
-  vecdP = cgetg(s+1, t_VEC);
+  dP = ZX_deriv(P); vecdP = cgetg(s+1, t_VEC);
   for (i=1; i<=s; i++) gel(vecdP,i) = poleval(dP, gel(ro,i));
 
   zp1 = dbltor(0.01);
@@ -825,19 +823,19 @@ LargeSols(GEN tnf, GEN rhs, GEN ne, GEN *pS)
   {
     GEN Delta, MatNE, Hmu, c5, c7;
 
-    Vect = cgetg(r+1,t_COL); for (i=1; i<=r; i++) gel(Vect,i) = gen_1;
+    Vect = const_vec(r, gen_1);
     if (iroot <= r) gel(Vect,iroot) = stoi(1-n);
     Delta = gmul(A,Vect);
 
     c5 = Vecmax(gabs(Delta,Prec));
     c5  = myround(gprec_w(c5,DEFAULTPREC), 1);
     c7  = mulur(r,c5);
-    c10 = divur(n,c7); BS.c10 = c10;
-    c13 = divur(n,c5); BS.c13 = c13;
+    BS.c10 = divur(n,c7);
+    BS.c13 = divur(n,c5);
     if (DEBUGLEVEL>1) {
       fprintferr("* real root no %ld/%ld\n", iroot,s);
-      fprintferr("  c10 = %Ps\n",c10);
-      fprintferr("  c13 = %Ps\n",c13);
+      fprintferr("  c10 = %Ps\n",BS.c10);
+      fprintferr("  c13 = %Ps\n",BS.c13);
     }
 
     prec = Prec;
@@ -887,18 +885,16 @@ LargeSols(GEN tnf, GEN rhs, GEN ne, GEN *pS)
       BS.Ind = Ind;
 
       i1 = Vecmaxind(gabs(Delta,prec));
-      if (gcmp1(Ind))
-	{
-	  if (! (B0 = get_B0(i1, Delta, Lambda, eps5, prec, &BS)) )
-	    goto PRECPB;
-	}
+      if (is_pm1(Ind))
+      {
+        if (! (B0 = get_B0(i1, Delta, Lambda, eps5, prec, &BS)) ) goto PRECPB;
+      }
       else
-	{
-	  if (! (Bx = get_Bx_LLL(i1, Delta, Lambda, eps5, prec, &BS)) )
-	    goto PRECPB;
-	  x3 = gmax(Bx, x3);
-	  continue;
-	}
+      {
+        if (! (Bx = get_Bx_LLL(i1, Delta, Lambda, eps5, prec, &BS)) ) goto PRECPB;
+        x3 = gmax(Bx, x3);
+        continue;
+      }
      /* For each possible value of b_i1, compute the b_i's
       * and 2 conjugates of z = x - alpha y. Then check. */
       upb = gtolong(gceil(B0));
@@ -908,9 +904,9 @@ LargeSols(GEN tnf, GEN rhs, GEN ne, GEN *pS)
 	for (i=1; i<=r; i++)
 	{
 	  gel(b,i) = gdiv(gsub(gmul(gel(Delta,i), stoi(bi1)),
-			   gsub(gmul(gel(Delta,i),gel(Lambda,i1)),
-				gmul(gel(Delta,i1),gel(Lambda,i)))),
-		      gel(Delta,i1));
+                               gsub(gmul(gel(Delta,i),gel(Lambda,i1)),
+                                    gmul(gel(Delta,i1),gel(Lambda,i)))),
+                          gel(Delta,i1));
 	  if (gcmp(distoZ(gel(b,i)), zp1) > 0) break;
 	}
 	if (i <= r) continue;
