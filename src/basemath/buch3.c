@@ -1919,11 +1919,10 @@ discrayabslist(GEN bnf, GEN L)
  * but for the last one which is allowed to be shorter. v[i][j]
  * (where j<=2^LGVINT) is understood as component number I = (i-1)*2^LGVINT+j
  * in a unique huge vector V. */
-
-#define SHLGVINT 15
-#define LGVINT (1L << SHLGVINT)
-#define vext0(i) ((((i)-1)>>SHLGVINT)+1)
-#define vext1(i) ((i)&(LGVINT-1))
+static const int SHLGVINT = 15;
+static const long LGVINT = 1L << 15;
+INLINE long vext0(long i) { return ((i-1)>>SHLGVINT) + 1; }
+INLINE long vext1(long i) { return i & (LGVINT-1); }
 #define bigel(v,i) gmael((v), vext0(i), vext1(i))
 
 /* allocate an extended vector (t_VEC of t_VEC) for N _true_ components */
