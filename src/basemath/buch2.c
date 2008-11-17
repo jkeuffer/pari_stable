@@ -2850,7 +2850,7 @@ bnfnewprec_shallow(GEN bnf, long prec)
   long r1, r2, prec1;
 
   nf_get_sign(nf0, &r1, &r2);
-  funits = matalgtobasis(nf0, check_units(bnf,"bnfnewprec"));
+  funits = matalgtobasis(nf0, bnf_get_fu(bnf));
 
   prec1 = prec;
   if (r1 + r2 > 1) {

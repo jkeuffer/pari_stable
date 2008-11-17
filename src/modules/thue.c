@@ -202,7 +202,7 @@ inithue(GEN P, GEN bnf, long flag, long prec)
   for(;;)
   {
     ro = tnf_get_roots(P, prec_roots, s, t);
-    MatFU = Conj_LH(gmael(bnf,8,5), &ALH, ro, prec);
+    MatFU = Conj_LH(bnf_get_fu(bnf), &ALH, ro, prec);
     if (MatFU) break;
     prec_roots = (prec_roots << 1) - 2;
     if (DEBUGLEVEL>1) pari_warn(warnprec, "inithue", prec_roots);
@@ -1183,10 +1183,7 @@ get_unit_1(GEN bnf, GEN *unit)
   if (odd(n)) { *unit = gen_m1; return 1; }
   v = nfsign_units(bnf, NULL, 0);
   for (i = 1; i < lg(v); i++)
-    if ( Flv_sum( gel(v,i), 2) ) {
-      GEN fu = check_units(bnf, "bnfisintnorm");
-      *unit = gel(fu,i); return 1;
-    }
+    if ( Flv_sum( gel(v,i), 2) ) { *unit = gel(bnf_get_fu(bnf), i); return 1; }
   return 0;
 }
 

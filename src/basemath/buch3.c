@@ -371,14 +371,14 @@ Buchray(GEN bnf, GEN module, long flag)
   pari_sp av = avma;
 
   bnf = checkbnf(bnf); nf = bnf_get_nf(bnf);
-  funits = check_units(bnf, "Buchray"); RU = lg(funits);
+  funits = bnf_get_fu(bnf); RU = lg(funits);
   El = Gen = NULL; /* gcc -Wall */
   cyc = bnf_get_cyc(bnf);
   gen = bnf_get_gen(bnf); ngen = lg(cyc)-1;
 
   bid = Idealstar(nf,module, nf_GEN|nf_INIT);
   cycbid = bid_get_cyc(bid);
-  genbid = bid_get_gen(bid);
+  genbid = bid_get_gen_nocheck(bid);
   Ri = lg(cycbid)-1; lh = ngen+Ri;
   if (Ri || add_gen || do_init)
   {
@@ -946,19 +946,17 @@ compute_M0(GEN M_star,long N)
 }
 
 static GEN
-lowerboundforregulator(GEN bnf)
+lowerboundforregulator(GEN bnf, GEN units)
 {
   long N,R1,R2,RU,i;
   GEN nf,M0,M,G,bound,minunit,newminunit;
   GEN vecminim,p1,pol,y;
-  GEN units = check_units(bnf,"bnfcertify");
 
   nf = bnf_get_nf(bnf); N = nf_get_degree(nf);
   nf_get_sign(nf, &R1, &R2); RU = R1+R2-1;
   if (!RU) return gen_1;
 
   G = nf_get_G(nf);
-  units = matalgtobasis(bnf,units);
   minunit = gnorml2(RgM_RgC_mul(G, gel(units,1))); /* T2(units[1]) */
   for (i=2; i<=RU; i++)
   {
@@ -995,10 +993,10 @@ lowerboundforregulator(GEN bnf)
 
 /* upper bound for the index of bnf.fu in the full unit group */
 static GEN
-bound_unit_index(GEN bnf)
+bound_unit_index(GEN bnf, GEN units)
 {
   pari_sp av = avma;
-  GEN x = lowerboundforregulator(bnf);
+  GEN x = lowerboundforregulator(bnf, units);
   if (!x) { avma = av; x = regulatorbound(bnf); }
   return gerepileuptoint(av, ground(gdiv(bnf_get_reg(bnf), x)));
 }
@@ -1135,13 +1133,13 @@ bnfcertify(GEN bnf)
   cyc = bnf_get_cyc(bnf);
   S.w = bnf_get_tuN(bnf);
   S.mu = nf_to_scalar_or_basis(nf, bnf_get_tuU(bnf));
-  S.fu= matalgtobasis(nf, check_units(bnf,"bnfcertify"));
+  S.fu= matalgtobasis(nf, bnf_get_fu(bnf));
   S.cyc = cyc;
   S.cycgen = check_and_build_cycgen(bnf);
   init_bad(&S, nf, bnf_get_gen(bnf));
 
   testprimes(bnf, zimmertbound(N, nf_get_r2(nf), absi(nf_get_disc(nf))));
-  B = bound_unit_index(bnf);
+  B = bound_unit_index(bnf, S.fu);
   if (DEBUGLEVEL>1)
   {
     fprintferr("\nPHASE 2: are all primes good ?\n\n");

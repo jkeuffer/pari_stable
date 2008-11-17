@@ -80,7 +80,7 @@ ok_sign(GEN X, GEN msign, GEN arch)
 static GEN
 fix_be(GEN bnfz, GEN be, GEN u)
 {
-  GEN nf = bnf_get_nf(bnfz), fu = gmael(bnfz,8,5);
+  GEN nf = bnf_get_nf(bnfz), fu = bnf_get_fu_nocheck(bnfz);
   return nfmul(nf, be, nffactorback(nf, fu, u));
 }
 
@@ -471,7 +471,7 @@ compute_beta(GEN X, GEN vecWB, GEN ell, GEN bnfz)
 static GEN
 get_Selmer(GEN bnf, GEN cycgen, long rc)
 {
-  GEN fu = check_units(bnf,"rnfkummer"), tu = bnf_get_tuU(bnf);
+  GEN fu = bnf_get_fu_nocheck(bnf), tu = bnf_get_tuU(bnf);
   GEN units = matalgtobasis(bnf,shallowconcat(fu,tu));
   return shallowconcat(units, vecslice(cycgen,1,rc));
 }
@@ -644,7 +644,7 @@ rnfkummersimple(GEN bnr, GEN subgroup, GEN gell, long all)
   GEN res=NULL,u,M,K,y,vecMsup,vecW,vecWB,vecBp,msign;
   primlist L;
 
-  bnf = bnr_get_bnf(bnr);
+  bnf = bnr_get_bnf(bnr); (void)bnf_get_fu(bnf);
   nf  = bnf_get_nf(bnf);
   degK = nf_get_degree(nf);
 

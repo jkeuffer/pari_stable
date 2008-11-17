@@ -95,14 +95,6 @@ checkbnrgen(GEN bnr)
     pari_err(talker,"please apply bnrinit(,,1) and not bnrinit(,)");
 }
 
-GEN
-check_units(GEN BNF, const char *f)
-{
-  GEN bnf = checkbnf(BNF), x = gel(bnf,8);
-  if (lg(x) < 6 || lg(x[5]) != lg(bnf[3])) pari_err(talker,"missing units in %s", f);
-  return gel(x,5);
-}
-
 void
 checksqmat(GEN x, long N)
 {
