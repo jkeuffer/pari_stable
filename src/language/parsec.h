@@ -84,10 +84,8 @@ parser_reset(void)
   s_node.n = OPnboperator;
 }
 
-/* check syntax, then execute */
-
 GEN
-pari_eval_str(char *lex, int strict)
+pari_compile_str(char *lex, int strict)
 {
   pari_sp ltop=avma;
   GEN code;
@@ -106,6 +104,13 @@ pari_eval_str(char *lex, int strict)
   optimizenode(s_node.n-1);
   code=gp_closure(s_node.n-1);
   parser_reset();
+  return code;
+}
+
+GEN
+pari_eval_str(char *lex, int strict)
+{
+  GEN code=pari_compile_str(lex, strict);
   return closure_evalres(code);
 }
 

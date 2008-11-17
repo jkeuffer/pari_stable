@@ -230,6 +230,14 @@ gp_read_str(const char *s)
   pari_free(t); return x;
 }
 
+GEN
+compile_str(const char *s)
+{
+  char *t = filtre(s, (compatible == OLDALL));
+  GEN x = pari_compile_str(t, 0);
+  pari_free(t); return x;
+}
+
 static long
 check_proto(const char *code)
 {

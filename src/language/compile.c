@@ -300,7 +300,7 @@ closure_context(GEN C, long lpc)
 GEN
 localvars_read_str(const char *x, GEN pack)
 {
-  GEN res;
+  GEN code;
   long l=0;
   if (pack)
   {
@@ -311,9 +311,9 @@ localvars_read_str(const char *x, GEN pack)
     for(i=1;i<=l;i++)
       var_push((entree*)e[i],(Ltype)t[i]);
   }
-  res = gp_read_str(x);
+  code = compile_str(x);
   s_lvar.n -= l;
-  return res;
+  return closure_evalres(code);
 }
 
 long

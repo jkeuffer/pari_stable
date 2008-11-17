@@ -571,6 +571,7 @@ GEN     qfsign(GEN a);
 
 void    addhelp(entree *ep, char *s);
 void    alias0(const char *s, const char *old);
+GEN     compile_str(const char *s);
 GEN     chartoGENstr(char c);
 void    delete_named_var(entree *ep);
 long    delete_var(void);
