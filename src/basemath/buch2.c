@@ -832,16 +832,16 @@ getfu(GEN nf, GEN *ptA, long force, long *pte, long prec)
 GEN
 init_units(GEN BNF)
 {
-  GEN bnf = checkbnf(BNF), res = gel(bnf,8), v, funits;
+  GEN bnf = checkbnf(BNF), funits = bnf_get_fu_nocheck(bnf), v;
   long i, l;
-  if (lg(res) == 5)
+  if (typ(funits) == t_MAT)
   {
     pari_sp av = avma;
     GEN nf = bnf_get_nf(bnf), A = bnf_get_logfu(bnf);
     funits = gerepilecopy(av, getfu(nf, &A, nf_FORCE, &l, 0));
+    if (typ(funits) == t_MAT)
+      pari_err(talker, "bnf accuracy too low to compute units on the fly");
   } 
-  else
-    funits = bnf_get_fu(bnf);
   l = lg(funits) + 1;
   v = cgetg(l, t_VEC); gel(v,1) = bnf_get_tuU(bnf);
   for (i = 2; i < l; i++) gel(v,i) = gel(funits,i-1);
@@ -2939,7 +2939,7 @@ buchall_end(GEN nf,GEN res, GEN clg2, GEN W, GEN B, GEN A, GEN C,GEN Vbase)
 static GEN
 bnftosbnf(GEN bnf)
 {
-  GEN nf = bnf_get_nf(bnf), T = nf_get_pol(nf), res = gel(bnf,8);
+  GEN nf = bnf_get_nf(bnf), T = nf_get_pol(nf);
   GEN y = cgetg(13,t_VEC);
 
   gel(y,1) = T;
@@ -2951,8 +2951,9 @@ bnftosbnf(GEN bnf)
   gel(y,7) = gel(bnf,1);
   gel(y,8) = gel(bnf,2);
   gel(y,9) = codeprimes(gel(bnf,5), degpol(T));
-  gel(y,10) = mkvec2(gmael(res,4,1), nf_to_scalar_or_basis(nf,gmael(res,4,2)));
-  gel(y,11) = matalgtobasis(bnf, gel(res,5));
+  gel(y,10) = mkvec2(utoipos(bnf_get_tuN(bnf)),
+                     nf_to_scalar_or_basis(nf, bnf_get_tuU(bnf)));
+  gel(y,11) = matalgtobasis(bnf, bnf_get_fu_nocheck(bnf));
   (void)check_and_build_matal(bnf);
   gel(y,12) = gel(bnf,10); return y;
 }

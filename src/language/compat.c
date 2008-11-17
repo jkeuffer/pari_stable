@@ -85,13 +85,7 @@ factoredbase(GEN x, GEN fa) { return nfbasis0(x, 0, fa); }
 static GEN
 factoreddiscf(GEN x, GEN fa) { return nfdisc0(x, 0, fa); }
 static GEN
-buchfu(GEN bnf)
-{
-  GEN res;
-  bnf = checkbnf(bnf); res = gel(bnf,8);
-  if (lg(res) != 6) return cgetg(1, t_MAT);
-  return gcopy(gel(res,5));
-}
+buchfu(GEN bnf) { return bnf_get_fu_nocheck(checkbnf(bnf)); }
 static GEN
 buchrayinitgen(GEN bnf, GEN ideal)
 { return Buchray(bnf,ideal, nf_INIT | nf_GEN); }

@@ -301,7 +301,7 @@ member_fu(GEN x) /* fundamental units */
     member_err("fu");
   }
   if (t == typ_BNR) pari_err(impl,"ray units");
-  return matbasistoalg(y, bnf_get_fu_error(y,".fu"));
+  return matbasistoalg(y, bnf_get_fu(y));
 }
 
 /* torsion units. return [w,e] where w is the number of roots of 1, and e a
