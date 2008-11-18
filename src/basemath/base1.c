@@ -1457,7 +1457,8 @@ nfbasic_init(GEN x, long flag, GEN fa, nfbasic_t *T)
     x = Q_primpart(x);
     RgX_check_ZX(x, "nfinit");
     if (!ZX_is_irred(x)) pari_err(redpoler, "nfinit");
-    x = ZX_primitive_to_monic(x, &(T->lead));
+    if (flag & nf_RED || !gcmp1(gel(x,lg(x)-1)))
+      x = ZX_primitive_to_monic(x, &(T->lead));
     nfmaxord(&S, x, flag, fa);
     if (DEBUGLEVEL) msgtimer("round4");
     index = S.index;
