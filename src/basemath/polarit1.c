@@ -1611,7 +1611,7 @@ rootpadic(GEN f, GEN p, long prec)
   f = pnormalize(f, p, prec, 1, &lead, &PREC, &reverse);
   y = ZX_Zp_roots(f,p,PREC);
   k = lg(y);
-  if (lead)
+  if (lead != gen_1)
     for (i=1; i<k; i++) gel(y,i) = gdiv(gel(y,i), lead);
   if (reverse)
     for (i=1; i<k; i++) gel(y,i) = ginv(gel(y,i));
@@ -1907,7 +1907,7 @@ factorpadic(GEN f,GEN p,long prec)
   f = pnormalize(f, p, prec, n-1, &lead, &pr, &reverse);
   y = ZX_monic_factorpadic(f, p, pr);
   P = gel(y,1); l = lg(P);
-  if (lead)
+  if (lead != gen_1)
     for (i=1; i<l; i++) gel(P,i) = Q_primpart( RgX_unscale(gel(P,i), lead) );
   ppow = powiu(p,prec);
   for (i=1; i<l; i++)

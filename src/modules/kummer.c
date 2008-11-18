@@ -1071,7 +1071,7 @@ nfX_Z_normalize(GEN nf, GEN P)
   }
   (void)ZX_Z_normalize(PZ, &C);
 
-  if (!C) return;
+  if (C == gen_1) return;
   Cj = C;
   for (i = l-2; i > 1; i--)
   {

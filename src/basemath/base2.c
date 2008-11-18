@@ -609,7 +609,7 @@ _nfbasis(GEN x0, long flag, GEN fa, GEN *pbas, GEN *pdK)
   RgX_check_ZX(x0, "nfbasis");
 
   x = ZX_to_monic(x0, &lead);
-  if (fa && lead) fa = update_fact(x, fa);
+  if (fa && lead != gen_1) fa = update_fact(x, fa);
   if (flag & compat_PARTIAL) fl |= nf_PARTIALFACT;
   if (flag & compat_ROUND2)  fl |= nf_ROUND2;
   nfmaxord(&S, x, fl, fa);

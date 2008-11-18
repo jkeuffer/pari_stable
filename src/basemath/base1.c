@@ -281,24 +281,26 @@ tschirnhaus(GEN x)
   avma=av2; return gerepileupto(av,u);
 }
 
-/* Assume pol in Z[X], monic, of degree n > 1. Find L in Z such that
+/* Assume pol in Z[X], monic of degree n. Find L in Z such that
  * POL = L^(-n) pol(L x) is monic in Z[X]. Return POL and set *ptk = L.
  * No GC. */
 GEN
 ZX_Z_normalize(GEN pol, GEN *ptk)
 {
   long i,j, n = degpol(pol); /* > 0 */
-  GEN k, fa, P, E, a, POL = leafcopy(pol);
+  GEN k, fa, P, E, a, POL;
 
-  a = POL + 2; k = gel(a,n-1); /* a[i] = coeff of degree i */
-  for (i = n-2; i > 0; i--)
+  a = pol + 2; k = gel(a,n-1); /* a[i] = coeff of degree i */
+  for (i = n-2; i >= 0; i--)
   {
-    if (is_pm1(k)) { if (ptk) *ptk = NULL; return pol; }
     k = gcdii(k, gel(a,i));
+    if (is_pm1(k)) { if (ptk) *ptk = gen_1; return pol; }
   }
+  if (!signe(k)) { if (ptk) *ptk = gen_1; return pol; /* monomial! */ }
   fa = Z_factor(k); k = gen_1;
   P = gel(fa,1);
   E = gel(fa,2);
+  POL = leafcopy(pol); a = POL+2;
   for (i = lg(P)-1; i > 0; i--)
   {
     GEN p = gel(P,i), pv, pvj;
@@ -334,7 +336,7 @@ ZX_primitive_to_monic(GEN pol, GEN *ptlc)
 
   a = POL + 2; lc = gel(a,n);
   if (signe(lc) < 0) { POL = ZX_neg(POL); a = POL+2; lc = gel(a,n); }
-  if (is_pm1(lc)) { if (ptlc) *ptlc = NULL; return POL; }
+  if (is_pm1(lc)) return ZX_Z_normalize(pol, ptlc);
   fa = Z_factor_limit(lc,0); lc = gen_1;
   P = gel(fa,1);
   E = gel(fa,2);
@@ -370,7 +372,9 @@ ZX_primitive_to_monic(GEN pol, GEN *ptlc)
       gel(a,j) = diviiexact(gel(a,j), pku);
     }
   }
-  if (ptlc) *ptlc = lc; return POL;
+  POL = ZX_Z_normalize(POL, ptlc);
+  if (ptlc) *ptlc = mul_denom(*ptlc, lc);
+  return POL;
 }
 /* pol != 0 in Z[x], returns a monic polynomial POL in Z[x] generating the
  * same field: there exist C, L in Z such that POL(x) = C pol(x/L).
@@ -380,7 +384,7 @@ ZX_to_monic(GEN pol, GEN *L)
 {
   long n = lg(pol)-1;
   GEN lc = gel(pol,n);
-  if (is_pm1(lc)) { *L = NULL; return signe(lc) > 0? pol: ZX_neg(pol); }
+  if (is_pm1(lc)) { *L = gen_1; return signe(lc) > 0? pol: ZX_neg(pol); }
   return ZX_primitive_to_monic(Q_primpart(pol), L);
 }
 
@@ -814,8 +818,8 @@ nfiso0(GEN a, GEN b, long fliso)
   if (fliso) { if (n!=m) return gen_0; }
   else       { if (n%m) return gen_0; }
 
-  if (nfb) lb = NULL; else b = ZX_primitive_to_monic(b,&lb);
-  if (nfa) la = NULL; else a = ZX_primitive_to_monic(a,&la);
+  if (nfb) lb = gen_1; else b = ZX_primitive_to_monic(b,&lb);
+  if (nfa) la = gen_1; else a = ZX_primitive_to_monic(a,&la);
   if (nfa && nfb)
   {
     if (fliso)
@@ -870,8 +874,8 @@ nfiso0(GEN a, GEN b, long fliso)
   {
     GEN t = gel(y,i);
     if (typ(t) == t_POL) setvarn(t, vb); else t = scalarpol(t, vb);
-    if (lb) t = RgX_unscale(t, lb);
-    if (la) t = RgX_Rg_div(t, la);
+    if (lb != gen_1) t = RgX_unscale(t, lb);
+    if (la != gen_1) t = RgX_Rg_div(t, la);
     gel(y,i) = t;
   }
   return gerepilecopy(av,y);
@@ -1445,7 +1449,7 @@ nfbasic_init(GEN x, long flag, GEN fa, nfbasic_t *T)
   long r1;
 
   T->basden = NULL;
-  T->lead   = NULL;
+  T->lead   = gen_1;
   if (DEBUGLEVEL) (void)timer2();
   if (typ(x) == t_POL)
   {
@@ -1504,7 +1508,7 @@ nfinitall(GEN x, long flag, long prec)
 
   nfbasic_init(x, flag, NULL, &T);
   nfbasic_add_disc(&T); /* more expensive after set_LLL_basis */
-  if (T.lead && !(flag & nf_RED))
+  if (T.lead != gen_1 && !(flag & nf_RED))
   {
     pari_warn(warner,"non-monic polynomial. Result of the form [nf,c]");
     flag |= nf_RED | nf_ORIG;
@@ -1517,7 +1521,7 @@ nfinitall(GEN x, long flag, long prec)
     if (flag & nf_ORIG)
     {
       if (!rev) rev = pol_x(varn(T.x)); /* no improvement */
-      if (T.lead) rev = RgX_Rg_div(rev, T.lead);
+      if (T.lead != gen_1) rev = RgX_Rg_div(rev, T.lead);
       nf = mkvec2(nf, mkpolmod(rev, T.x));
     }
   } else {
@@ -1748,7 +1752,7 @@ polred_aux(nfbasic_t *T, GEN *pro, long flag)
     if (ZX_canon_neg(ch) && orig) ai = RgX_neg(ai);
     if (nfred && degpol(ch) == l-1) return mkvec2(ch, ai);
     if (DEBUGLEVEL>3) fprintferr("polred: generator %Ps\n", ch);
-    if (T->lead && orig) ai = RgX_unscale(ai, T->lead);
+    if (T->lead != gen_1 && orig) ai = RgX_unscale(ai, ginv(T->lead));
     gel(y,i) = ch;
     gel(b,i) = ai;
   }
@@ -1972,7 +1976,7 @@ store(GEN x, GEN z, GEN a, nfbasic_t *T, long flag, GEN u)
   if (flag & (nf_ORIG|nf_ADDZK))
   {
     b = QXQ_reverse(a, x);
-    if (T->lead) b = RgX_Rg_div(b, T->lead);
+    if (T->lead != gen_1) b = RgX_Rg_div(b, T->lead);
   }
   else
     b = NULL;
