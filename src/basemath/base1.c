@@ -1767,7 +1767,7 @@ Polred(GEN x, long flag, GEN fa)
 {
   pari_sp av = avma;
   GEN ro;
-  nfbasic_t T; nfbasic_init(x, flag & nf_PARTIALFACT, fa, &T);
+  nfbasic_t T; nfbasic_init(x, flag & (nf_PARTIALFACT|nf_RED), fa, &T);
   return gerepilecopy(av, polred_aux(&T, &ro, flag & nf_ORIG));
 }
 
@@ -2032,7 +2032,7 @@ polredabs0(GEN x, long flag)
   GEN y, a, u;
   nfbasic_t T;
 
-  nfbasic_init(x, flag & nf_PARTIALFACT, NULL, &T);
+  nfbasic_init(x, flag & (nf_PARTIALFACT|nf_RED), NULL, &T);
   x = T.x; vx = varn(x);
 
   if (degpol(x) == 1)
