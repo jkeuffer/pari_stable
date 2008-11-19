@@ -9,3 +9,4 @@ nfinit(Pol([1,0,42,112,728,3248,14224,3392,289478,-804944,2966908,-11015200,1734
 setrand(2);bnfinit(x^4 - x^3 + 63*x^2 - 22*x + 1004).clgp
 setrand(1);bnfinit(x^8 - 8*x^6 + 38*x^4 - 143*x^2 + 121).clgp
 bnfcertify(bnfinit(x^2-40!));
+zetakinit(2*x-1);
