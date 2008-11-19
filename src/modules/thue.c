@@ -803,7 +803,7 @@ LargeSols(GEN tnf, GEN rhs, GEN ne, GEN *pS)
   c4 = mulur(n-1, c3);
   x1 = gmax(x0, sqrtnr(shiftr(tmp,1),n));
 
-  Vect = gmul(gabs(A,DEFAULTPREC), const_vec(r, gen_1));
+  Vect = gmul(gabs(A,DEFAULTPREC), const_col(r, gen_1));
   c14 = mulrr(c4, Vecmax(Vect));
   x2 = gmax(x1, sqrtnr(mulur(10,c14), n));
   if (DEBUGLEVEL>1) {
@@ -823,7 +823,7 @@ LargeSols(GEN tnf, GEN rhs, GEN ne, GEN *pS)
   {
     GEN Delta, MatNE, Hmu, c5, c7;
 
-    Vect = const_vec(r, gen_1);
+    Vect = const_col(r, gen_1);
     if (iroot <= r) gel(Vect,iroot) = stoi(1-n);
     Delta = gmul(A,Vect);
 
