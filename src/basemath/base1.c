@@ -287,7 +287,7 @@ tschirnhaus(GEN x)
 GEN
 ZX_Z_normalize(GEN pol, GEN *ptk)
 {
-  long i,j, n = degpol(pol); /* > 0 */
+  long i,j, sk, n = degpol(pol); /* > 0 */
   GEN k, fa, P, E, a, POL;
 
   a = pol + 2; k = gel(a,n-1); /* a[i] = coeff of degree i */
@@ -296,7 +296,9 @@ ZX_Z_normalize(GEN pol, GEN *ptk)
     k = gcdii(k, gel(a,i));
     if (is_pm1(k)) { if (ptk) *ptk = gen_1; return pol; }
   }
-  if (!signe(k)) { if (ptk) *ptk = gen_1; return pol; /* monomial! */ }
+  sk = signe(k);
+  if (!sk) { if (ptk) *ptk = gen_1; return pol; /* monomial! */ }
+  if (sk < 0) k = absi(k);
   fa = Z_factor(k); k = gen_1;
   P = gel(fa,1);
   E = gel(fa,2);
