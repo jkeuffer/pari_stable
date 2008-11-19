@@ -4794,7 +4794,7 @@ The result is suboptimal if $q$ is not primitive ($L$ larger than
 necessary), but remains correct.
 
 \fun{GEN}{ZX_Z_normalize}{GEN q, GEN *L} a restricted version of
-\kbd{ZX_primitive_to_monic}, where $q$ is a \emph{monic} \kbd{ZX}
+\kbd{ZX\_primitive\_to\_monic}, where $q$ is a \emph{monic} \kbd{ZX}
 of degree $> 0$. Finds the largest $L$ such that
 $Q(X) := L^{-\deg q} q(Lx)$ is integral and return $Q$; this is not
 well-defined if $q$ is a monomial, in that case, set $L=1$ and $Q = q$. If
