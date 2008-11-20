@@ -108,17 +108,17 @@ absisqrtn(GEN x, long n, long prec)
 { GEN r = itor(x,prec); setabssign(r); return sqrtnr(r, n); }
 
 static GEN
-get_emb(GEN x, GEN r, long prec)
+get_emb(GEN x, GEN r)
 {
-  long l = lg(r), i, tx;
-  GEN e, y = cgetg(l, t_COL);
+  long l = lg(r), i;
+  GEN y;
 
-  tx = typ(x);
-  if (tx != t_INT && tx != t_POL) pari_err(typeer,"get_emb");
+  if (typ(x) == t_INT) return const_col(l-1, x);
+  y = cgetg(l, t_COL);
   for (i=1; i<l; i++)
   {
-    e = poleval(x, gel(r,i));
-    if (gcmp0(e) || (typ(e) != t_INT && precision(e) < prec)) return NULL;
+    GEN e = poleval(x, gel(r,i));
+    if (gcmp0(e) || (typ(e) != t_INT && precision(e) == 3)) return NULL;
     gel(y,i) = e;
   }
   return y;
@@ -134,7 +134,7 @@ Conj_LH(GEN v, GEN *H, GEN r, long prec)
   (*H) = cgetg(l,t_COL);
   for (j = 1; j < l; j++)
   {
-    if (! (e = get_emb(gel(v,j), r, prec)) ) return NULL; /* FAIL */
+    if (! (e = get_emb(gel(v,j), r)) ) return NULL; /* FAIL */
     gel(M,j) = e;
     gel(*H,j) = LogHeight(e, prec);
   }
