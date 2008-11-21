@@ -523,43 +523,58 @@ MiddleSols(GEN *pS, GEN bound, GEN roo, GEN poly, GEN rhs, long s, GEN c1)
 
 /* Check for solutions under a small bound (see paper) */
 static GEN
-SmallSols(GEN S, long Bx, GEN poly, GEN rhs)
+SmallSols(GEN S, ulong Bx, GEN poly, GEN rhs)
 {
   pari_sp av = avma, lim = stack_lim(av, 1);
-  const long prec = DEFAULTPREC;
-  GEN X, Y, P, r;
-  long x, j, n = degpol(poly);
+  GEN X, Y, P, r, rhs2;
+  long j, l = lg(poly), n = degpol(poly);
+  ulong x;
 
   if (DEBUGLEVEL>1) fprintferr("* Checking for small solutions\n");
-  /* x = 0 first */
-  Y = roundr( absisqrtn(rhs, n, prec) );
-  if (equalii(powiu(Y,n), rhs)) add_sol(&S, Y, gen_0);
-  Y = negi(Y);
-  if (equalii(powiu(Y,n), rhs)) add_sol(&S, Y, gen_0);
-
-  /* x != 0 */
-  P = cgetg(lg(poly), t_POL); P[1] = poly[1];
-  for (x = -Bx; x <= Bx; x++)
+  /* x = 0 first: solve Y^n = rhs */
+  if (odd(n))
   {
-    if (!x) continue;
-
-    X = stoi(x);
-    P[lg(poly) - 1] = poly[lg(poly) - 1];
-    for (j = lg(poly) - 2; j >= 2; j--)
+    if (ispower(absi(rhs), utoipos(n), &Y))
+      add_sol(&S, signe(rhs) > 0? Y: negi(Y), gen_0);
+  }
+  else if (signe(rhs) > 0 && ispower(rhs, utoipos(n), &Y))
+  {
+    add_sol(&S, Y, gen_0);
+    add_sol(&S, negi(Y), gen_0);
+  }
+  rhs2 = shifti(rhs,1);
+  /* x != 0 */
+  P = cgetg(l, t_POL); P[1] = poly[1];
+  for (x = 1; x <= Bx; x++)
+  {
+    pari_sp av2 = avma;
+    long lS = lg(S);
+    X = utoipos(x);
+    gel(P, l-1) = gel(poly, l-1);
+    /* try x */
+    for (j = l-2; j >= 2; j--)
     {
       gel(P,j) = mulii(X, gel(poly,j));
-      X = mulis(X, x);
+      if (j > 2) X = muliu(X, x);
     }
     gel(P,2) = subii(gel(P,2), rhs);
     r = nfrootsQ(P);
-
     for (j = 1; j < lg(r); j++)
-      if (typ(gel(r,j)) == t_INT) add_sol(&S, gel(r,j), stoi(x));
+      if (typ(gel(r,j)) == t_INT) add_sol(&S, gel(r,j), utoipos(x));
+    /* try -x */
+    for (j = l-2; j >= 2; j -= 2) togglesign( gel(P,j) );
+    if (j == 0) gel(P,2) = subii(gel(P,2), rhs2);
+    r = nfrootsQ(P);
+    for (j = 1; j < lg(r); j++)
+      if (typ(gel(r,j)) == t_INT) add_sol(&S, gel(r,j), utoineg(x));
+
+    if (lS == lg(S)) { avma = av2; continue; } /* no solution found */
+
     if (low_stack(lim,stack_lim(av,1)))
     {
       if(DEBUGMEM>1) pari_warn(warnmem,"SmallSols");
       S = gerepilecopy(av, S);
-      P = cgetg(lg(poly), t_POL); P[1] = poly[1];
+      P = cgetg(l, t_POL); P[1] = poly[1];
     }
   }
   return S;
@@ -763,7 +778,7 @@ static GEN
 LargeSols(GEN tnf, GEN rhs, GEN ne, GEN *pS)
 {
   GEN Vect, P, ro, bnf, MatFU, A, csts, dP, vecdP, Bx;
-  GEN c1,c2,c3,c4,c11,c14,c15, x0, x1, x2, x3, b, zp1, tmp, eps5, Ind;
+  GEN c1,c2,c3,c4,c11,c14,c15, x0, x1, x2, x3, b, zp1, tmp, eps5;
   long iroot, ine, n, i, r, upb, bi1, Prec, prec, s,t;
   baker_s BS;
   pari_sp av = avma;
@@ -772,7 +787,7 @@ LargeSols(GEN tnf, GEN rhs, GEN ne, GEN *pS)
   if (!ne)
   {
     ne = bnfisintnorm(bnf, rhs);
-    if (!gcmp1(gmael(tnf, 7, 7)) && !is_pm1(bnf_get_no(bnf)) && !is_pm1(rhs))
+    if (!is_pm1(gmael(tnf, 7, 7)) && !is_pm1(bnf_get_no(bnf)) && !is_pm1(rhs))
       pari_warn(warner, "Non trivial conditional class group.\n  *** May miss solutions of the norm equation");
   }
   if (lg(ne)==1) return NULL;
@@ -791,7 +806,7 @@ LargeSols(GEN tnf, GEN rhs, GEN ne, GEN *pS)
   x0     = gel(csts,4);
   eps5   = gel(csts,5);
   Prec = gtolong(gel(csts,6));
-  Ind    = gel(csts,7);
+  BS.Ind = gel(csts,7);
   BS.MatFU = MatFU;
   BS.bak = mulss(n, (n-1)*(n-2)); /* safe */
   BS.deg = n;
@@ -825,7 +840,7 @@ LargeSols(GEN tnf, GEN rhs, GEN ne, GEN *pS)
 
     Vect = const_col(r, gen_1);
     if (iroot <= r) gel(Vect,iroot) = stoi(1-n);
-    Delta = gmul(A,Vect);
+    Delta = RgM_RgC_mul(A,Vect);
 
     c5 = Vecmax(gabs(Delta,Prec));
     c5  = myround(gprec_w(c5,DEFAULTPREC), 1);
@@ -851,6 +866,7 @@ LargeSols(GEN tnf, GEN rhs, GEN ne, GEN *pS)
 
     for (ine=1; ine<lg(ne); ine++)
     {
+      pari_sp av2 = avma;
       GEN Lambda, B0, c6, c8;
       GEN NE = gel(MatNE,ine), Vect2 = cgetg(r+1,t_COL);
       long k, i1;
@@ -864,7 +880,7 @@ LargeSols(GEN tnf, GEN rhs, GEN ne, GEN *pS)
 	  tmp = gdiv(gsub(gel(ro,iroot),gel(ro,k)), gel(NE,k));
 	gel(Vect2,k) = glog(gabs(tmp,prec), prec);
       }
-      Lambda = gmul(A,Vect2);
+      Lambda = RgM_RgC_mul(A,Vect2);
 
       c6 = addrr(dbltor(0.1), Vecmax(gabs(Lambda,DEFAULTPREC)));
       c6 = myround(c6, 1);
@@ -882,17 +898,16 @@ LargeSols(GEN tnf, GEN rhs, GEN ne, GEN *pS)
       BS.c15 = c15;
       BS.NE = NE;
       BS.Hmu = gel(Hmu,ine);
-      BS.Ind = Ind;
 
       i1 = Vecmaxind(gabs(Delta,prec));
-      if (is_pm1(Ind))
+      if (is_pm1(BS.Ind))
       {
         if (! (B0 = get_B0(i1, Delta, Lambda, eps5, prec, &BS)) ) goto PRECPB;
       }
       else
       {
         if (! (Bx = get_Bx_LLL(i1, Delta, Lambda, eps5, prec, &BS)) ) goto PRECPB;
-        x3 = gmax(Bx, x3);
+        x3 = gerepileupto(av2, gmax(Bx, x3));
         continue;
       }
      /* For each possible value of b_i1, compute the b_i's
@@ -946,6 +961,7 @@ thue(GEN tnf, GEN rhs, GEN ne)
 
   if (!checktnf(tnf)) pari_err(talker,"not a tnf in thue");
   if (typ(rhs) != t_INT) pari_err(typeer,"thue");
+  if (signe(rhs) == 0) return cgetg(1,t_VEC);
 
   P = gel(tnf,1);
   if (lg(tnf) == 8)
