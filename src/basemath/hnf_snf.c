@@ -2023,7 +2023,7 @@ static GEN
 gbezout_step(GEN *pa, GEN *pb, GEN *pu, GEN *pv)
 {
   GEN a = *pa, b = *pb, d;
-  if (!signe(a))
+  if (gcmp0(a))
   {
     *pa = gen_0; *pu = gen_0;
     *pb = gen_1; *pv = gen_1; return b;
