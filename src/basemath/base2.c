@@ -2427,7 +2427,7 @@ rnfelementid_powmod(GEN multab, long h, GEN n, GEN T, GEN p)
  *   flag = 1 iff O is pr-maximal
  *   v = v_pr(disc(O)). */
 static GEN
-rnfdedekind_i(GEN nf, GEN P, GEN pr, long vdisc)
+rnfdedekind_i(GEN nf, GEN P, GEN pr, long vdisc, long only_maximal)
 {
   GEN Ppr, A, I, p, tau, g, h, k, base, T, gzk, hzk, prinvp, pal;
   GEN nfT = nf_get_pol(nf), modpr = nf_to_Fq_init(nf,&pr, &T, &p);
@@ -2435,7 +2435,7 @@ rnfdedekind_i(GEN nf, GEN P, GEN pr, long vdisc)
 
   Ppr = nfX_to_FqX(P, nf, modpr);
   A = gel(FqX_factor(Ppr,T,p),1);
-  r = lg(A); if (r < 2) pari_err(constpoler,"rnfdedekind");
+  r = lg(A); if (r == 1) pari_err(constpoler,"rnfdedekind");
   g = gel(A,1);
   for (i=2; i<r; i++) g = FqX_mul(g, gel(A,i), T, p);
   h = FqX_div(Ppr,g, T, p);
@@ -2455,6 +2455,7 @@ rnfdedekind_i(GEN nf, GEN P, GEN pr, long vdisc)
   k  = FqX_gcd(FqX_gcd(g,h,  T,p), k, T,p);
   d = degpol(k);  /* <= m */
   if (!d) return NULL; /* pr-maximal */
+  if (only_maximal) return gen_0; /* not maximal */
 
   A = cgetg(m+d+1,t_MAT);
   I = cgetg(m+d+1,t_VEC); base = mkvec2(A, I);
@@ -2490,9 +2491,10 @@ triv_order(long n, long m)
   gel(z,2) = const_vec(n, gen_1); return z;
 }
 
-/* FIXME: is it really necessary to export this routine ? */
+/* if flag is set, return gen_1 (resp. gen_0) if the order K[X]/(P)
+ * is pr-maximal (resp. not pr-maximal). */
 GEN
-rnfdedekind(GEN nf, GEN P, GEN pr)
+rnfdedekind(GEN nf, GEN P, GEN pr, long flag)
 {
   pari_sp av = avma;
   long v;
@@ -2501,12 +2503,16 @@ rnfdedekind(GEN nf, GEN P, GEN pr)
   P = rnf_fix_pol(nf_get_pol(nf), P, 0);
   v = nfval(nf, RgX_disc(P), pr);
   P = lift_intern(P);
-  z = rnfdedekind_i(nf, P, pr, v);
+  z = rnfdedekind_i(nf, P, pr, v, 0);
   if (z)
+  {
+    if (flag) return gen_0;
     z = gerepilecopy(av, z);
+  }
   else {
-    long d = degpol(P);
-    avma = av;
+    long d;
+    if (flag) return gen_1;
+    d = degpol(P); avma = av;
     z = cgetg(4, t_VEC);
     gel(z,1) = gen_1;
     gel(z,2) = triv_order(d, nf_get_degree(nf));
@@ -2537,7 +2543,7 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
   if (DEBUGLEVEL>1) fprintferr(" treating %Ps^%ld\n", pr, vdisc);
   modpr = nf_to_Fq_init(nf,&pr,&T,&p);
   av1 = avma;
-  p1 = rnfdedekind_i(nf, pol, modpr, vdisc);
+  p1 = rnfdedekind_i(nf, pol, modpr, vdisc, 0);
   if (!p1) { avma = av; return NULL; }
   if (gcmp1(gel(p1,1))) return gerepilecopy(av,gel(p1,2));
   sep = itos(gel(p1,3));
