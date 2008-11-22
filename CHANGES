@@ -143,6 +143,8 @@ IZ111- missing `const's in groupid.c cause massive copying to stack.
 BA117- Fix detection for ppc64 running in 32bit mode.
   118- Fp_div used remii instead of modii: Mod(3,5)-1/3 -> Mod(0, 5) [#893]
   119- trying to prevent accuracy problems in thue() cauѕed oo loop
+  120- wrong results in matsnf with t_POL entries [#901]
+       minpoly(matrix(4,4,i,j,i/j)) -> x^3 - 4*x^2 + x
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
@@ -375,8 +377,6 @@ BA 92- make test-xxx: trap SIGINT in benching script to exit on <C-C>
        in disc P ]
    96- added a flag to the (mostly useless) function rnfdedekind(), the
        version with the flag set is a little more useful.
-   97- wrong results in matsnf with t_POL entries [#901]
-       minpoly(matrix(4,4,i,j,i/j)) -> x^3 - 4*x^2 + x
 
   Added
     1- many new benches (make test-all)
