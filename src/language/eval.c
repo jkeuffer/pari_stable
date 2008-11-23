@@ -653,6 +653,17 @@ trace_push(long *pc, GEN C)
   BLOCK_SIGINT_END
 }
 
+INLINE void
+st_alloc(long n)
+{
+  if (sp+n>s_st.n)
+  {
+    stack_alloc(&s_st,n+16);
+    s_st.n=s_st.alloc;
+    if (DEBUGMEM>=2) pari_warn(warner,"doubling evaluator stack");
+  }
+}
+
 static void
 closure_eval(GEN C)
 {
@@ -686,12 +697,7 @@ closure_eval(GEN C)
     long operand=oper[pc];
     entree *ep;
     if (sp<0) pari_err(bugparier,"closure_eval, stack underflow");
-    if (sp+16>s_st.n)
-    {
-      stack_alloc(&s_st,32);
-      s_st.n=s_st.alloc;
-      if (DEBUGMEM>=2) pari_warn(warner,"doubling evaluator stack");
-    }
+    st_alloc(16);
     switch(opcode)
     {
     case OCpushlong:
@@ -1250,6 +1256,7 @@ GEN
 closure_callgen2(GEN C, GEN x, GEN y)
 {
   long i;
+  st_alloc(C[1]);
   gel(st,sp++)=x;
   gel(st,sp++)=y;
   for(i=3; i<=C[1]; i++) gel(st,sp++) = NULL;
@@ -1260,6 +1267,7 @@ GEN
 closure_callgenvec(GEN C, GEN args)
 {
   long i, l = lg(args);
+  st_alloc(C[1]);
   for (i = 1; i < l;   i++) gel(st,sp++) = gel(args,i);
   for(      ; i<=C[1]; i++) gel(st,sp++) = NULL;
   return closure_returnupto(C);
@@ -1271,6 +1279,7 @@ closure_callgenall(GEN C, long n, ...)
   va_list ap;
   long i;
   va_start(ap,n);
+  st_alloc(C[1]);
   for (i = 1; i <=n;   i++) gel(st,sp++) = va_arg(ap, GEN);
   for(      ; i<=C[1]; i++) gel(st,sp++) = NULL;
   va_end(ap);
