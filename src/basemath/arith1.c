@@ -2522,12 +2522,12 @@ GEN
 pnqn(GEN x)
 {
   pari_sp av = avma;
-  long i, lx, ly, tx = typ(x);
-  GEN p0, p1, q0, q1, a, b, p2, q2;
+  long i, lx, tx = typ(x);
+  GEN p0, p1, q0, q1, a, p2, q2;
 
   if (! is_matvec_t(tx)) pari_err(typeer,"pnqn");
-  lx=lg(x); if (lx==1) return matid(2);
-  p0=gen_1; q0=gen_0;
+  lx = lg(x); if (lx == 1) return matid(2);
+  p0 = gen_1; q0 = gen_0;
   if (tx != t_MAT)
   {
     p1 = gel(x,1); q1 = gen_1;
@@ -2540,19 +2540,28 @@ pnqn(GEN x)
   }
   else
   {
-    ly = lg(x[1]);
+    long ly = lg(x[1]);
     if (ly==2)
     {
-      p1 = cgetg(lx,t_VEC); for (i=1; i<lx; i++) gel(p1,i) = gmael(x,i,1);
-      return pnqn(p1);
+      p1 = gcoeff(x,1,1); q1 = gen_1;
+      for (i=2; i<lx; i++)
+      {
+        a = gcoeff(x,1,i);
+        p2 = gadd(gmul(a,p1),p0); p0=p1; p1=p2;
+        q2 = gadd(gmul(a,q1),q0); q0=q1; q1=q2;
+      }
     }
-    if (ly!=3) pari_err(talker,"incorrect size in pnqn");
-    p1=gcoeff(x,2,1); q1=gcoeff(x,1,1);
-    for (i=2; i<lx; i++)
+    else
     {
-      a = gcoeff(x,2,i); b = gcoeff(x,1,i);
-      p2 = gadd(gmul(a,p1),gmul(b,p0)); p0=p1; p1=p2;
-      q2 = gadd(gmul(a,q1),gmul(b,q0)); q0=q1; q1=q2;
+      if (ly != 3) pari_err(talker,"incorrect size in pnqn");
+      p1 = gcoeff(x,2,1); q1 = gcoeff(x,1,1);
+      for (i=2; i<lx; i++)
+      {
+        GEN b = gcoeff(x,1,i);
+        a = gcoeff(x,2,i);
+        p2 = gadd(gmul(a,p1),gmul(b,p0)); p0=p1; p1=p2;
+        q2 = gadd(gmul(a,q1),gmul(b,q0)); q0=q1; q1=q2;
+      }
     }
   }
   return gerepilecopy(av, mkmat2(mkcol2(p1,q1), mkcol2(p0,q0)));
