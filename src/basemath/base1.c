@@ -299,7 +299,7 @@ ZX_Z_normalize(GEN pol, GEN *ptk)
   sk = signe(k);
   if (!sk) { if (ptk) *ptk = gen_1; return pol; /* monomial! */ }
   if (sk < 0) k = absi(k);
-  fa = Z_factor(k); k = gen_1;
+  fa = Z_factor_limit(k, 0); k = gen_1;
   P = gel(fa,1);
   E = gel(fa,2);
   POL = leafcopy(pol); a = POL+2;
