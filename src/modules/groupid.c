@@ -117,28 +117,22 @@ group_ident_i(GEN G, GEN S)
     case 1: /* p */
       return 1;
     case 2: /* p^2 */
-      if (s==1-p[1]+n*p[1]) return 2; /* pxp */
-      return 1; /* p^2 */
+      return (s == 1 - p[1] + n*p[1])? 2: 1; /* pxp || p^2 */
     case 3: /* p^3 */
       {
 	GEN H = group_abelianSNF(G, S);
 	if (H) /*G is abelian*/
 	{
 	  long l = lg(H)-1;
-	  if (l==3) return 5; /*pxpxp*/
-	  return l; /*p^3 or p^2xp*/
+	  return (l==3)?5: l; /*pxpxp || p^3 or p^2xp*/
 	} /*G is not abelian*/
 	if (p[1] == 2)
-	{
-	  if (s == 19) return 3; /*D8*/
-	  return 4; /*Q8*/
-	}
+	  return (s == 19)? 3: 4; /*D8 || Q8*/
 	else
 	{
 	  long q = p[1]*p[1];
 	  q *= q;
-	  if (s == q - p[1] + 1) return 3; /* pxp:p */
-	  return 4;   /* p^2:p */
+	  return (s == q - p[1] + 1)?3 :4; /* pxp:p || p^2:p */
 	}
       }
     }
@@ -147,8 +141,7 @@ group_ident_i(GEN G, GEN S)
     switch(e[1]+e[2])
     {
     case 2: /*pq*/
-      if(p[2]%p[1]!=1) return 1; /*pq*/
-      return 1+group_isabelian(G); /*pq || p:q*/
+      return (p[2]%p[1]!=1)?1:1+group_isabelian(G); /*pq || pq or p:q*/
     case 3:
       if (p[1]==2 && e[1]==2) /* 4p */
       {
@@ -307,8 +300,7 @@ group_ident_i(GEN G, GEN S)
           case 230171:
             {
               const long good[]={2,0}, bad[]={4,5,0};
-              if (indexgroupcentre(G,Z,good,bad)) return 4;
-              return 12;
+              return indexgroupcentre(G,Z,good,bad)? 4: 12;
             }
           case 70267:
             if (s==135) return 9;
@@ -316,28 +308,24 @@ group_ident_i(GEN G, GEN S)
           case 70187:
             {
               const long good[]={8,0}, bad[]={7,9,0};
-              if (indexgroupcentre(G,Z,good,bad)) return 13;
-              return 14;
+              return indexgroupcentre(G,Z,good,bad)? 13: 14;
             }
           case 70379:
             {
               const long good[]={4,0},bad[]={0};
-              if (indexgroupsubgroup(L,8,good,bad)) return 31;
-              return 30;
+              return indexgroupsubgroup(L,8,good,bad)? 31: 30;
             }
           }
           break;
         case 48: case 80:
           {
             const long good[]={5,8,0},bad[]={6,7,0};
-            if (indexgroupcentre(G,Z,good,bad)) return 12;
-            return 13;
+            return indexgroupcentre(G,Z,good,bad)? 12: 13;
           }
         case 112:
           {
             const long good[]={7,4,0},bad[]={5,6,0};
-            if (indexgroupcentre(G,Z,good,bad)) return 11;
-            return 12;
+            return indexgroupcentre(G,Z,good,bad)? 11: 12;
           }
         }
         pari_err(talker,"Not a group in group_ident");
@@ -401,56 +389,46 @@ group_ident_i(GEN G, GEN S)
             switch(w)
             {
             case 4270003:
-              if (scenter==439) return 2;
-              return 3;
+              return (scenter==439)? 2: 3;
             case 5870155:
               {
                 const long good[]={8,9,0},bad[]={7,0};
-                if (indexgroupcentre(G,Z,good,bad)) return 13;
-                return 14;
+                return indexgroupcentre(G,Z,good,bad)? 13: 14;
               }
             case 4270042:
               {
                 const long good[]={13,0},bad[]={14,0};
-                if (indexgroupcentre(G,Z,good,bad)) return 15;
-                return 16;
+                return indexgroupcentre(G,Z,good,bad)? 15: 16;
               }
             case 4430156:
               {
                 const long good[]={18,20,0},bad[]={19,0};
-                if (indexgroupcentre(G,Z,good,bad)) return 47;
-                return 48;
+                return indexgroupcentre(G,Z,good,bad)? 47: 48;
               }
             case 2510026:
-              if (scenter==1367) return 50;
-              return 51;
+              return scenter==1367? 50: 51;
             case 12190433:
-              if (scenter==47) return 59;
-              return 70;
+              return scenter==47? 59: 70;
             case 16514475:
               {
                 const long good[]={22,24,28,0},bad[]={23,25,27,30,0};
-                if (indexgroupcentre(G,Z,good,bad)) return 61;
-                return 66;
+                return indexgroupcentre(G,Z,good,bad)? 61: 66;
               }
             case 10910433:
               {
                 const long good[]={23,31,0},bad[]={25,26,29,30,33,0};
-                if (indexgroupcentre(G,Z,good,bad)) return 63;
-                return 68;
+                return indexgroupcentre(G,Z,good,bad)? 63: 68;
               }
             case 14590443:
               {
                 const long good[]={28,33,0},bad[]={30,34,0};
-                if (indexgroupcentre(G,Z,good,bad)) return 77;
-                return 80;
+                return indexgroupcentre(G,Z,good,bad)? 77: 80;
               }
             case 3630046:
               {
                 const long good[]={3,0},bad[]={12,16,0};
                 if (scenter==695) return 26;
-                if (indexgroupcentre(G,Z,good,bad)) return 27;
-                return 44;
+                return indexgroupcentre(G,Z,good,bad)? 27: 44;
               }
             }
             break;
@@ -519,8 +497,7 @@ group_ident_i(GEN G, GEN S)
             case 455322385:
               {
                 const long good[]={37,40,0},bad[]={34,41,0};
-                if (indexgroupcentre(G,Z,good,bad)) return 96;
-                return 97;
+                return indexgroupcentre(G,Z,good,bad)? 96: 97;
               }
             }
             break;
