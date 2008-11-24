@@ -2627,17 +2627,18 @@ ZX_gcd_all(GEN A, GEN B, GEN *Anew)
   GEN R, a, b, q, qp, H, Hp, g;
   long m, n, valX, vA = varn(A);
   ulong p;
-  pari_sp ltop = avma, av, avlim;
+  pari_sp ltop, av, avlim;
   byteptr d;
 
   if (!signe(A)) { if (Anew) *Anew = zeropol(vA); return ZX_copy(B); }
   if (!signe(B)) { if (Anew) *Anew = pol_1(vA); return ZX_copy(A); }
+  valX = ZX_valrem(A, &A); ltop = avma;
 
   n = 1 + minss(degpol(A), degpol(B)); /* > degree(gcd) */
   g = gcdii(leading_term(A), leading_term(B)); /* multiple of lead(gcd) */
   if (is_pm1(g)) g = NULL;
 
-  valX = minss(ZX_valrem(A, &A), ZX_valrem(B, &B));
+  valX = minss(valX, ZX_valrem(B, &B));
   av = avma; avlim = stack_lim(av, 1);
   H = NULL; d = init_modular(&p);
   for(;;)
