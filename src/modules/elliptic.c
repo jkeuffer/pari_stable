@@ -4047,7 +4047,6 @@ elltors(GEN e)
   pr = DEFAULTPREC + ((lgefint(ell_get_disc(e))-2) >> 1); /* pr >= size of sqrt(D) */
   w1 = gel(e,15);
   prec = precision(w1);
-  if (prec < pr) pari_err(precer, "elltors");
   if (pr < prec) { prec = pr; e = gprec_w(e, pr); w1 = gel(e,15); }
   if (v) gel(v,1) = ginv(gel(v,1));
   w22 = gmul2n(gel(e,16),-1);
@@ -4071,22 +4070,13 @@ elltors(GEN e)
 
   ord = 0; tor1 = tor2 = NULL;
   w12 = gmul2n(w1,-1);
-  if ((p = torspnt(e,w12,2,prec)))
-  {
-    tor1 = p; ord++;
-  }
+  if ((p = torspnt(e,w12,2,prec))) { tor1 = p; ord++; }
   w = w22;
-  if ((p = torspnt(e,w,2,prec)))
-  {
-    tor2 = p; ord += 2;
-  }
+  if ((p = torspnt(e,w,2,prec))) { tor2 = p; ord += 2; }
   if (!ord)
   {
     w = gadd(w12,w22);
-    if ((p = torspnt(e,w,2,prec)))
-    {
-      tor2 = p; ord += 2;
-    }
+    if ((p = torspnt(e,w,2,prec))) { tor2 = p; ord += 2; }
   }
   p = NULL;
   switch(ord)
@@ -4107,8 +4097,7 @@ elltors(GEN e)
 	if (B%i != 0) continue;
 	w1j = gdivgs(w1,i);
 	p = torspnt(e,w1j,i,prec);
-	if (!p && i%4==0)
-	  p = torspnt(e,gadd(w22,w1j),i,prec);
+	if (!p && i%4==0) p = torspnt(e,gadd(w22,w1j),i,prec);
 	if (p) { k = i; break; }
       }
       if (!p) { p = tor1; k = 2; }
