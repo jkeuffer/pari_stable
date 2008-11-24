@@ -1904,6 +1904,14 @@ $x/p^v$. Infinite loop if $x$ is the zero vector.
 \fun{long}{ZV_pval}{GEN x, GEN p} as \kbd{ZV\_pvalrem} but only returns the
 ``valuation''.
 
+\fun{long}{ZX_pvalrem}{GEN x, GEN p, GEN *r} $x$ being a \kbd{ZX}
+(a \typ{POL} with \typ{INT} coefficients), return the min $v$ of the
+valuations of its components and set \kbd{*r} to $x/p^v$. Infinite loop
+if $x$ is the zero polynomial.
+
+\fun{long}{ZX_pval}{GEN x, GEN p} as \kbd{ZX\_pvalrem} but only returns the
+``valuation''.
+
 \fun{long}{Z_lvalrem}{GEN x, ulong p, GEN *r} as \kbd{Z\_pvalrem}, except
 that \kbd{p} is an \kbd{ulong} ($\kbd{p} > 1$).
 

@@ -1036,6 +1036,36 @@ Z_pval(GEN x, GEN p) {
   }
 }
 long
+ZX_pval(GEN x, GEN p)
+{
+  long i, lx = lg(x), v = 0;
+  pari_sp av = avma;
+  GEN y = leafcopy(x);
+  for(;; v++)
+    for (i = 2; i < lx; i++)
+    {
+      GEN r; gel(y,i) = dvmdii(gel(y,i), p, &r);
+      if (r != gen_0) { avma = av; return v; }
+    }
+}
+long
+ZX_pvalrem(GEN x, GEN p, GEN *px)
+{
+  long i, lx, v = 0;
+  GEN y = cgetg_copy(x, &lx);
+  y[1] = x[1];
+  x = leafcopy(x);
+  for(;; v++)
+  {
+    for (i = 2; i < lx; i++)
+    {
+      GEN r; gel(y,i) = dvmdii(gel(x,i), p, &r);
+      if (r != gen_0) { *px = x; return v; }
+    }
+    swap(x, y);
+  }
+}
+long
 ZV_pval(GEN x, GEN p)
 {
   long i, lx = lg(x), v = 0;
@@ -1051,8 +1081,8 @@ ZV_pval(GEN x, GEN p)
 long
 ZV_pvalrem(GEN x, GEN p, GEN *px)
 {
-  long i, lx = lg(x), v = 0;
-  GEN y = cgetg(lx, t_COL);
+  long i, lx, v = 0;
+  GEN y = cgetg_copy(x, &lx);
   x = leafcopy(x);
   for(;; v++)
   {
