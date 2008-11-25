@@ -376,7 +376,9 @@ BA 92- make test-xxx: trap SIGINT in benching script to exit on <C-C>
        P(C * x)*C^(-deg P) for any integer C > 1  [ saves large powers of C
        in disc P ]
    96- added a flag to the (mostly useless) function rnfdedekind(), the
-       version with the flag set is a little more useful.
+       version with the flag set is a little more useful. Allow list of prime
+       ideals instead of single prime ideal, and make this list optional
+       (omitted = test for maximality at ALL primes)
 
   Added
     1- many new benches (make test-all)

@@ -2420,7 +2420,7 @@ rnfelementid_powmod(GEN multab, long h, GEN n, GEN T, GEN p)
 }
 
 /* Relative Dedekind criterion over (true) nf, applied to the order defined by a
- * root of irreducible polynomial P, modulo the prime ideal pr. Assume
+ * root of monic irreducible polynomial P, modulo the prime ideal pr. Assume
  * vdisc = v_pr( disc(P) ).
  * Return NULL if nf[X]/P is pr-maximal. Otherwise, return [flag, O, v]:
  *   O = enlarged order, given by a pseudo-basis
@@ -2435,7 +2435,7 @@ rnfdedekind_i(GEN nf, GEN P, GEN pr, long vdisc, long only_maximal)
 
   Ppr = nfX_to_FqX(P, nf, modpr);
   A = gel(FqX_factor(Ppr,T,p),1);
-  r = lg(A); if (r == 1) pari_err(constpoler,"rnfdedekind");
+  r = lg(A); /* > 1 */
   g = gel(A,1);
   for (i=2; i<r; i++) g = FqX_mul(g, gel(A,i), T, p);
   h = FqX_div(Ppr,g, T, p);
@@ -2467,8 +2467,7 @@ rnfdedekind_i(GEN nf, GEN P, GEN pr, long vdisc, long only_maximal)
     gel(A,j) = col_ei(m, j);
     gel(I,j) = p;
   }
-  pal = FqX_div(Ppr,k, T,p);
-  pal = FqX_to_nfX(pal, modpr);
+  pal = FqX_to_nfX(FqX_div(Ppr,k, T,p), modpr);
   for (   ; j<=m+d; j++)
   {
     gel(A,j) = RgX_to_RgV(pal,m);
@@ -2498,21 +2497,52 @@ rnfdedekind(GEN nf, GEN P, GEN pr, long flag)
 {
   pari_sp av = avma;
   long v;
-  GEN z;
+  GEN z, dP;
+
   nf = checknf(nf);
   P = rnf_fix_pol(nf_get_pol(nf), P, 0);
-  v = nfval(nf, RgX_disc(P), pr);
-  P = lift_intern(P);
-  z = rnfdedekind_i(nf, P, pr, v, 0);
+  if (!gcmp1(leading_term(P)))
+    pari_err(impl,"non-monic relative polynomials");
+  dP = RgX_disc(P); P = lift_intern(P);
+  if (!pr) {
+    GEN fa = idealfactor(nf, dP);
+    GEN Q = gel(fa,1), E = gel(fa,2);
+    pari_sp av2 = avma;
+    long i, l = lg(Q);
+    for (i=1; i < l; i++)
+    {
+      v = itos(gel(E,i));
+      if (v > 1 && rnfdedekind_i(nf,P,gel(Q,i),v,1)) { avma=av; return gen_0; }
+      avma = av2;
+    }
+    avma = av; return gen_1;
+  } else if (typ(pr) == t_VEC) {
+    if (lg(pr) == 1) { avma = av; return gen_1; } /* flag = 1 is implicit */
+    if (typ(gel(pr,1)) == t_VEC) {
+      GEN Q = pr;
+      pari_sp av2 = avma;
+      long i, l = lg(Q);
+      for (i=1; i < l; i++)
+      {
+        v = nfval(nf, dP, gel(Q,i));
+        if (v > 1 && rnfdedekind_i(nf,P,gel(Q,i),v,1)) { avma=av; return gen_0; }
+        avma = av2;
+      }
+      avma = av; return gen_1;
+    }
+  }
+
+  v = nfval(nf, dP, pr);
+  z = rnfdedekind_i(nf, P, pr, v, flag);
   if (z)
   {
-    if (flag) return gen_0;
+    if (flag) { avma = av; return gen_0; }
     z = gerepilecopy(av, z);
   }
   else {
     long d;
-    if (flag) return gen_1;
-    d = degpol(P); avma = av;
+    avma = av; if (flag) return gen_1;
+    d = degpol(P);
     z = cgetg(4, t_VEC);
     gel(z,1) = gen_1;
     gel(z,2) = triv_order(d, nf_get_degree(nf));
@@ -2755,7 +2785,7 @@ rnfallbase(GEN nf, GEN *ppol, GEN *pD, GEN *pd, GEN *pf)
 
   N = degpol(nfT);
   n = degpol(pol);
-  disc = RgX_disc(pol); pol = lift(pol);
+  disc = RgX_disc(pol); pol = lift_intern(pol);
   fa = idealfactor(nf, disc);
   P = gel(fa,1); l = lg(P);
   E = gel(fa,2);

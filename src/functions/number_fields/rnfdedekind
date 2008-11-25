@@ -1,10 +1,12 @@
 Function: rnfdedekind
 Section: number_fields
 C-Name: rnfdedekind
-Prototype: GGGD0,L,
-Help: rnfdedekind(nf,pol,pr,{flag=0}): relative Dedekind criterion over the
+Prototype: GGDGD0,L,
+Help: rnfdedekind(nf,pol,{pr},{flag=0}): relative Dedekind criterion over the
  number field K, represented by nf, applied to the order O_K[X]/(P),
- modulo the prime ideal pr. P is assumed to be monic, irreducible, in O_K[X].
+ modulo the prime ideal pr (at all primes if pr omitted, in which case
+ flag is automatically set to 1).
+ P is assumed to be monic, irreducible, in O_K[X].
  Returns [max,basis,v], where basis is a pseudo-basis of the
  enlarged order, max is 1 iff this order is pr-maximal, and v is the
  valuation at pr of the order discriminant. If flag is set, just return 1 if
@@ -12,8 +14,15 @@ Help: rnfdedekind(nf,pol,pr,{flag=0}): relative Dedekind criterion over the
 Doc: given a number field $K$ coded by $\var{nf}$ and a monic 
  polynomial $P\in \Z_K[X]$, irreducible over $K$ and thus defining a relative
  extension $L$ of $K$, applies \idx{Dedekind}'s criterion to the order
- $\Z_K[X]/(P)$, at the prime ideal \var{pr}. By default (\fl is 0 or
- ommitted), returns a 3-component vector $[\var{max}, \var{basis}, v]$:
+ $\Z_K[X]/(P)$, at the prime ideal \var{pr}. It is possible to set \var{pr}
+ to a vector of prime ideals (test maximality at all primes in the vector),
+ or to omit altogether, in which case maximality at \emph{all} primes is tested;
+ in this situation \fl\ is automatically set to $1$.
+
+ The default historic behaviour (\fl\ is 0 or omitted and \var{pr} is a
+ single prime ideal) is not so useful since
+ \kbd{rnfpseudobasis} gives more information and is generally not that
+ much slower. It returns a 3-component vector $[\var{max}, \var{basis}, v]$:
 
  \item \var{basis} is a pseudo-basis of an enlarged order $O$ produced by 
  Dedekind's criterion, containing the original order $\Z_K[X]/(P)$
@@ -25,12 +34,10 @@ Doc: given a number field $K$ coded by $\var{nf}$ and a monic
 
  \item $v$ is the valuation at \var{pr} of the order discriminant.
 
- If flag is non-zero, just return $1$ if the order $\Z_K[X]/(P)$ is
- \var{pr}-maximal, and $0$ if not. This is much faster than the default,
- since the enlargd order is not computed.
-
-
-
+ If \fl\ is non-zero, on the other hand, we just return $1$ if the order
+ $\Z_K[X]/(P)$ is \var{pr}-maximal (resp.~maximal at all relevant primes, as
+ described above), and $0$ if not. This is much faster than the default,
+ since the enlarged order is not computed.
  \bprog
  ? nf = nfinit(y^2-3); P = x^3 - 2*y;
  ? pr3 = idealprimedec(nf,3)[1];
@@ -48,6 +55,7 @@ Doc: given a number field $K$ coded by $\var{nf}$ and a monic
  %5 = 0
  ? rnfdedekind(nf, P, pr2)
  %6 = [0, [[1, 0, 0; 0, 1, 0; 0, 0, 1], [[1, 0; 0, 1], [1, 0; 0, 1], [1, 1/2; 0, 1/2]]], 2]
+ ? rnfdedekind(nf, P)
  @eprog
  The enlarged order is not proven to be \kbd{pr2}-maximal yet. In fact, it
  is; it is in fact the maximal order:
