@@ -13,3 +13,5 @@ P=[X,Y[1]]; Q=ellpow(E,P,113);
 o=ellorder(E,P, p+1-ellap(E,p))
 e=elllog(E,P,Q,o)
 ellpow(E,Q,e) == P
+
+elltors(ellinit([0,0,0,-2147484185^2,0]))
