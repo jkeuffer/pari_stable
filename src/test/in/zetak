@@ -1,0 +1,21 @@
+\p38
+allocatemem(20*10^6);
+znf=zetakinit(y^2-3);
+zetak(znf, 3)
+zetak(znf, 0)
+zetak(znf, 1/2+I)
+
+znf=zetakinit(y^2+3);
+zetak(znf, 3)
+zetak(znf, 0)
+zetak(znf, 1/2+I)
+
+znf=zetakinit(y^3-4*y+2);
+zetak(znf, 3)
+zetak(znf, 0)
+zetak(znf, 1/2+I)
+
+znf=zetakinit(y^5-3*y^2+y+2);
+zetak(znf, 3)
+zetak(znf, 0)
+zetak(znf, 1/2+I)

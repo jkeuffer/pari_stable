@@ -113,7 +113,7 @@ zeta_get_limx(long r1, long r2, long bit)
   p1 = divrr(mulur(N*(r+1), logr_abs(p2)), addsr(2*(r+1), gmul2n(A0,2)));
   return gerepileuptoleaf(av, divrr(addrs(p1, 1), powruhalf(p2, N)));
 }
-/* N_0 = floor( C_K / limx ) */
+/* N_0 = floor( C_K / limx ). Large */
 long
 zeta_get_N0(GEN C,  GEN limx)
 {
@@ -126,16 +126,23 @@ zeta_get_N0(GEN C,  GEN limx)
   avma = av; return itos(z);
 }
 
+/* even i such that limx^i ( (i\2)! )^r1 ( i! )^r2 ~ B. Small. */
 static long
 get_i0(long r1, long r2, GEN B, GEN limx)
 {
-  long imin = 1, imax   = 1400;
+  long imin = 1, imax = 1400;
   while(imax - imin >= 4)
   {
     long i = (imax + imin) >> 1;
     GEN t = powru(limx, i);
-    if (r1) t = mulrr(t, powru(mpfactr(i/2, DEFAULTPREC), r1));
-    if (r2) t = mulrr(t, powru(mpfactr(i  , DEFAULTPREC), r2));
+    if (!r1)      t = mulrr(t, powru(mpfactr(i  , DEFAULTPREC), r2));
+    else if (!r2) t = mulrr(t, powru(mpfactr(i/2, DEFAULTPREC), r1));
+    else {
+      GEN u1 = mpfactr(i  , DEFAULTPREC);
+      GEN u2 = mpfactr(i/2, DEFAULTPREC);
+      if (r1 == r2) t = mulrr(t, powru(mulrr(u1,u2), r1));
+      else t = mulrr(t, mulrr(powru(u1,r1), powru(u2,r2)));
+    }
     if (mpcmp(t, B) >= 0) imax = i; else imin = i;
   }
   return imax & ~1; /* make it even */
@@ -153,31 +160,57 @@ zeta_get_i0(long r1, long r2, long bit, GEN limx)
   avma = av; return i0;
 }
 
-GEN
-initzeta(GEN pol, long prec)
+/* sum(j=1, r-k+1, A[j] * B[j]), assumes k <= r and A[j],B[j] are 'mp' */
+INLINE GEN
+sumprod(GEN A, GEN B, long r, long k)
 {
-  GEN nfz, nf, gr2, gru, p1, p2, cst, coef, bnf = checkbnf_i(pol);
+  GEN s = signe(gel(A,1))? mpmul(gel(A,1), gel(B,1)): gen_0;
+  long j;
+  for (j=2; j<=r-k+1; j++)
+    if (signe(gel(A,j))) s = mpadd(s, mpmul(gel(A,j), gel(B,j)));
+  return s;
+}
+
+GEN
+initzeta(GEN T, long prec)
+{
+  GEN znf, nf, bnf, gr2, gru, p1, p2, cst, coef;
   GEN limx, resi,zet,C,coeflog,racpi,aij,tabj,colzero, tabcstn, tabcstni;
-  GEN c_even, ck_even, c_odd, ck_odd, serie_even, serie_odd, serie_exp, Pi;
+  GEN c_even, ck_even, c_odd, ck_odd, serie_even, serie_odd, serie_exp;
+  GEN VOID;
   long N0, i0, r1, r2, r, R, N, i, j, k, n, bit = bit_accuracy(prec) + 6;
+
+
   pari_sp av, av2;
   long court[] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3),0};
   stackzone *zone, *zone0, *zone1;
 
   /*************** residue & constants ***************/
-  nfz = cgetg(10,t_VEC);
-  if (bnf && nf_get_prec(bnf) >= prec)
-    bnf = gcopy(bnf);
-  else
-    bnf = Buchall(pol, 0, prec);
+  T = get_bnfpol(T, &bnf, &nf);
+  if (!nf) {
+    bnf = Buchall(T, 0, prec);
+    nf = bnf_get_nf(bnf);
+  }
+  else if (!bnf) {
+    if (nf_get_prec(nf) < prec) nf = nfnewprec_shallow(nf, prec);
+    bnf = Buchall(nf, 0, prec);
+  } else if (nf_get_prec(bnf) < prec) {
+    bnf = bnfnewprec(bnf, prec);
+    nf = bnf_get_nf(bnf);
+  }
+
   prec = (prec<<1) - 2;
-  Pi = mppi(prec); racpi = sqrtr(Pi);
+  racpi = sqrtr(mppi(prec));
+  /* all the above left on stack for efficiency */
 
   /* class number & regulator */
-  nf = bnf_get_nf(bnf); N = nf_get_degree(nf);
+  N = nf_get_degree(nf);
   nf_get_sign(nf, &r1, &r2);
   gr2 = gmael(nf,2,2);
   r = r1 + r2; R = r+2;
+
+  znf = cgetg(10,t_VEC);
+  VOID = cgetg(1, t_STR); /* unused value */
   av = avma;
   resi = gerepileupto(av,
            gdivgs(mpmul(shifti(bnf_get_no(bnf),r1), bnf_get_reg(bnf)),
@@ -269,16 +302,11 @@ initzeta(GEN pol, long prec)
   }
   aij = gerepilecopy(av, aij);
   if (DEBUGLEVEL>1) msgtimer("a(i,j)");
-  p1=cgetg(5,t_VEC);
-  gel(p1,1) = stoi(r1);
-  gel(p1,2) = stoi(r2);
-  gel(p1,3) = stoi(i0);
-  gel(p1,4) = bnf;
-  gel(nfz,1) = p1;
-  gel(nfz,2) = resi;
-  gel(nfz,5) = cst;
-  gel(nfz,6) = logr_abs(cst);
-  gel(nfz,7) = aij;
+  gel(znf,1) = mkvecsmall2(r1,r2);
+  gel(znf,2) = resi;
+  gel(znf,5) = cst;
+  gel(znf,6) = logr_abs(cst);
+  gel(znf,7) = aij;
 
   /************* Calcul du nombre d'ideaux de norme donnee *************/
   coef = dirzetak0(nf,N0); tabj = cgetg(N0+1,t_MAT);
@@ -302,19 +330,19 @@ initzeta(GEN pol, long prec)
       gel(tabj,i) = colzero;
   if (DEBUGLEVEL>1) msgtimer("a(n)");
 
-  coeflog=cgetg(N0+1,t_VEC); gel(coeflog,1) = gen_0;
+  coeflog=cgetg(N0+1,t_VEC); gel(coeflog,1) = VOID;
   for (i=2; i<=N0; i++)
     if (coef[i])
     {
       court[2] = i; p1 = glog(court,prec);
       setsigne(p1, -1); gel(coeflog,i) = p1;
     }
-    else gel(coeflog,i) = gen_0;
+    else gel(coeflog,i) = VOID;
   if (DEBUGLEVEL>1) msgtimer("log(n)");
 
-  gel(nfz,3) = tabj;
-  gel(nfz,8) = vecsmall_copy(coef);
-  gel(nfz,9) = coeflog;
+  gel(znf,3) = tabj;
+  gel(znf,8) = vecsmall_copy(coef);
+  gel(znf,9) = coeflog;
 
   /******************** Calcul des coefficients Cik ********************/
   C = cgetg(r+1,t_MAT);
@@ -322,22 +350,23 @@ initzeta(GEN pol, long prec)
   av2 = avma;
   for (i=1; i<=i0; i++)
   {
-    GEN aiji = gel(aij,i);
     stackzone *z;
     for (k=1; k<=r; k++)
     {
-      p1 = NULL;
-      for (n=1; n<=N0; n++)
+      GEN A = gel(aij,i) + k; /* A[j] = aij[i, j+k] */
+      GEN t = sumprod(A, gel(tabj,1), r, k);
+      /* n = 1 */
+      if (i > 1 && signe(t)) t = mpmul(t, gel(tabcstni,1));
+      for (n=2; n<=N0; n++)
 	if (coef[n])
-	{
-	  GEN tabjn = gel(tabj,n), p2 = mpmul(gel(aiji,1+k), gel(tabjn,1));
-	  for (j=2; j<=r-k+1; j++)
-	    p2 = mpadd(p2, mpmul(gel(aiji,j+k), gel(tabjn,j)));
-	  if (i > 1) p2 = mpmul(p2, gel(tabcstni,n));
-	  p1 = p1? mpadd(p1,p2): p2;
+	{ /* sum(j=1, r-k+1, aij[i,j+k] * tabj[n, j]) */
+          GEN s = sumprod(A, gel(tabj,n), r, k);
+          if (!signe(s)) continue;
+	  if (i > 1) s = mpmul(s, gel(tabcstni,n));
+	  t = mpadd(t,s);
 	}
-      togglesign(p1);
-      gcoeff(C,i,k) = gerepileuptoleaf(av2,p1);
+      togglesign(t);
+      gcoeff(C,i,k) = gerepileuptoleaf(av2,t);
       av2 = avma;
     }
     if (i > 1 && i < i0) {
@@ -350,190 +379,229 @@ initzeta(GEN pol, long prec)
       (void)switch_stack(z, 0);
     }
   }
-  gel(nfz,4) = C;
+  gel(znf,4) = C;
   if (DEBUGLEVEL>1) msgtimer("Cik");
   pari_free((void*)zone); pari_free((void*)zone1); pari_free((void*)zone0);
-  pari_free((void*)coef); return nfz;
+  pari_free((void*)coef); return znf;
 }
 
+static void
+znf_get_sign(GEN znf, long *r1, long *r2)
+{ GEN v = gel(znf,1); *r1 = v[1]; *r2 = v[2]; }
+
+/* s != 0,1 */
 GEN
-gzetakall(GEN nfz, GEN s, long flag, long prec2)
+slambdak(GEN znf, long s, long flag, long prec)
 {
-  GEN resi,C,cst,cstlog,coeflog,cs,coef;
-  GEN lambd,gammas,gammaunmoins,gammas2,gammaunmoins2,var1,var2;
-  GEN smoinun,unmoins,gexpro,gar,val,valm,valk,valkm;
-  long ts = typ(s), r1,r2,ru,i0,i,j,k,N0,sl,prec,bigprec;
-  pari_sp av = avma;
+  GEN resi, C, cst, cstlog, coeflog, cs, coef;
+  GEN lambd, gammas2, gammaunmoins2, var1, var2;
+  GEN gar, val, valm, valk, valkm;
+  long r1, r2, r, i0, i, k, N0;
 
-  if (typ(nfz)!=t_VEC || lg(nfz)!=10 || typ(nfz[1]) != t_VEC)
-    pari_err(talker,"not a zeta number field in zetakall");
-  if (! is_intreal_t(ts) && ts != t_COMPLEX && ts != t_FRAC)
-    pari_err(typeer,"gzetakall");
-  resi=gel(nfz,2); C=gel(nfz,4); cst=gel(nfz,5);
-  cstlog=gel(nfz,6); coef=gel(nfz,8); coeflog=gel(nfz,9);
-  r1 = itos(gmael(nfz,1,1));
-  r2 = itos(gmael(nfz,1,2)); ru = r1+r2;
-  i0 = itos(gmael(nfz,1,3)); N0 = lg(coef)-1;
-  bigprec = precision(cst); prec = prec2+1;
+  znf_get_sign(znf, &r1, &r2);
+  resi   = gel(znf,2);
+  C      = gel(znf,4); 
+  cst    = gel(znf,5);
+  cstlog = gel(znf,6);
+  coef   = gel(znf,8);
+  coeflog= gel(znf,9);
+  r1 = mael(znf,1,1);
+  r2 = mael(znf,1,2); r = r1+r2;
+  i0 = lg(gel(C,1))-1;
+  N0 = lg(coef)-1;
 
-  if (ts==t_COMPLEX && gcmp0(gel(s,2))) { s = gel(s,1); ts = typ(s); }
-  if (ts==t_REAL && !signe(gfrac(s))) { s = truncr(s); ts = t_INT; }
-  if (ts==t_INT)
+  if (s < 0 && (r2 || !odd(s))) s = 1 - s;
+
+  /* s >= 2 or s < 0 */
+  lambd = gdiv(resi, mulss(s, s-1));
+  gammas2 = ggamma(gmul2n(stoi(s),-1),prec);
+  gar = gpowgs(gammas2,r1);
+  cs = mpexp( mulrs(cstlog,s) );
+  val = stoi(s); valm = stoi(1 - s);
+  if (s < 0) /* r2 = 0 && odd(s) */
   {
-    sl = itos(s);
-    if (sl==1) pari_err(talker,"s = 1 is a pole (gzetakall)");
-    if (sl==0)
-    {
-      avma = av;
-      if (flag) pari_err(talker,"s = 0 is a pole (gzetakall)");
-      if (ru == 1) return r1? mkfrac(gen_m1, gen_2): gneg(resi);
-      return gen_0;
-    }
-    if (sl<0 && (r2 || !odd(sl)))
-    {
-      if (!flag) return gen_0;
-      s = subsi(1,s); sl = 1-sl;
-    }
-    unmoins=subsi(1,s);
-    lambd = gdiv(resi, mulis(s,sl-1));
-    gammas2=ggamma(gmul2n(s,-1),prec);
-    gar=gpowgs(gammas2,r1);
-    cs=gexp(gmul(cstlog,s),prec);
-    val=s; valm=unmoins;
-    if (sl < 0) /* r2 = 0 && odd(sl) */
-    {
-      gammaunmoins2 = ggamma(gmul2n(unmoins,-1),prec);
-      var1 = var2 = gen_1;
-      for (i=2; i<=N0; i++)
-	if (coef[i])
-	{
-	  gexpro=gexp(gmul(gel(coeflog,i),s),bigprec);
-	  var1 = gadd(var1,gmulsg(coef[i],gexpro));
-	  var2 = gadd(var2,gdivsg(coef[i],gmulsg(i,gexpro)));
-	}
-      lambd=gadd(lambd,gmul(gmul(var1,cs),gar));
-      lambd=gadd(lambd,gmul(gmul(var2,gdiv(cst,cs)),
-			    gpowgs(gammaunmoins2,r1)));
-      var1 = gen_0;
-      for (i=1; i<=i0; i+=2)
-      {
-	valk  = val;
-	valkm = valm;
-	for (k=1; k<=ru; k++)
-	{
-	  GEN c = gcoeff(C,i,k);
-	  var1 = mpadd(var1,mpdiv(c,valk )); valk  = mulii(val,valk);
-	  var1 = mpadd(var1,mpdiv(c,valkm)); valkm = mulii(valm,valkm);
-	}
-	val  = addis(val, 2);
-	valm = addis(valm,2);
-      }
-    }
-    else
-    {
-      GEN tabj=gel(nfz,3), aij=gel(nfz,7);
-
-      gar = gmul(gar,gpowgs(ggamma(s,prec),r2));
-      var1=var2=gen_0;
-      for (i=1; i<=N0; i++)
-	if (coef[i])
-	{
-	  gexpro=gexp(gmul(gel(coeflog,i),s),bigprec);
-	  var1 = gadd(var1,gmulsg(coef[i],gexpro));
-	  if (sl <= i0)
-	  {
-	    GEN t=gen_0;
-	    for (j=1; j<=ru+1; j++)
-	      t = gadd(t, gmul(gmael(aij,sl,j), gmael(tabj,i,j)));
-	    var2=gadd(var2,gdiv(t,gmulsg(i,gexpro)));
-	  }
-	}
-      lambd=gadd(lambd,gmul(gmul(var1,cs),gar));
-      lambd=gadd(lambd,gmul(var2,gdiv(cst,cs)));
-      var1 = gen_0;
-      for (i=1; i<=i0; i++)
-      {
-	valk  = val;
-	valkm = valm;
-	if (i == sl)
-	  for (k=1; k<=ru; k++)
-	  {
-	    GEN c = gcoeff(C,i,k);
-	    var1 = mpadd(var1,mpdiv(c,valk)); valk = mulii(val,valk);
-	  }
-	else
-	for (k=1; k<=ru; k++)
-	{
-	    GEN c = gcoeff(C,i,k);
-	    var1 = mpadd(var1,mpdiv(c,valk )); valk  = mulii(val,valk);
-	    var1 = mpadd(var1,mpdiv(c,valkm)); valkm = mulii(valm,valkm);
-	}
-	val  = addis(val,1);
-	valm = addis(valm,1);
-      }
-    }
-  }
-  else
-  {
-    GEN Pi = mppi(bigprec);
-    s = gtofp(s, bigprec);
-    smoinun = gsubgs(s,1);
-    unmoins = gneg(smoinun);
-    lambd = gdiv(resi,gmul(s,smoinun));
-    gammas = ggamma(s,prec);
-    gammas2= ggamma(gmul2n(s,-1),prec);
-    gar = gmul(gpowgs(gammas,r2),gpowgs(gammas2,r1));
-    cs = gexp(gmul(cstlog,s),prec);
-    var1 = gmul(Pi,s);
-    gammaunmoins = gdiv(Pi, gmul(gsin(var1,prec),gammas));
-    gammaunmoins2= gdiv(gmul(gmul(sqrtr(Pi),gpow(gen_2,smoinun,prec)),
-			     gammas2),
-			gmul(gcos(gmul2n(var1,-1),prec),gammas));
+    gammaunmoins2 = ggamma(gmul2n(valm,-1),prec); /* gamma((1-s) / 2) */
     var1 = var2 = gen_1;
     for (i=2; i<=N0; i++)
       if (coef[i])
       {
-	gexpro = gexp(gmul(gel(coeflog,i),s),bigprec);
-	var1 = gadd(var1,gmulsg(coef[i], gexpro));
-	var2 = gadd(var2,gdivsg(coef[i], gmulsg(i,gexpro)));
+        GEN gexpro = mpexp(mulrs(gel(coeflog,i),s));
+        var1 = gadd(var1, mulsr(coef[i],gexpro));
+        var2 = gadd(var2, divsr(coef[i],mulsr(i,gexpro)));
       }
     lambd = gadd(lambd,gmul(gmul(var1,cs),gar));
-    lambd = gadd(lambd,gmul(gmul(gmul(var2,gdiv(cst,cs)),
-	 		         gpowgs(gammaunmoins,r2)),
-			    gpowgs(gammaunmoins2,r1)));
-    val  = s;
-    valm = unmoins;
+    lambd = gadd(lambd,gmul(gmul(var2,gdiv(cst,cs)),
+                            gpowgs(gammaunmoins2,r1)));
     var1 = gen_0;
-    for (i=1; i<=i0; i++)
+    for (i=1; i<=i0; i+=2)
     {
       valk  = val;
       valkm = valm;
-      for (k=1; k<=ru; k++)
+      for (k=1; k<=r; k++)
       {
-	GEN c = gcoeff(C,i,k);
-	var1 = gadd(var1,gdiv(c,valk )); valk  = gmul(val, valk);
-	var1 = gadd(var1,gdiv(c,valkm)); valkm = gmul(valm,valkm);
+        GEN c = gcoeff(C,i,k);
+        var1 = mpadd(var1,mpdiv(c,valk )); valk  = mulii(val,valk);
+        var1 = mpadd(var1,mpdiv(c,valkm)); valkm = mulii(valm,valkm);
       }
-      if (r2)
+      val  = addis(val, 2);
+      valm = addis(valm,2);
+    }
+  }
+  else
+  {
+    GEN tabj = gel(znf,3), aij = gel(znf,7), A = gel(aij,s);
+    long n;
+
+    gar = gmul(gar,gpowgs(mpfactr(s-1,prec),r2)); /* x gamma(s)^r2 */
+    /* n = 1 */
+    var1 = gen_1;
+    var2 = (s <= i0)? sumprod(A, gel(tabj,1), r, 0): gen_0;
+    for (n=2; n<=N0; n++)
+      if (coef[n])
       {
-	val  = gaddgs(val, 1);
-	valm = gaddgs(valm,1);
+        GEN gexpro = mpexp( mulrs(gel(coeflog,n),s) );
+        var1 = mpadd(var1, mulsr(coef[n],gexpro));
+        if (s <= i0)
+        {
+          GEN t = sumprod(A, gel(tabj,n), r, 0);
+          if (!signe(t)) continue;
+          var2 = mpadd(var2, mpdiv(t, mulsr(n,gexpro)));
+        }
       }
+    lambd = gadd(lambd,gmul(gmul(var1,cs),gar));
+    lambd = gadd(lambd,gmul(var2,gdiv(cst,cs)));
+    var1 = gen_0;
+    for (n=1; n<=i0; n++)
+    {
+      valk  = val;
+      valkm = valm;
+      if (n == s)
+        for (k=1; k<=r; k++)
+        {
+          GEN c = gcoeff(C,n,k);
+          var1 = mpadd(var1,mpdiv(c,valk)); valk = mulii(val,valk);
+        }
       else
+      for (k=1; k<=r; k++)
       {
-	val  = gaddgs(val, 2);
-	valm = gaddgs(valm,2); i++;
+          GEN c = gcoeff(C,n,k);
+          var1 = mpadd(var1,mpdiv(c,valk )); valk  = mulii(val,valk);
+          var1 = mpadd(var1,mpdiv(c,valkm)); valkm = mulii(valm,valkm);
       }
+      val  = addis(val,1);
+      valm = addis(valm,1);
     }
   }
   lambd = gadd(lambd, var1);
   if (!flag) lambd = gdiv(lambd,gmul(gar,cs)); /* zetak */
-  if (gprecision(lambd) > prec2) lambd = gprec_w(lambd, prec2);
-  return gerepileupto(av, lambd);
+  return lambd;
+}
+
+/* s not an integer */
+static GEN
+cxlambdak(GEN znf, GEN s, long flag, long prec)
+{
+  GEN resi, C, cst, cstlog, coeflog, cs, coef;
+  GEN lambd, gammas, gammaunmoins, gammas2, gammaunmoins2, var1, var2;
+  GEN smoinun, unmoins, gar, val, valm, valk, valkm, Pi, sPi;
+  long r1, r2, r, i0, i, k, N0, bigprec;
+
+  znf_get_sign(znf, &r1, &r2);
+  resi   = gel(znf,2);
+  C      = gel(znf,4); 
+  cst    = gel(znf,5);
+  cstlog = gel(znf,6);
+  coef   = gel(znf,8);
+  coeflog= gel(znf,9);
+  r1 = mael(znf,1,1);
+  r2 = mael(znf,1,2); r = r1+r2;
+  i0 = lg(gel(C,1))-1;
+  N0 = lg(coef)-1;
+  bigprec = precision(cst);
+
+  Pi = mppi(bigprec);
+  s = gtofp(s, bigprec); sPi = gmul(s, Pi);
+  smoinun = gsubgs(s,1);
+  unmoins = gneg(smoinun);
+  lambd = gdiv(resi,gmul(s,smoinun));
+  gammas = ggamma(s,prec);
+  gammas2= ggamma(gmul2n(s,-1),prec);
+  gar = gmul(gpowgs(gammas,r2),gpowgs(gammas2,r1));
+  cs = gexp(gmul(cstlog,s),prec);
+  gammaunmoins = gdiv(Pi, gmul(gsin(sPi,prec),gammas));
+  gammaunmoins2= gdiv(gmul(gmul(sqrtr(Pi),gpow(gen_2,smoinun,prec)),
+                           gammas2),
+                      gmul(gcos(gmul2n(sPi,-1),prec),gammas));
+  var1 = var2 = gen_1;
+  for (i=2; i<=N0; i++)
+    if (coef[i])
+    {
+      GEN gexpro = gexp(gmul(gel(coeflog,i),s),bigprec);
+      var1 = gadd(var1,gmulsg(coef[i], gexpro));
+      var2 = gadd(var2,gdivsg(coef[i], gmulsg(i,gexpro)));
+    }
+  lambd = gadd(lambd,gmul(gmul(var1,cs),gar));
+  lambd = gadd(lambd,gmul(gmul(gmul(var2,gdiv(cst,cs)),
+                               gpowgs(gammaunmoins,r2)),
+                          gpowgs(gammaunmoins2,r1)));
+  val  = s;
+  valm = unmoins;
+  var1 = gen_0;
+  for (i=1; i<=i0; i++)
+  {
+    valk  = val;
+    valkm = valm;
+    for (k=1; k<=r; k++)
+    {
+      GEN c = gcoeff(C,i,k);
+      var1 = gadd(var1,gdiv(c,valk )); valk  = gmul(val, valk);
+      var1 = gadd(var1,gdiv(c,valkm)); valkm = gmul(valm,valkm);
+    }
+    if (r2)
+    {
+      val  = gaddgs(val, 1);
+      valm = gaddgs(valm,1);
+    }
+    else
+    {
+      val  = gaddgs(val, 2);
+      valm = gaddgs(valm,2); i++;
+    }
+  }
+  lambd = gadd(lambd, var1);
+  if (!flag) lambd = gdiv(lambd,gmul(gar,cs)); /* zetak */
+  return lambd;
 }
 
 GEN
-gzetak(GEN nfz, GEN s, long prec) { return gzetakall(nfz,s,0,prec); }
+gzetakall(GEN znf, GEN s, long flag, long prec)
+{
+  pari_sp av = avma;
+  GEN z;
 
+  if (typ(znf)!=t_VEC || lg(znf)!=10 || typ(znf[1]) != t_VECSMALL)
+    pari_err(talker,"not a zeta number field in zetakall");
+  if (isint(s, &s))
+  {
+    long ss = itos(s), r1, r2;
+    if (ss==1) pari_err(talker,"s = 1 is a pole (gzetakall)");
+    znf_get_sign(znf, &r1, &r2);
+    if (ss==0)
+    {
+      avma = av;
+      if (flag) pari_err(talker,"s = 0 is a pole (gzetakall)");
+      if (r1 + r2 > 1) return gen_0;
+      return r1? mkfrac(gen_m1, gen_2): gneg(gel(znf, 2));
+    }
+    if (!flag && ss < 0 && (r2 || !odd(ss))) return gen_0;
+    z = slambdak(znf, itos(s), flag, prec+1);
+  }
+  else 
+    z = cxlambdak(znf, s, flag, prec+1);
+  if (gprecision(z) > prec) z = gprec_w(z, prec);
+  return gerepileupto(av, z);
+}
+GEN
+gzetak(GEN nfz, GEN s, long prec) { return gzetakall(nfz,s,0,prec); }
 GEN
 glambdak(GEN nfz, GEN s, long prec) { return gzetakall(nfz,s,1,prec); }

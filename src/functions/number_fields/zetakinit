@@ -2,17 +2,18 @@ Function: zetakinit
 Section: number_fields
 C-Name: initzeta
 Prototype: Gp
-Help: zetakinit(x): compute number field information necessary to use zetak,
- where x is an irreducible polynomial.
+Help: zetakinit(bnf): compute number field information necessary to use zetak.
+ bnf may also be an irreducible polynomial.
 Doc: computes a number of initialization data
- concerning the number field defined by the polynomial $x$ so as to be able
- to compute the \idx{Dedekind} zeta and lambda functions (respectively
- $\kbd{zetak}(x)$ and $\kbd{zetak}(x,1)$). This function calls in particular
- the \kbd{bnfinit} program. The result is a 9-component vector $v$ whose
- components are very technical and cannot really be used by the user except
- through the \kbd{zetak} function. The only component which can be used if
- it has not been computed already is $v[1][4]$ which is the result of the
- \kbd{bnfinit} call.
+ concerning the number field associated to \kbd{bnf} so as to be able
+ to compute the \idx{Dedekind} zeta and lambda functions, respectively
+ $\kbd{zetak}(x)$ and $\kbd{zetak}(x,1)$, at the current real precision. If
+ you do not need the \kbd{bnfinit} data somewhere else, to may call it
+ with an irreducible polynomial instead of a \var{bnf}: it will call
+ \kbd{bnfinit} itself.
+
+ The result is a 9-component vector $v$ whose components are very technical
+ and cannot really be used except through the \kbd{zetak} function.
 
  This function is very inefficient and should be rewritten. It needs to
  computes millions of coefficients of the corresponding Dirichlet series if

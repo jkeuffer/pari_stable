@@ -107,6 +107,7 @@ This file lists the incompatible changes between Version 2.x and older versions
   - kill(z) has essentially the same effect as z = 'z [ it also kills addhelp
     messages attached to z, and works for aliases and installed functions too ]
   - removed optional flag to rnfconductor, use rnfisabelian.
+  - changed the "zetakinit" format: bnf no longer included
 
 * Specific to the PARI library:
 ===============================
