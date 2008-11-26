@@ -747,26 +747,40 @@ ZpX_reduced_resultant_fast(GEN f, GEN g, GEN p, long M)
 }
 
 
-/* *e a ZX, *de, *pp in Z */
+/* *e a ZX, *d, *z in Z, *d a power of p. Simplify e / d by cancelling a
+ * common factor p^v; if z!=NULL, update it by cancelling the same power of p */
 static void
-update_den(GEN *e, GEN *de, GEN *pp)
+update_den(GEN p, GEN *e, GEN *d, GEN *z)
 {
-  GEN ce = Q_content(*e);
-  if (!is_pm1(ce)) {
-    ce = gcdii(*de, ce);
-    if (!is_pm1(ce)) {
-      *de = diviiexact(*de, ce);
-      *e  = ZX_Z_divexact(*e, ce);
-      if (pp) *pp =diviiexact(*pp, ce);
+  GEN newe;
+  long ve = ZX_pvalrem(*e, p, &newe);
+  if (ve) {
+    GEN newd;
+    long vd = Z_pval(*d, p), v = minss(vd,ve);
+    if (v) {
+      if (v == vd)
+      { /* rare, denominator cancelled */
+        if (ve != v) newe = ZX_Z_mul(newe, powiu(p, ve - v));
+        newd = gen_1;
+        if (z) *z =diviiexact(*z, powiu(p, v));
+      }
+      else
+      { /* v = ve < vd, generic case */
+        GEN q = powiu(p, v);
+        newd = diviiexact(*d, q);
+        if (z) *z = diviiexact(*z, q);
+      }
+      *e = newe;
+      *d = newd;
     }
   }
 }
 
-/* SCAL * f o g mod (T,p), SCAL rational of NULL (= 1)  */
+/* SCAL * f o g mod (T,q), SCAL rational of NULL (= 1). q a power of p  */
 static GEN
-compmod(GEN f, GEN g, GEN T, GEN p, GEN SCAL)
+compmod(GEN p, GEN f, GEN g, GEN T, GEN q, GEN SCAL)
 {
-  GEN D = NULL, Dp, z, df, dg, q;
+  GEN D = NULL, z, df, dg, qD;
   f = Q_remove_denom(f, &df);
   if (typ(g) == t_VEC) /* pair [num,den] */
   { dg = gel(g,2); g = gel(g,1); }
@@ -774,17 +788,17 @@ compmod(GEN f, GEN g, GEN T, GEN p, GEN SCAL)
     g = Q_remove_denom(g, &dg);
   if (df) D = df;
   if (dg) D = mul_content(D, powiu(dg, degpol(f)));
-  q = D ? mulii(p, D): p;
-  if (dg) f = FpX_rescale(f, dg, q);
-  z = FpX_FpXQ_eval(f, g, T, q);
+  qD = D ? mulii(q, D): q;
+  if (dg) f = FpX_rescale(f, dg, qD);
+  z = FpX_FpXQ_eval(f, g, T, qD);
   if (!D) {
     if (SCAL) z = RgX_Rg_mul(z, SCAL);
     return z;
   }
-  update_den(&z, &D, NULL);
-  Dp = mulii(D,p);
+  update_den(p, &z, &D, NULL);
+  qD = mulii(D,q);
   if (SCAL) D = gdiv(D, SCAL);
-  return RgX_Rg_div( FpX_center(z, Dp, shifti(Dp,-1)), D );
+  return RgX_Rg_div( FpX_center(z, qD, shifti(qD,-1)), D );
 }
 
 static GEN
@@ -809,7 +823,7 @@ dbasis(GEN p, GEN f, long mf, GEN a, GEN U)
   for (i=1; i<n; i++)
   {
     if (i == dU)
-      ha = compmod(U, mkvec2(a,da), f, pdp, diviiexact(pd, p));
+      ha = compmod(p, U, mkvec2(a,da), f, pdp, diviiexact(pd, p));
     else
     {
       ha = FpXQ_mul(ha, a, f, D);
@@ -888,7 +902,7 @@ Decomp(decomp_t *S, long flag)
   de = powiu(dt, degpol(a));
   pr = mulii(p, de);
   e = FpX_FpXQ_eval(FpX_rescale(a, dt, pr), th, S->f, pr);
-  update_den(&e, &de, NULL);
+  update_den(p, &e, &de, NULL);
 
   pk = p; k = 1;
   /* E, (1 - E) tend to orthogonal idempotents in Zp[X]/(f) */
@@ -900,7 +914,7 @@ Decomp(decomp_t *S, long flag)
     de= mulii(de, sqri(de));
     D = mulii(pk, de);
     e = FpX_rem(e, centermod(S->f, D), D); /* e/de defined mod pk */
-    update_den(&e, &de, NULL);
+    update_den(p, &e, &de, NULL);
   }
   pr = powiu(p, r); /* required precision of the factors */
   ph = mulii(de, pr);
@@ -1020,7 +1034,7 @@ polsymmodp(GEN g, GEN p)
    a, chi in Zp[X]
    ns = Newton sums of chi */
 static GEN
-newtonsums(GEN a, GEN da, GEN chi, long c, GEN pp, GEN ns)
+newtonsums(GEN p, GEN a, GEN da, GEN chi, long c, GEN pp, GEN ns)
 {
   GEN va, pa, dpa, s;
   long j, k, n = degpol(chi);
@@ -1039,7 +1053,7 @@ newtonsums(GEN a, GEN da, GEN chi, long c, GEN pp, GEN ns)
       dpa = mulii(dpa, da);
       s = gdiv(s, dpa);
       if (typ(s) != t_INT) return NULL;
-      update_den(&pa, &dpa, &pp);
+      update_den(p, &pa, &dpa, &pp);
     }
 
     gel(va,j) = centermod(s, pp);
@@ -1135,7 +1149,7 @@ mycaract(decomp_t *S, GEN f, GEN a, GEN pp, GEN pdr)
   manage_cache(S, f, prec3);
 
   av = avma;
-  ns = newtonsums(a, d, f, n, prec2, S->ns);
+  ns = newtonsums(S->p, a, d, f, n, prec2, S->ns);
   if (!ns) return NULL;
   chi = newtoncharpoly(prec1, S->p, ns);
   if (!chi) return NULL;
@@ -1197,7 +1211,7 @@ getprime(decomp_t *S, GEN phi, GEN chip, GEN nup, long *Lp, long *Ep,
 
   q = powiu(S->p, s); qp = mulii(q, S->p);
   nup = FpXQ_pow(nup, utoipos(r), S->chi, qp);
-  return compmod(nup, phi, S->chi, qp, mkfrac(gen_1,q));
+  return compmod(S->p, nup, phi, S->chi, qp, mkfrac(gen_1,q));
 }
 
 static void
@@ -1206,7 +1220,7 @@ kill_cache(decomp_t *S) { S->precns = NULL; }
 /* S->phi := T o T0 mod (p, f) */
 static void
 composemod(decomp_t *S, GEN T, GEN T0) {
-  S->phi = compmod(T, T0, S->f, S->p, NULL);
+  S->phi = compmod(S->p, T, T0, S->f, S->p, NULL);
 }
 
 static int
@@ -1231,14 +1245,14 @@ update_phi(decomp_t *S, long *ptl, long flag)
     if (!equalii(prc, S->psc)) break;
 
     S->psc = gmax(S->psf, mulii(S->psc, S->p)); /* increase precision */
-    PHI = S->phi0? compmod(S->phi, S->phi0, S->f, S->psc, NULL): S->phi;
+    PHI = S->phi0? compmod(S->p, S->phi, S->phi0, S->f, S->psc, NULL): S->phi;
     PHI = gadd(PHI, ZX_Z_mul(X, mului(k, S->p)));
     S->chi = mycaract(S, S->f, PHI, S->psc, pdf);
   }
   psc = mulii(sqri(prc), S->p);
   S->chi = FpX_red(S->chi, psc);
   if (!PHI) /* ok above for k = 0 */
-    PHI = S->phi0? compmod(S->phi, S->phi0, S->f, psc, NULL): S->phi;
+    PHI = S->phi0? compmod(S->p, S->phi, S->phi0, S->f, psc, NULL): S->phi;
   S->phi = PHI;
 
   if (is_pm1(prc))
@@ -1315,7 +1329,7 @@ get_gamma(decomp_t *S, GEN x, long eq, long er)
     q = mulii(S->p, Dg);
     g = ZX_mul(g, FpXQ_pow(S->invnu, stoi(er), S->chi, q));
     g = FpX_rem(g, S->chi, q);
-    update_den(&g, &Dg, NULL);
+    update_den(S->p, &g, &Dg, NULL);
     g = centermod(g, mulii(S->p, Dg));
   }
   if (!is_pm1(Dg)) g = RgX_Rg_div(g, Dg);
