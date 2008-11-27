@@ -11,9 +11,18 @@ Doc: returns the row vector whose components are the partial quotients of the
  $[a_0,\dots,a_n]$ means that $x \approx a_0+1/(a_1+\dots+1/a_n)$. The
  output is normalized so that $a_n \neq 1$ (unless we also have $n = 0$).
 
- The number of partial quotients $n$ is limited to $nmax$. If $x$ is a real
- number, the expansion stops at the last significant partial quotient if
- $nmax$ is omitted. $x$ can also be a rational function or a power series.
+ The number of partial quotients $n+1$ is limited by \kbd{nmax}. If
+ \kbd{nmax} is omitted, the expansion stops at the last significant partial
+ quotient.
+ \bprog
+ ? \p19
+   realprecision = 19 significant digits
+ ? contfrac(Pi)
+ %1 = [3, 7, 15, 1, 292, 1, 1, 1, 2, 1, 3, 1, 14, 2, 1, 1, 2, 2]
+ ? contfrac(Pi,, 3)  \\ n = 2
+ %2 = [3, 7, 15]
+ @eprog\noindent
+ $x$ can also be a rational function or a power series.
 
  If a vector $b$ is supplied, the numerators are equal to the coefficients
  of $b$, instead of all equal to $1$ as above; more precisely, $x \approx
