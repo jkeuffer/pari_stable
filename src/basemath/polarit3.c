@@ -1165,7 +1165,6 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
       }
       Bp = FpM_invimage(MB,VQ,l);
       Bp = RgV_to_RgX(Bp,vq);
-      if (DEBUGLEVEL>=4) msgtimer("FpM_invimage");
     }
   }
   A = ZX_add(A,Ap);
@@ -1261,7 +1260,6 @@ FpX_factorff_irred(GEN P, GEN Q, GEN l)
   long i, vp = varn(P), vq = varn(Q);
 
   if (d==1) return mkcolcopy(P);
-  if (DEBUGLEVEL>=4) (void)timer2();
   if (lgefint(l)==3)
   {
     ulong p = l[2];
@@ -1269,7 +1267,6 @@ FpX_factorff_irred(GEN P, GEN Q, GEN l)
     FQ = Flxq_matrix_pow(Flxq_pow(polx_Flx(vq),l,Qx,p),nq,nq,Qx,p);
     av = avma;
     FP = Flxq_matrix_pow(Flxq_pow(polx_Flx(vp),l,Px,p),np,np,Px,p);
-    if (DEBUGLEVEL>=4) msgtimer("FpXQ_matrix_pows");
     FpX_ffintersect(P,Q,d,l,&SP,&SQ, Flm_to_ZM(FP), Flm_to_ZM(FQ));
 
     E = Flx_factorgalois(Px,p,d,vq, FP);
@@ -1282,7 +1279,6 @@ FpX_factorff_irred(GEN P, GEN Q, GEN l)
     MQ= Flxq_matrix_pow(ZX_to_Flx(SQ,p),nq,d,Qx,p);
     M = Flm_mul(MQ,M,p);
     M = Flm_mul(M,E,p);
-    if (DEBUGLEVEL>=4) msgtimer("factor_irred_mat");
     M = gerepileupto(av,M);
     V = cgetg(d+1,t_VEC);
     gel(V,1) = M;
@@ -1297,7 +1293,6 @@ FpX_factorff_irred(GEN P, GEN Q, GEN l)
     FQ = FpXQ_matrix_pow(FpXQ_pow(pol_x(vq),l,Q,l),nq,nq,Q,l);
     av = avma;
     FP = FpXQ_matrix_pow(FpXQ_pow(pol_x(vp),l,P,l),np,np,P,l);
-    if (DEBUGLEVEL>=4) msgtimer("FpXQ_matrix_pows");
     FpX_ffintersect(P,Q,d,l,&SP,&SQ,FP,FQ);
 
     E = FpX_factorgalois(P,l,d,vq,FP);
@@ -1311,7 +1306,6 @@ FpX_factorff_irred(GEN P, GEN Q, GEN l)
     M = FpM_mul(MQ,M,l);
     M = FpM_mul(M,E,l);
     M = gerepileupto(av,M);
-    if (DEBUGLEVEL>=4) msgtimer("factor_irred_mat");
     V = cgetg(d+1,t_VEC);
     gel(V,1) = M;
     for(i=2;i<=d;i++)
@@ -1320,7 +1314,6 @@ FpX_factorff_irred(GEN P, GEN Q, GEN l)
     for(i=1;i<=d;i++)
       gel(res,i) = RgM_to_RgXX(gel(V,i),vp,vq);
   }
-  if (DEBUGLEVEL>=4) msgtimer("factor_irred");
   return gerepilecopy(ltop,res);
 }
 
