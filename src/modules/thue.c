@@ -480,9 +480,10 @@ MiddleSols(GEN *pS, GEN bound, GEN roo, GEN poly, GEN rhs, long s, GEN c1)
   if (cmprr(bound, bndcf) < 0) return bound;
   /* divide by log((1+sqrt(5))/2)
    * 1 + ==> ceil
-   * 2 + ==> continued fraction is normalized if last entry is 1 */
-  nmax = 2 + (long)(gtodouble(mplog(bound)) / 0.4812118250596);
-  if (nmax < 3) nmax = 3;
+   * 2 + ==> continued fraction is normalized if last entry is 1
+   * 3 + ==> start at a0, not a1 */
+  nmax = 3 + (long)(gtodouble(logr_abs(bound)) / 0.4812118250596);
+  bound = floorr(bound);
 
   for (k = 1; k <= s; k++)
   {
@@ -494,15 +495,10 @@ MiddleSols(GEN *pS, GEN bound, GEN roo, GEN poly, GEN rhs, long s, GEN c1)
 
     for (j = 1; j < lg(t); j++)
     {
-      p = addii(mulii(p0, gel(t,j)), pm1);
-      pm1 = p0; p0 = p;
-
-      q = addii(mulii(q0, gel(t,j)), qm1);
-      qm1 = q0; q0 = q;
-
-      if (cmpir(q, bound) > 0) break;
-      if (DEBUGLEVEL >= 2)
-	fprintferr("Checking (\\pm %Ps, \\pm %Ps)\n",p, q);
+      p = addii(mulii(p0, gel(t,j)), pm1); pm1 = p0; p0 = p;
+      q = addii(mulii(q0, gel(t,j)), qm1); qm1 = q0; q0 = q;
+      if (cmpii(q, bound) > 0) break;
+      if (DEBUGLEVEL >= 2) fprintferr("Checking (+/- %Ps, +/- %Ps)\n",p, q);
 
       z = poleval(RgX_rescale(poly,q), p); /* = P(p/q) q^dep(P) */
       if (absi_equal(z, rhs))

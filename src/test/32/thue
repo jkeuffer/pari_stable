@@ -6,4 +6,5 @@
   *** May miss solutions of the norm equation.
 [[1, 1]]
 [[1, 0], [-1, 0], [1, 1], [0, 1], [-1, -1], [0, -1]]
-Total time spent: 1600
+[[5, 1]]
+Total time spent: 1764
