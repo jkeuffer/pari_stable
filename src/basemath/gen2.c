@@ -734,9 +734,9 @@ intdvd(GEN x, GEN y, GEN *z) { GEN r; *z = dvmdii(x,y,&r); return (r==gen_0); }
 /* x t_FRAC, p t_INT, return v_p(x) */
 static long
 ratval(GEN x, GEN p) {
-  long v = Z_pval(gel(x,1),p);
-  if (v) return v;
-  return - Z_pval(gel(x,2),p);
+  long v = Z_pval(gel(x,2),p);
+  if (v) return -v;
+  return Z_pval(gel(x,1),p);
 }
 
 long
