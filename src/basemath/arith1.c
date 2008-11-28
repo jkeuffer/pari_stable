@@ -747,10 +747,30 @@ polispower(GEN x, GEN K, GEN *pt)
 }
 
 long
+Z_ispowerall(GEN x, ulong k, GEN *pt)
+{
+  long s = signe(x);
+  ulong mask;
+  if (!s) { if (pt) *pt = gen_0; return 1; }
+  if (s > 0) {
+    if (k == 2) return Z_issquareall(x, pt);
+    if (k == 3) { mask = 1; return !!is_357_power(x, pt, &mask); }
+    if (k == 5) { mask = 2; return !!is_357_power(x, pt, &mask); }
+    if (k == 7) { mask = 4; return !!is_357_power(x, pt, &mask); }
+    return is_kth_power(x, k, pt, NULL);
+  }
+  if (!odd(k)) return 0;
+  if (Z_ispowerall(absi(x), k, pt))
+  {
+    if (pt) *pt = negi(*pt);
+    return 1;
+  };
+  return 0;
+}
+
+long
 ispower(GEN x, GEN K, GEN *pt)
 {
-  ulong k, mask;
-  long s;
   GEN z;
 
   if (!K) return gisanypower(x, pt);
@@ -759,25 +779,9 @@ ispower(GEN x, GEN K, GEN *pt)
   if (is_pm1(K)) { if (pt) *pt = gcopy(x); return 1; }
   switch(typ(x)) {
     case t_INT:
-      s = signe(x);
-      if (!s) { if (pt) *pt = gen_0; return 1; }
-      k = itou(K);
-      if (s > 0) {
-	if (k == 2) return Z_issquareall(x, pt);
-	if (k == 3) { mask = 1; return !!is_357_power(x, pt, &mask); }
-	if (k == 5) { mask = 2; return !!is_357_power(x, pt, &mask); }
-	if (k == 7) { mask = 4; return !!is_357_power(x, pt, &mask); }
-	return is_kth_power(x, k, pt, NULL);
-      } else {
-	if (!odd(k)) return 0;
-	if (ispower(absi(x), K, pt))
-	{
-	  if (pt) *pt = negi(*pt);
-	  return 1;
-	};
-	return 0;
-      }
-    case t_FRAC: {
+      return Z_ispowerall(x, itou(K), pt);
+    case t_FRAC:
+    {
       GEN a = gel(x,1), b = gel(x,2);
       if (pt) {
 	z = cgetg(3, t_FRAC);

@@ -488,28 +488,36 @@ MiddleSols(GEN *pS, GEN bound, GEN roo, GEN poly, GEN rhs, long s, GEN c1)
   for (k = 1; k <= s; k++)
   {
     GEN t = contfrac0(real_i(gel(roo,k)), NULL, nmax);
-    GEN p, q, pm1, qm1, p0, q0, z;
+    GEN pm1, qm1, p0, q0;
 
     pm1 = gen_0; p0 = gen_1;
     qm1 = gen_1; q0 = gen_0;
 
     for (j = 1; j < lg(t); j++)
     {
+      GEN p, q, z, Q, R;
       p = addii(mulii(p0, gel(t,j)), pm1); pm1 = p0; p0 = p;
       q = addii(mulii(q0, gel(t,j)), qm1); qm1 = q0; q0 = q;
       if (cmpii(q, bound) > 0) break;
       if (DEBUGLEVEL >= 2) fprintferr("Checking (+/- %Ps, +/- %Ps)\n",p, q);
 
       z = poleval(RgX_rescale(poly,q), p); /* = P(p/q) q^dep(P) */
-      if (absi_equal(z, rhs))
+      Q = dvmdii(rhs, z, &R);
+      if (R != gen_0) continue;
+      setabssign(Q);
+      if (Z_ispowerall(Q, d, &Q))
       {
+        if (!is_pm1(Q)) {
+          p = mulii(p, Q);
+          q = mulii(q, Q);
+        }
 	if (signe(z) == signe(rhs))
 	{
 	  add_sol(pS, p, q);
-	  if (d % 2 == 0) add_sol(pS, negi(p), negi(q));
+	  if (!odd(d)) add_sol(pS, negi(p), negi(q));
 	}
 	else
-	  if (d % 2 == 1) add_sol(pS, negi(p), negi(q));
+	  if (odd(d))  add_sol(pS, negi(p), negi(q));
       }
     }
     if (j == lg(t)) pari_err(bugparier, "Short continued fraction in thue");

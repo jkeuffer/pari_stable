@@ -146,6 +146,8 @@ BA117- Fix detection for ppc64 running in 32bit mode.
   120- wrong results in matsnf with t_POL entries [#901]
        minpoly(matrix(4,4,i,j,i/j)) -> x^3 - 4*x^2 + x
   121- thue(thueinit(x^3-100,1), 25) -> "Short continued fraction"
+  122- thue(thueinit(x^3-48, 320) -> missing solutions (similar problem
+       when LHS is a polynomial of degree d and RHS includes a d-th power).
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]

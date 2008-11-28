@@ -675,6 +675,7 @@ GEN     Z_chinese_post(GEN a, GEN b, GEN C, GEN U, GEN d);
 void    Z_chinese_pre(GEN A, GEN B, GEN *pC, GEN *pU, GEN *pd);
 long    Z_isanypower(GEN x, GEN *y);
 long    Z_isfundamental(GEN x);
+long    Z_ispowerall(GEN x, ulong k, GEN *pt);
 long    Z_issquareall(GEN x, GEN *pt);
 long    Zp_issquare(GEN a, GEN p);
 GEN     bestappr0(GEN x, GEN a, GEN b);
