@@ -2023,6 +2023,7 @@ long    perm_order(GEN perm);
 GEN     perm_pow(GEN perm, long exp);
 GEN     quotient_group(GEN C, GEN G);
 GEN     quotient_perm(GEN C, GEN p);
+GEN     trivialgroup(void);
 GEN     vecperm_orbits(GEN v, long n);
 int     vec_is1to1(GEN v);
 int     vec_isconst(GEN v);
