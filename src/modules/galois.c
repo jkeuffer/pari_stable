@@ -2406,8 +2406,8 @@ galoisbig(GEN pol, long prec)
     GEN r, z = cgetg(N + 1, t_VEC);
     for (i = 1; i <= N; i++)
     {
-      gel(z,i) = cgetg(i+2,t_VECSMALL);
-      mael(z,i,1)=0;
+      GEN v = cgetg(i+2,t_VECSMALL);
+      gel(z,i) = v; v[1] = 0;
     }
     BR.coef = z;
     BR.p = pol;
