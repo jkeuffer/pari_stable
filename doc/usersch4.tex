@@ -1243,26 +1243,25 @@ $(n,d) = 1$ (see \tet{gred_frac2}).
 \subsec{Type \typ{FFELT} (finite field element)}:%
 \kbdsidx{t_FFELT}\sidx{finite field element} (Experimental)
 
-Components of this type should normaly not be accessed directly.
-Instead, finite field elements should be created using \kbd{ffgen}.
+Components of this type should normaly not be accessed directly. Instead,
+finite field elements should be created using \kbd{ffgen}.
 
-This type has a second codeword \kbd{z[1]} which determines the storage format
-of the element.
+\noindent The second codeword \kbd{z[1]} determines the storage format of the
+element, among
 
-The format \tet{t_FF_FpXQ}:\kbd{A=z[2]} and \kbd{T=z[3]} are \kbd{FpX},
+\item \tet{t_FF_FpXQ}: \kbd{A=z[2]} and \kbd{T=z[3]} are \kbd{FpX},
 \kbd{p=z[4]} is a \typ{INT}, where $p$ is a prime number, $T$ is irreducible
-modulo $p$, and the degree of $A$ is strictly less than the degree of $T$.
+modulo $p$, and $\deg A < \deg T$.
 This represents the element $A\pmod{T}$ in $\F_p[X]/T$.
 
-The format \tet{t_FF_Flxq}:\kbd{A=z[2]} and \kbd{T=z[3]} are \kbd{Flx},
-\kbd{l=z[4]} is a \typ{INT}, where $l$ prime number, $T$ is irreducible
-modulo $p$, and the degree of $A$ is strictly less than the degree of $T$.
-This represents the element $A\pmod{T}$ in $\F_l[X]/T$.
+\item \tet{t_FF_Flxq}: \kbd{A=z[2]} and \kbd{T=z[3]} are \kbd{Flx},
+\kbd{l=z[4]} is a \typ{INT}, where $l$ is a prime number, $T$ is irreducible
+modulo $l$, and $\deg A < \deg T$ This represents the element $A\pmod{T}$ in
+$\F_l[X]/T$.
 
-The format \tet{t_FF_F2xq}:\kbd{A=z[2]} and \kbd{T=z[3]} are \kbd{F2x},
-\kbd{l=z[4]} is the \typ{INT} $2$, $T$ is irreducible
-modulo $2$, and the degree of $A$ is strictly less than the degree of $T$.
-This represents the element $A\pmod{T}$ in $\F_2[X]/T$.
+\item \tet{t_FF_F2xq}: \kbd{A=z[2]} and \kbd{T=z[3]} are \kbd{F2x},
+\kbd{l=z[4]} is the \typ{INT} $2$, $T$ is irreducible modulo $2$, and
+$\deg A < \deg T$. This represents the element $A\pmod{T}$ in $\F_2[X]/T$.
 
 \subsec{Type \typ{COMPLEX} (complex number)}:%
 \kbdsidx{t_COMPLEX}\sidx{complex number}
