@@ -27,7 +27,7 @@ _getFF(GEN x, GEN *T, GEN *p, ulong *pp)
 {
   *T=gel(x,3);
   *p=gel(x,4);
-  *pp=mael(x,4,2);
+  *pp=(*p)[2];
 }
 
 INLINE GEN
@@ -43,7 +43,6 @@ _checkFF(GEN x, GEN y, const char *s)
   if (x[1]!=y[1] || !equalii(gel(x,4),gel(y,4)) || !gequal(gel(x,3),gel(y,3)))
     pari_err(operi,s,x,y);
 }
-
 
 INLINE GEN
 _mkFF(GEN x, GEN z, GEN r)
@@ -97,12 +96,13 @@ FF_cmp0(GEN x)
 int
 FF_cmp1(GEN x)
 {
+  GEN A = gel(x,2);
   switch(x[1])
   {
   case t_FF_FpXQ:
-    return gcmp1(gel(x,2));
+    return degpol(A)==0 && gcmp1(gel(A,2));
   default:
-    return degpol(gel(x,2))==0 && mael(x,2,2)==1;
+    return degpol(A)==0 && A[2]==1;
   }
 }
 
@@ -347,20 +347,17 @@ GEN
 FF_Z_mul(GEN x, GEN y)
 {
   ulong pp;
-  GEN r, T, p, z=_initFF(x,&T,&p,&pp);
+  GEN r, T, p, A = gel(x,2), z=_initFF(x,&T,&p,&pp);
   switch(x[1])
   {
-  case t_FF_FpXQ:
-    {
-      pari_sp av=avma;
-      r=gerepileupto(av,FpX_Fp_mul(gel(x,2),modii(y,p),p));
-      break;
-    }
+  case t_FF_FpXQ: /* modii(y,p) left on stack for efficiency */
+    r = FpX_Fp_mul(A, modii(y,p),p);
+    break;
   case t_FF_F2xq:
-    r=mpodd(y)?vecsmall_copy(gel(x,2)):zero_Flx(mael(x,2,1));
+    r = mpodd(y)? vecsmall_copy(A): zero_Flx(A[1]);
     break;
   default:
-    r=Flx_Fl_mul(gel(x,2),umodiu(y,pp),pp);
+    r = Flx_Fl_mul(A, umodiu(y,pp), pp);
   }
   return _mkFF(x,z,r);
 }
@@ -369,19 +366,18 @@ GEN
 FF_Z_Z_muldiv(GEN x, GEN a, GEN b)
 {
   ulong pp;
-  GEN r, T, p, z=_initFF(x,&T,&p,&pp);
-  pari_sp av=avma;
+  GEN r, T, p, A = gel(x,2), z=_initFF(x,&T,&p,&pp);
   switch(x[1])
   {
-  case t_FF_FpXQ:
-    r=gerepileupto(av,FpX_Fp_mul(gel(x,2),Fp_div(a,b,p),p));
+  case t_FF_FpXQ: /* Fp_div(a,b,p) left on stack for efficiency */
+    r = FpX_Fp_mul(A, Fp_div(a,b,p), p);
     break;
   case t_FF_F2xq:
-    if (mpodd(b)==0) pari_err(gdiver);
-    r=mpodd(a)?vecsmall_copy(gel(x,2)):zero_Flx(mael(x,2,1));
+    if (!mpodd(b)) pari_err(gdiver);
+    r = mpodd(a)? vecsmall_copy(A): zero_Flx(A[1]);
     break;
   default:
-    r=gerepileupto(av,Flx_Fl_mul(gel(x,2),Fl_div(umodiu(a,pp),umodiu(b,pp),pp),pp));
+    r = Flx_Fl_mul(A, Fl_div(umodiu(a,pp),umodiu(b,pp),pp),pp);
   }
   return _mkFF(x,z,r);
 }
@@ -412,28 +408,27 @@ GEN
 FF_mul2n(GEN x, long n)
 {
   ulong pp;
-  GEN r, T, p, z=_initFF(x,&T,&p,&pp);
-  pari_sp av=avma;
+  GEN r, T, p, A = gel(x,2), z=_initFF(x,&T,&p,&pp);
   switch(x[1])
   {
   case t_FF_FpXQ:
     {
-      GEN p1;
+      GEN p1; /* left on stack for efficiency */
       if (n>0) p1=remii(int2n(n),p);
       else p1=Fp_inv(remii(int2n(-n),p),p);
-      r=gerepileupto(av,FpX_Fp_mul(gel(x,2),p1,p));
+      r = FpX_Fp_mul(A, p1, p);
     }
     break;
   case t_FF_F2xq:
     if (n<0) pari_err(gdiver);
-    r=n==0?vecsmall_copy(gel(x,2)):zero_Flx(mael(x,2,1));
+    r = n==0? vecsmall_copy(A): zero_Flx(A[1]);
     break;
   default:
     {
       ulong l1;
-      if (n>0) l1=umodiu(int2n(n),pp);
-      else l1=Fl_inv(umodiu(int2n(-n),pp),pp);
-      r=gerepileupto(av,Flx_Fl_mul(gel(x,2),l1,pp));
+      if (n>0) l1 = umodiu(int2n(n),pp);
+      else l1 = Fl_inv(umodiu(int2n(-n),pp),pp);
+      r = Flx_Fl_mul(A,l1,pp);
     }
   }
   return _mkFF(x,z,r);
@@ -484,19 +479,19 @@ GEN
 Z_FF_div(GEN n, GEN x)
 {
   ulong pp;
-  GEN r, T, p, z=_initFF(x,&T,&p,&pp);
+  GEN r, T, p, A = gel(x,2), z=_initFF(x,&T,&p,&pp);
   pari_sp av=avma;
   switch(x[1])
   {
   case t_FF_FpXQ:
-    r=gerepileupto(av,FpX_Fp_mul(FpXQ_inv(gel(x,2),T,p),modii(n,p),p));
+    r = gerepileupto(av,FpX_Fp_mul(FpXQ_inv(A,T,p),modii(n,p),p));
     break;
   case t_FF_F2xq:
-    r=F2xq_inv(gel(x,2),T); /*Check for division by 0*/
-    if(!mpodd(n)) {avma=av; r=zero_Flx(mael(x,2,1));}
+    r = F2xq_inv(A,T); /*Check for division by 0*/
+    if(!mpodd(n)) { avma = av; r = zero_Flx(A[1]); }
     break;
   default:
-    r=gerepileupto(av,Flx_Fl_mul(Flxq_inv(gel(x,2),T,pp),umodiu(n,pp),pp));
+    r = gerepileupto(av, Flx_Fl_mul(Flxq_inv(A,T,pp),umodiu(n,pp),pp));
   }
   return _mkFF(x,z,r);
 }
@@ -895,45 +890,42 @@ FFX_factor(GEN P, GEN x)
 GEN
 ffgen(GEN T, long v)
 {
-  GEN ff=cgetg(5,t_FFELT);
-  GEN p,junk;
-  long ljunk, d = degpol(T);
-  if (typ(T) != t_POL || d < 1) pari_err(typeer,"ffgen");
-  if (RgX_type(T,&p,&junk,&ljunk)!=t_INTMOD) pari_err(typeer,"ffgen");
-  if (v<0) v = varn(T);
+  GEN A, p, ff;
+  long d;
+  if (typ(T) != t_POL) pari_err(typeer,"ffgen");
+  d = degpol(T); p = NULL;
+  if (d < 1 || !is_FpX(&T, &p)) pari_err(typeer,"ffgen");
+  ff = cgetg(5,t_FFELT);
+  if (v < 0) v = varn(T);
   if (lgefint(p)==3)
   {
-    ulong pp=p[2];
-    long sv=evalvarn(v);
+    ulong pp = p[2];
+    long sv = evalvarn(v);
     if (pp==2)
     {
-      ff[1]=t_FF_F2xq;
-      gel(ff,3)=ZX_to_F2x(lift(T));
-      mael(ff,3,1)=sv;
-      gel(ff,2)=polx_F2x(sv);
-      if (d == 1) gel(ff,2) = F2x_rem(gel(ff,2), gel(ff,3));
-      gel(ff,4)=gen_2;
+      ff[1] = t_FF_F2xq;
+      T = ZX_to_F2x(T); T[1] = sv;
+      A = polx_F2x(sv); if (d == 1) A = F2x_rem(A, T);
+      p = gen_2;
     }
     else
     {
-      ff[1]=t_FF_Flxq;
-      gel(ff,2)=polx_Flx(sv);
-      gel(ff,3)=ZX_to_Flx(lift(T),pp);
-      mael(ff,3,1)=sv;
-      if (d == 1) gel(ff,2) = Flx_rem(gel(ff,2), gel(ff,3), pp);
-      gel(ff,4)=icopy(p);
+      ff[1] = t_FF_Flxq;
+      T = ZX_to_Flx(T,pp); T[1] = sv;
+      A = polx_Flx(sv); if (d == 1) A = Flx_rem(A, gel(ff,3), pp);
+      p = icopy(p);
     }
   }
   else
   {
-    ff[1]=t_FF_FpXQ;
-    gel(ff,2)=pol_x(v);
-    gel(ff,3)=lift(T);
-    setvarn(gel(ff,3),v);
-    if (d == 1) gel(ff,2) = FpX_rem(gel(ff,2), gel(ff,3), p);
-    gel(ff,4)=icopy(p);
+    ff[1] = t_FF_FpXQ;
+    T = ZX_copy(T); setvarn(T,v);
+    A = pol_x(v); if (d == 1) A = FpX_rem(A, T, p);
+    p = icopy(p);
   }
-  return ff;
+  gel(ff,2) = A;
+  gel(ff,3) = T;
+  gel(ff,4) = p; return ff;
 }
 
 GEN
