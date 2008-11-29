@@ -390,7 +390,7 @@ znf_get_sign(GEN znf, long *r1, long *r2)
 { GEN v = gel(znf,1); *r1 = v[1]; *r2 = v[2]; }
 
 /* s != 0,1 */
-GEN
+static GEN
 slambdak(GEN znf, long s, long flag, long prec)
 {
   GEN resi, C, cst, cstlog, coeflog, cs, coef;
