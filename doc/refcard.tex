@@ -840,38 +840,35 @@ A number field $K$ is given by a monic irreducible $f\in\ZZ[X]$.\hfill\break
 \key{structure of $(\ZZ_K/m)^*$}{\var{bnr}.zkst}
 \endindentedkeys
 
-\section{Simple Arithmetic Invariants (nf)}
-Elements are rational numbers, polynomials, polmods, or column vectors (on
-integral basis \kbd{\var{nf}.zk}).\hfill\break
+\section{Basic Number Field Arithmetic (nf)}
+Elements are \typ{INT}, \typ{FRAC}, \typ{POL}, \typ{POLMOD}, or \typ{COL} (on
+integral basis \kbd{\var{nf}.zk}). Basic operations (prefix \kbd{nfelt}):
+$($\kbd{nfelt}$)$\kbd{add}, \kbd{mul}, \kbd{pow}, \kbd{div}, \kbd{diveuc},
+\kbd{mod}, \kbd{divrem}, \kbd{val}, \kbd{trace}, \kbd{norm} \hfill\break
+%
+\li{express $x$ on integer basis}{nfalgtobasis$(\var{nf},x)$}
+\li{express element\ $x$ as a polmod}{nfbasistoalg$(\var{nf},x)$}
+\li{reverse polmod $a=A(X)\mod T(X)$}{modreverse$(a)$}
+
 \li{integral basis of field def. by $f=0$}{nfbasis$(f)$}
 \li{field discriminant of field $f=0$}{nfdisc$(f)$}
-\li{reverse polmod $a=A(X)\mod T(X)$}{modreverse$(a)$}
 \li{Galois group of field $f=0$, $\deg f\le 11$}{polgalois$(f)$}
 \li{smallest poly defining $f=0$}{polredabs$(f,\{\fl\})$}
 \li{small polys defining subfields of $f=0$}{polred$(f,\{\fl\},\{p\})$}
-\li{small polys defining suborders of $f=0$}{polredord$(f)$}
 \li{poly of degree $\le k$ with root $x\in\CC$}{algdep$(x,k)$}
 \li{small linear rel.\ on coords of vector $x$}{lindep$(x)$}
 \li{are fields $f=0$ and $g=0$ isomorphic?}{nfisisom$(f,g)$}
 \li{is field $f=0$ a subfield of $g=0$?}{nfisincl$(f,g)$}
 \li{compositum of $f=0$, $g=0$}{polcompositum$(f,g,\{\fl\})$}
+\li{subfields (of degree $d$) of \var{nf}}{nfsubfields$(\var{nf},\{d\})$}
 %
-\li{basic element operations (prefix \kbd{nfelt}):}{}
-\leavevmode\strut\hskip1em
-$($\kbd{nfelt}$)$\kbd{mul}, \kbd{pow}, \kbd{div}, \kbd{diveuc},
-\kbd{mod}, \kbd{divrem}, \kbd{val}
-\hfill\break
-%
-\li{express $x$ on integer basis}{nfalgtobasis$(\var{nf},x)$}
-\li{express element\ $x$ as a polmod}{nfbasistoalg$(\var{nf},x)$}
-\li{quadratic Hilbert symbol (at $p$)}{nfhilbert$(\var{nf},a,b,\{p\})$}
+\li{roots of unity in \var{nf}}{nfrootsof1$(\var{nf}\,)$}
 \li{roots of $g$ belonging to \var{nf}}{nfroots$(\{\var{nf}\},g)$}
 \li{factor $g$ in \var{nf}}{nffactor$(\var{nf},g)$}
 \li{factor $g$ mod prime $pr$ in \var{nf}}{nffactormod$(\var{nf},g,pr)$}
-\li{number of roots of unity in \var{nf}}{nfrootsof1$(\var{nf}\,)$}
 \li{conjugates of a root $\theta$ of \var{nf}}{nfgaloisconj$(\var{nf},\{\fl\})$}
 \li{apply Galois automorphism $s$ to $x$}{nfgaloisapply$(\var{nf},s,x)$}
-\li{subfields (of degree $d$) of \var{nf}}{nfsubfields$(\var{nf},\{d\})$}
+\li{quadratic Hilbert symbol (at $p$)}{nfhilbert$(\var{nf},a,b,\{p\})$}
 %
 \subsec{Dedekind Zeta Function $\zeta_K$}
 \li{$\zeta_K$ as Dirichlet series, $N(I)<b$}{dirzetak$(\var{nf},b)$}

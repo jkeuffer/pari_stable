@@ -476,7 +476,7 @@ BA 92- make test-xxx: trap SIGINT in benching script to exit on <C-C>
        nfM_to_FqM, FqM_to_nfM, nfX_to_FqX, FqX_to_nfX
        zk_multable, zk_scalar_or_multable, multable, tablemul, tablemul_ei,
        tablemul_ei_ej, tablemulvec, tablesqr, ei_multable.
-       nfordmax, nfarchstar (was zarchstar), nfadd, nfsign,
+       nfordmax, nfarchstar (was zarchstar), nfadd, nfsign, nfnorm, nftrace
        nfsign_arch, nfsign_units, nfsign_from_logarch, Buchquad, Buchall,
        Idealstar, idealaddtoone_i, idealcoprimefact,
        nfinvmodideal, nfpowmodideal, idealsqr, nfpow_u
@@ -536,6 +536,7 @@ BA 35- direct implementation of ZX_mul, ZX_sqr using Kronecker's trick + mulii
    37- default 'recover'
    38- more possibilities to draw "random" elements in natural sets using
        random(), e.g. finite fields, elliptic curve over finite field.
+   39- GP routines nfeltadd, nfelttrace, nfeltnorm
 
   Removed
     1- obsolete GP functions printp, printp1. Either replace them by

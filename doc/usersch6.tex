@@ -354,6 +354,10 @@ return their result in \typ{COL} form.
 maximal ideal $\goth{p}$ associated to the \var{prid} \kbd{pr}.
 Returns \kbd{LONG\_MAX} is $x$ is $0$.
 
+\fun{GEN}{nfnorm}{GEN nf,GEN x} absolute norm of $x$
+
+\fun{GEN}{nftrace}{GEN nf,GEN x} absolute trace of $x$
+
 The following three functions implement trivially functionnalities akin to
 Euclidean division, for which we currently have no real use. Of course, even if
 the number field is actually Euclidean, these do not in general implement a

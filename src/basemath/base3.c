@@ -145,6 +145,27 @@ zk_scalar_or_multable(GEN nf, GEN x)
   return (typ(x) == t_COL)? zk_multable(nf, x): x;
 }
 
+GEN 
+nftrace(GEN nf, GEN x)
+{
+  pari_sp av = avma;
+  nf = checknf(nf);
+  x = nf_to_scalar_or_basis(nf, x);
+  x = (typ(x) == t_COL)? RgV_dotproduct(x, gel(nf_get_Tr(nf),1))
+                       : gmulgs(x, nf_get_degree(nf));
+  return gerepileupto(av, x);
+} 
+GEN 
+nfnorm(GEN nf, GEN x)
+{
+  pari_sp av = avma;
+  nf = checknf(nf);
+  x = nf_to_scalar_or_alg(nf, x);
+  x = (typ(x) == t_POL)? RgXQ_norm(x, nf_get_pol(nf))
+                       : gpowgs(x, nf_get_degree(nf));
+  return gerepileupto(av, x);
+}
+
 /* sum of x and y in nf */
 GEN
 nfadd(GEN nf, GEN x, GEN y)
