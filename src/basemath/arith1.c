@@ -2742,11 +2742,8 @@ bestappr0(GEN x, GEN a, GEN b)
 static GEN
 get_quad(GEN f, GEN pol, long r)
 {
-  GEN y = cgetg(4,t_QUAD), c = gel(f,2), p1 = gel(c,1), q1 = gel(c,2);
-
-  gel(y,1) = pol;
-  gel(y,2) = r? subii(p1,q1): p1;
-  gel(y,3) = q1; return y;
+  GEN p1 = gcoeff(f,1,2), q1 = gcoeff(f,2,2);
+  return mkquad(pol, r? subii(p1,q1): p1, q1);
 }
 
 /* replace f by f * [a,1; 1,0] */
@@ -2767,31 +2764,40 @@ GEN
 quadunit(GEN x)
 {
   pari_sp av = avma, av2, lim;
-  long r, flp, flq;
-  GEN pol, y, a, u, v, u1, v1, sqd, f;
+  GEN pol, y, a, u, v, sqd, f;
+  long r;
 
   check_quaddisc_real(x, &r, "quadunit");
+  pol = quadpoly(x);
   sqd = sqrti(x); av2 = avma; lim = stack_lim(av2,2);
   a = shifti(addsi(r,sqd),-1);
-  f = mkmat2(mkcol2(a, gen_1), mkcol2(gen_1, gen_0));
+  f = mkmat2(mkcol2(a, gen_1), mkcol2(gen_1, gen_0)); /* [a,0; 1,0] */
   u = stoi(r); v = gen_2;
   for(;;)
   {
-    u1 = subii(mulii(a,v),u);       flp = equalii(u,u1); u = u1;
-    v1 = divii(subii(x,sqri(u)),v); flq = equalii(v,v1); v = v1;
-    if (flq) break; a = divii(addii(sqd,u),v);
-    if (flp) break; update_f(f,a);
+    GEN u1, v1;
+    u1 = subii(mulii(a,v),u);
+    v1 = divii(subii(x,sqri(u1)),v);
+    if ( equalii(v,v1) ) {
+      y = get_quad(f,pol,r);
+      update_f(f,a);
+      y = gdiv(get_quad(f,pol,r), gconj(y));
+      break;
+    }
+    a = divii(addii(sqd,u1), v1);
+    if ( equalii(u,u1) ) {
+      y = get_quad(f,pol,r);
+      y = gdiv(y, gconj(y));
+      break;
+    }
+    update_f(f,a);
+    u = u1; v = v1;
     if (low_stack(lim, stack_lim(av2,2)))
     {
       if(DEBUGMEM>1) pari_warn(warnmem,"quadunit");
       gerepileall(av2,4, &a,&f,&u,&v);
     }
   }
-  pol = quadpoly(x);
-  y = get_quad(f,pol,r);
-  if (!flq) v1 = y; else { update_f(f,a); v1 = get_quad(f,pol,r); }
-
-  y = gdiv(v1, gconj(y));
   if (signe(y[3]) < 0) y = gneg(y);
   return gerepileupto(av, y);
 }
@@ -2800,40 +2806,48 @@ GEN
 quadregulator(GEN x, long prec)
 {
   pari_sp av = avma, av2, lim;
-  long r, fl, rexp;
-  GEN reg, rsqd, y, u, v, u1, v1, sqd;
+  GEN R, rsqd, u, v, sqd;
+  long r, Rexpo;
 
   check_quaddisc_real(x, &r, "quadregulator");
   sqd = sqrti(x);
   rsqd = gsqrt(x,prec);
-  rexp = 0; reg = stor(2, prec);
+  Rexpo = 0; R = real2n(1, prec); /* = 2 */
   av2 = avma; lim = stack_lim(av2,2);
   u = stoi(r); v = gen_2;
   for(;;)
   {
-    u1 = subii(mulii(divii(addii(u,sqd),v), v), u);
-    v1 = divii(subii(x,sqri(u1)),v); fl = equalii(v,v1);
-    if (fl || equalii(u,u1)) break;
-    reg = mulrr(reg, divri(addir(u1,rsqd),v));
-    rexp += expo(reg); setexpo(reg,0);
+    GEN u1 = subii(mulii(divii(addii(u,sqd),v), v), u);
+    GEN v1 = divii(subii(x,sqri(u1)),v);
+    if (equalii(v,v1))
+    {
+      R = sqrr(R); setexpo(R,expo(R)-1);
+      R = mulrr(R, divri(addir(u1,rsqd),v));
+      break;
+    }
+    if (equalii(u,u1))
+    {
+      R = sqrr(R); setexpo(R,expo(R)-1);
+      break;
+    }
+    R = mulrr(R, divri(addir(u1,rsqd),v));
+    Rexpo += expo(R); setexpo(R,0);
     u = u1; v = v1;
-    if (rexp & ~EXPOBITS) pari_err(talker,"exponent overflow in quadregulator");
+    if (Rexpo & ~EXPOBITS) pari_err(talker,"exponent overflow in quadregulator");
     if (low_stack(lim, stack_lim(av2,2)))
     {
       if(DEBUGMEM>1) pari_warn(warnmem,"quadregulator");
-      gerepileall(av2,3, &reg,&u,&v);
+      gerepileall(av2,3, &R,&u,&v);
     }
   }
-  reg = sqrr(reg); setexpo(reg,expo(reg)-1);
-  if (fl) reg = mulrr(reg, divri(addir(u1,rsqd),v));
-  y = logr_abs(divri(reg,v));
-  if (rexp)
+  R = logr_abs(divri(R,v));
+  if (Rexpo)
   {
-    u1 = mulsr(rexp, mplog2(prec));
-    setexpo(u1, expo(u1)+1);
-    y = addrr(y,u1);
+    GEN t = mulsr(Rexpo, mplog2(prec));
+    setexpo(t, expo(t)+1);
+    R = addrr(R,t);
   }
-  return gerepileupto(av, y);
+  return gerepileuptoleaf(av, R);
 }
 
 /*************************************************************************/
