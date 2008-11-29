@@ -1,4 +1,4 @@
-\p38
+default(realprecision,38);
 allocatemem(20*10^6);
 znf=zetakinit(y^2-3);
 zetak(znf, 3)
