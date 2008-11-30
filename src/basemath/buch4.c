@@ -268,24 +268,29 @@ static GEN
 repres(GEN nf, GEN pr)
 {
   long i, j, k, f = pr_get_f(pr), p, pf, pi;
-  GEN fond, rep, bas = nf_get_zk(nf);
+  GEN g, rep, bas = nf_get_zk(nf);
 
-  fond = cgetg(f+1, t_VEC);
-  gel(fond,1) = gel(bas,1);
+  g = cgetg(f+1, t_VEC);
+  gel(g,1) = gel(bas,1);
   if (f > 1) {
     GEN mat = idealhnf_two(nf,pr);
     for (i = k = 2; k <= f; i++)
-      if (!is_pm1(gcoeff(mat,i,i))) gel(fond,k++) = gel(bas,i);
+      if (!is_pm1(gcoeff(mat,i,i))) gel(g,k++) = gel(bas,i);
   }
 
   p = itos(pr_get_p(pr));
   pf = upowuu(p, f);
   rep = cgetg(pf+1,t_VEC);
-  gel(rep,1) = gen_0; pi=1;
-  for (i=0; i<f; i++,pi*=p)
+  gel(rep,1) = gen_0; pi = 1;
+  for (i=1; i<=f; i++,pi*=p)
+  {
+    GEN gi = gel(g,i), jgi = gi;
     for (j=1; j<p; j++)
-      for (k=1; k<=pi; k++)
-	gel(rep, j*pi+k) = gadd(gel(rep,k),gmulsg(j,gel(fond,i+1)));
+    {
+      for (k=1; k<=pi; k++) gel(rep, j*pi+k) = gadd(gel(rep,k), jgi);
+      if (j < p-1) jgi = gadd(jgi, gi); /* j*g[i] */
+    }
+  }
   return gmodulo(rep, nf_get_pol(nf));
 }
 
