@@ -31,7 +31,7 @@ checktnf(GEN tnf)
 {
   long l = lg(tnf);
   if (typ(tnf)!=t_VEC || (l!=8 && l!=3)) return 0;
-  if (typ(tnf[1]) != t_POL) return 0;
+  if (typ(tnf[1]) != t_VEC) return 0;
   if (l != 8) return 1; /* S=0 */
 
   (void)checkbnf(gel(tnf,2));
@@ -525,53 +525,65 @@ MiddleSols(GEN *pS, GEN bound, GEN roo, GEN poly, GEN rhs, long s, GEN c1)
   return bndcf;
 }
 
+static void
+check_y_root(GEN *pS, GEN P, GEN Y)
+{
+  GEN r = nfrootsQ(P);
+  long j;
+  for (j = 1; j < lg(r); j++)
+    if (typ(gel(r,j)) == t_INT) add_sol(pS, gel(r,j), Y);
+}
+
+static void
+check_y(GEN *pS, GEN P, GEN poly, GEN Y, GEN rhs)
+{
+  long j, l = lg(poly);
+  GEN Yn = Y;
+  gel(P, l-1) = gel(poly, l-1);
+  for (j = l-2; j >= 2; j--)
+  {
+    gel(P,j) = mulii(Yn, gel(poly,j));
+    if (j > 2) Yn = mulii(Yn, Y);
+  }
+  gel(P,2) = subii(gel(P,2), rhs); /* P = poly(Y/y)*y^deg(poly) - rhs */
+  check_y_root(pS, P, Y);
+}
+
 /* Check for solutions under a small bound (see paper) */
 static GEN
-SmallSols(GEN S, ulong Bx, GEN poly, GEN rhs)
+SmallSols(GEN S, GEN x3, GEN poly, GEN rhs)
 {
   pari_sp av = avma, lim = stack_lim(av, 1);
-  GEN X, Y, P, r, rhs2;
+  GEN X, P, rhs2;
   long j, l = lg(poly), n = degpol(poly);
-  ulong x;
+  ulong y, By = itou(floorr(x3));
 
-  if (DEBUGLEVEL>1) fprintferr("* Checking for small solutions\n");
-  /* x = 0 first: solve Y^n = rhs */
+  if (DEBUGLEVEL>1) fprintferr("* Checking for small solutions <= %lu\n", By);
+  /* y = 0 first: solve X^n = rhs */
   if (odd(n))
   {
-    if (ispower(absi(rhs), utoipos(n), &Y))
-      add_sol(&S, signe(rhs) > 0? Y: negi(Y), gen_0);
+    if (Z_ispowerall(absi(rhs), n, &X))
+      add_sol(&S, signe(rhs) > 0? X: negi(X), gen_0);
   }
-  else if (signe(rhs) > 0 && ispower(rhs, utoipos(n), &Y))
+  else if (signe(rhs) > 0 && Z_ispowerall(rhs, n, &X))
   {
-    add_sol(&S, Y, gen_0);
-    add_sol(&S, negi(Y), gen_0);
+    add_sol(&S, X, gen_0);
+    add_sol(&S, negi(X), gen_0);
   }
   rhs2 = shifti(rhs,1);
-  /* x != 0 */
+  /* y != 0 */
   P = cgetg(l, t_POL); P[1] = poly[1];
-  for (x = 1; x <= Bx; x++)
+  for (y = 1; y <= By; y++)
   {
     pari_sp av2 = avma;
     long lS = lg(S);
-    X = utoipos(x);
-    gel(P, l-1) = gel(poly, l-1);
-    /* try x */
-    for (j = l-2; j >= 2; j--)
-    {
-      gel(P,j) = mulii(X, gel(poly,j));
-      if (j > 2) X = muliu(X, x);
-    }
-    gel(P,2) = subii(gel(P,2), rhs);
-    r = nfrootsQ(P);
-    for (j = 1; j < lg(r); j++)
-      if (typ(gel(r,j)) == t_INT) add_sol(&S, gel(r,j), utoipos(x));
-    /* try -x */
+    GEN Y = utoipos(y);
+    /* try y */
+    check_y(&S, P, poly, Y, rhs);
+    /* try -y */
     for (j = l-2; j >= 2; j -= 2) togglesign( gel(P,j) );
     if (j == 0) gel(P,2) = subii(gel(P,2), rhs2);
-    r = nfrootsQ(P);
-    for (j = 1; j < lg(r); j++)
-      if (typ(gel(r,j)) == t_INT) add_sol(&S, gel(r,j), utoineg(x));
-
+    check_y_root(&S, P, utoineg(y));
     if (lS == lg(S)) { avma = av2; continue; } /* no solution found */
 
     if (low_stack(lim,stack_lim(av,1)))
@@ -593,21 +605,60 @@ fact(double x)
   return ft ;
 }
 
-/* From a polynomial and optionally a system of fundamental units for the
- * field defined by pol, computes all relevant constants needed to solve
- * the equation P(x,y)=a given the solutions of N_{K/Q}(x)=a (see inithue). */
+static GEN
+RgX_homogenize(GEN P, long v)
+{
+  GEN Q = leafcopy(P);
+  long i, l = lg(P), d = degpol(P);
+  for (i = 2; i < l; i++) gel(Q,i) = monomial(gel(Q,i), d--, v);
+  return Q;
+}
+
+/* Compute all relevant constants needed to solve the equation P(x,y)=a given
+ * the solutions of N_{K/Q}(x)=a (see inithue). */
 GEN
 thueinit(GEN pol, long flag, long prec)
 {
-  GEN tnf, bnf = NULL;
+  GEN POL, C, L, fa, tnf, bnf = NULL;
   pari_sp av = avma;
-  long k, s;
+  long k, s, lfa, dpol = degpol(pol);
 
   if (checktnf(pol)) { bnf = checkbnf(gel(pol,2)); pol = gel(pol,1); }
   if (typ(pol)!=t_POL) pari_err(notpoler,"thueinit");
-  if (degpol(pol) <= 2) pari_err(talker,"invalid polynomial in thue (need deg>2)");
   RgX_check_ZX(pol, "thueinit");
+  if (varn(pol)) { pol = leafcopy(pol); setvarn(pol, 0); }
+  POL = ZX_to_monic(pol, &L); /* POL monic: POL(x) = C pol(x/L) */
+  C = gdiv(powiu(L, dpol), gel(pol, dpol+2));
+  pol = POL;
+  
+  fa = ZX_factor(pol);
+  lfa = lg(gel(fa,1));
+  if (lfa > 2 || itos(gcoeff(fa,1,2)) > 1)
+  { /* reducible polynomial */
+    GEN P, Q, R, g, f = gcoeff(fa,1,1), E = gcoeff(fa,1,2);
+    long e = itos(E);
+    long vy = fetch_user_var("y_");
+    long va = fetch_user_var("a_");
+    long vb = fetch_user_var("b_");
+    if (e != 1)
+    {
+      if (lfa == 2) {
+        tnf = mkvec2(thueinit(f, flag, prec), E);
+        return gerepilecopy(av, tnf);
+      }
+      P = gpowgs(f,e);
+    }
+    else
+      P = f;
+    g = RgX_div(pol, P);
+    P = RgX_Rg_sub(RgX_homogenize(f, vy), pol_x(va));
+    Q = RgX_Rg_sub(RgX_homogenize(g, vy), pol_x(vb));
+    R = polresultant0(P, Q, -1, 0);
+    tnf = mkvec2(mkvec3(pol,C,L), mkvec2(mkvecsmall4(degpol(f), e, va,vb),  R));
+    return gerepilecopy(av, tnf);
+  }
 
+  if (dpol <= 2) pari_err(talker,"invalid polynomial in thue (need deg>2)");
   s = sturm(pol);
   if (s)
   {
@@ -637,13 +688,11 @@ thueinit(GEN pol, long flag, long prec)
   }
   else
   {
-    GEN c0, ro = roots(pol, DEFAULTPREC);
-    if (!ZX_is_irred(pol)) pari_err(redpoler,"thueinit");
-    c0 = imag_i(gel(ro,1));
+    GEN ro = roots(pol, DEFAULTPREC), c0 = imag_i(gel(ro,1));
     for (k=2; k<lg(ro); k++) c0 = mulrr(c0, imag_i(gel(ro,k)));
-    c0 = invr( absr(c0) );
-    tnf = mkvec2(pol, c0);
+    c0 = invr( absr(c0) ); tnf = mkvec2(pol, c0);
   }
+  gel(tnf,1) = mkvec3(gel(tnf,1), C, L);
   return gerepilecopy(av,tnf);
 }
 
@@ -779,31 +828,30 @@ get_Bx_LLL(long i1, GEN Delta, GEN Lambda, GEN eps5, long prec, baker_s *BS)
 }
 
 static GEN
-LargeSols(GEN tnf, GEN rhs, GEN ne, GEN *pS)
+LargeSols(GEN P, GEN tnf, GEN rhs, GEN ne, GEN *pS)
 {
-  GEN Vect, P, ro, bnf, MatFU, A, csts, dP, vecdP, Bx;
+  GEN Vect, ro, bnf, MatFU, A, csts, dP, vecdP, Bx;
   GEN c1,c2,c3,c4,c11,c14,c15, x0, x1, x2, x3, b, zp1, tmp, eps5;
   long iroot, ine, n, i, r, upb, bi1, Prec, prec, s,t;
   baker_s BS;
   pari_sp av = avma;
 
   bnf  = gel(tnf,2);
+  csts = gel(tnf,7);
   if (!ne)
   {
     ne = bnfisintnorm(bnf, rhs);
-    if (!is_pm1(gmael(tnf, 7, 7)) && !is_pm1(bnf_get_no(bnf)) && !is_pm1(rhs))
+    if (!is_pm1(gel(csts, 7)) && !is_pm1(bnf_get_no(bnf)) && !is_pm1(rhs))
       pari_warn(warner, "Non trivial conditional class group.\n  *** May miss solutions of the norm equation");
   }
   if (lg(ne)==1) return NULL;
 
   nf_get_sign(bnf_get_nf(bnf), &s, &t);
-  BS.r = r = s+t-1;
-  P      = gel(tnf,1); n = degpol(P);
+  BS.r = r = s+t-1; n = degpol(P);
   ro     = gel(tnf,3);
   BS.ALH = gel(tnf,4);
   MatFU  = gel(tnf,5);
   A      = gel(tnf,6);
-  csts   = gel(tnf,7);
   c1     = gel(csts,1); c1 = gmul(absi(rhs), c1);
   c2     = gel(csts,2);
   BS.hal = gel(csts,3);
@@ -814,7 +862,6 @@ LargeSols(GEN tnf, GEN rhs, GEN ne, GEN *pS)
   BS.MatFU = MatFU;
   BS.bak = mulss(n, (n-1)*(n-2)); /* safe */
   BS.deg = n;
-  *pS = cgetg(1, t_VEC);
 
   if (t) x0 = gmul(x0, absisqrtn(rhs, n, Prec));
   tmp = divrr(c1,c2);
@@ -950,41 +997,105 @@ PRECPB:
   prec += 5 * (DEFAULTPREC-2);
   if (DEBUGLEVEL>1) pari_warn(warnprec,"thue",prec);
   tnf = inithue(P, bnf, 0, prec);
-  return LargeSols(tnf, rhs, ne, pS);
+  return LargeSols(P, tnf, rhs, ne, pS);
 }
+
+/* restrict to solutions (x,y) with L | x, replacing each by (x/L, y) */
+static GEN 
+filter_sol_x(GEN S, GEN L)
+{
+  long i, k, l;
+  if (is_pm1(L)) return S;
+  l = lg(S); k = 1;
+  for (i = 1; i < l; i++)
+  {
+    GEN s = gel(S,i), r;
+    gel(s,1) = dvmdii(gel(s,1), L, &r);
+    if (r == gen_0) gel(S, k++) = s;
+  }
+  setlg(S, k); return S;
+}
+
+static GEN
+sol_0(void)
+{ GEN S = cgetg(2, t_VEC); gel(S,1) = mkvec2(gen_0,gen_0); return S; }
 
 /* Given a tnf structure as returned by thueinit, a RHS and
  * optionally the solutions to the norm equation, returns the solutions to
- * the Thue equation F(x,y)=a
- */
+ * the Thue equation F(x,y)=a */
 GEN
 thue(GEN tnf, GEN rhs, GEN ne)
 {
   pari_sp av = avma;
-  GEN P, x3, S;
+  GEN POL, C, L, x3, S;
 
   if (!checktnf(tnf)) pari_err(talker,"not a tnf in thue");
   if (typ(rhs) != t_INT) pari_err(typeer,"thue");
-  if (signe(rhs) == 0) return cgetg(1,t_VEC);
 
-  P = gel(tnf,1);
+  /* solve P(x,y) = rhs <=> POL(L x, y) = C rhs, with POL monic in Z[X] */
+  POL = gel(tnf,1);
+  C = gel(POL,2); rhs = gmul(C, rhs);
+  if (typ(rhs) != t_INT) { avma = av; return cgetg(1, t_VEC); }
+  L = gel(POL,3);
+  POL = gel(POL,1);
+
+  S = cgetg(1,t_VEC);
   if (lg(tnf) == 8)
   {
-    x3 = LargeSols(tnf, rhs, ne, &S);
-    if (!x3) { avma = av; return cgetg(1,t_VEC); }
+    if (!signe(rhs)) { avma = av; return sol_0(); }
+    x3 = LargeSols(POL, tnf, rhs, ne, &S);
+    if (!x3) { avma = (pari_sp)S; return S; }
+    S = SmallSols(S, x3, POL, rhs);
+  }
+  else if (typ(gel(tnf,2)) == t_INT) /* reducible case, pure power*/
+  {
+    long e = itos( gel(tnf,2) );
+    if (!signe(rhs)) { avma = av; return sol_0(); }
+      
+    if (!Z_ispowerall(rhs, e, &rhs)) { avma = av; return cgetg(1, t_VEC); }
+    tnf = gel(tnf,1);
+    S = thue(tnf, rhs, NULL);
+    if (odd(e)) S = shallowconcat(S, thue(tnf, negi(rhs), NULL));
+  }
+  else if (typ(gel(tnf,2)) == t_VEC) /* other reducible cases */
+  { /* solve f^e * g = rhs, f irreducible factor of smallest degree */
+    GEN P, D, v = gmael(tnf, 2, 1), R = gmael(tnf, 2, 2);
+    long i, l, degf = v[1], e = v[2], va = v[3], vb = v[4];
+    if (!signe(rhs)) {
+      if (degf == 1) pari_err(talker,"infinitely many solutions in thue");
+      avma = av; return cgetg(1, t_VEC);
+    }
+    P = cgetg(lg(POL), t_POL); P[1] = POL[1];
+    D = divisors(rhs); l = lg(D);
+    for (i = 1; i < l; i++)
+    {
+      GEN Rab, ry, df = gel(D,i), dg = diviiexact(rhs, df);
+      long k;
+
+      if (e > 1 && !Z_ispowerall(df, e, &df)) continue;
+      /* Rab: univariate polynomial in Z[Y], whose roots are the possible y. */
+      /* Here and below, Rab != 0 */
+      Rab = gsubst(gsubst(R, va, df), vb, dg);
+      ry = nfrootsQ(Rab);
+      for (k = 1; k < lg(ry); k++)
+        if (typ(gel(ry,k)) == t_INT) check_y(&S, P, POL, gel(ry,k), rhs);
+      if (!odd(e)) {
+        Rab = gsubst(gsubst(R, va, negi(df)), vb, negi(dg));
+        ry = nfrootsQ(Rab);
+        for (k = 1; k < lg(ry); k++)
+          if (typ(gel(ry,k)) == t_INT) check_y(&S, P, POL, gel(ry,k), rhs);
+      }
+    }
   }
   else
   { /* Case s=0. All solutions are "small". */
     GEN c0 = gel(tnf,2); /* t_REAL */
-    S = cgetg(1,t_VEC);
-    x3 = sqrtnr(mulir(absi(rhs),c0), degpol(P));
+    if (!signe(rhs)) { avma = av; return sol_0(); }
+    x3 = sqrtnr(mulir(absi(rhs),c0), degpol(POL));
     x3 = addrr(x3, dbltor(0.1)); /* guard from round-off errors */
+    S = SmallSols(S, x3, POL, rhs);
   }
-
-  if (DEBUGLEVEL>=2)
-    fprintferr("All solutions are <= %Ps\n", x3);
-
-  return gerepilecopy(av, SmallSols(S, itos(floorr(x3)), P, rhs));
+  return gerepilecopy(av, filter_sol_x(S, L));
 }
 
 /********************************************************************/

@@ -383,6 +383,7 @@ BA 92- make test-xxx: trap SIGINT in benching script to exit on <C-C>
        ideals instead of single prime ideal, and make this list optional
        (omitted = test for maximality at ALL primes)
    97- the "zetakinit" format: bnf no longer included
+   98- thueinit / thue: allow reducible and non-monic polynomials
 
   Added
     1- many new benches (make test-all)

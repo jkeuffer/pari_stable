@@ -379,7 +379,7 @@ ZX_primitive_to_monic(GEN pol, GEN *ptlc)
   return POL;
 }
 /* pol != 0 in Z[x], returns a monic polynomial POL in Z[x] generating the
- * same field: there exist C, L in Z such that POL(x) = C pol(x/L).
+ * same field: there exist C in Q, L in Z such that POL(x) = C pol(x/L).
  * Set *L = NULL if L = 1, and to L otherwise. No garbage collecting. */
 GEN
 ZX_to_monic(GEN pol, GEN *L)

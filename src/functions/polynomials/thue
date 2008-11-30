@@ -6,21 +6,22 @@ Help: thue(tnf,a,{sol}): solve the equation P(x,y)=a, where tnf was created
  with thueinit(P), and sol, if present, contains the solutions of Norm(x)=a
  modulo units in the number field defined by P. If tnf was computed without
  assuming GRH (flag 1 in thueinit), the result is unconditional.
-Doc: solves the equation
+Doc: returns all solutions of the equation
  $P(x,y)=a$ in integers $x$ and $y$, where \var{tnf} was created with
- $\kbd{thueinit}(P)$. \var{sol}, if present, contains the solutions of
+ $\kbd{thueinit}(P)$. If present, \var{sol} must contain the solutions of
  $\Norm(x)=a$ modulo units of positive norm in the number field
- defined by $P$ (as computed by \kbd{bnfisintnorm}). If the
- result is conditional (on the GRH or some heuristic strengthening),
- a Warning is printed. Otherwise, the result is unconditional, barring bugs.
- For instance, here's how to solve the Thue equation $x^{13} - 5y^{13} = - 4$:
+ defined by $P$ (as computed by \kbd{bnfisintnorm}). If there are infinitely
+ many solutions, an error will be issued.
 
+ If the result is conditional on the GRH, a Warning is printed. Otherwise, the
+ result is unconditional, barring bugs. For instance, here's how to solve the
+ Thue equation $x^{13} - 5y^{13} = - 4$:
  \bprog
  ? tnf = thueinit(x^13 - 5);
  ? thue(tnf, -4)
  %1 = [[1, 1]]
  @eprog
- Hence, the only solution is $x = 1$, $y = 1$ and the result is
+ Hence, the only solution is $(x,y) = (1,1)$, and the result is
  unconditional. On the other hand:
  \bprog
  ? tnf = thueinit(x^3-2*x^2+3*x-17);
@@ -31,3 +32,16 @@ Doc: solves the equation
  @eprog
  This time the result is conditional. All results computed using this tnf
  are likewise conditional, \emph{except} for a right-hand side of $\pm 1$.
+ The above result is in fact correct, so we did not just disprove the GRH:
+ \bprog
+ ? tnf = thueinit(x^3-2*x^2+3*x-17, 1 /*unconditionnal*/);
+ ? thue(tnf, -15)
+ %4 = [[1, 1]]
+ @eprog
+ Note that reducible or non-monic polynomials are allowed:
+ \bprog
+ ? tnf = thueinit((2*x+1)^5 * (4*x^3-2*x^2+3*x-17), 1);
+ ? thue(tnf, 128)
+ %2 = [[-1, 0], [1, 0]]
+ @eprog\noindent Reducible polynomials are in fact much easier to handle, but
+ sometimes
