@@ -2352,7 +2352,10 @@ nfreducemodpr(GEN nf, GEN x, GEN modpr)
 GEN
 Fq_to_nf(GEN A, GEN modpr)
 {
-  if (lg(modpr) < LARGEMODPR) return A;
+  long dA;
+  if (typ(A) == t_INT || lg(modpr) < LARGEMODPR) return A;
+  dA = degpol(A);
+  if (dA <= 0) return dA ? gen_0: gel(A,2);
   return mulmat_pol(gel(modpr,mpr_NFP), A);
 }
 GEN
@@ -2510,21 +2513,85 @@ rnfelementid_powmod(GEN multab, long h, GEN n, GEN T, GEN p)
   return gerepilecopy(av, y);
 }
 
+/* P != 0 has at most degpol(P) roots. Look for an element in Fq which is not
+ * a root, cf repres() */
+static GEN
+FqX_non_root(GEN P, GEN T, GEN p)
+{
+  long dP = degpol(P), f, vT;
+  long i, j, k, pi, pp;
+  GEN v;
+  
+  if (dP == 0) return gen_1;
+  pp = is_bigint(p) ? dP+1: itos(p);
+  v = cgetg(dP + 2, t_VEC);
+  gel(v,1) = gen_0;
+  if (T)
+  { f = degpol(T); vT = varn(T); }
+  else
+  { f = 1; vT = 0; }
+  for (i=pi=1; i<=f; i++,pi*=pp)
+  {
+    GEN gi = i == 1? gen_1: monomial(gen_1, i-1, vT), jgi = gi;
+    for (j=1; j<pp; j++)
+    {
+      for (k=1; k<=pi; k++)
+      {
+        GEN z = Fq_add(gel(v,k), jgi, T,p);
+        if (!gcmp0(FqX_eval(P, z, T,p))) return z;
+        gel(v, j*pi+k) = z;
+      }
+      if (j < pp-1) jgi = Fq_add(jgi, gi, T,p); /* j*g[i] */
+    }
+  }
+  return NULL;
+}
+
 /* Relative Dedekind criterion over (true) nf, applied to the order defined by a
  * root of monic irreducible polynomial P, modulo the prime ideal pr. Assume
  * vdisc = v_pr( disc(P) ).
  * Return NULL if nf[X]/P is pr-maximal. Otherwise, return [flag, O, v]:
  *   O = enlarged order, given by a pseudo-basis
- *   flag = 1 iff O is pr-maximal
+ *   flag = 1 if O is proven pr-maximal (may be 0 and O nevertheless pr-maximal)
  *   v = v_pr(disc(O)). */
 static GEN
 rnfdedekind_i(GEN nf, GEN P, GEN pr, long vdisc, long only_maximal)
 {
-  GEN Ppr, A, I, p, tau, g, h, k, base, T, gzk, hzk, prinvp, pal;
-  GEN nfT = nf_get_pol(nf), modpr = nf_to_Fq_init(nf,&pr, &T, &p);
-  long m = degpol(P), vt, r, d, i, j;
+  GEN Ppr, A, I, p, tau, g, h, k, base, T, gzk, hzk, prinvp, pal, nfT, modpr;
+  long m, vt, r, d, i, j, mpr;
 
+  if (vdisc < 0)
+    pari_err(talker,"relative polynomial with non-integral coefficients");
+  if (vdisc == 1) return NULL; /* pr-maximal */
+  if (!only_maximal && !gcmp1(leading_term(P)))
+    pari_err(impl, "the full Dedekind criterion in the non-monic case");
+  /* either monic OR only_maximal = 1 */
+  m = degpol(P);
+  nfT = nf_get_pol(nf);
+  modpr = nf_to_Fq_init(nf,&pr, &T, &p);
   Ppr = nfX_to_FqX(P, nf, modpr);
+  mpr = degpol(Ppr);
+  if (mpr < m) /* non-monic => only_maximal = 1 */
+  {
+    if (mpr < 0) return 0;
+    if (! RgX_valrem(Ppr, &Ppr))
+    { /* non-zero constant coefficient */
+      Ppr = RgX_shift_shallow(RgX_recip_shallow(Ppr), m - mpr);
+      P = RgX_recip_shallow(P);
+    }
+    else
+    {
+      GEN z = FqX_non_root(Ppr, T, p);
+      if (!z) pari_err(impl, "Dedekind in the difficult case");
+      z = Fq_to_nf(z, modpr);
+      if (typ(z) == t_INT)
+        P = RgX_translate(P, z);
+      else
+        P = RgXQX_translate(P, z, T);
+      P = RgX_recip_shallow(P);
+      Ppr = nfX_to_FqX(P, nf, modpr); /* degpol(P) = degpol(Ppr) = m */
+    }
+  }
   A = gel(FqX_factor(Ppr,T,p),1);
   r = lg(A); /* > 1 */
   g = gel(A,1);
@@ -2592,8 +2659,6 @@ rnfdedekind(GEN nf, GEN P, GEN pr, long flag)
 
   nf = checknf(nf);
   P = rnf_fix_pol(nf_get_pol(nf), P, 0);
-  if (!gcmp1(leading_term(P)))
-    pari_err(impl,"non-monic relative polynomials");
   dP = RgX_disc(P); P = lift_intern(P);
   if (!pr) {
     GEN fa = idealfactor(nf, dP);
@@ -2603,7 +2668,7 @@ rnfdedekind(GEN nf, GEN P, GEN pr, long flag)
     for (i=1; i < l; i++)
     {
       v = itos(gel(E,i));
-      if (v > 1 && rnfdedekind_i(nf,P,gel(Q,i),v,1)) { avma=av; return gen_0; }
+      if (rnfdedekind_i(nf,P,gel(Q,i),v,1)) { avma=av; return gen_0; }
       avma = av2;
     }
     avma = av; return gen_1;
@@ -2616,7 +2681,7 @@ rnfdedekind(GEN nf, GEN P, GEN pr, long flag)
       for (i=1; i < l; i++)
       {
         v = nfval(nf, dP, gel(Q,i));
-        if (v > 1 && rnfdedekind_i(nf,P,gel(Q,i),v,1)) { avma=av; return gen_0; }
+        if (rnfdedekind_i(nf,P,gel(Q,i),v,1)) { avma=av; return gen_0; }
         avma = av2;
       }
       avma = av; return gen_1;

@@ -384,6 +384,7 @@ BA 92- make test-xxx: trap SIGINT in benching script to exit on <C-C>
        (omitted = test for maximality at ALL primes)
    97- the "zetakinit" format: bnf no longer included
    98- thueinit / thue: allow reducible and non-monic polynomials
+   99- rnfdedekind: allow non-monic polynomials
 
   Added
     1- many new benches (make test-all)

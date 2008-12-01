@@ -65,4 +65,14 @@
 1
 0
 0
-Total time spent: 670
+  ***   at top-level: rnfdedekind(nf,P,pr2
+  ***                 ^--------------------
+  *** rnfdedekind: sorry, Dedekind in the difficult case is not yet implemented.
+1
+  ***   at top-level: rnfdedekind(nf,P)
+  ***                 ^-----------------
+  *** rnfdedekind: sorry, Dedekind in the difficult case is not yet implemented.
+  ***   at top-level: rnfdedekind(nf,P,[pr
+  ***                 ^--------------------
+  *** rnfdedekind: sorry, Dedekind in the difficult case is not yet implemented.
+Total time spent: 660
