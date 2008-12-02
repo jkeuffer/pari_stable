@@ -2446,9 +2446,9 @@ fill(long l, GEN H, GEN Hx, GEN I, GEN Ix)
 {
   long i;
   if (typ(Ix) == t_VEC) /* standard */
-    for (i=1; i<l; i++) { H[i] = Hx[i]; I[i] = Ix[i]; }
+    for (i=1; i<l; i++) { gel(H,i) = gel(Hx,i); gel(I,i) = gel(Ix,i); }
   else /* constant ideal */
-    for (i=1; i<l; i++) { H[i] = Hx[i]; gel(I,i) = Ix; }
+    for (i=1; i<l; i++) { gel(H,i) = gel(Hx,i); gel(I,i) = Ix; }
 }
 
 /* given MODULES x and y by their pseudo-bases, returns a pseudo-basis of the
@@ -2457,10 +2457,7 @@ static GEN
 rnfjoinmodules_i(GEN nf, GEN Hx, GEN Ix, GEN Hy, GEN Iy)
 {
   long lx = lg(Hx), ly = lg(Hy), l = lx+ly-1;
-  GEN H, I;
-
-  H = cgetg(l, t_MAT);
-  I = cgetg(l, t_VEC);
+  GEN H = cgetg(l, t_MAT), I = cgetg(l, t_VEC);
   fill(lx, H     , Hx, I     , Ix);
   fill(ly, H+lx-1, Hy, I+lx-1, Iy); return nfhnf(nf, mkvec2(H, I));
 }
