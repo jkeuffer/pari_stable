@@ -424,12 +424,11 @@ get_ell(GEN x)
   switch(typ(x))
   {
     case t_STR: return gel(ellsearchcurve(x),2);
-    case t_VEC: if (lg(x) >= 6) return x;
+    case t_VEC: switch(lg(x)) { case 6: case 14: case 20: return x; }
     /*fall through*/
-    default:
-      checkell5(x); /*ERROR*/
-      return NULL;/*not reached*/
   }
+  checkell5(x); /*ERROR*/
+  return NULL;/*not reached*/
 }
 GEN
 smallellinit(GEN x)
