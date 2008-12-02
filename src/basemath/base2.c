@@ -2570,7 +2570,7 @@ rnfdedekind_i(GEN nf, GEN P, GEN pr, long vdisc, long only_maximal)
   mpr = degpol(Ppr);
   if (mpr < m) /* non-monic => only_maximal = 1 */
   {
-    if (mpr < 0) return 0;
+    if (mpr < 0) return NULL;
     if (! RgX_valrem(Ppr, &Ppr))
     { /* non-zero constant coefficient */
       Ppr = RgX_shift_shallow(RgX_recip_shallow(Ppr), m - mpr);
@@ -2728,7 +2728,7 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
   av1 = avma;
   p1 = rnfdedekind_i(nf, pol, modpr, vdisc, 0);
   if (!p1) { avma = av; return NULL; }
-  if (gcmp1(gel(p1,1))) return gerepilecopy(av,gel(p1,2));
+  if (is_pm1(gel(p1,1))) return gerepilecopy(av,gel(p1,2));
   sep = itos(gel(p1,3));
   W = gmael(p1,2,1);
   I = gmael(p1,2,2);
