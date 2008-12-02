@@ -1029,7 +1029,7 @@ multiple_crt(GEN x, GEN y, GEN q, GEN P)
 /****************************************************************************/
 
 static GEN
-possible_traces(GEN compile, GEN mask, GEN *P)
+possible_traces(GEN compile, GEN mask, GEN *P, int larger)
 {
   GEN V, Pfinal = gen_1, C = shallowextract(compile, mask);
   long i, lfinal = 1, lC = lg(C), lP;
@@ -1039,11 +1039,15 @@ possible_traces(GEN compile, GEN mask, GEN *P)
   {
     GEN c = gel(C,i), t;
     Pfinal = mulii(Pfinal, gel(c,1));
-    t = mulss(lfinal, lg(gel(c,2))-1);
-    lfinal = itos(t);
+    t = muluu(lfinal, lg(gel(c,2))-1);
+    lfinal = itou(t);
   }
   Pfinal = gerepileuptoint(av, Pfinal);
-  lP = lgefint(Pfinal); lfinal++;
+  if (larger)
+    lP = lgefint(shifti(Pfinal,1));
+  else
+    lP = lgefint(Pfinal);
+  lfinal++;
   /* allocate room for final result */
   V = cgetg(lfinal, t_VEC);
   for (i = 1; i < lfinal; i++) gel(V,i) = cgeti(lP);
@@ -1302,8 +1306,8 @@ match_and_sort(GEN compile_atkin, long k, GEN Mu, GEN u, GEN a4, GEN a6, GEN p)
   best_i = separation( get_lgatkin(compile_atkin, k) );
   avma = av1;
 
-  baby  = possible_traces(compile_atkin, stoi(best_i), &Mb);
-  giant = possible_traces(compile_atkin, subis(int2n(k), best_i+1), &Mg);
+  baby  = possible_traces(compile_atkin, stoi(best_i), &Mb, 1);
+  giant = possible_traces(compile_atkin, subis(int2n(k), best_i+1), &Mg, 0);
   lbaby = lg(baby);
   lgiant = lg(giant);
   den = Fp_inv(Fp_mul(Mu, Mb, Mg), Mg);
