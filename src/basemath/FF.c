@@ -912,7 +912,7 @@ ffgen(GEN T, long v)
     {
       ff[1] = t_FF_Flxq;
       T = ZX_to_Flx(T,pp); T[1] = sv;
-      A = polx_Flx(sv); if (d == 1) A = Flx_rem(A, gel(ff,3), pp);
+      A = polx_Flx(sv); if (d == 1) A = Flx_rem(A, T, pp);
       p = icopy(p);
     }
   }
