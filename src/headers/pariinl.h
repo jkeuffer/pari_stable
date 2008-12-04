@@ -499,6 +499,17 @@ RgX_is_monomial(GEN x)
     if (!isexactzero(gel(x,i))) return 0;
   return 1;
 }
+INLINE int
+RgM_is_ZM(GEN x)
+{
+  long i, j, h, l = lg(x);
+  if (l == 1) return 1;
+  h = lg(gel(x,1));
+  for (j = l-1; j > 0; j--)
+    for (i = h-1; h > 0; h--)
+      if (typ(gcoeff(x,i,j)) != t_INT) return 0;
+  return 1;
+}
 
 /********************************************************************/
 /**                                                                **/

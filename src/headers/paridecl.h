@@ -2748,6 +2748,7 @@ INLINE GEN    RgC_gtofp(GEN x, long prec);
 INLINE GEN    RgM_fpnorml2(GEN x, long prec);
 INLINE GEN    RgM_gtofp(GEN x, long prec);
 INLINE GEN    RgM_inv(GEN a);
+INLINE int    RgM_is_ZM(GEN x);
 INLINE GEN    RgM_shallowcopy(GEN x);
 INLINE int    RgV_isscalar(GEN x);
 INLINE int    RgX_is_monomial(GEN x);

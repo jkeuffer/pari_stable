@@ -4702,6 +4702,9 @@ identity matrix, and 0 otherwise.
 \fun{int}{RgM_isdiagonal}{GEN x} return 1 is the \typ{MAT} $x$ is a
 diagonal matrix, and 0 otherwise.
 
+\fun{int}{RgM_is_ZM}{GEN x} return 1 is the \typ{MAT}~$x$ has only
+\typ{INT} coefficients, and 0 otherwise.
+
 \fun{long}{RgV_isin}{GEN v, GEN x} return the first index $i$ such that
 $v[i] = x$ if it exists, and $0$ otherwise. Naive search in linear time, does
 not assume that \kbd{v} is sorted.
