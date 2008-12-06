@@ -13,3 +13,10 @@ do(12,6)
 do(4,8)
 
 do(100,2)
+
+
+install(factor_Aurifeuille_prime,GL)
+do(d, a) = polcyclo(d, a) / factor_Aurifeuille_prime(a, d);
+do(12, 2)
+do(15, 5)
+do(30, 3)

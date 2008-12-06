@@ -909,24 +909,44 @@ factor_Aurifeuille_aux(GEN A, long Astar, long n, GEN P,
   return f;
 }
 
+/* fd = factoru(odd part of d = d or d/4). Return eulerphi(d) */
+static ulong
+phi(long d, GEN fd)
+{
+  GEN P = gel(fd,1), E = gel(fd,2);
+  long i, l = lg(P);
+  ulong phi = 1;
+  for (i = 1; i < l; i++)
+  {
+    ulong p = P[i], e = E[i];
+    phi *= upowuu(p, e-1)*(p-1);
+  }
+  if (!odd(d)) phi <<= 1;
+  return phi;
+}
+
 static void
-Aurifeuille_init(GEN a, long n, struct aurifeuille_t *S)
+Aurifeuille_init(GEN a, long d, GEN fd, struct aurifeuille_t *S)
 {
   GEN sqrta = sqrtr_abs(itor(a, 3));
-  GEN bound = ceil_safe(powru(addrs(sqrta,1), eulerphiu(n)));
-  GEN zl = polsubcyclo_start(n, 0, 0, bound, &(S->e), (long*)&(S->l));
+  GEN bound = ceil_safe(powru(addrs(sqrta,1), phi(d, fd)));
+  GEN zl = polsubcyclo_start(d, 0, 0, bound, &(S->e), (long*)&(S->l));
   S->le = gel(zl,1);
   S->z  = gel(zl,2);
 }
 
 GEN
-factor_Aurifeuille_prime(GEN p, long n)
+factor_Aurifeuille_prime(GEN p, long d)
 {
   pari_sp av = avma;
   struct aurifeuille_t S;
-  long pp = itos(p);
-  Aurifeuille_init(p, n, &S);
-  return gerepileuptoint(av, factor_Aurifeuille_aux(p,pp,n,mkvecsmall(pp), &S));
+  GEN fd;
+  long pp;
+  if ((d & 3) == 2) { d >>= 1; p = negi(p); }
+  fd = factoru(odd(d)? d: d>>2);
+  pp = itos(p);
+  Aurifeuille_init(p, d, fd, &S);
+  return gerepileuptoint(av, factor_Aurifeuille_aux(p, pp, d, gel(fd,1), &S));
 }
 
 /* an algebraic factor of Phi_d(a), a != 0 */
@@ -934,7 +954,7 @@ GEN
 factor_Aurifeuille(GEN a, long d)
 {
   pari_sp av = avma;
-  GEN fd, P, E, A;
+  GEN fd, P, A;
   long i, lP, va = vali(a), sa, astar, D;
   struct aurifeuille_t S;
 
@@ -961,7 +981,7 @@ factor_Aurifeuille(GEN a, long d)
     avma = av; return gen_1;
   }
   /* v_2(d) = 0 or 2. Kill 2 from factorization (minor efficiency gain) */
-  fd = factoru(odd(d)? d: d>>2); P = gel(fd,1); E = gel(fd,2); lP = lg(P);
+  fd = factoru(odd(d)? d: d>>2); P = gel(fd,1); lP = lg(P);
   astar = sa;
   if (odd(va)) astar <<= 1;
   for (i = 1; i < lP; i++)
@@ -977,6 +997,6 @@ factor_Aurifeuille(GEN a, long d)
   for (i = 1; i < lP; i++) D *= P[i];
   if (D != d) { a = powiu(a, d/D); d = D; }
 
-  Aurifeuille_init(a, d, &S);
+  Aurifeuille_init(a, d, fd, &S);
   return gerepileuptoint(av, factor_Aurifeuille_aux(a, astar, d, P, &S));
 }
