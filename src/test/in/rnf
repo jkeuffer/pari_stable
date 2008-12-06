@@ -23,3 +23,6 @@ rnfdedekind(nf, P, pr2, 1)
 rnfdedekind(nf, P, pr3, 1)
 rnfdedekind(nf, P)
 rnfdedekind(nf, P, [pr2,pr3])
+
+K = nfinit(x^2-x+2); M = [1, 0, x; 0, x, 0; 0,0,2+x]; N = [1, 1, 1];
+nfsnf(K, [M, N, N])

@@ -1382,7 +1382,7 @@ idealinv_HNF_aux(GEN nf, GEN I)
 static GEN
 idealinv_HNF(GEN nf, GEN I)
 {
-  GEN J, IQ = gcoeff(I,1,1); /* I \cap Q */
+  GEN J, IQ = gcoeff(I,1,1); /* I \cap Q; d IQ = dI \cap Z */
 
   /* J = (dI)^(-1) * (d IQ) */
   J = idealinv_HNF_aux(nf, Q_remove_denom(I, NULL));
@@ -2523,8 +2523,15 @@ nfhnf(GEN nf, GEN x)
   return gerepilecopy(av0, mkvec2(A, I));
 }
 
+static long
+RgV_find_denom(GEN x)
+{
+  long l = lg(x), i = 1;
+  while (i < l && Q_denom(gel(x,i)) == gen_1) i++;
+  return i;
+}
 /* A torsion module M over Z_K will be given by a row vector [A,I,J] with
- * three components. I=[b_1,...,b_n] is a row vector of k fractional ideals
+ * three components. I=[b_1,...,b_n] is a row vector of n fractional ideals
  * given in HNF, J=[a_1,...,a_n] is a row vector of n fractional ideals in
  * HNF. A is an nxn matrix (same n) such that if A_j is the j-th column of A
  * and e_n is the canonical basis of K^n, then
@@ -2556,12 +2563,12 @@ nfsmith(GEN nf, GEN x)
   av = avma; lim = stack_lim(av,1);
   A = RgM_to_nfM(nf, A);
   I = leafcopy(I);
-  J = leafcopy(J);
+  J = leafcopy(J); for (i = 1; i <= n; i++) gel(J,i) = idealinv(nf, gel(J,i));
   for (i=n; i>=2; i--)
   {
     do
     {
-      GEN a, b;
+      GEN Aii, a, b, db;
       c = 0;
       for (j=i-1; j>=1; j--)
       {
@@ -2592,27 +2599,31 @@ nfsmith(GEN nf, GEN x)
       }
       if (c) continue;
 
-      b = gcoeff(A,i,i); if (gcmp0(b)) break;
-      b = idealmul(nf, b, idealmul(nf,gel(J,i),gel(I,i)));
+      Aii = gcoeff(A,i,i); if (gcmp0(Aii)) break;
+      gel(J,i) = idealmul(nf, gel(J,i), Aii);
+      gcoeff(A,i,i) = gen_1;
+      b = idealmul(nf,gel(J,i),gel(I,i));
+      b = Q_remove_denom(b, &db);
       for (k=1; k<i; k++)
 	for (l=1; l<i; l++)
 	{
-	  GEN p2, p3, p1 = gcoeff(A,k,l);
-	  if (gcmp0(p1)) continue;
+	  GEN D, p1, p2, p3, Akl = gcoeff(A,k,l);
+	  if (gcmp0(Akl)) continue;
 
-	  p3 = idealmul(nf, p1, idealmul(nf,gel(J,l),gel(I,k)));
-	  if (hnfdivide(b, p3)) continue;
+          p1 = idealmul(nf,Akl,gel(J,l));
+	  p3 = idealmul(nf, p1, gel(I,k));
+          if (db) p3 = RgM_Rg_mul(p3, db);
+	  if (RgM_is_ZM(p3) && hnfdivide(b, p3)) continue;
 
-	  b = idealdiv(nf,gel(I,k),gel(I,i));
-	  p2 = idealdiv(nf,gel(J,i), idealmul(nf,p1,gel(J,l)));
-	  p3 = RgM_solve(p2, b);
-	  l=1; while (l<=N && gcmp1(denom(gel(p3,l)))) l++;
+          /* find d in D = I[k]/I[i] not in J[i]/(a[k,l] J[l]) */
+	  D = idealdiv(nf,gel(I,k),gel(I,i));
+	  p2 = idealdiv(nf,gel(J,i), p1);
+          l = RgV_find_denom( RgM_solve(p2, D) );
 	  if (l>N) pari_err(talker,"bug2 in nfsmith");
-	  p1 = element_mulvecrow(nf,gel(b,l),A,k,i);
-	  for (l=1; l<=i; l++)
-	    gcoeff(A,i,l) = gadd(gcoeff(A,i,l),gel(p1,l));
+	  p1 = element_mulvecrow(nf,gel(D,l),A,k,i);
+	  for (l=1; l<=i; l++) gcoeff(A,i,l) = gadd(gcoeff(A,i,l),gel(p1,l));
 
-	  k = l = i; c = 1;
+	  k = l = i; c = 1; break;
 	}
       if (low_stack(lim, stack_lim(av,1)))
       {
