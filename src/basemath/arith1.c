@@ -38,7 +38,7 @@ int
 is_gener_Fl(ulong x, ulong p, ulong p_1, GEN L)
 {
   long i;
-  if (kross(x, p) >= 0) return 0;
+  if (krouu(x, p) >= 0) return 0;
   for (i=lg(L)-1; i; i--)
   {
     ulong t = Fl_powu(x, (ulong)L[i], p);
