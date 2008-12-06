@@ -225,7 +225,6 @@ initalgred(nfpol)
 initalgred2(nfpol)
 vp=primedec(nf,3)[1]
 idx=idealmul(nf,idmat(5),vp)
-idealinv(nf,idx)
 idy=ideallllred(nf,idx,[1,5,6])
 idealadd(nf,idx,idy)
 idealaddone(nf,idx,idy)
@@ -382,9 +381,7 @@ nfmul(nf,ba,bb)
 nfpow(nf,bb,5)
 nfreduce(nf,ba,idx)
 setrand(1);as=matrix(3,3,j,k,vvector(5,l,random()\10^8))
-vaid=[idx,idy,idmat(5)]
-haid=[idmat(5),idmat(5),idmat(5)]
-nfsmith(nf,[as,haid,vaid])
+nfsmith(nf,[as,[1,1,1],[idealinv(nf,idx), idealinv(nf,idy),1]])
 nfval(nf,ba,vp)
 norm(1+i)
 norm(mod(x+5,x^3+x+1))

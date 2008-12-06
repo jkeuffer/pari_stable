@@ -75,4 +75,5 @@
   ***   at top-level: rnfdedekind(nf,P,[pr
   ***                 ^--------------------
   *** rnfdedekind: sorry, Dedekind in the difficult case is not yet implemented.
-Total time spent: 660
+[[8, 2; 0, 1], [2, 0; 0, 1], [1, 0; 0, 1]]
+Total time spent: 752
