@@ -36,7 +36,14 @@ test(7, 7)
 test(precprime(2^32), 3)
 test(nextprime(2^32), 3)
 
-ffgen(x*Mod(1,2))
-ffprimroot(ffgen((x+1)*Mod(1,2)))
+test2(p)=
+{
+  ffgen(x*Mod(1,p));
+  ffprimroot(ffgen((x+1)*Mod(1,p)));
+}
+test2(2)
+test2(3)
+test2(nextprime(1<<64))
+test2(precprime(1<<64))
 
 getheap
