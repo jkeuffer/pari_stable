@@ -68,11 +68,16 @@ a^5 + 2*a^4 + 6*a^3 + 2)*x + 1, 1], [0, 0, 0, a, 1, 0, 2*a, 4, 6*a^2, a, 4,
 7263*a, 4294966447, 64*a^2 + 4294967183*a + 4294966815, 1484088443*a^2 + 114
 1114953*a + 4283364322, 0, 0, 0, 0, 0, 0], a/x, (x + a)/(x + 4294967310*a), 
 4204026293*a^2 + 2068287144*a + 232863018, 6148914735617846011, a]
-? ffgen(x*Mod(1,2))
-0
-? ffprimroot(ffgen((x+1)*Mod(1,2)))
+? test2(p)=ffgen(x*Mod(1,p));ffprimroot(ffgen((x+1)*Mod(1,p)));
+? test2(2)
 1
+? test2(3)
+2
+? test2(nextprime(1<<64))
+2
+? test2(precprime(1<<64))
+2
 ? getheap
-[13, 5631]
+[17, 5843]
 ? print("Total time spent: ",gettime);
-Total time spent: 2360
+Total time spent: 2300
