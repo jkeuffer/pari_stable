@@ -187,7 +187,7 @@ BA  3- builtin-in GP functions can now be used as closures.
        matrixqz3 -> QM_ImQ_hnf
        minideal -> idealmin and change prototype
        mu -> moebius, gmu -> gmoebius,
-       nfhermite -> nfhnf, nfhermitemod -> nfhnfmod
+       nfhermite -> nfhnf, nfhermitemod -> nfhnfmod, nfsmith -> nfsnf
        phi -> eulerphi, gphi -> geulerphi, phiu -> eulerphiu,
        poldeflate -> RgX_deflate_max
        polymodrecip -> modreverse

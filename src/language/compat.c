@@ -521,7 +521,7 @@ entree oldfonctions[]={
 {"nfmul",3,(void*)nfmul,6,"GGG","nfmul(nf,a,b)=element a.b in nf."},
 {"nfpow",3,(void*)nfpow,6,"GGG","nfpow(nf,a,k)=element a^k in nf."},
 {"nfreduce",3,(void*)nfreduce,6,"GGG","nfreduce(nf,a,id)=gives r such that a-r is the ideal id and r is small."},
-{"nfsmith",2,(void*)nfsmith,6,"GG","nfsmith(nf,x)=if x=[A,I,J], outputs [c_1,...c_n] Smith normal form of x."},
+{"nfsmith",2,(void*)nfsnf,6,"GG","nfsmith(nf,x)=if x=[A,I,J], outputs [c_1,...c_n] Smith normal form of x."},
 {"nfval",30,(void*)nfval,6,"lGGG","nfval(nf,a,pr)=valuation of element a at the prime pr."},
 {"norm",1,(void*)gnorm,2,"G","norm(x)=norm of x."},
 {"norml2",1,(void*)gnorml2,2,"G","norml2(x)=square of the L2-norm of the vector x."},

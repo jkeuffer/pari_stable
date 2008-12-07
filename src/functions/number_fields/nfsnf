@@ -1,6 +1,6 @@
 Function: nfsnf
 Section: number_fields
-C-Name: nfsmith
+C-Name: nfsnf
 Prototype: GG
 Help: nfsnf(nf,x): if x=[A,I,J], outputs [c_1,...c_n] Smith normal form of x.
 Doc: given a $\Z_K$-module $x$ associated to the integral pseudo-matrix

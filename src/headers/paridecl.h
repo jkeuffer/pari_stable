@@ -1004,7 +1004,7 @@ GEN     nfkermodpr(GEN nf, GEN x, GEN modpr);
 GEN     nfmulmodpr(GEN nf, GEN x, GEN y, GEN modpr);
 GEN     nfpowmodpr(GEN nf, GEN x, GEN k, GEN modpr);
 GEN     nfreduce(GEN nf, GEN x, GEN ideal);
-GEN     nfsmith(GEN nf, GEN x);
+GEN     nfsnf(GEN nf, GEN x);
 GEN     nfsolvemodpr(GEN nf, GEN a, GEN b, GEN modpr);
 GEN     to_famat(GEN x, GEN y);
 GEN     to_famat_shallow(GEN x, GEN y);

@@ -164,7 +164,8 @@ This file lists the incompatible changes between Version 2.x and older versions
   - rename factorpadic4 -> factorpadic, factorpadic2 now static
   - the "prec" parameter has disappeared in all floating point LLL various
   - remove obsolete function factpol()
-  - rename library functions nfhermite -> nfhnf, nfhermitemod -> nfhnfmod
+  - rename library functions nfhermite -> nfhnf, nfhermitemod -> nfhnfmod, 
+    nfsmith -> nfsnf
   - rename subres -> resultant, subresall -> resultant_all.
   - remove obsolete discsr. Use RgX_disc (or quad_disc, qfb_disc...)
   - remove obsolete allbase, base, base2, factoredbase, smallbase,

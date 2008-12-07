@@ -2540,25 +2540,25 @@ RgV_find_denom(GEN x)
 /* x=[A,I,J] a torsion module as above. Output the
  * smith normal form as K=[c_1,...,c_n] such that x = Z_K/c_1+...+Z_K/c_n */
 GEN
-nfsmith(GEN nf, GEN x)
+nfsnf(GEN nf, GEN x)
 {
   long i, j, k, l, c, n, m, N;
   pari_sp av, lim;
   GEN z,u,v,w,d,dinv,A,I,J;
 
   nf = checknf(nf); N = nf_get_degree(nf);
-  if (typ(x)!=t_VEC || lg(x)!=4) pari_err(talker,"not a module in nfsmith");
+  if (typ(x)!=t_VEC || lg(x)!=4) pari_err(talker,"not a module in nfsnf");
   A = gel(x,1);
   I = gel(x,2);
   J = gel(x,3);
-  if (typ(A)!=t_MAT) pari_err(talker,"not a matrix in nfsmith");
+  if (typ(A)!=t_MAT) pari_err(talker,"not a matrix in nfsnf");
   n = lg(A)-1;
   if (typ(I)!=t_VEC || lg(I)!=n+1 || typ(J)!=t_VEC || lg(J)!=n+1)
-    pari_err(talker,"not a correct ideal list in nfsmith");
-  if (!n) pari_err(talker,"not a matrix of maximal rank in nfsmith");
+    pari_err(talker,"not a correct ideal list in nfsnf");
+  if (!n) pari_err(talker,"not a matrix of maximal rank in nfsnf");
   m = lg(A[1])-1;
-  if (n < m) pari_err(talker,"not a matrix of maximal rank in nfsmith");
-  if (n > m) pari_err(impl,"nfsmith for non square matrices");
+  if (n < m) pari_err(talker,"not a matrix of maximal rank in nfsnf");
+  if (n > m) pari_err(impl,"nfsnf for non square matrices");
 
   av = avma; lim = stack_lim(av,1);
   A = RgM_to_nfM(nf, A);
@@ -2619,7 +2619,7 @@ nfsmith(GEN nf, GEN x)
 	  D = idealdiv(nf,gel(I,k),gel(I,i));
 	  p2 = idealdiv(nf,gel(J,i), p1);
           l = RgV_find_denom( RgM_solve(p2, D) );
-	  if (l>N) pari_err(talker,"bug2 in nfsmith");
+	  if (l>N) pari_err(talker,"bug2 in nfsnf");
 	  p1 = element_mulvecrow(nf,gel(D,l),A,k,i);
 	  for (l=1; l<=i; l++) gcoeff(A,i,l) = gadd(gcoeff(A,i,l),gel(p1,l));
 
@@ -2627,7 +2627,7 @@ nfsmith(GEN nf, GEN x)
 	}
       if (low_stack(lim, stack_lim(av,1)))
       {
-	if(DEBUGMEM>1) pari_warn(warnmem,"nfsmith");
+	if(DEBUGMEM>1) pari_warn(warnmem,"nfsnf");
 	gerepileall(av,3, &A,&I,&J);
       }
     }
