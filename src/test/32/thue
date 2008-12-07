@@ -7,7 +7,10 @@
 [[1, 1]]
 [[1, 0], [-1, 0], [1, 1], [0, 1], [-1, -1], [0, -1]]
 [[1868, 514], [-4, -2]]
+  *** thue: Warning: Non trivial conditional class group.
+  *** May miss solutions of the norm equation.
+[]
 [[5, 1]]
 [[1, 1]]
 [[1, 1]]
-Total time spent: 1756
+Total time spent: 3348

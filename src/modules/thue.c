@@ -483,7 +483,7 @@ MiddleSols(GEN *pS, GEN bound, GEN roo, GEN poly, GEN rhs, long s, GEN c1)
    * 2 + ==> continued fraction is normalized if last entry is 1
    * 3 + ==> start at a0, not a1 */
   nmax = 3 + (long)(gtodouble(logr_abs(bound)) / 0.4812118250596);
-  bound = floorr(bound);
+  bound = (expo(bound) > 30)? ceil_safe(bound): floorr(bound);
 
   for (k = 1; k <= s; k++)
   {
