@@ -1104,12 +1104,15 @@ void
 testprimes(GEN bnf, GEN BOUND)
 {
   pari_sp av0 = avma, av;
-  ulong p, pmax, bound = itou_or_0(BOUND);
+  ulong p, pmax, bound, boundp = itou_or_0(BOUND);
   FACT *fact;
   GEN nf = bnf_get_nf(bnf), f = nf_get_index(nf), dK = nf_get_disc(nf);
   GEN Vbase, fb, gp;
   byteptr d = diffptr + 1;
   FB_t F;
+
+  bound = maxprime();
+  if (boundp && boundp < bound) bound = boundp;
 
   if (!is_pm1(f))
   {
@@ -1125,7 +1128,7 @@ testprimes(GEN bnf, GEN BOUND)
   (void)recover_partFB(&F, Vbase, nf_get_degree(nf));
   fact = (FACT*)stackmalloc((F.KC+1)*sizeof(FACT));
 
-  if (!bound) bound = maxprime();
+  /* loop up to min(maxprime, BOUND) */
   for (av=avma, p=2; p < bound; avma=av)
   {
     GEN vP = idealprimedec(bnf, utoipos(p));
@@ -1152,8 +1155,9 @@ testprimes(GEN bnf, GEN BOUND)
     }
     NEXT_PRIME_VIADIFF(p, d);
   }
-  if (lgefint(BOUND) == 3) { avma = av0; return; }
+  if (boundp == bound) { avma = av0; return; }
 
+  /* finish looping up to BOUND */
   pari_warn(warner,"Zimmert's bound is large (%Pd), certification will take a long time", BOUND);
   gp = utoipos(bound);
   for (av=avma;; gp = gerepileuptoint(av, nextprime(addis(gp,1))))
