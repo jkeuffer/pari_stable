@@ -7,6 +7,9 @@ Help: bnrclassno(bnf,I): ray class number of the module I for the big number
 Doc: $\var{bnf}$ being as output by
  \kbd{bnfinit} (units are mandatory unless the ideal is trivial), and $I$
  being a modulus, computes the ray class number of the number field for the
- modulus $I$. This is faster than \kbd{bnrinit} and should be used if only the
+ modulus $I$. One can input the associated \var{bid} for $I$ instead of the
+ module itself, saving some time.
+
+ This function is faster than \kbd{bnrinit} and should be used if only the
  ray class number is desired. See \tet{bnrclassnolist} if you need ray class
  numbers for all moduli less than some bound.

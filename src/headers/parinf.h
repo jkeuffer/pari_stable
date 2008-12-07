@@ -166,6 +166,7 @@ GEN    archstar_full_rk(GEN x, GEN bas, GEN v, GEN gen);
 GEN    check_and_build_obj(GEN S, long tag, GEN (*build)(GEN));
 GEN    check_and_build_cycgen(GEN bnf);
 double check_bach(double cbach, double B);
+GEN    checkbid_i(GEN bid);
 GEN    checkbnf_i(GEN bnf);
 GEN    checknf_i(GEN nf);
 GEN    pow_ei_mod_p(GEN nf, long I, GEN n, GEN p);

@@ -103,11 +103,16 @@ checksqmat(GEN x, long N)
     pari_err(talker,"incorrect matrix for ideal");
 }
 
+GEN
+checkbid_i(GEN bid)
+{
+  if (typ(bid)!=t_VEC || lg(bid)!=6 || lg(bid[1])!=3) return NULL;
+  return bid;
+}
 void
 checkbid(GEN bid)
 {
-  if (typ(bid)!=t_VEC || lg(bid)!=6 || lg(bid[1])!=3)
-    pari_err(talker,"incorrect bigideal");
+  if (!checkbid_i(bid)) pari_err(typeer,"checkbid");
 }
 
 void
