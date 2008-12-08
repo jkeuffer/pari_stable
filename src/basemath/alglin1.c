@@ -748,18 +748,27 @@ is_modular_solve(GEN a, GEN b, GEN *u)
   GEN p = NULL;
   if (!is_FpM(&a, &p)) return 0;
   if (!b)
+  {
     a = FpM_inv(a,p);
+    if (a) a = FpM_to_mod(a, p);
+  }
   else
   {
     switch(typ(b))
     {
-      case t_COL: if (!is_FpC(&b, &p)) return 0; break;
-      case t_MAT: if (!is_FpM(&b, &p)) return 0; break;
+      case t_COL:
+        if (!is_FpC(&b, &p)) return 0;
+        a = FpM_gauss(a,b,p);
+        if (a) a = FpC_to_mod(a, p);
+        break;
+      case t_MAT:
+        if (!is_FpM(&b, &p)) return 0;
+        a = FpM_gauss(a,b,p);
+        if (a) a = FpM_to_mod(a, p);
+        break;
       default: return 0;
     }
-    a = FpM_gauss(a,b,p);
   }
-  if (a) a = (typ(b) == t_COL)? FpC_to_mod(a, p): FpM_to_mod(a, p);
   *u = a; return 1;
 }
 /* Gaussan Elimination. Compute a^(-1)*b
