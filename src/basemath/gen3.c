@@ -1678,7 +1678,10 @@ integ(GEN x, long v)
   {
     case t_POL:
       vx = varn(x); lx = lg(x);
-      if (lx == 2) return zeropol(v);
+      if (lx == 2) {
+        if (varncmp(vx, v) < 0) v = vx;
+        return zeropol(v);
+      }
       if (varncmp(vx, v) > 0) return deg1pol(x, gen_0, v);
       if (varncmp(vx, v) < 0) return triv_integ(x,v);
       y = cgetg(lx+1,tx); y[1] = x[1]; gel(y,2) = gen_0;
