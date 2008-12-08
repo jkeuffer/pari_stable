@@ -1678,7 +1678,6 @@ integ(GEN x, long v)
   {
     case t_POL:
       vx = varn(x); lx = lg(x);
-      if (varncmp(vx, v) < 0) v = vx;
       if (lx == 2) return zeropol(v);
       if (varncmp(vx, v) > 0) return deg1pol(x, gen_0, v);
       if (varncmp(vx, v) < 0) return triv_integ(x,v);

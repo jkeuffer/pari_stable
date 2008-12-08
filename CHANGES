@@ -149,6 +149,7 @@ BA117- Fix detection for ppc64 running in 32bit mode.
   122- thue(thueinit(x^3-48, 320) -> missing solutions (similar problem
        when LHS is a polynomial of degree d and RHS includes a d-th power).
   123- completely wrong results in nfsnf
+  124- intformal(A,Y) -> 1/2*A^2
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
