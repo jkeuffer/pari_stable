@@ -807,12 +807,63 @@ get_nfpol(GEN x, GEN *nf)
   *nf = checknf(x); return nf_get_pol(*nf);
 }
 
+/* is isomorphism / inclusion (a \subset b) compatible with what we know about
+ * basic invariants ? (degree, signature, discriminant) */
+static int
+tests_OK(GEN a, GEN nfa, GEN b, GEN nfb, long fliso)
+{
+  GEN da, db, fa, P, E, U;
+  long i, nP, m = degpol(a), n = degpol(b), q = m / n; /* relative degree */
+
+  if (m <= 0 || n <= 0) pari_err(constpoler, "nfincl");
+  if (fliso) { if (n != m) return 0; } else { if (n % m) return 0; }
+
+  if (nfa && nfb) /* both nf structures available */
+  {
+    long r1a = nf_get_r1(nfa), r1b = nf_get_r1(nfb) ;
+    if (fliso)
+      return (r1a == r1b && equalii(nf_get_disc(nfa), nf_get_disc(nfb)));
+    else
+      return (r1a <= r1b * q &&
+              dvdii(nf_get_disc(nfb), powiu(nf_get_disc(nfa), q)));
+  }
+  da = nfa? nf_get_disc(nfa): ZX_disc(a);
+  db = nfb? nf_get_disc(nfb): ZX_disc(b);
+  if (fliso) return (gissquare(gdiv(da,db)) == gen_1);
+
+  if (odd(q) && signe(da) != signe(db)) return 0;
+  fa = Z_factor_limit(absi(da), 0);
+  P = gel(fa,1);
+  E = gel(fa,2); nP = lg(P) - 1;
+  for (i=1; i<nP; i++)
+    if (mod2(gel(E,i)) && !dvdii(db, powiu(gel(P,i),q))) return 0;
+  U = gel(P,nP);
+  if (expi(U) < 150) /* "unfactored" cofactor is small, finish */
+  {
+    if (cmpiu(U, maxprime()) > 0)
+    {
+      fa = Z_factor(U);
+      P = gel(fa,1);
+      E = gel(fa,2);
+    }
+    else
+    {
+      P = mkvec(U);
+      E = mkvec(gel(E,nP));
+    }
+    nP = lg(P) - 1;
+    for (i=1; i<=nP; i++)
+      if (mod2(gel(E,i)) && !dvdii(db, powiu(gel(P,i),q))) return 0;
+  }
+  return 1;
+}
+
 /* if fliso test for isomorphism, for inclusion otherwise. */
 static GEN
 nfiso0(GEN a, GEN b, long fliso)
 {
   pari_sp av = avma;
-  long n, m, i, vb, lx;
+  long i, vb, lx;
   GEN nfa, nfb, y, la, lb;
 
   a = get_nfpol(a, &nfa);
@@ -820,41 +871,10 @@ nfiso0(GEN a, GEN b, long fliso)
   if (!nfa) { a = Q_primpart(a); RgX_check_ZX(a, "nsiso0"); }
   if (!nfb) { b = Q_primpart(b); RgX_check_ZX(b, "nsiso0"); }
   if (fliso && nfa && !nfb) { swap(a,b); nfb = nfa; nfa = NULL; }
-  m = degpol(a);
-  n = degpol(b); if (m<=0 || n<=0) pari_err(constpoler,"nfiso or nfincl");
-  if (fliso) { if (n!=m) return gen_0; }
-  else       { if (n%m) return gen_0; }
+  if (!tests_OK(a, nfa, b, nfb, fliso)) { avma = av; return gen_0; }
 
   if (nfb) lb = gen_1; else b = ZX_primitive_to_monic(b,&lb);
   if (nfa) la = gen_1; else a = ZX_primitive_to_monic(a,&la);
-  if (nfa && nfb)
-  {
-    if (fliso)
-    {
-      if (!ZV_equal(gel(nfa,2),gel(nfb,2))
-       || !equalii(nf_get_disc(nfa), nf_get_disc(nfb))) return gen_0;
-    }
-    else
-      if (!dvdii(nf_get_disc(nfb), powiu(nf_get_disc(nfa), n/m))) return gen_0;
-  }
-  else
-  {
-    GEN da = nfa? nf_get_disc(nfa): ZX_disc(a);
-    GEN db = nfb? nf_get_disc(nfb): ZX_disc(b);
-    if (fliso)
-    {
-      if (gissquare(gdiv(da,db)) == gen_0) { avma=av; return gen_0; }
-    }
-    else if (expi(da) < 150) /* too expensive otherwise */
-    {
-      GEN fa = Z_factor(da), P = gel(fa,1), E = gel(fa,2);
-      long q = n/m;
-      lx = lg(P);
-      for (i=1; i<lx; i++)
-	if (mod2(gel(E,i)) && !dvdii(db, powiu(gel(P,i),q)))
-	  { avma=av; return gen_0; }
-    }
-  }
   a = leafcopy(a); setvarn(a,0);
   b = leafcopy(b); vb = varn(b);
   if (nfb)
