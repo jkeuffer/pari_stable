@@ -1107,16 +1107,21 @@ newtonsums(GEN p, GEN a, GEN da, GEN chi, long c, GEN pp, GEN ns)
   pari_sp av, lim;
 
   a = centermod(a, pp); av = avma; lim = stack_lim(av, 1);
-  pa = pol_1(varn(a)); dpa = gen_1; vdpa = 0;
+  pa = NULL; /* -Wall */
+  dpa = gen_1; vdpa = 0;
   vda = da ? Z_pval(da,p): 0;
   va = zerovec(c);
   for (j = 1; j <= c; j++)
   { /* pa/dpa = (a/d)^(j-1) mod (chi, pp), dpa = p^vdpa */
     long degpa;
-    pa = FpX_rem(FpX_mul(pa, a, pp), chi, pp);
+    pa = j == 1? a: FpXQ_mul(pa, a, chi, pp);
     degpa = degpol(pa);
-    s = mulii(gel(pa,2), gel(ns,1)); /* k = 0 */
-    for (k = 1; k <= degpa; k++) s = addii(s, mulii(gel(pa,k+2), gel(ns,k+1)));
+    if (degpa < 0) s = gen_0;
+    else
+    {
+      s = mulii(gel(pa,2), gel(ns,1)); /* k = 0 */
+      for (k=1; k<=degpa; k++) s = addii(s, mulii(gel(pa,k+2), gel(ns,k+1)));
+    }
     if (da) {
       GEN r;
       dpa = mulii(dpa, da);
