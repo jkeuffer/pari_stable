@@ -1073,22 +1073,25 @@ redelt(GEN a, GEN N, GEN p)
 GEN
 polsymmodp(GEN g, GEN p)
 {
-  pari_sp av1, av2;
+  pari_sp av;
   long d = degpol(g), i, k;
-  GEN s , y;
+  GEN s, y, po2;
 
   y = cgetg(d + 1, t_COL);
   gel(y,1) = utoipos(d);
-  for (k = 1; k < d; k++)
+  if (d == 1) return y;
+  /* k = 1, split off for efficiency */
+  po2 = shifti(p,-1); /* to be left on stack */
+  av = avma;
+  s = gel(g,d-1+2);
+  gel(y,2) = gerepileuptoint(av, centermodii(negi(s), p, po2));
+  for (k = 2; k < d; k++)
   {
-    av1 = avma;
-    s = centermod(mului(k, polcoeff0(g,d-k,-1)), p);
-    for (i = 1; i < k; i++)
-      s = addii(s, mulii(gel(y,k-i+1), polcoeff0(g,d-i,-1)));
-    av2 = avma;
-    gel(y,k+1) = gerepile(av1, av2, centermod(negi(s), p));
+    av = avma;
+    s = mului(k, remii(gel(g,d-k+2), p));
+    for (i = 1; i < k; i++) s = addii(s, mulii(gel(y,k-i+1), gel(g,d-i+2)));
+    gel(y,k+1) = gerepileuptoint(av, centermodii(negi(s), p, po2));
   }
-
   return y;
 }
 
@@ -1100,7 +1103,7 @@ static GEN
 newtonsums(GEN p, GEN a, GEN da, GEN chi, long c, GEN pp, GEN ns)
 {
   GEN va, pa, dpa, s;
-  long j, k, vda, vdpa, n = degpol(chi);
+  long j, k, vda, vdpa;
   pari_sp av, lim;
 
   a = centermod(a, pp); av = avma; lim = stack_lim(av, 1);
@@ -1109,10 +1112,11 @@ newtonsums(GEN p, GEN a, GEN da, GEN chi, long c, GEN pp, GEN ns)
   va = zerovec(c);
   for (j = 1; j <= c; j++)
   { /* pa/dpa = (a/d)^(j-1) mod (chi, pp), dpa = p^vdpa */
+    long degpa;
     pa = FpX_rem(FpX_mul(pa, a, pp), chi, pp);
-    s  = gen_0;
-    for (k = 0; k < n; k++)
-      s = addii(s, mulii(polcoeff0(pa, k, -1), gel(ns,k+1)));
+    degpa = degpol(pa);
+    s = mulii(gel(pa,2), gel(ns,1)); /* k = 0 */
+    for (k = 1; k <= degpa; k++) s = addii(s, mulii(gel(pa,k+2), gel(ns,k+1)));
     if (da) {
       GEN r;
       dpa = mulii(dpa, da);
