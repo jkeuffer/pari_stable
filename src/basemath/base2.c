@@ -1116,12 +1116,13 @@ newtonsums(GEN p, GEN a, GEN da, GEN chi, long c, GEN pp, GEN ns)
     long degpa;
     pa = j == 1? a: FpXQ_mul(pa, a, chi, pp);
     degpa = degpol(pa);
-    if (degpa < 0) s = gen_0;
-    else
-    {
-      s = mulii(gel(pa,2), gel(ns,1)); /* k = 0 */
-      for (k=1; k<=degpa; k++) s = addii(s, mulii(gel(pa,k+2), gel(ns,k+1)));
+    if (degpa < 0) {
+      for (; j <= c; j++) gel(va,j) = gen_0;  
+      return va;
     }
+
+    s = mulii(gel(pa,2), gel(ns,1)); /* k = 0 */
+    for (k=1; k<=degpa; k++) s = addii(s, mulii(gel(pa,k+2), gel(ns,k+1)));
     if (da) {
       GEN r;
       dpa = mulii(dpa, da);
