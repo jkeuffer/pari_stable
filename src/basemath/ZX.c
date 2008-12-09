@@ -409,3 +409,57 @@ ZX_mul(GEN x, GEN y)
   dy = degpol(y); if (dy<=0) return dy < 0? ZX_copy(y): ZX_Z_mul(x, gel(y,2));
   return ZX_mul_mulii(x,y);
 }
+
+/* x,y two ZX in the same variable; assume y is monic */
+GEN
+ZX_rem(GEN x, GEN y)
+{
+  long vx, dx, dy, dz, i, j, sx, lr;
+  pari_sp av0, av;
+  GEN z,p1,rem;
+
+  vx = varn(x);
+  dy = degpol(y);
+  dx = degpol(x);
+  if (dx < dy) return ZX_copy(x);
+  if (!dy) return zeropol(vx); /* y is constant */
+  av0 = avma; dz = dx-dy;
+  avma = av0;
+  z=cgetg(dz+3,t_POL); z[1] = x[1];
+  x += 2; y += 2; z += 2;
+
+  p1 = gel(x,dx); av = avma;
+  gel(z,dz) = icopy(p1);
+  for (i=dx-1; i>=dy; i--)
+  {
+    av=avma; p1=gel(x,i);
+    for (j=i-dy+1; j<=i && j<=dz; j++)
+      p1 = subii(p1, mulii(gel(z,j),gel(y,i-j)));
+    gel(z,i-dy) = avma == av? icopy(p1): gerepileuptoint(av, p1);
+  }
+  rem = (GEN)avma; av = (pari_sp)new_chunk(dx+3);
+  for (sx=0; ; i--)
+  {
+    p1 = gel(x,i);
+    for (j=0; j<=i && j<=dz; j++)
+      p1 = subii(p1, mulii(gel(z,j),gel(y,i-j)));
+    if (signe(p1)) { sx = 1; break; }
+    if (!i) break;
+    avma=av;
+  }
+  lr=i+3; rem -= lr;
+  rem[0] = evaltyp(t_POL) | evallg(lr);
+  rem[1] = z[-1];
+  p1 = gerepileuptoint((pari_sp)rem, p1);
+  rem += 2; gel(rem,i) = p1;
+  for (i--; i>=0; i--)
+  {
+    av=avma; p1 = gel(x,i);
+    for (j=0; j<=i && j<=dz; j++)
+      p1 = subii(p1, mulii(gel(z,j),gel(y,i-j)));
+    gel(rem,i) = avma == av? icopy(p1): gerepileuptoint(av, p1);
+  }
+  rem -= 2;
+  if (!sx) (void)ZX_renormalize(rem, lr);
+  return gerepileupto(av0,rem);
+}

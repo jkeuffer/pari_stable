@@ -4775,6 +4775,16 @@ by the integer \kbd{y}.
 
 \fun{GEN}{ZX_sqr}{GEN x,GEN p} returns $\kbd{x}^2$.
 
+\fun{GEN}{ZX_rem}{GEN x, GEN y} returns the remainder of the Euclidean
+division of $x$ mod $y$. Assume that $x$, $y$ are two \kbd{ZX} and that
+$y$ is monic.
+
+\fun{GEN}{ZXQ_mul}{GEN x,GEN y,GEN T} returns $x*y$ mod $T$, assuming
+that all inputs are \kbd{ZX}s and that $T$ is monic.
+
+\fun{GEN}{ZXQ_sqr}{GEN x,GEN T} returns $x^2$ mod $T$, assuming
+that all inputs are \kbd{ZX}s and that $T$ is monic.
+
 \fun{long}{ZX_valrem}{GEN P, GEN *z} as \kbd{RgX\_valrem}, but assumes
 \kbd{P} has \typ{INT} coefficients.
 

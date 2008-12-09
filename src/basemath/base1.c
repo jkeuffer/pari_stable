@@ -1003,7 +1003,7 @@ get_mul_table(GEN x,GEN basden,GEN invbas)
     for (j=i; j<=n; j++)
     {
       pari_sp av = avma;
-      z = (i == j)? RgXQ_sqr(gel(w,i), x): RgXQ_mul(gel(w,i),gel(w,j), x);
+      z = (i == j)? ZXQ_sqr(gel(w,i), x): ZXQ_mul(gel(w,i),gel(w,j), x);
       z = mulmat_pol(invbas, z); /* integral column */
       if (den)
       {
@@ -1049,7 +1049,7 @@ make_Tr(GEN x, GEN basden)
     for (   ; j<=n; j++)
     {
       pari_sp av = avma;
-      t = (i == j)? RgXQ_sqr(gel(w,i), x): RgXQ_mul(gel(w,i),gel(w,j), x);
+      t = (i == j)? ZXQ_sqr(gel(w,i), x): ZXQ_mul(gel(w,i),gel(w,j), x);
       t = quicktrace(t, sym);
       if (den)
       {

@@ -1353,6 +1353,16 @@ INLINE long
 lgpol(GEN x) { return lg(x)-2; }
 
 INLINE GEN
+RgXQ_mul(GEN y, GEN x, GEN T) { return RgX_rem(RgX_mul(y, x), T); }
+INLINE GEN
+RgXQ_sqr(GEN x, GEN T) { return RgX_rem(RgX_sqr(x), T); }
+
+INLINE GEN
+ZXQ_mul(GEN y, GEN x, GEN T) { return ZX_rem(ZX_mul(y, x), T); }
+INLINE GEN
+ZXQ_sqr(GEN x, GEN T) { return ZX_rem(ZX_sqr(x), T); }
+
+INLINE GEN
 RgX_div(GEN x, GEN y) { return RgX_divrem(x,y,NULL); }
 INLINE GEN
 RgX_rem(GEN x, GEN y) { return RgX_divrem(x,y,ONLY_REM); }

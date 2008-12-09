@@ -194,7 +194,7 @@ GEN
 FpX_divrem(GEN x, GEN y, GEN p, GEN *pr)
 {
   long vx, dx, dy, dz, i, j, sx, lr;
-  pari_sp av0, av, tetpil;
+  pari_sp av0, av;
   GEN z,p1,rem,lead;
 
   if (!signe(y)) pari_err(gdiver);
@@ -247,14 +247,14 @@ FpX_divrem(GEN x, GEN y, GEN p, GEN *pr)
   x += 2; y += 2; z += 2;
 
   p1 = gel(x,dx); av = avma;
-  gel(z,dz) = lead? gerepileupto(av, Fp_mul(p1,lead, p)): icopy(p1);
+  gel(z,dz) = lead? gerepileuptoint(av, Fp_mul(p1,lead, p)): icopy(p1);
   for (i=dx-1; i>=dy; i--)
   {
     av=avma; p1=gel(x,i);
     for (j=i-dy+1; j<=i && j<=dz; j++)
       p1 = subii(p1, mulii(gel(z,j),gel(y,i-j)));
     if (lead) p1 = mulii(p1,lead);
-    tetpil=avma; gel(z,i-dy) = gerepile(av,tetpil,modii(p1, p));
+    gel(z,i-dy) = gerepileuptoint(av,modii(p1, p));
   }
   if (!pr) { if (lead) gunclone(lead); return z-2; }
 
@@ -264,7 +264,7 @@ FpX_divrem(GEN x, GEN y, GEN p, GEN *pr)
     p1 = gel(x,i);
     for (j=0; j<=i && j<=dz; j++)
       p1 = subii(p1, mulii(gel(z,j),gel(y,i-j)));
-    tetpil=avma; p1 = modii(p1,p); if (signe(p1)) { sx = 1; break; }
+    p1 = modii(p1,p); if (signe(p1)) { sx = 1; break; }
     if (!i) break;
     avma=av;
   }
@@ -277,14 +277,14 @@ FpX_divrem(GEN x, GEN y, GEN p, GEN *pr)
   lr=i+3; rem -= lr;
   rem[0] = evaltyp(t_POL) | evallg(lr);
   rem[1] = z[-1];
-  p1 = gerepile((pari_sp)rem,tetpil,p1);
+  p1 = gerepileuptoint((pari_sp)rem, p1);
   rem += 2; gel(rem,i) = p1;
   for (i--; i>=0; i--)
   {
     av=avma; p1 = gel(x,i);
     for (j=0; j<=i && j<=dz; j++)
       p1 = subii(p1, mulii(gel(z,j),gel(y,i-j)));
-    tetpil=avma; gel(rem,i) = gerepile(av,tetpil, modii(p1,p));
+    gel(rem,i) = gerepileuptoint(av, modii(p1,p));
   }
   rem -= 2;
   if (lead) gunclone(lead);
