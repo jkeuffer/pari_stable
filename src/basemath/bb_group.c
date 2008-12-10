@@ -28,9 +28,73 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**                                                                   **/
 /***********************************************************************/
 
+static GEN
+iter_rho(GEN x, GEN g, GEN q, GEN A, ulong h, void *E, const struct bb_group *grp)
+{
+  GEN a = gel(A,1);
+  switch((h|grp->hash(a))%3UL)
+  {
+    case 0:
+      return mkvec3(grp->pow(E,a,gen_2),Fp_mulu(gel(A,2),2,q),
+                                        Fp_mulu(gel(A,3),2,q));
+    case 1:
+      return mkvec3(grp->mul(E,a,x),addis(gel(A,2),1),gel(A,3));
+    case 2:
+      return mkvec3(grp->mul(E,a,g),gel(A,2),addis(gel(A,3),1));
+  }
+  return NULL;
+}
+
+/*Generic Pollard rho discrete log algorithm*/
+GEN
+gen_Pollard_log(GEN x, GEN g, GEN q, void *E, const struct bb_group *grp,
+    GEN easy(void*E, GEN, GEN, GEN))
+{
+  pari_sp av=avma, lim=stack_lim(av,2);
+  GEN A,B,l;
+  ulong h=0;
+  if (grp->hash==NULL) return gen_Shanks_log(x,g,q,E,grp,easy);
+  if (easy)
+  {
+    GEN e = easy(E, x, g, q);
+    if (e) return e;
+  }
+  if (grp->cmp1(x)) {avma=av; return gen_0;}
+  if (!grp->cmp(x,g)) {avma=av; return gen_1;}
+  long i,imax=itou(sqrti(shifti(q,4)));
+  do {
+ rho_restart:
+    A = B = mkvec3(grp->pow(E,g,gen_0),gen_0,gen_0);
+    i=0;
+    do {
+      if (i>imax)
+      {
+        h++;
+        if (DEBUGLEVEL)
+          pari_warn(warner,"changing Pollard rho hash seed to %ld",h);
+        goto rho_restart;
+      }
+      A = iter_rho(x, g, q, A, h, E, grp);
+      B = iter_rho(x, g, q, B, h, E, grp);
+      B = iter_rho(x, g, q, B, h, E, grp);
+      if (low_stack(lim, stack_lim(av,2)))
+      {
+        if(DEBUGMEM>1) pari_warn(warnmem,"gen_Pollard_log");
+        gerepileall(av, 2, &A, &B);
+      }
+      i++;
+    } while (grp->cmp(gel(A,1), gel(B,1)));
+    gel(A,2) = modii(gel(A,2), q);
+    gel(B,2) = modii(gel(B,2), q);
+    h++;
+  } while (equalii(gel(A,2), gel(B,2)));
+  l = Fp_div(Fp_sub(gel(B,3), gel(A,3),q),Fp_sub(gel(A,2), gel(B,2), q), q);
+  return gerepileuptoint(av, l);
+}
+
 /*Generic Shanks baby-step/giant-step algorithm*/
 GEN
-gen_Shanks_log(GEN x,GEN g0,GEN q, void *E, const struct bb_group *grp,
+gen_Shanks_log(GEN x, GEN g0,GEN q, void *E, const struct bb_group *grp,
     GEN easy(void*E, GEN, GEN, GEN))
 {
   pari_sp av=avma,av1,lim;
@@ -42,6 +106,7 @@ gen_Shanks_log(GEN x,GEN g0,GEN q, void *E, const struct bb_group *grp,
     if (e) return e;
   }
   if (grp->cmp1(x)) {avma=av; return gen_0;}
+  if (!grp->cmp(x,g0)) {avma=av; return gen_1;}
   p1 = sqrti(q);
   if (cmpiu(p1,LGBITS) >= 0)
     pari_err(talker,"order too large in gen_Shanks_log");
@@ -125,7 +190,7 @@ gen_PH_log(GEN a, GEN g, GEN ord, void *E, const struct bb_group *grp,
     for (j=0;; j++)
     { /* n_q = sum_{i<j} b_i q^i */
       b = grp->pow(E,a0, gel(qj,e-1-j));
-      b = gen_Shanks_log(b, g_q, q, E, grp, easy);
+      b = gen_Pollard_log(b, g_q, q, E, grp, easy);
       n_q = addii(n_q, mulii(b, gel(qj,j)));
       if (j == e-1) break;
 

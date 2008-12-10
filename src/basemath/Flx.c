@@ -1579,7 +1579,17 @@ _Flxq_rand(void *data)
   return z;
 }
 
-const static struct bb_group Flxq_star={_Flxq_mul,_Flxq_pow,_Flxq_rand,vecsmall_lexcmp,Flx_cmp1};
+static ulong
+_Flxq_hash(GEN x)
+{
+  ulong h = 0;
+  long i, l=lgpol(x);
+  for (i=0;i<l;i++)
+    h ^= x[2+i]<<(i&(BITS_IN_LONG-1));
+  return h;
+}
+
+const static struct bb_group Flxq_star={_Flxq_mul,_Flxq_pow,_Flxq_rand,_Flxq_hash,vecsmall_lexcmp,Flx_cmp1};
 
 GEN
 Flxq_order(GEN a, GEN ord, GEN T, ulong p)

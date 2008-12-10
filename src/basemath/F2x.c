@@ -597,7 +597,13 @@ _F2xq_rand(void *data)
   return z;
 }
 
-const static struct bb_group F2xq_star={_F2xq_mul,_F2xq_pow,_F2xq_rand,vecsmall_lexcmp,F2x_cmp1};
+static ulong
+_F2xq_hash(GEN x)
+{
+  return x[2];
+}
+
+const static struct bb_group F2xq_star={_F2xq_mul,_F2xq_pow,_F2xq_rand,_F2xq_hash,vecsmall_lexcmp,F2x_cmp1};
 
 GEN
 F2xq_order(GEN a, GEN ord, GEN T)

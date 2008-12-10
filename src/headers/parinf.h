@@ -72,11 +72,12 @@ typedef struct {
 /* black box groups */
 struct bb_group
 {
-  GEN (*mul)(void *E, GEN, GEN);
-  GEN (*pow)(void *E, GEN, GEN);
-  GEN (*rand)(void *E);
-  int (*cmp)(GEN, GEN);
-  int (*cmp1)(GEN);
+  GEN   (*mul)(void *E, GEN, GEN);
+  GEN   (*pow)(void *E, GEN, GEN);
+  GEN   (*rand)(void *E);
+  ulong (*hash)(GEN);
+  int   (*cmp)(GEN, GEN);
+  int   (*cmp1)(GEN);
 };
 /* qfr3 / qfr5 */
 struct qfr_data { GEN D, sqrtD, isqrtD; };
