@@ -734,7 +734,7 @@ FF_log(GEN x, GEN g, GEN ord)
   GEN r, T, p;
   _getFF(x,&T,&p,&pp);
   _checkFF(x,g,"log");
-  if (ord && !is_Z_factor(ord)) pari_err(typeer, "FF_log");
+  if (ord && typ(ord)!=t_INT && !is_Z_factor(ord)) pari_err(typeer, "FF_log");
   switch(x[1])
   {
   case t_FF_FpXQ:

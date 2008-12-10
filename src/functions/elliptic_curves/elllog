@@ -3,10 +3,11 @@ Section: elliptic_curves
 C-Name: elllog
 Prototype: GGGDG
 Help: elllog(E,P,G,{o}): return the discrete logarithm of the point P of
- the elliptic curve E in base G. If present, o must be the order of G.
+ the elliptic curve E in base G. If present, o must be the order of G,
+ or its factorisation matrix.
 Doc: discrete logarithm of the point $P$ of the elliptic curve $E$ in base $G$.
- If present, $o$ must be the order of $G$. The function assume that $P$ is a
- multiple of $G$.
+ If present, $o$ must be the order of $G$, or its factorisation matrix. The 
+ function assume that $P$ is a multiple of $G$.
  \bprog
  ? a = ffgen(ffinit(2,8),'a);
  ? E = ellinit([a,1,0,0,1]);  \\ over F_{2^8}
