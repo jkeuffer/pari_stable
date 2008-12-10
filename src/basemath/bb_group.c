@@ -46,21 +46,12 @@ iter_rho(GEN x, GEN g, GEN q, GEN A, ulong h, void *E, const struct bb_group *gr
 }
 
 /*Generic Pollard rho discrete log algorithm*/
-GEN
-gen_Pollard_log(GEN x, GEN g, GEN q, void *E, const struct bb_group *grp,
-    GEN easy(void*E, GEN, GEN, GEN))
+static GEN
+gen_Pollard_log(GEN x, GEN g, GEN q, void *E, const struct bb_group *grp)
 {
   pari_sp av=avma, lim=stack_lim(av,2);
   GEN A,B,l;
   ulong h=0;
-  if (grp->hash==NULL) return gen_Shanks_log(x,g,q,E,grp,easy);
-  if (easy)
-  {
-    GEN e = easy(E, x, g, q);
-    if (e) return e;
-  }
-  if (grp->cmp1(x)) {avma=av; return gen_0;}
-  if (!grp->cmp(x,g)) {avma=av; return gen_1;}
   long i,imax=itou(sqrti(shifti(q,4)));
   do {
  rho_restart:
@@ -93,20 +84,12 @@ gen_Pollard_log(GEN x, GEN g, GEN q, void *E, const struct bb_group *grp,
 }
 
 /*Generic Shanks baby-step/giant-step algorithm*/
-GEN
-gen_Shanks_log(GEN x, GEN g0,GEN q, void *E, const struct bb_group *grp,
-    GEN easy(void*E, GEN, GEN, GEN))
+static GEN
+gen_Shanks_log(GEN x, GEN g0,GEN q, void *E, const struct bb_group *grp)
 {
   pari_sp av=avma,av1,lim;
   long lbaby,i,k;
   GEN p1,smalltable,giant,perm,v,g0inv;
-  if (easy)
-  {
-    GEN e = easy(E, x, g0, q);
-    if (e) return e;
-  }
-  if (grp->cmp1(x)) {avma=av; return gen_0;}
-  if (!grp->cmp(x,g0)) {avma=av; return gen_1;}
   p1 = sqrti(q);
   if (cmpiu(p1,LGBITS) >= 0)
     pari_err(talker,"order too large in gen_Shanks_log");
@@ -140,6 +123,22 @@ gen_Shanks_log(GEN x, GEN g0,GEN q, void *E, const struct bb_group *grp,
       p1 = gerepileupto(av1, p1);
     }
   }
+}
+
+/*Generic discrete logarithme in a group of prime order p*/
+GEN
+gen_plog(GEN x, GEN g, GEN p, void *E, const struct bb_group *grp,
+    GEN easy(void*E, GEN, GEN, GEN))
+{
+  if (easy)
+  {
+    GEN e = easy(E, x, g, p);
+    if (e) return e;
+  }
+  if (grp->cmp1(x)) return gen_0;
+  if (!grp->cmp(x,g)) return gen_1;
+  if (grp->hash==NULL || expi(p)<32) return gen_Shanks_log(x,g,p,E,grp);
+  return gen_Pollard_log(x, g, p, E, grp);
 }
 
 /* easy() is an optional trapdoor function that catch easy logarithms*/
@@ -190,7 +189,7 @@ gen_PH_log(GEN a, GEN g, GEN ord, void *E, const struct bb_group *grp,
     for (j=0;; j++)
     { /* n_q = sum_{i<j} b_i q^i */
       b = grp->pow(E,a0, gel(qj,e-1-j));
-      b = gen_Pollard_log(b, g_q, q, E, grp, easy);
+      b = gen_plog(b, g_q, q, E, grp, easy);
       n_q = addii(n_q, mulii(b, gel(qj,j)));
       if (j == e-1) break;
 
@@ -301,7 +300,7 @@ gen_Shanks_sqrtl(GEN a, GEN l, GEN q,long e, GEN r, GEN y, GEN m,void *E, const 
       k++;
     } while(!grp->cmp1(p1));
     if (k==e) { avma = av; return NULL; }
-    dl = negi(gen_Shanks_log(z,m,l,E,grp,NULL));
+    dl = negi(gen_plog(z,m,l,E,grp,NULL));
     p1 = grp->pow(E,y, Fp_mul(dl,powiu(l,e-k-1),q));
     m = grp->pow(E,m,dl);
     e = k;

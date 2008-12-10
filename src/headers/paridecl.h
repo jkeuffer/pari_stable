@@ -1031,10 +1031,10 @@ GEN     rnfinitalg(GEN nf,GEN pol,long prec);
 
 /* bb_group.c */
 
-GEN gen_Shanks_log(GEN x,GEN g0,GEN q, void *E, const struct bb_group *grp, GEN easy(void*E, GEN, GEN, GEN));
 GEN gen_PH_log(GEN a, GEN g, GEN ord, void *E, const struct bb_group *grp, GEN easy(void *E, GEN, GEN, GEN));
-GEN gen_eltorder(GEN x, GEN o, void *E, const struct bb_group *grp);
 GEN gen_Shanks_sqrtn(GEN a, GEN n, GEN q, GEN *zetan, void *E, const struct bb_group *grp);
+GEN gen_eltorder(GEN x, GEN o, void *E, const struct bb_group *grp);
+GEN gen_plog(GEN x,GEN g0,GEN q, void *E, const struct bb_group *grp, GEN easy(void*E, GEN, GEN, GEN));
 
 /* bibli1.c */
 
