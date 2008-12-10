@@ -1386,11 +1386,11 @@ czeta(GEN s0, long prec)
 static GEN
 pol_mod_xn(GEN P, long n)
 {
-  long j;
-  GEN R = cgetg(n+2, t_POL);
-  R[1] = evalvarn(0);
-  for (j = 0; j < n; j++)
-    R[j+2] = (long)polcoeff0(P, j, 0);
+  long j, l = lg(P), N = n+2;
+  GEN R;
+  if (l > N) l = N;
+  R = cgetg(N, t_POL); R[1] = evalvarn(0);
+  for (j = 2; j < l; j++) gel(R,j) = gel(P,j);
   return normalizepol_lg(R, n+2);
 }
 

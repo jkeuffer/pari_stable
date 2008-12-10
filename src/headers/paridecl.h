@@ -1689,7 +1689,6 @@ GEN     simplify(GEN x);
 GEN     simplify_shallow(GEN x);
 GEN     tayl(GEN x, long v, long precdl);
 GEN     toser_i(GEN x);
-GEN     truecoeff(GEN x, long n);
 GEN     trunc0(GEN x, GEN *pte);
 GEN     uu32toi(ulong a, ulong b);
 
@@ -2923,6 +2922,7 @@ INLINE void   stack_init(pari_stack *s, size_t size, void **data);
 INLINE long   stack_new(pari_stack *s);
 INLINE void   stack_pushp(pari_stack *s, void *u);
 INLINE long   sturm(GEN x);
+INLINE GEN    truecoeff(GEN x, long n);
 INLINE GEN    trunc_safe(GEN x);
 INLINE GEN    vec_ei(long n, long i);
 INLINE GEN    vec_lengthen(GEN v, long n);

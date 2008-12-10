@@ -1684,7 +1684,7 @@ integ(GEN x, long v)
       }
       if (varncmp(vx, v) > 0) return deg1pol(x, gen_0, v);
       if (varncmp(vx, v) < 0) return triv_integ(x,v);
-      y = cgetg(lx+1,tx); y[1] = x[1]; gel(y,2) = gen_0;
+      y = cgetg(lx+1, t_POL); y[1] = x[1]; gel(y,2) = gen_0;
       for (i=3; i<=lx; i++) gel(y,i) = gdivgs(gel(x,i-1),i-2);
       return y;
 
@@ -1703,7 +1703,7 @@ integ(GEN x, long v)
 	gel(y,3) = gcopy(x); return y;
       }
       if (varncmp(vx, v) < 0) return triv_integ(x,v);
-      y = cgetg(lx,tx);
+      y = cgetg(lx, t_SER);
       for (i=2; i<lx; i++)
       {
 	long j = i+e-1;
@@ -2766,12 +2766,6 @@ polcoeff0(GEN x, long n, long v)
   if (x == gen_0) return x;
   if (avma == av) return gcopy(x);
   return gerepilecopy(av, x);
-}
-
-GEN
-truecoeff(GEN x, long n)
-{
-  return polcoeff0(x,n,-1);
 }
 
 GEN

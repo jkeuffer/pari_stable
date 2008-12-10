@@ -125,7 +125,7 @@ smallpolrev(GEN x)
 /* x polynomial in t_VECSMALL form, T t_POL return x mod T */
 static GEN
 u_red(GEN x, GEN T) {
-  return grem(smallpolrev(x), T);
+  return RgX_rem(smallpolrev(x), T);
 }
 
 /* special case R->C = polcyclo(2^n) */
@@ -722,15 +722,24 @@ calcglobs(Red *R, ulong t, long *pltab, GEN *pP)
   return pC;
 }
 
-/* sig_a^{-1}(z) for z in Q(ze) and sig_a: ze -> ze^a */
+/* sig_a^{-1}(z) for z in Q(zeta_pk) and sig_a: zeta -> zeta^a. Assume
+ * a reduced mod pk := p^k*/
 static GEN
 aut(long pk, GEN z, long a)
 {
-  GEN v = cgetg(pk+1,t_VEC);
-  long i;
-  for (i=1; i<=pk; i++)
-    gel(v,i) = polcoeff0(z, (a*(i-1))%pk, 0);
-  return gtopolyrev(v,0);
+  GEN v;
+  long b, i, dz = degpol(z);
+  if (a == 1 || dz < 0) return z;
+  v = cgetg(pk+2,t_POL);
+  v[1] = evalvarn(0);
+  b = 0;
+  gel(v,2) = gel(z,2); /* i = 0 */
+  for (i = 1; i < pk; i++)
+  {
+    b += a; if (b > pk) b -= pk; /* b = (a*i) % pk */
+    gel(v,i+2) = b > dz? gen_0: gel(z,b+2);
+  }
+  return normalizepol_lg(v, pk+2);
 }
 
 /* z^v for v in Z[G], represented by couples [sig_x^{-1},x] */

@@ -1351,6 +1351,8 @@ INLINE long
 degpol(GEN x) { return lg(x)-3; }
 INLINE long
 lgpol(GEN x) { return lg(x)-2; }
+INLINE GEN
+truecoeff(GEN x, long n) { return polcoeff0(x,n,-1); }
 
 INLINE GEN
 RgXQ_mul(GEN y, GEN x, GEN T) { return RgX_rem(RgX_mul(y, x), T); }
