@@ -2770,6 +2770,7 @@ INLINE GEN    ZV_to_zv(GEN x);
 INLINE GEN    ZX_ZXY_resultant(GEN a, GEN b);
 INLINE GEN    ZXQ_mul(GEN x,GEN y,GEN T);
 INLINE GEN    ZXQ_sqr(GEN x,GEN T);
+INLINE long   Z_ispower(GEN x, ulong k);
 INLINE long   Z_issquare(GEN x);
 INLINE GEN    absfrac(GEN x);
 INLINE GEN    affc_fixlg(GEN x, GEN res);

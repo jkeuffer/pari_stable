@@ -1524,6 +1524,8 @@ INLINE GEN
 matpascal(long n) { return matqpascal(n, NULL); }
 INLINE long
 Z_issquare(GEN x) { return Z_issquareall(x, NULL); }
+INLINE long
+Z_ispower(GEN x, ulong k) { return Z_ispowerall(x, k, NULL); }
 INLINE GEN
 sqrti(GEN x) { return sqrtremi(x,NULL); }
 INLINE GEN

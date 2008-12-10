@@ -2423,17 +2423,23 @@ such that $\kbd{au} + \kbd{bv} = d$.
 
 \subsec{Pure powers}
 
-\fun{long}{Z_issquare}{GEN n} returns $1$ if \typ{INT} \kbd{n} is
+\fun{long}{Z_issquare}{GEN n} returns $1$ if the \typ{INT} $n$ is
 a square, and $0$ otherwise. This is tested first modulo small prime
 powers, then \kbd{sqrtremi} is called.
 
 \fun{long}{Z_issquareall}{GEN n, GEN *sqrtn} as \kbd{Z\_issquare}. If
-\kbd{n} is indeed a square, set \kbd{sqrtn} to its integer square root.
+$n$ is indeed a square, set \kbd{sqrtn} to its integer square root.
 Uses a fast congruence test mod $64\times 63\times 65\times 11$ before
 computing an integer square root.
 
 \fun{long}{uissquareall}{ulong n, ulong *sqrtn} as \kbd{Z\_issquareall},
 for an \kbd{ulong} operand \kbd{n}.
+
+\fun{long}{Z_ispower}{GEN x, ulong k} returns $1$ if the \typ{INT} $n$ is a
+$k$-th power, and $0$ otherwise; assume that $k > 1$.
+
+\fun{long}{Z_ispowerall}{GEN x, ulong k, GEN *pt} as \kbd{Z\_ispower}. If
+$n$ is indeed a $k$-th power, set \kbd{*pt} to its integer $k$-th root.
 
 \fun{long}{Z_isanypower}{GEN x, GEN *ptn} returns the maximal $k\geq 2$  such
 that the \typ{INT} $x = n^k$ is a perfect power, or $0$ if no such $k$ exist;

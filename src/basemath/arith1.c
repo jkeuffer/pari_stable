@@ -783,14 +783,15 @@ ispower(GEN x, GEN K, GEN *pt)
     case t_FRAC:
     {
       GEN a = gel(x,1), b = gel(x,2);
+      ulong k = itou(K);
       if (pt) {
 	z = cgetg(3, t_FRAC);
-	if (ispower(a, K, &a) && ispower(b, K, &b)) {
+	if (Z_ispowerall(a, k, &a) && Z_ispowerall(b, k, &b)) {
 	  *pt = z; gel(z,1) = a; gel(z,2) = b; return 1;
 	}
 	avma = (pari_sp)(z + 3); return 0;
       }
-      return (ispower(a, K, NULL) && ispower(b, K, NULL));
+      return Z_ispower(a, k) && Z_ispower(b, k);
     }
     case t_INTMOD:
     {
