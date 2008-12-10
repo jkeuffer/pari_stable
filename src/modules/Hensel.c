@@ -98,81 +98,114 @@ BuildTree(GEN link, GEN V, GEN W, GEN a, GEN T, GEN p)
 /* au + bv = 1 (p0), ab = f (p0). Lift mod p1 = p0 pd (<= p0^2).
  * If noinv is set, don't lift the inverses u and v */
 static void
-HenselLift(GEN V, GEN W, long j, GEN f, GEN Td, GEN T1, GEN pd, GEN p0, GEN p1, int noinv)
+ZpX_HenselLift(GEN V, GEN W, long j, GEN f, GEN pd, GEN p0, GEN p1, int noinv)
 {
   pari_sp av = avma;
   long space = lg(f) * lgefint(p1);
-  GEN a2,b2,g,z,s,t;
+  GEN a2, b2, g, z, s, t;
   GEN a = gel(V,j), b = gel(V,j+1);
   GEN u = gel(W,j), v = gel(W,j+1);
 
-  if (T1) space *= lg(T1);
+  (void)new_chunk(space); /* HACK */
+  g = ZX_sub(f, ZX_mul(a,b));
+  g = ZX_Z_divexact(g, p0);
+  g = FpX_red(g, pd);
+  z = FpX_mul(v,g, pd);
+  t = FpX_divrem(z,a, pd, &s);
+  t = ZX_add(ZX_mul(u,g), ZX_mul(t,b));
+  t = FpX_red(t, pd);
+  t = ZX_Z_mul(t,p0);
+  s = ZX_Z_mul(s,p0);
+  avma = av;
+  a2 = ZX_add(a,s);
+  b2 = ZX_add(b,t);
+
+  /* already reduced mod p1 = pd p0 */
+  gel(V,j)   = a2;
+  gel(V,j+1) = b2;
+  if (noinv) return;
+
+  av = avma;
+  (void)new_chunk(space); /* HACK */
+  g = ZX_add(ZX_mul(u,a2), ZX_mul(v,b2));
+  g = Z_ZX_sub(gen_1, g);
+  g = ZX_Z_divexact(g, p0);
+  g = FpX_red(g, pd);
+  z = FpX_mul(v,g, pd);
+  t = FpX_divrem(z,a, pd, &s);
+  t = ZX_add(ZX_mul(u,g), ZX_mul(t,b));
+  t = FpX_red(t, pd);
+  t = ZX_Z_mul(t,p0);
+  s = ZX_Z_mul(s,p0);
+  avma = av;
+  gel(W,j)   = ZX_add(u,t);
+  gel(W,j+1) = ZX_add(v,s);
+}
+
+static void
+ZpXQ_HenselLift(GEN V, GEN W, long j, GEN f, GEN Td, GEN T1, GEN pd, GEN p0, GEN p1, int noinv)
+{
+  pari_sp av = avma;
+  long space = lg(f) * lgefint(p1) * lg(T1);
+  GEN a2, b2, g, z, s, t;
+  GEN a = gel(V,j), b = gel(V,j+1);
+  GEN u = gel(W,j), v = gel(W,j+1);
 
   (void)new_chunk(space); /* HACK */
   g = RgX_sub(f, RgX_mul(a,b));
-  if (T1) g = FpXQX_red(g, T1, p1);
+  g = FpXQX_red(g, T1, p1);
   g = RgX_Rg_divexact(g, p0);
-  if (Td)
-  {
-    z = FpXQX_mul(v,g, Td,pd);
-    t = FpXQX_divrem(z,a, Td,pd, &s);
-  }
-  else
-  {
-    g = FpX_red(g, pd);
-    z = FpX_mul(v,g, pd);
-    t = FpX_divrem(z,a, pd, &s);
-  }
+  z = FpXQX_mul(v,g, Td,pd);
+  t = FpXQX_divrem(z,a, Td,pd, &s);
   t = RgX_add(RgX_mul(u,g), RgX_mul(t,b));
-  t = Td? FpXQX_red(t, Td, pd): FpX_red(t, pd);
+  t = FpXQX_red(t, Td, pd);
   t = RgX_Rg_mul(t,p0);
   s = RgX_Rg_mul(s,p0);
   avma = av;
 
+  a2 = RgX_add(a,s);
+  b2 = RgX_add(b,t);
   /* already reduced mod p1 = pd p0 */
-  a2 = RgX_add(a,s); gel(V,j) = a2;
-  b2 = RgX_add(b,t); gel(V,j+1) = b2;
+  gel(V,j)   = a2;
+  gel(V,j+1) = b2;
   if (noinv) return;
 
   av = avma;
   (void)new_chunk(space); /* HACK */
   g = RgX_add(RgX_mul(u,a2), RgX_mul(v,b2));
   g = Rg_RgX_sub(gen_1, g);
-
-  if (T1) g = FpXQX_red(g, T1, p1);
+  g = FpXQX_red(g, T1, p1);
   g = RgX_Rg_divexact(g, p0);
-  if (Td)
-  {
-    z = FpXQX_mul(v,g, Td,pd);
-    t = FpXQX_divrem(z,a, Td,pd, &s);
-  }
-  else
-  {
-    g = FpX_red(g, pd);
-    z = FpX_mul(v,g, pd);
-    t = FpX_divrem(z,a, pd, &s);
-  }
+  z = FpXQX_mul(v,g, Td,pd);
+  t = FpXQX_divrem(z,a, Td,pd, &s);
   t = RgX_add(RgX_mul(u,g), RgX_mul(t,b));
-  t = Td? FpXQX_red(t, Td, pd): FpX_red(t, pd);
+  t = FpXQX_red(t, Td, pd);
   t = RgX_Rg_mul(t,p0);
   s = RgX_Rg_mul(s,p0);
   avma = av;
-
-  u = RgX_add(u,t); gel(W,j) = u;
-  v = RgX_add(v,s); gel(W,j+1) = v;
+  gel(W,j)   = RgX_add(u,t);
+  gel(W,j+1) = RgX_add(v,s);
 }
 
 /* v list of factors, w list of inverses.  f = v[j] v[j+1]
  * Lift v[j] and v[j+1] mod p0 pd (possibly mod T), then all their divisors */
 static void
-RecTreeLift(GEN link, GEN v, GEN w, GEN Td, GEN T1, GEN pd, GEN p0, GEN p1, 
-            GEN f, long j, int noinv)
+ZpX_RecTreeLift(GEN link, GEN v, GEN w, GEN pd, GEN p0, GEN p1, 
+                GEN f, long j, int noinv)
 {
   if (j < 0) return;
-
-  HenselLift(v, w, j, f, Td,T1, pd, p0,p1, noinv);
-  RecTreeLift(link, v, w, Td,T1, pd, p0,p1, gel(v,j)  , link[j  ], noinv);
-  RecTreeLift(link, v, w, Td,T1, pd, p0,p1, gel(v,j+1), link[j+1], noinv);
+  ZpX_HenselLift(v, w, j, f, pd, p0,p1, noinv);
+  ZpX_RecTreeLift(link, v, w, pd, p0,p1, gel(v,j)  , link[j  ], noinv);
+  ZpX_RecTreeLift(link, v, w, pd, p0,p1, gel(v,j+1), link[j+1], noinv);
+}
+static void
+ZpXQ_RecTreeLift(GEN link, GEN v, GEN w, GEN Td, GEN T1, GEN pd, GEN p0, GEN p1,
+                 GEN f, long j, int noinv)
+{
+  if (j < 0) return;
+  ZpXQ_HenselLift(v, w, j, f, Td,T1, pd, p0,p1, noinv);
+  ZpXQ_RecTreeLift(link, v, w, Td,T1, pd, p0,p1, gel(v,j)  , link[j  ], noinv);
+  ZpXQ_RecTreeLift(link, v, w, Td,T1, pd, p0,p1, gel(v,j+1), link[j+1], noinv);
 }
 
 /* Assume n > 0. We want to go to accuracy n, starting from accuracy 1, using
@@ -258,9 +291,12 @@ MultiLift(GEN f, GEN a, GEN T, GEN p, long e0, long flag)
         else
           Td = FpX_red(T, peold);
         Tnew = FpX_red(T, penew);
+        ZpXQ_RecTreeLift(link, v, w, Td, Tnew, pd, peold, penew, f, lgpol(v),
+                         (flag == 0 && mask == 1));
       }
-      RecTreeLift(link, v, w, Td, Tnew, pd, peold, penew, f, lgpol(v),
-                  (flag == 0 && mask == 1));
+      else
+        ZpX_RecTreeLift(link, v, w, pd, peold, penew, f, lgpol(v),
+                        (flag == 0 && mask == 1));
       if (DEBUGLEVEL > 3) msgTIMER(&Ti, "lifting to prec %ld", enew);
     }
     eold = enew;
