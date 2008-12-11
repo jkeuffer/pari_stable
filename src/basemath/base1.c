@@ -815,8 +815,9 @@ tests_OK(GEN a, GEN nfa, GEN b, GEN nfb, long fliso)
   GEN da, db, fa, P, E, U;
   long i, nP, m = degpol(a), n = degpol(b), q = m / n; /* relative degree */
 
-  if (m <= 0 || n <= 0) pari_err(constpoler, "nfincl");
+  if (m <= 0 || n <= 0) pari_err(constpoler, "nfisincl");
   if (fliso) { if (n != m) return 0; } else { if (n % m) return 0; }
+  if (m == 1) return 1;
 
   if (nfa && nfb) /* both nf structures available */
   {
@@ -835,6 +836,7 @@ tests_OK(GEN a, GEN nfa, GEN b, GEN nfb, long fliso)
   fa = Z_factor_limit(absi(da), 0);
   P = gel(fa,1);
   E = gel(fa,2); nP = lg(P) - 1;
+  if (!nP) pari_err(talker,"inconsistent data in nfisincl");
   for (i=1; i<nP; i++)
     if (mod2(gel(E,i)) && !dvdii(db, powiu(gel(P,i),q))) return 0;
   U = gel(P,nP);
