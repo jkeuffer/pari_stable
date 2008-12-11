@@ -50,9 +50,9 @@ static GEN
 gen_Pollard_log(GEN x, GEN g, GEN q, void *E, const struct bb_group *grp)
 {
   pari_sp av=avma, lim=stack_lim(av,2);
-  GEN A,B,l;
-  ulong h=0;
-  long i,imax=itou(sqrti(shifti(q,4)));
+  GEN A, B, l, sqrt4q = sqrti(shifti(q,4));
+  ulong i, h = 0, imax = itou_or_0(sqrt4q);
+  if (!imax) imax = ULONG_MAX;
   do {
  rho_restart:
     A = B = mkvec3(grp->pow(E,g,gen_0),gen_0,gen_0);
