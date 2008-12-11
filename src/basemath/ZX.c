@@ -211,8 +211,6 @@ Z_ZX_sub(GEN x, GEN y)
   return z;
 }
 
-/*ZX_mul and ZX_sqr are alias for RgX_mul and Rgx_sqr currently*/
-
 GEN
 ZX_Z_divexact(GEN y,GEN x)
 {
