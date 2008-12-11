@@ -3613,35 +3613,50 @@ try_name(char *name)
   pari_free(name); avma = av;
   return file;
 }
+static void
+switchin_last()
+{
+  char *s = last_filename;
+  FILE *file;
+  if (!s) pari_err(talker,"You never gave me anything to read!");
+  file = try_open(s);
+  if (!file) pari_err(openfiler,"input",s);
+  pari_infile = pari_get_infile(s,file)->file;
+}
+
+/* return 1 if s starts by '/' or './' or '../' */
+static int
+is_absolute(char *s)
+{
+  if (*s == '/') return 1;
+  if (*s++ != '.') return 0;
+  if (*s == '/') return 1;
+  if (*s++ != '.') return 0;
+  return *s == '/';
+}
 
 /* If name = "", re-read last file */
 void
-switchin(const char *name0)
+switchin(const char *name)
 {
-  char *s, *name;
+  char *s;
 
-  if (*name0)
-    name = path_expand(name0);
+  if (!*name) { switchin_last(); return; }
+  s = path_expand(name);
+  /* if s is an absolute path, don't use dir_list */
+  if (is_absolute(s)) { if (try_name(s)) return; }
   else
   {
-    if (last_filename == NULL)
-      pari_err(talker,"You never gave me anything to read!");
-    name0 = last_filename;
-    name = pari_strdup(name0);
-  }
-  /* if name starts by '/',  don't use dir_list */
-  if (*name == '/') { if (try_name(name)) return; }
-  else
-  {
+    size_t lens = strlen(s);
     char **tmp = GP_DATA->path->dirs;
     for ( ; *tmp; tmp++)
     { /* make room for '/' and '\0', try_name frees it */
-      s = (char*)pari_malloc(2 + strlen(*tmp) + strlen(name));
-      sprintf(s,"%s/%s",*tmp,name);
-      if (try_name(s)) return;
+      char *t = (char*)pari_malloc(2 + lens + strlen(*tmp));
+      sprintf(t,"%s/%s",*tmp,s);
+      if (try_name(t)) return;
     }
   }
-  pari_err(openfiler,"input",name0);
+  pari_err(openfiler,"input",name);
 }
 
 static int is_magic_ok(FILE *f);
