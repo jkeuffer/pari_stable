@@ -2620,10 +2620,11 @@ increase \kbd{parisize}, once the session is started.
 \kbd{".;C:\bs;C:\bs GP} on DOS, OS/2 and Windows, and \kbd{"."} otherwise):
 This is a list of directories, separated by colons ':' (semicolons ';' in the
 DOS world, since colons are preempted for drive names). When asked to read a
-file whose name does not contain \kbd{/} (i.e.~no explicit path was given),
-\kbd{gp} will look for it in these directories, in the order they were written in
-\kbd{path}. Here, as usual, '.' means the current directory, and '$.\,.$' its
-immediate parent. Environment expansion is performed.
+file whose name does not start with a \kbd{/} (i.e.~we were not given
+an absolute file path), \kbd{gp} will look for it in these directories, in
+the order they were written in \kbd{path}. Here, as usual, '.' means the
+current directory, and '$.\,.$' its immediate parent. Environment expansion
+is performed.
 
 \subsecidx{prettyprinter} (default \kbd{"tex2mail -TeX -noindent
 -ragged -by\_par"}) the name of an external prettyprinter to use when

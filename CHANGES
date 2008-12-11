@@ -388,6 +388,8 @@ BA 92- make test-xxx: trap SIGINT in benching script to exit on <C-C>
    98- thueinit / thue: allow reducible and non-monic polynomials
    99- rnfdedekind: allow non-monic polynomials
   100- bnrclassno(bnr,id) : allow bid as well as modules for the 'id' argument.
+  101- GP 'path' now also applies for file paths containing a '/' provided
+       they do not *start* with a '/' (i.e. not an absolute path)
 
   Added
     1- many new benches (make test-all)

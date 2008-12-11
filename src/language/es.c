@@ -3629,9 +3629,8 @@ switchin(const char *name0)
     name0 = last_filename;
     name = pari_strdup(name0);
   }
-  /* if name contains '/',  don't use dir_list */
-  s=name; while (*s && *s != '/' && *s != '\\') s++;
-  if (*s) { if (try_name(name)) return; }
+  /* if name starts by '/',  don't use dir_list */
+  if (*name == '/') { if (try_name(name)) return; }
   else
   {
     char **tmp = GP_DATA->path->dirs;
