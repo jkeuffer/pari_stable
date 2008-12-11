@@ -2325,6 +2325,7 @@ GEN     thueinit(GEN pol, long flag, long prec);
 GEN     Pi2n(long n, long prec);
 GEN     PiI2(long prec);
 GEN     PiI2n(long n, long prec);
+GEN     Qp_log(GEN x);
 GEN     agm(GEN x, GEN y, long prec);
 GEN     consteuler(long prec);
 GEN     constlog2(long prec);

@@ -16,3 +16,5 @@ Doc: principal branch of the natural logarithm of
  $p$-adic arguments are also accepted for $x$, with the convention that
  $\log(p)=0$. Hence in particular $\exp(\log(x))/x$ is not in general equal to
  1 but to a $(p-1)$-th root of unity (or $\pm1$ if $p=2$) times a power of $p$.
+Variant: For a \typ{PADIC} $x$, the function
+ \fun{GEN}{Qp_log}{GEN x} is also available.

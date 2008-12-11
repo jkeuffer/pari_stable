@@ -1142,13 +1142,13 @@ palogaux(GEN x)
   return gmul(s,y);
 }
 
-static GEN
-palog(GEN x)
+GEN
+Qp_log(GEN x)
 {
   pari_sp av = avma;
   GEN y, p = gel(x,2), a = gel(x,4);
 
-  if (!signe(a)) pari_err(talker,"zero argument in palog");
+  if (!signe(a)) pari_err(talker,"zero argument in Qp_log");
   if (equaliu(p,2))
   {
     y = gsqr(x); setvalp(y,0);
@@ -1187,7 +1187,7 @@ padic_sqrtn_ram(GEN x, long e)
   /*If p=2 -1 is an root of unity in U1,we need an extra check*/
   if (lgefint(p)==3 && p[2]==2 && mod8(gel(x,4))!=signe(gel(x,4)))
     return NULL;
-  a = exp_p(gdiv(palog(x), n));
+  a = exp_p(gdiv(Qp_log(x), n));
   if (!a) return NULL;
   /*Here n=p^e and a^n=z*x where z is a (p-1)th-root of unity. Note that
       z^p=z; hence for b = a/z, then b^n=x. We say b=x/a^(n-1)*/
@@ -2048,7 +2048,7 @@ glog(GEN x, long prec)
       gel(y,1) = gerepile(av,tetpil,gmul2n(p1,-1)); return y;
 
     case t_PADIC:
-      return palog(x);
+      return Qp_log(x);
 
     case t_INTMOD: pari_err(typeer,"glog");
     default:

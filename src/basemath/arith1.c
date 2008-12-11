@@ -2124,7 +2124,7 @@ Zplog(GEN x, GEN g, GEN p, ulong k, GEN pk)
   GEN b, n = subis(p,1), a = Fp_log(x, g, n, p);
   if (k == 1) return a;
   x = Fp_mul(x, Fp_pow(g, negi(a), pk), pk);
-  b = gdiv(glog(cvtop(x, p, k), 0), glog(cvtop(Fp_pow(g,n,pk), p, k), 0));
+  b = gdiv(Qp_log(cvtop(x, p, k)), Qp_log(cvtop(Fp_pow(g,n,pk), p, k)));
   return addii(a, mulii(n, gtrunc(b)));
 }
 #endif
