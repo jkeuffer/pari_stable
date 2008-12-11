@@ -218,13 +218,19 @@ data typecast to \kbd{void*}. The following functions operate on black-box
 groups:
 
 \fun{GEN}{gen_Shanks_log}{GEN x,GEN g,GEN N, void *E, const struct bb_group
-*grp, GEN easy(void*E, GEN, GEN, GEN)} Generic baby-step/giant-step algorithm
+*grp} Generic baby-step/giant-step algorithm
 (Shanks's method). Assuming that $g$ has order $N$, compute an integer $k$
 such that $g^k = x$. This requires $O(\sqrt{N})$ group operations and uses an
 auxilliary table containing $O(\sqrt{N})$ group elements.
 
-\misctitle{FIXME:} could implement Floyd's cycle finding method to reduce to
-$O(1)$ space.
+\fun{GEN}{gen_Pollard_log}{GEN x,GEN g,GEN N, void *E, const struct bb_group
+*grp} Generic Pollard rho algorithm. Assuming that $g$ has order $N$, compute an integer $k$
+such that $g^k = x$. This requires $O(\sqrt{N})$ group operations in average
+and $O(1)$ storage.
+
+\fun{GEN}{gen_plog}{GEN x,GEN g,GEN N, void *E, const struct bb_group
+Assuming that $g$ has prime order $N$, compute an integer $k$ such that 
+$g^k = x$, using either \kbd{gen\_Shanks\_log} or \kbd{gen\_Pollard\_log}.
 
 If \kbd{easy} is not \kbd{NULL}, call \kbd{easy(E,a,g,N)} first and if the
 return value is not \kbd{NULL}, return it. For instance this is used over
@@ -239,8 +245,7 @@ struct bb_group *grp} returns one solution of $x^n = a$ in a black-box cyclic
 group of order $N$. Return \kbd{NULL} if no solution exists. If \kbd{zetan}
 is not \kbd{NULL} it is set to an element of exact order $n$.
 
-This function uses Shanks's baby-step giant step techniques for all prime
-divisors of $\gcd(n,N)$.
+This function uses \kbd{gen\_plog} for all prime divisors of $\gcd(n,N)$.
 
 \fun{GEN}{gen_PH_log}{GEN a, GEN g, GEN N, void *E, const struct bb_group *grp, GEN easy(void *E, GEN, GEN, GEN)}
 Generic Pohlig-Helman algorithm. Assuming that $g$ has order $N$, compute
@@ -248,7 +253,7 @@ an integer $k$ such that $g^k = x$. This requires $O(p^{1/2+\epsilon})$ group
 operations, where $p$ is the largest prime divisor of $N$, and uses an
 auxiliary table containing $O(\sqrt{p})$ group elements.
 
-\kbd{easy} is as in \kbd{gen\_Shanks\_log}.
+\kbd{easy} is as in \kbd{gen\_plog}.
 
 \fun{GEN}{gen_eltorder}{GEN x, GEN N, void *E, const struct bb_group *grp}
 computes the order of $x$. If $N$ is not \kbd{NULL} it is a multiple of the

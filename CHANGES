@@ -544,6 +544,7 @@ BA 35- direct implementation of ZX_mul, ZX_sqr using Kronecker's trick + mulii
    38- more possibilities to draw "random" elements in natural sets using
        random(), e.g. finite fields, elliptic curve over finite field.
    39- GP routines nfeltadd, nfelttrace, nfeltnorm
+BA 40- Pollard rho discrete logarithm algorithm (function gen_Pollard_log)
 
   Removed
     1- obsolete GP functions printp, printp1. Either replace them by
