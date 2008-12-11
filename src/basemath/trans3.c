@@ -1668,7 +1668,7 @@ hurwitz_p(GEN cache, GEN s, GEN x, GEN p, long prec)
     if (j == J) break;
     x2j = gmul(x2, x2j);
   }
-  return gmul(gdiv(S, s_1), gexp(gmul(s_1, glog(x, 0)), 0));
+  return gmul(gdiv(S, s_1), Qp_exp(gmul(s_1, Qp_log(x))));
 }
 
 static GEN

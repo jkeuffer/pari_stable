@@ -1169,7 +1169,8 @@ Qp_log(GEN x)
   return gerepileupto(av,y);
 }
 
-static GEN exp_p(GEN x);
+static GEN Qp_exp_safe(GEN x);
+
 /*compute the p^e th root of x p-adic, assume x != 0 */
 GEN
 padic_sqrtn_ram(GEN x, long e)
@@ -1187,7 +1188,7 @@ padic_sqrtn_ram(GEN x, long e)
   /*If p=2 -1 is an root of unity in U1,we need an extra check*/
   if (lgefint(p)==3 && p[2]==2 && mod8(gel(x,4))!=signe(gel(x,4)))
     return NULL;
-  a = exp_p(gdiv(Qp_log(x), n));
+  a = Qp_exp_safe(gdiv(Qp_log(x), n));
   if (!a) return NULL;
   /*Here n=p^e and a^n=z*x where z is a (p-1)th-root of unity. Note that
       z^p=z; hence for b = a/z, then b^n=x. We say b=x/a^(n-1)*/
@@ -1523,7 +1524,7 @@ mpexp(GEN x)
 }
 
 static long
-exp_p_prec(GEN x)
+Qp_exp_prec(GEN x)
 {
   long k, e = valp(x), n = e + precp(x);
   GEN p = gel(x,2);
@@ -1544,19 +1545,28 @@ exp_p_prec(GEN x)
 }
 
 static GEN
-exp_p(GEN x)
+Qp_exp_safe(GEN x)
 {
   long k;
   pari_sp av;
   GEN y;
 
   if (gcmp0(x)) return gaddgs(x,1);
-  k = exp_p_prec(x);
+  k = Qp_exp_prec(x);
   if (k < 0) return NULL;
   av = avma;
   for (y=gen_1; k; k--) y = gaddsg(1, gdivgs(gmul(y,x), k));
   return gerepileupto(av, y);
 }
+
+GEN
+Qp_exp(GEN x)
+{
+  GEN y = Qp_exp_safe(x);
+  if (!y) pari_err(talker,"p-adic argument out of range in gexp");
+  return y;
+}
+
 static GEN
 cos_p(GEN x)
 {
@@ -1565,7 +1575,7 @@ cos_p(GEN x)
   GEN x2, y;
 
   if (gcmp0(x)) return gaddgs(x,1);
-  k = exp_p_prec(x);
+  k = Qp_exp_prec(x);
   if (k < 0) return NULL;
   av = avma; x2 = gsqr(x);
   if (k & 1) k--;
@@ -1584,7 +1594,7 @@ sin_p(GEN x)
   GEN x2, y;
 
   if (gcmp0(x)) return gaddgs(x,1);
-  k = exp_p_prec(x);
+  k = Qp_exp_prec(x);
   if (k < 0) return NULL;
   av = avma; x2 = gsqr(x);
   if (k & 1) k--;
@@ -1656,9 +1666,7 @@ gexp(GEN x, long prec)
   {
     case t_REAL: return mpexp(x);
     case t_COMPLEX: return cxexp(x,prec);
-    case t_PADIC: x = exp_p(x);
-      if (!x) pari_err(talker,"p-adic argument out of range in gexp");
-      return x;
+    case t_PADIC: return Qp_exp(x);
     case t_INTMOD: pari_err(typeer,"gexp");
     default:
     {
