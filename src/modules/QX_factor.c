@@ -446,7 +446,7 @@ root_bound(GEN P0)
 GEN
 special_pivot(GEN x)
 {
-  GEN t, H = ZM_hnf(x);
+  GEN t, perm, H = ZM_hnfperm(x,NULL,&perm);
   long i,j, l = lg(H), h = lg(H[1]);
   for (i=1; i<h; i++)
   {
@@ -461,7 +461,7 @@ special_pivot(GEN x)
       }
     }
   }
-  return H;
+  return rowpermute(H, perm_inv(perm));
 }
 
 GEN
