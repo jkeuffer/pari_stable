@@ -9,6 +9,7 @@ Help: fflog(x,g,{o}): return the discrete logarithm of the finite field
 Doc: discrete logarithm of the finite field element $x$ in base $g$. If
  present, $o$ must be the multiplicative order of $g$, or its factorisation
  matrix.  If no $o$ is given, assume that $g$ is a primitive root.
+ See \tet{znlog} for the limitations of the underlying discrete log algorithms.
  \bprog
  ? t = ffgen(ffinit(7,5));
  ? o = fforder(t)

@@ -16,3 +16,5 @@ Doc: $\var{nf}$ is a number field,
  $$x \equiv \prod_i g_i^{x_i} \pmod{\ ^*D}\enspace.$$
  Note that when the support of \kbd{D} contains places at infinity, this
  congruence implies also sign conditions on the associated real embeddings.
+ See \tet{znlog} for the limitations of the underlying discrete log algorithms.
+

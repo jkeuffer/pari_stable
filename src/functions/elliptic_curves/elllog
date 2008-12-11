@@ -6,6 +6,7 @@ Help: elllog(E,P,G,{o}): return the discrete logarithm of the point P of
  the elliptic curve E in base G. If present, o must be the order of G,
  or its factorisation matrix.
 Doc: discrete logarithm of the point $P$ of the elliptic curve $E$ in base $G$.
+ See \tet{znlog} for the limitations of the underlying discrete log algorithms.
  If present, $o$ must be the order of $G$, or its factorisation matrix. The 
  function assume that $P$ is a multiple of $G$.
  \bprog

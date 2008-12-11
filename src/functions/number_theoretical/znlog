@@ -7,11 +7,18 @@ Help: znlog(x,g): g as output by znprimroot (modulo a prime). Return
 Doc: let $N$ such that $(\Z/N\Z)^*$ is cyclic and $g$ a primitive root mod
  $N$, as would be output by \kbd{znprimroot}$(N)$.
  The result is the discrete log of $x$ in the multiplicative group
- $(\Z/N\Z)^*$. This function uses a simple-minded combination of
- Pohlig-Hellman algorithm and Shanks baby-step/giant-step which requires
- $O(\sqrt{q})$ storage, where $q$ is the largest prime factor of $p-1$ ($p$
- odd prime divisor of $N$). Hence it cannot be used when the
- $q$ is greater than about $10^{13}$.
+ $(\Z/N\Z)^*$. This function uses a simple-minded combination of generic
+ discrete log algorithms (index calculus methods are not yet implemented).
+ 
+ \item Pohlig-Hellman algorithm, to reduce to groups of prime order $q$,
+ where $q | p-1$ and $p$ is an odd prime divisor of $N$,
+
+ \item Shanks baby-step/giant-step ($q$ small),
+
+ \item Pollard rho method ($q$ large).
+
+ The latter two algorithms require $O(\sqrt{q})$ operations in the group on
+ average, hence will not be able to treat cases where $q > 10^{30}$, say.
  \bprog
  ? g = znprimroot(101)
  %1 = Mod(2,101)
