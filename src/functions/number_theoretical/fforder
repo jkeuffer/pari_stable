@@ -7,7 +7,7 @@ Help: fforder(x,{o}): multiplicative order of the finite field element x.
 Doc: multiplicative order of the finite field element $x$.  If $o$ is
  present, it represents a multiple of the order of the element,
  see \secref{se:DLfun}; the preferred format for
- this parameter is \kbd{[N, factor(N)]$, where \kbd{N} is the cardinality
+ this parameter is \kbd{[N, factor(N)]}, where \kbd{N} is the cardinality
  of the multiplicative group of the underlying finite field.
  \bprog
  ? t = ffgen(ffinit(nextprime(10^8), 5));

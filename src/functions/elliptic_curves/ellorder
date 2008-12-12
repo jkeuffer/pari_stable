@@ -9,9 +9,9 @@ Help: ellorder(E,z,{o}): order of the point z on the elliptic curve E over Q
 Doc:
  gives the order of the point $z$ on the elliptic
  curve $E$. If the curve is defined over $\Q$, return zero if the point has
- infinite order. The parameter o, if present, represents a non-zero
- multiple of the order of z, see \secref{se:DLfun}; the preferred format for
- this parameter is \kbd{[ord, factor(ord)]$, where \kbd{ord} is the
+ infinite order. The parameter $o$, if present, represents a non-zero
+ multiple of the order of $z$, see \secref{se:DLfun}; the preferred format for
+ this parameter is \kbd{[ord, factor(ord)]}, where \kbd{ord} is the
  cardinality of the curve.
 
  For a curve defined over $\F_p$, it is very important to supply $o$ since
