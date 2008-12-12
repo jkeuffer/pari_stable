@@ -6670,6 +6670,12 @@ with \typ{REAL} components. Assign $x$ to \kbd{res}, first shortening
 the components of \kbd{res} if needed (in a \kbd{gerepile}-safe way). Further
 convert \kbd{res} to a \typ{REAL} if $x$ is a \typ{REAL}.
 
+\subsec{Transcendental functions with \typ{PADIC} arguments}
+
+\fun{GEN}{Qp_exp}{GEN x} shortcut for \kbd{gexp(x, /*ignored*/prec)}
+
+\fun{GEN}{Qp_log}{GEN x} shortcut for \kbd{glog(x, /*ignored*/prec)}
+
 \subsec{Cached constants}
 
 The cached constant is returned at its current precision, which may be larger
