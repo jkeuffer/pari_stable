@@ -3,14 +3,16 @@ Section: elliptic_curves
 C-Name: elllog
 Prototype: GGGDG
 Help: elllog(E,P,G,{o}): return the discrete logarithm of the point P of
- the elliptic curve E in base G. If present, o must be the order ord of G,
- its factorisation matrix fa, or (preferably) the vector [ord, fa].
+ the elliptic curve E in base G. If present, o represents the order of G.
  If not present, assume that G generates the curve.
 Doc: discrete logarithm of the point $P$ of the elliptic curve $E$ in base $G$.
  See \tet{znlog} for the limitations of the underlying discrete log algorithms.
- If present, $o$ must be the order of $G$, or its factorisation matrix. 
+ If present, $o$ represents the order of $G$, see \secref{se:DLfun};
+ the preferred format for this parameter is \kbd{[N, factor(N)]}, where $N$
+ is  the order of $G$.
+
  If no $o$ is given, assume that $G$ generates the curve.
- The function assumes that $P$ is a multiple of $G$.
+ The function also assumes that $P$ is a multiple of $G$.
  \bprog
  ? a = ffgen(ffinit(2,8),'a);
  ? E = ellinit([a,1,0,0,1]);  \\ over F_{2^8}

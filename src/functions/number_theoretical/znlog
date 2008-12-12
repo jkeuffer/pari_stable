@@ -3,12 +3,13 @@ Section: number_theoretical
 C-Name: znlog
 Prototype: GGDG
 Help: znlog(x,g,{o}): return the discrete logarithm of the integermod x in
- (Z/nZ)* in base g. If present, o must be the the multiplicative
- order of g or its factorisation matrix. If no o is given, assume that g
- generate (Z/nZ)*.
+ (Z/nZ)* in base g. If present, o represents the multiplicative
+ order of g. If no o is given, assume that g generate (Z/nZ)*.
 Doc: discrete logarithm of the integermod $x$ in $(\Z/N\Z)^*$ in base $g$.
- If present, $o$ must be the multiplicative order of $g$, or its factorisation
- matrix.  If no $o$ is given, assume that $g$ generate $(\Z/N\Z)^*$.
+ If present, $o$ represents the multiplicative order of $g$, see
+ \secref{se:DLfun}; the preferred format for this parameter is
+ \kbd{[ord, factor(ord)]}, where \kbd{ord} is the order of $g$.
+ If no $o$ is given, assume that $g$ generate $(\Z/N\Z)^*$.
 
  This function uses a simple-minded combination of generic
  discrete log algorithms (index calculus methods are not yet implemented).
