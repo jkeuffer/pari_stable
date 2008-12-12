@@ -400,7 +400,7 @@ advise you to update soon ]
     and very inefficient). There are now aliases to t_FRAC, t_RFRAC and gcopy
     respectively for backward compatibility.
   - renamed nfdivres -> nfdivrem, poldivres -> poldivrem
-  - renamed permute -> numtoperm, permuteInv -> pertonum
+  - renamed permute -> numtoperm, permuteInv -> permtonum
   - renamed gzero -> gen_0, gun -> gen_1, gdeux -> gen_2, polx -> pol_x,
     polun -> pol_1
   - renamed gegal -> gequal, gegalgs -> gequalgs, gegalsg -> gequalsg,
