@@ -724,7 +724,7 @@ GEN     sqrtint(GEN a);
 GEN     mulu_interval(ulong a, ulong b);
 long    uissquareall(ulong A, ulong *sqrtA);
 GEN     znorder(GEN x, GEN o);
-GEN     znlog(GEN x, GEN g);
+GEN     znlog(GEN x, GEN g, GEN o);
 GEN     znprimroot(GEN m);
 GEN     znprimroot0(GEN m);
 GEN     znstar(GEN x);

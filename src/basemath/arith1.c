@@ -2119,9 +2119,9 @@ Zplog2(GEN x, GEN g, GEN p, ulong k, GEN pk)
 #else
 /* use p-adic log: O(log p + k) mul*/
 static GEN
-Zplog(GEN x, GEN g, GEN p, ulong k, GEN pk)
+Zplog(GEN x, GEN g, GEN p, ulong k, GEN pk, GEN o)
 {
-  GEN b, n = subis(p,1), a = Fp_log(x, g, n, p);
+  GEN b, n = subis(p,1), a = Fp_log(x, g, o?o:n, p);
   if (k == 1) return a;
   x = Fp_mul(x, Fp_pow(g, negi(a), pk), pk);
   b = gdiv(Qp_log(cvtop(x, p, k)), Qp_log(cvtop(Fp_pow(g,n,pk), p, k)));
@@ -2130,7 +2130,7 @@ Zplog(GEN x, GEN g, GEN p, ulong k, GEN pk)
 #endif
 
 GEN
-znlog(GEN x, GEN g)
+znlog(GEN x, GEN g, GEN o)
 {
   pari_sp av = avma;
   long k;
@@ -2172,7 +2172,7 @@ znlog(GEN x, GEN g)
     default: pari_err(talker,"not an element of (Z/pZ)* in znlog");
       return NULL; /* not reached */
   }
-  return gerepileuptoint(av, Zplog(x, g, p, k, pk));
+  return gerepileuptoint(av, Zplog(x, g, p, k, pk, o));
 }
 
 GEN
