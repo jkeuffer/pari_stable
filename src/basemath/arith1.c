@@ -102,7 +102,7 @@ GEN
 pgener_Fp_local(GEN p, GEN L0)
 {
   pari_sp av0 = avma;
-  long k, i;
+  long l, i;
   GEN x, q, p_1, L;
   if (lgefint(p) == 3)
   {
@@ -118,13 +118,13 @@ pgener_Fp_local(GEN p, GEN L0)
     GEN t;
     (void)Z_lvalrem(q, 2, &t);
     L0 = L = gel(Z_factor(t), 1);
-    k = lg(L)-1;
+    l = lg(L);
   } else {
-    k = lg(L0)-1;
-    L = cgetg(k + 1, t_VEC);
+    l = lg(L0);
+    L = cgetg(l, t_VEC);
   }
 
-  for (i=1; i<=k; i++) gel(L,i) = diviiexact(q, gel(L0,i));
+  for (i=1; i<l; i++) gel(L,i) = diviiexact(q, gel(L0,i));
   x = utoipos(2);
   for (;; x[2]++) { if (is_gener_Fp(x, p, p_1, L)) break; }
   avma = av0; return utoipos((ulong)x[2]);
