@@ -709,23 +709,6 @@ FF_minpoly(GEN x)
   }
 }
 
-int
-is_Z_factor(GEN f)
-{
-  long i, l;
-  GEN P, E;
-  if (typ(f) != t_MAT || lg(f) != 3) return 0;
-  P = gel(f,1);
-  E = gel(f,2); l = lg(P);
-  for (i = 1; i < l; i++)
-  {
-    GEN p = gel(P,i), e = gel(E,i);
-    if (typ(p) != t_INT || signe(p) <= 0 || typ(e) != t_INT || signe(e) <= 0)
-      return 0;
-  }
-  return 1;
-}
-
 GEN
 FF_log(GEN x, GEN g, GEN ord)
 {
@@ -734,7 +717,6 @@ FF_log(GEN x, GEN g, GEN ord)
   GEN r, T, p;
   _getFF(x,&T,&p,&pp);
   _checkFF(x,g,"log");
-  if (ord && typ(ord)!=t_INT && !is_Z_factor(ord)) pari_err(typeer, "FF_log");
   switch(x[1])
   {
   case t_FF_FpXQ:
@@ -931,8 +913,7 @@ ffgen(GEN T, long v)
 GEN
 fforder(GEN x, GEN o)
 {
-  if (typ(x)!=t_FFELT || (o && typ(o)!=t_INT && !is_Z_factor(o)))
-    pari_err(typeer,"fforder");
+  if (typ(x)!=t_FFELT) pari_err(typeer,"fforder");
   return FF_order(x,o);
 }
 

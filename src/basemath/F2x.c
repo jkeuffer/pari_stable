@@ -637,7 +637,7 @@ gener_F2xq(GEN T, GEN *po)
   GEN g, L2, o, q;
 
   if (f == 1) {
-    if (po) *po = trivfact();
+    if (po) *po = mkvec2(gen_1, trivfact());
     return pol1_F2x(vT);
   }
   q = subis(powuu(2,f), 1);
@@ -662,7 +662,8 @@ gener_F2xq(GEN T, GEN *po)
   }
   if (!po) g = gerepilecopy(av0, g);
   else {
-    *po = o; gerepileall(av0, 2, &g, po);
+    *po = mkvec2(subis(int2n(f), 1), o);
+    gerepileall(av0, 2, &g, po);
   }
   return g;
 }

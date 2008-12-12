@@ -773,8 +773,9 @@ Fp_FpXQ_log(GEN a, GEN g, GEN o, GEN T, GEN p)
   if (is_pm1(a)) return gen_0;
   /* p > 2 */
 
-  ord  = typ(o)==t_MAT ? factorback(o) : o;
   ordp = subis(p, 1); /* even */
+  ord  = dlog_get_ord(o);
+  if (!ord) ord = T? subis(powiu(p, degpol(T)), 1): ordp;
   if (equalii(a, ordp)) /* -1 */
     return gerepileuptoint(av, shifti(ord,-1));
   ordp = gcdii(ordp,ord);
@@ -979,7 +980,7 @@ gener_FpXQ(GEN T, GEN p, GEN *po)
     if (!po) g = gerepileupto(av0, g);
     else
     {
-      *po = Flx_to_ZX(*po);
+      gel(*po,2) = Flx_to_ZX(gel(*po,2));
       gerepileall(av0, 2, &g, po);
     }
     return g;
@@ -1016,7 +1017,8 @@ gener_FpXQ(GEN T, GEN p, GEN *po)
   }
   if (!po) g = gerepilecopy(av0, g);
   else {
-    *po = o; gerepileall(av0, 2, &g, po);
+    *po = mkvec2(subis(powiu(p,f), 1), o);
+    gerepileall(av0, 2, &g, po);
   }
   return g;
 }

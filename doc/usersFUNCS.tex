@@ -467,6 +467,7 @@ completely different from transcendental functions in that there are no
 automatic type conversions: in general only integers are accepted as
 arguments.
 
+\subsec{Arithmetic functions and factorization}
 All arithmetic functions in the narrow sense of the word~--- Euler's
 totient\sidx{Euler totient function} function, the \idx{Moebius} function,
 the sums over divisors or powers of divisors etc.--- call, after trial
@@ -474,9 +475,47 @@ division by small primes, the same versatile factoring machinery described
 under \kbd{factorint}. It includes \idx{Shanks SQUFOF}, \idx{Pollard Rho},
 \idx{ECM} and \idx{MPQS} stages, and has an early exit option for the
 functions \teb{moebius} and (the integer function underlying)
-\teb{issquarefree}. Note that it relies on a (fairly strong) probabilistic
-primality test, see \kbd{ispseudoprime}.
+\teb{issquarefree}. This machinery relies on a fairly strong
+probabilistic primality test, see \kbd{ispseudoprime}, but you may also set
+\bprog
+  default(factor_proven, 1)
+@eprog\noindent to ensure that all tentative factorizations are fully proven.
+This should not slow down PARI too much, unless prime numbers with
+hundreds of decimal digits occur frequently in your application.
 
+\subsec{Orders in finite groups and Discrete Logarithm functions}
+\label{se:DLfun}
+
+The following functions compute the order of an element in a finite group:
+\kbd{ellorder} (the rational points on an elliptic curve defined over a
+finite field), \kbd{fforder} (the multiplicative groupe of a finite field),
+\kbd{znorder} (the invertible elements in $\Z/n\Z$). The following functions
+compute discrete logarithms in the same groups (whenever this is meaningful)
+\kbd{elllog}, \kbd{fflog}, \kbd{znlog}.
+
+All such functions allow an optional argument specififying an integer
+$N$, representing the order of the group. (The \emph{order} functions also
+allow any non-zero multiple of the order, with a minor loss of efficiency.)
+The meaning of that optional argument is as follows and depends on its type
+
+\item \typ{INT}: the integer $N$,
+
+\item \typ{MAT}: the factorization \kbd{fa = factor($N$)},
+
+\item \typ{VEC}: this is the preferred format and provides both informations
+in a two-component vector \kbd{[$N$, fa]}.
+
+When the group is fixed and many orders or discrete logarithms will be
+computed, it is much more efficient to initialize this data once and for all
+and pass it to the relevant functions, as in
+\bprog
+? p = nextprime(10^40);
+? v = [p-1, factor(p-1)]; \\ data for discrete log & order computations
+? znorder(Mod(2,p), v)
+%3 = 500000000000000000000000000028
+? g = znprimroot(p);
+? znlog(2, g, v)
+%5 = 543038070904014908801878611374
 \bigskip
 
 %SECTION: number_theoretical

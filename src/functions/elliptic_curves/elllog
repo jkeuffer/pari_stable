@@ -3,9 +3,9 @@ Section: elliptic_curves
 C-Name: elllog
 Prototype: GGGDG
 Help: elllog(E,P,G,{o}): return the discrete logarithm of the point P of
- the elliptic curve E in base G. If present, o must be the order of G,
- or its factorisation matrix. If not present, assume that G generates the
- curve.
+ the elliptic curve E in base G. If present, o must be the order ord of G,
+ its factorisation matrix fa, or (preferably) the vector [ord, fa].
+ If not present, assume that G generates the curve.
 Doc: discrete logarithm of the point $P$ of the elliptic curve $E$ in base $G$.
  See \tet{znlog} for the limitations of the underlying discrete log algorithms.
  If present, $o$ must be the order of $G$, or its factorisation matrix. 
@@ -16,9 +16,10 @@ Doc: discrete logarithm of the point $P$ of the elliptic curve $E$ in base $G$.
  ? E = ellinit([a,1,0,0,1]);  \\ over F_{2^8}
  ? x = a^3; y = ellordinate(E,x)[1];
  ? P = [x,y]; G = ellpow(E, P, 113);
- ? ellorder(E, G, 242);
+ ? ord = [242, factor(242)]; \\ P generates a group of order 242. Initialize.
+ ? ellorder(E, G, ord)
  %4 = 242
- ? e = elllog(E, P, G, 242)
+ ? e = elllog(E, P, G, ord)
  %5 = 15
  ? ellpow(E,G,e) == P
  %6 = 1

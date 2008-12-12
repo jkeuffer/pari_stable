@@ -3829,7 +3829,6 @@ elllog(GEN e, GEN a, GEN g, GEN o)
   GEN j;
   checksmallell(e); checkellpt(a); checkellpt(g);
   j = ell_get_j(e);
-  if (o && typ(o)!=t_INT && !is_Z_factor(o)) pari_err(typeer, "elllog");
   switch(typ(j))
   {
     case t_INTMOD:

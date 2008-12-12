@@ -1720,7 +1720,8 @@ gener_Flxq(GEN T, ulong p, GEN *po)
   }
   if (!po) g = gerepilecopy(av0, g);
   else {
-    *po = o; gerepileall(av0, 2, &g, po);
+    *po = mkvec2(subis(powuu(p,f), 1), o);
+    gerepileall(av0, 2, &g, po);
   }
   return g;
 }

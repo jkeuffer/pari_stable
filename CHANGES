@@ -390,6 +390,10 @@ BA 92- make test-xxx: trap SIGINT in benching script to exit on <C-C>
   100- bnrclassno(bnr,id) : allow bid as well as modules for the 'id' argument.
   101- GP 'path' now also applies for file paths containing a '/' provided
        they do not *start* with a '/' (i.e. not an absolute path)
+  102- [library mode] the function znlog now takes an extra "order" argument
+  103- added an optional "order" argument to znlog, fflog, elllog, znorder,
+       fforder, ellorder, whose preferred format is [ord, factor(ord)] and
+       ord is the order of the group
 
   Added
     1- many new benches (make test-all)

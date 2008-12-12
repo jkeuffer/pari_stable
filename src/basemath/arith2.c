@@ -727,6 +727,23 @@ GEN
 Z_factor(GEN n)
 { return ifactor(n,NULL,NULL, 1,decomp_default_hint); }
 
+int
+is_Z_factor(GEN f)
+{
+  long i, l;
+  GEN P, E;
+  if (typ(f) != t_MAT || lg(f) != 3) return 0;
+  P = gel(f,1);
+  E = gel(f,2); l = lg(P);
+  for (i = 1; i < l; i++)
+  {
+    GEN p = gel(P,i), e = gel(E,i);
+    if (typ(p) != t_INT || signe(p) <= 0 || typ(e) != t_INT || signe(e) <= 0)
+      return 0;
+  }
+  return 1;
+}
+
 /* Factor until the unfactored part is smaller than limit. Return the
  * factored part. Hence factorback(output) may be smaller than n */
 GEN

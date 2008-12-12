@@ -2032,7 +2032,6 @@ znorder(GEN x, GEN o)
 {
   pari_sp av = avma;
   GEN b, a;
-  long to;
 
   if (typ(x) != t_INTMOD)
     pari_err(talker,"not an element of (Z/nZ)* in order");
@@ -2058,8 +2057,6 @@ znorder(GEN x, GEN o)
     }
     return gerepileuptoint(av, o);
   }
-  to = typ(o);
-  if (to != t_INT && to != t_MAT) pari_err(arither1);
   return Fp_order(a, o, b);
 }
 GEN
@@ -2080,7 +2077,8 @@ _Fp_easylog(void *E, GEN x, GEN g, GEN ord)
   p1 = addsi(-1, p);
   if (equalii(p1,x))  /* -1 */
   {
-    ord = (typ(ord)==t_MAT) ? factorback(ord) : ord;
+    ord = dlog_get_ord(ord);
+    if (!ord) ord = p1;
     return gerepileupto(av, shifti(ord,-1));
   }
   avma = av; return NULL;

@@ -141,6 +141,48 @@ gen_plog(GEN x, GEN g, GEN p, void *E, const struct bb_group *grp,
   return gen_Pollard_log(x, g, p, E, grp);
 }
 
+GEN
+dlog_get_ordfa(GEN o)
+{
+  if (!o) return NULL;
+  switch(typ(o))
+  {
+    case t_INT:
+      if (signe(o) > 0) return mkvec2(o, Z_factor(o));
+      break;
+    case t_MAT:
+      if (is_Z_factor(o)) return mkvec2(factorback(o), o);
+      break;
+    case t_VEC:
+      if (lg(o) == 3 && signe(gel(o,1)) > 0 && is_Z_factor(gel(o,2))) return o;
+      break;
+  }
+  pari_err(typeer, "generic discrete logarithm (order factorization)");
+  return NULL; /* not reached */
+}
+GEN
+dlog_get_ord(GEN o)
+{
+  if (!o) return NULL;
+  switch(typ(o))
+  {
+    case t_INT:
+      if (signe(o) > 0) return o;
+      break;
+    case t_MAT:
+      o = factorback(o);
+      if (typ(o) == t_INT && signe(o) > 0) return o;
+      break;
+    case t_VEC:
+      if (lg(o) != 3) break;
+      o = gel(o,1);
+      if (typ(o) == t_INT && signe(o) > 0) return o;
+      break;
+  }
+  pari_err(typeer, "generic discrete logarithm (order factorization)");
+  return NULL; /* not reached */
+}
+
 /* easy() is an optional trapdoor function that catch easy logarithms*/
 /* Generic Pohlig-Hellman discrete logarithm*/
 /* smallest integer n such that g^n=a. Assume g has order ord */
@@ -159,16 +201,11 @@ gen_PH_log(GEN a, GEN g, GEN ord, void *E, const struct bb_group *grp,
     GEN e = easy(E, a, g, ord);
     if (e) return e;
   }
-  if (typ(ord) == t_MAT)
-  {
-    fa = ord;
-    ord= factorback(fa);
-  }
-  else
-    fa = Z_factor(ord);
+  v = dlog_get_ordfa(ord);
+  ord= gel(v,1);
+  fa = gel(v,2);
   ex = gel(fa,2);
-  fa = gel(fa,1);
-  l = lg(fa);
+  fa = gel(fa,1); l = lg(fa);
   ginv = grp->pow(E,g,gen_m1);
   v = cgetg(l, t_VEC);
   for (i=1; i<l; i++)
@@ -215,15 +252,10 @@ gen_eltorder(GEN a, GEN o, void *E, const struct bb_group *grp)
   long i;
   GEN m;
 
-  if (typ(o) == t_MAT)
-  {
-    m = o;
-    o = factorback(m);
-    if (typ(o) != t_INT)
-      pari_err(talker, "incorrect order in gen_eltorder: %Ps", o);
-  }
-  else
-    m = Z_factor(o);
+  m = dlog_get_ordfa(o);
+  if (!m) pari_err(talker,"missing order in gen_eltorder");
+  o = gel(m,1);
+  m = gel(m,2);
   for (i = lg(m[1])-1; i; i--)
   {
     GEN t, y, p = gcoeff(m,i,1);
@@ -237,8 +269,10 @@ gen_eltorder(GEN a, GEN o, void *E, const struct bb_group *grp)
 	y = grp->pow(E, y, p);
 	if (grp->cmp1(y)) break;
       }
-      if (j > 1) p = powiu(p, j);
-      o = mulii(t, p);
+      if (j < e) {
+        if (j > 1) p = powiu(p, j);
+        o = mulii(t, p);
+      }
     }
   }
   return gerepilecopy(av, o);
