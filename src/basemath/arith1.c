@@ -53,7 +53,7 @@ pgener_Fl_local(ulong p, GEN L0)
   const pari_sp av = avma;
   const ulong p_1 = p - 1;
   const ulong q = p_1 >>1;
-  long i, x, k ;
+  long i, x, l ;
   GEN L;
   if (p <= 19)
   { /* quick trivial cases */
@@ -70,13 +70,13 @@ pgener_Fl_local(ulong p, GEN L0)
     ulong t;
     (void)u_lvalrem(q, 2, &t);
     L0 = L = gel(factoru(t), 1);
-    k = lg(L)-1;
+    l = lg(L);
   } else {
-    k = lg(L0)-1;
-    L = cgetg(k + 1, t_VECSMALL);
+    l = lg(L0);
+    L = cgetg(l, t_VECSMALL);
   }
 
-  for (i=1; i<=k; i++) L[i] = q / (ulong)L0[i];
+  for (i=1; i<l; i++) L[i] = q / (ulong)L0[i];
   for (x=2;;x++) { if (is_gener_Fl(x,p,p_1,L)) break; }
   avma = av; return x;
 }
