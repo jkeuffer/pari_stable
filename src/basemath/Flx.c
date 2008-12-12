@@ -1681,7 +1681,7 @@ gener_Flxq(GEN T, ulong p, GEN *po)
     fa = Z_factor(o);
     L = gel(fa,1);
     L = vecslice(L, 2, lg(L)-1); /* remove 2 for efficiency */
-    g = Fl_to_Flx(pgener_Fl_local(p, L), vT);
+    g = Fl_to_Flx(pgener_Fl_local(p, vec_to_vecsmall(L)), vT);
     if (po) *po = mkvec2(o, fa);
     return g;
   }
