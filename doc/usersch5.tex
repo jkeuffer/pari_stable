@@ -3446,9 +3446,11 @@ of \kbd{x}
 \fun{GEN}{FpXQ_conjvec}{GEN x, GEN T, GEN p} returns the vector of conjugates
 $[x,x^p,x^{p^2},\ldots,x^{p^{n-1}}]$ where $n$ is the degree of $T$.
 
-\fun{GEN}{gener_FpXQ}{GEN T, GEN p} returns a primitive root modulo
+\fun{GEN}{gener_FpXQ}{GEN T, GEN p, GEN *po} returns a primitive root modulo
 $(T,p)$. $T$ is an \kbd{FpX} assumed to be irreducible modulo the prime
-$p$.
+$p$. If \kbd{po} is not \kbd{NULL} it is set to $[o,\var{fa}]$, where $o$ is
+the order of the multiplicative group of the finite field, and \var{fa} is
+its factorization.
 
 \fun{GEN}{FpXQ_powers}{GEN x, long n, GEN T, GEN p} returns $[\kbd{x}^0,
 \dots, \kbd{x}^\kbd{n}]$ as a \typ{VEC} of \kbd{FpXQ}s.
@@ -3801,9 +3803,11 @@ of \kbd{x}
 \fun{GEN}{Flxq_conjvec}{GEN x, GEN T, ulong p} returns the conjugates
 $[x,x^p,x^{p^2},\ldots,x^{p^{n-1}}]$ where $n$ is the degree of $T$.
 
-\fun{GEN}{gener_Flxq}{GEN T, ulong p} returns a primitive root modulo
+\fun{GEN}{gener_Flxq}{GEN T, ulong p, GEN *po} returns a primitive root modulo
 $(T,p)$. $T$ is an \kbd{Flx} assumed to be irreducible modulo the prime
-$p$.
+$p$. If \kbd{po} is not \kbd{NULL} it is set to $[o,\var{fa}]$, where $o$ is the
+order of the multiplicative group of the finite field, and \var{fa} is
+its factorization.
 
 \subsec{\kbd{FlxX}}. See \kbd{FpXX} operations.
 

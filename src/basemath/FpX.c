@@ -967,9 +967,16 @@ gener_FpXQ(GEN T, GEN p, GEN *po)
   pari_sp av0 = avma, av;
 
   if (f == 1) {
+    GEN L, fa;
+    o = subis(p, 1);
+    fa = Z_factor(o);
+    L = gel(fa,1);
+    L = vecslice(L, 2, lg(L)-1); /* remove 2 for efficiency */
+
     g = cgetg(3, t_POL);
     g[1] = evalsigne(1) | evalvarn(vT);
-    gel(g,2) = pgener_Fp(p);
+    gel(g,2) = pgener_Fp_local(p, L);
+    if (po) *po = mkvec2(o, fa);
     return g;
   }
   if (lgefint(p) == 3)

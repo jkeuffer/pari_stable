@@ -1675,7 +1675,17 @@ gener_Flxq(GEN T, ulong p, GEN *po)
   GEN g, L, L2, o, q;
   pari_sp av0, av;
 
-  if (f == 1) return Fl_to_Flx(pgener_Fl(p), vT);
+  if (f == 1) {
+    GEN fa;
+    o = utoipos(p-1);
+    fa = Z_factor(o);
+    L = gel(fa,1);
+    L = vecslice(L, 2, lg(L)-1); /* remove 2 for efficiency */
+    g = Fl_to_Flx(pgener_Fl_local(p, L), vT);
+    if (po) *po = mkvec2(o, fa);
+    return g;
+  }
+
   av0 = avma; p_1 = p - 1;
   q = diviuexact(subis(powuu(p,f), 1), p_1);
 

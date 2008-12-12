@@ -1031,8 +1031,8 @@ primecertify(GEN bnf, GEN beta, ulong p, GEN bad)
       /* Q has degree 1 */
       if (!g)
       {
-	ord = Z_factor( utoipos(q-1) );
-	g = pgener_Fp_local(gq, gel(ord,1)); /* primitive root */
+        g = gener_Flxq(pol_x(0), q, &ord);
+        g = utoipos(g[2]); /* from Flx of degree 0 to t_INT */
       }
       modpr = zkmodprinit(nf, Q);
       newcol = cgetg(lb+1,t_COL);
