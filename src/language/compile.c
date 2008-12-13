@@ -717,6 +717,7 @@ compilevec(long n, long mode, op_code op)
     op_push(OCstackgen,i,n);
   }
   avma=ltop;
+  op_push(OCpop,1,n);
   compilecast(n,Gvec,mode);
 }
 
@@ -751,6 +752,7 @@ compilemat(long n, long mode)
     }
   }
   avma=ltop;
+  op_push(OCpop,1,n);
   compilecast(n,Gvec,mode);
 }
 
@@ -1142,6 +1144,7 @@ compilefunc(entree *ep, long n, int mode)
                 compilenode(g[l], Ggen, FLnocopy);
                 op_push(OCstackgen,l, a);
               }
+              op_push(OCpop, 1, a);
               op_push(OCcallgen,(long)is_entry("Str"), a);
               op_push(OCtostr, -1, a);
             }
@@ -1237,6 +1240,7 @@ compilefunc(entree *ep, long n, int mode)
                 compilenode(mael(g,k,l),Ggen,FLnocopy);
                 op_push(OCstackgen,m,mael(g,k,l));
               }
+            op_push_loc(OCpop, 1, str);
             j=nb+1;
             break;
           }
@@ -1681,6 +1685,7 @@ closure_deriv(GEN G)
     op_push_loc(OCpushlex,i-arity-1,code);
     op_push_loc(OCstackgen,i,code);
   }
+  op_push_loc(OCpop,1,code);
   op_push_loc(OCprecreal,0,code);
   op_push_loc(OCcallgen,(long)is_entry("_derivnum"),code);
   return gerepilecopy(ltop, getfunction(&pos,arity,0,text));

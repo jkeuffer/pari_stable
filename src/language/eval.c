@@ -806,9 +806,13 @@ closure_eval(GEN C)
       changelex(operand,gel(st,--sp));
       break;
     case OCstackgen:
-      gmael(st,sp-2,operand)=copyupto(gel(st,sp-1),gel(st,sp-2));
-      sp--;
-      break;
+      {
+        GEN z = gerepileupto(st[sp-2],gel(st,sp-1));
+        gmael(st,sp-3,operand) = copyupto(z,gel(st,sp-2));
+        st[sp-2] = avma;
+        sp--;
+        break;
+      }
     case OCprecreal:
       st[sp++]=precreal;
       break;
@@ -1149,9 +1153,11 @@ closure_eval(GEN C)
       break;
     case OCvec:
       gel(st,sp++)=cgetg(operand,t_VEC);
+      st[sp++]=avma;
       break;
     case OCcol:
       gel(st,sp++)=cgetg(operand,t_COL);
+      st[sp++]=avma;
       break;
     case OCmat:
       {
@@ -1161,6 +1167,7 @@ closure_eval(GEN C)
         for(j=1;j<operand;j++)
           gel(z,j) = cgetg(l,t_COL);
         gel(st,sp-1) = z;
+        st[sp++]=avma;
       }
       break;
     case OCpop:
