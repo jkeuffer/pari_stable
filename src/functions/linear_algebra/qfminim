@@ -31,10 +31,10 @@ Doc: $x$ being a square and symmetric matrix representing a positive definite
  If $\fl=1$, ignores $m$ and returns the first vector whose norm is less
  than $b$. In this variant, an explicit $b$ must be provided.
 
- In these two cases, $x$ is assumed to have integral entries. The
+ In these two cases, $x$ must have \emph{integral} entries. The
  implementation uses low precision floating point computations for maximal
  speed, which gives incorrect result when $x$ has large entries. (The
- condition is checked in the code and the routine will raise an error if
+ condition is checked in the code and the routine raises an error if
  large rounding errors occur.) A more robust, but much slower,
  implementation is chosen if the following flag is used:
 
@@ -49,7 +49,7 @@ Doc: $x$ being a square and symmetric matrix representing a positive definite
  ? x = matid(2);
  ? qfminim(x)  \\@com 4 minimal vectors of norm 1: $\pm[0,1]$, $\pm[1,0]$
  %2 = [4, 1, [0, 1; 1, 0]]
- ? { x=
+ ? { x =
  [4, 2, 0, 0, 0,-2, 0, 0, 0, 0, 0, 0, 1,-1, 0, 0, 0, 1, 0,-1, 0, 0, 0,-2;
   2, 4,-2,-2, 0,-2, 0, 0, 0, 0, 0, 0, 0,-1, 0, 0, 0, 0, 0,-1, 0, 1,-1,-1;
   0,-2, 4, 0,-2, 0, 0, 0, 0, 0, 0, 0,-1, 1, 0, 0, 1, 0, 0, 1,-1,-1, 0, 0;
