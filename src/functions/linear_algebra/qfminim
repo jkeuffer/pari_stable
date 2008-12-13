@@ -77,6 +77,9 @@ Doc: $x$ being a square and symmetric matrix representing a positive definite
  ? qfminim(x,,0)  \\ the Leech lattice has 196560 minimal vectors of norm 4
  time = 648 ms.
  %4 = [196560, 4, [;]]
+ ? qfminim(x,,0,2); \\ safe algorithm. Slower and unnecessary here.
+ time = 18,161 ms.
+ %5 = [196560, 4.000061035156250000, [;]]
  @eprog\noindent\sidx{Leech lattice}\sidx{minimal vector}
  In the last example, we store 0 vectors to limit memory use. All minimal
  vectors are nevertheless enumerated. Provided \kbd{parisize} is about 50MB,
