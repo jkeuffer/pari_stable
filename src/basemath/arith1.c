@@ -869,6 +869,7 @@ gisanypower(GEN x, GEN *pty)
 {
   long tx = typ(x);
   ulong k, h;
+  if (tx == t_INT) return Z_isanypower(x, pty);
   if (tx == t_FRAC)
   {
     pari_sp av = avma;
@@ -896,7 +897,6 @@ gisanypower(GEN x, GEN *pty)
     *pty = gerepilecopy(av, mkfrac(a, b));
     return k;
   }
-  if (tx == t_INT) return Z_isanypower(x, pty);
   pari_err(talker, "missing exponent");
   return 0; /* not reached */
 }
