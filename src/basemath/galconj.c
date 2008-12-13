@@ -2014,7 +2014,7 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
   struct galois_frobenius gf;
   pari_sp lbot, ltop2, ltop = avma;
   long p, deg, x, i, j, n = degpol(T);
-  GEN sigma, Tmod, res, pf, ip, frob, O, PG, Pg;
+  GEN sigma, Tmod, res, res1, res2, pf, ip, frob, O, PG, PG1, PG2, Pg;
 
   if (!ga->deg) return gen_0;
   x = varn(T);
@@ -2073,21 +2073,22 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
     PG=gerepileupto(btop, PG);
   }
   inittest(L, M, gb->bornesol, gb->ladicsol, &td);
+  PG1 = gel(PG, 1);
+  PG2 = gel(PG, 2);
   lbot = avma;
   res = cgetg(3, t_VEC);
-  gel(res,1) = cgetg(lg(PG[1]) + 1, t_VEC);
-  gel(res,2) = cgetg(lg(PG[1]) + 1, t_VECSMALL);
-  gmael(res,1,1) = cyc_pow_perm(O,1);
-  mael(res,2,1) = deg;
-  for (i = 2; i < lg(res[1]); i++)
-    gmael(res,1,i) = cgetg(n + 1, t_VECSMALL);
+  gel(res,1) = res1 = cgetg(lg(PG1) + 1, t_VEC);
+  gel(res,2) = res2 = cgetg(lg(PG1) + 1, t_VECSMALL);
+  gel(res1, 1) = cyc_pow_perm(O,1);
+  res2[1] = deg;
+  for (i = 2; i < lg(res1); i++) gel(res1,i) = cgetg(n+1, t_VECSMALL);
   ltop2 = avma;
-  for (j = 1; j < lg(PG[1]); j++)
+  for (j = 1; j < lg(PG1); j++)
   {
     long sr, k;
     GEN  X  = cgetg(lg(O), t_VECSMALL);
     GEN  oX = cgetg(lg(O), t_VECSMALL);
-    GEN  gj = gmael(PG,1,j);
+    GEN  gj = gel(PG1, j);
     long s  = gf.psi[Pg[j]];
     GEN  B  = perm_cycles(gj);
     long oj = lg(B[1]) - 1;
@@ -2096,7 +2097,7 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
     GEN  Fe = gel(F,2);
     if (DEBUGLEVEL >= 6)
       fprintferr("GaloisConj: G[%d]=%Ps of relative order %d\n", j, gj, oj);
-    B = perm_cycles(gmael(PG,1,j));
+    B = perm_cycles(gel(PG1,j));
     pf = identity_perm(n);
     for (k=lg(Fp)-1; k>=1; k--)
     {
@@ -2112,9 +2113,8 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
       for (i=1; i<lg(O); i++) oX[i] = 0;
       for (f=1; f<=e; f++)
       {
-	long sel;
+	long sel, t;
 	GEN Bel = gel(Be,f);
-	long t;
 	dg *= p; el /= p;
 	sel = Fl_powu(s,el,deg);
 	if (DEBUGLEVEL >= 6) fprintferr("GaloisConj: B=%Ps\n", Bel);
@@ -2142,8 +2142,8 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
       }
       pf = perm_mul(pf, perm_pow(pf1, el));
     }
-    for (k = 1; k <= n; k++) gmael3(res,1,j + 1,k) = gel(pf,k);
-    gmael(res,2,j+1) = gmael(PG,2,j);
+    for (k = 1; k <= n; k++) gmael(res1, j+1,k) = gel(pf,k);
+    res2[j+1] = PG2[j];
     avma = ltop2;
   }
   if (DEBUGLEVEL >= 4) fprintferr("GaloisConj:Fini!\n");
