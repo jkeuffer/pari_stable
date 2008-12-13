@@ -1963,7 +1963,7 @@ is_357_power(GEN x, GEN *pt, ulong *mask)
 	 if (*mask & 4) { b = 4; e = 7; }
     else if (*mask & 2) { b = 2; e = 5; }
     else                { b = 1; e = 3; }
-    y = mpround( sqrtnr(itor(x, 3 + (lx-2)/e), e) );
+    y = mpround( sqrtnr(itor(x, DEFAULTPREC + (lx-2) / e), e) );
     if (equalii(powiu(y,e), x))
     {
       if (!pt) { avma = av; return e; }
