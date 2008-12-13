@@ -47,5 +47,3 @@ test2(2)
 test2(3)
 test2(46744073709551653)
 test2(precprime(1<<32))
-
-getheap
