@@ -1670,6 +1670,7 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
   const double eps = 0.0001;
   int stockall = 0;
 
+  if (typ(a) != t_MAT || !RgM_is_ZM(a)) pari_err(typeer,"qfminim0");
   if (!BORNE) BORNE = gen_0;
   else
   {
@@ -1678,7 +1679,6 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
   }
   if (!STOCKMAX) stockall = 1;
   else if (typ(STOCKMAX) != t_INT) pari_err(typeer, "minim0");
-  if (typ(a) != t_MAT) pari_err(typeer,"minim0");
 
   maxrank = 0; res = V = invp = NULL; /* gcc -Wall */
   switch(flag)
