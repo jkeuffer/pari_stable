@@ -506,7 +506,7 @@ RgM_is_ZM(GEN x)
   if (l == 1) return 1;
   h = lg(gel(x,1));
   for (j = l-1; j > 0; j--)
-    for (i = h-1; h > 0; i--)
+    for (i = h-1; i > 0; i--)
       if (typ(gcoeff(x,i,j)) != t_INT) return 0;
   return 1;
 }
