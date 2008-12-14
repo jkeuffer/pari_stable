@@ -12,9 +12,9 @@ Doc: returns a primitive root (generator) of $(\Z/n\Z)^*$, whenever this
  undefined. If $n$ is a prime, then the smallest positive primitive root is
  returned. This is no longer true for composites.
 
- Note that this function requires factoring $n$ and $p-1$ for each prime
- divisor $p$ of $n$, in order to determine the exact order of elements in
- $(\Z/n\Z)^*$: this is likely to be very costly if $n$ is large.
+ Note that this function requires factoring $p-1$ for $p$ as above,
+ in order to determine the exact order of elements in
+ $(\Z/n\Z)^*$: this is likely to be very costly if $p$ is large.
  The function accepts vector/matrices arguments, and is then applied
  componentwise.
 Variant: For a \typ{INT} $x$, the special case
