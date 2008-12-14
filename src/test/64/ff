@@ -82,7 +82,5 @@ a^5 + 2*a^4 + 6*a^3 + 2)*x + 1, 1], [0, 0, 0, a, 1, 0, 2*a, 4, 6*a^2, a, 4,
 ? test2(precprime(1<<32))
 [2, [4294967290, [2, 1; 5, 1; 19, 1; 22605091, 1]]]
 17
-? getheap
-[19, 5928]
 ? print("Total time spent: ",gettime);
-Total time spent: 2460
+Total time spent: 2400
