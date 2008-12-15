@@ -1546,10 +1546,10 @@ Zp_appr(GEN f, GEN a)
   long prec;
   GEN z, p;
   if (typ(f) != t_POL) pari_err(notpoler,"Zp_appr");
-  if (gcmp0(f)) pari_err(zeropoler,"Zp_appr");
   if (typ(a) != t_PADIC) pari_err(typeer,"Zp_appr");
   p = gel(a,2); prec = gcmp0(a)? valp(a): precp(a);
   f = QpX_to_ZX(f);
+  if (degpol(f) <= 0) pari_err(constpoler,"Zp_appr");
   (void)ZX_gcd_all(f, ZX_deriv(f), &f);
   z = ZX_Zp_root(f, gtrunc(a), p, prec);
   return gerepilecopy(av, ZV_to_ZpV(z, p, prec));
