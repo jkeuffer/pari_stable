@@ -398,8 +398,9 @@ fact_from_sqff(GEN rep, GEN A, GEN B, GEN y, GEN T, GEN bad)
   { /* not squarefree */
     if (n == 1)
     { /* perfect power, simple ! */
+      long e = degpol(A) / degpol(gel(y,1));
       y = gerepileupto(av, QXQXV_to_mod(y, T));
-      ex = mkcol( utoipos(degpol(A) / degpol(gel(y,1))) );
+      ex = mkcol(utoipos(e));
     }
     else
     { /* compute valuations mod a prime of degree 1 (avoid coeff explosion) */
