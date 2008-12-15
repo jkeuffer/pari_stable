@@ -2618,20 +2618,21 @@ GEN
 ZX_gcd_all(GEN A, GEN B, GEN *Anew)
 {
   GEN R, a, b, q, qp, H, Hp, g;
-  long m, n, valX, vA = varn(A);
+  long m, n, valX, valA, vA = varn(A);
   ulong p;
   pari_sp ltop, av, avlim;
   byteptr d;
 
   if (!signe(A)) { if (Anew) *Anew = zeropol(vA); return ZX_copy(B); }
-  if (!signe(B)) { if (Anew) *Anew = pol_1(vA); return ZX_copy(A); }
-  valX = ZX_valrem(A, &A); ltop = avma;
+  if (!signe(B)) { if (Anew) *Anew = pol_1(vA);   return ZX_copy(A); }
+  valA = ZX_valrem(A, &A);
+  valX = minss(valA, ZX_valrem(B, &B));
+  ltop = avma;
 
   n = 1 + minss(degpol(A), degpol(B)); /* > degree(gcd) */
   g = gcdii(leading_term(A), leading_term(B)); /* multiple of lead(gcd) */
   if (is_pm1(g)) g = NULL;
 
-  valX = minss(valX, ZX_valrem(B, &B));
   av = avma; avlim = stack_lim(av, 1);
   H = NULL; d = init_modular(&p);
   for(;;)
@@ -2642,7 +2643,11 @@ ZX_gcd_all(GEN A, GEN B, GEN *Anew)
     b = ZX_to_Flx(B, p); Hp = Flx_gcd_i(a,b, p);
     m = degpol(Hp);
     if (m == 0) { /* coprime. DONE */
-      avma = ltop; if (Anew) *Anew = A;
+      avma = ltop;
+      if (Anew) {
+        if (valA != valX) A = RgX_shift(A, valA - valX);
+        *Anew = A;
+      }
       return monomial(gen_1, valX, vA);
     }
     if (m > n) continue; /* p | Res(A/G, B/G). Discard */
@@ -2672,10 +2677,14 @@ ZX_gcd_all(GEN A, GEN B, GEN *Anew)
     R = RgX_pseudorem(B,H); q = qp;
     if (signe(R)) continue;
     if (Anew)
-      *Anew = RgX_pseudodivrem(A, H, &R);
+      A = RgX_pseudodivrem(A, H, &R);
     else
       R = RgX_pseudorem(A, H);
     if (signe(R)) continue;
+    if (Anew) {
+      if (valA != valX) A = RgX_shift(A, valA - valX);
+      *Anew = A;
+    }
     return valX ? RgX_shift(H, valX): H;
   }
 }
