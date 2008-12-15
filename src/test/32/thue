@@ -13,4 +13,7 @@
 [[5, 1]]
 [[1, 1]]
 [[1, 1]]
-Total time spent: 3348
+  ***   at top-level: thueinit(x^0)
+  ***                 ^-------------
+  *** thueinit: constant polynomial in thueinit.
+Total time spent: 2580

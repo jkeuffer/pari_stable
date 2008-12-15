@@ -625,6 +625,7 @@ thueinit(GEN pol, long flag, long prec)
 
   if (checktnf(pol)) { bnf = checkbnf(gel(pol,2)); pol = gel(pol,1); }
   if (typ(pol)!=t_POL) pari_err(notpoler,"thueinit");
+  if (dpol <= 0) pari_err(constpoler,"thueinit");
   RgX_check_ZX(pol, "thueinit");
   if (varn(pol)) { pol = leafcopy(pol); setvarn(pol, 0); }
   POL = ZX_to_monic(pol, &L); /* POL monic: POL(x) = C pol(x/L) */
