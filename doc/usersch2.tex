@@ -369,29 +369,32 @@ time = 60 ms.
 @eprog\noindent
 
 \subsec{Finite field elements}\sidx{finite field element} (\tet{t_FFELT}):
-first, you must create a irreducible polynomial $T\in\F_p[X]$ defining your
-finite field over $\F_p$, for instance using \tet{ffinit}. Then the
-\tet{ffgen} function creates a generator of the finite field, namely the
-class of $X$ in $\F_p[X]/(T)$, from which you can build all other elements.
-For instance, to create the field $\F_{2^8}$, we write
+let $T\in\F_p[X]$ be a monic irreducible polynomial defining your
+finite field over $\F_p$, for instance obtained using \tet{ffinit}. Then the
+\tet{ffgen} function creates a generator of the finite field as an
+$\F_p$-algebra, namely the class of $X$ in $\F_p[X]/(T)$, from which you can
+build all other elements. For instance, to create the field $\F_{2^8}$, we
+write
 \bprog
 ? T = ffinit(2, 8);
-? y = ffgen(T, y);
+? y = ffgen(T, 'y);
+? y^0    \\ the unit element in the field
+%3 = 1
 ? y^8
-%3 = y^6 + y^5 + y^4 + y^3 + y + 1
+%4 = y^6 + y^5 + y^4 + y^3 + y + 1
 @eprog\noindent
-The second (optional) parameter to \tet{ffgen} is the name used to display
-the result, so it is customary to use the name of the variable we assign the
-generator to. If \kbd{f} is a \typ{FFELT}, the following member function is
+The second (optional) parameter to \tet{ffgen} is only used to display
+the result; it is customary to use the name of the variable we assign the
+generator to. If \kbd{f} is a \typ{FFELT}, the following member functions are
 defined:
 
-\kbd{f.pol}: returns the polynomial (with reduced integers coefficients)
+\kbd{f.pol}: the polynomial (with reduced integer coefficients)
 expressing \kbd{f} in term of the field generator.
 
-\kbd{f.p}: returns the characteristic of the finite field.
+\kbd{f.p}: the characteristic of the finite field.
 
-\kbd{f.mod}: returns the minimal polynomial (with reduced integers
-coefficients) of the the field generator.
+\kbd{f.mod}: the minimal polynomial (with reduced integer
+coefficients) of the field generator.
 
 \subsec{Complex numbers}\sidx{complex number} (\tet{t_COMPLEX}): to
 enter $x+iy$, type \kbd{x + I*y}. (That's \kbd{I}, \emph{not} \kbd{i}!) The
