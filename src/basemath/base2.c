@@ -719,6 +719,14 @@ ZpX_gcd(GEN f1, GEN f2, GEN pm)
   avma = av; return zeropol(v);
 }
 
+/* Return m > 0, such that p^m ~ 2^32 for initial value of m; p > 1 */
+static long 
+init_m(GEN p)
+{
+  if (lgefint(p) > 3) return 1;
+  return 32 / log2(p[2]);
+}
+
 /* reduced resultant mod p^m (assumes x monic) */
 GEN
 ZpX_reduced_resultant(GEN x, GEN y, GEN pm)
@@ -734,9 +742,9 @@ ZpX_reduced_resultant(GEN x, GEN y, GEN pm)
 GEN
 ZpX_reduced_resultant_fast(GEN f, GEN g, GEN p, long M)
 {
-  long m = 32 / expi(p); /* p^m ~ 2^32 for initial value of m */
   GEN R, q = NULL;
-  if (!m) m = 1;
+  long m;
+  m = init_m(p); if (m < 1) m = 1;
   for(;; m <<= 1) {
     if (M < 2*m) break;
     q = q? sqri(q): powiu(p, m); /* p^m */
@@ -746,6 +754,38 @@ ZpX_reduced_resultant_fast(GEN f, GEN g, GEN p, long M)
   R = ZpX_reduced_resultant(f,g, q); return signe(R)? R: q;
 }
 
+/* discriminant valuation mod p^m (assumes x monic, dx = x') */
+static long
+ZpX_disc_val_i(GEN x, GEN dx, GEN p, GEN pm)
+{
+  pari_sp av = avma;
+  GEN z = ZpX_sylvester_hnf(x,dx,pm);
+  long i, v = 0, l = lg(z);
+  for (i = 1; i < l; i++)
+  {
+    GEN c = gcoeff(z,i,i);
+    if (equalii(c, pm)) { avma = av; return -1; } /* failure */
+    v += Z_pval(c, p);
+  }
+  return v;
+}
+/* assume f monic */
+long 
+ZpX_disc_val(GEN f, GEN p)
+{
+  pari_sp av = avma;
+  GEN q = NULL, df;
+  long v, m;
+
+  if (degpol(f) == 1) return 0;
+  df = ZX_deriv(f);
+  m = init_m(p); if (m < 2) m = 2;
+  for(;; m <<= 1) {
+    q = q? sqri(q): powiu(p, m); /* p^m */
+    v = ZpX_disc_val_i(f,df, p, q); if (v >= 0) break;
+  }
+  avma = av; return v;
+}
 
 /* *e a ZX, *d, *z in Z, *d = p^(*vd). Simplify e / d by cancelling a
  * common factor p^v; if z!=NULL, update it by cancelling the same power of p */
@@ -897,8 +937,8 @@ dbasis(GEN p, GEN f, long mf, GEN a, GEN U)
 static GEN
 get_partial_order_as_pols(GEN p, GEN f)
 {
-  GEN b = maxord(p,f, Z_pval(ZX_disc(f),p));
-  return RgM_to_RgXV(b, varn(f));
+  long v = ZpX_disc_val(f, p);
+  return RgM_to_RgXV(maxord(p,f, v), varn(f));
 }
 
 typedef struct __decomp {
@@ -925,6 +965,7 @@ typedef struct __decomp {
 static GEN
 Decomp(decomp_t *S, long flag)
 {
+  pari_sp av = avma;
   GEN fred, res, pr, pk, ph, b1, b2, a, e, de, f1, f2, dt, th;
   GEN p = S->p;
   long k, r = flag? flag: 2*S->df + 1;
@@ -986,13 +1027,15 @@ Decomp(decomp_t *S, long flag)
   if (DEBUGLEVEL>5)
     fprintferr("  leaving Decomp: f1 = %Ps\nf2 = %Ps\ne = %Ps\nde= %Ps\n", f1,f2,e,de);
 
-  if (flag)
+  if (flag) {
+    gerepileall(av, 2, &f1, &f2);
     return famat_mul_shallow(ZX_monic_factorpadic(f1, p, flag),
 			     ZX_monic_factorpadic(f2, p, flag));
-  else
-  {
-    GEN D = de, Dov2, d1, d2, ib1, ib2;
+  } else {
+    GEN D, Dov2, d1, d2, ib1, ib2;
     long n, n1, n2, i;
+    gerepileall(av, 4, &f1, &f2, &e, &de);
+    D = de;
     ib1 = get_partial_order_as_pols(p,f1); n1 = lg(ib1)-1;
     ib2 = get_partial_order_as_pols(p,f2); n2 = lg(ib2)-1; n = n1+n2;
     d1 = QpXV_denom(ib1, p);
@@ -1006,10 +1049,10 @@ Decomp(decomp_t *S, long flag)
     fred = centermod_i(S->f, D, Dov2);
     res = cgetg(n+1, t_VEC);
     for (i=1; i<=n1; i++)
-      gel(res,i) = FpX_center(FpX_rem(ZX_mul(gel(ib1,i),e), fred, D), D, Dov2);
+      gel(res,i) = FpX_center(FpX_rem(FpX_mul(gel(ib1,i),e,D), fred, D), D, Dov2);
     e = Z_ZX_sub(de, e); ib2 -= n1;
     for (   ; i<=n; i++)
-      gel(res,i) = FpX_center(FpX_rem(ZX_mul(gel(ib2,i),e), fred, D), D, Dov2);
+      gel(res,i) = FpX_center(FpX_rem(FpX_mul(gel(ib2,i),e,D), fred, D), D, Dov2);
     res = RgXV_to_RgM(res, n);
     return RgM_Rg_div(ZM_hnfmodid(res,D), D); /* normalized integral basis */
   }

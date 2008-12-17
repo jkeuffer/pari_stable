@@ -837,6 +837,7 @@ GEN     Fq_to_nf(GEN x, GEN modpr);
 GEN     FqM_to_nfM(GEN z, GEN modpr);
 GEN     FqV_to_nfV(GEN z, GEN modpr);
 GEN     FqX_to_nfX(GEN x, GEN modpr);
+long    ZpX_disc_val(GEN f, GEN p);
 GEN     ZpX_gcd(GEN f1,GEN f2,GEN pm);
 GEN     ZpX_reduced_resultant(GEN x, GEN y, GEN pm);
 GEN     ZpX_reduced_resultant_fast(GEN f, GEN g, GEN p, long M);
