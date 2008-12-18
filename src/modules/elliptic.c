@@ -4157,3 +4157,507 @@ elltors0(GEN e, long flag)
   }
   return NULL; /* not reached */
 }
+
+/* Buhler-Gross algorithm for computing L-series derivatives */
+
+/* Implementation by C. Delaunay and X.-F. Roblot 
+   after a GP script of Tom Womack and John Cremona 
+   and the corresponding section of Henri Cohen's book GTM 239 */
+
+typedef struct {
+  GEN an;
+  GEN ap;
+  GEN bnd;
+  GEN N; 
+  GEN E;
+  GEN p;
+  long pnum;
+  long r; 
+  long rootbnd;
+  GEN sum;
+  GEN X;
+  GEN gcache;
+  long start;
+  GEN alpha;
+  GEN A;
+  GEN cm;
+  GEN eps;
+} ELLLD;
+
+GEN elllderiv(GEN e, long r, long prec);
+GEN ellanalyticrank(GEN e, GEN eps, long prec);
+
+static GEN
+number_of_terms(long r, GEN eps, GEN N, long prec)
+{
+  GEN p1, p2, nb;
+
+  p1 = gneg(gdiv(gmul2n(mppi(DEFAULTPREC), 1), gsqrt(N, DEFAULTPREC)));
+  p2 = gmul(eps, gsubsg(1, gexp(p1, DEFAULTPREC)));
+  p2 = gmul(gpowgs(stoi(10), r), p2); 
+  nb = gdiv(glog(p2, DEFAULTPREC), p1);
+
+  return gceil(gmax(nb, gmul2n(gsqrt(N, DEFAULTPREC), 1)));
+}
+
+static GEN
+init_alpha(long m, long prec)
+{
+  GEN p1, p2 = cgetg(m+2, t_VEC);
+  long i, vs = fetch_user_var("s");
+  GEN s = gadd(pol_x(vs), zeroser(vs, m+1));
+
+  p1 = gmul(mpeuler(prec), s);
+  for (i = 2; i <= m; i++)
+    p1 = gadd(p1, gmul(gdivgs(gzeta(stoi(i), prec), i), gpowgs(s, i))); 
+  p1 = gexp(p1, prec);
+
+  for (i = 1; i <= m+1; i++)
+    gel(p2, i) = polcoeff0(p1, i-1, vs);
+
+  if (DEBUGLEVEL) fprintferr("alpha = %Ps\n", p2);
+
+  return p2;
+}
+
+/* assume r >= 2 */
+static GEN
+init_A(long r, long m, long prec)
+{
+  long j, s, n;
+  GEN p1 = cgetg(m+2, t_VEC), p2, p3, p4, fj;
+  pari_sp av = avma, lim = stack_lim(av, 1);
+  
+  for (j = 0; j <= m; j++) gel(p1, j+1) = stor(1, prec);
+  for (s = 1; s <= r; s++)
+  {
+    p2 = zerovec(m+1);
+    for (n = 1; n <= m; n++)
+    {
+      p3 = gen_0;
+      for (j = 1; j <= n; j++) p3 = gadd(p3, gdivgs(gel(p1, j+1), j));
+      gel(p2, n+1) = p3;
+      if (low_stack(lim, stack_lim(av, 1)))
+      {
+	if (DEBUGMEM > 1) pari_warn(warnmem, "init_A");
+	gerepileall(av, 3, &p1, &p2, &p3);
+      }
+    }  
+    p1 = p2;
+  }
+
+  p4 = cgetg(m+2, t_VEC);
+  fj = gen_1;
+  for (j = 0; j <= m; j++) 
+  {
+    gel(p4, j+1) = gdiv(gel(p1, j+1), fj);
+    fj = gmulgs(fj, j+1);
+  }
+
+  return gerepileupto(av, p4);
+}
+
+static GEN
+estimate_prec_Sx(GEN x, long M)
+{
+  GEN p1, p2;
+
+  x = gmul(x, stor(1, DEFAULTPREC));
+  if (gcmpgs(gmul2n(x, 1), M) > 0) pari_err(talker, "M is smaller than 2x\n");
+  p1 = gdiv(gpowgs(x, M-2), mpfact(M-1));
+  if (gcmp(x, gen_1) < 0)
+  {
+    p2 = gdiv(gdiv(gpowgs(x, M+1), gsubsg(1, x)), mpfact(M));
+    return gmin(p1, p2);
+  }
+  return p1;
+}
+
+static long
+number_of_terms_Sx(GEN x, GEN eps, long prec)
+{
+  long M, M1, M2;
+
+  M1 = itos(gfloor(gdiv(glog(eps, DEFAULTPREC), 
+			gsubsg(1, glog(stoi(3), DEFAULTPREC)))));
+
+  M2 = itos(gceil(gmul2n(gmax(x, gen_1), 1)));
+
+  if (gcmp(estimate_prec_Sx(x, M2), eps) < 0) return M2;
+  
+  M = (M1+M2+1)/2;
+
+  while (M < M1) 
+  {
+    if (gcmp(estimate_prec_Sx(x, M), eps) < 0) 
+      M1 = M;
+    else
+      M2 = M;
+  
+    M = (M1+M2+1)/2;
+  }
+
+  return M1;
+}
+
+static GEN
+cutoff_point(long r, GEN X, GEN eps, long prec)
+{
+  GEN M1, M2, M, p1, x;
+
+  M1 = gceil(gdiv(stoi(7*bit_accuracy(prec)+1), X));
+  M2 = gen_2;
+
+  x  = gmul(X, M1);
+  p1 = gdiv(gexp(gneg(x), prec), gpowgs(x, r+1));
+  if (gcmp(p1, eps) > 0) pari_err(talker, "M1 is not valid upper bound\n");
+
+  M  = shifti(gadd(M1, M2), -1);
+
+  do
+  {
+    x  = gmul(X, M);
+    p1 = gdiv(gexp(gneg(x), prec), gpowgs(x, r+1));
+
+    if (gcmp(p1, eps) < 0)
+      M1 = M;
+    else 
+      M2 = M;
+
+    M = shifti(gadd(M1, M2), -1);
+
+  } while (gcmp(M2, M) < 0);
+
+  return M;
+}
+
+#define VSX 5
+
+static GEN
+compute_Gr_VSx(ELLLD *ellld, GEN x, long prec)
+{
+  long r = ellld->r, n;
+  GEN p1, p2, p3, eps;
+  pari_sp av = avma;
+
+  eps = ellld->eps;
+  
+  p1 = x;
+  p2 = gen_0;
+  p3 = p1;
+
+  for (n = 2; ; n++)
+  {
+    p2 = gadd(p2, p3);
+    p1 = gneg(gdivgs(gmul(p1, x), n));
+    p3 = gdiv(p1, gpowgs(stoi(n), r));
+    if (gcmp(gabs(p3, prec), eps) < 0) break;
+  }
+
+  return gerepileupto(av, gcopy(p2));  
+}
+
+static GEN
+compute_Gr_Sx(ELLLD *ellld, GEN m, long prec)
+{
+  long M, i, r = ellld->r;
+  GEN x = gmul(m, ellld->X), p1, p2, p3, p4, p5;
+  pari_sp av = avma, av2, lim;
+  GEN eps = ellld->eps;
+
+  av = avma;
+
+  timer2();
+
+  p1 = glog(x, prec);
+  p2 = gen_1;
+  p3 = gen_0;
+  for (i = 0; i <= r; i++)
+  {
+    p3 = gadd(p3, gmul(gel(ellld->alpha, r-i+1), p2));
+    p2 = gdivgs(gmul(p2, p1), i+1);
+  }
+
+  if (gcmpgs(x, VSX) < 0) 
+  {
+    p4 = compute_Gr_VSx(ellld, x, prec);
+  }
+  else 
+  {
+    M = glength(ellld->A)-1;
+
+    p1 = x;
+    p4 = gen_0;
+
+    av2 = avma; lim = stack_lim(av2, 1);
+    for (i = 1; i <= M; i++)
+    {
+      p5 = gmul(p1, gel(ellld->A, i+1));
+      p4 = gadd(p4, p5);
+      p1 = gmul(p1, x);
+      if (gcmp(p5, eps) < 0) break;
+      if (low_stack(lim, stack_lim(av2, 1)))
+      {
+	if (DEBUGMEM > 0) pari_warn(warnmem, "compute_Gr_Sx");
+	gerepileall(av2, 3, &p1, &p4, &p5);
+      }
+    }
+    p4 = gmul(gexp(gneg(x), prec), p4);
+  }
+    
+  if (r%2) return gerepileupto(av, gsub(p4, p3));
+
+  return gerepileupto(av, gsub(p3, p4));
+}
+
+static GEN
+init_Gr(ELLLD *ellld, long prec)
+{
+  GEN p1, p2, p3;
+  long m, j, rootbnd = ellld->rootbnd, r = ellld->r;
+
+  if (r == 0)
+  {
+    p1 = cgetg(rootbnd + 1, t_VEC);
+    p2 = gexp(gneg(ellld->X), prec);
+    p3 = p2;
+    for (j = 1; j <= rootbnd; j++)
+    { 
+      gel(p1, j) = p3;
+      p3 = gmul(p3, p2);
+    }
+    return p1;
+  }
+
+  if (r == 1)
+    return veceint1(ellld->X, stoi(rootbnd), prec);
+
+  ellld->cm = ellld->bnd;
+
+  m = number_of_terms_Sx(gmul(ellld->X, ellld->cm), ellld->eps, prec);
+  ellld->alpha = init_alpha(r, prec);
+  ellld->A = init_A(r, m, prec);
+  p1 = cgetg(rootbnd + 1, t_VEC);
+  for (j = 1; j <= rootbnd; j++)
+    gel(p1, j) = compute_Gr_Sx(ellld, stoi(j), prec);
+  return p1;
+}
+
+static GEN
+ellld_G(ELLLD *ellld, GEN m, long prec)
+{
+  if (gcmpgs(m, ellld->rootbnd) <= 0) return gel(ellld->gcache, itos(m));
+  if (ellld->r == 0)
+    return gexp(gneg(gmul(m, ellld->X)), prec);
+  if (ellld->r == 1)
+    return eint1(gmul(m, ellld->X), prec);
+  if (ellld->r >= 2)
+  {
+    if(gcmp(m, ellld->cm) < 0)
+      return compute_Gr_Sx(ellld, m, prec);
+    else 
+      return gen_0;
+  }
+  return NULL; /* not reached */
+}
+
+
+static GEN
+ellld_getap(long i, ELLLD *ellld)
+{
+  GEN p1;
+  if (i <= ellld->pnum)
+    p1 = gel(ellld->ap, i);
+  else
+    p1 = ellap0(ellld->E, prime(i), 0);
+  return p1;
+}
+
+static GEN
+ellld_getp(long i, ELLLD *ellld)
+{
+  if (i <= ellld->pnum)
+    return gel(ellld->p, i);
+  return prime(i);
+}
+
+static void
+BGadd(GEN n, long i, GEN a, GEN last_a, ELLLD *ellld, long prec)
+{
+  GEN next_a, p;
+  long j = i;
+
+  if (gcmpgs(n, ellld->rootbnd) <= 0)
+    gel(ellld->an, itos(n)) = a;
+
+  if (!gcmp0(a))
+  {
+    ellld->sum = gadd(ellld->sum, 
+		      gdiv(gmul(a, ellld_G(ellld, n, prec)), n));
+    if (DEBUGLEVEL>5) fprintferr("n = %Ps et a(n) = %Ps\n", n, a);
+    j = 1;
+  }
+
+  p = ellld_getp(j, ellld);
+  if (gcmp0(a) && (gcmpgs(p, ellld->rootbnd) > 0))
+    return;
+  while ((j <= i) && (gcmp(gmul(p, n), ellld->bnd) <= 0))
+  {
+    next_a = gmul(a, ellld_getap(j, ellld));
+    if ((i == j) && !gequalgs(gmod(ellld->N, p), 0))
+      next_a = gsub(next_a, gmul(p, last_a));
+    BGadd(gmul(p, n), j, next_a, a, ellld, prec);
+    j++;
+    p = ellld_getp(j, ellld);
+  }
+  return;
+}
+
+GEN
+ellanalyticrank(GEN e, GEN eps, long prec)	
+{
+  GEN egrd, cond, Lr1, rep; 
+  long rksgn, rk;
+  pari_sp av = avma;
+  
+  if (DEBUGLEVEL) fprintferr("CURVE = %Ps\n", e);
+ 
+  /* Reduce the curve and compute some invariants at the same time */
+  egrd   = ellglobalred(e);
+  e      = coordch(e, gel(egrd, 2));
+  cond   = gel(egrd, 1);
+
+  if (!eps) eps = real2n(-bit_accuracy(prec)/2+1, prec);
+
+  if (DEBUGLEVEL) fprintferr("eps = %Ps\n", eps);
+
+  if (DEBUGLEVEL>1) fprintferr("conductor = %Ps\n", cond);
+  
+  rksgn = ellrootno(e, NULL);
+  rk = (1-rksgn)/2;
+  if (DEBUGLEVEL) 
+  {  
+    if (rk == 0)
+      fprintferr("Rank is even\n");
+    else
+      fprintferr("Rank is odd\n");
+  }
+
+  while (1)
+  {
+    Lr1 = elllderiv(e, rk, prec);
+    if (DEBUGLEVEL) fprintferr("L^(%ld)=%Ps\n", rk, Lr1);
+    if (gcmp(gabs(Lr1, prec), eps) > 0) break;
+    rk = rk+2;    
+  }
+
+  rep = cgetg(3, t_VEC);
+  gel(rep, 1) = gcopy(stoi(rk));
+  gel(rep, 2) = gcopy(Lr1);
+
+  return gerepileupto(av, rep);
+}
+
+GEN
+elllderiv(GEN e, long r, long prec)
+{
+  GEN p, ap, n, aovern, p1, bnd;
+  long i, j, jmax, epsbit, sgn;
+  ELLLD ellld;
+  pari_sp av = avma;
+
+  if (DEBUGLEVEL) 
+    fprintferr("in elllderiv with r = %ld, prec = %ld\n", r, prec);
+
+  sgn = ellrootno(e, NULL);
+  if ((r%2 && sgn == 1) || (!(r%2) && sgn == -1)) return gen_0; 
+
+  ellld.E = e;
+  ellld.N = gcopy(gel(ellglobalred(e), 1));
+
+  epsbit = bit_accuracy(prec)+1;
+  ellld.eps = real2n(-epsbit, DEFAULTPREC);
+
+  bnd = number_of_terms(r, ellld.eps, ellld.N, prec);
+  if (DEBUGLEVEL>2) fprintferr("ellld_bnd1 = %Ps\n", bnd);
+
+  ellld.X = gdiv(mulsr(2, mppi(prec)), gsqrt(ellld.N, prec));
+
+  bnd = cutoff_point(r, ellld.X, ellld.eps, prec);
+  if (DEBUGLEVEL>2) fprintferr("ellld_bnd2 = %Ps\n", bnd);
+
+  if (DEBUGLEVEL>2) fprintferr("N = %Ps\n", ellld.N);
+
+  ellld.r = r;
+  ellld.bnd = bnd;
+  ellld.rootbnd = itos(sqrtint(bnd));
+
+  if (DEBUGLEVEL>2) fprintferr("ellld_rootbnd = %ld\n", ellld.rootbnd);
+
+  ellld.gcache = init_Gr(&ellld, prec);
+  ellld.sum = gel(ellld.gcache, 1);
+
+  if (DEBUGLEVEL>2) fprintferr("ellld_sum = %Ps\n", ellld.sum);
+  if (DEBUGLEVEL>2) fprintferr("ellld_gcache = %Ps\n", ellld.gcache);
+
+  ellld.an = zerovec(ellld.rootbnd);
+  gel(ellld.an, 1) = gen_1;
+
+  ellld.p  = primes(2*ellld.rootbnd);
+  ellld.pnum = glength(ellld.p);
+
+  if (DEBUGLEVEL>2) fprintferr("ellld_p = %Ps\n", ellld.p);
+  
+  p1 = cgetg(ellld.pnum+1, t_VEC);
+  for (i = 1; i <= ellld.pnum; ++i)
+    gel(p1, i) = ellap0(e, gel(ellld.p, i), 0);
+  ellld.ap = p1;
+
+  if (DEBUGLEVEL>2) fprintferr("ellld_ap = %Ps\n", ellld.ap);
+
+  if (DEBUGLEVEL) 
+    fprintferr("First stage, using recursion for p up to %ld\n", ellld.pnum);
+
+  for (i = 1; i <= ellld.pnum; i++)
+  {
+    p = ellld_getp(i, &ellld);
+    ap = ellld_getap(i, &ellld);
+
+    if (((i < 100) || !(i%100)) && (DEBUGLEVEL>3)) 
+      fprintferr("p=%Ps et ap=%Ps\n", p, ap);
+
+    BGadd(p, i, ap, gen_1, &ellld, prec);
+
+    if (((i < 100) || !(i%100)) && (DEBUGLEVEL>3))
+      fprintferr("\tsum=%Ps\n", ellld.sum);
+  }
+
+  if (DEBUGLEVEL) fprintferr("Second stage, looping for p up to %Ps\n", bnd);
+  p = prime(ellld.pnum);
+  i = ellld.pnum;
+
+  while (gcmp(p, ellld.bnd) < 0)
+  {
+    p = gnextprime(gaddgs(p, 1));
+    i++;
+    ap = ellap0(ellld.E, p, 0);
+
+    if (!(i%100) && (DEBUGLEVEL>3)) 
+      fprintferr("p=%Ps\tap=%Ps\n", p, ap);
+
+    if (!gequalgs(ap, 0))
+    {
+      p1 = gfloor(gdiv(ellld.bnd, p));
+      jmax = itos(gmings(p1, ellld.rootbnd));
+      for (j = 1;  j <= jmax; j++)
+      {
+	n = gmulgs(p, j);
+	aovern = gdiv(gmul(ap, gel(ellld.an, j)), n);
+	ellld.sum = gadd(ellld.sum, gmul(aovern, ellld_G(&ellld, n, prec)));
+      }
+    }
+  }
+
+  return gerepileupto(av, gmul(gmul2n(ellld.sum, 1), mpfact(r)));
+}
+
