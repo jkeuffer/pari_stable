@@ -47,10 +47,6 @@ matsolve(ma,mhbi)
 \\
 cmcurve=ellinit([0,-3/4,0,-2,-1])
 ellpow(cmcurve,[x,y],quadgen(-7))
-\\
-ellanalyticrank(ellinit([0, -1, 1, -10, -20]))
-ellanalyticrank(ellinit([0, 1, 1, -2, 0]))
-ellanalyticrank(ellinit([0, 0, 1, -7, 6]))
 \p 96
 precision(cmcurve)
 getheap
