@@ -4173,15 +4173,15 @@ struct ellld {
   GEN E, N; /* ell, conductor */
   GEN bnd; /* t_INT; will need all an for n <= bnd */
   long rootbnd; /* sqrt(bnd) */
-  GEN an; /* ZV: cache of ap, n <= rootbnd */
+  GEN an; /* t_VECSMALL: cache of ap, n <= rootbnd */
   GEN ap; /* t_VECSMALL: cache of ap, p <= rootbnd */
   GEN p; /* t_VECSMALL: primes <= rootbnd */
   long pnum; /* number of primes in p; length of ap */
   long r; /* we are comuting L^{(r)}(1) */
   GEN X; /* t_REAL */
-  GEN gcache;
-  GEN alpha; /* vectorof t_REAL, except alpha[1] = gen_1 */
-  GEN A;
+  GEN gcache; /* t_VEC of t_REALs */
+  GEN alpha; /* t_VEC of t_REALs, except alpha[1] = gen_1 */
+  GEN A; /* t_VEC of t_REALs, A[1] unused */
   long epsbit;
 };
 
@@ -4301,13 +4301,10 @@ number_of_terms_Sx(GEN x, long epsbit)
 static GEN
 cutoff_point(long r, GEN X, long epsbit, long prec)
 {
-  GEN M1, M2, M, p1, x;
-
-  M1 = ceilr(divsr(7*bit_accuracy(prec)+1, X));
-  M2 = gen_2;
-
-  x  = mulri(X, M1);
-  p1 = divrr(mpexp(negr(x)), powru(x, r+1));
+  GEN M1 = ceilr(divsr(7*bit_accuracy(prec)+1, X));
+  GEN M2 = gen_2, M;
+  GEN x  = mulri(X, M1);
+  GEN p1 = divrr(mpexp(negr(x)), powru(x, r+1));
   if (expo(p1) > -epsbit) pari_err(talker, "M1 is not valid upper bound\n");
 
   M  = shifti(addii(M1, M2), -1);
@@ -4322,37 +4319,37 @@ cutoff_point(long r, GEN X, long epsbit, long prec)
   }
 }
 
-/* x "small" t_REAL, use power series expansion */
+/* x "small" t_REAL, use power series expansion. Returns a t_REAL */
 static GEN
 compute_Gr_VSx(struct ellld *el, GEN x)
 {
+  pari_sp av = avma;
   long r = el->r, n;
   GEN p1, p2, p3;
-  pari_sp av = avma;
 
-  p3 = p1 = x;
-  p2 = gen_0;
-  for (n = 2; ; n++)
+  /* n = 2 */
+  p2 = p3 = x;
+  p1 = divrs(sqrr(x), -2); /* (-1)^(n-1) x^n / n! */
+  p3 = shiftr(p1, -r);
+  for (n = 3; ; n++)
   {
-    p2 = mpadd(p2, p3);
-    p1 = negr(divrs(mulrr(p1, x), n)); /* (-1)^(n-1) x^n / n! */
-    p3 = divri(p1, powuu(n, r));
     if (expo(p3) < -el->epsbit) return gerepilecopy(av, p2);
+    p2 = addrr(p2, p3);
+    p1 = divrs(mulrr(p1, x), -n); /* (-1)^(n-1) x^n / n! */
+    p3 = divri(p1, powuu(n, r));
   }
 }
 
-/* m t_INT, assume r >= 2 */
+/* t_REAL, assume r >= 2. Returns a t_REAL */
 static GEN
-compute_Gr_Sx(struct ellld *el, GEN m)
+compute_Gr_Sx(struct ellld *el, GEN x)
 {
-  long i, r = el->r;
-  GEN x = mulir(m, el->X), logx = mplog(x), p2, p3, p4;
-  pari_sp av = avma, av2, lim;
   const long VSX = 5;
-
+  long i, r = el->r;
+  GEN logx = mplog(x), p4;
   /* i = 0 */
-  p3 = gel(el->alpha, r+1);
-  p2 = logx;
+  GEN p3 = gel(el->alpha, r+1);
+  GEN p2 = logx;
   for (i = 1; i < r; i++)
   { /* p2 = (logx)^i / i! */
     p3 = addrr(p3, mulrr(gel(el->alpha, r-i+1), p2));
@@ -4365,27 +4362,28 @@ compute_Gr_Sx(struct ellld *el, GEN m)
     p4 = compute_Gr_VSx(el, x);
   else
   {
+    pari_sp av = avma, lim = stack_lim(av, 2);
     long M = lg(el->A);
     GEN p1 = x;
     p4 = gen_0;
-    av2 = avma; lim = stack_lim(av2, 1);
     for (i = 2; i < M; i++)
     {
       GEN p5 = mulrr(p1, gel(el->A, i));
       p4 = mpadd(p4, p5);
       if (expo(p5) < -el->epsbit) break;
       p1 = mulrr(p1, x); /* x^i */
-      if (low_stack(lim, stack_lim(av2, 1)))
+      if (low_stack(lim, stack_lim(av, 2)))
       {
 	if (DEBUGMEM > 0) pari_warn(warnmem, "compute_Gr_Sx");
-	gerepileall(av2, 2, &p1, &p4);
+	gerepileall(av, 2, &p1, &p4);
       }
     }
     p4 = mpmul(mpexp(negr(x)), p4);
   }
-  return gerepileupto(av, odd(r)? mpsub(p4, p3): mpsub(p3, p4));
+  return odd(r)? subrr(p4, p3): subrr(p3, p4);
 }
 
+/* returns a t_VEC of t_REALs */
 static GEN
 init_Gr(struct ellld *el, long prec)
 {
@@ -4405,11 +4403,14 @@ init_Gr(struct ellld *el, long prec)
   el->alpha = init_alpha(el->r, prec);
   el->A = init_A(el->r, m, prec);
   p1 = cgetg(rootbnd+1, t_VEC);
-  for (j = 1; j <= rootbnd; j++) gel(p1, j) = compute_Gr_Sx(el, stoi(j));
+  for (j = 1; j <= rootbnd; j++) {
+    pari_sp av = avma;
+    gel(p1, j) = gerepileuptoleaf(av, compute_Gr_Sx(el, mulur(j, el->X)));
+  }
   return p1;
 }
 
-/* m t_INT */
+/* m t_INT, returns a t_REAL or NULL (= 0) */
 static GEN
 ellld_G(struct ellld *el, GEN m)
 {
@@ -4417,53 +4418,42 @@ ellld_G(struct ellld *el, GEN m)
   if (el->r == 0) return mpexp(negr(mulir(m, el->X)));
   if (el->r == 1) return eint1(mulir(m, el->X), 0/*unused*/);
   /* r >= 2 */
-  if (gcmp(m, el->bnd) < 0) return compute_Gr_Sx(el, m);
-  return gen_0;
+  if (cmpii(m, el->bnd) < 0) {
+    pari_sp av = avma;
+    return gerepileuptoleaf(av, compute_Gr_Sx(el, mulir(m, el->X)));
+  }
+  return NULL;
 }
 
-static long
-ellld_getap(struct ellld *el, long i)
-{
-  pari_sp av;
-  long ap;
-  if (i <= el->pnum) return el->ap[i];
-  av = avma; ap = itos(ellap(el->E, prime(i)));
-  avma = av; return ap;
-}
-static ulong
-ellld_getp(struct ellld *el, long i)
-{
-  if (i <= el->pnum) return el->p[i];
-  return uprime(i);
-}
-
+/* *psum a t_REAL */
 static void
 BGadd(struct ellld *el, GEN *psum, GEN n, long i, GEN a, GEN last_a)
 {
   ulong p;
   long j = i;
 
-  if (cmpis(n, el->rootbnd) <= 0) gel(el->an, itos(n)) = a;
+  if (cmpis(n, el->rootbnd) <= 0) el->an[itos(n)] = itos(a);
 
   if (signe(a))
   {
-    *psum = mpadd(*psum, mpdiv(mpmul(a, ellld_G(el, n)), n));
+    GEN G = ellld_G(el, n);
+    if (G) *psum = addrr(*psum, divri(mulir(a, G), n));
     j = 1;
   }
 
-  p = ellld_getp(el, j);
+  p = el->p[j];
   if (!signe(a) && p > el->rootbnd) return;
 
   while (j <= i)
   {
     GEN next_a, pn = mului(p, n);
     if (cmpii(pn, el->bnd) > 0) return;
-    next_a = mulis(a, ellld_getap(el, j));
+    next_a = mulis(a, el->ap[j]);
     if (i == j && umodiu(el->N, p))
       next_a = subii(next_a, mului(p, last_a));
     BGadd(el, psum, pn, j, next_a, a);
-    j++;
-    p = ellld_getp(el, j);
+    if (++j > i) break;
+    p = el->p[j];
   }
 }
 
@@ -4481,9 +4471,9 @@ ellld_ap(GEN E, GEN vp)
 static GEN
 elllderiv_i(struct ellld *el, long r, long prec)
 {
-  GEN p, sum;
+  pari_sp av = avma, av2;
+  GEN p, SUM;
   long i, j, jmax;
-  pari_sp av = avma;
 
   if (DEBUGLEVEL)
     fprintferr("in elllderiv with r = %ld, prec = %ld\n", r, prec);
@@ -4493,8 +4483,8 @@ elllderiv_i(struct ellld *el, long r, long prec)
   el->bnd = cutoff_point(r, el->X, el->epsbit, prec);
   el->rootbnd = itou(sqrtint(el->bnd));
   el->gcache = init_Gr(el, prec);
-  el->an = zerovec(el->rootbnd);
-  gel(el->an, 1) = gen_1;
+  el->an = cgetg(el->rootbnd+1, t_VECSMALL);
+  el->an[1] = 1;
 
   el->p  = primes_zv(2*el->rootbnd);
   el->pnum = lg(el->p) - 1;
@@ -4504,48 +4494,45 @@ elllderiv_i(struct ellld *el, long r, long prec)
       fprintferr("el_bnd = %Ps\n", el->bnd);
       fprintferr("N = %Ps\n", el->N);
       fprintferr("rootbnd = %ld\n", el->rootbnd);
-      fprintferr("p = %Ps\n", el->p);
-      fprintferr("ap = %Ps\n", el->ap);
-      fprintferr("gcache = %Ps\n", el->gcache);
     }
-    fprintferr("First stage, using recursion for p up to %ld\n", el->pnum);
+    fprintferr("1st stage, using recursion for p <= %ld\n", el->pnum);
   }
 
-  sum = gel(el->gcache, 1);
+  SUM = rcopy(gel(el->gcache, 1)); av2 = avma;
   for (i = 1; i <= el->pnum; i++)
   {
-    const int dbg = (DEBUGLEVEL>3 && (i < 100 || i%100 == 0)) ;
-    ulong pp = ellld_getp(el, i);
-    long ap = ellld_getap(el, i);
-    if (dbg) fprintferr("p=%lu, ap=%ld\n", pp, ap);
+    ulong pp = el->p[i];
+    long ap = el->ap[i];
+    GEN sum = SUM;
+    if (DEBUGLEVEL>3) fprintferr("p=%lu, ap=%ld\n", pp, ap);
     BGadd(el, &sum, utoipos(pp), i, stoi(ap), gen_1);
-    if (dbg) fprintferr("\tsum=%Ps\n", sum);
+    if (DEBUGLEVEL>3) fprintferr("\tsum=%Ps\n", sum);
+    affrr(sum, SUM); avma = av2;
   }
-  if (DEBUGLEVEL) fprintferr("Second stage, looping for p up to %Ps\n", el->bnd);
+  if (DEBUGLEVEL) fprintferr("2nd stage, looping for p <= %Ps\n", el->bnd);
   i = el->pnum;
   p = prime(i);
   while (cmpii(p, el->bnd) < 0)
   {
     GEN ap;
-    pari_sp av2;
     p = nextprime(addis(p, 1));
-    av2 = avma;
     ap = ellap(el->E, p);
 
     i++;
-    if (DEBUGLEVEL>3 && i%100 == 0) fprintferr("p=%Ps\tap=%Ps\n", p, ap);
-    if (!signe(ap)) { avma = av2; continue; }
+    if (DEBUGLEVEL>3 && (i & 0x1ff) == 0) fprintferr("p=%Ps\tap=%Ps\n", p, ap);
+    if (!signe(ap)) continue;
 
     jmax = minss(el->rootbnd, itos( divii(el->bnd, p) ));
     for (j = 1;  j <= jmax; j++)
     {
-      GEN a = mulii(ap, gel(el->an, j));
-      GEN n = mulis(p, j);
-      sum = mpadd(sum, mpdiv(mpmul(a, ellld_G(el, n)), n));
+      GEN a = mulis(ap, el->an[j]);
+      GEN n = muliu(p, j);
+      GEN G = ellld_G(el, n);
+      if (G) SUM = addrr(SUM, divri(mulir(a, G), n));
     }
-    sum = gerepileuptoleaf(av2, sum);
+    gerepileall(av2, 2, &SUM, &p);
   }
-  return gerepileuptoleaf(av, mpmul(gmul2n(sum, 1), mpfact(r)));
+  return gerepileuptoleaf(av, mpmul(gmul2n(SUM, 1), mpfact(r)));
 }
 
 GEN
