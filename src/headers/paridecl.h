@@ -2258,8 +2258,10 @@ long    millerrabin(GEN n, long k);
 GEN     prime(long n);
 GEN     primepi(GEN x);
 GEN     primes(long n);
+GEN     primes_zv(long m);
 GEN     removeprimes(GEN primes);
 int     uisprime(ulong n);
+ulong   uprime(long n);
 ulong   uprimepi(ulong n);
 
 /* random.c */

@@ -702,8 +702,8 @@ isprime(GEN x) { return BPSW_psp(x) && BPSW_isprime(x); }
 /***********************************************************************/
 
 /* assume all primes up to 59359 are precomputed */
-GEN
-prime(long n)
+ulong
+uprime(long n)
 {
   byteptr p;
   ulong prime;
@@ -744,8 +744,10 @@ prime(long n)
     prime = 479909;
   }
   while (n--) NEXT_PRIME_VIADIFF_CHECK(prime,p);
-  return utoipos(prime);
+  return prime;
 }
+GEN
+prime(long n) { return utoipos(uprime(n)); }
 
 ulong
 uprimepi(ulong n)
@@ -782,6 +784,24 @@ primes(long m)
     if (!*p) /* use something close to Dusart's bound */
       maxprime_check((ulong)(m*( log((double)m*log((double)m))-0.948 )));
     gel(++z, 0) = utoipos(prime);
+  }
+  return y;
+}
+GEN
+primes_zv(long m)
+{
+  byteptr p = diffptr;
+  ulong prime = 0;
+  long n = (m < 0)? 0: m;
+  GEN y, z;
+
+  z = y = cgetg(n+1,t_VECSMALL);
+  while (n--)
+  {
+    NEXT_PRIME_VIADIFF(prime,p);
+    if (!*p) /* use something close to Dusart's bound */
+      maxprime_check((ulong)(m*( log((double)m*log((double)m))-0.948 )));
+    *++z = prime;
   }
   return y;
 }

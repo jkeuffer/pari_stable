@@ -2574,6 +2574,15 @@ $0$ otherwise.
 $0$ if it cannot be represented as an \kbd{ulong} (bigger than $2^{64} - 59$
 or $2^{32} - 5$ depending on the word size).
 
+\fun{ulong}{uprime}{long n} returns the $n$-th prime, assuming it belongs to
+the precomputed prime table. Error otherwise.
+
+\fun{GEN}{prime}{long n} same as \kbd{utoi(uprime(n))}.
+
+\fun{GEN}{primes_zv}{long m} returns the $m$-th first primes, in a
+\typ{VECSMALL}, assuming they belong to the precomputed prime table.
+Error otherwise.
+
 \fun{int}{isprime}{GEN n}, returns $1$ if the \typ{INT} \kbd{n} is a
 (fully proven) prime number and $0$ otherwise.
 
