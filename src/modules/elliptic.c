@@ -4246,11 +4246,13 @@ init_A(long r, long m, long prec)
     swap(A, B); /* B becomes the new A, old A becomes the new scratchspace */
   }
 
-  fj = gen_1; /* leave A[1] (unused), A[2] (division by 1) alone */
+  /* leave A[1] (unused), A[2] (division by 1) alone */
+  fj = ONE; /* will destroy ONE now */
   for (j = 3; j < l; j++)
   {
-    fj = mulis(fj, j-1);
-    affrr(divri(gel(A,j), fj), gel(A,j));
+    affrr(mulrs(fj, j-1), fj);
+    affrr(divrr(gel(A,j), fj), gel(A,j));
+    avma = av;
   }
   avma = av0; return A;
 }
