@@ -4457,7 +4457,7 @@ BGadd(struct ellld *el, GEN *psum, GEN n, long i, GEN a, GEN last_a)
   while (j <= i)
   {
     GEN next_a, pn = mului(p, n);
-    if (cmpii(pn, el->bnd) > 0) break;
+    if (cmpii(pn, el->bnd) > 0) return;
     next_a = mulis(a, ellld_getap(el, j));
     if (i == j && umodiu(el->N, p))
       next_a = subii(next_a, mului(p, last_a));
@@ -4465,7 +4465,6 @@ BGadd(struct ellld *el, GEN *psum, GEN n, long i, GEN a, GEN last_a)
     j++;
     p = ellld_getp(el, j);
   }
-  return;
 }
 
 static GEN
