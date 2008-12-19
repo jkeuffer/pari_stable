@@ -4467,7 +4467,7 @@ ellld_ap(GEN E, GEN vp)
   return ap;
 }
 
-/* basic data independent from r (E, N, X) already filled */
+/* basic data independent from r (E, N, X) already filled. Returns a t_REAL */
 static GEN
 elllderiv_i(struct ellld *el, long r, long prec)
 {
@@ -4476,7 +4476,7 @@ elllderiv_i(struct ellld *el, long r, long prec)
   long i, j, jmax;
 
   if (DEBUGLEVEL)
-    fprintferr("in elllderiv with r = %ld, prec = %ld\n", r, prec);
+    fprintferr("in ellL1 with r = %ld, prec = %ld\n", r, prec);
 
   el->epsbit = bit_accuracy(prec)+1;
   el->r = r;
@@ -4532,11 +4532,11 @@ elllderiv_i(struct ellld *el, long r, long prec)
     }
     gerepileall(av2, 2, &SUM, &p);
   }
-  return gerepileuptoleaf(av, mpmul(gmul2n(SUM, 1), mpfact(r)));
+  return gerepileuptoleaf(av, mulri(shiftr(SUM, 1), mpfact(r)));
 }
 
 GEN
-elllderiv(GEN E, long r, long prec)
+ellL1(GEN E, long r, long prec)
 {
   const long sgn = odd(r)? -1: 1;
   struct ellld el;
@@ -4575,7 +4575,6 @@ ellanalyticrank(GEN e, GEN eps, long prec)
   {
     GEN Lr1 = elllderiv_i(&el, rk, prec);
     if (DEBUGLEVEL) fprintferr("L^(%ld)=%Ps\n", rk, Lr1);
-    if (mpcmp(mpabs(Lr1), eps) > 0)
-      return gerepilecopy(av, mkvec2(stoi(rk), Lr1));
+    if (absr_cmp(Lr1, eps) > 0) return gerepilecopy(av, mkvec2(stoi(rk), Lr1));
   }
 }

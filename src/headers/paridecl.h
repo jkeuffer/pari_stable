@@ -1300,7 +1300,7 @@ GEN     ellinit0(GEN x,long flag,long prec);
 GEN     ellinit_padic(GEN x, GEN p, long prec);
 GEN     ellinit_real(GEN x, long prec);
 GEN     ellisoncurve(GEN e, GEN z);
-GEN     elllderiv(GEN e, long r, long prec);
+GEN     ellL1(GEN e, long r, long prec);
 GEN     elllseries(GEN e, GEN s, GEN A, long prec);
 GEN     elllocalred(GEN e, GEN p1);
 GEN     elllog(GEN e, GEN a, GEN g, GEN o);
