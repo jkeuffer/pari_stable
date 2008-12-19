@@ -4286,7 +4286,6 @@ number_of_terms_Sx(GEN x, long epsbit)
   M1 = epsbit * 7.02901423262; /* epsbit * log(2) / (log(3) - 1) */
   M2 = itos(ceilr(gmul2n(x,1))); /* >= 2x */
   if (M2 < 2) M2 = 2;
-  if (M2 > M1) pari_err(talker, "M is smaller than 2x\n");
 
   if (estimate_prec_Sx(x, M2) < -epsbit) return M2;
   M = (M1+M2+1)/2;
