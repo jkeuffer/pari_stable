@@ -103,16 +103,15 @@ logarch2arch(GEN x, long r1, long prec)
 
 /* multiply be by ell-th powers of units as to find small L2-norm for new be */
 static GEN
-reducebetanaive(GEN bnfz, GEN be, GEN ell, GEN elllogfu)
+reducebetanaive(GEN bnfz, GEN be, long ell, GEN elllogfu)
 {
-  long i, k, n, ru, r1, prec = nf_get_prec(bnfz);
-  GEN z, p1, p2, nmax, b, c, nf = bnf_get_nf(bnfz);
+  GEN z, nmax, b, c, nf = bnf_get_nf(bnfz);
+  const long r1 = nf_get_r1(nf), n = maxss(ell>>1,3);
+  long i, k, ru;
 
-  r1 = nf_get_r1(nf);
   b = gmul(nf_get_M(nf), be);
-  n = maxss((itos(ell)>>1), 3);
   z = cgetg(n+1, t_VEC);
-  c = logarch2arch(elllogfu, r1, prec); /* = embeddings of fu^ell */
+  c = logarch2arch(elllogfu, r1, nf_get_prec(nf)); /* embeddings of fu^ell */
   c = gprec_w(gnorm(c), DEFAULTPREC);
   b = gprec_w(gnorm(b), DEFAULTPREC); /* need little precision */
   gel(z,1) = shallowconcat(c, vecinv(c));
@@ -124,18 +123,22 @@ reducebetanaive(GEN bnfz, GEN be, GEN ell, GEN elllogfu)
     GEN B = NULL;
     long besti = 0, bestk = 0;
     for (k=1; k<=n; k++)
+    {
+      GEN zk = gel(z,k);
       for (i=1; i<=ru; i++)
       {
-	p1 = vecmul(b, gmael(z,k,i));    p2 = T2_from_embed_norm(p1,r1);
-	if (gcmp(p2,nmax) < 0) { B=p1; nmax=p2; besti=i; bestk = k; continue; }
-	p1 = vecmul(b, gmael(z,k,i+ru)); p2 = T2_from_embed_norm(p1,r1);
-	if (gcmp(p2,nmax) < 0) { B=p1; nmax=p2; besti=i; bestk =-k; }
+        GEN v, t;
+	v = vecmul(b, gel(zk,i));    t = T2_from_embed_norm(v,r1);
+	if (gcmp(t,nmax) < 0) { B=v; nmax=t; besti=i; bestk = k; continue; }
+	v = vecmul(b, gel(zk,i+ru)); t = T2_from_embed_norm(v,r1);
+	if (gcmp(t,nmax) < 0) { B=v; nmax=t; besti=i; bestk =-k; }
       }
+    }
     if (!B) break;
     b = B; gel(c,besti) = addis(gel(c,besti), bestk);
   }
   if (DEBUGLEVEL) fprintferr("naive reduction mod U^l: unit exp. = %Ps\n",c);
-  return fix_be(bnfz, be, gmul(ell,c));
+  return fix_be(bnfz, be, ZC_z_mul(c, ell));
 }
 
 static GEN
@@ -221,7 +224,7 @@ reducebeta(GEN bnfz, GEN be, GEN ell)
     }
   }
   if (DEBUGLEVEL>1) fprintferr("beta LLL-reduced mod U^l = %Ps\n",be);
-  return reducebetanaive(bnfz, be, ell, elllogfu);
+  return reducebetanaive(bnfz, be, itos(ell), elllogfu);
 }
 
 static GEN
