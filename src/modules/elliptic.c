@@ -4468,7 +4468,7 @@ ellld_ap(GEN E, GEN vp)
 
 /* basic data independent from r (E, N, X) already filled. Returns a t_REAL */
 static GEN
-elllderiv_i(struct ellld *el, long r, long prec)
+ellL1_i(struct ellld *el, long r, long prec)
 {
   pari_sp av = avma, av2;
   GEN p, SUM;
@@ -4529,6 +4529,7 @@ elllderiv_i(struct ellld *el, long r, long prec)
       GEN G = ellld_G(el, n);
       if (G) SUM = addrr(SUM, divri(mulir(a, G), n));
     }
+    if (DEBUGLEVEL>3) fprintferr("\tsum=%Ps\n", SUM);
     gerepileall(av2, 2, &SUM, &p);
   }
   return gerepileuptoleaf(av, mulri(shiftr(SUM, 1), mpfact(r)));
@@ -4545,7 +4546,7 @@ ellL1(GEN E, long r, long prec)
   if (ellrootno_global(el.E, el.N) != sgn) return gen_0;
 
   el.X = divrr(Pi2n(1, prec), sqrtr(itor(el.N, prec)));
-  return elllderiv_i(&el, r, prec);
+  return ellL1_i(&el, r, prec);
 }
 
 GEN
@@ -4554,6 +4555,7 @@ ellanalyticrank(GEN e, GEN eps, long prec)
   struct ellld el;
   long rk;
   pari_sp av = avma;
+  pari_timer T;
 
   if (!eps)
     eps = real2n(-bit_accuracy(prec)/2+1, DEFAULTPREC);
@@ -4569,11 +4571,12 @@ ellanalyticrank(GEN e, GEN eps, long prec)
     fprintferr("ellanalyticrank: CURVE = %Ps\n", e);
     fprintferr("Rank is %s\n", rk == 0? "even": "odd");
     fprintferr("eps = %Ps\nconductor = %Ps\n", eps, el.N);
+    TIMERstart(&T);
   }
   for(;; rk += 2)
   {
-    GEN Lr1 = elllderiv_i(&el, rk, prec);
-    if (DEBUGLEVEL) fprintferr("L^(%ld)=%Ps\n", rk, Lr1);
+    GEN Lr1 = ellL1_i(&el, rk, prec);
+    if (DEBUGLEVEL) msgTIMER(&T, "L^(%ld)=%Ps", rk, Lr1);
     if (absr_cmp(Lr1, eps) > 0) return gerepilecopy(av, mkvec2(stoi(rk), Lr1));
   }
 }
