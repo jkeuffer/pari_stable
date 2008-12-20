@@ -4182,7 +4182,7 @@ struct ellld {
   GEN emX; /* t_REAL, exp(-X) */
   GEN gcache; /* t_VEC of t_REALs */
   GEN alpha; /* t_VEC of t_REALs, except alpha[1] = gen_1 */
-  GEN A; /* t_VEC of t_REALs, A[1] unused */
+  GEN A; /* t_VEC of t_REALs, A[1] = 1 */
   long epsbit;
 };
 
@@ -4198,7 +4198,7 @@ init_alpha(long m, long prec)
   for (i = 2; i <= m; i++)
   {
     si = gmul(si, s); /* = s^i */
-    p1 = gadd(p1, gmul(divrs(szeta(i, prec), i), si));
+    p1 = gadd(p1, gmul(divru(szeta(i, prec), i), si));
   }
   p1 = gexp(p1, prec); /* t_SER of valuation = 0 */
 
@@ -4207,18 +4207,19 @@ init_alpha(long m, long prec)
   return a;
 }
 
-/* assume r >= 2, return a t_VEC A of t_REALs of length > 3.
- * NB: A[1] unused, A[2] = 1 */
+/* assume r >= 2, return a t_VEC A of t_REALs of length > 2.
+ * NB: A[1] = 1 */
 static GEN
 init_A(long r, long m, long prec)
 {
-  const long l = m+2;
+  const long l = m+1;
   long j, s, n;
   GEN A, B, ONE, fj;
   pari_sp av0, av;
 
   A = cgetg(l, t_VEC); /* will contain the final result */
-  for (j = 1; j < l; j++) gel(A,j) = cgetr(prec);
+  gel(A,1) = real_1(prec);
+  for (j = 2; j < l; j++) gel(A,j) = cgetr(prec);
   av0 = avma;
   B = cgetg(l, t_VEC); /* scratch space */
   for (j = 1; j < l; j++) gel(B,j) = cgetr(prec);
@@ -4232,29 +4233,29 @@ init_A(long r, long m, long prec)
   if (odd(r)) swap(A, B);
 
   /* s = 1 */
-    for (n = 1; n <= m; n++)
+    for (n = 2; n <= m; n++)
     {
       GEN p3 = ONE; /* j = 1 */
-      for (j = 2; j <= n; j++) p3 = addrr(p3, divrs(ONE, j));
-      affrr(p3, gel(B, n+1)); avma = av;
+      for (j = 2; j <= n; j++) p3 = addrr(p3, divru(ONE, j));
+      affrr(p3, gel(B, n)); avma = av;
     }
   swap(A, B); /* B becomes the new A, old A becomes the new scratchspace */
   for (s = 2; s <= r; s++)
   {
-    for (n = 1; n <= m; n++)
+    for (n = 2; n <= m; n++)
     {
-      GEN p3 = gel(A,2); /* j = 1 */
-      for (j = 2; j <= n; j++) p3 = addrr(p3, divrs(gel(A, j+1), j));
-      affrr(p3, gel(B, n+1)); avma = av;
+      GEN p3 = ONE; /* j = 1 */
+      for (j = 2; j <= n; j++) p3 = addrr(p3, divru(gel(A, j), j));
+      affrr(p3, gel(B, n)); avma = av;
     }
     swap(A, B); /* B becomes the new A, old A becomes the new scratchspace */
   }
 
-  /* leave A[1] (unused), A[2] (division by 1) alone */
+  /* leave A[1] (division by 1) alone */
   fj = ONE; /* will destroy ONE now */
-  for (j = 3; j < l; j++)
+  for (j = 2; j < l; j++)
   {
-    affrr(mulrs(fj, j-1), fj);
+    affrr(mulru(fj, j), fj);
     affrr(divrr(gel(A,j), fj), gel(A,j));
     avma = av;
   }
@@ -4345,7 +4346,7 @@ compute_Gr_Sx(struct ellld *el, GEN m, ulong sm)
   for (i = 1; i < r; i++)
   { /* p2 = (logx)^i / i! */
     p3 = addrr(p3, mulrr(gel(el->alpha, r-i+1), p2));
-    p2 = divrs(mulrr(p2, logx), i+1);
+    p2 = divru(mulrr(p2, logx), i+1);
   }
   /* i = r, use alpha[1] = 1 */
   p3 = addrr(p3, p2);
@@ -4357,8 +4358,8 @@ compute_Gr_Sx(struct ellld *el, GEN m, ulong sm)
     pari_sp av = avma, lim = stack_lim(av, 2);
     long M = lg(el->A);
     GEN xi = sqrr(x); /* x^2 */
-    p4 = x; /* i = 2. Uses A[2] = 1; NB: M > 2 */
-    for (i = 3; i < M; i++)
+    p4 = x; /* i = 1. Uses A[1] = 1; NB: M > 1 */
+    for (i = 2; i < M; i++)
     {
       GEN p5 = mulrr(xi, gel(el->A, i));
       if (expo(p5) < -el->epsbit) break;
