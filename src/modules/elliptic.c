@@ -4529,7 +4529,7 @@ ellL1_i(struct ellld *el, long r, long prec)
       GEN G = ellld_G(el, n);
       if (G) SUM = addrr(SUM, divri(mulir(a, G), n));
     }
-    if (DEBUGLEVEL>3) fprintferr("\tsum=%Ps\n", SUM);
+    if (DEBUGLEVEL>3 && (i & 0x1ff) == 0) fprintferr("\tsum=%Ps\n", SUM);
     gerepileall(av2, 2, &SUM, &p);
   }
   return gerepileuptoleaf(av, mulri(shiftr(SUM, 1), mpfact(r)));
