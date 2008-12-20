@@ -132,17 +132,21 @@ static long
 Babai(pari_sp av, long kappa, GEN *pG, GEN *pB, GEN *pU, GEN mu, GEN r, GEN s,
       long a, long zeros, long maxG, long n, GEN eta, GEN halfplus1, long prec)
 {
-  pari_sp lim = stack_lim(av,2);
+  const pari_sp lim = stack_lim(av,2);
   GEN B = *pB, G = *pG, U = *pU, tmp, rtmp, ztmp;
-  long i, j, k, test, aa = (a > zeros)? a : zeros+1;
-  long d = U ? lg(U)-1: 0;
-  /* HACK: we set d = 0 (resp. n = 0) to avoid updating U (resp. B) */
-  GEN maxmu = gen_0, max2mu = gen_0, max3mu;
-  do {
-    test = 0;
+  long k, aa = (a > zeros)? a : zeros+1;
+  GEN maxmu = gen_0, max2mu = gen_0;
+  /* N.B: we set d = 0 (resp. n = 0) to avoid updating U (resp. B) */
+  const long d = U ? lg(U)-1: 0;
+
+  for (;;) {
+    int go_on = 0;
+    GEN max3mu;
+    long i, j;
+
     if (low_stack(lim, stack_lim(av,2)))
     {
-      if(DEBUGMEM>1) pari_warn(warnmem,"Babai");
+      if(DEBUGMEM>1) pari_warn(warnmem,"Babai[1], a=%ld", aa);
       gerepileall(av,U?5:4,&B,&G,&maxmu,&max2mu,&U);
     }
     /* Step2: compute the GSO for stage kappa */
@@ -185,7 +189,12 @@ Babai(pari_sp av, long kappa, GEN *pG, GEN *pB, GEN *pU, GEN mu, GEN r, GEN s,
       tmp = gmael(mu,kappa,j);
       if (absr_cmp(tmp, eta) <= 0) continue; /* (essentially) size-reduced */
 
-      test = 1;
+      if (low_stack(lim, stack_lim(av,2)))
+      {
+        if(DEBUGMEM>1) pari_warn(warnmem,"Babai[2], a=%ld, j=%ld", aa,j);
+        gerepileall(av,U?5:4,&B,&G,&maxmu,&max2mu,&U);
+      }
+      go_on = 1;
       /* we consider separately the case |X| = 1 */
       if (absr_cmp(tmp, halfplus1) <= 0)
       {
@@ -317,9 +326,9 @@ Babai(pari_sp av, long kappa, GEN *pG, GEN *pB, GEN *pU, GEN mu, GEN r, GEN s,
           gmael(G,i,kappa) = submul(gmael(G,i,kappa), gmael(G,i,j), X);
       }
     }
-    /* Anything happened? */
-    if (test) aa = zeros+1;
-  } while (test);
+    if (!go_on) break; /* Anything happened? */
+    aa = zeros+1;
+  }
 
   affir(gmael(G,kappa,kappa), gel(s,zeros+1));
   /* the last s[kappa-1]=r[kappa][kappa] is computed only if kappa increases */
