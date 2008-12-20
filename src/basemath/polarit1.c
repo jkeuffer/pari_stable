@@ -1866,7 +1866,7 @@ ZX_monic_factorpadic(GEN f, GEN p, long prec)
       continue;
     }
     /* use Round 4 */
-    p2 = maxord_i(p, fx, Z_pval(ZX_disc(fx),p), w, prec);
+    p2 = maxord_i(p, fx, ZpX_disc_val(fx,p), w, prec);
     if (p2)
     {
       p2 = gerepilecopy(av1,p2);
