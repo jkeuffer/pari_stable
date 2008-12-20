@@ -4172,7 +4172,7 @@ elltors0(GEN e, long flag)
 struct ellld {
   GEN E, N; /* ell, conductor */
   GEN bnd; /* t_INT; will need all an for n <= bnd */
-  long rootbnd; /* sqrt(bnd) */
+  ulong rootbnd; /* sqrt(bnd) */
   GEN an; /* t_VECSMALL: cache of ap, n <= rootbnd */
   GEN ap; /* t_VECSMALL: cache of ap, p <= rootbnd */
   GEN p; /* t_VECSMALL: primes <= rootbnd */
@@ -4386,34 +4386,34 @@ compute_Gr_Sx(struct ellld *el, GEN x)
 static GEN
 init_Gr(struct ellld *el, long prec)
 {
-  GEN p1, p2, p3;
-  long m, j, rootbnd = el->rootbnd;
+  GEN G, p2, p3;
+  long m, j, l;
 
   if (el->r == 0)
   {
-    p1 = cgetg(rootbnd+1, t_VEC);
+    l = el->rootbnd + 1; G = cgetg(l, t_VEC);
     p3 = p2 = mpexp(negr(el->X));
-    for (j = 1; j <= rootbnd; j++) { gel(p1, j) = p3; p3 = mulrr(p3, p2); }
-    return p1;
+    for (j = 1; j < l; j++) { gel(G,j) = p3; p3 = mulrr(p3, p2); }
+    return G;
   }
-  if (el->r == 1) return veceint1(el->X, stoi(rootbnd), prec);
+  if (el->r == 1) return mpveceint1(el->X, el->rootbnd, prec);
 
   m = number_of_terms_Sx(mulri(el->X, el->bnd), el->epsbit);
   el->alpha = init_alpha(el->r, prec);
   el->A = init_A(el->r, m, prec);
-  p1 = cgetg(rootbnd+1, t_VEC);
-  for (j = 1; j <= rootbnd; j++) {
+  l = el->rootbnd + 1; G = cgetg(l, t_VEC);
+  for (j = 1; j < l; j++) {
     pari_sp av = avma;
-    gel(p1, j) = gerepileuptoleaf(av, compute_Gr_Sx(el, mulur(j, el->X)));
+    gel(G,j) = gerepileuptoleaf(av, compute_Gr_Sx(el, mulur(j, el->X)));
   }
-  return p1;
+  return G;
 }
 
 /* m t_INT, returns a t_REAL or NULL (= 0) */
 static GEN
 ellld_G(struct ellld *el, GEN m)
 {
-  if (cmpis(m, el->rootbnd) <= 0) return gel(el->gcache, itos(m));
+  if (cmpiu(m, el->rootbnd) <= 0) return gel(el->gcache, itos(m));
   if (el->r == 0) return mpexp(negr(mulir(m, el->X)));
   if (el->r == 1) return eint1(mulir(m, el->X), 0/*unused*/);
   /* r >= 2 */
@@ -4426,12 +4426,12 @@ ellld_G(struct ellld *el, GEN m)
 
 /* *psum a t_REAL */
 static void
-BGadd(struct ellld *el, GEN *psum, GEN n, long i, GEN a, GEN last_a)
+BGadd(struct ellld *el, GEN *psum, GEN n, long i, GEN a, GEN lasta)
 {
   ulong p;
   long j = i;
 
-  if (cmpis(n, el->rootbnd) <= 0) el->an[itos(n)] = itos(a);
+  if (cmpiu(n, el->rootbnd) <= 0) el->an[itou(n)] = itos(a);
 
   if (signe(a))
   {
@@ -4441,16 +4441,15 @@ BGadd(struct ellld *el, GEN *psum, GEN n, long i, GEN a, GEN last_a)
   }
 
   p = el->p[j];
-  if (!signe(a) && p > (ulong)el->rootbnd) return;
+  if (!signe(a) && p > el->rootbnd) return;
 
   while (j <= i)
   {
-    GEN next_a, pn = mului(p, n);
+    GEN nexta, pn = mului(p, n);
     if (cmpii(pn, el->bnd) > 0) return;
-    next_a = mulis(a, el->ap[j]);
-    if (i == j && umodiu(el->N, p))
-      next_a = subii(next_a, mului(p, last_a));
-    BGadd(el, psum, pn, j, next_a, a);
+    nexta = mulis(a, el->ap[j]);
+    if (i == j && umodiu(el->N, p)) nexta = subii(nexta, mului(p, lasta));
+    BGadd(el, psum, pn, j, nexta, a);
     if (++j > i) break;
     p = el->p[j];
   }
@@ -4492,7 +4491,7 @@ ellL1_i(struct ellld *el, long r, long prec)
     if (DEBUGLEVEL>2) {
       fprintferr("el_bnd = %Ps\n", el->bnd);
       fprintferr("N = %Ps\n", el->N);
-      fprintferr("rootbnd = %ld\n", el->rootbnd);
+      fprintferr("rootbnd = %lu\n", el->rootbnd);
     }
     fprintferr("1st stage, using recursion for p <= %ld\n", el->pnum);
   }
@@ -4521,7 +4520,7 @@ ellL1_i(struct ellld *el, long r, long prec)
     if (DEBUGLEVEL>3 && (i & 0x1ff) == 0) fprintferr("p=%Ps\tap=%Ps\n", p, ap);
     if (!signe(ap)) continue;
 
-    jmax = minss(el->rootbnd, itos( divii(el->bnd, p) ));
+    jmax = minuu(el->rootbnd, itou( divii(el->bnd, p) ));
     /* j = 1 */
     G = ellld_G(el, p);
     if (G) SUM = addrr(SUM, divri(mulir(ap, G), p));
