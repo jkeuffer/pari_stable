@@ -2412,6 +2412,7 @@ GEN     hbessel2(GEN n, GEN z, long prec);
 GEN     ibessel(GEN n, GEN z, long prec);
 GEN     jbessel(GEN n, GEN z, long prec);
 GEN     jbesselh(GEN n, GEN z, long prec);
+GEN     mpveceint1(GEN C, long n, long prec);
 GEN     nbessel(GEN n, GEN z, long prec);
 GEN     jell(GEN x, long prec);
 GEN     kbessel(GEN nu, GEN gx, long prec);

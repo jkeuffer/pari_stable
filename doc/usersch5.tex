@@ -6659,6 +6659,9 @@ where you want such computations as $\log(-1) = I$.
 \kbd{subrs(mpexp(x), 1)}, which suffers from catastrophic cancellation if
 $|x|$ is very small.
 
+\fun{GEN}{mpveceint1}{GEN C, long n, long prec} as \kbd{veceint1}; assumes
+that $C > 0$ is a \typ{REAL}.
+
 \fun{GEN}{szeta}{long s, long prec} returns the value of Riemann's zeta
 function at the (possibly negative) integer $s\neq 1$, in relative accuracy \kbd{prec}.
 

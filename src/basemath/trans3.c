@@ -792,28 +792,32 @@ eint1(GEN x, long prec)
 GEN
 veceint1(GEN C, GEN nmax, long prec)
 {
-  long i, n, nstop, nmin, G, chkpoint;
-  pari_sp av, av1;
-  GEN y, e1, e2, eC, F0, unr;
-
   if (!nmax) return eint1(C,prec);
   if (typ(nmax) != t_INT) pari_err(typeer,"veceint1");
-  n = itos(nmax);
-  if (n <= 0) return cgetg(1,t_VEC);
-  if (DEBUGLEVEL>1) fprintferr("Entering veceint1:\n");
   if (typ(C) != t_REAL) {
     C = gtofp(C, prec);
     if (typ(C) != t_REAL) pari_err(typeer,"veceint1");
   }
   if (signe(C) <= 0) pari_err(talker,"negative or zero constant in veceint1");
+  return mpveceint1(C, itos(nmax), prec);
+}
 
+/* C > 0 a t_REAL */
+GEN
+mpveceint1(GEN C, long n, long prec)
+{
+  long i, nstop, nmin, G, chkpoint;
+  pari_sp av, av1;
+  GEN y, e1, e2, eC, F0, unr;
+
+  if (n <= 0) return cgetg(1,t_VEC);
   y = cgetg(n+1,t_VEC);
   for(i=1; i<=n; i++) gel(y,i) = cgetr(prec);
   av = avma; G = expo(C);
   if (G >= 0) nstop = n;
   else
   {
-    nstop = itos(gceil(divur(4,C))); /* >= 4 ~ 4 / C */
+    nstop = itos(ceilr(divur(4,C))); /* >= 4 ~ 4 / C */
     if (nstop > n) nstop = n;
   }
 
@@ -822,7 +826,7 @@ veceint1(GEN C, GEN nmax, long prec)
   e2 = powru(eC, 10);
   unr = real_1(prec);
   av1 = avma;
-  if(DEBUGLEVEL>1) fprintferr("nstop = %ld\n",nstop);
+  if (DEBUGLEVEL>1) fprintferr("Entering veceint1, nstop = %ld\n",nstop);
   if (nstop == n) goto END;
 
   G = -bit_accuracy(prec);
