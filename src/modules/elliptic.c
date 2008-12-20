@@ -4343,7 +4343,7 @@ compute_Gr_VSx(struct ellld *el, GEN x)
 static GEN
 compute_Gr_Sx(struct ellld *el, GEN x)
 {
-  const long VSX = 5;
+  const long thresh_SMALL = 5;
   long i, r = el->r;
   GEN logx = mplog(x), p4;
   /* i = 0 */
@@ -4357,10 +4357,10 @@ compute_Gr_Sx(struct ellld *el, GEN x)
   /* i = r, use alpha[1] = 1 */
   p3 = addrr(p3, p2);
 
-  if (cmprs(x, VSX) < 0)
-    p4 = compute_Gr_VSx(el, x);
+  if (cmprs(x, thresh_SMALL) < 0)
+    p4 = compute_Gr_VSx(el, x); /* x "small" use expansion near 0 */
   else
-  {
+  { /* x "large" use expansion at infinity */
     pari_sp av = avma, lim = stack_lim(av, 2);
     long M = lg(el->A);
     GEN p1 = x;
