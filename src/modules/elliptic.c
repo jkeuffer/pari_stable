@@ -4178,7 +4178,8 @@ struct ellld {
   GEN p; /* t_VECSMALL: primes <= rootbnd */
   long pnum; /* number of primes in p; length of ap */
   long r; /* we are comuting L^{(r)}(1) */
-  GEN X; /* t_REAL */
+  GEN X; /* t_REAL, 2Pi / sqrt(N) */
+  GEN emX; /* t_REAL, exp(-X) */
   GEN gcache; /* t_VEC of t_REALs */
   GEN alpha; /* t_VEC of t_REALs, except alpha[1] = gen_1 */
   GEN A; /* t_VEC of t_REALs, A[1] unused */
@@ -4206,7 +4207,8 @@ init_alpha(long m, long prec)
   return a;
 }
 
-/* assume r >= 2, return a t_VEC A of t_REALs. NB A[1] unused */
+/* assume r >= 2, return a t_VEC A of t_REALs of length > 3.
+ * NB: A[1] unused, A[2] = 1 */
 static GEN
 init_A(long r, long m, long prec)
 {
@@ -4281,38 +4283,28 @@ static long
 number_of_terms_Sx(GEN x, long epsbit)
 {
   long M, M1, M2;
-
   M1 = (long)(epsbit * 7.02901423262); /* epsbit * log(2) / (log(3) - 1) */
   M2 = itos(ceilr(gmul2n(x,1))); /* >= 2x */
   if (M2 < 2) M2 = 2;
-
-  if (estimate_prec_Sx(x, M2) < -epsbit) return M2;
-  M = (M1+M2+1)/2;
-  while (M < M1)
-  {
-    if (estimate_prec_Sx(x, M) < -epsbit) M1 = M; else M2 = M;
-    M = (M1+M2+1)/2;
-  }
-  return M1;
-}
-
-/* X t_REAL, return t_INT */
-static GEN
-cutoff_point(long r, GEN X, long epsbit, long prec)
-{
-  GEN M1 = ceilr(divsr(7*bit_accuracy(prec)+1, X));
-  GEN M2 = gen_2, M;
-  GEN x  = mulri(X, M1);
-  GEN p1 = divrr(mpexp(negr(x)), powru(x, r+1));
-  if (expo(p1) > -epsbit) pari_err(talker, "M1 is not valid upper bound\n");
-
-  M  = shifti(addii(M1, M2), -1);
+  M = M2;
   for(;;)
   {
-    x  = mulri(X, M);
-    p1 = divrr(mpexp(negr(x)), powru(x, r+1));
-    if (expo(p1) < -epsbit) M1 = M; else M2 = M;
+    if (estimate_prec_Sx(x, M) < -epsbit) M1 = M; else M2 = M;
+    M = (M1+M2+1) >> 1;
+    if (M >= M1) return M1;
+  }
+}
 
+/* X t_REAL, emX = exp(-X) t_REAL; return t_INT */
+static GEN
+cutoff_point(long r, GEN X, GEN emX, long epsbit, long prec)
+{
+  GEN M1 = ceilr(divsr(7*bit_accuracy(prec)+1, X));
+  GEN M2 = gen_2, M = M1;
+  for(;;)
+  {
+    GEN c = divrr(powgi(emX, M), powru(mulri(X,M), r+1));
+    if (expo(c) < -epsbit) M1 = M; else M2 = M;
     M = shifti(addii(M1, M2), -1);
     if (cmpii(M2, M) >= 0) return M;
   }
@@ -4339,12 +4331,13 @@ compute_Gr_VSx(struct ellld *el, GEN x)
   }
 }
 
-/* t_REAL, assume r >= 2. Returns a t_REAL */
+/* t_REAL, assume r >= 2. m t_INT or NULL; Returns a t_REAL */
 static GEN
-compute_Gr_Sx(struct ellld *el, GEN x)
+compute_Gr_Sx(struct ellld *el, GEN m, ulong sm)
 {
   const long thresh_SMALL = 5;
   long i, r = el->r;
+  GEN x = m? mulir(m, el->X): mulur(sm, el->X);
   GEN logx = mplog(x), p4;
   /* i = 0 */
   GEN p3 = gel(el->alpha, r+1);
@@ -4363,21 +4356,21 @@ compute_Gr_Sx(struct ellld *el, GEN x)
   { /* x "large" use expansion at infinity */
     pari_sp av = avma, lim = stack_lim(av, 2);
     long M = lg(el->A);
-    GEN p1 = x;
-    p4 = gen_0;
-    for (i = 2; i < M; i++)
+    GEN xi = sqrr(x); /* x^2 */
+    p4 = x; /* i = 2. Uses A[2] = 1; NB: M > 2 */
+    for (i = 3; i < M; i++)
     {
-      GEN p5 = mulrr(p1, gel(el->A, i));
-      p4 = mpadd(p4, p5);
+      GEN p5 = mulrr(xi, gel(el->A, i));
       if (expo(p5) < -el->epsbit) break;
-      p1 = mulrr(p1, x); /* x^i */
+      p4 = addrr(p4, p5);
+      xi = mulrr(xi, x); /* = x^i */
       if (low_stack(lim, stack_lim(av, 2)))
       {
-	if (DEBUGMEM > 0) pari_warn(warnmem, "compute_Gr_Sx");
-	gerepileall(av, 2, &p1, &p4);
+        if (DEBUGMEM > 0) pari_warn(warnmem, "compute_Gr_Sx");
+        gerepileall(av, 2, &xi, &p4);
       }
     }
-    p4 = mpmul(mpexp(negr(x)), p4);
+    p4 = mulrr(p4, m? powgi(el->emX, m): powru(el->emX, sm));
   }
   return odd(r)? subrr(p4, p3): subrr(p3, p4);
 }
@@ -4386,14 +4379,15 @@ compute_Gr_Sx(struct ellld *el, GEN x)
 static GEN
 init_Gr(struct ellld *el, long prec)
 {
-  GEN G, p2, p3;
   long m, j, l;
+  GEN G;
 
   if (el->r == 0)
   {
+    GEN e, ej;
     l = el->rootbnd + 1; G = cgetg(l, t_VEC);
-    p3 = p2 = mpexp(negr(el->X));
-    for (j = 1; j < l; j++) { gel(G,j) = p3; p3 = mulrr(p3, p2); }
+    ej = e = el->emX;
+    for (j = 1; j < l; j++) { gel(G,j) = ej; ej = mulrr(ej, e); }
     return G;
   }
   if (el->r == 1) return mpveceint1(el->X, el->rootbnd, prec);
@@ -4404,7 +4398,7 @@ init_Gr(struct ellld *el, long prec)
   l = el->rootbnd + 1; G = cgetg(l, t_VEC);
   for (j = 1; j < l; j++) {
     pari_sp av = avma;
-    gel(G,j) = gerepileuptoleaf(av, compute_Gr_Sx(el, mulur(j, el->X)));
+    gel(G,j) = gerepileuptoleaf(av, compute_Gr_Sx(el, NULL, j));
   }
   return G;
 }
@@ -4414,12 +4408,12 @@ static GEN
 ellld_G(struct ellld *el, GEN m)
 {
   if (cmpiu(m, el->rootbnd) <= 0) return gel(el->gcache, itos(m));
-  if (el->r == 0) return mpexp(negr(mulir(m, el->X)));
+  if (el->r == 0) return powgi(el->emX, m);
   if (el->r == 1) return eint1(mulir(m, el->X), 0/*unused*/);
   /* r >= 2 */
   if (cmpii(m, el->bnd) < 0) {
     pari_sp av = avma;
-    return gerepileuptoleaf(av, compute_Gr_Sx(el, mulir(m, el->X)));
+    return gerepileuptoleaf(av, compute_Gr_Sx(el, m, 0));
   }
   return NULL;
 }
@@ -4476,9 +4470,10 @@ ellL1_i(struct ellld *el, long r, long prec)
   if (DEBUGLEVEL)
     fprintferr("in ellL1 with r = %ld, prec = %ld\n", r, prec);
 
+  el->emX = mpexp(negr(el->X));
   el->epsbit = bit_accuracy(prec)+1;
   el->r = r;
-  el->bnd = cutoff_point(r, el->X, el->epsbit, prec);
+  el->bnd = cutoff_point(r, el->X, el->emX, el->epsbit, prec);
   el->rootbnd = itou(sqrtint(el->bnd));
   el->gcache = init_Gr(el, prec);
   el->an = const_vecsmall(el->rootbnd, 0);
