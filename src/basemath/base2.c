@@ -724,7 +724,7 @@ static long
 init_m(GEN p)
 {
   if (lgefint(p) > 3) return 1;
-  return 32 / log2(p[2]);
+  return (long)(32 / log2(p[2]));
 }
 
 /* reduced resultant mod p^m (assumes x monic) */

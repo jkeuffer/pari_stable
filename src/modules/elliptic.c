@@ -4203,7 +4203,6 @@ init_alpha(long m, long prec)
 
   a = cgetg(m+2, t_VEC);
   for (i = 1; i <= m+1; i++) gel(a, i) = gel(p1, i+1);
-  if (DEBUGLEVEL) fprintferr("alpha = %Ps\n", a);
   return a;
 }
 
@@ -4283,7 +4282,7 @@ number_of_terms_Sx(GEN x, long epsbit)
 {
   long M, M1, M2;
 
-  M1 = epsbit * 7.02901423262; /* epsbit * log(2) / (log(3) - 1) */
+  M1 = (long)(epsbit * 7.02901423262); /* epsbit * log(2) / (log(3) - 1) */
   M2 = itos(ceilr(gmul2n(x,1))); /* >= 2x */
   if (M2 < 2) M2 = 2;
 
@@ -4442,7 +4441,7 @@ BGadd(struct ellld *el, GEN *psum, GEN n, long i, GEN a, GEN last_a)
   }
 
   p = el->p[j];
-  if (!signe(a) && p > el->rootbnd) return;
+  if (!signe(a) && p > (ulong)el->rootbnd) return;
 
   while (j <= i)
   {
