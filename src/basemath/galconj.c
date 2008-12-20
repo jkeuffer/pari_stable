@@ -917,7 +917,7 @@ sympol_eval_newtonsum(long e, GEN O, GEN mod)
     pari_sp av = avma;
     GEN s = gen_0;
     for(j=1; j<g; j++) s = addii(s, Fp_powu(gmael(O,i,j), (ulong)e, mod));
-    gel(PL,i) = gerepileuptoint(av, resii(s,mod));
+    gel(PL,i) = gerepileuptoint(av, remii(s,mod));
   }
   return PL;
 }
@@ -1513,7 +1513,7 @@ s4test(GEN u, GEN liftpow, struct galois_lift *gl, GEN phi)
   for (i = 1; i < d; i++)
     if (lg(liftpow[i])>2)
       res = addii(res, mulii(gmael(liftpow,i,2), gel(u,i+2)));
-  res = resii(res,Q);
+  res = remii(res,Q);
   if (gl->den != gen_1) res = mulii(res, gl->den);
   res = centermodii(res, Q,Q2);
   if (absi_cmp(res, gl->gb->bornesol) > 0) { avma = av; return 0; }
