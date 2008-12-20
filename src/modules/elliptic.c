@@ -4482,7 +4482,7 @@ ellL1_i(struct ellld *el, long r, long prec)
   el->bnd = cutoff_point(r, el->X, el->epsbit, prec);
   el->rootbnd = itou(sqrtint(el->bnd));
   el->gcache = init_Gr(el, prec);
-  el->an = cgetg(el->rootbnd+1, t_VECSMALL);
+  el->an = const_vecsmall(el->rootbnd, 0);
   el->an[1] = 1;
 
   el->p  = primes_zv(2*el->rootbnd);
@@ -4513,7 +4513,7 @@ ellL1_i(struct ellld *el, long r, long prec)
   p = prime(i);
   while (cmpii(p, el->bnd) < 0)
   {
-    GEN ap;
+    GEN ap, G;
     p = nextprime(addis(p, 1));
     ap = ellap(el->E, p);
 
@@ -4522,11 +4522,17 @@ ellL1_i(struct ellld *el, long r, long prec)
     if (!signe(ap)) continue;
 
     jmax = minss(el->rootbnd, itos( divii(el->bnd, p) ));
-    for (j = 1;  j <= jmax; j++)
+    /* j = 1 */
+    G = ellld_G(el, p);
+    if (G) SUM = addrr(SUM, divri(mulir(ap, G), p));
+    for (j = 2;  j <= jmax; j++)
     {
-      GEN a = mulis(ap, el->an[j]);
-      GEN n = muliu(p, j);
-      GEN G = ellld_G(el, n);
+      long aj = el->an[j];
+      GEN a, n;
+      if (!aj) continue;
+      a = mulis(ap, aj);
+      n = muliu(p, j);
+      G = ellld_G(el, n);
       if (G) SUM = addrr(SUM, divri(mulir(a, G), n));
     }
     if (DEBUGLEVEL>3 && (i & 0x1ff) == 0) fprintferr("\tsum=%Ps\n", SUM);
