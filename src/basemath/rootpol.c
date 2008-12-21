@@ -1627,20 +1627,23 @@ root_error(long n, long k, GEN roots_pol, long pari_err, GEN shatzle)
   if (expo(rho) < 0) rho = real_1(DEFAULTPREC);
   eps = mulrr(rho, shatzle);
   aux = shiftr(powru(rho,n), pari_err);
+  prod = NULL; /* 1. */
 
-  for (j=1; j<=2 || (j<=5 && gcmp(rap, dbltor(1.2)) > 0); j++)
+  for (j=1; j<=2 || (j<=5 && cmprr(rap, dbltor(1.2)) > 0); j++)
   {
-    m = n; prod = real_1(DEFAULTPREC);
+    m = n;
     epsbis = mulrr(eps, dbltor(1.25));
     for (i=1; i<=n; i++)
     {
       if (i != k && cmprr(gel(d,i),epsbis) > 0)
       {
+        GEN dif = subrr(gel(d,i),eps);
+	prod = prod? mulrr(prod, dif): dif;
 	m--;
-	prod = mulrr(prod, subrr(gel(d,i),eps));
       }
     }
-    eps2 = sqrtnr(mpdiv(shiftr(aux,2*m-2), prod), m);
+    eps2 = prod? divrr(aux, prod): aux;
+    if (m > 1) eps2 = sqrtnr(shiftr(eps2, 2*m-2), m);
     rap = divrr(eps,eps2); eps = eps2;
   }
   return eps;
