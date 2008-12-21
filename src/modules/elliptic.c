@@ -3134,9 +3134,9 @@ ellap(GEN e, GEN p)
   checksmallell(e);
   if (typ(p)!=t_INT || signe(p) <= 0) pari_err(talker,"not a prime in ellap");
   if ( (a = easy_ap(e, p)) ) return a;
-  lp = bit_accuracy(lg(p))-bfffo(*int_MSW(p));
-  if (lp < 31) return stoi(ellap2(e, itou(p)));
-  if (lp >= 63) { a = ellsea(e, p, 0); if (a) return a; }
+  lp = expi(p);
+  if (lp < 30) return stoi(ellap2(e, itou(p)));
+  if (lp >= 62) { a = ellsea(e, p, 0); if (a) return a; }
   return ellap1(e, p);
 }
 
@@ -4176,7 +4176,6 @@ struct ellld {
   GEN an; /* t_VECSMALL: cache of ap, n <= rootbnd */
   GEN ap; /* t_VECSMALL: cache of ap, p <= rootbnd */
   GEN p; /* t_VECSMALL: primes <= rootbnd */
-  long pnum; /* number of primes in p; length of ap */
   long r; /* we are comuting L^{(r)}(1) */
   GEN X; /* t_REAL, 2Pi / sqrt(N) */
   GEN emX; /* t_REAL, exp(-X) */
@@ -4469,7 +4468,7 @@ ellL1_i(struct ellld *el, long r, long prec)
 {
   pari_sp av = avma, av2;
   GEN p, SUM;
-  long i, j, jmax;
+  long i, j, lp;
 
   if (DEBUGLEVEL)
     fprintferr("in ellL1 with r = %ld, prec = %ld\n", r, prec);
@@ -4484,7 +4483,7 @@ ellL1_i(struct ellld *el, long r, long prec)
   el->an[1] = 1;
 
   el->p  = primes_zv(2*el->rootbnd);
-  el->pnum = lg(el->p) - 1;
+  lp = lg(el->p);
   el->ap = ellld_ap(el->E, el->p);
   if (DEBUGLEVEL) {
     if (DEBUGLEVEL>2) {
@@ -4492,11 +4491,11 @@ ellL1_i(struct ellld *el, long r, long prec)
       fprintferr("N = %Ps\n", el->N);
       fprintferr("rootbnd = %lu\n", el->rootbnd);
     }
-    fprintferr("1st stage, using recursion for p <= %ld\n", el->pnum);
+    fprintferr("1st stage, using recursion for p <= %ld\n", lp-1);
   }
 
   SUM = rcopy(gel(el->gcache, 1)); av2 = avma;
-  for (i = 1; i <= el->pnum; i++)
+  for (i = 1; i < lp; i++)
   {
     ulong pp = el->p[i];
     long ap = el->ap[i];
@@ -4507,11 +4506,12 @@ ellL1_i(struct ellld *el, long r, long prec)
     affrr(sum, SUM); avma = av2;
   }
   if (DEBUGLEVEL) fprintferr("2nd stage, looping for p <= %Ps\n", el->bnd);
-  i = el->pnum;
-  p = prime(i);
+  i = lp-1;
+  p = utoipos(el->p[i]);
   while (cmpii(p, el->bnd) < 0)
   {
     GEN ap, G;
+    long jmax;
     p = nextprime(addis(p, 1));
     ap = ellap(el->E, p);
 
