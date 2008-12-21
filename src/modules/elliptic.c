@@ -4262,7 +4262,7 @@ init_A(long r, long m, long prec)
   avma = av0; return A;
 }
 
-/* x > 0 t_REAL, M >= 1 */
+/* x > 0 t_REAL, M >= 2 */
 static long
 estimate_prec_Sx(GEN x, long M)
 {
@@ -4270,7 +4270,7 @@ estimate_prec_Sx(GEN x, long M)
   pari_sp av = avma;
 
   x = rtor(x, DEFAULTPREC);
-  p1 = divri(powrs(x, M-2), mpfact(M-1)); /* x^(M-2) / (M-1)! */
+  p1 = divri(powru(x, M-2), mpfact(M-1)); /* x^(M-2) / (M-1)! */
   if (expo(x) < 0)
   {
     p2 = divrr(mulrr(p1, powru(x,3)), mulur(M,subsr(1,x)));/* x^(M+1)/(1-x)M! */
@@ -4426,7 +4426,10 @@ BGadd(struct ellld *el, GEN *psum, GEN n, long i, GEN a, GEN lasta)
   ulong p;
   long j = i;
 
-  if (cmpiu(n, el->rootbnd) <= 0) el->an[itou(n)] = itos(a);
+  if (lgefint(n) == 3) {
+    ulong nn = n[2];
+    if (nn <= el->rootbnd) el->an[nn] = itos(a);
+  }
 
   if (signe(a))
   {
@@ -4457,7 +4460,7 @@ ellld_ap(GEN E, GEN vp)
   GEN ap = cgetg(l, t_VECSMALL);
   pari_sp av = avma;
   for (i = 1; i < l; ++i, avma = av) ap[i] = itos(ellap(E, utoipos(vp[i])));
-  return ap;
+  avma = av; return ap;
 }
 
 /* basic data independent from r (E, N, X) already filled. Returns a t_REAL */
