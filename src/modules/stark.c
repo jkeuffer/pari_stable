@@ -2009,19 +2009,18 @@ QuadGetST(GEN bnr, GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
   /* loop over conductors */
   for (j = 1; j <= ncond; j++)
   {
-    const GEN c1 = gel(C,j), c2 = divur(2,c1), cexp = mpexp(negr(c2));
-    const GEN LChar = gel(vChar,j);
+    GEN c1 = rtor(gel(C,j), prec), c2 = divur(2,c1), ec2 = mpexp(c2);
+    GEN LChar = gel(vChar,j);
     const long nChar = lg(LChar)-1, NN = N0[j];
-    GEN veint1, vcn = cgetg(NN+1, t_VEC);
+    GEN veint1, vcn;
 
     if (DEBUGLEVEL>1)
       fprintferr("* conductor no %ld/%ld (N = %ld)\n\tInit: ", j,ncond,NN);
-    veint1 = mpveceint1(c2, NN, prec);
-    gel(vcn,1) = cexp;
-    for (n=2; n<=NN; n++) gel(vcn,n) = mulrr(gel(vcn,n-1), cexp);
+    if (lg(ec2) > prec) ec2 = rtor(ec2, prec);
+    veint1 = mpveceint1(c2, ec2, NN);
+    vcn = mpvecpow(invr(ec2), NN);
     av2 = avma;
-    for (n=2; n<=NN; n++, avma = av2)
-      affrr(divru(gel(vcn,n),n), gel(vcn,n));
+    for (n=2; n<=NN; n++, avma = av2) affrr(divru(gel(vcn,n), n), gel(vcn,n));
 
     for (k = 1; k <= nChar; k++)
     {

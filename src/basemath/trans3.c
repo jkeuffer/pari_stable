@@ -755,6 +755,14 @@ incgam0(GEN s, GEN x, GEN g, long prec)
 GEN
 incgam(GEN s, GEN x, long prec) { return incgam0(s, x, NULL, prec); }
 
+/* x >= 0 a t_REAL */
+GEN
+mpeint1(GEN x, GEN expx)
+{
+  pari_sp av = avma;
+  return gerepileuptoleaf(av, incgam2_0(x, expx));
+}
+
 GEN
 eint1(GEN x, long prec)
 {
@@ -799,16 +807,16 @@ veceint1(GEN C, GEN nmax, long prec)
     if (typ(C) != t_REAL) pari_err(typeer,"veceint1");
   }
   if (signe(C) <= 0) pari_err(talker,"negative or zero constant in veceint1");
-  return mpveceint1(C, itos(nmax), prec);
+  return mpveceint1(C, NULL, itos(nmax));
 }
 
 /* C > 0 a t_REAL */
 GEN
-mpveceint1(GEN C, long n, long prec)
+mpveceint1(GEN C, GEN eC, long n)
 {
-  long i, nstop, nmin, G, chkpoint;
+  long i, nstop, nmin, G, chkpoint, prec = lg(C);
   pari_sp av, av1;
-  GEN y, e1, e2, eC, F0, unr;
+  GEN y, e1, e2, F0, unr;
 
   if (n <= 0) return cgetg(1,t_VEC);
   y = cgetg(n+1,t_VEC);
@@ -821,7 +829,7 @@ mpveceint1(GEN C, long n, long prec)
     if (nstop > n) nstop = n;
   }
 
-  eC = mpexp(C);
+  if (!eC) eC = mpexp(C);
   e1 = powrs(eC, -n);
   e2 = powru(eC, 10);
   unr = real_1(prec);
@@ -880,6 +888,17 @@ END:
   }
   if (DEBUGLEVEL>1) fprintferr("\n");
   avma = av; return y;
+}
+
+/* e t_REAL, vector of e^i, 1 <= i <= n */
+GEN
+mpvecpow(GEN e, long n)
+{
+  GEN G = cgetg(n+1, t_VEC);
+  long j;
+  gel(G, 1) = e;
+  for (j = 2; j <= n; j++) gel(G,j) = mulrr(gel(G,j-1), e);
+  return G;
 }
 
 GEN
