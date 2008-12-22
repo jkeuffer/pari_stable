@@ -4563,7 +4563,7 @@ ellL1_i(struct ellld *el, long r, long prec)
 }
 
 static void
-init_el(struct ellld *el, GEN E, long prec)
+init_el(struct ellld *el, GEN E, long *parity, long prec)
 {
   GEN eX;
   checksmallell(E);
@@ -4575,17 +4575,18 @@ init_el(struct ellld *el, GEN E, long prec)
   el->emX = invr(el->eX);
   el->epsbit = bit_accuracy(prec)+1;
   el->ap = NULL;
+  *parity = (ellrootno_global(el->E, el->N) > 0)? 0: 1; /* rank parity */
 }
 
 GEN
 ellL1(GEN E, long r, long prec)
 {
   pari_sp av = avma;
-  const long sgn = odd(r)? -1: 1;
   struct ellld el;
+  long parity;
 
-  init_el(&el, E, prec);
-  if (ellrootno_global(el.E, el.N) != sgn) return gen_0;
+  init_el(&el, E, &parity, prec);
+  if (parity != (r & 1)) return gen_0;
   return gerepileuptoleaf(av, ellL1_i(&el, r, prec));
 }
 
@@ -4604,8 +4605,7 @@ ellanalyticrank(GEN e, GEN eps, long prec)
       eps = gtofp(eps, DEFAULTPREC);
       if (typ(eps) != t_REAL) pari_err(typeer, "ellanalyticrank");
     }
-  init_el(&el, e, prec);
-  rk = (ellrootno_global(el.E, el.N) > 0)? 0: 1; /* rank parity */
+  init_el(&el, e, &rk, prec); /* set rk to rank parity (0 or 1) */
   if (DEBUGLEVEL) {
     fprintferr("ellanalyticrank: CURVE = %Ps\n", e);
     fprintferr("Rank is %s\n", rk == 0? "even": "odd");
