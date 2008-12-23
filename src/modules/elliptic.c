@@ -4330,6 +4330,7 @@ compute_Gr_VSx(struct ellld *el, GEN x)
     p1 = divrs(mulrr(p1, x), -n); /* (-1)^(n-1) x^n / n! */
     p3 = divri(p1, powuu(n, r));
   }
+  /* sum_{n = 1}^{oo} (-1)^(n-1) x^n / (n! n^r) */
 }
 
 /* t_REAL, assume r >= 2. m t_INT or NULL; Returns a t_REAL */
