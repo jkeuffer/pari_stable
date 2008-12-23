@@ -80,7 +80,7 @@ affrr_fixlg(GEN y, GEN z) { fixlg(z, lg(y)); affrr(y, z); }
 /*                                                                 */
 /*******************************************************************/
 INLINE GEN
-new_chunk(size_t x) /* x is a number of bytes */
+new_chunk(size_t x) /* x is a number of longs */
 {
   GEN z = ((GEN) avma) - x;
   if (x > (avma-bot) / sizeof(long)) pari_err(errpile);
