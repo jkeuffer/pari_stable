@@ -2159,7 +2159,7 @@ typedef struct {
 
 static void
 add(GEN z, GEN g, long d) { vectrunc_append(z, mkvec2(utoipos(d), g)); }
-/* return number of roots */
+/* return number of roots; z not properly initialized if deg(u) <= 1 */
 long
 FqX_split_deg1(GEN *pz, GEN u, GEN q, GEN T, GEN p)
 {
@@ -2167,7 +2167,7 @@ FqX_split_deg1(GEN *pz, GEN u, GEN q, GEN T, GEN p)
   GEN v, S, g, X, z = vectrunc_init(N+1);
 
   *pz = z;
-  if (N == 1) return 1;
+  if (N <= 1) return 1;
   v = X = pol_x(varn(u));
   S = init_spec_FqXQ_pow(X, q, u, T, p);
   vectrunc_append(z, S);
@@ -2178,7 +2178,7 @@ FqX_split_deg1(GEN *pz, GEN u, GEN q, GEN T, GEN p)
   return dg;
 }
 
-/* return number of factors */
+/* return number of factors; z not properly initialized if deg(u) <= 1 */
 long
 FqX_split_by_degree(GEN *pz, GEN u, GEN q, GEN T, GEN p)
 {
@@ -2186,7 +2186,7 @@ FqX_split_by_degree(GEN *pz, GEN u, GEN q, GEN T, GEN p)
   GEN v, S, g, X, z = vectrunc_init(N+1);
 
   *pz = z;
-  if (N == 1) return 1;
+  if (N <= 1) return 1;
   v = X = pol_x(varn(u));
   S = init_spec_FqXQ_pow(X, q, u, T, p);
   vectrunc_append(z, S);
@@ -2206,6 +2206,16 @@ FqX_split_by_degree(GEN *pz, GEN u, GEN q, GEN T, GEN p)
   }
   if (N) { add(z, u, 1); nb++; }
   return nb;
+}
+
+/* see roots_from_deg1() */
+static GEN
+FqX_roots_from_deg1(GEN x, GEN T, GEN p)
+{
+  long i,l = lg(x);
+  GEN r = cgetg(l,t_VEC);
+  for (i=1; i<l; i++) { GEN P = gel(x,i); gel(r,i) = Fq_neg(gel(P,2), T, p); }
+  return r;
 }
 
 static GEN
@@ -2238,8 +2248,12 @@ FqX_roots_i(GEN f, GEN T, GEN p)
 {
   GEN R;
   f = FqX_normalize(f, T, p);
-  (void)FqX_split_deg1(&R, f, powiu(p, degpol(T)), T, p);
-  return roots_from_deg1(FqX_split_roots(R, T, p, NULL));
+  switch( FqX_split_deg1(&R, f, powiu(p, degpol(T)), T, p) )
+  {
+    case 0: return cgetg(1, t_VEC);
+    case 1: if (lg(R) == 1) return FqX_roots_from_deg1(mkvec(f), T, p);
+  }
+  return FqX_roots_from_deg1(FqX_split_roots(R, T, p, NULL), T, p);
 }
 GEN
 FqX_roots(GEN x, GEN T, GEN p)

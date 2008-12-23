@@ -376,7 +376,7 @@ roots_from_deg1(GEN x)
 {
   long i,l = lg(x);
   GEN r = cgetg(l,t_VEC);
-  for (i=1; i<l; i++) gel(r,i) = gneg(constant_term(gel(x,i)));
+  for (i=1; i<l; i++) { GEN P = gel(x,i); gel(r,i) = gneg(gel(P,2)); }
   return r;
 }
 
