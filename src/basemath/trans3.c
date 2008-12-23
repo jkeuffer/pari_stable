@@ -828,15 +828,23 @@ mpveceint1(GEN C, GEN eC, long n)
     nstop = itos(ceilr(divur(4,C))); /* >= 4 ~ 4 / C */
     if (nstop > n) nstop = n;
   }
+  /* 1 <= nstop <= n */
 
   if (!eC) eC = mpexp(C);
+  if (DEBUGLEVEL>1) fprintferr("veceint1: (n, nstop) = (%ld, %ld)\n",n, nstop);
+  e1 = rcopy(eC); av1 = avma;
+  affrr(incgam2_0(C, e1), gel(y,1));
+  for(i=2; i <= nstop; i++, avma = av1)
+  {
+    affrr(mulrr(e1, eC), e1); /* e1 = exp(iC) */
+    affrr(incgam2_0(mulur(i,C), e1), gel(y,i));
+  }
+  if (nstop == n) { avma = av; return y; }
+
   e1 = powrs(eC, -n);
   e2 = powru(eC, 10);
   unr = real_1(prec);
   av1 = avma;
-  if (DEBUGLEVEL>1) fprintferr("Entering veceint1, nstop = %ld\n",nstop);
-  if (nstop == n) goto END;
-
   G = -bit_accuracy(prec);
   F0 = gel(y,n); chkpoint = n;
   affrr(eint1(mulur(n,C),prec), F0);
@@ -877,14 +885,6 @@ mpveceint1(GEN C, GEN eC, long n)
     avma = av1; F0 = gel(y, ++n);
     if (n <= nstop) break;
     affrr(mulrr(e1,e2), e1);
-  }
-END:
-  affrr(eC, e1);
-  for(i=1;; i++)
-  { /* e1 = exp(iC) */
-    affrr(incgam2_0(mulur(i,C), e1), gel(y,i));
-    if (i == nstop) break;
-    affrr(mulrr(e1, eC), e1); avma = av1;
   }
   if (DEBUGLEVEL>1) fprintferr("\n");
   avma = av; return y;
