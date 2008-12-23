@@ -777,9 +777,10 @@ fmtnum(outString *S, long lvalue, GEN gvalue, int base, int signvalue,
 
   if (gvalue)
   {
-    long vz, s;
+    long s, l;
     if (typ(gvalue) != t_INT) {
-      long i, j, h, l = lg(gvalue);
+      long i, j, h;
+      l = lg(gvalue);
       switch(typ(gvalue))
       {
         case t_VEC:
@@ -829,27 +830,25 @@ fmtnum(outString *S, long lvalue, GEN gvalue, int base, int signvalue,
     s = signe(gvalue);
     if (!s) { lbuf = 1; buf = zerotostr(); signvalue = 0; goto END; }
 
+    l = lgefint(gvalue);
     uvalue = gvalue;
     if (signvalue < 0)
     {
-      if (s < 0) uvalue = addii(int2n(bit_accuracy(lgefint(gvalue))), gvalue);
+      if (s < 0) uvalue = addii(int2n(bit_accuracy(l)), gvalue);
       signvalue = 0;
     }
     else
     {
       if (s < 0) { signvalue = '-'; uvalue = absi(uvalue); }
     }
-    vz = sizedigit(gvalue) + 1;
-    mxl = vz * 2 + 10; /* 2 needed for octal, 1 is enough otherwise */
+    mxl = (l-2)* 22 + 1; /* octal at worst; 22 octal chars per 64bit word */
   } else {
-    double vz;
     ulvalue = lvalue;
     if (signvalue < 0)
       signvalue = 0;
     else
       if (lvalue < 0) { signvalue = '-'; ulvalue = - lvalue; }
-    vz = log(ulvalue) / log(10);
-    mxl = (long)vz * 2 + 1;
+    mxl = 22 + 1; /* octal at worst; 22 octal chars to write down 2^64 - 1 */
   }
   if (base > 0) caps = 0; else { caps = 1; base = -base; }
 
