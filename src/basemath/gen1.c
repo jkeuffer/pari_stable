@@ -1950,14 +1950,16 @@ gmul(GEN x, GEN y)
 	  if (lg(y) == 2) return zeroser(vx, valp(y)+RgX_val(x));
 	  av = avma;
 	  vn = RgX_valrem(x, &x);
-	  avma = av;
 	  /* take advantage of x = t^n ! */
 	  if (degpol(x)) {
 	    p1 = RgX_to_ser(x,lg(y));
+            if (vn) settyp(x, t_VECSMALL); /* *new* x left on stack */
 	    p2 = gmul(p1,y);
             settyp(p1, t_VECSMALL); /* p1 left on stack */
-	  } else
+	  } else {
+            avma = av;
 	    p2 = mul_ser_scal(y, gel(x,2));
+          }
 	  setvalp(p2, valp(p2) + vn);
 	  return p2;
 	}
