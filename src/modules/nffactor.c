@@ -809,21 +809,20 @@ FqX_centermod(GEN z, GEN T, GEN pk, GEN pks2)
  * famod = array of modular factors.  Product should be congruent to
  * target/lc(target) modulo p^a
  * For true factors: S1,S2 <= p^b, with b <= a and p^(b-a) < 2^31 */
+/* set *done = 1 if factorisation is known to be complete */
 static GEN
-nfcmbf(nfcmbf_t *T, long maxK, long klim)
+nfcmbf(nfcmbf_t *T, long maxK, long klim, int *done)
 {
   GEN pol = T->pol, nf = T->nf, famod = T->fact, dn = T->dn;
   GEN bound = T->bound;
   GEN nfpol = nf_get_pol(nf);
   long K = 1, cnt = 1, i,j,k, curdeg, lfamod = lg(famod)-1, dnf = degpol(nfpol);
-  GEN res = cgetg(3, t_VEC);
   pari_sp av0 = avma;
   GEN pk = T->L->pk, pks2 = shifti(pk,-1);
 
   GEN ind      = cgetg(lfamod+1, t_VECSMALL);
   GEN deg      = cgetg(lfamod+1, t_VECSMALL);
   GEN degsofar = cgetg(lfamod+1, t_VECSMALL);
-  GEN listmod  = cgetg(lfamod+1, t_COL);
   GEN fa       = cgetg(lfamod+1, t_COL);
   GEN lc = absi(leading_term(pol)), lt = is_pm1(lc)? NULL: lc;
   GEN C2ltpol, C = T->L->topowden, Tpk = T->L->Tpk;
@@ -898,7 +897,7 @@ nextK:
     }
     if (curdeg <= klim) /* trial divide */
     {
-      GEN t, y, q, list;
+      GEN t, y, q;
       pari_sp av;
 
       av = avma;
@@ -945,10 +944,6 @@ nextK:
       }
 
       /* found a factor */
-      list = cgetg(K+1, t_VEC);
-      gel(listmod,cnt) = list;
-      for (i=1; i<=K; i++) list[i] = famod[ind[i]];
-
       y = Q_primpart(y);
       gel(fa,cnt++) = QXQX_normalize(y, nfpol);
       /* fix up pol */
@@ -994,29 +989,32 @@ NEXT:
     }
   }
 END:
+  *done = 1;
   if (degpol(pol) > 0)
   { /* leftover factor */
-    if (signe(leading_term(pol)) < 0) pol = gneg_i(pol);
-
-    if (C2lt && lfamod < 2*K) pol = QXQX_normalize(Q_primpart(pol), nfpol);
+    GEN LC = leading_term(pol);
+    if (signe(LC) < 0) { pol = RgX_neg(pol); LC = leading_term(pol); }
+    if (lfamod >= 2*K)
+    { /* restore leading coefficient */
+      if (!equalii(LC, lc)) pol = RgX_Rg_mul(pol, gdiv(lc,LC));
+      *done = 0; /* ... may still be reducible */
+    }
+    else { /* ... is irreducible */
+      if (C2lt) pol = QXQX_normalize(Q_primpart(pol), nfpol);
+    }
     setlg(famod, lfamod+1);
-    gel(listmod,cnt) = leafcopy(famod);
     gel(fa,cnt++) = pol;
   }
   if (DEBUGLEVEL>6) fprintferr("\n");
   if (cnt == 2) {
     avma = av0;
-    gel(res,1) = mkvec(T->pol);
-    gel(res,2) = mkvec(T->fact);
+    return mkvec(T->pol);
   }
   else
   {
-    setlg(listmod, cnt); setlg(fa, cnt);
-    gel(res,1) = fa;
-    gel(res,2) = listmod;
-    res = gerepilecopy(av0, res);
+    setlg(fa, cnt);
+    return gerepilecopy(av0, fa);
   }
-  return res;
 }
 
 static GEN
@@ -1393,8 +1391,9 @@ static GEN
 nf_combine_factors(nfcmbf_t *T, GEN polred, long klim)
 {
   nflift_t *L = T->L;
-  GEN res, v, listmod, famod = T->fact;
-  long l, maxK = 3, nft = lg(famod)-1;
+  GEN res, famod = T->fact;
+  long maxK = 3, nft = lg(famod)-1;
+  int done;
   pari_timer ti;
 
   if (DEBUGLEVEL>2) TIMERstart(&ti);
@@ -1402,18 +1401,16 @@ nf_combine_factors(nfcmbf_t *T, GEN polred, long klim)
   if (nft < 11) maxK = -1; /* few modular factors: try all posibilities */
   if (DEBUGLEVEL>2) msgTIMER(&ti, "Hensel lift");
 
-  v = nfcmbf(T, maxK, klim);
+  res = nfcmbf(T, maxK, klim, &done);
   if (DEBUGLEVEL>2) msgTIMER(&ti, "Naive recombination");
-
-  res     = gel(v,1);
-  listmod = gel(v,2); l = lg(listmod)-1;
-  famod = gel(listmod,l);
-  if (maxK >= 0 && lg(famod)-1 > 2*maxK)
+  if (!done)
   {
+    long l = lg(res)-1;
+    GEN v;
     if (l > 1)
     {
       T->pol = gel(res,l);
-      T->polbase = RgX_to_nfX(T->nf, gel(res,l));
+      T->polbase = RgX_to_nfX(T->nf, T->pol);
     }
     v = nf_LLL_cmbf(T, maxK);
     /* remove last elt, possibly unfactored. Add all new ones. */
