@@ -1408,13 +1408,12 @@ exp1r_abs(GEN x)
       setlg(unr,l1); p1 = addrr_sign(unr,1, i == n? p3: mulrr(p3,p2),1);
       setlg(p2,l1); affrr(p1,p2); /* p2 <- 1 + (X/i)*p2 */
     }
-    setlg(p2,L);
     setlg(X,L); p2 = mulrr(X,p2);
   }
 
   for (i=1; i<=m; i++)
   {
-    setlg(p2,L);
+    if (lg(p2) > L) setlg(p2,L);
     p2 = mulrr(p2, addsr(2,p2));
   }
   affrr_fixlg(p2,y); avma = av; return y;
@@ -2171,7 +2170,6 @@ mpsc1(GEN x, long *ptmod8)
       setlg(p2,l1); affrr(p1,p2); avma = av;
     }
     p2[1] = evalsigne(-signe(p2)) | evalexpo(expo(p2)-1); /* p2 := -p2/2 */
-    setlg(p2,L);
     setlg(x2,L); p2 = mulrr(x2,p2);
   }
   /* Now p2 = sum {1<= i <=n} (-1)^i x^(2i) / (2i)! ~ cos(x) - 1 */
