@@ -802,6 +802,14 @@ FqX_centermod(GEN z, GEN T, GEN pk, GEN pks2)
   return y;
 }
 
+/* nb = number of modular factors; return a "good" K such that naive
+ * recombination of up to maxK modular factors is not too costly */
+long
+cmbf_maxK(long nb)
+{
+  if (nb >  10) return 3;
+  return nb-1;
+}
 /* Naive recombination of modular factors: combine up to maxK modular
  * factors, degree <= klim
  *
@@ -811,7 +819,7 @@ FqX_centermod(GEN z, GEN T, GEN pk, GEN pks2)
  * For true factors: S1,S2 <= p^b, with b <= a and p^(b-a) < 2^31 */
 /* set *done = 1 if factorisation is known to be complete */
 static GEN
-nfcmbf(nfcmbf_t *T, long maxK, long klim, int *done)
+nfcmbf(nfcmbf_t *T, long klim, long *pmaxK, int *done)
 {
   GEN pol = T->pol, nf = T->nf, famod = T->fact, dn = T->dn;
   GEN bound = T->bound;
@@ -834,8 +842,7 @@ nfcmbf(nfcmbf_t *T, long maxK, long klim, int *done)
 
   TIMERstart(&ti);
 
-  if (maxK < 0) maxK = lfamod-1;
-
+  *pmaxK = cmbf_maxK(lfamod);
   C2ltpol = C2lt? gmul(C2lt,pol): pol;
   {
     GEN q = ceil_safe(sqrtr(T->BS_2));
@@ -883,7 +890,7 @@ nfcmbf(nfcmbf_t *T, long maxK, long klim, int *done)
   /* ind runs through strictly increasing sequences of length K,
    * 1 <= ind[i] <= lfamod */
 nextK:
-  if (K > maxK || 2*K > lfamod) goto END;
+  if (K > *pmaxK || 2*K > lfamod) goto END;
   if (DEBUGLEVEL > 3)
     fprintferr("\n### K = %d, %Ps combinations\n", K,binomial(utoipos(lfamod), K));
   setlg(ind, K+1); ind[1] = 1;
@@ -960,7 +967,7 @@ nextK:
 	}
       }
       lfamod -= K;
-      if (lfamod < 11) maxK = lfamod-1;
+      *pmaxK = cmbf_maxK(lfamod);
       if (lfamod < 2*K) goto END;
       i = 1; curdeg = deg[ind[1]];
 
@@ -1133,14 +1140,13 @@ get_R(GEN M)
 }
 
 static void
-init_proj(nflift_t *L, GEN nfT, GEN p)
+init_proj(nflift_t *L, GEN nfT)
 {
   if (L->Tp)
   {
-    GEN z = cgetg(3, t_VEC), proj;
-    gel(z,1) = L->Tp;
-    gel(z,2) = FpX_div(FpX_red(nfT,p), L->Tp, p);
-    z = ZpX_liftfact(nfT, z, NULL, p, L->k, L->pk);
+    GEN coTp = FpX_div(FpX_red(nfT, L->p), L->Tp,  L->p); /* Tp's cofactor */
+    GEN z, proj;
+    z = ZpX_liftfact(nfT, mkvec2(L->Tp, coTp), NULL,  L->p, L->k, L->pk);
     L->Tpk = gel(z,1);
     proj = get_proj_modT(L->topow, L->Tpk, L->pk);
     if (L->topowden)
@@ -1207,7 +1213,7 @@ bestlift_init(long a, GEN nf, GEN pr, GEN C, nflift_t *L)
   L->iprk = ZM_inv(PRK, pk);
   L->GSmin= GSmin;
   L->prkHNF = prk;
-  init_proj(L, nf_get_pol(nf), pr_get_p(pr));
+  init_proj(L, nf_get_pol(nf));
 }
 
 /* Let X = Tra * M_L, Y = bestlift(X) return V s.t Y = X - PRK V
@@ -1391,17 +1397,15 @@ static GEN
 nf_combine_factors(nfcmbf_t *T, GEN polred, long klim)
 {
   nflift_t *L = T->L;
-  GEN res, famod = T->fact;
-  long maxK = 3, nft = lg(famod)-1;
+  GEN res;
+  long maxK;
   int done;
   pari_timer ti;
 
   if (DEBUGLEVEL>2) TIMERstart(&ti);
-  T->fact = ZpX_liftfact(polred, famod, L->Tpk, L->p, L->k, L->pk);
-  if (nft < 11) maxK = -1; /* few modular factors: try all posibilities */
+  T->fact = ZpX_liftfact(polred, T->fact, L->Tpk, L->p, L->k, L->pk);
   if (DEBUGLEVEL>2) msgTIMER(&ti, "Hensel lift");
-
-  res = nfcmbf(T, maxK, klim, &done);
+  res = nfcmbf(T, klim, &maxK, &done);
   if (DEBUGLEVEL>2) msgTIMER(&ti, "Naive recombination");
   if (!done)
   {

@@ -160,7 +160,7 @@ factor_bound(GEN S)
  * For true factors: S1,S2 <= p^b, with b <= a and p^(b-a) < 2^31 */
 static GEN
 cmbf(GEN pol, GEN famod, GEN bound, GEN p, long a, long b,
-     long maxK, long klim)
+     long klim, long *pmaxK, int *done)
 {
   long K = 1, cnt = 1, i,j,k, curdeg, lfamod = lg(famod)-1;
   ulong spa_b, spa_bs2, Sbound;
@@ -173,8 +173,7 @@ cmbf(GEN pol, GEN famod, GEN bound, GEN p, long a, long b,
   GEN listmod  = cgetg(lfamod+1, t_COL);
   GEN fa       = cgetg(lfamod+1, t_COL);
 
-  if (maxK < 0) maxK = lfamod-1;
-
+  *pmaxK = cmbf_maxK(lfamod);
   lc = absi(leading_term(pol));
   if (is_pm1(lc)) lc = NULL;
   lcpol = lc? ZX_Z_mul(pol, lc): pol;
@@ -211,7 +210,7 @@ cmbf(GEN pol, GEN famod, GEN bound, GEN p, long a, long b,
   /* ind runs through strictly increasing sequences of length K,
    * 1 <= ind[i] <= lfamod */
 nextK:
-  if (K > maxK || 2*K > lfamod) goto END;
+  if (K > *pmaxK || 2*K > lfamod) goto END;
   if (DEBUGLEVEL > 3)
     fprintferr("\n### K = %d, %Ps combinations\n", K,binomial(utoipos(lfamod), K));
   setlg(ind, K+1); ind[1] = 1;
@@ -299,7 +298,7 @@ nextK:
 	}
       }
       lfamod -= K;
-      if (lfamod < 11) maxK = lfamod-1;
+      *pmaxK = cmbf_maxK(lfamod);
       if (lfamod < 2*K) goto END;
       i = 1; curdeg = deg[ind[1]];
       bound = factor_bound(pol);
@@ -323,9 +322,11 @@ NEXT:
     }
   }
 END:
+  *done = 1;
   if (degpol(pol) > 0)
   { /* leftover factor */
-    if (signe(leading_term(pol)) < 0) pol = gneg_i(pol);
+    if (signe(leading_term(pol)) < 0) pol = ZX_neg(pol);
+    if (lfamod >= 2*K) *done = 0;
 
     setlg(famod, lfamod+1);
     gel(listmod,cnt) = leafcopy(famod);
@@ -740,7 +741,8 @@ static GEN
 combine_factors(GEN target, GEN famod, GEN p, long klim)
 {
   GEN la, B, A, res, L, pa, pb, listmod;
-  long a,b, l, maxK = 3, nft = lg(famod)-1, n = degpol(target);
+  long a,b, l, maxK, n = degpol(target);
+  int done;
   pari_timer T;
 
   A = factor_bound(target);
@@ -752,9 +754,8 @@ combine_factors(GEN target, GEN famod, GEN p, long klim)
 
   if (DEBUGLEVEL>2) (void)TIMER(&T);
   famod = ZpX_liftfact(target,famod,NULL,p,a,pa);
-  if (nft < 11) maxK = -1; /* few modular factors: try all posibilities */
   if (DEBUGLEVEL>2) msgTIMER(&T, "Hensel lift (mod %Ps^%ld)", p,a);
-  L = cmbf(target, famod, A, p, a, b, maxK, klim);
+  L = cmbf(target, famod, A, p, a, b, klim, &maxK, &done);
   if (DEBUGLEVEL>2) msgTIMER(&T, "Naive recombination");
 
   res     = gel(L,1);
