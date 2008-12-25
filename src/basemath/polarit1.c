@@ -1960,9 +1960,7 @@ to_Fq(GEN x, GEN T, GEN p)
 static GEN
 to_Fq_pol(GEN x, GEN T, GEN p)
 {
-  long i, lx, tx = typ(x);
-  if (tx != t_POL) pari_err(typeer,"to_Fq_pol");
-  lx = lg(x);
+  long i, lx = lg(x);
   for (i=2; i<lx; i++) gel(x,i) = to_Fq(gel(x,i),T,p);
   return x;
 }
@@ -1970,21 +1968,37 @@ to_Fq_pol(GEN x, GEN T, GEN p)
 static GEN
 to_Fq_fact(GEN P, GEN E, GEN T, GEN p, pari_sp av)
 {
-  GEN y = cgetg(3,t_MAT), u, v;
+  GEN y, u, v;
   long j, l = lg(P), nbf = lg(P);
 
-  u = cgetg(nbf,t_COL); gel(y,1) = u;
-  v = cgetg(nbf,t_COL); gel(y,2) = v;
+  u = cgetg(nbf,t_COL);
+  v = cgetg(nbf,t_COL);
   for (j=1; j<l; j++)
   {
     gel(u,j) = simplify_shallow(gel(P,j)); /* may contain pols of degree 0 */
     gel(v,j) = utoi((ulong)E[j]);
   }
-  y = gerepilecopy(av, y); u = gel(y,1);
+  y = gerepilecopy(av, mkmat2(u, v));
+  u = gel(y,1);
   p = icopy(p);
   T = FpX_to_mod(T, p);
   for (j=1; j<nbf; j++) gel(u,j) = to_Fq_pol(gel(u,j), T,p);
   return y;
+}
+static GEN
+to_Fq_vec(GEN P, GEN T, GEN p, pari_sp av)
+{
+  GEN u;
+  long j, l = lg(P), nbf = lg(P);
+
+  u = cgetg(nbf,t_VEC);
+  for (j=1; j<l; j++)
+    gel(u,j) = simplify_shallow(gel(P,j)); /* may contain pols of degree 0 */
+  u = gerepilecopy(av, u);
+  p = icopy(p);
+  T = FpX_to_mod(T, p);
+  for (j=1; j<nbf; j++) gel(u,j) = to_Fq_pol(gel(u,j), T,p);
+  return u;
 }
 
 /* split into r factors of degree d */
@@ -2408,21 +2422,36 @@ FqX_factor_i(GEN f, GEN T, GEN p)
   setlg(t, nbfact);
   setlg(E, nbfact); return sort_factor_pol(mkvec2((GEN)t, E), cmp_RgX);
 }
+
+static void
+ffcheck(pari_sp *av, GEN *f, GEN *T, GEN p)
+{
+  long v;
+  if (typ(*T)!=t_POL || typ(*f)!=t_POL || typ(p)!=t_INT)
+    pari_err(typeer,"factorff");
+  v = varn(*T);
+  if (varncmp(v, varn(*f)) <= 0)
+    pari_err(talker,"polynomial variable must have higher priority in factorff");
+  *T = RgX_to_FpX(*T, p); *av = avma;
+  *f = RgX_to_FqX(*f, *T,p);
+}
 GEN
 factorff(GEN f, GEN p, GEN T)
 {
   pari_sp av;
-  long v;
   GEN z;
-
-  if (typ(T)!=t_POL || typ(f)!=t_POL || typ(p)!=t_INT) pari_err(typeer,"factorff");
-  v = varn(T);
-  if (varncmp(v, varn(f)) <= 0)
-    pari_err(talker,"polynomial variable must have higher priority in factorff");
-  T = RgX_to_FpX(T, p); av = avma;
-  z = FqX_factor_i(RgX_to_FqX(f, T,p), T, p);
-  return to_Fq_fact(gel(z,1),gel(z,2), T,p,av);
+  ffcheck(&av, &f, &T, p); z = FqX_factor_i(f, T, p);
+  return to_Fq_fact(gel(z,1),gel(z,2), T,p, av);
 }
+GEN
+polrootsff(GEN f, GEN p, GEN T)
+{
+  pari_sp av;
+  GEN z;
+  ffcheck(&av, &f, &T, p); z = FqX_roots_i(f, T, p);
+  return to_Fq_vec(z, T,p, av);
+}
+
 /* factorization of x modulo (T,p). Assume x already reduced */
 GEN
 FqX_factor(GEN x, GEN T, GEN p)

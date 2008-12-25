@@ -1,0 +1,9 @@
+Function: polrootsff
+Section: number_theoretical
+C-Name: polrootsff
+Prototype: GGG
+Help: polrootsff(x,p,a): returns the roots of the polynomial x in the finite
+ field F_p[X]/a(X)F_p[X].
+Doc: returns the vector of distinct roots of the polynomial $x$ in the field
+ $\F_q$ defined by the irreducible polynomial $a$ over $\F_p$. The
+ coefficients of $x$ must be operation-compatible with $\Z/p\Z$.

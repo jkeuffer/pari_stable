@@ -2073,6 +2073,7 @@ GEN     gdeuc(GEN x, GEN y);
 GEN     grem(GEN x, GEN y);
 GEN     padicappr(GEN f, GEN a);
 GEN     poldivrem(GEN x, GEN y, GEN *pr);
+GEN     polrootsff(GEN f, GEN p, GEN T);
 GEN     rootmod0(GEN f, GEN p,long flag);
 GEN     rootpadic(GEN f, GEN p, long r);
 GEN     rootpadicfast(GEN f, GEN p, long e);
