@@ -224,6 +224,7 @@ reducebeta(GEN bnfz, GEN be, GEN ell)
     }
   }
   if (DEBUGLEVEL>1) fprintferr("beta LLL-reduced mod U^l = %Ps\n",be);
+  if (typ(be) == t_INT) return be;
   return reducebetanaive(bnfz, be, itos(ell), elllogfu);
 }
 
@@ -738,7 +739,8 @@ FOUND:  X = Flm_Flc_mul(K, y, ell);
           * and relative discriminant are correct */
           if (all < 0) rk++;
           be = compute_beta(X, vecWB, gell, bnf);
-          be = lift_if_rational(coltoalg(nf, be));
+          be = nf_to_scalar_or_alg(nf, be);
+          if (typ(be) == t_POL) be = mkpolmod(be, nf_get_pol(nf));
           if (all == -1)
           {
             pari_sp av2 = avma;
