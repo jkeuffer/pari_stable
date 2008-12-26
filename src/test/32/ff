@@ -87,5 +87,7 @@ a^5 + 2*a^4 + 6*a^3 + 2)*x + 1, 1], [0, 0, 0, a, 1, 0, 2*a, 4, 6*a^2, a, 4,
 [t, t^2 + 1, -t^2 - t + 1]
 ? t=ffgen(ffinit(3,3),'t);do((x^3+x^2+x-1)*t^0,t.p,t.mod)
 [t, -t^2 - t + 1, t^2 + 1]
+? polrootsff(x^4+1,2,y^2+y+1)
+[Mod(Mod(1, 2), Mod(1, 2)*y^2 + Mod(1, 2)*y + Mod(1, 2))]
 ? print("Total time spent: ",gettime);
-Total time spent: 816
+Total time spent: 772

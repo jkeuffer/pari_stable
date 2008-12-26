@@ -1997,7 +1997,7 @@ to_Fq_vec(GEN P, GEN T, GEN p, pari_sp av)
   u = gerepilecopy(av, u);
   p = icopy(p);
   T = FpX_to_mod(T, p);
-  for (j=1; j<nbf; j++) gel(u,j) = to_Fq_pol(gel(u,j), T,p);
+  for (j=1; j<nbf; j++) gel(u,j) = to_Fq(gel(u,j), T,p);
   return u;
 }
 
