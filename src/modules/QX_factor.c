@@ -710,7 +710,7 @@ AGAIN:
 }
 
 /* Find a,b minimal such that A < q^a, B < q^b, 1 << q^(a-b) < 2^31 */
-int
+static int
 cmbf_precs(GEN q, GEN A, GEN B, long *pta, long *ptb, GEN *qa, GEN *qb)
 {
   long a,b,amin,d = (long)(31 * LOG2/gtodouble(glog(q,DEFAULTPREC)) - 1e-5);
