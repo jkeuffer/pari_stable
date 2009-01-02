@@ -1579,22 +1579,17 @@ init_zlog_bid(zlog_S *S, GEN bid)
   init_zlog(S, lg(U)-1, gel(fa,1), gel(fa,2), arch, lists, U);
 }
 
-/* Return decomposition of a on the S->nf successive generators contained in
+/* Return decomposition of a on the S->n successive generators contained in
  * S->lists. If index !=0, do the computation for the corresponding prime
  * ideal and set to 0 the other components. */
 static GEN
 zlog_ind(GEN nf, GEN a, zlog_S *S, GEN sgn, long index)
 {
-  GEN y0 = zerocol(S->n), y, list, pr, prk;
+  GEN y0 = zerocol(S->n), y;
   pari_sp av = avma;
-  long i, k, kmin, kmax;
+  long k, kmin, kmax;
 
   a = nf_to_scalar_or_basis(nf,a);
-  if (DEBUGLEVEL>3)
-  {
-    fprintferr("entering zlog, "); flusherr();
-    if (DEBUGLEVEL>5) fprintferr("with a = %Ps\n",a);
-  }
   if (index)
   {
     kmin = kmax = index;
@@ -1608,16 +1603,13 @@ zlog_ind(GEN nf, GEN a, zlog_S *S, GEN sgn, long index)
   if (!sgn) sgn = nfsign_arch(nf, a, S->archp);
   for (k = kmin; k <= kmax; k++)
   {
-    list= gel(S->lists,k);
-    pr  = gel(S->P,k);
-    prk = idealpow(nf, pr, gel(S->e,k));
+    GEN list= gel(S->lists,k);
+    GEN pr  = gel(S->P,k);
+    GEN prk = idealpow(nf, pr, gel(S->e,k));
     y = zlog_pk(nf, a, y, pr, prk, list, &sgn);
   }
   zlog_add_sign(y0, sgn, S->lists);
-  if (DEBUGLEVEL>3) { fprintferr("leaving\n"); flusherr(); }
-  avma = av;
-  for (i=1; i <= S->n; i++) gel(y0,i) = icopy(gel(y0,i));
-  return y0;
+  return gerepilecopy(av, y0);
 }
 /* sgn = sign(a, S->arch) or NULL if unknown */
 GEN
