@@ -1442,8 +1442,6 @@ idealpowprime(GEN nf, GEN pr, GEN n, GEN *d)
   long s = signe(n);
   GEN q, gen;
 
-  if (s < 0) n = negi(n);
-  /* now n > 0 */
   if (is_pm1(n)) /* n = 1 special cased for efficiency */
   {
     q = pr_get_p(pr);
@@ -1457,13 +1455,14 @@ idealpowprime(GEN nf, GEN pr, GEN n, GEN *d)
   }
   else
   {
-    long r;
+    ulong r;
     GEN p = pr_get_p(pr);
-    GEN m = divis_rem(n, pr_get_e(pr), &r);
-    if (r) m = addis(m,1); /* m = ceil(n/e) */
+    GEN m = diviu_rem(n, pr_get_e(pr), &r);
+    if (r) m = addis(m,1); /* m = ceil(|n|/e) */
     q = powii(p,m);
     if (s < 0)
     {
+      n = negi(n);
       gen = ZC_Z_divexact(nfpow(nf, pr_get_tau(pr), n), powii(p, subii(n,m)));
       *d = q;
     }
@@ -1492,7 +1491,7 @@ idealmulpowprime(GEN nf, GEN x, GEN pr, GEN n)
   x = Q_primitive_part(x, &cx);
   if (cx && dx)
   {
-    cx = gdiv(cx, dx);
+    cx = gred_frac2(cx, dx);
     if (typ(cx) != t_FRAC) dx = NULL;
     else { dx = gel(cx,2); cx = gel(cx,1); }
     if (is_pm1(cx)) cx = NULL;
