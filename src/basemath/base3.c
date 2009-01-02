@@ -1508,8 +1508,9 @@ zlog_add_sign(GEN y0, GEN sgn, GEN lists)
 }
 
 static GEN
-famat_zlog(GEN nf, GEN g, GEN e, GEN sgn, GEN bid)
+famat_zlog(GEN nf, GEN fa, GEN sgn, GEN bid)
 {
+  GEN g = gel(fa,1), e = gel(fa,2);
   GEN vp = gmael(bid, 3,1), ep = gmael(bid, 3,2), mod = bid_get_mod(bid);
   GEN arch = gel(mod,2);
   GEN cyc = bid_get_cyc(bid), lists = gel(bid,4), U = gel(bid,5);
@@ -1834,8 +1835,8 @@ check_nfelt(GEN x, GEN *den)
 GEN
 vecmodii(GEN a, GEN b)
 {
-  long i, l = lg(a);
-  GEN c = cgetg(l, typ(a));
+  long i, l;
+  GEN c = cgetg_copy(a, &l);
   for (i = 1; i < l; i++) gel(c,i) = modii(gel(a,i), gel(b,i));
   return c;
 }
@@ -1847,40 +1848,36 @@ GEN
 ideallog_sgn(GEN nf, GEN x, GEN sgn, GEN bid)
 {
   pari_sp av;
-  long N, lcyc;
+  long lcyc;
   GEN den, cyc, y;
-  int ok = 0;
 
   nf = checknf(nf); checkbid(bid);
   cyc = bid_get_cyc(bid);
   lcyc = lg(cyc); if (lcyc == 1) return cgetg(1, t_COL);
   av = avma;
-  N = nf_get_degree(nf);
+  if (typ(x) == t_MAT) {
+    if (lg(x) == 1) return zerocol(lcyc-1); /* x = 1 */
+    y = famat_zlog(nf, x, sgn, bid);
+    goto END;
+  }
+  x = nf_to_scalar_or_basis(nf, x);
   switch(typ(x))
   {
-    case t_INT: case t_FRAC:
-      ok = 1; den = denom(x);
+    case t_INT:
+      den = NULL;
       break;
-    case t_POLMOD: case t_POL:
-      x = algtobasis(nf,x); break;
-    case t_COL: break;
-    case t_MAT:
-      if (lg(x) == 1) return zerocol(lcyc-1);
-      y = famat_zlog(nf, gel(x,1), gel(x,2), sgn, bid);
-      goto END;
-
-    default: pari_err(talker,"not an element in ideallog");
-  }
-  if (!ok)
-  {
-    if (lg(x) != N+1) pari_err(talker,"not an element in ideallog");
-    check_nfelt(x, &den);
+    case t_FRAC:
+      den = gel(x,2);
+      x = gel(x,1);
+      break;
+    case t_COL:
+      check_nfelt(x, &den);
+      if (den) x = Q_muli_to_int(x, den);
   }
   if (den)
   {
-    GEN g = mkcol2(Q_muli_to_int(x,den), den);
-    GEN e = mkcol2(gen_1, gen_m1);
-    y = famat_zlog(nf, g, e, sgn, bid);
+    x = mkmat2(mkcol2(x, den), mkcol2(gen_1, gen_m1));
+    y = famat_zlog(nf, x, sgn, bid);
   }
   else
   {
