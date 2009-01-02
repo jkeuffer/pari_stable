@@ -1233,7 +1233,7 @@ zidealij(GEN x, GEN y, GEN *U)
     GEN c = gel(G,j);
     gel(c,1) = addsi(1, gel(c,1)); /* 1 + g_j */
   }
-  if (U) *U = RgM_mul(*U, ginv(x));
+  if (U) *U = RgM_mul(*U, RgM_inv(x));
   return mkvec2(cyc, G);
 }
 
