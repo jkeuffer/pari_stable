@@ -1641,7 +1641,7 @@ isideal(GEN nf,GEN x)
 
   av = avma; x = Q_primpart(x);
   if (!ZM_ishnf(x)) return 0;
-  for (i=2; i<=N; i++)
+  for (i=1; i<=N; i++)
     for (j=2; j<=N; j++)
       if (! hnf_invimage(x, zk_ei_mul(nf,gel(x,i),j)))
       {
