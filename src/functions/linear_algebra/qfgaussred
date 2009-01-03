@@ -7,11 +7,12 @@ Help: qfgaussred(q): square reduction of the (symmetric) matrix q (returns a
  in which the coefficient of the i-th variable is 1).
 Doc:
  \idx{decomposition into squares} of the
- quadratic form represented by the symmetric matrix $q$. The result is a
+ quadratic form represented by the symmetric matrix $q$. The result is an
+ upper triangular
  matrix whose diagonal entries are the coefficients of the squares, and the
  off-diagonal entries on each line represent the bilinear forms. More
  precisely, if $(a_{ij})$ denotes the output, one has
- $$ q(x) = \sum_i a_{ii} (x_i + \sum_{j\neq i} a_{ij} x_j)^2 $$
+ $$ q(x) = \sum_i a_{ii} (x_i + \sum_{j > i} a_{ij} x_j)^2 $$
 Variant: \fun{GEN}{qfgaussred_positive}{GEN q} assumes that $q$ is
   positive definite and is a little faster; returns \kbd{NULL} if a vector
-  with negative norm occurs (non positive matrix or too many roudoff errors).
+  with negative norm occurs (non positive matrix or too many roundoff errors).
