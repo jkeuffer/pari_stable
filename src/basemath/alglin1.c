@@ -849,6 +849,31 @@ RgM_solve(GEN a, GEN b)
   return gerepilecopy(av, iscol? gel(u,1): u);
 }
 
+/* assume dim A >= 1, A invertible + upper triangular  */
+static GEN
+RgM_inv_upper_ind(GEN A, long index)
+{
+  long n = lg(A)-1, i = index, j;
+  GEN u = zerocol(n);
+  gel(u,i) = ginv(gcoeff(A,i,i));
+  for (i--; i>0; i--)
+  {
+    pari_sp av = avma;
+    GEN m = gneg(gmul(gcoeff(A,i,i+1),gel(u,i+1))); /* j = i+1 */
+    for (j=i+2; j<=n; j++) m = gsub(m, gmul(gcoeff(A,i,j),gel(u,j)));
+    gel(u,i) = gerepileupto(av, gdiv(m, gcoeff(A,i,i)));
+  }
+  return u;
+}
+GEN
+RgM_inv_upper(GEN A)
+{
+  long i, l;
+  GEN B = cgetg_copy(A, &l);
+  for (i = 1; i < l; i++) gel(B,i) = RgM_inv_upper_ind(A, i);
+  return B;
+}
+
 static GEN
 split_realimag_col(GEN z, long r1, long r2)
 {

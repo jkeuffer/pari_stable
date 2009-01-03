@@ -2240,7 +2240,7 @@ fincke_pohst(GEN a, GEN B0, long stockmax, long PREC, FP_chk_fun *CHECK)
     }
   }
   /* now r~ * r = a in LLL basis */
-  rinv = RgM_inv(r);
+  rinv = RgM_inv_upper(r);
   if (!rinv) return NULL;
   rinvtrans = shallowtrans(rinv);
   if (DEBUGLEVEL>2)
@@ -2248,9 +2248,9 @@ fincke_pohst(GEN a, GEN B0, long stockmax, long PREC, FP_chk_fun *CHECK)
   v = lll(rinvtrans);
   if (lg(v) != lg(rinvtrans)) return NULL;
 
-  rinvtrans = gmul(rinvtrans, v);
+  rinvtrans = RgM_mul(rinvtrans, v);
   v = ZM_inv(shallowtrans(v),gen_1);
-  r = gmul(r,v);
+  r = RgM_mul(r,v);
   u = u? ZM_mul(u,v): v;
 
   l = lg(r);

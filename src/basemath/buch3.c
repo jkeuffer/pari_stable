@@ -454,7 +454,7 @@ Buchray(GEN bnf, GEN module, long flag)
   /* log(Units) U2 = H (mod D)
    * log(Units) U1 = 0 (mod D) */
   u1 = ZM_lll(u1, 0.99, LLL_INPLACE);
-  u2 = RgM_mul(reducemodinvertible(u2,u1), RgM_inv(H)); /* NOT integral */
+  u2 = RgM_mul(reducemodinvertible(u2,u1), RgM_inv_upper(H)); /* NOT integral */
   y = cgetg(7,t_VEC);
   gel(y,1) = bnf;
   gel(y,2) = bid;

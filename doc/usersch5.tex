@@ -4656,6 +4656,9 @@ square), or \kbd{NULL} if this turns out to be impossible. The latter
 happens when the matrix does not have maximal rank (or when roundoff errors
 make it appear so).
 
+\fun{GEN}{RgM_inv_upper}{GEN a} as \kbd{RgM\_inv}, assuming that $a$ is a
+non-empty invertible upper triangular matrix, hence a little faster.
+
 \fun{GEN}{RgM_solve}{GEN a, GEN b} returns $a^{-1}b$ where $a$ is a square
 \typ{MAT} and $b$ is a \typ{COL} or \typ{MAT}.
 Returns \kbd{NULL} if $a^{-1}$ cannot be computed, see \tet{RgM_inv}.

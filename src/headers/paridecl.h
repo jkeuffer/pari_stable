@@ -497,6 +497,7 @@ GEN     FqM_suppl(GEN x, GEN T, GEN p);
 GEN     QM_inv(GEN M, GEN dM);
 GEN     RgM_diagonal(GEN m);
 GEN     RgM_diagonal_shallow(GEN m);
+GEN     RgM_inv_upper(GEN a);
 GEN     RgM_solve(GEN a, GEN b);
 GEN     RgM_solve_realimag(GEN x, GEN y);
 GEN     ZM_detmult(GEN A);
