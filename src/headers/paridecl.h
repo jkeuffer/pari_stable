@@ -2705,6 +2705,7 @@ INLINE GEN    nf_get_TrInv(GEN nf);
 INLINE long   nf_get_degree(GEN nf);
 INLINE GEN    nf_get_disc(GEN nf);
 INLINE GEN    nf_get_index(GEN nf);
+INLINE GEN    nf_get_invzk(GEN nf);
 INLINE GEN    nf_get_pol(GEN nf);
 INLINE long   nf_get_r1(GEN nf);
 INLINE long   nf_get_r2(GEN nf);

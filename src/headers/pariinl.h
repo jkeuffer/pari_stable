@@ -1730,6 +1730,8 @@ INLINE GEN
 nf_get_roots(GEN nf) { return gel(nf,6); }
 INLINE GEN
 nf_get_zk(GEN nf) { return gel(nf,7); }
+INLINE GEN
+nf_get_invzk(GEN nf) { return gel(nf,8); }
 INLINE void
 nf_get_sign(GEN nf, long *r1, long *r2)
 {

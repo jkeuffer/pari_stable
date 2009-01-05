@@ -709,15 +709,21 @@ polgalois(GEN x, long prec)
 static GEN
 ZC_galoisapply(GEN nf, GEN x, GEN s, GEN T)
 {
+  x = nf_to_scalar_or_alg(nf, x);
+  if (typ(x) != t_POL) return scalarcol(x, degpol(T)); /* rational */
   return algtobasis(nf, RgX_RgXQ_eval(coltoliftalg(nf,x), s, T));
 }
 
 static GEN
 pr_galoisapply(GEN nf, GEN pr, GEN aut)
 {
-  GEN p = pr_get_p(pr), pov2 = shifti(p,-1);
-  GEN b, u, s = gel(aut,2), T = gel(aut,1);
-  b = centermod_i(ZC_galoisapply(nf, pr_get_tau(pr), s,T), p, pov2);
+  GEN p, pov2, b, u, s = gel(aut,2), T = gel(aut,1);
+  GEN tau = pr_get_tau(pr);
+  if (typ(tau) == t_INT) return pr; /* inert */
+  /* tau is a t_COL */
+  p = pr_get_p(pr);
+  pov2 = shifti(p,-1);
+  b = centermod_i(ZC_galoisapply(nf, tau, s,T), p, pov2);
   u = centermod_i(ZC_galoisapply(nf, pr_get_gen(pr), s,T), p, pov2);
   if (pr_get_e(pr) == 1 && int_elt_val(nf, u, p, b, NULL))
   {
@@ -1009,13 +1015,23 @@ get_bas_den(GEN bas)
   return mkvec2(dbas, den);
 }
 
-GEN
-get_mul_table(GEN x,GEN basden,GEN invbas)
+/* Internal: nf partially filled. Require pol; fill zk, invzk, multable */
+void
+nf_set_multable(GEN nf, GEN bas, GEN basden)
 {
-  long i,j, n = degpol(x);
-  GEN z, d, w, den, mul = cgetg(n*n+1,t_MAT);
+  GEN T = nf_get_pol(nf), invbas, basM;
+  long i,j, n = degpol(T);
+  GEN w, den, mul = cgetg(n*n+1,t_MAT);
 
-  if (typ(basden[1]) != t_VEC) basden = get_bas_den(basden); /*integral basis*/
+  if (typ(bas) == t_MAT) 
+  { basM = bas; bas = RgM_to_RgXV(basM, varn(T)); }
+  else
+    basM = RgXV_to_RgM(bas, n);
+  gel(nf,7) = bas;
+  gel(nf,8) = invbas = QM_inv(basM, gen_1);
+  gel(nf,9) = mul;
+
+  if (!basden) basden = get_bas_den(nf_get_zk(nf)); /*integral basis*/
   w   = gel(basden,1);
   den = gel(basden,2);
   /* i = 1 split for efficiency, assume w[1] = 1 */
@@ -1025,16 +1041,15 @@ get_mul_table(GEN x,GEN basden,GEN invbas)
     for (j=i; j<=n; j++)
     {
       pari_sp av = avma;
-      z = (i == j)? ZXQ_sqr(gel(w,i), x): ZXQ_mul(gel(w,i),gel(w,j), x);
+      GEN z = (i == j)? ZXQ_sqr(gel(w,i), T): ZXQ_mul(gel(w,i),gel(w,j), T);
       z = mulmat_pol(invbas, z); /* integral column */
       if (den)
       {
-	d = mul_denom(gel(den,i), gel(den,j));
+	GEN d = mul_denom(gel(den,i), gel(den,j));
 	if (d) z = ZC_Z_divexact(z, d);
       }
       gel(mul,j+(i-1)*n) = gel(mul,i+(j-1)*n) = gerepileupto(av,z);
     }
-  return mul;
 }
 
 /* as get_Tr, mul_table not precomputed */
@@ -1216,7 +1231,7 @@ GEN
 nfbasic_to_nf(nfbasic_t *T, GEN ro, long prec)
 {
   GEN nf = cgetg(10,t_VEC);
-  GEN x = T->x, absdK, invbas, Tr, D, TI, A, dA, MDI, mat = cgetg(8,t_VEC);
+  GEN x = T->x, absdK, Tr, D, TI, A, dA, MDI, mat = cgetg(8,t_VEC);
   long n = degpol(T->x);
   nffp_t F;
   get_nf_fp_compo(T, &F, ro, prec);
@@ -1227,14 +1242,11 @@ nfbasic_to_nf(nfbasic_t *T, GEN ro, long prec)
   gel(nf,4) = T->index;
   gel(nf,6) = F.ro;
   gel(nf,5) = mat;
-  gel(nf,7) = T->bas;
 
   gel(mat,1) = F.M;
   gel(mat,2) = F.G;
 
-  invbas = QM_inv(RgXV_to_RgM(T->bas, n), gen_1);
-  gel(nf,8) = invbas;
-  gel(nf,9) = get_mul_table(x, F.basden, invbas);
+  nf_set_multable(nf, T->bas, F.basden);
   if (DEBUGLEVEL) msgtimer("mult. table");
 
   Tr = get_Tr(gel(nf,9), x, F.basden);

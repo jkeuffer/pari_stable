@@ -1762,8 +1762,8 @@ static GEN
 padicff(GEN x,GEN p,long pr)
 {
   pari_sp av = avma;
-  GEN q, invbas, nf, g, e;
-  long n = degpol(x), v = Z_pvalrem(absi(ZX_disc(x)), p, &q);
+  GEN q, nf, g, e;
+  long v = Z_pvalrem(absi(ZX_disc(x)), p, &q);
   nfmaxord_t S;
 
   if (is_pm1(q)) {
@@ -1779,12 +1779,9 @@ padicff(GEN x,GEN p,long pr)
   gel(nf,1) = x;
   gel(nf,3) = S.dK;
   gel(nf,4) = dvdii(S.index, p)? p: gen_1;
-  invbas = QM_inv(RgXV_to_RgM(S.basis,n), gen_1);
-  gel(nf,7) = S.basis;
-  gel(nf,8) = invbas;
-  gel(nf,9) = get_mul_table(x, S.basis, invbas);
   gel(nf,2) = gel(nf,5) = gel(nf,6) = gen_0;
-  return gerepileupto(av,padicff2(nf,p,pr));
+  nf_set_multable(nf, S.basis, NULL);
+  return gerepileupto(av, padicff2(nf,p,pr));
 }
 
 static GEN

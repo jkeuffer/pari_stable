@@ -176,7 +176,7 @@ GEN    eltreltoabs(GEN rnfeq, GEN x);
 GEN    galoisbig(GEN x, long prec);
 GEN    get_arch_real(GEN nf,GEN x,GEN *emb,long prec);
 GEN    get_bas_den(GEN bas);
-GEN    get_mul_table(GEN x,GEN bas,GEN invbas);
+void   nf_set_multable(GEN nf, GEN bas, GEN basden);
 GEN    get_nfindex(GEN bas);
 GEN    get_proj_modT(GEN basis, GEN T, GEN p);
 GEN    get_roots(GEN x,long r1,long prec);

@@ -139,6 +139,13 @@ maximal order of $K$.
 maximal order of $K$. Those are polynonials in $\Q[x]$ of degree $<n$; it is
 guaranteed that $w_1 = 1$.
 
+\fun{GEN}{nf_get_invzk}{GEN nf} returns the matrix $(m_{i,j})\in M_n(\Z)$
+giving the power basis $(x^i)$ in terms of the $(w_j)$, i.e such that
+$x^{j-1} = \sum_{i = 1}^n m_{i,j} w_i$ for all $1\leq j \leq n$; since $w_1 =
+1 = x^0$, we have $m_{i,1} = \delta_{i,1}$ for all $i$. The conversion
+functions in the \kbd{algtobasis} family essentially amount to a left
+multiplication by this matrix.
+
 \fun{GEN}{nf_get_roots}{GEN nf} returns the $r_1$ real roots of the polynomial
 defining the number fields: first the $r_1$ real roots (as \typ{REAL}s), then
 the $r_2$ representatives of the pairs of complex conjugates.

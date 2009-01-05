@@ -131,9 +131,7 @@ makenfabs(GEN rnf)
   gel(NF,1) = pol;
   gel(NF,3) = mulii(powiu(nf_get_disc(nf), rnf_get_degree(rnf)),
 		    idealnorm(nf, gel(rnf,3)));
-  gel(NF,7) = RgM_to_RgXV(M,varn(pol));
-  gel(NF,8) = RgM_inv(M);
-  gel(NF,9) = get_mul_table(pol, gel(NF,7), gel(NF,8));
+  nf_set_multable(NF, M, NULL);
   /* possibly wrong, but correct prime divisors [for idealprimedec] */
   gel(NF,4) = Q_denom(gel(NF,7));
   return NF;

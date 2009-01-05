@@ -656,7 +656,7 @@ nf_root_bounds(GEN P, GEN T)
 static GEN
 L2_bound(GEN nf, GEN den)
 {
-  GEN M, L, prep, T = nf_get_pol(nf), tozk = gel(nf,8);
+  GEN M, L, prep, T = nf_get_pol(nf), tozk = nf_get_invzk(nf);
   long prec;
 
   prec = ZX_max_lg(T) + ZM_max_lg(tozk) - 2;
@@ -1696,7 +1696,7 @@ nfsqff(GEN nf, GEN pol, long fl, GEN den)
     msgTIMER(&ti, "choice of a prime ideal");
     fprintferr("Prime ideal chosen: %Ps\n", pr);
   }
-  L.tozk = gel(nf,8);
+  L.tozk = nf_get_invzk(nf);
   L.topow= Q_remove_denom(nf_get_zk(nf), &L.topowden);
   T.ZC = L2_bound(nf, den);
   T.dn = is_pm1(den)? NULL: den;
@@ -1821,7 +1821,7 @@ nf_pick_prime_for_units(GEN nf, prklift_t *P)
   P->modpr = amodpr;
   P->L->p = ap;
   P->L->Tp = aT;
-  P->L->tozk = gel(nf,8);
+  P->L->tozk = nf_get_invzk(nf);
   P->L->topow = Q_remove_denom(nf_get_zk(nf), &(P->L->topowden));
 }
 
