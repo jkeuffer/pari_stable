@@ -1459,6 +1459,8 @@ nfarchstar(GEN nf, GEN x, GEN archp)
   return mkvec3(cyc,gen,mat);
 }
 
+/* a0 in Z_K (t_COL or t_INT), pr prime ideal, prk = pr^k,
+ * list = zprimestar(nf, pr, k, ...)  */
 static GEN
 zlog_pk(GEN nf, GEN a0, GEN y, GEN pr, GEN prk, GEN list, GEN *psigne)
 {
@@ -1575,8 +1577,8 @@ init_zlog(zlog_S *S, long n, GEN P, GEN e, GEN arch, GEN lists, GEN U)
 void
 init_zlog_bid(zlog_S *S, GEN bid)
 {
-  GEN ideal = gel(bid,1), fa = gel(bid,3), lists = gel(bid,4), U = gel(bid,5);
-  GEN arch = gel(ideal,2);
+  GEN fa = gel(bid,3), lists = gel(bid,4), U = gel(bid,5);
+  GEN arch = gel(bid_get_mod(bid), 2);
   init_zlog(S, lg(U)-1, gel(fa,1), gel(fa,2), arch, lists, U);
 }
 

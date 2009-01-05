@@ -171,9 +171,8 @@ GEN
 idealmoddivisor(GEN bnr, GEN x)
 {
   GEN bid = bnr_get_bid(bnr), fa2 = gel(bid,4);
-  GEN divisor = gel(bid,1);
   GEN sarch = gel(fa2,lg(fa2)-1);
-  return idealmoddivisor_aux(checknf(bnr), x, divisor, sarch);
+  return idealmoddivisor_aux(checknf(bnr), x, bid_get_mod(bid), sarch);
 }
 
 /* v_pr(L0 * cx). tau = pr[5] or (more efficient) mult. table for pr[5] */
@@ -230,7 +229,7 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
   /* basecl = generators in factored form */
   basecl = compute_fact(nf,u1,gen);
 
-  module = gel(bid,1);
+  module = bid_get_mod(bid);
   cyc = bid_get_cyc(bid); EX = gel(cyc,1); /* exponent of (O/f)^* */
   f   = gel(module,1); fZ = gcoeff(f,1,1);
   fa  = gel(bid,3);
@@ -1841,7 +1840,7 @@ get_discdata(GEN t, GEN h)
   GEN bid = gel(t,1), fa = gel(bid,3);
   return mkvec3(mkmat2(gel(fa,1), vec_to_vecsmall(gel(fa,2))),
 		(GEN)itou(get_classno(t, h)),
-		gel(bid,1));
+		bid_get_mod(bid));
 }
 typedef struct _disc_data {
   long degk;
