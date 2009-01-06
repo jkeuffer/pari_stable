@@ -2170,7 +2170,7 @@ typedef struct {
 
 static void
 add(GEN z, GEN g, long d) { vectrunc_append(z, mkvec2(utoipos(d), g)); }
-/* return number of roots; z not properly initialized if deg(u) <= 1 */
+/* return number of roots of u; assume deg u >= 0 */
 long
 FqX_split_deg1(GEN *pz, GEN u, GEN q, GEN T, GEN p)
 {
@@ -2178,7 +2178,8 @@ FqX_split_deg1(GEN *pz, GEN u, GEN q, GEN T, GEN p)
   GEN v, S, g, X, z = vectrunc_init(N+1);
 
   *pz = z;
-  if (N <= 1) return 1;
+  if (N == 0) return 0;
+  if (N == 1) return 1;
   v = X = pol_x(varn(u));
   S = init_spec_FqXQ_pow(X, q, u, T, p);
   vectrunc_append(z, S);
@@ -2259,6 +2260,7 @@ FqX_roots_i(GEN f, GEN T, GEN p)
 {
   GEN R;
   f = FqX_normalize(f, T, p);
+  if (!signe(f)) pari_err(zeropoler,"FqX_roots");
   switch( FqX_split_deg1(&R, f, powiu(p, degpol(T)), T, p) )
   {
     case 0: return cgetg(1, t_VEC);
