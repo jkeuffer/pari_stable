@@ -216,8 +216,8 @@ arbitrary and varying length (each number carrying in its internal
 representation its own length or precision) with the following mild
 restrictions (given for 32-bit machines, the restrictions for 64-bit machines
 being so weak as to be considered nonexistent): integers must be in absolute
-value less than $2^{268435454}$ (i.e.~roughly 80807123 decimal digits). The
-precision of real numbers is also at most 80807123 significant decimal
+value less than $2^{536870815}$ (i.e.~roughly 161614219 decimal digits). The
+precision of real numbers is also at most 161614219 significant decimal
 digits, and the binary exponent must be in absolute value less than
 $2^{29}$.
 
@@ -226,9 +226,9 @@ numbers with at most a few thousand decimal digits. In particular, the
 native PARI kernel does not contain asymptotically fast DFT-based techniques
 Hence, although it is possible to use PARI to do computations with $10^7$
 decimal digits, better programs can be written for such huge numbers. At the
-very least the GMP kernel should be used at this point. (For reasons of
-backward compatibility, we do not enable GMP by default, but you
-\emph{should} enable it.)
+very least the GMP kernel should be used at this point. For reasons of
+backward compatibility, we do not enable GMP by default, but \emph{you
+should} enable it.
 
 Integers and real numbers are non-recursive types.
 
