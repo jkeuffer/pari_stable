@@ -1491,7 +1491,7 @@ idealmulpowprime(GEN nf, GEN x, GEN pr, GEN n)
   x = Q_primitive_part(x, &cx);
   if (cx && dx)
   {
-    cx = gred_frac2(cx, dx);
+    cx = gdiv(cx, dx);
     if (typ(cx) != t_FRAC) dx = NULL;
     else { dx = gel(cx,2); cx = gel(cx,1); }
     if (is_pm1(cx)) cx = NULL;
