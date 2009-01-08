@@ -346,18 +346,13 @@ factor0(GEN x,long flag)
 GEN
 gp_factor0(GEN x, GEN flag)
 {
-  long B = 0;
+  ulong B;
   if (!flag) return factor(x);
-  if (typ(flag) != t_INT) pari_err(typeer,"factor");
-  if (signe(flag) > 0)
+  if (typ(flag) != t_INT || signe(flag) < 0) pari_err(flagerr,"factor");
+  switch(lgefint(flag))
   {
-    ulong p = maxprime();
-    B = flag[2];
-    if (is_bigint(flag) || B > (long)p)
-    {
-      pari_warn(warner, "Bound too large in factor(,lim); using primelimit");
-      B = p;
-    }
+    case 2: B = 0; break;
+    case 3: B = flag[2]; maxprime_check(B); break;
   }
   return boundfact(x, B);
 }

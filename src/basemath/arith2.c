@@ -615,7 +615,10 @@ ifactor(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
   /* trial division bound */
   p = maxprime();
   if (!all) lim = p; /* smallfact() */
-  else if (all > 1) lim = minuu(all, p); /* use supplied limit */
+  else if (all > 1) {
+    if (all > p) pari_err(primer1, all);
+    lim = all; /* use supplied limit */
+  }
   else { lim = tridiv_bound(n); if (lim > p) lim = p; }
 
   /* trial division */
@@ -721,7 +724,7 @@ factorint(GEN n, long flag)
 }
 
 GEN
-Z_factor_limit(GEN n, long all)
+Z_factor_limit(GEN n, ulong all)
 { return ifactor(n,NULL,NULL, all,decomp_default_hint); }
 GEN
 Z_factor(GEN n)
@@ -758,9 +761,8 @@ Z_factor_until(GEN n, GEN limit)
 }
 
 GEN
-boundfact(GEN n, long lim)
+boundfact(GEN n, ulong lim)
 {
-  if (lim <= 1) lim = 0;
   switch(typ(n))
   {
     case t_INT: return Z_factor_limit(n,lim);

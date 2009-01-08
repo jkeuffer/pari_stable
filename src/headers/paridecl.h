@@ -733,11 +733,11 @@ GEN     znstar(GEN x);
 /* arith2.c */
 
 long    Z_issquarefree(GEN x);
-GEN     Z_factor_limit(GEN n, long all);
+GEN     Z_factor_limit(GEN n, ulong all);
 GEN     Z_factor_until(GEN n, GEN limit);
 GEN     Z_smoothen(GEN N, GEN L, GEN *pP, GEN *pe);
 long    bigomega(GEN n);
-GEN     boundfact(GEN n, long lim);
+GEN     boundfact(GEN n, ulong lim);
 GEN     core(GEN n);
 GEN     corepartial(GEN n, long l);
 GEN     core0(GEN n,long flag);

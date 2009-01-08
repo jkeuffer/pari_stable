@@ -108,6 +108,13 @@ This file lists the incompatible changes between Version 2.x and older versions
     messages attached to z, and works for aliases and installed functions too ]
   - removed optional flag to rnfconductor, use rnfisabelian.
   - changed the "zetakinit" format: bnf no longer included
+  - factor(t_INT/t_FRAC, lim) used to trial divide by primes up to 
+    min(lim, primelimit). Now we trial divide up to lim and raise an error
+    if lim > primelimit. [ Having the routine return an obviously "wrong" 
+    result depending on an invisible parameter was not a good idea. ]
+  - factor(t_INT/t_FRAC, 1) was the same as factor(t_INT/t_FRAC, 0). Now
+    abide by the input value and leave (..., 0) as the single special case 
+    (shortcut for "the largest precomputed prime")
 
 * Specific to the PARI library:
 ===============================
