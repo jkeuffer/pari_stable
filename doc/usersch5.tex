@@ -3309,10 +3309,10 @@ few factors, \kbd{FpX\_nbfact(f,p) == 1} is much faster.
 otherwise. Assumes that \kbd{p} is prime.
 
 \fun{GEN}{FpX_factor}{GEN f, GEN p}, factors the \kbd{FpX}~\kbd{f}. Assumes
-that \kbd{p} is prime. The returned value \kbd{v} has two components:
-\kbd{v[1]} is a vector of distinct irreducible (\kbd{FpX}) factors, and
-\kbd{v[2]} is a \typ{VECSMALL} of corresponding exponents. The order
-of the factors is deterministic (the computation is not).
+that \kbd{p} is prime. The returned value \kbd{v} is a \typ{VEC} with two
+components: \kbd{v[1]} is a vector of distinct irreducible (\kbd{FpX})
+factors, and \kbd{v[2]} is a \typ{VECSMALL} of corresponding exponents. The
+order of the factors is deterministic (the computation is not).
 
 \fun{long}{FpX_nbfact}{GEN f, GEN p}, assuming the \kbd{FpX}~f is squarefree,
 returns the number of its irreducible factors. Assumes that \kbd{p} is prime.

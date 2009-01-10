@@ -956,19 +956,19 @@ FpX_factor_2(GEN f, GEN p, long d)
   long v;
   int sgn;
   if (d < 0) pari_err(zeropoler,"FpX_factor_2");
-  if (!d) return trivfact();
-  if (d == 1) return mkmat2(mkcol(f), mkvecsmall(1));
+  if (!d) return mkvec2(cgetg(1,t_COL), cgetg(1,t_VECSMALL));
+  if (d == 1) return mkvec2(mkcol(f), mkvecsmall(1));
   r = FpX_quad_root(f, p, 1);
-  if (!r) return mkmat2(mkcol(f), mkvecsmall(1));
+  if (!r) return mkvec2(mkcol(f), mkvecsmall(1));
   v = varn(f);
   s = otherroot(f, r, p);
   if (signe(r)) r = subii(p, r);
   if (signe(s)) s = subii(p, s);
   sgn = cmpii(s, r); if (sgn < 0) swap(s,r);
   R = deg1pol_shallow(gen_1, r, v);
-  if (!sgn) return mkmat2(mkcol(R), mkvecsmall(2));
+  if (!sgn) return mkvec2(mkcol(R), mkvecsmall(2));
   S = deg1pol_shallow(gen_1, s, v);
-  return mkmat2(mkcol2(R,S), mkvecsmall2(1,1));
+  return mkvec2(mkcol2(R,S), mkvecsmall2(1,1));
 }
 
 /* factor f mod pp.
