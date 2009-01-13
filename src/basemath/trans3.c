@@ -1774,12 +1774,12 @@ static GEN
 cxpolylog(long m, GEN x, long prec)
 {
   long li, i, n, bern_upto;
-  pari_sp av=avma;
-  GEN p1,z,h,q,s;
+  pari_sp av = avma;
+  GEN z, h, q, s;
   int real;
 
   if (gcmp1(x)) return szeta(m,prec);
-  real = typ(x) == t_REAL;
+  real = (typ(x) == t_REAL && signe(x) > 0);
 
   z = glog(x,prec); h = gen_1;
   for (i=2; i<m; i++) h = gadd(h, mkfrac(gen_1, utoipos(i)));
@@ -1789,6 +1789,7 @@ cxpolylog(long m, GEN x, long prec)
   q = gen_1; s = szeta(m,prec);
   for (n=1; n<=m+1; n++)
   {
+    GEN p1;
     q = gdivgs(gmul(q,z),n);
     if (n == m-1) {
       p1 = gmul(h, q);
@@ -1828,7 +1829,7 @@ polylog(long m, GEN x, long prec)
   }
 
   l = precision(x); if (!l) l = prec;
-  av = avma; res = cgetc(l);
+  res = cgetc(l); av = avma;
   x = gtofp(x, l+1);
   e = gexpo(gnorm(x));
   if (!e || e== -1) return cxpolylog(m,x,prec);

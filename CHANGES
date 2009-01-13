@@ -157,6 +157,7 @@ BA117- Fix detection for ppc64 running in 32bit mode.
   127- nffactor(): obscure "no factor" bug [when trial division found and
        extracted *non monic* factors], #930
   128- incorrect output type in FpX_factor [#933]
+  129- possible stack corruption in polylog() + missing imaginary part.
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
