@@ -2,6 +2,8 @@
 #define __KARATSUBA_MULI_LIMIT  32
 #define __KARATSUBA_SQRI_LIMIT  62
 #define __KARATSUBA_MULR_LIMIT 294
+#define __FFT_MULI_LIMIT       1800
+#define __FFT_SQRI_LIMIT       2000
 #define __MONTGOMERY_LIMIT      70
 #define __REMIIMUL_LIMIT       139
 #define __DIVRR_GMP_LIMIT       -1 /* unused */

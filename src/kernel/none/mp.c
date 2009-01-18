@@ -37,7 +37,7 @@ int_normalize(GEN x, long known_zero_words)
   long i, lx = lgefint(x);
   GEN x0;
   if (lx == 2) { x[1] = evalsigne(0) | evallgefint(2); return x; }
-  if (x[2]) return x;
+  if (!known_zero_words && x[2]) return x;
   for (i = 2+known_zero_words; i < lx; i++)
     if (x[i]) break;
   x0 = x; i -= 2; x += i;
@@ -1161,7 +1161,7 @@ diviiexact(GEN x, GEN y)
 
 /********************************************************************/
 /**                                                                **/
-/**               INTEGER MULTIPLICATION (KARATSUBA)               **/
+/**               INTEGER MULTIPLICATION (BASECASE)                **/
 /**                                                                **/
 /********************************************************************/
 /* nx >= ny = num. of digits of x, y (not GEN, see mulii) */
@@ -1267,6 +1267,308 @@ END:
   avma=(pari_sp)zd; return zd;
 }
 
+/********************************************************************/
+/**                                                                **/
+/**               INTEGER MULTIPLICATION (FFT)                     **/
+/**                                                                **/
+/********************************************************************/
+
+/*
+ Compute parameters for FFT:
+   len: result length
+   k: FFT depth.
+   n: number of blocks (2^k)
+   bs: block size
+   mod: Modulus is M=2^(BIL*mod)+1
+   ord: order of 2 in Z/MZ.
+ We must have:
+   bs*n >= l
+   2^(BIL*mod) > nb*2^(2*BIL*bs)
+   2^k | 2*BIL*mod
+*/
+static void
+mulliifft_params(long len, long *k, long *mod, long *bs, long *n, long *ord)
+{
+  long r;
+  *k = expu((3*len)>>2)-3;
+  do {
+    (*k)--;
+    r  = *k-(TWOPOTBITS_IN_LONG+2);
+    *n = 1<<*k;
+    *bs = (len+*n-1)>>*k;
+    *mod= 2**bs+1;
+    if (r>0)
+      *mod=((*mod+(1<<r)-1)>>r)<<r;
+  } while(*mod>=3**bs);
+  *ord= 4**mod*BITS_IN_LONG;
+  if (DEBUGLEVEL>=9)
+    fprintferr("len=%ld k=%ld mod=%ld, bs=%ld, n=%ld ord=%ld\n",
+                len,*k,*mod,*bs,*n,*ord);
+}
+
+/* Zf_: arithmetic in ring Z/MZ where M= 2^(BITS_IN_LONG*mod)+1
+ * for some mod.
+ */
+
+static GEN
+Zf_add(GEN a, GEN b, GEN M)
+{
+  GEN y, z = addii(a,b);
+  long mod = lgefint(M)-3;
+  long l = lgefint(z)-2;
+  if (l<=mod) return z;
+  y = subis(z, 1);
+  if (lgefint(y)-2<=mod) return z;
+  return int_normalize(y,1);
+}
+
+static GEN
+Zf_sub(GEN a, GEN b, GEN M)
+{
+  GEN z = subii(a,b);
+  return signe(z)>=0? z: addii(M,z);
+}
+
+/* destroy z */
+static GEN
+Zf_red_destroy(GEN z, GEN M)
+{
+  long mod = lgefint(M)-3;
+  long l = lgefint(z)-2;
+  GEN y;
+  if (l<=mod) return z;
+  y = shifti(z, -mod*BITS_IN_LONG);
+  z = int_normalize(z, lgefint(y)-2);
+  y = Zf_red_destroy(y, M);
+  z = subii(z, y);
+  if (signe(z)<0) z = addii(z, M);
+  return z;
+}
+
+static GEN
+Zf_shift(GEN a, ulong s, GEN M)
+{
+  pari_sp av = avma;
+  GEN z = Zf_red_destroy(shifti(a, s), M);
+  return gerepileuptoint(av, z);
+}
+
+/* 
+ Multiply by sqrt(2)^s
+ We use the formula sqrt(2)=z_8*(1-z_4)) && z_8=2^(ord/16) [2^(ord/4)+1]
+*/
+
+static GEN
+Zf_mulsqrt2(GEN a, ulong s, long ord, GEN M)
+{
+  pari_sp av = avma;
+  long hord = ord>>1;  
+  if (!signe(a)) return gen_0;
+  if (odd(s)) /* Multiply by 2^(s/2) */
+  {
+    GEN az8  = Zf_shift(a,   ord>>4, M);
+    GEN az83 = Zf_shift(az8, ord>>3, M);
+    a = Zf_sub(az8, az83, M);
+    s--;
+  }
+  if (s < hord)
+    a = Zf_shift(a, s>>1, M);
+  else
+    a = subii(M,Zf_shift(a, (s-hord)>>1, M));
+  return gerepileuptoint(av, a);
+}
+
+static GEN
+Zf_sqr(GEN a, GEN M)
+{
+  pari_sp av = avma;
+  GEN z = Zf_red_destroy(sqri(a), M);
+  return gerepileuptoint(av, z);
+}
+
+static GEN
+Zf_mul(GEN a, GEN b, GEN M)
+{
+  pari_sp av = avma;
+  GEN z = Zf_red_destroy(mulii(a,b), M);
+  return gerepileuptoint(av, z);
+}
+
+/* In place, bit reversing FFT */
+static void
+muliifft_dit(long o, long ord, GEN M, GEN FFT, long d, long step)
+{
+  pari_sp av = avma;
+  long i, j;
+  long no = (o<<1)%ord;
+  long hstep=step>>1;
+  for (i = d+1, j = 0; i <= d+hstep; ++i, j =(j+o)%ord)
+  {
+    GEN a = Zf_add(gel(FFT,i), gel(FFT,i+hstep), M);
+    GEN b = Zf_mulsqrt2(Zf_sub(gel(FFT,i), gel(FFT,i+hstep), M), j, ord, M);
+    affii(a,gel(FFT,i));
+    affii(b,gel(FFT,i+hstep));
+    avma = av;
+  }
+  if (hstep>1)
+  {
+    muliifft_dit(no, ord, M, FFT, d, hstep);
+    muliifft_dit(no, ord, M, FFT, d+hstep, hstep);
+  }
+}
+
+/* In place, bit reversed FFT, inverse of muliifft_dit */
+static void
+muliifft_dis(long o, long ord, GEN M, GEN FFT, long d, long step)
+{
+  pari_sp av = avma;
+  long i, j;
+  long no = (o<<1)%ord;
+  long hstep=step>>1;
+  if (hstep>1)
+  {
+    muliifft_dis(no, ord, M, FFT, d, hstep);
+    muliifft_dis(no, ord, M, FFT, d+hstep, hstep);
+  }
+  for (i = d+1, j = 0; i <= d+hstep; ++i, j =(j+o)%ord)
+  {
+    GEN z = Zf_mulsqrt2(gel(FFT,i+hstep), j, ord, M);
+    GEN a = Zf_add(gel(FFT,i), z, M);
+    GEN b = Zf_sub(gel(FFT,i), z, M);
+    affii(a,gel(FFT,i));
+    affii(b,gel(FFT,i+hstep));
+    avma = av;
+  }
+}
+
+static GEN
+muliifft_spliti(GEN a, long na, long bs, long n, long mod)
+{
+  GEN ap = a+na-1;
+  GEN c  = cgetg(n+1, t_VEC);
+  long i,j;
+  for(i=1;i<=n;i++)
+  {
+    GEN z = cgeti(mod+3);
+    if (na)
+    {
+      long m = minss(bs, na), v=0;
+      GEN zp, aa=ap-m+1;
+      while (!*aa && v<m) {aa++; v++;}
+      zp = z+m-v+1;
+      for (j=v; j < m; j++)
+        *zp-- = *ap--;
+      ap -= v; na -= m;
+      z[1] = evalsigne(m!=v) | evallgefint(m-v+2);
+    } else
+      z[1] = evalsigne(0) | evallgefint(2);
+    gel(c, i) = z;
+  }
+  return c;
+}
+
+static GEN
+muliifft_unspliti(GEN V, long bs, long len)
+{
+  long s, i, j, l = lg(V);
+  GEN a = cgeti(len);
+  a[1] = evalsigne(1)|evallgefint(len);
+  for(i=2;i<len;i++)
+    a[i] = 0;
+  for(i=1, s=0; i<l; i++, s+=bs)
+  {
+    GEN  u = gel(V,i);
+    if (signe(u))
+    {
+      LOCAL_OVERFLOW;
+      GEN ap = int_W(a,s);
+      GEN up = int_LSW(u);
+      long lu = lgefint(u)-2;
+      *ap-- = addll(*ap, *up--);
+      for (j=1; j<lu; j++)
+        *ap-- = addllx(*ap, *up--);
+      while (overflow)
+        *ap-- = addll(*ap, 1);
+    }
+  }
+  return int_normalize(a,0);
+}
+
+static GEN
+sqrispec_fft(GEN a, long na)
+{
+  pari_sp av, ltop = avma;
+  long len = 2*na;
+  long k, mod, bs, n, ord;
+  GEN  FFT, M;
+  long i, o;
+  pari_timer T;
+
+  mulliifft_params(len,&k,&mod,&bs,&n,&ord);
+  o  = ord>>k;
+  M   = addis(shifti(gen_1,mod*BITS_IN_LONG),1);
+  FFT = muliifft_spliti(a, na, bs, n, mod);
+  if (DEBUGLEVEL>=9) TIMER(&T);
+  muliifft_dit(o, ord, M, FFT, 0, n);
+  if (DEBUGLEVEL>=9) msgTIMER(&T,"FFT");
+  av = avma;
+  for(i=1; i<=n; i++)
+  {
+    affii(Zf_sqr(gel(FFT,i), M), gel(FFT,i));
+    av=avma;
+  }
+  if (DEBUGLEVEL>=9) msgTIMER(&T,"sqr");
+  muliifft_dis(ord-o, ord, M, FFT, 0, n);
+  if (DEBUGLEVEL>=9) msgTIMER(&T,"IFT");
+  for(i=1; i<=n; i++)
+  {
+    affii(Zf_shift(gel(FFT,i), (ord>>1)-k, M), gel(FFT,i));
+    av=avma;
+  }
+  return gerepileuptoint(ltop, muliifft_unspliti(FFT,bs,2+len));
+}
+
+static GEN
+muliispec_fft(GEN a, GEN b, long na, long nb)
+{
+  pari_sp av, ltop = avma;
+  long len = na+nb;
+  long k, mod, bs, n, ord;
+  GEN FFT, FFTb, M;
+  long i, o;
+  pari_timer T;
+
+  mulliifft_params(len,&k,&mod,&bs,&n,&ord);
+  o  = ord>>k;
+  M   = shifti(gen_1,mod*BITS_IN_LONG);
+  M[2+mod]=1;
+  if (DEBUGLEVEL>=9) TIMER(&T);
+  FFT = muliifft_spliti(a, na, bs, n, mod);
+  av=avma;
+  muliifft_dit(o, ord, M, FFT, 0, n);
+  FFTb = muliifft_spliti(b, nb, bs, n, mod);
+  muliifft_dit(o, ord, M, FFTb, 0, n);
+  if (DEBUGLEVEL>=9) msgTIMER(&T,"FFT");
+  for(i=1; i<=n; i++)
+    affii(Zf_mul(gel(FFT,i), gel(FFTb,i), M), gel(FFT,i));
+  avma=av;
+  if (DEBUGLEVEL>=9) msgTIMER(&T,"mul");
+  muliifft_dis(ord-o, ord, M, FFT, 0, n);
+  if (DEBUGLEVEL>=9) msgTIMER(&T,"IFT");
+  for(i=1; i<=n; i++)
+  {
+    affii(Zf_shift(gel(FFT,i),(ord>>1)-k,M), gel(FFT,i));
+    avma=av;
+  }
+  return gerepileuptoint(ltop, muliifft_unspliti(FFT,bs,2+len));
+}
+
+/********************************************************************/
+/**                                                                **/
+/**               INTEGER MULTIPLICATION (KARATSUBA)               **/
+/**                                                                **/
+/********************************************************************/
+
 /* return (x shifted left d words) + y. Assume d > 0, x > 0 and y >= 0 */
 static GEN
 addshiftw(GEN x, GEN y, long d)
@@ -1308,6 +1610,7 @@ muliispec(GEN a, GEN b, long na, long nb)
 
   if (na < nb) swapspec(a,b, na,nb);
   if (nb < KARATSUBA_MULI_LIMIT) return muliispec_basecase(a,b,na,nb);
+  if (nb >= FFT_MULI_LIMIT)      return muliispec_fft(a,b,na,nb);
   i=(na>>1); n0=na-i; na=i;
   av=avma; a0=a+na; n0a=n0;
   while (!*a0 && n0a) { a0++; n0a--; }
@@ -1388,6 +1691,7 @@ sqrispec(GEN a, long na)
   pari_sp av;
 
   if (na < KARATSUBA_SQRI_LIMIT) return sqrispec_basecase(a,na);
+  if (na >= FFT_SQRI_LIMIT) return sqrispec_fft(a,na);
   i=(na>>1); n0=na-i; na=i;
   av=avma; a0=a+na; n0a=n0;
   while (!*a0 && n0a) { a0++; n0a--; }

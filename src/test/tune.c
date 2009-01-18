@@ -268,6 +268,8 @@ enum { PARI = 1, GMP = 2 };
 static tune_param param[] = {
 {PARI,var(KARATSUBA_MULI_LIMIT),   t_INT, 4,0, speed_mulii,speed_karamulii},
 {PARI,var(KARATSUBA_SQRI_LIMIT),   t_INT, 4,0, speed_sqri,speed_karasqri},
+{PARI,var(FFT_MULI_LIMIT),         t_INT, 1000,100000, speed_mulii,speed_karamulii,0.02},
+{PARI,var(FFT_SQRI_LIMIT),         t_INT, 1000,100000, speed_sqri,speed_karasqri,0.02},
 {0,   var(KARATSUBA_MULR_LIMIT),   t_REAL,4,0, speed_mulrr,speed_karamulrr},
 {PARI,var(MONTGOMERY_LIMIT),       t_INT, 3,0, speed_redc,speed_modii},
 {0,   var(REMIIMUL_LIMIT),         t_INT, 3,0, speed_modii,speed_remiimul},
