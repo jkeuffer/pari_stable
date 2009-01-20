@@ -409,6 +409,7 @@ BA 92- make test-xxx: trap SIGINT in benching script to exit on <C-C>
   104- factor(t_INT/t_FRAC, 1) was the same as factor(t_INT/t_FRAC, 0). Now
        abide by the input value and leave (..., 0) as the single special case 
        (shortcut for "the largest precomputed prime")
+BA105- [native kernel] Schoenhage-Strassen multiplication/squaring
 
   Added
     1- many new benches (make test-all)
