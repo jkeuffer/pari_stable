@@ -1774,7 +1774,6 @@ static GEN
 cxpolylog(long m, GEN x, long prec)
 {
   long li, i, n, bern_upto;
-  pari_sp av = avma;
   GEN z, h, q, s;
   int real;
 
@@ -1809,7 +1808,7 @@ cxpolylog(long m, GEN x, long prec)
     if (gexpo(q) + expo(zet) < li) break;
     if (n >= bern_upto) { bern_upto += 50; mpbern(bern_upto,prec); }
   }
-  return gerepileupto(av,s);
+  return s;
 }
 
 static GEN
@@ -1832,7 +1831,7 @@ polylog(long m, GEN x, long prec)
   res = cgetc(l); av = avma;
   x = gtofp(x, l+1);
   e = gexpo(gnorm(x));
-  if (!e || e== -1) return cxpolylog(m,x,prec);
+  if (!e || e== -1) { avma = av; return affc_fixlg(cxpolylog(m,x,prec); }
   X = (e > 0)? ginv(x): x;
   G = -bit_accuracy(l);
   av1 = avma; limpile = stack_lim(av1,1);
