@@ -609,35 +609,37 @@ Flx_sqrspec_basecase(GEN x, ulong p, long nx)
   z = cgetg(lz, t_VECSMALL) + 2;
   if (SMALL_ULONG(p))
   {
-    for (i=0; i<nx; i++)
+    z[0] = x[0]*x[0]%p;
+    for (i=1; i<nx; i++)
     {
       p1 = Flx_mullimb_ok(x+i,x,p,0, (i+1)>>1);
       p1 <<= 1;
       if ((i&1) == 0) p1 += x[i>>1] * x[i>>1];
-      z[i] = (p1 % p);
+      z[i] = p1 % p;
     }
     for (  ; i<nz; i++)
     {
       p1 = Flx_mullimb_ok(x+i,x,p,i-nx+1, (i+1)>>1);
       p1 <<= 1;
       if ((i&1) == 0) p1 += x[i>>1] * x[i>>1];
-      z[i] = (p1 % p);
+      z[i] = p1 % p;
     }
   }
   else
   {
-    for (i=0; i<nx; i++)
+    z[0] = Fl_sqr(x[0], p);
+    for (i=1; i<nx; i++)
     {
       p1 = Flx_mullimb(x+i,x,p,0, (i+1)>>1);
       p1 = Fl_add(p1, p1, p);
-      if ((i&1) == 0) p1 = Fl_add(p1, Fl_mul(x[i>>1], x[i>>1], p), p);
+      if ((i&1) == 0) p1 = Fl_add(p1, Fl_sqr(x[i>>1], p), p);
       z[i] = p1;
     }
     for (  ; i<nz; i++)
     {
       p1 = Flx_mullimb(x+i,x,p,i-nx+1, (i+1)>>1);
       p1 = Fl_add(p1, p1, p);
-      if ((i&1) == 0) p1 = Fl_add(p1, Fl_mul(x[i>>1], x[i>>1], p), p);
+      if ((i&1) == 0) p1 = Fl_add(p1, Fl_sqr(x[i>>1], p), p);
       z[i] = p1;
     }
   }
