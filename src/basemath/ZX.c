@@ -311,7 +311,7 @@ ZX_rescale(GEN P, GEN h)
 static GEN
 ZX_eval2BIL(GEN x, long k)
 {
-  long i,j, l = lgpol(x), lz = k*l;
+  long i,j, l = lgpol(x), lz = k*l, ki;
   GEN pz = cgetipos(2+lz);
   GEN nz = cgetipos(2+lz);
   for(i=0; i < lz; i++)
@@ -319,15 +319,15 @@ ZX_eval2BIL(GEN x, long k)
     *int_W(pz,i) = 0UL;
     *int_W(nz,i) = 0UL;
   }
-  for(i=0; i<l; i++)
+  for(i=0, ki=0; i<l; i++, ki+=k)
   {
     GEN c = gel(x,2+i);
     long lc = lgefint(c)-2;
     if (signe(c)==0) continue;
     if (signe(c) > 0)
-      for (j=0; j<lc; j++) *int_W(pz,j+k*i) = *int_W(c,j);
+      for (j=0; j<lc; j++) *int_W(pz,j+ki) = *int_W(c,j);
     else
-      for (j=0; j<lc; j++) *int_W(nz,j+k*i) = *int_W(c,j);
+      for (j=0; j<lc; j++) *int_W(nz,j+ki) = *int_W(c,j);
   }
   pz = int_normalize(pz,0);
   nz = int_normalize(nz,0); return subii(pz,nz);
