@@ -3,6 +3,7 @@ Section: linear_algebra
 C-Name: adj
 Prototype: G
 Help: matadjoint(x): adjoint matrix of x.
+  Note: n! must be invertible, where n is the dimension of the matrix.
 Doc:
  \idx{adjoint matrix} of $x$, i.e.~the matrix $y$
  of cofactors of $x$, satisfying $x*y=\det(x)*\Id$. $x$ must be a
