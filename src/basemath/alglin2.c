@@ -208,6 +208,31 @@ adj(GEN x)
   (void)caradj(x,MAXVARN,&y); return y;
 }
 
+GEN
+adjsafe(GEN x)
+{
+  long n = lg(x)-1;
+  pari_sp av = avma;
+  GEN C;
+  if (typ(x) != t_MAT) pari_err(typeer, "matadjoint");
+  if (n <= 1) return gcopy(x);
+  C = carberkowitz(x, 0);
+  C = RgX_shift_shallow(C, -1);
+  if (!odd(n)) C = RgX_neg(C);
+  return gerepileupto(av, RgX_RgM_eval(C, x));
+}
+
+GEN 
+matadjoint0(GEN x, long flag)
+{
+  switch(flag)
+  {
+    case 0: return adj(x);
+    case 1: return adjsafe(x);
+  }
+  pari_err(flagerr,"matadjoint"); return NULL; /* not reached */
+}
+
 /*******************************************************************/
 /*                                                                 */
 /*                       MINIMAL POLYNOMIAL                        */

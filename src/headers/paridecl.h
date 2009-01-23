@@ -546,6 +546,7 @@ GEN     QM_ImQ_hnf(GEN x);
 GEN     gnorml1_fake(GEN x);
 GEN     ZM_charpoly(GEN x);
 GEN     adj(GEN x);
+GEN     adjsafe(GEN x);
 GEN     caract(GEN x, long v);
 GEN     caradj(GEN x, long v, GEN *py);
 GEN     carberkowitz(GEN x, long v);
@@ -560,6 +561,7 @@ GEN     gtrace(GEN x);
 GEN     hess(GEN x);
 GEN     intersect(GEN x, GEN y);
 GEN     jacobi(GEN a, long prec);
+GEN     matadjoint0(GEN x, long flag);
 GEN     matcompanion(GEN x);
 GEN     matrixqz0(GEN x, GEN pp);
 GEN     minpoly(GEN x, long v);
@@ -1587,6 +1589,7 @@ long    z_pval(long n, GEN p);
 /* gen3.c */
 
 GEN     RgM_mulreal(GEN x, GEN y);
+GEN     RgX_RgM_eval(GEN x, GEN y);
 GEN     RgX_deflate_max(GEN x0, long *m);
 GEN     ceil_safe(GEN x);
 GEN     ceilr(GEN x);

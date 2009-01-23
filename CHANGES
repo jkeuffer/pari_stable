@@ -464,7 +464,7 @@ BA105- [native kernel] Schoenhage-Strassen multiplication/squaring
        RgC_RgM_mul, RgC_RgV_mul, RgM_RgC_mul, RgM_RgV_mul, RgM_mul, RgM_sqr,
        RgV_RgM_mul, RgV_RgC_mul, RgV_add, RgV_neg, RgV_sub, RgC_Rg_add
        RgM_diagonal, RgM_diagonal_shallow, RgM_inv, RgM_solve,
-       RgM_mulreal, mulreal
+       RgM_mulreal, mulreal, RgX_RgM_eval
        RgV_sum, RgV_sumpart, RgV_sumpart2
        RgX_neg, RgX_add, RgX_add_shallow, RgX_sub, RgX_Rg_add, RgX_Rg_sub,
        Rg_RgX_sub, RgX_equal, RgX_equal_var, RgX_translate,
@@ -566,6 +566,7 @@ BA 35- direct implementation of ZX_mul, ZX_sqr using Kronecker's trick + mulii
    39- GP routines nfeltadd, nfelttrace, nfeltnorm
 BA 40- Pollard rho discrete logarithm algorithm (function gen_Pollard_log)
    41- GP routine polrootsff
+   42- matadjoint: implement division-free algorithm (flag = 1) [#937]
 
   Removed
     1- obsolete GP functions printp, printp1. Either replace them by

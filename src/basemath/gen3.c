@@ -1196,6 +1196,26 @@ RgX_deflate_max(GEN x, long *m)
   return RgX_deflate(x, *m);
 }
 
+/* assume y is square, 4 <= lx <= lg(x) */
+static GEN
+RgX_RgM_eval_i(GEN x, GEN y, long lx)
+{
+  pari_sp av = avma;
+  GEN z = gel(x,lx-1);
+  long i = lx - 2;
+  z = RgM_Rg_add_shallow(RgM_Rg_mul(y,z), gel(x,i));
+  for (i--; i >= 2; i--) z = RgM_Rg_add_shallow(RgM_mul(z,y), gel(x,i));
+  return gerepilecopy(av,z);
+}
+GEN
+RgX_RgM_eval(GEN x, GEN y)
+{
+  long lx = lg(x), ly = lg(y);
+  if (lx==2) return scalarmat(gen_0,ly-1);
+  if (lx==3) return scalarmat(gel(x,2),ly-1);
+  return RgX_RgM_eval_i(x, y, lx);
+}
+
 GEN
 gsubst(GEN x, long v, GEN y)
 {
@@ -1271,9 +1291,7 @@ gsubst(GEN x, long v, GEN y)
 
       if (varncmp(vx, v) > 0) return scalarmat(x,ly-1);
       if (lx==3) return scalarmat(gel(x,2),ly-1);
-      av = avma; z = gel(x,lx-1);
-      for (i=lx-2; i>=2; i--) z = RgM_Rg_add_shallow(gmul(z,y), gel(x,i));
-      return gerepilecopy(av,z);
+      return RgX_RgM_eval_i(x, y, lx);
 
     case t_SER:
       vx = varn(x);
