@@ -1767,46 +1767,58 @@ gzeta(GEN x, long prec)
 /**                                                                   **/
 /***********************************************************************/
 
-/* m >= 2. Validity domain contains .005 < |x| < 230
- * Li_m(x = e^z) = sum_n=0 zeta(m-n) z^n / n!
+/* returns H_n = 1 + 1/2 + ... + 1/n, as a rational number (n "small") */
+static GEN
+Harmonic(long n)
+{
+  GEN h = gen_1;
+  long i;
+  for (i=2; i<=n; i++) h = gadd(h, mkfrac(gen_1, utoipos(i)));
+  return h;
+}
+
+/* m >= 2. Validity domain contains | log |x| | < 5, best for |x| ~ 1.
+ * Li_m(x = e^z) = sum_{n >= 0} zeta(m-n) z^n / n!
  *    with zeta(1) := H_m - log(-z) */
 static GEN
 cxpolylog(long m, GEN x, long prec)
 {
-  long li, i, n, bern_upto;
+  long li, n;
   GEN z, h, q, s;
   int real;
 
   if (gcmp1(x)) return szeta(m,prec);
-  real = (typ(x) == t_REAL && signe(x) > 0);
+  /* x real <= 1 ==> Li_m(x) real */
+  real = (typ(x) == t_REAL && (expo(x) < 0 || signe(x) <= 0));
 
-  z = glog(x,prec); h = gen_1;
-  for (i=2; i<m; i++) h = gadd(h, mkfrac(gen_1, utoipos(i)));
-  h = gsub(h, glog(gneg_i(z),prec));
-
-  bern_upto = m+50; mpbern(bern_upto,prec);
-  q = gen_1; s = szeta(m,prec);
-  for (n=1; n<=m+1; n++)
+  z = glog(x,prec);
+  /* n = 0 */
+  q = gen_1;
+  s = szeta(m,prec);
+  for (n=1; n < m-1; n++)
   {
-    GEN p1;
     q = gdivgs(gmul(q,z),n);
-    if (n == m-1) {
-      p1 = gmul(h, q);
-      if (real) p1 = real_i(p1);
-    }
-    else
-      p1 = gmul(szeta(m-n,prec), real? real_i(q): q);
-    s = gadd(s, p1);
+    s = gadd(s, gmul(szeta(m-n,prec), real? real_i(q): q));
   }
+  /* n = m-1 */
+    q = gdivgs(gmul(q,z),n); /* multiply by "zeta(1)" */
+    h = gmul(q, gsub(Harmonic(m-1), glog(gneg_i(z),prec)));
+    s = gadd(s, real? real_i(h): h);
+  /* n = m */
+    q = gdivgs(gmul(q,z),m);
+    s = gadd(s, gmul(szeta(0,prec), real? real_i(q): q));
+  /* n = m+1 */
+    q = gdivgs(gmul(q,z),m+1);
+    s = gadd(s, gmul(szeta(-1,prec), real? real_i(q): q));
 
   z = gsqr(z); li = -(bit_accuracy(prec)+1);
+  /* n = m+3, m+5, ...; note that zeta(- even integer) = 0 */
   for(n = m+3;; n += 2)
   {
     GEN zet = szeta(m-n,prec);
     q = divgunu(gmul(q,z), n-1);
     s = gadd(s, gmul(zet, real? real_i(q): q));
     if (gexpo(q) + expo(zet) < li) break;
-    if (n >= bern_upto) { bern_upto += 50; mpbern(bern_upto,prec); }
   }
   return s;
 }
@@ -1831,7 +1843,7 @@ polylog(long m, GEN x, long prec)
   res = cgetc(l); av = avma;
   x = gtofp(x, l+1);
   e = gexpo(gnorm(x));
-  if (!e || e== -1) { 
+  if (!e || e == -1) { 
     y = cxpolylog(m,x,prec);
     avma = av; return affc_fixlg(y, res);
   }
