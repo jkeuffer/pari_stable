@@ -10,8 +10,22 @@ Doc:
  of cofactors of $x$, satisfying $x*y=\det(x)*\Id$. $x$ must be a
  (non-necessarily invertible) square matrix of dimension $n$.
  If $\fl$ is 0 or omitted, use a fast algorithm which assumes that $n!$ is
- invertible. If $\fl$ is 1, use a slower division-free algorithm. Both
- algorithms use $O(n^4)$ operations in the base ring.
+ invertible. If $\fl$ is 1, use a slower division-free algorithm.
+ \bprog
+ ? a = [1,2,3;3,4,5;6,7,8] * Mod(1,2);
+ ? matadjoint(a)
+  ***   at top-level: matadjoint([1,2,3;3,
+  ***                 ^--------------------
+  *** matadjoint: impossible inverse modulo: Mod(0, 2).
+ ? matadjoint(a, 1)  \\ use safe algorithm
+ %2 =
+ [Mod(1, 2) Mod(1, 2) Mod(0, 2)]
+
+ [Mod(0, 2) Mod(0, 2) Mod(0, 2)]
+
+ [Mod(1, 2) Mod(1, 2) Mod(0, 2)]
+ @eprog\noindent
+ Both algorithms use $O(n^4)$ operations in the base ring.
 Variant: Also available are
  \fun{GEN}{adj}{GEN x} (\fl=0) and
  \fun{GEN}{adjsafe}{GEN x} (\fl=1).
