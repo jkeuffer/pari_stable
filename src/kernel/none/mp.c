@@ -1505,10 +1505,11 @@ sqrispec_fft(GEN a, long na)
   pari_timer T;
 
   mulliifft_params(len,&k,&mod,&bs,&n,&ord);
-  o  = ord>>k;
-  M   = addis(shifti(gen_1,mod*BITS_IN_LONG),1);
-  FFT = muliifft_spliti(a, na, bs, n, mod);
+  o = ord>>k;
+  M = int2n(mod*BITS_IN_LONG);
+  M[2+mod] = 1;
   if (DEBUGLEVEL>=9) TIMER(&T);
+  FFT = muliifft_spliti(a, na, bs, n, mod);
   muliifft_dit(o, ord, M, FFT, 0, n);
   if (DEBUGLEVEL>=9) msgTIMER(&T,"FFT");
   av = avma;
@@ -1539,9 +1540,9 @@ muliispec_fft(GEN a, GEN b, long na, long nb)
   pari_timer T;
 
   mulliifft_params(len,&k,&mod,&bs,&n,&ord);
-  o  = ord>>k;
-  M   = shifti(gen_1,mod*BITS_IN_LONG);
-  M[2+mod]=1;
+  o = ord>>k;
+  M = int2n(mod*BITS_IN_LONG);
+  M[2+mod] = 1;
   if (DEBUGLEVEL>=9) TIMER(&T);
   FFT = muliifft_spliti(a, na, bs, n, mod);
   av=avma;
