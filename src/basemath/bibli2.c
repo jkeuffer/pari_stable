@@ -1588,17 +1588,24 @@ gen_cmp_RgX(void *data, GEN x, GEN y)
   return 0;
 }
 
+static int
+cmp_RgX_Rg(GEN x, GEN y)
+{
+  long lx = lg(x);
+  if (lx > 3) return  1;
+  if (lx < 3) return -1;
+  return gcmp(gel(x,2), y);
+}
 int
 cmp_RgX(GEN x, GEN y)
 {
-  long F[3] = {_evallg(3)|evaltyp(t_POL)};
   if (typ(x) == t_POLMOD) x = gel(x,2);
   if (typ(y) == t_POLMOD) y = gel(y,2);
   if (typ(x) == t_POL) {
-    if (typ(y) != t_POL) { gel(F,2) = y; y = F; }
+    if (typ(y) != t_POL) return cmp_RgX_Rg(x, y);
   } else {
     if (typ(y) != t_POL) return gcmp(x,y);
-    gel(F,2) = x; x = F;
+    return - cmp_RgX_Rg(y,x);
   }
   return gen_cmp_RgX((void*)&gcmp,x,y);
 }
