@@ -11,7 +11,8 @@ Doc: returns the vector of distinct roots of the polynomial $x$ in the field
  \typ{FFELT} coefficients:
  \bprog
  ? polrootsff(x^2 + 1, 5, y^2+3)  \\ over F_5[y]/(y^2+3) ~ F_25
- %1 = [Mod(Mod(3, 5), Mod(1, 5)*y^2 + Mod(3, 5)), Mod(Mod(2, 5), Mod(1, 5)*y^2 + Mod(3, 5))]
+ %1 = [Mod(Mod(3, 5), Mod(1, 5)*y^2 + Mod(3, 5)),
+       Mod(Mod(2, 5), Mod(1, 5)*y^2 + Mod(3, 5))]
  ? t = ffgen(y^2 + Mod(3,5), 't); \\ a generator for F_25 as a t_FFELT
  ? polrootsff(x^2 + 1)   \\ not enough information to determine the base field
   ***   at top-level: polrootsff(x^2+1)
