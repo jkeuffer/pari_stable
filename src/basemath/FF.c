@@ -801,13 +801,21 @@ to_FF(GEN x, GEN ff)
   }
 }
 
+/* in place */
 static GEN
 to_FF_pol(GEN x, GEN ff)
 {
-  long i, lx, tx = typ(x);
-  if (tx != t_POL) pari_err(typeer,"to_FF_pol");
-  lx = lg(x);
+  long i, lx = lg(x);
+  if (typ(x) != t_POL) pari_err(typeer,"to_FF_pol");
   for (i=2; i<lx; i++) gel(x,i) = to_FF(gel(x,i), ff);
+  return x;
+}
+/* in place */
+static GEN
+to_FF_vec(GEN x, GEN ff)
+{
+  long i, lx = lg(x);
+  for (i=1; i<lx; i++) gel(x,i) = to_FF(gel(x,i), ff);
   return x;
 }
 
@@ -831,8 +839,7 @@ to_FF_fact(GEN P, GEN E, GEN ff, pari_sp av)
 }
 
 /*Warning: FFX are polynomials whose coefficients are compatible with FF:
- * t_INT t_INTMOD, t_FFELT*/
-
+ * t_INT t_INTMOD, t_FFELT */
 static GEN
 FFX_to_FqX(GEN x, GEN T, GEN p)
 {
@@ -867,6 +874,28 @@ FFX_factor(GEN P, GEN x)
   }
   r = FqX_factor(FFX_to_FqX(P, T,p), T,p);
   return to_FF_fact(gel(r,1),gel(r,2), x,av);
+}
+
+/* Roots of P over the field of definition of x */
+GEN
+FFX_roots(GEN P, GEN x)
+{
+  ulong pp;
+  GEN r, T, p;
+  pari_sp av=avma;
+  _getFF(x,&T,&p,&pp);
+  switch(x[1])
+  {
+  case t_FF_FpXQ:
+    break;
+  case t_FF_F2xq:
+    T=F2x_to_ZX(T);
+    break;
+  default:
+    T=Flx_to_ZX(T);
+  }
+  r = FqX_roots(FFX_to_FqX(P, T,p), T,p);
+  return gerepilecopy(av, to_FF_vec(r, x));
 }
 
 GEN

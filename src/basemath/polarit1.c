@@ -2439,6 +2439,12 @@ factorff(GEN f, GEN p, GEN T)
 {
   pari_sp av;
   GEN z;
+  if (!p || !T)
+  {
+    long pa, t = RgX_type(f, &p, &T, &pa);
+    if (t != t_FFELT) pari_err(typeer, "factorff");
+    return FFX_factor(f,T);
+  }
   ffcheck(&av, &f, &T, p); z = FqX_factor_i(f, T, p);
   return to_Fq_fact(gel(z,1),gel(z,2), T,p, av);
 }
@@ -2447,6 +2453,12 @@ polrootsff(GEN f, GEN p, GEN T)
 {
   pari_sp av;
   GEN z;
+  if (!p || !T)
+  {
+    long pa, t = RgX_type(f, &p, &T, &pa);
+    if (t != t_FFELT) pari_err(typeer, "factorff");
+    return FFX_roots(f,T);
+  }
   ffcheck(&av, &f, &T, p); z = FqX_roots_i(f, T, p);
   return to_Fq_vec(z, T,p, av);
 }

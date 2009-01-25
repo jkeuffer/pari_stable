@@ -27,7 +27,10 @@ a/x,
 (x+a)/(x-a),
 b=ffprimroot(a),
 fforder(a),
-b^fflog(a,b)]; 
+b^fflog(a,b),
+factorff(x^2+x+a),
+polrootsff(x^2+x+a)
+]; 
 }
 default(echo,1);
 
