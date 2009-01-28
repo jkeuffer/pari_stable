@@ -21,8 +21,18 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**                          MEMBER FUNCTIONS                      **/
 /**                                                                **/
 /********************************************************************/
-#define is_ell(x) (typ(x) == t_VEC && lg(x)>=14)
-#define is_bigell(x) (typ(x) == t_VEC && lg(x)>=20)
+INLINE int is_ell5(GEN x) {
+  long lx = lg(x);
+  return (typ(x) == t_VEC && (lx == 6 || lx == 14 || lx == 20));
+}
+INLINE int is_smallell(GEN x) {
+  long lx = lg(x);
+  return (typ(x) == t_VEC && (lx == 14 || lx == 20));
+}
+INLINE int is_ell(GEN x) { 
+  long lx = lg(x);
+  return (typ(x) == t_VEC && lx == 20);
+}
 
 static void
 member_err(const char *s) { pari_err(typeer,s); }
@@ -232,7 +242,7 @@ member_roots(GEN x) /* roots */
   long t; GEN y = get_nf(x,&t);
   if (!y)
   {
-    if (t == typ_ELL && is_bigell(x)) return gel(x,14);
+    if (t == typ_ELL && is_ell(x)) return gel(x,14);
     if (t == typ_GAL) return gel(x,3);
     member_err("roots");
   }
@@ -417,91 +427,91 @@ member_orders(GEN x)
 GEN
 member_a1(GEN x)
 {
-  if (!is_ell(x)) member_err("a1");
+  if (!is_ell5(x)) member_err("a1");
   return gel(x,1);
 }
 
 GEN
 member_a2(GEN x)
 {
-  if (!is_ell(x)) member_err("a2");
+  if (!is_ell5(x)) member_err("a2");
   return gel(x,2);
 }
 
 GEN
 member_a3(GEN x)
 {
-  if (!is_ell(x)) member_err("a3");
+  if (!is_ell5(x)) member_err("a3");
   return gel(x,3);
 }
 
 GEN
 member_a4(GEN x)
 {
-  if (!is_ell(x)) member_err("a4");
+  if (!is_ell5(x)) member_err("a4");
   return gel(x,4);
 }
 
 GEN
 member_a6(GEN x)
 {
-  if (!is_ell(x)) member_err("a6");
+  if (!is_ell5(x)) member_err("a6");
   return gel(x,5);
 }
 
 GEN
 member_b2(GEN x)
 {
-  if (!is_ell(x)) member_err("b2");
+  if (!is_smallell(x)) member_err("b2");
   return gel(x,6);
 }
 
 GEN
 member_b4(GEN x)
 {
-  if (!is_ell(x)) member_err("b4");
+  if (!is_smallell(x)) member_err("b4");
   return gel(x,7);
 }
 
 GEN
 member_b6(GEN x)
 {
-  if (!is_ell(x)) member_err("b6");
+  if (!is_smallell(x)) member_err("b6");
   return gel(x,8);
 }
 
 GEN
 member_b8(GEN x)
 {
-  if (!is_ell(x)) member_err("b8");
+  if (!is_smallell(x)) member_err("b8");
   return gel(x,9);
 }
 
 GEN
 member_c4(GEN x)
 {
-  if (!is_ell(x)) member_err("c4");
+  if (!is_smallell(x)) member_err("c4");
   return gel(x,10);
 }
 
 GEN
 member_c6(GEN x)
 {
-  if (!is_ell(x)) member_err("c6");
+  if (!is_smallell(x)) member_err("c6");
   return gel(x,11);
 }
 
 GEN
 member_j(GEN x)
 {
-  if (!is_ell(x)) member_err("j");
+  if (!is_smallell(x)) member_err("j");
   return gel(x,13);
 }
 
 GEN
 member_omega(GEN x)
 {
-  if (!is_bigell(x)) member_err("omega");
+  if (!is_ell(x)) member_err("omega");
   if (!ell_is_real(x)) pari_err(talker,"curve not defined over R");
   return mkvec2copy(gel(x,15), gel(x,16));
 }
@@ -509,7 +519,7 @@ member_omega(GEN x)
 GEN
 member_eta(GEN x)
 {
-  if (!is_bigell(x)) member_err("eta");
+  if (!is_ell(x)) member_err("eta");
   if (!ell_is_real(x)) pari_err(talker,"curve not defined over R");
   return mkvec2copy(gel(x,17), gel(x,18));
 }
@@ -517,7 +527,7 @@ member_eta(GEN x)
 GEN
 member_area(GEN x)
 {
-  if (!is_bigell(x)) member_err("area");
+  if (!is_ell(x)) member_err("area");
   if (!ell_is_real(x)) pari_err(talker,"curve not defined over R");
   return gel(x,19);
 }
@@ -525,7 +535,7 @@ member_area(GEN x)
 GEN
 member_tate(GEN x)
 {
-  if (!is_bigell(x)) member_err("tate");
+  if (!is_ell(x)) member_err("tate");
   if (!ell_is_padic(x))
     pari_err(talker,"curve not defined over a p-adic field");
   return mkvec3(gel(x,15), gel(x,16), gel(x,17));
@@ -534,7 +544,7 @@ member_tate(GEN x)
 GEN
 member_w(GEN x)
 {
-  if (!is_bigell(x)) member_err("w");
+  if (!is_ell(x)) member_err("w");
   if (!ell_is_padic(x))
     pari_err(talker,"curve not defined over a p-adic field");
   return gel(x,18);
