@@ -35,7 +35,7 @@ ASM addll mulll bfffo divll
 #define addllx(a,b) \
 ({ ulong __value, __arg1 = (a), __arg2 = (b), __temp; \
    __asm__ ("subq %5,%2 ; adcq %4,%0 ; adcq %1,%1" \
-	: "=r" (__value), "=&r" (overflow), "=r" (__temp) \
+	: "=r" (__value), "=&r" (overflow), "=&r" (__temp) \
 	: "0" (__arg1), "g" (__arg2), "g" (overflow), "1" ((ulong)0), "2" ((ulong)0) \
 	: "cc"); \
   __value; \
@@ -53,7 +53,7 @@ ASM addll mulll bfffo divll
 #define subllx(a,b) \
 ({ ulong __value, __arg1 = (a), __arg2 = (b), __temp; \
    __asm__ ("subq %5,%2 ; sbbq %4,%0 ; adcq %1,%1" \
-	: "=r" (__value), "=&r" (overflow), "=r" (__temp) \
+	: "=r" (__value), "=&r" (overflow), "=&r" (__temp) \
 	: "0" (__arg1), "g" (__arg2), "g" (overflow), "1" ((ulong)0), "2" ((ulong)0) \
 	: "cc"); \
   __value; \
