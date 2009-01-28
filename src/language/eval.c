@@ -25,7 +25,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 static THREAD long br_status, br_count;
 enum { br_NONE = 0, br_BREAK, br_NEXT, br_MULTINEXT, br_RETURN };
-static THREAD GEN br_res=NULL;
+static THREAD GEN br_res;
 
 long
 loop_break(void)
@@ -453,6 +453,7 @@ pari_init_evaluator(void)
   stack_init(&s_var,sizeof(*var),(void**)&var);
   stack_init(&s_lvars,sizeof(*lvars),(void**)&lvars);
   stack_init(&s_trace,sizeof(*trace),(void**)&trace);
+  br_res = NULL;
 }
 void
 pari_close_evaluator(void)
