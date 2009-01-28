@@ -118,9 +118,9 @@ enum logstyles {
 #define TEXSTYLE_PAREN	2
 #define TEXSTYLE_BREAK	4
 
-extern pari_sp THREAD avma,bot,top;
+extern THREAD pari_sp avma, bot, top;
 #define DISABLE_MEMUSED (size_t)-1
-extern size_t memused;
+extern THREAD size_t memused;
 extern byteptr diffptr;
 extern char *errmessage[], *current_psfile, *pari_datadir;
 
