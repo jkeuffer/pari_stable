@@ -266,7 +266,7 @@ int factor_add_primes = 0, factor_proven = 0;
 /**                                                                   **/
 /***********************************************************************/
 
-static THREAD GEN N, gl;
+static THREAD GEN gl;
 #define nbcmax 64		/* max number of simultaneous curves */
 #define bstpmax 1024		/* max number of baby step table entries */
 
@@ -325,7 +325,7 @@ static THREAD GEN N, gl;
  * collections every 8 iterations may help when nbc is large.) */
 
 static int
-elladd0(long nbc, long nbc1,
+elladd0(GEN N, long nbc, long nbc1,
 	GEN *X1, GEN *Y1, GEN *X2, GEN *Y2, GEN *X3, GEN *Y3)
 {
   GEN W[2*nbcmax], *A = W+nbc; /* W[0],A[0] unused */
@@ -378,8 +378,8 @@ elladd0(long nbc, long nbc1,
 /* Shortcut, for use in cases where Y coordinates follow their corresponding
  * X coordinates, and first summand doesn't need to be repeated */
 static int
-elladd(long nbc, GEN *X1, GEN *X2, GEN *X3) {
-  return elladd0(nbc, nbc, X1, X1+nbc, X2, X2+nbc, X3, X3+nbc);
+elladd(GEN N, long nbc, GEN *X1, GEN *X2, GEN *X3) {
+  return elladd0(N, nbc, nbc, X1, X1+nbc, X2, X2+nbc, X3, X3+nbc);
 }
 
 /* As elladd except it does twice as many additions (and thus hides even more
@@ -387,7 +387,7 @@ elladd(long nbc, GEN *X1, GEN *X2, GEN *X3) {
  * elladd(nbc,X1,X2,X3) followed by elladd(nbc,X4,X5,X6).  Safe to have
  * X2==X3, X5==X6, or X1 or X2 coincide with X4 or X5, in any order. */
 static int
-elladd2(long nbc, GEN *X1, GEN *X2, GEN *X3, GEN *X4, GEN *X5, GEN *X6)
+elladd2(GEN N, long nbc, GEN *X1, GEN *X2, GEN *X3, GEN *X4, GEN *X5, GEN *X6)
 {
   GEN *Y1 = X1+nbc, *Y2 = X2+nbc, *Y3 = X3+nbc;
   GEN *Y4 = X4+nbc, *Y5 = X5+nbc, *Y6 = X6+nbc;
@@ -456,7 +456,7 @@ elladd2(long nbc, GEN *X1, GEN *X2, GEN *X3, GEN *X4, GEN *X5, GEN *X6)
  * value as for elladd.  If we find a point at infinity mod N,
  * and if X1 != X2, we copy the points at X1 to X2. */
 static int
-elldouble(long nbc, GEN *X1, GEN *X2)
+elldouble(GEN N, long nbc, GEN *X1, GEN *X2)
 {
   GEN *Y1 = X1+nbc, *Y2 = X2+nbc;
   GEN W[nbcmax+1]; /* W[0] unused */
@@ -509,7 +509,7 @@ elldouble(long nbc, GEN *X1, GEN *X2)
 
 /* k>2 assumed prime, XAUX = scratchpad */
 static int
-ellmult(long nbc, ulong k, GEN *X1, GEN *X2, GEN *XAUX)
+ellmult(GEN N, long nbc, ulong k, GEN *X1, GEN *X2, GEN *XAUX)
 {
   ulong r, d, e, e1;
   long i;
@@ -520,7 +520,7 @@ ellmult(long nbc, ulong k, GEN *X1, GEN *X2, GEN *XAUX)
 
   /* first doubling picks up X1;  after this we'll be working in XAUX and
    * X2 only, mostly via A and B and T */
-  if ((res = elldouble(nbc, X1, X2)) != 0) return res;
+  if ((res = elldouble(N, nbc, X1, X2)) != 0) return res;
 
   /* split the work at the golden ratio */
   r = (ulong)(k*0.61803398875 + .5);
@@ -552,40 +552,40 @@ ellmult(long nbc, ulong k, GEN *X1, GEN *X2, GEN *XAUX)
     {
     case 0:			/* rule 1 */
       e1 = d - e; d = (d + e1)/3; e = (e - e1)/3;
-      if ( (res = elladd(nbc, A, B, T)) ) return res;
-      if ( (res = elladd2(nbc, T, A, A, T, B, B)) != 0) return res;
+      if ( (res = elladd(N, nbc, A, B, T)) ) return res;
+      if ( (res = elladd2(N, nbc, T, A, A, T, B, B)) != 0) return res;
       break;			/* end of rule 1 */
     case 1:			/* rules 2 and 4, part 1 */
       d -= e;
-      if ( (res = elladd(nbc, A, B, B)) ) return res;
+      if ( (res = elladd(N, nbc, A, B, B)) ) return res;
       /* FALL THROUGH */
     case 3:			/* rule 5, and 2nd part of rules 2 and 4 */
       d >>= 1;
-      if ( (res = elldouble(nbc, A, A)) ) return res;
+      if ( (res = elldouble(N, nbc, A, A)) ) return res;
       break;			/* end of rules 2, 4, and 5 */
     case 4:			/* rule 6 */
       d /= 3;
-      if ( (res = elldouble(nbc, A, T)) ) return res;
-      if ( (res = elladd(nbc, T, A, A)) ) return res;
+      if ( (res = elldouble(N, nbc, A, T)) ) return res;
+      if ( (res = elladd(N, nbc, T, A, A)) ) return res;
       /* FALL THROUGH */
     case 2:			/* rule 3, and 2nd part of rule 6 */
       d -= e;
-      if ( (res = elladd(nbc, A, B, B)) ) return res;
+      if ( (res = elladd(N, nbc, A, B, B)) ) return res;
       break;			/* end of rules 3 and 6 */
     case 5:			/* rule 7 */
       d = (d - e - e)/3;
-      if ( (res = elldouble(nbc, A, T)) ) return res;
-      if ( (res = elladd2(nbc, T, A, A, T, B, B)) != 0) return res;
+      if ( (res = elldouble(N, nbc, A, T)) ) return res;
+      if ( (res = elladd2(N, nbc, T, A, A, T, B, B)) != 0) return res;
       break;			/* end of rule 7 */
     case 6:			/* rule 8 */
       d = (d - e)/3;
-      if ( (res = elladd(nbc, A, B, B)) ) return res;
-      if ( (res = elldouble(nbc, A, T)) ) return res;
-      if ( (res = elladd(nbc, T, A, A)) ) return res;
+      if ( (res = elladd(N, nbc, A, B, B)) ) return res;
+      if ( (res = elldouble(N, nbc, A, T)) ) return res;
+      if ( (res = elladd(N, nbc, T, A, A)) ) return res;
       break;			/* end of rule 8 */
     case 7:			/* rule 9 */
       e >>= 1;
-      if ( (res = elldouble(nbc, B, B)) ) return res;
+      if ( (res = elldouble(N, nbc, B, B)) ) return res;
       break;			/* end of rule 9 */
     default: break; /* notreached */
     }
@@ -594,7 +594,7 @@ ellmult(long nbc, ulong k, GEN *X1, GEN *X2, GEN *XAUX)
     /* swap d <-> e and A <-> B if necessary */
     if (d < e) { r = d; d = e; e = r; S = A; A = B; B = S; }
   } /* while */
-  return elladd(nbc, XAUX, X2, X2);
+  return elladd(N, nbc, XAUX, X2, X2);
 }
 
 /* Auxiliary routines need < (3*nbc+240)*tf words on the PARI stack, in
@@ -710,7 +710,7 @@ static const long MR_Jaeschke_k2 = 1; /* B2 phase, not foolproof, much faster */
  * by Paul Zimmermann  (see http://www.loria.fr/~zimmerma/ and especially
  * http://www.loria.fr/~zimmerma/records/ecmnet.html). --GN 1998Jul,Aug */
 GEN
-ellfacteur(GEN n, int insist)
+ellfacteur(GEN N, int insist)
 {
   const ulong TB1[] = { /* table revised, cf. below 1998Aug15 --GN */
     142,172,208,252,305,370,450,545,661,801,972,1180,1430,
@@ -750,14 +750,13 @@ ellfacteur(GEN n, int insist)
     540400UL,606000UL,679500UL,761800UL,854100UL,957500UL,1073500UL,
   };
   long nbc,nbc2,dsn,dsnmax,rep,spc,gse,gss,rcn,rcn0,bstp,bstp0;
-  long a, i, j, k, size = expi(n) + 1, tf = lgefint(n);
+  long a, i, j, k, size = expi(N) + 1, tf = lgefint(N);
   ulong B1,B2,B2_p,B2_rt,m,p,p0,dp;
   GEN *X,*XAUX,*XT,*XD,*XG,*YG,*XH,*XB,*XB2,*Xh,*Yh,*Xb;
   GEN res = cgeti(tf);
   pari_sp av1, avtmp, av = avma;
   int rflag;
 
-  N = n; /* make n known to auxiliary functions */
   /* determine where we'll start, how long we'll persist, and how many
    * curves we'll use in parallel */
   if (insist)
@@ -888,7 +887,7 @@ ellfacteur(GEN n, int insist)
     B2_p = B2 >> 1;
     for (m=1; m<=B2_p; m<<=1)
     {
-      if ((rflag = elldouble(nbc, X, X)) > 1) goto fin;
+      if ((rflag = elldouble(N, nbc, X, X)) > 1) goto fin;
       else if (rflag) break;
     }
     /* p=3,...,nextprime(B1) */
@@ -899,7 +898,7 @@ ellfacteur(GEN n, int insist)
       B2_p = B2/p;		/* beware integer overflow on 32-bit CPUs */
       for (m=1; m<=B2_p; m*=p)
       {
-	if ((rflag = ellmult(nbc, p, X, X, XAUX)) > 1) goto fin;
+	if ((rflag = ellmult(N, nbc, p, X, X, XAUX)) > 1) goto fin;
 	else if (rflag) break;
 	avma = av;
       }
@@ -910,7 +909,7 @@ ellfacteur(GEN n, int insist)
     {
       pari_sp av = avma;
       p = snextpr(p, &d, &rcn, NULL, MR_Jaeschke_k1);
-      if (ellmult(nbc, p, X, X, XAUX) > 1) goto fin; /* p^2 > B2: no loop */
+      if (ellmult(N, nbc, p, X, X, XAUX) > 1) goto fin; /* p^2 > B2: no loop */
       avma = av;
     }
     if (DEBUGLEVEL >= 4) {
@@ -920,13 +919,13 @@ ellfacteur(GEN n, int insist)
 
     /* ---B2 PHASE--- */
     /* compute [2]Q,...,[10]Q, which we need to build the helix */
-    if (elldouble(nbc, X, XD) > 1)
+    if (elldouble(N, nbc, X, XD) > 1)
       goto fin;	/* [2]Q */
-    if (elldouble(nbc, XD, XD + nbc2) > 1)
+    if (elldouble(N, nbc, XD, XD + nbc2) > 1)
       goto fin;	/* [4]Q */
-    if (elladd(nbc, XD, XD + nbc2, XD + (nbc<<2)) > 1)
+    if (elladd(N, nbc, XD, XD + nbc2, XD + (nbc<<2)) > 1)
       goto fin;	/* [6]Q */
-    if (elladd2(nbc,
+    if (elladd2(N, nbc,
 		XD, XD + (nbc<<2), XT + (nbc<<3),
 		XD + nbc2, XD + (nbc<<2), XD + (nbc<<3)) > 1)
       goto fin;	/* [8]Q and [10]Q */
@@ -946,7 +945,7 @@ ellfacteur(GEN n, int insist)
     }
 
     /* compute [p]Q and put it into its place in the helix */
-    if (ellmult(nbc, p, X, XH + rcn*nbc2, XAUX) > 1) goto fin;
+    if (ellmult(N, nbc, p, X, XH + rcn*nbc2, XAUX) > 1) goto fin;
     if (DEBUGLEVEL >= 7)
       fprintferr("\t(got [p]Q, p = %lu = prc210_rp[%ld] mod 210)\n", p, rcn);
 
@@ -965,25 +964,25 @@ ellfacteur(GEN n, int insist)
       p += (dp = (ulong)prc210_d1[rcn]);
       if (rcn == 47)
       {	/* wrap mod 210 */
-	if (elladd(nbc, XT + dp*nbc, XH + rcn*nbc2, XH) > 1) goto fin;
+	if (elladd(N, nbc, XT + dp*nbc, XH + rcn*nbc2, XH) > 1) goto fin;
 	rcn = 0; continue;
       }
-      if (elladd(nbc, XT + dp*nbc, XH + rcn*nbc2, XH + rcn*nbc2 + nbc2) > 1)
+      if (elladd(N, nbc, XT + dp*nbc, XH + rcn*nbc2, XH + rcn*nbc2 + nbc2) > 1)
 	goto fin;
       rcn++;
     }
     if (DEBUGLEVEL >= 7) fprintferr("\t(got initial helix)\n");
 
     /* compute [210]Q etc, which will be needed for the baby step table */
-    if (ellmult(nbc, 3, XD + (nbc<<3), X, XAUX) > 1) goto fin;
-    if (ellmult(nbc, 7, X, X, XAUX) > 1) goto fin; /* [210]Q */
+    if (ellmult(N, nbc, 3, XD + (nbc<<3), X, XAUX) > 1) goto fin;
+    if (ellmult(N, nbc, 7, X, X, XAUX) > 1) goto fin; /* [210]Q */
     /* this was the last call to ellmult() in the main loop body; may now
      * overwrite XAUX and slots XD and following */
-    if (elldouble(nbc, X, XAUX) > 1) goto fin; /* [420]Q */
-    if (elladd(nbc, X, XAUX, XT) > 1) goto fin;/* [630]Q */
-    if (elladd(nbc, X, XT, XD) > 1) goto fin;  /* [840]Q */
+    if (elldouble(N, nbc, X, XAUX) > 1) goto fin; /* [420]Q */
+    if (elladd(N, nbc, X, XAUX, XT) > 1) goto fin;/* [630]Q */
+    if (elladd(N, nbc, X, XT, XD) > 1) goto fin;  /* [840]Q */
     for (i=1; i <= gse; i++)
-      if (elldouble(nbc, XT + i*nbc2, XD + i*nbc2) > 1) goto fin;
+      if (elldouble(N, nbc, XT + i*nbc2, XD + i*nbc2) > 1) goto fin;
     /* (the last iteration has initialized XG to [210*2^(gse+1)]Q) */
 
     if (DEBUGLEVEL >= 4)
@@ -1040,12 +1039,12 @@ ellfacteur(GEN n, int insist)
       if (DEBUGLEVEL >= 7)
 	fprintferr("\t(extracted precomputed helix / baby step entries)\n");
       /* ... glue in between, up to 16*210 ... */
-      if (elladd0(12, 4,	/* 12 pts + (4 pts replicated thrice) */
+      if (elladd0(N, 12, 4,	/* 12 pts + (4 pts replicated thrice) */
 		  XB + 12, XB2 + 12,
 		  XB,      XB2,
 		  XB + 16, XB2 + 16)
 	  > 1) goto fin;	/* 4 + {1,2,3} = {5,6,7} */
-      if (elladd0(28, 4,	/* 28 pts + (4 pts replicated 7fold) */
+      if (elladd0(N, 28, 4,	/* 28 pts + (4 pts replicated 7fold) */
 		  XB + 28, XB2 + 28,
 		  XB,      XB2,
 		  XB + 32, XB2 + 32)
@@ -1057,14 +1056,14 @@ ellfacteur(GEN n, int insist)
 	ulong m2 = 2UL << m;	/* will point at 2^(m-1)+1 */
 	for (j = 0; (ulong)j < m2-64; j+=64) /* executed 0 times when m == 5 */
 	{
-	  if (elladd0(64, 4,
+	  if (elladd0(N, 64, 4,
 		      XB + m2 - 4, XB2 + m2 - 4,
 		      XB + j,      XB2 + j,
 		      XB + m2 + j,
 		      (m<(ulong)gse ? XB2 + m2 + j : NULL))
 	      > 1) goto fin;
 	} /* j == m2-64 here, 60 points left */
-	if (elladd0(60, 4,
+	if (elladd0(N, 60, 4,
 		    XB + m2 - 4, XB2 + m2 - 4,
 		    XB + j,      XB2 + j,
 		    XB + m2 + j,
@@ -1079,7 +1078,7 @@ ellfacteur(GEN n, int insist)
       p = p0; d = d0; rcn = rcn0;
       gl = gen_1; av1 = avma;
       /* scratchspace for prod (x_i-x_j) */
-      avtmp = (pari_sp)new_chunk(8 * lgefint(n));
+      avtmp = (pari_sp)new_chunk(8 * lgefint(N));
       /* the correct entry in XB to use depends on bstp and on where we are
        * on the helix.  As we skip from prime to prime, bstp will be incre-
        * mented by snextpr() each time we wrap around through residue class
@@ -1106,19 +1105,19 @@ ellfacteur(GEN n, int insist)
 	/* check whether it's giant-step time */
 	if (k > gss)
 	{ /* take gcd */
-	  gl = gcdii(gl, n);
-	  if (!is_pm1(gl) && !equalii(gl, n)) { p = p2; goto fin; }
+	  gl = gcdii(gl, N);
+	  if (!is_pm1(gl) && !equalii(gl, N)) { p = p2; goto fin; }
 	  gl = gen_1; avma = av1;
 	  while (k > gss) /* hm, just how large are those prime gaps? */
 	  { /* giant step */
 	    if (DEBUGLEVEL >= 7) fprintferr("\t(giant step at p = %lu)\n", p);
-	    if (elladd0(64, 4,
+	    if (elladd0(N, 64, 4,
 			XG + i, YG + i,
 			Xh, Yh, Xh, Yh) > 1) goto fin;
-	    if (elladd0(64, 4,
+	    if (elladd0(N, 64, 4,
 			XG + i, YG + i,
 			Xh + 64, Yh + 64, Xh + 64, Yh + 64) > 1) goto fin;
-	    if (elladd0(64, 4,
+	    if (elladd0(N, 64, 4,
 			XG + i, YG + i,
 			Xh + 128, Yh + 128, Xh + 128, Yh + 128) > 1) goto fin;
 	    bstp -= (gss << 1);
@@ -1131,12 +1130,12 @@ ellfacteur(GEN n, int insist)
 	/* accumulate product of differences of X coordinates */
 	j = rcn<<2;
 	avma = avtmp; /* go to garbage zone */
-	gl = modii(mulii(gl, subii(XB[m],   Xh[j])), n);
-	gl = modii(mulii(gl, subii(XB[m+1], Xh[j+1])), n);
-	gl = modii(mulii(gl, subii(XB[m+2], Xh[j+2])), n);
+	gl = modii(mulii(gl, subii(XB[m],   Xh[j])), N);
+	gl = modii(mulii(gl, subii(XB[m+1], Xh[j+1])), N);
+	gl = modii(mulii(gl, subii(XB[m+2], Xh[j+2])), N);
 	gl = mulii(gl, subii(XB[m+3], Xh[j+3]));
 	avma = av1;
-	gl = modii(gl, n);
+	gl = modii(gl, N);
       }	/* loop over p */
       avma = av1;
     } /* for i (loop over sets of 4 curves) */
