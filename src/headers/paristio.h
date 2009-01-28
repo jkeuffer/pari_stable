@@ -31,7 +31,7 @@ typedef struct GENbin {
 		0: t_INT according to current kernel */
 } GENbin;
 
-struct pari_stack
+struct pari_mainstack
 {
   pari_sp top, bot, avma;
   size_t memused;
@@ -39,14 +39,14 @@ struct pari_stack
 
 struct pari_thread
 {
-  struct pari_stack st;
+  struct pari_mainstack st;
   GEN data;
 };
 
 typedef struct stackzone
 {
   pari_sp zonetop;
-  struct pari_stack st;
+  struct pari_mainstack st;
 } stackzone;
 
 typedef struct entree {

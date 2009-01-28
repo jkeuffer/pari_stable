@@ -580,7 +580,7 @@ pari_init_functions()
 /*********************************************************************/
 
 static void
-pari_stack_alloc(struct pari_stack *st, size_t s)
+pari_stack_alloc(struct pari_mainstack *st, size_t s)
 {
   st->bot = (pari_sp)pari_malloc(s);
   st->avma = st->top = st->bot+s;
@@ -588,14 +588,14 @@ pari_stack_alloc(struct pari_stack *st, size_t s)
 }
 
 static void
-pari_stack_free(struct pari_stack *st)
+pari_stack_free(struct pari_mainstack *st)
 {
   free((void*)st->bot);
   st->avma = st->top = st->bot = 0;
 }
 
 static void
-pari_stack_use(struct pari_stack *st)
+pari_stack_use(struct pari_mainstack *st)
 {
   bot = st->bot; top = st->top; avma = st->avma;
   memused = st->memused;
