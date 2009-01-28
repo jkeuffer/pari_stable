@@ -5,48 +5,54 @@
 void *
 mydet(void *arg)
 {
-  GEN F, M = (GEN)arg;
-
-  pari_thread_init(8000000); /* This thread uses a local PARI stack of 8MB */
-  /* Compute det(M) using local stack, then clone before freeing the stack */
-  F = gclone( det(M) );
-  pari_thread_close();     /* Free the local PARI stack */
-  pthread_exit((void*)F);  /* End the thread and return F */
-  return NULL;             /* Not reached */
+  GEN F, M;
+  /* Set up thread stack and get thread parameter */
+  M = pari_thread_init((struct pari_thread*) arg);
+  F = det(M);
+  /* Free memory used by the thread */
+  pari_thread_close();
+  return (void*)F;
 }
 
 void *
 myfactor(void *arg)  /* same principles */
 {
-  GEN F, N = (GEN)arg;
-
-  pari_thread_init(4000000);
-  F = gclone( factor(N) );
+  GEN F, N;
+  N = pari_thread_init((struct pari_thread*) arg);
+  F = factor(N);
   pari_thread_close();
-  pthread_exit((void*)F);
-  return NULL;
+  return (void*)F;
 }
 
 int
 main(void)
 {
   GEN M,N1,N2, F1,F2,D;
-  pthread_t th1, th2, th3; /* Allocate POSIX-thread variables */
-
+  /* Allocate POSIX-thread variables */
+  pthread_t th1, th2, th3;
+  /* Allocate pari thread variables */
+  struct pari_thread pth1, pth2, pth3;
   /* Initialise the main PARI stack and global objects (gen_0, etc.) */
   pari_init(4000000,500000);
   /* Compute in the main PARI stack */
   N1 = addis(int2n(256), 1); /* 2^256 + 1 */
   N2 = subis(int2n(193), 1); /* 2^193 - 1 */
   M = mathilbert(80);
+  /*Allocate pari thread structures */
+  pari_thread_alloc(&pth1,4000000,N1);
+  pari_thread_alloc(&pth2,4000000,N2);
+  pari_thread_alloc(&pth3,4000000,M);
   /* pthread_create and pthread_join are standard POSIX-thread functions
    * to start and get the result of threads. */
-  pthread_create(&th1,NULL, &myfactor, (void*)N1); /* Start threads */
-  pthread_create(&th2,NULL, &myfactor, (void*)N2);
-  pthread_create(&th3,NULL, &mydet,    (void*)M);
+  pthread_create(&th1,NULL, &myfactor, (void*)&pth1); /* Start threads */
+  pthread_create(&th2,NULL, &myfactor, (void*)&pth2);
+  pthread_create(&th3,NULL, &mydet,    (void*)&pth3);
   pthread_join(th1,(void*)&F1); /* Wait for termination, get the results */
   pthread_join(th2,(void*)&F2);
   pthread_join(th3,(void*)&D);
   pari_printf("F1=%Ps\nF2=%Ps\nlog(D)=%Ps\n", F1, F2, glog(D,3));
+  pari_thread_free(&pth1);
+  pari_thread_free(&pth2);
+  pari_thread_free(&pth3);
   return 0;
 }

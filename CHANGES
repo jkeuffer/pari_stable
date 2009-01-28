@@ -411,6 +411,7 @@ BA 92- make test-xxx: trap SIGINT in benching script to exit on <C-C>
        (shortcut for "the largest precomputed prime")
 BA105- [native kernel] Schoenhage-Strassen multiplication/squaring
   106- factorff(A, p, T): make p & T optional if A has t_FFELT coefficients
+BA107- [TLS] Change pari_thread calling convention
 
   Added
     1- many new benches (make test-all)

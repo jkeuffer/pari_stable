@@ -576,22 +576,66 @@ pari_init_functions()
 }
 
 /*********************************************************************/
-/*                       LIBPARI INIT / CLOSE                        */
+/*                       PARI THREAD                                 */
 /*********************************************************************/
-void
-pari_thread_init(size_t parisize)
+
+static void
+pari_stack_alloc(struct pari_stack *st, size_t s)
 {
-  pari_init_stack(parisize);
+  st->bot = (pari_sp)pari_malloc(s);
+  st->avma = st->top = st->bot+s;
+  st->memused = 0;
+}
+
+static void
+pari_stack_free(struct pari_stack *st)
+{
+  free((void*)st->bot);
+  st->avma = st->top = st->bot = 0;
+}
+
+static void
+pari_stack_use(struct pari_stack *st)
+{
+  bot = st->bot; top = st->top; avma = st->avma;
+  memused = st->memused;
+}
+
+/* Initial PARI thread structure t with a stack of size s and
+ * argument arg */
+
+void
+pari_thread_alloc(struct pari_thread *t, size_t s, GEN arg)
+{
+  pari_stack_alloc(&t->st,s);
+  t->data = arg;
+}
+
+void
+pari_thread_free(struct pari_thread *t)
+{
+  pari_stack_free(&t->st);
+}
+
+GEN
+pari_thread_init(struct pari_thread *t)
+{
+  pari_stack_use(&t->st);
   pari_init_floats();
   pari_init_seadata();
+  return t->data;
 }
+
 void
 pari_thread_close(void)
 {
-  pari_free((void *)bot);
   pari_close_floats();
   pari_close_seadata();
 }
+
+/*********************************************************************/
+/*                       LIBPARI INIT / CLOSE                        */
+/*********************************************************************/
 
 static void
 pari_exit()
@@ -1576,22 +1620,17 @@ switch_stack(stackzone *z, long n)
 
   if (n)
   { /* switch to parallel stack */
-    z->bot     = bot;
-    z->top     = top;
-    z->avma    = avma;
-    z->memused = memused;
+    z->st.bot     = bot;
+    z->st.top     = top;
+    z->st.avma    = avma;
+    z->st.memused = memused;
     bot     = (pari_sp) (z+1);
     top     = z->zonetop;
     avma    = top;
     memused = DISABLE_MEMUSED;
   }
-  else
-  { /* back to normalcy */
-    bot     = z->bot;
-    top     = z->top;
-    avma    = z->avma;
-    memused = z->memused;
-  }
+  else /* back to normalcy */
+    pari_stack_use(&z->st);
   return NULL;
 }
 

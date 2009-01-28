@@ -1806,7 +1806,7 @@ void    pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts);
 void    pari_init(size_t parisize, ulong maxprime);
 void    pari_stackcheck_init(void *stack_base);
 void    pari_sig_init(void (*f)(int));
-void    pari_thread_init(size_t parisize);
+GEN     pari_thread_init(struct pari_thread *t);
 void    pari_thread_close(void);
 void    pari_warn(int numerr, ...);
 stackzone* switch_stack(stackzone *z, long n);
