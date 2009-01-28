@@ -49,7 +49,7 @@ GEN pari_colormap = NULL, pari_graphcolors = NULL;
 entree  **varentries;
 
 THREAD pari_sp bot, top, avma;
-size_t memused;
+THREAD size_t memused;
 void   *global_err_data = NULL;
 
 static void ** MODULES, ** OLDMODULES;
