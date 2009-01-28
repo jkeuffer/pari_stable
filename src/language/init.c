@@ -560,7 +560,7 @@ gp_init_functions(void)
 }
 
 static void
-pari_init_functions()
+pari_init_functions(void)
 {
   funct_old_hash = init_fun_hash();
   functions_hash = init_fun_hash();
