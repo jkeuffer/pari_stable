@@ -7,7 +7,7 @@ mydet(void *arg)
 {
   GEN F, M;
   /* Set up thread stack and get thread parameter */
-  M = pari_thread_init((struct pari_thread*) arg);
+  M = pari_thread_start((struct pari_thread*) arg);
   F = det(M);
   /* Free memory used by the thread */
   pari_thread_close();
@@ -18,7 +18,7 @@ void *
 myfactor(void *arg)  /* same principles */
 {
   GEN F, N;
-  N = pari_thread_init((struct pari_thread*) arg);
+  N = pari_thread_start((struct pari_thread*) arg);
   F = factor(N);
   pari_thread_close();
   return (void*)F;

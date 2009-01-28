@@ -1806,8 +1806,9 @@ void    pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts);
 void    pari_init(size_t parisize, ulong maxprime);
 void    pari_stackcheck_init(void *stack_base);
 void    pari_sig_init(void (*f)(int));
-GEN     pari_thread_init(struct pari_thread *t);
 void    pari_thread_close(void);
+void    pari_thread_init(void);
+GEN     pari_thread_start(struct pari_thread *t);
 void    pari_warn(int numerr, ...);
 stackzone* switch_stack(stackzone *z, long n);
 GEN     trap0(const char *e, GEN f, GEN r);
@@ -2274,6 +2275,7 @@ ulong   uprimepi(ulong n);
 
 GEN     genrand(GEN N);
 GEN     getrand(void);
+void    pari_init_rand(void);
 ulong   pari_rand(void);
 GEN     randomi(GEN x);
 ulong   random_Fl(ulong n);

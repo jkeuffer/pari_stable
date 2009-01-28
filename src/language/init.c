@@ -617,13 +617,12 @@ pari_thread_free(struct pari_thread *t)
   pari_stack_free(&t->st);
 }
 
-GEN
-pari_thread_init(struct pari_thread *t)
+void
+pari_thread_init(void)
 {
-  pari_stack_use(&t->st);
+  pari_init_rand();
   pari_init_floats();
   pari_init_seadata();
-  return t->data;
 }
 
 void
@@ -631,6 +630,14 @@ pari_thread_close(void)
 {
   pari_close_floats();
   pari_close_seadata();
+}
+
+GEN
+pari_thread_start(struct pari_thread *t)
+{
+  pari_stack_use(&t->st);
+  pari_thread_init();
+  return t->data;
 }
 
 /*********************************************************************/
@@ -669,8 +676,7 @@ pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts)
 
   primetab = cgetalloc(t_VEC, 1);
   varentries = (entree**) pari_calloc((MAXVARN+1)*sizeof(entree*));
-  pari_init_floats();
-  pari_init_seadata();
+  pari_thread_init();
 
   pari_init_functions();
   cb_pari_whatnow = NULL;

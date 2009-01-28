@@ -37,7 +37,7 @@ Child thread:
 void *
 child_thread(void *arg)
 {
-  GEN data = pari_thread_init((struct pari_thread*) arg);
+  GEN data = pari_thread_start((struct pari_thread*) arg);
   GEN result;
 ...
   /* Compute result from data */
@@ -56,13 +56,19 @@ Free the PARI stack associated with the PARI thread data \kbd{pth}.
 Any \kbd{GEN} objects returned by the thread in the thread stack need to be
 saved before running this command.
 
-\fun{GEN}{pari_thread_init}{struct pari_thread *t}
-Initialize the thread using the PARI thread data \kbd{pth} and return the
-thread argument.
+\fun{void}{pari_thread_init}{void}
+Initialize the thread-local PARI data structures.
+This function is called by \kbd{pari\_thread\_start}.
+
+\fun{GEN}{pari_thread_start}{struct pari_thread *t}
+Initialize the thread-local PARI data structures and 
+set up the thread stack using the PARI thread data \kbd{pth}.
+This function returns the thread argument that was given to
+\kbd{pari\_thread\_alloc}.
 
 \fun{void}{pari_thread_close}{void}
-Free memory used by this thread. Any \kbd{GEN} objects returned by this thread
-need to stored in the thread stack.
+Free the thread-local PARI data structures, including clones. Any \kbd{GEN}
+objects returned by this thread need to stored in the thread stack.
 
 %\fun{void}{pari_stack_alloc}{struct pari_stack *st, size_t s}
 %\fun{void}{pari_stack_free}{struct pari_stack *st}

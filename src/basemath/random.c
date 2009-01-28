@@ -28,7 +28,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
  * 32-bit or 64-bit integer random number generator with period at
  * least 2**4096-1. It is assumed that "ulong" is a 32-bit or 64-bit integer */
 static THREAD ulong xorgen_w;
-static THREAD int xorgen_i = -1; /* not initialized */
+static THREAD int xorgen_i;
 
 #ifdef LONG_IS_64BIT /* weyl = odd approximation to 2^BIL*(sqrt(5)-1)/2. */
   static const ulong weyl = 0x61c8864680b583ebUL;
@@ -62,13 +62,14 @@ init_xor4096i(ulong seed)
   }
 }
 
+void pari_init_rand(void) { init_xor4096i(1); }
+
 /* One random number uniformly distributed in [0..2**BIL) is returned, where
  * BIL = 8*sizeof(ulong) = 32 or 64. */
 ulong
 pari_rand(void)
 {
   ulong t, v;
-  if (xorgen_i < 0) init_xor4096i(1);
 
   t = state[xorgen_i = (xorgen_i+1)&(r-1)];
   v = state[(xorgen_i+(r-s))&(r-1)];   /* Index is (xorgen_i-s) mod r */
