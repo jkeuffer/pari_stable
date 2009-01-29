@@ -843,8 +843,9 @@ LargeSols(GEN P, GEN tnf, GEN rhs, GEN ne, GEN *pS)
   {
     ne = bnfisintnorm(bnf, rhs);
     if (!is_pm1(gel(csts, 7)) && !is_pm1(bnf_get_no(bnf)) && !is_pm1(rhs))
-      pari_warn(warner, "Non trivial conditional class group.\n  *** May miss solutions of the norm equation");
+      pari_warn(warner, "Non trivial conditional class group.\n  *** The result returned by 'thue' is conditional on the GRH");
   }
+  else if (typ(ne) != t_VEC) pari_err(typeer, "thue");
   if (lg(ne)==1) return NULL;
 
   nf_get_sign(bnf_get_nf(bnf), &s, &t);
