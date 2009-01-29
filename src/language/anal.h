@@ -62,7 +62,6 @@ extern entree  functions_gp[];
 extern entree  functions_highlevel[];
 
 /* Variables containing the list of old PARI fonctions (up to 1.39.15) */
-extern entree **funct_old_hash;    /* hashtable */
 extern entree  oldfonctions[], functions_oldgp[];
 
 /* colors */

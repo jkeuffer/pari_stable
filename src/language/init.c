@@ -55,7 +55,7 @@ void   *global_err_data = NULL;
 static void ** MODULES, ** OLDMODULES;
 static pari_stack s_MODULES, s_OLDMODULES;
 const long functions_tblsz = 135; /* size of functions_hash */
-entree **functions_hash, **funct_old_hash;
+entree **functions_hash;
 
 void *foreignHandler; 	              /* Handler for foreign commands.   */
 char foreignExprSwitch = 3; 	      /* Just some unprobable char.      */
@@ -554,15 +554,11 @@ gp_init_functions(void)
 static void
 pari_init_functions(void)
 {
-  funct_old_hash = pari_calloc(sizeof(entree*)*functions_tblsz);
-  functions_hash = pari_calloc(sizeof(entree*)*functions_tblsz);
-
-  pari_fill_hashtable(funct_old_hash, oldfonctions);
-
   stack_init(&s_MODULES, sizeof(*MODULES),(void**)&MODULES);
   stack_pushp(&s_MODULES,functions_basic);
   stack_init(&s_OLDMODULES, sizeof(*OLDMODULES),(void**)&OLDMODULES);
   stack_pushp(&s_OLDMODULES,oldfonctions);
+  functions_hash = pari_calloc(sizeof(entree*)*functions_tblsz);
   pari_fill_hashtable(functions_hash,
 		      new_fun_set? functions_basic:oldfonctions);
 }
@@ -711,7 +707,6 @@ pari_close_opts(ulong init_opts)
   while (cur_block) killblock(cur_block);
   killallfiles(1);
   free((void*)functions_hash);
-  free((void*)funct_old_hash);
   free((void*)bot);
   free((void*)diffptr);
   free(current_logfile);

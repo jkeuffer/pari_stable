@@ -57,11 +57,6 @@ whatnow(const char *s, int flag)
   entree *ep;
 
   if (flag && s[0] && !s[1]) return 0; /* special case "i" and "o" */
-  if (!is_identifier(s) || !is_entry_intern(s,funct_old_hash,NULL))
-  {
-    if (!flag) msg("As far as I can recall, this function never existed");
-    return 0;
-  }
   n = 0;
   do
     def = (oldfonctions[n++]).name;
@@ -73,6 +68,14 @@ whatnow(const char *s, int flag)
       def = (functions_oldgp[m++]).name;
     while (def && strcmp(def,s));
     n += m - 1;
+  }
+  /* Above linear search is slow, esp. if the symbol is not found. BUT no 
+   * point in wasting time by preallocating [ or autoloading ] a hashtable:
+   * whatnow() is never used in a case where speed would be necessary */
+  if (!def)
+  {
+    if (!flag) msg("As far as I can recall, this function never existed");
+    return 0;
   }
 
   wp = whatnowlist[n-1]; def = wp.name;
