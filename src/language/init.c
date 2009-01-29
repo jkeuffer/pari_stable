@@ -507,14 +507,6 @@ pari_init_defaults(void)
 pari_stack *pari_get_modules(void) { return &s_MODULES; }
 pari_stack *pari_get_oldmodules(void) { return &s_OLDMODULES; }
 
-static entree **
-init_fun_hash(void) {
-  entree **H = (entree **) pari_malloc(sizeof(entree*)*functions_tblsz);
-  long i;
-  for (i = 0; i < functions_tblsz; i++) H[i] = NULL;
-  return H;
-}
-
 /* Initialize hashtable */
 static void
 init_hashtable(entree **table, long tblsz)
@@ -562,8 +554,8 @@ gp_init_functions(void)
 static void
 pari_init_functions(void)
 {
-  funct_old_hash = init_fun_hash();
-  functions_hash = init_fun_hash();
+  funct_old_hash = pari_calloc(sizeof(entree*)*functions_tblsz);
+  functions_hash = pari_calloc(sizeof(entree*)*functions_tblsz);
 
   pari_fill_hashtable(funct_old_hash, oldfonctions);
 
