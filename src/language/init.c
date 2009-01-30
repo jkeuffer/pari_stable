@@ -611,13 +611,19 @@ pari_thread_init(void)
   pari_init_rand();
   pari_init_floats();
   pari_init_seadata();
+  pari_init_parser();
+  pari_init_compiler();
+  pari_init_evaluator();
 }
 
 void
 pari_thread_close(void)
 {
-  pari_close_floats();
+  pari_close_evaluator();
+  pari_close_compiler();
+  pari_close_parser();
   pari_close_seadata();
+  pari_close_floats();
 }
 
 GEN
@@ -658,9 +664,6 @@ pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts)
   diffptr = initprimes(maxprime);
   init_universal_constants();
   if (pari_kernel_init()) pari_err(talker,"Cannot initialize kernel");
-  pari_init_parser();
-  pari_init_compiler();
-  pari_init_evaluator();
 
   primetab = cgetalloc(t_VEC, 1);
   varentries = (entree**) pari_calloc((MAXVARN+1)*sizeof(entree*));
@@ -700,9 +703,7 @@ pari_close_opts(ulong init_opts)
   free((void*)varentries);
   free((void*)primetab);
   free((void*)universal_constants);
-  pari_close_parser();
-  pari_close_compiler();
-  pari_close_evaluator();
+  pari_thread_close();
 
   while (cur_block) killblock(cur_block);
   killallfiles(1);
