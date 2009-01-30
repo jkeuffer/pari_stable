@@ -558,7 +558,7 @@ pari_init_functions(void)
   stack_pushp(&s_MODULES,functions_basic);
   stack_init(&s_OLDMODULES, sizeof(*OLDMODULES),(void**)&OLDMODULES);
   stack_pushp(&s_OLDMODULES,oldfonctions);
-  functions_hash = pari_calloc(sizeof(entree*)*functions_tblsz);
+  functions_hash = (entree**) pari_calloc(sizeof(entree*)*functions_tblsz);
   pari_fill_hashtable(functions_hash,
 		      new_fun_set? functions_basic:oldfonctions);
 }
