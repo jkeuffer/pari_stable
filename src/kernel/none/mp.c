@@ -1516,7 +1516,7 @@ sqrispec_fft(GEN a, long na)
   for(i=1; i<=n; i++)
   {
     affii(Zf_sqr(gel(FFT,i), M), gel(FFT,i));
-    av=avma;
+    avma=av;
   }
   if (DEBUGLEVEL>=9) msgTIMER(&T,"sqr");
   muliifft_dis(ord-o, ord, M, FFT, 0, n);
@@ -1524,7 +1524,7 @@ sqrispec_fft(GEN a, long na)
   for(i=1; i<=n; i++)
   {
     affii(Zf_shift(gel(FFT,i), (ord>>1)-k, M), gel(FFT,i));
-    av=avma;
+    avma=av;
   }
   return gerepileuptoint(ltop, muliifft_unspliti(FFT,bs,2+len));
 }
@@ -1532,7 +1532,7 @@ sqrispec_fft(GEN a, long na)
 static GEN
 muliispec_fft(GEN a, GEN b, long na, long nb)
 {
-  pari_sp av, ltop = avma;
+  pari_sp av, av2, ltop = avma;
   long len = na+nb;
   long k, mod, bs, n, ord;
   GEN FFT, FFTb, M;
@@ -1548,10 +1548,14 @@ muliispec_fft(GEN a, GEN b, long na, long nb)
   av=avma;
   muliifft_dit(o, ord, M, FFT, 0, n);
   FFTb = muliifft_spliti(b, nb, bs, n, mod);
+  av2 = avma;
   muliifft_dit(o, ord, M, FFTb, 0, n);
   if (DEBUGLEVEL>=9) msgTIMER(&T,"FFT");
   for(i=1; i<=n; i++)
+  {
     affii(Zf_mul(gel(FFT,i), gel(FFTb,i), M), gel(FFT,i));
+    avma=av2;
+  }
   avma=av;
   if (DEBUGLEVEL>=9) msgTIMER(&T,"mul");
   muliifft_dis(ord-o, ord, M, FFT, 0, n);
