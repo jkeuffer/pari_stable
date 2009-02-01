@@ -1430,9 +1430,26 @@ Flxq_sqr(GEN x,GEN T,ulong p)
   return Flx_rem(Flx_sqr(x,p),T,p);
 }
 
+static GEN
+Flxq_mul_mg(GEN x,GEN y,GEN mg,GEN T,ulong p)
+{
+  GEN z = Flx_mul(x,y,p);
+  if (lg(T) > lg(z)) return z;
+  return Flx_rem_montgomery(z, mg, T, p);
+}
+
+/* Square of y in Z/pZ[X]/(T), as t_VECSMALL. */
+static GEN
+Flxq_sqr_mg(GEN y,GEN mg,GEN T,ulong p)
+{
+  GEN z = Flx_sqr(y,p);
+  if (lg(T) > lg(z)) return z;
+  return Flx_rem_montgomery(z, mg, T, p);
+}
+
 typedef struct {
-  GEN pol;
   GEN mg;
+  GEN pol;
   ulong p;
 } Flxq_muldata;
 
@@ -1440,13 +1457,13 @@ static GEN
 _sqr_montgomery(void *data, GEN x)
 {
   Flxq_muldata *D = (Flxq_muldata*)data;
-  return Flx_rem_montgomery(Flx_sqr(x,D->p),D->mg, D->pol, D->p);
+  return Flxq_sqr_mg(x,D->mg, D->pol, D->p);
 }
 static GEN
 _mul_montgomery(void *data, GEN x, GEN y)
 {
   Flxq_muldata *D = (Flxq_muldata*)data;
-  return Flx_rem_montgomery(Flx_mul(x,y,D->p),D->mg, D->pol, D->p);
+  return Flxq_mul_mg(x,y,D->mg, D->pol, D->p);
 }
 
 static GEN
@@ -1519,24 +1536,22 @@ Flxq_div(GEN x,GEN y,GEN T,ulong p)
   return gerepileuptoleaf(av, Flxq_mul(x,Flxq_inv(y,T,p),T,p));
 }
 
-/* generates the list of powers of x of degree 0,1,2,...,l*/
 GEN
 Flxq_powers(GEN x, long l, GEN T, ulong p)
 {
+  GEN mg=Flx_invmontgomery(T,p);
   GEN V = cgetg(l+2,t_VEC);
   long i, v = T[1];
   gel(V,1) = pol1_Flx(v);  if (l==0) return V;
   gel(V,2) = vecsmall_copy(x); if (l==1) return V;
-  gel(V,3) = Flxq_sqr(x,T,p);
-  if ((degpol(x)<<1) < degpol(T)) {
+  gel(V,3) = Flxq_sqr_mg(x,mg,T,p);
+  if ((degpol(x)<<1) < degpol(T))
     for(i = 4; i < l+2; i++)
-      gel(V,i) = Flxq_mul(gel(V,i-1),x,T,p);
-  } else {
-    for(i = 4; i < l+2; i++) {
-      gel(V,i) = (i&1)? Flxq_sqr(gel(V, (i+1)>>1),T,p)
-		      : Flxq_mul(gel(V, i-1),x,T,p);
-    }
-  }
+      gel(V,i) = Flxq_mul_mg(gel(V,i-1),x,mg,T,p);
+  else
+    for(i = 4; i < l+2; i++)
+      gel(V,i) = (i&1)? Flxq_sqr_mg(gel(V, (i+1)>>1),mg,T,p)
+                      : Flxq_mul_mg(gel(V, i-1),x,mg,T,p);
   return V;
 }
 
