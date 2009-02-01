@@ -903,7 +903,7 @@ Flm_Frobenius(GEN M, long r, ulong p, long v)
 
 /* Let P a polynomial != 0 and M the matrix of the x^p Frobenius automorphism in
  * FFp[X]/T. Compute P(M)
- * V=FpX_Frobenius(M, p, degpol(P), v)
+ * V=FpM_Frobenius(M, p, degpol(P), v)
  * not stack clean
  */
 
@@ -1022,7 +1022,11 @@ intersect_ker(GEN P, GEN MA, GEN U, GEN l)
     GEN M, V = Flm_Frobenius(ZM_to_Flm(MA, p), r, p, evalvarn(vu));
     if (DEBUGLEVEL>=4) msgtimer("pol[Frobenius]");
     M = FlxqV_Flx_Frobenius(V, ZX_to_Flx(U, p), ZX_to_Flx(P, p), p);
-    A = Flm_to_ZM(Flm_ker(M,p));
+    if (DEBUGLEVEL>=4) msgtimer("U[Frobenius]");
+    if (p==2)
+      A = F2m_to_ZM(F2m_ker(Flm_to_F2m(M)));
+    else
+      A = Flm_to_ZM(Flm_ker(M,p));
   }
   else
   {

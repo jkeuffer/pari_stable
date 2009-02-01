@@ -723,12 +723,41 @@ ZV_to_F2v(GEN x)
 }
 
 GEN
+Flv_to_F2v(GEN x)
+{
+  long l = lg(x)-1;
+  GEN z = cgetg(nbits2prec(l), t_VECSMALL);
+  long i,j,k;
+  z[1] = l;
+  for(i=1, k=1,j=BITS_IN_LONG;i<=l;i++,j++)
+  {
+    if (j==BITS_IN_LONG)
+    {
+      j=0; k++; z[k]=0;
+    }
+    if (x[i]&1L)
+      z[k]|=1UL<<j;
+  }
+  return z;
+}
+
+GEN
 ZM_to_F2m(GEN x)
 {
   long j, l = lg(x);
   GEN y = cgetg(l,t_MAT);
   if (l == 1) return y;
   for (j=1; j<l; j++) gel(y,j) = ZV_to_F2v(gel(x,j));
+  return y;
+}
+
+GEN
+Flm_to_F2m(GEN x)
+{
+  long j, l = lg(x);
+  GEN y = cgetg(l,t_MAT);
+  if (l == 1) return y;
+  for (j=1; j<l; j++) gel(y,j) = Flv_to_F2v(gel(x,j));
   return y;
 }
 
