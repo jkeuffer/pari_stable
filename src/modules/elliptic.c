@@ -3787,8 +3787,8 @@ topol(GEN x)
   switch(typ(x))
   {
     case t_INTMOD: return gel(x,2);
-    case t_POLMOD: return gtovec(gel(x,2));
-    case t_FFELT:  return gtovec(FF_to_FpXQ(x));
+    case t_POLMOD: return gtovecrev(gel(x,2));
+    case t_FFELT:  return gtovecrev(FF_to_FpXQ(x));
   }
   return x;
 }
@@ -3806,8 +3806,9 @@ _hash(GEN x)
   else
   {
     long i, l=lg(r);
-    for(i=1;i<l;i++)
-      if (signe(gel(r,i))) h^=mod2BIL(gel(r,i));
+    for (i=1;i<l;i++)
+      if (signe(gel(r,i)))
+        h ^= mod2BIL(gel(r,i))<<((i-1)&(BITS_IN_LONG-1));
   }
   avma = av; return h;
 }
