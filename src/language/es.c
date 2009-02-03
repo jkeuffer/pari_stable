@@ -955,14 +955,20 @@ shift_add(int x, int ch)
 static long
 get_sigd(GEN gvalue, char ch, int maxwidth)
 {
-  long sigd;
+  long sigd, e;
   if (maxwidth < 0) return prec2ndec(precreal);
   switch(ch)
   {
     case 'E':
     case 'e': sigd = maxwidth+1; break;
     case 'F':
-    case 'f': sigd = ex10(gexpo(gvalue)) + 1 + maxwidth; break;
+    case 'f': 
+      e = gexpo(gvalue);
+      if (e == -(long)HIGHEXPOBIT) /* exact 0 */
+        sigd = 0;
+      else
+        sigd = ex10(e) + 1 + maxwidth; 
+      break;
     /* 'g', 'G' */
     default : sigd = maxwidth? maxwidth: 1; break;
   }

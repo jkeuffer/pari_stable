@@ -64,3 +64,4 @@ printf("%%-20.10g for aa : %-20.10g\n", aa) /* ERROR : aa is not a t_REAL */
 \\regression tests
 10^38 + 1.
 printf("%.100f",1.)
+printf("%1.0f",0)
