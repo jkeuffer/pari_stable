@@ -664,7 +664,7 @@ BPSW_isprime(GEN N)
   GEN fa, P, F, p, N_1;
 
   if (BPSW_isprime_small(N)) return 1;
-  N_1 = subis(N,1); fa = Z_factor_limit(N_1, 1<<19);
+  N_1 = subis(N,1); fa = Z_factor_limit(N_1, minss(1<<19, maxprime()));
   l = lg(gel(fa,1))-1; p = gcoeff(fa,l,1);
   F = diviiexact(N_1,  powii(p, gcoeff(fa,l,2)));
   P = gel(fa,1);
