@@ -2617,6 +2617,18 @@ These routine return pseudo-random integers uniformly distributed in some
 interval. The all use the same underlying generator which can be seeded and
 restarted using \tet{getrand} and \tet{setrand}.
 
+\fun{void}{setrand}{GEN seed} reseeds the random number generator using the
+seed $n$. The seed is either a technical array output by \kbd{getrand}
+or a small positive integer, used to generate deterministically a suitable
+state array. For instance, running a randomized computation starting by
+\kbd{setrand(1)} twice will generate the exact same output.
+
+\fun{GEN}{getrand}{void} returns the current value of the seed used by the
+pseudo-random number generator \tet{random}. Useful mainly for debugging
+purposes, to reproduce a specific chain of computations. The returned value
+is technical (reproduces an internal state array of type \typ{VECSMALL}),
+and can only be used as an argument to \tet{setrand}.
+
 \fun{ulong}{pari_rand}{void} returns a random $0 \leq x < 2^\B$.
 
 \fun{long}{random_bits}{long k} returns a random $0 \leq x < 2^k$. Assumes
