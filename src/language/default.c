@@ -771,7 +771,7 @@ sd_parisize(const char *v, long flag)
   GEN r = sd_ulong(v,flag,"parisize",&n, 10000,LONG_MAX,NULL);
   if (n != size) {
     if (flag == d_INITRC)
-      pari_init_stack(n);
+      pari_init_stack(n, size);
     else
       allocatemem0(r);
   }
@@ -781,16 +781,15 @@ sd_parisize(const char *v, long flag)
 GEN
 sd_primelimit(const char *v, long flag)
 {
-  ulong n = GP_DATA->primelimit;
+  ulong max = maxprime(), n = max;
   GEN r = sd_ulong(v,flag,"primelimit",&n, 0,2*(ulong)(LONG_MAX-1024) + 1,NULL);
-  if (n != GP_DATA->primelimit)
+  if (n != max)
   {
     if (flag != d_INITRC)
     {
       byteptr ptr = initprimes(n);
       pari_free(diffptr); diffptr = ptr;
     }
-    GP_DATA->primelimit = n;
   }
   return r;
 }
@@ -1069,7 +1068,6 @@ default_gp_data(void)
     | USE_READLINE
 #endif
   );
-  D->primelimit = 500000;
   D->lim_lines = 0;
   D->T    = &__T;
   D->hist = &__HIST;

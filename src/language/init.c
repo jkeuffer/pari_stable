@@ -442,10 +442,11 @@ fix_size(size_t a)
   if (b < 1024) b = 1024;
   return b;
 }
+/* old = current stack size (0 = unallocated), size = new size */
 void
-pari_init_stack(size_t size)
+pari_init_stack(size_t size, size_t old)
 {
-  size_t s = fix_size(size), old = top - bot;
+  size_t s = fix_size(size);
   if (old != s) {
     if (old) pari_free((void*)bot);
     BLOCK_SIGINT_START;
@@ -494,11 +495,10 @@ pari_init_defaults(void)
   if (!pari_datadir) pari_datadir = (char*)GPDATADIR;
   if (pari_datadir) pari_datadir = pari_strdup(pari_datadir);
 
-  next_block=0;
+  next_block = 0;
   for (i=0; i<c_LAST; i++) gp_colors[i] = c_NONE;
   (void)sd_graphcolormap("[\"white\",\"black\",\"blue\",\"violetred\",\"red\",\"green\",\"grey\",\"gainsboro\"]", d_SILENT);
   (void)sd_graphcolors("[4, 5]", d_SILENT);
-  top = bot = 0;
 }
 
 /*********************************************************************/
@@ -653,14 +653,15 @@ pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts)
 
   pari_stackcheck_init(&u);
   if ((init_opts&INIT_DFTm)) {
-    GP_DATA = default_gp_data(); gp_expand_path(GP_DATA->path);
+    GP_DATA = default_gp_data();
+    gp_expand_path(GP_DATA->path);
     pari_init_defaults();
   }
 
   stack_init(&s_ERR_CATCH, sizeof(cell), (void**)&ERR_CATCH);
   if ((init_opts&INIT_JMPm) && setjmp(GP_DATA->env)) pari_exit();
   if ((init_opts&INIT_SIGm)) pari_sig_init(pari_sighandler);
-  pari_init_stack(parisize);
+  pari_init_stack(parisize, 0);
   diffptr = initprimes(maxprime);
   init_universal_constants();
   if (pari_kernel_init()) pari_err(talker,"Cannot initialize kernel");
@@ -1592,9 +1593,9 @@ gerepile(pari_sp av, pari_sp tetpil, GEN q)
 long
 allocatemoremem(size_t newsize)
 {
-  size_t s;
-  if (!newsize) newsize = (top - bot) << 1;
-  pari_init_stack(newsize);
+  size_t s, old = top - bot;
+  if (!newsize) newsize = old << 1;
+  pari_init_stack(newsize, old);
   s = top - bot;
   pari_warn(warner,"new stack size = %lu (%.3f Mbytes)", s, s/1048576.);
   return s;

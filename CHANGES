@@ -415,6 +415,9 @@ BA105- [native kernel] Schoenhage-Strassen multiplication/squaring
   106- factorff(A, p, T): make p & T optional if A has t_FFELT coefficients
 BA107- [TLS] Change pari_thread calling convention
   108- allow x.a1, ..., x.a6 for an "ell5" x (5-component vector)
+  109- removed 'primelimit' grom gp_data struct: we now print the actual limit
+       of the primetable, not the value input by the user (which may be a
+       little less)
 
   Added
     1- many new benches (make test-all)

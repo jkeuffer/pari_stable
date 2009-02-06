@@ -312,7 +312,6 @@ void gen_output(GEN x, pariout_t *T);
 
 /* GP_DATA */
 typedef struct {
-  ulong primelimit;
   jmp_buf env;
   gp_hist *hist;
   gp_pp *pp;
@@ -557,7 +556,7 @@ int     uisprime_nosmalldiv(ulong n);
 
 void    err_recover(long numerr);
 void    pari_init_defaults(void);
-void    pari_init_stack(size_t size);
+void    pari_init_stack(size_t size, size_t old);
 
 /* nffactor.c */
 

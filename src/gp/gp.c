@@ -343,7 +343,7 @@ usage(char *s)
   printf("Options are:\n");
   printf("\t[-f,--fast]\tFaststart: do not read .gprc\n");
   printf("\t[-q,--quiet]\tQuiet mode: do not print banner and history numbers\n");
-  printf("\t[-p,--primelimit primelimit]\n\t\t\tPrecalculate primes up to the limit\n");
+  printf("\t[-p,--primelimit limit]\n\t\t\tPrecalculate primes up to 'limit'\n");
   printf("\t[-s,--stacksize stacksize]\n\t\t\tStart with the PARI stack of given size (in bytes)\n");
   printf("\t[--emacs]\tRun as if in Emacs shell\n");
   printf("\t[--help]\tPrint this message\n");
@@ -847,8 +847,7 @@ gp_head(void)
 License, and comes WITHOUT ANY WARRANTY WHATSOEVER.");
   pari_puts("\nType ? for help, \\q to quit.\n");
   print_text("Type ?12 for how to get moral (and possibly technical) support.");
-  pari_printf("\nparisize = %lu, primelimit = %lu\n",
-              top - bot, GP_DATA->primelimit);
+  pari_printf("\nparisize = %lu, primelimit = %lu\n", top - bot, maxprime());
 }
 
 /********************************************************************/
@@ -1759,14 +1758,13 @@ init_trivial_stack(void)
   avma = top = bot + s;
 }
 
-/* return what is to become parisize */
-static size_t
-read_opt(pari_stack *p_A, long argc, char **argv)
+/* sets what is to become parisize / primelimit */
+static void
+read_opt(pari_stack *p_A, long argc, char **argv, size_t *size, ulong *plimit)
 {
   char *b = NULL, *p = NULL, *s = NULL;
-  ulong f = GP_DATA->flags;
+  ulong maxp, f = GP_DATA->flags;
   long i = 1, initrc = 1;
-  size_t size;
 
   (void)&p; (void)&b; (void)&s; /* -Wall gcc-2.95 */
 
@@ -1831,12 +1829,13 @@ read_opt(pari_stack *p_A, long argc, char **argv)
   for ( ; i < argc; i++) stack_pushp(p_A, pari_strdup(argv[i]));
 
   /* override the values from gprc */
-  testuint(p, &(GP_DATA->primelimit));
-  size = top - bot;
-  testuint(s, (ulong*)&size);
+  maxp = maxprime(); /* possibly modified from gprc */
+  if (maxp) *plimit = maxp;
+  *size = top - bot;    /* possibly modified from gprc */
+  testuint(p, plimit);
+  testuint(s, (ulong*)size);
   if (GP_DATA->flags & (EMACS|TEXMACS|TEST)) disable_color = 1;
   pari_outfile = stdout;
-  return size;
 }
 
 #ifdef WINCE
@@ -1853,6 +1852,7 @@ main(int argc, char **argv)
 #endif
   void **A;
   pari_stack s_A, *newfun, *oldfun;
+  ulong plimit = 500000;
   size_t size;
 
   GP_DATA = default_gp_data();
@@ -1864,9 +1864,9 @@ main(int argc, char **argv)
   pari_init_defaults();
   stack_init(&s_A,sizeof(*A),(void**)&A);
   stack_init(&s_bufstack, sizeof(Buffer*), (void**)&bufstack);
-  pari_init_stack(1000000*sizeof(long));
-  size = read_opt(&s_A, argc,argv);
-  pari_init_opts(size, GP_DATA->primelimit, INIT_SIGm);
+  pari_init_stack(1000000*sizeof(long), 0);
+  read_opt(&s_A, argc,argv, &size, &plimit);
+  pari_init_opts(size, plimit, INIT_SIGm);
 #ifdef SIGALRM
   (void)os_signal(SIGALRM,gp_alarm_handler);
 #endif
