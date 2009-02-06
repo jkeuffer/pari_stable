@@ -4318,12 +4318,10 @@ compute_Gr_VSx(struct ellld *el, GEN x)
 {
   pari_sp av = avma;
   long r = el->r, n;
-  GEN p1, p2, p3;
-
   /* n = 2 */
-  p2 = p3 = x;
-  p1 = divrs(sqrr(x), -2); /* (-1)^(n-1) x^n / n! */
-  p3 = shiftr(p1, -r);
+  GEN p1 = divrs(sqrr(x), -2); /* (-1)^(n-1) x^n / n! */
+  GEN p2 = x;
+  GEN p3 = shiftr(p1, -r);
   for (n = 3; ; n++)
   {
     if (expo(p3) < -el->epsbit) return gerepilecopy(av, p2);
