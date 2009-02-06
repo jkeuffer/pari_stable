@@ -220,9 +220,6 @@ find_numerator_isogeny(GEN Eba4, GEN Eba6, GEN Eca4, GEN Eca6, GEN h, GEN p,
 /*               SIMPLE ELLIPTIC CURVE OVER Fp                              */
 /****************************************************************************/
 
-INLINE int
-is_inf(GEN z) { return lg(z) < 3; }
-
 static GEN
 Fp_ell_j(GEN a4, GEN a6, GEN p)
 {
@@ -238,7 +235,7 @@ Fp_ell_dbl(GEN P, GEN a4, GEN p)
 {
   pari_sp ltop = avma;
   GEN lambda, C, D, x = gel(P,1), y = gel(P,2);
-  if (is_inf(P) || !signe(y)) return mkvec(gen_0);
+  if (ell_is_inf(P) || !signe(y)) return mkvec(gen_0);
   lambda = Fp_div(Fp_add(Fp_mulu(Fp_sqr(x,p), 3, p), a4, p),
                   Fp_mulu(y, 2, p), p);
   C = Fp_sub(Fp_sqr(lambda, p), Fp_mulu(x, 2, p), p);
@@ -251,8 +248,8 @@ Fp_ell_add_i(GEN P, GEN Q, GEN a4, GEN p)
 {
   GEN Px = gel(P,1), Py = gel(P,2);
   GEN Qx = gel(Q,1), Qy = gel(Q,2), lambda, C, D;
-  if (is_inf(P)) return Q;
-  if (is_inf(Q)) return P;
+  if (ell_is_inf(P)) return Q;
+  if (ell_is_inf(Q)) return P;
   if (equalii(Px, Qx))
   {
     if (equalii(Py, Qy))
@@ -275,7 +272,7 @@ Fp_ell_add(GEN P, GEN Q, GEN a4, GEN p)
 static GEN
 Fp_ell_inv_i(GEN P, GEN p)
 {
-  if (is_inf(P)) return P;
+  if (ell_is_inf(P)) return P;
   return mkvec2(gel(P,1), Fp_neg(gel(P,2), p));
 }
 
@@ -308,7 +305,7 @@ Fp_ell_pow(GEN P, GEN n, GEN a4, GEN p)
 {
   pari_sp av = avma;
   struct _Fp_ell E;
-  if (!signe(n) || is_inf(P)) return mkvec(gen_0);
+  if (!signe(n) || ell_is_inf(P)) return mkvec(gen_0);
   if (is_pm1(n)) return gcopy(P);
   E.a4= a4; E.p = p;
   return gerepileupto(av, leftright_pow(P, n, &E, &_Fp_ell_dbl, &_Fp_ell_add));
@@ -356,7 +353,7 @@ eigen_elldbl(void *E, GEN P)
   pari_sp ltop = avma;
   struct eigen_ellinit *Edat=(struct eigen_ellinit *)E;
   GEN p = Edat->p, h = Edat->h, x = gel(P,1), y = gel(P,2);
-  if (is_inf(P)) return gcopy(P);
+  if (ell_is_inf(P)) return gcopy(P);
   if (gequal(x, pol_x(0)) && gequal(y, gen_1))
     return Edat->X12;
   else
@@ -384,8 +381,8 @@ eigen_elladd(void *E, GEN P, GEN Q)
   GEN Px = gel(P,1), Py = gel(P,2);
   GEN Qx = gel(Q,1), Qy = gel(Q,2);
   GEN p = Edat->p, h = Edat->h, lambda, C, D;
-  if (is_inf(P)) return gcopy(Q);
-  if (is_inf(Q)) return gcopy(P);
+  if (ell_is_inf(P)) return gcopy(Q);
+  if (ell_is_inf(Q)) return gcopy(P);
   if (gequal(Px, Qx))
   {
     if (gequal(Py, Qy))
@@ -403,7 +400,7 @@ static GEN
 eigen_ellpow(struct eigen_ellinit *E, GEN z, ulong n)
 {
   pari_sp av = avma;
-  if (!n || is_inf(z)) return mkvec(gen_0);
+  if (!n || ell_is_inf(z)) return mkvec(gen_0);
   if (n == 1) return gcopy(z);
   return gerepileupto(av, leftright_pow_u(z, n, E, &eigen_elldbl, &eigen_elladd));
 }
