@@ -311,6 +311,23 @@ Fp_ell_pow(GEN P, GEN n, GEN a4, GEN p)
   return gerepileupto(av, leftright_pow(P, n, &E, &_Fp_ell_dbl, &_Fp_ell_add));
 }
 
+/* Finds a random point on E */
+static GEN
+Fp_ell_rand(GEN a4, GEN a6, GEN p)
+{
+  pari_sp ltop = avma;
+  GEN x, y, rhs;
+  do
+  {
+    avma= ltop;
+    x   = randomi(p); /*  x^3+a4*x+a6 = x*(x^2+a4)+a6  */
+    rhs = Fp_add(Fp_mul(x, Fp_add(Fp_sqr(x,p), a4, p), p), a6, p);
+  } while (kronecker(rhs, p) < 0);
+  y = Fp_sqrt(rhs, p);
+  if (!y) pari_err(talker,"not a prime number");
+  return gerepilecopy(ltop, mkvec2(x,y));
+}
+
 /****************************************************************************/
 /*                              EIGENVALUE                                  */
 /****************************************************************************/
@@ -1063,23 +1080,6 @@ possible_traces(GEN compile, GEN mask, GEN *P, int larger)
   *P = Pfinal; return V;
 }
 
-/* Finds a random point on E */
-static GEN
-find_pt_aff(GEN a4, GEN a6, GEN p)
-{
-  pari_sp ltop = avma;
-  GEN x, y, rhs;
-  do
-  {
-    avma= ltop;
-    x   = randomi(p); /*  x^3+a4*x+a6 = x*(x^2+a4)+a6  */
-    rhs = Fp_add(Fp_mul(x, Fp_add(Fp_sqr(x,p), a4, p), p), a6, p);
-  } while (kronecker(rhs, p) < 0);
-  y = Fp_sqrt(rhs, p);
-  if (!y) pari_err(talker,"not a prime number");
-  return gerepilecopy(ltop, mkvec2(x,y));
-}
-
 /* E has order o[1], ..., or o[#o], draw random points until all solutions
  * but one are eliminated */
 static GEN
@@ -1096,7 +1096,7 @@ choose_card(GEN o, GEN a4, GEN a6, GEN p)
   for(;;)
   {
     GEN lasto = gen_0;
-    GEN P = find_pt_aff(a4, a6, p), t = mkvec(gen_0);
+    GEN P = Fp_ell_rand(a4, a6, p), t = mkvec(gen_0);
     long i;
     for (i = 1; i < lo; i++)
     {
@@ -1327,7 +1327,7 @@ match_and_sort(GEN compile_atkin, long k, GEN Mu, GEN u, GEN a4, GEN a6, GEN p)
   gen_sort_inplace(baby, (void*)&cmpii, &cmp_nodata, NULL);
 
   SgMb = mulii(Sg, Mb);
-  P = find_pt_aff(a4, a6, p);
+  P = Fp_ell_rand(a4, a6, p);
   point = Fp_ell_pow(P, Mu, a4, p);
   Pb = Fp_ell_pow(point, Mg, a4, p);
   Pg = Fp_ell_pow(point, Mb, a4, p);
