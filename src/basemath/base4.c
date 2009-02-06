@@ -2232,7 +2232,7 @@ GEN
 idealtwoelt2(GEN nf, GEN x, GEN a)
 {
   pari_sp av = avma;
-  GEN cx, b;
+  GEN cx, b, mod;
 
   nf = checknf(nf);
   a = nf_to_scalar_or_basis(nf, a);
@@ -2247,12 +2247,15 @@ idealtwoelt2(GEN nf, GEN x, GEN a)
   if (typ(a) != t_COL)
   { /* rational number */
     if (typ(a) != t_INT || !dvdii(a, gcoeff(x,1,1))) not_in_ideal();
+    mod = NULL;
   }
   else
+  {
     if (!hnf_invimage(x, a)) not_in_ideal();
-
+    mod = idealhnf_principal(nf, a);
+  }
   b = mat_ideal_two_elt2(nf, x, a);
-  b = centermod(b, gcoeff(x,1,1));
+  b = mod? ZC_hnfrem(b, mod): centermod(b, a);
   b = cx? RgC_Rg_mul(b,cx): gcopy(b);
   return gerepileupto(av, b);
 }

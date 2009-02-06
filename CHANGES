@@ -158,6 +158,8 @@ BA117- Fix detection for ppc64 running in 32bit mode.
        extracted *non monic* factors], #930
   128- incorrect output type in FpX_factor [#933]
   129- possible stack corruption in polylog() + missing imaginary part.
+  130- incorrect final simplification in idealtwoelt(nf, x, y).
+       Eg: idealtwoelt(nfinit(x^2+23), 3, 6) -> [0, 0]~
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]

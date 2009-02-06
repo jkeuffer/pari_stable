@@ -1,1 +1,2 @@
 idealaddtoone(nfinit(x),[1,[;]]);
+idealtwoelt(nfinit(x^2+23), 3, 6)
