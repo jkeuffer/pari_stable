@@ -30,13 +30,6 @@ typedef struct whatnow_t
 
 #include "whatnow.h"
 
-static int
-is_identifier(const char *s)
-{
-  while (*s && is_keyword_char(*s)) s++;
-  return *s? 0: 1;
-}
-
 static void
 msg(const char *s)
 {
