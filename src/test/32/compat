@@ -1293,7 +1293,7 @@ x^2 + 3*x + 2)]
 ? idealtwoelt(nf,idy)
 [5, [2, 2, 1, 2, 1]~]
 ? idealtwoelt2(nf,idy,10)
-[-1, -1, 2, -1, 2]~
+[-1, 4, 2, 4, 2]~
 ? idealval(nf,idp,vp)
 7
 ? idmat(5)
@@ -2656,4 +2656,4 @@ mod(391, 3120), mod(2081, 3120)]]
 ? getheap()
 [600, 111419]
 ? print("Total time spent: ",gettime);
-Total time spent: 352
+Total time spent: 300
