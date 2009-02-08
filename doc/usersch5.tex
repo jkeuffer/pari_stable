@@ -6316,7 +6316,8 @@ single entry; and otherwise apply the function recursively on the vector
 \noindent Only requires that \kbd{mul} is an associative binary operator,
 which need not correspond to a true multiplication. \kbd{D} is meant to encode
 an arbitrary evaluation context, set it to \kbd{NULL} in simple cases where you
-do not need this. Leaves some garbage on stack, but suitable for \kbd{gerepileupto}.
+do not need this. Leaves some garbage on stack, but suitable for
+\kbd{gerepileupto} if \kbd{mul} is.
 
 To describe the following functions, we use the following private typedefs
 to simplify the description:
