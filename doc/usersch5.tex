@@ -6689,6 +6689,9 @@ $|x|$ is very small.
 \fun{GEN}{mpveceint1}{GEN C, GEN eC, long n} as \kbd{veceint1}; assumes
 that $C > 0$ is a \typ{REAL} and that \kbd{eC} is \kbd{NULL} or \kbd{mpexp(C)}.
 
+\fun{GEN}{mpeint1}{GEN x, GEN expx} returns \kbd{eint1}$(x)$, for a \typ{REAL}
+$x\geq 0$, assuming that \kbd{expx} is \kbd{mpexp}$(x)$.
+
 \fun{GEN}{szeta}{long s, long prec} returns the value of Riemann's zeta
 function at the (possibly negative) integer $s\neq 1$, in relative accuracy \kbd{prec}.
 
