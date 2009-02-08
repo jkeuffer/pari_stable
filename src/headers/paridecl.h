@@ -2279,7 +2279,6 @@ ulong   uprimepi(ulong n);
 
 GEN     genrand(GEN N);
 GEN     getrand(void);
-void    pari_init_rand(void);
 ulong   pari_rand(void);
 GEN     randomi(GEN x);
 ulong   random_Fl(ulong n);

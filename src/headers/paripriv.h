@@ -615,6 +615,10 @@ GEN     ffinit_rand(GEN p, long n);
 byteptr init_modular(ulong *p);
 GEN     polint_triv(GEN xa, GEN ya);
 
+/* random.c */
+
+void    pari_init_rand(void);
+
 /* rootpol.c */
 
 GEN     FFT(GEN x, GEN Omega);
