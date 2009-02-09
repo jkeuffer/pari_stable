@@ -1287,7 +1287,7 @@ END:
    2^k | 2*BIL*mod
 */
 static void
-mulliifft_params(long len, long *k, long *mod, long *bs, long *n, long *ord)
+mulliifft_params(long len, long *k, long *mod, long *bs, long *n, ulong *ord)
 {
   long r;
   *k = expu((3*len)>>2)-3;
@@ -1359,10 +1359,10 @@ Zf_shift(GEN a, ulong s, GEN M)
 */
 
 static GEN
-Zf_mulsqrt2(GEN a, ulong s, long ord, GEN M)
+Zf_mulsqrt2(GEN a, ulong s, ulong ord, GEN M)
 {
   pari_sp av = avma;
-  long hord = ord>>1;  
+  ulong hord = ord>>1;
   if (!signe(a)) return gen_0;
   if (odd(s)) /* Multiply by 2^(s/2) */
   {
@@ -1396,11 +1396,11 @@ Zf_mul(GEN a, GEN b, GEN M)
 
 /* In place, bit reversing FFT */
 static void
-muliifft_dit(long o, long ord, GEN M, GEN FFT, long d, long step)
+muliifft_dit(ulong o, ulong ord, GEN M, GEN FFT, long d, long step)
 {
   pari_sp av = avma;
-  long i, j;
-  long no = (o<<1)%ord;
+  long i;
+  ulong j, no = (o<<1)%ord;
   long hstep=step>>1;
   for (i = d+1, j = 0; i <= d+hstep; ++i, j =(j+o)%ord)
   {
@@ -1419,11 +1419,11 @@ muliifft_dit(long o, long ord, GEN M, GEN FFT, long d, long step)
 
 /* In place, bit reversed FFT, inverse of muliifft_dit */
 static void
-muliifft_dis(long o, long ord, GEN M, GEN FFT, long d, long step)
+muliifft_dis(ulong o, ulong ord, GEN M, GEN FFT, long d, long step)
 {
   pari_sp av = avma;
-  long i, j;
-  long no = (o<<1)%ord;
+  long i;
+  ulong j, no = (o<<1)%ord;
   long hstep=step>>1;
   if (hstep>1)
   {
@@ -1499,9 +1499,10 @@ sqrispec_fft(GEN a, long na)
 {
   pari_sp av, ltop = avma;
   long len = 2*na;
-  long k, mod, bs, n, ord;
+  long k, mod, bs, n;
   GEN  FFT, M;
-  long i, o;
+  long i;
+  ulong o, ord;
   pari_timer T;
 
   mulliifft_params(len,&k,&mod,&bs,&n,&ord);
@@ -1534,9 +1535,10 @@ muliispec_fft(GEN a, GEN b, long na, long nb)
 {
   pari_sp av, av2, ltop = avma;
   long len = na+nb;
-  long k, mod, bs, n, ord;
+  long k, mod, bs, n;
   GEN FFT, FFTb, M;
-  long i, o;
+  long i;
+  ulong o, ord;
   pari_timer T;
 
   mulliifft_params(len,&k,&mod,&bs,&n,&ord);
