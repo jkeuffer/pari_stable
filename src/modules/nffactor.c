@@ -1317,7 +1317,6 @@ nf_LLL_cmbf(nfcmbf_t *T, long rec)
 AGAIN:
     M_L = Q_div_to_int(CM_L, utoipos(C));
     VV = get_V(Tra, M_L, L->prk, L->iprk, L->pk, &a);
-    if (!a) continue;
     if (first)
     { /* initialize lattice, using few p-adic digits for traces */
       bgood = (long)(a - maxss(32, (long)(BitPerFactor * r)));
