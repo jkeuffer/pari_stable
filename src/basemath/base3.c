@@ -1632,7 +1632,7 @@ log_gen_pr(zlog_S *S, long index, GEN nf, long e)
     L = gel(L2,1);
     y = col_ei(S->n, yind+1);
     zlog_add_sign(y, gmael(L,4,1), S->lists);
-    return mkmat( RgM_RgC_mul(S->U, y) );
+    return mkmat( ZM_ZC_mul(S->U, y) );
   }
   else
   {
@@ -1654,7 +1654,7 @@ log_gen_pr(zlog_S *S, long index, GEN nf, long e)
       zlog_add_sign(y, sgn, S->lists);
       gel(A,i) = y;
     }
-    return RgM_mul(S->U, A);
+    return ZM_mul(S->U, A);
   }
 }
 /* Log on bid.gen of generator of P_{1,f} / P_{1,f v[index]}
@@ -1664,7 +1664,7 @@ log_gen_arch(zlog_S *S, long index)
 {
   GEN y = zerocol(S->n);
   zlog_add_sign(y, vecsmall_ei(lg(S->archp)-1, index), S->lists);
-  return RgM_RgC_mul(S->U, y);
+  return ZM_ZC_mul(S->U, y);
 }
 
 /* add [h,cyc] or [h,cyc,gen] to bid */
