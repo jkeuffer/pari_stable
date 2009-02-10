@@ -1872,7 +1872,7 @@ ideallog_sgn(GEN nf, GEN x, GEN sgn, GEN bid)
       den = gel(x,2);
       x = gel(x,1);
       break;
-    case t_COL:
+    default: /* case t_COL: */
       check_nfelt(x, &den);
       if (den) x = Q_muli_to_int(x, den);
   }
