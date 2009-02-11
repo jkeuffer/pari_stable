@@ -1140,19 +1140,18 @@ polsymmodp(GEN g, GEN p)
 
 /* compute the c first Newton sums modulo pp of the
    characteristic polynomial of a/d mod chi, d > 0 power of p (NULL = gen_1),
-   a, chi in Zp[X]
+   a, chi in Zp[X], vda = v_p(da)
    ns = Newton sums of chi */
 static GEN
-newtonsums(GEN p, GEN a, GEN da, GEN chi, long c, GEN pp, GEN ns)
+newtonsums(GEN p, GEN a, GEN da, long vda, GEN chi, long c, GEN pp, GEN ns)
 {
   GEN va, pa, dpa, s;
-  long j, k, vda, vdpa;
+  long j, k, vdpa;
   pari_sp av, lim;
 
   a = centermod(a, pp); av = avma; lim = stack_lim(av, 1);
-  pa = NULL; /* -Wall */
-  dpa = gen_1; vdpa = 0;
-  vda = da ? Z_pval(da,p): 0;
+  dpa = pa = NULL; /* -Wall */
+  vdpa = 0;
   va = zerovec(c);
   for (j = 1; j <= c; j++)
   { /* pa/dpa = (a/d)^(j-1) mod (chi, pp), dpa = p^vdpa */
@@ -1164,15 +1163,17 @@ newtonsums(GEN p, GEN a, GEN da, GEN chi, long c, GEN pp, GEN ns)
       return va;
     }
 
+    if (da) {
+      dpa = j == 1? da: mulii(dpa, da);
+      vdpa += vda;
+      update_den(p, &pa, &dpa, &vdpa, &pp);
+    }
     s = mulii(gel(pa,2), gel(ns,1)); /* k = 0 */
     for (k=1; k<=degpa; k++) s = addii(s, mulii(gel(pa,k+2), gel(ns,k+1)));
     if (da) {
       GEN r;
-      dpa = mulii(dpa, da);
-      vdpa += vda;
       s = dvmdii(s, dpa, &r);
       if (r != gen_0) return NULL;
-      update_den(p, &pa, &dpa, &vdpa, &pp);
     }
     gel(va,j) = centermodii(s, pp, shifti(pp,-1));
 
@@ -1257,17 +1258,18 @@ mycaract(decomp_t *S, GEN f, GEN a, GEN pp, GEN pdr)
   prec1 = pp;
   if (lgefint(S->p) == 3)
     prec1 = mulii(prec1, powiu(S->p, factorial_lval(n, itou(S->p))));
-  prec2 = prec3 = prec1;
   if (d)
   {
     GEN p1 = powiu(d, n-1);
     prec2 = mulii(prec1, p1);
     prec3 = mulii(prec1, gmin(mulii(p1, d), pdr));
   }
+  else
+    prec2 = prec3 = prec1;
   manage_cache(S, f, prec3);
 
   av = avma;
-  ns = newtonsums(S->p, a, d, f, n, prec2, S->ns);
+  ns = newtonsums(S->p, a, d, vd, f, n, prec2, S->ns);
   if (!ns) return NULL;
   chi = newtoncharpoly(prec1, S->p, ns);
   if (!chi) return NULL;
