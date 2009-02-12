@@ -1532,6 +1532,8 @@ long    RgX_valrem(GEN x, GEN *z);
 long    RgX_valrem_inexact(GEN x, GEN *Z);
 long    ZV_pval(GEN x, GEN p);
 long    ZV_pvalrem(GEN x, GEN p, GEN *px);
+long    ZX_lvalrem(GEN x, ulong p, GEN *px);
+long    ZX_lval(GEN x, ulong p);
 long    ZX_pval(GEN x, GEN p);
 long    ZX_pvalrem(GEN x, GEN p, GEN *px);
 long    Z_lval(GEN n, ulong p);
