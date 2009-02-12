@@ -2849,6 +2849,8 @@ INLINE GEN    gtofp(GEN z, long prec);
 INLINE long   gtos(GEN x);
 INLINE long   gval(GEN x, long v);
 INLINE GEN    identity_perm(long l);
+INLINE int    equali1(GEN n);
+INLINE int    equali_1(GEN n);
 INLINE int    is_bigint(GEN n);
 INLINE int    is_const_t(long t);
 INLINE int    is_extscalar_t(long t);

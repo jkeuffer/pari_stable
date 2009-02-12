@@ -57,7 +57,7 @@ GEN
 FpX_normalize(GEN z, GEN p)
 {
   GEN p1 = leading_term(z);
-  if (lg(z) == 2 || is_pm1(p1)) return z;
+  if (lg(z) == 2 || equali1(p1)) return z;
   return FpX_Fp_mul_to_monic(z, Fp_inv(p1,p), p);
 }
 
@@ -241,7 +241,7 @@ FpX_divrem(GEN x, GEN y, GEN p, GEN *pr)
     }
     return Flx_to_ZX_inplace(z);
   }
-  lead = is_pm1(lead)? NULL: gclone(Fp_inv(lead,p));
+  lead = equali1(lead)? NULL: gclone(Fp_inv(lead,p));
   avma = av0;
   z=cgetg(dz+3,t_POL); z[1] = x[1];
   x += 2; y += 2; z += 2;
@@ -369,7 +369,7 @@ FpX_gcd_check(GEN x, GEN y, GEN p)
   {
     GEN lead = leading_term(b);
     GEN g = gcdii(lead,p);
-    if (!is_pm1(g)) return gerepileupto(av,g);
+    if (!equali1(g)) return gerepileupto(av,g);
     c = FpX_rem(a,b,p); a=b; b=c;
   }
   avma = av; return gen_1;
@@ -529,7 +529,7 @@ FpX_resultant(GEN a, GEN b, GEN p)
     if (dc < 0) { avma = av; return 0; }
 
     if (both_odd(da,db)) res = subii(p, res);
-    if (!is_pm1(lb)) res = Fp_mul(res, Fp_powu(lb, da - dc, p), p);
+    if (!equali1(lb)) res = Fp_mul(res, Fp_powu(lb, da - dc, p), p);
     if (low_stack(lim,stack_lim(av,2)))
     {
       if (DEBUGMEM>1) pari_warn(warnmem,"FpX_resultant (da = %ld)",da);
@@ -770,7 +770,7 @@ Fp_FpXQ_log(GEN a, GEN g, GEN o, GEN T, GEN p)
   pari_sp av = avma;
   GEN q,n_q,ord,ordp, op;
 
-  if (is_pm1(a)) return gen_0;
+  if (equali1(a)) return gen_0;
   /* p > 2 */
 
   ordp = subis(p, 1); /* even */
@@ -1013,7 +1013,7 @@ gener_FpXQ(GEN T, GEN p, GEN *po)
     g = random_FpX(f, vT, p);
     if (degpol(g) < 1) continue;
     t = FpX_resultant(T, g, p); /* Ng = g^q, assuming T is monic */
-    if (is_pm1(t) || !is_gener_Fp(t, p, p_1, L)) continue;
+    if (equali1(t) || !is_gener_Fp(t, p, p_1, L)) continue;
     t = FpXQ_pow(g, shifti(p_1,-1), T, p);
     for (i = 1; i < j; i++)
     {

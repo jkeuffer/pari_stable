@@ -252,9 +252,6 @@ zeromatcopy(long m, long n)
   return y;
 }
 
-INLINE int
-isintzero(GEN x) { return typ(x) == t_INT && !signe(x); }
-
 /* i-th vector in the standard basis */
 INLINE GEN
 col_ei(long n, long i) { GEN e = zerocol(n); gel(e,i) = gen_1; return e; }
@@ -1305,6 +1302,11 @@ sqrtnr(GEN x, long n) { return mpexp(divrs(mplog(x), n)); }
 /*                         MISCELLANEOUS                           */
 /*                                                                 */
 /*******************************************************************/
+INLINE int isintzero(GEN x) { return typ(x) == t_INT && !signe(x); }
+INLINE int equali1(GEN n)
+{ return n[1] == (evallgefint(3) | evalsigne(1)) && n[2] == 1; }
+INLINE int equali_1(GEN n)
+{ return n[1] == (evallgefint(3) | evalsigne(-1)) && n[2] == 1; }
 /* works only for POSITIVE integers */
 INLINE int is_pm1(GEN n)
 { return lgefint(n) == 3 && n[2] == 1; }

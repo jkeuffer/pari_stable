@@ -5848,7 +5848,15 @@ instance vectors, whose components are $0$.
 \fun{int}{isintzero}{GEN x} returns 1 (true) if \kbd{x} is a \typ{INT}
 equal to~0.
 
-\fun{int}{is_pm1}{GEN x}. assuming that \kbd{x} is a
+\fun{int}{equali1}{GEN n}
+Assuming that \kbd{x} is a \typ{INT}, return 1 (true) if \kbd{x} is equal to
+$1$, and return 0~(false) otherwise.
+
+\fun{int}{equali_1}{GEN n}
+Assuming that \kbd{x} is a \typ{INT}, return 1 (true) if \kbd{x} is equal to
+$-1$, and return 0~(false) otherwise.
+
+\fun{int}{is_pm1}{GEN x}. Assuming that \kbd{x} is a
 \emph{non-zero} \typ{INT}, return 1 (true) if \kbd{x} is equal to $-1$ or
 $1$, and return 0~(false) otherwise.
 
