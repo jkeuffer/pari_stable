@@ -1912,11 +1912,17 @@ if $x$ is the zero polynomial.
 \fun{long}{ZX_pval}{GEN x, GEN p} as \kbd{ZX\_pvalrem} but only returns the
 ``valuation''.
 
-\fun{long}{Z_lvalrem}{GEN x, ulong p, GEN *r} as \kbd{Z\_pvalrem}, except
-that \kbd{p} is an \kbd{ulong} ($\kbd{p} > 1$).
+\fun{long}{Z_lvalrem}{GEN x, ulong p, GEN *r} as \kbd{Z\_pvalrem},
+except that \kbd{p} is an \kbd{ulong} ($\kbd{p} > 1$).
 
-\fun{long}{Z_lval}{GEN x, ulong p} as \kbd{Z\_pval}, except
-that \kbd{p} is an \kbd{ulong} ($\kbd{p} > 1$).
+\fun{long}{Z_lval}{GEN x, ulong p} as \kbd{Z\_pval},
+except that \kbd{p} is an \kbd{ulong} ($\kbd{p} > 1$).
+
+\fun{long}{ZX_lval}{GEN x, ulong p} as \kbd{ZX\_pval}, 
+except that \kbd{p} is an \kbd{ulong} ($\kbd{p} > 1$).
+
+\fun{long}{ZX_lvalrem}{GEN x, ulong p, GEN *px} as \kbd{ZX\_pvalrem}, 
+except that \kbd{p} is an \kbd{ulong} ($\kbd{p} > 1$).
 
 \fun{long}{u_lvalrem}{ulong x, ulong p, ulong *r} as \kbd{Z\_pvalrem},
 except the inputs/outputs are now \kbd{ulong}s.

@@ -1035,27 +1035,102 @@ Z_pval(GEN x, GEN p) {
     vx++; x = q;
   }
 }
+
+static long
+ZX_2val(GEN x)
+{
+  long i, lx = lg(x), v = LONG_MAX;
+  for (i = 2; i < lx; i++)
+  {
+    GEN c = gel(x,i);
+    long w;
+    if (!signe(c)) continue;
+    w = vali(c);
+    if (w < v) { v = w; if (!v) break; }
+  }
+  return v;
+}
+long
+ZX_lval(GEN x, ulong p)
+{
+  long i, lx, v;
+  pari_sp av;
+  GEN y;
+  if (p == 2) return ZX_2val(x);
+  av = avma;
+  lx = lg(x); y = leafcopy(x);
+  for(v = 0;; v++)
+    for (i = 2; i < lx; i++)
+    {
+      ulong r; gel(y,i) = diviu_rem(gel(y,i), p, &r);
+      if (r) { avma = av; return v; }
+    }
+}
 long
 ZX_pval(GEN x, GEN p)
 {
-  long i, lx = lg(x), v = 0;
-  pari_sp av = avma;
-  GEN y = leafcopy(x);
-  for(;; v++)
+  long i, lx, v;
+  pari_sp av;
+  GEN y;
+  if (lgefint(p)) return ZX_lval(x, p[2]);
+  av = avma;
+  lx = lg(x); y = leafcopy(x);
+  for(v = 0;; v++)
     for (i = 2; i < lx; i++)
     {
       GEN r; gel(y,i) = dvmdii(gel(y,i), p, &r);
       if (r != gen_0) { avma = av; return v; }
     }
 }
+static long
+ZX_2valrem(GEN x, GEN *px)
+{
+  long i, lx = lg(x), v = LONG_MAX;
+  GEN z;
+  for (i = 2; i < lx; i++)
+  {
+    GEN c = gel(x,i);
+    long w;
+    if (!signe(c)) continue;
+    w = vali(c);
+    if (w < v) {
+      v = w;
+      if (!v) { *px = x; return 0; } /* early abort */
+    }
+  }
+  z = cgetg(lx, t_POL); z[1] = x[1];
+  for (i=2; i<lx; i++) gel(z,i) = shifti(gel(x,i), -v);
+  *px = z; return v;
+}
+long
+ZX_lvalrem(GEN x, ulong p, GEN *px)
+{
+  long i, lx, v;
+  GEN y;
+  if (p == 2) return ZX_2valrem(x, px);
+  y = cgetg_copy(x, &lx);
+  y[1] = x[1];
+  x = leafcopy(x);
+  for(v = 0;; v++)
+  {
+    for (i = 2; i < lx; i++)
+    {
+      ulong r; gel(y,i) = diviu_rem(gel(x,i), p, &r);
+      if (r) { *px = x; return v; }
+    }
+    swap(x, y);
+  }
+}
 long
 ZX_pvalrem(GEN x, GEN p, GEN *px)
 {
-  long i, lx, v = 0;
-  GEN y = cgetg_copy(x, &lx);
+  long i, lx, v;
+  GEN y;
+  if (lgefint(p) == 3) return ZX_lvalrem(x, p[2], px);
+  y = cgetg_copy(x, &lx);
   y[1] = x[1];
   x = leafcopy(x);
-  for(;; v++)
+  for(v = 0;; v++)
   {
     for (i = 2; i < lx; i++)
     {
