@@ -57,7 +57,7 @@ GEN
 FpX_normalize(GEN z, GEN p)
 {
   GEN p1 = leading_term(z);
-  if (lg(z) == 2 || gcmp1(p1)) return z;
+  if (lg(z) == 2 || is_pm1(p1)) return z;
   return FpX_Fp_mul_to_monic(z, Fp_inv(p1,p), p);
 }
 
@@ -241,7 +241,7 @@ FpX_divrem(GEN x, GEN y, GEN p, GEN *pr)
     }
     return Flx_to_ZX_inplace(z);
   }
-  lead = gcmp1(lead)? NULL: gclone(Fp_inv(lead,p));
+  lead = is_pm1(lead)? NULL: gclone(Fp_inv(lead,p));
   avma = av0;
   z=cgetg(dz+3,t_POL); z[1] = x[1];
   x += 2; y += 2; z += 2;
@@ -529,7 +529,7 @@ FpX_resultant(GEN a, GEN b, GEN p)
     if (dc < 0) { avma = av; return 0; }
 
     if (both_odd(da,db)) res = subii(p, res);
-    if (!gcmp1(lb)) res = Fp_mul(res, Fp_powu(lb, da - dc, p), p);
+    if (!is_pm1(lb)) res = Fp_mul(res, Fp_powu(lb, da - dc, p), p);
     if (low_stack(lim,stack_lim(av,2)))
     {
       if (DEBUGMEM>1) pari_warn(warnmem,"FpX_resultant (da = %ld)",da);
