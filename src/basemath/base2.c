@@ -1194,9 +1194,7 @@ newtoncharpoly(GEN pp, GEN p, GEN NS)
   long n = lg(NS)-1, j, k;
   GEN c = cgetg(n + 2, t_VEC);
 
-  if (!NS) return NULL;
   gel(c,1) = (n & 1 ? gen_m1: gen_1);
-  for (k = 2; k <= n+1; k++) gel(c,k) = gen_0;
   for (k = 2; k <= n+1; k++)
   {
     pari_sp av2 = avma;
@@ -1223,23 +1221,18 @@ newtoncharpoly(GEN pp, GEN p, GEN NS)
 static void
 manage_cache(decomp_t *S, GEN f, GEN pp)
 {
-  GEN p1 = S->precns;
+  GEN t = S->precns;
 
-  if (!p1)
-  {
-    p1 = mulii(S->pmf, powiu(S->p, S->df));
-    if (DEBUGLEVEL>4) fprintferr("  Initializing cached Newton sums\n");
-  }
+  if (!t) t = mulii(S->pmf, powiu(S->p, S->df));
+  t = gmax(t, pp);
 
-  p1 = gmax(p1, pp);
-
-  if (!(S->precns) || gcmp(S->precns, p1) < 0)
+  if (! S->precns || cmpii(S->precns, t) < 0)
   {
     if (DEBUGLEVEL>4)
       fprintferr("  Precision for cached Newton sums: %Ps -> %Ps\n",
-		 S->precns? S->precns: gen_0, p1);
-    S->ns = polsymmodp(f, p1);
-    S->precns = p1;
+		 S->precns? S->precns: gen_0, t);
+    S->ns = polsymmodp(f, t);
+    S->precns = t;
   }
 }
 
