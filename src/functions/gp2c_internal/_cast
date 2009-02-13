@@ -30,7 +30,7 @@ Description:
  (small):bool
  (lg):bool:parens      $(1)!=1
  (bptr):bool           *$(1)
- (gen):bool            !gcmp0($1)
+ (gen):bool            !gequal0($1)
  (real):bool           signe($1)
  (int):bool            signe($1)
  (mp):bool             signe($1)
@@ -41,7 +41,7 @@ Description:
  (bool):negbool        !$(1)
  (lg):negbool:parens   $(1)==1
  (bptr):negbool        !*$(1)
- (gen):negbool         gcmp0($1)
+ (gen):negbool         gequal0($1)
  (int):negbool         !signe($1)
  (real):negbool        !signe($1)
  (mp):negbool          !signe($1)

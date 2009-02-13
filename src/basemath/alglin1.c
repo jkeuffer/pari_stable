@@ -278,7 +278,7 @@ select0(GEN f, GEN A)
     L = cgetg(3, t_LIST);
     l = lg(A); v = cgetg(l, t_VECSMALL); av = avma;
     for (i = 1; i < l; i++) {
-      if (! gcmp0( closure_callgen1(f, gel(A,i)) )) v[++nb] = i;
+      if (! gequal0( closure_callgen1(f, gel(A,i)) )) v[++nb] = i;
       avma = av;
     }
     B = cgetg(nb+1, t_VEC);
@@ -291,7 +291,7 @@ select0(GEN f, GEN A)
 
   l = lg(A); v = cgetg(l, t_VECSMALL); av = avma;
   for (i = 1; i < l; i++) {
-    if (! gcmp0( closure_callgen1(f, gel(A,i)) )) v[++nb] = i;
+    if (! gequal0( closure_callgen1(f, gel(A,i)) )) v[++nb] = i;
     avma = av;
   }
   B = cgetg(nb+1, t);
@@ -529,7 +529,7 @@ approx_0(GEN x, GEN y)
   long tx = typ(x);
   if (tx == t_COMPLEX)
     return approx_0(gel(x,1), y) && approx_0(gel(x,2), y);
-  return gcmp0(x) ||
+  return gequal0(x) ||
 	 (tx == t_REAL && gexpo(y) - gexpo(x) > bit_accuracy(lg(x)));
 }
 
@@ -557,7 +557,7 @@ gauss_get_pivot_NZ(GEN x, GEN x0/*unused*/, GEN c)
   long i, lx = lg(x);
   (void)x0;
   for (i=1; i<lx; i++)
-    if (!c[i] && !gcmp0(gel(x,i))) return i;
+    if (!c[i] && !gequal0(gel(x,i))) return i;
   return lx;
 }
 static pivot_fun
@@ -809,11 +809,11 @@ RgM_solve(GEN a, GEN b)
 	e = gexpo(gcoeff(a,j,i));
 	if (e > ex) { ex=e; k=j; }
       }
-      if (gcmp0(gcoeff(a,k,i))) return NULL;
+      if (gequal0(gcoeff(a,k,i))) return NULL;
     }
-    else if (gcmp0(p)) /* first non-zero pivot */
+    else if (gequal0(p)) /* first non-zero pivot */
     {
-      do k++; while (k<=li && gcmp0(gcoeff(a,k,i)));
+      do k++; while (k<=li && gequal0(gcoeff(a,k,i)));
       if (k>li) return NULL;
     }
 
@@ -829,7 +829,7 @@ RgM_solve(GEN a, GEN b)
     for (k=i+1; k<=li; k++)
     {
       GEN m = gcoeff(a,k,i);
-      if (!gcmp0(m))
+      if (!gequal0(m))
       {
 	m = gdiv(m,p);
 	for (j=i+1; j<=aco; j++) _submul(gel(a,j),k,i,m);
@@ -1713,7 +1713,7 @@ sinverseimage(GEN mat, GEN y)
   if (!i) return NULL;
 
   col = gel(p1,i); p1 = gel(col,nbcol);
-  if (gcmp0(p1)) return NULL;
+  if (gequal0(p1)) return NULL;
 
   p1 = gneg_i(p1); setlg(col,nbcol);
   return gerepileupto(av, RgC_Rg_div(col, p1));
@@ -2694,7 +2694,7 @@ eigen(GEN x, long prec)
       r2 = gel(rr,k++);
       r3 = gsub(r1,r2);
     }
-    while (gcmp0(r3) || gexpo(r3) < ex);
+    while (gequal0(r3) || gexpo(r3) < ex);
   }
 }
 
@@ -2739,11 +2739,11 @@ det_simple_gauss(GEN a, int inexact)
 	if (e > ex) { ex=e; k=j; }
       }
       p1 = gcoeff(a,i,k);
-      if (gcmp0(p1)) return gerepilecopy(av, p1);
+      if (gequal0(p1)) return gerepilecopy(av, p1);
     }
-    else if (gcmp0(p))
+    else if (gequal0(p))
     {
-      do k++; while(k<=nbco && gcmp0(gcoeff(a,i,k)));
+      do k++; while(k<=nbco && gequal0(gcoeff(a,i,k)));
       if (k>nbco) return gerepilecopy(av, p);
     }
     if (k != i)
@@ -2756,7 +2756,7 @@ det_simple_gauss(GEN a, int inexact)
     for (k=i+1; k<=nbco; k++)
     {
       GEN m = gcoeff(a,i,k);
-      if (gcmp0(m)) continue;
+      if (gequal0(m)) continue;
 
       m = gdiv(m,p);
       for (j=i+1; j<=nbco; j++)
@@ -2815,9 +2815,9 @@ det(GEN a)
     int diveuc = (gequal1(pprec)==0);
 
     p = gcoeff(a,i,i);
-    if (gcmp0(p))
+    if (gequal0(p))
     {
-      k=i+1; while (k<=nbco && gcmp0(gcoeff(a,i,k))) k++;
+      k=i+1; while (k<=nbco && gequal0(gcoeff(a,i,k))) k++;
       if (k>nbco) return gerepilecopy(av, p);
       swap(gel(a,k), gel(a,i)); s = -s;
       p = gcoeff(a,i,i);
@@ -2826,7 +2826,7 @@ det(GEN a)
     for (k=i+1; k<=nbco; k++)
     {
       ck = gel(a,k); m = gel(ck,i);
-      if (gcmp0(m))
+      if (gequal0(m))
       {
 	if (gequal1(p))
 	{

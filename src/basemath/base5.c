@@ -289,7 +289,7 @@ rnfelementdown(GEN rnf,GEN x)
 
     case t_POLMOD: x = gel(x,2); /* fall through */
     case t_POL:
-      if (gcmp0(x)) return gen_0;
+      if (gequal0(x)) return gen_0;
       av = avma; z = rnfelementabstorel(rnf,x);
       if (typ(z)==t_POLMOD && varn(z[1])==varn(rnf[1])) z = gel(z,2);
       if (varncmp(gvar(z), varn(rnf[1])) <= 0)
@@ -658,7 +658,7 @@ RED(long k, long l, GEN U, GEN mu, GEN MC, GEN nf, GEN I, GEN *Ik_inv)
   ideal = idealmul(nf,gel(I,l), *Ik_inv);
   x = findmin(nf, ideal, gcoeff(mu,k,l));
   if (!x) return 0;
-  if (gcmp0(x)) return 1;
+  if (gequal0(x)) return 1;
 
   xc = nftocomplex(nf,x);
   gel(MC,k) = gsub(gel(MC,k), vecmul(xc,gel(MC,l)));

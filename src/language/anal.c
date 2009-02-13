@@ -989,7 +989,7 @@ alias0(const char *s, const char *old)
 GEN
 ifpari(GEN g, GEN a/*closure*/, GEN b/*closure*/)
 {
-  if (gcmp0(g)) /* false */
+  if (gequal0(g)) /* false */
     return b?closure_evalgen(b):gnil;
   else /* true */
     return a?closure_evalgen(a):gnil;
@@ -998,7 +998,7 @@ ifpari(GEN g, GEN a/*closure*/, GEN b/*closure*/)
 void
 ifpari_void(GEN g, GEN a/*closure*/, GEN b/*closure*/)
 {
-  if (gcmp0(g)) /* false */
+  if (gequal0(g)) /* false */
   {
     if(b) closure_evalvoid(b);
   }
@@ -1012,22 +1012,22 @@ GEN
 andpari(GEN a, GEN b/*closure*/)
 {
   GEN g;
-  if (gcmp0(a))
+  if (gequal0(a))
     return gen_0;
   g=closure_evalgen(b);
   if (!g) return g;
-  return gcmp0(g)?gen_0:gen_1;
+  return gequal0(g)?gen_0:gen_1;
 }
 
 GEN
 orpari(GEN a, GEN b/*closure*/)
 {
   GEN g;
-  if (!gcmp0(a))
+  if (!gequal0(a))
     return gen_1;
   g=closure_evalgen(b);
   if (!g) return g;
-  return gcmp0(g)?gen_0:gen_1;
+  return gequal0(g)?gen_0:gen_1;
 }
 
 GEN

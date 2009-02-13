@@ -220,7 +220,7 @@ gred_rfrac_simple(GEN n, GEN d)
     d = RgX_Rg_div(d,cd);
     if (!gequal1(cn))
     {
-      if (gcmp0(cn)) {
+      if (gequal0(cn)) {
 	n = (cn != n)? RgX_Rg_div(n,cd): gdiv(n, cd);
 	c = gen_1;
       } else {
@@ -233,7 +233,7 @@ gred_rfrac_simple(GEN n, GEN d)
   } else {
     if (!gequal1(cn))
     {
-      if (gcmp0(cn)) {
+      if (gequal0(cn)) {
 	c = gen_1;
       } else {
 	n = (cn != n)? RgX_Rg_div(n,cn): gen_1;
@@ -411,7 +411,7 @@ gconj(GEN x)
     case t_QUAD:
       y = cgetg(4,t_QUAD);
       gel(y,1) = ZX_copy(gel(x,1));
-      gel(y,2) = gcmp0(gmael(x,1,3))? gcopy(gel(x,2))
+      gel(y,2) = gequal0(gmael(x,1,3))? gcopy(gel(x,2))
 				    : gadd(gel(x,2), gel(x,3));
       gel(y,3) = gneg(gel(x,3));
       break;
@@ -668,7 +668,7 @@ NORMALIZE_i(GEN y, long a, long b)
 {
   long i;
   for (i = a; i < b; i++)
-    if (!gcmp0(gel(y,i))) { setsigne(y, 1); return y; }
+    if (!gequal0(gel(y,i))) { setsigne(y, 1); return y; }
   setsigne(y, 0); return y;
 }
 /* typ(y) == t_SER, varn(y) = vy, x "scalar" [e.g object in lower variable]
@@ -698,7 +698,7 @@ add_ser_scal(GEN y, GEN x, long vy, long l)
     gel(z,2) = gcopy(x);
     for (i=3; i<=l+1; i++) gel(z,i) = gen_0;
     for (   ; i < ly; i++) gel(z,i) = gcopy(gel(y,i));
-    if (gcmp0(x)) return normalize(z);
+    if (gequal0(x)) return normalize(z);
     return z;
   }
   /* l = 0, !isrationalzero(x) */
@@ -711,7 +711,7 @@ add_ser_scal(GEN y, GEN x, long vy, long l)
     z[1] = evalsigne(1) | _evalvalp(0) | evalvarn(vy);
     gel(z,2) = x;
     for (i=3; i<ly; i++) gel(z,i) = gcopy(gel(y,i));
-    if (gcmp0(x)) return normalize(z);
+    if (gequal0(x)) return normalize(z);
     return z;
   }
   avma = av; /* first coeff is rational 0 */
@@ -977,7 +977,7 @@ gadd(GEN x, GEN y)
 	  av=avma; z=addir(gel(y,1),mulir(gel(y,2),x)); tetpil=avma;
 	  return gerepile(av,tetpil,divri(z,gel(y,2)));
 	case t_COMPLEX: return addRc(x, y);
-	case t_QUAD: return gcmp0(y)? rcopy(x): addqf(y, x, lg(x));
+	case t_QUAD: return gequal0(y)? rcopy(x): addqf(y, x, lg(x));
 
 	default: pari_err(operf,"+",x,y);
       }
@@ -1019,7 +1019,7 @@ gadd(GEN x, GEN y)
 	  return Zp_nosquare_m1(gel(y,2))? addRc(y, x): addTp(x, y);
 	case t_QUAD:
 	  lx = precision(x); if (!lx) pari_err(operi,"+",x,y);
-	  return gcmp0(y)? rcopy(x): addqf(y, x, lx);
+	  return gequal0(y)? rcopy(x): addqf(y, x, lx);
       }
 
     case t_PADIC: /* ty == t_QUAD */
@@ -2169,7 +2169,7 @@ gsqr(GEN x)
       p3 = gsqr(gel(x,3));
       p4 = gmul(gneg_i(gel(p1,2)),p3);
 
-      if (gcmp0(gel(p1,3)))
+      if (gequal0(gel(p1,3)))
       {
         tetpil = avma;
         gel(z,2) = gerepile(av,tetpil,gadd(p4,p2));
@@ -2285,7 +2285,7 @@ static GEN
 div_scal_ser(GEN x, GEN y) { /* TODO: improve */
   GEN z;
   long ly, i;
-  if (gcmp0(x)) { pari_sp av=avma; return gerepileupto(av, gmul(x, ginv(y))); }
+  if (gequal0(x)) { pari_sp av=avma; return gerepileupto(av, gmul(x, ginv(y))); }
   ly = lg(y); z = (GEN)pari_malloc(ly*sizeof(long));
   z[0] = evaltyp(t_SER) | evallg(ly);
   z[1] = evalsigne(1) | _evalvalp(0) | evalvarn(varn(y));
@@ -2315,13 +2315,13 @@ div_ser(GEN x, GEN y, long vx)
   if (!signe(y)) pari_err(gdiver);
   if (lx == 2) return zeroser(vx, l);
   y_lead = gel(y,2);
-  if (gcmp0(y_lead)) /* normalize denominator if leading term is 0 */
+  if (gequal0(y_lead)) /* normalize denominator if leading term is 0 */
   {
     pari_warn(warner,"normalizing a series with 0 leading term");
     for (i=3,y++; i<ly; i++,y++)
     {
       y_lead = gel(y,2); ly--; l--;
-      if (!gcmp0(y_lead)) break;
+      if (!gequal0(y_lead)) break;
     }
   }
   if (ly < lx) lx = ly;
@@ -2530,7 +2530,7 @@ gdiv(GEN x, GEN y)
   {
     long s = signe(x);
     if (!s) {
-      if (gcmp0(y)) pari_err(gdiver);
+      if (gequal0(y)) pari_err(gdiver);
       switch (ty)
       {
       default: return gen_0;
@@ -2579,7 +2579,7 @@ gdiv(GEN x, GEN y)
 	return gerepile(av, tetpil, gdiv(p2,p1));
     }
   }
-  if (gcmp0(y) && ty != t_MAT) pari_err(gdiver);
+  if (gequal0(y) && ty != t_MAT) pari_err(gdiver);
 
   if (is_const_t(tx) && is_const_t(ty)) switch(tx)
   {
@@ -3269,7 +3269,7 @@ ginv(GEN x)
     {
       GEN n = gel(x,1), d = gel(x,2);
       pari_sp av = avma, ltop;
-      if (gcmp0(n)) pari_err(gdiver);
+      if (gequal0(n)) pari_err(gdiver);
 
       n = simplify_shallow(n);
       if (typ(n) != t_POL || varn(n) != varn(d))

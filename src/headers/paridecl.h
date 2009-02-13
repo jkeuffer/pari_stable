@@ -1547,7 +1547,7 @@ GEN     gabs(GEN x, long prec);
 void    gaffect(GEN x, GEN y);
 void    gaffsg(long s, GEN x);
 int     gcmp(GEN x, GEN y);
-int     gcmp0(GEN x);
+int     gequal0(GEN x);
 int     gequal1(GEN x);
 int     gcmpX(GEN x);
 int     gequalm1(GEN x);

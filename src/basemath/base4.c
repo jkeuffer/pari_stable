@@ -317,7 +317,7 @@ get_random_a(GEN nf, GEN x, GEN xZ)
     av1 = avma;
     y = zk_scalar_or_multable(nf, xi); /* ZM, cannot be a scalar */
     t = FpM_red(y, xZ);
-    if (gcmp0(t)) { avma = av1; continue; }
+    if (gequal0(t)) { avma = av1; continue; }
     if (ok_elt(x,xZ, t)) return xi;
     gel(beta,lm) = xi;
     /* mul[i] = { canonical generators for x[i] O/xZ as Z-module } */
@@ -1054,7 +1054,7 @@ famat_reduce(GEN fa)
   /* kill 0 exponents */
   l = k;
   for (k=i=1; i<l; i++)
-    if (!gcmp0(gel(E,i)))
+    if (!gequal0(gel(E,i)))
     {
       G[k] = G[i];
       E[k] = E[i]; k++;
@@ -1827,7 +1827,7 @@ idealred0(GEN nf, GEN I, GEN vdir)
   switch (idealtyp(&I,&aI))
   {
     case id_PRINCIPAL:
-      if (gcmp0(I)) I = cgetg(1,t_MAT); else { c1 = I; I = matid(N); }
+      if (gequal0(I)) I = cgetg(1,t_MAT); else { c1 = I; I = matid(N); }
       if (!aI) return I;
       goto END;
     case id_PRIME:
@@ -2198,7 +2198,7 @@ idealchinese(GEN nf, GEN x, GEN w)
   for (i=1; i<r; i++)
   {
     GEN u, t;
-    if (gcmp0(gel(w,i))) continue;
+    if (gequal0(gel(w,i))) continue;
     u = hnfmerge_get_1(idealdivpowprime(nf,F, gel(L,i), gel(e,i)),
 		       idealpow(nf, gel(L,i), gel(e,i)));
     if (!u) pari_err(talker, "non coprime ideals in idealchinese");
@@ -2323,12 +2323,12 @@ static GEN
 colcomb(GEN nf, GEN u, GEN v, GEN A, GEN B)
 {
   GEN z;
-  if (gcmp0(u))
+  if (gequal0(u))
     z = nfC_nf_mul(nf,B,v);
   else
   {
     z = u==gen_1? A: nfC_nf_mul(nf,A,u);
-    if (!gcmp0(v)) z = RgC_add(z, nfC_nf_mul(nf,B,v));
+    if (!gequal0(v)) z = RgC_add(z, nfC_nf_mul(nf,B,v));
   }
   return RgC_to_nfC(nf, z);
 }
@@ -2336,7 +2336,7 @@ colcomb(GEN nf, GEN u, GEN v, GEN A, GEN B)
 static GEN
 colcomb1(GEN nf, GEN v, GEN A, GEN B)
 {
-  if (gcmp0(v)) return A;
+  if (gequal0(v)) return A;
   return RgC_to_nfC(nf, RgC_add(A, nfC_nf_mul(nf,B,v)));
 }
 
@@ -2377,12 +2377,12 @@ static GEN
 rowcomb(GEN nf, GEN u, GEN v, long s, long t, GEN Z, long lim)
 {
   GEN z;
-  if (gcmp0(u))
+  if (gequal0(u))
     z = element_mulvecrow(nf,v,Z,t, lim);
   else
   {
     z = element_mulvecrow(nf,u,Z,s, lim);
-    if (!gcmp0(v)) z = gadd(z, element_mulvecrow(nf,v,Z,t, lim));
+    if (!gequal0(v)) z = gadd(z, element_mulvecrow(nf,v,Z,t, lim));
   }
   return z;
 }
@@ -2408,8 +2408,8 @@ nfbezout(GEN nf,GEN a,GEN b, GEN A,GEN B, GEN *pu,GEN *pv,GEN *pw,GEN *pdi)
 {
   GEN w, u,v, d, di, aA, bB;
 
-  if (gcmp0(a)) return zero_nfbezout(nf,b,A,B,pu,pv,pw,pdi);
-  if (gcmp0(b)) return zero_nfbezout(nf,a,B,A,pv,pu,pw,pdi);
+  if (gequal0(a)) return zero_nfbezout(nf,b,A,B,pu,pv,pw,pdi);
+  if (gequal0(b)) return zero_nfbezout(nf,a,B,A,pv,pu,pw,pdi);
 
   if (a != gen_1) /* frequently called with a = gen_1 */
   {
@@ -2485,7 +2485,7 @@ nfhnf(GEN nf, GEN x)
   {
     GEN d, di = NULL;
 
-    def--; j=def; while (j>=1 && gcmp0(gcoeff(A,i,j))) j--;
+    def--; j=def; while (j>=1 && gequal0(gcoeff(A,i,j))) j--;
     if (!j) pari_err(talker,"not a matrix of maximal rank in nfhnf");
     if (j==def) j--; else {
       swap(gel(A,j), gel(A,def)); swap(gel(I,j), gel(I,def));
@@ -2497,7 +2497,7 @@ nfhnf(GEN nf, GEN x)
     for (  ; j; j--)
     {
       GEN b, u,v,w, S, T, S0, T0 = gel(A,j);
-      b = gel(T0,i); if (gcmp0(b)) continue;
+      b = gel(T0,i); if (gequal0(b)) continue;
 
       S0 = gel(A,def);
       d = nfbezout(nf, gen_1,b, gel(I,def),gel(I,j), &u,&v,&w,&di);
@@ -2575,7 +2575,7 @@ nfsnf(GEN nf, GEN x)
       for (j=i-1; j>=1; j--)
       {
 	GEN S, T, S0, T0 = gel(A,j);
-	b = gel(T0,i); if (gcmp0(b)) continue;
+	b = gel(T0,i); if (gequal0(b)) continue;
 
 	S0 = gel(A,i); a = gel(S0,i);
 	d = nfbezout(nf, a,b, gel(J,i),gel(J,j), &u,&v,&w,&dinv);
@@ -2587,7 +2587,7 @@ nfsnf(GEN nf, GEN x)
       for (j=i-1; j>=1; j--)
       {
 	GEN ri, rj;
-	b = gcoeff(A,j,i); if (gcmp0(b)) continue;
+	b = gcoeff(A,j,i); if (gequal0(b)) continue;
 
 	a = gcoeff(A,i,i);
 	d = nfbezout(nf, a,b, gel(I,i),gel(I,j), &u,&v,&w,&dinv);
@@ -2601,7 +2601,7 @@ nfsnf(GEN nf, GEN x)
       }
       if (c) continue;
 
-      Aii = gcoeff(A,i,i); if (gcmp0(Aii)) break;
+      Aii = gcoeff(A,i,i); if (gequal0(Aii)) break;
       gel(J,i) = idealmul(nf, gel(J,i), Aii);
       gcoeff(A,i,i) = gen_1;
       b = idealmul(nf,gel(J,i),gel(I,i));
@@ -2610,7 +2610,7 @@ nfsnf(GEN nf, GEN x)
 	for (l=1; l<i; l++)
 	{
 	  GEN D, p1, p2, p3, Akl = gcoeff(A,k,l);
-	  if (gcmp0(Akl)) continue;
+	  if (gequal0(Akl)) continue;
 
           p1 = idealmul(nf,Akl,gel(J,l));
 	  p3 = idealmul(nf, p1, gel(I,k));
@@ -2747,7 +2747,7 @@ nfdetint(GEN nf, GEN x)
 	vi=nfmul(nf,piv,gcoeff(A,i,k));
 	for (j=1; j<=m; j++)
 	  if (c[j]) vi=gadd(vi,nfmul(nf,gcoeff(pass,i,j),gcoeff(A,j,k)));
-	gel(v,i) = vi; if (!t && !gcmp0(vi)) t=i;
+	gel(v,i) = vi; if (!t && !gequal0(vi)) t=i;
       }
     if (t)
     {
@@ -2855,7 +2855,7 @@ nfhnfmod(GEN nf, GEN x, GEN detmat)
   def = co; ldef = (li>co)? li-co+1: 1;
   for (i=li-1; i>=ldef; i--)
   {
-    def--; j=def; while (j>=1 && gcmp0(gcoeff(A,i,j))) j--;
+    def--; j=def; while (j>=1 && gequal0(gcoeff(A,i,j))) j--;
     if (!j) continue;
     if (j==def) j--;
     else {
@@ -2865,7 +2865,7 @@ nfhnfmod(GEN nf, GEN x, GEN detmat)
     for (  ; j; j--)
     {
       GEN a, b, S, T, S0, T0 = gel(A,j);
-      b = gel(T0,i); if (gcmp0(b)) continue;
+      b = gel(T0,i); if (gequal0(b)) continue;
 
       S0 = gel(A,def); a = gel(S0,i);
       d = nfbezout(nf, a,b, gel(I,def),gel(I,j), &u,&v,&w,&di);

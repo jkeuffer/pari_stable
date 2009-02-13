@@ -71,7 +71,7 @@ interp(GEN h, GEN s, long j, long lim, long KLOC)
   e1 = gexpo(ss);
   e2 = gexpo(dss);
   if (e1-e2 <= lim && (j <= 10 || e1 >= -lim)) { avma = av; return NULL; }
-  if (typ(ss) == t_COMPLEX && gcmp0(gel(ss,2))) ss = gel(ss,1);
+  if (typ(ss) == t_COMPLEX && gequal0(gel(ss,2))) ss = gel(ss,1);
   return ss;
 }
 
@@ -570,7 +570,7 @@ sumnuminit(GEN sig, long m, long sgn, long prec)
   long L, k, eps, flii;
 
   b = suminit_start(sig);
-  flii = gcmp0(gel(b,2));
+  flii = gequal0(gel(b,2));
   if (flii)
     tab = intnuminit(mkvec(gen_m1), mkvec(gen_1), m, prec);
   else
@@ -814,7 +814,7 @@ f_getycplx(GEN a, long prec)
   long s;
   GEN tmp, a2R, a2I;
 
-  if (lg(a) == 2 || gcmp0(gel(a,2))) return gen_1;
+  if (lg(a) == 2 || gequal0(gel(a,2))) return gen_1;
   a2R = real_i(gel(a,2));
   a2I = imag_i(gel(a,2));
   s = gsigne(a2I); if (s < 0) a2I = gneg(a2I);
@@ -830,11 +830,11 @@ code_aux(GEN a2, int warn)
   long s = gsigne(a2I);
   if (s)
   {
-    if(warn && !gcmp0(a2R))
+    if(warn && !gequal0(a2R))
       pari_warn(warner,"both nonzero real and imag. part in coding, real ignored");
     return s > 0 ? f_YOSCC : f_YOSCS;
   }
-  if (gcmp0(a2R) || gcmpgs(a2R, -2)<=0) return f_YSLOW;
+  if (gequal0(a2R) || gcmpgs(a2R, -2)<=0) return f_YSLOW;
   if (gsigne(a2R) > 0) return f_YFAST;
   if (gcmpgs(a2R, -1) >= 0) pari_err(talker,"incorrect a or b in intnum");
   return f_YVSLO;
@@ -867,7 +867,7 @@ static GEN
 homtab(GEN tab, GEN k)
 {
   GEN z;
-  if (gcmp0(k) || gequal(k, gen_1)) return tab;
+  if (gequal0(k) || gequal(k, gen_1)) return tab;
   if (gsigne(k) < 0) k = gneg(k);
   z = cgetg(8, t_VEC);
   TABm(z)  = icopy(TABm(tab));
@@ -944,7 +944,7 @@ intnuminit(GEN a, GEN b, long m, long prec)
       case f_YVSLO: return exptab(initexpsinh(m, l), gel(b,2), prec);
       case f_YFAST: return homtab(initexpexp(m, l), km);
       case f_YOSCS:
-	if (typ(a) == t_VEC || gcmp0(a)) return homtab(initnumsine(m, l), km);
+	if (typ(a) == t_VEC || gequal0(a)) return homtab(initnumsine(m, l), km);
 	    /* fall through */
       case f_YOSCC:
 	T = cgetg(3, t_VEC);
@@ -1204,7 +1204,7 @@ weight(void *E, GEN (*eval)(GEN,void*), GEN x, GEN w)
 {
   long k, l = lg(x);
   for (k = 1; k < l; k++) gel(w,k) = gmul(gel(w,k), eval(gel(x,k), E));
-  k--; while (k >= 1) if (!gcmp0(gel(w,k--))) break;
+  k--; while (k >= 1) if (!gequal0(gel(w,k--))) break;
   return k;
 }
 /* compute the necessary tabs, weights multiplied by f(t).
@@ -1285,7 +1285,7 @@ intnum_i(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN tab, long prec)
   /* now b is infinite */
   tmpi = codeb > 0 ? 1 : -1;
   if (codea == f_REG && labs(codeb) != f_YOSCC
-      && (labs(codeb) != f_YOSCS || gcmp0(a)))
+      && (labs(codeb) != f_YOSCS || gequal0(a)))
   {
     S = intninfpm(E, eval, a, tmpi, tab, prec);
     return sgns*tmpi < 0 ? gneg(S) : S;
@@ -1293,7 +1293,7 @@ intnum_i(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN tab, long prec)
   pi2 = Pi2n(1, prec); pis2 = Pi2n(-1, prec);
   if (is_fin_f(codea))
   { /* either codea == f_SING  or codea == f_REG and codeb = f_YOSCC
-     * or (codeb == f_YOSCS and !gcmp0(a)) */
+     * or (codeb == f_YOSCS and !gequal0(a)) */
     pi2p = gmul(pi2, f_getycplx(b, prec));
     pis2p = gmul2n(pi2p, -2);
     tm = real_i(codea == f_SING ? gel(a,1) : a);
@@ -1439,7 +1439,7 @@ intinvintern(void *E, GEN (*eval)(GEN, void*), GEN sig, GEN x, GEN tab, long fla
   D.prec = prec;
   D.f = eval;
   D.E = E;
-  if (gcmp0(gel(sig,2)))
+  if (gequal0(gel(sig,2)))
   {
     D.R = x;
     tmpP = gettmpP(mulcxI(gabs(x, prec)));
@@ -1550,7 +1550,7 @@ intfouriersin(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN x, GEN tab, lo
   auxint_t D;
   GEN z, tmp;
 
-  if (gcmp0(x)) return gcopy(x);
+  if (gequal0(x)) return gcopy(x);
   tmp = gmul(x, Pi2n(1, prec));
   D.a = tmp;
   D.R = NULL;
@@ -1567,7 +1567,7 @@ intfouriercos(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN x, GEN tab, lo
   auxint_t D;
   GEN z, tmp;
 
-  if (gcmp0(x)) return intnum(E, eval, a, b, tab, prec);
+  if (gequal0(x)) return intnum(E, eval, a, b, tab, prec);
   tmp = gmul(x, Pi2n(1, prec));
   D.a = tmp;
   D.R = NULL;
@@ -1759,7 +1759,7 @@ sumnumall(void *E, GEN (*eval)(GEN, void*), GEN a, GEN sig, GEN tab, long flag, 
   auxint_t D;
 
   b = suminit_start(sig);
-  flii = gcmp0(gel(b,2));
+  flii = gequal0(gel(b,2));
   if (!is_scalar_t(typ(a))) pari_err(talker, "incorrect beginning value in sumnum");
   tab = sumnuminit0(sig, tab, sgn, prec);
 

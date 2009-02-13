@@ -32,7 +32,7 @@ lll_trivial(GEN x, long flag)
     gel(y,2) = cgetg(1,t_MAT); return y;
   }
   /* dim x = 1 */
-  if (gcmp0(gel(x,1)))
+  if (gequal0(gel(x,1)))
   {
     if (flag & LLL_KER) return matid(1);
     if (flag & (LLL_IM|LLL_INPLACE)) return cgetg(1,t_MAT);
@@ -559,7 +559,7 @@ static int
 pslg(GEN x)
 {
   long tx;
-  if (gcmp0(x)) return 2;
+  if (gequal0(x)) return 2;
   tx = typ(x); return is_scalar_t(tx)? 3: lg(x);
 }
 
@@ -610,7 +610,7 @@ do_SWAPgen(GEN h, GEN L, GEN B, long k, GEN fl, int *flc)
       gcoeff(L,i,k-1) = gdiv(p1, Bk);
     }
   }
-  else if (!gcmp0(la))
+  else if (!gequal0(la))
   {
     p1 = gdiv(la2, Bk);
     gel(B,k+1) = gel(B,k) = p1;
@@ -652,7 +652,7 @@ incrementalGSgen(GEN x, GEN L, GEN B, long k, GEN fl)
 	}
       gcoeff(L,k,j) = u;
     }
-  if (gcmp0(u)) B[k+1] = B[k];
+  if (gequal0(u)) B[k+1] = B[k];
   else
   {
     gel(B,k+1) = gcoeff(L,k,k); gcoeff(L,k,k) = gen_1; fl[k] = 1;

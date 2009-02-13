@@ -207,7 +207,7 @@ RgX_translate(GEN P, GEN c)
   GEN Q, *R;
   long i, k, n;
 
-  if (!signe(P) || gcmp0(c)) return gcopy(P);
+  if (!signe(P) || gequal0(c)) return gcopy(P);
   Q = leafcopy(P);
   R = (GEN*)(Q+2); n = degpol(P);
   lim = stack_lim(av, 2);
@@ -257,7 +257,7 @@ RgXQX_translate(GEN P, GEN c, GEN T)
   GEN Q, *R;
   long i, k, n;
 
-  if (!signe(P) || gcmp0(c)) return gcopy(P);
+  if (!signe(P) || gequal0(c)) return gcopy(P);
   Q = leafcopy(P);
   R = (GEN*)(Q+2); n = degpol(P);
   lim = stack_lim(av, 2);
@@ -334,7 +334,7 @@ RgX_renormalize(GEN x)
 {
   long i, lx = lg(x);
   for (i = lx-1; i>1; i--)
-    if (! gcmp0(gel(x,i))) break; /* _not_ isexactzero */
+    if (! gequal0(gel(x,i))) break; /* _not_ isexactzero */
   stackdummy((pari_sp)(x + lg(x)), (pari_sp)(x + i+1));
   setlg(x, i+1); setsigne(x, i != 1); return x;
 }
@@ -345,7 +345,7 @@ RgV_to_RgX(GEN x, long v)
   long i, k = lg(x);
   GEN p;
 
-  while (--k && gcmp0(gel(x,k)));
+  while (--k && gequal0(gel(x,k)));
   if (!k) return zeropol(v);
   i = k+2; p = cgetg(i,t_POL);
   p[1] = evalsigne(1) | evalvarn(v);
@@ -543,7 +543,7 @@ RgX_valrem_inexact(GEN x, GEN *Z)
   long v;
   if (!signe(x)) { if (Z) *Z = zeropol(varn(x)); return LONG_MAX; }
   for (v = 0;; v++)
-    if (!gcmp0(gel(x,2+v))) break;
+    if (!gequal0(gel(x,2+v))) break;
   if (Z) *Z = RgX_shift_shallow(x, -v);
   return v;
 }
@@ -701,7 +701,7 @@ RgX_Rg_sub(GEN y, GEN x)
     long v = varn(y);
     if (isrationalzero(x)) return zeropol(v);
     z = cgetg(3,t_POL);
-    z[1] = gcmp0(x)? evalvarn(v)
+    z[1] = gequal0(x)? evalvarn(v)
                    : evalvarn(v) | evalsigne(1);
     gel(z,2) = gneg(x); return z;
   }
@@ -1083,13 +1083,13 @@ RgX_divrem(GEN x, GEN y, GEN *pr)
 
   dy = degpol(y);
   y_lead = gel(y,dy+2);
-  if (gcmp0(y_lead)) /* normalize denominator if leading term is 0 */
+  if (gequal0(y_lead)) /* normalize denominator if leading term is 0 */
   {
     pari_warn(warner,"normalizing a polynomial with 0 leading term");
     for (dy--; dy>=0; dy--)
     {
       y_lead = gel(y,dy+2);
-      if (!gcmp0(y_lead)) break;
+      if (!gequal0(y_lead)) break;
     }
   }
   if (!dy) /* y is constant */
@@ -1106,7 +1106,7 @@ RgX_divrem(GEN x, GEN y, GEN *pr)
   {
     if (pr)
     {
-      if (pr == ONLY_DIVIDES) return gcmp0(x)? gen_0: NULL;
+      if (pr == ONLY_DIVIDES) return gequal0(x)? gen_0: NULL;
       if (pr == ONLY_REM) return gcopy(x);
       *pr = gcopy(x);
     }
@@ -1178,7 +1178,7 @@ RgX_divrem(GEN x, GEN y, GEN *pr)
     for (j=0; j<=i && j<=dz; j++)
       if (y[i-j] && gel(z,j) != gen_0) p1 = gsub(p1, gmul(gel(z,j),gel(y,i-j)));
     if (mod && avma==av1) p1 = gmul(p1,mod);
-    if (!gcmp0(p1)) { sx = 1; break; } /* remainder is non-zero */
+    if (!gequal0(p1)) { sx = 1; break; } /* remainder is non-zero */
     if (!isexactzero(p1)) break;
     if (!i) break;
     avma=av1;
@@ -1273,7 +1273,7 @@ RgXQX_divrem(GEN x, GEN y, GEN T, GEN *pr)
     p1 = gel(x,i);
     for (j=0; j<=i && j<=dz; j++)
       p1 = gsub(p1, gmul(gel(z,j),gel(y,i-j)));
-    tetpil=avma; p1 = grem(p1, T); if (!gcmp0(p1)) { sx = 1; break; }
+    tetpil=avma; p1 = grem(p1, T); if (!gequal0(p1)) { sx = 1; break; }
     if (!i) break;
     avma=av;
   }
@@ -1349,7 +1349,7 @@ RgXQX_pseudorem(GEN x, GEN y, GEN T)
       GEN c = gmul(y_lead, gel(x,i));
       gel(x,i) = rem(c, T);
     }
-    do { x++; dx--; } while (dx >= 0 && gcmp0(gel(x,0)));
+    do { x++; dx--; } while (dx >= 0 && gequal0(gel(x,0)));
     if (dx < dy) break;
     if (low_stack(lim,stack_lim(av2,1)))
     {
@@ -1428,7 +1428,7 @@ RgXQX_pseudodivrem(GEN x, GEN y, GEN T, GEN *ptr)
       gel(x,i) = rem(c,T);
     }
     x++; dx--;
-    while (dx >= dy && gcmp0(gel(x,0))) { x++; dx--; gel(z,iz++) = gen_0; }
+    while (dx >= dy && gequal0(gel(x,0))) { x++; dx--; gel(z,iz++) = gen_0; }
     if (dx < dy) break;
     if (low_stack(lim,stack_lim(av2,1)))
     {
@@ -1436,7 +1436,7 @@ RgXQX_pseudodivrem(GEN x, GEN y, GEN T, GEN *ptr)
       gerepilecoeffs2(av2,x,dx+1, z,iz);
     }
   }
-  while (dx >= 0 && gcmp0(gel(x,0))) { x++; dx--; }
+  while (dx >= 0 && gequal0(gel(x,0))) { x++; dx--; }
   if (dx < 0)
     x = zeropol(vx);
   else
@@ -1589,6 +1589,6 @@ RgXQ_norm(GEN x, GEN T)
 
   av = avma; y = resultant(T, x);
   L = leading_term(T);
-  if (gequal1(L) || gcmp0(x)) return y;
+  if (gequal1(L) || gequal0(x)) return y;
   return gerepileupto(av, gdiv(y, gpowgs(L, degpol(x))));
 }

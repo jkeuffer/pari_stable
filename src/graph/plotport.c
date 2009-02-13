@@ -250,8 +250,8 @@ check_rect_init(long ne)
 
 static long
 initrect_get_arg(GEN x, long flag, long *dft)
-{ /* FIXME: gcmp0(x) undocumented backward compatibility hack */
-  if (!x || gcmp0(x) || flag) { PARI_get_plot(0); return *dft - 1; }
+{ /* FIXME: gequal0(x) undocumented backward compatibility hack */
+  if (!x || gequal0(x) || flag) { PARI_get_plot(0); return *dft - 1; }
   if (typ(x) != t_INT) pari_err(typeer, "initrect");
   return itos(x);
 }

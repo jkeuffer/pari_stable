@@ -459,7 +459,7 @@ RgV_isscalar(GEN x)
 {
   long lx = lg(x),i;
   for (i=2; i<lx; i++)
-    if (!gcmp0(gel(x, i))) return 0;
+    if (!gequal0(gel(x, i))) return 0;
   return 1;
 }
 INLINE int
@@ -467,7 +467,7 @@ RgX_isscalar(GEN x)
 {
   long i;
   for (i=lg(x)-1; i>2; i--)
-    if (!gcmp0(gel(x, i))) return 0;
+    if (!gequal0(gel(x, i))) return 0;
   return 1;
 }
 

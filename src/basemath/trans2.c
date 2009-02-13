@@ -27,7 +27,7 @@ trans_fix_arg(long *prec, GEN *s0, GEN *sig, pari_sp *av, GEN *res)
 {
   GEN s, p1;
   long l;
-  if (typ(*s0)==t_COMPLEX && gcmp0(gel(*s0,2))) *s0 = gel(*s0,1);
+  if (typ(*s0)==t_COMPLEX && gequal0(gel(*s0,2))) *s0 = gel(*s0,1);
   s = *s0;
   l = precision(s); if (!l) l = *prec;
   if (l < 3) l = 3;
@@ -207,11 +207,11 @@ gasin(GEN x, long prec)
     case t_INTMOD: case t_PADIC: pari_err(typeer,"gasin");
     default:
       av = avma; if (!(y = toser_i(x))) break;
-      if (gcmp0(y)) return gerepilecopy(av, y);
+      if (gequal0(y)) return gerepilecopy(av, y);
       /* lg(y) > 2*/
       if (valp(y) < 0) pari_err(negexper,"gasin");
       p1 = gsubsg(1,gsqr(y));
-      if (gcmp0(p1))
+      if (gequal0(p1))
       {
         GEN t = Pi2n(-1,prec);
         if (gsigne(gel(y,2)) < 0) setsigne(t, -1);
@@ -283,7 +283,7 @@ gacos(GEN x, long prec)
       if (lg(y) > 2)
       {
 	p1 = gsubsg(1,gsqr(y));
-	if (gcmp0(p1)) return zeroser(varn(y), valp(p1)>>1);
+	if (gequal0(p1)) return zeroser(varn(y), valp(p1)>>1);
 	p1 = integ(gdiv(gneg(derivser(y)), gsqrt(p1,prec)), varn(y));
 	if (gequal1(gel(y,2)) && !valp(y)) /*y(t) = 1+O(t)*/
 	  return gerepileupto(av, p1);
@@ -355,7 +355,7 @@ garg(GEN x, long prec)
   long tx = typ(x);
   pari_sp av;
 
-  if (gcmp0(x)) pari_err(talker,"zero argument in garg");
+  if (gequal0(x)) pari_err(talker,"zero argument in garg");
   switch(tx)
   {
     case t_REAL: prec = lg(x); /* fall through */
@@ -415,7 +415,7 @@ gch(GEN x, long prec)
     case t_INTMOD: pari_err(typeer,"gch");
     default:
       av = avma; if (!(y = toser_i(x))) break;
-      if (gcmp0(y) && valp(y) == 0) return gerepilecopy(av, y);
+      if (gequal0(y) && valp(y) == 0) return gerepilecopy(av, y);
       p1 = gexp(y,prec); p1 = gadd(p1, ginv(p1));
       return gerepileupto(av, gmul2n(p1,-1));
   }
@@ -463,7 +463,7 @@ gsh(GEN x, long prec)
     case t_INTMOD:
     default:
       av = avma; if (!(y = toser_i(x))) break;
-      if (gcmp0(y) && valp(y) == 0) return gerepilecopy(av, y);
+      if (gequal0(y) && valp(y) == 0) return gerepilecopy(av, y);
       p1 = gexp(y, prec); p1 = gsub(p1, ginv(p1));
       return gerepileupto(av, gmul2n(p1,-1));
   }
@@ -521,7 +521,7 @@ gth(GEN x, long prec)
     case t_INTMOD: pari_err(typeer,"gth");
     default:
       av = avma; if (!(y = toser_i(x))) break;
-      if (gcmp0(y)) return gerepilecopy(av, y);
+      if (gequal0(y)) return gerepilecopy(av, y);
       t = gexp(gmul2n(y, 1),prec);
       t = gdivsg(-2, gaddgs(t,1));
       return gerepileupto(av, gaddsg(1,t));
@@ -556,7 +556,7 @@ gash(GEN x, long prec)
   pari_sp av;
   GEN a, y, p1;
 
-  if (gcmp0(x)) return gcopy(x);
+  if (gequal0(x)) return gcopy(x);
   switch(typ(x))
   {
     case t_REAL:
@@ -580,10 +580,10 @@ gash(GEN x, long prec)
     case t_INTMOD: case t_PADIC: pari_err(typeer,"gash");
     default:
       av = avma; if (!(y = toser_i(x))) break;
-      if (gcmp0(y)) return gerepilecopy(av, y);
+      if (gequal0(y)) return gerepilecopy(av, y);
       if (valp(y) < 0) pari_err(negexper,"gash");
       p1 = gaddsg(1,gsqr(y));
-      if (gcmp0(p1))
+      if (gequal0(p1))
       {
         GEN t = PiI2n(-1,prec);
         if ( gsigne(imag_i(gel(y,2))) < 0 ) setsigne(gel(t,2), -1);
@@ -651,13 +651,13 @@ gach(GEN x, long prec)
       av = avma; if (!(y = toser_i(x))) break;
       v = valp(y);
       if (v < 0) pari_err(negexper,"gach");
-      if (gcmp0(y))
+      if (gequal0(y))
       {
 	if (!v) return gerepilecopy(av, y);
 	return gerepileupto(av, gadd(y, PiI2n(-1, prec)));
       }
       p1 = gsubgs(gsqr(y),1);
-      if (gcmp0(p1)) { avma = av; return zeroser(varn(y), valp(p1)>>1); }
+      if (gequal0(p1)) { avma = av; return zeroser(varn(y), valp(p1)>>1); }
       p1 = gdiv(derivser(y), gsqrt(p1,prec));
       a = integ(p1, varn(y));
       if (v)

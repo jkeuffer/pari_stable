@@ -523,7 +523,7 @@ eval_rel_pol(GEN p, long bit)
 {
   long i;
   for (i = 2; i < lg(p); i++)
-    if (gcmp0(gel(p,i))) gel(p,i) = gen_0; /* bad behaviour of gexpo */
+    if (gequal0(gel(p,i))) gel(p,i) = gen_0; /* bad behaviour of gexpo */
   return pol_to_gaussint(p, bit-gexpo(p)+1);
 }
 
@@ -663,7 +663,7 @@ logmin_modulus(GEN p, double tau)
   pari_sp av = avma;
   double r;
 
-  if (gcmp0(gel(p,2))) return -pariINFINITY;
+  if (gequal0(gel(p,2))) return -pariINFINITY;
   r = - logmax_modulus(RgX_recip_shallow(p),tau);
   avma = av; return r;
 }
@@ -938,8 +938,8 @@ abs_update(GEN x, double *mu) {
   if (typ(x) != t_COMPLEX) return abs_update_r(x, mu);
   xr = gel(x,1);
   yr = gel(x,2);
-  if (gcmp0(xr)) return abs_update_r(yr,mu);
-  if (gcmp0(yr)) return abs_update_r(xr,mu);
+  if (gequal0(xr)) return abs_update_r(yr,mu);
+  if (gequal0(yr)) return abs_update_r(xr,mu);
   /* have to treat 0 specially: 0E-10 + 1e-20 = 0E-10 */
   xr = gtofp(xr, DEFAULTPREC);
   yr = gtofp(yr, DEFAULTPREC);
@@ -1528,7 +1528,7 @@ split_0_2(GEN p, long bit, GEN *F, GEN *G)
   q = RgX_translate(q,b); gel(q,n+1) = gen_0; eq = gexpo(q);
   k = 0;
   while (k <= n/2 && (- gexpo(gel(q,k+2)) > bit2 + 2*(n-k) + eq
-		      || gcmp0(gel(q,k+2)))) k++;
+		      || gequal0(gel(q,k+2)))) k++;
   if (k > 0)
   {
     if (k > n/2) k = n/2;
@@ -1772,7 +1772,7 @@ cauchy_bound(GEN p)
   {
     GEN y = gel(p,i+2);
     double L;
-    if (gcmp0(y)) continue;
+    if (gequal0(y)) continue;
     L = dblogr(mulrr(quickabs(y), invlc)) / (n-i);
     if (L > Lmax) Lmax = L;
   }
@@ -2002,7 +2002,7 @@ roots_aux(GEN p, long l, long clean)
 
   if (typ(p) != t_POL)
   {
-    if (gcmp0(p)) pari_err(zeropoler,"roots");
+    if (gequal0(p)) pari_err(zeropoler,"roots");
     if (!isvalidcoeff(p)) pari_err(typeer,"roots");
     return cgetg(1,t_VEC); /* constant polynomial */
   }
@@ -2179,7 +2179,7 @@ rootsold(GEN x, long prec)
         for(;;)
 	{
 	  GEN p7 = gneg_i(gdiv(p4, poleval(xd,p3)));
-	  long exc = gcmp0(p5)? -32: expo(gnorm(p7)) - expo(gnorm(p3));
+	  long exc = gequal0(p5)? -32: expo(gnorm(p7)) - expo(gnorm(p3));
           if (exc < -20) break;
 	  for (j=1; j<=10; j++)
 	  {
@@ -2260,11 +2260,11 @@ rootsold(GEN x, long prec)
   for (j=2; j<=deg0; j++)
   {
     GEN z = gel(y,j);
-    long f, fr = !gcmp0(gel(z,2));
+    long f, fr = !gequal0(gel(z,2));
     for (k=j-1; k>=1; k--)
     {
       GEN t = gel(y,k);
-      f = !gcmp0(gel(t,2));
+      f = !gequal0(gel(t,2));
       if (!f && fr) break;
       if (f == fr && gcmp(gel(t,1),gel(z,1)) <= 0) break;
       y[k+1] = y[k];
@@ -2394,10 +2394,10 @@ roots2(GEN T, long PREC)
   }
   for (j=2; j<=N; j++)
   {
-    x=gel(rr,j); if (gcmp0(gel(x,2))) fr=0; else fr=1;
+    x=gel(rr,j); if (gequal0(gel(x,2))) fr=0; else fr=1;
     for (i=j-1; i>=1; i--)
     {
-      if (gcmp0(gmael(rr,i,2))) f=0; else f=1;
+      if (gequal0(gmael(rr,i,2))) f=0; else f=1;
       if (f<fr) break;
       if (f==fr && gcmp(real_i(gel(rr,i)),real_i(x)) <= 0) break;
       rr[i+1]=rr[i];
@@ -2505,7 +2505,7 @@ balanc(GEN x)
 	  c = gadd(c, gabs(gcoeff(a,j,i),0));
 	  r = gadd(r, gabs(gcoeff(a,i,j),0));
 	}
-      if (!gcmp0(r) && !gcmp0(c))
+      if (!gequal0(r) && !gequal0(c))
       {
 	GEN g, s = gmul(cof, gadd(c,r));
 	long ex = 0;

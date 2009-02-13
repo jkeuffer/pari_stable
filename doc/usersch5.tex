@@ -4728,11 +4728,11 @@ applying \kbd{gtofp(gel(x,i), prec)} to all coefficients of $x$.
 @eprog
 
 The following routines check whether matrices or vectors have a special
-shape, using \kbd{gequal1} and \kbd{gcmp0} to test components. (This makes a
+shape, using \kbd{gequal1} and \kbd{gequal0} to test components. (This makes a
 difference when components are inexact.)
 
 \fun{int}{RgV_isscalar}{GEN x} return 1 if all the entries of $x$ are $0$
-(as per \kbd{gcmp0}), except possibly the first one. The name comes from
+(as per \kbd{gequal0}), except possibly the first one. The name comes from
 vectors expressing polynomials on the standard basis $1,T,\dots, T^{n-1}$, or
 on \kbd{nf.zk} (whose first element is $1$).
 
@@ -5046,7 +5046,7 @@ is defined, to the proper accuracy (e.g. \kbd{0}, \kbd{Mod(0,3)},
 is defined, to the proper accuracy (e.g. \kbd{0}, \kbd{Mod(0,3)},
 
 \fun{int}{RgX_isscalar}{GEN x} return 1 if $x$ all the coefficients of
-$x$ of degree $> 0$ are $0$ (as per \kbd{gcmp0}).
+$x$ of degree $> 0$ are $0$ (as per \kbd{gequal0}).
 
 \fun{GEN}{RgX_add}{GEN x,GEN y} adds \kbd{x} and \kbd{y}.
 
@@ -5124,15 +5124,15 @@ shallow (coefficients are not copied).
 
 \fun{long}{RgX_valrem}{GEN P, GEN *pz} returns the valuation $v$ of the
 \typ{POL}~\kbd{P} with respect to its main variable $X$. Check whether
-coefficients are $0$ using \kbd{gcmp0}. Set \kbd{*pz} to
+coefficients are $0$ using \kbd{gequal0}. Set \kbd{*pz} to
 $\kbd{RgX\_shift\_shallow}(P,-v)$.
 
 \fun{long}{RgX_val}{GEN P} returns the valuation $v$ of the
 \typ{POL}~\kbd{P} with respect to its main variable $X$. Check whether
-coefficients are $0$ using \kbd{gcmp0}.
+coefficients are $0$ using \kbd{gequal0}.
 
 \fun{long}{RgX_valrem_inexact}{GEN P, GEN *z} as \kbd{RgX\_valrem}, using
-\kbd{isexactzero} instead of \kbd{gcmp0}.
+\kbd{isexactzero} instead of \kbd{gequal0}.
 
 \fun{GEN}{RgX_deriv}{GEN x} returns the derivative of \kbd{x} with respect to
 its main variable.
@@ -5174,7 +5174,7 @@ form $Q(X^d)$, return $Q$. Shallow function, not suitable for
 \kbd{gerepileupto}.
 
 \fun{long}{RgX_deflate_max}{GEN P, long *d} sets \kbd{d} to the largest exponent
-such that $P$ is of the form $P(x^d)$ (use \kbd{gcmp0} to check
+such that $P$ is of the form $P(x^d)$ (use \kbd{gequal0} to check
 whether coefficients are 0), $0$ if $P$ is the zero polynomial. Returns
 \kbd{RgX\_deflate(P,d)}.
 
@@ -5204,7 +5204,7 @@ monomial in its main variable, 0~otherwise.
 have the same \kbd{degpol} and their coefficients are equal (as per
 \tet{gequal}). Variable numbers are not checked. Note that this is more
 stringent than \kbd{gequal(x,y)}, which only checks whether $x - y$ satisfies
-\kbd{gcmp0}; in particular, they may have different apparent degrees provided
+\kbd{gequal0}; in particular, they may have different apparent degrees provided
 the extra leading terms are $0$.
 
 \fun{long}{RgX_equal_var}{GEN x, GEN y} returns $1$ if $x$ and $y$
@@ -5445,7 +5445,7 @@ or equal to \kbd{lg(x)}. If equal, the function is equivalent to
 
 \fun{GEN}{normalizepol_approx}{GEN x, long lx} as \kbd{normalizepol\_lg},
 with the difference that we just delete all leading zeroes (as per
-\kbd{gcmp0}). This rougher normalization is used when we have no other
+\kbd{gequal0}). This rougher normalization is used when we have no other
 choice, for instance before attempting a Euclidean division by $x$.
 
 The following routines do \emph{not} copy coefficients on the stack (they
@@ -5497,7 +5497,7 @@ remainder is $O(T^{d+l})$.
 \fun{GEN}{RgX_to_ser_inexact}{GEN x, long l} applied to a \typ{POL}~\kbd{x},
 creates a \emph{shallow} \typ{SER} of length~\kbd{l} starting with~\kbd{x}.
 Unless the polynomial is zero, the coefficient of lowest degree
-$T^d$ of the result is not zero (as per \kbd{gcmp0}). The
+$T^d$ of the result is not zero (as per \kbd{gequal0}). The
 remainder is $O(T^{d+l})$.
 
 \fun{GEN}{gtoser}{GEN x, long v} converts the object~\kbd{x} into a \typ{SER}
@@ -5827,7 +5827,7 @@ to~\kbd{y}, 0~otherwise. A priori, this makes sense only if \kbd{x} and
 \kbd{y} have the same type, in which case they are recursively compared
 componentwise. When the types are different, a \kbd{true} result
 means that \kbd{x - y} was successfully computed and that
-\kbd{gcmp0} found it equal to $0$. In particular
+\kbd{gequal0} found it equal to $0$. In particular
 \bprog
   gequal(cgetg(1, t_VEC), gen_0)
 @eprog\noindent is true, and the relation is not transitive. E.g.~an empty
@@ -5860,7 +5860,7 @@ $-1$, and return 0~(false) otherwise.
 \emph{non-zero} \typ{INT}, return 1 (true) if \kbd{x} is equal to $-1$ or
 $1$, and return 0~(false) otherwise.
 
-\fun{int}{gcmp0}{GEN x} returns 1 (true) if \kbd{x} is equal to~0, 0~(false)
+\fun{int}{gequal0}{GEN x} returns 1 (true) if \kbd{x} is equal to~0, 0~(false)
 otherwise.
 
 \fun{int}{gequal1}{GEN x} returns 1 (true) if \kbd{x} is equal to~1, 0~(false)

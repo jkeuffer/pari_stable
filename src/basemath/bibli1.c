@@ -632,7 +632,7 @@ real_indep(GEN re, GEN im, long bitprec)
 {
   GEN p1 = gsub(gmul(gel(re,1),gel(im,2)),
 		gmul(gel(re,2),gel(im,1)));
-  return (!gcmp0(p1) && gexpo(p1) > - bitprec);
+  return (!gequal0(p1) && gexpo(p1) > - bitprec);
 }
 
 GEN
@@ -662,7 +662,7 @@ lindep2(GEN x, long bit)
   im = imag_i(x);
   /* independent over R ? */
   if (lx == 3 && real_indep(re,im,bit)) { avma = av; return cgetg(1, t_VEC); }
-  if (gcmp0(im)) im = NULL;
+  if (gequal0(im)) im = NULL;
   ly = im? lx+2: lx+1;
   M = cgetg(lx,t_MAT);
   for (i=1; i<lx; i++)
@@ -680,7 +680,7 @@ lindep2(GEN x, long bit)
 
 static int
 quazero(GEN x, long EXP)
-{ return gcmp0(x) || (typ(x)==t_REAL && expo(x) < EXP); }
+{ return gequal0(x) || (typ(x)==t_REAL && expo(x) < EXP); }
 GEN
 lindep(GEN x)
 {
@@ -883,7 +883,7 @@ redall(pslq_M *M, long i, long jsup)
   {
     pari_sp av = avma;
     t = round_safe( gdiv(gcoeff(H,i,j), gcoeff(H,j,j)) );
-    if (!t || gcmp0(t)) { avma = av; continue; }
+    if (!t || gequal0(t)) { avma = av; continue; }
 
     b = gel(B,j);
     gel(y,j) = gadd(gel(y,j), gmul(t,gel(y,i)));
@@ -990,7 +990,7 @@ init_timer(pslq_timer *T)
 static int
 is_zero(GEN x, long e, long prec)
 {
-  if (gcmp0(x)) return 1;
+  if (gequal0(x)) return 1;
   if (typ(x) == t_REAL)
   {
     long ex = expo(x);
@@ -1008,7 +1008,7 @@ init_pslq(pslq_M *M, GEN x, long *PREC)
   if (! is_vec_t(tx)) pari_err(typeer,"pslq");
   /* check trivial cases */
   for (k = 1; k <= n; k++)
-    if (gcmp0(gel(x,k))) return col_ei(n, k);
+    if (gequal0(gel(x,k))) return col_ei(n, k);
   if (n <= 1) return cgetg(1, t_COL);
   prec = gprecision(x) - 1; /* don't trust the last word */
   if (prec < 0)
@@ -1018,13 +1018,13 @@ init_pslq(pslq_M *M, GEN x, long *PREC)
     x = Q_primpart(x);
     im = imag_i(x);
     x = real_i(x); settyp(x, t_VEC);
-    if (!gcmp0(im))
+    if (!gequal0(im))
     {
       U = gel(extendedgcd(im),2);
       setlg(U, lg(U)-1); /* remove last column */
       x = gmul(x, U);
       if (n == 2) /* x has a single component */
-	return gcmp0(gel(x,1))? gel(U,1): cgetg(1, t_COL);
+	return gequal0(gel(x,1))? gel(U,1): cgetg(1, t_COL);
     }
     x = gel(extendedgcd(x),2);
     x = gel(x,1);
@@ -1299,7 +1299,7 @@ initializedoubles(pslqL2_M *Mbar, pslq_M *M, long prec)
       if (j < n)
       {
 	GEN h = gcoeff(M->H,i,j);
-	if (!gcmp0(h) && labs(gexpo(h)) > 0x3ff) return 0;
+	if (!gequal0(h) && labs(gexpo(h)) > 0x3ff) return 0;
 	Mbar->H[i][j] = rtodbl(h);
       }
     }
@@ -1563,7 +1563,7 @@ algdep0(GEN x, long n, long bit)
 
   if (! is_scalar_t(tx)) pari_err(typeer,"algdep0");
   if (tx==t_POLMOD) { y = gcopy(gel(x,1)); setvarn(y,0); return y; }
-  if (gcmp0(x)) return pol_x(0);
+  if (gequal0(x)) return pol_x(0);
   if (n <= 0)
   {
     if (!n) return gen_1;
@@ -1628,14 +1628,14 @@ addcolumntomatrix(GEN V, GEN invp, GEN L)
     fprintferr("list = %Ps\n",L);
     fprintferr("base change matrix =\n%Ps\n", invp);
   }
-  k = 1; while (k<n && (L[k] || gcmp0(gel(a,k)))) k++;
+  k = 1; while (k<n && (L[k] || gequal0(gel(a,k)))) k++;
   if (k == n) return 0;
   L[k] = 1;
   for (i=k+1; i<n; i++) gel(a,i) = gdiv(gneg_i(gel(a,i)),gel(a,k));
   for (j=1; j<=k; j++)
   {
     GEN c = gel(invp,j), ck = gel(c,k);
-    if (gcmp0(ck)) continue;
+    if (gequal0(ck)) continue;
     gel(c,k) = gdiv(ck, gel(a,k));
     if (j==k)
       for (i=k+1; i<n; i++)
@@ -1684,7 +1684,7 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
   switch(flag)
   {
     case min_FIRST:
-      if (gcmp0(BORNE)) pari_err(talker,"bound = 0 in minim2");
+      if (gequal0(BORNE)) pari_err(talker,"bound = 0 in minim2");
       res = cgetg(3,t_VEC); break;
     case min_ALL: res = cgetg(4,t_VEC); break;
     case min_PERF: break;
@@ -1695,7 +1695,7 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
 
       res = const_vecsmall(maxrank, 0);
       if (flag == min_VECSMALL2) BORNE = shifti(BORNE,1);
-      if (gcmp0(BORNE)) return res;
+      if (gequal0(BORNE)) return res;
       break;
     default: pari_err(flagerr, "minim0");
   }
@@ -1730,7 +1730,7 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
     for (i=1; i<j; i++) q[i][j] = rtodbl(gcoeff(r,i,j));
   }
 
-  if (flag==min_PERF || gcmp0(BORNE))
+  if (flag==min_PERF || gequal0(BORNE))
   {
     double c;
     p = rtodbl(gcoeff(a,1,1));

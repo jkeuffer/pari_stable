@@ -1245,7 +1245,7 @@ mycaract(decomp_t *S, GEN f, GEN a, GEN pp, GEN pdr)
   GEN d, chi, prec1, prec2, prec3, ns;
   long vd, n = degpol(f);
 
-  if (gcmp0(a)) return zeropol(varn(f));
+  if (gequal0(a)) return zeropol(varn(f));
 
   a = QpX_remove_denom(a, S->p, &d, &vd);
   prec1 = pp;
@@ -2583,7 +2583,7 @@ FqX_non_root(GEN P, GEN T, GEN p)
       for (k=1; k<=pi; k++)
       {
         GEN z = Fq_add(gel(v,k), jgi, T,p);
-        if (!gcmp0(FqX_eval(P, z, T,p))) return z;
+        if (!gequal0(FqX_eval(P, z, T,p))) return z;
         gel(v, j*pi+k) = z;
       }
       if (j < pp-1) jgi = Fq_add(jgi, gi, T,p); /* j*g[i] */
@@ -3255,7 +3255,7 @@ rnfisfree_aux(GEN bnf, GEN order)
   P = gel(I,j);
   for (j++; j<=n; j++)
     if (!ideal_is1(gel(I,j))) P = idealmul(nf,P,gel(I,j));
-  return gcmp0( isprincipal(bnf,P) );
+  return gequal0( isprincipal(bnf,P) );
 }
 
 long

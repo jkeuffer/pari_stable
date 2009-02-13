@@ -79,7 +79,7 @@ ellLHS0(GEN e, GEN x)
 {
   GEN a1 = ell_get_a1(e);
   GEN a3 = ell_get_a3(e);
-  return gcmp0(a1)? a3: gadd(a3, gmul(x,a1));
+  return gequal0(a1)? a3: gadd(a3, gmul(x,a1));
 }
 
 static GEN
@@ -144,7 +144,7 @@ initsmall(GEN x, GEN y)
   D = gsub(gmul(b4, gadd(gmulsg(9,gmul(b2,b6)),gmulsg(-8,gsqr(b4)))),
 	   gadd(gmul(b22,b8),gmulsg(27,gsqr(b6))));
   gel(y,12) = D;
-  if (gcmp0(D)) pari_err(talker,"singular curve in ellinit");
+  if (gequal0(D)) pari_err(talker,"singular curve in ellinit");
 
   j = gdiv(gmul(gsqr(c4),c4), D);
   gel(y,13) = j;
@@ -231,7 +231,7 @@ do_padic_agm(GEN *ptx, GEN a1, GEN b1, GEN p)
   long mi;
 
   if (!x) x = gmul2n(gsub(a1,b1),-2);
-  if (gcmp0(x)) pari_err(precer,"ellinit");
+  if (gequal0(x)) pari_err(precer,"ellinit");
   mi = minss(precp(a1),precp(b1));
   for(;;)
   {
@@ -242,7 +242,7 @@ do_padic_agm(GEN *ptx, GEN a1, GEN b1, GEN p)
     if (!equalii(bmod1,bmod)) b1 = gneg_i(b1);
     a1 = gprec(gmul2n(gadd(gadd(a,b),gmul2n(b1,1)),-2),mi);
     d = gsub(a1,b1);
-    if (gcmp0(d)) break;
+    if (gequal0(d)) break;
     p1 = padic_sqrt(gdiv(gadd(x,d),x));
     if (! gequal1(modii(gel(p1,4),p))) p1 = gneg_i(p1);
     x = gmul(x, gsqr(gmul2n(gaddsg(1,p1),-1)));
@@ -261,7 +261,7 @@ ellinit_padic(GEN x, GEN p, long prec)
   for (i=1; i<=13; i++)
     if (typ(gel(y,i)) != t_PADIC) gel(y,i) = cvtop(gel(y,i), p, prec);
   j = ell_get_j(y);
-  if (gcmp0(j) || valp(j) >= 0) /* p | j */
+  if (gequal0(j) || valp(j) >= 0) /* p | j */
     pari_err(talker,"valuation of j must be negative in p-adic ellinit");
   if (equaliu(p,2))
   {
@@ -304,7 +304,7 @@ ellinit_padic(GEN x, GEN p, long prec)
   w = gaddsg(1,p1);
   q = padic_sqrt(gmul(p1, gaddgs(p1,2))); /* sqrt(w^2 - 1) */
   p1 = gadd(w,q);
-  q = gcmp0(p1)? gsub(w,q): p1;
+  q = gequal0(p1)? gsub(w,q): p1;
   if (valp(q) < 0) q = ginv(q);
 
   gel(y,14) = mkvec(e1);
@@ -723,7 +723,7 @@ oncurve(GEN e, GEN z)
   av = avma;
   LHS = ellLHS(e,z);
   RHS = ellRHS(e,gel(z,1)); x = gsub(LHS,RHS);
-  if (gcmp0(x)) { avma = av; return 1; }
+  if (gequal0(x)) { avma = av; return 1; }
   pl = precision(LHS);
   pr = precision(RHS);
   if (!pl && !pr) { avma = av; return 0; } /* both of LHS, RHS are exact */
@@ -779,7 +779,7 @@ addell(GEN e, GEN z1, GEN z2)
       if (!eq) { avma = av; return ellinf(); }
     }
     p2 = d_ellLHS(e,z1);
-    if (gcmp0(p2)) { avma = av; return ellinf(); }
+    if (gequal0(p2)) { avma = av; return ellinf(); }
     p1 = gadd(gsub(ell_get_a4(e),gmul(ell_get_a1(e),y1)),
 	      gmul(x1,gadd(gmul2n(ell_get_a2(e),1),gmulsg(3,x1))));
   }
@@ -838,9 +838,9 @@ ordell(GEN e, GEN x, long prec)
     avma = av;
     if (!signe(D[2])) {
       y = cgetg(2,t_VEC);
-      gel(y,1) = mkintmodu(gcmp0(a)?0:1, 2);
+      gel(y,1) = mkintmodu(gequal0(a)?0:1, 2);
     } else {
-      if (!gcmp0(a)) return cgetg(1,t_VEC);
+      if (!gequal0(a)) return cgetg(1,t_VEC);
       y = cgetg(3,t_VEC);
       gel(y,1) = mkintmodu(0,2);
       gel(y,2) = mkintmodu(1,2);
@@ -855,7 +855,7 @@ ordell(GEN e, GEN x, long prec)
     return gerepileupto(av, roots_from_deg1(P));
   }
 
-  if (gcmp0(D)) {
+  if (gequal0(D)) {
     b = gneg_i(b);
     y = cgetg(2,t_VEC);
     gel(y,1) = gmul2n(b,-1);
@@ -944,7 +944,7 @@ ellpow_CM(GEN e, GEN z, GEN n)
     pari_err(talker,"not a complex multiplication in powell");
   q1p = RgX_deriv(q1);
   q1 = poleval(q1, grdx);
-  if (gcmp0(q1)) return ellinf();
+  if (gequal0(q1)) return ellinf();
 
   p1p = RgX_deriv(p1);
   p1 = poleval(p1, grdx);
@@ -1037,7 +1037,7 @@ zell(GEN e, GEN z, long prec)
   if (ty==t_PADIC)
   {
     u2 = do_padic_agm(&x1,a,b,gel(D,2));
-    if (!gcmp0(gel(e,16)))
+    if (!gequal0(gel(e,16)))
     {
       t = padic_sqrt(gaddsg(1, gdiv(x1,a)));
       t = gdiv(gaddsg(-1,t), gaddsg(1,t));
@@ -1055,11 +1055,11 @@ zell(GEN e, GEN z, long prec)
     if (gsigne(real_i(b)) != sw) b = gneg_i(b);
     a = gmul2n(gadd(gadd(a0,b0),gmul2n(b,1)),-2);
     d = gsub(a,b);
-    if (gcmp0(d) || gexpo(d) < gexpo(a) - bit_accuracy(prec) + 5) break;
+    if (gequal0(d) || gexpo(d) < gexpo(a) - bit_accuracy(prec) + 5) break;
     p1 = gsqrt(gdiv(gadd(x0,d),x0),prec);
     x1 = gmul(x0,gsqr(gmul2n(gaddsg(1,p1),-1)));
     d = gsub(x1,x0);
-    if (gcmp0(d) || gexpo(d) < gexpo(x1) - bit_accuracy(prec) + 5)
+    if (gequal0(d) || gexpo(d) < gexpo(x1) - bit_accuracy(prec) + 5)
     {
       if (fl) break;
       fl = 1;
@@ -1067,7 +1067,7 @@ zell(GEN e, GEN z, long prec)
     else fl = 0;
   }
   u = gdiv(x1,a); t = gaddsg(1,u);
-  if (gcmp0(t) || gexpo(t) <  5 - bit_accuracy(prec))
+  if (gequal0(t) || gexpo(t) <  5 - bit_accuracy(prec))
     t = gen_m1;
   else
     t = gdiv(u,gsqr(gaddsg(1,gsqrt(t,prec))));
@@ -1075,7 +1075,7 @@ zell(GEN e, GEN z, long prec)
   t = gmul(u, glog(t,prec));
 
   /* which square root? test the reciprocal function (pointell) */
-  if (!gcmp0(t))
+  if (!gequal0(t))
   {
     GEN z1,z2;
     int bad;
@@ -1178,7 +1178,7 @@ expIxy(GEN x, GEN y, long prec) { return gexp(gmul(x, mulcxI(y)), prec); }
 
 static GEN
 check_real(GEN q)
-{ return (typ(q) == t_COMPLEX && gcmp0(gel(q,2)))? gel(q,1): q; }
+{ return (typ(q) == t_COMPLEX && gequal0(gel(q,2)))? gel(q,1): q; }
 
 /* Return E_k(tau). Slow if tau is not in standard fundamental domain */
 static GEN
@@ -1196,7 +1196,7 @@ trueE(GEN tau, long k, long prec)
   { /* compute y := sum_{n>0} n^(k-1) q^n / (1-q^n) */
     qn = gmul(q,qn);
     p1 = gdiv(gmul(powuu(n,k-1),qn), gsubsg(1,qn));
-    if (gcmp0(p1) || gexpo(p1) <= - bit_accuracy(prec) - 5) break;
+    if (gequal0(p1) || gexpo(p1) <= - bit_accuracy(prec) - 5) break;
     y = gadd(y, p1);
     if (low_stack(lim, stack_lim(av,2)))
     {
@@ -1295,7 +1295,7 @@ reduce_z(GEN z, SL2_red *T)
   T->y = ground(real_i(Z));
   Z = gsub(Z, T->y);
   pr = gprecision(Z);
-  if (gcmp0(Z) || (pr && gexpo(Z) < 5 - bit_accuracy(pr))) Z = NULL; /*z in L*/
+  if (gequal0(Z) || (pr && gexpo(Z) < 5 - bit_accuracy(pr))) Z = NULL; /*z in L*/
   return Z;
 }
 
@@ -1372,7 +1372,7 @@ ellzeta(GEN om, GEN z, long prec)
   if (!get_periods(om, &T)) pari_err(typeer,"ellzeta");
   Z = reduce_z(z, &T);
   if (!Z) pari_err(talker,"can't evaluate ellzeta at a pole");
-  if (!gcmp0(T.x) || !gcmp0(T.y))
+  if (!gequal0(T.x) || !gequal0(T.y))
   {
     et = _elleta(&T,prec);
     et = gadd(gmul(T.x,gel(et,1)), gmul(T.y,gel(et,2)));
@@ -1564,7 +1564,7 @@ weipell0(GEN e, long prec, long PREC)
 static int
 is_simple_var(GEN x)
 {
-  return (degpol(x) == 1 && gcmp0(gel(x,2)) && gequal1(gel(x,3)));
+  return (degpol(x) == 1 && gequal0(gel(x,2)) && gequal1(gel(x,3)));
 }
 
 GEN
@@ -1655,7 +1655,7 @@ localred_p(GEN e, GEN p, int minim)
   c4 = ell_get_c4(e);
   c6 = ell_get_c6(e);
   D  = ell_get_disc(e);
-  nuj = gcmp0(ell_get_j(e))? 0: - Q_pval(ell_get_j(e), p);
+  nuj = gequal0(ell_get_j(e))? 0: - Q_pval(ell_get_j(e), p);
   nuD = Z_pval(D, p);
   k = (nuj > 0 ? nuD - nuj : nuD) / 12;
   if (k <= 0)
@@ -1980,7 +1980,7 @@ ellintegralmodel(GEN e)
     GEN p = gel(L,k);
     long n = 0, m;
     for (i = 1; i < 6; i++)
-      if (!gcmp0(gel(a,i)))
+      if (!gequal0(gel(a,i)))
       {
 	long r = (i == 5)? 6: i; /* a5 is missing */
 	m = r * n + Q_pval(gel(a,i), p);
@@ -2096,8 +2096,8 @@ neron(GEN e, long p, long* ptkod)
   nv = localred_23(e,p);
   *ptkod = kod = itos(gel(nv,2));
   c4=ell_get_c4(e); c6=ell_get_c6(e); d=ell_get_disc(e);
-  v4 = gcmp0(c4) ? 12 : Z_lval(c4,p);
-  v6 = gcmp0(c6) ? 12 : Z_lval(c6,p);
+  v4 = gequal0(c4) ? 12 : Z_lval(c4,p);
+  v6 = gequal0(c6) ? 12 : Z_lval(c6,p);
   vd = Z_lval(d,p); avma = av;
   if (p == 2) {
     if (kod > 4) return 1;
@@ -2333,7 +2333,7 @@ ellrootno_p(GEN e, GEN p, ulong ex)
   if (!ex) return 1;
   if (ex == 1) return -kronecker(negi(ell_get_c6(e)),p);
   j=ell_get_j(e);
-  if (!gcmp0(j) && Q_pval(j,p) < 0) return krosi(-1,p);
+  if (!gequal0(j) && Q_pval(j,p) < 0) return krosi(-1,p);
   ep = 12 / ugcd(12, Z_pval(ell_get_disc(e),p));
   if (ep==4) z = 2; else z = (ep&1) ? 3 : 1;
   return krosi(-z, p);
@@ -3440,7 +3440,7 @@ exphellagm(GEN e, GEN z, int flag, long prec)
     GEN p1, p2, ab, a0 = a;
     a = gmul2n(gadd(a0,b), -1);
     r = gsub(a, a0);
-    if (gcmp0(r) || gexpo(r) < ex) break;
+    if (gequal0(r) || gexpo(r) < ex) break;
     ab = gmul(a0, b);
     b = gsqrt(ab, prec);
 

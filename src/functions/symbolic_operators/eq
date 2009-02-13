@@ -14,7 +14,7 @@ Description:
  (int, -1):bool                         gequalm1($1)
  (int, small):bool:parens               cmpis($1, $2) == 0
  (int, int):bool                        equalii($1, $2)
- (gen, 0):bool                          gcmp0($1)
+ (gen, 0):bool                          gequal0($1)
  (gen, 1):bool                          gequal1($1)
  (gen, -1):bool                         gequalm1($1)
  (real,real):bool                       cmprr($1, $2) == 0

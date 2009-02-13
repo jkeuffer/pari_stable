@@ -851,7 +851,7 @@ gpow(GEN x, GEN n, long prec)
       if (lg(x) == 2) return gerepilecopy(av, x); /* O(1) */
       return gerepileupto(av, ser_pow(x, n, prec));
   }
-  if (gcmp0(x))
+  if (gequal0(x))
   {
     if (!is_scalar_t(tn) || tn == t_PADIC || tn == t_INTMOD)
       pari_err(talker,"gpow: 0 to a forbidden power");
@@ -947,7 +947,7 @@ padic_sqrt(GEN x)
   GEN z,y,mod, p = gel(x,2);
   pari_sp av;
 
-  if (gcmp0(x)) return zeropadic(p, (e+1) >> 1);
+  if (gequal0(x)) return zeropadic(p, (e+1) >> 1);
   if (e & 1) pari_err(talker,"odd exponent in p-adic sqrt");
 
   y = cgetg(5,t_PADIC);
@@ -1316,7 +1316,7 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
     if (tx==t_INT && is_pm1(x) && signe(x) > 0)
      /*speed-up since there is no way to call rootsof1complex from gp*/
       y = real_1(prec);
-    else if (gcmp0(x))
+    else if (gequal0(x))
     {
       if (signe(n) < 0) pari_err(gdiver);
       if (isinexactreal(x))
@@ -1550,7 +1550,7 @@ Qp_exp_safe(GEN x)
   pari_sp av;
   GEN y;
 
-  if (gcmp0(x)) return gaddgs(x,1);
+  if (gequal0(x)) return gaddgs(x,1);
   k = Qp_exp_prec(x);
   if (k < 0) return NULL;
   av = avma;
@@ -1573,7 +1573,7 @@ cos_p(GEN x)
   pari_sp av;
   GEN x2, y;
 
-  if (gcmp0(x)) return gaddgs(x,1);
+  if (gequal0(x)) return gaddgs(x,1);
   k = Qp_exp_prec(x);
   if (k < 0) return NULL;
   av = avma; x2 = gsqr(x);
@@ -1592,7 +1592,7 @@ sin_p(GEN x)
   pari_sp av;
   GEN x2, y;
 
-  if (gcmp0(x)) return gaddgs(x,1);
+  if (gequal0(x)) return gaddgs(x,1);
   k = Qp_exp_prec(x);
   if (k < 0) return NULL;
   av = avma; x2 = gsqr(x);
@@ -1611,7 +1611,7 @@ cxexp(GEN x, long prec)
   GEN r,p1,p2, y = cgetg(3,t_COMPLEX);
   pari_sp av = avma, tetpil;
   r = gexp(gel(x,1),prec);
-  if (gcmp0(r)) { gel(y,1) = r; gel(y,2) = r; return y; }
+  if (gequal0(r)) { gel(y,1) = r; gel(y,2) = r; return y; }
   gsincos(gel(x,2),&p2,&p1,prec);
   tetpil = avma;
   gel(y,1) = gmul(r,p1);
@@ -1629,7 +1629,7 @@ serexp(GEN x, long prec)
 
   ex = valp(x);
   if (ex < 0) pari_err(negexper,"gexp");
-  if (gcmp0(x)) return gaddsg(1,x);
+  if (gequal0(x)) return gaddsg(1,x);
   lx = lg(x);
   if (ex)
   {
@@ -1712,7 +1712,7 @@ static int
 agmcx_gap(GEN a, GEN b, long L)
 {
   GEN d = gsub(b, a);
-  return (!gcmp0(d) && gexpo(d) - gexpo(b) >= L);
+  return (!gequal0(d) && gexpo(d) - gexpo(b) >= L);
 }
 static GEN
 agm1cx(GEN x, long prec)
@@ -1743,7 +1743,7 @@ agm1(GEN x, long prec)
   long l, l2, ep;
   pari_sp av;
 
-  if (gcmp0(x)) return gcopy(x);
+  if (gequal0(x)) return gcopy(x);
   switch(typ(x))
   {
     case t_INT:
@@ -1753,7 +1753,7 @@ agm1(GEN x, long prec)
     case t_REAL: return signe(x) > 0? agm1r_abs(x): agm1cx(x, prec);
 
     case t_COMPLEX:
-      if (gcmp0(gel(x,2)) && gsigne(gel(x,1)) > 0)
+      if (gequal0(gel(x,2)) && gsigne(gel(x,1)) > 0)
 	return agm1(gel(x,1), prec);
       return agm1cx(x, prec);
 
@@ -1768,7 +1768,7 @@ agm1(GEN x, long prec)
 	p1 = gsub(b1,a1); ep = valp(p1)-valp(b1);
 	if (ep<=0) { b1 = gneg_i(b1); p1 = gsub(b1,a1); ep=valp(p1)-valp(b1); }
       }
-      while (ep<l && !gcmp0(p1));
+      while (ep<l && !gequal0(p1));
       return gerepilecopy(av,a1);
 
     default:
@@ -1782,7 +1782,7 @@ agm1(GEN x, long prec)
 	b1 = ser_powfrac(gmul(a,b1), ghalf, prec);
 	p1 = gsub(b1,a1); ep = valp(p1)-valp(b1);
       }
-      while (ep<l && !gcmp0(p1)
+      while (ep<l && !gequal0(p1)
 		  && (!isinexactreal(p1) || gexpo(p1) - gexpo(b1) >= l2));
       return gerepilecopy(av,a1);
   }
@@ -1801,7 +1801,7 @@ agm(GEN x, GEN y, long prec)
     if (is_matvec_t(ty)) pari_err(talker,"agm of two vector/matrices");
     swap(x, y);
   }
-  if (gcmp0(y)) return gcopy(y);
+  if (gequal0(y)) return gcopy(y);
   av = avma;
   return gerepileupto(av, gmul(y, agm1(gdiv(x,y), prec)));
 }
@@ -1965,7 +1965,7 @@ logagmcx(GEN q, long prec)
   Q = gtofp(q, prec);
   a = gel(Q,1);
   b = gel(Q,2);
-  if (gcmp0(a)) {
+  if (gequal0(a)) {
     affrr_fixlg(logr_abs(b), gel(z,1));
     y = Pi2n(-1, prec);
     if (signe(b) < 0) setsigne(y, -1);
@@ -2047,7 +2047,7 @@ glog(GEN x, long prec)
       gel(y,2) = mppi(lg(x)); return y;
 
     case t_COMPLEX:
-      if (gcmp0(gel(x,2))) return glog(gel(x,1), prec);
+      if (gequal0(gel(x,2))) return glog(gel(x,1), prec);
       if (prec > LOGAGMCX_LIMIT) return logagmcx(x, prec);
       y = cgetg(3,t_COMPLEX);
       gel(y,2) = garg(x,prec);
@@ -2060,7 +2060,7 @@ glog(GEN x, long prec)
     case t_INTMOD: pari_err(typeer,"glog");
     default:
       av = avma; if (!(y = toser_i(x))) break;
-      if (valp(y) || gcmp0(y)) pari_err(talker,"log is not meromorphic at 0");
+      if (valp(y) || gequal0(y)) pari_err(talker,"log is not meromorphic at 0");
       p1 = integ(gdiv(derivser(y), y), varn(y)); /* log(y)' = y'/y */
       if (!gequal1(gel(y,2))) p1 = gadd(p1, glog(gel(y,2),prec));
       return gerepileupto(av, p1);
@@ -2264,7 +2264,7 @@ gcos(GEN x, long prec)
 
     default:
       av = avma; if (!(y = toser_i(x))) break;
-      if (gcmp0(y)) return gerepileupto(av, gaddsg(1,y));
+      if (gequal0(y)) return gerepileupto(av, gaddsg(1,y));
       if (valp(y) < 0) pari_err(negexper,"gcos");
       gsincos(y,&u,&v,prec);
       return gerepilecopy(av,v);
@@ -2334,7 +2334,7 @@ gsin(GEN x, long prec)
 
     default:
       av = avma; if (!(y = toser_i(x))) break;
-      if (gcmp0(y)) return gerepilecopy(av, y);
+      if (gequal0(y)) return gerepilecopy(av, y);
       if (valp(y) < 0) pari_err(negexper,"gsin");
       gsincos(y,&u,&v,prec);
       return gerepilecopy(av,u);
@@ -2426,7 +2426,7 @@ gsincos(GEN x, GEN *s, GEN *c, long prec)
 
     default:
       av = avma; if (!(y = toser_i(x))) break;
-      if (gcmp0(y)) { *s = gerepilecopy(av,y); *c = gaddsg(1,*s); return; }
+      if (gequal0(y)) { *s = gerepilecopy(av,y); *c = gaddsg(1,*s); return; }
 
       ex = valp(y); lx = lg(y); ex2 = 2*ex+2;
       if (ex < 0) pari_err(talker,"non zero exponent in gsincos");
@@ -2529,7 +2529,7 @@ gtan(GEN x, long prec)
 
     default:
       av = avma; if (!(y = toser_i(x))) break;
-      if (gcmp0(y)) return gerepilecopy(av, y);
+      if (gequal0(y)) return gerepilecopy(av, y);
       if (valp(y) < 0) pari_err(negexper,"gtan");
       gsincos(y,&s,&c,prec);
       return gerepileupto(av, gdiv(s,c));
@@ -2582,7 +2582,7 @@ gcotan(GEN x, long prec)
 
     default:
       av = avma; if (!(y = toser_i(x))) break;
-      if (gcmp0(y)) pari_err(talker,"0 argument in cotan");
+      if (gequal0(y)) pari_err(talker,"0 argument in cotan");
       if (valp(y) < 0) pari_err(negexper,"cotan"); /* fall through */
       gsincos(y,&s,&c,prec);
       return gerepileupto(av, gdiv(c,s));

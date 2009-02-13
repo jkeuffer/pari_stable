@@ -746,7 +746,7 @@ hnfmerge_get_1(GEN A, GEN B)
     for (k = j; k > 0; k--)
     {
       t = gcoeff(C,k,c);
-      if (gcmp0(t)) continue;
+      if (gequal0(t)) continue;
       setlg(C[c], k+1);
       ZC_elem(t, gcoeff(C,k,k), C, U, c, k);
       if (lgefint(gcoeff(C,k,k)) > lb) gel(C,k) = FpC_red(gel(C,k), b);
@@ -2023,7 +2023,7 @@ static GEN
 gbezout_step(GEN *pa, GEN *pb, GEN *pu, GEN *pv)
 {
   GEN a = *pa, b = *pb, d;
-  if (gcmp0(a))
+  if (gequal0(a))
   {
     *pa = gen_0; *pu = gen_0;
     *pb = gen_1; *pv = gen_1; return b;
@@ -2079,7 +2079,7 @@ gsmithall_i(GEN x,long all)
       int c = 0;
       for (j=i-1; j>=1; j--)
       {
-	b = gcoeff(x,i,j); if (gcmp0(b)) continue;
+	b = gcoeff(x,i,j); if (gequal0(b)) continue;
 	a = gcoeff(x,i,i);
 	d = gbezout_step(&b, &a, &v, &u);
 	for (k = 1; k < i; k++)
@@ -2094,7 +2094,7 @@ gsmithall_i(GEN x,long all)
       }
       for (j=i-1; j>=1; j--)
       {
-	b = gcoeff(x,j,i); if (gcmp0(b)) continue;
+	b = gcoeff(x,j,i); if (gequal0(b)) continue;
 	a = gcoeff(x,i,i);
 	d = gbezout_step(&b, &a, &v, &u);
 	for (k = 1; k < i; k++)
@@ -2142,7 +2142,7 @@ gsmithall_i(GEN x,long all)
     if (typ(T) == t_POL && signe(T))
     {
       GEN d = leading_term(T);
-      while (gcmp0(d) || ( typ(d) == t_REAL && lg(d) == 3
+      while (gequal0(d) || ( typ(d) == t_REAL && lg(d) == 3
 			   && gexpo(T) - expo(d) > (long)BITS_IN_LONG)) {
 	 T = normalizepol_lg(T, lg(T)-1);
 	 if (!signe(T)) { gcoeff(x,k,k) = T; continue; }

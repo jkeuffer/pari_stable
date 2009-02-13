@@ -15,6 +15,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /* For compatibility with 1.x.x */
 /*functions renamed*/
+#define gcmp0 gequal0
 #define gcmp1 gequal1
 #define gcmp_1 gequalm1
 #define nfsmith nfsnf

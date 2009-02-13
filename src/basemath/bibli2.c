@@ -672,7 +672,7 @@ static long
 dirval(GEN x)
 {
   long i = 1, lx = lg(x);
-  while (i < lx && gcmp0(gel(x,i))) i++;
+  while (i < lx && gequal0(gel(x,i))) i++;
   return i;
 }
 
@@ -692,7 +692,7 @@ dirmul(GEN x, GEN y)
   for (j=dx; j<lx; j++)
   {
     GEN c = gel(x,j);
-    if (gcmp0(c)) continue;
+    if (gequal0(c)) continue;
     if (gequal1(c))
       for (k=dy,i=j*dy; i<lz; i+=j,k++) gel(z,i) = gadd(gel(z,i),gel(y,k));
     else
@@ -728,7 +728,7 @@ dirdiv(GEN x, GEN y)
   for (j=dx; j<lz; j++)
   {
     p1=gel(x,j); gel(z,j) = p1;
-    if (gcmp0(p1)) continue;
+    if (gequal0(p1)) continue;
     if (gequal1(p1))
       for (i=j+j; i<lz; i+=j) gel(x,i) = gsub(gel(x,i),gel(y,i/j));
     else
@@ -1031,7 +1031,7 @@ polint_i(GEN X, GEN Y, GEN x, long n, GEN *ptdy)
     for (i=0; i<n-m; i++)
     {
       GEN ho = gsub(gel(X,i),x), hp = gsub(gel(X,i+m),x), den = gsub(ho,hp);
-      if (gcmp0(den)) pari_err(talker,"two abcissas are equal in polint");
+      if (gequal0(den)) pari_err(talker,"two abcissas are equal in polint");
       den = gdiv(gsub(gel(c,i+1),gel(d,i)), den);
       gel(c,i) = gmul(ho,den);
       gel(d,i) = gmul(hp,den);

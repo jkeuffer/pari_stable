@@ -50,7 +50,7 @@ polidivis(GEN x, GEN y, GEN bound)
     /* we always enter this loop at least once */
     for (j=0; j<=i && j<=dz; j++)
       p1 = subii(p1, mulii(gel(z,j),gel(y,i-j)));
-    if (!gcmp0(p1)) return NULL;
+    if (!gequal0(p1)) return NULL;
     avma = av;
     if (!i) break;
   }
@@ -126,7 +126,7 @@ Beauzamy_bound(GEN S)
   for (i=0; i<=d; i++)
   {
     GEN c = gel(S,i+2);
-    if (gcmp0(c)) continue;
+    if (gequal0(c)) continue;
     /* s += P_i^2 / binomial(d,i) */
     s = addrr(s, divri(itor(sqri(c), prec), gel(bin,i+1)));
   }

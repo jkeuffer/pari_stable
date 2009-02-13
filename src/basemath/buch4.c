@@ -201,7 +201,7 @@ lemma6nf(GEN nf, GEN T, GEN pr, long nu, GEN x, GEN modpr)
 
   la = nfval(nf,gx,pr);
   gpx = poleval(RgX_deriv(T), x);
-  mu = gcmp0(gpx)? la+nu+1: nfval(nf,gpx,pr);
+  mu = gequal0(gpx)? la+nu+1: nfval(nf,gpx,pr);
   avma = av;
   if (la > mu<<1) return 1;
   if (la >= nu<<1  && mu >= nu) return 0;
@@ -218,7 +218,7 @@ lemma7nf(GEN nf, GEN T, GEN pr, long nu, GEN x, GEN zinit)
 
   gpx = poleval(RgX_deriv(T), x);
   la = nfval(nf,gx,pr);
-  mu = gcmp0(gpx)? la+nu+1: nfval(nf,gpx,pr);
+  mu = gequal0(gpx)? la+nu+1: nfval(nf,gpx,pr);
 
   if (la > mu<<1) return 1;
   if (nu > mu)
@@ -304,7 +304,7 @@ nf_hyperell_locally_soluble(GEN nf,GEN T,GEN pr)
   pari_sp av = avma;
 
   if (typ(T)!=t_POL) pari_err(notpoler,"nf_hyperell_locally_soluble");
-  if (gcmp0(T)) return 1;
+  if (gequal0(T)) return 1;
   checkprid(pr); nf = checknf(nf);
 
   if (equaliu(pr_get_p(pr), 2))
@@ -420,7 +420,7 @@ nfhilbert0(GEN nf,GEN a,GEN b,GEN p)
   nf = checknf(nf);
   if (p) {
     checkprid(p);
-    if (gcmp0(a) || gcmp0(b)) pari_err (talker,"0 argument in nfhilbertp");
+    if (gequal0(a) || gequal0(b)) pari_err (talker,"0 argument in nfhilbertp");
     return nfhilbertp(nf,a,b,p);
   }
   return nfhilbert(nf,a,b);
@@ -534,7 +534,7 @@ make_unit(GEN nf, GEN bnfS, GEN *px)
   long lB, cH, i, ls;
   GEN den, gen, S, v, p1, xp, xb, N, HB, perm;
 
-  if (gcmp0(*px)) return NULL;
+  if (gequal0(*px)) return NULL;
   S = gel(bnfS,6); ls = lg(S);
   if (ls==1) return cgetg(1, t_COL);
 
@@ -671,7 +671,7 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
     polabs = rnfequationall(bnf, relpol, &sk, NULL);
     k = stoi(sk);
   }
-  if (!bnfabs || !gcmp0(k)) bnfabs = Buchall(polabs, nf_FORCE, nf_get_prec(nf));
+  if (!bnfabs || !gequal0(k)) bnfabs = Buchall(polabs, nf_FORCE, nf_get_prec(nf));
   if (!nfabs) nfabs = bnf_get_nf(bnfabs);
 
   if (galois == 2)
@@ -728,7 +728,7 @@ rnfisnorm(GEN T, GEN x, long flag)
   rel = checkbnf(rel);
   nf = bnf_get_nf(bnf);
   x = nf_to_scalar_or_alg(nf,x);
-  if (gcmp0(x)) { avma = av; return mkvec2(gen_0, gen_1); }
+  if (gequal0(x)) { avma = av; return mkvec2(gen_0, gen_1); }
   if (gequal1(x)) { avma = av; return mkvec2(gen_1, gen_1); }
   if (gequalm1(x) && odd(drel)) { avma = av; return mkvec2(gen_m1, gen_1); }
 
@@ -737,7 +737,7 @@ rnfisnorm(GEN T, GEN x, long flag)
   prod = gel(T,5);
   S1   = gel(T,6);
   S2   = gel(T,7);
-  if (flag && !gcmp0(gel(T,8)))
+  if (flag && !gequal0(gel(T,8)))
     pari_warn(warner,"useless flag in rnfisnorm: the extension is Galois");
   if (flag > 0)
   {

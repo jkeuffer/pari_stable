@@ -13,7 +13,7 @@ extgcd(GEN A, GEN B, GEN *U, GEN *V)
 
   if (typ(a) != t_INT || typ(b) != t_INT) pari_err(typeer, "extgcd");
   if (signe(a) < 0) { a = negi(a); ux = negi(ux); }
-  while (!gcmp0(b))
+  while (!gequal0(b))
   {
     GEN r, q = dvmdii(a, b, &r), v = vx;
 

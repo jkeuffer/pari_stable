@@ -70,7 +70,7 @@ tablemul_ei(GEN M, GEN x, long i)
     for (j=1; j<=N; j++)
     {
       GEN c = gcoeff(tab,k,j);
-      if (!gcmp0(c)) s = gadd(s, gmul(c, gel(x,j)));
+      if (!gequal0(c)) s = gadd(s, gmul(c, gel(x,j)));
     }
     gel(v,k) = gerepileupto(av,s);
   }
@@ -457,13 +457,13 @@ tablemul(GEN TAB, GEN x, GEN y)
     {
       GEN t, xi = gel(x,i);
       TABi += N;
-      if (gcmp0(xi)) continue;
+      if (gequal0(xi)) continue;
 
       t = NULL;
       for (j=2; j<=N; j++)
       {
 	GEN p1, c = gcoeff(TABi, k, j); /* m^{i,j}_k */
-	if (gcmp0(c)) continue;
+	if (gequal0(c)) continue;
 	p1 = gmul(c, gel(y,j));
 	t = t? gadd(t, p1): p1;
       }
@@ -495,14 +495,14 @@ tablesqr(GEN TAB, GEN x)
     {
       GEN p1, c, t, xi = gel(x,i);
       TABi += N;
-      if (gcmp0(xi)) continue;
+      if (gequal0(xi)) continue;
 
       c = gcoeff(TABi, k, i);
-      t = !gcmp0(c)? gmul(c,xi): NULL;
+      t = !gequal0(c)? gmul(c,xi): NULL;
       for (j=i+1; j<=N; j++)
       {
 	c = gcoeff(TABi, k, j);
-	if (gcmp0(c)) continue;
+	if (gequal0(c)) continue;
 	p1 = gmul(gmul2n(c,1), gel(x,j));
 	t = t? gadd(t, p1): p1;
       }
@@ -637,7 +637,7 @@ nfval(GEN nf, GEN x, GEN pr)
   long w, e;
   GEN cx,p;
 
-  if (gcmp0(x)) return LONG_MAX;
+  if (gequal0(x)) return LONG_MAX;
   nf = checknf(nf);
   checkprid(pr);
   p = pr_get_p(pr);
@@ -773,7 +773,7 @@ mulmat_pol(GEN A, GEN x)
   l=lg(x)-1; if (l == 1) return typ(A)==t_VEC? gen_0: zerocol(lg(A[1])-1);
   x++; z = gmul(gel(x,1), gel(A,1));
   for (i=2; i<l ; i++)
-    if (!gcmp0(gel(x,i))) z = gadd(z, gmul(gel(x,i), gel(A,i)));
+    if (!gequal0(gel(x,i))) z = gadd(z, gmul(gel(x,i), gel(A,i)));
   return z;
 }
 

@@ -804,7 +804,7 @@ isvirtualunit(GEN bnf, GEN v, GEN cycgen, GEN cyc, GEN gell, long rc)
 
   L = bnfisprincipal0(bnf, w, nf_GENMAT|nf_FORCE);
   q = gel(L,1);
-  if (gcmp0(q)) { eps = v; y = q; }
+  if (gequal0(q)) { eps = v; y = q; }
   else
   {
     b = gel(L,2);

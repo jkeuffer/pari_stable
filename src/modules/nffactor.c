@@ -749,7 +749,7 @@ init_trace(trace_data *T, GEN S, nflift_t *L, GEN q)
   if (cmpii(qgood, q) > 0) q = qgood;
 
   S1 = gdivround(S, q);
-  if (gcmp0(S1)) return NULL;
+  if (gequal0(S1)) return NULL;
 
   invd = invr(itor(L->den, DEFAULTPREC));
 

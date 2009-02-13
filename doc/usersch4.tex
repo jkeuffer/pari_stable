@@ -1381,7 +1381,7 @@ instance). By convention, the degree of $0$ is~$-1$.
 fact that its sign is~0. However, its length may be greater than 2, meaning
 that all the coefficients of the polynomial are equal to zero, but the
 leading term \kbd{z[lg(z)-1]} is not an exact integer zero. More precisely,
-\kbd{gcmp0(x)} is true for all coefficients \kbd{x} of the polynomial,
+\kbd{gequal0(x)} is true for all coefficients \kbd{x} of the polynomial,
 and \kbd{isrationalzero(x)} is false for the leading coefficient. The same
 remark applies to \typ{SER}s.
 
@@ -2127,7 +2127,7 @@ of linear. Here is a better version of that loop:
 \bprog
   pari_sp av = avma, lim = stack_lim(av,1);
   ...
-  while (!gcmp0(b))
+  while (!gequal0(b))
   {
     GEN r, q = dvmdii(a, b, &r), v = vx;
 

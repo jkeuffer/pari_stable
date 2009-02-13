@@ -234,7 +234,7 @@ RgX_to_ser_inexact(GEN x, long l)
   int first = 1;
   /* analogous to RgX_valrem + normalize */
   i = 2;
-  while (i<lx && gcmp0(gel(x,i))) {
+  while (i<lx && gequal0(gel(x,i))) {
     if (first && !isexactzero(gel(x,i))) 
     {
       pari_warn(warner,"normalizing a series with 0 leading term");
@@ -265,9 +265,9 @@ gtolong(GEN x)
       avma = av; return y;
     }
     case t_COMPLEX:
-      if (gcmp0(gel(x,2))) return gtolong(gel(x,1)); break;
+      if (gequal0(gel(x,2))) return gtolong(gel(x,1)); break;
     case t_QUAD:
-      if (gcmp0(gel(x,3))) return gtolong(gel(x,2)); break;
+      if (gequal0(gel(x,3))) return gtolong(gel(x,2)); break;
   }
   pari_err(typeer,"gtolong");
   return 0; /* not reached */
@@ -333,7 +333,7 @@ isrationalzero(GEN g)
 }
 
 int
-gcmp0(GEN x)
+gequal0(GEN x)
 {
   switch(typ(x))
   {
@@ -350,13 +350,13 @@ gcmp0(GEN x)
      /* is 0 iff norm(x) would be 0 (can happen with Re(x) and Im(x) != 0
       * only if Re(x) and Im(x) are of type t_REAL). See mp.c:addrr().
       */
-      if (gcmp0(gel(x,1)))
+      if (gequal0(gel(x,1)))
       {
-	if (gcmp0(gel(x,2))) return 1;
+	if (gequal0(gel(x,2))) return 1;
 	if (typ(x[1])!=t_REAL || typ(x[2])!=t_REAL) return 0;
 	return (expo(x[1])>expo(x[2]));
       }
-      if (gcmp0(gel(x,2)))
+      if (gequal0(gel(x,2)))
       {
 	if (typ(x[1])!=t_REAL || typ(x[2])!=t_REAL) return 0;
 	return (expo(x[2])>expo(x[1]));
@@ -367,19 +367,19 @@ gcmp0(GEN x)
       return !signe(x[4]);
 
     case t_QUAD:
-      return gcmp0(gel(x,2)) && gcmp0(gel(x,3));
+      return gequal0(gel(x,2)) && gequal0(gel(x,3));
 
     case t_POLMOD:
-      return gcmp0(gel(x,2));
+      return gequal0(gel(x,2));
 
     case t_RFRAC:
-      return gcmp0(gel(x,1));
+      return gequal0(gel(x,1));
 
     case t_VEC: case t_COL: case t_MAT:
     {
       long i;
       for (i=lg(x)-1; i; i--)
-	if (!gcmp0(gel(x,i))) return 0;
+	if (!gequal0(gel(x,i))) return 0;
       return 1;
     }
   }
@@ -424,13 +424,13 @@ gequal1(GEN x)
       return 0;
 
     case t_COMPLEX:
-      return gequal1(gel(x,1)) && gcmp0(gel(x,2));
+      return gequal1(gel(x,1)) && gequal0(gel(x,2));
 
     case t_PADIC:
       return !valp(x) && gequal1(gel(x,4));
 
     case t_QUAD:
-      return gequal1(gel(x,2)) && gcmp0(gel(x,3));
+      return gequal1(gel(x,2)) && gequal0(gel(x,3));
 
     case t_POL:
       return lg(x)==3 && gequal1(gel(x,2));
@@ -464,10 +464,10 @@ gequalm1(GEN x)
       return FF_cmp_1(x);
 
     case t_COMPLEX:
-      return gequalm1(gel(x,1)) && gcmp0(gel(x,2));
+      return gequalm1(gel(x,1)) && gequal0(gel(x,2));
 
     case t_QUAD:
-      return gequalm1(gel(x,2)) && gcmp0(gel(x,3));
+      return gequalm1(gel(x,2)) && gequal0(gel(x,3));
 
     case t_PADIC:
       av=avma; y=equalii(addsi(1,gel(x,4)), gel(x,3)); avma=av; return y;
@@ -603,8 +603,8 @@ polequal(GEN x, GEN y)
   long lx, ly;
   if (x[1] != y[1]) return 0;
   lx = lg(x); ly = lg(y);
-  while (lx > ly) if (!gcmp0(gel(x,--lx))) return 0;
-  while (ly > lx) if (!gcmp0(gel(y,--ly))) return 0;
+  while (lx > ly) if (!gequal0(gel(x,--lx))) return 0;
+  while (ly > lx) if (!gequal0(gel(y,--ly))) return 0;
   for (lx--; lx >= 2; lx--) if (!gequal(gel(x,lx), gel(y,lx))) return 0;
   return 1;
 }
@@ -634,7 +634,7 @@ gequal_try(GEN x, GEN y)
     }
     return 0;
   } TRY {
-    i = gcmp0(gadd(x, gneg_i(y)));
+    i = gequal0(gadd(x, gneg_i(y)));
   } ENDCATCH;
   return i;
 }
@@ -1658,7 +1658,7 @@ gaffect(GEN x, GEN y)
       break;
 
     case t_COMPLEX:
-      if (!gcmp0(gel(x,2))) pari_err(operf,"",x,y);
+      if (!gequal0(gel(x,2))) pari_err(operf,"",x,y);
       gaffect(gel(x,1), y);
       break;
 
@@ -1721,7 +1721,7 @@ qtop(GEN x, GEN p, long d)
 {
   GEN z, D, P, b, u = gel(x,2), v = gel(x,3);
   pari_sp av;
-  if (gcmp0(v)) return cvtop(u, p, d);
+  if (gequal0(v)) return cvtop(u, p, d);
   P = gel(x,1);
   b = gel(P,3);
   av = avma; D = quad_disc(x);
@@ -1889,7 +1889,7 @@ gexpo(GEN x)
 long
 sizedigit(GEN x)
 {
-  return gcmp0(x)? 0: (long) ((gexpo(x)+1) * LOG10_2) + 1;
+  return gequal0(x)? 0: (long) ((gexpo(x)+1) * LOG10_2) + 1;
 }
 
 /* normalize series. avma is not updated */
@@ -1923,7 +1923,7 @@ normalize(GEN x)
 
   stackdummy((pari_sp)y, (pari_sp)x);
   for (i = 2; i < lx; i++)
-    if (!gcmp0(gel(y, i))) return y;
+    if (!gequal0(gel(y, i))) return y;
   setsigne(y, 0); return y;
 }
 
@@ -1932,7 +1932,7 @@ normalizepol_approx(GEN x, long lx)
 {
   long i;
   for (i = lx-1; i>1; i--)
-    if (! gcmp0(gel(x,i))) break;
+    if (! gequal0(gel(x,i))) break;
   stackdummy((pari_sp)(x + lg(x)), (pari_sp)(x + i+1));
   setlg(x, i+1); setsigne(x, i!=1); return x;
 }
@@ -1946,7 +1946,7 @@ normalizepol_lg(GEN x, long lx)
   for (i = lx-1; i>1; i--)
   {
     GEN z = gel(x,i);
-    if (! gcmp0(z) ) {
+    if (! gequal0(z) ) {
       if (!LX) LX = i+1;
       stackdummy((pari_sp)(x + lg(x)), (pari_sp)(x + LX));
       x[0] = evaltyp(t_POL) | evallg(LX);

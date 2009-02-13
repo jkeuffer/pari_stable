@@ -561,7 +561,7 @@ polgalois(GEN x, long prec)
 
 	  pr = - (bit_accuracy(prec) >> 1);
 	  for (l=1; l<=6; l++)
-	    if (ee[l] <= pr && gcmp0(poleval(p5,gel(w,l)))) break;
+	    if (ee[l] <= pr && gequal0(poleval(p5,gel(w,l)))) break;
 	  if (l>6) pari_err(bugparier,"galois (bug4)");
 	  p2=(l==6)? transroot(p1,2,5):transroot(p1,1,l);
 	  p3=gen_0;
@@ -575,7 +575,7 @@ polgalois(GEN x, long prec)
 	  e1 = gexpo(imag_i(p5)); if (e1>e) e=e1;
 	  if (e <= -10)
 	  {
-	    if (gcmp0(p4)) goto tchi;
+	    if (gequal0(p4)) goto tchi;
 	    f = Z_issquare(p4); avma = av;
 	    return f? galois_res(n,5,1,1): galois_res(n,10,1,2);
 	  }

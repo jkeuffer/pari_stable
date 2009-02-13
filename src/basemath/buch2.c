@@ -688,7 +688,7 @@ addRe_modIm(GEN x, GEN a, GEN m)
     im = modr_safe(gel(x,2), m);
     if (!im) return NULL;
     re = gadd(gel(x,1), a);
-    z = gcmp0(im)? re: mkcomplex(re, im);
+    z = gequal0(im)? re: mkcomplex(re, im);
   }
   else
     z = gadd(x, a);
@@ -1190,7 +1190,7 @@ static GEN famat_to_arch(GEN nf, GEN fa, long prec);
 static GEN
 mylog(GEN x, long prec)
 {
-  if (gcmp0(x)) pari_err(precer,"get_arch");
+  if (gequal0(x)) pari_err(precer,"get_arch");
   return glog(x,prec);
 }
 static GEN
@@ -1275,7 +1275,7 @@ scalar_get_arch_real(GEN nf, GEN u, GEN *emb)
 }
 
 static int
-low_prec(GEN x) { return gcmp0(x) || (typ(x) == t_REAL && lg(x) == 3); }
+low_prec(GEN x) { return gequal0(x) || (typ(x) == t_REAL && lg(x) == 3); }
 
 /* For internal use. Get archimedean components: [e_i log( | sigma_i(x) | )],
  * with e_i = 1 (resp 2.) for i <= R1 (resp. > R1)
@@ -1489,7 +1489,7 @@ isprincipalall(GEN bnf, GEN x, long *ptprec, long flag)
   for (i=1; i<=c; i++)
     gel(Q,i) = truedvmdii(gel(Q,i), gel(cyc,i), (GEN*)(ex+i));
   if ((flag & nf_GEN_IF_PRINCIPAL))
-    { if (!gcmp0(ex)) return gen_0; }
+    { if (!gequal0(ex)) return gen_0; }
   else if (!(flag & (nf_GEN|nf_GENMAT)))
     return gcopy(ex);
 
@@ -1556,7 +1556,7 @@ bnfisprincipal0(GEN bnf,GEN x,long flag)
   switch( idealtyp(&x, &arch) )
   {
     case id_PRINCIPAL:
-      if (gcmp0(x)) pari_err(talker,"zero ideal in isprincipal");
+      if (gequal0(x)) pari_err(talker,"zero ideal in isprincipal");
       return triv_gen(bnf, x, flag);
     case id_PRIME:
       if (pr_is_inert(x))
@@ -1808,7 +1808,7 @@ bnfisunit(GEN bnf,GEN x)
         if (ex)
         {
           ex = grndtoi(ex, &e);
-          if (gcmp0(gel(ex,RU)) && e < -4) break;
+          if (gequal0(gel(ex,RU)) && e < -4) break;
         }
       }
     }
@@ -2402,7 +2402,7 @@ renormalize_cols(GEN A, GEN *pE, int *precpb)
       long e = gexpo(c);
       if (e >= -2)
       {
-        if (gcmp0(c)) *precpb = 1;
+        if (gequal0(c)) *precpb = 1;
         else {
           non0 = 1;
           if (e > maxe) maxe = e;
@@ -2424,7 +2424,7 @@ compute_multiple_of_R_pivot(GEN x, GEN x0/*unused*/, GEN c)
   long i, k = 0, ex = - (long)HIGHEXPOBIT, lx = lg(x);
   (void)x0;
   for (i=1; i<lx; i++)
-    if (!c[i] && !gcmp0(gel(x,i)))
+    if (!c[i] && !gequal0(gel(x,i)))
     {
       long e = gexpo(gel(x,i));
       if (e > ex) { ex = e; k = i; }

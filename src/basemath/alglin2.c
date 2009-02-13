@@ -299,7 +299,7 @@ hess(GEN x)
   for (m=2; m<lx-1; m++)
   {
     GEN t = NULL;
-    for (i=m+1; i<lx; i++) { t = gcoeff(x,i,m-1); if (!gcmp0(t)) break; }
+    for (i=m+1; i<lx; i++) { t = gcoeff(x,i,m-1); if (!gequal0(t)) break; }
     if (i == lx) continue;
     for (j=m-1; j<lx; j++) swap(gcoeff(x,i,j), gcoeff(x,m,j));
     swap(gel(x,i), gel(x,m)); t = ginv(t);
@@ -307,7 +307,7 @@ hess(GEN x)
     for (i=m+1; i<lx; i++)
     {
       GEN c = gcoeff(x,i,m-1);
-      if (gcmp0(c)) continue;
+      if (gequal0(c)) continue;
 
       c = gmul(c,t); gcoeff(x,i,m-1) = gen_0;
       for (j=m; j<lx; j++)
@@ -376,7 +376,7 @@ carhess(GEN x, long v)
     for (i = r-1; i; i--)
     {
       a = gmul(a, gcoeff(H,i+1,i));
-      if (gcmp0(a)) break;
+      if (gequal0(a)) break;
       b = RgX_add(b, RgX_Rg_mul(gel(y,i), gmul(a,gcoeff(H,i,r))));
     }
     z = RgX_sub(RgX_shift_shallow(gel(y,r), 1),
@@ -734,7 +734,7 @@ matcompanion(GEN x)
 
   if (typ(x)!=t_POL) pari_err(notpoler,"matcompanion");
   if (n == 0) return cgetg(1, t_MAT);
-  if (gcmp0(x)) pari_err(zeropoler,"matcompanion");
+  if (gequal0(x)) pari_err(zeropoler,"matcompanion");
 
   y = cgetg(n+1,t_MAT);
   for (j=1; j < n; j++) gel(y,j) = col_ei(n, j+1);
@@ -769,7 +769,7 @@ gtrace(GEN x)
 
     case t_QUAD:
       y = gel(x,1);
-      if (!gcmp0(gel(y,3)))
+      if (!gequal0(gel(y,3)))
       { /* assume quad. polynomial is either x^2 + d or x^2 - x + d */
 	av = avma;
 	return gerepileupto(av, gadd(gel(x,3), gmul2n(gel(x,2),1)));
@@ -877,7 +877,7 @@ gaussred(GEN a, long signature)
   t = n; sp = sn = 0;
   while (t)
   {
-    k=1; while (k<=n && (!r[k] || gcmp0(gcoeff(a,k,k)))) k++;
+    k=1; while (k<=n && (!r[k] || gequal0(gcoeff(a,k,k)))) k++;
     if (k <= n)
     {
       p = gcoeff(a,k,k); invp = ginv(p); /* != 0 */
@@ -892,7 +892,7 @@ gaussred(GEN a, long signature)
       for (i=1; i<=n; i++) if (r[i])
       {
 	GEN c = gel(ak,i); /* - p * a[k,i] */
-	if (gcmp0(c)) continue;
+	if (gequal0(c)) continue;
 	for (j=1; j<=n; j++) if (r[j])
 	  gcoeff(a,i,j) = gsub(gcoeff(a,i,j), gmul(c,gcoeff(a,k,j)));
       }
@@ -902,7 +902,7 @@ gaussred(GEN a, long signature)
     { /* all remaining diagonal coeffs are currently 0 */
       for (k=1; k<=n; k++) if (r[k])
       {
-	l=k+1; while (l<=n && (!r[l] || gcmp0(gcoeff(a,k,l)))) l++;
+	l=k+1; while (l<=n && (!r[l] || gequal0(gcoeff(a,k,l)))) l++;
 	if (l > n) continue;
 
 	p = gcoeff(a,k,l); invp = ginv(p);
@@ -1077,7 +1077,7 @@ QM_minors_coprime(GEN x, GEN D)
   if (n==m)
   {
     D = det(x);
-    if (gcmp0(D)) pari_err(talker,"matrix of non-maximal rank in QM_minors_coprime");
+    if (gequal0(D)) pari_err(talker,"matrix of non-maximal rank in QM_minors_coprime");
     avma = av; return matid(n);
   }
   /* m > n */
@@ -1089,7 +1089,7 @@ QM_minors_coprime(GEN x, GEN D)
   }
 
   /* x now a ZM */
-  if (!D || gcmp0(D))
+  if (!D || gequal0(D))
   {
     pari_sp av2 = avma;
     D = ZM_detmult(shallowtrans(x));
@@ -1148,7 +1148,7 @@ QC_elem(GEN aj, GEN ak, GEN A, long j, long k)
 {
   GEN p1, u, v, d;
 
-  if (gcmp0(ak)) { swap(gel(A,j), gel(A,k)); return; }
+  if (gequal0(ak)) { swap(gel(A,j), gel(A,k)); return; }
   if (typ(aj) == t_INT) {
     if (typ(ak) != t_INT) { aj = mulii(aj, gel(ak,2)); ak = gel(ak,1); }
   } else {
@@ -1206,14 +1206,14 @@ QM_imZ_hnf_aux(GEN A)
     for (j = k = 1; j<n; j++)
     {
       GEN a = gcoeff(A,i,j);
-      if (gcmp0(a)) continue;
+      if (gequal0(a)) continue;
 
       k = j+1; if (k == n) k = 1;
       /* zero a = Aij  using  b = Aik */
       QC_elem(a, gcoeff(A,i,k), A, j,k);
     }
     a = gcoeff(A,i,k);
-    if (!gcmp0(a))
+    if (!gequal0(a))
     {
       a = Q_denom(a);
       if (!is_pm1(a)) gel(A,k) = RgC_Rg_mul(gel(A,k), a);
@@ -1247,7 +1247,7 @@ QM_ImQ_hnf(GEN x)
   av1 = avma; lim = stack_lim(av1,1);
   for (k=1; k<m; k++)
   {
-    j=1; while (j<n && (c[j] || gcmp0(gcoeff(x,k,j)))) j++;
+    j=1; while (j<n && (c[j] || gequal0(gcoeff(x,k,j)))) j++;
     if (j==n) continue;
 
     c[j]=k; gel(x,j) = RgC_Rg_div(gel(x,j),gcoeff(x,k,j));
@@ -1255,7 +1255,7 @@ QM_ImQ_hnf(GEN x)
       if (j1!=j)
       {
 	GEN t = gcoeff(x,k,j1);
-	if (!gcmp0(t)) gel(x,j1) = RgC_sub(gel(x,j1), RgC_Rg_mul(gel(x,j),t));
+	if (!gequal0(t)) gel(x,j1) = RgC_sub(gel(x,j1), RgC_Rg_mul(gel(x,j),t));
       }
     if (low_stack(lim, stack_lim(av1,1)))
     {

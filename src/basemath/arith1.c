@@ -480,7 +480,7 @@ polissquareall(GEN x, GEN *pt)
     lx = lg(x);
     if ((lx-3) & 1) { avma = av; return 0; }
     for (i = 3; i < lx; i+=2)
-      if (!gcmp0(gel(x,i))) { avma = av; return 0; }
+      if (!gequal0(gel(x,i))) { avma = av; return 0; }
     if (pt) {
       y = cgetg((lx+3) / 2, t_POL);
       for (i = 2; i < lx; i+=2)
@@ -1234,7 +1234,7 @@ hilbert(GEN x, GEN y, GEN p)
   long tx, ty, z;
   GEN p1, p2;
 
-  if (gcmp0(x) || gcmp0(y)) return 0;
+  if (gequal0(x) || gequal0(y)) return 0;
   av = avma; tx = typ(x); ty = typ(y);
   if (tx > ty) swapspec(x,y, tx,ty);
   if (p)
@@ -1601,7 +1601,7 @@ chinese(GEN x, GEN y)
       av = avma;
       d = RgX_extgcd(gel(x,1),gel(y,1),&u,&v);
       p2 = gsub(gel(y,2), gel(x,2));
-      if (!gcmp0(gmod(p2, d))) break;
+      if (!gequal0(gmod(p2, d))) break;
       p1 = gdiv(gel(x,1),d);
       p2 = gadd(gel(x,2), gmul(gmul(u,p1), p2));
 
@@ -2402,7 +2402,7 @@ sersfcont(GEN a, GEN b, long k)
   for (i=1; i<l; i++)
   {
     gel(y,i) = poldivrem(a,b,&c);
-    if (gcmp0(c)) { i++; break; }
+    if (gequal0(c)) { i++; break; }
     a = b; b = c;
   }
   setlg(y, i); return y;
@@ -2418,7 +2418,7 @@ gboundcf(GEN x, long k)
   if (k < 0) pari_err(talker, "negative nmax in gboundcf");
   if (is_scalar_t(tx))
   {
-    if (gcmp0(x)) return mkvec(gen_0);
+    if (gequal0(x)) return mkvec(gen_0);
     switch(tx)
     {
       case t_INT: return mkveccopy(x);
@@ -2489,7 +2489,7 @@ sfcont2(GEN b, GEN x, long k)
       p1 = gsub(x, gel(y,i));
     }
     if (++i >= lb) break;
-    if (gcmp0(p1)) break;
+    if (gequal0(p1)) break;
     x = gdiv(gel(b,i),p1);
   }
   setlg(y,i);
@@ -2650,7 +2650,7 @@ bestappr(GEN x, GEN k)
       while (cmpii(q0,k) <= 0)
       {
 	x = gsub(x,a); /* 0 <= x < 1 */
-	if (gcmp0(x)) { p1 = p0; q1 = q0; break; }
+	if (gequal0(x)) { p1 = p0; q1 = q0; break; }
 
 	x = ginv(x); /* > 1 */
 	a = typ(x)==t_INT? x: divii(gel(x,1), gel(x,2));
@@ -2913,7 +2913,7 @@ end_classno(GEN h, GEN hin, GEN forms, long lform)
     if (signe(p1[2]) == signe(b)) com = -com;
     /* f_i ^ h(q+com) = 1 */
     q = addsi(com,q);
-    if (gcmp0(q))
+    if (gequal0(q))
     { /* f^(ih) != 1 for all 0 < i <= oldq. Happen if the original upper bound
 	 for h was wrong */
       long c;

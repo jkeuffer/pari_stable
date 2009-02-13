@@ -668,7 +668,7 @@ find_isogenous_from_canonical(GEN a4, GEN a6, long q, GEN meqn, GEN g, GEN p)
   GEN itis = Fp_inv(stoi(-tis), p);
   GEN deltal = Fp_div(Fp_mul(delta, Fp_powu(g, tis, p), p), powuu(q, 12), p);
   GEN E4l, E6l, a4tilde, a6tilde, p_1;
-  if (gcmp0(dJ))
+  if (gequal0(dJ))
   {
     GEN jl;
     if (DEBUGLEVEL) fprintferr("Division by zero for prime %Ps\n", p);

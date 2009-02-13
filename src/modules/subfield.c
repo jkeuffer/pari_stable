@@ -411,12 +411,12 @@ embedding(GEN g, GEN DATA, primedata *S, GEN den, GEN listdelta)
     if (ZX_equal(w1_Q, w0_Q))
     {
       GEN G = is_pm1(den)? g: RgX_rescale(g,den);
-      if (gcmp0(RgX_RgXQ_eval(G, w1_Q, T))) break;
+      if (gequal0(RgX_RgXQ_eval(G, w1_Q, T))) break;
     }
     else if (cmpii(q,maxp) > 0)
     {
       GEN G = is_pm1(den)? g: RgX_rescale(g,den);
-      if (gcmp0(RgX_RgXQ_eval(G, w1_Q, T))) break;
+      if (gequal0(RgX_RgXQ_eval(G, w1_Q, T))) break;
       if (DEBUGLEVEL) fprintferr("coeff too big for embedding\n");
       return NULL;
     }
@@ -432,7 +432,7 @@ embedding(GEN g, GEN DATA, primedata *S, GEN den, GEN listdelta)
     w0 = w1; w0_Q = w1_Q; p = q; q = q2;
   }
   TR = gel(DATA,5);
-  if (!gcmp0(TR)) w1_Q = RgX_translate(w1_Q, TR);
+  if (!gequal0(TR)) w1_Q = RgX_translate(w1_Q, TR);
   return gdiv(w1_Q,den);
 }
 

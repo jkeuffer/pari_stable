@@ -1230,7 +1230,7 @@ static GEN
 check_subgroup(GEN bnr, GEN H, GEN *clhray, int triv_is_NULL, const char *s)
 {
   GEN h, D = NULL;
-  if (H && gcmp0(H)) H = NULL;
+  if (H && gequal0(H)) H = NULL;
   if (H)
   {
     D = diagonal_shallow(bnr_get_cyc(bnr));
@@ -1281,7 +1281,7 @@ bnr_log_gen_arch(GEN bnr, zlog_S *S, long index)
 /* A \subset H ? Allow H = NULL = trivial subgroup */
 static int
 contains(GEN H, GEN A)
-{ return H? (hnf_solve(H, A) != NULL): gcmp0(A); }
+{ return H? (hnf_solve(H, A) != NULL): gequal0(A); }
 
 /* (see also Discrayrel). Given a number field bnf=bnr[1], a ray class
  * group structure bnr (with generators if flag > 0), and a subgroup H of the

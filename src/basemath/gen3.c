@@ -262,7 +262,7 @@ poldegree(GEN x, long v)
 {
   long tx = typ(x), lx,w,i,d;
 
-  if (is_scalar_t(tx)) return gcmp0(x)? DEGREE0: 0;
+  if (is_scalar_t(tx)) return gequal0(x)? DEGREE0: 0;
   switch(tx)
   {
     case t_POL:
@@ -279,7 +279,7 @@ poldegree(GEN x, long v)
       return d;
 
     case t_RFRAC:
-      if (gcmp0(gel(x,1))) return DEGREE0;
+      if (gequal0(gel(x,1))) return DEGREE0;
       return poldegree(gel(x,1),v) - poldegree(gel(x,2),v);
   }
   pari_err(typeer,"degree");
@@ -446,7 +446,7 @@ iscomplex(GEN x)
     case t_INT: case t_REAL: case t_FRAC:
       return 0;
     case t_COMPLEX:
-      return !gcmp0(gel(x,2));
+      return !gequal0(gel(x,2));
     case t_QUAD:
       return signe(gmael(x,1,2)) > 0;
   }
@@ -624,7 +624,7 @@ int
 gdvd(GEN x, GEN y)
 {
   pari_sp av = avma;
-  x = gmod(x,y); avma = av; return gcmp0(x);
+  x = gmod(x,y); avma = av; return gequal0(x);
 }
 
 GEN
@@ -1122,7 +1122,7 @@ checkdeflate(GEN x)
 {
   ulong d = 0, i, lx = (ulong)lg(x);
   for (i=3; i<lx; i++)
-    if (!gcmp0(gel(x,i))) { d = ugcd(d,i-2); if (d == 1) break; }
+    if (!gequal0(gel(x,i))) { d = ugcd(d,i-2); if (d == 1) break; }
   return (long)d;
 }
 
@@ -1345,7 +1345,7 @@ gsubst(GEN x, long v, GEN y)
 	    long l2;
 	    for (i = 3; i < lx; i++)
 	      if (!isexactzero(gel(x,i))) break;
-	    l2 = (i-2)*ey + (gcmp0(y)? 2 : ly);
+	    l2 = (i-2)*ey + (gequal0(y)? 2 : ly);
 	    if (l > l2) l = l2;
 	  }
 	  p2 = ex? gpowgs(y, ex): NULL;
@@ -1451,7 +1451,7 @@ recip(GEN x)
     long i, j, k, mi;
     pari_sp lim=stack_lim(av, 2);
 
-    mi = lx-1; while (mi>=3 && gcmp0(gel(x,mi))) mi--;
+    mi = lx-1; while (mi>=3 && gequal0(gel(x,mi))) mi--;
     u = cgetg(lx,t_SER);
     y = cgetg(lx,t_SER);
     u[1] = y[1] = evalsigne(1) | _evalvalp(1) | evalvarn(v);
@@ -1647,7 +1647,7 @@ ggrando(GEN x, long n)
     v = varn(x); if ((ulong)v > MAXVARN) pari_err(talker,"incorrect object in O()");
     m = n * RgX_val(x); break;
   case t_RFRAC:
-    if (!gcmp0(gel(x,1))) pari_err(talker,"zero argument in O()");
+    if (!gequal0(gel(x,1))) pari_err(talker,"zero argument in O()");
     v = gvar(x); if ((ulong)v > MAXVARN) pari_err(talker,"incorrect object in O()");
     m = n * gval(x,v); break;
     default: pari_err(talker,"incorrect argument in O()");
@@ -1688,7 +1688,7 @@ integ(GEN x, long v)
       gel(y,1) = gcopy(gel(x,1));
       gel(y,2) = integ(gel(x,2),v); return y;
     }
-    if (gcmp0(x)) return gen_0;
+    if (gequal0(x)) return gen_0;
     return deg1pol(x, gen_0, v);
   }
 
@@ -1727,7 +1727,7 @@ integ(GEN x, long v)
 	long j = i+e-1;
 	if (!j)
 	{ /* should be isexactzero, but try to avoid error */
-	  if (gcmp0(gel(x,i))) { gel(y,i) = gen_0; continue; }
+	  if (gequal0(gel(x,i))) { gel(y,i) = gen_0; continue; }
 	  pari_err(talker, "a log appears in intformal");
 	}
 	else gel(y,i) = gdivgs(gel(x,i),j);
@@ -2100,8 +2100,8 @@ isint(GEN n, GEN *ptk)
       *ptk = z; avma = av; return 1;
     }
     case t_FRAC:    return 0;
-    case t_COMPLEX: return gcmp0(gel(n,2)) && isint(gel(n,1),ptk);
-    case t_QUAD:    return gcmp0(gel(n,3)) && isint(gel(n,2),ptk);
+    case t_COMPLEX: return gequal0(gel(n,2)) && isint(gel(n,1),ptk);
+    case t_QUAD:    return gequal0(gel(n,3)) && isint(gel(n,2),ptk);
     default: pari_err(typeer,"isint"); return 0; /* not reached */
   }
 }
@@ -2330,7 +2330,7 @@ scalarpol(GEN x, long v)
   GEN y;
   if (isrationalzero(x)) return zeropol(v);
   y = cgetg(3,t_POL);
-  y[1] = gcmp0(x)? evalvarn(v)
+  y[1] = gequal0(x)? evalvarn(v)
 		 : evalvarn(v) | evalsigne(1);
   gel(y,2) = gcopy(x); return y;
 }
@@ -2396,7 +2396,7 @@ _gtopoly(GEN x, long v, int reverse)
         if (i == 0) return scalarpol(y, v);
 
         for (j = i; j>0; j--)
-          if (! gcmp0(gel(x,j))) break;
+          if (! gequal0(gel(x,j))) break;
         i += 2;
 	y = cgetg(i,t_POL);
 	y[1] = evalvarn(v) | evalsigne((j == 0)? 0: 1);
@@ -2415,7 +2415,7 @@ _gtopoly(GEN x, long v, int reverse)
         if (i == lx) return scalarpol(y, v);
 
         for (j = i; j<lx; j++)
-          if (! gcmp0(gel(x,j))) break;
+          if (! gequal0(gel(x,j))) break;
         i = lx-i+2;
 	y = cgetg(i, t_POL);
 	y[1] = evalvarn(v) | evalsigne((j == lx)? 0: 1);
@@ -2449,7 +2449,7 @@ scalarser(GEN x, long v, long prec)
     gel(y,2) = gcopy(x); return y;
   }
   l = prec + 2; y = cgetg(l, t_SER);
-  y[1] = evalsigne(gcmp0(x)? 0: 1) | _evalvalp(0) | evalvarn(v);
+  y[1] = evalsigne(gequal0(x)? 0: 1) | _evalvalp(0) | evalvarn(v);
   gel(y,2) = gcopy(x); for (i=3; i<l; i++) gel(y,i) = gen_0;
   return y;
 }
@@ -3201,13 +3201,13 @@ GEN
 gne(GEN x, GEN y) { return _egal(x,y)? gen_0: gen_1; }
 
 GEN
-gand(GEN x, GEN y) { return gcmp0(x)? gen_0: (gcmp0(y)? gen_0: gen_1); }
+gand(GEN x, GEN y) { return gequal0(x)? gen_0: (gequal0(y)? gen_0: gen_1); }
 
 GEN
-gor(GEN x, GEN y) { return gcmp0(x)? (gcmp0(y)? gen_0: gen_1): gen_1; }
+gor(GEN x, GEN y) { return gequal0(x)? (gequal0(y)? gen_0: gen_1): gen_1; }
 
 GEN
-gnot(GEN x) { return gcmp0(x)? gen_1: gen_0; }
+gnot(GEN x) { return gequal0(x)? gen_1: gen_0; }
 
 /*******************************************************************/
 /*                                                                 */

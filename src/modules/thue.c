@@ -118,7 +118,7 @@ get_emb(GEN x, GEN r)
   for (i=1; i<l; i++)
   {
     GEN e = poleval(x, gel(r,i));
-    if (gcmp0(e) || (typ(e) != t_INT && precision(e) == 3)) return NULL;
+    if (gequal0(e) || (typ(e) != t_INT && precision(e) == 3)) return NULL;
     gel(y,i) = e;
   }
   return y;
@@ -425,7 +425,7 @@ add_sol(GEN *pS, GEN x, GEN y)
 static void
 check_sol(GEN x, GEN y, GEN P, GEN rhs, GEN *pS)
 {
-  if (gcmp0(y))
+  if (gequal0(y))
   { if (equalii(powiu(x,degpol(P)), rhs)) add_sol(pS, x, gen_0); }
   else
   { if (equalii(poleval(RgX_rescale(P,y),x), rhs)) add_sol(pS, x, y); }
@@ -464,7 +464,7 @@ GuessQi(GEN b, GEN c, GEN *eps)
   gcoeff(Lat,3,3) = ground(gmul(C,c));
 
   Q = gel(lllint(Lat),1);
-  if (gcmp0(gel(Q,3))) return NULL; /* FAIL */
+  if (gequal0(gel(Q,3))) return NULL; /* FAIL */
 
   *eps = gadd(gadd(gel(Q,1), gmul(gel(Q,2),b)), gmul(gel(Q,3),c));
   *eps = mpabs(*eps); return Q;

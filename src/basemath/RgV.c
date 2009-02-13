@@ -504,11 +504,11 @@ RgM_isscalar(GEN x, GEN s)
   {
     GEN c = gel(x,j);
     for (i=1; i<j; )
-      if (!gcmp0(gel(c,i++))) return 0;
+      if (!gequal0(gel(c,i++))) return 0;
     /* i = j */
       if (!gequal(gel(c,i++),s)) return 0;
     for (   ; i<lx; )
-      if (!gcmp0(gel(c,i++))) return 0;
+      if (!gequal0(gel(c,i++))) return 0;
   }
   return 1;
 }
@@ -524,11 +524,11 @@ RgM_isidentity(GEN x)
   {
     GEN c = gel(x,j);
     for (i=1; i<j; )
-      if (!gcmp0(gel(c,i++))) return 0;
+      if (!gequal0(gel(c,i++))) return 0;
     /* i = j */
       if (!gequal1(gel(c,i++))) return 0;
     for (   ; i<lx; )
-      if (!gcmp0(gel(c,i++))) return 0;
+      if (!gequal0(gel(c,i++))) return 0;
   }
   return 1;
 }
@@ -544,9 +544,9 @@ RgM_isdiagonal(GEN x)
   {
     GEN c = gel(x,j);
     for (i=1; i<j; i++)
-      if (!gcmp0(gel(c,i))) return 0;
+      if (!gequal0(gel(c,i))) return 0;
     for (i++; i<lx; i++)
-      if (!gcmp0(gel(c,i))) return 0;
+      if (!gequal0(gel(c,i))) return 0;
   }
   return 1;
 }
@@ -575,7 +575,7 @@ RgM_ishnf(GEN x)
   {
     if (gsigne(gcoeff(x,i,i)) <= 0) return 0;
     for (j=1; j<i; j++)
-      if (!gcmp0(gcoeff(x,i,j))) return 0;
+      if (!gequal0(gcoeff(x,i,j))) return 0;
   }
   return (gsigne(gcoeff(x,1,1)) > 0);
 }

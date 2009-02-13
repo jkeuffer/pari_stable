@@ -417,7 +417,7 @@ monomial(GEN a, long d, long v)
     gel(P,2) = monomial(gen_1, -d, v);
   } else {
     P = cgetg(lP, t_POL);
-    if (gcmp0(a)) P[1] = evalsigne(0) | evalvarn(v);
+    if (gequal0(a)) P[1] = evalsigne(0) | evalvarn(v);
     else          P[1] = evalsigne(1) | evalvarn(v);
     lP--; gel(P,lP) = a;
     for (i=2; i<lP; i++) gel(P,i) = gen_0;
@@ -435,7 +435,7 @@ monomialcopy(GEN a, long d, long v)
     gel(P,2) = monomial(gen_1, -d, v);
   } else {
     P = cgetg(lP, t_POL);
-    if (gcmp0(a)) P[1] = evalsigne(0) | evalvarn(v);
+    if (gequal0(a)) P[1] = evalsigne(0) | evalvarn(v);
     else          P[1] = evalsigne(1) | evalvarn(v);
     lP--; gel(P,lP) = gcopy(a);
     for (i=2; i<lP; i++) gel(P,i) = gen_0;
@@ -1716,7 +1716,7 @@ pol_comp(GEN P, GEN u, GEN v)
   for (i=2; i<l; i++)
   {
     GEN t = gel(P,i);
-    gel(y,i) = gcmp0(t)? gen_0:
+    gel(y,i) = gequal0(t)? gen_0:
 			 (i&1)? gmul(t, gsub(u,v)) /*  odd degree */
 			      : gmul(t, gadd(u,v));/* even degree */
   }
@@ -1732,7 +1732,7 @@ polint_triv(GEN xa, GEN ya)
   for (i=1; i<n; i++)
   {
     GEN T, dP, r;
-    if (gcmp0(gel(ya,i))) continue;
+    if (gequal0(gel(ya,i))) continue;
     T = RgX_div_by_X_x(Q, gel(xa,i), NULL);
     r = poleval(T, gel(xa,i));
     if (i < n-1 && absi_equal(gel(xa,i), gel(xa,i+1)))
@@ -2457,7 +2457,7 @@ ZX_resultant_all(GEN A, GEN B, GEN dB, ulong bound)
       {
 	GEN R = resultant(RgX_gtofp(A, prec), RgX_gtofp(B, prec));
 	bound = gexpo(R) + 1;
-	if (!gcmp0(R)) break;
+	if (!gequal0(R)) break;
       }
       if (dB) bound -= (long)(dbllog2(dB)*degA);
     }

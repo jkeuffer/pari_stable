@@ -50,7 +50,7 @@ whilepari(GEN a, GEN b)
   for(;;)
   {
     GEN res = closure_evalnobrk(a);
-    if (gcmp0(res)) break;
+    if (gequal0(res)) break;
     avma = av;
     closure_evalvoid(b); if (loop_break()) break;
   }
@@ -66,7 +66,7 @@ untilpari(GEN a, GEN b)
     GEN res;
     closure_evalvoid(b); if (loop_break()) break;
     res = closure_evalnobrk(a);
-    if (!gcmp0(res)) break;
+    if (!gequal0(res)) break;
     avma = av;
   }
   avma = av;
@@ -519,7 +519,7 @@ suminf(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
   for(;;)
   {
     p1 = eval(a, E); x = gadd(x,p1); a = incloop(a);
-    if (gcmp0(p1) || gexpo(p1) <= gexpo(x)-G)
+    if (gequal0(p1) || gexpo(p1) <= gexpo(x)-G)
       { if (++fl==3) break; }
     else
       fl=0;
@@ -599,10 +599,10 @@ prodinf(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
   fl=0; G = -bit_accuracy(prec)-5;
   for(;;)
   {
-    p1 = eval(a, E); if (gcmp0(p1)) { x = p1; break; }
+    p1 = eval(a, E); if (gequal0(p1)) { x = p1; break; }
     x = gmul(x,p1); a = incloop(a);
     p1 = gsubgs(p1, 1);
-    if (gcmp0(p1) || gexpo(p1) <= G) { if (++fl==3) break; } else fl=0;
+    if (gequal0(p1) || gexpo(p1) <= G) { if (++fl==3) break; } else fl=0;
     if (low_stack(lim, stack_lim(av,1)))
     {
       if (DEBUGMEM>1) pari_warn(warnmem,"prodinf");
@@ -625,9 +625,9 @@ prodinf1(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
   for(;;)
   {
     p2 = eval(a, E); p1 = gaddgs(p2,1);
-    if (gcmp0(p1)) { x = p1; break; }
+    if (gequal0(p1)) { x = p1; break; }
     x = gmul(x,p1); a = incloop(a);
-    if (gcmp0(p2) || gexpo(p2) <= G) { if (++fl==3) break; } else fl=0;
+    if (gequal0(p2) || gexpo(p2) <= G) { if (++fl==3) break; } else fl=0;
     if (low_stack(lim, stack_lim(av,1)))
     {
       if (DEBUGMEM>1) pari_warn(warnmem,"prodinf1");
@@ -729,7 +729,7 @@ direuler(void *E, GEN (*eval)(GEN,void*), GEN ga, GEN gb, GEN c)
       for (j = 1; q<=n && j<=lx; j++)
       {
 	c = gel(polnum,j+2);
-	if (!gcmp0(c))
+	if (!gequal0(c))
 	  for (k=1,k1=q; k1<=n; k1+=q,k++)
 	    gel(x,k1) = gadd(gel(x,k1), gmul(c,gel(y,k)));
 	if (q > qlim) break;
@@ -753,7 +753,7 @@ direuler(void *E, GEN (*eval)(GEN,void*), GEN ga, GEN gb, GEN c)
 	for (j = 1; !(k%p) && j<=lx; j++)
 	{
 	  c = gel(polden,j+2); k /= p;
-	  if (!gcmp0(c)) s = gadd(s, gmul(c,gel(x,k)));
+	  if (!gequal0(c)) s = gadd(s, gmul(c,gel(x,k)));
 	}
 	gel(x,i) = gsub(gel(x,i),s);
       }
@@ -1126,7 +1126,7 @@ zbrent(void *E, GEN (*eval)(GEN,void*), GEN a, GEN b, long prec)
     }
     tol1 = mulrr(tol, gmax(tol,absr(b)));
     xm = shiftr(subrr(c,b),-1);
-    if (cmprr(absr(xm),tol1) <= 0 || gcmp0(fb)) break; /* SUCCESS */
+    if (cmprr(absr(xm),tol1) <= 0 || gequal0(fb)) break; /* SUCCESS */
 
     if (cmprr(absr(e),tol1) >= 0 && gcmp(gabs(fa,0),gabs(fb,0)) > 0)
     { /* attempt interpolation */

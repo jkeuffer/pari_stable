@@ -36,7 +36,7 @@ poldivrem(GEN x, GEN y, GEN *pr)
   if (is_scalar_t(ty) || varncmp(vx, vy) < 0)
   {
     if (pr == ONLY_REM) {
-      if (gcmp0(y)) pari_err(gdiver);
+      if (gequal0(y)) pari_err(gdiver);
       return gen_0;
     }
     if (pr && pr != ONLY_DIVIDES) *pr=gen_0;
@@ -56,7 +56,7 @@ poldivrem(GEN x, GEN y, GEN *pr)
       return p1;
     }
     if (pr == ONLY_REM) return gcopy(x);
-    if (pr == ONLY_DIVIDES) return gcmp0(x)? gen_0: NULL;
+    if (pr == ONLY_DIVIDES) return gequal0(x)? gen_0: NULL;
     if (pr) *pr = gcopy(x);
     return gen_0;
   }
@@ -98,7 +98,7 @@ grem(GEN x, GEN y)
 
   if (is_scalar_t(ty) || varncmp(vx, vy) < 0)
   {
-    if (gcmp0(y)) pari_err(gdiver);
+    if (gequal0(y)) pari_err(gdiver);
     return gen_0;
   }
   if (ty != t_POL) pari_err(typeer,"euclidean division (poldivrem)");
@@ -1413,7 +1413,7 @@ static GEN
 QpX_to_ZX(GEN f)
 {
   GEN c = content(f);
-  if (gcmp0(c)) /*  O(p^n) can occur */
+  if (gequal0(c)) /*  O(p^n) can occur */
   {
     if (typ(c) != t_PADIC) pari_err(typeer,"QpX_to_ZX");
     c = powis(gel(c,2), valp(c));
@@ -1483,7 +1483,7 @@ QpXQ_to_ZXY(GEN f)
 {
   GEN c = content(f);
   long i, l = lg(f);
-  if (gcmp0(c)) /*  O(p^n) can occur */
+  if (gequal0(c)) /*  O(p^n) can occur */
   {
     if (typ(c) != t_PADIC) pari_err(typeer,"QpXQ_to_ZXY");
     c = powis(gel(c,2), valp(c));
@@ -1547,7 +1547,7 @@ Zp_appr(GEN f, GEN a)
   GEN z, p;
   if (typ(f) != t_POL) pari_err(notpoler,"Zp_appr");
   if (typ(a) != t_PADIC) pari_err(typeer,"Zp_appr");
-  p = gel(a,2); prec = gcmp0(a)? valp(a): precp(a);
+  p = gel(a,2); prec = gequal0(a)? valp(a): precp(a);
   f = QpX_to_ZX(f);
   if (degpol(f) <= 0) pari_err(constpoler,"Zp_appr");
   (void)ZX_gcd_all(f, ZX_deriv(f), &f);
@@ -1605,7 +1605,7 @@ rootpadic(GEN f, GEN p, long prec)
 
   if (typ(p)!=t_INT) pari_err(typeer,"rootpadic");
   if (typ(f)!=t_POL) pari_err(notpoler,"rootpadic");
-  if (gcmp0(f)) pari_err(zeropoler,"rootpadic");
+  if (gequal0(f)) pari_err(zeropoler,"rootpadic");
   if (prec <= 0) pari_err(talker,"non-positive precision in rootpadic");
   f = QpX_to_ZX(f);
   f = pnormalize(f, p, prec, 1, &lead, &PREC, &reverse);
@@ -1693,7 +1693,7 @@ padicappr(GEN f, GEN a)
     default: pari_err(typeer,"padicappr");
   }
   if (typ(f)!=t_POL) pari_err(notpoler,"padicappr");
-  if (gcmp0(f)) pari_err(zeropoler,"padicappr");
+  if (gequal0(f)) pari_err(zeropoler,"padicappr");
   z = RgX_gcd(f, RgX_deriv(f));
   if (degpol(z) > 0) f = RgX_div(f,z);
   T = gel(a,1); a = gel(a,2);
@@ -1800,7 +1800,7 @@ factorpadic2(GEN f, GEN p, long prec)
 
   if (typ(f)!=t_POL) pari_err(notpoler,"factorpadic");
   if (typ(p)!=t_INT) pari_err(arither1);
-  if (gcmp0(f)) pari_err(zeropoler,"factorpadic");
+  if (gequal0(f)) pari_err(zeropoler,"factorpadic");
   if (prec <= 0) pari_err(talker,"non-positive precision in factorpadic");
 
   n = degpol(f);
@@ -1896,7 +1896,7 @@ factorpadic(GEN f,GEN p,long prec)
 
   if (typ(f)!=t_POL) pari_err(notpoler,"factorpadic");
   if (typ(p)!=t_INT) pari_err(arither1);
-  if (gcmp0(f)) pari_err(zeropoler,"factorpadic");
+  if (gequal0(f)) pari_err(zeropoler,"factorpadic");
   if (prec <= 0) pari_err(talker,"non-positive precision in factorpadic");
   if (n == 0) return trivfact();
 
@@ -2372,7 +2372,7 @@ FqX_factor_i(GEN f, GEN T, GEN p)
     {
       g1 = FqX_div(f,f2, T,p);
       df2 = FqX_deriv(f2, T,p);
-      if (gcmp0(df2)) { u = g1; f3 = f2; }
+      if (gequal0(df2)) { u = g1; f3 = f2; }
       else
       {
 	f3 = FqX_gcd(f2,df2, T,p);

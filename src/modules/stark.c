@@ -328,7 +328,7 @@ ComputeKernel0(GEN P, GEN DA, GEN DB)
   rk = nbA + lg(DB) - lg(ZM_hnfall(shallowconcat(P, DB), &U, 1));
   U = vecslice(U, 1,rk);
   U = rowslice(U, 1,nbA);
-  if (!gcmp0(DA)) U = shallowconcat(U, DA);
+  if (!gequal0(DA)) U = shallowconcat(U, DA);
   return gerepileupto(av, ZM_hnf(U));
 }
 
@@ -425,10 +425,10 @@ CplxModulus(GEN data, long *newprec, long prec)
     pr = nbits2nlong( gexpo(pol) );
     if (pr < 0) pr = 0;
     dprec = maxss(dprec, pr) + EXTRA_PREC;
-    if (!gcmp0(leading_term(pol)))
+    if (!gequal0(leading_term(pol)))
     {
       cpl = RgX_fpnorml2(pol, DEFAULTPREC);
-      if (!gcmp0(cpl)) break;
+      if (!gequal0(cpl)) break;
     }
     if (DEBUGLEVEL>1) pari_warn(warnprec, "CplxModulus", dprec);
   }
@@ -981,7 +981,7 @@ get_listCR(GEN bnr, GEN dtQ)
     if (j != tnc) continue;
 
     cond = bnrconductorofchar(bnr, lchi);
-    if (gcmp0(gel(cond,2))) continue;
+    if (gequal0(gel(cond,2))) continue;
 
     /* the infinite part of chi is non trivial */
     gel(listCR,nc++) = mkvec2(lchi, cond);
@@ -2472,7 +2472,7 @@ makescind(GEN nf, GEN P)
   Pp = gsubst(P, varn(nfpol), a);
   Pp = FpX_red(Pp, p); /* P mod a prime \wp above p (which splits) */
   roo = gel(G,3);
-  is_P = gcmp0( FpX_eval(Pp, remii(gel(roo,1),p), p) );
+  is_P = gequal0( FpX_eval(Pp, remii(gel(roo,1),p), p) );
   /* each roo[i] mod p is a root of P or (exclusive) tau(P) mod \wp */
   /* record whether roo[1] is a root of P or tau(P) */
 
@@ -2481,7 +2481,7 @@ makescind(GEN nf, GEN P)
   {
     perm = gel(L,i);
     k = perm[1]; if (k == 1) continue;
-    k = gcmp0( FpX_eval(Pp, remii(gel(roo,k),p), p) );
+    k = gequal0( FpX_eval(Pp, remii(gel(roo,k),p), p) );
     /* roo[k] is a root of the other polynomial */
     if (k != is_P) break;
   }
@@ -2555,7 +2555,7 @@ quadhilbertreal(GEN D, long prec)
 static GEN
 get_subgroup(GEN subgp, GEN cyc, const char *s)
 {
-  if (!subgp || gcmp0(subgp)) return cyc;
+  if (!subgp || gequal0(subgp)) return cyc;
   if (typ(subgp) == t_MAT)
   {
     RgM_check_ZM(subgp, s);
@@ -2594,7 +2594,7 @@ bnrstark(GEN bnr, GEN subgrp, long prec)
   if (gequal1( ZM_det_triangular(subgrp) )) { avma = av; return pol_x(0); }
 
   /* check the class field */
-  if (!gcmp0(gel(bnr_get_mod(bnr), 2)))
+  if (!gequal0(gel(bnr_get_mod(bnr), 2)))
     pari_err(talker, "class field not totally real in bnrstark");
 
   if (DEBUGLEVEL) (void)timer2();

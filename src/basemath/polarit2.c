@@ -551,7 +551,7 @@ factor(GEN x)
   pari_sp av, tetpil;
   GEN  y, p, p1, p2, pol;
 
-  if (gcmp0(x))
+  if (gequal0(x))
   {
     switch(tx)
     {
@@ -1028,7 +1028,7 @@ gauss_gcd(GEN x, GEN y)
   GEN dx, dy;
   dx = denom(x); x = gmul(x, dx);
   dy = denom(y); y = gmul(y, dy);
-  while (!gcmp0(y))
+  while (!gequal0(y))
   {
     GEN z = gsub(x, gmul(ground(gdiv(x,y)), y));
     x = y; y = z;
@@ -1036,8 +1036,8 @@ gauss_gcd(GEN x, GEN y)
   x = gauss_normal(x);
   if (typ(x) == t_COMPLEX)
   {
-    if      (gcmp0(gel(x,2))) x = gel(x,1);
-    else if (gcmp0(gel(x,1))) x = gel(x,2);
+    if      (gequal0(gel(x,2))) x = gel(x,1);
+    else if (gequal0(gel(x,1))) x = gel(x,2);
   }
   return gerepileupto(av, gdiv(x, lcmii(dx, dy)));
 }
@@ -1208,7 +1208,7 @@ ggcd(GEN x, GEN y)
 
       case t_QUAD:
 	av=avma; p1=gdiv(x,y);
-	if (gcmp0(gel(p1,3)))
+	if (gequal0(gel(p1,3)))
 	{
 	  p1=gel(p1,2);
 	  if (typ(p1)==t_INT) { avma=av; return gcopy(y); }
@@ -1455,7 +1455,7 @@ glcm(GEN x, GEN y)
     return z;
   }
   if (tx==t_INT && ty==t_INT) return lcmii(x,y);
-  if (gcmp0(x)) return gen_0;
+  if (gequal0(x)) return gen_0;
 
   av = avma;
   p1 = ggcd(x,y); if (!gequal1(p1)) y = gdiv(y,p1);
@@ -1467,7 +1467,7 @@ static int
 pol_approx0(GEN r, GEN x, int exact)
 {
   long i, lx,lr;
-  if (exact) return gcmp0(r);
+  if (exact) return gequal0(r);
   lx = lg(x);
   lr = lg(r); if (lr < lx) lx = lr;
   for (i=2; i<lx; i++)
@@ -1621,7 +1621,7 @@ primitive_part(GEN x, GEN *ptc)
   pari_sp av = avma;
   GEN c = content(x);
   if (gequal1(c)) { avma = av; c = NULL; }
-  else if (!gcmp0(c)) x = gdiv(x,c);
+  else if (!gequal0(c)) x = gdiv(x,c);
   if (ptc) *ptc = c;
   return x;
 }
@@ -1950,7 +1950,7 @@ init_resultant(GEN x, GEN y)
   long tx = typ(x), ty = typ(y), vx, vy;
   if (is_scalar_t(tx) || is_scalar_t(ty))
   {
-    if (gcmp0(x) || gcmp0(y)) return gen_0;
+    if (gequal0(x) || gequal0(y)) return gen_0;
     if (tx==t_POL) return gpowgs(y, degpol(x));
     if (ty==t_POL) return gpowgs(x, degpol(y));
     return gen_1;
@@ -2044,7 +2044,7 @@ subresext(GEN x, GEN y, GEN *U, GEN *V)
   GEN *gptr[3];
 
   if (!is_extscalar_t(tx) || !is_extscalar_t(ty)) pari_err(typeer,"subresext");
-  if (gcmp0(x) || gcmp0(y)) { *U = *V = gen_0; return gen_0; }
+  if (gequal0(x) || gequal0(y)) { *U = *V = gen_0; return gen_0; }
   if (tx != t_POL) {
     if (ty != t_POL) { *U = ginv(x); *V = gen_0; return gen_1; }
     return scalar_res(y,x,V,U);
@@ -2145,11 +2145,11 @@ RgX_extgcd(GEN x, GEN y, GEN *U, GEN *V)
   GEN z, g, h, p1, cu, cv, u, v, um1, uze, vze, *gptr[3];
 
   if (!is_extscalar_t(tx) || !is_extscalar_t(ty)) pari_err(typeer,"RgX_gcd");
-  if (gcmp0(x)) {
-    if (gcmp0(y)) { *U = *V = gen_0; return gen_0; }
+  if (gequal0(x)) {
+    if (gequal0(y)) { *U = *V = gen_0; return gen_0; }
     return zero_bezout(y,U,V);
   }
-  if (gcmp0(y)) return zero_bezout(x,V,U);
+  if (gequal0(y)) return zero_bezout(x,V,U);
   if (tx != t_POL) {
     if (ty != t_POL) { *U = ginv(x); *V = gen_0; return pol_1(0); }
     return scalar_bezout(y,x,V,U);
@@ -2255,7 +2255,7 @@ static long
 reductum_lg(GEN x, long lx)
 {
   long i = lx-2;
-  while (i > 1 && gcmp0(gel(x,i))) i--;
+  while (i > 1 && gequal0(gel(x,i))) i--;
   return i+1;
 }
 
@@ -2676,7 +2676,7 @@ RgX_gcd(GEN x, GEN y)
 
       if (dr <= 3)
       {
-	if (gcmp0(r)) break;
+	if (gequal0(r)) break;
 	avma = av1; return gerepileupto(av, scalarpol(d, varn(x)));
       }
       if (DEBUGLEVEL > 9) fprintferr("RgX_gcd: dr = %ld\n", dr);
@@ -2800,7 +2800,7 @@ sturmpart(GEN x, GEN a, GEN b)
   pari_sp av = avma, lim = stack_lim(av, 1);
   GEN g,h,u,v;
 
-  if (gcmp0(x)) pari_err(zeropoler,"sturm");
+  if (gequal0(x)) pari_err(zeropoler,"sturm");
   t = typ(x);
   if (t != t_POL)
   {
@@ -2917,7 +2917,7 @@ RgXQ_inv(GEN x, GEN y)
   if (isinexact(x) || isinexact(y)) return RgXQ_inv_inexact(x,y);
 
   av = avma; d = subresext(x,y,&u,&v/*junk*/);
-  if (gcmp0(d)) pari_err(talker,"non-invertible polynomial in RgXQ_inv");
+  if (gequal0(d)) pari_err(talker,"non-invertible polynomial in RgXQ_inv");
   if (typ(d) == t_POL && varn(d) == vx)
   {
     if (lg(d) > 3) pari_err(talker,"non-invertible polynomial in RgXQ_inv");

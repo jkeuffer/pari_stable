@@ -183,7 +183,7 @@ BA  3- builtin-in GP functions can now be used as closures.
        factorback0 -> factorback2
        factorpadic4 -> factorpadic, factorpadic2 now static
        fundunit -> quadunit
-       gcmp1 -> gequal1, gcmp_1 -> gequalm1
+       gcmp0 -> gequal0, gcmp1 -> gequal1, gcmp_1 -> gequalm1
        gener -> znprimroot, ggener -> znprimroot0
        greffe -> RgX_to_ser (+ change prototype)
        hil0 -> hilbert, hilii -> hilbertii [ delete useless hil() ]
