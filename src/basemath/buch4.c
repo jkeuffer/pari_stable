@@ -652,7 +652,7 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
   if (!nf) nf = bnf_get_nf(bnf);
 
   relpol = get_bnfpol(relpol, &bnfabs, &nfabs);
-  if (!gcmp1(leading_term(relpol))) pari_err(impl,"non monic relative equation");
+  if (!gequal1(leading_term(relpol))) pari_err(impl,"non monic relative equation");
   drel = degpol(relpol);
   if (varncmp(varn(relpol), vbas) >= 0)
     pari_err(talker,"main variable must be of higher priority in rnfisnorminit");
@@ -729,8 +729,8 @@ rnfisnorm(GEN T, GEN x, long flag)
   nf = bnf_get_nf(bnf);
   x = nf_to_scalar_or_alg(nf,x);
   if (gcmp0(x)) { avma = av; return mkvec2(gen_0, gen_1); }
-  if (gcmp1(x)) { avma = av; return mkvec2(gen_1, gen_1); }
-  if (gcmp_1(x) && odd(drel)) { avma = av; return mkvec2(gen_m1, gen_1); }
+  if (gequal1(x)) { avma = av; return mkvec2(gen_1, gen_1); }
+  if (gequalm1(x) && odd(drel)) { avma = av; return mkvec2(gen_m1, gen_1); }
 
   /* build set T of ideals involved in the solutions */
   nfpol = nf_get_pol(nf);

@@ -617,7 +617,7 @@ FpX_is_totally_split(GEN f, GEN p)
   f = FpX_red(f, p);
   z = FpXQ_pow(pol_x(varn(f)), p, f, p);
   avma = av;
-  return degpol(z) == 1 && gcmp1(gel(z,3)) && !signe(z[2]); /* x^p = x ? */
+  return degpol(z) == 1 && gequal1(gel(z,3)) && !signe(z[2]); /* x^p = x ? */
 }
 
 /* Flv_Flx( Flm_Flc_mul(x, Flx_Flv(y), p) ) */
@@ -805,14 +805,14 @@ try_pow(GEN w0, GEN pol, GEN p, GEN q, long r)
 {
   GEN w2, w = FpXQ_pow(w0,q, pol,p);
   long s;
-  if (gcmp1(w)) return w0;
+  if (gequal1(w)) return w0;
   for (s=1; s<r; s++,w=w2)
   {
     w2 = gsqr(w);
     w2 = FpX_rem(w2, pol, p);
-    if (gcmp1(w2)) break;
+    if (gequal1(w2)) break;
   }
-  return gcmp_1(w)? NULL: w;
+  return gequalm1(w)? NULL: w;
 }
 
 /* INPUT:
@@ -917,7 +917,7 @@ spec_FpXQ_pow(GEN x, GEN p, GEN S)
   {
     GEN d, c = gel(x0,i); /* assume coeffs in [0, p-1] */
     if (!signe(c)) continue;
-    d = gel(S,i); if (!gcmp1(c)) d = ZX_Z_mul(d, c);
+    d = gel(S,i); if (!gequal1(c)) d = ZX_Z_mul(d, c);
     z = typ(z) == t_INT? ZX_Z_add(d,z): ZX_add(d,z);
     if (low_stack(lim, stack_lim(av,1)))
     {
@@ -1462,7 +1462,7 @@ ZX_to_ZpX_normalized(GEN x, GEN p, GEN pr, long r)
   long i, lx = lg(x);
   GEN z, lead = leading_term(x);
 
-  if (gcmp1(lead)) return ZX_to_ZpX(x, p, pr, r);
+  if (gequal1(lead)) return ZX_to_ZpX(x, p, pr, r);
   (void)Z_pvalrem(lead, p, &lead); lead = Fp_inv(lead, pr);
   z = cgetg(lx,t_POL);
   for (i=2; i < lx; i++) gel(z,i) = Z_to_Zp(mulii(lead,gel(x,i)),p,pr,r);
@@ -1807,7 +1807,7 @@ factorpadic2(GEN f, GEN p, long prec)
   if (n==0) return trivfact();
   f = QpX_to_ZX(f);
   if (n==1) return gerepilecopy(av, padic_trivfact(f,p,prec));
-  if (!gcmp1(leading_term(f)))
+  if (!gequal1(leading_term(f)))
     pari_err(impl,"factorpadic2 for non-monic polynomial");
 
   fa = ZX_squff(f, &ex);
@@ -1913,7 +1913,7 @@ factorpadic(GEN f,GEN p,long prec)
     if (reverse) t = normalizepol(RgX_recip_shallow(t));
     gel(P,i) = ZX_to_ZpX_normalized(t,p,ppow,prec);
   }
-  if (!gcmp1(lt)) gel(P,1) = gmul(gel(P,1), lt);
+  if (!gequal1(lt)) gel(P,1) = gmul(gel(P,1), lt);
   return gerepilecopy(av, sort_factor_pol(y, cmp_padic));
 }
 

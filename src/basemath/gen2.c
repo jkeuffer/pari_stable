@@ -404,7 +404,7 @@ absrnz_egal1(GEN x) { return !expo(x) && absrnz_egal2n(x); }
 
 /* returns 1 whenever x = 1, 0 otherwise */
 int
-gcmp1(GEN x)
+gequal1(GEN x)
 {
   switch(typ(x))
   {
@@ -415,7 +415,7 @@ gcmp1(GEN x)
       return signe(x) > 0 ? absrnz_egal1(x): 0;
 
     case t_INTMOD: case t_POLMOD:
-      return gcmp1(gel(x,2));
+      return gequal1(gel(x,2));
 
     case t_FFELT:
       return FF_cmp1(x);
@@ -424,23 +424,23 @@ gcmp1(GEN x)
       return 0;
 
     case t_COMPLEX:
-      return gcmp1(gel(x,1)) && gcmp0(gel(x,2));
+      return gequal1(gel(x,1)) && gcmp0(gel(x,2));
 
     case t_PADIC:
-      return !valp(x) && gcmp1(gel(x,4));
+      return !valp(x) && gequal1(gel(x,4));
 
     case t_QUAD:
-      return gcmp1(gel(x,2)) && gcmp0(gel(x,3));
+      return gequal1(gel(x,2)) && gcmp0(gel(x,3));
 
     case t_POL:
-      return lg(x)==3 && gcmp1(gel(x,2));
+      return lg(x)==3 && gequal1(gel(x,2));
   }
   return 0;
 }
 
 /* returns 1 whenever the x = -1, 0 otherwise */
 int
-gcmp_1(GEN x)
+gequalm1(GEN x)
 {
   pari_sp av;
   long y;
@@ -464,10 +464,10 @@ gcmp_1(GEN x)
       return FF_cmp_1(x);
 
     case t_COMPLEX:
-      return gcmp_1(gel(x,1)) && gcmp0(gel(x,2));
+      return gequalm1(gel(x,1)) && gcmp0(gel(x,2));
 
     case t_QUAD:
-      return gcmp_1(gel(x,2)) && gcmp0(gel(x,3));
+      return gequalm1(gel(x,2)) && gcmp0(gel(x,3));
 
     case t_PADIC:
       av=avma; y=equalii(addsi(1,gel(x,4)), gel(x,3)); avma=av; return y;
@@ -477,7 +477,7 @@ gcmp_1(GEN x)
       y = signe(p1) && !gequal(p1,gel(x,1)); avma=av; return !y;
 
     case t_POL:
-      return lg(x)==3 && gcmp_1(gel(x,2));
+      return lg(x)==3 && gequalm1(gel(x,2));
   }
   return 0;
 }
@@ -1526,7 +1526,7 @@ padic_to_Fp(GEN x, GEN Y) {
   long vy, vx = valp(x);
   if (!signe(Y)) pari_err(gdiver);
   vy = Z_pvalrem(Y,p, &z);
-  if (vx < 0 || !gcmp1(z)) pari_err(operi,"",x, mkintmod(gen_1,Y));
+  if (vx < 0 || !gequal1(z)) pari_err(operi,"",x, mkintmod(gen_1,Y));
   if (vx >= vy) { avma = av; return gen_0; }
   z = gel(x,4);
   if (!signe(z) || vy > vx + precp(x)) pari_err(operi,"",x, mkintmod(gen_1,Y));

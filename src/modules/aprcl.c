@@ -565,7 +565,7 @@ finda(Cache *Cp, GEN N, long pk, long p)
       {
 	a = Fp_pow(utoipos(u), q, N);
 	b = Fp_pow(a, ph, N);
-	if (!gcmp1(b)) break;
+	if (!gequal1(b)) break;
       }
     }
     else
@@ -576,7 +576,7 @@ finda(Cache *Cp, GEN N, long pk, long p)
     }
     /* checking b^p = 1 mod N done economically in caller */
     b = gcdii(addis(b,-1), N);
-    if (!gcmp1(b)) return NULL;
+    if (!gequal1(b)) return NULL;
 
     if (Cp) {
       Cp->avite  = a; /* a has order p^v */
@@ -636,7 +636,7 @@ filltabs(Cache *C, Cache *Cp, Red *R, long p, long pk, long ltab)
 	GEN z = mulii((i%p==1) ? a2 : a, gel(vpa,jj));
 	gel(vpa,++jj) = centermodii(z , R->N, R->N2);
       }
-    if (!gcmp1( centermodii( mulii(a, gel(vpa,ph)), R->N, R->N2) )) return 0;
+    if (!gequal1( centermodii( mulii(a, gel(vpa,ph)), R->N, R->N2) )) return 0;
     p1 = cgetg(ph+1,t_MAT);
     p2 = cgetg(ph+1,t_COL); gel(p1,1) = p2;
     for (i=1; i<=ph; i++) gel(p2,i) = gen_1;
@@ -927,7 +927,7 @@ step6(GEN N, ulong t, GEN et)
   for (i=1; i<t; i++)
   {
     r = remii(mulii(r,N1), et);
-    if (gcmp1(r)) break;
+    if (gequal1(r)) break;
     if (!signe(remii(N,r)) && !equalii(r,N)) return mkvec2(r, gen_0);
     if ((i & 0x1f) == 0) r = gerepileuptoint(av, r);
   }
@@ -959,7 +959,7 @@ aprcl(GEN N)
   if (DEBUGLEVEL) fprintferr("Choosing t = %ld\n",t);
   et = e(t, &globfa);
   if (cmpii(sqri(et),N) < 0) pari_err(bugparier,"aprcl: e(t) too small");
-  if (!gcmp1(gcdii(N,mului(t,et)))) return _res(1,0);
+  if (!gequal1(gcdii(N,mului(t,et)))) return _res(1,0);
 
   R.N = N;
   R.N2= shifti(N, -1);

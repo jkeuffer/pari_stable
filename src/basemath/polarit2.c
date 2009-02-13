@@ -53,7 +53,7 @@ polsym_gen(GEN P, GEN y0, long n, GEN T, GEN N)
   }
   P += 2; /* strip codewords */
 
-  P_lead = gel(P,dP); if (gcmp1(P_lead)) P_lead = NULL;
+  P_lead = gel(P,dP); if (gequal1(P_lead)) P_lead = NULL;
   if (P_lead)
   {
     if (N) P_lead = Fq_inv(P_lead,T,N);
@@ -537,7 +537,7 @@ gauss_factor(GEN x)
   fa = sort_factor(fa, (void*)&gauss_cmp, &cmp_nodata);
 
   y = gmul(y, powIs(exp));
-  if (!gcmp1(y)) {
+  if (!gequal1(y)) {
     gel(fa,1) = shallowconcat(mkcol(y), gel(fa,1));
     gel(fa,2) = shallowconcat(gen_1,    gel(fa,2));
   }
@@ -1181,7 +1181,7 @@ ggcd(GEN x, GEN y)
 	  gel(z,1) = icopy(gel(x,1));
 	else
 	  gel(z,1) = gcdii(gel(x,1),gel(y,1));
-	if (gcmp1(gel(z,1))) gel(z,2) = gen_0;
+	if (gequal1(gel(z,1))) gel(z,2) = gen_0;
 	else
 	{
 	  av = avma; p1 = gcdii(gel(z,1),gel(x,2));
@@ -1303,7 +1303,7 @@ ggcd(GEN x, GEN y)
 	GEN X, Y, d;
 	av = avma; X = gel(x,2); Y = gel(y,2);
 	d = ggcd(content(X), content(Y));
-	if (!gcmp1(d)) { X = gdiv(X,d); Y = gdiv(Y,d); }
+	if (!gequal1(d)) { X = gdiv(X,d); Y = gdiv(Y,d); }
 	p1 = ggcd(T, X);
 	gel(z,2) = gerepileupto(av, gmul(d, ggcd(p1, Y)));
       }
@@ -1458,7 +1458,7 @@ glcm(GEN x, GEN y)
   if (gcmp0(x)) return gen_0;
 
   av = avma;
-  p1 = ggcd(x,y); if (!gcmp1(p1)) y = gdiv(y,p1);
+  p1 = ggcd(x,y); if (!gequal1(p1)) y = gdiv(y,p1);
   return gerepileupto(av, fix_lcm(gmul(x,y)));
 }
 
@@ -1620,7 +1620,7 @@ primitive_part(GEN x, GEN *ptc)
 {
   pari_sp av = avma;
   GEN c = content(x);
-  if (gcmp1(c)) { avma = av; c = NULL; }
+  if (gequal1(c)) { avma = av; c = NULL; }
   else if (!gcmp0(c)) x = gdiv(x,c);
   if (ptc) *ptc = c;
   return x;
@@ -1911,7 +1911,7 @@ gdivexact(GEN x, GEN y)
 {
   long i,lx;
   GEN z;
-  if (gcmp1(y)) return x;
+  if (gequal1(y)) return x;
   switch(typ(x))
   {
     case t_INT:
@@ -2532,7 +2532,7 @@ RgXQ_caract(GEN x, GEN T, long v)
       ch = gsubst(ch, MAXVARN, pol_x(v));
   }
   L = leading_term(ch);
-  if (!gcmp1(L)) ch = RgX_Rg_div(ch, L);
+  if (!gequal1(L)) ch = RgX_Rg_div(ch, L);
   return gerepileupto(av, ch);
 }
 
@@ -2720,7 +2720,7 @@ RgX_disc_aux(GEN x)
     D = resultant2(x,y);
   else
     D = resultant_aux(x, y, NULL);
-  L = leading_term(x); if (!gcmp1(L)) D = gdiv(D,L);
+  L = leading_term(x); if (!gequal1(L)) D = gdiv(D,L);
   if (dx & 2) D = gneg(D);
   return D;
 }
@@ -2773,7 +2773,7 @@ reduceddiscsmith(GEN x)
   if (typ(x) != t_POL) pari_err(typeer,"reduceddiscsmith");
   if (n<=0) pari_err(constpoler,"reduceddiscsmith");
   RgX_check_ZX(x,"poldiscreduced");
-  if (!gcmp1(gel(x,n+2)))
+  if (!gequal1(gel(x,n+2)))
     pari_err(talker,"non-monic polynomial in poldiscreduced");
   M = cgetg(n+1,t_MAT);
   xp = ZX_deriv(x);

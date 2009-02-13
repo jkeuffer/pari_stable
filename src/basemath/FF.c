@@ -100,7 +100,7 @@ FF_cmp1(GEN x)
   switch(x[1])
   {
   case t_FF_FpXQ:
-    return degpol(A)==0 && gcmp1(gel(A,2));
+    return degpol(A)==0 && gequal1(gel(A,2));
   default:
     return degpol(A)==0 && A[2]==1;
   }

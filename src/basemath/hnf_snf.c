@@ -574,7 +574,7 @@ TOOLARGE:
   x = ZM_hnf(x); lx = lg(x); j = ly; k = 0;
   for (i=1; i<ly; i++)
   {
-    if (gcmp1(gcoeff(x,i,i + lx-ly)))
+    if (gequal1(gcoeff(x,i,i + lx-ly)))
       perm[--j] = i;
     else
       perm[++k] = i;
@@ -764,7 +764,7 @@ hnfmerge_get_1(GEN A, GEN B)
     {
       GEN u;
       t = bezout(gcoeff(C,1,1), b, &u, NULL); /* >= 0 */
-      if (signe(u) && !gcmp1(u)) gel(U,1) = ZC_Z_mul(gel(U,1), u);
+      if (signe(u) && !gequal1(u)) gel(U,1) = ZC_Z_mul(gel(U,1), u);
       gcoeff(C,1,1) = t;
     }
     if (signe(t) && is_pm1(t)) break;
@@ -1999,12 +1999,12 @@ smithclean(GEN z)
   if (l != 4 || typ(u) != t_MAT)
   {
     for (c=1; c<l; c++)
-      if (gcmp1(gel(z,c))) break;
+      if (gequal1(gel(z,c))) break;
     return gcopy_lg(z, c);
   }
   v=gel(z,2); d=gel(z,3); l = lg(d);
   for (c=1; c<l; c++)
-    if (gcmp1(gcoeff(d,c,c))) break;
+    if (gequal1(gcoeff(d,c,c))) break;
 
   y=cgetg(4,t_VEC);
   gel(y,1) = p1 = cgetg(l,t_MAT);
@@ -2148,7 +2148,7 @@ gsmithall_i(GEN x,long all)
 	 if (!signe(T)) { gcoeff(x,k,k) = T; continue; }
 	 d = leading_term(T);
       }
-      if (!gcmp1(d))
+      if (!gequal1(d))
       {
 	gcoeff(x,k,k) = RgX_Rg_div(T,d);
 	if (all) gel(V,k) = RgC_Rg_div(gel(V,k), d);

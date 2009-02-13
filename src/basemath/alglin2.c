@@ -739,7 +739,7 @@ matcompanion(GEN x)
   y = cgetg(n+1,t_MAT);
   for (j=1; j < n; j++) gel(y,j) = col_ei(n, j+1);
   c = cgetg(n+1,t_COL); gel(y,n) = c;
-  if (gcmp1(gel(x, n+2)))
+  if (gequal1(gel(x, n+2)))
     for (j=1; j<=n; j++) gel(c,j) = gneg(gel(x,j+1));
   else
   { /* not monic. Hardly ever used */

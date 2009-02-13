@@ -1325,7 +1325,7 @@ GEN
 FqX_normalize(GEN z, GEN T, GEN p)
 {
   GEN p1 = leading_term(z);
-  if (lg(z) == 2 || gcmp1(p1)) return z;
+  if (lg(z) == 2 || gequal1(p1)) return z;
   if (!T) return FpX_normalize(z,p);
   return FqX_Fq_mul(z, Fq_inv(p1,T,p), T,p);
 }
@@ -1446,7 +1446,7 @@ FpXQX_divrem(GEN x, GEN y, GEN T, GEN p, GEN *pr)
       return z;
     }
   }
-  lead = gcmp1(lead)? NULL: gclone(Fq_inv(lead,T,p));
+  lead = gequal1(lead)? NULL: gclone(Fq_inv(lead,T,p));
   avma = av0;
   z = cgetg(dz+3,t_POL); z[1] = x[1];
   x += 2; y += 2; z += 2;
@@ -1937,7 +1937,7 @@ FpX_FpXY_eval_resultant(GEN a, GEN b, GEN n, GEN p, GEN la)
   GEN ev = FpXY_evalx(b, n, p);
   long drop=lg(b)-lg(ev);
   GEN r = FpX_resultant(a, ev, p);
-  if (drop && !gcmp1(la)) r = Fp_mul(r, Fp_powu(la, drop,p),p);
+  if (drop && !gequal1(la)) r = Fp_mul(r, Fp_powu(la, drop,p),p);
   return r;
 }
 
@@ -2408,7 +2408,7 @@ ZX_caract_sqf(GEN A, GEN B, long *lambda, long v)
   R = ZX_ZXY_rnfequation(A, B0, lambda);
   if (delvar) (void)delete_var();
   setvarn(R, v); a = leading_term(A);
-  if (!gcmp1(a)) R = gdiv(R, powiu(a, dB));
+  if (!gequal1(a)) R = gdiv(R, powiu(a, dB));
   return gerepileupto(av, R);
 }
 

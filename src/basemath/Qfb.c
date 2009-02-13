@@ -501,7 +501,7 @@ nupow(GEN x, GEN n)
   GEN y, l;
 
   if (typ(n) != t_INT) pari_err(talker,"not an integer exponent in nupow");
-  if (gcmp1(n)) return gcopy(x);
+  if (gequal1(n)) return gcopy(x);
   av = avma; y = qfi_1(x);
   if (!signe(n)) return y;
 
@@ -734,7 +734,7 @@ qfr5_to_qfr(GEN x, GEN d0)
       setexpo(d, expo(d)-1);
       d0 = addrr(d0, d);
     }
-    else if (!gcmp1(d)) /* avoid loss of precision */
+    else if (!gequal1(d)) /* avoid loss of precision */
     {
       d = logr_abs(d);
       setexpo(d, expo(d)-1);
@@ -1121,8 +1121,8 @@ qfisolvep(GEN Q, GEN p)
   {
     a = gel(Q,1);
     c = gel(Q,3); /* if principal form, use faster cornacchia */
-    if (gcmp1(a)) return qfbsolve_cornacchia(c, p, 0);
-    if (gcmp1(c)) return qfbsolve_cornacchia(a, p, 1);
+    if (gequal1(a)) return qfbsolve_cornacchia(c, p, 0);
+    if (gequal1(c)) return qfbsolve_cornacchia(a, p, 1);
   }
   d = qfb_disc(Q); if (kronecker(d,p) < 0) return gen_0;
   a = redimagsl2(Q, &N);

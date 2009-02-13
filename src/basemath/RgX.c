@@ -211,7 +211,7 @@ RgX_translate(GEN P, GEN c)
   Q = leafcopy(P);
   R = (GEN*)(Q+2); n = degpol(P);
   lim = stack_lim(av, 2);
-  if (gcmp1(c))
+  if (gequal1(c))
   {
     for (i=1; i<=n; i++)
     {
@@ -223,7 +223,7 @@ RgX_translate(GEN P, GEN c)
       }
     }
   }
-  else if (gcmp_1(c))
+  else if (gequalm1(c))
   {
     for (i=1; i<=n; i++)
     {
@@ -1121,7 +1121,7 @@ RgX_divrem(GEN x, GEN y, GEN *pr)
     case t_POLMOD: y_lead = ginv(y_lead);
       f = gmul; mod = gmodulo(gen_1, gel(y_lead,1));
       break;
-    default: if (gcmp1(y_lead)) y_lead = NULL;
+    default: if (gequal1(y_lead)) y_lead = NULL;
       f = gdiv; mod = NULL;
   }
   p1 = new_chunk(dy+3);
@@ -1245,12 +1245,12 @@ RgXQX_divrem(GEN x, GEN y, GEN T, GEN *pr)
       if (pr == ONLY_REM) return zeropol(vx);
       *pr = zeropol(vx);
     }
-    if (gcmp1(lead)) return gcopy(x);
+    if (gequal1(lead)) return gcopy(x);
     av0 = avma; x = gmul(x, ginvmod(lead,T)); tetpil = avma;
     return gerepile(av0,tetpil,RgXQX_red(x,T));
   }
   av0 = avma; dz = dx-dy;
-  lead = gcmp1(lead)? NULL: gclone(ginvmod(lead,T));
+  lead = gequal1(lead)? NULL: gclone(ginvmod(lead,T));
   avma = av0;
   z = cgetg(dz+3,t_POL); z[1] = x[1];
   x += 2; y += 2; z += 2;
@@ -1325,7 +1325,7 @@ RgXQX_pseudorem(GEN x, GEN y, GEN T)
   if (!signe(y)) pari_err(gdiver);
   dy = degpol(y); y_lead = gel(y,dy+2);
   /* if monic, no point in using pseudo-division */
-  if (gcmp1(y_lead)) return T? RgXQX_rem(x, y, T): RgX_rem(x, y);
+  if (gequal1(y_lead)) return T? RgXQX_rem(x, y, T): RgX_rem(x, y);
   (void)new_chunk(2);
   dx = degpol(x);
   x = RgX_recip_shallow(x)+2;
@@ -1393,7 +1393,7 @@ RgXQX_pseudodivrem(GEN x, GEN y, GEN T, GEN *ptr)
 
   if (!signe(y)) pari_err(gdiver);
   dy = degpol(y); y_lead = gel(y,dy+2);
-  if (gcmp1(y_lead)) return T? RgXQX_divrem(x,y, T, ptr): RgX_divrem(x,y, ptr);
+  if (gequal1(y_lead)) return T? RgXQX_divrem(x,y, T, ptr): RgX_divrem(x,y, ptr);
   (void)new_chunk(2);
   dx = degpol(x);
   x = RgX_recip_shallow(x)+2;
@@ -1589,6 +1589,6 @@ RgXQ_norm(GEN x, GEN T)
 
   av = avma; y = resultant(T, x);
   L = leading_term(T);
-  if (gcmp1(L) || gcmp0(x)) return y;
+  if (gequal1(L) || gcmp0(x)) return y;
   return gerepileupto(av, gdiv(y, gpowgs(L, degpol(x))));
 }

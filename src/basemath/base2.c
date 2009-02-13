@@ -1499,7 +1499,7 @@ loop(decomp_t *S, long nv, long Ea, long Fa)
       GEN h = powiu(S->p, eq);
       gamm = RgX_Rg_div(beta, h);
       chig = RgX_Rg_div(RgX_unscale(chib, h), powiu(h, N));
-      chig = gcmp1(Q_denom(chig))? FpX_red(chig, S->pmf): NULL;
+      chig = gequal1(Q_denom(chig))? FpX_red(chig, S->pmf): NULL;
     }
 
     if (!chig)
@@ -1783,7 +1783,7 @@ Fp_basis(GEN nf, GEN pr)
   l = lg(x);
   y = cgetg(l, t_MAT);
   for (i=j=1; i<l; i++)
-    if (gcmp1(gcoeff(x,i,i))) y[j++] = x[i];
+    if (gequal1(gcoeff(x,i,i))) y[j++] = x[i];
   setlg(y, j); return y;
 }
 /* Let Ip = prod_{ P | p } P be the p-radical. The list L contains the
@@ -2608,7 +2608,7 @@ rnfdedekind_i(GEN nf, GEN P, GEN pr, long vdisc, long only_maximal)
   if (vdisc < 0)
     pari_err(talker,"relative polynomial with non-integral coefficients");
   if (vdisc == 1) return NULL; /* pr-maximal */
-  if (!only_maximal && !gcmp1(leading_term(P)))
+  if (!only_maximal && !gequal1(leading_term(P)))
     pari_err(impl, "the full Dedekind criterion in the non-monic case");
   /* either monic OR only_maximal = 1 */
   m = degpol(P);
@@ -2981,7 +2981,7 @@ rnfallbase(GEN nf, GEN *ppol, GEN *pD, GEN *pd, GEN *pf)
 
   nf = checknf(nf); nfT = nf_get_pol(nf);
   pol = rnf_fix_pol(nfT,pol,0);
-  if (!gcmp1(leading_term(pol)))
+  if (!gequal1(leading_term(pol)))
     pari_err(impl,"non-monic relative polynomials");
 
   N = degpol(nfT);

@@ -515,7 +515,7 @@ nf_Mignotte_bound(GEN nf, GEN polbase)
   long prec, i, j, d = degpol(polbase), n = nf_get_degree(nf), r1 = nf_get_r1(nf);
 
   binlS = bin = vecbinome(d-1);
-  if (!gcmp1(lS)) binlS = gmul(lS, bin);
+  if (!gequal1(lS)) binlS = gmul(lS, bin);
 
   N2 = cgetg(n+1, t_VEC);
   prec = gprecision(G);
@@ -1518,7 +1518,7 @@ nf_pick_prime(long ct, GEN nf, GEN polbase, long fl,
 
   if (DEBUGLEVEL>3) TIMERstart(&ti_pr);
   *lt  = leading_term(polbase); /* t_INT */
-  if (gcmp1(*lt)) *lt = NULL;
+  if (gequal1(*lt)) *lt = NULL;
   *pr = NULL;
   *Fa = NULL;
   *Tp = NULL;
@@ -2012,7 +2012,7 @@ is_primitive_root(GEN nf, GEN fa, GEN x, long w)
     exp[2] = w / p; y = nfpow(nf,x,exp);
     if (nf_pm1(y) > 0) /* y = 1 */
     {
-      if (p!=2 || !gcmp1(gcoeff(fa,i,2))) return NULL;
+      if (p!=2 || !gequal1(gcoeff(fa,i,2))) return NULL;
       x = gneg_i(x);
     }
   }

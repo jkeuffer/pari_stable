@@ -793,7 +793,7 @@ idealaddmultoone(GEN nf, GEN list)
     gel(L,i) = I;
   }
   H = ZM_hnfperm(shallowconcat1(L), &U, &perm);
-  if (lg(H) == 1 || !gcmp1(gcoeff(H,1,1)))
+  if (lg(H) == 1 || !gequal1(gcoeff(H,1,1)))
     pari_err(talker,"ideals don't sum to Z_K in idealaddmultoone");
   for (i=1; i<=N; i++)
     if (perm[i] == 1) break;
@@ -1938,7 +1938,7 @@ nf_coprime_part(GEN nf, GEN x, GEN listpr)
   x = scalarmat(x, N);
   for (;;)
   {
-    if (gcmp1(gcoeff(f,1,1))) break;
+    if (gequal1(gcoeff(f,1,1))) break;
     x = idealdivexact(nf, x, f);
     f = ZM_hnfmodid(shallowconcat(f,x), gcoeff(x,1,1)); /* gcd(f,x) */
   }
@@ -2024,7 +2024,7 @@ unif_mod_fZ(GEN pr, GEN F)
   {
     GEN u, v, q, a = diviiexact(F,p);
     q = (pr_get_e(pr) == 1)? sqri(p): p;
-    if (!gcmp1(bezout(q, a, &u,&v))) pari_err(bugparier,"unif_mod_fZ");
+    if (!gequal1(bezout(q, a, &u,&v))) pari_err(bugparier,"unif_mod_fZ");
     u = mulii(u,q);
     v = mulii(v,a);
     t = ZC_Z_mul(t, v);

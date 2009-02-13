@@ -285,7 +285,7 @@ gacos(GEN x, long prec)
 	p1 = gsubsg(1,gsqr(y));
 	if (gcmp0(p1)) return zeroser(varn(y), valp(p1)>>1);
 	p1 = integ(gdiv(gneg(derivser(y)), gsqrt(p1,prec)), varn(y));
-	if (gcmp1(gel(y,2)) && !valp(y)) /*y(t) = 1+O(t)*/
+	if (gequal1(gel(y,2)) && !valp(y)) /*y(t) = 1+O(t)*/
 	  return gerepileupto(av, p1);
       }
       else p1 = y;
@@ -664,7 +664,7 @@ gach(GEN x, long prec)
 	p1 = PiI2n(-1, prec); /* I Pi/2 */
       else
       {
-	p1 = gel(y,2); if (gcmp1(p1)) return gerepileupto(av,a);
+	p1 = gel(y,2); if (gequal1(p1)) return gerepileupto(av,a);
 	p1 = gach(p1, prec);
       }
       return gerepileupto(av, gadd(p1,a));

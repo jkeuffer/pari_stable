@@ -404,7 +404,7 @@ Zp_issquare(GEN a, GEN p)
   long v;
   GEN ap;
 
-  if (!signe(a) || gcmp1(a)) return 1;
+  if (!signe(a) || gequal1(a)) return 1;
   v = Z_pvalrem(a, p, &ap);
   if (v&1) return 0;
   return equaliu(p, 2)? umodiu(ap, 8) == 1
@@ -499,7 +499,7 @@ polissquareall(GEN x, GEN *pt)
     y = gtrunc(gsqrt(RgX_to_ser(x,2+l),0));
     if (!RgX_equal(gsqr(y), x)) { avma = av; return 0; }
     if (!pt) { avma = av; return 1; }
-    if (!gcmp1(a))
+    if (!gequal1(a))
     {
       if (!b) b = gsqrt(a,DEFAULTPREC);
       y = gmul(b, y);
@@ -735,7 +735,7 @@ polispower(GEN x, GEN K, GEN *pt)
   else y = pol_1(varn(x));
   if (pt)
   {
-    if (!gcmp1(a))
+    if (!gequal1(a))
     {
       if (!b) b = gsqrtn(a, K, NULL, DEFAULTPREC);
       y = gmul(b,y);
@@ -1498,7 +1498,7 @@ Fp_sqrt(GEN a, GEN p)
       av1 = avma;
       y = m = Fp_pow(utoipos((ulong)k),q,p);
       for (i=1; i<e; i++)
-	if (gcmp1(m = sqrmod(m,p))) break;
+	if (gequal1(m = sqrmod(m,p))) break;
       if (i == e) break; /* success */
       avma = av1;
     }
@@ -1962,7 +1962,7 @@ static GEN
 _Fp_rand(void *E) { return addis(randomi(subis((GEN)E,1)),1); }
 
 const static struct bb_group Fp_star={_Fp_mul,_Fp_pow,_Fp_rand,mod2BIL,
-                                      cmpii,gcmp1};
+                                      cmpii,gequal1};
 
 /*********************************************************************/
 /**                                                                 **/
@@ -2036,7 +2036,7 @@ znorder(GEN x, GEN o)
   if (typ(x) != t_INTMOD)
     pari_err(talker,"not an element of (Z/nZ)* in order");
   b = gel(x,1); a = gel(x,2);
-  if (!gcmp1(gcdii(a,b)))
+  if (!gequal1(gcdii(a,b)))
     pari_err(talker,"not an element of (Z/nZ)* in order");
   if (!o)
   {
@@ -2350,7 +2350,7 @@ Qsfcont(GEN a, GEN b, GEN y, ulong k)
     {
       GEN q = gel(y,i);
       gel(z,i) = q;
-      c = b; if (!gcmp1(q)) c = mulii(q, b);
+      c = b; if (!gequal1(q)) c = mulii(q, b);
       c = subii(a, c);
       if (signe(c) < 0)
       { /* partial quotient too large */
@@ -2383,7 +2383,7 @@ Qsfcont(GEN a, GEN b, GEN y, ulong k)
     }
   }
   i--;
-  if (i > 1 && gcmp1(gel(z,i)))
+  if (i > 1 && gequal1(gel(z,i)))
   {
     cgiv(gel(z,i)); --i;
     gel(z,i) = addsi(1, gel(z,i)); /* unclean: leave old z[i] on stack */
@@ -2473,7 +2473,7 @@ sfcont2(GEN b, GEN x, long k)
   }
   else if (tx == t_SER) x = ser2rfrac_i(x);
 
-  if (!gcmp1(gel(b,1))) x = gmul(gel(b,1),x);
+  if (!gequal1(gel(b,1))) x = gmul(gel(b,1),x);
   for (i = 1;;)
   {
     if (tx == t_REAL)
@@ -2919,7 +2919,7 @@ end_classno(GEN h, GEN hin, GEN forms, long lform)
       long c;
       p1 = fh;
       for (c=1; ; c++, p1 = gmul(p1,fh))
-	if (gcmp1(gel(p1,1))) break;
+	if (gequal1(gel(p1,1))) break;
       q = mulsi(-com, find_order(fh, utoipos((ulong)c)));
     }
     q = gerepileuptoint(av, q);

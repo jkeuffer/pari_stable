@@ -244,7 +244,7 @@ do_padic_agm(GEN *ptx, GEN a1, GEN b1, GEN p)
     d = gsub(a1,b1);
     if (gcmp0(d)) break;
     p1 = padic_sqrt(gdiv(gadd(x,d),x));
-    if (! gcmp1(modii(gel(p1,4),p))) p1 = gneg_i(p1);
+    if (! gequal1(modii(gel(p1,4),p))) p1 = gneg_i(p1);
     x = gmul(x, gsqr(gmul2n(gaddsg(1,p1),-1)));
   }
   *ptx = x; return ginv(gmul2n(a1,2));
@@ -568,7 +568,7 @@ cumulev(GEN *vtotal, GEN u, GEN r, GEN s, GEN t)
   R = gel(v,2);
   S = gel(v,3);
   T = gel(v,4);
-  if (gcmp1(U))
+  if (gequal1(U))
   {
     gel(v,1) = u;
     gel(v,2) = addii(R, r);
@@ -1564,7 +1564,7 @@ weipell0(GEN e, long prec, long PREC)
 static int
 is_simple_var(GEN x)
 {
-  return (degpol(x) == 1 && gcmp0(gel(x,2)) && gcmp1(gel(x,3)));
+  return (degpol(x) == 1 && gcmp0(gel(x,2)) && gequal1(gel(x,3)));
 }
 
 GEN
@@ -2020,7 +2020,7 @@ ellminimalmodel(GEN E, GEN *ptv)
   for (k = 1; k < l; k++)
   {
     GEN w = localred(e, gel(P,k), 1);
-    if (!gcmp1(gel(w,1)))
+    if (!gequal1(gel(w,1)))
       cumule(&v, &e, gel(w,1), gel(w,2), gel(w,3), gel(w,4));
   }
   standard_model(e, &v);
@@ -2063,7 +2063,7 @@ ellglobalred(GEN E)
     GEN p = gel(P,k), q = localred(e, p, 0), w = gel(q,3);
     N = mulii(N, powii(p, gel(q,1)));
     c = mulii(c, gel(q,4));
-    if (!gcmp1(gel(w,1)))
+    if (!gequal1(gel(w,1)))
       cumule(&v, &e, gel(w,1), gel(w,2), gel(w,3), gel(w,4));
   }
   standard_model(e, &v);
@@ -2364,7 +2364,7 @@ ellrootno(GEN e, GEN p)
   GEN N;
   checksmallell(e);
   e = ell_to_small_red(e, &N);
-  if (!p || gcmp1(p))
+  if (!p || gequal1(p))
     s = ellrootno_global(e, N);
   else
   {
@@ -3238,7 +3238,7 @@ akell(GEN e, GEN n)
   checksmallell(e);
   if (typ(n) != t_INT) pari_err(typeer,"akell");
   if (signe(n)<= 0) return gen_0;
-  if (gcmp1(n)) return gen_1;
+  if (gequal1(n)) return gen_1;
   c6= ell_get_c6(e);
   D = ell_get_disc(e);
   if (typ(D) != t_INT) pari_err(talker,"not an integral model in akell");
@@ -3295,7 +3295,7 @@ elllseries(GEN e, GEN s, GEN A, long prec)
     if (gcmpgs(A,1) < 0) A = ginv(A);
   }
   if (isint(s, &s) && signe(s) <= 0) { avma = av; return gen_0; }
-  flun = gcmp1(A) && gcmp1(s);
+  flun = gequal1(A) && gequal1(s);
   checksmallell(e);
   e = ell_to_small_red(e, &N);
   eps = ellrootno_global(e, N);

@@ -450,7 +450,7 @@ get_bezout(GEN pol, GEN fk, GEN p)
     d = FpX_extgcd(A,B,p, &u, &v);
     if (degpol(d) > 0) pari_err(talker, "relatively prime polynomials expected");
     d = constant_term(d);
-    if (!gcmp1(d)) v = FpX_Fp_mul(v, Fp_inv(d, p), p);
+    if (!gequal1(d)) v = FpX_Fp_mul(v, Fp_inv(d, p), p);
     gel(U,i) = FpX_mul(B,v, p);
   }
   return U;

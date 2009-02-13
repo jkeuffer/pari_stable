@@ -1737,7 +1737,7 @@ zetap(GEN s)
 GEN
 gzeta(GEN x, long prec)
 {
-  if (gcmp1(x)) pari_err(talker, "argument equal to one in zeta");
+  if (gequal1(x)) pari_err(talker, "argument equal to one in zeta");
   switch(typ(x))
   {
     case t_INT:
@@ -1787,7 +1787,7 @@ cxpolylog(long m, GEN x, long prec)
   GEN z, h, q, s;
   int real;
 
-  if (gcmp1(x)) return szeta(m,prec);
+  if (gequal1(x)) return szeta(m,prec);
   /* x real <= 1 ==> Li_m(x) real */
   real = (typ(x) == t_REAL && (expo(x) < 0 || signe(x) <= 0));
 
@@ -1929,7 +1929,7 @@ polylogD(long m, GEN x, long flag, long prec)
 
   if (gcmp0(x)) return gcopy(x);
   m2 = m&1;
-  if (gcmp1(x) && m>=2) return m2? szeta(m,prec): gen_0;
+  if (gequal1(x) && m>=2) return m2? szeta(m,prec): gen_0;
   av = avma; l = precision(x);
   if (!l) { l = prec; x = gtofp(x,l); }
   p1 = logabs(x);
@@ -1964,7 +1964,7 @@ polylogP(long m, GEN x, long prec)
 
   if (gcmp0(x)) return gcopy(x);
   m2 = m&1;
-  if (gcmp1(x) && m>=2) return m2? szeta(m,prec): gen_0;
+  if (gequal1(x) && m>=2) return m2? szeta(m,prec): gen_0;
   av = avma; l = precision(x);
   if (!l) { l = prec; x = gtofp(x,l); }
   mpbern(m>>1, l);

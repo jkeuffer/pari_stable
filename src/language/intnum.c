@@ -1144,7 +1144,7 @@ intnuminitgen(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, long m,
   h = bit_accuracy(precl)/2;
   eps = real2n(-h, newprec);
 
-  if (not_osc(flag) || !gcmp1(eval(gen_0, E)))
+  if (not_osc(flag) || !gequal1(eval(gen_0, E)))
   {
     ab = real_0(precl);
     tmpxw = ffprime(E, eval, ab, real_0(newprec), eps, h, precl);

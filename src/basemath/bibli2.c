@@ -693,11 +693,11 @@ dirmul(GEN x, GEN y)
   {
     GEN c = gel(x,j);
     if (gcmp0(c)) continue;
-    if (gcmp1(c))
+    if (gequal1(c))
       for (k=dy,i=j*dy; i<lz; i+=j,k++) gel(z,i) = gadd(gel(z,i),gel(y,k));
     else
     {
-      if (gcmp_1(c))
+      if (gequalm1(c))
 	for (k=dy,i=j*dy; i<lz; i+=j,k++) gel(z,i) = gsub(gel(z,i),gel(y,k));
       else
 	for (k=dy,i=j*dy; i<lz; i+=j,k++) gel(z,i) = gadd(gel(z,i),gmul(c,gel(y,k)));
@@ -723,17 +723,17 @@ dirdiv(GEN x, GEN y)
   dy = dirval(y); ly = lg(y);
   if (dy != 1 || ly == 1) pari_err(talker,"not an invertible dirseries in dirdiv");
   lz = minss(lx,ly*dx); p1 = gel(y,1);
-  if (!gcmp1(p1)) { y = gdiv(y,p1); x = gdiv(x,p1); } else x = leafcopy(x);
+  if (!gequal1(p1)) { y = gdiv(y,p1); x = gdiv(x,p1); } else x = leafcopy(x);
   z = zerovec(lz-1);
   for (j=dx; j<lz; j++)
   {
     p1=gel(x,j); gel(z,j) = p1;
     if (gcmp0(p1)) continue;
-    if (gcmp1(p1))
+    if (gequal1(p1))
       for (i=j+j; i<lz; i+=j) gel(x,i) = gsub(gel(x,i),gel(y,i/j));
     else
     {
-      if (gcmp_1(p1))
+      if (gequalm1(p1))
 	for (i=j+j; i<lz; i+=j) gel(x,i) = gadd(gel(x,i),gel(y,i/j));
       else
 	for (i=j+j; i<lz; i+=j) gel(x,i) = gsub(gel(x,i),gmul(p1,gel(y,i/j)));

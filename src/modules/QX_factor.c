@@ -29,7 +29,7 @@ polidivis(GEN x, GEN y, GEN bound)
   z=cgetg(dz+3,t_POL); z[1] = x[1];
   x += 2; y += 2; z += 2;
   y_lead = gel(y,dy);
-  if (gcmp1(y_lead)) y_lead = NULL;
+  if (gequal1(y_lead)) y_lead = NULL;
 
   p1 = gel(x,dx);
   gel(z,dz) = y_lead? diviiexact(p1,y_lead): icopy(p1);
@@ -853,7 +853,7 @@ DDF(GEN a, int fl)
   if (DEBUGLEVEL>2) { TIMERstart(&T); TIMERstart(&T2); }
   nmax = da+1;
   chosenp = 0;
-  lead = gel(a,da+2); if (gcmp1(lead)) lead = NULL;
+  lead = gel(a,da+2); if (gequal1(lead)) lead = NULL;
   av1 = avma;
   for (p = np = 0; np < MAXNP; avma = av1)
   {

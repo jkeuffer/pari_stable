@@ -1498,7 +1498,7 @@ nfbasic_init(GEN x, long flag, GEN fa, nfbasic_t *T)
     x = Q_primpart(x);
     RgX_check_ZX(x, "nfinit");
     if (!ZX_is_irred(x)) pari_err(redpoler, "nfinit");
-    if (flag & nf_RED || !gcmp1(gel(x,lg(x)-1)))
+    if (flag & nf_RED || !gequal1(gel(x,lg(x)-1)))
       x = ZX_primitive_to_monic(x, &(T->lead));
     nfmaxord(&S, x, flag, fa);
     if (DEBUGLEVEL) msgtimer("round4");
@@ -1829,7 +1829,7 @@ ordred(GEN x)
   GEN y;
 
   if (typ(x) != t_POL) pari_err(typeer,"ordred");
-  if (!gcmp1(leading_term(x))) pari_err(impl,"ordred");
+  if (!gequal1(leading_term(x))) pari_err(impl,"ordred");
   if (!signe(x)) return gcopy(x);
   y = mkvec2(x, matid(degpol(x)));
   return gerepileupto(av, Polred(y, 0, NULL));

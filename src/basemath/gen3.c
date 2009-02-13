@@ -1106,7 +1106,7 @@ gsubst_expr(GEN expr, GEN from, GEN to)
 GEN
 gsubstpol(GEN x, GEN T, GEN y)
 {
-  if (typ(T) == t_POL && RgX_is_monomial(T) && gcmp1(leading_term(T)))
+  if (typ(T) == t_POL && RgX_is_monomial(T) && gequal1(leading_term(T)))
   { /* T = t^d */
     long d = degpol(T), v = varn(T);
     pari_sp av = avma;
@@ -1446,7 +1446,7 @@ recip(GEN x)
     pari_err(talker,"valuation not equal to 1 in serreverse");
 
   a=gel(x,2);
-  if (gcmp1(a))
+  if (gequal1(a))
   {
     long i, j, k, mi;
     pari_sp lim=stack_lim(av, 2);
@@ -1559,7 +1559,7 @@ deriv(GEN x, long v)
 
       bp = deriv(b, v);
       d = RgX_gcd(bp, b);
-      if (gcmp1(d)) {
+      if (gequal1(d)) {
         d = gsub(gmul(b, deriv(a,v)), gmul(a, bp));
         if (isexactzero(d)) return gerepileupto((pari_sp)(y+3), d);
         gel(y,1) = gerepileupto(av, d);
@@ -1570,7 +1570,7 @@ deriv(GEN x, long v)
       a = gsub(gmul(b0, deriv(a,v)), gmul(a, bp));
       if (isexactzero(a)) return gerepileupto((pari_sp)(y+3), a);
       t = ggcd(a, d);
-      if (!gcmp1(t)) { a = gdivexact(a, t); d = gdivexact(d, t); }
+      if (!gequal1(t)) { a = gdivexact(a, t); d = gdivexact(d, t); }
       gel(y,1) = a;
       gel(y,2) = gmul(d, gsqr(b0));
       return gerepilecopy((pari_sp)(y+3), y);

@@ -800,7 +800,7 @@ getfu(GEN nf, GEN *ptA, long force, long *pte, long prec)
   *pte = -e;
   if (e >= 0) return not_given(force, fupb_PRECI);
   for (j=1; j<RU; j++)
-    if (!gcmp1(idealnorm(nf, gel(y,j)))) break;
+    if (!gequal1(idealnorm(nf, gel(y,j)))) break;
   if (j < RU) { *pte = 0; return not_given(force, fupb_PRECI); }
   A = RgM_mul(A,u);
 
@@ -1348,7 +1348,7 @@ red_mod_units(GEN col, GEN z, long prec)
   if (typ(x) != t_MAT) return NULL;
   x = gel(x,RU);
   if (signe(x[RU]) < 0) x = gneg_i(x);
-  if (!gcmp1(gel(x,RU))) pari_err(bugparier,"red_mod_units");
+  if (!gequal1(gel(x,RU))) pari_err(bugparier,"red_mod_units");
   setlg(x,RU); return x;
 }
 
@@ -1596,7 +1596,7 @@ static GEN
 add_principal_part(GEN nf, GEN u, GEN v, long flag)
 {
   if (flag & nf_GENMAT)
-    return (typ(u) == t_COL && RgV_isscalar(u) && gcmp1(gel(u,1)))? v: famat_mul(v,u);
+    return (typ(u) == t_COL && RgV_isscalar(u) && gequal1(gel(u,1)))? v: famat_mul(v,u);
   else
     return nfmul(nf, v, u);
 }
@@ -1780,7 +1780,7 @@ bnfisunit(GEN bnf,GEN x)
       gel(v,RU) = mkintmodu((s > 0)? 0: n>>1, n);
       return v;
     }
-    if (!gcmp1(Q_denom(x))) { avma = av; return cgetg(1,t_COL); }
+    if (!gequal1(Q_denom(x))) { avma = av; return cgetg(1,t_COL); }
   }
 
   R1 = nf_get_r1(nf); v = cgetg(RU+1,t_COL);
@@ -2275,7 +2275,7 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN L_jid, long *pjid, FACT *fact)
       }
     } while (ideal == P); /* If ex  = 0, try another */
     ideal = remove_content(ideal);
-    if (gcmp1(gcoeff(ideal,1,1))) continue;
+    if (gequal1(gcoeff(ideal,1,1))) continue;
 
     Nideal = ZM_det_triangular(ideal);
     if (DEBUGLEVEL>1) fprintferr("(%ld)", jid);
@@ -2665,7 +2665,7 @@ class_group_gen(GEN nf,GEN W,GEN C,GEN Vbase,long prec, GEN nf0,
   for (j=1; j<lo; j++)
   {
     gel(cyc,j) = gcoeff(D,j,j);
-    if (gcmp1(gel(cyc,j)))
+    if (gequal1(gel(cyc,j)))
     { /* strip useless components */
       lo = j; setlg(cyc,lo); setlg_col(Ur,lo);
       setlg(G,lo); setlg(Ga,lo); setlg(GD,lo); break;

@@ -826,7 +826,7 @@ _FpXQ_rand(void *data)
   return z;
 }
 
-static const struct bb_group FpXQ_star={_FpXQ_mul,_FpXQ_pow,_FpXQ_rand,_FpXQ_hash,cmp_RgX,gcmp1};
+static const struct bb_group FpXQ_star={_FpXQ_mul,_FpXQ_pow,_FpXQ_rand,_FpXQ_hash,cmp_RgX,gequal1};
 
 GEN
 FpXQ_order(GEN a, GEN ord, GEN T, GEN p)
@@ -911,7 +911,7 @@ FpXQ_norm(GEN x, GEN T, GEN p)
   pari_sp av = avma;
   GEN y = FpX_resultant(T, x, p);
   GEN L = leading_term(T);
-  if (gcmp1(L) || signe(x)==0) return y;
+  if (gequal1(L) || signe(x)==0) return y;
   return gerepileupto(av, Fp_div(y, Fp_pows(L, degpol(x), p), p));
 }
 

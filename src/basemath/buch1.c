@@ -88,7 +88,7 @@ get_pq(GEN D, GEN z, ulong *ptp, ulong *ptq)
     if (umodiu(z,ell) && kross(d,ell) > 0)
     {
       form = redimag(primeform_u(D,ell));
-      if (gcmp1(gel(form,1))) continue;
+      if (gequal1(gel(form,1))) continue;
       gel(wlf,l) = form;
       wp[l]  = ell; l++;
     }
@@ -600,7 +600,7 @@ treatspecialsigma(GEN bnr)
 
   p1 = gcoeff(f,1,1); /* integer > 0 */
   p2 = gcoeff(f,2,2);
-  if (gcmp1(p2)) { fl = 0; tryf = p1; }
+  if (gequal1(p2)) { fl = 0; tryf = p1; }
   else {
     if (Ds % 16 != 8 || !equaliu(Q_content(f),2)) return NULL;
     fl = 1; tryf = shifti(p1,-1);

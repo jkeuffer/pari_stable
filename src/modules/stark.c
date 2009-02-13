@@ -638,7 +638,7 @@ ArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
 
   /* find mu in idg such that idh=(mu) / idg is coprime with cond0 and
      mu >> 0 at cond1 */
-  if (!gcmp1(gcoeff(idg, 1, 1))) {
+  if (!gequal1(gcoeff(idg, 1, 1))) {
     GEN P = divcond(bnr);
     GEN f = famat_mul_shallow(idealfactor(nf, idg),
 			  mkmat2(P, zerocol(lg(P)-1)));
@@ -843,7 +843,7 @@ ComputeAChi(GEN dtcr, long *r, long flag, long prec)
 
     if (flag)
       B = gsubsg(1, gdiv(p1, pr_norm(pr)));
-    else if (gcmp1(p1))
+    else if (gequal1(p1))
     {
       B = glog(pr_norm(pr), prec);
       (*r)++;
@@ -1255,7 +1255,7 @@ an_AddMul(int **an,int **an2, long np, long n, long deg, GEN chi, int **reduc)
   CopyCoeff(an, an2, n/np, deg);
   for (q=np;;)
   {
-    if (gcmp1(chi2)) c = NULL; else { Polmod2Coeff(c2, chi2, deg); c = c2; }
+    if (gequal1(chi2)) c = NULL; else { Polmod2Coeff(c2, chi2, deg); c = c2; }
     for(k = 1, qk = q; qk <= n; k++, qk += q)
       AddMulCoeff(an[qk], c, an2[k], reduc, deg);
     if (! (q = next_pow(q,np, n)) ) break;
@@ -1704,7 +1704,7 @@ chk_reccoeff(void *data, GEN x)
   RC_data *d = (RC_data*)data;
   GEN v = gmul(d->U, x), z = gel(v,1);
 
-  if (!gcmp1(z)) return NULL;
+  if (!gequal1(z)) return NULL;
   *++v = evaltyp(t_COL) | evallg( lg(d->M) );
   if (TestOne(gmul(d->M, v), d)) return v;
   return NULL;
@@ -1855,7 +1855,7 @@ an_mul(int **an, long p, long q, long n, long deg, GEN chi, int **reduc)
   long c,i;
   int *T;
 
-  if (gcmp1(chi)) return;
+  if (gequal1(chi)) return;
   av = avma;
   T = (int*)new_chunk(deg); Polmod2Coeff(T,chi, deg);
   for (c = 1, i = q; i <= n; i += q, c++)
@@ -2290,7 +2290,7 @@ AllStark(GEN data,  GEN nf,  long flag,  long newprec)
   vChar = sortChars(dataCR);
 
   v = 1;
-  while (gcmp1(gel(cond1,v))) v++;
+  while (gequal1(gel(cond1,v))) v++;
 
   cl = lg(dataCR)-1;
   degs = GetDeg(dataCR);
@@ -2591,7 +2591,7 @@ bnrstark(GEN bnr, GEN subgrp, long prec)
   p1     = bnrconductor(bnr, subgrp, 2);
   bnr    = gel(p1,2); Mcyc = diagonal_shallow(bnr_get_cyc(bnr));
   subgrp = gel(p1,3);
-  if (gcmp1( ZM_det_triangular(subgrp) )) { avma = av; return pol_x(0); }
+  if (gequal1( ZM_det_triangular(subgrp) )) { avma = av; return pol_x(0); }
 
   /* check the class field */
   if (!gcmp0(gel(bnr_get_mod(bnr), 2)))

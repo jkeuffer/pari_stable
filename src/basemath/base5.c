@@ -624,7 +624,7 @@ findmin(GEN nf, GEN x, GEN muf)
   GEN cx, y, m, M = nf_get_M(nf);
 
   x = Q_primitive_part(x, &cx);
-  if (gcmp1(gcoeff(x,1,1))) y = M;
+  if (gequal1(gcoeff(x,1,1))) y = M;
   else
   {
     GEN G = nf_get_G(nf);

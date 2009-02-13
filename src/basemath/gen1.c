@@ -216,9 +216,9 @@ gred_rfrac_simple(GEN n, GEN d)
 
   cd = content(d);
   cn = (typ(n) == t_POL && varn(n) == varn(d))? content(n): n;
-  if (!gcmp1(cd)) {
+  if (!gequal1(cd)) {
     d = RgX_Rg_div(d,cd);
-    if (!gcmp1(cn))
+    if (!gequal1(cn))
     {
       if (gcmp0(cn)) {
 	n = (cn != n)? RgX_Rg_div(n,cd): gdiv(n, cd);
@@ -231,7 +231,7 @@ gred_rfrac_simple(GEN n, GEN d)
     else
       c = ginv(cd);
   } else {
-    if (!gcmp1(cn))
+    if (!gequal1(cn))
     {
       if (gcmp0(cn)) {
 	c = gen_1;
@@ -387,7 +387,7 @@ quad_polmod_norm(GEN x, GEN y)
   b = gel(y,3); v = gel(x,2);
   c = gel(y,2); av = avma;
   z = gmul(u, gsub(gmul(c,u), gmul(b,v)));
-  if (!gcmp1(a)) z = gdiv(z, a);
+  if (!gequal1(a)) z = gdiv(z, a);
   return gerepileupto(av, gadd(z, gsqr(v)));
 }
 
@@ -1275,7 +1275,7 @@ mul_scal(GEN y, GEN x, long ty)
     case t_SER: return mul_ser_scal(y, x);
     case t_RFRAC: return mul_rfrac_scal(gel(y,1),gel(y,2), x);
     case t_QFI: case t_QFR:
-      if (typ(x) == t_INT && gcmp1(x)) return gcopy(y); /* fall through */
+      if (typ(x) == t_INT && gequal1(x)) return gcopy(y); /* fall through */
   }
   pari_err(operf,"*",x,y);
   return NULL; /* not reached */
@@ -3274,7 +3274,7 @@ ginv(GEN x)
       n = simplify_shallow(n);
       if (typ(n) != t_POL || varn(n) != varn(d))
       {
-	if (gcmp1(n)) { avma = av; return gcopy(d); }
+	if (gequal1(n)) { avma = av; return gcopy(d); }
 	ltop = avma;
 	z = RgX_Rg_div(d,n);
       } else {

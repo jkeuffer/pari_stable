@@ -526,7 +526,7 @@ RgM_isidentity(GEN x)
     for (i=1; i<j; )
       if (!gcmp0(gel(c,i++))) return 0;
     /* i = j */
-      if (!gcmp1(gel(c,i++))) return 0;
+      if (!gequal1(gel(c,i++))) return 0;
     for (   ; i<lx; )
       if (!gcmp0(gel(c,i++))) return 0;
   }

@@ -2812,7 +2812,7 @@ det(GEN a)
   for (pprec=gen_1,i=1; i<nbco; i++,pprec=p)
   {
     GEN ci, ck, m, p1;
-    int diveuc = (gcmp1(pprec)==0);
+    int diveuc = (gequal1(pprec)==0);
 
     p = gcoeff(a,i,i);
     if (gcmp0(p))
@@ -2828,7 +2828,7 @@ det(GEN a)
       ck = gel(a,k); m = gel(ck,i);
       if (gcmp0(m))
       {
-	if (gcmp1(p))
+	if (gequal1(p))
 	{
 	  if (diveuc)
 	    gel(a,k) = mydiv(gel(a,k), pprec);

@@ -705,9 +705,9 @@ direuler(void *E, GEN (*eval)(GEN,void*), GEN ga, GEN gb, GEN c)
     tx = typ(polnum);
     if (is_scalar_t(tx))
     {
-      if (!gcmp1(polnum))
+      if (!gequal1(polnum))
       {
-	if (!gcmp_1(polnum)) pari_err(talker,"constant term != 1 in direuler");
+	if (!gequalm1(polnum)) pari_err(talker,"constant term != 1 in direuler");
 	polden = gneg(polden);
       }
     }
@@ -718,9 +718,9 @@ direuler(void *E, GEN (*eval)(GEN,void*), GEN ga, GEN gb, GEN c)
       lx = degpol(polnum);
       if (lx < 0) pari_err(talker,"constant term != 1 in direuler");
       c = gel(polnum,2);
-      if (!gcmp1(c))
+      if (!gequal1(c))
       {
-	if (!gcmp_1(c)) pari_err(talker,"constant term != 1 in direuler");
+	if (!gequalm1(c)) pari_err(talker,"constant term != 1 in direuler");
 	polnum = gneg(polnum);
 	polden = gneg(polden);
       }
@@ -739,13 +739,13 @@ direuler(void *E, GEN (*eval)(GEN,void*), GEN ga, GEN gb, GEN c)
     tx = typ(polden);
     if (is_scalar_t(tx))
     {
-      if (!gcmp1(polden)) pari_err(talker,"constant term != 1 in direuler");
+      if (!gequal1(polden)) pari_err(talker,"constant term != 1 in direuler");
     }
     else
     {
       if (tx != t_POL) pari_err(typeer,"direuler");
       c = gel(polden,2);
-      if (!gcmp1(c)) pari_err(talker,"constant term != 1 in direuler");
+      if (!gequal1(c)) pari_err(talker,"constant term != 1 in direuler");
       lx = degpol(polden);
       for (i=p; i<=n; i+=p)
       {

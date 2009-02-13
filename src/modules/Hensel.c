@@ -75,7 +75,7 @@ BuildTree(GEN link, GEN V, GEN W, GEN a, GEN T, GEN p)
       d = FpX_extgcd(gel(V,j), gel(V,j+1), p, &u, &v);
     if (degpol(d) > 0) pari_err(talker, "relatively prime polynomials expected");
     d = gel(d,2);
-    if (!gcmp1(d))
+    if (!gequal1(d))
     {
       if (typ(d)==t_POL)
       {

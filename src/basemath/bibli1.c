@@ -505,7 +505,7 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
   if (d == 0) { avma = av; return cgetg(1, t_VEC); }
   if (d < 0) pari_err(talker, "zero polynomial forbidden");
 
-  if (!gcmp1(gel(P,d+2)))
+  if (!gequal1(gel(P,d+2)))
   {
     gel(P,d+2) = bezout(gel(P,d+2), N, &z, &r);
     for (j = 0; j < d; j++) gel(P,j+2) = modii(mulii(gel(P,j+2), z), N);

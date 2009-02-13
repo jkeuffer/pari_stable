@@ -470,7 +470,7 @@ subgroup_engine(subgp_iter *T)
     if (T->boundtype == b_EXACT)
     {
       (void)Z_pvalrem(T->bound,p,&B);
-      if (!gcmp1(B)) { avma = av; return; }
+      if (!gequal1(B)) { avma = av; return; }
     }
   }
   else
@@ -480,7 +480,7 @@ subgroup_engine(subgp_iter *T)
     for (i=1; i<n; i++)
     {
       gel(cycI,i) = divis(gel(cycI,i), T->powlist[L[i]]);
-      if (gcmp1(gel(cycI,i))) break;
+      if (gequal1(gel(cycI,i))) break;
     }
     setlg(cycI, i); /* cyclic factors of I */
     if (T->boundtype == b_EXACT)

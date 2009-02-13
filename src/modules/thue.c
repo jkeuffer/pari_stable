@@ -190,7 +190,7 @@ inithue(GEN P, GEN bnf, long flag, long prec)
 
   if (!bnf)
   {
-    if (!gcmp1(leading_term(P))) pari_err(talker,"non-monic polynomial in thue");
+    if (!gequal1(leading_term(P))) pari_err(talker,"non-monic polynomial in thue");
     bnf = Buchall(P, nf_FORCE, DEFAULTPREC);
     if (flag) (void)bnfcertify(bnf);
     else

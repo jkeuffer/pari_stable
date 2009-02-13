@@ -763,7 +763,7 @@ ser_pow(GEN x, GEN n, long prec)
 
   if (varncmp(gvar(n), varn(x)) <= 0) return gexp(gmul(n, glog(x,prec)), prec);
   lead = gel(x,2);
-  if (gcmp1(lead))
+  if (gequal1(lead))
   {
     GEN X, Y, alp = gadd(n,gen_1); /* will be left on the stack */
     long lx, mi, i, j, d;
@@ -1154,7 +1154,7 @@ Qp_log(GEN x)
     y = gsqr(x); setvalp(y,0);
     y = palogaux(y);
   }
-  else if (gcmp1(modii(a, p)))
+  else if (gequal1(modii(a, p)))
   {
     y = gmul2n(palogaux(x), 1);
   }
@@ -2062,7 +2062,7 @@ glog(GEN x, long prec)
       av = avma; if (!(y = toser_i(x))) break;
       if (valp(y) || gcmp0(y)) pari_err(talker,"log is not meromorphic at 0");
       p1 = integ(gdiv(derivser(y), y), varn(y)); /* log(y)' = y'/y */
-      if (!gcmp1(gel(y,2))) p1 = gadd(p1, glog(gel(y,2),prec));
+      if (!gequal1(gel(y,2))) p1 = gadd(p1, glog(gel(y,2),prec));
       return gerepileupto(av, p1);
   }
   return transc(glog,x,prec);

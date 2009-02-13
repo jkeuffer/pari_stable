@@ -2171,7 +2171,7 @@ galoisconj4_main(GEN T, GEN den, long flag)
     RgX_check_ZX(T, "galoisinit");
     if (!ZX_is_squarefree(T))
       pari_err(talker, "Polynomial not squarefree in galoisinit");
-    if (!gcmp1(gel(T,n+2)))
+    if (!gequal1(gel(T,n+2)))
       pari_err(talker, "non-monic polynomial in galoisinit");
   }
   if (n == 1)

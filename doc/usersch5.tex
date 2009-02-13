@@ -4728,7 +4728,7 @@ applying \kbd{gtofp(gel(x,i), prec)} to all coefficients of $x$.
 @eprog
 
 The following routines check whether matrices or vectors have a special
-shape, using \kbd{gcmp1} and \kbd{gcmp0} to test components. (This makes a
+shape, using \kbd{gequal1} and \kbd{gcmp0} to test components. (This makes a
 difference when components are inexact.)
 
 \fun{int}{RgV_isscalar}{GEN x} return 1 if all the entries of $x$ are $0$
@@ -5852,7 +5852,7 @@ equal to~0.
 Assuming that \kbd{x} is a \typ{INT}, return 1 (true) if \kbd{x} is equal to
 $1$, and return 0~(false) otherwise.
 
-\fun{int}{equali_1}{GEN n}
+\fun{int}{equalim1}{GEN n}
 Assuming that \kbd{x} is a \typ{INT}, return 1 (true) if \kbd{x} is equal to
 $-1$, and return 0~(false) otherwise.
 
@@ -5863,10 +5863,10 @@ $1$, and return 0~(false) otherwise.
 \fun{int}{gcmp0}{GEN x} returns 1 (true) if \kbd{x} is equal to~0, 0~(false)
 otherwise.
 
-\fun{int}{gcmp1}{GEN x} returns 1 (true) if \kbd{x} is equal to~1, 0~(false)
+\fun{int}{gequal1}{GEN x} returns 1 (true) if \kbd{x} is equal to~1, 0~(false)
 otherwise.
 
-\fun{int}{gcmp_1}{GEN x} returns 1 (true) if \kbd{x} is equal to~$-1$,
+\fun{int}{gequalm1}{GEN x} returns 1 (true) if \kbd{x} is equal to~$-1$,
 0~(false) otherwise.
 
 

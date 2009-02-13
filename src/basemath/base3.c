@@ -1438,7 +1438,7 @@ nfarchstar(GEN nf, GEN x, GEN archp)
   {
     GEN xZ = gcoeff(x,1,1), gZ;
     pari_sp av = avma;
-    if (gcmp1(xZ)) x = NULL; /* x = O_K */
+    if (gequal1(xZ)) x = NULL; /* x = O_K */
     gZ = x? subsi(1, xZ): gen_m1; /* gZ << 0, gZ = 1 mod x */
     if (nba == 1)
     {
@@ -1911,7 +1911,7 @@ join_bid(GEN nf, GEN bid1, GEN bid2)
 
   f1 = gel(bid1,1); I1 = gel(f1,1);
   f2 = gel(bid2,1); I2 = gel(f2,1);
-  if (gcmp1(gcoeff(I1,1,1))) return bid2; /* frequent trivial case */
+  if (gequal1(gcoeff(I1,1,1))) return bid2; /* frequent trivial case */
   G1 = gel(bid1,2); G2 = gel(bid2,2);
   fa1= gel(bid1,3); fa2= gel(bid2,3); x = idealmul(nf, I1,I2);
   fa = famat_mul_shallow(fa1, fa2);

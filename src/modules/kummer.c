@@ -215,7 +215,7 @@ reducebeta(GEN bnfz, GEN be, GEN ell)
   {
     ru = lg(u);
     for (j=1; j < ru; j++)
-      if (gcmp1(gcoeff(u,ru-1,j))) break;
+      if (gequal1(gcoeff(u,ru-1,j))) break;
     if (j < ru)
     {
       u = gel(u,j); /* coords on (fu^ell, be) of a small generator */
