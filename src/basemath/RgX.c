@@ -1114,7 +1114,7 @@ RgX_divrem(GEN x, GEN y, GEN *pr)
   }
 
   /* x,y in R[X], y non constant */
-  dz = dx-dy; av = avma;
+  av = avma;
   switch(typ(y_lead))
   {
     case t_INTMOD:
@@ -1130,15 +1130,12 @@ RgX_divrem(GEN x, GEN y, GEN *pr)
     p2 = gel(y,i);
     gel(p1,i) = isrationalzero(p2)? NULL: p2;
   }
-  avy = avma;
-  z = cgetg(dz+3,t_POL); z[1] = x[1];
-  x += 2; z += 2;
 
   if (y_lead == NULL)
-    p2 = gcopy(gel(x,dx));
+    p2 = gel(x,dx+2);
   else {
     for(;;) {
-      p2 = f(gel(x,dx),y_lead);
+      p2 = f(gel(x,dx+2),y_lead);
       if (!isexactzero(p2) || (--dx < 0)) break;
     }
     if (dx < 0) /* x was in fact zero */
@@ -1153,8 +1150,13 @@ RgX_divrem(GEN x, GEN y, GEN *pr)
       return x;
     }
   }
+  avy = avma;
+  dz = dx-dy;
+  z = cgetg(dz+3,t_POL); z[1] = x[1];
+  x += 2;
+  z += 2;
   y = p1+2;
-  gel(z,dz) = p2;
+  gel(z,dz) = gcopy(p2);
 
   for (i=dx-1; i>=dy; i--)
   {
