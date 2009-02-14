@@ -91,6 +91,7 @@ allocatemem0(GEN z)
     newsize = itou(z);
     if (signe(z) < 0) pari_err(talker,"negative size in allocatemem");
   }
+  compiler_reset();
   closure_reset();
   (void)allocatemoremem(newsize);
   global_err_data = NULL;
