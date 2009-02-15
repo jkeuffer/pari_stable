@@ -2779,6 +2779,8 @@ INLINE int    RgX_is_monomial(GEN x);
 INLINE int    RgX_is_rational(GEN x);
 INLINE int    RgX_is_ZX(GEN x);
 INLINE int    RgX_isscalar(GEN x);
+INLINE GEN    RgX_shift_inplace(GEN x, long v);
+INLINE void   RgX_shift_inplace_init(long v);
 INLINE GEN    RgXQ_mul(GEN x,GEN y,GEN T);
 INLINE GEN    RgXQ_sqr(GEN x,GEN T);
 INLINE GEN    RgXQX_div(GEN x, GEN y, GEN T);

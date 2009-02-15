@@ -885,25 +885,6 @@ addmulXncopy(GEN x, GEN y, long d)
   *--zd = evaltyp(t_POL) | evallg(lz); return zd;
 }
 
-/* shift polynomial in place. assume v free cells have been left before x */
-static GEN
-shiftpol_ip(GEN x, long v)
-{
-  long i, lx;
-  GEN y, z;
-  if (!v) return x;
-  lx = lg(x);
-  if (lx == 2) return x;
-  y = x + v;
-  z = x + lx;
-  /* stackdummy from normalizepol: move it up */
-  if (lg(z) != v) x[lx + v] = z[0];
-  for (i = lx-1; i >= 2; i--) y[i] = x[i];
-  for (i = v+1;  i >= 2; i--) gel(x,i) = gen_0;
-  /* leave x[1] alone: it is correct */
-  x[0] = evaltyp(t_POL) | evallg(lx+v); return x;
-}
-
 /* fast product (Karatsuba) of polynomials a,b. These are not real GENs, a+2,
  * b+2 were sent instead. na, nb = number of terms of a, b.
  * Only c, c0, c1, c2 are genuine GEN.
@@ -920,9 +901,9 @@ RgX_mulspec(GEN a, GEN b, long na, long nb)
   if (na < nb) swapspec(a,b, na,nb);
   if (!nb) return zeropol(0);
 
-  if (v) (void)cgetg(v,t_VECSMALL); /* v gerepile-safe cells for shiftpol_ip */
+  RgX_shift_inplace_init(v);
   if (nb < RgX_MUL_LIMIT)
-    return shiftpol_ip(mulpol(a,b,na,nb), v);
+    return RgX_shift_inplace(mulpol(a,b,na,nb), v);
   i = (na>>1); n0 = na-i; na = i;
   av = avma; a0 = a+n0; n0a = n0;
   while (n0a && isrationalzero(gel(a,n0a-1))) n0a--;
@@ -950,7 +931,7 @@ RgX_mulspec(GEN a, GEN b, long na, long nb)
     c0 = RgX_mulspec(a0,b,na,nb);
   }
   c0 = addmulXncopy(c0,c,n0);
-  return shiftpol_ip(gerepileupto(av,c0), v);
+  return RgX_shift_inplace(gerepileupto(av,c0), v);
 }
 
 static GEN
@@ -999,8 +980,8 @@ RgX_sqrspec(GEN a, long na)
   pari_sp av;
 
   while (na && isrationalzero(gel(a,0))) { a++; na--; v += 2; }
-  if (v) (void)cgetg(v, t_VECSMALL);
-  if (na<RgX_SQR_LIMIT) return shiftpol_ip(sqrpol(a,na), v);
+  RgX_shift_inplace_init(v);
+  if (na<RgX_SQR_LIMIT) return RgX_shift_inplace(sqrpol(a,na), v);
   i = (na>>1); n0 = na-i; na = i;
   av = avma; a0 = a+n0; n0a = n0;
   while (n0a && isrationalzero(gel(a,n0a-1))) n0a--;
@@ -1010,7 +991,7 @@ RgX_sqrspec(GEN a, long na)
   c1 = gmul2n(RgX_mulspec(a0,a, na,n0a), 1);
   c0 = addmulXn(c0,c1, n0);
   c0 = addmulXncopy(c0,c,n0);
-  return shiftpol_ip(gerepileupto(av,c0), v);
+  return RgX_shift_inplace(gerepileupto(av,c0), v);
 }
 
 GEN

@@ -1430,6 +1430,29 @@ gval(GEN x, long v) {
   avma = av; return n;
 }
 
+INLINE void
+RgX_shift_inplace_init(long v)
+{ if (v) (void)cgetg(v, t_VECSMALL); }
+/* shift polynomial in place. assume v free cells have been left before x */
+INLINE GEN
+RgX_shift_inplace(GEN x, long v)
+{
+  long i, lx;
+  GEN y, z;
+  if (!v) return x;
+  lx = lg(x);
+  if (lx == 2) return x;
+  y = x + v;
+  z = x + lx;
+  /* stackdummy from normalizepol: move it up */
+  if (lg(z) != v) x[lx + v] = z[0];
+  for (i = lx-1; i >= 2; i--) y[i] = x[i];
+  for (i = v+1;  i >= 2; i--) gel(x,i) = gen_0;
+  /* leave x[1] alone: it is correct */
+  x[0] = evaltyp(t_POL) | evallg(lx+v); return x;
+}
+
+
 /* LINEAR ALGEBRA */
 INLINE GEN
 zv_to_ZV(GEN x) { return vecsmall_to_vec(x); }
