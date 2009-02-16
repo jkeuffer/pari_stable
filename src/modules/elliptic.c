@@ -2494,13 +2494,16 @@ typedef struct {
 
 static GEN
 mul_sell(void *d, GEN x, GEN y)
-{
+{ /* convert NULL <-> sentinel gen_0 since leftright_pow can't handle them */
   sellp *S = (sellp*)d;
-  return addsell(S->e, x, y, S->p);
+  if (typ(x) == t_INT) return y;
+  if (typ(y) == t_INT) return x;
+  x = addsell(S->e, x, y, S->p);
+  if (!x) x = gen_0;
+  return x;
 }
 static GEN
 sqr_sell(void *d, GEN x) { return mul_sell(d,x,x); }
-
 static GEN
 powsell(GEN e, GEN z, GEN n, GEN p)
 {
@@ -2512,7 +2515,9 @@ powsell(GEN e, GEN z, GEN n, GEN p)
   if (is_pm1(n)) return z;
   S.e = e;
   S.p = p;
-  return leftright_pow(z, n, &S, &sqr_sell, &mul_sell);
+  z = leftright_pow(z, n, &S, &sqr_sell, &mul_sell);
+  if (typ(z) == t_INT) z = NULL;
+  return z;
 }
 
 /* assume H.f = 0, return exact order of f */
