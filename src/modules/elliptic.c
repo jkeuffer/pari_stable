@@ -2447,8 +2447,8 @@ addsell(GEN e, GEN z1, GEN z2, GEN p)
   p1 = mulii(p1, Fp_inv(p2, p));
   p1 = remii(p1, p);
   x = subii(sqri(p1), addii(x1,x2));
-  y = subii(mulii(p1,subii(x1,x)), y1);
   x = modii(x,p);
+  y = subii(mulii(p1,subii(x1,x)), y1);
   y = modii(y,p); avma = av;
   gel(z,1) = icopy(x);
   gel(z,2) = icopy(y); return z;
@@ -2471,8 +2471,10 @@ addsell_part2(GEN e, GEN z1, GEN z2, GEN p, GEN p2inv)
 
   p1 = mulii(p1, p2inv);
   p1 = remii(p1, p);
-  x = subii(sqri(p1), addii(x1,x2)); x = modii(x,p);
-  y = negi(addii(y1, mulii(p1,subii(x,x1)))); y = modii(y,p);
+  x = subii(sqri(p1), addii(x1,x2));
+  x = modii(x,p);
+  y = subii(mulii(p1,subii(x1,x)), y1);
+  y = modii(y,p);
   affii(x, x1);
   affii(y, y1);
 }
