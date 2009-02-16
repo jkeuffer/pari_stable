@@ -2447,7 +2447,7 @@ addsell(GEN e, GEN z1, GEN z2, GEN p)
   p1 = mulii(p1, Fp_inv(p2, p));
   p1 = remii(p1, p);
   x = subii(sqri(p1), addii(x1,x2));
-  y = negi(addii(y1, mulii(p1,subii(x,x1))));
+  y = subii(mulii(p1,subii(x1,x)), y1);
   x = modii(x,p);
   y = modii(y,p); avma = av;
   gel(z,1) = icopy(x);
@@ -2497,11 +2497,7 @@ mul_sell(void *d, GEN x, GEN y)
   return addsell(S->e, x, y, S->p);
 }
 static GEN
-sqr_sell(void *d, GEN x)
-{
-  sellp *S = (sellp*)d;
-  return addsell(S->e, x, x, S->p);
-}
+sqr_sell(void *d, GEN x) { return mul_sell(d,x,x); }
 
 static GEN
 powsell(GEN e, GEN z, GEN n, GEN p)
