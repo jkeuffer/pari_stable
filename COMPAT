@@ -115,6 +115,8 @@ This file lists the incompatible changes between Version 2.x and older versions
   - factor(t_INT/t_FRAC, 1) was the same as factor(t_INT/t_FRAC, 0). Now
     abide by the input value and leave (..., 0) as the single special case 
     (shortcut for "the largest precomputed prime")
+  - listsort(L) no longer returns the list L: it now returns nothing.
+    (No point in sorting in place if we must immediately copy the result.)
 
 * Specific to the PARI library:
 ===============================

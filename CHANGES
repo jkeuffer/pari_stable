@@ -160,6 +160,8 @@ BA117- Fix detection for ppc64 running in 32bit mode.
   129- possible stack corruption in polylog() + missing imaginary part.
   130- incorrect final simplification in idealtwoelt(nf, x, y).
        Eg: idealtwoelt(nfinit(x^2+23), 3, 6) -> [0, 0]~
+BA131- listsort() could return a pointer referencing freed memory: make it
+       return void
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
@@ -419,6 +421,8 @@ BA107- [TLS] Change pari_thread calling convention
   109- removed 'primelimit' grom gp_data struct: we now print the actual limit
        of the primetable, not the value input by the user (which may be a
        little less)
+BA110- listsort(L) no longer returns the list L: it now returns nothing.
+       (No point in sorting in place if we must immediately copy the result.)
 
   Added
     1- many new benches (make test-all)

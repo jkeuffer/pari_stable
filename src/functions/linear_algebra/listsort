@@ -1,10 +1,9 @@
 Function: listsort
 Section: linear_algebra
 C-Name: listsort
-Prototype: WD0,L,
-Help: listsort(list,{flag=0}): sort list in place. If flag is non-zero,
+Prototype: vWD0,L,
+Help: listsort(L,{flag=0}): sort the list L in place. If flag is non-zero,
  suppress all but one occurence of each element in list.
-Doc: sorts \var{list} (which must
- be of type \typ{LIST}) in place. If $\fl$ is non-zero, suppresses all repeated
- coefficients. This is faster than the \kbd{vecsort} command since no
- copy has to be made.
+Doc: sorts the \typ{LIST} \var{list} in place. If $\fl$ is non-zero,
+ suppresses all repeated coefficients. This is faster than the \kbd{vecsort}
+ command since no copy has to be made. No value returned.

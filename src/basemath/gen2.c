@@ -2135,7 +2135,7 @@ gtolist(GEN x)
   }
 }
 
-GEN
+void
 listsort(GEN L, long flag)
 {
   long i, l;
@@ -2144,7 +2144,7 @@ listsort(GEN L, long flag)
 
   if (typ(L) != t_LIST) pari_err(typeer,"listsort");
   v = list_data(L); l = v? lg(v): 1;
-  if (l < 3) return L;
+  if (l < 3) return;
   if (flag)
   {
     long lnew;
@@ -2169,5 +2169,5 @@ listsort(GEN L, long flag)
     for (i=1; i<l; i++) gel(vnew,i) = gel(v,perm[i]);
   }
   for (i=1; i<l; i++) gel(v,i) = gel(vnew,i);
-  v[0] = vnew[0]; avma = av; return L;
+  v[0] = vnew[0]; avma = av;
 }
