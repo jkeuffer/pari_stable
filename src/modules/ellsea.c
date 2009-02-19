@@ -371,7 +371,7 @@ eigen_elldbl(void *E, GEN P)
   struct eigen_ellinit *Edat=(struct eigen_ellinit *)E;
   GEN p = Edat->p, h = Edat->h, x = gel(P,1), y = gel(P,2);
   if (ell_is_inf(P)) return gcopy(P);
-  if (gequal(x, pol_x(0)) && gequal(y, gen_1))
+  if (gequal(x, pol_x(0)) && gequal(y, pol_1(0)))
     return Edat->X12;
   else
   {
