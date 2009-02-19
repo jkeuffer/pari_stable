@@ -1046,9 +1046,7 @@ nf_chk_factors(nfcmbf_t *T, GEN P, GEN M_L, GEN famod, GEN pk)
   for (i = 1;;)
   {
     pari_sp av = avma;
-    if (DEBUGLEVEL)
-      fprintferr("nf_LLL_cmbf: checking factor %ld (avma - bot = %lu)\n",
-		 i, avma - bot);
+    if (DEBUGLEVEL) fprintferr("nf_LLL_cmbf: checking factor %ld\n", i);
     y = chk_factors_get(lt, famod, gel(piv,i), Tpk, pk);
     if (DEBUGLEVEL>2) fprintferr("... mod p^k (avma - bot = %lu)\n", avma-bot);
 
