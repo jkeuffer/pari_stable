@@ -371,7 +371,7 @@ eigen_elldbl(void *E, GEN P)
   struct eigen_ellinit *Edat=(struct eigen_ellinit *)E;
   GEN p = Edat->p, h = Edat->h, x = gel(P,1), y = gel(P,2);
   if (ell_is_inf(P)) return gcopy(P);
-  if (RgX_equal(x, pol_x(0)) && RgX_equal(y, pol_1(0)))
+  if (ZX_equal(x, pol_x(0)) && ZX_equal(y, pol_1(0)))
     return Edat->X12;
   else
   {
@@ -400,9 +400,9 @@ eigen_elladd(void *E, GEN P, GEN Q)
   GEN p = Edat->p, h = Edat->h, lambda, C, D;
   if (ell_is_inf(P)) return gcopy(Q);
   if (ell_is_inf(Q)) return gcopy(P);
-  if (RgX_equal(Px, Qx))
+  if (ZX_equal(Px, Qx))
   {
-    if (RgX_equal(Py, Qy))
+    if (ZX_equal(Py, Qy))
       return eigen_elldbl(E, P);
     else
       return mkvec(gen_0);
@@ -441,8 +441,8 @@ find_eigen_value(GEN a4, GEN a6, ulong ell, GEN h, GEN p, GEN tr)
     pari_sp btop = avma;
     for (t = 1; t <= (ell>>1); t++)
     {
-      if (RgX_equal(gel(Dr,2), Edat.Gr)) { avma = ltop; return t; }
-      if (RgX_equal(gel(Dr,2), FpX_neg(Edat.Gr, p)))
+      if (ZX_equal(gel(Dr,2), Edat.Gr)) { avma = ltop; return t; }
+      if (ZX_equal(gel(Dr,2), FpX_neg(Edat.Gr, p)))
                                          { avma = ltop; return ell-t; }
       Dr = gerepileupto(btop, eigen_elladd((void*)&Edat, Dr, BP));
     }
@@ -454,7 +454,7 @@ find_eigen_value(GEN a4, GEN a6, ulong ell, GEN h, GEN p, GEN tr)
     t = Fl_div(tr[1], 2, ell);
     if (t < (ell>>1)) t = ell - t;
     Dr = eigen_ellpow(&Edat, BP, t);
-    if (!RgX_equal(gel(Dr,2), Edat.Gr)) t = ell - t;
+    if (!ZX_equal(gel(Dr,2), Edat.Gr)) t = ell - t;
     avma = ltop; return t;
   }
 }
@@ -481,8 +481,8 @@ find_eigen_value_power(GEN a4, GEN a6, ulong ell, long k, GEN h, ulong lambda, G
   btop = avma; st_lim = stack_lim(btop, 1);
   for (t = 0; t < ellk; t += ellk1)
   {
-    if (RgX_equal(gel(Dr,2), Gr)) { avma = ltop; return t+lambda; }
-    if (RgX_equal(gel(Dr,2), negGr)) { avma = ltop; return ellk-(t+lambda); }
+    if (ZX_equal(gel(Dr,2), Gr)) { avma = ltop; return t+lambda; }
+    if (ZX_equal(gel(Dr,2), negGr)) { avma = ltop; return ellk-(t+lambda); }
     Dr = eigen_elladd((void*)&Edat, Dr, BP);
     if (low_stack(st_lim, stack_lim(btop, 1))) Dr = gerepileupto(btop, Dr);
   }
