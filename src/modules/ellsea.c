@@ -1447,13 +1447,7 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
     if (trace_mod==gen_0)
     {
       pari_warn(warner,"no more modular polynomials available!");
-      if (DEBUGLEVEL)
-      {
-        GEN p15 = prod_lgatkin(compile_atkin, nb_atkin);
-        pari_warn(warner,"no more modular polynomials available, match and sort may be very long: it remains %Ps possibilities for the trace", p15);
-      }
-      res = match_and_sort(compile_atkin, nb_atkin, gel(tr, 1), gel(tr, 2), a4, a6, p);
-      return gerepileuptoint(ltop, subii(addis(p,1), res));
+      goto end_sea;
     }
     if (!trace_mod) continue;
     ellkt = powuu(ell, kt);
@@ -1493,9 +1487,8 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
     trace_mod = find_trace(a4, a6, ell, p , &kt, EARLY_ABORT);
     if (trace_mod==gen_0)
     {
-      if (DEBUGLEVEL && gcmp(gel(best_champ, 2), bound_bsgs) > 0)
-        pari_warn(warner,"no more modular polynomials available, match and sort may be very long: it remains %Ps possibilities for the trace", gel(best_champ, 2));
-      break;
+      pari_warn(warner,"no more modular polynomials available!");
+      goto end_sea;
     }
     if (!trace_mod) continue;
     ellkt = powuu(ell, kt);
@@ -1534,8 +1527,13 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
     if (low_stack(st_lim, stack_lim(btop, 1)))
       gerepileall(btop, 3, &tr, &compile_atkin, &bound_bsgs, &best_champ);
   }
+end_sea:
   if (DEBUGLEVEL)
-    fprintferr("\nComputation of traces done. Entering match-and-sort algorithm.\nIt remains %Ps possibilities for the trace.\n", gel(best_champ, 2));
+  {
+    GEN pos = prod_lgatkin(compile_atkin, nb_atkin);
+    fprintferr("\nComputation of traces done. Entering match-and-sort algorithm.");
+    fprintferr("\nIt remains %Ps possibilities for the trace.\n", pos);
+  }
   res = match_and_sort(compile_atkin, nb_atkin, gel(tr,1), gel(tr,2), a4,a6,p);
   return gerepileuptoint(ltop, subii(addis(p, 1), res));
 }
