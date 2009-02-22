@@ -6,8 +6,8 @@ L = List([1,2,3,3]);
 concat(L,5)
 concat(1,L)
 L = concat(L,L)
-listsort(L)
-listsort(L,1)
+listsort(L); L
+listsort(L,1); L
 listpop(L); L
 listpop(L,1); L
 \\
