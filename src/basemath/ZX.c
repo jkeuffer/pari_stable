@@ -307,7 +307,7 @@ ZX_rescale(GEN P, GEN h)
   Q[1] = P[1]; return Q;
 }
 
-/*Eval x in 2^(k*BIL) in linear time*/
+/*Eval x in 2^(k*BIL) in linear time; assume x non-constant */
 static GEN
 ZX_eval2BIL(GEN x, long k)
 {
@@ -333,6 +333,7 @@ ZX_eval2BIL(GEN x, long k)
   nz = int_normalize(nz,0); return subii(pz,nz);
 }
 
+#if 0
 static long
 ZX_expi(GEN x)
 {
@@ -344,16 +345,39 @@ ZX_expi(GEN x)
   }
   return m;
 }
+#endif
 
-static GEN
-Z_mod2BIL_ZX(GEN x, long bs, long d, long v)
+/* x != 0 a ZX */
+static long
+ZX_valrem_expi(GEN *px, long *pe)
 {
-  long i, offset, lm = lgefint(x)-2, l = d+3, sx = signe(x);
+  GEN x = *px;
+  const long l = lg(x);
+  long vx, i, m = 0;
+  for (i = 2;; i++)
+    if (signe(gel(x,i))) break;
+  vx = i - 2;
+  for (; i < l; i++)
+  {
+    long e = expi(gel(x,i));
+    if (e > m) m = e;
+  }
+  *px = RgX_shift_shallow(x, -vx);
+  *pe = m; return vx;
+}
+
+/* Convert a t_INT x equal to T(2^(BIL*bs)) to a ZX T(y) * y^valx * .
+ * v = variable number, d >= deg(T) */
+static GEN
+Z_mod2BIL_ZX(GEN x, long bs, long d, long v, long valx)
+{
+  long i, offset, lm = lgefint(x)-2, l = d+valx+3, sx = signe(x);
   GEN s1 = int2n(bs*BITS_IN_LONG), pol = cgetg(l, t_POL);
   int carry = 0;
 
   pol[1] = evalsigne(1)|evalvarn(v);
-  for (i=0, offset=0; i <= d; i++, offset += bs)
+  for (i=0; i<valx; i++) gel(pol,i+2) = gen_0;
+  for (offset=0; i <= d+valx; i++, offset += bs)
   {
     pari_sp av = avma;
     long lz = minss(bs, lm-offset);
@@ -371,24 +395,53 @@ Z_mod2BIL_ZX(GEN x, long bs, long d, long v)
   return ZX_renormalize(pol,l);
 }
 
+/* assume x != 0 a ZX */
 static GEN
 ZX_sqr_sqri(GEN x)
 {
   pari_sp av = avma;
-  long e = 2*ZX_expi(x) + expu(degpol(x)) + 3;
-  long N = divsBIL(e)+1;
-  GEN  z = sqri(ZX_eval2BIL(x,N));
-  return gerepileupto(av, Z_mod2BIL_ZX(z, N, degpol(x)*2, varn(x)));
+  long ex, vx = ZX_valrem_expi(&x, &ex);
+  long dx = degpol(x), v = vx*2;
+  long e, N;
+  GEN z;
+  if (!dx)
+  {
+    RgX_shift_inplace_init(v);
+    z = ZX_Z_mul(x,gel(x,2)); /* FIXE: improve ? */
+    return gerepileupto(av, RgX_shift_inplace(z, v));
+  }
+  e = 2*ex + expu(dx) + 3;
+  N = divsBIL(e)+1;
+  z = sqri(ZX_eval2BIL(x,N));
+  return gerepileupto(av, Z_mod2BIL_ZX(z, N, dx*2, varn(x), v));
 }
 
+/* assume x,y two non-constant ZX */
 static GEN
 ZX_mul_mulii(GEN x,GEN y)
 {
   pari_sp av = avma;
-  long e = ZX_expi(x) + ZX_expi(y) + expu(degpol(x)) + 3;
-  long N = divsBIL(e)+1;
-  GEN  z = mulii(ZX_eval2BIL(x,N), ZX_eval2BIL(y,N));
-  return gerepileupto(av, Z_mod2BIL_ZX(z, N, degpol(x)+degpol(y), varn(x)));
+  long ex, vx = ZX_valrem_expi(&x, &ex);
+  long ey, vy = ZX_valrem_expi(&y, &ey);
+  long dx = degpol(x), dy = degpol(y), v = vx+vy;
+  long e, N;
+  GEN z;
+  if (!dx)
+  {
+    RgX_shift_inplace_init(v);
+    z = ZX_Z_mul(y,gel(x,2));
+    return gerepileupto(av, RgX_shift_inplace(z, v));
+  }
+  if (!dy)
+  {
+    RgX_shift_inplace_init(v);
+    z = ZX_Z_mul(x,gel(y,2));
+    return gerepileupto(av, RgX_shift_inplace(z, v));
+  }
+  e = ex + ey + expu(dx) + 3;
+  N = divsBIL(e)+1;
+  z = mulii(ZX_eval2BIL(x,N), ZX_eval2BIL(y,N));
+  return gerepileupto(av, Z_mod2BIL_ZX(z, N, dx+dy, varn(x), v));
 }
 
 GEN
