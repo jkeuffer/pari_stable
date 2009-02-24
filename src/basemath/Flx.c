@@ -539,11 +539,12 @@ Flx_mulspec(GEN a, GEN b, ulong p, long na, long nb)
   ulong maxlen;
   long n0, n0a, i, v = 0;
   pari_sp av;
-
+  
   while (na && !a[0]) { a++; na--; v++; }
   while (nb && !b[0]) { b++; nb--; v++; }
   if (na < nb) swapspec(a,b, na,nb);
   if (!nb) return zero_Flx(0);
+  if (a[na-1]==0 ||b[nb-1]==0) pari_err(bugparier,"Flx_mulspec");
 
   av = avma;
   maxlen = maxlenghtcoeffpol(p,nb);
@@ -669,6 +670,8 @@ Flx_sqrspec(GEN a, ulong p, long na)
   pari_sp av;
 
   while (na && !a[0]) { a++; na--; v += 2; }
+  if (!na) return zero_Flx(0);
+  if (a[na-1]==0) pari_err(bugparier,"Flx_sqrspec");
   av = avma;
   maxlen = maxlenghtcoeffpol(p,na);
   if (maxlen)
@@ -851,13 +854,16 @@ Flx_rem_montgomery(GEN x, GEN mg, GEN T, ulong p)
   long lead=lt-1;
   long ld=l-lt+1;
   long lm=minss(ld,lgpol(mg));
+  long lT, lmg;
   if (l<=lt)
     return vecsmall_copy(x);
   (void)new_chunk(lt+2);
+  lT  = Flx_lgrenormalizespec(T+2,lt);
+  lmg = Flx_lgrenormalizespec(mg+2,lm);
   z=Flx_recipspec(x+2+lead,ld,ld);             /* z = rec(x)      lz<=ld*/
-  z=Flx_mulspec(z+2,mg+2,p,lgpol(z),lm);       /* z = rec(x) * mg lz<=ld+lm*/
+  z=Flx_mulspec(z+2,mg+2,p,lgpol(z),lmg);      /* z = rec(x) * mg lz<=ld+lm*/
   z=Flx_recipspec(z+2,minss(ld,lgpol(z)),ld);  /* z = rec (rec(x) * mg) lz<=ld*/
-  z=Flx_mulspec(z+2,T+2,p,lgpol(z),lt);        /* z *= pol        lz<=ld+lt*/
+  z=Flx_mulspec(z+2,T+2,p,lgpol(z),lT);        /* z *= pol        lz<=ld+lt*/
   avma=ltop;
   z=Flx_subspec(x+2,z+2,p,lt,minss(lt,lgpol(z)));/* z = x - z       lz<=lt */
   z[1]=x[1];
