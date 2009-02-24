@@ -1304,9 +1304,9 @@ sqrtnr(GEN x, long n) { return mpexp(divrs(mplog(x), n)); }
 /*******************************************************************/
 INLINE int isintzero(GEN x) { return typ(x) == t_INT && !signe(x); }
 INLINE int equali1(GEN n)
-{ return n[1] == (evallgefint(3) | evalsigne(1)) && n[2] == 1; }
+{ return (ulong) n[1] == (evallgefint(3UL) | evalsigne(1)) && n[2] == 1; }
 INLINE int equalim1(GEN n)
-{ return n[1] == (evallgefint(3) | evalsigne(-1)) && n[2] == 1; }
+{ return (ulong) n[1] == (evallgefint(3UL) | evalsigne(-1)) && n[2] == 1; }
 /* works only for POSITIVE integers */
 INLINE int is_pm1(GEN n)
 { return lgefint(n) == 3 && n[2] == 1; }
