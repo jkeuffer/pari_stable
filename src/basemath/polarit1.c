@@ -2255,18 +2255,45 @@ FqX_split_all(GEN z, GEN T, GEN p)
     rep = shallowconcat(rep, FqX_split_equal(gel(z,i), S, T, p));
   return rep;
 }
+
+/* not memory-clean, as FpX_factorff_i, returning only linear factors */
+static GEN
+FpX_factorff_deg1(GEN P, GEN T, GEN p)
+{
+  GEN V, F = gel(FpX_factor(P,p), 1);
+  long i, lfact = 1, nmax = lgpol(P), n = lg(F), dT = degpol(T);
+
+  V = cgetg(nmax,t_VEC);
+  for(i=1;i<n;i++)
+  {
+    GEN R, Fi = gel(F,i);
+    long di = degpol(Fi), j, r;
+    if (dT % di) continue;
+    R = FpX_factorff_irred(gel(F,i),T,p);
+    r = lg(R);
+    for (j=1; j<r; j++,lfact++) gel(V,lfact) = gel(R,j);
+  }
+  setlg(V,lfact); return V;
+}
 static GEN
 FqX_roots_i(GEN f, GEN T, GEN p)
 {
   GEN R;
   f = FqX_normalize(f, T, p);
   if (!signe(f)) pari_err(zeropoler,"FqX_roots");
-  switch( FqX_split_deg1(&R, f, powiu(p, degpol(T)), T, p) )
-  {
-    case 0: return cgetg(1, t_VEC);
-    case 1: if (lg(R) == 1) return FqX_roots_from_deg1(mkvec(f), T, p);
-  }
-  return FqX_roots_from_deg1(FqX_split_roots(R, T, p, NULL), T, p);
+  if (isabsolutepol(f)) 
+    R = FpX_factorff_deg1(simplify_shallow(f), T, p);
+  else
+    switch( FqX_split_deg1(&R, f, powiu(p, degpol(T)), T, p) )
+    {
+      case 0: return cgetg(1, t_VEC);
+      case 1: if (lg(R) == 1) { R = mkvec(f); break; }
+      /* fall through */
+      default: R = FqX_split_roots(R, T, p, NULL);
+    }
+  R = FqX_roots_from_deg1(R, T, p);
+  gen_sort_inplace(R, &cmp_RgX, &cmp_nodata, NULL);
+  return R;
 }
 GEN
 FqX_roots(GEN x, GEN T, GEN p)
