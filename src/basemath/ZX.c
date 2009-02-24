@@ -438,6 +438,12 @@ ZX_mul_mulii(GEN x,GEN y)
     z = ZX_Z_mul(x,gel(y,2));
     return gerepileupto(av, RgX_shift_inplace(z, v));
   }
+  if (ex > 2*ey || ey > 2*ex)
+  {
+    RgX_shift_inplace_init(v);
+    z = RgX_mul(x, y);
+    return gerepileupto(av, RgX_shift_inplace(z, v));
+  }
   e = ex + ey + expu(dx) + 3;
   N = divsBIL(e)+1;
   z = mulii(ZX_eval2BIL(x,N), ZX_eval2BIL(y,N));
