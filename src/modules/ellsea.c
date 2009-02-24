@@ -868,7 +868,9 @@ find_trace_Atkin(ulong ell, long r, GEN p)
   GEN T = mkvecsmall4(0, pell, 0, 1);
   GEN U = mkvecsmall3(0, ell-1, 0);
   pari_sp btop = avma;
-  for (teta = 0; teta < ell; teta++, avma = btop)
+  if (r==2 && krouu(ell-pell, ell) < 0)
+    val_pos[++nval] = 0;
+  for (teta = 1; teta < ell; teta++, avma = btop)
   {
     ulong disc = Fl_sub(Fl_sqr(teta,ell), Fl_mul(4UL,pell,ell), ell);
     GEN a;
