@@ -2146,6 +2146,7 @@ spec_FqXQ_pow(GEN x, GEN S, GEN T, GEN p)
       z = gerepileupto(av, z);
     }
   }
+  z[1] = x[1]; /* make sure variable number is sane */
   z = Kronecker_to_FpXQX(z, T, p);
   return gerepileupto(av, z);
 }
