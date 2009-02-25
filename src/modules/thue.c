@@ -152,21 +152,25 @@ T_A_Matrices(GEN MatFU, long r, GEN *eps5, long prec)
   long e = bit_accuracy(prec);
 
   m1 = rowslice(vecslice(MatFU, 1,r), 1,r); /* minor order r */
-  m1 = logabs(m1,prec);
+  m1 = logabs(m1, 3);
 
   A = RgM_inv(m1); if (!A) pari_err(precer,"thue");
-  IntM = gsub(gmul(A,m1), matid(r));
+  IntM = RgM_Rg_add(RgM_mul(A,m1), gen_m1);
 
-  eps2 = gadd(vecmax(gabs(IntM,prec)), real2n(-e, prec));
-  nia = vecmax(gabs(A,prec));
+  eps2 = gadd(vecmax(gabs(IntM, 3)), real2n(-e, 3)); /* t_REAL */
+  nia = vecmax(gabs(A, 3));
+  if (typ(nia) != t_REAL) nia = gtofp(nia, 3);
 
   /* Check for the precision in matrix inversion. See paper, Lemma 2.4.2. */
-  p1 = gadd(gmulsg(r, gmul2n(nia, e)), eps2);
-  if (gexpo(p1) < -2*r) pari_err(precer,"thue");
+  p1 = addrr(mulsr(r, gmul2n(nia, e)), eps2); /* t_REAL */
+  if (expo(p1) < -2*r) pari_err(precer,"thue");
 
-  p1 = gadd(gmulsg(r, gmul2n(nia,-e)), eps2);
-  eps3 = gmul(gmulsg(2*r*r,nia), p1);
-  eps3 = myround(eps3, 1);
+  p1 = addrr(mulsr(r, gmul2n(nia,-e)), eps2);
+  eps3 = mulrr(mulsr(2*r*r,nia), p1);
+  if (!signe(eps3))
+    eps3 = real2n(expo(eps3), 3);
+  else
+    eps3 = myround(eps3, 1);
 
   if (DEBUGLEVEL>1) fprintferr("epsilon_3 -> %Ps\n",eps3);
   *eps5 = mulur(r, eps3); return A;
