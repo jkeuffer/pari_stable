@@ -449,7 +449,7 @@ BA110- listsort(L) no longer returns the list L: it now returns nothing.
        Fp_center, FpM_center, FpV_center
        Fp_ratlift, FpM_ratlift, FpX_ratlift
        FpM_FpC_mul_FpX
-       FqX_roots, FpX_factorff
+       FqX_roots, FpX_factorff, FpX_polrootsff
        ZC_ZV_mul, ZM_is_identity, ZM_copy, ZM_neg, ZM_add, ZM_mul, ZM_pow
        ZM_max_lg, ZM_sub, ZM_ZC_mul, ZXV_Z_mul, ZM_Z_mul, ZV_Z_mul, ZV_isscalar,
        ZV_copy, ZV_neg, ZV_neg_inplace ZV_togglesign, ZV_indexsort

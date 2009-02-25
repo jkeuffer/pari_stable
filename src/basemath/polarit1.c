@@ -2259,7 +2259,7 @@ FqX_split_all(GEN z, GEN T, GEN p)
 
 /* not memory-clean, as FpX_factorff_i, returning only linear factors */
 static GEN
-FpX_factorff_deg1(GEN P, GEN T, GEN p)
+FpX_rootsff_i(GEN P, GEN p, GEN T)
 {
   GEN V, F = gel(FpX_factor(P,p), 1);
   long i, lfact = 1, nmax = lgpol(P), n = lg(F), dT = degpol(T);
@@ -2272,26 +2272,34 @@ FpX_factorff_deg1(GEN P, GEN T, GEN p)
     if (dT % di) continue;
     R = FpX_factorff_irred(gel(F,i),T,p);
     r = lg(R);
-    for (j=1; j<r; j++,lfact++) gel(V,lfact) = gel(R,j);
+    for (j=1; j<r; j++,lfact++)
+      gel(V,lfact) = Fq_neg(gmael(R,j, 2), T, p);
   }
-  setlg(V,lfact); return V;
+  setlg(V,lfact);
+  gen_sort_inplace(V, &cmp_RgX, &cmp_nodata, NULL);
+  return V;
 }
+GEN
+FpX_rootsff(GEN P, GEN p, GEN T)
+{
+  pari_sp av = avma;
+  return gerepilecopy(av, FpX_rootsff_i(P, p, T));
+}
+
 static GEN
 FqX_roots_i(GEN f, GEN T, GEN p)
 {
   GEN R;
   f = FqX_normalize(f, T, p);
   if (!signe(f)) pari_err(zeropoler,"FqX_roots");
-  if (isabsolutepol(f)) 
-    R = FpX_factorff_deg1(simplify_shallow(f), T, p);
-  else
-    switch( FqX_split_deg1(&R, f, powiu(p, degpol(T)), T, p) )
-    {
-      case 0: return cgetg(1, t_VEC);
-      case 1: if (lg(R) == 1) { R = mkvec(f); break; }
-      /* fall through */
-      default: R = FqX_split_roots(R, T, p, NULL);
-    }
+  if (isabsolutepol(f)) return FpX_rootsff_i(simplify_shallow(f), p, T);
+  switch( FqX_split_deg1(&R, f, powiu(p, degpol(T)), T, p) )
+  {
+  case 0: return cgetg(1, t_VEC);
+  case 1: if (lg(R) == 1) { R = mkvec(f); break; }
+            /* fall through */
+  default: R = FqX_split_roots(R, T, p, NULL);
+  }
   R = FqX_roots_from_deg1(R, T, p);
   gen_sort_inplace(R, (void*) &cmp_RgX, &cmp_nodata, NULL);
   return R;
