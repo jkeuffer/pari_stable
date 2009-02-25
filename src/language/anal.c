@@ -1150,17 +1150,9 @@ print_all_user_fun(int member)
     L = gen_sort(L, NULL, &cmp_epname);
     for (i = 1; i <= iL; i++)
     {
-      char *arg, *seq;
-      GEN str;
       ep = (entree*)L[i];
       f = ep->name;
-      str = gel(ep->value,5);
-      arg = GSTR(gel(str,1));
-      seq = GSTR(gel(str,2));
-      if (member)
-        pari_printf("{%s.%s=%s\n}\n\n", arg, f+2, seq);
-      else
-        pari_printf("{%s(%s)=%s\n}\n\n", f, arg, seq);
+      pari_printf("%s = {\n  %Ps\n}\n\n", f, ep->value);
     }
   }
   avma = av;
