@@ -2223,7 +2223,7 @@ FqX_split_by_degree(GEN *pz, GEN u, GEN q, GEN T, GEN p)
 
 /* see roots_from_deg1() */
 static GEN
-FqX_roots_from_deg1(GEN x, GEN T, GEN p)
+FqXV_roots_from_deg1(GEN x, GEN T, GEN p)
 {
   long i,l = lg(x);
   GEN r = cgetg(l,t_VEC);
@@ -2300,7 +2300,7 @@ FqX_roots_i(GEN f, GEN T, GEN p)
             /* fall through */
   default: R = FqX_split_roots(R, T, p, NULL);
   }
-  R = FqX_roots_from_deg1(R, T, p);
+  R = FqXV_roots_from_deg1(R, T, p);
   gen_sort_inplace(R, (void*) &cmp_RgX, &cmp_nodata, NULL);
   return R;
 }
