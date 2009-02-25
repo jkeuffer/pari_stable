@@ -2276,7 +2276,7 @@ FpX_rootsff_i(GEN P, GEN p, GEN T)
       gel(V,lfact) = Fq_neg(gmael(R,j, 2), T, p);
   }
   setlg(V,lfact);
-  gen_sort_inplace(V, &cmp_RgX, &cmp_nodata, NULL);
+  gen_sort_inplace(V, (void*) &cmp_RgX, &cmp_nodata, NULL);
   return V;
 }
 GEN
