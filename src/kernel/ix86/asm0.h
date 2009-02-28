@@ -1,4 +1,4 @@
-#line 2 "../src/kernel/ix86/level0.h"
+#line 2 "../src/kernel/ix86/asm0.h"
 /* $Id$
 
 Copyright (C) 2000  The PARI group.

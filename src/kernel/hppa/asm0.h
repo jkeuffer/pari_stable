@@ -1,4 +1,4 @@
-#line 2 "../src/kernel/hppa/level0.h"
+#line 2 "../src/kernel/hppa/asm0.h"
 /* $Id$
 
 Copyright (C) 2004  The PARI group.

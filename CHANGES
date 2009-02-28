@@ -162,6 +162,7 @@ BA117- Fix detection for ppc64 running in 32bit mode.
        Eg: idealtwoelt(nfinit(x^2+23), 3, 6) -> [0, 0]~
 BA131- listsort() could return a pointer referencing freed memory: make it
        return void
+BA132- src/kernel/ix86/asm0.h had an incorrect #line entry.
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
