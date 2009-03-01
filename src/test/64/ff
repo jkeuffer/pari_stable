@@ -89,7 +89,11 @@ a^5 + 2*a^4 + 6*a^3 + 2)*x + 1, 1], [0, 0, 0, a, 1, 0, 2*a, 4, 6*a^2, a, 4,
 1
 ? test2(46744073709551653)
 [2, [46744073709551652, [2, 2; 3, 1; 7, 1; 37, 1; 1036513, 1; 14510113, 1]]]
-17
+  ***   at top-level: test2(46744073709551
+  ***                 ^--------------------
+  ***   in function test2: ...d(1,p)),&o);print([g,o]);fflog(g^17,g,o)
+  ***                                                  ^---------------
+  *** fflog: gen_Shanks_log: supplied order (= 2) is incorrect.
 ? test2(precprime(1<<32))
 [2, [4294967290, [2, 1; 5, 1; 19, 1; 22605091, 1]]]
 17
@@ -100,5 +104,9 @@ a^5 + 2*a^4 + 6*a^3 + 2)*x + 1, 1], [0, 0, 0, a, 1, 0, 2*a, 4, 6*a^2, a, 4,
 [t, t^2 + 1, -t^2 - t + 1]
 ? polrootsff(x^4+1,2,y^2+y+1)
 [Mod(Mod(1, 2), Mod(1, 2)*y^2 + Mod(1, 2)*y + Mod(1, 2))]
+? t=ffgen(ffinit(7,4));fflog(t^6,t^2)
+  ***   at top-level: t=ffgen(ffinit(7,4));fflog(t^6,t^2)
+  ***                                      ^--------------
+  *** fflog: gen_Shanks_log: supplied order (= 5) is incorrect.
 ? print("Total time spent: ",gettime);
-Total time spent: 1977
+Total time spent: 1924
