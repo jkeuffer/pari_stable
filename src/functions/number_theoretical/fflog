@@ -18,7 +18,7 @@ Doc: discrete logarithm of the finite field element $x$ in base $g$. If
  ? o = fforder(t)
  %2 = 5602   \\@com \emph{not} a primitive root.
  ? fflog(t^10,t)
- %3 = 11214  \\@com indeed correct modulo o
+ %3 = 11214  \\@com indeed correct modulo o. We are lucky !
  ? fflog(t^10,t, o)
  %4 = 10
  ? g = ffprimroot(t, &o);

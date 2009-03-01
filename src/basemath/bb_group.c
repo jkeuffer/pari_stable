@@ -107,7 +107,7 @@ gen_Shanks_log(GEN x, GEN g0,GEN q, void *E, const struct bb_group *grp)
   gen_sort_inplace(smalltable, (void*)grp->cmp, &cmp_nodata, &perm);
 
   av1 = avma; lim=stack_lim(av1,2);
-  for (k=1;;k++)
+  for (k=1; k<= lbaby; k++)
   {
     i=tablesearch(smalltable,p1,grp->cmp);
     if (i)
@@ -123,6 +123,8 @@ gen_Shanks_log(GEN x, GEN g0,GEN q, void *E, const struct bb_group *grp)
       p1 = gerepileupto(av1, p1);
     }
   }
+  pari_err(talker,"gen_Shanks_log: supplied order (= %Ps) is incorrect", q);
+  return NULL; /* not reached */
 }
 
 /*Generic discrete logarithme in a group of prime order p*/
