@@ -1152,7 +1152,7 @@ print_all_user_fun(int member)
     {
       ep = (entree*)L[i];
       f = ep->name;
-      pari_printf("%s = {\n  %Ps\n}\n\n", f, ep->value);
+      pari_printf("%s =\n  %Ps\n\n", f, ep->value);
     }
   }
   avma = av;
