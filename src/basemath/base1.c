@@ -711,7 +711,7 @@ ZC_galoisapply(GEN nf, GEN x, GEN s, GEN T)
 {
   x = nf_to_scalar_or_alg(nf, x);
   if (typ(x) != t_POL) return scalarcol(x, degpol(T)); /* rational */
-  return algtobasis(nf, RgX_RgXQ_eval(coltoliftalg(nf,x), s, T));
+  return algtobasis(nf, RgX_RgXQ_eval(x, s, T));
 }
 
 static GEN
