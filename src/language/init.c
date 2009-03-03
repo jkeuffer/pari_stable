@@ -290,7 +290,6 @@ pari_daemon(void)
 /*********************************************************************/
 static int try_to_recover = 0;
 VOLATILE int PARI_SIGINT_block  = 0, PARI_SIGINT_pending = 0;
-static GEN universal_constants;
 static void pari_sighandler(int sig);
 
 /*********************************************************************/
@@ -408,7 +407,8 @@ init_universal_constants(void)
   /* 2 (gnil) + 2 (gen_0)
    * + 3 (gen_1) + 3 (gen_m1) + 3 (gen_2) + 3 (gen_m2)
    * + 3 (half) */
-  GEN p = universal_constants = (long*) pari_malloc(19*sizeof(long));
+  static long universal_constants[19];
+  GEN p = (GEN) universal_constants;
   gen_0 = p; p+=2; gnil = p; p+=2;
   gen_0[0] = gnil[0] = evaltyp(t_INT) | _evallg(2);
   gen_0[1] = gnil[1] = evallgefint(2);
@@ -703,7 +703,6 @@ pari_close_opts(ulong init_opts)
   }
   free((void*)varentries);
   free((void*)primetab);
-  free((void*)universal_constants);
   pari_thread_close();
 
   while (cur_block) killblock(cur_block);
