@@ -563,6 +563,12 @@ pari_init_functions(void)
 		      new_fun_set? functions_basic:oldfonctions);
 }
 
+static void
+pari_init_errcatch(void)
+{
+  stack_init(&s_ERR_CATCH, sizeof(cell), (void**)&ERR_CATCH);
+}
+
 /*********************************************************************/
 /*                       PARI THREAD                                 */
 /*********************************************************************/
@@ -608,6 +614,7 @@ pari_thread_free(struct pari_thread *t)
 void
 pari_thread_init(void)
 {
+  pari_init_errcatch();
   pari_init_rand();
   pari_init_floats();
   pari_init_seadata();
@@ -658,7 +665,6 @@ pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts)
     pari_init_defaults();
   }
 
-  stack_init(&s_ERR_CATCH, sizeof(cell), (void**)&ERR_CATCH);
   if ((init_opts&INIT_JMPm) && setjmp(GP_DATA->env)) pari_exit();
   if ((init_opts&INIT_SIGm)) pari_sig_init(pari_sighandler);
   pari_init_stack(parisize, 0);
