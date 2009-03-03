@@ -1331,7 +1331,6 @@ genclosure(long n, entree *ep)
         op_push(OCprecdl,0,n);
         break;
       case 'C':
-        break;
         op_push(OCpushgen,data_push(pack_localvars()),n);
         break;
       case 'f':
