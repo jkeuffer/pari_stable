@@ -807,7 +807,9 @@ find_trace_Elkies_power(GEN a4, GEN a6, ulong ell, long k, GEN meqn, char meqnty
   GEN Eba4, Eba6, Eca4, Eca6, Ib, p_1, kpoly;
   ulong lambda, ellk = upowuu(ell, k), pellk = umodiu(p, ellk);
   long cnt;
-  if (DEBUGLEVEL) fprintferr("Compute trace mod %ld", ell);
+  pari_timer T;
+
+  if (DEBUGLEVEL) { fprintferr("Trace mod %ld", ell); TIMERstart(&T); }
   Eba4 = a4; Eba6 = a6;
   if (meqntype=='C')
   {
@@ -828,6 +830,7 @@ find_trace_Elkies_power(GEN a4, GEN a6, ulong ell, long k, GEN meqn, char meqnty
   }
   Ib = pol_x(0);
   lambda = find_eigen_value(a4, a6, ell, kpoly, p, tr);
+  if (DEBUGLEVEL>1) fprintferr(" [%ld ms]", TIMER(&T));
   if (EARLY_ABORT)
   {
     ulong pell = pellk%ell;
@@ -851,6 +854,7 @@ find_trace_Elkies_power(GEN a4, GEN a6, ulong ell, long k, GEN meqn, char meqnty
     Ib = gel(tmp, 5);
     if (low_stack(st_lim, stack_lim(btop, 1)))
       gerepileall(btop, 6, &Eba4, &Eba6, &Eca4, &Eca6, &kpoly, &Ib);
+    if (DEBUGLEVEL>1) fprintferr(" [%ld ms]", TIMER(&T));
   }
   avma = ltop;
   return mkvecsmall(Fl_add(lambda, Fl_div(pellk, lambda, ellk), ellk));
@@ -916,6 +920,8 @@ find_trace(GEN a4, GEN a6, ulong ell, GEN p, long *ptr_kt, long EARLY_ABORT)
   char meqntype;
   long k = 1, kt, r;
   enum mod_type mt;
+  pari_timer T;
+
   if (ell <= 13)
   {
     long lp = bit_accuracy(lg(p))-bfffo(*int_MSW(p));
@@ -930,7 +936,8 @@ find_trace(GEN a4, GEN a6, ulong ell, GEN p, long *ptr_kt, long EARLY_ABORT)
   kt = k;
   meqn = get_modular_eqn(ell, &meqntype);
   if (!meqn) return gen_0;
-  if (DEBUGLEVEL) fprintferr("Process prime %ld.\tType: ", ell);
+  if (DEBUGLEVEL)
+  { fprintferr("Process prime %5ld. ", ell); TIMERstart(&T); }
   meqnj = FpXY_evalx(meqn, Fp_ell_j(a4, a6, p), p);
   g = study_modular_eqn(ell, meqnj, p, &mt, &r);
   /* If l is an Elkies prime, search for a factor of the l-division polynomial.
@@ -965,7 +972,11 @@ find_trace(GEN a4, GEN a6, ulong ell, GEN p, long *ptr_kt, long EARLY_ABORT)
   }
   if (DEBUGLEVEL) {
     long n = lg(tr)-1;
-    if (n > 1 || mt == MTAtkin) fprintferr("%3ld trace(s)",n);
+    if (n > 1 || mt == MTAtkin) 
+    {
+      fprintferr("%3ld trace(s)",n);
+      if (DEBUGLEVEL>1) fprintferr(" [%ld ms]", TIMER(&T));
+    }
     fprintferr("\n");
   }
   *ptr_kt = kt;
