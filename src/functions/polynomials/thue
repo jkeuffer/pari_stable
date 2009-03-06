@@ -26,8 +26,8 @@ Doc: returns all solutions of the equation
  \bprog
  ? tnf = thueinit(x^3-2*x^2+3*x-17);
  ? thue(tnf, -15)
- *** thue: Warning: Non trivial conditional class group.
- *** May miss solutions of the norm equation.
+  *** thue: Warning: Non trivial conditional class group.
+  *** The result returned by 'thue' is conditional on the GRH.
  %2 = [[1, 1]]
  @eprog
  This time the result is conditional. All results computed using this tnf
