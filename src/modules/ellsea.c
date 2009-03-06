@@ -1185,12 +1185,12 @@ get_lgatkin(GEN compile_atkin, long k)
 }
 
 static GEN
-champion(GEN atkin, long k, ulong ell)
+champion(GEN atkin, long k, ulong ell, GEN bound_champ)
 {
   const long two_k = 1L<<k;
   pari_sp ltop = avma, btop, st_lim;
   long i, j, n, i1, i2;
-  GEN B, Bp, cost_vec, res;
+  GEN B, Bp, cost_vec, res = NULL;
   cost_vec = get_lgatkin(atkin, k);
   B  = const_vecsmall(two_k, 0);
   Bp = const_vecsmall(two_k, 0);
@@ -1218,13 +1218,14 @@ champion(GEN atkin, long k, ulong ell)
     for (i = 1; i <= n; i++)
       Bp[i] = B[i];
   }
-  res = cgetg(n, t_VEC);
-  for (i = 1, n = 1; i <= two_k; i++)
+  for (i = 1; i <= two_k; i++)
     if (B[i])
     {
       GEN b = cost (B[i], cost_vec);
       GEN v = value(B[i], atkin, k);
-      gel(res, n++) = mkvec3(utoi(B[i]), b, v);
+      if (cmpii(v, bound_champ) <=0) continue;
+      if (res && gcmp(b, gel(res, 2)) >=0) continue;
+      res = mkvec2(utoi(B[i]), b);
     }
   return gerepilecopy(ltop, res);
 }
@@ -1492,7 +1493,7 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
   {
     long kt;
     GEN ellkt;
-    GEN bound_champ, champ;
+    GEN bound_champ;
     NEXT_PRIME_VIADIFF(ell, primepointer);
     bound_bsgs = gmul(bound_bsgs, growth_factor);
     if (gcmp(gel(best_champ, 2), bound_bsgs) < 0) break;
@@ -1519,16 +1520,7 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
     }
     get_extra_l = 1;
     bound_champ = truedivii(bound, gel(tr, 2));
-    champ = champion(compile_atkin, nb_atkin, ell);
-    best_champ = gel(champ, lg(champ) - 1);
-    for (i = 1; i < lg(champ); i++)
-    {
-      GEN C = gel(champ,i);
-      if (gcmp(gel(C,3), bound_champ) > 0
-          && gcmp(gel(C,2), gel(best_champ, 2)) < 0) best_champ = C;
-    }
-    /*best_champ is the champion of lowest cost among champions less than the */
-    /*required bound.*/
+    best_champ = champion(compile_atkin, nb_atkin, ell, bound_champ);
     if (DEBUGLEVEL>=2)
       fprintferr("Remaining %Ps possibilities.\n", gel(best_champ, 2));
     if (low_stack(st_lim, stack_lim(btop, 1)))
