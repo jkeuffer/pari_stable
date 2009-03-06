@@ -1400,7 +1400,7 @@ match_and_sort(GEN compile_atkin, long k, GEN Mu, GEN u, GEN a4, GEN a6, GEN p)
 GEN
 ellsea(GEN E, GEN p, long EARLY_ABORT)
 {
-  const long MAX_ATKIN = 20;
+  const long MAX_ATKIN = 21;
   pari_sp ltop = avma, btop, st_lim;
   long i, nb_atkin, lp, M, get_extra_l, mask;
   GEN compile_atkin;
@@ -1492,7 +1492,7 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
   {
     long kt;
     GEN ellkt;
-    GEN cat, bound_champ, champ;
+    GEN bound_champ, champ;
     NEXT_PRIME_VIADIFF(ell, primepointer);
     bound_bsgs = gmul(bound_bsgs, growth_factor);
     if (gcmp(gel(best_champ, 2), bound_bsgs) < 0) break;
@@ -1528,17 +1528,14 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
           && gcmp(gel(C,2), gel(best_champ, 2)) < 0) best_champ = C;
     }
     /*best_champ is the champion of lowest cost among champions less than the */
-    /*required bound. We now recover the corresponding sets of traces. */
-    cat = shallowextract(compile_atkin, gel(best_champ, 1));
-    for (i=1; i<lg(cat);   i++) gel(compile_atkin, i) = gel(cat, i);
-    for (   ; i<=nb_atkin; i++) gel(compile_atkin, i) = gen_0;
-    nb_atkin = lg(cat)-1;
+    /*required bound.*/
     if (DEBUGLEVEL>=2)
-      fprintferr("Keeping %ld primes, %Ps remaining possibilities.\n",
-                 nb_atkin, gel(best_champ, 2));
+      fprintferr("Remaining %Ps possibilities.\n", gel(best_champ, 2));
     if (low_stack(st_lim, stack_lim(btop, 1)))
       gerepileall(btop, 3, &tr, &compile_atkin, &bound_bsgs, &best_champ);
   }
+  compile_atkin = shallowextract(compile_atkin, gel(best_champ, 1));
+  nb_atkin = lg(compile_atkin)-1;
 end_sea:
   if (DEBUGLEVEL)
   {
