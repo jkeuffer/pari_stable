@@ -1402,9 +1402,9 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
 {
   const long MAX_ATKIN = 20;
   pari_sp ltop = avma, btop, st_lim;
-  long i, nb_atkin, lp, M, get_extra_l;
+  long i, nb_atkin, lp, M, get_extra_l, mask;
   GEN compile_atkin;
-  GEN tr, bound, product, trace_mod, bound_bsgs, growth_factor, best_champ;
+  GEN tr, bound, prod_atkin, trace_mod, bound_bsgs, growth_factor, best_champ;
   GEN res;
   GEN a4 = modii(mulis(Rg_to_Fp(gel(E,10), p), -27), p);
   GEN a6 = modii(mulis(Rg_to_Fp(gel(E,11), p), -54), p);
@@ -1432,10 +1432,7 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
     avma = ltop; return gen_0;
   }
 
-  /* 'product' is the product of the primes we use, the computation
-   *  stops when product > 4*sqrt(p)
-   * l is the current prime,
-   * compile_atkin is a vector containing informations about Atkin primes,
+  /* compile_atkin is a vector containing informations about Atkin primes,
    *   informations about Elkies primes lie in tr. */
   bound = sqrti(shifti(p, 4));
   M = 1000000;
@@ -1448,11 +1445,10 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
     bound_bsgs = mulru(mulrr(powru(dbltor(1.035), lp), dbltor(1.35)), M);
   else bound_bsgs = muluu(50000, M);
   growth_factor = dbltor(1.26);
-  product = gen_2;
+  prod_atkin = gen_1;
   compile_atkin = zerovec(MAX_ATKIN); nb_atkin = 0;
   btop = avma; st_lim = stack_lim(btop, 1);
-  while (gcmp(product, bound) <= 0)
-  {
+  do {
     GEN ellkt;
     long kt;
     NEXT_PRIME_VIADIFF(ell, primepointer);
@@ -1474,18 +1470,21 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
       tr = crt(ellkt, stoi(trace_mod[1]), gel(tr,1), gel(tr,2));
     }
     else
+    {
       /* compute possible values for the trace using Atkin method. */
       add_atkin(compile_atkin, mkvec2(ellkt, trace_mod), &nb_atkin);
-    /*increase the product with this prime and go to the next prime */
-    product = mulii(product, ellkt);
+      prod_atkin = value(-1, compile_atkin, nb_atkin);
+    }
     if (low_stack(st_lim, stack_lim(btop, 1)))
-      gerepileall(btop, 3, &tr, &compile_atkin, &product);
-  }
-  best_champ = mkvec2(value(-1, compile_atkin, nb_atkin),
-                      prod_lgatkin(compile_atkin, nb_atkin));
+      gerepileall(btop, 3, &tr, &compile_atkin, &prod_atkin);
+  } while (cmpii(mulii(gel(tr, 2), prod_atkin) , bound) <= 0);
+  mask = (1UL<<nb_atkin)-1;
+  best_champ = mkvec3(utoi(mask), prod_lgatkin(compile_atkin, nb_atkin),
+      value(mask, compile_atkin, nb_atkin));
   /*If the number of possible traces is too large, we treat a new prime */
   if (DEBUGLEVEL && gcmp(gel(best_champ, 2), bound_bsgs) >= 0)
-    fprintferr("Too many possibilities for the trace: %Ps. Look for new primes\n", gel(best_champ, 2));
+    fprintferr("Too many possibilities for the trace: %Ps. "
+               "Look for new primes\n", gel(best_champ, 2));
   btop = avma; st_lim = stack_lim(btop, 1);
   get_extra_l = 1;
   bound_bsgs = gdiv(bound_bsgs, growth_factor);
@@ -1519,7 +1518,7 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
       continue;
     }
     get_extra_l = 1;
-    bound_champ = gdiv(bound, gel(tr, 2));
+    bound_champ = truedivii(bound, gel(tr, 2));
     champ = champion(compile_atkin, nb_atkin, ell);
     best_champ = gel(champ, lg(champ) - 1);
     for (i = 1; i < lg(champ); i++)
