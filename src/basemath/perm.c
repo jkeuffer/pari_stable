@@ -136,7 +136,7 @@ GEN
 vecsmall_indexsort(GEN V)
 {
   long l=lg(V)-1;
-  if (l==0) return V;
+  if (l==0) return cgetg(1, t_VECSMALL);
   return vecsmall_indexsortspec(V,l);
 }
 
