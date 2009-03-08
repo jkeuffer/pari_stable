@@ -1403,7 +1403,7 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
 {
   const long MAX_ATKIN = 21;
   pari_sp ltop = avma, btop, st_lim;
-  long i, nb_atkin, lp, M, get_extra_l, mask;
+  long i, nb_atkin, lp, M, get_extra_l;
   GEN compile_atkin;
   GEN tr, bound, prod_atkin, trace_mod, bound_bsgs, growth_factor, best_champ;
   GEN res;
@@ -1479,9 +1479,8 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
     if (low_stack(st_lim, stack_lim(btop, 1)))
       gerepileall(btop, 3, &tr, &compile_atkin, &prod_atkin);
   } while (cmpii(mulii(gel(tr, 2), prod_atkin) , bound) <= 0);
-  mask = (1UL<<nb_atkin)-1;
-  best_champ = mkvec3(utoi(mask), prod_lgatkin(compile_atkin, nb_atkin),
-      value(mask, compile_atkin, nb_atkin));
+  best_champ = mkvec2(utoi((1UL<<nb_atkin)-1), 
+                      prod_lgatkin(compile_atkin, nb_atkin));
   /*If the number of possible traces is too large, we treat a new prime */
   if (DEBUGLEVEL && gcmp(gel(best_champ, 2), bound_bsgs) >= 0)
     fprintferr("Too many possibilities for the trace: %Ps. "
