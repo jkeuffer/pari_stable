@@ -824,6 +824,14 @@ closure_eval(GEN C)
     case OCavma:
       st[sp++]=avma;
       break;
+    case OCcowvardyn:
+      ep = (entree*) operand;
+      checkvalue(ep);
+      (void)copyvalue(ep);
+      break;
+    case OCcowvarlex:
+      (void)copylex(operand);
+      break;
     case OCstoi:
       gel(st,sp-1)=stoi(st[sp-1]);
       break;
@@ -1518,6 +1526,13 @@ closure_disassemble(GEN C)
       break;
     case OCgerepile:
       pari_printf("gerepile\n",operand);
+      break;
+    case OCcowvardyn:
+      ep=(entree*)operand;
+      pari_printf("cowvardyn\t%s\n",ep->name);
+      break;
+    case OCcowvarlex:
+      pari_printf("cowvarlex\t%ld\n",operand);
       break;
     }
   }

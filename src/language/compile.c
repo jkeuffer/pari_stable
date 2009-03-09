@@ -1000,9 +1000,14 @@ compilefunc(entree *ep, long n, int mode)
           j++;
           break;
         case 'W':
-          (void)getlvalue(arg[j]);
-          compilenode(arg[j++],Ggen,FLnocopy);
-          break;
+          {
+            entree *ep = getlvalue(arg[j]);
+            long vn = getmvar(ep);
+            if (vn) op_push(OCcowvarlex,vn,n);
+            else op_push(OCcowvardyn,(long)ep,n);
+            compilenode(arg[j++],Ggen,FLnocopy);
+            break;
+          }
         case 'M':
           if (tree[arg[j]].f!=Fsmall)
           {
