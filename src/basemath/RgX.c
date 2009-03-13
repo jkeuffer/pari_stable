@@ -778,39 +778,45 @@ addpolcopy(GEN x, GEN y, long lx, long ly)
 }
 
 INLINE GEN
-mulpol_limb(GEN x, GEN y, char *ynonzero, long a, long b)
+RgX_mulspec_basecase_limb(GEN x, GEN y, long a, long b)
 {
-  GEN p1 = NULL;
-  long i;
   pari_sp av = avma;
+  GEN s = NULL;
+  long i;
+
   for (i=a; i<b; i++)
-    if (ynonzero[i])
+  {
+    GEN yi = gel(y,i);
+    if (yi)
     {
-      GEN p2 = gmul(gel(y,i),gel(x,-i));
-      p1 = p1 ? gadd(p1, p2): p2;
+      GEN t = gmul(yi, gel(x,-i));
+      s = s? gadd(s, t): t;
     }
-  return p1 ? gerepileupto(av, p1): gen_0;
+  }
+  return s? gerepileupto(av, s): gen_0;
 }
 
-/* assume nx >= ny > 0 */
+/* assume nx >= ny > 0, return x * y * t^v */
 static GEN
-mulpol(GEN x, GEN y, long nx, long ny)
+RgX_mulspec_basecase(GEN x, GEN y, long nx, long ny, long v)
 {
-  long i,lz,nz;
-  GEN z;
-  char *p1;
+  long i, lz, nz;
+  GEN z, y0;
 
-  lz = nx+ny+1; nz = lz-2;
+  lz = nx + ny + 1; nz = lz-2;
+  lz += v;
+  y0 = cgetg(ny+1, t_VECSMALL) + 1; /* left on stack */
   z = cgetg(lz, t_POL) + 2; /* x:y:z [i] = term of degree i */
-  p1 = (char*)pari_malloc(ny);
+  for (i=0; i<v; i++) gel(z++, 0) = gen_0;
   for (i=0; i<ny; i++)
   {
-    p1[i] = !isrationalzero(gel(y,i));
-    gel(z,i) = mulpol_limb(x+i,y,p1,0,i+1);
+    GEN yi = gel(y,i);
+    gel(y0,i) = isrationalzero(yi)? NULL: yi;
+    gel(z,i) = RgX_mulspec_basecase_limb(x+i, y0, 0, i+1);
   }
-  for (  ; i<nx; i++) gel(z,i) = mulpol_limb(x+i,y,p1,0,ny);
-  for (  ; i<nz; i++) gel(z,i) = mulpol_limb(x+i,y,p1,i-nx+1,ny);
-  pari_free(p1); z -= 2; z[1]=0; return normalizepol_lg(z, lz);
+  for (  ; i<nx; i++) gel(z,i) = RgX_mulspec_basecase_limb(x+i,y0, 0,ny);
+  for (  ; i<nz; i++) gel(z,i) = RgX_mulspec_basecase_limb(x+i,y0, i-nx+1,ny);
+  z -= v+2; z[1] = 0; return normalizepol_lg(z, lz);
 }
 
 /* return (x * X^d) + y. Assume d > 0, y != 0 */
@@ -901,9 +907,8 @@ RgX_mulspec(GEN a, GEN b, long na, long nb)
   if (na < nb) swapspec(a,b, na,nb);
   if (!nb) return zeropol(0);
 
+  if (nb < RgX_MUL_LIMIT) return RgX_mulspec_basecase(a,b,na,nb, v);
   RgX_shift_inplace_init(v);
-  if (nb < RgX_MUL_LIMIT)
-    return RgX_shift_inplace(mulpol(a,b,na,nb), v);
   i = (na>>1); n0 = na-i; na = i;
   av = avma; a0 = a+n0; n0a = n0;
   while (n0a && isrationalzero(gel(a,n0a-1))) n0a--;
@@ -934,42 +939,52 @@ RgX_mulspec(GEN a, GEN b, long na, long nb)
   return RgX_shift_inplace(gerepileupto(av,c0), v);
 }
 
-static GEN
-sqrpol(GEN x, long nx)
+INLINE GEN
+RgX_sqrspec_basecase_limb(GEN x, long a, long i)
 {
-  long i, j, l, lz, nz;
-  pari_sp av;
-  GEN p1,z;
-  char *p2;
+  pari_sp av = avma;
+  GEN s = NULL;
+  long j, l = (i+1)>>1;
+  for (j=a; j<l; j++)
+  {
+    GEN xj = gel(x,j), xx = gel(x,i-j);
+    if (xj && xx)
+    {
+      GEN t = gmul(xj, xx);
+      s = s? gadd(s, t): t;
+    }
+  }
+  if (s) s = gshift(s,1);
+  if ((i&1) == 0)
+  {
+    GEN t = gel(x, i>>1);
+    if (t) {
+      t = gsqr(t);
+      s = s? gadd(s, t): t;
+    }
+  }
+  return s? gerepileupto(av,s): gen_0;
+}
+static GEN
+RgX_sqrspec_basecase(GEN x, long nx, long v)
+{
+  long i, lz, nz;
+  GEN z, x0;
 
   if (!nx) return zeropol(0);
   lz = (nx << 1) + 1, nz = lz-2;
+  lz += v;
+  x0 = cgetg(nx+1, t_VECSMALL) + 1; /* left on stack */
   z = cgetg(lz,t_POL) + 2;
-  p2 = (char*)pari_malloc(nx);
+  for (i=0; i<v; i++) gel(z++, 0) = gen_0;
   for (i=0; i<nx; i++)
   {
-    p2[i] = !isrationalzero(gel(x,i));
-    p1=gen_0; av=avma; l=(i+1)>>1;
-    for (j=0; j<l; j++)
-      if (p2[j] && p2[i-j])
-	p1 = gadd(p1, gmul(gel(x,j),gel(x,i-j)));
-    p1 = gshift(p1,1);
-    if ((i&1) == 0 && p2[i>>1])
-      p1 = gadd(p1, gsqr(gel(x,i>>1)));
-    gel(z,i) = gerepileupto(av,p1);
+    GEN xi = gel(x,i);
+    gel(x0,i) = isrationalzero(xi)? NULL: xi;
+    gel(z,i) = RgX_sqrspec_basecase_limb(x, 0, i);
   }
-  for (  ; i<nz; i++)
-  {
-    p1=gen_0; av=avma; l=(i+1)>>1;
-    for (j=i-nx+1; j<l; j++)
-      if (p2[j] && p2[i-j])
-	p1 = gadd(p1, gmul(gel(x,j),gel(x,i-j)));
-    p1 = gshift(p1,1);
-    if ((i&1) == 0 && p2[i>>1])
-      p1 = gadd(p1, gsqr(gel(x,i>>1)));
-    gel(z,i) = gerepileupto(av,p1);
-  }
-  pari_free(p2); z -= 2; z[1]=0; return normalizepol_lg(z,lz);
+  for (  ; i<nz; i++) gel(z,i) = RgX_sqrspec_basecase_limb(x, i-nx+1, i);
+  z -= v+2; z[1] = 0; return normalizepol_lg(z, lz);
 }
 
 GEN
@@ -980,8 +995,8 @@ RgX_sqrspec(GEN a, long na)
   pari_sp av;
 
   while (na && isrationalzero(gel(a,0))) { a++; na--; v += 2; }
+  if (na<RgX_SQR_LIMIT) return RgX_sqrspec_basecase(a, na, v);
   RgX_shift_inplace_init(v);
-  if (na<RgX_SQR_LIMIT) return RgX_shift_inplace(sqrpol(a,na), v);
   i = (na>>1); n0 = na-i; na = i;
   av = avma; a0 = a+n0; n0a = n0;
   while (n0a && isrationalzero(gel(a,n0a-1))) n0a--;
