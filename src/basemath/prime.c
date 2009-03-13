@@ -616,7 +616,8 @@ isprimePL(GEN N, long flag)
   eps = cmpis(N,2);
   if (eps<=0) return eps? gen_0: gen_1;
 
-  if (DEBUGLEVEL>3) fprintferr("PL: proving primality of N = %Ps\n", N);
+  if (DEBUGLEVEL>3)
+    fprintferr("Pocklington-Lehmer: proving primality of N = %Ps\n", N);
   N = absi(N);
   if (!F)
   {
@@ -624,9 +625,16 @@ isprimePL(GEN N, long flag)
     GEN N_1 = addis(N,-1), f;
     F = Z_factor_until(N_1, sqri(floorr(cbrtN)));
     f = factorback(F); F = gel(F,1);
-    if (!equalii(f, N_1) && !BLS_test(N,f)) { avma = ltop; return gen_0; }
-    if (DEBUGLEVEL>3) fprintferr("PL: N-1 factored!\n");
+    if (!equalii(f, N_1) && !BLS_test(N,f)) {
+      if (DEBUGLEVEL>3)
+        fprintferr("Pocklington-Lehmer: N-1 not smooth enough --> Failure. Factored up to %Ps (%.3Ps%%)\n", f, divri(itor(f,3), N));
+      avma = ltop; return gen_0;
+    }
+    if (DEBUGLEVEL>3)
+      fprintferr("Pocklington-Lehmer: N-1 factored up to %Ps! (%.3Ps%%)\n", f, divri(itor(f,3), N));
   }
+  if (DEBUGLEVEL>3)
+    fprintferr("Pocklington-Lehmer: N-1 smooth enough! Computing certificate\n");
   C = cgetg(4,t_MAT); l = lg(F);
   gel(C,1) = cgetg(l,t_COL);
   gel(C,2) = cgetg(l,t_COL);
@@ -639,6 +647,8 @@ isprimePL(GEN N, long flag)
     if (!witness) { avma = ltop; return gen_0; }
     gmael(C,1,i) = icopy(p);
     gmael(C,2,i) = utoi(witness);
+    if (DEBUGLEVEL>3)
+      fprintferr("Pocklington-Lehmer: recursively proving primality of p = %Ps\n", p);
     if (!flag) r = BPSW_isprime(p)? gen_1: gen_0;
     else
     {

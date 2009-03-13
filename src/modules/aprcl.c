@@ -956,7 +956,7 @@ aprcl(GEN N)
     }
   if (Z_issquare(N)) return _res(0,0);
   t = compt(N);
-  if (DEBUGLEVEL) fprintferr("Choosing t = %ld\n",t);
+  if (DEBUGLEVEL) fprintferr("Starting APRCL: Choosing t = %ld\n",t);
   et = e(t, &globfa);
   if (cmpii(sqri(et),N) < 0) pari_err(bugparier,"aprcl: e(t) too small");
   if (!gequal1(gcdii(N,mului(t,et)))) return _res(1,0);
