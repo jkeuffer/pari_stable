@@ -1872,7 +1872,7 @@ optimizefunc(entree *ep, long n)
       q=p;
     }
   }
-  else vec_optimize(arg);
+  else (void)vec_optimize(arg);
   avma=av; tree[n].flags=fl;
 }
 
