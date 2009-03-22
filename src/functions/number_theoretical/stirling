@@ -15,11 +15,14 @@ Doc: \idx{Stirling number} of the first kind $s(n,k)$ ($\fl=1$, default) or
  Similarly, if a large number of $S(n,k)$ are needed for the same $k$,
  one should use
  $$\sum_n S(n,k) x^n = \dfrac{x^k}{(1-x)\dots(1-kx)}.$$
- (Should be implemented using a divide and conquer product.) Here is a
- simple variant for $n$ fixed:
+ (Should be implemented using a divide and conquer product.) Here are
+ simple variants for $n$ fixed:
  \bprog
+ /* list of s(n,k), k = 1..n */
+ vecstirling(n) = Vec( factorback(vector(n-1,i,1-i*'x)) )
+
  /* list of S(n,k), k = 1..n */
- vecstirling2(n)=
+ vecstirling2(n) =
  { my(Q = x^(n-1), t);
    vector(n, i, t = divrem(Q, x-i); Q=t[1]; t[2]);
  }
