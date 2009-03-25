@@ -1399,7 +1399,7 @@ rnfnormgroup(GEN bnr, GEN polrel)
   group = FpC_red(bnr_get_cyc(bnr), greldeg);
   for (i=1; i<lg(group); i++)
     if (!signe(gel(group,i))) gel(group,i) = greldeg;
-  detgroup = detcyc(group, &i/*junk*/);
+  detgroup = ZV_prod(group);
   group = diagonal_shallow(group);
   k = cmpiu(detgroup,reldeg);
   if (k < 0)
