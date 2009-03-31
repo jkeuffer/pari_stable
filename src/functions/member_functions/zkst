@@ -4,4 +4,4 @@ Section: member_functions
 C-Name: member_zkst
 Prototype: G
 Description:
- (bnr):gen:copy        gel($1, 2)
+ (bnr):gen:copy        bnr_get_bid($1)

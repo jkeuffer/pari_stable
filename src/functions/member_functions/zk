@@ -4,5 +4,5 @@ Section: member_functions
 C-Name: member_zk
 Prototype: G
 Description:
- (nf):vec:copy         gel($1, 17)
+ (nf):vec:copy         nf_get_zk($1)
  (gen):vec             member_zk($1)

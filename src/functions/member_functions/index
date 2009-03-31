@@ -4,5 +4,5 @@ C-Name: member_index
 Prototype: G
 Help: _.index
 Description:
- (nf):int:copy                  gel($1, 4)
+ (nf):int:copy                  nf_get_index($1)
  (gen):int                      member_index($1)

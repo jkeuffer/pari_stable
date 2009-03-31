@@ -4,7 +4,7 @@ C-Name: member_disc
 Prototype: G
 Help: _.disc
 Description: 
- (nf):int:copy                  gel($1, 3)
+ (nf):int:copy                  nf_get_disc($1)
  (ell):gen:copy                 ell_get_disc($1)
  (gen):gen                      member_disc($1)
 

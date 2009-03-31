@@ -5,5 +5,5 @@ C-Name: member_pol
 Prototype: G
 Description:
  (gal):gen:copy                 gel($1, 1)
- (nf):gen:copyi                 gel($1, 1)
+ (nf):gen:copyi                 nf_get_pol($1)
  (gen):gen                      member_pol($1)

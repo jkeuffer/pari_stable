@@ -6,6 +6,6 @@ Help: _.roots
 Description: 
  (gal):gen:copy                 gel($1, 3)
  (bell):gen:copy                ell_get_roots($1)
- (nf):gen:copy                  gel($1, 6)
+ (nf):gen:copy                  nf_get_roots($1)
  (gen):gen                      member_roots($1)
 

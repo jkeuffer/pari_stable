@@ -6,4 +6,5 @@ Prototype: G
 Description:
  (gal):gen:copy        gel($1, 7)
  (clgp):gen:copy       gel($1, 3)
+ (prid):gen:copy       pr_get_gen($1)
  (gen):gen             member_gen($1)

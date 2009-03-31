@@ -5,5 +5,5 @@ C-Name: member_p
 Prototype: G
 Description:
  (gal):int:copy                 gmael($1, 2, 1)
- (prid):int:copy                gel($1, 1)
+ (prid):int:copy                pr_get_p($1)
  (gen):int                      member_p($1)
