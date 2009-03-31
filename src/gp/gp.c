@@ -503,7 +503,8 @@ t2   : t2 matrix                                           nf, bnf, bnr\n\
 tate : Tate's [u^2, u, q]                             ell\n\
 tu   : torsion unit and its order                              bnf, bnr\n\
 w    : Mestre's w                                     ell\n\
-zk   : integral basis                                      nf, bnf, bnr\n");
+zk   : integral basis                                      nf, bnf, bnr\n\
+zkst : structure of (Z_K/m)*         bid,                           bnr\n");
 }
 
 #define QUOTE "_QUOTE"
