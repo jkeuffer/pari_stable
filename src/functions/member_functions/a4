@@ -1,7 +1,8 @@
 Function: _.a4
-Help: _.a4
 Section: member_functions
 C-Name: member_a4
 Prototype: G
-Description:
- (ell):gen:copy        gel($1, 4)
+Help: _.a4
+Description: 
+ (ell):gen:copy        ell_get_a4($1)
+

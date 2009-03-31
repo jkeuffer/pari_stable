@@ -1,7 +1,8 @@
 Function: _.a6
-Help: _.a6
 Section: member_functions
 C-Name: member_a6
 Prototype: G
-Description:
- (ell):gen:copy         gel($1, 5)
+Help: _.a6
+Description: 
+ (ell):gen:copy         ell_get_a6($1)
+
