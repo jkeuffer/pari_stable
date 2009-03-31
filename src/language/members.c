@@ -132,7 +132,7 @@ member_disc(GEN x) /* discriminant */
     switch(t)
     {
       case typ_Q  : return quad_disc(x);
-      case typ_ELL: return gel(x,12);
+      case typ_ELL: return ell_get_disc(x);
     }
     member_err("disc");
   }
@@ -242,7 +242,7 @@ member_roots(GEN x) /* roots */
   long t; GEN y = get_nf(x,&t);
   if (!y)
   {
-    if (t == typ_ELL && is_ell(x)) return gel(x,14);
+    if (t == typ_ELL && is_ell(x)) return ell_get_roots(x);
     if (t == typ_GAL) return gel(x,3);
     member_err("roots");
   }
@@ -428,84 +428,84 @@ GEN
 member_a1(GEN x)
 {
   if (!is_ell5(x)) member_err("a1");
-  return gel(x,1);
+  return ell_get_a1(x);
 }
 
 GEN
 member_a2(GEN x)
 {
   if (!is_ell5(x)) member_err("a2");
-  return gel(x,2);
+  return ell_get_a2(x);
 }
 
 GEN
 member_a3(GEN x)
 {
   if (!is_ell5(x)) member_err("a3");
-  return gel(x,3);
+  return ell_get_a3(x);
 }
 
 GEN
 member_a4(GEN x)
 {
   if (!is_ell5(x)) member_err("a4");
-  return gel(x,4);
+  return ell_get_a4(x);
 }
 
 GEN
 member_a6(GEN x)
 {
   if (!is_ell5(x)) member_err("a6");
-  return gel(x,5);
+  return ell_get_a6(x);
 }
 
 GEN
 member_b2(GEN x)
 {
   if (!is_smallell(x)) member_err("b2");
-  return gel(x,6);
+  return ell_get_b2(x);
 }
 
 GEN
 member_b4(GEN x)
 {
   if (!is_smallell(x)) member_err("b4");
-  return gel(x,7);
+  return ell_get_b4(x);
 }
 
 GEN
 member_b6(GEN x)
 {
   if (!is_smallell(x)) member_err("b6");
-  return gel(x,8);
+  return ell_get_b6(x);
 }
 
 GEN
 member_b8(GEN x)
 {
   if (!is_smallell(x)) member_err("b8");
-  return gel(x,9);
+  return ell_get_b8(x);
 }
 
 GEN
 member_c4(GEN x)
 {
   if (!is_smallell(x)) member_err("c4");
-  return gel(x,10);
+  return ell_get_c4(x);
 }
 
 GEN
 member_c6(GEN x)
 {
   if (!is_smallell(x)) member_err("c6");
-  return gel(x,11);
+  return ell_get_c6(x);
 }
 
 GEN
 member_j(GEN x)
 {
   if (!is_smallell(x)) member_err("j");
-  return gel(x,13);
+  return ell_get_j(x);
 }
 
 GEN
