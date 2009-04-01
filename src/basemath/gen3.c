@@ -2672,7 +2672,14 @@ compo(GEN x, long n)
   ulong l, lx = (ulong)lg(x);
 
   if (!is_recursive_t(tx))
+  {
+    if (tx == t_VECSMALL)
+    {
+      if (n < 1 || n >= lx) pari_err(talker,"nonexistent component");
+      return stoi(x[n]);
+    }
     pari_err(talker, "this object is a leaf. It has no components");
+  }
   if (n < 1) pari_err(talker,"nonexistent component");
   if (tx == t_POL && (ulong)n+1 >= lx) return gen_0;
   if (tx == t_LIST) {
