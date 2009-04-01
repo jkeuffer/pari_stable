@@ -455,7 +455,7 @@ monomorphismratlift(GEN P, GEN S, struct galois_lift *gl, GEN frob)
     S = FpXQ_mul(Wr, FpX_FpXQV_eval(Pr, Spow, Qr, q),Qr,q);
     lbot = avma;
     S = FpX_sub(Sr, S, q);
-    if (DEBUGLEVEL >= 2) msgtimer("MonomorphismLift: lift to prec %d",level);
+    if (DEBUGLEVEL >= 4) msgtimer("MonomorphismLift: lift to prec %d",level);
     if (mask == 1) break;
     Wr = ZX_copy(Wr);
     gerepilemanysp(ltop, lbot, gptr, 2);
@@ -522,7 +522,7 @@ inittestlift(GEN plift, GEN Tmod, struct galois_lift *gl,
       gel(gt->pauto,i) = FpX_FpXQV_eval(gel(gt->pauto,i-1),autpow,gl->TQ,gl->Q);
     /*Somewhat paranoid with memory, but this function use a lot of stack.*/
     gerepilecoeffssp(av, ltop, gt->pauto + 3, gt->f-2);
-    if (DEBUGLEVEL >= 1) msgtimer("frobenius power");
+    if (DEBUGLEVEL >= 1) msgtimer("Frobenius power");
   }
 }
 
@@ -1872,11 +1872,11 @@ galoisfindfrobenius(GEN T, GEN L, GEN den, struct galois_frobenius *gf,
     GEN Ti, Tp = ZX_to_Flx(T, gf->p);
     long nb, d;
     if (!Flx_is_squarefree(Tp, gf->p)) goto nextp;
-
     Ti = gel(FpX_factor(Flx_to_ZX(Tp), utoipos(gf->p)), 1);
     nb = lg(Ti)-1; d = degpol(gel(Ti,1));
     if (nb > 1 && degpol(gel(Ti,nb)) != d) { avma = ltop; return NULL; }
     if (((gmask&1)==0 || d % deg) && ((gmask&2)==0 || odd(d))) goto nextp;
+    if (DEBUGLEVEL >= 1) fprintferr("GaloisConj: Trying p=%ld\n", gf->p);
     gf->fp = d;
     gf->Tmod = Ti; lbot = avma;
     frob = galoisfrobeniuslift(T, den, L, Lden, gf, gb);
@@ -1888,14 +1888,16 @@ galoisfindfrobenius(GEN T, GEN L, GEN den, struct galois_frobenius *gf,
       gerepilemanysp(ltop,lbot,gptr,3); return frob;
     }
     if ((ga->group&ga_all_normal) && d % deg == 0) gmask &= ~1;
-    /*The first prime degree is always divisible by deg, so we don't
+    /* The first prime degree is always divisible by deg, so we don't
      * have to worry about ext_2 being used before regular supersolvable*/
     if (!gmask) { avma = ltop; return NULL; }
-    if ((ga->group&ga_non_wss) && ++Try > n)
-      pari_warn(warner, "galoisconj _may_ hang up for this polynomial");
+    if ((ga->group&ga_non_wss) && ++Try > ((3*n)>>1))
+    {
+      pari_warn(warner,"Galois group almost certainly not weakly super solvable");
+      return NULL;
+    }
 nextp:
     NEXT_PRIME_VIADIFF_CHECK(gf->p, primepointer);
-    if (DEBUGLEVEL >= 4) fprintferr("GaloisConj:next p=%ld\n", gf->p);
     avma = av;
   }
 }
