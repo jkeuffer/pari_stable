@@ -42,7 +42,7 @@ galoisconj1(GEN nf)
   for (i = 1; i < lz; i++)
   {
     GEN t = lift(gel(z,i));
-    setvarn(t, v);
+    if (typ(t) == t_POL) setvarn(t, v);
     gel(y,i) = t;
   }
   return gerepileupto(av, y);
