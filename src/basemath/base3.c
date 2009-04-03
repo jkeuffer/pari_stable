@@ -1240,22 +1240,18 @@ zidealij(GEN x, GEN y, GEN *U)
 static GEN
 Fq_FpXQ_log(GEN a, GEN g, GEN ord, GEN T, GEN p)
 {
-  if (!T)
-    return Fp_log(a,g,ord,p);
-  if (typ(a)==t_INT)
-    return Fp_FpXQ_log(a,g,ord,T,p);
+  if (!T) return Fp_log(a,g,ord,p);
+  if (typ(a)==t_INT) return Fp_FpXQ_log(a,g,ord,T,p);
   return FpXQ_log(a,g,ord,T,p);
 }
-
 /* same in nf.zk / pr */
 static GEN
-nf_log(GEN nf, GEN a, GEN g, GEN pr)
+nf_log(GEN nf, GEN a, GEN g, GEN ord, GEN pr)
 {
   pari_sp av = avma;
   GEN T,p, modpr = nf_to_Fq_init(nf, &pr, &T, &p);
   GEN A = nf_to_Fq(nf,a,modpr);
   GEN G = nf_to_Fq(nf,g,modpr);
-  GEN ord = addis(T?powiu(p,degpol(T)):p,-1);
   return gerepileuptoint(av, Fq_FpXQ_log(A,G,ord,T,p));
 }
 
@@ -1475,7 +1471,7 @@ zlog_pk(GEN nf, GEN a0, GEN y, GEN pr, GEN prk, GEN list, GEN *psigne)
     s   = gel(L,4);
     U   = gel(L,5);
     if (j == 1)
-      e = mkcol( nf_log(nf, a, gel(gen,1), pr) );
+      e = mkcol( nf_log(nf, a, gel(gen,1), gel(cyc,1), pr) );
     else if (typ(a) == t_INT)
       e = RgC_Rg_mul(gel(U,1), subis(a, 1));
     else
@@ -1513,8 +1509,8 @@ static GEN
 famat_zlog(GEN nf, GEN fa, GEN sgn, GEN bid)
 {
   GEN g = gel(fa,1), e = gel(fa,2);
-  GEN vp = gmael(bid, 3,1), ep = gmael(bid, 3,2), mod = bid_get_mod(bid);
-  GEN arch = gel(mod,2);
+  GEN vp = gmael(bid, 3,1), ep = gmael(bid, 3,2);
+  GEN arch = bid_get_arch(bid);
   GEN cyc = bid_get_cyc(bid), lists = gel(bid,4), U = gel(bid,5);
   GEN y0, x, y, EX = gel(cyc,1);
   long i, l;
@@ -1526,7 +1522,7 @@ famat_zlog(GEN nf, GEN fa, GEN sgn, GEN bid)
   {
     GEN pr = gel(vp,i), prk, ex;
     if (l == 2) {
-      prk = gel(mod,1);
+      prk = bid_get_ideal(bid);
       ex = EX;
     } else { /* try to improve EX: should be group exponent mod prf, not f */
       GEN k = gel(ep,i);
