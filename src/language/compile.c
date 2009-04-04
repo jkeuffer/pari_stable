@@ -849,6 +849,7 @@ compilefunc(entree *ep, long n, int mode)
       str=tree[arg[1]].str;
     else
       str=tree[n].str;
+    while(*str==')') str++;
   }
   if (tree[n].f==Faffect)
   {
