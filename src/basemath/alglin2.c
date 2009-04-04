@@ -80,7 +80,7 @@ easychar(GEN x, long v, GEN *py)
 
     case t_POLMOD:
       if (py) pari_err(typeer,"easychar");
-      return RgXQ_caract(gel(x,2), gel(x,1), v);
+      return RgXQ_charpoly(gel(x,2), gel(x,1), v);
 
     case t_MAT:
       lx=lg(x);

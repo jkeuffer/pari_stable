@@ -897,7 +897,7 @@ rnfpolred(GEN nf, GEN pol, long prec)
       if (typ(c) == t_COL) gel(a,i) = coltoliftalg(nf, c);
     }
     a = RgV_to_RgX(a, v);
-    newpol = RgXQX_red(RgXQ_caract(a, pol, v), nfpol);
+    newpol = RgXQX_red(RgXQ_charpoly(a, pol, v), nfpol);
     newpol = Q_primpart(newpol);
 
     (void)nfgcd_all(newpol, RgX_deriv(newpol), nfpol, nf_get_index(nf), &newpol);
@@ -1004,7 +1004,7 @@ rnfpolredabs(GEN nf, GEN relpol, long flag)
 
   elt = RgXQX_translate(gel(red,2), deg1pol_shallow(a,gen_0,varn(T)), T);
   elt = rnf_fix_pol(T, elt, 0);
-  pol = RgXQ_caract(elt, relpol, varn(relpol));
+  pol = RgXQ_charpoly(elt, relpol, varn(relpol));
   pol = lift_if_rational(pol);
   if (flag & nf_ORIG) pol = mkvec2(pol, mkpolmod(RgXQ_reverse(elt,relpol),pol));
   return gerepilecopy(av, pol);

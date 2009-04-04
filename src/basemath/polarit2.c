@@ -2504,7 +2504,7 @@ caract_const(pari_sp av, GEN x, long v, long d)
 
 /* return caract(Mod(x,T)) in variable v */
 GEN
-RgXQ_caract(GEN x, GEN T, long v)
+RgXQ_charpoly(GEN x, GEN T, long v)
 {
   pari_sp av = avma;
   long d = degpol(T), dx, vx, vp;
@@ -2515,7 +2515,7 @@ RgXQ_caract(GEN x, GEN T, long v)
   vp = varn(T);
   if (varncmp(vx, vp) > 0) return caract_const(av, x, v, d);
   if (varncmp(vx, vp) < 0)
-    pari_err(talker,"incorrect variable priorities in RgXQ_caract");
+    pari_err(talker,"incorrect variable priorities in RgXQ_charpoly");
   dx = degpol(x);
   if (dx <= 0)
     return dx? monomial(gen_1, d, v): caract_const(av, gel(x,2), v, d);
@@ -2568,7 +2568,7 @@ rnfcharpoly(GEN nf, GEN Q, GEN x, long v)
   x = rnf_fix_pol(T,x,0);
   if (degpol(x) >= dQ) x = RgX_rem(x, Q);
   if (dQ <= 1) return caract_const(av, constant_term(x), v, 1);
-  return gerepilecopy(av, lift_if_rational( RgXQ_caract(x, Q, v) ));
+  return gerepilecopy(av, lift_if_rational( RgXQ_charpoly(x, Q, v) ));
 }
 
 /*******************************************************************/

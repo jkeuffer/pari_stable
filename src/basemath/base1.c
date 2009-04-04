@@ -278,7 +278,7 @@ tschirnhaus(GEN x)
     a = random_bits(2); if (a==0) a  = 1; gel(y,4) = stoi(a);
     a = random_bits(3); if (a>=4) a -= 8; gel(y,3) = stoi(a);
     a = random_bits(3); if (a>=4) a -= 8; gel(y,2) = stoi(a);
-    u = RgXQ_caract(y,x,v); av2 = avma;
+    u = RgXQ_charpoly(y,x,v); av2 = avma;
   }
   while (degpol(RgX_gcd(u,RgX_deriv(u)))); /* while u not separable */
   if (DEBUGLEVEL>1)
@@ -1790,7 +1790,7 @@ polred_aux(nfbasic_t *T, GEN *pro, long flag)
     GEN ch, ai = gel(T->bas,i);
     ch = get_polmin_w(&d, i);
     /* if accuracy too low, compute algebraically */
-    if (!ch) ch = ZX_caract(x, ai, v);
+    if (!ch) ch = ZX_charpoly(x, ai, v);
     if (ZX_canon_neg(ch) && orig) ai = RgX_neg(ai);
     if (nfred && degpol(ch) == l-1) return mkvec2(ch, ai);
     if (DEBUGLEVEL>3) fprintferr("polred: generator %Ps\n", ch);

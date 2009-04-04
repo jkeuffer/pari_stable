@@ -1122,7 +1122,7 @@ modreverse(GEN x)
   a = gel(x,2);
   v = varn(T);
   y = cgetg(3,t_POLMOD);
-  gel(y,1) = (n==1)? gsub(pol_x(v), a): RgXQ_caract(a, T, v);
+  gel(y,1) = (n==1)? gsub(pol_x(v), a): RgXQ_charpoly(a, T, v);
   gel(y,2) = RgXQ_reverse(a, T); return y;
 }
 

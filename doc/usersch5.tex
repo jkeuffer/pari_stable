@@ -4885,7 +4885,7 @@ component in $x$.
 \fun{long}{ZXY_max_lg}{GEN x} returs the effective length of the longest
 component in $x$; assume all coefficients are \typ{INT} or \kbd{ZX}s.
 
-\fun{GEN}{ZX_caract}{GEN T, GEN A, long v}: let \kbd{T} and \kbd{A} be
+\fun{GEN}{ZX_charpoly}{GEN T, GEN A, long v}: let \kbd{T} and \kbd{A} be
 \kbd{ZX}s, returns the characteristic polynomial of \kbd{Mod(A, T)}.
 More generally, \kbd{A} is allowed to be a \kbd{QX}, hence possibly has
 rational coefficients, \emph{assuming} the result is a \kbd{ZX}, i.e.~the
@@ -5239,7 +5239,7 @@ scalar, not a constant \typ{POL}.
 
 \fun{GEN}{RgXQ_norm}{GEN x, GEN T} returns the norm of \kbd{Mod(x, T)}.
 
-\fun{GEN}{RgXQ_caract}{GEN x, GEN T, long v} returns the characteristic
+\fun{GEN}{RgXQ_charpoly}{GEN x, GEN T, long v} returns the characteristic
 polynomial of \kbd{Mod(x, T)}, in variable $v$.
 
 \fun{GEN}{RgX_RgXQ_eval}{GEN f,GEN x,GEN T} returns
