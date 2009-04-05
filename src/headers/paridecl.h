@@ -2240,7 +2240,7 @@ GEN     RgX_to_FpX(GEN x, GEN p);
 GEN     RgX_to_FqX(GEN x, GEN T, GEN p);
 GEN     ZX_QX_resultant(GEN A, GEN B);
 GEN     ZX_ZXY_rnfequation(GEN A, GEN B0, long *lambda);
-GEN     ZX_charpoly(GEN A, GEN B, long v);
+GEN     ZX_charpoly(GEN A, GEN T, long v);
 GEN     ZX_disc(GEN x);
 int     ZX_is_squarefree(GEN x);
 GEN     ZX_gcd(GEN A, GEN B);

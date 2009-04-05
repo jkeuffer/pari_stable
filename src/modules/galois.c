@@ -716,7 +716,7 @@ tschirn(buildroot *BR)
     h = Flx_to_ZX(Flx_renormalize(a,l+2));
   } while (degpol(h) <= 0 || !ZX_is_squarefree(h));
   setvarn(h, v); k = 0;
-  (void)ZX_caract_sqf(h, BR->p, &k, v);
+  (void)ZX_charpoly_sqf(BR->p, h, &k, v);
   a[2] += k;
 
   r = gel(BR->r,1);

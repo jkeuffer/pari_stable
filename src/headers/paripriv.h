@@ -207,7 +207,7 @@ long FqX_split_by_degree(GEN *pz, GEN u, GEN q, GEN T, GEN p);
 long FqX_split_deg1(GEN *pz, GEN u, GEN q, GEN T, GEN p);
 GEN  FqX_split_roots(GEN z, GEN T, GEN p, GEN pol);
 GEN  polsym_gen(GEN P, GEN y0, long n, GEN T, GEN N);
-GEN  ZX_caract_sqf(GEN A, GEN B, long *lambda, long v);
+GEN  ZX_charpoly_sqf(GEN A, GEN B, long *lambda, long v);
 GEN  ZX_disc_all(GEN,ulong);
 GEN  ZX_resultant_all(GEN A, GEN B, GEN dB, ulong bound);
 GEN  ZX_ZXY_resultant_all(GEN A, GEN B0, long *lambda, GEN *LPRS);
