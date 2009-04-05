@@ -221,6 +221,8 @@ BA  3- builtin-in GP functions can now be used as closures.
        subres -> resultant, subresall -> resultant_all.
        torsell -> elltors and document it
        zideallog -> ideallog
+       RgXQ_caract -> RgXQ_charpoly
+       ZX_caract -> ZXQ_charpoly
        ZX_isirreducible -> ZX_is_irred
        pariputc -> pari_putc, pariputs -> pari_puts, pariflush -> pari_flush,
        gpmalloc -> pari_malloc, gprealloc -> pari_realloc, gpfree -> pari_free

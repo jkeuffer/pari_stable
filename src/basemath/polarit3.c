@@ -2378,7 +2378,7 @@ ZX_ZXY_rnfequation(GEN A, GEN B, long *lambda)
  * Otherwise find a small lambda such that caract (Mod(B + lambda X, A)) is
  * squarefree */
 GEN
-ZX_charpoly_sqf(GEN B, GEN A, long *lambda, long v)
+ZXQ_charpoly_sqf(GEN B, GEN A, long *lambda, long v)
 {
   pari_sp av = avma;
   GEN B0, R, a;
@@ -2415,9 +2415,9 @@ ZX_charpoly_sqf(GEN B, GEN A, long *lambda, long v)
 
 /* charpoly(Mod(A,T)), A may be in Q[X], but assume T and result are integral */
 GEN
-ZX_charpoly(GEN A, GEN T, long v)
+ZXQ_charpoly(GEN A, GEN T, long v)
 {
-  return (degpol(T) < 16) ? RgXQ_charpoly(A,T,v): ZX_charpoly_sqf(A,T, NULL, v);
+  return (degpol(T) < 16) ? RgXQ_charpoly(A,T,v): ZXQ_charpoly_sqf(A,T, NULL, v);
 }
 
 static GEN

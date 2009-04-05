@@ -1304,7 +1304,7 @@ getprime(decomp_t *S, GEN phi, GEN chip, GEN nup, long *Lp, long *Ep,
     chin = signe(c)? RgX_translate(chip, negi(c)): chip;
   }
   else
-    chin = ZX_charpoly(nup, chip, varn(chip));
+    chin = ZXQ_charpoly(nup, chip, varn(chip));
 
   vstar(S->p, chin, Lp, Ep);
   if (*Ep < oE || (Ediv && Ediv % *Ep == 0)) return NULL;
@@ -1483,7 +1483,7 @@ loop(decomp_t *S, long nv, long Ea, long Fa)
     }
     else
     { /* pmf | norm(beta) ==> useless */
-      chib = ZX_charpoly(beta, S->chi, v);
+      chib = ZXQ_charpoly(beta, S->chi, v);
       vstar(S->p, chib, &L, &E);
     }
     eq = (long)(L / E);
@@ -1504,7 +1504,7 @@ loop(decomp_t *S, long nv, long Ea, long Fa)
 
     if (!chig)
     { /* Valuation of beta was wrong ==> gamma fails the v*-test */
-      chib = ZX_charpoly(beta, S->chi, v);
+      chib = ZXQ_charpoly(beta, S->chi, v);
       vstar(S->p, chib, &L, &E);
       eq = (long)(L / E);
       er = (long)(L*Ea / E - eq*Ea);
@@ -1557,7 +1557,7 @@ loop(decomp_t *S, long nv, long Ea, long Fa)
 	{
 	  chie = mycaract(S, S->chi, eta, S->pmf, S->prc);
 	  if (dvdii(constant_term(chie), S->pmf))
-	    chie = ZX_charpoly(eta, S->chi, v);
+	    chie = ZXQ_charpoly(eta, S->chi, v);
 	}
 
 	pie = getprime(S, eta, chie, nue, &Le, &Ee,  0,Ea);

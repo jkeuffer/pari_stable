@@ -1790,7 +1790,7 @@ polred_aux(nfbasic_t *T, GEN *pro, long flag)
     GEN ch, ai = gel(T->bas,i);
     ch = get_polmin_w(&d, i);
     /* if accuracy too low, compute algebraically */
-    if (!ch) ch = ZX_charpoly(ai, x, v);
+    if (!ch) ch = ZXQ_charpoly(ai, x, v);
     if (ZX_canon_neg(ch) && orig) ai = RgX_neg(ai);
     if (nfred && degpol(ch) == l-1) return mkvec2(ch, ai);
     if (DEBUGLEVEL>3) fprintferr("polred: generator %Ps\n", ch);
