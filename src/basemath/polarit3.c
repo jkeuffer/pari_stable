@@ -2374,41 +2374,37 @@ ZX_ZXY_rnfequation(GEN A, GEN B, long *lambda)
   return ZX_ZXY_resultant_all(A, B, lambda, NULL);
 }
 
-/* If lambda = NULL, return caract(Mod(B, A)), A,B in Z[X].
- * Otherwise find a small lambda such that caract (Mod(B + lambda X, A)) is
+/* If lambda = NULL, return caract(Mod(A, T)), T,A in Z[X].
+ * Otherwise find a small lambda such that caract (Mod(A + lambda X, T)) is
  * squarefree */
 GEN
-ZXQ_charpoly_sqf(GEN B, GEN A, long *lambda, long v)
+ZXQ_charpoly_sqf(GEN A, GEN T, long *lambda, long v)
 {
   pari_sp av = avma;
-  GEN B0, R, a;
-  long dB;
+  GEN R, a;
+  long dA;
   int delvar;
 
   if (v < 0) v = 0;
-  switch (typ(B))
+  switch (typ(A))
   {
-    case t_POL: dB = degpol(B); if (dB > 0) break;
-      B = dB? gel(B,2): gen_0; /* fall through */
+    case t_POL: dA = degpol(A); if (dA > 0) break;
+      A = dA? gel(A,2): gen_0; /* fall through */
     default:
-      if (lambda) { B = scalar_ZX_shallow(B,varn(A)); dB = 0; break;}
-      return gerepileupto(av, gpowgs(gsub(pol_x(v), B), degpol(A)));
+      if (lambda) { A = scalar_ZX_shallow(A,varn(T)); dA = 0; break;}
+      return gerepileupto(av, gpowgs(gsub(pol_x(v), A), degpol(T)));
   }
   delvar = 0;
-  if (varn(A) == 0)
+  if (varn(T) == 0)
   {
     long v0 = fetch_var(); delvar = 1;
+    T = leafcopy(T); setvarn(T,v0);
     A = leafcopy(A); setvarn(A,v0);
-    B = leafcopy(B); setvarn(B,v0);
   }
-  B0 = cgetg(4, t_POL);
-  B0[1] = evalsigne(1);
-  gel(B0,2) = gneg_i(B);
-  gel(B0,3) = gen_1;
-  R = ZX_ZXY_rnfequation(A, B0, lambda);
+  R = ZX_ZXY_rnfequation(T, deg1pol_shallow(gneg_i(A), gen_1, 0), lambda);
   if (delvar) (void)delete_var();
-  setvarn(R, v); a = leading_term(A);
-  if (!gequal1(a)) R = gdiv(R, powiu(a, dB));
+  setvarn(R, v); a = leading_term(T);
+  if (!gequal1(a)) R = gdiv(R, powiu(a, dA));
   return gerepileupto(av, R);
 }
 
