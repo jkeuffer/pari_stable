@@ -628,7 +628,7 @@ closure_err(void)
       s = sbase + offset;
       member = offset>0 && (s[-1] == '.');
       /* avoid "in function foo: foo" */
-      if (next_fun && strcmp(next_fun, s)) {
+      if (!next_fun || strcmp(next_fun, s)) {
         print_errcontext(next_label, s, sbase);
         pari_putc('\n');
       }

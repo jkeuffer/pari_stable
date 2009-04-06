@@ -26,6 +26,8 @@
 
   ***   at top-level: (x->1/x)(0)
   ***                  ^----------
+  ***   in anonymous function: 1/x
+  ***                           ^--
   *** _/_: division by zero
 
-Total time spent: 16
+Total time spent: 24
