@@ -2401,7 +2401,7 @@ ZXQ_charpoly_sqf(GEN A, GEN T, long *lambda, long v)
     T = leafcopy(T); setvarn(T,v0);
     A = leafcopy(A); setvarn(A,v0);
   }
-  R = ZX_ZXY_rnfequation(T, deg1pol_shallow(gneg_i(A), gen_1, 0), lambda);
+  R = ZX_ZXY_rnfequation(T, deg1pol_shallow(gen_1, gneg_i(A), 0), lambda);
   if (delvar) (void)delete_var();
   setvarn(R, v); a = leading_term(T);
   if (!gequal1(a)) R = gdiv(R, powiu(a, dA));
