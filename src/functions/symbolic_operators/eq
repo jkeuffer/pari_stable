@@ -8,10 +8,8 @@ Description:
  (lg, lg):bool:parens                   $(1) == $(2)
  (small, int):bool:parens               cmpsi($1, $2) == 0
  (mp, 0):bool                           !signe($1)
- (@int, 1):bool:parens                  is_pm1($1) && signe($1)==1
- (int, 1):bool                          gequal1($1)
- (@int, -1):bool:parens                 is_pm1($1) && signe($1)==-1
- (int, -1):bool                         gequalm1($1)
+ (int, 1):bool                          equali1($1)
+ (int, -1):bool                         equalim1($1)
  (int, small):bool:parens               cmpis($1, $2) == 0
  (int, int):bool                        equalii($1, $2)
  (gen, 0):bool                          gequal0($1)

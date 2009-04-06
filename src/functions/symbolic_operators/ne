@@ -8,7 +8,9 @@ Description:
  (lg, lg):bool:parens			$(1) != $(2)
  (small, int):bool:parens		cmpsi($1, $2) != 0
  (int, small):bool:parens		cmpis($1, $2) != 0
- (int, int):negbool			equalii($1, $2)
+ (int, 1):negbool                       equali1($1)
+ (int, -1):negbool                      equalim1($1)
+ (int, int):negbool                     equalii($1, $2)
  (real,real):bool                       cmprr($1, $2) != 0
  (mp, mp):bool:parens			mpcmp($1, $2) != 0
  (typ, typ):bool:parens			$(1) != $(2)
