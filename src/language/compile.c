@@ -861,7 +861,7 @@ compilefunc(entree *ep, long n, int mode)
   {
     long lgarg;
     GEN vep = cgetg_copy(arg, &lgarg);
-    
+
     if (nb)
     {
       long i;
@@ -1598,7 +1598,7 @@ compilenode(long n, int mode, long flag)
       gel(text,1)=strntoGENstr(tree[x].str,tree[x].len);
       gel(text,2)=strntoGENstr(tree[y].str,tree[y].len);
       getcodepos(&pos);
-      dbgstart=tree[y].str;
+      dbgstart=tree[x].str+tree[x].len;
       nbmvar=ctxmvar();
       nb = lgarg-1;
       if (nb)
@@ -1627,6 +1627,7 @@ compilenode(long n, int mode, long flag)
           localvars[s_lvar.n-nb+i-1].ep=(entree*)vep[i];
         }
       }
+      dbgstart=tree[y].str;
       if (y>=0 && tree[y].f!=Fnoarg)
         compilenode(y,Ggen,FLreturn);
       else

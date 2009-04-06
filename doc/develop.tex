@@ -96,10 +96,11 @@ which which hold extra data needed for error-reporting and debugging.
 The object \kbd{dbg} is a \typ{VEC} with $3$ components:
 
 \kbd{dbg[1]} is a \typ{VECSMALL} of the same length than \kbd{z[3]}. For each
-opcode, it holds the position of the corresponding GP source code in the string
-stored in the second component of \kbd{z[6]} for function or true closures.
-For inline closures, the string of the parent function or true closure is used
-instead.
+opcode, it holds the position of the corresponding GP source code in the
+strings stored in \kbd{z[6]} for function or true closures, positive indices
+referring to the second strings, and negative indices referring to the first
+strings, the last element being indexed as $-1$. For inline closures, the
+string of the parent function or true closure is used instead.
 
 \kbd{dbg[2]} is a \typ{VECSMALL} that lists opcodes index where new lexical
 local variables are created. The value $0$ denotes the position before the

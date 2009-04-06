@@ -597,7 +597,7 @@ get_next_label(const char *s, int member, char **next_fun)
 void
 closure_err(void)
 {
-  const char *base = NULL;
+  GEN base = NULL;
   const long lastfun = s_trace.n - 1;
   char *next_label, *next_fun;
   long i, fun = lastfun;
@@ -614,22 +614,22 @@ closure_err(void)
   for (; i <= lastfun; i++)
   {
     GEN C = trace[i].closure;
-    if (lg(C) >= 7)
-    {
-      GEN code = gel(C,6);
-      if (typ(code)==t_VEC) code = gel(code,2);
-      base = GSTR(code);
-    }
+    if (lg(C) >= 7) base=gel(C,6);
     if (i==lastfun || lg(trace[i+1].closure)>=7)
     {
       /* After a SIGINT, pc can be slightly off: ensure 0 <= pc < lg() */
       long pc = minss(*trace[i].pc, lg(mael(C,5,1))-1);
       long offset = pc? mael3(C,5,1,pc): 0;
-      const char *s = base + offset;
-      int member = offset>0 && (s[-1] == '.');
+      int member;
+      const char *s, *sbase;
+      if (typ(base)!=t_VEC) sbase = GSTR(base);
+      else if (offset>=0)   sbase = GSTR(gel(base,2));
+      else { sbase = GSTR(gel(base,1)); offset += strlen(sbase); }
+      s = sbase + offset;
+      member = offset>0 && (s[-1] == '.');
       /* avoid "in function foo: foo" */
       if (next_fun && strcmp(next_fun, s)) {
-        print_errcontext(next_label, s, base);
+        print_errcontext(next_label, s, sbase);
         pari_putc('\n');
       }
       pari_free(next_label);
