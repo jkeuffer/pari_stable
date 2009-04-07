@@ -1431,8 +1431,8 @@ archstar_full_rk(GEN x, GEN bas, GEN v, GEN gen)
   }
 }
 
-/* x integral ideal, compute elements in 1+x (in x, if x = zk) whose sign
- * matrix is invertible. archp in 'indices' format */
+/* x non-0 integral ideal in HNF, compute elements in 1+x (in x, if x = zk)
+ * whose sign matrix is invertible. archp in 'indices' format */
 GEN
 nfarchstar(GEN nf, GEN x, GEN archp)
 {
@@ -1445,7 +1445,7 @@ nfarchstar(GEN nf, GEN x, GEN archp)
   {
     GEN xZ = gcoeff(x,1,1), gZ;
     pari_sp av = avma;
-    if (gequal1(xZ)) x = NULL; /* x = O_K */
+    if (is_pm1(xZ)) x = NULL; /* x = O_K */
     gZ = x? subsi(1, xZ): gen_m1; /* gZ << 0, gZ = 1 mod x */
     if (nba == 1)
     {
