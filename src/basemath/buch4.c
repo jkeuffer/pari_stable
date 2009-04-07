@@ -359,9 +359,14 @@ nfhilbertp(GEN nf, GEN a, GEN b, GEN pr)
   vb = nfval(nf,b,pr);
   if (!odd(va) && !odd(vb)) { avma = av; return 1; }
   /* Trick: pretend the exponent is 2, result is OK up to squares ! */
-  t = famat_makecoprime(nf, mkvec2(a,b), mkvec2(stoi(vb), stoi(-va)),
+  t = famat_makecoprime(nf, mkvec2(a,b), mkvec2s(vb, -va),
                         pr, idealhnf_two(nf, pr), gen_2);
-  if (ZV_isscalar(t)) { /* automatic if pr has degree 1 ! */
+  if (typ(t) == t_INT) {
+    if (odd(va) && odd(vb)) t = negi(t);
+    /* t = (-1)^(v(a)v(b)) a^v(b) b^(-v(a)) */
+    rep = Z_quad_char(t, pr);
+  }
+  else if (ZV_isscalar(t)) {
     t = gel(t,1);
     if (odd(va) && odd(vb)) t = negi(t);
     /* t = (-1)^(v(a)v(b)) a^v(b) b^(-v(a)) */

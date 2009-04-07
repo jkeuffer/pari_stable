@@ -386,8 +386,10 @@ GEN     Rg_RgX_sub(GEN x, GEN y);
 /* ZV.c */
 
 GEN     ZC_ZV_mul(GEN x, GEN y);
+GEN     ZC_Z_add(GEN x, GEN y);
 GEN     ZC_Z_divexact(GEN X, GEN c);
 GEN     ZC_Z_mul(GEN X, GEN c);
+GEN     ZC_Z_sub(GEN x, GEN y);
 GEN     ZC_add(GEN x, GEN y);
 GEN     ZC_copy(GEN x);
 GEN     ZC_hnfremdiv(GEN x, GEN y, GEN *Q);

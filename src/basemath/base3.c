@@ -1158,12 +1158,9 @@ nfpowmodideal(GEN nf,GEN x,GEN k,GEN A)
   long s = signe(k);
   GEN y;
 
-  if (!s) return scalarcol_shallow(gen_1, nf_get_degree(nf));
+  if (!s) return gen_1;
   x = nf_to_scalar_or_basis(nf, x);
-  if (typ(x) != t_COL) {
-    x = Fp_pow(x, k, gcoeff(A,1,1));
-    return scalarcol_shallow(x, nf_get_degree(nf));
-  }
+  if (typ(x) != t_COL) return Fp_pow(x, k, gcoeff(A,1,1));
   if (s < 0) { x = nfinvmodideal(nf, x,A); k = absi(k); }
   for(y = NULL;;)
   {
@@ -1274,14 +1271,28 @@ detcyc(GEN cyc, long *L)
   *L = i; return i <= 2? icopy(s): gerepileuptoint(av,s);
 }
 
-/* (U,V) = 1. Return y = x mod U, = 1 mod V (uv: u + v = 1, u in U, v in V).
- * mv = multiplication table by v */
+static GEN
+makeprimetoideal_i(GEN u,GEN mv, GEN x)
+{
+  GEN xv;
+  if (typ(mv) == t_INT)
+  {
+    if (typ(x) == t_INT) return ZC_Z_add(u, mulii(x,mv)); 
+    xv = ZC_Z_mul(x,mv);
+  }
+  else
+  {
+    if (typ(x) == t_INT) xv = ZC_Z_mul(gel(mv,1),x); else xv = ZM_ZC_mul(mv,x);
+  }
+  return ZC_add(u, xv);
+}
+
+/* (U,V) = 1. Return y = x mod U, = 1 mod V (uv: u + v = 1, u in U, v in V),
+ * namely u + x*v. 
+ * u is a t_COL, mv = multiplication table by v is a t_MAT or t_INT */
 static GEN
 makeprimetoideal(GEN UV, GEN u,GEN mv, GEN x)
-{
-  GEN xv = typ(mv) == t_INT? ZC_Z_mul(x, mv): ZM_ZC_mul(mv,x);
-  return ZC_hnfrem(ZC_add(u, xv), UV);
-}
+{ return ZC_hnfrem(makeprimetoideal_i(u, mv, x), UV); }
 
 static GEN
 makeprimetoidealvec(GEN nf, GEN UV, GEN u,GEN mv, GEN gen)

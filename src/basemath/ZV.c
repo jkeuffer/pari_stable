@@ -267,6 +267,16 @@ ZC_add_i(GEN x, GEN y, long lx)
 }
 GEN
 ZC_add(GEN x, GEN y) { return ZC_add_i(x, y, lg(x)); }
+GEN
+ZC_Z_add(GEN x, GEN y)
+{
+  long k, lx = lg(x);
+  GEN z = cgetg(lx, t_COL);
+  if (lx == 1) pari_err(operf,"+",x,y);
+  gel(z,1) = addii(y,gel(x,1));
+  for (k = 2; k < lx; k++) gel(z,k) = icopy(gel(x,k));
+  return z;
+}
 
 static GEN
 ZC_sub_i(GEN x, GEN y, long lx)
@@ -278,6 +288,16 @@ ZC_sub_i(GEN x, GEN y, long lx)
 }
 GEN
 ZC_sub(GEN x, GEN y) { return ZC_sub_i(x, y, lg(x)); }
+GEN
+ZC_Z_sub(GEN x, GEN y)
+{
+  long k, lx = lg(x);
+  GEN z = cgetg(lx, t_COL);
+  if (lx == 1) pari_err(operf,"+",x,y);
+  gel(z,1) = subii(gel(x,1), y);
+  for (k = 2; k < lx; k++) gel(z,k) = icopy(gel(x,k));
+  return z;
+}
 
 GEN
 ZM_add(GEN x, GEN y)
