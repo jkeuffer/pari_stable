@@ -1077,10 +1077,11 @@ zell(GEN e, GEN z, long prec)
   /* which square root? test the reciprocal function (pointell) */
   if (!gequal0(t))
   {
-    GEN z1,z2;
+    GEN z1, z2;
     int bad;
 
     z1 = pointell(e,gprec_w(t,3),3); /* we don't need much precision */
+    if (ell_is_inf(z1)) pari_err(precer, "ellpointtoz");
     /* Either z = z1 (ok: keep t), or z = z2 (bad: t <-- -t) */
     z2 = invell(e, z1);
     bad = (gexpo(gsub(z,z1)) > gexpo(gsub(z,z2)));

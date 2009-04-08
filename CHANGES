@@ -167,6 +167,7 @@ BA132- src/kernel/ix86/asm0.h had an incorrect #line entry.
        bnrM = bnrinit(bnfinit(X^4 - 34*X^2 + 1189,1), 5, 1);
        rnfkummer(bnrM, matdiagonal([3,1,1]))
   134- nfgaloisconj(y,1) -> invalid object
+  135- weird error message in ellpointtoz on loss of accuracy [#962]
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
