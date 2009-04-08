@@ -14,6 +14,9 @@ Doc:
  uniformly distributed between $0$ and $N-1$. Omitting the argument
  is equivalent to \kbd{random(2\pow31)}.
 
+ \item \typ{REAL}: returns a real number in $[0,1[$ with the same accuracy as
+$x$ (whose mantissa has the same number of significant words).
+
  \item \typ{INTMOD}: returns a random intmod for the same modulus.
 
  \item \typ{FFELT}: returns a random element in the same finite field.

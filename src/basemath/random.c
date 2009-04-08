@@ -163,6 +163,21 @@ randomi(GEN N)
 }
 
 GEN
+randomr(long prec)
+{
+  pari_sp av;
+  long b;
+  GEN x, y;
+  if (prec <= 2) return real_0_bit(0);
+  x = cgetr(prec); av = avma;
+  b = bit_accuracy(prec);
+  y = randomi(int2n(b));
+  if (!signe(y)) return real_0_bit(b);
+  affir(y, x); setexpo(x, expo(x) - b);
+  avma = av; return x;
+}
+
+GEN
 genrand(GEN N)
 {
   GEN z;
@@ -172,6 +187,8 @@ genrand(GEN N)
     case t_INT:
       if (signe(N)<=0) pari_err(talker,"invalid bound in random");
       return randomi(N);
+    case t_REAL: 
+      return randomr(lg(N));
     case t_INTMOD: 
       z = cgetg(3, t_INTMOD);
       gel(z,1) = icopy(gel(N,1));

@@ -2646,6 +2646,9 @@ in $0, 1, \dots p-1$.
 \fun{GEN}{randomi}{GEN n} returns a random \typ{INT} between $0$ and $\kbd{n}
 - 1$.
 
+\fun{GEN}{randomr}{long prec} returns a random \typ{REAL} in $[0,1[$, with
+precision \kbd{prec}.
+
 \subsec{Modular operations}. In this subsection, all \kbd{GEN}s are \typ{INT}.
 
 \fun{GEN}{Fp_neg}{GEN a, GEN m} returns $-$\kbd{a} modulo \kbd{m} (smallest

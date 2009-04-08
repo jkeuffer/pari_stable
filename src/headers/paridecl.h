@@ -2286,6 +2286,7 @@ GEN     genrand(GEN N);
 GEN     getrand(void);
 ulong   pari_rand(void);
 GEN     randomi(GEN x);
+GEN     randomr(long prec);
 ulong   random_Fl(ulong n);
 void    setrand(GEN seed);
 
