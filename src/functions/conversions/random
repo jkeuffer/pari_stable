@@ -15,7 +15,7 @@ Doc:
  is equivalent to \kbd{random(2\pow31)}.
 
  \item \typ{REAL}: returns a real number in $[0,1[$ with the same accuracy as
-$x$ (whose mantissa has the same number of significant words).
+ $x$ (whose mantissa has the same number of significant words).
 
  \item \typ{INTMOD}: returns a random intmod for the same modulus.
 
