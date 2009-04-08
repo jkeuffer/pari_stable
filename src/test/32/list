@@ -18,5 +18,5 @@ List([Vecsmall([1, 2, 3]), 2])
 
 List([10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0])
 List([10, 9, 8, 7, 6, 5])
-[98, 883]
-Total time spent: 56
+98
+Total time spent: 80
