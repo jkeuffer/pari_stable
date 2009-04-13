@@ -2675,7 +2675,7 @@ compo(GEN x, long n)
   {
     if (tx == t_VECSMALL)
     {
-      if (n < 1 || n >= lx) pari_err(talker,"nonexistent component");
+      if (n < 1 || (ulong)n >= lx) pari_err(talker,"nonexistent component");
       return stoi(x[n]);
     }
     pari_err(talker, "this object is a leaf. It has no components");
