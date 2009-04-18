@@ -2,8 +2,10 @@ Function: bestappr
 Section: number_theoretical
 C-Name: bestappr0
 Prototype: GGDG
-Help: bestappr(x, A,{B}): gives the best approximation to the real x with
- denominator less or equal to A.
+Help: bestappr(x, A,{B}): if x is real, gives the best approximation to x with
+ denominator less or equal to A. If x is an intmod, returns a rational number
+ congruent to x with numerator less than A and denominator less than B, which
+ must be given. Otherwise applies recursively to all components.
 Doc: if $B$ is omitted, finds the best rational approximation to $x\in\R$
  with denominator at most equal to $A$ using continued fractions. If $B$ is
  present perform rational modular reconstruction (see below). In both cases,
