@@ -4625,3 +4625,168 @@ ellanalyticrank(GEN e, GEN eps, long prec)
     el.ap = gclone(el.ap); avma = av2;
   }
 }
+
+/********************************************************************/
+/**                                                                **/
+/**                       PAIRINGS                                 **/
+/**                                                                **/
+/********************************************************************/
+/* Formulae from a GP script by J.E.Cremona */
+
+static GEN
+ellffvert(GEN t, GEN pt)
+{
+  return ell_is_inf(t)?gen_1:gsub(gel(pt, 1), gel(t, 1));
+}
+
+static GEN
+ellfftang(GEN E, GEN t, GEN pt)
+{
+  GEN dyf, dxf;
+  GEN a1 = ell_get_a1(E), a2 = ell_get_a2(E), a3 = ell_get_a3(E);
+  GEN a4 = ell_get_a4(E);
+  if (ell_is_inf(t)) return gen_1;
+  dyf = gadd(gadd(gmulgs(gel(t, 2), 2),gmul(a1, gel(t, 1))), a3);
+  if (gequal0(dyf))
+    return gsub(gel(pt, 1), gel(t, 1));
+  dxf = gsub(gmul(a1, gel(t, 2)), gadd(gadd(gmulsg(3, gsqr(gel(t, 1))),
+                                       gmul(gmulsg(2, a2), gel(t, 1))), a4));
+  return gadd(gsub(gel(pt, 2), gel(t, 2)), gmul(gdiv(dxf, dyf),
+              gsub(gel(pt, 1), gel(t, 1))));
+}
+
+static GEN
+ellffchord(GEN E, GEN t, GEN s, GEN pt)
+{
+  if (ell_is_inf(s)) return ellffvert(t, pt);
+  if (ell_is_inf(t)) return ellffvert(s, pt);
+  if (gequal(gel(s, 1), gel(t, 1)))
+  {
+    if (gequal(gel(s, 2), gel(t, 2))) return ellfftang(E, t, pt);
+    else return ellffvert(t, pt);
+  }
+  return gsub(gsub(gel(pt, 2), gel(t, 2)), gmul(gdiv(gsub(gel(t, 2), gel(s, 2)), gsub(gel(t, 1), gel(s, 1))), gsub(gel(pt, 1), gel(t, 1))));
+}
+
+struct ellff
+{
+  GEN E, pt1, pt2;
+};
+
+static GEN
+ellffadd(GEN E, GEN S, GEN T, GEN pt1, GEN pt2)
+{
+  GEN s=gel(S,1), t=gel(T,1);
+  GEN a, b, h;
+  GEN ST = cgetg(3, t_VEC);
+  GEN st = addell(E, s, t);
+  pari_sp av=avma;
+  gel(ST, 1) = st;
+  if (ell_is_inf(st))
+  {
+    a  = ellffvert(s, pt1);
+    if (gequal0(a)) return gen_0;
+    b  = ellffvert(s, pt2);
+  } else
+  {
+    a  = gmul(ellffchord(E, s, t, pt1), ellffvert(st, pt2));
+    if (gequal0(a)) return gen_0;
+    b  = gmul(ellffchord(E, s, t, pt2), ellffvert(st, pt1));
+  }
+  if (gequal0(b)) return gen_0;
+  h = gmul(gmul(gel(S,2), gel(T,2)),  gdiv(a, b));
+  gel(ST, 2) = gerepileupto(av, h);
+  return ST;
+}
+static GEN
+_ellffadd(void *data, GEN s, GEN t)
+{
+  struct ellff* ff=(struct ellff*) data;
+  if (s==gen_0 || t==gen_0) return gen_0;
+  return ellffadd(ff->E,s,t,ff->pt1,ff->pt2);
+}
+
+static GEN
+ellffdbl(GEN E, GEN S, GEN pt1, GEN pt2)
+{
+  GEN s=gel(S,1);
+  GEN a, b, h;
+  GEN S2 = cgetg(3, t_VEC);
+  GEN s2 = addell(E, s, s);
+  pari_sp av=avma;
+  gel(S2, 1) = s2;
+  if (ell_is_inf(s2))
+  {
+    a  = ellfftang(E, s, pt1);
+    if (gequal0(a)) return gen_0;
+    b  = ellfftang(E, s, pt2);
+  } else
+  {
+    a  = gmul(ellfftang(E, s, pt1), ellffvert(s2, pt2));
+    if (gequal0(a)) return gen_0;
+    b  = gmul(ellfftang(E, s, pt2), ellffvert(s2, pt1));
+  }
+  if (gequal0(b)) return gen_0;
+  h = gmul(gsqr(gel(S,2)), gdiv(a, b));
+  gel(S2, 2) = gerepileupto(av, h);
+  return S2;
+}
+
+static GEN
+_ellffdbl(void *data, GEN s)
+{
+  struct ellff* ff=(struct ellff*) data;
+  if (s==gen_0) return gen_0;
+  return ellffdbl(ff->E, s,ff->pt1,ff->pt2);
+}
+
+static GEN
+ellffmul(GEN E, GEN t, GEN m, GEN pt1, GEN pt2)
+{
+  struct ellff ff;
+  ff.E=E;  ff.pt1=pt1; ff.pt2=pt2;
+  return leftright_pow(t, m, (void*)&ff, _ellffdbl, _ellffadd);
+}
+
+static GEN
+ellweilpairing3(GEN E, GEN t, GEN s)
+{
+  GEN t2,s2,a,b;
+  if (gequal(s,t)) return gen_1;
+  t2 = addell(E,t,t);
+  if (gequal(s,t2)) return gen_1;
+  s2 = addell(E,s,s);
+  a  = gmul(ellfftang(E, s, t),  ellfftang(E, t, s2));
+  b  = gmul(ellfftang(E, s, t2), ellfftang(E, t, s));
+  return gsqr(gdiv(a,b));
+}
+
+GEN
+ellweilpairing(GEN E, GEN t, GEN s, GEN m)
+{
+  pari_sp ltop=avma;
+  GEN w;
+  checksmallell(E); checkellpt(t); checkellpt(s);
+  if (typ(m)!=t_INT) pari_err(typeer,"ellweilpairing");
+  if (ell_is_inf(s) || ell_is_inf(t)) return gen_1;
+  if (equaliu(m, 2)) return gequal(s, t)?gen_1:gen_m1;
+  if (equaliu(m, 3)) return ellweilpairing3(E, s, t);
+  while(1)
+  {
+    GEN r, rs, tr, a, b;
+    avma = ltop;
+    r  = ellrandom(E);
+    rs = addell(E, r, s);
+    tr = subell(E, t, r);
+    if (ell_is_inf(rs) || ell_is_inf(tr) || ell_is_inf(r) || gequal(rs, t))
+      continue;
+    a = ellffmul(E, mkvec2(t, gen_1), m, rs, r);
+    if (a==gen_0) continue;
+    b = ellffmul(E, mkvec2(s, gen_1), m, tr, invell(E,r));
+    if (b==gen_0) continue;
+    if (!ell_is_inf(gel(a,1)) || !ell_is_inf(gel(b,1)))
+      pari_err(talker,"Points of wrong order in ellweilpairing");
+    w = gdiv(gel(a, 2), gel(b, 2));
+    return gerepileupto(ltop,w);
+  }
+}
