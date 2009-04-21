@@ -227,6 +227,7 @@ BA  3- builtin-in GP functions can now be used as closures.
        ZX_isirreducible -> ZX_is_irred
        pariputc -> pari_putc, pariputs -> pari_puts, pariflush -> pari_flush,
        gpmalloc -> pari_malloc, gprealloc -> pari_realloc, gpfree -> pari_free
+       ordell -> ellordinate
     7- polvaluation -> RgX_valrem(x, pz) and no longer accept pz = NULL
        (use RgX_val). Same for ZX_valuation -> ZX_valrem [ & ZX_val ]
     8- rename u2toi -> uu32toi [ paste two 32-bit unsigned into a t_INT ]

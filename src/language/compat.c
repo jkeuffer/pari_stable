@@ -531,7 +531,7 @@ entree oldfonctions[]={
 {"nupow",2,(void*)nupow,4,"GG","nupow(x,n)=n-th power of primitive positive definite quadratic form x using nucomp and nudupl."},
 {"o",0,(void*)ggrando,7,"GD1,L,","o(a^b): p-adic or power series zero with precision given by b."},
 {"omega",1,(void*)gomega,4,"G","omega(x)=number of unrepeated prime divisors of x."},
-{"ordell",2,(void*)ordell,5,"GGp","ordell(e,x)=y-coordinates corresponding to x-ordinate x on elliptic curve e."},
+{"ordell",2,(void*)ellordinate,5,"GGp","ordell(e,x)=y-coordinates corresponding to x-ordinate x on elliptic curve e."},
 {"order",1,(void*)order,4,"G","order(x)=order of the integermod x in (Z/nZ)*."},
 {"orderell",2,(void*)orderell,5,"GG","orderell(e,p)=order of the point p on the elliptic curve e over Q, 0 if non-torsion."},
 {"ordred",1,(void*)ordred,6,"Gp","ordred(x)=reduction of the polynomial x, staying in the same order."},

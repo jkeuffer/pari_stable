@@ -814,20 +814,13 @@ subell(GEN e, GEN z1, GEN z2)
   return gerepileupto(av, addell(e, z1, invell(e,z2)));
 }
 
-GEN
-ordell(GEN e, GEN x, long prec)
+/* e an ell5, x a scalar */
+static GEN
+ellordinate_i(GEN e, GEN x, long prec)
 {
-  long td, i, tx = typ(x);
+  long td;
   pari_sp av = avma;
   GEN D, a, b, d, y;
-
-  checkell5(e);
-  if (is_matvec_t(tx))
-  {
-    long lx; y = cgetg_copy(x, &lx);
-    for (i=1; i<lx; i++) gel(y,i) = ordell(e,gel(x,i),prec);
-    return y;
-  }
 
   a = ellRHS(e,x);
   b = ellLHS0(e,x); /* y*(y+b) = a */
@@ -883,6 +876,20 @@ ordell(GEN e, GEN x, long prec)
 }
 
 GEN
+ellordinate(GEN e, GEN x, long prec)
+{
+  checkell5(e);
+  if (is_matvec_t(typ(x)))
+  {
+    long i, lx;
+    GEN v = cgetg_copy(x, &lx);
+    for (i=1; i<lx; i++) gel(v,i) = ellordinate(e,gel(x,i),prec);
+    return v;
+  }
+  return ellordinate_i(e, x, prec);
+}
+
+GEN
 ellrandom(GEN e)
 {
   GEN x, y, j;
@@ -896,7 +903,7 @@ ellrandom(GEN e)
       for (;; avma = av)
       {
         x = genrand(j);
-        y = ordell(e, x, 0);
+        y = ellordinate_i(e, x, 0);
         if (lg(y) > 1) break;
       }
       return gerepilecopy(av, mkvec2(x, gel(y,1)));

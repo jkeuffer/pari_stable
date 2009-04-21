@@ -1,6 +1,6 @@
 Function: ellordinate
 Section: elliptic_curves
-C-Name: ordell
+C-Name: ellordinate
 Prototype: GGp
 Help: ellordinate(E,x): y-coordinates corresponding to x-ordinate x on
  elliptic curve E.

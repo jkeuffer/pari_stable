@@ -141,7 +141,8 @@ This file lists the incompatible changes between Version 2.x and older versions
   - FpX_ functions no longer accept p==NULL.
 
   - Fl_pow renamed to Fl_powu [ exponent may not be negative ]
-  - rename pointch ->  ellchangepoint, coordch -> ellchangecurve
+  - rename pointch ->  ellchangepoint, coordch -> ellchangecurve,
+    ordell -> ellordinate
   - remove obsolete undocumented functions outerr, outbeauterr, outsor,
     outtex. Rename voir -> dbgGEN. Functions brute, outbrute, matbrute,
     outmat, sor, outbeaut are obsoleted and no longer documented.
