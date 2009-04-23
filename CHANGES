@@ -168,6 +168,7 @@ BA132- src/kernel/ix86/asm0.h had an incorrect #line entry.
        rnfkummer(bnrM, matdiagonal([3,1,1]))
   134- nfgaloisconj(y,1) -> invalid object
   135- weird error message in ellpointtoz on loss of accuracy [#962]
+  136- ^C before inital prompt appears ==> SEGV [#965]
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]

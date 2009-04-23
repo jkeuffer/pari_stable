@@ -658,6 +658,10 @@ pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts)
 {
   ulong u;
 
+  cb_pari_whatnow = NULL;
+  cb_pari_sigint = dflt_sigint_fun;
+  cb_pari_handle_exception = NULL;
+
   pari_stackcheck_init(&u);
   if ((init_opts&INIT_DFTm)) {
     GP_DATA = default_gp_data();
@@ -675,12 +679,7 @@ pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts)
   primetab = cgetalloc(t_VEC, 1);
   varentries = (entree**) pari_calloc((MAXVARN+1)*sizeof(entree*));
   pari_thread_init();
-
   pari_init_functions();
-  cb_pari_whatnow = NULL;
-  cb_pari_sigint = dflt_sigint_fun;
-  cb_pari_handle_exception = NULL;
-
   pari_var_init();
   try_to_recover = 1;
 }
