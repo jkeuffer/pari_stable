@@ -1,20 +1,24 @@
 Function: bestappr
 Section: number_theoretical
 C-Name: bestappr0
-Prototype: GGDG
-Help: bestappr(x, A,{B}): if x is real, gives the best approximation to x with
+Prototype: GDGDG
+Help: bestappr(x, {A},{B}): if x is real, gives the best approximation to x with
  denominator less or equal to A. If x is an intmod, returns a rational number
  congruent to x with numerator less than A and denominator less than B, which
  must be given. Otherwise applies recursively to all components.
 Doc: if $B$ is omitted, finds the best rational approximation to $x\in\R$
- with denominator at most equal to $A$ using continued fractions. If $B$ is
+ using continued fractions. If $A$ is omitted, return the best approximation
+ affordable given the input accuracy; otherwise make sure that denominator is
+ at most equal to $A$.
+
+ If $B$ is
  present perform rational modular reconstruction (see below). In both cases,
  the function applies recursively to components of complex objects
  (polynomials, vectors, \dots).
  \bprog
  ? bestappr(Pi, 100)
  %1 = 22/7
- ? bestappr(0.1428571428571428571428571429, 10^5)
+ ? bestappr(0.1428571428571428571428571429)
  %2 = 1/7
  ? bestappr([Pi, sqrt(2) + 'x], 10^3)
  %3 = [355/113, x + 1393/985]

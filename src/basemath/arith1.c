@@ -2622,6 +2622,7 @@ bestappr_mod(GEN x, GEN A, GEN B)
   return NULL; /* not reached */
 }
 
+/* allow k = NULL: maximal accuracy */
 GEN
 bestappr(GEN x, GEN k)
 {
@@ -2629,21 +2630,23 @@ bestappr(GEN x, GEN k)
   long lx, i;
   GEN p0, p1, p, q0, q1, q, a, y;
 
-  switch(typ(k))
-  {
-    case t_INT: break;
-    case t_REAL: case t_FRAC: k = gcvtoi(k,&i); break;
-    default:
-      pari_err(talker,"incorrect bound type in bestappr");
+  if (k) {
+    switch(typ(k))
+    {
+      case t_INT: break;
+      case t_REAL: case t_FRAC: k = gcvtoi(k,&i); break;
+      default:
+        pari_err(talker,"incorrect bound type in bestappr");
+    }
+    if (signe(k) <= 0) k = gen_1;
   }
-  if (signe(k) <= 0) k = gen_1;
   switch(typ(x))
   {
     case t_INT:
       avma = av; return icopy(x);
 
     case t_FRAC:
-      if (cmpii(gel(x,2),k) <= 0) { avma = av; return gcopy(x); }
+      if (!k || cmpii(gel(x,2),k) <= 0) { avma = av; return gcopy(x); }
       y = x;
       p1 = gen_1; a = p0 = truedivii(gel(x,1), gel(x,2)); /* = floor(x) */
       q1 = gen_0; q0 = gen_1;
@@ -2674,15 +2677,22 @@ bestappr(GEN x, GEN k)
       return gerepileupto(av, gdiv(p1,q1));
 
     case t_REAL: {
+      long lx;
       GEN kr;
 
       if (!signe(x)) return gen_0; /* faster. Besides itor crashes on x = 0 */
-      kr = itor(k, lg(x));
       y = x;
       p1 = gen_1; a = p0 = floorr(x); q1 = gen_0; q0 = gen_1;
+      x = subri(x,a); /* 0 <= x < 1 */
+      lx = lg(x);
+      if (!k) {
+        long n = bit_accuracy(lx) + expo(x);
+        if (n < 1) pari_err(precer,"bestappr");
+        k = int2n(n - 1);
+      }
+      kr = itor(k, lx);
       while (cmpii(q0,k) <= 0)
       {
-	x = subri(x,a); /* 0 <= x < 1 */
 	if (!signe(x)) { p1 = p0; q1 = q0; break; }
 
 	x = invr(x); /* > 1 */
@@ -2700,6 +2710,7 @@ bestappr(GEN x, GEN k)
 	a = truncr(x); /* truncr(x) may raise precer */
 	p = addii(mulii(a,p0), p1); p1=p0; p0=p;
 	q = addii(mulii(a,q0), q1); q1=q0; q0=q;
+        x = subri(x,a); /* 0 <= x < 1 */
       }
       return gerepileupto(av, gdiv(p1,q1));
    }
