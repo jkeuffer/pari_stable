@@ -2685,6 +2685,7 @@ bestappr(GEN x, GEN k)
       p1 = gen_1; a = p0 = floorr(x); q1 = gen_0; q0 = gen_1;
       x = subri(x,a); /* 0 <= x < 1 */
       lx = lg(x);
+      if (lx == 2) { cgiv(x); return a; }
       if (!k) {
         long n = bit_accuracy(lx) + expo(x);
         if (n < 1) pari_err(precer,"bestappr");
