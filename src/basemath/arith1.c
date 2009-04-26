@@ -2622,6 +2622,30 @@ bestappr_mod(GEN x, GEN A, GEN B)
   return NULL; /* not reached */
 }
 
+/* bestappr(t_REAL != 0), to maximal accuracy */
+static GEN
+bestappr_max(GEN x)
+{
+  pari_sp av = avma;
+  GEN p0, p1, p, q0, q1, q, a;
+  p1 = gen_1; a = p0 = floorr(x); q1 = gen_0; q0 = gen_1;
+  x = subri(x,a); /* 0 <= x < 1 */
+  for(;;)
+  {
+    long d;
+    if (!signe(x)) { p1 = p0; q1 = q0; break; }
+    x = invr(x); /* > 1 */
+    d = nbits2prec(expo(x) + 1);
+    if (d > lg(x)) { p1 = p0; q1 = q0; break; } /* original x was ~ 0 */
+
+    a = truncr(x); /* truncr(x) will NOT raise precer */
+    p = addii(mulii(a,p0), p1); p1=p0; p0=p;
+    q = addii(mulii(a,q0), q1); q1=q0; q0=q;
+    x = subri(x,a); /* 0 <= x < 1 */
+  }
+  return gerepileupto(av, gdiv(p1,q1));
+}
+
 /* allow k = NULL: maximal accuracy */
 GEN
 bestappr(GEN x, GEN k)
@@ -2650,11 +2674,8 @@ bestappr(GEN x, GEN k)
       y = x;
       p1 = gen_1; a = p0 = truedivii(gel(x,1), gel(x,2)); /* = floor(x) */
       q1 = gen_0; q0 = gen_1;
-      while (cmpii(q0,k) <= 0)
+      for(;;)
       {
-	x = gsub(x,a); /* 0 <= x < 1 */
-	if (gequal0(x)) { p1 = p0; q1 = q0; break; }
-
 	x = ginv(x); /* > 1 */
 	a = typ(x)==t_INT? x: divii(gel(x,1), gel(x,2));
 	if (cmpii(a,k) > 0)
@@ -2673,6 +2694,11 @@ bestappr(GEN x, GEN k)
 	}
 	p = addii(mulii(a,p0), p1); p1=p0; p0=p;
 	q = addii(mulii(a,q0), q1); q1=q0; q0=q;
+
+        if (cmpii(q0,k) > 0) break;
+	x = gsub(x,a); /* 0 <= x < 1 */
+	if (typ(x) == t_INT) { p1 = p0; q1 = q0; break; } /* x = 0 */
+
       }
       return gerepileupto(av, gdiv(p1,q1));
 
@@ -2680,22 +2706,17 @@ bestappr(GEN x, GEN k)
       long lx;
       GEN kr;
 
-      if (!signe(x)) return gen_0; /* faster. Besides itor crashes on x = 0 */
+      if (!signe(x)) return gen_0;
+      if (!k) return bestappr_max(x);
       y = x;
-      p1 = gen_1; a = p0 = floorr(x); q1 = gen_0; q0 = gen_1;
+      p1 = gen_1; a = p0 = floorr(x);
+      q1 = gen_0; q0 = gen_1;
       x = subri(x,a); /* 0 <= x < 1 */
       lx = lg(x);
       if (lx == 2) { cgiv(x); return a; }
-      if (!k) {
-        long n = bit_accuracy(lx) + expo(x);
-        if (n < 1) pari_err(precer,"bestappr");
-        k = int2n(n - 1);
-      }
       kr = itor(k, lx);
-      while (cmpii(q0,k) <= 0)
+      for(;;)
       {
-	if (!signe(x)) { p1 = p0; q1 = q0; break; }
-
 	x = invr(x); /* > 1 */
 	if (cmprr(x,kr) > 0)
 	{ /* next partial quotient will overflow limits */
@@ -2711,7 +2732,10 @@ bestappr(GEN x, GEN k)
 	a = truncr(x); /* truncr(x) may raise precer */
 	p = addii(mulii(a,p0), p1); p1=p0; p0=p;
 	q = addii(mulii(a,q0), q1); q1=q0; q0=q;
+
+        if (cmpii(q0,k) > 0) break;
         x = subri(x,a); /* 0 <= x < 1 */
+	if (!signe(x)) { p1 = p0; q1 = q0; break; }
       }
       return gerepileupto(av, gdiv(p1,q1));
    }
