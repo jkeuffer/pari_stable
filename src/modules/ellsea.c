@@ -835,7 +835,7 @@ find_trace_Elkies_power(GEN a4, GEN a6, ulong ell, long k, GEN meqn, char meqnty
   {
     ulong pell = pellk%ell;
     ulong ap = Fl_add(lambda, Fl_div(pell, lambda, ell), ell);
-    if (Fl_add(pell, ap, ell)==ell-1) { avma = ltop; return mkvecsmall(ap); }
+    if (Fl_sub(pell, ap, ell)==ell-1) { avma = ltop; return mkvecsmall(ap); }
   }
   btop = avma; st_lim = stack_lim(btop, 1);
   for (cnt = 2; cnt <= k; cnt++)
@@ -1465,7 +1465,7 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
     {
       if (EARLY_ABORT && dvdiu(addis(p, 1 - trace_mod[1]), ell))
       {
-        if (DEBUGLEVEL) fprintferr("\nAborting: #E(Fp) divisible by %Ps\n",ell);
+        if (DEBUGLEVEL) fprintferr("\nAborting: #E(Fp) divisible by %ld\n",ell);
         avma = ltop; return gen_0;
       }
       tr = crt(ellkt, stoi(trace_mod[1]), gel(tr,1), gel(tr,2));
@@ -1505,7 +1505,14 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
     if (!trace_mod) continue;
     ellkt = powuu(ell, kt);
     if (lg(trace_mod) == 2)
-      tr = crt(ellkt, stoi(trace_mod[1]), gel(tr, 1), gel(tr, 2));
+    {
+      if (EARLY_ABORT && dvdiu(addis(p, 1 - trace_mod[1]), ell))
+      {
+        if (DEBUGLEVEL) fprintferr("\nAborting: #E(Fp) divisible by %ld\n",ell);
+        avma = ltop; return gen_0;
+      }
+      tr = crt(ellkt, stoi(trace_mod[1]), gel(tr,1), gel(tr,2));
+    }
     else
       add_atkin(compile_atkin, mkvec2(ellkt, trace_mod), &nb_atkin);
     /*Let us now treat an other prime if we are too far from the bound_bsgs */
