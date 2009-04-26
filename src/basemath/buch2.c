@@ -2466,7 +2466,13 @@ compute_multiple_of_R(GEN A, long RU, long N, GEN *ptL)
   /* could be using indexrank(), but need custom "get_pivot" function */
   d = RgM_pivots(mdet, &r, &compute_multiple_of_R_pivot);
   /* # of independent columns == unit rank ? */
-  if (lg(mdet)-1 - r != RU) { avma = av; return NULL; }
+  if (lg(mdet)-1 - r != RU)
+  {
+    if (DEBUGLEVEL)
+      fprintferr("Unit group rank %ld < %ld\n",lg(mdet)-1 - r, RU);
+    avma = av; 
+    return NULL; 
+  }
 
   Im_mdet = cgetg(RU+1, t_MAT); /* extract independent columns */
   Im_expo = cgetg(RU+1, t_VECSMALL); /* ... and exponents (from renormalize) */
