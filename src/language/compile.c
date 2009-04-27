@@ -713,7 +713,7 @@ compilevec(long n, long mode, op_code op)
   op_push(op,l,n);
   for (i=1;i<l;i++)
   {
-    compilenode(arg[i],Ggen,FLnocopy);
+    compilenode(arg[i],Ggen,0);
     op_push(OCstackgen,i,n);
   }
   avma=ltop;
@@ -747,7 +747,7 @@ compilemat(long n, long mode)
     for(j=1;j<lgcol;j++)
     {
       k-=lglin;
-      compilenode(col[j], Ggen, FLnocopy);
+      compilenode(col[j], Ggen, 0);
       op_push(OCstackgen,k,n);
     }
   }
@@ -1147,7 +1147,7 @@ compilefunc(entree *ep, long n, int mode)
               op_push(OCvec, nb+1, a);
               for(l=1; l<=nb; l++)
               {
-                compilenode(g[l], Ggen, FLnocopy);
+                compilenode(g[l], Ggen, 0);
                 op_push(OCstackgen,l, a);
               }
               op_push(OCpop, 1, a);
@@ -1243,7 +1243,7 @@ compilefunc(entree *ep, long n, int mode)
             for(m=1,k=1;k<=n;k++)
               for(l=1;l<lg(g[k]);l++,m++)
               {
-                compilenode(mael(g,k,l),Ggen,FLnocopy);
+                compilenode(mael(g,k,l),Ggen,0);
                 op_push(OCstackgen,m,mael(g,k,l));
               }
             op_push_loc(OCpop, 1, str);
