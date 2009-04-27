@@ -2628,12 +2628,14 @@ bestappr_max(GEN x)
 {
   pari_sp av = avma;
   GEN p0, p1, p, q0, q1, q, a;
+  long e;
   p1 = gen_1; a = p0 = floorr(x); q1 = gen_0; q0 = gen_1;
   x = subri(x,a); /* 0 <= x < 1 */
+  e = bit_accuracy(lg(x)) - expo(x);
   for(;;)
   {
     long d;
-    if (!signe(x)) { p1 = p0; q1 = q0; break; }
+    if (!signe(x) || expi(q0) > e) { p1 = p0; q1 = q0; break; }
     x = invr(x); /* > 1 */
     d = nbits2prec(expo(x) + 1);
     if (d > lg(x)) { p1 = p0; q1 = q0; break; } /* original x was ~ 0 */
