@@ -1318,6 +1318,7 @@ GEN     ellrandom(GEN e);
 long    ellrootno(GEN e, GEN p);
 GEN     ellsigma(GEN om, GEN z, long flag, long prec);
 GEN     elltaniyama(GEN e, long prec);
+GEN     elltatepairing(GEN E, GEN t, GEN s, GEN m);
 GEN     elltors0(GEN e, long flag);
 GEN     ellweilpairing(GEN E, GEN t, GEN s, GEN m);
 GEN     ellwp0(GEN e, GEN z, long flag, long prec, long PREC);

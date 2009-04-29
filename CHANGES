@@ -593,7 +593,7 @@ BA 35- direct implementation of ZX_mul, ZX_sqr using Kronecker's trick + mulii
 BA 40- Pollard rho discrete logarithm algorithm (function gen_Pollard_log)
    41- GP routine polrootsff
    42- matadjoint: implement division-free algorithm (flag = 1) [#937]
-BA 43- GP routine and PARI function ellweilpairing
+BA 43- GP routines and PARI functions ellweilpairing and elltatepairing.
 
   Removed
     1- obsolete GP functions printp, printp1. Either replace them by
