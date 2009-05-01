@@ -3,7 +3,8 @@ Section: elliptic_curves
 C-Name: ellap
 Prototype: GG
 Help: ellap(E,p): computes a_p for the elliptic curve E using
- Shanks-Mestre's method. Assume the equation is minimal at p.
+ Shanks-Mestre's method, or SEA algorithm if the package seadata is installed.
+ Assume the equation is minimal at p.
 Doc: computes the trace of Frobenius $a_p$ for the elliptic curve $E$ and the
  prime number $p$. This is defined by the equation $\#E(\F_p) = p+1 - a_p$,
  where $\#E(\F_p)$ stands for the number of points of the curve $E$ over the
