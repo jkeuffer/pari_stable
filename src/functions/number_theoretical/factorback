@@ -2,6 +2,10 @@ Function: factorback
 Section: number_theoretical
 C-Name: factorback2
 Prototype: GDG
+Description:
+ (gen):gen      factorback($1)
+ (gen,):gen     factorback($1)
+ (gen,gen):gen  factorback2($1, $2)
 Help: factorback(f,{e}): given a factorisation f, gives the factored
  object back. If this is a prime ideal factorisation you must supply the
  corresponding number field as last argument. If e is present, f has to be a
