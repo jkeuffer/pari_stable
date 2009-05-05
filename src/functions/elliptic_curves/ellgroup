@@ -1,0 +1,8 @@
+Function: ellgroup
+Section: elliptic_curves
+C-Name: ellgroup
+Prototype: GG
+Help: ellgroup(E,p): computes the structure of the group E(Fp)
+ Assume the equation is minimal at p.
+Doc: computes the structure of the group $E(\F_p)$
+ Assume the equation is minimal at p.

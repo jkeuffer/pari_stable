@@ -4826,3 +4826,93 @@ elltatepairing(GEN E, GEN t, GEN s, GEN m)
     return gerepilecopy(ltop, w);
   }
 }
+
+static GEN
+ellmod(GEN E, GEN p)
+{
+  GEN a1,a2,a3,a4,a6, b2,b4,b6,b8, c4,c6, D, j, a11, a13, a33, b22;
+  GEN y;
+  checkell5(E);
+  y = cgetg(14,t_VEC);
+  gel(y,1) = a1 = gmodulo(gel(E,1),p);
+  gel(y,2) = a2 = gmodulo(gel(E,2),p);
+  gel(y,3) = a3 = gmodulo(gel(E,3),p);
+  gel(y,4) = a4 = gmodulo(gel(E,4),p);
+  gel(y,5) = a6 = gmodulo(gel(E,5),p);
+  a11 = gsqr(a1);
+  b2 = gadd(a11, gmul2n(a2,2));
+  gel(y,6) = b2; /* a1^2 + 4a2 */
+
+  a13 = gmul(a1, a3);
+  b4 = gadd(a13, gmul2n(a4,1));
+  gel(y,7) = b4; /* a1 a3 + 2a4 */
+
+  a33 = gsqr(a3);
+  b6 = gadd(a33, gmul2n(a6,2));
+  gel(y,8) = b6; /* a3^2 + 4 a6 */
+  b8 = gsub(gadd(gmul(a11,a6), gmul(b6, a2)), gmul(a4, gadd(a4,a13)));
+  gel(y,9) = b8; /* a1^2 a6 + 4a6 a2 + a2 a3^2 + 4 a6 - a4(a4 + a1 a3) */
+
+  b22 = gsqr(b2);
+  c4 = gadd(b22, gmulsg(-24,b4));
+  gel(y,10) = c4; /* b2^2 - 24 b4 */
+
+  c6 = gadd(gmul(b2,gsub(gmulsg(36,b4),b22)), gmulsg(-216,b6));
+  gel(y,11) = c6; /* 36 b2 b4 - b2^3 - 216 b6 */
+
+  D = gsub(gmul(b4, gadd(gmulsg(9,gmul(b2,b6)),gmulsg(-8,gsqr(b4)))),
+	   gadd(gmul(b22,b8),gmulsg(27,gsqr(b6))));
+  gel(y,12) = D;
+  if (gequal0(D)) pari_err(talker,"singular curve in ellinit");
+
+  j = gdiv(gmul(gsqr(c4),c4), D);
+  gel(y,13) = j;
+  return y;
+}
+
+
+GEN
+ellgroup(GEN E, GEN p)
+{
+  pari_sp av = avma;
+  GEN m, z, d, N0, N1;
+  long i, j, l1;
+  GEN N, r, F, F1;
+  if (typ(p)!=t_INT) pari_err(typeer,"ellgroup");
+  E = ellmod(E,p);
+  N = subii(addis(p, 1), ellap(E, p));
+  r = gcdii(N, subis(p, 1));
+  F1 = gel(factor(r), 1);
+  l1 = lg(F1);
+  F = cgetg(3,t_MAT);
+  gel(F,1) = cgetg(l1, t_COL);
+  gel(F,2) = cgetg(l1, t_COL);
+  for (i = 1, j = 1; i < l1; ++i)
+  {
+    long v = Z_pval(N, gel(F1, i));
+    if (v <=1) continue;
+    gcoeff(F, j  , 1) = gel(F1, i);
+    gcoeff(F, j++, 2) = stoi(v);
+  }
+  setlg(F[1],j); setlg(F[2],j);
+  if (j==1) goto ellgroup_cyclic;
+  N0 = factorback(F); N1 = diviiexact(N, N0);
+  do
+  {
+    GEN P = ellrandom(E);
+    GEN Q = ellrandom(E);
+    GEN Pp = powell(E, P, N1);
+    GEN Qp = powell(E, Q, N1);
+    GEN s = ellorder(E, Pp, F);
+    GEN t = ellorder(E, Qp, F);
+    if (equalii(s, N0) || equalii(t, N0))
+      goto ellgroup_cyclic;
+    m = lcmii(s, t);
+    z = Rg_to_Fp(ellweilpairing(E, Pp, Qp, m), p);
+    d = Fp_order(z, F, p);
+  } while (!equalii(mulii(m, d), N0));
+  if (cmpis(d, 1) > 0)
+    return gerepilecopy(av, mkvec2(gdiv(N, d),d));
+ellgroup_cyclic:
+  return gerepilecopy(av, mkvec(N));
+}

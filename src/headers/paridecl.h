@@ -1298,6 +1298,7 @@ void    checkell5(GEN e);
 GEN     ellap(GEN e, GEN p);
 GEN     ellanalyticrank(GEN e, GEN eps, long prec);
 GEN     ellchangecurve(GEN e, GEN ch);
+GEN     ellgroup(GEN E, GEN p);
 GEN     elleisnum(GEN om, long k, long flag, long prec);
 GEN     elleta(GEN om, long prec);
 GEN     ellglobalred(GEN e1);
