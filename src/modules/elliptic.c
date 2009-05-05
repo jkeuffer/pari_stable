@@ -4756,12 +4756,12 @@ ellffmul(GEN E, GEN t, GEN m, GEN pt1, GEN pt2)
 }
 
 static GEN
-ellweilpairing3(GEN E, GEN t, GEN s)
+ellweilpairing3(GEN E, GEN t, GEN s, GEN unit)
 {
   GEN t2,s2,a,b;
-  if (gequal(s,t)) return gen_1;
+  if (gequal(s,t)) return unit;
   t2 = addell(E,t,t);
-  if (gequal(s,t2)) return gen_1;
+  if (gequal(s,t2)) return unit;
   s2 = addell(E,s,s);
   a  = gmul(ellfftang(E, s, t),  ellfftang(E, t, s2));
   b  = gmul(ellfftang(E, s, t2), ellfftang(E, t, s));
@@ -4772,12 +4772,15 @@ GEN
 ellweilpairing(GEN E, GEN t, GEN s, GEN m)
 {
   pari_sp ltop=avma;
-  GEN w;
+  GEN w, unit;
   checksmallell(E); checkellpt(t); checkellpt(s);
   if (typ(m)!=t_INT) pari_err(typeer,"ellweilpairing");
-  if (ell_is_inf(s) || ell_is_inf(t)) return gen_1;
-  if (equaliu(m, 2)) return gequal(s, t)?gen_1:gen_m1;
-  if (equaliu(m, 3)) return ellweilpairing3(E, s, t);
+  unit = gpowgs(ell_get_j(E), 0);
+  if (ell_is_inf(s) || ell_is_inf(t)) return unit;
+  if (equaliu(m, 2)) 
+    return gequal(s, t)?unit:gerepileupto(ltop, gneg(unit));
+  if (equaliu(m, 3)) 
+    return gerepileupto(ltop,ellweilpairing3(E, s, t, unit));
   while(1)
   {
     GEN r, rs, tr, a, b;
