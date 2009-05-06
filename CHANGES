@@ -170,6 +170,8 @@ BA132- src/kernel/ix86/asm0.h had an incorrect #line entry.
   135- weird error message in ellpointtoz on loss of accuracy [#962]
   136- ^C before inital prompt appears ==> SEGV [#965]
 BA137- ellsea(,,1) did not work
+BA138- COMPAT file was missing some functions renamed in 2.3: 
+       flisexpr, flisseq -> gp_read_str; lisGEN  -> gp_read_stream
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]

@@ -429,8 +429,9 @@ advise you to update soon ]
   - rename globalreduction -> ellglobalred, localreduction -> elllocalred
   - taniyama(e) is deprecated. Use elltaniyama(e, prec) instead of
       old = precdl; precdl = prec; x = taniyama(e); precdl = old;
-  - rename lisexpr -> readexp, lisseq -> readseq, flisexpr -> freadexpr,
-    flisseq -> freadseq
+  - rename lisexpr -> readexp, lisseq -> readseq
+  - rename flisexpr, flisseq -> gp_read_str
+  - rename lisGEN  -> gp_read_stream
   - rename idmat -> matid
   - rename coefs_to_col -> mkcoln, coefs_to_int -> mkintn
            coefs_to_pol -> mkpoln, coefs_to_vec -> mkvecn
