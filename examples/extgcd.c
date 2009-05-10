@@ -34,5 +34,6 @@ main()
   printf("y = "); y = gp_read_stream(stdin);
   d = extgcd(x, y, &u, &v);
   pari_printf("gcd = %Ps\nu = %Ps\nv = %Ps\n", d, u, v);
+  pari_close();
   return 0;
 }

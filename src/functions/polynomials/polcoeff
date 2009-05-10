@@ -20,4 +20,4 @@ Doc: coefficient of degree $n$ of the polynomial $x$, with respect to the
  message is issued.
 
   For greater flexibility, vector or matrix types are also accepted for $x$,
-  and the meaning is then identical with that of \kbd{compo(x,n}.
+  and the meaning is then identical with that of \kbd{component(x,n)}.

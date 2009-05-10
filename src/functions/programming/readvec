@@ -28,6 +28,6 @@ Doc: reads in the file
  %5 = [1, 2, 3]
  @eprog
  In general a sequence is just a single line, but as usual braces and
- \kbd{\bs\bs} may be used to enter multiline sequences.
+ \kbd{\bs} may be used to enter multiline sequences.
 Variant: The underlying library function
  \fun{GEN}{gp_readvec_stream}{FILE *f} is usually more flexible.

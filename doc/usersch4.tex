@@ -1356,7 +1356,7 @@ For an object of type \typ{POL}, \tet{leading_term}, \tet{constant_term},
 \tet{degpol} return a pointer to the leading term (with respect to the main
 variable of course), constant term, and degree of the polynomial (with the
 convention $\deg(0) = -1$). Applied to any other type, the result is
-unspecified. Note that no copy is made on the pari stack so the returned
+unspecified. Note that no copy is made on the PARI stack so the returned
 value is not safe for a basic \kbd{gerepile} call. Note that $\kbd{degpol(z)}
 = \kbd{lg(z)} - 3$.
 
@@ -1557,7 +1557,7 @@ that this may not be the same as \kbd{pol\_x(v)} if assignments have been
 performed in the interpreter.
 
 \subsubsec{Temporary variables}\sidx{variable (temporary)}:
-\kbd{MAXVARN} is available, but is better left to pari internal functions
+\kbd{MAXVARN} is available, but is better left to PARI internal functions
 (some of which do not check that \kbd{MAXVARN} is free for them to use,
 which can be considered a bug). You can create more temporary variables
 using

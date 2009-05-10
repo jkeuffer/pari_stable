@@ -64,10 +64,10 @@ initialized with \kbd{pari\_init}) and frees all allocated objects.
 \kbd{pari\_init}, more flexible. \kbd{opts} is a mask of flags
 among the following:
 
-  \kbd{INIT\_JMPm}: install pari error handler. When an exception is
+  \kbd{INIT\_JMPm}: install PARI error handler. When an exception is
 raised, the program is terminated with \kbd{exit(1)}.
 
-  \kbd{INIT\_SIGm}: install pari signal handler.
+  \kbd{INIT\_SIGm}: install PARI signal handler.
 
   \kbd{INIT\_DFTm}: initialize the \kbd{GP\_DATA} environment structure.
 This one \emph{must} be enabled once. If you close pari, then restart it,
@@ -79,7 +79,7 @@ for a library initialized with a mask of options using
 \kbd{pari\_init\_opts}. \kbd{opts} is a mask of flags among
 
   \kbd{INIT\_SIGm}: restore \kbd{SIG\_DFL} default action for signals
-tampered with by pari signal handler.
+tampered with by PARI signal handler.
 
   \kbd{INIT\_DFTm}: frees the \kbd{GP\_DATA} environment structure.
 
@@ -123,7 +123,7 @@ a function, it has at least the following fields:
   \kbd{char *help} : the help text for the function.
 
 A routine in GP is described to the analyzer by an \kbd{entree}
-structure. Built-in pari routines are grouped in \emph{modules}, which
+structure. Built-in PARI routines are grouped in \emph{modules}, which
 are arrays of \kbd{entree} structs, the last of which satisfy
 \kbd{name = NULL} (sentinel).
 
