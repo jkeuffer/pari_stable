@@ -801,15 +801,14 @@ study_modular_eqn(long q, GEN mpoly, GEN p, enum mod_type *mt, long *ptr_r)
 
 /*Returns the trace modulo ell^k when ell is an Elkies prime */
 static GEN
-find_trace_Elkies_power(GEN a4, GEN a6, ulong ell, long k, GEN meqn, char meqntype, GEN g, GEN tr, GEN p, long EARLY_ABORT)
+find_trace_Elkies_power(GEN a4, GEN a6, ulong ell, long k, GEN meqn, char meqntype, GEN g, GEN tr, GEN p, long EARLY_ABORT, pari_timer *T)
 {
   pari_sp ltop = avma, btop, st_lim;
   GEN Eba4, Eba6, Eca4, Eca6, Ib, p_1, kpoly;
   ulong lambda, ellk = upowuu(ell, k), pellk = umodiu(p, ellk);
   long cnt;
-  pari_timer T;
 
-  if (DEBUGLEVEL) { fprintferr("Trace mod %ld", ell); TIMERstart(&T); }
+  if (DEBUGLEVEL) { fprintferr("Trace mod %ld", ell); }
   Eba4 = a4; Eba6 = a6;
   if (meqntype=='C')
   {
@@ -830,7 +829,7 @@ find_trace_Elkies_power(GEN a4, GEN a6, ulong ell, long k, GEN meqn, char meqnty
   }
   Ib = pol_x(0);
   lambda = find_eigen_value(a4, a6, ell, kpoly, p, tr);
-  if (DEBUGLEVEL>1) fprintferr(" [%ld ms]", TIMER(&T));
+  if (DEBUGLEVEL>1) fprintferr(" [%ld ms]", TIMER(T));
   if (EARLY_ABORT)
   {
     ulong pell = pellk%ell;
@@ -854,7 +853,7 @@ find_trace_Elkies_power(GEN a4, GEN a6, ulong ell, long k, GEN meqn, char meqnty
     Ib = gel(tmp, 5);
     if (low_stack(st_lim, stack_lim(btop, 1)))
       gerepileall(btop, 6, &Eba4, &Eba6, &Eca4, &Eca6, &kpoly, &Ib);
-    if (DEBUGLEVEL>1) fprintferr(" [%ld ms]", TIMER(&T));
+    if (DEBUGLEVEL>1) fprintferr(" [%ld ms]", TIMER(T));
   }
   avma = ltop;
   return mkvecsmall(Fl_add(lambda, Fl_div(pellk, lambda, ellk), ellk));
@@ -950,12 +949,12 @@ find_trace(GEN a4, GEN a6, ulong ell, GEN p, long *ptr_kt, long EARLY_ABORT)
     kt = k = 1;
     /* Must take k = 1 because we can't apply Hensel: no guarantee that a
      * root mod ell^2 exists */
-    tr = find_trace_Elkies_power(a4,a6,ell, k, meqn,meqntype, g, tr2, p, EARLY_ABORT);
+    tr = find_trace_Elkies_power(a4,a6,ell, k, meqn,meqntype, g, tr2, p, EARLY_ABORT, &T);
     if (!tr) tr = tr2;
     break;
   case MTElkies:
     /* Contrary to MTone_root, may look mod higher powers of ell */
-    tr = find_trace_Elkies_power(a4,a6,ell, k, meqn,meqntype, g, NULL, p, EARLY_ABORT);
+    tr = find_trace_Elkies_power(a4,a6,ell, k, meqn,meqntype, g, NULL, p, EARLY_ABORT, &T);
     if (!tr) { avma = ltop; return NULL; }
     break;
   case MTroots:
