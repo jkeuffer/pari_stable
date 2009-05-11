@@ -1021,7 +1021,7 @@ FpM_gauss(GEN a, GEN b, GEN p)
     a = ZM_to_Flm(a, pp);
     b = ZM_to_Flm(b, pp);
     u = Flm_gauss_sp(a,b, pp);
-    if (!u) return NULL;
+    if (!u) {avma = av; return u;}
     u = iscol? Flc_to_ZC(gel(u,1)): Flm_to_ZM(u);
     return gerepileupto(av, u);
   }
