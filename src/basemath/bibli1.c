@@ -2008,7 +2008,7 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
     norme1 = BORNE;
     borne2 = mulrr(norme1,alpha);
   } else {
-    norme1 = mpsqr(gel(v,1));
+    norme1 = gel(v,1);
     borne2 = sub_fudge(norme1,epsbit);
   }
   borne1 = add_fudge(norme1,epsbit);
