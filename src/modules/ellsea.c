@@ -81,6 +81,7 @@ get_modular_eqn(ulong ell, char *type)
   if (idx<lg(modular_eqn))
     eqn = gel(modular_eqn, idx);
   else eqn = get_seadata(ell);
+  if (!eqn) return NULL;
   *type = *GSTR(gel(eqn, 2));
   return list_to_pol(gel(eqn, 3));
 }
@@ -997,9 +998,10 @@ separation(GEN cnt)
   P = gen_1;
   for (j = 1; j <= k; ++j) P = mulis(P, cnt[j]);
   /* p_b * p_g = P is constant */
+  P3 = mulsi(3, P);
   btop = avma; st_lim = stack_lim(btop, 1);
   best_i = 0;
-  best_r = P3 = mulsi(3, P);
+  best_r = P3;
   for (i = 1; i < l; i++)
   {
     /* scan all possibilities */
