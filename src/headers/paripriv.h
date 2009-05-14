@@ -518,6 +518,7 @@ GEN     polgaloisnamesbig(long n, long k);
 /* gen1.c */
 
 int     ff_poltype(GEN *x, GEN *p, GEN *pol);
+int     is_Fp(GEN *x, GEN *p);
 int     is_FpC(GEN *x, GEN *p);
 int     is_FpM(GEN *x, GEN *p);
 int     is_FpX(GEN *x, GEN *p);

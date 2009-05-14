@@ -2013,67 +2013,62 @@ ff_poltype(GEN *x, GEN *p, GEN *pol)
 }
 
 int
+is_Fp(GEN *px, GEN *pp)
+{
+  GEN N, c = *px, p=*pp;
+  switch(typ(c))
+  {
+  case t_INTMOD:
+    N = gel(c,1);
+    if (!p) p = N;
+    else if (N != p && !equalii(N, p))
+    {
+      if (DEBUGMEM) pari_warn(warner,"different moduli in is_Fp");
+      *pp = NULL; return 0;
+    }
+    c = gel(c,2); break;
+  case t_INT:
+    if (p) c = modii(c, p);
+    break;
+  default: *pp = NULL; return 0;
+  }
+  *px = c; *pp = p; return 1;
+}
+
+int
 is_FpX(GEN *px, GEN *pp)
 {
-  GEN p = *pp, x = *px;
+  pari_sp av = avma;
   long i, lx;
+  GEN x = *px;
   GEN y = cgetg_copy(x, &lx);
 
   for (i=lx-1; i>1; i--)
   {
     GEN c = gel(x,i);
-    switch(typ(c))
-    {
-      case t_INTMOD: {
-        GEN N = gel(c,1);
-        if (!p) p = N;
-        else if (N != p && !equalii(N, p))
-        {
-          if (DEBUGMEM) pari_warn(warner,"different moduli in is_FpX");
-          *pp = NULL; return 0;
-        }
-        c = gel(c,2); break;
-      }
-      case t_INT:
-	if (p) c = modii(c, p);
-        break;
-      default: return 0;
-    }
+    if (!is_Fp(&c, pp)) { avma=av; return 0; }
     gel(y,i) = c;
   }
   y[1] = x[1];
-  *px = y; *pp = p; return (p != NULL);
+  *px = y; return (*pp != NULL);
 }
+
 int
 is_FpC(GEN *px, GEN *pp)
 {
-  GEN p = *pp, x = *px;
+  pari_sp av = avma;
   long i, hx;
+  GEN x = *px;
   GEN y = cgetg_copy(x, &hx);
   for (i=hx-1; i>0; i--)
   {
     GEN c = gel(x,i);
-    switch(typ(c))
-    {
-      case t_INTMOD: {
-        GEN N = gel(c,1);
-        if (!p) p = N;
-        else if (N != p && !equalii(N, p))
-        {
-          if (DEBUGMEM) pari_warn(warner,"different moduli in is_FpM");
-          *pp = NULL; return 0;
-        }
-        c = gel(c,2); break;
-      }
-      case t_INT:
-        if (p) c = modii(c, p);
-        break;
-      default: return 0;
-    }
+    if (!is_Fp(&c, pp)) { avma=av; return 0; }
     gel(y,i) = c;
   }
-  *px = y; *pp = p; return (p != NULL);
+  *px = y; return (*pp != NULL);
 }
+
 int
 is_FpM(GEN *px, GEN *pp)
 {
