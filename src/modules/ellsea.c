@@ -222,111 +222,13 @@ find_numerator_isogeny(GEN Eba4, GEN Eba6, GEN Eca4, GEN Eca6, GEN h, GEN p,
 /****************************************************************************/
 
 static GEN
-Fp_ell_j(GEN a4, GEN a6, GEN p)
+a4a6_j(GEN a4, GEN a6, GEN p)
 {
   pari_sp ltop=avma;
   GEN a43 = Fp_mulu(Fp_powu(a4, 3, p), 4, p);
   GEN j   = Fp_div(Fp_mulu(a43, 1728, p),
                    Fp_add(a43, Fp_mulu(Fp_sqr(a6, p), 27, p), p), p);
   return gerepileupto(ltop, j);
-}
-
-static GEN
-Fp_ell_dbl(GEN P, GEN a4, GEN p)
-{
-  pari_sp ltop = avma;
-  GEN lambda, C, D, x = gel(P,1), y = gel(P,2);
-  if (ell_is_inf(P) || !signe(y)) return mkvec(gen_0);
-  lambda = Fp_div(Fp_add(Fp_mulu(Fp_sqr(x,p), 3, p), a4, p),
-                  Fp_mulu(y, 2, p), p);
-  C = Fp_sub(Fp_sqr(lambda, p), Fp_mulu(x, 2, p), p);
-  D = Fp_sub(Fp_mul(lambda, Fp_sub(x, C, p), p), y, p);
-  return gerepilecopy(ltop, mkvec2(C,D));
-}
-
-static GEN
-Fp_ell_add_i(GEN P, GEN Q, GEN a4, GEN p)
-{
-  GEN Px = gel(P,1), Py = gel(P,2);
-  GEN Qx = gel(Q,1), Qy = gel(Q,2), lambda, C, D;
-  if (ell_is_inf(P)) return Q;
-  if (ell_is_inf(Q)) return P;
-  if (equalii(Px, Qx))
-  {
-    if (equalii(Py, Qy))
-      return Fp_ell_dbl(P, a4, p);
-    else
-      return mkvec(gen_0);
-  }
-  lambda = Fp_div(Fp_sub(Py, Qy, p), Fp_sub(Px, Qx, p), p);
-  C = Fp_sub(Fp_sub(Fp_sqr(lambda, p), Px, p), Qx, p);
-  D = Fp_sub(Fp_mul(lambda, Fp_sub(Px, C, p), p), Py, p);
-  return mkvec2(C,D);
-}
-static GEN
-Fp_ell_add(GEN P, GEN Q, GEN a4, GEN p)
-{
-  pari_sp av = avma;
-  return gerepilecopy(av, Fp_ell_add_i(P,Q,a4,p));
-}
-
-static GEN
-Fp_ell_inv_i(GEN P, GEN p)
-{
-  if (ell_is_inf(P)) return P;
-  return mkvec2(gel(P,1), Fp_neg(gel(P,2), p));
-}
-
-static GEN
-Fp_ell_sub_i(GEN P, GEN Q, GEN a4, GEN p)
-{
-  return Fp_ell_add_i(P, Fp_ell_inv_i(Q, p), a4, p);
-}
-
-struct _Fp_ell
-{
-  GEN a4;
-  GEN p;
-};
-static GEN
-_Fp_ell_dbl(void *E, GEN P)
-{
-  struct _Fp_ell *ell=(struct _Fp_ell *) E;
-  return Fp_ell_dbl(P, ell->a4, ell->p);
-}
-static GEN
-_Fp_ell_add(void *E, GEN P, GEN Q)
-{
-  struct _Fp_ell *ell=(struct _Fp_ell *) E;
-  return Fp_ell_add(P, Q, ell->a4, ell->p);
-}
-
-static GEN
-Fp_ell_pow(GEN P, GEN n, GEN a4, GEN p)
-{
-  pari_sp av = avma;
-  struct _Fp_ell E;
-  if (!signe(n) || ell_is_inf(P)) return mkvec(gen_0);
-  if (is_pm1(n)) return gcopy(P);
-  E.a4= a4; E.p = p;
-  return gerepileupto(av, leftright_pow(P, n, &E, &_Fp_ell_dbl, &_Fp_ell_add));
-}
-
-/* Finds a random point on E */
-static GEN
-Fp_ell_rand(GEN a4, GEN a6, GEN p)
-{
-  pari_sp ltop = avma;
-  GEN x, y, rhs;
-  do
-  {
-    avma= ltop;
-    x   = randomi(p); /*  x^3+a4*x+a6 = x*(x^2+a4)+a6  */
-    rhs = Fp_add(Fp_mul(x, Fp_add(Fp_sqr(x,p), a4, p), p), a6, p);
-  } while (kronecker(rhs, p) < 0);
-  y = Fp_sqrt(rhs, p);
-  if (!y) pari_err(talker,"not a prime number");
-  return gerepilecopy(ltop, mkvec2(x,y));
 }
 
 /****************************************************************************/
@@ -842,7 +744,7 @@ find_trace_Elkies_power(GEN a4, GEN a6, ulong ell, long k, GEN meqn, char meqnty
   {
     GEN tmp, mpoly;
     if (DEBUGLEVEL) fprintferr(", %Ps", powuu(ell, cnt));
-    mpoly = FpXY_evalx(meqn, Fp_ell_j(Eca4, Eca6, p), p);
+    mpoly = FpXY_evalx(meqn, a4a6_j(Eca4, Eca6, p), p);
     tmp = find_kernel_power(Eba4, Eba6, Eca4, Eca6, ell, meqn, meqntype, mpoly, kpoly, Ib, p);
     if (!tmp) { avma = ltop; return NULL; }
     lambda = find_eigen_value_power(a4, a6, ell, cnt, gel(tmp,3), lambda, p);
@@ -938,7 +840,7 @@ find_trace(GEN a4, GEN a6, ulong ell, GEN p, long *ptr_kt, long EARLY_ABORT)
   if (!meqn) return gen_0;
   if (DEBUGLEVEL)
   { fprintferr("Process prime %5ld. ", ell); TIMERstart(&T); }
-  meqnj = FpXY_evalx(meqn, Fp_ell_j(a4, a6, p), p);
+  meqnj = FpXY_evalx(meqn, a4a6_j(a4, a6, p), p);
   g = study_modular_eqn(ell, meqnj, p, &mt, &r);
   /* If l is an Elkies prime, search for a factor of the l-division polynomial.
   * Then deduce the trace by looking for eigenvalues of the Frobenius by
@@ -1111,13 +1013,13 @@ choose_card(GEN o, GEN a4, GEN a6, GEN p)
   for(;;)
   {
     GEN lasto = gen_0;
-    GEN P = Fp_ell_rand(a4, a6, p), t = mkvec(gen_0);
+    GEN P = random_FpE(a4, a6, p), t = mkvec(gen_0);
     long i;
     for (i = 1; i < lo; i++)
     {
       GEN newo = gel(o, so[i]);
       if (vo[i]) continue;
-      t = Fp_ell_add(t, Fp_ell_pow(P, subii(newo,lasto), a4,p), a4,p);/*P^o[i]*/
+      t = FpE_add(t, FpE_mul(P, subii(newo,lasto), a4,p), a4,p);/*P^o[i]*/
       lasto = newo;
       if (lg(t) != 2)
       {
@@ -1270,13 +1172,13 @@ BSGS_pre(GEN *pdiff, GEN V, GEN P, GEN a4, GEN p)
   GEN diff = compute_diff(V);
   GEN pre = cgetg(lg(diff), t_VEC);
   long i, l = lg(diff);
-  gel(pre, 1) = Fp_ell_pow(P, gel(diff, 1), a4, p);
+  gel(pre, 1) = FpE_mul(P, gel(diff, 1), a4, p);
   /* what we'd _really_ want here is a hashtable diff[i] -> pre[i]  */
   for (i = 2; i < l; i++)
   {
     pari_sp av = avma;
     GEN d = subii(gel(diff, i), gel(diff, i-1));
-    GEN Q = Fp_ell_add_i(gel(pre, i-1), Fp_ell_pow(P, d, a4, p), a4, p);
+    GEN Q = FpE_add(gel(pre, i-1), FpE_mul(P, d, a4, p), a4, p);
     gel(pre, i) = gerepilecopy(av, Q);
   }
   *pdiff = diff; return pre;
@@ -1343,10 +1245,10 @@ match_and_sort(GEN compile_atkin, long k, GEN Mu, GEN u, GEN a4, GEN a6, GEN p)
   gen_sort_inplace(baby, (void*)&cmpii, &cmp_nodata, NULL);
 
   SgMb = mulii(Sg, Mb);
-  P = Fp_ell_rand(a4, a6, p);
-  point = Fp_ell_pow(P, Mu, a4, p);
-  Pb = Fp_ell_pow(point, Mg, a4, p);
-  Pg = Fp_ell_pow(point, Mb, a4, p);
+  P = random_FpE(a4, a6, p);
+  point = FpE_mul(P, Mu, a4, p);
+  Pb = FpE_mul(point, Mg, a4, p);
+  Pg = FpE_mul(point, Mb, a4, p);
   /* Precomputation for babies */
   pre = BSGS_pre(&diff, baby, Pb, a4, p);
 
@@ -1356,12 +1258,12 @@ match_and_sort(GEN compile_atkin, long k, GEN Mu, GEN u, GEN a4, GEN a6, GEN p)
   for (i = 1; i < lbaby; i++) gel(table,i) = cgeti(lp);
   av1 = avma;
   /* (p+1 - u - Mu*Mb*Sg) P - (baby[1]) Pb */
-  point = Fp_ell_pow(P, subii(subii(pp1, u), mulii(Mu, addii(SgMb, mulii(Mg, gel(baby,1))))), a4, p);
+  point = FpE_mul(P, subii(subii(pp1, u), mulii(Mu, addii(SgMb, mulii(Mg, gel(baby,1))))), a4, p);
   affii(gel(point,1), gel(table, 1));
   for (i = 2; i < lbaby; i++)
   {
     GEN d = subii(gel(baby, i), gel(baby, i-1));
-    point = Fp_ell_sub_i(point, gel(pre, ZV_search(diff, d)), a4, p);
+    point = FpE_sub(point, gel(pre, ZV_search(diff, d)), a4, p);
     affii(gel(point,1), gel(table, i));
     point = gerepilecopy(av1, point);
   }
@@ -1371,7 +1273,7 @@ match_and_sort(GEN compile_atkin, long k, GEN Mu, GEN u, GEN a4, GEN a6, GEN p)
   /* Look for a collision among the x-coordinates */
   gen_sort_inplace(table, (void*)&cmpii, &cmp_nodata, &table_ind);
   av1 = avma;
-  point = Fp_ell_pow(Pg, gel(giant, 1), a4, p);
+  point = FpE_mul(Pg, gel(giant, 1), a4, p);
   for (i = 1; i < lgiant - 1; i++)
   {
     GEN d;
@@ -1386,7 +1288,7 @@ match_and_sort(GEN compile_atkin, long k, GEN Mu, GEN u, GEN a4, GEN a6, GEN p)
     }
 
     d = subii(gel(giant, i+1), gel(giant, i));
-    point = Fp_ell_add_i(point, gel(pre, ZV_search(diff, d)), a4, p);
+    point = FpE_add(point, gel(pre, ZV_search(diff, d)), a4, p);
     if ((i & 0xff) == 0) point = gerepilecopy(av1, point);
   }
   /* no match ? */

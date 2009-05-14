@@ -2861,6 +2861,10 @@ the prime field.
 
   \kbd{M}: matrix (\typ{MAT}). E.g. \kbd{QM} means a matrix with rational
   entries
+  
+  \kbd{E}: point over an elliptic curve, represented
+  as two-component vectors \kbd{[x,y]}, except for the  represented by the
+  one-component vector \kbd{[0]}. Not all curve models are supported.
 
   \kbd{Q}: representative (\typ{POL}) of a class in a polynomial quotient ring.
   E.g.~an \kbd{FpXQ} belongs to $(\Z/p\Z)[X]/(T(X))$, \kbd{FpXQV} means a
@@ -4400,6 +4404,31 @@ with \kbd{n} components (assumed larger than the number of coefficients of
 
 \fun{GEN}{F2xV_to_F2m}{GEN v, long n} \kbd{F2x\_to\_F2v} to each polynomials
 to get an \kbd{F2m} with \kbd{n} rows.
+
+\section{Arithmetic on elliptic curve over a finite field in simple form}
+\subsec{\kbd{FpE}}
+
+Let $p$ a prime number and $E$ the elliptic curve given by the equation
+$E:y^2=x^3+a_4\*x+a_6$. A \kbd{FpE} is a point of $E(\F_p)$.
+
+\fun{GEN}{FpE_add}{GEN P, GEN Q, GEN a4, GEN p} returns the sum $P+Q$
+in the group $E(\F_p)$, where $E$ is defined by $E:y^2=x^3+a_4\*x+a_6$,
+for any value of $a_6$ compatible with the points given. 
+
+\fun{GEN}{FpE_sub}{GEN P, GEN Q, GEN a4, GEN p} returns $P-Q$.
+
+\fun{GEN}{FpE_dbl}{GEN P, GEN a4, GEN p} returns $2.P$.
+
+\fun{GEN}{FpE_neg}{GEN P, GEN p} returns $-P$.
+
+\fun{GEN}{FpE_mul}{GEN P, GEN n, GEN a4, GEN p} return $n.P$.
+
+\fun{GEN}{random_FpE}{GEN a4, GEN a6, GEN p} returns a random point on
+$E(\F_p)$, where $E$ is defined by $E:y^2=x^3+a_4\*x+a_6$.
+
+\fun{GEN}{FpE_order}{GEN P, GEN o, GEN a4, GEN p} returns the order of $P$ in
+the group $E(\F_p)$, where $o$ is a multiple of the order of $P$, or its
+factorisation.
 
 \section{Integral, rational and generic linear algebra}
 \subsec{\kbd{ZC} / \kbd{ZV}, \kbd{ZM}}. A \kbd{ZV} (resp.~a~\kbd{ZM},

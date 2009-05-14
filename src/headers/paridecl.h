@@ -176,6 +176,16 @@ GEN     pol1_Flx(long sv);
 GEN     polx_Flx(long sv);
 GEN     random_Flx(long d1, long v, ulong p);
 
+/* FpE.c */
+
+GEN     FpE_add(GEN P, GEN Q, GEN a4, GEN p);
+GEN     FpE_dbl(GEN P, GEN a4, GEN p);
+GEN     FpE_neg(GEN P, GEN p);
+GEN     FpE_order(GEN z, GEN o, GEN a4, GEN p);
+GEN     FpE_mul(GEN P, GEN n, GEN a4, GEN p);
+GEN     FpE_sub(GEN P, GEN Q, GEN a4, GEN p);
+GEN     random_FpE(GEN a4, GEN a6, GEN p);
+
 /* FpX.c */
 
 GEN     Fp_FpX_sub(GEN x, GEN y, GEN p);

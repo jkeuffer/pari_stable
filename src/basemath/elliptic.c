@@ -2432,119 +2432,24 @@ ap_jacobi(GEN e, ulong p)
   }
 }
 
-static GEN
-addsell(GEN e, GEN z1, GEN z2, GEN p)
-{
-  GEN z,p1,p2,x,x1,x2,y,y1,y2;
-  pari_sp av;
-
-  if (!z1) return z2;
-  if (!z2) return z1;
-
-  x1 = gel(z1,1); y1 = gel(z1,2);
-  x2 = gel(z2,1); y2 = gel(z2,2);
-  z = cgetg(3, t_VEC); av = avma;
-  if (x1 == x2 || equalii(x1, x2))
-  {
-    if (!signe(y1) || !equalii(y1,y2)) return NULL;
-    p2 = shifti(y1,1);
-    p1 = addii(e, mulii(x1,mului(3,x1)));
-    p1 = remii(p1, p);
-  }
-  else { p1 = subii(y2,y1); p2 = subii(x2, x1); }
-  p1 = mulii(p1, Fp_inv(p2, p));
-  p1 = remii(p1, p);
-  x = subii(sqri(p1), addii(x1,x2));
-  x = modii(x,p);
-  y = subii(mulii(p1,subii(x1,x)), y1);
-  y = modii(y,p); avma = av;
-  gel(z,1) = icopy(x);
-  gel(z,2) = icopy(y); return z;
-}
-
-/* z1 <-- z1 + z2 */
+/* z1 <-- z1 + z2, with precomputed inverse */
 static void
-addsell_part2(GEN e, GEN z1, GEN z2, GEN p, GEN p2inv)
+FpE_add_ip(GEN z1, GEN z2, GEN a4, GEN p, GEN p2inv)
 {
   GEN p1,x,x1,x2,y,y1,y2;
 
   x1 = gel(z1,1); y1 = gel(z1,2);
   x2 = gel(z2,1); y2 = gel(z2,2);
   if (x1 == x2)
-  {
-    p1 = addii(e, mulii(x1,mului(3,x1)));
-    p1 = remii(p1, p);
-  }
-  else p1 = subii(y2,y1);
+    p1 = Fp_add(a4, mulii(x1,mului(3,x1)), p);
+  else 
+    p1 = Fp_sub(y2,y1, p);
 
-  p1 = mulii(p1, p2inv);
-  p1 = remii(p1, p);
-  x = subii(sqri(p1), addii(x1,x2));
-  x = modii(x,p);
-  y = subii(mulii(p1,subii(x1,x)), y1);
-  y = modii(y,p);
+  p1 = Fp_mul(p1, p2inv, p);
+  x = Fp_sub(sqri(p1), addii(x1,x2), p);
+  y = Fp_sub(mulii(p1,subii(x1,x)), y1, p);
   affii(x, x1);
   affii(y, y1);
-}
-
-static GEN
-negsell(GEN f, GEN p)
-{
-  GEN g = cgetg(3, t_VEC), y = gel(f,2);
-  gel(g,1) = gel(f,1);
-  gel(g,2) = signe(y)? subii(p, y): y;
-  return g;
-}
-
-typedef struct {
-  GEN e, p;
-} sellp;
-
-static GEN
-mul_sell(void *d, GEN x, GEN y)
-{ /* convert NULL <-> sentinel gen_0 since leftright_pow can't handle them */
-  sellp *S = (sellp*)d;
-  if (typ(x) == t_INT) return y;
-  if (typ(y) == t_INT) return x;
-  x = addsell(S->e, x, y, S->p);
-  if (!x) x = gen_0;
-  return x;
-}
-static GEN
-sqr_sell(void *d, GEN x) { return mul_sell(d,x,x); }
-static GEN
-powsell(GEN e, GEN z, GEN n, GEN p)
-{
-  long s = signe(n);
-  sellp S;
-
-  if (!s || !z) return NULL;
-  if (s < 0) z = negsell(z, p);
-  if (is_pm1(n)) return z;
-  S.e = e;
-  S.p = p;
-  z = leftright_pow(z, n, &S, &sqr_sell, &mul_sell);
-  if (typ(z) == t_INT) z = NULL;
-  return z;
-}
-
-/* assume H.f = 0, return exact order of f */
-static GEN
-exact_order(GEN H, GEN f, GEN c4, GEN p)
-{
-  GEN P, e, h = H, fa = Z_factor(H);
-  long i, j, l;
-
-  P = gel(fa,1); l = lg(P);
-  e = gel(fa,2);
-  for (i=1; i<l; i++)
-    for (j=itos(gel(e,i)); j; j--)
-    {
-      GEN n = diviiexact(h,gel(P,i));
-      if (powsell(c4,f,n,p)) break;
-      h = n;
-    }
-  return h;
 }
 
 /* make sure *x has lgefint >= k */
@@ -2569,7 +2474,7 @@ ellap1(GEN e, GEN p)
   long *tx, *ty, *ti, pfinal, i, j, s, KRO, KROold, nb;
   ulong x;
   pari_sp av = avma, av2;
-  GEN p1, P, h, mfh, F,f, fh,fg, pordmin, u, v, p1p, p2p, A, B, c4,c6, cp4, pts;
+  GEN p1, P, h, mfh, F,f, fh,fg, pordmin, u, v, p1p, p2p, A, B, c4,c6, a4, pts;
   tx = NULL;
   ty = ti = NULL; /* gcc -Wall */
 
@@ -2608,8 +2513,8 @@ ellap1(GEN e, GEN p)
     f = cgetg(3,t_VEC);
     gel(f,1) = modii(mului(x,u), p);
     gel(f,2) = modii(sqri(u),    p);
-    cp4 = modii(mulii(c4, gel(f,2)), p); /* c4 for E_u */
-    fh = powsell(cp4,f,h,p);
+    a4 = modii(mulii(c4, gel(f,2)), p); /* c4 for E_u */
+    fh = FpE_mul(f, h, a4, p);
     if (!fh) goto FOUND;
 
     s = itos( gceil(gsqrt(gdiv(pordmin,B),DEFAULTPREC)) ) >> 1;
@@ -2621,19 +2526,19 @@ ellap1(GEN e, GEN p)
       ty = tx + (s+1);
       ti = ty + (s+1);
     }
-    F = powsell(cp4,f,B,p);
+    F = FpE_mul(f,B,a4,p);
     *tx = CODE;
 
     /* F = B.f */
     P = gcopy(fh);
     if (s < 3)
     { /* we're nearly done: naive search */
-      GEN q1 = P, mF = negsell(F, p); /* -F */
+      GEN q1 = P, mF = FpE_neg(F, p); /* -F */
       for (i=1;; i++)
       {
-	P = addsell(cp4,P, F,p); /* h.f + i.F */
+	P = FpE_add(P,F,a4,p); /* h.f + i.F */
 	if (!P) { h = addii(h, mului(i,B)); goto FOUND; }
-	q1 = addsell(cp4,q1,mF,p); /* h.f - i.F */
+	q1 = FpE_add(q1,mF,a4,p); /* h.f - i.F */
 	if (!q1) { h = subii(h, mului(i,B)); goto FOUND; }
       }
     }
@@ -2646,11 +2551,11 @@ ellap1(GEN e, GEN p)
       gel(pts,i) = P; /* h.f + (i-1).F */
       _fix(P+1, j); tx[i] = mod2BIL(gel(P,1));
       _fix(P+2, j); ty[i] = mod2BIL(gel(P,2));
-      P = addsell(cp4,P,F,p); /* h.f + i.F */
+      P = FpE_add(P,F,a4,p); /* h.f + i.F */
       if (!P) { h = addii(h, mului(i,B)); goto FOUND; }
     }
-    mfh = negsell(fh, p);
-    fg = addsell(cp4,P,mfh,p); /* h.f + nb.F - h.f = nb.F */
+    mfh = FpE_neg(fh, p);
+    fg = FpE_add(P,mfh,a4,p); /* h.f + nb.F - h.f = nb.F */
     if (!fg) { h = mului(nb,B); goto FOUND; }
     u = cgetg(nb+1, t_VEC);
     av2 = avma; /* more baby steps, nb points at a time */
@@ -2673,18 +2578,18 @@ ellap1(GEN e, GEN p)
       for (j=1; j<=maxj; j++,i++) /* adding nb.F (part 2) */
       {
 	P = gel(pts,j);
-	addsell_part2(cp4,P,fg,p, gel(v,j));
+	FpE_add_ip(P,fg, a4,p, gel(v,j));
 	tx[i] = mod2BIL(gel(P,1));
 	ty[i] = mod2BIL(gel(P,2));
       }
       avma = av2;
     }
-    P = addsell(cp4,gel(pts,j-1),mfh,p); /* = (s-1).F */
+    P = FpE_add(gel(pts,j-1),mfh,a4,p); /* = (s-1).F */
     if (!P) { h = mului(s-1,B); goto FOUND; }
     if (DEBUGLEVEL) msgtimer("[ellap1] baby steps, s = %ld",s);
 
     /* giant steps: fg = s.F */
-    fg = addsell(cp4,P,F,p);
+    fg = FpE_add(P,F,a4,p);
     if (!fg) { h = mului(s,B); goto FOUND; }
     pfinal = mod2BIL(p); av2 = avma;
     /* Goal of the following: sort points by increasing x-coordinate hash.
@@ -2702,7 +2607,7 @@ ellap1(GEN e, GEN p)
     gaffect(fg, gel(pts,1));
     for (j=2; j<=nb; j++) /* pts[j] = j.fg = (s*j).F */
     {
-      P = addsell(cp4,gel(pts,j-1),fg,p);
+      P = FpE_add(gel(pts,j-1),fg,a4,p);
       if (!P) { h = mulii(mulss(s,j), B); goto FOUND; }
       gaffect(P, gel(pts,j));
     }
@@ -2733,7 +2638,7 @@ ellap1(GEN e, GEN p)
 	  { /* [h+j2] f == +/- ftest (= [i.s] f)? */
 	    j2 = ti[r] - 1;
 	    if (DEBUGLEVEL) msgtimer("[ellap1] giant steps, i = %ld",i);
-	    P = addsell(cp4, powsell(cp4,F,stoi(j2),p),fh,p);
+	    P = FpE_add(FpE_mul(F,stoi(j2),a4,p),fh,a4,p);
 	    if (equalii(gel(P,1), gel(ftest,1)))
 	    {
 	      if (equalii(gel(P,2), gel(ftest,2))) i = -i;
@@ -2757,13 +2662,13 @@ ellap1(GEN e, GEN p)
 	}
 	v = FpV_inv(u, p);
 	for (j=1; j<=nb; j++)
-	  addsell_part2(cp4, gel(pts,j),fg,p, gel(v,j));
+	  FpE_add_ip(gel(pts,j),fg,a4,p, gel(v,j));
 	if (i == nb) { fg[1] = save; }
 	j = 1;
       }
     }
 FOUND: /* found a point of exponent h on E_u */
-    h = exact_order(h, f, cp4, p);
+    h = FpE_order(h, f, a4, p);
     /* h | #E_u(Fp) = A (mod B) */
     if (B == gen_1)
       B = h;
