@@ -929,14 +929,11 @@ Flm_gauss_sp(GEN a, GEN b, ulong p)
 {
   long i, j, k, li, bco, aco = lg(a)-1;
   const int OK_ulong = 0;
-  int iscol;
   GEN u;
 
   if (!aco) return cgetg(1,t_MAT);
   li = lg(a[1])-1;
   bco = lg(b)-1;
-  iscol = (typ(b)!=t_MAT);
-  if (iscol) b = mkmat(b);
   for (i=1; i<=aco; i++)
   {
     ulong invpiv;
@@ -980,7 +977,7 @@ Flm_gauss_sp(GEN a, GEN b, ulong p)
     for (j=1; j<=bco; j++) ugel(u,j) = Fl_get_col_OK(a,(uGEN)b[j], aco,p);
   else
     for (j=1; j<=bco; j++) ugel(u,j) = Fl_get_col(a,(uGEN)b[j], aco,p);
-  return iscol? gel(u,1): u;
+  return u;
 }
 
 GEN
@@ -995,7 +992,7 @@ matid_Flm(long n)
 
 GEN
 Flm_gauss(GEN a, GEN b, ulong p) {
-  return Flm_gauss_sp(RgM_shallowcopy(a), shallowcopy(b), p);
+  return Flm_gauss_sp(RgM_shallowcopy(a), RgM_shallowcopy(b), p);
 }
 static GEN
 Flm_inv_sp(GEN a, ulong p) {
