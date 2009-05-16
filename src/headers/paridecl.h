@@ -1531,6 +1531,11 @@ GEN     gsubsg(long x, GEN y);
 GEN     invr(GEN b);
 GEN     inv_ser(GEN b);
 
+/* galpol.c */
+
+GEN     galoisnbpol(long a);
+GEN     galoispol(long a, long b, long s);
+
 /* gen2.c */
 
 GEN     gassoc_proto(GEN f(GEN,GEN),GEN,GEN);
