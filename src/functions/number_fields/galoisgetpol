@@ -1,13 +1,13 @@
-Function: galoispol
+Function: galoisgetpol
 Section: number_fields
-C-Name: galoispol
+C-Name: galoisgetpol
 Prototype: LD0,L,D1,L,
 Description:
- galoispol(small):int               galoisnbpol($1)
- galoispol(small,):int              galoisnbpol($1)
- galoispol(small,,):int             galoisnbpol($1)
- galoispol(small,small,small):vec   galoispol($1, $2 ,$3)
-Help: galoispol(a,{b},{s}): Query the galpol package for a polynomial with
+ galoisgetpol(small):int               galoisnbpol($1)
+ galoisgetpol(small,):int              galoisnbpol($1)
+ galoisgetpol(small,,):int             galoisnbpol($1)
+ galoisgetpol(small,small,small):vec   galoisgetpol($1, $2 ,$3)
+Help: galoisgetpol(a,{b},{s}): Query the galpol package for a polynomial with
  Galois group isomorphic to GAP4(a,b), totally real if s=1 (default) and
  totally complex if s=2.  The output is a vector [pol, den] where pol is the
  polynomial and den is the the common denominator of the conjugates expressed
@@ -22,7 +22,7 @@ Doc: Query the galpol package for a polynomial with Galois group isomorphic to
  follow:
 
  \bprog
- V=galoispol(8,4,1);
+ V=galoisgetpol(8,4,1);
  G=galoisinit(V[1],V[2])
  @eprog
 

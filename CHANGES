@@ -601,7 +601,7 @@ BA 40- Pollard rho discrete logarithm algorithm (function gen_Pollard_log)
 BA 43- GP routines and PARI functions ellweilpairing, elltatepairing and
        ellgroup
 BA 44- FpE functions family for points on E(F_p)
-BA 45- GP routine galoispol and PARI function galoispol, galoisnbpol
+BA 45- GP routine galoisgetpol and PARI function galoisgetpol, galoisnbpol
 
   Removed
     1- obsolete GP functions printp, printp1. Either replace them by

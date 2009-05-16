@@ -30,19 +30,19 @@ galoisnbpol(long a)
 }
 
 GEN
-galoispol(long a, long b, long sig)
+galoisgetpol(long a, long b, long sig)
 {
   pariFILE *F;
   GEN V;
   const char *si;
   char *s;
   if (a<=0 || b<0) pari_err(talker,"argument must be positive");
-  if (!b && !sig) return galoisnbpol(a);
+  if (!b) return galoisnbpol(a);
   switch(sig)
   {
     case 1: si="real"; break;
     case 2: si="complex"; break;
-    default: pari_err(talker,"invalid signature in galoispol"); return NULL;
+    default: pari_err(talker,"invalid signature in galoisgetpol"); return NULL;
   }
   s = pari_sprintf("%s/galpol/%ld/%ld/%s", pari_datadir, a,b,si);
   F = pari_fopengz(s); free(s);

@@ -1534,7 +1534,7 @@ GEN     inv_ser(GEN b);
 /* galpol.c */
 
 GEN     galoisnbpol(long a);
-GEN     galoispol(long a, long b, long s);
+GEN     galoisgetpol(long a, long b, long s);
 
 /* gen2.c */
 
