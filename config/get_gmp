@@ -43,8 +43,18 @@ if test -n "$gmp"; then
   $CC $extraflag $GMPINCLUDE -o $exe gmp_version.c $GMPLIBS 2> /dev/null
   if test -r $exe; then
     gmp_version=`env LD_LIBRARY_PATH="$LD_LIBRARY_PATH$dir_sep$gmp" $exe`;
-  else
-    echo "### Your version of GMP is too old for PARI. Please upgrade"
+  fi
+  if test "$gmp_version" = "unsupported"; then
+    echo "### Your GMP library ABI is unsupported."
+    gmp=
+  fi
+  if test -z "$gmp_version"; then
+    $CC $extraflag $GMPINCLUDE -o $exe ansi.c $GMPLIBS 2> /dev/null
+    if test -r $exe; then
+      echo "### Your version of GMP is too old for PARI. Please upgrade"
+    else
+      echo "### Your GMP library is incompatible with the compiler settings."
+    fi
     gmp=
   fi
   rm -f $exe $exe$exe_suff
