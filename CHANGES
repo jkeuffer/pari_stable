@@ -441,6 +441,7 @@ BA110- listsort(L) no longer returns the list L: it now returns nothing.
        (No point in sorting in place if we must immediately copy the result.)
   111- allow component(t_VECSMALL,...) [#957]
   112- allow bestappr(x)  [2nd argument made optional]
+BA113- GMP kernel chosen by default when GMP is available
 
   Added
     1- many new benches (make test-all)

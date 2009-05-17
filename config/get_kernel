@@ -47,7 +47,7 @@ esac
 #
 pretty="$pretty running $osname"
 
-tmp_kern=auto-none
+tmp_kern=auto-auto
 if test  -n "$kernel"; then
   tmp_kern=$kernel
 else
@@ -69,7 +69,12 @@ EOM
 EOM
   fi
 fi
-tmp_kern=`./kernel-name $tmp_kern $asmarch none`
+if test -z "$without_gmp" ; then
+  lvl1=gmp
+else
+  lvl1=none
+fi
+tmp_kern=`./kernel-name $tmp_kern $asmarch $lvl1`
 kernlvl0=`echo "$tmp_kern" | sed -e 's/\(.*\)-.*/\1/'`
 kernlvl1=`echo "$tmp_kern" | sed -e 's/.*-\(.*\)/\1/'`
 
@@ -99,7 +104,7 @@ case "$sizeof_long" in
   4) pretty="$pretty ($prettyk kernel) 32-bit version";;
   8) pretty="$pretty ($prettyk kernel) 64-bit version";;
 esac;
-echo "Building for architecture: $pretty"
+echo "Building for: $pretty"
 cat << EOM
 ==========================================================================
 EOM

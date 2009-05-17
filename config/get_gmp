@@ -4,9 +4,6 @@ if test -n "$kernel"; then # kernel explicitly provided
     gmp) if test -z "$with_gmp"; then with_gmp=yes; fi ;;
   esac
 fi
-if test -z "$with_gmp" -a "$fastread" = yes; then
-  without_gmp=yes
-fi
 
 _gmp_list="gmp GMPLIBS GMPINCLUDE"
 gmp=
