@@ -1,10 +1,3 @@
-if test -n "$kernel"; then # kernel explicitly provided
-  case "$kernlvl1" in
-    none) with_gmp=;;
-    gmp) if test -z "$with_gmp"; then with_gmp=yes; fi ;;
-  esac
-fi
-
 _gmp_list="gmp GMPLIBS GMPINCLUDE"
 gmp=
 if test -n "$with_gmp"; then
@@ -94,4 +87,16 @@ if test -n "$gmp"; then
       pretty=`echo $pretty | sed "s, *kernel,/GMP-$gmp_version kernel,"` ;;
   esac
   kernlvl1=gmp
+else
+  case "$pretty" in
+    *GMP*)
+      pretty=`echo $pretty | sed "s,GMP,,"` ;;
+    /$kernlvl1)
+      pretty=`echo $pretty | sed "s,$kernlvl1,,"` ;;
+    *)
+      pretty=`echo $pretty | sed "s, *kernel, kernel,"` ;;
+  esac
+  kernlvl1=none
+  GMPINCLUDE=
+  GMPLIBS=
 fi
