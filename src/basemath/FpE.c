@@ -169,3 +169,167 @@ FpE_order(GEN z, GEN o, GEN a4, GEN p)
   return gerepileuptoint(av, gen_eltorder(z, o, (void*)&e, &FpE_group));
 }
 
+/***********************************************************************/
+/**                                                                   **/
+/**                            Pairings                               **/
+/**                                                                   **/
+/***********************************************************************/
+/* Formulae from a GP script by J.E.Cremona */
+
+static GEN
+FpE_ffvert(GEN t, GEN pt, GEN p)
+{
+  return ell_is_inf(t)?gen_1:Fp_sub(gel(pt, 1), gel(t, 1), p);
+}
+
+static GEN
+FpE_fftang(GEN t, GEN pt, GEN a4, GEN p)
+{
+  GEN dyf, dxf;
+  if (ell_is_inf(t)) return gen_1;
+  dyf = Fp_mulu(gel(t, 2), 2, p);
+  if (signe(dyf)==0)
+    return Fp_sub(gel(pt, 1), gel(t, 1), p);
+  dxf = Fp_neg(Fp_add(Fp_mulu(Fp_sqr(gel(t, 1),p ),3,p), a4, p), p);
+  return Fp_add(Fp_sub(gel(pt, 2), gel(t, 2), p), Fp_mul(Fp_div(dxf, dyf, p),
+                Fp_sub(gel(pt, 1), gel(t, 1), p), p), p);
+}
+
+static GEN
+FpE_ffchord(GEN t, GEN s, GEN pt, GEN a4, GEN p)
+{
+  if (ell_is_inf(s)) return FpE_ffvert(t, pt, p);
+  if (ell_is_inf(t)) return FpE_ffvert(s, pt, p);
+  if (equalii(gel(s, 1), gel(t, 1)))
+  {
+    if (equalii(gel(s, 2), gel(t, 2))) return FpE_fftang(t, pt, a4, p);
+    else return FpE_ffvert(t, pt, p);
+  }
+  return Fp_sub(Fp_sub(gel(pt, 2), gel(t, 2),p), 
+                Fp_mul(Fp_div(Fp_sub(gel(t, 2), gel(s, 2), p), 
+                              Fp_sub(gel(t, 1), gel(s, 1),p), p), 
+                       Fp_sub(gel(pt, 1), gel(t, 1), p), p), p);
+}
+
+struct FpE_ff
+{
+  GEN pt1, pt2, a4, p;
+};
+
+static GEN
+FpE_ffadd(GEN S, GEN T, GEN pt1, GEN pt2, GEN a4, GEN p)
+{
+  GEN s=gel(S,1), t=gel(T,1);
+  GEN a, b, h;
+  GEN ST = cgetg(3, t_VEC);
+  GEN st = FpE_add(s, t, a4, p);
+  pari_sp av=avma;
+  gel(ST, 1) = st;
+  a  = Fp_mul(FpE_ffchord(s, t, pt1, a4, p), FpE_ffvert(st, pt2, p), p);
+  if (signe(a)==0) return gen_0;
+  b  = Fp_mul(FpE_ffchord(s, t, pt2, a4, p), FpE_ffvert(st, pt1, p), p);
+  if (signe(b)==0) return gen_0;
+  h = Fp_mul(Fp_mul(gel(S,2), gel(T,2), p), Fp_div(a, b, p), p);
+  gel(ST, 2) = gerepileupto(av, h);
+  return ST;
+}
+static GEN
+_FpE_ffadd(void *data, GEN s, GEN t)
+{
+  struct FpE_ff* ff=(struct FpE_ff*) data;
+  if (s==gen_0 || t==gen_0) return gen_0;
+  return FpE_ffadd(s,t,ff->pt1,ff->pt2,ff->a4,ff->p);
+}
+
+static GEN
+FpE_ffdbl(GEN S, GEN pt1, GEN pt2, GEN a4, GEN p)
+{
+  GEN s=gel(S,1);
+  GEN a, b, h;
+  GEN S2 = cgetg(3, t_VEC);
+  GEN s2 = FpE_dbl(s, a4, p);
+  pari_sp av=avma;
+  gel(S2, 1) = s2;
+  a  = Fp_mul(FpE_fftang(s, pt1, a4, p), FpE_ffvert(s2, pt2, p), p);
+  if (signe(a)==0) return gen_0;
+  b  = Fp_mul(FpE_fftang(s, pt2, a4, p), FpE_ffvert(s2, pt1, p), p);
+  if (signe(b)==0) return gen_0;
+  h = Fp_mul(Fp_sqr(gel(S,2),p), Fp_div(a, b, p), p);
+  gel(S2, 2) = gerepileupto(av, h);
+  return S2;
+}
+
+static GEN
+_FpE_ffdbl(void *data, GEN s)
+{
+  struct FpE_ff* ff=(struct FpE_ff*) data;
+  if (s==gen_0) return gen_0;
+  return FpE_ffdbl(s,ff->pt1,ff->pt2,ff->a4,ff->p);
+}
+
+static GEN
+FpE_ffmul(GEN t, GEN m, GEN pt1, GEN pt2, GEN a4, GEN p)
+{
+  struct FpE_ff ff;
+  ff.pt1=pt1; ff.pt2=pt2; ff.a4=a4; ff.p=p;
+  return leftright_pow(t, m, (void*)&ff, _FpE_ffdbl, _FpE_ffadd);
+}
+
+static GEN
+FpE_get_a6(GEN P, GEN a4, GEN p)
+{
+  GEN x=gel(P,1), y=gel(P,2);
+  GEN RHS = Fp_mul(x, Fp_add(Fp_sqr(x, p), a4, p), p);
+  return Fp_sub(Fp_sqr(y, p), RHS, p);
+}
+
+GEN
+FpE_weilpairing(GEN t, GEN s, GEN m, GEN a4, GEN p)
+{
+  pari_sp ltop=avma;
+  GEN w, a6;
+  if (ell_is_inf(s) || ell_is_inf(t)) return gen_1;
+  if (equaliu(m, 2)) return gequal(s, t)?gen_1:gen_m1;
+  a6 = FpE_get_a6(t, a4, p);
+  while(1)
+  {
+    GEN r, rs, tr, a, b;
+    avma = ltop;
+    r  = random_FpE(a4, a6, p);
+    rs = FpE_add(r, s, a4, p);
+    tr = FpE_sub(t, r, a4, p);
+    if (ell_is_inf(rs) || ell_is_inf(tr) || ell_is_inf(r) || gequal(rs, t))
+      continue;
+    a = FpE_ffmul(mkvec2(t, gen_1), m, rs, r, a4, p);
+    if (a==gen_0) continue;
+    gel(r, 2) = Fp_neg(gel(r, 2), p);
+    b = FpE_ffmul(mkvec2(s, gen_1), m, tr, r, a4, p);
+    if (b==gen_0) continue;
+    w = Fp_div(gel(a, 2), gel(b, 2), p);
+    return gerepileuptoint(ltop,w);
+  }
+}
+
+GEN
+FpE_tatepairing(GEN t, GEN s, GEN m, GEN a4, GEN p)
+{
+  pari_sp ltop=avma;
+  GEN w, a6;
+  if (ell_is_inf(s) || ell_is_inf(t)) return gen_1;
+  if (equaliu(m, 2)) return gequal(s, t)?gen_1:gen_m1;
+  a6 = FpE_get_a6(t, a4, p);
+  while(1)
+  {
+    GEN r, rs, tr, a;
+    avma = ltop;
+    r  = random_FpE(a4, a6, p);
+    rs = FpE_add(r, s, a4, p);
+    tr = FpE_sub(t, r, a4, p);
+    if (ell_is_inf(rs) || ell_is_inf(tr) || ell_is_inf(r) || gequal(rs, t))
+      continue;
+    a = FpE_ffmul(mkvec2(t, gen_1), m, rs, r, a4, p);
+    if (a==gen_0) continue;
+    w = Fp_pow(gel(a, 2), diviiexact(subis(p,1), m), p);
+    return gerepileuptoint(ltop, w);
+  }
+}

@@ -4733,48 +4733,21 @@ elltatepairing(GEN E, GEN t, GEN s, GEN m)
 }
 
 static GEN
-ellmod(GEN E, GEN p)
+ell_to_a4a6(GEN E, GEN p)
 {
-  GEN a1,a2,a3,a4,a6, b2,b4,b6,b8, c4,c6, D, j, a11, a13, a33, b22;
-  GEN y;
+  GEN c4, c6;
   checkell5(E);
-  y = cgetg(14,t_VEC);
-  gel(y,1) = a1 = gmodulo(gel(E,1),p);
-  gel(y,2) = a2 = gmodulo(gel(E,2),p);
-  gel(y,3) = a3 = gmodulo(gel(E,3),p);
-  gel(y,4) = a4 = gmodulo(gel(E,4),p);
-  gel(y,5) = a6 = gmodulo(gel(E,5),p);
-  a11 = gsqr(a1);
-  b2 = gadd(a11, gmul2n(a2,2));
-  gel(y,6) = b2; /* a1^2 + 4a2 */
-
-  a13 = gmul(a1, a3);
-  b4 = gadd(a13, gmul2n(a4,1));
-  gel(y,7) = b4; /* a1 a3 + 2a4 */
-
-  a33 = gsqr(a3);
-  b6 = gadd(a33, gmul2n(a6,2));
-  gel(y,8) = b6; /* a3^2 + 4 a6 */
-  b8 = gsub(gadd(gmul(a11,a6), gmul(b6, a2)), gmul(a4, gadd(a4,a13)));
-  gel(y,9) = b8; /* a1^2 a6 + 4a6 a2 + a2 a3^2 + 4 a6 - a4(a4 + a1 a3) */
-
-  b22 = gsqr(b2);
-  c4 = gadd(b22, gmulsg(-24,b4));
-  gel(y,10) = c4; /* b2^2 - 24 b4 */
-
-  c6 = gadd(gmul(b2,gsub(gmulsg(36,b4),b22)), gmulsg(-216,b6));
-  gel(y,11) = c6; /* 36 b2 b4 - b2^3 - 216 b6 */
-
-  D = gsub(gmul(b4, gadd(gmulsg(9,gmul(b2,b6)),gmulsg(-8,gsqr(b4)))),
-	   gadd(gmul(b22,b8),gmulsg(27,gsqr(b6))));
-  gel(y,12) = D;
-  if (gequal0(D)) pari_err(talker,"singular curve in ellinit");
-
-  j = gdiv(gmul(gsqr(c4),c4), D);
-  gel(y,13) = j;
-  return y;
+  c4 = Rg_to_Fp(ell_get_c4(E),p);
+  c6 = Rg_to_Fp(ell_get_c6(E),p);
+  return mkvec2(Fp_neg(Fp_mulu(c4, 27, p), p), Fp_neg(Fp_mulu(c6, 54, p), p));
 }
 
+/* Standard polynomial of 2-division */
+static GEN
+elldivpol2(GEN e, GEN x)
+{
+  return gadd(gmulgs(ellRHS(e, x), 4),gsqr(ellLHS0(e, x)));
+}
 
 GEN
 ellgroup(GEN E, GEN p)
@@ -4783,13 +4756,25 @@ ellgroup(GEN E, GEN p)
   GEN m, z, d, N0, N1;
   long i, j, l1;
   GEN N, r, F, F1;
+  GEN a4, a6;
   if (typ(p)!=t_INT) pari_err(typeer,"ellgroup");
-  E = ellmod(E,p);
   N = subii(addis(p, 1), ellap(E, p));
   r = gcdii(N, subis(p, 1));
-  F1 = gel(factor(r), 1);
-  l1 = lg(F1);
-  F = cgetg(3,t_MAT);
+  if (equaliu(r, 1)) goto ellgroup_cyclic;
+  /* This take care of p=2 */
+  if (equaliu(p, 3))
+  { 
+    /* The only possible non-cyclic group is [2,2] which happens 9 times */
+    if (!equaliu(N, 4)) goto ellgroup_cyclic;
+    /* If the group is not cyclic, elldivpol2 must have 3 roots else 1 one */
+    if (!gequal0(elldivpol2(E,gmodulss(0,3)))
+     || !gequal0(elldivpol2(E,gmodulss(1,3))))
+      goto ellgroup_cyclic;
+    return gerepileupto(av, mkvec2s(2, 2));
+  } /* Now assume p>3 */
+  E = ell_to_a4a6(E, p); a4 = gel(E, 1); a6 = gel(E, 2);
+  F1 = gel(factor(r), 1); l1 = lg(F1);
+  F = cgetg(3, t_MAT);
   gel(F,1) = cgetg(l1, t_COL);
   gel(F,2) = cgetg(l1, t_COL);
   for (i = 1, j = 1; i < l1; ++i)
@@ -4804,20 +4789,20 @@ ellgroup(GEN E, GEN p)
   N0 = factorback(F); N1 = diviiexact(N, N0);
   do
   {
-    GEN P = ellrandom(E);
-    GEN Q = ellrandom(E);
-    GEN Pp = powell(E, P, N1);
-    GEN Qp = powell(E, Q, N1);
-    GEN s = ellorder(E, Pp, F);
-    GEN t = ellorder(E, Qp, F);
+    GEN P = random_FpE(a4, a6, p);
+    GEN Q = random_FpE(a4, a6, p);
+    GEN Pp = FpE_mul(P, N1, a4, p);
+    GEN Qp = FpE_mul(Q, N1, a4, p);
+    GEN s = FpE_order(Pp, F, a4, p);
+    GEN t = FpE_order(Qp, F, a4, p);
     if (equalii(s, N0) || equalii(t, N0))
       goto ellgroup_cyclic;
     m = lcmii(s, t);
-    z = Rg_to_Fp(ellweilpairing(E, Pp, Qp, m), p);
+    z = FpE_weilpairing(Pp, Qp, m, a4, p);
     d = Fp_order(z, F, p);
   } while (!equalii(mulii(m, d), N0));
   if (cmpis(d, 1) > 0)
-    return gerepilecopy(av, mkvec2(gdiv(N, d),d));
+    return gerepilecopy(av, mkvec2(diviiexact(N, d),d));
 ellgroup_cyclic:
-  return gerepilecopy(av, mkvec(N));
+  return gerepileupto(av, mkveccopy(N));
 }
