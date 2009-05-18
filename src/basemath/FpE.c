@@ -316,7 +316,6 @@ FpE_tatepairing(GEN t, GEN s, GEN m, GEN a4, GEN p)
   pari_sp ltop=avma;
   GEN w, a6;
   if (ell_is_inf(s) || ell_is_inf(t)) return gen_1;
-  if (equaliu(m, 2)) return gequal(s, t)?gen_1:gen_m1;
   a6 = FpE_get_a6(t, a4, p);
   while(1)
   {
