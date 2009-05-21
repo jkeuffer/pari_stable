@@ -142,11 +142,11 @@ random_FpE(GEN a4, GEN a6, GEN p)
   {
     avma= ltop;
     x   = randomi(p); /*  x^3+a4*x+a6 = x*(x^2+a4)+a6  */
-    rhs = Fp_add(Fp_mul(x, Fp_add(Fp_sqr(x,p), a4, p), p), a6, p);
+    rhs = Fp_add(Fp_mul(x, Fp_add(Fp_sqr(x, p), a4, p), p), a6, p);
   } while (kronecker(rhs, p) < 0);
   y = Fp_sqrt(rhs, p);
   if (!y) pari_err(talker,"not a prime number");
-  return gerepilecopy(ltop, mkvec2(x,y));
+  return gerepilecopy(ltop, mkvec2(x, y));
 }
 
 static int
@@ -187,10 +187,10 @@ FpE_fftang(GEN t, GEN pt, GEN a4, GEN p)
 {
   GEN dyf, dxf;
   if (ell_is_inf(t)) return gen_1;
-  dyf = Fp_mulu(gel(t, 2), 2, p);
-  if (signe(dyf)==0)
+  if (signe(gel(t, 2))==0)
     return Fp_sub(gel(pt, 1), gel(t, 1), p);
-  dxf = Fp_neg(Fp_add(Fp_mulu(Fp_sqr(gel(t, 1),p ),3,p), a4, p), p);
+  dxf = Fp_neg(Fp_add(Fp_mulu(Fp_sqr(gel(t, 1), p), 3, p), a4, p), p);
+  dyf = Fp_mulu(gel(t, 2), 2, p);
   return Fp_add(Fp_sub(gel(pt, 2), gel(t, 2), p), Fp_mul(Fp_div(dxf, dyf, p),
                 Fp_sub(gel(pt, 1), gel(t, 1), p), p), p);
 }
@@ -250,11 +250,11 @@ FpE_ffdbl(GEN S, GEN pt1, GEN pt2, GEN a4, GEN p)
   GEN s2 = FpE_dbl(s, a4, p);
   pari_sp av=avma;
   gel(S2, 1) = s2;
-  a  = Fp_mul(FpE_fftang(s, pt1, a4, p), FpE_ffvert(s2, pt2, p), p);
+  a = Fp_mul(FpE_fftang(s, pt1, a4, p), FpE_ffvert(s2, pt2, p), p);
   if (signe(a)==0) return gen_0;
-  b  = Fp_mul(FpE_fftang(s, pt2, a4, p), FpE_ffvert(s2, pt1, p), p);
+  b = Fp_mul(FpE_fftang(s, pt2, a4, p), FpE_ffvert(s2, pt1, p), p);
   if (signe(b)==0) return gen_0;
-  h = Fp_mul(Fp_sqr(gel(S,2),p), Fp_div(a, b, p), p);
+  h = Fp_mul(Fp_sqr(gel(S, 2), p), Fp_div(a, b, p), p);
   gel(S2, 2) = gerepileupto(av, h);
   return S2;
 }
