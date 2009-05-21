@@ -2515,7 +2515,7 @@ ellap1(GEN e, GEN p)
     gel(f,2) = modii(sqri(u),    p);
     a4 = modii(mulii(c4, gel(f,2)), p); /* c4 for E_u */
     fh = FpE_mul(f, h, a4, p);
-    if (!fh) goto FOUND;
+    if (ell_is_inf(fh)) goto FOUND;
 
     s = itos( gceil(gsqrt(gdiv(pordmin,B),DEFAULTPREC)) ) >> 1;
     CODE = evaltyp(t_VECSMALL) | evallg(s+1);
@@ -2537,9 +2537,9 @@ ellap1(GEN e, GEN p)
       for (i=1;; i++)
       {
 	P = FpE_add(P,F,a4,p); /* h.f + i.F */
-	if (!P) { h = addii(h, mului(i,B)); goto FOUND; }
+	if (ell_is_inf(P)) { h = addii(h, mului(i,B)); goto FOUND; }
 	q1 = FpE_add(q1,mF,a4,p); /* h.f - i.F */
-	if (!q1) { h = subii(h, mului(i,B)); goto FOUND; }
+	if (ell_is_inf(q1)) { h = subii(h, mului(i,B)); goto FOUND; }
       }
     }
     /* Baby Step/Giant Step */
@@ -2552,11 +2552,11 @@ ellap1(GEN e, GEN p)
       _fix(P+1, j); tx[i] = mod2BIL(gel(P,1));
       _fix(P+2, j); ty[i] = mod2BIL(gel(P,2));
       P = FpE_add(P,F,a4,p); /* h.f + i.F */
-      if (!P) { h = addii(h, mului(i,B)); goto FOUND; }
+      if (ell_is_inf(P)) { h = addii(h, mului(i,B)); goto FOUND; }
     }
     mfh = FpE_neg(fh, p);
     fg = FpE_add(P,mfh,a4,p); /* h.f + nb.F - h.f = nb.F */
-    if (!fg) { h = mului(nb,B); goto FOUND; }
+    if (ell_is_inf(fg)) { h = mului(nb,B); goto FOUND; }
     u = cgetg(nb+1, t_VEC);
     av2 = avma; /* more baby steps, nb points at a time */
     while (i <= s)
@@ -2566,7 +2566,7 @@ ellap1(GEN e, GEN p)
       {
 	P = gel(pts,j); /* h.f + (i-nb-1+j-1).F */
 	gel(u,j) = subii(gel(fg,1), gel(P,1));
-	if (gel(u,j) == gen_0) /* sum = 0 or doubling */
+	if (!signe(gel(u,j))) /* sum = 0 or doubling */
 	{
 	  long k = i+j-2;
 	  if (equalii(gel(P,2),gel(fg,2))) k -= 2*nb; /* fg == P */
@@ -2585,12 +2585,12 @@ ellap1(GEN e, GEN p)
       avma = av2;
     }
     P = FpE_add(gel(pts,j-1),mfh,a4,p); /* = (s-1).F */
-    if (!P) { h = mului(s-1,B); goto FOUND; }
+    if (ell_is_inf(P)) { h = mului(s-1,B); goto FOUND; }
     if (DEBUGLEVEL) msgtimer("[ellap1] baby steps, s = %ld",s);
 
     /* giant steps: fg = s.F */
     fg = FpE_add(P,F,a4,p);
-    if (!fg) { h = mului(s,B); goto FOUND; }
+    if (ell_is_inf(fg)) { h = mului(s,B); goto FOUND; }
     pfinal = mod2BIL(p); av2 = avma;
     /* Goal of the following: sort points by increasing x-coordinate hash.
      * Done in a complicated way to avoid allocating a large temp vector */
@@ -2608,7 +2608,7 @@ ellap1(GEN e, GEN p)
     for (j=2; j<=nb; j++) /* pts[j] = j.fg = (s*j).F */
     {
       P = FpE_add(gel(pts,j-1),fg,a4,p);
-      if (!P) { h = mulii(mulss(s,j), B); goto FOUND; }
+      if (ell_is_inf(P)) { h = mulii(mulss(s,j), B); goto FOUND; }
       gaffect(P, gel(pts,j));
     }
     /* replace fg by nb.fg since we do nb points at a time */
@@ -2668,7 +2668,7 @@ ellap1(GEN e, GEN p)
       }
     }
 FOUND: /* found a point of exponent h on E_u */
-    h = FpE_order(h, f, a4, p);
+    h = FpE_order(f, h, a4, p);
     /* h | #E_u(Fp) = A (mod B) */
     if (B == gen_1)
       B = h;
