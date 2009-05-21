@@ -4752,11 +4752,11 @@ elldivpol2(GEN e, GEN x)
 GEN
 ellgroup(GEN E, GEN p)
 {
-  pari_sp av = avma;
+  pari_sp av = avma, av2;
   GEN m, z, d, N0, N1;
   long i, j, l1;
   GEN N, r, F, F1;
-  GEN a4, a6;
+  GEN e, a4, a6;
   if (typ(p)!=t_INT) pari_err(typeer,"ellgroup");
   N = subii(addis(p, 1), ellap(E, p));
   r = gcdii(N, subis(p, 1));
@@ -4772,7 +4772,7 @@ ellgroup(GEN E, GEN p)
       goto ellgroup_cyclic;
     return gerepileupto(av, mkvec2s(2, 2));
   } /* Now assume p>3 */
-  E = ell_to_a4a6(E, p); a4 = gel(E, 1); a6 = gel(E, 2);
+  e = ell_to_a4a6(E, p); a4 = gel(e, 1); a6 = gel(e, 2);
   F1 = gel(factor(r), 1); l1 = lg(F1);
   F = cgetg(3, t_MAT);
   gel(F,1) = cgetg(l1, t_COL);
@@ -4787,7 +4787,8 @@ ellgroup(GEN E, GEN p)
   setlg(F[1],j); setlg(F[2],j);
   if (j==1) goto ellgroup_cyclic;
   N0 = factorback(F); N1 = diviiexact(N, N0);
-  do
+  av2 = avma;
+  while(1)
   {
     GEN P = random_FpE(a4, a6, p);
     GEN Q = random_FpE(a4, a6, p);
@@ -4800,7 +4801,9 @@ ellgroup(GEN E, GEN p)
     m = lcmii(s, t);
     z = FpE_weilpairing(Pp, Qp, m, a4, p);
     d = Fp_order(z, F, p);
-  } while (!equalii(mulii(m, d), N0));
+    if (equalii(mulii(m, d), N0)) break;
+    avma = av2;
+  }
   if (cmpis(d, 1) > 0)
     return gerepilecopy(av, mkvec2(diviiexact(N, d),d));
 ellgroup_cyclic:
