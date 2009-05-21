@@ -286,15 +286,16 @@ FpE_get_a6(GEN P, GEN a4, GEN p)
 GEN
 FpE_weilpairing(GEN t, GEN s, GEN m, GEN a4, GEN p)
 {
-  pari_sp ltop=avma;
+  pari_sp ltop=avma, av;
   GEN w, a6;
   if (ell_is_inf(s) || ell_is_inf(t)) return gen_1;
-  if (equaliu(m, 2)) return gequal(s, t)?gen_1:gen_m1;
+  if (equaliu(m, 2)) return gequal(s, t)? gen_1: subis(p, 1);
   a6 = FpE_get_a6(t, a4, p);
+  av = avma;
   while(1)
   {
     GEN r, rs, tr, a, b;
-    avma = ltop;
+    avma = av;
     r  = random_FpE(a4, a6, p);
     rs = FpE_add(r, s, a4, p);
     tr = FpE_sub(t, r, a4, p);
@@ -302,25 +303,25 @@ FpE_weilpairing(GEN t, GEN s, GEN m, GEN a4, GEN p)
       continue;
     a = FpE_ffmul(mkvec2(t, gen_1), m, rs, r, a4, p);
     if (a==gen_0) continue;
-    gel(r, 2) = Fp_neg(gel(r, 2), p);
-    b = FpE_ffmul(mkvec2(s, gen_1), m, tr, r, a4, p);
+    b = FpE_ffmul(mkvec2(s, gen_1), m, tr, FpE_neg_i(r, p), a4, p);
     if (b==gen_0) continue;
     w = Fp_div(gel(a, 2), gel(b, 2), p);
-    return gerepileuptoint(ltop,w);
+    return gerepileuptoint(ltop, w);
   }
 }
 
 GEN
 FpE_tatepairing(GEN t, GEN s, GEN m, GEN a4, GEN p)
 {
-  pari_sp ltop=avma;
+  pari_sp ltop=avma, av;
   GEN w, a6;
   if (ell_is_inf(s) || ell_is_inf(t)) return gen_1;
   a6 = FpE_get_a6(t, a4, p);
+  av = avma;
   while(1)
   {
     GEN r, rs, tr, a;
-    avma = ltop;
+    avma = av;
     r  = random_FpE(a4, a6, p);
     rs = FpE_add(r, s, a4, p);
     tr = FpE_sub(t, r, a4, p);
