@@ -221,6 +221,7 @@ gred_rfrac_simple(GEN n, GEN d)
     if (!gequal1(cn))
     {
       if (gequal0(cn)) {
+        if (isexactzero(cn)) return scalarpol(cn, varn(d));
 	n = (cn != n)? RgX_Rg_div(n,cd): gdiv(n, cd);
 	c = gen_1;
       } else {
@@ -234,6 +235,7 @@ gred_rfrac_simple(GEN n, GEN d)
     if (!gequal1(cn))
     {
       if (gequal0(cn)) {
+        if (isexactzero(cn)) return scalarpol(cn, varn(d));
 	c = gen_1;
       } else {
 	n = (cn != n)? RgX_Rg_div(n,cn): gen_1;
