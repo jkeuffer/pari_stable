@@ -427,7 +427,7 @@ get_ell(GEN x)
     case t_VEC: switch(lg(x)) { case 6: case 14: case 20: return x; }
     /*fall through*/
   }
-  pari_err(talker, "not an elliptic curve (ell5) in ellxxx"); }
+  pari_err(talker, "not an elliptic curve (ell5) in ellxxx");
   return NULL;/*not reached*/
 }
 GEN
