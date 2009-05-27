@@ -4705,6 +4705,9 @@ a row matrix $1\times n$, error otherwise.
 \fun{GEN}{RgM_RgV_mul}{GEN x, GEN y} returns $x\times y[,1]$ is $y$ is
 a column matrix $n\times 1$, error otherwise.
 
+\fun{GEN}{RgM_powers}{GEN x, long n} returns $[\kbd{x}^0,
+\dots, \kbd{x}^\kbd{n}]$ as a \typ{VEC} of \kbd{RgM}s.
+
 \smallskip
 \fun{GEN}{RgV_sum}{GEN v} sum of the entries of $v$
 

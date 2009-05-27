@@ -381,6 +381,20 @@ RgM_sqr(GEN x)
   for (j=1; j<lx; j++) gel(z,j) = RgM_RgC_mul_i(x, gel(x,j), lx, lx);
   return z;
 }
+/* generates the list of powers of x of degree 0,1,2,...,l*/
+GEN
+RgM_powers(GEN x, long l)
+{
+  GEN V=cgetg(l+2,t_VEC);
+  long i;
+  gel(V,1) = matid(lg(x)-1); if (l==0) return V;
+  gel(V,2) = gcopy(x);       if (l==1) return V;
+  gel(V,3) = RgM_sqr(x);
+  for(i = 4; i < l+2; i++)
+    gel(V,i) = (i&1)? RgM_sqr(gel(V, (i+1)>>1))
+	            : RgM_mul(gel(V, i-1), x);
+  return V;
+}
 
 GEN
 RgC_Rg_div(GEN x, GEN y) {

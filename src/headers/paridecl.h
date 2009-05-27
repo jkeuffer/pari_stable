@@ -302,6 +302,7 @@ int     RgM_isidentity(GEN x);
 int     RgM_isscalar(GEN x, GEN s);
 GEN     RgM_mul(GEN x, GEN y);
 GEN     RgM_neg(GEN x);
+GEN     RgM_powers(GEN x, long l);
 GEN     RgM_sqr(GEN x);
 GEN     RgM_sub(GEN x, GEN y);
 GEN     RgM_zc_mul(GEN x, GEN y);
