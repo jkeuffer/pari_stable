@@ -1618,8 +1618,8 @@ long    z_pval(long n, GEN p);
 
 GEN     RgM_mulreal(GEN x, GEN y);
 GEN     RgX_RgM_eval(GEN x, GEN y);
+GEN     RgX_RgMV_eval(GEN x, GEN y);
 GEN     RgX_deflate_max(GEN x0, long *m);
-GEN     RgXV_RgM_eval(GEN x, GEN y);
 GEN     ceil_safe(GEN x);
 GEN     ceilr(GEN x);
 GEN     centerlift(GEN x);

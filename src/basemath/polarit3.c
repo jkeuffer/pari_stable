@@ -214,7 +214,7 @@ spec_compo_powers(GEN P, GEN V, long a, long n, GEN p)
 GEN
 FpX_FpXQV_eval(GEN P, GEN V, GEN T, GEN p)
 {
-  pari_sp av = avma;
+  pari_sp av = avma, btop;
   long l = lg(V)-1, d = degpol(P);
   GEN z, u;
 
@@ -226,12 +226,14 @@ FpX_FpXQV_eval(GEN P, GEN V, GEN T, GEN p)
   }
   if (l<=1) pari_err(talker,"powers is only [] or [1] in FpX_FpXQV_eval");
   d -= l;
+  btop = avma;
   z = spec_compo_powers(P,V,d+1,l-1,p);
   while (d >= l-1)
   {
     d -= l-1;
     u = spec_compo_powers(P,V,d+1,l-2,p);
     z = FpX_add(u, FpXQ_mul(z,gel(V,l),T,p), p);
+    z = gerepileupto(btop, z);
   }
   u = spec_compo_powers(P,V,0,d,p);
   z = FpX_add(u, FpXQ_mul(z,gel(V,d+2),T,p), p);
