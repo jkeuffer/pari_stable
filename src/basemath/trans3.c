@@ -268,13 +268,13 @@ kbessel1(GEN nu, GEN gx, long prec)
     av1 = avma;
     zf = sqrtr(divru(pitemp,n2));
     zz = invr(stor(n2<<2, prec));
-    s=gen_1; t=gen_0;
+    s = real_1(prec); t = real_0(prec);
     for (k=n2,k2=2*n2-1; k > 0; k--,k2-=2)
     {
       p1 = addri(nu2, mulss(k2,k2));
-      ak = divrs(gmul(p1,zz),-k);
-      s = addsr(1, gmul(ak,s));
-      t = addsr(k2,gmul(ak,t));
+      ak = divrs(mulrr(p1,zz),-k);
+      s = addsr(1, mulrr(ak,s));
+      t = addsr(k2,mulrr(ak,t));
     }
     mulrrz(zf, s, u); setexpo(t, expo(t)-1);
     divrsz(addrr(mulrr(t,zf),mulrr(u,nu)),-n2,v);
