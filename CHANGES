@@ -175,6 +175,7 @@ BA138- COMPAT file was missing some functions renamed in 2.3:
 AF139- fix for documentation of polcoeff, extern and readvec
 BA140- 1/matrix(2,2,i,j,Mod(0, 2)) -> SEGV
   141- wrong results for qfminim(A,,,2) if minimal norm < 1. E.g. A = matid(2)/2
+BA142- besselk(0.001,1) -> SEGV
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
