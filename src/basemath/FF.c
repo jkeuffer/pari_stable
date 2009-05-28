@@ -1343,19 +1343,37 @@ to_FF(GEN x, GEN ff)
 
 /* in place */
 static GEN
-to_FF_pol(GEN x, GEN ff)
+to_FFX(GEN x, GEN ff)
 {
   long i, lx = lg(x);
-  if (typ(x) != t_POL) pari_err_TYPE("to_FF_pol",x);
+  if (typ(x) != t_POL) pari_err_TYPE("to_FFX",x);
   for (i=2; i<lx; i++) gel(x,i) = to_FF(gel(x,i), ff);
   return x;
 }
 /* in place */
 static GEN
-to_FF_col(GEN x, GEN ff)
+to_FFC(GEN x, GEN ff)
 {
   long i, lx = lg(x);
   for (i=1; i<lx; i++) gel(x,i) = to_FF(gel(x,i), ff);
+  return x;
+}
+
+/* in place */
+static GEN
+raw_to_FFC(GEN x, GEN ff)
+{
+  long i, lx = lg(x);
+  for (i=1; i<lx; i++) gel(x,i) = mkFF_i(ff, gel(x,i));
+  return x;
+}
+
+/* in place */
+static GEN
+raw_to_FFM(GEN x, GEN ff)
+{
+  long i, lx = lg(x);
+  for (i=1; i<lx; i++) gel(x,i) = raw_to_FFC(gel(x,i), ff);
   return x;
 }
 
@@ -1379,7 +1397,7 @@ to_FF_fact(long vP, GEN P, GEN E, GEN ff, pari_sp av)
   }
   y = gerepilecopy(av, y); u = gel(y,1);
   zf = FF_zero(ff);
-  for (j=1; j<nbf; j++) gel(u,j) = to_FF_pol(gel(u,j), zf);
+  for (j=1; j<nbf; j++) gel(u,j) = to_FFX(gel(u,j), zf);
   return y;
 }
 
@@ -1454,7 +1472,7 @@ FFX_roots(GEN P, GEN x)
 
   P = FFX_init_fix_varn(P, x, &T, &p);
   r = FqX_roots(P, T,p);
-  return gerepilecopy(av, to_FF_col(r, x));
+  return gerepilecopy(av, to_FFC(r, x));
 }
 
 GEN
@@ -1588,4 +1606,79 @@ ffrandom(GEN ff)
     r = random_Flx(degpol(T), T[1], pp);
   }
   return _mkFF(ff,z,r);
+}
+
+int
+is_FF(GEN c, GEN *ff)
+{
+  switch(typ(c))
+  {
+  case t_FFELT:
+    if (!*ff) *ff = c;
+    else if (!FF_samefield(*ff, c)) return 0;
+    break;
+  default:
+    return 0;
+  }
+  return 1;
+}
+
+int
+is_FFC(GEN x, GEN *ff)
+{
+  long i, lx = lg(x);
+  for (i=lx-1; i>0; i--)
+    if (!is_FF(gel(x,i), ff)) return 0;
+  return (*ff != NULL);
+}
+
+int
+is_FFM(GEN x, GEN *ff)
+{
+  long j, lx = lg(x);
+  for (j=lx-1; j>0; j--)
+    if (!is_FFC(gel(x,j), ff)) return 0;
+  return (*ff != NULL);
+}
+
+static GEN
+FFC_to_raw(GEN x)
+{
+  long i, lx;
+  GEN y = cgetg_copy(x,&lx);
+  for(i=1; i<lx; i++)
+    gel(y, i) = gmael(x, i, 2);
+  return y;
+}
+
+static GEN
+FFM_to_raw(GEN x)
+{
+  long i, lx;
+  GEN y = cgetg_copy(x,&lx);
+  for(i=1; i<lx; i++)
+    gel(y, i) = FFC_to_raw(gel(x, i));
+  return y;
+}
+
+GEN
+FFM_ker(GEN M, GEN ff)
+{
+  pari_sp av=avma;
+  ulong pp;
+  GEN T, p;
+  _getFF(ff,&T,&p,&pp);
+  switch(ff[1])
+  {
+  case t_FF_FpXQ:
+    M = FqM_ker(FFM_to_raw(M), T, p);
+    break;
+  case t_FF_F2xq:
+    M = F2xqM_ker(FFM_to_raw(M), T);
+    break;
+  default:
+    M = FlxqM_ker(FFM_to_raw(M), T, pp);
+    break;
+  }
+  return gerepilecopy(av, raw_to_FFM(M, ff));
 }

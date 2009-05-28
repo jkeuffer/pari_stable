@@ -1037,6 +1037,23 @@ FlxqM_ker(GEN x, GEN T, ulong p)
   return FlxqM_ker_i(x, T, p, 0);
 }
 
+static GEN
+F2xqM_ker_i(GEN x, GEN T, long deplin)
+{
+  const struct bb_field *ff;
+  void *E;
+
+  if (lg(x)==1) return cgetg(1,t_MAT);
+  //ff = get_F2xq_field(&E,T);
+  //return gen_ker(x,deplin, E, ff);
+}
+
+GEN
+F2xqM_ker(GEN x, GEN T)
+{
+  return F2xqM_ker_i(x, T, 0);
+}
+
 /*******************************************************************/
 /*                                                                 */
 /*                       Solve A*X=B (Gauss pivot)                 */
