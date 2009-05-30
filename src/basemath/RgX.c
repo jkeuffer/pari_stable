@@ -1364,7 +1364,7 @@ RgXQX_pseudorem(GEN x, GEN y, GEN T)
   { /* multiply by y[0]^p   [beware dummy vars from FpX_FpXY_resultant] */
     GEN t = y_lead;
     if (T && typ(t) == t_POL && varn(t) == varn(T))
-      t = RgXQ_u_pow(t, p, T);
+      t = RgXQ_powu(t, p, T);
     else
       t = gpowgs(t, p);
     for (i=2; i<lx; i++)
@@ -1496,7 +1496,7 @@ _mul(void *data, GEN x, GEN y) { return RgXQ_mul(x,y, (GEN)data); }
 
 /* x,T in Rg[X], n in N, compute lift(x^n mod T)) */
 GEN
-RgXQ_u_pow(GEN x, ulong n, GEN T)
+RgXQ_powu(GEN x, ulong n, GEN T)
 {
   pari_sp av;
   GEN y;

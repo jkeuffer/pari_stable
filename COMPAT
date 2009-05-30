@@ -241,6 +241,7 @@ This file lists the incompatible changes between Version 2.x and older versions
     rnfdedekind(), the version with the flag set is more useful.
   - rename gcmp0 -> gequal0, gcmp1 -> gequal1, gcmp_1 -> gequalm1
   - rename ZX_caract -> ZXQ_charpoly and swap arguments.
+  - rename RgXQ_u_pow -> RgXQ_powu
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

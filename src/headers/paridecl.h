@@ -352,6 +352,7 @@ GEN     RgXQX_translate(GEN P, GEN c, GEN T);
 GEN     RgXQ_matrix_pow(GEN y, long n, long m, GEN P);
 GEN     RgXQ_norm(GEN x, GEN T);
 GEN     RgXQ_pow(GEN x, GEN n, GEN T);
+GEN     RgXQ_powu(GEN x, ulong n, GEN T);
 GEN     RgXQ_powers(GEN x, long l, GEN T);
 GEN     RgXV_to_RgM(GEN v, long n);
 GEN     RgXV_unscale(GEN v, GEN h);

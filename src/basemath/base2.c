@@ -1417,7 +1417,7 @@ testc2(decomp_t *S, GEN A, long Ea, GEN T, long Et)
   while (r < 0) { r = r + Et; t++; }
   while (s < 0) { s = s + Ea; t++; }
 
-  c = RgX_mul(RgXQ_u_pow(A, s, S->chi), RgXQ_u_pow(T, r, S->chi));
+  c = RgX_mul(RgXQ_powu(A, s, S->chi), RgXQ_powu(T, r, S->chi));
   c = RgX_Rg_div(RgX_rem(c, S->chi), powiu(S->p, t));
   S->phi = gadd( pol_x( varn(S->chi) ), redelt(c, S->psc, S->p) );
   if (factcp(S) > 1) { composemod(S, S->phi, T0); return 1; }

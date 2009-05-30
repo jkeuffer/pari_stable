@@ -443,6 +443,7 @@ BA110- listsort(L) no longer returns the list L: it now returns nothing.
   111- allow component(t_VECSMALL,...) [#957]
   112- allow bestappr(x)  [2nd argument made optional]
 BA113- GMP kernel chosen by default when GMP is available
+BA114- Rename RgXQ_u_pow to RgXQ_powu
 
   Added
     1- many new benches (make test-all)

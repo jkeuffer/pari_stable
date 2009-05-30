@@ -211,7 +211,6 @@ GEN  ZXQ_charpoly_sqf(GEN A, GEN B, long *lambda, long v);
 GEN  ZX_disc_all(GEN,ulong);
 GEN  ZX_resultant_all(GEN A, GEN B, GEN dB, ulong bound);
 GEN  ZX_ZXY_resultant_all(GEN A, GEN B0, long *lambda, GEN *LPRS);
-GEN  RgXQ_u_pow(GEN x, ulong n, GEN T);
 GEN  RgX_gcd_simple(GEN x, GEN y);
 GEN  RgX_extgcd_simple(GEN a, GEN b, GEN *pu, GEN *pv);
 GEN  RgXQ_minpoly_naive(GEN y, GEN P);

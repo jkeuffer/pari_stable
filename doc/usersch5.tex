@@ -5268,6 +5268,9 @@ have the same variable number and \kbd{RgX\_equal(x,y)} is $1$.
 
 \fun{GEN}{RgXQ_pow}{GEN x, GEN n, GEN T} computes $x^n$ mod $T$
 
+\fun{GEN}{RgXQ_powu}{GEN x, ulong n, GEN T} computes $x^n$ mod $T$,
+$n$ being an \kbd{ulong}.
+
 \fun{GEN}{RgXQ_powers}{GEN x, long n, GEN T} returns $[\kbd{x}^0,
 \dots, \kbd{x}^\kbd{n}]$ as a \typ{VEC} of \kbd{RgXQ}s.
 
