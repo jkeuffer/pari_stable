@@ -640,7 +640,7 @@ sd_echo(const char *v, long flag)
 
 GEN
 sd_recover(const char *v, long flag)
-{ return sd_gptoggle(v,flag,"rechover", RECOVER); }
+{ return sd_gptoggle(v,flag,"recover", RECOVER); }
 
 GEN
 sd_lines(const char *v, long flag)
