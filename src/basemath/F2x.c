@@ -420,7 +420,7 @@ F2x_divrem(GEN x, GEN y, GEN *pr)
   if (!pr) { cgiv(x); return z; }
   x = F2x_renormalize(x, lx);
   if (pr == ONLY_DIVIDES) {
-    if (lg(x) == 2) { cgiv(x); return z; } 
+    if (lg(x) == 2) { cgiv(x); return z; }
     avma = (pari_sp)(z + lg(z)); return NULL;
   }
   *pr = x; return z;

@@ -205,9 +205,9 @@ FpE_ffchord(GEN t, GEN s, GEN pt, GEN a4, GEN p)
     if (equalii(gel(s, 2), gel(t, 2))) return FpE_fftang(t, pt, a4, p);
     else return FpE_ffvert(t, pt, p);
   }
-  return Fp_sub(Fp_sub(gel(pt, 2), gel(t, 2),p), 
-                Fp_mul(Fp_div(Fp_sub(gel(t, 2), gel(s, 2), p), 
-                              Fp_sub(gel(t, 1), gel(s, 1),p), p), 
+  return Fp_sub(Fp_sub(gel(pt, 2), gel(t, 2),p),
+                Fp_mul(Fp_div(Fp_sub(gel(t, 2), gel(s, 2), p),
+                              Fp_sub(gel(t, 1), gel(s, 1),p), p),
                        Fp_sub(gel(pt, 1), gel(t, 1), p), p), p);
 }
 

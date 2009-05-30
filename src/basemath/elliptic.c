@@ -2442,7 +2442,7 @@ FpE_add_ip(GEN z1, GEN z2, GEN a4, GEN p, GEN p2inv)
   x2 = gel(z2,1); y2 = gel(z2,2);
   if (x1 == x2)
     p1 = Fp_add(a4, mulii(x1,mului(3,x1)), p);
-  else 
+  else
     p1 = Fp_sub(y2,y1, p);
 
   p1 = Fp_mul(p1, p2inv, p);
@@ -4420,7 +4420,7 @@ ellL1_i(struct ellld *el, long r, long prec)
     long jmax;
 
     p = nextprime(addis(p, 1));
-    if (cmpii(p, bndov2) >= 0) break; 
+    if (cmpii(p, bndov2) >= 0) break;
     ap = ellap(el->E, p);
 
     i++;
@@ -4682,9 +4682,9 @@ ellweilpairing(GEN E, GEN t, GEN s, GEN m)
   if (typ(m)!=t_INT) pari_err(typeer,"ellweilpairing");
   unit = gpowgs(ell_get_j(E), 0);
   if (ell_is_inf(s) || ell_is_inf(t)) return unit;
-  if (equaliu(m, 2)) 
+  if (equaliu(m, 2))
     return gequal(s, t)?unit:gerepileupto(ltop, gneg(unit));
-  if (equaliu(m, 3)) 
+  if (equaliu(m, 3))
     return gerepileupto(ltop,ellweilpairing3(E, s, t, unit));
   while(1)
   {
@@ -4763,7 +4763,7 @@ ellgroup(GEN E, GEN p)
   if (equaliu(r, 1)) goto ellgroup_cyclic;
   /* This take care of p=2 */
   if (equaliu(p, 3))
-  { 
+  {
     /* The only possible non-cyclic group is [2,2] which happens 9 times */
     if (!equaliu(N, 4)) goto ellgroup_cyclic;
     /* If the group is not cyclic, elldivpol2 must have 3 roots else 1 one */

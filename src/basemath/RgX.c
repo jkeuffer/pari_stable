@@ -1338,7 +1338,7 @@ RgXQX_pseudorem(GEN x, GEN y, GEN T)
     gel(x,0) = gneg(gel(x,0)); p--;
     for (i=1; i<=dy; i++)
     {
-      GEN c = gmul(y_lead, gel(x,i)); 
+      GEN c = gmul(y_lead, gel(x,i));
       if (gel(y,i)) c = gadd(c, gmul(gel(x,0),gel(y,i)));
       gel(x,i) = rem(c, T);
     }
@@ -1416,7 +1416,7 @@ RgXQX_pseudodivrem(GEN x, GEN y, GEN T, GEN *ptr)
     gel(z,iz++) = rem(gmul(gel(x,0), gel(ypow,p)), T);
     for (i=1; i<=dy; i++)
     {
-      GEN c = gmul(y_lead, gel(x,i)); 
+      GEN c = gmul(y_lead, gel(x,i));
       if (gel(y,i)) c = gsub(c, gmul(gel(x,0),gel(y,i)));
       gel(x,i) = rem(c, T);
     }
@@ -1516,7 +1516,7 @@ RgXQ_pow(GEN x, GEN n, GEN T)
   GEN y;
 
   if (!s) return pol_1(varn(x));
-  if (is_pm1(n) == 1) 
+  if (is_pm1(n) == 1)
     return (s < 0)? RgXQ_inv(x, T): gcopy(x);
   av = avma;
   if (s < 0) x = RgXQ_inv(x, T);

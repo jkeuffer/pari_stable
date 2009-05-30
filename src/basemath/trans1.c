@@ -395,7 +395,7 @@ powiu(GEN a, ulong N)
   return powiu_sign(a, N, (s < 0 && odd(N))? -1: 1);
 }
 GEN
-powis(GEN x, long n) 
+powis(GEN x, long n)
 {
   long sx, s;
   GEN t, y;
@@ -483,7 +483,7 @@ rpowuu(ulong a, ulong n, long prec)
   return gerepileuptoleaf(av, y);
 }
 
-GEN 
+GEN
 powrs(GEN x, long n)
 {
   pari_sp av = avma;
@@ -493,7 +493,7 @@ powrs(GEN x, long n)
   if (n < 0) y = invr(y);
   return gerepileupto(av,y);
 }
-GEN 
+GEN
 powru(GEN x, ulong n)
 {
   if (!n) return powr0(x);
@@ -1012,7 +1012,7 @@ sqrt_ser(GEN b, long prec)
   {
     GEN y, x2 = gmul2n(x,1);
     long l = lold << 1;
-    
+
     if (mask & 1) l--;
     mask >>= 1;
     setlg(a, l + 2);

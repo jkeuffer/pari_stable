@@ -1663,7 +1663,7 @@ GetValue1(GEN bnr, long flag, long prec)
   nf_get_sign(nf, &r1,&r2);
   h = bnf_get_no(bnf);
   R = bnf_get_reg(bnf);
-  
+
   c = gneg_i(gdivgs(mpmul(h, R), bnf_get_tuN(bnf)));
   r = r1 + r2 - 1;
 

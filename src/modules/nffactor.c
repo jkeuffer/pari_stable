@@ -1537,7 +1537,7 @@ nf_pick_prime(long ct, GEN nf, GEN polbase, long fl,
     ap = utoipos(pp);
     r = get_good_factor(nfpol, ap, maxf);
     if (!r) continue;
-   
+
     apr = primedec_apply_kummer(nf,r,1,ap);
     amodpr = zk_to_Fq_init(nf,&apr,&aT,&ap);
 
@@ -1801,7 +1801,7 @@ nf_pick_prime_for_units(GEN nf, prklift_t *P)
   long maxf, nfdeg = degpol(nfpol);
   byteptr pt = diffptr;
   ulong pp = 0;
-  
+
   maxf = get_maxf(nfdeg);
   for (;;)
   {

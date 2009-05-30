@@ -31,7 +31,7 @@ buchnarrow(GEN bnf)
 
   bnf = checkbnf(bnf);
   nf = bnf_get_nf(bnf); r1 = nf_get_r1(nf);
-  
+
   if (!r1) return gcopy( bnf_get_clgp(bnf) );
 
   cyc = bnf_get_cyc(bnf);
@@ -1025,7 +1025,7 @@ primecertify(GEN bnf, GEN beta, ulong p, GEN bad)
     for (i=1; i<=nbqq; i++)
     {
       GEN mat1, Q = gel(LQ,i);
-      
+
       if (pr_get_f(Q) != 1) break;
       /* Q has degree 1 */
       if (!g)
@@ -1129,7 +1129,7 @@ bnfcertify(GEN bnf)
   bnf = checkbnf(bnf);
   nf = bnf_get_nf(bnf);
   N = nf_get_degree(nf); if (N==1) return 1;
-  
+
   cyc = bnf_get_cyc(bnf);
   S.w = bnf_get_tuN(bnf);
   S.mu = nf_to_scalar_or_basis(nf, bnf_get_tuU(bnf));
@@ -1371,7 +1371,7 @@ bnrisconductor(GEN bnr, GEN H0)
   l = lg(archp);
   for (k = 1; k < l; k++)
     if (contains(H, bnr_log_gen_arch(bnr, &S, k))) { avma = av; return 0; }
-  avma = av; return 1; 
+  avma = av; return 1;
 }
 
 /* return the norm group corresponding to the relative extension given by

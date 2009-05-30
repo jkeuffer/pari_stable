@@ -235,7 +235,7 @@ RgX_to_ser_inexact(GEN x, long l)
   /* analogous to RgX_valrem + normalize */
   i = 2;
   while (i<lx && gequal0(gel(x,i))) {
-    if (first && !isexactzero(gel(x,i))) 
+    if (first && !isexactzero(gel(x,i)))
     {
       pari_warn(warner,"normalizing a series with 0 leading term");
       first = 0;
@@ -1837,7 +1837,7 @@ gcvtop(GEN x, GEN p, long r)
   {
     case t_POL: case t_SER:
       y = cgetg_copy(x, &lx); y[1] = x[1];
-      for (i=2; i<lx; i++) gel(y,i) = gcvtop(gel(x,i),p,r); 
+      for (i=2; i<lx; i++) gel(y,i) = gcvtop(gel(x,i),p,r);
     case t_POLMOD: case t_RFRAC:
     case t_VEC: case t_COL: case t_MAT:
       y = cgetg_copy(x, &lx);

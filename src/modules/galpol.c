@@ -21,7 +21,7 @@ galoisnbpol(long a)
 {
   GEN n;
   char *s = pari_sprintf("%s/galpol/%ld/nb", pari_datadir, a);
-  pariFILE *F = pari_fopengz(s); 
+  pariFILE *F = pari_fopengz(s);
   free(s);
   if (!F) pari_err(talker,"Missing galpol file");
   n = gp_read_stream(F->file);
@@ -46,7 +46,7 @@ galoisgetpol(long a, long b, long sig)
   }
   s = pari_sprintf("%s/galpol/%ld/%ld/%s", pari_datadir, a,b,si);
   F = pari_fopengz(s); free(s);
-  if (!F) 
+  if (!F)
   {
     long n = itos(galoisnbpol(a));
     if (b>n)

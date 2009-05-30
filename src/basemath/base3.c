@@ -145,7 +145,7 @@ zk_scalar_or_multable(GEN nf, GEN x)
   return (typ(x) == t_COL)? zk_multable(nf, x): x;
 }
 
-GEN 
+GEN
 nftrace(GEN nf, GEN x)
 {
   pari_sp av = avma;
@@ -154,8 +154,8 @@ nftrace(GEN nf, GEN x)
   x = (typ(x) == t_COL)? RgV_dotproduct(x, gel(nf_get_Tr(nf),1))
                        : gmulgs(x, nf_get_degree(nf));
   return gerepileupto(av, x);
-} 
-GEN 
+}
+GEN
 nfnorm(GEN nf, GEN x)
 {
   pari_sp av = avma;
@@ -1277,7 +1277,7 @@ makeprimetoideal_i(GEN u,GEN mv, GEN x)
   GEN xv;
   if (typ(mv) == t_INT)
   {
-    if (typ(x) == t_INT) return ZC_Z_add(u, mulii(x,mv)); 
+    if (typ(x) == t_INT) return ZC_Z_add(u, mulii(x,mv));
     xv = ZC_Z_mul(x,mv);
   }
   else
@@ -1288,7 +1288,7 @@ makeprimetoideal_i(GEN u,GEN mv, GEN x)
 }
 
 /* (U,V) = 1. Return y = x mod U, = 1 mod V (uv: u + v = 1, u in U, v in V),
- * namely u + x*v. 
+ * namely u + x*v.
  * u is a t_COL, mv = multiplication table by v is a t_MAT or t_INT */
 static GEN
 makeprimetoideal(GEN UV, GEN u,GEN mv, GEN x)

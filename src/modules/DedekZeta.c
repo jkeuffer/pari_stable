@@ -40,7 +40,7 @@ dirzetak0(GEN nf, ulong N)
     NEXT_PRIME_VIADIFF(p, d);
     court[2] = p;
     if (umodiu(index, p)) /* court does not divide index */
-    { 
+    {
       vect = gel(FpX_degfact(pol,court),1);
       lx = lg(vect);
     }
@@ -400,7 +400,7 @@ slambdak(GEN znf, long s, long flag, long prec)
 
   znf_get_sign(znf, &r1, &r2);
   resi   = gel(znf,2);
-  C      = gel(znf,4); 
+  C      = gel(znf,4);
   cst    = gel(znf,5);
   cstlog = gel(znf,6);
   coef   = gel(znf,8);
@@ -508,7 +508,7 @@ cxlambdak(GEN znf, GEN s, long flag, long prec)
 
   znf_get_sign(znf, &r1, &r2);
   resi   = gel(znf,2);
-  C      = gel(znf,4); 
+  C      = gel(znf,4);
   cst    = gel(znf,5);
   cstlog = gel(znf,6);
   coef   = gel(znf,8);
@@ -596,7 +596,7 @@ gzetakall(GEN znf, GEN s, long flag, long prec)
     if (!flag && ss < 0 && (r2 || !odd(ss))) return gen_0;
     z = slambdak(znf, itos(s), flag, prec+1);
   }
-  else 
+  else
     z = cxlambdak(znf, s, flag, prec+1);
   if (gprecision(z) > prec) z = gprec_w(z, prec);
   return gerepileupto(av, z);

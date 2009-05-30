@@ -841,7 +841,7 @@ init_units(GEN BNF)
     funits = gerepilecopy(av, getfu(nf, &A, nf_FORCE, &l, 0));
     if (typ(funits) == t_MAT)
       pari_err(talker, "bnf accuracy too low to compute units on the fly");
-  } 
+  }
   l = lg(funits) + 1;
   v = cgetg(l, t_VEC); gel(v,1) = bnf_get_tuU(bnf);
   for (i = 2; i < l; i++) gel(v,i) = gel(funits,i-1);
@@ -2166,7 +2166,7 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
         Nx = grndtoi(norm_by_embed(R1,xembed), &e);
         if (e >= 0) {
           if (DEBUGLEVEL > 1) { fprintferr("+"); flusherr(); }
-          continue; 
+          continue;
         }
         setabssign(Nx);
         if (!can_factor(F, nf, NULL, gx, Nx, fact)) {
@@ -2470,8 +2470,8 @@ compute_multiple_of_R(GEN A, long RU, long N, GEN *ptL)
   {
     if (DEBUGLEVEL)
       fprintferr("Unit group rank %ld < %ld\n",lg(mdet)-1 - r, RU);
-    avma = av; 
-    return NULL; 
+    avma = av;
+    return NULL;
   }
 
   Im_mdet = cgetg(RU+1, t_MAT); /* extract independent columns */
@@ -2639,7 +2639,7 @@ class_group_gen(GEN nf,GEN W,GEN C,GEN Vbase,long prec, GEN nf0,
       p1 = gcoeff(Uir,i,j);
       if (signe(p1))
       {
-	z[1]=Vbase[i]; 
+	z[1]=Vbase[i];
 	I = extideal_HNF_mul(nf0, I, idealpowred(nf0,z,p1));
 	I = idealred(nf0,I);
       }
@@ -3055,7 +3055,7 @@ bnfinit0(GEN P, long flag, GEN data, long prec)
 GEN
 Buchall(GEN P, long flag, long prec)
 { return Buchall_param(P, BNF_C1, BNF_C2, BNF_RELPID, flag, prec); }
- 
+
 static GEN
 Buchall_deg1(GEN nf)
 {

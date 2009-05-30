@@ -871,7 +871,7 @@ pari_warn(int numerr, ...)
       pari_puts("collecting garbage in "); ch1=va_arg(ap, char*);
       pari_vprintf(ch1,ap); pari_putc('.');
       break;
-    
+
     case warner:
       pari_puts("Warning: "); ch1=va_arg(ap, char*);
       pari_vprintf(ch1,ap); pari_putc('.');
@@ -954,7 +954,7 @@ pari_err(int numerr, ...)
         pari_puts("user error: ");
         print0(va_arg(ap, GEN), f_RAW);
         break;
-      case invmoder: 
+      case invmoder:
 	pari_printf("impossible inverse modulo: %Ps.", va_arg(ap, GEN));
         break;
       case openfiler: {

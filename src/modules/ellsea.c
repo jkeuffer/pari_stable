@@ -874,7 +874,7 @@ find_trace(GEN a4, GEN a6, ulong ell, GEN p, long *ptr_kt, long EARLY_ABORT)
   }
   if (DEBUGLEVEL) {
     long n = lg(tr)-1;
-    if (n > 1 || mt == MTAtkin) 
+    if (n > 1 || mt == MTAtkin)
     {
       fprintferr("%3ld trace(s)",n);
       if (DEBUGLEVEL>1) fprintferr(" [%ld ms]", TIMER(&T));
@@ -1382,7 +1382,7 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
     if (low_stack(st_lim, stack_lim(btop, 1)))
       gerepileall(btop, 3, &tr, &compile_atkin, &prod_atkin);
   } while (cmpii(mulii(gel(tr, 2), prod_atkin) , bound) <= 0);
-  best_champ = mkvec2(utoi((1UL<<nb_atkin)-1), 
+  best_champ = mkvec2(utoi((1UL<<nb_atkin)-1),
                       prod_lgatkin(compile_atkin, nb_atkin));
   /*If the number of possible traces is too large, we treat a new prime */
   if (DEBUGLEVEL && gcmp(gel(best_champ, 2), bound_bsgs) >= 0)

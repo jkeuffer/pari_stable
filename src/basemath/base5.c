@@ -876,7 +876,7 @@ rnfpolred(GEN nf, GEN pol, long prec)
     for (j=1; j<=n; j++)
     {
       GEN al = gen_if_principal(bnf,gel(I,j));
-      gel(newI,j) = gen_1; 
+      gel(newI,j) = gen_1;
       gel(newO,j) = nfC_nf_mul(nf, gel(O,j), al);
     }
     id = mkvec2(newO, newI);

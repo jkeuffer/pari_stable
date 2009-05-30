@@ -83,7 +83,7 @@ idealhnf_two(GEN nf, GEN v)
 }
 
 static GEN
-ZM_Q_mul(GEN x, GEN y) 
+ZM_Q_mul(GEN x, GEN y)
 { return typ(y) == t_INT? ZM_Z_mul(x,y): RgM_Rg_mul(x,y); }
 
 
@@ -123,7 +123,7 @@ idealhnf_shallow(GEN nf, GEN x)
 {
   GEN cx;
   long tx = typ(x), lx = lg(x);
-  
+
   /* cannot use idealtyp because here we allow non-square matrices */
   if (tx == t_VEC && lx == 3) { x = gel(x,1); tx = typ(x); lx = lg(x); }
   if (tx == t_VEC && lx == 6) return idealhnf_two(nf,x); /* PRIME */
@@ -364,7 +364,7 @@ mat_ideal_two_elt(GEN nf, GEN x)
     a = get_random_a(nf, x, xZ);
   else
   {
-    const long FB[] = { _evallg(15+1) | evaltyp(t_VECSMALL), 
+    const long FB[] = { _evallg(15+1) | evaltyp(t_VECSMALL),
       2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47
     };
     GEN P, E, a1 = Z_smoothen(xZ, (GEN)FB, &P, &E);
@@ -551,7 +551,7 @@ idealfactor(GEN nf, GEN x)
     if (vc == 0) continue;
     for (j++; j<lg(p1); j++)
     {
-      P = gel(p1,j); 
+      P = gel(p1,j);
       gel(y1,k) = P;
       y2[k++] = vc * pr_get_e(P);
     }
@@ -803,7 +803,7 @@ idealaddmultoone(GEN nf, GEN list)
   {
     GEN c = gel(L,i);
     if (lg(c) == 1)
-      c = zerocol(N); 
+      c = zerocol(N);
     else {
       c = ZM_ZC_mul(c, vecslice(U, nz*N + 1, (nz+1)*N));
       nz++;
@@ -1845,7 +1845,7 @@ idealred0(GEN nf, GEN I, GEN vdir)
     G = nf_get_roundG(nf);
   else if (typ(vdir) == t_MAT)
     G = vdir;
-  else 
+  else
     G = nf_get_Gtwist(nf, vdir);
   y = idealpseudomin(I, G);
 
@@ -2353,7 +2353,7 @@ element_mulvecrow(GEN nf, GEN x, GEN m, long i, long lim)
     for (j=1; j<l; j++)
     {
       GEN t = gcoeff(m,i,j);
-      if (!isintzero(t)) 
+      if (!isintzero(t))
       {
         if (typ(t) == t_COL)
           t = RgM_RgC_mul(x, t);
@@ -2367,7 +2367,7 @@ element_mulvecrow(GEN nf, GEN x, GEN m, long i, long lim)
   }
   else
   {
-    for (j=1; j<l; j++) gel(y,j) = gmul(x, gcoeff(m,i,j)); 
+    for (j=1; j<l; j++) gel(y,j) = gmul(x, gcoeff(m,i,j));
   }
   return y;
 }

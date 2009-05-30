@@ -222,7 +222,7 @@ adjsafe(GEN x)
   return gerepileupto(av, RgX_RgM_eval(C, x));
 }
 
-GEN 
+GEN
 matadjoint0(GEN x, long flag)
 {
   switch(flag)
@@ -431,7 +431,7 @@ charpoly_bound(GEN M)
   d = dbllog2(s); avma = av; return ceil(d);
 }
 
-GEN 
+GEN
 ZM_charpoly(GEN M)
 {
   pari_sp av = avma;
@@ -460,7 +460,7 @@ ZM_charpoly(GEN M)
       q = utoipos(p);
     }
     else
-    { 
+    {
       GEN qp = muliu(q, p);
       int stable = ZX_incremental_CRT(&H, Hp, q,qp, p);
       if (DEBUGLEVEL>5)
@@ -624,7 +624,7 @@ gnorml1(GEN x,long prec)
   {
     case t_INT: case t_REAL: return mpabs(x);
     case t_FRAC: return absfrac(x);
-    
+
     case t_COMPLEX: case t_QUAD:
       return gabs(x,prec);
 

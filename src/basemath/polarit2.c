@@ -557,7 +557,7 @@ factor(GEN x)
     {
       case t_INT: case t_FRAC: case t_COMPLEX:
       case t_POL: case t_RFRAC: break;
-      default: 
+      default:
         pari_err(talker,"can't factor %Ps",x);
     }
     y = cgetg(3,t_MAT);
@@ -2186,7 +2186,7 @@ RgX_extgcd(GEN x, GEN y, GEN *U, GEN *V)
     p1 = ginv(content(v));
   }
   else /* y | x */
-  { 
+  {
     vze = pol_1(vx);
     uze = zeropol(vx);
     p1 = gen_1;

@@ -208,7 +208,7 @@ gprecision(GEN x)
 
 GEN
 precision0(GEN x, long n)
-{ 
+{
   long a;
   if (n) return gprec(x,n);
   a = gprecision(x);
@@ -234,7 +234,7 @@ padicprec(GEN x, GEN p)
 	pari_err(talker,"not the same prime in padicprec");
       return precp(x)+valp(x);
 
-    case t_POL: case t_SER: 
+    case t_POL: case t_SER:
       for (s=LONG_MAX, i=lg(x)-1; i>1; i--)
       {
 	t = padicprec(gel(x,i),p); if (t<s) s = t;
@@ -3022,7 +3022,7 @@ centerlift0(GEN x, long v)
       y = cgetg(3, t_POLMOD);
       gel(y,1) = centerlift0(gel(x,1),v);
       gel(y,2) = centerlift0(gel(x,2),v); return y;
-    case t_FRAC: 
+    case t_FRAC:
       return gcopy(x);
    case t_POL: case t_SER:
       y = cgetg_copy(x, &lx); y[1] = x[1];

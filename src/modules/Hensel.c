@@ -190,7 +190,7 @@ ZpXQ_HenselLift(GEN V, GEN W, long j, GEN f, GEN Td, GEN T1, GEN pd, GEN p0, GEN
 /* v list of factors, w list of inverses.  f = v[j] v[j+1]
  * Lift v[j] and v[j+1] mod p0 pd (possibly mod T), then all their divisors */
 static void
-ZpX_RecTreeLift(GEN link, GEN v, GEN w, GEN pd, GEN p0, GEN p1, 
+ZpX_RecTreeLift(GEN link, GEN v, GEN w, GEN pd, GEN p0, GEN p1,
                 GEN f, long j, int noinv)
 {
   if (j < 0) return;
@@ -232,7 +232,7 @@ quadratic_prec_mask(long n)
   for(i = 1;; i++, mask <<= 1)
   {
     mask |= (a&1); a = (a+1)>>1;
-    if (a==1) return mask | (1 << i); 
+    if (a==1) return mask | (1 << i);
   }
 }
 

@@ -174,7 +174,7 @@ get_bnf(GEN x, long *t)
 	  x = gel(x,2);
 	  if (typ(x) == t_VEC && lg(x) == 4) *t = typ_GAL;
 	  return NULL;
-	case 13: 
+	case 13:
           *t = typ_RNF; return NULL;
 	case 14: case 20:
 	  *t = typ_ELL; return NULL;
@@ -211,7 +211,7 @@ get_nf(GEN x, long *t)
 	  x = gel(x,2);
 	  if (typ(x) == t_VEC && lg(x) == 4) *t = typ_GAL;
 	  return NULL;
-	case 13: 
+	case 13:
           *t = typ_RNF; return NULL;
 	case 14: case 20:
 	  *t = typ_ELL; return NULL;
@@ -1023,7 +1023,7 @@ nf_set_multable(GEN nf, GEN bas, GEN basden)
   long i,j, n = degpol(T);
   GEN w, den, mul = cgetg(n*n+1,t_MAT);
 
-  if (typ(bas) == t_MAT) 
+  if (typ(bas) == t_MAT)
   { basM = bas; bas = RgM_to_RgXV(basM, varn(T)); }
   else
     basM = RgXV_to_RgM(bas, n);
@@ -1421,7 +1421,7 @@ nfpolred(nfbasic_t *T, GEN *pro)
 
   rev = QXQ_reverse(gel(z,2), x);
   x = gel(z,1); if (DEBUGLEVEL>1) fprintferr("xbest = %Ps\n",x);
-  
+
   /* update T */
   pow = QXQ_powers(rev, n-1, x);
   pow = Q_remove_denom(pow, &dpow);

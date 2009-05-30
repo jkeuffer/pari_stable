@@ -62,7 +62,7 @@ whatnow(const char *s, int flag)
     while (def && strcmp(def,s));
     n += m - 1;
   }
-  /* Above linear search is slow, esp. if the symbol is not found. BUT no 
+  /* Above linear search is slow, esp. if the symbol is not found. BUT no
    * point in wasting time by preallocating [ or autoloading ] a hashtable:
    * whatnow() is never used in a case where speed would be necessary */
   if (!def)

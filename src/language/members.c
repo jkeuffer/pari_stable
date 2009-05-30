@@ -29,7 +29,7 @@ INLINE int is_smallell(GEN x) {
   long lx = lg(x);
   return (typ(x) == t_VEC && (lx == 14 || lx == 20));
 }
-INLINE int is_ell(GEN x) { 
+INLINE int is_ell(GEN x) {
   long lx = lg(x);
   return (typ(x) == t_VEC && lx == 20);
 }

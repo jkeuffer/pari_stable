@@ -422,7 +422,7 @@ gconj(GEN x)
       y = cgetg_copy(x, &lx); y[1] = x[1];
       for (i=2; i<lx; i++) gel(y,i) = gconj(gel(x,i));
       break;
-    
+
     case t_RFRAC: case t_VEC: case t_COL: case t_MAT:
       y = cgetg_copy(x, &lx);
       for (i=1; i<lx; i++) gel(y,i) = gconj(gel(x,i));

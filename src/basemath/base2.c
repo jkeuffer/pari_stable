@@ -35,7 +35,7 @@ nfmaxord_check_args(nfmaxord_t *S, GEN T, long flag, GEN fa)
 
   if (fa) {
     if (typ(fa) != t_MAT) pari_err(typeer,"nfmaxord");
-    dT = factorback(fa); 
+    dT = factorback(fa);
     if (!signe(dT)) pari_err(talker,"reducible polynomial in nfmaxord");
   } else {
     dT = ZX_disc(T);
@@ -720,7 +720,7 @@ ZpX_gcd(GEN f1, GEN f2, GEN pm)
 }
 
 /* Return m > 0, such that p^m ~ 2^32 for initial value of m; p > 1 */
-static long 
+static long
 init_m(GEN p)
 {
   if (lgefint(p) > 3) return 1;
@@ -770,7 +770,7 @@ ZpX_disc_val_i(GEN x, GEN dx, GEN p, GEN pm)
   return v;
 }
 /* assume f monic */
-long 
+long
 ZpX_disc_val(GEN f, GEN p)
 {
   pari_sp av = avma;
@@ -822,7 +822,7 @@ update_den(GEN p, GEN *e, GEN *d, long *vd, GEN *z)
 static GEN
 QpX_denom(GEN x, GEN p)
 {
-  long i, l = lg(x); 
+  long i, l = lg(x);
   GEN maxd = gen_1;
   for (i=2; i<l; i++)
   {
@@ -1159,7 +1159,7 @@ newtonsums(GEN p, GEN a, GEN da, long vda, GEN chi, long c, GEN pp, GEN ns)
     pa = j == 1? a: FpXQ_mul(pa, a, chi, pp);
     degpa = degpol(pa);
     if (degpa < 0) {
-      for (; j <= c; j++) gel(va,j) = gen_0;  
+      for (; j <= c; j++) gel(va,j) = gen_0;
       return va;
     }
 
@@ -2566,7 +2566,7 @@ FqX_non_root(GEN P, GEN T, GEN p)
   long dP = degpol(P), f, vT;
   long i, j, k, pi, pp;
   GEN v;
-  
+
   if (dP == 0) return gen_1;
   pp = is_bigint(p) ? dP+1: itos(p);
   v = cgetg(dP + 2, t_VEC);
@@ -3313,7 +3313,7 @@ polcompositum0(GEN A, GEN B, long flall)
       GEN D = gel(C,i);
       a = RgXQ_mul(RgX_neg(H0), QXQ_inv(H1, D), D);
       b = gadd(pol_x(v), gmulsg(k,a));
-      gel(C,i) = mkvec4(D, mkpolmod(a,D), mkpolmod(b,D), stoi(-k)); 
+      gel(C,i) = mkvec4(D, mkpolmod(a,D), mkpolmod(b,D), stoi(-k));
     }
   }
   settyp(C, t_VEC); return gerepilecopy(av, C);

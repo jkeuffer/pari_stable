@@ -635,7 +635,7 @@ thueinit(GEN pol, long flag, long prec)
   POL = ZX_to_monic(pol, &L); /* POL monic: POL(x) = C pol(x/L) */
   C = gdiv(powiu(L, dpol), gel(pol, dpol+2));
   pol = POL;
-  
+
   fa = ZX_factor(pol);
   lfa = lg(gel(fa,1));
   if (lfa > 2 || itos(gcoeff(fa,1,2)) > 1)
@@ -1007,7 +1007,7 @@ PRECPB:
 }
 
 /* restrict to solutions (x,y) with L | x, replacing each by (x/L, y) */
-static GEN 
+static GEN
 filter_sol_x(GEN S, GEN L)
 {
   long i, k, l;
@@ -1057,7 +1057,7 @@ thue(GEN tnf, GEN rhs, GEN ne)
   {
     long e = itos( gel(tnf,2) );
     if (!signe(rhs)) { avma = av; return sol_0(); }
-      
+
     if (!Z_ispowerall(rhs, e, &rhs)) { avma = av; return cgetg(1, t_VEC); }
     tnf = gel(tnf,1);
     S = thue(tnf, rhs, NULL);

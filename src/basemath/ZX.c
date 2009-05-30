@@ -386,7 +386,7 @@ Z_mod2BIL_ZX(GEN x, long bs, long d, long v, long valx)
     else
     {
       carry = (lgefint(z) == 2+bs && (HIGHBIT & *int_W(z,bs-1)));
-      if (carry) 
+      if (carry)
         z = gerepileuptoint(av, (sx==-1)? subii(s1,z): subii(z,s1));
       else if (sx==-1) togglesign(z);
     }

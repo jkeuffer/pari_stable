@@ -1843,7 +1843,7 @@ polylog(long m, GEN x, long prec)
   res = cgetc(l); av = avma;
   x = gtofp(x, l+1);
   e = gexpo(gnorm(x));
-  if (!e || e == -1) { 
+  if (!e || e == -1) {
     y = cxpolylog(m,x,prec);
     avma = av; return affc_fixlg(y, res);
   }

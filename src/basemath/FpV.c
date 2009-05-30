@@ -522,7 +522,7 @@ GEN
 FpC_to_mod(GEN z, GEN p)
 {
   long i, l = lg(z);
-  GEN x = cgetg(l, t_COL); 
+  GEN x = cgetg(l, t_COL);
   if (l == 1) return x;
   p = icopy(p);
   for (i=1; i<l; i++) gel(x,i) = to_intmod(gel(z,i), p);
@@ -552,7 +552,7 @@ FpXQC_to_mod(GEN z, GEN T, GEN p)
 {
   long i,l = lg(z);
   GEN x = cgetg(l, t_COL); T = FpX_to_mod(T, p);
-  for (i=1; i<l; i++) 
+  for (i=1; i<l; i++)
     gel(x,i) = mkpolmod(FpX_to_mod(gel(z,i), p), T);
   return x;
 }

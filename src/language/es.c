@@ -962,12 +962,12 @@ get_sigd(GEN gvalue, char ch, int maxwidth)
     case 'E':
     case 'e': sigd = maxwidth+1; break;
     case 'F':
-    case 'f': 
+    case 'f':
       e = gexpo(gvalue);
       if (e == -(long)HIGHEXPOBIT) /* exact 0 */
         sigd = 0;
       else
-        sigd = ex10(e) + 1 + maxwidth; 
+        sigd = ex10(e) + 1 + maxwidth;
       break;
     /* 'g', 'G' */
     default : sigd = maxwidth? maxwidth: 1; break;
@@ -1513,7 +1513,7 @@ print_prefixed_text(const char *s, const char *prefix, const char *str)
       if (linelen >= W) { new_line(prefix); linelen = prelen; }
       s++;
     }
-    if (!*s) break; 
+    if (!*s) break;
     if (!blank) { pari_putc(' '); linelen++; }
   }
   if (!str)
@@ -3303,7 +3303,7 @@ os_getenv(const char *s)
 /* user = "": use current uid */
 char *
 pari_get_homedir(const char *user)
-{ 
+{
   struct passwd *p;
   char *dir = NULL;
 

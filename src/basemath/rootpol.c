@@ -1748,7 +1748,7 @@ quickabs(GEN x)
       /* avoid problem with 0, e.g. x = 0 + I*1e-100. We don't want |x| = 0. */
       if (isintzero(a)) return cxcompotor(b, prec);
       if (isintzero(b)) return cxcompotor(a, prec);
-      a = cxcompotor(a, prec); 
+      a = cxcompotor(a, prec);
       b = cxcompotor(b, prec); return sqrtr(addrr(sqrr(a), sqrr(b)));
     }
     default: pari_err(typeer,"quickabs");
