@@ -75,41 +75,69 @@ RgX_get_0(GEN x)
 /**                                                                **/
 /********************************************************************/
 
-/* evaluate f(x) mod T */
-GEN
-RgX_RgXQ_eval(GEN f, GEN x, GEN T)
+/*Close to FpXV_FpC_mul*/
+static GEN
+RgXQ_eval_powers(GEN P, GEN V, long a, long n)
 {
-  pari_sp av = avma, limit;
-  long l;
-  GEN y;
-
-  if (typ(f) != t_POL) return gcopy(f);
-  l = lg(f)-1;
-  if (l == 1) return zeropol(varn(T));
-  y = gel(f,l);
-  if (l == 2) return scalarpol(y, varn(T));
-  limit = stack_lim(av, 1);
-  for (l--; l>=2; l--)
-  {
-    y = grem(gadd(gmul(y,x), gel(f,l)), T);
-    if (low_stack(limit,stack_lim(av,1)))
-    {
-      if (DEBUGMEM > 1) pari_warn(warnmem, "RgX_RgXQ_eval");
-      y = gerepileupto(av, y);
-    }
-  }
-  return gerepileupto(av, y);
-}
-GEN
-RgX_RgXQV_eval(GEN P, GEN V)
-{
-  long i, n = degpol(P);
-  GEN z;
-  if (n < 0) return gen_0;
-  z = scalar_ZX_shallow(gel(P,2), varn(P)); /* V[1] = 1 */
-  for (i=1; i<=n; i++) z = RgX_add(z, RgX_Rg_mul(gel(V,i+1),gel(P,2+i)));
+  GEN z = scalarpol(gel(P,2+a), varn(P)); /* V[1] = 1 */
+  long i;
+  for (i=1; i<=n; i++) z = RgX_add(z, RgX_Rg_mul(gel(V,i+1), gel(P,2+a+i)));
   return z;
 }
+
+/* Brent & Kung
+ * (Fast algorithms for manipulating formal power series, JACM 25:581-595, 1978)
+ *
+ * V as output by FpXQ_powers(x,l,T,p). For optimal performance, l is as given
+ * by brent_kung_optpow */
+GEN
+RgX_RgXQV_eval(GEN P, GEN V, GEN T)
+{
+  pari_sp av = avma, btop;
+  long l = lg(V)-1, d = degpol(P);
+  GEN z, u;
+
+  if (d < 0) return zeropol(varn(T));
+  if (d < l)
+  {
+    z = RgXQ_eval_powers(P,V,0,d);
+    return gerepileupto(av, z);
+  }
+  if (l<=1) pari_err(talker,"powers is only [] or [1] in RgX_RgXQV_eval");
+  d -= l;
+  btop = avma;
+  z = RgXQ_eval_powers(P,V,d+1,l-1);
+  while (d >= l-1)
+  {
+    d -= l-1;
+    u = RgXQ_eval_powers(P,V,d+1,l-2);
+    z = RgX_add(u, RgXQ_mul(z, gel(V,l), T));
+    z = gerepileupto(btop, z);
+  }
+  u = RgXQ_eval_powers(P,V,0,d);
+  z = RgX_add(u, RgXQ_mul(z, gel(V,d+2), T));
+  if (DEBUGLEVEL>=8)
+  {
+    long cnt = 1 + (degpol(P) - l) / (l-1);
+    fprintferr("RgX_RgXQV_eval: %ld RgXQ_mul [%ld]\n", cnt, l-1);
+  }
+  return gerepileupto(av, z);
+}
+
+/* Q in Z[X] and x in Rg[X]/(T). Return a lift of Q(x) */
+GEN
+RgX_RgXQ_eval(GEN Q, GEN x, GEN T)
+{
+  pari_sp av = avma;
+  GEN z;
+  long d = degpol(Q), rtd;
+  if (typ(Q)!=t_POL || typ(x)!=t_POL) pari_err(typeer,"RgX_RgXQ_eval");
+  if (d < 0) return zeropol(varn(Q));
+  rtd = (long) sqrt((double)d);
+  z = RgX_RgXQV_eval(Q, RgXQ_powers(x, rtd, T), T);
+  return gerepileupto(av, z);
+}
+
 GEN
 QX_ZXQV_eval(GEN P, GEN V, GEN dV)
 {

@@ -359,7 +359,7 @@ GEN     RgXV_unscale(GEN v, GEN h);
 GEN     RgXX_to_RgM(GEN v, long n);
 GEN     RgXY_swap(GEN x, long n, long w);
 GEN     RgX_RgXQ_eval(GEN f, GEN x, GEN T);
-GEN     RgX_RgXQV_eval(GEN P, GEN V);
+GEN     RgX_RgXQV_eval(GEN P, GEN V, GEN T);
 GEN     RgX_Rg_add(GEN y, GEN x);
 GEN     RgX_Rg_add_shallow(GEN y, GEN x);
 GEN     RgX_Rg_div(GEN y, GEN x);

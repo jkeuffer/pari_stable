@@ -1625,7 +1625,8 @@ nilord(decomp_t *S, GEN dred, long mf, long flag)
       if (!update_phi(S, &l, flag)) break;
     }
     if (!pia) break;
-    oE = Ea; opa = RgX_RgXQ_eval(pia, S->phi, S->f);
+    oE = Ea;
+    opa = (Ea > 1)? RgX_RgXQ_eval(pia, S->phi, S->f): pia;
     if (La > 1)
     { /* change phi such that nu = pia */
       S->phi = gadd(S->phi, opa);

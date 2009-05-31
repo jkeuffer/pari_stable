@@ -198,7 +198,7 @@ brent_kung_optpow(long d, long n)
 
 /*Close to FpXV_FpC_mul*/
 static GEN
-spec_compo_powers(GEN P, GEN V, long a, long n, GEN p)
+FpXQ_eval_powers(GEN P, GEN V, long a, long n, GEN p)
 {
   GEN z = scalar_ZX_shallow(gel(P,2+a), varn(P)); /* V[1] = 1 */
   long i;
@@ -221,21 +221,21 @@ FpX_FpXQV_eval(GEN P, GEN V, GEN T, GEN p)
   if (d < 0) return zeropol(varn(T));
   if (d < l)
   {
-    z = spec_compo_powers(P,V,0,d,p);
+    z = FpXQ_eval_powers(P,V,0,d,p);
     return gerepileupto(av, z);
   }
   if (l<=1) pari_err(talker,"powers is only [] or [1] in FpX_FpXQV_eval");
   d -= l;
   btop = avma;
-  z = spec_compo_powers(P,V,d+1,l-1,p);
+  z = FpXQ_eval_powers(P,V,d+1,l-1,p);
   while (d >= l-1)
   {
     d -= l-1;
-    u = spec_compo_powers(P,V,d+1,l-2,p);
+    u = FpXQ_eval_powers(P,V,d+1,l-2,p);
     z = FpX_add(u, FpXQ_mul(z,gel(V,l),T,p), p);
     z = gerepileupto(btop, z);
   }
-  u = spec_compo_powers(P,V,0,d,p);
+  u = FpXQ_eval_powers(P,V,0,d,p);
   z = FpX_add(u, FpXQ_mul(z,gel(V,d+2),T,p), p);
   if (DEBUGLEVEL>=8)
   {
