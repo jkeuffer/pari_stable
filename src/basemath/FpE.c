@@ -276,11 +276,57 @@ FpE_ffmul(GEN t, GEN m, GEN pt1, GEN pt2, GEN a4, GEN p)
 }
 
 static GEN
+FpE_ffmul1(GEN t, GEN m, GEN pt1, GEN pt2, GEN a4, GEN p)
+{
+  return gel(FpE_ffmul(mkvec2(t, gen_1), m, pt1, pt2, a4, p), 2);
+}
+static GEN
 FpE_get_a6(GEN P, GEN a4, GEN p)
 {
   GEN x=gel(P,1), y=gel(P,2);
   GEN RHS = Fp_mul(x, Fp_add(Fp_sqr(x, p), a4, p), p);
   return Fp_sub(Fp_sqr(y, p), RHS, p);
+}
+
+static GEN
+FpE_weilpairing2(GEN t, GEN s, GEN p)
+{
+ return gequal(s, t)? gen_1: subis(p, 1);
+}
+
+static GEN
+FpE_weilpairing3(GEN t, GEN s, GEN a4, GEN p)
+{
+  pari_sp ltop = avma;
+  GEN t2, s2, a, b;
+  if (gequal(s, t)) return gen_1;
+  t2 = FpE_dbl(t, a4, p);
+  if (gequal(s, t2)) return gen_1;
+  s2 = FpE_dbl(s, a4, p);
+  a  = Fp_mul(FpE_fftang(s, t,  a4, p), FpE_fftang(t, s2, a4 ,p), p);
+  b  = Fp_mul(FpE_fftang(s, t2, a4, p), FpE_fftang(t, s,  a4, p), p);
+  return gerepileuptoint(ltop, Fp_sqr(Fp_div(a, b, p), p));
+}
+
+static GEN
+FpE_weilpairing4(GEN t, GEN s, GEN m, GEN a4, GEN p)
+{
+  pari_sp ltop = avma;
+  GEN s2, t2, t3;
+  GEN w;
+  if (gequal(s, t)) return gen_1;
+  s2 = FpE_dbl(s, a4, p);
+  t2 = FpE_dbl(t, a4, p);
+  if (ell_is_inf(s2)) return FpE_weilpairing2(s, t2, p);
+  if (ell_is_inf(t2)) return FpE_weilpairing2(s2, t, p);
+  if (gequal(s2, t2)) return FpE_weilpairing2(s2, FpE_sub(s, t, a4, p), p);
+  t3 = FpE_add(t2, t, a4, p);
+  if (gequal(s, t3)) return gen_1;
+  w = Fp_mul(Fp_mul(FpE_ffmul1(s, m, t, t2, a4, p),
+                    FpE_ffmul1(s2,m, t2, t, a4, p), p),
+             Fp_mul(FpE_ffmul1(t, m, s2, s, a4, p),
+                    FpE_ffmul1(t2,m, s, s2, a4, p), p), p);
+  return gerepileuptoint(ltop, w);
 }
 
 GEN
@@ -289,7 +335,12 @@ FpE_weilpairing(GEN t, GEN s, GEN m, GEN a4, GEN p)
   pari_sp ltop=avma, av;
   GEN w, a6;
   if (ell_is_inf(s) || ell_is_inf(t)) return gen_1;
-  if (equaliu(m, 2)) return gequal(s, t)? gen_1: subis(p, 1);
+  switch(itou_or_0(m))
+  {
+    case 2: return FpE_weilpairing2(s, t, p);
+    case 3: return FpE_weilpairing3(s, t, a4, p);
+    case 4: return FpE_weilpairing4(s, t, m, a4, p);
+  }
   a6 = FpE_get_a6(t, a4, p);
   av = avma;
   while(1)

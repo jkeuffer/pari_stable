@@ -42,3 +42,7 @@ check([0, 0, 1, 0, 0],[22, 95],[22, 95],2,191);
   forvec(v=vector(5,i,[0,2]),E=trap(talker,0,ellinit(v*Mod(1,3)));
     if(E,G=ellgroup(E,3);if(#G>1,print(v,":",G))))
 }
+{
+  forvec(v=vector(5,i,[0,4]),E=trap(talker,0,ellinit(v*Mod(1,5)));
+    if(E,G=ellgroup(E,5);if(#G>1,print(v,":",G))))
+}
