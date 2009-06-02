@@ -2202,7 +2202,7 @@ galoisconj4_main(GEN T, GEN den, long flag)
   if (n == 1)
   {
     G = cgetg(3, t_VEC);
-    gel(G,1) = cgetg(1, t_VECSMALL);
+    gel(G,1) = cgetg(1, t_VEC);
     gel(G,2) = cgetg(1, t_VECSMALL);
   }
   else
