@@ -79,11 +79,11 @@ filtre0(filtre_t *F)
       *t++ = c; /* copy verbatim */
       switch(c)
       {
-	case '\\': /* in strings, \ is the escape character */
-	  if (*s) *t++ = *s++;
-	  break;
+        case '\\': /* in strings, \ is the escape character */
+          if (*s) *t++ = *s++;
+          break;
 
-	case '"': F->in_string = 0;
+        case '"': F->in_string = 0;
       }
       continue;
     }
@@ -92,19 +92,19 @@ filtre0(filtre_t *F)
     { /* look for comment's end */
       if (F->in_comment == MULTI_LINE_COMMENT)
       {
-	while (c != '*' || *s != '/')
-	{
-	  if (!*s)
-	  {
-	    if (!F->more_input) F->more_input = 1;
-	    goto END;
-	  }
-	  c = *s++;
-	}
-	s++;
+        while (c != '*' || *s != '/')
+        {
+          if (!*s)
+          {
+            if (!F->more_input) F->more_input = 1;
+            goto END;
+          }
+          c = *s++;
+        }
+        s++;
       }
       else
-	while (c != '\n' && *s) c = *s++;
+        while (c != '\n' && *s) c = *s++;
       F->in_comment = 0;
       continue;
     }
@@ -117,43 +117,43 @@ filtre0(filtre_t *F)
     switch(c)
     {
       case '/':
-	if (*s == '*') { t--; F->in_comment = MULTI_LINE_COMMENT; }
-	break;
+        if (*s == '*') { t--; F->in_comment = MULTI_LINE_COMMENT; }
+        break;
 
       case '\\':
-	if (!*s) {
-	  if (t-2 >= F->t && t[-2] == '?') break; /* '?\' */
-	  t--;
-	  if (!F->more_input) F->more_input = 1;
-	  goto END;
-	}
-	if (*s == '\r') s++; /* DOS */
-	if (*s == '\n') {
-	  if (t-2 >= F->t && t[-2] == '?') break; /* '?\' */
-	  t--; s++;
-	  if (!*s)
-	  {
-	    if (!F->more_input) F->more_input = 1;
-	    goto END;
-	  }
-	} /* skip \<CR> */
-	break;
+        if (!*s) {
+          if (t-2 >= F->t && t[-2] == '?') break; /* '?\' */
+          t--;
+          if (!F->more_input) F->more_input = 1;
+          goto END;
+        }
+        if (*s == '\r') s++; /* DOS */
+        if (*s == '\n') {
+          if (t-2 >= F->t && t[-2] == '?') break; /* '?\' */
+          t--; s++;
+          if (!*s)
+          {
+            if (!F->more_input) F->more_input = 1;
+            goto END;
+          }
+        } /* skip \<CR> */
+        break;
 
       case '"': F->in_string = 1;
-	break;
+        break;
 
       case LBRACE:
-	t--;
-	if (F->wait_for_brace) pari_err(impl,"embedded braces (in parser)");
-	F->more_input = 2;
-	F->wait_for_brace = 1;
-	break;
+        t--;
+        if (F->wait_for_brace) pari_err(impl,"embedded braces (in parser)");
+        F->more_input = 2;
+        F->wait_for_brace = 1;
+        break;
 
       case RBRACE:
-	if (!F->wait_for_brace) pari_err(talker,"unexpected closing brace");
-	F->more_input = 0; t--;
-	F->wait_for_brace = 0;
-	break;
+        if (!F->wait_for_brace) pari_err(talker,"unexpected closing brace");
+        F->more_input = 0; t--;
+        F->wait_for_brace = 0;
+        break;
     }
   }
 
@@ -1921,7 +1921,7 @@ dbg(GEN x, long nb, long bl)
     pari_printf("(%c,varn=%ld):", vsigne(x), varn(x));
   else if (tx == t_SER)
     pari_printf("(%c,varn=%ld,prec=%ld,valp=%ld):",
-	       vsigne(x), varn(x), lgpol(x), valp(x));
+               vsigne(x), varn(x), lgpol(x), valp(x));
   else if (tx == t_LIST)
   {
     pari_printf("(lmax=%ld):", list_nmax(x));
@@ -1971,8 +1971,8 @@ dbg(GEN x, long nb, long bl)
       e = (tx==t_SER)? valp(x): 0;
       for (i=2; i<lx; i++)
       {
-	blancs(bl); pari_printf("coef of degree %ld = ",e);
-	e++; dbg(gel(x,i),nb,bl);
+        blancs(bl); pari_printf("coef of degree %ld = ",e);
+        e++; dbg(gel(x,i),nb,bl);
       }
       break;
 
@@ -1981,8 +1981,8 @@ dbg(GEN x, long nb, long bl)
     case t_QFR: case t_QFI: case t_VEC: case t_COL:
       for (i=1; i<lx; i++)
       {
-	blancs(bl); pari_printf("%ld%s component = ",i,eng_ord(i));
-	dbg(gel(x,i),nb,bl);
+        blancs(bl); pari_printf("%ld%s component = ",i,eng_ord(i));
+        dbg(gel(x,i),nb,bl);
       }
       break;
 
@@ -2007,21 +2007,21 @@ dbg(GEN x, long nb, long bl)
       if (lx == 1) return;
       if (typ(c) == t_VECSMALL)
       {
-	for (i = 1; i < lx; i++)
-	{
-	  blancs(bl); pari_printf("%ld%s column = ",i,eng_ord(i));
-	  dbg(gel(x,i),nb,bl);
-	}
+        for (i = 1; i < lx; i++)
+        {
+          blancs(bl); pari_printf("%ld%s column = ",i,eng_ord(i));
+          dbg(gel(x,i),nb,bl);
+        }
       }
       else
       {
-	dx = lg(c);
-	for (i=1; i<dx; i++)
-	  for (j=1; j<lx; j++)
-	  {
-	    blancs(bl); pari_printf("mat(%ld,%ld) = ",i,j);
-	    dbg(gcoeff(x,i,j),nb,bl);
-	  }
+        dx = lg(c);
+        for (i=1; i<dx; i++)
+          for (j=1; j<lx; j++)
+          {
+            blancs(bl); pari_printf("mat(%ld,%ld) = ",i,j);
+            dbg(gcoeff(x,i,j),nb,bl);
+          }
       }
     }
   }
@@ -2035,7 +2035,7 @@ print_entree(entree *ep, long hash)
 {
   pari_printf(" %s ",ep->name); dbg_addr((ulong)ep);
   pari_printf(":\n   hash = %3ld, menu = %2ld, code = %-10s",
-	    hash, ep->menu, ep->code? ep->code: "NULL");
+            hash, ep->menu, ep->code? ep->code: "NULL");
   if (ep->next)
   {
     pari_printf("next = %s ",(ep->next)->name);
@@ -2071,7 +2071,7 @@ print_functions_hash(const char *s)
     {
       pari_printf("*** hashcode = %lu\n",n);
       for (ep=functions_hash[n]; ep; ep=ep->next)
-	print_entree(ep,n);
+        print_entree(ep,n);
     }
     return;
   }
@@ -2158,19 +2158,19 @@ get_texvar(long v, char *buf, unsigned int len)
     do_append(&t, '[', e, seen - 1);
     while (1) {
       if (*s == '_')
-	seen1++, s++;
+        seen1++, s++;
       else {
-	if (seen1) {
-	  do_append(&t, ']', e, (seen >= seen1 ? seen1 : seen) - 1);
-	  do_append(&t, ',', e, 1);
-	  do_append(&t, '[', e, seen1 - 1);
-	  if (seen1 > seen)
-	    seen = seen1;
-	  seen1 = 0;
-	}
-	if (*s == 0)
-	  break;
-	do_append(&t, *s++, e, 1);
+        if (seen1) {
+          do_append(&t, ']', e, (seen >= seen1 ? seen1 : seen) - 1);
+          do_append(&t, ',', e, 1);
+          do_append(&t, '[', e, seen1 - 1);
+          if (seen1 > seen)
+            seen = seen1;
+          seen1 = 0;
+        }
+        if (*s == 0)
+          break;
+        do_append(&t, *s++, e, 1);
       }
     }
     do_append(&t, ']', e, seen - 1);
@@ -2190,18 +2190,18 @@ dbg_pari_heap(void)
   nu = (top-avma)/sizeof(long);
   l = (top-bot)/sizeof(long);
   pari_printf("\n Top : %lx   Bottom : %lx   Current stack : %lx\n",
-	      top, bot, avma);
+              top, bot, avma);
   pari_printf(" Used :                         %ld  long words  (%ld K)\n",
-	      nu, nu/1024*sizeof(long));
+              nu, nu/1024*sizeof(long));
   pari_printf(" Available :                    %ld  long words  (%ld K)\n",
-	      (l-nu), (l-nu)/1024*sizeof(long));
+              (l-nu), (l-nu)/1024*sizeof(long));
   pari_printf(" Occupation of the PARI stack : %6.2f percent\n", 100.0*nu/l);
   pari_printf(" %ld objects on heap occupy %ld long words\n\n",
-	      itos(gel(adr,1)), itos(gel(adr,2)));
+              itos(gel(adr,1)), itos(gel(adr,2)));
   u = pari_var_next();
   s = MAXVARN - pari_var_next_temp();
   pari_printf(" %ld variable names used (%ld user + %ld private) out of %d\n\n",
-	      u+s, u, s, MAXVARN);
+              u+s, u, s, MAXVARN);
   avma = av;
 }
 
@@ -2228,7 +2228,7 @@ isnull(GEN g)
       return isnull(gel(g,2));
     case t_POL:
       for (i=lg(g)-1; i>1; i--)
-	if (!isnull(gel(g,i))) return 0;
+        if (!isnull(gel(g,i))) return 0;
       return 1;
   }
   return 0;
@@ -2252,7 +2252,7 @@ isone(GEN g)
     case t_POL:
       if (!signe(g)) return 0;
       for (i=lg(g)-1; i>2; i--)
-	if (!isnull(gel(g,i))) return 0;
+        if (!isnull(gel(g,i))) return 0;
       return isone(gel(g,2));
   }
   return 0;
@@ -2283,15 +2283,15 @@ isfactor(GEN g)
       return 0;
     case t_POL: deja = 0; sig = 1;
       for (i=lg(g)-1; i>1; i--)
-	if (!isnull_for_pol(gel(g,i)))
-	{
-	  if (deja) return 0;
-	  sig=isfactor(gel(g,i)); deja=1;
-	}
+        if (!isnull_for_pol(gel(g,i)))
+        {
+          if (deja) return 0;
+          sig=isfactor(gel(g,i)); deja=1;
+        }
       return sig? sig: 1;
     case t_SER:
       for (i=lg(g)-1; i>1; i--)
-	if (!isnull(gel(g,i))) return 0;
+        if (!isnull(gel(g,i))) return 0;
   }
   return 1;
 }
@@ -2311,17 +2311,17 @@ isdenom(GEN g)
 
     case t_POL: deja = 0;
       for (i=lg(g)-1; i>1; i--)
-	if (!isnull(gel(g,i)))
-	{
-	  if (deja) return 0;
-	  if (i==2) return isdenom(gel(g,2));
-	  if (!isone(gel(g,i))) return 0;
-	  deja=1;
-	}
+        if (!isnull(gel(g,i)))
+        {
+          if (deja) return 0;
+          if (i==2) return isdenom(gel(g,2));
+          if (!isone(gel(g,i))) return 0;
+          deja=1;
+        }
       return 1;
     case t_SER:
       for (i=lg(g)-1; i>1; i--)
-	if (!isnull(gel(g,i))) return 0;
+        if (!isnull(gel(g,i))) return 0;
   }
   return 1;
 }
@@ -2551,8 +2551,8 @@ bruti_intern(GEN g, pariout_t *T, outString *S, int addsign)
       a = gel(g,r+1); b = gel(g,r+2); v = r? "w": "I";
       if (isnull(a))
       {
-	wr_lead_monome(T,S,b,v,1,addsign);
-	return;
+        wr_lead_monome(T,S,b,v,1,addsign);
+        return;
       }
       bruti_sign(a,T,S,addsign);
       if (!isnull(b)) wr_monome(T,S,b,v,1);
@@ -2564,8 +2564,8 @@ bruti_intern(GEN g, pariout_t *T, outString *S, int addsign)
       wr_lead_monome(T,S,gel(g,i),v,i,addsign);
       while (i--)
       {
-	a = gel(g,i);
-	if (!isnull_for_pol(a)) wr_monome(T,S,a,v,i);
+        a = gel(g,i);
+        if (!isnull_for_pol(a)) wr_monome(T,S,a,v,i);
       }
       break;
 
@@ -2573,14 +2573,14 @@ bruti_intern(GEN g, pariout_t *T, outString *S, int addsign)
       i = valp(g);
       if (lgpol(g))
       { /* hack: we want g[i] = coeff of degree i. */
-	l = i + lgpol(g); g -= i-2;
-	wr_lead_monome(T,S,gel(g,i),v,i,addsign);
-	while (++i < l)
-	{
-	  a = gel(g,i);
-	  if (!isnull_for_pol(a)) wr_monome(T,S,a,v,i);
-	}
-	sp_sign_sp(T,S,1);
+        l = i + lgpol(g); g -= i-2;
+        wr_lead_monome(T,S,gel(g,i),v,i,addsign);
+        while (++i < l)
+        {
+          a = gel(g,i);
+          if (!isnull_for_pol(a)) wr_monome(T,S,a,v,i);
+        }
+        sp_sign_sp(T,S,1);
       }
       str_puts(S, "O("); monome(S,v,i); str_putc(S, ')'); break;
 
@@ -2593,17 +2593,17 @@ bruti_intern(GEN g, pariout_t *T, outString *S, int addsign)
       g = gel(g,4); ev = GENtostr(p);
       for (; i<l; i++)
       {
-	g = dvmdii(g,p,&a);
-	if (signe(a))
-	{
-	  if (!i || !is_pm1(a))
-	  {
-	    str_absint(S, a); if (i) str_putc(S, '*');
-	  }
-	  if (i) VpowE(S, ev,i);
-	  sp_sign_sp(T,S,1);
-	}
-	if ((i & 0xff) == 0) g = gerepileuptoint(av,g);
+        g = dvmdii(g,p,&a);
+        if (signe(a))
+        {
+          if (!i || !is_pm1(a))
+          {
+            str_absint(S, a); if (i) str_putc(S, '*');
+          }
+          if (i) VpowE(S, ev,i);
+          sp_sign_sp(T,S,1);
+        }
+        if ((i & 0xff) == 0) g = gerepileuptoint(av,g);
       }
       str_puts(S, "O("); VpowE(S, ev,i); str_putc(S, ')');
       pari_free(ev); break;
@@ -2621,8 +2621,8 @@ bruti_intern(GEN g, pariout_t *T, outString *S, int addsign)
       str_putc(S, '['); l = lg(g);
       for (i=1; i<l; i++)
       {
-	bruti(gel(g,i),T,S);
-	if (i<l-1) comma_sp(T,S);
+        bruti(gel(g,i),T,S);
+        if (i<l-1) comma_sp(T,S);
       }
       str_putc(S, ']'); if (tg==t_COL) str_putc(S, '~');
       break;
@@ -2634,8 +2634,8 @@ bruti_intern(GEN g, pariout_t *T, outString *S, int addsign)
       l = g? lg(g): 1;
       for (i=1; i<l; i++)
       {
-	bruti(gel(g,i),T,S);
-	if (i<l-1) comma_sp(T,S);
+        bruti(gel(g,i),T,S);
+        if (i<l-1) comma_sp(T,S);
       }
       str_puts(S, "])"); break;
 
@@ -2671,29 +2671,29 @@ bruti_intern(GEN g, pariout_t *T, outString *S, int addsign)
       l = lg(g[1]);
       if (l==1)
       {
-	str_puts(S, "matrix(0,");
+        str_puts(S, "matrix(0,");
         str_long(S, r-1);
         if (new_fun_set)
           str_putc(S, ')');
         else
-	  str_puts(S, ",j,k,0)");
-	return;
+          str_puts(S, ",j,k,0)");
+        return;
       }
       print = (typ(g[1]) == t_VECSMALL)? prints: bruti;
       if (l==2)
       {
-	str_puts(S, new_fun_set? "Mat(": "mat(");
-	if (r == 2) { print(gcoeff(g,1,1),T,S); str_putc(S, ')'); return; }
+        str_puts(S, new_fun_set? "Mat(": "mat(");
+        if (r == 2) { print(gcoeff(g,1,1),T,S); str_putc(S, ')'); return; }
       }
       str_putc(S, '[');
       for (i=1; i<l; i++)
       {
-	for (j=1; j<r; j++)
-	{
-	  print(gcoeff(g,i,j),T,S);
-	  if (j<r-1) comma_sp(T,S);
-	}
-	if (i<l-1) { str_putc(S, ';'); if (T->sp) str_putc(S, ' '); }
+        for (j=1; j<r; j++)
+        {
+          print(gcoeff(g,i,j),T,S);
+          if (j<r-1) comma_sp(T,S);
+        }
+        if (i<l-1) { str_putc(S, ';'); if (T->sp) str_putc(S, ' '); }
       }
       str_putc(S, ']'); if (l==2) str_putc(S, ')');
       break;
@@ -2781,8 +2781,8 @@ texi_sign(GEN g, pariout_t *T, outString *S, int addsign)
       a = gel(g,r+1); b = gel(g,r+2); v = r? "w": "I";
       if (isnull(a))
       {
-	wr_lead_texnome(T,S,b,v,1,addsign);
-	break;
+        wr_lead_texnome(T,S,b,v,1,addsign);
+        break;
       }
       texi_sign(a,T,S,addsign);
       if (!isnull(b)) wr_texnome(T,S,b,v,1);
@@ -2794,8 +2794,8 @@ texi_sign(GEN g, pariout_t *T, outString *S, int addsign)
       wr_lead_texnome(T,S,gel(g,i),v,i,addsign);
       while (i--)
       {
-	a = gel(g,i);
-	if (!isnull_for_pol(a)) wr_texnome(T,S,a,v,i);
+        a = gel(g,i);
+        if (!isnull_for_pol(a)) wr_texnome(T,S,a,v,i);
       }
       break;
 
@@ -2803,14 +2803,14 @@ texi_sign(GEN g, pariout_t *T, outString *S, int addsign)
       i = valp(g);
       if (lgpol(g))
       { /* hack: we want g[i] = coeff of degree i. */
-	l = i + lgpol(g); g -= i-2;
-	wr_lead_texnome(T,S,gel(g,i),v,i,addsign);
-	while (++i < l)
-	{
-	  a = gel(g,i);
-	  if (!isnull_for_pol(a)) wr_texnome(T,S,a,v,i);
-	}
-	str_puts(S, "+ ");
+        l = i + lgpol(g); g -= i-2;
+        wr_lead_texnome(T,S,gel(g,i),v,i,addsign);
+        while (++i < l)
+        {
+          a = gel(g,i);
+          if (!isnull_for_pol(a)) wr_texnome(T,S,a,v,i);
+        }
+        str_puts(S, "+ ");
       }
       str_puts(S, "O("); texnome(S,v,i); str_putc(S, ')'); break;
 
@@ -2822,16 +2822,16 @@ texi_sign(GEN g, pariout_t *T, outString *S, int addsign)
       g = gel(g,4); ev = GENtostr(p);
       for (; i<l; i++)
       {
-	g = dvmdii(g,p,&a);
-	if (signe(a))
-	{
-	  if (!i || !is_pm1(a))
-	  {
-	    str_absint(S, a); if (i) str_puts(S, "\\cdot");
-	  }
-	  if (i) texVpowE(S, ev,i);
-	  str_putc(S, '+');
-	}
+        g = dvmdii(g,p,&a);
+        if (signe(a))
+        {
+          if (!i || !is_pm1(a))
+          {
+            str_absint(S, a); if (i) str_puts(S, "\\cdot");
+          }
+          if (i) texVpowE(S, ev,i);
+          str_putc(S, '+');
+        }
       }
       str_puts(S, "O("); texVpowE(S, ev,i); str_putc(S, ')');
       pari_free(ev); break;
@@ -2841,7 +2841,7 @@ texi_sign(GEN g, pariout_t *T, outString *S, int addsign)
       str_puts(S, "\\pmatrix{ "); l = lg(g);
       for (i=1; i<l; i++)
       {
-	texi(gel(g,i),T,S); if (i < l-1) str_putc(S, '&');
+        texi(gel(g,i),T,S); if (i < l-1) str_putc(S, '&');
       }
       str_puts(S, "\\cr}\n"); break;
 
@@ -2851,7 +2851,7 @@ texi_sign(GEN g, pariout_t *T, outString *S, int addsign)
       l = g? lg(g): 1;
       for (i=1; i<l; i++)
       {
-	texi(gel(g,i),T,S); if (i < l-1) str_putc(S, '&');
+        texi(gel(g,i),T,S); if (i < l-1) str_putc(S, '&');
       }
       str_puts(S, "\\cr}\n"); break;
 
@@ -2859,7 +2859,7 @@ texi_sign(GEN g, pariout_t *T, outString *S, int addsign)
       str_puts(S, "\\pmatrix{ "); l = lg(g);
       for (i=1; i<l; i++)
       {
-	texi(gel(g,i),T,S); str_puts(S, "\\cr\n");
+        texi(gel(g,i),T,S); str_puts(S, "\\cr\n");
       }
       str_putc(S, '}'); break;
 
@@ -2867,8 +2867,8 @@ texi_sign(GEN g, pariout_t *T, outString *S, int addsign)
       str_puts(S, "\\pmatrix{ "); l = lg(g);
       for (i=1; i<l; i++)
       {
-	str_long(S, g[i]);
-	if (i < l-1) str_putc(S, '&');
+        str_long(S, g[i]);
+        if (i < l-1) str_putc(S, '&');
       }
       str_puts(S, "\\cr}\n"); break;
 
@@ -2902,15 +2902,15 @@ texi_sign(GEN g, pariout_t *T, outString *S, int addsign)
       {
         OUT_FUN print = (typ(g[1]) == t_VECSMALL)? prints: texi;
 
-	l = lg(g[1]);
-	for (i=1; i<l; i++)
-	{
-	  for (j=1; j<r; j++)
-	  {
-	    print(gcoeff(g,i,j),T,S); if (j<r-1) str_putc(S, '&');
-	  }
-	  str_puts(S, "\\cr\n ");
-	}
+        l = lg(g[1]);
+        for (i=1; i<l; i++)
+        {
+          for (j=1; j<r; j++)
+          {
+            print(gcoeff(g,i,j),T,S); if (j<r-1) str_putc(S, '&');
+          }
+          str_puts(S, "\\cr\n ");
+        }
       }
       str_putc(S, '}'); break;
     }
@@ -3549,7 +3549,7 @@ pari_get_infile(const char *name, FILE *file)
 
   if (l > 2 && (!strncmp(end-1,".Z",2)
 #ifdef GNUZCAT
-	     || !strncmp(end-2,".gz",3)
+             || !strncmp(end-2,".gz",3)
 #endif
   ))
   { /* compressed file (compress or gzip) */
@@ -3681,7 +3681,7 @@ switchout(const char *name)
       if (f)
       {
         if (is_magic_ok(f))
-	  pari_err(talker,"%s is a GP binary file. Please use writebin", name);
+          pari_err(talker,"%s is a GP binary file. Please use writebin", name);
         fclose(f);
       }
     }
@@ -3857,7 +3857,7 @@ check_magic(const char *name, FILE *f)
     pari_warn(warner, "%s is not a GP binary file",name);
   else if (!is_sizeoflong_ok(f))
     pari_warn(warner, "%s not written for a %ld bit architecture",
-	       name, sizeof(long)*8);
+               name, sizeof(long)*8);
   else if (!is_long_ok(f, ENDIAN_CHECK))
     pari_warn(warner, "unexpected endianness in %s",name);
   else if (!is_long_ok(f, BINARY_VERSION))
@@ -3933,7 +3933,7 @@ readbin(const char *name, FILE *f, int *vector)
     if (x && cx == BIN_GEN) z = z? shallowconcat(z, mkvec(x)): mkvec(x);
     if (DEBUGLEVEL)
       pari_warn(warner,"%ld unnamed objects read. Returning then in a vector",
-	  lg(z)-1);
+          lg(z)-1);
     x = gerepilecopy(av, z);
     if (vector) *vector = 1;
   }
@@ -4241,7 +4241,7 @@ swap_slash(char *s)
     {
       char *t;
       for (t=s; *t; t++)
-	if (*t == '/') *t = '\\';
+        if (*t == '/') *t = '\\';
     }
 #endif
 }

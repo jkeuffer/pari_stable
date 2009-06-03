@@ -130,7 +130,7 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
 {
   long s, sa, sb;
   ulong g;
-  ulong xu,xu1,xv,xv1;		/* Lehmer stage recurrence matrix */
+  ulong xu,xu1,xv,xv1;                /* Lehmer stage recurrence matrix */
 
   if (typ(a) != t_INT || typ(b) != t_INT) pari_err(arither1);
   s = absi_cmp(a,b);
@@ -148,7 +148,7 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
     case -1: if (pu) *pu = gen_m1; return(negi(a));
     }
   }
-  if (s == 0)			/* |a| == |b| != 0 */
+  if (s == 0)                        /* |a| == |b| != 0 */
   {
     if (pu) *pu = gen_0;
     if (sb > 0)
@@ -158,7 +158,7 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
   }
   /* now |a| > |b| > 0 */
 
-  if (lgefint(a) == 3)		/* single-word affair */
+  if (lgefint(a) == 3)                /* single-word affair */
   {
     g = xxgcduu((ulong)a[2], (ulong)b[2], 0, &xu, &xu1, &xv, &xv1, &s);
     sa = s > 0 ? sa : -sa;
@@ -170,9 +170,9 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
       else if (xu == 2) *pu = sa < 0 ? negi(gen_2) : gen_2;
       else
       {
-	*pu = cgeti(3);
-	(*pu)[1] = evalsigne(sa)|evallgefint(3);
-	(*pu)[2] = xu;
+        *pu = cgeti(3);
+        (*pu)[1] = evalsigne(sa)|evallgefint(3);
+        (*pu)[2] = xu;
       }
     }
     if (pv)
@@ -181,9 +181,9 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
       else if (xv == 2) *pv = sb < 0 ? negi(gen_2) : gen_2;
       else
       {
-	*pv = cgeti(3);
-	(*pv)[1] = evalsigne(sb)|evallgefint(3);
-	(*pv)[2] = xv;
+        *pv = cgeti(3);
+        (*pv)[1] = evalsigne(sb)|evallgefint(3);
+        (*pv)[2] = xv;
       }
     }
     if (g == 1) return gen_1;

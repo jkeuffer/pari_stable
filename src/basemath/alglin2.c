@@ -86,8 +86,8 @@ easychar(GEN x, long v, GEN *py)
       lx=lg(x);
       if (lx==1)
       {
-	if (py) *py = cgetg(1,t_MAT);
-	return pol_1(v);
+        if (py) *py = cgetg(1,t_MAT);
+        return pol_1(v);
       }
       if (lg(x[1]) != lx) break;
       return NULL;
@@ -511,9 +511,9 @@ carberkowitz(GEN x, long v)
       gel(C,i+2) = gerepileupto(av, t);
       for (j = 1; j < r; j++)
       {
-	av = avma; t = gmul(gcoeff(x,j,1), gel(S,1));
-	for (k = 2; k < r; k++) t = gadd(t, gmul(gcoeff(x,j,k), gel(S,k)));
-	gel(Q,j) = gerepileupto(av, t);
+        av = avma; t = gmul(gcoeff(x,j,1), gel(S,1));
+        for (k = 2; k < r; k++) t = gadd(t, gmul(gcoeff(x,j,k), gel(S,k)));
+        gel(Q,j) = gerepileupto(av, t);
       }
       for (j = 1; j < r; j++) gel(S,j) = gel(Q,j);
     }
@@ -771,8 +771,8 @@ gtrace(GEN x)
       y = gel(x,1);
       if (!gequal0(gel(y,3)))
       { /* assume quad. polynomial is either x^2 + d or x^2 - x + d */
-	av = avma;
-	return gerepileupto(av, gadd(gel(x,3), gmul2n(gel(x,2),1)));
+        av = avma;
+        return gerepileupto(av, gadd(gel(x,3), gmul2n(gel(x,2),1)));
       }
       return gmul2n(gel(x,2),1);
 
@@ -844,7 +844,7 @@ qfgaussred_positive(GEN a)
     {
       GEN c = gel(bk, i);
       for (j=i; j<n; j++)
-	gcoeff(b,i,j) = gsub(gcoeff(b,i,j), gmul(c,gcoeff(b,k,j)));
+        gcoeff(b,i,j) = gsub(gcoeff(b,i,j), gmul(c,gcoeff(b,k,j)));
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
@@ -882,19 +882,19 @@ gaussred(GEN a, long signature)
     {
       p = gcoeff(a,k,k); invp = ginv(p); /* != 0 */
       if (signature) { /* skip if (!signature): gsigne may fail ! */
-	if (gsigne(p) > 0) sp++; else sn++;
+        if (gsigne(p) > 0) sp++; else sn++;
       }
       r[k] = 0; t--;
       ak = row(a, k);
       for (i=1; i<=n; i++)
-	gcoeff(a,k,i) = r[i]? gmul(gcoeff(a,k,i), invp): gen_0;
+        gcoeff(a,k,i) = r[i]? gmul(gcoeff(a,k,i), invp): gen_0;
 
       for (i=1; i<=n; i++) if (r[i])
       {
-	GEN c = gel(ak,i); /* - p * a[k,i] */
-	if (gequal0(c)) continue;
-	for (j=1; j<=n; j++) if (r[j])
-	  gcoeff(a,i,j) = gsub(gcoeff(a,i,j), gmul(c,gcoeff(a,k,j)));
+        GEN c = gel(ak,i); /* - p * a[k,i] */
+        if (gequal0(c)) continue;
+        for (j=1; j<=n; j++) if (r[j])
+          gcoeff(a,i,j) = gsub(gcoeff(a,i,j), gmul(c,gcoeff(a,k,j)));
       }
       gcoeff(a,k,k) = p;
     }
@@ -902,47 +902,47 @@ gaussred(GEN a, long signature)
     { /* all remaining diagonal coeffs are currently 0 */
       for (k=1; k<=n; k++) if (r[k])
       {
-	l=k+1; while (l<=n && (!r[l] || gequal0(gcoeff(a,k,l)))) l++;
-	if (l > n) continue;
+        l=k+1; while (l<=n && (!r[l] || gequal0(gcoeff(a,k,l)))) l++;
+        if (l > n) continue;
 
-	p = gcoeff(a,k,l); invp = ginv(p);
-	sp++; sn++;
-	r[k] = r[l] = 0; t -= 2;
-	ak = row(a, k);
-	al = row(a, l);
-	for (i=1; i<=n; i++) if (r[i])
-	{
-	  gcoeff(a,k,i) = gmul(gcoeff(a,k,i), invp);
-	  gcoeff(a,l,i) = gmul(gcoeff(a,l,i), invp);
-	} else {
-	  gcoeff(a,k,i) = gen_0;
-	  gcoeff(a,l,i) = gen_0;
-	}
+        p = gcoeff(a,k,l); invp = ginv(p);
+        sp++; sn++;
+        r[k] = r[l] = 0; t -= 2;
+        ak = row(a, k);
+        al = row(a, l);
+        for (i=1; i<=n; i++) if (r[i])
+        {
+          gcoeff(a,k,i) = gmul(gcoeff(a,k,i), invp);
+          gcoeff(a,l,i) = gmul(gcoeff(a,l,i), invp);
+        } else {
+          gcoeff(a,k,i) = gen_0;
+          gcoeff(a,l,i) = gen_0;
+        }
 
-	for (i=1; i<=n; i++) if (r[i])
-	{ /* c = a[k,i] * p, d = a[l,i] * p; */
-	  GEN c = gel(ak,i), d = gel(al,i);
-	  for (j=1; j<=n; j++) if (r[j])
-	    gcoeff(a,i,j) = gsub(gcoeff(a,i,j),
-			         gadd(gmul(gcoeff(a,l,j), c),
-				      gmul(gcoeff(a,k,j), d)));
-	}
-	for (i=1; i<=n; i++) if (r[i])
-	{
-	  GEN c = gcoeff(a,k,i), d = gcoeff(a,l,i);
-	  gcoeff(a,k,i) = gadd(c, d);
-	  gcoeff(a,l,i) = gsub(c, d);
-	}
-	gcoeff(a,k,l) = gen_1;
-	gcoeff(a,l,k) = gen_m1;
-	gcoeff(a,k,k) = gmul2n(p,-1);
-	gcoeff(a,l,l) = gneg(gcoeff(a,k,k));
-	if (low_stack(lim, stack_lim(av1,1)))
-	{
-	  if(DEBUGMEM>1) pari_warn(warnmem,"gaussred");
-	  a = gerepilecopy(av1, a);
-	}
-	break;
+        for (i=1; i<=n; i++) if (r[i])
+        { /* c = a[k,i] * p, d = a[l,i] * p; */
+          GEN c = gel(ak,i), d = gel(al,i);
+          for (j=1; j<=n; j++) if (r[j])
+            gcoeff(a,i,j) = gsub(gcoeff(a,i,j),
+                                 gadd(gmul(gcoeff(a,l,j), c),
+                                      gmul(gcoeff(a,k,j), d)));
+        }
+        for (i=1; i<=n; i++) if (r[i])
+        {
+          GEN c = gcoeff(a,k,i), d = gcoeff(a,l,i);
+          gcoeff(a,k,i) = gadd(c, d);
+          gcoeff(a,l,i) = gsub(c, d);
+        }
+        gcoeff(a,k,l) = gen_1;
+        gcoeff(a,l,k) = gen_m1;
+        gcoeff(a,k,k) = gmul2n(p,-1);
+        gcoeff(a,l,l) = gneg(gcoeff(a,k,k));
+        if (low_stack(lim, stack_lim(av1,1)))
+        {
+          if(DEBUGMEM>1) pari_warn(warnmem,"gaussred");
+          a = gerepilecopy(av1, a);
+        }
+        break;
       }
       if (k > n) break;
     }
@@ -1037,9 +1037,9 @@ jacobi(GEN a, long prec)
     for (j=1; j<l; j++)
     {
       for (i=1; i<j; i++)
-	if ((e=expo(gcoeff(a,i,j))) > e2) { e2=e; p=i; q=j; }
+        if ((e=expo(gcoeff(a,i,j))) > e2) { e2=e; p=i; q=j; }
       for (i=j+1; i<l; i++)
-	if ((e=expo(gcoeff(a,j,i))) > e2) { e2=e; p=j; q=i; }
+        if ((e=expo(gcoeff(a,j,i))) > e2) { e2=e; p=j; q=i; }
     }
     avma = av2;
   }
@@ -1047,9 +1047,9 @@ jacobi(GEN a, long prec)
 }
 
 /*************************************************************************/
-/**									**/
-/**		    MATRICE RATIONNELLE --> ENTIERE			**/
-/**									**/
+/**                                                                     **/
+/**              MATRICE RATIONNELLE --> ENTIERE                        **/
+/**                                                                     **/
 /*************************************************************************/
 
 GEN
@@ -1110,13 +1110,13 @@ QM_minors_coprime(GEN x, GEN D)
       N = ZM_Z_divexact(ZM_mul(x,M), p);
       for (j=1; j<lM; j++)
       {
-	long k = n; while (!signe(gcoeff(M,k,j))) k--;
-	gel(x,k) = gel(N,j);
+        long k = n; while (!signe(gcoeff(M,k,j))) k--;
+        gel(x,k) = gel(N,j);
       }
       if (low_stack(lim, stack_lim(av1,1)))
       {
-	if (DEBUGMEM>1) pari_warn(warnmem,"QM_minors_coprime, prime p = %Ps", p);
-	x = gerepilecopy(av1, x);
+        if (DEBUGMEM>1) pari_warn(warnmem,"QM_minors_coprime, prime p = %Ps", p);
+        x = gerepilecopy(av1, x);
       }
     }
   }
@@ -1254,8 +1254,8 @@ QM_ImQ_hnf(GEN x)
     for (j1=1; j1<n; j1++)
       if (j1!=j)
       {
-	GEN t = gcoeff(x,k,j1);
-	if (!gequal0(t)) gel(x,j1) = RgC_sub(gel(x,j1), RgC_Rg_mul(gel(x,j),t));
+        GEN t = gcoeff(x,k,j1);
+        if (!gequal0(t)) gel(x,j1) = RgC_sub(gel(x,j1), RgC_Rg_mul(gel(x,j),t));
       }
     if (low_stack(lim, stack_lim(av1,1)))
     {

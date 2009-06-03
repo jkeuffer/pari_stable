@@ -15,8 +15,8 @@ with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /***********************************************************************/
-/**								      **/
-/**		          GCD                            	      **/
+/**                                                                   **/
+/**                          GCD                                      **/
 /**                                                                   **/
 /***********************************************************************/
 /* Fast ulong gcd.  Called with y odd; x can be arbitrary (but will most of
@@ -243,7 +243,7 @@ xgcduu(ulong d, ulong d1, int f, ulong* v, ulong* v1, long *s)
   xv = 0UL; xv1 = 1UL;
   while (d1 > 1UL)
   {
-    d -= d1;			/* no need to use subll */
+    d -= d1;                        /* no need to use subll */
     if (d >= d1)
     {
       hiremainder = 0; q = 1 + divll(d,d1); d = hiremainder;
@@ -251,9 +251,9 @@ xgcduu(ulong d, ulong d1, int f, ulong* v, ulong* v1, long *s)
     }
     else
       xv += xv1;
-				/* possible loop exit */
+                                /* possible loop exit */
     if (d <= 1UL) { xs=1; break; }
-				/* repeat with inverted roles */
+                                /* repeat with inverted roles */
     d1 -= d;
     if (d1 >= d)
     {
@@ -264,7 +264,7 @@ xgcduu(ulong d, ulong d1, int f, ulong* v, ulong* v1, long *s)
       xv1 += xv;
   } /* while */
 
-  if (!(f&1))			/* division by 1 postprocessing if needed */
+  if (!(f&1))                        /* division by 1 postprocessing if needed */
   {
     if (xs && d==1)
     { xv1 += d1 * xv; xs = 0; res = 1UL; }
@@ -287,7 +287,7 @@ xgcduu(ulong d, ulong d1, int f, ulong* v, ulong* v1, long *s)
 
 ulong
 xxgcduu(ulong d, ulong d1, int f,
-	ulong* u, ulong* u1, ulong* v, ulong* v1, long *s)
+        ulong* u, ulong* u1, ulong* v, ulong* v1, long *s)
 {
   ulong xu,xu1, xv,xv1, xs, q,res;
   LOCAL_HIREMAINDER;
@@ -297,7 +297,7 @@ xxgcduu(ulong d, ulong d1, int f,
   xu1 = xv = 0UL;
   while (d1 > 1UL)
   {
-    d -= d1;			/* no need to use subll */
+    d -= d1;                        /* no need to use subll */
     if (d >= d1)
     {
       hiremainder = 0; q = 1 + divll(d,d1); d = hiremainder;
@@ -306,9 +306,9 @@ xxgcduu(ulong d, ulong d1, int f,
     }
     else
     { xv += xv1; xu += xu1; }
-				/* possible loop exit */
+                                /* possible loop exit */
     if (d <= 1UL) { xs=1; break; }
-				/* repeat with inverted roles */
+                                /* repeat with inverted roles */
     d1 -= d;
     if (d1 >= d)
     {
@@ -320,7 +320,7 @@ xxgcduu(ulong d, ulong d1, int f,
     { xv1 += xv; xu1 += xu; }
   } /* while */
 
-  if (!(f&1))			/* division by 1 postprocessing if needed */
+  if (!(f&1))                        /* division by 1 postprocessing if needed */
   {
     if (xs && d==1)
     {
@@ -362,7 +362,7 @@ rgcduu(ulong d, ulong d1, ulong vmax,
   xu1 = xv = 0UL;
   while (d1 > 1UL)
   {
-    d -= d1;			/* no need to use subll */
+    d -= d1;                        /* no need to use subll */
     if (d >= d1)
     {
       hiremainder = 0; q = 1 + divll(d,d1); d = hiremainder;
@@ -371,10 +371,10 @@ rgcduu(ulong d, ulong d1, ulong vmax,
     }
     else
     { xv += xv1; xu += xu1; }
-				/* possible loop exit */
+                                /* possible loop exit */
     if (xv > vmax) { f=xs=1; break; }
     if (d <= 1UL) { xs=1; break; }
-				/* repeat with inverted roles */
+                                /* repeat with inverted roles */
     d1 -= d;
     if (d1 >= d)
     {
@@ -384,11 +384,11 @@ rgcduu(ulong d, ulong d1, ulong vmax,
     }
     else
     { xv1 += xv; xu1 += xu; }
-				/* possible loop exit */
+                                /* possible loop exit */
     if (xv1 > vmax) { f=1; break; }
   } /* while */
 
-  if (!(f&1))			/* division by 1 postprocessing if needed */
+  if (!(f&1))                        /* division by 1 postprocessing if needed */
   {
     if (xs && d==1)
     {
@@ -465,7 +465,7 @@ cbezout(long a,long b,long *uu,long *vv)
 #endif
     return (long)d1;
   }
-  else if (d == 1)		/* frequently used by nfinit */
+  else if (d == 1)                /* frequently used by nfinit */
   {
     *uu = a; *vv = 0L;
 #ifdef DEBUG_CBEZOUT
@@ -477,7 +477,7 @@ cbezout(long a,long b,long *uu,long *vv)
   {
 /* bug in gcc-2.95.3:
  * s = a; a = b; b = s; produces wrong result a = b. This is OK:  */
-    { long _x = a; a = b; b = _x; }	/* in order to keep the right signs */
+    { long _x = a; a = b; b = _x; }        /* in order to keep the right signs */
     r = d; d = d1; d1 = r;
     t = uu; uu = vv; vv = t;
 #ifdef DEBUG_CBEZOUT
@@ -587,11 +587,11 @@ lgcdii(ulong* d, ulong* d1,
    * possibly overflow.)
    */
   ulong dd,dd1,ddlo,dd1lo, sh,shc;        /* `digits', shift count */
-  ulong xu,xu1, xv,xv1, q,res;	/* recurrences, partial quotient, count */
+  ulong xu,xu1, xv,xv1, q,res;        /* recurrences, partial quotient, count */
   ulong tmp0,tmp1,tmp2,tmpd,tmpu,tmpv; /* temps */
   ulong dm1,dm2,d1m1,d1m2;
-  long ld, ld1, lz;		/* t_INT effective lengths */
-  int skip = 0;			/* a boolean flag */
+  long ld, ld1, lz;                /* t_INT effective lengths */
+  int skip = 0;                        /* a boolean flag */
   LOCAL_OVERFLOW;
   LOCAL_HIREMAINDER;
 
@@ -601,37 +601,37 @@ lgcdii(ulong* d, ulong* d1,
   /* following is just for convenience: vmax==0 means no bound */
   if (vmax == 0) vmax = ULONG_MAX;
   ld = lgefint(d); ld1 = lgefint(d1); lz = ld - ld1; /* >= 0 */
-  if (lz > 1) return 0;		/* rare, quick and desperate exit */
+  if (lz > 1) return 0;                /* rare, quick and desperate exit */
 
-  d = int_MSW(d); d1 = int_MSW(d1);		/* point at the leading `digits' */
+  d = int_MSW(d); d1 = int_MSW(d1);                /* point at the leading `digits' */
   dm1 = *int_precW(d); d1m1 = *int_precW(d1);
   dm2 = *int_precW(int_precW(d)); d1m2 = *int_precW(int_precW(d1));
-  dd1lo = 0;		        /* unless we find something better */
-  sh = bfffo(*d);		/* obtain dividend left shift count */
+  dd1lo = 0;                        /* unless we find something better */
+  sh = bfffo(*d);                /* obtain dividend left shift count */
 
   if (sh)
-  {				/* do the shifting */
+  {                                /* do the shifting */
     shc = BITS_IN_LONG - sh;
     if (lz)
-    {				/* dividend longer than divisor */
+    {                                /* dividend longer than divisor */
       dd1 = (*d1 >> shc);
       if (!(HIGHMASK & dd1)) return 0;  /* overflow detected */
       if (ld1 > 3)
-	dd1lo = (*d1 << sh) + (d1m1 >> shc);
+        dd1lo = (*d1 << sh) + (d1m1 >> shc);
       else
-	dd1lo = (*d1 << sh);
+        dd1lo = (*d1 << sh);
     }
     else
-    {				/* dividend and divisor have the same length */
+    {                                /* dividend and divisor have the same length */
       dd1 = (*d1 << sh);
       if (!(HIGHMASK & dd1)) return 0;
       if (ld1 > 3)
       {
-	dd1 += (d1m1 >> shc);
-	if (ld1 > 4)
-	  dd1lo = (d1m1 << sh) + (d1m2 >> shc);
-	else
-	  dd1lo = (d1m1 << sh);
+        dd1 += (d1m1 >> shc);
+        if (ld1 > 4)
+          dd1lo = (d1m1 << sh) + (d1m2 >> shc);
+        else
+          dd1lo = (d1m1 << sh);
       }
     }
     /* following lines assume d to have 2 or more significant words */
@@ -642,8 +642,8 @@ lgcdii(ulong* d, ulong* d1,
       ddlo = (dm1 << sh);
   }
   else
-  {				/* no shift needed */
-    if (lz) return 0;		/* div'd longer than div'r: o'flow automatic */
+  {                                /* no shift needed */
+    if (lz) return 0;                /* div'd longer than div'r: o'flow automatic */
     dd1 = *d1;
     if (!(HIGHMASK & dd1)) return 0;
     if(ld1 > 3) dd1lo = d1m1;
@@ -662,28 +662,28 @@ lgcdii(ulong* d, ulong* d1,
    */
   dd -= dd1;
   if (dd < dd1)
-  {				/* first quotient known to be == 1 */
+  {                                /* first quotient known to be == 1 */
     xv1 = 1UL;
-    if (!dd)			/* !(Jebelean condition), extraspecial case */
-    {				/* note this can actually happen...  Now
-    				 * q==1 is known, but we underflow already.
-				 * OTOH we've just shortened d by a whole word.
-				 * Thus we feel pleased with ourselves and
-				 * return.  (The re-shift code below would
-				 * do so anyway.) */
+    if (!dd)                        /* !(Jebelean condition), extraspecial case */
+    {                                /* note this can actually happen...  Now
+                                     * q==1 is known, but we underflow already.
+                                 * OTOH we've just shortened d by a whole word.
+                                 * Thus we feel pleased with ourselves and
+                                 * return.  (The re-shift code below would
+                                 * do so anyway.) */
       *u = 0; *v = *u1 = *v1 = 1UL;
-      return -1;		/* Next step will be a full division. */
+      return -1;                /* Next step will be a full division. */
     } /* if !(Jebelean) then */
   }
   else
-  {				/* division indicated */
+  {                                /* division indicated */
     hiremainder = 0;
-    xv1 = 1 + divll(dd, dd1);	/* xv1: alternative spelling of `q', here ;) */
+    xv1 = 1 + divll(dd, dd1);        /* xv1: alternative spelling of `q', here ;) */
     dd = hiremainder;
-    if (dd < xv1)		/* !(Jebelean cond'), non-extra special case */
-    {				/* Attempt to complete the division using the
-				 * less significant bits, before skipping right
-				 * past the 1st loop to the reshift stage. */
+    if (dd < xv1)                /* !(Jebelean cond'), non-extra special case */
+    {                                /* Attempt to complete the division using the
+                                 * less significant bits, before skipping right
+                                 * past the 1st loop to the reshift stage. */
       ddlo = subll(ddlo, mulll(xv1, dd1lo));
       dd = subllx(dd, hiremainder);
 
@@ -693,10 +693,10 @@ lgcdii(ulong* d, ulong* d1,
        * quotient is in fact q-1.  Adjust our data accordingly. */
       if (overflow)
       {
-	xv1--;
-	ddlo = addll(ddlo,dd1lo);
-	dd = addllx(dd,dd1);	/* overflows again which cancels the borrow */
-	/* ...and fall through to skip=1 below */
+        xv1--;
+        ddlo = addll(ddlo,dd1lo);
+        dd = addllx(dd,dd1);        /* overflows again which cancels the borrow */
+        /* ...and fall through to skip=1 below */
       }
       else
       /* Test Jebelean condition anew, at this point using _all_ the extracted
@@ -704,7 +704,7 @@ lgcdii(ulong* d, ulong* d1,
        * even chance of succeeding this time.  Note that if we fail, we really
        * do not know whether the correct quotient would have been q or some
        * smaller value. */
-	if (!dd && ddlo < xv1) return 0;
+        if (!dd && ddlo < xv1) return 0;
 
       /* Otherwise, we now know that q is correct, but we cannot go into the
        * 1st loop.  Raise a flag so we'll remember to skip past the loop.
@@ -717,7 +717,7 @@ lgcdii(ulong* d, ulong* d1,
   fprintferr("  q = %ld, %lx, %lx\n", xv1, dd1, dd);
 #endif
   if (xv1 > vmax)
-  {				/* gone past the bound already */
+  {                                /* gone past the bound already */
     *u = 0UL; *u1 = 1UL; *v = 1UL; *v1 = xv1;
     return res;
   }
@@ -759,79 +759,79 @@ lgcdii(ulong* d, ulong* d1,
        * entries) when successful. */
       tmpd = dd1 - dd;
       if (tmpd < dd)
-      {				/* quotient suspected to be 1 */
+      {                                /* quotient suspected to be 1 */
 #ifdef DEBUG_LEHMER
-	q = 1;
+        q = 1;
 #endif
-	tmpu = xu + xu1;	/* cannot overflow -- everything bounded by
-				 * the original dd during first loop */
-	tmpv = xv + xv1;
+        tmpu = xu + xu1;        /* cannot overflow -- everything bounded by
+                                 * the original dd during first loop */
+        tmpv = xv + xv1;
       }
       else
-      {				/* division indicated */
-	hiremainder = 0;
-	q = 1 + divll(tmpd, dd);
-	tmpd = hiremainder;
-	tmpu = xu + q*xu1;	/* can't overflow, but may need to be undone */
-	tmpv = xv + q*xv1;
+      {                                /* division indicated */
+        hiremainder = 0;
+        q = 1 + divll(tmpd, dd);
+        tmpd = hiremainder;
+        tmpu = xu + q*xu1;        /* can't overflow, but may need to be undone */
+        tmpv = xv + q*xv1;
       }
 
       tmp0 = addll(tmpv, xv1);
       if ((tmpd < tmpu) || overflow ||
-	  (dd - tmpd < tmp0))	/* !(Jebelean cond.) */
-	break;			/* skip ahead to reshift stage */
+          (dd - tmpd < tmp0))        /* !(Jebelean cond.) */
+        break;                        /* skip ahead to reshift stage */
       else
-      {				/* commit dd1, xu, xv */
-	res++;
-	dd1 = tmpd; xu = tmpu; xv = tmpv;
+      {                                /* commit dd1, xu, xv */
+        res++;
+        dd1 = tmpd; xu = tmpu; xv = tmpv;
 #ifdef DEBUG_LEHMER
-	fprintferr("  q = %ld, %lx, %lx [%lu,%lu;%lu,%lu]\n",
-		   q, dd, dd1, xu1, xu, xv1, xv);
+        fprintferr("  q = %ld, %lx, %lx [%lu,%lu;%lu,%lu]\n",
+                   q, dd, dd1, xu1, xu, xv1, xv);
 #endif
-	if (xv > vmax)
-	{			/* time to return */
-	  *u = xu1; *u1 = xu; *v = xv1; *v1 = xv;
-	  return res;
-	}
+        if (xv > vmax)
+        {                        /* time to return */
+          *u = xu1; *u1 = xu; *v = xv1; *v1 = xv;
+          return res;
+        }
       }
 
       /* Second half of loop divides dd1 into dd, and the matrix returns to its
        * normal arrangement. */
       tmpd = dd - dd1;
       if (tmpd < dd1)
-      {				/* quotient suspected to be 1 */
+      {                                /* quotient suspected to be 1 */
 #ifdef DEBUG_LEHMER
-	q = 1;
+        q = 1;
 #endif
-	tmpu = xu1 + xu;	/* cannot overflow */
-	tmpv = xv1 + xv;
+        tmpu = xu1 + xu;        /* cannot overflow */
+        tmpv = xv1 + xv;
       }
       else
-      {				/* division indicated */
-	hiremainder = 0;
-	q = 1 + divll(tmpd, dd1);
-	tmpd = hiremainder;
-	tmpu = xu1 + q*xu;
-	tmpv = xv1 + q*xv;
+      {                                /* division indicated */
+        hiremainder = 0;
+        q = 1 + divll(tmpd, dd1);
+        tmpd = hiremainder;
+        tmpu = xu1 + q*xu;
+        tmpv = xv1 + q*xv;
       }
 
       tmp0 = addll(tmpu, xu);
       if ((tmpd < tmpv) || overflow ||
-	  (dd1 - tmpd < tmp0))	/* !(Jebelean cond.) */
-	break;			/* skip ahead to reshift stage */
+          (dd1 - tmpd < tmp0))        /* !(Jebelean cond.) */
+        break;                        /* skip ahead to reshift stage */
       else
-      {				/* commit dd, xu1, xv1 */
-	res++;
-	dd = tmpd; xu1 = tmpu; xv1 = tmpv;
+      {                                /* commit dd, xu1, xv1 */
+        res++;
+        dd = tmpd; xu1 = tmpu; xv1 = tmpv;
 #ifdef DEBUG_LEHMER
-	fprintferr("  q = %ld, %lx, %lx [%lu,%lu;%lu,%lu]\n",
-		q, dd1, dd, xu, xu1, xv, xv1);
+        fprintferr("  q = %ld, %lx, %lx [%lu,%lu;%lu,%lu]\n",
+                q, dd1, dd, xu, xu1, xv, xv1);
 #endif
-	if (xv1 > vmax)
-	{			/* time to return */
-	  *u = xu; *u1 = xu1; *v = xv; *v1 = xv1;
-	  return res;
-	}
+        if (xv1 > vmax)
+        {                        /* time to return */
+          *u = xu; *u1 = xu1; *v = xv; *v1 = xv1;
+          return res;
+        }
       }
 
     } /* end of first loop */
@@ -913,31 +913,31 @@ lgcdii(ulong* d, ulong* d1,
 #endif
 
   if (res&1)
-  {				/* after odd number of division(s) */
+  {                                /* after odd number of division(s) */
     if (dd1 && (sh = bfffo(dd1)))
     {
       shc = BITS_IN_LONG - sh;
       dd = (ddlo >> shc) + (dd << sh);
       if (!(HIGHMASK & dd))
       {
-	*u = xu; *u1 = xu1; *v = xv; *v1 = xv1;
-	return -res;		/* full division asked for */
+        *u = xu; *u1 = xu1; *v = xv; *v1 = xv1;
+        return -res;                /* full division asked for */
       }
       dd1 = (dd1lo >> shc) + (dd1 << sh);
     }
     else
-    {				/* time to return: <= 1 word left, or sh==0 */
+    {                                /* time to return: <= 1 word left, or sh==0 */
       *u = xu; *u1 = xu1; *v = xv; *v1 = xv1;
       return res;
     }
   }
   else
-  {				/* after even number of divisions */
+  {                                /* after even number of divisions */
     if (dd)
     {
-      sh = bfffo(dd);		/* Known to be positive. */
+      sh = bfffo(dd);                /* Known to be positive. */
       shc = BITS_IN_LONG - sh;
-				/* dd:ddlo will become the new dd1, and v.v. */
+                                /* dd:ddlo will become the new dd1, and v.v. */
       tmpd = (ddlo >> shc) + (dd << sh);
       dd = (dd1lo >> shc) + (dd1 << sh);
       dd1 = tmpd;
@@ -946,19 +946,19 @@ lgcdii(ulong* d, ulong* d1,
        * most annoying bug. The Management. */
       if (HIGHMASK & dd)
       {
-	/* recurrence matrix is the wrong way round;  swap it. */
-	tmp0 = xu; xu = xu1; xu1 = tmp0;
-	tmp0 = xv; xv = xv1; xv1 = tmp0;
+        /* recurrence matrix is the wrong way round;  swap it. */
+        tmp0 = xu; xu = xu1; xu1 = tmp0;
+        tmp0 = xv; xv = xv1; xv1 = tmp0;
       }
       else
       {
-	/* recurrence matrix is the wrong way round;  fix this. */
-	*u = xu1; *u1 = xu; *v = xv1; *v1 = xv;
-	return -res;		/* full division asked for */
+        /* recurrence matrix is the wrong way round;  fix this. */
+        *u = xu1; *u1 = xu; *v = xv1; *v1 = xv;
+        return -res;                /* full division asked for */
       }
     }
     else
-    {				/* time to return: <= 1 word left */
+    {                                /* time to return: <= 1 word left */
       *u = xu1; *u1 = xu; *v = xv1; *v1 = xv;
       return res;
     }
@@ -980,16 +980,16 @@ lgcdii(ulong* d, ulong* d1,
      * entries) when successful. */
     tmpd = dd1 - dd;
     if (tmpd < dd)
-    {				/* quotient suspected to be 1 */
+    {                                /* quotient suspected to be 1 */
 #ifdef DEBUG_LEHMER
       q = 1;
 #endif
       tmpu = xu + xu1;
-      tmpv = addll(xv, xv1);	/* xv,xv1 will overflow first */
+      tmpv = addll(xv, xv1);        /* xv,xv1 will overflow first */
       tmp1 = overflow;
     }
     else
-    {				/* division indicated */
+    {                                /* division indicated */
       hiremainder = 0;
       q = 1 + divll(tmpd, dd);
       tmpd = hiremainder;
@@ -1000,7 +1000,7 @@ lgcdii(ulong* d, ulong* d1,
 
     tmp0 = addll(tmpv, xv1);
     if ((tmpd < tmpu) || overflow || tmp1 ||
-	(dd - tmpd < tmp0))	/* !(Jebelean cond.) */
+        (dd - tmpd < tmp0))        /* !(Jebelean cond.) */
     {
       /* The recurrence matrix has not yet been warped... */
       *u = xu; *u1 = xu1; *v = xv; *v1 = xv1;
@@ -1013,7 +1013,7 @@ lgcdii(ulong* d, ulong* d1,
     fprintferr("  q = %ld, %lx, %lx\n", q, dd, dd1);
 #endif
     if (xv > vmax)
-    {				/* time to return */
+    {                                /* time to return */
       *u = xu1; *u1 = xu; *v = xv1; *v1 = xv;
       return res;
     }
@@ -1022,7 +1022,7 @@ lgcdii(ulong* d, ulong* d1,
      * normal arrangement. */
     tmpd = dd - dd1;
     if (tmpd < dd1)
-    {				/* quotient suspected to be 1 */
+    {                                /* quotient suspected to be 1 */
 #ifdef DEBUG_LEHMER
       q = 1;
 #endif
@@ -1031,7 +1031,7 @@ lgcdii(ulong* d, ulong* d1,
       tmp1 = overflow;
     }
     else
-    {				/* division indicated */
+    {                                /* division indicated */
       hiremainder = 0;
       q = 1 + divll(tmpd, dd1);
       tmpd = hiremainder;
@@ -1042,7 +1042,7 @@ lgcdii(ulong* d, ulong* d1,
 
     tmp0 = addll(tmpu, xu);
     if ((tmpd < tmpv) || overflow || tmp1 ||
-	(dd1 - tmpd < tmp0))	/* !(Jebelean cond.) */
+        (dd1 - tmpd < tmp0))        /* !(Jebelean cond.) */
     {
       /* The recurrence matrix has not yet been unwarped, so it is
        * the wrong way round;  fix this. */
@@ -1056,7 +1056,7 @@ lgcdii(ulong* d, ulong* d1,
     fprintferr("  q = %ld, %lx, %lx\n", q, dd1, dd);
 #endif
     if (xv1 > vmax)
-    {				/* time to return */
+    {                                /* time to return */
       *u = xu; *u1 = xu1; *v = xv; *v1 = xv1;
       return res;
     }

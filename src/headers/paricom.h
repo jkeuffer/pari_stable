@@ -28,8 +28,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
  * can be used as a single statement, as in
  * if (x) STMT_START { ... } STMT_END; else ...
  * [ avoid "dangling else" problem in macros ] */
-#define STMT_START	do
-#define STMT_END	while (0)
+#define STMT_START        do
+#define STMT_END        while (0)
 /*=====================================================================*/
 /* CATCH(numer) {
  *   recovery
@@ -110,8 +110,8 @@ enum {
 #define ONLY_REM ((GEN*)0x1L)
 #define ONLY_DIVIDES ((GEN*)0x2L)
 
-#define DIFFPTR_SKIP	255		/* Skip these entries */
-#define NEXT_PRIME_VIADIFF(p,d)	 STMT_START \
+#define DIFFPTR_SKIP        255                /* Skip these entries */
+#define NEXT_PRIME_VIADIFF(p,d)         STMT_START \
   { while (*(d) == DIFFPTR_SKIP) (p) += *(d)++; (p) += *(d)++; } STMT_END
 #define NEXT_PRIME_VIADIFF_CHECK(p,d)  STMT_START \
   { if (!*(d)) pari_err(primer1,0); NEXT_PRIME_VIADIFF(p,d); } STMT_END

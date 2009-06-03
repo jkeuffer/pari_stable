@@ -108,13 +108,13 @@ vecsmall_indexsortspec(GEN v, long n)
     case 2: return (v[1] <= v[2])? mkvecsmall2(1,2): mkvecsmall2(2,1);
     case 3:
       if (v[1] <= v[2]) {
-	if (v[2] <= v[3]) return mkvecsmall3(1,2,3);
-	return (v[1] <= v[3])? mkvecsmall3(1,3,2)
-			     : mkvecsmall3(3,1,2);
+        if (v[2] <= v[3]) return mkvecsmall3(1,2,3);
+        return (v[1] <= v[3])? mkvecsmall3(1,3,2)
+                             : mkvecsmall3(3,1,2);
       } else {
-	if (v[1] <= v[3]) return mkvecsmall3(2,1,3);
-	return (v[2] <= v[3])? mkvecsmall3(2,3,1)
-			     : mkvecsmall3(3,2,1);
+        if (v[1] <= v[3]) return mkvecsmall3(2,1,3);
+        return (v[2] <= v[3])? mkvecsmall3(2,3,1)
+                             : mkvecsmall3(3,2,1);
       }
   }
   nx = n>>1; ny = n-nx;
@@ -316,8 +316,8 @@ cyc_pow(GEN cyc, long exp)
       gel(c,r++) = p;
       for (k = 1, l = i; k <= m; k++)
       {
-	p[k] = v[l+1];
-	l += e; if (l >= n) l -= n;
+        p[k] = v[l+1];
+        l += e; if (l >= n) l -= n;
       }
     }
   }
@@ -388,13 +388,13 @@ perm_to_GAP(GEN p)
       s[c++] = '(';
       for (j = 1; j < lg(z); ++j)
       {
-	if (j > 1)
-	{
-	  s[c++] = ','; s[c++] = ' ';
-	}
-	sprintf(s+c,"%ld",z[j]);
-	while(s[c++]) /* empty */;
-	c--;
+        if (j > 1)
+        {
+          s[c++] = ','; s[c++] = ' ';
+        }
+        sprintf(s+c,"%ld",z[j]);
+        while(s[c++]) /* empty */;
+        c--;
       }
       s[c++] = ')';
     }
@@ -658,7 +658,7 @@ group_perm_normalize(GEN N, GEN g)
 {
   pari_sp ltop = avma;
   long r = gequal(vecvecsmall_sort(group_leftcoset(N, g)),
-		  vecvecsmall_sort(group_rightcoset(N, g)));
+                  vecvecsmall_sort(group_rightcoset(N, g)));
   avma = ltop; return r;
 }
 
@@ -681,8 +681,8 @@ liftlistsubgroups(GEN L, GEN C, long r)
     {
       GEN p = gel(C,j);
       if (perm_relorder(p, Selt) == r && group_perm_normalize(S, p))
-	gel(R,k++) = mkvec2(vecsmall_append(gen, (long)p),
-	                    vecsmall_append(ord, r));
+        gel(R,k++) = mkvec2(vecsmall_append(gen, (long)p),
+                            vecsmall_append(ord, r));
     }
   }
   setlg(R, k);
@@ -751,30 +751,30 @@ group_subgroups(GEN G)
       GEN u = gel(gen,3);
       GEN v = gel(gen,4), st = perm_mul(s,t), w, u2;
       if (zv_equal(perm_conj(u,s), t)) /*u=(2,3,4)*/
-	u2 = perm_mul(u,u);
+        u2 = perm_mul(u,u);
       else
       {
-	u2 = u;
-	u = perm_mul(u,u);
+        u2 = u;
+        u = perm_mul(u,u);
       }
       if (perm_order(v)==2)
       {
-	if (!perm_commute(s,v)) /*v=(1,2)*/
-	{
-	  v = perm_conj(u,v);
-	  if (!perm_commute(s,v)) v = perm_conj(u,v);
-	}
-	w = perm_mul(v,t); /*w=(1,4,2,3)*/
+        if (!perm_commute(s,v)) /*v=(1,2)*/
+        {
+          v = perm_conj(u,v);
+          if (!perm_commute(s,v)) v = perm_conj(u,v);
+        }
+        w = perm_mul(v,t); /*w=(1,4,2,3)*/
       }
       else
       {
-	w = v;
-	if (!zv_equal(perm_mul(w,w), s)) /*w=(1,4,2,3)*/
-	{
-	  w = perm_conj(u,w);
-	  if (!zv_equal(perm_mul(w,w), s)) w = perm_conj(u,w);
-	}
-	v = perm_mul(w,t); /*v=(1,2)*/
+        w = v;
+        if (!zv_equal(perm_mul(w,w), s)) /*w=(1,4,2,3)*/
+        {
+          w = perm_conj(u,w);
+          if (!zv_equal(perm_mul(w,w), s)) w = perm_conj(u,w);
+        }
+        v = perm_mul(w,t); /*v=(1,2)*/
       }
       gel(sg3,4) = dicyclicgroup(s,v,2,2);
       gel(sg3,5) = dicyclicgroup(t,perm_conj(u,v),2,2);
@@ -808,13 +808,13 @@ group_subgroups(GEN G)
     if (n==5) /*ensure that the D4 subgroups of S4 are in supersolvable format*/
       for(j = 3; j <= 5; j++)
       {
-	GEN c = gmael(p1,j,1);
-	if (!perm_commute(gel(c,1),gel(c,3)))
-	{
-	  if (perm_commute(gel(c,2),gel(c,3))) { swap(gel(c,1), gel(c,2)); }
-	  else
-	    perm_mul_inplace2(gel(c,2), gel(c,1));
-	}
+        GEN c = gmael(p1,j,1);
+        if (!perm_commute(gel(c,1),gel(c,3)))
+        {
+          if (perm_commute(gel(c,2),gel(c,3))) { swap(gel(c,1), gel(c,2)); }
+          else
+            perm_mul_inplace2(gel(c,2), gel(c,1));
+        }
       }
   }
   return gerepileupto(ltop,p1);
@@ -893,7 +893,7 @@ abelian_group(GEN v)
     for(j=1;j<=card;)
     {
       for(k=1;k<o;k++)
-	for(l=1;l<=d; l++,j++) p[j] = j+d;
+        for(l=1;l<=d; l++,j++) p[j] = j+d;
       for (l=1; l<=d; l++,j++) p[j] = j-u;
     }
     d += u;
@@ -926,8 +926,8 @@ groupelts_center(GEN S)
     for(j=1; j<=n; j++)
       if (!perm_commute(gel(S,i),gel(S,j)))
       {
-	F2v_set(elts,i);
-	F2v_set(elts,j); l--; break;
+        F2v_set(elts,i);
+        F2v_set(elts,j); l--; break;
       }
   }
   V = cgetg(l+1,t_VEC);

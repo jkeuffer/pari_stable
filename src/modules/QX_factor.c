@@ -196,8 +196,8 @@ cmbf(GEN pol, GEN famod, GEN bound, GEN p, long a, long b,
       T2 = modii(T2, pa); /* = S_2 Newton sum */
       if (lc)
       {
-	T1 = Fp_mul(lc, T1, pa);
-	T2 = Fp_mul(lc2,T2, pa);
+        T1 = Fp_mul(lc, T1, pa);
+        T2 = Fp_mul(lc2,T2, pa);
       }
       trace1[i] = itou(diviiround(T1, pb));
       trace2[i] = itou(diviiround(T2, pb));
@@ -231,21 +231,21 @@ nextK:
 
       /* d - 1 test */
       for (t=trace1[ind[1]],i=2; i<=K; i++)
-	t = Fl_add(t, trace1[ind[i]], spa_b);
+        t = Fl_add(t, trace1[ind[i]], spa_b);
       if (t > spa_bs2) t = spa_b - t;
       if (t > Sbound)
       {
-	if (DEBUGLEVEL>6) fprintferr(".");
-	goto NEXT;
+        if (DEBUGLEVEL>6) fprintferr(".");
+        goto NEXT;
       }
       /* d - 2 test */
       for (t=trace2[ind[1]],i=2; i<=K; i++)
-	t = Fl_add(t, trace2[ind[i]], spa_b);
+        t = Fl_add(t, trace2[ind[i]], spa_b);
       if (t > spa_bs2) t = spa_b - t;
       if (t > Sbound)
       {
-	if (DEBUGLEVEL>6) fprintferr("|");
-	goto NEXT;
+        if (DEBUGLEVEL>6) fprintferr("|");
+        goto NEXT;
       }
 
       av = avma;
@@ -253,28 +253,28 @@ nextK:
       y = lc;
       for (i=1; i<=K; i++)
       {
-	GEN q = constant_term(gel(famod,ind[i]));
-	if (y) q = mulii(y, q);
-	y = centermodii(q, pa, pas2);
+        GEN q = constant_term(gel(famod,ind[i]));
+        if (y) q = mulii(y, q);
+        y = centermodii(q, pa, pas2);
       }
       if (!signe(y) || remii(constant_term(lcpol), y) != gen_0)
       {
-	if (DEBUGLEVEL>3) fprintferr("T");
-	avma = av; goto NEXT;
+        if (DEBUGLEVEL>3) fprintferr("T");
+        avma = av; goto NEXT;
       }
       y = lc; /* full computation */
       for (i=1; i<=K; i++)
       {
-	GEN q = gel(famod,ind[i]);
-	if (y) q = gmul(y, q);
-	y = centermod_i(q, pa, pas2);
+        GEN q = gel(famod,ind[i]);
+        if (y) q = gmul(y, q);
+        y = centermod_i(q, pa, pas2);
       }
 
       /* y is the candidate factor */
       if (! (q = polidivis(lcpol,y,bound)) )
       {
-	if (DEBUGLEVEL>3) fprintferr("*");
-	avma = av; goto NEXT;
+        if (DEBUGLEVEL>3) fprintferr("*");
+        avma = av; goto NEXT;
       }
       /* found a factor */
       list = cgetg(K+1, t_VEC);
@@ -288,14 +288,14 @@ nextK:
       if (lc) pol = Q_div_to_int(pol, leading_term(y));
       for (i=j=k=1; i <= lfamod; i++)
       { /* remove used factors */
-	if (j <= K && i == ind[j]) j++;
-	else
-	{
-	  famod[k] = famod[i];
-	  trace1[k] = trace1[i];
-	  trace2[k] = trace2[i];
-	  deg[k] = deg[i]; k++;
-	}
+        if (j <= K && i == ind[j]) j++;
+        else
+        {
+          famod[k] = famod[i];
+          trace1[k] = trace1[i];
+          trace2[k] = trace2[i];
+          deg[k] = deg[i]; k++;
+        }
       }
       lfamod -= K;
       *pmaxK = cmbf_maxK(lfamod);
@@ -305,8 +305,8 @@ nextK:
       if (lc) lc = absi(leading_term(pol));
       lcpol = lc? ZX_Z_mul(pol, lc): pol;
       if (DEBUGLEVEL>3)
-	fprintferr("\nfound factor %Ps\nremaining modular factor(s): %ld\n",
-		   y, lfamod);
+        fprintferr("\nfound factor %Ps\nremaining modular factor(s): %ld\n",
+                   y, lfamod);
       continue;
     }
 
@@ -316,8 +316,8 @@ NEXT:
       if (--i == 0) { K++; goto nextK; }
       if (++ind[i] <= lfamod - K + i)
       {
-	curdeg = degsofar[i-1] + deg[ind[i]];
-	if (curdeg <= klim) break;
+        curdeg = degsofar[i-1] + deg[ind[i]];
+        if (curdeg <= klim) break;
       }
     }
   }
@@ -457,8 +457,8 @@ special_pivot(GEN x)
       t = gcoeff(H,i,j);
       if (signe(t))
       {
-	if (!is_pm1(t) || fl) return NULL;
-	fl = 1;
+        if (!is_pm1(t) || fl) return NULL;
+        fl = 1;
       }
     }
   }
@@ -596,7 +596,7 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
     bmin = (long)ceil(b0 + tnew*logBr);
     if (DEBUGLEVEL>2)
       fprintferr("\nLLL_cmbf: %ld potential factors (tmax = %ld, bmin = %ld)\n",
-		 r, tmax, bmin);
+                 r, tmax, bmin);
 
     /* compute Newton sums (possibly relifting first) */
     if (a <= bmin)
@@ -617,12 +617,12 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
       for (j=1; j<=N0; j++) p1[j] = p2[j];
       if (lP)
       { /* make Newton sums integral */
-	GEN lPpow = powiu(lP, tmax);
-	for (j=1; j<=N0; j++)
-	{
-	  lPpow = mulii(lPpow,lP);
-	  gel(p1,j) = mulii(gel(p1,j), lPpow);
-	}
+        GEN lPpow = powiu(lP, tmax);
+        for (j=1; j<=N0; j++)
+        {
+          lPpow = mulii(lPpow,lP);
+          gel(p1,j) = mulii(gel(p1,j), lPpow);
+        }
       }
     }
 
@@ -665,7 +665,7 @@ AGAIN:
     CM_L = LLL_check_progress(Bnorm, n0, m, b == bmin, /*dbg:*/ &ti_LLL);
     if (DEBUGLEVEL>2)
       fprintferr("LLL_cmbf: (a,b) =%4ld,%4ld; r =%3ld -->%3ld, time = %ld\n",
-		 a,b, lg(m)-1, CM_L? lg(CM_L)-1: 1, TIMER(&TI));
+                 a,b, lg(m)-1, CM_L? lg(CM_L)-1: 1, TIMER(&TI));
     if (!CM_L) { list = mkcol(P); break; }
     if (b > bmin)
     {
@@ -800,7 +800,7 @@ DDF_roots(GEN pol, GEN polp, GEN p)
   if (lz > (degpol(pol) >> 2))
   { /* many roots */
     z = shallowconcat(deg1_from_roots(z, v),
-		 FpX_div(polp, FpV_roots_to_pol(z, p, v), p));
+                 FpX_div(polp, FpV_roots_to_pol(z, p, v), p));
     z = ZpX_liftfact(pol, z, NULL, p, e, pe);
   }
   else
@@ -865,13 +865,13 @@ DDF(GEN a, int fl)
     nfacp = fl? Flx_nbroots(z, p): Flx_nbfact(z, p);
     if (DEBUGLEVEL>4)
       fprintferr("...tried prime %3ld (%-3ld %s). Time = %ld\n",
-		  p, nfacp, fl?"roots": "factors", TIMER(&T2));
+                  p, nfacp, fl?"roots": "factors", TIMER(&T2));
     if (nfacp < nmax)
     {
       if (nfacp <= 1)
       {
-	if (!fl) { avma = av; return mkcol(a); } /* irreducible */
-	if (!nfacp) return cgetg(1, t_VEC); /* no root */
+        if (!fl) { avma = av; return mkcol(a); } /* irreducible */
+        if (!nfacp) return cgetg(1, t_VEC); /* no root */
       }
       nmax = nfacp; chosenp = p;
       if (da > 100 && nmax < 5) break; /* large degree, few factors. Enough */
@@ -922,7 +922,7 @@ ZX_DDF(GEN x)
     {
       GEN L2 = cgetg(1,t_VEC);
       for (i=1; i < lg(L); i++)
-      	L2 = shallowconcat(L2, DDF(RgX_inflate(gel(L,i), v[k]), 0));
+              L2 = shallowconcat(L2, DDF(RgX_inflate(gel(L,i), v[k]), 0));
       L = L2;
     }
   }

@@ -268,8 +268,8 @@ gen_eltorder(GEN a, GEN o, void *E, const struct bb_group *grp)
     else {
       for (j = 1; j < e; j++)
       {
-	y = grp->pow(E, y, p);
-	if (grp->cmp1(y)) break;
+        y = grp->pow(E, y, p);
+        if (grp->cmp1(y)) break;
       }
       if (j < e) {
         if (j > 1) p = powiu(p, j);
@@ -399,8 +399,8 @@ gen_Shanks_sqrtn(GEN a, GEN n, GEN q, GEN *zetan, void *E, const struct bb_group
       }
       if (low_stack(lim, stack_lim(ltop,1)))
       { /* n can have lots of prime factors*/
-	if(DEBUGMEM>1) pari_warn(warnmem,"gen_Shanks_sqrtn");
-	gerepileall(av1, zetan? 2: 1, &a, &z);
+        if(DEBUGMEM>1) pari_warn(warnmem,"gen_Shanks_sqrtn");
+        gerepileall(av1, zetan? 2: 1, &a, &z);
       }
     }
   }

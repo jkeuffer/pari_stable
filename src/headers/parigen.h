@@ -98,7 +98,7 @@ typedef unsigned long pari_ulong;
 
 #define typ(x)        ((long)((((ulong*)(x))[0]) >> TYPSHIFT))
 #define settyp(x,s)   (((ulong*)(x))[0]=\
-			(((ulong*)(x))[0]&(~TYPBITS)) | evaltyp(s))
+                        (((ulong*)(x))[0]&(~TYPBITS)) | evaltyp(s))
 
 #define isclone(x)    (((ulong*) (x))[0] & CLONEBIT)
 #define setisclone(x) (((ulong*) (x))[0] |= CLONEBIT)
@@ -106,31 +106,31 @@ typedef unsigned long pari_ulong;
 
 #define lg(x)         ((long)(((ulong*)(x))[0] & LGBITS))
 #define setlg(x,s)    (((ulong*)(x))[0]=\
-			(((ulong*)(x))[0]&(~LGBITS)) | evallg(s))
+                        (((ulong*)(x))[0]&(~LGBITS)) | evallg(s))
 
 #define signe(x)      ((((long*)(x))[1]) >> SIGNSHIFT)
 #define setsigne(x,s) (((ulong*)(x))[1]=\
-			(((ulong*)(x))[1]&(~SIGNBITS)) | (ulong)evalsigne(s))
+                        (((ulong*)(x))[1]&(~SIGNBITS)) | (ulong)evalsigne(s))
 
 #define lgefint(x)      ((long)(((ulong*)(x))[1] & LGBITS))
 #define setlgefint(x,s) (((ulong*)(x))[1]=\
-			  (((ulong*)(x))[1]&(~LGBITS)) | (ulong)evallgefint(s))
+                          (((ulong*)(x))[1]&(~LGBITS)) | (ulong)evallgefint(s))
 
 #define expo(x)       ((long) ((((ulong*)(x))[1] & EXPOBITS) - HIGHEXPOBIT))
 #define setexpo(x,s)  (((ulong*)(x))[1]=\
-		       (((ulong*)(x))[1]&(~EXPOBITS)) | (ulong)evalexpo(s))
+                       (((ulong*)(x))[1]&(~EXPOBITS)) | (ulong)evalexpo(s))
 
 #define valp(x)       ((long) ((((ulong*)(x))[1] & VALPBITS) - HIGHVALPBIT))
 #define setvalp(x,s)  (((ulong*)(x))[1]=\
-		       (((ulong*)(x))[1]&(~VALPBITS)) | (ulong)evalvalp(s))
+                       (((ulong*)(x))[1]&(~VALPBITS)) | (ulong)evalvalp(s))
 
 #define precp(x)      ((long) (((ulong*)(x))[1] >> PRECPSHIFT))
 #define setprecp(x,s) (((ulong*)(x))[1]=\
-		       (((ulong*)(x))[1]&(~PRECPBITS)) | (ulong)evalprecp(s))
+                       (((ulong*)(x))[1]&(~PRECPBITS)) | (ulong)evalprecp(s))
 
 #define varn(x)       ((long)((((ulong*)(x))[1]&VARNBITS) >> VARNSHIFT))
 #define setvarn(x,s)  (((ulong*)(x))[1]=\
-		       (((ulong*)(x))[1]&(~VARNBITS)) | (ulong)evalvarn(s))
+                       (((ulong*)(x))[1]&(~VARNBITS)) | (ulong)evalvarn(s))
 
 #define varncmp(x,y)  ((x)-(y))
 

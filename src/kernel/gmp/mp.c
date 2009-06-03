@@ -15,8 +15,8 @@ with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /***********************************************************************/
-/**								      **/
-/**		                GMP KERNEL                     	      **/
+/**                                                                   **/
+/**                               GMP KERNEL                          **/
 /** BA2002Sep24                                                       **/
 /***********************************************************************/
 /* GMP t_INT as just like normal t_INT, just the mantissa is the other way
@@ -116,8 +116,8 @@ icopy_ef(GEN x, long l)
  */
 
 /***********************************************************************/
-/**								      **/
-/**		         ADDITION / SUBTRACTION          	      **/
+/**                                                                   **/
+/**                     ADDITION / SUBTRACTION                        **/
 /**                                                                   **/
 /***********************************************************************/
 
@@ -356,8 +356,8 @@ shifti(GEN x, long n)
       mpn_rshift(LIMBS(z), LIMBS(x) + d, NLIMBS(x) - d, m);
       if (z[lz - 1] == 0)
       {
-	if (lz == 3) { avma = (pari_sp)(z+3); return gen_0; }
-	lz--;
+        if (lz == 3) { avma = (pari_sp)(z+3); return gen_0; }
+        lz--;
       }
     }
   }
@@ -404,8 +404,8 @@ trunc2nr_lg(GEN x, long lx, long n)
       shift_right(y,x, 2,ly, 0,m);
       if (y[2] == 0)
       {
-	if (ly==3) { avma = (pari_sp)(y+3); return gen_0; }
-	ly--; avma = (pari_sp)(++y);
+        if (ly==3) { avma = (pari_sp)(y+3); return gen_0; }
+        ly--; avma = (pari_sp)(++y);
       }
     } else {
       for (i=2; i<ly; i++) y[i]=x[i];
@@ -486,8 +486,8 @@ absi_equal_lg(GEN x, GEN y, long l)
 }
 
 /***********************************************************************/
-/**								      **/
-/**		          MULTIPLICATION                 	      **/
+/**                                                                   **/
+/**                          MULTIPLICATION                           **/
 /**                                                                   **/
 /***********************************************************************/
 /* assume ny > 0 */
@@ -550,8 +550,8 @@ muliispec_mirror(GEN x, GEN y, long nx, long ny)
 }
 
 /***********************************************************************/
-/**								      **/
-/**		          DIVISION                       	      **/
+/**                                                                   **/
+/**                          DIVISION                                 **/
 /**                                                                   **/
 /***********************************************************************/
 
@@ -768,10 +768,10 @@ divrr(GEN x, GEN y)
     {
       if ((ulong)r1[1] > y0) /* can't happen if i=0 */
       {
-	GEN y1 = y+1;
-	j = lr-i; r1[j] = subll(r1[j],y1[j]);
-	for (j--; j>0; j--) r1[j] = subllx(r1[j],y1[j]);
-	j=i; do r[--j]++; while (j && !r[j]);
+        GEN y1 = y+1;
+        j = lr-i; r1[j] = subll(r1[j],y1[j]);
+        for (j--; j>0; j--) r1[j] = subllx(r1[j],y1[j]);
+        j=i; do r[--j]++; while (j && !r[j]);
       }
       hiremainder = r1[1]; overflow = 0;
       qp = divll(r1[2],y0); k = hiremainder;
@@ -800,20 +800,20 @@ divrr(GEN x, GEN y)
     {
       if ((ulong)r1[1] < hiremainder)
       {
-	qp--;
-	j = lr-i-(lr-i>=ly); r1[j] = addll(r1[j], y[j]);
-	for (j--; j>1; j--) r1[j] = addllx(r1[j], y[j]);
+        qp--;
+        j = lr-i-(lr-i>=ly); r1[j] = addll(r1[j], y[j]);
+        for (j--; j>1; j--) r1[j] = addllx(r1[j], y[j]);
       }
       else
       {
-	r1[1] -= hiremainder;
-	while (r1[1])
-	{
-	  qp++; if (!qp) { j=i; do r[--j]++; while (j && !r[j]); }
-	  j = lr-i-(lr-i>=ly); r1[j] = subll(r1[j],y[j]);
-	  for (j--; j>1; j--) r1[j] = subllx(r1[j],y[j]);
-	  r1[1] -= overflow;
-	}
+        r1[1] -= hiremainder;
+        while (r1[1])
+        {
+          qp++; if (!qp) { j=i; do r[--j]++; while (j && !r[j]); }
+          j = lr-i-(lr-i>=ly); r1[j] = subll(r1[j],y[j]);
+          for (j--; j>1; j--) r1[j] = subllx(r1[j],y[j]);
+          r1[1] -= overflow;
+        }
       }
     }
     *++r1 = qp;
@@ -867,10 +867,10 @@ dvmdii(GEN x, GEN y, GEN *z)
       if (s>0) goto DIVIDE;
       if (s==0)
       {
-	if (z == ONLY_REM) return gen_0;
-	if (z) *z = gen_0;
-	if (sx < 0) sy = -sy;
-	return stoi(sy);
+        if (z == ONLY_REM) return gen_0;
+        if (z) *z = gen_0;
+        if (sx < 0) sy = -sy;
+        return stoi(sy);
       }
     }
     if (z == ONLY_REM) return icopy(x);
@@ -1179,7 +1179,7 @@ sqrtr_abs(GEN a)
     n = mpn_sqrtrem(c,b,b,(l<<1)+2); /* c <- sqrt; b <- rem */
     u = (ulong)*c++;
     if ( u&HIGHBIT || (u == ~HIGHBIT &&
-	     (n>l || (n==l && mpn_cmp(b,c,l)>0))))
+             (n>l || (n==l && mpn_cmp(b,c,l)>0))))
       mpn_add_1(c,c,l,1);
   }
   xmpn_mirrorcopy(RLIMBS(res),c,l);

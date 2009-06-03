@@ -145,8 +145,8 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
   pari_sp av, av1, lim;
   long s, sa, sb;
   ulong g;
-  ulong xu,xu1,xv,xv1;		/* Lehmer stage recurrence matrix */
-  int lhmres;			/* Lehmer stage return value */
+  ulong xu,xu1,xv,xv1;                /* Lehmer stage recurrence matrix */
+  int lhmres;                        /* Lehmer stage return value */
 
   if (typ(a) != t_INT || typ(b) != t_INT) pari_err(arither1);
   s = absi_cmp(a,b);
@@ -168,7 +168,7 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
     case -1: if (pu) *pu = gen_m1; return(negi(a));
     }
   }
-  if (s == 0)			/* |a| == |b| != 0 */
+  if (s == 0)                        /* |a| == |b| != 0 */
   {
     if (pu) *pu = gen_0;
     if (sb > 0)
@@ -178,7 +178,7 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
   }
   /* now |a| > |b| > 0 */
 
-  if (lgefint(a) == 3)		/* single-word affair */
+  if (lgefint(a) == 3)                /* single-word affair */
   {
     g = xxgcduu((ulong)a[2], (ulong)b[2], 0, &xu, &xu1, &xv, &xv1, &s);
     sa = s > 0 ? sa : -sa;
@@ -190,9 +190,9 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
       else if (xu == 2) *pu = sa < 0 ? gen_m2 : gen_2;
       else
       {
-	*pu = cgeti(3);
-	(*pu)[1] = evalsigne(sa)|evallgefint(3);
-	(*pu)[2] = xu;
+        *pu = cgeti(3);
+        (*pu)[1] = evalsigne(sa)|evallgefint(3);
+        (*pu)[2] = xu;
       }
     }
     if (pv)
@@ -201,9 +201,9 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
       else if (xv == 2) *pv = sb < 0 ? gen_m2 : gen_2;
       else
       {
-	*pv = cgeti(3);
-	(*pv)[1] = evalsigne(sb)|evallgefint(3);
-	(*pv)[2] = xv;
+        *pv = cgeti(3);
+        (*pv)[1] = evalsigne(sb)|evallgefint(3);
+        (*pv)[2] = xv;
       }
     }
     if      (g == 1) return gen_1;
@@ -220,7 +220,7 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
   if (lgefint(a) > lgefint(b))
   {
     d = absi(b), q = dvmdii(absi(a), d, &d1);
-    if (!signe(d1))		/* a == qb */
+    if (!signe(d1))                /* a == qb */
     {
       avma = av;
       if (pu) *pu = gen_0;
@@ -246,33 +246,33 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
   while (lgefint(d) > 3 && signe(d1))
   {
     lhmres = lgcdii((ulong *)d, (ulong *)d1, &xu, &xu1, &xv, &xv1, ULONG_MAX);
-    if (lhmres != 0)		/* check progress */
-    {				/* apply matrix */
+    if (lhmres != 0)                /* check progress */
+    {                                /* apply matrix */
       if ((lhmres == 1) || (lhmres == -1))
       {
-	if (xv1 == 1)
-	{
-	  r = subii(d,d1); d=d1; d1=r;
-	  a = subii(u,u1); u=u1; u1=a;
-	  a = subii(v,v1); v=v1; v1=a;
-	}
-	else
-	{
-	  r = subii(d, mului(xv1,d1)); d=d1; d1=r;
-	  a = subii(u, mului(xv1,u1)); u=u1; u1=a;
-	  a = subii(v, mului(xv1,v1)); v=v1; v1=a;
-	}
+        if (xv1 == 1)
+        {
+          r = subii(d,d1); d=d1; d1=r;
+          a = subii(u,u1); u=u1; u1=a;
+          a = subii(v,v1); v=v1; v1=a;
+        }
+        else
+        {
+          r = subii(d, mului(xv1,d1)); d=d1; d1=r;
+          a = subii(u, mului(xv1,u1)); u=u1; u1=a;
+          a = subii(v, mului(xv1,v1)); v=v1; v1=a;
+        }
       }
       else
       {
-	r  = subii(muliu(d,xu),  muliu(d1,xv));
-	d1 = subii(muliu(d,xu1), muliu(d1,xv1)); d = r;
-	a  = subii(muliu(u,xu),  muliu(u1,xv));
-	u1 = subii(muliu(u,xu1), muliu(u1,xv1)); u = a;
-	a  = subii(muliu(v,xu),  muliu(v1,xv));
-	v1 = subii(muliu(v,xu1), muliu(v1,xv1)); v = a;
-	if (lhmres&1) { togglesign(d);  togglesign(u);  togglesign(v); }
-	else          { togglesign(d1); togglesign(u1); togglesign(v1); }
+        r  = subii(muliu(d,xu),  muliu(d1,xv));
+        d1 = subii(muliu(d,xu1), muliu(d1,xv1)); d = r;
+        a  = subii(muliu(u,xu),  muliu(u1,xv));
+        u1 = subii(muliu(u,xu1), muliu(u1,xv1)); u = a;
+        a  = subii(muliu(v,xu),  muliu(v1,xv));
+        v1 = subii(muliu(v,xu1), muliu(v1,xv1)); v = a;
+        if (lhmres&1) { togglesign(d);  togglesign(u);  togglesign(v); }
+        else          { togglesign(d1); togglesign(u1); togglesign(v1); }
       }
     }
     if (lhmres <= 0 && signe(d1))

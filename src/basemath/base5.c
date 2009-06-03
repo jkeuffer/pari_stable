@@ -68,7 +68,7 @@ eltreltoabs(GEN rnfeq, GEN x)
       case t_POLMOD: c = gel(c,2); /* fall through */
       case t_POL:    c = RgX_RgXQ_eval(c, alpha, polabs); break;
       default:
-	if (!is_const_t(tc)) pari_err(talker, "incorrect data in eltreltoabs");
+        if (!is_const_t(tc)) pari_err(talker, "incorrect data in eltreltoabs");
     }
     s = RgX_rem(gadd(c, gmul(teta,s)), polabs);
   }
@@ -130,7 +130,7 @@ makenfabs(GEN rnf)
 
   gel(NF,1) = pol;
   gel(NF,3) = mulii(powiu(nf_get_disc(nf), rnf_get_degree(rnf)),
-		    idealnorm(nf, gel(rnf,3)));
+                    idealnorm(nf, gel(rnf,3)));
   nf_set_multable(NF, M, NULL);
   /* possibly wrong, but correct prime divisors [for idealprimedec] */
   gel(NF,4) = Q_denom(gel(NF,7));
@@ -294,11 +294,11 @@ rnfelementdown(GEN rnf,GEN x)
       if (typ(z)==t_POLMOD && varn(z[1])==varn(rnf[1])) z = gel(z,2);
       if (varncmp(gvar(z), varn(rnf[1])) <= 0)
       {
-	lx = lg(z);
-	if (lx == 2) { avma = av; return gen_0; }
-	if (lx > 3)
-	  pari_err(talker,"element is not in the base field in rnfelementdown");
-	z = gel(z,2);
+        lx = lg(z);
+        if (lx == 2) { avma = av; return gen_0; }
+        if (lx > 3)
+          pari_err(talker,"element is not in the base field in rnfelementdown");
+        z = gel(z,2);
       }
       return gerepilecopy(av, z);
 
@@ -680,13 +680,13 @@ check_0(GEN B)
 
 static int
 do_SWAP(GEN I, GEN MC, GEN MCS, GEN h, GEN mu, GEN B, long kmax, long k,
-	const long alpha, long r1)
+        const long alpha, long r1)
 {
   GEN p1, p2, muf, mufc, Bf, temp;
   long i, j;
 
   p1 = nftau(r1, gadd(gel(B,k),
-		      gmul(gnorml2(gcoeff(mu,k,k-1)), gel(B,k-1))));
+                      gmul(gnorml2(gcoeff(mu,k,k-1)), gel(B,k-1))));
   p2 = nftau(r1, gel(B,k-1));
   if (gcmp(gmulsg(alpha,p1), gmulsg(alpha-1,p2)) > 0) return 0;
 
@@ -704,7 +704,7 @@ do_SWAP(GEN I, GEN MC, GEN MCS, GEN h, GEN mu, GEN B, long kmax, long k,
   temp = gel(MCS,k-1);
   gel(MCS,k-1) = gadd(gel(MCS,k), vecmul(muf,gel(MCS,k-1)));
   gel(MCS,k) = gsub(vecmul(vecdiv(gel(B,k),Bf), temp),
-		    vecmul(gcoeff(mu,k,k-1), gel(MCS,k)));
+                    vecmul(gcoeff(mu,k,k-1), gel(MCS,k)));
   gel(B,k) = vecmul(gel(B,k),p1);
   gel(B,k-1) = Bf;
   for (i=k+1; i<=kmax; i++)
@@ -736,22 +736,22 @@ rel_T2(GEN nf, GEN pol, long lx, long prec)
     {
       GEN c = cgetg(lx, t_COL); gel(powreorder,k) = c;
       for (j=1; j < lx; j++)
-	gel(c,j) = gmul(gel(ro,j), gmael(powreorder,k-1,j));
+        gel(c,j) = gmul(gel(ro,j), gmael(powreorder,k-1,j));
     }
     for (l = 1; l < lx; l++)
       for (k = 1; k <= l; k++)
       {
-	s = gen_0;
-	for (j = 1; j < lx; j++)
-	  s = gadd(s, gmul(gconj(gmael(powreorder,k,j)),
-				 gmael(powreorder,l,j)));
-	if (l == k)
-	  gcoeff(m, l, l) = real_i(s);
-	else
-	{
-	  gcoeff(m, k, l) = s;
-	  gcoeff(m, l, k) = gconj(s);
-	}
+        s = gen_0;
+        for (j = 1; j < lx; j++)
+          s = gadd(s, gmul(gconj(gmael(powreorder,k,j)),
+                                 gmael(powreorder,l,j)));
+        if (l == k)
+          gcoeff(m, l, l) = real_i(s);
+        else
+        {
+          gcoeff(m, k, l) = s;
+          gcoeff(m, l, k) = gconj(s);
+        }
       }
     gel(T2,i) = m;
   }
@@ -818,9 +818,9 @@ PRECPB:
       kmax = k; MCS[k] = MC[k];
       for (j=1; j<k; j++)
       {
-	gcoeff(mu,k,j) = vecdiv(rnfscal(mth,gel(MCS,j),gel(MC,k)),
-				gel(B,j));
-	gel(MCS,k) = gsub(gel(MCS,k), vecmul(gcoeff(mu,k,j),gel(MCS,j)));
+        gcoeff(mu,k,j) = vecdiv(rnfscal(mth,gel(MCS,j),gel(MC,k)),
+                                gel(B,j));
+        gel(MCS,k) = gsub(gel(MCS,k), vecmul(gcoeff(mu,k,j),gel(MCS,j)));
       }
       gel(B,k) = real_i(rnfscal(mth,gel(MCS,k),gel(MCS,k)));
       if (check_0(gel(B,k))) goto PRECPB;
@@ -834,7 +834,7 @@ PRECPB:
     else
     {
       for (l=k-2; l; l--)
-	if (!RED(k, l, h, mu, MC, nf, I, &Ik_inv)) goto PRECPB;
+        if (!RED(k, l, h, mu, MC, nf, I, &Ik_inv)) goto PRECPB;
       k++;
     }
     if (low_stack(lim, stack_lim(av,2)))

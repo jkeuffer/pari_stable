@@ -99,30 +99,30 @@ initprimes1(ulong size, long *lenp, long *lastp)
 
       arena|    30m     100m    300m    1000m    2000m  <-- primelimit
       =================================================
-	16K    1.014    0.9835  0.9942  0.9889  1.004
-	24K    0.9526   0.9758  0.9861  0.9942  0.981
-	32K    0.971    0.9939  0.9884  0.9849  0.9806
-	48K    0.9902   0.9825  0.996   0.9945  0.9885
-	50K    0.9917   0.9853  0.9906  0.9926  0.9907
-	52K    0.9932   0.9878  0.9999  0.9928  0.9903
-	54K    0.9945   0.9902  1.064   0.9939  0.9913
-	56K    1.048    0.9924  0.9925  0.993   0.9921
-	58K    0.9969   0.9945  0.9909  0.9932  0.9918
-	60K    0.9455   0.9809  0.9992  0.9915  0.9923
-	62K    0.9991   0.9827  0.9921  0.9924  0.9929
-	64K    1        1       1       1       1
-	66K    1.02     0.9849  0.9857  0.9772  0.9704
-	68K    0.8827   0.9232  0.9176  0.9025  0.8903
-	70K    0.9255   0.9177  0.9162  0.9029  0.8881
-	72K    0.9309   0.936   0.9429  0.9219  0.9052
-	74K    0.9715   0.9644  0.967   0.9477  0.9292
-	76K    0.9935   0.9975  0.9946  0.9751  0.9552
-	78K    0.9987   1.021   1.021   1.003   0.9819
-	80K    1.047    1.041   1.052   1.027   1.006
-	84K    1.052    1.086   1.092   1.075   1.053
-	88K    1.116    1.125   1.133   1.117   1.096
-	92K    1.132    1.156   1.167   1.155   1.134
-	96K    1.137    1.177   1.195   1.185   1.196
+        16K    1.014    0.9835  0.9942  0.9889  1.004
+        24K    0.9526   0.9758  0.9861  0.9942  0.981
+        32K    0.971    0.9939  0.9884  0.9849  0.9806
+        48K    0.9902   0.9825  0.996   0.9945  0.9885
+        50K    0.9917   0.9853  0.9906  0.9926  0.9907
+        52K    0.9932   0.9878  0.9999  0.9928  0.9903
+        54K    0.9945   0.9902  1.064   0.9939  0.9913
+        56K    1.048    0.9924  0.9925  0.993   0.9921
+        58K    0.9969   0.9945  0.9909  0.9932  0.9918
+        60K    0.9455   0.9809  0.9992  0.9915  0.9923
+        62K    0.9991   0.9827  0.9921  0.9924  0.9929
+        64K    1        1       1       1       1
+        66K    1.02     0.9849  0.9857  0.9772  0.9704
+        68K    0.8827   0.9232  0.9176  0.9025  0.8903
+        70K    0.9255   0.9177  0.9162  0.9029  0.8881
+        72K    0.9309   0.936   0.9429  0.9219  0.9052
+        74K    0.9715   0.9644  0.967   0.9477  0.9292
+        76K    0.9935   0.9975  0.9946  0.9751  0.9552
+        78K    0.9987   1.021   1.021   1.003   0.9819
+        80K    1.047    1.041   1.052   1.027   1.006
+        84K    1.052    1.086   1.092   1.075   1.053
+        88K    1.116    1.125   1.133   1.117   1.096
+        92K    1.132    1.156   1.167   1.155   1.134
+        96K    1.137    1.177   1.195   1.185   1.196
        112K    1.067    1.13    1.148   1.15    1.217
        128K    1.04     1.083   1.113   1.124   1.178
        192K    0.9368   0.985   1.025   1.051   1.095
@@ -193,7 +193,7 @@ static cache_model_t cache_model = { CACHE_ARENA, CACHE_ALPHA, CACHE_CUTOFF };
  */
 static ulong
 good_arena_size(ulong slow2_size, ulong total, ulong fixed_to_cache,
-		cache_model_t *cache_model, long model_type)
+                cache_model_t *cache_model, long model_type)
 {
   ulong asize, cache_arena = cache_model->arena;
   double Xmin, Xmax, A, B, C1, C2, D, V;
@@ -264,7 +264,7 @@ good_arena_size(ulong slow2_size, ulong total, ulong fixed_to_cache,
   if ( D <= 0 || (V >= 0 && C1 + cut_off >= 0) ) /* slowdown increasing */
       Xmax = cut_off;                   /* Only one candidate */
   else if (V >= 0 &&                    /* slowdown concave down */
-	   ((Xmax + C1) <= 0 || (Xmax*Xmax + 2*C1*Xmax + C2) <= 0))
+           ((Xmax + C1) <= 0 || (Xmax*Xmax + 2*C1*Xmax + C2) <= 0))
       /* DO NOTHING */;                 /* Keep both candidates */
   else if (V <= 0 && (Xmax*Xmax + 2*C1*Xmax + C2) <= 0) /* slowdown decreasing */
       Xmin = cut_off;                   /* Only one candidate */
@@ -275,10 +275,10 @@ good_arena_size(ulong slow2_size, ulong total, ulong fixed_to_cache,
       double v2 = 2.33 * (Xmax + A)/(Xmax + B) * pow(Xmax, alpha);
 
       if (1.1 * v2 >= v1) /* Prefer fitting into the cache if slowdown < 10% */
-	  V = v1;
+          V = v1;
       else {
-	  Xmin = Xmax;
-	  V = v2;
+          Xmin = Xmax;
+          V = v2;
       }
   } else if (B > 0)                     /* We need V */
       V = 2.33 * (Xmin + A)/(Xmin + B) * pow(Xmin, alpha);
@@ -297,12 +297,12 @@ good_arena_size(ulong slow2_size, ulong total, ulong fixed_to_cache,
     \\ 2,3,4 are in units of 0.001
 
     { time_primes_arena(ar,limit) =     \\ ar = arena size in K
-	set_optimize(1,floor(ar*1024));
-	default(primelimit, 200 000);   \\ 100000 results in *larger* malloc()!
-	gettime;
-	default(primelimit, floor(limit));
-	if(ar >= 1, ar=floor(ar));
-	print("arena "ar"K => "gettime"ms");
+        set_optimize(1,floor(ar*1024));
+        default(primelimit, 200 000);   \\ 100000 results in *larger* malloc()!
+        gettime;
+        default(primelimit, floor(limit));
+        if(ar >= 1, ar=floor(ar));
+        print("arena "ar"K => "gettime"ms");
     }
 */
 long
@@ -363,17 +363,17 @@ sieve_chunk(byteptr known_primes, ulong s, byteptr data, ulong count)
     /* data corresponds to start.  q runs over primediffs.  */
     /* Don't care about DIFFPTR_SKIP: false positives provide no problem */
     for (q = known_primes + 1, p = 3; delta; delta = *++q, p += delta) {
-	/* first odd number which is >= start > p and divisible by p
-	   = last odd number which is <= start + 2p - 1 and 0 (mod p)
-	   = p + the last even number which is <= start + p - 1 and 0 (mod p)
-	   = p + the last even number which is <= start + p - 2 and 0 (mod p)
-	   = p + start + p - 2 - (start + p - 2) % 2p
-	   = start + 2(p - 1 - ((start-1)/2 + (p-1)/2) % p). */
+        /* first odd number which is >= start > p and divisible by p
+           = last odd number which is <= start + 2p - 1 and 0 (mod p)
+           = p + the last even number which is <= start + p - 1 and 0 (mod p)
+           = p + the last even number which is <= start + p - 2 and 0 (mod p)
+           = p + start + p - 2 - (start + p - 2) % 2p
+           = start + 2(p - 1 - ((start-1)/2 + (p-1)/2) % p). */
       long off = cnt - ((start+(p>>1)) % p);
 
       while (off >= 0) {
-	  write_to[off] = 1;
-	  off -= p;
+          write_to[off] = 1;
+          off -= p;
       }
     }
 }
@@ -418,7 +418,7 @@ initprimes0(ulong maxnum, long *lenp, ulong *lastp)
   /* Actually, we access primes array of psize too; but we access it
      consequently, thus we do not include it in fixed_to_cache */
   asize = good_arena_size((ulong)(rootnum * slow2_in_roots), remains + 1, 0,
-			  &cache_model, 0) - 1;
+                          &cache_model, 0) - 1;
   /* enough room on the stack ? */
   alloced = (((byteptr)avma) <= ((byteptr)bot) + asize);
   if (alloced)
@@ -444,7 +444,7 @@ initprimes0(ulong maxnum, long *lenp, ulong *lastp)
     }
     /* Fake the upper limit appropriate for the given arena */
     while (prime_above*prime_above <= curlow + (asize << 1) && *p_prime_above)
-	prime_above += *p_prime_above++;
+        prime_above += *p_prime_above++;
     was_delta = *p_prime_above;
     *p_prime_above = 0;                 /* Put a 0 sentinel for sieve_chunk */
 
@@ -461,7 +461,7 @@ initprimes0(ulong maxnum, long *lenp, ulong *lastp)
       if (q >= fin) break;
       d = (q - plast) << 1;
       while (d >= DIFFPTR_SKIP)
-	*curdiff++ = DIFFPTR_SKIP, d -= DIFFPTR_SKIP;
+        *curdiff++ = DIFFPTR_SKIP, d -= DIFFPTR_SKIP;
       *curdiff++ = (unsigned char)d;
     }
     plast -= asize;
@@ -587,7 +587,7 @@ aux_end(GEN n, long nb)
 
 static GEN
 ifactor(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
-	GEN state, ulong all, long hint)
+        GEN state, ulong all, long hint)
 {
   pari_sp av;
   long pp[] = { evaltyp(t_INT)|_evallg(4), 0,0,0 };
@@ -650,8 +650,8 @@ ifactor(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
       STOREi(gel(primetab,i), k);
       if (absi_cmp(pp, n) > 0)
       {
-	if (!is_pm1(n)) STOREi(n, 1);
-	return aux_end(n,nb);
+        if (!is_pm1(n)) STOREi(n, 1);
+        return aux_end(n,nb);
       }
     }
 
@@ -904,10 +904,10 @@ factor_eulerphi(GEN n)
     }
     if (e > 1) {
       if (B) {
-	gel(B,1) = shallowconcat(gel(B,1), p);
-	gel(B,2) = shallowconcat(gel(B,2), utoipos(e-1));
+        gel(B,1) = shallowconcat(gel(B,1), p);
+        gel(B,2) = shallowconcat(gel(B,2), utoipos(e-1));
       } else
-	B = to_mat(p, e-1);
+        B = to_mat(p, e-1);
     }
   }
   avma = av;
@@ -1351,12 +1351,12 @@ divisors(GEN n)
   {
     for (i=1; i<l; i++)
       for (t1=t,j=e[i]; j; j--,t1=t2)
-	for (t2=d, t3=t1; t3<t2; ) *++d = mulii(*++t3, gel(P,i));
+        for (t2=d, t3=t1; t3<t2; ) *++d = mulii(*++t3, gel(P,i));
     e = sort((GEN)t);
   } else {
     for (i=1; i<l; i++)
       for (t1=t,j=e[i]; j; j--,t1=t2)
-	for (t2=d, t3=t1; t3<t2; ) *++d = gmul(*++t3, gel(P,i));
+        for (t2=d, t3=t1; t3<t2; ) *++d = gmul(*++t3, gel(P,i));
     e = (GEN)t;
   }
   return gerepileupto(av, e);

@@ -59,9 +59,9 @@ protected:
 
 public:
     Plotter( long *w, long *x, long *y, long lw,
-	     QWidget* parent = 0, const char* name = 0, WFlags fl = 0);
+             QWidget* parent = 0, const char* name = 0, WFlags fl = 0);
     void save( const QString& s = *plotFile + ".xpm",//QString("pariplot.xpm"),
-	       const QString& f = QString( "XPM"));
+               const QString& f = QString( "XPM"));
 
 protected:
     void paintEvent( QPaintEvent *);
@@ -90,7 +90,7 @@ QString *Plotter::plotFile = new QString( "pariplot");
 
 
 Plotter::Plotter( long *w, long *x, long *y, long lw,
-		  QWidget* parent,  const char* name, WFlags fl)
+                  QWidget* parent,  const char* name, WFlags fl)
     : QWidget( parent, name, fl), font( "lucida", 9) {
 
     long i;
@@ -191,7 +191,7 @@ void Plotter::draw(QPainter *p){
   plotQt.st=&DrawString;
   plotQt.pl=&pari_plot;
   double xs = double(this->width()) / pari_plot.width,
-	 ys = double(this->height()) / pari_plot.height;
+         ys = double(this->height()) / pari_plot.height;
   gen_rectdraw0(&plotQt, (void *)&d, this->w, this->x, this->y,this->lw,xs,ys);
 }
 
@@ -223,10 +223,10 @@ void Plotter::resizeEvent( QResizeEvent *) { }
 void Plotter::keyPressEvent( QKeyEvent *e) {
 
     switch ( tolower( e->ascii())) {
-	case 's':
-	    save();
-	    this->setCaption( "Pari QtPlot: " + *plotFile);
-	    break;
+        case 's':
+            save();
+            this->setCaption( "Pari QtPlot: " + *plotFile);
+            break;
     }
 }
 #endif
@@ -266,8 +266,8 @@ void Plotter::mouseReleaseEvent( QMouseEvent*) {
 /* XPM */
 static const char * const fullscreen_xpm[] = {
 "14 14 2 1",
-" 	c None",
-".	c #000000",
+"         c None",
+".        c #000000",
 "..............",
 ".     ..     .",
 ".     ..     .",
@@ -296,8 +296,8 @@ QFileDialog
 
 public:
     SaveAsDialog( const QString & c = QString::null,
-		  const QString & s = QString::null, int w = 0, int h = 0,
-		  QWidget *parent = 0, const char *name = 0, WFlags f = 0);
+                  const QString & s = QString::null, int w = 0, int h = 0,
+                  QWidget *parent = 0, const char *name = 0, WFlags f = 0);
     ~SaveAsDialog();
 #ifdef __QPE__
     QString selectedFile() { return nameW->text();}
@@ -313,7 +313,7 @@ private:
 
 
 SaveAsDialog::SaveAsDialog( const QString & c, const QString & s, int w, int h,
-			    QWidget *parent, const char *name, WFlags f)
+                            QWidget *parent, const char *name, WFlags f)
 #ifdef __QPE__
     // simplistic dialog in case of QPE ( fancy alternative: class FileSelector)
 
@@ -386,7 +386,7 @@ class PlotWindow: public QMainWindow {
 
 public:
     PlotWindow( long *w, long *x, long *y, long lw,
-		QWidget* parent = 0, const char* name = 0, WFlags fl = 0);
+                QWidget* parent = 0, const char* name = 0, WFlags fl = 0);
     ~PlotWindow();
 
 #ifndef __QPE__
@@ -415,7 +415,7 @@ const QStrList PlotWindow::file_formats = QImage::outputFormats();
 
 
 PlotWindow::PlotWindow( long *w, long *x, long *y, long lw,
-			QWidget* parent, const char* name, WFlags fl)
+                        QWidget* parent, const char* name, WFlags fl)
     : QMainWindow( parent, name, fl),
       saveFileName( "pariplot"), saveFileFormat( 0) {
 
@@ -434,10 +434,10 @@ PlotWindow::PlotWindow( long *w, long *x, long *y, long lw,
     // Setting up the File and View menu
     QPopupMenu *format = new QPopupMenu( this);
     for( uint i = 0; i < file_formats.count(); i++) {
-	format->insertItem( QString( QStrList(file_formats).at(i)) + " ...",
-			    this, SLOT( save( int)), 0, i);
-	if( 0 == QString( QStrList(file_formats).at(i)).compare( "PNG"))
-	    format->setItemEnabled( i, FALSE); // PNG seems to be broken
+        format->insertItem( QString( QStrList(file_formats).at(i)) + " ...",
+                            this, SLOT( save( int)), 0, i);
+        if( 0 == QString( QStrList(file_formats).at(i)).compare( "PNG"))
+            format->setItemEnabled( i, FALSE); // PNG seems to be broken
     }
     QPopupMenu *file = new QPopupMenu( this);
     CHECK_PTR( file );
@@ -453,8 +453,8 @@ PlotWindow::PlotWindow( long *w, long *x, long *y, long lw,
 #endif
     // Setting up the Fullscreen action
     QAction *a = new QAction( "use full screen",
-			      QPixmap( (const char ** )fullscreen_xpm),
-			      "&Fullscreen", CTRL+Key_F, this);
+                              QPixmap( (const char ** )fullscreen_xpm),
+                              "&Fullscreen", CTRL+Key_F, this);
     connect( a, SIGNAL( activated()), this, SLOT( fullScreen()));
 #ifdef __QPE__
     a->addTo( toolBar);
@@ -469,7 +469,7 @@ PlotWindow::PlotWindow( long *w, long *x, long *y, long lw,
 
 #ifndef __QPE__
     this->resize( pari_plot.width,
-		  pari_plot.height + 25);
+                  pari_plot.height + 25);
     res = new QLabel( statusBar());
     statusBar()->addWidget( res);
 #endif
@@ -485,8 +485,8 @@ void PlotWindow::resizeEvent( QResizeEvent *e) {
 
     QMainWindow::resizeEvent( e);
     res->setText( QString( "Resolution: ") +
-		  QString::number( plr->width()) + "x" +
-		  QString::number( plr->height()));
+                  QString::number( plr->width()) + "x" +
+                  QString::number( plr->height()));
     res->setFixedSize( res->sizeHint());
 }
 #endif
@@ -495,10 +495,10 @@ void PlotWindow::resizeEvent( QResizeEvent *e) {
 void PlotWindow::fullScreen() {
 
     if ( plr->parentWidget()) {
-	plr->reparent( 0, WStyle_Tool | WStyle_Customize | WStyle_StaysOnTop,
-		      QPoint( 0, 0), FALSE);
-	plr->resize( qApp->desktop()->width(), qApp->desktop()->height());
-	plr->show();
+        plr->reparent( 0, WStyle_Tool | WStyle_Customize | WStyle_StaysOnTop,
+                      QPoint( 0, 0), FALSE);
+        plr->resize( qApp->desktop()->width(), qApp->desktop()->height());
+        plr->show();
     }
 }
 
@@ -506,9 +506,9 @@ void PlotWindow::fullScreen() {
 void PlotWindow::normalView() {
 
     if ( !plr->parentWidget()) {
-	plr->reparent( this, 0, QPoint(0,0), FALSE);
-	this->setCentralWidget( plr);
-	plr->show();
+        plr->reparent( this, 0, QPoint(0,0), FALSE);
+        this->setCentralWidget( plr);
+        plr->show();
     }
 }
 
@@ -534,30 +534,30 @@ void PlotWindow::save( int id) {
     QString s( ff + " (*." + ff.lower() +");;All (*)");
 #endif
     SaveAsDialog d( s, saveFileName + "." + ff.lower(),
-		    plr->width(), plr->height());
+                    plr->width(), plr->height());
     if( QDialog::Rejected == d.exec()) return;
     QString fn = d.selectedFile();
     if ( !fn.isEmpty()) {
-	if( QFile( fn).exists() &&
-	    QMessageBox::warning(
-		this, this->caption(),
-		QString( "A file named\n\"") + fn
-		+ QString( "\"\nalready exists\n"
-			   "Should this file be overwritten ?\n\n"),
-		"&Overwrite", "&Cancel"))  return;
-	saveFileName = fn;
-	int p;
-	if( (p = saveFileName.findRev( "." + ff, -1, FALSE)) >=0)
-	    saveFileName.truncate( p);
-	saveFileFormat = id;
-	int old_w = plr->width(), old_h = plr->height();
-	int w = d.picWidth(), h = d.picHeight();
-	if( w != old_w ||  h != old_h) {
-	    plr->resize( w, h);
-	    save();
-	    plr->resize( old_w, old_h);
-	} else
-	    save();
+        if( QFile( fn).exists() &&
+            QMessageBox::warning(
+                this, this->caption(),
+                QString( "A file named\n\"") + fn
+                + QString( "\"\nalready exists\n"
+                           "Should this file be overwritten ?\n\n"),
+                "&Overwrite", "&Cancel"))  return;
+        saveFileName = fn;
+        int p;
+        if( (p = saveFileName.findRev( "." + ff, -1, FALSE)) >=0)
+            saveFileName.truncate( p);
+        saveFileFormat = id;
+        int old_w = plr->width(), old_h = plr->height();
+        int w = d.picWidth(), h = d.picHeight();
+        if( w != old_w ||  h != old_h) {
+            plr->resize( w, h);
+            save();
+            plr->resize( old_w, old_h);
+        } else
+            save();
     }
 }
 
@@ -583,13 +583,13 @@ rectdraw0(long *w, long *x, long *y, long lw)
 
     // launch Qt window
     int argc = 1; char *argv[] = { "gp", "-qws"}; // set argc = 2 for cross
-						  // development using qvfb
+                                                  // development using qvfb
 #ifdef __QPE__
     QPEApplication
 #else
     QApplication
 #endif
-	a( argc, argv);
+        a( argc, argv);
 #ifdef __FANCY_WIN__
     PlotWindow *win = new PlotWindow(w, x, y, lw);
 #else

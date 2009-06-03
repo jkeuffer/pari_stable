@@ -39,8 +39,8 @@ getallforms(GEN D, GEN *ptz)
     for (a=1; a*a<=t; a++)
       if (c = t/a, t == c*a)
       {
-	z = mului(a,z);
-	gel(L,++h) = mkvecsmall3(a,b,c);
+        z = mului(a,z);
+        gel(L,++h) = mkvecsmall3(a,b,c);
       }
     b = 2; b2 = 4;
   }
@@ -58,9 +58,9 @@ getallforms(GEN D, GEN *ptz)
     for (a = b+1; a*a < t; a++)
       if (c = t/a, t == c*a)
       {
-	z = mului(a,z);
-	gel(L,++h) = mkvecsmall3(a, b,c);
-	gel(L,++h) = mkvecsmall3(a,-b,c);
+        z = mului(a,z);
+        gel(L,++h) = mkvecsmall3(a, b,c);
+        gel(L,++h) = mkvecsmall3(a,-b,c);
       }
     /* a = c */
     if (a * a == t) { z = mului(a,z); gel(L,++h) = mkvecsmall3(a,b,c); }
@@ -106,8 +106,8 @@ get_pq(GEN D, GEN z, ulong *ptp, ulong *ptq)
     for (i=1; i<l; i++)
       if (gequal(gel(wlf,i),form))
       {
-	if (MOD4(p) == 1 || MOD4(wp[i]) == 1) break;
-	if (!oki) oki = i; /* not too bad, still e = 2 */
+        if (MOD4(p) == 1 || MOD4(wp[i]) == 1) break;
+        if (!oki) oki = i; /* not too bad, still e = 2 */
       }
     if (i==l) i = oki;
     if (!i) pari_err(bugparier,"quadhilbertimag (can't find p,q)");
@@ -117,7 +117,7 @@ get_pq(GEN D, GEN z, ulong *ptp, ulong *ptq)
     if (MOD4(p) == 3)
     {
       for (i=1; i<l; i++)
-	if (MOD4(wp[i]) == 1) break;
+        if (MOD4(wp[i]) == 1) break;
     }
     if (i==l) i = 1;
   }
@@ -223,7 +223,7 @@ quadhilbert(GEN D, long prec)
   else if (!Z_isfundamental(D))
     pari_err(talker,"quadhilbert needs a fundamental discriminant");
   return (signe(D)>0)? quadhilbertreal(D,prec)
-		     : quadhilbertimag(D);
+                     : quadhilbertimag(D);
 }
 
 /* return a vector of all roots of 1 in bnf [not necessarily quadratic] */
@@ -236,7 +236,7 @@ getallrootsof1(GEN bnf)
   if (n == 2) {
     long N = nf_get_degree(nf);
     return mkvec2(scalarcol_shallow(gen_m1, N),
-		  scalarcol_shallow(gen_1, N));
+                  scalarcol_shallow(gen_1, N));
   }
   tu = poltobasis(nf, bnf_get_tuU(bnf));
   T = zk_multable(nf, tu);
@@ -268,12 +268,12 @@ get_lambda(GEN bnr)
       labas = poltobasis(nf, la);
       lamodf = ZC_hnfrem(labas, f);
       for (i=1; i<lu; i++)
-	if (ZV_equal(lamodf, gel(u,i))) break;
+        if (ZV_equal(lamodf, gel(u,i))) break;
       if (i < lu) continue; /* la = unit mod f */
       if (DEBUGLEVEL)
       {
-	if (DEBUGLEVEL>1) fprintferr("\n");
-	fprintferr("lambda = %Ps\n",la);
+        if (DEBUGLEVEL>1) fprintferr("\n");
+        fprintferr("lambda = %Ps\n",la);
       }
       return labas;
     }
@@ -291,7 +291,7 @@ to_approx(GEN nf, GEN a)
 static GEN
 get_om(GEN nf, GEN a) {
   return mkvec2(to_approx(nf,gel(a,2)),
-		to_approx(nf,gel(a,1)));
+                to_approx(nf,gel(a,1)));
 }
 
 /* Compute all elts in class group G = [|G|,c,g], c=cyclic factors, g=gens.
@@ -378,7 +378,7 @@ form_to_ideal(GEN x)
        && tx != t_QFR && tx != t_QFI) pari_err(typeer,"form_to_ideal");
   b = negi(gel(x,2)); if (mpodd(b)) b = addis(b,1);
   return mkmat2( mkcol2(gel(x,1), gen_0),
-		 mkcol2(shifti(b,-1), gen_1) );
+                 mkcol2(shifti(b,-1), gen_1) );
 }
 
 /* P approximation computed at initial precision prec. Compute needed prec
@@ -950,10 +950,10 @@ FBquad(struct buch_quad *B, long C2, long C1, GRHcheck_t *S)
     {
       case -1: break; /* inert */
       case  0: /* ramified */
-	if (is_bad(D, (ulong)p)) { B->badprim = muliu(B->badprim, p); break; }
-	/* fall through */
+        if (is_bad(D, (ulong)p)) { B->badprim = muliu(B->badprim, p); break; }
+        /* fall through */
       default:  /* split */
-	i++; B->numFB[p] = i; B->FB[i] = p; break;
+        i++; B->numFB[p] = i; B->FB[i] = p; break;
     }
     if (S)
     {
@@ -964,9 +964,9 @@ FBquad(struct buch_quad *B, long C2, long C1, GRHcheck_t *S)
       long M = (long)(L/logNP);
       if (M > 1)
       {
-	double inv1_q = 1 / (1-q);
-	A *= (1 - pow(q, M)) * inv1_q;
-	B *= (1 - pow(q, M)*(M+1 - M*q)) * inv1_q * inv1_q;
+        double inv1_q = 1 / (1-q);
+        A *= (1 - pow(q, M)) * inv1_q;
+        B *= (1 - pow(q, M)*(M+1 - M*q)) * inv1_q * inv1_q;
       }
       if (s > 0) { SA += 2 * A; SB += 2 * B; } else { SA += A; SB += B; }
     }
@@ -1105,10 +1105,10 @@ get_clgp(struct buch_quad *B, GEN W, GEN *ptD, long prec)
     {
       for (i=1; i<l; i++)
       {
-	GEN t, u = gcoeff(u1,i,j);
-	if (!signe(u)) continue;
-	t = qfr3_pow(gel(init,i), u, B->QFR);
-	g = g? qfr3_comp(g, t, B->QFR): t;
+        GEN t, u = gcoeff(u1,i,j);
+        if (!signe(u)) continue;
+        t = qfr3_pow(gel(init,i), u, B->QFR);
+        g = g? qfr3_comp(g, t, B->QFR): t;
       }
       g = qfr3_to_qfr(qfr3_canon(qfr3_red(g, B->QFR), B->QFR), Z);
     }
@@ -1116,10 +1116,10 @@ get_clgp(struct buch_quad *B, GEN W, GEN *ptD, long prec)
     {
       for (i=1; i<l; i++)
       {
-	GEN t, u = gcoeff(u1,i,j);
-	if (!signe(u)) continue;
-	t = powgi(gel(init,i), u);
-	g = g? qficomp(g, t): t;
+        GEN t, u = gcoeff(u1,i,j);
+        if (!signe(u)) continue;
+        t = powgi(gel(init,i), u);
+        g = g? qficomp(g, t): t;
       }
     }
     gel(res,j) = g;
@@ -1181,8 +1181,8 @@ imag_relations(struct buch_quad *B, long need, long *pc, long lim, ulong LIMC, G
       GEN form2;
       if (!fpd)
       {
-	if (DEBUGLEVEL>1) fprintferr(".");
-	continue;
+        if (DEBUGLEVEL>1) fprintferr(".");
+        continue;
       }
       form2 = qficomp(qfi_factorback(B,fpd), qfi_pf(B->QFR->D, B->FB[fpd[-2]]));
       p = fpc << 1;
@@ -1195,13 +1195,13 @@ imag_relations(struct buch_quad *B, long need, long *pc, long lim, ulong LIMC, G
       (void)factorquad(B,form2,B->KC,LIMC);
       if (b1==b2)
       {
-	for (i=1; i<lgsub; i++) col[B->subFB[i]] += fpd[i]-ex[i];
-	sub_fact(B, col, form2); col[fpd[-2]]++;
+        for (i=1; i<lgsub; i++) col[B->subFB[i]] += fpd[i]-ex[i];
+        sub_fact(B, col, form2); col[fpd[-2]]++;
       }
       else
       {
-	for (i=1; i<lgsub; i++) col[B->subFB[i]] += -fpd[i]-ex[i];
-	add_fact(B, col, form2); col[fpd[-2]]--;
+        for (i=1; i<lgsub; i++) col[B->subFB[i]] += -fpd[i]-ex[i];
+        add_fact(B, col, form2); col[fpd[-2]]--;
       }
     }
     else
@@ -1281,20 +1281,20 @@ CYCLE:
       form = qfr3_rho(form, B->QFR); rho++;
       rhoacc++;
       if (first)
-	endcycle = (absi_equal(gel(form,1),gel(form0,1))
-	     && equalii(gel(form,2),gel(form0,2)));
+        endcycle = (absi_equal(gel(form,1),gel(form0,1))
+             && equalii(gel(form,2),gel(form0,2)));
       else
       {
-	if (absi_equal(gel(form,1), gel(form,3))) /* a = -c */
-	{
-	  if (absi_equal(gel(form,1),gel(form0,1)) &&
-		  equalii(gel(form,2),gel(form0,2))) continue;
-	  form = qfr3_rho(form, B->QFR); rho++;
-	}
-	else
-	  { setsigne(form[1],1); setsigne(form[3],-1); }
-	if (equalii(gel(form,1),gel(form0,1)) &&
-	    equalii(gel(form,2),gel(form0,2))) continue;
+        if (absi_equal(gel(form,1), gel(form,3))) /* a = -c */
+        {
+          if (absi_equal(gel(form,1),gel(form0,1)) &&
+                  equalii(gel(form,2),gel(form0,2))) continue;
+          form = qfr3_rho(form, B->QFR); rho++;
+        }
+        else
+          { setsigne(form[1],1); setsigne(form[3],-1); }
+        if (equalii(gel(form,1),gel(form0,1)) &&
+            equalii(gel(form,2),gel(form0,2))) continue;
       }
     }
     nbtest++; fpc = factorquad(B,form,B->KC,LIMC);
@@ -1310,13 +1310,13 @@ CYCLE:
       GEN form2;
       if (!fpd)
       {
-	if (DEBUGLEVEL>1) fprintferr(".");
-	goto CYCLE;
+        if (DEBUGLEVEL>1) fprintferr(".");
+        goto CYCLE;
       }
       if (!form1)
       {
-	form1 = qfr5_factorback(B,ex);
-	if (!first)
+        form1 = qfr5_factorback(B,ex);
+        if (!first)
           form1 = QFR5_comp(form1, qfr5_pf(B->QFR, B->FB[current], prec), B->QFR);
       }
       form1 = qrf5_rho_pow(form1, rho, B->QFR);
@@ -1328,8 +1328,8 @@ CYCLE:
       form2 = qrf5_rho_pow(form2, fpd[-3], B->QFR);
       if (!absi_equal(gel(form2,1),gel(form2,3)))
       {
-	setsigne(form2[1], 1);
-	setsigne(form2[3],-1);
+        setsigne(form2[1], 1);
+        setsigne(form2[3],-1);
       }
       p = fpc << 1;
       b1 = umodiu(gel(form2,2), p);
@@ -1341,19 +1341,19 @@ CYCLE:
       (void)factorquad(B,form2,B->KC,LIMC);
       if (b1==b2)
       {
-	for (i=1; i<lgsub; i++) col[B->subFB[i]] += fpd[i]-ex[i];
-	sub_fact(B,col, form2);
-	if (fpd[-2]) col[fpd[-2]]++;
-	d = qfr5_dist(subii(gel(form1,4),gel(form2,4)),
-		      divrr(gel(form1,5),gel(form2,5)), prec);
+        for (i=1; i<lgsub; i++) col[B->subFB[i]] += fpd[i]-ex[i];
+        sub_fact(B,col, form2);
+        if (fpd[-2]) col[fpd[-2]]++;
+        d = qfr5_dist(subii(gel(form1,4),gel(form2,4)),
+                      divrr(gel(form1,5),gel(form2,5)), prec);
       }
       else
       {
-	for (i=1; i<lgsub; i++) col[B->subFB[i]] += -fpd[i]-ex[i];
-	add_fact(B, col, form2);
-	if (fpd[-2]) col[fpd[-2]]--;
-	d = qfr5_dist(addii(gel(form1,4),gel(form2,4)),
-		      mulrr(gel(form1,5),gel(form2,5)), prec);
+        for (i=1; i<lgsub; i++) col[B->subFB[i]] += -fpd[i]-ex[i];
+        add_fact(B, col, form2);
+        if (fpd[-2]) col[fpd[-2]]--;
+        d = qfr5_dist(addii(gel(form1,4),gel(form2,4)),
+                      mulrr(gel(form1,5),gel(form2,5)), prec);
       }
       if (DEBUGLEVEL) fprintferr(" %ldP",s);
     }
@@ -1361,8 +1361,8 @@ CYCLE:
     { /* standard relation */
       if (!form1)
       {
-	form1 = qfr5_factorback(B, ex);
-	if (!first)
+        form1 = qfr5_factorback(B, ex);
+        if (!first)
           form1 = QFR5_comp(form1, qfr5_pf(B->QFR, B->FB[current], prec), B->QFR);
       }
       form1 = qrf5_rho_pow(form1, rho, B->QFR);
@@ -1621,9 +1621,9 @@ MORE:
 
     case fupb_RELAT:
       if (++nrelsup <= 7 || cbach > 1) {
-	need = minss(BQ.KC, nrelsup);
-	if (cbach > 1 && nsubFB < 3 && lg(BQ.vperm) > 3) nsubFB++;
-	goto MORE;
+        need = minss(BQ.KC, nrelsup);
+        if (cbach > 1 && nsubFB < 3 && lg(BQ.vperm) > 3) nsubFB++;
+        goto MORE;
       }
       goto START;
   }

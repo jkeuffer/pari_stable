@@ -55,8 +55,8 @@ rgb_color(int R, int G, int B)
 }
 
 Plotter::Plotter( long *w, long *x, long *y, long lw,
-	     const char* name)
-	: Fl_Window(pari_plot.width, pari_plot.height, "PARI/GP")
+             const char* name)
+        : Fl_Window(pari_plot.width, pari_plot.height, "PARI/GP")
 
 {
     long i;
@@ -158,16 +158,16 @@ int Plotter::handle(int event)
        flag=1-flag;
        if (flag)
        {
-	 my_x=this->x();
-	 my_y=this->y();
-	 my_w=this->w();
-	 my_h=this->h();
-	 this->fullscreen();
+         my_x=this->x();
+         my_y=this->y();
+         my_w=this->w();
+         my_h=this->h();
+         this->fullscreen();
        }
        else
        {
-	 this->fullscreen_off(my_x,my_y,my_w,my_h);
-	 this->size_range(1,1);
+         this->fullscreen_off(my_x,my_y,my_w,my_h);
+         this->size_range(1,1);
        }
        return 1;
      }
@@ -178,9 +178,9 @@ int Plotter::handle(int event)
     case 'q':
       switch(Fl::event_shift())
       {
-	case 0:
-	case FL_CTRL:
-	  exit(0);
+        case 0:
+        case FL_CTRL:
+          exit(0);
       }
       break;
     case 'c':

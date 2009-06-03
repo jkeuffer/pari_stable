@@ -1,7 +1,7 @@
 /* $Id$ */
 /*
 Copyright (c) 2002 Jorge Acereda  <jacereda@users.sourceforge.net> &
-		   Peter O'Gorman <ogorman@users.sourceforge.net>
+                   Peter O'Gorman <ogorman@users.sourceforge.net>
 
 Portions may be copyright others, see the AUTHORS file included with this
 distribution.
@@ -42,10 +42,10 @@ extern "C" {
  */
 
 typedef struct dl_info {
-	const char      *dli_fname;     /* Pathname of shared object */
-	void            *dli_fbase;     /* Base address of shared object */
-	const char      *dli_sname;     /* Name of nearest symbol */
-	void            *dli_saddr;     /* Address of nearest symbol */
+        const char      *dli_fname;     /* Pathname of shared object */
+        void            *dli_fbase;     /* Base address of shared object */
+        const char      *dli_sname;     /* Name of nearest symbol */
+        void            *dli_saddr;     /* Address of nearest symbol */
 } Dl_info;
 
 
@@ -55,12 +55,12 @@ extern const char * dlerror(void);
 extern int dlclose(void * handle);
 extern int dladdr(void *, Dl_info *);
 
-#define RTLD_LAZY	0x1
-#define RTLD_NOW	0x2
-#define RTLD_LOCAL	0x4
-#define RTLD_GLOBAL	0x8
-#define RTLD_NOLOAD	0x10
-#define RTLD_NODELETE	0x80
+#define RTLD_LAZY        0x1
+#define RTLD_NOW        0x2
+#define RTLD_LOCAL        0x4
+#define RTLD_GLOBAL        0x8
+#define RTLD_NOLOAD        0x10
+#define RTLD_NODELETE        0x80
 
 
 #ifdef __cplusplus

@@ -28,7 +28,7 @@ typedef struct GENbin {
   GEN x; /* binary copy of x */
   GEN base; /* base address of p->x */
   int canon; /* 1: t_INT in canonical (native kernel) form,
-		0: t_INT according to current kernel */
+                0: t_INT according to current kernel */
 } GENbin;
 
 struct pari_mainstack
@@ -66,7 +66,7 @@ typedef struct PariOUT {
   void (*puts)(const char*);
   void (*flush)(void);     /* Finalize a report of a non fatal-error. */
   void (*die)(void);       /* If not-NULL, should be called to finalize
-			  a report of a fatal error (no "\n" required). */
+                          a report of a fatal error (no "\n" required). */
 } PariOUT;
 
 typedef struct pariFILE {
@@ -109,14 +109,14 @@ extern FILE    *pari_outfile, *pari_logfile, *pari_infile, *pari_errfile;
 extern ulong    logstyle;
 
 enum logstyles {
-    logstyle_none,	/* 0 */
-    logstyle_plain,	/* 1 */
-    logstyle_color,	/* 2 */
-    logstyle_TeX 	/* 3 */
+    logstyle_none,        /* 0 */
+    logstyle_plain,        /* 1 */
+    logstyle_color,        /* 2 */
+    logstyle_TeX         /* 3 */
 };
 
-#define TEXSTYLE_PAREN	2
-#define TEXSTYLE_BREAK	4
+#define TEXSTYLE_PAREN        2
+#define TEXSTYLE_BREAK        4
 
 extern THREAD pari_sp avma, bot, top;
 #define DISABLE_MEMUSED (size_t)-1

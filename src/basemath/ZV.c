@@ -452,9 +452,9 @@ ZC_lincomb1(GEN v, GEN X, GEN Y)
       else if (!signe(p2)) gel(A,i) = icopy(p1);
       else
       {
-	pari_sp av = avma; (void)new_chunk(m+lgefint(p1)+lgefint(p2)); /*HACK*/
-	p2 = mulii(v,p2);
-	avma = av; gel(A,i) = addii(p1,p2);
+        pari_sp av = avma; (void)new_chunk(m+lgefint(p1)+lgefint(p2)); /*HACK*/
+        p2 = mulii(v,p2);
+        avma = av; gel(A,i) = addii(p1,p2);
       }
     }
   }
@@ -468,9 +468,9 @@ ZC_lincomb1(GEN v, GEN X, GEN Y)
       else if (!signe(p2)) gel(A,i) = icopy(p1);
       else
       {
-	pari_sp av = avma; (void)new_chunk(1+lgefint(p1)+lgefint(p2)); /*HACK*/
-	p2 = mulsi(w,p2);
-	avma = av; gel(A,i) = addii(p1,p2);
+        pari_sp av = avma; (void)new_chunk(1+lgefint(p1)+lgefint(p2)); /*HACK*/
+        p2 = mulsi(w,p2);
+        avma = av; gel(A,i) = addii(p1,p2);
       }
     }
   }
@@ -536,10 +536,10 @@ ZC_lincomb(GEN u, GEN v, GEN X, GEN Y)
       else if (!signe(p2)) gel(A,i) = mulii(u,p1);
       else
       {
-	av = avma; (void)new_chunk(m+lgefint(p1)+lgefint(p2)); /* HACK */
-	p1 = mulii(u,p1);
-	p2 = mulii(v,p2);
-	avma = av; gel(A,i) = addii(p1,p2);
+        av = avma; (void)new_chunk(m+lgefint(p1)+lgefint(p2)); /* HACK */
+        p1 = mulii(u,p1);
+        p2 = mulii(v,p2);
+        avma = av; gel(A,i) = addii(p1,p2);
       }
     }
   }

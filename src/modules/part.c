@@ -63,13 +63,13 @@ g(ulong q, ulong h)
   if (q < 3)  return gen_0;
   if (h == 1) return gdivgs(muluu(q-1,q-2), 12);
   if (h == 2) return q == 3? mkfrac(gen_m1, utoipos(6))
-			   : gdivgs(muluu((q-1)>>1,(q-5)>>1), 6);
+                           : gdivgs(muluu((q-1)>>1,(q-5)>>1), 6);
   k = q % h;
   if (k <= 2)
   {
     GEN h2 = sqru(h);
     return k == 1? gdivgs(mului((q-1)/h, subsi(q-1, h2)), 12)
-		 : gdivgs(mului((q-2)/h, subsi((q<<1)-1, h2)), 24); /* k=2 */
+                 : gdivgs(mului((q-2)/h, subsi((q<<1)-1, h2)), 24); /* k=2 */
 
   }
   /* TODO: expr for h-1 mod h  +  gcd-style computation */

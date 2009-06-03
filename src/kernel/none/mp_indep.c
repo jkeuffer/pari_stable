@@ -273,8 +273,8 @@ mulrrz_i(GEN z, GEN x, GEN y, long lz, long flag, long sz)
       hiremainder = (hiremainder<<1) | (garde>>(BITS_IN_LONG-1));
       if (garde & (HIGHBIT-1))
       {
-	hiremainder++; /* round properly */
-	if (!hiremainder) { hiremainder = HIGHBIT; ez++; }
+        hiremainder++; /* round properly */
+        if (!hiremainder) { hiremainder = HIGHBIT; ez++; }
       }
     }
     z[1] = evalsigne(sz) | evalexpo(ez);
@@ -299,8 +299,8 @@ mulrrz_i(GEN z, GEN x, GEN y, long lz, long flag, long sz)
       garde = addll(addmul(p1,y1[lz]), garde);
       for (i=lzz; i>j; i--)
       {
-	hiremainder += overflow;
-	z[i] = addll(addmul(p1,y1[i]), z[i]);
+        hiremainder += overflow;
+        z[i] = addll(addmul(p1,y1[i]), z[i]);
       }
       z[j] = hiremainder+overflow;
     }
@@ -856,17 +856,17 @@ dbltor(double x)
       int sh;
       if (A)
       {
-	sh = bfffo(A);
-	e -= sh-1;
-	z[2] = (A << sh) | (B >> (32-sh));
-	z[3] = B << sh;
+        sh = bfffo(A);
+        e -= sh-1;
+        z[2] = (A << sh) | (B >> (32-sh));
+        z[3] = B << sh;
       }
       else
       {
-	sh = bfffo(B); /* B != 0 */
-	e -= sh-1 + 32;
-	z[2] = B << sh;
-	z[3] = 0;
+        sh = bfffo(B); /* B != 0 */
+        e -= sh-1 + 32;
+        z[2] = B << sh;
+        z[3] = 0;
       }
     }
     else

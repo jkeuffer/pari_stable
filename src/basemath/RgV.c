@@ -392,7 +392,7 @@ RgM_powers(GEN x, long l)
   gel(V,3) = RgM_sqr(x);
   for(i = 4; i < l+2; i++)
     gel(V,i) = (i&1)? RgM_sqr(gel(V, (i+1)>>1))
-	            : RgM_mul(gel(V, i-1), x);
+                    : RgM_mul(gel(V, i-1), x);
   return V;
 }
 

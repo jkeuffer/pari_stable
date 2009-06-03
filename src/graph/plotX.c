@@ -242,46 +242,46 @@ rectdraw0(long *w, long *x, long *y, long lw)
     switch(event.type)
     {
       case ClientMessage:
-	if (event.xclient.message_type != wm_protocols ||
-	    (Atom)event.xclient.data.l[0] != wm_delete_window) break;
+        if (event.xclient.message_type != wm_protocols ||
+            (Atom)event.xclient.data.l[0] != wm_delete_window) break;
       case ButtonPress:
       case DestroyNotify:
 EXIT:
-	XUnloadFont(display,font_info->fid);
-	XFreeGC(display,gc);
-	XCloseDisplay(display); exit(0);
+        XUnloadFont(display,font_info->fid);
+        XFreeGC(display,gc);
+        XCloseDisplay(display); exit(0);
 
       case KeyRelease:
-	/* Mod4 == Super on "std" Linux */
-	keystate = event.xkey.state & (ShiftMask|ControlMask|Mod1Mask|Mod4Mask);
-	switch (XKeycodeToKeysym(display, event.xkey.keycode, 0))
-	{
-	case XK_q:
-	  if (!keystate || keystate == ControlMask)
-	    goto EXIT;
-	  break;
-	case XK_c:
-	  if (keystate == ControlMask)
-	    goto EXIT;
-	  break;
-	}
-	break;
+        /* Mod4 == Super on "std" Linux */
+        keystate = event.xkey.state & (ShiftMask|ControlMask|Mod1Mask|Mod4Mask);
+        switch (XKeycodeToKeysym(display, event.xkey.keycode, 0))
+        {
+        case XK_q:
+          if (!keystate || keystate == ControlMask)
+            goto EXIT;
+          break;
+        case XK_c:
+          if (keystate == ControlMask)
+            goto EXIT;
+          break;
+        }
+        break;
 
       case ConfigureNotify:
       {
-	int width  = event.xconfigure.width;
-	int height = event.xconfigure.height;
+        int width  = event.xconfigure.width;
+        int height = event.xconfigure.height;
 
-	if (width == oldwidth && height == oldheight) break;
-	oldwidth  = width;
-	oldheight = height;
+        if (width == oldwidth && height == oldheight) break;
+        oldwidth  = width;
+        oldheight = height;
 
-	/* recompute scale */
-	xs = ((double)width)/pari_plot.width;
-	ys = ((double)height)/pari_plot.height;
+        /* recompute scale */
+        xs = ((double)width)/pari_plot.width;
+        ys = ((double)height)/pari_plot.height;
       }
       case Expose:
-	gen_rectdraw0(&plotX, (void *)&dx, w, x, y,lw,xs,ys);
+        gen_rectdraw0(&plotX, (void *)&dx, w, x, y,lw,xs,ys);
     }
   }
 }

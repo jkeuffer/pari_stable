@@ -128,10 +128,10 @@ reducebetanaive(GEN bnfz, GEN be, long ell, GEN elllogfu)
       for (i=1; i<=ru; i++)
       {
         GEN v, t;
-	v = vecmul(b, gel(zk,i));    t = T2_from_embed_norm(v,r1);
-	if (gcmp(t,nmax) < 0) { B=v; nmax=t; besti=i; bestk = k; continue; }
-	v = vecmul(b, gel(zk,i+ru)); t = T2_from_embed_norm(v,r1);
-	if (gcmp(t,nmax) < 0) { B=v; nmax=t; besti=i; bestk =-k; }
+        v = vecmul(b, gel(zk,i));    t = T2_from_embed_norm(v,r1);
+        if (gcmp(t,nmax) < 0) { B=v; nmax=t; besti=i; bestk = k; continue; }
+        v = vecmul(b, gel(zk,i+ru)); t = T2_from_embed_norm(v,r1);
+        if (gcmp(t,nmax) < 0) { B=v; nmax=t; besti=i; bestk =-k; }
       }
     }
     if (!B) break;
@@ -380,16 +380,16 @@ build_list_Hecke(primlist *L, GEN nfz, GEN fa, GEN gothf, GEN gell, tau_s *tau)
       if (vd > 0) return 4;
       if (vd==0)
       {
-	if (!isconjinprimelist(nfz, L->Sml1,pr,tau)) vectrunc_append(L->Sml1, pr);
+        if (!isconjinprimelist(nfz, L->Sml1,pr,tau)) vectrunc_append(L->Sml1, pr);
       }
       else
       {
-	if (vp==1) return 2;
-	if (!isconjinprimelist(nfz, L->Sml2,pr,tau))
-	{
-	  vectrunc_append(L->Sml2, pr);
-	  vecsmalltrunc_append(L->ESml2, vp);
-	}
+        if (vp==1) return 2;
+        if (!isconjinprimelist(nfz, L->Sml2,pr,tau))
+        {
+          vectrunc_append(L->Sml2, pr);
+          vecsmalltrunc_append(L->ESml2, vp);
+        }
       }
     }
   }
@@ -494,9 +494,9 @@ lift_if_rational(GEN x)
       y = gel(x,2);
       if (typ(y) == t_POL)
       {
-	long d = degpol(y);
-	if (d > 0) return x;
-	return (d < 0)? gen_0: gel(y,2);
+        long d = degpol(y);
+        if (d > 0) return x;
+        return (d < 0)? gen_0: gel(y,2);
       }
       return y;
 
@@ -1184,7 +1184,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
       GEN z = FpM_red(gmulsg((j*d)%ell,gel(p1,m-j)), gell);
       p2 = tauofvec(p2, tau);
       for (i=1; i<=rc; i++)
-	gel(vecC,i) = famat_mul(gel(vecC,i), famat_factorback(p2,gel(z,i)));
+        gel(vecC,i) = famat_mul(gel(vecC,i), famat_factorback(p2,gel(z,i)));
     }
     for (i=1; i<=rc; i++) gel(vecC,i) = famat_reduce(gel(vecC,i));
   }

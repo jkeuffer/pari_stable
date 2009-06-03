@@ -48,7 +48,7 @@ typedef struct PariRect {
   double xscale,yscale;
   double xshift,yshift;
   long has_graph; /* xy-ranges of this rectangle should be used
-		     for interactive operations.  */
+                     for interactive operations.  */
 } PariRect;
 
 /* The structures below are "subclasses" of RectObj. */
@@ -107,19 +107,19 @@ struct plot_eng {
   void (*st)(void *data, long x, long y, char *s, long l);
 };
 
-#define ROt_MV 0			/* Move */
-#define ROt_PT 1			/* Point */
-#define ROt_LN 2			/* Line */
-#define ROt_BX 3			/* Box */
-#define ROt_MP 4			/* Multiple point */
-#define ROt_ML 5			/* Multiple lines */
-#define ROt_ST 6			/* String */
-#define ROt_PTT 7			/* Point type change */
-#define ROt_LNT 8			/* Line type change */
-#define ROt_PTS 9			/* Point size change */
-#define ROt_NULL 10		/* To be the start of the chain */
+#define ROt_MV 0                        /* Move */
+#define ROt_PT 1                        /* Point */
+#define ROt_LN 2                        /* Line */
+#define ROt_BX 3                        /* Box */
+#define ROt_MP 4                        /* Multiple point */
+#define ROt_ML 5                        /* Multiple lines */
+#define ROt_ST 6                        /* String */
+#define ROt_PTT 7                        /* Point type change */
+#define ROt_LNT 8                        /* Line type change */
+#define ROt_PTS 9                        /* Point size change */
+#define ROt_NULL 10                /* To be the start of the chain */
 
-#define ROt_MAX 10		/* Maximal type */
+#define ROt_MAX 10                /* Maximal type */
 
 /* Pointer conversion. */
 
@@ -179,18 +179,18 @@ struct plot_eng {
 #define RoSTy(rop) (RoST(rop)->y)
 #define RoSTdir(rop) (RoST(rop)->dir)
 
-#define RoSTdirLEFT	  0x00
-#define RoSTdirCENTER	  0x01
-#define RoSTdirRIGHT	  0x02
+#define RoSTdirLEFT          0x00
+#define RoSTdirCENTER          0x01
+#define RoSTdirRIGHT          0x02
 #define RoSTdirHPOS_mask  0x03
 
-#define RoSTdirBOTTOM	  0x00
-#define RoSTdirVCENTER	  0x04
-#define RoSTdirTOP	  0x08
+#define RoSTdirBOTTOM          0x00
+#define RoSTdirVCENTER          0x04
+#define RoSTdirTOP          0x08
 #define RoSTdirVPOS_mask  0x0c
 
-#define RoSTdirHGAP	  0x10
-#define RoSTdirVGAP	  0x20
+#define RoSTdirHGAP          0x10
+#define RoSTdirVGAP          0x20
 
 
 #define RoPTTpen(rop) (RoPTT(rop)->pen)
@@ -221,14 +221,14 @@ struct plot_eng {
 #define RECT_CP_SE        0x4
 #define RECT_CP_NE        0x6
 
-#define TICKS_CLOCKW	1	/* Draw in clockwise direction */
-#define TICKS_ACLOCKW	2	/* Draw in anticlockwise direction */
-#define TICKS_ENDSTOO	4	/* Draw at endspoints if needed */
-#define TICKS_NODOUBLE	8	/* Do not draw double-length ticks */
+#define TICKS_CLOCKW        1        /* Draw in clockwise direction */
+#define TICKS_ACLOCKW        2        /* Draw in anticlockwise direction */
+#define TICKS_ENDSTOO        4        /* Draw at endspoints if needed */
+#define TICKS_NODOUBLE        8        /* Do not draw double-length ticks */
 
 /* Not implemented yet */
-#define TICKS_COORD	16	/* Output [x,y,l,isdbl] for each tick */
-#define TICKS_RELATIVE	32	/* x,y-coordinates are relative */
+#define TICKS_COORD        16        /* Output [x,y,l,isdbl] for each tick */
+#define TICKS_RELATIVE        32        /* x,y-coordinates are relative */
 
 extern long  rectpoint_itype;
 extern long  rectline_itype;

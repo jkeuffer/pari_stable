@@ -90,16 +90,16 @@ void *dlopen(const char *path, int mode)
       /* Don't forget to destroy the object file image, unless you like leaks */
       NSDestroyObjectFileImage(ofi);
       /* If the mode was global, then change the module, this avoids
-	 multiply defined symbol errors to first load private then make
-	 global. Silly, isn't it. */
+         multiply defined symbol errors to first load private then make
+         global. Silly, isn't it. */
       if ((mode & RTLD_GLOBAL))
       {
-	if (!make_private_module_public)
-	{
-	  _dyld_func_lookup("__dyld_NSMakePrivateModulePublic",
-	(void**)&make_private_module_public);
-	}
-	make_private_module_public((NSModule)module);
+        if (!make_private_module_public)
+        {
+          _dyld_func_lookup("__dyld_NSMakePrivateModulePublic",
+        (void**)&make_private_module_public);
+        }
+        make_private_module_public((NSModule)module);
       }
       break;
     case NSObjectFileImageInappropriateFile:
@@ -128,7 +128,7 @@ static int
 is_mach_header(void *handle)
 { /* Check for both possible magic numbers depending on x86/ppc byte order */
   return ((((struct mach_header *)handle)->magic == MH_MAGIC) ||
-	  (((struct mach_header *)handle)->magic == MH_CIGAM));
+          (((struct mach_header *)handle)->magic == MH_CIGAM));
 }
 
 /* used by dlsym to find the symbol */
@@ -145,9 +145,9 @@ void *dlsymIntern(void *handle, const char *symbol)
     if (is_mach_header(handle))
     { /* library */
       if (NSIsSymbolNameDefinedInImage((struct mach_header *)handle, symbol))
-	nssym = NSLookupSymbolInImage((struct mach_header *)handle, symbol,
-			NSLOOKUPSYMBOLINIMAGE_OPTION_BIND
-			| NSLOOKUPSYMBOLINIMAGE_OPTION_RETURN_ON_ERROR);
+        nssym = NSLookupSymbolInImage((struct mach_header *)handle, symbol,
+                        NSLOOKUPSYMBOLINIMAGE_OPTION_BIND
+                        | NSLOOKUPSYMBOLINIMAGE_OPTION_RETURN_ON_ERROR);
     }
     else /* bundle */
       nssym = NSLookupSymbolInModule((NSModule)handle, symbol);

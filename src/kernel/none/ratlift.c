@@ -19,17 +19,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
  *==========================================================
  * Reconstruct rational number from its residue x mod m
  *    Given t_INT x, m, amax>=0, bmax>0 such that
- * 	0 <= x < m;  2*amax*bmax < m
+ *         0 <= x < m;  2*amax*bmax < m
  *    attempts to find t_INT a, b such that
- * 	(1) a = b*x (mod m)
- * 	(2) |a| <= amax, 0 < b <= bmax
- * 	(3) gcd(m, b) = gcd(a, b)
+ *         (1) a = b*x (mod m)
+ *         (2) |a| <= amax, 0 < b <= bmax
+ *         (3) gcd(m, b) = gcd(a, b)
  *    If unsuccessful, it will return 0 and leave a,b unchanged  (and
  *    caller may deduce no such a,b exist).  If successful, sets a,b
  *    and returns 1.  If there exist a,b satisfying (1), (2), and
- * 	(3') gcd(m, b) = 1
+ *         (3') gcd(m, b) = 1
  *    then they are uniquely determined subject to (1),(2) and
- * 	(3'') gcd(a, b) = 1,
+ *         (3'') gcd(a, b) = 1,
  *    and will be returned by the routine.  (The caller may wish to
  *    check gcd(a,b)==1, either directly or based on known prime
  *    divisors of m, depending on the application.)
@@ -73,8 +73,8 @@ get_vmax(GEN r, long lb, long lbb)
 {
   long lr = lb - lgefint(r);
   ulong vmax;
-  if (lr > 1)	/* still more than a word's worth to go */
-    vmax = ULONG_MAX;	/* (cannot in fact happen) */
+  if (lr > 1)        /* still more than a word's worth to go */
+    vmax = ULONG_MAX;        /* (cannot in fact happen) */
   else
   { /* take difference of bit lengths */
     long lbr = bfffo(*int_MSW(r));
@@ -175,42 +175,42 @@ Fp_ratlift(GEN x, GEN m, GEN amax, GEN bmax, GEN *a, GEN *b)
     { /* apply matrix */
       if (lhmres == 1 || lhmres == -1)
       {
-	s = -s;
-	if (xv1 == 1)
-	{ /* re-use v+v1 computed above */
-	  v = v1; v1 = r;
-	  r = subii(d,d1); d = d1; d1 = r;
-	}
-	else
-	{
-	  r = subii(d, mului(xv1,d1)); d = d1; d1 = r;
-	  r = addii(v, mului(xv1,v1)); v = v1; v1 = r;
-	}
+        s = -s;
+        if (xv1 == 1)
+        { /* re-use v+v1 computed above */
+          v = v1; v1 = r;
+          r = subii(d,d1); d = d1; d1 = r;
+        }
+        else
+        {
+          r = subii(d, mului(xv1,d1)); d = d1; d1 = r;
+          r = addii(v, mului(xv1,v1)); v = v1; v1 = r;
+        }
       }
       else
       {
-	r  = subii(muliu(d,xu),  muliu(d1,xv));
-	d1 = subii(muliu(d,xu1), muliu(d1,xv1)); d = r;
-	r  = addii(muliu(v,xu),  muliu(v1,xv));
-	v1 = addii(muliu(v,xu1), muliu(v1,xv1)); v = r;
-	if (lhmres&1) { togglesign(d); s = -s; } else togglesign(d1);
+        r  = subii(muliu(d,xu),  muliu(d1,xv));
+        d1 = subii(muliu(d,xu1), muliu(d1,xv1)); d = r;
+        r  = addii(muliu(v,xu),  muliu(v1,xv));
+        v1 = addii(muliu(v,xu1), muliu(v1,xv1)); v = r;
+        if (lhmres&1) { togglesign(d); s = -s; } else togglesign(d1);
       }
       /* check whether we're done.  Assert v <= bmax here.  Examine v1:
        * if v1 > bmax, check d and return 0 or 1 depending on the outcome;
        * if v1 <= bmax, check d1 and return 1 if d1 <= amax, otherwise proceed*/
       if (cmpii(v1,bmax) > 0)
       {
-	avma = av;
-	if (cmpii(d,amax) > 0) return 0; /* done, not found */
+        avma = av;
+        if (cmpii(d,amax) > 0) return 0; /* done, not found */
         /* done, found */
         *a = icopy(d); setsigne(*a,-s);
         *b = icopy(v); return 1;
       }
       if (cmpii(d1,amax) <= 0)
       { /* done, found */
-	avma = av;
+        avma = av;
         if (signe(d1)) { *a = icopy(d1); setsigne(*a,s); } else *a = gen_0;
-	*b = icopy(v1); return 1;
+        *b = icopy(v1); return 1;
       }
     } /* lhmres != 0 */
 
@@ -229,9 +229,9 @@ Fp_ratlift(GEN x, GEN m, GEN amax, GEN bmax, GEN *a, GEN *b)
       if (cmpii(v1,bmax) > 0) { avma = av; return 0; } /* done, not found */
       if (cmpii(d1,amax) <= 0) /* done, found */
       {
-	avma = av;
-	if (signe(d1)) { *a = icopy(d1); setsigne(*a,s); } else *a = gen_0;
-	*b = icopy(v1); return 1;
+        avma = av;
+        if (signe(d1)) { *a = icopy(d1); setsigne(*a,s); } else *a = gen_0;
+        *b = icopy(v1); return 1;
       }
     }
 
@@ -264,7 +264,7 @@ Fp_ratlift(GEN x, GEN m, GEN amax, GEN bmax, GEN *a, GEN *b)
     (void)rgcduu((ulong)*int_MSW(d), (ulong)*int_MSW(d1), vmax, &xu, &xu1, &xv, &xv1, &s0);
 #ifdef DEBUG_RATLIFT
     fprintferr("rl-fs: [%lu,%lu; %lu,%lu] %s\n",
-	       xu, xu1, xv, xv1, s0 < 0 ? "-" : "+");
+               xu, xu1, xv, xv1, s0 < 0 ? "-" : "+");
 #endif
     if (xv1 == 1) /* avoid multiplications */
     { /* re-use r = v+v1 computed above */

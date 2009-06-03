@@ -37,8 +37,8 @@ invmod(GEN a, GEN b, GEN *res)
   pari_sp av, av1, lim;
   long s;
   ulong g;
-  ulong xu,xu1,xv,xv1;		/* Lehmer stage recurrence matrix */
-  int lhmres;			/* Lehmer stage return value */
+  ulong xu,xu1,xv,xv1;                /* Lehmer stage recurrence matrix */
+  int lhmres;                        /* Lehmer stage return value */
 
   if (typ(a) != t_INT || typ(b) != t_INT) pari_err(arither1);
   if (!signe(b)) { *res=absi(a); return 0; }
@@ -49,9 +49,9 @@ invmod(GEN a, GEN b, GEN *res)
     if (d1 == 0)
     {
       if (b[2] == 1L)
-	{ *res = gen_0; return 1; }
+        { *res = gen_0; return 1; }
       else
-	{ *res = absi(b); return 0; }
+        { *res = absi(b); return 0; }
     }
     g = xgcduu((ulong)(b[2]), d1, 1, &xv, &xv1, &s);
 #ifdef DEBUG_LEHMER
@@ -67,7 +67,7 @@ invmod(GEN a, GEN b, GEN *res)
   (void)new_chunk(lgefint(b));
   d = absi(b); d1 = modii(a,d);
 
-  v=gen_0; v1=gen_1;	/* general case */
+  v=gen_0; v1=gen_1;        /* general case */
 #ifdef DEBUG_LEHMER
   fprintferr("INVERT: -------------------------\n");
   output(d1);
@@ -80,33 +80,33 @@ invmod(GEN a, GEN b, GEN *res)
     fprintferr("Calling Lehmer:\n");
 #endif
     lhmres = lgcdii((ulong*)d, (ulong*)d1, &xu, &xu1, &xv, &xv1, ULONG_MAX);
-    if (lhmres != 0)		/* check progress */
-    {				/* apply matrix */
+    if (lhmres != 0)                /* check progress */
+    {                                /* apply matrix */
 #ifdef DEBUG_LEHMER
       fprintferr("Lehmer returned %d [%lu,%lu;%lu,%lu].\n",
-	      lhmres, xu, xu1, xv, xv1);
+              lhmres, xu, xu1, xv, xv1);
 #endif
       if ((lhmres == 1) || (lhmres == -1))
       {
-	if (xv1 == 1)
-	{
-	  r = subii(d,d1); d=d1; d1=r;
-	  a = subii(v,v1); v=v1; v1=a;
-	}
-	else
-	{
-	  r = subii(d, mului(xv1,d1)); d=d1; d1=r;
-	  a = subii(v, mului(xv1,v1)); v=v1; v1=a;
-	}
+        if (xv1 == 1)
+        {
+          r = subii(d,d1); d=d1; d1=r;
+          a = subii(v,v1); v=v1; v1=a;
+        }
+        else
+        {
+          r = subii(d, mului(xv1,d1)); d=d1; d1=r;
+          a = subii(v, mului(xv1,v1)); v=v1; v1=a;
+        }
       }
       else
       {
-	r  = subii(muliu(d,xu),  muliu(d1,xv));
-	a  = subii(muliu(v,xu),  muliu(v1,xv));
-	d1 = subii(muliu(d,xu1), muliu(d1,xv1)); d = r;
-	v1 = subii(muliu(v,xu1), muliu(v1,xv1)); v = a;
-	if (lhmres&1) { togglesign(d);  togglesign(v); }
-	else          { togglesign(d1); togglesign(v1); }
+        r  = subii(muliu(d,xu),  muliu(d1,xv));
+        a  = subii(muliu(v,xu),  muliu(v1,xv));
+        d1 = subii(muliu(d,xu1), muliu(d1,xv1)); d = r;
+        v1 = subii(muliu(v,xu1), muliu(v1,xv1)); v = a;
+        if (lhmres&1) { togglesign(d);  togglesign(v); }
+        else          { togglesign(d1); togglesign(v1); }
       }
     }
 #ifdef DEBUG_LEHMER

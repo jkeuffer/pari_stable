@@ -15,8 +15,8 @@ with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /***********************************************************************/
-/**								      **/
-/**		         MULTIPRECISION KERNEL           	      **/
+/**                                                                   **/
+/**                       MULTIPRECISION KERNEL                       **/
 /**                                                                   **/
 /***********************************************************************/
 #include "pari.h"
@@ -51,8 +51,8 @@ int_normalize(GEN x, long known_zero_words)
 }
 
 /***********************************************************************/
-/**								      **/
-/**		         ADDITION / SUBTRACTION          	      **/
+/**                                                                   **/
+/**                      ADDITION / SUBTRACTION                       **/
 /**                                                                   **/
 /***********************************************************************/
 
@@ -334,8 +334,8 @@ shifti_spec(GEN x, long lx, long n)
       shift_right(y,x, 2,ly, 0,m);
       if (y[2] == 0)
       {
-	if (ly==3) { avma = (pari_sp)(y+3); return gen_0; }
-	ly--; avma = (pari_sp)(++y);
+        if (ly==3) { avma = (pari_sp)(y+3); return gen_0; }
+        ly--; avma = (pari_sp)(++y);
       }
     } else {
       for (i=2; i<ly; i++) y[i]=x[i];
@@ -427,8 +427,8 @@ absi_equal_lg(GEN x, GEN y, long l)
 }
 
 /***********************************************************************/
-/**								      **/
-/**		          MULTIPLICATION                 	      **/
+/**                                                                   **/
+/**                          MULTIPLICATION                           **/
 /**                                                                   **/
 /***********************************************************************/
 /* assume ny > 0 */
@@ -478,8 +478,8 @@ GEN muliispec(GEN a, GEN b, long na, long nb);
 #define muliispec_mirror muliispec
 
 /***********************************************************************/
-/**								      **/
-/**		          DIVISION                       	      **/
+/**                                                                   **/
+/**                          DIVISION                                 **/
 /**                                                                   **/
 /***********************************************************************/
 
@@ -619,10 +619,10 @@ divrr(GEN x, GEN y)
     {
       if ((ulong)r1[1] > y0) /* can't happen if i=0 */
       {
-	GEN y1 = y+1;
-	j = lr-i; r1[j] = subll(r1[j],y1[j]);
-	for (j--; j>0; j--) r1[j] = subllx(r1[j],y1[j]);
-	j=i; do r[--j]++; while (j && !r[j]);
+        GEN y1 = y+1;
+        j = lr-i; r1[j] = subll(r1[j],y1[j]);
+        for (j--; j>0; j--) r1[j] = subllx(r1[j],y1[j]);
+        j=i; do r[--j]++; while (j && !r[j]);
       }
       hiremainder = r1[1]; overflow = 0;
       qp = divll(r1[2],y0); k = hiremainder;
@@ -651,20 +651,20 @@ divrr(GEN x, GEN y)
     {
       if ((ulong)r1[1] < hiremainder)
       {
-	qp--;
-	j = lr-i-(lr-i>=ly); r1[j] = addll(r1[j], y[j]);
-	for (j--; j>1; j--) r1[j] = addllx(r1[j], y[j]);
+        qp--;
+        j = lr-i-(lr-i>=ly); r1[j] = addll(r1[j], y[j]);
+        for (j--; j>1; j--) r1[j] = addllx(r1[j], y[j]);
       }
       else
       {
-	r1[1] -= hiremainder;
-	while (r1[1])
-	{
-	  qp++; if (!qp) { j=i; do r[--j]++; while (j && !r[j]); }
-	  j = lr-i-(lr-i>=ly); r1[j] = subll(r1[j],y[j]);
-	  for (j--; j>1; j--) r1[j] = subllx(r1[j],y[j]);
-	  r1[1] -= overflow;
-	}
+        r1[1] -= hiremainder;
+        while (r1[1])
+        {
+          qp++; if (!qp) { j=i; do r[--j]++; while (j && !r[j]); }
+          j = lr-i-(lr-i>=ly); r1[j] = subll(r1[j],y[j]);
+          for (j--; j>1; j--) r1[j] = subllx(r1[j],y[j]);
+          r1[1] -= overflow;
+        }
       }
     }
     *++r1 = qp;
@@ -734,11 +734,11 @@ dvmdii(GEN x, GEN y, GEN *z)
     if (lz == 0)
     {
       for (i=2; i<lx; i++)
-	if (x[i] != y[i])
-	{
-	  if ((ulong)x[i] > (ulong)y[i]) goto DIVIDE;
-	  goto TRIVIAL;
-	}
+        if (x[i] != y[i])
+        {
+          if ((ulong)x[i] > (ulong)y[i]) goto DIVIDE;
+          goto TRIVIAL;
+        }
       if (z == ONLY_REM) return gen_0;
       if (z) *z = gen_0;
       if (sx < 0) sy = -sy;
@@ -855,8 +855,8 @@ DIVIDE: /* quotient is non-zero */
       xd--;
       while (--lz) /* fill r[3..] */
       {
-	l = *xd >> sh;
-	*--rd = l | (*--xd << shl);
+        l = *xd >> sh;
+        *--rd = l | (*--xd << shl);
       }
       l = *xd >> sh;
       if (l) *--rd = l; else lr--;
@@ -884,8 +884,8 @@ DIVIDE: /* quotient is non-zero */
       xd--;
       while (--lz)
       {
-	l = *xd >> sh;
-	*--rd = l | (*--xd << shl);
+        l = *xd >> sh;
+        *--rd = l | (*--xd << shl);
       }
       l = *xd >> sh;
       if (l) *--rd = l; else lr--;
@@ -1033,13 +1033,13 @@ diviuexact_i(GEN x, ulong y)
       (void)mulll(q,y);
       if (hiremainder)
       {
-	if ((ulong)*x1 < hiremainder)
-	{
-	  *x1 -= hiremainder;
-	  do (*--x1)--; while ((ulong)*x1 == ULONG_MAX);
-	}
-	else
-	  *x1 -= hiremainder;
+        if ((ulong)*x1 < hiremainder)
+        {
+          *x1 -= hiremainder;
+          do (*--x1)--; while ((ulong)*x1 == ULONG_MAX);
+        }
+        else
+          *x1 -= hiremainder;
       }
     }
   }
@@ -1136,18 +1136,18 @@ diviiexact(GEN x, GEN y)
       register GEN x0 = x + (ii - 1), y0 = y - 1, xlim = x + limj;
       for (; x0 >= xlim; x0--, y0--)
       {
-	*x0 = subll(*x0, addmul(q,*y0));
-	hiremainder += overflow;
+        *x0 = subll(*x0, addmul(q,*y0));
+        hiremainder += overflow;
       }
       if (hiremainder && limj != lx - lz)
       {
-	if ((ulong)*x0 < hiremainder)
-	{
-	  *x0 -= hiremainder;
-	  do (*--x0)--; while ((ulong)*x0 == ULONG_MAX);
-	}
-	else
-	  *x0 -= hiremainder;
+        if ((ulong)*x0 < hiremainder)
+        {
+          *x0 -= hiremainder;
+          do (*--x0)--; while ((ulong)*x0 == ULONG_MAX);
+        }
+        else
+          *x0 -= hiremainder;
       }
     }
   }
@@ -1755,8 +1755,8 @@ p_sqrtu1(ulong *N, ulong *ps, ulong *pr)
 
   q = n0 >> (BITS_IN_LONG - 8);
   /* 2^6 = 64 <= q < 256 = 2^8 */
-  s = approx_tab[q - 64];				/* 128 <= s < 255 */
-  r = (n0 >> (BITS_IN_LONG - 16)) - s * s;		/* r <= 2*s */
+  s = approx_tab[q - 64];                                /* 128 <= s < 255 */
+  r = (n0 >> (BITS_IN_LONG - 16)) - s * s;                /* r <= 2*s */
   if (r > (s << 1)) { r -= (s << 1) | 1; s++; }
 
   /* 8-bit approximation from the high 8-bits of N[0] */

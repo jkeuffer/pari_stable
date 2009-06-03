@@ -64,8 +64,8 @@ MR_Jaeschke_ok(MR_Jaeschke_t *S, GEN c)
     if (!equalii(c, S->sqrt1) && !equalii(c, S->sqrt2))
     { /* too many sqrt(-1)s mod n */
       if (DEBUGLEVEL) {
-	GEN z = gcdii(addii(c, S->sqrt1), S->n);
-	pari_warn(warner,"found factor\n\t%Ps\ncurrently lost to the factoring machinery", z);
+        GEN z = gcdii(addii(c, S->sqrt1), S->n);
+        pari_warn(warner,"found factor\n\t%Ps\ncurrently lost to the factoring machinery", z);
       }
       return 1;
     }
@@ -271,20 +271,20 @@ LucasMod(GEN n, ulong P, GEN N)
     { /* v = v_k, v1 = v_{k+1} */
       if (m < 0)
       { /* set v = v_{2k+1}, v1 = v_{2k+2} */
-	v = subis(mulii(v,v1), (long)P);
-	v1= subis(sqri(v1), 2);
+        v = subis(mulii(v,v1), (long)P);
+        v1= subis(sqri(v1), 2);
       }
       else
       {/* set v = v_{2k}, v1 = v_{2k+1} */
-	v1= subis(mulii(v,v1), (long)P);
-	v = subis(sqri(v), 2);
+        v1= subis(mulii(v,v1), (long)P);
+        v = subis(sqri(v), 2);
       }
       v = modii(v, N);
       v1= modii(v1,N);
       if (low_stack(lim,stack_lim(av,1)))
       {
-	if(DEBUGMEM>1) pari_warn(warnmem,"LucasMod");
-	gerepileall(av, 2, &v,&v1);
+        if(DEBUGMEM>1) pari_warn(warnmem,"LucasMod");
+        gerepileall(av, 2, &v,&v1);
       }
     }
     if (--i == 0) return v;
@@ -681,7 +681,7 @@ BPSW_isprime(GEN N)
   /* N-1 = F U, F factored, U possibly composite */
   if (cmpii(powiu(F, 3), N) >= 0) /* half-smooth, F >= N^(1/3) */
     res = BLS_test(N, F)
-	  && isprimeSelfridge(mkvec2(N,vecslice(P,1,l-1)));
+          && isprimeSelfridge(mkvec2(N,vecslice(P,1,l-1)));
   else if (BPSW_psp_nosmalldiv(p)) /* smooth */
     res = isprimeSelfridge(mkvec2(N,P));
   else

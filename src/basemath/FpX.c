@@ -471,9 +471,9 @@ FpX_eval(GEN x,GEN y,GEN p)
     for (j=i; !signe(gel(x,j)); j--)
       if (j==2)
       {
-	if (i!=j) y = Fp_powu(y,i-j+1,p);
-	p1=mulii(p1,y);
-	goto fppoleval;/*sorry break(2) no implemented*/
+        if (i!=j) y = Fp_powu(y,i-j+1,p);
+        p1=mulii(p1,y);
+        goto fppoleval;/*sorry break(2) no implemented*/
       }
     r = (i==j)? y: Fp_powu(y,i-j+1,p);
     p1 = modii(addii(mulii(p1,r), gel(x,j)),p);
@@ -714,7 +714,7 @@ FpXQ_powers(GEN x, long l, GEN T, GEN p)
   } else { /* use squarings if degree(x) is large */
     for(i = 4; i < l+2; i++)
       gel(V,i) = odd(i)? FpXQ_sqr(gel(V, (i+1)>>1),T,p)
-		       : FpXQ_mul(gel(V, i-1),x,T,p);
+                       : FpXQ_mul(gel(V, i-1),x,T,p);
   }
   return V;
 }
@@ -901,7 +901,7 @@ FpXQ_sqrtn(GEN a, GEN n, GEN T, GEN p, GEN *zeta)
     FpX_muldata s;
     s.pol=T; s.p=p;
     return gen_Shanks_sqrtn(a,n,addis(powiu(p,degpol(T)),-1),zeta,
-	(void*)&s,&FpXQ_star);
+                            (void*)&s,&FpXQ_star);
   }
 }
 

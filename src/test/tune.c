@@ -283,9 +283,9 @@ static tune_param param[] = {
 {0,   var(Flx_MUL_LIMIT),          t_Flx, 4,0, speed_Flx_mul,speed_Flx_karamul},
 {0,   var(Flx_SQR_LIMIT),          t_Flx, 4,0, speed_Flx_sqr,speed_Flx_karasqr},
 {0,   var(Flx_INVMONTGOMERY_LIMIT),t_NFlx,10,30000,
-				   speed_Flx_inv,speed_Flx_invnewton,0.3},
+                                   speed_Flx_inv,speed_Flx_invnewton,0.3},
 {0,  var(Flx_POW_MONTGOMERY_LIMIT),t_NFlx,1,0,
-				   speed_Flxq_pow_redc,speed_Flxq_pow_mod},
+                                   speed_Flxq_pow_redc,speed_Flxq_pow_mod},
 {0,  var(Flx_REM_MONTGOMERY_LIMIT),t_NFlx,10,0, speed_Flx_rem,speed_Flx_rem_mg,0.1},
 {0,  var(RgX_MUL_LIMIT),          t_FpX, 4,0, speed_RgX_mul,speed_RgX_karamul},
 {0,  var(RgX_SQR_LIMIT),          t_FpX, 4,0, speed_RgX_sqr,speed_RgX_karasqr},
@@ -322,10 +322,10 @@ time_fun(speed_function_t fun, speed_param *s)
 
       /* go to a value of reps to make t[i] >= precision */
       reps_d = ceil (1.1 * s->reps
-		     * speed_unittime * speed_precision
-		     / maxdd(t[i], speed_unittime));
+                     * speed_unittime * speed_precision
+                     / maxdd(t[i], speed_unittime));
       if (reps_d > 2e9 || reps_d < 1.0)
-	pari_err(talker, "Fatal error: new reps bad: %.2f\n", reps_d);
+        pari_err(talker, "Fatal error: new reps bad: %.2f\n", reps_d);
 
       s->reps = (ulong)reps_d;
     }
@@ -340,7 +340,7 @@ time_fun(speed_function_t fun, speed_param *s)
     {
       qsort (t, i+1, sizeof(t[0]), (QSCOMP)double_cmp_ptr);
       for (j = e-1; j < i; j++)
-	if (t[j] <= t[j-e+1] * TOLERANCE) { avma = av; return t[j-e+1]; }
+        if (t[j] <= t[j-e+1] * TOLERANCE) { avma = av; return t[j-e+1]; }
     }
   }
   pari_err(talker,"couldn't measure time");
@@ -445,7 +445,7 @@ Test(tune_param *param)
 
     if (option_trace >= 2)
       diag ("size =%4ld     %.8f   %.8f  % .4f %c  %ld\n",
-	    s.size, t1,t2, d, d < 0? '#': ' ', dat[new_thresh].size);
+            s.size, t1,t2, d, d < 0? '#': ' ', dat[new_thresh].size);
 
 #define SINCE_POSITIVE 20
 #define SINCE_CHANGE 50
@@ -455,15 +455,15 @@ Test(tune_param *param)
     else
       if (++since_positive > SINCE_POSITIVE)
       {
-	if (option_trace >= 1)
-	  diag("Stop: since_positive (%d)\n", SINCE_POSITIVE);
-	break;
+        if (option_trace >= 1)
+          diag("Stop: since_positive (%d)\n", SINCE_POSITIVE);
+        break;
       }
     /* Stop if method A has become slower by a certain factor */
     if (t1 >= t2 * param->stop_factor)
     {
       if (option_trace >= 1)
-	diag("Stop: t1 >= t2 * factor (%.1f)\n", param->stop_factor);
+        diag("Stop: t1 >= t2 * factor (%.1f)\n", param->stop_factor);
       break;
     }
     /* Stop if threshold implied hasn't changed for a while */
@@ -472,15 +472,15 @@ Test(tune_param *param)
     else
       if (++since_change > SINCE_CHANGE)
       {
-	if (option_trace >= 1)
-	  diag("Stop: since_change (%d)\n", SINCE_CHANGE);
-	break;
+        if (option_trace >= 1)
+          diag("Stop: since_change (%d)\n", SINCE_CHANGE);
+        break;
       }
     s.size += maxss((long)floor(s.size * param->step_factor), 1);
     if (s.size >= param->max_size)
     {
       if (option_trace >= 1)
-	diag("Stop: max_size (%ld). Disable Algorithm B?\n",param->max_size);
+        diag("Stop: max_size (%ld). Disable Algorithm B?\n",param->max_size);
       break;
     }
   }
@@ -510,29 +510,29 @@ main(int argc, char **argv)
     char *s = argv[i];
     if (*s == '-') {
       switch(*++s) {
-	case 't': option_trace += 2; break;
-	case 'p':
-	  if (!*++s)
-	  {
-	    if (++i == argc) error(argv);
-	    s = argv[i];
-	  }
-	  DFLT_mod = itou(gp_read_str(s)); break;
-	case 's':
-	  if (!*++s)
-	  {
-	    if (++i == argc) error(argv);
-	    s = argv[i];
-	  }
-	  Step_Factor = atof(s); break;
-	case 'u': s++;
-	  if (!*++s)
-	  {
-	    if (++i == argc) error(argv);
-	    s = argv[i];
-	  }
-	  speed_unittime = atof(s); break;
-	default: error(argv);
+        case 't': option_trace += 2; break;
+        case 'p':
+          if (!*++s)
+          {
+            if (++i == argc) error(argv);
+            s = argv[i];
+          }
+          DFLT_mod = itou(gp_read_str(s)); break;
+        case 's':
+          if (!*++s)
+          {
+            if (++i == argc) error(argv);
+            s = argv[i];
+          }
+          Step_Factor = atof(s); break;
+        case 'u': s++;
+          if (!*++s)
+          {
+            if (++i == argc) error(argv);
+            s = argv[i];
+          }
+          speed_unittime = atof(s); break;
+        default: error(argv);
       }
     } else {
       if (!isdigit((int)*s)) error(argv);

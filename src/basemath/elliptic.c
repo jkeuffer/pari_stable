@@ -142,7 +142,7 @@ initsmall(GEN x, GEN y)
   gel(y,11) = c6; /* 36 b2 b4 - b2^3 - 216 b6 */
 
   D = gsub(gmul(b4, gadd(gmulsg(9,gmul(b2,b6)),gmulsg(-8,gsqr(b4)))),
-	   gadd(gmul(b22,b8),gmulsg(27,gsqr(b6))));
+           gadd(gmul(b22,b8),gmulsg(27,gsqr(b6))));
   gel(y,12) = D;
   if (gequal0(D)) pari_err(talker,"singular curve in ellinit");
 
@@ -333,19 +333,19 @@ base_ring(GEN x, GEN *pp, long *prec)
     GEN q = gel(x,i);
     switch(typ(q)) {
       case t_PADIC: {
-	long e2 = signe(q[4])? precp(q)+valp(q): valp(q);
-	if (e2 < e) e = e2;
-	if (!p)
+        long e2 = signe(q[4])? precp(q)+valp(q): valp(q);
+        if (e2 < e) e = e2;
+        if (!p)
           p = gel(q,2);
-	else if (!equalii(p, gel(q,2)))
-	  pari_err(talker,"incompatible p-adic numbers in ellinit");
-	break;
+        else if (!equalii(p, gel(q,2)))
+          pari_err(talker,"incompatible p-adic numbers in ellinit");
+        break;
       }
       case t_INT: case t_REAL: case t_FRAC:
-	break;
+        break;
 
       default: /* base ring too general */
-	*prec = 0; break;
+        *prec = 0; break;
     }
   }
   if (p) { *pp = p; *prec = e; return t_PADIC; }
@@ -510,11 +510,11 @@ coordch4(GEN e, GEN u, GEN r, GEN s, GEN t)
   gel(y,7) = gmul(v4,gadd(b4,gadd(b2r, gmulsg(6,r2))));
   /* B6 = (b6 + 2b4 r + 2b2 r^2 + 4r^3) / u^6 */
   gel(y,8) = gmul(v6,gadd(b6,gmul(r,gadd(gmul2n(b4,1),
-					    gadd(b2r,gmul2n(r2,2))))));
+                                            gadd(b2r,gmul2n(r2,2))))));
   /* B8 = (b8 + 3b6r + 3b4 r^2 + b2 r^3 + 3r^4) / u^8 */
   p1 = gadd(gmulsg(3,b4),gadd(b2r, gmulsg(3,r2)));
   gel(y,9) = gmul(gsqr(v4),
-	      gadd(ell_get_b8(e), gmul(r,gadd(gmulsg(3,b6), gmul(r,p1)))));
+              gadd(ell_get_b8(e), gmul(r,gadd(gmulsg(3,b6), gmul(r,p1)))));
   gel(y,10) = gmul(v4,ell_get_c4(e));
   gel(y,11) = gmul(v6,ell_get_c6(e));
   gel(y,12) = gmul(gsqr(v6),ell_get_disc(e));
@@ -773,15 +773,15 @@ addell(GEN e, GEN z1, GEN z2)
     {
       int eq;
       if (precision(y1) || precision(y2))
-	eq = (gexpo(gadd(ellLHS0(e,x1),gadd(y1,y2))) >= gexpo(y1));
+        eq = (gexpo(gadd(ellLHS0(e,x1),gadd(y1,y2))) >= gexpo(y1));
       else
-	eq = gequal(y1,y2);
+        eq = gequal(y1,y2);
       if (!eq) { avma = av; return ellinf(); }
     }
     p2 = d_ellLHS(e,z1);
     if (gequal0(p2)) { avma = av; return ellinf(); }
     p1 = gadd(gsub(ell_get_a4(e),gmul(ell_get_a1(e),y1)),
-	      gmul(x1,gadd(gmul2n(ell_get_a2(e),1),gmulsg(3,x1))));
+              gmul(x1,gadd(gmul2n(ell_get_a2(e),1),gmulsg(3,x1))));
   }
   else {
     p1 = gsub(y2,y1);
@@ -864,7 +864,7 @@ ellordinate_i(GEN e, GEN x, long prec)
       break;
     case t_INTMOD:
       if (kronecker(gel(D,2),gel(D,1)) < 0) {
-	avma = av; return cgetg(1,t_VEC);
+        avma = av; return cgetg(1,t_VEC);
       } /* fall through */
     default:
       d = gsqrt(D,prec);
@@ -1095,9 +1095,9 @@ zell(GEN e, GEN z, long prec)
     if (bad) t = gneg(t);
     if (DEBUGLEVEL) {
       if (DEBUGLEVEL>4) {
-	fprintferr("  z  = %Ps\n",z);
-	fprintferr("  z1 = %Ps\n",z1);
-	fprintferr("  z2 = %Ps\n",z2);
+        fprintferr("  z  = %Ps\n",z);
+        fprintferr("  z1 = %Ps\n",z1);
+        fprintferr("  z2 = %Ps\n",z2);
       }
       fprintferr("ellpointtoz: %s square root\n", bad? "bad": "good");
       flusherr();
@@ -1339,12 +1339,12 @@ weipellnumall(SL2_red *T, GEN z, long flall, long prec)
     qnu3 = gsub(qn,u);    /* q^n - u */
     qnu4 = gsqr(qnu3);    /* (q^n - u)^2 */
     p1 = gsub(gmul(u, gadd(ginv(qnu2),ginv(qnu4))),
-	      gmul2n(ginv(gsqr(gsubsg(1,qn))), 1));
+              gmul2n(ginv(gsqr(gsubsg(1,qn))), 1));
     y = gadd(y, gmul(qn,p1));
     if (flall)
     {
       p1 = gadd(gdiv(gadd(gen_1,qnu),gmul(qnu1,qnu2)),
-		gdiv(gadd(qn,u),gmul(qnu3,qnu4)));
+                gdiv(gadd(qn,u),gmul(qnu3,qnu4)));
 
       yp = gadd(yp, gmul(qn,p1));
     }
@@ -1460,8 +1460,8 @@ ellsigma(GEN w, GEN z, long flag, long prec)
       if (gexpo(qn) <= - bit_accuracy(prec) - 5 - toadd) break;
       if (low_stack(lim, stack_lim(av1,1)))
       {
-	if(DEBUGMEM>1) pari_warn(warnmem,"ellsigma");
-	gerepileall(av1,2, &y,&qn);
+        if(DEBUGMEM>1) pari_warn(warnmem,"ellsigma");
+        gerepileall(av1,2, &y,&qn);
       }
     }
   } else { /* use sum */
@@ -1484,12 +1484,12 @@ ellsigma(GEN w, GEN z, long flag, long prec)
       if (gexpo(qn2) + n*toadd <= - bit_accuracy(prec) - 5) break;
       if (low_stack(lim, stack_lim(av1,1)))
       {
-	if(DEBUGMEM>1) pari_warn(warnmem,"ellsigma");
-	gerepileall(av1,5, &y,&qn,&qn2,&urn,&urninv);
+        if(DEBUGMEM>1) pari_warn(warnmem,"ellsigma");
+        gerepileall(av1,5, &y,&qn,&qn2,&urn,&urninv);
       }
     }
     p1 = gmul(gmul(y,q8),
-	      gdiv(mulcxmI(T.W2), gmul(pi2,gpowgs(trueeta(T.Tau,prec),3))));
+              gdiv(mulcxmI(T.W2), gmul(pi2,gpowgs(trueeta(T.Tau,prec),3))));
   }
   y1 = dolog? gadd(y1, glog(p1,prec)): gmul(p1, gexp(y1,prec));
   return gerepileupto(av, y1);
@@ -1598,11 +1598,11 @@ ellwp0(GEN w, GEN z, long flag, long prec, long PREC)
     case 1: v = weipellnumall(&T,z,1,prec);
       if (!v)
       {
-	GEN p1 = gmul2n(gpowgs(z,3),1);
-	pari_sp tetpil = avma;
-	v = cgetg(3,t_VEC);
-	gel(v,1) = gpowgs(z,-2);
-	gel(v,2) = gneg(p1); return gerepile(av,tetpil,v);
+        GEN p1 = gmul2n(gpowgs(z,3),1);
+        pari_sp tetpil = avma;
+        v = cgetg(3,t_VEC);
+        gel(v,1) = gpowgs(z,-2);
+        gel(v,2) = gneg(p1); return gerepile(av,tetpil,v);
       }
       return v;
     case 2: return pointell(w,z,prec);
@@ -1709,16 +1709,16 @@ localred_p(GEN e, GEN p, int minim)
     case 0: f = 1; kod = 4+nuj; /* Inu */
       switch(kronecker(negi(c6),p))
       {
-	case  1: c = nuD; break;
-	case -1: c = odd(nuD)? 1: 2; break;
-	default: return localredbug(p,"localred (p | c6)");
+        case  1: c = nuD; break;
+        case -1: c = odd(nuD)? 1: 2; break;
+        default: return localredbug(p,"localred (p | c6)");
       }
       break;
     case 6: f = 2; kod = -4-nuj; /* Inu* */
       if (nuj & 1)
-	c = 3 + kronecker(diviiexact(mulii(c6, D),powiu(p, 9+nuj)), p);
+        c = 3 + kronecker(diviiexact(mulii(c6, D),powiu(p, 9+nuj)), p);
       else
-	c = 3 + kronecker(diviiexact(D, powiu(p, 6+nuj)), p);
+        c = 3 + kronecker(diviiexact(D, powiu(p, 6+nuj)), p);
       break;
     default: return localredbug(p,"localred (nu_D - nu_j != 0,6)");
   }
@@ -1734,8 +1734,8 @@ localred_p(GEN e, GEN p, int minim)
       p2 = sqri(p);
       /* x^3 - 3c4/p^2 x - 2c6/p^3 */
       tri = mkpoln(4, gen_1, gen_0,
-			    negi(mului(3, diviiexact(c4, p2))),
-			    negi(shifti(diviiexact(c6, mulii(p2,p)), 1)));
+                            negi(mului(3, diviiexact(c4, p2))),
+                            negi(shifti(diviiexact(c6, mulii(p2,p)), 1)));
       c = 1 + FpX_nbroots(tri, p);
       break;
     case  8: f = 2; kod = -4; /* IV*  */
@@ -1808,16 +1808,16 @@ localred_23(GEN e, long p)
   for (;;)
   {
     if (!nuD) return localred_result(0, 1, 1, v);
-	/* I0   */
+        /* I0   */
     if (umodiu(ell_get_b2(e), p)) /* p \nmid b2 */
     {
       if (umodiu(negi(ell_get_c6(e)), p == 2 ? 8 : 3) == 1)
-	c = nuD;
+        c = nuD;
       else
-	c = 2 - (nuD & 1);
+        c = 2 - (nuD & 1);
       return localred_result(1, 4 + nuD, c, v);
     }
-	/* Inu  */
+        /* Inu  */
     if (p == 2)
     {
       r = umodiu(ell_get_a4(e), 2);
@@ -1836,95 +1836,95 @@ localred_23(GEN e, long p)
     if (r || s || t) cumule(&v, &e, gen_1, stoi(r), stoi(s), stoi(t));
     if (umodiu(ell_get_a6(e), p2))
       return localred_result(nuD, 2, 1, v);
-	/* II   */
+        /* II   */
     if (umodiu(ell_get_b8(e), p3))
       return localred_result(nuD - 1, 3, 2, v);
-	/* III  */
+        /* III  */
     if (umodiu(ell_get_b6(e), p3))
     {
       if (umodiu(ell_get_b6(e), (p==2)? 32: 27) == (ulong)p2)
-	c = 3;
+        c = 3;
       else
-	c = 1;
+        c = 1;
       return localred_result(nuD - 2, 4, c, v);
     }
-	/* IV   */
+        /* IV   */
 
     if (umodiu(ell_get_a6(e), p3))
       cumule(&v, &e, gen_1, gen_0, gen_0, p == 2? gen_2: modis(ell_get_a3(e), 9));
-	/* p | a1, a2; p^2  | a3, a4; p^3 | a6 */
+        /* p | a1, a2; p^2  | a3, a4; p^3 | a6 */
     a21 = aux(ell_get_a2(e), p2, p);
     a42 = aux(ell_get_a4(e), p3, p2);
     a63 = aux(ell_get_a6(e), p4, p3);
     switch (numroots3(a21, a42, a63, p, &theroot))
     {
       case 3:
-	c = a63 ? 1: 2;
-	if (p == 2)
-	  c += ((a21 + a42 + a63) & 1);
-	else {
-	  if (((1 + a21 + a42 + a63) % 3) == 0) c++;
-	  if (((1 - a21 + a42 - a63) % 3) == 0) c++;
-	}
-	return localred_result(nuD - 4, -1, c, v);
+        c = a63 ? 1: 2;
+        if (p == 2)
+          c += ((a21 + a42 + a63) & 1);
+        else {
+          if (((1 + a21 + a42 + a63) % 3) == 0) c++;
+          if (((1 - a21 + a42 - a63) % 3) == 0) c++;
+        }
+        return localred_result(nuD - 4, -1, c, v);
       case 2: /* I0*  */
       { /* compute nu */
-	GEN pk, pk1, p2k;
-	long al, be, ga;
-	if (theroot) cumule(&v, &e, gen_1, stoi(theroot * p), gen_0, gen_0);
-	    /* p | a1; p^2  | a2, a3; p^3 | a4; p^4 | a6 */
-	nu = 1;
-	pk  = utoipos(p2);
-	p2k = utoipos(p4);
-	for(;;)
-	{
-	  be =  aux2(ell_get_a3(e), p, pk);
-	  ga = -aux2(ell_get_a6(e), p, p2k);
-	  al = 1;
-	  if (numroots2(al, be, ga, p, &theroot) == 2) break;
-	  if (theroot) cumule(&v, &e, gen_1, gen_0, gen_0, mulsi(theroot,pk));
-	  pk1 = pk;
-	  pk  = mului(p, pk);
-	  p2k = mului(p, p2k); nu++;
+        GEN pk, pk1, p2k;
+        long al, be, ga;
+        if (theroot) cumule(&v, &e, gen_1, stoi(theroot * p), gen_0, gen_0);
+            /* p | a1; p^2  | a2, a3; p^3 | a4; p^4 | a6 */
+        nu = 1;
+        pk  = utoipos(p2);
+        p2k = utoipos(p4);
+        for(;;)
+        {
+          be =  aux2(ell_get_a3(e), p, pk);
+          ga = -aux2(ell_get_a6(e), p, p2k);
+          al = 1;
+          if (numroots2(al, be, ga, p, &theroot) == 2) break;
+          if (theroot) cumule(&v, &e, gen_1, gen_0, gen_0, mulsi(theroot,pk));
+          pk1 = pk;
+          pk  = mului(p, pk);
+          p2k = mului(p, p2k); nu++;
 
-	  al = a21;
-	  be = aux2(ell_get_a4(e), p, pk);
-	  ga = aux2(ell_get_a6(e), p, p2k);
-	  if (numroots2(al, be, ga, p, &theroot) == 2) break;
-	  if (theroot) cumule(&v, &e, gen_1, mulsi(theroot, pk1), gen_0, gen_0);
-	  p2k = mului(p, p2k); nu++;
-	}
-	if (p == 2)
-	  c = 4 - 2 * (ga & 1);
-	else
-	  c = 3 + kross(be * be - al * ga, 3);
-	return localred_result(nuD - 4 - nu, -4 - nu, c, v);
+          al = a21;
+          be = aux2(ell_get_a4(e), p, pk);
+          ga = aux2(ell_get_a6(e), p, p2k);
+          if (numroots2(al, be, ga, p, &theroot) == 2) break;
+          if (theroot) cumule(&v, &e, gen_1, mulsi(theroot, pk1), gen_0, gen_0);
+          p2k = mului(p, p2k); nu++;
+        }
+        if (p == 2)
+          c = 4 - 2 * (ga & 1);
+        else
+          c = 3 + kross(be * be - al * ga, 3);
+        return localred_result(nuD - 4 - nu, -4 - nu, c, v);
       }
       case 1: /* Inu* */
-	if (theroot) cumule(&v, &e, gen_1, stoi(theroot*p), gen_0, gen_0);
-	    /* p | a1; p^2  | a2, a3; p^3 | a4; p^4 | a6 */
-	a32 = aux(ell_get_a3(e), p3, p2);
-	a64 = aux(ell_get_a6(e), p5, p4);
-	if (numroots2(1, a32, -a64, p, &theroot) == 2)
-	{
-	  if (p == 2)
-	    c = 3 - 2 * a64;
-	  else
-	    c = 2 + kross(a32 * a32 + a64, 3);
-	  return localred_result(nuD - 6, -4, c, v);
-	}
-	    /* IV*  */
-	if (theroot) cumule(&v, &e, gen_1, gen_0, gen_0, stoi(theroot*p2));
-	    /* p | a1; p^2 | a2; p^3 | a3, a4; p^5 | a6 */
-	if (umodiu(ell_get_a4(e), p4))
-	  return localred_result(nuD - 7, -3, 2, v);
-	    /* III* */
+        if (theroot) cumule(&v, &e, gen_1, stoi(theroot*p), gen_0, gen_0);
+            /* p | a1; p^2  | a2, a3; p^3 | a4; p^4 | a6 */
+        a32 = aux(ell_get_a3(e), p3, p2);
+        a64 = aux(ell_get_a6(e), p5, p4);
+        if (numroots2(1, a32, -a64, p, &theroot) == 2)
+        {
+          if (p == 2)
+            c = 3 - 2 * a64;
+          else
+            c = 2 + kross(a32 * a32 + a64, 3);
+          return localred_result(nuD - 6, -4, c, v);
+        }
+            /* IV*  */
+        if (theroot) cumule(&v, &e, gen_1, gen_0, gen_0, stoi(theroot*p2));
+            /* p | a1; p^2 | a2; p^3 | a3, a4; p^5 | a6 */
+        if (umodiu(ell_get_a4(e), p4))
+          return localred_result(nuD - 7, -3, 2, v);
+            /* III* */
 
-	if (umodiu(ell_get_a6(e), p6))
-	  return localred_result(nuD - 8, -2, 1, v);
-	    /* II*  */
-	cumule(&v, &e, utoipos(p), gen_0, gen_0, gen_0); /* not minimal */
-	nuD -= 12;
+        if (umodiu(ell_get_a6(e), p6))
+          return localred_result(nuD - 8, -2, 1, v);
+            /* II*  */
+        cumule(&v, &e, utoipos(p), gen_0, gen_0, gen_0); /* not minimal */
+        nuD -= 12;
     }
   }
 }
@@ -1971,8 +1971,8 @@ ellintegralmodel(GEN e)
     {
       case t_INT: break;
       case t_FRAC: /* partial factorization */
-	L = shallowconcat(L, gel(Z_factor_limit(gel(c,2), 0),1));
-	break;
+        L = shallowconcat(L, gel(Z_factor_limit(gel(c,2), 0),1));
+        break;
       default: pari_err(talker, "not a rational curve in ellintegralmodel");
     }
   }
@@ -1990,9 +1990,9 @@ ellintegralmodel(GEN e)
     for (i = 1; i < 6; i++)
       if (!gequal0(gel(a,i)))
       {
-	long r = (i == 5)? 6: i; /* a5 is missing */
-	m = r * n + Q_pval(gel(a,i), p);
-	while (m < 0) { n++; m += r; }
+        long r = (i == 5)? 6: i; /* a5 is missing */
+        m = r * n + Q_pval(gel(a,i), p);
+        while (m < 0) { n++; m += r; }
       }
     u = mulii(u, powiu(p, n));
   }
@@ -2113,52 +2113,52 @@ neron(GEN e, long p, long* ptkod)
     {
       case 1: return (v6>0) ? 2 : 1;
       case 2:
-	if (vd==4) return 1;
-	else
-	{
-	  if (vd==7) return 3;
-	  else return v4==4 ? 2 : 4;
-	}
+        if (vd==4) return 1;
+        else
+        {
+          if (vd==7) return 3;
+          else return v4==4 ? 2 : 4;
+        }
       case 3:
-	switch(vd)
-	{
-	  case 6: return 3;
-	  case 8: return 4;
-	  case 9: return 5;
-	  default: return v4==5 ? 2 : 1;
-	}
+        switch(vd)
+        {
+          case 6: return 3;
+          case 8: return 4;
+          case 9: return 5;
+          default: return v4==5 ? 2 : 1;
+        }
       case 4: return v4>4 ? 2 : 1;
       case -1:
-	switch(vd)
-	{
-	  case 9: return 2;
-	  case 10: return 4;
-	  default: return v4>4 ? 3 : 1;
-	}
+        switch(vd)
+        {
+          case 9: return 2;
+          case 10: return 4;
+          default: return v4>4 ? 3 : 1;
+        }
       case -2:
-	switch(vd)
-	{
-	  case 12: return 2;
-	  case 14: return 3;
-	  default: return 1;
-	}
+        switch(vd)
+        {
+          case 12: return 2;
+          case 14: return 3;
+          default: return 1;
+        }
       case -3:
-	switch(vd)
-	{
-	  case 12: return 2;
-	  case 14: return 3;
-	  case 15: return 4;
-	  default: return 1;
-	}
+        switch(vd)
+        {
+          case 12: return 2;
+          case 14: return 3;
+          case 15: return 4;
+          default: return 1;
+        }
       case -4: return v6==7 ? 2 : 1;
       case -5: return (v6==7 || v4==6) ? 2 : 1;
       case -6:
-	switch(vd)
-	{
-	  case 12: return 2;
-	  case 13: return 3;
-	  default: return v4==6 ? 2 : 1;
-	}
+        switch(vd)
+        {
+          case 12: return 2;
+          case 13: return 3;
+          default: return v4==6 ? 2 : 1;
+        }
       case -7: return (vd==12 || v4==6) ? 2 : 1;
       default: return v4==6 ? 2 : 1;
     }
@@ -2169,19 +2169,19 @@ neron(GEN e, long p, long* ptkod)
       case -1: case 1: return v4&1 ? 2 : 1;
       case -3: case 3: return (2*v6>vd+3) ? 2 : 1;
       case -4: case 2:
-	switch (vd%6)
-	{
-	  case 4: return 3;
-	  case 5: return 4;
-	  default: return v6%3==1 ? 2 : 1;
-	}
+        switch (vd%6)
+        {
+          case 4: return 3;
+          case 5: return 4;
+          default: return v6%3==1 ? 2 : 1;
+        }
       default: /* kod = -2 et 4 */
-	switch (vd%6)
-	{
-	  case 0: return 2;
-	  case 1: return 3;
-	  default: return 1;
-	}
+        switch (vd%6)
+        {
+          case 0: return 2;
+          case 1: return 3;
+          default: return 1;
+        }
     }
   }
 }
@@ -2196,7 +2196,7 @@ val_aux(GEN x, long p, long pk, long *u) {
 }
 static void
 val_init(GEN e, long p, long pk,
-	 long *v4, long *u, long *v6, long *v, long *vd, long *d1)
+         long *v4, long *u, long *v6, long *v, long *vd, long *d1)
 {
   GEN c4 = ell_get_c4(e), c6 = ell_get_c6(e), D = ell_get_disc(e);
   pari_sp av = avma;
@@ -2223,46 +2223,46 @@ ellrootno_2(GEN e)
     case 2:
       switch(n2)
       {
-	case 1:
-	  switch(v4)
-	  {
-	    case 4: return kross(-1,u);
-	    case 5: return 1;
-	    default: return -1;
-	  }
-	case 2: return (v6==7) ? 1 : -1;
-	case 3: return (v%8==5 || (u*v)%8==5) ? 1 : -1;
-	case 4: if (v4>5) return kross(-1,v);
-	  return (v4==5) ? -kross(-1,u) : -1;
+        case 1:
+          switch(v4)
+          {
+            case 4: return kross(-1,u);
+            case 5: return 1;
+            default: return -1;
+          }
+        case 2: return (v6==7) ? 1 : -1;
+        case 3: return (v%8==5 || (u*v)%8==5) ? 1 : -1;
+        case 4: if (v4>5) return kross(-1,v);
+          return (v4==5) ? -kross(-1,u) : -1;
       }
     case 3:
       switch(n2)
       {
-	case 1: return -kross(2,u*v);
-	case 2: return -kross(2,v);
-	case 3: y1 = (u - (v << (v6-5))) & 15;
-	  return (y1==7 || y1==11) ? 1 : -1;
-	case 4: return (v%8==3 || (2*u+v)%8==7) ? 1 : -1;
-	case 5: return v6==8 ? kross(2,x1) : kross(-2,u);
+        case 1: return -kross(2,u*v);
+        case 2: return -kross(2,v);
+        case 3: y1 = (u - (v << (v6-5))) & 15;
+          return (y1==7 || y1==11) ? 1 : -1;
+        case 4: return (v%8==3 || (2*u+v)%8==7) ? 1 : -1;
+        case 5: return v6==8 ? kross(2,x1) : kross(-2,u);
       }
     case -1:
       switch(n2)
       {
-	case 1: return -kross(2,x1);
-	case 2: return (v%8==7) || (x1%32==11) ? 1 : -1;
-	case 3: return v4==6 ? 1 : -1;
-	case 4: if (v4>6) return kross(-1,v);
-	  return v4==6 ? -kross(-1,u*v) : -1;
+        case 1: return -kross(2,x1);
+        case 2: return (v%8==7) || (x1%32==11) ? 1 : -1;
+        case 3: return v4==6 ? 1 : -1;
+        case 4: if (v4>6) return kross(-1,v);
+          return v4==6 ? -kross(-1,u*v) : -1;
       }
     case -2: return n2==1 ? kross(-2,v) : kross(-1,v);
     case -3:
       switch(n2)
       {
-	case 1: y1=(u-2*v)%64; if (y1<0) y1+=64;
-	  return (y1==3) || (y1==19) ? 1 : -1;
-	case 2: return kross(2*kross(-1,u),v);
-	case 3: return -kross(-1,u)*kross(-2*kross(-1,u),u*v);
-	case 4: return v6==11 ? kross(-2,x1) : -kross(-2,u);
+        case 1: y1=(u-2*v)%64; if (y1<0) y1+=64;
+          return (y1==3) || (y1==19) ? 1 : -1;
+        case 2: return kross(2*kross(-1,u),v);
+        case 3: return -kross(-1,u)*kross(-2*kross(-1,u),u*v);
+        case 4: return v6==11 ? kross(-2,x1) : -kross(-2,u);
       }
     case -5:
       if (n2==1) return x1%32==23 ? 1 : -1;
@@ -2270,17 +2270,17 @@ ellrootno_2(GEN e)
     case -6:
       switch(n2)
       {
-	case 1: return 1;
-	case 2: return v6==10 ? 1 : -1;
-	case 3: return (u%16==11) || ((u+4*v)%16==3) ? 1 : -1;
+        case 1: return 1;
+        case 2: return v6==10 ? 1 : -1;
+        case 3: return (u%16==11) || ((u+4*v)%16==3) ? 1 : -1;
       }
     case -7:
       if (n2==1) return 1;
       else
       {
-	y1 = (u + (v << (v6-8))) & 15;
-	if (v6==10) return (y1==9 || y1==13) ? 1 : -1;
-	else return (y1==9 || y1==5) ? 1 : -1;
+        y1 = (u + (v << (v6-8))) & 15;
+        if (v6==10) return (y1==9 || y1==13) ? 1 : -1;
+        else return (y1==9 || y1==5) ? 1 : -1;
       }
     case -8: return n2==2 ? kross(-1,v*d1) : -1;
     case -9: return n2==2 ? -kross(-1,d1) : -1;
@@ -2304,28 +2304,28 @@ ellrootno_3(GEN e)
     case 2:
       switch(n2)
       {
-	case 1: return (r6==4 || r6>6) ? 1 : -1;
-	case 2: return -K4*K6;
-	case 3: return 1;
-	case 4: return -K6;
+        case 1: return (r6==4 || r6>6) ? 1 : -1;
+        case 2: return -K4*K6;
+        case 3: return 1;
+        case 4: return -K6;
       }
     case 4:
       switch(n2)
       {
-	case 1: return K6*kross(d1,3);
-	case 2: return -K4;
-	case 3: return -K6;
+        case 1: return K6*kross(d1,3);
+        case 2: return -K4;
+        case 3: return -K6;
       }
     case -2: return n2==2 ? 1 : K6;
     case -4:
       switch(n2)
       {
-	case 1:
-	  if (v4==4) return (r6==4 || r6==8) ? 1 : -1;
-	  else return (r6==1 || r6==2) ? 1 : -1;
-	case 2: return -K6;
-	case 3: return (r6==2 || r6==7) ? 1 : -1;
-	case 4: return K6;
+        case 1:
+          if (v4==4) return (r6==4 || r6==8) ? 1 : -1;
+          else return (r6==1 || r6==2) ? 1 : -1;
+        case 2: return -K6;
+        case 3: return (r6==2 || r6==7) ? 1 : -1;
+        case 4: return K6;
       }
     default: return -1;
   }
@@ -2424,10 +2424,10 @@ ap_jacobi(GEN e, ulong p)
     long s = krouu(e8, p) + krouu((e8 + e72 + e6 + 4) % p, p); /* i = 0,1 */
     if (p < 757UL)
       for (i=2; i<p; i++)
-	s += krouu((e8 + i*(e72 + i*(e6 + (i<<2)))) % p, p);
+        s += krouu((e8 + i*(e72 + i*(e6 + (i<<2)))) % p, p);
     else
       for (i=2; i<p; i++)
-	s += krouu(e8 + Fl_mul(i, e72 + Fl_mul(i, e6 + (i<<2), p), p), p);
+        s += krouu(e8 + Fl_mul(i, e72 + Fl_mul(i, e6 + (i<<2), p), p), p);
     return -s;
   }
 }
@@ -2536,10 +2536,10 @@ ellap1(GEN e, GEN p)
       GEN q1 = P, mF = FpE_neg(F, p); /* -F */
       for (i=1;; i++)
       {
-	P = FpE_add(P,F,a4,p); /* h.f + i.F */
-	if (ell_is_inf(P)) { h = addii(h, mului(i,B)); goto FOUND; }
-	q1 = FpE_add(q1,mF,a4,p); /* h.f - i.F */
-	if (ell_is_inf(q1)) { h = subii(h, mului(i,B)); goto FOUND; }
+        P = FpE_add(P,F,a4,p); /* h.f + i.F */
+        if (ell_is_inf(P)) { h = addii(h, mului(i,B)); goto FOUND; }
+        q1 = FpE_add(q1,mF,a4,p); /* h.f - i.F */
+        if (ell_is_inf(q1)) { h = subii(h, mului(i,B)); goto FOUND; }
       }
     }
     /* Baby Step/Giant Step */
@@ -2564,23 +2564,23 @@ ellap1(GEN e, GEN p)
       long maxj;
       for (j=1; j<=nb; j++) /* adding nb.F (part 1) */
       {
-	P = gel(pts,j); /* h.f + (i-nb-1+j-1).F */
-	gel(u,j) = subii(gel(fg,1), gel(P,1));
-	if (!signe(gel(u,j))) /* sum = 0 or doubling */
-	{
-	  long k = i+j-2;
-	  if (equalii(gel(P,2),gel(fg,2))) k -= 2*nb; /* fg == P */
-	  h = addii(h, mului(k,B)); goto FOUND;
-	}
+        P = gel(pts,j); /* h.f + (i-nb-1+j-1).F */
+        gel(u,j) = subii(gel(fg,1), gel(P,1));
+        if (!signe(gel(u,j))) /* sum = 0 or doubling */
+        {
+          long k = i+j-2;
+          if (equalii(gel(P,2),gel(fg,2))) k -= 2*nb; /* fg == P */
+          h = addii(h, mului(k,B)); goto FOUND;
+        }
       }
       v = FpV_inv(u, p);
       maxj = (i-1 + nb <= s)? nb: s % nb;
       for (j=1; j<=maxj; j++,i++) /* adding nb.F (part 2) */
       {
-	P = gel(pts,j);
-	FpE_add_ip(P,fg, a4,p, gel(v,j));
-	tx[i] = mod2BIL(gel(P,1));
-	ty[i] = mod2BIL(gel(P,2));
+        P = gel(pts,j);
+        FpE_add_ip(P,fg, a4,p, gel(v,j));
+        tx[i] = mod2BIL(gel(P,1));
+        ty[i] = mod2BIL(gel(P,2));
       }
       avma = av2;
     }
@@ -2626,45 +2626,45 @@ ellap1(GEN e, GEN p)
       k = mod2BIL(gel(ftest,1));
       while (l<r)
       {
-	m = (l+r) >> 1;
-	if (tx[m] < k) l = m+1; else r = m;
+        m = (l+r) >> 1;
+        if (tx[m] < k) l = m+1; else r = m;
       }
       if (r <= (ulong)s && tx[r] == k)
       {
-	while (tx[r] == k && r) r--;
-	k2 = mod2BIL(gel(ftest,2));
-	for (r++; tx[r] == k && r <= (ulong)s; r++)
-	  if (ty[r] == k2 || ty[r] == pfinal - k2)
-	  { /* [h+j2] f == +/- ftest (= [i.s] f)? */
-	    j2 = ti[r] - 1;
-	    if (DEBUGLEVEL) msgtimer("[ellap1] giant steps, i = %ld",i);
-	    P = FpE_add(FpE_mul(F,stoi(j2),a4,p),fh,a4,p);
-	    if (equalii(gel(P,1), gel(ftest,1)))
-	    {
-	      if (equalii(gel(P,2), gel(ftest,2))) i = -i;
-	      h = addii(h, mulii(addis(mulss(s,i), j2), B));
-	      goto FOUND;
-	    }
-	  }
+        while (tx[r] == k && r) r--;
+        k2 = mod2BIL(gel(ftest,2));
+        for (r++; tx[r] == k && r <= (ulong)s; r++)
+          if (ty[r] == k2 || ty[r] == pfinal - k2)
+          { /* [h+j2] f == +/- ftest (= [i.s] f)? */
+            j2 = ti[r] - 1;
+            if (DEBUGLEVEL) msgtimer("[ellap1] giant steps, i = %ld",i);
+            P = FpE_add(FpE_mul(F,stoi(j2),a4,p),fh,a4,p);
+            if (equalii(gel(P,1), gel(ftest,1)))
+            {
+              if (equalii(gel(P,2), gel(ftest,2))) i = -i;
+              h = addii(h, mulii(addis(mulss(s,i), j2), B));
+              goto FOUND;
+            }
+          }
       }
       if (++j > nb)
       { /* compute next nb points */
-	long save = 0; /* gcc -Wall */;
-	for (j=1; j<=nb; j++)
-	{
-	  P = gel(pts,j);
-	  gel(u,j) = subii(gel(fg,1), gel(P,1));
-	  if (gel(u,j) == gen_0) /* occurs once: i = j = nb, P == fg */
-	  {
-	    gel(u,j) = shifti(gel(P,2),1);
-	    save = fg[1]; fg[1] = P[1];
-	  }
-	}
-	v = FpV_inv(u, p);
-	for (j=1; j<=nb; j++)
-	  FpE_add_ip(gel(pts,j),fg,a4,p, gel(v,j));
-	if (i == nb) { fg[1] = save; }
-	j = 1;
+        long save = 0; /* gcc -Wall */;
+        for (j=1; j<=nb; j++)
+        {
+          P = gel(pts,j);
+          gel(u,j) = subii(gel(fg,1), gel(P,1));
+          if (gel(u,j) == gen_0) /* occurs once: i = j = nb, P == fg */
+          {
+            gel(u,j) = shifti(gel(P,2),1);
+            save = fg[1]; fg[1] = P[1];
+          }
+        }
+        v = FpV_inv(u, p);
+        for (j=1; j<=nb; j++)
+          FpE_add_ip(gel(pts,j),fg,a4,p, gel(v,j));
+        if (i == nb) { fg[1] = save; }
+        j = 1;
       }
     }
 FOUND: /* found a point of exponent h on E_u */
@@ -2838,14 +2838,14 @@ ellap2(GEN e, ulong p)
     for (i=1; ; i++)
     {
       if (ftest.isnull) {
-	if (!uisprime(p)) pari_err(talker,"%lu is not prime, use ellak", p);
-	pari_err(bugparier,"ellap (f^(i*s) = 1)");
+        if (!uisprime(p)) pari_err(talker,"%lu is not prime, use ellak", p);
+        pari_err(bugparier,"ellap (f^(i*s) = 1)");
       }
       l=0; r=s;
       while (l<r)
       {
-	m = (l+r) >> 1;
-	if (table[m].x < ftest.x) l=m+1; else r=m;
+        m = (l+r) >> 1;
+        if (table[m].x < ftest.x) l=m+1; else r=m;
       }
       if (r < s && table[r].x == ftest.x) break;
       s_addell(&ftest, &fg, cp4, p);
@@ -3103,41 +3103,41 @@ anell(GEN e, long n0)
     if (!umodiu(D,p)) /* bad reduction, p | D */
       switch (tab[p&3] * krois(c6,p)) /* (-c6/p) */
       {
-	case -1: /* non deployee */
-	  for (m=p; m<=n; m+=p)
-	    if (an[m/p]) gel(an,m) = negi(gel(an,m/p));
-	  continue;
-	case 0: /* additive */
-	  for (m=p; m<=n; m+=p) gel(an,m) = gen_0;
-	  continue;
-	case 1: /* deployee */
-	  for (m=p; m<=n; m+=p)
+        case -1: /* non deployee */
+          for (m=p; m<=n; m+=p)
+            if (an[m/p]) gel(an,m) = negi(gel(an,m/p));
+          continue;
+        case 0: /* additive */
+          for (m=p; m<=n; m+=p) gel(an,m) = gen_0;
+          continue;
+        case 1: /* deployee */
+          for (m=p; m<=n; m+=p)
             if (an[m/p]) gel(an,m) = gel(an,m/p);
-	  continue;
+          continue;
       }
     else /* good reduction */
     {
       long ap = ellap_small_goodred(e, p);
 
       if (p <= SQRTn) {
-	ulong pk, oldpk = 1;
-	for (pk=p; pk <= n; oldpk=pk, pk *= p)
-	{
-	  if (pk == p) gel(an,pk) = stoi(ap);
-	  else
-	  {
-	    pari_sp av = avma;
-	    GEN u = mulsi(ap, gel(an,oldpk));
-	    GEN v = mului(p, gel(an,oldpk/p));
-	    gel(an,pk) = gerepileuptoint(av, subii(u,v));
-	  }
-	  for (m = n/pk; m > 1; m--)
-	    if (an[m] && m%p) gel(an,m*pk) = mulii(gel(an,m), gel(an,pk));
-	}
+        ulong pk, oldpk = 1;
+        for (pk=p; pk <= n; oldpk=pk, pk *= p)
+        {
+          if (pk == p) gel(an,pk) = stoi(ap);
+          else
+          {
+            pari_sp av = avma;
+            GEN u = mulsi(ap, gel(an,oldpk));
+            GEN v = mului(p, gel(an,oldpk/p));
+            gel(an,pk) = gerepileuptoint(av, subii(u,v));
+          }
+          for (m = n/pk; m > 1; m--)
+            if (an[m] && m%p) gel(an,m*pk) = mulii(gel(an,m), gel(an,pk));
+        }
       } else {
-	gel(an,p) = stoi(ap);
-	for (m = n/p; m > 1; m--)
-	  if (an[m]) gel(an,m*p) = mulsi(ap, gel(an,m));
+        gel(an,p) = stoi(ap);
+        for (m = n/p; m > 1; m--)
+          if (an[m]) gel(an,m*p) = mulsi(ap, gel(an,m));
       }
     }
   }
@@ -3171,8 +3171,8 @@ akell(GEN e, GEN n)
       j = kronecker(c6,p); if (!j) { avma = av; return gen_0; }
       if (mod2(gel(E,i)))
       {
-	if (mod4(p) == 3) j = -j;
-	if (j < 0) s = -s;
+        if (mod4(p) == 3) j = -j;
+        if (j < 0) s = -s;
       }
     }
   }
@@ -3222,8 +3222,8 @@ elllseries(GEN e, GEN s, GEN A, long prec)
   cga = gmul(cg, A);
   cgb = gdiv(cg, A);
   l = (ulong)((bit_accuracy_mul(prec, LOG2) +
-	      fabs(gtodouble(real_i(s))-1.) * log(rtodbl(cga)))
-	    / rtodbl(cgb) + 1);
+              fabs(gtodouble(real_i(s))-1.) * log(rtodbl(cga)))
+            / rtodbl(cgb) + 1);
   if ((long)l < 1) l = 1;
   v = anell(e, minss(l,LGBITS-1));
   s2 = ns = NULL; /* gcc -Wall */
@@ -3373,7 +3373,7 @@ exphellagm(GEN e, GEN z, int flag, long prec)
   }
   /* height on E1 is log(x)/2. Go back to E0 */
   return flag? gsqr( gdiv(gsqr(x), x_a) )
-	     : gdiv(x, sqrtr( mpabs(x_a) ));
+             : gdiv(x, sqrtr( mpabs(x_a) ));
 }
 /* exp( 4h_oo(z) ) */
 static GEN
@@ -3452,7 +3452,7 @@ ellheight0(GEN e, GEN a, long flag, long prec)
 
   phi2 = numer( /* a4 + 2a2 x + 3x^2 - y a1*/
     gsub(gadd(ell_get_a4(e),gmul(x,gadd(shifti(ell_get_a2(e),1),gmulsg(3,x)))),
-	 gmul(ell_get_a1(e),y)) );
+         gmul(ell_get_a1(e),y)) );
   Lp = gel(Z_factor(gcdii(psi2,phi2)),1);
   lx = lg(Lp);
   for (i=1; i<lx; i++)
@@ -3588,15 +3588,15 @@ elltaniyama(GEN e, long prec)
       if (!n) s3 = gadd(s3, ell_get_b4(e));
       s2 = gen_0;
       for (m=-2; m<=n+1; m++)
-	s2 = gadd(s2,gmulsg(m*(n+m),gmul(gel(X,m),gel(C,n-m))));
+        s2 = gadd(s2,gmulsg(m*(n+m),gmul(gel(X,m),gel(C,n-m))));
       s2 = gmul2n(s2,-1);
       s1 = gen_0;
       for (m=-1; m+m<=n; m++)
       {
-	if (m+m==n)
-	  s1 = gadd(s1, gsqr(gel(X,m)));
-	else
-	  s1 = gadd(s1, gmul2n(gmul(gel(X,m),gel(X,n-m)),1));
+        if (m+m==n)
+          s1 = gadd(s1, gsqr(gel(X,m)));
+        else
+          s1 = gadd(s1, gmul2n(gmul(gel(X,m),gel(X,n-m)),1));
       }
       gel(X,n+2) = gdivgs(gsub(gadd(gmulsg(6,s1),s3),s2), (n+2)*(n+1)-12);
     }
@@ -3605,7 +3605,7 @@ elltaniyama(GEN e, long prec)
       setlg(x, 9); gel(x,8) = pol_x(MAXVARN);
       w = derivser(x); setvalp(w,-2); /* 4v^3 + b2 x^2 + 2b4 x + b6 */
       s1 = gadd(ell_get_b6(e), gmul(x, gadd(gmul2n(ell_get_b4(e),1),
-					gmul(x,gadd(ell_get_b2(e),gmul2n(x,2))))));
+                                        gmul(x,gadd(ell_get_b2(e),gmul2n(x,2))))));
       setlg(x, prec+3);
       s2 = gsub(s1, gmul(c,gsqr(w)));
       s2 = gel(s2,2);
@@ -3881,8 +3881,8 @@ nagelllutz(GEN e)
       p1 = mkvec2(x, y);
       if (is_new_torsion(e,r,p1,t2))
       {
-	gel(r,++t) = p1;
-	gel(r,++t) = mkvec2(x, gsub(y, d));
+        gel(r,++t) = p1;
+        gel(r,++t) = mkvec2(x, gsub(y, d));
       }
     }
   }
@@ -4000,8 +4000,8 @@ elltors(GEN e)
       p = torspnt(e,w1j,i,prec);
       if (!p && i%2==0)
       {
-	p = torspnt(e,gadd(w22,w1j),i,prec);
-	if (!p) p = torspnt(e,gadd(w22,gmul2n(w1j,1)),i,prec);
+        p = torspnt(e,gadd(w22,w1j),i,prec);
+        if (!p) p = torspnt(e,gadd(w22,gmul2n(w1j,1)),i,prec);
       }
       if (p) { k = i; break; }
     }
@@ -4024,21 +4024,21 @@ elltors(GEN e)
     case 0: /* no point of order 2 */
       for (i=9; i>1; i-=2)
       {
-	if (B%i != 0) continue;
-	w1j = gdivgs(w1,i);
-	p = torspnt(e,w1j,i,prec);
-	if (p) { k = i; break; }
+        if (B%i != 0) continue;
+        w1j = gdivgs(w1,i);
+        p = torspnt(e,w1j,i,prec);
+        if (p) { k = i; break; }
       }
       break;
 
     case 1: /* 1 point of order 2: w1 / 2 */
       for (i=12; i>2; i-=2)
       {
-	if (B%i != 0) continue;
-	w1j = gdivgs(w1,i);
-	p = torspnt(e,w1j,i,prec);
-	if (!p && i%4==0) p = torspnt(e,gadd(w22,w1j),i,prec);
-	if (p) { k = i; break; }
+        if (B%i != 0) continue;
+        w1j = gdivgs(w1,i);
+        p = torspnt(e,w1j,i,prec);
+        if (!p && i%4==0) p = torspnt(e,gadd(w22,w1j),i,prec);
+        if (p) { k = i; break; }
       }
       if (!p) { p = tor1; k = 2; }
       break;
@@ -4046,10 +4046,10 @@ elltors(GEN e)
     case 2: /* 1 point of order 2: w = w2/2 or (w1+w2)/2 */
       for (i=5; i>1; i-=2)
       {
-	if (B%i != 0) continue;
-	w1j = gdivgs(w1,i);
-	p = torspnt(e,gadd(w,w1j),2*i,prec);
-	if (p) { k = 2*i; break; }
+        if (B%i != 0) continue;
+        w1j = gdivgs(w1,i);
+        p = torspnt(e,gadd(w,w1j),2*i,prec);
+        if (p) { k = 2*i; break; }
       }
       if (!p) { p = tor2; k = 2; }
       tor2 = NULL; break;
@@ -4057,10 +4057,10 @@ elltors(GEN e)
     case 3: /* 2 points of order 2: w1/2 and w2/2 */
       for (i=8; i>2; i-=2)
       {
-	if (B%(2*i) != 0) continue;
-	w1j = gdivgs(w1,i);
-	p = torspnt(e,w1j,i,prec);
-	if (p) { k = i; break; }
+        if (B%(2*i) != 0) continue;
+        w1j = gdivgs(w1,i);
+        p = torspnt(e,w1j,i,prec);
+        if (p) { k = i; break; }
       }
       if (!p) { p = tor1; k = 2; }
       break;
@@ -4507,7 +4507,7 @@ ellL1(GEN E, long r, long prec)
 }
 
 GEN
-ellanalyticrank(GEN e, GEN eps, long prec)	
+ellanalyticrank(GEN e, GEN eps, long prec)
 {
   struct ellld el;
   long rk;

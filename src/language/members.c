@@ -112,9 +112,9 @@ member_zk(GEN x)
     switch(t)
     {
       case typ_Q:
-	y = cgetg(3,t_VEC);
-	gel(y,1) = gen_1;
-	gel(y,2) = pol_x(varn(x[1])); return y;
+        y = cgetg(3,t_VEC);
+        gel(y,1) = gen_1;
+        gel(y,2) = pol_x(varn(x[1])); return y;
       case typ_RNF:
         return gel(x,7);
     }
@@ -272,8 +272,8 @@ member_clgp(GEN x) /* class group (3-component row vector) */
     if (typ(x)==t_VEC)
       switch(lg(x))
       {
-	case 3: /* no gen */
-	case 4: return x;
+        case 3: /* no gen */
+        case 4: return x;
       }
     member_err("clgp");
   }
@@ -305,8 +305,8 @@ member_fu(GEN x) /* fundamental units */
     switch(t)
     {
       case typ_Q:
-	x = quad_disc(x);
-	return (signe(x)<0)? cgetg(1,t_VEC): quadunit(x);
+        x = quad_disc(x);
+        return (signe(x)<0)? cgetg(1,t_VEC): quadunit(x);
     }
     member_err("fu");
   }

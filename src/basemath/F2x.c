@@ -543,7 +543,7 @@ F2xq_powers(GEN x, long l, GEN T)
   } else {
     for(i = 4; i < l+2; i++) {
       gel(V,i) = (i&1)? F2xq_sqr(gel(V, (i+1)>>1),T)
-		      : F2xq_mul(gel(V, i-1),x,T);
+                      : F2xq_mul(gel(V, i-1),x,T);
     }
   }
   return V;

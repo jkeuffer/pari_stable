@@ -964,8 +964,8 @@ Flx_rem_basecase(GEN x, GEN y, ulong p)
       p1 = p - x[i]; /* compute -p1 instead of p1 (pb with ulongs otherwise) */
       for (j=i-dy+1; j<=i && j<=dz; j++)
       {
-	p1 += z[j]*y[i-j];
-	if (p1 & HIGHBIT) p1 %= p;
+        p1 += z[j]*y[i-j];
+        if (p1 & HIGHBIT) p1 %= p;
       }
       p1 %= p;
       z[i-dy] = p1? ((p - p1)*inv) % p: 0;
@@ -975,8 +975,8 @@ Flx_rem_basecase(GEN x, GEN y, ulong p)
       p1 = z[0]*y[i];
       for (j=1; j<=i && j<=dz; j++)
       {
-	p1 += z[j]*y[i-j];
-	if (p1 & HIGHBIT) p1 %= p;
+        p1 += z[j]*y[i-j];
+        if (p1 & HIGHBIT) p1 %= p;
       }
       c[i] = Fl_sub(x[i], p1%p, p);
     }
@@ -988,14 +988,14 @@ Flx_rem_basecase(GEN x, GEN y, ulong p)
     {
       p1 = p - x[i]; /* compute -p1 instead of p1 (pb with ulongs otherwise) */
       for (j=i-dy+1; j<=i && j<=dz; j++)
-	p1 = Fl_add(p1, Fl_mul(z[j],y[i-j],p), p);
+        p1 = Fl_add(p1, Fl_mul(z[j],y[i-j],p), p);
       z[i-dy] = p1? Fl_mul(p - p1, inv, p): 0;
     }
     for (i=0; i<dy; i++)
     {
       p1 = Fl_mul(z[0],y[i],p);
       for (j=1; j<=i && j<=dz; j++)
-	p1 = Fl_add(p1, Fl_mul(z[j],y[i-j],p), p);
+        p1 = Fl_add(p1, Fl_mul(z[j],y[i-j],p), p);
       c[i] = Fl_sub(x[i], p1, p);
     }
   }
@@ -1062,8 +1062,8 @@ Flx_divrem(GEN x, GEN y, ulong p, GEN *pr)
       p1 = p - x[i]; /* compute -p1 instead of p1 (pb with ulongs otherwise) */
       for (j=i-dy+1; j<=i && j<=dz; j++)
       {
-	p1 += z[j]*y[i-j];
-	if (p1 & HIGHBIT) p1 %= p;
+        p1 += z[j]*y[i-j];
+        if (p1 & HIGHBIT) p1 %= p;
       }
       p1 %= p;
       z[i-dy] = p1? (long) ((p - p1)*inv) % p: 0;
@@ -1076,7 +1076,7 @@ Flx_divrem(GEN x, GEN y, ulong p, GEN *pr)
     { /* compute -p1 instead of p1 (pb with ulongs otherwise) */
       p1 = p - (ulong)x[i];
       for (j=i-dy+1; j<=i && j<=dz; j++)
-	p1 = Fl_add(p1, Fl_mul(z[j],y[i-j],p), p);
+        p1 = Fl_add(p1, Fl_mul(z[j],y[i-j],p), p);
       z[i-dy] = p1? Fl_mul(p - p1, inv, p): 0;
     }
   }
@@ -1091,8 +1091,8 @@ Flx_divrem(GEN x, GEN y, ulong p, GEN *pr)
       p1 = (ulong)z[0]*y[i];
       for (j=1; j<=i && j<=dz; j++)
       {
-	p1 += (ulong)z[j]*y[i-j];
-	if (p1 & HIGHBIT) p1 %= p;
+        p1 += (ulong)z[j]*y[i-j];
+        if (p1 & HIGHBIT) p1 %= p;
       }
       c[i] = Fl_sub(x[i], p1%p, p);
     }
@@ -1103,7 +1103,7 @@ Flx_divrem(GEN x, GEN y, ulong p, GEN *pr)
     {
       p1 = Fl_mul(z[0],y[i],p);
       for (j=1; j<=i && j<=dz; j++)
-	p1 = Fl_add(p1, Fl_mul(z[j],y[i-j],p), p);
+        p1 = Fl_add(p1, Fl_mul(z[j],y[i-j],p), p);
       c[i] = Fl_sub(x[i], p1, p);
     }
   }
@@ -1345,11 +1345,11 @@ Flx_eval(GEN x, ulong y, ulong p)
     for (i--; i>=2; i=j-1)
     {
       for (j=i; !x[j]; j--)
-	if (j==2)
-	{
-	  if (i != j) y = Fl_powu(y, i-j+1, p);
-	  return (p1 * y) % p;
-	}
+        if (j==2)
+        {
+          if (i != j) y = Fl_powu(y, i-j+1, p);
+          return (p1 * y) % p;
+        }
       r = (i==j)? y: Fl_powu(y, i-j+1, p);
       p1 = ((p1*r) + x[j]) % p;
     }
@@ -1359,11 +1359,11 @@ Flx_eval(GEN x, ulong y, ulong p)
     for (i--; i>=2; i=j-1)
     {
       for (j=i; !x[j]; j--)
-	if (j==2)
-	{
-	  if (i != j) y = Fl_powu(y, i-j+1, p);
-	  return Fl_mul(p1, y, p);
-	}
+        if (j==2)
+        {
+          if (i != j) y = Fl_powu(y, i-j+1, p);
+          return Fl_mul(p1, y, p);
+        }
       r = (i==j)? y: Fl_powu(y, i-j+1, p);
       p1 = Fl_add((ulong)x[j], Fl_mul(p1,r,p), p);
     }
@@ -1444,8 +1444,8 @@ Flx_even_odd_comb(GEN P, ulong u, ulong v, ulong p)
   {
     ulong t = P[i];
     y[i] = (t == 0)? 0:
-		     (i&1)? Fl_mul(t, Fl_sub(u, v, p), p)
-			  : Fl_mul(t, Fl_add(u, v, p), p);
+                     (i&1)? Fl_mul(t, Fl_sub(u, v, p), p)
+                          : Fl_mul(t, Fl_add(u, v, p), p);
   }
   return Flx_renormalize(y,l);
 }
@@ -1977,9 +1977,9 @@ FlxX_swap(GEN x, long n, long ws)
     p1[1] = ws;
     for (k=2; k<lx; k++)
       if( j<lg(x[k]))
-	p1[k] = mael(x,k,j);
+        p1[k] = mael(x,k,j);
       else
-	p1[k] = 0;
+        p1[k] = 0;
     gel(y,j) = Flx_renormalize(p1,lx);
   }
   return FlxX_renormalize(y,ly);
@@ -2242,8 +2242,8 @@ FlxqX_divrem(GEN x, GEN y, GEN T, ulong p, GEN *pr)
       av0 = avma; x = FlxqX_red(x, T, p);
       if (pr == ONLY_DIVIDES)
       {
-	avma=av0;
-	return signe(x)? NULL: zeropol(vx);
+        avma=av0;
+        return signe(x)? NULL: zeropol(vx);
       }
       if (pr == ONLY_REM) return x;
       *pr = x;
@@ -2522,14 +2522,14 @@ FlxqXQ_pow(GEN x, GEN n, GEN S, GEN T, ulong p)
     /* We do not handle polynomials multiple of x yet */
     D.mg  = FlxqX_invmontgomery(S,T,p);
     y = leftright_pow(zxX_to_Kronecker(x,T), n,
-	(void*)&D, &FlxqXQ_sqr_montgomery, &FlxqXQ_mul_montgomery);
+        (void*)&D, &FlxqXQ_sqr_montgomery, &FlxqXQ_mul_montgomery);
     y = leftright_pow(zxX_to_Kronecker(x,T), n,
-	(void*)&D, &FlxqXQ_sqr, &FlxqXQ_mul);
+        (void*)&D, &FlxqXQ_sqr, &FlxqXQ_mul);
   }
   else
 #endif
     y = leftright_pow(zxX_to_Kronecker(x,T), n,
-	(void*)&D, &FlxqXQ_sqr, &FlxqXQ_mul);
+        (void*)&D, &FlxqXQ_sqr, &FlxqXQ_mul);
   y = Kronecker_to_FlxqX(y, T,p);
   return gerepileupto(av0, y);
 }

@@ -187,12 +187,12 @@ dogroup(subgp_iter *T)
       affui(powlist[L[c[r]] - M[r]], H[r][c[r]]);
       for (r=i+1; r<=l; r++)
       {
-	if (c[r] < c[i])
-	  e = g[i][r] * powlist[L[c[r]] - M[i]+1];
-	else
-	  if (L[c[r]] < M[i]) e = g[i][r];
-	  else e = g[i][r] * powlist[L[c[r]] - M[i]];
-	affui(e, H[i][c[r]]);
+        if (c[r] < c[i])
+          e = g[i][r] * powlist[L[c[r]] - M[i]+1];
+        else
+          if (L[c[r]] < M[i]) e = g[i][r];
+          else e = g[i][r] * powlist[L[c[r]] - M[i]];
+        affui(e, H[i][c[r]]);
       }
     }
     treatsub(T, (GEN)H); avma = av;
@@ -296,7 +296,7 @@ dopsub(subgp_iter *T, GEN p, GEN indexsubq)
     if (M[1] > L[1])
     {
       for (j=2; j<=n; j++)
-	if (M[j] < L[j] && M[j] < M[j-1]) break;
+        if (M[j] < L[j] && M[j] < M[j-1]) break;
       if (j > n) return;
 
       M[j]++; for (k=1; k<j; k++) M[k]=M[j];
@@ -310,34 +310,34 @@ dopsub(subgp_iter *T, GEN p, GEN indexsubq)
 
       if (T->subq && T->bound) /* G not a p-group */
       {
-	pari_sp av = avma;
-	GEN indexH = powiu(p, wG - w);
-	GEN B = divii(T->bound, indexH);
-	k = 1;
-	for (i=1; i<lsubq; i++)
-	  if (cmpii(gel(indexsubq,i), B) <= 0)
-	    T->subqpart[k++] = T->subq[i];
-	setlg(T->subqpart, k); avma = av;
+        pari_sp av = avma;
+        GEN indexH = powiu(p, wG - w);
+        GEN B = divii(T->bound, indexH);
+        k = 1;
+        for (i=1; i<lsubq; i++)
+          if (cmpii(gel(indexsubq,i), B) <= 0)
+            T->subqpart[k++] = T->subq[i];
+        setlg(T->subqpart, k); avma = av;
       }
       if (DEBUGLEVEL)
       {
-	long *Lp = conjugate(L);
-	long *Mp = conjugate(M);
-	GEN BINMAT = matqpascal(len(L)+1, p);
+        long *Lp = conjugate(L);
+        long *Mp = conjugate(M);
+        GEN BINMAT = matqpascal(len(L)+1, p);
 
-	if (DEBUGLEVEL > 3)
-	{
-	  fprintferr("    lambda = "); printtyp(L);
-	  fprintferr("    lambda'= "); printtyp(Lp);
-	  fprintferr("    mu = "); printtyp(M);
-	  fprintferr("    mu'= "); printtyp(Mp);
-	}
-	for (j=1; j<=len(Mp); j++)
-	{
-	  p1 = mulii(p1, powiu(p, Mp[j+1]*(Lp[j]-Mp[j])));
-	  p1 = mulii(p1, gcoeff(BINMAT, Lp[j]-Mp[j+1]+1, Mp[j]-Mp[j+1]+1));
-	}
-	fprintferr("  alpha_lambda(mu,p) = %Ps\n",p1);
+        if (DEBUGLEVEL > 3)
+        {
+          fprintferr("    lambda = "); printtyp(L);
+          fprintferr("    lambda'= "); printtyp(Lp);
+          fprintferr("    mu = "); printtyp(M);
+          fprintferr("    mu'= "); printtyp(Mp);
+        }
+        for (j=1; j<=len(Mp); j++)
+        {
+          p1 = mulii(p1, powiu(p, Mp[j+1]*(Lp[j]-Mp[j])));
+          p1 = mulii(p1, gcoeff(BINMAT, Lp[j]-Mp[j+1]+1, Mp[j]-Mp[j+1]+1));
+        }
+        fprintferr("  alpha_lambda(mu,p) = %Ps\n",p1);
       }
 
       T->countsub = 0; dopsubtyp(T);
@@ -345,8 +345,8 @@ dopsub(subgp_iter *T, GEN p, GEN indexsubq)
 
       if (DEBUGLEVEL)
       {
-	fprintferr("  countsub = %ld\n", T->countsub);
-	msgtimer("for this type");
+        fprintferr("  countsub = %ld\n", T->countsub);
+        msgtimer("for this type");
         if (T->subq) p1 = muliu(p1,lg(T->subqpart)-1);
         if (!equaliu(p1,T->countsub))
         {
@@ -498,7 +498,7 @@ subgroup_engine(subgp_iter *T)
     {
       indexsubq = cgetg(lsubq,t_VEC);
       for (i=1; i<lsubq; i++)
-	gel(indexsubq,i) = ZM_det_triangular(gel(T->subq,i));
+        gel(indexsubq,i) = ZM_det_triangular(gel(T->subq,i));
     }
     /* lift subgroups of I to G */
     for (i=1; i<lsubq; i++)

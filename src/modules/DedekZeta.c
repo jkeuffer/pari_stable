@@ -154,7 +154,7 @@ zeta_get_i0(long r1, long r2, long bit, GEN limx)
 {
   pari_sp av = avma;
   GEN B = gmul(sqrtr( divrr(powrs(mppi(DEFAULTPREC), r2-3), limx) ),
-	       gmul2n(powuu(5, r1), bit + r2));
+               gmul2n(powuu(5, r1), bit + r2));
   long i0 = get_i0(r1, r2, B, limx);
   if (DEBUGLEVEL>1) { fprintferr("i0 = %ld\n",i0); flusherr(); }
   avma = av; return i0;
@@ -321,8 +321,8 @@ initzeta(GEN T, long prec)
       gel(t,2) = mulur(coef[i], p1);
       for (j=2; j<=r; j++)
       {
-	pari_sp av2 = avma;
-	gel(t,j+1) = gerepileuptoleaf(av2, divru(mulrr(gel(t,j), p1), j));
+        pari_sp av2 = avma;
+        gel(t,j+1) = gerepileuptoleaf(av2, divru(mulrr(gel(t,j), p1), j));
       }
       gel(tabj,i) = t; /* tabj[n,j] = coef(n)*ln(c/n)^(j-1)/(j-1)! */
     }
@@ -358,13 +358,13 @@ initzeta(GEN T, long prec)
       /* n = 1 */
       if (i > 1 && signe(t)) t = mpmul(t, gel(tabcstni,1));
       for (n=2; n<=N0; n++)
-	if (coef[n])
-	{ /* sum(j=1, r-k+1, aij[i,j+k] * tabj[n, j]) */
+        if (coef[n])
+        { /* sum(j=1, r-k+1, aij[i,j+k] * tabj[n, j]) */
           GEN s = sumprod(A, gel(tabj,n), r, k);
           if (!signe(s)) continue;
-	  if (i > 1) s = mpmul(s, gel(tabcstni,n));
-	  t = mpadd(t,s);
-	}
+          if (i > 1) s = mpmul(s, gel(tabcstni,n));
+          t = mpadd(t,s);
+        }
       togglesign(t);
       gcoeff(C,i,k) = gerepileuptoleaf(av2,t);
       av2 = avma;
@@ -374,7 +374,7 @@ initzeta(GEN T, long prec)
       z = i&1? zone1: zone0;
       (void)switch_stack(z, 1);
       for (n=1; n<=N0; n++)
-	if (coef[n]) gel(tabcstni,n) = mpmul(gel(tabcstni,n),gel(tabcstn,n));
+        if (coef[n]) gel(tabcstni,n) = mpmul(gel(tabcstni,n),gel(tabcstn,n));
       /* come back */
       (void)switch_stack(z, 0);
     }

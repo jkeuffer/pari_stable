@@ -509,64 +509,64 @@ FindModulus(GEN bnr, GEN dtQ, long *newprec, long prec)
       nbidnn  = lg(idnormn) - 1;
       for (i = 1; i <= nbidnn; i++)
       { /* finite part of the conductor */
-	gel(m,1) = idealmul(nf, f, gel(idnormn,i));
+        gel(m,1) = idealmul(nf, f, gel(idnormn,i));
 
-	for (s = 1; s <= narch; s++)
-	{ /* infinite part */
-	  gel(arch,N+1-s) = gen_0;
+        for (s = 1; s <= narch; s++)
+        { /* infinite part */
+          gel(arch,N+1-s) = gen_0;
 
-	  /* compute Clk(m), check if m is a conductor */
-	  dbg_block();
-	  bnrm = Buchray(bnf, m, nf_INIT|nf_GEN);
-	  c = bnrisconductor(bnrm, NULL);
-	  dbg_release();
-	  gel(arch,N+1-s) = gen_1;
-	  if (!c) continue;
-
-	  /* compute Im(C) in Clk(m)... */
-	  ImC = ComputeKernel(bnrm, bnr, dtQ);
-
-	  /* ... and its subgroups of index 2 with conductor m */
+          /* compute Clk(m), check if m is a conductor */
           dbg_block();
-	  candD = subgrouplist_cond_sub(bnrm, ImC, mkvec(gen_2));
+          bnrm = Buchray(bnf, m, nf_INIT|nf_GEN);
+          c = bnrisconductor(bnrm, NULL);
           dbg_release();
-	  nbcand = lg(candD) - 1;
-	  for (c = 1; c <= nbcand; c++)
-	  {
-	    GEN D  = gel(candD,c);
-	    long cpl;
+          gel(arch,N+1-s) = gen_1;
+          if (!c) continue;
 
-	    /* check the splitting of primes */
-	    for (j = 1; j <= nbp; j++)
-	    {
-	      GEN ef = GetIndex(gel(bpr,j), bnrm, D);
-	      if (ef[1] * ef[2] == indpr[j]) break; /* no good */
-	    }
-	    if (j <= nbp) continue;
+          /* compute Im(C) in Clk(m)... */
+          ImC = ComputeKernel(bnrm, bnr, dtQ);
 
-	    p2 = cgetg(6, t_VEC); /* p2[5] filled in CplxModulus */
-	    gel(p2,1) = bnrm;
-	    gel(p2,2) = D;
-	    gel(p2,3) = InitQuotient(D);
-	    gel(p2,4) = InitQuotient(ImC);
-	    if (DEBUGLEVEL>1)
-	      fprintferr("\nTrying modulus = %Ps and subgroup = %Ps\n",
-			 bnr_get_mod(bnrm), D);
-	    cpl = CplxModulus(p2, &pr, prec);
-	    if (oldcpl < 0 || cpl < oldcpl)
-	    {
-	      *newprec = pr;
-	      if (rep) gunclone(rep);
-	      rep    = gclone(p2);
-	      oldcpl = cpl;
-	    }
-	    if (oldcpl < rb) goto END; /* OK */
+          /* ... and its subgroups of index 2 with conductor m */
+          dbg_block();
+          candD = subgrouplist_cond_sub(bnrm, ImC, mkvec(gen_2));
+          dbg_release();
+          nbcand = lg(candD) - 1;
+          for (c = 1; c <= nbcand; c++)
+          {
+            GEN D  = gel(candD,c);
+            long cpl;
 
-	    if (DEBUGLEVEL>1) fprintferr("Trying to find another modulus...");
-	    first = 0;
-	  }
-	}
-	if (!first) goto END; /* OK */
+            /* check the splitting of primes */
+            for (j = 1; j <= nbp; j++)
+            {
+              GEN ef = GetIndex(gel(bpr,j), bnrm, D);
+              if (ef[1] * ef[2] == indpr[j]) break; /* no good */
+            }
+            if (j <= nbp) continue;
+
+            p2 = cgetg(6, t_VEC); /* p2[5] filled in CplxModulus */
+            gel(p2,1) = bnrm;
+            gel(p2,2) = D;
+            gel(p2,3) = InitQuotient(D);
+            gel(p2,4) = InitQuotient(ImC);
+            if (DEBUGLEVEL>1)
+              fprintferr("\nTrying modulus = %Ps and subgroup = %Ps\n",
+                         bnr_get_mod(bnrm), D);
+            cpl = CplxModulus(p2, &pr, prec);
+            if (oldcpl < 0 || cpl < oldcpl)
+            {
+              *newprec = pr;
+              if (rep) gunclone(rep);
+              rep    = gclone(p2);
+              oldcpl = cpl;
+            }
+            if (oldcpl < rb) goto END; /* OK */
+
+            if (DEBUGLEVEL>1) fprintferr("Trying to find another modulus...");
+            first = 0;
+          }
+        }
+        if (!first) goto END; /* OK */
       }
     }
     /* if necessary compute more ideals */
@@ -578,7 +578,7 @@ FindModulus(GEN bnr, GEN dtQ, long *newprec, long prec)
 END:
   if (DEBUGLEVEL>1)
     fprintferr("No, we're done!\nModulus = %Ps and subgroup = %Ps\n",
-	       bnr_get_mod(gel(rep,1)), gel(rep,2));
+               bnr_get_mod(gel(rep,1)), gel(rep,2));
   gel(rep,5) = InitChar(gel(rep,1), gel(rep,5), *newprec);
   return gerepilecopy(av, rep);
 }
@@ -641,7 +641,7 @@ ArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
   if (!gequal1(gcoeff(idg, 1, 1))) {
     GEN P = divcond(bnr);
     GEN f = famat_mul_shallow(idealfactor(nf, idg),
-			  mkmat2(P, zerocol(lg(P)-1)));
+                          mkmat2(P, zerocol(lg(P)-1)));
     GEN mu = set_sign_mod_divisor(nf, NULL, idealapprfact(nf, f), cond,sarch);
     idh = idealdivexact(nf, mu, idg);
     muslambda = nfdiv(nf, mu, lambda);
@@ -874,8 +874,8 @@ _data4(GEN arch, long r1, long r2)
    2: the constant C(F) [t_REAL]
    3: bnr(F)
    4: [q, r1 - q, r2, rc] where
-	q = number of real places in F
-	rc = max{r1 + r2 - q + 1, r2 + q}
+        q = number of real places in F
+        rc = max{r1 + r2 - q + 1, r2 + q}
    6: diff(chi) primes dividing m but not F
    7: finite part of F
 
@@ -921,13 +921,13 @@ InitChar(GEN bnr, GEN listCR, long prec)
       ch_cond(dtcr) = gel(cond,1);
       if (gequal(cond,modul))
       {
-	ch_bnr(dtcr) = bnr;
-	ch_diff(dtcr) = cgetg(1, t_VEC);
+        ch_bnr(dtcr) = bnr;
+        ch_diff(dtcr) = cgetg(1, t_VEC);
       }
       else
       {
-	ch_bnr(dtcr) = Buchray(bnf, cond, nf_INIT|nf_GEN);
-	ch_diff(dtcr) = get_prdiff(bnr, cond);
+        ch_bnr(dtcr) = Buchray(bnf, cond, nf_INIT|nf_GEN);
+        ch_diff(dtcr) = get_prdiff(bnr, cond);
       }
     }
     else
@@ -1207,9 +1207,9 @@ EvalCoeff(GEN z, int* c, long deg)
     for (j=i; c[j] == 0; j--)
       if (j==0)
       {
-	if (!e) return NULL;
-	if (i!=j) z = gpowgs(z,i-j+1);
-	return gmul(e,z);
+        if (!e) return NULL;
+        if (i!=j) z = gpowgs(z,i-j+1);
+        return gmul(e,z);
       }
     if (e)
     {
@@ -1384,15 +1384,15 @@ InitPrimesQuad(GEN bnr, long N0, LISTray *R)
       else if (contZ % p == 0) deg0(R,p);
       else
       {
-	GEN pr = idealval(nf, cond, gel(Lpr,1))? gel(Lpr,2): gel(Lpr,1);
-	deg11(R, p, bnr, pr);
+        GEN pr = idealval(nf, cond, gel(Lpr,1))? gel(Lpr,2): gel(Lpr,1);
+        deg11(R, p, bnr, pr);
       }
       break;
     default: /* ramified */
       if (condZ % p == 0) deg0(R,p);
       else {
         GEN pr = gel(idealprimedec(nf,prime),1);
-	deg11(R, p, bnr, pr);
+        deg11(R, p, bnr, pr);
       }
       break;
     }
@@ -1435,7 +1435,7 @@ InitPrimes(GEN bnr, long N0, LISTray *R)
       if (!np || np > N0) break;
       if (condZ % p == 0 && idealval(nf, cond, pr))
       {
-	gel(tmpray,j) = NULL; continue;
+        gel(tmpray,j) = NULL; continue;
       }
 
       vecsmalltrunc_append(R->L1, np);
@@ -1752,9 +1752,9 @@ LABrcf: ct++;
       p1 = gen_0;
       for (k = 1; k <= N; k++)
       {
-	GEN p2 = gmul(gcoeff(M, k, j-1), gcoeff(M, k, i-1));
-	if (k == v) p2 = gmul(C2, p2);
-	p1 = gadd(p1,p2);
+        GEN p2 = gmul(gcoeff(M, k, j-1), gcoeff(M, k, i-1));
+        if (k == v) p2 = gmul(C2, p2);
+        p1 = gadd(p1,p2);
       }
       gcoeff(A, i, j) = gcoeff(A, j, i) = p1;
     }
@@ -2031,15 +2031,15 @@ QuadGetST(GEN bnr, GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
       long c = 0;
 
       if (DEBUGLEVEL>1)
-	fprintferr("\tcharacter no: %ld (%ld/%ld)\n", t,k,nChar);
+        fprintferr("\tcharacter no: %ld (%ld/%ld)\n", t,k,nChar);
       matan = computean(gel(dataCR,t), &LIST, NN, d);
       for (n = 1; n <= NN; n++)
-	if ((an = EvalCoeff(z, matan[n], d)))
-	{
-	  p1 = gadd(p1, gmul(an, gel(vcn,n)));
-	  p2 = gadd(p2, gmul(an, gel(veint1,n)));
-	  if (++c == 256) { gerepileall(av2,2, &p1,&p2); c = 0; }
-	}
+        if ((an = EvalCoeff(z, matan[n], d)))
+        {
+          p1 = gadd(p1, gmul(an, gel(vcn,n)));
+          p2 = gadd(p2, gmul(an, gel(veint1,n)));
+          if (++c == 256) { gerepileall(av2,2, &p1,&p2); c = 0; }
+        }
       gaffect(gmul(cfh, gmul(p1,c1)), gel(S,t));
       gaffect(gmul(cf,  gconj(p2)),   gel(T,t));
       FreeMat(matan,NN); avma = av2;
@@ -2216,16 +2216,16 @@ GetST(GEN bnr, GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
       int **matan;
 
       if (DEBUGLEVEL>1)
-	fprintferr("\tcharacter no: %ld (%ld/%ld)\n", t,k,nChar);
+        fprintferr("\tcharacter no: %ld (%ld/%ld)\n", t,k,nChar);
       matan = ComputeCoeff(gel(dataCR,t), &LIST, NN, d);
       for (n = 1; n <= NN; n++)
-	if ((an = EvalCoeff(z, matan[n], d)))
-	{
-	  get_cS_cT(&cScT, n);
-	  p1 = gadd(p1, gmul(an, gel(cScT.cS,n)));
-	  p2 = gadd(p2, gmul(an, gel(cScT.cT,n)));
-	  if (++c == 256) { gerepileall(av2,2, &p1,&p2); c = 0; }
-	}
+        if ((an = EvalCoeff(z, matan[n], d)))
+        {
+          get_cS_cT(&cScT, n);
+          p1 = gadd(p1, gmul(an, gel(cScT.cS,n)));
+          p2 = gadd(p2, gmul(an, gel(cScT.cT,n)));
+          if (++c == 256) { gerepileall(av2,2, &p1,&p2); c = 0; }
+        }
       gaffect(p1,        gel(S,t));
       gaffect(gconj(p2), gel(T,t));
       FreeMat(matan, NN); avma = av2;
@@ -2309,7 +2309,7 @@ LABDOUB:
       GetST(bnr, &S, &T, dataCR, vChar, newprec);
     for (i = 1; i <= cl; i++)
       Lp[i] = GetValue(gel(dataCR,i), gel(W,i), gel(S,i), gel(T,i),
-		       2, newprec)[2];
+                       2, newprec)[2];
   }
   else
   { /* compute a crude approximation of the result */
@@ -2329,8 +2329,8 @@ LABDOUB:
       av2 = avma;
       p1 = real_0(newprec); p2 = gel(ch_CHI(dtcr), 2);
       for (j = 1; j <= n; j++)
-	if ( (an = EvalCoeff(p2, matan[j], degs[i])) )
-	  p1 = gadd(p1, gdivgs(an, j));
+        if ( (an = EvalCoeff(p2, matan[j], degs[i])) )
+          p1 = gadd(p1, gdivgs(an, j));
       gel(L1,i) = gerepileupto(av2, p1);
       FreeMat(matan, n);
     }
@@ -2401,7 +2401,7 @@ LABDOUB:
     if (++cpt >= 3) pari_err(precer, "stark (computation impossible)");
 
     /* compute the precision, we need
-	  a) get at least EXTRA_PREC fractional digits if there is none;
+          a) get at least EXTRA_PREC fractional digits if there is none;
        or b) double the fractional digits.
     */
     incr_pr = gprecision(polrelnum)-2 - divsBIL( gexpo(polrelnum) );
@@ -2709,7 +2709,7 @@ bnrL1(GEN bnr, GEN subgp, long flag, long prec)
     a = indCR[i];
     if (a > 0)
       gel(L1,i) = GetValue(gel(dataCR,a), gel(W,a), gel(S,a), gel(T,a),
-			   flag, prec);
+                           flag, prec);
     else
       gel(L1,i) = gconj(gel(L1,-a));
   }

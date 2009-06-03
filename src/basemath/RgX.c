@@ -246,8 +246,8 @@ RgX_translate(GEN P, GEN c)
       for (k=n-i; k<n; k++) R[k] = gadd(R[k], R[k+1]);
       if (low_stack(lim, stack_lim(av,2)))
       {
-	if(DEBUGMEM>1) pari_warn(warnmem,"TR_POL(1), i = %ld/%ld", i,n);
-	Q = gerepilecopy(av, Q); R = (GEN*)Q+2;
+        if(DEBUGMEM>1) pari_warn(warnmem,"TR_POL(1), i = %ld/%ld", i,n);
+        Q = gerepilecopy(av, Q); R = (GEN*)Q+2;
       }
     }
   }
@@ -258,8 +258,8 @@ RgX_translate(GEN P, GEN c)
       for (k=n-i; k<n; k++) R[k] = gsub(R[k], R[k+1]);
       if (low_stack(lim, stack_lim(av,2)))
       {
-	if(DEBUGMEM>1) pari_warn(warnmem,"TR_POL(-1), i = %ld/%ld", i,n);
-	Q = gerepilecopy(av, Q); R = (GEN*)Q+2;
+        if(DEBUGMEM>1) pari_warn(warnmem,"TR_POL(-1), i = %ld/%ld", i,n);
+        Q = gerepilecopy(av, Q); R = (GEN*)Q+2;
       }
     }
   }
@@ -270,8 +270,8 @@ RgX_translate(GEN P, GEN c)
       for (k=n-i; k<n; k++) R[k] = gadd(R[k], gmul(c, R[k+1]));
       if (low_stack(lim, stack_lim(av,2)))
       {
-	if(DEBUGMEM>1) pari_warn(warnmem,"TR_POL, i = %ld/%ld", i,n);
-	Q = gerepilecopy(av, Q); R = (GEN*)Q+2;
+        if(DEBUGMEM>1) pari_warn(warnmem,"TR_POL, i = %ld/%ld", i,n);
+        Q = gerepilecopy(av, Q); R = (GEN*)Q+2;
       }
     }
   }
@@ -460,9 +460,9 @@ RgXY_swap(GEN x, long n, long w)
     {
       GEN xk = gel(x,k);
       if (j < lg(xk))
-	gel(a,k) = gel(xk,j);
+        gel(a,k) = gel(xk,j);
       else
-	gel(a,k) = gen_0;
+        gel(a,k) = gen_0;
     }
     gel(y,j) = normalizepol_lg(a,lx);
   }
@@ -539,7 +539,7 @@ RgX_mulXn(GEN x, long d)
   if (v >= d) return RgX_shift(x, -d);
   av = avma;
   z = gred_rfrac_simple( RgX_shift(x, -v),
-			 monomial(gen_1, d - v, varn(x)));
+                         monomial(gen_1, d - v, varn(x)));
   return gerepileupto(av, z);
 }
 
@@ -1567,7 +1567,7 @@ RgXQ_powers(GEN x, long l, GEN T)
   } else { /* use squarings if degree(x) is large */
     for(i = 4; i < l+2; i++)
       gel(V,i) = (i&1)? RgXQ_sqr(gel(V, (i+1)>>1),T)
-		      : RgXQ_mul(gel(V, i-1),x,T);
+                      : RgXQ_mul(gel(V, i-1),x,T);
   }
   return V;
 }

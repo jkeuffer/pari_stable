@@ -26,60 +26,60 @@ ASM addll mulll bfffo divll
 #define addll(a,b) \
 ({ ulong __value, __arg1 = (a), __arg2 = (b); \
    __asm__ ("addq %3,%0 ; adcq %1,%1" \
-	: "=r" (__value), "=r" (overflow) \
-	: "0" (__arg1), "g" (__arg2), "1" ((ulong)0) \
-	: "cc"); \
+        : "=r" (__value), "=r" (overflow) \
+        : "0" (__arg1), "g" (__arg2), "1" ((ulong)0) \
+        : "cc"); \
   __value; \
 })
 
 #define addllx(a,b) \
 ({ ulong __value, __arg1 = (a), __arg2 = (b), __temp; \
    __asm__ ("subq %5,%2 ; adcq %4,%0 ; adcq %1,%1" \
-	: "=r" (__value), "=&r" (overflow), "=&r" (__temp) \
-	: "0" (__arg1), "g" (__arg2), "g" (overflow), "1" ((ulong)0), "2" ((ulong)0) \
-	: "cc"); \
+        : "=r" (__value), "=&r" (overflow), "=&r" (__temp) \
+        : "0" (__arg1), "g" (__arg2), "g" (overflow), "1" ((ulong)0), "2" ((ulong)0) \
+        : "cc"); \
   __value; \
 })
 
 #define subll(a,b) \
 ({ ulong __value, __arg1 = (a), __arg2 = (b); \
    __asm__ ("subq %3,%0 ; adcq %1,%1" \
-	: "=r" (__value), "=r" (overflow) \
-	: "0" (__arg1), "g" (__arg2), "1" ((ulong)0) \
-	: "cc"); \
+        : "=r" (__value), "=r" (overflow) \
+        : "0" (__arg1), "g" (__arg2), "1" ((ulong)0) \
+        : "cc"); \
   __value; \
 })
 
 #define subllx(a,b) \
 ({ ulong __value, __arg1 = (a), __arg2 = (b), __temp; \
    __asm__ ("subq %5,%2 ; sbbq %4,%0 ; adcq %1,%1" \
-	: "=r" (__value), "=&r" (overflow), "=&r" (__temp) \
-	: "0" (__arg1), "g" (__arg2), "g" (overflow), "1" ((ulong)0), "2" ((ulong)0) \
-	: "cc"); \
+        : "=r" (__value), "=&r" (overflow), "=&r" (__temp) \
+        : "0" (__arg1), "g" (__arg2), "g" (overflow), "1" ((ulong)0), "2" ((ulong)0) \
+        : "cc"); \
   __value; \
 })
 
 #define mulll(a,b) \
 ({ ulong __valuelo, __arg1 = (a), __arg2 = (b); \
    __asm__ ("mulq %3" \
-	: "=a" /* %eax */ (__valuelo), "=d" /* %edx */ (hiremainder) \
-	: "0" (__arg1), "rm" (__arg2)); \
+        : "=a" /* %eax */ (__valuelo), "=d" /* %edx */ (hiremainder) \
+        : "0" (__arg1), "rm" (__arg2)); \
    __valuelo; \
 })
 
 #define addmul(a,b) \
 ({ ulong __valuelo, __arg1 = (a), __arg2 = (b), __temp; \
    __asm__ ("mulq %4 ; addq %5,%0 ; adcq %6,%1" \
-	: "=a" /* %eax */ (__valuelo), "=&d" /* %edx */ (hiremainder), "=r" (__temp) \
-	: "0" (__arg1), "rm" (__arg2), "g" (hiremainder), "2" ((ulong)0)); \
+        : "=a" /* %eax */ (__valuelo), "=&d" /* %edx */ (hiremainder), "=r" (__temp) \
+        : "0" (__arg1), "rm" (__arg2), "g" (hiremainder), "2" ((ulong)0)); \
    __valuelo; \
 })
 
 #define divll(a,b) \
 ({ ulong __value, __arg1 = (a), __arg2 = (b); \
    __asm__ ("divq %4" \
-	: "=a" /* %eax */ (__value), "=&d" /* %edx */ (hiremainder) \
-	: "0" /* %eax */ (__arg1), "1" /* %edx */ (hiremainder), "mr" (__arg2)); \
+        : "=a" /* %eax */ (__value), "=&d" /* %edx */ (hiremainder) \
+        : "0" /* %eax */ (__arg1), "1" /* %edx */ (hiremainder), "mr" (__arg2)); \
    __value; \
 })
 

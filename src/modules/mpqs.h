@@ -277,7 +277,7 @@ typedef struct mpqs_handle {
   /* the following three are in non-descending order, and the first two must
    * be adjusted for omega_k at the beginning */
   mpqs_int32_t index0_FB;       /* lowest subscript into FB of a "real" prime
-				 * (i.e. other than -1, 2, factors of k) */
+                                 * (i.e. other than -1, 2, factors of k) */
   mpqs_int32_t index1_FB;       /* lowest subscript into FB for sieving */
   mpqs_int32_t index2_FB;       /* primes for A are chosen relative to this */
   unsigned char index2_moved;   /* true when we're starved for small A's */
@@ -313,7 +313,7 @@ typedef struct mpqs_handle {
   /* further sizing parameters: */
   mpqs_int32_t target_no_rels;  /* target number of full relations */
   mpqs_int32_t largest_FB_p;    /* largest prime in the FB */
-  mpqs_int32_t pmin_index1;	/* lower bound for primes used for sieving */
+  mpqs_int32_t pmin_index1;        /* lower bound for primes used for sieving */
   mpqs_int32_t lp_scale;        /* factor by which LPs may exceed FB primes */
 
   mpqs_int32_t first_sort_point; /* when to sort and combine */

@@ -79,15 +79,15 @@ BuildTree(GEN link, GEN V, GEN W, GEN a, GEN T, GEN p)
     {
       if (typ(d)==t_POL)
       {
-	d = FpXQ_inv(d, T, p);
-	u = FqX_Fq_mul(u, d, T, p);
-	v = FqX_Fq_mul(v, d, T, p);
+        d = FpXQ_inv(d, T, p);
+        u = FqX_Fq_mul(u, d, T, p);
+        v = FqX_Fq_mul(v, d, T, p);
       }
       else
       {
-	d = Fp_inv(d, p);
-	u = FpX_Fp_mul(u, d, p);
-	v = FpX_Fp_mul(v, d, p);
+        d = Fp_inv(d, p);
+        u = FpX_Fp_mul(u, d, p);
+        v = FpX_Fp_mul(v, d, p);
       }
     }
     gel(W,j) = u;

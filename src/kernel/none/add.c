@@ -254,11 +254,11 @@ addrr_sign(GEN x, long sx, GEN y, long sy)
     if (extend) {
       ulong garde = addll(x[lx], y[i]);
       if (m < 4) /* don't extend for few correct bits */
-	z = cgetr(--lz);
+        z = cgetr(--lz);
       else
       {
-	z = cgetr(lz);
-	z[i] = garde;
+        z = cgetr(lz);
+        z[i] = garde;
       }
     }
     else
@@ -274,8 +274,8 @@ addrr_sign(GEN x, long sx, GEN y, long sy)
       for (;;) { z[i] = y[i]+1; if (z[i--]) break; }
       if (i <= 0)
       {
-	shift_right(z,z, 2,lz, 1,1);
-	z[1] = evalsigne(sx) | evalexpo(ey+1); return z;
+        shift_right(z,z, 2,lz, 1,1);
+        z[1] = evalsigne(sx) | evalexpo(ey+1); return z;
       }
     }
     for (; i>=2; i--) z[i] = y[i];
@@ -324,18 +324,18 @@ addrr_sign(GEN x, long sx, GEN y, long sy)
       /* if we need to shift anyway, shorten from left
        * If not, shorten from right, neutralizing last word of z */
       if (j == 0)
-	/* stackdummy((pari_sp)(z + lz+1), (pari_sp)(z + lz)); */
-	z[lz] = evaltyp(t_VECSMALL) | _evallg(1);
+        /* stackdummy((pari_sp)(z + lz+1), (pari_sp)(z + lz)); */
+        z[lz] = evaltyp(t_VECSMALL) | _evallg(1);
       else
       {
-	GEN t = z;
-	z++; shift_left(z,t,2,lz-1, last,j);
+        GEN t = z;
+        z++; shift_left(z,t,2,lz-1, last,j);
       }
       if ((last<<j) & HIGHBIT)
       { /* round up */
-	i = lz-1;
-	while (++z[i] == 0 && i > 1) i--;
-	if (i == 1) { ez++; z[2] = (long)HIGHBIT; }
+        i = lz-1;
+        while (++z[i] == 0 && i > 1) i--;
+        if (i == 1) { ez++; z[2] = (long)HIGHBIT; }
       }
     }
     else if (j) shift_left(z,z,2,lz-1, 0,j);

@@ -44,8 +44,8 @@ binaire(GEN x)
       do { gel(y,ly) = m & u ? gen_1 : gen_0; ly++; } while (m>>=1);
       for (i=3; i<lx; i++)
       {
-	m=HIGHBIT; xp=int_precW(xp); u=*xp;
-	do { gel(y,ly) = m & u ? gen_1 : gen_0; ly++; } while (m>>=1);
+        m=HIGHBIT; xp=int_precW(xp); u=*xp;
+        do { gel(y,ly) = m & u ? gen_1 : gen_0; ly++; } while (m>>=1);
       }
       break;
     }
@@ -62,27 +62,27 @@ binaire(GEN x)
       ly = -ex; ex++; m = HIGHBIT;
       if (ex<=0)
       {
-	gel(p1,1) = gen_0; for (i=1; i <= -ex; i++) gel(p2,i) = gen_0;
-	i=2;
+        gel(p1,1) = gen_0; for (i=1; i <= -ex; i++) gel(p2,i) = gen_0;
+        i=2;
       }
       else
       {
-	ly=1;
-	for (i=2; i<lx && ly<=ex; i++)
-	{
-	  m=HIGHBIT; u=x[i];
-	  do
-	    { gel(p1,ly) = (m & u) ? gen_1 : gen_0; ly++; }
-	  while ((m>>=1) && ly<=ex);
-	}
-	ly=1;
-	if (m) i--; else m=HIGHBIT;
+        ly=1;
+        for (i=2; i<lx && ly<=ex; i++)
+        {
+          m=HIGHBIT; u=x[i];
+          do
+            { gel(p1,ly) = (m & u) ? gen_1 : gen_0; ly++; }
+          while ((m>>=1) && ly<=ex);
+        }
+        ly=1;
+        if (m) i--; else m=HIGHBIT;
       }
       for (; i<lx; i++)
       {
-	u=x[i];
-	do { gel(p2,ly) = m & u ? gen_1 : gen_0; ly++; } while (m>>=1);
-	m=HIGHBIT;
+        u=x[i];
+        do { gel(p2,ly) = m & u ? gen_1 : gen_0; ly++; } while (m>>=1);
+        m=HIGHBIT;
       }
       break;
 
@@ -133,12 +133,12 @@ ibittrunc(GEN x, long bits)
   long len_out = nbits2nlong(bits);
 
   if (xl < len_out)
-      return x;
+    return x;
       /* Check whether mask is trivial */
   lowbits = bits & (BITS_IN_LONG-1);
   if (!lowbits) {
-      if (xl == len_out)
-	  return x;
+    if (xl == len_out)
+      return x;
   } else if (len_out <= xl) {
     GEN xi = int_W(x, len_out-1);
     /* Non-trival mask is given by a formula, if x is not
@@ -159,9 +159,9 @@ gbitneg(GEN x, long bits)
   long lowbits, xl, len_out, i;
 
   if (typ(x) != t_INT)
-      pari_err(typeer, "bitwise negation");
+    pari_err(typeer, "bitwise negation");
   if (bits < -1)
-      pari_err(talker, "negative exponent in bitwise negation");
+    pari_err(talker, "negative exponent in bitwise negation");
   if (bits == -1) return inegate(x);
   if (bits == 0) return gen_0;
   if (signe(x) < 0) { /* Consider as if mod big power of 2 */
@@ -171,7 +171,8 @@ gbitneg(GEN x, long bits)
   xl = lgefint(x);
   len_out = nbits2prec(bits);
   lowbits = bits & (BITS_IN_LONG-1);
-  if (len_out > xl) { /* Need to grow */
+  if (len_out > xl) /* Need to grow */
+  {
     GEN out, outp, xp = int_MSW(x);
     out = cgetipos(len_out);
     outp = int_MSW(out);
@@ -410,7 +411,8 @@ gbitnegimply(GEN x, GEN y)
   pari_sp ltop = avma;
   GEN z;
 
-  if (typ(x) != t_INT || typ(y) != t_INT) pari_err(typeer, "bitwise negated imply");
+  if (typ(x) != t_INT || typ(y) != t_INT)
+    pari_err(typeer, "bitwise negated imply");
   switch (signs(x, y))
   {
     case 3: /*1,1*/

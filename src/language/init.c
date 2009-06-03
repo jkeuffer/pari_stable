@@ -57,8 +57,8 @@ static pari_stack s_MODULES, s_OLDMODULES;
 const long functions_tblsz = 135; /* size of functions_hash */
 entree **functions_hash;
 
-void *foreignHandler; 	              /* Handler for foreign commands.   */
-char foreignExprSwitch = 3; 	      /* Just some unprobable char.      */
+void *foreignHandler;                       /* Handler for foreign commands.   */
+char foreignExprSwitch = 3;               /* Just some unprobable char.      */
 GEN  (*foreignExprHandler)(char*);    /* Handler for foreign expressions.*/
 entree* (*foreignAutoload)(const char*, long len); /* Autoloader         */
 void (*foreignFuncFree)(entree *);    /* How to free external entree.    */
@@ -184,7 +184,7 @@ THREAD void *PARI_stack_limit = NULL;
 
 #ifdef STACK_CHECK
 
-#  ifdef __EMX__				/* Emulate */
+#  ifdef __EMX__                                /* Emulate */
 void
 pari_stackcheck_init(void *stack_base)
 {
@@ -263,13 +263,13 @@ pari_daemon(void)
   switch(pid) {
       case -1: return 1; /* father, fork failed */
       case 0:
-	(void)setsid(); /* son becomes process group leader */
-	if (fork()) exit(0); /* now son exits, also when fork fails */
-	break; /* grandson: its father is the son, which exited,
-		* hence father becomes 'init', that'll take care of it */
+        (void)setsid(); /* son becomes process group leader */
+        if (fork()) exit(0); /* now son exits, also when fork fails */
+        break; /* grandson: its father is the son, which exited,
+                * hence father becomes 'init', that'll take care of it */
       default: /* father, fork succeeded */
-	(void)waitpid(pid,NULL,0); /* wait for son to exit, immediate */
-	return 1;
+        (void)waitpid(pid,NULL,0); /* wait for son to exit, immediate */
+        return 1;
   }
   /* grandson */
   return 0;
@@ -361,9 +361,9 @@ pari_sighandler(int sig)
       pariFILE *f = GP_DATA->pp->file;
       if (f && pari_outfile == f->file)
       {
-	pari_err(talker, "Broken Pipe, resetting file stack...");
-	GP_DATA->pp->file = NULL; /* to avoid oo recursion on error */
-	pari_outfile = stdout; pari_fclose(f);
+        pari_err(talker, "Broken Pipe, resetting file stack...");
+        GP_DATA->pp->file = NULL; /* to avoid oo recursion on error */
+        pari_outfile = stdout; pari_fclose(f);
       }
       /*Do not attempt to write to stdout in case it triggered the SIGPIPE*/
       return; /* not reached */
@@ -521,15 +521,15 @@ init_hashtable(entree **table, long tblsz)
       entree *EP = ep->next;
       switch(EpVALENCE(ep))
       {
-	case EpVAR: case EpINSTALL:
+        case EpVAR: case EpINSTALL:
         /* keep: attach it to last entree seen */
-	  if (last)
-	    last->next = ep;
-	  else
-	    table[i] = ep;
+          if (last)
+            last->next = ep;
+          else
+            table[i] = ep;
           ep->next = NULL; last = ep;
-	  break;
-	default: freeep(ep);
+          break;
+        default: freeep(ep);
       }
       ep = EP;
     }
@@ -560,7 +560,7 @@ pari_init_functions(void)
   stack_pushp(&s_OLDMODULES,oldfonctions);
   functions_hash = (entree**) pari_calloc(sizeof(entree*)*functions_tblsz);
   pari_fill_hashtable(functions_hash,
-		      new_fun_set? functions_basic:oldfonctions);
+                      new_fun_set? functions_basic:oldfonctions);
 }
 
 static void
@@ -763,10 +763,10 @@ recover(int flag)
       entree *EP = ep->next;
       switch(EpVALENCE(ep))
       {
-	case EpVAR:
-	  while (pop_val_if_newer(ep,listloc)) /* empty */;
-	  break;
-	case EpNEW: break;
+        case EpVAR:
+          while (pop_val_if_newer(ep,listloc)) /* empty */;
+          break;
+        case EpNEW: break;
       }
       ep = EP;
     }
@@ -947,19 +947,19 @@ pari_err(int numerr, ...)
     switch (numerr)
     {
       case talker: case alarmer: {
-	const char *ch1 = va_arg(ap, char*);
-	pari_vprintf(ch1,ap); pari_putc('.'); break;
+        const char *ch1 = va_arg(ap, char*);
+        pari_vprintf(ch1,ap); pari_putc('.'); break;
       }
       case user:
         pari_puts("user error: ");
         print0(va_arg(ap, GEN), f_RAW);
         break;
       case invmoder:
-	pari_printf("impossible inverse modulo: %Ps.", va_arg(ap, GEN));
+        pari_printf("impossible inverse modulo: %Ps.", va_arg(ap, GEN));
         break;
       case openfiler: {
-	const char *type = va_arg(ap, char*);
-	pari_printf("error opening %s file: `%s'.", type, va_arg(ap,char*));
+        const char *type = va_arg(ap, char*);
+        pari_printf("error opening %s file: `%s'.", type, va_arg(ap,char*));
         break;
       }
       case overflower:
@@ -978,21 +978,21 @@ pari_err(int numerr, ...)
       }
 
       case impl:
-	pari_printf("sorry, %s is not yet implemented.", va_arg(ap, char*));
+        pari_printf("sorry, %s is not yet implemented.", va_arg(ap, char*));
         break;
       case typeer: case mattype1: case negexper:
       case constpoler: case notpoler: case redpoler:
       case zeropoler: case consister: case flagerr: case precer:
-	pari_printf(" in %s.",va_arg(ap, char*)); break;
+        pari_printf(" in %s.",va_arg(ap, char*)); break;
 
       case bugparier:
-	pari_printf("bug in %s, please report",va_arg(ap, char*)); break;
+        pari_printf("bug in %s, please report",va_arg(ap, char*)); break;
 
       case operi: case operf:
       {
         const char *f, *op = va_arg(ap, const char*);
-	GEN x = va_arg(ap, GEN);
-	GEN y = va_arg(ap, GEN);
+        GEN x = va_arg(ap, GEN);
+        GEN y = va_arg(ap, GEN);
         pari_puts(numerr == operi? "impossible": "forbidden");
         switch(*op)
         {
@@ -1007,13 +1007,13 @@ pari_err(int numerr, ...)
         }
         if (f)
           pari_printf(" %s %s %s %s.",f,type_name(typ(x)),op,type_name(typ(y)));
-	break;
+        break;
       }
 
       case primer1: {
         ulong c = va_arg(ap, ulong);
-	if (c) pari_printf(", need primelimit ~ %lu.", c);
-	break;
+        if (c) pari_printf(", need primelimit ~ %lu.", c);
+        break;
       }
     }
   }
@@ -1417,8 +1417,8 @@ shiftaddress(GEN x, long dec)
       if (!x[i]) gel(x,i) = gen_0;
       else
       {
-	x[i] += dec;
-	shiftaddress(gel(x,i), dec);
+        x[i] += dec;
+        shiftaddress(gel(x,i), dec);
       }
     }
   }
@@ -1447,10 +1447,10 @@ shiftaddress_canon(GEN x, long dec)
     case t_LIST: {
       GEN Lx = list_data(x);
       if (Lx) {
-	pari_sp av = avma;
-	GEN L = (GEN)((long)Lx+dec);
-	shiftaddress_canon(L, dec);
-	list_data(x) = list_internal_copy(L, lg(L)); avma = av;
+        pari_sp av = avma;
+        GEN L = (GEN)((long)Lx+dec);
+        shiftaddress_canon(L, dec);
+        list_data(x) = list_internal_copy(L, lg(L)); avma = av;
       }
     }
     default:
@@ -1681,9 +1681,9 @@ TIMER(pari_timer *T)
   struct tms t; times(&t);
   return _get_time(T, t.tms_utime,
 #ifdef _SC_CLK_TCK
-		      sysconf(_SC_CLK_TCK)
+                      sysconf(_SC_CLK_TCK)
 #else
-		      CLK_TCK
+                      CLK_TCK
 #endif
   );
 }
@@ -1841,7 +1841,7 @@ pari_version(void) {
  *     the current output format)
  *  s* any number of strings (see s)
  *  M  Mnemonic or a flag (converted to a long); description follows
- *	 after \n at the end of the argument description
+ *         after \n at the end of the argument description
  *  D  Has a default value. Format is "Dvalue,type," (the ending comma is
  *     mandatory). Ex: D0,L, (arg is long, 0 by default).
  *     Special syntax:

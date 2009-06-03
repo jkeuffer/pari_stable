@@ -43,11 +43,11 @@ get_sep(const char *t)
     switch(*s++ = *t++)
     {
       case '"':
-	outer = !outer; break;
+        outer = !outer; break;
       case '\0':
-	return buf;
+        return buf;
       case ';':
-	if (outer) { s[-1] = 0; return buf; }
+        if (outer) { s[-1] = 0; return buf; }
         break;
       case '\\': /* gobble next char */
         if (s == lim) break;
@@ -248,7 +248,7 @@ sd_ulong_init(const char *v, const char *s, ulong *ptn, ulong Min, ulong Max)
     {
       char *buf = stackmalloc(strlen(s) + 2 * 20 + 40);
       (void)sprintf(buf, "default: incorrect value for %s [%lu-%lu]",
-		    s, Min, Max);
+                    s, Min, Max);
       pari_err(talker2, buf, v,v);
     }
     *ptn = n;
@@ -257,7 +257,7 @@ sd_ulong_init(const char *v, const char *s, ulong *ptn, ulong Min, ulong Max)
 
 static GEN
 sd_ulong(const char *v, long flag, const char *s, ulong *ptn, ulong Min, ulong Max,
-	 const char **msg)
+         const char **msg)
 {
   ulong n = *ptn;
   sd_ulong_init(v, s, ptn, Min, Max);
@@ -267,14 +267,14 @@ sd_ulong(const char *v, long flag, const char *s, ulong *ptn, ulong Min, ulong M
       return utoi(*ptn);
     case d_ACKNOWLEDGE:
       if (!*v || *ptn != n) {
-	if (msg)
-	{
-	  if (!*msg) msg++; /* single msg, always printed */
-	  else       msg += *ptn; /* one per possible value */
-	  pari_printf("   %s = %lu %s\n", s, *ptn, *msg);
-	}
-	else
-	  pari_printf("   %s = %lu\n", s, *ptn);
+        if (msg)
+        {
+          if (!*msg) msg++; /* single msg, always printed */
+          else       msg += *ptn; /* one per possible value */
+          pari_printf("   %s = %lu %s\n", s, *ptn, *msg);
+        }
+        else
+          pari_printf("   %s = %lu\n", s, *ptn);
       }
       break;
   }
@@ -333,7 +333,7 @@ sd_format(const char *v, long flag)
     {
       if (*v == '-') fmt->sigd = -1;
       else
-	if (isdigit((int)*v)) fmt->sigd=atol(v);
+        if (isdigit((int)*v)) fmt->sigd=atol(v);
     }
   }
   if (flag == d_RETURN)
@@ -362,7 +362,7 @@ gp_get_color(char **st)
       const char *a[3];
       long i = 0;
       for (a[0] = s = ++v; *s && *s != ']'; s++)
-	if (*s == ',') { *s = 0; a[++i] = s+1; }
+        if (*s == ',') { *s = 0; a[++i] = s+1; }
       if (*s != ']') pari_err(talker2,"expected character: ']'",s, *st);
       *s = 0; for (i++; i<3; i++) a[i] = "";
       /*    properties    |   color    | background */
@@ -394,7 +394,7 @@ sd_colors(const char *v, long flag)
       v = "1, 5, 3, 7, 6, 2, 3"; /* Assume recent ReadLine. */
     if (l <= 7 && strncmp(v, "lightbg", l) == 0)
       v = "1, 6, 3, 4, 5, 2, 3"; /* Assume recent ReadLine. */
-    if (l <= 6 && strncmp(v, "boldfg", l) == 0)	/* Good for darkbg consoles */
+    if (l <= 6 && strncmp(v, "boldfg", l) == 0)        /* Good for darkbg consoles */
       v = "[1,,1], [5,,1], [3,,1], [7,,1], [6,,1], , [2,,1]";
     v0 = s = filtre(v, 0);
     for (c=c_ERR; c < c_LAST; c++)
@@ -409,19 +409,19 @@ sd_colors(const char *v, long flag)
     {
       n = gp_colors[c];
       if (n == c_NONE)
-	sprintf(t,"no");
+        sprintf(t,"no");
       else
       {
-	decode_color(n,col);
-	if (n & (1<<12))
-	{
-	  if (col[0])
-	    sprintf(t,"[%ld,,%ld]",col[1],col[0]);
-	  else
-	    sprintf(t,"%ld",col[1]);
-	}
-	else
-	  sprintf(t,"[%ld,%ld,%ld]",col[1],col[2],col[0]);
+        decode_color(n,col);
+        if (n & (1<<12))
+        {
+          if (col[0])
+            sprintf(t,"[%ld,,%ld]",col[1],col[0]);
+          else
+            sprintf(t,"%ld",col[1]);
+        }
+        else
+          sprintf(t,"[%ld,%ld,%ld]",col[1],col[2],col[0]);
       }
       t += strlen(t);
       if (c < c_LAST - 1) { *t++=','; *t++=' '; }
@@ -455,20 +455,20 @@ sd_graphcolormap(const char *v, long flag)
     for (s = 0, p = t+1, l = 2, a=0; *p; p++)
       if (*p == '[')
       {
-	a++;
-	while (*++p != ']')
-	  if (!*p || *p == '[')
-	    pari_err(talker2, "incorrect value for graphcolormap", p, t);
+        a++;
+        while (*++p != ']')
+          if (!*p || *p == '[')
+            pari_err(talker2, "incorrect value for graphcolormap", p, t);
       }
       else if (*p == '"')
       {
-	s += sizeof(long)+1;
-	while (*p && *++p != '"') s++;
-	if (!*p) pari_err(talker2, "incorrect value for graphcolormap", p, t);
-	s = (s+sizeof(long)-1) & ~(sizeof(long)-1);
+        s += sizeof(long)+1;
+        while (*p && *++p != '"') s++;
+        if (!*p) pari_err(talker2, "incorrect value for graphcolormap", p, t);
+        s = (s+sizeof(long)-1) & ~(sizeof(long)-1);
       }
       else if (*p == ',')
-	l++;
+        l++;
     if (l < 4)
       pari_err(talker, "too few colors (< 4) in graphcolormap");
     if (pari_colormap) pari_free(pari_colormap);
@@ -478,40 +478,40 @@ sd_graphcolormap(const char *v, long flag)
       switch(*p)
       {
       case '"':
-	gel(pari_colormap, i) = lp;
-	q = ++p; while (*q != '"') q++;
-	*q = 0;
-	j = 1 + nchar2nlong(q-p+1);
-	lp[0] = evaltyp(t_STR)|evallg(j);
-	strncpy(GSTR(lp), p, q-p+1);
-	lp += j; p = q;
-	break;
+        gel(pari_colormap, i) = lp;
+        q = ++p; while (*q != '"') q++;
+        *q = 0;
+        j = 1 + nchar2nlong(q-p+1);
+        lp[0] = evaltyp(t_STR)|evallg(j);
+        strncpy(GSTR(lp), p, q-p+1);
+        lp += j; p = q;
+        break;
       case '[': {
         const char *ap[3];
-	gel(pari_colormap, i) = lp;
-	lp[0] = evaltyp(t_VECSMALL)|_evallg(4);
-	for (ap[0] = ++p, j=0; *p && *p != ']'; p++)
-	  if (*p == ',' && j<2) { *p++ = 0; ap[++j] = p; }
-	while (j<2) ap[++j] = "0";
-	if (j>2 || *p != ']')
-	{
-	  char buf[100];
-	  sprintf(buf, "incorrect value for graphcolormap[%ld]: ", i);
-	  pari_err(talker2, buf, p, t);
-	}
-	*p = '\0';
-	lp[1] = atocolor(ap[0]);
-	lp[2] = atocolor(ap[1]);
-	lp[3] = atocolor(ap[2]);
-	lp += 4;
-	break;
+        gel(pari_colormap, i) = lp;
+        lp[0] = evaltyp(t_VECSMALL)|_evallg(4);
+        for (ap[0] = ++p, j=0; *p && *p != ']'; p++)
+          if (*p == ',' && j<2) { *p++ = 0; ap[++j] = p; }
+        while (j<2) ap[++j] = "0";
+        if (j>2 || *p != ']')
+        {
+          char buf[100];
+          sprintf(buf, "incorrect value for graphcolormap[%ld]: ", i);
+          pari_err(talker2, buf, p, t);
+        }
+        *p = '\0';
+        lp[1] = atocolor(ap[0]);
+        lp[2] = atocolor(ap[1]);
+        lp[3] = atocolor(ap[2]);
+        lp += 4;
+        break;
       }
       case ',':
       case ']':
-	i++;
-	break;
+        i++;
+        break;
       default:
-	pari_err(talker2, "incorrect value for graphcolormap", p, t);
+        pari_err(talker2, "incorrect value for graphcolormap", p, t);
       }
     free(t);
   }
@@ -524,9 +524,9 @@ sd_graphcolormap(const char *v, long flag)
     {
       GEN c = gel(pari_colormap, i);
       if (typ(c) == t_STR)
-	gel(cols, i) = gcopy(c);
+        gel(cols, i) = gcopy(c);
       else
-	gel(cols, i) = vecsmall_to_vec(c);
+        gel(cols, i) = vecsmall_to_vec(c);
     }
     if (flag == d_RETURN) return cols;
     pari_printf("   graphcolormap = %Ps\n", cols);
@@ -545,7 +545,7 @@ sd_graphcolors(const char *v, long flag)
     for (p = t+1, l=2; *p != ']'; p++)
       if (*p == ',') l++;
       else if (*p < '0' || *p > '9')
-	pari_err(talker2, "incorrect value for graphcolors", p, t);
+        pari_err(talker2, "incorrect value for graphcolors", p, t);
     if (*++p) pari_err(talker2, "incorrect value for graphcolors", p, t);
     if (pari_graphcolors) pari_free(pari_graphcolors);
     pari_graphcolors = cgetalloc(t_VECSMALL, l);
@@ -554,9 +554,9 @@ sd_graphcolors(const char *v, long flag)
       long n = 0;
       while (*p >= '0' && *p <= '9')
       {
-	n *= 10;
-	n += *p-'0';
-	p++;
+        n *= 10;
+        n += *p-'0';
+        p++;
       }
       pari_graphcolors[++i] = n;
     }
@@ -613,7 +613,7 @@ GEN
 sd_rl(const char *v, long flag)
 {
   const char *msg[] = {NULL,
-	"(bits 0x2/0x4 control matched-insert/arg-complete)"};
+        "(bits 0x2/0x4 control matched-insert/arg-complete)"};
   ulong o_readline_state = readline_state;
   GEN res = sd_ulong(v,flag,"readline", &readline_state, 0, 7, msg);
 
@@ -652,7 +652,7 @@ sd_histsize(const char *v, long flag)
   gp_hist *H = GP_DATA->hist;
   ulong n = H->size;
   GEN r = sd_ulong(v,flag,"histsize",&n, 1,
-		     (LONG_MAX / sizeof(long)) - 1,NULL);
+                     (LONG_MAX / sizeof(long)) - 1,NULL);
   if (n != H->size)
   {
     const ulong total = H->total;
@@ -718,12 +718,12 @@ sd_log(const char *v, long flag)
   ulong oldstyle = logstyle;
   GEN res = sd_ulong(v,flag,"log", &logstyle, 0, 3, msg);
 
-  if (!oldstyle != !logstyle)		/* Compare converts to boolean */
+  if (!oldstyle != !logstyle)                /* Compare converts to boolean */
   { /* toggled LOG */
     if (oldstyle)
     { /* close log */
       if (flag == d_ACKNOWLEDGE)
-	pari_printf("   [logfile was \"%s\"]\n", current_logfile);
+        pari_printf("   [logfile was \"%s\"]\n", current_logfile);
       fclose(pari_logfile); pari_logfile = NULL;
     }
     else
@@ -732,12 +732,12 @@ sd_log(const char *v, long flag)
   if (pari_logfile && oldstyle != logstyle && logstyle == logstyle_TeX)
   {
     TeX_define("PARIbreak",
-	       "\\hskip 0pt plus \\hsize\\relax\\discretionary{}{}{}");
+               "\\hskip 0pt plus \\hsize\\relax\\discretionary{}{}{}");
     TeX_define("PARIpromptSTART", "\\vskip\\medskipamount\\bgroup\\bf");
     TeX_define("PARIpromptEND", "\\egroup\\bgroup\\tt");
     TeX_define("PARIinputEND", "\\egroup");
     TeX_define2("PARIout",
-		"\\vskip\\smallskipamount$\\displaystyle{\\tt\\%#1} = #2$");
+                "\\vskip\\smallskipamount$\\displaystyle{\\tt\\%#1} = #2$");
   }
   return res;
 }
@@ -746,7 +746,7 @@ GEN
 sd_TeXstyle(const char *v, long flag)
 {
   const char *msg[] = { NULL,
-	"(bits 0x2/0x4 control output of \\left/\\PARIbreak)"};
+        "(bits 0x2/0x4 control output of \\left/\\PARIbreak)"};
   ulong n = GP_DATA->fmt->TeXstyle;
   GEN z = sd_ulong(v,flag,"TeXstyle", &n, 0, 7, msg);
   GP_DATA->fmt->TeXstyle = n; return z;
@@ -756,7 +756,7 @@ GEN
 sd_output(const char *v, long flag)
 {
   const char *msg[] = {"(raw)", "(prettymatrix)", "(prettyprint)",
-		 "(external prettyprint)", NULL};
+                 "(external prettyprint)", NULL};
   ulong n = GP_DATA->fmt->prettyp;
   GEN z = sd_ulong(v,flag,"output", &n, 0,3,msg);
   GP_DATA->fmt->prettyp = n;
@@ -929,12 +929,12 @@ sd_prettyprinter(const char *v, long flag)
       if (cancel) f = NULL;
       else
       {
-	f = try_pipe(v, mf_OUT);
-	if (!f)
-	{
-	  pari_warn(warner,"broken prettyprinter: '%s'",v);
-	  return gnil;
-	}
+        f = try_pipe(v, mf_OUT);
+        if (!f)
+        {
+          pari_warn(warner,"broken prettyprinter: '%s'",v);
+          return gnil;
+        }
       }
       pari_fclose(pp->file);
       pp->file = f;

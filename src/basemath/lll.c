@@ -619,7 +619,7 @@ do_SWAPgen(GEN h, GEN L, GEN B, long k, GEN fl, int *flc)
       gcoeff(L,i,k-1) = gdiv(gmul(la,gcoeff(L,i,k-1)), Bk);
     for (j=k+1; j<lx-1; j++)
       for (i=j+1; i<lx; i++)
-	gcoeff(L,i,j) = gdiv(gmul(p1,gcoeff(L,i,j)), Bk);
+        gcoeff(L,i,j) = gdiv(gmul(p1,gcoeff(L,i,j)), Bk);
   }
   else
   {
@@ -645,11 +645,11 @@ incrementalGSgen(GEN x, GEN L, GEN B, long k, GEN fl)
       u = gcoeff(x,k,j); tu = typ(u);
       if (! is_extscalar_t(tu)) pari_err(typeer,"incrementalGSgen");
       for (i=1; i<j; i++)
-	if (fl[i])
-	{
-	  u = gsub(gmul(gel(B,i+1),u), gmul(gcoeff(L,k,i),gcoeff(L,j,i)));
-	  u = gdiv(u, gel(B,i));
-	}
+        if (fl[i])
+        {
+          u = gsub(gmul(gel(B,i+1),u), gmul(gcoeff(L,k,i),gcoeff(L,j,i)));
+          u = gdiv(u, gel(B,i));
+        }
       gcoeff(L,k,j) = u;
     }
   if (gequal0(u)) B[k+1] = B[k];
@@ -688,7 +688,7 @@ lllgramallgen(GEN x, long flag)
     else
     {
       for (l=k-2; l>=1; l--)
-	if (REDgen(k, l, h, L, gel(B,l+1))) flc = 1;
+        if (REDgen(k, l, h, L, gel(B,l+1))) flc = 1;
       if (++k > n) break;
     }
     if (low_stack(lim, stack_lim(av,1)))

@@ -867,13 +867,13 @@ nfcmbf(nfcmbf_t *T, long klim, long *pmaxK, int *done)
       t2 = typ(t2)!=t_INT? FpX_rem(t2, Tpk, pk): modii(t2, pk);
       if (lt)
       {
-	if (typ(t2)!=t_INT) {
-	  t1 = FpX_Fp_mul(t1, ltdn, pk);
-	  t2 = FpX_Fp_mul(t2, lt2dn, pk);
-	} else {
-	  t1 = Fp_mul(t1, ltdn, pk);
-	  t2 = Fp_mul(t2, lt2dn, pk);
-	}
+        if (typ(t2)!=t_INT) {
+          t1 = FpX_Fp_mul(t1, ltdn, pk);
+          t2 = FpX_Fp_mul(t2, lt2dn, pk);
+        } else {
+          t1 = Fp_mul(t1, ltdn, pk);
+          t2 = Fp_mul(t2, lt2dn, pk);
+        }
       }
       gel(trace1,i) = gclone( nf_bestlift(t1, NULL, T->L) );
       gel(trace2,i) = gclone( nf_bestlift(t2, NULL, T->L) ); avma = av;
@@ -911,43 +911,43 @@ nextK:
       /* d - 1 test */
       if (T1)
       {
-	t = get_trace(ind, T1);
-	if (rtodbl(RgC_fpnorml2(t,DEFAULTPREC)) > Bhigh)
-	{
-	  if (DEBUGLEVEL>6) fprintferr(".");
-	  avma = av; goto NEXT;
-	}
+        t = get_trace(ind, T1);
+        if (rtodbl(RgC_fpnorml2(t,DEFAULTPREC)) > Bhigh)
+        {
+          if (DEBUGLEVEL>6) fprintferr(".");
+          avma = av; goto NEXT;
+        }
       }
       /* d - 2 test */
       if (T2)
       {
-	t = get_trace(ind, T2);
-	if (rtodbl(RgC_fpnorml2(t,DEFAULTPREC)) > Bhigh)
-	{
-	  if (DEBUGLEVEL>3) fprintferr("|");
-	  avma = av; goto NEXT;
-	}
+        t = get_trace(ind, T2);
+        if (rtodbl(RgC_fpnorml2(t,DEFAULTPREC)) > Bhigh)
+        {
+          if (DEBUGLEVEL>3) fprintferr("|");
+          avma = av; goto NEXT;
+        }
       }
       avma = av;
       y = lt; /* full computation */
       for (i=1; i<=K; i++)
       {
-	GEN q = gel(famod, ind[i]);
-	if (y) q = gmul(y, q);
-	y = FqX_centermod(q, Tpk, pk, pks2);
+        GEN q = gel(famod, ind[i]);
+        if (y) q = gmul(y, q);
+        y = FqX_centermod(q, Tpk, pk, pks2);
       }
       y = nf_pol_lift(y, bound, T);
       if (!y)
       {
-	if (DEBUGLEVEL>3) fprintferr("@");
-	avma = av; goto NEXT;
+        if (DEBUGLEVEL>3) fprintferr("@");
+        avma = av; goto NEXT;
       }
       /* try out the new combination: y is the candidate factor */
       q = RgXQX_divrem(C2ltpol, y, nfpol, ONLY_DIVIDES);
       if (!q)
       {
-	if (DEBUGLEVEL>3) fprintferr("*");
-	avma = av; goto NEXT;
+        if (DEBUGLEVEL>3) fprintferr("*");
+        avma = av; goto NEXT;
       }
 
       /* found a factor */
@@ -957,14 +957,14 @@ nextK:
       pol = q;
       for (i=j=k=1; i <= lfamod; i++)
       { /* remove used factors */
-	if (j <= K && i == ind[j]) j++;
-	else
-	{
-	  famod[k] = famod[i];
-	  update_trace(T1, k, i);
-	  update_trace(T2, k, i);
-	  deg[k] = deg[i]; k++;
-	}
+        if (j <= K && i == ind[j]) j++;
+        else
+        {
+          famod[k] = famod[i];
+          update_trace(T1, k, i);
+          update_trace(T2, k, i);
+          deg[k] = deg[i]; k++;
+        }
       }
       lfamod -= K;
       *pmaxK = cmbf_maxK(lfamod);
@@ -978,8 +978,8 @@ nextK:
       C2ltpol = C2lt? gmul(C2lt,pol): pol;
       if (DEBUGLEVEL > 2)
       {
-	fprintferr("\n"); msgTIMER(&ti, "to find factor %Ps",y);
-	fprintferr("remaining modular factor(s): %ld\n", lfamod);
+        fprintferr("\n"); msgTIMER(&ti, "to find factor %Ps",y);
+        fprintferr("remaining modular factor(s): %ld\n", lfamod);
       }
       continue;
     }
@@ -990,8 +990,8 @@ NEXT:
       if (--i == 0) { K++; goto nextK; }
       if (++ind[i] <= lfamod - K + i)
       {
-	curdeg = degsofar[i-1] + deg[ind[i]];
-	if (curdeg <= klim) break;
+        curdeg = degsofar[i-1] + deg[ind[i]];
+        if (curdeg <= klim) break;
       }
     }
   }
@@ -1282,7 +1282,7 @@ nf_LLL_cmbf(nfcmbf_t *T, long rec)
     bmin = logint(ceil_safe(sqrtr(Btra)), gen_2, NULL);
     if (DEBUGLEVEL>2)
       fprintferr("\nLLL_cmbf: %ld potential factors (tmax = %ld, bmin = %ld)\n",
-		 r, tmax, bmin);
+                 r, tmax, bmin);
 
     /* compute Newton sums (possibly relifting first) */
     if (gcmp(L->GSmin, Btra) < 0)
@@ -1346,7 +1346,7 @@ AGAIN:
     CM_L = LLL_check_progress(Bnorm, n0, m, b == bmin, /*dbg:*/ &ti_LLL);
     if (DEBUGLEVEL>2)
       fprintferr("LLL_cmbf: (a,b) =%4ld,%4ld; r =%3ld -->%3ld, time = %ld\n",
-		 a,b, lg(m)-1, CM_L? lg(CM_L)-1: 1, TIMER(&TI));
+                 a,b, lg(m)-1, CM_L? lg(CM_L)-1: 1, TIMER(&TI));
     if (!CM_L) { list = mkcol(QXQX_normalize(P,nfT)); break; }
     if (b > bmin)
     {
@@ -1382,7 +1382,7 @@ AGAIN:
     {
       if(DEBUGMEM>1) pari_warn(warnmem,"nf_LLL_cmbf");
       gerepileall(av, L->Tpk? 9: 8,
-		      &CM_L,&TT,&Tra,&famod,&L->pk,&L->GSmin,&L->prk,&L->iprk,&L->Tpk);
+                      &CM_L,&TT,&Tra,&famod,&L->pk,&L->GSmin,&L->prk,&L->iprk,&L->Tpk);
     }
   }
   if (DEBUGLEVEL>2)
@@ -1422,7 +1422,7 @@ nf_combine_factors(nfcmbf_t *T, GEN polred, long klim)
 
 static GEN
 nf_DDF_roots(GEN pol, GEN polred, GEN nfpol, GEN ltdn, GEN init_fa, long nbf,
- 	     long fl, nflift_t *L)
+              long fl, nflift_t *L)
 {
   GEN z, Cltdnx_r, C2ltdnpol, C = L->topowden;
   GEN Cltdn  = mul_content(C, ltdn);
@@ -1506,7 +1506,7 @@ get_maxf(long nfdeg)
  *   Tp: polynomial defining Fq/Fp */
 static long
 nf_pick_prime(long ct, GEN nf, GEN polbase, long fl,
-	      GEN *lt, GEN *Fa, GEN *pr, GEN *Tp)
+              GEN *lt, GEN *Fa, GEN *pr, GEN *Tp)
 {
   GEN nfpol = nf_get_pol(nf), bad = mulii(nf_get_disc(nf), nf_get_index(nf));
   long maxf, nfdeg = degpol(nfpol), dpol = degpol(polbase), nbf = 0;
@@ -1557,7 +1557,7 @@ nf_pick_prime(long ct, GEN nf, GEN polbase, long fl,
       if (!FqX_is_squarefree(red,aT,ap)) { avma = av2; continue; }
       q = powiu(ap, degpol(aT));
       anbf = fl? FqX_split_deg1(&fa, red, q, aT, ap)
-	       : FqX_split_by_degree(&fa, red, q, aT, ap);
+               : FqX_split_by_degree(&fa, red, q, aT, ap);
     }
     if (fl == 2 && anbf < dpol) return anbf;
     if (anbf <= 1)
@@ -1567,7 +1567,7 @@ nf_pick_prime(long ct, GEN nf, GEN polbase, long fl,
     }
 
     if (!nbf || anbf < nbf
-	     || (anbf == nbf && pr_get_f(apr) > pr_get_f(*pr)))
+             || (anbf == nbf && pr_get_f(apr) > pr_get_f(*pr)))
     {
       nbf = anbf;
       *pr = apr;
@@ -1577,7 +1577,7 @@ nf_pick_prime(long ct, GEN nf, GEN polbase, long fl,
     else avma = av2;
     if (DEBUGLEVEL>3)
       fprintferr("%3ld %s at prime\n  %Ps\nTime: %ld\n",
-		 anbf, fl?"roots": "factors", apr, TIMER(&ti_pr));
+                 anbf, fl?"roots": "factors", apr, TIMER(&ti_pr));
     if (--ct <= 0) return nbf;
   }
 }
@@ -1669,10 +1669,10 @@ nfsqff(GEN nf, GEN pol, long fl, GEN den)
       long i, l = lg(z);
       for (i = 1; i < l; i++)
       {
-	GEN LT, t = gel(z,i); if (degpol(t) > 1) break;
+        GEN LT, t = gel(z,i); if (degpol(t) > 1) break;
         LT = gel(t,3);
         if (typ(LT) == t_POL) LT = gel(LT,2); /* constant */
-	gel(z,i) = gdiv(gel(t,2), negi(LT));
+        gel(z,i) = gdiv(gel(t,2), negi(LT));
       }
       setlg(z, i);
       if (fl == 2 && i != l) return cgetg(1,t_VEC);

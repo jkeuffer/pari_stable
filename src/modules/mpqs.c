@@ -130,7 +130,7 @@ mpqs_set_parameters(mpqs_handle_t *h)
    * on 100% theory and 0% practice. */
   if (i >= 79)
     pari_warn(warner, "MPQS: factoring this number will take %s hours:\nN = %Ps",
-	i >= 86 ? "many": "several", h->N);
+        i >= 86 ? "many": "several", h->N);
 
   if (DEBUGLEVEL >= 5)
   {
@@ -146,8 +146,8 @@ mpqs_set_parameters(mpqs_handle_t *h)
   /* for the purpose of Gauss elimination etc., prime factors of k behave
    * like real FB primes, so take them into account when setting the goal: */
   h->target_no_rels   = (h->size_of_FB >= 200 ?
-			 h->size_of_FB + 70 :
-			 (mpqs_int32_t)(h->size_of_FB * 1.35));
+                         h->size_of_FB + 70 :
+                         (mpqs_int32_t)(h->size_of_FB * 1.35));
   h->M                = P->M;
   h->omega_A          = P->omega_A;
   h->no_B             = 1UL << (P->omega_A - 1);
@@ -162,7 +162,7 @@ mpqs_set_parameters(mpqs_handle_t *h)
   if (mb > 128.)
   {
     pari_warn(warner,
-	"MPQS: Gauss elimination will require more than\n\t128MBy of memory");
+        "MPQS: Gauss elimination will require more than\n\t128MBy of memory");
     if (DEBUGLEVEL >= 1)
       fprintferr("\t(estimated memory needed: %4.1fMBy)\n", mb);
   }
@@ -244,7 +244,7 @@ mpqs_sieve_array_ctor(mpqs_handle_t *h)
     (unsigned char *) pari_malloc(size * sizeof(unsigned char));
 #ifdef MPQS_DEBUG_VERBOSE
   fprintferr("MPQS DEBUG: sieve_array allocated @0x%p\n",
-	     (void *)h->sieve_array);
+             (void *)h->sieve_array);
 #endif
   h->sieve_array_end =
     h->sieve_array + size - 2;
@@ -254,7 +254,7 @@ mpqs_sieve_array_ctor(mpqs_handle_t *h)
     (long *) pari_malloc(MPQS_CANDIDATE_ARRAY_SIZE * sizeof(long));
 #ifdef MPQS_DEBUG_VERBOSE
   fprintferr("MPQS DEBUG: candidates table allocated @0x%p\n",
-	     (void *)h->candidates);
+             (void *)h->candidates);
 #endif
 
   /* Room needed for string representation of a relation - worst case:
@@ -398,13 +398,13 @@ mpqs_find_k(mpqs_handle_t *h)
       primes_ptr = diffptr; /* that's PARI's, not our private one */
       while (j <= MPQS_MULTIPLIER_SEARCH_DEPTH)
       {
-	primes_ptr = mpqs_iterate_primes(&p, primes_ptr);
-	if (krouu(umodiu(kN, p), p) == 1)
-	{
-	  j++;
-	  dp = log2((double) p) / p;
-	  value += (k % p == 0) ? dp : 2 * dp;
-	}
+        primes_ptr = mpqs_iterate_primes(&p, primes_ptr);
+        if (krouu(umodiu(kN, p), p) == 1)
+        {
+          j++;
+          dp = log2((double) p) / p;
+          value += (k % p == 0) ? dp : 2 * dp;
+        }
       }
       if (value > best_value) { best_value = value; best_i = i; }
     }
@@ -528,25 +528,25 @@ mpqs_create_FB(mpqs_handle_t *h, ulong *f)
       kr = krouu(kN_mod_p, p);
       if (kr != -1)
       {
-	if (kr == 0)
-	{
-	  if (MPQS_DEBUGLEVEL >= 7)
-	    fprintferr(",%lu...] Wait a second --\n", p);
-	  *f = p;
-	  return FB;
-	}
-	if (MPQS_DEBUGLEVEL >= 7) fprintferr(",%lu", p);
-	FB[i].fbe_p = (mpqs_uint32_t) p;
-	FB[i].fbe_flags = MPQS_FBE_CLEAR;
-	/* dyadic logarithm of p; single precision suffices */
-	FB[i].fbe_flogp = (float) log2((double)p);
-	/* cannot yet fill in fbe_logval because the scaling multiplier for
-	 * it depends on the largest prime in FB, which we're still in the
-	 * process of finding here! */
+        if (kr == 0)
+        {
+          if (MPQS_DEBUGLEVEL >= 7)
+            fprintferr(",%lu...] Wait a second --\n", p);
+          *f = p;
+          return FB;
+        }
+        if (MPQS_DEBUGLEVEL >= 7) fprintferr(",%lu", p);
+        FB[i].fbe_p = (mpqs_uint32_t) p;
+        FB[i].fbe_flags = MPQS_FBE_CLEAR;
+        /* dyadic logarithm of p; single precision suffices */
+        FB[i].fbe_flogp = (float) log2((double)p);
+        /* cannot yet fill in fbe_logval because the scaling multiplier for
+         * it depends on the largest prime in FB, which we're still in the
+         * process of finding here! */
 
-	/* x_i such that x_i^2 = (kN % p_i) mod p_i */
-	FB[i++].fbe_sqrt_kN =
-	  (mpqs_uint32_t) Fl_sqrt(kN_mod_p, p);
+        /* x_i such that x_i^2 = (kN % p_i) mod p_i */
+        FB[i++].fbe_sqrt_kN =
+          (mpqs_uint32_t) Fl_sqrt(kN_mod_p, p);
       }
     }
   }
@@ -566,11 +566,11 @@ mpqs_create_FB(mpqs_handle_t *h, ulong *f)
       hitsum = 0.;
       for (i = j; i < size + 2; i++)
       {
-	p = FB[i].fbe_p; if (p == 0) break;
-	hitsum += ((4.0 * h->M) / p);
+        p = FB[i].fbe_p; if (p == 0) break;
+        hitsum += ((4.0 * h->M) / p);
       }
       fprintferr("MPQS DEBUG: hits from FB[%d]=%ld up: %10.2f\n",
-		 j, (long)(FB[j].fbe_p), hitsum);
+                 j, (long)(FB[j].fbe_p), hitsum);
     }
   }
 #endif
@@ -632,10 +632,10 @@ mpqs_set_sieve_threshold(mpqs_handle_t *h)
   log_multiplier = 232.0 / log_maxval;
   h->sieve_threshold =
     (unsigned char) (log_multiplier *
-		     (log_maxval
-		      - h->tolerance * log2((double)h->largest_FB_p)
-		      )
-		     ) + 1;
+                     (log_maxval
+                      - h->tolerance * log2((double)h->largest_FB_p)
+                      )
+                     ) + 1;
   /* That "+ 1" really helps - we may want to tune towards somewhat smaller
    * tolerances  (or introduce self-tuning one day)... */
 
@@ -646,7 +646,7 @@ mpqs_set_sieve_threshold(mpqs_handle_t *h)
   if (h->sieve_threshold < 128) {
     h->sieve_threshold = 128;
     pari_warn(warner,
-	"MPQS: sizing out of tune, FB size or tolerance\n\ttoo large");
+        "MPQS: sizing out of tune, FB size or tolerance\n\ttoo large");
   }
 
   /* Now fill in the byte-sized approximate scaled logarithms of p_i */
@@ -695,7 +695,7 @@ mpqs_locate_A_range(mpqs_handle_t *h)
 
 #ifdef MPQS_DEBUG_LOCATE_A_RANGE
   fprintferr("MPQS DEBUG: omega_A=%ld, index0=%ld, i=%ld\n",
-	     (long) h->omega_A, (long) h->index0_FB, i);
+             (long) h->omega_A, (long) h->index0_FB, i);
 #endif
 
   /* check whether this hasn't walked off the top end... */
@@ -703,7 +703,7 @@ mpqs_locate_A_range(mpqs_handle_t *h)
   if (i > h->size_of_FB - 3)
   { /* this isn't going to work at all. */
     pari_warn(warner,
-	"MPQS: sizing out of tune, FB too small or\n\tway too few primes in A");
+        "MPQS: sizing out of tune, FB too small or\n\tway too few primes in A");
     return 0;
   }
 
@@ -769,9 +769,9 @@ mpqs_print_histo(mpqs_handle_t *h)
     tot += rowtot;
     if ((rowtot > 0) || (i == h->sieve_threshold))
       fprintferr("%s[%3d] %7ld %7ld %7ld %8ld\n",
-		 i + 128 == h->sieve_threshold ? "^-" : "  ", i + 128,
-		 h->histo_full[i], h->histo_lprl[i], h->histo_drop[i],
-		 rowtot);
+                 i + 128 == h->sieve_threshold ? "^-" : "  ", i + 128,
+                 h->histo_full[i], h->histo_lprl[i], h->histo_drop[i],
+                 rowtot);
   }
   fprintferr("        (total evaluated candidates: %ld)\n", tot);
 }
@@ -852,7 +852,7 @@ mpqs_eval_histograms(mpqs_handle_t *h)
   for (i = 127; i >= th; i--)
   {
     if (h->histo_lprl[i] + 1 <
-	MPQS_HISTO_LPREL_BASEFLOW * h->histo_drop[i])
+        MPQS_HISTO_LPREL_BASEFLOW * h->histo_drop[i])
     {
       th_base = i; break;
     }
@@ -865,7 +865,7 @@ mpqs_eval_histograms(mpqs_handle_t *h)
     tot_lprl += h->histo_full[i] + h->histo_lprl[i];
     tot_drop += h->histo_drop[i];
     if (tot_drop >
-	MPQS_HISTO_DROP_LIMIT * (tot_lprl + 1))
+        MPQS_HISTO_DROP_LIMIT * (tot_lprl + 1))
     {
       th_drop = i; break;
     }
@@ -879,10 +879,10 @@ mpqs_eval_histograms(mpqs_handle_t *h)
     mpqs_print_histo(h);
     if (th_full >= 0)
       fprintferr("MPQS: threshold estimate for full rels: %d\n",
-		 th_full + 128);
+                 th_full + 128);
     if (th_drop >= 0)
       fprintferr("MPQS: threshold estimate for useful candidates: %d\n",
-		 th_drop + 128);
+                 th_drop + 128);
   }
 
   /* any reason to open up the sieve?  wait until a minimal number of lprels
@@ -893,7 +893,7 @@ mpqs_eval_histograms(mpqs_handle_t *h)
     h->sieve_threshold = th + 127;
     if (MPQS_DEBUGLEVEL >= 4)
       fprintferr("MPQS: loosening sieve tolerance, new threshold %d\n",
-		 h->sieve_threshold);
+                 h->sieve_threshold);
     return 0;                   /* this should be re-examined after a bit */
   }
   /* otherwise, any reason to tighten it? */
@@ -903,7 +903,7 @@ mpqs_eval_histograms(mpqs_handle_t *h)
     h->sieve_threshold = th;
     if (MPQS_DEBUGLEVEL >= 4)
       fprintferr("MPQS: tightening sieve tolerance, new threshold %d\n",
-		 h->sieve_threshold);
+                 h->sieve_threshold);
   }
   /* maybe also loosen it if th_drop persistently stays below th... */
   return 1;                     /* wait a good while before rechecking */
@@ -1018,7 +1018,7 @@ mpqs_sort_lp_file(char *filename)
     if (bufspace < min_bufspace)
     {
       if (MPQS_DEBUGLEVEL >= 7)
-	fprintferr("MQPS: short of space -- another buffer for sorting\n");
+        fprintferr("MQPS: short of space -- another buffer for sorting\n");
       buf = (char*) pari_malloc(MPQS_STRING_LENGTH * sizeof(char));
       cur_line = buf;
       bufspace = MPQS_STRING_LENGTH;
@@ -1027,10 +1027,10 @@ mpqs_sort_lp_file(char *filename)
       /* remember buffer for later deallocation */
       if (buflist - buflist_head >= buflist_size)
       { /* need another buflist block */
-	next_buflist = (char**) pari_malloc(buflist_size * sizeof(char*));
-	*next_buflist = (char*)buflist_head; /* link */
-	buflist_head = next_buflist;
-	buflist = buflist_head + 1;
+        next_buflist = (char**) pari_malloc(buflist_size * sizeof(char*));
+        *next_buflist = (char*)buflist_head; /* link */
+        buflist_head = next_buflist;
+        buflist = buflist_head + 1;
       }
       *buflist++ = buf;
       length = strlen(cur_line) + 1;
@@ -1047,15 +1047,15 @@ mpqs_sort_lp_file(char *filename)
     {
       size_t lg1;
       if (MPQS_DEBUGLEVEL >= 7)
-	fprintferr("MQPS: line wrap -- another buffer for sorting\n");
+        fprintferr("MQPS: line wrap -- another buffer for sorting\n");
       buf = (char*) pari_malloc(MPQS_STRING_LENGTH * sizeof(char));
       /* remember buffer for later deallocation */
       if (buflist - buflist_head >= buflist_size)
       { /* need another buflist block */
-	next_buflist = (char**)pari_malloc(buflist_size * sizeof(char*));
-	*next_buflist = (char*)buflist_head; /* link */
-	buflist_head = next_buflist;
-	buflist = buflist_head + 1;
+        next_buflist = (char**)pari_malloc(buflist_size * sizeof(char*));
+        *next_buflist = (char*)buflist_head; /* link */
+        buflist_head = next_buflist;
+        buflist = buflist_head + 1;
       }
       *buflist++ = buf;
 
@@ -1065,7 +1065,7 @@ mpqs_sort_lp_file(char *filename)
       bufspace = MPQS_STRING_LENGTH - length + 1;
       /* read remainder of line */
       if (fgets(cur_line, bufspace, TMP) == NULL)
-	pari_err(talker,"MPQS: relations file truncated?!\n");
+        pari_err(talker,"MPQS: relations file truncated?!\n");
       lg1 = strlen(cur_line);
       length += lg1; /* we already counted the \0 once */
       bufspace -= (lg1 + 1); /* but here we must take it into account */
@@ -1142,7 +1142,7 @@ mpqs_append_file(pariFILE *f, FILE *fp1)
 
 static long
 mpqs_mergesort_lp_file0(FILE *LPREL, FILE *LPNEW, pariFILE *pCOMB,
-			pariFILE *pTMP)
+                        pariFILE *pTMP)
 {
   char line1[MPQS_STRING_LENGTH], line2[MPQS_STRING_LENGTH];
   char line[MPQS_STRING_LENGTH];
@@ -1181,26 +1181,26 @@ mpqs_mergesort_lp_file0(FILE *LPREL, FILE *LPNEW, pariFILE *pCOMB,
       q_new = atol(line_new);
       if (q_new_old == q_new)
       { /* found combinables, check whether we're already busy on this
-	   particular `large prime' */
-	if (!comb_in_progress)
-	{ /* if not, write first line to pCOMB, creating and opening the
-	   * file first if it isn't open yet */
-	  pari_fputs(line_new_old, pCOMB);
-	  comb_in_progress = 1;
-	}
-	/* in any case, write the current line, and count it */
-	pari_fputs(line_new, pCOMB);
-	i++;
+           particular `large prime' */
+        if (!comb_in_progress)
+        { /* if not, write first line to pCOMB, creating and opening the
+           * file first if it isn't open yet */
+          pari_fputs(line_new_old, pCOMB);
+          comb_in_progress = 1;
+        }
+        /* in any case, write the current line, and count it */
+        pari_fputs(line_new, pCOMB);
+        i++;
       }
       else
       { /* not combinable */
-	q_new_old = q_new;
-	comb_in_progress = 0;
-	/* and dump it to the TMP file */
-	pari_fputs(line_new, pTMP);
-	/* and stash it away for a moment */
-	swap_lines();
-	comb_in_progress = 0;
+        q_new_old = q_new;
+        comb_in_progress = 0;
+        /* and dump it to the TMP file */
+        pari_fputs(line_new, pTMP);
+        /* and stash it away for a moment */
+        swap_lines();
+        comb_in_progress = 0;
       }
     } /* while */
     pari_fclose(pTMP); return i;
@@ -1222,33 +1222,33 @@ mpqs_mergesort_lp_file0(FILE *LPREL, FILE *LPNEW, pariFILE *pCOMB,
       if (!pCOMB) c++; /* in FREL mode, count lines written */
       else if (!comb_in_progress)
       {
-	q_new_old = q_new;
-	swap_lines();
+        q_new_old = q_new;
+        swap_lines();
       }
       if (!fgets(line_new, MPQS_STRING_LENGTH, LPNEW))
       {
-	pari_fputs(line, pTMP);
-	if (!pCOMB) c++; else c += i;
-	i = mpqs_append_file(pTMP, LPREL);
-	return pCOMB? c: c + i;
+        pari_fputs(line, pTMP);
+        if (!pCOMB) c++; else c += i;
+        i = mpqs_append_file(pTMP, LPREL);
+        return pCOMB? c: c + i;
       }
       q_new = atol(line_new);
       if (!pCOMB) continue;
 
       /* LP mode only: */
       if (q_new_old != q_new) /* not combinable */
-	comb_in_progress = 0; /* next loop will deal with it, or loop may end */
+        comb_in_progress = 0; /* next loop will deal with it, or loop may end */
       else
       { /* found combinables, check whether we're already busy on this
-	   `large prime' */
-	if (!comb_in_progress)
-	{
-	  pari_fputs(line_new_old, pCOMB);
-	  comb_in_progress = 1;
-	}
-	/* in any case, write the current line, and count it */
-	pari_fputs(line_new, pCOMB);
-	i++;
+           `large prime' */
+        if (!comb_in_progress)
+        {
+          pari_fputs(line_new_old, pCOMB);
+          comb_in_progress = 1;
+        }
+        /* in any case, write the current line, and count it */
+        pari_fputs(line_new, pCOMB);
+        i++;
       }
     } /* while q > q_new */
 
@@ -1265,12 +1265,12 @@ mpqs_mergesort_lp_file0(FILE *LPREL, FILE *LPNEW, pariFILE *pCOMB,
       if (!pCOMB) c++;
       if (!fgets(line, MPQS_STRING_LENGTH, LPREL))
       {
-	pari_fputs(line_new, pTMP);
-	i = mpqs_append_file(pTMP, LPNEW);
-	return pCOMB? c: c + i + 1;
+        pari_fputs(line_new, pTMP);
+        i = mpqs_append_file(pTMP, LPNEW);
+        return pCOMB? c: c + i + 1;
       }
       else
-	q = atol(line);
+        q = atol(line);
     }
 
     /* q >= q_new */
@@ -1286,22 +1286,22 @@ mpqs_mergesort_lp_file0(FILE *LPREL, FILE *LPNEW, pariFILE *pCOMB,
     {
       if (!strcmp(line_new, line))
       { /* duplicate -- move right ahead to the next LPNEW line */
-	;/* do nothing here */
+        ;/* do nothing here */
       }
       else if (!pCOMB)
       { /* full relations mode: write line_new out first, keep line */
-	pari_fputs(line_new, pTMP);
-	c++;
+        pari_fputs(line_new, pTMP);
+        c++;
       }
       else
       { /* LP mode, and combinable relation */
-	if (!comb_in_progress)
-	{
-	  pari_fputs(line, pCOMB);
-	  comb_in_progress = 1;
-	}
-	pari_fputs(line_new, pCOMB);
-	i++;
+        if (!comb_in_progress)
+        {
+          pari_fputs(line, pCOMB);
+          comb_in_progress = 1;
+        }
+        pari_fputs(line_new, pCOMB);
+        i++;
       }
       /* NB comb_in_progress is cleared by q_new becoming bigger than q, thus
        * the current while loop terminating, the next time through the main for
@@ -1310,13 +1310,13 @@ mpqs_mergesort_lp_file0(FILE *LPREL, FILE *LPNEW, pariFILE *pCOMB,
       /* common ending: get another line_new, if any */
       if (!fgets(line_new, MPQS_STRING_LENGTH, LPNEW))
       {
-	pari_fputs(line, pTMP);
-	if (!pCOMB) c++; else c += i;
-	i = mpqs_append_file(pTMP, LPREL);
-	return pCOMB? c: c + i;
+        pari_fputs(line, pTMP);
+        if (!pCOMB) c++; else c += i;
+        i = mpqs_append_file(pTMP, LPREL);
+        return pCOMB? c: c + i;
       }
       else
-	q_new = atol(line_new);
+        q_new = atol(line_new);
     } /* while */
 
     if (pCOMB) c += i; /* accumulate count of combinables */
@@ -1553,7 +1553,7 @@ mpqs_si_choose_primes(mpqs_handle_t *h)
     if (h->index2_moved)
     {
       while ((h->bin_index & (room_mask | 0x3)) == 0)
-	mpqs_increment(&h->bin_index);
+        mpqs_increment(&h->bin_index);
     }
     /* ok so did we fall off the edge on the left? */
     if ((h->bin_index & room_mask) != 0)
@@ -1563,9 +1563,9 @@ mpqs_si_choose_primes(mpqs_handle_t *h)
       h->index2_moved = 1;
       h->bin_index = 0;
       if (MPQS_DEBUG_SI_CHOOSE_PRIMES || (MPQS_DEBUGLEVEL >= 5))
-	fprintferr("MPQS: wrapping, more primes for A now chosen near FB[%ld] = %ld\n",
-		   (long)h->index2_FB,
-		   (long)FB[h->index2_FB].fbe_p);
+        fprintferr("MPQS: wrapping, more primes for A now chosen near FB[%ld] = %ld\n",
+                   (long)h->index2_FB,
+                   (long)FB[h->index2_FB].fbe_p);
       return 0;                 /* back off - caller should retry */
     }
   }
@@ -1607,8 +1607,8 @@ mpqs_si_choose_primes(mpqs_handle_t *h)
     j++; p = FB[j].fbe_p;
   }
   MPQS_I(omega_A - 1) = (p == 0 ? /* did we fall off the end of the FB? */
-			 h->size_of_FB + 1 : /* then improvise */
-			 j);
+                         h->size_of_FB + 1 : /* then improvise */
+                         j);
   MPQS_FLG(omega_A - 1) |= MPQS_FBE_DIVIDES_A;
 
   if (MPQS_DEBUG_SI_CHOOSE_PRIMES || (MPQS_DEBUGLEVEL >= 6))
@@ -1617,9 +1617,9 @@ mpqs_si_choose_primes(mpqs_handle_t *h)
     for (i = 0; i < omega_A; i++)
     {
       fprintferr(" FB[%ld]=%ld%s",
-		 (long) MPQS_I(i),
-		 (long) MPQS_AP(i),
-		 i < omega_A - 1 ? "," : "\n");
+                 (long) MPQS_I(i),
+                 (long) MPQS_AP(i),
+                 i < omega_A - 1 ? "," : "\n");
     }
   }
   return 1;
@@ -1737,8 +1737,8 @@ mpqs_self_init(mpqs_handle_t *h)
       FB[j].fbe_start2 = (mpqs_int32_t)Fl_add(tmp2, m, p);
       for (i = 0; i < h->omega_A - 1; i++)
       {
-	ulong h = umodiu(MPQS_H(i), p) << 1; if (h > p) h -= p;
-	MPQS_INV_A_H(i,j) = Fl_mul(h, inv_A2, p); /* 1/A * H[i] mod p_j */
+        ulong h = umodiu(MPQS_H(i), p) << 1; if (h > p) h -= p;
+        MPQS_INV_A_H(i,j) = Fl_mul(h, inv_A2, p); /* 1/A * H[i] mod p_j */
       }
     }
   }
@@ -1773,10 +1773,10 @@ mpqs_self_init(mpqs_handle_t *h)
     { /* j = 3 mod 4 */
       for (j = 3; (ulong)j <= size_of_FB; j++)
       {
-	if (FB[j].fbe_flags & MPQS_FBE_DIVIDES_A) continue;
-	p = (ulong)FB[j].fbe_p;
-	FB[j].fbe_start1 = Fl_sub(FB[j].fbe_start1, MPQS_INV_A_H(v2,j), p);
-	FB[j].fbe_start2 = Fl_sub(FB[j].fbe_start2, MPQS_INV_A_H(v2,j), p);
+        if (FB[j].fbe_flags & MPQS_FBE_DIVIDES_A) continue;
+        p = (ulong)FB[j].fbe_p;
+        FB[j].fbe_start1 = Fl_sub(FB[j].fbe_start1, MPQS_INV_A_H(v2,j), p);
+        FB[j].fbe_start2 = Fl_sub(FB[j].fbe_start2, MPQS_INV_A_H(v2,j), p);
       }
       p1 = addii(B, p1);
     }
@@ -1784,10 +1784,10 @@ mpqs_self_init(mpqs_handle_t *h)
     { /* j = 1 mod 4 */
       for (j = 3; (ulong)j <= size_of_FB; j++)
       {
-	if (FB[j].fbe_flags & MPQS_FBE_DIVIDES_A) continue;
-	p = (ulong)FB[j].fbe_p;
-	FB[j].fbe_start1 = Fl_add(FB[j].fbe_start1, MPQS_INV_A_H(v2,j), p);
-	FB[j].fbe_start2 = Fl_add(FB[j].fbe_start2, MPQS_INV_A_H(v2,j), p);
+        if (FB[j].fbe_flags & MPQS_FBE_DIVIDES_A) continue;
+        p = (ulong)FB[j].fbe_p;
+        FB[j].fbe_start1 = Fl_add(FB[j].fbe_start1, MPQS_INV_A_H(v2,j), p);
+        FB[j].fbe_start2 = Fl_add(FB[j].fbe_start2, MPQS_INV_A_H(v2,j), p);
       }
       p1 = subii(B, p1);
     }
@@ -1819,8 +1819,8 @@ mpqs_self_init(mpqs_handle_t *h)
   {
     /* must happen before resetting avma, because of the absi() */
     fprintferr("MPQS: chose Q_%ld(x) = %Ps x^2 %c %Ps x + C\n",
-	       (long) h->index_j, h->A,
-	       signe(h->B) < 0? '-': '+', absi(h->B));
+               (long) h->index_j, h->A,
+               signe(h->B) < 0? '-': '+', absi(h->B));
   }
 
   avma = av;
@@ -1858,7 +1858,7 @@ mpqs_self_init(mpqs_handle_t *h)
  * starting_sieving_index: marks the first FB element used for sieving */
 INLINE void
 mpqs_sieve_p(unsigned char *begin, unsigned char *end,
-	     long p4, long p, unsigned char log_p)
+             long p4, long p, unsigned char log_p)
 {
   register unsigned char *e = end - p4;
   /* Loop unrolled some time ago. It might be better to let the compiler worry
@@ -1983,7 +1983,7 @@ mpqs_factorback(mpqs_handle_t *h, char *relations)
 /* NB FREL, LPREL are actually FNEW, LPNEW when we get called */
 static long
 mpqs_eval_cand(mpqs_handle_t *h, long number_of_cand,
-	       FILE *FREL, FILE *LPREL)
+               FILE *FREL, FILE *LPREL)
 {
   pari_sp av;
   long number_of_relations = 0;
@@ -2084,14 +2084,14 @@ mpqs_eval_cand(mpqs_handle_t *h, long number_of_cand,
 
       if (tmp_p == FB[pi].fbe_start1 || tmp_p == FB[pi].fbe_start2)
       { /* p divides Q(x)/A (and possibly A), 1st or 3rd case */
-	relaprimes[relaprpos++] = pi;
-	relaprimes[relaprpos++] = 1 + ei;
-	Qx_part = muliu(Qx_part, p);
+        relaprimes[relaprpos++] = pi;
+        relaprimes[relaprpos++] = 1 + ei;
+        Qx_part = muliu(Qx_part, p);
       }
       else if (ei)
       { /* p divides A but does not divide Q(x)/A, 2nd case */
-	relaprimes[relaprpos++] = pi;
-	relaprimes[relaprpos++] = 0;
+        relaprimes[relaprpos++] = pi;
+        relaprimes[relaprpos++] = 0;
       }
     }
 
@@ -2124,15 +2124,15 @@ mpqs_eval_cand(mpqs_handle_t *h, long number_of_cand,
        * to identify them just by their position before index0_FB. */
       if ((mpqs_int32_t)pi < h->index0_FB) {
 #ifdef MPQS_DEBUG
-	PRINT_IF_VERBOSE("\bk!");
+        PRINT_IF_VERBOSE("\bk!");
 #endif
-	mpqs_add_factor(&relations_end, 1, pi);
-	continue;
+        mpqs_add_factor(&relations_end, 1, pi);
+        continue;
       }
       if (ei == 0) /* p divides A and that was it */
       {
-	mpqs_add_factor(&relations_end, 1, pi);
-	continue;
+        mpqs_add_factor(&relations_end, 1, pi);
+        continue;
       }
       p = FB[pi].fbe_p;
 #ifdef MPQS_DEBUG_CANDIDATE_EVALUATION
@@ -2148,8 +2148,8 @@ mpqs_eval_cand(mpqs_handle_t *h, long number_of_cand,
        * an explicit if (!is_pm1(Qx)) here did not help any. */
       Qx_div_p = divis_rem(Qx, p, &remd_p);
       while (remd_p == 0) {
-	ei++; Qx = Qx_div_p;
-	Qx_div_p = divis_rem(Qx, p, &remd_p);
+        ei++; Qx = Qx_div_p;
+        Qx_div_p = divis_rem(Qx, p, &remd_p);
       }
       mpqs_add_factor(&relations_end, ei, pi);
     }
@@ -2170,20 +2170,20 @@ mpqs_eval_cand(mpqs_handle_t *h, long number_of_cand,
 
 #ifdef MPQS_DEBUG
       {
-	pari_sp av1 = avma;
-	GEN rhs = mpqs_factorback(h, relations);
-	GEN Qx_2 = remii(sqri(Y), h->N);
-	if (!equalii(Qx_2, rhs))
-	{
-	  PRINT_IF_VERBOSE("\b(!)\n");
-	  fprintferr("MPQS: %Ps @ %Ps :%s\n", Y, Qx, relations);
-	  fprintferr("\tQx_2 = %Ps\n", Qx_2);
-	  fprintferr("\t rhs = %Ps\n", rhs);
-	  pari_err(talker, "MPQS: wrong full relation found!!");
-	}
-	else
-	  PRINT_IF_VERBOSE("\b(:)");
-	avma = av1;
+        pari_sp av1 = avma;
+        GEN rhs = mpqs_factorback(h, relations);
+        GEN Qx_2 = remii(sqri(Y), h->N);
+        if (!equalii(Qx_2, rhs))
+        {
+          PRINT_IF_VERBOSE("\b(!)\n");
+          fprintferr("MPQS: %Ps @ %Ps :%s\n", Y, Qx, relations);
+          fprintferr("\tQx_2 = %Ps\n", Qx_2);
+          fprintferr("\t rhs = %Ps\n", rhs);
+          pari_err(talker, "MPQS: wrong full relation found!!");
+        }
+        else
+          PRINT_IF_VERBOSE("\b(:)");
+        avma = av1;
       }
 #endif
     }
@@ -2205,22 +2205,22 @@ mpqs_eval_cand(mpqs_handle_t *h, long number_of_cand,
 #endif
 #ifdef MPQS_DEBUG
       {
-	pari_sp av1 = avma;
-	GEN rhs = mpqs_factorback(h, relations);
-	GEN Qx_2 = remii(sqri(Y), h->N);
+        pari_sp av1 = avma;
+        GEN rhs = mpqs_factorback(h, relations);
+        GEN Qx_2 = remii(sqri(Y), h->N);
 
-	rhs = modii(mulii(rhs, Qx), h->N);
-	if (!equalii(Qx_2, rhs))
-	{
-	  PRINT_IF_VERBOSE("\b(!)\n");
-	  fprintferr("MPQS: %Ps @ %Ps :%s\n", Y, Qx, relations);
-	  fprintferr("\tQx_2 = %Ps\n", Qx_2);
-	  fprintferr("\t rhs = %Ps\n", rhs);
-	  pari_err(talker, "MPQS: wrong large prime relation found!!");
-	}
-	else
-	  PRINT_IF_VERBOSE("\b(;)");
-	avma = av1;
+        rhs = modii(mulii(rhs, Qx), h->N);
+        if (!equalii(Qx_2, rhs))
+        {
+          PRINT_IF_VERBOSE("\b(!)\n");
+          fprintferr("MPQS: %Ps @ %Ps :%s\n", Y, Qx, relations);
+          fprintferr("\tQx_2 = %Ps\n", Qx_2);
+          fprintferr("\t rhs = %Ps\n", rhs);
+          pari_err(talker, "MPQS: wrong large prime relation found!!");
+        }
+        else
+          PRINT_IF_VERBOSE("\b(;)");
+        avma = av1;
       }
 #endif
     }
@@ -2282,7 +2282,7 @@ set_lp_entry(mpqs_lp_entry *e, char *buf)
 
 static long
 mpqs_combine_large_primes(mpqs_handle_t *h,
-			  FILE *COMB, pariFILE *pFNEW, GEN *f)
+                          FILE *COMB, pariFILE *pFNEW, GEN *f)
 {
   pari_sp av0 = avma, av, av2;
   char new_relation[MPQS_STRING_LENGTH], buf[MPQS_STRING_LENGTH];
@@ -2335,18 +2335,18 @@ mpqs_combine_large_primes(mpqs_handle_t *h,
       avma = av; /* discard old inv_q and Y1 */
       if (!invmod(utoipos(old_q), h->N, &inv_q)) /* can happen --GN */
       {
-	inv_q = gcdii(inv_q, h->N);
-	if (is_pm1(inv_q) || equalii(inv_q, h->N)) /* pity */
-	{
+        inv_q = gcdii(inv_q, h->N);
+        if (is_pm1(inv_q) || equalii(inv_q, h->N)) /* pity */
+        {
 #ifdef MPQS_DEBUG
-	  fprintferr("MPQS: skipping relation with non-invertible q\n");
+          fprintferr("MPQS: skipping relation with non-invertible q\n");
 #endif
-	  old_q = -1; /* sentinel */
-	  av2 = avma = av;
-	  continue; /* discard this combination */
-	}
-	*f = gerepileuptoint(av0, inv_q);
-	return c;
+          old_q = -1; /* sentinel */
+          av2 = avma = av;
+          continue; /* discard this combination */
+        }
+        *f = gerepileuptoint(av0, inv_q);
+        return c;
       }
       Y1 = strtoi(e[i].Y);
       i = 1 - i; /* subsequent relations go to other row */
@@ -2368,8 +2368,8 @@ mpqs_combine_large_primes(mpqs_handle_t *h,
     for (l = 2; l < ei_size; l++)
       if (ei[l])
       {
-	sprintf(buf, " %ld %ld", ei[l], l);
-	strcat(new_relation, buf);
+        sprintf(buf, " %ld %ld", ei[l], l);
+        strcat(new_relation, buf);
       }
     strcat(new_relation, " 0");
     if (DEBUGLEVEL >= 6)
@@ -2390,7 +2390,7 @@ mpqs_combine_large_primes(mpqs_handle_t *h,
       Qx_2 = modii(sqri(new_Y), h->N);
       prod = mpqs_factorback(h, s);
       if (!equalii(Qx_2, prod))
-	pari_err(talker, "MPQS: combined large prime relation is false");
+        pari_err(talker, "MPQS: combined large prime relation is false");
       avma = av1;
     }
 #endif
@@ -2451,7 +2451,7 @@ stream_read_F2m(FILE *FREL, long rows, long cols, long *fpos)
   if (i != cols)
   {
     fprintferr("MPQS: full relations file %s than expected",
-	       i > cols ? "longer" : "shorter");
+               i > cols ? "longer" : "shorter");
     pari_err(talker, "MPQS panicking");
   }
   return m;
@@ -2517,8 +2517,8 @@ split(GEN N, GEN *e, GEN *res)
     *e = utoipos(flag);
     if (DEBUGLEVEL >= 5)
       fprintferr("MPQS: decomposed a %s\n",
-		 (flag == 3 ? "cube" :
-		  (flag == 5 ? "5th power" : "7th power")));
+                 (flag == 3 ? "cube" :
+                  (flag == 5 ? "5th power" : "7th power")));
     return 1;
   }
   *e = gen_0; return 0; /* known composite */
@@ -2598,12 +2598,12 @@ mpqs_solve_linear_system(mpqs_handle_t *h, pariFILE *pFREL, long rel)
     for (j = 1; j <= H_rows; j++)
     {
       if (F2m_coeff(ker_m, j, i))
-	Y_prod = mpqs_add_relation(Y_prod, N, ei,
-				   mpqs_get_relation(buf, fpos[j-1], FREL));
+        Y_prod = mpqs_add_relation(Y_prod, N, ei,
+                                   mpqs_get_relation(buf, fpos[j-1], FREL));
       if (low_stack(lim3, stack_lim(av3,1)))
       {
-	if(DEBUGMEM>1) pari_warn(warnmem,"[1]: mpqs_solve_linear_system");
-	Y_prod = gerepileuptoint(av3, Y_prod);
+        if(DEBUGMEM>1) pari_warn(warnmem,"[1]: mpqs_solve_linear_system");
+        Y_prod = gerepileuptoint(av3, Y_prod);
       }
     }
     Y_prod = gerepileuptoint(av3, Y_prod);
@@ -2612,24 +2612,24 @@ mpqs_solve_linear_system(mpqs_handle_t *h, pariFILE *pFREL, long rel)
     for (j = 2; j <= h->size_of_FB + 1; j++)
       if (ei[j])
       {
-	if (ei[j] & 1) pari_err(bugparier, "MPQS (relation is a nonsquare)");
-	X = remii(mulii(X,
-			Fp_powu(utoipos(FB[j].fbe_p), (ulong)ei[j]>>1, N)),
-		  N);
-	if (low_stack(lim3, stack_lim(av3,1)))
-	{
-	  if(DEBUGMEM>1) pari_warn(warnmem,"[2]: mpqs_solve_linear_system");
-	  X = gerepileupto(av3, X);
-	}
+        if (ei[j] & 1) pari_err(bugparier, "MPQS (relation is a nonsquare)");
+        X = remii(mulii(X,
+                        Fp_powu(utoipos(FB[j].fbe_p), (ulong)ei[j]>>1, N)),
+                  N);
+        if (low_stack(lim3, stack_lim(av3,1)))
+        {
+          if(DEBUGMEM>1) pari_warn(warnmem,"[2]: mpqs_solve_linear_system");
+          X = gerepileupto(av3, X);
+        }
       }
     X = gerepileuptoint(av3, X);
     if (MPQS_DEBUGLEVEL >= 1)
     {
       if (signe(remii(subii(sqri(X), sqri(Y_prod)), N)))
       { /* shouldn't happen */
-	fprintferr("MPQS: X^2 - Y^2 != 0 mod N\n");
-	fprintferr("\tindex i = %ld\n", i);
-	pari_warn(warner, "MPQS: wrong relation found after Gauss");
+        fprintferr("MPQS: X^2 - Y^2 != 0 mod N\n");
+        fprintferr("\tindex i = %ld\n", i);
+        pari_warn(warner, "MPQS: wrong relation found after Gauss");
       }
     }
     /* At this point, X^2 == Y^2 mod N.  Indeed, something stronger is true:
@@ -2644,7 +2644,7 @@ mpqs_solve_linear_system(mpqs_handle_t *h, pariFILE *pFREL, long rel)
      * alone, and never look at gcd(X-Y, N).
      */
     done = 0; /* (re-)counts probably-prime factors (or powers whose bases we
-	       * don't want to handle any further) */
+               * don't want to handle any further) */
     X_plus_Y = addii(X, Y_prod);
     if (res_next < 3)
     { /* we still haven't decomposed the original N, and want both a gcd and
@@ -2653,8 +2653,8 @@ mpqs_solve_linear_system(mpqs_handle_t *h, pariFILE *pFREL, long rel)
       if (is_pm1(D1) || equalii(D1,N)) { avma = av3; continue; }
       /* got something that works */
       if (DEBUGLEVEL >= 5)
-	fprintferr("MPQS: splitting N after %ld kernel vector%s\n",
-		   i+1, (i? "s" : ""));
+        fprintferr("MPQS: splitting N after %ld kernel vector%s\n",
+                   i+1, (i? "s" : ""));
       /* GN20050707 Fixed:
        * Don't divide N in place. We still need it for future X and Y_prod
        * computations! */
@@ -2669,74 +2669,74 @@ mpqs_solve_linear_system(mpqs_handle_t *h, pariFILE *pFREL, long rel)
        * two split() invocations.  Very rare case anyway. */
       if (res_max == 2) break; /* two out of two possible factors seen */
       if (DEBUGLEVEL >= 5)
-	fprintferr("MPQS: got two factors, looking for more...\n");
+        fprintferr("MPQS: got two factors, looking for more...\n");
     }
     else
     { /* we already have factors */
       for (j=1; j < res_next; j++)
       { /* loop over known-composite factors */
-	if (gel(res,res_size+j) && gel(res,res_size+j) != gen_0)
-	{
-	  done++; continue; /* skip probable primes etc */
-	}
-	/* actually, also skip square roots of squares etc.  They are a lot
-	 * smaller than the original N, and should be easy to deal with later */
-	av3 = avma;
-	D1 = gcdii(X_plus_Y, gel(res,j));
-	if (is_pm1(D1) || equalii(D1, gel(res,j))) { avma = av3; continue; }
-	/* got one which splits this factor */
-	if (DEBUGLEVEL >= 5)
-	  fprintferr("MPQS: resplitting a factor after %ld kernel vectors\n",
-		     i+1);      /* always plural */
-	/* first make sure there's room for another factor */
-	if (res_next > res_size)
-	{ /* need to reallocate (_very_ rare case) */
-	  long i1, size = 2*res_size;
-	  GEN RES;
-	  if (size > res_max) size = res_max;
-	  RES = cgetg(2*size+1, t_VEC);
-	  for (i1=2*size; i1>=res_next; i1--) gel(RES,i1) = NULL;
-	  for (i1=1; i1<res_next; i1++)
-	  {
-	    /* GN20050707:
-	     * on-stack contents of RES must be rejuvenated */
-	    icopyifstack(gel(res,i1), gel(RES,i1)); /* factors */
-	    if ( gel(res,res_size+i1) )
-	      icopyifstack(gel(res,res_size+i1), gel(RES,size+i1));
-	    /* primality tags */
-	  }
-	  res = RES; res_size = size;   /* res_next unchanged */
-	}
-	/* now there is room; divide into existing factor and store the
-	   new gcd */
-	diviiz(gel(res,j), D1, gel(res,j));
-	gel(res,res_next) = D1;
+        if (gel(res,res_size+j) && gel(res,res_size+j) != gen_0)
+        {
+          done++; continue; /* skip probable primes etc */
+        }
+        /* actually, also skip square roots of squares etc.  They are a lot
+         * smaller than the original N, and should be easy to deal with later */
+        av3 = avma;
+        D1 = gcdii(X_plus_Y, gel(res,j));
+        if (is_pm1(D1) || equalii(D1, gel(res,j))) { avma = av3; continue; }
+        /* got one which splits this factor */
+        if (DEBUGLEVEL >= 5)
+          fprintferr("MPQS: resplitting a factor after %ld kernel vectors\n",
+                     i+1);      /* always plural */
+        /* first make sure there's room for another factor */
+        if (res_next > res_size)
+        { /* need to reallocate (_very_ rare case) */
+          long i1, size = 2*res_size;
+          GEN RES;
+          if (size > res_max) size = res_max;
+          RES = cgetg(2*size+1, t_VEC);
+          for (i1=2*size; i1>=res_next; i1--) gel(RES,i1) = NULL;
+          for (i1=1; i1<res_next; i1++)
+          {
+            /* GN20050707:
+             * on-stack contents of RES must be rejuvenated */
+            icopyifstack(gel(res,i1), gel(RES,i1)); /* factors */
+            if ( gel(res,res_size+i1) )
+              icopyifstack(gel(res,res_size+i1), gel(RES,size+i1));
+            /* primality tags */
+          }
+          res = RES; res_size = size;   /* res_next unchanged */
+        }
+        /* now there is room; divide into existing factor and store the
+           new gcd */
+        diviiz(gel(res,j), D1, gel(res,j));
+        gel(res,res_next) = D1;
 
-	/* following overwrites the old known-composite indication at j */
-	if (split( gel(res,j), &gel(res,res_size+j), &gel(res,j)) ) done++;
-	/* GN20050707 Fixed:
-	 * Don't increment done when the newly stored factor seems to be
-	 * prime or otherwise devoid of interest - this happens later
-	 * when we routinely revisit it during the present inner loop. */
-	(void)split(D1, &gel(res,res_size+res_next), &gel(res,res_next));
+        /* following overwrites the old known-composite indication at j */
+        if (split( gel(res,j), &gel(res,res_size+j), &gel(res,j)) ) done++;
+        /* GN20050707 Fixed:
+         * Don't increment done when the newly stored factor seems to be
+         * prime or otherwise devoid of interest - this happens later
+         * when we routinely revisit it during the present inner loop. */
+        (void)split(D1, &gel(res,res_size+res_next), &gel(res,res_next));
 
-	/* GN20050707: Following line moved down to here, was before the
-	 * two split() invocations. */
-	if (++res_next > res_max)
-	{
-	  /* all possible factors seen, outer loop postprocessing will
-	   * proceed to break out of the outer loop below. */
-	  break;
-	}
+        /* GN20050707: Following line moved down to here, was before the
+         * two split() invocations. */
+        if (++res_next > res_max)
+        {
+          /* all possible factors seen, outer loop postprocessing will
+           * proceed to break out of the outer loop below. */
+          break;
+        }
       }       /* loop over known composite factors */
 
       if (res_next > res_last)
       {
-	res_last = res_next - 1; /* we might have resplit more than one */
-	if (DEBUGLEVEL >= 5)
-	  fprintferr("MPQS: got %ld factors%s\n", res_last,
-		     (done < res_last ? ", looking for more..." : ""));
-	res_last = res_next;
+        res_last = res_next - 1; /* we might have resplit more than one */
+        if (DEBUGLEVEL >= 5)
+          fprintferr("MPQS: got %ld factors%s\n", res_last,
+                     (done < res_last ? ", looking for more..." : ""));
+        res_last = res_next;
       }
       /* break out of the outer loop when we have seen res_max factors, and
        * also when all current factors are probable primes */
@@ -2751,10 +2751,10 @@ mpqs_solve_linear_system(mpqs_handle_t *h, pariFILE *pFREL, long rel)
       for (i1=2*res_size; i1>=res_next; i1--) new_res[i1] = 0;
       for (i1=1; i1<res_next; i1++)
       {
-	icopyifstack(gel(res,i1), gel(new_res,i1));
-	/* GN20050707: the marker GENs might need rejuvenating, too */
-	if (gel(res,res_size+i1))
-	  icopyifstack(gel(res,res_size+i1), gel(new_res,res_size+i1));
+        icopyifstack(gel(res,i1), gel(new_res,i1));
+        /* GN20050707: the marker GENs might need rejuvenating, too */
+        if (gel(res,res_size+i1))
+          icopyifstack(gel(res,res_size+i1), gel(new_res,res_size+i1));
       }
       res = gerepileupto(av2, new_res);
     }
@@ -2776,15 +2776,15 @@ mpqs_solve_linear_system(mpqs_handle_t *h, pariFILE *pFREL, long rel)
     icopyifstack(gel(res,i), gel(new_res,j++)); /* factor */
     gel(new_res,j++) = /* exponent */
       F ? (F == gen_0 ? gen_1
-		      : (isonstack(F) ? icopy(F) : F))
-	: gen_1; /* F was NULL */
+                      : (isonstack(F) ? icopy(F) : F))
+        : gen_1; /* F was NULL */
     gel(new_res,j++) = /* class */
       F == gen_0 ? gen_0 :      /* known composite */
-	NULL;           /* base of power or suspected prime --
-				   mark as `unknown' */
+        NULL;           /* base of power or suspected prime --
+                                   mark as `unknown' */
     if (DEBUGLEVEL >= 6)
       fprintferr("\tpackaging %ld: %Ps ^%ld (%s)\n", i, res[i],
-		 itos(gel(new_res,j-2)), (F == gen_0 ? "comp." : "unknown"));
+                 itos(gel(new_res,j-2)), (F == gen_0 ? "comp." : "unknown"));
   }
   return gerepileupto(av, new_res);
 }
@@ -2862,17 +2862,17 @@ mpqs_i(mpqs_handle_t *handle)
 
   if (DEBUGLEVEL >= 4)
     fprintferr("MPQS: factoring number of %ld decimal digits\n",
-	       handle->digit_size_N);
+               handle->digit_size_N);
 
   mpqs_find_k(handle);
   if (DEBUGLEVEL >= 5) fprintferr("MPQS: found multiplier %ld for N\n",
-				  handle->_k.k);
+                                  handle->_k.k);
   handle->kN = muliu(N, handle->_k.k);
 
   if (!mpqs_set_parameters(handle))
   {
     pari_warn(warner,
-	"MPQS: number too big to be factored with MPQS,\n\tgiving up");
+        "MPQS: number too big to be factored with MPQS,\n\tgiving up");
     return NULL;
   }
 
@@ -2914,33 +2914,33 @@ mpqs_i(mpqs_handle_t *handle)
     fprintferr("MPQS: sieving interval = [%ld, %ld]\n", -(long)M, (long)M);
     /* that was a little white lie, we stop one position short at the top */
     fprintferr("MPQS: size of factor base = %ld\n",
-	       (long)size_of_FB);
+               (long)size_of_FB);
     fprintferr("MPQS: striving for %ld relations\n",
-	       (long)handle->target_no_rels);
+               (long)handle->target_no_rels);
     fprintferr("MPQS: coefficients A will be built from %ld primes each\n",
-	       (long)handle->omega_A);
+               (long)handle->omega_A);
     fprintferr("MPQS: primes for A to be chosen near FB[%ld] = %ld\n",
-	       (long)handle->index2_FB,
-	       (long)FB[handle->index2_FB].fbe_p);
+               (long)handle->index2_FB,
+               (long)FB[handle->index2_FB].fbe_p);
     fprintferr("MPQS: smallest prime used for sieving FB[%ld] = %ld\n",
-	       (long)handle->index1_FB,
-	       (long)FB[handle->index1_FB].fbe_p);
+               (long)handle->index1_FB,
+               (long)FB[handle->index1_FB].fbe_p);
     fprintferr("MPQS: largest prime in FB = %ld\n",
-	       (long)handle->largest_FB_p);
+               (long)handle->largest_FB_p);
     fprintferr("MPQS: bound for `large primes' = %ld\n", (long)lp_bound);
   }
 
   if (DEBUGLEVEL >= 5)
   {
     fprintferr("MPQS: sieve threshold = %u\n",
-	       (unsigned int)handle->sieve_threshold);
+               (unsigned int)handle->sieve_threshold);
   }
 
   if (DEBUGLEVEL >= 4)
   {
     fprintferr("MPQS: first sorting at %ld%%, then every %3.1f%% / %3.1f%%\n",
-	       sort_interval/10, followup_sort_interval/10.,
-	       followup_sort_interval/20.);
+               sort_interval/10, followup_sort_interval/10.,
+               followup_sort_interval/20.);
   }
 
 
@@ -2982,7 +2982,7 @@ mpqs_i(mpqs_handle_t *handle)
     { /* have run out of primes for A */
       /* We might change some parameters.  For the moment, simply give up */
       if (DEBUGLEVEL >= 2)
-	fprintferr("MPQS: Ran out of primes for A, giving up.\n");
+        fprintferr("MPQS: Ran out of primes for A, giving up.\n");
       pari_fclose(pFNEW);
       pari_fclose(pLPNEW);
       /* FREL, LPREL are closed at this point */
@@ -3007,20 +3007,20 @@ mpqs_i(mpqs_handle_t *handle)
 
 #ifdef MPQS_USE_HISTOGRAMS
     if (handle->do_histograms && !handle->done_histograms &&
-	total_no_cand >= histo_checkpoint)
+        total_no_cand >= histo_checkpoint)
     {
       int res = mpqs_eval_histograms(handle);
       if (res >= 0)
       {
-	/* retry later */
-	if (res > 0)
-	  /* histo_checkpoint *= 2.6; */
-	  handle->do_histograms = 0; /* no, don't retry later */
-	else
-	  histo_checkpoint += (MPQS_MIN_CANDS_FOR_HISTO /* >> 1 */);
+        /* retry later */
+        if (res > 0)
+          /* histo_checkpoint *= 2.6; */
+          handle->do_histograms = 0; /* no, don't retry later */
+        else
+          histo_checkpoint += (MPQS_MIN_CANDS_FOR_HISTO /* >> 1 */);
       }
       else
-	handle->done_histograms = 1;
+        handle->done_histograms = 1;
     }
 #endif
 
@@ -3034,11 +3034,11 @@ mpqs_i(mpqs_handle_t *handle)
     if (DEBUGLEVEL >= 3)
     {
       if (DEBUGLEVEL >= 4)
-	fprintferr("\nMPQS: passing the %3.1f%% sort point, time = %ld ms\n",
-		   sort_interval/10., timer2());
+        fprintferr("\nMPQS: passing the %3.1f%% sort point, time = %ld ms\n",
+                   sort_interval/10., timer2());
       else
-	fprintferr("\nMPQS: passing the %3.1f%% sort point\n",
-		   sort_interval/10.);
+        fprintferr("\nMPQS: passing the %3.1f%% sort point\n",
+                   sort_interval/10.);
       flusherr();
     }
 
@@ -3061,16 +3061,16 @@ mpqs_i(mpqs_handle_t *handle)
       /* now FREL, LPREL are closed and FNEW, LPNEW are still open */
       if (fact)
       { /* factor found during combining */
-	if (DEBUGLEVEL >= 4)
-	{
-	  fprintferr("\nMPQS: split N whilst combining, time = %ld ms\n",
-		     timer2());
-	  fprintferr("MPQS: found factor = %Ps\n", fact);
-	}
-	pari_fclose(pLPNEW);
-	pari_fclose(pFNEW);
-	unlink_all();
-	return gerepileupto(av, fact);
+        if (DEBUGLEVEL >= 4)
+        {
+          fprintferr("\nMPQS: split N whilst combining, time = %ld ms\n",
+                     timer2());
+          fprintferr("MPQS: found factor = %Ps\n", fact);
+        }
+        pari_fclose(pLPNEW);
+        pari_fclose(pFNEW);
+        unlink_all();
+        return gerepileupto(av, fact);
       }
       total_partial_relations += tp;
     }
@@ -3112,25 +3112,25 @@ mpqs_i(mpqs_handle_t *handle)
     {
       if (tfc_ratio > 1.)
       {
-	if (percentage + (followup_sort_interval >> 1) * tfc_ratio > 994)
-	{
-	  /* aim for a _slight_ overshoot */
-	  sort_interval = (ulong)(percentage + 2 +
-	    (1000 - percentage) / tfc_ratio);
-	}
-	else if (percentage >= 980)
-	  sort_interval = percentage + 8;
-	else
-	  sort_interval = percentage + (followup_sort_interval >> 1);
+        if (percentage + (followup_sort_interval >> 1) * tfc_ratio > 994)
+        {
+          /* aim for a _slight_ overshoot */
+          sort_interval = (ulong)(percentage + 2 +
+            (1000 - percentage) / tfc_ratio);
+        }
+        else if (percentage >= 980)
+          sort_interval = percentage + 8;
+        else
+          sort_interval = percentage + (followup_sort_interval >> 1);
       }
       else
       {
-	if (percentage >= 980)
-	  sort_interval = percentage + 10;
-	else
-	  sort_interval = percentage + (followup_sort_interval >> 1);
-	if (sort_interval >= 1000 && percentage < 1000)
-	  sort_interval = 1000;
+        if (percentage >= 980)
+          sort_interval = percentage + 10;
+        else
+          sort_interval = percentage + (followup_sort_interval >> 1);
+        if (sort_interval >= 1000 && percentage < 1000)
+          sort_interval = 1000;
       }
     }
     else
@@ -3139,25 +3139,25 @@ mpqs_i(mpqs_handle_t *handle)
     if (DEBUGLEVEL >= 4)
     {
       fprintferr("MPQS: done sorting%s, time = %ld ms\n",
-		 tp > 0 ? " and combining" : "", timer2());
+                 tp > 0 ? " and combining" : "", timer2());
       fprintferr("MPQS: found %3.1f%% of the required relations\n",
-		 percentage/10.);
+                 percentage/10.);
       if (DEBUGLEVEL >= 5)
       { /* total_full_relations are always plural */
-	/* GN20050708: present code doesn't succeed in discarding all
-	 * dups, so don't lie about it... */
-	fprintferr("MPQS: found %ld full relations\n",
-		   total_full_relations);
-	if (lp_scale > 1)
-	fprintferr("MPQS:   (%ld of these from partial relations)\n",
-		   total_partial_relations);
-	fprintferr("MPQS: Net yield: %4.3g full relations per 100 candidates\n",
-		   net_yield);
-	fprintferr("MPQS:            %4.3g full relations per 100 polynomials\n",
-		   (total_full_relations * 100.) / iterations);
-	fprintferr("MPQS: %4.1f%% of the polynomials yielded no candidates\n",
-		   vain_iterations/10.);
-	fprintferr("MPQS: next sort point at %3.1f%%\n", sort_interval/10.);
+        /* GN20050708: present code doesn't succeed in discarding all
+         * dups, so don't lie about it... */
+        fprintferr("MPQS: found %ld full relations\n",
+                   total_full_relations);
+        if (lp_scale > 1)
+        fprintferr("MPQS:   (%ld of these from partial relations)\n",
+                   total_partial_relations);
+        fprintferr("MPQS: Net yield: %4.3g full relations per 100 candidates\n",
+                   net_yield);
+        fprintferr("MPQS:            %4.3g full relations per 100 polynomials\n",
+                   (total_full_relations * 100.) / iterations);
+        fprintferr("MPQS: %4.1f%% of the polynomials yielded no candidates\n",
+                   vain_iterations/10.);
+        fprintferr("MPQS: next sort point at %3.1f%%\n", sort_interval/10.);
       }
     }
 
@@ -3176,7 +3176,7 @@ mpqs_i(mpqs_handle_t *handle)
      * therefore removing the adjective "distinct" for the time being */
     if (DEBUGLEVEL >= 4)
       fprintferr("\nMPQS: starting Gauss over F_2 on %ld relations\n",
-		 total_full_relations);
+                 total_full_relations);
     pFREL = pari_fopen_or_fail(FREL_str, READ);
     fact = mpqs_solve_linear_system(handle, pFREL, total_full_relations);
     pari_fclose(pFREL);
@@ -3185,27 +3185,27 @@ mpqs_i(mpqs_handle_t *handle)
     { /* solution found */
       if (DEBUGLEVEL >= 4)
       {
-	fprintferr("\nMPQS: time in Gauss and gcds = %ld ms\n", timer2());
-	if (typ(fact) == t_INT) fprintferr("MPQS: found factor = %Ps\n", fact);
-	else
-	{
-	  long j, nf = (lg(fact)-1)/3;
-	  if (nf == 2)
-	    /* GN20050707: Changed the arrangement of the two factors,
-	     * to match the debug diagnostics in mpqs_solve_linear_system()
-	     * above */
-	    fprintferr("MPQS: found factors = %Ps\n\tand %Ps\n",
-			fact[1], fact[4]);
-	  else
-	  {
-	    /* GN20050707: Changed loop to scan upwards instead of downwards,
-	     * to match the debug diagnostics in mpqs_solve_linear_system()
-	     * above */
-	    fprintferr("MPQS: found %ld factors =\n", nf);
-	    for (j=1; j<=nf; j++)
-	      fprintferr("\t%Ps%s\n", fact[3*j-2], (j<nf ? "," : ""));
-	  }
-	}
+        fprintferr("\nMPQS: time in Gauss and gcds = %ld ms\n", timer2());
+        if (typ(fact) == t_INT) fprintferr("MPQS: found factor = %Ps\n", fact);
+        else
+        {
+          long j, nf = (lg(fact)-1)/3;
+          if (nf == 2)
+            /* GN20050707: Changed the arrangement of the two factors,
+             * to match the debug diagnostics in mpqs_solve_linear_system()
+             * above */
+            fprintferr("MPQS: found factors = %Ps\n\tand %Ps\n",
+                        fact[1], fact[4]);
+          else
+          {
+            /* GN20050707: Changed loop to scan upwards instead of downwards,
+             * to match the debug diagnostics in mpqs_solve_linear_system()
+             * above */
+            fprintferr("MPQS: found %ld factors =\n", nf);
+            for (j=1; j<=nf; j++)
+              fprintferr("\t%Ps%s\n", fact[3*j-2], (j<nf ? "," : ""));
+          }
+        }
       }
       pari_fclose(pLPNEW);
       unlink_all();
@@ -3218,17 +3218,17 @@ mpqs_i(mpqs_handle_t *handle)
     {
       if (DEBUGLEVEL >= 4)
       {
-	fprintferr("\nMPQS: time in Gauss and gcds = %ld ms\n", timer2());
-	fprintferr("MPQS: no factors found.\n");
-	if (percentage <= MPQS_ADMIT_DEFEAT)
-	  fprintferr("\nMPQS: restarting sieving ...\n");
-	else
-	  fprintferr("\nMPQS: giving up.\n");
+        fprintferr("\nMPQS: time in Gauss and gcds = %ld ms\n", timer2());
+        fprintferr("MPQS: no factors found.\n");
+        if (percentage <= MPQS_ADMIT_DEFEAT)
+          fprintferr("\nMPQS: restarting sieving ...\n");
+        else
+          fprintferr("\nMPQS: giving up.\n");
       }
       if (percentage > MPQS_ADMIT_DEFEAT)
       {
-	pari_fclose(pLPNEW);
-	unlink_all(); avma = av; return NULL;
+        pari_fclose(pLPNEW);
+        unlink_all(); avma = av; return NULL;
       }
       pFNEW = pari_fopen_or_fail(FNEW_str, WRITE);
     }

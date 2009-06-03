@@ -274,8 +274,8 @@ FqX_eval(GEN x, GEN y, GEN T, GEN p)
     for (j=i; !signe(gel(x,j)); j--)
       if (j==2)
       {
-	if (i!=j) y = Fq_pow(y,utoipos(i-j+1), T, p);
-	return gerepileupto(av, gmul(p1,y));
+        if (i!=j) y = Fq_pow(y,utoipos(i-j+1), T, p);
+        return gerepileupto(av, gmul(p1,y));
       }
     r = (i==j)? y: Fq_pow(y, utoipos(i-j+1), T, p);
     p1 = Fq_red(gadd(gmul(p1,r), gel(x,j)), T, p);
@@ -306,8 +306,8 @@ FpXX_red(GEN z, GEN p)
       c = FpX_red(zi,p);
       if (lg(c) <= 3)
       {
-	if (lg(c)==2) { avma = av; c = gen_0;}
-	else c = gerepilecopy(av, gel(c,2));
+        if (lg(c)==2) { avma = av; c = gen_0;}
+        else c = gerepilecopy(av, gel(c,2));
       }
     }
     gel(res,i) = c;
@@ -673,7 +673,7 @@ Fq_mul(GEN x, GEN y, GEN T, GEN p)
     case 1: return FpX_Fp_mul(x,y,p);
     case 2: return FpX_Fp_mul(y,x,p);
     case 3: if (T) return FpXQ_mul(x,y,T,p);
-	    else return FpX_mul(x,y,p);
+            else return FpX_mul(x,y,p);
   }
   return NULL;
 }
@@ -822,7 +822,7 @@ FqV_to_FlxV(GEN v, GEN T, GEN pp)
   GEN y = cgetg(N, t_VEC);
   for (j=1; j<N; j++)
     gel(y,j) = (typ(v[j])==t_INT?  Z_to_Flx(gel(v,j), p, vT)
-				  : ZX_to_Flx(gel(v,j), p));
+                                  : ZX_to_Flx(gel(v,j), p));
   return y;
 }
 
@@ -835,7 +835,7 @@ FqC_to_FlxC(GEN v, GEN T, GEN pp)
   GEN y = cgetg(N, t_COL);
   for (j=1; j<N; j++)
     gel(y,j) = (typ(v[j])==t_INT?  Z_to_Flx(gel(v,j), p, vT)
-				  : ZX_to_Flx(gel(v,j), p));
+                                  : ZX_to_Flx(gel(v,j), p));
   return y;
 }
 
@@ -1039,7 +1039,7 @@ intersect_ker(GEN P, GEN MA, GEN U, GEN l)
   if (DEBUGLEVEL>=4) msgtimer("matrix polcyclo");
   if (lg(A)!=r+1)
     pari_err(talker,"ZZ_%Ps[%Ps]/(%Ps) is not a field in FpX_ffintersect"
-	,l,pol_x(vp),P);
+        ,l,pol_x(vp),P);
   A = gerepileupto(ltop,A);
   /*The formula is
    * a_{r-1} = -\phi(a_0)/b_0
@@ -1051,7 +1051,7 @@ intersect_ker(GEN P, GEN MA, GEN U, GEN l)
   gel(R,r) = FpM_FpC_mul(MA, FpC_Fp_mul(gel(A,1),ib0,l), l);
   for(i=r-1;i>1;i--)
     gel(R,i) = FpC_add(FpM_FpC_mul(MA,gel(R,i+1),l),
-	               FpC_Fp_mul(gel(R,r), gel(U,i+2), l),l);
+                       FpC_Fp_mul(gel(R,r), gel(U,i+2), l),l);
   R = shallowtrans(R);
   for(i=1;i<lg(R);i++) gel(R,i) = RgV_to_RgX(gel(R,i),vu);
   A = gtopolyrev(R,vp);
@@ -1100,25 +1100,25 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
       if (DEBUGLEVEL>=4) (void)timer2();
       A = FpM_ker(RgM_Rg_add_shallow(MA, z),l);
       if (lg(A)!=2)
-	pari_err(talker,"ZZ_%Ps[%Ps]/(%Ps) is not a field in FpX_ffintersect"
-	    ,l,pol_x(vp),P);
+        pari_err(talker,"ZZ_%Ps[%Ps]/(%Ps) is not a field in FpX_ffintersect"
+            ,l,pol_x(vp),P);
       A = RgV_to_RgX(gel(A,1),vp);
 
       B = FpM_ker(RgM_Rg_add_shallow(MB, z),l);
       if (lg(B)!=2)
-	pari_err(talker,"ZZ_%Ps[%Ps]/(%Ps) is not a field in FpX_ffintersect"
-	    ,l,pol_x(vq),Q);
+        pari_err(talker,"ZZ_%Ps[%Ps]/(%Ps) is not a field in FpX_ffintersect"
+            ,l,pol_x(vq),Q);
       B = RgV_to_RgX(gel(B,1),vq);
 
       if (DEBUGLEVEL>=4) msgtimer("FpM_ker");
       An = gel(FpXQ_pow(A,ipg,P,l),2);
       Bn = gel(FpXQ_pow(B,ipg,Q,l),2);
       if (!invmod(Bn,l,&z))
-	pari_err(talker,"Polynomials not irreducible in FpX_ffintersect");
+        pari_err(talker,"Polynomials not irreducible in FpX_ffintersect");
       z = Fp_mul(An,z,l);
       L = Fp_sqrtn(z,ipg,l,NULL);
       if ( !L )
-	pari_err(talker,"Polynomials not irreducible in FpX_ffintersect");
+        pari_err(talker,"Polynomials not irreducible in FpX_ffintersect");
       if (DEBUGLEVEL>=4) msgtimer("Fp_sqrtn");
       B = FpX_Fp_mul(B,L,l);
     }
@@ -1156,18 +1156,18 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
     {
       if (j)
       {
-	Ay = FpXQ_mul(Ay,FpXQ_pow(Ap,lmun,P,l),P,l);
-	for(i=1;i<lg(Ay)-1;i++) VP[i] = Ay[i+1];
-	for(;i<=np;i++) gel(VP,i) = gen_0;
+        Ay = FpXQ_mul(Ay,FpXQ_pow(Ap,lmun,P,l),P,l);
+        for(i=1;i<lg(Ay)-1;i++) VP[i] = Ay[i+1];
+        for(;i<=np;i++) gel(VP,i) = gen_0;
       }
       Ap = FpM_invimage(MA,VP,l);
       Ap = RgV_to_RgX(Ap,vp);
 
       if (j)
       {
-	By = FpXQ_mul(By,FpXQ_pow(Bp,lmun,Q,l),Q,l);
-	for(i=1;i<lg(By)-1;i++) VQ[i] = By[i+1];
-	for(;i<=nq;i++) gel(VQ,i) = gen_0;
+        By = FpXQ_mul(By,FpXQ_pow(Bp,lmun,Q,l),Q,l);
+        for(i=1;i<lg(By)-1;i++) VQ[i] = By[i+1];
+        for(;i<=nq;i++) gel(VQ,i) = gen_0;
       }
       Bp = FpM_invimage(MB,VQ,l);
       Bp = RgV_to_RgX(Bp,vq);
@@ -1441,7 +1441,7 @@ FpXQX_divrem(GEN x, GEN y, GEN T, GEN p, GEN *pr)
       tetpil=avma;
       z = FlxX_to_ZXX(z);
       if (pr && pr != ONLY_DIVIDES && pr != ONLY_REM)
-	*pr = FlxX_to_ZXX(*pr);
+        *pr = FlxX_to_ZXX(*pr);
       else return gerepile(av0,tetpil,z);
       gptr[0]=pr; gptr[1]=&z;
       gerepilemanysp(av0,tetpil,gptr,2);
@@ -1637,8 +1637,8 @@ ZM_incremental_CRT(GEN *pH, GEN Hp, GEN q, GEN qp, ulong p)
       h = Fl_chinese_coprime(gcoeff(H,i,j), coeff(Hp,i,j),q,p,qinv,qp);
       if (h)
       {
-	if (cmpii(h,lim) > 0) h = subii(h,qp);
-	gcoeff(H,i,j) = h; stable = 0;
+        if (cmpii(h,lim) > 0) h = subii(h,qp);
+        gcoeff(H,i,j) = h; stable = 0;
       }
     }
   return stable;
@@ -1681,9 +1681,9 @@ Flx_resultant_all(GEN a, GEN b, long *C0, long *C1, GEN dglist, ulong p)
       if (both_odd(da,db)) res = p-res;
       if (lb != 1)
       {
-	ulong t = Fl_powu(lb, da - dc, p);
-	res = Fl_mul(res, t, p);
-	if (dc) cx = Fl_mul(cx, t, p);
+        ulong t = Fl_powu(lb, da - dc, p);
+        res = Fl_mul(res, t, p);
+        if (dc) cx = Fl_mul(cx, t, p);
       }
     }
     else
@@ -1719,8 +1719,8 @@ pol_comp(GEN P, GEN u, GEN v)
   {
     GEN t = gel(P,i);
     gel(y,i) = gequal0(t)? gen_0:
-			 (i&1)? gmul(t, gsub(u,v)) /*  odd degree */
-			      : gmul(t, gadd(u,v));/* even degree */
+                         (i&1)? gmul(t, gsub(u,v)) /*  odd degree */
+                              : gmul(t, gadd(u,v));/* even degree */
   }
   y[1] = P[1]; return normalizepol_lg(y,l);
 }
@@ -1769,7 +1769,7 @@ FpV_polint(GEN xa, GEN ya, GEN p, long v)
     if (i < n-1 && equalii(addii(gel(xa,i), gel(xa,i+1)), p))
     {
       dP = pol_comp(T, Fp_mul(gel(ya,i),  inv,p),
-		       Fp_mul(gel(ya,i+1),inv,p));
+                       Fp_mul(gel(ya,i+1),inv,p));
       i++; /* x_i = -x_{i+1} */
     }
     else
@@ -1981,7 +1981,7 @@ FlxX_pseudorem(GEN x, GEN y, ulong p)
     gel(x,0) = Flx_neg(gel(x,0), p); dp--;
     for (i=1; i<=dy; i++)
       gel(x,i) = Flx_add( Flx_mul(gel(y,0), gel(x,i), p),
-			      Flx_mul(gel(x,0), gel(y,i), p), p );
+                              Flx_mul(gel(x,0), gel(y,i), p), p );
     for (   ; i<=dx; i++)
       gel(x,i) = Flx_mul(gel(y,0), gel(x,i), p);
     do { x++; dx--; } while (dx >= 0 && lg(gel(x,0))==2);
@@ -2034,10 +2034,10 @@ FlxX_resultant(GEN u, GEN v, ulong p, long sx)
     {
       case 0: break;
       case 1:
-	p1 = Flx_mul(h,p1, p); h = g; break;
+        p1 = Flx_mul(h,p1, p); h = g; break;
       default:
-	p1 = Flx_mul(Flx_pow(h,degq,p), p1, p);
-	h = Flx_div(Flx_pow(g,degq,p), Flx_pow(h,degq-1,p), p);
+        p1 = Flx_mul(Flx_pow(h,degq,p), p1, p);
+        h = Flx_div(Flx_pow(g,degq,p), Flx_pow(h,degq-1,p), p);
     }
     if (both_odd(du,dv)) signh = -signh;
     v = FlxY_Flx_div(r, p1, p);
@@ -2264,32 +2264,32 @@ INIT:
       if (degpol(a) < degA || lg(b) < lb) continue; /* p | lc(A)lc(B) */
       if (checksqfree)
       { /* find degree list for generic Euclidean Remainder Sequence */
-	long goal = minss(degpol(a), degpol(b)); /* longest possible */
-	for (n=1; n <= goal; n++) dglist[n] = 0;
-	setlg(dglist, 1);
-	for (n=0; n <= dres; n++)
-	{
-	  ev = FlxY_evalx_drop(b, n, p);
-	  (void)Flx_resultant_all(a, ev, NULL, NULL, dglist, p);
-	  if (lg(dglist)-1 == goal) break;
-	}
-	/* last pol in ERS has degree > 1 ? */
-	goal = lg(dglist)-1;
-	if (degpol(B) == 1) { if (!goal) goto INIT; }
-	else
-	{
-	  if (goal <= 1) goto INIT;
-	  if (dglist[goal] != 0 || dglist[goal-1] != 1) goto INIT;
-	}
-	if (DEBUGLEVEL>4)
-	  fprintferr("Degree list for ERS (trials: %ld) = %Ps\n",n+1,dglist);
+        long goal = minss(degpol(a), degpol(b)); /* longest possible */
+        for (n=1; n <= goal; n++) dglist[n] = 0;
+        setlg(dglist, 1);
+        for (n=0; n <= dres; n++)
+        {
+          ev = FlxY_evalx_drop(b, n, p);
+          (void)Flx_resultant_all(a, ev, NULL, NULL, dglist, p);
+          if (lg(dglist)-1 == goal) break;
+        }
+        /* last pol in ERS has degree > 1 ? */
+        goal = lg(dglist)-1;
+        if (degpol(B) == 1) { if (!goal) goto INIT; }
+        else
+        {
+          if (goal <= 1) goto INIT;
+          if (dglist[goal] != 0 || dglist[goal-1] != 1) goto INIT;
+        }
+        if (DEBUGLEVEL>4)
+          fprintferr("Degree list for ERS (trials: %ld) = %Ps\n",n+1,dglist);
       }
 
       for (i=0,n = 0; i <= dres; n++)
       {
-	ev = FlxY_evalx_drop(b, n, p);
-	x[++i] = n; y[i] = Flx_resultant_all(a, ev, C0+i, C1+i, dglist, p);
-	if (!C1[i]) i--; /* C1(i) = 0. No way to recover C0(i) */
+        ev = FlxY_evalx_drop(b, n, p);
+        x[++i] = n; y[i] = Flx_resultant_all(a, ev, C0+i, C1+i, dglist, p);
+        if (!C1[i]) i--; /* C1(i) = 0. No way to recover C0(i) */
       }
       Flv_polint_all(x,y,C0,C1, p);
       Hp = gel(y,1);
@@ -2333,8 +2333,8 @@ INIT:
       q = utoipos(p); stable = 0;
       H = ZX_init_CRT(Hp, p,vX);
       if (LERS) {
-	H0= ZX_init_CRT(H0p, p,vX);
-	H1= ZX_init_CRT(H1p, p,vX);
+        H0= ZX_init_CRT(H0p, p,vX);
+        H1= ZX_init_CRT(H1p, p,vX);
       }
     }
     else
@@ -2342,8 +2342,8 @@ INIT:
       GEN qp = muliu(q,p);
       stable = ZX_incremental_CRT(&H, Hp, q,qp, p);
       if (LERS) {
-	stable &= ZX_incremental_CRT(&H0,H0p, q,qp, p);
-	stable &= ZX_incremental_CRT(&H1,H1p, q,qp, p);
+        stable &= ZX_incremental_CRT(&H0,H0p, q,qp, p);
+        stable &= ZX_incremental_CRT(&H1,H1p, q,qp, p);
       }
       q = qp;
     }
@@ -2453,9 +2453,9 @@ ZX_resultant_all(GEN A, GEN B, GEN dB, ulong bound)
       long eA = gexpo(A), eB = gexpo(B), prec = nbits2prec(maxss(eA,eB));
       for(;; prec = (prec-1)<<1)
       {
-	GEN R = resultant(RgX_gtofp(A, prec), RgX_gtofp(B, prec));
-	bound = gexpo(R) + 1;
-	if (!gequal0(R)) break;
+        GEN R = resultant(RgX_gtofp(A, prec), RgX_gtofp(B, prec));
+        bound = gexpo(R) + 1;
+        if (!gequal0(R)) break;
       }
       if (dB) bound -= (long)(dbllog2(dB)*degA);
     }

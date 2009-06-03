@@ -39,7 +39,7 @@ typedef struct _primedata {
   GEN fk;      /* factorization of pol over F_(p^lcm) */
   GEN firstroot; /* *[i] = index of first root of fk[i] */
   GEN interp;    /* *[i] = interpolation polynomial for fk[i]
-		  * [= 1 on the first root firstroot[i], 0 on the others] */
+                  * [= 1 on the first root firstroot[i], 0 on the others] */
   GEN bezoutC; /* Bezout coefficients associated to the ff[i] */
   GEN Trk;     /* used to compute traces (cf poltrace) */
 } primedata;
@@ -112,9 +112,9 @@ calc_block(blockdata *B, GEN Z, GEN Y, GEN SB)
     for (j=2; j<r; j++)
       if (n[j]%k == 0)
       {
-	if (++lpn >= BIL) pari_err(talker,"overflow in calc_block");
-	pn[lpn] = n[j]; pnon[lpn] = j;
-	ngcd = ugcd(ngcd, n[j]);
+        if (++lpn >= BIL) pari_err(talker,"overflow in calc_block");
+        pn[lpn] = n[j]; pnon[lpn] = j;
+        ngcd = ugcd(ngcd, n[j]);
       }
     if (dk % ngcd) continue;
     T = 1<<lpn;
@@ -136,17 +136,17 @@ calc_block(blockdata *B, GEN Z, GEN Y, GEN SB)
     { /* loop through all non-empty subsets of [1..lpn] */
       for (nn=n[1],tp=t, u=1; u<=lpn; u++,tp>>=1)
       {
-	if (tp&1) { nn += pn[u]; e[u] = 1; } else e[u] = 0;
+        if (tp&1) { nn += pn[u]; e[u] = 1; } else e[u] = 0;
       }
       if (dk != nn) continue;
 
       for (j=1; j<r; j++) non[j]=0;
       Zp[1] = Z[1];
       for (u=2,j=1; j<=lpn; j++)
-	if (e[j]) { Zp[u] = Z[pnon[j]]; non[pnon[j]] = 1; u++; }
+        if (e[j]) { Zp[u] = Z[pnon[j]]; non[pnon[j]] = 1; u++; }
       setlg(Zp, u);
       for (u=1,j=2; j<r; j++)
-	if (!non[j]) Zpp[u++] = Z[j];
+        if (!non[j]) Zpp[u++] = Z[j];
       setlg(Zpp, u);
       SB = calc_block(B, Zpp, Yp, SB);
     }
@@ -235,8 +235,8 @@ print_block_system(blockdata *B, GEN Y, GEN SB)
       GEN cy = gel(Yi,j);
       for (l=1,lp=0; l<=n[j]; l++)
       {
-	lp++; if (lp > ki) lp = 1;
-	gel(De,lp) = vecsmall_append(gel(De,lp), cy[l]);
+        lp++; if (lp > ki) lp = 1;
+        gel(De,lp) = vecsmall_append(gel(De,lp), cy[l]);
       }
     }
     append(D, De);
@@ -268,7 +268,7 @@ print_block_system(blockdata *B, GEN Y, GEN SB)
     for (u=1; u<=N; u++) perm[u] = u;
     for (u=1; u<=ns; u++)
       for (v=1; v<=t[u]; v++)
-	perm_mul_i(perm, cycle_power_to_perm(cyperm, gmael(Z,u,v), e[u][v]));
+        perm_mul_i(perm, cycle_power_to_perm(cyperm, gmael(Z,u,v), e[u][v]));
     SB = test_block(B, SB, im_block_by_perm(D,perm));
     avma = av;
 
@@ -281,21 +281,21 @@ print_block_system(blockdata *B, GEN Y, GEN SB)
       if (j >= 1) { e[ns][j]++; for (l=j+1; l<=t[ns]; l++) e[ns][l] = 0; }
       else
       {
-	i = ns-1;
-	while (i>=1)
-	{
-	  j = t[i];
-	  while (j>=1 && e[i][j] == k[i]) j--;
-	  if (j<1) i--;
-	  else
-	  {
-	    e[i][j]++;
-	    for (l=j+1; l<=t[i]; l++) e[i][l] = 0;
-	    for (ll=i+1; ll<=ns; ll++)
-	      for (l=1; l<=t[ll]; l++) e[ll][l] = 0;
-	    break;
-	  }
-	}
+        i = ns-1;
+        while (i>=1)
+        {
+          j = t[i];
+          while (j>=1 && e[i][j] == k[i]) j--;
+          if (j<1) i--;
+          else
+          {
+            e[i][j]++;
+            for (l=j+1; l<=t[i]; l++) e[i][l] = 0;
+            for (ll=i+1; ll<=ns; ll++)
+              for (l=1; l<=t[ll]; l++) e[ll][l] = 0;
+            break;
+          }
+        }
       }
     }
   }
@@ -604,7 +604,7 @@ bound_for_coeff(long m, GEN rr, GEN *maxroot)
   for (i=1; i<m; i++)
   {
     p1 = gadd(gmul(gcoeff(C, m, i+1), B),/* binom(m-1, i)   */
-	      gcoeff(C, m, i));          /* binom(m-1, i-1) */
+              gcoeff(C, m, i));          /* binom(m-1, i-1) */
     gel(M,i+2) = ceil_safe(p1);
   }
   return M;
@@ -656,13 +656,13 @@ compute_data(blockdata *B)
     {
       if (degpol(gel(interp,i)) > 0) /* do not turn pol_1(0) into gen_1 */
       {
-	p1 = RgX_translate(gel(interp,i), gen_m1);
-	gel(interp,i) = FpXX_red(p1, p);
+        p1 = RgX_translate(gel(interp,i), gen_m1);
+        gel(interp,i) = FpXX_red(p1, p);
       }
       if (degpol(gel(bezoutC,i)) > 0)
       {
-	p1 = RgX_translate(gel(bezoutC,i), gen_m1);
-	gel(bezoutC,i) = FpXX_red(p1, p);
+        p1 = RgX_translate(gel(bezoutC,i), gen_m1);
+        gel(bezoutC,i) = FpXX_red(p1, p);
       }
     }
     ff = cgetg(lff, t_VEC); /* copy, do not overwrite! */
@@ -925,7 +925,7 @@ nfsubfields(GEN nf, long d)
     {
       GEN H = gel(L,i);
       if (group_order(H) == o)
-	gel(F,k++) = lift_intern(galoisfixedfield(G, gel(H,1), 0, v0));
+        gel(F,k++) = lift_intern(galoisfixedfield(G, gel(H,1), 0, v0));
     }
     setlg(F, k);
     return gerepilecopy(av, F);

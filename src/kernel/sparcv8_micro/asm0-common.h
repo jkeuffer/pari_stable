@@ -26,57 +26,57 @@ NOASM bfffo
 #define addll(a,b) \
 ({ ulong __value, __arg1 = (a), __arg2 = (b); \
    __asm__ ( "addcc %2,%3,%0; \
-	  addx  %%g0,%%g0,%1" \
-	 : "=r" (__value), "=r" (overflow) \
-	 : "r" (__arg1), "r" (__arg2) \
-	 : "cc"); \
+          addx  %%g0,%%g0,%1" \
+         : "=r" (__value), "=r" (overflow) \
+         : "r" (__arg1), "r" (__arg2) \
+         : "cc"); \
 __value; })
 
 #define addllx(a,b) \
 ({ ulong __value, __arg1 = (a), __arg2 = (b); \
    __asm__ ( "subcc %%g0,%1,%%g0; \
-	  addxcc %2,%3,%0; \
-	  addx  %%g0,%%g0,%1" \
-	 : "=r" (__value), "=r" (overflow) \
-	 : "r" (__arg1), "r" (__arg2), "1" (overflow) \
-	 : "cc"); \
+          addxcc %2,%3,%0; \
+          addx  %%g0,%%g0,%1" \
+         : "=r" (__value), "=r" (overflow) \
+         : "r" (__arg1), "r" (__arg2), "1" (overflow) \
+         : "cc"); \
 __value; })
 
 #define subll(a,b) \
 ({ ulong __value, __arg1 = (a), __arg2 = (b); \
    __asm__ ( "subcc %2,%3,%0; \
-	  addx  %%g0,%%g0,%1" \
-	 : "=r" (__value), "=r" (overflow) \
-	 : "r" (__arg1), "r" (__arg2) \
-	 : "cc"); \
+          addx  %%g0,%%g0,%1" \
+         : "=r" (__value), "=r" (overflow) \
+         : "r" (__arg1), "r" (__arg2) \
+         : "cc"); \
 __value; })
 
 #define subllx(a,b) \
 ({ ulong __value, __arg1 = (a), __arg2 = (b); \
    __asm__ ( "subcc %%g0,%1,%%g0; \
-	  subxcc %2,%3,%0; \
-	  addx  %%g0,%%g0,%1" \
-	 : "=r" (__value), "=r" (overflow) \
-	 : "r" (__arg1), "r" (__arg2), "1" (overflow) \
-	 : "cc"); \
+          subxcc %2,%3,%0; \
+          addx  %%g0,%%g0,%1" \
+         : "=r" (__value), "=r" (overflow) \
+         : "r" (__arg1), "r" (__arg2), "1" (overflow) \
+         : "cc"); \
 __value; })
 
 #define mulll(a,b) \
 ({ ulong __value, __arg1 = (a), __arg2 = (b); \
    __asm__ ( "umul %2,%3,%0; \
-	  rd  %%y,%1" \
-	 : "=r" (__value), "=r" (hiremainder) \
-	 : "r" (__arg1), "r" (__arg2));	\
+          rd  %%y,%1" \
+         : "=r" (__value), "=r" (hiremainder) \
+         : "r" (__arg1), "r" (__arg2));        \
 __value;})
 
 #define addmul(a,b) \
 ({ ulong __value, __arg1 = (a), __arg2 = (b), __tmp; \
    __asm__ ( "umul %3,%4,%0; \
-	  rd  %%y,%2; \
-	  addcc %0,%1,%0; \
-	  addx %%g0,%2,%1" \
-	 : "=&r" (__value), "=&r" (hiremainder), "=&r" (__tmp) \
-	 : "r" (__arg1), "r" (__arg2), "1" (hiremainder) \
-	 : "cc");	\
+          rd  %%y,%2; \
+          addcc %0,%1,%0; \
+          addx %%g0,%2,%1" \
+         : "=&r" (__value), "=&r" (hiremainder), "=&r" (__tmp) \
+         : "r" (__arg1), "r" (__arg2), "1" (hiremainder) \
+         : "cc");        \
 __value;})
 #endif

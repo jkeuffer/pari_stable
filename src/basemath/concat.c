@@ -176,44 +176,44 @@ shallowconcat(GEN x, GEN y)
     case t_VEC:
       switch(ty)
       {
-	case t_COL:
-	  if (lx<=2) return (lx==1)? y: shallowconcat(gel(x,1),y);
-	  if (ly>=3) break;
-	  return (ly==1)? x: shallowconcat(x,gel(y,1));
-	case t_MAT:
-	  z=cgetg(ly,t_MAT); if (lx != ly) break;
-	  for (i=1; i<ly; i++) gel(z,i) = shallowconcat(gel(x,i),gel(y,i));
-	  return z;
+        case t_COL:
+          if (lx<=2) return (lx==1)? y: shallowconcat(gel(x,1),y);
+          if (ly>=3) break;
+          return (ly==1)? x: shallowconcat(x,gel(y,1));
+        case t_MAT:
+          z=cgetg(ly,t_MAT); if (lx != ly) break;
+          for (i=1; i<ly; i++) gel(z,i) = shallowconcat(gel(x,i),gel(y,i));
+          return z;
       }
       break;
 
     case t_COL:
       switch(ty)
       {
-	case t_VEC:
-	  if (lx<=2) return (lx==1)? y: shallowconcat(gel(x,1), y);
-	  if (ly>=3) break;
-	  return (ly==1)? x: shallowconcat(x, gel(y,1));
-	case t_MAT:
-	  if (lx != lg(y[1])) break;
-	  z=cgetg(ly+1,t_MAT); gel(z,1) = x;
-	  for (i=2; i<=ly; i++) z[i]=y[i-1];
-	  return z;
+        case t_VEC:
+          if (lx<=2) return (lx==1)? y: shallowconcat(gel(x,1), y);
+          if (ly>=3) break;
+          return (ly==1)? x: shallowconcat(x, gel(y,1));
+        case t_MAT:
+          if (lx != lg(y[1])) break;
+          z=cgetg(ly+1,t_MAT); gel(z,1) = x;
+          for (i=2; i<=ly; i++) z[i]=y[i-1];
+          return z;
       }
       break;
 
     case t_MAT:
       switch(ty)
       {
-	case t_VEC:
-	  z=cgetg(lx, t_MAT); if (ly != lx) break;
-	  for (i=1; i<lx; i++) gel(z,i) = shallowconcat(gel(x,i), gel(y,i));
-	  return z;
-	case t_COL:
-	  if (ly != lg(x[1])) break;
-	  z=cgetg(lx+1,t_MAT); gel(z,lx) = y;
-	  for (i=1; i<lx; i++) z[i]=x[i];
-	  return z;
+        case t_VEC:
+          z=cgetg(lx, t_MAT); if (ly != lx) break;
+          for (i=1; i<lx; i++) gel(z,i) = shallowconcat(gel(x,i), gel(y,i));
+          return z;
+        case t_COL:
+          if (ly != lg(x[1])) break;
+          z=cgetg(lx+1,t_MAT); gel(z,lx) = y;
+          for (i=1; i<lx; i++) z[i]=x[i];
+          return z;
       }
       break;
   }
@@ -407,44 +407,44 @@ concat(GEN x, GEN y)
     case t_VEC:
       switch(ty)
       {
-	case t_COL:
-	  if (lx<=2) return (lx==1)? gcopy(y): concat(gel(x,1),y);
-	  if (ly>=3) break;
-	  return (ly==1)? gcopy(x): concat(x,gel(y,1));
-	case t_MAT:
-	  z=cgetg(ly,t_MAT); if (lx != ly) break;
-	  for (i=1; i<ly; i++) gel(z,i) = concat(gel(x,i),gel(y,i));
-	  return z;
+        case t_COL:
+          if (lx<=2) return (lx==1)? gcopy(y): concat(gel(x,1),y);
+          if (ly>=3) break;
+          return (ly==1)? gcopy(x): concat(x,gel(y,1));
+        case t_MAT:
+          z=cgetg(ly,t_MAT); if (lx != ly) break;
+          for (i=1; i<ly; i++) gel(z,i) = concat(gel(x,i),gel(y,i));
+          return z;
       }
       break;
 
     case t_COL:
       switch(ty)
       {
-	case t_VEC:
-	  if (lx<=2) return (lx==1)? gcopy(y): concat(gel(x,1),y);
-	  if (ly>=3) break;
-	  return (ly==1)? gcopy(x): concat(x,gel(y,1));
-	case t_MAT:
-	  if (lx != lg(y[1])) break;
-	  z=cgetg(ly+1,t_MAT); gel(z,1) = gcopy(x);
-	  for (i=2; i<=ly; i++) gel(z,i) = gcopy(gel(y,i-1));
-	  return z;
+        case t_VEC:
+          if (lx<=2) return (lx==1)? gcopy(y): concat(gel(x,1),y);
+          if (ly>=3) break;
+          return (ly==1)? gcopy(x): concat(x,gel(y,1));
+        case t_MAT:
+          if (lx != lg(y[1])) break;
+          z=cgetg(ly+1,t_MAT); gel(z,1) = gcopy(x);
+          for (i=2; i<=ly; i++) gel(z,i) = gcopy(gel(y,i-1));
+          return z;
       }
       break;
 
     case t_MAT:
       switch(ty)
       {
-	case t_VEC:
-	  z=cgetg(lx,t_MAT); if (ly != lx) break;
-	  for (i=1; i<lx; i++) gel(z,i) = concat(gel(x,i),gel(y,i));
-	  return z;
-	case t_COL:
-	  if (ly != lg(x[1])) break;
-	  z=cgetg(lx+1,t_MAT); gel(z,lx) = gcopy(y);
-	  for (i=1; i<lx; i++) gel(z,i) = gcopy(gel(x,i));
-	  return z;
+        case t_VEC:
+          z=cgetg(lx,t_MAT); if (ly != lx) break;
+          for (i=1; i<lx; i++) gel(z,i) = concat(gel(x,i),gel(y,i));
+          return z;
+        case t_COL:
+          if (ly != lg(x[1])) break;
+          z=cgetg(lx+1,t_MAT); gel(z,lx) = gcopy(y);
+          for (i=1; i<lx; i++) gel(z,i) = gcopy(gel(x,i));
+          return z;
       }
       break;
   }

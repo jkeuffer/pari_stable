@@ -183,19 +183,19 @@ znstar_conductor(long n, GEN H)
       q /= p;
       for (j = 1; j < p; j++)
       {
-	z += q;
-	if (!F2v_coeff(gel(H,3),z) && ugcd(z,n)==1)
-	  break;
+        z += q;
+        if (!F2v_coeff(gel(H,3),z) && ugcd(z,n)==1)
+          break;
       }
       if ( j < p )
       {
-	if (DEBUGLEVEL>=4)
-	  fprintferr("SubCyclo: %ld not found\n",z);
-	break;
+        if (DEBUGLEVEL>=4)
+          fprintferr("SubCyclo: %ld not found\n",z);
+        break;
       }
       cnd /= p;
       if (DEBUGLEVEL>=4)
-	fprintferr("SubCyclo: new conductor:%ld\n",cnd);
+        fprintferr("SubCyclo: new conductor:%ld\n",cnd);
     }
   }
   if (DEBUGLEVEL>=6)
@@ -319,12 +319,12 @@ lift_check_modulus(GEN H, long n)
   {
     case t_INTMOD:
       if (!equalsi(n, gel(H,1)))
-	pari_err(talker,"wrong modulus in galoissubcyclo");
+        pari_err(talker,"wrong modulus in galoissubcyclo");
       H = gel(H,2);
     case t_INT:
       h = smodis(H,n);
       if (ugcd(h,n) != 1)
-	pari_err(talker,"generators must be prime to conductor in galoissubcyclo");
+        pari_err(talker,"generators must be prime to conductor in galoissubcyclo");
       return h;
   }
   pari_err(talker,"wrong type in galoissubcyclo");
@@ -587,21 +587,21 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
       if (lg(N)==4)
       {
         GEN gen = gel(N,3);
-	Z = N;
-	if (typ(gen)!=t_VEC) pari_err(typeer,"galoissubcyclo");
-	if (lg(gen) == 1) n = 1;
-	else
-	{
+        Z = N;
+        if (typ(gen)!=t_VEC) pari_err(typeer,"galoissubcyclo");
+        if (lg(gen) == 1) n = 1;
+        else
+        {
           GEN z = gel(gen,1);
-	  if (typ(z) != t_INTMOD)
+          if (typ(z) != t_INTMOD)
 #ifdef NETHACK_MESSAGES
-	    pari_err(talker,"You have transgressed!");
+            pari_err(talker,"You have transgressed!");
 #else
-	    pari_err(talker,"Please do not try to break PARI with ridiculous counterfeit data. Thanks!");
+            pari_err(talker,"Please do not try to break PARI with ridiculous counterfeit data. Thanks!");
 #endif
-	  n = itos(gel(z,1));
-	}
-	break;
+          n = itos(gel(z,1));
+        }
+        break;
       }
     default: /*fall through*/
       pari_err(typeer,"galoissubcyclo");
@@ -625,13 +625,13 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
       break;
     case t_MAT:/*Fall through*/
       {
-	if (lg(sg) == 1 || lg(sg) != lg(sg[1]))
-	  pari_err(talker,"not a HNF matrix in galoissubcyclo");
-	if (!Z)
-	  pari_err(talker,"N must be a bnrinit or a znstar if H is a matrix in galoissubcyclo");
-	if ( lg(Z[2]) != lg(sg) || lg(Z[3]) != lg(sg))
-	  pari_err(talker,"Matrix of wrong dimensions in galoissubcyclo");
-	V = znstar_hnf_generators(znstar_small(Z),sg);
+        if (lg(sg) == 1 || lg(sg) != lg(sg[1]))
+          pari_err(talker,"not a HNF matrix in galoissubcyclo");
+        if (!Z)
+          pari_err(talker,"N must be a bnrinit or a znstar if H is a matrix in galoissubcyclo");
+        if ( lg(Z[2]) != lg(sg) || lg(Z[3]) != lg(sg))
+          pari_err(talker,"Matrix of wrong dimensions in galoissubcyclo");
+        V = znstar_hnf_generators(znstar_small(Z),sg);
       }
       break;
     default:

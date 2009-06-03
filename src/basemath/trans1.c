@@ -87,9 +87,9 @@ piold(long prec)
     else
     {
       if (n1 < SQRTVERYBIGINT)
-	p3 = divru(divru(mulur(n1-4,mulur(n1*(n1-2),p1)),n*n),n);
+        p3 = divru(divru(mulur(n1-4,mulur(n1*(n1-2),p1)),n*n),n);
       else
-	p3 = divru(divru(divru(mulur(n1-4,mulur(n1,mulur(n1-2,p1))),n),n),n);
+        p3 = divru(divru(divru(mulur(n1-4,mulur(n1,mulur(n1-2,p1))),n),n),n);
     }
     p3 = divru(divru(p3,100100025), 327843840);
     subisz(p2,k1,p2);
@@ -680,14 +680,14 @@ gpowgs(GEN x, long n)
       GEN a = gel(x,1), b = gel(x,2);
       long sx = signe(a), s;
       if (!sx) {
-	if (n < 0) pari_err(gdiver);
-	return gen_0;
+        if (n < 0) pari_err(gdiver);
+        return gen_0;
       }
       s = (sx < 0 && odd(n))? -1: 1;
       if (n < 0) {
-	n = -n;
-	if (is_pm1(a)) return powiu_sign(b, n, s); /* +-1/x[2] inverts to t_INT */
-	swap(a, b);
+        n = -n;
+        if (is_pm1(a)) return powiu_sign(b, n, s); /* +-1/x[2] inverts to t_INT */
+        swap(a, b);
       }
       y = cgetg(3, t_FRAC);
       gel(y,1) = powiu_sign(a, n, s);
@@ -781,8 +781,8 @@ ser_pow(GEN x, GEN n, long prec)
       av = avma; p1 = gen_0;
       for (j=1; j<=minss(i,mi); j++)
       {
-	p2 = gsubgs(gmulgs(alp,j),i);
-	p1 = gadd(p1, gmul(gmul(p2,gel(X,j)),gel(Y,i-j)));
+        p2 = gsubgs(gmulgs(alp,j),i);
+        p1 = gadd(p1, gmul(gmul(p2,gel(X,j)),gel(Y,i-j)));
       }
       tetpil = avma; gel(Y,i) = gerepile(av,tetpil, gdivgs(p1,i));
     }
@@ -847,7 +847,7 @@ gpow(GEN x, GEN n, long prec)
     case t_SER:
       if (tn == t_FRAC) return gerepileupto(av, ser_powfrac(x, n, prec));
       if (valp(x))
-	pari_err(talker,"gpow: need integer exponent if series valuation != 0");
+        pari_err(talker,"gpow: need integer exponent if series valuation != 0");
       if (lg(x) == 2) return gerepilecopy(av, x); /* O(1) */
       return gerepileupto(av, ser_pow(x, n, prec));
   }
@@ -961,10 +961,10 @@ padic_sqrt(GEN x)
     if (pp <= 3)
     {
       switch(pp) {
-	case 1: break;
-	case 2: if ((r&3) == 1) break;
-	case 3: if (r == 1) break;
-	default: pari_err(sqrter5);
+        case 1: break;
+        case 2: if ((r&3) == 1) break;
+        case 3: if (r == 1) break;
+        default: pari_err(sqrter5);
       }
       z = gen_1;
       pp = 1;
@@ -1053,14 +1053,14 @@ gsqrt(GEN x, long prec)
       if (!signe(p1)) { gel(y,1) = gel(y,2) = sqrtr(p1); return y; }
       if (gsigne(gel(x,1)) < 0)
       {
-	p1 = sqrtr( gmul2n(gsub(p1,gel(x,1)), -1) );
-	if (gsigne(gel(x,2)) < 0) togglesign(p1);
-	gel(y,2) = gerepileuptoleaf(av, p1); av = avma;
-	gel(y,1) = gerepileuptoleaf(av, gdiv(gel(x,2), gmul2n(p1,1)));
+        p1 = sqrtr( gmul2n(gsub(p1,gel(x,1)), -1) );
+        if (gsigne(gel(x,2)) < 0) togglesign(p1);
+        gel(y,2) = gerepileuptoleaf(av, p1); av = avma;
+        gel(y,1) = gerepileuptoleaf(av, gdiv(gel(x,2), gmul2n(p1,1)));
       } else {
-	p1 = sqrtr( gmul2n(gadd(p1,gel(x,1)), -1) );
-	gel(y,1) = gerepileuptoleaf(av, p1); av = avma;
-	gel(y,2) = gerepileuptoleaf(av, gdiv(gel(x,2), gmul2n(p1,1)));
+        p1 = sqrtr( gmul2n(gadd(p1,gel(x,1)), -1) );
+        gel(y,1) = gerepileuptoleaf(av, p1); av = avma;
+        gel(y,2) = gerepileuptoleaf(av, gdiv(gel(x,2), gmul2n(p1,1)));
       }
       return y;
 
@@ -1244,7 +1244,7 @@ padic_sqrtn(GEN x, GEN n, GEN *zetan)
     x = gerepileupto(av, x);
     if (zetan)
       *zetan = (e && lgefint(p)==3 && p[2]==2)? gen_m1 /*-1 in Q_2*/
-					      : gen_1;
+                                              : gen_1;
     return x;
   }
   tetpil = avma;
@@ -1321,11 +1321,11 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
       if (signe(n) < 0) pari_err(gdiver);
       if (isinexactreal(x))
       {
-	long e = gexpo(x), junk;
-	y = real_0_bit(e < 2? 0: sdivsi_rem(e, n, &junk));
+        long e = gexpo(x), junk;
+        y = real_0_bit(e < 2? 0: sdivsi_rem(e, n, &junk));
       }
       else
-	y = real_0(prec);
+        y = real_0(prec);
     }
     else
       y = gerepileupto(av, gexp(gdiv(glog(x,prec), n), prec));
@@ -1645,7 +1645,7 @@ serexp(GEN x, long prec)
     {
       av = avma; p1 = gen_0;
       for (j=ex; j<=minss(i,mi); j++)
-	p1 = gadd(p1, gmulgs(gmul(gel(xd,j),gel(yd,i-j)),j));
+        p1 = gadd(p1, gmulgs(gmul(gel(xd,j),gel(yd,i-j)),j));
       gel(yd,i) = gerepileupto(av, gdivgs(p1,i));
     }
     return y;
@@ -1754,7 +1754,7 @@ agm1(GEN x, long prec)
 
     case t_COMPLEX:
       if (gequal0(gel(x,2)) && gsigne(gel(x,1)) > 0)
-	return agm1(gel(x,1), prec);
+        return agm1(gel(x,1), prec);
       return agm1cx(x, prec);
 
     case t_PADIC:
@@ -1762,11 +1762,11 @@ agm1(GEN x, long prec)
       a1 = x; b1 = gen_1; l = precp(x);
       do
       {
-	a = a1;
-	a1 = gmul2n(gadd(a,b1),-1);
-	b1 = padic_sqrt(gmul(a,b1));
-	p1 = gsub(b1,a1); ep = valp(p1)-valp(b1);
-	if (ep<=0) { b1 = gneg_i(b1); p1 = gsub(b1,a1); ep=valp(p1)-valp(b1); }
+        a = a1;
+        a1 = gmul2n(gadd(a,b1),-1);
+        b1 = padic_sqrt(gmul(a,b1));
+        p1 = gsub(b1,a1); ep = valp(p1)-valp(b1);
+        if (ep<=0) { b1 = gneg_i(b1); p1 = gsub(b1,a1); ep=valp(p1)-valp(b1); }
       }
       while (ep<l && !gequal0(p1));
       return gerepilecopy(av,a1);
@@ -1777,13 +1777,13 @@ agm1(GEN x, long prec)
       l2 = 5-bit_accuracy(prec);
       do
       {
-	a = a1;
-	a1 = gmul2n(gadd(a,b1),-1);
-	b1 = ser_powfrac(gmul(a,b1), ghalf, prec);
-	p1 = gsub(b1,a1); ep = valp(p1)-valp(b1);
+        a = a1;
+        a1 = gmul2n(gadd(a,b1),-1);
+        b1 = ser_powfrac(gmul(a,b1), ghalf, prec);
+        p1 = gsub(b1,a1); ep = valp(p1)-valp(b1);
       }
       while (ep<l && !gequal0(p1)
-		  && (!isinexactreal(p1) || gexpo(p1) - gexpo(b1) >= l2));
+                  && (!isinexactreal(p1) || gexpo(p1) - gexpo(b1) >= l2));
       return gerepilecopy(av,a1);
   }
   return transc(agm1,x,prec);
@@ -1991,7 +1991,7 @@ logagmcx(GEN q, long prec)
   a = addrr(a, mulsr(-e, mplog2(prec)));
   if (lg(a) == 3) a = real_0_bit(expo(a));
   if (neg) b = gsigne(b) <= 0? gadd(b, mppi(prec))
-			     : gsub(b, mppi(prec));
+                             : gsub(b, mppi(prec));
   affrr_fixlg(a, gel(z,1));
   affrr_fixlg(b, gel(z,2)); avma = av; return z;
 }
@@ -2039,8 +2039,8 @@ glog(GEN x, long prec)
     case t_REAL:
       if (signe(x) >= 0)
       {
-	if (!signe(x)) pari_err(talker,"zero argument in mplog");
-	return logr_abs(x);
+        if (!signe(x)) pari_err(talker,"zero argument in mplog");
+        return logr_abs(x);
       }
       y = cgetg(3,t_COMPLEX);
       gel(y,1) = logr_abs(x);
@@ -2226,7 +2226,7 @@ static GEN
 tofp_safe(GEN x, long prec)
 {
   return (typ(x) == t_INT || gexpo(x) > 0)? gadd(x, real_0(prec))
-					  : fractor(x, prec);
+                                          : fractor(x, prec);
 }
 
 GEN
@@ -2432,24 +2432,24 @@ gsincos(GEN x, GEN *s, GEN *c, long prec)
       if (ex < 0) pari_err(talker,"non zero exponent in gsincos");
       if (ex2 > lx)
       {
-	*s = x == y? gcopy(y): gerepilecopy(av, y); av = avma;
-	*c = gerepileupto(av, gsubsg(1, gdivgs(gsqr(y),2)));
-	return;
+        *s = x == y? gcopy(y): gerepilecopy(av, y); av = avma;
+        *c = gerepileupto(av, gsubsg(1, gdivgs(gsqr(y),2)));
+        return;
       }
       if (!ex)
       {
-	p1 = leafcopy(y); gel(p1,2) = gen_0;
-	gsincos(normalize(p1),&u,&v,prec);
-	gsincos(gel(y,2),&u1,&v1,prec);
-	p1 = gmul(v1,v);
-	p2 = gmul(u1,u);
-	p3 = gmul(v1,u);
-	p4 = gmul(u1,v); tetpil = avma;
-	*c = gsub(p1,p2);
-	*s = gadd(p3,p4);
-	gptr[0]=s; gptr[1]=c;
-	gerepilemanysp(av,tetpil,gptr,2);
-	return;
+        p1 = leafcopy(y); gel(p1,2) = gen_0;
+        gsincos(normalize(p1),&u,&v,prec);
+        gsincos(gel(y,2),&u1,&v1,prec);
+        p1 = gmul(v1,v);
+        p2 = gmul(u1,u);
+        p3 = gmul(v1,u);
+        p4 = gmul(u1,v); tetpil = avma;
+        *c = gsub(p1,p2);
+        *s = gadd(p3,p4);
+        gptr[0]=s; gptr[1]=c;
+        gerepilemanysp(av,tetpil,gptr,2);
+        return;
       }
 
       ly = lx+2*ex;
@@ -2463,18 +2463,18 @@ gsincos(GEN x, GEN *s, GEN *c, long prec)
       for (i=3; i< ex2; i++) gel(pc,i) = gen_0;
       for (i=ex2; i<ly; i++)
       {
-	ii = i-ex; av = avma; p1 = gen_0;
-	for (j=ex; j<=minss(ii-2,mi); j++)
-	  p1 = gadd(p1, gmulgs(gmul(gel(y,j-ex+2),gel(ps,ii-j)),j));
-	gel(pc,i) = gerepileupto(av, gdivgs(p1,2-i));
-	if (ii < lx)
-	{
-	  av = avma; p1 = gen_0;
-	  for (j=ex; j<=minss(i-ex2,mi); j++)
-	    p1 = gadd(p1,gmulgs(gmul(gel(y,j-ex+2),gel(pc,i-j)),j));
-	  p1 = gdivgs(p1,i-2);
-	  gel(ps,i-ex) = gerepileupto(av, gadd(p1,gel(y,i-ex)));
-	}
+        ii = i-ex; av = avma; p1 = gen_0;
+        for (j=ex; j<=minss(ii-2,mi); j++)
+          p1 = gadd(p1, gmulgs(gmul(gel(y,j-ex+2),gel(ps,ii-j)),j));
+        gel(pc,i) = gerepileupto(av, gdivgs(p1,2-i));
+        if (ii < lx)
+        {
+          av = avma; p1 = gen_0;
+          for (j=ex; j<=minss(i-ex2,mi); j++)
+            p1 = gadd(p1,gmulgs(gmul(gel(y,j-ex+2),gel(pc,i-j)),j));
+          p1 = gdivgs(p1,i-2);
+          gel(ps,i-ex) = gerepileupto(av, gadd(p1,gel(y,i-ex)));
+        }
       }
       return;
   }

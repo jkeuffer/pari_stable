@@ -77,8 +77,8 @@ buchnarrow(GEN bnf)
       p1 = gcoeff(u1,i,j);
       if (signe(p1))
       {
-	p2 = idealmul(nf,p2, idealpow(nf,gel(gen,i),p1));
-	p2 = Q_primpart(p2);
+        p2 = idealmul(nf,p2, idealpow(nf,gel(gen,i),p1));
+        p2 = Q_primpart(p2);
       }
     }
     gel(basecl,j) = p2;
@@ -112,11 +112,11 @@ compute_fact(GEN nf, GEN u1, GEN gen)
       g = gel(gen,i);
       if (typ(g) != t_MAT)
       {
-	if (z)
-	  gel(z,2) = famat_mul(gel(z,2), to_famat_shallow(g, e));
-	else
-	  z = mkvec2(NULL, to_famat_shallow(g, e));
-	continue;
+        if (z)
+          gel(z,2) = famat_mul(gel(z,2), to_famat_shallow(g, e));
+        else
+          z = mkvec2(NULL, to_famat_shallow(g, e));
+        continue;
       }
 
       gel(G,1) = g;
@@ -299,23 +299,23 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
       GEN L0 = Q_primitive_part(LL, &cx); /* LL = L0*cx (faster nfval) */
       for (j=1; j<lp; j++)
       {
-	pr = gel(listpr,j);
-	v  = fast_val(nf, L0,cx, pr,gel(vectau,j)); /* = val_pr(LL) */
-	if (!v) continue;
-	p  = pr_get_p(pr);
-	pi = get_pi(F, pr, &gel(vecpi,j));
-	if (v > 0)
-	{
-	  pinvpi = get_pinvpi(nf, fZ, p, pi, &gel(vecpinvpi,j));
-	  t = nfpow_u(nf,pinvpi, (ulong)v);
-	  LL = nfmul(nf, LL, t);
-	  LL = RgC_Rg_div(LL, powiu(p, v));
-	}
-	else
-	{
-	  t = nfpow_u(nf,pi,(ulong)(-v));
-	  LL = nfmul(nf, LL, t);
-	}
+        pr = gel(listpr,j);
+        v  = fast_val(nf, L0,cx, pr,gel(vectau,j)); /* = val_pr(LL) */
+        if (!v) continue;
+        p  = pr_get_p(pr);
+        pi = get_pi(F, pr, &gel(vecpi,j));
+        if (v > 0)
+        {
+          pinvpi = get_pinvpi(nf, fZ, p, pi, &gel(vecpinvpi,j));
+          t = nfpow_u(nf,pinvpi, (ulong)v);
+          LL = nfmul(nf, LL, t);
+          LL = RgC_Rg_div(LL, powiu(p, v));
+        }
+        else
+        {
+          t = nfpow_u(nf,pi,(ulong)(-v));
+          LL = nfmul(nf, LL, t);
+        }
       }
       LL = make_integral(nf,LL,f,listpr);
       gel(newL,k) = typ(LL) == t_INT? LL: FpC_red(LL, fZ);
@@ -755,19 +755,19 @@ minimforunits(GEN nf, long BORNE, ulong w)
     {
       if (k>1)
       {
-	long l = k-1;
-	z[l] = 0;
-	for (j=k; j<=n; j++) z[l] += q[l][j]*x[j];
-	p = (double)x[k] + z[k];
-	y[l] = y[k] + p*p*v[k];
-	x[l] = (long)floor(sqrt((BOUND-y[l])/v[l])-z[l]);
-	k = l;
+        long l = k-1;
+        z[l] = 0;
+        for (j=k; j<=n; j++) z[l] += q[l][j]*x[j];
+        p = (double)x[k] + z[k];
+        y[l] = y[k] + p*p*v[k];
+        x[l] = (long)floor(sqrt((BOUND-y[l])/v[l])-z[l]);
+        k = l;
       }
       for(;;)
       {
-	p = (double)x[k] + z[k];
-	if (y[k] + p*p*v[k] <= BOUND) break;
-	k++; x[k]--;
+        p = (double)x[k] + z[k];
+        if (y[k] + p*p*v[k] <= BOUND) break;
+        k++; x[k]--;
       }
     }
     while (k>1);
@@ -780,7 +780,7 @@ minimforunits(GEN nf, long BORNE, ulong w)
     if (norme > normax) normax = norme;
     if (is_unit(M,r1, x)
     && (norme > 2*n  /* exclude roots of unity */
-	|| !ZV_isscalar(nfpow_u(nf, zc_to_ZC(x), w))))
+        || !ZV_isscalar(nfpow_u(nf, zc_to_ZC(x), w))))
     {
       if (norme < normin) normin = norme;
       if (DEBUGLEVEL>=2) { fprintferr("*"); flusherr(); }
@@ -827,116 +827,116 @@ compute_M0(GEN M_star,long N)
       pari_sp av = avma; n3=N-n1-n2;
       if (n1==n2 && n1==n3) /* n1 = n2 = n3 = m1 = N/3 */
       {
-	p1 = divru(M_star, m1);
-	p4 = sqrtr_abs( mulrr(addsr(1,p1),subrs(p1,3)) );
-	p5 = subrs(p1,1);
-	u = gen_1;
-	v = gmul2n(addrr(p5,p4),-1);
-	w = gmul2n(subrr(p5,p4),-1);
-	M0_pro=gmul2n(mulur(m1,addrr(sqrr(logr_abs(v)),sqrr(logr_abs(w)))), -2);
-	if (DEBUGLEVEL>2)
-	{
-	  fprintferr("[ %ld, %ld, %ld ]: %Ps\n",n1,n2,n3,gprec_w(M0_pro,3));
-	  flusherr();
-	}
-	if (!M0 || gcmp(M0_pro,M0) < 0) M0 = M0_pro;
+        p1 = divru(M_star, m1);
+        p4 = sqrtr_abs( mulrr(addsr(1,p1),subrs(p1,3)) );
+        p5 = subrs(p1,1);
+        u = gen_1;
+        v = gmul2n(addrr(p5,p4),-1);
+        w = gmul2n(subrr(p5,p4),-1);
+        M0_pro=gmul2n(mulur(m1,addrr(sqrr(logr_abs(v)),sqrr(logr_abs(w)))), -2);
+        if (DEBUGLEVEL>2)
+        {
+          fprintferr("[ %ld, %ld, %ld ]: %Ps\n",n1,n2,n3,gprec_w(M0_pro,3));
+          flusherr();
+        }
+        if (!M0 || gcmp(M0_pro,M0) < 0) M0 = M0_pro;
       }
       else if (n1==n2 || n2==n3)
       { /* n3 > N/3 >= n1 */
-	long k = N - 2*n2;
-	p2 = deg1pol_shallow(stoi(-n2), M_star, vx); /* M* - n2 X */
-	p3 = gmul(powuu(k,k),
-		  gpowgs(gsubgs(RgX_Rg_mul(p2, M_star), k*k), n2));
-	pol = gsub(p3, RgX_mul(monomial(powuu(n2,n2), n2, vx),
+        long k = N - 2*n2;
+        p2 = deg1pol_shallow(stoi(-n2), M_star, vx); /* M* - n2 X */
+        p3 = gmul(powuu(k,k),
+                  gpowgs(gsubgs(RgX_Rg_mul(p2, M_star), k*k), n2));
+        pol = gsub(p3, RgX_mul(monomial(powuu(n2,n2), n2, vx),
                                gpowgs(p2, N-n2)));
-	r = roots(pol, DEFAULTPREC); lr = lg(r);
-	for (i=1; i<lr; i++)
-	{
+        r = roots(pol, DEFAULTPREC); lr = lg(r);
+        for (i=1; i<lr; i++)
+        {
           GEN n2S;
-	  S = real_i(gel(r,i));
-	  if (is_complex(gel(r,i), bitprec) || signe(S) <= 0) continue;
+          S = real_i(gel(r,i));
+          if (is_complex(gel(r,i), bitprec) || signe(S) <= 0) continue;
 
           n2S = mulur(n2,S);
-	  p4 = subrr(M_star, n2S);
-	  P = divrr(mulrr(n2S,p4), subrs(mulrr(M_star,p4),k*k));
-	  p5 = subrr(sqrr(S), gmul2n(P,2));
-	  if (gsigne(p5) < 0) continue;
+          p4 = subrr(M_star, n2S);
+          P = divrr(mulrr(n2S,p4), subrs(mulrr(M_star,p4),k*k));
+          p5 = subrr(sqrr(S), gmul2n(P,2));
+          if (gsigne(p5) < 0) continue;
 
-	  p6 = sqrtr(p5);
-	  v = gmul2n(subrr(S,p6),-1);
-	  if (gsigne(v) <= 0) continue;
+          p6 = sqrtr(p5);
+          v = gmul2n(subrr(S,p6),-1);
+          if (gsigne(v) <= 0) continue;
 
-	  u = gmul2n(addrr(S,p6),-1);
-	  w = gpow(P, gdivgs(utoineg(n2),k), 0);
-	  p6 = mulur(n2, addrr(sqrr(logr_abs(u)), sqrr(logr_abs(v))));
-	  M0_pro = gmul2n(addrr(p6, mulur(k, sqrr(logr_abs(w)))),-2);
-	  if (DEBUGLEVEL>2)
-	  {
-	    fprintferr("[ %ld, %ld, %ld ]: %Ps\n",n1,n2,n3,gprec_w(M0_pro,3));
-	    flusherr();
-	  }
-	  if (!M0 || gcmp(M0_pro,M0) < 0) M0 = M0_pro;
-	}
+          u = gmul2n(addrr(S,p6),-1);
+          w = gpow(P, gdivgs(utoineg(n2),k), 0);
+          p6 = mulur(n2, addrr(sqrr(logr_abs(u)), sqrr(logr_abs(v))));
+          M0_pro = gmul2n(addrr(p6, mulur(k, sqrr(logr_abs(w)))),-2);
+          if (DEBUGLEVEL>2)
+          {
+            fprintferr("[ %ld, %ld, %ld ]: %Ps\n",n1,n2,n3,gprec_w(M0_pro,3));
+            flusherr();
+          }
+          if (!M0 || gcmp(M0_pro,M0) < 0) M0 = M0_pro;
+        }
       }
       else
       {
-	f1 = gsub(gadd(gmulsg(n1,X),gadd(gmulsg(n2,Y),gmulsg(n3,Z))), M);
-	f2 =         gmulsg(n1,gmul(Y,Z));
-	f2 = gadd(f2,gmulsg(n2,gmul(X,Z)));
-	f2 = gadd(f2,gmulsg(n3,gmul(X,Y)));
-	f2 = gsub(f2,gmul(M,gmul(X,gmul(Y,Z))));
-	f3 = gsub(gmul(gpowgs(X,n1),gmul(gpowgs(Y,n2),gpowgs(Z,n3))), gen_1);
-	/* f1 = n1 X + n2 Y + n3 Z - M */
-	/* f2 = n1 YZ + n2 XZ + n3 XY */
-	/* f3 = X^n1 Y^n2 Z^n3 - 1*/
-	g1=resultant(f1,f2); g1=primpart(g1);
-	g2=resultant(f1,f3); g2=primpart(g2);
-	g3=resultant(g1,g2); g3=primpart(g3);
-	pf1=gsubst(f1,vM,M_star); pg1=gsubst(g1,vM,M_star);
-	pf2=gsubst(f2,vM,M_star); pg2=gsubst(g2,vM,M_star);
-	pf3=gsubst(f3,vM,M_star); pg3=gsubst(g3,vM,M_star);
-	/* g3 = Res_Y,Z(f1,f2,f3) */
-	r = roots(pg3,DEFAULTPREC); lr = lg(r);
-	for (i=1; i<lr; i++)
-	{
-	  w = real_i(gel(r,i));
-	  if (is_complex(gel(r,i), bitprec) || signe(w) <= 0) continue;
-	  p1=gsubst(pg1,vz,w);
-	  p2=gsubst(pg2,vz,w);
-	  p3=gsubst(pf1,vz,w);
-	  p4=gsubst(pf2,vz,w);
-	  p5=gsubst(pf3,vz,w);
-	  r1 = roots(p1, DEFAULTPREC); lr1 = lg(r1);
-	  for (j=1; j<lr1; j++)
-	  {
-	    v = real_i(gel(r1,j));
-	    if (is_complex(gel(r1,j), bitprec) || signe(v) <= 0
-	     || !is_zero(gsubst(p2,vy,v), bitprec)) continue;
+        f1 = gsub(gadd(gmulsg(n1,X),gadd(gmulsg(n2,Y),gmulsg(n3,Z))), M);
+        f2 =         gmulsg(n1,gmul(Y,Z));
+        f2 = gadd(f2,gmulsg(n2,gmul(X,Z)));
+        f2 = gadd(f2,gmulsg(n3,gmul(X,Y)));
+        f2 = gsub(f2,gmul(M,gmul(X,gmul(Y,Z))));
+        f3 = gsub(gmul(gpowgs(X,n1),gmul(gpowgs(Y,n2),gpowgs(Z,n3))), gen_1);
+        /* f1 = n1 X + n2 Y + n3 Z - M */
+        /* f2 = n1 YZ + n2 XZ + n3 XY */
+        /* f3 = X^n1 Y^n2 Z^n3 - 1*/
+        g1=resultant(f1,f2); g1=primpart(g1);
+        g2=resultant(f1,f3); g2=primpart(g2);
+        g3=resultant(g1,g2); g3=primpart(g3);
+        pf1=gsubst(f1,vM,M_star); pg1=gsubst(g1,vM,M_star);
+        pf2=gsubst(f2,vM,M_star); pg2=gsubst(g2,vM,M_star);
+        pf3=gsubst(f3,vM,M_star); pg3=gsubst(g3,vM,M_star);
+        /* g3 = Res_Y,Z(f1,f2,f3) */
+        r = roots(pg3,DEFAULTPREC); lr = lg(r);
+        for (i=1; i<lr; i++)
+        {
+          w = real_i(gel(r,i));
+          if (is_complex(gel(r,i), bitprec) || signe(w) <= 0) continue;
+          p1=gsubst(pg1,vz,w);
+          p2=gsubst(pg2,vz,w);
+          p3=gsubst(pf1,vz,w);
+          p4=gsubst(pf2,vz,w);
+          p5=gsubst(pf3,vz,w);
+          r1 = roots(p1, DEFAULTPREC); lr1 = lg(r1);
+          for (j=1; j<lr1; j++)
+          {
+            v = real_i(gel(r1,j));
+            if (is_complex(gel(r1,j), bitprec) || signe(v) <= 0
+             || !is_zero(gsubst(p2,vy,v), bitprec)) continue;
 
-	    p7=gsubst(p3,vy,v);
-	    p8=gsubst(p4,vy,v);
-	    p9=gsubst(p5,vy,v);
-	    r2 = roots(p7, DEFAULTPREC); lr2 = lg(r2);
-	    for (l=1; l<lr2; l++)
-	    {
-	      u = real_i(gel(r2,l));
-	      if (is_complex(gel(r2,l), bitprec) || signe(u) <= 0
-	       || !is_zero(gsubst(p8,vx,u), bitprec)
-	       || !is_zero(gsubst(p9,vx,u), bitprec)) continue;
+            p7=gsubst(p3,vy,v);
+            p8=gsubst(p4,vy,v);
+            p9=gsubst(p5,vy,v);
+            r2 = roots(p7, DEFAULTPREC); lr2 = lg(r2);
+            for (l=1; l<lr2; l++)
+            {
+              u = real_i(gel(r2,l));
+              if (is_complex(gel(r2,l), bitprec) || signe(u) <= 0
+               || !is_zero(gsubst(p8,vx,u), bitprec)
+               || !is_zero(gsubst(p9,vx,u), bitprec)) continue;
 
-	      M0_pro =              mulur(n1, sqrr(logr_abs(u)));
-	      M0_pro = gadd(M0_pro, mulur(n2, sqrr(logr_abs(v))));
-	      M0_pro = gadd(M0_pro, mulur(n3, sqrr(logr_abs(w))));
-	      M0_pro = gmul2n(M0_pro,-2);
-	      if (DEBUGLEVEL>2)
-	      {
-	       fprintferr("[ %ld, %ld, %ld ]: %Ps\n",n1,n2,n3,gprec_w(M0_pro,3));
-	       flusherr();
-	      }
-	      if (!M0 || gcmp(M0_pro,M0) < 0) M0 = M0_pro;
-	    }
-	  }
-	}
+              M0_pro =              mulur(n1, sqrr(logr_abs(u)));
+              M0_pro = gadd(M0_pro, mulur(n2, sqrr(logr_abs(v))));
+              M0_pro = gadd(M0_pro, mulur(n3, sqrr(logr_abs(w))));
+              M0_pro = gmul2n(M0_pro,-2);
+              if (DEBUGLEVEL>2)
+              {
+               fprintferr("[ %ld, %ld, %ld ]: %Ps\n",n1,n2,n3,gprec_w(M0_pro,3));
+               flusherr();
+              }
+              if (!M0 || gcmp(M0_pro,M0) < 0) M0 = M0_pro;
+            }
+          }
+        }
       }
       if (!M0) avma = av; else M0 = gerepilecopy(av, M0);
     }
@@ -1037,15 +1037,15 @@ primecertify(GEN bnf, GEN beta, ulong p, GEN bad)
       newcol = cgetg(lb+1,t_COL);
       for (j=1; j<=lb; j++)
       {
-	GEN t = to_Fp_simple(nf, gel(beta,j), modpr);
-	gel(newcol,j) = Fp_log(t,g,ord,gq);
+        GEN t = to_Fp_simple(nf, gel(beta,j), modpr);
+        gel(newcol,j) = Fp_log(t,g,ord,gq);
       }
       if (DEBUGLEVEL>3)
       {
-	if (i==1) fprintferr("       generator of (Zk/Q)^*: %Ps\n", g);
-	fprintferr("       prime ideal Q: %Ps\n",Q);
-	fprintferr("       column #%ld of the matrix log(b_j/Q): %Ps\n",
-		   nbcol, newcol);
+        if (i==1) fprintferr("       generator of (Zk/Q)^*: %Ps\n", g);
+        fprintferr("       prime ideal Q: %Ps\n",Q);
+        fprintferr("       column #%ld of the matrix log(b_j/Q): %Ps\n",
+                   nbcol, newcol);
       }
       mat1 = shallowconcat(mat,newcol); ra = rank(mat1);
       if (ra==nbcol) continue;
@@ -1108,8 +1108,8 @@ init_bad(struct check_pr *S, GEN nf, GEN gen)
       GEN g = gel(c,1);
       for (j = 1; j < lg(g); j++)
       {
-	GEN h = idealhnf_shallow(nf, gel(g,j));
-	bad = lcmii(bad, gcoeff(h,1,1));
+        GEN h = idealhnf_shallow(nf, gel(g,j));
+        bad = lcmii(bad, gcoeff(h,1,1));
       }
     }
   }
@@ -1437,8 +1437,8 @@ rnfnormgroup(GEN bnr, GEN polrel)
       nfac = lg(fac)-1;
       /* check decomposition of pr has Galois type */
       for (j=2; j<=nfac; j++)
-	if (degpol(gel(fac,j)) != f)
-	  pari_err(talker,"non Galois extension in rnfnormgroup");
+        if (degpol(gel(fac,j)) != f)
+          pari_err(talker,"non Galois extension in rnfnormgroup");
       if (oldf < 0) oldf = f; else if (oldf != f) oldf = 0;
       if (f == reldeg) continue; /* reldeg-th powers already included */
 
@@ -1573,7 +1573,7 @@ Discrayrel(GEN bnr, GEN H0, long flag)
   P     = S.P;
   e     = S.e; l = lg(e);
   dlk = flrel? idealpow(nf,ideal,clhray)
-	     : powii(ZM_det_triangular(ideal),clhray);
+             : powii(ZM_det_triangular(ideal),clhray);
   for (k = 1; k < l; k++)
   {
     GEN pr = gel(P,k), sum = gen_0;
@@ -1588,7 +1588,7 @@ Discrayrel(GEN bnr, GEN H0, long flag)
       sum = addii(sum, clhss);
     }
     dlk = flrel? idealdivpowprime(nf, dlk, pr, sum)
-	       : diviiexact(dlk, powii(pr_norm(pr),sum));
+               : diviiexact(dlk, powii(pr_norm(pr),sum));
   }
   l = lg(archp); nz = nf_get_r1(nf) - (l-1);
   for (k = 1; k < l; k++)
@@ -1829,8 +1829,8 @@ get_NR1D(long Nf, long clhray, long degk, long nz, GEN fadkabs, GEN idealrel)
   /* r2 odd, set dlk = -dlk */
   if (((n-R1)&3)==2) dlk = factormul(to_famat_shallow(gen_m1,gen_1), dlk);
   return mkvec3(utoipos(n),
-		stoi(R1),
-		factormul(dlk,factorpow(fadkabs,clhray)));
+                stoi(R1),
+                factormul(dlk,factorpow(fadkabs,clhray)));
 }
 
 /* t = [bid,U], h = #Cl(K) */
@@ -1839,8 +1839,8 @@ get_discdata(GEN t, GEN h)
 {
   GEN bid = gel(t,1), fa = gel(bid,3);
   return mkvec3(mkmat2(gel(fa,1), vec_to_vecsmall(gel(fa,2))),
-		(GEN)itou(get_classno(t, h)),
-		bid_get_mod(bid));
+                (GEN)itou(get_classno(t, h)),
+                bid_get_mod(bid));
 }
 typedef struct _disc_data {
   long degk;
@@ -2024,7 +2024,7 @@ bnrclassnointernarch(GEN B, GEN h, GEN matU)
     {
       nba = nc+1;
       for (kk=k,jj=1; jj<=r1; jj++,kk>>=1)
-	if (kk&1) rowsel[nba++] = nc + jj;
+        if (kk&1) rowsel[nba++] = nc + jj;
       setlg(rowsel, nba);
       rowselect_p(m, mm, rowsel, nc+1);
       H[k+1] = itou( mulii(h, ZM_det_triangular(ZM_hnf(mm))) );
@@ -2054,7 +2054,7 @@ decodemodule(GEN nf, GEN fa)
     if (lg(P) <= j) pari_err(talker, "incorrect hash code in decodemodule");
     pr = gel(P,j);
     id = id? idealmulpowprime(nf,id, pr,e)
-	   : idealpow(nf, pr,e);
+           : idealpow(nf, pr,e);
   }
   if (!id) { avma = av; return matid(n); }
   return gerepileupto(av,id);
@@ -2129,7 +2129,7 @@ discrayabslistarch(GEN bnf, GEN arch, long bound)
       Z = gerepilecopy(av,Z); av1 = avma;
       Ray = bigcgetvec(bound);
       for (i=1; i<=bound; i++)
-	bigel(Ray,i) = bnrclassnointernarch(bigel(Z,i),h,matarchunit);
+        bigel(Ray,i) = bnrclassnointernarch(bigel(Z,i),h,matarchunit);
       Ray = gerepilecopy(av1,Ray);
       z = bigcgetvec(sqbou);
       for (i=1; i<=sqbou; i++) bigel(z,i) = bigel(Z,i);
@@ -2147,34 +2147,34 @@ discrayabslistarch(GEN bnf, GEN arch, long bound)
       q = Q; ideal = pr;
       for (l=1;; l++) /* Q <= bound */
       {
-	bidp = Idealstar(nf,ideal, nf_INIT);
-	embunit = zlog_units_noarch(nf, U, bidp);
-	for (i=Q; i<=bound; i+=Q)
-	{
-	  GEN pz, p2, p1 = bigel(Z,i/Q);
-	  long lz = lg(p1);
-	  if (lz == 1) continue;
+        bidp = Idealstar(nf,ideal, nf_INIT);
+        embunit = zlog_units_noarch(nf, U, bidp);
+        for (i=Q; i<=bound; i+=Q)
+        {
+          GEN pz, p2, p1 = bigel(Z,i/Q);
+          long lz = lg(p1);
+          if (lz == 1) continue;
 
-	  p2 = cgetg(lz,t_VEC); c = 0;
-	  for (k=1; k<lz; k++)
-	  {
-	    GEN z = gel(p1,k), v = gmael(z,1,1); /* primes in zsimp's fact. */
-	    long lv = lg(v);
-	    /* If z has a power of pr in its modulus, skip it */
-	    if (Q != i && lv > 1 && v[lv-1] == prcode) break;
-	    gel(p2,++c) = zsimpjoin(z,bidp,embunit,prcode,l);
-	  }
+          p2 = cgetg(lz,t_VEC); c = 0;
+          for (k=1; k<lz; k++)
+          {
+            GEN z = gel(p1,k), v = gmael(z,1,1); /* primes in zsimp's fact. */
+            long lv = lg(v);
+            /* If z has a power of pr in its modulus, skip it */
+            if (Q != i && lv > 1 && v[lv-1] == prcode) break;
+            gel(p2,++c) = zsimpjoin(z,bidp,embunit,prcode,l);
+          }
 
-	  setlg(p2, c+1);
-	  pz = bigel(Ray,i);
-	  if (flbou) p2 = bnrclassnointernarch(p2,h,matarchunit);
-	  if (lg(pz) > 1) p2 = shallowconcat(pz,p2);
-	  bigel(Ray,i) = p2;
-	}
-	Q = itos_or_0( mulss(Q, q) );
-	if (!Q || Q > bound) break;
+          setlg(p2, c+1);
+          pz = bigel(Ray,i);
+          if (flbou) p2 = bnrclassnointernarch(p2,h,matarchunit);
+          if (lg(pz) > 1) p2 = shallowconcat(pz,p2);
+          bigel(Ray,i) = p2;
+        }
+        Q = itos_or_0( mulss(Q, q) );
+        if (!Q || Q > bound) break;
 
-	ideal = idealmul(nf,ideal,pr);
+        ideal = idealmul(nf,ideal,pr);
       }
     }
     if (low_stack(lim, stack_lim(av,1)))
@@ -2221,52 +2221,52 @@ discrayabslistarch(GEN bnf, GEN arch, long bound)
       if (allarch) discall = cgetg(nbarch+1,t_VEC);
       for (karch=0; karch<nbarch; karch++)
       {
-	long nz, clhray = clhrayall[karch+1];
-	if (allarch)
-	{
-	  long ka, k2;
-	  nba = 0;
-	  for (ka=karch,k=1; k<=r1; k++,ka>>=1)
-	    if (ka & 1) nba++;
-	  for (k2=1,k=1; k<=r1; k++,k2<<=1)
-	    if (karch&k2 && clhrayall[karch-k2+1] == clhray)
-	      { res = EMPTY; goto STORE; }
-	}
-	idealrel = idealrelinit;
-	for (k=1; k<lP; k++) /* cf get_discray */
-	{
-	  long e, ep = E[k], pf = P[k] / degk, f = (pf%degk) + 1;
-	  long S = 0, normi = i, Npr, clhss;
-	  p = utoipos(pf / degk);
-	  Npr = itos(powiu(p,f));
-	  for (e=1; e<=ep; e++)
-	  {
-	    GEN fad;
-	    if (e < ep) { E[k] = ep-e; fad = Fa; }
-	    else fad = factorsplice(Fa, k);
-	    normi /= Npr;
-	    clhss = Lbnrclassno(bigel(Ray,normi),fad)[karch+1];
-	    if (e==1 && clhss==clhray) { E[k] = ep; res = EMPTY; goto STORE; }
-	    if (clhss == 1) { S += ep-e+1; break; }
-	    S += clhss;
-	  }
-	  E[k] = ep;
-	  idealrel = factormul(idealrel, to_famat_shallow(p, utoi(f * S)));
-	}
-	if (!allarch && nba)
-	  nz = get_nz(bnf, decodemodule(nf,Fa), arch, clhray);
-	else
-	  nz = r1 - nba;
-	res = get_NR1D(i, clhray, degk, nz, fadkabs, idealrel);
+        long nz, clhray = clhrayall[karch+1];
+        if (allarch)
+        {
+          long ka, k2;
+          nba = 0;
+          for (ka=karch,k=1; k<=r1; k++,ka>>=1)
+            if (ka & 1) nba++;
+          for (k2=1,k=1; k<=r1; k++,k2<<=1)
+            if (karch&k2 && clhrayall[karch-k2+1] == clhray)
+              { res = EMPTY; goto STORE; }
+        }
+        idealrel = idealrelinit;
+        for (k=1; k<lP; k++) /* cf get_discray */
+        {
+          long e, ep = E[k], pf = P[k] / degk, f = (pf%degk) + 1;
+          long S = 0, normi = i, Npr, clhss;
+          p = utoipos(pf / degk);
+          Npr = itos(powiu(p,f));
+          for (e=1; e<=ep; e++)
+          {
+            GEN fad;
+            if (e < ep) { E[k] = ep-e; fad = Fa; }
+            else fad = factorsplice(Fa, k);
+            normi /= Npr;
+            clhss = Lbnrclassno(bigel(Ray,normi),fad)[karch+1];
+            if (e==1 && clhss==clhray) { E[k] = ep; res = EMPTY; goto STORE; }
+            if (clhss == 1) { S += ep-e+1; break; }
+            S += clhss;
+          }
+          E[k] = ep;
+          idealrel = factormul(idealrel, to_famat_shallow(p, utoi(f * S)));
+        }
+        if (!allarch && nba)
+          nz = get_nz(bnf, decodemodule(nf,Fa), arch, clhray);
+        else
+          nz = r1 - nba;
+        res = get_NR1D(i, clhray, degk, nz, fadkabs, idealrel);
 STORE:  gel(discall,karch+1) = res;
       }
       res = allarch? mkvec2(Fa, discall)
-		   : mkvec4(Fa, gel(res,1), gel(res,2), gel(res,3));
+                   : mkvec4(Fa, gel(res,1), gel(res,2), gel(res,3));
       gel(sousdisc,j) = res;
       if (low_stack(lim, stack_lim(av1,1)))
       {
-	if(DEBUGMEM>1) pari_warn(warnmem,"[2]: discrayabslistarch");
-	Disc = gerepilecopy(av1, Disc);
+        if(DEBUGMEM>1) pari_warn(warnmem,"[2]: discrayabslistarch");
+        Disc = gerepilecopy(av1, Disc);
       }
     }
   }

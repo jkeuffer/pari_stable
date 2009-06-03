@@ -168,17 +168,17 @@ rayergroup11(long EVEN, long num, long *gr)
     switch(num)
     {
       case 2: case 5:
-	if (gr[3]) { gr[3]=0; r++; }
+        if (gr[3]) { gr[3]=0; r++; }
       case 3: case 6: case 7:
-	if (gr[2]) { gr[2]=0; r++; }
+        if (gr[2]) { gr[2]=0; r++; }
       case 4:
-	if (gr[1]) { gr[1]=0; r++; }
+        if (gr[1]) { gr[1]=0; r++; }
     }
   else
     switch(num)
     {
       case 2: case 3:
-	if (gr[1]) { gr[1]=0; r++; }
+        if (gr[1]) { gr[1]=0; r++; }
     }
   return r;
 }
@@ -397,9 +397,9 @@ Monomial(GEN r, PERM bb, long nbv)
       if (!absr_cmp(gel(n,1), gel(c,1))
        && !absr_cmp(gel(n,2), gel(c,2))
        && signe(c[2]) != signe(n[2]))
-	c = addrr(sqrr(gel(c,1)), sqrr(gel(c,2)));
+        c = addrr(sqrr(gel(c,1)), sqrr(gel(c,2)));
       else
-	c = gmul(c,n);
+        c = gmul(c,n);
     }
     t = t? gmul(t, c): c;
   }
@@ -536,7 +536,7 @@ gpoly(GEN rr, long n1, long n2)
       return gmul(p1,p2);
     }
     else if ((n1==43 && n2==33) || (n1==42 && n2==28) || (n1==41 && n2==27)
-	  || (n1==40 && n2==21))
+          || (n1==40 && n2==21))
     {
       p2=gadd(r[2],r[5]);
       p2=gsub(p2,gadd(r[3],r[4]));
@@ -566,7 +566,7 @@ gpoly(GEN rr, long n1, long n2)
       return gadd(p1,p2);
     }
     else if ((n1==41 && n2==22) || (n1==40 && n2==11) || (n1==17 && n2==5)
-	    || (n1==10 && n2==4) || (n1==9 && n2==3) || (n1==6 && n2==1))
+            || (n1==10 && n2==4) || (n1==9 && n2==3) || (n1==6 && n2==1))
     {
       p1=gadd(r[1],r[6]);
       for (i=2; i<6; i++) p1=gmul(p1,gadd(r[i],r[i+5]));
@@ -582,7 +582,7 @@ gpoly(GEN rr, long n1, long n2)
       return gmul(p1,p2);
     }
     else if ((n1==39 && n2==36) || (n1==37 && n2==34) || (n1==29 && n2==23)
-	  || (n1==24 && n2==15))
+          || (n1==24 && n2==15))
     {
       for (i=1; i<6; i++) z[i]=gadd(r[2*i-1],r[2*i]);
       p1=gsub(z[4],z[5]); p2=gmul(gsub(z[3],z[4]),gsub(z[3],z[5]));
@@ -590,7 +590,7 @@ gpoly(GEN rr, long n1, long n2)
       return gmul(p1,p2);
     }
     else if ((n1==39 && n2==29) || (n1==38 && n2==25) || (n1==37 && n2==24)
-	  || (n1==36 && n2==23) || (n1==34 && n2==15))
+          || (n1==36 && n2==23) || (n1==34 && n2==15))
     {
       for (i=1; i<6; i++) z[i]=gadd(r[2*i-1],r[2*i]);
       p2=gadd(z[2],z[5]);
@@ -604,8 +604,8 @@ gpoly(GEN rr, long n1, long n2)
       return gsqr(p1);
     }
     else if ((n1==39 && n2==22) || (n1==38 && n2==12) || (n1==36 && n2==11)
-	  || (n1==29 && n2== 5) || (n1==25 && n2== 4) || (n1==23 && n2== 3)
-	  || (n1==16 && n2== 2) || (n1==14 && n2== 1))
+          || (n1==29 && n2== 5) || (n1==25 && n2== 4) || (n1==23 && n2== 3)
+          || (n1==16 && n2== 2) || (n1==14 && n2== 1))
     {
       p1=r[1]; for (i=2; i<6; i++) p1=gadd(p1,r[2*i-1]);
       p2=r[2]; for (i=2; i<6; i++) p2=gadd(p2,r[2*i]);
@@ -737,8 +737,8 @@ sortroots(GEN newr, GEN oldr)
     for (j=1; j<l; j++)
       if (t[j])
       {
-	e = gexpo(gsub(gel(oldr,i), gel(newr,j)));
-	if (e < e0) { e0 = e; k = j; }
+        e = gexpo(gsub(gel(oldr,i), gel(newr,j)));
+        if (e < e0) { e0 = e; k = j; }
       }
     z[i] = newr[k]; t[k] = 0;
   }
@@ -870,60 +870,60 @@ check_isin(buildroot *BR, resolv *R, GROUP tau, GROUP ss)
     {
       if (!init)
       {
-	av2 = avma; nbrac = nbracint = 0;
-	for (nocos=1; nocos<=nbcos; nocos++, avma = av2)
-	{
-	  roint = get_ro_perm(T, ss[nocos], d, R, BR);
-	  if (!roint) continue;
+        av2 = avma; nbrac = nbracint = 0;
+        for (nocos=1; nocos<=nbcos; nocos++, avma = av2)
+        {
+          roint = get_ro_perm(T, ss[nocos], d, R, BR);
+          if (!roint) continue;
 
-	  nbrac++;
-	  if (nbrac >= M)
-	  {
-	    pari_warn(warner, "more than %ld rational integer roots\n", M);
-	    avma = av1; goto NEXT;
-	  }
-	  for (j=1; j<=nbracint; j++)
-	    if (equalii(roint,racint[j])) { multi[j]++; break; }
-	  if (j > nbracint)
-	  {
-	    nbracint = j; multi[j] = 1; numi[j] = nocos;
-	    racint[j] = gerepileuptoint(av2,roint); av2 = avma;
-	  }
-	  numj[nbrac] = nocos; norac[nbrac] = j;
-	}
-	if (DEBUGLEVEL) dbg_rac(0,nbracint,numi,racint,multi);
-	for (i=1; i<=nbracint; i++)
-	  if (multi[i]==1) return permmul(T, ss[numi[i]]);
-	init = 1;
+          nbrac++;
+          if (nbrac >= M)
+          {
+            pari_warn(warner, "more than %ld rational integer roots\n", M);
+            avma = av1; goto NEXT;
+          }
+          for (j=1; j<=nbracint; j++)
+            if (equalii(roint,racint[j])) { multi[j]++; break; }
+          if (j > nbracint)
+          {
+            nbracint = j; multi[j] = 1; numi[j] = nocos;
+            racint[j] = gerepileuptoint(av2,roint); av2 = avma;
+          }
+          numj[nbrac] = nocos; norac[nbrac] = j;
+        }
+        if (DEBUGLEVEL) dbg_rac(0,nbracint,numi,racint,multi);
+        for (i=1; i<=nbracint; i++)
+          if (multi[i]==1) return permmul(T, ss[numi[i]]);
+        init = 1;
       }
       else
       {
-	nbrac = nbracint = 0;
-	for (l=1; l<=lastnbri; l++, avma = av1)
-	{
-	  long nri = nbracint;
-	  av2 = avma;
-	  for (k=1; k<=lastnbrm; k++)
-	    if (lastnor[k]==l)
-	    {
-	      nocos = lastnum[k];
-	      roint = get_ro_perm(T, ss[nocos], d, R, BR);
-	      if (!roint) { avma = av2; continue; }
+        nbrac = nbracint = 0;
+        for (l=1; l<=lastnbri; l++, avma = av1)
+        {
+          long nri = nbracint;
+          av2 = avma;
+          for (k=1; k<=lastnbrm; k++)
+            if (lastnor[k]==l)
+            {
+              nocos = lastnum[k];
+              roint = get_ro_perm(T, ss[nocos], d, R, BR);
+              if (!roint) { avma = av2; continue; }
 
-	      nbrac++;
-	      for (j=nri+1; j<=nbracint; j++)
-		if (equalii(roint,racint[j])) { multi[j]++; break; }
-	      if (j > nbracint)
-	      {
-		nbracint = j; multi[j] = 1; numi[j] = nocos;
-		racint[j] = gerepileuptoint(av2,roint); av2=avma;
-	      }
-	      numj[nbrac] = nocos; norac[nbrac] = j;
-	    }
-	  if (DEBUGLEVEL) dbg_rac(nri,nbracint,numi,racint,multi);
-	  for (i=nri+1; i<=nbracint; i++)
-	    if (multi[i]==1) return permmul(T, ss[numi[i]]);
-	}
+              nbrac++;
+              for (j=nri+1; j<=nbracint; j++)
+                if (equalii(roint,racint[j])) { multi[j]++; break; }
+              if (j > nbracint)
+              {
+                nbracint = j; multi[j] = 1; numi[j] = nocos;
+                racint[j] = gerepileuptoint(av2,roint); av2=avma;
+              }
+              numj[nbrac] = nocos; norac[nbrac] = j;
+            }
+          if (DEBUGLEVEL) dbg_rac(nri,nbracint,numi,racint,multi);
+          for (i=nri+1; i<=nbracint; i++)
+            if (multi[i]==1) return permmul(T, ss[numi[i]]);
+        }
       }
       avma = av1; if (!nbracint) break;
 
@@ -932,8 +932,8 @@ check_isin(buildroot *BR, resolv *R, GROUP tau, GROUP ss)
 
 NEXT:
       if (DEBUGLEVEL) {
-	fprintferr("        all integer roots are double roots\n");
-	fprintferr("      Working with polynomial #%ld:\n", d+1);
+        fprintferr("        all integer roots are double roots\n");
+        fprintferr("      Working with polynomial #%ld:\n", d+1);
       }
       if (++d >= lg(BR->r)) tschirn(BR);
     }
@@ -1305,13 +1305,13 @@ data8(long N, long n1, long n2, GROUP *t)
     case 11:
       switch(n2)
       {
-	case 2:
-	  *t=initgroup(N,2);
-	  _aff(N, (*t)[2], 1, 2, 5, 6, 3, 4, 8, 7);
-	  return _cr(N, 1, 3, 5, 8, 2, 4, 6, 7);
-	case 4:
-	  *t=initgroup(N,1);
-	  return _cr(N, 1, 3, 7, 5, 2, 4, 8, 6);
+        case 2:
+          *t=initgroup(N,2);
+          _aff(N, (*t)[2], 1, 2, 5, 6, 3, 4, 8, 7);
+          return _cr(N, 1, 3, 5, 8, 2, 4, 6, 7);
+        case 4:
+          *t=initgroup(N,1);
+          return _cr(N, 1, 3, 7, 5, 2, 4, 8, 6);
       }break;
     case 14: if (n2!=4) break;
       *t=initgroup(N,1);
@@ -1327,14 +1327,14 @@ data8(long N, long n1, long n2, GROUP *t)
     case 18:
       switch(n2)
       {
-	case 9: *t=initgroup(N,3);
-	  _aff(N, (*t)[2], 1, 5, 3, 7, 2, 6, 4, 8);
-	  _aff(N, (*t)[3], 1, 2, 3, 4, 6, 5, 8, 7);
-	  return (*t)[1];
-	case 10: *t=initgroup(N,3);
-	  _aff(N, (*t)[2], 1, 6, 3, 8, 2, 5, 4, 7);
-	  _aff(N, (*t)[3], 1, 5, 3, 7, 2, 6, 4, 8);
-	  return (*t)[1];
+        case 9: *t=initgroup(N,3);
+          _aff(N, (*t)[2], 1, 5, 3, 7, 2, 6, 4, 8);
+          _aff(N, (*t)[3], 1, 2, 3, 4, 6, 5, 8, 7);
+          return (*t)[1];
+        case 10: *t=initgroup(N,3);
+          _aff(N, (*t)[2], 1, 6, 3, 8, 2, 5, 4, 7);
+          _aff(N, (*t)[3], 1, 5, 3, 7, 2, 6, 4, 8);
+          return (*t)[1];
       }break;
     case 19: if (n2!=9) break;
       *t=initgroup(N,1);
@@ -1346,20 +1346,20 @@ data8(long N, long n1, long n2, GROUP *t)
     case 22:
       switch(n2)
       {
-	case 9: *t=initgroup(N,6);
-	  _aff(N, (*t)[2], 1, 2, 7, 8, 3, 4, 6, 5);
-	  _aff(N, (*t)[3], 1, 2, 7, 8, 3, 4, 5, 6);
-	  _aff(N, (*t)[4], 1, 2, 5, 6, 3, 4, 8, 7);
-	  _aff(N, (*t)[5], 1, 2, 5, 6, 3, 4, 7, 8);
-	  _aff(N, (*t)[6], 1, 2, 3, 4, 5, 6, 8, 7);
-	  return _cr(N, 1, 3, 5, 7, 2, 4, 6, 8);
-	case 11: *t=initgroup(N,6);
-	  _aff(N, (*t)[2], 1, 2, 5, 6, 7, 8, 4, 3);
-	  _aff(N, (*t)[3], 1, 2, 5, 6, 7, 8, 3, 4);
-	  _aff(N, (*t)[4], 1, 2, 3, 4, 7, 8, 6, 5);
-	  _aff(N, (*t)[5], 1, 2, 3, 4, 7, 8, 5, 6);
-	  _aff(N, (*t)[6], 1, 2, 3, 4, 5, 6, 8, 7);
-	  return (*t)[1];
+        case 9: *t=initgroup(N,6);
+          _aff(N, (*t)[2], 1, 2, 7, 8, 3, 4, 6, 5);
+          _aff(N, (*t)[3], 1, 2, 7, 8, 3, 4, 5, 6);
+          _aff(N, (*t)[4], 1, 2, 5, 6, 3, 4, 8, 7);
+          _aff(N, (*t)[5], 1, 2, 5, 6, 3, 4, 7, 8);
+          _aff(N, (*t)[6], 1, 2, 3, 4, 5, 6, 8, 7);
+          return _cr(N, 1, 3, 5, 7, 2, 4, 6, 8);
+        case 11: *t=initgroup(N,6);
+          _aff(N, (*t)[2], 1, 2, 5, 6, 7, 8, 4, 3);
+          _aff(N, (*t)[3], 1, 2, 5, 6, 7, 8, 3, 4);
+          _aff(N, (*t)[4], 1, 2, 3, 4, 7, 8, 6, 5);
+          _aff(N, (*t)[5], 1, 2, 3, 4, 7, 8, 5, 6);
+          _aff(N, (*t)[6], 1, 2, 3, 4, 5, 6, 8, 7);
+          return (*t)[1];
       }break;
     case 23: if (n2!=8) break;
       *t=initgroup(N,1);
@@ -1390,20 +1390,20 @@ data8(long N, long n1, long n2, GROUP *t)
     case 33:
       switch(n2)
       {
-	case 13: *t=initgroup(N,1);
-	  return _cr(N, 1, 5, 2, 6, 3, 7, 4, 8);
-	case 18: *t=initgroup(N,1);
-	  return _cr(N, 1, 2, 5, 6, 3, 4, 7, 8);
+        case 13: *t=initgroup(N,1);
+          return _cr(N, 1, 5, 2, 6, 3, 7, 4, 8);
+        case 18: *t=initgroup(N,1);
+          return _cr(N, 1, 2, 5, 6, 3, 4, 7, 8);
       }break;
     case 34:
       switch(n2)
       {
-	case 14: *t=initgroup(N,3);
-	  _aff(N, (*t)[2], 1, 2, 3, 4, 5, 8, 6, 7);
-	  _aff(N, (*t)[3], 1, 2, 3, 4, 5, 7, 8, 6);
-	  return _cr(N, 1, 5, 2, 6, 3, 7, 4, 8);
-	case 18: *t=initgroup(N,1);
-	  return _cr(N, 1, 2, 5, 6, 3, 4, 8, 7);
+        case 14: *t=initgroup(N,3);
+          _aff(N, (*t)[2], 1, 2, 3, 4, 5, 8, 6, 7);
+          _aff(N, (*t)[3], 1, 2, 3, 4, 5, 7, 8, 6);
+          return _cr(N, 1, 5, 2, 6, 3, 7, 4, 8);
+        case 18: *t=initgroup(N,1);
+          return _cr(N, 1, 2, 5, 6, 3, 4, 8, 7);
       }break;
     case 39: if (n2!=24) break;
       *t=initgroup(N,2);
@@ -1416,10 +1416,10 @@ data8(long N, long n1, long n2, GROUP *t)
     case 41:
       switch(n2)
       {
-	case 24: *t=initgroup(N,1);
-	  return _cr(N, 1, 5, 2, 6, 3, 7, 4, 8);
-	case 29: *t=initgroup(N,1);
-	  return _cr(N, 1, 2, 5, 6, 3, 4, 7, 8);
+        case 24: *t=initgroup(N,1);
+          return _cr(N, 1, 5, 2, 6, 3, 7, 4, 8);
+        case 29: *t=initgroup(N,1);
+          return _cr(N, 1, 2, 5, 6, 3, 4, 7, 8);
       }break;
     case 42: if (n2!=34) break;
       *t=initgroup(N,1);

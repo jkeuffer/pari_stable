@@ -28,36 +28,36 @@ ASM addll mulll bfffo divll
 #define addll(a,b)                                              \
 ({ ulong __value, __arg1 = (a), __arg2 = (b);                   \
    __asm__ ("add.l %2,%0 ; addx.l %1,%1"                        \
-	: "=&d" (__value), "=d" (overflow)                      \
-	: "rm" (__arg1), "0" (__arg2), "1" (0UL)                \
-	: "cc");                                                \
+        : "=&d" (__value), "=d" (overflow)                      \
+        : "rm" (__arg1), "0" (__arg2), "1" (0UL)                \
+        : "cc");                                                \
   __value;                                                      \
 })
 
 #define addllx(a,b)                                             \
 ({ ulong __value, __arg1 = (a), __arg2 = (b), __temp;           \
    __asm__ ("neg.l %2 ; addx.l %4,%0 ; addx.l %1,%1"            \
-	: "=d" (__value), "=d" (overflow), "=d" (__temp)        \
-	: "0" (__arg1), "d" (__arg2), "2" (overflow), "1" (0UL) \
-	: "cc");                                                \
+        : "=d" (__value), "=d" (overflow), "=d" (__temp)        \
+        : "0" (__arg1), "d" (__arg2), "2" (overflow), "1" (0UL) \
+        : "cc");                                                \
   __value;                                                      \
 })
 
 #define subll(a,b)                                              \
 ({ ulong __value, __arg1 = (a), __arg2 = (b);                   \
    __asm__ ("sub.l %3,%0 ; addx.l %1,%1"                        \
-	: "=&d" (__value), "=d" (overflow)                      \
-	: "0" (__arg1), "rm" (__arg2), "1" (0UL)                \
-	: "cc");                                                \
+        : "=&d" (__value), "=d" (overflow)                      \
+        : "0" (__arg1), "rm" (__arg2), "1" (0UL)                \
+        : "cc");                                                \
   __value;                                                      \
 })
 
 #define subllx(a,b)                                             \
 ({ ulong __value, __arg1 = (a), __arg2 = (b), __temp;           \
    __asm__ ("neg.l %2 ; subx.l %4,%0 ; addx.l %1,%1"            \
-	: "=d" (__value), "=d" (overflow), "=d" (__temp)        \
-	: "0" (__arg1), "d" (__arg2), "2" (overflow), "1" (0UL) \
-	: "cc");                                                \
+        : "=d" (__value), "=d" (overflow), "=d" (__temp)        \
+        : "0" (__arg1), "d" (__arg2), "2" (overflow), "1" (0UL) \
+        : "cc");                                                \
   __value;                                                      \
 })
 
@@ -65,9 +65,9 @@ ASM addll mulll bfffo divll
 ({                                                                      \
   ulong __arg1 = (a), __arg2 = (b), __value;                            \
   __asm__ ("mulu.l %2, %0:%1"                                           \
-	   : "=d" (hiremainder), "=d" (__value)                         \
-	   : "md" (__arg1) , "1" (__arg2)                               \
-	   : "cc");                                                     \
+           : "=d" (hiremainder), "=d" (__value)                         \
+           : "md" (__arg1) , "1" (__arg2)                               \
+           : "cc");                                                     \
   __value;                                                              \
 })
 
@@ -75,9 +75,9 @@ ASM addll mulll bfffo divll
 ({                                                                      \
   ulong __arg1 = (a), __arg2 = (b), __value;                            \
   __asm__ ("mulu.l %2, %0:%1; add.l %4,%1; addx.l %5,%0"                \
-	   : "=&d" (hiremainder), "=&d" (__value)                       \
-	   : "md" (__arg1), "1" (__arg2), "d" (hiremainder), "d" (0UL)  \
-	   : "cc" );                                                    \
+           : "=&d" (hiremainder), "=&d" (__value)                       \
+           : "md" (__arg1), "1" (__arg2), "d" (hiremainder), "d" (0UL)  \
+           : "cc" );                                                    \
   __value;                                                              \
 })
 
@@ -85,9 +85,9 @@ ASM addll mulll bfffo divll
 ({                                                                      \
   ulong __arg1 = (a), __value;                                          \
   __asm__ ("bfffo %1{#0:#0}, %0"                                        \
-	   : "=d" (__value)                                             \
-	   : "md" (__arg1)                                              \
-	   : "cc" );                                                    \
+           : "=d" (__value)                                             \
+           : "md" (__arg1)                                              \
+           : "cc" );                                                    \
   __value;                                                              \
 })
 
@@ -95,9 +95,9 @@ ASM addll mulll bfffo divll
 ({                                                                      \
   ulong __arg2 = (b), __value =(a);                                     \
   __asm__ ("divu.l %2, %0:%1"                                           \
-	   : "+d" (hiremainder), "+d" (__value)                         \
-	   : "md" (__arg2)                                              \
-	   : "cc");                                                     \
+           : "+d" (hiremainder), "+d" (__value)                         \
+           : "md" (__arg2)                                              \
+           : "cc");                                                     \
   __value;                                                              \
 })
 #endif

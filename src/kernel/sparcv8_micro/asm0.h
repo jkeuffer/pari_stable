@@ -19,8 +19,8 @@ ASM divll
 ({ ulong __value, __arg1 = (a), __arg2 = (b), __tmp; \
   __asm__( "mov %1, %%y; nop;nop;nop;\n\t\
 udivcc  %3,%4,%0;\n\tumul    %0,%4,%2;\n\tsub     %3,%2,%1"\
-	: "=&r" (__value), "=&r" (hiremainder), "=&r" (__tmp) \
-	: "r" (__arg1), "r" (__arg2), "1" (hiremainder) \
-	: "cc");        \
+        : "=&r" (__value), "=&r" (hiremainder), "=&r" (__tmp) \
+        : "r" (__arg1), "r" (__arg2), "1" (hiremainder) \
+        : "cc");        \
 __value;})
 #endif

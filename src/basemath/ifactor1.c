@@ -26,7 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /* map from prime residue classes mod 210 to their numbers in {0...47}.
  * Subscripts into this array take the form ((k-1)%210)/2, ranging from
  * 0 to 104.  Unused entries are */
-#define NPRC 128		/* non-prime residue class */
+#define NPRC 128                /* non-prime residue class */
 
 static unsigned char prc210_no[] = {
   0, NPRC, NPRC, NPRC, NPRC, 1, 2, NPRC, 3, 4, NPRC, /* 21 */
@@ -210,13 +210,13 @@ snextpr(ulong p, byteptr *d, long *rcn, long *q, long k)
       long rcn0 = *rcn;
       while (d1 > 0)
       {
-	d1 -= prc210_d1[*rcn];
-	if (++*rcn > 47) { *rcn = 0; if (q) (*q)++; }
+        d1 -= prc210_d1[*rcn];
+        if (++*rcn > 47) { *rcn = 0; if (q) (*q)++; }
       }
       if (d1 < 0)
       {
-	fprintferr("snextpr: %lu != prc210_rp[%ld] mod 210\n", p, rcn0);
-	pari_err(bugparier, "[caller of] snextpr");
+        fprintferr("snextpr: %lu != prc210_rp[%ld] mod 210\n", p, rcn0);
+        pari_err(bugparier, "[caller of] snextpr");
       }
     }
     NEXT_PRIME_VIADIFF(p,*d);
@@ -239,7 +239,7 @@ snextpr(ulong p, byteptr *d, long *rcn, long *q, long k)
   {
     n += prc210_d1[*rcn];
     if (++*rcn > 47) { *rcn = 0; if (q) (*q)++; }
-    if (n <= 11)		/* wraparound mod 2^BITS_IN_LONG */
+    if (n <= 11)                /* wraparound mod 2^BITS_IN_LONG */
     {
       fprintferr("snextpr: integer wraparound after prime %lu\n", p);
       pari_err(bugparier, "[caller of] snextpr");
@@ -266,8 +266,8 @@ int factor_add_primes = 0, factor_proven = 0;
 /**                                                                   **/
 /***********************************************************************/
 
-#define nbcmax 64		/* max number of simultaneous curves */
-#define bstpmax 1024		/* max number of baby step table entries */
+#define nbcmax 64                /* max number of simultaneous curves */
+#define bstpmax 1024                /* max number of baby step table entries */
 
 /* addition/doubling/multiplication of a point on an 'elliptic curve mod N'
  * may result in one of three things:
@@ -325,7 +325,7 @@ int factor_add_primes = 0, factor_proven = 0;
 
 static int
 elladd0(GEN N, GEN *gl, long nbc, long nbc1,
-	GEN *X1, GEN *Y1, GEN *X2, GEN *Y2, GEN *X3, GEN *Y3)
+        GEN *X1, GEN *Y1, GEN *X2, GEN *Y2, GEN *X3, GEN *Y3)
 {
   GEN W[2*nbcmax], *A = W+nbc; /* W[0],A[0] unused */
   long i;
@@ -360,7 +360,7 @@ elladd0(GEN N, GEN *gl, long nbc, long nbc1,
   {
     pari_sp av2 = avma;
     GEN t, L = modii(mulii(subii(Y1[i&mask], Y2[i]),
-	 		   i?mulii(*gl, W[i]):*gl), N);
+                            i?mulii(*gl, W[i]):*gl), N);
     t = subii(sqri(L), addii(X2[i], X1[i&mask]));
     affii(modii(t, N), X3[i]);
     if (Y3) {
@@ -398,7 +398,7 @@ elladd2(GEN N, GEN *gl, long nbc,
   W[1] = subii(X1[0], X2[0]);
   for (i=1; i<nbc; i++)
   {
-    A[i] = subii(X1[i], X2[i]);	/* don't waste time reducing mod N here */
+    A[i] = subii(X1[i], X2[i]);        /* don't waste time reducing mod N here */
     W[i+1] = modii(mulii(A[i], W[i]), N);
   }
   for (j=0; j<nbc; i++,j++)
@@ -441,7 +441,7 @@ elladd2(GEN N, GEN *gl, long nbc,
   {
     pari_sp av2 = avma;
     GEN t, L = modii(mulii(subii(Y1[i], Y2[i]),
-			   i?mulii(*gl, W[i]):*gl), N);
+                           i?mulii(*gl, W[i]):*gl), N);
     t = subii(sqri(L), addii(X2[i], X1[i]));         affii(modii(t,N), X3[i]);
     t = subii(mulii(L, subii(X1[i], X3[i])), Y1[i]); affii(modii(t,N), Y3[i]);
     if (!i) break;
@@ -488,7 +488,7 @@ elldouble(GEN N, GEN *gl, long nbc, GEN *X1, GEN *X2)
     if (i) *gl = modii(mulii(*gl, Y1[i]), N);
     av2 = avma;
     L = modii(mulii(addsi(1, mului(3, sqri(X1[i]))),
-		    i? mulii(GL,W[i]): GL), N);
+                    i? mulii(GL,W[i]): GL), N);
     if (signe(L)) /* half of zero is still zero */
       L = shifti(mod2(L)? addii(L, N): L, -1);
     v = modii(subii(sqri(L), shifti(X1[i],1)), N);
@@ -531,62 +531,62 @@ ellmult(GEN N, GEN *gl, long nbc, ulong k, GEN *X1, GEN *X2, GEN *XAUX)
   { /* apply one of the nine transformations from PM's Table 4. First
      * figure out which, and then go into an eight-way switch, because
      * some of the transformations are similar enough to share code. */
-    if (d <= e + (e>>2))	/* floor(1.25*e) */
+    if (d <= e + (e>>2))        /* floor(1.25*e) */
     {
       if ((d+e)%3 == 0) { i = 0; goto apply; } /* rule 1 */
       if ((d-e)%6 == 0) { i = 1; goto apply; } /* rule 2 */
     } /* else fall through */
     /* d <= 4*e but no ofl */
-    if ((d+3)>>2 <= e){ i = 2; goto apply; }	/* rule 3, common case */
-    if ((d&1)==(e&1)) { i = 1; goto apply; }	/* rule 4 = rule 2 */
-    if (!(d&1))       { i = 3; goto apply; }	/* rule 5 */
-    if (d%3 == 0)     { i = 4; goto apply; }	/* rule 6 */
-    if ((d+e)%3 == 0) { i = 5; goto apply; }	/* rule 7 */
-    if ((d-e)%3 == 0) { i = 6; goto apply; }	/* rule 8 */
+    if ((d+3)>>2 <= e){ i = 2; goto apply; }        /* rule 3, common case */
+    if ((d&1)==(e&1)) { i = 1; goto apply; }        /* rule 4 = rule 2 */
+    if (!(d&1))       { i = 3; goto apply; }        /* rule 5 */
+    if (d%3 == 0)     { i = 4; goto apply; }        /* rule 6 */
+    if ((d+e)%3 == 0) { i = 5; goto apply; }        /* rule 7 */
+    if ((d-e)%3 == 0) { i = 6; goto apply; }        /* rule 8 */
     /* when we get here, e must be even, for otherwise one of rules 4,5
      * would have applied */
-    i = 7;			/* rule 9 */
+    i = 7;                        /* rule 9 */
 
   apply:
-    switch(i)			/* i takes values in {0,...,7} here */
+    switch(i)                        /* i takes values in {0,...,7} here */
     {
-    case 0:			/* rule 1 */
+    case 0:                        /* rule 1 */
       e1 = d - e; d = (d + e1)/3; e = (e - e1)/3;
       if ( (res = elladd(N, gl, nbc, A, B, T)) ) return res;
       if ( (res = elladd2(N, gl, nbc, T, A, A, T, B, B)) != 0) return res;
-      break;			/* end of rule 1 */
-    case 1:			/* rules 2 and 4, part 1 */
+      break;                        /* end of rule 1 */
+    case 1:                        /* rules 2 and 4, part 1 */
       d -= e;
       if ( (res = elladd(N, gl, nbc, A, B, B)) ) return res;
       /* FALL THROUGH */
-    case 3:			/* rule 5, and 2nd part of rules 2 and 4 */
+    case 3:                        /* rule 5, and 2nd part of rules 2 and 4 */
       d >>= 1;
       if ( (res = elldouble(N, gl, nbc, A, A)) ) return res;
-      break;			/* end of rules 2, 4, and 5 */
-    case 4:			/* rule 6 */
+      break;                        /* end of rules 2, 4, and 5 */
+    case 4:                        /* rule 6 */
       d /= 3;
       if ( (res = elldouble(N, gl, nbc, A, T)) ) return res;
       if ( (res = elladd(N, gl, nbc, T, A, A)) ) return res;
       /* FALL THROUGH */
-    case 2:			/* rule 3, and 2nd part of rule 6 */
+    case 2:                        /* rule 3, and 2nd part of rule 6 */
       d -= e;
       if ( (res = elladd(N, gl, nbc, A, B, B)) ) return res;
-      break;			/* end of rules 3 and 6 */
-    case 5:			/* rule 7 */
+      break;                        /* end of rules 3 and 6 */
+    case 5:                        /* rule 7 */
       d = (d - e - e)/3;
       if ( (res = elldouble(N, gl, nbc, A, T)) ) return res;
       if ( (res = elladd2(N, gl, nbc, T, A, A, T, B, B)) != 0) return res;
-      break;			/* end of rule 7 */
-    case 6:			/* rule 8 */
+      break;                        /* end of rule 7 */
+    case 6:                        /* rule 8 */
       d = (d - e)/3;
       if ( (res = elladd(N, gl, nbc, A, B, B)) ) return res;
       if ( (res = elldouble(N, gl, nbc, A, T)) ) return res;
       if ( (res = elladd(N, gl, nbc, T, A, A)) ) return res;
-      break;			/* end of rule 8 */
-    case 7:			/* rule 9 */
+      break;                        /* end of rule 8 */
+    case 7:                        /* rule 9 */
       e >>= 1;
       if ( (res = elldouble(N, gl, nbc, B, B)) ) return res;
-      break;			/* end of rule 9 */
+      break;                        /* end of rule 9 */
     default: break; /* notreached */
     }
     /* end of Table 4 processing */
@@ -721,7 +721,7 @@ ellfacteur(GEN N, int insist)
     1211670UL,1469110UL,1781250UL,2159700UL,2618600UL,3175000UL,
     3849600UL,4667500UL,5659200UL,6861600UL,8319500UL,10087100UL,
     12230300UL,14828900UL,17979600UL,21799700UL,26431500UL,
-    32047300UL,38856400UL,	/* 110 times that still fits into 32bits */
+    32047300UL,38856400UL,        /* 110 times that still fits into 32bits */
 #ifdef LONG_IS_64BIT
     47112200UL,57122100UL,69258800UL,83974200UL,101816200UL,
     123449000UL,149678200UL,181480300UL,220039400UL,266791100UL,
@@ -772,7 +772,7 @@ ellfacteur(GEN N, int insist)
     if (dsn < 0) dsn = 0;
     else if (dsn > 47) dsn = 47;
     /* pick up the torch where non-insistent stage would have given up */
-    nbc = dsn + (dsn >> 2) + 9;	/* 8 or more curves in parallel */
+    nbc = dsn + (dsn >> 2) + 9;        /* 8 or more curves in parallel */
     nbc &= ~3; /* 4 | nbc */
     if (nbc > nbcmax) nbc = nbcmax;
     a = 1 + (nbcmax<<7)*(size&0xffff); /* seed for choice of curves */
@@ -792,15 +792,15 @@ ellfacteur(GEN N, int insist)
       nbc = 8;
 #else
       if (DEBUGLEVEL >= 4)
-	fprintferr("ECM: number too small to justify this stage\n");
+        fprintferr("ECM: number too small to justify this stage\n");
       avma = av; return NULL;
 #endif
     }
     else
     {
       rep = (size <= 248 ?
-	     (size <= 176 ? (size - 124) >> 4 : (size - 148) >> 3) :
-	     (size - 224) >> 1);
+             (size <= 176 ? (size - 124) >> 4 : (size - 148) >> 3) :
+             (size - 224) >> 1);
       nbc = ((size >> 3) << 2) - 80;
       if (nbc < 8) nbc = 8;
       else if (nbc > nbcmax) nbc = nbcmax;
@@ -832,14 +832,14 @@ ellfacteur(GEN N, int insist)
   nbc2 = nbc << 1;
   spc = (13 + 48) * nbc2 + bstpmax * 4;
   X = alloc_scratch(nbc, spc, tf);
-  XAUX = X    + nbc2;	 /* scratchpad for ellmult() */
-  XT   = XAUX + nbc2;	 /* ditto, will later hold [3*210]Q */
-  XD   = XT   + nbc2;	 /* room for various multiples */
+  XAUX = X    + nbc2;         /* scratchpad for ellmult() */
+  XT   = XAUX + nbc2;         /* ditto, will later hold [3*210]Q */
+  XD   = XT   + nbc2;         /* room for various multiples */
   XB   = XD   + 10*nbc2; /* start of baby steps table */
   XB2  = XB   + 2 * bstpmax; /* middle of baby steps table */
   XH   = XB2  + 2 * bstpmax; /* end of bstps table, start of helix */
   Xh   = XH   + 48*nbc2; /* little helix, X coords */
-  Yh   = XH   + 192;	 /* ditto, Y coords */
+  Yh   = XH   + 192;         /* ditto, Y coords */
   /* XG will be set inside the main loop, since it depends on B2 */
 
   /* Xh range of 384 pointers not set; these will later duplicate the pointers
@@ -866,17 +866,17 @@ ellfacteur(GEN N, int insist)
      * imply roughly the same number of E.C. additions.
      */
     gse = B1 < 656
-	    ? (B1 < 200? 5: 6)
-	    : (B1 < 10500
-	      ? (B1 < 2625? 7: 8)
-	      : (B1 < 42000? 9: 10));
+            ? (B1 < 200? 5: 6)
+            : (B1 < 10500
+              ? (B1 < 2625? 7: 8)
+              : (B1 < 42000? 9: 10));
     gss = 1UL << gse;
-    XG = XT + gse*nbc2;	/* will later hold [2^(gse+1)*210]Q */
+    XG = XT + gse*nbc2;        /* will later hold [2^(gse+1)*210]Q */
     YG = XG + nbc;
 
     if (DEBUGLEVEL >= 4) {
       fprintferr("ECM: time = %6ld ms\nECM: dsn = %2ld,\tB1 = %4lu,",
-		 timer2(), dsn, B1);
+                 timer2(), dsn, B1);
       fprintferr("\tB2 = %6lu,\tgss = %4ld*420\n", B2, gss);
     }
     p = 0;
@@ -895,12 +895,12 @@ ellfacteur(GEN N, int insist)
     {
       pari_sp av = avma;
       p = snextpr(p, &d, &rcn, NULL, MR_Jaeschke_k1);
-      B2_p = B2/p;		/* beware integer overflow on 32-bit CPUs */
+      B2_p = B2/p;                /* beware integer overflow on 32-bit CPUs */
       for (m=1; m<=B2_p; m*=p)
       {
-	if ((rflag = ellmult(N, &gl, nbc, p, X, X, XAUX)) > 1) goto fin;
-	else if (rflag) break;
-	avma = av;
+        if ((rflag = ellmult(N, &gl, nbc, p, X, X, XAUX)) > 1) goto fin;
+        else if (rflag) break;
+        avma = av;
       }
       avma = av;
     }
@@ -921,15 +921,15 @@ ellfacteur(GEN N, int insist)
     /* ---B2 PHASE--- */
     /* compute [2]Q,...,[10]Q, which we need to build the helix */
     if (elldouble(N, &gl, nbc, X, XD) > 1)
-      goto fin;	/* [2]Q */
+      goto fin;        /* [2]Q */
     if (elldouble(N, &gl, nbc, XD, XD + nbc2) > 1)
-      goto fin;	/* [4]Q */
+      goto fin;        /* [4]Q */
     if (elladd(N, &gl, nbc, XD, XD + nbc2, XD + (nbc<<2)) > 1)
-      goto fin;	/* [6]Q */
+      goto fin;        /* [6]Q */
     if (elladd2(N, &gl, nbc,
-		XD, XD + (nbc<<2), XT + (nbc<<3),
-		XD + nbc2, XD + (nbc<<2), XD + (nbc<<3)) > 1)
-      goto fin;	/* [8]Q and [10]Q */
+                XD, XD + (nbc<<2), XT + (nbc<<3),
+                XD + nbc2, XD + (nbc<<2), XD + (nbc<<3)) > 1)
+      goto fin;        /* [8]Q and [10]Q */
     if (DEBUGLEVEL >= 7) fprintferr("\t(got [2]Q...[10]Q)\n");
 
     /* get next prime (still using the foolproof test) */
@@ -940,8 +940,8 @@ ellfacteur(GEN N, int insist)
       rcn = prc210_no[(p % 210) >> 1];
       if (rcn == NPRC)
       {
-	fprintferr("ECM: %lu should have been prime but isn\'t\n", p);
-	pari_err(bugparier, "ellfacteur");
+        fprintferr("ECM: %lu should have been prime but isn\'t\n", p);
+        pari_err(bugparier, "ellfacteur");
       }
     }
 
@@ -953,8 +953,8 @@ ellfacteur(GEN N, int insist)
     /* save current p, d, and rcn;  we'll need them more than once below */
     p0 = p;
     d0 = d;
-    rcn0 = rcn;	/* remember where the helix wraps */
-    bstp0 = 0;	/* p is at baby-step offset 0 from itself */
+    rcn0 = rcn;        /* remember where the helix wraps */
+    bstp0 = 0;        /* p is at baby-step offset 0 from itself */
 
     /* fill up the helix, stepping forward through the prime residue classes
      * mod 210 until we're back at the r'class of p0.  Keep updating p so
@@ -964,12 +964,12 @@ ellfacteur(GEN N, int insist)
     {
       p += (dp = (ulong)prc210_d1[rcn]);
       if (rcn == 47)
-      {	/* wrap mod 210 */
-	if (elladd(N, &gl, nbc, XT + dp*nbc, XH + rcn*nbc2, XH) > 1) goto fin;
-	rcn = 0; continue;
+      {        /* wrap mod 210 */
+        if (elladd(N, &gl, nbc, XT + dp*nbc, XH + rcn*nbc2, XH) > 1) goto fin;
+        rcn = 0; continue;
       }
       if (elladd(N, &gl, nbc, XT + dp*nbc, XH + rcn*nbc2, XH + rcn*nbc2 + nbc2) > 1)
-	goto fin;
+        goto fin;
       rcn++;
     }
     if (DEBUGLEVEL >= 7) fprintferr("\t(got initial helix)\n");
@@ -988,13 +988,13 @@ ellfacteur(GEN N, int insist)
 
     if (DEBUGLEVEL >= 4)
       fprintferr("ECM: time = %6ld ms, entering B2 phase, p = %lu\n",
-		 timer2(), p);
+                 timer2(), p);
 
     /* inner loop over small sets of 4 curves at a time */
     for (i = nbc - 4; i >= 0; i -= 4)
     {
       if (DEBUGLEVEL >= 6)
-	fprintferr("ECM: finishing curves %ld...%ld\n", i, i+3);
+        fprintferr("ECM: finishing curves %ld...%ld\n", i, i+3);
       /* copy relevant pointers from XH to Xh. Recall memory layout in XH is
        * nbc X coordinates followed by nbc Y coordinates for residue class
        * 1 mod 210, then the same for r.c. 11 mod 210, etc. Memory layout for
@@ -1004,13 +1004,13 @@ ellfacteur(GEN N, int insist)
        * calls to elladd0() each acting on 64 points in parallel */
       for (j = 48; j--; )
       {
-	k = nbc2*j + i;
-	m = j << 2;		/* X coordinates */
-	Xh[m]   = XH[k];   Xh[m+1] = XH[k+1];
-	Xh[m+2] = XH[k+2]; Xh[m+3] = XH[k+3];
-	k += nbc;		/* Y coordinates */
-	Yh[m]   = XH[k];   Yh[m+1] = XH[k+1];
-	Yh[m+2] = XH[k+2]; Yh[m+3] = XH[k+3];
+        k = nbc2*j + i;
+        m = j << 2;                /* X coordinates */
+        Xh[m]   = XH[k];   Xh[m+1] = XH[k+1];
+        Xh[m+2] = XH[k+2]; Xh[m+3] = XH[k+3];
+        k += nbc;                /* Y coordinates */
+        Yh[m]   = XH[k];   Yh[m+1] = XH[k+1];
+        Yh[m+2] = XH[k+2]; Yh[m+3] = XH[k+3];
       }
       /* build baby step table of X coords of multiples of [210]Q.  XB[4*j]
        * will point at X coords on four curves from [(j+1)*210]Q.  Until
@@ -1021,57 +1021,57 @@ ellfacteur(GEN N, int insist)
        * that were initially reserved for them. Here are the initial entries */
       for (Xb=XB,k=2,j=i; k--; Xb=XB2,j+=nbc) /* do first X, then Y coords */
       {
-	Xb[0]  = X[j];      Xb[1]  = X[j+1]; /* [210]Q */
-	Xb[2]  = X[j+2];    Xb[3]  = X[j+3];
-	Xb[4]  = XAUX[j];   Xb[5]  = XAUX[j+1]; /* [420]Q */
-	Xb[6]  = XAUX[j+2]; Xb[7]  = XAUX[j+3];
-	Xb[8]  = XT[j];     Xb[9]  = XT[j+1]; /* [630]Q */
-	Xb[10] = XT[j+2];   Xb[11] = XT[j+3];
-	Xb += 4; /* points at [420]Q */
-	/* ... entries at powers of 2 times 210 .... */
-	for (m = 2; m < (ulong)gse+k; m++) /* omit Y coords of [2^gse*210]Q */
-	{
-	  long m2 = m*nbc2 + j;
-	  Xb += (2UL<<m); /* points at [2^m*210]Q */
-	  Xb[0] = XAUX[m2];   Xb[1] = XAUX[m2+1];
-	  Xb[2] = XAUX[m2+2]; Xb[3] = XAUX[m2+3];
-	}
+        Xb[0]  = X[j];      Xb[1]  = X[j+1]; /* [210]Q */
+        Xb[2]  = X[j+2];    Xb[3]  = X[j+3];
+        Xb[4]  = XAUX[j];   Xb[5]  = XAUX[j+1]; /* [420]Q */
+        Xb[6]  = XAUX[j+2]; Xb[7]  = XAUX[j+3];
+        Xb[8]  = XT[j];     Xb[9]  = XT[j+1]; /* [630]Q */
+        Xb[10] = XT[j+2];   Xb[11] = XT[j+3];
+        Xb += 4; /* points at [420]Q */
+        /* ... entries at powers of 2 times 210 .... */
+        for (m = 2; m < (ulong)gse+k; m++) /* omit Y coords of [2^gse*210]Q */
+        {
+          long m2 = m*nbc2 + j;
+          Xb += (2UL<<m); /* points at [2^m*210]Q */
+          Xb[0] = XAUX[m2];   Xb[1] = XAUX[m2+1];
+          Xb[2] = XAUX[m2+2]; Xb[3] = XAUX[m2+3];
+        }
       }
       if (DEBUGLEVEL >= 7)
-	fprintferr("\t(extracted precomputed helix / baby step entries)\n");
+        fprintferr("\t(extracted precomputed helix / baby step entries)\n");
       /* ... glue in between, up to 16*210 ... */
-      if (elladd0(N, &gl, 12, 4,	/* 12 pts + (4 pts replicated thrice) */
-		  XB + 12, XB2 + 12,
-		  XB,      XB2,
-		  XB + 16, XB2 + 16)
-	  > 1) goto fin;	/* 4 + {1,2,3} = {5,6,7} */
-      if (elladd0(N, &gl, 28, 4,	/* 28 pts + (4 pts replicated 7fold) */
-		  XB + 28, XB2 + 28,
-		  XB,      XB2,
-		  XB + 32, XB2 + 32)
-	  > 1) goto fin;	/* 8 + {1,...,7} = {9,...,15} */
+      if (elladd0(N, &gl, 12, 4,        /* 12 pts + (4 pts replicated thrice) */
+                  XB + 12, XB2 + 12,
+                  XB,      XB2,
+                  XB + 16, XB2 + 16)
+          > 1) goto fin;        /* 4 + {1,2,3} = {5,6,7} */
+      if (elladd0(N, &gl, 28, 4,        /* 28 pts + (4 pts replicated 7fold) */
+                  XB + 28, XB2 + 28,
+                  XB,      XB2,
+                  XB + 32, XB2 + 32)
+          > 1) goto fin;        /* 8 + {1,...,7} = {9,...,15} */
       /* ... and the remainder of the lot */
       for (m = 5; m <= (ulong)gse; m++)
       {
-	/* fill in from 2^(m-1)+1 to 2^m-1 in chunks of 64 and 60 points */
-	ulong m2 = 2UL << m;	/* will point at 2^(m-1)+1 */
-	for (j = 0; (ulong)j < m2-64; j+=64) /* executed 0 times when m == 5 */
-	{
-	  if (elladd0(N, &gl, 64, 4,
-		      XB + m2 - 4, XB2 + m2 - 4,
-		      XB + j,      XB2 + j,
-		      XB + m2 + j,
-		      (m<(ulong)gse ? XB2 + m2 + j : NULL))
-	      > 1) goto fin;
-	} /* j == m2-64 here, 60 points left */
-	if (elladd0(N, &gl, 60, 4,
-		    XB + m2 - 4, XB2 + m2 - 4,
-		    XB + j,      XB2 + j,
-		    XB + m2 + j,
-		    (m<(ulong)gse ? XB2 + m2 + j : NULL))
-	    > 1) goto fin;
-	/* when m==gse, drop Y coords of result, and when both equal 1024,
-	 * overwrite Y coords of second argument with X coords of result */
+        /* fill in from 2^(m-1)+1 to 2^m-1 in chunks of 64 and 60 points */
+        ulong m2 = 2UL << m;        /* will point at 2^(m-1)+1 */
+        for (j = 0; (ulong)j < m2-64; j+=64) /* executed 0 times when m == 5 */
+        {
+          if (elladd0(N, &gl, 64, 4,
+                      XB + m2 - 4, XB2 + m2 - 4,
+                      XB + j,      XB2 + j,
+                      XB + m2 + j,
+                      (m<(ulong)gse ? XB2 + m2 + j : NULL))
+              > 1) goto fin;
+        } /* j == m2-64 here, 60 points left */
+        if (elladd0(N, &gl, 60, 4,
+                    XB + m2 - 4, XB2 + m2 - 4,
+                    XB + j,      XB2 + j,
+                    XB + m2 + j,
+                    (m<(ulong)gse ? XB2 + m2 + j : NULL))
+            > 1) goto fin;
+        /* when m==gse, drop Y coords of result, and when both equal 1024,
+         * overwrite Y coords of second argument with X coords of result */
       }
       if (DEBUGLEVEL >= 7) fprintferr("\t(baby step table complete)\n");
       /* initialize a few other things */
@@ -1098,46 +1098,46 @@ ellfacteur(GEN N, int insist)
        * steps as necessary */
       while (p < B2)
       {
-	ulong p2 = p; /* save current p for diagnostics */
-	/* get next probable prime */
-	p = snextpr(p, &d, &rcn, &bstp, MR_Jaeschke_k2);
-	/* work out the corresponding baby-step multiplier */
-	k = bstp - (rcn < rcn0 ? 1 : 0);
-	/* check whether it's giant-step time */
-	if (k > gss)
-	{ /* take gcd */
-	  gl = gcdii(gl, N);
-	  if (!is_pm1(gl) && !equalii(gl, N)) { p = p2; goto fin; }
-	  gl = gen_1; avma = av1;
-	  while (k > gss) /* hm, just how large are those prime gaps? */
-	  { /* giant step */
-	    if (DEBUGLEVEL >= 7) fprintferr("\t(giant step at p = %lu)\n", p);
-	    if (elladd0(N, &gl, 64, 4,
-			XG + i, YG + i,
-			Xh, Yh, Xh, Yh) > 1) goto fin;
-	    if (elladd0(N, &gl, 64, 4,
-			XG + i, YG + i,
-			Xh + 64, Yh + 64, Xh + 64, Yh + 64) > 1) goto fin;
-	    if (elladd0(N, &gl, 64, 4,
-			XG + i, YG + i,
-			Xh + 128, Yh + 128, Xh + 128, Yh + 128) > 1) goto fin;
-	    bstp -= (gss << 1);
-	    k = bstp - (rcn < rcn0 ? 1 : 0); /* recompute multiplier */
-	  }
-	}
-	if (!k) continue; /* point of interest is already in Xh */
-	if (k < 0) k = -k;
-	m = ((ulong)k - 1) << 2;
-	/* accumulate product of differences of X coordinates */
-	j = rcn<<2;
-	avma = avtmp; /* go to garbage zone */
-	gl = modii(mulii(gl, subii(XB[m],   Xh[j])), N);
-	gl = modii(mulii(gl, subii(XB[m+1], Xh[j+1])), N);
-	gl = modii(mulii(gl, subii(XB[m+2], Xh[j+2])), N);
-	gl = mulii(gl, subii(XB[m+3], Xh[j+3]));
-	avma = av1;
-	gl = modii(gl, N);
-      }	/* loop over p */
+        ulong p2 = p; /* save current p for diagnostics */
+        /* get next probable prime */
+        p = snextpr(p, &d, &rcn, &bstp, MR_Jaeschke_k2);
+        /* work out the corresponding baby-step multiplier */
+        k = bstp - (rcn < rcn0 ? 1 : 0);
+        /* check whether it's giant-step time */
+        if (k > gss)
+        { /* take gcd */
+          gl = gcdii(gl, N);
+          if (!is_pm1(gl) && !equalii(gl, N)) { p = p2; goto fin; }
+          gl = gen_1; avma = av1;
+          while (k > gss) /* hm, just how large are those prime gaps? */
+          { /* giant step */
+            if (DEBUGLEVEL >= 7) fprintferr("\t(giant step at p = %lu)\n", p);
+            if (elladd0(N, &gl, 64, 4,
+                        XG + i, YG + i,
+                        Xh, Yh, Xh, Yh) > 1) goto fin;
+            if (elladd0(N, &gl, 64, 4,
+                        XG + i, YG + i,
+                        Xh + 64, Yh + 64, Xh + 64, Yh + 64) > 1) goto fin;
+            if (elladd0(N, &gl, 64, 4,
+                        XG + i, YG + i,
+                        Xh + 128, Yh + 128, Xh + 128, Yh + 128) > 1) goto fin;
+            bstp -= (gss << 1);
+            k = bstp - (rcn < rcn0 ? 1 : 0); /* recompute multiplier */
+          }
+        }
+        if (!k) continue; /* point of interest is already in Xh */
+        if (k < 0) k = -k;
+        m = ((ulong)k - 1) << 2;
+        /* accumulate product of differences of X coordinates */
+        j = rcn<<2;
+        avma = avtmp; /* go to garbage zone */
+        gl = modii(mulii(gl, subii(XB[m],   Xh[j])), N);
+        gl = modii(mulii(gl, subii(XB[m+1], Xh[j+1])), N);
+        gl = modii(mulii(gl, subii(XB[m+2], Xh[j+2])), N);
+        gl = mulii(gl, subii(XB[m+3], Xh[j+3]));
+        avma = av1;
+        gl = modii(gl, N);
+      }        /* loop over p */
       avma = av1;
     } /* for i (loop over sets of 4 curves) */
 
@@ -1151,9 +1151,9 @@ ellfacteur(GEN N, int insist)
     if (!insist && !--rep)
     {
       if (DEBUGLEVEL >= 4) {
-	fprintferr("ECM: time = %6ld ms,\tellfacteur giving up.\n",
-		   timer2());
-	flusherr();
+        fprintferr("ECM: time = %6ld ms,\tellfacteur giving up.\n",
+                   timer2());
+        flusherr();
       }
       res = NULL; goto ret;
     }
@@ -1163,7 +1163,7 @@ fin:
   affii(gl, res);
   if (DEBUGLEVEL >= 4) {
     fprintferr("ECM: time = %6ld ms,\tp <= %6lu,\n\tfound factor = %Ps\n",
-	       timer2(), p, res);
+               timer2(), p, res);
     flusherr();
   }
 ret:
@@ -1199,7 +1199,7 @@ rho_dbg(long c, long msg_mask)
 {
   if (c & msg_mask) return;
   fprintferr("Rho: time = %6ld ms,\t%3ld round%s\n",
-	     timer2(), c, (c==1?"":"s"));
+             timer2(), c, (c==1?"":"s"));
   flusherr();
 }
 
@@ -1210,7 +1210,7 @@ rho_dbg(long c, long msg_mask)
  * rapidly after we pass 80 bits.-- Changed this to adjust for the presence of
  * squfof, which will finish input up to 59 bits quickly. */
 
-#define tune_pb_min 14		/* even 15 seems too much. */
+#define tune_pb_min 14                /* even 15 seems too much. */
 
 /* Return NULL when we run out of time, or a single t_INT containing a
  * nontrivial factor of n, or a vector of t_INTs, each triple of successive
@@ -1230,12 +1230,12 @@ pollardbrent(GEN n)
 
   if (tf >= 4)
     size = expi(n) + 1;
-  else if (tf == 3)		/* try to keep purify happy...  */
+  else if (tf == 3)                /* try to keep purify happy...  */
     size = 1 + expu((ulong)n[2]);
 
   if (size <= 28)
     c0 = 32;/* amounts very nearly to 'insist'. Now that we have squfof(), we
-	     * don't insist any more when input is 2^29 ... 2^32 */
+             * don't insist any more when input is 2^29 ... 2^32 */
   else if (size <= 42)
     c0 = tune_pb_min;
   else if (size <= 59) /* match squfof() cutoff point */
@@ -1248,11 +1248,11 @@ pollardbrent(GEN n)
     c0 = tune_pb_min + size - 60 +
       ((size-73)>>1)*((size-70)>>3)*((size-56)>>4);
   else
-    c0 = 49152;	/* ECM is faster when it'd take longer */
+    c0 = 49152;        /* ECM is faster when it'd take longer */
 
   c = c0 << 5; /* 2^5 iterations per round */
   msg_mask = (size >= 448? 0x1fff:
-			   (size >= 192? (256L<<((size-128)>>6))-1: 0xff));
+                           (size >= 192? (256L<<((size-128)>>6))-1: 0xff));
 PB_RETRY:
  /* trick to make a 'random' choice determined by n.  Don't use x^2+0 or
   * x^2-2, ever.  Don't use x^2-3 or x^2-7 with a starting value of 2.
@@ -1279,7 +1279,7 @@ PB_RETRY:
     else
       fprintferr("Rho: restarting for remaining rounds...\n");
     fprintferr("Rho: using X^2%+1ld for up to %ld rounds of 32 iterations\n",
-	       delta, c >> 5);
+               delta, c >> 5);
     flusherr();
   }
   x = gen_2; P = gen_1; g1 = NULL; k = 1; l = 1;
@@ -1290,7 +1290,7 @@ PB_RETRY:
   avP = (pari_sp)new_chunk(2 * tf); /* enough for x = addsi(tf+1) */
   GGG = (pari_sp)new_chunk(4 * tf); /* enough for P = modii(2tf+1, tf) */
 
-  for (;;)			/* terminated under the control of c */
+  for (;;)                        /* terminated under the control of c */
   {
     /* use the polynomial  x^2 + delta */
 #define one_iter() STMT_START {\
@@ -1305,21 +1305,21 @@ PB_RETRY:
     { /* one round complete */
       g = gcdii(n, P); if (!is_pm1(g)) goto fin;
       if (c <= 0)
-      {	/* getting bored */
-	if (DEBUGLEVEL >= 4)
-	{
-	  fprintferr("Rho: time = %6ld ms,\tPollard-Brent giving up.\n",
-		     timer2());
-	  flusherr();
-	}
-	avma = av; return NULL;
+      {        /* getting bored */
+        if (DEBUGLEVEL >= 4)
+        {
+          fprintferr("Rho: time = %6ld ms,\tPollard-Brent giving up.\n",
+                     timer2());
+          flusherr();
+        }
+        avma = av; return NULL;
       }
-      P = gen_1;			/* not necessary, but saves 1 mulii/round */
+      P = gen_1;                        /* not necessary, but saves 1 mulii/round */
       if (DEBUGLEVEL >= 4) rho_dbg(c0-(c>>5), msg_mask);
       affii(x,y);
     }
 
-    if (--k) continue;		/* normal end of loop body */
+    if (--k) continue;                /* normal end of loop body */
 
     if (c & 0x1f) /* otherwise, we already checked */
     {
@@ -1336,16 +1336,16 @@ PB_RETRY:
     * (similarly for all other powers of two)
     */
     if ((c -= (l>>1)) <= 0)
-    {				/* got bored */
+    {                                /* got bored */
       if (DEBUGLEVEL >= 4)
       {
-	fprintferr("Rho: time = %6ld ms,\tPollard-Brent giving up.\n",
-		   timer2());
-	flusherr();
+        fprintferr("Rho: time = %6ld ms,\tPollard-Brent giving up.\n",
+                   timer2());
+        flusherr();
       }
       avma = av; return NULL;
     }
-    c &= ~0x1f;			/* keep it on multiples of 32 */
+    c &= ~0x1f;                        /* keep it on multiples of 32 */
 
     /* Fast forward loop */
     affii(x, x1); k = l; l <<= 1;
@@ -1359,7 +1359,7 @@ PB_RETRY:
     if (DEBUGLEVEL >= 4 && (l>>7) > msg_mask)
     {
       fprintferr("Rho: time = %6ld ms,\t%3ld rounds, back to normal mode\n",
-		 timer2(), c0-(c>>5));
+                 timer2(), c0-(c>>5));
       flusherr();
     }
 
@@ -1375,16 +1375,16 @@ fin:
     {
       if (DEBUGLEVEL >= 4)
       {
-	rho_dbg(c0-(c>>5), 0);
-	fprintferr("\tfound factor = %Ps\n",g);
-	flusherr();
+        rho_dbg(c0-(c>>5), 0);
+        fprintferr("\tfound factor = %Ps\n",g);
+        flusherr();
       }
       avma = av; return icopy(g);
     }
     avma = avx; g1 = icopy(g);  /* known composite, keep it safe */
     avx = avma;
   }
-  else g1 = n;			/* and work modulo g1 for backtracking */
+  else g1 = n;                        /* and work modulo g1 for backtracking */
 
   /* Here g1 is known composite */
   if (DEBUGLEVEL >= 4 && size > 192)
@@ -1408,8 +1408,8 @@ fin:
     { /* out of luck */
       if (DEBUGLEVEL >= 4)
       {
-	rho_dbg(c0-(c>>5), 0);
-	fprintferr("\tPollard-Brent failed.\n"); flusherr();
+        rho_dbg(c0-(c>>5), 0);
+        fprintferr("\tPollard-Brent failed.\n"); flusherr();
       }
       if (++retries >= 4) return NULL;
       goto PB_RETRY;
@@ -1487,7 +1487,7 @@ squfof_ambig(long a, long B, long dd, GEN D)
   fprintferr("SQUFOF: Form on ambigous cycle (%ld, %ld, %ld)\n", a, b, c);
 #endif
 
-  a0 = a; b0 = b1 = b;	/* end of loop detection and safeguard */
+  a0 = a; b0 = b1 = b;        /* end of loop detection and safeguard */
 
   for (;;) /* reduced cycles are finite */
   { /* reduction step */
@@ -1519,11 +1519,11 @@ squfof_ambig(long a, long B, long dd, GEN D)
   {
     if (q > 1)
       fprintferr("SQUFOF: found factor %ld from ambiguous form\n"
-		 "\tafter %ld steps on the ambiguous cycle, time = %ld ms\n",
-		 q / ugcd(q,15), cnt, timer2());
+                 "\tafter %ld steps on the ambiguous cycle, time = %ld ms\n",
+                 q / ugcd(q,15), cnt, timer2());
     else
       fprintferr("SQUFOF: ...found nothing on the ambiguous cycle\n"
-		 "\tafter %ld steps there, time = %ld ms\n", cnt, timer2());
+                 "\tafter %ld steps there, time = %ld ms\n", cnt, timer2());
     if (DEBUGLEVEL >= 6) fprintferr("SQUFOF: squfof_ambig returned %ld\n", q);
   }
   return q;
@@ -1557,7 +1557,7 @@ squfof(GEN n)
   { /* n = 1 (mod4):  run one iteration on D1 = n, another on D2 = 5n */
     D1 = n;
     D2 = mului(5,n); d2 = itou(sqrti(D2)); dd2 = (long)((d2>>1) + (d2&1));
-    b2 = (long)((d2-1) | 1);	/* b1, b2 will always stay odd */
+    b2 = (long)((d2-1) | 1);        /* b1, b2 will always stay odd */
   }
   else
   { /* n = 3 (mod4):  run one iteration on D1 = 3n, another on D2 = 4n */
@@ -1601,8 +1601,8 @@ squfof(GEN n)
   if (DEBUGLEVEL >= 4)
   {
     fprintferr("SQUFOF: entering main loop with forms\n"
-	       "\t(1, %ld, %ld) and (1, %ld, %ld)\n\tof discriminants\n"
-	       "\t%Ps and %Ps, respectively\n", b1, -c1, b2, -c2, D1, D2);
+               "\t(1, %ld, %ld) and (1, %ld, %ld)\n\tof discriminants\n"
+               "\t%Ps and %Ps, respectively\n", b1, -c1, b2, -c2, D1, D2);
     (void)timer2();
   }
 
@@ -1629,14 +1629,14 @@ squfof(GEN n)
 
       if (a1 <= L1)
       { /* blacklist this */
-	if (blp1 >= SQUFOF_BLACKLIST_SZ) /* overflows: shouldn't happen */
-	  act1 = 0;		/* silently */
-	else
-	{
-	  if (DEBUGLEVEL >= 6)
-	    fprintferr("SQUFOF: blacklisting a = %ld on first cycle\n", a1);
-	  blacklist1[blp1++] = a1;
-	}
+        if (blp1 >= SQUFOF_BLACKLIST_SZ) /* overflows: shouldn't happen */
+          act1 = 0;                /* silently */
+        else
+        {
+          if (DEBUGLEVEL >= 6)
+            fprintferr("SQUFOF: blacklisting a = %ld on first cycle\n", a1);
+          blacklist1[blp1++] = a1;
+        }
       }
     }
     if (act2)
@@ -1651,14 +1651,14 @@ squfof(GEN n)
 
       if (a2 <= L2)
       { /* blacklist this */
-	if (blp2 >= SQUFOF_BLACKLIST_SZ) /* overflows: shouldn't happen */
-	  act2 = 0;		/* silently */
-	else
-	{
-	  if (DEBUGLEVEL >= 6)
-	    fprintferr("SQUFOF: blacklisting a = %ld on second cycle\n", a2);
-	  blacklist2[blp2++] = a2;
-	}
+        if (blp2 >= SQUFOF_BLACKLIST_SZ) /* overflows: shouldn't happen */
+          act2 = 0;                /* silently */
+        else
+        {
+          if (DEBUGLEVEL >= 6)
+            fprintferr("SQUFOF: blacklisting a = %ld on second cycle\n", a2);
+          blacklist2[blp2++] = a2;
+        }
       }
     }
 
@@ -1674,40 +1674,40 @@ squfof(GEN n)
     { /* drop this discriminant */
       act1 = 0;
       if (DEBUGLEVEL >= 4)
-	fprintferr("SQUFOF: first cycle exhausted after %ld iterations,\n"
-		   "\tdropping it\n", cnt);
+        fprintferr("SQUFOF: first cycle exhausted after %ld iterations,\n"
+                   "\tdropping it\n", cnt);
     }
     if (act1)
     {
       if (uissquareall((ulong)a1, (ulong*)&a))
       { /* square form */
-	if (DEBUGLEVEL >= 4)
-	  fprintferr("SQUFOF: square form (%ld^2, %ld, %ld) on first cycle\n"
-		     "\tafter %ld iterations, time = %ld ms\n",
-		     a, b1, -c1, cnt, timer2());
-	if (a <= L1)
-	{ /* blacklisted? */
-	  long j;
-	  for (j = 0; j < blp1; j++)
-	    if (a == blacklist1[j]) { a = 0; break; }
-	}
-	if (a > 0)
-	{ /* not blacklisted */
-	  q = ugcd(a, b1); /* imprimitive form? */
-	  if (q > 1)
-	  { /* q^2 divides D1 hence n [ assuming n % 3 != 0 ] */
-	    avma = av;
-	    if (DEBUGLEVEL >= 4) fprintferr("SQUFOF: found factor %ld^2\n", q);
-	    return mkvec3(utoipos(q), gen_2, NULL);/* exponent 2, unknown status */
-	  }
-	  /* chase the inverse root form back along the ambiguous cycle */
-	  q = squfof_ambig(a, b1, dd1, D1);
-	  if (nm4 == 3 && q % 3 == 0) q /= 3;
-	  if (q > 1) { avma = av; return utoipos(q); } /* SUCCESS! */
-	}
-	else if (DEBUGLEVEL >= 4) /* blacklisted */
-	  fprintferr("SQUFOF: ...but the root form seems to be on the "
-		     "principal cycle\n");
+        if (DEBUGLEVEL >= 4)
+          fprintferr("SQUFOF: square form (%ld^2, %ld, %ld) on first cycle\n"
+                     "\tafter %ld iterations, time = %ld ms\n",
+                     a, b1, -c1, cnt, timer2());
+        if (a <= L1)
+        { /* blacklisted? */
+          long j;
+          for (j = 0; j < blp1; j++)
+            if (a == blacklist1[j]) { a = 0; break; }
+        }
+        if (a > 0)
+        { /* not blacklisted */
+          q = ugcd(a, b1); /* imprimitive form? */
+          if (q > 1)
+          { /* q^2 divides D1 hence n [ assuming n % 3 != 0 ] */
+            avma = av;
+            if (DEBUGLEVEL >= 4) fprintferr("SQUFOF: found factor %ld^2\n", q);
+            return mkvec3(utoipos(q), gen_2, NULL);/* exponent 2, unknown status */
+          }
+          /* chase the inverse root form back along the ambiguous cycle */
+          q = squfof_ambig(a, b1, dd1, D1);
+          if (nm4 == 3 && q % 3 == 0) q /= 3;
+          if (q > 1) { avma = av; return utoipos(q); } /* SUCCESS! */
+        }
+        else if (DEBUGLEVEL >= 4) /* blacklisted */
+          fprintferr("SQUFOF: ...but the root form seems to be on the "
+                     "principal cycle\n");
       }
     }
 
@@ -1716,41 +1716,41 @@ squfof(GEN n)
     { /* drop this discriminant */
       act2 = 0;
       if (DEBUGLEVEL >= 4)
-	fprintferr("SQUFOF: second cycle exhausted after %ld iterations,\n"
-		   "\tdropping it\n", cnt);
+        fprintferr("SQUFOF: second cycle exhausted after %ld iterations,\n"
+                   "\tdropping it\n", cnt);
     }
     if (act2)
     {
       if (uissquareall((ulong)a2, (ulong*)&a))
       { /* square form */
-	if (DEBUGLEVEL >= 4)
-	  fprintferr("SQUFOF: square form (%ld^2, %ld, %ld) on second cycle\n"
-		     "\tafter %ld iterations, time = %ld ms\n",
-		     a, b2, -c2, cnt, timer2());
-	if (a <= L2)
-	{ /* blacklisted? */
-	  long j;
-	  for (j = 0; j < blp2; j++)
-	    if (a == blacklist2[j]) { a = 0; break; }
-	}
-	if (a > 0)
-	{ /* not blacklisted */
-	  q = ugcd(a, b2); /* imprimitive form? */
-	  /* NB if b2 is even, a is odd, so the gcd is always odd */
-	  if (q > 1)
-	  { /* q^2 divides D2 hence n [ assuming n % 5 != 0 ] */
-	    avma = av;
-	    if (DEBUGLEVEL >= 4) fprintferr("SQUFOF: found factor %ld^2\n", q);
-	    return mkvec3(utoipos(q), gen_2, NULL);/* exponent 2, unknown status */
-	  }
-	  /* chase the inverse root form along the ambiguous cycle */
-	  q = squfof_ambig(a, b2, dd2, D2);
-	  if (nm4 == 1 && q % 5 == 0) q /= 5;
-	  if (q > 1) { avma = av; return utoipos(q); } /* SUCCESS! */
-	}
-	else if (DEBUGLEVEL >= 4)	/* blacklisted */
-	  fprintferr("SQUFOF: ...but the root form seems to be on the "
-		     "principal cycle\n");
+        if (DEBUGLEVEL >= 4)
+          fprintferr("SQUFOF: square form (%ld^2, %ld, %ld) on second cycle\n"
+                     "\tafter %ld iterations, time = %ld ms\n",
+                     a, b2, -c2, cnt, timer2());
+        if (a <= L2)
+        { /* blacklisted? */
+          long j;
+          for (j = 0; j < blp2; j++)
+            if (a == blacklist2[j]) { a = 0; break; }
+        }
+        if (a > 0)
+        { /* not blacklisted */
+          q = ugcd(a, b2); /* imprimitive form? */
+          /* NB if b2 is even, a is odd, so the gcd is always odd */
+          if (q > 1)
+          { /* q^2 divides D2 hence n [ assuming n % 5 != 0 ] */
+            avma = av;
+            if (DEBUGLEVEL >= 4) fprintferr("SQUFOF: found factor %ld^2\n", q);
+            return mkvec3(utoipos(q), gen_2, NULL);/* exponent 2, unknown status */
+          }
+          /* chase the inverse root form along the ambiguous cycle */
+          q = squfof_ambig(a, b2, dd2, D2);
+          if (nm4 == 1 && q % 5 == 0) q /= 5;
+          if (q > 1) { avma = av; return utoipos(q); } /* SUCCESS! */
+        }
+        else if (DEBUGLEVEL >= 4)        /* blacklisted */
+          fprintferr("SQUFOF: ...but the root form seems to be on the "
+                     "principal cycle\n");
       }
     }
   } /* end main loop */
@@ -1923,8 +1923,8 @@ is_357_power(GEN x, GEN *pt, ulong *mask)
   pari_sp av;
   GEN y;
 
-  *mask &= 7;		/* paranoia */
-  if (!*mask) return 0;	/* useful when running in a loop */
+  *mask &= 7;                /* paranoia */
+  if (!*mask) return 0;        /* useful when running in a loop */
 
   if (DEBUGLEVEL >= 5)
   {
@@ -1941,7 +1941,7 @@ is_357_power(GEN x, GEN *pt, ulong *mask)
   *mask &= (powersmod[resbyte] >> shift); \
   if (DEBUGLEVEL >= 5)\
     fprintferr("\t   %3ld:  %3ld   (3rd %ld, 5th %ld, 7th %ld)\n",\
-	       N, resbyte, *mask&1, (*mask>>1)&1, (*mask>>2)&1);\
+               N, resbyte, *mask&1, (*mask>>1)&1, (*mask>>2)&1);\
   if (!*mask) return 0;\
 }
   check_res(211, 0);
@@ -1960,7 +1960,7 @@ is_357_power(GEN x, GEN *pt, ulong *mask)
     long e, b;
     /* priority to higher powers: if we have a 21st, it is easier to rediscover
      * that its 7th root is a cube than that its cube root is a 7th power */
-	 if (*mask & 4) { b = 4; e = 7; }
+         if (*mask & 4) { b = 4; e = 7; }
     else if (*mask & 2) { b = 2; e = 5; }
     else                { b = 1; e = 3; }
     y = mpround( sqrtnr(itor(x, DEFAULTPREC + (lx-2) / e), e) );
@@ -2016,9 +2016,9 @@ is_kth_power(GEN x, ulong n, GEN *pt, byteptr d)
     {
       if (*d0) NEXT_PRIME_VIADIFF(q,d0);
       else {
-	if (init) q += n; else { init = 1; q += n+1 - q%n; }
-	while (!uisprime(q)) q += n;
-	break;
+        if (init) q += n; else { init = 1; q += n+1 - q%n; }
+        while (!uisprime(q)) q += n;
+        break;
       }
     } while (q % n != 1);
     /* q a prime = 1 mod n */
@@ -2444,8 +2444,8 @@ ifac_realloc(GEN *partial, GEN *where, long new_lg)
   GEN newpart, scan_new, scan_old;
 
   if (new_lg == 1)
-    new_lg = 2*old_lg - 6;	/* from 7 slots to 13 to 25... */
-  else if (new_lg <= old_lg)	/* includes case new_lg == 0 */
+    new_lg = 2*old_lg - 6;        /* from 7 slots to 13 to 25... */
+  else if (new_lg <= old_lg)        /* includes case new_lg == 0 */
   {
     GEN first = *partial + 3;
     new_lg = old_lg;
@@ -2456,7 +2456,7 @@ ifac_realloc(GEN *partial, GEN *where, long new_lg)
   newpart = cgetg(new_lg, t_VEC);
   if (DEBUGMEM >= 3)
     fprintferr("IFAC: new partial factorization structure (%ld slots)\n",
-	       (new_lg - 3)/3);
+               (new_lg - 3)/3);
   MOEBIUS(newpart) = MOEBIUS(*partial);
   icopyifstack(HINT(*partial), HINT(newpart));
   /* Downward sweep through the old *partial. Pick up 'where' and carry it
@@ -2498,7 +2498,7 @@ ifac_sort_one(GEN *partial, GEN *where, GEN washere)
     return 1; /* should have been detected by caller */
   class0 = CLASS(washere);
 
-  if (scan < *where) return 0;	/* nothing to do, washere==*where */
+  if (scan < *where) return 0;        /* nothing to do, washere==*where */
 
   cmp_res = -1; /* sentinel */
   while (scan >= *where) /* at least once */
@@ -2531,7 +2531,7 @@ ifac_sort_one(GEN *partial, GEN *where, GEN washere)
   /* case cmp_res == 0: repeated factor detected */
   if (DEBUGLEVEL >= 4)
     fprintferr("IFAC: repeated factor %Ps\n\tin ifac_sort_one\n", value);
-  if (moebius_mode) return 1;	/* not squarefree */
+  if (moebius_mode) return 1;        /* not squarefree */
   old = scan - 3;
   /* if old class0 was composite and new is prime, or vice versa, complain
    * (and if one class0 was unknown and the other wasn't, use the known one) */
@@ -2541,14 +2541,14 @@ ifac_sort_one(GEN *partial, GEN *where, GEN washere)
     if (class1)
     {
       if (class0 == gen_0 && class1 != gen_0)
-	pari_err(talker, "composite equals prime in ifac_sort_one");
+        pari_err(talker, "composite equals prime in ifac_sort_one");
       else if (class0 != gen_0 && class1 == gen_0)
-	pari_err(talker, "prime equals composite in ifac_sort_one");
-      else if (class0 == gen_2)	/* should happen even less */
-	CLASS(scan) = class0;	/* use it */
+        pari_err(talker, "prime equals composite in ifac_sort_one");
+      else if (class0 == gen_2)        /* should happen even less */
+        CLASS(scan) = class0;        /* use it */
     }
-    else			/* shouldn't happen either */
-      CLASS(scan) = class0;	/* use it */
+    else                        /* shouldn't happen either */
+      CLASS(scan) = class0;        /* use it */
   }
   /* else stay with the existing known class0 */
   CLASS(scan) = class1;
@@ -2576,7 +2576,7 @@ ifac_resort(GEN *partial, GEN *where)
 
   for (scan = *where; scan <= scan_end; scan += 3)
     if (VALUE(scan) && !CLASS(scan) /* slot occupied with an unknown */
-	&& (res = ifac_sort_one(partial, where, scan)) ) return res;
+        && (res = ifac_sort_one(partial, where, scan)) ) return res;
   return 0;
 }
 
@@ -2589,7 +2589,7 @@ ifac_isprime(GEN x)
   else if (factor_proven && ! BPSW_isprime(VALUE(x)))
   {
     pari_warn(warner, "IFAC: pseudo-prime %Ps\n\tis not prime. PLEASE REPORT!\n",
-	      VALUE(x));
+              VALUE(x));
     CLASS(x) = gen_0;
   }
   else
@@ -2618,19 +2618,19 @@ ifac_whoiswho(GEN *partial, GEN *where, long after_crack)
     {
       if (CLASS(scan))
       { /* known class of factor */
-	if (CLASS(scan) == gen_0) break;
-	if (CLASS(scan) == gen_1)
-	{
-	  if (DEBUGLEVEL>=3)
-	  {
-	    fprintferr("IFAC: factor %Ps\n\tis prime (no larger composite)\n",
-		       VALUE(*where));
-	    fprintferr("IFAC: prime %Ps\n\tappears with exponent = %ld\n",
-		       VALUE(*where), itos(EXPON(*where)));
-	  }
-	  CLASS(scan) = gen_2;
-	}
-	continue;
+        if (CLASS(scan) == gen_0) break;
+        if (CLASS(scan) == gen_1)
+        {
+          if (DEBUGLEVEL>=3)
+          {
+            fprintferr("IFAC: factor %Ps\n\tis prime (no larger composite)\n",
+                       VALUE(*where));
+            fprintferr("IFAC: prime %Ps\n\tappears with exponent = %ld\n",
+                       VALUE(*where), itos(EXPON(*where)));
+          }
+          CLASS(scan) = gen_2;
+        }
+        continue;
       }
       if (!ifac_isprime(scan)) break; /* must disable Q-to-P */
       CLASS(scan) = gen_2; /* P_i, finished prime */
@@ -2673,31 +2673,31 @@ ifac_divide(GEN *partial, GEN *where)
       if (!otherexp) otherexp = itos(EXPON(scan));
       newexp += otherexp;
     }
-    if (newexp > exponent)	/* did anything happen? */
+    if (newexp > exponent)        /* did anything happen? */
     {
       EXPON(*where) = (newexp == 2 ? gen_2 : utoipos(newexp));
       exponent = newexp;
       if (is_pm1((GEN)*scan)) /* factor dissolved completely */
       {
-	INIT0(scan);
-	if (DEBUGLEVEL >= 4)
-	  fprintferr("IFAC: a factor was a power of another prime factor\n");
+        INIT0(scan);
+        if (DEBUGLEVEL >= 4)
+          fprintferr("IFAC: a factor was a power of another prime factor\n");
       } else {
-	CLASS(scan) = NULL;	/* at any rate it's Unknown now */
-	if (DEBUGLEVEL >= 4)
-	  fprintferr("IFAC: a factor was divisible by another prime factor,\n"
-		     "\tleaving a cofactor = %Ps\n", VALUE(scan));
+        CLASS(scan) = NULL;        /* at any rate it's Unknown now */
+        if (DEBUGLEVEL >= 4)
+          fprintferr("IFAC: a factor was divisible by another prime factor,\n"
+                     "\tleaving a cofactor = %Ps\n", VALUE(scan));
       }
       res = 1;
       if (DEBUGLEVEL >= 5)
-	fprintferr("IFAC: prime %Ps\n\tappears at least to the power %ld\n",
-		   VALUE(*where), newexp);
+        fprintferr("IFAC: prime %Ps\n\tappears at least to the power %ld\n",
+                   VALUE(*where), newexp);
     }
   } /* for */
   CLASS(*where) = gen_2; /* make it a finished prime */
   if (DEBUGLEVEL >= 3)
     fprintferr("IFAC: prime %Ps\n\tappears with exponent = %ld\n",
-	       VALUE(*where), newexp);
+               VALUE(*where), newexp);
   return res;
 }
 
@@ -2760,7 +2760,7 @@ ifac_crack(GEN *partial, GEN *where)
     {
       good = 1; /* remember we succeeded once */
       update_pow(*where, factor, 2, &av);
-      if (moebius_mode) return 0;	/* no need to carry on */
+      if (moebius_mode) return 0;        /* no need to carry on */
     }
     /* At debug levels > 4, is_357_power() prints something more informative */
     if (DEBUGLEVEL == 4) fprintferr("IFAC: checking for odd power\n");
@@ -2781,8 +2781,8 @@ ifac_crack(GEN *partial, GEN *where)
     if (good && hint != 15 && ifac_isprime(*where))
     { /* our composite was a prime power */
       if (DEBUGLEVEL>3)
-	fprintferr("IFAC: factor %Ps\n\tis prime\n", VALUE(*where));
-      return 0;	/* bypass subsequent ifac_whoiswho() call */
+        fprintferr("IFAC: factor %Ps\n\tis prime\n", VALUE(*where));
+      return 0;        /* bypass subsequent ifac_whoiswho() call */
     }
   } /* pure power stage */
 
@@ -2794,8 +2794,8 @@ ifac_crack(GEN *partial, GEN *where)
     if (!factor)
     { /* Shanks' squfof() */
       if (DEBUGLEVEL >= 4)
-	fprintferr("IFAC: trying Shanks' SQUFOF, will fail silently if input\n"
-		   "      is too large for it.\n");
+        fprintferr("IFAC: trying Shanks' SQUFOF, will fail silently if input\n"
+                   "      is too large for it.\n");
       factor = squfof(VALUE(*where));
     }
   }
@@ -2814,21 +2814,21 @@ ifac_crack(GEN *partial, GEN *where)
     if (!(hint & 8))
     { /* still no luck? Final ECM stage, guaranteed to succeed */
       if (DEBUGLEVEL >= 4)
-	fprintferr("IFAC: forcing ECM, may take some time\n");
+        fprintferr("IFAC: forcing ECM, may take some time\n");
       factor = ellfacteur(VALUE(*where), 1);
     }
     else
     { /* limited factorization */
       if (DEBUGLEVEL >= 2)
       {
-	if (hint != 15)
-	  pari_warn(warner, "IFAC: unfactored composite declared prime");
-	else
-	  pari_warn(warner, "IFAC: untested integer declared prime");
+        if (hint != 15)
+          pari_warn(warner, "IFAC: unfactored composite declared prime");
+        else
+          pari_warn(warner, "IFAC: untested integer declared prime");
 
-	/* don't print it out at level 3 or above, where it would appear
-	 * several times before and after this message already */
-	if (DEBUGLEVEL == 2) fprintferr("\t%Ps\n", VALUE(*where));
+        /* don't print it out at level 3 or above, where it would appear
+         * several times before and after this message already */
+        if (DEBUGLEVEL == 2) fprintferr("\t%Ps\n", VALUE(*where));
       }
       CLASS(*where) = gen_1; /* might as well trial-divide by it... */
       return 1;
@@ -2913,16 +2913,16 @@ ifac_insert_multiplet(GEN *partial, GEN *where, GEN facvec)
     if (equalii(factor, VALUE(*where)))
     {
       if (DEBUGLEVEL >= 6)
-	fprintferr("\tfactor no. %ld is a duplicate%s\n", j, (j>1? "...": ""));
+        fprintferr("\tfactor no. %ld is a duplicate%s\n", j, (j>1? "...": ""));
       /* update exponent, ignore class which would already have been set,
        * then forget current factor */
       newexp = EXPON(cur);
       if (newexp != gen_1) /* new exp > 1 */
-	e = addis(EXPON(*where), exponent * itos(newexp));
+        e = addis(EXPON(*where), exponent * itos(newexp));
       else if (EXPON(*where) == gen_1 && exponent == 1)
-	e = gen_2;
+        e = gen_2;
       else
-	e = addis(EXPON(*where), exponent);
+        e = addis(EXPON(*where), exponent);
       EXPON(*where) = e;
 
       if (moebius_mode) return 0; /* stop now, but with exponent updated */
@@ -2930,19 +2930,19 @@ ifac_insert_multiplet(GEN *partial, GEN *where, GEN facvec)
     }
 
     *where -= 3;
-    CLASS(*where) = CLASS(cur);	/* class as given */
+    CLASS(*where) = CLASS(cur);        /* class as given */
     newexp = EXPON(cur);
     if (newexp != gen_1) /* new exp > 1 */
     {
       if (exponent == 1 && newexp == gen_2)
-	e = gen_2;
+        e = gen_2;
       else /* exponent*newexp > 2 */
-	e = mului(exponent, newexp);
+        e = mului(exponent, newexp);
     }
     else
       e = (exponent == 1 ? gen_1 :
-	    (exponent == 2 ? gen_2 :
-	       utoipos(exponent))); /* inherit parent's exponent */
+            (exponent == 2 ? gen_2 :
+               utoipos(exponent))); /* inherit parent's exponent */
     EXPON(*where) = e;
     /* keep components younger than *partial */
     VALUE(*where) = isonstack(factor) ? icopy(factor) : factor;
@@ -2981,16 +2981,16 @@ ifac_main(GEN *partial)
       /* make sure there's room for another factor */
       if (here < *partial + 6)
       {
-	ifac_defrag(partial, &here); /* try defrag first */
-	if (here < *partial + 6) /* no luck */
-	  ifac_realloc(partial, &here, 1); /* guaranteed to work */
+        ifac_defrag(partial, &here); /* try defrag first */
+        if (here < *partial + 6) /* no luck */
+          ifac_realloc(partial, &here, 1); /* guaranteed to work */
       }
       nf = ifac_crack(partial, &here);
       if (moebius_mode && EXPON(here) != gen_1) /* that was a power */
       {
-	if (DEBUGLEVEL >= 3)
-	  fprintferr("IFAC: main loop: repeated new factor\n\t%Ps\n", *here);
-	return gen_0;
+        if (DEBUGLEVEL >= 3)
+          fprintferr("IFAC: main loop: repeated new factor\n\t%Ps\n", *here);
+        return gen_0;
       }
       /* deal with the new unknowns.  No sort: ifac_crack did it */
       ifac_whoiswho(partial, &here, nf);
@@ -3000,19 +3000,19 @@ ifac_main(GEN *partial)
     {
       if (ifac_divide(partial, &here))
       {
-	if (moebius_mode)
-	{
-	  if (DEBUGLEVEL >= 3)
-	    fprintferr("IFAC: main loop: another factor was divisible by\n"
-		       "\t%Ps\n", *here);
-	  return gen_0;
-	}
-	ifac_defrag(partial, &here);
-	(void)ifac_resort(partial, &here); /* sort new cofactors down */
-	/* it doesn't matter whether this finds a repeated factor: we never
-	 * get to this point in Moebius mode */
-	ifac_defrag(partial, &here); /* resort may have created new gaps */
-	ifac_whoiswho(partial, &here, -1);
+        if (moebius_mode)
+        {
+          if (DEBUGLEVEL >= 3)
+            fprintferr("IFAC: main loop: another factor was divisible by\n"
+                       "\t%Ps\n", *here);
+          return gen_0;
+        }
+        ifac_defrag(partial, &here);
+        (void)ifac_resort(partial, &here); /* sort new cofactors down */
+        /* it doesn't matter whether this finds a repeated factor: we never
+         * get to this point in Moebius mode */
+        ifac_defrag(partial, &here); /* resort may have created new gaps */
+        ifac_whoiswho(partial, &here, -1);
       }
       continue;
     }
@@ -3087,7 +3087,7 @@ ifac_primary_factor(GEN *partial, long *exponent)
 
 long
 ifac_decomp_break(GEN n, long (*ifac_break)(GEN n,GEN pairs,GEN here,GEN state),
-		  GEN state, long hint)
+                  GEN state, long hint)
 {
   pari_sp av = avma, lim = stack_lim(av, 1);
   long nb = 0;
@@ -3125,7 +3125,7 @@ ifac_decomp_break(GEN n, long (*ifac_break)(GEN n,GEN pairs,GEN here,GEN state),
   avma = (pari_sp)pairs;
   if (DEBUGLEVEL >= 3)
     fprintferr("IFAC: found %ld large prime (power) factor%s.\n",
-	       nb, (nb>1? "s": ""));
+               nb, (nb>1? "s": ""));
   return nb;
 }
 

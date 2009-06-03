@@ -68,9 +68,9 @@ indexgroupcentre(GEN G, GEN Z, const long *good, const long *bad)
       long idx=group_ident(Q,NULL);
       avma=btop;
       for(p=good;*p;p++)
-	if (*p==idx) return 1;
+        if (*p==idx) return 1;
       for(p=bad;*p;p++)
-	if (*p==idx) return 0;
+        if (*p==idx) return 0;
     }
   }
   return 0;
@@ -120,20 +120,20 @@ group_ident_i(GEN G, GEN S)
       return (s == 1 - p[1] + n*p[1])? 2: 1; /* pxp || p^2 */
     case 3: /* p^3 */
       {
-	GEN H = group_abelianSNF(G, S);
-	if (H) /*G is abelian*/
-	{
-	  long l = lg(H)-1;
-	  return (l==3)?5: l; /*pxpxp || p^3 or p^2xp*/
-	} /*G is not abelian*/
-	if (p[1] == 2)
-	  return (s == 19)? 3: 4; /*D8 || Q8*/
-	else
-	{
-	  long q = p[1]*p[1];
-	  q *= q;
-	  return (s == q - p[1] + 1)?3 :4; /* pxp:p || p^2:p */
-	}
+        GEN H = group_abelianSNF(G, S);
+        if (H) /*G is abelian*/
+        {
+          long l = lg(H)-1;
+          return (l==3)?5: l; /*pxpxp || p^3 or p^2xp*/
+        } /*G is not abelian*/
+        if (p[1] == 2)
+          return (s == 19)? 3: 4; /*D8 || Q8*/
+        else
+        {
+          long q = p[1]*p[1];
+          q *= q;
+          return (s == q - p[1] + 1)?3 :4; /* pxp:p || p^2:p */
+        }
       }
     }
     break;
@@ -145,30 +145,30 @@ group_ident_i(GEN G, GEN S)
     case 3:
       if (p[1]==2 && e[1]==2) /* 4p */
       {
-	long q = p[2], q2 = q*q, pmq2 = (q%4 == 1 || q==3);
-	if (s==3+5*q+3*q2) return 1; /* 2p.2 */
-	if (s==11-11*q+11*q2) return 2; /* 4p */
-	if (s==3+q+3*q2) return 3+pmq2; /* D4p */
-	if (s==7-7*q+7*q2) return 4+pmq2; /* 2px2 */
-	return 3; /*A4 or p:4 */
+        long q = p[2], q2 = q*q, pmq2 = (q%4 == 1 || q==3);
+        if (s==3+5*q+3*q2) return 1; /* 2p.2 */
+        if (s==11-11*q+11*q2) return 2; /* 4p */
+        if (s==3+q+3*q2) return 3+pmq2; /* D4p */
+        if (s==7-7*q+7*q2) return 4+pmq2; /* 2px2 */
+        return 3; /*A4 or p:4 */
       }
       else if (p[1]==2 && e[1]==1) /*2p^2*/
       {
-	long q = p[2], q2 = q*q, q3 = q*q2, q4 = q*q3;
-	if (s==1-q+3*q2-q3+q4) return 1; /* p^2:2 */
-	if (s==3-3*q+3*q2-3*q3+3*q4) return 2; /* 2p^2 */
-	if (s==1+q-2*q2+3*q3) return 3; /* D2pxp */
-	if (s==1-q+2*q2+q3) return 4; /* p:2+p:2 */
-	return 5;   /* 2pxp */
+        long q = p[2], q2 = q*q, q3 = q*q2, q4 = q*q3;
+        if (s==1-q+3*q2-q3+q4) return 1; /* p^2:2 */
+        if (s==3-3*q+3*q2-3*q3+3*q4) return 2; /* 2p^2 */
+        if (s==1+q-2*q2+3*q3) return 3; /* D2pxp */
+        if (s==1-q+2*q2+q3) return 4; /* p:2+p:2 */
+        return 5;   /* 2pxp */
       }
       else if (p[1]==3 && e[1]==2) /*9p, p>3*/
       {
-	long q= p[2], q2 = q*q, p3 = (q%3 == 1), p9 = (q%9 == 1);
-	if (s==7+47*q+7*q2) return 1; /* 3p.3 */
-	if (s==61-61*q+61*q2) return 1+p3; /* 9p */
-	if (s==1+59*q+q2) return 3; /* p:9 */
-	if (s==7+11*q+7*q2) return 3+p9; /* p:3x3 */
-	return 2+2*p3+p9; /* 3^2xp */
+        long q= p[2], q2 = q*q, p3 = (q%3 == 1), p9 = (q%9 == 1);
+        if (s==7+47*q+7*q2) return 1; /* 3p.3 */
+        if (s==61-61*q+61*q2) return 1+p3; /* 9p */
+        if (s==1+59*q+q2) return 3; /* p:9 */
+        if (s==7+11*q+7*q2) return 3+p9; /* p:3x3 */
+        return 2+2*p3+p9; /* 3^2xp */
       }
       break;
     }
@@ -178,13 +178,13 @@ group_ident_i(GEN G, GEN S)
     case 3: /*pqr*/
       if (p[1]==2 && p[2]==3)  /*6p*/
       {
-	long q = p[3],q2 = q*q, pmq = (q%3==1)? 2: 0;
-	if (s==13-13*q+13*q2) return 1+pmq; /* S3xp */
-	if (s==7+7*q+7*q2) return 2+pmq; /* D2px3 */
-	if (s==7-q+7*q2) return 3+pmq; /* 3:2+p:2 */
-	if (s==21-21*q+21*q2) return 4+pmq; /* 6p */
-	if (s==1+19*q+q2) return 1; /* p:6 */
-	return 2;       /* p:3x2 */
+        long q = p[3],q2 = q*q, pmq = (q%3==1)? 2: 0;
+        if (s==13-13*q+13*q2) return 1+pmq; /* S3xp */
+        if (s==7+7*q+7*q2) return 2+pmq; /* D2px3 */
+        if (s==7-q+7*q2) return 3+pmq; /* 3:2+p:2 */
+        if (s==21-21*q+21*q2) return 4+pmq; /* 6p */
+        if (s==1+19*q+q2) return 1; /* p:6 */
+        return 2;       /* p:3x2 */
       }
       break;
     }
@@ -214,16 +214,16 @@ group_ident_i(GEN G, GEN S)
       long i;
       const long *t;
       if (DEBUGLEVEL)
-	fprintferr("GaloisIndex: Using hash value s=%ld\n",s);
+        fprintferr("GaloisIndex: Using hash value s=%ld\n",s);
       for(t=tab;*t!=-1;t++)
       {
-	if (t[0]==n)
-	{
-	  for(i=1; t[i] != -1; i++)
-	    if (t[i]==s) return i;
-	  pari_err(talker,"Not a group in group_ident");
-	}
-	while (*t>=0) t++;
+        if (t[0]==n)
+        {
+          for(i=1; t[i] != -1; i++)
+            if (t[i]==s) return i;
+          pari_err(talker,"Not a group in group_ident");
+        }
+        while (*t>=0) t++;
       }
   }
   {
@@ -525,32 +525,32 @@ long
 group_ident_trans(GEN G, GEN S)
 {
   const long tab[]={
-	4, 1, 2, -1,
-	6, 2, 1, -1,
-	8, 1, 2, 4, 5, 3, -1,
-	9, 1, 2, -1,
-	10, 2, 1, -1,
-	12, 5, 1, 4, 3, 2, -1,
-	14, 2, 1, -1,
-	15, 1, -1,
-	16, 1, 4, 10, 8, 5, 6, 13, 12, 14, 2, 9, 7, 11, 3, -1,
-	18, 5, 1, 3, 4, 2, -1,
-	20, 2, 1, 5, 4, 3, -1,
-	21, 2, 1, -1,
-	22, 2, 1, -1,
-	24, 8, 1, 7, 5, 12, 13, 6, 14, 2, 15, 4, 10, 9, 11, 3, -1,
-	25, 1, 2, -1,
-	26, 2, 1, -1,
-	27, 1, 2, 3, 5, 4, -1,
-	28, 3, 1, 4, 2, -1,
-	30, 2, 4, 3, 1, -1,
-	-1};
+        4, 1, 2, -1,
+        6, 2, 1, -1,
+        8, 1, 2, 4, 5, 3, -1,
+        9, 1, 2, -1,
+        10, 2, 1, -1,
+        12, 5, 1, 4, 3, 2, -1,
+        14, 2, 1, -1,
+        15, 1, -1,
+        16, 1, 4, 10, 8, 5, 6, 13, 12, 14, 2, 9, 7, 11, 3, -1,
+        18, 5, 1, 3, 4, 2, -1,
+        20, 2, 1, 5, 4, 3, -1,
+        21, 2, 1, -1,
+        22, 2, 1, -1,
+        24, 8, 1, 7, 5, 12, 13, 6, 14, 2, 15, 4, 10, 9, 11, 3, -1,
+        25, 1, 2, -1,
+        26, 2, 1, -1,
+        27, 1, 2, 3, 5, 4, -1,
+        28, 3, 1, 4, 2, -1,
+        30, 2, 4, 3, 1, -1,
+        -1};
   long n = group_order(G), s;
   const long *t;
   if (n == 1) return 1;
   if (n > 30)
     pari_err(talker,
-	"Classification of transitive groups of order > 30 is not known");
+        "Classification of transitive groups of order > 30 is not known");
   if (uisprime(n)) return 1;
   s = group_ident(G,S);
   for(t=tab;*t>=0;t++)

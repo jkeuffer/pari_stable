@@ -59,10 +59,10 @@ translate(char **src, char *s)
     {
       switch(*++t)
       {
-	case 'e':  *s='\033'; break; /* escape */
-	case 'n':  *s='\n'; break;
-	case 't':  *s='\t'; break;
-	default:   *s=*t; if (!*t) pari_err(talker,"unfinished string");
+        case 'e':  *s='\033'; break; /* escape */
+        case 'n':  *s='\n'; break;
+        case 't':  *s='\t'; break;
+        default:   *s=*t; if (!*t) pari_err(talker,"unfinished string");
       }
       t++; s++;
     }
@@ -77,7 +77,7 @@ translate(char **src, char *s)
 }
 
 #define match2(s,c) if (*s != c) \
-		      pari_err(talker,"expected character: '%c' instead of",c);
+                      pari_err(talker,"expected character: '%c' instead of",c);
 
 /*  Read a "string" from src. Format then copy it, starting at s. Return
  *  pointer to char following the end of the input string */
@@ -301,20 +301,20 @@ commands(long n)
       long m;
       switch (EpVALENCE(ep))
       {
-	case EpVAR:
+        case EpVAR:
           if (typ(ep->value) == t_CLOSURE) break;
           /* fall through */
-	case EpNEW: continue;
+        case EpNEW: continue;
       }
       m = ep->menu;
       if ((n < 0 && m && m < 13) || m == n)
       {
-	list[s] = (char*)ep->name;
-	if (++s >= size)
-	{
-	  size += LIST_LEN+1;
-	  list = (char**) pari_realloc(list, size*sizeof(char *));
-	}
+        list[s] = (char*)ep->name;
+        if (++s >= size)
+        {
+          size += LIST_LEN+1;
+          list = (char**) pari_realloc(list, size*sizeof(char *));
+        }
       }
     }
   list[s] = NULL;
@@ -534,8 +534,8 @@ filter_quotes(const char *s)
       case '"' : doubquote++;
     }
   str = (char*)pari_malloc(l + quote * (strlen(QUOTE)-1)
-			  + doubquote * (strlen(DOUBQUOTE)-1)
-			  + backquote * (strlen(BACKQUOTE)-1) + 1);
+                          + doubquote * (strlen(DOUBQUOTE)-1)
+                          + backquote * (strlen(BACKQUOTE)-1) + 1);
   t = str;
   for (i=0; i < l; i++)
     switch(s[i])
@@ -674,9 +674,9 @@ aide0(const char *s0, int flag)
       char *t = s+7, *e;
       skip_space(t);
       if (*t == '(') {
-	t++; skip_space(t);
-	e = t; skip_alpha(e); *e = '\0'; /* safe: get_sep() made it a copy */
-	if (pari_is_default(t)) { external_help(t, 2); return; }
+        t++; skip_space(t);
+        e = t; skip_alpha(e); *e = '\0'; /* safe: get_sep() made it a copy */
+        if (pari_is_default(t)) { external_help(t, 2); return; }
       }
     }
   }
@@ -770,8 +770,8 @@ what_readline(void)
   }
   s = stackmalloc(3 + strlen(ver) + 8 + strlen(extra));
   (void)sprintf(s, "v%s %s%s", ver,
-	    (GP_DATA->flags & USE_READLINE)? "enabled": "disabled",
-	    extra);
+            (GP_DATA->flags & USE_READLINE)? "enabled": "disabled",
+            extra);
 #else
   s = "not compiled in";
 #endif
@@ -828,7 +828,7 @@ print_version(void)
   ver = what_readline();
   buf = stackmalloc(strlen(ver) + 64);
   (void)sprintf(buf, "(readline %s, extended help%s enabled)", ver,
-		has_ext_help()? "": " not");
+                has_ext_help()? "": " not");
   center(buf); avma = av;
 }
 
@@ -838,7 +838,7 @@ gp_head(void)
 #ifdef READLINE
   if (GP_DATA->flags & TEXMACS)
     printf("%ccommand:(cas-supports-completions-set! \"pari\")%c\n",
-	   DATA_BEGIN, DATA_END);
+           DATA_BEGIN, DATA_END);
 #endif
   print_version();
   pari_putc('\n');
@@ -891,14 +891,14 @@ escape(char *tch)
     while (*s)
       if (*s++ == '=')
       {
-	const char *f = NULL;
-	long len = (s-tch) - 1;
-	if      (!strncmp(tch,"precision",len))    f = "realprecision";
-	else if (!strncmp(tch,"serieslength",len)) f = "seriesprecision";
-	else if (!strncmp(tch,"format",len))       f = "format";
-	else if (!strncmp(tch,"prompt",len))       f = "prompt";
-	if (f) { (void)setdefault(f, s, d_ACKNOWLEDGE); return; }
-	break;
+        const char *f = NULL;
+        long len = (s-tch) - 1;
+        if      (!strncmp(tch,"precision",len))    f = "realprecision";
+        else if (!strncmp(tch,"serieslength",len)) f = "seriesprecision";
+        else if (!strncmp(tch,"format",len))       f = "format";
+        else if (!strncmp(tch,"prompt",len))       f = "prompt";
+        if (f) { (void)setdefault(f, s, d_ACKNOWLEDGE); return; }
+        break;
       }
   }
   s = tch;
@@ -911,31 +911,31 @@ escape(char *tch)
       if (c != 'w' && c != 'x') d = get_int(s,0);
       else
       {
-	d = atol(s); if (*s == '-') s++;
-	while (isdigit((int)*s)) s++;
+        d = atol(s); if (*s == '-') s++;
+        while (isdigit((int)*s)) s++;
       }
       x = gp_history(GP_DATA->hist, d, tch+1,tch-1);
       switch (c)
       {
-	case 'B':
-	{ /* prettyprinter */
-	  gp_data G = *GP_DATA; /* copy */
-	  gp_hist   h = *(G.hist); /* copy */
-	  pariout_t f = *(G.fmt);  /* copy */
+        case 'B':
+        { /* prettyprinter */
+          gp_data G = *GP_DATA; /* copy */
+          gp_hist   h = *(G.hist); /* copy */
+          pariout_t f = *(G.fmt);  /* copy */
 
-	  G.hist = &h; h.total = 0; /* no hist number */
-	  G.fmt  = &f; f.prettyp = f_PRETTY;
-	  G.flags &= ~(TEST|TEXMACS);
-	  G.lim_lines = 0;
-	  gp_output(x, &G); break;
-	}
-	case 'a': brute   (x, GP_DATA->fmt->format, -1); break;
-	case 'b': /* fall through */
-	case 'm': matbrute(x, GP_DATA->fmt->format, -1); break;
-	case 'x': dbgGEN(x, get_int(s, -1)); break;
-	case 'w':
-	  s = get_sep(s); if (!*s) s = current_logfile;
-	  write0(s, mkvec(x)); return;
+          G.hist = &h; h.total = 0; /* no hist number */
+          G.fmt  = &f; f.prettyp = f_PRETTY;
+          G.flags &= ~(TEST|TEXMACS);
+          G.lim_lines = 0;
+          gp_output(x, &G); break;
+        }
+        case 'a': brute   (x, GP_DATA->fmt->format, -1); break;
+        case 'b': /* fall through */
+        case 'm': matbrute(x, GP_DATA->fmt->format, -1); break;
+        case 'x': dbgGEN(x, get_int(s, -1)); break;
+        case 'w':
+          s = get_sep(s); if (!*s) s = current_logfile;
+          write0(s, mkvec(x)); return;
       }
       pari_putc('\n'); return;
     }
@@ -949,9 +949,9 @@ escape(char *tch)
     case 'g':
       switch (*s)
       {
-	case 'm': (void)sd_debugmem(++s,d_ACKNOWLEDGE); break;
-	case 'f': (void)sd_debugfiles(++s,d_ACKNOWLEDGE); break;
-	default : (void)sd_debug(s,d_ACKNOWLEDGE); break;
+        case 'm': (void)sd_debugmem(++s,d_ACKNOWLEDGE); break;
+        case 'f': (void)sd_debugfiles(++s,d_ACKNOWLEDGE); break;
+        default : (void)sd_debug(s,d_ACKNOWLEDGE); break;
       }
       break;
     case 'h': print_functions_hash(s); break;
@@ -959,8 +959,8 @@ escape(char *tch)
       s = get_sep(s);
       if (*s)
       {
-	(void)sd_logfile(s,d_ACKNOWLEDGE);
-	if (pari_logfile) break;
+        (void)sd_logfile(s,d_ACKNOWLEDGE);
+        if (pari_logfile) break;
       }
       (void)sd_log(pari_logfile?"0":"1",d_ACKNOWLEDGE);
       break;
@@ -968,8 +968,8 @@ escape(char *tch)
     case 'p':
       switch (*s)
       {
-	case 's': (void)sd_seriesprecision(++s,d_ACKNOWLEDGE); break;
-	default : (void)sd_realprecision(s,d_ACKNOWLEDGE); break;
+        case 's': (void)sd_seriesprecision(++s,d_ACKNOWLEDGE); break;
+        default : (void)sd_realprecision(s,d_ACKNOWLEDGE); break;
       }
       break;
     case 'q': gp_quit(0); break;
@@ -978,14 +978,14 @@ escape(char *tch)
       switchin(s);
       if (file_is_binary(pari_infile))
       {
-	int vector;
-	GEN x = gpreadbin(s, &vector);
-	if (vector) /* many BIN_GEN */
-	{
-	  long i, l = lg(x);
-	  pari_warn(warner,"setting %ld history entries", l-1);
-	  for (i=1; i<l; i++) (void)set_hist_entry(GP_DATA->hist, (GEN)x[i]);
-	}
+        int vector;
+        GEN x = gpreadbin(s, &vector);
+        if (vector) /* many BIN_GEN */
+        {
+          long i, l = lg(x);
+          pari_warn(warner,"setting %ld history entries", l-1);
+          for (i=1; i<l; i++) (void)set_hist_entry(GP_DATA->hist, (GEN)x[i]);
+        }
       }
       break;
     case 's': dbg_pari_heap(); break;
@@ -1153,11 +1153,11 @@ gprc_get(char *path)
       while (t > path && *t != '/') t--;
       if (*t == '/')
       {
-	long l = t - path + 1;
-	t = (char*)pari_malloc(l + 6);
-	strncpy(t, path, l);
-	strcpy(t+l, s); f = gprc_chk(t);
-	pari_free(t);
+        long l = t - path + 1;
+        t = (char*)pari_malloc(l + 6);
+        strncpy(t, path, l);
+        strcpy(t+l, s); f = gprc_chk(t);
+        pari_free(t);
       }
     }
     pari_free(str);
@@ -1238,12 +1238,12 @@ next_expr(char *t)
     switch ((c = *s++))
     {
       case '"':
-	if (outer || (s >= t+2 && s[-2] != '\\')) outer = !outer;
-	break;
+        if (outer || (s >= t+2 && s[-2] != '\\')) outer = !outer;
+        break;
       case '\0':
-	return (char*)"";
+        return (char*)"";
       default:
-	if (outer && c == ';') { s[-1] = 0; return s; }
+        if (outer && c == ';') { s[-1] = 0; return s; }
     }
   }
 }
@@ -1288,8 +1288,8 @@ gp_initrc(pari_stack *p_A, char *path)
       if (NOT) z = !z;
       if (!*s)
       { /* make sure at least an expr follows the directive */
-	if (!get_line_from_file(NULL,&F,file)) break;
-	s = b->buf;
+        if (!get_line_from_file(NULL,&F,file)) break;
+        s = b->buf;
       }
       if (!z) continue; /* dump current line */
     }
@@ -1299,18 +1299,18 @@ gp_initrc(pari_stack *p_A, char *path)
       nexts = next_expr(s);
       if (!strncmp(s,"read",4) && (s[4] == ' ' || s[4] == '\t' || s[4] == '"'))
       { /* read file */
-	s += 4;
-	t = (char*)pari_malloc(strlen(s) + 1);
-	if (*s == '"') (void)readstring(s, t); else strcpy(t,s);
-	stack_pushp(p_A,t);
+        s += 4;
+        t = (char*)pari_malloc(strlen(s) + 1);
+        if (*s == '"') (void)readstring(s, t); else strcpy(t,s);
+        stack_pushp(p_A,t);
       }
       else
       { /* set default */
-	t = s; while (*t && *t != '=') t++;
-	if (*t != '=') err_gprc("missing '='",t,b->buf);
-	*t++ = 0;
-	if (*t == '"') (void)readstring(t, t);
-	(void)setdefault(s,t,d_INITRC);
+        t = s; while (*t && *t != '=') t++;
+        if (*t != '=') err_gprc("missing '='",t,b->buf);
+        *t++ = 0;
+        if (*t == '"') (void)readstring(t, t);
+        (void)setdefault(s,t,d_INITRC);
       }
     }
   }
@@ -1364,8 +1364,8 @@ update_logfile(const char *prompt, const char *s)
   switch (logstyle) {
   case logstyle_TeX:
     fprintf(pari_logfile,
-	    "\\PARIpromptSTART|%s\\PARIpromptEND|%s\\PARIinputEND|%%\n",
-	    prompt,s);
+            "\\PARIpromptSTART|%s\\PARIpromptEND|%s\\PARIinputEND|%%\n",
+            prompt,s);
     break;
   case logstyle_plain:
     fprintf(pari_logfile, "%s%s\n",prompt,s);
@@ -1426,7 +1426,7 @@ is_interactive(void)
 {
   ulong f = GP_DATA->flags;
   return (pari_infile == stdin && !(f & TEXMACS)
-			       && (f & EMACS || pari_stdin_isatty()));
+                               && (f & EMACS || pari_stdin_isatty()));
 }
 
 /* return 0 if no line could be read (EOF) */
@@ -1443,7 +1443,7 @@ gp_read_line(filtre_t *F, const char *PROMPT)
 #ifdef READLINE
     if (GP_DATA->flags & USE_READLINE)
       res = get_line_from_readline(PROMPT? PROMPT: GP_DATA->prompt,
-				   GP_DATA->prompt_cont, F);
+                                   GP_DATA->prompt_cont, F);
     else
 #endif
     {
@@ -1510,8 +1510,8 @@ gp_main_loop(long flag)
           GP_DATA->fmt->prettyp = outtyp;
           prune_history(H, tloc);
         }
-	avma = av = top;
-	kill_all_buffers(b);
+        avma = av = top;
+        kill_all_buffers(b);
         if (!ismain && er > 0) {
           /* true error not from main instance. Cleanup then let caller sort
            * it out */
@@ -1779,37 +1779,37 @@ read_opt(pari_stack *p_A, long argc, char **argv, size_t *size, ulong *plimit)
     switch(*t++)
     {
       case 'b': b = read_arg(&i,t,argc,argv);
-	pari_warn(warner, "buffersize is no longer used. -b ignored");
-	break;
+        pari_warn(warner, "buffersize is no longer used. -b ignored");
+        break;
       case 'p': p = read_arg(&i,t,argc,argv); break;
       case 's': s = read_arg(&i,t,argc,argv); break;
 
       case 'e':
-	if (strncmp(t,"macs",4)) usage(argv[0]); /* obsolete */
-	f |= EMACS; break;
+        if (strncmp(t,"macs",4)) usage(argv[0]); /* obsolete */
+        f |= EMACS; break;
       case 'q':
-	f |= QUIET; break;
+        f |= QUIET; break;
       case 't':
-	if (strncmp(t,"est",3)) usage(argv[0]); /* obsolete */
-	f |= TEST; break;
+        if (strncmp(t,"est",3)) usage(argv[0]); /* obsolete */
+        f |= TEST; break;
       case 'f':
-	initrc = 0; break;
+        initrc = 0; break;
       case '-':
-	if (strcmp(t, "version-short") == 0) { print_shortversion(); exit(0); }
-	if (strcmp(t, "version") == 0) {
-	  init_trivial_stack(); print_version();
-	  pari_free((void*)bot); exit(0);
-	}
-	if (strcmp(t, "texmacs") == 0) { f |= TEXMACS; break; }
-	if (strcmp(t, "emacs") == 0) { f |= EMACS; break; }
-	if (strcmp(t, "test") == 0) { f |= TEST; break; }
-	if (strcmp(t, "quiet") == 0) { f |= QUIET; break; }
-	if (strcmp(t, "fast") == 0) { initrc = 0; break; }
-	if (strncmp(t, "primelimit",10) == 0) {p = read_arg_equal(&i,t+10,argc,argv); break; }
-	if (strncmp(t, "stacksize",9) == 0) {s = read_arg_equal(&i,t+9,argc,argv); break; }
+        if (strcmp(t, "version-short") == 0) { print_shortversion(); exit(0); }
+        if (strcmp(t, "version") == 0) {
+          init_trivial_stack(); print_version();
+          pari_free((void*)bot); exit(0);
+        }
+        if (strcmp(t, "texmacs") == 0) { f |= TEXMACS; break; }
+        if (strcmp(t, "emacs") == 0) { f |= EMACS; break; }
+        if (strcmp(t, "test") == 0) { f |= TEST; break; }
+        if (strcmp(t, "quiet") == 0) { f |= QUIET; break; }
+        if (strcmp(t, "fast") == 0) { initrc = 0; break; }
+        if (strncmp(t, "primelimit",10) == 0) {p = read_arg_equal(&i,t+10,argc,argv); break; }
+        if (strncmp(t, "stacksize",9) == 0) {s = read_arg_equal(&i,t+9,argc,argv); break; }
        /* fall through */
       default:
-	usage(argv[0]);
+        usage(argv[0]);
     }
   }
   if (!OK_breakloop()) f &= ~BREAKLOOP;
@@ -1842,7 +1842,7 @@ read_opt(pari_stack *p_A, long argc, char **argv, size_t *size, ulong *plimit)
 #ifdef WINCE
 int
 WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
-	LPWSTR lpCmdLine, int nShowCmd)
+        LPWSTR lpCmdLine, int nShowCmd)
 {
   char **argv = NULL;
   int argc = 1;
@@ -1978,14 +1978,14 @@ tex2mail_output(GEN z, long n)
     if (o_logfile) {
       switch (logstyle) {
       case logstyle_plain:
-	fprintf(o_logfile, "%%%ld = ", n);
-	break;
+        fprintf(o_logfile, "%%%ld = ", n);
+        break;
       case logstyle_color:
-	fprintf(o_logfile, "%s%%%ld = %s", c_hist, n, c_out);
-	break;
+        fprintf(o_logfile, "%s%%%ld = %s", c_hist, n, c_out);
+        break;
       case logstyle_TeX:
-	fprintf(o_logfile, "\\PARIout{%ld}", n);
-	break;
+        fprintf(o_logfile, "\\PARIout{%ld}", n);
+        break;
       }
     }
   }

@@ -41,8 +41,8 @@ NOASM addll divll
 ({                                                                      \
   ulong __arg1 = (a), __arg2 = (b), __value;                            \
   __asm__ ("xma.hu %0 = %2, %3, f0\n\t;;\n\txma.l %1 = %2, %3, f0"      \
-	   : "=&f" (hiremainder), "=f" (__value)                        \
-	   : "f" (__arg1), "f" (__arg2));                               \
+           : "=&f" (hiremainder), "=f" (__value)                        \
+           : "f" (__arg1), "f" (__arg2));                               \
   __value;                                                              \
 })
 
@@ -50,8 +50,8 @@ NOASM addll divll
 ({                                                                      \
   ulong __arg1 = (a), __arg2 = (b), __value;                            \
   __asm__ ("xma.hu %0 = %2, %3, %4\n\txma.l %1 = %2, %3, %4"            \
-	   : "=&f" (hiremainder), "=f" (__value)                        \
-	   : "f" (__arg1), "f" (__arg2), "f" (hiremainder));            \
+           : "=&f" (hiremainder), "=f" (__value)                        \
+           : "f" (__arg1), "f" (__arg2), "f" (hiremainder));            \
   __value;                                                              \
 })
 #endif

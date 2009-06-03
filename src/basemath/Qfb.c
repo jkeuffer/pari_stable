@@ -411,10 +411,10 @@ nucomp(GEN x, GEN y, GEN L)
       d1 = bezout(s,d,&u1,&v1);
       if (!is_pm1(d1))
       {
-	a1 = diviiexact(a1,d1);
-	a2 = diviiexact(a2,d1);
-	s = diviiexact(s,d1);
-	d = diviiexact(d,d1);
+        a1 = diviiexact(a1,d1);
+        a2 = diviiexact(a2,d1);
+        s = diviiexact(s,d1);
+        d = diviiexact(d,d1);
       }
       p1 = remii(gel(x,3),d);
       p2 = remii(gel(y,3),d);
@@ -1071,9 +1071,9 @@ SL2_div_mul_e1(GEN N, GEN M)
   GEN d = gcoeff(M, 2, 2);
   GEN p2 = cgetg(3, t_VEC);
   gel(p2,1) = subii(mulii(gcoeff(N, 1, 1), d),
-		    mulii(gcoeff(N, 1, 2), b));
+                    mulii(gcoeff(N, 1, 2), b));
   gel(p2,2) = subii(mulii(gcoeff(N, 2, 1), d),
-		    mulii(gcoeff(N, 2, 2), b));
+                    mulii(gcoeff(N, 2, 2), b));
   return p2;
 }
 /* Let M and N in SL_2(Z), return (N*[1,0;0,-1]*M^-1)[,1]
@@ -1086,9 +1086,9 @@ SL2_swap_div_mul_e1(GEN N, GEN M)
   GEN d = gcoeff(M, 2, 2);
   GEN p2 = cgetg(3, t_VEC);
   gel(p2,1) = addii(mulii(gcoeff(N, 1, 1), d),
-		    mulii(gcoeff(N, 1, 2), b));
+                    mulii(gcoeff(N, 1, 2), b));
   gel(p2,2) = addii(mulii(gcoeff(N, 2, 1), d),
-		    mulii(gcoeff(N, 2, 2), b));
+                    mulii(gcoeff(N, 2, 2), b));
   return p2;
 }
 
@@ -1173,8 +1173,8 @@ redrealsl2step(GEN A)
   c = truedvmdii(subii(sqri(r), d), shifti(c,2), NULL);
   if (signe(a) < 0) q = negi(q);
   N = mkmat2(gel(M,2),
-	     mkcol2(subii(mulii(q, gcoeff(M, 1, 2)), gcoeff(M, 1, 1)),
-		    subii(mulii(q, gcoeff(M, 2, 2)), gcoeff(M, 2, 1))));
+             mkcol2(subii(mulii(q, gcoeff(M, 1, 2)), gcoeff(M, 1, 1)),
+                    subii(mulii(q, gcoeff(M, 2, 2)), gcoeff(M, 2, 1))));
   return gerepilecopy(ltop, mkvec2(mkvec3(a,b,c),N));
 }
 
