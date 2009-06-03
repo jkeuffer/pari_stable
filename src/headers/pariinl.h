@@ -880,7 +880,7 @@ gerepileall(pari_sp av, int n, ...)
     { gptr[i] = va_arg(a,GEN*); *gptr[i] = (GEN)copy_bin(*gptr[i]); }
     avma = av;
     for (--i; i>=0; i--) *gptr[i] = bin_copy((GENbin*)*gptr[i]);
-  
+
   }
   else
   {
@@ -932,7 +932,7 @@ bin_copy(GENbin *p)
   pari_free(p); return y;
 }
 
-INLINE GEN 
+INLINE GEN
 GENbinbase(GENbin *p) { return (GEN)(p + 1); }
 
 INLINE void
@@ -1539,7 +1539,7 @@ INLINE ulong
 F2m_coeff(GEN x, long a, long b) { return F2v_coeff(gel(x,b), a); }
 
 INLINE void
-F2m_set(GEN x, long a, long b) { F2v_set(gel(x,b), a); } 
+F2m_set(GEN x, long a, long b) { F2v_set(gel(x,b), a); }
 
 INLINE void
 F2m_flip(GEN x, long a, long b) { F2v_flip(gel(x,b), a); }

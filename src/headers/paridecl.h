@@ -675,7 +675,7 @@ GEN     redreal(GEN x);
 GEN     redrealnod(GEN x, GEN isqrtD);
 GEN     rhoreal(GEN x);
 GEN     rhorealnod(GEN x, GEN isqrtD);
-        
+
 /* arith1.c */
 
 ulong   Fl_order(ulong a, ulong o, ulong p);

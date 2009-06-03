@@ -20,7 +20,7 @@ enum {
   alarmer, openfiler,
 
   talker, flagerr, impl, archer, notfuncer,
-  
+
   precer, typeer, consister, user,
 
   errpile, overflower,
@@ -45,6 +45,6 @@ enum {
 
 /* NO ERROR */
   noer
-}; 
+};
 
 enum { warner, warnprec, warnfile, warnmem };

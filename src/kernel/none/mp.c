@@ -1353,7 +1353,7 @@ Zf_shift(GEN a, ulong s, GEN M)
   return gerepileuptoint(av, z);
 }
 
-/* 
+/*
  Multiply by sqrt(2)^s
  We use the formula sqrt(2)=z_8*(1-z_4)) && z_8=2^(ord/16) [2^(ord/4)+1]
 */

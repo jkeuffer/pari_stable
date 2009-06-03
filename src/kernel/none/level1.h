@@ -221,7 +221,7 @@ uutoi(ulong x, ulong y)
 {
   GEN z;
   if (!x) return utoi(y);
-  z = cgetipos(4); 
+  z = cgetipos(4);
   *int_W_lg(z, 1, 4) = x;
   *int_W_lg(z, 0, 4) = y; return z;
 }
@@ -231,7 +231,7 @@ uutoineg(ulong x, ulong y)
 {
   GEN z;
   if (!x) return y? utoineg(y): gen_0;
-  z = cgetineg(4); 
+  z = cgetineg(4);
   *int_W_lg(z, 1, 4) = x;
   *int_W_lg(z, 0, 4) = y; return z;
 }
@@ -243,7 +243,7 @@ itos(GEN x)
   long u;
 
   if (!s) return 0;
-  u = x[2]; 
+  u = x[2];
   if (lgefint(x) > 3 || u < 0)
     pari_err(overflower,"t_INT-->long assignment");
   return (s>0) ? u : -u;
