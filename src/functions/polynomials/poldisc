@@ -5,9 +5,9 @@ Prototype: GDn
 Help: poldisc(pol,{v}): discriminant of the polynomial pol, with respect to main
  variable if v is omitted, with respect to v otherwise.
 Description:
- (pol):gen	discsr($1)
- (gen):gen	poldisc0($1, -1)
- (gen, var):gen	poldisc0($1, $2)
+ (pol):gen        discsr($1)
+ (gen):gen        poldisc0($1, -1)
+ (gen, var):gen   poldisc0($1, $2)
 Doc: discriminant of the polynomial
  \var{pol} in the main variable is $v$ is omitted, in $v$ otherwise. The
  algorithm used is the \idx{subresultant algorithm}.

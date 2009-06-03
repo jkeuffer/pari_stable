@@ -4,8 +4,8 @@ C-Name: gprecprime
 Prototype: G
 Help: precprime(x): largest pseudoprime <= x, 0 if x<=1.
 Description:
- (int):int	precprime($1)
- (gen):gen	gprecprime($1)
+ (int):int        precprime($1)
+ (gen):gen        gprecprime($1)
 Doc: finds the largest pseudoprime (see
  \tet{ispseudoprime}) less than or equal to $x$. $x$ can be of any real type.
  Returns 0 if $x\le1$. Note that if $x$ is a prime, this function returns $x$

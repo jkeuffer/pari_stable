@@ -10,14 +10,14 @@ Help: nfinit(pol,{flag=0}): pol being a nonconstant irreducible polynomial,
  a simpler polynomial; 3: outputs a two-element vector [nf,Mod(a,P)], where
  nf is as in 2 and Mod(a,P) is a polmod equal to Mod(x,pol) and P=nf.pol.
 Description:
- (gen, ?0):nf:prec	nfinit0($1, 0, prec)
- (gen, 1):nf:prec	nfinit0($1, 1, prec)
- (gen, 2):nf:prec	nfinit0($1, 2, prec)
- (gen, 3):gen:prec	nfinit0($1, 3, prec)
- (gen, 4):nf:prec	nfinit0($1, 4, prec)
- (gen, 5):gen:prec	nfinit0($1, 5, prec)
- (gen, #small):void	$"incorrect flag in nfinit"
- (gen, small):gen:prec	nfinit0($1, $2, prec)
+ (gen, ?0):nf:prec       nfinit0($1, 0, prec)
+ (gen, 1):nf:prec        nfinit0($1, 1, prec)
+ (gen, 2):nf:prec        nfinit0($1, 2, prec)
+ (gen, 3):gen:prec       nfinit0($1, 3, prec)
+ (gen, 4):nf:prec        nfinit0($1, 4, prec)
+ (gen, 5):gen:prec       nfinit0($1, 5, prec)
+ (gen, #small):void      $"incorrect flag in nfinit"
+ (gen, small):gen:prec   nfinit0($1, $2, prec)
 Doc: \var{pol} being a non-constant,
  preferably monic, irreducible polynomial in $\Z[X]$, initializes a
  \emph{number field} structure (\kbd{nf}) associated to the field $K$ defined

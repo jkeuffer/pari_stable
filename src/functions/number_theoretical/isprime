@@ -7,10 +7,10 @@ Help: isprime(x,{flag=0}): true(1) if x is a (proven) prime number, false(0)
  1, the primality is certified by the Pocklington-Lehmer Test. If flag is 2,
  the primality is certified using the APRCL test.
 Description:
- (int, ?0):bool	isprime($1)
- (int, 1):bool	plisprime($1, 0)
- (int, 2):gen	plisprime($1, 1)
- (gen, ?small):gen	gisprime($1, $2)
+ (int, ?0):bool        isprime($1)
+ (int, 1):bool         plisprime($1, 0)
+ (int, 2):gen          plisprime($1, 1)
+ (gen, ?small):gen     gisprime($1, $2)
 Doc: true (1) if $x$ is a prime
  number, false (0) otherwise. A prime number is a positive integer having
  exactly two distinct divisors among the natural numbers, namely 1 and

@@ -4,5 +4,5 @@ Section: symbolic_operators
 C-Name: gnot
 Prototype: G
 Description:
- (negbool):bool:parens		$1
- (bool):negbool:parens		$1
+ (negbool):bool:parens                $1
+ (bool):negbool:parens                $1

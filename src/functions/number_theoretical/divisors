@@ -5,7 +5,7 @@ Prototype: G
 Help: divisors(x): gives a vector formed by the divisors of x in increasing
  order.
 Description:
- (gen):vec	divisors($1)
+ (gen):vec        divisors($1)
 Doc: creates a row vector whose components are the
  divisors of $x$. The factorization of $x$ (as output by \tet{factor}) can
  be used instead.

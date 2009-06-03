@@ -5,8 +5,8 @@ Prototype: DG
 Help: Vec({x=[]}): transforms the object x into a vector.
  Empty vector if x is omitted.
 Description:
- ():vec	cgetg(1,t_VEC)
- (gen):vec	gtovec($1)
+ ():vec           cgetg(1,t_VEC)
+ (gen):vec        gtovec($1)
 Doc:
  transforms the object $x$ into a row vector.
  That vector has a single component, except when $x$ is

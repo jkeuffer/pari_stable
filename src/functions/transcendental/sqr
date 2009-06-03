@@ -4,9 +4,9 @@ C-Name: gsqr
 Prototype: G
 Help: sqr(x): square of x. NOT identical to x*x.
 Description:
- (int):int	sqri($1)
- (mp):mp	gsqr($1)
- (gen):gen	gsqr($1)
+ (int):int        sqri($1)
+ (mp):mp          gsqr($1)
+ (gen):gen        gsqr($1)
 Doc: square of $x$. This operation is not completely
  straightforward, i.e.~identical to $x * x$, since it can usually be
  computed more efficiently (roughly one-half of the elementary

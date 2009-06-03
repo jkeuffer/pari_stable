@@ -4,5 +4,5 @@ C-Name: gtrans
 Prototype: G
 Help: x~: transpose of x.
 Description:
- (vec):vec			gtrans($1)
- (gen):gen			gtrans($1)
+ (vec):vec                        gtrans($1)
+ (gen):gen                        gtrans($1)

@@ -5,8 +5,8 @@ Prototype: DG
 Help: Set({x=[]}): convert x into a set, i.e. a row vector with strictly
  increasing coefficients. Empty set if x is omitted.
 Description:
- ():vec	cgetg(1,t_VEC)
- (gen):vec	gtoset($1)
+ ():vec           cgetg(1,t_VEC)
+ (gen):vec        gtoset($1)
 Doc:
  converts $x$ into a set, i.e.~into a row
  vector of character strings, with strictly increasing entries with respect to

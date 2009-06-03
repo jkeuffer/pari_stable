@@ -5,7 +5,7 @@ Prototype: GG
 Help: ellchangecurve(E,v): change data on elliptic curve according to
  v=[u,r,s,t].
 Description:
- (gen, gen):ell	ellchangecurve($1, $2)
+ (gen, gen):ell        ellchangecurve($1, $2)
 Doc:
  changes the data for the elliptic curve $E$
  by changing the coordinates using the vector \kbd{v=[u,r,s,t]}, i.e.~if $x'$

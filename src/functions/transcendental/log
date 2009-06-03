@@ -4,7 +4,7 @@ C-Name: glog
 Prototype: Gp
 Help: log(x): natural logarithm of x.
 Description:
- (gen):gen:prec	glog($1, prec)
+ (gen):gen:prec        glog($1, prec)
 Doc: principal branch of the natural logarithm of
  $x$, i.e.~such that $\text{Im(log}(x))\in{} ]-\pi,\pi]$. The result is complex
  (with imaginary part equal to $\pi$) if $x\in \R$ and $x < 0$. In general,

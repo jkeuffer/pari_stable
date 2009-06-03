@@ -4,8 +4,8 @@ C-Name: znprimroot0
 Prototype: G
 Help: znprimroot(n): returns a primitive root of n when it exists.
 Description:
- (int):gen	znprimroot($1)
- (gen):gen	znprimroot0($1)
+ (int):gen        znprimroot($1)
+ (gen):gen        znprimroot0($1)
 Doc: returns a primitive root (generator) of $(\Z/n\Z)^*$, whenever this
  latter group is cyclic ($n = 4$ or $n = 2p^k$ or $n = p^k$, where $p$ is an
  odd prime and $k \geq 0$). If the group is not cyclic, the result is

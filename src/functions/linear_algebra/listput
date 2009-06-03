@@ -5,7 +5,7 @@ Prototype: WGD0,L,
 Help: listput(list,x,{n}): sets n-th element of list equal to x. If n is
  omitted or greater than the current list length, appends x.
 Description:
- (list, gen, small):gen	listput($1, $2, $3)
+ (list, gen, small):gen        listput($1, $2, $3)
 Doc:
  sets the $n$-th element of the list
  \var{list} (which must be of type \typ{LIST}) equal to $x$. If $n$ is omitted,

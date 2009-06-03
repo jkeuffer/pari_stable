@@ -8,10 +8,10 @@ Help: bnfinit(P,{flag=0},{tech=[]}): compute the necessary data for future
  0: default, 1: insist on having fundamental units.
  See manual for details about tech.
 Description:
- (gen):bnf:prec	Buchall($1, 0, prec)
- (gen, 0):bnf:prec	Buchall($1, 0, prec)
- (gen, 1):bnf:prec	Buchall($1, nf_FORCE, prec)
- (gen, ?small, ?gen):bnf:prec	bnfinit0($1, $2, $3, prec)
+ (gen):bnf:prec           Buchall($1, 0, prec)
+ (gen, 0):bnf:prec        Buchall($1, 0, prec)
+ (gen, 1):bnf:prec        Buchall($1, nf_FORCE, prec)
+ (gen, ?small, ?gen):bnf:prec        bnfinit0($1, $2, $3, prec)
 Doc: initializes a
  \var{bnf} structure. Used in programs such as \kbd{bnfisprincipal},
  \kbd{bnfisunit} or \kbd{bnfnarrow}. By default, the results are conditional

@@ -5,8 +5,8 @@ Prototype: DG
 Help: Vecrev({x=[]}): transforms the object x into a vector.
  Empty vector if x is omitted.
 Description:
- ():vec	cgetg(1,t_VEC)
- (gen):vec	gtovecrev($1)
+ ():vec        cgetg(1,t_VEC)
+ (gen):vec     gtovecrev($1)
 Doc:
  as $\kbd{Vec}(x)$, then reverse the result. In particular
  In this case, \kbd{Vecrev} is the reciprocal function of \kbd{Polrev}: the

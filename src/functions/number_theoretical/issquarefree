@@ -4,8 +4,8 @@ C-Name: gissquarefree
 Prototype: G
 Help: issquarefree(x): true(1) if x is squarefree, false(0) if not.
 Description:
- (int):bool	issquarefree($1)
- (gen):gen	gissquarefree($1)
+ (int):bool       issquarefree($1)
+ (gen):gen        gissquarefree($1)
 Doc: true (1) if $x$ is squarefree, false (0) if not. Here $x$ can be an
  integer or a polynomial.
  The function accepts vector/matrices arguments, and is then applied

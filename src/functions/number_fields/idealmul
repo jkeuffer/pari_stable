@@ -5,9 +5,9 @@ Prototype: GGGD0,L,
 Help: idealmul(nf,x,y,{flag=0}): product of the two ideals x and y in the
  number field nf. If (optional) flag is non-nul, reduce the result.
 Description:
- (gen, gen, gen, ?0):gen	idealmul($1, $2, $3)
+ (gen, gen, gen, ?0):gen        idealmul($1, $2, $3)
  (gen, gen, gen, 1):gen         idealmulred($1, $2, $3)
- (gen, gen, gen, #small):gen	$"invalid flag in idealmul"
+ (gen, gen, gen, #small):gen    $"invalid flag in idealmul"
  (gen, gen, gen, small):gen     idealmul0($1, $2, $3, $4)
 Doc: ideal multiplication of the ideals $x$ and $y$ in the number field
  \var{nf}; the result is the ideal product in HNF. If either $x$ or $y$

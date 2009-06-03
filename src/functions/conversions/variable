@@ -5,8 +5,8 @@ Prototype: DG
 Help: variable({x}): main variable of object x. Gives p for p-adic x, error
  for scalars. Returns the list of user variables if x is omitted.
 Description:
- (pol):var:parens:copy	$var:1
- (gen):gen	gpolvar($1)
+ (pol):var:parens:copy        $var:1
+ (gen):gen        gpolvar($1)
 Doc:
  gives the main variable of the object $x$, and
  $p$ if $x$ is a $p$-adic number. Gives an error if $x$ has no variable

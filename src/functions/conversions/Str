@@ -4,7 +4,7 @@ C-Name: Str
 Prototype: s*
 Help: Str({x}*): concatenates its (string) argument into a single string.
 Description:
- (gen):genstr:copy:parens	$genstr:1
+ (gen):genstr:copy:parens        $genstr:1
 Doc:
  converts its argument list into a
  single character string (type \typ{STR}, the empty string if $x$ is omitted).

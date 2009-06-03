@@ -4,7 +4,7 @@ C-Name: setintersect
 Prototype: GG
 Help: setintersect(x,y): intersection of the sets x and y.
 Description:
- (vec, vec):vec	setintersect($1, $2)
+ (vec, vec):vec        setintersect($1, $2)
 Doc: intersection of the two sets $x$ and $y$ (see \kbd{setisset}).
  The function also works if both $x$ and $y$ are vectors of stricly increasing
  entries, according to \kbd{<}); in that case we return a vector of strictly

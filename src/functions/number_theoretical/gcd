@@ -4,10 +4,10 @@ C-Name: ggcd0
 Prototype: GDG
 Help: gcd(x,{y}): greatest common divisor of x and y.
 Description:
- (small, small):small	cgcd($1, $2)
- (int, int):int	        gcdii($1, $2)
+ (small, small):small   cgcd($1, $2)
+ (int, int):int         gcdii($1, $2)
  (gen):gen              content($1)
- (gen, gen):gen	        ggcd($1, $2)
+ (gen, gen):gen         ggcd($1, $2)
 Doc: creates the greatest common divisor of $x$ and $y$.
  If you also need the $u$ and $v$ such that $x*u + y*v = \gcd(x,y)$,
  use the \tet{bezout} function. $x$ and $y$ can have rather quite general

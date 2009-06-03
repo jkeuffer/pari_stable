@@ -5,8 +5,8 @@ Prototype: DG
 Help: List({x=[]}): transforms the vector or list x into a list. Empty list
  if x is omitted.
 Description:
- ():list listcreate()
- (gen):list	gtolist($1)
+ ():list           listcreate()
+ (gen):list        gtolist($1)
 Doc:
  transforms a (row or column) vector $x$ into a list, whose components are
  the entries of $x$. Similarly for a list, but rather useless in this case.

@@ -4,5 +4,5 @@ C-Name: member_b6
 Prototype: G
 Help: _.b6
 Description: 
- (ell):gen:copy	       ell_get_b6($1)
+ (ell):gen:copy               ell_get_b6($1)
 
