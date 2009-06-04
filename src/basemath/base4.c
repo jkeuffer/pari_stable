@@ -459,8 +459,10 @@ val_norm(GEN x, GEN p, long *vz)
 GEN
 factor_norm(GEN x)
 {
-  GEN f = factor(gcoeff(x,1,1)), p = gel(f,1), e = gel(f,2);
-  long i,k, l = lg(p);
+  GEN r = gcoeff(x,1,1), f, p, e;
+  long i, k, l;
+  if (typ(r)!=t_INT) pari_err(typeer,"idealfactor");
+  f = Z_factor(r); p = gel(f,1); e = gel(f,2); l = lg(p);
   for (i=1; i<l; i++) e[i] = val_norm(x,gel(p,i), &k);
   settyp(e, t_VECSMALL); return f;
 }
