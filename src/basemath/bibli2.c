@@ -903,7 +903,7 @@ stirling1(ulong n, ulong m)
     s = odd(k)? subii(s, c): addii(s, c);
     if ((k & 0x1f) == 0) {
       t = gerepileuptoint(ltop, t);
-      s = gerepileuptoint((pari_sp)t, s);
+      s = gerepileuptoint(avma, s);
     }
   }
   return gerepileuptoint(ltop, s);
