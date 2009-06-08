@@ -1288,9 +1288,9 @@ factcp(decomp_t *S)
   S->nu  = get_nu(chi, S->p, &l); return l;
 }
 
-/* return the prime element in Zp[phi], nup, chip in Z[X]
- * if *Ep < oE or Ep divides Ediv (!=0) return NULL (not interesting)
- * */
+/* Return the prime element in Zp[phi], a t_INT (iff *Ep = 1) or QX;
+ * nup, chip are ZX.
+ * If *Ep < oE or Ep divides Ediv (!=0) return NULL (uninteresting) */
 static GEN
 getprime(decomp_t *S, GEN phi, GEN chip, GEN nup, long *Lp, long *Ep,
          long oE, long Ediv)
@@ -1320,10 +1320,9 @@ getprime(decomp_t *S, GEN phi, GEN chip, GEN nup, long *Lp, long *Ep,
   /* r > 0 minimal such that r L/E - s = 1/E
    * pi = nu^r / p^s is an element of valuation 1/E,
    * so is pi + O(p) since 1/E < 1. May compute nu^r mod p^(s+1) */
-
-
   q = powiu(S->p, s); qp = mulii(q, S->p);
   nup = FpXQ_pow(nup, utoipos(r), S->chi, qp);
+  if (!phi) return RgX_Rg_div(nup, q); /* phi = X : no composition */
   return compmod(S->p, nup, phi, S->chi, qp, s+1, -s);
 }
 
@@ -1405,21 +1404,29 @@ testb2(decomp_t *S, long D, GEN theta)
 }
 
 /* return 1 if at least 2 factors mod p ==> chi can be split.
- * compute a new S->phi such that E = lcm(Ea, Et) */
+ * compute a new S->phi such that E = lcm(Ea, Et);
+ * A a ZX, T a t_INT (iff Et = 1, probably impossible ?) or QX */
 static int
 testc2(decomp_t *S, GEN A, long Ea, GEN T, long Et)
 {
   GEN c, T0 = S->phi;
-  long r, s, t;
 
   if (DEBUGLEVEL>4) fprintferr("  Increasing Ea\n");
-  (void)cbezout(Ea, Et, &r, &s); t = 0;
-  while (r < 0) { r = r + Et; t++; }
-  while (s < 0) { s = s + Ea; t++; }
+  if (Et == 1) /* same as other branch, split for efficiency */
+    c = A; /* Et = 1 => s = 1, r = 0, t = 0 */
+  else
+  {
+    long r, s, t;
+    (void)cbezout(Ea, Et, &r, &s); t = 0;
+    while (r < 0) { r = r + Et; t++; }
+    while (s < 0) { s = s + Ea; t++; }
 
-  c = RgX_mul(RgXQ_powu(A, s, S->chi), RgXQ_powu(T, r, S->chi));
-  c = RgX_Rg_div(RgX_rem(c, S->chi), powiu(S->p, t));
-  S->phi = gadd( pol_x( varn(S->chi) ), redelt(c, S->psc, S->p) );
+    /* A^s T^r / p^t */
+    c = RgXQ_mul(RgXQ_powu(A, s, S->chi), RgXQ_powu(T, r, S->chi), S->chi);
+    c = RgX_Rg_div(c, powiu(S->p, t));
+    c = redelt(c, S->psc, S->p);
+  }
+  S->phi = RgX_add(c,  pol_x(varn(S->chi)));
   if (factcp(S) > 1) { composemod(S, S->phi, T0); return 1; }
   S->phi0 = T0; return 0; /* E_phi = lcm(E_alpha,E_theta) */
 }
@@ -1586,8 +1593,8 @@ static GEN
 nilord(decomp_t *S, GEN dred, long mf, long flag)
 {
   GEN p = S->p;
-  long Fa, La, Ea, oE, l, N  = degpol(S->f), v = varn(S->f), nv = fetch_var();
-  GEN pia, opa;
+  long Fa, oE, l, N  = degpol(S->f), v = varn(S->f), nv = fetch_var();
+  GEN opa; /* t_INT or QX */
 
   if (DEBUGLEVEL>2)
   {
@@ -1606,44 +1613,45 @@ nilord(decomp_t *S, GEN dred, long mf, long flag)
   S->psf = S->psc;
   S->vpsf = S->vpsc;
   S->chi = FpX_red(S->f, S->psc);
+  S->phi = pol_x(v);
   S->pmf = powiu(p, mf+1);
   S->precns = NULL;
   oE = 0;
   opa = NULL;
+  l = 2; /* Decomp by default */
 
   for(;;)
   {
-    l = 2; /* Decomp by default */
     S->phi0 = NULL; /* no delayed composition */
-    Fa   = degpol(S->nu);
+    Fa = degpol(S->nu);
     for(;;)
     {
-      pia  = getprime(S, pol_x(v), S->chi, S->nu, &La, &Ea, oE,0);
+      long La, Ea;
+      GEN pia  = getprime(S, NULL, S->chi, S->nu, &La, &Ea, oE,0);
+      if (pia) { /* success, we break out in THIS loop */
+        opa = (Ea > 1)? RgX_RgXQ_eval(pia, S->phi, S->f): pia;
+        oE = Ea;
+        if (La == 1) break; /* no need to change phi so that nu = pia */
+      }
+      /* phi += prime elt */
+      S->phi = typ(opa) == t_INT? RgX_Rg_add_shallow(S->phi, opa)
+                                : RgX_add(S->phi, opa);
+      S->chi = NULL;
+      if (!update_phi(S, &l, flag)) goto DONE;
       if (pia) break;
-      S->phi = gadd(S->phi, opa);
-      S->chi = NULL;
-      if (!update_phi(S, &l, flag)) break;
-    }
-    if (!pia) break;
-    oE = Ea;
-    opa = (Ea > 1)? RgX_RgXQ_eval(pia, S->phi, S->f): pia;
-    if (La > 1)
-    { /* change phi such that nu = pia */
-      S->phi = gadd(S->phi, opa);
-      S->chi = NULL;
-      if (!update_phi(S, &l, flag)) break;
     }
 
-    if (DEBUGLEVEL>4) fprintferr("  (Fa, Ea) = (%ld,%ld)\n", Fa, Ea);
-    if (Ea*Fa == N)
+    if (DEBUGLEVEL>4) fprintferr("  (Fa, oE) = (%ld,%ld)\n", Fa, oE);
+    if (oE*Fa == N)
     { /* O = Zp[phi] */
       if (!flag) S->phi = redelt(S->phi, sqri(p), p);
-      S->chi = NULL; l = 1; break;
+      S->chi = NULL; l = 1; goto DONE;
     }
     l = 2;
-    if (loop(S, nv, Ea, Fa)) break;
-    if (!update_phi(S, &l, flag)) break;
+    if (loop(S, nv, oE, Fa)) goto DONE;
+    if (!update_phi(S, &l, flag)) goto DONE;
   }
+DONE:
   (void)delete_var();
   if (l == 1) return flag? NULL: dbasis(p, S->f, mf, S->phi, S->chi);
   return Decomp(S, flag);
@@ -1661,9 +1669,9 @@ maxord_i(GEN p, GEN f, long mf, GEN w, long flag)
   S.p = p;
   S.nu = h;
   S.df = Z_pval(D, p);
-  S.phi = pol_x(varn(f));
   if (l == 1) return nilord(&S, D, mf, flag);
   if (flag && flag <= mf) flag = mf + 1;
+  S.phi = pol_x(varn(f));
   S.chi = f; return Decomp(&S, flag);
 }
 
