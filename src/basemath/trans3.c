@@ -271,7 +271,7 @@ kbessel1(GEN nu, GEN gx, long prec)
     s = real_1(prec); t = real_0(prec);
     for (k=n2,k2=2*n2-1; k > 0; k--,k2-=2)
     {
-      p1 = addri(nu2, mulss(k2,k2));
+      p1 = addri(nu2, sqrs(k2));
       ak = divrs(mulrr(p1,zz),-k);
       s = addsr(1, mulrr(ak,s));
       t = addsr(k2,mulrr(ak,t));
@@ -308,10 +308,10 @@ kbessel1(GEN nu, GEN gx, long prec)
   else
   {
     zf = sqrtr(divrr(pitemp,r));
-    zz = ginv(gmul2n(r,2)); s=gen_1;
+    zz = ginv(gmul2n(r,2)); s = real_1(prec);
     for (k=n2,k2=2*n2-1; k > 0; k--,k2-=2)
     {
-      p1 = addir(mulss(k2,k2),nu2);
+      p1 = addri(nu2, sqrs(k2));
       ak = divru(mulrr(p1,zz), k);
       s = subsr(1, mulrr(ak,s));
     }
