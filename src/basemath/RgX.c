@@ -1500,10 +1500,19 @@ RgX_Rg_mul(GEN y, GEN x) {
   long i, ly;
   GEN z;
   if (isrationalzero(x)) return zeropol(varn(y));
-  ly = lg(y);
-  z = cgetg(ly,t_POL); z[1] = y[1];
+  z = cgetg_copy(y, &ly); z[1] = y[1];
   if (ly == 2) return z;
   for (i = 2; i < ly; i++) gel(z,i) = gmul(x,gel(y,i));
+  return normalizepol_lg(z,ly);
+}
+GEN
+RgX_muls(GEN y, long x) {
+  long i, ly;
+  GEN z;
+  if (!x) return zeropol(varn(y));
+  z = cgetg_copy(y, &ly); z[1] = y[1];
+  if (ly == 2) return z;
+  for (i = 2; i < ly; i++) gel(z,i) = gmulsg(x,gel(y,i));
   return normalizepol_lg(z,ly);
 }
 GEN

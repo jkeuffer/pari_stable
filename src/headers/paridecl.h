@@ -379,6 +379,7 @@ GEN     RgX_inflate(GEN x0, long d);
 GEN     RgX_modXn_shallow(GEN a, long n);
 GEN     RgX_mul(GEN x,GEN y);
 GEN     RgX_mulXn(GEN x, long d);
+GEN     RgX_muls(GEN y, long x);
 GEN     RgX_mulspec(GEN a, GEN b, long na, long nb);
 GEN     RgX_neg(GEN x);
 GEN     RgX_pseudodivrem(GEN x, GEN y, GEN *ptr);
