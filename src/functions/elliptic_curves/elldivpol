@@ -1,0 +1,8 @@
+Function: elldivpol
+Section: elliptic_curves
+C-Name: elldivpol
+Prototype: GLDn
+Help: elldivpol(E,n,{v='x}): n-division polynomial for the curve E in the
+ variable v.
+Doc: $n$-division polynomial for the curve \kbd{E} in the
+ variable $v$.

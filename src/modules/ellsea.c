@@ -112,7 +112,7 @@ find_coeff(GEN a4, GEN a6, GEN p, long precS)
 
 /*Computes the n-division polynomial modulo the polynomial h \in Fp[x] */
 static GEN
-elldivpol(GEN a4, GEN a6, long n, GEN h, GEN p)
+a4a6_divpolmod(GEN a4, GEN a6, long n, GEN h, GEN p)
 {
   pari_sp ltop = avma;
   GEN f, f2, ff, rhs, inv2y, a42, res;
@@ -640,7 +640,7 @@ find_kernel_power(GEN Eba4, GEN Eba6, GEN Eca4, GEN Eca6, ulong ell, GEN meqn, c
     {
       GEN kpoly2 = FpX_sqr(kpoly, p);
       GEN h = lift(numer(gsubst(gtmp, vx, gdiv(num_iso, kpoly2))));
-      if (signe(elldivpol(Eba4, Eba6, ell, h, p)))
+      if (signe(a4a6_divpolmod(Eba4, Eba6, ell, h, p)))
       {
         GEN Ic = gdiv(gsubst(num_iso, vx, Ib), gsqr(gsubst(kpoly, vx, Ib)));
         GEN kpoly_new = lift(numer(gsubst(gtmp, vx, Ic)));

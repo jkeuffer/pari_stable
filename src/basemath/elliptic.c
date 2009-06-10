@@ -4746,7 +4746,7 @@ ell_to_a4a6(GEN E, GEN p)
 static GEN
 elldivpol2(GEN e, GEN x)
 {
-  return gadd(gmulgs(ellRHS(e, x), 4),gsqr(ellLHS0(e, x)));
+  return gadd(gmulgs(ellRHS(e, x), 4), gsqr(ellLHS0(e, x)));
 }
 
 GEN
@@ -4808,4 +4808,89 @@ ellgroup(GEN E, GEN p)
     return gerepilecopy(av, mkvec2(diviiexact(N, d),d));
 ellgroup_cyclic:
   return gerepileupto(av, mkveccopy(N));
+}
+
+static GEN
+elldivpol4(GEN e, long n, long v)
+{
+  GEN b2,b4,b6,b8, res;
+  if (n==0) return zeropol(v);
+  if (n<=2) return pol_1(v);
+  b2  = ell_get_b2(e); b4  = ell_get_b4(e);
+  b6  = ell_get_b6(e); b8  = ell_get_b8(e);
+  if (n==3)
+    res = mkpoln(5,utoi(3),b2,gmulsg(3,b4),gmulsg(3,b6),b8);
+  else
+  {
+    GEN b10 = gsub(gmul(b2, b8), gmul(b4, b6));
+    GEN b12 = gsub(gmul(b8, b4), gsqr(b6));
+    res = mkpoln(7,gen_2,b2,gmulsg(5,b4),gmulsg(10,b6),gmulsg(10,b8),b10,b12);
+  }
+  setvarn(res, v); return res;
+}
+
+static GEN
+elldivpol0(GEN e, GEN t, GEN p24, long n, long v)
+{
+  GEN ret;
+  long m = n/2;
+  if (gel(t,n)) return gel(t,n);
+  if (n<=4) ret = elldivpol4(e, n, v);
+  else if (n%2==1)
+  {
+    GEN t1 = gmul(elldivpol0(e,t,p24,m+2,v),
+                  gpowgs(elldivpol0(e,t,p24,m,v),3));
+    GEN t2 = gmul(elldivpol0(e,t,p24,m-1,v),
+                  gpowgs(elldivpol0(e,t,p24,m+1,v),3));
+    if (m%2==1)
+      ret = gsub(t1, gmul(p24,t2));
+    else
+      ret = gsub(gmul(p24,t1), t2);
+  }
+  else
+  {
+    GEN t1 = gmul(elldivpol0(e,t,p24,m+2,v),
+                  gpowgs(elldivpol0(e,t,p24,m-1,v),v));
+    GEN t2 = gmul(elldivpol0(e,t,p24,m-2,v),
+                  gpowgs(elldivpol0(e,t,p24,m+1,v),2));
+    ret = gmul(elldivpol0(e,t,p24,m,v), gsub(t1,t2));
+  }
+  gel(t,n) = ret;
+  return ret;
+}
+
+GEN
+elldivpol(GEN e, long n, long v)
+{
+  pari_sp av = avma;
+  GEN ret;
+  checksmallell(e);
+  if (v==-1) v = 0;
+  if (varncmp(gvar(e), v) <= 0)
+    pari_err(talker,"variable must have higher priority in elldivpol");
+  if (n<0) n = -n;
+  if (n==1 || n==3)
+    return gerepilecopy(av, elldivpol4(e, n, v));
+  else
+  {
+    GEN a1 = ell_get_a1(e), a2 = ell_get_a2(e), a3 = ell_get_a3(e);
+    GEN a4 = ell_get_a4(e), a6 = ell_get_a6(e);
+    GEN f1 = mkpoln(4, gen_1, a2, a4, a6);
+    GEN f2 = mkpoln(2, a1, a3);
+    GEN d2, psi24;
+    setvarn(f1,v); setvarn(f2,v);
+    d2 = gadd(gmulsg(4, f1), gsqr(f2));
+    psi24 = gsqr(d2);
+    if (n <= 4)
+      ret = elldivpol4(e, n, v);
+    else
+    {
+      GEN t = cgetg(n+1, t_VEC);
+      long i;
+      for(i=1; i<=n; i++) gel(t,i) = NULL;
+      ret = elldivpol0(e, t, psi24, n, v);
+    }
+    if (n%2==0) ret = gmul(ret, d2);
+    return gerepilecopy(av, ret);
+  }
 }
