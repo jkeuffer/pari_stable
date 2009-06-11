@@ -1074,6 +1074,13 @@ RgX_Rg_div(GEN x, GEN y) {
   return normalizepol_lg(z, lx);
 }
 GEN
+RgX_divs(GEN x, long y) {
+  long i, lx;
+  GEN z = cgetg_copy(x, &lx); z[1] = x[1];
+  for (i=2; i<lx; i++) gel(z,i) = gdivgs(gel(x,i),y);
+  return normalizepol_lg(z, lx);
+}
+GEN
 RgX_div_by_X_x(GEN a, GEN x, GEN *r)
 {
   long l = lg(a), i;
