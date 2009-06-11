@@ -2531,6 +2531,9 @@ RgXQ_charpoly(GEN x, GEN T, long v)
     else
       ch = gsubst(ch, MAXVARN, pol_x(v));
   }
+  /* test for silly input: x mod (deg 0 polynomial) */
+  if (typ(ch) != t_POL) { avma = av; return pol_1(v); }
+
   L = leading_term(ch);
   if (!gequal1(L)) ch = RgX_Rg_div(ch, L);
   return gerepileupto(av, ch);
