@@ -1190,12 +1190,12 @@ BSGS_pre(GEN *pdiff, GEN V, GEN P, GEN a4, GEN p)
  *   size(baby)+size(giant)+size(table)+size(table_ind) + O(log p)
  * bits of stack */
 static GEN
-match_and_sort(GEN compile_atkin, long k, GEN Mu, GEN u, GEN a4, GEN a6, GEN p)
+match_and_sort(GEN compile_atkin, GEN Mu, GEN u, GEN a4, GEN a6, GEN p)
 {
   pari_sp av1, av2;
   GEN baby, giant, SgMb, Mb, Mg, den, Sg, dec_inf, div, pp1 = addis(p,1);
   GEN P, Pb, Pg, point, diff, pre, table, table_ind;
-  long best_i, i, lbaby, lgiant, lp = lg(p);
+  long best_i, i, lbaby, lgiant, lp = lg(p), k = lg(compile_atkin)-1;
 
   if (!k)
   { /*no Atkin prime: Mu >= 4*sqrt(p). */
@@ -1436,14 +1436,13 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
       gerepileall(btop, 3, &tr, &compile_atkin, &bound_bsgs, &best_champ);
   }
   compile_atkin = shallowextract(compile_atkin, gel(best_champ, 1));
-  nb_atkin = lg(compile_atkin)-1;
 end_sea:
   if (DEBUGLEVEL)
   {
-    GEN pos = prod_lgatkin(compile_atkin, nb_atkin);
+    GEN pos = prod_lgatkin(compile_atkin, lg(compile_atkin)-1);
     fprintferr("\nComputation of traces done. Entering match-and-sort algorithm.");
     fprintferr("\nIt remains %Ps possibilities for the trace.\n", pos);
   }
-  res = match_and_sort(compile_atkin, nb_atkin, gel(tr,1), gel(tr,2), a4,a6,p);
+  res = match_and_sort(compile_atkin, gel(tr,1), gel(tr,2), a4,a6,p);
   return gerepileuptoint(ltop, subii(addis(p, 1), res));
 }
