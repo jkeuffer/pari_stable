@@ -40,7 +40,7 @@ trans_fix_arg(long *prec, GEN *s0, GEN *sig, pari_sp *av, GEN *res)
   else /* real number */
   {
     *sig = s = gtofp(s, l+1);
-    p1 = floorr(s);
+    p1 = trunc2nr(s, 0);
     if (!signe(subri(s,p1))) *s0 = p1;
   }
   *prec = l; return s;
@@ -950,20 +950,59 @@ static GEN
 cxgamma(GEN s0, int dolog, long prec)
 {
   GEN s, u, a, y, res, tes, sig, invn2, p1, nnx, pi, pi2, sqrtpi2;
-  long i, lim, nn;
+  long i, lim, nn, esig, et;
   pari_sp av, av2, avlim;
   int funeq = 0;
 
   if (DEBUGLEVEL>5) (void)timer2();
   s = trans_fix_arg(&prec,&s0,&sig,&av,&res);
 
-  if ((signe(sig) <= 0 || expo(sig) < -1)
-    && (typ(s) == t_REAL || gexpo(gel(s,2)) <= 16))
+  esig = expo(sig);
+  et = (typ(s) == t_REAL) ? 0: gexpo(gel(s,2));
+  if ((signe(sig) <= 0 || esig < -1) && et <= 16)
   { /* s <--> 1-s */
-    funeq = 1; s = gsub(gen_1, s); sig = real_i(s);
+    funeq = 1; s = gsubsg(1, s); sig = real_i(s);
   }
 
-  { /* find "optimal" parameters [lim, nn] */
+  /* find "optimal" parameters [lim, nn] */
+  if (esig > 300 || et > 300)
+  { /* |s| is HUGE ! Play safe and avoid inf / NaN */
+    GEN S, iS, l2, la, u;
+    double logla, l;
+
+    S = gprec_w(s,3);
+    /* l2 ~ |lngamma(s))|^2 */
+    l2 = gnorm(gmul(S, glog(S, 3)));
+    l = (bit_accuracy_mul(prec, LOG2) - rtodbl(glog(l2,3))/2) / 2.;
+    if (l < 0) l = 0.;
+
+    iS = imag_i(S);
+    if (et > 0 && l > 0)
+    {
+      GEN t = gmul(iS, dbltor(PI / l)), logt = glog(t,3);
+      la = gmul(t, logt);
+      if      (gcmpgs(la, 3) < 0)   { logla = log(3.); la = stoi(3); }
+      else if (gcmpgs(la, 150) > 0) { logla = rtodbl(logt); la = t; }
+    }
+    else
+    {
+      logla = log(3.); la = stoi(3);
+    }
+    lim = (long)ceil(l / (1.+ logla));
+    if (lim == 0) lim = 1;
+
+    u = gmul(la, dbltor((lim-0.5)/PI));
+    l2 = gsub(gsqr(u), gsqr(iS));
+    if (signe(l2) > 0)
+    {
+      l2 = gsub(gsqrt(l2,3), sig);
+      if (signe(l2) > 0) nn = itos( gceil(l2) ); else nn = 1;
+    }
+    else
+      nn = 1;
+  }
+  else
+  { /* |s| is moderate. Use floats  */
     double ssig = rtodbl(sig);
     double st = rtodbl(imag_i(s));
     double la, l,l2,u,v, rlogs, ilogs;
@@ -1001,36 +1040,6 @@ cxgamma(GEN s0, int dolog, long prec)
     }
     else
       nn = 1;
-#if 0
-#define pariK2 (1.1239968) /* 1/(1-(log(2)/(2*pi))) */
-#define pariK4 (17.079468445347/BITS_IN_LONG) /* 2*e*pi/BIL */
-    {/* same: old method */
-      long e = gexpo(s);
-      double beta;
-      if (e > 1000)
-      {
-        nn = 0;
-        beta = log(pariK4 / (prec-2)) / LOG2 + e;
-        if (beta > 1.) beta += log(beta)/LOG2;
-        lim = (long)((bit_accuracy(prec)>>1)/beta + 1);
-      }
-      else
-      {
-        double alpha = sqrt( dnorm(ssig, st) );
-        beta = bit_accuracy_mul(prec,LOG2/(2*PI)) - alpha;
-        if (beta >= 0) nn = (long)(1+pariK2*beta); else nn = 0;
-        if (nn)
-          lim = (long)(1+PI*(alpha+nn));
-        else
-        {
-          beta = log( pariK4 * alpha / (prec-2) ) / LOG2;
-          if (beta > 1.) beta += log(beta)/LOG2;
-          lim = (long)((bit_accuracy(prec)>>1)/beta + 1);
-        }
-      }
-      nn++;
-    }
-#endif
     if (DEBUGLEVEL>5) fprintferr("lim, nn: [%ld, %ld], la = %lf\n",lim,nn,la);
   }
   prec++;
@@ -1451,6 +1460,25 @@ cxpsi(GEN s0, long prec)
   if (typ(s0) == t_INT && signe(s0) <= 0)
     pari_err(talker,"non-positive integer argument in cxpsi");
 
+  if (expo(sig) > 300 || (typ(s) == t_COMPLEX && gexpo(gel(s,2)) > 300))
+  { /* |s| is HUGE. Play safe */
+    GEN L, S = gprec_w(s,3), rS = real_i(S), iS = imag_i(S);
+    double l;
+
+    l = rtodbl( gnorm(glog(S, 3)) );
+    l = log(l) / 2.;
+    lim = 2 + (long)ceil((bit_accuracy_mul(prec, LOG2) - l) / (2*(1+log((double)la))));
+    if (lim < 2) lim = 2;
+
+    l = (2*lim-1)*la / (2.*PI);
+    L = gsub(dbltor(l*l), gsqr(iS));
+    if (signe(L) < 0) L = gen_0;
+    
+    L = gsub(gsqrt(L, 3), rS);
+    if (signe(L) > 0) nn = (long)ceil(rtodbl(L)); else nn = 1;
+    if (DEBUGLEVEL>2) fprintferr("lim, nn: [%ld, %ld]\n",lim,nn);
+  }
+  else
   {
     double ssig = rtodbl(sig);
     double st = rtodbl(imag_i(s));

@@ -177,6 +177,7 @@ BA140- 1/matrix(2,2,i,j,Mod(0, 2)) -> SEGV
   141- wrong results for qfminim(A,,,2) if minimal norm < 1. E.g. A = matid(2)/2
 BA142- besselk(0.001,1) -> SEGV
 BA143- galoisinit(x).gen was not a t_VEC
+  144- lngamma(10^1000) -> precision too low in truncr. Same for psi()
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
