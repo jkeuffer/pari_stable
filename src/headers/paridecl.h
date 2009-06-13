@@ -2240,6 +2240,7 @@ GEN     Fq_neg_inv(GEN x, GEN T, GEN p);
 GEN     Fq_pow(GEN x, GEN n, GEN T, GEN p);
 GEN     Fq_red(GEN x, GEN T, GEN p);
 GEN     Fq_sub(GEN x, GEN y, GEN T/*unused*/, GEN p);
+GEN     Fq_sqr(GEN x, GEN T, GEN p);
 GEN     FqC_to_FlxC(GEN v, GEN T, GEN pp);
 GEN     FqM_to_FlxM(GEN x, GEN T, GEN pp);
 GEN     FqV_roots_to_pol(GEN V, GEN T, GEN p, long v);

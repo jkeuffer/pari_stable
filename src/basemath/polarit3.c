@@ -677,6 +677,19 @@ Fq_mul(GEN x, GEN y, GEN T, GEN p)
   }
   return NULL;
 }
+/* If T==NULL do not reduce*/
+GEN
+Fq_sqr(GEN x, GEN T, GEN p)
+{
+  if (typ(x) == t_POL)
+  {
+    if (T) return FpXQ_sqr(x,T,p);
+    else return FpX_sqr(x,p);
+  }
+  else
+    return Fp_sqr(x,p);
+  return NULL;
+}
 
 GEN
 Fq_neg_inv(GEN x, GEN T, GEN p)

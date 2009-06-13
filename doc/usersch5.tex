@@ -1860,7 +1860,8 @@ by~$2^{-\kbd{n}}$.
 \fun{GEN}{shiftr}{GEN x, long n} shifts the \typ{REAL}~$x$ by~$n$.
 
 \fun{GEN}{trunc2nr}{GEN x, long n} given a \typ{REAL} $x$, returns
-\kbd{truncr(shiftr(x,n))}, but faster and without leaving garbage on the stack.
+\kbd{truncr(shiftr(x,n))}, but faster, without leaving garbage on the stack
+and never raising a \emph{precision loss in truncation} error.
 Called by \tet{gtrunc2n}.
 
 \fun{GEN}{trunc2nr_lg}{GEN x, long lx, long n} given a \typ{REAL} $x$, returns
@@ -3454,6 +3455,8 @@ primitive \kbd{n}-th root of the unity. Assumes that \kbd{T} is irreducible mod 
 \fun{GEN}{Fq_sub}{GEN x, GEN y, GEN T/*unused*/, GEN p}
 
 \fun{GEN}{Fq_mul}{GEN x, GEN y, GEN T, GEN p}
+
+\fun{GEN}{Fq_sqr}{GEN x, GEN T, GEN p}
 
 \fun{GEN}{Fq_neg}{GEN x, GEN T, GEN p}
 

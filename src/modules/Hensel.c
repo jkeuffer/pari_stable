@@ -422,7 +422,7 @@ GEN
 ZpX_liftroot(GEN f, GEN a, GEN p, long e)
 {
   pari_sp av = avma;
-  GEN qold = NULL, q = p, frold = NULL, fr, W, Wr = NULL;
+  GEN q = p, fr, W;
   ulong mask;
 
   a = modii(a,q);
@@ -435,24 +435,17 @@ ZpX_liftroot(GEN f, GEN a, GEN p, long e)
     q = sqri(q);
     if (mask & 1) q = diviiexact(q, p);
     mask >>= 1;
-    if (Wr)
-    {
-      W = Fp_mul(Wr, FpX_eval(ZX_deriv(frold),a,qold), qold);
-      W = Fp_mul(Wr, subsi(2,W), qold);
-    }
-    Wr = W;
     fr = FpX_red(f,q);
-    a = Fp_sub(a, Fp_mul(Wr, FpX_eval(fr, a,q), q), q);
+    a = Fp_sub(a, Fp_mul(W, FpX_eval(fr, a,q), q), q);
     if (mask == 1) return gerepileuptoint(av, a);
-    qold = q;
-    frold= fr;
+    W = Fp_sub(shifti(W,1), Fp_mul(Fp_sqr(W,q), FpX_eval(ZX_deriv(fr),a,q), q), q);
   }
 }
 GEN
 ZpXQX_liftroot(GEN f, GEN a, GEN T, GEN p, long e)
 {
   pari_sp av = avma;
-  GEN qold = NULL, q = p, frold = NULL, fr, W, Wr = NULL;
+  GEN q = p, fr, W;
   ulong mask;
 
   a = Fq_red(a, T, q);
@@ -465,19 +458,10 @@ ZpXQX_liftroot(GEN f, GEN a, GEN T, GEN p, long e)
     q = sqri(q);
     if (mask & 1) q = diviiexact(q, p);
     mask >>= 1;
-    if (Wr)
-    {
-      GEN z;
-      W = Fq_mul(Wr,FqX_eval(RgX_deriv(frold),a,T,qold), T, qold);
-      z = typ(W) == t_INT?subsi(2, W): Rg_RgX_sub(gen_2, W); /* 2 - W */
-      W = Fq_mul(Wr, z, T, qold);
-    }
-    Wr = W;
     fr = FpXQX_red(f,T,q);
-    a = Fq_sub(a, Fq_mul(Wr, FqX_eval(fr, a, T,q), T,q), T,q);
+    a = Fq_sub(a, Fq_mul(W, FqX_eval(fr, a, T,q), T,q), T,q);
     if (mask == 1) return gerepileupto(av, a);
-    qold = q;
-    frold= fr;
+    W = Fq_sub(gmul2n(W,1), Fq_mul(Fq_sqr(W,T,q), FqX_eval(RgX_deriv(fr),a,T,q), T, q), T,q);
   }
 }
 /* Apply ZpX_liftroot to all roots in S and trace trick.
@@ -542,19 +526,20 @@ padicsqrtlift(GEN T, GEN a, GEN p, long e)
   }
   return gerepileuptoint(ltop,a);
 }
-/* Same as ZpX_liftroot for the polynomial X^n-T
+/* Same as ZpX_liftroot for the polynomial X^n-b
  * TODO: generalize to sparse polynomials. */
 GEN
-padicsqrtnlift(GEN T, GEN n, GEN a, GEN p, long e)
+padicsqrtnlift(GEN b, GEN n, GEN a, GEN p, long e)
 {
   pari_sp ltop=avma;
-  GEN q, W;
+  GEN q, w, n_1;
   ulong mask;
 
-  if (equalii(n, gen_2)) return padicsqrtlift(T,a,p,e);
+  if (equalii(n, gen_2)) return padicsqrtlift(b,a,p,e);
   if (e == 1) return icopy(a);
+  n_1 = subis(n,1);
   mask = quadratic_prec_mask(e);
-  W = Fp_inv(Fp_mul(n,Fp_pow(a,subis(n,1),p), p), p);
+  w = Fp_inv(Fp_mul(n,Fp_pow(a,n_1,p), p), p);
   q = p;
   for(;;)
   {
@@ -565,22 +550,49 @@ padicsqrtnlift(GEN T, GEN n, GEN a, GEN p, long e)
     {
       ulong Q = (ulong)q[2], N = (ulong)n[2];
       ulong A = umodiu(a, Q);
-      ulong t = umodiu(T, Q);
-      ulong w = umodiu(W, Q);
+      ulong B = umodiu(b, Q);
+      ulong W = umodiu(w, Q);
 
-      A = Fl_sub(A, Fl_mul(w, Fl_sub(Fl_powu(A,N,Q), t, Q), Q), Q);
+      A = Fl_sub(A, Fl_mul(W, Fl_sub(Fl_powu(A,N,Q), B, Q), Q), Q);
       a = utoi(A);
       if (mask == 1) break;
-      w = Fl_sub(Fl_add(w,w,Q),
-                 Fl_mul(Fl_sqr(w,Q), Fl_mul(N,Fl_powu(A, N-1, Q), Q), Q), Q);
-      W = utoi(w);
+      W = Fl_sub(Fl_add(W,W,Q),
+                 Fl_mul(Fl_sqr(W,Q), Fl_mul(N,Fl_powu(A, N-1, Q), Q), Q), Q);
+      w = utoi(W);
     }
     else
     {
-      a = modii(subii(a, mulii(W, subii(Fp_pow(a,n,q),T))), q);
+      /* a -= w (a^n - b) */
+      a = modii(subii(a, mulii(w, subii(Fp_pow(a,n,q),b))), q);
       if (mask == 1) break;
-      W = subii(shifti(W,1), Fp_mul(Fp_sqr(W,q), mulii(n,Fp_pow(a,subis(n,1),q)), q));
+      /* w += w - w^2 n a^(n-1)*/
+      w = subii(shifti(w,1), Fp_mul(Fp_sqr(w,q), mulii(n,Fp_pow(a,n_1,q)), q));
     }
   }
   return gerepileuptoint(ltop,a);
+}
+/* Same as ZpXQX_liftroot for the polynomial X^n-b */
+GEN
+qadicsqrtnlift(GEN b, GEN n, GEN a, GEN T, GEN p, long e)
+{
+  pari_sp av = avma;
+  GEN q = p, n_1, w;
+  ulong mask;
+
+  a = Fq_red(a, T, q);
+  if (e == 1) return a;
+  n_1 = subis(n,1);
+  mask = quadratic_prec_mask(e);
+  w = Fq_inv(Fq_mul(n, Fq_pow(a, n_1, T,q), T,q), T,q);
+  for(;;)
+  {
+    q = sqri(q);
+    if (mask & 1) q = diviiexact(q, p);
+    mask >>= 1;
+    /* a -= w (a^n - b) */
+    a = Fq_sub(a, Fq_mul(w, Fq_sub(Fq_pow(a, n, T,q), b, T,q), T,q), T,q);
+    if (mask == 1) return gerepileupto(av, a);
+    /* w += w - w^2 n a^(n-1)*/
+    w = Fq_sub(gmul2n(w,1), Fq_mul(Fq_sqr(w,T,q), Fq_mul(n, Fq_pow(a,n_1,T, q), T,q), T,q), T,q);
+  }
 }
