@@ -1238,7 +1238,7 @@ match_and_sort(GEN compile_atkin, GEN Mu, GEN u, GEN a4, GEN a6, GEN p)
   av2 = avma;
   for (i = 1; i < lbaby; i++, avma = av2)
   {
-    GEN b = addii(Fp_mul(subii(gel(baby,i), u), den, Mb), div);
+    GEN b = addii(Fp_mul(Fp_sub(gel(baby,i), u, Mb), den, Mb), div);
     if (cmpii(b, dec_inf) < 0) b = addii(b, Mb);
     affii(b, gel(baby,i));
   }
@@ -1274,7 +1274,7 @@ match_and_sort(GEN compile_atkin, GEN Mu, GEN u, GEN a4, GEN a6, GEN p)
   gen_sort_inplace(table, (void*)&cmpii, &cmp_nodata, &table_ind);
   av1 = avma;
   point = FpE_mul(Pg, gel(giant, 1), a4, p);
-  for (i = 1; i < lgiant - 1; i++)
+  for (i = 1; i < lgiant; i++)
   {
     GEN d;
     long s = ZV_search(table, gel(point, 1));
