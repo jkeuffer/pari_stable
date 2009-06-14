@@ -2494,7 +2494,10 @@ polrootsff(GEN f, GEN p, GEN T)
   GEN z;
   if (!p || !T)
   {
-    long pa, t = RgX_type(f, &p, &T, &pa);
+    long pa, t;
+    if (typ(f) != t_POL) pari_err(typeer, "polrootsff"); 
+    T = p = NULL;
+    t = RgX_type(f, &p, &T, &pa);
     if (t != t_FFELT) pari_err(typeer, "factorff");
     return FFX_roots(f,T);
   }
