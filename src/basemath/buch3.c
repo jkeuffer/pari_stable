@@ -1490,10 +1490,17 @@ nf_deg1_prime(GEN nf)
 long
 rnfisabelian(GEN nf, GEN pol)
 {
-  GEN modpr, pr, T, pp, ro, nfL, C, z, a, sig, eq = rnfequation2(nf,pol);
-  long i, j, l, v = nf_get_varn(nf);
+  GEN modpr, pr, T, pp, ro, nfL, C, z, a, sig, eq;
+  long i, j, l, v;
   ulong p, k, ka;
 
+  if (typ(nf) == t_POL)
+    v = varn(nf);
+  else {
+    nf = checknf(nf);
+    v = nf_get_varn(nf);
+  }
+  eq = rnfequation2(nf,pol);
   C = gel(eq,1); setvarn(C, v);
   a = lift_intern(gel(eq,2)); setvarn(a, v); /* root of nf[1] */
   z = nfroots_split(C, liftpol(pol, a));
