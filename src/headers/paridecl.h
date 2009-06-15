@@ -371,6 +371,7 @@ GEN     RgX_deflate(GEN x0, long d);
 GEN     RgX_deriv(GEN x);
 GEN     RgX_div_by_X_x(GEN a, GEN x, GEN *r);
 GEN     RgX_divrem(GEN x,GEN y,GEN *r);
+GEN     RgX_divs(GEN y, long x);
 long    RgX_equal(GEN x, GEN y);
 long    RgX_equal_var(GEN x, GEN y);
 GEN     RgX_get_0(GEN x);
