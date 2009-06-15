@@ -4,7 +4,5 @@ C-Name: idealadd
 Prototype: GGG
 Help: idealadd(nf,x,y): sum of two ideals x and y in the number field
  defined by nf.
-Doc: sum of the two ideals $x$ and $y$ in the
- number field $\var{nf}$. When $x$ and $y$ are given by $\Z$-bases, this does
- not depend on $\var{nf}$ and can be used to compute the sum of any two
- $\Z$-modules. The result is given in HNF.
+Doc: sum of the two ideals $x$ and $y$ in the number field $\var{nf}$. The
+ result is given in HNF.
