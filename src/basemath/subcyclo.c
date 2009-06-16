@@ -439,8 +439,8 @@ polsubcyclo_start(long n, long d, long o, GEN borne, long *ptr_val,long *ptr_l)
   if (DEBUGLEVEL >= 4) fprintferr("Subcyclo: val=%ld\n",val);
   le = powiu(gl,val);
   z = utoipos( Fl_powu(pgener_Fl(l), e, l) );
-  z = padicsqrtnlift(gen_1,utoipos(n),z,gl,val);
-  if (DEBUGLEVEL >= 1) msgtimer("padicsqrtnlift.");
+  z = Zp_sqrtnlift(gen_1,utoipos(n),z,gl,val);
+  if (DEBUGLEVEL >= 1) msgtimer("Zp_sqrtnlift.");
   *ptr_val = val;
   *ptr_l = l;
   return gmodulo(z,le);
@@ -843,7 +843,7 @@ factor_Aurifeuille_aux(GEN A, long Astar, long n, GEN P,
       Astar >>= 1;
       t = Astar & 3; if (Astar < 0) t = 4-t; /* t = 1 or 3 */
       if (t == 1) B = Fp_neg(B, le);
-      a = padicsqrtlift(B, Fp_sqrt(B, gl), gl, e);
+      a = Zp_sqrtlift(B, Fp_sqrt(B, gl), gl, e);
       b = Fp_mul(a, i, le);
       ma = Fp_neg(a, le);
       mb = Fp_neg(b, le);
@@ -873,7 +873,7 @@ factor_Aurifeuille_aux(GEN A, long Astar, long n, GEN P,
     }
     /* A^* = 1 (mod 4) */
     g = Fl_sqrt(umodiu(A,l), l);
-    a = padicsqrtlift(A, utoipos(g), utoipos(l), e);
+    a = Zp_sqrtlift(A, utoipos(g), utoipos(l), e);
     b = negi(a);
 
     invertible = stackmalloc(n);

@@ -937,7 +937,7 @@ sqrt_padic(GEN x, GEN modx, long pp, GEN p)
   GEN z = Fp_sqrt(x, p);
   if (!z) pari_err(sqrter5);
   if (pp <= 1) return z;
-  return padicsqrtlift(x, z, p, pp);
+  return Zp_sqrtlift(x, z, p, pp);
 }
 
 GEN
@@ -1099,7 +1099,7 @@ rootsof1padic(GEN n, GEN y)
 
   av = avma; (void)Fp_sqrtn(gen_1,n,gel(y,2),&z);
   if (z==gen_0) { avma = av0; return gen_0; }/*should not happen*/
-  z = padicsqrtnlift(gen_1, n, z, gel(y,2), precp(y));
+  z = Zp_sqrtnlift(gen_1, n, z, gel(y,2), precp(y));
   affii(z, gel(r,4)); avma = av; return r;
 }
 
@@ -1214,10 +1214,10 @@ padic_sqrtn_unram(GEN x, GEN n, GEN *zetan)
   if (zetan) Z = cgetp(x);
   av = avma; a = Fp_sqrtn(gel(x,4), n, p, zetan);
   if (!a) return NULL;
-  affii(padicsqrtnlift(gel(x,4), n, a, p, precp(x)), gel(r,4));
+  affii(Zp_sqrtnlift(gel(x,4), n, a, p, precp(x)), gel(r,4));
   if (zetan)
   {
-    affii(padicsqrtnlift(gen_1, n, *zetan, p, precp(x)), gel(Z,4));
+    affii(Zp_sqrtnlift(gen_1, n, *zetan, p, precp(x)), gel(Z,4));
     *zetan = Z;
   }
   avma = av; return r;

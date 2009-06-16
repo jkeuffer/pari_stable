@@ -488,17 +488,17 @@ ZpX_liftroots(GEN f, GEN S, GEN q, long e)
   return y;
 }
 
-/* Same as ZpX_liftroot for the polynomial X^2-T */
+/* Same as ZpX_liftroot for the polynomial X^2-b */
 GEN
-padicsqrtlift(GEN T, GEN a, GEN p, long e)
+Zp_sqrtlift(GEN b, GEN a, GEN p, long e)
 {
   pari_sp ltop=avma;
-  GEN q, W;
+  GEN q, w;
   ulong mask;
 
   if (e == 1) return icopy(a);
   mask = quadratic_prec_mask(e);
-  W = Fp_inv(modii(shifti(a,1), p), p);
+  w = Fp_inv(modii(shifti(a,1), p), p);
   q = p;
   for(;;)
   {
@@ -509,19 +509,19 @@ padicsqrtlift(GEN T, GEN a, GEN p, long e)
     {
       ulong Q = (ulong)q[2];
       ulong A = umodiu(a, Q);
-      ulong t = umodiu(T, Q);
-      ulong w = umodiu(W, Q);
-      A = Fl_sub(A, Fl_mul(w, Fl_sub(Fl_sqr(A,Q), t, Q), Q), Q);
+      ulong B = umodiu(b, Q);
+      ulong W = umodiu(w, Q);
+      A = Fl_sub(A, Fl_mul(W, Fl_sub(Fl_sqr(A,Q), B, Q), Q), Q);
       a = utoi(A);
       if (mask == 1) break;
-      w = Fl_sub(Fl_add(w,w,Q), Fl_mul(Fl_sqr(w,Q), Fl_add(A,A,Q),Q), Q);
-      W = utoi(w);
+      W = Fl_sub(Fl_add(W,W,Q), Fl_mul(Fl_sqr(W,Q), Fl_add(A,A,Q),Q), Q);
+      w = utoi(W);
     }
     else
     {
-      a = modii(subii(a, mulii(W, subii(Fp_sqr(a,q),T))), q);
+      a = modii(subii(a, mulii(w, subii(Fp_sqr(a,q),b))), q);
       if (mask == 1) break;
-      W = subii(shifti(W,1), Fp_mul(Fp_sqr(W,q), shifti(a,1),q));
+      w = subii(shifti(w,1), Fp_mul(Fp_sqr(w,q), shifti(a,1),q));
     }
   }
   return gerepileuptoint(ltop,a);
@@ -529,13 +529,13 @@ padicsqrtlift(GEN T, GEN a, GEN p, long e)
 /* Same as ZpX_liftroot for the polynomial X^n-b
  * TODO: generalize to sparse polynomials. */
 GEN
-padicsqrtnlift(GEN b, GEN n, GEN a, GEN p, long e)
+Zp_sqrtnlift(GEN b, GEN n, GEN a, GEN p, long e)
 {
   pari_sp ltop=avma;
   GEN q, w, n_1;
   ulong mask;
 
-  if (equalii(n, gen_2)) return padicsqrtlift(b,a,p,e);
+  if (equalii(n, gen_2)) return Zp_sqrtlift(b,a,p,e);
   if (e == 1) return icopy(a);
   n_1 = subis(n,1);
   mask = quadratic_prec_mask(e);
@@ -573,7 +573,7 @@ padicsqrtnlift(GEN b, GEN n, GEN a, GEN p, long e)
 }
 /* Same as ZpXQX_liftroot for the polynomial X^n-b */
 GEN
-qadicsqrtnlift(GEN b, GEN n, GEN a, GEN T, GEN p, long e)
+ZpXQ_sqrtnlift(GEN b, GEN n, GEN a, GEN T, GEN p, long e)
 {
   pari_sp av = avma;
   GEN q = p, n_1, w;

@@ -2121,12 +2121,13 @@ GEN     rootpadicfast(GEN f, GEN p, long e);
 
 /* Hensel.c */
 
+GEN     Zp_sqrtlift(GEN b, GEN a, GEN p, long e);
+GEN     Zp_sqrtnlift(GEN b, GEN n, GEN a, GEN p, long e);
 GEN     ZpX_liftroot(GEN f, GEN a, GEN p, long e);
 GEN     ZpX_liftroots(GEN f, GEN S, GEN q, long e);
 GEN     ZpXQX_liftroot(GEN f, GEN a, GEN T, GEN p, long e);
+GEN     ZpXQ_sqrtnlift(GEN b, GEN n, GEN a, GEN T, GEN p, long e);
 GEN     ZpX_liftfact(GEN pol, GEN Q, GEN T, GEN p, long e, GEN pe);
-GEN     padicsqrtlift(GEN T, GEN a, GEN p, long e);
-GEN     padicsqrtnlift(GEN a, GEN n, GEN S, GEN p, long e);
 GEN     polhensellift(GEN pol, GEN fct, GEN p, long exp);
 ulong   quadratic_prec_mask(long n);
 
