@@ -14,7 +14,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 BEGINEXTERN
 
-typedef enum {Gvoid, Gsmall, Gvec, Gvar, Ggen} Gtype;
+typedef enum {Gvoid, Gsmall, Gvec, Gvar, Ggen, Gclosure} Gtype;
 
 typedef enum {OCpushlong='A',OCpushgen,OCpushreal,OCpushstoi,OCpushvar,
               OCpop,

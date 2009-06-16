@@ -447,7 +447,7 @@ get_ret_type(const char **p, long arity, Gtype *t)
 }
 
 /*supported types:
- * type: Gsmall, Ggen, Gvoid, Gvec
+ * type: Gsmall, Ggen, Gvoid, Gvec, Gclosure
  * mode: Gsmall, Ggen, Gvar, Gvoid
  */
 static void
@@ -1451,6 +1451,7 @@ closurefunc(entree *ep, long n, long mode)
     return;
   }
   op_push(OCpushgen, data_push(C), n);
+  compilecast(n,Gclosure,mode);
   avma=ltop;
 }
 
