@@ -394,18 +394,16 @@ find_eigen_value_power(GEN a4, GEN a6, ulong ell, long k, GEN h, ulong lambda, G
 }
 
 /*Finds the kernel polynomial h, dividing the ell-division polynomial from the
-  isogenous curve Eb and trace term pp1.
-  Uses CCR algorithm and returns [h, 1] if the result is correct or [h, 0]
-  otherwise (E and Eb not isogenous) */
+  isogenous curve Eb and trace term pp1. Uses CCR algorithm and returns h.
+  Return NULL if E and Eb are *not* isogenous. */
 static GEN
-find_kernel(GEN a4, GEN a6, ulong ell, GEN a4t, GEN a6t, GEN pp1, GEN p, long *ptr_iszero)
+find_kernel(GEN a4, GEN a6, ulong ell, GEN a4t, GEN a6t, GEN pp1, GEN p)
 {
   const long ext = 2;
   pari_sp ltop = avma;
   GEN M, N, V, K, K1, K2, v, tlist, res;
   long i, j, k;
   long deg = (ell - 1)/2, dim = deg + ext;
-  long iszero = 1;
   GEN Coeff  = find_coeff(a4, a6, p, dim);
   GEN Coefft = find_coeff(a4t, a6t, p, dim);
   GEN psi2  = mkpoln(4, utoi(4), gen_0, Fp_mulu(a4, 4, p), Fp_mulu(a6, 4, p));
@@ -454,10 +452,10 @@ find_kernel(GEN a4, GEN a6, ulong ell, GEN a4t, GEN a6t, GEN pp1, GEN p, long *p
     gel(tlist, dim-k+1) = gerepileuptoint(btop, Fp_div(s, stoi(-k), p));
   }
   for (i = 1; i <= ext; i++)
-    if (signe(gel(tlist, i))) { iszero = 0; break; }
+    if (signe(gel(tlist, i))) { avma = ltop; return NULL; }
   res = vecslice(tlist, ext+1, dim+1);
-  *ptr_iszero = iszero;
-  return gerepilecopy(ltop, RgV_to_RgX(res, 0));
+  
+  return RgV_to_RgX(res, 0);
 }
 
 static GEN
@@ -479,10 +477,10 @@ compute_u(GEN gprime, GEN Dxxg, GEN DxJg, GEN DJJg, GEN j, GEN pJ, GEN px, ulong
 
 /* Finds the isogenous EC, and the sum of the x-coordinates of the points in
  * the kernel of the isogeny E -> Eb
- * E: elliptic curve, q: a prime, meqn: Atkin modular equation
+ * E: elliptic curve, ell: a prime, meqn: Atkin modular equation
  * g: root of meqn defining isogenous curve Eb. */
 static GEN
-find_isogenous_from_Atkin(GEN a4, GEN a6, long q, GEN meqn, GEN g, GEN p)
+find_isogenous_from_Atkin(GEN a4, GEN a6, long ell, GEN meqn, GEN g, GEN p)
 {
   pari_sp ltop = avma, btop;
   GEN Roots, gprime, u1;
@@ -511,7 +509,7 @@ find_isogenous_from_Atkin(GEN a4, GEN a6, long q, GEN meqn, GEN g, GEN p)
   if (!signe(a) || !signe(b))
   { /* TODO: understand what this means and use the information */
     if (DEBUGLEVEL)
-      fprintferr("find_isogenous_from_Atkin: division by zero at prime %ld", q);
+      fprintferr("find_isogenous_from_Atkin: division by zero at prime %ld", ell);
     avma = ltop; return NULL;
   }
   gprime = Fp_div(a, b, p);
@@ -525,32 +523,32 @@ find_isogenous_from_Atkin(GEN a4, GEN a6, long q, GEN meqn, GEN g, GEN p)
     GEN pxstar = FpX_eval(Dxg, jt, p);
     GEN dxstar = Fp_mul(pxstar, g, p);
     GEN pJstar = FpX_eval(DJg, jt, p);
-    GEN dJstar = Fp_mul(Fp_mulu(jt, q, p), pJstar, p);
+    GEN dJstar = Fp_mul(Fp_mulu(jt, ell, p), pJstar, p);
     GEN u = Fp_mul(Fp_mul(dxstar, dJ, p), E6, p);
     GEN v = Fp_mul(Fp_mul(dJstar, dx, p), E4, p);
     GEN E4t = Fp_div(Fp_mul(Fp_sqr(u, p), jt, p), Fp_mul(Fp_sqr(v, p), Fp_sub(jt, utoi(1728), p), p), p);
     GEN E6t = Fp_div(Fp_mul(u, E4t, p), v, p);
-    GEN u2 = compute_u(gprime, Dxxg, DxJg, DJJg, jt, pJstar, pxstar, q, E4t, E6t, p);
-    GEN pp1 = Fp_mulu(Fp_sub(u1, u2, p), 3*q, p);
-    GEN a4t = Fp_mul(mulsi(-3, powuu(q,4)), E4t, p);
-    GEN a6t = Fp_mul(mulsi(-2, powuu(q,6)), E6t, p);
-    long iszero;
-    GEN check = find_kernel(a4, a6, q, a4t, a6t, pp1, p, &iszero);
-    if (iszero) return gerepilecopy(ltop, mkvec3(a4t, a6t, check));
+    GEN u2 = compute_u(gprime, Dxxg, DxJg, DJJg, jt, pJstar, pxstar, ell, E4t, E6t, p);
+    GEN pp1 = Fp_mulu(Fp_sub(u1, u2, p), 3*ell, p);
+    GEN a4t = Fp_mul(mulsi(-3, powuu(ell,4)), E4t, p);
+    GEN a6t = Fp_mul(mulsi(-2, powuu(ell,6)), E6t, p);
+    GEN h = find_kernel(a4, a6, ell, a4t, a6t, pp1, p);
+    if (h) return gerepilecopy(ltop, mkvec3(a4t, a6t, h));
   }
   pari_err(bugparier, "find_isogenous_from_Atkin, kernel not found");
   return NULL;
 }
 
-/* Finds E' q-isogenous to E and the trace term p1 from canonical modular
+/* Finds E' ell-isogenous to E and the trace term p1 from canonical modular
  *   equation meqn
- * E: elliptic curve, q: a prime, meqn: canonical modular equation
+ * E: elliptic curve, ell: a prime, meqn: canonical modular equation
  * g: root of meqn defining isogenous curve Eb. */
 static GEN
-find_isogenous_from_canonical(GEN a4, GEN a6, long q, GEN meqn, GEN g, GEN p)
+find_isogenous_from_canonical(GEN a4, GEN a6, long ell, GEN meqn, GEN g, GEN p)
 {
   pari_sp ltop = avma;
   long vx = 0, vJ = MAXVARN;
+  GEN h;
   GEN E4 = Fp_div(a4, stoi(-3), p);
   GEN E6 = Fp_mul(a6, shifti(p, -1), p);
   GEN E42 = Fp_sqr(E4, p);
@@ -568,15 +566,15 @@ find_isogenous_from_canonical(GEN a4, GEN a6, long q, GEN meqn, GEN g, GEN p)
   GEN DxJg = FpX_deriv(Dxg, p);
 
   GEN ExJ = FpX_eval(DxJg, j, p);
-  ulong tis = ugcd(12, q-1), is = 12 / tis;
+  ulong tis = ugcd(12, ell-1), is = 12 / tis;
   GEN itis = Fp_inv(stoi(-tis), p);
-  GEN deltal = Fp_div(Fp_mul(delta, Fp_powu(g, tis, p), p), powuu(q, 12), p);
+  GEN deltal = Fp_div(Fp_mul(delta, Fp_powu(g, tis, p), p), powuu(ell, 12), p);
   GEN E4l, E6l, a4tilde, a6tilde, p_1;
   if (signe(dJ)==0)
   {
     GEN jl;
     if (DEBUGLEVEL) fprintferr("Division by zero for prime %Ps\n", p);
-    E4l = Fp_div(E4, sqru(q), p);
+    E4l = Fp_div(E4, sqru(ell), p);
     jl  = Fp_div(Fp_powu(E4l, 3, p), deltal, p);
     E6l = Fp_sqrt(Fp_mul(Fp_sub(jl, utoi(1728), p), deltal, p), p);
     p_1 = gen_0;
@@ -593,59 +591,54 @@ find_isogenous_from_canonical(GEN a4, GEN a6, long q, GEN meqn, GEN g, GEN p)
     GEN DJgJj = FpX_eval(FpX_deriv(DJg, p), j, p);
     GEN Djd = Fp_add(Fp_mul(jd, pJ, p), Fp_mul(j, Fp_add(Fp_mul(jd, DJgJj, p), Fp_mul(gd, ExJ, p), p), p), p);
     GEN E0bd = Fp_div(Fp_sub(Fp_mul(Dgd, itis, p), Fp_mul(E0b, Djd, p), p), dJ, p);
-    E4l = Fp_div(Fp_sub(E4, Fp_mul(E2s, Fp_sub(Fp_sub(Fp_add(Fp_div(Fp_mulu(E0bd, 12, p), E0b, p), Fp_div(Fp_mulu(E42, 6, p), E6, p), p), Fp_div(Fp_mulu(E6, 4, p), E4, p), p), E2s, p), p), p), sqru(q), p);
+    E4l = Fp_div(Fp_sub(E4, Fp_mul(E2s, Fp_sub(Fp_sub(Fp_add(Fp_div(Fp_mulu(E0bd, 12, p), E0b, p), Fp_div(Fp_mulu(E42, 6, p), E6, p), p), Fp_div(Fp_mulu(E6, 4, p), E4, p), p), E2s, p), p), p), sqru(ell), p);
     jl = Fp_div(Fp_powu(E4l, 3, p), deltal, p);
-    f =  Fp_div(powuu(q, is), g, p);
+    f =  Fp_div(powuu(ell, is), g, p);
     fd = Fp_neg(Fp_mul(Fp_mul(E2s, f, p), itis, p), p);
     Dgs = FpXY_eval(Dx, f, jl, p);
     Djs = FpXY_eval(DJ, f, jl, p);
-    jld = Fp_div(Fp_mul(Fp_neg(fd, p), Dgs, p), Fp_mulu(Djs, q, p), p);
+    jld = Fp_div(Fp_mul(Fp_neg(fd, p), Dgs, p), Fp_mulu(Djs, ell, p), p);
     E6l = Fp_div(Fp_mul(Fp_neg(E4l, p), jld, p), jl, p);
-    p_1 = Fp_mul(Fp_mulu(E2s, q, p), shifti(p, -1), p);
+    p_1 = Fp_mul(Fp_mulu(E2s, ell, p), shifti(p, -1), p);
   }
-  a4tilde = Fp_mul(Fp_mul(stoi(-3), powuu(q,4), p), E4l, p);
-  a6tilde = Fp_mul(Fp_mul(stoi(-2), powuu(q,6), p), E6l, p);
-  return gerepilecopy(ltop, mkvec3(a4tilde, a6tilde, p_1));
+  a4tilde = Fp_mul(Fp_mul(stoi(-3), powuu(ell,4), p), E4l, p);
+  a6tilde = Fp_mul(Fp_mul(stoi(-2), powuu(ell,6), p), E6l, p);
+  h = find_kernel(a4, a6, ell, a4tilde, a6tilde, p_1, p);
+  return gerepilecopy(ltop, mkvec3(a4tilde, a6tilde, h));
 }
 
 static GEN
-find_kernel_power(GEN Eba4, GEN Eba6, GEN Eca4, GEN Eca6, ulong ell, GEN meqn, char meqntype, GEN mpoly, GEN kpoly, GEN Ib, GEN p)
+find_kernel_power(GEN Eba4, GEN Eba6, GEN Eca4, GEN Eca6, ulong ell, GEN meqn, char meqntype, GEN kpoly, GEN Ib, GEN p)
 {
   pari_sp ltop = avma, btop;
-  GEN a4t, a6t, p1c, gtmp;
+  GEN a4t, a6t, gtmp;
   GEN num_iso = find_numerator_isogeny(Eba4, Eba6, Eca4, Eca6, kpoly, p, ell+1);
-  GEN mroots = FpX_roots(mpoly, p);
-  long i, check, vx = 0, l1 = lg(mroots);
+  GEN mpoly = FpXY_evalx(meqn, a4a6_j(Eca4, Eca6, p), p);
+  GEN tmp, mroots = FpX_roots(mpoly, p);
+  long i, vx = 0, l1 = lg(mroots);
   btop = avma;
   for (i = 1; i < l1; i++)
   {
+    GEN kpoly2, h;
     if (meqntype=='C')
-    {
-      GEN tmp = find_isogenous_from_canonical(Eca4, Eca6, ell, meqn, gel(mroots, i), p);
-      a4t = gel(tmp, 1);
-      a6t = gel(tmp, 2);
-      p1c = gel(tmp, 3);
-      gtmp = find_kernel(Eca4, Eca6, ell, a4t, a6t, p1c, p, &check);
-    }
+      tmp = find_isogenous_from_canonical(Eca4, Eca6, ell, meqn, gel(mroots, i), p);
     else
     {
-      GEN tmp = find_isogenous_from_Atkin(Eca4, Eca6, ell, meqn, gel(mroots, i), p);
-      if (!tmp) { avma=ltop; return NULL; }
-      a4t =  gel(tmp, 1);
-      a6t =  gel(tmp, 2);
-      gtmp = gel(tmp, 3); check = 1;
+      tmp = find_isogenous_from_Atkin(Eca4, Eca6, ell, meqn, gel(mroots, i), p);
+      if (!tmp) { avma = ltop; return NULL; }
     }
+    a4t =  gel(tmp, 1);
+    a6t =  gel(tmp, 2);
+    gtmp = gel(tmp, 3);
+
     /*check that the kernel kpoly is the good one */
-    if (check)
+    kpoly2 = FpX_sqr(kpoly, p);
+    h = lift(numer(gsubst(gtmp, vx, gdiv(num_iso, kpoly2))));
+    if (signe(a4a6_divpolmod(Eba4, Eba6, ell, h, p)))
     {
-      GEN kpoly2 = FpX_sqr(kpoly, p);
-      GEN h = lift(numer(gsubst(gtmp, vx, gdiv(num_iso, kpoly2))));
-      if (signe(a4a6_divpolmod(Eba4, Eba6, ell, h, p)))
-      {
-        GEN Ic = gdiv(gsubst(num_iso, vx, Ib), gsqr(gsubst(kpoly, vx, Ib)));
-        GEN kpoly_new = lift(numer(gsubst(gtmp, vx, Ic)));
-        return gerepilecopy(ltop, mkvecn(5, a4t, a6t, kpoly_new, gtmp, Ic));
-      }
+      GEN Ic = gdiv(gsubst(num_iso, vx, Ib), gsqr(gsubst(kpoly, vx, Ib)));
+      GEN kpoly_new = lift(numer(gsubst(gtmp, vx, Ic)));
+      return gerepilecopy(ltop, mkvecn(5, a4t, a6t, kpoly_new, gtmp, Ic));
     }
     avma = btop;
   }
@@ -660,7 +653,7 @@ enum mod_type {MTpathological, MTAtkin, MTElkies, MTone_root, MTroots};
 
 /* Berlekamp variant */
 static GEN
-study_modular_eqn(long q, GEN mpoly, GEN p, enum mod_type *mt, long *ptr_r)
+study_modular_eqn(long ell, GEN mpoly, GEN p, enum mod_type *mt, long *ptr_r)
 {
   pari_sp ltop = avma;
   long r = 0;
@@ -674,9 +667,9 @@ study_modular_eqn(long q, GEN mpoly, GEN p, enum mod_type *mt, long *ptr_r)
     long dG = degpol(G);
     if (!dG)
     {
-      GEN L = FpXQ_matrix_pow(XP, q+1, q+1, mpoly, p);
-      long s = q + 1 - FpM_rank(RgM_Rg_add(L, gen_m1), p);
-      r = (q + 1)/s;
+      GEN L = FpXQ_matrix_pow(XP, ell+1, ell+1, mpoly, p);
+      long s = ell + 1 - FpM_rank(RgM_Rg_add(L, gen_m1), p);
+      r = (ell + 1)/s;
       *mt = MTAtkin;
     }
     else
@@ -686,7 +679,7 @@ study_modular_eqn(long q, GEN mpoly, GEN p, enum mod_type *mt, long *ptr_r)
       {
         case 1:  *mt = MTone_root; break;
         case 2:  *mt = MTElkies;   break;
-        default: *mt = (dG == q + 1)? MTroots: MTpathological;
+        default: *mt = (dG == ell + 1)? MTroots: MTpathological;
       }
     }
   }
@@ -707,29 +700,23 @@ static GEN
 find_trace_Elkies_power(GEN a4, GEN a6, ulong ell, long k, GEN meqn, char meqntype, GEN g, GEN tr, GEN p, long EARLY_ABORT, pari_timer *T)
 {
   pari_sp ltop = avma, btop, st_lim;
-  GEN Eba4, Eba6, Eca4, Eca6, Ib, p_1, kpoly;
+  GEN tmp, Eba4, Eba6, Eca4, Eca6, Ib, kpoly;
   ulong lambda, ellk = upowuu(ell, k), pellk = umodiu(p, ellk);
   long cnt;
 
   if (DEBUGLEVEL) { fprintferr("Trace mod %ld", ell); }
-  Eba4 = a4; Eba6 = a6;
+  Eba4 = a4;
+  Eba6 = a6;
   if (meqntype=='C')
-  {
-    GEN tmp = find_isogenous_from_canonical(Eba4, Eba6, ell, meqn, g, p);
-    long check;
-    Eca4 = gel(tmp, 1);
-    Eca6 = gel(tmp, 2);
-    p_1  = gel(tmp, 3);
-    kpoly = find_kernel(a4, a6, ell, Eca4, Eca6, p_1, p, &check);
-  }
+    tmp = find_isogenous_from_canonical(Eba4, Eba6, ell, meqn, g, p);
   else
   {
-    GEN tmp = find_isogenous_from_Atkin(a4, a6, ell, meqn, g, p);
+    tmp = find_isogenous_from_Atkin(a4, a6, ell, meqn, g, p);
     if (!tmp) { avma = ltop; return NULL; }
-    Eca4 =  gel(tmp, 1);
-    Eca6 =  gel(tmp, 2);
-    kpoly = gel(tmp, 3);
   }
+  Eca4 =  gel(tmp, 1);
+  Eca6 =  gel(tmp, 2);
+  kpoly = gel(tmp, 3);
   Ib = pol_x(0);
   lambda = find_eigen_value(a4, a6, ell, kpoly, p, tr);
   if (DEBUGLEVEL>1) fprintferr(" [%ld ms]", TIMER(T));
@@ -742,10 +729,9 @@ find_trace_Elkies_power(GEN a4, GEN a6, ulong ell, long k, GEN meqn, char meqnty
   btop = avma; st_lim = stack_lim(btop, 1);
   for (cnt = 2; cnt <= k; cnt++)
   {
-    GEN tmp, mpoly;
+    GEN tmp;
     if (DEBUGLEVEL) fprintferr(", %Ps", powuu(ell, cnt));
-    mpoly = FpXY_evalx(meqn, a4a6_j(Eca4, Eca6, p), p);
-    tmp = find_kernel_power(Eba4, Eba6, Eca4, Eca6, ell, meqn, meqntype, mpoly, kpoly, Ib, p);
+    tmp = find_kernel_power(Eba4, Eba6, Eca4, Eca6, ell, meqn, meqntype, kpoly, Ib, p);
     if (!tmp) { avma = ltop; return NULL; }
     lambda = find_eigen_value_power(a4, a6, ell, cnt, gel(tmp,3), lambda, p);
     Eba4 = Eca4;
