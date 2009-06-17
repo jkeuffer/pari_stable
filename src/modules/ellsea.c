@@ -73,17 +73,20 @@ list_to_pol(GEN list)
   return gerepileupto(ltop, gtopoly(P, -1));
 }
 
-static GEN
-get_modular_eqn(ulong ell, char *type)
+struct meqn { char type; GEN eq; };
+
+static int
+get_modular_eqn(struct meqn *M, ulong ell)
 {
   GEN eqn;
   long idx = uprimepi(ell)-1;
   if (idx<lg(modular_eqn))
     eqn = gel(modular_eqn, idx);
   else eqn = get_seadata(ell);
-  if (!eqn) return NULL;
-  *type = *GSTR(gel(eqn, 2));
-  return list_to_pol(gel(eqn, 3));
+  if (!eqn) return 0;
+  M->type = *GSTR(gel(eqn, 2));
+  M->eq = list_to_pol(gel(eqn, 3));
+  return 1;
 }
 
 /*Gives the first precS terms of the Weierstrass series related to */
@@ -608,25 +611,28 @@ find_isogenous_from_canonical(GEN a4, GEN a6, long ell, GEN meqn, GEN g, GEN p)
 }
 
 static GEN
-find_kernel_power(GEN Eba4, GEN Eba6, GEN Eca4, GEN Eca6, ulong ell, GEN meqn, char meqntype, GEN kpoly, GEN Ib, GEN p)
+find_isogenous(GEN a4, GEN a6, long ell, struct meqn *MEQN, GEN g, GEN p)
+{
+  return (MEQN->type == 'C')
+    ? find_isogenous_from_canonical(a4, a6, ell, MEQN->eq, g, p)
+    : find_isogenous_from_Atkin(a4, a6, ell, MEQN->eq, g, p);
+}
+
+static GEN
+find_kernel_power(GEN Eba4, GEN Eba6, GEN Eca4, GEN Eca6, ulong ell, struct meqn *MEQN, GEN kpoly, GEN Ib, GEN p)
 {
   pari_sp ltop = avma, btop;
   GEN a4t, a6t, gtmp;
   GEN num_iso = find_numerator_isogeny(Eba4, Eba6, Eca4, Eca6, kpoly, p, ell+1);
-  GEN mpoly = FpXY_evalx(meqn, a4a6_j(Eca4, Eca6, p), p);
+  GEN mpoly = FpXY_evalx(MEQN->eq, a4a6_j(Eca4, Eca6, p), p);
   GEN tmp, mroots = FpX_roots(mpoly, p);
   long i, vx = 0, l1 = lg(mroots);
   btop = avma;
   for (i = 1; i < l1; i++)
   {
     GEN kpoly2, h;
-    if (meqntype=='C')
-      tmp = find_isogenous_from_canonical(Eca4, Eca6, ell, meqn, gel(mroots, i), p);
-    else
-    {
-      tmp = find_isogenous_from_Atkin(Eca4, Eca6, ell, meqn, gel(mroots, i), p);
-      if (!tmp) { avma = ltop; return NULL; }
-    }
+    tmp = find_isogenous(Eca4, Eca6, ell, MEQN, gel(mroots, i), p);
+    if (!tmp) { avma = ltop; return NULL; }
     a4t =  gel(tmp, 1);
     a6t =  gel(tmp, 2);
     gtmp = gel(tmp, 3);
@@ -697,7 +703,7 @@ study_modular_eqn(long ell, GEN mpoly, GEN p, enum mod_type *mt, long *ptr_r)
 
 /*Returns the trace modulo ell^k when ell is an Elkies prime */
 static GEN
-find_trace_Elkies_power(GEN a4, GEN a6, ulong ell, long k, GEN meqn, char meqntype, GEN g, GEN tr, GEN p, long EARLY_ABORT, pari_timer *T)
+find_trace_Elkies_power(GEN a4, GEN a6, ulong ell, long k, struct meqn *MEQN, GEN g, GEN tr, GEN p, long EARLY_ABORT, pari_timer *T)
 {
   pari_sp ltop = avma, btop, st_lim;
   GEN tmp, Eba4, Eba6, Eca4, Eca6, Ib, kpoly;
@@ -707,13 +713,8 @@ find_trace_Elkies_power(GEN a4, GEN a6, ulong ell, long k, GEN meqn, char meqnty
   if (DEBUGLEVEL) { fprintferr("Trace mod %ld", ell); }
   Eba4 = a4;
   Eba6 = a6;
-  if (meqntype=='C')
-    tmp = find_isogenous_from_canonical(Eba4, Eba6, ell, meqn, g, p);
-  else
-  {
-    tmp = find_isogenous_from_Atkin(a4, a6, ell, meqn, g, p);
-    if (!tmp) { avma = ltop; return NULL; }
-  }
+  tmp = find_isogenous(a4,a6, ell, MEQN, g, p);
+  if (!tmp) { avma = ltop; return NULL; }
   Eca4 =  gel(tmp, 1);
   Eca6 =  gel(tmp, 2);
   kpoly = gel(tmp, 3);
@@ -731,7 +732,7 @@ find_trace_Elkies_power(GEN a4, GEN a6, ulong ell, long k, GEN meqn, char meqnty
   {
     GEN tmp;
     if (DEBUGLEVEL) fprintferr(", %Ps", powuu(ell, cnt));
-    tmp = find_kernel_power(Eba4, Eba6, Eca4, Eca6, ell, meqn, meqntype, kpoly, Ib, p);
+    tmp = find_kernel_power(Eba4, Eba6, Eca4, Eca6, ell, MEQN, kpoly, Ib, p);
     if (!tmp) { avma = ltop; return NULL; }
     lambda = find_eigen_value_power(a4, a6, ell, cnt, gel(tmp,3), lambda, p);
     Eba4 = Eca4;
@@ -804,10 +805,10 @@ static GEN
 find_trace(GEN a4, GEN a6, ulong ell, GEN p, long *ptr_kt, long EARLY_ABORT)
 {
   pari_sp ltop = avma;
-  GEN  g, meqn, meqnj, tr, tr2;
-  char meqntype;
+  GEN  g, meqnj, tr, tr2;
   long k = 1, kt, r;
   enum mod_type mt;
+  struct meqn MEQN;
   pari_timer T;
 
   if (ell <= 13)
@@ -822,11 +823,10 @@ find_trace(GEN a4, GEN a6, ulong ell, GEN p, long *ptr_kt, long EARLY_ABORT)
     }
   }
   kt = k;
-  meqn = get_modular_eqn(ell, &meqntype);
-  if (!meqn) return gen_0;
+  if (!get_modular_eqn(&MEQN, ell)) return gen_0;
   if (DEBUGLEVEL)
   { fprintferr("Process prime %5ld. ", ell); TIMERstart(&T); }
-  meqnj = FpXY_evalx(meqn, a4a6_j(a4, a6, p), p);
+  meqnj = FpXY_evalx(MEQN.eq, a4a6_j(a4, a6, p), p);
   g = study_modular_eqn(ell, meqnj, p, &mt, &r);
   /* If l is an Elkies prime, search for a factor of the l-division polynomial.
   * Then deduce the trace by looking for eigenvalues of the Frobenius by
@@ -838,12 +838,12 @@ find_trace(GEN a4, GEN a6, ulong ell, GEN p, long *ptr_kt, long EARLY_ABORT)
     kt = k = 1;
     /* Must take k = 1 because we can't apply Hensel: no guarantee that a
      * root mod ell^2 exists */
-    tr = find_trace_Elkies_power(a4,a6,ell, k, meqn,meqntype, g, tr2, p, EARLY_ABORT, &T);
+    tr = find_trace_Elkies_power(a4,a6,ell, k, &MEQN, g, tr2, p, EARLY_ABORT, &T);
     if (!tr) tr = tr2;
     break;
   case MTElkies:
     /* Contrary to MTone_root, may look mod higher powers of ell */
-    tr = find_trace_Elkies_power(a4,a6,ell, k, meqn,meqntype, g, NULL, p, EARLY_ABORT, &T);
+    tr = find_trace_Elkies_power(a4,a6,ell, k, &MEQN, g, NULL, p, EARLY_ABORT, &T);
     if (!tr) { avma = ltop; return NULL; }
     break;
   case MTroots:
