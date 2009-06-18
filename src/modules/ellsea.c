@@ -80,7 +80,7 @@ get_modular_eqn(struct meqn *M, ulong ell)
 {
   GEN eqn;
   long idx = uprimepi(ell)-1;
-  if (idx<lg(modular_eqn))
+  if (idx && idx<lg(modular_eqn))
     eqn = gel(modular_eqn, idx);
   else eqn = get_seadata(ell);
   if (!eqn) return 0;
