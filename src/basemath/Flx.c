@@ -871,7 +871,8 @@ Flx_invmontgomery_newton(GEN T, ulong p)
     if (i >= lz) continue; /* z-1 = 0(t^(nnew + 1)) */
 
     /* z + i represents (x*q - 1) / t^i */
-    z = Flx_mulspec(x, z+i, p, lx, lz-i); /* FIXME: low product */
+    lz = Flx_lgrenormalizespec (z+i, lz-i);
+    z = Flx_mulspec(x, z+i, p, lx, lz); /* FIXME: low product */
     lz = lgpol(z); z += 2;
     if (lz > lnew-i) lz = Flx_lgrenormalizespec(z, lnew-i);
 
