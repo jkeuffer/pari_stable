@@ -1635,6 +1635,7 @@ compilenode(long n, int mode, long flag)
         compilecast(n,Gvoid,Ggen);
       op_push(OCpushgen, data_push(getfunction(&pos,nb,nbmvar,text)),n);
       if (nbmvar) op_push(OCsaveframe,!!(flag&FLreturn),n);
+      compilecast(n, Gclosure, mode);
       avma=ltop;
       return;
     }
