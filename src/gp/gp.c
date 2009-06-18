@@ -1730,9 +1730,6 @@ alarm0(long s)
 /**                        INITIALIZATION                         **/
 /**                                                               **/
 /*******************************************************************/
-static void
-testuint(char *s, ulong *d) { if (s) *d = get_uint(s); }
-
 static char *
 read_arg(long *nread, char *t, long argc, char **argv)
 {
@@ -1759,12 +1756,11 @@ init_trivial_stack(void)
   avma = top = bot + s;
 }
 
-/* sets what is to become parisize / primelimit */
 static void
-read_opt(pari_stack *p_A, long argc, char **argv, size_t *size, ulong *plimit)
+read_opt(pari_stack *p_A, long argc, char **argv)
 {
   char *b = NULL, *p = NULL, *s = NULL;
-  ulong maxp, f = GP_DATA->flags;
+  ulong f = GP_DATA->flags;
   long i = 1, initrc = 1;
 
   (void)&p; (void)&b; (void)&s; /* -Wall gcc-2.95 */
@@ -1830,11 +1826,9 @@ read_opt(pari_stack *p_A, long argc, char **argv, size_t *size, ulong *plimit)
   for ( ; i < argc; i++) stack_pushp(p_A, pari_strdup(argv[i]));
 
   /* override the values from gprc */
-  maxp = maxprime(); /* possibly modified from gprc */
-  if (maxp) *plimit = maxp;
-  *size = top - bot;    /* possibly modified from gprc */
-  testuint(p, plimit);
-  testuint(s, (ulong*)size);
+  if (p) (void)sd_primelimit(p, d_INITRC);
+  if (s) (void)sd_parisize(s, d_INITRC);
+
   if (GP_DATA->flags & (EMACS|TEXMACS|TEST)) disable_color = 1;
   pari_outfile = stdout;
 }
@@ -1853,8 +1847,6 @@ main(int argc, char **argv)
 #endif
   void **A;
   pari_stack s_A, *newfun, *oldfun;
-  ulong plimit = 500000;
-  size_t size;
 
   GP_DATA = default_gp_data();
   if (setjmp(GP_DATA->env))
@@ -1865,9 +1857,8 @@ main(int argc, char **argv)
   pari_init_defaults();
   stack_init(&s_A,sizeof(*A),(void**)&A);
   stack_init(&s_bufstack, sizeof(Buffer*), (void**)&bufstack);
-  pari_init_stack(1000000*sizeof(long), 0);
-  read_opt(&s_A, argc,argv, &size, &plimit);
-  pari_init_opts(size, plimit, INIT_SIGm);
+  pari_init_opts(1000000 * sizeof(long), 500000, INIT_SIGm);
+  read_opt(&s_A, argc,argv);
 #ifdef SIGALRM
   (void)os_signal(SIGALRM,gp_alarm_handler);
 #endif
