@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "paripriv.h"
 
 static GEN nfsqff(GEN nf,GEN pol,long fl,GEN den);
+enum { FACTORS = 0, ROOTS, ROOTS_SPLIT };
 
 /* for nf_bestlift: reconstruction of algebraic integers known mod P^k,
  * P maximal ideal above p */
@@ -302,7 +303,7 @@ nfroots(GEN nf,GEN pol)
   (void)nfgcd_all(A, RgX_deriv(A), T, den == gen_1? f: mulii(f, den), &A);
   if (degpol(A) != d) A = Q_primpart( QXQX_normalize(A, T) );
   ensure_lt_INT(A);
-  A = nfsqff(nf,A,1, den);
+  A = nfsqff(nf,A, ROOTS, den);
   A = gerepileupto(av, QXQV_to_mod(A, T));
   gen_sort_inplace(A, (void*)&cmp_RgX, &cmp_nodata, NULL);
   return A;
@@ -317,7 +318,7 @@ nfissplit(GEN nf, GEN x)
   nf = checknf(nf);
   x = rnf_fix_pol(nf_get_pol(nf), x, 1);
   if (typ(x) != t_POL) pari_err(typeer, "nfissplit");
-  l = lg(nfsqff(nf, x, 2, gen_1));
+  l = lg(nfsqff(nf, x, ROOTS_SPLIT, gen_1));
   avma = av; return l != 1;
 }
 
@@ -480,7 +481,7 @@ nffactor(GEN nf,GEN pol)
   if (DEBUGLEVEL>2) msgTIMER(&ti, "squarefree test");
   if (degpol(B) != dA) B = Q_primpart( QXQX_normalize(B, T) );
   ensure_lt_INT(B);
-  y = nfsqff(nf,B,0, den);
+  y = nfsqff(nf,B, 0, den);
   if (DEBUGLEVEL>3) fprintferr("number of factor(s) found: %ld\n", lg(y)-1);
 
   fact_from_sqff(rep, A, B, y, T, bad);
@@ -1453,7 +1454,7 @@ nf_DDF_roots(GEN pol, GEN polred, GEN nfpol, GEN ltdn, GEN init_fa, long nbf,
       if (Cltdn) r = gdiv(r, Cltdn);
       gel(z,m++) = r;
     }
-    else if (fl == 2) return cgetg(1, t_VEC);
+    else if (fl == ROOTS_SPLIT) return cgetg(1, t_VEC);
   }
   z[0] = evaltyp(t_VEC) | evallg(m);
   return z;
@@ -1548,7 +1549,7 @@ nf_pick_prime(long ct, GEN nf, GEN polbase, long fl,
       red = ZX_to_Flx(red, pp);
       if (ltp) red = Flx_normalize(red, pp);
       if (!Flx_is_squarefree(red, pp)) { avma = av2; continue; }
-      anbf = fl? Flx_nbroots(red, pp): Flx_nbfact(red, pp);
+      anbf = fl == FACTORS? Flx_nbfact(red, pp): Flx_nbroots(red, pp);
     }
     else
     {
@@ -1556,13 +1557,13 @@ nf_pick_prime(long ct, GEN nf, GEN polbase, long fl,
       if (ltp) red = FqX_normalize(red, aT,ap);
       if (!FqX_is_squarefree(red,aT,ap)) { avma = av2; continue; }
       q = powiu(ap, degpol(aT));
-      anbf = fl? FqX_split_deg1(&fa, red, q, aT, ap)
-               : FqX_split_by_degree(&fa, red, q, aT, ap);
+      anbf = fl == FACTORS? FqX_split_by_degree(&fa, red, q, aT, ap)
+                          : FqX_split_deg1(&fa, red, q, aT, ap);
     }
-    if (fl == 2 && anbf < dpol) return anbf;
+    if (fl == ROOTS_SPLIT && anbf < dpol) return anbf;
     if (anbf <= 1)
     {
-      if (!fl) return anbf; /* irreducible */
+      if (fl == FACTORS) return anbf; /* irreducible */
       if (!anbf) return 0; /* no root */
     }
 
@@ -1577,7 +1578,7 @@ nf_pick_prime(long ct, GEN nf, GEN polbase, long fl,
     else avma = av2;
     if (DEBUGLEVEL>3)
       fprintferr("%3ld %s at prime\n  %Ps\nTime: %ld\n",
-                 anbf, fl?"roots": "factors", apr, TIMER(&ti_pr));
+                 anbf, fl == FACTORS?"factors": "roots", apr, TIMER(&ti_pr));
     if (--ct <= 0) return nbf;
   }
 }
@@ -1641,8 +1642,9 @@ polfnf(GEN a, GEN T)
 /* return the factorization of the square-free polynomial pol. Not memory-clean
    The coeffs of pol are in Z_nf and its leading term is a rational integer.
    deg(pol) > 0, deg(nfpol) > 1
-   If fl = 1, return only the roots of x in nf
-   If fl = 2, as fl=1 if pol splits, [] otherwise
+   fl is either FACTORS (return factors), or ROOTS / ROOTS_SPLIT (return roots):
+     - ROOTS, return only the roots of x in nf
+     - ROOTS_SPLIT, as ROOTS if pol splits, [] otherwise
    den is usually 1, otherwise nf.zk is doubtful, and den bounds the
    denominator of an arbitrary element of Z_nf on nf.zk */
 static GEN
@@ -1665,7 +1667,7 @@ nfsqff(GEN nf, GEN pol, long fl, GEN den)
     GEN z;
     if (DEBUGLEVEL>2) fprintferr("Using Trager's method\n");
     z = nfsqff_trager(Q_primpart(pol), nfpol, mulii(den, nf_get_index(nf)));
-    if (fl) {
+    if (fl != FACTORS) {
       long i, l = lg(z);
       for (i = 1; i < l; i++)
       {
@@ -1675,17 +1677,17 @@ nfsqff(GEN nf, GEN pol, long fl, GEN den)
         gel(z,i) = gdiv(gel(t,2), negi(LT));
       }
       setlg(z, i);
-      if (fl == 2 && i != l) return cgetg(1,t_VEC);
+      if (fl == ROOTS_SPLIT && i != l) return cgetg(1,t_VEC);
     }
     return z;
   }
 
   polbase = RgX_to_nfX(nf, pol);
   nbf = nf_pick_prime(5, nf, polbase, fl, &lt, &init_fa, &pr, &L.Tp);
-  if (fl == 2 && nbf < dpol) return cgetg(1,t_VEC);
+  if (fl == ROOTS_SPLIT && nbf < dpol) return cgetg(1,t_VEC);
   if (nbf <= 1)
   {
-    if (!fl) return mkvec(QXQX_normalize(pol, nfpol)); /* irreducible */
+    if (fl == FACTORS) return mkvec(QXQX_normalize(pol, nfpol)); /* irred. */
     if (!nbf) return cgetg(1,t_VEC); /* no root */
   }
 
@@ -1699,8 +1701,9 @@ nfsqff(GEN nf, GEN pol, long fl, GEN den)
   T.dn = is_pm1(den)? NULL: den;
   T.Br = nf_root_bounds(pol, nf); if (lt) T.Br = gmul(T.Br, lt);
 
-  if (fl) C0 = normlp(T.Br, 2, n);
-  else    C0 = nf_factor_bound(nf, polbase); /* bound for T_2(Q_i), Q | P */
+  /* C0 = bound for T_2(Q_i), Q | P */
+  if (fl != FACTORS) C0 = normlp(T.Br, 2, n);
+  else               C0 = nf_factor_bound(nf, polbase);
   T.bound = mulrr(T.ZC, C0); /* bound for |Q_i|^2 in Z^n on chosen Z-basis */
 
   N2 = mulur(dpol*dpol, normlp(T.Br, 4, n)); /* bound for T_2(lt * S_2) */
@@ -1708,7 +1711,8 @@ nfsqff(GEN nf, GEN pol, long fl, GEN den)
 
   if (DEBUGLEVEL>2) {
     msgTIMER(&ti, "bound computation");
-    fprintferr("  1) T_2 bound for %s: %Ps\n", fl?"root":"factor", C0);
+    fprintferr("  1) T_2 bound for %s: %Ps\n",
+               fl == FACTORS?"factor": "root", C0);
     fprintferr("  2) Conversion from T_2 --> | |^2 bound : %Ps\n", T.ZC);
     fprintferr("  3) Final bound: %Ps\n", T.bound);
   }
@@ -1719,7 +1723,7 @@ nfsqff(GEN nf, GEN pol, long fl, GEN den)
   if (DEBUGLEVEL>2) TIMERstart(&ti);
   polred = ZqX_normalize(polbase, lt, &L); /* monic */
 
-  if (fl) {
+  if (fl != FACTORS) {
     GEN z = nf_DDF_roots(pol, polred, nfpol, mul_content(lt, T.dn),
                          init_fa, nbf, fl, &L);
     if (lg(z) == 1) return cgetg(1, t_VEC);
@@ -1857,7 +1861,7 @@ nfcyclo_root(GEN nf, long n_cyclo, prklift_t *P, GEN C0)
     nbf = Flx_nbroots(ZX_to_Flx(pol,p), p);
   }
   if (nbf != deg) return NULL; /* no roots in residue field */
-  z = nf_DDF_roots(pol, pol, nfpol, gen_1, init_fa, nbf, 2/*fl*/, P->L);
+  z = nf_DDF_roots(pol, pol, nfpol, gen_1, init_fa, nbf, ROOTS_SPLIT, P->L);
   if (lg(z) == 1) { avma = av; return NULL; } /* no roots */
   return gel(z,1);
 }
