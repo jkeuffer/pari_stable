@@ -591,7 +591,7 @@ GEN     qfsign(GEN a);
 
 /* anal.c */
 
-void    addhelp(entree *ep, char *s);
+void    addhelp(const char *e, char *s);
 void    alias0(const char *s, const char *old);
 GEN     compile_str(const char *s);
 GEN     chartoGENstr(char c);
@@ -604,7 +604,7 @@ GEN     fetch_var_value(long vx, GEN t);
 GEN     gp_read_str(const char *t);
 entree* install(void *f, char *name, char *code);
 entree* is_entry(const char *s);
-void    kill0(entree *ep);
+void    kill0(const char *e);
 long    manage_var(long n, entree *ep);
 void    pari_var_init(void);
 long    pari_var_next(void);

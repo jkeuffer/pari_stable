@@ -48,7 +48,6 @@ void alarm0(long s);
 GEN  extern0(const char *cmd);
 void gp_quit(long exitcode);
 GEN  input0(void);
-void kill0(entree *ep);
 GEN  read0(const char *s);
 void system0(const char *cmd);
 int  whatnow(const char *s, int silent);

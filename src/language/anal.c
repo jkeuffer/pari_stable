@@ -245,7 +245,6 @@ check_proto(const char *code)
     case 'L':
     case 'M':
     case 'P':
-    case 'S':
     case 'W':
     case 'f':
     case 'n':
@@ -341,27 +340,20 @@ install(void *f, char *name, char *code)
 
 /* Kill ep, i.e free all memory it references, and reset to initial value */
 void
-kill0(entree *ep)
+kill0(const char *e)
 {
-  entree *EP = initial_value(ep);
-  if (EpSTATIC(ep)) pari_err(talker,"can't kill that");
+  entree *ep = is_entry(e);
+  if (!ep || EpSTATIC(ep)) pari_err(talker,"can't kill that");
   freeep(ep);
-  switch(EpVALENCE(ep))
-  {
-    case EpNEW: break;
-    case EpALIAS:
-    case EpINSTALL:
-      ep->valence = EpNEW;
-      init_initial_value(EP);
-      break;
-  }
-  ep->value   = EP;
+  ep->valence = EpNEW;
+  ep->value   = NULL;
   ep->pvalue  = NULL;
 }
 
 void
-addhelp(entree *ep, char *s)
+addhelp(const char *e, char *s)
 {
+  entree *ep = fetch_entry(e, strlen(e));
   if (ep->help && !EpSTATIC(ep)) pari_free((void*)ep->help);
   ep->help = pari_strdup(s);
 }
@@ -881,7 +873,10 @@ void
 delete_named_var(entree *ep)
 {
   (void)pari_var_pop( varn(initial_value(ep)) );
-  kill0(ep);
+  freeep(ep);
+  ep->valence = EpNEW;
+  ep->value   = NULL;
+  ep->pvalue  = NULL;
 }
 
 void

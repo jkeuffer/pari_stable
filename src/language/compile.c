@@ -478,36 +478,22 @@ compilecast(long n, int type, int mode)
 }
 
 static entree *
-get_entree(long n)
+getfunc(long n)
 {
   long x=tree[n].x;
   if (tree[x].x==CSTmember)
-    return fetch_member(tree[x].str, tree[x].len);
+    return do_alias(fetch_member(tree[x].str, tree[x].len));
   else
-    return fetch_entry(tree[x].str, tree[x].len);
+    return do_alias(fetch_entry(tree[x].str, tree[x].len));
 }
 
-/* match any Fentry */
 static entree *
-getsymbol(long n)
+getentry(long n)
 {
   n = detag(n);
   if (tree[n].f!=Fentry)
     compile_varerr(tree[n].str);
-  return get_entree(n);
-}
-
-/* match any Fentry */
-static entree *
-getentry(long n)
-{
-  return do_alias(getsymbol(n));
-}
-
-static entree *
-getfunc(long n)
-{
-  return do_alias(get_entree(n));
+  return getfunc(n);
 }
 
 /* match Fentry that are not actually EpSTATIC functions called without parens*/
@@ -1102,13 +1088,6 @@ compilefunc(entree *ep, long n, int mode)
             ev[lev++] = getvar(arg[j++]);
             break;
           }
-        case 'S':
-          {
-            long a = arg[j++];
-            entree *ep = getsymbol(a);
-            op_push(OCpushlong, (long)ep,a);
-            break;
-          }
         case '=':
           {
             long x=tree[arg[j]].x;
@@ -1371,7 +1350,6 @@ genclosure(long n, entree *ep)
       case 'I':
       case 'E':
       case 'V':
-      case 'S':
       case '=':
         return NULL;
       case 'r':
@@ -1824,7 +1802,6 @@ optimizefunc(entree *ep, long n)
           optimizenode(arg[j++]);
           fl=0;
           break;
-        case 'S':
         case 'V':
         case 'r':
           tree[arg[j++]].flags=COsafelex|COsafedyn;

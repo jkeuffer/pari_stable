@@ -1,7 +1,7 @@
 Function: addhelp
 Section: programming/specific
 C-Name: addhelp
-Prototype: vSs
+Prototype: vrs
 Help: addhelp(S,str): add/change help message for the symbol S.
 Doc: changes the help
  message for the symbol $S$. The string \var{str} is expanded on the spot
