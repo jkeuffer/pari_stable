@@ -2,10 +2,10 @@ Function: kill
 Section: programming/specific
 C-Name: kill0
 Prototype: vr
-Help: kill(S): restores a symbol to its ``undefined'' status and kill
+Help: kill(sym): restores the symbol sym to its ``undefined'' status and kill
  associated help messages.
-Doc: restores a symbol to its ``undefined'' status, and deletes any help
- messages associated to $S$ using \kbd{addhelp}. This allow to remove aliases
- and installed functions, and reset variables to its starting value
- (which can be performed in a simpler way by using the \idx{quote} operator 
- \kbd{a = 'a}).
+Doc: restores the symbol \kbd{sym} to its ``undefined'' status, and deletes any
+ help messages associated to \kbd{sym} using \kbd{addhelp}. This allows one to
+ remove aliases and installed functions, and reset variables to their starting
+ values (which can be performed in a simpler way by using the \idx{quote}
+ operator \kbd{a = 'a}).

@@ -2,16 +2,15 @@ Function: addhelp
 Section: programming/specific
 C-Name: addhelp
 Prototype: vrs
-Help: addhelp(S,str): add/change help message for the symbol S.
-Doc: changes the help
- message for the symbol $S$. The string \var{str} is expanded on the spot
- and stored as the online help for $S$. If $S$ is a function \emph{you} have
- defined, its definition will still be printed before the message \var{str}.
- It is recommended that you document global variables and user functions in
- this way. Of course \kbd{gp} will not protest if you skip this.
- It is possible to attach a help text to an alias, but it will never be
- shown: aliases are expanded by the \kbd{?} help operator and we get the help of
- the functions the alias points to.
+Help: addhelp(sym,str): add/change help message for the symbol sym.
+Doc: changes the help message for the symbol \kbd{sym}. The string \var{str} is
+ expanded on the spot and stored as the online help for \kbd{sym}. If \kbd{sym}
+ is a function \emph{you} have defined, its definition will still be printed
+ before the message \var{str}.  It is recommended that you document global
+ variables and user functions in this way. Of course \kbd{gp} will not protest
+ if you skip this.  It is possible to attach a help text to an alias, but it
+ will never be shown: aliases are expanded by the \kbd{?} help operator and we
+ get the help of the functions the alias points to.
 
  Nothing prevents you from modifying the help of built-in PARI
  functions. But if you do, we would like to hear why you needed to do it!

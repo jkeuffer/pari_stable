@@ -2,9 +2,9 @@ Function: alias
 Section: programming/specific
 C-Name: alias0
 Prototype: vrr
-Help: alias(newsym,sym): defines the symbol newkey as an alias for the the
- symbol key.
-Doc: defines the symbol \var{newkey} as an alias for the the symbol \var{key}.
+Help: alias(newsym,sym): defines the symbol newsym as an alias for the symbol
+ sym.
+Doc: defines the symbol \var{newsym} as an alias for the the symbol \var{sym}.
  Alias expansion is performed directly by the internal GP compiler. 
  Member functions can be aliased (to/from) by prefixing them by \kbd{\_.}.
  Operators can be aliased to by using their internal name (obtained by writing
@@ -26,7 +26,7 @@ Doc: defines the symbol \var{newkey} as an alias for the the symbol \var{key}.
  @eprog
  Note that since alias is performed at compilation-time, it does not
  require any run-time processing, however it only affects GP code
- compiled after the alias command is evaluated. A slower but more
+ compiled \emph{after} the alias command is evaluated. A slower but more
  flexible alternative is to use variables. Compare
  \bprog
  ? fun=sin;
