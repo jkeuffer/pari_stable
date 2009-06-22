@@ -2,12 +2,54 @@ Function: alias
 Section: programming/specific
 C-Name: alias0
 Prototype: vrr
-Help: alias(newkey,key): newkey is now an alias for key.
-Doc: defines the keyword \var{newkey} as an alias for keyword \var{key}.
- \var{key} must correspond to an existing \emph{function} name. This is
- different from the general user macros in that alias expansion takes place
- immediately upon execution, without having to look up any function code, and
- is thus much faster. A sample alias file \kbd{misc/gpalias} is provided with
- the standard distribution. Alias commands are meant to be read upon startup
- from the \kbd{.gprc} file, to cope with function names you are dissatisfied
- with, and should be useless in interactive usage.
+Help: alias(newsym,sym): defines the symbol newkey as an alias for the the
+ symbol key.
+Doc: defines the symbol \var{newkey} as an alias for the the symbol \var{key}.
+ Alias expansion is performed directly by the internal GP compiler. 
+ Member functions can be aliased (to/from) by prefixing them by \kbd{\_.}.
+ Operators can be aliased to by using their internal name (obtained by writing
+ \kbd{\_} in lieu of the operators argument: \kbd{\_!} and \kbd{!\_} are the
+ internal names of respectively the factorial and the logical negation.
+ \bprog
+ ? alias("det","matdet");
+ ? alias("mod","_.mod");
+ ? alias("add","_+_");
+ ? alias("_.sin","sin");
+ ? det([1,2;3,4])
+ %1 = -2
+ ? mod(Mod(x,x^4+1))
+ %2 = x^4 + 1
+ ? add(4,6)
+ %3 = 10
+ ? Pi.sin
+ %4 = 0.E-37
+ @eprog
+ Note that since alias is performed at compilation-time, it does not
+ require any run-time processing, however it only affects GP code
+ compiled after the alias command is evaluated. A slower but more
+ flexible alternative is to use variables. Compare
+ \bprog
+ ? fun=sin;
+ ? g(a,b)=intnum(t=a,b,fun(t));
+ ? g(0,Pi)
+ %3 = 2.0000000000000000000000000000000000000
+ ? fun=cos;
+ ? g(0,Pi)
+ %5 = 1.8830410776607851098 E-39
+ @eprog
+ with
+ \bprog
+ ? alias(fun,sin);
+ ? g(a,b)=intnum(t=a,b,fun(t));
+ ? g(0,Pi)
+ %2 = 2.0000000000000000000000000000000000000
+ ? alias(fun,cos);
+ ? g(0,Pi)
+ %3 = 2.0000000000000000000000000000000000000
+ ? g(a,b)=intnum(t=a,b,fun(t));
+ ? g(0,Pi)
+ %5 = 1.8830410776607851098 E-39
+ @eprog
+
+ A sample alias file \kbd{misc/gpalias} is provided with
+ the standard distribution.

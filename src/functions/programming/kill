@@ -2,9 +2,10 @@ Function: kill
 Section: programming/specific
 C-Name: kill0
 Prototype: vr
-Help: kill(S): restores a variable to its ``undefined'' value and kill
- associated help messages. Mostly obsolete.
-Doc: restores a variable to its ``undefined'' value (monomial of degree one),
- and deletes any help messages associated to $S$ using \kbd{addhelp}.
- For the first use, you should simply use the \idx{quote} operator:
- \kbd{a = 'a}. More generally, deletes aliases and installed functions.
+Help: kill(S): restores a symbol to its ``undefined'' status and kill
+ associated help messages.
+Doc: restores a symbol to its ``undefined'' status, and deletes any help
+ messages associated to $S$ using \kbd{addhelp}. This allow to remove aliases
+ and installed functions, and reset variables to its starting value
+ (which can be performed in a simpler way by using the \idx{quote} operator 
+ \kbd{a = 'a}).
