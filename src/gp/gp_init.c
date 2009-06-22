@@ -73,7 +73,7 @@ entree functions_oldgp[] = {
 {"default",0,(void*)default0,11,"D\"\",r,D\"\",s,D0,L,","default({opt},{v},{flag}): set the default opt to v. If v is omitted, print the current default for opt. If no argument is given, print a list of all defaults as well as their values. If flag is non-zero, return the result instead of printing it on screen. See manual for details"},
 {"draw",1,(void*)rectdraw,10,"vGp","draw(list)=draw vector of rectwindows list at indicated x,y positions; list is a vector w1,x1,y1,w2,x2,y2,etc..."},
 {"initrect",34,(void*)initrect,10,"vLLL","initrect(w,x,y)=initialize rectwindow w to size x,y"},
-{"kill",85,(void*)kill0,11,"vS","kill(x)=kills the present value of the variable or function x. Returns new value or 0"},
+{"kill",85,(void*)kill0,11,"vr","kill(x)=kills the present value of the variable or function x. Returns new value or 0"},
 {"killrect",11,(void *)killrect,10,"vL","killrect(w)=erase the rectwindow w"},
 {"line",35,(void *)rectline,10,"vLGG","line(w,x2,y2)=if cursor is at position (x1,y1), draw a line from (x1,y1) to (x2,y2) (and move the cursor) in the rectwindow w"},
 {"lines",35,(void *)rectlines,10,"vLGG","lines(w,listx,listy)=draws an open polygon in rectwindow w where listx and listy contain the x (resp. y) coordinates of the vertices"},
