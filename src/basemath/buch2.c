@@ -2769,7 +2769,7 @@ makematal(GEN bnf)
   nf  = bnf_get_nf(bnf);
   lW=lg(W)-1; lma=lW+lg(B);
   pFB = get_Vbase(bnf);
-  ma = cgetg(lma,t_MAT);
+  ma = cgetg(lma,t_VEC);
 
   prec = prec_arch(bnf);
   for (j=1; j<lma; j++)
