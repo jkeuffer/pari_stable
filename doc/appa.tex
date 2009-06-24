@@ -355,7 +355,8 @@ There are a few extra tests which should be useful only for developpers.
 and provides simple diagnostics if it does not. Only useful if \kbd{make
 bench} fails horribly, e.g.~things like \kbd{1+1} do not work.
 
-\kbd{make test-all} runs all available test suites. Slow.
+\kbd{make test-all} runs all available test suites. Slow. Some of the
+test requires the extra packages to be installed.
 
 \section{Installation} When everything looks fine, type
 
@@ -395,17 +396,26 @@ of just installing the new dynamic library. On the other hand, there is no
 risk of breaking them by installing a new pari library.
 
 \subsec{Extra packages:} The following optional packages endow PARI with some
-extra capabilities (only two packages for now!).
+extra capabilities:
 
 $\bullet$ \kbd{elldata}: This package contains the elliptic curves in
 John Cremona's database. It is needed by the functions \kbd{ellidentify},
-\kbd{ellsearch} and can be used by \kbd{ellinit} to initialize a curve
-given by its standard code.
+\kbd{ellsearch}, \kbd{forell} and can be used by \kbd{ellinit} to initialize a curve given by its standard code.
 
 $\bullet$ \kbd{galdata}: The default \kbd{polgalois} function can only
 compute Galois groups of polynomials of degree less or equal to 7. Install
 this package if you want to handle polynomials of degree bigger than 7 (and
-less than 11). \medskip
+less than 11).
+
+$\bullet$ \kbd{seadata}: This package contains the database of modular
+polynomials extracted from the ECHIDNA databases and computed by David R.
+Kohel. It is needed by the functions \kbd{ellap} and \kbd{ellgroup} for
+primes larger than $10^{20}$.
+
+$\bullet$ \kbd{galpol}: This package contains the GALPOL database of polynomials
+defining Galois extensions of the rationals, accessed by \kbd{galoisgetpol}.
+
+\medskip
 
 To install package \emph{pack}, you need to fetch the separate archive:
 \emph{pack}\kbd{.tgz} which you can download from the \kbd{pari} server.
