@@ -2867,6 +2867,7 @@ bnfnewprec_shallow(GEN bnf, long prec)
     long e = gexpo(bnf_get_logfu(bnf)) + 1 - TWOPOTBITS_IN_LONG;
     if (e >= 0) prec += 1 << e;
   }
+  if (DEBUGLEVEL && prec1!=prec) pari_warn(warnprec,"bnfnewprec",prec);
   nf = nfnewprec_shallow(nf0,prec);
   mun = get_archclean(nf,funits,prec,1);
   if (!mun) pari_err(precer,"bnfnewprec");
