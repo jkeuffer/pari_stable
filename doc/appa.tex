@@ -31,9 +31,7 @@ to get these.
 
   $\bullet$ GNU \kbd{MP} library. This provides an alternative multiprecision
 kernel, which is faster than PARI's native one, but unfortunately binary
-incompatible. To enable detection of GMP, use \kbd{Configure --with-gmp}.
-You should really do this if you only intend to use GP, and probably also if
-you will use libpari unless you have backwards compatibility requirements.
+incompatible, so the resulting PARI library SONAME is libpari-gmp.
 
   $\bullet$ GNU \kbd{readline} library. This provides line editing under GP,
 an automatic context-dependent completion, and an editable history of
@@ -97,8 +95,7 @@ heavily loaded machine for tunings.
 \misctitle{Technical note:} \kbd{Configure} accepts many other flags
 besides \kbd{--prefix}. See \kbd{Configure --help} for a complete list. In
 particular, there are sets of flags related to GNU MP (\kbd{--with-gmp*}) and
-GNU readline library (\kbd{--with-readline*}). Note that autodetection of GMP
-is \emph{disabled} by default, you probably want to enable it.
+GNU readline library (\kbd{--with-readline*}).
 
 Decide whether you agree with what \kbd{Configure} printed on your screen, in
 particular the architecture, compiler and optimization flags. Look for
