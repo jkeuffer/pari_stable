@@ -4,19 +4,22 @@ C-Name: alias0
 Prototype: vrr
 Help: alias(newsym,sym): defines the symbol newsym as an alias for the symbol
  sym.
-Doc: defines the symbol \var{newsym} as an alias for the the symbol \var{sym}.
- Alias expansion is performed directly by the internal GP compiler. 
- Member functions can be aliased (to/from) by prefixing them by \kbd{\_.}.
- Operators can be aliased to by using their internal name (obtained by writing
- \kbd{\_} in lieu of the operators argument: \kbd{\_!} and \kbd{!\_} are the
- internal names of respectively the factorial and the logical negation.
+Doc: defines the symbol \var{newsym} as an alias for the the symbol \var{sym}:
  \bprog
- ? alias("det","matdet");
- ? alias("mod","_.mod");
- ? alias("add","_+_");
- ? alias("_.sin","sin");
+ ? alias("det", "matdet");
  ? det([1,2;3,4])
  %1 = -2
+ @eprog\noindent
+ You are not restricted to ordinary functions, as in the above example:
+ to alias (from/to) member functions, prefix them with `\kbd{\_.}';
+ to alias operators, use their internal name, obtained by writing
+ \kbd{\_} in lieu of the operators argument: for instance, \kbd{\_!} and
+ \kbd{!\_} are the internal names of the factorial and the
+ logical negation, respectively.
+ \bprog
+ ? alias("mod", "_.mod");
+ ? alias("add", "_+_");
+ ? alias("_.sin", "sin");
  ? mod(Mod(x,x^4+1))
  %2 = x^4 + 1
  ? add(4,6)
@@ -24,29 +27,30 @@ Doc: defines the symbol \var{newsym} as an alias for the the symbol \var{sym}.
  ? Pi.sin
  %4 = 0.E-37
  @eprog
+ Alias expansion is performed directly by the internal GP compiler. 
  Note that since alias is performed at compilation-time, it does not
  require any run-time processing, however it only affects GP code
  compiled \emph{after} the alias command is evaluated. A slower but more
  flexible alternative is to use variables. Compare
  \bprog
- ? fun=sin;
- ? g(a,b)=intnum(t=a,b,fun(t));
- ? g(0,Pi)
+ ? fun = sin;
+ ? g(a,b) = intnum(t=a,b,fun(t));
+ ? g(0, Pi)
  %3 = 2.0000000000000000000000000000000000000
- ? fun=cos;
- ? g(0,Pi)
+ ? fun = cos;
+ ? g(0, Pi)
  %5 = 1.8830410776607851098 E-39
- @eprog
+ @eprog\noindent
  with
  \bprog
- ? alias(fun,sin);
- ? g(a,b)=intnum(t=a,b,fun(t));
+ ? alias(fun, sin);
+ ? g(a,b) = intnum(t=a,b,fun(t));
  ? g(0,Pi)
  %2 = 2.0000000000000000000000000000000000000
- ? alias(fun,cos);
+ ? alias(fun, cos);  \\ Oops. Does not affect *previous* definition!
  ? g(0,Pi)
  %3 = 2.0000000000000000000000000000000000000
- ? g(a,b)=intnum(t=a,b,fun(t));
+ ? g(a,b) = intnum(t=a,b,fun(t)); \\ Redefine, taking new alias into account
  ? g(0,Pi)
  %5 = 1.8830410776607851098 E-39
  @eprog
