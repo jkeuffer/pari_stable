@@ -1480,10 +1480,12 @@ muliifft_unspliti(GEN V, long bs, long len)
     GEN  u = gel(V,i);
     if (signe(u))
     {
+      GEN ap, up; 
+      long lu;
       LOCAL_OVERFLOW;
-      GEN ap = int_W(a,s);
-      GEN up = int_LSW(u);
-      long lu = lgefint(u)-2;
+      ap = int_W(a,s);
+      up = int_LSW(u);
+      lu = lgefint(u)-2;
       *ap-- = addll(*ap, *up--);
       for (j=1; j<lu; j++)
         *ap-- = addllx(*ap, *up--);
