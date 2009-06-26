@@ -213,8 +213,6 @@ group_ident_i(GEN G, GEN S)
       -1};
       long i;
       const long *t;
-      if (DEBUGLEVEL)
-        fprintferr("GaloisIndex: Using hash value s=%ld\n",s);
       for(t=tab;*t!=-1;t++)
       {
         if (t[0]==n)
@@ -284,8 +282,6 @@ group_ident_i(GEN G, GEN S)
     long scenter = groupelts_sumorders(Z), svecgroup = vecgroup_sumorders(L);
     long u = svecgroup+10000*scenter; /*This is used as a hash value*/
 
-    if (DEBUGLEVEL)
-      fprintferr("GaloisIndex: Using hash value u=%ld\n",u);
     for(t=tab; *t!=-1; t++)
     {
       if (t[0]==n)
@@ -375,8 +371,6 @@ group_ident_i(GEN G, GEN S)
       GEN V=vecgroup_idxlist(L,32);
       long idxlist=vecsmall_pack(V,10,9967);
       long w=10000*svecgroup+idxlist; /*This is used as a hash value*/
-      if (DEBUGLEVEL)
-        fprintferr("GaloisIndex: Using hash value w=%ld\n",w);
       for(t=tab; *t!=-1; t++)
       {
         if (t[0]==n)
@@ -481,8 +475,6 @@ group_ident_i(GEN G, GEN S)
       long idx32=vecgroup_idxlist(L,32)[1];
       long w=1000000*(svecgroup%997)+10000*idx32+idx48;
       /*This is used as a hash value*/
-      if (DEBUGLEVEL)
-        fprintferr("GaloisIndex: Using hash value w=%ld\n",w);
       for(t=tab; *t!=-1; t++)
       {
         if (t[0]==n)
