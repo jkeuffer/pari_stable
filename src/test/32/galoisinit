@@ -16,7 +16,7 @@
   ***                 ^--------------------
   ***   in function do: galoisidentify(galoi
   ***                   ^--------------------
-  *** galoisidentify: Not a Galois field in a Galois related function.
+  *** galoisidentify: Not a Galois group in a Galois related function.
 [x]~
 [-x, x]~
 
