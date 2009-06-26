@@ -1042,10 +1042,6 @@ wrapper.
 current value of the variable numbered $v$. Return \kbd{NULL} for a temporary
 variable.
 
-\fun{void}{delete_named_var}{entree *ep} delete variable created by
-\kbd{fetch\_named\_var}, which must be the last one created. Don't use this:
-if a variable is to be deleted, it should be a temp.
-
 \fun{entree*}{is_entry}{const char *s} returns the \kbd{entree*} associated
 to an identifier \kbd{s} (variable or function), from the interpreter
 hashtables. Return \kbd{NULL} is the identifier is unknown.

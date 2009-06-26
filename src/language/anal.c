@@ -870,16 +870,6 @@ fetch_var_value(long vx, GEN t)
 }
 
 void
-delete_named_var(entree *ep)
-{
-  (void)pari_var_pop( varn(initial_value(ep)) );
-  freeep(ep);
-  ep->valence = EpNEW;
-  ep->value   = NULL;
-  ep->pvalue  = NULL;
-}
-
-void
 name_var(long n, const char *s)
 {
   entree *ep;

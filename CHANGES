@@ -673,6 +673,7 @@ BA 46- GP routine and PARI function elldivpol
        mulcxI/mkcomplex/gen_I(), mpeuler() and mppi().
 BA 43- bitvec family function. Use F2v instead.
 BA 44- useless prototype code 'S'. Use 'r' instead.
+BA 45- useless function delete_named_var.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.2 (released 22/12/2007):

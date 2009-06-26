@@ -595,7 +595,6 @@ void    addhelp(const char *e, char *s);
 void    alias0(const char *s, const char *old);
 GEN     compile_str(const char *s);
 GEN     chartoGENstr(char c);
-void    delete_named_var(entree *ep);
 long    delete_var(void);
 entree* fetch_named_var(const char *s);
 long    fetch_user_var(const char *s);
