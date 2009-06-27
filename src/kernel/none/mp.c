@@ -30,6 +30,9 @@ int pari_kernel_init(void) { return 0; } /*nothing to do*/
  * BITS_IN_LONG) : a[0], ..., a[na-1]. [ In ordre to facilitate splitting: no
  * need to reintroduce codewords ] */
 
+#define LIMBS(x)  ((x)+2)
+#define NLIMBS(x) (lgefint(x)-2)
+
 /* Normalize a non-negative integer */
 GEN
 int_normalize(GEN x, long known_zero_words)
@@ -459,8 +462,8 @@ addumului(ulong a, ulong b, GEN Y)
 
   if (!signe(Y)) return utoi(a);
 
-  y = Y+2; z = (GEN)avma;
-  ny = lgefint(Y)-2;
+  y = LIMBS(Y); z = (GEN)avma;
+  ny = NLIMBS(Y);
   lz = ny+3;
 
   (void)new_chunk(lz);
@@ -919,13 +922,13 @@ red_montgomery(GEN T, GEN N, ulong inv)
 {
   pari_sp av;
   GEN Te, Td, Ne, Nd, scratch;
-  ulong i, j, m, t, d, k = lgefint(N)-2;
+  ulong i, j, m, t, d, k = NLIMBS(N);
   int carry;
   LOCAL_HIREMAINDER;
   LOCAL_OVERFLOW;
 
   if (k == 0) return gen_0;
-  d = lgefint(T)-2; /* <= 2*k */
+  d = NLIMBS(T); /* <= 2*k */
 #ifdef DEBUG
   if (d > 2*k) pari_err(bugparier,"red_montgomery");
 #endif
@@ -992,7 +995,7 @@ red_montgomery(GEN T, GEN N, ulong inv)
   *--Td = evaltyp(t_INT) | evallg(k);
 #ifdef DEBUG
 {
-  long l = lgefint(N)-2, s = BITS_IN_LONG*l;
+  long l = NLIMBS(N), s = BITS_IN_LONG*l;
   GEN R = int2n(s);
   GEN res = remii(mulii(T, Fp_inv(R, N)), N);
   if (k > lgefint(N)
@@ -1315,10 +1318,10 @@ Zf_add(GEN a, GEN b, GEN M)
 {
   GEN y, z = addii(a,b);
   long mod = lgefint(M)-3;
-  long l = lgefint(z)-2;
+  long l = NLIMBS(z);
   if (l<=mod) return z;
   y = subis(z, 1);
-  if (lgefint(y)-2<=mod) return z;
+  if (NLIMBS(y)<=mod) return z;
   return int_normalize(y,1);
 }
 
@@ -1334,11 +1337,11 @@ static GEN
 Zf_red_destroy(GEN z, GEN M)
 {
   long mod = lgefint(M)-3;
-  long l = lgefint(z)-2;
+  long l = NLIMBS(z);
   GEN y;
   if (l<=mod) return z;
   y = shifti(z, -mod*BITS_IN_LONG);
-  z = int_normalize(z, lgefint(y)-2);
+  z = int_normalize(z, NLIMBS(y));
   y = Zf_red_destroy(y, M);
   z = subii(z, y);
   if (signe(z)<0) z = addii(z, M);
@@ -1482,7 +1485,7 @@ muliifft_unspliti(GEN V, long bs, long len)
     {
       GEN ap = int_W(a,s);
       GEN up = int_LSW(u);
-      long lu = lgefint(u)-2;
+      long lu = NLIMBS(u);
       LOCAL_OVERFLOW;
       *ap-- = addll(*ap, *up--);
       for (j=1; j<lu; j++)
@@ -1590,7 +1593,7 @@ addshiftw(GEN x, GEN y, long d)
     y0 = yd-d; while (yd > y0) *--zd = *--yd; /* copy last d words of y */
     a -= d;
     if (a)
-      z = addiispec(x+2, y+2, lgefint(x)-2, a);
+      z = addiispec(LIMBS(x), LIMBS(y), NLIMBS(x), a);
     else
       z = icopy(x);
   }
@@ -1637,10 +1640,10 @@ muliispec(GEN a, GEN b, long na, long nb)
 
       c2 = addiispec(a0,a, n0a,na);
       c1 = addiispec(b0,b, n0b,nb);
-      c1 = muliispec(c1+2,c2+2, lgefint(c1)-2,lgefint(c2)-2);
-      c2 = addiispec(c0+2, c+2, lgefint(c0)-2,lgefint(c) -2);
+      c1 = muliispec(LIMBS(c1),LIMBS(c2), NLIMBS(c1),NLIMBS(c2));
+      c2 = addiispec(LIMBS(c0),LIMBS(c),  NLIMBS(c0),NLIMBS(c));
 
-      c1 = subiispec(c1+2,c2+2, lgefint(c1)-2,lgefint(c2)-2);
+      c1 = subiispec(LIMBS(c1),LIMBS(c2), NLIMBS(c1),NLIMBS(c2));
     }
     else
     {
@@ -1710,9 +1713,9 @@ sqrispec(GEN a, long na)
     c1 = shifti(muliispec(a0,a, n0a,na),1);
 #else /* faster */
     t = addiispec(a0,a,n0a,na);
-    t = sqrispec(t+2,lgefint(t)-2);
-    c1= addiispec(c0+2,c+2, lgefint(c0)-2, lgefint(c)-2);
-    c1= subiispec(t+2, c1+2, lgefint(t)-2, lgefint(c1)-2);
+    t = sqrispec(LIMBS(t),NLIMBS(t));
+    c1= addiispec(LIMBS(c0),LIMBS(c), NLIMBS(c0), NLIMBS(c));
+    c1= subiispec(LIMBS(t),LIMBS(c1), NLIMBS(t), NLIMBS(c1));
 #endif
     c = addshiftw(c,c1, n0);
     c = addshiftw(c,c0, n0);
@@ -1837,8 +1840,8 @@ catii(GEN a, long la, GEN b, long lb)
 {
   long l = la + lb + 2;
   GEN z = cgetipos(l);
-  xmpn_copy(z + 2, a, la);
-  xmpn_copy(z + 2 + la, b, lb);
+  xmpn_copy(LIMBS(z), a, la);
+  xmpn_copy(LIMBS(z) + la, b, lb);
   return int_normalize(z, 0);
 }
 
@@ -1923,16 +1926,16 @@ sqrtispec(GEN N, long n, GEN *r)
   h = n - l; /* N = a3(h) | a2(h) | a1(l) | a0(l words) */
   S = sqrtispec(N, h, &R); /* S^2 + R = a3|a2 */
 
-  z = catii(R+2, lgefint(R)-2, N + 2*h, l); /* = R | a1(l) */
+  z = catii(LIMBS(R), NLIMBS(R), N + 2*h, l); /* = R | a1(l) */
   q = dvmdii(z, shifti(S,1), &u);
-  z = catii(u+2, lgefint(u)-2, N + n + h, l); /* = u | a0(l) */
+  z = catii(LIMBS(u), NLIMBS(u), N + n + h, l); /* = u | a0(l) */
 
   S = addshiftw(S, q, l);
   R = subii(z, sqri(q));
   if (signe(R) < 0)
   {
     GEN S2 = shifti(S,1);
-    R = addis(subiispec(S2+2, R+2, lgefint(S2)-2,lgefint(R)-2), -1);
+    R = addis(subiispec(LIMBS(S2),LIMBS(R), NLIMBS(S2),NLIMBS(R)), -1);
     S = addis(S, -1);
   }
   *r = R; return S;
@@ -1946,7 +1949,7 @@ sqrtremi(GEN N, GEN *r)
 {
   pari_sp av;
   GEN S, R, n = N+2;
-  long k, l2, ln = lgefint(N) - 2;
+  long k, l2, ln = NLIMBS(N);
   int sh;
 
   if (ln <= 2)
