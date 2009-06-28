@@ -343,7 +343,7 @@ install-bin: install-bin-$dft
 install-bin-dyn: gp-dyn install-lib-dyn
 	-mkdir -p \$(BINDIR)
 	-\$(RM) \$(BINDIR)/gp-$version$exe_suff \$(BINDIR)/gp$exe_suff
-	-\$(LD) -o \$(BINDIR)/gp-$version$exe_suff \$(LDFLAGS) \$(OBJSGP) \$(RUNPTH_FINAL) \$(LDDYN) \$(RLLIBS) \$(PLOTLIBS) \$(LIBS) \$(DL_LIBS)
+	\$(LD) -o \$(BINDIR)/gp-$version$exe_suff \$(LDFLAGS) \$(OBJSGP) \$(RUNPTH_FINAL) \$(LDDYN) \$(RLLIBS) \$(PLOTLIBS) \$(LIBS) \$(DL_LIBS)
 	-\$(STRIP) \$(STRIPFLAGS) \$(BINDIR)/gp-$version$exe_suff
 	$postconfig \$(BINDIR)/gp-$version$exe_suff
 	-\$(LN) gp-$version$exe_suff \$(BINDIR)/gp$exe_suff
