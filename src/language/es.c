@@ -1773,8 +1773,7 @@ str_ulong(outString *S, ulong e)
   if (e == 0) str_putc(S, '0');
   else
   {
-    const int MAX = 21;
-    char buf[MAX], *p = buf + MAX;
+    char buf[21], *p = buf + sizeof(buf)/sizeof(*buf);
     *--p = 0;
     if (e > 9) {
       do
