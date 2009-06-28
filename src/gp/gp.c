@@ -1722,7 +1722,9 @@ void
 alarm0(long s)
 {
   if (s < 0) pari_err(talker,"delay must be non-negative");
+#ifdef HAS_ALARM
   alarm(s);
+#endif
 }
 
 /*******************************************************************/

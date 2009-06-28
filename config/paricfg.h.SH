@@ -141,6 +141,10 @@ esac
 case "$has_isatty" in
 yes) echo '#define HAS_ISATTY' >> $file;;
 esac
+case "$has_alarm" in
+yes) echo '#define HAS_ALARM' >> $file;;
+esac
+
 
 case "$has_getrusage" in
 yes) echo '#define USE_GETRUSAGE 1' >> $file;;
