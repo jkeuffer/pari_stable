@@ -110,6 +110,7 @@ ellcondfile(long f)
   char *s = stackmalloc(strlen(pari_datadir) + 12 + 20 + 1);
   pariFILE *F;
   GEN V;
+  if (f <= 0) pari_err(talker,"Non-positive conductor in ellcondfile");
   sprintf(s, "%s/elldata/ell%ld", pari_datadir, n);
   F = pari_fopengz(s); avma = av;
   if (!F) pari_err(talker,"Missing elldata for conductor %ld\n[need %s]",f,s);
