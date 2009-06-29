@@ -35,13 +35,13 @@ strtoclass(const char *s)
  * f to the conductor, (100)
  * c to the isogeny class (in base 26), ("a" or 0)
  * i to the curve index (2).
- * return 0 if garbage is found at the end. */
+ * return 0 if parse error. */
 static int
 ellparsename(const char *s, long *f, long *c, long *i)
 {
   long j;
   *f=-1; *c=-1; *i=-1;
-  if (*s<'0' || *s>'9') return !*s;
+  if (*s<'0' || *s>'9') return 0;
   *f=0;
   for (j=0;j<10 && '0'<=*s && *s<='9';j++)
     *f=10**f+*(s++)-'0';
@@ -84,6 +84,8 @@ ellconvertname(GEN n)
       long f,i,c;
       if (!ellparsename(GSTR(n),&f,&c,&i))
         pari_err(talker,"Incorrect curve name in ellconvertname");
+      if (f<0 || c<0 || i<0)
+        pari_err(talker,"Incomplete curve name in ellconvertname");
       return mkvec3s(f,c,i);
     }
   case t_VEC:
@@ -171,6 +173,7 @@ ellsearch(GEN A)
   else if (typ(A)==t_STR) {
     if (!ellparsename(GSTR(A),&f,&c,&i))
       pari_err(talker,"Incorrect curve name in ellsearch");
+    if (f < 0) pari_err(talker,"Need a conductor in ellsearch");
   } else {
     pari_err(typeer,"ellsearch");
     return NULL;
@@ -224,10 +227,11 @@ forell(long a, long b, GEN code)
   long i, j, k;
 
   push_lex(NULL);
+  if (ca < 0) ca = 0;
   for(i=ca; i<=cb; i++)
   {
     pari_sp ltop=avma;
-    GEN V = ellcondfile(i*1000);
+    GEN V = ellcondfile(i*1000 + 1);
     for (j=1; j<lg(V); j++)
     {
       GEN ells = gel(V,j);
