@@ -610,6 +610,14 @@ the extra information given by an \tev{ell} structure, the curve can be given
 either as a five-component vector, as a \var{smallell}, or as an \var{ell};
 if a \var{smallell} is requested, an \var{ell} may equally be given.
 
+
+A few routines --- namely \tet{ellgenerators}, \tet{ellidentify},
+\tet{ellsearch}, \tet{forell} --- require the optional package \tet{elldata}
+(John Cremona's database) to be installed. The function \tet{ellinit} will
+also allow alternative inputs, e.g.~\kbd{ellinit("11a1")}. Functions using
+this package need to load chunks of a large database in memory and require
+at least 2MB stack to avoid stack overflows.
+
 %SECTION: elliptic_curves
 
 \section{Functions related to general number fields}
