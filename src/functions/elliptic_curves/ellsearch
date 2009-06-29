@@ -7,7 +7,7 @@ Help: ellsearch(N): if N is an integer, it is taken as a conductor else if N is
  conductor ("11"). Return all curves in the elldata database that match the
  property.
 Doc: if $N$ is an integer, it is taken as a conductor else if $N$ is a
- string, it can be a curve name ("11a1"), a isogeny class ("11a") or a
+ string, it can be a curve name ("11a1"), an isogeny class ("11a") or a
  conductor "11". This function finds all curves in the \tet{elldata} database
  with the given property.
 
