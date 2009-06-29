@@ -112,7 +112,6 @@ ellcondfile(long f)
   char *s = stackmalloc(strlen(pari_datadir) + 12 + 20 + 1);
   pariFILE *F;
   GEN V;
-  if (f <= 0) pari_err(talker,"Non-positive conductor in ellcondfile");
   sprintf(s, "%s/elldata/ell%ld", pari_datadir, n);
   F = pari_fopengz(s); avma = av;
   if (!F) pari_err(talker,"Missing elldata for conductor %ld\n[need %s]",f,s);
@@ -124,8 +123,10 @@ ellcondfile(long f)
 static GEN
 ellcondlist(long f)
 {
-  GEN  v, V = ellcondfile(f);
+  GEN  v, V;
   long i;
+  if (f <= 0) pari_err(talker,"Non-positive conductor in ellcondlist");
+  V = ellcondfile(f);
   for (i=1; i<lg(V); i++)
   {
     int cmp  = cmpis(gmael(V,i,1), f);
@@ -231,7 +232,7 @@ forell(long a, long b, GEN code)
   for(i=ca; i<=cb; i++)
   {
     pari_sp ltop=avma;
-    GEN V = ellcondfile(i*1000 + 1);
+    GEN V = ellcondfile(i*1000);
     for (j=1; j<lg(V); j++)
     {
       GEN ells = gel(V,j);
