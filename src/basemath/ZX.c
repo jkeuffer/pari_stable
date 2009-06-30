@@ -450,11 +450,15 @@ ZX_mul_mulii(GEN x,GEN y)
   return gerepileupto(av, Z_mod2BIL_ZX(z, N, dx+dy, varn(x), v));
 }
 
+/* copy a ZX equal to 0, faster than ZX_copy */
+static GEN
+ZX0_copy(GEN x) { GEN y = cgetg(2, t_POL); y[1] = x[1]; return y; }
+
 GEN
 ZX_sqr(GEN x)
 {
   long dx = degpol(x);
-  if (dx<=0) return dx < 0? ZX_copy(x): ZX_Z_mul(x, gel(x,2));
+  if (dx<=0) return dx < 0? ZX0_copy(x): ZX_Z_mul(x, gel(x,2));
   return ZX_sqr_sqri(x);
 }
 
@@ -462,8 +466,8 @@ GEN
 ZX_mul(GEN x, GEN y)
 {
   long dx, dy;
-  dx = degpol(x); if (dx<=0) return dx < 0? ZX_copy(x): ZX_Z_mul(y, gel(x,2));
-  dy = degpol(y); if (dy<=0) return dy < 0? ZX_copy(y): ZX_Z_mul(x, gel(y,2));
+  dx = degpol(x); if (dx<=0) return dx < 0? ZX0_copy(x): ZX_Z_mul(y, gel(x,2));
+  dy = degpol(y); if (dy<=0) return dy < 0? ZX0_copy(y): ZX_Z_mul(x, gel(y,2));
   return ZX_mul_mulii(x,y);
 }
 
