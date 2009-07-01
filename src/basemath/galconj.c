@@ -566,6 +566,8 @@ polheadlong(GEN P, long n, GEN mod)
   return (lg(P)>n+2)? intheadlong(gel(P,n+2),mod): 0;
 }
 
+#define headlongisint(Z,N) (-(ulong)(Z)<=(ulong)(N))
+
 static long
 frobeniusliftall(GEN sg, long el, GEN *psi, struct galois_lift *gl,
                  struct galois_testlift *gt, GEN frob)
@@ -619,11 +621,11 @@ frobeniusliftall(GEN sg, long el, GEN *psi, struct galois_lift *gl,
       }
       cache[j] = cache[j+1]+mael(Cd,h,j);
     }
-    if (-(ulong)cache[1]<=(ulong)n)
+    if (headlongisint(cache[1],n))
     {
       long ZZ = Z;
       for (j = 1; j < m; j++) ZZ += polheadlong(gmael(C,SG[pf[j]],j),2,gl->Q);
-      if (-(ulong)ZZ<=(ulong)n)
+      if (headlongisint(ZZ,n))
       {
         u = v;
         for (j = 1; j < m; j++) u = ZX_add(u, gmael(C,SG[pf[j]],j));
@@ -831,7 +833,7 @@ testpermutation(GEN F, GEN B, GEN x, long s, long e, long cut,
         }
         ar[p1] = ar[p1+1] + V;
       }
-      if (-(ulong)ar[1] > (ulong)n) continue;
+      if (!headlongisint(ar[1],n)) continue;
 
       /* intheadlong succeeds. Full computation */
       for (p1=1, p5=d; p1 <= a; p1++, p5++)
