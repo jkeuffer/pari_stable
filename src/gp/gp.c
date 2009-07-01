@@ -1540,7 +1540,7 @@ gp_main_loop(long flag)
     }
     z = closure_evalres(pari_compile_str(b->buf, GP_DATA->flags & STRICTMATCH));
     if (! ismain) continue;
-    alarm(0);
+    alarm0(0);
 
     if (!pari_last_was_newline()) pari_putc('\n');
 
@@ -1724,6 +1724,8 @@ alarm0(long s)
   if (s < 0) pari_err(talker,"delay must be non-negative");
 #ifdef HAS_ALARM
   alarm(s);
+#else
+  if (s) pari_err(archer,"alarm");
 #endif
 }
 
