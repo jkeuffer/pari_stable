@@ -1281,7 +1281,6 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l)
   avma = ltop; return 1;
 }
 
-/* A4. FIXME: should use the intheadlong technique */
 static GEN
 a4galoisgen(GEN T, struct galois_test *td)
 {
@@ -1297,16 +1296,15 @@ a4galoisgen(GEN T, struct galois_test *td)
   gel(res,1) = mkvec3(pft,pfu,pfv);
   gel(res,2) = mkvecsmall3(2,2,3);
   av = avma;
-  ar = cgetg(n+1, t_VEC);
-  for (i = 1; i <= n; i++) gel(ar,i) = cgeti(1 + lg(td->ladic));
-  mt = gel(td->PV, td->order[n]);
+  ar = cgetg(n+1, t_VECSMALL);
+  mt = matheadlong(gel(td->PV, td->order[n]), td->ladic);
   t = identity_perm(n) + 1; /* Sorry for this hack */
   u = cgetg(n+1, t_VECSMALL) + 1; /* too lazy to correct */
   MT = cgetg(n+1, t_MAT);
-  for (j = 1; j <= n; j++) gel(MT,j) = cgetg(n+1, t_COL);
+  for (j = 1; j <= n; j++) gel(MT,j) = cgetg(n+1, t_VECSMALL);
   for (j = 1; j <= n; j++)
     for (i = 1; i < j; i++)
-      gcoeff(MT,i,j) = gcoeff(MT,j,i) = addii(gcoeff(mt,i,j),gcoeff(mt,j,i));
+      coeff(MT,i,j) = coeff(MT,j,i) = coeff(mt,i,j)+coeff(mt,j,i);
   /* MT(i,i) unused */
 
   av2 = avma;
@@ -1314,12 +1312,12 @@ a4galoisgen(GEN T, struct galois_test *td)
   /* n = 2k = 12; N = (2k)! / (k! * 2^k) = 10395 */
   N = 10395;
   if (DEBUGLEVEL>=4) fprintferr("A4GaloisConj:will test %ld permutations\n", N);
-  affsi(0, gel(ar, (n-2) >> 1));
+  ar[(n-2) >> 1]=0;
   for (k = n-2; k > 2; k -= 2)
-    addiiz(gel(ar,k>>1), gmael(MT,k+1,k+2), gel(ar,(k>>1) - 1));
+    ar[(k>>1) - 1] = ar[k>>1] + mael(MT,k+1,k+2);
   for (i = 0; i < N; i++)
   {
-    GEN g;
+    long g;
     if (i)
     {
       long a, x = i, y = 1;
@@ -1332,21 +1330,21 @@ a4galoisgen(GEN T, struct galois_test *td)
       case 5:
         x = t[0]; t[0] = t[2]; t[2] = t[1]; t[1] = x;
         lswap(t[4], t[4-a]);
-        addiiz(gel(ar,2), gmael(MT,t[4],t[5]), gel(ar,1));
+        ar[1] = ar[2] + mael(MT,t[4],t[5]);
         break;
       case 7:
         x = t[0]; t[0] = t[4]; t[4] = t[3]; t[3] = t[1]; t[1] = t[2]; t[2] = x;
         lswap(t[6], t[6-a]);
-        addiiz(gel(ar,3), gmael(MT,t[6],t[7]), gel(ar,2));
-        addiiz(gel(ar,2), gmael(MT,t[4],t[5]), gel(ar,1));
+        ar[2] = ar[3] + mael(MT,t[6],t[7]);
+        ar[1] = ar[2] + mael(MT,t[4],t[5]);
         break;
       case 9:
         x = t[0]; t[0] = t[6]; t[6] = t[5]; t[5] = t[3]; t[3] = x;
         lswap(t[1], t[4]);
         lswap(t[8], t[8-a]);
-        addiiz(gel(ar,4), gmael(MT,t[8],t[9]), gel(ar,3));
-        addiiz(gel(ar,3), gmael(MT,t[6],t[7]), gel(ar,2));
-        addiiz(gel(ar,2), gmael(MT,t[4],t[5]), gel(ar,1));
+        ar[3] = ar[4] + mael(MT,t[8],t[9]);
+        ar[2] = ar[3] + mael(MT,t[6],t[7]);
+        ar[1] = ar[2] + mael(MT,t[4],t[5]);
         break;
       default:
         y--;
@@ -1360,11 +1358,11 @@ a4galoisgen(GEN T, struct galois_test *td)
         }
         lswap(t[y], t[y-a]);
         for (k = y; k > 2; k -= 2)
-          addiiz(gel(ar,k>>1), gmael(MT,t[k],t[k+1]), gel(ar,(k>>1) - 1));
+          ar[(k>>1) - 1] = ar[k>>1] + mael(MT,t[k],t[k+1]);
       }
     }
-    g = addii(gel(ar,1), addii(gmael(MT,t[0],t[1]), gmael(MT,t[2],t[3])));
-    if (padicisint(g, td))
+    g = ar[1]+mael(MT,t[0],t[1])+ mael(MT,t[2],t[3]);
+    if (headlongisint(g,n))
     {
       for (k = 0; k < n; k += 2)
       {
@@ -1391,7 +1389,7 @@ a4galoisgen(GEN T, struct galois_test *td)
   }
   for (i = 0; i < N; i++)
   {
-    GEN g;
+    long g = 0;
     if (i)
     {
       long a, x = i, y = -2;
@@ -1425,9 +1423,8 @@ a4galoisgen(GEN T, struct galois_test *td)
         break;
       }
     }
-    g = gen_0;
-    for (k = 0; k < n; k += 2) g = addii(g, gmael(MT,u[k],u[k+1]));
-    if (padicisint(g, td))
+    for (k = 0; k < n; k += 2) g += mael(MT,u[k],u[k+1]);
+    if (headlongisint(g,n))
     {
       for (k = 0; k < n; k += 2)
       {
@@ -1460,7 +1457,7 @@ a4galoisgen(GEN T, struct galois_test *td)
     pfv[O1[4]] = O2[2+j];
     for (i = 0; i < 4; i++)
     {
-      GEN g;
+      long g = 0;
       switch (i)
       {
       case 0: break;
@@ -1476,9 +1473,8 @@ a4galoisgen(GEN T, struct galois_test *td)
       pfv[O3[4-j]]        = O1[2];
       pfv[O3[2 + (j<<1)]] = O1[3];
       pfv[O3[3-j]]        = O1[4];
-      g = gen_0;
-      for (k = 1; k <= n; k++) g = addii(g, gmael(mt,k,pfv[k]));
-      if (padicisint(g, td) && galois_test_perm(td, pfv))
+      for (k = 1; k <= n; k++) g += mael(mt,k,pfv[k]);
+      if (headlongisint(g,n) && galois_test_perm(td, pfv))
       {
         avma = av;
         if (DEBUGLEVEL >= 1)
