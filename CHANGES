@@ -179,6 +179,7 @@ BA142- besselk(0.001,1) -> SEGV
 BA143- galoisinit(x).gen was not a t_VEC
   144- lngamma(10^1000) -> precision too low in truncr. Same for psi()
   145- nffactor could segfault. [#979]
+  146- Mod(10,37)^10000000000 -> SEGV
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]

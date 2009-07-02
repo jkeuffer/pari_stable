@@ -1868,17 +1868,9 @@ Fp_pows(GEN A, long k, GEN N)
   return Fp_powu(A, (ulong)k, N);
 }
 
-static GEN
-_Fl_mul(void *E, GEN x, GEN y)
-{ return (GEN)Fl_mul((ulong)x,(ulong)y,(ulong)E); }
-
-static GEN
-_Fl_sqr(void *E, GEN x)
-{ return (GEN)Fl_sqr((ulong)x,(ulong)E); }
-
-/* A^k mod N */
+/* A^K mod N */
 GEN
-Fp_pow(GEN A, GEN k, GEN N)
+Fp_pow(GEN A, GEN K, GEN N)
 {
   pari_sp av = avma;
   long t,s, lN = lgefint(N);
@@ -1887,7 +1879,7 @@ Fp_pow(GEN A, GEN k, GEN N)
   muldata  D;
   montdata S;
 
-  s = signe(k);
+  s = signe(K);
   if (!s)
   {
     t = signe(remii(A,N)); avma = av;
@@ -1895,14 +1887,17 @@ Fp_pow(GEN A, GEN k, GEN N)
   }
   if (lN == 3)
   {
-    ulong n = N[2];
-    ulong a = umodiu(A, n);
+    ulong k, n = N[2], a = umodiu(A, n);
     if (s < 0) a = Fl_inv(a, n);
-    if (lgefint(k) == 3) return utoi(Fl_powu(a, (ulong)k[2], n));
-    /* should not occur */
     if (a <= 1) return utoi(a); /* 0 or 1 */
-    pari_warn(warner, "large exponent in Mod(a,N)^n: reduce n mod phi(N)");
-    return utoi((ulong)leftright_pow((GEN)a, k, (void*)n, &_Fl_sqr, &_Fl_mul));
+    if (lgefint(K) > 3)
+    {
+      pari_warn(warner, "Mod(a,N)^n: reducing large n mod phi(N). Do it yourself?");
+      k = umodiu(K, eulerphiu(n));
+    }
+    else 
+      k = (ulong)K[2];
+    return utoi(Fl_powu(a, k, n));
   }
 
   if (s < 0) y = Fp_inv(A,N);
@@ -1911,7 +1906,7 @@ Fp_pow(GEN A, GEN k, GEN N)
     y = modii(A,N);
     if (!signe(y)) { avma = av; return gen_0; }
   }
-  if (lgefint(k) == 3) return gerepileuptoint(av, Fp_powu(y, k[2], N));
+  if (lgefint(K) == 3) return gerepileuptoint(av, Fp_powu(y, K[2], N));
 
   base_is_2 = 0;
   if (lgefint(y) == 3) switch(y[2])
@@ -1943,7 +1938,7 @@ Fp_pow(GEN A, GEN k, GEN N)
     D.N = N;
   }
 
-  y = leftright_pow(y, k, (void*)&D, &_sqr, &_mul);
+  y = leftright_pow(y, K, (void*)&D, &_sqr, &_mul);
   if (use_montgomery)
   {
     y = montred(y, (GEN)&S);
