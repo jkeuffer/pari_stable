@@ -216,12 +216,16 @@ place to look for the user's gprc file (before $HOME/.gprc, ./gprc, and
 
 .TP
 .I $GP_DATA_DIR
-directory containing precomputed data. For now, the Galois resolvents files
-in directory 
-.I galdata/,
+directory containing data installed by optional PARI packages.
+For exemples, the Galois resolvents files in directory 
+.I galdata/
 needed by the
 .B polgalois
-function, in degrees 8 to 11.
+function, in degrees 8 to 11; or the modular polynomials in
+.I seadata/
+used by the
+.B ellap
+function for large base fields.
 
 .TP
 .I $GPHELP
