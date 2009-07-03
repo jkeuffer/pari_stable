@@ -2019,7 +2019,7 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
   if (!ga->deg) return gen_0;
   x = varn(T);
   if (DEBUGLEVEL >= 9) fprintferr("GaloisConj:denominator:%Ps\n", den);
-  if (n == 12 && ga->ord==3)
+  if (n == 12 && ga->ord==3 && ga->p4==NULL)
   { /* A4 is very probable: test it first */
     pari_sp av = avma;
     if (DEBUGLEVEL >= 4) fprintferr("GaloisConj:Testing A4 first\n");
