@@ -179,6 +179,7 @@ matrix: '[' ']'             {$$=newnode(Fvec,-1,-1,&@$);}
       | '[' ';' ']'         {$$=newnode(Fmat,-1,-1,&@$);}
       | '[' matrixelts ']'  {$$=newnode(Fvec,$2,-1,&@$);}
       | '[' matrixlines ']' {$$=newnode(Fmat,$2,-1,&@$);}
+      | '[' error ']'       {YYABORT;}
 ;
 
 arg: seq        {$$=$1;}
