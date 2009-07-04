@@ -1196,7 +1196,7 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l)
                 || (n == 24 && O[6] == 0 && O[4] == 0)
                 || ((group&ga_non_wss) && order == Fp[np]))
   {
-    long d, o, norm_o;
+    long d, o, norm_o = 1;
     GEN D, Tp;
 
     if ((group&ga_non_wss) && nbtest >= 3*nbmax) break; /* in all cases */
@@ -1210,15 +1210,14 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l)
     if (D[o] != d) { notgalois(p, ga); avma = ltop; return 0; }
 
     if (!O[o]) O[o] = p;
-    if (o % deg) continue; /* NB: deg > 1 */
-    if ((group&ga_all_normal) && o < order) continue;
+    if (o % deg) goto ga_end; /* NB: deg > 1 */
+    if ((group&ga_all_normal) && o < order) goto ga_end;
 
     /*Frob_p has order o > 1, find a power which generates a normal subgroup*/
     if (o * Fp[1] >= n)
       norm_o = o; /*subgroups of smallest index are normal*/
     else
     {
-      norm_o = 1;
       for (i = np; i > 0; i--)
       {
         if (o % Fpe[i]) break;
@@ -1230,17 +1229,17 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l)
     {
       if (!(group&ga_all_normal) || o > order)
         karma = ugcd(p-1,n);
-      else if (!improves(norm_o, deg, plift,p,n, &karma)) continue;
+      else if (!improves(norm_o, deg, plift,p,n, &karma)) goto ga_end;
       /* karma0=0, deg0<=norm_o -> the first improves() returns 1 */
       deg = norm_o; group |= ga_all_normal; /* STORE */
     }
-    else if (group&ga_all_normal) continue;
-    else if (!improves(o, order, plift,p,n, &karma)) continue;
+    else if (group&ga_all_normal) goto ga_end;
+    else if (!improves(o, order, plift,p,n, &karma)) goto ga_end;
 
     order = o; plift = p; pp = primepointer; /* STORE */
+    ga_end:
     if (DEBUGLEVEL >= 5)
-      fprintferr("GaloisAnalysis:nbtest=%ld,p=%ld,ord=%ld,k=%ld\n",
-                 nbtest, plift, order, karma);
+      fprintferr("GaloisAnalysis:Nbtest=%ld,p=%ld,o=%ld,n_o=%d,best p=%ld,ord=%ld,k=%ld\n", nbtest, p, o, norm_o, plift, order,karma);
   }
   /* To avoid looping on non-wss group.
    * TODO: check for large groups. Would it be better to disable this check if
