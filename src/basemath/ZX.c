@@ -407,7 +407,7 @@ ZX_sqr_sqri(GEN x)
   if (!dx)
   {
     RgX_shift_inplace_init(v);
-    z = ZX_Z_mul(x,gel(x,2)); /* FIXE: improve ? */
+    z = ZX_Z_mul(x,gel(x,2)); /* FIXME: improve ? */
     return gerepileupto(av, RgX_shift_inplace(z, v));
   }
   e = 2*ex + expu(dx) + 3;
