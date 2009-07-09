@@ -2401,7 +2401,7 @@ sylvester_col(GEN x, long j, long d, long D)
   GEN c = cgetg(d+1,t_COL);
   long i;
   for (i=1; i< j; i++) gel(c,i) = gen_0;
-  for (   ; i<=D; i++) c[i]=x[D-i+2];
+  for (   ; i<=D; i++) gel(c,i) = gel(x,D-i+2);
   for (   ; i<=d; i++) gel(c,i) = gen_0;
   return c;
 }
@@ -2415,7 +2415,7 @@ sylvestermatrix_i(GEN x, GEN y)
   dx = degpol(x); if (dx < 0) { dx = 0; x = _zeropol(); }
   dy = degpol(y); if (dy < 0) { dy = 0; y = _zeropol(); }
   d = dx+dy; M = cgetg(d+1,t_MAT);
-  for (j=1; j<=dy; j++) gel(M,j) = sylvester_col(x,j,d,j+dx);
+  for (j=1; j<=dy; j++) gel(M,j)    = sylvester_col(x,j,d,j+dx);
   for (j=1; j<=dx; j++) gel(M,j+dy) = sylvester_col(y,j,d,j+dy);
   return M;
 }
