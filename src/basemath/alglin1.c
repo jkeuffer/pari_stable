@@ -2763,7 +2763,9 @@ det_simple_gauss(GEN a, int inexact)
         if (low_stack(lim, stack_lim(av,1)))
         {
           if(DEBUGMEM>1) pari_warn(warnmem,"det. col = %ld",i);
-          gerepileall(av,2, &a,&x); p = gcoeff(a,i,i);
+          gerepileall(av,2, &a,&x);
+          p = gcoeff(a,i,i);
+          m = gcoeff(a,i,k); m = gdiv(m, p);
         }
       }
     }
