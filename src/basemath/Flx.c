@@ -419,7 +419,7 @@ Flx_shiftip(pari_sp av, GEN x, long v)
 }
 
 INLINE long
-maxlenghtcoeffpol(ulong p, long n)
+maxlengthcoeffpol(ulong p, long n)
 {
   pari_sp ltop = avma;
   GEN z = muliu(sqru(p-1), n);
@@ -475,7 +475,7 @@ Flx_mulspec_basecase(GEN x, GEN y, ulong p, long nx, long ny)
     for (  ; i<nx; i++) z[i] = Flx_mullimb(x+i,y,p,0,ny);
     for (  ; i<nz; i++) z[i] = Flx_mullimb(x+i,y,p,i-nx+1,ny);
   }
-  z -= 2; return z;
+  z -= 2; return Flx_renormalize(z, lz);
 }
 
 static GEN
@@ -586,11 +586,12 @@ Flx_mulspec(GEN a, GEN b, ulong p, long na, long nb)
   if (!nb) return zero_Flx(0);
 
   av = avma;
-  switch (maxlenghtcoeffpol(p,nb))
+  switch (maxlengthcoeffpol(p,nb))
   {
   case 0:
     if (na>10)
       return Flx_shiftip(av,Flx_mulspec_halfmulii(a,b,p,na,nb), v);
+    break;
   case 1:
     if (na>30)
       return Flx_shiftip(av,Flx_mulspec_mulii(a,b,p,na,nb), v);
@@ -693,7 +694,7 @@ Flx_sqrspec_basecase(GEN x, ulong p, long nx)
       z[i] = p1;
     }
   }
-  z -= 2; return z;
+  z -= 2; return Flx_renormalize(z, lz);
 }
 
 static GEN
@@ -729,11 +730,12 @@ Flx_sqrspec(GEN a, ulong p, long na)
   if (!na) return zero_Flx(0);
 
   av = avma;
-  switch(maxlenghtcoeffpol(p,na))
+  switch(maxlengthcoeffpol(p,na))
   {
   case 0:
     if (na>10)
       return Flx_shiftip(av, Flx_sqrspec_halfsqri(a,p,na), v);
+    break;
   case 1:
     if (na>30)
       return Flx_shiftip(av, Flx_sqrspec_sqri(a,p,na), v);
