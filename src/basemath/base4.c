@@ -1926,6 +1926,17 @@ coprime_part(GEN x, GEN f)
   }
   return x;
 }
+/* write x = x1 x2, x2 maximal s.t. (x2,f) = 1, return x2 */
+ulong
+ucoprime_part(ulong x, ulong f)
+{
+  for (;;)
+  {
+    f = ugcd(x, f); if (f == 1) break;
+    x /= f;
+  }
+  return x;
+}
 
 /* x t_INT, f ideal. Write x = x1 x2, sqf(x1) | f, (x2,f) = 1. Return x2 */
 static GEN

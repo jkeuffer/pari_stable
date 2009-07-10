@@ -1891,8 +1891,21 @@ Fp_pow(GEN A, GEN K, GEN N)
     if (s < 0) a = Fl_inv(a, n);
     if (a <= 1) return utoi(a); /* 0 or 1 */
     if (lgefint(K) > 3)
-    {
-      pari_warn(warner, "Mod(a,N)^n: reducing large n mod phi(N). Do it yourself?");
+    { /* silly case : huge exponent, small modulus */
+      pari_warn(warner, "Mod(a,b)^n with n >> b : wasteful");
+      if (s > 0)
+      {
+        ulong d = ugcd(a, n);
+        if (d != 1)
+        { /* write n = n1 n2, with n2 maximal such that (n1,a) = 1 */
+          ulong n1 = ucoprime_part(n, d), n2 = n/n1;
+
+          k = umodiu(K, eulerphiu(n1));
+          /* CRT: = a^K (mod n1), = 0 (mod n2)*/
+          return utoi( Fl_mul(Fl_powu(a, k, n1), n2 * Fl_inv(n2,n1), n) );
+        }
+      }
+      /* gcd(a,n) = 1 */
       k = umodiu(K, eulerphiu(n));
     }
     else 
