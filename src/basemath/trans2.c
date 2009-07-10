@@ -983,6 +983,7 @@ cxgamma(GEN s0, int dolog, long prec)
       la = gmul(t, logt);
       if      (gcmpgs(la, 3) < 0)   { logla = log(3.); la = stoi(3); }
       else if (gcmpgs(la, 150) > 0) { logla = rtodbl(logt); la = t; }
+      else logla = rtodbl(mplog(la));
     }
     else
     {
