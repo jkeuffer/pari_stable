@@ -2034,7 +2034,7 @@ gbezout_step(GEN *pa, GEN *pb, GEN *pu, GEN *pv)
   if (typ(d) == t_POL)
   {
     if (degpol(d)) { a = RgX_div(a, d); b = RgX_div(b, d); }
-    else if (typ(d[2]) == t_REAL && lg(d[2]) == 3)
+    else if (typ(d[2]) == t_REAL && lg(d[2]) <= 3)
 #if 1
     { /* possible accuracy problem */
       GEN D = RgX_gcd_simple(a,b);
