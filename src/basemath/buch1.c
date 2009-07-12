@@ -919,7 +919,7 @@ is_bad(GEN D, ulong p)
     if (r && signe(D) < 0) r = 8-r;
     return (r < 4);
   }
-  r = (remii(D, muluu(p,p)) == gen_0); /* p^2 | D ? */
+  r = (remii(D, sqru(p)) == gen_0); /* p^2 | D ? */
   avma = av; return r;
 }
 

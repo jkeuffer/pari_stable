@@ -2500,7 +2500,7 @@ ellap1(GEN e, GEN p)
     while (!KRO || KRO == KROold)
     { /* look for points alternatively on E and its quadratic twist E' */
       x++; /* u = x^3 + c4 x + c6 */
-      u = modii(addii(c6, mului(x, addii(c4, muluu(x,x)))), p);
+      u = modii(addii(c6, mului(x, addii(c4, sqru(x)))), p);
       KRO = kronecker(u, p);
     }
     KROold = KRO;

@@ -212,7 +212,7 @@ consteuler(long prec)
   }
   else
   {
-    GEN xx = muluu(x,x);
+    GEN xx = sqru(x);
     av2 = avma;
     for (k=1; k<n1; k++)
     {

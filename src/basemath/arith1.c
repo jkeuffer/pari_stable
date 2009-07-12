@@ -145,7 +145,7 @@ pgener_Zl(ulong p)
 #ifdef LONG_IS_64BIT
 {
   pari_sp av = avma;
-  GEN q = muluu(p,p);
+  GEN q = sqru(p);
   GEN y = Fp_powu(utoipos(x), p-1, q);
   if (is_pm1(y)) {
     x += p;

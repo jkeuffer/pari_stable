@@ -1071,7 +1071,7 @@ sqrispec(GEN x, long nx)
   long lz;
 
   if (!nx) return gen_0;
-  if (nx==1) return muluu(*x,*x);
+  if (nx==1) return sqru(*x);
 
   lz = (nx<<1)+2;
   zd = cgeti(lz);
