@@ -1148,6 +1148,10 @@ RgX_divrem(GEN x, GEN y, GEN *pr)
   av = avma;
   switch(typ(y_lead))
   {
+    case t_REAL:
+      y_lead = ginv(y_lead);
+      f = gmul; mod = NULL;
+      break;
     case t_INTMOD:
     case t_POLMOD: y_lead = ginv(y_lead);
       f = gmul; mod = gmodulo(gen_1, gel(y_lead,1));

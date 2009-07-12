@@ -1269,7 +1269,7 @@ Flx_resultant(GEN a, GEN b, ulong p)
     swapspec(a,b, da,db);
     if (both_odd(da,db)) res = p-res;
   }
-  if (!da) return 1; /* = res * a[2] ^ db, since 0 <= db <= da = 0 */
+  else if (!da) return 1; /* = res * a[2] ^ db, since 0 <= db <= da = 0 */
   cnt = 0; av = avma;
   while (db)
   {

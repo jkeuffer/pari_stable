@@ -1665,7 +1665,6 @@ Flx_resultant_all(GEN a, GEN b, long *C0, long *C1, GEN dglist, ulong p)
   long da,db,dc,cnt,ind;
   ulong lb, cx = 1, res = 1UL;
   pari_sp av;
-  GEN c;
 
   if (C0) { *C0 = 1; *C1 = 0; }
   if (lgpol(a)==0 || lgpol(b)==0) return 0;
@@ -1676,13 +1675,12 @@ Flx_resultant_all(GEN a, GEN b, long *C0, long *C1, GEN dglist, ulong p)
     swapspec(a,b, da,db);
     if (both_odd(da,db)) res = p-res;
   }
-  /* = res * a[2] ^ db, since 0 <= db <= da = 0 */
-  if (!da) return 1;
+  else if (!da) return 1; /* = res * a[2] ^ db, since 0 <= db <= da = 0 */
   cnt = ind = 0; av = avma;
   while (db)
   {
+    GEN c = Flx_rem(a,b, p);
     lb = b[db+2];
-    c = Flx_rem(a,b, p);
     a = b; b = c; dc = degpol(c);
     if (dc < 0) { avma = av; return 0; }
 
@@ -2442,6 +2440,43 @@ trivial_case(GEN A, GEN B)
   return NULL;
 }
 
+/* floating point resultant */
+static GEN
+fp_resultant(GEN a, GEN b)
+{
+  long da, db, dc;
+  GEN res = gen_1;
+  pari_sp av, lim;
+
+  if (lgpol(a)==0 || lgpol(b)==0) return gen_0;
+  da = degpol(a);
+  db = degpol(b);
+  if (db > da)
+  {
+    swapspec(a,b, da,db);
+    if (both_odd(da,db)) res = gneg(res);
+  }
+  else if (!da) return gen_1; /* = res * a[2] ^ db, since 0 <= db <= da = 0 */
+  av = avma; lim = stack_lim(av, 1);
+  while (db)
+  {
+    GEN lb = gel(b,db+2), c = RgX_rem(a,b);
+    c = normalizepol_approx(c, lg(c)); /* kill leading zeroes without warning */
+    a = b; b = c; dc = degpol(c);
+    if (dc < 0) { avma = av; return gen_0; }
+
+    if (both_odd(da,db)) res = gneg(res);
+    res = gmul(res, gpowgs(lb, da - dc));
+    if (low_stack(lim, stack_lim(av,1))) {
+      if (DEBUGMEM>1) pari_warn(warnmem,"fp_resultant");
+      gerepileall(av, 3, &a,&b,&res);
+    }
+    da = db; /* = degpol(a) */
+    db = dc; /* = degpol(b) */
+  }
+  return gerepileupto(av, gmul(res, gpowgs(gel(b,2), da)));
+}
+
 /* Res(A, B/dB), assuming the A,B in Z[X] and result is integer */
 GEN
 ZX_resultant_all(GEN A, GEN B, GEN dB, ulong bound)
@@ -2461,15 +2496,18 @@ ZX_resultant_all(GEN A, GEN B, GEN dB, ulong bound)
   if (!bound)
   {
     bound = ZX_ZXY_ResBound(A, B, dB);
-    if (bound > 50000)
+    if (bound > 10000)
     {
-      long eA = gexpo(A), eB = gexpo(B), prec = nbits2prec(maxss(eA,eB));
-      for(;; prec = (prec-1)<<1)
+      const long CNTMAX = 5; /* to avoid oo loops if R = 0 */
+      long bnd = 0, cnt;
+      long prec = nbits2prec( maxss(gexpo(A), gexpo(B)) );
+      for(cnt = 1; cnt < CNTMAX; cnt++, prec = (prec-1)<<1)
       {
-        GEN R = resultant(RgX_gtofp(A, prec), RgX_gtofp(B, prec));
-        bound = gexpo(R) + 1;
-        if (!gequal0(R)) break;
+        GEN R = fp_resultant(RgX_gtofp(A, prec), RgX_gtofp(B, prec));
+        bnd = gexpo(R) + 1;
+        if (bnd >= 0 && bnd <= (long)bound && !gequal0(R)) break;
       }
+      if (cnt < CNTMAX) bound = bnd;
       if (dB) bound -= (long)(dbllog2(dB)*degA);
     }
   }
