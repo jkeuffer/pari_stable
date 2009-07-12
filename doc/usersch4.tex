@@ -2076,6 +2076,9 @@ Since you can set \kbd{E} to a pointer to any \kbd{struct} (typecast to
 functions without extra parameters, you may set \kbd{E = NULL} and ignore
 that argument in your function definition.
 
+\fun{long}{TIMERread}{pari_timer *T} returns the time elapsed since the timer
+was started (or last reset), without reseting it.
+
 \section{A complete program}
 \label{se:prog}
 

@@ -1798,6 +1798,7 @@ ulong   unextprime(ulong n);
 /* init.c */
 
 long    TIMER(pari_timer *T);
+long    TIMERread(pari_timer *T);
 void    TIMERstart(pari_timer *T);
 long    allocatemoremem(size_t newsize);
 int     chk_gerepileupto(GEN x);

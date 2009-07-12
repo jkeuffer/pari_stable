@@ -1737,6 +1737,11 @@ TIMER(pari_timer *T)
 #endif
 void
 TIMERstart(pari_timer *T) { (void)TIMER(T); }
+long
+TIMERread(pari_timer *T) {
+  long s = T->s, us = T->us, delay = TIMER(T);
+  T->s = s; T->us = us; return delay;
+}
 
 long
 timer(void)   { static THREAD pari_timer T; return TIMER(&T);}
