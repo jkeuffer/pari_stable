@@ -1,4 +1,4 @@
 Mod(5, 9223372036854775837)
-  *** _^_: Warning: Mod(a,N)^n: reducing large n mod phi(N). Do it yourself?.
+  *** _^_: Warning: Mod(a,b)^n with n >> b : wasteful.
 Mod(10, 37)
-Total time spent: 12
+Total time spent: 20
