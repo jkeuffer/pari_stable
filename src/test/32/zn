@@ -1,4 +1,4 @@
 Mod(5, 9223372036854775837)
   *** _^_: Warning: Mod(a,b)^n with n >> b : wasteful.
-Mod(10, 37)
+Mod(84, 148)
 Total time spent: 20
