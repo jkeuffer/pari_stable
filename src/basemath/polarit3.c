@@ -2365,9 +2365,8 @@ INIT:
     if (stable && (ulong)expi(q) >= bound) break; /* DONE */
     if (low_stack(lim, stack_lim(av,2)))
     {
-      GEN *gptr[4]; gptr[0] = &H; gptr[1] = &q; gptr[2] = &H0; gptr[3] = &H1;
       if (DEBUGMEM>1) pari_warn(warnmem,"ZX_ZXY_rnfequation");
-      gerepilemany(av2,gptr,LERS? 4: 2);
+      gerepileall(av2, LERS? 4: 2, &H, &q, &H0, &H1);
     }
   }
 END:
@@ -2561,9 +2560,8 @@ ZX_resultant_all(GEN A, GEN B, GEN dB, ulong bound)
     if (stable && (ulong)expi(q) >= bound) break; /* DONE */
     if (low_stack(lim, stack_lim(av,2)))
     {
-      GEN *gptr[2]; gptr[0] = &H; gptr[1] = &q;
       if (DEBUGMEM>1) pari_warn(warnmem,"ZX_resultant");
-      gerepilemany(av2,gptr, 2);
+      gerepileall(av2, 2, &H,&q);
     }
   }
   return gerepileuptoint(av, icopy(H));

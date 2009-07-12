@@ -129,9 +129,8 @@ invmod(GEN a, GEN b, GEN *res)
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
-      GEN *gptr[4]; gptr[0]=&d; gptr[1]=&d1; gptr[2]=&v; gptr[3]=&v1;
       if(DEBUGMEM>1) pari_warn(warnmem,"invmod");
-      gerepilemany(av1,gptr,4);
+      gerepileall(av1, 4, &d,&d1,&v,&v1);
     }
   } /* end while */
 

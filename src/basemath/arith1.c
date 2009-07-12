@@ -1522,9 +1522,8 @@ Fp_sqrt(GEN a, GEN p)
     v = Fp_mul(v, p1, p);
     if (low_stack(lim, stack_lim(av,1)))
     {
-      GEN *gptr[3]; gptr[0]=&y; gptr[1]=&w; gptr[2]=&v;
       if(DEBUGMEM>1) pari_warn(warnmem,"Fp_sqrt");
-      gerepilemany(av,gptr,3);
+      gerepileall(av,3, &y,&w,&v);
     }
   }
   av1 = avma;

@@ -1364,7 +1364,6 @@ InitPrimesQuad(GEN bnr, long N0, LISTray *R)
   long p,i,l, condZ = itos(gcoeff(cond,1,1)), contZ = itos(content(cond));
   GEN prime, Lpr, nf = bnf_get_nf(bnf), dk = nf_get_disc(nf);
   byteptr d = diffptr + 1;
-  GEN *gptr[7];
 
   l = 1 + PiBound(N0);
   R->L0 = vecsmalltrunc_init(l);
@@ -1402,12 +1401,8 @@ InitPrimesQuad(GEN bnr, long N0, LISTray *R)
   R->rayZ = cgetg(condZ, t_VEC);
   for (i=1; i<condZ; i++)
     gel(R->rayZ,i) = (ugcd(i,condZ) == 1)? isprincipalray(bnr, utoipos(i)): gen_0;
-
-  gptr[0] = &(R->L0);
-  gptr[1] = &(R->L2);  gptr[2] = &(R->rayZ);
-  gptr[3] = &(R->L1);  gptr[5] = &(R->L1ray);
-  gptr[4] = &(R->L11); gptr[6] = &(R->L11ray);
-  gerepilemany(av,gptr,7);
+  gerepileall(av, 7, &(R->L0), &(R->L2), &(R->rayZ),
+              &(R->L1), &(R->L1ray), &(R->L11), &(R->L11ray) );
 }
 
 static void

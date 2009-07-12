@@ -2743,7 +2743,7 @@ nfdetint(GEN nf, GEN x)
   piv = pivprec = gen_1;
 
   av1 = avma; lim = stack_lim(av1,1);
-  det1 = idprod = gen_0; /* dummy for gerepilemany */
+  det1 = idprod = gen_0; /* dummy for gerepileall */
   pass = cgetg(m1,t_MAT);
   v = cgetg(m1,t_COL);
   for (j=1; j<=m; j++)
