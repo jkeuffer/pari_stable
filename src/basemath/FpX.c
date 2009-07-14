@@ -178,7 +178,7 @@ FpX_Fp_mul(GEN y,GEN x,GEN p)
   if (!signe(x)) return zeropol(varn(y));
   z = cgetg_copy(y, &l); z[1] = y[1];
   for(i=2; i<l; i++) gel(z,i) = Fp_mul(gel(y,i), x, p);
-  return z;
+  return ZX_renormalize(z, l);
 }
 GEN
 FpX_Fp_mul_to_monic(GEN y,GEN x,GEN p)

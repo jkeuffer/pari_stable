@@ -335,7 +335,7 @@ Flx_Fl_mul(GEN y, ulong x, ulong p)
     for(i=2; i<l; i++) z[i] = Fl_mul(y[i], x, p);
   else
     for(i=2; i<l; i++) z[i] = (y[i] * x) % p;
-  return z;
+  return Flx_renormalize(z, l);
 }
 GEN
 Flx_Fl_mul_to_monic(GEN y, ulong x, ulong p)
