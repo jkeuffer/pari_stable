@@ -702,7 +702,7 @@ long    Zp_issquare(GEN a, GEN p);
 GEN     bestappr0(GEN x, GEN a, GEN b);
 GEN     bestappr(GEN x, GEN k);
 long    cgcd(long a,long b);
-long    ugcd(ulong a,ulong b);
+ulong   ugcd(ulong a,ulong b);
 GEN     chinese1(GEN x);
 GEN     chinese1_coprime_Z(GEN x);
 GEN     chinese(GEN x, GEN y);

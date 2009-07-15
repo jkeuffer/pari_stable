@@ -92,7 +92,7 @@ cgcd(long a,long b)
   v = vals(a|b);
   return (long)(mygcduodd((ulong)(a>>v), (ulong)(b>>v)) << v);
 }
-long
+ulong
 ugcd(ulong a,ulong b)
 {
   long v;
