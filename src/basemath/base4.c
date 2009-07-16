@@ -1124,6 +1124,7 @@ famat_makecoprime(GEN nf, GEN g, GEN e, GEN pr, GEN prk, GEN EX)
   long i, l = lg(g);
   GEN prkZ, u, vden = gen_0, p = pr_get_p(pr);
   GEN mul = zk_scalar_or_multable(nf, pr_get_tau(pr));
+  pari_sp av = avma, lim = stack_lim(av, 2);
   GEN newg = cgetg(l+1, t_VEC); /* room for z */
 
   prkZ = gcoeff(prk, 1,1);
@@ -1149,6 +1150,14 @@ famat_makecoprime(GEN nf, GEN g, GEN e, GEN pr, GEN prk, GEN EX)
       x =  ZC_hnfrem(x, prk);
     }
     gel(newg,i) = x;
+    if (low_stack(lim, stack_lim(av, 2)))
+    {
+      GEN dummy = cgetg(1,t_VEC);
+      long j;
+      if(DEBUGMEM>1) pari_warn(warnmem,"famat_makecoprime");
+      for (j = i+1; j <= l; j++) gel(newg,j) = dummy;
+      gerepileall(av,2, &newg, &vden);
+    }
   }
   if (vden == gen_0) setlg(newg, l);
   else
