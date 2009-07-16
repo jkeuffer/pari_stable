@@ -482,13 +482,9 @@ gequalm1(GEN x)
   return 0;
 }
 
-static int
-is_0(GEN x) { return typ(x) == t_INT && !signe(x); }
-static int
-is_1(GEN x) { return typ(x) == t_INT && signe(x) == 1 && is_pm1(x); }
 int
 gcmpX(GEN x) { return typ(x) == t_POL && lg(x) == 4
-                      && is_0(gel(x,2)) && is_1(gel(x,3)); }
+                      && isintzero(gel(x,2)) && isint1(gel(x,3)); }
 
 /* returns the sign of x - y when it makes sense. 0 otherwise */
 int

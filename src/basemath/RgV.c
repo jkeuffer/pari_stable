@@ -107,11 +107,7 @@ RgV_dotproduct_i(GEN x, GEN y, long lx)
   if (lx == 1) return gen_0;
   av = avma;
   z = gmul(gel(x,1),gel(y,1));
-  for (i=2; i<lx; i++)
-  {
-    GEN c = gel(y,i);
-    if (typ(c) != t_INT || signe(c)) z = gadd(z, gmul(gel(x,i), c));
-  }
+  for (i=2; i<lx; i++) z = gadd(z, gmul(gel(x,i), gel(y,i)));
   return gerepileupto(av,z);
 }
 GEN
@@ -328,12 +324,8 @@ RgM_RgC_mul_i(GEN x, GEN y, long l, long lz)
   for (i=1; i<lz; i++)
   {
     pari_sp av = avma;
-    GEN t = gen_0;
-    for (j=1; j<l; j++)
-    {
-      GEN c = gel(y,j);
-      if (typ(c) != t_INT || signe(c)) t = gadd(t, gmul(gcoeff(x,i,j), c));
-    }
+    GEN t = gmul(gcoeff(x,i,1), gel(y,1)); /* l > 1 ! */
+    for (j=2; j<l; j++) t = gadd(t, gmul(gcoeff(x,i,j), gel(y,j)));
     gel(z,i) = gerepileupto(av,t);
   }
   return z;

@@ -814,12 +814,8 @@ RgX_mulspec_basecase_limb(GEN x, GEN y, long a, long b)
 
   for (i=a; i<b; i++)
   {
-    GEN yi = gel(y,i);
-    if (yi)
-    {
-      GEN t = gmul(yi, gel(x,-i));
-      s = s? gadd(s, t): t;
-    }
+    GEN t = gmul(gel(y,i), gel(x,-i));
+    s = s? gadd(s, t): t;
   }
   return s? gerepileupto(av, s): gen_0;
 }
@@ -829,21 +825,15 @@ static GEN
 RgX_mulspec_basecase(GEN x, GEN y, long nx, long ny, long v)
 {
   long i, lz, nz;
-  GEN z, y0;
+  GEN z;
 
   lz = nx + ny + 1; nz = lz-2;
   lz += v;
-  y0 = cgetg(ny+1, t_VECSMALL) + 1; /* left on stack */
   z = cgetg(lz, t_POL) + 2; /* x:y:z [i] = term of degree i */
   for (i=0; i<v; i++) gel(z++, 0) = gen_0;
-  for (i=0; i<ny; i++)
-  {
-    GEN yi = gel(y,i);
-    gel(y0,i) = isrationalzero(yi)? NULL: yi;
-    gel(z,i) = RgX_mulspec_basecase_limb(x+i, y0, 0, i+1);
-  }
-  for (  ; i<nx; i++) gel(z,i) = RgX_mulspec_basecase_limb(x+i,y0, 0,ny);
-  for (  ; i<nz; i++) gel(z,i) = RgX_mulspec_basecase_limb(x+i,y0, i-nx+1,ny);
+  for (i=0; i<ny; i++)gel(z,i) = RgX_mulspec_basecase_limb(x+i,y, 0, i+1);
+  for (  ; i<nx; i++) gel(z,i) = RgX_mulspec_basecase_limb(x+i,y, 0,ny);
+  for (  ; i<nz; i++) gel(z,i) = RgX_mulspec_basecase_limb(x+i,y, i-nx+1,ny);
   z -= v+2; z[1] = 0; return normalizepol_lg(z, lz);
 }
 
@@ -1159,12 +1149,6 @@ RgX_divrem(GEN x, GEN y, GEN *pr)
     default: if (gequal1(y_lead)) y_lead = NULL;
       f = gdiv; mod = NULL;
   }
-  p1 = new_chunk(dy+3);
-  for (i=2; i<dy+3; i++)
-  {
-    p2 = gel(y,i);
-    gel(p1,i) = isrationalzero(p2)? NULL: p2;
-  }
 
   if (y_lead == NULL)
     p2 = gel(x,dx+2);
@@ -1190,14 +1174,13 @@ RgX_divrem(GEN x, GEN y, GEN *pr)
   z = cgetg(dz+3,t_POL); z[1] = x[1];
   x += 2;
   z += 2;
-  y = p1+2;
+  y += 2;
   gel(z,dz) = gcopy(p2);
 
   for (i=dx-1; i>=dy; i--)
   {
     av1=avma; p1=gel(x,i);
-    for (j=i-dy+1; j<=i && j<=dz; j++)
-      if (y[i-j] && gel(z,j) != gen_0) p1 = gsub(p1, gmul(gel(z,j),gel(y,i-j)));
+    for (j=i-dy+1; j<=i && j<=dz; j++) p1 = gsub(p1, gmul(gel(z,j),gel(y,i-j)));
     if (y_lead) p1 = f(p1,y_lead);
 
     if (isrationalzero(p1)) { avma=av1; p1 = gen_0; }
@@ -1212,8 +1195,7 @@ RgX_divrem(GEN x, GEN y, GEN *pr)
   {
     p1 = gel(x,i);
     /* we always enter this loop at least once */
-    for (j=0; j<=i && j<=dz; j++)
-      if (y[i-j] && gel(z,j) != gen_0) p1 = gsub(p1, gmul(gel(z,j),gel(y,i-j)));
+    for (j=0; j<=i && j<=dz; j++) p1 = gsub(p1, gmul(gel(z,j),gel(y,i-j)));
     if (mod && avma==av1) p1 = gmul(p1,mod);
     if (!gequal0(p1)) { sx = 1; break; } /* remainder is non-zero */
     if (!isexactzero(p1)) break;
@@ -1236,8 +1218,7 @@ RgX_divrem(GEN x, GEN y, GEN *pr)
   for (i--; i>=0; i--)
   {
     av1=avma; p1 = gel(x,i);
-    for (j=0; j<=i && j<=dz; j++)
-      if (y[i-j] && gel(z,j) != gen_0) p1 = gsub(p1, gmul(gel(z,j),gel(y,i-j)));
+    for (j=0; j<=i && j<=dz; j++) p1 = gsub(p1, gmul(gel(z,j),gel(y,i-j)));
     if (mod && avma==av1) p1 = gmul(p1,mod);
     gel(rem,i) = avma==av1? gcopy(p1):gerepileupto(av1,p1);
   }
@@ -1297,8 +1278,7 @@ RgXQX_divrem(GEN x, GEN y, GEN T, GEN *pr)
   for (i=dx-1; i>=dy; i--)
   {
     av=avma; p1=gel(x,i);
-    for (j=i-dy+1; j<=i && j<=dz; j++)
-      p1 = gsub(p1, gmul(gel(z,j),gel(y,i-j)));
+    for (j=i-dy+1; j<=i && j<=dz; j++) p1 = gsub(p1, gmul(gel(z,j),gel(y,i-j)));
     if (lead) p1 = gmul(grem(p1, T), lead);
     tetpil=avma; gel(z,i-dy) = gerepile(av,tetpil, grem(p1, T));
   }
@@ -1308,8 +1288,7 @@ RgXQX_divrem(GEN x, GEN y, GEN T, GEN *pr)
   for (sx=0; ; i--)
   {
     p1 = gel(x,i);
-    for (j=0; j<=i && j<=dz; j++)
-      p1 = gsub(p1, gmul(gel(z,j),gel(y,i-j)));
+    for (j=0; j<=i && j<=dz; j++) p1 = gsub(p1, gmul(gel(z,j),gel(y,i-j)));
     tetpil=avma; p1 = grem(p1, T); if (!gequal0(p1)) { sx = 1; break; }
     if (!i) break;
     avma=av;

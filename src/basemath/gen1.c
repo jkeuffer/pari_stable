@@ -741,7 +741,7 @@ add_rfrac_scal(GEN y, GEN x)
   pari_sp av;
   GEN n;
 
-  if (typ(x) == t_INT && !signe(x)) return gcopy(y); /* frequent special case */
+  if (isintzero(x)) return gcopy(y); /* frequent special case */
   av = avma; n = gadd(gmul(x, gel(y,2)), gel(y,1));
   return gerepileupto(av, gred_rfrac_simple(n, gel(y,2)));
 }
@@ -1381,8 +1381,6 @@ quad_polmod_mul(GEN P, GEN x, GEN y)
   gerepilecoeffssp(av,tetpil,T+2,2);
   return normalizepol_lg(T,4);
 }
-static int
-is_int1(GEN a) { return  (typ(a) == t_INT && is_pm1(a) && signe(a) == 1); }
 /* Mod(x,T) * Mod(y,T) */
 static GEN
 mul_polmod_same(GEN T, GEN x, GEN y)
@@ -1396,7 +1394,7 @@ mul_polmod_same(GEN T, GEN x, GEN y)
     a = gmul(x, y);
   else
   {
-    if (lg(T) == 5 && is_int1(gel(T,4))) /* quadratic fields */
+    if (lg(T) == 5 && isint1(gel(T,4))) /* quadratic fields */
       a = quad_polmod_mul(T, x, y);
     else
     {
@@ -2373,7 +2371,7 @@ div_polmod_same(GEN T, GEN x, GEN y)
     pari_sp av = avma;
     a = gerepileupto(av, gmul(x, RgXQ_inv(y, T)));
   }
-  else if (degpol(T) == 2 && is_int1(gel(T,4))) /* quadratic fields */
+  else if (degpol(T) == 2 && isint1(gel(T,4))) /* quadratic fields */
   {
     pari_sp av = avma;
     a = quad_polmod_mul(T, x, quad_polmod_conj(y, T));

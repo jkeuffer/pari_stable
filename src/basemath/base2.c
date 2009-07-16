@@ -2136,8 +2136,7 @@ static GEN
 modpr_TAU(GEN modpr)
 {
   GEN tau = gel(modpr,mpr_TAU);
-  if (typ(tau) == t_INT && signe(tau) == 0) tau = NULL;
-  return tau;
+  return isintzero(tau)? NULL: tau;
 }
 
 /* prh = HNF matrix, which is identity but for the first line. Return a

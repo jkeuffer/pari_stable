@@ -43,7 +43,7 @@ get_extra_obj(GEN S, long K)
   if (typ(v) == t_VEC)
   {
     GEN O = gel(v,K);
-    if (typ(O) != t_INT || signe(O)) return O;
+    if (!isintzero(O)) return O;
   }
   return NULL;
 }

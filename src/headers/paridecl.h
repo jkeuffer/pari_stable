@@ -2897,6 +2897,8 @@ INLINE int    is_recursive_t(long t);
 INLINE int    is_scalar_t(long t);
 INLINE int    is_universal_constant(GEN x);
 INLINE int    is_vec_t(long t);
+INLINE int    isint1(GEN x);
+INLINE int    isintm1(GEN x);
 INLINE int    isintzero(GEN x);
 INLINE int    isonstack(GEN x);
 INLINE void   killblock(GEN x);

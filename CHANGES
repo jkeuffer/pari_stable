@@ -182,6 +182,7 @@ BA143- galoisinit(x).gen was not a t_VEC
   146- Mod(10,37)^10000000000 -> SEGV
   147- missing Flx_renormalize at the end of Flx_mulspec_basecase() &
        Flx_sqrspec_basecase() [#984]
+  148- After \y0, [1,x]*[0,0]~ returned 0 t_INT, which should be a t_POL [#983]
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]

@@ -2261,7 +2261,7 @@ idealtwoelt2(GEN nf, GEN x, GEN a)
   x = idealhnf_shallow(nf,x);
   if (lg(x) == 1)
   {
-    if (typ(a) != t_INT || signe(a)) not_in_ideal();
+    if (!isintzero(a)) not_in_ideal();
     avma = av; return zerocol(nf_get_degree(nf));
   }
   x = Q_primitive_part(x, &cx);
@@ -2436,9 +2436,8 @@ nfbezout(GEN nf,GEN a,GEN b, GEN A,GEN B, GEN *pu,GEN *pv,GEN *pw,GEN *pdi)
   if (a != gen_1) /* frequently called with a = gen_1 */
   {
     a = nf_to_scalar_or_basis(nf,a);
-    if (typ(a) == t_INT && is_pm1(a) && signe(a) > 0) a = gen_1;
+    if (isint1(a)) a = gen_1;
   }
-
   aA = (a == gen_1)? A: idealmul(nf,a,A);
   bB = idealmul(nf,b,B);
   d = idealadd(nf,aA,bB);
