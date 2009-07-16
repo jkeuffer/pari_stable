@@ -1042,7 +1042,8 @@ static GEN
 lifttoKz(GEN nfz, GEN nf, GEN id, compo_s *C)
 {
   GEN I = idealtwoelt(nf,id);
-  GEN x = coltoliftalg(nf, gel(I,2));
+  GEN x = nf_to_scalar_or_alg(nf, gel(I,2));
+  if (typ(x) != t_POL) return gel(I,1);
   gel(I,2) = algtobasis(nfz, RgX_RgXQ_eval(x, C->p, C->R));
   return idealhnf_two(nfz,I);
 }
