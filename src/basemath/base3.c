@@ -1156,9 +1156,11 @@ GEN
 nfpowmodideal(GEN nf,GEN x,GEN k,GEN A)
 {
   long s = signe(k);
+  pari_sp av;
   GEN y;
 
   if (!s) return gen_1;
+  av = avma;
   x = nf_to_scalar_or_basis(nf, x);
   if (typ(x) != t_COL) return Fp_pow(x, k, gcoeff(A,1,1));
   if (s < 0) { x = nfinvmodideal(nf, x,A); k = absi(k); }
@@ -1168,7 +1170,7 @@ nfpowmodideal(GEN nf,GEN x,GEN k,GEN A)
     k = shifti(k,-1); if (!signe(k)) break;
     x = nfsqrmodideal(nf,x,A);
   }
-  return y;
+  return gerepileupto(av, y);
 }
 
 /* a * g^n mod id */
@@ -1183,16 +1185,17 @@ elt_mulpow_modideal(GEN nf, GEN a, GEN g, GEN n, GEN id)
 GEN
 famat_to_nf_modideal_coprime(GEN nf, GEN g, GEN e, GEN id, GEN EX)
 {
-  GEN dh, h, n, plus = NULL, minus = NULL, idZ = gcoeff(id,1,1);
+  GEN plus = NULL, minus = NULL, idZ = gcoeff(id,1,1);
+  pari_sp av = avma, lim = stack_lim(av,2);
   long i, lx = lg(g);
   GEN EXo2 = (expi(EX) > 10)? shifti(EX,-1): NULL;
 
   if (is_pm1(idZ)) lx = 1; /* id = Z_K */
   for (i=1; i<lx; i++)
   {
-    long sn;
-    n = centermodii(gel(e,i), EX, EXo2);
-    sn = signe(n); if (!sn) continue;
+    GEN h, n = centermodii(gel(e,i), EX, EXo2);
+    long sn = signe(n);
+    if (!sn) continue;
 
     h = nf_to_scalar_or_basis(nf, gel(g,i));
     switch(typ(h))
@@ -1201,13 +1204,26 @@ famat_to_nf_modideal_coprime(GEN nf, GEN g, GEN e, GEN id, GEN EX)
       case t_FRAC:
         h = Fp_div(gel(h,1), gel(h,2), idZ); break;
       default:
+      {
+        GEN dh;
         h = Q_remove_denom(h, &dh);
         if (dh) h = FpC_Fp_mul(h, Fp_inv(dh,idZ), idZ);
+      }
     }
     if (sn > 0)
       plus = elt_mulpow_modideal(nf, plus, h, n, id);
     else /* sn < 0 */
-      minus = elt_mulpow_modideal(nf, minus, h, negi(n), id);
+      minus = elt_mulpow_modideal(nf, minus, h, absi(n), id);
+
+    if (low_stack(lim, stack_lim(av, 2)))
+    {
+      if(DEBUGMEM>1) pari_warn(warnmem,"famat_to_nf_modideal_coprime");
+      if (!plus) plus = gen_0;
+      if (!minus) minus = gen_0;
+      gerepileall(av,2, &plus, &minus);
+      if (isintzero(plus)) plus = NULL;
+      if (isintzero(minus)) minus = NULL;
+    }
   }
   if (minus)
     plus = nfmulmodideal(nf, plus, nfinvmodideal(nf,minus,id), id);
