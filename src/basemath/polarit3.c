@@ -2587,17 +2587,39 @@ GEN
 ZX_resultant(GEN A, GEN B) { return ZX_resultant_all(A,B,NULL,0); }
 
 GEN
-ZX_QX_resultant(GEN A, GEN B)
+QXQ_intnorm(GEN A, GEN B)
 {
-  GEN c, d, n, R;
+  GEN c, n, R, lB;
+  long dA = degpol(A), dB = degpol(B);
   pari_sp av = avma;
-  B = Q_primitive_part(B, &c);
-  if (!c) return ZX_resultant(A,B);
-  n = numer(c);
-  d = denom(c); if (is_pm1(d)) d = NULL;
-  R = ZX_resultant_all(A, B, d, 0);
-  if (!is_pm1(n)) R = mulii(R, powiu(n, degpol(A)));
+  if (dA < 0) return gen_0;
+  A = Q_primitive_part(A, &c);
+  if (!c || typ(c) == t_INT) {
+    n = c;
+    R = ZX_resultant(B, A);
+  } else {
+    n = gel(c,1);
+    R = ZX_resultant_all(B, A, gel(c,2), 0);
+  }
+  if (n && !equali1(n)) R = mulii(R, powiu(n, dB));
+  lB = leading_term(B);
+  if (!equali1(lB)) R = diviiexact(R, powiu(lB, dA));
   return gerepileuptoint(av, R);
+}
+
+GEN
+QXQ_norm(GEN A, GEN B)
+{
+  GEN c, R, lB;
+  long dA = degpol(A), dB = degpol(B);
+  pari_sp av = avma;
+  if (dA < 0) return gen_0;
+  A = Q_primitive_part(A, &c);
+  R = ZX_resultant(B, A);
+  if (c) R = gmul(R, gpowgs(c, dB));
+  lB = leading_term(B);
+  if (!equali1(lB)) R = gdiv(R, gpowgs(lB, dA));
+  return gerepileupto(av, R);
 }
 
 /* assume x has integral coefficients */

@@ -1546,7 +1546,7 @@ loop(decomp_t *S, long nv, long Ea, long Fa)
         chie = RgX_translate(chig, delt); /* frequent special case */
       else
       {
-        if (!dvdii(ZX_QX_resultant(S->chi, eta), S->p)) continue;
+        if (!dvdii(QXQ_intnorm(eta, S->chi), S->p)) continue;
         chie = mycaract(S, S->chi, eta, S->psc, S->prc);
       }
       nue = get_nu(chie, S->p, &l);

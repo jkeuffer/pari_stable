@@ -1610,10 +1610,11 @@ GEN
 RgXQ_norm(GEN x, GEN T)
 {
   pari_sp av;
+  long dx = degpol(x);
   GEN L, y;
 
   av = avma; y = resultant(T, x);
   L = leading_term(T);
-  if (gequal1(L) || gequal0(x)) return y;
-  return gerepileupto(av, gdiv(y, gpowgs(L, degpol(x))));
+  if (gequal1(L) || dx < 0) return y;
+  return gerepileupto(av, gdiv(y, gpowgs(L, dx)));
 }

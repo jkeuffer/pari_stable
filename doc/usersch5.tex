@@ -4971,9 +4971,24 @@ as a \typ{VECSMALL}.
 \fun{GEN}{QX_resultant}{GEN A, GEN B} returns the resultant of the
 \kbd{QX}~\kbd{A} and \kbd{B}.
 
-\fun{GEN}{ZX_QX_resultant}{GEN A, GEN B} returns the resultant of the
-\kbd{ZX}~\kbd{A} and the \kbd{QX}~\kbd{B}, \emph{assuming} the result
-is an integer.
+\fun{GEN}{QXQ_norm}{GEN A, GEN B} $A$ being a \kbd{QX} and $B$ being a
+\kbd{ZX}, returns the norm of the algebraic number $A \mod B$, using a
+modular algorithm. To ensure that $B$ is a \kbd{ZX}, one may replace it by
+\kbd{Q\_primpart(B)}, which of course does not change the norm.
+
+If $A$ is not a \kbd{ZX} --- it has a denominator ---, but the result is
+nevertheless known to be an integer, it is much more efficient to call
+\tet{QXQ_intnorm} instead.
+
+\fun{GEN}{QXQ_intnorm}{GEN A, GEN B} $A$ being a \kbd{QX} and $B$
+being a \kbd{ZX}, returns the norm of the algebraic number $A \mod B$,
+\emph{assuming} that the result is an integer, which is for instance the case
+is $A\mod B$ is an algebraic integer, in particular if $A$ is a \kbd{ZX}. To
+ensure that $B$ is a \kbd{ZX}, one may replace it by \kbd{Q\_primpart(B)}
+(which of course does not change the norm).
+
+If the result is not known to be an integer, you must use \tet{QXQ_norm}
+instead, which is slower.
 
 \fun{GEN}{ZX_ZXY_resultant}{GEN A, GEN B}
 under the assumption that \kbd{A} in $\Z[Y]$, \kbd{B} in $\Q[Y][X]$, and
