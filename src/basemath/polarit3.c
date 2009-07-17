@@ -1999,7 +1999,7 @@ FlxX_pseudorem(GEN x, GEN y, ulong p)
     if (dx < dy) break;
     if (low_stack(lim,stack_lim(av2,1)))
     {
-      if(DEBUGMEM>1) pari_warn(warnmem,"RgX_pseudorem dx = %ld >= %ld",dx,dy);
+      if(DEBUGMEM>1) pari_warn(warnmem,"FlxX_pseudorem dx = %ld >= %ld",dx,dy);
       gerepilecoeffs(av2,x,dx+1);
     }
   }
@@ -2649,131 +2649,6 @@ QX_disc(GEN x)
   GEN c, d = ZX_disc( Q_primitive_part(x, &c) );
   if (c) d = gmul(d, gpowgs(c, 2*degpol(x) - 2));
   return gerepileupto(av, d);
-}
-
-int
-ZX_is_squarefree(GEN x)
-{
-  pari_sp av = avma;
-  GEN d = ZX_gcd(x,ZX_deriv(x));
-  int r = (lg(d) == 3); avma = av; return r;
-}
-
-static GEN
-_gcd(GEN a, GEN b)
-{
-  if (!a) a = gen_1;
-  if (!b) b = gen_1;
-  return Q_gcd(a,b);
-}
-
-#if 0
-/* ceil( || p ||_oo / lc(p) ) */
-static GEN
-maxnorm(GEN p)
-{
-  long i, n = degpol(p), av = avma;
-  GEN x, m = gen_0;
-
-  p += 2;
-  for (i=0; i<n; i++)
-  {
-    x = gel(p,i);
-    if (absi_cmp(x,m) > 0) m = x;
-  }
-  m = divii(m, gel(p,n));
-  return gerepileuptoint(av, addis(absi(m),1));
-}
-#endif
-
-/* A, B in Z[X] */
-GEN
-ZX_gcd_all(GEN A, GEN B, GEN *Anew)
-{
-  GEN R, a, b, q, qp, H, Hp, g;
-  long m, n, valX, valA, vA = varn(A);
-  ulong p;
-  pari_sp ltop, av, avlim;
-  byteptr d;
-
-  if (!signe(A)) { if (Anew) *Anew = zeropol(vA); return ZX_copy(B); }
-  if (!signe(B)) { if (Anew) *Anew = pol_1(vA);   return ZX_copy(A); }
-  valA = ZX_valrem(A, &A);
-  valX = minss(valA, ZX_valrem(B, &B));
-  ltop = avma;
-
-  n = 1 + minss(degpol(A), degpol(B)); /* > degree(gcd) */
-  g = gcdii(leading_term(A), leading_term(B)); /* multiple of lead(gcd) */
-  if (is_pm1(g)) g = NULL;
-
-  av = avma; avlim = stack_lim(av, 1);
-  H = NULL; d = init_modular(&p);
-  for(;;)
-  {
-    NEXT_PRIME_VIADIFF_CHECK(p,d);
-    if (g && !umodiu(g,p)) continue;
-    a = ZX_to_Flx(A, p);
-    b = ZX_to_Flx(B, p); Hp = Flx_gcd_i(a,b, p);
-    m = degpol(Hp);
-    if (m == 0) { /* coprime. DONE */
-      avma = ltop;
-      if (Anew) {
-        if (valA != valX) A = RgX_shift(A, valA - valX);
-        *Anew = A;
-      }
-      return monomial(gen_1, valX, vA);
-    }
-    if (m > n) continue; /* p | Res(A/G, B/G). Discard */
-
-    if (!g) /* make sure lead(H) = g mod p */
-      Hp = Flx_normalize(Hp, p);
-    else
-    {
-      ulong t = Fl_mul(umodiu(g, p), Fl_inv(Hp[m+2],p), p);
-      Hp = Flx_Fl_mul(Hp, t, p);
-    }
-    if (m < n)
-    { /* First time or degree drop [all previous p were as above; restart]. */
-      H = ZX_init_CRT(Hp,p,vA);
-      q = utoipos(p); n = m; continue;
-    }
-    if (DEBUGLEVEL>5) msgtimer("gcd mod %lu (bound 2^%ld)", p,expi(q));
-    if (low_stack(avlim, stack_lim(av,1)))
-    {
-      if (DEBUGMEM>1) pari_warn(warnmem,"QX_gcd");
-      gerepileall(av, 2, &H, &q);
-    }
-
-    qp = muliu(q,p);
-    if (!ZX_incremental_CRT(&H, Hp, q, qp, p)) { q = qp; continue; }
-    /* H stable: check divisibility */
-    R = RgX_pseudorem(B,H); q = qp;
-    if (signe(R)) continue;
-    if (Anew)
-      A = RgX_pseudodivrem(A, H, &R);
-    else
-      R = RgX_pseudorem(A, H);
-    if (signe(R)) continue;
-    if (Anew) {
-      if (valA != valX) A = RgX_shift(A, valA - valX);
-      *Anew = A;
-    }
-    return valX ? RgX_shift(H, valX): H;
-  }
-}
-GEN
-ZX_gcd(GEN A, GEN B) { return ZX_gcd_all(A,B,NULL); }
-
-/* A0 and B0 in Q[X] */
-GEN
-QX_gcd(GEN A0, GEN B0)
-{
-  GEN a, b, A, B;
-  pari_sp av = avma;
-
-  A = Q_primitive_part(A0, &a);
-  B = Q_primitive_part(B0, &b);
-  return gerepileupto(av, gmul(_gcd(a,b), ZX_gcd(A, B)));
 }
 
 /* lift(1 / Mod(A,B)). B a ZX, A a scalar or a QX */

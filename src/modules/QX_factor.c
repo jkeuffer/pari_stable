@@ -15,9 +15,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "paripriv.h"
 
-/* assume same variables, y normalized, non constant */
+/* x,y two ZX, y non constant. Return q = x/y if y divides x in Z[X] and NULL
+ * otherwise. If not NULL, B is a t_INT upper bound for ||q||_oo. */
 static GEN
-polidivis(GEN x, GEN y, GEN bound)
+ZX_divides_i(GEN x, GEN y, GEN B)
 {
   long dx, dy, dz, i, j;
   pari_sp av;
@@ -29,18 +30,28 @@ polidivis(GEN x, GEN y, GEN bound)
   z=cgetg(dz+3,t_POL); z[1] = x[1];
   x += 2; y += 2; z += 2;
   y_lead = gel(y,dy);
-  if (gequal1(y_lead)) y_lead = NULL;
+  if (equali1(y_lead)) y_lead = NULL;
 
   p1 = gel(x,dx);
-  gel(z,dz) = y_lead? diviiexact(p1,y_lead): icopy(p1);
+  if (y_lead) {
+    GEN r;
+    p1 = dvmdii(p1,y_lead, &r);
+    if (r != gen_0) return NULL;
+  }
+  else p1 = icopy(p1);
+  gel(z,dz) = p1;
   for (i=dx-1; i>=dy; i--)
   {
     av = avma; p1 = gel(x,i);
     for (j=i-dy+1; j<=i && j<=dz; j++)
       p1 = subii(p1, mulii(gel(z,j),gel(y,i-j)));
-    if (y_lead) p1 = diviiexact(p1,y_lead);
-    if (bound && absi_cmp(p1, bound) > 0) return NULL;
-    p1 = gerepileupto(av,p1);
+    if (y_lead) {
+      GEN r;
+      p1 = dvmdii(p1,y_lead, &r);
+      if (r != gen_0) return NULL;
+    }
+    if (B && absi_cmp(p1, B) > 0) return NULL;
+    p1 = gerepileuptoint(av, p1);
     gel(z,i-dy) = p1;
   }
   av = avma;
@@ -50,12 +61,14 @@ polidivis(GEN x, GEN y, GEN bound)
     /* we always enter this loop at least once */
     for (j=0; j<=i && j<=dz; j++)
       p1 = subii(p1, mulii(gel(z,j),gel(y,i-j)));
-    if (!gequal0(p1)) return NULL;
+    if (signe(p1)) return NULL;
     avma = av;
     if (!i) break;
   }
   return z - 2;
 }
+static GEN
+ZX_divides(GEN x, GEN y) { return ZX_divides_i(x,y,NULL); }
 
 #if 0
 /* cf Beauzamy et al: upper bound for
@@ -271,7 +284,7 @@ nextK:
       }
 
       /* y is the candidate factor */
-      if (! (q = polidivis(lcpol,y,bound)) )
+      if (! (q = ZX_divides_i(lcpol,y,bound)) )
       {
         if (DEBUGLEVEL>3) fprintferr("*");
         avma = av; goto NEXT;
@@ -499,14 +512,14 @@ chk_factors(GEN P, GEN M_L, GEN bound, GEN famod, GEN pa)
     if (DEBUGLEVEL) fprintferr("LLL_cmbf: checking factor %ld\n",i);
     y = chk_factors_get(lt, famod, gel(piv,i), NULL, pa);
     y = FpX_center(y, pa, paov2);
-    if (! (pol = polidivis(ltpol,y,bound)) ) return NULL;
+    if (! (pol = ZX_divides_i(ltpol,y,bound)) ) return NULL;
     if (lt) y = Q_primpart(y);
     gel(list,i) = y;
     if (++i >= r) break;
 
     if (lt)
     {
-      pol = RgX_Rg_divexact(pol, leading_term(y));
+      pol = ZX_Z_divexact(pol, leading_term(y));
       lt = absi(leading_term(pol));
       ltpol = ZX_Z_mul(pol, lt);
     }
@@ -815,7 +828,7 @@ DDF_roots(GEN pol, GEN polp, GEN p)
     GEN q, r, y = gel(z,i);
     if (lc) y = ZX_Z_mul(y, lc);
     y = centermod_i(y, pe, pes2);
-    if (! (q = polidivis(lcpol, y, NULL)) ) continue;
+    if (! (q = ZX_divides(lcpol, y)) ) continue;
 
     lcpol = pol = q;
     r = negi( constant_term(y) );
@@ -853,7 +866,7 @@ DDF(GEN a, int fl)
   if (DEBUGLEVEL>2) { TIMERstart(&T); TIMERstart(&T2); }
   nmax = da+1;
   chosenp = 0;
-  lead = gel(a,da+2); if (gequal1(lead)) lead = NULL;
+  lead = gel(a,da+2); if (equali1(lead)) lead = NULL;
   av1 = avma;
   for (p = np = 0; np < MAXNP; avma = av1)
   {
@@ -1037,4 +1050,137 @@ nfrootsQ(GEN x)
   z = DDF(x, 1);
   if (val) z = shallowconcat(z, gen_0);
   return gerepilecopy(av, z);
+}
+
+/************************************************************************
+ *                   GCD OVER Z[X] / Q[X]                               *
+ ************************************************************************/
+int
+ZX_is_squarefree(GEN x)
+{
+  pari_sp av = avma;
+  GEN d = ZX_gcd(x,ZX_deriv(x));
+  int r = (lg(d) == 3); avma = av; return r;
+}
+
+#if 0
+/* ceil( || p ||_oo / lc(p) ) */
+static GEN
+maxnorm(GEN p)
+{
+  long i, n = degpol(p), av = avma;
+  GEN x, m = gen_0;
+
+  p += 2;
+  for (i=0; i<n; i++)
+  {
+    x = gel(p,i);
+    if (absi_cmp(x,m) > 0) m = x;
+  }
+  m = divii(m, gel(p,n));
+  return gerepileuptoint(av, addis(absi(m),1));
+}
+#endif
+
+/* A, B in Z[X] */
+GEN
+ZX_gcd_all(GEN A, GEN B, GEN *Anew)
+{
+  GEN R, a, b, q, qp, H, Hp, g, Ag, Bg;
+  long m, n, valX, valA, vA = varn(A);
+  ulong p;
+  pari_sp ltop, av, avlim;
+  byteptr d;
+
+  if (!signe(A)) { if (Anew) *Anew = zeropol(vA); return ZX_copy(B); }
+  if (!signe(B)) { if (Anew) *Anew = pol_1(vA);   return ZX_copy(A); }
+  valA = ZX_valrem(A, &A);
+  valX = minss(valA, ZX_valrem(B, &B));
+  ltop = avma;
+
+  n = 1 + minss(degpol(A), degpol(B)); /* > degree(gcd) */
+  g = gcdii(leading_term(A), leading_term(B)); /* multiple of lead(gcd) */
+  if (is_pm1(g)) {
+    g = NULL;
+    Ag = A;
+    Bg = B;
+  } else {
+    Ag = ZX_Z_mul(A,g);
+    Bg = ZX_Z_mul(B,g);
+  }
+
+  av = avma; avlim = stack_lim(av, 1);
+  H = NULL; d = init_modular(&p);
+  for(;;)
+  {
+    NEXT_PRIME_VIADIFF_CHECK(p,d);
+    if (g && !umodiu(g,p)) continue;
+    a = ZX_to_Flx(A, p);
+    b = ZX_to_Flx(B, p); Hp = Flx_gcd_i(a,b, p);
+    m = degpol(Hp);
+    if (m == 0) { /* coprime. DONE */
+      avma = ltop;
+      if (Anew) {
+        if (valA != valX) A = RgX_shift(A, valA - valX);
+        *Anew = A;
+      }
+      return monomial(gen_1, valX, vA);
+    }
+    if (m > n) continue; /* p | Res(A/G, B/G). Discard */
+
+    if (!g) /* make sure lead(H) = g mod p */
+      Hp = Flx_normalize(Hp, p);
+    else
+    {
+      ulong t = Fl_mul(umodiu(g, p), Fl_inv(Hp[m+2],p), p);
+      Hp = Flx_Fl_mul(Hp, t, p);
+    }
+    if (m < n)
+    { /* First time or degree drop [all previous p were as above; restart]. */
+      H = ZX_init_CRT(Hp,p,vA);
+      q = utoipos(p); n = m; continue;
+    }
+    if (DEBUGLEVEL>5) msgtimer("gcd mod %lu (bound 2^%ld)", p,expi(q));
+    if (low_stack(avlim, stack_lim(av,1)))
+    {
+      if (DEBUGMEM>1) pari_warn(warnmem,"QX_gcd");
+      gerepileall(av, 2, &H, &q);
+    }
+
+    qp = muliu(q,p);
+    if (!ZX_incremental_CRT(&H, Hp, q, qp, p)) { q = qp; continue; }
+    /* H stable: check divisibility */
+    q = qp;
+    if (!ZX_divides(Bg, H)) continue;
+    R = ZX_divides(Ag, H);
+    if (!R) continue;
+    if (Anew) {
+      A = R;
+      if (valA != valX) A = RgX_shift(A, valA - valX);
+      *Anew = A;
+    }
+    return valX ? RgX_shift(H, valX): H;
+  }
+}
+GEN
+ZX_gcd(GEN A, GEN B) { return ZX_gcd_all(A,B,NULL); }
+
+static GEN
+_gcd(GEN a, GEN b)
+{
+  if (!a) a = gen_1;
+  if (!b) b = gen_1;
+  return Q_gcd(a,b);
+}
+/* A0 and B0 in Q[X] */
+GEN
+QX_gcd(GEN A0, GEN B0)
+{
+  GEN a, b, D;
+  pari_sp av = avma, av2;
+
+  D = ZX_gcd(Q_primitive_part(A0, &a), Q_primitive_part(B0, &b));
+  av2 = avma; a = _gcd(a,b);
+  if (isint1(a)) avma = av2; else D = RgX_Rg_mul(D, a);
+  return gerepileupto(av, D);
 }
