@@ -39,6 +39,10 @@ else
     hpux-*) tmp=-E ;;
   esac
 fi
+case "$osname" in
+  darwin) tmp=$tmp -search_paths_first;;
+esac
+
 if test -n "$tmp"; then
   tmp=`./ldflags "$LDneedsWl" $tmp`
   ldflags="$ldflags $tmp"

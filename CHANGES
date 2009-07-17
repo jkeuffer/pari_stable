@@ -451,6 +451,8 @@ BA110- listsort(L) no longer returns the list L: it now returns nothing.
   112- allow bestappr(x)  [2nd argument made optional]
 BA113- GMP kernel chosen by default when GMP is available
 BA114- Rename RgXQ_u_pow to RgXQ_powu
+  115- Darwin: add -search_paths_first to LDFLAGS (try to solve the Editline
+       / Readline conflict in a user-friendly way)
 
   Added
     1- many new benches (make test-all)
