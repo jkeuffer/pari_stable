@@ -430,7 +430,7 @@ ZX_sqr(GEN x)
   if (!nx) return ZX0_copy(x);
   vx = ZX_val(x); nx-=vx;
   if (nx==1) return ZX1_sqr(x);
-  ex = ZX_expi(x); 
+  ex = ZX_expi(x);
   z = ZX_sqrspec_sqri(x+2+vx, nx, ex, 2*vx);
   z[1] = x[1];
   return gerepileupto(av, z);
