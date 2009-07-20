@@ -389,6 +389,44 @@ ZX_mulspec_mulii(GEN x, GEN y, long nx, long ny, long ex, long ey, long v)
   return Z_mod2BIL_ZX(z, N, nx+ny-2, v);
 }
 
+INLINE GEN
+ZX_sqrspec_basecase_limb(GEN x, long a, long i)
+{
+  pari_sp av = avma;
+  GEN s = gen_0;
+  long j, l = (i+1)>>1;
+  for (j=a; j<l; j++)
+  {
+    GEN xj = gel(x,j), xx = gel(x,i-j);
+    if (signe(xj) && signe(xx))
+      s = addii(s, mulii(xj, xx));
+  }
+  s = shifti(s,1);
+  if ((i&1) == 0)
+  {
+    GEN t = gel(x, i>>1);
+    if (signe(t)) 
+      s = addii(s, sqri(t));
+  }
+  return gerepileupto(av,s);
+}
+
+static GEN
+ZX_sqrspec_basecase(GEN x, long nx, long v)
+{
+  long i, lz, nz;
+  GEN z;
+
+  lz = (nx << 1) + 1; nz = lz-2;
+  lz += v;
+  z = cgetg(lz,t_POL) + 2;
+  for (i=0; i<v; i++) gel(z++, 0) = gen_0;
+  for (i=0; i<nx; i++)
+    gel(z,i) = ZX_sqrspec_basecase_limb(x, 0, i);
+  for (  ; i<nz; i++) gel(z,i) = ZX_sqrspec_basecase_limb(x, i-nx+1, i);
+  z -= v+2; return z;
+}
+
 /* copy a ZX equal to 0, faster than ZX_copy */
 static GEN
 ZX0_copy(GEN x) { GEN y = cgetg(2, t_POL); y[1] = x[1]; return y; }
@@ -424,6 +462,8 @@ ZX1_ZX_mul(GEN x, GEN y, long vy)
 GEN
 ZX_sqr(GEN x)
 {
+  const long low[]={ 17, 32, 96, 112, 160, 128, 128, 160, 160, 160, 160, 160, 176, 192, 192, 192, 192, 192, 224, 224, 224, 240, 240, 240, 272, 288, 288, 240, 288, 304, 304, 304, 304, 304, 304, 352, 352, 368, 352, 352, 352, 368, 368, 432, 432, 496, 432, 496, 496};
+  const long high[]={ 102860, 70254, 52783, 27086, 24623, 18500, 15289, 13899, 12635, 11487, 10442, 9493, 8630, 7845, 7132, 7132, 6484, 6484, 5894, 5894, 4428, 4428, 3660, 4428, 3660, 3660, 2749, 2499, 2272, 2066, 1282, 1282, 1166, 1166, 1166, 1166, 1166, 1166, 1166, 963, 963, 724, 658, 658, 658, 528, 528, 528, 528};
   pari_sp av = avma;
   long nx = lgpol(x), ex, vx;
   GEN z;
@@ -431,7 +471,10 @@ ZX_sqr(GEN x)
   vx = ZX_val(x); nx-=vx;
   if (nx==1) return ZX1_sqr(x);
   ex = ZX_expi(x);
-  z = ZX_sqrspec_sqri(x+2+vx, nx, ex, 2*vx);
+  if (nx-2<sizeof(low) && low[nx-2]<=ex && ex<=high[nx-2])
+    z = ZX_sqrspec_basecase(x+2+vx, nx, 2*vx);
+  else
+    z = ZX_sqrspec_sqri(x+2+vx, nx, ex, 2*vx);
   z[1] = x[1];
   return gerepileupto(av, z);
 }
