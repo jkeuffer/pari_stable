@@ -27,6 +27,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 %pure-parser
 %parse-param {char **lex}
 %lex-param {char **lex}
+%initial-action{ @$.start=@$.end=*lex; }
 %token KPARROW ")->"
 %token KARROW "->"
 %token KPE   "+="
@@ -80,9 +81,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 sequnused: seq       {$$=$1;}
          | seq error {$$=$1; pari_unused_chars=@1.end;YYABORT;}
 
-seq: /**/ %prec SEQ  { if(*lex<=pari_lex_start+2)
-                         @$.start=@$.end=pari_lex_start;
-                       $$=newnode(Fnoarg,-1,-1,&@$);}
+seq: /**/ %prec SEQ  {$$=newnode(Fnoarg,-1,-1,&@$);}
    | expr %prec SEQ  {$$=$1;}
    | seq ';'         {$$=$1;}
    | seq ';' expr    {$$=newnode(Fseq,$1,$3,&@$);}
