@@ -987,20 +987,14 @@ static GEN
 RgX_sqrspec_basecase(GEN x, long nx, long v)
 {
   long i, lz, nz;
-  GEN z, x0;
+  GEN z;
 
   if (!nx) return zeropol(0);
   lz = (nx << 1) + 1, nz = lz-2;
   lz += v;
-  x0 = cgetg(nx+1, t_VECSMALL) + 1; /* left on stack */
   z = cgetg(lz,t_POL) + 2;
   for (i=0; i<v; i++) gel(z++, 0) = gen_0;
-  for (i=0; i<nx; i++)
-  {
-    GEN xi = gel(x,i);
-    gel(x0,i) = isrationalzero(xi)? NULL: xi;
-    gel(z,i) = RgX_sqrspec_basecase_limb(x, 0, i);
-  }
+  for (i=0; i<nx; i++)gel(z,i) = RgX_sqrspec_basecase_limb(x, 0, i);
   for (  ; i<nz; i++) gel(z,i) = RgX_sqrspec_basecase_limb(x, i-nx+1, i);
   z -= v+2; z[1] = 0; return normalizepol_lg(z, lz);
 }
