@@ -713,9 +713,9 @@ gequalsg(long s, GEN x)
 /*******************************************************************/
 
 static long
-minval(GEN x, GEN p, long first, long lx)
+minval(GEN x, GEN p, long first)
 {
-  long i,k, val = LONG_MAX;
+  long i,k, val = LONG_MAX, lx = lg(x);
   for (i=first; i<lx; i++)
   {
     k = ggval(gel(x,i),p);
@@ -815,7 +815,7 @@ ggval(GEN x, GEN p)
       else
         if (tp != t_INT) break;
       i=2; while (isrationalzero(gel(x,i))) i++;
-      return minval(x,p,i,lg(x));
+      return minval(x,p,i);
 
     case t_SER:
       if (tp!=t_POL && tp!=t_SER && tp!=t_INT) break;
@@ -827,13 +827,13 @@ ggval(GEN x, GEN p)
         return (long)(valp(x) / vp);
       }
       if (varncmp(vx, vp) > 0) return 0;
-      return minval(x,p,2,lg(x));
+      return minval(x,p,2);
 
     case t_RFRAC:
       return ggval(gel(x,1),p) - ggval(gel(x,2),p);
 
     case t_COMPLEX: case t_QUAD: case t_VEC: case t_COL: case t_MAT:
-      return minval(x,p,1,lg(x));
+      return minval(x,p,1);
   }
   pari_err(talker,"forbidden or conflicting type in gval");
   return 0; /* not reached */
@@ -1032,11 +1032,88 @@ Z_pval(GEN x, GEN p) {
   }
 }
 
+/* return v_p(n!) = [n/p] + [n/p^2] + ... */
+long
+factorial_lval(ulong n, ulong p)
+{
+  ulong q = p, v = 0;
+  do { v += n/q; q *= p; } while (n >= q);
+  return (long)v;
+}
+
+/********** Same for "containers" ZX / ZV / ZC **********/
+
+/* If the t_INT q divides the ZX/ZV x, return the quotient. Otherwise NULL.
+ * Stack clean; assumes lg(x) > 1 */
+static GEN
+gen_Z_divides(GEN x, GEN q, long imin)
+{
+  long i, l;
+  GEN y = cgetg_copy(x, &l);
+
+  y[1] = x[1]; /* Needed for ZX; no-op if ZV, overwritten in first iteration */
+  for (i = imin; i < l; i++)
+  {
+    GEN r, xi = gel(x,i);
+    if (!signe(xi)) { gel(y,i) = xi; continue; }
+    gel(y,i) = dvmdii(xi, q, &r);
+    if (r != gen_0) { avma = (pari_sp)(y+l); return NULL; }
+  }
+  return y;
+}
+/* If q divides the ZX/ZV x, return the quotient. Otherwise NULL.
+ * Stack clean; assumes lg(x) > 1 */
+static GEN
+gen_z_divides(GEN x, ulong q, long imin)
+{
+  long i, l;
+  GEN y = cgetg_copy(x, &l);
+
+  y[1] = x[1]; /* Needed for ZX; no-op if ZV, overwritten in first iteration */
+  for (i = imin; i < l; i++)
+  {
+    ulong r;
+    GEN xi = gel(x,i);
+    if (!signe(xi)) { gel(y,i) = xi; continue; }
+    gel(y,i) = diviu_rem(xi, q, &r);
+    if (r) { avma = (pari_sp)(y+l); return NULL; }
+  }
+  return y;
+}
+
+/* return v_q(x) and set *py = x / q^v_q(x), using divide & conquer */
 static long
-ZX_2val(GEN x)
+gen_pvalrem_DC(GEN x, GEN q, GEN *py, long imin)
+{
+
+  pari_sp av = avma;
+  long v, i, l, lz = LONG_MAX;
+  GEN y = cgetg_copy(x, &l);
+
+  y[1] = x[1];
+  for (i = imin; i < l; i++)
+  {
+    GEN r, xi = gel(x,i);
+    if (!signe(xi)) { gel(y,i) = xi; continue; }
+    gel(y,i) = dvmdii(xi, q, &r);
+    if (r != gen_0) { avma = av; *py = x; return 0; }
+    lz = minss(lz, lgefint(gel(y,i)));
+  }
+  if (2 * lgefint(q) <= lz+3) /* avoid squaring if pointless */
+    v = gen_pvalrem_DC(y, sqri(q), py, imin) << 1;
+  else
+  { v = 0; *py = y; }
+
+  y = gen_Z_divides(*py, q, imin);
+  if (!y) return v+1;
+  *py = y; return v+2;
+}
+
+static long
+gen_2val(GEN x, long imin)
 {
   long i, lx = lg(x), v = LONG_MAX;
-  for (i = 2; i < lx; i++)
+  for (i = imin; i < lx; i++)
   {
     GEN c = gel(x,i);
     long w;
@@ -1046,44 +1123,63 @@ ZX_2val(GEN x)
   }
   return v;
 }
-long
-ZX_lval(GEN x, ulong p)
+static long
+gen_lval(GEN x, ulong p, long imin)
 {
   long i, lx, v;
   pari_sp av;
   GEN y;
-  if (p == 2) return ZX_2val(x);
+  if (p == 2) return gen_2val(x, imin);
   av = avma;
   lx = lg(x); y = leafcopy(x);
   for(v = 0;; v++)
-    for (i = 2; i < lx; i++)
+    for (i = imin; i < lx; i++)
     {
       ulong r; gel(y,i) = diviu_rem(gel(y,i), p, &r);
       if (r) { avma = av; return v; }
     }
 }
 long
-ZX_pval(GEN x, GEN p)
+ZX_lval(GEN x, ulong p) { return gen_lval(x, p, 2); }
+long
+ZV_lval(GEN x, ulong p) { return gen_lval(x, p, 1); }
+
+long
+gen_pval(GEN x, GEN p, long imin)
 {
   long i, lx, v;
   pari_sp av;
   GEN y;
-  if (lgefint(p)) return ZX_lval(x, p[2]);
+  if (lgefint(p) == 3) return gen_lval(x, p[2], imin);
   av = avma;
   lx = lg(x); y = leafcopy(x);
   for(v = 0;; v++)
-    for (i = 2; i < lx; i++)
+  {
+    if (v == VAL_DC_THRESHOLD)
+    {
+      if (is_pm1(p)) pari_err(talker, "p = 1 in gen_pvalrem");
+      v += gen_pvalrem_DC(y, p, &y, imin);
+      avma = av; return v;
+    }
+
+    for (i = imin; i < lx; i++)
     {
       GEN r; gel(y,i) = dvmdii(gel(y,i), p, &r);
       if (r != gen_0) { avma = av; return v; }
     }
+  }
 }
+long
+ZX_pval(GEN x, GEN p) { return gen_pval(x, p, 2); }
+long
+ZV_pval(GEN x, GEN p) { return gen_pval(x, p, 2); }
+
 static long
-ZX_2valrem(GEN x, GEN *px)
+gen_2valrem(GEN x, GEN *px, long imin)
 {
   long i, lx = lg(x), v = LONG_MAX;
   GEN z;
-  for (i = 2; i < lx; i++)
+  for (i = imin; i < lx; i++)
   {
     GEN c = gel(x,i);
     long w;
@@ -1094,22 +1190,31 @@ ZX_2valrem(GEN x, GEN *px)
       if (!v) { *px = x; return 0; } /* early abort */
     }
   }
-  z = cgetg(lx, t_POL); z[1] = x[1];
-  for (i=2; i<lx; i++) gel(z,i) = shifti(gel(x,i), -v);
+  z = cgetg_copy(x, &lx); z[1] = x[1];
+  for (i=imin; i<lx; i++) gel(z,i) = shifti(gel(x,i), -v);
   *px = z; return v;
 }
-long
-ZX_lvalrem(GEN x, ulong p, GEN *px)
+static long
+gen_lvalrem(GEN x, ulong p, GEN *px, long imin)
 {
   long i, lx, v;
   GEN y;
-  if (p == 2) return ZX_2valrem(x, px);
+  if (p == 2) return gen_2valrem(x, px, imin);
   y = cgetg_copy(x, &lx);
   y[1] = x[1];
   x = leafcopy(x);
   for(v = 0;; v++)
   {
-    for (i = 2; i < lx; i++)
+    if (v == VAL_DC_THRESHOLD)
+    {
+      if (p == 1) pari_err(talker, "p = 1 in gen_lvalrem");
+      v += gen_pvalrem_DC(x, sqru(p), px, imin) << 1;
+      x = gen_z_divides(*px, p, imin);
+      if (x) { *px = x; v++; }
+      return v;
+    }
+
+    for (i = imin; i < lx; i++)
     {
       ulong r; gel(y,i) = diviu_rem(gel(x,i), p, &r);
       if (r) { *px = x; return v; }
@@ -1118,62 +1223,39 @@ ZX_lvalrem(GEN x, ulong p, GEN *px)
   }
 }
 long
-ZX_pvalrem(GEN x, GEN p, GEN *px)
+ZX_lvalrem(GEN x, ulong p, GEN *px) { return gen_lvalrem(x,p,px, 2); }
+long
+ZV_lvalrem(GEN x, ulong p, GEN *px) { return gen_lvalrem(x,p,px, 1); }
+
+static long
+gen_pvalrem(GEN x, GEN p, GEN *px, long imin)
 {
   long i, lx, v;
   GEN y;
-  if (lgefint(p) == 3) return ZX_lvalrem(x, p[2], px);
+  if (lgefint(p) == 3) return gen_lvalrem(x, p[2], px, imin);
   y = cgetg_copy(x, &lx);
   y[1] = x[1];
   x = leafcopy(x);
   for(v = 0;; v++)
   {
-    for (i = 2; i < lx; i++)
+    if (v == VAL_DC_THRESHOLD)
     {
-      GEN r; gel(y,i) = dvmdii(gel(x,i), p, &r);
-      if (r != gen_0) { *px = x; return v; }
+      if (is_pm1(p)) pari_err(talker, "p = 1 in gen_pvalrem");
+      return v + gen_pvalrem_DC(x, p, px, imin);
     }
-    swap(x, y);
-  }
-}
-long
-ZV_pval(GEN x, GEN p)
-{
-  long i, lx = lg(x), v = 0;
-  pari_sp av = avma;
-  GEN y = leafcopy(x);
-  for(;; v++)
-    for (i = 1; i < lx; i++)
-    {
-      GEN r; gel(y,i) = dvmdii(gel(y,i), p, &r);
-      if (r != gen_0) { avma = av; return v; }
-    }
-}
-long
-ZV_pvalrem(GEN x, GEN p, GEN *px)
-{
-  long i, lx, v = 0;
-  GEN y = cgetg_copy(x, &lx);
-  x = leafcopy(x);
-  for(;; v++)
-  {
-    for (i = 1; i < lx; i++)
-    {
-      GEN r; gel(y,i) = dvmdii(gel(x,i), p, &r);
-      if (r != gen_0) { *px = x; return v; }
-    }
-    swap(x, y);
-  }
-}
 
-/* return v_p(n!) = [n/p] + [n/p^2] + ... */
-long
-factorial_lval(ulong n, ulong p)
-{
-  ulong q = p, v = 0;
-  do { v += n/q; q *= p; } while (n >= q);
-  return (long)v;
+    for (i = imin; i < lx; i++)
+    {
+      GEN r; gel(y,i) = dvmdii(gel(x,i), p, &r);
+      if (r != gen_0) { *px = x; return v; }
+    }
+    swap(x, y);
+  }
 }
+long
+ZX_pvalrem(GEN x, GEN p, GEN *px) { return gen_pvalrem(x,p,px, 2); }
+long
+ZV_pvalrem(GEN x, GEN p, GEN *px) { return gen_pvalrem(x,p,px, 1); }
 
 /*******************************************************************/
 /*                                                                 */

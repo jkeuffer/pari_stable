@@ -1892,31 +1892,10 @@ the prime-to-\kbd{p} part of~\kbd{x}.
 \fun{long}{Z_pval}{GEN x, GEN p} as \kbd{Z\_pvalrem} but only returns the
 ``valuation''.
 
-\fun{long}{ZV_pvalrem}{GEN x, GEN p, GEN *r} $x$ being a vector of \typ{INT}s,
-return the min $v$ of the valuations of its components and set \kbd{*r} to
-$x/p^v$. Infinite loop if $x$ is the zero vector.
-
-\fun{long}{ZV_pval}{GEN x, GEN p} as \kbd{ZV\_pvalrem} but only returns the
-``valuation''.
-
-\fun{long}{ZX_pvalrem}{GEN x, GEN p, GEN *r} $x$ being a \kbd{ZX}
-(a \typ{POL} with \typ{INT} coefficients), return the min $v$ of the
-valuations of its components and set \kbd{*r} to $x/p^v$. Infinite loop
-if $x$ is the zero polynomial.
-
-\fun{long}{ZX_pval}{GEN x, GEN p} as \kbd{ZX\_pvalrem} but only returns the
-``valuation''.
-
 \fun{long}{Z_lvalrem}{GEN x, ulong p, GEN *r} as \kbd{Z\_pvalrem},
 except that \kbd{p} is an \kbd{ulong} ($\kbd{p} > 1$).
 
 \fun{long}{Z_lval}{GEN x, ulong p} as \kbd{Z\_pval},
-except that \kbd{p} is an \kbd{ulong} ($\kbd{p} > 1$).
-
-\fun{long}{ZX_lval}{GEN x, ulong p} as \kbd{ZX\_pval}, 
-except that \kbd{p} is an \kbd{ulong} ($\kbd{p} > 1$).
-
-\fun{long}{ZX_lvalrem}{GEN x, ulong p, GEN *px} as \kbd{ZX\_pvalrem}, 
 except that \kbd{p} is an \kbd{ulong} ($\kbd{p} > 1$).
 
 \fun{long}{u_lvalrem}{ulong x, ulong p, ulong *r} as \kbd{Z\_pvalrem},
@@ -1936,6 +1915,40 @@ of the \typ{INT} or \typ{FRAC}~\kbd{x}.
 
 \fun{long}{factorial_lval}{ulong n, ulong p} returns $v_p(n!)$, assuming
 $p$ is prime.
+
+
+The following convenience functions generalize \kbd{Z\_pval} and its variants
+to ``containers'' (\kbd{ZV} and \kbd{ZX}):
+
+
+\fun{long}{ZV_pvalrem}{GEN x, GEN p, GEN *r} $x$ being a \kbd{ZV} (a vector
+of \typ{INT}s), return the min $v$ of the valuations of its components and
+set \kbd{*r} to $x/p^v$. Infinite loop if $x$ is the zero vector.
+This function is not stack clean.
+
+\fun{long}{ZV_pval}{GEN x, GEN p} as \kbd{ZV\_pvalrem} but only returns the
+``valuation''.
+
+\fun{long}{ZV_lvalrem}{GEN x, ulong p, GEN *px} as \kbd{ZV\_pvalrem}, 
+except that \kbd{p} is an \kbd{ulong} ($\kbd{p} > 1$).
+This function is not stack-clean.
+
+\fun{long}{ZV_lval}{GEN x, ulong p} as \kbd{ZV\_pval}, 
+except that \kbd{p} is an \kbd{ulong} ($\kbd{p} > 1$).
+
+
+\fun{long}{ZX_pvalrem}{GEN x, GEN p, GEN *r} as \kbd{ZV\_pvalrem}, for
+a \kbd{ZX} $x$ (a \typ{POL} with \typ{INT} coefficients).
+This function is not stack-clean.
+
+\fun{long}{ZX_pval}{GEN x, GEN p} as \kbd{ZV\_pval} for a \kbd{ZX} $x$.
+
+\fun{long}{ZX_lvalrem}{GEN x, ulong p, GEN *px} as \kbd{ZV\_lvalrem}, 
+a \kbd{ZX} $x$.
+This function is not stack-clean.
+
+\fun{long}{ZX_lval}{GEN x, ulong p} as \kbd{ZX\_pval}, 
+except that \kbd{p} is an \kbd{ulong} ($\kbd{p} > 1$).
 
 \subsec{Generic unary operators}. Let ``\op'' be a unary operation among
 
