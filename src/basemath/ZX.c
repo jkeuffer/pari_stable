@@ -408,7 +408,7 @@ ZX_sqrspec_basecase_limb(GEN x, long a, long i)
     if (signe(t)) 
       s = addii(s, sqri(t));
   }
-  return gerepileupto(av,s);
+  return gerepileuptoint(av,s);
 }
 
 static GEN
