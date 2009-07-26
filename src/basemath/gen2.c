@@ -1144,7 +1144,7 @@ ZX_lval(GEN x, ulong p) { return gen_lval(x, p, 2); }
 long
 ZV_lval(GEN x, ulong p) { return gen_lval(x, p, 1); }
 
-long
+static long
 gen_pval(GEN x, GEN p, long imin)
 {
   long i, lx, v;
