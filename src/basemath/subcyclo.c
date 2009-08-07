@@ -440,7 +440,7 @@ polsubcyclo_start(long n, long d, long o, GEN borne, long *ptr_val,long *ptr_l)
   le = powiu(gl,val);
   z = utoipos( Fl_powu(pgener_Fl(l), e, l) );
   z = Zp_sqrtnlift(gen_1,utoipos(n),z,gl,val);
-  if (DEBUGLEVEL >= 1) msgtimer("Zp_sqrtnlift.");
+  if (DEBUGLEVEL >= 1) msgtimer("Zp_sqrtnlift");
   *ptr_val = val;
   *ptr_l = l;
   return gmodulo(z,le);
