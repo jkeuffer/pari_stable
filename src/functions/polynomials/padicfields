@@ -1,0 +1,20 @@
+Function: padicfields
+Section: polynomials
+C-Name: padicfields
+Prototype: GLLD0,L,
+Help: padicfields(p, m, d, {flag=0}): vector of polynomials generating all the extensions 
+ of degree m and discriminant p^d of the field of p-adic rational numbers (or all possible 
+ discriminants if d < 0). flag is optional, and can be 0: default, 1: return also the 
+ ramification index, the residual degree and the valuation of the discriminant, or 2: return 
+ only the number of extensions.
+Doc: vector of polynomials generating all the extensions of degree \var{m} and discriminant $p^d$
+ of the field $\Bbb{Q}_p$ of $p$-adic rational numbers (or all possible discriminants if $\var{d} < 0$). 
+ The list is minimal in the sense that two different polynomials generate non-isomorphic extensions.
+ In particular, the number of polynomials is the number of classes of isomorphic extensions. Note that 
+ any root of these polynomials is in fact the sum of an uniformizer and a generator of the residual
+ field of the field it defines. In particular, its powers always generate the ring of $p$-adic 
+ integers of this field. 
+ 
+ If $\fl = 1$, for each polynomial $pol$ return a vector $[pol, e, f, d]$ where $e$ is the ramification 
+ index, $f$ the residual degree and $d$ the valuation of the discriminant, or 2: return only the number 
+ of extensions.

@@ -1873,6 +1873,10 @@ GEN     sumnum(void *E, GEN (*f) (GEN, void *), GEN a, GEN sig, GEN tab, long fl
 GEN     sumnumalt(void *E, GEN (*f) (GEN, void *), GEN a, GEN s, GEN tab, long flag, long prec);
 GEN     sumnuminit(GEN sig, long m, long sgn, long prec);
 
+/* krasner.c */
+
+GEN     padicfields(GEN p, long m, long d, long flag);
+
 /* kummer.c */
 
 GEN     rnfkummer(GEN bnr, GEN subgroup, long all, long prec);
