@@ -4529,7 +4529,10 @@ assumed to have compatible dimensions).
 of~\kbd{x}.
 
 \fun{GEN}{ZV_prod}{GEN x} returns the product of all the components
-of~\kbd{x}.
+of~\kbd{x} ($1$ for the empty vector).
+
+\fun{GEN}{ZV_sum}{GEN x} returns the sum of all the components
+of~\kbd{x} ($0$ for the empty vector).
 
 \fun{long}{ZV_max_lg}{GEN x} returns the effective length of the longest
 entry in $x$.
@@ -4634,6 +4637,9 @@ occurs in the fringe case where an entry is equal to $2^{\B-1}$.
 \fun{long}{zv_content}{GEN x} returns the gcd of the entries of $x$.
 
 \fun{long}{zv_prod}{GEN x} returns the product of all the components
+of~\kbd{x} (assumes no overflow occurs).
+
+\fun{long}{zv_sum}{GEN x} returns the sum of all the components
 of~\kbd{x} (assumes no overflow occurs).
 
 \fun{int}{zv_cmp0}{GEN x} returns 1 if all entries of the \kbd{zv} $x$ are $0$,

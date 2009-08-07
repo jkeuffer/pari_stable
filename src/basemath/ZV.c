@@ -849,3 +849,24 @@ ZV_prod(GEN v)
   for (i = 2; i < l; i++) n = mulii(n, gel(v,i));
   return gerepileuptoint(av, n);
 }
+/* assumes no overflow */
+long
+zv_sum(GEN v)
+{
+  long n, i, l = lg(v);
+  if (l == 1) return 0;
+  n = v[1]; for (i = 2; i < l; i++) n += v[i];
+  return n;
+}
+GEN
+ZV_sum(GEN v)
+{
+  pari_sp av = avma;
+  long i, l = lg(v);
+  GEN n;
+  if (l == 1) return gen_0;
+  n = gel(v,1);
+  if (l == 2) return icopy(n);
+  for (i = 2; i < l; i++) n = addii(n, gel(v,i));
+  return gerepileuptoint(av, n);
+}
