@@ -779,6 +779,7 @@ WildlyRamifiedCase(KRASNER_t *data)
   long nbext, ct, fd, nb = 0, j;
   GEN nbpol, rpl, rep;
   FAD_t **vfd;
+  pari_timer T;
   pari_sp av = avma, av2;
 
   InitStructureOmega(data);
@@ -786,10 +787,10 @@ WildlyRamifiedCase(KRASNER_t *data)
   nbpol = data->nbpol;
   nbext = itos(data->nbext);
   
-  if (DEBUGLEVEL>0)
+  if (DEBUGLEVEL>0) {
     fprintferr("There are %ld extensions to find and %Ps polynomials to consider\n", nbext, nbpol);
-  
-  timer2();
+    TIMERstart(&T);
+  }
 
   vfd = (FAD_t**)new_chunk(nbext);
   for (j = 0; j < nbext; j++) vfd[j] = (FAD_t*)new_chunk(sizeof(FAD_t));
@@ -829,10 +830,8 @@ WildlyRamifiedCase(KRASNER_t *data)
       fd += nb;
       ct++;
       if (DEBUGLEVEL>1)
-      {
-	msgtimer("New polynomial"); 
-	fprintferr("Found a new polynomial generating %ld extension(s) (total: %ld/%ld)\n", nb, fd, nbext);
-      }
+	msgTIMER(&T, "new pol., generating %ld extension%s (total: %ld/%ld)",
+                 nb, (nb == 1)? "": "s", fd, nbext);
     }
     avma = av2;
   }
