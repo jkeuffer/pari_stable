@@ -444,6 +444,7 @@ int     ZV_equal(GEN V, GEN W);
 long    ZV_max_lg(GEN x);
 void    ZV_neg_inplace(GEN M);
 GEN     ZV_prod(GEN v);
+GEN     ZV_sum(GEN v);
 GEN     ZV_to_Flv(GEN x, ulong p);
 GEN     ZV_to_nv(GEN z);
 void    ZV_togglesign(GEN M);
@@ -453,6 +454,7 @@ long    zv_content(GEN x);
 int     zv_equal(GEN V, GEN W);
 GEN     zv_neg(GEN x);
 long    zv_prod(GEN v);
+long    zv_sum(GEN v);
 int     ZM_ishnf(GEN x);
 int     ZM_isidentity(GEN x);
 void    RgM_check_ZM(GEN A, const char *s);
@@ -1875,6 +1877,7 @@ GEN     sumnuminit(GEN sig, long m, long sgn, long prec);
 
 /* krasner.c */
 
+GEN     padicfields0(GEN p, GEN n, long flag);
 GEN     padicfields(GEN p, long m, long d, long flag);
 
 /* kummer.c */
