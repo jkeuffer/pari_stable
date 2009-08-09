@@ -824,7 +824,7 @@ compilefunc(entree *ep, long n, int mode)
   long lnl=first_safe_arg(arg, COsafelex);
   long nbpointers=0, nbopcodes;
   long nb=lg(arg)-1, lev=0;
-  entree *ev[8];
+  long ev[8];
   if (x>=OPnboperator)
     str=tree[x].str;
   else
@@ -1067,13 +1067,18 @@ compilefunc(entree *ep, long n, int mode)
             {
               long i;
               GEN vep=cgetg(lev+1,t_VECSMALL);
+              GEN varg=cgetg(lev+1,t_VECSMALL);
               for(i=0;i<lev;i++)
               {
-                if (!ev[i])
+                entree *ve;
+                if (ev[i]<0)
                   compile_err("missing variable name", tree[a].str-1);
-                var_push(ev[i],Lmy);
-                vep[i+1]=(long)ev[i];
+                ve = getvar(ev[i]);
+                vep[i+1]=(long)ve;
+                varg[i+1]=ev[i];
+                var_push(ve,Lmy);
               }
+              checkdups(varg,vep);
               frame_push(vep);
             }
             if (tree[a].f==Fnoarg)
@@ -1085,16 +1090,16 @@ compilefunc(entree *ep, long n, int mode)
           }
         case 'V':
           {
-            ev[lev++] = getvar(arg[j++]);
+            long a = arg[j++];
+            (void)getvar(a);
+            ev[lev++] = a;
             break;
           }
         case '=':
           {
-            long x=tree[arg[j]].x;
-            long y=tree[arg[j]].y;
-            ev[lev++] = getvar(x);
-            compilenode(y,Ggen,FLnocopy);
-            j++;
+            long a = arg[j++];
+            ev[lev++] = tree[a].x;
+            compilenode(tree[a].y, Ggen, FLnocopy);
           }
           break;
         case 'r':
@@ -1174,7 +1179,7 @@ compilefunc(entree *ep, long n, int mode)
           op_push(OCpushlong,-1,n);
           break;
         case 'V':
-          ev[lev++] = NULL;
+          ev[lev++] = -1;
           break;
         default:
           pari_err(talker,"Unknown prototype code `%c' for `%.*s'",c,
