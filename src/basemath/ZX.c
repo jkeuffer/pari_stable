@@ -405,7 +405,7 @@ ZX_sqrspec_basecase_limb(GEN x, long a, long i)
   if ((i&1) == 0)
   {
     GEN t = gel(x, i>>1);
-    if (signe(t)) 
+    if (signe(t))
       s = addii(s, sqri(t));
   }
   return gerepileuptoint(av,s);

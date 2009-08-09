@@ -457,7 +457,7 @@ find_kernel(GEN a4, GEN a6, ulong ell, GEN a4t, GEN a6t, GEN pp1, GEN p)
   for (i = 1; i <= ext; i++)
     if (signe(gel(tlist, i))) { avma = ltop; return NULL; }
   res = vecslice(tlist, ext+1, dim+1);
-  
+
   return RgV_to_RgX(res, 0);
 }
 

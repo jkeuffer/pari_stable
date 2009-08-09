@@ -1907,7 +1907,7 @@ Fp_pow(GEN A, GEN K, GEN N)
       /* gcd(a,n) = 1 */
       k = umodiu(K, eulerphiu(n));
     }
-    else 
+    else
       k = (ulong)K[2];
     return utoi(Fl_powu(a, k, n));
   }

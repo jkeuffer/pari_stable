@@ -1474,7 +1474,7 @@ cxpsi(GEN s0, long prec)
     l = (2*lim-1)*la / (2.*PI);
     L = gsub(dbltor(l*l), gsqr(iS));
     if (signe(L) < 0) L = gen_0;
-    
+
     L = gsub(gsqrt(L, 3), rS);
     if (signe(L) > 0) nn = (long)ceil(rtodbl(L)); else nn = 1;
     if (DEBUGLEVEL>2) fprintferr("lim, nn: [%ld, %ld]\n",lim,nn);

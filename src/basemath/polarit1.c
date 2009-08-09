@@ -2478,7 +2478,7 @@ factorff(GEN f, GEN p, GEN T)
   if (!p || !T)
   {
     long pa, t;
-    if (typ(f) != t_POL) pari_err(typeer, "factorff"); 
+    if (typ(f) != t_POL) pari_err(typeer, "factorff");
     T = p = NULL;
     t = RgX_type(f, &p, &T, &pa);
     if (t != t_FFELT) pari_err(typeer, "factorff");
@@ -2495,7 +2495,7 @@ polrootsff(GEN f, GEN p, GEN T)
   if (!p || !T)
   {
     long pa, t;
-    if (typ(f) != t_POL) pari_err(typeer, "polrootsff"); 
+    if (typ(f) != t_POL) pari_err(typeer, "polrootsff");
     T = p = NULL;
     t = RgX_type(f, &p, &T, &pa);
     if (t != t_FFELT) pari_err(typeer, "factorff");
