@@ -367,8 +367,8 @@ factor_quad(GEN x, GEN res, long *ptcnt)
   gel(res,cnt++) = gmul(u, gsub(pol_x(v), z2)); *ptcnt = cnt;
 }
 
-/* y > 1 and B integers. Let n such that y^(n-1) <= B < y^n.
- * Return e = max(n,1), set *ptq = y^e if non-NULL */
+/* y > 1 and B > 0 integers. Return e such that y^(e-1) <= B < y^e, i.e
+ * e = 1 + floor(log_y B). Set *ptq = y^e if non-NULL */
 long
 logint(GEN B, GEN y, GEN *ptq)
 {
@@ -379,8 +379,12 @@ logint(GEN B, GEN y, GEN *ptq)
   if (typ(B) != t_INT) B = ceil_safe(B);
   if (expi(B) <= (expi(y) << 6)) /* e small, be naive */
   {
-    for (e=1; cmpii(r, B) < 0; e++) r = mulii(r,y);
-    goto END;
+    for (e=1;; e++)
+    { /* here, r = y^e */
+      fl = cmpii(r, B);
+      if (fl > 0) goto END;
+      r = mulii(r,y);
+    }
   }
   /* binary splitting: compute bits of e one by one */
   /* compute pow2[i] = y^(2^i) [i < very crude upper bound for log_2(n)] */
