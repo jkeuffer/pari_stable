@@ -1017,6 +1017,12 @@ u_pvalrem(ulong x, GEN p, ulong *py)
   *py = x; return 0;
 }
 long
+u_pval(ulong x, GEN p)
+{
+  if (lgefint(p) == 3) return u_lval(x, (ulong)p[2]);
+  return 0;
+}
+long
 Z_pval(GEN x, GEN p) {
   long vx;
   pari_sp av;

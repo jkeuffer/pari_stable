@@ -888,8 +888,8 @@ padicfields0(GEN p, GEN N, long flag)
   }
 
   if (d < 0)
-  { /* maximal possible discriminant valuation: m*(1+log(m)/log(p)) */
-    long ds = m * logint(stoi(m), p, NULL);
+  { /* maximal possible discriminant valuation: m * (1+v_p(m)) - 1 */
+    long ds = m * (1 + u_pval(m, p)) - 1;
     GEN L = cgetg(ds + 2, t_VEC);
     for (d = 0; d <= ds; d++) gel(L, d+1) = padicfields(p, m, d, flag);
     if (flag == 2)

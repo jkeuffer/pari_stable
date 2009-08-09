@@ -1616,6 +1616,7 @@ GEN     quadtofp(GEN x, long l);
 long    sizedigit(GEN x);
 long    u_lval(ulong x, ulong p);
 long    u_lvalrem(ulong x, ulong p, ulong *py);
+long    u_pval(ulong x, GEN p);
 long    u_pvalrem(ulong x, GEN p, ulong *py);
 GEN     vecmax(GEN x);
 GEN     vecmin(GEN x);
