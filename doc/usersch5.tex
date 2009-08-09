@@ -3560,6 +3560,10 @@ by its leading term.
 \fun{GEN}{FqX_deriv}{GEN x, GEN T, GEN p} returns the derivative of \kbd{x}.
 (This function is suitable for \kbd{gerepilupto} but not memory-clean.)
 
+\fun{GEN}{FqX_translate}{GEN P, GEN c, GEN T, GEN p} let $c$ be an \kbd{Fq}
+defined modulo $(p, T)$, and let $P$ be an \kbd{FqX}; returns the translated
+\kbd{FqX} of $P(X+c)$.
+
 \fun{GEN}{FqX_gcd}{GEN P, GEN Q, GEN T, GEN p}
 
 \fun{GEN}{FqX_eval}{GEN x, GEN y, GEN T, GEN p} evaluates the \kbd{FqX}~\kbd{x}

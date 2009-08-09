@@ -763,6 +763,32 @@ FqX_divrem(GEN x, GEN y, GEN T, GEN p, GEN *z)
 {
   return T? FpXQX_divrem(x,y,T,p,z): FpX_divrem(x,y,p,z);
 }
+/* P(X + c), c an Fq */
+GEN
+FqX_translate(GEN P, GEN c, GEN T, GEN p)
+{
+  pari_sp av = avma, lim;
+  GEN Q, *R;
+  long i, k, n;
+
+  if (!signe(P) || gequal0(c)) return gcopy(P);
+  Q = leafcopy(P);
+  R = (GEN*)(Q+2); n = degpol(P);
+  lim = stack_lim(av, 2);
+  for (i=1; i<=n; i++)
+  {
+    for (k=n-i; k<n; k++)
+      R[k] = Fq_add(R[k], Fq_mul(c, R[k+1], T, p), T, p);
+
+    if (low_stack(lim, stack_lim(av,2)))
+    {
+      if(DEBUGMEM>1) pari_warn(warnmem,"FqX_translate, i = %ld/%ld", i,n);
+      Q = gerepilecopy(av, Q); R = (GEN*)Q+2;
+    }
+  }
+  return gerepilecopy(av, normalizepol(Q));
+}
+
 
 struct _FpXQX { GEN T,p; };
 static GEN _FpXQX_mul(void *data, GEN a,GEN b)
