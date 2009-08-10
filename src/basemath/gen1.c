@@ -673,17 +673,17 @@ NORMALIZE_i(GEN y, long a, long b)
     if (!gequal0(gel(y,i))) { setsigne(y, 1); return y; }
   setsigne(y, 0); return y;
 }
-/* typ(y) == t_SER, varn(y) = vy, x "scalar" [e.g object in lower variable]
- * l = valp(y) */
+/* typ(y) == t_SER, x "scalar" [e.g object in lower variable] */
 static GEN
-add_ser_scal(GEN y, GEN x, long vy, long l)
+add_ser_scal(GEN y, GEN x)
 {
-  long i, j, ly;
+  long i, j, l, ly, vy;
   pari_sp av;
   GEN z, t;
 
   if (isrationalzero(x)) return gcopy(y);
   ly = lg(y);
+  l = valp(y);
   if (l < 3-ly) return gcopy(y);
   if (l < 0)
   {
@@ -693,6 +693,7 @@ add_ser_scal(GEN y, GEN x, long vy, long l)
     for (     ; i < ly; i++)   gel(z,i) = gcopy(gel(y,i));
     return NORMALIZE_i(z, 2, ly);
   }
+  vy = varn(y);
   if (l > 0)
   {
     ly += l; y -= l; z = cgetg(ly,t_SER);
@@ -748,13 +749,13 @@ add_rfrac_scal(GEN y, GEN x)
 
 /* x "scalar", ty != t_MAT and non-scalar */
 static GEN
-add_scal(GEN y, GEN x, long ty, long vy)
+add_scal(GEN y, GEN x, long ty)
 {
   long tx;
   switch(ty)
   {
     case t_POL: return RgX_Rg_add(y, x);
-    case t_SER: return add_ser_scal(y, x, vy, valp(y));
+    case t_SER: return add_ser_scal(y, x);
     case t_RFRAC: return add_rfrac_scal(y, x);
     case t_COL: return RgC_Rg_add(y, x);
     case t_VEC:
@@ -901,8 +902,8 @@ gadd(GEN x, GEN y)
       vx = varn(x);
       vy = varn(y);
       if (vx != vy) {
-        if (varncmp(vx, vy) < 0) return add_ser_scal(x, y, vx, valp(x));
-        else                     return add_ser_scal(y, x, vy, valp(y));
+        if (varncmp(vx, vy) < 0) return add_ser_scal(x, y);
+        else                     return add_ser_scal(y, x);
       }
       l = valp(y) - valp(x);
       if (l < 0) { l = -l; swap(x,y); }
@@ -1047,17 +1048,17 @@ gadd(GEN x, GEN y)
       vx = varn(x[1]);
       if (vx == vy) y = gmod(y, gel(x,1)); /* error if ty == t_SER */
       else
-        if (varncmp(vx,vy) > 0) return add_scal(y, x, ty, vy);
+        if (varncmp(vx,vy) > 0) return add_scal(y, x, ty);
       return addsub_polmod_scal(gel(x,1), gel(x,2), y, &gadd);
     }
-    return add_scal(y, x, ty, vy);
+    return add_scal(y, x, ty);
   }
   /* x and y are not scalars, ty != t_MAT */
   vx = gvar(x);
   if (vx != vy) { /* x or y is treated as a scalar */
     if (is_vec_t(tx) || is_vec_t(ty)) pari_err(operf,"+",x,y);
-    return (varncmp(vx, vy) < 0)? add_scal(x, y, tx, vx)
-                                : add_scal(y, x, ty, vy);
+    return (varncmp(vx, vy) < 0)? add_scal(x, y, tx)
+                                : add_scal(y, x, ty);
   }
   /* vx = vy */
   switch(tx)
