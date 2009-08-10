@@ -922,8 +922,8 @@ gadd(GEN x, GEN y)
       }
       z[1] = x[1]; return normalize(z);
     case t_RFRAC:
-      vx = gvar(x);
-      vy = gvar(y);
+      vx = varn(gel(x,2));
+      vy = varn(gel(y,2));
       if (vx != vy) {
         if (varncmp(vx, vy) < 0) return add_rfrac_scal(x, y);
         else                     return add_rfrac_scal(y, x);
@@ -1041,11 +1041,11 @@ gadd(GEN x, GEN y)
     case t_POLMOD: /* is_const_t(tx) in this case */
       return addsub_polmod_scal(gel(y,1), gel(y,2), x, &gadd);
   }
-  vy = gvar(y);
   if (is_scalar_t(tx))  {
     if (tx == t_POLMOD)
     {
       vx = varn(x[1]);
+      vy = gvar(y);
       if (vx == vy) y = gmod(y, gel(x,1)); /* error if ty == t_SER */
       else
         if (varncmp(vx,vy) > 0) return add_scal(y, x, ty);
@@ -1055,6 +1055,7 @@ gadd(GEN x, GEN y)
   }
   /* x and y are not scalars, ty != t_MAT */
   vx = gvar(x);
+  vy = gvar(y);
   if (vx != vy) { /* x or y is treated as a scalar */
     if (is_vec_t(tx) || is_vec_t(ty)) pari_err(operf,"+",x,y);
     return (varncmp(vx, vy) < 0)? add_scal(x, y, tx)
@@ -2502,8 +2503,8 @@ gdiv(GEN x, GEN y)
       }
       return div_ser(x, y, vx);
     case t_RFRAC:
-      vx = gvar(x);
-      vy = gvar(y);
+      vx = varn(gel(x,2));
+      vy = varn(gel(y,2));
       if (vx != vy) {
         if (varncmp(vx, vy) < 0) return div_rfrac_scal(x, y);
                             else return div_scal_rfrac(x, y);
