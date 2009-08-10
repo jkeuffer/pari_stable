@@ -445,6 +445,8 @@ replace \kbd{*x} by its negation (e.g.~replace \kbd{gen\_1} by \kbd{gen\_m1}).
 
 \fun{void}{setabssign}{GEN x} sets the sign $s$ of~\kbd{x} to $|s|$, in place.
 
+\fun{void}{affectsign}{GEN x, GEN y} shortcut for \kbd{setsigne(y, signe(x))}.
+
 \fun{void}{normalize_frac}{GEN z} assuming $z$ is of the form \kbd{mkfrac(a,b)}
 with $b\neq 0$, make sure that $b > 0$ by changing the sign of $a$ in place if
 needed (use \kbd{togglesign}).
@@ -2318,8 +2320,8 @@ and remainder of the \typ{INT}~\kbd{x} by the \kbd{long}~\kbd{s}. As
 \kbd{sdivss\_rem} otherwise.
 
 \fun{GEN}{diviu_rem}{GEN x, ulong s, long *r} computes the Euclidean quotient
-and remainder of the \typ{INT}~\kbd{x} by the \kbd{ulong}~\kbd{s}. As
-\kbd{sdivss\_rem} otherwise.
+and remainder of \emph{absolute value} of the \typ{INT}~\kbd{x} by the
+\kbd{ulong}~\kbd{s}. As \kbd{sdivss\_rem} otherwise.
 
 \fun{ulong}{udivui_rem}{ulong s, GEN y, ulong *rem}
 computes the Euclidean quotient and remainder of the $x$ by $y$. As

@@ -189,11 +189,20 @@ setabssign(GEN x) { x[1] &= ~HIGHBIT; }
 INLINE void
 togglesign_safe(GEN *px)
 {
-  if      (*px == gen_1)  *px = gen_m1;
-  else if (*px == gen_m1) *px = gen_1;
-  else if (*px == gen_2)  *px = gen_m2;
-  else if (*px == gen_m2) *px = gen_2;
-  else togglesign(*px);
+  switch(*px - gen_1) /* gen_1, gen_2, gen_m1, gen_m2 */
+  {
+    case 0: *px = gen_m1; break;
+    case 3: *px = gen_m2;  break;
+    case 6: *px = gen_1; break;
+    case 9: *px = gen_2;  break;
+    default: togglesign(*px);
+  }
+}
+/* setsigne(y, signe(x)) */
+INLINE void
+affectsign(GEN x, GEN y)
+{
+  y[1] = (x[1] & SIGNBITS) | (y[1] & ~SIGNBITS);
 }
 /*******************************************************************/
 /*                                                                 */

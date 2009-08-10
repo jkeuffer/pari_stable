@@ -2693,6 +2693,7 @@ INLINE void   subssz(long x, long y, GEN z);
 INLINE GEN    subuu(ulong x, ulong y);
 INLINE void   togglesign(GEN x);
 INLINE void   togglesign_safe(GEN *px);
+INLINE void   affectsign(GEN x, GEN y);
 INLINE GEN    truedivii(GEN a,GEN b);
 INLINE GEN    truedivis(GEN a, long b);
 INLINE GEN    truedivsi(long a, GEN b);
