@@ -853,6 +853,8 @@ padicfields0(GEN p, GEN N, long flag)
   long m = 0, d = -1, av = avma;
 
   if (typ(p) != t_INT) pari_err(arither1);
+  /* be nice to silly users */
+  if (!BPSW_psp(p)) pari_err(talker,"p must be a prime in padicfields");
   switch(typ(N))
   {
     case t_VEC:
