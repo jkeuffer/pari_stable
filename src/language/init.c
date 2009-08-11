@@ -1057,7 +1057,7 @@ trap0(const char *e, GEN r, GEN f)
     return gnil;
   }
   /* explicit recovery text */
-  x = closure_trapgen(numerr,f);
+  x = closure_trapgen(f, numerr);
   if (x == (GEN)1L) x = r? closure_evalgen(r): gnil;
   return x;
 }

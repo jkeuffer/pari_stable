@@ -1206,7 +1206,7 @@ closure_evalgen(GEN C)
 }
 
 GEN
-closure_trapgen(long numerr, GEN C)
+closure_trapgen(GEN C, long numerr)
 {
   pari_sp av=avma;
   long saved_sp=sp;
