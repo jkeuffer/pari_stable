@@ -1179,7 +1179,7 @@ gen_pval(GEN x, GEN p, long imin)
 long
 ZX_pval(GEN x, GEN p) { return gen_pval(x, p, 2); }
 long
-ZV_pval(GEN x, GEN p) { return gen_pval(x, p, 2); }
+ZV_pval(GEN x, GEN p) { return gen_pval(x, p, 1); }
 
 static long
 gen_2valrem(GEN x, GEN *px, long imin)
