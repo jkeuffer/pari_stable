@@ -33,12 +33,13 @@ typedef struct {
   long e, f, j;
   long a, b, c;
   long v;     /* auxiliary variable */
-  long r;     /* pred = p^r */
-  GEN pred;   /* p-adic precision for poly. reduction */
+  long r;     /* pr = p^r */
+  GEN pr;     /* p-adic precision for poly. reduction */
   GEN q, qm1; /* p^f, q - 1 */
-  GEN upl;    /* cyclo. pol. generating K^ur (mod pred) */
+  GEN upl;    /* cyclotomic polynomial (in v) generating K^ur (mod pr) */
+  GEN mv;     /* -v mod upl (mod pr) */
   GEN uplr;   /* upl reduced mod p */
-  GEN frob;   /* Frobenius acting of the root of upl (mod pred) */
+  GEN frob;   /* Frobenius acting of the root of upl (mod pr) */
   GEN nbext;  /* number of extensions */
   GEN roottable; /* table of roots of polynomials over the residue field */
 } KRASNER_t;
@@ -46,15 +47,13 @@ typedef struct {
 /* Structure containing the field data (constructed with FieldData) */
 typedef struct {
   GEN p;
-  GEN topx;  /* absolute polynomial (in x) with root zq + pi (mod pred) */
-  GEN top;  /* absolute polynomial with root zq + pi (mod pred) */
-  GEN topr; /* absolute polynomial with root zq + pi (mod pred) */
-  GEN rpl;  /* relative polynomial with root zq + pi (mod pred) (y=zq) */
-  GEN eis;  /* relative polynomial with root pi (mod prec) (y=zq) */
-  GEN zq;   /* prim. root of unity (root of upl) (mod pred) (y=zq+pi) */
+  GEN top;  /* absolute polynomial with root zq + pi (mod pr) */
+  GEN topr; /* absolute polynomial with root zq + pi (mod p) */
+  GEN eis;  /* relative polynomial with root pi (mod pr) (y=zq) */
+  GEN zq;   /* prim. root of unity (root of upl) (mod pr) (y=zq+pi) */
   GEN pi;   /* prime element (mod p) (y=zq+pi)*/
-  GEN ipi;  /* p/pi (mod pred) (y=zq+pi) (used to divide by pi) */
-  GEN ppi;  /* powers of pi (mod pred) (for GetSharp) */
+  GEN ipi;  /* p/pi (mod pr) (y=zq+pi) (used to divide by pi) */
+  GEN ppi;  /* powers of pi (mod pr) (for GetSharp) */
 } FAD_t;
 
 static long
@@ -192,63 +191,57 @@ NumberExtensions(KRASNER_t *data)
   switch(a)
   {
     case 0:  pa = 1;  s0 = utoipos(e); break;
-    case 1:  pa = pp; s0 = mulsi(e, powis(q, e / pa)); break;
+    case 1:  pa = pp; s0 = mului(e, powiu(q, e / pa)); break;
     default:
       pa = upowuu(pp, a); /* p^a */
-      s0 = mulsi(e, powis(q, (e / pa) * ((pa - 1) / (pp - 1))));
+      s0 = mulsi(e, powiu(q, (e / pa) * ((pa - 1) / (pp - 1))));
   }
   /* s0 = e * q^(e*sum(p^-i, i=1...a)) */
   if (b == 0) return s0;
 
   /* q^floor((b-1)/p^(a+1)) */
-  p1 = powis(q, sdivsi(b-1, muluu(pa, pp)));
+  p1 = powiu(q, sdivsi(b-1, muluu(pa, pp)));
   return mulii(mulii(data->qm1, s0), p1);
 }
 
-/* eis is an Eisenstein polynomial (as a ZXY) over the field defined
- * by upl. Return the struct FAD corresponding to the field it defines.
- * If flag is zero, return only the polynomials top and rpl.
- * If flag is non-zero, assume e > 1; the GENs are created on the heap */
-static void
-FieldData(KRASNER_t *data, FAD_t *fdata, GEN eis, long flag)
+static GEN
+get_topx(KRASNER_t *data, GEN eis)
 {
-  GEN p1, p2;
+  GEN p1, p2, rpl;
   long j;
 
-  fdata->p = data->p;
-
   /* top poly. is the minimal polynomial of root(pol) + root(upl) */
-  fdata->rpl =
-    FqX_translate(FqX_red(eis, data->upl, data->pred),
-		  FpX_rem(gneg(pol_x(data->v)), data->upl, data->pred), data->upl, data->pred);
-
-  p1 = fdata->rpl;
-  p2 = fdata->rpl;
+  rpl = FqX_translate(FqX_red(eis, data->upl, data->pr),
+		      data->mv, data->upl, data->pr);
+  p1 = p2 = rpl;
   for (j = 1; j < data->f; j++)
   {
-    p1 = FqX_FpXQ_eval(p1, data->frob, data->upl, data->pred);
-    p2 = FqX_mul(p2, p1, data->upl, data->pred);
+    p1 = FqX_FpXQ_eval(p1, data->frob, data->upl, data->pr);
+    p2 = FqX_mul(p2, p1, data->upl, data->pr);
   }
-  p2 = simplify_shallow(p2); /* ZX */
+  return p2 = simplify_shallow(p2); /* ZX */
+}
 
-  fdata->topx = p2;
-  fdata->top  = gsubst(p2, 0, pol_x(data->v));
-  fdata->topr = FpX_red(fdata->top, data->pred);
+/* eis (ZXY): Eisenstein polynomial  over the field defined by upl.
+ * topx (ZX): corresponding absolute equation.
+ * Return the struct FAD corresponding to the field it defines (GENs created
+ * as clones). Assume e > 1. */
+static void
+FieldData(KRASNER_t *data, FAD_t *fdata, GEN eis, GEN topx)
+{
+  GEN p1, t;
 
-  if (!flag) return;
-
-  /* From now on, assume data->e > 1 */
-  fdata->rpl  = gclone(fdata->rpl);
-  fdata->topx = gclone(fdata->topx);
-  fdata->top  = gclone(fdata->top);
-  fdata->topr = gclone(fdata->topr);
+  fdata->p = data->p;
+  t = leafcopy(topx); setvarn(t, data->v);
+  fdata->top  = gclone(t);
+  fdata->topr = gclone(FpX_red(t, data->pr));
 
   fdata->zq  = pol_x(data->v);
   /* FIXME: do as in CycloPol (not so easy) */
   for(;;)
   {
     GEN zq2 = fdata->zq;
-    fdata->zq = Fq_pow(fdata->zq, data->q, fdata->top, data->pred);
+    fdata->zq = Fq_pow(fdata->zq, data->q, fdata->top, data->pr);
     if (gequal(fdata->zq, zq2)) break;
   }
   fdata->zq   = gclone(fdata->zq);
@@ -257,10 +250,10 @@ FieldData(KRASNER_t *data, FAD_t *fdata, GEN eis, long flag)
 			      FpX_red(fdata->top, data->p), data->p));
   fdata->ipi  = RgXQ_inv(fdata->pi, fdata->top);
   fdata->ipi  = RgX_Rg_mul(fdata->ipi, data->p);
-  fdata->ipi  = gclone(RgX_to_FpX(fdata->ipi, mulii(data->pred, data->p)));
+  fdata->ipi  = gclone(RgX_to_FpX(fdata->ipi, mulii(data->pr, data->p)));
 
   /* Last one is in fact pi^e/p */
-  p1 = FpXQ_powers(fdata->pi, data->e, fdata->topr, data->pred);
+  p1 = FpXQ_powers(fdata->pi, data->e, fdata->topr, data->pr);
   gel(p1, data->e+1) = ZX_Z_divexact(gel(p1, data->e+1), data->p);
   fdata->ppi  = gclone(p1);
 }
@@ -268,8 +261,6 @@ FieldData(KRASNER_t *data, FAD_t *fdata, GEN eis, long flag)
 static void
 FreeFieldData(FAD_t *fdata)
 {
-  gunclone(fdata->rpl);
-  gunclone(fdata->topx);
   gunclone(fdata->top);
   gunclone(fdata->topr);
   gunclone(fdata->zq);
@@ -445,7 +436,7 @@ RootCongruents(KRASNER_t *data, FAD_t *fdata, GEN pol, GEN alpha, GEN pp, GEN pp
 
 /* pol is a ZXY defining a polynomial over the field defined by fdata
    If flag != 0, return 1 as soon as a root is found. Precision are done with
-   a precision of pred. */
+   a precision of pr. */
 static long
 RootCountingAlgorithm(KRASNER_t *data, FAD_t *fdata, GEN pol, long flag)
 {
@@ -461,11 +452,11 @@ RootCountingAlgorithm(KRASNER_t *data, FAD_t *fdata, GEN pol, long flag)
       cf = diviiexact(cf, data->p);
     else
       cf = ZX_Z_divexact(cf, data->p);
-    gel(P, j+2) = Fq_mul(cf, gel(fdata->ppi, j+1), fdata->topr, data->pred);
+    gel(P, j+2) = Fq_mul(cf, gel(fdata->ppi, j+1), fdata->topr, data->pr);
   }
   gel(P, d+2) = gel(fdata->ppi, d+1); /* ppi[d] = pi^d/p */
 
-  return RootCongruents(data, fdata, P, NULL, diviiexact(data->pred, data->p), data->pred, 0, flag);
+  return RootCongruents(data, fdata, P, NULL, diviiexact(data->pr, data->p), data->pr, 0, flag);
 }
 
 /* Return non-zero if the field given by fdata defines a field isomorphic to
@@ -482,11 +473,11 @@ IsIsomorphic(KRASNER_t *data, FAD_t *fdata, GEN pol)
 
   for (j = 1; j <= data->f; j++)
   {
-    GEN p1 = FqX_FpXQ_eval(pol, fdata->zq, fdata->top, data->pred);
+    GEN p1 = FqX_FpXQ_eval(pol, fdata->zq, fdata->top, data->pr);
     nb = RootCountingAlgorithm(data, fdata, p1, 1);
     if (nb) { avma = av; return nb; }
     if (j < data->f)
-      pol = FqX_FpXQ_eval(pol, data->frob, data->upl, data->pred);
+      pol = FqX_FpXQ_eval(pol, data->frob, data->upl, data->pr);
   }
   avma = av; return 0;
 }
@@ -507,10 +498,10 @@ NbConjugateFields(KRASNER_t *data, FAD_t *fdata)
   nb = 0;
   for (j = 1; j <= data->f; j++)
   {
-    GEN p1 = FqX_FpXQ_eval(pol, fdata->zq, fdata->top, data->pred);
+    GEN p1 = FqX_FpXQ_eval(pol, fdata->zq, fdata->top, data->pr);
     nb += RootCountingAlgorithm(data, fdata, p1, 0);
     if (j < data->f)
-      pol = FqX_FpXQ_eval(pol, data->frob, data->upl, data->pred);
+      pol = FqX_FpXQ_eval(pol, data->frob, data->upl, data->pr);
   }
   avma = av;
   return data->e * data->f / nb;
@@ -523,10 +514,10 @@ static GEN
 TamelyRamifiedCase(KRASNER_t *data)
 {
   long av = avma, g;
-  GEN p1, p2, rep;
-  FAD_t fdata;
+  GEN rep, topx, eis;
 
 #ifdef CHECK_EXTENSIONS
+  FAD_t fdata;
   long cnt = 0, nb, j;
   GEN vpl;
   fprintferr("Number of extensions: %ld\n", itos(data->nbext));
@@ -535,42 +526,40 @@ TamelyRamifiedCase(KRASNER_t *data)
   g   = ugcd(data->e, umodiu(data->qm1, data->e));
   rep = zerovec(g);
 
-  p1 = gadd(gpowgs(pol_x(0), data->e), data->p);
+  eis = gadd(gpowgs(pol_x(0), data->e), data->p);
+  topx = get_topx(data, eis);
+  gel(rep, 1) = topx;
 #ifdef CHECK_EXTENSIONS
   vpl = zerovec(g);
+  gel(vpl, 1) = eis;
   if (data->e == 1)
-  {
-    FieldData(data, &fdata, p1, 0);
     nb = 1;
-  }
   else
   {
-    FieldData(data, &fdata, p1, 1);
+    FieldData(data, &fdata, eis, topx);
     nb = NbConjugateFields(data, &fdata);
+    FreeFieldData(&fdata);
   }
   fprintferr("Found %ld field(s)\n", nb);
   cnt += nb;
-  gel(rep, 1) = gcopy(fdata.topx);
-  gel(vpl, 1) = p1;
-  if (data->e != 1) FreeFieldData(&fdata);
-#else
-  FieldData(data, &fdata, p1, 0);
-  gel(rep, 1) = fdata.topx;
 #endif
 
   if (g > 1)
   {
     ulong pmodg = umodiu(data->p, g);
     long r = 1, ct = 1;
-    GEN sv = InitSieve(g-1);
+    GEN sv = InitSieve(g-1), Xe = gpowgs(pol_x(0), data->e);
     while (r)
     {
       long gr;
-      p1 = FpXQ_pow(pol_x(data->v), stoi(r), data->uplr, data->p);
+      GEN p1 = FpXQ_pow(pol_x(data->v), stoi(r), data->uplr, data->p);
+      eis = ZX_add(Xe, ZX_Z_mul(p1, data->p));
       ct++;
-      p2 = gadd(gpowgs(pol_x(0), data->e), gmul(p1, data->p));
+      topx = get_topx(data, eis);
+      gel(rep, ct) = topx;
 #ifdef CHECK_EXTENSIONS
-      FieldData(data, &fdata, p2, 1);
+      gel(vpl, ct) = eis;
+      FieldData(data, &fdata, eis, topx);
       for (j = 1; j < ct; j++)
       {
 	nb = IsIsomorphic(data, &fdata, gel(vpl, j));
@@ -579,14 +568,9 @@ TamelyRamifiedCase(KRASNER_t *data)
 		   "Oops, fields are isomorphic in TamelyRamifiedCase!\n");
       }
       nb = NbConjugateFields(data, &fdata);
+      FreeFieldData(&fdata);
       fprintferr("Found %ld field(s)\n", nb);
       cnt += nb;
-      gel(rep, ct) = gcopy(fdata.topx);
-      gel(vpl, ct) = gcopy(fdata.eis);
-      FreeFieldData(&fdata);
-#else
-      FieldData(data, &fdata, p2, 0);
-      gel(rep, ct) = fdata.topx;
 #endif
       gr = r;
       do
@@ -601,7 +585,7 @@ TamelyRamifiedCase(KRASNER_t *data)
   }
 
 #ifdef CHECK_EXTENSIONS
-  if (!equalis(data->nbext, cnt))
+  if (!equaliu(data->nbext, cnt))
     pari_err(talker,"Number of fields incorrect in TamelyRamifiedCase\n");
 #endif
 
@@ -644,7 +628,7 @@ StructureOmega(KRASNER_t *data, GEN *pnbpol)
     {
       GEN p1;
       v_start = function_l(data->p, data->a, data->b, i);
-      p1 = powis(data->q, data->c - v_start);
+      p1 = powiu(data->q, data->c - v_start);
       if (i == data->b)
 	p1 = mulii(p1, data->qm1);
       else
@@ -687,10 +671,11 @@ RandomPol(KRASNER_t *data, GEN Omega)
     } /* if (!zr) insist on c != 0 */
     for (j = 1; j <= ed-st; j++)
     {
-      c = gadd(c, ZX_Z_mul(RandomFF(data), pp));
+      c = ZX_add(c, ZX_Z_mul(RandomFF(data), pp));
       pp = mulii(data->p, pp);
     }
-    gel(pol, i+1) = ZX_Z_mul(c, powiu(data->p, st));
+    c = ZX_Z_mul(c, powiu(data->p, st));
+    gel(pol, i+1) = FpX_rem(c, data->upl, data->pr);
   }
   gel(pol, i+1) = gen_1; /* monic */
   return pol;
@@ -745,7 +730,8 @@ WildlyRamifiedCase(KRASNER_t *data)
     }
     if (!nb)
     {
-      FieldData(data, (FAD_t*)vfd[ct], rpl, 1);
+      GEN topx = get_topx(data, rpl);
+      FieldData(data, (FAD_t*)vfd[ct], rpl, topx);
       nb = NbConjugateFields(data, (FAD_t*)vfd[ct]);
       fd += nb;
       ct++;
@@ -759,14 +745,16 @@ WildlyRamifiedCase(KRASNER_t *data)
   rep = cgetg(ct+1, t_VEC);
   for (j = 0; j < ct; j++)
   {
-    gel(rep, j+1) = gcopy(((FAD_t*)vfd[j])->topx);
+    GEN topx = ZX_copy(((FAD_t*)vfd[j])->top);
+    setvarn(topx, 0);
+    gel(rep, j+1) = topx;
     FreeFieldData((FAD_t*)vfd[j]);
   }
   FreeRootTable(data->roottable);
   return gerepileupto(av, rep);
 }
 
-/* return a cyclotomic polynomial (mod pred) of degree f and variable v */
+/* return a cyclotomic polynomial (mod pr) of degree f and variable v */
 static GEN
 CycloPol(KRASNER_t *data)
 {
@@ -775,7 +763,7 @@ CycloPol(KRASNER_t *data)
   p2 = gener_FpXQ(p1, data->p, NULL);
   p3 = ZpXQ_sqrtnlift(gen_1, data->qm1, p2, p1, data->p, data->r);
 
-  return RgX_to_FpX(ZXQ_charpoly(p3, p1, data->v), data->pred);
+  return RgX_to_FpX(ZXQ_charpoly(p3, p1, data->v), data->pr);
 }
 
 /* Compute an absolute polynomial for all the totally ramified
@@ -803,23 +791,26 @@ GetRamifiedPol(GEN p, GEN efj, long v, long flag)
   data.qm1 = subis(data.q, 1);
   data.v   = v;
   data.r   = 1 + 2*data.a + ceildiv(2*data.b+3, e); /* enough precision */
-  data.pred  = powiu(p, data.r);
+  data.pr  = powiu(p, data.r);
   data.nbext = NumberExtensions(&data);
 
   if (flag == 2) return data.nbext;
 
   data.upl   = CycloPol(&data);
+  /* mv = -v mod upl. If f = 1, then upl = v - 1, hence mv = p^r - 1 */
+  data.mv    = f == 1? subis(data.pr, 1)
+                     : FpX_neg(pol_x(v), data.pr);
   data.uplr  = FpX_red(data.upl, data.p);
-  data.frob  = FpXQ_pow(pol_x(v), p, data.upl, data.pred);
+  data.frob  = FpXQ_pow(pol_x(v), p, data.upl, data.pr);
   if (DEBUGLEVEL>1) fprintferr("  Unramified part %Ps\n", data.upl);
   data.roottable = NULL;
   if (dvdsi(e, p))
   {
-    GEN npol = powis(data.q, e+1);
+    GEN npol = powiu(data.q, e+1);
     if (lgefint(data.p) == 3 && expi(npol) < 19)
     {
       long i, l = itou(npol);
-      data.roottable = cgetg(l+1, t_POL);
+      data.roottable = cgetg(l+1, t_VEC);
       for (i = 1; i <= l; i++) gel(data.roottable, i) = NULL;
     }
     pols = WildlyRamifiedCase(&data);
