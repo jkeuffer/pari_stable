@@ -771,7 +771,7 @@ FqX_translate(GEN P, GEN c, GEN T, GEN p)
   GEN Q, *R;
   long i, k, n;
 
-  if (!signe(P) || gequal0(c)) return gcopy(P);
+  if (!signe(P) || !signe(c)) return gcopy(P); /* signe works for t_(INT|POL) */
   Q = leafcopy(P);
   R = (GEN*)(Q+2); n = degpol(P);
   lim = stack_lim(av, 2);
