@@ -420,8 +420,8 @@ RootCongruents(KRASNER_t *data, FAD_t *fdata, GEN pol, GEN alpha, GEN pp, GEN pp
     if (sl >= data->e)
     {
       sl -= data->e;
+      ppp = pp;
       pp = diviiexact(pp, data->p);
-      ppp = mulii(pp, data->p); /* update */
     }
   }
 
@@ -759,6 +759,9 @@ static GEN
 CycloPol(KRASNER_t *data)
 {
   GEN p1, p2, p3;
+  /* v - 1 */
+  if (data->f == 1) return deg1pol_shallow(gen_1, subis(data->pr, 1), data->v);
+
   p1 = init_Fq(data->p, data->f, data->v);
   p2 = gener_FpXQ(p1, data->p, NULL);
   p3 = ZpXQ_sqrtnlift(gen_1, data->qm1, p2, p1, data->p, data->r);
