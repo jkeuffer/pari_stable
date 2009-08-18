@@ -600,13 +600,11 @@ function_l(GEN p, long a, long b, long i)
   return (l < 1)? 1: l;
 }
 
-/* Structure of the coefficients set Omega
-   Each coefficient is a smallvec [v_start, v_end, zero, nbcf] meaning
-   all the numbers of the form:
-   zeta_0 * p^v_start + ... + zeta_s * p^v_end (s = v_end - v_start)
-   with zeta_i roots of unity (powers of zq + zero), zeta_0 = 0 is
-   possible iff zero = 1, and nbcf the number of such coefficients
-*/
+/* Structure of the coefficients set Omega. Each coefficient is [start, zr]
+ * meaning all the numbers of the form:
+ *   zeta_0 * p^start + ... + zeta_s * p^c (s = c - start)
+ * with zeta_i roots of unity (powers of zq + zero), zeta_0 = 0 is
+ * possible iff zr = 1. nbcf is the number of such coefficients */
 static GEN
 StructureOmega(KRASNER_t *data, GEN *pnbpol)
 {
@@ -616,9 +614,7 @@ StructureOmega(KRASNER_t *data, GEN *pnbpol)
   nbpol = gen_1;
   for (i = 0; i < data->e; i++)
   {
-    long v_start, v_end, zero, nbcf;
-    v_end = data->c;
-    zero = 0;
+    long v_start, zero = 0, nbcf;
     if (i == 0)
     {
       v_start = 1;
@@ -638,7 +634,7 @@ StructureOmega(KRASNER_t *data, GEN *pnbpol)
       }
       nbcf = itos(p1);
     }
-    gel(O, i+1) = mkvecsmall4(v_start, v_end, zero, nbcf);
+    gel(O, i+1) = mkvecsmall2(v_start, zero);
     nbpol = muliu(nbpol, nbcf);
   }
   *pnbpol = nbpol; return O;
@@ -657,25 +653,27 @@ RandomFF(KRASNER_t *data)
 static GEN
 RandomPol(KRASNER_t *data, GEN Omega)
 {
-  long i, j, l = data->e + 3;
+  long i, j, l = data->e + 3, end = data->c;
   GEN pol = cgetg(l, t_POL);
   pol[1] = evalsigne(1) | evalvarn(0);
   for (i = 1; i <= data->e; i++)
   {
     GEN cf = gel(Omega, i);
-    long st = cf[1], ed = cf[2], zr = cf[3];
+    long st = cf[1], zr = cf[2];
     GEN pp = data->p, c;
+    /* c = sum_{st <= j <= end} x_j p^j, where x_j are random Fq mod (p,upl)
+     * If (!zr), insist on x_st != 0 */
     for (;;) {
       c = RandomFF(data);
       if (zr || signe(c)) break;
-    } /* if (!zr) insist on c != 0 */
-    for (j = 1; j <= ed-st; j++)
+    }
+    for (j = 1; j <= end-st; j++)
     {
       c = ZX_add(c, ZX_Z_mul(RandomFF(data), pp));
       pp = mulii(data->p, pp);
     }
     c = ZX_Z_mul(c, powiu(data->p, st));
-    gel(pol, i+1) = FpX_rem(c, data->upl, data->pr);
+    gel(pol, i+1) = FpX_red(c, data->pr);
   }
   gel(pol, i+1) = gen_1; /* monic */
   return pol;
@@ -731,8 +729,9 @@ WildlyRamifiedCase(KRASNER_t *data)
     if (!nb)
     {
       GEN topx = get_topx(data, rpl);
-      FieldData(data, (FAD_t*)vfd[ct], rpl, topx);
-      nb = NbConjugateFields(data, (FAD_t*)vfd[ct]);
+      FAD_t *fdata = (FAD_t*)vfd[ct];
+      FieldData(data, fdata, rpl, topx);
+      nb = NbConjugateFields(data, fdata);
       fd += nb;
       ct++;
       if (DEBUGLEVEL>1)
@@ -793,7 +792,7 @@ GetRamifiedPol(GEN p, GEN efj, long v, long flag)
   data.q   = powiu(p, f);
   data.qm1 = subis(data.q, 1);
   data.v   = v;
-  data.r   = 1 + 2*data.a + ceildiv(2*data.b+3, e); /* enough precision */
+  data.r   = 1 + ceildiv(2*j + 3, e); /* enough precision */
   data.pr  = powiu(p, data.r);
   data.nbext = NumberExtensions(&data);
 
