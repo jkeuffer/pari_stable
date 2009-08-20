@@ -683,8 +683,8 @@ intnsing(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN tab, long prec)
     for (i = pas; i < L; i += pas)
       if (i & pas || k == 1) /* i = odd multiple of pas = 2^(m-k) */
       {
-        GEN p = gaddsg(1, gel(tabxp,i));
-        GEN m = gsubsg(1, gel(tabxp,i));
+        GEN p = addsr(1, gel(tabxp,i));
+        GEN m = subsr(1, gel(tabxp,i));
         bp = gmul(ba, gpow(p, ea, prec));
         bm = gmul(ba, gpow(m, ea, prec));
         SP = gmul(gdiv(bp, p), eval(gadd(bp, tra), E));
