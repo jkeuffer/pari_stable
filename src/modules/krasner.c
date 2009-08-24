@@ -42,6 +42,7 @@ typedef struct {
   GEN frob;   /* Frobenius acting of the root of upl (mod pr) */
   GEN nbext;  /* number of extensions */
   GEN roottable; /* table of roots of polynomials over the residue field */
+  GEN pk;     /* powers of p: [p^1, p^2, ..., p^c] */
 } KRASNER_t;
 
 /* Structure containing the field data (constructed with FieldData) */
@@ -50,10 +51,10 @@ typedef struct {
   GEN top;  /* absolute polynomial with root zq + pi (mod pr) */
   GEN topr; /* absolute polynomial with root zq + pi (mod p) */
   GEN eis;  /* relative polynomial with root pi (mod pr) (y=zq) */
-  GEN zq;   /* prim. root of unity (root of upl) (mod pr) (y=zq+pi) */
+  GEN zq;   /* (q-1)-th root of unity (root of upl) (mod pr) (y=zq+pi) */
   GEN pi;   /* prime element (mod p) (y=zq+pi)*/
   GEN ipi;  /* p/pi (mod pr) (y=zq+pi) (used to divide by pi) */
-  GEN ppi;  /* powers of pi (mod pr) (for GetSharp) */
+  GEN pik;  /* [1, pi, ..., pi^(e-1), pi^e / p] (mod pr). Note the last one ! */
 } FAD_t;
 
 static long
@@ -138,29 +139,33 @@ SetSieveValue(GEN sv, long i)
 static long
 VerifyOre(GEN p, long e, long j)
 {
-  long nv, m, b, vb, nb;
+  long nv, b, vb, nb;
 
-  m  = z_pval(e, p);
-  nv = m*e;
+  if (j < 0) return 0;
+  nv = e * u_pval(e, p);
   b  = j%e;
   if (b == 0) return (j == nv);
   if (j > nv) return 0;
-
-  vb = z_pval(b, p);
+  /* j < nv */
+  vb = u_pval(b, p);
   nb = vb*e;
-  return (minss(nb, nv) <= j);
+  return (nb <= j);
 }
 
-/* Given [K:Q_p] = m and disc(K/Q_p) = p^d, return all the possible
-   decompositions K/K^ur/Q_p as [e, f, j] with [K^ur:Q_p] = f and
-   K^ur/Q_p unramified, [K:K^ur] = e and K/K^ur totally ramified of
-   discriminant p^j (thus d = f*j) */
+/* Given [K:Q_p] = m and disc(K/Q_p) = p^d, return all decompositions K/K^ur/Q_p
+ * as [e, f, j] with 
+ *   K^ur/Q_p unramified of degree f,
+ *   K/K^ur totally ramified of degree e, and discriminant p^(e+j-1);
+ * thus d = f*(e+j-1) and j > 0 iff ramification is wild */
 static GEN
-PossibleDecomposition(GEN p, long m, long d)
+possible_efj_by_d(GEN p, long m, long d)
 {
-  GEN rep, div = divisorsu(ugcd(m, d));
-  long i, ctr = 1, l = lg(div);
+  GEN rep, div;
+  long i, ctr, l;
 
+  if (d == 0) return mkvec(mkvecsmall3(1, m, 0)); /* unramified */
+  div = divisorsu(ugcd(m, d));
+  l = lg(div); ctr = 1;
   rep = cgetg(l, t_VEC);
   for (i = 1; i < l; i++)
   {
@@ -255,7 +260,7 @@ FieldData(KRASNER_t *data, FAD_t *fdata, GEN eis, GEN topx)
   /* Last one is in fact pi^e/p */
   p1 = FpXQ_powers(fdata->pi, data->e, fdata->topr, data->pr);
   gel(p1, data->e+1) = ZX_Z_divexact(gel(p1, data->e+1), data->p);
-  fdata->ppi  = gclone(p1);
+  fdata->pik  = gclone(p1);
 }
 
 static void
@@ -267,7 +272,7 @@ FreeFieldData(FAD_t *fdata)
   gunclone(fdata->eis);
   gunclone(fdata->pi);
   gunclone(fdata->ipi);
-  gunclone(fdata->ppi);
+  gunclone(fdata->pik);
 }
 
 /* return pol*ipi/p (mod top, pp) if it has integral coefficient, NULL
@@ -333,7 +338,7 @@ GetSharp(FAD_t *fdata, GEN pp, GEN ppp, GEN pol, GEN beta, long *pl)
   /* adjust powers */
   for (i = v+1; i <= d; i++)
     gel(p1, i+2) = Fq_mul(gel(p1, i+2),
-			  gel(fdata->ppi, i-v+1), fdata->topr, pp);
+			  gel(fdata->pik, i-v+1), fdata->topr, pp);
 
   return gerepilecopy(av, normalizepol(p1));
 }
@@ -452,9 +457,9 @@ RootCountingAlgorithm(KRASNER_t *data, FAD_t *fdata, GEN pol, long flag)
       cf = diviiexact(cf, data->p);
     else
       cf = ZX_Z_divexact(cf, data->p);
-    gel(P, j+2) = Fq_mul(cf, gel(fdata->ppi, j+1), fdata->topr, data->pr);
+    gel(P, j+2) = Fq_mul(cf, gel(fdata->pik, j+1), fdata->topr, data->pr);
   }
-  gel(P, d+2) = gel(fdata->ppi, d+1); /* ppi[d] = pi^d/p */
+  gel(P, d+2) = gel(fdata->pik, d+1); /* pik[d] = pi^d/p */
 
   return RootCongruents(data, fdata, P, NULL, diviiexact(data->pr, data->p), data->pr, 0, flag);
 }
@@ -514,7 +519,7 @@ static GEN
 TamelyRamifiedCase(KRASNER_t *data)
 {
   long av = avma, g;
-  GEN rep, topx, eis;
+  GEN rep, topx, eis, Xe = gpowgs(pol_x(0), data->e);
 
 #ifdef CHECK_EXTENSIONS
   FAD_t fdata;
@@ -523,10 +528,10 @@ TamelyRamifiedCase(KRASNER_t *data)
   fprintferr("Number of extensions: %ld\n", itos(data->nbext));
 #endif
 
-  g   = ugcd(data->e, umodiu(data->qm1, data->e));
+  g   = ugcd(data->e, umodiu(data->qm1, data->e)); /* (e, q-1) */
   rep = zerovec(g);
 
-  eis = gadd(gpowgs(pol_x(0), data->e), data->p);
+  eis = gadd(Xe, data->p);
   topx = get_topx(data, eis);
   gel(rep, 1) = topx;
 #ifdef CHECK_EXTENSIONS
@@ -548,7 +553,7 @@ TamelyRamifiedCase(KRASNER_t *data)
   {
     ulong pmodg = umodiu(data->p, g);
     long r = 1, ct = 1;
-    GEN sv = InitSieve(g-1), Xe = gpowgs(pol_x(0), data->e);
+    GEN sv = InitSieve(g-1);
     while (r)
     {
       long gr;
@@ -604,7 +609,7 @@ function_l(GEN p, long a, long b, long i)
  * meaning all the numbers of the form:
  *   zeta_0 * p^start + ... + zeta_s * p^c (s = c - start)
  * with zeta_i roots of unity (powers of zq + zero), zeta_0 = 0 is
- * possible iff zr = 1. nbcf is the number of such coefficients */
+ * possible iff zr = 1 */
 static GEN
 StructureOmega(KRASNER_t *data, GEN *pnbpol)
 {
@@ -614,11 +619,12 @@ StructureOmega(KRASNER_t *data, GEN *pnbpol)
   nbpol = gen_1;
   for (i = 0; i < data->e; i++)
   {
-    long v_start, zero = 0, nbcf;
+    long v_start, zero = 0;
+    GEN nbcf;
     if (i == 0)
     {
       v_start = 1;
-      nbcf = itos(mulii(data->qm1, powiu(data->q, data->c - 1)));
+      nbcf = mulii(data->qm1, powiu(data->q, data->c - 1));
     }
     else
     {
@@ -626,16 +632,15 @@ StructureOmega(KRASNER_t *data, GEN *pnbpol)
       v_start = function_l(data->p, data->a, data->b, i);
       p1 = powiu(data->q, data->c - v_start);
       if (i == data->b)
-	p1 = mulii(p1, data->qm1);
+	nbcf = mulii(p1, data->qm1);
       else
       {
-	p1 = mulii(p1, data->q);
+	nbcf = mulii(p1, data->q);
 	zero = 1;
       }
-      nbcf = itos(p1);
     }
     gel(O, i+1) = mkvecsmall2(v_start, zero);
-    nbpol = muliu(nbpol, nbcf);
+    nbpol = mulii(nbpol, nbcf);
   }
   *pnbpol = nbpol; return O;
 }
@@ -658,9 +663,8 @@ RandomPol(KRASNER_t *data, GEN Omega)
   pol[1] = evalsigne(1) | evalvarn(0);
   for (i = 1; i <= data->e; i++)
   {
-    GEN cf = gel(Omega, i);
+    GEN c, cf = gel(Omega, i);
     long st = cf[1], zr = cf[2];
-    GEN pp = data->p, c;
     /* c = sum_{st <= j <= end} x_j p^j, where x_j are random Fq mod (p,upl)
      * If (!zr), insist on x_st != 0 */
     for (;;) {
@@ -668,11 +672,8 @@ RandomPol(KRASNER_t *data, GEN Omega)
       if (zr || signe(c)) break;
     }
     for (j = 1; j <= end-st; j++)
-    {
-      c = ZX_add(c, ZX_Z_mul(RandomFF(data), pp));
-      pp = mulii(data->p, pp);
-    }
-    c = ZX_Z_mul(c, powiu(data->p, st));
+      c = ZX_add(c, ZX_Z_mul(RandomFF(data), gel(data->pk, j)));
+    c = ZX_Z_mul(c, gel(data->pk, st));
     gel(pol, i+1) = FpX_red(c, data->pr);
   }
   gel(pol, i+1) = gen_1; /* monic */
@@ -691,7 +692,9 @@ WildlyRamifiedCase(KRASNER_t *data)
   /* Omega = vector giving the structure of the set Omega */
   /* nbpol = number of polynomials to consider = |Omega| */
   Omega = StructureOmega(data, &nbpol);
-  nbext = itos(data->nbext);
+  nbext = itos_or_0(data->nbext);
+  if (!nbext || (nbext & ~LGBITS))
+    pari_err(talker,"too many extensions in padicfields");
 
   if (DEBUGLEVEL>0) {
     fprintferr("There are %ld extensions to find and %Ps polynomials to consider\n", nbext, nbpol);
@@ -768,6 +771,17 @@ CycloPol(KRASNER_t *data)
   return RgX_to_FpX(ZXQ_charpoly(p3, p1, data->v), data->pr);
 }
 
+/* return [ p^1, p^2, ..., p^c ] */
+static GEN
+get_pk(KRASNER_t *data)
+{
+  long i, l = data->c + 1;
+  GEN pk = cgetg(l, t_VEC), p = data->p;
+  gel(pk, 1) = p;
+  for (i = 2; i <= data->c; i++) gel(pk, i) = mulii(gel(pk, i-1), p);
+  return pk;
+}
+
 /* Compute an absolute polynomial for all the totally ramified
    extensions of Q_p(z) of degree e and discriminant p^{e + j - 1}
    where z is a root of upl defining an unramified extension of Q_p */
@@ -806,7 +820,7 @@ GetRamifiedPol(GEN p, GEN efj, long v, long flag)
   data.frob  = FpXQ_pow(pol_x(v), p, data.upl, data.pr);
   if (DEBUGLEVEL>1) fprintferr("  Unramified part %Ps\n", data.upl);
   data.roottable = NULL;
-  if (dvdsi(e, p))
+  if (j)
   {
     GEN npol = powiu(data.q, e+1);
     if (lgefint(data.p) == 3 && expi(npol) < 19)
@@ -815,6 +829,7 @@ GetRamifiedPol(GEN p, GEN efj, long v, long flag)
       data.roottable = cgetg(l+1, t_VEC);
       for (i = 1; i <= l; i++) gel(data.roottable, i) = NULL;
     }
+    data.pk = get_pk(&data);
     pols = WildlyRamifiedCase(&data);
   }
   else
@@ -825,13 +840,70 @@ GetRamifiedPol(GEN p, GEN efj, long v, long flag)
     long i, l;
     GEN p1 = cgetg_copy(pols, &l);
     for (i = 1; i < l; i++)
-      gel(p1, i) = mkvec4(gcopy(gel(pols, i)), stoi(e), stoi(f), stoi(f*(e+j-1)));
+      gel(p1, i) = mkvec4(gcopy(gel(pols, i)), 
+                          utoipos(e),
+                          utoipos(f),
+                          utoipos(f*(e+j-1)));
     pols = gerepileupto(av, p1);
   }
   else
     pols = gerepilecopy(av, pols);
 
   return pols;
+}
+static GEN
+possible_efj(GEN p, long m)
+{ /* maximal possible discriminant valuation d <= m * (1+v_p(m)) - 1 */
+  /* 1) [j = 0, tame] d = m - f with f | m and v_p(f) = v_p(m), or
+   * 2) [j > 0, wild] d >= m, j <= v_p(e)*e   */
+  ulong m1, pve, pp = p[2]; /* pp used only if v > 0 */
+  long ve, v = u_pvalrem(m, p, &m1);
+  GEN L, D = divisorsu(m1);
+  long i, taum1 = lg(D)-1, nb = 0;
+
+  if (v) {
+    for (pve = 1,ve = 1; ve <= v; ve++) { pve *= pp; nb += pve * ve; }
+    nb = itos_or_0(muluu(nb, zv_sum(D)));
+    if (!nb || is_bigint( mului(pve, sqru(v)) ) )
+      pari_err(talker,"too many ramification possibilities in padicfields");
+  }
+  nb += taum1; /* upper bound for the number of possible triples [e,f,j] */
+
+  L = cgetg(nb + 1, t_VEC);
+  /* 1) tame */
+  for (nb=1, i=1; i < lg(D); i++)
+  {
+    long e = D[i], f = m / e;
+    gel(L, nb++) = mkvecsmall3(e, f, 0);
+  }
+  /* 2) wild */
+  /* Ore's condition: either 
+   * 1) j = v_p(e) * e, or
+   * 2) j = a e + b, with 0 < b < e and v_p(b) <= a < v_p(e) */
+  for (pve = 1, ve = 1; ve <= v; ve++)
+  {
+    pve *= pp; /* = p^ve */
+    for (i = 1; i < lg(D); i++)
+    {
+      long a,b, e = D[i] * pve, f = m / e;
+      for (b = 1; b < e; b++)
+        for (a = u_lval(b, pp); a < ve; a++)
+          gel(L, nb++) = mkvecsmall3(e, f,  a*e + b);
+      gel(L, nb++) = mkvecsmall3(e, f, ve*e);
+    }
+  }
+  setlg(L, nb); return L;
+}
+
+static GEN
+pols_from_efj(pari_sp av, GEN EFJ, GEN p, long flag)
+{
+  long i, l, v = fetch_user_var("y");
+  GEN L = cgetg_copy(EFJ, &l);
+  if (l == 1) { avma = av; return flag == 2? gen_0: cgetg(1, t_VEC); }
+  for (i = 1; i < l; i++) gel(L,i) = GetRamifiedPol(p, gel(EFJ,i), v, flag);
+  if (flag == 2) return gerepileuptoint(av, ZV_sum(L));
+  return gerepilecopy(av, shallowconcat1(L));
 }
 
 /* return a minimal list of polynomials generating all the extensions of
@@ -843,7 +915,9 @@ GetRamifiedPol(GEN p, GEN efj, long v, long flag)
 GEN
 padicfields0(GEN p, GEN N, long flag)
 {
-  long m = 0, d = -1, av = avma;
+  pari_sp av = avma;
+  long m = 0, d = -1;
+  GEN L;
 
   if (typ(p) != t_INT) pari_err(arither1);
   /* be nice to silly users */
@@ -851,8 +925,7 @@ padicfields0(GEN p, GEN N, long flag)
   switch(typ(N))
   {
     case t_VEC:
-      if (lg(N) != 3) pari_err(typeer, "padicfields");
-      if (typ(gel(N,2)) != t_INT) pari_err(typeer,"padicfields");
+      if (lg(N) != 3 || typ(gel(N,2)) != t_INT) pari_err(typeer, "padicfields");
       d = itos(gel(N,2));
       N = gel(N,1); /* fall through */
     case t_INT:
@@ -860,37 +933,15 @@ padicfields0(GEN p, GEN N, long flag)
       if (m <= 0) pari_err(talker,"non-positive degree in padicfields()");
       break;
   }
-
-  if (d < 0)
-  { /* maximal possible discriminant valuation: m * (1+v_p(m)) - 1 */
-    long ds = m * (1 + u_pval(m, p)) - 1;
-    GEN L = cgetg(ds + 2, t_VEC);
-    for (d = 0; d <= ds; d++) gel(L, d+1) = padicfields(p, m, d, flag);
-    if (flag == 2)
-      return gerepileuptoint(av, ZV_sum(L));
-    return gerepilecopy(av, shallowconcat1(L));
-  }
-  return padicfields(p, m, d, flag);
+  if (d >= 0) return padicfields(p, m, d, flag);
+  L = possible_efj(p, m);
+  return pols_from_efj(av, L, p, flag);
 }
 
 GEN
 padicfields(GEN p, long m, long d, long flag)
 {
-  long j, l, av = avma, v = fetch_user_var("y");
-  GEN L;
-
-  L = PossibleDecomposition(p, m, d);
-  l = lg(L);
-  if( DEBUGLEVEL>0)
-  {
-    fprintferr("Extension(s) of degree %ld and discriminant %Ps^%ld of Q_%Ps\n",
-               m, p, d, p);
-    if (DEBUGLEVEL>1)
-      fprintferr("Possible decomposition(s) [e, f, j] = %Ps\n", L);
-  }
-  for (j = 1; j < l; j++) gel(L,j) = GetRamifiedPol(p, gel(L,j), v, flag);
-  if (flag == 2)
-    return gerepileuptoint(av, ZV_sum(L));
-  if (l == 1) { avma = av; return cgetg(1, t_VEC); }
-  return gerepilecopy(av, shallowconcat1(L));
+  long av = avma;
+  GEN L = possible_efj_by_d(p, m, d);
+  return pols_from_efj(av, L, p, flag);
 }
