@@ -7681,9 +7681,6 @@ calling \kbd{loop\_break}.
 trapping error \kbd{numerr}. Return \kbd{(GEN)1L} if error trapped, and the
 result otherwise, or \kbd{NULL} if a flow change occured.
 
-\fun{void}{closure_reset}{void} reinitializes the byte-code evaluator.
-This is used by the error recovery code.
-
 \subsec{Functions to handle control flow changes}
 
 \fun{long}{loop_break}{void} processes an eventual flow changes inside an iterator. If this function return $1$, the iterator should stop.

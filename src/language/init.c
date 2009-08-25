@@ -747,14 +747,16 @@ recover(int flag)
 {
   static long listloc;
   long i;
+  static struct pari_evalstate state;
 
-  if (!flag) { listloc = next_block; return; }
+  if (!flag) { listloc = next_block; evalstate_save(&state); return; }
   if (!(GP_DATA->flags & RECOVER)) pari_exit();
 
   /* disable recover() and SIGINT */
   try_to_recover = 0;
   BLOCK_SIGINT_START
   if (DEBUGMEM>2) fprintferr("entering recover(), loc = %ld\n", listloc);
+  evalstate_restore(&state);
   for (i = 0; i < functions_tblsz; i++)
   {
     entree *ep = functions_hash[i];
@@ -773,7 +775,6 @@ recover(int flag)
   }
   parser_reset();
   compiler_reset();
-  closure_reset();
   if (DEBUGMEM>2) fprintferr("leaving recover()\n");
   BLOCK_SIGINT_END
   try_to_recover = 1;

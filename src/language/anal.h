@@ -157,4 +157,17 @@ pari_stack *pari_get_oldmodules(void);
 INLINE long
 is_keyword_char(char c) { return (isalnum((int)c) || c=='_'); }
 
+struct pari_evalstate
+{
+  long sp;
+  long rp;
+  long var;
+  long lvars;
+  long trace;
+};
+
+void evalstate_save(struct pari_evalstate *state);
+void evalstate_reset(void);
+void evalstate_restore(struct pari_evalstate *state);
+
 ENDEXTERN

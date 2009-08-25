@@ -1591,10 +1591,7 @@ break_loop(int sigint)
   if (sigint)
     pari_puts("[type <Return> in empty line to continue]\n");
   else
-  {
-    closure_reset();
     killallfiles(0);
-  }
   oldinfile = pari_infile;
   pari_infile = stdin;
   for(;;)

@@ -91,8 +91,8 @@ allocatemem0(GEN z)
     newsize = itou(z);
     if (signe(z) < 0) pari_err(talker,"negative size in allocatemem");
   }
+  evalstate_reset();
   compiler_reset();
-  closure_reset();
   (void)allocatemoremem(newsize);
   global_err_data = NULL;
   longjmp(GP_DATA->env, -1);
@@ -1205,28 +1205,44 @@ closure_evalgen(GEN C)
   return gerepileupto(ltop,gel(st,--sp));
 }
 
+void
+evalstate_save(struct pari_evalstate *state)
+{
+  state->sp   = sp;
+  state->rp   = rp;
+  state->var  = s_var.n;
+  state->lvars= s_lvars.n;
+  state->trace= s_trace.n;
+}
+
+void
+evalstate_restore(struct pari_evalstate *state)
+{
+  sp=state->sp; rp=state->rp;
+  restore_vars(s_var.n-state->var,s_lvars.n-state->lvars);
+  s_trace.n=state->trace;
+  reset_break();
+}
+
+void
+evalstate_reset(void)
+{
+  sp=0; rp=0;
+  restore_vars(s_var.n,s_lvars.n);
+  s_trace.n = 0;
+  reset_break();
+}
+
 GEN
 closure_trapgen(GEN C, long numerr)
 {
   pari_sp av=avma;
-  long saved_sp=sp;
-  long saved_rp=rp;
-  long saved_mvar=s_var.n;
-  long saved_lvar=s_lvars.n;
-  long saved_tr=s_trace.n;
+  struct pari_evalstate state;
+  evalstate_save(&state);
   VOLATILE GEN x;
   CATCH(numerr) { x = (GEN)1L; }
   TRY { x = closure_evalgen(C); } ENDCATCH;
-  if (x == (GEN)1L)
-  {
-    long nbmvar=s_var.n-saved_mvar;
-    long nblvar=s_lvars.n-saved_lvar;
-    sp=saved_sp;
-    rp=saved_rp;
-    s_trace.n=saved_tr;
-    restore_vars(nbmvar, nblvar);
-    avma=av;
-  }
+  if (x == (GEN)1L) { evalstate_restore(&state); avma=av; }
   return x;
 }
 
@@ -1302,9 +1318,6 @@ closure_callgenall(GEN C, long n, ...)
   va_end(ap);
   return closure_returnupto(C);
 }
-
-void
-closure_reset(void) {sp=0; rp=0; s_trace.n=0; reset_break();}
 
 INLINE const char *
 disassemble_cast(long mode)

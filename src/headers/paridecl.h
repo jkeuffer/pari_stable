@@ -1443,7 +1443,6 @@ GEN     closure_evalgen(GEN C);
 GEN     closure_evalnobrk(GEN C);
 GEN     closure_evalres(GEN C);
 void    closure_evalvoid(GEN C);
-void    closure_reset(void);
 GEN     closure_trapgen(GEN C, long numerr);
 GEN     get_lex(long vn);
 GEN     next0(long n);
