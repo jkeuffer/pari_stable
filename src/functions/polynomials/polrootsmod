@@ -2,7 +2,7 @@ Function: polrootsmod
 Section: polynomials
 C-Name: rootmod0
 Prototype: GGD0,L,
-Help: polrootsmod(pol,p,{flag=0}): roots mod p of the polynomial pol. flag is
+Help: polrootsmod(pol,p,{flag=0}): roots mod the prime p of the polynomial pol. flag is
  optional, and can be 0: default, or 1: use a naive search, useful for small p.
 Description:
  (pol, int, ?0):vec           rootmod($1, $2)
