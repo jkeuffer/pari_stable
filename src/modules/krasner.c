@@ -234,45 +234,35 @@ get_topx(KRASNER_t *data, GEN eis)
 static void
 FieldData(KRASNER_t *data, FAD_t *fdata, GEN eis, GEN topx)
 {
-  GEN p1, t;
+  GEN p1, zq, ipi, cipi, dipi, t, Q;
 
   fdata->p = data->p;
   t = leafcopy(topx); setvarn(t, data->v);
-  fdata->top  = gclone(t);
-  fdata->topr = gclone(FpX_red(t, data->pr));
+  fdata->top  = t;
+  fdata->topr = FpX_red(t, data->pr);
 
-  fdata->zq  = pol_x(data->v);
+  zq  = pol_x(data->v);
   /* FIXME: do as in CycloPol (not so easy) */
   for(;;)
   {
-    GEN zq2 = fdata->zq;
-    fdata->zq = Fq_pow(fdata->zq, data->q, fdata->top, data->pr);
-    if (gequal(fdata->zq, zq2)) break;
+    GEN zq2 = zq;
+    zq = Fq_pow(zq, data->q, fdata->top, data->pr);
+    if (gequal(zq, zq2)) break;
   }
-  fdata->zq   = gclone(fdata->zq);
-  fdata->eis  = gclone(eis);
-  fdata->pi   = gclone(Fq_sub(pol_x(data->v), fdata->zq,
-			      FpX_red(fdata->top, data->p), data->p));
-  fdata->ipi  = RgXQ_inv(fdata->pi, fdata->top);
-  fdata->ipi  = RgX_Rg_mul(fdata->ipi, data->p);
-  fdata->ipi  = gclone(RgX_to_FpX(fdata->ipi, mulii(data->pr, data->p)));
+  fdata->zq  = zq;
+  fdata->eis = eis;
+  fdata->pi  = Fq_sub(pol_x(data->v), fdata->zq,
+	              FpX_red(fdata->top, data->p), data->p);
+  ipi = RgXQ_inv(fdata->pi, fdata->top);
+  ipi = Q_remove_denom(ipi, &dipi);
+  Q = mulii(data->pr, data->p);
+  cipi = Fp_inv(diviiexact(dipi, data->p), Q);
+  fdata->ipi = FpX_Fp_mul(ipi, cipi, Q); /* p/pi mod p^(pr+1) */
 
   /* Last one is in fact pi^e/p */
   p1 = FpXQ_powers(fdata->pi, data->e, fdata->topr, data->pr);
   gel(p1, data->e+1) = ZX_Z_divexact(gel(p1, data->e+1), data->p);
-  fdata->pik  = gclone(p1);
-}
-
-static void
-FreeFieldData(FAD_t *fdata)
-{
-  gunclone(fdata->top);
-  gunclone(fdata->topr);
-  gunclone(fdata->zq);
-  gunclone(fdata->eis);
-  gunclone(fdata->pi);
-  gunclone(fdata->ipi);
-  gunclone(fdata->pik);
+  fdata->pik  = p1;
 }
 
 /* return pol*ipi/p (mod top, pp) if it has integral coefficient, NULL
@@ -465,9 +455,7 @@ RootCountingAlgorithm(KRASNER_t *data, FAD_t *fdata, GEN pol, long flag)
 }
 
 /* Return non-zero if the field given by fdata defines a field isomorphic to
- * the one defined by pol. If flag is non-zero, use some probabilistic
- * argument, so might answer yes even if the fields are not (but not the
- * other way around) */
+ * the one defined by pol */
 static long
 IsIsomorphic(KRASNER_t *data, FAD_t *fdata, GEN pol)
 {
@@ -543,7 +531,6 @@ TamelyRamifiedCase(KRASNER_t *data)
   {
     FieldData(data, &fdata, eis, topx);
     nb = NbConjugateFields(data, &fdata);
-    FreeFieldData(&fdata);
   }
   fprintferr("Found %ld field(s)\n", nb);
   cnt += nb;
@@ -573,7 +560,6 @@ TamelyRamifiedCase(KRASNER_t *data)
 		   "Oops, fields are isomorphic in TamelyRamifiedCase!\n");
       }
       nb = NbConjugateFields(data, &fdata);
-      FreeFieldData(&fdata);
       fprintferr("Found %ld field(s)\n", nb);
       cnt += nb;
 #endif
@@ -680,6 +666,29 @@ RandomPol(KRASNER_t *data, GEN Omega)
   return pol;
 }
 
+static void
+CloneFieldData(FAD_t *fdata)
+{
+ fdata->top = gclone(fdata->top);
+ fdata->topr= gclone(fdata->topr);
+ fdata->zq  = gclone(fdata->zq);
+ fdata->eis = gclone(fdata->eis);
+ fdata->pi  = gclone(fdata->pi);
+ fdata->ipi = gclone(fdata->ipi);
+ fdata->pik = gclone(fdata->pik);
+}
+static void
+FreeFieldData(FAD_t *fdata)
+{
+  gunclone(fdata->top);
+  gunclone(fdata->topr);
+  gunclone(fdata->zq);
+  gunclone(fdata->eis);
+  gunclone(fdata->pi);
+  gunclone(fdata->ipi);
+  gunclone(fdata->pik);
+}
+
 static GEN
 WildlyRamifiedCase(KRASNER_t *data)
 {
@@ -734,6 +743,7 @@ WildlyRamifiedCase(KRASNER_t *data)
       GEN topx = get_topx(data, rpl);
       FAD_t *fdata = (FAD_t*)vfd[ct];
       FieldData(data, fdata, rpl, topx);
+      CloneFieldData(fdata);
       nb = NbConjugateFields(data, fdata);
       fd += nb;
       ct++;
@@ -760,15 +770,14 @@ WildlyRamifiedCase(KRASNER_t *data)
 static GEN
 CycloPol(KRASNER_t *data)
 {
-  GEN p1, p2, p3;
+  GEN T, z;
   /* v - 1 */
   if (data->f == 1) return deg1pol_shallow(gen_1, subis(data->pr, 1), data->v);
 
-  p1 = init_Fq(data->p, data->f, data->v);
-  p2 = gener_FpXQ(p1, data->p, NULL);
-  p3 = ZpXQ_sqrtnlift(gen_1, data->qm1, p2, p1, data->p, data->r);
-
-  return RgX_to_FpX(ZXQ_charpoly(p3, p1, data->v), data->pr);
+  T = init_Fq(data->p, data->f, data->v);
+  z = gener_FpXQ(T, data->p, NULL);
+  z = ZpXQ_sqrtnlift(gen_1, data->qm1, z, T, data->p, data->r);
+  return FpX_red(ZXQ_charpoly(z, T, data->v), data->pr);
 }
 
 /* return [ p^1, p^2, ..., p^c ] */
