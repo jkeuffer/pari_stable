@@ -153,7 +153,7 @@ VerifyOre(GEN p, long e, long j)
 }
 
 /* Given [K:Q_p] = m and disc(K/Q_p) = p^d, return all decompositions K/K^ur/Q_p
- * as [e, f, j] with 
+ * as [e, f, j] with
  *   K^ur/Q_p unramified of degree f,
  *   K/K^ur totally ramified of degree e, and discriminant p^(e+j-1);
  * thus d = f*(e+j-1) and j > 0 iff ramification is wild */
@@ -849,7 +849,7 @@ GetRamifiedPol(GEN p, GEN efj, long v, long flag)
     long i, l;
     GEN p1 = cgetg_copy(pols, &l);
     for (i = 1; i < l; i++)
-      gel(p1, i) = mkvec4(gcopy(gel(pols, i)), 
+      gel(p1, i) = mkvec4(gcopy(gel(pols, i)),
                           utoipos(e),
                           utoipos(f),
                           utoipos(f*(e+j-1)));
@@ -886,7 +886,7 @@ possible_efj(GEN p, long m)
     gel(L, nb++) = mkvecsmall3(e, f, 0);
   }
   /* 2) wild */
-  /* Ore's condition: either 
+  /* Ore's condition: either
    * 1) j = v_p(e) * e, or
    * 2) j = a e + b, with 0 < b < e and v_p(b) <= a < v_p(e) */
   for (pve = 1, ve = 1; ve <= v; ve++)
