@@ -548,6 +548,9 @@ static int
 BPSW_isprime_small(GEN x)
 {
   long l = lgefint(x);
+#ifdef LONG_IS_64BIT
+  return (l == 3 && x[2] < 1000000000000000); /* 10^15 */
+#else
   if (l < 4) return 1;
   if (l == 4)
   {
@@ -557,6 +560,7 @@ BPSW_isprime_small(GEN x)
     if (t < 0) return 1;
   }
   return 0;
+#endif
 }
 
 /* Brillhart, Lehmer, Selfridge test (Crandall & Pomerance, Th 4.1.5)

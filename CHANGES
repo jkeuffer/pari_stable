@@ -183,6 +183,7 @@ BA143- galoisinit(x).gen was not a t_VEC
   147- missing Flx_renormalize at the end of Flx_mulspec_basecase() &
        Flx_sqrspec_basecase() [#984]
   148- After \y0, [1,x]*[0,0]~ returned 0 t_INT, which should be a t_POL [#983]
+  149- isprime(x) possibly incorrect on 64 bit machines when 10^15 < x < 2^64
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
