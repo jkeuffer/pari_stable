@@ -646,7 +646,7 @@ pari_thread_start(struct pari_thread *t)
 /*********************************************************************/
 
 static void
-pari_exit()
+pari_exit(void)
 {
   fprintferr("  ***   Error in the PARI system. End of program.\n");
   exit(1);
