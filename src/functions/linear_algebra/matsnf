@@ -16,7 +16,8 @@ Doc: if $X$ is a (singular or non-singular)
 
  1 (complete output): if set, outputs $[U,V,D]$, where $U$ and $V$ are two
  unimodular matrices such that $UXV$ is the diagonal matrix $D$. Otherwise
- output only the diagonal of $D$.
+ output only the diagonal of $D$. If $X$ is not a square matrix, then $D$
+ will be a square diagonal matrix padded with zeros on the left or the top.
 
  2 (generic input): if set, allows polynomial entries, in which case the
  input matrix must be square. Otherwise, assume that $X$ has integer

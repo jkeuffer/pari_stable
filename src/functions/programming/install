@@ -33,9 +33,9 @@ Doc: loads from dynamic library \var{lib} the function \var{name}. Assigns to it
  ? addii(1, 2)
  %1 = 3
  @eprog\noindent
- Re-installing a function will print a Warning, and update the prototype code
- if needed, but will reload a symbol from the library, even it the latter has
- been recompiled.
+ Re-installing a function will print a warning and update the prototype code
+ if needed. However, it will not reload a symbol from the library, even it the
+ latter has been recompiled.
 
  \misctitle{Caution:} This function may not work on all systems, especially
  when \kbd{gp} has been compiled statically. In that case, the first use of an
