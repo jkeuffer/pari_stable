@@ -2311,8 +2311,8 @@ nextSousResultant(GEN P, GEN Q, GEN Z, GEN s)
 }
 
 /* Ducos's subresultant */
-static GEN
-resultant_aux(GEN P, GEN Q, GEN *sol)
+GEN
+RgX_resultant_all(GEN P, GEN Q, GEN *sol)
 {
   pari_sp av, av2, lim;
   long dP, dQ, delta, sig = 1;
@@ -2325,9 +2325,15 @@ resultant_aux(GEN P, GEN Q, GEN *sol)
     if (both_odd(dP, dQ)) sig = -1;
     swap(P,Q); lswap(dP, dQ); delta = -delta;
   }
-  if (dQ == 0) /* 0 caught in init_resultant(), dQ = 0 ==> sig = 1 */
-    return gpowgs(gel(Q,2), dP);
+  if (sol) *sol = gen_0;
   av = avma;
+  if (dQ <= 0)
+  {
+    if (dQ < 0) return gen_0;
+    s = gpowgs(gel(Q,2), dP);
+    if (sig == -1) s = gerepileupto(av, gneg(s));
+    return s;
+  }
   P = primitive_part(P, &cP);
   Q = primitive_part(Q, &cQ);
   av2 = avma; lim = stack_lim(av2,1);
@@ -2379,7 +2385,7 @@ resultant_all(GEN P, GEN Q, GEN *sol)
     if (TP == t_INT && TQ == t_INT) return ZX_resultant(P,Q);
     return QX_resultant(P,Q);
   }
-  return resultant_aux(P, Q, sol);
+  return RgX_resultant_all(P, Q, sol);
 }
 
 /*******************************************************************/
@@ -2722,7 +2728,7 @@ RgX_disc_aux(GEN x)
   if (Tx == t_REAL)
     D = resultant2(x,y);
   else
-    D = resultant_aux(x, y, NULL);
+    D = RgX_resultant_all(x, y, NULL);
   L = leading_term(x); if (!gequal1(L)) D = gdiv(D,L);
   if (dx & 2) D = gneg(D);
   return D;

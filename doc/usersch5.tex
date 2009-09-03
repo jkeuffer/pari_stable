@@ -5244,6 +5244,13 @@ coefficients such that $\kbd{*ux} + \kbd{*vy} = d$.
 \fun{GEN}{RgX_disc}{GEN x} returns the discriminant of the \typ{POL} \kbd{x}
 with respect to its main variable.
 
+\fun{GEN}{RgX_resultant_all}{GEN x, GEN y, GEN *sol} returns
+\kbd{resultant(x,y)}. If \kbd{sol} is not \kbd{NULL}, sets it to the last
+non-zero remainder in the polynomial remainder sequence if it exists and to
+\kbd{gen\_0} otherwise (e.g. one polynomial has degree 0). Compared to
+\kbd{resultant\_all}, this function always uses the generic subresultant
+algorithm, hence always computes \kbd{sol}.
+
 \fun{GEN}{RgX_modXn_shallow}{GEN x, long n} return $\kbd{x \% } t^n$,
 where $n\geq 0$. Shallow function.
 

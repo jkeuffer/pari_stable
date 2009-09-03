@@ -2163,6 +2163,7 @@ GEN     RgXQ_inv(GEN x, GEN y);
 GEN     RgX_disc(GEN x);
 GEN     RgX_extgcd(GEN x, GEN y, GEN *U, GEN *V);
 GEN     RgX_gcd(GEN x, GEN y);
+GEN     RgX_resultant_all(GEN P, GEN Q, GEN *sol);
 long    RgX_type(GEN x, GEN *ptp, GEN *ptpol, long *ptpa);
 void    RgX_type_decode(long x, long *t1, long *t2);
 int     RgX_type_is_composite(long t);
