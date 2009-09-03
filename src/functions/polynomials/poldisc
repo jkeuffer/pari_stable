@@ -9,5 +9,5 @@ Description:
  (gen):gen        poldisc0($1, -1)
  (gen, var):gen   poldisc0($1, $2)
 Doc: discriminant of the polynomial
- \var{pol} in the main variable is $v$ is omitted, in $v$ otherwise. The
+ \var{pol} in the main variable if $v$ is omitted, in $v$ otherwise. The
  algorithm used is the \idx{subresultant algorithm}.

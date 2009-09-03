@@ -2,8 +2,8 @@ Function: intformal
 Section: polynomials
 C-Name: integ
 Prototype: GDn
-Help: intformal(x,{v}): formal integration of x with respect to the main
- variable of v, or to the main variable of x if v is omitted.
+Help: intformal(x,{v}): formal integration of x with respect to v, or to the
+ main variable of x if v is omitted.
 Doc: \idx{formal integration} of $x$ with respect to the main variable if $v$
  is omitted, with respect to the variable $v$ otherwise. Since PARI does not
  know about ``abstract'' logarithms (they are immediately evaluated, if only

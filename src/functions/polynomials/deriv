@@ -2,8 +2,8 @@ Function: deriv
 Section: polynomials
 C-Name: deriv
 Prototype: GDn
-Help: deriv(x,{v}): derivative of x with respect to the main variable of v,
- or to the main variable of x if v is omitted.
+Help: deriv(x,{v}): derivative of x with respect to v, or to the main
+ variable of x if v is omitted.
 Doc:
  derivative of $x$ with respect to the main
  variable if $v$ is omitted, and with respect to $v$ otherwise. The derivative
