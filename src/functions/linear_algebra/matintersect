@@ -10,4 +10,4 @@ Doc: $x$ and $y$ being two matrices with the same
  columns of $x$ and $y$ respectively. The faster function
  \tet{idealintersect} can be used to intersect fractional ideals (projective
  $\Z_K$ modules of rank $1$); the slower but much more general function
-\tet{nfhnf} can be used to intersect general $\Z_K$-modules.
+ \tet{nfhnf} can be used to intersect general $\Z_K$-modules.
