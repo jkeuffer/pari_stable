@@ -7,5 +7,7 @@ Help: matintersect(x,y): intersection of the vector spaces whose bases are
 Doc: $x$ and $y$ being two matrices with the same
  number of rows each of whose columns are independent, finds a basis of the
  $\Q$-vector space equal to the intersection of the spaces spanned by the
- columns of $x$ and $y$ respectively. See also the function
- \tet{idealintersect}, which does the same for free $\Z$-modules.
+ columns of $x$ and $y$ respectively. The faster function
+ \tet{idealintersect} can be used to intersect fractional ideals (projective
+ $\Z_K$ modules of rank $1$); the slower but much more general function
+\tet{nfhnf} can be used to intersect general $\Z_K$-modules.
