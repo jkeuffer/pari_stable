@@ -16,10 +16,16 @@ if test -n "$myuname"; then
 		9000/[678]*)	arch=hppa;;
 		*)		arch=hppa;;
 	    esac;;
-  netbsd|freebsd|os2)
+  freebsd|os2)
             arch=`uname -m`
             if test -z "$arch"; then arch=ix86; fi
             ;;
+  netbsd)
+            arch=`uname -m`
+            if test -z "$arch"; then arch=ix86; fi
+            case $arch in
+              amd64) arch=x86_64;;
+            esac;;
   cygwin*)  arch=`uname -m`
             if test -z "$arch"; then arch=ix86; fi
             osname=cygwin;;

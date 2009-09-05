@@ -9,7 +9,7 @@ DLSUFFIX=so
 soname=.$soname_num
 do_dll=yes
 case "$osname" in
-  gnu*|aix|osf1|solaris|linux|freebsd)
+  gnu*|aix|osf1|solaris|linux|freebsd|netbsd)
     case $pari_release_verbose in
       *STABLE*)      sodest=.$version.$patch;; # released version
       *DEVELOPMENT*) sodest=.$patch.0.0;;      # unstable version
@@ -59,6 +59,7 @@ if test -n "$DLLD"; then
   fi
 
 # Which Flags for Dynamic Lib Linker ?
+  dlldflags="$DLLDFLAGS"
   DLLDFLAGS=
   if test -n "$GNUdlld"; then
     DLLDFLAGS="-shared -soname=\$(LIBPARI_SONAME)"
@@ -105,6 +106,7 @@ if test -n "$DLLD"; then
     dflt=$DLLDFLAGS; rep=; . ./myread
     DLLDFLAGS=$ans
   fi
+  DLLDFLAGS="$DLLDFLAGS $dlldflags"
 fi
 
 if test -z "$DLLD"; then
