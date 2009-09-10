@@ -1699,7 +1699,7 @@ TIMER(pari_timer *T)
   struct timeval t;
   long delay;
 
-  getrusage(0,&r); t = r.ru_utime;
+  getrusage(RUSAGE_SELF,&r); t = r.ru_utime;
   delay = 1000 * (t.tv_sec - T->s) + (t.tv_usec - T->us) / 1000;
   T->us = t.tv_usec;
   T->s  = t.tv_sec; return delay;
