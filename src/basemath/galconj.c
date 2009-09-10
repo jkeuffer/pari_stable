@@ -244,7 +244,7 @@ initgaloisborne(GEN T, GEN dn, long prec, GEN *ptL, GEN *ptprep, GEN *ptdis)
   GEN L, prep, den, nf, r;
   pari_timer ti;
 
-  if (DEBUGLEVEL>=4) (void)TIMER(&ti);
+  if (DEBUGLEVEL>=4) TIMERstart(&ti);
   T = get_nfpol(T, &nf);
   r = nf ? nf_get_roots(nf) : NULL;
   if (nf &&  lg(gel(r, 1)) >= prec)

@@ -769,7 +769,7 @@ combine_factors(GEN target, GEN famod, GEN p, long klim)
 
   (void)cmbf_precs(p, A, B, &a, &b, &pa, &pb);
 
-  if (DEBUGLEVEL>2) (void)TIMER(&T);
+  if (DEBUGLEVEL>2) TIMERstart(&T);
   famod = ZpX_liftfact(target,famod,NULL,p,a,pa);
   if (DEBUGLEVEL>2) msgTIMER(&T, "Hensel lift (mod %Ps^%ld)", p,a);
   L = cmbf(target, famod, A, p, a, b, klim, &maxK, &done);
