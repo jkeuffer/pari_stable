@@ -16,11 +16,11 @@ if test -n "$myuname"; then
 		9000/[678]*)	arch=hppa;;
 		*)		arch=hppa;;
 	    esac;;
-  freebsd|os2)
+  os2)
             arch=`uname -m`
             if test -z "$arch"; then arch=ix86; fi
             ;;
-  netbsd)
+  freebsd|netbsd|openbsd)
             arch=`uname -m`
             if test -z "$arch"; then arch=ix86; fi
             case $arch in
