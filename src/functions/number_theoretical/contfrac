@@ -35,7 +35,7 @@ Doc: returns the row vector whose components are the partial quotients of the
  compared to the available significant digits for $x$ a \typ{REAL}).
 
  A direct implementation of the numerical continued fraction
- \kbd{contfrac(x,b)} descrived above would be
+ \kbd{contfrac(x,b)} described above would be
  \bprog
  \\ "greedy" generalized continued fraction
  cf(x, b) =

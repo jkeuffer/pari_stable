@@ -55,7 +55,7 @@ with, and the second is the upper limit on a precomputed prime number table;
 \kbd{size} should not reasonably be taken below $500000$ but you may set
 $\tet{maxprime} = 0$, although the system still needs to precompute all
 primes up to about $2^{16}$. For lower-level variants allowing finer
-control, e.g.~preventing PARI from installings its own error or signal
+control, e.g.~preventing PARI from installing its own error or signal
 handlers, see~\secref{se:pari_init_tech}.
 
 \noindent We have now at our disposal:
@@ -215,7 +215,7 @@ necessary condition.
 \misctitle{Important Note.} These specialized functions are of course more
 efficient than the generic ones, but note the hidden danger here: the types of the
 objects involved (which is not checked) must be severely controlled, e.g.~using
-\kbd{addii} on a \typ{FRAC} argument will cause disasters. Type mismatchs may
+\kbd{addii} on a \typ{FRAC} argument will cause disasters. Type mismatches may
 corrupt the PARI stack, though in most cases they will just immediately overflow
 the stack. Because of this, the PARI philosophy of giving a result which is as
 exact as possible, enforced for generic functions like \kbd{gadd} or \kbd{gmul},
@@ -832,7 +832,7 @@ there are four \tet{varargs} functions:
 returns the non-negative \typ{INT} whose development in base $2^{32}$
 is given by the following $n$ words (\kbd{unsigned long}). It is assumed that
 all such arguments are less than $2^{32}$ (the actual \kbd{sizeof(long)} is
-irrelevant, the behaviour is also as above on $64$-bit machines).
+irrelevant, the behavior is also as above on $64$-bit machines).
 \bprog
   mkintn(3, a2, a1, a0);
 @eprog
@@ -876,7 +876,7 @@ an object a priori suitable for \tet{gerepileupto}. For instance
 \fun{GEN}{uu32toi}{ulong a, ulong b}
 
 Returns the \kbd{GEN} equal to $2^{32} a + b$, \emph{assuming} that
-$a,b < 2^{32}$. This does not depend on \kbd{sizeof(long)}: the behaviour is
+$a,b < 2^{32}$. This does not depend on \kbd{sizeof(long)}: the behavior is
 as above on both $32$ and $64$-bit machines.
 
 \subsec{Sizes}
@@ -927,7 +927,7 @@ instance, the assignment of an imprecise object into a precise one does \emph{no
 make sense. However, a change in precision of imprecise objects is allowed, even
 if it \emph{increases} its accuracy: we complement the ``mantissa'' with
 infinitely many $0$ digits in this case. (Mantissa between quotes, because this
-is not resticted to \typ{REAL}s, it also applies for $p$-adics for instance.)
+is not restricted to \typ{REAL}s, it also applies for $p$-adics for instance.)
 
 All functions ending in ``\kbd{z}'' such as \teb{gaddz}
 (see~\secref{se:low_level}) implicitly use this function. In fact what they
@@ -1054,7 +1054,7 @@ an advanced example in \secref{se:prog}).
 
 \fun{void}{setisclone}{GEN z} sets the \emph{clone} bit.
 
-\fun{void}{unsetisclone}{GEN z} unsets the \emph{clone} bit.
+\fun{void}{unsetisclone}{GEN z} clears the \emph{clone} bit.
 
 \misctitle{Remark.} The clone bit is there so that \kbd{gunclone} can check
 it is deleting an object which was allocated by \kbd{gclone}. Miscellaneous
@@ -1243,7 +1243,7 @@ $(n,d) = 1$ (see \tet{gred_frac2}).
 \subsec{Type \typ{FFELT} (finite field element)}:%
 \kbdsidx{t_FFELT}\sidx{finite field element} (Experimental)
 
-Components of this type should normaly not be accessed directly. Instead,
+Components of this type should normally not be accessed directly. Instead,
 finite field elements should be created using \kbd{ffgen}.
 
 \noindent The second codeword \kbd{z[1]} determines the storage format of the
@@ -1445,7 +1445,7 @@ polynomial arithmetic and linear algebra over small finite fields, etc.
 
 \subsec{Type \typ{CLOSURE} (closure)}:\kbdsidx{t_CLOSURE}\sidx{closure}
 This type hold GP functions and closures, in compiled form. It is useless in
-library mode and subjet to change each time the GP language evolves. Hence we
+library mode and subject to change each time the GP language evolves. Hence we
 do not describe it here and refer to the Developer's Guide.
 
 \subsec{Type \typ{LIST} (list)}:\kbdsidx{t_LIST}\sidx{list}
@@ -1672,7 +1672,7 @@ side effect. Low level routines are available to write on PARI output stream
 \fun{void}{pari_puts}{char *s}: write \kbd{s} to the output stream.
 
 \fun{void}{pari_flush}{}: flush output stream; most streams are buffered by
-default, this command makes sure that all charaters output so are actually
+default, this command makes sure that all characters output so are actually
 written.
 
 \fun{void}{pari_printf}{const char *fmt, ...}: the most versatile such
@@ -1761,7 +1761,7 @@ output context, i.e.~ a set of low-level functions to actually interact with
 a ``stream''. By default, we have \kbd{pariOut = defaultOut}, the output
 ``stream'' is an actual \kbd{FILE*}, \tet{pari_outfile}, initialized to
 \tet{stdout}, and the low-level printing functions are actually the standard
-\kbd{putc} / \kbd{puts}, plus some magic to handle a logfile if one is open.
+\kbd{putc} / \kbd{puts}, plus some magic to handle a log file if one is open.
 If you intend to change \kbd{pariOut}, diverting output in non-trivial ways,
 this probably means you are rewriting \kbd{gp}. In that case, have a look at
 the code in \kbd{language/es.c} (\kbd{pariOut80} comes to mind).
@@ -1856,7 +1856,7 @@ tree} associated to an object:
 the leaves (non-recursive components) are truncated to \kbd{nb} words.
 
 \noindent The function \tet{output} is vital under debuggers, since none of
-them knows how to print PARI objects by default. Seasoned PARI developpers
+them knows how to print PARI objects by default. Seasoned PARI developers
 add the following \kbd{gdb} macro to their \kbd{.gdbinit}:
 \bprog
   define i
@@ -2048,7 +2048,7 @@ PARI currently guarantees that the first 6547 primes, up to and including
 in the \kbd{pari\_init} call.
 
 \fun{ulong}{init_primepointer}{ulong a, ulong p, byteptr *ptr}
-assume \kbd{*ptr} is inside of a \kbd{diffptr} containing the succesive
+assume \kbd{*ptr} is inside of a \kbd{diffptr} containing the successive
 differences between primes, and $p$ is the current prime (up to \kbd{*ptr}
 excluded). Returns return the smallest prime $\geq a$, and update \kbd{ptr}.
 
@@ -2077,7 +2077,7 @@ functions without extra parameters, you may set \kbd{E = NULL} and ignore
 that argument in your function definition.
 
 \fun{long}{TIMERread}{pari_timer *T} returns the time elapsed since the timer
-was started (or last reset), without reseting it.
+was started (or last reset), without resetting it.
 
 \section{A complete program}
 \label{se:prog}

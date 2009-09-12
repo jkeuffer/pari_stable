@@ -23,9 +23,9 @@ Doc: if $x$ is a (not necessarily square)
  If $\fl=1$, outputs a two-component row vector $[H,U]$, where $H$ is the
  Hermite normal form of $x$ defined as above,  and $U$ is the
  unimodular transformation matrix such that $xU=[0|H]$. When the kernel is
- large, $U$ has in general huge coefficients. In the worst case, the runtime
- is exponential with respect to the dimension, but the routine behaves well
- in small dimension (less than 50 or 100, say).
+ large, $U$ has in general huge coefficients. In the worst case, the
+ running time is exponential with respect to the dimension, but the
+ routine behaves well in small dimension (less than 50 or 100, say).
 
  If $\fl=3$, uses Batut's algorithm and output $[H,U,P]$, such that $H$ and
  $U$ are as before and $P$ is a permutation of the rows such that $P$ applied

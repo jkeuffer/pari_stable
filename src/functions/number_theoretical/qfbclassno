@@ -50,7 +50,7 @@ Doc: ordinary class number of the quadratic
  %4 = 7253
  @eprog\noindent
  See also \kbd{qfbhclassno}.
-Variant: The following funtions are also available:
+Variant: The following functions are also available:
  \fun{GEN}{classno}{GEN D} ($\fl = 0$)
  \fun{GEN}{classno2}{GEN D} ($\fl = 1$). Finally
  \fun{GEN}{hclassno}{GEN D} computes the class number of an imaginary

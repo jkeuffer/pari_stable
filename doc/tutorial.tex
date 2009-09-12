@@ -174,7 +174,7 @@ Conspicuously, most function names have been changed.
 
 Of course, this is going to break all your nice old scripts. Well, you can
 either change the compatibility level (typing \kbd{default(compatible, 3)}
-will send you back to the stone-age behaviour of good ol' version 1.39.15),
+will send you back to the stone-age behavior of good ol' version 1.39.15),
 or rewrite the scripts. We really advise you to do the latter if they are not
 too long, since they can now be written much more cleanly than before
 (especially with the new control statements: \kbd{break}, \kbd{next},
@@ -233,7 +233,7 @@ more ``defaults'' than just \kbd{format} and \kbd{realprecision}: type
 \kbd{default} by itself now, they are all there. \smallskip
 %
 7) Note that the \kbd{default} command reacts differently according to the
-number of input arguments. This is not an uncommon behaviour for \kbd{gp}
+number of input arguments. This is not an uncommon behavior for \kbd{gp}
 functions. You can see this from the online help, or the complete description
 in Chapter~3: any argument surrounded by braces \kbd{\obr\cbr} in the
 function prototype is optional, which really means that a \emph{default}
@@ -519,7 +519,7 @@ There are two other reserved variable names: \kbd{Pi} and \kbd{Euler}. All
 function names are forbidden as well. On the other hand there is nothing
 special about \kbd{i}, \kbd{pi} or \kbd{euler}.
 
-When creating vectors or matrices, it is often useful to use boolean
+When creating vectors or matrices, it is often useful to use Boolean
 operators and the \kbd{if()} statement. Indeed, an \kbd{if} expression has a
 value, which is of course equal to the evaluated part of the \kbd{if}. So for
 example you can type
@@ -1479,7 +1479,7 @@ Type
   ellisoncurve(e, q)
 @eprog\noindent
 The point \kbd{q0} is on the curve, as checked by \kbd{ellisoncurve}, and we
-transfered it onto the minimal model \kbd{e}, using \kbd{ellchangepoint} and
+transferred it onto the minimal model \kbd{e}, using \kbd{ellchangepoint} and
 the change of variable computed above. Note that \kbd{ellchangepoint()} is
 unusual among the elliptic curve functions in that it does not take an
 \kbd{ell} structure as its first argument: in \kbd{gp}, points do not
@@ -1727,7 +1727,7 @@ know that the torsion subgroup of $E$ contains a point of order 5, and typing
 @eprog\noindent This shows that $\sha$ must be the trivial group.
 
 For more detailed information on the local reduction of an elliptic curve at
-a spceific prime~\kbd{p}, use the function \kbd{elllocalred(E,p)}; the second
+a specific prime~\kbd{p}, use the function \kbd{elllocalred(E,p)}; the second
 component gives the Kodaira symbol in an encoded form.  See the manual or
 online help for details.
 
@@ -1924,7 +1924,7 @@ and Scholz's mirror theorem.) Let us create a form by typing
 \bprog
   f = qfbred(qfbprimeform(d,2), 2)
 @eprog\noindent
-(the last 2 tells \kbd{qfbred} to ignore the archimedean component). This
+(the last 2 tells \kbd{qfbred} to ignore the Archimedean component). This
 gives us a prime ideal of norm equal to 2. Is this ideal principal? Well, one
 way to check this, which is not the most efficient but will suffice for now,
 is to look at the complete cycle of reduced forms equivalent to \kbd{f}. Type
@@ -2260,7 +2260,7 @@ there's a quadratic subfield, but it's given by \kbd{T = x\pow 2 + 22*x + 133
 } and I don't recognize it. But \kbd{nfisisom(T, polcyclo(3))} indeed tells
 us that the fields $\Q[x]/(T)$ and $\Q[x]/(x^2+x+1)$ are isomorphic.
 (In fact, \kbd{polred(T)} would tell us the same, but does not correspond to
-a foolproof test: \kbd{polred} could have returnes some other polynomials.)
+a foolproof test: \kbd{polred} could have returned some other polynomials.)
 
 We may also check that \kbd{k = matker(M-1)} is two-dimensional, then \kbd{z
 = nfbasistoalg(nf, k[,2])} generates the quadratic subfield. Notice that 1,
@@ -2502,7 +2502,7 @@ and you get the exact same results). Now type
 where \kbd{NF} is the same number field as before. You do not want to see the
 output clutter a number of screens so don't forget the semi-colon. (Well if
 you insist, it is about three screenful in this case, but may require several
-MegaBytes for larger degrees.) Note that \kbd{NF} is now expressed in terms
+Megabytes for larger degrees.) Note that \kbd{NF} is now expressed in terms
 of the variable \kbd{y}, to avoid later problems with variable priorities.
 
 A word of warning: both the \kbd{bnf} and all results obtained from it are
@@ -2740,7 +2740,7 @@ field of $Q(x^2)$.  We can check that with
 
 PARI supports high and low-level graphing functions, on a variety of output
 devices: a special purpose window under standard graphical environments (the
-\kbd{X Windows} system, Mac OS X, MicroSoft Windows), or a \kbd{PostScript}
+\kbd{X Windows} system, Mac OS X, Microsoft Windows), or a \kbd{PostScript}
 file ready for the printer. These functions use a multitude of flags, which
 are mostly power-of-2. To simplify understanding we first give these flags
 symbolic names.
@@ -3193,7 +3193,7 @@ Perhaps the most useful simple command we haven't seen yet is
 you regularly see \kbd{PARI stack overflows!} messages, think about this
 one.
 
-To customize \kbd{gp}, e.g.~increase the defaut stack space or load your
+To customize \kbd{gp}, e.g.~increase the default stack space or load your
 private script libraries on startup, look up \kbd{The preferences file}
 section in the User's manual. You probably want to use \kbd{trap} on startup
 as well: it enables so-called \emph{break loops} when an error occurs, where

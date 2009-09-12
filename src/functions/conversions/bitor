@@ -12,7 +12,7 @@ Doc:
  \tet{or} of two integers $x$ and $y$, that is the integer $$\sum
  (x_i~\kbd{or}~y_i) 2^i$$
 
- See \secref{se:bitand} for the behaviour for negative arguments.
+ See \secref{se:bitand} for the behavior for negative arguments.
 Variant: Also available is
  \fun{GEN}{ibitor}{GEN x, GEN y}, which returns the bitwise \emph{ir}
  of $|x|$ and $|y|$, two integers.

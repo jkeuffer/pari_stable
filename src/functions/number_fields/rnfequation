@@ -13,7 +13,7 @@ Doc: given a number field
  $\Q$.
 
  If $\fl$ is non-zero, outputs a 3-component row vector $[z,a,k]$, where
- $z$ is the absolute equation of $L$ over $\Q$, as in the default behaviour,
+ $z$ is the absolute equation of $L$ over $\Q$, as in the default behavior,
  $a$ expresses as an element of $L$ a root $\alpha$ of the polynomial
  defining the base field $\var{nf}$, and $k$ is a small integer such that
  $\theta = \beta+k\alpha$ where $\theta$ is a root of $z$ and $\beta$ a root

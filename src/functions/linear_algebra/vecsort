@@ -84,7 +84,7 @@ Doc: sorts the vector $x$ in ascending order, using a mergesort method.
  \item 4: use descending instead of ascending order.
 
  \item 8: remove ``duplicate'' entries with respect to the sorting function
- (keep the first occuring entry).  For example:
+ (keep the first occurring entry).  For example:
  \bprog
    ? vecsort([Pi,Mod(1,2),z], (x,y)->0, 8)   \\@com make everything compare equal
    %1 = [3.141592653589793238462643383]

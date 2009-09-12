@@ -3,7 +3,7 @@ Section: linear_algebra
 C-Name: det0
 Prototype: GD0,L,
 Help: matdet(x,{flag=0}): determinant of the matrix x using Gauss-Bareiss.
- If (optional) flag is set to 1, use classical gaussian elimination (slightly
+ If (optional) flag is set to 1, use classical Gaussian elimination (slightly
  better for integer entries).
 Description:
  (gen, ?0):gen           det($1)

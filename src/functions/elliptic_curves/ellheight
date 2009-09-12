@@ -4,13 +4,13 @@ C-Name: ellheight0
 Prototype: GGD2,L,p
 Help: ellheight(E,x,{flag=2}): canonical height of point x on elliptic curve
  E (assumed to be a minimal model). flag is optional and selects the algorithm
- used to compute the archimedean local height. Its meaning is 0: use
+ used to compute the Archimedean local height. Its meaning is 0: use
  theta-functions, 1: use Tate's method, 2: use Mestre's AGM.
 Doc: global \idx{N\'eron-Tate height} of the point $z$ on the elliptic curve
  $E$ (defined over $\Q$), given by a standard minimal integral model. $E$
  must be an \kbd{ell} as output by \kbd{ellinit}. \fl selects the algorithm
- used to compute the archimedean local height. If $\fl=0$, this computation
- is done using sigma and theta-functions and a trick due to J. Silverman. If
+ used to compute the Archimedean local height. If $\fl=0$, this computation
+ is done using sigma and theta-functions and a trick due to J.~Silverman. If
  $\fl=1$, use Tate's $4^n$ algorithm. If $\fl=2$, use Mestre's AGM algorithm.
  The latter is much faster than the other two, both in theory (converges
  quadratically) and in practice.

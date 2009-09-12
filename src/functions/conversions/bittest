@@ -18,7 +18,7 @@ Doc:
  ? bittest(7, 4)
  %2 = 0 \\ the 4th bit is 0
  @eprog\noindent
- See \secref{se:bitand} for the behaviour at negative arguments.
+ See \secref{se:bitand} for the behavior at negative arguments.
 Variant: For a \typ{INT} $x$, the variant \fun{long}{bittest}{GEN x, long n} is
  generally easier to use.
 

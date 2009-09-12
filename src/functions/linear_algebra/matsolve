@@ -2,7 +2,7 @@ Function: matsolve
 Section: linear_algebra
 C-Name: gauss
 Prototype: GG
-Help: matsolve(M,B): gaussian solution of MX=B (M matrix, B column vector).
+Help: matsolve(M,B): Gaussian solution of MX=B (M matrix, B column vector).
 Doc: $M$ being an invertible matrix and $B$ a column
  vector, finds the solution $X$ of $MX=B$, using Gaussian elimination. This
  has the same effect as, but is a bit faster, than $M^{-1}*B$.

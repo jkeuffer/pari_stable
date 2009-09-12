@@ -9,6 +9,6 @@ Help: ellidentify(E): look up the elliptic curve E in the elldata database and
 Doc:
  look up the elliptic curve $E$ (over $\Z$)
  in the \tet{elldata} database and return \kbd{[[N, M, G], C]}  where $N$
- is the name of the curve in J.  E.  Cremona database, $M$ the minimal
+ is the name of the curve in the J.~E.~Cremona database, $M$ the minimal
  model, $G$ a $\Z$-basis of the free part of the \idx{Mordell-Weil group}
  of $E$ and $C$ the coordinates change (see \kbd{ellchangecurve}).

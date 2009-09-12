@@ -24,7 +24,7 @@ workings of generic routines, offering more options to the programmer.
 functions. Optimize your algorithms first, not overhead and conversion costs
 between PARI routines. For generic operations, use generic routines first;
 do not waste time looking for the most specialized one available unless you
-identify a genuine bottleneck, or you need some special behaviour the generic
+identify a genuine bottleneck, or you need some special behavior the generic
 routine does not offer. The PARI source code is part of the documentation;
 look for inspiration there.\smallskip
 
@@ -174,7 +174,7 @@ Function called when \kbd{SIGINT} is raised. By default, raises
 \doc{cb_pari_whatnow}{int (*cb_pari_whatnow)(const char *s, int flag)}
 initialized to \kbd{NULL}. If not \kbd{NULL}, must check whether
 $s$ existed in older versions of \kbd{pari} (the \kbd{gp} callback 
-checks agains \kbd{pari-1.39.15}).
+checks against \kbd{pari-1.39.15}).
 
 \item $\fl = 0$: should print verbosely the answer, including help text if
 available.
@@ -576,7 +576,7 @@ $2$.
 \noindent \kbd{ulong} \tet{LOWMASK}: bitmask yielding the least significant
 bits.
 
-\noindent \kbd{ulong} \tet{HIGHMASK}: bitmask yielding the most sicgnificant
+\noindent \kbd{ulong} \tet{HIGHMASK}: bitmask yielding the most significant
 bits.
 
 \noindent The last two are used to implement the following convenience macros,
@@ -742,12 +742,12 @@ functions:
 \fun{GEN}{GENbinbase}{GENbin *p} the \kbd{GEN} data actually stored in $p$.
 All addresses are stored as offsets with respect to a common reference point,
 so the resulting \kbd{GEN} is unusable unless it is a non-recursive type;
-private low-level routines must be called first to restore absolute adresses.
+private low-level routines must be called first to restore absolute addresses.
 
-\fun{void}{shiftaddress}{GEN x, long dec} converts relative adresses to
+\fun{void}{shiftaddress}{GEN x, long dec} converts relative addresses to
 absolute ones.
 
-\fun{void}{shiftaddress_canon}{GEN x, long dec} converts relative adresses to
+\fun{void}{shiftaddress_canon}{GEN x, long dec} converts relative addresses to
 absolute ones, and converts leaves from a canonical form to the one
 specific to the multiprecision kernel in use. The \kbd{GENbin} type stores
 whether leaves are stored in canonical form, so \kbd{bin\_copy} can call
@@ -784,7 +784,7 @@ instead of updating its address through a pointer.
 to \kbd{gerepileall}. The preserved \kbd{GEN}s are the elements of the array
 \kbd{g} of length $n$: \kbd{g[0]}, \kbd{g[1]}, \dots,
 \kbd{g[$n$-1]}. Obsolete: no more efficient than \kbd{gerepileall},
-error-prone, and clumsy (need to declare an extre \kbd{GEN *g}).
+error-prone, and clumsy (need to declare an extra \kbd{GEN *g}).
 
 \fun{void}{gerepilemanysp}{pari_sp av, pari_sp ltop, GEN* g[], int n}
 alternative interface to \kbd{gerepileallsp}. Obsolete.
@@ -944,7 +944,7 @@ One rather uses:
 \subsec{Introduction}
 
 It is implemented as a doubly-linked list of \kbd{malloc}'ed blocks of
-memory, equiped with reference counts. Each block has type \kbd{GEN} but need
+memory, equipped with reference counts. Each block has type \kbd{GEN} but need
 not be a valid \kbd{GEN}: it is a chunk of data preceded by a hidden header
 (meaning that we allocate $x$ and return $x + \kbd{header size}$). A
 \tev{clone}, created by \tet{gclone}, is a block which is a valid \kbd{GEN}
@@ -1074,7 +1074,7 @@ next release.
 We classify changes to PARI into four rough classes, where changes of the
 first three types are almost certain to be accepted. The first type includes
 all improvements to the documentation, in a broad sense. This includes
-correcting typos or inacurracies of course, but also items which are not
+correcting typos or inaccuracies of course, but also items which are not
 really covered in this document, e.g.~if you happen to write a tutorial,
 or pieces of code exemplifying fine points unduly omitted in the present
 manual.
@@ -1086,7 +1086,7 @@ on an operating system previously not catered for. This includes discovering
 and removing idiosyncrasies in the code that would hinder its portability.
 
 The third type is to modify existing (mathematical) code, either to correct
-bugs, to add new functionalities to existing functions, or to improve their
+bugs, to add new functionality to existing functions, or to improve their
 efficiency.
 
 Finally the last type is to add new functions to PARI. We explain here how
@@ -1192,7 +1192,7 @@ mandatory. For instance \kbd{D0,L,} stands for ``this optional argument is
 converted to a \kbd{long}, and is \kbd{0} by default''. So if the
 user-given argument reads \kbd{1 + 3} at this point, \kbd{4L} is sent to
 the function; and \kbd{0L} if the argument is omitted. The following
-special syntaxes are available:
+special notations are available:
 
 \settabs\+\indent\indent&\kbd{Dxxx}\quad& optional \kbd{*GEN},&\cr
 \+&\kbd{DG}& optional \kbd{GEN}, & send \kbd{NULL} if argument omitted.\cr
@@ -1285,7 +1285,7 @@ Read that file from your \kbd{gp} session, for instance from your
 can now use the new function \var{gpname} under \kbd{gp}, and we would very
 much like to hear about it! \smallskip
 
-There is a corresponding library interface for this functionnality, letting
+There is a corresponding library interface for this functionality, letting
 you expand the GP parser/evaluator available in the library with new
 functions from your C source code! You may then
 evaluate a GP expression sequence involving calls to these new function.
@@ -1760,14 +1760,14 @@ $\kbd{prec} > 2$.
 \fun{GEN}{rtor}{GEN x, long prec} converts the \typ{REAL}~\kbd{x} to a
 \typ{REAL} of length \kbd{prec} and return the latter. If
 $\kbd{prec} < \kbd{lg(x)}$, round properly. If $\kbd{prec} > \kbd{lg(x)}$,
-padd with zeroes. Assumes that $\kbd{prec} > 2$.
+pad with zeroes. Assumes that $\kbd{prec} > 2$.
 
 \noindent The following function is also available as a special case of
 \tet{mkintn}:
 
 \fun{GEN}{uu32toi}{ulong a, ulong b} returns the \kbd{GEN} equal to $2^{32} a +
 b$, \emph{assuming} that $a,b < 2^{32}$. This does not depend on
-\kbd{sizeof(long)}: the behaviour is as above on both $32$ and $64$-bit
+\kbd{sizeof(long)}: the behavior is as above on both $32$ and $64$-bit
 machines.
 
 \fun{GEN}{uutoi}{ulong a, ulong b} returns the \kbd{GEN} equal to
@@ -2041,7 +2041,7 @@ The result is $1$ if $\kbd{x} = \kbd{y}$, $0$ otherwise.
 The result is $1$ if $\kbd{x} = \kbd{y}$, $0$ otherwise. Equality is decided
 according to the following rules: all real zeroes are equal, and
 different from a non-zero real; two non-zero reals are equal if all their
-digits conincide up to the length of the shortest of the two, and the
+digits coincide up to the length of the shortest of the two, and the
 remaining words in the mantissa of the longest are all $0$.
 
 \fun{int}{equalsi}{long s, GEN x}
@@ -2110,7 +2110,7 @@ as \kbd{gmul} or \kbd{gdiv} for instance: the latter return a result
 containing as much information as could be deduced from the inputs, so it is
 not true that if $x$ is a \typ{INT} and $y$ a \typ{REAL}, then
 \kbd{gmul(x,y)} is always the same as \kbd{mulir(x,y)}. The exception
-is $x = 0$, in that cas we can deduce that the result is an exact $0$,
+is $x = 0$, in that case we can deduce that the result is an exact $0$,
 so \kbd{gmul} returns \kbd{gen\_0}, while \kbd{mulir} returns a
 \typ{REAL} $0$. Specifically, the one resulting from the conversion of
 \kbd{gen\_0} to a \typ{REAL} of precision \kbd{precision(y)}, multiplied by
@@ -2526,7 +2526,7 @@ is a fundamental discriminant, and $0$ otherwise.
 
 \fun{GEN}{Z_factor_until}{GEN n, GEN lim} as \kbd{Z\_factor}, but stop the
 factorization process as soon as the unfactored part is smaller than \kbd{lim}.
-The resulting factorisation matrix only contains the factors found. No other
+The resulting factorization matrix only contains the factors found. No other
 assumptions can be made on the remaining factors.
 
 \fun{GEN}{Z_factor_limit}{GEN n, ulong lim} trial divide $n$ by all primes $p
@@ -2914,7 +2914,7 @@ ring. Standard functions \var{fun} are
 
   \kbd{divrem}: return Euclidean quotient, store remainder in a pointer
 argument. Three special values of that pointer argument modify the default
-behaviour: \kbd{NULL} (do not store the remainder, used to implement
+behavior: \kbd{NULL} (do not store the remainder, used to implement
 \kbd{div}), \tet{ONLY_REM} (return the remainder, used to implement
 \kbd{rem}), \tet{ONLY_DIVIDES} (return the quotient if the division is exact,
 and \kbd{NULL} otherwise).
@@ -4247,7 +4247,7 @@ here is what it looks like in practice:
 order bits, stop when \kbd{mask} is $1$ (that last bit corresponds to the
 $2^{k+1}$ that we added to the mask proper). Note that there is nothing
 specific to Hensel lifts in that function: it would work equally well for
-an archimedean Newton iteration.
+an Archimedean Newton iteration.
 
 Note that in practice, we rather use an infinite loop, and insert an
 \bprog
@@ -4286,7 +4286,7 @@ the $p$-adic reduced resultant of $f$ and $g$ modulo $p^M$. This function
 computes resultants for a sequence of increasing $p$-adic accuracies
 (up to $M$ $p$-adic digits), returning as soon as it obtains a non-zero
 result. It is very inefficient when the resultant is $0$, but otherwise
-usually more eficient than computations using a priori bounds.
+usually more efficient than computations using a priori bounds.
 
 \subsec{Conversions involving single precision objects}
 
@@ -4455,7 +4455,7 @@ $E(\F_p)$, where $E$ is defined by $E:y^2=x^3+a_4\*x+a_6$.
 
 \fun{GEN}{FpE_order}{GEN P, GEN o, GEN a4, GEN p} returns the order of $P$ in
 the group $E(\F_p)$, where $o$ is a multiple of the order of $P$, or its
-factorisation.
+factorization.
 
 \fun{GEN}{FpE_tatepairing}{GEN P, GEN Q, GEN m, GEN a4, GEN p} returns the
 reduced Tate pairing of the point of $m$-torsion $P$ and the point $Q$. 
@@ -4606,7 +4606,7 @@ are exact.
 is a square \kbd{ZM} and $\kbd{n}\geq 0$.
 
 \fun{GEN}{ZM_detmult}{GEN M} if \kbd{M} is a \kbd{ZM}, returns a multiple of
-the determinant of the lattice generated by its colums. This is the function
+the determinant of the lattice generated by its columns. This is the function
 underlying \tet{detint}.
 
 \fun{GEN}{ZM_supnorm}{GEN x} return the sup norm of the \kbd{ZM} $x$.
@@ -4753,11 +4753,11 @@ when $m > n$.
 
 \fun{GEN}{RgV_dotproduct}{GEN x,GEN y} returns the scalar product of $x$ and $y$
 
-\fun{GEN}{RgV_dotsquare}{GEN x} returns the scala product of $x$ with itself.
+\fun{GEN}{RgV_dotsquare}{GEN x} returns the scalar product of $x$ with itself.
 
 \fun{GEN}{RgM_inv}{GEN a} returns a left inverse of $a$ (which needs not be
 square), or \kbd{NULL} if this turns out to be impossible. The latter
-happens when the matrix does not have maximal rank (or when roundoff errors
+happens when the matrix does not have maximal rank (or when rounding errors
 make it appear so).
 
 \fun{GEN}{RgM_inv_upper}{GEN a} as \kbd{RgM\_inv}, assuming that $a$ is a
@@ -4770,7 +4770,7 @@ Returns \kbd{NULL} if $a^{-1}$ cannot be computed, see \tet{RgM_inv}.
 \fun{GEN}{RgM_solve_realimag}{GEN M, GEN b} $M$ being a \typ{MAT}
 with $r_1+r_2$ rows and $r_1+2r_2$ columns, $y$ a \typ{COL} or \typ{MAT}
 such that the equation $Mx = y$ makes sense, returns $x$ under the following
-simpifying assumptions: the first $r_1$ rows of $M$ and $y$ are real
+simplifying assumptions: the first $r_1$ rows of $M$ and $y$ are real
 (the $r_2$ others are complex), and $x$ is real. This is stabler and faster
 than calling $\kbd{RgM\_solve}(M, b)$ over $\C$. In most applications,
 $M$ approximates the complex embeddings of an integer basis in a number
@@ -4825,7 +4825,7 @@ on \kbd{nf.zk} (whose first element is $1$).
 \kbd{ZV} (\typ{INT} entries only).
 
 \fun{int}{RgM_isscalar}{GEN x, GEN s} return 1 if $x$ is the scalar matrix
-equalt to $s$ times the identity, and 0 otherwise. If $s$ is \kbd{NULL}, test
+equal to $s$ times the identity, and 0 otherwise. If $s$ is \kbd{NULL}, test
 whether $x$ is an arbitrary scalar matrix.
 
 \fun{int}{RgM_isidentity}{GEN x} return 1 is the \typ{MAT} $x$ is the
@@ -4960,7 +4960,7 @@ objects on the stack. Suitable but inefficient for \kbd{gerepileupto}.)
 \fun{long}{ZX_max_lg}{GEN x} returns the effective length of the longest
 component in $x$.
 
-\fun{long}{ZXY_max_lg}{GEN x} returs the effective length of the longest
+\fun{long}{ZXY_max_lg}{GEN x} returns the effective length of the longest
 component in $x$; assume all coefficients are \typ{INT} or \kbd{ZX}s.
 
 \fun{GEN}{ZXQ_charpoly}{GEN A, GEN T, long v}: let \kbd{T} and \kbd{A} be
@@ -5178,7 +5178,7 @@ $\sum_{i = 0}^{\kbd{na}} \kbd{a}[i] X^i$. Return its square (as a true
 
 \fun{GEN}{RgX_divrem}{GEN x, GEN y, GEN *r} by default, returns the Euclidean
 quotient and store the remainder in $r$. Three special values of $r$ change
-that behaviour
+that behavior
 \item \kbd{NULL}: do not store the remainder, used to implement \kbd{RgX\_div},
 
 \item \tet{ONLY_REM}: return the remainder, used to implement \kbd{RgX\_rem},
@@ -5352,7 +5352,7 @@ $T$.
 assuming $V$ was output by \kbd{RgXQ\_powers(x, n, T)}.
 
 \fun{GEN}{QX_ZXQV_eval}{GEN f, GEN nV, GEN dV} as \kbd{RgX\_RgXQV\_eval},
-except that $f$ is assumed to be a \kbd{QX}, $V$ is given implicitely 
+except that $f$ is assumed to be a \kbd{QX}, $V$ is given implicitly 
 by a numerator \kbd{nV} (\kbd{ZV}) and denominator \kbd{dV} (a positive
 \typ{INT} or \kbd{NULL} for trivial denominator). Not memory clean, but
 suitable for \kbd{gerepileupto}.
@@ -5454,7 +5454,7 @@ integer if possible, otherwise raise an exception. This function
 is similar to \tet{itos}, slightly slower since it checks the type of \kbd{x}.
 
 \fun{double}{dbllog2r}{GEN x} assuming \kbd{x} is a non-zero \typ{REAL},
-returns an aproximation to \kbd{log2(|x|)}.
+returns an approximation to \kbd{log2(|x|)}.
 
 \fun{long}{gtolong}{GEN x} if \kbd{x} is an integer (not necessarily
 a~\typ{INT}), converts \kbd{x} into a \kbd{long} if possible.
@@ -5810,7 +5810,7 @@ equal to \kbd{[x,y,z,t]}.
 \fun{GEN}{mkintn}{long n, ...} returns the non-negative \typ{INT} whose
 development in base $2^{32}$ is given by the following $n$ words
 (\kbd{unsigned long}). It is assumed that all such arguments are less than
-$2^{32}$ (the actual \kbd{sizeof(long)} is irrelevant, the behaviour is also
+$2^{32}$ (the actual \kbd{sizeof(long)} is irrelevant, the behavior is also
 as above on $64$-bit machines).
 \bprog
   mkintn(3, a2, a1, a0);
@@ -6008,7 +6008,7 @@ the \kbd{long}~\kbd{s} (converted to \kbd{GEN})
 \fun{long}{gequalgs}{GEN x, long s} returns 1 (true) if \kbd{x} is equal to
 the \kbd{long}~\kbd{s}, 0~otherwise.
 
-\section{Miscellaneous boolean functions}
+\section{Miscellaneous Boolean functions}
 
 \fun{int}{isrationalzeroscalar}{GEN x} equivalent to, but faster than,
 \bprog
@@ -6041,7 +6041,7 @@ round to a small integer (suitable for \kbd{itos}). Otherwise, returns 1
 
 \subsec{Obsolete}
 
-The following less convenient comparison functions and boolean operators were
+The following less convenient comparison functions and Boolean operators were
 used by the historical GP interpreter. They are provided for backward
 compatibility only and should not be used:
 
@@ -6253,7 +6253,7 @@ type or a \typ{POL}).
 \subsec{Generic}
 
 \fun{GEN}{resultant}{GEN x, GEN y} creates the resultant of the \typ{POL}s
-\kbd{x} and~\kbd{y} computed using Sylverster's matrix (inexact inputs), a
+\kbd{x} and~\kbd{y} computed using Sylvester's matrix (inexact inputs), a
 modular algorithm (inputs in $\Q[X]$) or the subresultant algorithm, as
 optimized by Lazard and Ducos. Either of \kbd{x} and \kbd{y} may also be
 scalars (treated as polynomials of degree $0$)
@@ -6330,7 +6330,7 @@ representing the trivial content $1$. Returns their product (either a
 
 \fun{GEN}{mul_denom}{GEN dx, GEN dy} \kbd{dx} and \kbd{dy} are
 as set by \kbd{Q\_remove\_denom}: either a \typ{INT} or \kbd{NULL} representing
-the trivial denominatory $1$. Returns their product (either a \typ{INT} or
+the trivial denominator $1$. Returns their product (either a \typ{INT} or
 \kbd{NULL}).
 
 \section{Generic arithmetic operators}
@@ -6404,7 +6404,7 @@ we return
 \item \kbd{Mod(1,N)} if $x$ is a \typ{INTMOD} modulo $N$.
 
 \item \kbd{gen\_1} for \typ{COMPLEX}, \typ{QUAD} unless one component
-is a \typ{INTMOD}, in which cas we return \kbd{Mod(1, N)} for a suitable
+is a \typ{INTMOD}, in which case we return \kbd{Mod(1, N)} for a suitable
 $N$ (the gcd of the moduli that appear).
 
 \item \kbd{FF\_1}$(x)$ for a \typ{FFELT}.
@@ -6759,7 +6759,7 @@ $\kbd{a}$ if it exist. If \kbd{zn} is non-\kbd{NULL} set it to a primitive
 \kbd{n}-th root of the unity.
 
 \fun{GEN}{FF_log}{GEN a, GEN g, GEN o} the \typ{FFELT} \kbd{g} being a
-generator fo the definition field of the \typ{FFELT} \kbd{a}, returns a
+generator for the definition field of the \typ{FFELT} \kbd{a}, returns a
 \typ{INT} $e$ such that $a^e=g$.  If $e$ does not exists, the result is
 currently undefined. If \kbd{o} is not \kbd{NULL} it is assumed to be a
 factorization of the multiplicative order of \kbd{g} (as set by
@@ -6774,7 +6774,7 @@ multiplicative group of the definition field of the \typ{FFELT} \kbd{a}.
 If \kbd{o} is not \kbd{NULL}, set it to the factorization of the order
 of the primitive root (to speed up \tet{FF_log}).
 
-\fun{GEN}{FFX_factor}{GEN f, GEN a} returns the factorisation of the univariate
+\fun{GEN}{FFX_factor}{GEN f, GEN a} returns the factorization of the univariate
 polynomial \kbd{f} over the definition field of the \typ{FFELT} \kbd{a}. The
 coefficients of \kbd{f} must be of type \typ{INT}, \typ{INTMOD} or \typ{FFELT}
 and compatible with \kbd{a}.
@@ -6801,7 +6801,7 @@ decimal digits, not in words as used everywhere else):
 In the following routines, $x$ is assumed to be a \typ{REAL} and the result
 is a \typ{REAL} (sometimes a \typ{COMPLEX} with \typ{REAL} components), with
 the largest accuracy which can be deduced from the input. The naming scheme
-is inconsistant here, since we somethimes use the prefix \kbd{mp} even though
+is inconsistent here, since we sometimes use the prefix \kbd{mp} even though
 \typ{INT} inputs are forbidden:
 
 \fun{GEN}{sqrtr}{GEN x} returns the square root of $x$.
@@ -6846,7 +6846,7 @@ function at the (possibly negative) integer $s\neq 1$, in relative accuracy \kbd
 $\sin(x)$ and $\cos(x)$ respectively, where $x$ is a \typ{REAL}
 
 \fun{GEN}{exp_Ir}{GEN x} returns $\exp(ix)$, where $x$ is a \typ{REAL}.
-The return type is \typ{COMPLEXE} unless the imaginary part is equal to $0$
+The return type is \typ{COMPLEX} unless the imaginary part is equal to $0$
 to the current accuracy (its sign is $0$).
 
 \fun{void}{gsincos}{GEN x, GEN *s, GEN *c, long prec} general case.
@@ -6913,7 +6913,7 @@ precision \kbd{prec}.
 \noindent Permutation are represented in two different ways
 
 \item (\kbd{perm}) a \typ{VECSMALL} $p$ representing the bijection $i\mapsto
-p[i]$; unless mentionned otherwise, this is the form used in the funcitons
+p[i]$; unless mentioned otherwise, this is the form used in the functions
 below for both input and output,
 
 \item (\kbd{cyc}) a \typ{VEC} of \typ{VECSMALL}s representing a product of
@@ -7022,7 +7022,7 @@ small group $G$, returns $1$ if $H$ is normal in $G$, else $0$.
 
 \fun{long}{group_isA4S4}{GEN grp} returns $1$ if the small group
 \var{grp} is isomorphic to $A_4$, $2$ if it is isomorphic to $S_4$ and
-$0$ else. This is mainly to deal with the idiosynchrasy of the format.
+$0$ else. This is mainly to deal with the idiosyncrasy of the format.
 
 \fun{GEN}{group_leftcoset}{GEN G, GEN g} where $G$ is a small group and $g$ a
 small of the same domain, the the left coset $gG$ as a vector of small.
@@ -7125,14 +7125,14 @@ to free the string after use.
 spaces from the output.
 
 \fun{GEN}{Str}{GEN g} as \tet{RgV_to_str} with output format \tet{f_RAW},
-but returns a \typ{STR}, not a malloced string.
+but returns a \typ{STR}, not a malloc'ed string.
 
 \fun{GEN}{Strtex}{GEN g} as \tet{RgV_to_str} with output format \tet{f_TEX},
-but returns a \typ{STR}, not a malloced string.
+but returns a \typ{STR}, not a malloc'ed string.
 
 \fun{GEN}{Strexpand}{GEN g} as \tet{RgV_to_str} with output format \tet{f_RAW},
 performing tilde and environment expansion on the result. Returns a
-\typ{STR}, not a malloced string.
+\typ{STR}, not a malloc'ed string.
 
 \subsec{Obsolete output functions}
 
@@ -7180,7 +7180,7 @@ by subsequent system calls: use immediately or \kbd{strdup} it.
 
 \subsec{pariFILE}
 
-PARI maintains a linked list of open files, to reclaim ressources
+PARI maintains a linked list of open files, to reclaim resources
 (file descriptors) on error or interrupts. The corresponding data structure
 is a \kbd{pariFILE}, which is a wrapper around a standard \kbd{FILE*},
 containing further the file name, its type (regular file, pipe, input or
@@ -7231,7 +7231,7 @@ value. The table length is a prime number, which roughly doubles as the table
 overflows by gaining new entries; both the current number of entries and the
 threshold before the table grows are stored in the table. Finally the table
 remembers the functions used to hash the entries's keys and to test for
-equality two entries hased to the same value.
+equality two entries hashed to the same value.
 
 An entry, or \tet{hashentry}, contains
 
@@ -7520,7 +7520,7 @@ of the same length, returns the vector whose $i$-th component
 is \kbd{modii}$(a[i], b[i])$.
 
 Note that \kbd{vecadd} or \kbd{vecsub} do not exist since \kbd{gadd}
-and \kbd{gsub} have the expected behaviour. On the other hand,
+and \kbd{gsub} have the expected behavior. On the other hand,
 \kbd{ginv} does not accept vector types, hence \kbd{vecinv}.
 
 \subsec{Low-level vectors and columns functions}
@@ -7669,7 +7669,7 @@ evaluation of the closure to be interrupted; this is called below a
 \item handles the flow change.
 
 \fun{GEN}{closure_evalgen}{GEN code} evaluates a closure and returns the result,
-or \kbd{NULL} if a flow change occured.
+or \kbd{NULL} if a flow change occurred.
 
 \fun{GEN}{closure_evalnobrk}{GEN code} as \kbd{closure\_evalgen} but raise
 an exception if a flow change occurs. Meant for pseudo-iterators where
@@ -7686,7 +7686,7 @@ calling \kbd{loop\_break}.
 
 \fun{GEN}{closure_trapgen}{long numerr, GEN code} evaluates closure, while
 trapping error \kbd{numerr}. Return \kbd{(GEN)1L} if error trapped, and the
-result otherwise, or \kbd{NULL} if a flow change occured.
+result otherwise, or \kbd{NULL} if a flow change occurred.
 
 \subsec{Functions to handle control flow changes}
 

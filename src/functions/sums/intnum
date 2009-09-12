@@ -21,7 +21,7 @@ Doc: numerical integration
  An endpoint equal to $\pm\infty$ is coded as the single-component vector
  $[\pm1]$. You are welcome to set, e.g \kbd{oo = [1]} or \kbd{INFINITY = [1]},
  then using \kbd{+oo}, \kbd{-oo}, \kbd{-INFINITY}, etc. will have the expected
- behaviour.
+ behavior.
  \bprog
  ? oo = [1];  \\@com for clarity
  ? intnum(x = 1,+oo, 1/x^2)
@@ -54,10 +54,10 @@ Doc: numerical integration
  accuracy), in particular for multivariate integrals, since we then skip
  expensive precomputations.
 
- \misctitle{Specifying the behaviour at endpoints.}
+ \misctitle{Specifying the behavior at endpoints.}
  This is done as follows. An endpoint $a$ is either given as such (a scalar,
  real or complex, or $[\pm1]$ for $\pm\infty$), or as a two component vector
- $[a,\alpha]$, to indicate the behaviour of the integrand in a neighbourhood
+ $[a,\alpha]$, to indicate the behavior of the integrand in a neighborhood
  of $a$.
 
  If $a$ is finite, the code $[a,\alpha]$ means the function has a
@@ -104,7 +104,7 @@ Doc: numerical integration
  words to no $\alpha$ at all.
 
  \smallskip The last two codes are reserved for oscillating functions.
- Let $k > 0$ real, and $g(x)$ a nonoscillating function tending slowly to $0$
+ Let $k > 0$ real, and $g(x)$ a non-oscillating function tending slowly to $0$
  (e.g. like a negative power of $x$), then
 
  \item $\alpha=k * I$ assumes that the function behaves like $\cos(kx)g(x)$.

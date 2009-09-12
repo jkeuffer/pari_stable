@@ -52,5 +52,5 @@ Doc: computes the list
  %6 = [[25, 7; 0, 1], []]
  @eprog\noindent where we ask for the structures of the $(\Z[i]/I)^*$ for all
  three ideals of norm $25$. In fact, for all moduli with finite part of norm
- $25$ and trivial archimedean part, as the last 3 commands show. See
+ $25$ and trivial Archimedean part, as the last 3 commands show. See
  \tet{ideallistarch} to treat general moduli.

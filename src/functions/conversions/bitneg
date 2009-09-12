@@ -11,4 +11,4 @@ Doc:
  2^i$$ The special case $n=-1$ means no truncation: an infinite sequence of
  leading $1$ is then represented as a negative number.
 
- See \secref{se:bitand} for the behaviour for negative arguments.
+ See \secref{se:bitand} for the behavior for negative arguments.

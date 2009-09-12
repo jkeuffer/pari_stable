@@ -28,7 +28,7 @@ Doc: creates the greatest common divisor of $x$ and $y$.
  \item integers: use modified right-shift binary (``plus-minus''
  variant).
 
- \item univariate polynomials with coeffients in the same number
+ \item univariate polynomials with coefficients in the same number
  field (in particular rational): use modular gcd algorithm.
 
  \item general polynomials: use the \idx{subresultant algorithm} if

@@ -169,4 +169,4 @@ Variant: Also available are
  \bprog
    Z_factor_limit(disc, 0)
  @eprog\noindent Namely the ``maximal order'' may not be maximal at any prime
- biger than \kbd{primelimit} dividing the field discriminant.
+ bigger than \kbd{primelimit} dividing the field discriminant.

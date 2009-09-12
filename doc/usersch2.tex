@@ -107,7 +107,7 @@ like
   ***                 ^--------
   *** gcd: user interrupt after 236 ms.
 @eprog\noindent
-telling you how much time ellapsed since the last command was typed in and
+telling you how much time elapsed since the last command was typed in and
 in which GP function the computation was aborted. It does not mean that that
 much time was spent in the function, only that the evaluator was busy
 processing that specific function when you stopped it.
@@ -310,7 +310,7 @@ By definition, \kbd{0.E $n$} returns a real $0$ of exponent $n$, whereas
 \kbd{0.} returns a real 0 ``of default precision'' (of exponent
 $-\tet{realprecision}$), see \secref{se:whatzero}, behaving like the machine
 epsilon for the current default accuracy: any float of smaller absolute value
-is undistinguishable from $0$.
+is indistinguishable from $0$.
 
 
 \misctitle{Note on output formats.} A zero real number is printed in \kbd{e}
@@ -355,8 +355,8 @@ time = 1,392 ms.
 time = 1,116 ms.
 @eprog\noindent
 And much more efficient (but harder to setup) to use homomorphic imaging
-schemes and modular computations. As the simple exemple below indicates, if you
-only need modular information, it is very much worthwile to work with
+schemes and modular computations. As the simple example below indicates, if you
+only need modular information, it is very worthwhile to work with
 \typ{INTMOD}s directly, rather than deal with \typ{RFRAC}s all the way through:
 \bprog
 ? p = nextprime(10^7);
@@ -557,7 +557,7 @@ time = 3,985ms
 @eprog
 
 Polynomials are always printed as \emph{univariate} polynomials, with
-monomials sorted by degreasing degree:
+monomials sorted by decreasing degree:
 \bprog
 ? (x+y+1)^2
 %1 = x^2 + (2*y + 2)*x + (y^2 + 2*y + 1)
@@ -577,7 +577,7 @@ in the \typ{POL} section about variables remains valid; a constructor
 \tet{Ser} replaces \tet{Pol} and \tet{Polrev}.
 
 \misctitle{Caveat.} Power series with inexact coefficients sometimes have a
-non-intuitive behaviour: if $k$ significant terms are requested, an inexact
+non-intuitive behavior: if $k$ significant terms are requested, an inexact
 zero is counted as significant, even if it is the coefficient of lowest
 degree. This means that useful higher order terms may be disregarded.
 
@@ -748,7 +748,7 @@ value of some variable.
 
 Each operator has a fixed and unchangeable priority, which means that, in
 a given expression, the operations with the highest priority is performed
-first. Unless mentionned otherwise, operators at the same priority level are
+first. Unless mentioned otherwise, operators at the same priority level are
 left-associative (performed from left to right), unless they are assignments,
 in which case they are right-associative. Anything enclosed between
 parenthesis is considered a complete subexpression, and is resolved
@@ -1196,7 +1196,7 @@ A user's function body, the body of a loop, an individual command line, all
 define scopes; the whole program defines the \emph{global} scope. The
 argument of \tet{eval} is evaluated in the enclosing scope.
 
-Variables are bound to values within a given scope. This is traditionnally
+Variables are bound to values within a given scope. This is traditionally
 implemented in two different ways:
 
 \item\sidx{lexical scoping} lexical (or static) scoping: the binding makes
@@ -1285,7 +1285,7 @@ Note how the declaration can include (optional) initial values, \kbd{i2 =
 i\pow 2} in the above. Variables for which no explicit default value is given
 in the declaration are initialized to $0$. It would be more natural to
 initialize them to free variables, but this would break backward
-compatibility. To obtain this behaviour, you may explicitly use the quoting
+compatibility. To obtain this behavior, you may explicitly use the quoting
 operator:
 \bprog
 my(x = 'x, y = 'y, z = 'z);
@@ -1424,7 +1424,7 @@ list of all user-defined functions.
 
 \misctitle{Backward compatibility (lexical scope)}. Lexically scoped
 variables were introduced in version~2.4.2. Before that, the formal
-parameters were dynamically scoped. If your script depends on this behaviour,
+parameters were dynamically scoped. If your script depends on this behavior,
 you may use the following trick: replace the initial \kbd{f(x) =} \ by
 \bprog
 f(x_orig) = local(x = x_orig)
@@ -1571,10 +1571,10 @@ formula. Indeed, Peter Borwein (\emph{An efficient algorithm for the Riemann
 zeta function}, CMS Conf.~Proc.~{\bf 27} (2000), pp.~29--34) proved that the
 formula used in \kbd{sumalt} with $n$ terms computes $(1-2^{1-s})\zeta(s)$
 with a relative error of the order of $(3+\sqrt{8})^{-n}|\Gamma(s)|^{-1}$.},
-providing very good convergence acceleration; in effect, we are computating
+providing very good convergence acceleration; in effect, we are computing
 the analytic continuation of our original function. To convince ourselves
 that \kbd{sumalt} is a non-trivial implementation, let us try a simpler
-exemple:
+example:
 \bprog
 ? sum(n=1, 10^7, (-1)^n/n, 0.) / (-log(2)) \\@com approximates the well-known formula
 time = 7,417 ms.
@@ -1963,7 +1963,7 @@ vector; \kbd{histlast(10)} returns the last $10$ history entries:
 \subsec{Errors}. Your input program is first compiled to a more efficient
 bytecode; then the latter is evaluated, calling appropriate functions from
 the PARI library. Accordingly, there are two kind of errors: syntax errors
-occuring during the compilation phase, and runtime errors produced by
+occurring during the compilation phase, and runtime errors produced by
 functions in the PARI library. Both kinds are fatal to your computation:
 \kbd{gp} will report the error, perform some cleanup (restore variables
 modified while evaluating the erroneous command, close open files, reclaim
@@ -2011,7 +2011,7 @@ separated from the first by a comma. And this is essentially what the error
 message says: we reached the end  of the input (\kbd{\$end}) while expecting
 a \kbd{')'} or a \kbd{','}.
 
-Actually, a third possibility is mentionned in the error message \kbd{)->},
+Actually, a third possibility is mentioned in the error message \kbd{)->},
 which could never be valid in the above context, but a subexpression like
 \kbd{(x)->sin(x)}, defining an inline closure would be valid, and the parser is
 not clever enough to rule that out, so we get the same message as in
@@ -2043,7 +2043,7 @@ mathematical content, which is easier to grasp than a parser's logic:
   ***   at top-level: 1/0
   ***                  ^--
   *** _/_: division by zero
-@eprog\noindent telling us that a runtime error occured while evaluating the
+@eprog\noindent telling us that a runtime error occurred while evaluating the
 binary \kbd{/} operator (the \kbd{\_} surrounding the operator are
 placeholders). More context is provided if the error occurs deep in the
 call chain:
@@ -2109,7 +2109,7 @@ To get out of a break loop, you can type
 (hit \kbd{Return} thrice), any of which will let \kbd{gp}
 perform its usual cleanup, and send you back to the \kbd{gp} prompt. If the
 break loop was started by a user interrupt (and not by an error),
-inputing an empty line, i.e hitting the \kbd{<Return>} key at the
+inputting an empty line, i.e hitting the \kbd{<Return>} key at the
 \kbd{break>} prompt, resumes the temporarily interrupted computation.
 A single empty line has no effect in case of a fatal error, to avoid
 getting get out of the loop prematurely, thereby losing valuable debugging
@@ -2118,7 +2118,7 @@ data.
 Break loops are useful as a debugging tool. You may inspect the values of
 \kbd{gp} variables to understand why an error occurred, or change
 \kbd{gp}'s state in the middle of a computation (increase debugging level,
-start storing results in a logfile, set variables to different values\dots):
+start storing results in a log file, set variables to different values\dots):
 hit \kbd{C-c}, type in your modifications, then let the computation go on as
 explained above. A break loop looks like this:
 \bprog
@@ -2157,7 +2157,7 @@ Even though loop indices are automatically lexically scoped and no longer
 exist when the break loop is run, enough debugging information is retained in
 the bytecode to reconstruct the evaluation context.
 
-\misctitle{Note:} if you do not like this behaviour, you may disable it by
+\misctitle{Note:} if you do not like this behavior, you may disable it by
 setting the default \tet{breakloop} to 0 in for \kbd{gprc}. A runtime error
 will send you back to the prompt. Note that the break loop is automatically
 disabled when running \kbd{gp} in non interactive mode, i.e.~when the
@@ -2301,7 +2301,7 @@ like
 @eprog
 logs the output in \kbd{file3.log}.
 
-Some special defaults, corresponding to filenames and prompts, expand further
+Some special defaults, corresponding to file names and prompts, expand further
 the resulting value at the time they are set. Two kinds of expansions may be
 performed:
 
@@ -2325,7 +2325,7 @@ searched and if \var{SOMEVAR} is defined, the sequence is replaced by the
 corresponding value. Also the \kbd{\til} symbol has the same meaning as in
 many shells~--- \kbd{\til} by itself stands for your home directory, and
 \kbd{\til{}user} is expanded to \kbd{user}'s home directory. This is applied
-to all filenames\sidx{filename}. \label{se:envir}
+to all file names\sidx{filename}. \label{se:envir}
 
 We shall now describe all the available defaults, specifying each time
 whether time and/or environment expansion is performed.
@@ -2407,7 +2407,7 @@ suddenly can't seem to remember.
 
 \quad \kbd{compatible} = 1: warn when using obsolete functions, but
 otherwise accept them. The output uses the new conventions though, and
-there may be subtle incompatibilities between the behaviour of former and
+there may be subtle incompatibilities between the behavior of former and
 current functions, even when they share the same name (the current function
 is used in such cases, of course!). We thought of this one as a transitory
 help for \kbd{gp} old-timers. Thus, to encourage switching to \kbd{compatible}=0,
@@ -2419,7 +2419,7 @@ used up to version 1.39.15), but \emph{taking case into account}. Thus
 by default), and you won't get an error message using \kbd{i} as a loop
 index as used to be the case.
 
-\quad \kbd{compatible} = 3: try to mimic exactly the former behaviour. This
+\quad \kbd{compatible} = 3: try to mimic exactly the former behavior. This
 is not always possible when functions have changed in a fundamental way.
 But these differences are usually for the better (they were meant to,
 anyway), and will probably not be discovered by the casual user.
@@ -2476,7 +2476,7 @@ default, the factors output by the integer factorization machinery are
 only pseudo-primes, not proven primes. If this is
 set, a primality proof is done for each factor and all results depending on
 integer factorization are fully proven. This flag does not affect partial
-factorization when it is explicitely requested. Note that if affects all
+factorization when it is explicitly requested. Note that if affects all
 other factorizations, and will in general lead to significant slowdowns.
 
 \subsecidx{format} (default \kbd{"g.28"} and \kbd{"g.38"} on 32-bit and
@@ -2573,7 +2573,7 @@ performed.
 \subsec{new\_galois\_format}\kbdsidx{new_galois_format} (default \kbd{0}): if
 this is set, the \tet{polgalois} command will use a different, more
 consistent, naming scheme for Galois groups. This default is provided to
-ensure that scripts can control this behaviour and do not break unexpectedly.
+ensure that scripts can control this behavior and do not break unexpectedly.
 Note that the default value of $0$ (unset) will change to $1$ (set) in the
 next major version.
 
@@ -2753,8 +2753,8 @@ the following list, braces are used to denote optional arguments, with their
 default values when applicable, e.g.~$\{n=0\}$ means that if $n$ is not
 there, it is assumed to be~$0$. Whitespace (or spaces) between the
 metacommand and its arguments and within arguments is optional. (This can
-cause problems only with \b{w}, when you insist on having a filename whose
-first character is a digit, and with \b{r} or \b{w}, if the filename itself
+cause problems only with \b{w}, when you insist on having a file name whose
+first character is a digit, and with \b{r} or \b{w}, if the file name itself
 contains a space. In such cases, just use the underlying \tet{read} or
 \tet{write} function; see~\secref{se:write}).
 
@@ -2772,7 +2772,7 @@ disposal as well, though a trifle less readable).
 If the line before the copyright message indicates that extended help is
 available (this means \kbd{perl} is present on your system and the PARI
 distribution was correctly installed), you can add more \kbd{?} signs for
-extended functionalities:
+extended functionality:
 
 \kbd{??~\var{keyword}} yields the functions description as it stands in this
 manual, usually in Chapter~2 or~3. If you're not satisfied with the default
@@ -2824,7 +2824,7 @@ environment) containing the full user's manual. \kbd{??tutorial} and
 \kbd{??refcard} do the same with the \idx{tutorial} and \idx{reference card}
 respectively.
 
-\misctitle{Technical note:} these functionalities are provided by an
+\misctitle{Technical note:} this functionality is provided by an
 external \kbd{perl} script that you are free to use outside any \kbd{gp} session
 (and modify to your liking, if you are perl-knowledgeable). It is called
 \tet{gphelp}, lies in the \kbd{doc} subdirectory of your distribution
@@ -2931,7 +2931,7 @@ explained in Chapter~4, but its knowledge is not necessary for a \kbd{gp} user.
 $n$ ( $\%n$ ) into the named file, in raw format. If the number $n$ is
 omitted, writes the latest computed object ( $\%$ ). If \var{filename} is
 omitted, appends to \kbd{logfile} (the GP function \tet{write} is a trifle more
-powerful, as you can have arbitrary filenames).
+powerful, as you can have arbitrary file names).
 
 \subsec{\b{x}}: prints the complete tree with addresses and contents (in
 hexadecimal) of the \idx{internal representation} of the latest computed
@@ -2955,7 +2955,7 @@ Useful when you forgot to turn on the \kbd{timer}.
 
 This file, called \tet{gprc} in the sequel, is used to modify or extend
 \kbd{gp}
-default behaviour, in all \kbd{gp} sessions: e.g customize \kbd{default} values or
+default behavior, in all \kbd{gp} sessions: e.g customize \kbd{default} values or
 load common user functions and aliases. \kbd{gp} opens the \kbd{gprc} file and
 processes the commands in there, \emph{before} doing anything else,
 e.g.~creating the PARI stack. If the file does not exist or cannot be read,
@@ -2981,7 +2981,7 @@ $\bullet$ lines starting with \kbd{\#if} \var{boolean} are treated as
 comments if \var{boolean} evaluates to \kbd{false}, and read normally
 otherwise. The condition can be negated using either \kbd{\#if not} (or
 \kbd{\#if !}). If the rest of the current line is empty, the test applies to
-the next line (same behaviour as \kbd{=} under \kbd{gp}). Only three tests can be
+the next line (same behavior as \kbd{=} under \kbd{gp}). Only three tests can be
 performed:
 
 \kbd{EMACS}: \kbd{true} if \kbd{gp} is running in an Emacs or TeXmacs shell (see
@@ -2998,7 +2998,7 @@ This is \kbd{true} if \kbd{gp}'s version number satisfies the required
 inequality.
 
 \subsubsec{Commands:}
-After the preprocessing the remaining lines are executed as
+After preprocessing, the remaining lines are executed as
 sequence of expressions (as usual, separated by \kbd{;} if necessary). Only
 two kinds of expressions are recognized:
 
@@ -3131,7 +3131,7 @@ incrementally (\kbd{M-r} undoes all changes made to the current line).
 cursor and the one under the cursor.
 
   Keeping the \kbd{M-} key down while you enter an integer (a minus sign
-meaning reverse behaviour) gives an argument to your next readline command
+meaning reverse behavior) gives an argument to your next readline command
 (for instance \kbd{M-- C-k} will kill text back to the start of line). If you
 prefer \idx{Vi}--style editing, \kbd{M-C-j} will toggle you to Vi mode.
 
@@ -3156,7 +3156,7 @@ changes made to it during the current session.
 \misctitle{Note:} By default, \kbd{(} and \kbd{[} are bound to the function
 \kbd{pari-matched-insert} which, if ``electric parentheses'' are enabled
 (default: off) will automatically insert the matching closure (respectively
-\kbd{)} and \kbd{]}). This behaviour can be toggled on and off by giving
+\kbd{)} and \kbd{]}). This behavior can be toggled on and off by giving
 the numeric argument $-2$ to \kbd{(} (\kbd{M--2(}), which is useful if you
 want, e.g to copy-paste some text into the calculator. If you do not want a
 toggle, you can use \kbd{M--0} / \kbd{M--1} to specifically switch it on or

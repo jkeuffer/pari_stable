@@ -6,7 +6,7 @@ Help: intmellininvshort(sig,z,tab): numerical integration on the
  line real(X) = sig (or sig[1]) of s(X)z^(-X)dX/(2*I*Pi), i.e. inverse Mellin
  transform of s at z. sig is coded as follows: either it is real, and then
  by default assume s(X) decreases like exp(-X). Or sig = [sigR, al], sigR is
- the abcissa of integration, and al = 0 for slowly decreasing functions, or
+ the abscissa of integration, and al = 0 for slowly decreasing functions, or
  al > 0 if s(X) decreases like exp(-al*X). Compulsory table tab has been
  precomputed using the command intfuncinit(t=[[-1],sig[2]],[[1],sig[2]],s)
  (with possibly its two optional additional parameters), where sig[2] = 1

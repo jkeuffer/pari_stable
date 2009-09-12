@@ -13,15 +13,15 @@ Doc: general factorization function, where $x$ is a
  rational (including integers), a complex number with rational
  real and imaginary parts, or a rational function (including polynomials).
  The result is a two-column matrix: the first contains the irreducibles
- dividing $x$ (rational or gaussian primes, irreducible polynomials),
+ dividing $x$ (rational or Gaussian primes, irreducible polynomials),
  and the second the exponents. By convention, $0$ is factored as $0^1$.
 
  \misctitle{$\Q$ and $\Q(i)$.}
  See \tet{factorint} for more information about the algorithms used.
- The rational or gaussian primes are in fact \var{pseudoprimes}
+ The rational or Gaussian primes are in fact \var{pseudoprimes}
  (see \kbd{ispseudoprime}), a priori not rigorously proven primes. In fact,
  any factor which is $\leq 10^{15}$ (whose norm is $\leq 10^{15}$ for an
- irrational gaussian prime) is a genuine prime. Use
+ irrational Gaussian prime) is a genuine prime. Use
  \kbd{isprime} to prove primality of other factors, as in
  \bprog
  ? fa = factor(2^2^7 + 1)

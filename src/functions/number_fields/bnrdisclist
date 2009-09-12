@@ -35,7 +35,7 @@ Doc: $\var{bnf}$ being as output by \kbd{bnfinit} (with units), computes a
  component of $W$ has the form $[m, [[d_1,r_1,D_1], \dots, [d_t,r_t,D_t]]]$,
  where $m$ is the finite part of the conductor as above, and
  $[d_i,r_i,D_i]$ are the invariants of the ray class field of conductor
- $[m,v_i]$, where $v_i$ is the $i$-th archimedean component, ordered by
+ $[m,v_i]$, where $v_i$ is the $i$-th Archimedean component, ordered by
  inverse lexicographic order; so $v_1 = [0,\dots,0]$, $v_2 = [1,0\dots,0]$,
  etc. Again, we set $d_i = r_i = D_i = 0$ if $[m,v_i]$ is not a conductor.
 

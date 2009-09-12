@@ -7,6 +7,6 @@ Description:
  (vec, vec):vec        setminus($1, $2)
 Doc: difference of the two sets $x$ and $y$ (see \kbd{setisset}),
  i.e.~set of elements of $x$ which do not belong to $y$.
- The function also works if both $x$ and $y$ are vectors of stricly increasing
+ The function also works if both $x$ and $y$ are vectors of strictly increasing
  entries, according to \kbd{<}); in that case we return a vector of strictly
  increasing entries, not a set. Otherwise, the result is undefined.

@@ -59,7 +59,7 @@ Doc: This function is based on the C library command of the same name.
  \misctitle{The field width.} An optional decimal digit string (whose first
  digit is non-zero) specifying a \emph{minimum} field width. If the value has
  fewer characters than the field width, it is padded with spaces on the left
- (or right, if the left-adjusment flag has been given). In no case does a
+ (or right, if the left-adjustment flag has been given). In no case does a
  small field width cause truncation of a field; if the value is wider than
  the field width, the field is expanded to contain the conversion result.
  Instead of a decimal digit string, one may write \kbd{*} to specify that the
@@ -123,7 +123,7 @@ Doc: This function is based on the C library command of the same name.
  \item \kbd{s}: Convert to a character string. If a precision is given, no
  more than the specified number of characters are written.
 
- \item \kbd{p}: Print the adress of the argument in hexadecimal (as if by
+ \item \kbd{p}: Print the address of the argument in hexadecimal (as if by
  \kbd{\%\#x}).
 
  \item \kbd{\%}: A \kbd{\%} is written. No argument is converted. The complete

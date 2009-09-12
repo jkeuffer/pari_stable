@@ -51,7 +51,7 @@ Doc: \idx{Galois} group of the non-constant
  $S_7=[5040,-1,1]$.
  \smallskip
  This is deprecated and obsolete, but for reasons of backward compatibility,
- we cannot change this behaviour yet. So you can use the default
+ we cannot change this behavior yet. So you can use the default
  \tet{new_galois_format} to switch to a consistent naming scheme, namely $k$ is
  always the standard numbering of the group among all transitive subgroups of
  $S_n$. If this default is in effect, the above groups will be coded as:

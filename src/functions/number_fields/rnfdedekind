@@ -19,7 +19,7 @@ Doc: given a number field $K$ coded by $\var{nf}$ and a monic
  or to omit altogether, in which case maximality at \emph{all} primes is tested;
  in this situation \fl\ is automatically set to $1$.
 
- The default historic behaviour (\fl\ is 0 or omitted and \var{pr} is a
+ The default historic behavior (\fl\ is 0 or omitted and \var{pr} is a
  single prime ideal) is not so useful since
  \kbd{rnfpseudobasis} gives more information and is generally not that
  much slower. It returns a 3-component vector $[\var{max}, \var{basis}, v]$:

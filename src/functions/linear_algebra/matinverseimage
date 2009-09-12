@@ -5,7 +5,7 @@ Prototype: GG
 Help: matinverseimage(x,y): an element of the inverse image of the vector y
  by the matrix x if one exists, the empty vector otherwise.
 Doc: given a matrix $x$ and
- a column vector or matrix $y$, returns a pre-image $z$ of $y$ by $x$ if one
+ a column vector or matrix $y$, returns a preimage $z$ of $y$ by $x$ if one
  exists (i.e such that $x z = y$), an empty vector or matrix otherwise. The
  complete inverse image is $z + \text{Ker} x$, where a basis of the kernel of
  $x$ may be obtained by \kbd{matker}.

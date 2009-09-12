@@ -13,7 +13,7 @@ Doc: initializes the \var{tnf} corresponding to $P$, a univariate polynomial
 
  If $\fl$ is non-zero, certify results unconditionally. Otherwise, assume
  \idx{GRH}, this being much faster of course. In the latter case, the result
- may still be unconditionnally correct; \kbd{thue} prints a Warning if it
+ may still be unconditionally correct; \kbd{thue} prints a Warning if it
  actually needs to assume the GRH.
 
  For instance in most cases where $P$ is reducible (not a pure power of an

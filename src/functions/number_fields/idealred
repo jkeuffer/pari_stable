@@ -43,7 +43,7 @@ Doc: \idx{LLL} reduction of
  coefficient explosion; see also \tet{idealpow}.
 
  \misctitle{Technical note}: The routine computes an LLL-reduced
- basis for the latice $I$ equipped with the quadratic form 
+ basis for the lattice $I$ equipped with the quadratic form 
  $$|| x ||_v^2 = \sum_{i=1}^{r_1+r_2} 2^{v_i}\varepsilon_i|\sigma_i(x)|^2,$$
  where as usual the $\sigma_i$ are the (real and) complex embeddings and
  $\varepsilon_i = 1$, resp.~$2$, for a real, resp.~complex place. The element

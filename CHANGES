@@ -186,6 +186,7 @@ BA143- galoisinit(x).gen was not a t_VEC
   149- isprime(x) possibly incorrect on 64 bit machines when 10^15 < x < 2^64
 LM150- fix for the documentation of deriv, intformal, poldisc and taylor.
 JD151- fix for the documentation of install and matsnf.
+LM152- General documentation spelling fixes.
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]

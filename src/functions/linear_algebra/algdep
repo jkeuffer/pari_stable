@@ -15,7 +15,7 @@ Doc: \sidx{algebraic dependence}
  Internally, \tet{lindep}$([1,x,\ldots,x^k], \fl)$ is used. If
  \tet{lindep} is not able to find a relation and returns a lower bound for the
  sup norm of the smallest relation, \tet{algdep} returns that bound instead.
- A non-zero value of $\fl$ may improve on the default behaviour
+ A non-zero value of $\fl$ may improve on the default behavior
  if the input number is known to a \emph{huge} accuracy, and you suspect the
  last bits are incorrect  (this truncates the number, throwing away the least
  significant bits), but default values are usually sufficient:
@@ -54,7 +54,7 @@ Doc: \sidx{algebraic dependence}
  reliably succeeds from 205 digits on (and is 15 times slower at that
  accuracy).
 
- The above example is the testcase studied in a 2000 paper by Borwein and
+ The above example is the test case studied in a 2000 paper by Borwein and
  Lisonek: Applications of integer relation algorithms, \emph{Discrete Math.},
  {\bf 217}, p.~65--82. The paper concludes in the superiority of the PSLQ
  algorithm, which either shows that PARI's implementation of PSLQ is lacking,

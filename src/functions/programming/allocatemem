@@ -21,7 +21,7 @@ Doc: this very special operation
  the rest of the sequence following \kbd{allocatemem()} is silently
  discarded, as well as all pending sequences of instructions. We just go on
  reading the next instruction sequence from the file we're in (or from the
- user). In particular, we have the following possibly unexpected behaviour: in
+ user). In particular, we have the following possibly unexpected behavior: in
  \bprog
     read("file.gp"); x = 1
  @eprog\noindent were \kbd{file.gp} contains an \kbd{allocatemem} statement,

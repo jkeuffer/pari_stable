@@ -15,7 +15,7 @@ Doc: resultant of the two
  the $u$ and $v$ such that $x*u + y*v = res(x,y)$, use the \tet{bezoutres}
  function.
 
- If $\fl=0$ (default), uses the the algorithm best suited to the intputs,
+ If $\fl=0$ (default), uses the the algorithm best suited to the inputs,
  either the \idx{subresultant algorithm} (Lazard/Ducos variant, generic case),
  a modular algorithm (inputs in $\Q[X]$) or Sylvester's matrix (inexact
  inputs).

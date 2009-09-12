@@ -9,7 +9,7 @@
 \label{se:functions}
 
 The functions and operators available in PARI and in the GP/PARI calculator
-are numerous and everexpanding. Here is a description of the ones available
+are numerous and ever-expanding. Here is a description of the ones available
 in version \vers. It should be noted that many of these functions accept
 quite different types as arguments, but others are more restricted. The list
 of acceptable types will be given for each function or class of functions.
@@ -58,7 +58,7 @@ be given. This is in particular used by the various \kbd{print} routines.
 
 \misctitle{Flags}. A \tev{flag} is an argument which, rather than conveying
 actual information to the routine, instructs it to change its default
-behaviour, e.g.~return more or less information. All such
+behavior, e.g.~return more or less information. All such
 flags are optional, and will be called \fl\ in the function descriptions to
 follow. There are two different kind of flags
 
@@ -327,7 +327,7 @@ for $x\hbox{\kbd{\pow}}n$.
 
 %SECTION: operators
 
-\subsec{Comparison and boolean operators}\sidx{boolean operators} The six
+\subsec{Comparison and Boolean operators}\sidx{Boolean operators} The six
 standard \idx{comparison operators} \kbd{<=}, \kbd{<}, \kbd{>=}, \kbd{>},
 \kbd{==}, \kbd{!=} are available in GP. The result is 1 if the comparison is
 true, 0 if it is false. For the purpose of comparison, \typ{STR} objects are
@@ -488,22 +488,23 @@ hundreds of decimal digits occur frequently in your application.
 
 The following functions compute the order of an element in a finite group:
 \kbd{ellorder} (the rational points on an elliptic curve defined over a
-finite field), \kbd{fforder} (the multiplicative groupe of a finite field),
+finite field), \kbd{fforder} (the multiplicative group of a finite field),
 \kbd{znorder} (the invertible elements in $\Z/n\Z$). The following functions
 compute discrete logarithms in the same groups (whenever this is meaningful)
 \kbd{elllog}, \kbd{fflog}, \kbd{znlog}.
 
-All such functions allow an optional argument specififying an integer
+All such functions allow an optional argument specifying an integer
 $N$, representing the order of the group. (The \emph{order} functions also
-allow any non-zero multiple of the order, with a minor loss of efficiency.)
+allows any non-zero multiple of the order, with a minor loss of efficiency.)
 The meaning of that optional argument is as follows and depends on its type
 
 \item \typ{INT}: the integer $N$,
 
 \item \typ{MAT}: the factorization \kbd{fa = factor($N$)},
 
-\item \typ{VEC}: this is the preferred format and provides both informations
-in a two-component vector \kbd{[$N$, fa]}.
+\item \typ{VEC}: this is the preferred format and provides both the
+integer $N$ and its factorization in a two-component vector \kbd{[$N$,
+fa]}.
 
 When the group is fixed and many orders or discrete logarithms will be
 computed, it is much more efficient to initialize this data once and for all
@@ -788,7 +789,7 @@ module it generates.
 
 A $\tev{modulus}$, in the sense of class field theory, is a divisor supported
 on the non-complex places of $K$. In PARI terms, this means either an
-ordinary ideal $I$ as above (no archimedean component), or a pair $[I,a]$,
+ordinary ideal $I$ as above (no Archimedean component), or a pair $[I,a]$,
 where $a$ is a vector with $r_1$ $\{0,1\}$-components, corresponding to the
 infinite part of the divisor. More precisely, the $i$-th component of $a$
 corresponds to the real embedding associated to the $i$-th real root of
@@ -1037,7 +1038,7 @@ $\Z$.
 \label{se:sums}
 
 Although the \kbd{gp} calculator is programmable, it is useful to have
-preprogrammed a number of loops, including sums, products, and a certain
+a number of preprogrammed loops, including sums, products, and a certain
 number of recursions. Also, a number of functions from numerical analysis
 like numerical integration and summation of series will be described here.
 
@@ -1179,7 +1180,7 @@ expressions, including the empty sequence.
     for (X = a,b, seq)
 @eprog\noindent
 the variable \kbd{X} is lexically scoped to the loop, leading to possibly
-unexpected behaviour:
+unexpected behavior:
 \bprog
     n = 5;
     for (n = 1, 10,

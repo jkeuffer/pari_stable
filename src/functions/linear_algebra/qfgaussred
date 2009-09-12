@@ -15,4 +15,4 @@ Doc:
  $$ q(x) = \sum_i a_{ii} (x_i + \sum_{j > i} a_{ij} x_j)^2 $$
 Variant: \fun{GEN}{qfgaussred_positive}{GEN q} assumes that $q$ is
   positive definite and is a little faster; returns \kbd{NULL} if a vector
-  with negative norm occurs (non positive matrix or too many roundoff errors).
+  with negative norm occurs (non positive matrix or too many rounding errors).

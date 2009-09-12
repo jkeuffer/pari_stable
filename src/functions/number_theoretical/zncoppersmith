@@ -44,7 +44,7 @@ Doc: $N$ being an integer and $P\in \Z[X]$, finds all integers $x$ with
  e = 3;            \\ small public encryption exponent
  X = floor(N^0.3); \\ N^(1/e - epsilon)
  x0 = random(X);   \\ unknown short message
- C = lift( (Mod(x0,N) + P)^e ); \\ known cyphertext, with padding P
+ C = lift( (Mod(x0,N) + P)^e ); \\ known ciphertext, with padding P
  zncoppersmith((P + x)^3 - C, N, X)
 
  \\ result in 3.8s.

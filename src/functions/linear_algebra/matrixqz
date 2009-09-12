@@ -10,7 +10,7 @@ Help: matrixqz(A,{p=0}): if p>=0, transforms the rational or integral mxn (m>=n)
 Doc: $A$ being an $m\times n$ matrix in $M_{m,n}(\Q)$, let
  $\text{Im}_\Q A$ (resp.~$\text{Im}_\Z A$) the $\Q$-vector space
  (resp.~the $\Z$-module) spanned by the columns of $A$. This function has
- varying behaviour depending on the sign of $p$:
+ varying behavior depending on the sign of $p$:
 
  If $p \geq 0$, $A$ is assumed to have maximal rank $n\leq m$. The function
  returns a matrix $B\in M_{m,n}(\Z)$, with $\text{Im}_\Q B = \text{Im}_\Q A$,

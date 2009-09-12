@@ -5,7 +5,7 @@ Prototype: GGG
 Help: substpol(x,y,z): in expression x, replace the polynomial y by the
  expression z, using remainder decomposition of x.
 Doc: replace the ``variable'' $y$ by the argument $z$ in the ``polynomial''
- expression $x$. Every type is allowed for $x$, but the same behaviour
+ expression $x$. Every type is allowed for $x$, but the same behavior
  as \kbd{subst} above apply.
 
  The difference with \kbd{subst} is that $y$ is allowed to be any polynomial

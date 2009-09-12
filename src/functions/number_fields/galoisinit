@@ -60,7 +60,7 @@ Doc: computes the Galois group
  \var{pol} as integers implicitly modulo \kbd{\var{gal}.mod}.
  (\kbd{\var{gal}.roots}).
 
- $\var{gal}[4]$ is the inverse of the Van der Monde matrix of the
+ $\var{gal}[4]$ is the inverse of the Vandermonde matrix of the
  $p$-adic roots of \var{pol}, multiplied by $\var{gal}[5]$.
 
  $\var{gal}[5]$ is a multiple of the least common denominator of the
