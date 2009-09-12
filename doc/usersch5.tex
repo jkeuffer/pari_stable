@@ -2204,8 +2204,9 @@ that $a \leq b$. Very inefficient when $a = 0$.
 
 \fun{GEN}{centermodii}{GEN x, GEN y, GEN y2}, given
 \typ{INT}s \kbd{x}, \kbd{y}, returns $z$ congruent to \kbd{x} modulo \kbd{y},
-such that $-\kbd{y}/2 \leq z < \kbd{y}/2$. Assumes that \kbd{y2 = shifti(y,
--1)}. the representative of ssquares the \typ{INT}~\kbd{x}
+such that $-\kbd{y}/2 \leq z < \kbd{y}/2$. The function requires an extra
+argument \kbd{y2}, such that \kbd{y2 = shifti(y, -1)}. (In most cases, \kbd{y}
+is constant for many reductions and \kbd{y2} need only be computed once.)
 
 \fun{GEN}{remi2n}{GEN x, long n} returns \kbd{x} mod $2^n$.
 
