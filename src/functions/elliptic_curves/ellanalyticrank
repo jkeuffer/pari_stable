@@ -7,10 +7,10 @@ Help: ellanalyticrank(e, {eps}): returns the order of vanishing at s=1
  non-zero derivative. To determine this order, it is assumed that any
  value less than eps is zero. If no value of eps is given, a value of
  half the current precision is used.
-Doc: returns the order of vanishing at s=1 of the L-function of the
- elliptic curve e and the value of the first non-zero derivative. To
- determine this order, it is assumed that any value less than eps is
- zero. If no value of eps is given, a value of half the current
+Doc: returns the order of vanishing at $s=1$ of the $L$-function of the
+ elliptic curve $e$ and the value of the first non-zero derivative. To
+ determine this order, it is assumed that any value less than \kbd{eps} is
+ zero. If no value of \kbd{eps} is given, a value of half the current
  precision is used.
  \bprog
  ? e = ellinit("11a1"); \\ rank 0 
