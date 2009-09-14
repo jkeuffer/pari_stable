@@ -346,9 +346,12 @@ gred_frac2(GEN x1, GEN x2)
     ulong rr = r[2];
     avma = av;
     if (rr == 1) y = mkfraccopy(x1, x2);
-    y = cgetg(3,t_FRAC);
-    gel(y,1) = diviuexact(x1, rr);
-    gel(y,2) = diviuexact(x2, rr);
+    else
+    {
+      y = cgetg(3,t_FRAC);
+      gel(y,1) = diviuexact(x1, rr);
+      gel(y,2) = diviuexact(x2, rr);
+    }
   }
   else
   { /* rare: r left on stack for efficiency */

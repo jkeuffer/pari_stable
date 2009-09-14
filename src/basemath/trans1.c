@@ -2250,7 +2250,7 @@ gcos(GEN x, long prec)
       u1 = subrr(v1, r); /* = - I*sin(I*Im(x)) */
       gsincos(gel(x,1),&u,&v,prec);
       affrr_fixlg(gmul(v1,v), gel(y,1));
-      affrr_fixlg(gmul(u1,u), gel(y,2)); return y;
+      affrr_fixlg(gmul(u1,u), gel(y,2)); avma = av; return y;
 
     case t_INT: case t_FRAC:
       y = cgetr(prec); av = avma;
@@ -2320,7 +2320,7 @@ gsin(GEN x, long prec)
       u1 = subrr(r, v1); /* = I*sin(I*Im(x)) */
       gsincos(gel(x,1),&u,&v,prec);
       affrr_fixlg(gmul(v1,u), gel(y,1));
-      affrr_fixlg(gmul(u1,v), gel(y,2)); return y;
+      affrr_fixlg(gmul(u1,v), gel(y,2)); avma = av; return y;
 
     case t_INT: case t_FRAC:
       y = cgetr(prec); av = avma;
@@ -2418,7 +2418,8 @@ gsincos(GEN x, GEN *s, GEN *c, long prec)
       affrr_fixlg(mulrr(v1,u), gel(ps,1));
       affrr_fixlg(mulrr(u1,v), gel(ps,2));
       affrr_fixlg(mulrr(v1,v), gel(pc,1));
-      affrr_fixlg(mulrr(u1,u), gel(pc,2)); togglesign(gel(pc,2)); return;
+      affrr_fixlg(mulrr(u1,u), gel(pc,2)); togglesign(gel(pc,2));
+      avma = av; return;
 
     case t_QUAD:
       av = avma; gsincos(quadtofp(x, prec), s, c, prec);

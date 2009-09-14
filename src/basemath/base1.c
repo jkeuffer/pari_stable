@@ -1057,14 +1057,11 @@ static GEN
 make_Tr(GEN x, GEN basden)
 {
   long i,j, n = degpol(x);
-  GEN c, t, d, w;
-  GEN sym = cgetg(n+2,t_VEC);
-  GEN den = cgetg(n+1,t_VEC);
-  GEN T = cgetg(n+1,t_MAT);
-
-  sym = polsym(x, n-1);
-  w   = gel(basden,1); /* W[i] = w[i]/den[i] */
-  den = gel(basden,2);
+  GEN c, t, d;
+  GEN T   = cgetg(n+1,t_MAT);
+  GEN sym = polsym(x, n-1);
+  GEN w   = gel(basden,1); /* W[i] = w[i]/den[i] */
+  GEN den = gel(basden,2);
   /* assume W[1] = 1, case i = 1 split for efficiency */
   c = cgetg(n+1,t_COL); gel(T,1) = c;
   gel(c, 1) = utoipos(n);

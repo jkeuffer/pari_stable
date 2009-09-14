@@ -2041,7 +2041,7 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
     avma = av;
   }
   frob = galoisfindfrobenius(T, L, den, &gf, gb, ga);
-  if (!frob) { ltop=avma; return gen_0; }
+  if (!frob) { avma=ltop; return gen_0; }
   p = gf.p; ip = utoipos(p);
   Tmod = gf.Tmod;
   O = perm_cycles(frob);
