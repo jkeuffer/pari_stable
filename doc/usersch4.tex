@@ -1754,17 +1754,34 @@ seen so far:
 
 \fun{char *}{pari_vsprintf}{const char *fmt, va_list ap}
 
-\misctitle{Advanced remark}. The functions \tet{pari_putc}, \tet{pari_puts},
-\tet{pari_flush}, \tet{pari_printf} output according to the values of the
-\teb{pariOut}~/ \teb{pariErr} global variables which provides a global
-output context, i.e.~ a set of low-level functions to actually interact with
-a ``stream''. By default, we have \kbd{pariOut = defaultOut}, the output
-``stream'' is an actual \kbd{FILE*}, \tet{pari_outfile}, initialized to
-\tet{stdout}, and the low-level printing functions are actually the standard
-\kbd{putc} / \kbd{puts}, plus some magic to handle a log file if one is open.
-If you intend to change \kbd{pariOut}, diverting output in non-trivial ways,
-this probably means you are rewriting \kbd{gp}. In that case, have a look at
-the code in \kbd{language/es.c} (\kbd{pariOut80} comes to mind).
+\subsec{Output contexts}.
+
+The behavior of the functions \tet{pari_putc}, \tet{pari_puts},
+\tet{pari_flush} and \tet{pari_printf} can be customized by modifying
+the output contexts used for printing, which are \tet{pariOut} for
+normal output and \tet{pariErr} for error messages.  \tet{pariOut} and
+\tet{pariErr} are pointers to a \tet{PariOUT}, which is a \kbd{struct}
+that models a stream and contains the following function pointers:
+\bprog
+void (*putch)(char);           /* putc()-alike */
+void (*puts)(const char*);     /* fputs()-alike */
+void (*flush)(void);           /* flush function */
+void (*die)(void);             /* flush function for fatal errors */
+@eprog\noindent
+The functions \tet{putch} and \tet{puts} are used to print a character
+or a string respectively.  \tet{flush} is called to finalize (flush)
+error messges in normal circumstances, and \tet{die} is a variant of
+flush that (if non-\kbd{NULL}) is used if a fatal error has occurred.
+
+By default, we have \kbd{pariOut = defaultOut}, which writes output to a
+\kbd{FILE*}, \tet{pari_outfile}, initialized to \tet{stdout}.  The
+low-level printing functions of \kbd{defaultOut} are actually the
+standard \kbd{putc} / \kbd{fputs}, plus some magic to handle a log file
+if one is open.  Similarly, the default for \kbd{pariErr} is
+\tet{defaultErr}, which prints to \tet{stderr}.  If you intend to change
+\kbd{pariOut} or \kbd{pariErr}, diverting output in non-trivial ways,
+this probably means you are rewriting \kbd{gp}. In that case, have a
+look at the code in \kbd{language/es.c} (\kbd{pariOut80} comes to mind).
 
 Still keeping the default output context \kbd{defaultOut}, you can change
 PARI's standard output, redirecting \tet{pari_outfile} to another file, using
