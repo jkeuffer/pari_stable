@@ -26,4 +26,4 @@ Doc: returns a vector of polynomials generating all the extensions of degree
  If $\fl = 1$, replace each polynomial $P$ by a vector $[P, e, f, d]$
  where $e$ is the ramification index, $f$ the residual degree and $d$ the
  valuation of the discriminant. If $\fl = 2$, only return the \emph{number} of
- extensions (Krasner's formula), which is much faster.
+ extensions in a fixed algebraic closure (Krasner's formula), which is much faster.
