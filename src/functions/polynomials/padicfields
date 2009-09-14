@@ -8,7 +8,7 @@ Help: padicfields(p, N, {flag=0}): returns polynomials generating all
  extensions of degree n and discriminant p^d. flag is optional,
  and can be 0: default, 1: return also the ramification index, the residual
  degree and the valuation of the discriminant, or 2: return only the number of
- extensions.
+ extensions in a fixed algebraic closure.
 
 Doc: returns a vector of polynomials generating all the extensions of degree
  $N$ of the field $\Q_p$ of $p$-adic rational numbers; $N$ is
