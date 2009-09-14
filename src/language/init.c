@@ -829,7 +829,7 @@ err_recover(long numerr)
 }
 
 static void
-err_init()
+err_init(void)
 {
   /* make sure pari_err msg starts at the beginning of line */
   if (!pari_last_was_newline()) pari_putc('\n');
