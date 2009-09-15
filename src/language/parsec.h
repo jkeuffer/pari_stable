@@ -138,7 +138,7 @@ newopcall(OPerator op, long x, long y, struct node_loc *loc)
 static long
 newintnode(struct node_loc *loc)
 {
-  if (loc->end-loc->start<=(long)(1+LOG10_2*BITS_IN_LONG));
+  if (loc->end-loc->start<=(long)(1+LOG10_2*BITS_IN_LONG))
   {
     pari_sp ltop=avma;
     GEN g=strtoi(loc->start);
