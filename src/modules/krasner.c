@@ -348,12 +348,11 @@ DegreeMod(FAD_t *fdata, GEN pp, GEN ppp, GEN pol)
 {
   long d = degpol(pol); /* should be > 0 */
   pari_sp av = avma;
-  GEN pp = sqri(fdata->p);
 
   do
   {
     GEN c = gel(pol, d+2);
-    if (!gequal0(c) && !DivideByPi(fdata, fdata->p, pp, c))
+    if (!gequal0(c) && !DivideByPi(fdata, pp, ppp, c))
       return d;
   }
   while (--d >= 1);
@@ -545,7 +544,7 @@ TamelyRamifiedCase(KRASNER_t *data)
     {
       long gr;
       GEN p1 = FpXQ_pow(pol_x(data->v), stoi(r), data->uplr, data->p);
-      eis = ZX_add(Xe, ZX_Z_mul(p1, data->p));
+      eis = gadd(Xe, ZX_Z_mul(p1, data->p)); /* Adding a ZX and a ZY (cste coefficient) */
       ct++;
       topx = get_topx(data, eis);
       gel(rep, ct) = topx;
@@ -766,13 +765,13 @@ WildlyRamifiedCase(KRASNER_t *data)
   return gerepileupto(av, rep);
 }
 
-/* return a cyclotomic polynomial (mod pr) of degree f and variable v */
+/* return the minimal polynomial (mod pr) of a generator of (F_p^f)^x with variable v */
 static GEN
 CycloPol(KRASNER_t *data)
 {
   GEN T, z;
-  /* v - 1 */
-  if (data->f == 1) return deg1pol_shallow(gen_1, subis(data->pr, 1), data->v);
+  /* v - primroot(p) */
+  if (data->f == 1) return deg1pol_shallow(gen_1, Fp_neg(pgener_Fp(data->p), data->pr), data->v);
 
   T = init_Fq(data->p, data->f, data->v);
   z = gener_FpXQ(T, data->p, NULL);
@@ -822,8 +821,8 @@ GetRamifiedPol(GEN p, GEN efj, long v, long flag)
   if (flag == 2) return data.nbext;
 
   data.upl   = CycloPol(&data);
-  /* mv = -v mod upl. If f = 1, then upl = v - 1, hence mv = p^r - 1 */
-  data.mv    = f == 1? subis(data.pr, 1)
+  /* mv = -v mod upl. If f = 1, then upl = v + c, hence mv = c */
+  data.mv    = f == 1? gel(data.upl, 2)
                      : FpX_neg(pol_x(v), data.pr);
   data.uplr  = FpX_red(data.upl, data.p);
   data.frob  = FpXQ_pow(pol_x(v), p, data.upl, data.pr);
