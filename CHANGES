@@ -185,7 +185,7 @@ BA143- galoisinit(x).gen was not a t_VEC
   148- After \y0, [1,x]*[0,0]~ returned 0 t_INT, which should be a t_POL [#983]
   149- isprime(x) possibly incorrect on 64 bit machines when 10^15 < x < 2^64
 LM150- fix for the documentation of deriv, intformal, poldisc and taylor.
-JD151- fix for the documentation of install and matsnf.
+JD151- fix for the documentation of install, matsnf and polsturm.
 LM152- General documentation spelling fixes.
 
   Changed
