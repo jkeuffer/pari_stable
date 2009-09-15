@@ -187,6 +187,7 @@ BA143- galoisinit(x).gen was not a t_VEC
 LM150- fix for the documentation of deriv, intformal, poldisc and taylor.
 JD151- fix for the documentation of install, matsnf and polsturm.
 LM152- General documentation spelling fixes.
+BA153- Detection of exp2 and log2 was broken with C++
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]

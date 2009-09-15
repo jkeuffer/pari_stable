@@ -1,3 +1,3 @@
 #include <math.h>
-char (*f)() = exp2;
+double (*f)(double) = exp2;
 int main(){ return f != exp2; }

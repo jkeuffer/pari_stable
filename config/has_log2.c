@@ -1,3 +1,3 @@
 #include <math.h>
-char (*f)() = log2;
+double (*f)(double) = log2;
 int main(){ return f != log2; }

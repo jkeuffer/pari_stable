@@ -90,19 +90,11 @@ enum {
 
 #ifndef HAS_EXP2
 #  undef exp2
-#  ifdef __cplusplus
-     inline double exp2(double x) {return exp(x*LOG2);}
-#  else
-#    define exp2(x) (exp((double)(x)*LOG2))
-#  endif
+#  define exp2(x) (exp((double)(x)*LOG2))
 #endif
 #ifndef HAS_LOG2
 #  undef log2
-#  ifdef __cplusplus
-     inline double log2(double x) {return log(x)/LOG2;}
-#  else
-#    define log2(x) (log((double)(x))/LOG2)
-#  endif
+#  define log2(x) (log((double)(x))/LOG2)
 #endif
 
 #define bern(i)       (bernzone + 3 + (i)*bernzone[2])
