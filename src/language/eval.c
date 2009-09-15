@@ -597,7 +597,7 @@ get_next_label(const char *s, int member, char **next_fun)
 void
 closure_err(void)
 {
-  GEN base = NULL;
+  GEN base;
   const long lastfun = s_trace.n - 1;
   char *next_label, *next_fun;
   long i, fun = lastfun;
@@ -609,6 +609,7 @@ closure_err(void)
 
   i = maxss(0, lastfun - 19);
   if (i > 0) while (lg(trace[i].closure)==6) i--;
+  base = gel(trace[i].closure,6); /* gcc -Wall*/
   next_label = pari_strdup(i == 0? "at top-level": "[...] at");
   next_fun = next_label;
   for (; i <= lastfun; i++)
