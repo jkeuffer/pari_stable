@@ -516,11 +516,10 @@ ZX_rem(GEN x, GEN y)
   if (dx < dy) return ZX_copy(x);
   if (!dy) return zeropol(vx); /* y is constant */
   av0 = avma; dz = dx-dy;
-  avma = av0;
   z=cgetg(dz+3,t_POL); z[1] = x[1];
   x += 2; y += 2; z += 2;
 
-  p1 = gel(x,dx); av = avma;
+  p1 = gel(x,dx);
   gel(z,dz) = icopy(p1);
   for (i=dx-1; i>=dy; i--)
   {

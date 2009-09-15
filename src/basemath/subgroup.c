@@ -149,7 +149,7 @@ dogroup(subgp_iter *T)
   long  *a = T->a,  *maxa = T->maxa;
   long **g = T->g, **maxg = T->maxg;
   GEN **H = T->H;
-  pari_sp av = avma;
+  pari_sp av;
   long e,i,j,k,r,n,t2,ind, t = len(M), l = len(L);
 
   t2 = (l==t)? t-1: t;

@@ -2771,7 +2771,6 @@ makematal(GEN bnf)
   pFB = get_Vbase(bnf);
   ma = cgetg(lma,t_VEC);
 
-  prec = prec_arch(bnf);
   for (j=1; j<lma; j++)
   {
     long e;
@@ -2981,7 +2980,7 @@ sbnf2bnf(GEN sbnf, long prec)
 {
   long j, k, l, n;
   pari_sp av = avma;
-  GEN bas, ro, nf, A, fu, FU, L;
+  GEN ro, nf, A, fu, FU, L;
   GEN pfc, C, clgp, clgp2, res, y, W, zu, matal, Vbase;
   nfbasic_t T;
 
@@ -2993,7 +2992,6 @@ sbnf2bnf(GEN sbnf, long prec)
   fu = gel(sbnf,11);
   if (prec > gprecision(ro)) ro = get_roots(T.x,T.r1,prec);
   nf = nfbasic_to_nf(&T, ro, prec);
-  bas = nf_get_zk(nf);
 
   A = get_archclean(nf, fu, prec, 1);
   if (!A) pari_err(precer, "bnfmake");

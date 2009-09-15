@@ -280,7 +280,7 @@ rowred(GEN a, GEN rmod)
     if (low_stack(lim, stack_lim(av,1)))
     {
       long j1,k1;
-      GEN p1 = a;
+      GEN p1;
       if(DEBUGMEM>1) pari_warn(warnmem,"rowred j=%ld", j);
       p1 = gerepilecopy(av,a);
       for (j1=1; j1<r; j1++)

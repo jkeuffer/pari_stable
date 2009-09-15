@@ -180,13 +180,12 @@ static GEN
 NumberExtensions(KRASNER_t *data)
 {
   ulong pp, pa;
-  long e, j, a, b;
+  long e, a, b;
   GEN p, q, s0, p1;
 
   e = data->e;
   p = data->p;
   q = data->q;
-  j = data->j;
   a = data->a; /* floor(j/e) <= v_p(e), hence p^a | e */
   b = data->b; /* j % e */
   if (is_bigint(p)) /* implies a = 0 */
@@ -224,7 +223,7 @@ get_topx(KRASNER_t *data, GEN eis)
     p1 = FqX_FpXQ_eval(p1, data->frob, data->upl, data->pr);
     p2 = FqX_mul(p2, p1, data->upl, data->pr);
   }
-  return p2 = simplify_shallow(p2); /* ZX */
+  return simplify_shallow(p2); /* ZX */
 }
 
 /* eis (ZXY): Eisenstein polynomial  over the field defined by upl.

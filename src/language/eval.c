@@ -1403,7 +1403,6 @@ closure_disassemble(GEN C)
       pari_printf("simpleptrdyn\t%s\n",ep->name);
       break;
     case OCsimpleptrlex:
-      ep=(entree*)operand;
       pari_printf("simpleptrlex\t%ld\n",operand);
       break;
     case OCnewptrdyn:

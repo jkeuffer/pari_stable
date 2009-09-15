@@ -1286,7 +1286,6 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   /* step 16 */
   if (DEBUGLEVEL>2) fprintferr("Step 16\n");
   K = Flm_ker(M, ell);
-  dK = lg(K)-1;
   if (all < 0)
     K = fix_kernel(K, M, vecMsup, lW, ell);
   /* step 18 & ff */

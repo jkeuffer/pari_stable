@@ -327,14 +327,14 @@ hess(GEN x)
 GEN
 Flm_hess(GEN x, ulong p)
 {
-  pari_sp av = avma, lim;
+  pari_sp av = avma;
   long lx = lg(x), m, i, j;
 
   if (typ(x) != t_MAT) pari_err(mattype1,"hess");
   if (lx == 1) return cgetg(1,t_MAT);
   if (lg(x[1]) != lx) pari_err(mattype1,"hess");
 
-  x = Flm_copy(x); lim = stack_lim(av,2);
+  x = Flm_copy(x);
   for (m=2; m<lx-1; m++)
   {
     ulong t = 0;
@@ -419,7 +419,7 @@ charpoly_bound(GEN M)
 {
   pari_sp av = avma;
   GEN s = real_0(3), bin, B2 = itor(sqri(ZM_supnorm(M)), 3);
-  long n = lg(M)-1, k = (n+1)>>1;
+  long n = lg(M)-1, k;
   double d;
   bin = gen_1;
   for (k = n; k >= (n+1)>>1; k--)

@@ -1208,7 +1208,7 @@ RgM_eval_powers(GEN P, GEN V, long a, long n)
 GEN
 RgX_RgMV_eval(GEN P, GEN V)
 {
-  pari_sp av = avma, btop;
+  pari_sp av = avma;
   long l = lg(V)-1, d = degpol(P), n = lg(V[1])-1;
   GEN z;
 
@@ -1220,7 +1220,6 @@ RgX_RgMV_eval(GEN P, GEN V)
   }
   if (l<=1) pari_err(talker,"powers is only [] or [1] in FpX_FpXQV_eval");
   d -= l;
-  btop = avma;
   z = RgM_eval_powers(P,V,d+1,l-1);
   while (d >= l-1)
   {

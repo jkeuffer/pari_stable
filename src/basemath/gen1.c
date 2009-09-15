@@ -2011,7 +2011,7 @@ ff_poltype(GEN *x, GEN *p, GEN *pol)
     }
   }
   if (!Q) return is_FpX(x, p);
-  *x = P = mod_to_Kronecker(P, Q);
+  *x = mod_to_Kronecker(P, Q);
   *pol = Q;
   return is_FpX(x, p);
 }

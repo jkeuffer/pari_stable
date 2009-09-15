@@ -1058,7 +1058,7 @@ sm_dopr(const char *fmt, GEN arg_vector, va_list args)
   long lvalue;
   int index = 1;
   GEN gvalue;
-  const char *recall = NULL, *save_fmt = fmt;
+  const char *save_fmt = fmt;
   outString __S, *S = &__S;
 
   str_init(S);
@@ -1069,7 +1069,6 @@ sm_dopr(const char *fmt, GEN arg_vector, va_list args)
         ljust = zpad = 0;
         len = maxwidth = -1;
         GENflag = longflag = pointflag = 0;
-        recall = fmt - 1; /* '%' was skipped */
         print_plus = print_blank = with_sharp = 0;
 nextch:
         ch = *fmt++;
@@ -3918,10 +3917,9 @@ readbin(const char *name, FILE *f, int *vector)
 {
   pari_sp av = avma;
   GEN x,y,z;
-  int cx,cy;
+  int cx = 0 /* gcc -Wall */, cy;
   if (!check_magic(name,f)) return NULL;
-  x = y = z = NULL;
-  cx = 0; /* gcc -Wall */
+  x = z = NULL;
   while ((y = readobj(f, &cy)))
   {
     if (x && cx == BIN_GEN) z = z? shallowconcat(z, mkvec(x)): mkvec(x);

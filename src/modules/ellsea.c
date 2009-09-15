@@ -1077,14 +1077,14 @@ static GEN
 champion(GEN atkin, long k, ulong ell, GEN bound_champ)
 {
   const long two_k = 1L<<k;
-  pari_sp ltop = avma, btop, st_lim;
+  pari_sp ltop = avma, btop;
   long i, j, n, i1, i2;
   GEN B, Bp, cost_vec, res = NULL;
   cost_vec = get_lgatkin(atkin, k);
   B  = const_vecsmall(two_k, 0);
   Bp = const_vecsmall(two_k, 0);
   Bp[2] = 1;
-  btop = avma; st_lim = stack_lim(btop, 1);
+  btop = avma;
   for (n = 2, j = 2; j <= k; j++)
   {
     long b;

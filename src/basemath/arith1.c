@@ -715,7 +715,7 @@ pow_check(ulong p, GEN *x, GEN *logx, long *k)
 static long
 polispower(GEN x, GEN K, GEN *pt)
 {
-  pari_sp av,av2;
+  pari_sp av;
   long v, l = degpol(x), k = itos(K);
   GEN y, a, b;
 
@@ -723,13 +723,13 @@ polispower(GEN x, GEN K, GEN *pt)
   if (l % k) return 0; /* degree not multiple of k */
   v = RgX_valrem(x, &x);
   if (v % k) return 0;
-  av2 = avma; a = gel(x,2); b = NULL;
-  if (!ispower(a, K, &b)) { avma = av2; return 0; }
+  av = avma; a = gel(x,2); b = NULL;
+  if (!ispower(a, K, &b)) { avma = av; return 0; }
   av = avma;
   if (degpol(x))
   {
     x = RgX_Rg_div(x,a);
-    y = gtrunc(gsqrtn(RgX_to_ser(x,lg(x)), K, NULL, 0)); av2 = avma;
+    y = gtrunc(gsqrtn(RgX_to_ser(x,lg(x)), K, NULL, 0));
     if (!RgX_equal(powgi(y, K), x)) { avma = av; return 0; }
   }
   else y = pol_1(varn(x));
@@ -2681,7 +2681,7 @@ bestappr(GEN x, GEN k)
     case t_FRAC:
       if (!k || cmpii(gel(x,2),k) <= 0) { avma = av; return gcopy(x); }
       y = x;
-      p1 = gen_1; a = p0 = truedivii(gel(x,1), gel(x,2)); /* = floor(x) */
+      p1 = gen_1; p0 = truedivii(gel(x,1), gel(x,2)); /* = floor(x) */
       q1 = gen_0; q0 = gen_1;
       for(;;)
       {

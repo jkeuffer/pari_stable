@@ -364,7 +364,7 @@ fplll(GEN *ptrB, GEN *ptrU, GEN *ptrr, double DELTA, double ETA, long flag, long
 {
   const long gram = flag & LLL_GRAM; /*Gram matrix*/
   const long keepfirst = flag & LLL_KEEP_FIRST; /*never swap with first vector*/
-  pari_sp av, av2, lim;
+  pari_sp av, av2;
   long kappa, kappa2, d, n, i, j, zeros, kappamax, maxG, bab;
   GEN G, mu, r, s, tmp, SPtmp, alpha;
   GEN delta = dbltor(DELTA), eta = dbltor(ETA), halfplus1 = dbltor(1.5);
@@ -408,7 +408,7 @@ fplll(GEN *ptrB, GEN *ptrU, GEN *ptrr, double DELTA, double ETA, long flag, long
   }
   SPtmp = zerovec(d+1);
   alpha = cgetg(d+1, t_VECSMALL);
-  av = avma; lim = stack_lim(av, 2);
+  av = avma;
 
   /* Step2: Initializing the main loop */
   kappamax = 1;

@@ -1200,7 +1200,6 @@ mpqs_mergesort_lp_file0(FILE *LPREL, FILE *LPNEW, pariFILE *pCOMB,
         pari_fputs(line_new, pTMP);
         /* and stash it away for a moment */
         swap_lines();
-        comb_in_progress = 0;
       }
     } /* while */
     pari_fclose(pTMP); return i;

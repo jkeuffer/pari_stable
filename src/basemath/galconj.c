@@ -893,7 +893,6 @@ listznstarelts(long m, long o)
   phi = itos(gel(zn,1));
   o = ugcd(o, phi); /* do we impose this on input ? */
   zns = znstar_small(zn);
-  ind = phi/o;
   L = cgetg(o+1, t_VEC);
   for (i=1,ind = phi; ind; ind -= phi/o, i++) /* by *decreasing* exact index */
     gel(L,i) = subgrouplist(gel(zn,2), mkvec(utoipos(ind)));
@@ -1286,7 +1285,7 @@ a4galoisgen(GEN T, struct galois_test *td)
   const long n = 12;
   pari_sp ltop = avma, av, av2;
   long i, j, k, N, hop = 0;
-  GEN MT, O,O1,O2,O3,O4, ar, mt, t, u, res, orb, pft, pfu, pfv;
+  GEN MT, O,O1,O2,O3, ar, mt, t, u, res, orb, pft, pfu, pfv;
 
   res = cgetg(3, t_VEC);
   pft = cgetg(n+1, t_VECSMALL);
@@ -1447,7 +1446,7 @@ a4galoisgen(GEN T, struct galois_test *td)
     fprintferr("A4GaloisConj:O=%Ps \n", O);
   }
   av2 = avma;
-  O1 = gel(O,1); O2 = gel(O,2); O3 = gel(O,3); O4 = gel(O,4);
+  O1 = gel(O,1); O2 = gel(O,2); O3 = gel(O,3);
   for (j = 0; j < 2; j++)
   {
     pfv[O1[1]] = O2[1];

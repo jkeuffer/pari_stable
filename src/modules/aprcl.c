@@ -515,7 +515,7 @@ get_jac2(GEN N, ulong q, long k, GEN *j2q, GEN *j3q)
 static void
 calcjac(Cache **pC, GEN globfa, GEN *ptabfaq, GEN *ptabj)
 {
-  GEN J, tabg, faq, tabfaq, tabj, P, E, PE;
+  GEN J, tabg, faq, tabfaq, tabj, P, PE;
   long lfaq, j;
   ulong i, q, l;
   pari_sp av;
@@ -528,7 +528,6 @@ calcjac(Cache **pC, GEN globfa, GEN *ptabfaq, GEN *ptabj)
     q = globfa[i]; /* odd prime */
     faq = factoru_pow(q-1); gel(tabfaq,i) = faq;
     P = gel(faq,1); lfaq = lg(P);
-    E = gel(faq,2);
     PE= gel(faq,3);
     av = avma;
     tabg = compute_g(q);

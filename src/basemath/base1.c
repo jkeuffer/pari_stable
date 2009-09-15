@@ -1768,13 +1768,13 @@ static GEN
 polred_aux(nfbasic_t *T, GEN *pro, long flag)
 {
   GEN b, y, x = T->x;
-  long i, prec, v = varn(x), l = lg(T->bas);
+  long i, v = varn(x), l = lg(T->bas);
   const long orig = flag & nf_ORIG;
   const long nfred = flag & nf_RED;
   nffp_t F;
   CG_data d;
 
-  prec = polred_init(T, &F, &d);
+  (void)polred_init(T, &F, &d);
   *pro = F.ro;
   d.ZKembed = F.M;
 

@@ -1423,7 +1423,7 @@ vecsort0(GEN x, GEN k, long flag)
        goto END;
       default: pari_err(typeer,"vecsort");
     }
-    lk = lg(k); l = 0;
+    lk = lg(k);
     for (l=0,i=1; i<lk; i++)
     {
       j = k[i]; if (j<=0) pari_err(talker,"negative index in vecsort");

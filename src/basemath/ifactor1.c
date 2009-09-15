@@ -2417,7 +2417,7 @@ ifac_find(GEN *partial, GEN *where)
 static void
 ifac_defrag(GEN *partial, GEN *where)
 {
-  GEN scan_new = LAST(*partial), scan_old = scan_new;
+  GEN scan_new = LAST(*partial), scan_old;
 
   for (scan_old = scan_new; scan_old >= *where; scan_old -= 3)
   {

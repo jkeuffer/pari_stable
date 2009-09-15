@@ -1831,7 +1831,7 @@ image2(GEN x)
 
   if (typ(x)!=t_MAT) pari_err(typeer,"image2");
   if (lg(x) == 1) return cgetg(1,t_MAT);
-  n = lg(x[1])-1; A = ker(x); k = lg(A)-1;
+  A = ker(x); k = lg(A)-1;
   if (!k) { avma = av; return gcopy(x); }
   A = suppl(A); n = lg(A)-1;
   B = cgetg(n-k+1, t_MAT);
