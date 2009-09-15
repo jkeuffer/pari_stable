@@ -739,7 +739,7 @@ oncurve(GEN e, GEN z)
 GEN
 ellisoncurve(GEN e, GEN x)
 {
-  long i, tx = typ(x), lx = lg(x);
+  long i, tx = typ(x), lx;
 
   checkell5(e);
   if (!is_vec_t(tx))
@@ -3411,7 +3411,7 @@ ellheightoo(GEN e, GEN z, long prec)
 GEN
 ellheight0(GEN e, GEN a, long flag, long prec)
 {
-  long i, tx = typ(a), lx = lg(a);
+  long i, tx = typ(a), lx;
   pari_sp av = avma;
   GEN Lp, x, y, z, phi2, psi2, psi3;
 

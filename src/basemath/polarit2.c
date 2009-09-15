@@ -506,7 +506,7 @@ gauss_factor(GEN x)
     GEN Fa = factor(gdiv(n, d));
     P = gel(Fa,1); l = lg(P);
     E = gel(Fa,2);
-    for (i = j = 1; i < l; i++)
+    for (i = 1; i < l; i++)
     {
       GEN w, p = gel(P,i);
       long e;
@@ -1687,7 +1687,7 @@ ZX_content(GEN x)
 GEN
 Q_denom(GEN x)
 {
-  long i, l = lg(x);
+  long i, l;
   GEN d, D;
   pari_sp av;
 

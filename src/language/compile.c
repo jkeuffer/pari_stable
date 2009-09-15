@@ -54,7 +54,7 @@ strntoGENexp(const char *str, long len)
     }
     *s++ = *t++;
   }
-  *s++=0;
+  *s = '\0';
   return z;
 }
 
@@ -1752,7 +1752,7 @@ optimizefunc(entree *ep, long n)
   Gtype t;
   PPproto mod;
   long fl=COsafelex|COsafedyn;
-  const char *p=ep->code, *q;
+  const char *p=ep->code;
   char c;
   GEN arg = listtogen(y,Flistarg);
   long nb=lg(arg)-1;
@@ -1762,7 +1762,7 @@ optimizefunc(entree *ep, long n)
     (void) get_ret_type(&p, 2, &t);
   if (p && *p)
   {
-    j=1; q=p;
+    j=1;
     while((mod=parseproto(&p,&c,tree[n].str))!=PPend)
     {
       if (j<=nb && tree[arg[j]].f!=Fnoarg
@@ -1855,7 +1855,6 @@ optimizefunc(entree *ep, long n)
       default:
         pari_err(bugparier,"PPproto %d in compilefunc",mod);
       }
-      q=p;
     }
   }
   else (void)vec_optimize(arg);

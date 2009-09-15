@@ -1413,7 +1413,7 @@ GEN
 idealinv(GEN nf, GEN x)
 {
   GEN res,ax;
-  pari_sp av = avma;
+  pari_sp av;
   long tx = idealtyp(&x,&ax);
 
   res = ax? cgetg(3,t_VEC): NULL;
@@ -1526,7 +1526,7 @@ idealpow_aux(GEN nf, GEN x, long tx, GEN n)
   if (!s) return matid(N);
   switch(tx)
   {
-    case id_PRINCIPAL: tx = typ(x);
+    case id_PRINCIPAL:
       x = nf_to_scalar_or_alg(nf, x);
       x = (typ(x) == t_POL)? RgXQ_pow(x,n,T): powgi(x,n);
       return idealhnf_principal(nf,x);
@@ -2646,7 +2646,7 @@ nfsnf(GEN nf, GEN x)
           p1 = element_mulvecrow(nf,gel(D,l),A,k,i);
           for (l=1; l<=i; l++) gcoeff(A,i,l) = gadd(gcoeff(A,i,l),gel(p1,l));
 
-          k = l = i; c = 1; break;
+          k = i; c = 1; break;
         }
       if (low_stack(lim, stack_lim(av,1)))
       {
@@ -2855,11 +2855,11 @@ nfcleanmod(GEN nf, GEN x, long lim, GEN D)
 GEN
 nfhnfmod(GEN nf, GEN x, GEN detmat)
 {
-  long li, co, i, j, def, ldef, N;
+  long li, co, i, j, def, ldef;
   pari_sp av0=avma, av, lim;
   GEN d0, w, p1, d, u, v, A, I, J, di;
 
-  nf = checknf(nf); N = nf_get_degree(nf);
+  nf = checknf(nf);
   check_ZKmodule(x, "nfhnfmod");
   A = gel(x,1);
   I = gel(x,2);

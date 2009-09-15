@@ -400,7 +400,7 @@ perm_to_GAP(GEN p)
     }
   }
   if (!c) { s[c++]='('; s[c++]=')'; }
-  s[c++] = 0;
+  s[c] = '\0';
   return gerepileupto(ltop,gap);
 }
 

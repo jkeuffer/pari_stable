@@ -821,7 +821,7 @@ print_escape_string(char *s)
       case '"': *t++ = '\\'; continue;
     }
   *t++ = '"';
-  *t++ = 0; puts(t0); pari_free(t0);
+  *t = '\0'; puts(t0); pari_free(t0);
 }
 
 static char *
