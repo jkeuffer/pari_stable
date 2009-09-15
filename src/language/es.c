@@ -1048,7 +1048,7 @@ fmtreal(outString *S, GEN gvalue, int space, int signvalue, int FORMAT,
 }
 /* format handling "inspired" by the standard draft at
 -- http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1124.pdf pages 274ff
- * fmt is a standard printf format, except 'Z' is a "length modifier"
+ * fmt is a standard printf format, except 'P' is a "length modifier"
  * allowing GEN arguments. Use either the arg_vector or (if NULL) the va_list */
 static char *
 sm_dopr(const char *fmt, GEN arg_vector, va_list args)
