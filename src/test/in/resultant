@@ -1,6 +1,6 @@
-gettime;
+gettime();
 allocatemem(20*10^6);
-do(P,Q)= sizebyte( polresultant(P,Q) );
+do(P,Q)=my(v=variable()); substvec(polresultant(P,Q), v, vector(#v,i,i));
 
 P = Pol([k,c,d,e,f,g]);
 Q = P';
@@ -43,10 +43,9 @@ Q = 1 + Polrev( vector(301,j, (j-1)^4) );
 do(P,Q)
 
 n = 110; 
-setrand(1);
-polrandom(d) = x^d + Polrev(vector(d+1, i, random()));
-P = polrandom(n); 
-Q = polrandom(n);
+polrandom(d, fudge) = x^d + Polrev(vector(d+1, i, round(2^32*sin(i+fudge))));
+P = polrandom(n,0); 
+Q = polrandom(n,1/2);
 do(P,Q)
 
 polresultant(-27673*x^2+322883101*x-1876122109136,x^4+4503599627370517)
