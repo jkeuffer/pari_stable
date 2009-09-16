@@ -1482,12 +1482,12 @@ nfarchstar(GEN nf, GEN x, GEN archp)
   return mkvec3(cyc,gen,mat);
 }
 
-/* a0 in Z_K (t_COL or t_INT), pr prime ideal, prk = pr^k,
+/* a in Z_K (t_COL or t_INT), pr prime ideal, prk = pr^k,
  * list = zprimestar(nf, pr, k, ...)  */
 static GEN
-zlog_pk(GEN nf, GEN a0, GEN y, GEN pr, GEN prk, GEN list, GEN *psigne)
+zlog_pk(GEN nf, GEN a, GEN y, GEN pr, GEN prk, GEN list, GEN *psigne)
 {
-  GEN a = a0, L, e, cyc, gen, s, U;
+  GEN L, e, cyc, gen, s, U;
   long i,j, llist = lg(list)-1;
 
   for (j = 1; j <= llist; j++)
