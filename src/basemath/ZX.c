@@ -476,7 +476,7 @@ ZX_sqr(GEN x)
   vx = ZX_val(x); nx-=vx;
   if (nx==1) return ZX1_sqr(x);
   ex = ZX_expi(x);
-  if (nx-2<sizeof(low) && low[nx-2]<=ex && ex<=high[nx-2])
+  if (nx-2 < (long)sizeof(low) && low[nx-2]<=ex && ex<=high[nx-2])
     z = ZX_sqrspec_basecase(x+2+vx, nx, 2*vx);
   else
     z = ZX_sqrspec_sqri(x+2+vx, nx, ex, 2*vx);
