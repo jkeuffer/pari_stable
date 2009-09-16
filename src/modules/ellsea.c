@@ -1419,7 +1419,7 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
     if (DEBUGLEVEL>=2)
       fprintferr("Remaining %Ps possibilities.\n", gel(best_champ, 2));
     if (low_stack(st_lim, stack_lim(btop, 1)))
-      gerepileall(btop, 3, &tr, &compile_atkin, &bound_bsgs, &best_champ);
+      gerepileall(btop, 4, &tr, &compile_atkin, &bound_bsgs, &best_champ);
   }
   compile_atkin = shallowextract(compile_atkin, gel(best_champ, 1));
 end_sea:
