@@ -1,1 +1,3 @@
-main(){ setsid(); }
+#include <unistd.h>
+pid_t (*f)() = setsid;
+int main(){ return f != setsid; }

@@ -1,4 +1,3 @@
 #include <unistd.h>
-
-char (*f)() = alarm;
+unsigned int (*f)(unsigned int) = alarm;
 int main(){ return f != alarm; }
