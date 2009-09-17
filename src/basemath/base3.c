@@ -1510,8 +1510,8 @@ zlog_pk(GEN nf, GEN a, GEN y, GEN pr, GEN prk, GEN list, GEN *psigne)
     }
     /* here lg(e) == lg(cyc) */
     for (i = 1; i < lg(cyc); i++)
-    {
-      GEN t = modii(negi(gel(e,i)), gel(cyc,i));
+    { /* FIXME: e has rational entries */
+      GEN t = gmod(gneg(gel(e,i)), gel(cyc,i));
       gel(++y,0) = negi(t); if (!signe(t)) continue;
 
       if (mod2(t)) Flv_add_inplace(*psigne, gel(s,i), 2);

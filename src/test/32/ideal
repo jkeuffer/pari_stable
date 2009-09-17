@@ -3,8 +3,10 @@
   ***   at top-level: idealaddtoone(Q,[1,[
   ***                 ^--------------------
   *** idealaddtoone: not an integer matrix in idealaddmultoone.
-[0]~
+  ***   at top-level: ideallog(Q,2,idealst
+  ***                 ^--------------------
+  *** ideallog: impossible inverse modulo: Mod(0, 2).
   ***   at top-level: idealstar(nfinit(y^2
   ***                 ^--------------------
   *** idealstar: non coprime ideals in idealaddtoone.
-Total time spent: 16
+Total time spent: 4
