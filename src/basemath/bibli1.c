@@ -2126,7 +2126,7 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
           }
         }
         imin = i;
-        for (j = 0; i <= s; i++)
+        for (; i <= s; i++)
           if (mpcmp(gel(norms,per[i]), borne1) > 0) break;
         imax = i;
         for (i=imin, s=0; i < imax; i++) gel(S,++s) = gel(S,per[i]);
