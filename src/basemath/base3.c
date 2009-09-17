@@ -1563,7 +1563,7 @@ famat_zlog(GEN nf, GEN fa, GEN sgn, GEN bid)
         if (v) ex = mulii(ex, powiu(p, v));
       }
     }
-    x = famat_makecoprime(nf, g, e, pr, prk, EX);
+    x = famat_makecoprime(nf, g, e, pr, prk, ex);
     y = zlog_pk(nf, x, y, pr, prk, gel(lists,i), &sgn);
   }
   zlog_add_sign(y0, sgn, lists);
