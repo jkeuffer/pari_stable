@@ -2222,9 +2222,10 @@ init_modular(ulong *p) { *p = 27449; return diffptr + 3000; }
  * If LERS is non-NULL, set it to the Last non-constant polynomial in the
  * Euclidean Remainder Sequence */
 GEN
-ZX_ZXY_resultant_all(GEN A, GEN B0, long *lambda, GEN *LERS)
+ZX_ZXY_resultant_all(GEN A, GEN B0, long *plambda, GEN *LERS)
 {
-  int checksqfree = lambda? 1: 0, delvar = 0, stable;
+  int checksqfree = plambda? 1: 0, delvar = 0, stable;
+  long lambda = plambda? *plambda: 0;
   ulong bound, p, dp;
   pari_sp av = avma, av2 = 0, lim;
   long i,n, lb, degA = degpol(A), dres = degA*degpol(B0);
@@ -2236,7 +2237,8 @@ ZX_ZXY_resultant_all(GEN A, GEN B0, long *lambda, GEN *LERS)
   dglist = Hp = H0p = H1p = C0 = C1 = NULL; /* gcc -Wall */
   if (LERS)
   {
-    if (!lambda) pari_err(talker,"ZX_ZXY_resultant_all: LERS needs lambda");
+    if (!checksqfree)
+      pari_err(talker,"ZX_ZXY_resultant_all: LERS != NULL needs lambda");
     C0 = cgetg(dres+2, t_VECSMALL);
     C1 = cgetg(dres+2, t_VECSMALL);
     dglist = cgetg(dres+1, t_VECSMALL);
@@ -2253,34 +2255,34 @@ ZX_ZXY_resultant_all(GEN A, GEN B0, long *lambda, GEN *LERS)
   B0 = Q_remove_denom(B0, &dB);
   lim = stack_lim(av,2);
 
+  /* make sure p large enough */
+  while (p < (ulong)(dres<<1)) NEXT_PRIME_VIADIFF(p,d);
+
 INIT:
-  if (av2) { avma = av2; *lambda = next_lambda(*lambda); }
-  if (lambda)
+  /* allways except the first time */
+  if (av2) { avma = av2; lambda = next_lambda(lambda); }
+  if (checksqfree)
   {
-    L = deg1pol_shallow(stoi(*lambda), pol_x(MAXVARN), vY);
-    if (DEBUGLEVEL>4) fprintferr("Trying lambda = %ld\n",*lambda);
+    /* # + lambda */
+    L = deg1pol_shallow(stoi(lambda), pol_x(MAXVARN), vY);
+    if (DEBUGLEVEL>4) fprintferr("Trying lambda = %ld\n", lambda);
   }
   B = poleval(B0, L); av2 = avma;
 
   if (degA <= 3)
   { /* sub-resultant faster for small degrees */
     if (LERS)
-    {
+    { /* implies checksqfree */
       H = resultant_all(A,B,&q);
-      if (typ(q) != t_POL || degpol(q)!=1 || !ZX_is_squarefree(H)) goto INIT;
+      if (typ(q) != t_POL || degpol(q)!=1) goto INIT;
       H0 = gel(q,2); if (typ(H0) == t_POL) setvarn(H0,vX);
       H1 = gel(q,3); if (typ(H1) == t_POL) setvarn(H1,vX);
     }
     else
-    {
       H = resultant(A,B);
-      if (checksqfree && !ZX_is_squarefree(H)) goto INIT;
-    }
+    if (checksqfree && !ZX_is_squarefree(H)) goto INIT;
     goto END;
   }
-
-  /* make sure p large enough */
-  while (p < (ulong)(dres<<1)) NEXT_PRIME_VIADIFF(p,d);
 
   H = H0 = H1 = NULL;
   lb = lg(B);
@@ -2361,7 +2363,7 @@ INIT:
     if (dp != 1) Hp = Flx_Fl_mul(Hp, Fl_powu(Fl_inv(dp,p), degA, p), p);
     if (checksqfree) {
       if (!Flx_is_squarefree(Hp, p)) goto INIT;
-      if (DEBUGLEVEL>4) fprintferr("Final lambda = %ld\n",*lambda);
+      if (DEBUGLEVEL>4) fprintferr("Final lambda = %ld\n", lambda);
       checksqfree = 0;
     }
 
@@ -2397,6 +2399,7 @@ INIT:
   }
 END:
   setvarn(H, vX); if (delvar) (void)delete_var();
+  if (plambda) *plambda = lambda;
   if (LERS)
   {
     *LERS = mkvec2(H0,H1);
