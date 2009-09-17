@@ -1617,7 +1617,7 @@ nilord(decomp_t *S, GEN dred, long mf, long flag)
   S->pmf = powiu(p, mf+1);
   S->precns = NULL;
   oE = 0;
-  opa = NULL;
+  opa = NULL; /* -Wall */
   l = 2; /* Decomp by default */
 
   for(;;)
@@ -1627,6 +1627,7 @@ nilord(decomp_t *S, GEN dred, long mf, long flag)
     for(;;)
     {
       long La, Ea;
+      /* N.B If oE = 0, getprime cannot return NULL */
       GEN pia  = getprime(S, NULL, S->chi, S->nu, &La, &Ea, oE,0);
       if (pia) { /* success, we break out in THIS loop */
         opa = (Ea > 1)? RgX_RgXQ_eval(pia, S->phi, S->f): pia;
