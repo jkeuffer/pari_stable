@@ -2252,7 +2252,7 @@ rootsold(GEN x, long prec)
         }
       }
       xc = gerepileupto(av0, xc);
-      xd = RgX_deriv(xc); av2 = avma;
+      xd = RgX_deriv(xc);
     }
     k += deg*m;
   }
