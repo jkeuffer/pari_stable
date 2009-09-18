@@ -5,8 +5,8 @@
   *** idealaddtoone: not an integer matrix in idealaddmultoone.
   ***   at top-level: ideallog(Q,2,idealst
   ***                 ^--------------------
-  *** ideallog: ideallog: 2 not coprime to [2, [2]~, 1, 1, 1].
+  *** ideallog: 2 not coprime to [2, [2]~, 1, 1, 1] in zlog_pk.
   ***   at top-level: idealstar(nfinit(y^2
   ***                 ^--------------------
   *** idealstar: non coprime ideals in idealaddtoone.
-Total time spent: 10
+Total time spent: 4
