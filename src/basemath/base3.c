@@ -1513,7 +1513,7 @@ zlog_pk(GEN nf, GEN a, GEN y, GEN pr, GEN prk, GEN list, GEN *psigne)
     {
       GEN t;
       if (typ(gel(e,i)) != t_INT)
-        pari_err(talker,"ideallog: %Ps not coprime to %Ps", a, pr);
+        pari_err(talker,"%Ps not coprime to %Ps in zlog_pk", a, pr);
       t = modii(negi(gel(e,i)), gel(cyc,i));
       gel(++y,0) = negi(t); if (!signe(t)) continue;
 
