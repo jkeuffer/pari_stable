@@ -64,9 +64,7 @@ typedef struct entree {
 typedef struct PariOUT {
   void (*putch)(char);
   void (*puts)(const char*);
-  void (*flush)(void);     /* Finalize a report of a non fatal-error. */
-  void (*die)(void);       /* If not-NULL, should be called to finalize
-                          a report of a fatal error (no "\n" required). */
+  void (*flush)(void);
 } PariOUT;
 
 typedef struct pariFILE {

@@ -385,7 +385,7 @@ normalOutF(void)
   fflush(pari_outfile);
   if (pari_logfile) fflush(pari_logfile);
 }
-PariOUT defaultOut = {normalOutC, normalOutS, normalOutF, NULL};
+PariOUT defaultOut = {normalOutC, normalOutS, normalOutF};
 
 static void
 normalErrC(char c)
@@ -405,7 +405,7 @@ normalErrF(void)
   fflush(pari_errfile);
   if (pari_logfile) fflush(pari_logfile);
 }
-PariOUT defaultErr = {normalErrC, normalErrS, normalErrF, NULL};
+PariOUT defaultErr = {normalErrC, normalErrS, normalErrF};
 
 /**                         GENERIC PRINTING                       **/
 void
@@ -1416,7 +1416,7 @@ putc80(char c)
 static void
 puts80(const char *s) { while (*s) putc80(*s++); }
 
-PariOUT pariOut80= {putc80, puts80, normalOutF, NULL};
+PariOUT pariOut80= {putc80, puts80, normalOutF};
 
 void
 init80col() { col_index = 0; pariOut = &pariOut80; }

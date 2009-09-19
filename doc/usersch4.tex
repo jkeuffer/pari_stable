@@ -1766,12 +1766,10 @@ that models a stream and contains the following function pointers:
 void (*putch)(char);           /* putc()-alike */
 void (*puts)(const char*);     /* fputs()-alike */
 void (*flush)(void);           /* flush function */
-void (*die)(void);             /* flush function for fatal errors */
 @eprog\noindent
 The functions \tet{putch} and \tet{puts} are used to print a character
-or a string respectively.  \tet{flush} is called to finalize (flush)
-error messges in normal circumstances, and \tet{die} is a variant of
-flush that (if non-\kbd{NULL}) is used if a fatal error has occurred.
+or a string respectively.  The function \tet{flush} is called to finalize a
+messages.
 
 By default, we have \kbd{pariOut = defaultOut}, which writes output to a
 \kbd{FILE*}, \tet{pari_outfile}, initialized to \tet{stdout}.  The

@@ -819,7 +819,6 @@ err_recover(long numerr)
   killallfiles(0);
   s_ERR_CATCH.n = 0; /* untrapped error: kill all error handlers */
 
-  if (pariErr->die) pariErr->die();    /* Caller wants to catch exceptions? */
   global_err_data = NULL;
   fprintferr("\n"); flusherr();
 
