@@ -128,13 +128,30 @@ getcodepos(struct codepos *pos)
 }
 
 void
-compiler_reset(void)
+compilestate_reset(void)
 {
   s_opcode.n=0;
   s_operand.n=0;
   s_dbginfo.n=0;
   s_data.n=0;
   s_lvar.n=0;
+  offset=-1;
+}
+
+void
+compilestate_save(struct pari_compilestate *comp)
+{
+  comp->lvar=s_lvar.n;
+}
+
+void
+compilestate_restore(struct pari_compilestate *comp)
+{
+  s_opcode.n=0;
+  s_operand.n=0;
+  s_dbginfo.n=0;
+  s_data.n=0;
+  s_lvar.n=comp->lvar;
   offset=-1;
 }
 

@@ -144,7 +144,6 @@ void pari_init_evaluator(void);
 GEN  pari_compile_str(char *lex, int strict);
 void parser_reset(void);
 void optimizenode(long n);
-void compiler_reset(void);
 void closure_context(GEN C, long lpc);
 void closure_err(void);
 const char * closure_func_err(void);
@@ -156,18 +155,5 @@ pari_stack *pari_get_oldmodules(void);
 
 INLINE long
 is_keyword_char(char c) { return (isalnum((int)c) || c=='_'); }
-
-struct pari_evalstate
-{
-  long sp;
-  long rp;
-  long var;
-  long lvars;
-  long trace;
-};
-
-void evalstate_save(struct pari_evalstate *state);
-void evalstate_reset(void);
-void evalstate_restore(struct pari_evalstate *state);
 
 ENDEXTERN

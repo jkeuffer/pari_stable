@@ -310,6 +310,29 @@ typedef struct {
 void lim_lines_output(char *s, long n, long max);
 void gen_output(GEN x, pariout_t *T);
 
+struct pari_compilestate
+{
+  long lvar;
+};
+
+struct pari_evalstate
+{
+  long sp;
+  long rp;
+  long var;
+  long lvars;
+  long trace;
+  struct pari_compilestate comp;
+};
+
+void compilestate_reset(void);
+void compilestate_save(struct pari_compilestate *comp);
+void compilestate_restore(struct pari_compilestate *comp);
+
+void evalstate_reset(void);
+void evalstate_restore(struct pari_evalstate *state);
+void evalstate_save(struct pari_evalstate *state);
+
 /* GP_DATA */
 typedef struct {
   jmp_buf env;

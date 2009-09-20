@@ -92,7 +92,6 @@ allocatemem0(GEN z)
     if (signe(z) < 0) pari_err(talker,"negative size in allocatemem");
   }
   evalstate_reset();
-  compiler_reset();
   (void)allocatemoremem(newsize);
   global_err_data = NULL;
   longjmp(GP_DATA->env, -1);
@@ -1214,6 +1213,7 @@ evalstate_save(struct pari_evalstate *state)
   state->var  = s_var.n;
   state->lvars= s_lvars.n;
   state->trace= s_trace.n;
+  compilestate_save(&state->comp);
 }
 
 void
@@ -1223,6 +1223,7 @@ evalstate_restore(struct pari_evalstate *state)
   restore_vars(s_var.n-state->var,s_lvars.n-state->lvars);
   s_trace.n=state->trace;
   reset_break();
+  compilestate_restore(&state->comp);
 }
 
 void
@@ -1232,6 +1233,7 @@ evalstate_reset(void)
   restore_vars(s_var.n,s_lvars.n);
   s_trace.n = 0;
   reset_break();
+  compilestate_reset();
 }
 
 GEN

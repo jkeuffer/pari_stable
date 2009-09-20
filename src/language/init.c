@@ -774,7 +774,6 @@ recover(int flag)
     }
   }
   parser_reset();
-  compiler_reset();
   if (DEBUGMEM>2) fprintferr("leaving recover()\n");
   BLOCK_SIGINT_END
   try_to_recover = 1;
