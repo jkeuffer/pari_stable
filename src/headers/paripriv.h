@@ -263,7 +263,6 @@ void  pari_set_last_newline(int last);
 void  print_functions_hash(const char *s);
 void  print_all_user_fun(int member);
 GEN   readbin(const char *name, FILE *f, int *vector);
-void  recover(int flag);
 void  term_color(long c);
 const char *term_get_color(long c);
 int   term_height(void);
@@ -333,6 +332,15 @@ void evalstate_reset(void);
 void evalstate_restore(struct pari_evalstate *state);
 void evalstate_save(struct pari_evalstate *state);
 
+struct gp_recover
+{
+  long listloc;
+  struct pari_evalstate state;
+};
+
+void gp_recover_save(struct gp_recover* rec);
+void gp_recover_restore(struct gp_recover* rec);
+
 /* GP_DATA */
 typedef struct {
   jmp_buf env;
@@ -343,6 +351,7 @@ typedef struct {
   ulong flags, lim_lines;
   char *help, *prompt, *prompt_cont;
   pari_timer *T;
+  struct gp_recover rec;
 } gp_data;
   /* GP_DATA->flags */
 enum { QUIET=1, TEST=2, SIMPLIFY=4, CHRONO=8, ECHO=16, STRICTMATCH=32,

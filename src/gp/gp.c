@@ -1500,7 +1500,7 @@ gp_main_loop(long flag)
       static long tloc, outtyp;
       long er;
       outtyp = GP_DATA->fmt->prettyp;
-      tloc = H->total; recover(0);
+      tloc = H->total; gp_recover_save(&GP_DATA->rec);
       /* recover: jump from error [ > 0 ] or allocatemem [ -1 ] */
       if ((er = setjmp(GP_DATA->env)))
       {

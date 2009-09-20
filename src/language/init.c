@@ -740,23 +740,26 @@ pari_close(void)
 /*                         ERROR RECOVERY                          */
 /*                                                                 */
 /*******************************************************************/
-/* IF flag = 0: record address of next block allocated.
- * ELSE (after an error) recover all memory allocated since last call */
-void
-recover(int flag)
-{
-  static long listloc;
-  long i;
-  static struct pari_evalstate state;
 
-  if (!flag) { listloc = next_block; evalstate_save(&state); return; }
+void
+gp_recover_save(struct gp_recover* rec)
+{
+  rec->listloc = next_block;
+  evalstate_save(&rec->state);
+}
+
+void
+gp_recover_restore(struct gp_recover* rec)
+{
+  long i;
+
   if (!(GP_DATA->flags & RECOVER)) pari_exit();
 
   /* disable recover() and SIGINT */
   try_to_recover = 0;
   BLOCK_SIGINT_START
-  if (DEBUGMEM>2) fprintferr("entering recover(), loc = %ld\n", listloc);
-  evalstate_restore(&state);
+  if (DEBUGMEM>2) fprintferr("entering recover(), loc = %ld\n", rec->listloc);
+  evalstate_restore(&rec->state);
   for (i = 0; i < functions_tblsz; i++)
   {
     entree *ep = functions_hash[i];
@@ -766,7 +769,7 @@ recover(int flag)
       switch(EpVALENCE(ep))
       {
         case EpVAR:
-          while (pop_val_if_newer(ep,listloc)) /* empty */;
+          while (pop_val_if_newer(ep,rec->listloc)) /* empty */;
           break;
         case EpNEW: break;
       }
@@ -822,7 +825,7 @@ err_recover(long numerr)
   fprintferr("\n"); flusherr();
 
   /* reclaim memory stored in "blocs" */
-  if (try_to_recover) recover(1);
+  if (try_to_recover) gp_recover_restore(&GP_DATA->rec);
   longjmp(GP_DATA->env, numerr);
 }
 
