@@ -106,6 +106,7 @@ extern default_type gp_default_list[];
 /* prompts */
 #define DFT_PROMPT "? "
 #define BREAK_LOOP_PROMPT "break> "
+#define BREAK_LOOP_PROMPTM "break[%ld]> "
 #define COMMENTPROMPT "comment> "
 #define CONTPROMPT ""
 #define DFT_INPROMPT ""

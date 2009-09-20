@@ -1257,8 +1257,8 @@ filtered_buffer(filtre_t *F)
   return b;
 }
 
-static jmp_buf GP_env;
-static struct gp_recover GP_rec;
+static jmp_buf *env;
+static pari_stack s_env;
 
 static void
 gp_initrc(pari_stack *p_A, char *path)
@@ -1273,7 +1273,7 @@ gp_initrc(pari_stack *p_A, char *path)
   b = filtered_buffer(&F);
   for(;;)
   {
-    if (setjmp(GP_env)) fprintferr("...skipping line %ld.\n", c);
+    if (setjmp(env[s_env.n-1])) fprintferr("...skipping line %ld.\n", c);
     c++;
     if (!get_line_from_file(NULL,&F,file)) break;
     s = b->buf;
@@ -1502,11 +1502,15 @@ gp_main_loop(long flag)
     { /* set a recovery point */
       static long tloc, outtyp;
       long er;
+      struct gp_recover rec;
       outtyp = GP_DATA->fmt->prettyp;
-      tloc = H->total; gp_recover_save(&GP_rec);
+      tloc = H->total; gp_recover_save(&rec);
       /* recover: jump from error [ > 0 ] or allocatemem [ -1 ] */
-      if ((er = setjmp(GP_env)))
+      if ((er = setjmp(env[s_env.n-1])))
       {
+        if (er>=0) gp_recover_restore(&rec);
+        else gp_recover_save(&rec);
+
         if (ismain && er > 0) {
           char *s = (char*)global_err_data;
           if (s && *s) fprintferr("%Ps\n", readseq(s));
@@ -1583,7 +1587,10 @@ break_loop(int sigint)
   filtre_t F;
   Buffer *b = filtered_buffer(&F);
   int go_on = sigint, cnt = 0;
-
+  struct gp_recover rec;
+  char *prompt, promptbuf[MAX_PROMPT_LEN + 24];
+  gp_recover_save(&rec);
+  stack_new(&s_env);
   term_color(c_ERR); pari_putc('\n');
   if (sigint)
     print_errcontext("Break loop: type <Return> or Control-d to continue",
@@ -1595,12 +1602,26 @@ break_loop(int sigint)
     pari_puts("[type <Return> in empty line to continue]\n");
   else
     killallfiles(0);
+  if (s_env.n==2)
+    prompt=BREAK_LOOP_PROMPT;
+  else
+  {
+    sprintf(promptbuf,BREAK_LOOP_PROMPTM,s_env.n-1);
+    prompt=promptbuf;
+  }
   oldinfile = pari_infile;
   pari_infile = stdin;
   for(;;)
   {
     GEN x;
-    if (! gp_read_line(&F, BREAK_LOOP_PROMPT))
+    long er;
+    if ((er=setjmp(env[s_env.n-1])))
+    {
+      if (er<0) { s_env.n=1; longjmp(env[s_env.n-1], er); }
+      gp_recover_restore(&rec);
+      closure_err();
+    }
+    if (! gp_read_line(&F, prompt))
     {
       if (popinfile()) { go_on = 0; break; }
       continue;
@@ -1622,6 +1643,7 @@ break_loop(int sigint)
     term_color(c_OUTPUT); gen_output(x, GP_DATA->fmt);
     term_color(c_NONE); pari_putc('\n');
   }
+  s_env.n--;
   pari_infile = oldinfile;
   pop_buffer(); return go_on;
 }
@@ -1641,9 +1663,7 @@ gp_handle_exception(long numerr)
 void
 gp_err_recover(long numerr)
 {
-  if (numerr>=0) gp_recover_restore(&GP_rec);
-  else gp_recover_save(&GP_rec);
-  longjmp(GP_env, numerr);
+  longjmp(env[s_env.n-1], numerr);
 }
 
 static void
@@ -1682,7 +1702,7 @@ static void
 read_main(const char *s)
 {
   GEN z;
-  if (setjmp(GP_env))
+  if (setjmp(env[s_env.n-1]))
     z = NULL;
   else {
     switchin(s);
@@ -1830,7 +1850,7 @@ read_opt(pari_stack *p_A, long argc, char **argv)
   } else if (initrc)
   {
     gp_initrc(p_A, argv[0]);
-    if (setjmp(GP_env))
+    if (setjmp(env[s_env.n-1]))
     {
       puts("### Errors on startup, exiting...\n\n");
       exit(1);
@@ -1862,7 +1882,10 @@ main(int argc, char **argv)
   pari_stack s_A, *newfun, *oldfun;
 
   GP_DATA = default_gp_data();
-  if (setjmp(GP_env))
+  stack_init(&s_env, sizeof(*env), (void**)&env);
+  stack_new(&s_env);
+
+  if (setjmp(env[s_env.n-1]))
   {
     puts("### Errors on startup, exiting...\n\n");
     exit(1);

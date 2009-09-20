@@ -763,6 +763,7 @@ gp_recover_restore(struct gp_recover* rec)
   try_to_recover = 0;
   BLOCK_SIGINT_START
   if (DEBUGMEM>2) fprintferr("entering recover(), loc = %ld\n", rec->listloc);
+  parser_reset();
   evalstate_restore(&rec->state);
   for (i = 0; i < functions_tblsz; i++)
   {
@@ -780,7 +781,6 @@ gp_recover_restore(struct gp_recover* rec)
       ep = EP;
     }
   }
-  parser_reset();
   if (DEBUGMEM>2) fprintferr("leaving recover()\n");
   BLOCK_SIGINT_END
   try_to_recover = 1;
