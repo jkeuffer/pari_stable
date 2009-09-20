@@ -94,7 +94,7 @@ allocatemem0(GEN z)
   evalstate_reset();
   (void)allocatemoremem(newsize);
   global_err_data = NULL;
-  longjmp(GP_DATA->env, -1);
+  cb_pari_err_recover(-1);
 }
 
 /*******************************************************************/

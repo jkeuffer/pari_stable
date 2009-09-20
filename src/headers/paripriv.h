@@ -343,7 +343,6 @@ void gp_recover_restore(struct gp_recover* rec);
 
 /* GP_DATA */
 typedef struct {
-  jmp_buf env;
   gp_hist *hist;
   gp_pp *pp;
   gp_path *path;
@@ -351,7 +350,6 @@ typedef struct {
   ulong flags, lim_lines;
   char *help, *prompt, *prompt_cont;
   pari_timer *T;
-  struct gp_recover rec;
 } gp_data;
   /* GP_DATA->flags */
 enum { QUIET=1, TEST=2, SIMPLIFY=4, CHRONO=8, ECHO=16, STRICTMATCH=32,

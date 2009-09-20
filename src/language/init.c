@@ -67,6 +67,7 @@ void (*cb_pari_ask_confirm)(const char *);
 int  (*cb_pari_handle_exception)(long);
 int  (*cb_pari_whatnow)(const char *, int);
 void (*cb_pari_sigint)(void);
+void (*cb_pari_err_recover)(long);
 
 typedef struct {
   jmp_buf *penv;
@@ -652,6 +653,9 @@ pari_exit(void)
   exit(1);
 }
 
+static void
+dflt_err_recover(long errnum) { pari_exit(); }
+
 /* initialize PARI data. Initialize [new|old]fun to NULL for default set. */
 void
 pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts)
@@ -661,6 +665,7 @@ pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts)
   cb_pari_whatnow = NULL;
   cb_pari_sigint = dflt_sigint_fun;
   cb_pari_handle_exception = NULL;
+  cb_pari_err_recover = dflt_err_recover;
 
   pari_stackcheck_init(&u);
   if ((init_opts&INIT_DFTm)) {
@@ -669,7 +674,6 @@ pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts)
     pari_init_defaults();
   }
 
-  if ((init_opts&INIT_JMPm) && setjmp(GP_DATA->env)) pari_exit();
   if ((init_opts&INIT_SIGm)) pari_sig_init(pari_sighandler);
   pari_init_stack(parisize, 0);
   diffptr = initprimes(maxprime);
@@ -754,8 +758,8 @@ gp_recover_restore(struct gp_recover* rec)
   long i;
 
   if (!(GP_DATA->flags & RECOVER)) pari_exit();
-
-  /* disable recover() and SIGINT */
+  if (!try_to_recover) return;
+  /* disable gp_recover_restore() and SIGINT */
   try_to_recover = 0;
   BLOCK_SIGINT_START
   if (DEBUGMEM>2) fprintferr("entering recover(), loc = %ld\n", rec->listloc);
@@ -824,9 +828,7 @@ err_recover(long numerr)
   global_err_data = NULL;
   fprintferr("\n"); flusherr();
 
-  /* reclaim memory stored in "blocs" */
-  if (try_to_recover) gp_recover_restore(&GP_DATA->rec);
-  longjmp(GP_DATA->env, numerr);
+  cb_pari_err_recover(numerr);
 }
 
 static void

@@ -1257,6 +1257,9 @@ filtered_buffer(filtre_t *F)
   return b;
 }
 
+static jmp_buf GP_env;
+static struct gp_recover GP_rec;
+
 static void
 gp_initrc(pari_stack *p_A, char *path)
 {
@@ -1270,7 +1273,7 @@ gp_initrc(pari_stack *p_A, char *path)
   b = filtered_buffer(&F);
   for(;;)
   {
-    if (setjmp(GP_DATA->env)) fprintferr("...skipping line %ld.\n", c);
+    if (setjmp(GP_env)) fprintferr("...skipping line %ld.\n", c);
     c++;
     if (!get_line_from_file(NULL,&F,file)) break;
     s = b->buf;
@@ -1500,9 +1503,9 @@ gp_main_loop(long flag)
       static long tloc, outtyp;
       long er;
       outtyp = GP_DATA->fmt->prettyp;
-      tloc = H->total; gp_recover_save(&GP_DATA->rec);
+      tloc = H->total; gp_recover_save(&GP_rec);
       /* recover: jump from error [ > 0 ] or allocatemem [ -1 ] */
-      if ((er = setjmp(GP_DATA->env)))
+      if ((er = setjmp(GP_env)))
       {
         if (ismain && er > 0) {
           char *s = (char*)global_err_data;
@@ -1634,6 +1637,15 @@ gp_handle_exception(long numerr)
   return 0;
 }
 
+/* numerr < 0: from SIGINT */
+void
+gp_err_recover(long numerr)
+{
+  if (numerr>=0) gp_recover_restore(&GP_rec);
+  else gp_recover_save(&GP_rec);
+  longjmp(GP_env, numerr);
+}
+
 static void
 gp_alarm_handler(int sig)
 {
@@ -1670,7 +1682,7 @@ static void
 read_main(const char *s)
 {
   GEN z;
-  if (setjmp(GP_DATA->env))
+  if (setjmp(GP_env))
     z = NULL;
   else {
     switchin(s);
@@ -1818,7 +1830,7 @@ read_opt(pari_stack *p_A, long argc, char **argv)
   } else if (initrc)
   {
     gp_initrc(p_A, argv[0]);
-    if (setjmp(GP_DATA->env))
+    if (setjmp(GP_env))
     {
       puts("### Errors on startup, exiting...\n\n");
       exit(1);
@@ -1850,7 +1862,7 @@ main(int argc, char **argv)
   pari_stack s_A, *newfun, *oldfun;
 
   GP_DATA = default_gp_data();
-  if (setjmp(GP_DATA->env))
+  if (setjmp(GP_env))
   {
     puts("### Errors on startup, exiting...\n\n");
     exit(1);
@@ -1884,6 +1896,7 @@ main(int argc, char **argv)
   cb_pari_sigint = gp_sigint_fun;
   cb_pari_handle_exception = gp_handle_exception;
   cb_pari_ask_confirm = gp_ask_confirm;
+  cb_pari_err_recover = gp_err_recover;
   gp_expand_path(GP_DATA->path);
 
   if (!(GP_DATA->flags & QUIET)) gp_head();
