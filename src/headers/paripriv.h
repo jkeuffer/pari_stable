@@ -316,6 +316,7 @@ struct pari_compilestate
 
 struct pari_evalstate
 {
+  pari_sp avma;
   long sp;
   long rp;
   long var;

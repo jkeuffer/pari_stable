@@ -1208,6 +1208,7 @@ closure_evalgen(GEN C)
 void
 evalstate_save(struct pari_evalstate *state)
 {
+  state->avma = avma;
   state->sp   = sp;
   state->rp   = rp;
   state->var  = s_var.n;
@@ -1219,9 +1220,11 @@ evalstate_save(struct pari_evalstate *state)
 void
 evalstate_restore(struct pari_evalstate *state)
 {
-  sp=state->sp; rp=state->rp;
+  avma = state->avma;
+  sp = state->sp;
+  rp = state->rp;
   restore_vars(s_var.n-state->var,s_lvars.n-state->lvars);
-  s_trace.n=state->trace;
+  s_trace.n = state->trace;
   reset_break();
   compilestate_restore(&state->comp);
 }
@@ -1229,23 +1232,24 @@ evalstate_restore(struct pari_evalstate *state)
 void
 evalstate_reset(void)
 {
-  sp=0; rp=0;
-  restore_vars(s_var.n,s_lvars.n);
+  sp = 0;
+  rp = 0;
+  restore_vars(s_var.n, s_lvars.n);
   s_trace.n = 0;
   reset_break();
   compilestate_reset();
+  avma = top;
 }
 
 GEN
 closure_trapgen(GEN C, long numerr)
 {
-  pari_sp av=avma;
   VOLATILE GEN x;
   struct pari_evalstate state;
   evalstate_save(&state);
   CATCH(numerr) { x = (GEN)1L; }
   TRY { x = closure_evalgen(C); } ENDCATCH;
-  if (x == (GEN)1L) { evalstate_restore(&state); avma=av; }
+  if (x == (GEN)1L) evalstate_restore(&state);
   return x;
 }
 

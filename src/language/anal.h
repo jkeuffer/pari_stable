@@ -157,7 +157,4 @@ pari_stack *pari_get_oldmodules(void);
 INLINE long
 is_keyword_char(char c) { return (isalnum((int)c) || c=='_'); }
 
-void compiler_save(long *lvar);
-void compiler_restore(long *lvar);
-
 ENDEXTERN
