@@ -840,7 +840,7 @@ matrice(GEN nlig, GEN ncol, GEN code)
   if (!m) return cgetg(1,t_MAT);
   if (!code || !n) return zeromatcopy(n, m);
   push_lex(c1,code);
-  push_lex(c2,code); y = cgetg(m+1,t_MAT);
+  push_lex(c2,NULL); y = cgetg(m+1,t_MAT);
   for (i=1; i<=m; i++)
   {
     c2[2] = i; z = cgetg(n+1,t_COL); gel(y,i) = z;

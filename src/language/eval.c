@@ -408,13 +408,25 @@ restore_vars(long nbmvar, long nblvar)
   s_lvars.n-=nblvar;
 }
 
+INLINE void
+trace_push(long *pc, GEN C)
+{
+  long tr;
+  BLOCK_SIGINT_START
+  tr = stack_new(&s_trace);
+  trace[tr].pc = pc;
+  trace[tr].closure = C;
+  BLOCK_SIGINT_END
+}
+
 void
-push_lex(GEN a, GEN C/*unused*/)
+push_lex(GEN a, GEN C)
 {
   long vn=stack_new(&s_var);
   struct var_lex *v=var+vn;
   v->flag  = PUSH_VAL;
   v->value = a;
+  if (C) trace_push(NULL, C);
 }
 
 GEN
@@ -439,6 +451,7 @@ pop_lex(long n)
   for(j=1; j<=n; j++)
     freelex(-j);
   s_var.n-=n;
+  s_trace.n--;
 }
 
 void
@@ -565,7 +578,7 @@ closure_func_err(void)
   long fun=s_trace.n-1, pc;
   const char *code;
   GEN C, oper;
-  if (fun < 0) return NULL;
+  if (fun < 0 || !trace[fun].pc) return NULL;
   pc = *trace[fun].pc; C  = trace[fun].closure;
   code = GSTR(gel(C,2))-1; oper = gel(C,3);
   if (code[pc]==OCcallgen || code[pc]==OCcallgen2 ||
@@ -606,7 +619,10 @@ closure_err(void)
   if (fun < 0) return; /*e.g. when called by gp_main_loop's simplify */
   while (lg(trace[fun].closure)==6) fun--;
   for (i=fun; i<=lastfun; i++)
-    closure_context(trace[i].closure, *trace[i].pc);
+  {
+    long *pc=trace[i].pc;
+    closure_context(trace[i].closure, pc?*pc:-1);
+  }
 
   i = maxss(0, lastfun - 19);
   if (i > 0) while (lg(trace[i].closure)==6) i--;
@@ -617,7 +633,7 @@ closure_err(void)
   {
     GEN C = trace[i].closure;
     if (lg(C) >= 7) base=gel(C,6);
-    if (i==lastfun || lg(trace[i+1].closure)>=7)
+    if ((i==lastfun || lg(trace[i+1].closure)>=7) && trace[i].pc)
     {
       /* After a SIGINT, pc can be slightly off: ensure 0 <= pc < lg() */
       long pc = minss(*trace[i].pc, lg(mael(C,5,1))-1);
@@ -644,17 +660,6 @@ closure_err(void)
       }
     }
   }
-}
-
-INLINE void
-trace_push(long *pc, GEN C)
-{
-  long tr;
-  BLOCK_SIGINT_START
-  tr = stack_new(&s_trace);
-  trace[tr].pc = pc;
-  trace[tr].closure = C;
-  BLOCK_SIGINT_END
 }
 
 INLINE void

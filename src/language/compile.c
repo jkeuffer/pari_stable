@@ -299,7 +299,15 @@ closure_context(GEN C, long lpc)
   GEN frpc=gmael(C,5,2);
   GEN fram=gmael(C,5,3);
   long pc, j=1;
-  for(pc=0; pc<=lpc; pc++)
+  if (lpc==-1)
+  {
+    long k;
+    GEN e = gel(fram, 1);
+    for(k=1; k<lg(e); k++)
+      var_push((entree*)e[k], Lmy);
+    return;
+  }
+  for(pc=1; pc<=lpc; pc++)
   {
     if (pc>0 && (code[pc]==OClocalvar || code[pc]==OClocalvar0))
       var_push((entree*)oper[pc],Llocal);
