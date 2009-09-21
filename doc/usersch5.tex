@@ -172,7 +172,7 @@ Function called when \kbd{SIGINT} is raised. By default, raises
 @eprog
 
 \doc{cb_pari_err_recover}{extern void (*cb_pari_handle_exception)(long)}
-initialized to \kbd{pari_exit()}. This call-back must not return.
+initialized to \kbd{pari\_exit()}. This call-back must not return.
 This call-back is called after PARI has cleaned-up from an error.
 The error number is passed as argument, unless the PARI stack
 has been destroyed, in which case it is called with argument $-1$.
