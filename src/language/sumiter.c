@@ -28,7 +28,7 @@ forpari(GEN a, GEN b, GEN code)
   pari_sp ltop=avma, av, lim;
   b = gcopy(b); /* Kludge to work-around the a+(a=2) bug */
   av=avma; lim = stack_lim(av,1);
-  push_lex(a);
+  push_lex(a,code);
   while (gcmp(a,b) <= 0)
   {
     closure_evalvoid(code); if (loop_break()) break;
@@ -83,7 +83,7 @@ forstep(GEN a, GEN b, GEN s, GEN code)
   int (*cmp)(GEN,GEN);
 
   b = gcopy(b); av=avma; lim = stack_lim(av,1);
-  push_lex(a);
+  push_lex(a,code);
   if (is_vec_t(typ(s)))
   {
     v = s; s = gen_0;
@@ -167,7 +167,7 @@ forprime(GEN ga, GEN gb, GEN code)
   d = prime_loop_init(ga,gb, &a,&b, (ulong*)&prime[2]);
   if (!d) { avma = av; return; }
 
-  avma = av; push_lex((GEN)prime);
+  avma = av; push_lex((GEN)prime,code);
   while (prime[2] < b)
   {
     closure_evalvoid(code); if (loop_break()) break;
@@ -190,7 +190,7 @@ fordiv(GEN a, GEN code)
   pari_sp av2, av = avma;
   GEN t = divisors(a);
 
-  push_lex(NULL); l=lg(t); av2 = avma;
+  push_lex(NULL,code); l=lg(t); av2 = avma;
   for (i=1; i<l; i++)
   {
     set_lex(-1,gel(t,i));
@@ -462,7 +462,7 @@ forvec(GEN x, GEN code, long flag)
   pari_sp av = avma;
   GEN (*next)(GEN,GEN);
   GEN D, v = forvec_start(x, flag, &D, &next);
-  push_lex(v);
+  push_lex(v,code);
   while (v) {
     closure_evalvoid(code); if (loop_break()) break;
     v = next(D, v);
@@ -489,7 +489,7 @@ somme(GEN a, GEN b, GEN code, GEN x)
   b = gfloor(b);
   a = setloop(a);
   av=avma; lim = stack_lim(av,1);
-  push_lex(a);
+  push_lex(a,code);
   for(;;)
   {
     p1 = closure_evalnobrk(code);
@@ -542,7 +542,7 @@ divsum(GEN num, GEN code)
   GEN y = gen_0, t = divisors(num);
   long i, l = lg(t);
 
-  push_lex(NULL);
+  push_lex(NULL, code);
   for (i=1; i<l; i++)
   {
     set_lex(-1,gel(t,i));
@@ -570,7 +570,7 @@ produit(GEN a, GEN b, GEN code, GEN x)
   b = gfloor(b);
   a = setloop(a);
   av=avma; lim = stack_lim(av,1);
-  push_lex(a);
+  push_lex(a,code);
   for(;;)
   {
     p1 = closure_evalnobrk(code);
@@ -788,7 +788,7 @@ vecteur(GEN nmax, GEN code)
   m = gtos(nmax);
   if (m < 0)  pari_err(talker,"negative number of components in vector");
   if (!code) return zerovec(m);
-  y = cgetg(m+1,t_VEC); push_lex(c);
+  y = cgetg(m+1,t_VEC); push_lex(c, code);
   for (i=1; i<=m; i++)
   {
     c[2] = i; p1 = closure_evalnobrk(code);
@@ -808,7 +808,7 @@ vecteursmall(GEN nmax, GEN code)
   m = gtos(nmax);
   if (m < 0)  pari_err(talker,"negative number of components in vector");
   if (!code) return const_vecsmall(m, 0);
-  y = cgetg(m+1,t_VECSMALL); push_lex(c);
+  y = cgetg(m+1,t_VECSMALL); push_lex(c,code);
   for (i=1; i<=m; i++)
   {
     c[2] = i;
@@ -839,8 +839,8 @@ matrice(GEN nlig, GEN ncol, GEN code)
   if (n < 0) pari_err(talker,"negative number of rows in matrix");
   if (!m) return cgetg(1,t_MAT);
   if (!code || !n) return zeromatcopy(n, m);
-  push_lex(c1);
-  push_lex(c2); y = cgetg(m+1,t_MAT);
+  push_lex(c1,code);
+  push_lex(c2,code); y = cgetg(m+1,t_MAT);
   for (i=1; i<=m; i++)
   {
     c2[2] = i; z = cgetg(n+1,t_COL); gel(y,i) = z;

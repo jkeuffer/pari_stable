@@ -409,7 +409,7 @@ restore_vars(long nbmvar, long nblvar)
 }
 
 void
-push_lex(GEN a)
+push_lex(GEN a, GEN C/*unused*/)
 {
   long vn=stack_new(&s_var);
   struct var_lex *v=var+vn;

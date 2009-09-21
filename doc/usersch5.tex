@@ -7705,8 +7705,11 @@ Function using the prototype code 'V' need to manually create and delete a
 lexical variable for each code 'V', which will be given a number $-1, -2,
 \ldots$.
 
-\fun{void}{push_lex}{GEN a} creates a new lexical variable whose initial value
-is $a$ on the top of the stack. This variable get the number $-1$, and the number of the other variables is decreased by one unit.
+\fun{void}{push_lex}{GEN a, GEN code} creates a new lexical variable whose
+initial value is $a$ on the top of the stack. This variable get the number
+$-1$, and the number of the other variables is decreased by one unit. The
+argument \kbd{code} must be the closure that references this lexical variable
+(The closure contains the debugging data for the variable).
 
 \fun{void}{pop_lex}{void} deletes topmost lexical variable, increasing the
 number of other variables by one unit.

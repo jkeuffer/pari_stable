@@ -557,7 +557,7 @@ traversesubgroups(GEN cyc, GEN bound, void fun(GEN, void*), void *data)
 void
 forsubgroup(GEN cyc, GEN bound, GEN code)
 {
-  push_lex(gen_0);
+  push_lex(gen_0, code);
   traversesubgroups(cyc, bound, &std_fun, (void*)code);
   pop_lex();
 }

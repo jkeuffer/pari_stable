@@ -23,7 +23,7 @@ BEGINEXTERN
 GEN gp_eval(GEN x, void *dat);
 #define EXPR_WRAP(code, call) \
 { GEN z; GEN __E = code; \
-  push_lex(NULL); z = call; pop_lex(); return z; }
+  push_lex(NULL, __E); z = call; pop_lex(); return z; }
 #define EXPR_ARG __E, &gp_eval
 
 /* to manipulate 'blocs' */

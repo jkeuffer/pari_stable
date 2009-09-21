@@ -131,7 +131,7 @@ plot(GEN a, GEN b, GEN code, GEN ysmlu,GEN ybigu, long prec)
 
   sig=gcmp(b,a); if (!sig) return;
   if (sig<0) { x=a; a=b; b=x; }
-  x = gtofp(a, prec); push_lex(x);
+  x = gtofp(a, prec); push_lex(x, code);
   dx = divru(gtofp(gsub(b,a),prec), ISCR-1);
   ysml = ybig = 0.;
   for (j=1; j<=JSCR; j++) scr[1][j]=scr[ISCR][j]=YY;
@@ -1338,7 +1338,7 @@ rectplothin(GEN a, GEN b, GEN code, long prec, ulong flags,
   dx = divru(gtofp(gsub(b,a),prec), testpoints-1);
 
   x = gtofp(a, prec);
-  if (typ(code) == t_CLOSURE) push_lex(x);
+  if (typ(code) == t_CLOSURE) push_lex(x, code);
   av2=avma; t=READ_EXPR(code,x); tx=typ(t);
   /* nc = nb of curves; nl = nb of coord. lists */
   if (!is_matvec_t(tx) && !cplx)

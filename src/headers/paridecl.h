@@ -1447,7 +1447,7 @@ GEN     closure_trapgen(GEN C, long numerr);
 GEN     get_lex(long vn);
 GEN     next0(long n);
 void    pop_lex(void);
-void    push_lex(GEN a);
+void    push_lex(GEN a, GEN C);
 GEN     return0(GEN x);
 void    set_lex(long vn, GEN x);
 
