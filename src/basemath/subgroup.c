@@ -559,7 +559,7 @@ forsubgroup(GEN cyc, GEN bound, GEN code)
 {
   push_lex(gen_0, code);
   traversesubgroups(cyc, bound, &std_fun, (void*)code);
-  pop_lex();
+  pop_lex(1);
 }
 
 static GEN

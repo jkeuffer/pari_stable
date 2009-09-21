@@ -7711,8 +7711,8 @@ $-1$, and the number of the other variables is decreased by one unit. The
 argument \kbd{code} must be the closure that references this lexical variable
 (The closure contains the debugging data for the variable).
 
-\fun{void}{pop_lex}{void} deletes topmost lexical variable, increasing the
-number of other variables by one unit.
+\fun{void}{pop_lex}{long n} deletes the $n$ topmost lexical variables,
+increasing the number of other variables by $n$.
 
 \fun{GEN}{get_lex}{long vn} get the value of the variable with number \kbd{vn}.
 

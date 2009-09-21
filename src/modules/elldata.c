@@ -252,5 +252,5 @@ forell(long a, long b, GEN code)
     avma = ltop;
   }
   forell_end:
-  pop_lex();
+  pop_lex(1);
 }

@@ -1708,7 +1708,7 @@ intnumdoub0(GEN a, GEN b, int nc, int nd, int nf, GEN tabext, GEN tabint, long p
   push_lex(NULL);
   push_lex(NULL);
   z = intnumdoub(chf, &gp_eval2, chc, &gp_eval, chd, &gp_eval, a, b, tabext, tabint, prec);
-  pop_lex(); pop_lex(); return z;
+  pop_lex(1); pop_lex(1); return z;
 }
 #endif
 

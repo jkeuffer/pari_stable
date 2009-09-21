@@ -189,7 +189,7 @@ plot(GEN a, GEN b, GEN code, GEN ysmlu,GEN ybigu, long prec)
     sprintf(line, "%10s%-9.7g%*.7g\n"," ",todbl(a),ISCR-9,todbl(b));
     pari_printf(line);
   }
-  pop_lex();
+  pop_lex(1);
 }
 
 /********************************************************************/
@@ -1557,7 +1557,7 @@ rectplothin(GEN a, GEN b, GEN code, long prec, ulong flags,
       }
   }
   pl[0].nb = nc;
-  if (typ(code) == t_CLOSURE) pop_lex();
+  if (typ(code) == t_CLOSURE) pop_lex(1);
   avma = av; return pl;
 }
 

@@ -433,10 +433,12 @@ set_lex(long vn, GEN x)
 }
 
 void
-pop_lex(void)
+pop_lex(long n)
 {
-  freelex(-1);
-  s_var.n--;
+  long j;
+  for(j=1; j<=n; j++)
+    freelex(-j);
+  s_var.n-=n;
 }
 
 void

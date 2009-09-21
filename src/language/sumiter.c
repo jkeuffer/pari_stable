@@ -40,7 +40,7 @@ forpari(GEN a, GEN b, GEN code)
     }
     set_lex(-1, a);
   }
-  pop_lex(); avma = ltop;
+  pop_lex(1); avma = ltop;
 }
 
 void
@@ -110,7 +110,7 @@ forstep(GEN a, GEN b, GEN s, GEN code)
     }
     set_lex(-1,a);
   }
-  pop_lex(); avma = av0;
+  pop_lex(1); avma = av0;
 }
 
 /* value changed during the loop, replace by the first prime whose
@@ -180,7 +180,7 @@ forprime(GEN ga, GEN gb, GEN code)
   /* if b = P --> *d = 0 now and the loop wouldn't end if it read 'while
    * (prime[2] <= b)' */
   if (prime[2] == b) { closure_evalvoid(code); (void)loop_break(); avma = av; }
-  pop_lex();
+  pop_lex(1);
 }
 
 void
@@ -197,7 +197,7 @@ fordiv(GEN a, GEN code)
     closure_evalvoid(code); if (loop_break()) break;
     avma = av2;
   }
-  pop_lex(); avma=av;
+  pop_lex(1); avma=av;
 }
 
 /* Embedded for loops:
@@ -467,7 +467,7 @@ forvec(GEN x, GEN code, long flag)
     closure_evalvoid(code); if (loop_break()) break;
     v = next(D, v);
   }
-  pop_lex(); avma = av;
+  pop_lex(1); avma = av;
 }
 
 /********************************************************************/
@@ -502,7 +502,7 @@ somme(GEN a, GEN b, GEN code, GEN x)
     }
     set_lex(-1,a);
   }
-  pop_lex(); return gerepileupto(av0,x);
+  pop_lex(1); return gerepileupto(av0,x);
 }
 
 GEN
@@ -548,7 +548,7 @@ divsum(GEN num, GEN code)
     set_lex(-1,gel(t,i));
     y = gadd(y, closure_evalnobrk(code));
   }
-  pop_lex(); return gerepileupto(av,y);
+  pop_lex(1); return gerepileupto(av,y);
 }
 
 /********************************************************************/
@@ -583,7 +583,7 @@ produit(GEN a, GEN b, GEN code, GEN x)
     }
     set_lex(-1,a);
   }
-  pop_lex(); return gerepileupto(av0,x);
+  pop_lex(1); return gerepileupto(av0,x);
 }
 
 GEN
@@ -795,7 +795,7 @@ vecteur(GEN nmax, GEN code)
     gel(y,i) = isonstack(p1)? p1 : gcopy(p1);
     set_lex(-1,c);
   }
-  pop_lex(); return y;
+  pop_lex(1); return y;
 }
 
 GEN
@@ -815,7 +815,7 @@ vecteursmall(GEN nmax, GEN code)
     y[i] = gtos(closure_evalnobrk(code));
     set_lex(-1,c);
   }
-  pop_lex(); return y;
+  pop_lex(1); return y;
 }
 
 GEN
@@ -852,7 +852,7 @@ matrice(GEN nlig, GEN ncol, GEN code)
       set_lex(-1,c2);
     }
   }
-  pop_lex(); pop_lex(); return y;
+  pop_lex(2); return y;
 }
 
 /********************************************************************/
