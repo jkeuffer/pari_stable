@@ -667,7 +667,7 @@ static GEN
 Vmatrix(long i, struct galois_test *td)
 {
   pari_sp av = avma;
-  GEN m = gclone( FpC_FpV_mul(td->L, row(td->M,i), td->ladic) );
+  GEN m = gclone( matheadlong(FpC_FpV_mul(td->L, row(td->M,i), td->ladic), td->ladic));
   avma = av; return m;
 }
 
@@ -718,19 +718,19 @@ galois_test_perm(struct galois_test *td, GEN pf)
 {
   pari_sp av = avma;
   long i, j, n = lg(td->L)-1;
-  GEN V, P = vecpermute(td->L, pf);
+  GEN V, P = NULL;
   for (i = 1; i < n; i++)
   {
     long ord = td->order[i];
     GEN PW = gel(td->PV, ord);
     if (PW)
     {
-      V = gmael(PW,1,pf[1]);
-      for (j = 2; j <= n; j++) V = addii(V, gmael(PW,j,pf[j]));
-      if (!padicisint(V, td)) break;
-    }
-    else
+      long Z = mael(PW,1,pf[1]);
+      for (j = 2; j <= n; j++) Z += mael(PW,j,pf[j]);
+      if (!headlongisint(Z,n)) break;
+    } else
     {
+      if (!P) P = vecpermute(td->L, pf);
       V = FpV_dotproduct(gel(td->TM,ord), P, td->ladic);
       if (!padicisint(V, td)) {
         gel(td->PV, ord) = Vmatrix(ord, td);
@@ -781,7 +781,7 @@ testpermutation(GEN F, GEN B, GEN x, long s, long e, long cut,
   av = avma;
   ar = cgetg(a+2, t_VECSMALL); ar[a+1]=0;
   G  = cgetg(a+1, t_VECSMALL);
-  W  = matheadlong(gel(td->PV, td->order[n]), td->ladic);
+  W  = gel(td->PV, td->order[n]);
   for (cx=1, i=1, j=1; cx <= a; cx++, i++)
   {
     gel(G,cx) = gel(F, coeff(B,i,j));
@@ -1295,7 +1295,7 @@ a4galoisgen(GEN T, struct galois_test *td)
   gel(res,2) = mkvecsmall3(2,2,3);
   av = avma;
   ar = cgetg(n+1, t_VECSMALL);
-  mt = matheadlong(gel(td->PV, td->order[n]), td->ladic);
+  mt = gel(td->PV, td->order[n]);
   t = identity_perm(n) + 1; /* Sorry for this hack */
   u = cgetg(n+1, t_VECSMALL) + 1; /* too lazy to correct */
   MT = cgetg(n+1, t_MAT);
