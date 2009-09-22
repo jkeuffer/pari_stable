@@ -4766,7 +4766,7 @@ ellgroup(GEN E, GEN p)
   {
     /* The only possible non-cyclic group is [2,2] which happens 9 times */
     if (!equaliu(N, 4)) goto ellgroup_cyclic;
-    /* If the group is not cyclic, elldivpol2 must have 3 roots else 1 one */
+    /* If the group is not cyclic, elldivpol2 must have 3 roots else 1 root*/
     if (!gequal0(elldivpol2(E,gmodulss(0,3)))
      || !gequal0(elldivpol2(E,gmodulss(1,3))))
       goto ellgroup_cyclic;
