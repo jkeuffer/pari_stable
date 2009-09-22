@@ -189,6 +189,7 @@ JD151- fix for the documentation of install, matsnf and polsturm.
 LM152- general documentation spelling fixes.
 BA153- detection of exp2 and log2 was broken with C++
 BA154- support for shared library on netbsd.
+IZ155- [readline] 'foo)' + M-C-b -> infinite loop
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]

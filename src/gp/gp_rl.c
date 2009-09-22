@@ -230,9 +230,10 @@ pari_rl_forward_sexp(int count, int key)
     if (is_keyword_char(rl_line_buffer[rl_point]))
     {
       while ( is_keyword_char(rl_line_buffer[rl_point])
-              && (!((dir == 1) ? (rl_point >= rl_end) : (rl_point <= 0))
+              && (!((dir == 1) ? (rl_point >= rl_end) : (rl_point <= 0 && (lfail = 1)))
                   || (move_point = 0)))
         rl_point += dir;
+      if (deep && lfail) goto fail;
       if (!deep) count--;
     }
     else if (strchr(paropen,rl_line_buffer[rl_point]))
