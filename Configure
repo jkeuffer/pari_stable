@@ -84,6 +84,9 @@ case $kernlvl1 in
 gmp) libpari_base=pari-gmp;;
 none) libpari_base=pari;;
 esac
+case $enable_tls in
+yes) libpari_base="${libpari_base}-tls"
+esac
 
 if test `expr $VersionMinor % 2` = 0; then
   libpari_base=$libpari_base-$version
