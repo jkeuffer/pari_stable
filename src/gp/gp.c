@@ -1496,13 +1496,13 @@ gp_main_loop(long flag)
   VOLATILE pari_sp av = avma;
   filtre_t F;
   Buffer *b = filtered_buffer(&F);
+  struct gp_recover rec;
   for(;;)
   {
     if (dorecover)
     { /* set a recovery point */
       static long tloc, outtyp;
       long er;
-      struct gp_recover rec;
       outtyp = GP_DATA->fmt->prettyp;
       tloc = H->total; gp_recover_save(&rec);
       /* recover: jump from error [ > 0 ] or allocatemem [ -1 ] */
