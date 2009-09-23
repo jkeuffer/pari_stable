@@ -1894,6 +1894,7 @@ main(int argc, char **argv)
   stack_init(&s_A,sizeof(*A),(void**)&A);
   stack_init(&s_bufstack, sizeof(Buffer*), (void**)&bufstack);
   pari_init_opts(1000000 * sizeof(long), 500000, INIT_SIGm);
+  cb_pari_err_recover = gp_err_recover;
   read_opt(&s_A, argc,argv);
 #ifdef SIGALRM
   (void)os_signal(SIGALRM,gp_alarm_handler);
@@ -1919,7 +1920,6 @@ main(int argc, char **argv)
   cb_pari_sigint = gp_sigint_fun;
   cb_pari_handle_exception = gp_handle_exception;
   cb_pari_ask_confirm = gp_ask_confirm;
-  cb_pari_err_recover = gp_err_recover;
   gp_expand_path(GP_DATA->path);
 
   if (!(GP_DATA->flags & QUIET)) gp_head();
