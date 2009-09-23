@@ -1588,7 +1588,8 @@ break_loop(int sigint)
   Buffer *b = filtered_buffer(&F);
   int go_on = sigint, cnt = 0;
   struct gp_recover rec;
-  char *prompt, promptbuf[MAX_PROMPT_LEN + 24];
+  const char *prompt;
+  char promptbuf[MAX_PROMPT_LEN + 24];
   gp_recover_save(&rec);
   stack_new(&s_env);
   term_color(c_ERR); pari_putc('\n');
