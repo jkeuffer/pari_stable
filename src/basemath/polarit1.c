@@ -2057,7 +2057,8 @@ FqX_frob_deflate(GEN f, GEN T, GEN p)
   for (i=2; i<l; i++) gel(F,i) = Fq_pow(gel(F,i), frobinv, T,p);
   return F;
 }
-/* Factor _sqfree_ polynomial a on the finite field Fp[X]/(T) */
+/* Factor _sqfree_ polynomial a on the finite field Fp[X]/(T). Assumes
+ * varncmp (varn(T), varn(A)) > 0 */
 static GEN
 FqX_split_Trager(GEN A, GEN T, GEN p)
 {
@@ -2086,7 +2087,7 @@ FqX_split_Trager(GEN A, GEN T, GEN p)
     GEN f = gel(fa,i), F = lift_intern(poleval(f, x0));
     F = FqX_gcd(u, F, T, p);
     if (typ(F) != t_POL || degpol(F) == 0)
-      pari_err(talker,"reducible modulus in factornf");
+      pari_err(talker,"reducible modulus in FqX_split_Trager");
     u = FqX_div(u, F, T, p);
     gel(P,i) = F;
   }
@@ -2371,6 +2372,7 @@ FpX_factorff(GEN P, GEN p, GEN T)
   return gerepilecopy(av, FpX_factorff_i(P, p, T));
 }
 
+/* assumes varncmp (varn(T), varn(f)) > 0 */
 static GEN
 FqX_factor_i(GEN f, GEN T, GEN p)
 {
