@@ -820,7 +820,7 @@ to_FF_vec(GEN x, GEN ff)
   return x;
 }
 
-/* P vector of t_POL, E t_VECSMALL of exponents, ff a t_FFELT. Update elts of 
+/* P vector of t_POL, E t_VECSMALL of exponents, ff a t_FFELT. Update elts of
  * P so that 1) variable number is vP, 2) coefficients are ff-compatible.
  * Collect garbage wrt av */
 static GEN
@@ -857,10 +857,10 @@ FFX_to_FqX(GEN x, GEN T, GEN p)
     GEN y = gel(x,i);
     if (typ(y) == t_FFELT)
     {
-      y = FF_to_FpXQ(y); 
+      y = FF_to_FpXQ(y);
       setvarn(y, varn(T)); /* paranoia */
     }
-    else 
+    else
       y = Rg_to_FpXQ(y, T,p);
     gel(z,i) = simplify_shallow(y);
   }
