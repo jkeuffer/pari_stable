@@ -797,6 +797,7 @@ to_FF(GEN x, GEN ff)
     default:
       r=ZX_to_Flx(x,pp);
     }
+    setvarn(r, varn(T)); /* paranoia */
     return _mkFF_i(ff,z,r);
   }
 }
@@ -819,8 +820,11 @@ to_FF_vec(GEN x, GEN ff)
   return x;
 }
 
+/* P vector of t_POL, E t_VECSMALL of exponents, ff a t_FFELT. Update elts of 
+ * P so that 1) variable number is vP, 2) coefficients are ff-compatible.
+ * Collect garbage wrt av */
 static GEN
-to_FF_fact(GEN P, GEN E, GEN ff, pari_sp av)
+to_FF_fact(long vP, GEN P, GEN E, GEN ff, pari_sp av)
 {
   GEN y = cgetg(3,t_MAT), u, v, zf;
   long j, l = lg(P), nbf = lg(P);
@@ -829,7 +833,9 @@ to_FF_fact(GEN P, GEN E, GEN ff, pari_sp av)
   v = cgetg(nbf,t_COL); gel(y,2) = v;
   for (j=1; j<l; j++)
   {
-    gel(u,j) = simplify_shallow(gel(P,j)); /* may contain pols of degree 0 */
+    GEN Q = simplify_shallow(gel(P,j)); /* may contain pols of degree 0 */
+    if (typ(Q) == t_POL) setvarn(Q, vP);
+    gel(u,j) = Q;
     gel(v,j) = utoi((ulong)E[j]);
   }
   y = gerepilecopy(av, y); u = gel(y,1);
@@ -839,62 +845,76 @@ to_FF_fact(GEN P, GEN E, GEN ff, pari_sp av)
 }
 
 /*Warning: FFX are polynomials whose coefficients are compatible with FF:
- * t_INT t_INTMOD, t_FFELT */
+ * t_INT t_INTMOD, t_FFELT. Assume varncmp(varn(T), varn(x)) < 0 */
 static GEN
 FFX_to_FqX(GEN x, GEN T, GEN p)
 {
   long i, l = lg(x);
   GEN z = cgetg(l, t_POL); z[1] = x[1];
+
   for (i = 2; i < l; i++)
   {
     GEN y = gel(x,i);
-    y = (typ(y)==t_FFELT)? FF_to_FpXQ(y): Rg_to_FpXQ(y, T,p);
+    if (typ(y) == t_FFELT)
+    {
+      y = FF_to_FpXQ(y); 
+      setvarn(y, varn(T)); /* paranoia */
+    }
+    else 
+      y = Rg_to_FpXQ(y, T,p);
     gel(z,i) = simplify_shallow(y);
   }
   return normalizepol_lg(z, l);
+}
+
+static GEN
+FFX_init_fix_varn(GEN P, GEN x, GEN *pT, GEN *pp)
+{
+  ulong junk;
+  GEN Q, T, p;
+
+  _getFF(x, &T, &p, &junk);
+  switch(x[1])
+  {
+  case t_FF_FpXQ:
+    T=shallowcopy(T);
+    break;
+  case t_FF_F2xq:
+    T=F2x_to_ZX(T);
+    break;
+  default:
+    T=Flx_to_ZX(T);
+  }
+  setvarn(T, 1);
+  Q = FFX_to_FqX(P, T,p);
+  setvarn(Q, 0);
+
+  *pT = T;
+  *pp = p; return Q;
 }
 
 /* Factor P over the field of definition of x */
 GEN
 FFX_factor(GEN P, GEN x)
 {
-  ulong pp;
+  long vP = varn(P);
   GEN r, T, p;
   pari_sp av=avma;
-  _getFF(x,&T,&p,&pp);
-  switch(x[1])
-  {
-  case t_FF_FpXQ:
-    break;
-  case t_FF_F2xq:
-    T=F2x_to_ZX(T);
-    break;
-  default:
-    T=Flx_to_ZX(T);
-  }
-  r = FqX_factor(FFX_to_FqX(P, T,p), T,p);
-  return to_FF_fact(gel(r,1),gel(r,2), x,av);
+
+  P = FFX_init_fix_varn(P, x, &T, &p);
+  r = FqX_factor(P, T,p);
+  return to_FF_fact(vP, gel(r,1),gel(r,2), x,av);
 }
 
 /* Roots of P over the field of definition of x */
 GEN
 FFX_roots(GEN P, GEN x)
 {
-  ulong pp;
   GEN r, T, p;
   pari_sp av=avma;
-  _getFF(x,&T,&p,&pp);
-  switch(x[1])
-  {
-  case t_FF_FpXQ:
-    break;
-  case t_FF_F2xq:
-    T=F2x_to_ZX(T);
-    break;
-  default:
-    T=Flx_to_ZX(T);
-  }
-  r = FqX_roots(FFX_to_FqX(P, T,p), T,p);
+
+  P = FFX_init_fix_varn(P, x, &T, &p);
+  r = FqX_roots(P, T,p);
   return gerepilecopy(av, to_FF_vec(r, x));
 }
 
