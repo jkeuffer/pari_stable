@@ -192,6 +192,7 @@ BA154- support for shared library on netbsd.
 IZ155- [readline] 'foo)' + M-C-b -> infinite loop
   156- factorff / polrootsff : wrong result if t_FFELT coefficients
        in variable 'x
+BA157- nfisideal did not reject invalid hnf ideal matrices [#999]
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]

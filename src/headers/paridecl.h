@@ -297,7 +297,6 @@ GEN     RgM_RgV_mul(GEN x, GEN y);
 GEN     RgM_add(GEN x, GEN y);
 GEN     RgM_det_triangular(GEN x);
 int     RgM_isdiagonal(GEN x);
-int     RgM_ishnf(GEN x);
 int     RgM_isidentity(GEN x);
 int     RgM_isscalar(GEN x, GEN s);
 GEN     RgM_mul(GEN x, GEN y);

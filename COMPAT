@@ -243,6 +243,7 @@ This file lists the incompatible changes between Version 2.x and older versions
   - rename ZX_caract -> ZXQ_charpoly and swap arguments.
   - rename RgXQ_u_pow -> RgXQ_powu
   - remove function delete_named_var (using kill0 instead).
+  - remove RgM_ishnf (use ZM_ishnf instead).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

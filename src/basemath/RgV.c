@@ -572,20 +572,6 @@ RgV_isin(GEN v, GEN x)
   return 0;
 }
 
-/* check whether x is upper trinagular with positive diagonal coeffs */
-int
-RgM_ishnf(GEN x)
-{
-  long i,j, lx = lg(x);
-  for (i=2; i<lx; i++)
-  {
-    if (gsigne(gcoeff(x,i,i)) <= 0) return 0;
-    for (j=1; j<i; j++)
-      if (!gequal0(gcoeff(x,i,j))) return 0;
-  }
-  return (gsigne(gcoeff(x,1,1)) > 0);
-}
-
 GEN
 RgM_det_triangular(GEN mat)
 {

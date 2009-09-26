@@ -751,18 +751,23 @@ zv_equal(GEN V, GEN W)
   return 1;
 }
 
-/* check whether x is upper trinagular with positive diagonal coeffs */
 int
 ZM_ishnf(GEN x)
 {
   long i,j, lx = lg(x);
-  for (i=2; i<lx; i++)
+  for (i=1; i<lx; i++)
   {
-    if (signe(gcoeff(x,i,i)) <= 0) return 0;
+    GEN xii = gcoeff(x,i,i);
+    if (signe(xii) <= 0) return 0;
     for (j=1; j<i; j++)
       if (signe(gcoeff(x,i,j))) return 0;
+    for (j=i+1; j<lx; j++)
+    {
+      GEN xij = gcoeff(x,i,j);
+      if (signe(xij)<0 || cmpii(xij,xii)>=0) return 0;
+    }
   }
-  return (signe(gcoeff(x,1,1)) > 0);
+  return 1;
 }
 int
 ZM_isidentity(GEN x)

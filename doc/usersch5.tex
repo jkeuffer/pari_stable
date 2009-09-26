@@ -4638,12 +4638,9 @@ entries of $x$ (its determinant if it is indeed triangular).
 \fun{int}{ZM_isidentity}{GEN x} return 1 is the \typ{ZM} $x$ is the
 identity matrix, and 0 otherwise.
 
-\fun{int}{ZM_ishnf}{GEN x} return $1$ if $x$ is upper triangular with
-positive diagonal coefficients. Assumes $x$ is a square \kbd{ZM} (has integer
-coefficients).
-
-\fun{int}{RgM_ishnf}{GEN x} as \kbd{ZM\_ishnf}, without assumptions on the
-types of the coefficients.
+\fun{int}{ZM_ishnf}{GEN x} return $1$ if $x$ is in HNF form, i.e. is upper
+triangular with positive diagonal coefficients, and  for $j>i$,
+$x_{i,i}>x_{i,j} \ge 0$.
 
 \subsec{\kbd{zv}, \kbd{zm}}
 

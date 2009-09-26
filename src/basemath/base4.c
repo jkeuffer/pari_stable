@@ -133,7 +133,7 @@ idealhnf_shallow(GEN nf, GEN x)
     if (lg(x[1])-1 != N) pari_err(talker,"incorrect dimension in idealhnf");
     if (nx == 1) return idealhnf_principal(nf, gel(x,1));
 
-    if (nx == N && RgM_ishnf(x)) return x;
+    if (nx == N && RgM_is_ZM(x) && ZM_ishnf(x)) return x;
     x = Q_primitive_part(x, &cx);
     if (nx < N) x = vec_mulid(nf, x, nx, N);
     x = ZM_hnfmod(x, ZM_detmult(x));
