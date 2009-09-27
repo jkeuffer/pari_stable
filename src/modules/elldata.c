@@ -123,18 +123,14 @@ ellcondfile(long f)
 static GEN
 ellcondlist(long f)
 {
-  GEN  v, V;
-  long i;
-  if (f <= 0) pari_err(talker,"Non-positive conductor in ellcondlist");
-  V = ellcondfile(f);
+  GEN  v, V = ellcondfile(f);
+  long i, cmp=1;
   for (i=1; i<lg(V); i++)
   {
-    int cmp  = cmpis(gmael(V,i,1), f);
-    if (cmp >= 0) {
-      if (cmp == 0) break;
-      return cgetg(1,t_VEC);
-    }
+    cmp  = cmpis(gmael(V,i,1), f);
+    if (cmp >= 0) break;
   }
+  if (cmp) return cgetg(1,t_VEC);
   v = gel(V,i); return vecslice(v,2, lg(v)-1);
 }
 
