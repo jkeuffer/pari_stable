@@ -1591,7 +1591,7 @@ break_loop(int sigint)
   const char *prompt;
   char promptbuf[MAX_PROMPT_LEN + 24];
   gp_recover_save(&rec);
-  stack_new(&s_env);
+  (void)stack_new(&s_env);
   term_color(c_ERR); pari_putc('\n');
   if (sigint)
     print_errcontext("Break loop: type <Return> or Control-d to continue",
@@ -1884,7 +1884,7 @@ main(int argc, char **argv)
 
   GP_DATA = default_gp_data();
   stack_init(&s_env, sizeof(*env), (void**)&env);
-  stack_new(&s_env);
+  (void)stack_new(&s_env);
 
   if (setjmp(env[s_env.n-1]))
   {
