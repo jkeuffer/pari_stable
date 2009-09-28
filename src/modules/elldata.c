@@ -120,18 +120,21 @@ ellcondfile(long f)
   pari_fclose(F); return V;
 }
 
+/* FIXME: could use a binary search */
 static GEN
 ellcondlist(long f)
 {
   GEN  v, V = ellcondfile(f);
-  long i, cmp=1;
+  long i;
   for (i=1; i<lg(V); i++)
   {
-    cmp  = cmpis(gmael(V,i,1), f);
-    if (cmp >= 0) break;
+    int cmp  = cmpis(gmael(V,i,1), f);
+    if (cmp >= 0) {
+      if (cmp) break;
+      v = gel(V,i); return vecslice(v,2, lg(v)-1);
+    }
   }
-  if (cmp) return cgetg(1,t_VEC);
-  v = gel(V,i); return vecslice(v,2, lg(v)-1);
+  return cgetg(1,t_VEC);
 }
 
 static GEN
