@@ -193,6 +193,8 @@ IZ155- [readline] 'foo)' + M-C-b -> infinite loop
   156- factorff / polrootsff : wrong result if t_FFELT coefficients
        in variable 'x
 BA157- nfisideal did not reject invalid hnf ideal matrices [#999]
+  158- v=vectorv(1);concat([matrix(0,0),v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v])
+       -> SEGV [#1002]
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]

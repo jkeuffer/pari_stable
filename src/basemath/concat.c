@@ -298,8 +298,8 @@ catmany(GEN y1, GEN y2, long t)
 GEN
 shallowconcat1(GEN x)
 {
-  pari_sp av = avma;
-  long cat = 0, tx = typ(x), lx, t, i;
+  pari_sp av = avma, lim = stack_lim(av, 3);
+  long tx = typ(x), lx, t, i;
   GEN z;
 
   if      (tx == t_VEC) lx = lg(x);
@@ -321,7 +321,11 @@ shallowconcat1(GEN x)
   }
   for (; i<lx; i++) {
     z = shallowconcat(z, gel(x,i));
-    if (++cat == 16) { cat = 0; z = gerepileuptoleaf(av, z); }
+    if (low_stack(lim, stack_lim(av,3)))
+    {
+      if (DEBUGMEM>1) pari_warn(warnmem,"concat: i = %ld", i);
+      z = gerepilecopy(av, z);
+    }
   }
   return z;
 }
