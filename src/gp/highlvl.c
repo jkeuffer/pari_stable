@@ -52,7 +52,7 @@ install0(char *name, char *code, char *gpname, char *lib)
     pari_err(talker,"can't find symbol '%s' in dynamic symbol table of process",name);
   }
   if (lib) pari_free(lib);
-  install(f, gpname, code);
+  (void)install(f, gpname, code);
 }
 #else
 #  ifdef _WIN32
