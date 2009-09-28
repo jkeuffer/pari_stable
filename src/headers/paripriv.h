@@ -157,7 +157,6 @@ GEN mathnfspec(GEN x, GEN *ptperm, GEN *ptdep, GEN *ptB, GEN *ptC);
 
 GEN LLL_check_progress(GEN Bnorm, long n0, GEN m, int final, long *ti_LLL);
 GEN extendedgcd(GEN A);
-GEN qfgaussred_positive(GEN a);
 
 /* miscellaneous linear algebra */
 GEN  imagecomplspec(GEN x, long *nlze);
@@ -463,7 +462,6 @@ GEN     polsymmodp(GEN g, GEN p);
 /* base3.c */
 
 void    check_nfelt(GEN x, GEN *den);
-GEN     zk_scalar_or_multable(GEN nf, GEN x);
 GEN     zk_ei_mul(GEN nf, GEN x, long i);
 
 /* base4.c */

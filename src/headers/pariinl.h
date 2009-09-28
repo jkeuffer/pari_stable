@@ -943,7 +943,7 @@ cgiv(GEN x)
 }
 
 INLINE void
-killblock(GEN x) { return gunclone(x); }
+killblock(GEN x) { gunclone(x); }
 
 INLINE int
 is_universal_constant(GEN x) { return (x >= gen_0 && x <= ghalf); }
