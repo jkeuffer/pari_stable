@@ -229,7 +229,7 @@ op_push_loc(op_code o, long x, const char *loc)
 static void
 op_push(op_code o, long x, long n)
 {
-  return op_push_loc(o,x,tree[n].str);
+  op_push_loc(o,x,tree[n].str);
 }
 
 static void
