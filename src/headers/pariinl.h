@@ -513,10 +513,10 @@ RgM_is_ZM(GEN x)
 /**            Dynamic arrays implementation                       **/
 /**                                                                **/
 /********************************************************************/
-void **
+INLINE void **
 stack_base(pari_stack *s) { return (void **) ((char *)s+s->offset); }
 
-void
+INLINE void
 stack_init(pari_stack *s, size_t size, void **data)
 {
   s->offset = (char *)data-(char *)s;
@@ -526,7 +526,7 @@ stack_init(pari_stack *s, size_t size, void **data)
   s->size = size;
 }
 
-void
+INLINE void
 stack_alloc(pari_stack *s, long nb)
 {
   void **sdat = stack_base(s);
@@ -540,17 +540,17 @@ stack_alloc(pari_stack *s, long nb)
   *sdat = pari_realloc(*sdat,s->alloc*s->size);
 }
 
-long
+INLINE long
 stack_new(pari_stack *s) { stack_alloc(s, 1); return s->n++; }
 
-void
+INLINE void
 stack_delete(pari_stack *s)
 {
   void **sdat = stack_base(s);
   if (*sdat) free(*sdat);
 }
 
-void
+INLINE void
 stack_pushp(pari_stack *s, void *u)
 {
   long n = stack_new(s);
