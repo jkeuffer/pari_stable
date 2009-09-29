@@ -1271,6 +1271,7 @@ gp_initrc(pari_stack *p_A, char *path)
 
   if (!file) return;
   b = filtered_buffer(&F);
+  (void)stack_new(&s_env);
   for(;;)
   {
     if (setjmp(env[s_env.n-1])) fprintferr("...skipping line %ld.\n", c);
@@ -1317,6 +1318,7 @@ gp_initrc(pari_stack *p_A, char *path)
       }
     }
   }
+  s_env.n--;
   pop_buffer();
   if (!(GP_DATA->flags & QUIET)) fprintferr("Done.\n\n");
   fclose(file);
@@ -1849,14 +1851,7 @@ read_opt(pari_stack *p_A, long argc, char **argv)
     GP_DATA->flags &= ~BREAKLOOP;
     init80col();
   } else if (initrc)
-  {
     gp_initrc(p_A, argv[0]);
-    if (setjmp(env[s_env.n-1]))
-    {
-      puts("### Errors on startup, exiting...\n\n");
-      exit(1);
-    }
-  }
   for ( ; i < argc; i++) stack_pushp(p_A, pari_strdup(argv[i]));
 
   /* override the values from gprc */
