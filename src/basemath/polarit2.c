@@ -2144,14 +2144,14 @@ RgX_extgcd(GEN x, GEN y, GEN *U, GEN *V)
   long dx, dy, vx, tx = typ(x), ty = typ(y);
   GEN z, g, h, p1, cu, cv, u, v, um1, uze, vze, *gptr[3];
 
-  if (!is_extscalar_t(tx) || !is_extscalar_t(ty)) pari_err(typeer,"RgX_gcd");
+  if (!is_extscalar_t(tx) || !is_extscalar_t(ty)) pari_err(typeer,"RgX_extgcd");
   if (gequal0(x)) {
     if (gequal0(y)) { *U = *V = gen_0; return gen_0; }
     return zero_bezout(y,U,V);
   }
   if (gequal0(y)) return zero_bezout(x,V,U);
   if (tx != t_POL) {
-    if (ty != t_POL) { *U = ginv(x); *V = gen_0; return pol_1(0); }
+    if (ty != t_POL) { *U = ginv(x); *V = gen_0; return gen_1; }
     return scalar_bezout(y,x,V,U);
   }
   if (ty != t_POL) return scalar_bezout(x,y,U,V);
