@@ -3,10 +3,10 @@ Section: linear_algebra
 C-Name: lindep0
 Prototype: GD0,L,
 Help: lindep(x,{flag=0}): Z-linear dependencies between components of x.
- flag is optional, and can be 0: default, PSLQ; -1: using Hastad et al; -2:
- returns a non-trivial kernel vector (not integral in general); positive, and
- in that case should be between 0.5 and 1.0 times the accuracy in decimal
- digits of x, using a standard LLL.
+ flag is optional, and can be 0: default, uses a standard LLL; -1: uses
+ Hastad et al; -2: returns a non-trivial kernel vector (not integral in
+ general); -3: uses PSLQ; or positive, using LLL with 'flag' many digits of
+ accuracy, which should be less than the input accuracy.
 Doc: \sidx{linear dependence}$x$ being a
  vector with $p$-adic or real/complex coefficients, finds a small integral
  linear combination among these coefficients.
@@ -23,8 +23,8 @@ Doc: \sidx{linear dependence}$x$ being a
  This is in general much faster than the other variants.
  If $\fl = 0$ the accuracy is chosen internally using a crude heuristic.
  If $\fl > 0$ the computation is done with an accuracy of $\fl$ decimal digits.
- In that case, the parameter $\fl$ should be between 0.6 and 0.9 times the
- number of correct decimal digits in the input.
+ To get meaningful results in the latter case, the parameter $\fl$ should be
+ smaller than the number of correct decimal digits in the input.
 
  If $\fl=-1$, uses a variant of the \idx{LLL} algorithm due to Hastad,
  Lagarias and Schnorr (STACS 1986). If the precision is too low, the routine
