@@ -2144,8 +2144,8 @@ RgX_extgcd(GEN x, GEN y, GEN *U, GEN *V)
   if (gequal0(x))
   {
     if (!gequal0(y)) return zero_extgcd(y,U,V,vx);
-    *U = zeropol(vx); *V = zeropol(vx); 
-    return zeropol(vx); 
+    *U = zeropol(vx); *V = zeropol(vx);
+    return zeropol(vx);
   }
   if (gequal0(y)) return zero_extgcd(x,V,U,vx);
   dx = degpol(x); dy = degpol(y);
@@ -2929,7 +2929,7 @@ RgXQ_inv(GEN x, GEN y)
 static GEN
 scalar_bezout(GEN x, GEN y, GEN *U, GEN *V)
 {
-  long vx=varn(x); 
+  long vx=varn(x);
   *U=zeropol(vx); *V=ginv(y);
   return pol_1(vx);
 }
