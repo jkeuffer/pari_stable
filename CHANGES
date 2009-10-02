@@ -195,6 +195,8 @@ IZ155- [readline] 'foo)' + M-C-b -> infinite loop
 BA157- nfisideal did not reject invalid hnf ideal matrices [#999]
   158- v=vectorv(1);concat([matrix(0,0),v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v])
        -> SEGV [#1002]
+BA159- minpoly([-5,0,-1,1;0,-5,-1,-1;1,1,-5,0;-1,1,0,-5]/3) 
+       -> wrong result[#994]
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]

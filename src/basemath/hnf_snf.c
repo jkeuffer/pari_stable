@@ -2019,6 +2019,9 @@ smithclean(GEN z)
   return y;
 }
 
+INLINE int
+is_RgX(GEN a, long v) { return typ(a) == t_POL && varn(a)==v; }
+
 static GEN
 gbezout_step(GEN *pa, GEN *pb, GEN *pu, GEN *pv, long vx)
 {
@@ -2028,33 +2031,28 @@ gbezout_step(GEN *pa, GEN *pb, GEN *pu, GEN *pv, long vx)
     *pa = gen_0; *pu = gen_0;
     *pb = gen_1; *pv = gen_1; return b;
   }
-  if (typ(a) == t_POL && varn(a)==vx) a = RgX_renormalize(a);
-  else a = scalarpol(a, vx);
-  if (typ(b) == t_POL && varn(b)==vx) b = RgX_renormalize(b);
-  else b = scalarpol(b, vx);
+  a = is_RgX(a,vx)? RgX_renormalize(a): scalarpol(a, vx);
+  b = is_RgX(b,vx)? RgX_renormalize(b): scalarpol(b, vx);
   d = RgX_extgcd(a,b, pu,pv);
-  if (typ(d) == t_POL)
-  {
-    if (degpol(d)) { a = RgX_div(a, d); b = RgX_div(b, d); }
-    else if (typ(d[2]) == t_REAL && lg(d[2]) <= 3)
+  if (degpol(d)) { a = RgX_div(a, d); b = RgX_div(b, d); }
+  else if (typ(d[2]) == t_REAL && lg(d[2]) <= 3)
 #if 1
-    { /* possible accuracy problem */
-      GEN D = RgX_gcd_simple(a,b);
-      if (degpol(D)) {
-        D = RgX_Rg_div(D, leading_term(D));
-        a = RgX_div(a, D);
-        b = RgX_div(b, D);
-        d = RgX_extgcd(a,b, pu,pv); /* retry now */
-        d = RgX_mul(d, D);
-      }
+  { /* possible accuracy problem */
+    GEN D = RgX_gcd_simple(a,b);
+    if (degpol(D)) {
+      D = RgX_Rg_div(D, leading_term(D));
+      a = RgX_div(a, D);
+      b = RgX_div(b, D);
+      d = RgX_extgcd(a,b, pu,pv); /* retry now */
+      d = RgX_mul(d, D);
     }
-#else
-    { /* less stable */
-      d = RgX_extgcd_simple(a,b, pu,pv);
-      if (degpol(d)) { a = RgX_div(a, d); b = RgX_div(b, d); }
-    }
-#endif
   }
+#else
+  { /* less stable */
+    d = RgX_extgcd_simple(a,b, pu,pv);
+    if (degpol(d)) { a = RgX_div(a, d); b = RgX_div(b, d); }
+  }
+#endif
   *pa = a;
   *pb = b; return d;
 }
@@ -2113,13 +2111,15 @@ gsmithall_i(GEN x,long all)
       }
       if (!c)
       {
-        b = gcoeff(x,i,i); if (degpol(b) <= 0) break;
+        b = gcoeff(x,i,i); if (!is_RgX(b,vx) || degpol(b)<=0) break;
 
         for (k=1; k<i; k++)
         {
           for (j=1; j<i; j++)
           {
-            GEN r = gmod(gcoeff(x,k,j), b);
+            GEN z = gcoeff(x,k,j), r;
+            if (!is_RgX(z,vx)) z = scalarpol(z, vx);
+            r = RgX_rem(z, b);
             if (signe(r) && (! isinexactreal(r) ||
                    gexpo(r) > 16 + gexpo(b) - bit_accuracy(gprecision(r)))
                ) break;
@@ -2142,7 +2142,7 @@ gsmithall_i(GEN x,long all)
   for (k=1; k<=n; k++)
   {
     GEN T = gcoeff(x,k,k);
-    if (typ(T) == t_POL && signe(T))
+    if (is_RgX(T,vx) && signe(T))
     {
       GEN d = leading_term(T);
       while (gequal0(d) || ( typ(d) == t_REAL && lg(d) == 3
