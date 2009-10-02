@@ -2187,7 +2187,7 @@ RgX_extgcd(GEN x, GEN y, GEN *U, GEN *V)
   }
   else /* y | x */
   {
-    vze = pol_1(vx);
+    vze = cv ? RgX_Rg_div(pol_1(vx),cv): pol_1(vx);
     uze = zeropol(vx);
     p1 = gen_1;
   }
