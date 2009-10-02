@@ -1591,7 +1591,9 @@ chinese(GEN x, GEN y)
   {
     case t_POLMOD:
       z = cgetg(3, t_POLMOD);
-      if (RgX_equal_var(gel(x,1),gel(y,1)))  /* same modulus */
+      if (varn(gel(x,1))!=varn(gel(y,1)))
+         pari_err(talker,"incompatible variables in chinese");
+      if (RgX_equal(gel(x,1),gel(y,1)))  /* same modulus */
       {
         gel(z,1) = gcopy(gel(x,1));
         gel(z,2) = chinese(gel(x,2),gel(y,2));

@@ -2109,16 +2109,10 @@ subresext(GEN x, GEN y, GEN *U, GEN *V)
 }
 
 static GEN
-scalar_bezout(GEN x, GEN y, GEN *U, GEN *V)
-{
-  *U=gen_0; *V=ginv(y); return pol_1(varn(x));
-}
-
-static GEN
-zero_bezout(GEN y, GEN *U, GEN *V)
+zero_extgcd(GEN y, GEN *U, GEN *V, long vx)
 {
   GEN x=content(y);
-  *U=gen_0; *V = ginv(x); return gmul(y,*V);
+  *U=zeropol(vx); *V = scalarpol(ginv(x), vx); return gmul(y,*V);
 }
 
 static int
@@ -2144,24 +2138,19 @@ RgX_extgcd(GEN x, GEN y, GEN *U, GEN *V)
   long dx, dy, vx, tx = typ(x), ty = typ(y);
   GEN z, g, h, p1, cu, cv, u, v, um1, uze, vze, *gptr[3];
 
-  if (!is_extscalar_t(tx) || !is_extscalar_t(ty)) pari_err(typeer,"RgX_extgcd");
-  if (gequal0(x)) {
-    if (gequal0(y)) { *U = *V = gen_0; return gen_0; }
-    return zero_bezout(y,U,V);
+  if (tx!=t_POL || ty!=t_POL || varncmp(varn(x),varn(y)))
+    pari_err(typeer,"RgX_extgcd");
+  vx=varn(x);
+  if (gequal0(x))
+  {
+    if (!gequal0(y)) return zero_extgcd(y,U,V,vx);
+    *U = zeropol(vx); *V = zeropol(vx); 
+    return zeropol(vx); 
   }
-  if (gequal0(y)) return zero_bezout(x,V,U);
-  if (tx != t_POL) {
-    if (ty != t_POL) { *U = ginv(x); *V = gen_0; return gen_1; }
-    return scalar_bezout(y,x,V,U);
-  }
-  if (ty != t_POL) return scalar_bezout(x,y,U,V);
-  vx = varn(x);
-  if (vx != varn(y))
-    return varncmp(vx, varn(y)) < 0? scalar_bezout(x,y,U,V)
-                                   : scalar_bezout(y,x,V,U);
+  if (gequal0(y)) return zero_extgcd(x,V,U,vx);
   dx = degpol(x); dy = degpol(y);
   if (dx < dy) { pswap(U,V); lswap(dx,dy); swap(x,y); }
-  if (dy==0) return scalar_bezout(x,y,U,V);
+  if (dy==0) { *U=zeropol(vx); *V=ginv(y); return pol_1(vx); }
 
   av = avma;
   u = x = primitive_part(x, &cu);
@@ -2937,10 +2926,29 @@ RgXQ_inv(GEN x, GEN y)
   return gerepileupto(av, d);
 }
 
+static GEN
+scalar_bezout(GEN x, GEN y, GEN *U, GEN *V)
+{
+  long vx=varn(x); 
+  *U=zeropol(vx); *V=ginv(y);
+  return pol_1(vx);
+}
+
 GEN
 gbezout(GEN x, GEN y, GEN *u, GEN *v)
 {
-  if (typ(x) == t_INT && typ(y) == t_INT) return bezout(x,y,u,v);
+  long tx=typ(x), ty=typ(y), vx;
+  if (tx == t_INT && ty == t_INT) return bezout(x,y,u,v);
+  if (tx != t_POL)
+  {
+    if (ty == t_POL) return scalar_bezout(y,x,v,u);
+    *u = ginv(x); *v = gen_0; return gen_1;
+  }
+  if (ty != t_POL) return scalar_bezout(x,y,u,v);
+  vx = varn(x);
+  if (vx != varn(y))
+    return varncmp(vx, varn(y)) < 0? scalar_bezout(x,y,u,v)
+                                   : scalar_bezout(y,x,v,u);
   return RgX_extgcd(x,y,u,v);
 }
 

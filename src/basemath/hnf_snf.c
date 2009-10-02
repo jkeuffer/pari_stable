@@ -2020,7 +2020,7 @@ smithclean(GEN z)
 }
 
 static GEN
-gbezout_step(GEN *pa, GEN *pb, GEN *pu, GEN *pv)
+gbezout_step(GEN *pa, GEN *pb, GEN *pu, GEN *pv, long vx)
 {
   GEN a = *pa, b = *pb, d;
   if (gequal0(a))
@@ -2028,8 +2028,10 @@ gbezout_step(GEN *pa, GEN *pb, GEN *pu, GEN *pv)
     *pa = gen_0; *pu = gen_0;
     *pb = gen_1; *pv = gen_1; return b;
   }
-  if (typ(a) == t_POL) a = RgX_renormalize(a);
-  if (typ(b) == t_POL) b = RgX_renormalize(b);
+  if (typ(a) == t_POL && varn(a)==vx) a = RgX_renormalize(a);
+  else a = scalarpol(a, vx);
+  if (typ(b) == t_POL && varn(b)==vx) b = RgX_renormalize(b);
+  else b = scalarpol(b, vx);
   d = RgX_extgcd(a,b, pu,pv);
   if (typ(d) == t_POL)
   {
@@ -2063,8 +2065,9 @@ gsmithall_i(GEN x,long all)
   pari_sp av, lim;
   long i, j, k, n;
   GEN z, u, v, U, V;
-
+  long vx = gvar(x);
   if (typ(x)!=t_MAT) pari_err(typeer,"gsmithall");
+  if (vx==NO_VARIABLE) return all?smithall(x):smith(x);
   n = lg(x)-1;
   if (!n) return trivsmith(all);
   if (lg(x[1]) != n+1) pari_err(mattype1,"gsmithall");
@@ -2081,7 +2084,7 @@ gsmithall_i(GEN x,long all)
       {
         b = gcoeff(x,i,j); if (gequal0(b)) continue;
         a = gcoeff(x,i,i);
-        d = gbezout_step(&b, &a, &v, &u);
+        d = gbezout_step(&b, &a, &v, &u, vx);
         for (k = 1; k < i; k++)
         {
           GEN t = gadd(gmul(u,gcoeff(x,k,i)),gmul(v,gcoeff(x,k,j)));
@@ -2096,7 +2099,7 @@ gsmithall_i(GEN x,long all)
       {
         b = gcoeff(x,j,i); if (gequal0(b)) continue;
         a = gcoeff(x,i,i);
-        d = gbezout_step(&b, &a, &v, &u);
+        d = gbezout_step(&b, &a, &v, &u, vx);
         for (k = 1; k < i; k++)
         {
           GEN t = gadd(gmul(u,gcoeff(x,i,k)),gmul(v,gcoeff(x,j,k)));
