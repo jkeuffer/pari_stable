@@ -79,9 +79,19 @@ compile_varerr(const char *str)
 }
 
 void
-parser_reset(void)
+parsestate_reset(void)
 {
   s_node.n = OPnboperator;
+}
+void
+parsestate_save(struct pari_parsestate *state)
+{
+  state->node = s_node.n;
+}
+void
+parsestate_restore(struct pari_parsestate *state)
+{
+  s_node.n = state->node;
 }
 
 GEN
@@ -89,6 +99,8 @@ pari_compile_str(char *lex, int strict)
 {
   pari_sp ltop=avma;
   GEN code;
+  struct pari_parsestate state;
+  parsestate_save(&state);
   pari_lex_start = lex;
   pari_unused_chars=NULL;
   pari_once=1;
@@ -103,7 +115,7 @@ pari_compile_str(char *lex, int strict)
   avma=ltop;
   optimizenode(s_node.n-1);
   code=gp_closure(s_node.n-1);
-  parser_reset();
+  parsestate_restore(&state);
   return code;
 }
 

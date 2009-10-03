@@ -749,7 +749,8 @@ void
 gp_recover_save(struct gp_recover* rec)
 {
   rec->listloc = next_block;
-  evalstate_save(&rec->state);
+  evalstate_save(&rec->eval);
+  parsestate_save(&rec->parse);
 }
 
 void
@@ -763,8 +764,8 @@ gp_recover_restore(struct gp_recover* rec)
   try_to_recover = 0;
   BLOCK_SIGINT_START
   if (DEBUGMEM>2) fprintferr("entering recover(), loc = %ld\n", rec->listloc);
-  parser_reset();
-  evalstate_restore(&rec->state);
+  evalstate_restore(&rec->eval);
+  parsestate_restore(&rec->parse);
   for (i = 0; i < functions_tblsz; i++)
   {
     entree *ep = functions_hash[i];

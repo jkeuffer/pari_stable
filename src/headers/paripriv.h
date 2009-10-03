@@ -308,6 +308,11 @@ typedef struct {
 void lim_lines_output(char *s, long n, long max);
 void gen_output(GEN x, pariout_t *T);
 
+struct pari_parsestate
+{
+  long node;
+};
+
 struct pari_compilestate
 {
   long lvar;
@@ -324,6 +329,10 @@ struct pari_evalstate
   struct pari_compilestate comp;
 };
 
+void parsestate_reset(void);
+void parsestate_save(struct pari_parsestate *state);
+void parsestate_restore(struct pari_parsestate *state);
+
 void compilestate_reset(void);
 void compilestate_save(struct pari_compilestate *comp);
 void compilestate_restore(struct pari_compilestate *comp);
@@ -335,7 +344,8 @@ void evalstate_save(struct pari_evalstate *state);
 struct gp_recover
 {
   long listloc;
-  struct pari_evalstate state;
+  struct pari_evalstate eval;
+  struct pari_parsestate parse;
 };
 
 void gp_recover_save(struct gp_recover* rec);
