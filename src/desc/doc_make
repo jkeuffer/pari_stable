@@ -44,7 +44,7 @@ while (<FILE>)
 #        print "ZZZ" . join ("|", @ARGS). "\n";
 
         $type = "GEN";
-        $args = $post = '';
+        $args = ''; @vars=();
         for ($i = 0; $i <= $#proto; )
         {
           my ($c) = $proto[$i++];
@@ -53,7 +53,8 @@ while (<FILE>)
 
           if ($c eq 'G') {$args .= ", GEN " . shift(@ARGS); next;}
           if ($c eq 'L') {$args .= ", long " . shift(@ARGS); next;}
-          if ($c eq 'n') {$args .= ", long " . shift(@ARGS); next;}
+          if ($c eq 'n') {my ($v) = shift(@ARGS); push @vars,"\\kbd{$v}";
+                          $args .= ", long " . $v; next;}
           if ($c =~ /^[rs]$/) {$args .= ", char *" . shift(@ARGS); next;}
           if ($c eq 'S') {$args .= ", entree *" . shift(@ARGS); next;}
 
@@ -67,7 +68,7 @@ while (<FILE>)
             if ($c eq 'n') {
               my ($v) = shift(@ARGS);
               $args .= ", long $v = -1";
-              $post = ", where \\kbd{$v} is a variable number";
+              push @vars,"\\kbd{$v}";
               next;
             }
             if ($c eq 'V') {
@@ -81,6 +82,17 @@ while (<FILE>)
         }
         $args =~ s/^, //;
 
+        my ($l)=scalar @vars;
+        if ($l==0) { $post=""; }
+        elsif ($l==1)
+        {
+          $post = ", where $vars[0] is a variable number";
+        }
+        else
+        {
+          my ($vl)=join(", ",@vars);
+          $post = ", where $vl are variable numbers";
+        }
         $doc .= "\n\nThe library syntax is \\fun{$type}{$Cname}{$args}$post.";
         $doc .= "\n$Variant" if ($Variant);
       }

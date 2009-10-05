@@ -630,6 +630,7 @@ BA 43- GP routines and PARI functions ellweilpairing, elltatepairing and
 BA 44- FpE functions family for points on E(F_p)
 BA 45- GP routine galoisgetpol and PARI function galoisgetpol, galoisnbpol
 BA 46- GP routine and PARI function elldivpol
+BA 47- GP routine and PARI function ellmodulareqn
 
   Removed
     1- obsolete GP functions printp, printp1. Either replace them by

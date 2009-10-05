@@ -1,0 +1,13 @@
+Function: ellmodulareqn
+Section: elliptic_curves
+C-Name: ellmodulareqn
+Prototype: LDnDn
+Help: ellmodulareqn(l,{x},{y}): return a vector [eqn, t] where eqn is a modular
+ equation of level l, for l<500, l prime. This requires the package seadata to
+ be installed.  The equation is either of canonical type (t=0) or of Atkin type
+ (t=1)
+Doc: return a vector [\kbd{eqn},$t$] where \kbd{eqn} is a modular equation of
+ level $l$, for $l<500$, $l$ prime. This requires the package seadata to be
+ installed. The equation is either of canonical type ($t=0$) or of Atkin type
+ ($t=1$).
+

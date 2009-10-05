@@ -1357,6 +1357,7 @@ GEN     zell(GEN e, GEN z, long prec);
 
 /* ellsea.c */
 
+GEN     ellmodulareqn(long l, long vx, long vy);
 GEN     ellsea(GEN E, GEN p, long early_abort);
 
 /* es.c */

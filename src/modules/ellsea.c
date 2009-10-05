@@ -64,19 +64,19 @@ get_seadata(ulong ell)
 
 /*Builds the modular equation corresponding to the vector list */
 static GEN
-list_to_pol(GEN list)
+list_to_pol(GEN list, long vx, long vy)
 {
   pari_sp ltop = avma;
   long i, l = lg(list);
   GEN P = cgetg(l, t_VEC);
-  for (i = 1; i < l; i++) gel(P, i) = gtopoly(gel(list,i), MAXVARN);
-  return gerepileupto(ltop, gtopoly(P, -1));
+  for (i = 1; i < l; i++) gel(P, i) = gtopoly(gel(list,i), vy);
+  return gerepileupto(ltop, gtopoly(P, vx));
 }
 
 struct meqn { char type; GEN eq; };
 
 static int
-get_modular_eqn(struct meqn *M, ulong ell)
+get_modular_eqn(struct meqn *M, ulong ell, long vx, long vy)
 {
   GEN eqn;
   long idx = uprimepi(ell)-1;
@@ -85,8 +85,27 @@ get_modular_eqn(struct meqn *M, ulong ell)
   else eqn = get_seadata(ell);
   if (!eqn) return 0;
   M->type = *GSTR(gel(eqn, 2));
-  M->eq = list_to_pol(gel(eqn, 3));
+  M->eq = list_to_pol(gel(eqn, 3), vx, vy);
   return 1;
+}
+
+GEN
+ellmodulareqn(long ell, long vx, long vy)
+{
+  struct meqn meqn;
+  GEN res;
+  if (vx<0) vx=0;
+  if (vy<0) vy=fetch_user_var("y");
+  if (varncmp(vx,vy)>=0) pari_err(talker,"wrong variable priority");
+  if (ell<0) pari_err(talker,"level must be positive");
+  if (!uisprime(ell)) pari_err(talker,"level must be prime");
+
+  get_seadata(0);
+  res = cgetg(3, t_VEC);
+  if (!get_modular_eqn(&meqn, ell, vx, vy))
+    pari_err(talker,"no such modular equations available");
+  gel(res,1) = meqn.eq; gel(res,2) = stoi(meqn.type=='A');
+  return res;
 }
 
 /*Gives the first precS terms of the Weierstrass series related to */
@@ -823,7 +842,7 @@ find_trace(GEN a4, GEN a6, ulong ell, GEN p, long *ptr_kt, long EARLY_ABORT)
     }
   }
   kt = k;
-  if (!get_modular_eqn(&MEQN, ell)) return gen_0;
+  if (!get_modular_eqn(&MEQN, ell, 0, MAXVARN)) return gen_0;
   if (DEBUGLEVEL)
   { fprintferr("Process prime %5ld. ", ell); TIMERstart(&T); }
   meqnj = FpXY_evalx(MEQN.eq, a4a6_j(a4, a6, p), p);
