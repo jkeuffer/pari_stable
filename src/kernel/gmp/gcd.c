@@ -143,18 +143,18 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
     if (pv) *pv = gen_0;
     switch(sa)
     {
-    case  0: if (pu) *pu = gen_0; return gen_0;
-    case  1: if (pu) *pu = gen_1; return icopy(a);
-    case -1: if (pu) *pu = gen_m1; return(negi(a));
+    case  0: if (pu) *pu = gen_0;  return gen_0;
+    case  1: if (pu) *pu = gen_1;  return icopy(a);
+    case -1: if (pu) *pu = gen_m1; return negi(a);
     }
   }
   if (s == 0)                        /* |a| == |b| != 0 */
   {
     if (pu) *pu = gen_0;
     if (sb > 0)
-    { if (pv) *pv = gen_1; return icopy(b); }
+    { if (pv) *pv = gen_1;  return icopy(b); }
     else
-    { if (pv) *pv = gen_m1; return(negi(b)); }
+    { if (pv) *pv = gen_m1; return negi(b); }
   }
   /* now |a| > |b| > 0 */
 
@@ -167,7 +167,7 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
     {
       if (xu == 0) *pu = gen_0; /* can happen when b divides a */
       else if (xu == 1) *pu = sa < 0 ? gen_m1 : gen_1;
-      else if (xu == 2) *pu = sa < 0 ? negi(gen_2) : gen_2;
+      else if (xu == 2) *pu = sa < 0 ? gen_m2 : gen_2;
       else
       {
         *pu = cgeti(3);
@@ -178,7 +178,7 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
     if (pv)
     {
       if (xv == 1) *pv = sb < 0 ? gen_m1 : gen_1;
-      else if (xv == 2) *pv = sb < 0 ? negi(gen_2) : gen_2;
+      else if (xv == 2) *pv = sb < 0 ? gen_m2 : gen_2;
       else
       {
         *pv = cgeti(3);
