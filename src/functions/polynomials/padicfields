@@ -7,8 +7,8 @@ Help: padicfields(p, N, {flag=0}): returns polynomials generating all
  allowed to be a 2-component vector [n,d], in which case, returns the
  extensions of degree n and discriminant p^d. flag is optional,
  and can be 0: default, 1: return also the ramification index, the residual
- degree and the valuation of the discriminant, or 2: return only the number of
- extensions in a fixed algebraic closure.
+ degree, the valuation of the discriminant and the number of conjugate fields, 
+ or 2: return only the number of extensions in a fixed algebraic closure.
 
 Doc: returns a vector of polynomials generating all the extensions of degree
  $N$ of the field $\Q_p$ of $p$-adic rational numbers; $N$ is
@@ -23,7 +23,8 @@ Doc: returns a vector of polynomials generating all the extensions of degree
  of $K$; in particular, the powers of $\alpha$ generate the ring of $p$-adic
  integers of $K$. 
  
- If $\fl = 1$, replace each polynomial $P$ by a vector $[P, e, f, d]$
- where $e$ is the ramification index, $f$ the residual degree and $d$ the
- valuation of the discriminant. If $\fl = 2$, only return the \emph{number} of
- extensions in a fixed algebraic closure (Krasner's formula), which is much faster.
+ If $\fl = 1$, replace each polynomial $P$ by a vector $[P, e, f, d, c]$
+ where $e$ is the ramification index, $f$ the residual degree, $d$ the
+ valuation of the discriminant, and $c$ the number of conjugate fields. 
+ If $\fl = 2$, only return the \emph{number} of extensions in a fixed 
+ algebraic closure (Krasner's formula), which is much faster.

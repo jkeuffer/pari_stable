@@ -55,6 +55,7 @@ typedef struct {
   GEN pi;   /* prime element (mod p) (y=zq+pi)*/
   GEN ipi;  /* p/pi (mod pr) (y=zq+pi) (used to divide by pi) */
   GEN pik;  /* [1, pi, ..., pi^(e-1), pi^e / p] (mod pr). Note the last one ! */
+  long cj;  /* number of conjugate fields */
 } FAD_t;
 
 static long
@@ -473,8 +474,8 @@ IsIsomorphic(KRASNER_t *data, FAD_t *fdata, GEN pol)
   avma = av; return 0;
 }
 
-/* Return the number of conjugates fields of the field given by fdata */
-static long
+/* Compute the number of conjugates fields of the field given by fdata */
+static void
 NbConjugateFields(KRASNER_t *data, FAD_t *fdata)
 {
   GEN pol = fdata->eis;
@@ -482,8 +483,8 @@ NbConjugateFields(KRASNER_t *data, FAD_t *fdata)
   pari_sp av = avma;
 
   if (RgX_is_ZX(pol)) { /* split for efficiency; contains the case f = 1 */
-    nb = data->e / RootCountingAlgorithm(data, fdata, pol, 0);
-    avma = av; return nb;
+    fdata->cj = data->e / RootCountingAlgorithm(data, fdata, pol, 0);
+    avma = av; return; 
   }
 
   nb = 0;
@@ -495,7 +496,8 @@ NbConjugateFields(KRASNER_t *data, FAD_t *fdata)
       pol = FqX_FpXQ_eval(pol, data->frob, data->upl, data->pr);
   }
   avma = av;
-  return data->e * data->f / nb;
+  fdata->cj = data->e * data->f / nb;
+  return;
 }
 
 /* return a minimal list of polynomials generating all the totally
@@ -505,7 +507,7 @@ static GEN
 TamelyRamifiedCase(KRASNER_t *data)
 {
   long av = avma, g;
-  GEN rep, topx, eis, Xe = gpowgs(pol_x(0), data->e);
+  GEN rep, p2, topx, m, eis, Xe = gpowgs(pol_x(0), data->e);
 
 #ifdef CHECK_EXTENSIONS
   FAD_t fdata;
@@ -515,11 +517,13 @@ TamelyRamifiedCase(KRASNER_t *data)
 #endif
 
   g   = ugcd(data->e, umodiu(data->qm1, data->e)); /* (e, q-1) */
+  m   = stoi(data->e/g);
   rep = zerovec(g);
 
   eis = gadd(Xe, data->p);
   topx = get_topx(data, eis);
-  gel(rep, 1) = topx;
+  p2 = mkvec2(topx, m);
+  gel(rep, 1) = p2;
 #ifdef CHECK_EXTENSIONS
   vpl = zerovec(g);
   gel(vpl, 1) = eis;
@@ -528,7 +532,8 @@ TamelyRamifiedCase(KRASNER_t *data)
   else
   {
     FieldData(data, &fdata, eis, topx);
-    nb = NbConjugateFields(data, &fdata);
+    NbConjugateFields(data, &fdata);
+    nb = fdata.cj;
   }
   fprintferr("Found %ld field(s)\n", nb);
   cnt += nb;
@@ -546,7 +551,8 @@ TamelyRamifiedCase(KRASNER_t *data)
       eis = gadd(Xe, ZX_Z_mul(p1, data->p)); /* Adding a ZX and a ZY (cste coefficient) */
       ct++;
       topx = get_topx(data, eis);
-      gel(rep, ct) = topx;
+      p2 = mkvec2(topx, m);
+      gel(rep, ct) = p2;
 #ifdef CHECK_EXTENSIONS
       gel(vpl, ct) = eis;
       FieldData(data, &fdata, eis, topx);
@@ -557,7 +563,8 @@ TamelyRamifiedCase(KRASNER_t *data)
 	  pari_err(talker,
 		   "Oops, fields are isomorphic in TamelyRamifiedCase!\n");
       }
-      nb = NbConjugateFields(data, &fdata);
+      NbConjugateFields(data, &fdata);
+      nb = fdata.cj;
       fprintferr("Found %ld field(s)\n", nb);
       cnt += nb;
 #endif
@@ -742,7 +749,8 @@ WildlyRamifiedCase(KRASNER_t *data)
       FAD_t *fdata = (FAD_t*)vfd[ct];
       FieldData(data, fdata, rpl, topx);
       CloneFieldData(fdata);
-      nb = NbConjugateFields(data, fdata);
+      NbConjugateFields(data, fdata);
+      nb = fdata->cj;
       fd += nb;
       ct++;
       if (DEBUGLEVEL>1)
@@ -756,8 +764,10 @@ WildlyRamifiedCase(KRASNER_t *data)
   for (j = 0; j < ct; j++)
   {
     GEN topx = ZX_copy(((FAD_t*)vfd[j])->top);
+    GEN p1;
     setvarn(topx, 0);
-    gel(rep, j+1) = topx;
+    p1 = mkvec2(topx, stoi(((FAD_t*)vfd[j])->cj));
+    gel(rep, j+1) = p1;
     FreeFieldData((FAD_t*)vfd[j]);
   }
   FreeRootTable(data->roottable);
@@ -847,17 +857,24 @@ GetRamifiedPol(GEN p, GEN efj, long v, long flag)
     long i, l;
     GEN p1 = cgetg_copy(pols, &l);
     for (i = 1; i < l; i++)
-      gel(p1, i) = mkvec4(gcopy(gel(pols, i)),
+      gel(p1, i) = mkvec5(gcopy(gmael2(pols, i, 1)),
                           utoipos(e),
                           utoipos(f),
-                          utoipos(f*(e+j-1)));
+                          utoipos(f*(e+j-1)),
+			  gcopy(gmael2(pols, i, 2)));
     pols = gerepileupto(av, p1);
   }
   else
-    pols = gerepilecopy(av, pols);
-
+  {
+    long i, l;
+    GEN p1 = cgetg_copy(pols, &l);
+    for (i = 1; i < l; i++)
+      gel(p1, i) = gcopy(gmael2(pols, i, 1));
+    pols = gerepilecopy(av, p1);
+  }
   return pols;
 }
+
 static GEN
 possible_efj(GEN p, long m)
 { /* maximal possible discriminant valuation d <= m * (1+v_p(m)) - 1 */
