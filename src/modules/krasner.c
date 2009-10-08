@@ -214,15 +214,17 @@ get_topx(KRASNER_t *data, GEN eis)
 {
   GEN p1, p2, rpl;
   long j;
-
+  pari_sp av, lim; 
   /* top poly. is the minimal polynomial of root(pol) + root(upl) */
   rpl = FqX_translate(FqX_red(eis, data->upl, data->pr),
 		      data->mv, data->upl, data->pr);
   p1 = p2 = rpl;
+  av = avma; lim = stack_lim(av, 1);
   for (j = 1; j < data->f; j++)
   {
     p1 = FqX_FpXQ_eval(p1, data->frob, data->upl, data->pr);
     p2 = FqX_mul(p2, p1, data->upl, data->pr);
+    if (low_stack(lim, stack_lim(av, 1))) gerepileall(av, 2, &p1, &p2);
   }
   return simplify_shallow(p2); /* ZX */
 }
