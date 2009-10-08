@@ -484,7 +484,7 @@ NbConjugateFields(KRASNER_t *data, FAD_t *fdata)
 
   if (RgX_is_ZX(pol)) { /* split for efficiency; contains the case f = 1 */
     fdata->cj = data->e / RootCountingAlgorithm(data, fdata, pol, 0);
-    avma = av; return; 
+    avma = av; return;
   }
 
   nb = 0;
