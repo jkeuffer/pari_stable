@@ -860,7 +860,7 @@ GetRamifiedPol(GEN p, GEN efj, long v, long flag)
       gel(p1, i) = mkvec5(gcopy(gmael2(pols, i, 1)),
                           utoipos(e),
                           utoipos(f),
-                          utoipos(f*(e+j-1)),
+                          utoi(f*(e+j-1)),
 			  gcopy(gmael2(pols, i, 2)));
     pols = gerepileupto(av, p1);
   }
