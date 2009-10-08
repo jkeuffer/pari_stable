@@ -214,7 +214,7 @@ get_topx(KRASNER_t *data, GEN eis)
 {
   GEN p1, p2, rpl;
   long j;
-  pari_sp av, lim; 
+  pari_sp av, lim;
   /* top poly. is the minimal polynomial of root(pol) + root(upl) */
   rpl = FqX_translate(FqX_red(eis, data->upl, data->pr),
 		      data->mv, data->upl, data->pr);
