@@ -197,6 +197,7 @@ BA157- nfisideal did not reject invalid hnf ideal matrices [#999]
        -> SEGV [#1002]
 BA159- minpoly([-5,0,-1,1;0,-5,-1,-1;1,1,-5,0;-1,1,0,-5]/3) 
        -> wrong result[#994]
+BA160- 2/O(5) -> O(5^-1) (should raise an error) [#1009]
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]

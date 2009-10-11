@@ -2353,6 +2353,7 @@ divpp(GEN x, GEN y) {
   long a, b;
   GEN z, M;
 
+  if (!signe(y[4])) pari_err(gdiver);
   if (!signe(x[4])) return zeropadic(gel(x,2), valp(x)-valp(y));
   a = precp(x);
   b = precp(y); if (a > b) { M = gel(y,3); } else { M = gel(x,3); b = a; }
