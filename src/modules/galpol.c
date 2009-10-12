@@ -41,8 +41,9 @@ galoisgetpol(long a, long b, long sig)
   switch(sig)
   {
     case 1: si="real"; break;
-    case 2: si="complex"; break;
-    default: pari_err(talker,"invalid signature in galoisgetpol"); return NULL;
+    case 2: if (a%2==0) { si="complex"; break; }
+    default: /*FALL THROUGH*/
+      pari_err(talker,"invalid signature in galoisgetpol"); return NULL;
   }
   s = pari_sprintf("%s/galpol/%ld/%ld/%s", pari_datadir, a,b,si);
   F = pari_fopengz(s); free(s);
