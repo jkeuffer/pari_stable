@@ -1592,8 +1592,8 @@ break_loop(int sigint)
   struct gp_recover rec;
   const char *prompt;
   char promptbuf[MAX_PROMPT_LEN + 24];
+  long nenv=stack_new(&s_env);
   gp_recover_save(&rec);
-  (void)stack_new(&s_env);
   term_color(c_ERR); pari_putc('\n');
   if (sigint)
     print_errcontext("Break loop: type <Return> or Control-d to continue",
@@ -1618,7 +1618,7 @@ break_loop(int sigint)
   {
     GEN x;
     long er;
-    if ((er=setjmp(env[s_env.n-1])))
+    if ((er=setjmp(env[nenv])))
     {
       if (er<0) { s_env.n=1; longjmp(env[s_env.n-1], er); }
       gp_recover_restore(&rec);
@@ -1646,7 +1646,7 @@ break_loop(int sigint)
     term_color(c_OUTPUT); gen_output(x, GP_DATA->fmt);
     term_color(c_NONE); pari_putc('\n');
   }
-  s_env.n--;
+  s_env.n=nenv;
   pari_infile = oldinfile;
   pop_buffer(); return go_on;
 }
