@@ -1901,14 +1901,19 @@ Fly_to_FlxY(GEN B, long sv)
 GEN
 FlxX_to_ZXX(GEN B)
 {
-  long lb=lg(B);
-  long i;
-  GEN b=cgetg(lb,t_POL);
+  long i, lb = lg(B);
+  GEN b = cgetg(lb,t_POL);
   for (i=2; i<lb; i++)
-    if (lgpol(gel(B,i)))
-      gel(b,i) = Flx_to_ZX(gel(B,i));
-    else
-      gel(b,i) = gen_0;
+  {
+    GEN c = gel(B,i);
+    switch(lgpol(c))
+    {
+      case 0:  c = gen_0; break;
+      case 1:  c = utoi(c[2]); break;
+      default: c = Flx_to_ZX(c); break;
+    }
+    gel(b,i) = c;
+  }
   b[1] = B[1]; return b;
 }
 
