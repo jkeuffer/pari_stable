@@ -1189,8 +1189,9 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
       An = gel(FpXYQQ_pow(A,ipg,U,P,l),2);
       Bn = gel(FpXYQQ_pow(B,ipg,U,Q,l),2);
       if (DEBUGLEVEL>=4) msgtimer("pows [P,Q]");
-      z = FpXQ_inv(Bn,U,l);
-      z = FpXQ_mul(An,z,U,l);
+      z = Fq_inv(Bn,U,l);
+      z = Fq_mul(An,z,U,l);
+      if (typ(z)==t_INT) z = scalarpol(z,MAXVARN);
       L = FpXQ_sqrtn(z,ipg,U,l,NULL);
       if (DEBUGLEVEL>=4) msgtimer("FpXQ_sqrtn");
       if (!L) pari_err(talker,"Polynomials not irreducible in FpX_ffintersect");
