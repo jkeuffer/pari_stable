@@ -3475,6 +3475,9 @@ primitive \kbd{n}-th root of the unity. Assumes that \kbd{T} is irreducible mod 
 
 \fun{GEN}{Fq_mul}{GEN x, GEN y, GEN T, GEN p}
 
+\fun{GEN}{Fq_Fp_mul}{GEN x, GEN y, GEN T, GEN p} multiplies the \kbd{Fq} $x$
+by the \typ{INT} $y$.
+
 \fun{GEN}{Fq_sqr}{GEN x, GEN T, GEN p}
 
 \fun{GEN}{Fq_neg}{GEN x, GEN T, GEN p}
@@ -3551,12 +3554,15 @@ enforce strict consistency, which would not imply any efficiency gain.)
 
 \fun{GEN}{FqX_mul}{GEN x, GEN y, GEN T, GEN p}
 
-\fun{GEN}{FqX_Fq_mul}{GEN P, GEN U, GEN T, GEN p} multiplies the
-\kbd{FqX}~\kbd{y} by the \kbd{Fq}~\kbd{x}.
+\fun{GEN}{FqX_Fq_mul}{GEN x, GEN y, GEN T, GEN p} multiplies the
+\kbd{FqX}~\kbd{x} by the \kbd{Fq}~\kbd{y}.
 
-\fun{GEN}{FqX_Fq_mul_to_monic}{GEN P, GEN U, GEN T, GEN p}
-returns $P*U$ assuming the result is monic of the same degree as $P$ (in
-particular $U\neq 0$).
+\fun{GEN}{FqX_Fp_mul}{GEN x, GEN y, GEN T, GEN p} multiplies the
+\kbd{FqX}~\kbd{x} by the \typ{INT}~\kbd{y}.
+
+\fun{GEN}{FqX_Fq_mul_to_monic}{GEN x, GEN y, GEN T, GEN p}
+returns $x*y$ assuming the result is monic of the same degree as $x$ (in
+particular $y\neq 0$).
 
 \fun{GEN}{FqX_normalize}{GEN z, GEN T, GEN p} divides the \kbd{FqX}~\kbd{z}
 by its leading term.
