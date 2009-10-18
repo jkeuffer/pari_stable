@@ -831,7 +831,7 @@ typedef struct {
   GEN lt, C, C2, C2lt, C2ltpol;
 } div_data;
 
-static void 
+static void
 init_div_data(div_data *D, GEN pol, GEN C)
 {
   GEN C2, C2lt, lc = leading_term(pol), lt = is_pm1(lc)? NULL: absi(lc);
@@ -865,7 +865,7 @@ update_target(div_data *D, GEN cy, GEN pol)
     }
     else
       C2lt = Clt = D->lt;
-    /* cofactor of y has leading coeff C old_lt : must be multiplied by 
+    /* cofactor of y has leading coeff C old_lt : must be multiplied by
      * new_lt / C old_lt = 1/(C*cy) to obtain the new 'pol'
      * C2ltpol obtained by multiplying further by
      * C^2 new_lt : pol * C new_lt / cy */
@@ -1023,7 +1023,7 @@ nextK:
         if (DEBUGLEVEL>3) fprintferr("*");
         avma = av; goto NEXT;
       }
-      /* pol in O_K[X] with leading coeff lt in Z, 
+      /* pol in O_K[X] with leading coeff lt in Z,
        * y = C*lt \prod famod[i] is in O_K[X] with leading coeff in Z
        * q = C^2 * lt * pol / y = C * (lt * pol) / (lt*\prod famod[i]), a
        * K-rational factor, in fact in Z[Y]/nf.pol)[X] as above.
@@ -1105,7 +1105,7 @@ nf_chk_factors(nfcmbf_t *T, GEN P, GEN M_L, GEN famod, GEN pk)
   GEN pol = P, list, piv, y;
   GEN Tpk = T->L->Tpk;
   div_data D;
-  
+
   piv = special_pivot(M_L);
   if (!piv) return NULL;
   if (DEBUGLEVEL>3) fprintferr("special_pivot output:\n%Ps\n",piv);
