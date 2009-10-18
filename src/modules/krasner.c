@@ -217,7 +217,7 @@ get_topx(KRASNER_t *data, GEN eis)
   pari_sp av, lim;
   /* top poly. is the minimal polynomial of root(pol) + root(upl) */
   rpl = FqX_translate(FqX_red(eis, data->upl, data->pr),
-		      data->mv, data->upl, data->pr);
+                      data->mv, data->upl, data->pr);
   p1 = p2 = rpl;
   av = avma; lim = stack_lim(av, 1);
   for (j = 1; j < data->f; j++)
@@ -254,7 +254,7 @@ FieldData(KRASNER_t *data, FAD_t *fdata, GEN eis, GEN topx)
   fdata->zq  = zq;
   fdata->eis = eis;
   fdata->pi  = Fq_sub(pol_x(data->v), fdata->zq,
-	              FpX_red(fdata->top, data->p), data->p);
+                      FpX_red(fdata->top, data->p), data->p);
   ipi = RgXQ_inv(fdata->pi, fdata->top);
   ipi = Q_remove_denom(ipi, &dipi);
   Q = mulii(data->pr, data->p);
@@ -330,7 +330,7 @@ GetSharp(FAD_t *fdata, GEN pp, GEN ppp, GEN pol, GEN beta, long *pl)
   /* adjust powers */
   for (i = v+1; i <= d; i++)
     gel(p1, i+2) = Fq_mul(gel(p1, i+2),
-			  gel(fdata->pik, i-v+1), fdata->topr, pp);
+                          gel(fdata->pik, i-v+1), fdata->topr, pp);
 
   return gerepilecopy(av, normalizepol(p1));
 }
@@ -560,10 +560,10 @@ TamelyRamifiedCase(KRASNER_t *data)
       FieldData(data, &fdata, eis, topx);
       for (j = 1; j < ct; j++)
       {
-	nb = IsIsomorphic(data, &fdata, gel(vpl, j));
-	if (nb)
-	  pari_err(talker,
-		   "Oops, fields are isomorphic in TamelyRamifiedCase!\n");
+        nb = IsIsomorphic(data, &fdata, gel(vpl, j));
+        if (nb)
+          pari_err(talker,
+                   "Oops, fields are isomorphic in TamelyRamifiedCase!\n");
       }
       NbConjugateFields(data, &fdata);
       nb = fdata.cj;
@@ -573,8 +573,8 @@ TamelyRamifiedCase(KRASNER_t *data)
       gr = r;
       do
       {
-	SetSieveValue(sv, gr);
-	gr = Fl_mul(gr, pmodg, g);
+        SetSieveValue(sv, gr);
+        gr = Fl_mul(gr, pmodg, g);
       }
       while (gr != r);
       r  = NextZeroValue(sv, r);
@@ -625,11 +625,11 @@ StructureOmega(KRASNER_t *data, GEN *pnbpol)
       v_start = function_l(data->p, data->a, data->b, i);
       p1 = powiu(data->q, data->c - v_start);
       if (i == data->b)
-	nbcf = mulii(p1, data->qm1);
+        nbcf = mulii(p1, data->qm1);
       else
       {
-	nbcf = mulii(p1, data->q);
-	zero = 1;
+        nbcf = mulii(p1, data->q);
+        zero = 1;
       }
     }
     gel(O, i+1) = mkvecsmall2(v_start, zero);
@@ -736,7 +736,7 @@ WildlyRamifiedCase(KRASNER_t *data)
       long e = data->e, f = data->f, j = data->j;
       disc = RgXQ_norm(disc, data->upl);
       if (Z_pval(disc, data->p) != f*(e+j-1))
-	pari_err(talker, "incorrect discriminant in WildlyRamifiedCase\n");
+        pari_err(talker, "incorrect discriminant in WildlyRamifiedCase\n");
     }
 #endif
 
@@ -756,7 +756,7 @@ WildlyRamifiedCase(KRASNER_t *data)
       fd += nb;
       ct++;
       if (DEBUGLEVEL>1)
-	fprintferr("%ld more extension%s\t(%ld/%ld, %ldms)\n",
+        fprintferr("%ld more extension%s\t(%ld/%ld, %ldms)\n",
                    nb, (nb == 1)? "": "s", fd, nbext, TIMER(&T));
     }
     avma = av2;
@@ -863,7 +863,7 @@ GetRamifiedPol(GEN p, GEN efj, long v, long flag)
                           utoipos(e),
                           utoipos(f),
                           utoi(f*(e+j-1)),
-			  gcopy(gmael2(pols, i, 2)));
+                          gcopy(gmael2(pols, i, 2)));
     pols = gerepileupto(av, p1);
   }
   else
