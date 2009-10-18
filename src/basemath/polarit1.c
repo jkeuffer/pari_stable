@@ -2015,7 +2015,7 @@ FqX_split(GEN *t, long d, GEN q, GEN S, GEN T, GEN p)
     w = w0 = FqX_rand(dt,v, T,p);
     if (degpol(w) <= 0) continue;
     for (l=1; l<d; l++) /* sum_{0<i<d} w^(q^i), result in (F_q)^r */
-      w = gadd(w0, spec_FqXQ_pow(w, S, T, p));
+      w = RgX_add(w0, spec_FqXQ_pow(w, S, T, p));
     w = FpXQX_red(w, T,p);
     if (is2)
     {
@@ -2023,7 +2023,7 @@ FqX_split(GEN *t, long d, GEN q, GEN S, GEN T, GEN p)
       for (l=1; l<dT; l++) /* sum_{0<i<k} w^(2^i), result in (F_2)^r */
       {
         w = FqX_rem(FqX_sqr(w,T,p), *t, T,p);
-        w = FpXX_red(gadd(w0,w), p);
+        w = FpXX_red(RgX_add(w0,w), p);
       }
     }
     else
