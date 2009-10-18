@@ -489,10 +489,9 @@ chk_factors_get(GEN lt, GEN famod, GEN c, GEN T, GEN N)
   GEN V = cgetg(l, t_VEC);
   for (j = 1; j < l; j++)
     if (signe(c[j])) V[i++] = famod[j];
-  if (lt && i > 1) gel(V,1) = gmul(lt, gel(V,1));
+  if (lt && i > 1) gel(V,1) = RgX_Rg_mul(gel(V,1), lt);
   setlg(V, i);
-  if (T) return FpXQXV_prod(V, T, N);
-  else return FpXV_prod(V,N);
+  return T? FpXQXV_prod(V, T, N): FpXV_prod(V,N);
 }
 
 static GEN
