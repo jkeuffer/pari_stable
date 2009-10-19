@@ -135,24 +135,35 @@ compilestate_reset(void)
   s_dbginfo.n=0;
   s_data.n=0;
   s_lvar.n=0;
+  s_frame.n=0;
   offset=-1;
+  dbgstart=NULL;
 }
 
 void
 compilestate_save(struct pari_compilestate *comp)
 {
-  comp->lvar=s_lvar.n;
+  comp->opcode=s_opcode.n;
+  comp->operand=s_operand.n;
+  comp->data=s_data.n;
+  comp->offset=offset;
+  comp->localvars=s_lvar.n;
+  comp->dbgstart=dbgstart;
+  comp->dbginfo=s_dbginfo.n;
+  comp->frames=s_frame.n;
 }
 
 void
 compilestate_restore(struct pari_compilestate *comp)
 {
-  s_opcode.n=0;
-  s_operand.n=0;
-  s_dbginfo.n=0;
-  s_data.n=0;
-  s_lvar.n=comp->lvar;
-  offset=-1;
+  s_opcode.n=comp->opcode;
+  s_operand.n=comp->operand;
+  s_data.n=comp->data;
+  offset=comp->offset;
+  s_lvar.n=comp->localvars;
+  dbgstart=comp->dbgstart;
+  s_dbginfo.n=comp->dbginfo;
+  s_frame.n=comp->frames;
 }
 
 static GEN

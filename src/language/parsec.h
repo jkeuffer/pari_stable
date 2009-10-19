@@ -40,7 +40,7 @@ pari_init_parser(void)
 
   stack_init(&s_node,sizeof(*pari_tree),(void **)&pari_tree);
   stack_alloc(&s_node,OPnboperator);
-  s_node.n=OPnboperator;
+  parsestate_reset();
   for (i=0;i<OPnboperator;i++)
   {
     pari_tree[i].f    = Fconst;
@@ -82,16 +82,28 @@ void
 parsestate_reset(void)
 {
   s_node.n = OPnboperator;
+  pari_lex_start = NULL;
+  pari_unused_chars=NULL;
+  pari_once=1;
+  pari_lasterror=NULL;
 }
 void
 parsestate_save(struct pari_parsestate *state)
 {
   state->node = s_node.n;
+  state->lex_start = pari_lex_start;
+  state->unused_chars = pari_unused_chars;
+  state->once = pari_once;
+  state->lasterror = pari_lasterror;
 }
 void
 parsestate_restore(struct pari_parsestate *state)
 {
   s_node.n = state->node;
+  pari_lex_start = state->lex_start;
+  pari_unused_chars = state->unused_chars;
+  pari_once = state->once;
+  pari_lasterror = state->lasterror;
 }
 
 GEN
@@ -102,9 +114,6 @@ pari_compile_str(char *lex, int strict)
   struct pari_parsestate state;
   parsestate_save(&state);
   pari_lex_start = lex;
-  pari_unused_chars=NULL;
-  pari_once=1;
-  pari_lasterror=NULL;
   if (pari_parse(&lex))
   {
     if (pari_unused_chars)

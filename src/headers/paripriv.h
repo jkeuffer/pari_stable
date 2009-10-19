@@ -311,11 +311,16 @@ void gen_output(GEN x, pariout_t *T);
 struct pari_parsestate
 {
   long node;
+  int once;
+  const char *lex_start, *unused_chars;
+  GEN lasterror;
 };
 
 struct pari_compilestate
 {
-  long lvar;
+  long opcode, operand, data, localvars, frames, dbginfo;
+  long offset;
+  const char *dbgstart;
 };
 
 struct pari_evalstate
