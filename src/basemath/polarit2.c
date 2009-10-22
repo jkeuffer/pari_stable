@@ -2141,13 +2141,13 @@ RgX_extgcd(GEN x, GEN y, GEN *U, GEN *V)
   if (tx!=t_POL || ty!=t_POL || varncmp(varn(x),varn(y)))
     pari_err(typeer,"RgX_extgcd");
   vx=varn(x);
-  if (gequal0(x))
+  if (!signe(x))
   {
-    if (!gequal0(y)) return zero_extgcd(y,U,V,vx);
+    if (!signe(y)) return zero_extgcd(y,U,V,vx);
     *U = zeropol(vx); *V = zeropol(vx);
     return zeropol(vx);
   }
-  if (gequal0(y)) return zero_extgcd(x,V,U,vx);
+  if (!signe(y)) return zero_extgcd(x,V,U,vx);
   dx = degpol(x); dy = degpol(y);
   if (dx < dy) { pswap(U,V); lswap(dx,dy); swap(x,y); }
   if (dy==0) { *U=zeropol(vx); *V=ginv(y); return pol_1(vx); }
