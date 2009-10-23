@@ -75,7 +75,6 @@ RgX_get_0(GEN x)
 /**                                                                **/
 /********************************************************************/
 
-/*Close to FpXV_FpC_mul*/
 static GEN
 RgXQ_eval_powers(GEN P, GEN V, long a, long n)
 {
@@ -88,7 +87,7 @@ RgXQ_eval_powers(GEN P, GEN V, long a, long n)
 /* Brent & Kung
  * (Fast algorithms for manipulating formal power series, JACM 25:581-595, 1978)
  *
- * V as output by FpXQ_powers(x,l,T,p). For optimal performance, l is as given
+ * V as output by RgXQ_powers(x,l,T,p). For optimal performance, l is as given
  * by brent_kung_optpow */
 GEN
 RgX_RgXQV_eval(GEN P, GEN V, GEN T)

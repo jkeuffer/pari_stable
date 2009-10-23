@@ -1218,7 +1218,7 @@ RgX_RgMV_eval(GEN P, GEN V)
     z = RgM_eval_powers(P,V,0,d);
     return gerepileupto(av, z);
   }
-  if (l<=1) pari_err(talker,"powers is only [] or [1] in FpX_FpXQV_eval");
+  if (l<=1) pari_err(talker,"powers is only [] or [1] in RgX_RgMV_eval");
   d -= l;
   z = RgM_eval_powers(P,V,d+1,l-1);
   while (d >= l-1)
@@ -1236,7 +1236,6 @@ RgX_RgMV_eval(GEN P, GEN V)
   return gerepileupto(av, z);
 }
 
-/* Q in Z[X] and x in Fp[X]/(T). Return a lift of Q(x) */
 GEN
 RgX_RgM_eval(GEN Q, GEN x)
 {
