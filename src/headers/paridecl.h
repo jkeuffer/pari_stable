@@ -2833,6 +2833,7 @@ INLINE GEN    RgX_div(GEN x, GEN y);
 INLINE GEN    RgX_fpnorml2(GEN x, long prec);
 INLINE GEN    RgX_gtofp(GEN x, long prec);
 INLINE GEN    RgX_rem(GEN x, GEN y);
+INLINE GEN    Rg_col_ei(GEN x, long n, long i);
 INLINE GEN    ZC_hnfrem(GEN x, GEN y);
 INLINE GEN    ZM_hnfrem(GEN x, GEN y);
 INLINE GEN    ZM_lll(GEN x, double D, long f);

@@ -830,9 +830,6 @@ hnf_i(GEN A, int remove)
 GEN
 ZM_hnf(GEN x) { return lg(x) > 8? ZM_hnfall(x, NULL, 1): hnf_i(x, 1); }
 
-static GEN
-ZC_Cei(long n, long i, GEN c) { GEN e = zerocol(n); gel(e,i) = c; return e; }
-
 /* u*z[1..k] mod b, in place */
 static void
 FpV_Fp_mul_part_ip(GEN z, GEN u, GEN p, long k)
@@ -914,7 +911,7 @@ ZM_hnfmodall(GEN x, GEN dm, long flag)
     { /* missing pivot on line i, insert column */
       GEN a = cgetg(co + 1, t_MAT);
       for (k = 1; k <= def; k++) a[k] = x[k];
-      gel(a,k++) = ZC_Cei(li-1, i, dm);
+      gel(a,k++) = Rg_col_ei(dm, li-1, i);
       for (     ; k <= co;  k++) a[k] = x[k-1];
       ldef--; if (ldef < 0) ldef = 0;
       co++; def++; x = a;
@@ -925,7 +922,7 @@ ZM_hnfmodall(GEN x, GEN dm, long flag)
   { /* w[li] is an accumulator, discarded at the end */
     GEN w = cgetg(li+1, t_MAT);
     for (i = li-1; i > ldef; i--) w[i] = x[i];
-    for (        ; i > 0;    i--) gel(w,i) = ZC_Cei(li-1, i, dm);
+    for (        ; i > 0;    i--) gel(w,i) = Rg_col_ei(dm, li-1, i);
     x = w;
     for (i = li-1; i > 0; i--)
     { /* check that dm*Id \subset L + add up missing dm*Id components */

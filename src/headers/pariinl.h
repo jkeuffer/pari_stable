@@ -259,6 +259,8 @@ INLINE GEN
 vec_ei(long n, long i) { GEN e = zerovec(n); gel(e,i) = gen_1; return e; }
 INLINE GEN
 vecsmall_ei(long n, long i) { GEN e = const_vecsmall(n,0); e[i] = 1; return e; }
+INLINE GEN
+Rg_col_ei(GEN x, long n, long i) { GEN e = zerocol(n); gel(e,i) = x; return e; }
 
 INLINE GEN
 shallowcopy(GEN x)
