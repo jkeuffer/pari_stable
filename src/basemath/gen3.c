@@ -1241,8 +1241,8 @@ RgX_RgM_eval(GEN Q, GEN x)
 {
   pari_sp av = avma;
   GEN z;
-  long d = degpol(Q), rtd;
-  if (d < 0) return zeropol(varn(Q));
+  long d = degpol(Q), rtd, n = lg(x)-1;
+  if (d < 0) return zeromat(n, n);
   rtd = (long) sqrt((double)d);
   z = RgX_RgMV_eval(Q, RgM_powers(x, rtd));
   return gerepileupto(av, z);
