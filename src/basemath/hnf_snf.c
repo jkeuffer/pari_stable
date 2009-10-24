@@ -2257,14 +2257,21 @@ build_frobeniusbc(GEN V, long n)
 static GEN
 build_basischange(GEN N, GEN U)
 {
-  long i, j, n = lg(N);
-  GEN p2 = cgetg(n, t_MAT);
-  for (j = 1; j < n; ++j)
+  long i, j, n = lg(N)-1;
+  GEN p2 = cgetg(n+1, t_MAT);
+  for (j = 1; j <= n; ++j)
   {
     pari_sp btop = avma;
-    GEN p3 = gen_0;
-    for (i = 1; i < n; ++i)
-      p3 = gadd(p3, gel(gsubst(gcoeff(U, i, j), 0, N),i));
+    GEN p3 = NULL;
+    for (i = 1; i <= n; ++i)
+    {
+      GEN Uij = gcoeff(U, i, j), z;
+      if (is_RgX(Uij, 0))
+        z = RgX_RgM_eval_col(Uij, N, i);
+      else
+        z = Rg_col_ei(Uij, n, i);
+      p3 = p3 ? RgC_add(p3, z):z;
+    }
     gel(p2,j) = gerepileupto(btop, p3);
   }
   return p2;

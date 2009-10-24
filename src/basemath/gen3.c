@@ -1249,6 +1249,21 @@ RgX_RgM_eval(GEN Q, GEN x)
 }
 
 GEN
+RgX_RgM_eval_col(GEN x, GEN M, long c)
+{
+  long i, n = lg(M)-1, lc = lg(x)-1;
+  GEN z;
+  if (signe(x)==0) return zerocol(n);
+  z = Rg_col_ei(gel(x, lc), n, c);
+  for (i=lc-1; i>=2; i--)
+  {
+    z = RgM_RgC_mul(M, z);
+    gel(z,c) = gadd(gel(z,c), gel(x, i));
+  }
+  return z;
+}
+
+GEN
 gsubst(GEN x, long v, GEN y)
 {
   long tx = typ(x), ty = typ(y), lx = lg(x), ly = lg(y);

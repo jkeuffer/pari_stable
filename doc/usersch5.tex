@@ -6577,6 +6577,9 @@ square matrix $x$.
 $\kbd{f}(\kbd{x})$, assuming that \kbd{V} was computed by
 $\kbd{FpXQ\_powers}(\kbd{x}, n)$ for some $n>1$.
 
+\fun{GEN}{RgX_RgM_eval_col}{GEN q, GEN x, long c} evaluates the \typ{POL} $q$
+at the square matrix $x$ but only returns the \kbd{c}-th column of the result.
+
 \fun{GEN}{qfeval}{GEN q, GEN x} evaluates the quadratic form
 $q$ (symmetric matrix) at $x$ (column vector of compatible dimensions).
 
