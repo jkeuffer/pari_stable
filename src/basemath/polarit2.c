@@ -2143,7 +2143,7 @@ RgX_extgcd(GEN x, GEN y, GEN *U, GEN *V)
   vx=varn(x);
   if (!signe(x))
   {
-    if (!signe(y)) return zero_extgcd(y,U,V,vx);
+    if (signe(y)) return zero_extgcd(y,U,V,vx);
     *U = zeropol(vx); *V = zeropol(vx);
     return zeropol(vx);
   }
@@ -2926,12 +2926,21 @@ RgXQ_inv(GEN x, GEN y)
   return gerepileupto(av, d);
 }
 
+/*Assume vx is a polynomial and y is not */
 static GEN
 scalar_bezout(GEN x, GEN y, GEN *U, GEN *V)
 {
   long vx=varn(x);
-  *U=zeropol(vx); *V=ginv(y);
-  return pol_1(vx);
+  int xis0 = signe(x)==0, yis0 = gequal0(y);
+  if (xis0 && yis0) { *U = *V = zeropol(vx); return zeropol(vx); }
+  if (yis0) { *U=pol_1(vx); *V = zeropol(vx); return gcopy(x);}
+  *U=zeropol(vx); *V= ginv(y); return pol_1(vx);
+}
+/* Assume x==0, y!=0 */
+static GEN
+zero_bezout(GEN y, GEN *U, GEN *V)
+{
+  *U=gen_0; *V = ginv(y); return gen_1;
 }
 
 GEN
@@ -2941,10 +2950,17 @@ gbezout(GEN x, GEN y, GEN *u, GEN *v)
   if (tx == t_INT && ty == t_INT) return bezout(x,y,u,v);
   if (tx != t_POL)
   {
-    if (ty == t_POL) return scalar_bezout(y,x,v,u);
-    *u = ginv(x); *v = gen_0; return gen_1;
+    if (ty == t_POL)
+      return scalar_bezout(y,x,v,u);
+    else
+    {
+      int xis0 = gequal0(x), yis0 = gequal0(y);
+      if (xis0 && yis0) { *u = *v = gen_0; return gen_0; }
+      if (xis0) return zero_bezout(y,u,v);
+      else return zero_bezout(x,v,u);
+    }
   }
-  if (ty != t_POL) return scalar_bezout(x,y,u,v);
+  else if (ty != t_POL) return scalar_bezout(x,y,u,v);
   vx = varn(x);
   if (vx != varn(y))
     return varncmp(vx, varn(y)) < 0? scalar_bezout(x,y,u,v)
