@@ -22,7 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "paripriv.h"
 
 static GEN nfsqff(GEN nf,GEN pol,long fl,GEN den);
-static int nfsqff_use_Trajer(long n, long dpol);
+static int nfsqff_use_Trager(long n, long dpol);
 
 enum { FACTORS = 0, ROOTS, ROOTS_SPLIT };
 
@@ -283,7 +283,7 @@ static GEN
 get_nfsqff_data(GEN *nf, GEN T, GEN A, GEN *B, GEN *ptbad)
 {
   GEN den, bad;
-  if (nfsqff_use_Trajer(degpol(T), degpol(A)))
+  if (nfsqff_use_Trager(degpol(T), degpol(A)))
   {
     *nf = T; bad = den = ZX_disc(T);
     if (is_pm1(leading_term(T))) den = indexpartial(T, den);
@@ -1721,7 +1721,7 @@ polfnf(GEN a, GEN T)
 }
 
 static int
-nfsqff_use_Trajer(long n, long dpol)
+nfsqff_use_Trager(long n, long dpol)
 {
   return dpol*3<n;
 }
@@ -1748,7 +1748,7 @@ nfsqff(GEN nf, GEN pol, long fl, GEN den)
   n = degpol(nfpol);
   /* deg = 1 => irreducible */
   if (dpol == 1) return mkvec(QXQX_normalize(pol, nfpol));
-  if (typ(nf)==t_POL || nfsqff_use_Trajer(n,dpol))
+  if (typ(nf)==t_POL || nfsqff_use_Trager(n,dpol))
   {
     GEN z;
     if (DEBUGLEVEL>2) fprintferr("Using Trager's method\n");
