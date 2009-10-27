@@ -22,6 +22,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "paripriv.h"
 
 static GEN nfsqff(GEN nf,GEN pol,long fl,GEN den);
+static int nfsqff_use_Trajer(long n, long dpol);
+
 enum { FACTORS = 0, ROOTS, ROOTS_SPLIT };
 
 /* for nf_bestlift: reconstruction of algebraic integers known mod P^k,
@@ -277,6 +279,25 @@ get_den(GEN *nf, GEN T)
   return den;
 }
 
+static GEN
+get_nfsqff_data(GEN *nf, GEN T, GEN A, GEN *B, GEN *ptbad)
+{
+  GEN den, bad;
+  if (nfsqff_use_Trajer(degpol(T), degpol(A)))
+  {
+    *nf = T; bad = den = ZX_disc(T);
+    if (is_pm1(leading_term(T))) den = indexpartial(T, den);
+  }
+  else
+  {
+    den = get_den(nf, T);
+    bad = nf_get_index(*nf); if (den != gen_1) bad = mulii(bad, den);
+  }
+  (void)nfgcd_all(A, RgX_deriv(A), T, bad, B);
+  if( ptbad) *ptbad = bad;
+  return den;
+}
+
 /* lt(A) is an integer; ensure it is not a constant t_POL. In place */
 static void
 ensure_lt_INT(GEN A)
@@ -291,7 +312,7 @@ GEN
 nfroots(GEN nf,GEN pol)
 {
   pari_sp av = avma;
-  GEN A, T, den, f;
+  GEN A, T, den;
   long d;
 
   if (!nf) return nfrootsQ(pol);
@@ -309,9 +330,7 @@ nfroots(GEN nf,GEN pol)
   if (degpol(T) == 1) return gerepileupto(av, nfrootsQ(simplify_shallow(A)));
 
   A = Q_primpart(A);
-  den = get_den(&nf, T);
-  f = nf_get_index(nf);
-  (void)nfgcd_all(A, RgX_deriv(A), T, den == gen_1? f: mulii(f, den), &A);
+  den = get_nfsqff_data(&nf, T, A, &A, NULL);
   if (degpol(A) != d) A = Q_primpart( QXQX_normalize(A, T) );
   ensure_lt_INT(A);
   A = nfsqff(nf,A, ROOTS, den);
@@ -409,7 +428,7 @@ zerofact(long v)
 }
 
 /* Return the factorization of A in Q[X]/(T) in rep [pre-allocated with
- * cgeg(3,t_MAT)], reclaiming all memory between avma and rep.
+ * cgetg(3,t_MAT)], reclaiming all memory between avma and rep.
  * y is the vector of irreducible factors of B = Q_primpart( A/gcd(A,A') ).
  * Bad primes divide 'bad' */
 static void
@@ -499,9 +518,7 @@ nffactor(GEN nf,GEN pol)
   }
   if (degpol(T) == 1) return gerepileupto(av, QX_factor(simplify_shallow(A)));
 
-  den = get_den(&nf, T);
-  bad = nf_get_index(nf); if (den != gen_1) bad = mulii(bad, den);
-  (void)nfgcd_all(A, RgX_deriv(A), T, bad, &B);
+  den = get_nfsqff_data(&nf, T, A, &B, &bad);
   if (DEBUGLEVEL>2) msgTIMER(&ti, "squarefree test");
   if (degpol(B) != dA) B = Q_primpart( QXQX_normalize(B, T) );
   ensure_lt_INT(B);
@@ -1703,6 +1720,12 @@ polfnf(GEN a, GEN T)
   return sort_factor_pol(rep, cmp_RgX);
 }
 
+static int
+nfsqff_use_Trajer(long n, long dpol)
+{
+  return dpol*3<n;
+}
+
 /* return the factorization of the square-free polynomial pol. Not memory-clean
    The coeffs of pol are in Z_nf and its leading term is a rational integer.
    deg(pol) > 0, deg(nfpol) > 1
@@ -1716,7 +1739,7 @@ nfsqff(GEN nf, GEN pol, long fl, GEN den)
 {
   long n, nbf, dpol = degpol(pol);
   GEN pr, C0, polbase, init_fa = NULL;
-  GEN N2, res, polred, lt, nfpol = nf_get_pol(nf);
+  GEN N2, res, polred, lt, nfpol = typ(nf)==t_POL?nf:nf_get_pol(nf);
   nfcmbf_t T;
   nflift_t L;
   pari_timer ti, ti_tot;
@@ -1725,8 +1748,7 @@ nfsqff(GEN nf, GEN pol, long fl, GEN den)
   n = degpol(nfpol);
   /* deg = 1 => irreducible */
   if (dpol == 1) return mkvec(QXQX_normalize(pol, nfpol));
-  /* heuristic */
-  if (dpol*3 < n)
+  if (typ(nf)==t_POL || nfsqff_use_Trajer(n,dpol))
   {
     GEN z;
     if (DEBUGLEVEL>2) fprintferr("Using Trager's method\n");
