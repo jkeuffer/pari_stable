@@ -1,6 +1,6 @@
 test(N) = /* pentagonal numbers recurrence */
 { my(s,t,p);
-  p = vector(N); p[1] = 1; 
+  p = vector(N); p[1] = 1;
   for (n=1, N-1,
      s = 0; t = n+1;
      for (k=1, n,

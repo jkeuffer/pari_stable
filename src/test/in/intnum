@@ -52,4 +52,4 @@ sumnum(n=1,[2,log(2)],2^(-n), intnumstep()+1, 1) - 1
 tab = sumnuminit(2,,-1);
 a = sumnumalt(n=1,2,1/(n^3+n+1),tab,1);
 b = sumalt(n=1,(-1)^n/(n^3+n+1));
-a - b 
+a - b
