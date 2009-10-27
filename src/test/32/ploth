@@ -70,5 +70,4 @@
 ? plotdraw([0,10,10])
 ? psdraw([0,10,10])
 ? print("Total time spent: ",gettime);
-Total time spent: 36
-? \q
+Total time spent: 32
