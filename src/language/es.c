@@ -4169,8 +4169,13 @@ pari_dir_exists(const char *s) { return mkdir(s, 0777); }
 #else
 static int
 pari_file_exists(const char *s) { return 0; }
+#if defined(_MSC_VER)
+static int
+pari_dir_exists(const char *s) { return mkdir(s); }
+#else
 static int
 pari_dir_exists(const char *s) { return 0; }
+#endif
 #endif
 
 char *
