@@ -307,91 +307,91 @@ GTo21- wrong prototype for qfrep
    25- neither freadseq() nor readGEN() were able to parse '{' / '}' [Bug #216]
    26- accuracy problem in polroots (--> division by zero) [Bug #252]
    27- acos(x < 0) --> result off by Pi [ introduced in 2.2.9-A3 ]
-   27- ellrootno(e,p) incorrect in the case of good reduction [#262]
-   28- (rare) "impossible assignment I-->I" in contfrac
-   29- typo in qfbclassno's hash function (when D < 0, function can't handle 0).
+   28- ellrootno(e,p) incorrect in the case of good reduction [#262]
+   29- (rare) "impossible assignment I-->I" in contfrac
+   30- typo in qfbclassno's hash function (when D < 0, function can't handle 0).
        qfbclassno(-948) --> division by 0 [GMP kernel]
-   30- [Makefiles:] the behaviour of '//' as path leader is undefined. Make
+   31- [Makefiles:] the behaviour of '//' as path leader is undefined. Make
        sure path prefixes are not '/' [ e.g $prefix/lib --> //lib ]
-   31- pollead(u*v + (v+1)/v, v) --> 'x' [ should raise an error ]
-GN 32- problems in MPQS : some factors missed e.g factor(2^263-9) -->
+   32- pollead(u*v + (v+1)/v, v) --> 'x' [ should raise an error ]
+GN 33- problems in MPQS : some factors missed e.g factor(2^263-9) -->
        expensive extra runs ( + possible stack corruptions when many factors
        found simultaneously ).
-   33- tanh(x) was actually computing tanh(|x|) for real x ([#269] from 2.2.8)
-   34- [MacOS X] dlopen is now part of the system library. Don't redefine
+   34- tanh(x) was actually computing tanh(|x|) for real x ([#269] from 2.2.8)
+   35- [MacOS X] dlopen is now part of the system library. Don't redefine
        dlopen in darwin.c if HAS_DLOPEN is defined.
-   35- fix Trager's trick in factorff (from 2.2.10)
-   36- rnfisnorminit(quadpoly(145,y),quadray(145,1)) --> stack overflow [#273]
-   37- matker([1,2,3;4,5,6]*1.) --> [;]  (missing 1 vector)
-   38- rnfconductor(bnfinit(y),x,1) --> error [#277]
-   39- gcc-4.0 miscompiles PARI on ix86 [#274]
+   36- fix Trager's trick in factorff (from 2.2.10)
+   37- rnfisnorminit(quadpoly(145,y),quadray(145,1)) --> stack overflow [#273]
+   38- matker([1,2,3;4,5,6]*1.) --> [;]  (missing 1 vector)
+   39- rnfconductor(bnfinit(y),x,1) --> error [#277]
+   40- gcc-4.0 miscompiles PARI on ix86 [#274]
        ( http://gcc.gnu.org/bugzilla/show_bug.cgi?id=23453 )
-   40- truncate(1/4/x+1+O(x)) -> (x + 1/4)/x instead of (4*x + 1)/(4*x) [#276]
-   41- bitneg(2^32-1,32) -> corrupt integer [#279]
-   42- typo in rnf_is_abelian [#277]
-GN 43- several minor fixes in mpqs.c
-BA 44- ellrootno(e,2) was wrong for curves of Kodaira type 3 and -7. 
+   41- truncate(1/4/x+1+O(x)) -> (x + 1/4)/x instead of (4*x + 1)/(4*x) [#276]
+   42- bitneg(2^32-1,32) -> corrupt integer [#279]
+   43- typo in rnf_is_abelian [#277]
+GN 44- several minor fixes in mpqs.c
+BA 45- ellrootno(e,2) was wrong for curves of Kodaira type 3 and -7. 
                                                            ([#212] from 2.2.9)
-BA 45- galoisfixedfield() was not robust enough ([#256, #228 from 2.2.9)
-   46- tanh(-10^20) --> error instead of -1  [tanh(10^20) was treated properly]
-BA 47- wrong rounding in wr_float: with default(format,"f0.10")
+BA 46- galoisfixedfield() was not robust enough ([#256, #228 from 2.2.9)
+   47- tanh(-10^20) --> error instead of -1  [tanh(10^20) was treated properly]
+BA 48- wrong rounding in wr_float: with default(format,"f0.10")
         1.23456789049999999997 -> 1.234567891
-GH 48- typo in thue.c:MiddleSols() --> missing solutions [#264]
-   49- default(prettyprinter,,1) --> t_POL instead of t_STR [#296]
-BA 50- truncate(1/x+O(x)) --> SEGV
-   51- overflow in Flm_gauss (when solving triangular system) --> wrong result
+GH 49- typo in thue.c:MiddleSols() --> missing solutions [#264]
+   50- default(prettyprinter,,1) --> t_POL instead of t_STR [#296]
+BA 51- truncate(1/x+O(x)) --> SEGV
+   52- overflow in Flm_gauss (when solving triangular system) --> wrong result
        [#284]
-   52- isprime(25, 2)
+   53- isprime(25, 2)
          *** impossible inverse modulo: Mod(5, 25).
        although it's useful to get a factor, it's not nice to raise an error,
        since 'trap' then becomes mandatory. Removed this feature: the factor
        is silently discarded (exceedingly rare anyway).
-   53- (-1)^(any integer >= 2^31) --> -1 [ from 2.2.9 ]
-GH 54- zncoppersmith(x,1002,1001) --> SEGV [#221]
-   55- subst(1+O(x),x,x^2+O(x^3)) --> SEGV [#287] (patch by MSo)
+   54- (-1)^(any integer >= 2^31) --> -1 [ from 2.2.9 ]
+GH 55- zncoppersmith(x,1002,1001) --> SEGV [#221]
+   56- subst(1+O(x),x,x^2+O(x^3)) --> SEGV [#287] (patch by MSo)
        subst(1+O(x^2),x, x^2+O(x^3)) --> 1 + O(x^3)  [ should be O(x^4) ]
-   56- component() didn't work on lists [ SEGV ]
-   57- quadclassunit(D,, [c0 > 6]) --> weird error message
-   58- weird errors in bnrstark [#285]
-   59- (x^0)^2^31 --> length overflow
-   60- polroots(pollegendre(51),1) --> SEGV [#293]
-   61- print({}) --> oo loop
-BA 62- when choosing between (p-1) and APRCL, isprime() required a complete
+   57- component() didn't work on lists [ SEGV ]
+   58- quadclassunit(D,, [c0 > 6]) --> weird error message
+   59- weird errors in bnrstark [#285]
+   60- (x^0)^2^31 --> length overflow
+   61- polroots(pollegendre(51),1) --> SEGV [#293]
+   62- print({}) --> oo loop
+BA 63- when choosing between (p-1) and APRCL, isprime() required a complete
        factorization of p-1, whereas accumuluting factors up to sqrt(p-1) was
        enough. (e.g 2^127 - 1)
-BA 63- function name not always properly reported on interrupt (e.g if, while)
-   64- content([-1]) --> -1 
-   65- memory leaks in quadclassunit (#318)
-BA 66- [Configure] check that 'readline' is not an EditLine wrapper
+BA 64- function name not always properly reported on interrupt (e.g if, while)
+   65- content([-1]) --> -1 
+   66- memory leaks in quadclassunit (#318)
+BA 67- [Configure] check that 'readline' is not an EditLine wrapper
        [ ==> compilation failure otherwise ]
-   67- Str() --> junk string (uninitialized data) (#326)
-   68- arg(I*O(7^5)+1) --> junk, exp(3*I + O(3^5)) --> junk. (#328)
-   69- powiu(2, ulong n) called int2n(long n), incorrect for huge n (#331)
-   70- Qfb(8,-4,1)*Qfb(5,-4,1) --> Floating Point Exception (BIB, #332)
-   71- t_QRF distance component was evaluated using an unstable algorithm,
+   68- Str() --> junk string (uninitialized data) (#326)
+   69- arg(I*O(7^5)+1) --> junk, exp(3*I + O(3^5)) --> junk. (#328)
+   70- powiu(2, ulong n) called int2n(long n), incorrect for huge n (#331)
+   71- Qfb(8,-4,1)*Qfb(5,-4,1) --> Floating Point Exception (BIB, #332)
+   72- t_QRF distance component was evaluated using an unstable algorithm,
        possibly leading to catastrophic cancellation (#333)
-   72- dbltor did not recognize Infinity, NaN, or unnormalized numbers.
-   73- makerfrac(1,quadgen(24)*x^0)%b --> SEGV, where
+   73- dbltor did not recognize Infinity, NaN, or unnormalized numbers.
+   74- makerfrac(1,quadgen(24)*x^0)%b --> SEGV, where
        GEN makerfrac(GEN p,GEN q) {
           GEN z=cgetg(3,t_RFRAC);
           z[1]=lcopy(p);
           z[2]=lcopy(q); return z;
         }
-BA 74- exp(x) gave imprecise results at huge accuracies for expo(x) >> 1.
-   75- valuation(x,p) using a divide & conquer algorithm would kill the
+BA 75- exp(x) gave imprecise results at huge accuracies for expo(x) >> 1.
+   76- valuation(x,p) using a divide & conquer algorithm would kill the
        session if p = 1
-   76- (2 + O(2^8))^(-1/3) --> SEGV [#341]
-   77- exp(0.E100) --> invalid GEN
-   78- stack corruption in gsubst [#343]
-   79- Pol([Mat(0.1)],x)^3. --> crash [#346]
-   80- besseljh(0,2^65) --> crash [#340]
-BA 81- [plotQt:] ^C while hi-res window is present would crash the session
-   82- Strtex(Vecsmall) --> SEGV [#348]
-   83- oo loop in zeta() [catastrophic cancellation in get_xinf() ]
-   84- oo loop in nfdisc() [#350]
-   85- Mod(1,2)*x / (1/2) --> incorrect t_POL
-   86- qfbsolve forgot some solutions: qfbsolve(Qfb(2,1,3),3) --> 0
-   87- multiplying ideals could lead to factoring big integers (failsafe
+   77- (2 + O(2^8))^(-1/3) --> SEGV [#341]
+   78- exp(0.E100) --> invalid GEN
+   79- stack corruption in gsubst [#343]
+   80- Pol([Mat(0.1)],x)^3. --> crash [#346]
+   81- besseljh(0,2^65) --> crash [#340]
+BA 82- [plotQt:] ^C while hi-res window is present would crash the session
+   83- Strtex(Vecsmall) --> SEGV [#348]
+   84- oo loop in zeta() [catastrophic cancellation in get_xinf() ]
+   85- oo loop in nfdisc() [#350]
+   86- Mod(1,2)*x / (1/2) --> incorrect t_POL
+   87- qfbsolve forgot some solutions: qfbsolve(Qfb(2,1,3),3) --> 0
+   88- multiplying ideals could lead to factoring big integers (failsafe
        algorithm in idealtwoelt, when random trials don't work): fix
        idealtwoelt.
 
@@ -2429,31 +2429,31 @@ Done for version 2.0.19.beta (released 17/03/2000):
     1- buffer overflow in ploth (when extrema too large)
     2- trap(,"") didn't work
 IS+BA 3- various fixes necessary for g++
-    4- prototype inconsistency in level1.h (evalexpo/evalvalp)
-    5- trouble with pgcc -mk6 + variable k6 in elliptic.c
-HC  6- nfnewprec(bnf) could contain objects of low accuracy
-XR  7- check subgroup argument in bnrL1
-    8- typo in ideal_two_elt (oo loop)
-    9- pb with GNU as + preprocessor on Sparc
-   10- incorrect result in matdet over Z[1/n] (Gauss-Bareiss) [gdivexact]
-   11- solve(x=0,1,deriv(x)) --> SEGV
-   12- ??' --> weird error
-   13- generic SNF (polynomial entries) couldn't handle 0s on diagonal
-   14- incorrect handling of 0 ideals in some functions
-XR 15- typos in bnrL1
-   16- bad input not handled in rnfcharpoly()
-IZ 17- delay rounding in rectplot structures until plotting device
-   18- Mod(1,x) / matid(2) --> incorrect object
-   19- avoid getrusage on alpha (pb with gp-dyn)
-   20- incorrect file inclusions when using gas on Sparc (-->undefined symbols)
-   21- massive cancellations in zetak(nfz,) when current prec lower than nfz's
-XR 22- bnrstark(): fixed inconsistency between 32bit & 64bit versions +
+    3- prototype inconsistency in level1.h (evalexpo/evalvalp)
+    4- trouble with pgcc -mk6 + variable k6 in elliptic.c
+HC  5- nfnewprec(bnf) could contain objects of low accuracy
+XR  6- check subgroup argument in bnrL1
+    7- typo in ideal_two_elt (oo loop)
+    8- pb with GNU as + preprocessor on Sparc
+    9- incorrect result in matdet over Z[1/n] (Gauss-Bareiss) [gdivexact]
+   10- solve(x=0,1,deriv(x)) --> SEGV
+   11- ??' --> weird error
+   12- generic SNF (polynomial entries) couldn't handle 0s on diagonal
+   13- incorrect handling of 0 ideals in some functions
+XR 14- typos in bnrL1
+   15- bad input not handled in rnfcharpoly()
+IZ 16- delay rounding in rectplot structures until plotting device
+   17- Mod(1,x) / matid(2) --> incorrect object
+   18- avoid getrusage on alpha (pb with gp-dyn)
+   19- incorrect file inclusions when using gas on Sparc (-->undefined symbols)
+   20- massive cancellations in zetak(nfz,) when current prec lower than nfz's
+XR 21- bnrstark(): fixed inconsistency between 32bit & 64bit versions +
        check maxprime() before starting the computation
-PW 23- hyperu bad input bug
-PW 24- intnum(x=1,2,0) --> oo loop
-   25- sin(x + y) --> error
-   26- next(i > 1) didn't work (part of the last loop could be executed)
-   27- typo in polrootspadic(p, 2, *) [singular case]
+PW 22- hyperu bad input bug
+PW 23- intnum(x=1,2,0) --> oo loop
+   24- sin(x + y) --> error
+   25- next(i > 1) didn't work (part of the last loop could be executed)
+   26- typo in polrootspadic(p, 2, *) [singular case]
 
   Changed
 XR  1- bnrL1 now takes a congruence subgroup as second argument
@@ -2697,20 +2697,20 @@ XR  1- modulus choice in bnrstark
     6- look for at least MIN_EXTRA extra relations in buchall
     7- simplified calling interface to hnfspec/add
     8  Used hnfspec in bnfsunit, changed the way S-units are found
-    9- output of bnfsunit modified (removed res[3], made res[2] suitable
+    8- output of bnfsunit modified (removed res[3], made res[2] suitable
        for hnfadd)
-   10- listput and listinsert now return the inserted element, not the list
-   11- check_break_status rewritten: was very inefficient
-   12- Used parser code DG whenever it was possible (moved reorder to init.c)
-   13- faster isunit()
-   14- added GC in expr()
-   15- buchall(): increase subfactorbase without starting over
-GN 16- minor tuning in pollardbrent() for huge integers (call ECM sooner)
-   17- renamed directories dos -> Odos, o.xxx.xxx --> Oxxx.
+    9- listput and listinsert now return the inserted element, not the list
+   10- check_break_status rewritten: was very inefficient
+   11- Used parser code DG whenever it was possible (moved reorder to init.c)
+   12- faster isunit()
+   13- added GC in expr()
+   14- buchall(): increase subfactorbase without starting over
+GN 15- minor tuning in pollardbrent() for huge integers (call ECM sooner)
+   16- renamed directories dos -> Odos, o.xxx.xxx --> Oxxx.
        Moved win32/* --> Odos
-OR 18- new version of pari.el
-XR 19- new modular round 4 implementation (nilord2)
-BA 20- improved algorithms in galconj.c
+OR 17- new version of pari.el
+XR 18- new modular round 4 implementation (nilord2)
+BA 19- improved algorithms in galconj.c
 
   Added
     1- an optional argument to next()
@@ -3188,51 +3188,51 @@ GN  3- [From 2.0.11- Fixed 14] floating point exponents: 1E1 --> possibly 0.1
    16- not enough garbage collection in rootmod (polgcdnun)
 TP 17- compilation using cc -64 on 64-bit SGI
 IS+GN 18- "(hit return to continue)" message did not flush stdin
-GN 19- ECM rewrite
-   20- incorect absi_cmp in buch3.c
-   21- useless garbage collecting in sqred2
-   22- O(1)^(1/2) --> SEGV
-   23- forvec(i=[],...) --> SEGV
-GN 24- deriv(x*y, y) --> 0
-GN 25- inefficient GC in ispseudoprime()
-   26- fixed some (not all) compiler warnings (char * --> unsigned char *)
-   27- exp(too large number) now gives a meaningful error message
-AW 28- getrusage still not detected on FreeBSD 2.2.5
-GN 29- off by 1 error in initprimes() (--> not enough calculated primes)
-   30- inefficiencies in factor(t_POL)
-HC 31- bug in rnfelementabstorel for Mod(scalar, t_POL)
-HC 32- typo in gaussmoduloall
-   33- idealred(principal ideal) always returned an archimedean part
-HC 34- idealpowprime wrong for negative powers
-   35- typo in binomial(n,k) (wrong answer if n<=k)
-   36- online help for polinterpolate
-   37- incorrect garbage collecting in quickmulii/quicksqri
-   38- reformatted the output in test mode (gp -test)
-   39- polroots((x-7)*(x-8)*(x+16)) took far too much time
-   40- ellap assumed ell was given in characteristic 0
-IZ 41- outlook of plot function (better labels, better choice of chars)
-RD 42- when factoring over a non prime finite field and found a p-th power,
+GN 18- ECM rewrite
+   19- incorect absi_cmp in buch3.c
+   20- useless garbage collecting in sqred2
+   21- O(1)^(1/2) --> SEGV
+   22- forvec(i=[],...) --> SEGV
+GN 23- deriv(x*y, y) --> 0
+GN 24- inefficient GC in ispseudoprime()
+   25- fixed some (not all) compiler warnings (char * --> unsigned char *)
+   26- exp(too large number) now gives a meaningful error message
+AW 27- getrusage still not detected on FreeBSD 2.2.5
+GN 28- off by 1 error in initprimes() (--> not enough calculated primes)
+   29- inefficiencies in factor(t_POL)
+HC 30- bug in rnfelementabstorel for Mod(scalar, t_POL)
+HC 31- typo in gaussmoduloall
+   32- idealred(principal ideal) always returned an archimedean part
+HC 33- idealpowprime wrong for negative powers
+   34- typo in binomial(n,k) (wrong answer if n<=k)
+   35- online help for polinterpolate
+   36- incorrect garbage collecting in quickmulii/quicksqri
+   37- reformatted the output in test mode (gp -test)
+   38- polroots((x-7)*(x-8)*(x+16)) took far too much time
+   39- ellap assumed ell was given in characteristic 0
+IZ 40- outlook of plot function (better labels, better choice of chars)
+RD 41- when factoring over a non prime finite field and found a p-th power,
        forgot about Frobenius
-GN 43- rare memory bug in ellfacteur
-   44- gscalmat was not suitable for gerepileupto
-   45- polredabs(,2) didn't handle non-monic polynomials
-   46- check for various overflows (x ^ 1000000, etc.)
-   47- printtex(I) --> missing closing brace
-   48- setisset() did not check that elements were strings
-   49- typo in gdiv(t_POLMOD, t_POLMOD) with different variables
-KO 50- missing ; in level1.h (Windows specific code)
-   51- forprime(p=0,10,) indeed started at p=0
-   52- (cf 2.0.11 Fixed-1) put back 3 cgeti in galois.c (were necessary)
-   53- factorpadic could overstate the precision of the result
-   54- (very) rare memory corruption in allhnfmod (when cleaning up)
-PM 55- prototypes in paridecl.h (fussy IRIX compiler), cc -64 in MACHINES
-   56- factormod implemented for all primes (p = 2 and p > 2^31 called
+GN 42- rare memory bug in ellfacteur
+   43- gscalmat was not suitable for gerepileupto
+   44- polredabs(,2) didn't handle non-monic polynomials
+   45- check for various overflows (x ^ 1000000, etc.)
+   46- printtex(I) --> missing closing brace
+   47- setisset() did not check that elements were strings
+   48- typo in gdiv(t_POLMOD, t_POLMOD) with different variables
+KO 49- missing ; in level1.h (Windows specific code)
+   50- forprime(p=0,10,) indeed started at p=0
+   51- (cf 2.0.11 Fixed-1) put back 3 cgeti in galois.c (were necessary)
+   52- factorpadic could overstate the precision of the result
+   53- (very) rare memory corruption in allhnfmod (when cleaning up)
+PM 54- prototypes in paridecl.h (fussy IRIX compiler), cc -64 in MACHINES
+   55- factormod implemented for all primes (p = 2 and p > 2^31 called
        factorcantor which was much slower)
-   57- check for unsuitable input in [factor|roots] (SEGV for multivar. pol)
-   58- polresultant sometimes gave the wrong sign
-   59- extraneous space in err(impl,"") (= "sorry,... not implemented")
-   60- aliases treated incorrectly during error recovery (--> obscure bugs)
-   61- obscure bug when normalizing rational functions with real coeffs
+   56- check for unsuitable input in [factor|roots] (SEGV for multivar. pol)
+   57- polresultant sometimes gave the wrong sign
+   58- extraneous space in err(impl,"") (= "sorry,... not implemented")
+   59- aliases treated incorrectly during error recovery (--> obscure bugs)
+   60- obscure bug when normalizing rational functions with real coeffs
        (corrected content())
 
   Changed
@@ -3251,47 +3251,47 @@ PM 55- prototypes in paridecl.h (fussy IRIX compiler), cc -64 in MACHINES
 GN  9- ECM tunings
    10- check for overflow in cget* (instead of silent wraparound)
    11- gp_main_loop cut into (improved) pieces
-   13- simplified normalizepol
-   14- Warn when trying to replace an existing function with install
+   12- simplified normalizepol
+   13- Warn when trying to replace an existing function with install
        (previously error)
-   15- new function mpcopy. replaced some inlined function (rcopy, absi,
+   14- new function mpcopy. replaced some inlined function (rcopy, absi,
        absr, negi, negr) by compatibility macros
-   16- gphelp now uses GPDOCDIR and GPTMPDIR
-   17- improved rational arithmetic by computing smaller gcds (gredsp removed)
-GN 18- improvements in MPQS (use less memory, count relations precisely)
-   19- text-mode (non-TeX) extended help printed screen by screen
-   20- retuned integer multiplication, and made polkaramul the default
+   15- gphelp now uses GPDOCDIR and GPTMPDIR
+   16- improved rational arithmetic by computing smaller gcds (gredsp removed)
+GN 17- improvements in MPQS (use less memory, count relations precisely)
+   18- text-mode (non-TeX) extended help printed screen by screen
+   19- retuned integer multiplication, and made polkaramul the default
        polynomial multiplication
-XR 21- stark.c rewritten
-IZ 22- updated the pariperl interface
-   23- improved handling of t_INTMODs (less GC)
-   24- improved (a lot) factoring/root finding for intmod polynomials
-   25- modified poldivres to avoid computing remainder when useless
-   26- removed inefficient shiftl/shiftlr from the kernel
-   27- from the same sources, Configure can now simultaneously run on
+XR 20- stark.c rewritten
+IZ 21- updated the pariperl interface
+   22- improved handling of t_INTMODs (less GC)
+   23- improved (a lot) factoring/root finding for intmod polynomials
+   24- modified poldivres to avoid computing remainder when useless
+   25- removed inefficient shiftl/shiftlr from the kernel
+   26- from the same sources, Configure can now simultaneously run on
        different architectures
-   28- polynomial factorizer now sorts the factors (increasing degree)
-   29- ?an_obsolete_function now calls whatnow
-   30- .pol operates also on t_POLMOD
-   31- random() argument can have arbitrary length
-IZ 32- with gnuplot, pick a sensible terminal when X11 is not around
-IZ 33- change valences for use with Math::PARI
-IZ 34- various interface patches (new file highlvl.c, different prototype
+   27- polynomial factorizer now sorts the factors (increasing degree)
+   28- ?an_obsolete_function now calls whatnow
+   29- .pol operates also on t_POLMOD
+   30- random() argument can have arbitrary length
+IZ 31- with gnuplot, pick a sensible terminal when X11 is not around
+IZ 32- change valences for use with Math::PARI
+IZ 33- various interface patches (new file highlvl.c, different prototype
        for foreignAutoload...)
-   35- optimized permute()
-   36- setrand, getrand, getstack, gettime return a C long, and not a GEN
-   37- pari_randseed no longer global. Don't reset random number generator
+   34- optimized permute()
+   35- setrand, getrand, getstack, gettime return a C long, and not a GEN
+   36- pari_randseed no longer global. Don't reset random number generator
        when entering certain functions
-   38- improved smallvectors() (correcting the "not enough storage" bug)
-   39- improved computation of special polynomials ([sub]cyclo,tchebi,legendre)
-   40- read() and extern() are timed as a whole now
-   41- check if LONG_IS_64BIT is correctly defined in pari_init (in case we
+   37- improved smallvectors() (correcting the "not enough storage" bug)
+   38- improved computation of special polynomials ([sub]cyclo,tchebi,legendre)
+   39- read() and extern() are timed as a whole now
+   40- check if LONG_IS_64BIT is correctly defined in pari_init (in case we
        include the wrong pari.h)
-GN 42- use Lehmer-Jebelean to compute inverse mod p (TODO: extended gcd)
-   43- moved subcyclo() to bibli2.c
-   44- improved polredabs, suppressed flag 8
-   45- improved ground(), case t_REAL
-   46- modified the internal SMALL nf structure (add matrix M, for polredabs)
+GN 41- use Lehmer-Jebelean to compute inverse mod p (TODO: extended gcd)
+   42- moved subcyclo() to bibli2.c
+   43- improved polredabs, suppressed flag 8
+   44- improved ground(), case t_REAL
+   45- modified the internal SMALL nf structure (add matrix M, for polredabs)
 
   Removed
     1- doc/Makefile.SOS, since make should succeed even if Configure failed
@@ -3450,28 +3450,28 @@ GN 18- (t_RFRAC) ^ t_INT took an unreasonable amount of time
    20- hyperu could enter an oo loop due to round-off errors
 XR 21- matadjoint(Mat(n)) returned Mat(n), not Mat(1)
    22- matadjoint([;]) returned [[;]] (???)
-   22- wrap some long error messages
-XR 23- inefficiencies in rnfpolredabs
-XR 24- nffactor (wrong format for discriminant computation + problems with
+   23- wrap some long error messages
+XR 24- inefficiencies in rnfpolredabs
+XR 25- nffactor (wrong format for discriminant computation + problems with
        unseparable polynomials + compute disc only once)
-HC 25- typos in kummer.c
-GN 26- check environment variable LINES, not ROWS
-   27- introduced in 2.0.7 (Fixed 7-): lift(Mod(O(2^0)*x, x^3 - 2)^4) was a
+HC 26- typos in kummer.c
+GN 27- check environment variable LINES, not ROWS
+   28- introduced in 2.0.7 (Fixed 7-): lift(Mod(O(2^0)*x, x^3 - 2)^4) was a
        zero polynomial with non-zero sign (=> pb when normalizing in poldivres)
-   28- timer always returned 0 if times() was used (e.g linux-alpha)
-   29- kill'ing the argument of a user function corrupted the function
-   30- make clean did not remove pariinline.h
-   31- incorrect memcopy in identifier, case 's' (removed * sizeof(long))
-   32- online help for ?. (nf.nf does not exist)
-   33- lisseq0: gnil not respected after break/next. avma=av too brutal
+   29- timer always returned 0 if times() was used (e.g linux-alpha)
+   30- kill'ing the argument of a user function corrupted the function
+   31- make clean did not remove pariinline.h
+   32- incorrect memcopy in identifier, case 's' (removed * sizeof(long))
+   33- online help for ?. (nf.nf does not exist)
+   34- lisseq0: gnil not respected after break/next. avma=av too brutal
        after return
-   34- ellwp assumed precdl > 3
-   35- under emacs, \c + hit return froze emacs (Emmanuel Kowalski)
-   36- (f()= f()=x); f; didn't set f properly
-GN 37- comments in anal.c
-   38- qflllgram([;]) --> SEGV
-   39- no online help for bernfrac
-   40- from 2.0.6 (Fixed-8): in padicff2, forgot to raise ideal to power e
+   35- ellwp assumed precdl > 3
+   36- under emacs, \c + hit return froze emacs (Emmanuel Kowalski)
+   37- (f()= f()=x); f; didn't set f properly
+GN 38- comments in anal.c
+   39- qflllgram([;]) --> SEGV
+   40- no online help for bernfrac
+   41- from 2.0.6 (Fixed-8): in padicff2, forgot to raise ideal to power e
 
   Changed
     1- improved (trivially) gneg (case t_INTMOD), gtopoly
@@ -3809,12 +3809,12 @@ Done for version 2.0.3.alpha (released 13/01/98):
     7- command line switches so that one can enter them with or without white
        space (new function read_arg in gp.c)
     8- setdcolors so that it can't unset disable_colors if we are under emacs
-   11- random did not check its argument correctly (random(2^32) was accepted)
-   12- b=10; for(a=1,b, b=2) exited immediately, whereas the upper bound is
+    9- random did not check its argument correctly (random(2^32) was accepted)
+   10- b=10; for(a=1,b, b=2) exited immediately, whereas the upper bound is
        supposed to be evaluated only once
-   13- reorganized the error recovery system (initially because errpile could
+   11- reorganized the error recovery system (initially because errpile could
        cause SEGV on Linux systems)
-   14- typo. problems in doc and refcard (interletter spacing in $nfz$...)
+   12- typo. problems in doc and refcard (interletter spacing in $nfz$...)
 
   Changed:
     1- Reorganized Makefile.SH: extraction twice as fast

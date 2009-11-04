@@ -44,160 +44,160 @@ BA 27- priority of << had become lower than priority of * (should be =)
    28- last digit of polylogs was wrong
 BA 29- missing GC in the leftrightpow functions
    30- bnr=bnrinit(bnfinit(y^2-229,1),5,1); rnfkummer(bnr,,3) --> oo loop
-   41- mathnf(a,1) could have negative entries if non-trivial kernel [#741]
-   42- [Configure -pg] some variables not written to pari.cfg
-   43- missing subfields in nfsubfields [#744]
-   44- [readline] <F1> or <M-h> would fail on 'fun()'. Delete trailing
+   31- mathnf(a,1) could have negative entries if non-trivial kernel [#741]
+   32- [Configure -pg] some variables not written to pari.cfg
+   33- missing subfields in nfsubfields [#744]
+   34- [readline] <F1> or <M-h> would fail on 'fun()'. Delete trailing
        garbage in help routine.
-   45- modular matrix inversion routines used O(n^2) inversions instead of O(n)
-   46- print1() + read() or extern() + error/warning ==> missing \n
-   47- infinite loop in nffactor [#751]
-   48- ellordinate couldn't handle t_FFELTs
-   49- eint1(10,10) completely wrong
-   50- ispower broken due to 1) uninitialized variable, 2) insufficient
+   35- modular matrix inversion routines used O(n^2) inversions instead of O(n)
+   36- print1() + read() or extern() + error/warning ==> missing \n
+   37- infinite loop in nffactor [#751]
+   38- ellordinate couldn't handle t_FFELTs
+   39- eint1(10,10) completely wrong
+   40- ispower broken due to 1) uninitialized variable, 2) insufficient
        precision [#916]
-   51- compilation fails with yacc unable to handle parse.y [ add explicit
+   41- compilation fails with yacc unable to handle parse.y [ add explicit
        rule in Makefile to prevent from generating a wrong one ]
-   52- duplicate factors in nffactor (easy cases) [#761]
-   53- ellisoncurve(e, P) didn't check that "point" P had the correct format
-   54- znlog(...,znprimroot(p)) --> SEGV [#765]
-   55- wrong signs in bnfisintnorm e.g. [bnfinit(x^3+5), 5] -> x [#767]
-   56- x/(x+2) * Mod(1,2) -> Mod(1, 2)*x/(x + 2)  [ should be Mod(1,2) ]
-   57- substpol(x/(y^3*x+1),y^2,1) -> x/(y^3*x + 1) [ should be x/(y*x+1) ]
-   58- missing sanity checks in rnfbasistoalg()
-   59- setrand(1); E=ellinit([0,0,0,1,T^4]*Mod(1,ffinit(2,7,T))) --> "weird
+   42- duplicate factors in nffactor (easy cases) [#761]
+   43- ellisoncurve(e, P) didn't check that "point" P had the correct format
+   44- znlog(...,znprimroot(p)) --> SEGV [#765]
+   45- wrong signs in bnfisintnorm e.g. [bnfinit(x^3+5), 5] -> x [#767]
+   46- x/(x+2) * Mod(1,2) -> Mod(1, 2)*x/(x + 2)  [ should be Mod(1,2) ]
+   47- substpol(x/(y^3*x+1),y^2,1) -> x/(y^3*x + 1) [ should be x/(y*x+1) ]
+   48- missing sanity checks in rnfbasistoalg()
+   49- setrand(1); E=ellinit([0,0,0,1,T^4]*Mod(1,ffinit(2,7,T))) --> "weird
        base ring; can't divide"
-   60- nffactor(nfinit(y),x*y)
+   50- nffactor(nfinit(y),x*y)
        nffactor(nfinit(y),x^2*y+1)
        nffactor(nfinit(y),x^2*y)  --> errors or SEGV. [#769]
-   61- hilbert(1,1,1) --> oo loop [#770]
-   62- nffactor(y^2+1, x+1/2) --> x+1/2 [ not integral ]
-   63- nffactor(y^2+1,x*y+1) --> x*y + 1 [ not normalized, missing POLMOD ]
-   64- nffactor(y^2+1,x^2+2*y+1) --> x^2+2*y+1 [ missing POLMOD ]
-   65- ellpow() with CM raised a "division by 0" instead of returning [0] [#777]
-   66- ellpow(e,z,2^20*I) --> norm too large in CM.
-   67- p=x^4-x^3+x^2-x+1; tnf = thueinit(p); thue(tnf,1) -> missing solutions
+   51- hilbert(1,1,1) --> oo loop [#770]
+   52- nffactor(y^2+1, x+1/2) --> x+1/2 [ not integral ]
+   53- nffactor(y^2+1,x*y+1) --> x*y + 1 [ not normalized, missing POLMOD ]
+   54- nffactor(y^2+1,x^2+2*y+1) --> x^2+2*y+1 [ missing POLMOD ]
+   55- ellpow() with CM raised a "division by 0" instead of returning [0] [#777]
+   56- ellpow(e,z,2^20*I) --> norm too large in CM.
+   57- p=x^4-x^3+x^2-x+1; tnf = thueinit(p); thue(tnf,1) -> missing solutions
        (could occur whenever p has no real root) [#764]
-   68- missing GC in numtoperm()
-   69- harmless uninitialized memory read in mulrrz_i()
-   70- sigma(..., 2) --> SEGV [ introduced in 2.4.1 ] [#783]
-   71- tuning problems in bnfinit
+   58- missing GC in numtoperm()
+   59- harmless uninitialized memory read in mulrrz_i()
+   60- sigma(..., 2) --> SEGV [ introduced in 2.4.1 ] [#783]
+   61- tuning problems in bnfinit
        bnfinit(polredabs(quadhilbert(-2939))) --> oo loop
-   72- minor inaccuracy in GMP kernel (affir)
-   73- missing GC in gamma / lngamma
-   74- obscure SEGV when setting 'log' in a file read from command-line
+   62- minor inaccuracy in GMP kernel (affir)
+   63- missing GC in gamma / lngamma
+   64- obscure SEGV when setting 'log' in a file read from command-line
        as gp foo.gp [#789]
-   75- check that moduli are compatible in Rg_to_Fp(t_INTMOD, t_INT)
-   76- matsolve([1;2;3],[1,2,4]~) --> [1]~  (should raise an error)
-   77- allow polredabs(x in Q[X])
-BA 78- [galoisinit] Documentation of "weakly" supersolvable was incorrect.
-   79- binomial(t_REAL or t_COMPLEX, k) was very slow for large k
-   80- quadclassunit(-3 or -4) --> one extra (obsolete) component.
-BA 81- the evaluator did not garbage collect huge expressions [#713]
-BA 82- changing a function in use caused a crash [#784]
-   83- vecsort() would not check the type of element in 1-dimensional vector
+   65- check that moduli are compatible in Rg_to_Fp(t_INTMOD, t_INT)
+   66- matsolve([1;2;3],[1,2,4]~) --> [1]~  (should raise an error)
+   67- allow polredabs(x in Q[X])
+BA 68- [galoisinit] Documentation of "weakly" supersolvable was incorrect.
+   69- binomial(t_REAL or t_COMPLEX, k) was very slow for large k
+   70- quadclassunit(-3 or -4) --> one extra (obsolete) component.
+BA 71- the evaluator did not garbage collect huge expressions [#713]
+BA 72- changing a function in use caused a crash [#784]
+   73- vecsort() would not check the type of element in 1-dimensional vector
        [ e.g. vecsort([I] now raises an error ]
-   84- RgX_val would raise a SEGV on t_POLs with exact *non-rational* 0
+   74- RgX_val would raise a SEGV on t_POLs with exact *non-rational* 0
        leading coeff, e.g. Mod(0,2)*x
-   85- SEGV (stack corruption) in idealval(K, rational number, pr) [#808]
-   86- All the charpoly(x,v) variants failed when v > variable(x)
-BA 87- conjvec did not support FFELTs.
-   88- memory leak in t_LIST handling
-   89- polrootsmod(,1) could return an incomplete result [when 0 was a root
+   75- SEGV (stack corruption) in idealval(K, rational number, pr) [#808]
+   76- All the charpoly(x,v) variants failed when v > variable(x)
+BA 77- conjvec did not support FFELTs.
+   78- memory leak in t_LIST handling
+   79- polrootsmod(,1) could return an incomplete result [when 0 was a root
        or there was a double root], e.g. polrootsmod(x^3 + x^2 + 21*x,23,1)
-IM 90- lngamma(x) gave incorrect results (off by 2*Pi*I) when real(x) was a
+IM 80- lngamma(x) gave incorrect results (off by 2*Pi*I) when real(x) was a
        negative half-integer.
-   91- trying to write to a binary file and failing leaked a file descriptor
-   92- long-standing stack corruption when <C-C> pressed during gclone [#458]
-   93- idealaddtoone had problems with 0 ideals [#829]
-   94- wrong results in qfgaussred() [only totally real case was correct]
-   95- uninitialized memory read in divrr (both kernels), would only affect
+   81- trying to write to a binary file and failing leaked a file descriptor
+   82- long-standing stack corruption when <C-C> pressed during gclone [#458]
+   83- idealaddtoone had problems with 0 ideals [#829]
+   84- wrong results in qfgaussred() [only totally real case was correct]
+   85- uninitialized memory read in divrr (both kernels), would only affect
        the last bit of the result, but could cause SEGV on empty stack.
-   96- After A=1/(y + 0.); B=1. + O(y); all of A*B, A/B, B/A caused an error
-   97- wrong result in ellap(E, 2) if bad reduction
-   98- 0.*x+1 == 1 --> 1 but 0.*x^2+x == x  --> 0 [ latter is now 1 ]
-   99- ffinit(2,30) --> division by 0 [typo in FlxY_Flx_div], [#859]
-  100- when unexpected exception/signal raised (^C, stack overflow, out of
+   86- After A=1/(y + 0.); B=1. + O(y); all of A*B, A/B, B/A caused an error
+   87- wrong result in ellap(E, 2) if bad reduction
+   88- 0.*x+1 == 1 --> 1 but 0.*x^2+x == x  --> 0 [ latter is now 1 ]
+   89- ffinit(2,30) --> division by 0 [typo in FlxY_Flx_div], [#859]
+   90- when unexpected exception/signal raised (^C, stack overflow, out of
        memory), == would cancel it and silently return wrong value [#329]
-  101- reading recently freed memory in popinfile()
-  102- contfrac(1,[],-1) ==> SEGV [#865]
-  103- missing type checks in bnrconductorofchar [#867], nfhilbert [#868]
-  104- unstable evaluation of tan(t_COMPLEX); at \p9, try
+   91- reading recently freed memory in popinfile()
+   92- contfrac(1,[],-1) ==> SEGV [#865]
+   93- missing type checks in bnrconductorofchar [#867], nfhilbert [#868]
+   94- unstable evaluation of tan(t_COMPLEX); at \p9, try
        ploth(t=-0.1,0.1,abs(tan(10*I+t)))
-BA105- Vecsmall([1,1])^-1 returned garbage
-  106- was not handling nffactor(*huge degree* nf, *non-monic* t_POL) properly
+BA 95- Vecsmall([1,1])^-1 returned garbage
+   96- was not handling nffactor(*huge degree* nf, *non-monic* t_POL) properly
        --> wrong result and possible memory corruption [#870]
-  107- polredabs: excessive stack usage [#872]
-  108- besselj(0., 0) --> error [#880]
-  109- polred didn't accept non-monic inputs
-  110- factor(..., 10^100) ==> "overflow in t_INT-->long conversion" [#855]
-IZ111- missing `const's in groupid.c cause massive copying to stack.
-  112- [native kernel only] int_normalize() didn't treat properly inputs
+   97- polredabs: excessive stack usage [#872]
+   98- besselj(0., 0) --> error [#880]
+   99- polred didn't accept non-monic inputs
+  100- factor(..., 10^100) ==> "overflow in t_INT-->long conversion" [#855]
+IZ101- missing `const's in groupid.c cause massive copying to stack.
+  102- [native kernel only] int_normalize() didn't treat properly inputs
        of lgefint 2
-  113- gerepile errors in quadclassunit(13).gen or .cyc
-  114- from_Kronecker & FpXQX_from_Kronecker returned polynomials with invalid
+  103- gerepile errors in quadclassunit(13).gen or .cyc
+  104- from_Kronecker & FpXQX_from_Kronecker returned polynomials with invalid
        first codeword [ unused bits not reset to 0 ]
-  115- gred_rfrac_simple(n,d) [ basic constructor for t_RFRAC n/d ] did not
+  105- gred_rfrac_simple(n,d) [ basic constructor for t_RFRAC n/d ] did not
        cater for d = constant polynomial
-  116- RgX_extgcd created invalid objects in trivial cases [ gen_0 used by
+  106- RgX_extgcd created invalid objects in trivial cases [ gen_0 used by
        RgX-only routines ]
-BA117- Fix detection for ppc64 running in 32bit mode.
-  118- Fp_div used remii instead of modii: Mod(3,5)-1/3 -> Mod(0, 5) [#893]
-  119- trying to prevent accuracy problems in thue() cauѕed oo loop
-  120- wrong results in matsnf with t_POL entries [#901]
+BA107- Fix detection for ppc64 running in 32bit mode.
+  108- Fp_div used remii instead of modii: Mod(3,5)-1/3 -> Mod(0, 5) [#893]
+  109- trying to prevent accuracy problems in thue() cauѕed oo loop
+  110- wrong results in matsnf with t_POL entries [#901]
        minpoly(matrix(4,4,i,j,i/j)) -> x^3 - 4*x^2 + x
-  121- thue(thueinit(x^3-100,1), 25) -> "Short continued fraction"
-  122- thue(thueinit(x^3-48, 320) -> missing solutions (similar problem
+  111- thue(thueinit(x^3-100,1), 25) -> "Short continued fraction"
+  112- thue(thueinit(x^3-48, 320) -> missing solutions (similar problem
        when LHS is a polynomial of degree d and RHS includes a d-th power).
-  123- completely wrong results in nfsnf
-  124- intformal(A,Y) -> 1/2*A^2
-  125- uninitialized memory read in sin / cos / exp (possibly fed random
+  113- completely wrong results in nfsnf
+  114- intformal(A,Y) -> 1/2*A^2
+  115- uninitialized memory read in sin / cos / exp (possibly fed random
        final digits to the algorithm, normally truncated away before returning)
-  126- nffactor(): SEGV if "relifting" was necessary (very rare)
-  127- nffactor(): obscure "no factor" bug [when trial division found and
+  116- nffactor(): SEGV if "relifting" was necessary (very rare)
+  117- nffactor(): obscure "no factor" bug [when trial division found and
        extracted *non monic* factors], #930
-  128- incorrect output type in FpX_factor [#933]
-  129- possible stack corruption in polylog() + missing imaginary part.
-  130- incorrect final simplification in idealtwoelt(nf, x, y).
+  118- incorrect output type in FpX_factor [#933]
+  119- possible stack corruption in polylog() + missing imaginary part.
+  120- incorrect final simplification in idealtwoelt(nf, x, y).
        Eg: idealtwoelt(nfinit(x^2+23), 3, 6) -> [0, 0]~
-BA131- listsort() could return a pointer referencing freed memory: make it
+BA121- listsort() could return a pointer referencing freed memory: make it
        return void
-BA132- src/kernel/ix86/asm0.h had an incorrect #line entry.
-  133- rnfkummer could miss some fields ( bug in rnfnormgroup() ), e.g.
+BA122- src/kernel/ix86/asm0.h had an incorrect #line entry.
+  123- rnfkummer could miss some fields ( bug in rnfnormgroup() ), e.g.
        bnrM = bnrinit(bnfinit(X^4 - 34*X^2 + 1189,1), 5, 1);
        rnfkummer(bnrM, matdiagonal([3,1,1]))
-  134- nfgaloisconj(y,1) -> invalid object
-  135- weird error message in ellpointtoz on loss of accuracy [#962]
-  136- ^C before inital prompt appears ==> SEGV [#965]
-BA137- ellsea(,,1) did not work
-BA138- COMPAT file was missing some functions renamed in 2.3: 
+  124- nfgaloisconj(y,1) -> invalid object
+  125- weird error message in ellpointtoz on loss of accuracy [#962]
+  126- ^C before inital prompt appears ==> SEGV [#965]
+BA127- ellsea(,,1) did not work
+BA128- COMPAT file was missing some functions renamed in 2.3: 
        flisexpr, flisseq -> gp_read_str; lisGEN  -> gp_read_stream
-AF139- fix for documentation of polcoeff, extern and readvec
-BA140- 1/matrix(2,2,i,j,Mod(0, 2)) -> SEGV
-  141- wrong results for qfminim(A,,,2) if minimal norm < 1. E.g. A = matid(2)/2
-BA142- besselk(0.001,1) -> SEGV
-BA143- galoisinit(x).gen was not a t_VEC
-  144- lngamma(10^1000) -> precision too low in truncr. Same for psi()
-  145- nffactor could segfault. [#979]
-  146- Mod(10,37)^10000000000 -> SEGV
-  147- missing Flx_renormalize at the end of Flx_mulspec_basecase() &
+AF129- fix for documentation of polcoeff, extern and readvec
+BA130- 1/matrix(2,2,i,j,Mod(0, 2)) -> SEGV
+  131- wrong results for qfminim(A,,,2) if minimal norm < 1. E.g. A = matid(2)/2
+BA132- besselk(0.001,1) -> SEGV
+BA133- galoisinit(x).gen was not a t_VEC
+  134- lngamma(10^1000) -> precision too low in truncr. Same for psi()
+  135- nffactor could segfault. [#979]
+  136- Mod(10,37)^10000000000 -> SEGV
+  137- missing Flx_renormalize at the end of Flx_mulspec_basecase() &
        Flx_sqrspec_basecase() [#984]
-  148- after \y0, [1,x]*[0,0]~ returned 0 t_INT, which should be a t_POL [#983]
-  149- isprime(x) possibly incorrect on 64 bit machines when 10^15 < x < 2^64
-LM150- fix for the documentation of deriv, intformal, poldisc and taylor.
-JD151- fix for the documentation of install, matsnf and polsturm.
-LM152- general documentation spelling fixes.
-BA153- detection of exp2 and log2 was broken with C++
-BA154- support for shared library on netbsd.
-IZ155- [readline] 'foo)' + M-C-b -> infinite loop
-  156- factorff / polrootsff : wrong result if t_FFELT coefficients
+  138- after \y0, [1,x]*[0,0]~ returned 0 t_INT, which should be a t_POL [#983]
+  139- isprime(x) possibly incorrect on 64 bit machines when 10^15 < x < 2^64
+LM140- fix for the documentation of deriv, intformal, poldisc and taylor.
+JD141- fix for the documentation of install, matsnf and polsturm.
+LM142- general documentation spelling fixes.
+BA143- detection of exp2 and log2 was broken with C++
+BA144- support for shared library on netbsd.
+IZ145- [readline] 'foo)' + M-C-b -> infinite loop
+  146- factorff / polrootsff : wrong result if t_FFELT coefficients
        in variable 'x
-BA157- nfisideal did not reject invalid hnf ideal matrices [#999]
-  158- v=vectorv(1);concat([matrix(0,0),v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v])
+BA147- nfisideal did not reject invalid hnf ideal matrices [#999]
+  148- v=vectorv(1);concat([matrix(0,0),v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v])
        -> SEGV [#1002]
-BA159- minpoly([-5,0,-1,1;0,-5,-1,-1;1,1,-5,0;-1,1,0,-5]/3) 
+BA149- minpoly([-5,0,-1,1;0,-5,-1,-1;1,1,-5,0;-1,1,0,-5]/3) 
        -> wrong result[#994]
-BA160- 2/O(5) -> O(5^-1) (should raise an error) [#1009]
+BA150- 2/O(5) -> O(5^-1) (should raise an error) [#1009]
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
@@ -450,25 +450,25 @@ BA 92- make test-xxx: trap SIGINT in benching script to exit on <C-C>
        min(lim, primelimit). Now we trial divide up to lim and raise an error
        if lim > primelimit. [ Having the routine return an obviously "wrong" 
        result depending on an invisible parameter was not a good idea. ]
-  104- factor(t_INT/t_FRAC, 1) was the same as factor(t_INT/t_FRAC, 0). Now
+  105- factor(t_INT/t_FRAC, 1) was the same as factor(t_INT/t_FRAC, 0). Now
        abide by the input value and leave (..., 0) as the single special case 
        (shortcut for "the largest precomputed prime")
-BA105- [native kernel] Schoenhage-Strassen multiplication/squaring
-  106- factorff(A, p, T): make p & T optional if A has t_FFELT coefficients
-BA107- [TLS] Change pari_thread calling convention
-  108- allow x.a1, ..., x.a6 for an "ell5" x (5-component vector)
-  109- removed 'primelimit' grom gp_data struct: we now print the actual limit
+BA106- [native kernel] Schoenhage-Strassen multiplication/squaring
+  107- factorff(A, p, T): make p & T optional if A has t_FFELT coefficients
+BA108- [TLS] Change pari_thread calling convention
+  109- allow x.a1, ..., x.a6 for an "ell5" x (5-component vector)
+  110- removed 'primelimit' grom gp_data struct: we now print the actual limit
        of the primetable, not the value input by the user (which may be a
        little less)
-BA110- listsort(L) no longer returns the list L: it now returns nothing.
+BA111- listsort(L) no longer returns the list L: it now returns nothing.
        (No point in sorting in place if we must immediately copy the result.)
-  111- allow component(t_VECSMALL,...) [#957]
-  112- allow bestappr(x)  [2nd argument made optional]
-BA113- GMP kernel chosen by default when GMP is available
-BA114- Rename RgXQ_u_pow to RgXQ_powu
-  115- Darwin: add -search_paths_first to LDFLAGS (try to solve the Editline
+  112- allow component(t_VECSMALL,...) [#957]
+  113- allow bestappr(x)  [2nd argument made optional]
+BA114- GMP kernel chosen by default when GMP is available
+BA115- Rename RgXQ_u_pow to RgXQ_powu
+  116- Darwin: add -search_paths_first to LDFLAGS (try to solve the Editline
        / Readline conflict in a user-friendly way)
-BA116- [enable-tls] Library soname changed to libpari[-gmp]-tls[-2.4].so.N.
+BA117- [enable-tls] Library soname changed to libpari[-gmp]-tls[-2.4].so.N.
 
   Added
     1- many new benches (make test-all)
@@ -973,49 +973,49 @@ BA 65- vecsmall_uniq(v) no longer assumes that v is sorted
     5- library function gtos
     6- library function pari_daemon
     7- library function Fp_sqr, padicsqrtlift
-    7- library function RgXQ_inv
-    8- bench 'extract'
-    9- charpoly: Berkowitz division-free algorithm (new default) [#541]
-   10- library function phiu
-   11- library function mkvecsmalln
-   12- library function chk_gerepileupto, dbg_gerepile, dbg_gerepileupto
-   13- library function gen_sort_uniq, gen_indexsort_uniq+add flag 8 in vecsort
-   14- library function remi2n, cmp_RgX, gen_cmp_RgX
-   15- library function RgV_dotproduct, ZV_dotproduct, RgV_dotsquare, ZV_dotsquare, FpV_dotproduct, FpV_dotsquare
-   16- library function FpX_Fp_add_shallow
-   17- library function Q_pval
-BA 18- new keyword "my" to declare lexically-scopped local variables.
-   19- new GP function listpop()
-   20- library function RgX_inflate, RgX_deflate, Flx_inflate, Flx_deflate, poldeflate
-   21- library function Fp_neg, Fp_add, Fp_sub
-   22- library function ugcd
-   23- library function vecinv, vecmul, vecpow, vecdiv, vecmodii
-   24- library function RgM_isidentity, RgV_isin
-   25- library function nfnewprec_shallow, bnfnewprec_shallow, bnrnewprec_shallow
-   26- library function Zp_issquare
-   27- library function dvmdsBIL, divsBIL, remsBIL
-   28- library functions gassoc_proto, map_proto_G, map_proto_GG, map_proto_GL,
+    8- library function RgXQ_inv
+    9- bench 'extract'
+   10- charpoly: Berkowitz division-free algorithm (new default) [#541]
+   11- library function phiu
+   12- library function mkvecsmalln
+   13- library function chk_gerepileupto, dbg_gerepile, dbg_gerepileupto
+   14- library function gen_sort_uniq, gen_indexsort_uniq+add flag 8 in vecsort
+   15- library function remi2n, cmp_RgX, gen_cmp_RgX
+   16- library function RgV_dotproduct, ZV_dotproduct, RgV_dotsquare, ZV_dotsquare, FpV_dotproduct, FpV_dotsquare
+   17- library function FpX_Fp_add_shallow
+   18- library function Q_pval
+BA 19- new keyword "my" to declare lexically-scopped local variables.
+   20- new GP function listpop()
+   21- library function RgX_inflate, RgX_deflate, Flx_inflate, Flx_deflate, poldeflate
+   22- library function Fp_neg, Fp_add, Fp_sub
+   23- library function ugcd
+   24- library function vecinv, vecmul, vecpow, vecdiv, vecmodii
+   25- library function RgM_isidentity, RgV_isin
+   26- library function nfnewprec_shallow, bnfnewprec_shallow, bnrnewprec_shallow
+   27- library function Zp_issquare
+   28- library function dvmdsBIL, divsBIL, remsBIL
+   29- library functions gassoc_proto, map_proto_G, map_proto_GG, map_proto_GL,
        map_proto_lG, map_proto_lGG, map_proto_lGL [ were private with
        other names ]
-   29- default factor_proven
-   30- experimental -balloon option to gphelp
-LGr31- defaults graphcolormap, graphcolors [runtime-defined colormap for plots]
-LGr32- bit 4096 [ complex ] to ploth
-   33- member function .p / .mod for t_PADIC
-   34- same mnemonic flags to plotrecth as in ploth
-BA 35- member function .pol, .mod and .p for t_FFELT
-BA 36- New type t_CLOSURE to store GP functions
-   37- Ability to use arbitrary comparison functions in vecsort()
-   38- library functions closure_callgen1, closure_callgen2, closure_callgen,
+   30- default factor_proven
+   31- experimental -balloon option to gphelp
+LGr32- defaults graphcolormap, graphcolors [runtime-defined colormap for plots]
+LGr33- bit 4096 [ complex ] to ploth
+   34- member function .p / .mod for t_PADIC
+   35- same mnemonic flags to plotrecth as in ploth
+BA 36- member function .pol, .mod and .p for t_FFELT
+BA 37- New type t_CLOSURE to store GP functions
+   38- Ability to use arbitrary comparison functions in vecsort()
+   39- library functions closure_callgen1, closure_callgen2, closure_callgen,
        closure_callgenvec.
-   39- GP function apply(), select()
-   40- library functions FF_issquare, FpXQ_issquare, Flxq_issquare
-BA 41- library function vecsmall_uniq_sorted
-   42- bench 'ff', 'exact0'
-   43- has_getenv.c
-   44- library function FpX_oneroot
-   45- library function gcmpX
-   46- library functions ZV_sort, ZV_sort_uniq, ZV_search
+   40- GP function apply(), select()
+   41- library functions FF_issquare, FpXQ_issquare, Flxq_issquare
+BA 42- library function vecsmall_uniq_sorted
+   43- bench 'ff', 'exact0'
+   44- has_getenv.c
+   45- library function FpX_oneroot
+   46- library function gcmpX
+   47- library functions ZV_sort, ZV_sort_uniq, ZV_search
 
   Removed
     1- obsolete function kbessel2 (now static). Removed optional flag in besselk
@@ -1066,44 +1066,44 @@ LGr 4- [gphelp] race condition --> incomplete cleanup (improved patch BA)
    17- polrootspadic(f, 2, r) --> some roots would be found twice [ due to
        FpX_roots(f, 4) called ]  [#521]
    18- ??sumalt doesn't compile: in GPHELP, treat \ref in verbatim mode [#518]
-   20- matinverseimage returned [;] when no pre-image exists. Conform to
+   19- matinverseimage returned [;] when no pre-image exists. Conform to
        the docs: "an empty vector or matrix", depending on the input types.
-   21- [Configure] abort when $CFLAGS is not supported by $CC
-   22- 3.5 % 2 --> error [ should be 0.5 ]
-   23- sin(1/10^100) --> 0e-28 [ also affected cos,tan,cotan ]
-   24- fix e.eta and elleta such that e.eta = 2 ellzeta(e,e.omega/2)
+   20- [Configure] abort when $CFLAGS is not supported by $CC
+   21- 3.5 % 2 --> error [ should be 0.5 ]
+   22- sin(1/10^100) --> 0e-28 [ also affected cos,tan,cotan ]
+   23- fix e.eta and elleta such that e.eta = 2 ellzeta(e,e.omega/2)
        [ was ellzeta(e,e.omega/2) ]. COMPAT.
-   25- elleta(e) was different from elleta(e.omega). Analogous problems
+   24- elleta(e) was different from elleta(e.omega). Analogous problems
        in all quasi-elliptic functions. COMPAT: change e.omega so that
        e.omega[1] / e.omega[2] belongs to the Poincare half plane [ used
        to be the inverse ]. Together with 24: the Legendre relation now reads
        w1 e2 - w2 e1 = 2 I Pi
        Rationale: 1) the action of Sl_2(R) becomes the standard one, not a
        twisted one 2) fixes quite a few normalization problems in our code.
-   26- check that k >= 0 in thetanullk [#531]
-   27- isprime(-2,1) returned 1
-   28- Fix 'Not enough precision in thue' error
-BA 29- [OS X] Fix kernel detection on x86_64-darwin
-   30- Remove "VERY long time" Warning in bnfcertify (few minutes nowadays)
-BA 31- missing prototype for documented function ZY_ZXY_rnfequation
-   32- sqrt(x^2/y^2) --> SEGV [#536]
-   33- \r foo no longer worked if foo was a directory and foo.gp a valid
+   25- check that k >= 0 in thetanullk [#531]
+   26- isprime(-2,1) returned 1
+   27- Fix 'Not enough precision in thue' error
+BA 28- [OS X] Fix kernel detection on x86_64-darwin
+   29- Remove "VERY long time" Warning in bnfcertify (few minutes nowadays)
+BA 30- missing prototype for documented function ZY_ZXY_rnfequation
+   31- sqrt(x^2/y^2) --> SEGV [#536]
+   32- \r foo no longer worked if foo was a directory and foo.gp a valid
        input file [#540]
-BA 34- [Configure] spectacular failure to recognize gcc under some locales.
-   35- polredabs(x^8+2*x^6-5*x^4+78*x^2+9) was incorrect [ missed
+BA 33- [Configure] spectacular failure to recognize gcc under some locales.
+   34- polredabs(x^8+2*x^6-5*x^4+78*x^2+9) was incorrect [ missed
        x^8+6*x^6-x^4+54*x^2+25 due to incorrect "skipfirst" ]   [#542]
-   36- typo in resmod2n (both kernels) [#546]
-   37- At \p28, 0.1 - 0.1 would return 0.E-30 instead of 0.E-29
-BA 38- missing prototype for documented function FpX_div_by_X_x
-   39- isprime(,0) very slow when primelimit is large [#546]
-   40- nfmodprinit could create FpX's which were not reduced mod p
-   41- O(x^3)^(1/2) was O(x^2) instead of O(x)
-RB 42- the following TODO item:
+   35- typo in resmod2n (both kernels) [#546]
+   36- At \p28, 0.1 - 0.1 would return 0.E-30 instead of 0.E-29
+BA 37- missing prototype for documented function FpX_div_by_X_x
+   38- isprime(,0) very slow when primelimit is large [#546]
+   39- nfmodprinit could create FpX's which were not reduced mod p
+   40- O(x^3)^(1/2) was O(x^2) instead of O(x)
+RB 41- the following TODO item:
        v = vector(2); v[1] = v = 0  --> SEGV. Occurs with high probability if
        any variable is "deleted", while it (or part of it) is still in use
        Reference count could be helpful here.
-   43- substpol(x^-2+O(x^-1),x^2,x) --> error [#555]
-BA 44- [TLS] addss, addsr and subsr were not reentrant.
+   42- substpol(x^-2+O(x^-1),x^2,x) --> error [#555]
+BA 43- [TLS] addss, addsr and subsr were not reentrant.
 
   Changed
     1- concat(t_VECSMALL, t_VECSMALL) to return the concatenated vector
