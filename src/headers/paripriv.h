@@ -502,7 +502,7 @@ GEN     pslqL2(GEN x);
 /* buch1.c */
 
 GEN     form_to_ideal(GEN x);
-GEN     getallforms(GEN D, GEN *ptz);
+GEN     qfbforms(GEN D);
 
 /* buch2.c */
 

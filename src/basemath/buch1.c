@@ -20,168 +20,284 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*       Hilbert and Ray Class field using CM (Schertz)            */
 /*                                                                 */
 /*******************************************************************/
+/* See GenusFieldQuadReal() */
+static GEN
+GenusFieldQuadImag(GEN disc)
+{
+  long i, l;
+  pari_sp av = avma;
+  GEN T = NULL, P;
+
+  P = gel(Z_factor(absi(disc)), 1);
+  l = lg(P);
+  l--; /* remove last prime */
+  for (i = 1; i < l; i++)
+  {
+    GEN p = gel(P,i), d, t;
+    if (equaliu(p, 2))
+      switch (mod32(disc))
+      {
+        case 24: d = gen_2; break;  /* disc = 8 mod 32 */
+        case  8: d = gen_m2; break; /* disc =-8 mod 32 */
+        default: d = gen_m1; break;
+      }
+    else
+      d = (mod4(p) == 1)? p: negi(p);
+    t = mkpoln(3, gen_1, gen_0, negi(d)); /* x^2 - d */
+    T = T? ZX_compositum_disjoint(T, t): t;
+  }
+  return gerepileupto(av, polredabs0(T, nf_PARTIALFACT));
+}
+
+/* form^2 = 1 ? */
 static int
-isoforder2(GEN form)
+hasexp2(GEN form)
 {
   GEN a = gel(form,1), b = gel(form,2), c = gel(form,3);
   return !signe(b) || absi_equal(a,b) || equalii(a,c);
 }
+static int
+uhasexp2(GEN form)
+{
+  long a = form[1], b = form[2], c = form[3];
+  return !b || a == labs(b) || a == c;
+}
 
 GEN
-getallforms(GEN D, GEN *ptz)
+qfbforms(GEN D)
 {
   ulong d = itou(D), dover3 = d/3, t, b2, a, b, c, h;
-  GEN z, L = cgetg((long)(sqrt(d) * log2(d)), t_VEC);
-  b2 = b = (d&1); h = 0; z = gen_1;
+  GEN L = cgetg((long)(sqrt(d) * log2(d)), t_VEC);
+  b2 = b = (d&1); h = 0;
   if (!b) /* b = 0 treated separately to avoid special cases */
   {
     t = d >> 2; /* (b^2 - D) / 4*/
     for (a=1; a*a<=t; a++)
-      if (c = t/a, t == c*a)
-      {
-        z = mului(a,z);
-        gel(L,++h) = mkvecsmall3(a,b,c);
-      }
+      if (c = t/a, t == c*a) gel(L,++h) = mkvecsmall3(a,b,c);
     b = 2; b2 = 4;
   }
-  /* now b > 0 */
+  /* now b > 0, b = D (mod 2) */
   for ( ; b2 <= dover3; b += 2, b2 = b*b)
   {
     t = (b2 + d) >> 2; /* (b^2 - D) / 4*/
     /* b = a */
-    if (c = t/b, t == c*b)
-    {
-      z = mului(b,z);
-      gel(L,++h) = mkvecsmall3(b,b,c);
-    }
+    if (c = t/b, t == c*b) gel(L,++h) = mkvecsmall3(b,b,c);
     /* b < a < c */
     for (a = b+1; a*a < t; a++)
       if (c = t/a, t == c*a)
       {
-        z = mului(a,z);
         gel(L,++h) = mkvecsmall3(a, b,c);
         gel(L,++h) = mkvecsmall3(a,-b,c);
       }
     /* a = c */
-    if (a * a == t) { z = mului(a,z); gel(L,++h) = mkvecsmall3(a,b,c); }
+    if (a * a == t) gel(L,++h) = mkvecsmall3(a,b,a);
   }
-  *ptz = z; setlg(L,h+1); return L;
+  setlg(L,h+1); return L;
 }
 
-#define MOD4(x) ((x)&3)
-/* find P and Q two non principal prime ideals (above p,q) such that
- *   (pq, 2z) = 1  [coprime to all class group representatives]
- *   cl(P) = cl(Q) if P has order 2 in Cl(K)
- * Try to have e = 24 / gcd(24, (p-1)(q-1)) as small as possible */
-static void
-get_pq(GEN D, GEN z, ulong *ptp, ulong *ptq)
+/* gcd(n, 24) */
+static long
+GCD24(long n)
 {
-  const long MAXL = 50;
-  GEN form, wp = cgetg(MAXL,t_VECSMALL), wlf = cgetg(MAXL,t_VEC);
-  long i, ell, p, l = 1, d = itos(D);
-  byteptr diffell = diffptr + 2;
-
-  ell = 3;
-  while (l < MAXL)
+  switch(n % 24)
   {
-    NEXT_PRIME_VIADIFF_CHECK(ell, diffell);
-    if (umodiu(z,ell) && kross(d,ell) > 0)
-    {
-      form = redimag(primeform_u(D,ell));
-      if (gequal1(gel(form,1))) continue;
-      gel(wlf,l) = form;
-      wp[l]  = ell; l++;
-    }
+    case 0: return 24;
+    case 1: return 1;
+    case 2: return 2;
+    case 3: return 3;
+    case 4: return 4;
+    case 5: return 1;
+    case 6: return 6;
+    case 7: return 1;
+    case 8: return 8;
+    case 9: return 3;
+    case 10: return 2;
+    case 11: return 1;
+    case 12: return 12;
+    case 13: return 1;
+    case 14: return 2;
+    case 15: return 3;
+    case 16: return 8;
+    case 17: return 1;
+    case 18: return 6;
+    case 19: return 1;
+    case 20: return 4;
+    case 21: return 3;
+    case 22: return 2;
+    case 23: return 1;
+    default: return 0;
   }
-  setlg(wp,l); setlg(wlf,l);
-
-  for (i=1; i<l; i++)
-    if (wp[i] % 3 == 1) break;
-  if (i==l) i = 1;
-  p = wp[i]; form = gel(wlf,i);
-  i = l;
-  if (isoforder2(form))
-  {
-    long oki = 0;
-    for (i=1; i<l; i++)
-      if (gequal(gel(wlf,i),form))
-      {
-        if (MOD4(p) == 1 || MOD4(wp[i]) == 1) break;
-        if (!oki) oki = i; /* not too bad, still e = 2 */
-      }
-    if (i==l) i = oki;
-    if (!i) pari_err(bugparier,"quadhilbertimag (can't find p,q)");
-  }
-  else
-  {
-    if (MOD4(p) == 3)
-    {
-      for (i=1; i<l; i++)
-        if (MOD4(wp[i]) == 1) break;
-    }
-    if (i==l) i = 1;
-  }
-  *ptp = p;
-  *ptq = wp[i];
 }
 
 struct gpq_data {
-  ulong p, q;
-  long e;
-  GEN sqd, u, pq, pq2;
+  long p, q;
+  GEN sqd; /* sqrt(D), t_REAL */
+  GEN u;
+  GEN pq, pq2; /* p*q, 2*p*q */
 };
+
+/* find P and Q two non principal prime ideals (above p <= q) such that
+ *   cl(P) = cl(Q) if P has order 2 in Cl(K).
+ *   Ensure that e = 24 / gcd(24, (p-1)(q-1)) = 1 */
+/* D t_INT, discriminant */
+static void
+get_pq(GEN D, struct gpq_data *T)
+{
+  const long Np = 6547;
+  GEN listp = cgetg(Np + 1, t_VECSMALL); /* primes p */
+  GEN listP = cgetg(Np + 1, t_VEC); /* primeform(p) if of order 2, else NULL */
+  GEN gcd24 = cgetg(Np + 1, t_VECSMALL); /* gcd(p-1, 24) */
+  long i, l = 1;
+  double best = 0.;
+  ulong q = 0;
+  byteptr d = diffptr;
+
+  T->p = T->q = 0;
+  for(;;)
+  {
+    GEN Q;
+    long gcdq, mod;
+    int order2, store;
+    double t;
+
+    NEXT_PRIME_VIADIFF_CHECK(q, d);
+    if (best > 0 && q > 1000000)
+    {
+      if (DEBUGLEVEL)
+        pari_warn(warner,"possibly suboptimal (p,q) for D = %Ps", D);
+      break;
+    }
+    if (krois(D, q) < 0) continue; /* inert */
+    Q = redimag(primeform_u(D, q));
+    if (is_pm1(gel(Q,1))) continue; /* Q | q is principal */
+
+    store = 1;
+    order2 = hasexp2(Q);
+    gcd24[l] = gcdq = GCD24(q-1);
+    mod = 24 / gcdq; /* mod must divide p-1 otherwise e > 1 */
+    listp[l] = q;
+    gel(listP,l) = order2 ? Q : NULL;
+    t = (q+1)/(double)(q-1);
+    for (i = 1; i < l; i++) /* try all (p, q), p < q in listp */
+    {
+      long p = listp[i], gcdp = gcd24[i];
+      double b;
+      /* P,Q order 2 => cl(Q) = cl(P) */
+      if (order2 && gel(listP,i) && !gequal(gel(listP,i), Q)) continue;
+      if (gcdp % gcdq == 0) store = 0; /* already a better one in the list */
+      if ((p-1) % mod) continue;
+
+      b = (t*(p+1)) / (p-1); /* (p+1)(q+1) / (p-1)(q-1) */
+      if (b > best) {
+        store = 0; /* (p,q) always better than (q,r) for r >= q */
+        best = b; T->q = q; T->p = p;
+        if (DEBUGLEVEL>2) fprintferr("p,q = %ld,%ld\n", p, q);
+      }
+      /* won't improve with this q as largest member */
+      if (best > 0) break;
+    }
+    /* if !store or (q,r) won't improve on current best pair, forget that q */
+    if (store && t*t > best)
+      if (++l >= Np) pari_err(bugparier, "quadhilbert (not enough primes)");
+    if (!best) /* (p,q) with p < q always better than (q,q) */
+    { /* try (q,q) */
+      if (gcdq >= 12 && umodiu(D, q)) /* e = 1 and unramified */
+      {
+        double b = (t*q) / (q-1); /* q(q+1) / (q-1)^2 */
+        if (b > best) {
+          best = b; T->q = T->p = q;
+          if (DEBUGLEVEL>2) fprintferr("p,q = %ld,%ld\n", q, q);
+        }
+      }
+    }
+    /* If (p1+1)(q+1) / (p1-1)(q-1) <= best, we can no longer improve
+     * even with best p : stop */
+    if ((listp[1]+1)*t <= (listp[1]-1)*best) break;
+  }
+  if (DEBUGLEVEL>1)
+    fprintferr("(p, q) = %ld, %ld; gain = %f\n", T->p, T->q, 12*best);
+}
 
 static GEN
 gpq(GEN form, struct gpq_data *D, long prec)
 {
-  long a = form[1], a2 = a << 1; /* gcd(a2, u) = 2 */
-  GEN p1,p2,p3,p4;
-  GEN w = Z_chinese(D->u, stoi(-form[2]), D->pq2, stoi(a2));
-  GEN al = mkcomplex(gdivgs(w, -a2), gdivgs(D->sqd, a2));
-  p1 = trueeta(gdivgs(al,D->p), prec);
-  p2 = D->p == D->q? p1: trueeta(gdivgs(al,D->q), prec);
+  long a = form[1], b = form[2], c = form[3], a2;
+  long p = D->p, q = D->q;
+  GEN w, al, p1,p2,p3,p4;
+
+  if (p == 2) { /* (a,b,c) = (1,1,0) mod 2 ? */
+    if (a % q == 0 && (a & b & 1) && !(c & 1))
+    { /* apply S : make sure that (a,b,c) represents odd values */
+      lswap(a,c); b = -b;
+    }
+  }
+  if (a % p == 0 || a % q == 0)
+  { /* apply T^k, look for c' = a k^2 + b k + c coprime to N */
+    while (c % p == 0 || c % q == 0)
+    {
+      c += a + b;
+      b += a << 1;
+    }
+    lswap(a, c); b = -b; /* apply S */
+  }
+  /* now (a,b,c) ~ form and (a,pq) = 1 */
+
+  a2 = a << 1; /* gcd(a2, u) = 2 */
+  /* w = u mod 2pq, -b mod 2a */
+  w = Z_chinese(D->u, stoi(-b), D->pq2, utoipos(a2));
+  al = mkcomplex(gdivgs(w, -a2), gdivgs(D->sqd, a2));
+  p1 = trueeta(gdivgs(al,p), prec);
+  p2 = p == q? p1: trueeta(gdivgs(al,q), prec);
   p3 = trueeta(gdiv(al, D->pq), prec);
   p4 = trueeta(al, prec);
-  return gpowgs(gdiv(gmul(p1,p2),gmul(p3,p4)), D->e);
+  return gdiv(gmul(p1,p2), gmul(p3,p4));
 }
 
 /* returns an equation for the Hilbert class field of Q(sqrt(D)), D < 0 */
 static GEN
 quadhilbertimag(GEN D)
 {
-  GEN z, L, P, qfp, u;
+  GEN L, P, qfp, u;
   pari_sp av = avma;
   long h, i, prec;
   struct gpq_data T;
-  ulong p, q;
 
   if (DEBUGLEVEL>1) (void)timer2();
   if (lgefint(D) == 3)
-  {
-    long d = D[2]; /* = |D| */
-    if (d <= 11 || d == 19 || d == 43 || d == 67 || d == 163) return pol_x(0);
-  }
-  L = getallforms(D,&z);
+    switch (D[2]) { /* = |D|; special cases where e > 1 */
+      case 3:
+      case 4:
+      case 7:
+      case 8:
+      case 11:
+      case 19:
+      case 43:
+      case 67:
+      case 163: return pol_x(0);
+    }
+  L = qfbforms(D);
   h = lg(L)-1;
+  if ((1 << vals(h)) == h) /* power of 2 */
+  { /* check whether > |Cl|/2 elements have order <= 2 ==> 2-elementary */
+    long lim = (h>>1) + 1;
+    for (i=1; i <= lim; i++)
+      if (!uhasexp2(gel(L,i))) break;
+    if (i > lim) return GenusFieldQuadImag(D);
+  }
   if (DEBUGLEVEL>1) msgtimer("class number = %ld",h);
-  get_pq(D, z, &p, &q);
-  T.p = p;
-  T.q = q;
-  T.e = 24 / ugcd((p%24 - 1) * (q%24 - 1), 24);
-  if(DEBUGLEVEL>1) fprintferr("p = %lu, q = %lu, e = %ld\n",p,q,T.e);
-  qfp = primeform_u(D, p);
-  T.pq =  muluu(p, q);
+  get_pq(D, &T);
+  qfp = primeform_u(D, T.p);
+  T.pq =  muluu(T.p, T.q);
   T.pq2 = shifti(T.pq,1);
-  if (p == q)
+  if (T.p == T.q)
   {
     u = gel(qficompraw(qfp, qfp),2);
     T.u = modii(u, T.pq2);
   }
   else
   {
-    GEN qfq = primeform_u(D, q), bp = gel(qfp,2), bq = gel(qfq,2);
-    T.u = Z_chinese_coprime(bp, bq, utoipos(p), utoipos(q), T.pq);
-    if (mpodd(bp) != mpodd(T.u)) T.u = addii(T.u, T.pq);
+    GEN qfq = primeform_u(D, T.q), bp = gel(qfp,2), bq = gel(qfq,2);
+    T.u = Z_chinese(bp, bq, utoipos(T.p << 1), utoipos(T.q << 1));
     /* T.u = bp (mod 2p), T.u = bq (mod 2q) */
   }
   /* u modulo 2pq */
@@ -212,15 +328,8 @@ quadhilbertimag(GEN D)
 GEN
 quadhilbert(GEN D, long prec)
 {
-  if (typ(D) != t_INT)
-  {
-    GEN nf;
-    D = checkbnf(D); nf = bnf_get_nf(D);
-    if (nf_get_degree(nf) != 2)
-      pari_err(talker,"not a polynomial of degree 2 in quadhilbert");
-    D = nf_get_disc(nf);
-  }
-  else if (!Z_isfundamental(D))
+  if (typ(D) != t_INT) pari_err(typeer, "quadhilbert");
+  if (!Z_isfundamental(D))
     pari_err(talker,"quadhilbert needs a fundamental discriminant");
   return (signe(D)>0)? quadhilbertreal(D,prec)
                      : quadhilbertimag(D);

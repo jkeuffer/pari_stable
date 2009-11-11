@@ -2239,31 +2239,41 @@ GetST(GEN bnr, GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
 /*                                                                 */
 /*******************************************************************/
 /* compute the Hilbert class field using genus class field theory when
-   the exponent of the class group is 2 */
+   the exponent of the class group is exactly 2 (trivial group not covered) */
+/* Cf Herz, Construction of class fields, LNM 21, Theorem 1 (VII-6) */
 static GEN
-GenusField(GEN bnf)
+GenusFieldQuadReal(GEN disc)
 {
-  long hk, c, l;
+  long i, i0 = 0, l;
   pari_sp av = avma;
-  GEN disc, pol, div, d;
+  GEN T = NULL, P, p0;
 
-  hk   = itos(bnf_get_no(bnf));
-  disc = nf_get_disc(bnf_get_nf(bnf));
-
-  if (mod4(disc) == 0) disc = shifti(disc, -2);
-  div = divisors(disc);
-  pol = NULL;
-  for (c = 2, l = 0; l < hk; c++) /* skip c = 1 : div[1] = gen_1 */
+  P = gel(Z_factor(disc), 1);
+  l = lg(P);
+  for (i = 1; i < l; i++)
   {
-    d = gel(div,c);
-    if (mod4(d) == 1)
-    {
-      GEN t = mkpoln(3, gen_1, gen_0, negi(d)); /* x^2 - d */
-      pol = pol? gel(compositum(pol, t),1): t;
-      l = degpol(pol);
-    }
+    GEN p = gel(P,i);
+    if (mod4(p) == 3) { p0 = p; i0 = i; break; }
   }
-  return gerepileupto(av, polredabs0(pol, nf_PARTIALFACT));
+  l--; /* remove last prime */
+  if (i0 == l) l--; /* ... remove p0 and last prime */
+  for (i = 1; i < l; i++)
+  {
+    GEN p = gel(P,i), d, t;
+    if (i == i0) continue;
+    if (equaliu(p, 2))
+      switch (mod32(disc))
+      {
+        case  8: d = gen_2; break;
+        case 24: d = shifti(p0, 1); break;
+        default: d = p0; break;
+      }
+    else
+      d = (mod4(p) == 1)? p: mulii(p0, p);
+    t = mkpoln(3, gen_1, gen_0, negi(d)); /* x^2 - d */
+    T = T? ZX_compositum_disjoint(T, t): t;
+  }
+  return gerepileupto(av, polredabs0(T, nf_PARTIALFACT));
 }
 
 /* if flag != 0, computes a fast and crude approximation of the result */
@@ -2504,7 +2514,7 @@ quadhilbertreal(GEN D, long prec)
   cyc = bnf_get_cyc(bnf);
   if (lg(cyc) == 1) { avma = av; return pol_x(0); }
   /* if the exponent of the class group is 2, use Genus Theory */
-  if (equaliu(gel(cyc,1), 2)) return gerepileupto(av, GenusField(bnf));
+  if (equaliu(gel(cyc,1), 2)) return gerepileupto(av, GenusFieldQuadReal(D));
   if (DEBUGLEVEL) msgtimer("Compute Cl(k)");
 
   bnr  = Buchray(bnf, gen_1, nf_INIT|nf_GEN);

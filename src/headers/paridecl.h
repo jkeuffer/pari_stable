@@ -865,6 +865,7 @@ GEN     ZpX_gcd(GEN f1,GEN f2,GEN pm);
 GEN     ZpX_reduced_resultant(GEN x, GEN y, GEN pm);
 GEN     ZpX_reduced_resultant_fast(GEN f, GEN g, GEN p, long M);
 void    checkmodpr(GEN modpr);
+GEN     ZX_compositum_disjoint(GEN A, GEN B);
 GEN     compositum(GEN P, GEN Q);
 GEN     compositum2(GEN P, GEN Q);
 GEN     nfdisc(GEN x);
