@@ -2965,12 +2965,14 @@ mpqs_i(mpqs_handle_t *handle)
       pari_unlink(FNEW_str);\
       pari_unlink(LPREL_str);\
       pari_unlink(LPNEW_str);\
-      pari_unlink(COMB_str); rmdir(dir); pari_free(dir);
+      if (pCOMB) pari_unlink(COMB_str);\
+      rmdir(dir); pari_free(dir);
 
   pFREL = pari_fopen_or_fail(FREL_str,  WRITE); pari_fclose(pFREL);
   pLPREL = pari_fopen_or_fail(LPREL_str,  WRITE); pari_fclose(pLPREL);
   pFNEW = pari_fopen_or_fail(FNEW_str,  WRITE);
   pLPNEW= pari_fopen_or_fail(LPNEW_str, WRITE);
+  pCOMB = NULL;
 
   for(;;)
   { /* FNEW and LPNEW are open for writing */
