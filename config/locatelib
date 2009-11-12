@@ -31,7 +31,7 @@ done
 if test -z "$try"; then
   if test "$osname" = linux -a  -n "$_pb"; then
     case "$lib" in
-      X11) rpmlib=XFree86; devlib=xlibs ;;
+      X11) rpmlib="[XFree86|xorg-x11|libx11]"; devlib=libx11 ;;
       *) rpmlib=$lib; devlib=lib$lib ;;
     esac
     echo "###"
