@@ -2246,7 +2246,7 @@ GenusFieldQuadReal(GEN disc)
 {
   long i, i0 = 0, l;
   pari_sp av = avma;
-  GEN T = NULL, P, p0;
+  GEN T = NULL, p0 = NULL, P;
 
   P = gel(Z_factor(disc), 1);
   l = lg(P);
