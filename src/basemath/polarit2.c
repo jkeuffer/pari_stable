@@ -2191,6 +2191,54 @@ RgX_extgcd(GEN x, GEN y, GEN *U, GEN *V)
   gerepilemanysp(av,tetpil,gptr,3); return z;
 }
 
+int
+RgXQ_ratlift(GEN x, GEN T, long amax, long bmax, GEN *P, GEN *Q)
+{
+  pari_sp av, av2, tetpil, lim;
+  long dr, signh; /* junk */
+  long dx, dT, vx;
+  GEN g, h, p1, cu, cv, u, v, um1, uze, *gptr[2];
+
+  if (typ(x)!=t_POL || typ(T)!=t_POL || varncmp(varn(x),varn(T)))
+    pari_err(typeer,"RgXQ_ratlift");
+  if (amax+bmax>=degpol(T))
+    pari_err(talker, "ratlift: must have amax+bmax < deg(T)");
+  if (!signe(T)) pari_err(zeropoler,"RgXQ_ratlift");
+  vx = varn(T);
+  dx = degpol(x); dT = degpol(T);
+
+  av = avma;
+  u = x = primitive_part(x, &cu);
+  v = T = primitive_part(T, &cv);
+  g = h = gen_1; av2 = avma; lim = stack_lim(av2,1);
+  um1 = gen_1; uze = gen_0;
+  for(;;)
+  {
+    (void) subres_step(&u, &v, &g, &h, &uze, &um1, &signh, &dr);
+    if (dr==2 || (typ(uze)==t_POL && degpol(uze)>bmax)) { avma=av; return 0; }
+    if (typ(v)!=t_POL || degpol(v)<=amax) break;
+    if (low_stack(lim,stack_lim(av2,1)))
+    {
+      if(DEBUGMEM>1) pari_warn(warnmem,"RgXQ_ratlift, dr = %ld",dr);
+      gerepileall(av2,6,&u,&v,&g,&h,&uze,&um1);
+    }
+  }
+  if (uze == gen_0)
+  {
+    avma = av; *P = zeropol(vx); *Q = pol_1(vx);
+    return 1;
+  }
+  if (cu) uze = RgX_Rg_div(uze,cu);
+  p1 = ginv(content(v));
+  if (must_negate(v)) p1 = gneg(p1);
+  tetpil = avma;
+  *P = RgX_Rg_mul(v,p1);
+  *Q = RgX_Rg_mul(uze,p1);
+  gptr[0] = P;
+  gptr[1] = Q;
+  gerepilemanysp(av,tetpil,gptr,2); return 1;
+}
+
 /*******************************************************************/
 /*                                                                 */
 /*                RESULTANT USING DUCOS VARIANT                    */

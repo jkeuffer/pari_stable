@@ -3334,9 +3334,9 @@ compositum2(GEN pol1,GEN pol2) { return polcompositum0(pol1,pol2,1); }
 
 /* Assume A,B irreducible (in particular squarefree) and define linearly
  * disjoint extensions: no factorisation needed */
-GEN 
+GEN
 ZX_compositum_disjoint(GEN A, GEN B)
-{ 
+{
   long k = 1;
   return ZX_ZXY_resultant_all(A, B, &k, NULL);
 }

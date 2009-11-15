@@ -5,7 +5,9 @@ Prototype: GDGDG
 Help: bestappr(x, {A},{B}): if x is real, gives the best approximation to x with
  denominator less or equal to A. If x is an intmod, returns a rational number
  congruent to x with numerator less than A and denominator less than B, which
- must be given. Otherwise applies recursively to all components.
+ must be given. If x is a polmod, returns a rational functions congruent to x
+ with numerator degree less than A and denominator degree less than B, which
+ must be given.  Otherwise applies recursively to all components.
 Doc: if $B$ is omitted, finds the best rational approximation to $x\in\R$
  using continued fractions. If $A$ is omitted, return the best approximation
  affordable given the input accuracy; otherwise make sure that denominator is
@@ -27,12 +29,14 @@ Doc: if $B$ is omitted, finds the best rational approximation to $x\in\R$
  $|d x - n| < |v x - u|$ for all integers $(u,v)$ with $v \leq A$. (Which
  implies that $n/d$ is a convergent of the continued fraction of $x$.)
 
- If $B$ is present, $x$ must be an \typ{INTMOD} (or a recursive combination of
- those), modulo $N$ say. The routine then returns the unique rational number
- $a/b$ in coprime integers $a\leq A$ and $b\leq B$ which is congruent to $x$
- modulo $N$. If $N \leq 2AB$, uniqueness is not guaranteed and the function
- fails with an error message. If rational reconstruction is not possible (no
- such $a/b$ exists for at least one component of $x$), returns $-1$.
+ If $x$ is an \typ{INTMOD},  (or a recursive combination of
+ those), modulo $N$ say, $B$ must be present. The routine then returns the
+ unique rational number $a/b$ in coprime integers $a\leq A$ and $b\leq B$ which
+ is congruent to $x$ modulo $N$. If $N \leq 2AB$, uniqueness is not guaranteed
+ and the function fails with an error message. If rational reconstruction is not
+ possible (no such $a/b$ exists for at least one component of $x$), returns
+ $-1$.
+
  \bprog
  ? bestappr(Mod(18526731858, 11^10), 10^10, 10^10)
   ***   at top-level: bestappr(Mod(1852673
@@ -47,4 +51,10 @@ Doc: if $B$ is omitted, finds the best rational approximation to $x\in\R$
  %2 = -1
  @eprog\noindent In most concrete uses, $B$ is a prime power and we performed
  Hensel lifting to obtain $x$.
+
+ If $x$ is a \typ{POLMOD}, modulo $T$ say, $B$ must be present. The routine
+ then returns the unique rational function $P/Q$ with  $\deg P\leq A$ and $\deg
+ Q\leq B$ which is congruent to $x$ modulo $T$. If $\deg T \leq A+B$, uniqueness
+ is not guaranteed and the function fails with an error message. If rational
+ reconstruction is not possible, returns $-1$.
 Variant: Also available is \fun{GEN}{bestappr}{GEN x, GEN A}.

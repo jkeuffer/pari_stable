@@ -2600,6 +2600,16 @@ bestappr_mod(GEN x, GEN A, GEN B)
       gel(t,1) = a;
       gel(t,2) = b; return t;
     }
+    case t_POLMOD:
+    {
+      pari_sp av = avma;
+      GEN a,b,d;
+      if (! RgXQ_ratlift(gel(x,2), gel(x,1), itos(A), itos(B), &a,&b))
+        return NULL;
+      d = RgX_gcd(a,b);
+      if (degpol(d)>0) { avma = av; return NULL; }
+      return gerepileupto(av, gdiv(a,b));
+    }
     case t_COMPLEX: {
         GEN t;
         y = cgetg(3, t_COMPLEX);

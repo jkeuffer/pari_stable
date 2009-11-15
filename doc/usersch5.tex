@@ -5339,6 +5339,19 @@ $n$ being an \kbd{ulong}.
 \fun{GEN}{RgXQ_powers}{GEN x, long n, GEN T} returns $[\kbd{x}^0,
 \dots, \kbd{x}^\kbd{n}]$ as a \typ{VEC} of \kbd{RgXQ}s.
 
+\fun{int}{RgXQ_ratlift}{GEN x, GEN T, long amax, long bmax, GEN *P, GEN *Q}
+Assuming that $\kbd{amax}+\kbd{bmax}<\deg T$,
+attempts to recognize $x$ as a rational function $a/b$, i.e. to find \typ{POL}s $P$ and $Q$ such that
+
+\item $P \equiv Q x$ modulo $T$,
+
+\item $\deg P \leq \kbd{amax}$, $\deg Q \leq \kbd{bmax}$,
+
+\item $\gcd(T,P) = \gcd(P,Q)$.
+
+\noindent If unsuccessful, the routine returns $0$ and leaves $P$, $Q$
+unchanged; otherwise it returns $1$ and sets $P$ and $Q$.
+
 \fun{GEN}{RgXQ_reverse}{GEN f, GEN T} returns a \typ{POL} $g$ of degree $< n
 = \text{deg}~T$ such that $T(x)$ divides $(g \circ f)(x) - x$, by solving a
 linear system. Low-level function underlying \tet{modreverse}: it returns a
