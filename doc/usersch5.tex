@@ -179,7 +179,7 @@ has been destroyed, in which case it is called with argument $-1$.
 
 \doc{cb_pari_whatnow}{int (*cb_pari_whatnow)(const char *s, int flag)}
 initialized to \kbd{NULL}. If not \kbd{NULL}, must check whether
-$s$ existed in older versions of \kbd{pari} (the \kbd{gp} callback 
+$s$ existed in older versions of \kbd{pari} (the \kbd{gp} callback
 checks against \kbd{pari-1.39.15}).
 
 \item $\fl = 0$: should print verbosely the answer, including help text if
@@ -190,7 +190,7 @@ non-$0$ result otherwise. May print a help message.
 
 \misctitle{Utility function:}
 
-\fun{void}{pari_ask_confirm}{const char *s} raise an error if the 
+\fun{void}{pari_ask_confirm}{const char *s} raise an error if the
 associated callback \tet{cb_pari_ask_confirm} is \kbd{NULL}. Otherwise
 calls
 \bprog
@@ -1940,11 +1940,11 @@ This function is not stack clean.
 \fun{long}{ZV_pval}{GEN x, GEN p} as \kbd{ZV\_pvalrem} but only returns the
 ``valuation''.
 
-\fun{long}{ZV_lvalrem}{GEN x, ulong p, GEN *px} as \kbd{ZV\_pvalrem}, 
+\fun{long}{ZV_lvalrem}{GEN x, ulong p, GEN *px} as \kbd{ZV\_pvalrem},
 except that \kbd{p} is an \kbd{ulong} ($\kbd{p} > 1$).
 This function is not stack-clean.
 
-\fun{long}{ZV_lval}{GEN x, ulong p} as \kbd{ZV\_pval}, 
+\fun{long}{ZV_lval}{GEN x, ulong p} as \kbd{ZV\_pval},
 except that \kbd{p} is an \kbd{ulong} ($\kbd{p} > 1$).
 
 
@@ -1954,11 +1954,11 @@ This function is not stack-clean.
 
 \fun{long}{ZX_pval}{GEN x, GEN p} as \kbd{ZV\_pval} for a \kbd{ZX} $x$.
 
-\fun{long}{ZX_lvalrem}{GEN x, ulong p, GEN *px} as \kbd{ZV\_lvalrem}, 
+\fun{long}{ZX_lvalrem}{GEN x, ulong p, GEN *px} as \kbd{ZV\_lvalrem},
 a \kbd{ZX} $x$.
 This function is not stack-clean.
 
-\fun{long}{ZX_lval}{GEN x, ulong p} as \kbd{ZX\_pval}, 
+\fun{long}{ZX_lval}{GEN x, ulong p} as \kbd{ZX\_pval},
 except that \kbd{p} is an \kbd{ulong} ($\kbd{p} > 1$).
 
 \subsec{Generic unary operators}. Let ``\op'' be a unary operation among
@@ -2881,7 +2881,7 @@ the prime field.
 
   \kbd{M}: matrix (\typ{MAT}). E.g. \kbd{QM} means a matrix with rational
   entries
-  
+
   \kbd{E}: point over an elliptic curve, represented
   as two-component vectors \kbd{[x,y]}, except for the  represented by the
   one-component vector \kbd{[0]}. Not all curve models are supported.
@@ -3164,7 +3164,7 @@ components set to $0$. Note that the result allocates a
 all columns.
 
 \fun{GEN}{zero_F2m_copy}{long m, long n} creates a \kbd{F2m} with \kbd{m} x
-\kbd{n} components set to $0$. 
+\kbd{n} components set to $0$.
 
 \fun{GEN}{F2c_to_ZC}{GEN x}
 
@@ -3631,7 +3631,7 @@ if \kbd{P} is known to be irreducible of $\F_p$.
 
 \fun{GEN}{FpX_rootsff}{GEN P, GEN p, GEN T}. Assumes \kbd{p} prime
 and \kbd{T} irreducible in $\F_p[X]$. Returns the roots of the \kbd{FpX}
-\kbd{P} belonging to the finite field $\F_p[Y]/(T(Y))$. 
+\kbd{P} belonging to the finite field $\F_p[Y]/(T(Y))$.
 
 \fun{GEN}{FpX_factorff_irred}{GEN P, GEN T, GEN p}. Assumes \kbd{p} prime
 and \kbd{T} irreducible in $\F_p[X]$. Factors the \emph{irreducible}
@@ -4453,7 +4453,7 @@ $E:y^2=x^3+a_4\*x+a_6$. A \kbd{FpE} is a point of $E(\F_p)$.
 
 \fun{GEN}{FpE_add}{GEN P, GEN Q, GEN a4, GEN p} returns the sum $P+Q$
 in the group $E(\F_p)$, where $E$ is defined by $E:y^2=x^3+a_4\*x+a_6$,
-for any value of $a_6$ compatible with the points given. 
+for any value of $a_6$ compatible with the points given.
 
 \fun{GEN}{FpE_sub}{GEN P, GEN Q, GEN a4, GEN p} returns $P-Q$.
 
@@ -4471,10 +4471,10 @@ the group $E(\F_p)$, where $o$ is a multiple of the order of $P$, or its
 factorization.
 
 \fun{GEN}{FpE_tatepairing}{GEN P, GEN Q, GEN m, GEN a4, GEN p} returns the
-reduced Tate pairing of the point of $m$-torsion $P$ and the point $Q$. 
+reduced Tate pairing of the point of $m$-torsion $P$ and the point $Q$.
 
 \fun{GEN}{FpE_weilpairing}{GEN Q, GEN Q, GEN m, GEN a4, GEN p} returns the
-Weil pairing of the points of $m$-torsion $P$ and $Q$. 
+Weil pairing of the points of $m$-torsion $P$ and $Q$.
 
 \section{Integral, rational and generic linear algebra}
 \subsec{\kbd{ZC} / \kbd{ZV}, \kbd{ZM}}. A \kbd{ZV} (resp.~a~\kbd{ZM},
@@ -5054,8 +5054,8 @@ multiple of $P/d$. If $P$ and $Q$ are both monic, then $d$ is monic and
 (in that case \kbd{*Pnew} is set to $P$).
 
 \fun{GEN}{QXQ_inv}{GEN A, GEN B} returns the inverse of $A$ modulo $B$
-where $A$ is a \kbd{QX} and $B$ is a \kbd{ZX}. Should you need this for 
-a \kbd{QX} $B$, just use 
+where $A$ is a \kbd{QX} and $B$ is a \kbd{ZX}. Should you need this for
+a \kbd{QX} $B$, just use
 \bprog
   QXQ_inv(A, Q_primpart(B));
 @eprog\noindent But in all cases where modular arithmetic modulo $B$ is
@@ -5375,7 +5375,7 @@ $T$.
 assuming $V$ was output by \kbd{RgXQ\_powers(x, n, T)}.
 
 \fun{GEN}{QX_ZXQV_eval}{GEN f, GEN nV, GEN dV} as \kbd{RgX\_RgXQV\_eval},
-except that $f$ is assumed to be a \kbd{QX}, $V$ is given implicitly 
+except that $f$ is assumed to be a \kbd{QX}, $V$ is given implicitly
 by a numerator \kbd{nV} (\kbd{ZV}) and denominator \kbd{dV} (a positive
 \typ{INT} or \kbd{NULL} for trivial denominator). Not memory clean, but
 suitable for \kbd{gerepileupto}.
@@ -5679,7 +5679,7 @@ $a + b \kbd{pol\_x}(v)$
 
 \fun{GEN}{pol_x}{long v} Returns the monomial of degree $1$ in variable $v$.
 
-\fun{GEN}{pol_x_powers}{long N, long v} returns the powers of 
+\fun{GEN}{pol_x_powers}{long N, long v} returns the powers of
 \kbd{pol\_x(v)}, of degree $0$ to $N$, in a vector with $N+1$ components.
 
 \fun{GEN}{zerocol}{long n} creates a \typ{COL} with \kbd{n} components set to
@@ -7367,7 +7367,7 @@ void swapfoo(long a, long b)
 @eprog
 
 \subsec{Stack of stacks}
-Changing the address of \kbd{t\_foo} is not supported in general, 
+Changing the address of \kbd{t\_foo} is not supported in general,
 however changing both the address of \kbd{t\_foo} and \kbd{s\_foo}
 is supported as long as the offset \kbd{\&t\_foo-\&s\_foo} do not change.
 This allow to create stacks of stacks as follow:
@@ -7399,7 +7399,7 @@ following public fields are defined:
 
 \item \kbd{s.n} is the number of elements in the stack and \kbd{data[s.n-1]} is
 the topmost element of the stack.  \kbd{s.n} can be changed as long as
-$0\leq\kbd{s.n}\leq\kbd{s.alloc}$ holds. 
+$0\leq\kbd{s.n}\leq\kbd{s.alloc}$ holds.
 
 \fun{void}{stack_init}{pari_stack *s, size_t size, void **data} links
 \kbd{*s} to the data pointer \kbd{*data}, where \kbd{size} is the size of

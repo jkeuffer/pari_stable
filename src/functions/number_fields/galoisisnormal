@@ -8,5 +8,5 @@ Help: galoisisabelian(gal,subgrp): gal being as output by galoisinit,
 Doc: \var{gal} being as output by \kbd{galoisinit}, and \var{subgrp} a subgroup
  of \var{gal} as output by \kbd{galoissubgroups},return $1$ if \var{subgrp} is a
  normal subgroup of \var{gal}, else return 0.
- 
+
  This command also accepts subgroups returned by \kbd{galoissubgroups}.

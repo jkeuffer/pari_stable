@@ -7,7 +7,7 @@ Help: eta(z,{flag=0}): if flag=0, returns prod(n=1,oo, 1-q^n), where
  q = z if z is a p-adic number or can be converted to a power series.
  If flag is non-zero, the function only applies to complex scalars and returns
  the true eta function, with the factor q^(1/24) included.
- 
+
 Doc: Variants of \idx{Dedekind}'s $\eta$ function.
  If $\fl = 0$, return $\prod_{n=1}^\infty(1-q^n)$, where $q$ depends on $x$
  in the following way:
@@ -16,7 +16,7 @@ Doc: Variants of \idx{Dedekind}'s $\eta$ function.
  have positive imaginary part); notice that the factor $q^{1/24}$ is
  missing!
 
- \item $q = x$ if $x$ is a \typ{PADIC}, or can be converted to a 
+ \item $q = x$ if $x$ is a \typ{PADIC}, or can be converted to a
  \emph{power series} (which must then have positive valuation).
 
  If $\fl$ is non-zero, $x$ is converted to a complex number and we return the

@@ -155,14 +155,14 @@ Variant: Also available are
 
  \fun{GEN}{nfinitall}{GEN x, long flag, long prec}, where \fl\ is an
  or-ed combination of
- 
+
  \item \tet{nf_RED}: find a simpler defining polynomial,
 
  \item \tet{nf_ORIG}: if \tet{nf_RED} set, also return the change of variable,
 
  \item \tet{nf_ROUND2}: slow down the routine by using an obsolete
  normalization algorithm (do not use this one!),
- 
+
  \item \tet{nf_PARTIALFACT}: lazy factorization of the polynomial discriminant.
  Result is conditional unless the \emph{field} discriminant obtained
  is fully factored by

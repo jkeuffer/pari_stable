@@ -24,7 +24,7 @@ Doc: evaluates \var{seq},
  $\R$.
 
  \bprog
- f(N) = 
+ f(N) =
  {
    forprime(p = 2, N,
      print(p);

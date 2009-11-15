@@ -27,7 +27,7 @@ Doc: defines the symbol \var{newsym} as an alias for the the symbol \var{sym}:
  ? Pi.sin
  %4 = 0.E-37
  @eprog
- Alias expansion is performed directly by the internal GP compiler. 
+ Alias expansion is performed directly by the internal GP compiler.
  Note that since alias is performed at compilation-time, it does not
  require any run-time processing, however it only affects GP code
  compiled \emph{after} the alias command is evaluated. A slower but more

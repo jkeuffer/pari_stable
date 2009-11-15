@@ -17,7 +17,7 @@ Doc: factors the polynomial $x$ in the field
  \bprog
  ? factorff(x^2 + 1, 5, y^2+3)  \\ over F_5[y]/(y^2+3) ~ F_25
  %1 =
- [Mod(Mod(1, 5), Mod(1, 5)*y^2 + Mod(3, 5))*x 
+ [Mod(Mod(1, 5), Mod(1, 5)*y^2 + Mod(3, 5))*x
   + Mod(Mod(2, 5), Mod(1, 5)*y^2 + Mod(3, 5)) 1]
 
  [Mod(Mod(1, 5), Mod(1, 5)*y^2 + Mod(3, 5))*x

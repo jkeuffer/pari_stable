@@ -29,7 +29,7 @@ Doc: \idx{LLL} reduction of
  but it is not a necessary condition: a non-trivial result does not prove that
  the ideal is non-principal. For guaranteed results, see \kbd{bnfisprincipal},
  which requires the computation of a full \kbd{bnf} structure.
- 
+
  If the input is an extended ideal $[I,s]$, the output is $[J,sa/r]$; this way,
  one can keep track of the principal ideal part:
  \bprog
@@ -43,7 +43,7 @@ Doc: \idx{LLL} reduction of
  coefficient explosion; see also \tet{idealpow}.
 
  \misctitle{Technical note}: The routine computes an LLL-reduced
- basis for the lattice $I$ equipped with the quadratic form 
+ basis for the lattice $I$ equipped with the quadratic form
  $$|| x ||_v^2 = \sum_{i=1}^{r_1+r_2} 2^{v_i}\varepsilon_i|\sigma_i(x)|^2,$$
  where as usual the $\sigma_i$ are the (real and) complex embeddings and
  $\varepsilon_i = 1$, resp.~$2$, for a real, resp.~complex place. The element
@@ -52,7 +52,7 @@ Doc: \idx{LLL} reduction of
  the elements found for a fixed ideal, which is heuristically useful in index
  calculus algorithms like \tet{bnfinit} and \tet{bnfisprincipal}.
 
- \misctitle{Even more technical note:} In fact, the above is a white lie. 
+ \misctitle{Even more technical note:} In fact, the above is a white lie.
  We do not use $||\cdot||_v$ exactly but a rescaled rounded variant which
  gets us faster and simpler LLLs. There's no harm since we are not using any
  theoretical property of $a$ after all, except that it belongs to $I$ and is

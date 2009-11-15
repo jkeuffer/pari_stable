@@ -17,7 +17,7 @@ Doc: $N$ being an integer and $P\in \Z[X]$, finds all integers $x$ with
  or a prime power, \tet{polrootsmod} or \tet{polrootspadic} will be much
  faster.
 
- We shall now present two simple applications. The first one is 
+ We shall now present two simple applications. The first one is
  finding non-trivial factors of $N$, given some partial information on the
  factors; in that case $B$ must obviously be smaller than the largest
  non-trivial divisor of $N$.
@@ -36,7 +36,7 @@ Doc: $N$ being an integer and $P\in \Z[X]$, finds all integers $x$ with
  possibilities $ < 10^{12}$.
 
  The second application is an attack on RSA with low exponent, when the
- message $x$ is short and the padding $P$ is known to the attacker. We use 
+ message $x$ is short and the padding $P$ is known to the attacker. We use
  the same RSA modulus $N$ as in the first example:
  \bprog
  setrand(1);

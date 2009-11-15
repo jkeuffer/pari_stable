@@ -19,7 +19,7 @@ Doc: \var{bnr} being the
  ray class group generators, i.e.~it may be created with \kbd{bnrinit}$(,,0)$
  If $x$ is not coprime to the modulus of \var{bnr} the result is undefined.
 Variant: Instead of hardcoded  numerical flags,  one should rather
- use 
+ use
  \fun{GEN}{isprincipalray}{GEN bnr, GEN x} for $\kbd{flag} = 0$, and if you
  want generators:
  \bprog

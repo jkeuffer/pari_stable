@@ -50,7 +50,7 @@ Doc: sorts the vector $x$ in ascending order, using a mergesort method.
  $x=y$ respectively. The \tet{sign} function is very useful in this context:
  \bprog
  ? vecsort([3,0,2; 1,0,2],lex) \\ sort columns according to lex order
- %1 = 
+ %1 =
  [2 3]
 
  [2 1]

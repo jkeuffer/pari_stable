@@ -157,7 +157,7 @@ If we had been malloc'ing memory for the
 
 \item as soon as a list is assigned to a variable (or a component thereof)
 by the GP evaluator, the assigned list is converted to the proper format
-(with \kbd{list\_nmax} set) previously described. 
+(with \kbd{list\_nmax} set) previously described.
 
 \fun{GEN}{listcopy}{GEN L} return a full copy of the \typ{LIST}~\kbd{L},
 allocated on the \emph{stack} (hence \kbd{list\_nmax} is $0$). Shortcut for
@@ -230,7 +230,7 @@ such that $g^k = x$. This requires $O(\sqrt{N})$ group operations in average
 and $O(1)$ storage.
 
 \fun{GEN}{gen_plog}{GEN x,GEN g,GEN N, void *E, const struct bb_group
-Assuming that $g$ has prime order $N$, compute an integer $k$ such that 
+Assuming that $g$ has prime order $N$, compute an integer $k$ such that
 $g^k = x$, using either \kbd{gen\_Shanks\_log} or \kbd{gen\_Pollard\_log}.
 
 If \kbd{easy} is not \kbd{NULL}, call \kbd{easy(E,a,g,N)} first and if the

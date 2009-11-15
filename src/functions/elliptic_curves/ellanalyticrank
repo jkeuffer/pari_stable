@@ -13,7 +13,7 @@ Doc: returns the order of vanishing at $s=1$ of the $L$-function of the
  zero. If no value of \kbd{eps} is given, a value of half the current
  precision is used.
  \bprog
- ? e = ellinit("11a1"); \\ rank 0 
+ ? e = ellinit("11a1"); \\ rank 0
  ? ellanalyticrank(e)
  %2 = [0, 0.2538418608559106843377589233]
  ? e = ellinit("37a1"); \\ rank 1

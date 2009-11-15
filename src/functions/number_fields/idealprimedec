@@ -12,7 +12,7 @@ Doc: computes the prime ideal
 
  The result is a vector of \tev{prid} structures, each representing one of the
  prime ideals above $p$ in the number field $\var{nf}$. The representation
- $\kbd{pr}=[p,a,e,f,b]$ of a prime ideal means the following: $a$ and $b$ are 
+ $\kbd{pr}=[p,a,e,f,b]$ of a prime ideal means the following: $a$ and $b$ are
  algebraic integers in the maximal order $\Z_K$; the prime ideal is
  equal to $\goth{p} = p\Z_K + a\Z_K$
  $e$ is the ramification index, $f$ is the residual index,
@@ -26,7 +26,7 @@ Doc: computes the prime ideal
  ? K = nfinit(x^3-2);
  ? L = idealprimedec(K, 5);
  ? #L       \\ 2 primes above 5 in Q(2^(1/3))
- %3 = 2;            
+ %3 = 2
  ? p1 = L[1]; p2 = L[2];
  ? [p1.e, p1.f]    \\ the first is unramified of degree 1
  %4 = [1, 1]

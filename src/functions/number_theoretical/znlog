@@ -13,7 +13,7 @@ Doc: discrete logarithm of $x$ in $(\Z/N\Z)^*$ in base $g$.
 
  This function uses a simple-minded combination of generic
  discrete log algorithms (index calculus methods are not yet implemented).
- 
+
  \item Pohlig-Hellman algorithm, to reduce to groups of prime order $q$,
  where $q | p-1$ and $p$ is an odd prime divisor of $N$,
 

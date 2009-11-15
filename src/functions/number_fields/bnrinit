@@ -31,7 +31,7 @@ Doc: $\var{bnf}$ is as
  which saves time. Hence \kbd{\var{bnr}.gen} would produce an error.
 
  If $\fl=1$, as the default, except that generators are computed.
-Variant: Instead the above  hardcoded  numerical flags,  one should rather use 
+Variant: Instead the above  hardcoded  numerical flags,  one should rather use
  \fun{GEN}{Buchray}{GEN bnf, GEN module, long flag}
  where flag is an or-ed combination of \kbd{nf\_GEN} (include generators)
  and \kbd{nf\_INIT} (if omitted, return just the cardinal of the ray class group

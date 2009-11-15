@@ -53,7 +53,7 @@ is not a \var{bnr} structure.
 \fun{void}{checkbnrgen}{GEN bnr} Raise an exception if the argument is not a
 \var{bnr} structure, complete with explicit generators for the ray class group.
 This is normally useless and \tet{checkbnr} should be instead, unless
-you are absolutely certain that the generators will be needed at a later 
+you are absolutely certain that the generators will be needed at a later
 point, and you are about to embark in a costly intermediate computation.
 PARI function do check that generators are present in \var{bnr} before
 accessing them: they will raise an error themselves; many functions
@@ -155,7 +155,7 @@ first the $r_1$ real roots (as \typ{REAL}s), then the $r_2$ pairs of complex
 conjugates.
 
 \fun{GEN}{nf_get_M}{GEN nf} returns the $(r_1+r_2)\times n$ matrix $M$
-giving the embeddings of $K$: $M[i,j]$ contains $w_j(\alpha_i)$, where 
+giving the embeddings of $K$: $M[i,j]$ contains $w_j(\alpha_i)$, where
 $\alpha_i$ is the $i$-th element of \kbd{nf\_get\_roots(nf)}. In particular,
 if $v$ is an $n$-th dimensional \typ{COL} representing the element
 $\sum_{i=1}^n v[i] w_i$ of $K$, then \kbd{RgM\_RgC\_mul(M,v)} represents the
@@ -1026,7 +1026,7 @@ to the lattice $G x$. Suitable for \kbd{gerepileupto}, but does not collect
 garbage.
 
 In applications, $x$ is an integral ideal, $G$ approximates a Cholesky form for
-the $T_2$ quadratic form as returned by \tet{nf_get_Gtwist}, and we return 
+the $T_2$ quadratic form as returned by \tet{nf_get_Gtwist}, and we return
 a small element $a$ in the lattice $(x,T_2)$. This is used to implement
 \tet{idealred}.
 

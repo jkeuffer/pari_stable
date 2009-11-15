@@ -44,7 +44,7 @@ Doc: $\var{bnf}$ being the \sidx{principal ideal}
  @eprog
 
  \noindent The binary digits of \fl mean:
- 
+
  \item $1$: If set, outputs $[e,t]$ as explained above, otherwise returns
  only $e$, which is much easier to compute. The following idiom only tests
  whether an ideal is principal:

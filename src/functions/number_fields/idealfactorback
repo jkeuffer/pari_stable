@@ -4,7 +4,7 @@ C-Name: idealfactorback
 Prototype: GGDGD0,L,
 Help: idealfactorback(nf,f,{e},{flag = 0}): given a factorisation f, gives the
  ideal product back. If e is present, f has to be a
- vector of the same length, and we return the product of the f[i]^e[i]. If 
+ vector of the same length, and we return the product of the f[i]^e[i]. If
  flag is non-zero, perform idealred along the way.
 Doc: gives back the ideal corresponding to a factorization. The integer $1$
  corresponds to the empty factorization.
@@ -19,7 +19,7 @@ Doc: gives back the ideal corresponding to a factorization. The integer $1$
  ? nf = nfinit(y^2+1); idealfactor(nf, 4 + 2*y)
  %1 =
  [[2, [1, 1]~, 2, 1, [1, 1]~] 2]
- 
+
  [[5, [2, 1]~, 1, 1, [-2, 1]~] 1]
 
  ? idealfactorback(nf, %)

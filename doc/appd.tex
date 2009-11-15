@@ -10,7 +10,7 @@
 To use PARI in multi-threaded programs, you must configure it using
 \kbd{Configure --enable-tls}. Your system must implement the \kbd{\_\_thread}
 storage class. As a major side effect, this breaks the \kbd{libpari} ABI: the
-resulting library binary is not compatible with the old one, and 
+resulting library binary is not compatible with the old one, and
 \kbd{-tls} is appended to PARI library SONAME.
 
 On the other hand, it will be thread-safe. In this model, each concurrent
@@ -63,7 +63,7 @@ Initialize the thread-local PARI data structures.
 This function is called by \kbd{pari\_thread\_start}.
 
 \fun{GEN}{pari_thread_start}{struct pari_thread *t}
-Initialize the thread-local PARI data structures and 
+Initialize the thread-local PARI data structures and
 set up the thread stack using the PARI thread data \kbd{pth}.
 This function returns the thread argument that was given to
 \kbd{pari\_thread\_alloc}.

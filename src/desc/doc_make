@@ -96,7 +96,7 @@ while (<FILE>)
         $doc .= "\n\nThe library syntax is \\fun{$type}{$Cname}{$args}$post.";
         $doc .= "\n$Variant" if ($Variant);
       }
-      print "\n\\subsecidx{$_}$v:\\label{se:$_} $doc\n";
+      print "\n\\subsecidx{$_}$v:\\label{se:$_}$doc\n";
     }
     next;
   }

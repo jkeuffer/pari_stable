@@ -9,7 +9,7 @@ Help: setsearch(S,x,{flag=0}): looks if x belongs to the set S. If flag is 0
 Doc: searches if $x$ belongs to the set $S$ (see \kbd{setisset}).
  A set is a vector of \typ{STR}, but this function
  works also if $S$ is a arbitrary \emph{sorted} vector or list (see
- \kbd{listsort}): if $x$ is not a \typ{STR}, we first 
+ \kbd{listsort}): if $x$ is not a \typ{STR}, we first
  replace it by \kbd{Str}$(x)$ \emph{unless} the first element of $S$ is also
  not a \typ{STR}.
 

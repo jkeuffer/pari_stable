@@ -9,7 +9,7 @@ Description:
  (int, ?-1):vec        Z_factor($1)
  (gen, ?-1):vec        factor($1)
  (gen, small):vec      factor0($1, $2)
-Doc: general factorization function, where $x$ is a 
+Doc: general factorization function, where $x$ is a
  rational (including integers), a complex number with rational
  real and imaginary parts, or a rational function (including polynomials).
  The result is a two-column matrix: the first contains the irreducibles
@@ -38,7 +38,7 @@ Doc: general factorization function, where $x$ is a
 
  A \typ{INT} argument \var{lim} can be added, meaning that we look only for
  prime factors $p < \var{lim}$, which must be non-negative and satisfy
- $\var{lim} \leq \kbd{primelimit}$; setting $\var{lim}=0$ is the same 
+ $\var{lim} \leq \kbd{primelimit}$; setting $\var{lim}=0$ is the same
  as setting it to \kbd{primelimit}. In this case, all but the last
  factor
  are proven primes, but the remaining factor may actually be a proven composite!

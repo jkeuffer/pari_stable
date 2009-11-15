@@ -29,12 +29,12 @@ Doc: sum of the two ideals $x$ and $y$ in the number field $\var{nf}$. The
    ? c = [2, 0; 2, 0]; idealadd(K, c, c)   \\ non-sense
    %6 =
    [2 0]
- 
+
    [0 2]
    ? d = [1, 0; 0, 2]; idealadd(K, d, d)   \\ non-sense
    %7 =
    [1 0]
- 
+
    [0 1]
 
  @eprog\noindent In the last two examples, we get wrong results since the

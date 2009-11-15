@@ -8,7 +8,7 @@ Doc: Returns $[u,v,d]$ such that $d$ is the gcd of $x,y$,
  The arguments must be integers or polynomials. \sidx{extended gcd}
 
  If $x,y$ are polynomials in the same variable and \emph{inexact}
- coefficients, then compute $u,v,d$ such that $x*u+y*v = d$, where $d$ 
+ coefficients, then compute $u,v,d$ such that $x*u+y*v = d$, where $d$
  approximately divides both and $x$ and $y$; in particular, we do not obtain
  \kbd{gcd(x,y)} which is \emph{defined} to be a scalar in this case:
  \bprog

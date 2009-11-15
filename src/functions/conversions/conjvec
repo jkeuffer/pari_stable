@@ -15,7 +15,7 @@ Doc:
 
  \noindent if $z$ is a finite field element, the result is the vector of
  conjugates $[z,z^p,z^{p^2},\ldots,z^{p^{n-1}}]$ where $n=\text{degree}(T)$.
- 
+
  \noindent If $z$ is an integer or a rational number, the result is~$z$. If
  $z$ is a (row or column) vector, the result is a matrix whose columns are
  the conjugate vectors of the individual elements of $z$.

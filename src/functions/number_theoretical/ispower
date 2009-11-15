@@ -26,5 +26,5 @@ Doc: if $k$ is given, returns true (1) if $x$ is a $k$-th power, false
  \bprog
  k = (x.p ^ poldegree(x.pol) - 1) / fforder(x)
  @eprog
-Variant: Also available is 
+Variant: Also available is
  \fun{long}{gisanypower}{GEN x, GEN *pty} ($k$ omitted).

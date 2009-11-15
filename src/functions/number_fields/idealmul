@@ -19,7 +19,7 @@ Doc: ideal multiplication of the ideals $x$ and $y$ in the number field
  ? idealmul(nf, 2, x+1)
  %2 =
  [4 2]
- 
+
  [0 2]
  ? idealmul(nf, [2, x], x+1)        \\ extended ideal * ideal
  %4 = [[4, 2; 0, 2], x]

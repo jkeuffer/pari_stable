@@ -3,6 +3,6 @@ Section: member_functions
 C-Name: member_a4
 Prototype: G
 Help: _.a4
-Description: 
+Description:
  (ell):gen:copy        ell_get_a4($1)
 

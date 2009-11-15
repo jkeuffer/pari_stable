@@ -22,6 +22,6 @@ Doc: roots of the polynomial $x$ in the
  (true) field discriminant and an \kbd{addprimes} entry are strictly divisible
  by some prime. If you have such an unsafe \var{nf}, it is safer to input
  \kbd{nf.pol}.
-Variant: See also \fun{GEN}{nfrootsQ}{GEN x}, 
+Variant: See also \fun{GEN}{nfrootsQ}{GEN x},
  corresponding to $\kbd{nf} = \kbd{NULL}$.
 

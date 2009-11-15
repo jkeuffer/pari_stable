@@ -7,10 +7,10 @@ Help: polredabs(T,{flag=0}): a smallest generating polynomial of the number
  norm. flag is optional, whose binary digit mean 1: give the element whose
  characteristic polynomial is the given polynomial. 4: give all polynomials
  of minimal T2 norm (give only one of P(x) and P(-x)). 16: partial reduction.
-Doc: returns a canonical defining polynomial $P$ for the same number field 
+Doc: returns a canonical defining polynomial $P$ for the same number field
  defined by $T$, such that the sum of the squares of the modulus of the
  roots (i.e.~the $T_2$-norm) is minimal. Different $T$ defining isomorphic
- number fields will yield the same $P$. 
+ number fields will yield the same $P$.
  All $T$ accepted by \tet{nfinit} are also allowed here: non-monic
  polynomials, \kbd{nf}, \kbd{bnf}, \kbd{[T, Z\_K\_basis]}.
 
@@ -30,7 +30,7 @@ Doc: returns a canonical defining polynomial $P$ for the same number field
 
  16: possibly use a suborder of the maximal order. The primes dividing the
  index of the order chosen are larger than \tet{primelimit} or divide integers
- stored in the \tet{addprimes} table. In that case the polynomial $P$ is 
+ stored in the \tet{addprimes} table. In that case the polynomial $P$ is
  no longer canonical, and it may happen that it does not have minimal
  $T_2$ norm. You should always include this flag; without it, the routine
  will often spend infinite time trying to factor the discriminant of $T$. As
@@ -38,8 +38,8 @@ Doc: returns a canonical defining polynomial $P$ for the same number field
  (has at most one large prime factor not in the \kbd{addprimes} table), the
  result is the same.
 
-Variant: Instead of the above hardcoded numerical flags, one should use an 
- or-ed combination of 
+Variant: Instead of the above hardcoded numerical flags, one should use an
+ or-ed combination of
 
  \item \tet{nf_PARTIALFACT}: partial factorization of the discriminant,
  possibly work in a non-maximal order. You should always include this.

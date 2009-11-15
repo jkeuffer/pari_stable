@@ -9,7 +9,7 @@ Doc: given a $\Z_K$-module $x$ associated to the integral pseudo-matrix
  $\Z_K/d_1\oplus\cdots\oplus\Z_K/d_n$ and $d_i$ divides $d_{i-1}$ for $i\ge2$.
 
  See \secref{se:ZKmodules} for the definition of integral pseudo-matrix;
- briefly, it is input as a 3-component row vector $[A,I,J]$ where 
+ briefly, it is input as a 3-component row vector $[A,I,J]$ where
  $I = [b_1,\dots,b_n]$ and $J = [a_1,\dots,a_n]$ are two ideal lists,
  and $A$ is a square $n\times n$ matrix with columns $(A_1,\dots,A_n)$,
  seen as elements in $K^n$ (with canonical basis $(e_1,\dots,e_n)$).
