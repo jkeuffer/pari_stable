@@ -1133,7 +1133,8 @@ polsymmodp(GEN g, GEN p)
     av = avma;
     s = mului(k, remii(gel(g,d-k+2), p));
     for (i = 1; i < k; i++) s = addii(s, mulii(gel(y,k-i+1), gel(g,d-i+2)));
-    gel(y,k+1) = gerepileuptoint(av, centermodii(negi(s), p, po2));
+    togglesign_safe(&s);
+    gel(y,k+1) = gerepileuptoint(av, centermodii(s, p, po2));
   }
   return y;
 }
