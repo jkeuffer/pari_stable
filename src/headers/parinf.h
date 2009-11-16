@@ -194,7 +194,6 @@ GEN    norm_by_embed(long r1, GEN x);
 GEN    pidealprimeinv(GEN nf, GEN x);
 GEN    primedec_apply_kummer(GEN nf,GEN pol,long e,GEN p);
 GEN    prodid(GEN nf, GEN I);
-GEN    quadhilbertreal(GEN D, long prec);
 GEN    rnfallbase(GEN nf, GEN *ppol, GEN *pD, GEN *pd, GEN *pfi);
 GEN    special_anti_uniformizer(GEN nf, GEN pr);
 GEN    subgroupcondlist(GEN cyc, GEN bound, GEN listKer);
