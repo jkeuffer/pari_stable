@@ -199,7 +199,7 @@ BA149- minpoly([-5,0,-1,1;0,-5,-1,-1;1,1,-5,0;-1,1,0,-5]/3)
        -> wrong result[#994]
 BA150- 2/O(5) -> O(5^-1) (should raise an error) [#1009]
   151-  factor(13533236897) -> I/O Warning [#1012]
-
+BA152- usqrtsafe result could be off by one.
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
