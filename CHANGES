@@ -590,7 +590,7 @@ BA  9- handle numerical derivation as an operation on closure.
 RB 10- GP functions printf, Strprintf
    11- pari_printf, pari_fprintf, pari_sprintf, pari_vfprintf, pari_vprintf,
        pari_vsprintf
-BA 12- docpdf and install-doc-pdf targets (toplevel Makefile)
+BA 12- docpdf and install-docpdf targets (toplevel Makefile)
 JD 13- add an optional argument to quit()
    14- universal constant gen_m2, for symmetry
    15- GP function version() [ current version number ]
