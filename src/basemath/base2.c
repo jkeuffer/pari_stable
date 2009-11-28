@@ -946,7 +946,7 @@ typedef struct __decomp {
   GEN p, f; /* goal: factor f p-adically */
   long df; /* p^df = reduced discriminant of f */
   GEN psf, pmf; /* stability precision for f, wanted precision for f */
-  long vpsf; /* v_p(pѕf) */
+  long vpsf; /* v_p(p_f) */
   /* these are updated along the way */
   GEN phi; /* a p-integer, in Q[X] */
   GEN phi0; /* a p-integer, in Q[X] from testb2 / testc2, to be composed with
@@ -957,7 +957,7 @@ typedef struct __decomp {
   GEN Dinvnu;/* denominator ( ... ) */
   long vDinvnu; /* v_p(Dinvnu) */
   GEN prc, psc; /* reduced discriminant of chi, stability precision for chi */
-  long vpsc; /* v_p(pѕc) */
+  long vpsc; /* v_p(p_c) */
   GEN ns, precns; /* cached Newton sums and their precision */
 } decomp_t;
 

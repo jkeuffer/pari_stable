@@ -1839,7 +1839,7 @@ bid_get_gen(GEN bid) {
 INLINE long
 rnf_get_degree(GEN rnf) { return degpol(gel(rnf,1)); }
 
-/* I integral (not necessarіly HNF), G ZM, rounded Cholesky form of a weighted
+/* I integral (not necessarily HNF), G ZM, rounded Cholesky form of a weighted
  * T2 matrix. Return m in I with T2(m) small */
 INLINE GEN
 idealpseudomin(GEN I, GEN G)
