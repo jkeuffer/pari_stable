@@ -553,7 +553,7 @@ GEN
 minkowski_bound(GEN D, long N, long r2, long prec)
 {
   pari_sp av = avma;
-  GEN c = divrr(mpfactr(N,prec), powuu(N,N));
+  GEN c = divri(mpfactr(N,prec), powuu(N,N));
   if (r2) c = mulrr(c, powru(divur(4,mppi(prec)), r2));
   c = mulrr(c, gsqrt(absi(D),prec));
   return gerepileuptoleaf(av, c);
