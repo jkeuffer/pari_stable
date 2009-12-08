@@ -1117,7 +1117,7 @@ init_bad(struct check_pr *S, GEN nf, GEN gen)
 }
 
 long
-bnfcertify(GEN bnf)
+bnfcertify0(GEN bnf, long flag)
 {
   pari_sp av = avma;
   long i, N;
@@ -1129,6 +1129,8 @@ bnfcertify(GEN bnf)
   bnf = checkbnf(bnf);
   nf = bnf_get_nf(bnf);
   N = nf_get_degree(nf); if (N==1) return 1;
+  testprimes(bnf, zimmertbound(N, nf_get_r2(nf), absi(nf_get_disc(nf))));
+  if (flag) return 1;
 
   cyc = bnf_get_cyc(bnf);
   S.w = bnf_get_tuN(bnf);
@@ -1138,7 +1140,6 @@ bnfcertify(GEN bnf)
   S.cycgen = check_and_build_cycgen(bnf);
   init_bad(&S, nf, bnf_get_gen(bnf));
 
-  testprimes(bnf, zimmertbound(N, nf_get_r2(nf), absi(nf_get_disc(nf))));
   B = bound_unit_index(bnf, S.fu);
   if (DEBUGLEVEL>1)
   {
@@ -1165,6 +1166,8 @@ bnfcertify(GEN bnf)
   }
   avma = av; return 1;
 }
+long
+bnfcertify(GEN bnf) { return bnfcertify0(bnf, 0); }
 
 /*******************************************************************/
 /*                                                                 */

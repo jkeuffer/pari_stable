@@ -635,6 +635,8 @@ BA 45- GP routine galoisgetpol and PARI function galoisgetpol, galoisnbpol
 BA 46- GP routine and PARI function elldivpol
 BA 47- GP routine and PARI function ellmodulareqn
 BA 48- function RgXQ_ratlift for reconstruction of rational functions.
+   49- optional flag to bnfcertify : only check that the correct class group
+       is a quotient of the computed one.
 
   Removed
     1- obsolete GP functions printp, printp1. Either replace them by
