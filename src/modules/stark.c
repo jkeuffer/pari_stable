@@ -2794,7 +2794,10 @@ quadhilbertreal(GEN D, long prec)
       }
       pol = AllStark(data, nf, 0, newprec);
     } ENDCATCH;
-    if (pol) return gerepileupto(av, makescind(nf, pol));
+    if (pol) {
+      pol = makescind(nf, pol);
+      return gerepileupto(av, polredabs0(pol, nf_PARTIALFACT));
+    }
   }
 }
 
