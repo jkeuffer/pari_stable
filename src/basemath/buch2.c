@@ -869,7 +869,7 @@ get_norm_fact_primes(GEN G, GEN E, GEN C)
     if (!s) continue;
 
     P = gel(G,i); p = pr_get_p(P);
-    N = mulii(N, powii(p, mulii(gel(P,4), ex)));
+    N = mulii(N, powii(p, mului(pr_get_f(P), ex)));
   }
   if (C) N = mulii(N, pr_norm(C));
   return N;

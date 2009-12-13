@@ -2661,8 +2661,8 @@ pol_quad_conj(GEN x, GEN y)
 static GEN
 makescind(GEN nf, GEN P)
 {
-  GEN Pp, p, perm, pol, G, L, a, roo, nfpol = nf_get_pol(nf);
-  long i, k, l, is_P;
+  GEN Pp, p, pol, G, L, a, roo, nfpol = nf_get_pol(nf);
+  long i, is_P;
 
   P = lift_intern(P);
   pol = RgX_mul(P, pol_quad_conj(P, nfpol)); /* Norm_{k/Q}(P), irreducible/Q */
@@ -2686,20 +2686,22 @@ makescind(GEN nf, GEN P)
   /* each roo[i] mod p is a root of P or (exclusive) tau(P) mod \wp */
   /* record whether roo[1] is a root of P or tau(P) */
 
-  perm = NULL; /*-Wall*/
-  for (i = 1; lg(L); i++)
+  for (i = 1; i < lg(L); i++)
   {
-    perm = gel(L,i);
-    k = perm[1]; if (k == 1) continue;
+    GEN perm = gel(L,i);
+    long k = perm[1]; if (k == 1) continue;
     k = gequal0( FpX_eval(Pp, remii(gel(roo,k),p), p) );
     /* roo[k] is a root of the other polynomial */
-    if (k != is_P) break;
+    if (k != is_P)
+    {
+      long o = perm_order(perm);
+      if (o != 2) perm = perm_pow(perm, o >> 1);
+      /* perm has order two and doesn't belong to Gal(H_k/k) */
+      return galoisfixedfield(G, perm, 1, varn(P));
+    }
   }
-
-  l = perm_order(perm);
-  if (l != 2) perm = perm_pow(perm, l >> 1);
-  /* perm has order two and doesn't belong to Gal(H_k/k) */
-  return galoisfixedfield(G, perm, 1, varn(P));
+  pari_err(bugparier,"makeѕcind");
+  return NULL; /*not reached*/
 }
 
 /* pbnf = NULL if no bnf is needed, f = NULL may be passed for a trivial
@@ -3084,7 +3086,7 @@ quadhilbert(GEN D, long prec)
 {
   GEN d = D;
   quadray_init(&d, NULL, NULL, 0);
-  return (signe(D)>0)? quadhilbertreal(D,prec)
+  return (signe(d)>0)? quadhilbertreal(D,prec)
                      : quadhilbertimag(d);
 }
 
