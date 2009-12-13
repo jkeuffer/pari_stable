@@ -2636,51 +2636,50 @@ bnrL1(GEN bnr, GEN subgp, long flag, long prec)
 /*       Hilbert and Ray Class field using Stark                   */
 /*                                                                 */
 /*******************************************************************/
-/* conj(Mod(x,y)), assume y normalized */
-static GEN
-quad_conj(GEN x, GEN y)
+/* P in A[x,y], deg_y P < 2, return P0 and P1 in A[x] such that P = P0 + P1 y */
+static void
+split_pol_quad(GEN P, GEN *gP0, GEN *gP1)
 {
-  GEN z, u, v, b;
-  if (typ(x) != t_POL || degpol(x) <= 0) return x;
-  u = gel(x,3); /*Mod(ux + v, x^2 + bx + c)*/
-  v = gel(x,2); b = gel(y,3);
-  z = cgetg(4, t_POL); z[1] = x[1];
-  gel(z,2) = gadd(v, gmul(u,negi(b)));
-  gel(z,3) = gneg(u); return z;
+  long i, l = lg(P);
+  GEN P0 = cgetg(l, t_POL), P1 = cgetg(l, t_POL);
+  P0[1] = P1[1] = P[1];
+  for (i = 2; i < l; i++)
+  {
+    GEN c = gel(P,i), c0 = c, c1 = gen_0;
+    if (typ(c) == t_POL) /* write c = c1 y + c0 */
+      switch(degpol(c))
+      {
+        case -1: c0 = gen_0; break;
+        default: c1 = gel(c,3); /* fall through */
+        case  0: c0 = gel(c,2); break;
+      }
+    gel(P0,i) = c0; gel(P1,i) = c1;
+  }
+  *gP0 = normalizepol_lg(P0, l);
+  *gP1 = normalizepol_lg(P1, l);
 }
-static GEN
-pol_quad_conj(GEN x, GEN y)
-{
-  long i, l = lg(x);
-  GEN z = cgetg(l, t_POL); z[1] = x[1];
-  for (i = 2; i < l; i++) gel(z,i) = quad_conj(gel(x,i), y);
-  return z;
-}
+
 /* k = nf quadratic field, P relative equation of H_k (Hilbert class field)
  * return T in Z[X], such that H_k / Q is the compositum of Q[X]/(T) and k */
 static GEN
 makescind(GEN nf, GEN P)
 {
-  GEN Pp, p, pol, G, L, a, roo, nfpol = nf_get_pol(nf);
+  GEN Pp, p, pol, G, L, a, roo, P0,P1, Ny,Try, nfpol = nf_get_pol(nf);
   long i, is_P;
 
-  P = lift_intern(P);
-  pol = RgX_mul(P, pol_quad_conj(P, nfpol)); /* Norm_{k/Q}(P), irreducible/Q */
-  for (i = 2; i < lg(pol); i++)
-  {
-    GEN c = gel(pol,i);
-    if (typ(c) != t_POL) continue;
-    c = RgX_rem(c, nfpol); /* ZX, degree <= 0 */
-    c = signe(c)? gel(c,2) : gen_0;
-    gel(pol,i) = c;
-  }
+  split_pol_quad(lift_intern(P), &P0, &P1);
+  /* P = P0 + y P1, Norm_{k/Q}(P) = P0^2 + Tr y P0P1 + Ny P1^2, irreducible/Q */
+  Ny = gel(nfpol, 2);
+  Try = negi(gel(nfpol, 3));
+  pol = RgX_add(RgX_sqr(P0), RgX_Rg_mul(RgX_sqr(P1), Ny));
+  if (signe(Try)) pol = RgX_add(pol, RgX_Rg_mul(RgX_mul(P0,P1), Try));
   /* pol = rnfequation(nf, P); */
   G = galoisinit(pol, NULL);
   L = gel(G,6);
   p = gmael(G,2,1);
   a = FpX_quad_root(nfpol, p, 0);
-  Pp = gsubst(P, varn(nfpol), a);
-  Pp = FpX_red(Pp, p); /* P mod a prime \wp above p (which splits) */
+  /* P mod a prime \wp above p (which splits) */
+  Pp = FpXY_evalx(P, a, p);
   roo = gel(G,3);
   is_P = gequal0( FpX_eval(Pp, remii(gel(roo,1),p), p) );
   /* each roo[i] mod p is a root of P or (exclusive) tau(P) mod \wp */
