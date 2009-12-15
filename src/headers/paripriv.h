@@ -266,7 +266,6 @@ void  term_color(long c);
 const char *term_get_color(long c);
 int   term_height(void);
 int   term_width(void);
-void  var_make_safe(void);
 void  whatnow_new_syntax(const char *f, long n);
 /* gp_colors */
 void decode_color(long n, long *c);
@@ -342,6 +341,7 @@ void compilestate_reset(void);
 void compilestate_save(struct pari_compilestate *comp);
 void compilestate_restore(struct pari_compilestate *comp);
 
+void evalstate_clone(void);
 void evalstate_reset(void);
 void evalstate_restore(struct pari_evalstate *state);
 void evalstate_save(struct pari_evalstate *state);

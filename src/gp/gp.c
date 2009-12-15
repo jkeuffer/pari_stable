@@ -1656,7 +1656,7 @@ int
 gp_handle_exception(long numerr)
 {
   if (disable_exception_handler) { disable_exception_handler = 0; return 0; }
-  if (numerr == errpile) { var_make_safe(); avma = top; }
+  if (numerr == errpile) { evalstate_clone(); avma = top; }
   if ((GP_DATA->flags & BREAKLOOP) && OK_breakloop())
     return break_loop(numerr < 0);
   return 0;

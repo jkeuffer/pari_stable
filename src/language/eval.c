@@ -252,8 +252,8 @@ checkvalue(entree *ep)
 }
 
 /* make GP variables safe for avma = top */
-void
-var_make_safe(void)
+static void
+lvar_make_safe(void)
 {
   long n;
   entree *ep;
@@ -406,6 +406,18 @@ restore_vars(long nbmvar, long nblvar)
   for(j=1;j<=nblvar;j++)
     pop_val(lvars[s_lvars.n-j]);
   s_lvars.n-=nblvar;
+}
+
+INLINE void
+restore_trace(long nbtrace)
+{
+  long j;
+  for(j=1;j<=nbtrace;j++)
+  {
+    GEN C = trace[s_trace.n-j].closure;
+    if (isclone(C)) gunclone(C);
+  }
+  s_trace.n-=nbtrace;
 }
 
 INLINE void
@@ -1231,7 +1243,7 @@ evalstate_restore(struct pari_evalstate *state)
   sp = state->sp;
   rp = state->rp;
   restore_vars(s_var.n-state->var,s_lvars.n-state->lvars);
-  s_trace.n = state->trace;
+  restore_trace(s_trace.n-state->trace);
   reset_break();
   compilestate_restore(&state->comp);
 }
@@ -1246,6 +1258,19 @@ evalstate_reset(void)
   reset_break();
   compilestate_reset();
   avma = top;
+}
+
+void
+evalstate_clone(void)
+{
+  long i;
+  for (i = 1; i<=s_var.n; i++) copylex(-i);
+  lvar_make_safe();
+  for (i = 0; i< s_trace.n; i++) 
+  {
+    GEN C = trace[i].closure;
+    if (isonstack(C)) trace[i].closure = gclone(C);
+  }
 }
 
 GEN
