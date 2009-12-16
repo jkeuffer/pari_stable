@@ -190,7 +190,7 @@ fordiv(GEN a, GEN code)
   pari_sp av2, av = avma;
   GEN t = divisors(a);
 
-  push_lex(NULL,code); l=lg(t); av2 = avma;
+  push_lex(gen_0,code); l=lg(t); av2 = avma;
   for (i=1; i<l; i++)
   {
     set_lex(-1,gel(t,i));
@@ -542,7 +542,7 @@ divsum(GEN num, GEN code)
   GEN y = gen_0, t = divisors(num);
   long i, l = lg(t);
 
-  push_lex(NULL, code);
+  push_lex(gen_0, code);
   for (i=1; i<l; i++)
   {
     set_lex(-1,gel(t,i));

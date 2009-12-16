@@ -226,7 +226,7 @@ forell(long a, long b, GEN code)
   long ca=a/1000, cb=b/1000;
   long i, j, k;
 
-  push_lex(NULL, code);
+  push_lex(gen_0, code);
   if (ca < 0) ca = 0;
   for(i=ca; i<=cb; i++)
   {
