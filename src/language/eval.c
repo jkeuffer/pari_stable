@@ -1266,7 +1266,7 @@ evalstate_clone(void)
   long i;
   for (i = 1; i<=s_var.n; i++) copylex(-i);
   lvar_make_safe();
-  for (i = 0; i< s_trace.n; i++) 
+  for (i = 0; i< s_trace.n; i++)
   {
     GEN C = trace[i].closure;
     if (isonstack(C)) trace[i].closure = gclone(C);

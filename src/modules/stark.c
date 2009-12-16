@@ -2705,7 +2705,7 @@ makescind(GEN nf, GEN P)
 
 /* pbnf = NULL if no bnf is needed, f = NULL may be passed for a trivial
  * conductor */
-static void 
+static void
 quadray_init(GEN *pD, GEN f, GEN *pbnf, long prec)
 {
   GEN D = *pD, nf, bnf = NULL;
