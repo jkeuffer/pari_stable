@@ -1219,7 +1219,7 @@ famat_to_arch(GEN nf, GEN fa, long prec)
   GEN g,e, y = NULL;
   long i,l;
 
-  if (typ(fa) != t_MAT) return get_arch(nf, fa, prec);
+  if (typ(fa) != t_MAT) pari_err(typeer,"famat_to_arch");
   if (lg(fa) == 1) return triv_arch(nf);
   g = gel(fa,1);
   e = gel(fa,2); l = lg(e);
@@ -1501,7 +1501,7 @@ isprincipalall(GEN bnf, GEN x, long *ptprec, long flag)
     if (lW) col = gadd(col, act_arch(A, ga));
     if (c)  col = gadd(col, act_arch(Q, GD));
   }
-  if (xar) col = gadd(col, famat_to_arch(nf, xar, prec));
+  if (xar) col = gadd(col, get_arch(nf, xar, prec));
 
   /* find coords on Zk; Q = N (x / \prod gj^ej) = N(alpha), denom(alpha) | d */
   Q = gdiv(ZM_det_triangular(x), get_norm_fact(gen, ex, &d));
