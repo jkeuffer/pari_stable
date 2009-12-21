@@ -9,7 +9,16 @@ if test -z "$has_waitpid" -o -z "$has_setsid"; then
   echo "### Missing waitpid() or setsid(), no Hi-Res graphing window"
   which_graphic_lib=none
 else
-  . ./get_X11  # X11,X11_INC,X11_LIBS. If auto try to set which_graphic_lib=X11
+  if test -n "$with_fltk"; then which_graphic_lib=fltk; fi
+  if test -n "$with_qt";   then which_graphic_lib=Qt; fi
+  if test "$which_graphic_lib" != none; then
+    . ./get_X11  # X11,X11_INC,X11_LIBS.
+    if test -z "$X11"; then
+      case $which_graphic_lib in X11) which_graphic_lib=none;; esac
+    else
+      case $which_graphic_lib in auto) which_graphic_lib=X11;; esac
+    fi
+  fi
 
   if test "$fastread" != yes; then
     cat << EOT
@@ -24,9 +33,23 @@ EOT
   fi
 fi
 
-if test "$which_graphic_lib" != none; then
-. ./get_fltk # FLTKDIR, FLTK_LIBS
-. ./get_Qt   # QTDIR, QTLIB
-fi
+case $which_graphic_lib in
+  auto|fltk)
+    . ./get_fltk # FLTKDIR, FLTK_LIBS
+    if test -z "$FLTKDIR"; then
+      case $which_graphic_lib in fltk) which_graphic_lib=none;; esac
+    else
+      which_graphic_lib=fltk
+    fi;;
+esac
+case $which_graphic_lib in
+  auto|Qt|qt)
+    . ./get_Qt   # QTDIR, QTLIB
+    if test -z "$QTDIR"; then
+      case $which_graphic_lib in qt|Qt) which_graphic_lib=none;; esac
+    else
+      which_graphic_lib=Qt
+    fi;;
+esac
 
 echo "Hi-Res Graphics: $which_graphic_lib"
