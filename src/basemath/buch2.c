@@ -2457,7 +2457,13 @@ compute_multiple_of_R(GEN A, long RU, long N, GEN *ptL)
   mdet = renormalize_cols(xreal, &xexpo, &precpb);
   /* will cause precision to increase on later failure, but we may succeed! */
   *ptL = precpb? NULL: gen_1;
-  if (lg(mdet) < RU) { avma = av; return NULL; }
+  if (lg(mdet) < RU)
+  {
+    if (DEBUGLEVEL)
+      fprintferr("Unit group rank %ld < %ld\n",lg(mdet)-1, RU);
+    avma = av;
+    return NULL;
+  }
   T = cgetg(RU+1,t_COL);
   for (i=1; i<=R1; i++) gel(T,i) = gen_1;
   for (   ; i<=RU; i++) gel(T,i) = gen_2;
