@@ -51,5 +51,6 @@ case $which_graphic_lib in
       which_graphic_lib=Qt
     fi;;
 esac
+case $which_graphic_lib in auto) which_graphic_lib=none;; esac
 
 echo "Hi-Res Graphics: $which_graphic_lib"
