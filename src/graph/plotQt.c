@@ -26,7 +26,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /////////////////////////////////////////////////////////////////////////////
 extern "C" {
 #include "pari.h"
+#include "paripriv.h"
 #undef grem
+#undef swap
 #include "rect.h"
 }
 
@@ -100,7 +102,6 @@ Plotter::Plotter( long *w, long *x, long *y, long lw,
     this->resize( pari_plot.width, pari_plot.height);
     this->setCaption( "Pari QtPlot");
 #endif
-    this->setBackgroundColor( color[0]);
     this->setFont( font);
     numcolors = lg(pari_colormap)-1;
     color = (QColor*)pari_malloc(numcolors*sizeof(QColor));
@@ -110,6 +111,7 @@ Plotter::Plotter( long *w, long *x, long *y, long lw,
       color_to_rgb(gel(pari_colormap,i), &r, &g, &b);
       color[i-1] = QColor(r, g, b);
     }
+    this->setBackgroundColor( color[0]);
 }
 
 // void Plotter::setPlotFile( const char *s) {
