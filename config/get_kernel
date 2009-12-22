@@ -4,15 +4,15 @@ case "$arch" in
   sparc)         asmarch=sparcv8_micro; prettya=Sparc ;;
   sparcv8_micro) asmarch=$arch;         prettya=MicroSparc ;;
   sparcv8_super) asmarch=$arch;         prettya=SuperSparc ;;
-  sparcv9) case "$sizeof_long" in   
+  sparcv9) case "$sizeof_long" in
            4) asmarch=sparcv8_micro;;
            8) asmarch=none;;
            esac;                        prettya=UltraSparc ;;
-  i?86)    case "$sizeof_long" in   
+  i?86)    case "$sizeof_long" in
            4) asmarch=ix86;;
            8) asmarch=x86_64;;
            esac;                        prettya=$arch ;;
-  x86_64)  case "$sizeof_long" in   
+  x86_64)  case "$sizeof_long" in
            4) asmarch=ix86;;
            8) asmarch=x86_64;;
            esac;                        prettya='amd64';;
@@ -20,15 +20,15 @@ case "$arch" in
            4) asmarch=none;;
            8) asmarch=ia64;;
            esac;                        prettya=Itanium;;
-  hppa) case "$sizeof_long" in   
+  hppa) case "$sizeof_long" in
            4) asmarch=hppa;             prettya='PA-RISC1.1';;
            8) asmarch=hppa64;           prettya='PA-RISC2.0';;
            esac;;
   alpha)         asmarch=$arch;         prettya=Alpha ;;
-  ppc|ppc64)  case "$sizeof_long" in   
+  ppc|ppc64)  case "$sizeof_long" in
         4) asmarch=ppc;;
         8) asmarch=ppc64;;
-        esac;                           prettya='PowerPC' ;; 
+        esac;                           prettya='PowerPC' ;;
   arm*)          asmarch=none;          prettya=$arch ;;
   mips)          asmarch=none;          prettya=MIPS ;;
   m68k)          asmarch=m68k;          prettya='Motorola 68k';;
@@ -60,7 +60,7 @@ EOM
   none-gmp sparcv8_super-gmp sparcv8_micro-gmp ix86-gmp alpha-gmp hppa-gmp m68k-gmp ppc-gmp ppc64-gmp x86_64-gmp'
   . ./display
   echo $n ..."Which of these apply, if any ? $c"
-  dflt=$asmarch; . ./myread; 
+  dflt=$asmarch; . ./myread;
   kernel=$ans # explicit kernel, needed when checking for gmp in Configure
   tmp_kern=$ans
   cat << EOM

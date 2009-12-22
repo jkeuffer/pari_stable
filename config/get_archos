@@ -1,6 +1,6 @@
 # Testing Architectures. Try uname to provide a default, then ask user.
 #
-if test -z "$target_host"; then 
+if test -z "$target_host"; then
   target_host=`./arch-osname`
 fi
 arch=`echo "$target_host" | sed -e 's/\(.*\)-.*/\1/'`

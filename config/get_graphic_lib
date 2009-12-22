@@ -1,5 +1,5 @@
 if test "$optimization" = profiling; then
-  which_graphic_lib=none  
+  which_graphic_lib=none
 fi
 
 _graphic_list="which_graphic_lib X11 X11_INC X11_LIBS \

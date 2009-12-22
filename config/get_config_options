@@ -104,8 +104,8 @@ for i in with_readline with_readline_lib with_readline_include \
          with_gmp with_gmp_lib with_gmp_include \
          with_ncurses_lib with_qt with_fltk ; do
   eval "dflt=\"\$$i\""
-  case $dflt in 
-    ''|yes|/*) ;; 
+  case $dflt in
+    ''|yes|/*) ;;
             *) eval "$i='$TOP/$dflt'";;
   esac
 done
@@ -143,7 +143,7 @@ Installation directories:
   --libdir=<dir>        for libraries
   --mandir=<dir>        for manual pages
   --sysdatadir=<dir>    for architecture-dependent data
-  --datadir=<dir>       for architecture-independent data 
+  --datadir=<dir>       for architecture-independent data
 
 Optional libraries:
   --without-readline          do not link with GNU readline

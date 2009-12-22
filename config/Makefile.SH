@@ -4,13 +4,13 @@ echo Extracting $file
 rm -f $file
 
 # Path to directories
-cfg=../$config_dir 
-data=../$data_dir 
-doc=../$doc_dir 
-desc=../$desc_dir 
-ex=../$examples_dir 
-misc=../$misc_dir 
-src=../$src_dir 
+cfg=../$config_dir
+data=../$data_dir
+doc=../$doc_dir
+desc=../$desc_dir
+ex=../$examples_dir
+misc=../$misc_dir
+src=../$src_dir
 
 knone=$src/kernel/none
 kern0=$src/kernel/$kernlvl0
@@ -523,7 +523,7 @@ EOT
 fi
 
 cat >> $file << EOT
-$src/language/parse.h: $src/language/parse.y 
+$src/language/parse.h: $src/language/parse.y
 	\$(BISON) -d $src/language/parse.y -o $src/language/parse.c
 $src/language/parse.c: $src/language/parse.h
 	@:

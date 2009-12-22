@@ -93,7 +93,7 @@ EOT
     if test -n "$_rl_save_prompt"; then
       echo '#define HAS_UNDERSCORE_RL_SAVE_PROMPT' >> $file
     fi
-  fi 
+  fi
   if test -n "$rl_message"; then
     echo '#define HAS_RL_MESSAGE' >> $file
   fi

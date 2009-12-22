@@ -8,7 +8,7 @@ for dir in $pth; do
       if test -n "$ok"; then
         _pb="$ok"
         # for .so and .sl
-        try=`ls $dir/lib$lib.s? 2> /dev/null` 
+        try=`ls $dir/lib$lib.s? 2> /dev/null`
         # for .dylib
         if test -z "$try"; then
           try=`ls $dir/lib$lib.dylib 2> /dev/null`

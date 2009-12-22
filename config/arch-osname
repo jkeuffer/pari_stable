@@ -67,7 +67,7 @@ if test -n "$myuname"; then
             i*pc) arch=ix86;;
 	    esac;;
   gnu*)     # Cover GNU/Hurd, GNU/kFreeBSD and other GNU userland
-            arch=`uname -m`; 
+            arch=`uname -m`;
             case $arch in i386-*) arch=i386;;esac;;
   esac
 fi

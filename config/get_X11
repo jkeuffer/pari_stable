@@ -43,5 +43,5 @@ if test -f $Xincroot/X11/Xos.h -a -n "$X11"; then
 else
   echo "### X11 not found"
   X11=
-fi 
+fi
 

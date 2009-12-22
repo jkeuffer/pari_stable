@@ -17,7 +17,7 @@ EOT
 echo $n "Installation prefix ? $c"
 . ./myread; prefix=$ans
 
-if test -z "$share_prefix"; then 
+if test -z "$share_prefix"; then
   share_prefix=$prefix/share
 fi
 echo $n "...for architecture-independent files (share-prefix) ? $c"
@@ -47,7 +47,7 @@ dflt=${dfltdatadir:-$dfltdata}; . ./myread; datadir=$ans
 
 for i in prefix share_prefix bindir libdir includedir mandir sysdatadir datadir ; do
   eval "dflt=\"\$$i\""
-  case $dflt in 
+  case $dflt in
       /*) ;;
        *) eval "$i='$TOP/$dflt'";;
   esac
