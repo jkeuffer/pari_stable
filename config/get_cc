@@ -39,7 +39,7 @@ if test -z "$CC"; then
   if test -z "$gcc"; then
     exe=$osname-$arch-gnu$$
     $cc $extraflag -o $exe gnu.c
-    if $exe; then gcc=$cc; fi; rm -f $exe
+    if $RUNTEST $exe; then gcc=$cc; fi; rm -f $exe
   fi
   case "$gcc" in
 ?:/*|/*) echo ..."gcc is $gcc";;
@@ -78,7 +78,7 @@ EOT
 fi
 
 exe=$osname-$arch-ansi$$
-$CC $CFLAGS $extraflag -o $exe ansi.c 2>/dev/null && $exe
+$CC $CFLAGS $extraflag -o $exe ansi.c 2>/dev/null && $RUNTEST $exe
 if test $? != 0; then cat << EOT
 ###
 ### C compiler does not work. PARI/GP requires an ANSI C compiler! Aborting.
@@ -93,7 +93,7 @@ if test "$CC" != "$gcc"; then __gnuc__=; fi
 if test -z "$__gnuc__"; then
   exe=$osname-$arch-gnu$$
   $CC $extraflag -o $exe gnu.c
-  if $exe; then
+  if $RUNTEST $exe; then
     # avoid internationalization trouble by setting LANG=C
     __gnuc__=`env LANG=C LC_ALL=C LC_MESSAGES=C $CC -v 2>&1 | sed -n 's/.*version //p'`
     echo GNU compiler version $__gnuc__

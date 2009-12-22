@@ -1,6 +1,6 @@
 exe=$osname-$arch-endian$$
 if ($CC $CFLAGS $extraflag endian.c -o $exe 2>/dev/null); then
-  doubleformat=`$exe`;
+  doubleformat=`$RUNTEST $exe`;
 else
   echo "***************************************************************"
   echo "Cannot compile endian.c. Aborting. PLEASE REPORT!"

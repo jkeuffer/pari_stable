@@ -35,7 +35,7 @@ if test -n "$gmp"; then
   exe=$osname-$arch-rlv$$
   $CC $extraflag $GMPINCLUDE -o $exe gmp_version.c $GMPLIBS 2> /dev/null
   if test -r $exe; then
-    gmp_version=`env LD_LIBRARY_PATH="$LD_LIBRARY_PATH$dir_sep$gmp" $exe`;
+    gmp_version=`env LD_LIBRARY_PATH="$LD_LIBRARY_PATH$dir_sep$gmp" $RUNTEST $exe`;
   fi
   if test "$gmp_version" = "unsupported"; then
     echo "### Your GMP library ABI is unsupported."
