@@ -21,6 +21,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "paripriv.h"
 #include "anal.h"
+#ifdef _WIN32
+#include <windows.h>
+#include "../systems/mingw/mingw.h"
+#endif
 
 typedef struct outString {
   char *string; /* start of the output buffer */
@@ -376,7 +380,11 @@ normalOutC(char c)
 static void
 normalOutS(const char *s)
 {
+#ifdef _WIN32
+   win32_ansi_fputs(s, pari_outfile);
+#else
   fputs(s, pari_outfile);
+#endif
   if (pari_logfile) { fputs(s, pari_logfile); }
 }
 static void
@@ -396,7 +404,11 @@ normalErrC(char c)
 static void
 normalErrS(const char *s)
 {
+#ifdef _WIN32
+   win32_ansi_fputs(s, pari_errfile);
+#else
   fputs(s, pari_errfile);
+#endif
   if (pari_logfile) fputs(s, pari_logfile);
 }
 static void
@@ -1340,6 +1352,9 @@ static int
 term_width_intern(void)
 {
   if (GP_DATA->flags & TEST) return 0;
+#ifdef _WIN32
+  return win32_terminal_width();
+#endif
 #ifdef HAS_TIOCGWINSZ
   {
     struct winsize s;
@@ -1364,6 +1379,9 @@ static int
 term_height_intern(void)
 {
   if (GP_DATA->flags & TEST) return 0;
+#ifdef _WIN32
+  return win32_terminal_height();
+#endif
 #ifdef HAS_TIOCGWINSZ
   {
     struct winsize s;
@@ -2999,6 +3017,9 @@ static pariFILE *last_file = NULL;
 #  endif
 #  define HAVE_PIPES
 #endif
+#if defined(_WIN32)
+#  define HAVE_PIPES
+#endif
 #ifndef O_RDONLY
 #  define O_RDONLY 0
 #endif
@@ -3481,7 +3502,17 @@ _expand_env(char *str)
 char *
 path_expand(const char *s)
 {
+#ifdef _WIN32
+  char *ss, *p;
+  ss = pari_strdup(s);
+  for (p = ss; *p != 0; ++p)
+    if (*p == '\\') *p = '/';
+  p = _expand_env(_path_expand(ss));
+  free(ss);
+  return p;
+#else
   return _expand_env(_path_expand(s));
+#endif
 }
 
 void
@@ -3631,6 +3662,13 @@ switchin_last()
 static int
 is_absolute(char *s)
 {
+#ifdef _WIN32
+  if( (*s >= 'A' && *s <= 'Z') ||
+      (*s >= 'a' && *s <= 'z') )
+  {
+      return *(s+1) == ':';
+  }
+#endif
   if (*s == '/') return 1;
   if (*s++ != '.') return 0;
   if (*s == '/') return 1;
@@ -4166,16 +4204,16 @@ pari_file_exists(const char *s)
 }
 static int
 pari_dir_exists(const char *s) { return mkdir(s, 0777); }
-#else
+#elif defined(_WIN32)
 static int
-pari_file_exists(const char *s) { return 0; }
-#if defined(_MSC_VER)
+pari_file_exists(const char *s) { return GetFileAttributesA(s) != ~0; }
 static int
 pari_dir_exists(const char *s) { return mkdir(s); }
 #else
 static int
+pari_file_exists(const char *s) { return 0; }
+static int
 pari_dir_exists(const char *s) { return 0; }
-#endif
 #endif
 
 char *
@@ -4239,7 +4277,7 @@ swap_slash(char *s)
 #ifdef __EMX__
     if (!unix_shell())
 #endif
-#if defined(__EMX__) || defined(WINCE)
+#if defined(__EMX__) || defined(WINCE) || defined(_WIN32)
     {
       char *t;
       for (t=s; *t; t++)

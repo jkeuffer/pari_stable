@@ -48,6 +48,9 @@ case "$osname" in
 	export_file=pari.def; export_create="emxexp -u"
 	# Actually, the build will fail until the switch to -Zomf
 	dlld_ignore=- ;;
+  mingw)
+    export_file='$(LIBPARI).def'
+    ;;
 esac
 
 PLOTCFLAGS=
@@ -65,6 +68,9 @@ fltk)
   PLOTLIBS="-L\$(FLTKDIR)/lib -lfltk $FLTK_LIBS"
   postconfig='-fltk-config --post '
   graph=plotfltk;;
+win32)
+  PLOTLIBS="-lgdi32"
+  graph=plotWin32;;
 esac
 graph="plotport $graph"
 
@@ -489,6 +495,8 @@ if test -z "$DLLD"; then
 EOT
 else
   if test -n "$export_file"; then
+    case "$osname" in
+    os2)
     cat >> $file << EOT
 
 EXPORT_FILE_BASE = $src/systems/os2/pari.def.base
@@ -502,6 +510,19 @@ VERSION_VERBOSE = $pari_release_verbose
 	\$(EXPORT_LIB_CREATE) -o \$@ \$(EXPORT_FILE)
 
 EOT
+    ;;
+    mingw)
+    cat >> $file << EOT
+    
+\$(EXPORT_FILE): \$(OBJS)
+	echo LIBRARY \$(LIBPARI) > \$@
+	echo EXPORTS >> \$@
+	nm --defined-only \$(OBJS) | grep -E '[0-9a-f]+ [A-Z] [^.]' | cut -d ' ' -f 3 | cut -c '2-' >> \$@
+	nm --defined-only \$(OBJS) | grep -E '[0-9a-f]+ [BCDGRS] [^.]' | cut -d ' ' -f 3 | cut -c '2-' | sed -e 's/\(.*\)/\1 DATA/'>> \$@
+
+EOT
+    ;;
+    esac
   fi
   cat >> $file << EOT
 

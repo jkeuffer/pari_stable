@@ -10,7 +10,7 @@ esac
 
 if test -n "$perl"; then
   case "$osname" in
-    os2) gphelp="perl -S gphelp -detex" ;;
+    os2|mingw) gphelp="perl -S gphelp -detex" ;;
     *) gphelp="$bindir/gphelp" ;;
   esac
 fi
@@ -71,6 +71,17 @@ else if test -n "$zcat"; then
 
 EOT
   fi
+fi
+
+if test "$osname" = "mingw"; then
+cat >> $file << EOT
+
+#undef UNIX
+#define GNUZCAT
+#undef ZCAT 
+#define ZCAT "gzip.exe -dc"
+
+EOT
 fi
 
 if test -n "$readline"; then

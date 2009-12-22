@@ -125,7 +125,7 @@ cat > $dflt_conf_file << EOT
 
 EOT
 case "$osname" in
-  os2) shell_q='"'; echo "shell_q='\"'"  >> $dflt_conf_file;;
+  os2|mingw) shell_q='"'; echo "shell_q='\"'"  >> $dflt_conf_file;;
     *) shell_q="'"; echo "shell_q=\"'\"" >> $dflt_conf_file;;
 esac
 

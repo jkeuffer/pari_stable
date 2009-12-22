@@ -18,7 +18,7 @@ case "$osname" in
          soname=$sodest;;
   hpux) soname= ; sodest= ; DLSUFFIX=sl;;
   irix) soname= ; sodest= ;;
-  os2|cygwin)soname= ; sodest= ; DLSUFFIX=dll ;;
+  os2|cygwin|mingw)soname= ; sodest= ; DLSUFFIX=dll ;;
   darwin)soname= ; sodest= ; DLSUFFIX=dylib;;
   *) do_dll=no ;;
 esac
@@ -27,6 +27,7 @@ esac
 # On FreeBSD 2.2.5 (Y. Uchikawa) and Cygwin, this does not work.
 case "$osname" in
   freebsd|cygwin) DL_DFLT_NAME="\\\"\$(LIBPARI_DYN)\\\"" ;;
+  mingw) DL_DFLT_NAME="\\\"\$(LIBPARI_SO)\\\"" ;;
   *) DL_DFLT_NAME=NULL ;;
 esac
 
@@ -84,6 +85,7 @@ if test -n "$DLLD"; then
   case "$osname" in
     os2) DLLDFLAGS="$CFLAGS -Zdll" ;; # assume DLLD = gcc
     cygwin) DLLDFLAGS="-Wl,--out-implib=\$(LIBPARI_SO)\$(_A),--export-all-symbols";;
+    mingw) DLLDFLAGS="-Wl,--out-implib=\$(LIBPARI_SO)\$(_A)";;
   esac
   if test -n "$DLLDisGCC"; then
     case "$arch" in

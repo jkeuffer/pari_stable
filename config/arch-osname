@@ -29,6 +29,9 @@ if test -n "$myuname"; then
   cygwin*)  arch=`uname -m`
             if test -z "$arch"; then arch=ix86; fi
             osname=cygwin;;
+  mingw*)   arch=`uname -m`
+            if test -z "$arch"; then arch=ix86; fi
+            osname=mingw;;
   ultrix)   arch=mips;;
   nextstep) arch=`file /bin/sh | sed 's/.*(for architecture \(.*\))/\1/'`;;
   darwin*)  arch=`uname -p`
