@@ -78,7 +78,7 @@ cat >> $file << EOT
 
 #undef UNIX
 #define GNUZCAT
-#undef ZCAT 
+#undef ZCAT
 #define ZCAT "gzip.exe -dc"
 
 EOT

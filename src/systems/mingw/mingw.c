@@ -28,7 +28,7 @@ win32_console_color(unsigned long c)
   if( c >= 90 && c <= 97 ) { shift = 0; intense = 8; c %= 90; } else
   if(c >= 100 && c <= 107) { shift = 4; intense = 8; c %= 100; } else
   return 0;
-  
+
   WORD w = 0;
   switch(c) {
   case 0: w = 0; break; /* black      */
@@ -50,7 +50,7 @@ win32_ansi_fputs(const char* s, void* f)
     fputs(s,f);
     return;
   }
-  
+
   while(1) {
     char *p;
     p = strstr(s, "\x1b[");

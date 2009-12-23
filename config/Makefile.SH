@@ -518,7 +518,7 @@ EOT
     ;;
     mingw)
     cat >> $file << EOT
-    
+
 \$(EXPORT_FILE): \$(OBJS)
 	echo LIBRARY \$(LIBPARI) > \$@
 	echo EXPORTS >> \$@

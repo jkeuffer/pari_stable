@@ -110,12 +110,12 @@ PARI_get_plot(long f)
   pari_plot.height  = GetSystemMetrics(SM_CYSCREEN)/2;
   pari_plot.hunit   = pari_plot.width/100;
   pari_plot.vunit   = pari_plot.height/100;
-      
+
   hdc = GetDC(0);
   SelectObject(hdc, GetStockObject(DEFAULT_GUI_FONT));
   GetTextMetrics(hdc, &tm);
   ReleaseDC(0,hdc);
-      
+
   pari_plot.fwidth  = tm.tmAveCharWidth;
   pari_plot.fheight = tm.tmHeight;
 }
