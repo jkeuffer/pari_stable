@@ -52,8 +52,6 @@ case $which_graphic_lib in
     . ./get_Qt   # QTDIR, QTLIB
     if test -z "$QTDIR"; then
       case $which_graphic_lib in qt|Qt) which_graphic_lib=none;; esac
-    else
-      which_graphic_lib=Qt
     fi;;
 esac
 case $which_graphic_lib in auto) which_graphic_lib=none;; esac

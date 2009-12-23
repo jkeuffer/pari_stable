@@ -63,6 +63,10 @@ Qt)
   PLOTCFLAGS='-D__FANCY_WIN__ -I$(QTDIR)/include'
   PLOTLIBS="-L\$(QTDIR)/lib $QTLIB"
   graph=plotQt;;
+Qt4)
+  PLOTCFLAGS='-D__FANCY_WIN__ -I$(QTDIR)/include'
+  PLOTLIBS="-L\$(QTDIR)/lib $QTLIB"
+  graph=plotQt4;;
 fltk)
   PLOTCFLAGS="-I\$(FLTKDIR)/include $X11_INC"
   PLOTLIBS="-L\$(FLTKDIR)/lib -lfltk $FLTK_LIBS"
@@ -639,6 +643,11 @@ for dir in basemath modules language gp graph graphdyn systems; do
     cflags="$cflags \$(PLOTCFLAGS)"
     depend="$RECT_H"
     compile="\$(MOC) -o plotQt.moc.cpp $src/graph/plotQt.c && \$(CPLUSPLUS)"
+    ;;
+  plotQt4)
+    cflags="$cflags \$(PLOTCFLAGS)"
+    depend="$RECT_H"
+    compile="\$(MOC) \$(PLOTCFLAGS) -o plotQt4.moc.cpp $src/graph/plotQt4.c && \$(CPLUSPLUS)"
     ;;
   plotfltk)
     cflags="$cflags \$(PLOTCFLAGS)"

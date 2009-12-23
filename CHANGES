@@ -639,7 +639,8 @@ BA 48- function RgXQ_ratlift for reconstruction of rational functions.
    49- optional flag to bnfcertify : only check that the correct class group
        is a quotient of the computed one.
 VB 50- mingw support
-VB 51- plotwin32 graphic library
+VB 51- plotwin32 graphic engine
+   52- plotQt4 graphic engine
 
   Removed
     1- obsolete GP functions printp, printp1. Either replace them by

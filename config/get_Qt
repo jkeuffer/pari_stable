@@ -5,11 +5,22 @@ QTDIR=
 case "$with_qt" in
 yes)
    pth="/usr/local/lib /usr/local/share /usr/lib /usr/share"
-   QTDIR=`locatedir qt/bin $pth`
+   QTDIR=`locatedir qt4/bin $pth`
+   QTLIB="-lQtCore -lQtGui"
+   which_graphic_lib=Qt4
    if test -z "$QTDIR"; then
-     QTDIR=`locatedir qt3/bin $pth`
+     QTDIR=`locatedir qt/bin $pth`
+     QTLIB="-lQtCore -lQtGui"
+     which_graphic_lib=Qt4
      if test -z "$QTDIR"; then
-       QTDIR=`locatedir qt2/bin $pth`
+       QTDIR=`locatedir qt3/bin $pth`
+       QTLIB="-lqt-mt"
+       which_graphic_lib=Qt
+       if test -z "$QTDIR"; then
+         QTDIR=`locatedir qt2/bin $pth`
+         QTLIB="-lqt"
+         which_graphic_lib=Qt
+       fi
      fi
    fi;
    if test -n "$QTDIR"; then
@@ -22,14 +33,6 @@ yes)
   fi;;
 esac
 if test -n "$QTDIR"; then
-  case "$QTDIR" in /) QTDIR=;; esac
-  exe=$osname-$arch-Qt$$
-  if ($CC $extraflag -o $exe ansi.c -L$QTDIR/lib -lqt-mt 2>/dev/null); then
-    QTLIB=-lqt-mt
-  else
-    QTLIB=-lqt
-  fi
-  rm -f $exe $exe$exe_suff
   echo "Using Qt library, QTDIR = $QTDIR, QTLIB = $QTLIB"
 else
   echo "### Qt not found. Building without Qt support"
