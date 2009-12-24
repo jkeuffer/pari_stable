@@ -13,7 +13,7 @@ else
   if test -n "$with_qt";   then which_graphic_lib=Qt; fi
   if test "$which_graphic_lib" != none; then
     case $osname in
-      mingw*) case $which_graphic_lib in
+      mingw) case $which_graphic_lib in
                 win32|auto) which_graphic_lib=win32;;
               esac;;
       *) . ./get_X11  # X11,X11_INC,X11_LIBS.

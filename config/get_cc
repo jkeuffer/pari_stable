@@ -14,13 +14,13 @@ EOT
   optimization=$ans
 fi
 
-case "$osname-$arch" in
-  os2-*)   exe_suff=.exe; extraflag="-Zexe";;
-  cygwin*) exe_suff=.exe; extraflag="";;
+case "$osname" in
+  os2)   exe_suff=.exe; extraflag="-Zexe";;
+  cygwin) exe_suff=.exe; extraflag="";;
 # On Darwin, by default, the full library search path is searched for a .dylib
 # before a .a can be considered, preventing users to install their libraries
 # in a simple way (e.g. the readline / Editline conflict). Override this.
-  darwin-*)exe_suff=;     extraflag=-Wl,-search_paths_first;;
+  darwin)exe_suff=;     extraflag=-Wl,-search_paths_first;;
   *)       exe_suff=;     extraflag="";;
 esac
 
