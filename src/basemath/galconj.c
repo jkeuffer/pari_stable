@@ -1294,7 +1294,7 @@ a4galoisgen(GEN T, struct galois_test *td)
   gel(res,1) = mkvec3(pft,pfu,pfv);
   gel(res,2) = mkvecsmall3(2,2,3);
   av = avma;
-  ar = cgetg(n+1, t_VECSMALL);
+  ar = cgetg(5, t_VECSMALL);
   mt = gel(td->PV, td->order[n]);
   t = identity_perm(n) + 1; /* Sorry for this hack */
   u = cgetg(n+1, t_VECSMALL) + 1; /* too lazy to correct */
@@ -1310,9 +1310,10 @@ a4galoisgen(GEN T, struct galois_test *td)
   /* n = 2k = 12; N = (2k)! / (k! * 2^k) = 10395 */
   N = 10395;
   if (DEBUGLEVEL>=4) fprintferr("A4GaloisConj:will test %ld permutations\n", N);
-  ar[(n-2) >> 1]=0;
-  for (k = n-2; k > 2; k -= 2)
-    ar[(k>>1) - 1] = ar[k>>1] + mael(MT,k+1,k+2);
+  ar[4] = mael(MT,11,12);
+  ar[3] = ar[4] + mael(MT,9,10);
+  ar[2] = ar[3] + mael(MT,7,8);
+  ar[1] = ar[2] + mael(MT,5,6);
   for (i = 0; i < N; i++)
   {
     long g;
@@ -1344,22 +1345,18 @@ a4galoisgen(GEN T, struct galois_test *td)
         ar[2] = ar[3] + mael(MT,t[6],t[7]);
         ar[1] = ar[2] + mael(MT,t[4],t[5]);
         break;
-      default:
-        y--;
-        x = t[0]; t[0] = t[2]; t[2] = t[1]; t[1] = x;
-        for (k = 4; k < y; k += 2)
-        {
-          long j;
-          x = t[k];
-          for (j = k; j > 0; j--) t[j] = t[j-1];
-          t[0] = x;
-        }
-        lswap(t[y], t[y-a]);
-        for (k = y; k > 2; k -= 2)
-          ar[(k>>1) - 1] = ar[k>>1] + mael(MT,t[k],t[k+1]);
+      case 11:
+        y = 10;
+        x = t[0]; t[0] = t[8]; t[8] = t[7]; t[7] = t[5]; t[5] = t[1];
+        t[1] = t[6]; t[6] = t[3]; t[3] = t[2]; t[2] = t[4]; t[4] = x;
+        lswap(t[10], t[10-a]);
+        ar[4] = mael(MT,t[10],t[11]);
+        ar[3] = ar[4] + mael(MT,t[8],t[9]);
+        ar[2] = ar[3] + mael(MT,t[6],t[7]);
+        ar[1] = ar[2] + mael(MT,t[4],t[5]);
       }
     }
-    g = ar[1]+mael(MT,t[0],t[1])+ mael(MT,t[2],t[3]);
+    g = ar[1]+mael(MT,t[0],t[1])+mael(MT,t[2],t[3]);
     if (headlongisint(g,n))
     {
       for (k = 0; k < n; k += 2)
