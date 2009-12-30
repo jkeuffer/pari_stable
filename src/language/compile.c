@@ -309,7 +309,7 @@ closure_context(GEN C, long lpc)
   GEN oper=gel(C,3);
   GEN frpc=gmael(C,5,2);
   GEN fram=gmael(C,5,3);
-  long pc, j=1;
+  long pc, j=1, lfr = lg(frpc);
   if (lpc==-1)
   {
     long k;
@@ -318,11 +318,12 @@ closure_context(GEN C, long lpc)
       var_push((entree*)e[k], Lmy);
     return;
   }
+  while (j<lfr && frpc[j]==0) j++;
   for(pc=1; pc<=lpc; pc++)
   {
     if (pc>0 && (code[pc]==OClocalvar || code[pc]==OClocalvar0))
       var_push((entree*)oper[pc],Llocal);
-    if (j<lg(frpc) && pc==frpc[j])
+    if (j<lfr && pc==frpc[j])
     {
       long k;
       GEN e = gel(fram,j);
