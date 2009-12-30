@@ -1,0 +1,21 @@
+   echo = 1 (on)
+? default(breakloop,1)
+1
+? check(B)=my(bi=[B^2]);for(i=1,100,my(p=i+20,N=p^2);if(i==41,error("check:"
+,N)))
+(B)->my(bi=[B^2]);for(i=1,100,my(p=i+20,N=p^2);if(i==41,error("check:",N)))
+? check(1000);
+  ***   at top-level: check(1000)
+  ***                 ^-----------
+  ***   in function check: ...y(p=i+20,N=p^2);if(i==41,error("check:",N)))
+  ***                                                  ^-------------------
+  ***   user error: check:3721
+  ***   Break loop: type <Return> three times, or Control-d, to go back to G
+P)
+? [i,p,N,bi,B]
+
+[41, 61, 3721, [1000000], 1000]
+? [i,p,N,bi,B]
+[i, p, N, bi, B]
+? print("Total time spent: ",gettime);
+Total time spent: 8
