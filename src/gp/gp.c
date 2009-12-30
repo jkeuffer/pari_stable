@@ -1430,8 +1430,7 @@ static int
 is_interactive(void)
 {
   ulong f = GP_DATA->flags;
-  return (pari_infile == stdin && !(f & TEXMACS)
-                               && (f & EMACS || pari_stdin_isatty()));
+  return (pari_infile == stdin && !(f & TEXMACS) && !(f & TEST));
 }
 
 /* return 0 if no line could be read (EOF) */
@@ -1657,8 +1656,7 @@ gp_handle_exception(long numerr)
 {
   if (disable_exception_handler) { disable_exception_handler = 0; return 0; }
   if (numerr == errpile) { evalstate_clone(); avma = top; }
-  if ((GP_DATA->flags & BREAKLOOP) && OK_breakloop())
-    return break_loop(numerr < 0);
+  if (GP_DATA->flags & BREAKLOOP) return break_loop(numerr < 0);
   return 0;
 }
 
