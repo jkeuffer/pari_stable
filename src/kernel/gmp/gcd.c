@@ -14,6 +14,13 @@ Check the License for details. You should have received a copy of it, along
 with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
+/* assume y > x > 0. return y mod x */
+static ulong
+resiu(GEN y, ulong x)
+{
+  return mpn_mod_1(LIMBS(y), NLIMBS(y), x);
+}
+
 GEN
 gcdii(GEN a, GEN b)
 {

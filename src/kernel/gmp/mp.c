@@ -935,14 +935,6 @@ DIVIDE: /* quotient is non-zero */
   }
 }
 
-/* assume y > x > 0. return y mod x */
-
-static ulong
-resiu(GEN y, ulong x)
-{
-  return mpn_mod_1(LIMBS(y), NLIMBS(y), x);
-}
-
 /* Montgomery reduction.
  * N has k words, assume T >= 0 has less than 2k.
  * Return res := T / B^k mod N, where B = 2^BIL
