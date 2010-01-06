@@ -273,7 +273,7 @@ gp: gp-$dft ../gp$suffix$exe_suff $libdft
 
 ../gp$suffix$exe_suff: gp-$dft
 	-\$(RM) \$@
-	-\$(LN) $ln_objdir/gp-$dft$exe_suff \$@
+	-\$(LN) $ln_objdir/gp-$dft \$@
 
 all: $exec lib-sta
 
@@ -363,7 +363,7 @@ install-bin-dyn: gp-dyn install-lib-dyn
 install-bin-sta: gp-sta
 	-mkdir -p \$(BINDIR)
 	-\$(RM) \$(BINDIR)/gp-$version$exe_suff \$(BINDIR)/gp$exe_suff
-	\$(INSTALL_PROGRAM) gp-sta$exe_suff \$(BINDIR)/gp-$version$exe_suff
+	\$(INSTALL_PROGRAM) gp-sta \$(BINDIR)/gp-$version$exe_suff
 	-\$(LN) gp-$version$exe_suff \$(BINDIR)/gp$exe_suff
 # Can't strip it if we want install() to work on OSF.
 #	-\$(STRIP) \$(STRIPFLAGS)  \$(BINDIR)/gp-$version
