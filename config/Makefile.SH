@@ -131,7 +131,7 @@ case "$sizeof_long" in
   4) numbits=32;;
   8) numbits=64;;
 esac
-dotest="env \"LD_LIBRARY_PATH=.$dir_sep\$\$LD_LIBRARY_PATH\" \$(SHELL) $src/test/dotest $numbits"
+dotest="env \"RUNTEST=\$(RUNTEST)\" \"LD_LIBRARY_PATH=.$dir_sep\$\$LD_LIBRARY_PATH\" \$(SHELL) $src/test/dotest $numbits"
 case "$static" in
   n) dft=dyn; libdft=lib-dyn;;
   y) dft=sta; libdft= ;;
@@ -175,6 +175,7 @@ DLLD_FLAVOR  = \$(LD_FLAVOR)
 DLLD       = $DLLD \$(DLLD_FLAVOR)
 DLLDFLAGS  = $DLLDFLAGS
 EXTRADLLDFLAGS = $EXTRADLLDFLAGS
+RUNTEST    = $RUNTEST
 
 # HIGHLY EXPERIMENTAL (only tested with gmp-4.0 on ix86 and Ultra).
 # If you've configured and compiled GMP and would like to tune PARI using

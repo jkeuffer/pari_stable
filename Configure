@@ -25,6 +25,8 @@ misc_dir=misc
 src_dir=src
 desc_dir=src/desc
 
+case "x$RUNTEST" in x);; x/*);; *) RUNTEST=$TOP/$RUNTEST;; esac
+
 cd $config_dir
 # Process options, initialize
 . ./get_head # do we need head -n # or head -# ?
@@ -133,7 +135,7 @@ for variable in\
   pari_release pari_release_verbose version libpari_base static TOP objdir\
   arch asmarch osname pretty\
   kernlvl0 kernlvl1 DL_LIBS LIBS\
-  dir_sep runpath runpathprefix LDDYN\
+  dir_sep runpath runpathprefix LDDYN RUNTEST\
   ranlib gzip zcat perl ln_s make_sh\
   sizeof_long doubleformat\
   enable_tls\
