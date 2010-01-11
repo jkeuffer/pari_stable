@@ -20,12 +20,13 @@ GEN
 galoisnbpol(long a)
 {
   GEN n;
-  char *s = pari_sprintf("%s/galpol/%ld/nb", pari_datadir, a);
-  pariFILE *F = pari_fopengz(s);
-  free(s);
-  if (!F) pari_err(talker,"Missing galpol file");
+  pariFILE *F;
+  char *s = stackmalloc(strlen(pari_datadir) + 11 + 20 + 1);
+  sprintf(s,"%s/galpol/%ld/nb", pari_datadir, a);
+  F = pari_fopengz(s);
+  if (!F) pari_err(talker,"Missing galpol file %s\n",s);
   n = gp_read_stream(F->file);
-  if (!n || typ(n)!=t_INT ) pari_err(talker,"Incompatible galpol file %s\n",s);
+  if (!n || typ(n)!=t_INT) pari_err(talker,"Incompatible galpol file %s\n",s);
   pari_fclose(F); return n;
 }
 
