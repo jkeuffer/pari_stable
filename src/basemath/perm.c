@@ -737,19 +737,19 @@ group_subgroups(GEN G)
   if (n == 1) return trivialsubgroups();
   if (group_isA4S4(G))
   {
-    GEN u = perm_mul(gel(gen,1),gel(gen,2));
-    H = dicyclicgroup(gel(gen,1),gel(gen,2),2,2);
+    GEN s = gel(gen,1);       /*s = (1,2)(3,4) */
+    GEN t = gel(gen,2);       /*t = (1,3)(2,4) */
+    GEN st = perm_mul(s, t); /*st = (1,4)(2,3) */
+    H = dicyclicgroup(s, t, 2, 2);
     /* sg3 is the list of subgroups intersecting only partially with H*/
     sg3 = cgetg((n==4)?4: 10, t_VEC);
-    gel(sg3,1) = cyclicgroup(gel(gen,1), 2);
-    gel(sg3,2) = cyclicgroup(gel(gen,2), 2);
-    gel(sg3,3) = cyclicgroup(u, 2);
+    gel(sg3,1) = cyclicgroup(s, 2);
+    gel(sg3,2) = cyclicgroup(t, 2);
+    gel(sg3,3) = cyclicgroup(st, 2);
     if (n==5)
     {
-      GEN s = gel(gen,1); /*s=(1,2)(3,4)*/
-      GEN t = gel(gen,2); /*t=(1,3)(2,4)*/
       GEN u = gel(gen,3);
-      GEN v = gel(gen,4), st = perm_mul(s,t), w, u2;
+      GEN v = gel(gen,4), w, u2;
       if (zv_equal(perm_conj(u,s), t)) /*u=(2,3,4)*/
         u2 = perm_mul(u,u);
       else
