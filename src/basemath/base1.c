@@ -732,14 +732,14 @@ ZC_galoisapply(GEN nf, GEN x, GEN s)
 static GEN
 pr_galoisapply(GEN nf, GEN pr, GEN aut)
 {
-  GEN p, pov2, b, u, s = gel(aut,2);
+  GEN p, pov2, b, u;
   GEN tau = pr_get_tau(pr);
   if (typ(tau) == t_INT) return pr; /* inert */
   /* tau is a t_COL */
   p = pr_get_p(pr);
   pov2 = shifti(p,-1);
-  b = centermod_i(ZC_galoisapply(nf, tau, s), p, pov2);
-  u = centermod_i(ZC_galoisapply(nf, pr_get_gen(pr), s), p, pov2);
+  b = centermod_i(ZC_galoisapply(nf, tau, aut), p, pov2);
+  u = centermod_i(ZC_galoisapply(nf, pr_get_gen(pr), aut), p, pov2);
   if (pr_get_e(pr) == 1 && int_elt_val(nf, u, p, b, NULL))
   {
     GEN t = gel(u,1);
@@ -768,10 +768,10 @@ galoisapply(GEN nf, GEN aut, GEN x)
   GEN y, T;
 
   nf = checknf(nf); T = nf_get_pol(nf);
-  if (typ(aut)==t_POL) aut = gmodulo(aut,T);
+  if (typ(aut)==t_POLMOD && RgX_equal_var(gel(aut,1),T)) aut=gel(aut,2);
   else
   {
-    if (typ(aut)!=t_POLMOD || !RgX_equal_var(gel(aut,1),T))
+    if (typ(aut)!=t_POL)
       pari_err(typeer,"galoisapply");
   }
   switch(typ(x))
@@ -781,8 +781,7 @@ galoisapply(GEN nf, GEN aut, GEN x)
 
     case t_POLMOD: x = gel(x,2); /* fall through */
     case t_POL:
-      y = gsubst(x,varn(T),aut);
-      if (typ(y)!=t_POLMOD || !RgX_equal_var(gel(y,1),T)) y = gmodulo(y,T);
+      y = basistoalg(nf,ZC_galoisapply(nf,x, aut));
       return gerepileupto(av,y);
 
     case t_VEC:
@@ -797,13 +796,13 @@ galoisapply(GEN nf, GEN aut, GEN x)
       break;
 
     case t_COL:
-      return gerepileupto(av, ZC_galoisapply(nf,x, gel(aut,2)));
+      return gerepileupto(av, ZC_galoisapply(nf,x, aut));
 
     case t_MAT:
       lx=lg(x); if (lx==1) return cgetg(1,t_MAT);
       N = degpol(T); if (lg(x[1])!=N+1) break;
       y = cgetg(lx,t_MAT);
-      for (j=1; j<lx; j++) gel(y,j) = ZC_galoisapply(nf,gel(x,j), gel(aut,2));
+      for (j=1; j<lx; j++) gel(y,j) = ZC_galoisapply(nf,gel(x,j), aut);
       return gerepileupto(av, idealhnf_shallow(nf,y));
   }
   pari_err(typeer,"galoisapply");
