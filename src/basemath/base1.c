@@ -705,26 +705,41 @@ polgalois(GEN x, long prec)
 
 #undef _res
 
-/* assume correct dimensions, return x(s) mod T */
+/* Evaluate pol in a using nfelt arithmetic and Horner rule */
+
+GEN
+nfpoleval(GEN nf, GEN pol, GEN a)
+{
+  pari_sp av=avma;
+  long i=lg(pol)-1;
+  GEN res;
+  if (i==1) return gen_0;
+  a = nf_to_scalar_or_basis(nf, a);
+  res = nf_to_scalar_or_basis(nf, gel(pol,i));
+  for (i-- ; i>=2; i--)
+    res = nfadd(nf, nfmul(nf, a, res), gel(pol,i));
+  return gerepileupto(av, res);
+}
+
 static GEN
-ZC_galoisapply(GEN nf, GEN x, GEN s, GEN T)
+ZC_galoisapply(GEN nf, GEN x, GEN s)
 {
   x = nf_to_scalar_or_alg(nf, x);
-  if (typ(x) != t_POL) return scalarcol(x, degpol(T)); /* rational */
-  return algtobasis(nf, RgX_RgXQ_eval(x, s, T));
+  if (typ(x) != t_POL) return scalarcol(x, degpol(nf_get_pol(nf)));
+  return nfpoleval(nf,x,s);
 }
 
 static GEN
 pr_galoisapply(GEN nf, GEN pr, GEN aut)
 {
-  GEN p, pov2, b, u, s = gel(aut,2), T = gel(aut,1);
+  GEN p, pov2, b, u, s = gel(aut,2);
   GEN tau = pr_get_tau(pr);
   if (typ(tau) == t_INT) return pr; /* inert */
   /* tau is a t_COL */
   p = pr_get_p(pr);
   pov2 = shifti(p,-1);
-  b = centermod_i(ZC_galoisapply(nf, tau, s,T), p, pov2);
-  u = centermod_i(ZC_galoisapply(nf, pr_get_gen(pr), s,T), p, pov2);
+  b = centermod_i(ZC_galoisapply(nf, tau, s), p, pov2);
+  u = centermod_i(ZC_galoisapply(nf, pr_get_gen(pr), s), p, pov2);
   if (pr_get_e(pr) == 1 && int_elt_val(nf, u, p, b, NULL))
   {
     GEN t = gel(u,1);
@@ -782,13 +797,13 @@ galoisapply(GEN nf, GEN aut, GEN x)
       break;
 
     case t_COL:
-      return gerepileupto(av, ZC_galoisapply(nf,x, gel(aut,2),T));
+      return gerepileupto(av, ZC_galoisapply(nf,x, gel(aut,2)));
 
     case t_MAT:
       lx=lg(x); if (lx==1) return cgetg(1,t_MAT);
       N = degpol(T); if (lg(x[1])!=N+1) break;
       y = cgetg(lx,t_MAT);
-      for (j=1; j<lx; j++) gel(y,j) = ZC_galoisapply(nf,gel(x,j), gel(aut,2),T);
+      for (j=1; j<lx; j++) gel(y,j) = ZC_galoisapply(nf,gel(x,j), gel(aut,2));
       return gerepileupto(av, idealhnf_shallow(nf,y));
   }
   pari_err(typeer,"galoisapply");

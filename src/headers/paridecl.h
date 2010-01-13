@@ -837,6 +837,7 @@ GEN     nfisincl(GEN a, GEN b);
 GEN     nfisisom(GEN a, GEN b);
 GEN     nfnewprec(GEN nf, long prec);
 GEN     nfnewprec_shallow(GEN nf, long prec);
+GEN     nfpoleval(GEN nf, GEN pol, GEN a);
 long    nftyp(GEN x);
 GEN     ordred(GEN x);
 GEN     polgalois(GEN x, long prec);
