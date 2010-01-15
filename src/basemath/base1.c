@@ -721,6 +721,23 @@ nfpoleval(GEN nf, GEN pol, GEN a)
   return gerepileupto(av, res);
 }
 
+GEN
+FpX_FpC_nfpoleval(GEN nf, GEN pol, GEN a, GEN p)
+{
+  pari_sp av=avma;
+  long i=lg(pol)-1, n=nf_get_degree(nf);
+  GEN res, Ma;
+  if (i==1) return zerocol(n);
+  Ma = FpM_red(zk_multable(nf, a), p);
+  res = scalarcol(gel(pol,i),n);
+  for (i-- ; i>=2; i--)
+  {
+    res = FpM_FpC_mul(Ma, res, p);
+    gel(res,1) = Fp_add(gel(res,1), gel(pol,i), p);
+  }
+  return gerepileupto(av, res);
+}
+
 static GEN
 ZC_galoisapply(GEN nf, GEN x, GEN s)
 {
@@ -730,23 +747,38 @@ ZC_galoisapply(GEN nf, GEN x, GEN s)
 }
 
 static GEN
+QX_galoisapplymod(GEN nf, GEN pol, GEN S, GEN p)
+{
+  GEN den, P = Q_remove_denom(pol,&den);
+  GEN pe, pe1, denpe, R;
+  if (den)
+  {
+    ulong e = Z_pval(den, p);
+    pe = powiu(p, e); pe1 = mulii(pe, p);
+    denpe = Fp_inv(diviiexact(den, pe), pe1);
+  } else {
+    pe = gen_1; pe1 = p; denpe = gen_1;
+  }
+  R = FpX_FpC_nfpoleval(nf, FpX_red(P, pe1), FpC_red(S, pe1), pe1);
+  return gdivexact(FpC_Fp_mul(R, denpe, pe1), pe);
+}
+
+static GEN
 pr_galoisapply(GEN nf, GEN pr, GEN aut)
 {
-  GEN p, pov2, b, u;
-  GEN tau = pr_get_tau(pr);
-  if (typ(tau) == t_INT) return pr; /* inert */
-  /* tau is a t_COL */
-  p = pr_get_p(pr);
-  pov2 = shifti(p,-1);
-  b = centermod_i(ZC_galoisapply(nf, tau, aut), p, pov2);
-  u = centermod_i(ZC_galoisapply(nf, pr_get_gen(pr), aut), p, pov2);
-  if (pr_get_e(pr) == 1 && int_elt_val(nf, u, p, b, NULL))
-  {
-    GEN t = gel(u,1);
-    gel(u,1) =  (signe(t) > 0)? subii(t, p) : addii(t, p);
-  }
+  GEN p, b, u;
+  GEN autp;
+  if (typ(pr_get_tau(pr)) == t_INT) return pr; /* inert */
+  p = pr_get_p(pr); autp = poltobasis(nf, aut);
+  u = QX_galoisapplymod(nf, coltoliftalg(nf, pr_get_gen(pr)), autp, p);
+#if 1
+  b = FpM_deplin(zk_multable(nf, u), p);
+#else /* Slower */
+  b = QX_galoisapplymod(nf, coltoliftalg(nf, pr_get_tau(pr)), autp, p);
+#endif
   return mkvec5(p, u, gel(pr,3), gel(pr,4), b);
 }
+
 static GEN
 fa_galoisapply(GEN nf, GEN fa, GEN aut)
 {
