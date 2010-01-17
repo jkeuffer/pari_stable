@@ -2335,7 +2335,8 @@ galoispermtopol_i(GEN gal, GEN perm, GEN mod, GEN mod2)
   case t_VECSMALL:
   {
     long v = varn(gel(gal,1));
-    return permtopol(perm, gel(gal,3), gel(gal,4), gel(gal,5), mod, mod2, v);
+    return permtopol(perm, gal_get_roots(gal), gal_get_invvdm(gal),
+                           gal_get_den(gal), mod, mod2, v);
   }
   case t_VEC: case t_COL: case t_MAT:
     v = cgetg(lg(perm), t);
@@ -2353,7 +2354,7 @@ galoispermtopol(GEN gal, GEN perm)
   pari_sp av = avma;
   GEN mod, mod2;
   gal = checkgal(gal);
-  mod = gmael(gal,2,3);
+  mod = gal_get_mod(gal);
   mod2 = shifti(mod,-1);
   return gerepilecopy(av, galoispermtopol_i(gal, perm, mod, mod2));
 }
@@ -2414,13 +2415,13 @@ GEN
 galoisfixedfield(GEN gal, GEN perm, long flag, long y)
 {
   pari_sp lbot, ltop = avma;
-  GEN L, P, S, PL, O, res, mod, mod2;
+  GEN T, L, P, S, PL, O, res, mod, mod2;
   long x, n, i;
   if (flag<0 || flag>2) pari_err(flagerr, "galoisfixedfield");
-  gal = checkgal(gal);
-  x = varn(gel(gal,1));
-  L = gel(gal,3); n = lg(L)-1;
-  mod = gmael(gal,2,3);
+  gal = checkgal(gal); T = gal_get_pol(gal);
+  x = varn(T);
+  L = gal_get_roots(gal); n = lg(L)-1;
+  mod = gal_get_mod(gal);
   if (typ(perm) == t_VEC)
   {
     for (i = 1; i < lg(perm); i++) chk_perm(gel(perm,i), n);
@@ -2434,29 +2435,29 @@ galoisfixedfield(GEN gal, GEN perm, long flag, long y)
 
   {
     GEN OL= fixedfieldorbits(O,L);
-    GEN V = fixedfieldsympol(OL, mod, gmael(gal,2,1), NULL, x);
+    GEN V = fixedfieldsympol(OL, mod, gal_get_p(gal), NULL, x);
     PL= gel(V,2);
     P = gel(V,3);
   }
   if (flag==1) return gerepileupto(ltop,P);
   mod2 = shifti(mod,-1);
   S = fixedfieldinclusion(O, PL);
-  S = vectopol(S, gel(gal,4), gel(gal,5), mod, mod2, x);
+  S = vectopol(S, gal_get_invvdm(gal), gal_get_den(gal), mod, mod2, x);
   if (flag==0)
   { lbot = avma; res = cgetg(3, t_VEC); }
   else
   {
     GEN PM, Pden;
     struct galois_borne Pgb;
-    long val = itos(gmael(gal,2,2));
-    Pgb.l = gmael(gal,2,1);
+    long val = itos(gal_get_e(gal));
+    Pgb.l = gal_get_p(gal);
     Pden = galoisborne(P, NULL, &Pgb);
     if (Pgb.valabs > val)
     {
       if (DEBUGLEVEL>=4)
         fprintferr("GaloisConj:increase p-adic prec by %ld.\n", Pgb.valabs-val);
       PL = ZpX_liftroots(P, PL, Pgb.l, Pgb.valabs);
-      L = ZpX_liftroots(gel(gal,1), L, Pgb.l, Pgb.valabs);
+      L  = ZpX_liftroots(T, L, Pgb.l, Pgb.valabs);
       mod = Pgb.ladicabs;
     }
     PM = vandermondeinversemod(PL, P, Pden, mod);
@@ -2464,16 +2465,16 @@ galoisfixedfield(GEN gal, GEN perm, long flag, long y)
     if (y <= x)
       pari_err(talker,"variable priority too high in galoisfixedfield");
     lbot = avma; res = cgetg(4, t_VEC);
-    gel(res,3) = fixedfieldfactor(L,O,gel(gal,6), PM,Pden,mod,mod2,x,y);
+    gel(res,3) = fixedfieldfactor(L,O,gal_get_group(gal), PM,Pden,mod,mod2,x,y);
   }
   gel(res,1) = gcopy(P);
-  gel(res,2) = gmodulo(S, gel(gal,1));
+  gel(res,2) = gmodulo(S, T);
   return gerepile(ltop, lbot, res);
 }
 
 /* gal a galois group output the underlying wss group */
 GEN
-galois_group(GEN gal) { return mkvec2(gel(gal,7), gel(gal,8)); }
+galois_group(GEN gal) { return mkvec2(gal_get_gen(gal), gal_get_orders(gal)); }
 
 GEN
 checkgroup(GEN g, GEN *S)
@@ -2482,7 +2483,7 @@ checkgroup(GEN g, GEN *S)
       && typ(g[1])==t_VEC
       && typ(g[2])==t_VECSMALL) { *S = NULL; return g; }
   g  = checkgal(g);
-  *S = gel(g,6); return galois_group(g);
+  *S = gal_get_group(g); return galois_group(g);
 }
 
 GEN

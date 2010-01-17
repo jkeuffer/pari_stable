@@ -1295,6 +1295,38 @@ certainly want to include the \tet{nf_PARTIALFACT} flag.
 
 \fun{GEN}{discrayabslistlong}{GEN bnf, long bound}
 
+\section{Galois extensions of $\Q$}
+
+This section describes the data structure output by the function
+\tet{galoisinit}. This will be called a \kbd{gal} structure in
+the following.
+
+\subsec{Extracting info from a \kbd{gal} structure}
+
+The functions below expect a \kbd{gal} structure and are shallow. See the
+documentation of \tet{galoisinit} for the meaning of the member functions.
+
+\fun{GEN}{gal_get_pol}{GEN gal} returns \kbd{gal.pol}
+
+\fun{GEN}{gal_get_p}{GEN gal} returns \kbd{gal.p}
+
+\fun{GEN}{gal_get_e}{GEN gal} returns the integer $e$ such that
+\kbd{gal.mod==gal.p\pow e}.
+
+\fun{GEN}{gal_get_mod}{GEN gal} returns \kbd{gal.mod}.
+
+\fun{GEN}{gal_get_roots}{GEN gal} returns \kbd{gal.roots}.
+
+\fun{GEN}{gal_get_invvdm}{GEN gal} \kbd{gal[4]}.
+
+\fun{GEN}{gal_get_den}{GEN gal} return \kbd{gal[5]}.
+
+\fun{GEN}{gal_get_group}{GEN gal} returns \kbd{gal.group}.
+
+\fun{GEN}{gal_get_gen}{GEN gal} returns \kbd{gal.gen}.
+
+\fun{GEN}{gal_get_orders}{GEN gal} returns \kbd{gal.orders}.
+
 \section{Quadratic number fields and quadratic forms}
 
 \subsec{Checks}

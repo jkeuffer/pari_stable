@@ -642,6 +642,7 @@ BA 48- function RgXQ_ratlift for reconstruction of rational functions.
 VB 50- mingw support
 VB 51- plotwin32 graphic engine
    52- plotQt4 graphic engine
+BA 53- low-level accessors functions gal_get_* for galoisinit objects.
 
   Removed
     1- obsolete GP functions printp, printp1. Either replace them by

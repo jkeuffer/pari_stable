@@ -1834,6 +1834,26 @@ bid_get_gen(GEN bid) {
   if (lg(G) != 4) pari_err(talker,"missing bid generators. Use idealstar(,,2)");
   return gel(G,3);
 }
+INLINE GEN
+gal_get_pol(GEN gal) { return gel(gal,1); }
+INLINE GEN
+gal_get_p(GEN gal) { return gmael(gal,2,1); }
+INLINE GEN
+gal_get_e(GEN gal) { return gmael(gal,2,2); }
+INLINE GEN
+gal_get_mod(GEN gal) { return gmael(gal,2,3); }
+INLINE GEN
+gal_get_roots(GEN gal) { return gel(gal,3); }
+INLINE GEN
+gal_get_invvdm(GEN gal) { return gel(gal,4); }
+INLINE GEN
+gal_get_den(GEN gal) { return gel(gal,5); }
+INLINE GEN
+gal_get_group(GEN gal) { return gel(gal,6); }
+INLINE GEN
+gal_get_gen(GEN gal) { return gel(gal,7); }
+INLINE GEN
+gal_get_orders(GEN gal) { return gel(gal,8); }
 
 /* assume rnf a genuine rnf */
 INLINE long

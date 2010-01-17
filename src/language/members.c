@@ -57,7 +57,7 @@ GEN
 member_p(GEN x)
 {
   long t; (void)get_nf(x,&t);
-  if (t == typ_GAL) return gmael(x,2,1);
+  if (t == typ_GAL) return gal_get_p(x);
   switch(typ(x)) {
     case t_VEC:
       x = get_prid(x); if (!x) member_err("p");
@@ -149,7 +149,7 @@ member_pol(GEN x) /* polynomial */
     {
       case typ_POL: return x;
       case typ_Q  : return gel(x,1);
-      case typ_GAL: return gel(x,1);
+      case typ_GAL: return gal_get_pol(x);
       case typ_RNF: return gmael(x,11,1);
     }
     if (typ(x)==t_POLMOD) return gel(x,2);
@@ -164,7 +164,7 @@ member_mod(GEN x) /* modulus */
 {
   long t; (void)get_nf(x,&t);
   switch(t) {
-    case typ_GAL: return gmael(x,2,3);
+    case typ_GAL: return gal_get_mod(x);
     case typ_BNR: return bnr_get_mod(x);
     case typ_BID: return gel(x,1);
   }
@@ -243,7 +243,7 @@ member_roots(GEN x) /* roots */
   if (!y)
   {
     if (t == typ_ELL && is_ell(x)) return ell_get_roots(x);
-    if (t == typ_GAL) return gel(x,3);
+    if (t == typ_GAL) return gal_get_roots(x);
     member_err("roots");
   }
   return nf_get_roots(y);
@@ -399,7 +399,7 @@ member_gen(GEN x)
   GEN y = get_prid(x);
   if (y) return mkvec2copy(gel(y,1), gel(y,2));
   (void)get_nf(x,&t);
-  if (t == typ_GAL) return gel(x,7);
+  if (t == typ_GAL) return gal_get_gen(x);
   av = avma;
   x = member_clgp(x);
   if (typ(x)!=t_VEC || lg(x)!=4) member_err("gen");
@@ -411,7 +411,7 @@ GEN
 member_group(GEN x)
 {
   long t; (void)get_nf(x,&t);
-  if (t == typ_GAL) return gel(x,6);
+  if (t == typ_GAL) return gal_get_group(x);
   member_err("group");
   return NULL; /* not reached */
 }
@@ -419,7 +419,7 @@ GEN
 member_orders(GEN x)
 {
   long t; (void)get_nf(x,&t);
-  if (t == typ_GAL) return gel(x,8);
+  if (t == typ_GAL) return gal_get_orders(x);
   member_err("orders");
   return NULL; /* not reached */
 }
