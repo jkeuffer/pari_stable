@@ -844,7 +844,7 @@ ellordinate_i(GEN e, GEN x, long prec)
   { /* treat separately: may be of characteristic 2 */
     GEN P = gel(FFX_factor(mkpoln(3, gen_1, b, gneg(a)), D), 1);
     long l = lg(P);
-    if (l == 2) { avma = av; return cgetg(1,t_VEC); }
+    if (l == 1) { avma = av; return cgetg(1,t_VEC); }
     return gerepileupto(av, roots_from_deg1(P));
   }
 
