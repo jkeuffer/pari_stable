@@ -380,13 +380,13 @@ static GEN
 nf_bestlift_to_pol(GEN elt, GEN *cu, GEN bound, nflift_t *L)
 {
   pari_sp av = avma;
-  GEN v, u = nf_bestlift(elt,bound,L);
-  if (!u) return NULL;
-  v = gclone(u); avma = av;
-  if (ZV_isscalar(u))
+  GEN u,v, E = nf_bestlift(elt,bound,L);
+  if (!E) return NULL;
+  v = gclone(E); avma = av;
+  if (ZV_isscalar(E))
   {
-    if (cu) *cu = gel(u,1);
-    u = mul_content(L->topowden, gel(u,1));
+    if (cu) *cu = gel(v,1);
+    u = mul_content(L->topowden, gel(v,1));
   }
   else
   {
