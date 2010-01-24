@@ -385,8 +385,13 @@ nf_bestlift_to_pol(GEN elt, GEN *cu, GEN bound, nflift_t *L)
   v = gclone(v); avma = av;
   if (ZV_isscalar(v))
   {
-    if (cu) *cu = gel(v,1);
-    u = L->topowden?mul_content(L->topowden, gel(v,1)):gcopy(gel(v,1));
+    if (L->topowden) {
+      u = mulii(L->topowden, gel(v,1));
+      if (cu) *cu = icopy(gel(v,1));
+    } else {
+      u = icopy(gel(v,1));
+      if (cu) *cu = u;
+    }
   }
   else
   {
