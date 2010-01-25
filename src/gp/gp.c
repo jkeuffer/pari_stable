@@ -1796,6 +1796,7 @@ read_opt(pari_stack *p_A, long argc, char **argv)
   char *b = NULL, *p = NULL, *s = NULL;
   ulong f = GP_DATA->flags;
   long i = 1, initrc = 1;
+  long hastty = pari_stdin_isatty();
 
   (void)&p; (void)&b; (void)&s; /* -Wall gcc-2.95 */
 
@@ -1842,7 +1843,11 @@ read_opt(pari_stack *p_A, long argc, char **argv)
         usage(argv[0]);
     }
   }
-  if (!OK_breakloop()) f &= ~BREAKLOOP;
+  if (!hastty)
+  { 
+    if (GP_DATA->flags & EMACS) f &= ~BREAKLOOP;
+    readline_state = 0;
+  }
   if (f & TEXMACS) tm_start_output();
   GP_DATA->flags = f;
   if (f & TEST) {
