@@ -1424,9 +1424,6 @@ get_line_from_file(const char *PROMPT, filtre_t *F, FILE *file)
 }
 
 static int
-OK_breakloop(void) { return (GP_DATA->flags & EMACS) || pari_stdin_isatty(); }
-
-static int
 is_interactive(void)
 {
   ulong f = GP_DATA->flags;
@@ -1846,7 +1843,7 @@ read_opt(pari_stack *p_A, long argc, char **argv)
   if (!hastty)
   { 
     if (GP_DATA->flags & EMACS) f &= ~BREAKLOOP;
-    readline_state = 0;
+    readline_state = 0; f &= ~USE_READLINE;
   }
   if (f & TEXMACS) tm_start_output();
   GP_DATA->flags = f;
