@@ -1842,7 +1842,7 @@ read_opt(pari_stack *p_A, long argc, char **argv)
   }
   if (!hastty)
   { 
-    if (GP_DATA->flags & EMACS) f &= ~BREAKLOOP;
+    if (!(GP_DATA->flags & EMACS)) f &= ~BREAKLOOP;
     readline_state = 0; f &= ~USE_READLINE;
     GP_DATA->prompt="";
   }
