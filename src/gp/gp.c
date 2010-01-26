@@ -1841,10 +1841,10 @@ read_opt(pari_stack *p_A, long argc, char **argv)
     }
   }
   if (!hastty)
-  { 
+  {
     if (!(GP_DATA->flags & EMACS)) f &= ~BREAKLOOP;
     readline_state = 0; f &= ~USE_READLINE;
-    GP_DATA->prompt="";
+    GP_DATA->prompt[0] = 0;
   }
   if (f & TEXMACS) tm_start_output();
   GP_DATA->flags = f;
