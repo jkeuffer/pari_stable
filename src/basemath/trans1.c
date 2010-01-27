@@ -444,13 +444,6 @@ typedef struct {
 } sr_muldata;
 
 static GEN
-_rpowuu_mul(void *data, GEN x, GEN y/*unused*/)
-{
-  sr_muldata *D = (sr_muldata *)data;
-  (void)y; return D->mulug(D->a, x);
-}
-
-static GEN
 _rpowuu_sqr(void *data, GEN x)
 {
   sr_muldata *D = (sr_muldata *)data;
@@ -460,6 +453,14 @@ _rpowuu_sqr(void *data, GEN x)
     D->mulug = &mulur; x = itor(x, D->prec);
   }
   return D->sqr(x);
+}
+
+static GEN
+_rpowuu_msqr(void *data, GEN x)
+{
+  GEN x2 = _rpowuu_sqr(data, x);
+  sr_muldata *D = (sr_muldata *)data;
+  return D->mulug(D->a, x2);
 }
 
 /* return a^n as a t_REAL of precision prec. Assume a > 0, n > 0 */
@@ -478,7 +479,8 @@ rpowuu(ulong a, ulong n, long prec)
   D.mulug = &mului;
   D.prec = prec;
   D.a = (long)a;
-  y = leftright_pow_u(utoipos(a), n, (void*)&D, &_rpowuu_sqr, &_rpowuu_mul);
+  y = leftright_pow_u_fold(utoipos(a), n, (void*)&D, &_rpowuu_sqr,
+                                                     &_rpowuu_msqr);
   if (typ(y) == t_INT) y = itor(y, prec);
   return gerepileuptoleaf(av, y);
 }

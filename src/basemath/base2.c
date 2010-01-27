@@ -2533,20 +2533,19 @@ typedef struct {
 } rnfeltmod_muldata;
 
 static GEN
-_mul(void *data, GEN x, GEN y/* base; ignored */)
-{
-  rnfeltmod_muldata *D = (rnfeltmod_muldata *) data;
-  GEN z = x? tablemul_ei(D->multab,x,D->h)
-           : tablemul_ei_ej(D->multab,D->h,D->h);
-  (void)y;
-  return FqV_red(z,D->T,D->p);
-}
-static GEN
 _sqr(void *data, GEN x)
 {
   rnfeltmod_muldata *D = (rnfeltmod_muldata *) data;
   GEN z = x? tablesqr(D->multab,x)
            : tablemul_ei_ej(D->multab,D->h,D->h);
+  return FqV_red(z,D->T,D->p);
+}
+static GEN
+_msqr(void *data, GEN x)
+{
+  GEN x2 = _sqr(data, x), z;
+  rnfeltmod_muldata *D = (rnfeltmod_muldata *) data;
+  z = tablemul_ei(D->multab, x2, D->h);
   return FqV_red(z,D->T,D->p);
 }
 
@@ -2564,7 +2563,7 @@ rnfelementid_powmod(GEN multab, long h, GEN n, GEN T, GEN p)
   D.h = h;
   D.T = T;
   D.p = p;
-  y = leftright_pow(NULL, n, (void*)&D, &_sqr, &_mul);
+  y = leftright_pow_fold(NULL, n, (void*)&D, &_sqr, &_msqr);
   return gerepilecopy(av, y);
 }
 
