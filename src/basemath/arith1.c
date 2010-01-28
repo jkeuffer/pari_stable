@@ -1707,76 +1707,69 @@ chinese1_coprime_Z(GEN x) {return gassoc_proto(chinese1_coprime_Z_aux,x,NULL);}
 /*********************************************************************/
 /* Montgomery reduction */
 
-typedef struct {
-  GEN N;
-  ulong inv; /* inv = -N^(-1) mod B, */
-} montdata;
-
-static void
-init_montdata(GEN N, montdata *s)
-{
-  s->N = N;
-  s->inv = (ulong) -invmod2BIL(mod2BIL(N));
-}
+INLINE ulong
+init_montdata(GEN N) { return (ulong) -invmod2BIL(mod2BIL(N)); }
 
 GEN
-init_remiimul(GEN M)
-{
-  GEN iM = invr( itor(M, lgefint(M) + 1) ); /* 1. / M */
-  return mkvec2(M, iM);
+init_remiimul(GEN M) 
+{ 
+  return invr( itor(M, lgefint(M) + 1) ); /* 1. / M */
 }
 
-typedef struct {
+
+typedef struct muldata {
   GEN N;
-  GEN (*res)(GEN,GEN);
-  GEN (*mul2)(GEN,GEN);
+  GEN iM;
+  ulong inv;
+  GEN (*res)(struct muldata *,GEN);
+  GEN (*mul2)(struct muldata *,GEN);
 } muldata;
 
 /* Montgomery reduction */
 static GEN
-montred(GEN x, GEN N)
+_montred(muldata *D, GEN x)
 {
-  return red_montgomery(x, ((montdata*)N)->N, ((montdata*)N)->inv);
+  return red_montgomery(x, D->N, D->inv);
 }
+
+static GEN
+_remii(muldata *D, GEN x) { return remii(x, D->N); }
+
+static GEN
+_remiimul(muldata *D, GEN x) { return remiimul(x, mkvec2(D->N, D->iM)); }
+
 /* 2x mod N */
 static GEN
-_muli2red(GEN N, GEN x)
+_muli2red(muldata *D, GEN x)
 {
   GEN z = shifti(x,1);
-  return (cmpii(z,N) >= 0)? subii(z,N): z;
+  return (cmpii(z,D->N) >= 0)? subii(z,D->N): z;
 }
 static GEN
-_muli2montred(GEN N, GEN x)
+_muli2montred(muldata *D, GEN x)
 {
-  GEN n = ((montdata*)N)->N;
-  GEN z = _muli2red(n,x);
-  long l = lgefint(n);
-  while (lgefint(z) > l) z = subii(z,n);
+  GEN z = _muli2red(D,x);
+  long l = lgefint(D->N);
+  while (lgefint(z) > l) z = subii(z,D->N);
   return z;
-}
-static GEN
-_muli2invred(GEN N, GEN x)
-{
-  return _muli2red(gel(N,1),x);
 }
 static GEN
 _mul(void *data, GEN x, GEN y)
 {
   muldata *D = (muldata *)data;
-  return D->res(mulii(x,y), D->N);
+  return D->res(D, mulii(x,y));
 }
 static GEN
 _sqr(void *data, GEN x)
 {
   muldata *D = (muldata *)data;
-  return D->res(sqri(x), D->N);
+  return D->res(D, sqri(x));
 }
 static GEN
-_mul2(void *data, GEN x)
+_m2sqr(void *data, GEN x)
 {
-  GEN x2 = _sqr(data, x);
   muldata *D = (muldata *)data;
-  return D->mul2(D->N, x2);
+  return D->mul2(D, D->res(D, sqri(x)));
 }
 ulong
 Fl_powu(ulong x, ulong n0, ulong p)
@@ -1799,28 +1792,27 @@ Fl_powu(ulong x, ulong n0, ulong p)
 }
 
 static long
-Fp_select_red(GEN *y, ulong k, GEN N, long lN, muldata *D, montdata *S)
+Fp_select_red(GEN *y, ulong k, GEN N, long lN, muldata *D)
 {
   long use_montgomery = mod2(N) && lN < MONTGOMERY_LIMIT;
+  D->N = N;
   if (use_montgomery)
   {
-    init_montdata(N, S);
     *y = remii(shifti(*y, bit_accuracy(lN)), N);
     D->mul2 = &_muli2montred;
-    D->res = &montred;
-    D->N = (GEN)S;
+    D->res = &_montred;
+    D->inv = init_montdata(N);
   }
   else if (lN > REMIIMUL_LIMIT  && (k==0 || ((double)k)*expi(*y) > 2 + expi(N)))
   {
-    D->mul2 = &_muli2invred;
-    D->res = &remiimul;
-    D->N = init_remiimul(N);
+    D->mul2 = &_muli2red;
+    D->res = &_remiimul;
+    D->iM = init_remiimul(N);
   }
   else
   {
     D->mul2 = &_muli2red;
-    D->res = &remii;
-    D->N = N;
+    D->res = &_remii;
   }
   return use_montgomery;
 }
@@ -1831,7 +1823,6 @@ Fp_powu(GEN A, ulong k, GEN N)
   long lN = lgefint(N);
   int base_is_2, use_montgomery;
   muldata  D;
-  montdata S;
 
   if (lN == 3) {
     ulong n = (ulong)N[2];
@@ -1852,14 +1843,14 @@ Fp_powu(GEN A, ulong k, GEN N)
   }
 
   /* TODO: Move this out of here and use for general modular computations */
-  use_montgomery = Fp_select_red(&A, k, N, lN, &D, &S);
+  use_montgomery = Fp_select_red(&A, k, N, lN, &D);
   if (base_is_2)
-    A = leftright_pow_u_fold(A, k, (void*)&D, &_sqr, &_mul2);
+    A = leftright_pow_u_fold(A, k, (void*)&D, &_sqr, &_m2sqr);
   else
     A = leftright_pow_u(A, k, (void*)&D, &_sqr, &_mul);
   if (use_montgomery)
   {
-    A = montred(A, (GEN)&S);
+    A = _montred(&D, A);
     if (cmpii(A,N) >= 0) A = subii(A,N);
   }
   return A;
@@ -1889,7 +1880,6 @@ Fp_pow(GEN A, GEN K, GEN N)
   int base_is_2, use_montgomery;
   GEN y;
   muldata  D;
-  montdata S;
 
   s = signe(K);
   if (!s)
@@ -1941,14 +1931,14 @@ Fp_pow(GEN A, GEN K, GEN N)
   }
 
   /* TODO: Move this out of here and use for general modular computations */
-  use_montgomery = Fp_select_red(&y, 0UL, N, lN, &D, &S);
+  use_montgomery = Fp_select_red(&y, 0UL, N, lN, &D);
   if (base_is_2)
-    y = leftright_pow_fold(y, K, (void*)&D, &_sqr, &_mul2);
+    y = leftright_pow_fold(y, K, (void*)&D, &_sqr, &_m2sqr);
   else
     y = leftright_pow(y, K, (void*)&D, &_sqr, &_mul);
   if (use_montgomery)
   {
-    y = montred(y, (GEN)&S);
+    y = _montred(&D,y);
     if (cmpii(y,N) >= 0) y = subii(y,N);
   }
   return gerepileuptoint(av,y);
