@@ -1729,7 +1729,7 @@ init_remiimul(GEN M)
 typedef struct {
   GEN N;
   GEN (*res)(GEN,GEN);
-  GEN (*mulred)(GEN,GEN,GEN);
+  GEN (*mul2)(GEN,GEN);
 } muldata;
 
 /* Montgomery reduction */
@@ -1740,41 +1740,43 @@ montred(GEN x, GEN N)
 }
 /* 2x mod N */
 static GEN
-_muli2red(GEN x, GEN y/* ignored */, GEN N) {
+_muli2red(GEN N, GEN x)
+{
   GEN z = shifti(x,1);
-  (void)y; return (cmpii(z,N) >= 0)? subii(z,N): z;
+  return (cmpii(z,N) >= 0)? subii(z,N): z;
 }
 static GEN
-_muli2montred(GEN x, GEN y/* ignored */, GEN N) {
+_muli2montred(GEN N, GEN x)
+{
   GEN n = ((montdata*)N)->N;
-  GEN z = _muli2red(x,y, n);
+  GEN z = _muli2red(n,x);
   long l = lgefint(n);
   while (lgefint(z) > l) z = subii(z,n);
   return z;
 }
 static GEN
-_muli2invred(GEN x, GEN y/* ignored */, GEN N) {
-  return _muli2red(x,y, gel(N,1));
+_muli2invred(GEN N, GEN x)
+{
+  return _muli2red(gel(N,1),x);
 }
-/* xy mod N */
-static GEN
-_muliired(GEN x, GEN y, GEN N) { return remii(mulii(x,y), N); }
-static GEN
-_muliimontred(GEN x, GEN y, GEN N) { return montred(mulii(x,y), N); }
-static GEN
-_muliiinvred(GEN x, GEN y, GEN N) { return remiimul(mulii(x,y), N); }
-
 static GEN
 _mul(void *data, GEN x, GEN y)
 {
   muldata *D = (muldata *)data;
-  return D->mulred(x,y,D->N);
+  return D->res(mulii(x,y), D->N);
 }
 static GEN
 _sqr(void *data, GEN x)
 {
   muldata *D = (muldata *)data;
   return D->res(sqri(x), D->N);
+}
+static GEN
+_mul2(void *data, GEN x)
+{
+  GEN x2 = _sqr(data, x);
+  muldata *D = (muldata *)data;
+  return D->mul2(D->N, x2);
 }
 ulong
 Fl_powu(ulong x, ulong n0, ulong p)
@@ -1828,24 +1830,26 @@ Fp_powu(GEN A, ulong k, GEN N)
   {
     init_montdata(N, &S);
     A = remii(shifti(A, bit_accuracy(lN)), N);
-    D.mulred = base_is_2? &_muli2montred: &_muliimontred;
+    D.mul2 = &_muli2montred;
     D.res = &montred;
     D.N = (GEN)&S;
   }
   else if (lN > REMIIMUL_LIMIT && ((double)k)*expi(A) > 2 + expi(N))
   {
-    D.mulred = base_is_2? &_muli2invred: &_muliiinvred;
+    D.mul2 = &_muli2invred;
     D.res = &remiimul;
     D.N = init_remiimul(N);
   }
   else
   {
-    D.mulred = base_is_2? &_muli2red: &_muliired;
+    D.mul2 = &_muli2red;
     D.res = &remii;
     D.N = N;
   }
-
-  A = leftright_pow_u(A, k, (void*)&D, &_sqr, &_mul);
+  if (base_is_2)
+    A = leftright_pow_u_fold(A, k, (void*)&D, &_sqr, &_mul2);
+  else
+    A = leftright_pow_u(A, k, (void*)&D, &_sqr, &_mul);
   if (use_montgomery)
   {
     A = montred(A, (GEN)&S);
@@ -1935,24 +1939,26 @@ Fp_pow(GEN A, GEN K, GEN N)
   {
     init_montdata(N, &S);
     y = remii(shifti(y, bit_accuracy(lN)), N);
-    D.mulred = base_is_2? &_muli2montred: &_muliimontred;
+    D.mul2 = _muli2montred;
     D.res = &montred;
     D.N = (GEN)&S;
   }
   else if (lN > REMIIMUL_LIMIT)
   {
-    D.mulred = base_is_2? &_muli2invred: &_muliiinvred;
+    D.mul2 = _muli2invred;
     D.res = &remiimul;
     D.N = init_remiimul(N);
   }
   else
   {
-    D.mulred = base_is_2? &_muli2red: &_muliired;
+    D.mul2 = &_muli2red;
     D.res = &remii;
     D.N = N;
   }
-
-  y = leftright_pow(y, K, (void*)&D, &_sqr, &_mul);
+  if (base_is_2)
+    y = leftright_pow_fold(y, K, (void*)&D, &_sqr, &_mul2);
+  else
+    y = leftright_pow(y, K, (void*)&D, &_sqr, &_mul);
   if (use_montgomery)
   {
     y = montred(y, (GEN)&S);
