@@ -1798,6 +1798,33 @@ Fl_powu(ulong x, ulong n0, ulong p)
   }
 }
 
+static long
+Fp_select_red(GEN y, ulong k, GEN N, long lN, muldata *D, montdata *S)
+{
+  long use_montgomery = mod2(N) && lN < MONTGOMERY_LIMIT;
+  if (use_montgomery)
+  {
+    init_montdata(N, S);
+    y = remii(shifti(y, bit_accuracy(lN)), N);
+    D->mul2 = &_muli2montred;
+    D->res = &montred;
+    D->N = (GEN)&S;
+  }
+  else if (lN > REMIIMUL_LIMIT  && (k==0 || ((double)k)*expi(y) > 2 + expi(N)))
+  {
+    D->mul2 = &_muli2invred;
+    D->res = &remiimul;
+    D->N = init_remiimul(N);
+  }
+  else
+  {
+    D->mul2 = &_muli2red;
+    D->res = &remii;
+    D->N = N;
+  }
+  return use_montgomery;
+}
+
 GEN
 Fp_powu(GEN A, ulong k, GEN N)
 {
@@ -1825,27 +1852,7 @@ Fp_powu(GEN A, ulong k, GEN N)
   }
 
   /* TODO: Move this out of here and use for general modular computations */
-  use_montgomery = mod2(N) && lN < MONTGOMERY_LIMIT;
-  if (use_montgomery)
-  {
-    init_montdata(N, &S);
-    A = remii(shifti(A, bit_accuracy(lN)), N);
-    D.mul2 = &_muli2montred;
-    D.res = &montred;
-    D.N = (GEN)&S;
-  }
-  else if (lN > REMIIMUL_LIMIT && ((double)k)*expi(A) > 2 + expi(N))
-  {
-    D.mul2 = &_muli2invred;
-    D.res = &remiimul;
-    D.N = init_remiimul(N);
-  }
-  else
-  {
-    D.mul2 = &_muli2red;
-    D.res = &remii;
-    D.N = N;
-  }
+  use_montgomery = Fp_select_red(A, k, N, lN, &D, &S);
   if (base_is_2)
     A = leftright_pow_u_fold(A, k, (void*)&D, &_sqr, &_mul2);
   else
@@ -1934,27 +1941,7 @@ Fp_pow(GEN A, GEN K, GEN N)
   }
 
   /* TODO: Move this out of here and use for general modular computations */
-  use_montgomery = mod2(N) && lN < MONTGOMERY_LIMIT;
-  if (use_montgomery)
-  {
-    init_montdata(N, &S);
-    y = remii(shifti(y, bit_accuracy(lN)), N);
-    D.mul2 = _muli2montred;
-    D.res = &montred;
-    D.N = (GEN)&S;
-  }
-  else if (lN > REMIIMUL_LIMIT)
-  {
-    D.mul2 = _muli2invred;
-    D.res = &remiimul;
-    D.N = init_remiimul(N);
-  }
-  else
-  {
-    D.mul2 = &_muli2red;
-    D.res = &remii;
-    D.N = N;
-  }
+  use_montgomery = Fp_select_red(A, 0UL, N, lN, &D, &S);
   if (base_is_2)
     y = leftright_pow_fold(y, K, (void*)&D, &_sqr, &_mul2);
   else
