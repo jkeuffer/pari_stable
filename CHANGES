@@ -201,6 +201,8 @@ BA150- 2/O(5) -> O(5^-1) (should raise an error) [#1009]
   151-  factor(13533236897) -> I/O Warning [#1012]
 BA152- usqrtsafe result could be off by one.
 BA153- faster algorithm for nfgaloisapply.
+  154- bnfisnorm: output could have constant t_POL(MAXVARN) components
+       instead of t_INT. E.g. bnfisnorm( bnfinit(x^2+10), 1690 )  [#1026]
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]

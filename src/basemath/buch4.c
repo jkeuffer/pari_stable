@@ -766,7 +766,7 @@ rnfisnorm(GEN T, GEN x, long flag)
   bnfS = bnfsunit(bnf,S1,3);
   sunitrel = shallowconcat(futu, gel(bnfsunit(rel,S2,3), 1));
 
-  A = lift(bnfissunit(bnf,bnfS,x));
+  A = lift_intern(bnfissunit(bnf,bnfS,x));
   L = lg(sunitrel);
   itu = lg(nf[6])-1; /* index of torsion unit in bnfsunit(nf) output */
   M = cgetg(L+1,t_MAT);
@@ -787,14 +787,14 @@ rnfisnorm(GEN T, GEN x, long flag)
   /* Y: sols of MY = A over Q */
   setlg(Y, L);
   aux = factorback2(sunitrel, gfloor(Y));
-  x = gdiv(mkpolmod(x,nfpol), gnorm(gmodulo(lift_intern(aux), relpol)));
+  x = gdiv(mkpolmod(x,nfpol), RgXQ_norm(lift_intern(aux), relpol));
   if (typ(x) == t_POLMOD && (typ(x[2]) != t_POL || !degpol(gel(x,2))))
   {
     x = gel(x,2); /* rational number */
     if (typ(x) == t_POL) x = gel(x,2);
   }
   if (typ(aux) == t_POLMOD && degpol(nfpol) == 1)
-    gel(aux,2) = lift_intern(gel(aux,2));
+    gel(aux,2) = simplify_shallow( lift_intern(gel(aux,2)) );
   return gerepilecopy(av, mkvec2(aux, x));
 }
 
