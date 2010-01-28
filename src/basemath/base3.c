@@ -563,19 +563,21 @@ typedef struct {
   GEN nf, p;
   long I;
 } eltmod_muldata;
-static GEN
-ei_mul_mod(void *data, GEN x, GEN y)
-{
-  eltmod_muldata *D = (eltmod_muldata*)data;
-  (void)y; /* ignored */
-  return FpC_red(zk_ei_mul(D->nf, x, D->I), D->p);
-}
+
 static GEN
 sqr_mod(void *data, GEN x)
 {
   eltmod_muldata *D = (eltmod_muldata*)data;
   return FpC_red(nfsqri(D->nf, x), D->p);
 }
+static GEN
+ei_msqr_mod(void *data, GEN x)
+{
+  GEN x2 = sqr_mod(data, x);
+  eltmod_muldata *D = (eltmod_muldata*)data;
+  return FpC_red(zk_ei_mul(D->nf, x2, D->I), D->p);
+}
+
 /* x = I-th vector of the Z-basis of Z_K, in Z^n, compute lift(x^n mod p) */
 GEN
 pow_ei_mod_p(GEN nf, long I, GEN n, GEN p)
@@ -593,7 +595,7 @@ pow_ei_mod_p(GEN nf, long I, GEN n, GEN p)
   D.nf = nf;
   D.p = p;
   D.I = I;
-  y = leftright_pow(col_ei(N, I), n, (void*)&D, &sqr_mod, &ei_mul_mod);
+  y = leftright_pow_fold(col_ei(N, I), n, (void*)&D, &sqr_mod, &ei_msqr_mod);
   return gerepileupto(av,y);
 }
 
