@@ -506,7 +506,7 @@ nupow(GEN x, GEN n)
   if (!signe(n)) return y;
 
   l = sqrti(shifti(sqrti(gel(y,3)),1));
-  y = leftright_pow(x, n, (void*)l, &mul_nudupl, &mul_nucomp);
+  y = gen_pow(x, n, (void*)l, &mul_nudupl, &mul_nucomp);
   if (signe(n) < 0
   && !absi_equal(gel(y,1),gel(y,2))
   && !absi_equal(gel(y,1),gel(y,3))) togglesign(gel(y,2));

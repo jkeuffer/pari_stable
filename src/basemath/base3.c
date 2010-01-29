@@ -537,7 +537,7 @@ nfpow(GEN nf, GEN z, GEN n)
     n = absi(n);
   }
   x = primitive_part(x, &cx);
-  x = leftright_pow(x, n, (void*)nf, _sqr, _mul);
+  x = gen_pow(x, n, (void*)nf, _sqr, _mul);
   if (cx) x = RgC_Rg_mul(x, powgi(cx, n));
   return av==avma? gcopy(x): gerepileupto(av,x);
 }

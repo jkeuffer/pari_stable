@@ -769,15 +769,6 @@ leftright_msqr(void* data, GEN y)
 }
 
 GEN
-leftright_pow(GEN x, GEN n, void *data, GEN (*sqr)(void*,GEN),
-                                        GEN (*mul)(void*,GEN,GEN))
-{
-  struct leftright_fold d;
-  d.data=data; d.mul=mul; d.sqr=sqr; d.x=x;
-  return leftright_pow_fold(x, n, (void *)&d, leftright_sqr, leftright_msqr);
-}
-
-GEN
 leftright_pow_u(GEN x, ulong n, void *data, GEN (*sqr)(void*,GEN),
                                         GEN (*mul)(void*,GEN,GEN))
 {

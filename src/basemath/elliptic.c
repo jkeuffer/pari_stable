@@ -982,7 +982,7 @@ ellpow_Z(GEN e, GEN z, GEN n)
   if (!s) return ellinf();
   if (s < 0) z = invell(e,z);
   if (is_pm1(n)) return z;
-  return leftright_pow(z, n, (void*)e, &_sqr, &_mul);
+  return gen_pow(z, n, (void*)e, &_sqr, &_mul);
 }
 /* [a + bw] z, a,b integral */
 static GEN
@@ -4657,7 +4657,7 @@ ellffmul(GEN E, GEN t, GEN m, GEN pt1, GEN pt2)
 {
   struct ellff ff;
   ff.E=E;  ff.pt1=pt1; ff.pt2=pt2;
-  return leftright_pow(t, m, (void*)&ff, _ellffdbl, _ellffadd);
+  return gen_pow(t, m, (void*)&ff, _ellffdbl, _ellffadd);
 }
 
 static GEN

@@ -1540,7 +1540,7 @@ RgXQ_pow(GEN x, GEN n, GEN T)
     return (s < 0)? RgXQ_inv(x, T): gcopy(x);
   av = avma;
   if (s < 0) x = RgXQ_inv(x, T);
-  y = leftright_pow(x, n, (void*)T, &_sqr, &_mul);
+  y = gen_pow(x, n, (void*)T, &_sqr, &_mul);
   return gerepileupto(av, y);
 }
 

@@ -1931,7 +1931,7 @@ Fp_pow(GEN A, GEN K, GEN N)
   if (base_is_2)
     y = leftright_pow_fold(y, K, (void*)&D, &_sqr, &_m2sqr);
   else
-    y = leftright_pow(y, K, (void*)&D, &_sqr, &_mul);
+    y = gen_pow(y, K, (void*)&D, &_sqr, &_mul);
   if (use_montgomery)
   {
     y = _montred(&D,y);

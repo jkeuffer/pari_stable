@@ -690,7 +690,7 @@ FpXQ_pow(GEN x, GEN n, GEN pol, GEN p)
     D.pol = pol;
     D.p   = p;
     if (s < 0) x = FpXQ_inv(x,pol,p);
-    y = leftright_pow(x, n, (void*)&D, &_FpXQ_sqr, &_FpXQ_mul);
+    y = gen_pow(x, n, (void*)&D, &_FpXQ_sqr, &_FpXQ_mul);
   }
   return gerepileupto(av, y);
 }

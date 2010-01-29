@@ -524,7 +524,7 @@ F2xq_pow(GEN x, GEN n, GEN pol)
     return (signe(n) < 0)? F2xq_inv(x,pol): vecsmall_copy(x);
 
   if (signe(n) < 0) x = F2xq_inv(x,pol);
-  y = leftright_pow(x, n, (void*)pol, &_F2xq_sqr, &_F2xq_mul);
+  y = gen_pow(x, n, (void*)pol, &_F2xq_sqr, &_F2xq_mul);
   return gerepileupto(av, y);
 }
 

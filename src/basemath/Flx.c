@@ -1573,10 +1573,10 @@ Flxq_pow(GEN x, GEN n, GEN pol, ulong p)
   if (degpol(pol) >= Flx_POW_MONTGOMERY_LIMIT)
   {
     D.mg  = Flx_invmontgomery(pol,p);
-    y = leftright_pow(x, n, (void*)&D, &_sqr_montgomery, &_mul_montgomery);
+    y = gen_pow(x, n, (void*)&D, &_sqr_montgomery, &_mul_montgomery);
   }
   else
-    y = leftright_pow(x, n, (void*)&D, &_Flxq_sqr, &_Flxq_mul);
+    y = gen_pow(x, n, (void*)&D, &_Flxq_sqr, &_Flxq_mul);
   return gerepileuptoleaf(av, y);
 }
 
@@ -2466,7 +2466,7 @@ FlxYqQ_pow(GEN x, GEN n, GEN S, GEN T, ulong p)
   D.S = S;
   D.T = T;
   D.p = p;
-  y = leftright_pow(x, n, (void*)&D, &FlxYqQ_sqr, &FlxYqQ_mul);
+  y = gen_pow(x, n, (void*)&D, &FlxYqQ_sqr, &FlxYqQ_mul);
   return gerepileupto(av, y);
 }
 
@@ -2529,14 +2529,14 @@ FlxqXQ_pow(GEN x, GEN n, GEN S, GEN T, ulong p)
   {
     /* We do not handle polynomials multiple of x yet */
     D.mg  = FlxqX_invmontgomery(S,T,p);
-    y = leftright_pow(zxX_to_Kronecker(x,T), n,
+    y = gen_pow(zxX_to_Kronecker(x,T), n,
         (void*)&D, &FlxqXQ_sqr_montgomery, &FlxqXQ_mul_montgomery);
-    y = leftright_pow(zxX_to_Kronecker(x,T), n,
+    y = gen_pow(zxX_to_Kronecker(x,T), n,
         (void*)&D, &FlxqXQ_sqr, &FlxqXQ_mul);
   }
   else
 #endif
-    y = leftright_pow(zxX_to_Kronecker(x,T), n,
+    y = gen_pow(zxX_to_Kronecker(x,T), n,
         (void*)&D, &FlxqXQ_sqr, &FlxqXQ_mul);
   y = Kronecker_to_FlxqX(y, T,p);
   return gerepileupto(av0, y);

@@ -1614,7 +1614,7 @@ idealpowred(GEN nf, GEN x, GEN n)
 
   if (typ(n) != t_INT) pari_err(talker,"non-integral exponent in idealpowred");
   s = signe(n); if (s == 0) return idealpow(nf,x,n);
-  y = leftright_pow(x, n, (void*)nf, &_sqr, &_mul);
+  y = gen_pow(x, n, (void*)nf, &_sqr, &_mul);
 
   if (s < 0) y = idealinv(nf,y);
   if (s < 0 || is_pm1(n)) y = idealred(nf,y);

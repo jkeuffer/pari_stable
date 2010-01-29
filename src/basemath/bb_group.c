@@ -24,6 +24,105 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /***********************************************************************/
 /**                                                                   **/
+/**                    POWERING                                       **/
+/**                                                                   **/
+/***********************************************************************/
+
+/* return (n>>(i-l)) & ((1<<l)-1) */
+static ulong
+int_block(GEN n, long i, long l)
+{
+  long q = divsBIL(i), r = remsBIL(i)+1, lr;
+  GEN nw = int_W(n, q);
+  ulong w = (ulong) *nw, w2;
+  if (r>=l) return (w>>(r-l))&((1UL<<l)-1);
+  w &= (1UL<<r)-1; lr = l-r;
+  w2 = (ulong) *int_precW(nw); w2 >>= (BITS_IN_LONG-lr);
+  return (w<<lr)|w2;
+}
+
+INLINE ulong
+int_bit(GEN x, long n)
+{
+  long r, q = dvmdsBIL(n, &r);
+  return (*int_W(x,q) >> r) & 1;
+}
+
+/* assume n != 0, t_INT. Compute x^|n| using left-right binary powering */
+static GEN
+sliding_window_pow(GEN x, GEN n, long e, void *E, GEN (*sqr)(void*,GEN),
+                                                  GEN (*mul)(void*,GEN,GEN))
+{
+  pari_sp av = avma;
+  long i, l = expi(n), u = (1<<(e-1));
+  long w, v;
+  GEN tab = cgetg(1+u, t_VEC);
+  GEN x2 = sqr(E, x), z = NULL, tw;
+  gel(tab, 1) = x;
+  for (i=2; i<=u; i++) gel(tab,i) = mul(E, gel(tab,i-1), x2);
+  while (l>=0)
+  {
+    if (e > l+1) e = l+1;
+    w = int_block(n,l,e); v = vals(w); l-=e;
+    tw = gel(tab, 1+(w>>(v+1)));
+    if (z)
+    { 
+      for (i=1; i<=e-v; i++) z = sqr(E, z);
+      z = mul(E, z, tw);
+    } else z = tw;
+    for (i=1; i<=v; i++) z = sqr(E, z);
+    while (l>=0 && !int_bit(n,l)) { z = sqr(E, z); l--; }
+  }
+  return gerepilecopy(av, z);
+}
+
+static GEN
+leftright_binary_pow(GEN x, GEN n, void *E, GEN (*sqr)(void*,GEN),
+                                            GEN (*mul)(void*,GEN,GEN))
+{
+  long ln = lgefint(n);
+  GEN nd = int_MSW(n), y = x;
+  long m = *nd;
+  long i, j = 1+bfffo(m);
+  pari_sp av = avma, lim = stack_lim(av, 1);
+
+  /* normalize, i.e set highest bit to 1 (we know m != 0) */
+  m<<=j; j = BITS_IN_LONG-j;
+  /* first bit is now implicit */
+  for (i=ln-2;;)
+  {
+    for (; j; m<<=1,j--)
+    {
+      y = sqr(E,y);
+      if (m < 0) y = mul(E,y,x); /* first bit set: multiply by base */
+      if (low_stack(lim, stack_lim(av,1)))
+      {
+        if (DEBUGMEM>1) pari_warn(warnmem,"leftright_pow");
+        y = gerepilecopy(av, y);
+      }
+    }
+    if (--i == 0) return gerepilecopy(av, y);
+    nd=int_precW(nd);
+    m = *nd; j = BITS_IN_LONG;
+  }
+}
+
+GEN
+gen_pow(GEN x, GEN n, void *E, GEN (*sqr)(void*,GEN),
+                               GEN (*mul)(void*,GEN,GEN))
+{
+  long l = expi(n);
+  if (l<=8) return leftright_binary_pow(x, n, E, sqr, mul);
+  if (l<=24)  return sliding_window_pow(x, n, 2, E, sqr, mul);
+  if (l<=64)  return sliding_window_pow(x, n, 3, E, sqr, mul);
+  if (l<=160) return sliding_window_pow(x, n, 4, E, sqr, mul);
+  if (l<=384) return sliding_window_pow(x, n, 5, E, sqr, mul);
+  if (l<=896) return sliding_window_pow(x, n, 6, E, sqr, mul);
+  return sliding_window_pow(x, n, 7, E, sqr, mul);
+}
+
+/***********************************************************************/
+/**                                                                   **/
 /**                    DISCRETE LOGARITHM                             **/
 /**                                                                   **/
 /***********************************************************************/

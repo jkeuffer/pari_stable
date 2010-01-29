@@ -573,7 +573,7 @@ FpXYQQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p)
     D.S = S;
     D.T = T;
     D.p = p;
-    y = leftright_pow(x, n, (void*)&D, &FpXYQQ_sqr, &FpXYQQ_mul);
+    y = gen_pow(x, n, (void*)&D, &FpXYQQ_sqr, &FpXYQQ_mul);
   }
   return gerepileupto(av, y);
 }
@@ -622,7 +622,7 @@ FpXQYQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p)
     D.S = S;
     D.T = T;
     D.p = p;
-    y = leftright_pow(mod_to_Kronecker(x,T), n, (void*)&D, &FpXQYQ_sqr, &FpXQYQ_mul);
+    y = gen_pow(mod_to_Kronecker(x,T), n, (void*)&D, &FpXQYQ_sqr, &FpXQYQ_mul);
     y = Kronecker_to_FpXQX(y, T,p);
   }
   return gerepileupto(ltop, y);

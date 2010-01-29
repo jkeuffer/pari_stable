@@ -749,7 +749,7 @@ powgi(GEN x, GEN n)
     case t_POLMOD: return pow_polmod(x, n);
     default: {
       pari_sp av = avma;
-      y = leftright_pow(x, n, NULL, &_sqr, &_mul);
+      y = gen_pow(x, n, NULL, &_sqr, &_mul);
       if (signe(n) < 0) y = ginv(y);
       return gerepileupto(av,y);
     }

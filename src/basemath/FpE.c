@@ -121,7 +121,7 @@ _FpE_mul(void *E, GEN P, GEN n)
   if (!s || ell_is_inf(P)) return ellinf();
   if (s<0) P = FpE_neg(P, e->p);
   if (is_pm1(n)) return s>0? gcopy(P): P;
-  return gerepileupto(av, leftright_pow(P, n, e, &_FpE_dbl, &_FpE_add));
+  return gerepileupto(av, gen_pow(P, n, e, &_FpE_dbl, &_FpE_add));
 }
 
 GEN
@@ -272,7 +272,7 @@ FpE_ffmul(GEN t, GEN m, GEN pt1, GEN pt2, GEN a4, GEN p)
 {
   struct FpE_ff ff;
   ff.pt1=pt1; ff.pt2=pt2; ff.a4=a4; ff.p=p;
-  return leftright_pow(t, m, (void*)&ff, _FpE_ffdbl, _FpE_ffadd);
+  return gen_pow(t, m, (void*)&ff, _FpE_ffdbl, _FpE_ffadd);
 }
 
 static GEN
