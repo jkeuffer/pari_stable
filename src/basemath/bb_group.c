@@ -53,13 +53,14 @@ static GEN
 sliding_window_pow(GEN x, GEN n, long e, void *E, GEN (*sqr)(void*,GEN),
                                                   GEN (*mul)(void*,GEN,GEN))
 {
-  pari_sp av = avma;
+  pari_sp ltop = avma, av, lim;
   long i, l = expi(n), u = (1<<(e-1));
   long w, v;
   GEN tab = cgetg(1+u, t_VEC);
   GEN x2 = sqr(E, x), z = NULL, tw;
   gel(tab, 1) = x;
   for (i=2; i<=u; i++) gel(tab,i) = mul(E, gel(tab,i-1), x2);
+  av = avma; lim = stack_lim(av, 1);
   while (l>=0)
   {
     if (e > l+1) e = l+1;
@@ -72,6 +73,11 @@ sliding_window_pow(GEN x, GEN n, long e, void *E, GEN (*sqr)(void*,GEN),
     } else z = tw;
     for (i=1; i<=v; i++) z = sqr(E, z);
     while (l>=0 && !int_bit(n,l)) { z = sqr(E, z); l--; }
+    if (low_stack(lim, stack_lim(av,1)))
+    {
+      if (DEBUGMEM>1) pari_warn(warnmem,"sliding_window_pow");
+      z = gerepilecopy(av, z);
+    }
   }
   return gerepilecopy(av, z);
 }
