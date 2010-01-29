@@ -1711,11 +1711,7 @@ INLINE ulong
 init_montdata(GEN N) { return (ulong) -invmod2BIL(mod2BIL(N)); }
 
 GEN
-init_remiimul(GEN M) 
-{ 
-  return invr( itor(M, lgefint(M) + 1) ); /* 1. / M */
-}
-
+init_remiimul(GEN M) { return invr( itor(M, lgefint(M) + 1) ); } /* 1. / M */
 
 typedef struct muldata {
   GEN N;
