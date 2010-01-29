@@ -1736,7 +1736,7 @@ static GEN
 _remii(muldata *D, GEN x) { return remii(x, D->N); }
 
 static GEN
-_remiimul(muldata *D, GEN x) { return remiimul(x, mkvec2(D->N, D->iM)); }
+_remiimul(muldata *D, GEN x) { return remiimul(x, D->N, D->iM); }
 
 /* 2x mod N */
 static GEN

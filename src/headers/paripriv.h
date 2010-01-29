@@ -123,7 +123,7 @@ GEN   init_remiimul(GEN M);
 GEN   logagmcx(GEN q, long prec);
 GEN   muliispec(GEN x, GEN y, long nx, long ny);
 GEN   red_montgomery(GEN T, GEN N, ulong inv);
-GEN   remiimul(GEN x, GEN sy);
+GEN   remiimul(GEN x, GEN y, GEN invy);
 GEN   sqrispec(GEN x, long nx);
 GEN   subrex01(GEN x);
 GEN   modr_safe(GEN x, GEN y);

@@ -658,15 +658,14 @@ mulii(GEN a,GEN b)
 }
 
 GEN
-remiimul(GEN x, GEN sy)
+remiimul(GEN x, GEN y, GEN invy)
 {
-  GEN r, q, y = gel(sy,1), invy;
+  GEN r, q;
   long k;
   pari_sp av = avma;
 
   k = cmpii(x, y);
   if (k <= 0) return k? icopy(x): gen_0;
-  invy = gel(sy,2);
   q = mulir(x,invy);
   q = truncr(q); /* differs from divii(x, y) at most by 1 */
   r = subii(x, mulii(y,q));
