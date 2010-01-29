@@ -234,7 +234,7 @@ static double speed_modii(speed_param *s) {
 static double speed_remiimul(speed_param *s) {
   GEN sM = init_remiimul(s->y);
   GEN op; INIT_RED(s, op);
-  TIME_FUN( remiimul(op, sM) ); }
+  TIME_FUN( remiimul(op, s->y, sM) ); }
 
 static double speed_Flxq_pow_redc(speed_param *s) {
   ulong p = DFLT_mod;
