@@ -554,7 +554,7 @@ nfpow_u(GEN nf, GEN z, ulong n)
   x = nf_to_scalar_or_basis(nf, z);
   if (typ(x) != t_COL) { GEN y = zerocol(N); gel(y,1) = powiu(x,n); return y; }
   x = primitive_part(x, &cx);
-  x = leftright_pow_u(x, n, (void*)nf, _sqr, _mul);
+  x = gen_powu(x, n, (void*)nf, _sqr, _mul);
   if (cx) x = RgC_Rg_mul(x, powgi(cx, utoipos(n)));
   return av==avma? gcopy(x): gerepileupto(av,x);
 }

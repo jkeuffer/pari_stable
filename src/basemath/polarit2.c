@@ -746,37 +746,6 @@ leftright_pow_fold(GEN x, GEN n, void *data, GEN (*sqr)(void*,GEN),
   }
 }
 
-struct leftright_fold
-{
-  void *data;
-  GEN x;
-  GEN (*sqr)(void*,GEN);
-  GEN (*mul)(void*,GEN,GEN);
-};
-
-static GEN
-leftright_sqr(void* data, GEN y)
-{
-  struct leftright_fold *d=(struct leftright_fold*) data;
-  return d->sqr(d->data,y);
-}
-
-static GEN
-leftright_msqr(void* data, GEN y)
-{
-  struct leftright_fold *d=(struct leftright_fold*) data;
-  return d->mul(d->data,d->sqr(d->data,y),d->x);
-}
-
-GEN
-leftright_pow_u(GEN x, ulong n, void *data, GEN (*sqr)(void*,GEN),
-                                        GEN (*mul)(void*,GEN,GEN))
-{
-  struct leftright_fold d;
-  d.data=data; d.mul=mul; d.sqr=sqr; d.x=x;
-  return leftright_pow_u_fold(x, n, (void *)&d, leftright_sqr, leftright_msqr);
-}
-
 /*******************************************************************/
 /*                                                                 */
 /*                     ROOTS --> MONIC POLYNOMIAL                  */

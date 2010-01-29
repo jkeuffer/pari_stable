@@ -344,7 +344,7 @@ eigen_ellpow(struct eigen_ellinit *E, GEN z, ulong n)
   pari_sp av = avma;
   if (!n || ell_is_inf(z)) return mkvec(gen_0);
   if (n == 1) return gcopy(z);
-  return gerepileupto(av, leftright_pow_u(z, n, E, &eigen_elldbl, &eigen_elladd));
+  return gerepileupto(av, gen_powu(z, n, E, &eigen_elldbl, &eigen_elladd));
 }
 
 /*Finds the eigenvalue of the Frobenius given E, ell odd prime, h factor of the

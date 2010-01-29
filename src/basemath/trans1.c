@@ -381,7 +381,7 @@ powiu_sign(GEN a, ulong N, long s)
   if (N == 1) { a = icopy(a); setsigne(a,s); return a; }
   if (N == 2) return sqri(a);
   av = avma;
-  y = leftright_pow_u(a, N, NULL, &_sqri, &_muli);
+  y = gen_powu(a, N, NULL, &_sqri, &_muli);
   setsigne(y,s); return gerepileuptoint(av, y);
 }
 /* a^N */
@@ -491,7 +491,7 @@ powrs(GEN x, long n)
   pari_sp av = avma;
   GEN y;
   if (!n) return powr0(x);
-  y = leftright_pow_u(x, (ulong)labs(n), NULL, &_sqrr, &_mulr);
+  y = gen_powu(x, (ulong)labs(n), NULL, &_sqrr, &_mulr);
   if (n < 0) y = invr(y);
   return gerepileupto(av,y);
 }
@@ -499,7 +499,7 @@ GEN
 powru(GEN x, ulong n)
 {
   if (!n) return powr0(x);
-  return leftright_pow_u(x, n, NULL, &_sqrr, &_mulr);
+  return gen_powu(x, n, NULL, &_sqrr, &_mulr);
 }
 
 /* x^(s/2), assume x t_REAL */
@@ -713,7 +713,7 @@ gpowgs(GEN x, long n)
       if (RgX_is_monomial(x)) return pow_monome(x, n);
     default: {
       pari_sp av = avma;
-      y = leftright_pow_u(x, (ulong)labs(n), NULL, &_sqr, &_mul);
+      y = gen_powu(x, (ulong)labs(n), NULL, &_sqr, &_mul);
       if (n < 0) y = ginv(y);
       return gerepileupto(av,y);
     }

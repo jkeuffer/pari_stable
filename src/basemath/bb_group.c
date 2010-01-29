@@ -68,7 +68,7 @@ sliding_window_powu(GEN x, ulong n, long e, void *E, GEN (*sqr)(void*,GEN),
     w = (n>>(i-l)) & ((1<<l)-1); v = vals(w); l-=e;
     tw = gel(tab, 1+(w>>(v+1)));
     if (z)
-    { 
+    {
       for (i=1; i<=e-v; i++) z = sqr(E, z);
       z = mul(E, z, tw);
     } else z = tw;
@@ -103,7 +103,7 @@ sliding_window_pow(GEN x, GEN n, long e, void *E, GEN (*sqr)(void*,GEN),
     w = int_block(n,l,e); v = vals(w); l-=e;
     tw = gel(tab, 1+(w>>(v+1)));
     if (z)
-    { 
+    {
       for (i=1; i<=e-v; i++) z = sqr(E, z);
       z = mul(E, z, tw);
     } else z = tw;

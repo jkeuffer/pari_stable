@@ -142,6 +142,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define tchebi polchebyshev1
 #define legendre pollegendre
 #define subcyclo polsubcyclo
+#define leftright_pow gen_pow
+#define leftright_pow_u gen_powu
 
 #define apprgen padicappr
 #define apprgen9 padicappr

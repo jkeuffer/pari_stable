@@ -6495,16 +6495,16 @@ operator. If $v$ has $k$ entries, return
 $$v[1]~\var{op}~v[2]~\var{op}~\ldots ~\var{op}~v[k];$$
 returns \kbd{gen\_1} if $k = 0$ and a copy of $v[1]$ if $k = 1$.
 
-\fun{GEN}{leftright_pow}{GEN x, GEN n, void *D, F1 sqr, F2 mul} $n > 0$ a
+\fun{GEN}{gen_pow}{GEN x, GEN n, void *D, F1 sqr, F2 mul} $n > 0$ a
 \typ{INT}, returns $x^n$; \kbd{mul(D, $x$, $y$)} implements the multiplication
 in the underlying monoid; \kbd{sqr} is a (presumably optimized) shortcut for
-\kbd{mul(D, $x$, $x$)}. Uses a left-right binary powering algorithm.
+\kbd{mul(D, $x$, $x$)}.
 
-\fun{GEN}{leftright_pow_u}{GEN x, ulong n, void *D, F1 sqr, F2 mul} $n > 0$,
+\fun{GEN}{gen_powu}{GEN x, ulong n, void *D, F1 sqr, F2 mul} $n > 0$,
 returns $x^n$. See \tet{leftright_pow}.
 
 \fun{GEN}{leftright_pow_fold}{GEN x, GEN n, void *D, F1 sqr, F1 msqr} as
-\tet{leftright_pow}, \kbd{mul} being replaced by \kbd{msqr}, with \kbd{msqr(D,
+\tet{gen_pow}, \kbd{mul} being replaced by \kbd{msqr}, with \kbd{msqr(D,
 $y$)} returning $xy^2$. In particular \kbd{D} must implicitly contain $x$.
 
 \fun{GEN}{leftright_pow_u_fold}{GEN x, ulong n, void *D, F1 sqr, F1 msqr}, see

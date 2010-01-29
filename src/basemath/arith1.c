@@ -1843,7 +1843,7 @@ Fp_powu(GEN A, ulong k, GEN N)
   if (base_is_2)
     A = leftright_pow_u_fold(A, k, (void*)&D, &_sqr, &_m2sqr);
   else
-    A = leftright_pow_u(A, k, (void*)&D, &_sqr, &_mul);
+    A = gen_powu(A, k, (void*)&D, &_sqr, &_mul);
   if (use_montgomery)
   {
     A = _montred(&D, A);

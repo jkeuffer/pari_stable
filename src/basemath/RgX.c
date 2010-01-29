@@ -1524,7 +1524,7 @@ RgXQ_powu(GEN x, ulong n, GEN T)
   if (!n) return pol_1(varn(x));
   if (n == 1) return gcopy(x);
   av = avma;
-  y = leftright_pow_u(x, n, (void*)T, &_sqr, &_mul);
+  y = gen_powu(x, n, (void*)T, &_sqr, &_mul);
   return gerepileupto(av, y);
 }
 /* x,T in Rg[X], n in N, compute lift(x^n mod T)) */

@@ -475,6 +475,8 @@ BA115- Rename RgXQ_u_pow to RgXQ_powu
        / Readline conflict in a user-friendly way)
 BA117- [enable-tls] Library soname changed to libpari[-gmp]-tls[-2.4].so.N.
   118- integrate a final polredabs in quadhilbertreal() 
+BA119- Rename leftright_pow to gen_pow, leftright_pow_u to gen_pow_u and
+       implement sliding window powering.
 
   Added
     1- many new benches (make test-all)

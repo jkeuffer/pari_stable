@@ -244,6 +244,7 @@ This file lists the incompatible changes between Version 2.x and older versions
   - rename RgXQ_u_pow -> RgXQ_powu
   - remove function delete_named_var (using kill0 instead).
   - remove RgM_ishnf (use ZM_ishnf instead).
+  - rename leftright_pow to gen_pow, leftright_pow_u to gen_powu.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
