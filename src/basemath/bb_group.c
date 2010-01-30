@@ -28,8 +28,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**                                                                   **/
 /***********************************************************************/
 
-/* return (n>>(i-l)) & ((1<<l)-1) */
-static ulong
+/* return (n>>(i+1-l)) & ((1<<l)-1) */
+ulong
 int_block(GEN n, long i, long l)
 {
   long q = divsBIL(i), r = remsBIL(i)+1, lr;
@@ -49,13 +49,13 @@ int_bit(GEN x, long n)
   return (*int_W(x,q) >> r) & 1;
 }
 
-/* assume n != 0, t_INT. Compute x^|n| using left-right binary powering */
+/* assume n != 0, t_INT. Compute x^|n| using sliding window powering */
 static GEN
 sliding_window_powu(GEN x, ulong n, long e, void *E, GEN (*sqr)(void*,GEN),
                                                      GEN (*mul)(void*,GEN,GEN))
 {
   pari_sp ltop = avma, av, lim;
-  long i, l = expu(n), u = (1<<(e-1));
+  long i, l = expu(n), u = (1UL<<(e-1));
   long w, v;
   GEN tab = cgetg(1+u, t_VEC);
   GEN x2 = sqr(E, x), z = NULL, tw;
@@ -65,7 +65,7 @@ sliding_window_powu(GEN x, ulong n, long e, void *E, GEN (*sqr)(void*,GEN),
   while (l>=0)
   {
     if (e > l+1) e = l+1;
-    w = (n>>(i-l)) & ((1<<l)-1); v = vals(w); l-=e;
+    w = (n>>(l+1-e)) & ((1UL<<e)-1); v = vals(w); l-=e;
     tw = gel(tab, 1+(w>>(v+1)));
     if (z)
     {
@@ -73,10 +73,10 @@ sliding_window_powu(GEN x, ulong n, long e, void *E, GEN (*sqr)(void*,GEN),
       z = mul(E, z, tw);
     } else z = tw;
     for (i=1; i<=v; i++) z = sqr(E, z);
-    while (l>=0 && !(n&(1<<l))) { z = sqr(E, z); l--; }
+    while (l>=0 && !(n&(1UL<<l))) { z = sqr(E, z); l--; }
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if (DEBUGMEM>1) pari_warn(warnmem,"sliding_window_pow");
+      if (DEBUGMEM>1) pari_warn(warnmem,"sliding_window_powu");
       z = gerepilecopy(av, z);
     }
   }
@@ -84,13 +84,13 @@ sliding_window_powu(GEN x, ulong n, long e, void *E, GEN (*sqr)(void*,GEN),
 }
 
 
-/* assume n != 0, t_INT. Compute x^|n| using left-right binary powering */
+/* assume n != 0, t_INT. Compute x^|n| using sliding window powering */
 static GEN
 sliding_window_pow(GEN x, GEN n, long e, void *E, GEN (*sqr)(void*,GEN),
                                                   GEN (*mul)(void*,GEN,GEN))
 {
   pari_sp ltop = avma, av, lim;
-  long i, l = expi(n), u = (1<<(e-1));
+  long i, l = expi(n), u = (1UL<<(e-1));
   long w, v;
   GEN tab = cgetg(1+u, t_VEC);
   GEN x2 = sqr(E, x), z = NULL, tw;
@@ -118,9 +118,10 @@ sliding_window_pow(GEN x, GEN n, long e, void *E, GEN (*sqr)(void*,GEN),
   return gerepilecopy(ltop, z);
 }
 
+/* assume n != 0, t_INT. Compute x^|n| using leftright binary powering */
 static GEN
 leftright_binary_powu(GEN x, long n, void *E, GEN (*sqr)(void*,GEN),
-                                               GEN (*mul)(void*,GEN,GEN))
+                                              GEN (*mul)(void*,GEN,GEN))
 {
   pari_sp av = avma, lim = stack_lim(av, 1);
   GEN  y = x;
@@ -144,13 +145,12 @@ leftright_binary_powu(GEN x, long n, void *E, GEN (*sqr)(void*,GEN),
 
 GEN
 gen_powu(GEN x, ulong n, void *E, GEN (*sqr)(void*,GEN),
-                               GEN (*mul)(void*,GEN,GEN))
+                                  GEN (*mul)(void*,GEN,GEN))
 {
   long l;
   if (n == 1) return gcopy(x);
-  if (n == 2) return sqr(E,x);
   l = expu(n);
-  /*if (l<=8)*/ return leftright_binary_powu(x, n, E, sqr, mul);
+  if (l<=8) return leftright_binary_powu(x, n, E, sqr, mul);
   if (l<=24)  return sliding_window_powu(x, n, 2, E, sqr, mul);
   return sliding_window_powu(x, n, 3, E, sqr, mul);
 }
