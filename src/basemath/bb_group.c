@@ -29,7 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /***********************************************************************/
 
 /* return (n>>(i+1-l)) & ((1<<l)-1) */
-ulong
+static ulong
 int_block(GEN n, long i, long l)
 {
   long q = divsBIL(i), r = remsBIL(i)+1, lr;
