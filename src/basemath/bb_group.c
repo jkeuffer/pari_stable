@@ -73,11 +73,15 @@ sliding_window_powu(GEN x, ulong n, long e, void *E, GEN (*sqr)(void*,GEN),
       z = mul(E, z, tw);
     } else z = tw;
     for (i=1; i<=v; i++) z = sqr(E, z);
-    while (l>=0 && !(n&(1UL<<l))) { z = sqr(E, z); l--; }
-    if (low_stack(lim, stack_lim(av,1)))
+    while (l>=0)
     {
-      if (DEBUGMEM>1) pari_warn(warnmem,"sliding_window_powu");
-      z = gerepilecopy(av, z);
+      if (low_stack(lim, stack_lim(av,1)))
+      {
+        if (DEBUGMEM>1) pari_warn(warnmem,"sliding_window_powu");
+        z = gerepilecopy(av, z);
+      }
+      if (n&(1UL<<l)) break;
+      z = sqr(E, z); l--;
     }
   }
   return gerepilecopy(ltop, z);
@@ -108,11 +112,15 @@ sliding_window_pow(GEN x, GEN n, long e, void *E, GEN (*sqr)(void*,GEN),
       z = mul(E, z, tw);
     } else z = tw;
     for (i=1; i<=v; i++) z = sqr(E, z);
-    while (l>=0 && !int_bit(n,l)) { z = sqr(E, z); l--; }
-    if (low_stack(lim, stack_lim(av,1)))
+    while (l>=0)
     {
-      if (DEBUGMEM>1) pari_warn(warnmem,"sliding_window_pow");
-      z = gerepilecopy(av, z);
+      if (low_stack(lim, stack_lim(av,1)))
+      {
+        if (DEBUGMEM>1) pari_warn(warnmem,"sliding_window_pow");
+        z = gerepilecopy(av, z);
+      }
+      if (int_bit(n,l)) break;
+      z = sqr(E, z); l--;
     }
   }
   return gerepilecopy(ltop, z);
