@@ -204,6 +204,7 @@ BA153- faster algorithm for nfgaloisapply.
   154- bnfisnorm: output could have constant t_POL(MAXVARN) components
        instead of t_INT. E.g. bnfisnorm( bnfinit(x^2+10), 1690 )  [#1026]
 IZ155- [OS/2] Fix warning about string signedness.
+IZ156- [OS/2] Fix symbol checking in Configure.
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
