@@ -142,11 +142,11 @@ if test -n "$file_diff"; then
 
   if test -n "$sys0190"; then
     len=`expr $len - 2`			# more verbose error message on OS/2
+    if test $len -eq 29; then
+      len=25				# ??? Usually len=29???
+    fi
   fi
-  if test $len -eq 25; then
-    len=49				# ??? Usually len=29???
-  fi
-  if test $len -eq 49  -a  -n "$pat"; then
+  if test $len -eq 25  -a  -n "$pat"; then
     cat << EOT
 NOTE: the problem noted in 'program' is that install() does not work in your
 configuration$end, so you will not be able to use this feature. Otherwise you
