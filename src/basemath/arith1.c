@@ -1985,7 +1985,9 @@ Fp_order(GEN a, GEN o, GEN p) {
   if (lgefint(p) == 3 && typ(o) == t_INT)
   {
     ulong q = p[2];
-    return utoi( Fl_order(umodiu(a, q), umodiu(o, q-1), q) );
+    ulong n = umodiu(o, q-1);
+    if (!n) n = q-1;
+    return utoi( Fl_order(umodiu(a, q), n, q) );
   }
   return gen_eltorder(a, o, (void*)p, &Fp_star);
 }
