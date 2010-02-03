@@ -20,7 +20,9 @@ To build with OMF-type target
 This build constructs a working DLL.  Both -Zomf and -Zcrtdll are crucial to
 have a functioning DLL (see EMX documentation for details).  -Zstack 8192
 forces the same C stack size as for AOUT build (and the same - 8M - as on many
-Unices, so you get few surprises when things work on Unix, but core on OS/2).
+Unices, so you get fewer surprises when things work on Unix, but core on OS/2
+due only to shorter C stack).  (The standard Configure adds -Zsysv-signals
+option; in fact, this option is not needed - as checked with v2.3.5.)
 
 Use of the the readline-DLL (via the readline_import.lib library) is not only
 a convenience, but also statically linked readline library are often broken;
@@ -36,7 +38,7 @@ Thus the build process may look like this:
   sh Configure --graphic=gnuplot-dynamic,gnpltdrw
   make gp
   cd Oos2-ix86
-  make _O=.obj _A=.lib CC_FLAVOR="-Zomf -Zcrtdll -Zstack 8192 -DOLD_SET_FEEDBACK_RECTANGLE" RLLIBS=-lreadline_import DLLD_IGNORE= AR=emxomfar bench
+  make _O=.obj _A=.lib CC_FLAVOR="-Zomf -Zcrtdll -Zstack 8192 -DUSE_SET_FEEDBACK_RECTANGLE" RLLIBS=-lreadline_import DLLD_IGNORE= AR=emxomfar bench
   cd ..
 
 The statically build PARI library is in a file named similar to libpari-2_2.a,
