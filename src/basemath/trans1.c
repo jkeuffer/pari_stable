@@ -432,7 +432,7 @@ upowuu(ulong p, ulong k)
   ulong i, pk;
 
   if (!k) return 1;
-  if (p == 2) return 1<<k;
+  if (p == 2) return 1UL<<k;
   pk = p; for (i=2; i<=k; i++) pk *= p;
   return pk;
 }
