@@ -4,6 +4,8 @@
 #include <os2.h>
 #include <float.h>
 #include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
 
 static ULONG retcode;
 static char fail[300];
@@ -83,7 +85,7 @@ dlopen(char *path, int mode)
                     retcode = rc;
                     return 0;
                 }
-                rc = DosLoadModule(fail, sizeof fail, dllname, &handle);
+                rc = DosLoadModule((PSZ)fail, sizeof fail, (PSZ)dllname, &handle);
                 if (rc) {
                     strcpy(fail, "can't load my own DLL");
                     retcode = rc;
@@ -96,7 +98,7 @@ dlopen(char *path, int mode)
             strcpy(fail, "can't load from myself: compiled without -DDLOPEN_INITTERM");
             return 0;
         }
-        if ((rc = DosLoadModule(fail, sizeof fail, path, &handle)) == 0)
+        if ((rc = DosLoadModule((PSZ)fail, sizeof fail, (PSZ)path, &handle)) == 0)
                 goto ret;
 
         retcode = rc;
@@ -112,7 +114,7 @@ dlopen(char *path, int mode)
                 int n = beg+8-path;
                 memmove(tmp, path, n);
                 memmove(tmp+n, dot, strlen(dot)+1);
-                rc = DosLoadModule(fail, sizeof fail, tmp, &handle);
+                rc = DosLoadModule((PSZ)fail, sizeof fail, (PSZ)tmp, &handle);
                 if (rc == 0)
                         goto ret;
                 retcode = rc;
@@ -133,9 +135,9 @@ dlsym(void *handle, char *symbol)
         PFN addr;
 
         fail[0] = 0;
-        rc = DosQueryProcAddr((HMODULE)handle, 0, symbol, &addr);
+        rc = DosQueryProcAddr((HMODULE)handle, 0, (PSZ)symbol, &addr);
         if (rc == 0) {
-                rc = DosQueryProcType((HMODULE)handle, 0, symbol, &type);
+                rc = DosQueryProcType((HMODULE)handle, 0, (PSZ)symbol, &type);
                 if (rc == 0 && type == PT_32BIT)
                         return (void *)addr;
                 rc = ERROR_WRONG_PROCTYPE;
@@ -158,7 +160,7 @@ dlerror(void)
         }
         if ((retcode != ERROR_WRONG_PROCTYPE)
             && DosGetMessage(NULL, 0, buf, sizeof buf - 1, retcode,
-                             "OSO001.MSG", &len)) {
+                             (PSZ)"OSO001.MSG", &len)) {
                 if (fail[0])
                   sprintf(buf,
 "OS/2 system error code %d, possible problematic module: '%s'",
