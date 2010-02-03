@@ -714,7 +714,6 @@ nfpoleval(GEN nf, GEN pol, GEN a)
   long i=lg(pol)-1;
   GEN res;
   if (i==1) return gen_0;
-  a = nf_to_scalar_or_basis(nf, a);
   res = nf_to_scalar_or_basis(nf, gel(pol,i));
   for (i-- ; i>=2; i--)
     res = nfadd(nf, nfmul(nf, a, res), gel(pol,i));
@@ -767,14 +766,13 @@ static GEN
 pr_galoisapply(GEN nf, GEN pr, GEN aut)
 {
   GEN p, b, u;
-  GEN autp;
   if (typ(pr_get_tau(pr)) == t_INT) return pr; /* inert */
-  p = pr_get_p(pr); autp = poltobasis(nf, aut);
-  u = QX_galoisapplymod(nf, coltoliftalg(nf, pr_get_gen(pr)), autp, p);
+  p = pr_get_p(pr);
+  u = QX_galoisapplymod(nf, coltoliftalg(nf, pr_get_gen(pr)), aut, p);
 #if 1
   b = FpM_deplin(zk_multable(nf, u), p);
 #else /* Slower */
-  b = QX_galoisapplymod(nf, coltoliftalg(nf, pr_get_tau(pr)), autp, p);
+  b = QX_galoisapplymod(nf, coltoliftalg(nf, pr_get_tau(pr)), aut, p);
 #endif
   return mkvec5(p, u, gel(pr,3), gel(pr,4), b);
 }
@@ -800,12 +798,7 @@ galoisapply(GEN nf, GEN aut, GEN x)
   GEN y, T;
 
   nf = checknf(nf); T = nf_get_pol(nf);
-  if (typ(aut)==t_POLMOD && RgX_equal_var(gel(aut,1),T)) aut=gel(aut,2);
-  else
-  {
-    if (typ(aut)!=t_POL)
-      pari_err(typeer,"galoisapply");
-  }
+  aut = algtobasis(nf, aut);
   switch(typ(x))
   {
     case t_INT: case t_INTMOD: case t_FRAC:
