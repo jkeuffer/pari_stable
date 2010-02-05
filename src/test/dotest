@@ -137,20 +137,21 @@ case "x$bugp" in
 esac
 if test -n "$file_diff"; then
   len=`wc -l $file_diff | sed -e 's/ *\([0-9]*\).*/\1/'`
-  pat=`${head}4 $file_diff|${tail}1|grep "131,139"`
+  pat=`${head}4 $file_diff|${tail}1|grep "13[0-1],139"`
+  case "$pat" in
+    *130,139*) elen=30;;
+    *131,139*) elen=25;;
+    *) elen=0;;
+  esac
   sys0190=`grep "^+ SYS0190\>" $file_diff`
-
   if test -n "$sys0190"; then
     len=`expr $len - 2`			# more verbose error message on OS/2
-    if test $len -eq 29; then
-      len=25				# ??? Usually len=29???
-    fi
   fi
-  if test $len -eq 25  -a  -n "$pat"; then
+  if test $len -eq $elen  -a  -n "$pat"; then
     cat << EOT
 NOTE: the problem noted in 'program' is that install() does not work in your
-configuration$end, so you will not be able to use this feature. Otherwise you
-can safely ignore the above warning.
+configuration$end, so you will not be able to use this feature. 
+Otherwise you can safely ignore the above warning.
 EOT
   fi
 fi
