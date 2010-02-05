@@ -1788,7 +1788,7 @@ gettime(void) { return timer(); }
 GEN
 pari_version(void) {
   GEN v = cgetg(4, t_VEC);
-  const ulong mask = (1<<PARI_VERSION_SHIFT) - 1;
+  const ulong mask = (1UL<<PARI_VERSION_SHIFT) - 1;
   ulong major, minor, patch, n = PARI_VERSION_CODE;
   patch = n & mask; n >>= PARI_VERSION_SHIFT;
   minor = n & mask; n >>= PARI_VERSION_SHIFT;

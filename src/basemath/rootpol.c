@@ -817,7 +817,7 @@ fft(GEN Omega, GEN p, GEN f, long step, long l)
   }
 
   ltop = avma;
-  l1 = l>>2; l2 = l1<<1; l3 = l1+l2; step4 = step<<2;
+  l1 = l>>2; l2 = 2*l1; l3 = l1+l2; step4 = step<<2;
   fft(Omega,p,          f,   step4,l1);
   fft(Omega,p+step,     f+l1,step4,l1);
   fft(Omega,p+(step<<1),f+l2,step4,l1);
@@ -893,7 +893,7 @@ GEN
 FFTinit(long k, long prec)
 {
   if (k <= 0) pari_err(typeer,"FFTinit");
-  return initRU(1 << k, bit_accuracy(prec)) - 1;
+  return initRU(1L << k, bit_accuracy(prec)) - 1;
 }
 
 GEN

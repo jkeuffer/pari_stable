@@ -1100,7 +1100,7 @@ eulerphiu(ulong n)
 
   if (n == 1) return 1;
   v = vals(n); n >>= v;
-  m = v > 1 ? 1 << (v-1) : 1;
+  m = v > 1 ? 1UL << (v-1) : 1;
   if (n == 1) return m;
 
   lim = utridiv_bound(n);

@@ -117,7 +117,7 @@ calc_block(blockdata *B, GEN Z, GEN Y, GEN SB)
         ngcd = ugcd(ngcd, n[j]);
       }
     if (dk % ngcd) continue;
-    T = 1<<lpn;
+    T = 1L<<lpn;
     if (lpn == r-2)
     {
       T--; /* done already above --> print_block_system */

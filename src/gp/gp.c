@@ -781,7 +781,7 @@ what_readline(void)
 static void
 print_shortversion(void)
 {
-  const ulong mask = (1<<PARI_VERSION_SHIFT) - 1;
+  const ulong mask = (1UL<<PARI_VERSION_SHIFT) - 1;
   ulong n = PARI_VERSION_CODE, major, minor, patch;
 
   patch = n & mask; n >>= PARI_VERSION_SHIFT;

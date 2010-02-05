@@ -3113,7 +3113,7 @@ invr(GEN b)
   GEN x, a;
   ulong mask;
 
-  if (l <= maxss(INVNEWTON_LIMIT, (1<<s) + 2)) {
+  if (l <= maxss(INVNEWTON_LIMIT, (1L<<s) + 2)) {
     if (l == 2) pari_err(gdiver);
     return invr_basecase(b);
   }

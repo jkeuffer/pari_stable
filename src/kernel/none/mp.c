@@ -1297,11 +1297,11 @@ mulliifft_params(long len, long *k, long *mod, long *bs, long *n, ulong *ord)
   do {
     (*k)--;
     r  = *k-(TWOPOTBITS_IN_LONG+2);
-    *n = 1<<*k;
+    *n = 1L<<*k;
     *bs = (len+*n-1)>>*k;
     *mod= 2**bs+1;
     if (r>0)
-      *mod=((*mod+(1<<r)-1)>>r)<<r;
+      *mod=((*mod+(1L<<r)-1)>>r)<<r;
   } while(*mod>=3**bs);
   *ord= 4**mod*BITS_IN_LONG;
   if (DEBUGLEVEL>=9)
@@ -1870,7 +1870,7 @@ sqrtispec1_sh(GEN n, GEN *pr)
    * so 2^(2k) n = (S - s0)^2 + (2*S*s0 - s0^2 + R), s0 = S mod 2^k. */
   if (sh) {
     int k = sh >> 1;
-    ulong s0 = s & ((1<<k) - 1);
+    ulong s0 = s & ((1L<<k) - 1);
     r += s * (s0<<1);
     s >>= k;
     r >>= sh;
@@ -1898,7 +1898,7 @@ sqrtispec2_sh(GEN n, GEN *pr)
    * so 2^(2k) n = (S - s0)^2 + (2*S*s0 - s0^2 + R), s0 = S mod 2^k. */
   if (sh) {
     int k = sh >> 1;
-    ulong s0 = s & ((1<<k) - 1);
+    ulong s0 = s & ((1L<<k) - 1);
     LOCAL_HIREMAINDER;
     LOCAL_OVERFLOW;
     r = addll(r, mulll(s, (s0<<1)));
@@ -1906,7 +1906,7 @@ sqrtispec2_sh(GEN n, GEN *pr)
     hiremainder += hi; /* + 0 or 1 */
     s >>= k;
     r = (r>>sh) | (hiremainder << (BITS_IN_LONG-sh));
-    hi = (hiremainder & (1<<sh));
+    hi = (hiremainder & (1L<<sh));
   }
   S = utoi(s);
   if (pr) *pr = hi? uutoi(1,r): utoi(r);

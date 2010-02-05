@@ -85,7 +85,7 @@ red_cyclop(GEN T, long p)
 static GEN
 u_red_cyclo2n_ip(GEN x, long n)
 {
-  long i, pow2 = 1<<(n-1);
+  long i, pow2 = 1L<<(n-1);
   GEN z;
 
   for (i = lg(x)-1; i>pow2; i--) x[i-pow2] -= x[i];
@@ -100,7 +100,7 @@ u_red_cyclo2n_ip(GEN x, long n)
 static GEN
 red_cyclo2n_ip(GEN x, long n)
 {
-  long i, pow2 = 1<<(n-1);
+  long i, pow2 = 1L<<(n-1);
   for (i = lg(x)-1; i>pow2+1; i--)
     if (signe(x[i])) gel(x,i-pow2) = subii(gel(x,i-pow2), gel(x,i));
   return normalizepol_lg(x, i+1);
@@ -482,7 +482,7 @@ get_jac2(GEN N, ulong q, long k, GEN *j2q, GEN *j3q)
   T = computetabdl(q);
   /* could store T[x+1] + T[x] + qs2 (cf compute_g).
    * Recompute instead, saving half the memory. */
-  pk = 1 << k;;
+  pk = 1UL << k;;
   vpk = const_vecsmall(pk, 0);
 
   qs2 = q>>1; /* (q-1)/2 */
@@ -690,7 +690,7 @@ calcglobs(Red *R, ulong t, long *pltab, GEN *pP)
   k = 3; while (((k+1)*(k+2) << (k-1)) < b) k++;
   *pltab = ltab = (b/k) + 2;
   R->k  = k;
-  R->lv = 1 << (k-1);
+  R->lv = 1L << (k-1);
   R->mask = (1UL << k) - 1;
 
   fat = factoru_pow(t);
@@ -792,7 +792,7 @@ look_eta2(long k, GEN z)
   }
   s = signe(z);
   if (!s || !is_pm1(z)) return -1;
-  return (s > 0)? d: d + (1<<(k-1));
+  return (s > 0)? d: d + (1L<<(k-1));
 }
 
 static long
@@ -824,7 +824,7 @@ is_m1(GEN x, GEN N)
 static long
 step4b(Cache *C, Red *R, ulong q, long k)
 {
-  const long pk = 1 << k;
+  const long pk = 1L << k;
   long ind;
   GEN s1, s2, s3, j2q, j3q;
 

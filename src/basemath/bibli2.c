@@ -419,8 +419,8 @@ polcyclo_eval(long n, GEN x)
   if (tx == t_POL || tx == t_MAT || lg(x) > n)
     return gerepileupto(av, poleval(polcyclo(n,0), x));
 
-  xd = cgetg((1<<l) + 1, t_VEC); /* the x^d, where d | n */
-  md = cgetg((1<<l) + 1, t_VECSMALL); /* the mu(d), where d | n */
+  xd = cgetg((1L<<l) + 1, t_VEC); /* the x^d, where d | n */
+  md = cgetg((1L<<l) + 1, t_VECSMALL); /* the mu(d), where d | n */
   gel(xd, 1) = x;
   md[1] = 1;
   mu = odd(l)? -1: 1; /* mu(n) */
@@ -428,7 +428,7 @@ polcyclo_eval(long n, GEN x)
   else         { yn = gen_1; yd = gsubgs(x,1); }
   for (i = 1; i <= l; i++) /* compute Prod_{d|n} (x^d-1)^mu(n/d) */
   {
-    long ti = 1<<(i-1), p = P[i];
+    long ti = 1L<<(i-1), p = P[i];
     for (j = 1; j <= ti; j++) {
       GEN X = gpowgs(gel(xd,j), p);
       gel(xd,ti+j) = X;

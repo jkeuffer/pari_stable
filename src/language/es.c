@@ -1326,7 +1326,7 @@ term_get_color(long n)
   {
     decode_color(a,c);
     if (c[1]<8) c[1] += 30; else c[1] += 82;
-    if (a & (1<<12)) /* transparent background */
+    if (a & (1L<<12)) /* transparent background */
       sprintf(s, "%c[%ld;%ldm", ESC, c[0], c[1]);
     else
     {

@@ -143,7 +143,7 @@ ibittrunc(GEN x, long bits)
     GEN xi = int_W(x, len_out-1);
     /* Non-trival mask is given by a formula, if x is not
        normalized, this works even in the exceptional case */
-    *xi &= (1 << lowbits) - 1;
+    *xi &= (1L << lowbits) - 1;
     if (*xi && xl == len_out) return x;
   }
   /* Normalize */
@@ -179,7 +179,7 @@ gbitneg(GEN x, long bits)
     if (!lowbits)
       *outp = ~uzero;
     else
-      *outp = (1 << lowbits) - 1;
+      *outp = (1L << lowbits) - 1;
     for (i = 3; i < len_out - xl + 2; i++)
     {
       outp = int_precW(outp); *outp = ~uzero;

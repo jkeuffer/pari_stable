@@ -398,14 +398,14 @@ logint(GEN B, GEN y, GEN *ptq)
   }
   if (i == 0) { e = 1; goto END; } /* y <= B */
 
-  for (i--, e=1<<i;;)
+  for (i--, e=1L<<i;;)
   { /* y^e = q < B <= r = q * y^(2^i) */
     if (!fl) break; /* B = r */
     /* q < B < r */
     if (--i < 0) { if (fl > 0) e++; break; }
     r = mulii(q, gel(pow2,i));
     fl = cmpii(r, B);
-    if (fl <= 0) { e += (1<<i); q = r; }
+    if (fl <= 0) { e += (1L<<i); q = r; }
   }
   if (fl <= 0) { e++; r = mulii(r,y); }
 END:

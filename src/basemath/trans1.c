@@ -1491,7 +1491,7 @@ mpexp(GEN x)
   GEN a, t, z;
   ulong mask;
 
-  if (l <= maxss(EXPNEWTON_LIMIT, (1<<s) + 2))
+  if (l <= maxss(EXPNEWTON_LIMIT, (1L<<s) + 2))
   {
     if (l == 2) {
       long e = expo(x);

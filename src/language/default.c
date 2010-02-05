@@ -372,7 +372,7 @@ gp_get_color(char **st)
     }
     else { c = c_NONE; trans = 0; }
   }
-  if (trans) c = c | (1<<12);
+  if (trans) c = c | (1L<<12);
   while (*v && *v++ != ',') /* empty */;
   if (c != c_NONE) disable_color = 0;
   *st = v; return c;
@@ -413,7 +413,7 @@ sd_colors(const char *v, long flag)
       else
       {
         decode_color(n,col);
-        if (n & (1<<12))
+        if (n & (1L<<12))
         {
           if (col[0])
             sprintf(t,"[%ld,,%ld]",col[1],col[0]);

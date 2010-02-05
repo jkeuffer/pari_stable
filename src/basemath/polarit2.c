@@ -173,7 +173,7 @@ void
 RgX_type_decode(long x, long *t1, long *t2)
 {
   *t1 = x >> tsh;
-  *t2 = (x & ((1<<tsh)-1));
+  *t2 = (x & ((1L<<tsh)-1));
 }
 int
 RgX_type_is_composite(long t) { return t >= tsh; }

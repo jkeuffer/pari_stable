@@ -356,7 +356,7 @@ ZZV_equal(GEN x, GEN y) {
 static void
 powFBgen(FB_t *F, RELCACHE_t *cache, GEN nf)
 {
-  const long a = 1<<RANDOM_BITS;
+  const long a = 1L<<RANDOM_BITS;
   pari_sp av = avma;
   long i, j, n = lg(F->subFB);
   GEN Id2, Alg, Ord;
@@ -2870,7 +2870,7 @@ bnfnewprec_shallow(GEN bnf, long prec)
   prec1 = prec;
   if (r1 + r2 > 1) {
     long e = gexpo(bnf_get_logfu(bnf)) + 1 - TWOPOTBITS_IN_LONG;
-    if (e >= 0) prec += 1 << e;
+    if (e >= 0) prec += 1L << e;
   }
   if (DEBUGLEVEL && prec1!=prec) pari_warn(warnprec,"bnfnewprec",prec);
   nf = nfnewprec_shallow(nf0,prec);

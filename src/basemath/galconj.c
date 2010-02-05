@@ -976,7 +976,7 @@ static GEN
 fixedfieldsurmer(GEN O, GEN mod, GEN l, GEN p, long v, GEN NS, GEN W)
 {
   const long step=3;
-  long i, j, n = lg(W)-1, m = 1<<((n-1)<<1);
+  long i, j, n = lg(W)-1, m = 1L<<((n-1)<<1);
   GEN sym = cgetg(n+1,t_VECSMALL), mod2 = shifti(mod,-1);
   for (j=1;j<n;j++) sym[j] = step;
   sym[n] = 0;

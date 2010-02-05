@@ -2019,7 +2019,7 @@ bnrclassnointernarch(GEN B, GEN h, GEN matU)
   lx = lg(B); if (lx == 1) return B;
 
   r1 = lg(matU[1])-1; _2 = const_vec(r1, gen_2);
-  L = cgetg(lx,t_VEC); nbarch = 1<<r1;
+  L = cgetg(lx,t_VEC); nbarch = 1L<<r1;
   for (j=1; j<lx; j++)
   {
     b = gel(B,j); qm = ZM_mul(gel(b,3),gel(b,4));
@@ -2204,7 +2204,7 @@ discrayabslistarch(GEN bnf, GEN arch, long bound)
   Ray = gerepilecopy(av, Ray);
 
   if (DEBUGLEVEL>1) fprintferr("Starting discrayabs computations\n");
-  if (allarch) nbarch = 1<<r1;
+  if (allarch) nbarch = 1L<<r1;
   else
   {
     nbarch = 1;

@@ -232,7 +232,7 @@ quadratic_prec_mask(long n)
   for(i = 1;; i++, mask <<= 1)
   {
     mask |= (a&1); a = (a+1)>>1;
-    if (a==1) return mask | (1 << i);
+    if (a==1) return mask | (1UL << i);
   }
 }
 

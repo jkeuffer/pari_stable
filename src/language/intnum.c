@@ -312,7 +312,7 @@ intnumstep(long prec) { return findmforinit(0, prec); }
 static void
 intinit_start(intdata *D, long m0, long flext, long prec)
 {
-  long m = findmforinit(m0, prec), lim = 20<<m;
+  long m = findmforinit(m0, prec), lim = 20L<<m;
   if (flext > 0) lim = lim << (2*flext);
   D->m = m;
   D->eps = bit_accuracy(prec);
@@ -644,7 +644,7 @@ intn(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN tab, long prec)
   S = gmul(tabw0, eval(gadd(bpa, bmb), E));
   for (k = 1; k <= m; k++)
   {
-    long pas = 1<<(m-k);
+    long pas = 1L<<(m-k);
     for (i = pas; i < L; i += pas)
       if (i & pas || k == 1)
       {
@@ -679,7 +679,7 @@ intnsing(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN tab, long prec)
   S = gmul(gmul(tabw0, ba), eval(gadd(gmul(ba, gaddsg(1, tabx0)), tra), E));
   for (k = 1; k <= m; k++)
   {
-    long pas = 1<<(m-k);
+    long pas = 1L<<(m-k);
     for (i = pas; i < L; i += pas)
       if (i & pas || k == 1) /* i = odd multiple of pas = 2^(m-k) */
       {
@@ -719,7 +719,7 @@ intninfpm(void *E, GEN (*eval)(GEN, void*), GEN a, long si, GEN tab, long prec)
   S = gmul(tabw0, eval(gadd(a, gmulsg(si, tabx0)), E));
   for (k = 1; k <= m; k++)
   {
-    h++; pas = 1<<(m-k);
+    h++; pas = 1L<<(m-k);
     for (i = pas; i < L; i += pas)
       if (i & pas || k == 1)
       {
@@ -756,7 +756,7 @@ intninfinfintern(void *E, GEN (*eval)(GEN, void*), GEN tab, long flag, long prec
   if (spf) S = gmul2n(real_i(S), -1);
   for (k = 1; k <= m; k++)
   {
-    long pas = 1<<(m-k);
+    long pas = 1L<<(m-k);
     for (i = pas; i < L; i += pas)
       if (i & pas || k == 1)
       {

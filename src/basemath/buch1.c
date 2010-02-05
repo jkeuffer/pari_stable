@@ -25,17 +25,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
  * 2 | index), hence the low order bit is not useful. So we hash
  * HASHBITS bits starting at bit 1, not bit 0 */
 #define HASHBITS 10
-static const long HASHT = 1 << HASHBITS;
+static const long HASHT = 1L << HASHBITS;
 
 static long
-hash(long q) { return (q & ((1 << (HASHBITS+1)) - 1)) >> 1; }
+hash(long q) { return (q & ((1L << (HASHBITS+1)) - 1)) >> 1; }
 #undef HASHBITS
 
 /* See buch2.c:
  * B->subFB contains split p such that \prod p > sqrt(B->Disc)
  * B->powsubFB contains powers of forms in B->subFB */
 #define RANDOM_BITS 4
-static const long CBUCH = (1<<RANDOM_BITS)-1;
+static const long CBUCH = (1L<<RANDOM_BITS)-1;
 
 struct buch_quad
 {
