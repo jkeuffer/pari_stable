@@ -412,30 +412,30 @@ Zp_issquare(GEN a, GEN p)
 }
 
 static int
-is_char_2(GEN x)
+is_char_2(GEN a)
 {
-  long i, j, lx = lg(x);
-  for (i = 2; i < lx; i++)
+  long j;
+  GEN b;
+  switch(typ(a))
   {
-    GEN b, a = gel(x,i);
-    switch(typ(x[i]))
+  case t_INTMOD:
+    b = gel(a,1);
+    if (!mod2(b))
     {
-      case t_INTMOD:
-        b = gel(a,1);
-        if (!mod2(b))
-        {
-          if (!equaliu(b, 2)) pari_err(impl, "issquare for this input");
-          return 1;
-        }
-      case t_FFELT:
-        if (equaliu(gel(a,4), 2)) return 1;
-
-      case t_POLMOD:
-        if (is_char_2(gel(a,1)) || is_char_2(gel(a,2))) return 1;
-      case t_POL:
-        for (j = 2; j < lg(a); j++)
-          if (is_char_2(gel(a,j))) return 1;
+      if (!equaliu(b, 2)) pari_err(impl, "issquare for this input");
+      return 1;
     }
+    return 0;
+  case t_FFELT:
+    if (equaliu(FF_p_i(a), 2)) return 1;
+    return 0;
+  case t_POLMOD:
+    if (is_char_2(gel(a,1)) || is_char_2(gel(a,2))) return 1;
+    return 0;
+  case t_POL:
+    for (j = 2; j < lg(a); j++)
+      if (is_char_2(gel(a,j))) return 1;
+    return 0;
   }
   return 0;
 }
