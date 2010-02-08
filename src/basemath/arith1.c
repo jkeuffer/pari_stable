@@ -2672,9 +2672,9 @@ bestappr(GEN x, GEN k)
     case t_FRAC:
       if (!k || cmpii(gel(x,2),k) <= 0) { avma = av; return gcopy(x); }
       y = x;
-      p1 = gen_1; p0 = truedivii(gel(x,1), gel(x,2)); /* = floor(x) */
+      p1 = gen_1; p0 = truedvmdii(gel(x,1), gel(x,2), &a); /* = floor(x) */
       q1 = gen_0; q0 = gen_1;
-      x = gsub(x,p0);    /* 0<= x < 1 */
+      x = mkfrac(a, gel(x,2)); /* = frac(x); now 0<= x < 1 */
       for(;;)
       {
         x = ginv(x); /* > 1 */
