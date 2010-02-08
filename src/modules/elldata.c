@@ -173,11 +173,11 @@ ellsearch(GEN A)
   else if (typ(A)==t_STR) {
     if (!ellparsename(GSTR(A),&f,&c,&i))
       pari_err(talker,"Incorrect curve name in ellsearch");
-    if (f < 0) pari_err(talker,"Need a conductor in ellsearch");
   } else {
     pari_err(typeer,"ellsearch");
     return NULL;
   }
+  if (f <= 0) pari_err(talker,"Non-positive conductor in ellsearch");
   V = ellcondlist(f);
   if (c >= 0)
     V = (i < 0)? ellsearchbyclass(V,c): ellsearchbyname(V, GSTR(A));
