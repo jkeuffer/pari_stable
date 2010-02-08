@@ -2674,6 +2674,7 @@ bestappr(GEN x, GEN k)
       y = x;
       p1 = gen_1; p0 = truedivii(gel(x,1), gel(x,2)); /* = floor(x) */
       q1 = gen_0; q0 = gen_1;
+      x = gsub(x,p0);    /* 0<= x < 1 */
       for(;;)
       {
         x = ginv(x); /* > 1 */
