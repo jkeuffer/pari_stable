@@ -150,7 +150,7 @@ if test -n "$file_diff"; then
   if test $len -eq $elen  -a  -n "$pat"; then
     cat << EOT
 NOTE: the problem noted in 'program' is that install() does not work in your
-configuration$end, so you will not be able to use this feature. 
+configuration$end, so you will not be able to use this feature.
 Otherwise you can safely ignore the above warning.
 EOT
   fi
