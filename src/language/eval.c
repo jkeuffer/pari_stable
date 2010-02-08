@@ -918,29 +918,33 @@ closure_eval(GEN C)
     case OCcompo1ptr:
       {
         long c=st[sp-1];
+        long lx;
         gp_pointer *g = &ptrs[rp-1];
         matcomp *C=&g->c;
         GEN p = g->x;
         sp--;
         switch(typ(p))
         {
-        case t_VEC: case t_COL: case t_VECSMALL:
+        case t_VEC: case t_COL:
           check_array_index(c, lg(p));
           C->ptcell = (GEN *) p+c;
+          g->x = *(C->ptcell);
+          break;
+        case t_VECSMALL:
+          check_array_index(c, lg(p));
+          C->ptcell = (GEN *) p+c;
+          g->x = stoi(p[c]);
           break;
         case t_LIST:
-          {
-            long lx;
-            p = list_data(p); lx = p? lg(p): 1;
-            check_array_index(c,lx);
-            C->ptcell = (GEN *) p+c;
-            break;
-          }
+          p = list_data(p); lx = p? lg(p): 1;
+          check_array_index(c,lx);
+          C->ptcell = (GEN *) p+c;
+          g->x = *(C->ptcell);
+          break;
         default:
           pari_err(talker,"_[_]: not a vector");
         }
         C->parent   = p;
-        g->x = *(C->ptcell);
         break;
       }
     case OCcompo2:

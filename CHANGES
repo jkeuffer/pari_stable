@@ -206,7 +206,8 @@ BA153- faster algorithm for nfgaloisapply.
 IZ155- [OS/2] Fix warning about string signedness.
 IZ156- [OS/2] Fix symbol checking in Configure.
 BA157- upowuu(2,31) returned a wrong result [#1031]
-BA158- [from 2.4.2] issquare(x^2+y^2)->SEGV [#1027]
+BA158- [from 2.4.2] issquare(x^2+y^2) -> SEGV [#1027]
+BA159- [from 2.4.2] pointers to Vecsmall components were broken.
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
