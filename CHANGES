@@ -208,6 +208,7 @@ IZ156- [OS/2] Fix symbol checking in Configure.
 BA157- upowuu(2,31) returned a wrong result [#1031]
 BA158- [from 2.4.2] issquare(x^2+y^2) -> SEGV [#1027]
 BA159- [from 2.4.2] pointers to Vecsmall components were broken.
+BA160- [from 2.4.2] ellap could return a wrong result. [#1030]
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]

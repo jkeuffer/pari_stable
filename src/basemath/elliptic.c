@@ -2570,7 +2570,7 @@ ellap1(GEN e, GEN p)
         {
           long k = i+j-2;
           if (equalii(gel(P,2),gel(fg,2))) k -= 2*nb; /* fg == P */
-          h = addii(h, mului(k,B)); goto FOUND;
+          h = addii(h, mulsi(k,B)); goto FOUND;
         }
       }
       v = FpV_inv(u, p);
