@@ -6,7 +6,7 @@ Help: matsolvemod(M,D,B,{flag=0}): one solution of system of congruences
  MX=B mod D (M matrix, B and D column vectors). If (optional) flag is
  non-null return all solutions.
 Doc: $M$ being any integral matrix,
- $D$ a vector of positive integer moduli, and $B$ an integral
+ $D$ a column vector of positive integer moduli, and $B$ an integral
  column vector, gives a small integer solution to the system of congruences
  $\sum_i m_{i,j}x_j\equiv b_i\pmod{d_i}$ if one exists, otherwise returns
  zero. Shorthand notation: $B$ (resp.~$D$) can be given as a single integer,
