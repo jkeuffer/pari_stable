@@ -2883,16 +2883,19 @@ gaussmoduloall(GEN M, GEN D, GEN Y, GEN *ptu1)
   n = lg(M[1])-1;
   switch(typ(D))
   {
-    case t_VEC:
-    case t_COL: delta = diagonal_shallow(D); break;
-    case t_INT: delta =scalarmat(D,n); break;
+    case t_COL:
+      if (lg(D)-1!=n) pari_err(consister,"gaussmodulo");
+      delta = diagonal_shallow(D); break;
+    case t_INT: delta = scalarmat(D,n); break;
     default: pari_err(typeer,"gaussmodulo");
       return NULL; /* not reached */
   }
   switch(typ(Y))
   {
     case t_INT: Y = const_col(n, Y); break;
-    case t_COL: break;
+    case t_COL:
+      if (lg(Y)-1!=n) pari_err(consister,"gaussmodulo");
+      break;
     default: pari_err(typeer,"gaussmodulo");
   }
   H = ZM_hnfall(shallowconcat(M,delta), &U, 1);
