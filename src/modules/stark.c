@@ -2675,12 +2675,12 @@ makescind(GEN nf, GEN P)
   if (signe(Try)) pol = RgX_add(pol, RgX_Rg_mul(RgX_mul(P0,P1), Try));
   /* pol = rnfequation(nf, P); */
   G = galoisinit(pol, NULL);
-  L = gel(G,6);
-  p = gmael(G,2,1);
+  L = gal_get_group(G);
+  p = gal_get_p(G);
   a = FpX_quad_root(nfpol, p, 0);
   /* P mod a prime \wp above p (which splits) */
   Pp = FpXY_evalx(P, a, p);
-  roo = gel(G,3);
+  roo = gal_get_roots(G);
   is_P = gequal0( FpX_eval(Pp, remii(gel(roo,1),p), p) );
   /* each roo[i] mod p is a root of P or (exclusive) tau(P) mod \wp */
   /* record whether roo[1] is a root of P or tau(P) */
@@ -2699,7 +2699,7 @@ makescind(GEN nf, GEN P)
       return galoisfixedfield(G, perm, 1, varn(P));
     }
   }
-  pari_err(bugparier,"makeѕcind");
+  pari_err(bugparier,"makescind");
   return NULL; /*not reached*/
 }
 
