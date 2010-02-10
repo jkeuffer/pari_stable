@@ -1426,8 +1426,8 @@ get_line_from_file(const char *PROMPT, filtre_t *F, FILE *file)
 static int
 is_interactive(void)
 {
-  ulong f = GP_DATA->flags;
-  return (pari_infile == stdin && !(f & TEXMACS) && !(f & TEST));
+  ulong f = GP_DATA->flags&(TEXMACS|TEST);
+  return pari_infile == stdin && (!f || pari_stdin_isatty());
 }
 
 /* return 0 if no line could be read (EOF) */
