@@ -1,7 +1,11 @@
 pretty="$prettya running $osname"
 
 case "$kernlvl1" in
-  gmp) prettyk="$prettyk0/GMP";;
+  gmp) if test -n "$gmp_version"; then 
+         prettyk="$prettyk0/GMP-${gmp_version}"
+       else
+         prettyk="$prettyk0/GMP"
+       fi;;
   none) prettyk="$prettyk0";;
   *) prettyk="$prettyk0/$kernlvl1";;
 esac
