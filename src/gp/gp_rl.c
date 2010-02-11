@@ -966,7 +966,8 @@ get_line_from_readline(const char *prompt, const char *prompt_cont, filtre_t *F)
       }
       gp_add_history(s);
     }
-
+    if (GP_DATA->flags & ECHO)
+      { pari_puts(color_prompt(prompt)); pari_puts(s); pari_putc('\n'); }
     if (pari_logfile) update_logfile(expand_prompt(IM.prompt, F), s);
   }
   return 1;
