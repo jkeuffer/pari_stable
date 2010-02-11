@@ -89,7 +89,7 @@ dynlib: \$(DYN)
 	\$(LD) -o \$@ \$(LDFLAGS) \$< \$(EXTRALIBS) \$(STATIC) \$(LIBS)
 
 \$(TARGET)-dyn: \$(OBJS)
-	\$(LD) -o \$@ \$(LDFLAGS) \$< \$(RUNPTH) \$(LIBS)
+	\$(LD) -o \$@ \$(LDFLAGS) \$< \$(EXTRALIBS) \$(RUNPTH) \$(LIBS)
 
 %.o: %.c
 	\$(CC) -c \$(CFLAGS) \$(CPPFLAGS) \$(DLCFLAGS) \$<
