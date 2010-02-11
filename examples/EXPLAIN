@@ -13,7 +13,7 @@ POSIX threads version, as described in Appendix D of the users' manual.
 This require that PARI is Configured with --enable-tls. To build it, run
 make TARGET=thread EXTRALIBS=-lpthread
 
-* the C program thread.c using the Pari library in a multi-threaded context,
+* the C program openmp.c using the Pari library in a multi-threaded context,
 OpenMP version, as described in Appendix D of the users' manual.
 This require that PARI is Configured with --enable-tls. To build it, run
 make TARGET=openmp EXTRACFLAGS=-fopenmp
