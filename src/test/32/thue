@@ -16,4 +16,5 @@
   ***   at top-level: thueinit(x^0)
   ***                 ^-------------
   *** thueinit: constant polynomial in thueinit.
-Total time spent: 2630
+[[2, 2], [-2, -2], [4, 1], [-4, -1]]
+Total time spent: 3104

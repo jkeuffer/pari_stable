@@ -1591,7 +1591,7 @@ pnormalize(GEN f, GEN p, long prec, long n, GEN *plead, long *pprec, int *prev)
     }
     *pprec += v * n;
   }
-  return ZX_to_monic(f, plead);
+  return ZX_Q_normalize(f, plead);
 }
 
 /* return p-adic roots of f, precision prec */

@@ -632,7 +632,8 @@ thueinit(GEN pol, long flag, long prec)
   if (dpol <= 0) pari_err(constpoler,"thueinit");
   RgX_check_ZX(pol, "thueinit");
   if (varn(pol)) { pol = leafcopy(pol); setvarn(pol, 0); }
-  POL = ZX_to_monic(pol, &L); /* POL monic: POL(x) = C pol(x/L) */
+  /* POL monic: POL(x) = C pol(x/L), L integer */
+  POL = ZX_primitive_to_monic(Q_primpart(pol), &L);
   C = gdiv(powiu(L, dpol), gel(pol, dpol+2));
   pol = POL;
 

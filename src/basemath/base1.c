@@ -332,7 +332,7 @@ ZX_Z_normalize(GEN pol, GEN *ptk)
   if (ptk) *ptk = k; return POL;
 }
 
-/* Assume pol != 0 in Z[X]. Find C, L in Z such that POL = C pol(x/L) monic
+/* Assume pol != 0 in Z[X]. Find C in Q, L in Z such that POL = C pol(x/L) monic
  * in Z[X]. Return POL and set *ptlc = L. Wasteful (but correct) if pol is not
  * primitive: better if caller used Q_primpart already. No GC. */
 GEN
@@ -343,7 +343,10 @@ ZX_primitive_to_monic(GEN pol, GEN *ptlc)
 
   a = POL + 2; lc = gel(a,n);
   if (signe(lc) < 0) { POL = ZX_neg(POL); a = POL+2; lc = gel(a,n); }
-  if (is_pm1(lc)) return ZX_Z_normalize(pol, ptlc);
+  if (is_pm1(lc)) {
+    if (ptlc) *ptlc = gen_1;
+    return pol;
+  }
   fa = Z_factor_limit(lc,0); lc = gen_1;
   P = gel(fa,1);
   E = gel(fa,2);
@@ -379,8 +382,19 @@ ZX_primitive_to_monic(GEN pol, GEN *ptlc)
       gel(a,j) = diviiexact(gel(a,j), pku);
     }
   }
+  if (ptlc) *ptlc = lc;
+  return POL;
+}
+/* Assume pol != 0 in Z[X]. Find C,L in Q such that POL = C pol(x/L)
+ * monic in Z[X]. Return POL and set *ptlc = L.
+ * Wasteful (but correct) if pol is not primitive: better if caller used
+ * Q_primpart already. No GC. */
+GEN
+ZX_Q_normalize(GEN pol, GEN *ptlc)
+{
+  GEN lc = NULL, POL = ZX_primitive_to_monic(pol, ptlc? &lc : NULL);
   POL = ZX_Z_normalize(POL, ptlc);
-  if (ptlc) *ptlc = mul_denom(*ptlc, lc);
+  if (ptlc) *ptlc = gdiv(lc, *ptlc);
   return POL;
 }
 /* pol != 0 in Z[x], returns a monic polynomial POL in Z[x] generating the
@@ -486,7 +500,7 @@ polgalois(GEN x, long prec)
     return f? galois_res(n,3,1,1):
               galois_res(n,6,-1,2);
   }
-  x1 = x = ZX_primitive_to_monic(x,NULL); av1=avma;
+  x1 = x = ZX_Q_normalize(x,NULL); av1=avma;
   if (n > 7) return galoisbig(x, prec);
   for(;;)
   {
@@ -920,8 +934,8 @@ nfiso0(GEN a, GEN b, long fliso)
   if (fliso && nfa && !nfb) { swap(a,b); nfb = nfa; nfa = NULL; }
   if (!tests_OK(a, nfa, b, nfb, fliso)) { avma = av; return gen_0; }
 
-  if (nfb) lb = gen_1; else b = ZX_primitive_to_monic(b,&lb);
-  if (nfa) la = gen_1; else a = ZX_primitive_to_monic(a,&la);
+  if (nfb) lb = gen_1; else b = ZX_Q_normalize(b,&lb);
+  if (nfa) la = gen_1; else a = ZX_Q_normalize(a,&la);
   a = leafcopy(a); setvarn(a,0);
   b = leafcopy(b); vb = varn(b);
   if (nfb)
@@ -1535,7 +1549,7 @@ nfbasic_init(GEN x, long flag, GEN fa, nfbasic_t *T)
     RgX_check_ZX(x, "nfinit");
     if (!ZX_is_irred(x)) pari_err(redpoler, "nfinit");
     if (flag & nf_RED || !gequal1(gel(x,lg(x)-1)))
-      x = ZX_primitive_to_monic(x, &(T->lead));
+      x = ZX_Q_normalize(x, &(T->lead));
     nfmaxord(&S, x, flag, fa);
     if (DEBUGLEVEL) msgtimer("round4");
     index = S.index;

@@ -576,10 +576,11 @@ nfmaxord(nfmaxord_t *S, GEN T, long flag, GEN fa)
   allbase_from_ordmax(S, ordmax, P, T);
 }
 
+/* d a t_INT, f a t_MAT factorisation sharing some prime divisors with d */
 static GEN
-update_fact(GEN x, GEN f)
+update_fact(GEN d, GEN f)
 {
-  GEN E, Q, d = ZX_disc(x), P = gel(f,1);
+  GEN E, Q, P = gel(f,1);
   long iq, i, k, l;
   if (typ(f)!=t_MAT || lg(f)!=3)
     pari_err(talker,"not a factorisation in nfbasis");
@@ -608,8 +609,8 @@ _nfbasis(GEN x0, long flag, GEN fa, GEN *pbas, GEN *pdK)
   if (degpol(x0) <= 0) pari_err(zeropoler,"nfbasis");
   RgX_check_ZX(x0, "nfbasis");
 
-  x = ZX_to_monic(x0, &lead);
-  if (fa && lead != gen_1) fa = update_fact(x, fa);
+  x = ZX_Q_normalize(x0, &lead);
+  if (fa && lead != gen_1) fa = update_fact(ZX_disc(x), fa);
   if (flag & compat_PARTIAL) fl |= nf_PARTIALFACT;
   if (flag & compat_ROUND2)  fl |= nf_ROUND2;
   nfmaxord(&S, x, fl, fa);
