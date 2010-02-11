@@ -835,6 +835,7 @@ static void
 compileuserfunc(entree *ep, long n, int mode)
 {
   long vn=getmvar(ep);
+  if (tree[n].x<OPnboperator) compile_err("operator unknown",tree[n].str);
   if (vn)
     op_push(OCpushlex,vn,n);
   else
