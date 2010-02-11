@@ -36,8 +36,9 @@ cat > $file << EOT
 TARGET = extgcd
 SHELL  = $make_sh
 
-DBGFLAGS   = $DBGFLAGS $CFLAGS
-CFLAGS     = $OPTFLAGS $CFLAGS
+DBGFLAGS   = $DBGFLAGS
+CFLAGS     = $OPTFLAGS
+EXTRACFLAGS=
 #CFLAGS    = \$(DBGFLAGS)
 
 # Various linkers use different flags to force static compilation. Choose
@@ -56,8 +57,8 @@ CC         = $CC
 CPPFLAGS   = -I. -I$includedir
 LD         = $LD
 LDFLAGS    = $LDFLAGS
-MODLD       = $MODLD
-MODLDFLAGS  = $MODLDFLAGS
+MODLD      = $MODLD
+MODLDFLAGS = $MODLDFLAGS
 EXTRAMODLDFLAGS = $EXTRAMODLDFLAGS
 EXTRALIBS  =
 
@@ -83,16 +84,16 @@ dyn: \$(TARGET)-dyn
 dynlib: \$(DYN)
 
 \$(DYN): \$(OBJS)
-	\$(MODLD) -o \$@ \$(MODLDFLAGS) \$(OBJS) \$(EXTRAMODLDFLAGS)
+	\$(MODLD) -o \$@ \$(MODLDFLAGS) \$(EXTRACFLAGS) \$(OBJS) \$(EXTRAMODLDFLAGS)
 
 \$(TARGET)-sta: \$(OBJS)
-	\$(LD) -o \$@ \$(LDFLAGS) \$< \$(EXTRALIBS) \$(STATIC) \$(LIBS)
+	\$(LD) -o \$@ \$(LDFLAGS) \$(EXTRACFLAGS) \$< \$(EXTRALIBS) \$(STATIC) \$(LIBS)
 
 \$(TARGET)-dyn: \$(OBJS)
-	\$(LD) -o \$@ \$(LDFLAGS) \$< \$(EXTRALIBS) \$(RUNPTH) \$(LIBS)
+	\$(LD) -o \$@ \$(LDFLAGS) \$(EXTRACFLAGS) \$< \$(EXTRALIBS) \$(RUNPTH) \$(LIBS)
 
 %.o: %.c
-	\$(CC) -c \$(CFLAGS) \$(CPPFLAGS) \$(DLCFLAGS) \$<
+	\$(CC) -c \$(CFLAGS) \$(EXTRACFLAGS) \$(CPPFLAGS) \$(DLCFLAGS) \$<
 clean:
 	-\$(RM) *.o \$(ALL)
 EOT

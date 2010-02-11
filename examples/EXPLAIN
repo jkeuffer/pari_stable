@@ -1,13 +1,22 @@
 This directory contains:
 
+* Inputrc: an example of .inputrc file for the readline library.
+
+* A generic Makefile for PARI programs, adapted to your system by Configure.
+
 * the C program extgcd.c using the Pari library described in Chapter 4 of
-the users' manual. A generic Makefile for PARI programs, adapted to your
-system by Configure, is included.
+the users' manual.  To build it, run:
+make TARGET=extgcd
 
 * the C program thread.c using the Pari library in a multi-threaded context,
-as described in Appendix D of the users' manual.
+POSIX threads version, as described in Appendix D of the users' manual.
+This require that PARI is Configured with --enable-tls. To build it, run
+make TARGET=thread EXTRALIBS=-lpthread
 
-* Inputrc: an example of .inputrc file for the readline library.
+* the C program thread.c using the Pari library in a multi-threaded context,
+OpenMP version, as described in Appendix D of the users' manual.
+This require that PARI is Configured with --enable-tls. To build it, run
+make TARGET=openmp EXTRACFLAGS=-fopenmp
 
 * Several examples of complete GP programs. The rest of this file gives a
 brief description of these programs. They should be read into GP
