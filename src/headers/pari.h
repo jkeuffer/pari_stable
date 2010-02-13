@@ -35,6 +35,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include <string.h>
 #if !defined(_WIN32) && !defined(WINCE)
 #  include <unistd.h>
+#else
+#  include <io.h>
 #endif
 #include <math.h>
 #include <memory.h>
