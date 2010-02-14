@@ -8,14 +8,18 @@ This directory contains:
 the users' manual.  To build it, run:
 make TARGET=extgcd
 
+* the C program minigp.c using the Pari library to implement a basic GP
+interpretor (Need readline). To build it, run
+make TARGET=minigp EXTRALIBS=-lreadline
+
 * the C program thread.c using the Pari library in a multi-threaded context,
 POSIX threads version, as described in Appendix D of the users' manual.
-This require that PARI is Configured with --enable-tls. To build it, run
+This requires that PARI is Configured with --enable-tls. To build it, run
 make TARGET=thread EXTRALIBS=-lpthread
 
 * the C program openmp.c using the Pari library in a multi-threaded context,
 OpenMP version, as described in Appendix D of the users' manual.
-This require that PARI is Configured with --enable-tls. To build it, run
+This requires that PARI is Configured with --enable-tls. To build it, run
 make TARGET=openmp EXTRACFLAGS=-fopenmp
 
 * Several examples of complete GP programs. The rest of this file gives a
