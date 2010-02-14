@@ -873,7 +873,7 @@ get_norm_fact_primes(GEN G, GEN E, GEN C)
     N = mulii(N, powii(p, mului(pr_get_f(P), ex)));
   }
   if (C) N = mulii(N, pr_norm(C));
-  return gerepileupto(av, N);
+  return gerepileuptoint(av, N);
 }
 
 /* gen: HNF ideals */
