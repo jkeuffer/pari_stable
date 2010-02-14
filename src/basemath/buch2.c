@@ -860,6 +860,7 @@ init_units(GEN BNF)
 static GEN
 get_norm_fact_primes(GEN G, GEN E, GEN C)
 {
+  pari_sp av=avma;
   GEN N = gen_1, P, p;
   long i, c = lg(E);
   for (i=1; i<c; i++)
@@ -872,7 +873,7 @@ get_norm_fact_primes(GEN G, GEN E, GEN C)
     N = mulii(N, powii(p, mului(pr_get_f(P), ex)));
   }
   if (C) N = mulii(N, pr_norm(C));
-  return N;
+  return gerepileupto(av, N);
 }
 
 /* gen: HNF ideals */
@@ -2779,6 +2780,7 @@ makematal(GEN bnf)
 
   for (j=1; j<lma; j++)
   {
+    pari_sp btop = avma;
     long e;
     GEN c = getrand();
     GEN ex = (j<=lW)? gel(W,j): gel(B,j-lW);
@@ -2788,13 +2790,13 @@ makematal(GEN bnf)
     if (y && fact_ok(nf,y,C,pFB,ex))
     {
       if (DEBUGLEVEL>1) fprintferr("*%ld ",j);
-      gel(ma,j) = y; continue;
+      gel(ma,j) = gerepileupto(btop, y); continue;
     }
     y = isprincipalfact_or_fail(bnf, C, pFB, ex);
     if (typ(y) != t_INT)
     {
       if (DEBUGLEVEL>1) fprintferr("%ld ",j);
-      gel(ma,j) = gel(y,2); continue;
+      gel(ma,j) = gerepileupto(btop,gel(y,2)); continue;
     }
 
     prec = itos(y);
