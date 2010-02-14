@@ -1651,6 +1651,7 @@ break_loop(int sigint)
 int
 gp_handle_exception(long numerr)
 {
+  if (numerr == talker2) return 0;
   if (disable_exception_handler) { disable_exception_handler = 0; return 0; }
   if (numerr == errpile) { evalstate_clone(); avma = top; }
   if (GP_DATA->flags & BREAKLOOP) return break_loop(numerr < 0);
