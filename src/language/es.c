@@ -4119,7 +4119,7 @@ gp_history(gp_hist *H, long p, char *old, char *entry)
   ulong t = H->total, s = H->size;
   GEN z;
 
-  if (!t) 
+  if (!t)
     pari_err(old?talker2:talker,"The result history is empty", old, entry);
 
   if (p <= 0) p += t; /* count |p| entries starting from last */
