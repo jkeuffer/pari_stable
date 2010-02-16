@@ -1232,13 +1232,13 @@ trivially be changed by modifying the definition of \kbd{argvec} in
 \kbd{anal.c:identifier()}. This limitation should disappear in future
 versions.
 
-When the function is called under \kbd{gp}, the prototype is scanned and each time
-an atom corresponding to a mandatory argument is met, a user-given argument
-is read (\kbd{gp} outputs an error message it the argument was missing). Each time
-an optional atom is met, a default value is inserted if the user omits the
-argument. The ``automatic'' atoms fill in the argument list transparently,
-supplying the current value of the corresponding variable (or a dummy
-pointer).
+When the function is called under \kbd{gp}, the prototype is scanned and each
+time an atom corresponding to a mandatory argument is met, a user-given
+argument is read (\kbd{gp} outputs an error message it the argument was
+missing). Each time an optional atom is met, a default value is inserted if the
+user omits the argument. The ``automatic'' atoms fill in the argument list
+transparently, supplying the current value of the corresponding variable (or a
+dummy pointer).
 
 For instance, here is how you would code the following prototypes, which
 do not involve default values:
