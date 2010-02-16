@@ -726,7 +726,7 @@ that the result is allocated using \tet{pari_malloc} instead of the PARI
 stack. The resulting \kbd{GEN} is now impervious to garbage collecting
 routines, but should be freed using \tet{pari_free}.
 
-\subsec{Stack)independent binary objects}
+\subsec{Stack-independent binary objects}
 
 \fun{GENbin*}{copy_bin}{GEN x} copies $x$ into a malloc'ed structure suitable
 for stack-independent binary transmission or storage. The object obtained
