@@ -127,10 +127,10 @@ structure. Built-in PARI routines are grouped in \emph{modules}, which
 are arrays of \kbd{entree} structs, the last of which satisfy
 \kbd{name = NULL} (sentinel).
 
-There are currently six modules in GP: general functions
-(\tet{functions_basic}), gp-specific functions (\tet{functions_fp}),
+There are currently five modules in GP: general functions
+(\tet{functions_basic}), gp-specific functions (\tet{functions_gp}),
 gp-specific highlevel functions (\tet{functions_highlevel}),
-member functions, and two modules of obsolete functions. The function
+ and two modules of obsolete functions. The function
 \kbd{pari\_init} initializes the interpreter and declares all symbols
 in \kbd{functions\_basic}. You may declare further functions on a case by
 case basis or as a whole module using
