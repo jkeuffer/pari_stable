@@ -1219,12 +1219,15 @@ do not use the resulting \kbd{long}\cr
 \+& \kbd{P} &  series precision (default \kbd{seriesprecision},
  global variable \kbd{precdl} for the library)\cr
 
-\noindent $\bullet$ Return type: \kbd{GEN} by default, otherwise the
-following can appear at the start of the code string:
+\noindent $\bullet$ Return type: \kbd{GEN} by default (must be valid for
+\kbd{gerepileupto}), otherwise the following can appear at the start of the
+code string:
 %
 \+& \kbd{i} & return \kbd{int}\cr
 \+& \kbd{l} & return \kbd{long}\cr
 \+& \kbd{v} & return \kbd{void}\cr
+\+& \kbd{m} & return \kbd{GEN}. Here it is allowable to return 
+a component of the input (used for member functions).\cr
 
 No more than 8 arguments can be given (syntax requirements and return types
 are not considered as arguments). This is currently hardcoded but can

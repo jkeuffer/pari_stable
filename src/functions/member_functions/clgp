@@ -2,7 +2,7 @@ Function: _.clgp
 Help: _.clgp
 Section: member_functions
 C-Name: member_clgp
-Prototype: G
+Prototype: mG
 Description:
  (bnf):clgp:copy:parens         $clgp:1
  (bnr):clgp:copy:parens         $clgp:1

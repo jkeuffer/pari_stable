@@ -342,15 +342,13 @@ member_tu(GEN x)
 GEN
 member_futu(GEN x) /*  concatenation of fu and tu, w is lost */
 {
-  GEN fuc = member_fu(x);
-  return concat(fuc, gel(member_tu(x),2));
+  return shallowconcat(member_fu(x), gel(member_tu(x),2));
 }
 
 GEN
 member_tufu(GEN x) /*  concatenation of tu and fu, w is lost */
 {
-  GEN fuc = member_fu(x);
-  return concat(gel(member_tu(x),2), fuc);
+  return shallowconcat(gel(member_tu(x),2), member_fu(x));
 }
 
 /* structure of (Z_K/m)^*, where x is an idealstarinit (with or without gen)
@@ -397,7 +395,7 @@ member_gen(GEN x)
   pari_sp av;
   long t;
   GEN y = get_prid(x);
-  if (y) return mkvec2copy(gel(y,1), gel(y,2));
+  if (y) return mkvec2(gel(y,1), gel(y,2));
   (void)get_nf(x,&t);
   if (t == typ_GAL) return gal_get_gen(x);
   av = avma;
@@ -513,7 +511,7 @@ member_omega(GEN x)
 {
   if (!is_ell(x)) member_err("omega");
   if (!ell_is_real(x)) pari_err(talker,"curve not defined over R");
-  return mkvec2copy(gel(x,15), gel(x,16));
+  return mkvec2(gel(x,15), gel(x,16));
 }
 
 GEN
@@ -521,7 +519,7 @@ member_eta(GEN x)
 {
   if (!is_ell(x)) member_err("eta");
   if (!ell_is_real(x)) pari_err(talker,"curve not defined over R");
-  return mkvec2copy(gel(x,17), gel(x,18));
+  return mkvec2(gel(x,17), gel(x,18));
 }
 
 GEN

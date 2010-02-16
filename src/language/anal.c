@@ -235,7 +235,7 @@ check_proto(const char *code)
 {
   long arity = 0;
   const char *s = code, *old;
-  if (*s == 'l' || *s == 'v' || *s == 'i') s++;
+  if (*s == 'l' || *s == 'v' || *s == 'i' || *s == 'm') s++;
   while (*s && *s != '\n') switch (*s++)
   {
     case '&':
@@ -272,6 +272,7 @@ check_proto(const char *code)
     case ',': break;
     case '\n': return arity; /* Before the mnemonic */
 
+    case 'm':
     case 'l':
     case 'i':
     case 'v': pari_err(talker2, "this code has to come first", s-1, code);

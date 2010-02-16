@@ -1,7 +1,7 @@
 Function: _.bid
 Section: member_functions
 C-Name: member_bid
-Prototype: G
+Prototype: mG
 Help: _.bid
 Description:
  (gen):gen                      member_bid($1)

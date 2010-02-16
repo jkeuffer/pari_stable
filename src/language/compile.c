@@ -475,12 +475,14 @@ detag(long n)
 
 /* return type for GP functions */
 static op_code
-get_ret_type(const char **p, long arity, Gtype *t)
+get_ret_type(const char **p, long arity, Gtype *t, long *flag)
 {
+  *flag = 0;
   if (**p == 'v') { (*p)++; *t=Gvoid; return OCcallvoid; }
   else if (**p == 'i') { (*p)++; *t=Gsmall; return OCcallint; }
   else if (**p == 'l') { (*p)++; *t=Gsmall; return OCcalllong; }
-  else { *t=Ggen; return arity==2?OCcallgen2:OCcallgen; }
+  else if (**p == 'm') { (*p)++; *flag = FLnocopy; }
+  *t=Ggen; return arity==2?OCcallgen2:OCcallgen;
 }
 
 /*supported types:
@@ -844,13 +846,13 @@ compileuserfunc(entree *ep, long n, int mode)
 }
 
 static void
-compilefunc(entree *ep, long n, int mode)
+compilefunc(entree *ep, long n, int mode, long flag)
 {
   pari_sp ltop=avma;
   long j;
-  long x=tree[n].x;
-  long y=tree[n].y;
+  long x=tree[n].x, y=tree[n].y;
   op_code ret_op;
+  long ret_flag;
   Gtype ret_typ;
   char const *p,*q;
   char c;
@@ -1002,7 +1004,7 @@ compilefunc(entree *ep, long n, int mode)
   if (!ep->value)
     compile_err("unknown function",tree[n].str);
   nbopcodes = s_opcode.n;
-  ret_op = get_ret_type(&p, ep->arity, &ret_typ);
+  ret_op = get_ret_type(&p, ep->arity, &ret_typ, &ret_flag);
   j=1;
   if (*p)
   {
@@ -1286,6 +1288,8 @@ compilefunc(entree *ep, long n, int mode)
   if (j<=nb)
     compile_err("too many arguments",tree[arg[j]].str);
   op_push_loc(ret_op, (long) ep, str);
+  if ((ret_flag&FLnocopy) && !(flag&FLnocopy))
+    op_push_loc(OCcopy,0,str);
   if (ret_typ==Ggen && nbpointers==0 && s_opcode.n>nbopcodes+128)
   {
     op_insert_loc(nbopcodes,OCavma,0,str);
@@ -1307,7 +1311,8 @@ genclosure(long n, entree *ep)
   long arity=0, maskarg=0, maskarg0=0, stop=0;
   PPproto mod;
   Gtype ret_typ;
-  op_code ret_op=get_ret_type(&code,ep->arity,&ret_typ);
+  long ret_flag;
+  op_code ret_op=get_ret_type(&code,ep->arity,&ret_typ,&ret_flag);
   p=code;
   while ((mod=parseproto(&p,&c,NULL))!=PPend)
   {
@@ -1454,6 +1459,7 @@ genclosure(long n, entree *ep)
     q = p;
   }
   op_push(ret_op, (long) ep, n);
+  if (ret_flag==FLnocopy) op_push(OCcopy,0,n);
   compilecast(n, ret_typ, Ggen);
   return getfunction(&pos,nb+arity,0,strtoGENstr(ep->name));
 }
@@ -1468,7 +1474,7 @@ closurefunc(entree *ep, long n, long mode)
   if (!C) compile_err("sorry, closure not implemented",tree[n].str);
   if (C==gen_0)
   {
-    compilefunc(ep,n,mode);
+    compilefunc(ep,n,mode,0);
     return;
   }
   op_push(OCpushgen, data_push(C), n);
@@ -1524,7 +1530,7 @@ compilenode(long n, int mode, long flag)
       }
     }
     else
-      compilefunc(is_entry("_=_"),n,mode);
+      compilefunc(is_entry("_=_"),n,mode,0);
     return;
   case Fconst:
     {
@@ -1602,7 +1608,7 @@ compilenode(long n, int mode, long flag)
       if (EpVALENCE(ep)==EpVAR || EpVALENCE(ep)==EpNEW)
         compileuserfunc(ep,n,mode);
       else
-        compilefunc(ep,n,mode);
+        compilefunc(ep,n,mode,flag);
       return;
     }
   case Fcall:
@@ -1793,11 +1799,11 @@ optimizefunc(entree *ep, long n)
   const char *p=ep->code;
   char c;
   GEN arg = listtogen(y,Flistarg);
-  long nb=lg(arg)-1;
+  long nb=lg(arg)-1, ret_flag;
   if (!p)
     fl=0;
   else
-    (void) get_ret_type(&p, 2, &t);
+    (void) get_ret_type(&p, 2, &t, &ret_flag);
   if (p && *p)
   {
     j=1;
@@ -1975,4 +1981,3 @@ optimizenode(long n)
     pari_err(bugparier,"optimizenode");
   }
 }
-

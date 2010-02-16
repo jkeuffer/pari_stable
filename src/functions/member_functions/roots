@@ -1,7 +1,7 @@
 Function: _.roots
 Section: member_functions
 C-Name: member_roots
-Prototype: G
+Prototype: mG
 Help: _.roots
 Description:
  (gal):gen:copy                 gel($1, 3)

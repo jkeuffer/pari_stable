@@ -2,7 +2,7 @@ Function: _.gen
 Help: _.gen
 Section: member_functions
 C-Name: member_gen
-Prototype: G
+Prototype: mG
 Description:
  (gal):gen:copy        gel($1, 7)
  (clgp):gen:copy       gel($1, 3)

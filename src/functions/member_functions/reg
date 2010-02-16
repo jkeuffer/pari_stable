@@ -2,7 +2,7 @@ Function: _.reg
 Help: _.reg
 Section: member_functions
 C-Name: member_reg
-Prototype: G
+Prototype: mG
 Description:
  (bnr):void                $"ray regulator not implemented"
  (bnf):real:copy        gmael($1, 8, 2)

@@ -2,7 +2,7 @@ Function: _.sign
 Help: _.sign
 Section: member_functions
 C-Name: member_sign
-Prototype: G
+Prototype: mG
 Description:
  (nf):vec:copy                  gel($1, 2)
  (gen):vec                      member_sign($1)

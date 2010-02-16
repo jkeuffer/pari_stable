@@ -2,6 +2,6 @@ Function: _.orders
 Help: _.orders
 Section: member_functions
 C-Name: member_orders
-Prototype: G
+Prototype: mG
 Description:
  (gal):vecsmall:copy   gel($1, 8)

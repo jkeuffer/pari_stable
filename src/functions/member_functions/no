@@ -2,7 +2,7 @@ Function: _.no
 Help: _.no
 Section: member_functions
 C-Name: member_no
-Prototype: G
+Prototype: mG
 Description:
  (clgp):gen:copy                gel($1, 1)
  (gen):gen                      member_no($1)

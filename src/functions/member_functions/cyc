@@ -2,7 +2,7 @@ Function: _.cyc
 Help: _.cyc
 Section: member_functions
 C-Name: member_cyc
-Prototype: G
+Prototype: mG
 Description:
  (clgp):gen:copy                gel($1, 2)
  (gen):gen                      member_cyc($1)
