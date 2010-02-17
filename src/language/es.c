@@ -4141,13 +4141,31 @@ gp_history(gp_hist *H, long p, char *old, char *entry)
   return z;
 }
 
-GEN
+static GEN
 set_hist_entry(gp_hist *H, GEN x)
 {
   int i = H->total % H->size;
   H->total++;
   if (H->res[i]) gunclone(H->res[i]);
   return H->res[i] = gclone(x);
+}
+
+GEN
+pari_get_hist(long p)
+{
+  return gp_history(GP_DATA->hist, p, NULL,NULL);
+}
+
+GEN
+pari_add_hist(GEN x)
+{
+  return set_hist_entry(GP_DATA->hist, x);
+}
+
+ulong
+pari_nb_hist(void)
+{
+  return GP_DATA->hist->total;
 }
 
 /*******************************************************************/

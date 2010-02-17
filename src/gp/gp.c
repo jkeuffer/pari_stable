@@ -984,7 +984,7 @@ escape(char *tch)
         {
           long i, l = lg(x);
           pari_warn(warner,"setting %ld history entries", l-1);
-          for (i=1; i<l; i++) (void)set_hist_entry(GP_DATA->hist, (GEN)x[i]);
+          for (i=1; i<l; i++) (void)pari_add_hist(gel(x,i));
         }
       }
       break;
@@ -1489,7 +1489,6 @@ gp_main_loop(long flag)
 {
   VOLATILE const long dorecover = flag & gp_RECOVER;
   VOLATILE const long ismain    = flag & gp_ISMAIN;
-  gp_hist *H  = GP_DATA->hist;
   VOLATILE GEN z = gnil;
   VOLATILE pari_sp av = avma;
   filtre_t F;
@@ -1502,7 +1501,7 @@ gp_main_loop(long flag)
       static long tloc, outtyp;
       long er;
       outtyp = GP_DATA->fmt->prettyp;
-      tloc = H->total; gp_recover_save(&rec);
+      tloc = pari_nb_hist(); gp_recover_save(&rec);
       /* recover: jump from error [ > 0 ] or allocatemem [ -1 ] */
       if ((er = setjmp(env[s_env.n-1])))
       {
@@ -1513,7 +1512,7 @@ gp_main_loop(long flag)
           char *s = (char*)global_err_data;
           if (s && *s) fprintferr("%Ps\n", readseq(s));
           GP_DATA->fmt->prettyp = outtyp;
-          prune_history(H, tloc);
+          prune_history(GP_DATA->hist, tloc);
         }
         avma = av = top;
         kill_all_buffers(b);
@@ -1556,7 +1555,7 @@ gp_main_loop(long flag)
     if (z == gnil) continue;
 
     if (GP_DATA->flags & SIMPLIFY) z = simplify_shallow(z);
-    z = set_hist_entry(H, z);
+    z = pari_add_hist(z);
     if (! is_silent(b->buf) ) gp_output(z, GP_DATA);
   }
 }

@@ -1,6 +1,5 @@
 Function: %
-C-Name: parihist
+C-Name: pari_get_hist
 Prototype: D0,L,
-Class: gp
 Section: symbolic_operators
 Help: last history item.

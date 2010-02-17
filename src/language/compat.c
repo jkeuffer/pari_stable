@@ -99,6 +99,7 @@ static GEN
 principalideal(GEN nf, GEN x) { return algtobasis(nf,x); }
 
 entree oldfonctions[]={
+{"%",0,(void*)pari_get_hist,1,"D0,L,","last history item"},
 {"!_",0,(void*)gnot,13,"G","!_"},
 {"#_",0,(void*)glength,13,"lG","length(x): number of non code words in x, number of characters for a string."},
 {"+_",0,NULL,13,NULL,"+_"},

@@ -394,7 +394,6 @@ void check_filtre(filtre_t *F);
 
 gp_data *default_gp_data(void);
 GEN  gp_history(gp_hist *H, long p, char *old, char *entry);
-GEN  set_hist_entry(gp_hist *H, GEN x);
 
 void delete_dirs(gp_path *p);
 void gp_expand_path(gp_path *p);

@@ -26,12 +26,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 static void whatnow0(char *s) { whatnow(s,0); }
 
-GEN
-parihist(long p)
-{
-  return gp_history(GP_DATA->hist, p, NULL,NULL);
-}
-
 #include "gp_init.h"
 
 /* Backward Compatibility */
@@ -65,7 +59,6 @@ setprecr(long n)
 }
 
 entree functions_oldgp[] = {
-{"%",0,(void*)parihist,1,"D0,L,","last history item"},
 {"allocatemem",11,(void *)allocatemem0,2,"vLp","allocatemem(s)=allocates a new stack of s bytes, or doubles the stack if size is 0"},
 {"box",35,(void *)rectbox,10,"vLGG","box(w,x2,y2)=if the cursor is at position (x1,y1), draw a box with diagonal (x1,y1) and (x2,y2) in rectwindow w (cursor does not move)"},
 {"color",2,(void *)rectcolor,2,"vLL","color(w,c)=set default color to c in rectwindow. Possible values for c are 1=sienna, 2=cornsilk, 3=red, 4=black, 5=grey, 6=blue, 7=gainsborough"},
