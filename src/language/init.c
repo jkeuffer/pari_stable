@@ -1055,6 +1055,7 @@ trap0(const char *e, GEN r, GEN f)
        if (!strcmp(e,"errpile")) numerr = errpile;
   else if (!strcmp(e,"typeer")) numerr = typeer;
   else if (!strcmp(e,"gdiver")) numerr = gdiver;
+  else if (!strcmp(e,"impl")) numerr = impl;
   else if (!strcmp(e,"invmoder")) numerr = invmoder;
   else if (!strcmp(e,"archer")) numerr = archer;
   else if (!strcmp(e,"alarmer")) numerr = alarmer;

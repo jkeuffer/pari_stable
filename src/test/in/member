@@ -49,7 +49,7 @@ test(s)=
 {
   for (i=1, #members,
     my (m = members[i]);
-    trap(,, print(".", m, ": ",  eval(Str(s,".", m))))
+    trap("impl",,trap("talker",,trap("typeer",, print(".", m, ": ",  eval(Str(s,".", m))))))
   );
 }
 

@@ -48,6 +48,8 @@ Doc: tries to
 
  \kbd{invmoder}: impossible inverse modulo
 
+ \kbd{impl}: not yet implemented
+
  \kbd{overflower}: all forms of arithmetic overflow, including length
  or exponent overflow (when a larger value is supplied than the
  implementation can handle).
