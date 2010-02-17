@@ -935,11 +935,6 @@ pari_add_function(entree *ep)
 {
   fill_hashtable_single(functions_hash, ep);
 }
-void
-pari_add_module(entree *ep)
-{
-  pari_fill_hashtable(functions_hash, ep);
-}
 
 /********************************************************************/
 /**                                                                **/

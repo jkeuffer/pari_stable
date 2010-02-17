@@ -150,9 +150,6 @@ const char * closure_func_err(void);
 GEN  gp_closure(long n);
 long eval_mnemonic(GEN str, const char *tmplate);
 
-pari_stack *pari_get_modules(void);
-pari_stack *pari_get_oldmodules(void);
-
 INLINE long
 is_keyword_char(char c) { return (isalnum((int)c) || c=='_'); }
 

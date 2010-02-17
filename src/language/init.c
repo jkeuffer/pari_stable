@@ -505,8 +505,6 @@ pari_init_defaults(void)
 /*********************************************************************/
 /*                   FUNCTION HASHTABLES, MODULES                    */
 /*********************************************************************/
-pari_stack *pari_get_modules(void) { return &s_MODULES; }
-pari_stack *pari_get_oldmodules(void) { return &s_OLDMODULES; }
 
 /* Initialize hashtable */
 static void
@@ -562,6 +560,22 @@ pari_init_functions(void)
   functions_hash = (entree**) pari_calloc(sizeof(entree*)*functions_tblsz);
   pari_fill_hashtable(functions_hash,
                       new_fun_set? functions_basic:oldfonctions);
+}
+
+void
+pari_add_module(entree *ep)
+{
+  if (new_fun_set)
+    pari_fill_hashtable(functions_hash, ep);
+  stack_pushp(&s_MODULES, ep);
+}
+
+void
+pari_add_oldmodule(entree *ep)
+{
+  if (!new_fun_set)
+    pari_fill_hashtable(functions_hash, ep);
+  stack_pushp(&s_OLDMODULES, ep);
 }
 
 static void

@@ -150,6 +150,11 @@ it adds to the default set via the call
   pari_add_module(functions_highlevel);
 @eprog
 
+\fun{void}{pari_add_oldmodule}{entree *mod} adds all the routines in module
+\kbd{mod} to the table of symbols in the interpreter when running in
+"PARI 1.xx compatible" mode (see \kbd{default(compatible)}) . It assumes
+\kbd{pari\_init} has been called.
+
 \subsec{Public callbacks}
 
 The \kbd{gp} calculator associates elaborate functions (for instance the
@@ -1226,7 +1231,7 @@ code string:
 \+& \kbd{i} & return \kbd{int}\cr
 \+& \kbd{l} & return \kbd{long}\cr
 \+& \kbd{v} & return \kbd{void}\cr
-\+& \kbd{m} & return \kbd{GEN}. Here it is allowable to return 
+\+& \kbd{m} & return \kbd{GEN}. Here it is allowable to return
 a component of the input (used for member functions).\cr
 
 No more than 8 arguments can be given (syntax requirements and return types

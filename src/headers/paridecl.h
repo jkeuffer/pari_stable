@@ -1842,6 +1842,7 @@ void    msgtimer(const char *format, ...);
 GEN     newblock(size_t n);
 void    pari_add_function(entree *ep);
 void    pari_add_module(entree *ep);
+void    pari_add_oldmodule(entree *ep);
 void    pari_close(void);
 void    pari_close_opts(ulong init_opts);
 int     pari_daemon(void);

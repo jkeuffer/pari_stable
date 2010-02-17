@@ -1877,7 +1877,7 @@ main(int argc, char **argv)
 {
 #endif
   void **A;
-  pari_stack s_A, *newfun, *oldfun;
+  pari_stack s_A;
 
   GP_DATA = default_gp_data();
   stack_init(&s_env, sizeof(*env), (void**)&env);
@@ -1897,18 +1897,9 @@ main(int argc, char **argv)
 #ifdef SIGALRM
   (void)os_signal(SIGALRM,gp_alarm_handler);
 #endif
-  newfun = pari_get_modules();
-  stack_pushp(newfun, functions_gp);
-  stack_pushp(newfun, functions_highlevel);
-  oldfun = pari_get_oldmodules();
-  stack_pushp(oldfun, functions_oldgp);
-  if (new_fun_set)
-  {
-    pari_add_module(functions_gp);
-    pari_add_module(functions_highlevel);
-  }
-  else
-    pari_add_module(functions_oldgp);
+  pari_add_module(functions_gp);
+  pari_add_module(functions_highlevel);
+  pari_add_oldmodule(functions_oldgp);
 
   init_graph();
 #ifdef READLINE
