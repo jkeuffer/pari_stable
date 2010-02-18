@@ -16,5 +16,12 @@ else
   file="$2"
 fi
 
-cp "$1" "$2";
-if test -f "$file"; then chmod "$mode" "$file"; fi
+if test -d "$1"; then
+  mkdir -p "$file"
+  for f in `ls "$1"`; do
+    "$0" -m "$mode" "$1/$f" "$file"
+  done
+else
+  cp "$1" "$2";
+  if test -f "$file"; then chmod "$mode" "$file"; fi
+fi
