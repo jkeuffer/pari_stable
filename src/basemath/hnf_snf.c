@@ -2217,6 +2217,20 @@ ZM_snf_group(GEN H, GEN *newU, GEN *newUi)
  ****         Frobenius form and Jordan form of a matrix            ****
  ****                                                               ****
  ***********************************************************************/
+
+static long
+prod_degree(GEN V)
+{
+  long i, s=0, l = lg(V);
+  for (i=1; i<l; i++)
+  {
+    long d = degpol(gel(V,i));
+    if (d<0) return d;
+    s += d;
+  }
+  return s;
+}
+
 GEN
 Frobeniusform(GEN V, long n)
 {
@@ -2293,12 +2307,14 @@ matfrobenius(GEN M, long flag, long v)
   if (flag<2)
   {
     D = matsnf0(M_x,6);
+    if (prod_degree(D) != n) pari_err(talker, "accuracy lost in matfrobenius");
     if (flag != 1) D = Frobeniusform(D, n);
     return gerepileupto(ltop, D);
   }
   if (flag>2) pari_err(flagerr,"matfrobenius");
   A = matsnf0(M_x,3);
   D = smithclean(RgM_diagonal_shallow(gel(A,3)));
+  if (prod_degree(D) != n) pari_err(talker, "accuracy lost in matfrobenius");
   N = Frobeniusform(D, n);
   B = build_frobeniusbc(D, n);
   R = build_basischange(N, RgM_mul(B,gel(A,1)));
