@@ -3323,6 +3323,7 @@ simplify_shallow(GEN x)
 {
   long i, lx;
   GEN y, z;
+  if (!x) pari_err(bugparier, "simplify, NULL input");
 
   switch(typ(x))
   {
