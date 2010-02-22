@@ -5,7 +5,8 @@ Done for version 2.4.3 (released ??/??/2008):
 
   Fixed
     1- \h m-n no longer worked
-BA  2- some error messages displayed internal token names (e.g for '1) 3- named colors in 'graphcolormap' were not portable across graphic drivers
+BA  2- some error messages displayed internal token names (e.g for '1)
+    3- named colors in 'graphcolormap' were not portable across graphic drivers
     4- setunion(Set(),Set()) -> SEGV [#714]
 DE  5- [Solaris] pari.desc won't compile [#715]
     6- 822.pm broke the formatting of inline program examples
