@@ -1663,7 +1663,7 @@ addcolumntomatrix(GEN V, GEN invp, GEN L)
 static GEN
 minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
 {
-  GEN x,res,p1,u,r,L,gnorme,invp,V;
+  GEN A, x, res, u, r, L, gnorme, invp, V;
   long n = lg(a), i, j, k, s, maxrank;
   pari_sp av0 = avma, av1, av, lim;
   double p,maxnorm,BOUND,*v,*y,*z,**q;
@@ -1684,7 +1684,7 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
   switch(flag)
   {
     case min_FIRST:
-      if (gequal0(BORNE)) pari_err(talker,"bound = 0 in minim2");
+      if (isintzero(BORNE)) pari_err(talker,"bound = 0 in minim2");
       res = cgetg(3,t_VEC); break;
     case min_ALL: res = cgetg(4,t_VEC); break;
     case min_PERF: break;
@@ -1720,10 +1720,14 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
   if (lg(u) != n) pari_err(talker,"not a definite form in minim0");
   a = qf_apply_ZM(a,u);
 
-  n--;
+  n--; A = a; /* save exact input */
   a = RgM_gtofp(a, DEFAULTPREC);
   r = qfgaussred_positive(a);
-  if (!r) pari_err(precer, "minim0");
+  if (!r) {
+    r = qfgaussred_positive(A); /* exact computation */
+    if (!r) pari_err(talker,"not a positive definite form in minim0");
+    r = RgM_gtofp(r, DEFAULTPREC);
+  }
   for (j=1; j<=n; j++)
   {
     v[j] = rtodbl(gcoeff(r,j,j));
@@ -1823,11 +1827,7 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
           for (i=1; i<=maxrank; i++) Lnew[i] = L[i];
           L = Lnew; maxrank = maxranknew;
         }
-        if (s<=maxrank)
-        {
-          p1 = new_chunk(n+1); gel(L,s) = p1;
-          for (i=1; i<=n; i++) p1[i] = x[i];
-        }
+        if (s<=maxrank) gel(L,s) = leafcopy(x);
         break;
 
       case min_VECSMALL:
