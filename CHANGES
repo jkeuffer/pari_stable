@@ -5,8 +5,7 @@ Done for version 2.4.3 (released ??/??/2008):
 
   Fixed
     1- \h m-n no longer worked
-BA  2- some error messages displayed internal token names (e.g for '1)
-    3- named colors in 'graphcolormap' were not portable across graphic drivers
+BA  2- some error messages displayed internal token names (e.g for '1) 3- named colors in 'graphcolormap' were not portable across graphic drivers
     4- setunion(Set(),Set()) -> SEGV [#714]
 DE  5- [Solaris] pari.desc won't compile [#715]
     6- 822.pm broke the formatting of inline program examples
@@ -211,6 +210,7 @@ BA159- [from 2.4.2] pointers to Vecsmall components were broken.
 BA160- [from 2.4.2] ellap could return a wrong result. [#1030]
   161- thue() could return wrong results (ZX_Z_normalize() didn't follow its
        documentation) [#1032]
+  162- qfminim([1,2;2,1]*1.,,,2) -> SEGV [#1033]
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
