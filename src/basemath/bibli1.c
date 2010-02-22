@@ -1695,7 +1695,7 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
 
       res = const_vecsmall(maxrank, 0);
       if (flag == min_VECSMALL2) BORNE = shifti(BORNE,1);
-      if (gequal0(BORNE)) return res;
+      if (isintzero(BORNE)) return res;
       break;
     default: pari_err(flagerr, "minim0");
   }
@@ -1734,7 +1734,7 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
     for (i=1; i<j; i++) q[i][j] = rtodbl(gcoeff(r,i,j));
   }
 
-  if (flag==min_PERF || gequal0(BORNE))
+  if (flag==min_PERF || isintzero(BORNE))
   {
     double c;
     p = rtodbl(gcoeff(a,1,1));
@@ -1758,7 +1758,7 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
       L = new_chunk(1+maxrank);
       break;
     case min_PERF:
-      BORNE = gerepileupto(av1,BORNE);
+      BORNE = gerepileuptoint(av1,BORNE);
       maxrank = (n*(n+1)) >> 1;
       L = const_vecsmall(maxrank, 0);
       V = cgetg(1+maxrank, t_VECSMALL);
@@ -1807,7 +1807,7 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
     {
       pari_sp av2 = avma;
       gnorme = roundr(dbltor(p));
-      if (gcmp(gnorme,BORNE) >= 0) avma = av2;
+      if (cmpii(gnorme,BORNE) >= 0) avma = av2;
       else
       {
         BOUND=gtodouble(gnorme)*(1+eps); s=0;
