@@ -18,7 +18,9 @@ Doc: $x$ being a square and symmetric matrix representing a positive definite
  quadratic form, this function deals with the vectors of $x$ whose norm is
  less than or equal to $b$, enumerated using the Fincke-Pohst algorithm,
  storing at most $m$ vectors (no limit if $m$ is omitted). The function
- searches for the minimal non-zero vectors if $b$ is omitted. The precise
+ searches for the minimal non-zero vectors if $b$ is omitted. The behavior is
+ undefined if $x$ is not positive definite (a ``precision too low'' error is
+ most likely, although more precise error messages are possible). The precise
  behavior depends on $\fl$.
 
  If $\fl=0$ (default), seeks at most $2m$ vectors. The result is a
