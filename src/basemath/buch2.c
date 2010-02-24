@@ -2442,15 +2442,20 @@ row_mul2n(GEN x, long i, long e)
   for (j = 1; j < l; j++) gcoeff(x,i,j) = gmul2n(gcoeff(x,i,j), e);
 }
 
-/* A = complex logarithmic embeddings of units (u_j) found so far */
+/* A = complex logarithmic embeddings of units (u_j) found so far,
+ * RU = R1+R2 = unit rank, N = field degree
+ * need = max(1, unit rank defect)
+ * L = NULL (prec problem) or B^(-1) * A with approximate rational entries
+ * (as t_REAL), B a submatrix of A, with (probably) maximal rank RU */
 static GEN
-compute_multiple_of_R(GEN A, long RU, long N, GEN *ptL)
+compute_multiple_of_R(GEN A, long RU, long N, long *pneed, GEN *ptL)
 {
   GEN T, d, mdet, Im_mdet, Im_expo, kR, xreal, xexpo, L;
   long i, j, r, e, R1 = 2*RU - N;
   int precpb;
   pari_sp av = avma;
 
+  *pneed = 1;
   if (RU == 1) { *ptL = zeromat(0, lg(A)-1); return gen_1; }
 
   if (DEBUGLEVEL) fprintferr("\n#### Computing regulator multiple\n");
@@ -2462,8 +2467,8 @@ compute_multiple_of_R(GEN A, long RU, long N, GEN *ptL)
   {
     if (DEBUGLEVEL)
       fprintferr("Unit group rank %ld < %ld\n",lg(mdet)-1, RU);
-    avma = av;
-    return NULL;
+    *pneed = RU - (lg(mdet)-1);
+    avma = av; return NULL;
   }
   T = cgetg(RU+1,t_COL);
   for (i=1; i<=R1; i++) gel(T,i) = gen_1;
@@ -2477,8 +2482,8 @@ compute_multiple_of_R(GEN A, long RU, long N, GEN *ptL)
   {
     if (DEBUGLEVEL)
       fprintferr("Unit group rank %ld < %ld\n",lg(mdet)-1 - r, RU);
-    avma = av;
-    return NULL;
+    *pneed = RU - (lg(mdet)-1);
+    avma = av; return NULL;
   }
 
   Im_mdet = cgetg(RU+1, t_MAT); /* extract independent columns */
@@ -3351,10 +3356,9 @@ PRECPB:
       goto MORE;
     }
   }
-  need = 1;
   zc = (cache.last - cache.base) - (lg(B)-1) - (lg(W)-1);
   A = vecslice(C, 1, zc); /* cols corresponding to units */
-  R = compute_multiple_of_R(A, RU, N, &lambda);
+  R = compute_multiple_of_R(A, RU, N, &need, &lambda);
   if (!lambda) { precpb = "bestappr"; goto PRECPB; }
   if (!R)
   { /* not full rank for units */
