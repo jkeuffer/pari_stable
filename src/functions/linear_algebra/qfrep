@@ -18,4 +18,4 @@ Doc:
 
  \item 1: count vectors of even norm from $1$ to $2B$.
 
- \item 2: return a \typ{VECSMALL} instead of a \typ{GEN}
+ \item 2: return a \typ{VECSMALL} instead of a \typ{VEC}

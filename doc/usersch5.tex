@@ -223,7 +223,7 @@ meaningless.
 
 \subsec{Allocation}
 
-\fun{GEN}{cgetg}{long l, long t} allocates (the root of) a \typ{GEN}
+\fun{GEN}{cgetg}{long l, long t} allocates (the root of) a \kbd{GEN}
 of type $t$ and length $l$. Sets $z[0]$.
 
 \fun{GEN}{cgeti}{long l} allocates a \typ{INT} of length $l$ (including the
@@ -7464,7 +7464,7 @@ manipulate subvectors or submatrices but, like the accessors above, none of
 them are suitable for \tet{gerepileupto}. Worse, there are no type
 verification, nor bound checking, so use at your own risk.
 
-\fun{GEN}{shallowcopy}{GEN x} returns a \typ{GEN} whose components are the
+\fun{GEN}{shallowcopy}{GEN x} returns a \kbd{GEN} whose components are the
 components of $x$ (no copy is made). The result may now be used to compute in
 place without destroying $x$. This is essentially equivalent to
 \bprog
