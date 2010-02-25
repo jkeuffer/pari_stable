@@ -2375,19 +2375,15 @@ be_honest(FB_t *F, GEN nf, FACT *fact)
 }
 
 /* A t_MAT of complex floats, in fact reals. Extract a submatrix B
- * whose columns are definitely non-0, i.e. gexpo(A[j]) >= -2, renormalized
- * so that gexpo(B[i]) ~ 1. Set (*pE)[i] to e >= 0 such that A[j] = B[i]*2^e.
- * The indexing sets (i vs j) are not the same for A and B since 0 columns
- * are deleted.
+ * whose columns are definitely non-0, i.e. gexpo(A[j]) >= -2
  *
  * If possible precision problem (t_REAL 0 with large exponent), set
  * *precpb to 1 */
 static GEN
-renormalize_cols(GEN A, GEN *pE, int *precpb)
+clean_cols(GEN A, int *precpb)
 {
   long l = lg(A), h, i, j, k;
-  GEN B, E;
-  *pE = E = cgetg(l, t_VECSMALL);
+  GEN B;
   *precpb = 0;
   if (l == 1) return A;
   h = lg(gel(A,1));;
@@ -2395,28 +2391,18 @@ renormalize_cols(GEN A, GEN *pE, int *precpb)
   for (i = k = 1; i < l; i++)
   {
     GEN Ai = gel(A,i);
-    long maxe = 0;
     int non0 = 0;
     for (j = 1; j < h; j++)
     {
       GEN c = gel(Ai,j);
-      long e = gexpo(c);
-      if (e >= -2)
+      if (gexpo(c) >= -2)
       {
-        if (gequal0(c)) *precpb = 1;
-        else {
-          non0 = 1;
-          if (e > maxe) maxe = e;
-        }
+        if (gequal0(c)) *precpb = 1; else non0 = 1;
       }
     }
-    E[k] = 0;
-    if (non0) {
-      if (maxe > 0) { E[k] = maxe; Ai = gmul2n(Ai, -maxe); }
-      gel(B, k++) = Ai;
-    }
+    if (non0) gel(B, k++) = Ai;
   }
-  setlg(B, k); setlg(E, k); return B;
+  setlg(B, k); return B;
 }
 
 static long
@@ -2433,15 +2419,6 @@ compute_multiple_of_R_pivot(GEN x, GEN x0/*unused*/, GEN c)
   return (k && ex > -32)? k: lx;
 }
 
-/* x[i,] *= 2^e. In place. */
-static void
-row_mul2n(GEN x, long i, long e)
-{
-  long j, l = lg(x);
-  if (!e) return;
-  for (j = 1; j < l; j++) gcoeff(x,i,j) = gmul2n(gcoeff(x,i,j), e);
-}
-
 /* A = complex logarithmic embeddings of units (u_j) found so far,
  * RU = R1+R2 = unit rank, N = field degree
  * need = max(1, unit rank defect)
@@ -2450,8 +2427,8 @@ row_mul2n(GEN x, long i, long e)
 static GEN
 compute_multiple_of_R(GEN A, long RU, long N, long *pneed, GEN *ptL)
 {
-  GEN T, d, mdet, Im_mdet, Im_expo, kR, xreal, xexpo, L;
-  long i, j, r, e, R1 = 2*RU - N;
+  GEN T, d, mdet, Im_mdet, Im_expo, kR, xreal, L;
+  long i, j, r, R1 = 2*RU - N;
   int precpb;
   pari_sp av = avma;
 
@@ -2460,7 +2437,7 @@ compute_multiple_of_R(GEN A, long RU, long N, long *pneed, GEN *ptL)
 
   if (DEBUGLEVEL) fprintferr("\n#### Computing regulator multiple\n");
   xreal = real_i(A); /* = (log |sigma_i(u_j)|) */
-  mdet = renormalize_cols(xreal, &xexpo, &precpb);
+  mdet = clean_cols(xreal, &precpb);
   /* will cause precision to increase on later failure, but we may succeed! */
   *ptL = precpb? NULL: gen_1;
   if (lg(mdet) < RU)
@@ -2482,7 +2459,7 @@ compute_multiple_of_R(GEN A, long RU, long N, long *pneed, GEN *ptL)
   {
     if (DEBUGLEVEL)
       fprintferr("Unit group rank %ld < %ld\n",lg(mdet)-1 - r, RU);
-    *pneed = RU - (lg(mdet)-1);
+    *pneed = RU - (lg(mdet)-1-r);
     avma = av; return NULL;
   }
 
@@ -2491,18 +2468,12 @@ compute_multiple_of_R(GEN A, long RU, long N, long *pneed, GEN *ptL)
   /* N.B: d[1] = 1, corresponding to T above */
   gel(Im_mdet, 1) = T;
   Im_expo[1] = 0;
-  e = 0;
   for (i = j = 2; i <= RU; j++)
-    if (d[j]) {
-      gel(Im_mdet, i) = gel(mdet,j);
-      Im_expo[i] = xexpo[j-1];
-      e += xexpo[j-1]; i++;
-    }
+    if (d[j]) gel(Im_mdet, i++) = gel(mdet,j);
 
   /* integral multiple of R: the cols we picked form a Q-basis, they have an
    * index in the full lattice. First column is T */
   kR = divru(det2(Im_mdet), N);
-  if (e) setexpo(kR, expo(kR)+e);
   /* R > 0.2 uniformly */
   if (!signe(kR) || expo(kR) < -3) { avma=av; return NULL; }
 
@@ -2510,8 +2481,6 @@ compute_multiple_of_R(GEN A, long RU, long N, long *pneed, GEN *ptL)
   L = RgM_inv(Im_mdet);
   if (!L) { *ptL = NULL; return kR; }
 
-  /* restore exponents, i = 1 corresponds to T */
-  for (i = 2; i <= RU; i++) row_mul2n(L, i, -Im_expo[i]);
   L = rowslice(L, 2, RU); /* remove first line */
   L = RgM_mul(L, xreal); /* approximate rational entries */
   gerepileall(av,2, &L, &kR);
@@ -2540,12 +2509,11 @@ bestappr_noer(GEN x, GEN k)
  *
  * Output: *ptkR = R, *ptU = basis of fundamental units (in terms lambda) */
 static int
-compute_R(GEN lambda, GEN z, GEN *ptL, GEN *ptkR, double *ptr_c)
+compute_R(GEN lambda, GEN z, GEN *ptL, GEN *ptkR)
 {
   pari_sp av = avma;
-  long r;
-  GEN L,H,D,den,R;
-  double c;
+  long r, ec;
+  GEN L, H, D, den, R, c;
 
   if (DEBUGLEVEL) { fprintferr("\n#### Computing check\n"); flusherr(); }
   D = gmul2n(mpmul(*ptkR,z), 1); /* bound for denom(lambda) */
@@ -2568,15 +2536,22 @@ compute_R(GEN lambda, GEN z, GEN *ptL, GEN *ptkR, double *ptr_c)
 
   /* tentative regulator */
   R = gmul(*ptkR, gdiv(ZM_det_triangular(H), powiu(den, r)));
-  c = gtodouble(gmul(R,z)); /* should be n (= 1 if we are done) */
+  c = gmul(R,z); /* should be n (= 1 if we are done) */
   if (DEBUGLEVEL)
   {
     msgtimer("bestappr/regulator");
     fprintferr("\n#### Tentative regulator : %Ps\n", gprec_w(R,3));
-    fprintferr("\n ***** check = %f\n",c);
+    fprintferr("\n ***** check = %Ps\n",gprec_w(c,3));
   }
-  if (c < 0.75) { avma = av; return fupb_PRECI; }
-  if (c > 1.3) { avma = av; *ptr_c = c; return fupb_RELAT; }
+  ec = gexpo(c);
+  /* safe check for c < 0.75 : avoid underflow in gtodouble() */
+  if (ec < -1 || (ec == -1 && gtodouble(c) < 0.75)) { 
+    avma = av; return fupb_PRECI;
+  }
+  /* safe check for c > 1.3 : avoid overflow */
+  if (ec > 0 || (ec == 0 && gtodouble(c) > 1.3)) {
+    avma = av; return fupb_RELAT;
+  }
   *ptkR = R; *ptL = L; return fupb_NONE;
 }
 
@@ -3211,7 +3186,7 @@ Buchall_param(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long
   pari_sp av0 = avma, av, av2;
   long PRECREG, N, R1, R2, RU, LIMC, LIMC2, lim, zc, i, jid;
   long nreldep, sfb_trials, need, old_need = -1, precdouble = 0, precadd = 0;
-  double drc, LOGD, LOGD2, check;
+  double drc, LOGD, LOGD2;
   GEN fu, zu, nf, D, A, W, R, Res, z, h, L_jid, PERM;
   GEN res, L, resc, B, C, C0, lambda, dep, clg1, clg2, Vbase;
   const char *precpb = NULL;
@@ -3370,7 +3345,7 @@ PRECPB:
   if (DEBUGLEVEL) fprintferr("\n#### Tentative class number: %Ps\n", h);
 
   z = mulrr(Res, resc); /* ~ hR if enough relations, a multiple otherwise */
-  switch (compute_R(lambda, divir(h,z), &L, &R, &check))
+  switch (compute_R(lambda, divir(h,z), &L, &R))
   {
     case fupb_RELAT:
       goto MORE; /* not enough relations */
