@@ -2545,7 +2545,7 @@ compute_R(GEN lambda, GEN z, GEN *ptL, GEN *ptkR)
   }
   ec = gexpo(c);
   /* safe check for c < 0.75 : avoid underflow in gtodouble() */
-  if (ec < -1 || (ec == -1 && gtodouble(c) < 0.75)) { 
+  if (ec < -1 || (ec == -1 && gtodouble(c) < 0.75)) {
     avma = av; return fupb_PRECI;
   }
   /* safe check for c > 1.3 : avoid overflow */
