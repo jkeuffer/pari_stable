@@ -1246,11 +1246,7 @@ code string:
 \+& \kbd{m} & return \kbd{GEN}. Here it is allowable to return
 a component of the input (used for member functions).\cr
 
-No more than 8 arguments can be given (syntax requirements and return types
-are not considered as arguments). This is currently hardcoded but can
-trivially be changed by modifying the definition of \kbd{argvec} in
-\kbd{anal.c:identifier()}. This limitation should disappear in future
-versions.
+No more than 8 arguments to the C function can be given.
 
 When the function is called under \kbd{gp}, the prototype is scanned and each
 time an atom corresponding to a mandatory argument is met, a user-given
