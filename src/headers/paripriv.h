@@ -307,32 +307,6 @@ typedef struct {
 void lim_lines_output(char *s, long n, long max);
 void gen_output(GEN x, pariout_t *T);
 
-struct pari_parsestate
-{
-  long node;
-  int once;
-  const char *lex_start, *unused_chars;
-  GEN lasterror;
-};
-
-struct pari_compilestate
-{
-  long opcode, operand, data, localvars, frames, dbginfo;
-  long offset;
-  const char *dbgstart;
-};
-
-struct pari_evalstate
-{
-  pari_sp avma;
-  long sp;
-  long rp;
-  long var;
-  long lvars;
-  long trace;
-  struct pari_compilestate comp;
-};
-
 void parsestate_reset(void);
 void parsestate_save(struct pari_parsestate *state);
 void parsestate_restore(struct pari_parsestate *state);
@@ -345,16 +319,6 @@ void evalstate_clone(void);
 void evalstate_reset(void);
 void evalstate_restore(struct pari_evalstate *state);
 void evalstate_save(struct pari_evalstate *state);
-
-struct gp_context
-{
-  long listloc;
-  struct pari_evalstate eval;
-  struct pari_parsestate parse;
-};
-
-void gp_context_save(struct gp_context* rec);
-void gp_context_restore(struct gp_context* rec);
 
 /* GP_DATA */
 typedef struct {

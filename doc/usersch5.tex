@@ -201,6 +201,13 @@ calls
 \bprog
   cb_pari_ask_confirm(s);
 @eprog
+\subsec{Saving and restoring the GP context}
+
+\fun{void}{gp_context_save}{struct gp_context* rec} save the current GP
+context.
+
+\fun{void}{gp_context_restore}{struct gp_context* rec} restore the current
+GP context. The new context need to be an ancestor of the current context.
 
 \subsec{GP history}
 

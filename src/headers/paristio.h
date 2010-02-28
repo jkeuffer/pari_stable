@@ -61,6 +61,39 @@ typedef struct entree {
   struct entree *next;
 } entree;
 
+struct pari_parsestate
+{
+  long node;
+  int once;
+  const char *lex_start, *unused_chars;
+  GEN lasterror;
+};
+
+struct pari_compilestate
+{
+  long opcode, operand, data, localvars, frames, dbginfo;
+  long offset;
+  const char *dbgstart;
+};
+
+struct pari_evalstate
+{
+  pari_sp avma;
+  long sp;
+  long rp;
+  long var;
+  long lvars;
+  long trace;
+  struct pari_compilestate comp;
+};
+
+struct gp_context
+{
+  long listloc;
+  struct pari_evalstate eval;
+  struct pari_parsestate parse;
+};
+
 typedef struct PariOUT {
   void (*putch)(char);
   void (*puts)(const char*);

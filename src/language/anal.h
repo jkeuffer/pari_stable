@@ -145,7 +145,6 @@ void pari_init_evaluator(void);
 GEN  pari_compile_str(char *lex, int strict);
 void optimizenode(long n);
 void closure_context(GEN C, long lpc);
-void closure_err(void);
 const char * closure_func_err(void);
 GEN  gp_closure(long n);
 long eval_mnemonic(GEN str, const char *tmplate);
