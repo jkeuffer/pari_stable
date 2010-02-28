@@ -768,7 +768,7 @@ pari_close(void)
 /*******************************************************************/
 
 void
-gp_recover_save(struct gp_recover* rec)
+gp_context_save(struct gp_context* rec)
 {
   rec->listloc = next_block;
   evalstate_save(&rec->eval);
@@ -776,13 +776,13 @@ gp_recover_save(struct gp_recover* rec)
 }
 
 void
-gp_recover_restore(struct gp_recover* rec)
+gp_context_restore(struct gp_context* rec)
 {
   long i;
 
   if (!(GP_DATA->flags & RECOVER)) pari_exit();
   if (!try_to_recover) return;
-  /* disable gp_recover_restore() and SIGINT */
+  /* disable gp_context_restore() and SIGINT */
   try_to_recover = 0;
   BLOCK_SIGINT_START
   if (DEBUGMEM>2) fprintferr("entering recover(), loc = %ld\n", rec->listloc);

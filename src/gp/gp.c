@@ -1493,7 +1493,7 @@ gp_main_loop(long flag)
   VOLATILE pari_sp av = avma;
   filtre_t F;
   Buffer *b = filtered_buffer(&F);
-  struct gp_recover rec;
+  struct gp_context rec;
   for(;;)
   {
     if (dorecover)
@@ -1501,12 +1501,12 @@ gp_main_loop(long flag)
       static long tloc, outtyp;
       long er;
       outtyp = GP_DATA->fmt->prettyp;
-      tloc = pari_nb_hist(); gp_recover_save(&rec);
+      tloc = pari_nb_hist(); gp_context_save(&rec);
       /* recover: jump from error [ > 0 ] or allocatemem [ -1 ] */
       if ((er = setjmp(env[s_env.n-1])))
       {
-        if (er>=0) gp_recover_restore(&rec);
-        else gp_recover_save(&rec);
+        if (er>=0) gp_context_restore(&rec);
+        else gp_context_save(&rec);
 
         if (ismain && er > 0) {
           char *s = (char*)global_err_data;
@@ -1584,11 +1584,11 @@ break_loop(int sigint)
   filtre_t F;
   Buffer *b = filtered_buffer(&F);
   int go_on = sigint, cnt = 0;
-  struct gp_recover rec;
+  struct gp_context rec;
   const char *prompt;
   char promptbuf[MAX_PROMPT_LEN + 24];
   long nenv=stack_new(&s_env);
-  gp_recover_save(&rec);
+  gp_context_save(&rec);
   term_color(c_ERR); pari_putc('\n');
   if (sigint)
     print_errcontext("Break loop: type <Return> or Control-d to continue",
@@ -1616,7 +1616,7 @@ break_loop(int sigint)
     if ((er=setjmp(env[nenv])))
     {
       if (er<0) { s_env.n=1; longjmp(env[s_env.n-1], er); }
-      gp_recover_restore(&rec);
+      gp_context_restore(&rec);
       closure_err();
     }
     if (! gp_read_line(&F, prompt))

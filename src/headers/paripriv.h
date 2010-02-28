@@ -346,15 +346,15 @@ void evalstate_reset(void);
 void evalstate_restore(struct pari_evalstate *state);
 void evalstate_save(struct pari_evalstate *state);
 
-struct gp_recover
+struct gp_context
 {
   long listloc;
   struct pari_evalstate eval;
   struct pari_parsestate parse;
 };
 
-void gp_recover_save(struct gp_recover* rec);
-void gp_recover_restore(struct gp_recover* rec);
+void gp_context_save(struct gp_context* rec);
+void gp_context_restore(struct gp_context* rec);
 
 /* GP_DATA */
 typedef struct {
