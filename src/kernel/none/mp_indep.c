@@ -155,7 +155,7 @@ mul0r(GEN x)
 INLINE GEN
 div0r(GEN x) {
   long l = lg(x), e = expo(x);
-  return real_0_bit(-bit_accuracy(l) + e);
+  return real_0_bit(-bit_accuracy(l) - e);
 }
 
 GEN
