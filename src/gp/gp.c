@@ -1036,7 +1036,7 @@ gp_format_time(long flag)
   }
   if (delay >= 60000)
   {
-    sprintf(s, "%ldmn, ", delay / 60000); s+=strlen(s);
+    sprintf(s, "%ldmin, ", delay / 60000); s+=strlen(s);
     delay %= 60000;
   }
   if (delay >= 1000)
