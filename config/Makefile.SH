@@ -606,7 +606,7 @@ if test -s $f; then . $f; fi
 ANAL_H=$src/language/anal.h
 RECT_H=$src/graph/rect.h
 HUGELINE=
-for dir in basemath modules language gp graph graphdyn systems; do
+for dir in basemath modules language gp graph systems; do
   eval list='$'$dir
   case "$dir" in
     systems)  SRC=$src/$dir/$osname;;
