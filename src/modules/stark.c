@@ -2907,9 +2907,10 @@ get_pq(GEN D, struct gpq_data *T)
   GEN gcd24 = cgetg(Np + 1, t_VECSMALL); /* gcd(p-1, 24) */
   long i, l = 1;
   double best = 0.;
-  ulong q = 0;
+  ulong q = 0, maxq = maxprime();
   byteptr d = diffptr;
 
+  if (maxq > 50000) maxq = 50000;
   T->p = T->q = 0;
   for(;;)
   {
@@ -2919,7 +2920,7 @@ get_pq(GEN D, struct gpq_data *T)
     double t;
 
     NEXT_PRIME_VIADIFF_CHECK(q, d);
-    if (best > 0 && q > 1000000)
+    if (best > 0 && q >= maxq)
     {
       if (DEBUGLEVEL)
         pari_warn(warner,"possibly suboptimal (p,q) for D = %Ps", D);
