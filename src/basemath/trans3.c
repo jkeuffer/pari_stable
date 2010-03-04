@@ -2108,40 +2108,44 @@ ser_addmulXn(GEN y, GEN x, long d)
   z[1] = x[1]; return z;
 }
 
+/* q a t_POL */
 static GEN
 inteta_pol(GEN q, long v, long l)
 {
-  pari_sp av = avma, lim = stack_lim(av, 3);
-  GEN qn, ps, y = pol_1(0);
+  pari_sp av = avma, lim = stack_lim(av, 1);
+  GEN qn, ps, y;
   ulong vps, vqn, n;
 
-  qn = gen_1; ps = gen_1;
+  y = qn = ps = pol_1(0);
   vps = vqn = 0;
   for(n = 0;; n++)
   { /* qn = q^n,  ps = (-1)^n q^(n(3n+1)/2),
      * vps, vqn valuation of ps, qn HERE */
-    ulong vp1 = vps + 2*vqn + v; /* valuation of p1 at END of loop body */
+    pari_sp av2 = avma;
+    ulong vt = vps + 2*vqn + v; /* valuation of t at END of loop body */
     long k1, k2;
-    GEN p1, t;
-    vqn += v; vps = vp1 + vqn; /* valuation of qn, ps at END of body */
-    k1 = l-2 + v - vp1 + 1;
+    GEN t;
+    vqn += v; vps = vt + vqn; /* valuation of qn, ps at END of body */
+    k1 = l-2 + v - vt + 1;
     k2 = k1 - vqn; /* = l-2 + v - vps + 1 */
     if (k1 <= 0) break;
-    t = gmul(q,gsqr(qn));
+    t = RgX_mul(q, RgX_sqr(qn));
     t = RgX_modXn_shallow(t, k1);
-    p1 = gneg_i(gmul(ps,t)); /* p1 = (-1)^(n+1) q^(n(3n+1)/2 + 2n+1) */
-    p1 = RgX_modXn_shallow(p1, k1);
-    y = addmulXn(p1, y, vp1);
+    t = RgX_mul(ps,t);
+    t = RgX_modXn_shallow(t, k1);
+    t = RgX_neg(t); /* t = (-1)^(n+1) q^(n(3n+1)/2 + 2n+1) */
+    t = gerepileupto(av2, t);
+    y = addmulXn(t, y, vt);
     if (k2 <= 0) break;
 
-    qn = gmul(qn,q);
-    ps = gmul(p1,qn);
+    qn = RgX_mul(qn,q);
+    ps = RgX_mul(t,qn);
     ps = RgX_modXn_shallow(ps, k2);
     y = addmulXn(ps, y, vps);
 
-    if (low_stack(lim, stack_lim(av,3)))
+    if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) pari_warn(warnmem,"eta");
+      if(DEBUGMEM>1) pari_warn(warnmem,"eta, n = %ld", n);
       gerepileall(av, 3, &y, &qn, &ps);
     }
   }
@@ -2152,7 +2156,7 @@ static GEN
 inteta(GEN q)
 {
   long tx = typ(q);
-  GEN p1, ps, qn, y;
+  GEN ps, qn, y;
 
   y = gen_1; qn = gen_1; ps = gen_1;
   if (tx==t_PADIC)
@@ -2160,10 +2164,10 @@ inteta(GEN q)
     if (valp(q) <= 0) pari_err(talker,"non-positive valuation in eta");
     for(;;)
     {
-      p1 = gneg_i(gmul(ps,gmul(q,gsqr(qn))));
-      y = gadd(y,p1); qn = gmul(qn,q); ps = gmul(p1,qn);
-      p1 = y;
-      y = gadd(y,ps); if (gequal(p1,y)) return y;
+      GEN t = gneg_i(gmul(ps,gmul(q,gsqr(qn))));
+      y = gadd(y,t); qn = gmul(qn,q); ps = gmul(t,qn);
+      t = y;
+      y = gadd(y,ps); if (gequal(t,y)) return y;
     }
   }
 
@@ -2185,13 +2189,14 @@ inteta(GEN q)
     vps = vqn = 0;
     for(n = 0;; n++)
     { /* qn = q^n,  ps = (-1)^n q^(n(3n+1)/2) */
-      ulong vp1 = vps + 2*vqn + v;
+      ulong vt = vps + 2*vqn + v;
       long k;
-      p1 = gneg_i(gmul(ps,gmul(q,gsqr(qn))));
-      /* p1 = (-1)^(n+1) q^(n(3n+1)/2 + 2n+1) */
-      y = ser_addmulXn(p1, y, vp1);
-      qn = gmul(qn,q); ps = gmul(p1,qn);
-      vqn += v; vps = vp1 + vqn;
+      GEN t;
+      t = gneg_i(gmul(ps,gmul(q,gsqr(qn))));
+      /* t = (-1)^(n+1) q^(n(3n+1)/2 + 2n+1) */
+      y = ser_addmulXn(t, y, vt);
+      qn = gmul(qn,q); ps = gmul(t,qn);
+      vqn += v; vps = vt + vqn;
       k = l+v - vps; if (k <= 2) return y;
 
       y = ser_addmulXn(ps, y, vps);
@@ -2217,11 +2222,11 @@ inteta(GEN q)
     }
     for(;;)
     {
-      p1 = gneg_i(gmul(ps,gmul(q,gsqr(qn))));
+      GEN t = gneg_i(gmul(ps,gmul(q,gsqr(qn))));
       /* qn = q^n
        * ps = (-1)^n q^(n(3n+1)/2)
-       * p1 = (-1)^(n+1) q^(n(3n+1)/2 + 2n+1) */
-      y = gadd(y,p1); qn = gmul(qn,q); ps = gmul(p1,qn);
+       * t = (-1)^(n+1) q^(n(3n+1)/2 + 2n+1) */
+      y = gadd(y,t); qn = gmul(qn,q); ps = gmul(t,qn);
       y = gadd(y,ps);
       if (tx)
         { if (gexpo(ps)-gexpo(y) < l) return y; }
