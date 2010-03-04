@@ -574,7 +574,7 @@ TOOLARGE:
   x = ZM_hnf(x); lx = lg(x); j = ly; k = 0;
   for (i=1; i<ly; i++)
   {
-    if (gequal1(gcoeff(x,i,i + lx-ly)))
+    if (equali1(gcoeff(x,i,i + lx-ly)))
       perm[--j] = i;
     else
       perm[++k] = i;
@@ -764,10 +764,10 @@ hnfmerge_get_1(GEN A, GEN B)
     {
       GEN u;
       t = bezout(gcoeff(C,1,1), b, &u, NULL); /* >= 0 */
-      if (signe(u) && !gequal1(u)) gel(U,1) = ZC_Z_mul(gel(U,1), u);
+      if (signe(u) && !equali1(u)) gel(U,1) = ZC_Z_mul(gel(U,1), u);
       gcoeff(C,1,1) = t;
     }
-    if (signe(t) && is_pm1(t)) break;
+    if (equali1(t)) break;
   }
   if (j >= l) return NULL;
   return gerepileupto(av, ZM_ZC_mul(A,gel(U,1)));
