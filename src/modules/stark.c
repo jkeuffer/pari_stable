@@ -2830,7 +2830,7 @@ qfbforms(GEN D)
   {
     t = d >> 2; /* (b^2 - D) / 4*/
     for (a=1; a*a<=t; a++)
-      if (c = t/a, t == c*a) gel(L,++h) = mkvecsmall3(a,b,c);
+      if (c = t/a, t == c*a) gel(L,++h) = mkvecsmall3(a,0,c);
     b = 2; b2 = 4;
   }
   /* now b > 0, b = D (mod 2) */
@@ -2891,10 +2891,11 @@ struct gpq_data {
   GEN sqd; /* sqrt(D), t_REAL */
   GEN u;
   GEN pq, pq2; /* p*q, 2*p*q */
+  GEN qfpq ; /* class of \P * \Q */
 };
 
 /* find P and Q two non principal prime ideals (above p <= q) such that
- *   cl(P) = cl(Q) if P has order 2 in Cl(K).
+ *   cl(P) = cl(Q) if P,Q have order 2 in Cl(K).
  *   Ensure that e = 24 / gcd(24, (p-1)(q-1)) = 1 */
 /* D t_INT, discriminant */
 static void
@@ -2980,7 +2981,24 @@ gpq(GEN form, struct gpq_data *D, long prec)
 {
   long a = form[1], b = form[2], c = form[3], a2;
   long p = D->p, q = D->q;
-  GEN w, al, p1,p2,p3,p4;
+  GEN form2, w, al, p1,p2,p3,p4;
+  int fl, real = 0;
+
+  form2 = qficomp(D->qfpq, mkvec3(stoi(a), stoi(-b), stoi(c)));
+  /* form2 and form yield complex conjugate roots : only compute for the
+   * lexicographically smallest of the 2 */
+  fl = cmpis(gel(form2,1), a);
+  if (fl <= 0)
+  {
+    if (fl < 0) return NULL;
+    fl = cmpis(gel(form2,2), b);
+    if (fl <= 0)
+    {
+      if (fl < 0) return NULL;
+      /* form == form2 : real root */
+      real = 1;
+    }
+  }
 
   if (p == 2) { /* (a,b,c) = (1,1,0) mod 2 ? */
     if (a % q == 0 && (a & b & 1) && !(c & 1))
@@ -3007,7 +3025,9 @@ gpq(GEN form, struct gpq_data *D, long prec)
   p2 = p == q? p1: trueeta(gdivgs(al,q), prec);
   p3 = trueeta(gdiv(al, D->pq), prec);
   p4 = trueeta(al, prec);
-  return gdiv(gmul(p1,p2), gmul(p3,p4));
+  p4 = gdiv(gmul(p1,p2), gmul(p3,p4));
+  if (real && typ(p4) == t_COMPLEX) p4 = gel(p4, 1);
+  return p4;
 }
 
 /* returns an equation for the Hilbert class field of Q(sqrt(D)), D < 0
@@ -3015,7 +3035,7 @@ gpq(GEN form, struct gpq_data *D, long prec)
 static GEN
 quadhilbertimag(GEN D)
 {
-  GEN L, P, qfp, u;
+  GEN L, P, Pi, Pr, qfp, u;
   pari_sp av = avma;
   long h, i, prec;
   struct gpq_data T;
@@ -3049,31 +3069,40 @@ quadhilbertimag(GEN D)
   T.pq2 = shifti(T.pq,1);
   if (T.p == T.q)
   {
-    u = gel(qficompraw(qfp, qfp),2);
+    GEN qfbp2 = qficompraw(qfp, qfp);
+    u = gel(qfbp2,2);
     T.u = modii(u, T.pq2);
+    T.qfpq = redimag(qfbp2);
   }
   else
   {
     GEN qfq = primeform_u(D, T.q), bp = gel(qfp,2), bq = gel(qfq,2);
     T.u = Z_chinese(bp, bq, utoipos(T.p << 1), utoipos(T.q << 1));
     /* T.u = bp (mod 2p), T.u = bq (mod 2q) */
+    T.qfpq = qficomp(qfp, qfq);
   }
   /* u modulo 2pq */
   prec = 3;
+  Pr = cgetg(h+1,t_VEC);
+  Pi = cgetg(h+1,t_VEC);
   for(;;)
   {
-    long ex, exmax = 0;
+    long ex, exmax = 0, r1 = 0, r2 = 0;
     pari_sp av0 = avma;
     T.sqd = sqrtr_abs(itor(D, prec));
-    P = cgetg(h+1,t_VEC);
     for (i=1; i<=h; i++)
     {
       GEN s = gpq(gel(L,i), &T, prec);
       if (DEBUGLEVEL>3) fprintferr("%ld ", i);
-      gel(P,i) = s; ex = gexpo(s); if (ex > 0) exmax += ex;
+      if (!s) continue;
+      if (typ(s) != t_COMPLEX) gel(Pr, ++r1) = s; /* real root */
+      else                     gel(Pi, ++r2) = s;
+      ex = gexpo(s); if (ex > 0) exmax += ex;
     }
     if (DEBUGLEVEL>1) msgtimer("roots");
-    P = real_i( roots_to_pol(P,0) );
+    setlg(Pr, r1+1);
+    setlg(Pi, r2+1);
+    P = roots_to_pol_r1(shallowconcat(Pr,Pi), 0, r1);
     P = grndtoi(P,&exmax);
     if (DEBUGLEVEL>1) msgtimer("product, error bits = %ld",exmax);
     if (exmax <= -10) break;
