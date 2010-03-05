@@ -78,7 +78,8 @@ ApplyQ(GEN Q, GEN r)
   s = mpmul(gel(v,1), gel(rd,1));
   for (i=2; i<l; i++) s = mpadd(s, mpmul(gel(v,i) ,gel(rd,i)));
   s = mpmul(beta, s);
-  for (i=1; i<l; i++) gel(rd,i) = mpsub(gel(rd,i), mpmul(s, gel(v,i)));
+  for (i=1; i<l; i++) 
+    if (signe(gel(v,i))) gel(rd,i) = mpsub(gel(rd,i), mpmul(s, gel(v,i)));
 }
 static GEN
 ApplyAllQ(GEN Q, GEN r0, long k)
@@ -1968,6 +1969,23 @@ step(GEN x, GEN y, GEN inc, long k)
     inc[k] = (i > 0)? -1-i: 1-i;
   }
 }
+
+/* x a t_INT, y  t_INT or t_REAL */
+INLINE GEN
+mulimp(GEN x, GEN y)
+{
+  if (typ(y) == t_INT) return mulii(x,y);
+  return signe(y) ? mulir(x,y): gen_0;
+}
+/* x + y*z, x,z two mp's, y a t_INT */
+INLINE GEN
+addmulimp(GEN x, GEN y, GEN z)
+{
+  if (!signe(y)) return x;
+  if (typ(z) == t_INT) return mpadd(x, mulii(y, z));
+  return mpadd(x, mulir(y, z));
+}
+
 static GEN
 add_fudge(GEN x, long epsbit)
 { return mpadd(x, real2n(mpexpo(x) - epsbit, 3)); }
@@ -2029,8 +2047,9 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
       if (k > 1)
       {
         long l = k-1;
-        av1 = avma; p1 = mpmul(gcoeff(q,l,k),gel(x,k));
-        for (j=k+1; j<N; j++) p1 = mpadd(p1, mpmul(gcoeff(q,l,j),gel(x,j)));
+        av1 = avma;
+        p1 = mulimp(gel(x,k), gcoeff(q,l,k));
+        for (j=k+1; j<N; j++) p1 = addmulimp(p1, gel(x,j), gcoeff(q,l,j));
         gel(z,l) = gerepileuptoleaf(av1,p1);
 
         av1 = avma; p1 = mpsqr(mpadd(gel(x,k),gel(z,k)));
