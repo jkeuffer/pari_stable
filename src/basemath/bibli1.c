@@ -1975,7 +1975,7 @@ INLINE GEN
 mulimp(GEN x, GEN y)
 {
   if (typ(y) == t_INT) return mulii(x,y);
-  return signe(y) ? mulir(x,y): gen_0;
+  return signe(x) ? mulir(x,y): gen_0;
 }
 /* x + y*z, x,z two mp's, y a t_INT */
 INLINE GEN
