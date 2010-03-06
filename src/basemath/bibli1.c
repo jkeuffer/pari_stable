@@ -78,7 +78,7 @@ ApplyQ(GEN Q, GEN r)
   s = mpmul(gel(v,1), gel(rd,1));
   for (i=2; i<l; i++) s = mpadd(s, mpmul(gel(v,i) ,gel(rd,i)));
   s = mpmul(beta, s);
-  for (i=1; i<l; i++) 
+  for (i=1; i<l; i++)
     if (signe(gel(v,i))) gel(rd,i) = mpsub(gel(rd,i), mpmul(s, gel(v,i)));
 }
 static GEN
