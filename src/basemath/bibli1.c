@@ -1985,6 +1985,22 @@ addmulimp(GEN x, GEN y, GEN z)
   if (typ(z) == t_INT) return mpadd(x, mulii(y, z));
   return mpadd(x, mulir(y, z));
 }
+/* yk + vk * (xk + zk)^2 < borne1, approximately */
+static int
+check_bound(GEN borne1, long epsbit, GEN xk, GEN yk, GEN zk, GEN vk)
+{
+  pari_sp av = avma;
+  long i;
+  GEN t = mpadd(xk, zk);
+  if (isintzero(t))
+    i = mpcmp(yk, borne1);
+  else
+  {
+    t = mpmul(vk, mpsqr(t));
+    i = mpcmp(mpsub(mpadd(t,yk), borne1), gmul2n(t,-epsbit));
+  }
+  avma = av; return (i <= 0);
+}
 
 static GEN
 add_fudge(GEN x, long epsbit)
@@ -2052,8 +2068,14 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
         for (j=k+1; j<N; j++) p1 = addmulimp(p1, gel(x,j), gcoeff(q,l,j));
         gel(z,l) = gerepileuptoleaf(av1,p1);
 
-        av1 = avma; p1 = mpsqr(mpadd(gel(x,k),gel(z,k)));
-        p1 = mpadd(gel(y,k), mpmul(p1,gel(v,k)));
+        av1 = avma; p1 = mpadd(gel(x,k),gel(z,k));
+        if (typ(p1) == t_INT) { /* probably gen_0, avoid loss of accuracy */
+          p1 = sqri(p1);
+          p1 = addmulimp(gel(y,k), p1, gel(v,k));
+        } else {
+          p1 = sqrr(p1);
+          p1 = mpadd(gel(y,k), mpmul(p1, gel(v,k)));
+        }
         gel(y,l) = gerepileuptoleaf(av1, p1);
         /* skip the [x_1,...,x_skipfirst,0,...,0] */
         if ((l <= skipfirst && !signe(y[skipfirst]))
@@ -2066,17 +2088,11 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
       {
         if (!fl)
         {
-          av1 = avma;
-          p1 = mpmul(gel(v,k), mpsqr(mpadd(gel(x,k), gel(z,k))));
-          i = mpcmp(mpsub(mpadd(p1,gel(y,k)), borne1), gmul2n(p1,-epsbit));
-          avma = av1; if (i <= 0) break;
-
+          if (check_bound(borne1, epsbit, gel(x,k),gel(y,k),gel(z,k),gel(v,k)))
+            break;
           step(x,y,inc,k);
-
-          av1 = avma; /* same as above */
-          p1 = mpmul(gel(v,k), mpsqr(mpadd(gel(x,k), gel(z,k))));
-          i = mpcmp(mpsub(mpadd(p1,gel(y,k)), borne1), gmul2n(p1,-epsbit));
-          avma = av1; if (i <= 0) break;
+          if (check_bound(borne1, epsbit, gel(x,k),gel(y,k),gel(z,k),gel(v,k)))
+            break;
         }
         fl = 0; inc[k] = 1;
         if (++k > n) goto END;
