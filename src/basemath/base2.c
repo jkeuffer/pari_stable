@@ -2315,6 +2315,25 @@ to_ff_init(GEN nf, GEN *pr, GEN *T, GEN *p, int zk)
   *pr = gel(modpr,mpr_PR);
   *p = gel(*pr,1); return modpr;
 }
+
+/* Return an element of O_K which is set to x Mod T */
+GEN
+modpr_genFq(GEN modpr)
+{
+  switch(lg(modpr))
+  {
+    case SMALLMODPR: /* Fp */
+      return gen_1;
+    case LARGEMODPR:  /* painful case, p \mid index */
+      return gmael(modpr,mpr_NFP, 2);
+    default: /* trivial case : p \nmid index */
+    {
+      long v = varn( gel(modpr, mpr_T) );
+      return pol_x(v);
+    }
+  }
+}
+
 GEN
 nf_to_Fq_init(GEN nf, GEN *pr, GEN *T, GEN *p) {
   GEN modpr = to_ff_init(nf,pr,T,p,0);

@@ -769,6 +769,9 @@ canonical: all elements in a given residue class are represented by the same
 the residue field element $x$, either a \typ{INT} or an algebraic integer
 in \kbd{algtobasis} format.
 
+\fun{GEN}{modpr_genFq}{GEN modpr} Returns an \kbd{nf} element whose image by
+\tet{nf_to_Fq} is $X \pmod T$, if $\deg T>1$, else $1$.
+
 \fun{GEN}{zkmodprinit}{GEN nf, GEN pr} as \tet{nfmodprinit}, but we assume we
 will only reduce algebraic integers, hence do not initialize data allowing to
 remove denominators. More precisely, we can in fact still handle an $x$ whose

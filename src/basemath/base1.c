@@ -848,6 +848,43 @@ galoisapply(GEN nf, GEN aut, GEN x)
   return NULL; /* not reached */
 }
 
+GEN
+idealfrobenius(GEN nf, GEN gal, GEN pr)
+{
+  pari_sp av = avma;
+  GEN S=NULL, g=NULL; /*-Wall*/
+  GEN T, p, a, b, modpr, grp;
+  long i, f, n, s;
+  checknf(nf);
+  checkgal(gal);
+  checkprid(pr);
+  if (!gequal(nf_get_pol(nf), gal_get_pol(gal)))
+    pari_err(talker,"incompatible data in idealfrobenius");
+  if (pr_get_e(pr)>1)
+    pari_err(talker,"ramified prime in idealfrobenius");
+  f = pr_get_f(pr); n = nf_get_degree(nf);
+  if (f==1) { avma = av; return identity_perm(n); }
+  modpr = nf_to_Fq_init(nf,&pr,&T,&p);
+  grp = gal_get_group(gal);
+  for (i=1; i<=n; i++)
+  {
+    g = gel(grp,i);
+    if (perm_order(g)==f)
+    {
+      S = poltobasis(nf, galoispermtopol(gal, g));
+      if (idealval(nf, galoisapply(nf, S, pr), pr)==1)
+        break;
+    }
+  }
+  if (i>n) pari_err(talker,"Frobenius element not found");
+  a = pol_x(nf_get_varn(nf));
+  b = nf_to_Fq(nf, QX_galoisapplymod(nf, modpr_genFq(modpr), S, p), modpr);
+  for (s=0; !ZX_equal(a, b); s++)
+    a = Fq_pow(a, p, T, p);
+  g = perm_pow(g, Fl_inv(s, f));
+  return gerepileupto(av, g);
+}
+
 /* x = relative polynomial nf = absolute nf, bnf = absolute bnf */
 GEN
 get_bnfpol(GEN x, GEN *bnf, GEN *nf)
