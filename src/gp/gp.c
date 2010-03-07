@@ -1578,16 +1578,22 @@ gp_alarm_fun(void) {
 }
 
 int
-break_loop(int sigint)
+break_loop(int numerr)
 {
   static FILE *oldinfile = NULL;
   filtre_t F;
-  Buffer *b = filtered_buffer(&F);
-  int go_on = sigint, cnt = 0;
+  Buffer *b;
+  int sigint = numerr<0, go_on = sigint, cnt = 0;
   struct gp_context rec;
   const char *prompt;
   char promptbuf[MAX_PROMPT_LEN + 24];
-  long nenv=stack_new(&s_env);
+  long nenv;
+
+  if (numerr == talker2) return 0;
+  if (numerr == errpile) { evalstate_clone(); avma = top; }
+
+  b = filtered_buffer(&F);
+  nenv=stack_new(&s_env);
   gp_context_save(&rec);
   term_color(c_ERR); pari_putc('\n');
   if (sigint)
@@ -1647,21 +1653,23 @@ break_loop(int sigint)
 }
 
 /* numerr < 0: from SIGINT */
-int
-gp_handle_exception(long numerr)
-{
-  if (numerr == talker2) return 0;
-  if (disable_exception_handler) { disable_exception_handler = 0; return 0; }
-  if (numerr == errpile) { evalstate_clone(); avma = top; }
-  if (GP_DATA->flags & BREAKLOOP) return break_loop(numerr < 0);
-  return 0;
-}
-
-/* numerr < 0: from SIGINT */
 void
 gp_err_recover(long numerr)
 {
   longjmp(env[s_env.n-1], numerr);
+}
+
+/* numerr < 0: from SIGINT */
+int
+gp_handle_exception(long numerr)
+{
+  if (disable_exception_handler) disable_exception_handler = 0;
+  else if ((GP_DATA->flags & BREAKLOOP) && break_loop(numerr)) return 1;
+  if (s_env.n>=1) {
+    fprintferr("\n"); flusherr();
+    gp_err_recover(numerr>=0? numerr: talker);
+  }
+  return 0;
 }
 
 static void

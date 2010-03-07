@@ -670,14 +670,6 @@ pari_exit(void)
 static void
 dflt_err_recover(long errnum) { pari_exit(); }
 
-static int
-dflt_handle_exception(long errnum)
-{
-  evalstate_reset();
-  parsestate_reset();
-  return 0;
-}
-
 /* initialize PARI data. Initialize [new|old]fun to NULL for default set. */
 void
 pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts)
@@ -686,7 +678,7 @@ pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts)
 
   cb_pari_whatnow = NULL;
   cb_pari_sigint = dflt_sigint_fun;
-  cb_pari_handle_exception = dflt_handle_exception;
+  cb_pari_handle_exception = NULL;
   cb_pari_err_recover = dflt_err_recover;
 
   pari_stackcheck_init(&u);
@@ -843,11 +835,12 @@ err_seek(long n)
 void
 err_recover(long numerr)
 {
+  evalstate_reset();
+  parsestate_reset();
   initout(0);
   dbg_release();
   killallfiles(0);
   s_ERR_CATCH.n = 0; /* untrapped error: kill all error handlers */
-
   global_err_data = NULL;
   fprintferr("\n"); flusherr();
 
@@ -1056,7 +1049,8 @@ pari_err(int numerr, ...)
     pariErr->puts("  [hint] you can increase GP stack with allocatemem()\n");
   }
   pariOut = out;
-  if (cb_pari_handle_exception(numerr)) { flusherr(); return; }
+  if (cb_pari_handle_exception &&
+      cb_pari_handle_exception(numerr)) { flusherr(); return; }
   err_recover(numerr);
 }
 
