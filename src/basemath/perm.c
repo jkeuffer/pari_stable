@@ -211,12 +211,6 @@ vecvecsmall_search(GEN x, GEN y, long flag)
   return gen_search(x,y,flag,(void*)vecsmall_prefixcmp, cmp_nodata);
 }
 
-static long
-vecvecsmall_tablesearch(GEN x, GEN y)
-{
-  return tablesearch(x,y,vecsmall_prefixcmp);
-}
-
 /*************************************************************************/
 /**                                                                     **/
 /**                  Routines for handling permutations                 **/
@@ -583,12 +577,15 @@ group_quotient(GEN G, GEN H)
   GEN  p2, p3;
   long i, j, k, a = 1;
   long n = group_domain(G), o = group_order(H);
-  GEN elt = vecvecsmall_sort(group_elts(G,n));
+  GEN  elt = group_elts(G,n), elti;
   long le = lg(elt)-1;
   GEN used = zero_F2v(le+1);
   long l = le/o;
   p2 = cgetg(l+1, t_VEC);
   p3 = cgetg(n+1, t_VECSMALL);
+  elti = cgetg(n+1, t_VECSMALL);
+  for (i = 1; i<lg(elt); i++)
+    elti[mael(elt,i,1)]=i;
   for (i = 1, k = 1; i <= l; ++i)
   {
     GEN V;
@@ -596,10 +593,7 @@ group_quotient(GEN G, GEN H)
     V = group_leftcoset(H,gel(elt,a));
     gel(p2,i) = gel(V,1);
     for(j=1;j<lg(V);j++)
-    {
-      long b=vecvecsmall_tablesearch(elt,gel(V,j));
-      F2v_set(used,b);
-    }
+      F2v_set(used,elti[mael(V,j,1)]);
     for (j = 1; j <= o; j++)
       p3[mael(V, j, 1)] = i;
   }
