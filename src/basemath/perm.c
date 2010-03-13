@@ -434,14 +434,14 @@ static GEN
 trivialsubgroups(void)
 { GEN L = cgetg(2, t_VEC); gel(L,1) = trivialgroup(); return L; }
 
-/* Compute the order of p modulo the group S given by a set */
+/* Compute the order of p modulo the group given by a set */
 long
-perm_relorder(GEN p, GEN S)
+perm_relorder(GEN p, GEN set)
 {
   pari_sp ltop = avma;
   long n = 1;
-  GEN  q = p;
-  while (!vecvecsmall_tablesearch(S, q)) { q = perm_mul(q, p); n++; }
+  long q = p[1];
+  while (!F2v_coeff(set,q)) { q = p[q]; n++; }
   avma = ltop; return n;
 }
 
@@ -519,6 +519,30 @@ group_elts(GEN G, long n)
     gel(res,++k) = vecsmall_copy(gel(gen,i));
     for (j = 2; j <= c; j++) gel(res,++k) = perm_mul(gel(res,j), gel(gen,i));
   }
+  return res;
+}
+
+GEN
+groupelts_set(GEN elts, long n)
+{
+  GEN res = zero_F2v(n);
+  long i, l = lg(elts);
+  for(i=1; i<l; i++)
+    F2v_set(res,mael(elts,i,1));
+  return res;
+}
+
+/*Elements of a group from the generators, returned as a set (bitmap)*/
+GEN
+group_set(GEN G, long n)
+{
+  GEN res = zero_F2v(n);
+  pari_sp av = avma;
+  GEN elts = group_elts(G, n);
+  long i, l = lg(elts);
+  for(i=1; i<l; i++)
+    F2v_set(res,mael(elts,i,1));
+  avma = av;
   return res;
 }
 
@@ -631,20 +655,26 @@ GEN
 quotient_group(GEN C, GEN G)
 {
   pari_sp ltop = avma;
-  GEN Qgen, Qord, Qelt, Q;
+  GEN Qgen, Qord, Qelt, Qset, Q;
   GEN Cgen = quo_get_gen(C);
   GEN Ggen = grp_get_gen(G);
   long i,j, n = lg(Cgen)-1, l = lg(Ggen);
   Qord = cgetg(l, t_VECSMALL);
   Qgen = cgetg(l, t_VEC);
   Qelt = mkvec(identity_perm(n));
+  Qset = groupelts_set(Qelt, n);
   for (i = 1, j = 1; i < l; ++i)
   {
     GEN  g = quotient_perm(C, gel(Ggen,i));
-    long o = perm_relorder(g, vecvecsmall_sort(Qelt));
+    long o = perm_relorder(g, Qset);
     gel(Qgen,j) = g;
     Qord[j] = o;
-    if (o != 1) { Qelt = perm_generate(g, Qelt, o); j++; }
+    if (o != 1)
+    {
+      Qelt = perm_generate(g, Qelt, o);
+      Qset = groupelts_set(Qelt, n);
+      j++;
+    }
   }
   setlg(Qgen,j);
   setlg(Qord,j); Q = mkvec2(Qgen, Qord);
@@ -673,7 +703,7 @@ liftlistsubgroups(GEN L, GEN C, long r)
   R = cgetg(l*c+1, t_VEC);
   for (i = 1, k = 1; i <= l; ++i)
   {
-    GEN S = gel(L,i), Selt = vecvecsmall_sort(group_elts(S,n));
+    GEN S = gel(L,i), Selt = group_set(S,n);
     GEN gen = grp_get_gen(S);
     GEN ord = grp_get_ord(S);
     long j;
@@ -949,7 +979,7 @@ groupelts_abelian_group(GEN S)
   for (i = 1, j = 1; i < l; ++i)
   {
     GEN  g = gel(S,i);
-    long o = perm_relorder(g, vecvecsmall_sort(Qelt));
+    long o = perm_relorder(g, groupelts_set(Qelt, n));
     gel(Qgen,j) = g;
     Qord[j] = o;
     if (o != 1) { Qelt = perm_generate(g, Qelt, o); j++; }
