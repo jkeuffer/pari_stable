@@ -424,11 +424,12 @@ perm_commute(GEN s, GEN t)
 INLINE GEN grp_get_gen(GEN G) { return gel(G,1); }
 INLINE GEN grp_get_ord(GEN G) { return gel(G,2); }
 
-/* A Quotient Group is a t_VEC [gen,hash]
+/* A Quotient Group is a t_VEC [gen,coset]
  * gen (vecvecsmall): coset generators
- * hash (vecvecsmall): sorted vecsmall of concat(perm,coset number) */
+ * coset (vecsmall): gen[coset[p[1]]] generate the p-coset.
+ */
 INLINE GEN quo_get_gen(GEN C) { return gel(C,1); }
-INLINE GEN quo_get_hash(GEN C) { return gel(C,2); }
+INLINE GEN quo_get_coset(GEN C) { return gel(C,2); }
 
 static GEN
 trivialsubgroups(void)
@@ -574,12 +575,12 @@ dicyclicgroup(GEN g1, GEN g2, long s1, long s2)
 /* return the quotient map G --> G/H */
 /*The ouput is [gen,hash]*/
 /* gen (vecvecsmall): coset generators
- * hash (vecvecsmall): sorted vecsmall of concat(perm,coset number) */
+ * coset (vecsmall): vecsmall of coset number) */
 GEN
 group_quotient(GEN G, GEN H)
 {
   pari_sp ltop = avma;
-  GEN p1, p2, p3;
+  GEN  p2, p3;
   long i, j, k, a = 1;
   long n = group_domain(G), o = group_order(H);
   GEN elt = vecvecsmall_sort(group_elts(G,n));
@@ -587,7 +588,7 @@ group_quotient(GEN G, GEN H)
   GEN used = zero_F2v(le+1);
   long l = le/o;
   p2 = cgetg(l+1, t_VEC);
-  p3 = cgetg(le+1, t_VEC);
+  p3 = cgetg(n+1, t_VECSMALL);
   for (i = 1, k = 1; i <= l; ++i)
   {
     GEN V;
@@ -600,22 +601,9 @@ group_quotient(GEN G, GEN H)
       F2v_set(used,b);
     }
     for (j = 1; j <= o; j++)
-      gel(p3,k++) = vecsmall_append(gel(V,j),i);
+      p3[mael(V, j, 1)] = i;
   }
-  p1 = cgetg(3,t_VEC);
-  gel(p1,1) = gcopy(p2);
-  gel(p1,2) = vecvecsmall_sort(p3);
-  return gerepileupto(ltop,p1);
-}
-
-/*Find in which coset a perm lie.*/
-long
-cosets_perm_search(GEN C, GEN p)
-{
-  GEN h = quo_get_hash(C);
-  long n = tablesearch(h,p,vecsmall_prefixcmp);
-  if (!n) pari_err(talker, "coset not found in cosets_perm_search");
-  return mael(h, n, lg(p));
+  return gerepilecopy(ltop,mkvec2(p2,p3));
 }
 
 /*Compute the image of a permutation by a quotient map.*/
@@ -623,10 +611,11 @@ GEN
 quotient_perm(GEN C, GEN p)
 {
   GEN gen = quo_get_gen(C);
+  GEN coset = quo_get_coset(C);
   long j, l = lg(gen);
   GEN p3 = cgetg(l, t_VECSMALL);
   for (j = 1; j < l; ++j)
-    p3[j] = cosets_perm_search(C, perm_mul(p, gel(gen,j)));
+    p3[j] = coset[p[mael(gen,j,1)]];
   return p3;
 }
 
