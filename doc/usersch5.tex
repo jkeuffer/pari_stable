@@ -7600,11 +7600,11 @@ These functions handle \typ{VEC} as an abstract container type of
 
 \misctitle{Note.} All the functions below are shallow.
 
-\fun{GEN}{const_col}{long n, long c} returns a \typ{COL} of \kbd{n} components
-equal to \kbd{c}.
+\fun{GEN}{const_col}{long n, GEN x} returns a \typ{COL} of \kbd{n} components
+equal to \kbd{x}.
 
-\fun{GEN}{const_vec}{long n, long c} returns a \typ{VEC} of \kbd{n} components
-equal to \kbd{c}.
+\fun{GEN}{const_vec}{long n, GEN x} returns a \typ{VEC} of \kbd{n} components
+equal to \kbd{x}.
 
 \fun{int}{vec_isconst}{GEN v} Returns 1 if all the components of \kbd{v} are
 equal, else returns 0.
