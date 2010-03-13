@@ -7058,7 +7058,7 @@ a small abelian group, return its regular representation.
 trivial.
 
 \fun{GEN}{group_elts}{GEN grp, long n} returns the list of elements of the
-small group \var{grp} of domain \var{n} as smalls.
+small group \var{grp} of domain \var{n} as permutations.
 
 \fun{long}{group_order}{GEN grp} returns the order of the small group
 \var{grp} (which is the product of the relative orders).
@@ -7083,13 +7083,14 @@ small group $G$, returns $1$ if $H$ is normal in $G$, else $0$.
 $0$ else. This is mainly to deal with the idiosyncrasy of the format.
 
 \fun{GEN}{group_leftcoset}{GEN G, GEN g} where $G$ is a small group and $g$ a
-small of the same domain, the the left coset $gG$ as a vector of small.
+permutation of the same domain, the the left coset $gG$ as a vector of
+permutations.
 
 \fun{GEN}{group_rightcoset}{GEN G, GEN g} where $G$ is a small group and $g$ a
-small of the same domain, the the right coset $Gg$  as a vector of small.
+permutation of the same domain, the the right coset $Gg$  as a vector of permutations.
 
 \fun{long}{group_perm_normalize}{GEN G, GEN g} where $G$ is a small group and
-$g$ a small of the same domain, return $1$ if $gGg^-1=G$, else $0$.
+$g$ a permutation of the same domain, return $1$ if $gGg^-1=G$, else $0$.
 
 \fun{GEN}{group_quotient}{GEN G, GEN H}, where $G$ is a small group and
 $H$ is a subgroup of $G$, returns the quotient map $G\rightarrow G/H$
