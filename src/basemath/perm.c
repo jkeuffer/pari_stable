@@ -577,15 +577,15 @@ group_quotient(GEN G, GEN H)
   GEN  p2, p3;
   long i, j, k, a = 1;
   long n = group_domain(G), o = group_order(H);
-  GEN  elt = group_elts(G,n), elti;
+  GEN  elt = group_elts(G,n), el;
   long le = lg(elt)-1;
   GEN used = zero_F2v(le+1);
   long l = le/o;
   p2 = cgetg(l+1, t_VEC);
-  p3 = cgetg(n+1, t_VECSMALL);
-  elti = cgetg(n+1, t_VECSMALL);
-  for (i = 1; i<lg(elt); i++)
-    elti[mael(elt,i,1)]=i;
+  p3 = const_vecsmall(n, 0);
+  el = const_vecsmall(n, 0);
+  for (i = 1; i<=le; i++)
+    el[mael(elt,i,1)]=i;
   for (i = 1, k = 1; i <= l; ++i)
   {
     GEN V;
@@ -593,7 +593,11 @@ group_quotient(GEN G, GEN H)
     V = group_leftcoset(H,gel(elt,a));
     gel(p2,i) = gel(V,1);
     for(j=1;j<lg(V);j++)
-      F2v_set(used,elti[mael(V,j,1)]);
+    {
+      long b = el[mael(V,j,1)];
+      if (b==0) pari_err(talker, "not a WSS group");
+      F2v_set(used,b);
+    }
     for (j = 1; j <= o; j++)
       p3[mael(V, j, 1)] = i;
   }
@@ -609,7 +613,10 @@ quotient_perm(GEN C, GEN p)
   long j, l = lg(gen);
   GEN p3 = cgetg(l, t_VECSMALL);
   for (j = 1; j < l; ++j)
+  {
     p3[j] = coset[p[mael(gen,j,1)]];
+    if (p3[j]==0) pari_err(talker,"not a WSS group");
+  }
   return p3;
 }
 
@@ -661,7 +668,6 @@ quotient_group(GEN C, GEN G)
   }
   setlg(Qgen,j);
   setlg(Qord,j); Q = mkvec2(Qgen, Qord);
-  if (group_order(Q) != n) pari_err(talker,"galoissubgroup: not a WSS group");
   return gerepilecopy(ltop,Q);
 }
 
