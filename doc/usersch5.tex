@@ -7060,6 +7060,15 @@ trivial.
 \fun{GEN}{group_elts}{GEN grp, long n} returns the list of elements of the
 small group \var{grp} of domain \var{n} as permutations.
 
+\fun{GEN}{group_set}{GEN grp, long n} returns a \var{F2v} $b$ such that
+$b[i]$ is set if and only if the small group \var{grp} of domain \var{n}
+contains a permutation sending $1$ to $i$.
+
+\fun{GEN}{groupelts_set}{GEN elts, long n}, where \var{elts} is the list of
+elements of a small group of domain \var{n}, returns a \var{F2v} $b$ such that
+$b[i]$ is set if and only if the small group contains a permutation sending $1$
+to $i$.
+
 \fun{long}{group_order}{GEN grp} returns the order of the small group
 \var{grp} (which is the product of the relative orders).
 
