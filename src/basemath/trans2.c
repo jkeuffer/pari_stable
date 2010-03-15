@@ -1277,7 +1277,7 @@ static GEN
 gammap_Dwork(GEN x, long p)
 {
   pari_sp ltop = avma;
-  long k = itos(gmodgs(x, p));
+  long k = padic_to_Fl(x, p);
   GEN p1;
   long j;
   if (k)
