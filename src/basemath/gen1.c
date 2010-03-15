@@ -2953,9 +2953,13 @@ gdivgs(GEN x, long s)
       gel(z,1) = gdivgs(gel(x,1),s);
       gel(z,2) = gdivgs(gel(x,2),s); return z;
 
-    case t_PADIC: /* divTp */
+    case t_PADIC: /* divpT */
+    {
+      GEN p = gel(x,2);
+      if (!signe(gel(x,4))) return zeropadic(p, valp(x) - u_pval(s,p));
       av = avma;
       return gerepileupto(av, divpp(x, cvtop2(stoi(s),x)));
+    }
 
     case t_QUAD: z = cgetg(4, t_QUAD);
       gel(z,1) = ZX_copy(gel(x,1));

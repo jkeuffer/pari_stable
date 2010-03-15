@@ -1584,6 +1584,7 @@ long    Z_lvalrem(GEN n, ulong p, GEN *py);
 long    Z_pval(GEN n, GEN p);
 long    Z_pvalrem(GEN x, GEN p, GEN *py);
 GEN     cgetp(GEN x);
+GEN     cvstop2(long s, GEN y);
 GEN     cvtop(GEN x, GEN p, long l);
 GEN     cvtop2(GEN x, GEN y);
 GEN     gabs(GEN x, long prec);
@@ -1633,7 +1634,11 @@ long    u_pval(ulong x, GEN p);
 long    u_pvalrem(ulong x, GEN p, ulong *py);
 GEN     vecmax(GEN x);
 GEN     vecmin(GEN x);
+long    z_lval(long s, ulong p);
+long    z_lvalrem(long s, ulong p, long *py);
 long    z_pval(long n, GEN p);
+long    z_pvalrem(long n, GEN p, long *py);
+
 
 /* gen3.c */
 

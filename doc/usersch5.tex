@@ -1941,7 +1941,14 @@ except the inputs are now \kbd{ulong}s.
 \fun{long}{u_pval}{ulong x, GEN p} as \kbd{Z\_pval},
 except \kbd{x} is now an \kbd{ulong}.
 
+\fun{long}{z_lval}{long x, ulong p} as \kbd{u\_lval}, for signed \kbd{x}.
+
+\fun{long}{z_lvalrem}{long x, ulong p} as \kbd{u\_lvalrem}, for signed \kbd{x}.
+
 \fun{long}{z_pval}{long x, GEN p} as \kbd{Z\_pval},
+except \kbd{x} is now a \kbd{long}.
+
+\fun{long}{z_pvalrem}{long x, GEN p} as \kbd{Z\_pvalrem},
 except \kbd{x} is now a \kbd{long}.
 
 \fun{long}{Q_pval}{GEN x, GEN p} valuation at the \typ{INT} \kbd{p}
@@ -5547,6 +5554,9 @@ non-zero number yield a result well defined modulo $p^{v_p(x) + l}$.
 is a scalar.
 
 \fun{GEN}{cvtop2}{GEN x, GEN y} $y$ being a $p$-adic, converts the scalar $x$
+to a $p$-adic of the same accuracy. Shallow function.
+
+\fun{GEN}{cvstop2}{long s, GEN y} $y$ being a $p$-adic, converts the scalar $s$
 to a $p$-adic of the same accuracy. Shallow function.
 
 \fun{GEN}{gprec}{GEN x, long l} returns a copy of $x$ whose precision is

@@ -865,12 +865,39 @@ u_lval(ulong x, ulong p)
   }
 }
 
+long 
+z_lval(long s, ulong p) { return u_lval(labs(s), p); }
+long 
+z_lvalrem(long s, ulong p, long *py)
+{
+  long v;
+  if (s < 0) 
+  {
+    ulong u = (ulong)-s;
+    v = u_lvalrem(u, p, &u);
+    *py = -(long)u;
+  } 
+  else
+  {
+    ulong u = (ulong)s;
+    v = u_lvalrem(u, p, &u);
+    *py = (long)u;
+  }
+  return v;
+}
 /* assume |p| > 1 */
 long
-z_pval(long n, GEN p)
+z_pval(long s, GEN p)
 {
   if (lgefint(p) > 3) return 0;
-  return u_lval((ulong)labs(n), (ulong)p[2]);
+  return z_lval(s, (ulong)p[2]);
+}
+/* assume |p| > 1 */
+long
+z_pvalrem(long s, GEN p, long *py)
+{
+  if (lgefint(p) > 3) { *py = s; return 0; }
+  return z_lvalrem(s, (ulong)p[2], py);
 }
 
 /* return v_q(x) and set *py = x / q^v_q(x), using divide & conquer */
@@ -1310,6 +1337,7 @@ gneg(GEN x)
       gel(y,2) = gcopy(gel(x,2)); break;
 
     case t_PADIC:
+      if (!signe(gel(x,4))) return gcopy(x);
       y = cgetp2(x,valp(x));
       gel(y,4) = subii(gel(x,3),gel(x,4));
       break;
@@ -1823,6 +1851,22 @@ ctop(GEN x, GEN p, long d)
   if (isrationalzero(v)) return cvtop(u, p, d);
   z = padic_sqrt(cvtop(gen_m1, p, d - ggval(v, p))); /* = I */
   return gerepileupto(av, gadd(u, gmul(v, z)) );
+}
+
+/* cvtop2(stoi(s), y) */
+GEN
+cvstop2(long s, GEN y)
+{
+  GEN z, p = gel(y,2);
+  long v, d = signe(y[4])? precp(y): 0;
+  if (!s) return zeropadic(p, d);
+  v = z_pvalrem(s, p, &s);
+  if (d <= 0) return zeropadic(p, v);
+  z = cgetg(5, t_PADIC);
+  z[1] = evalprecp(d) | evalvalp(v);
+  gel(z,2) = p;
+  gel(z,3) = gel(y,3);
+  gel(z,4) = modsi(s, gel(y,3)); return z;
 }
 
 /* cvtop(x, gel(y,2), precp(y)), internal, not memory-clean */
