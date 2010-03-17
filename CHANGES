@@ -213,6 +213,7 @@ BA160- [from 2.4.2] ellap could return a wrong result. [#1030]
        documentation) [#1032]
   162- qfminim([1,2;2,1]*1.,,,2) -> SEGV [#1033]
   163- [doc] const_col, const_vec: typo in prototype [#1040]
+BA164- precision(0.E100) returned an invalid object.
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]

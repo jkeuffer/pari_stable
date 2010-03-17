@@ -212,7 +212,7 @@ precision0(GEN x, long n)
   long a;
   if (n) return gprec(x,n);
   a = gprecision(x);
-  return utoipos(a ? prec2ndec(a): LONG_MAX);
+  return utoi(a ? prec2ndec(a): LONG_MAX);
 }
 
 /* ABSOLUTE padic precision */
