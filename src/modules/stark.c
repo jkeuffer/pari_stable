@@ -2004,7 +2004,7 @@ QuadGetST(GEN bnr, GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
   /* loop over conductors */
   for (j = 1; j <= ncond; j++)
   {
-    GEN c1 = rtor(gel(C,j), prec), c2 = divur(2,c1), ec2 = mpexp(c2);
+    GEN c1 = gel(C,j), c2 = divur(2,c1), ec2 = mpexp(c2);
     GEN LChar = gel(vChar,j);
     const long nChar = lg(LChar)-1, NN = N0[j];
     GEN veint1, vcn;
@@ -2012,7 +2012,7 @@ QuadGetST(GEN bnr, GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
     if (DEBUGLEVEL>1)
       fprintferr("* conductor no %ld/%ld (N = %ld)\n\tInit: ", j,ncond,NN);
     if (lg(ec2) > prec) ec2 = rtor(ec2, prec);
-    veint1 = mpveceint1(c2, ec2, NN);
+    veint1 = mpveceint1(rtor(c2, prec), ec2, NN);
     vcn = mpvecpow(invr(ec2), NN);
     av2 = avma;
     for (n=2; n<=NN; n++, avma = av2) affrr(divru(gel(vcn,n), n), gel(vcn,n));
