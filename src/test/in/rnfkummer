@@ -41,3 +41,6 @@ do(quadpoly(689,y), 2, Mat(2))
 do(y^8-76*y^6+1425*y^4-5776*y^2+5776, 5, matdiagonal([2,1]))
 
 do(y^4 - 34*y^2 + 1189, 5, matdiagonal([3,1,1]))
+
+do(y, [36,[1]], matdiagonal([3,1]), 3)
+
