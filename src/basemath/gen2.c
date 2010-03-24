@@ -865,18 +865,18 @@ u_lval(ulong x, ulong p)
   }
 }
 
-long 
+long
 z_lval(long s, ulong p) { return u_lval(labs(s), p); }
-long 
+long
 z_lvalrem(long s, ulong p, long *py)
 {
   long v;
-  if (s < 0) 
+  if (s < 0)
   {
     ulong u = (ulong)-s;
     v = u_lvalrem(u, p, &u);
     *py = -(long)u;
-  } 
+  }
   else
   {
     ulong u = (ulong)s;
