@@ -10,20 +10,18 @@ Description:
 Help: galoisgetpol(a,{b},{s}): Query the galpol package for a polynomial with
  Galois group isomorphic to GAP4(a,b), totally real if s=1 (default) and
  totally complex if s=2.  The output is a vector [pol, den] where pol is the
- polynomial and den is the the common denominator of the conjugates expressed
+ polynomial and den is the common denominator of the conjugates expressed
  as a polynomial in a root of pol. If b and s are omitted, return the number of
- isomorphic class of groups of order a.
+ isomorphism classes of groups of order a.
 Doc: Query the galpol package for a polynomial with Galois group isomorphic to
  GAP4(a,b), totally real if $s=1$ (default) and totally complex if $s=2$. The
  output is a vector [\kbd{pol}, \kbd{den}] where \kbd{pol} is the polynomial and
- \kbd{den} is the the common denominator of the conjugates expressed as a
- polynomial in a root of \kbd{pol}, which can be passed as the optional argument
- of \tet{galoisinit} and \tet{nfgaloisconj} to speed up the computation as
- follow:
-
+ \kbd{den} is the common denominator of the conjugates expressed as a
+ polynomial in a root of \kbd{pol}, which can be passed as an optional argument
+ to \tet{galoisinit} and \tet{nfgaloisconj} as follows:
  \bprog
  V=galoisgetpol(8,4,1);
- G=galoisinit(V[1],V[2])
+ G=galoisinit(V[1], V[2])  \\ passing V[2] speeds up the computation
  @eprog
 
  If $b$ and $s$ are omitted, return the number of isomorphic class of groups
