@@ -660,6 +660,7 @@ VB 51- plotwin32 graphic engine
    52- plotQt4 graphic engine
 BA 53- low-level accessors functions gal_get_* for galoisinit objects.
    54- libpari functions cvstop2, z_lval, z_lvalrem, z_pvalrem
+   55- GP function externstr()
 
   Removed
     1- obsolete GP functions printp, printp1. Either replace them by

@@ -46,6 +46,7 @@ extern const char *keyword_list[];
 /* gp specific routines */
 void alarm0(long s);
 GEN  extern0(const char *cmd);
+GEN  externstr(const char *cmd);
 void gp_quit(long exitcode);
 GEN  input0(void);
 GEN  read0(const char *s);

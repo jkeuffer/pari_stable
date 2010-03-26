@@ -1484,6 +1484,32 @@ is_silent(char *s) { return s[strlen(s) - 1] == ';'; }
 
 enum { gp_ISMAIN = 1, gp_RECOVER = 2 };
 
+/* as gp_main_loop(0) */
+static GEN
+gp_get_str()
+{
+  pari_sp av = avma;
+  long i, nz = 16;
+  GEN z = cgetg(nz + 1, t_VEC);
+  filtre_t F;
+  Buffer *b = filtered_buffer(&F);
+  for(i = 1;;)
+  {
+    if (! gp_read_line(&F, NULL)) break;
+    if (i > nz) {
+      long j, NZ = nz << 1;
+      GEN Z = cgetg(NZ + 1, t_VEC);
+      for (j = 1; j <= nz; j++) gel(Z,j) = gel(z,j);
+      z = Z; nz = NZ;
+    }
+    gel(z,i++) = strtoGENstr(b->buf);
+  }
+  if (popinfile()) gp_quit(0);
+  pop_buffer(); 
+  setlg(z, i);
+  return gerepilecopy(av, z);
+}
+
 static GEN
 gp_main_loop(long flag)
 {
@@ -1719,6 +1745,14 @@ read_main(const char *s)
     else z = gp_main_loop(gp_RECOVER);
   }
   if (!z) fprintferr("... skipping file '%s'\n", s);
+}
+
+GEN
+externstr(const char *s)
+{
+  check_secure(s);
+  pari_infile = try_pipe(s, mf_IN)->file;
+  return gp_get_str();
 }
 
 GEN
