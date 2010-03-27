@@ -377,6 +377,7 @@ typedef struct input_method {
 
 int input_loop(filtre_t *F, input_method *IM);
 char *file_input(char **s0, int junk, input_method *IM, filtre_t *F);
+char *file_getline(Buffer *b, char **s0, input_method *IM);
 
 /* By files */
 

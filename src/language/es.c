@@ -303,20 +303,17 @@ gp_readvec_file(char *s)
   popinfile(); return x;
 }
 
-/* Read from file (up to '\n' or EOF) and copy at s0 (points in b->buf) */
 char *
-file_input(char **s0, int junk, input_method *IM, filtre_t *F)
+file_getline(Buffer *b, char **s0, input_method *IM)
 {
-  Buffer *b = (Buffer*)F->buf;
   int first = 1;
-  char *s = *s0;
-  ulong used0, used = s - b->buf;
+  ulong used0, used;
 
-  (void)junk;
-  used0 = used;
+  used0 = used = *s0 - b->buf;
   for(;;)
   {
     ulong left = b->len - used, l;
+    char *s;
 
     if (left < 512)
     {
@@ -332,6 +329,14 @@ file_input(char **s0, int junk, input_method *IM, filtre_t *F)
     if (l+1 < left || s[l-1] == '\n') return *s0; /* \n */
     used += l;
   }
+}
+
+/* Read from file (up to '\n' or EOF) and copy at s0 (points in b->buf) */
+char *
+file_input(char **s0, int junk, input_method *IM, filtre_t *F)
+{
+  (void)junk;
+  return file_getline(F->buf, s0, IM);
 }
 
 /* Read a "complete line" and filter it. Return: 0 if EOF, 1 otherwise */

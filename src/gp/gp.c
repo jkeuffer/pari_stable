@@ -1384,7 +1384,7 @@ update_logfile(const char *prompt, const char *s)
   }
 }
 
-/* prompt = NULL --> from gprc. Return 1 if new input, and 0 if EOF */
+/* PROMPT = NULL --> from gprc. Return 1 if new input, and 0 if EOF */
 static int
 get_line_from_file(const char *PROMPT, filtre_t *F, FILE *file)
 {
@@ -1394,8 +1394,7 @@ get_line_from_file(const char *PROMPT, filtre_t *F, FILE *file)
 
   IM.file = file;
   IM.fgets= Texmacs_stdin? &fgets_texmacs: &fgets;
-  IM.prompt = NULL;
-  IM.getline= &file_input;
+  IM.getline = &file_input;
   IM.free = 0;
   if (! input_loop(F,&IM))
   {
@@ -1483,32 +1482,6 @@ static int
 is_silent(char *s) { return s[strlen(s) - 1] == ';'; }
 
 enum { gp_ISMAIN = 1, gp_RECOVER = 2 };
-
-/* as gp_main_loop(0) */
-static GEN
-gp_get_str()
-{
-  pari_sp av = avma;
-  long i, nz = 16;
-  GEN z = cgetg(nz + 1, t_VEC);
-  filtre_t F;
-  Buffer *b = filtered_buffer(&F);
-  for(i = 1;;)
-  {
-    if (! gp_read_line(&F, NULL)) break;
-    if (i > nz) {
-      long j, NZ = nz << 1;
-      GEN Z = cgetg(NZ + 1, t_VEC);
-      for (j = 1; j <= nz; j++) gel(Z,j) = gel(z,j);
-      z = Z; nz = NZ;
-    }
-    gel(z,i++) = strtoGENstr(b->buf);
-  }
-  if (popinfile()) gp_quit(0);
-  pop_buffer(); 
-  setlg(z, i);
-  return gerepilecopy(av, z);
-}
 
 static GEN
 gp_main_loop(long flag)
@@ -1750,9 +1723,30 @@ read_main(const char *s)
 GEN
 externstr(const char *s)
 {
+  pari_sp av = avma;
+  long i, nz = 16;
+  GEN z = cgetg(nz + 1, t_VEC);
+  pariFILE *F;
+  Buffer *b;
+  input_method IM;
+
   check_secure(s);
-  pari_infile = try_pipe(s, mf_IN)->file;
-  return gp_get_str();
+  F = try_pipe(s, mf_IN);
+  b = new_buffer();
+  IM.fgets = &fgets;
+  IM.file = F->file;
+  for(i = 1;;)
+  {
+    char *s = b->buf, *e;
+    if (!file_getline(b, &s, &IM)) break;
+    if (i > nz) { nz <<= 1; z = vec_lengthen(z, nz); }
+    e = s + strlen(s)-1;
+    if (*e == '\n') *e = 0;
+    gel(z,i++) = strtoGENstr(s);
+  }
+  delete_buffer(b); 
+  pari_fclose(F);
+  setlg(z, i); return gerepilecopy(av, z);
 }
 
 GEN
