@@ -1111,12 +1111,23 @@ INLINE long
 ndec2nlong(long x) { return 1 + (long)((x)*(LOG2_10/BITS_IN_LONG)); }
 INLINE long
 ndec2prec(long x) { return 2 + ndec2nlong(x); }
+/* Fast implementation of ceil(x / (8*sizeof(long))); typecast to (ulong)
+ * to avoid overflow. Faster than 1 + ((x-1)>>TWOPOTBITS_IN_LONG)) :
+ *   addl, shrl instead of subl, sarl, addl */
 INLINE long
-nbits2nlong(long x) { return (x+BITS_IN_LONG-1) >> TWOPOTBITS_IN_LONG; }
+nbits2nlong(long x) { 
+  return (long)(((ulong)x+BITS_IN_LONG-1) >> TWOPOTBITS_IN_LONG);
+}
+/* Fast implementation of 2 + nbits2nlong(x) */
 INLINE long
-nbits2prec(long x) { return (x+3*BITS_IN_LONG-1) >> TWOPOTBITS_IN_LONG; }
+nbits2prec(long x) {
+  return (long)(((ulong)x+3*BITS_IN_LONG-1) >> TWOPOTBITS_IN_LONG);
+}
+/* ceil(x / sizeof(long)) */
 INLINE long
-nchar2nlong(long x) { return (x+sizeof(long)-1) / sizeof(long); }
+nchar2nlong(long x) {
+  return (long)(((ulong)x+sizeof(long)-1) >> (TWOPOTBITS_IN_LONG-3L));
+}
 INLINE long
 bit_accuracy(long x) { return (x-2) * BITS_IN_LONG; }
 INLINE double

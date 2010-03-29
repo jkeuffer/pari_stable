@@ -284,6 +284,9 @@ function will be able to operate on it.
 
 \subsec{Length conversions}
 
+These routines convert a non-negative length to different units. Their
+behaviour is undefined at negative integers.
+
 \fun{long}{ndec2nlong}{long x} converts a number of decimal digits to a number
 of words. Returns $ 1 + \kbd{floor}(x \times \B \log_2 10)$.
 
