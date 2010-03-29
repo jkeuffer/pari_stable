@@ -1142,7 +1142,7 @@ szeta_odd(long k, long prec)
       p1 = invr( mulir(powuu(n,k),addrs(qn,-1)) );
 
       z = addrr(z,p1); if ((ep1 = expo(p1)) < li) break;
-      l = prec+1 + nbits2nlong(ep1);
+      l = (ep1 < 0) ? prec+1 : prec+1 + nbits2nlong(ep1);
       if (l < lg(qn)) setlg(qn, l);
       qn = mulrr(qn,q);
       if (low_stack(limit,stack_lim(av2,1)))
@@ -1177,7 +1177,7 @@ szeta_odd(long k, long prec)
       p1 = divrr(addrs(mulrr(qn,addsr(1,mulur(n<<1,p2))),-1),p1);
 
       z = addrr(z,p1); if ((ep1 = expo(p1)) < li) break;
-      l = prec+1 + nbits2nlong(ep1);
+      l = (ep1 < 0)? prec+1 : prec+1 + nbits2nlong(ep1);
       if (l < lg(qn)) setlg(qn, l);
       qn = mulrr(qn,q);
       if (low_stack(limit,stack_lim(av2,1)))

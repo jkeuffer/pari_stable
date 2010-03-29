@@ -506,15 +506,15 @@ GEN
 modr_safe(GEN x, GEN y)
 {
   GEN q, f;
-  long d;
+  long e;
   if (typ(x) == t_INT && !signe(x)) return gen_0;
   q = gdiv(x,y); /* t_REAL */
 
-  d = nbits2prec(expo(q));
-  if (d>lg(x)) return NULL;
+  e = expo(q);
+  if (e >= 0 && nbits2prec(e) > lg(x)) return NULL;
   f = floorr(q);
   if (gsigne(y) < 0 && signe(subri(q,f))) f = addis(f, 1);
-  return signe(f)? gadd(x, negr(mulir(f,y))): x;
+  return signe(f)? gsub(x, mulir(f,y)): x;
 }
 
 /* x t_POLMOD, y t_POL in the same variable as x[1], return x % y */
