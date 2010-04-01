@@ -1744,7 +1744,7 @@ externstr(const char *s)
     if (*e == '\n') *e = 0;
     gel(z,i++) = strtoGENstr(s);
   }
-  delete_buffer(b); 
+  delete_buffer(b);
   pari_fclose(F);
   setlg(z, i); return gerepilecopy(av, z);
 }

@@ -703,9 +703,9 @@ RgX_Rg_add(GEN y, GEN x)
   z = cgetg(lz,t_POL); z[1] = y[1];
   gel(z,2) = gadd(gel(y,2),x);
   for(i=3; i<lz; i++) gel(z,i) = gcopy(gel(y,i));
-  /* probably useless unless lz = 3, but cannot be skipped if y is 
+  /* probably useless unless lz = 3, but cannot be skipped if y is
    * an inexact 0 */
-  return normalizepol_lg(z,lz); 
+  return normalizepol_lg(z,lz);
 }
 GEN
 RgX_Rg_add_shallow(GEN y, GEN x)
