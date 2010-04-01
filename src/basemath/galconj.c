@@ -2340,8 +2340,13 @@ galoispermtopol_i(GEN gal, GEN perm, GEN mod, GEN mod2)
   }
   case t_VEC: case t_COL: case t_MAT:
     v = cgetg(lg(perm), t);
+    if (DEBUGLEVEL>=4) fprintferr("GaloisPermToPol:");
     for (i = 1; i < lg(v); i++)
+    {
       gel(v,i) = galoispermtopol_i(gal, gel(perm,i), mod, mod2);
+      if (DEBUGLEVEL>=4) fprintferr("%ld ",i);
+    }
+    if (DEBUGLEVEL>=4) fprintferr("\n");
     return v;
   }
   pari_err(typeer, "galoispermtopol");
