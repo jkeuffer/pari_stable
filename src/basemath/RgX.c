@@ -703,8 +703,9 @@ RgX_Rg_add(GEN y, GEN x)
   z = cgetg(lz,t_POL); z[1] = y[1];
   gel(z,2) = gadd(gel(y,2),x);
   for(i=3; i<lz; i++) gel(z,i) = gcopy(gel(y,i));
-  if (lz==3) z = normalizepol_lg(z,lz);
-  return z;
+  /* probably useless unless lz = 3, but cannot be skipped if y is 
+   * an inexact 0 */
+  return normalizepol_lg(z,lz); 
 }
 GEN
 RgX_Rg_add_shallow(GEN y, GEN x)
@@ -715,8 +716,7 @@ RgX_Rg_add_shallow(GEN y, GEN x)
   z = cgetg(lz,t_POL); z[1] = y[1];
   gel(z,2) = gadd(gel(y,2),x);
   for(i=3; i<lz; i++) gel(z,i) = gel(y,i);
-  if (lz==3) z = normalizepol_lg(z,lz);
-  return z;
+  return z = normalizepol_lg(z,lz);
 }
 GEN
 RgX_Rg_sub(GEN y, GEN x)
@@ -735,8 +735,7 @@ RgX_Rg_sub(GEN y, GEN x)
   z = cgetg(lz,t_POL); z[1] = y[1];
   gel(z,2) = gsub(gel(y,2),x);
   for(i=3; i<lz; i++) gel(z,i) = gcopy(gel(y,i));
-  if (lz==3) z = normalizepol_lg(z,lz);
-  return z;
+  return z = normalizepol_lg(z,lz);
 }
 GEN
 Rg_RgX_sub(GEN x, GEN y)
@@ -747,8 +746,7 @@ Rg_RgX_sub(GEN x, GEN y)
   z = cgetg(lz,t_POL); z[1] = y[1];
   gel(z,2) = gsub(x, gel(y,2));
   for(i=3; i<lz; i++) gel(z,i) = gneg(gel(y,i));
-  if (lz==3) z = normalizepol_lg(z,lz);
-  return z;
+  return z = normalizepol_lg(z,lz);
 }
 /*******************************************************************/
 /*                                                                 */

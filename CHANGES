@@ -215,6 +215,8 @@ BA160- [from 2.4.2] ellap could return a wrong result. [#1030]
   163- [doc] const_col, const_vec: typo in prototype [#1040]
 BA164- precision(0.E100) returned an invalid object.
   165- nbits2nlong, nbits2prec, nbits2nchar : avoid overflow [#1037]
+  166- normalization problems in RgX_Rg_add & friends, leading to t_POL
+       with sign incorrectly set to 0, e.g. O(2)*x + 1 [#1042]
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
