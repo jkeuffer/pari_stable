@@ -1115,7 +1115,7 @@ ndec2prec(long x) { return 2 + ndec2nlong(x); }
  * to avoid overflow. Faster than 1 + ((x-1)>>TWOPOTBITS_IN_LONG)) :
  *   addl, shrl instead of subl, sarl, addl */
 INLINE long
-nbits2nlong(long x) { 
+nbits2nlong(long x) {
   return (long)(((ulong)x+BITS_IN_LONG-1) >> TWOPOTBITS_IN_LONG);
 }
 /* Fast implementation of 2 + nbits2nlong(x) */
