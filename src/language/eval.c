@@ -716,7 +716,6 @@ closure_eval(GEN C)
   {
     op_code opcode=(op_code) code[pc];
     long operand=oper[pc];
-    entree *ep;
     if (sp<0) pari_err(bugparier,"closure_eval, stack underflow");
     st_alloc(16);
     switch(opcode)
@@ -734,15 +733,19 @@ closure_eval(GEN C)
       gel(st,sp++)=stoi(operand);
       break;
     case OCpushvar:
-      ep=(entree*)operand;
-      pari_var_create(ep);
-      gel(st,sp++)=(GEN)initial_value(ep);
-      break;
+      {
+        entree *ep = (entree *)operand;
+        pari_var_create(ep);
+        gel(st,sp++)=(GEN)initial_value(ep);
+        break;
+      }
     case OCpushdyn:
-      ep=(entree*)operand;
-      checkvalue(ep);
-      gel(st,sp++)=(GEN)ep->value;
-      break;
+      {
+        entree *ep = (entree *)operand;
+        checkvalue(ep);
+        gel(st,sp++)=(GEN)ep->value;
+        break;
+      }
     case OCpushlex:
       gel(st,sp++)=var[s_var.n+operand].value;
       break;
@@ -769,9 +772,9 @@ closure_eval(GEN C)
       }
     case OCnewptrdyn:
       {
+        entree *ep = (entree *)operand;
         gp_pointer *g = new_ptr();
         matcomp *C;
-        ep = (entree*) operand;
         checkvalue(ep);
         g->sp = -1;
         g->x = copyvalue(ep);
@@ -819,10 +822,12 @@ closure_eval(GEN C)
       }
       break;
     case OCstoredyn:
-      ep=(entree *)operand;
-      checkvalue(ep);
-      changevalue(ep, gel(st,--sp));
-      break;
+      {
+        entree *ep = (entree *)operand;
+        checkvalue(ep);
+        changevalue(ep, gel(st,--sp));
+        break;
+      }
     case OCstorelex:
       changelex(operand,gel(st,--sp));
       break;
@@ -844,10 +849,12 @@ closure_eval(GEN C)
       st[sp++]=avma;
       break;
     case OCcowvardyn:
-      ep = (entree*) operand;
-      checkvalue(ep);
-      (void)copyvalue(ep);
-      break;
+      {
+        entree *ep = (entree *)operand;
+        checkvalue(ep);
+        (void)copyvalue(ep);
+        break;
+      }
     case OCcowvarlex:
       (void)copylex(operand);
       break;
@@ -1043,23 +1050,27 @@ closure_eval(GEN C)
       sp--;
       break;
     case OClocalvar:
-      ep=(entree *)operand;
-      j=stack_new(&s_lvars);
-      lvars[j]=ep;
-      nblvar++;
-      pushvalue(ep,gel(st,--sp));
-      break;
+      {
+        entree *ep = (entree *)operand;
+        long n = stack_new(&s_lvars);
+        lvars[n] = ep;
+        nblvar++;
+        pushvalue(ep,gel(st,--sp));
+        break;
+      }
     case OClocalvar0:
-      ep=(entree *)operand;
-      j=stack_new(&s_lvars);
-      lvars[j]=ep;
-      nblvar++;
-      zerovalue(ep);
-      break;
+      {
+        entree *ep = (entree *)operand;
+        long n = stack_new(&s_lvars);
+        lvars[n] = ep;
+        nblvar++;
+        zerovalue(ep);
+        break;
+      }
 #define ARGS st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4],st[sp+5],st[sp+6],st[sp+7]
     case OCcallgen:
       {
-        entree *ep=(entree*)operand;
+        entree *ep = (entree *)operand;
         GEN res;
         sp-=ep->arity;
         res = ((GEN (*)(ANYARG))ep->value)(ARGS);
@@ -1069,7 +1080,7 @@ closure_eval(GEN C)
       }
     case OCcallgen2:
       {
-        entree *ep=(entree*)operand;
+        entree *ep = (entree *)operand;
         GEN res;
         sp-=ep->arity;
         res = ((GEN (*)(GEN,GEN))ep->value)(gel(st,sp),gel(st,sp+1));
@@ -1079,7 +1090,7 @@ closure_eval(GEN C)
       }
     case OCcalllong:
       {
-        entree *ep=(entree*)operand;
+        entree *ep = (entree *)operand;
         long res;
         sp-=ep->arity;
         res = ((long (*)(ANYARG))ep->value)(ARGS);
@@ -1089,7 +1100,7 @@ closure_eval(GEN C)
       }
     case OCcallint:
       {
-        entree *ep=(entree*)operand;
+        entree *ep = (entree *)operand;
         long res;
         sp-=ep->arity;
         res = ((int (*)(ANYARG))ep->value)(ARGS);
@@ -1099,7 +1110,7 @@ closure_eval(GEN C)
       }
     case OCcallvoid:
       {
-        entree *ep=(entree*)operand;
+        entree *ep = (entree *)operand;
         sp-=ep->arity;
         ((void (*)(ANYARG))ep->value)(ARGS);
         if (br_status) goto endeval;
@@ -1394,7 +1405,6 @@ closure_disassemble(GEN C)
   {
     op_code opcode=(op_code) code[i];
     long operand=oper[i];
-    entree *ep;
     pari_printf("%05ld\t",i);
     switch(opcode)
     {
@@ -1424,34 +1434,44 @@ closure_disassemble(GEN C)
       pari_printf("pushstoi\t%ld\n",operand);
       break;
     case OCpushvar:
-      ep=(entree*)operand;
-      pari_printf("pushvar\t%s\n",ep->name);
-      break;
+      {
+        entree *ep = (entree *)operand;
+        pari_printf("pushvar\t%s\n",ep->name);
+        break;
+      }
     case OCpushdyn:
-      ep=(entree*)operand;
-      pari_printf("pushdyn\t\t%s\n",ep->name);
-      break;
+      {
+        entree *ep = (entree *)operand;
+        pari_printf("pushdyn\t\t%s\n",ep->name);
+        break;
+      }
     case OCpushlex:
       pari_printf("pushlex\t\t%ld\n",operand);
       break;
     case OCstoredyn:
-      ep=(entree *)operand;
-      pari_printf("storedyn\t%s\n",ep->name);
-      break;
+      {
+        entree *ep = (entree *)operand;
+        pari_printf("storedyn\t%s\n",ep->name);
+        break;
+      }
     case OCstorelex:
       pari_printf("storelex\t%ld\n",operand);
       break;
     case OCsimpleptrdyn:
-      ep=(entree*)operand;
-      pari_printf("simpleptrdyn\t%s\n",ep->name);
-      break;
+      {
+        entree *ep = (entree *)operand;
+        pari_printf("simpleptrdyn\t%s\n",ep->name);
+        break;
+      }
     case OCsimpleptrlex:
       pari_printf("simpleptrlex\t%ld\n",operand);
       break;
     case OCnewptrdyn:
-      ep=(entree*)operand;
-      pari_printf("newptrdyn\t%s\n",ep->name);
-      break;
+      {
+        entree *ep = (entree *)operand;
+        pari_printf("newptrdyn\t%s\n",ep->name);
+        break;
+      }
     case OCnewptrlex:
       pari_printf("newptrlex\t%ld\n",operand);
       break;
@@ -1528,33 +1548,47 @@ closure_disassemble(GEN C)
       pari_printf("defaultarg\t%ld\n",operand);
       break;
     case OClocalvar:
-      ep=(entree*)operand;
-      pari_printf("localvar\t%s\n",ep->name);
-      break;
+      {
+        entree *ep = (entree *)operand;
+        pari_printf("localvar\t%s\n",ep->name);
+        break;
+      }
     case OClocalvar0:
-      ep=(entree*)operand;
-      pari_printf("localvar0\t%s\n",ep->name);
-      break;
+      {
+        entree *ep = (entree *)operand;
+        pari_printf("localvar0\t%s\n",ep->name);
+        break;
+      }
     case OCcallgen:
-      ep=(entree*)operand;
-      pari_printf("callgen\t\t%s\n",ep->name);
-      break;
+      {
+        entree *ep = (entree *)operand;
+        pari_printf("callgen\t\t%s\n",ep->name);
+        break;
+      }
     case OCcallgen2:
-      ep=(entree*)operand;
-      pari_printf("callgen2\t%s\n",ep->name);
-      break;
+      {
+        entree *ep = (entree *)operand;
+        pari_printf("callgen2\t%s\n",ep->name);
+        break;
+      }
     case OCcalllong:
-      ep=(entree*)operand;
-      pari_printf("calllong\t%s\n",ep->name);
-      break;
+      {
+        entree *ep = (entree *)operand;
+        pari_printf("calllong\t%s\n",ep->name);
+        break;
+      }
     case OCcallint:
-      ep=(entree*)operand;
-      pari_printf("callint\t\t%s\n",ep->name);
-      break;
+      {
+        entree *ep = (entree *)operand;
+        pari_printf("callint\t\t%s\n",ep->name);
+        break;
+      }
     case OCcallvoid:
-      ep=(entree*)operand;
-      pari_printf("callvoid\t%s\n",ep->name);
-      break;
+      {
+        entree *ep = (entree *)operand;
+        pari_printf("callvoid\t%s\n",ep->name);
+        break;
+      }
     case OCcalluser:
       pari_printf("calluser\t%ld\n",operand);
       break;
@@ -1583,9 +1617,11 @@ closure_disassemble(GEN C)
       pari_printf("gerepile\n",operand);
       break;
     case OCcowvardyn:
-      ep=(entree*)operand;
-      pari_printf("cowvardyn\t%s\n",ep->name);
-      break;
+      {
+        entree *ep = (entree *)operand;
+        pari_printf("cowvardyn\t%s\n",ep->name);
+        break;
+      }
     case OCcowvarlex:
       pari_printf("cowvarlex\t%ld\n",operand);
       break;
