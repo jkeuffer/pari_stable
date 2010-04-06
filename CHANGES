@@ -492,7 +492,8 @@ BA117- [enable-tls] Library soname changed to libpari[-gmp]-tls[-2.4].so.N.
 BA119- Rename leftright_pow to gen_pow, leftright_pow_u to gen_pow_u and
        implement sliding window powering.
 BA120- galoisapply now accept automorphisms in t_COL format.
-  121- allow moduli equal to 0 in matsolvemod (was SEGV) [#947]
+  121- allow moduli equal to 0 in matsolvemod (was SEGV) [#947] + rigorously
+       size-reduce the output in all cases.
 
   Added
     1- many new benches (make test-all)
