@@ -875,3 +875,77 @@ ZV_sum(GEN v)
   for (i = 2; i < l; i++) n = addii(n, gel(v,i));
   return gerepileuptoint(av, n);
 }
+
+/********************************************************************/
+/**                                                                **/
+/**         GRAM SCHMIDT REDUCTION (integer matrices)              **/
+/**                                                                **/
+/********************************************************************/
+
+/* L[k,] += q * L[l,], l < k. Inefficient if q = 0 */
+static void
+Zupdate_row(long k, long l, GEN q, GEN L, GEN B)
+{
+  long i, qq = itos_or_0(q);
+  if (!qq)
+  {
+    for(i=1;i<l;i++)  gcoeff(L,k,i) = addii(gcoeff(L,k,i),mulii(q,gcoeff(L,l,i)));
+    gcoeff(L,k,l) = addii(gcoeff(L,k,l), mulii(q,B));
+    return;
+  }
+  if (qq == 1) {
+    for (i=1;i<l; i++) gcoeff(L,k,i) = addii(gcoeff(L,k,i),gcoeff(L,l,i));
+    gcoeff(L,k,l) = addii(gcoeff(L,k,l), B);
+  } else if (qq == -1) {
+    for (i=1;i<l; i++) gcoeff(L,k,i) = subii(gcoeff(L,k,i),gcoeff(L,l,i));
+    gcoeff(L,k,l) = addii(gcoeff(L,k,l), negi(B));
+  } else {
+    for(i=1;i<l;i++) gcoeff(L,k,i) = addii(gcoeff(L,k,i),mulsi(qq,gcoeff(L,l,i)));
+    gcoeff(L,k,l) = addii(gcoeff(L,k,l), mulsi(qq,B));
+  }
+}
+
+static void
+ZRED(long k, long l, GEN x, GEN L, GEN B)
+{
+  GEN q = truedivii(addii(B,shifti(gcoeff(L,k,l),1)), shifti(B,1));
+  if (!signe(q)) return;
+  q = negi(q);
+  Zupdate_row(k,l,q,L,B);
+  gel(x,k) = ZC_lincomb(gen_1, q, gel(x,k), gel(x,l));
+}
+
+/* Gram-Schmidt reduction, x a ZM */
+static void
+ZincrementalGS(GEN x, GEN L, GEN B, long k)
+{
+  long i, j;
+  for (j=1; j<=k; j++)
+  {
+    pari_sp av = avma;
+    GEN u = ZV_dotproduct(gel(x,k), gel(x,j));
+    for (i=1; i<j; i++)
+    {
+      u = subii(mulii(gel(B,i+1), u), mulii(gcoeff(L,k,i), gcoeff(L,j,i)));
+      u = diviiexact(u, gel(B,i));
+    }
+    gcoeff(L,k,j) = gerepileuptoint(av, u);
+  }
+  gel(B,k+1) = gcoeff(L,k,k); gcoeff(L,k,k) = gen_1;
+}
+
+/* Variant reducemodinvertible(ZC v, ZM y), when y singular.
+ * Very inefficient if y is not LLL-reduced of maximal rank */
+GEN
+ZC_reducemodmatrix(GEN v, GEN y)
+{
+  pari_sp av = avma;
+  GEN B, L, x = shallowconcat(y, v);
+  long k, lx = lg(x), nx = lx-1;
+
+  B = scalarcol_shallow(gen_1, lx);
+  L = zeromatcopy(nx, nx);
+  for (k=1; k <= nx; k++) ZincrementalGS(x, L, B, k);
+  for (k = nx-1; k >= 1; k--) ZRED(nx,k, x,L,gel(B,k+1));
+  return gerepilecopy(av, gel(x,nx));
+}

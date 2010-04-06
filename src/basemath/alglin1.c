@@ -2869,15 +2869,16 @@ static GEN
 gaussmoduloall(GEN M, GEN D, GEN Y, GEN *ptu1)
 {
   pari_sp av = avma;
-  long n, m, j, lM = lg(M);
-  GEN p1, delta, H, U, u1, u2, x;
+  long n, m, j, l, lM;
+  GEN delta, H, U, u1, u2, x;
 
   if (typ(M)!=t_MAT) pari_err(typeer,"gaussmodulo");
-  m = lM-1;
-  if (!m)
+  lM = lg(M);
+  if (lM == 1)
   {
     if ((typ(Y)!=t_INT && lg(Y)!=1)
      || (typ(D)!=t_INT && lg(D)!=1)) pari_err(consister,"gaussmodulo");
+    if (ptu1) *ptu1 = cgetg(1, t_MAT);
     return gen_0;
   }
   n = lg(M[1])-1;
@@ -2886,7 +2887,7 @@ gaussmoduloall(GEN M, GEN D, GEN Y, GEN *ptu1)
     case t_COL:
       if (lg(D)-1!=n) pari_err(consister,"gaussmodulo");
       delta = diagonal_shallow(D); break;
-    case t_INT: delta = scalarmat(D,n); break;
+    case t_INT: delta = scalarmat_shallow(D,n); break;
     default: pari_err(typeer,"gaussmodulo");
       return NULL; /* not reached */
   }
@@ -2897,23 +2898,23 @@ gaussmoduloall(GEN M, GEN D, GEN Y, GEN *ptu1)
       if (lg(Y)-1!=n) pari_err(consister,"gaussmodulo");
       break;
     default: pari_err(typeer,"gaussmodulo");
+      return NULL; /* not reached */
   }
   H = ZM_hnfall(shallowconcat(M,delta), &U, 1);
   Y = hnf_solve(H,Y); if (!Y) return gen_0;
+  l = lg(H); /* may be smaller than lM if some moduli are 0 */
+  n = l-1; 
+  m = lg(U)-1 - n;
   u1 = cgetg(m+1,t_MAT);
   u2 = cgetg(n+1,t_MAT);
-  for (j=1; j<=m; j++)
-  {
-    p1 = gel(U,j); setlg(p1,lM);
-    gel(u1,j) = p1;
-  }
+  for (j=1; j<=m; j++) { GEN c = gel(U,j); setlg(c,lM); gel(u1,j) = c; }
   U += m;
-  for (j=1; j<=n; j++)
-  {
-    p1 = gel(U,j); setlg(p1,lM);
-    gel(u2,j) = p1;
-  }
-  x = reducemodlll(ZM_ZC_mul(u2,Y), u1);
+  for (j=1; j<=n; j++) { GEN c = gel(U,j); setlg(c,lM); gel(u2,j) = c; }
+  /*       (u1 u2)
+   * (M D) (*  * ) = (0 H) */
+  u1 = ZM_lll(u1, 0.75, LLL_INPLACE);
+  Y = ZM_ZC_mul(u2,Y);
+  x = ZM_reducemodmatrix(Y, u1);
   if (!ptu1) x = gerepileupto(av, x);
   else
   {

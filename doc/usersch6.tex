@@ -1578,13 +1578,13 @@ integral matrices; in practice, these come from HNF algorithms.
 $B$ a \kbd{ZM}, $t$ an integer, such that $C := tA^{-1}B$ is integral.
 Return $C$.
 
-\fun{GEN}{hnf_solve}{GEN A, GEN B} $A$ an upper triangular \kbd{ZM},
-$B$ a \kbd{ZM} or \kbd{ZC}. Return $A^{-1}B$ if it is integral, and \kbd{NULL}
-if it is not.
+\fun{GEN}{hnf_solve}{GEN A, GEN B} $A$ a \kbd{ZM} in upper HNF (not
+necessarily square), $B$ a \kbd{ZM} or \kbd{ZC}. Return $A^{-1}B$ if it is
+integral, and \kbd{NULL} if it is not.
 
-\fun{GEN}{hnf_invimage}{GEN A, GEN b} $A$ an upper triangular \kbd{ZM},
-$b$ a \kbd{ZC}.  Return $A^{-1}B$ if it is integral, and \kbd{NULL} if it is
-not.
+\fun{GEN}{hnf_invimage}{GEN A, GEN b} $A$ a \kbd{ZM} in upper HNF
+(not necessarily square), $b$ a \kbd{ZC}.  Return $A^{-1}B$ if it is
+integral, and \kbd{NULL} if it is not.
 
 \fun{int}{hnfdivide}{GEN A, GEN B} $A$ and $B$ are two upper triangular
 \kbd{ZM}. Return $1$ if $A^{-1} B$ is integral, and $0$ otherwise.
@@ -1825,9 +1825,18 @@ for \kbd{gerepileupto}, but does not collect garbage.
 \kbd{reducemodinvertible}(x,y)$, i.e. an integral linear combination of
 the columns of $y$, which is close to $x$.
 
-\fun{GEN}{reducemodlll}{GEN x,GEN y} LLL-reduce the \kbd{ZM} $y$ and call
-\kbd{reducemodinvertible} to find a small representative of $x$ mod $y \Z^n$.
-Suitable for \kbd{gerepileupto}, but does not collect garbage.
+\fun{GEN}{reducemodlll}{GEN x,GEN y} LLL-reduce the non-singular \kbd{ZM} $y$
+and call \kbd{reducemodinvertible} to find a small representative of $x$ mod $y
+\Z^n$. Suitable for \kbd{gerepileupto}, but does not collect garbage.
+
+\fun{GEN}{ZC_reducemodmatrix}{GEN v, GEN y} general version of
+\tet{reducemodlll}. The ZM $y$ is no longer assumed to have maximal rank, but
+should already be LLL-reduced (otherwise, very poor reduction is expected).
+Size-reduces the ZC $v$ modulo the $\Z$-module $Y$ spanned by $y$ : if the
+columns of $y$ are denoted by $(y_1,\dots, y_{n-1})$, return $y_n \equiv v$
+modulo $Y$, such that the Gram-Schmidt coefficients $\mu_{n,j}$ are less than
+$1/2$ in absolute value for all $j < n$. In short, $y_n$ is almost orthogonal
+to $Y$.
 
 \subsec{Miscellaneous}
 

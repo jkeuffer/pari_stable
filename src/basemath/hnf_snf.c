@@ -1620,29 +1620,34 @@ hnfdivide(GEN A, GEN B)
 }
 
 /* A upper HNF, b integral vector. Return A^(-1) b if integral,
- * NULL otherwise. */
+ * NULL otherwise. Assume #A[,1] = #b. */
 GEN
 hnf_invimage(GEN A, GEN b)
 {
-  pari_sp av = avma, av2;
-  long n = lg(A)-1, i,j;
-  GEN u, m, r;
+  pari_sp av = avma;
+  long n = lg(A)-1, m, i, k;
+  GEN u, t, r;
 
   if (!n) return NULL;
+  m = lg(A[1])-1;
   u = cgetg(n+1, t_COL);
-  m = gel(b,n);
-  if (typ(m) != t_INT) pari_err(typeer,"hnf_invimage");
-  gel(u,n) = dvmdii(m, gcoeff(A,n,n), &r);
-  if (r != gen_0) { avma = av; return NULL; }
-  for (i=n-1; i>0; i--)
+  for (i = n, k = m; i > 0; i--, k--)
   {
-    av2 = avma;
-    if (typ(b[i]) != t_INT) pari_err(typeer,"hnf_invimage");
-    m = gel(b,i);
-    for (j=i+1; j<=n; j++) m = subii(m, mulii(gcoeff(A,i,j),gel(u,j)));
-    m = dvmdii(m, gcoeff(A,i,i), &r);
+    pari_sp av2 = avma;
+    long j;
+    GEN Aki;
+    t = gel(b,k);
+    if (typ(t) != t_INT) pari_err(typeer,"hnf_invimage");
+    for (j=i+1; j<=n; j++) t = subii(t, mulii(gcoeff(A,i,j),gel(u,j)));
+    Aki = gcoeff(A,k,i);
+    if (!signe(Aki))
+    {
+      if (signe(t)) { avma = av;return NULL; }
+      avma = av2; gel(u,i) = gen_0; continue;
+    }
+    t = dvmdii(t, Aki, &r);
     if (r != gen_0) { avma = av; return NULL; }
-    gel(u,i) = gerepileuptoint(av2, m);
+    gel(u,i) = gerepileuptoint(av2, t);
   }
   return u;
 }
