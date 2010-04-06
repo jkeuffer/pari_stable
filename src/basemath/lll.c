@@ -49,11 +49,13 @@ lll_trivial(GEN x, long flag)
   return y;
 }
 
+/* vecslice(h,#h-k,#h) in place. Works for t_MAT, t_VEC/t_COL */
 static GEN
 lll_get_im(GEN h, long k)
 {
+  ulong mask = h[0] & ~LGBITS;
   long l = lg(h) - k;
-  h += k; h[0] = evaltyp(t_MAT) | evallg(l);
+  h += k; h[0] = mask | evallg(l);
   return h;
 }
 
@@ -507,7 +509,20 @@ fplll(GEN *ptrB, GEN *ptrU, GEN *ptrr, double DELTA, double ETA, long flag, long
 
   if (DEBUGLEVEL>=4) msgTIMER(&T,"LLL");
   if (ptrr) *ptrr = RgM_diagonal_shallow(r);
-  if (U && flag & (LLL_IM|LLL_KER|LLL_ALL)) U = lll_finish(U, zeros, flag);
+  if (!U)
+  {
+    if (zeros) {
+      if (gram) {
+        G = lll_get_im(G, zeros);
+        d -= zeros;
+        for (i = 1; i <= d; i++) gel(G,i) = lll_get_im(gel(G,i), zeros);
+      }
+      else
+        B = lll_get_im(B, zeros);
+    }
+  }
+  else if (flag & (LLL_IM|LLL_KER|LLL_ALL))
+    U = lll_finish(U, zeros, flag);
   if (gram)
   {
     if (U) return U;
