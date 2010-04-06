@@ -2914,7 +2914,7 @@ gaussmoduloall(GEN M, GEN D, GEN Y, GEN *ptu1)
    * (M D) (*  * ) = (0 H) */
   u1 = ZM_lll(u1, 0.75, LLL_INPLACE);
   Y = ZM_ZC_mul(u2,Y);
-  x = ZM_reducemodmatrix(Y, u1);
+  x = ZC_reducemodmatrix(Y, u1);
   if (!ptu1) x = gerepileupto(av, x);
   else
   {
