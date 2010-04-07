@@ -739,7 +739,7 @@ idealaddtoone_i(GEN nf, GEN x, GEN y)
     a = trivial_merge(x);
   else {
     a = hnfmerge_get_1(x, y);
-    if (a) a = reducemodlll(a, idealmul_HNF(nf,x,y));
+    if (a) a = ZC_reducemodlll(a, idealmul_HNF(nf,x,y));
   }
   if (!a) pari_err(talker, "non coprime ideals in idealaddtoone");
   return a;
@@ -2123,7 +2123,7 @@ idealapprfact_i(GEN nf, GEN x, int nored)
   }
   else
     d = NULL;
-  z = reducemodlll(z, x);
+  z = ZC_reducemodlll(z, x);
   return d? RgC_Rg_div(z,d): z;
 }
 
@@ -2224,12 +2224,12 @@ idealchinese(GEN nf, GEN x, GEN w)
     u = hnfmerge_get_1(idealdivpowprime(nf,F, gel(L,i), gel(e,i)),
                        idealpow(nf, gel(L,i), gel(e,i)));
     if (!u) pari_err(talker, "non coprime ideals in idealchinese");
-    t = nfmul(nf, u, gel(w,i));
-    s = s? gadd(s,t): t;
+    t = nfmuli(nf, u, gel(w,i));
+    s = s? ZC_add(s,t): t;
   }
   if (!s) { avma = av; return zerocol(N); }
-  y = reducemodlll(s, F);
-  return gerepileupto(av, den? RgM_Rg_div(y,den): y);
+  y = ZC_reducemodlll(s, F);
+  return gerepileupto(av, den? RgC_Rg_div(y,den): y);
 }
 
 static GEN

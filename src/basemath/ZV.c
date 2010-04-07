@@ -905,6 +905,7 @@ Zupdate_row(long k, long l, GEN q, GEN L, GEN B)
   }
 }
 
+/* update L[k,] */
 static void
 ZRED(long k, long l, GEN x, GEN L, GEN B)
 {
@@ -936,10 +937,9 @@ ZincrementalGS(GEN x, GEN L, GEN B, long k)
 
 /* Variant reducemodinvertible(ZC v, ZM y), when y singular.
  * Very inefficient if y is not LLL-reduced of maximal rank */
-GEN
-ZC_reducemodmatrix(GEN v, GEN y)
+static GEN
+ZC_reducemodmatrix_i(GEN v, GEN y)
 {
-  pari_sp av = avma;
   GEN B, L, x = shallowconcat(y, v);
   long k, lx = lg(x), nx = lx-1;
 
@@ -947,5 +947,52 @@ ZC_reducemodmatrix(GEN v, GEN y)
   L = zeromatcopy(nx, nx);
   for (k=1; k <= nx; k++) ZincrementalGS(x, L, B, k);
   for (k = nx-1; k >= 1; k--) ZRED(nx,k, x,L,gel(B,k+1));
-  return gerepilecopy(av, gel(x,nx));
+  return gel(x,nx);
 }
+GEN
+ZC_reducemodmatrix(GEN v, GEN y) {
+  pari_sp av = avma;
+  return gerepilecopy(av, ZC_reducemodmatrix_i(v,y));
+}
+
+/* Variant reducemodinvertible(ZM v, ZM y), when y singular.
+ * Very inefficient if y is not LLL-reduced of maximal rank */
+static GEN
+ZM_reducemodmatrix_i(GEN v, GEN y)
+{
+  GEN B, L, V;
+  long j, k, lv = lg(v), nx = lg(y), lx = nx+1;
+
+  V = cgetg(lv, t_MAT);
+  B = scalarcol_shallow(gen_1, lx);
+  L = zeromatcopy(nx, nx);
+  for (k=1; k < nx; k++) ZincrementalGS(y, L, B, k);
+  for (j = 1; j < lg(v); j++)
+  {
+    GEN x = shallowconcat(y, gel(v,j));
+    ZincrementalGS(x, L, B, nx); /* overwrite last */
+    for (k = nx-1; k >= 1; k--) ZRED(nx,k, x,L,gel(B,k+1));
+    gel(V,j) = gel(x,nx);
+  }
+  return V;
+}
+GEN
+ZM_reducemodmatrix(GEN v, GEN y) {
+  pari_sp av = avma;
+  return gerepilecopy(av, ZM_reducemodmatrix_i(v,y));
+}
+
+GEN
+ZC_reducemodlll(GEN x,GEN y)
+{
+  pari_sp av = avma;
+  GEN z = ZC_reducemodmatrix(x, ZM_lll(y, 0.75, LLL_INPLACE));
+  return gerepilecopy(av, z);
+} 
+GEN
+ZM_reducemodlll(GEN x,GEN y)
+{
+  pari_sp av = avma;
+  GEN z = ZM_reducemodmatrix(x, ZM_lll(y, 0.75, LLL_INPLACE));
+  return gerepilecopy(av, z);
+} 

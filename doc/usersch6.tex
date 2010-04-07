@@ -1812,8 +1812,28 @@ each column of the \kbd{ZM} $x$ using \kbd{ZC\_hnfremdiv}. If $Q$ is not
 
 \fun{GEN}{ZM_hnfrem}{GEN x, GEN y} alias for \kbd{ZM\_hnfremdiv(x,y,NULL)}.
 
-Besides the \emph{hnfrem} functions, which were specific to integral input,
-we also have:
+\fun{GEN}{ZC_reducemodmatrix}{GEN v, GEN y} Let $y$ be a ZM, not necessarily
+square, which is assumed to be LLL-reduced (otherwise, very poor reduction is
+expected). Size-reduces the ZC $v$ modulo the $\Z$-module $Y$ spanned by $y$
+: if the columns of $y$ are denoted by $(y_1,\dots, y_{n-1})$, we return $y_n
+\equiv v$ modulo $Y$, such that the Gram-Schmidt coefficients $\mu_{n,j}$ are
+less than $1/2$ in absolute value for all $j < n$. In short, $y_n$ is almost
+orthogonal to $Y$.
+
+\fun{GEN}{ZM_reducemodmatrix}{GEN v, GEN y} Let $y$ be as in
+\tet{ZC_reducemodmatrix}, and $v$ be a ZM. This returns a matrix $v$ which is
+congruent to $v$ modulo the $\Z$-module spanned by $y$, whose columns are
+size-reduced. This is faster than repeatedly calling \tet{ZC_reducemodmatrix}
+on the columns since most of the Gram-Schmidt coefficients can be reused.
+
+\fun{GEN}{ZC_reducemodlll}{GEN v, GEN y} Let $y$ be an arbitrary ZM,
+LLL-reduce it then call \tet{ZC_reducemodmatrix}.
+
+\fun{GEN}{ZM_reducemodlll}{GEN v, GEN y} Let $y$ be an arbitrary ZM,
+LLL-reduce it then call \tet{ZM_reducemodmatrix}.
+
+Besides the above functions, which were specific to integral input, we also
+have:
 
 \fun{GEN}{reducemodinvertible}{GEN x, GEN y} $y$ is an invertible matrix
 and $x$ a \typ{COL} or \typ{MAT} of compatible dimension.
@@ -1828,15 +1848,6 @@ the columns of $y$, which is close to $x$.
 \fun{GEN}{reducemodlll}{GEN x,GEN y} LLL-reduce the non-singular \kbd{ZM} $y$
 and call \kbd{reducemodinvertible} to find a small representative of $x$ mod $y
 \Z^n$. Suitable for \kbd{gerepileupto}, but does not collect garbage.
-
-\fun{GEN}{ZC_reducemodmatrix}{GEN v, GEN y} general version of
-\tet{reducemodlll}. The ZM $y$ is no longer assumed to have maximal rank, but
-should already be LLL-reduced (otherwise, very poor reduction is expected).
-Size-reduces the ZC $v$ modulo the $\Z$-module $Y$ spanned by $y$ : if the
-columns of $y$ are denoted by $(y_1,\dots, y_{n-1})$, return $y_n \equiv v$
-modulo $Y$, such that the Gram-Schmidt coefficients $\mu_{n,j}$ are less than
-$1/2$ in absolute value for all $j < n$. In short, $y_n$ is almost orthogonal
-to $Y$.
 
 \subsec{Miscellaneous}
 
