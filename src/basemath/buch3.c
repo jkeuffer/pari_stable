@@ -363,7 +363,7 @@ GEN
 Buchray(GEN bnf, GEN module, long flag)
 {
   GEN nf, cyc, gen, Gen, u, clg, logs, p1, h, met, u1, u2, U, cycgen;
-  GEN bid, cycbid, genbid, y, funits, H, El;
+  GEN bid, cycbid, genbid, y, funits, H, Hi, c1, c2, El;
   long RU, Ri, j, ngen, lh;
   const long add_gen = flag & nf_GEN;
   const long do_init = flag & nf_INIT;
@@ -409,7 +409,7 @@ Buchray(GEN bnf, GEN module, long flag)
     gel(y,3) = El;
     gel(y,4) = matid(ngen);
     gel(y,5) = clg;
-    gel(y,6) = mkvec2(cgetg(1,t_MAT), matid(RU));
+    gel(y,6) = mkvec3(cgetg(1,t_MAT), matid(RU), gen_1);
     return gerepilecopy(av,y);
   }
 
@@ -453,14 +453,29 @@ Buchray(GEN bnf, GEN module, long flag)
   /* log(Units) U2 = H (mod D)
    * log(Units) U1 = 0 (mod D) */
   u1 = ZM_lll(u1, 0.99, LLL_INPLACE);
-  u2 = RgM_mul(reducemodinvertible(u2,u1), RgM_inv_upper(H)); /* NOT integral */
+  Hi = Q_primitive_part(RgM_inv_upper(H), &c1);
+  u2 = Q_primitive_part(ZM_mul(ZM_reducemodmatrix(u2,u1), Hi), &c2);
+  c1 = mul_content(c1, c2);
+  if (!c1)
+    c2 = gen_1;
+  else if (typ(c1) == t_INT)
+  {
+    if (!is_pm1(c1)) u2 = ZM_Z_mul(u2, c1);
+    c2 = gen_1;
+  }
+  else /* t_FRAC */
+  {
+    c2 = gel(c1,2);
+    c1 = gel(c1,1);
+    if (!is_pm1(c1)) u2 = ZM_Z_mul(u2, c1);
+  }
   y = cgetg(7,t_VEC);
   gel(y,1) = bnf;
   gel(y,2) = bid;
   gel(y,3) = El;
   gel(y,4) = U;
   gel(y,5) = clg;
-  gel(y,6) = mkvec2(u2,u1); /* [QM, ZM] */
+  gel(y,6) = mkvec3(u2,u1,c2); /* u2/c2 = H^(-1) (mod Im u1) */
   return gerepilecopy(av,y);
 }
 
@@ -495,16 +510,16 @@ bnrclassno(GEN bnf,GEN ideal)
 GEN
 bnrisprincipal(GEN bnr, GEN x, long flag)
 {
-  long i, j, c;
   pari_sp av = avma;
-  GEN bnf, nf, bid, U, El, ep, L, beta, idep, ex, divray, alpha;
+  GEN bnf, nf, bid, U, El, ep, L, idep, ex, cycray, cycbid, alpha;
 
   checkbnr(bnr);
-  divray = bnr_get_cyc(bnr); c = lg(divray);
-  if (c == 1 && !(flag & nf_GEN)) return cgetg(1,t_COL);
+  cycray = bnr_get_cyc(bnr); 
+  if (lg(cycray) == 1 && !(flag & nf_GEN)) return cgetg(1,t_COL);
 
   bnf = bnr_get_bnf(bnr); nf = bnf_get_nf(bnf);
   bid = bnr_get_bid(bnr);
+  cycbid = bid_get_cyc(bid);
   El  = gel(bnr,3);
   U   = gel(bnr,4);
 
@@ -513,13 +528,16 @@ bnrisprincipal(GEN bnr, GEN x, long flag)
   else
     idep = bnfisprincipal0(bnf, x, nf_FORCE|nf_GENMAT);
   ep  = gel(idep,1);
-  beta= gel(idep,2);
-  j = lg(ep);
-  for (i=1; i<j; i++) /* modify beta as if gen -> El.gen (coprime to bid) */
-    if (typ(El[i]) != t_INT && signe(ep[i])) /* <==> != 1 */
-      beta = famat_mul(to_famat_shallow(gel(El,i), negi(gel(ep,i))), beta);
-  ex = ZM_ZC_mul(U, shallowconcat(ep, ideallog(nf,beta,bid)));
-  ex = vecmodii(ex, divray);
+  if (lg(cycbid) > 1)
+  {
+    GEN beta = gel(idep,2);
+    long i, j = lg(ep);
+    for (i=1; i<j; i++) /* modify beta as if gen -> El.gen (coprime to bid) */
+      if (typ(El[i]) != t_INT && signe(ep[i])) /* <==> != 1 */
+        beta = famat_mul(to_famat_shallow(gel(El,i), negi(gel(ep,i))), beta);
+    ep = shallowconcat(ep, ideallog(nf,beta,bid));
+  }
+  ex = vecmodii(ZM_ZC_mul(U, ep), cycray);
   if (!(flag & nf_GEN)) return gerepileupto(av, ex);
 
   /* compute generator */
@@ -527,10 +545,12 @@ bnrisprincipal(GEN bnr, GEN x, long flag)
                       nf_GENMAT|nf_GEN_IF_PRINCIPAL|nf_FORCE);
   if (L == gen_0) pari_err(bugparier,"isprincipalray");
   alpha = nffactorback(nf, L, NULL);
-  if (lg(bid[5]) > 1 && lg(gmael(bid,5,1)) > 1)
+  if (lg(cycbid) > 1)
   {
-    GEN u = gel(bnr,6), y = RgM_RgC_mul(gel(u,1), ideallog(nf, L, bid));
-    y = reducemodinvertible(y, gel(u,2));
+    GEN v = gel(bnr,6), u2 = gel(v,1), u1 = gel(v,2), du2 = gel(v,3);
+    GEN y = ZM_ZC_mul(u2, ideallog(nf, L, bid));
+    if (!is_pm1(du2)) y = ZC_Z_divexact(y,du2);
+    y = ZC_reducemodmatrix(y, u1);
     alpha = nfdiv(nf, alpha, nffactorback(nf, init_units(bnf), y));
   }
   return gerepilecopy(av, mkvec2(ex,alpha));

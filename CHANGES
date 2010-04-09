@@ -494,6 +494,7 @@ BA119- Rename leftright_pow to gen_pow, leftright_pow_u to gen_pow_u and
 BA120- galoisapply now accept automorphisms in t_COL format.
   121- allow moduli equal to 0 in matsolvemod (was SEGV) [#947] + rigorously
        size-reduce the output in all cases.
+  122- the bnr structure in a minor way (bnr[6] has 3 components now)
 
   Added
     1- many new benches (make test-all)
