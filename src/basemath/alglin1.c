@@ -1369,6 +1369,23 @@ gerepile_gauss(GEN x,long k,long t,pari_sp av, long j, GEN c)
       }
 }
 
+/* Reduce x modulo (invertible) y */
+GEN
+closemodinvertible(GEN x, GEN y)
+{
+  return gmul(y, ground(RgM_solve(y,x)));
+}
+GEN
+reducemodinvertible(GEN x, GEN y)
+{
+  return gsub(x, closemodinvertible(x,y));
+}
+GEN
+reducemodlll(GEN x,GEN y)
+{
+  return reducemodinvertible(x, ZM_lll(y, 0.75, LLL_INPLACE));
+}
+
 /*******************************************************************/
 /*                                                                 */
 /*                    KERNEL of an m x n matrix                    */

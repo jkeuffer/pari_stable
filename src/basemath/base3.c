@@ -1091,23 +1091,6 @@ nfsign(GEN nf, GEN x)
   return S;
 }
 
-/* For internal use. Reduce x modulo (invertible) y */
-GEN
-closemodinvertible(GEN x, GEN y)
-{
-  return gmul(y, ground(RgM_solve(y,x)));
-}
-GEN
-reducemodinvertible(GEN x, GEN y)
-{
-  return gsub(x, closemodinvertible(x,y));
-}
-GEN
-reducemodlll(GEN x,GEN y)
-{
-  return reducemodinvertible(x, ZM_lll(y, 0.75, LLL_INPLACE));
-}
-
 /* multiply y by t = 1 mod^* f such that sign(x) = sign(y) at arch = divisor[2].
  * If x == NULL, make y >> 0 at sarch */
 GEN
