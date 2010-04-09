@@ -1177,6 +1177,7 @@ GEN     Q_from_QR(GEN x, long prec);
 GEN     R_from_QR(GEN x, long prec);
 GEN     algdep(GEN x, long n);
 GEN     algdep0(GEN x, long n, long bit);
+void    forqfvec0(GEN a, GEN BORNE, GEN code);
 GEN     gram_matrix(GEN M);
 GEN     lindep0(GEN x, long flag);
 GEN     lindep(GEN x);

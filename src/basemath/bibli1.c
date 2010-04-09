@@ -825,6 +825,117 @@ addcolumntomatrix(GEN V, GEN invp, GEN L)
   return 1;
 }
 
+struct qfvec
+{
+  GEN a, r, u;
+};
+
+static void
+forqfvec_init(struct qfvec *qv, GEN a)
+{
+  GEN r, u;
+  if (typ(a) != t_MAT || !RgM_is_ZM(a)) pari_err_TYPE("forqfvec",a);
+  u = lllgramint(a);
+  if (lg(u) != lg(a)) pari_err(e_MISC, "not a definite form in minim0");
+  a = qf_apply_ZM(a, u);
+  qv->a = RgM_gtofp(a, DEFAULTPREC);
+  r = qfgaussred_positive(qv->a);
+  if (!r)
+  {
+    r = qfgaussred_positive(a); /* exact computation */
+    if (!r) pari_err(e_MISC,"not a positive definite form in minim0");
+    r = RgM_gtofp(r, DEFAULTPREC);
+  }
+  qv->r = r;
+  qv->u = u;
+}
+
+static void
+forqfvec(void *E, long (*fun)(void *, GEN, GEN, double), struct qfvec *qv, GEN BORNE)
+{
+  GEN x, a = qv->a, r = qv->r, u = qv->u;
+  long n = lg(a), i, j, k;
+  double p,BOUND,*v,*y,*z,**q;
+  const double eps = 0.0001;
+  if (!BORNE) BORNE = gen_0;
+  else
+  {
+    BORNE = gfloor(BORNE);
+    if (typ(BORNE) != t_INT) pari_err_TYPE("minim0",BORNE);
+  }
+  minim_alloc(n, &q, &x, &y, &z, &v);
+  n--;
+  for (j=1; j<=n; j++)
+  {
+    v[j] = rtodbl(gcoeff(r,j,j));
+    for (i=1; i<j; i++) q[i][j] = rtodbl(gcoeff(r,i,j));
+  }
+
+  if (gequal0(BORNE))
+  {
+    double c;
+    p = rtodbl(gcoeff(a,1,1));
+    for (i=2; i<=n; i++) { c = rtodbl(gcoeff(a,i,i)); if (c < p) p = c; }
+    BORNE = roundr(dbltor(p));
+  }
+  else
+    p = gtodouble(BORNE);
+  BOUND = p * (1 + eps);
+  if (BOUND == p) pari_err_PREC("minim0");
+
+  k = n; y[n] = z[n] = 0;
+  x[n] = (long)sqrt(BOUND/v[n]);
+  for(;;x[1]--)
+  {
+    do
+    {
+      if (k>1)
+      {
+        long l = k-1;
+        z[l] = 0;
+        for (j=k; j<=n; j++) z[l] += q[l][j]*x[j];
+        p = (double)x[k] + z[k];
+        y[l] = y[k] + p*p*v[k];
+        x[l] = (long)floor(sqrt((BOUND-y[l])/v[l])-z[l]);
+        k = l;
+      }
+      for(;;)
+      {
+        p = (double)x[k] + z[k];
+        if (y[k] + p*p*v[k] <= BOUND) break;
+        k++; x[k]--;
+      }
+    } while (k > 1);
+    if (! x[1] && y[1]<=eps) break;
+
+    p = (double)x[1] + z[1]; p = y[1] + p*p*v[1]; /* norm(x) */
+    if (fun(E, u, x, p)) break;
+  }
+}
+
+static long
+_gp_forqf(void *E, GEN u, GEN x, double p/*unused*/)
+{
+  pari_sp av = avma;
+  (void)p;
+  set_lex(-1, ZM_zc_mul(u, x));
+  closure_evalvoid((GEN)E);
+  avma = av;
+  return loop_break();
+}
+
+void
+forqfvec0(GEN a, GEN BORNE, GEN code)
+{
+  pari_sp av = avma;
+  struct qfvec qv;
+  forqfvec_init(&qv, a);
+  push_lex(gen_0, code);
+  forqfvec((void*) code, &_gp_forqf, &qv, BORNE);
+  pop_lex(1);
+  avma = av;
+}
+
 /* Minimal vectors for the integral definite quadratic form: a.
  * Result u:
  *   u[1]= Number of vectors of square norm <= BORNE

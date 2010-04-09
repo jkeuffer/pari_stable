@@ -208,6 +208,7 @@ BA 45- [breakloop] GP function breakpoint
 BA 46- GP function ffnbirred
 BA 47- cubic sieve algorithm for Flxq_log
 BA 48- library functions F2x_F2xqV_eval, F2x_F2xq_eval
+BA 49- forqfvec()
 
   Removed
     1- dropped DOS support
