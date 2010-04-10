@@ -2223,10 +2223,11 @@ remove_content(GEN I)
 static GEN
 get_random_ideal(FB_t *F, GEN A, GEN nf, GEN ex)
 {
-  long i, l = lg(ex);
-  GEN ideal, P;
-  ideal = P = idealhnf_two(nf, A);
+  long l = lg(ex);
   for (;;) {
+    GEN ideal, P;
+    long i;
+    ideal = P = idealhnf_two(nf, A);
     for (i=1; i<l; i++)
     { /* reduce mod apparent order */
       ex[i] = random_bits(RANDOM_BITS) % F->pow->ord[i];
