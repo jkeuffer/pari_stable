@@ -35,7 +35,7 @@ v = [
 }
 
 do(w) =
-{ local(mod, bnf);
+{ my(mod, bnf);
   mod = w[2]; bnf = bnfinit(w[1]);
   if (type(mod) == "t_VEC", mod = idealhnf(bnf, mod[1], mod[2]));
   bnrstark(bnrinit(bnf, mod, 1), 0);

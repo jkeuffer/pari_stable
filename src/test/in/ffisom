@@ -1,6 +1,6 @@
 fpisom2(l,P,Q)=
 {
-        local(L);
+        my(L);
         x=variable(P);
         L=factorff(lift(P),l,lift(subst(Q,x,MAXVARN)))[,1];
         L=-subst(L,x,0);
@@ -8,7 +8,7 @@ fpisom2(l,P,Q)=
 }
 fptest(l,P,Q)=
 {
-        local(C);
+        my(C);
         C=fpisom2(l,P,Q);
         print(vector(length(C),i,if(subst(P,x,C[i])==0,0,error("fptest("a","l","P","Q")"))));
         C;

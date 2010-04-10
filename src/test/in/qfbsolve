@@ -1,14 +1,14 @@
 gettime;
 qfbeval(V,v)=
 {
-  local(x,y);
+  my(x,y);
   V=Vec(V);x=v[1];y=v[2];
   V[1]*x^2+V[2]*x*y+V[3]*y^2;
 }
 
 bqfb(N=10000)=
 {
-  local(p,d,r,V,q,q2,Q,Q2);
+  my(p,d,r,V,q,q2,Q,Q2);
   for(i=1,N,
     until(!issquare(d) && (d%4==0 || d%4==1),d=random(4000)-2000);
     until(p==1 || kronecker(d,p)>=0,

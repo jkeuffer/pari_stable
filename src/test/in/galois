@@ -1,5 +1,5 @@
 test(a)=
-{ local(x, y, z);
+{ my(x, y, z);
   for (i=1, 10000,
     z = eval(Str("T", a, "_", i));
     if (poldegree(z) == 1, break); \\ undefined
