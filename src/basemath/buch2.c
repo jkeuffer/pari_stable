@@ -97,6 +97,7 @@ typedef struct FB_t {
             * isclone() is set for LV[p] iff all P|p are in FB
             * LV[i], i not prime or i > n2, is undefined! */
   GEN iLP; /* iLP[p] = i such that LV[p] = [LP[i],...] */
+  GEN L_jid; /* indexes of "useful" prime ideals for rnd_rel */
   long KC, KCZ, KCZ2;
   GEN subFB; /* LP o subFB =  part of FB used to build random relations */
   int sfb_chg; /* need to change subFB ? */
@@ -237,7 +238,7 @@ subFBgen(FB_t *F, GEN nf, double PROD, long minsFB)
   pari_sp av;
 
   F->LP   = cgetg(lv, t_VEC);
-  F->perm = cgetg(lv, t_VECSMALL);
+  F->L_jid = F->perm = cgetg(lv, t_VECSMALL);
   av = avma;
   y = cgetg(lv,t_COL); /* Norm P */
   for (k=0, i=1; i <= F->KCZ; i++)
@@ -279,11 +280,11 @@ subFBgen(FB_t *F, GEN nf, double PROD, long minsFB)
   avma = av; return 1;
 }
 static int
-subFB_change(FB_t *F, GEN nf, GEN L_jid)
+subFB_change(FB_t *F, GEN nf)
 {
   long i, iyes, minsFB, lv = F->KC + 1, l = lg(F->subFB)-1;
   pari_sp av = avma;
-  GEN yes;
+  GEN yes, L_jid = F->L_jid;
 
   switch (F->sfb_chg)
   {
@@ -354,7 +355,7 @@ ZZV_equal(GEN x, GEN y) {
 
 /* Compute powers of prime ideals (P^0,...,P^a) in subFB (a > 1) */
 static void
-powFBgen(FB_t *F, RELCACHE_t *cache, GEN nf)
+powFBgen(RELCACHE_t *cache, FB_t *F, GEN nf)
 {
   const long a = 1L<<RANDOM_BITS;
   pari_sp av = avma;
@@ -554,7 +555,8 @@ FBgen(FB_t *F, GEN nf, long N, long C2, long C1, GRHcheck_t *S)
     msgtimer("factor base");
   }
   if (!GRHok(S, L, SA, SB)) return NULL;
-  F->perm = NULL; return Res;
+  F->perm = NULL;
+  F->L_jid = NULL; return Res;
 }
 
 /*  SMOOTH IDEALS */
@@ -2218,69 +2220,52 @@ remove_content(GEN I)
   return I;
 }
 
-static void
-rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN L_jid, long *pjid, FACT *fact)
+static GEN
+get_random_ideal(FB_t *F, GEN A, GEN nf, GEN ex)
 {
-  long nbG = lg(F->vecG)-1, lgsub = lg(F->subFB), jlist = 1, jid = *pjid;
-  long i, j, cptlist = 0;
-  pari_sp av, av1;
-  GEN ideal, Nideal, m, ex = cgetg(lgsub, t_VECSMALL);
-  const long maxcptlist = 3;
+  long i, l = lg(ex);
+  GEN ideal, P;
+  ideal = P = idealhnf_two(nf, A);
+  for (;;) {
+    for (i=1; i<l; i++)
+    { /* reduce mod apparent order */
+      ex[i] = random_bits(RANDOM_BITS) % F->pow->ord[i];
+      if (ex[i]) ideal = idealmul_HNF(nf,ideal, gmael(F->pow->id2,i,ex[i]));
+    }
+    if (ideal != P) { /* If ex  != 0 */
+      ideal = remove_content(ideal);
+      if (!is_pm1(gcoeff(ideal,1,1))) return ideal; /* ideal != Z_K */
+    }
+  }
+}
 
-  /* will compute L_jid[i] * (random product from subFB); at most
-     maxcptlist times for each i */
+static void
+rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, FACT *fact)
+{
+  long jlist, nbG = lg(F->vecG)-1, lgsub = lg(F->subFB);
+  GEN L_jid = F->L_jid, ex = cgetg(lgsub, t_VECSMALL);
+  pari_sp av;
+
+  /* will compute P[ L_jid[i] ] * (random product from subFB) */
   if (DEBUGLEVEL) {
     long d = cache->end - cache->last;
     fprintferr("\n(more relations needed: %ld)\n", d > 0? d: 1);
-    if (L_jid) fprintferr("looking hard for %Ps\n",L_jid);
+    if (lg(L_jid) < F->KC) fprintferr("looking hard for %Ps\n",L_jid);
   }
-  for (av = avma;;)
+  for (av = avma, jlist = 1; jlist < lg(L_jid); jlist++, avma = av)
   {
+    const long jid = L_jid[jlist];
     REL_t *rel = cache->last;
-    GEN P;
-    if (L_jid)
-    {
-      if (++cptlist > maxcptlist)
-      {
-        jid = L_jid[jlist];
-        if (++jlist >= lg(L_jid))
-        {
-          if (DEBUGLEVEL) msgtimer("for remaining ideals");
-          return;
-        }
-        cptlist = 0;
-      }
-      if (!jid) jid = 1;
-    }
-    else
-    {
-      if (++jid > F->KC)
-      {
-        jid = 1;
-        if (++cptlist > maxcptlist)
-        {
-          if (DEBUGLEVEL) msgtimer("for remaining ideals");
-          return;
-        }
-      }
-    }
-    avma = av;
-    ideal = P = idealhnf_two(nf, gel(F->LP,jid));
-    do {
-      for (i=1; i<lgsub; i++)
-      { /* reduce mod apparent order */
-        ex[i] = random_bits(RANDOM_BITS) % F->pow->ord[i];
-        if (ex[i]) ideal = idealmul_HNF(nf,ideal, gmael(F->pow->id2,i,ex[i]));
-      }
-    } while (ideal == P); /* If ex  = 0, try another */
-    ideal = remove_content(ideal);
-    if (is_pm1(gcoeff(ideal,1,1))) continue; /* ideal = Z_K */
-
-    Nideal = ZM_det_triangular(ideal);
+    GEN Nideal, ideal;
+    pari_sp av1;
+    long i, j;
+    
     if (DEBUGLEVEL>1) fprintferr("(%ld)", jid);
+    ideal = get_random_ideal(F, gel(F->LP,jid), nf, ex);
+    Nideal = ZM_det_triangular(ideal);
     for (av1 = avma, j = 1; j <= nbG; j++, avma = av1)
     { /* reduce along various directions */
-      m = idealpseudomin_nonscalar(ideal, gel(F->vecG,j));
+      GEN m = idealpseudomin_nonscalar(ideal, gel(F->vecG,j));
       if (!factorgen(F,nf,ideal,Nideal,m,fact))
       {
         if (DEBUGLEVEL>1) { fprintferr("."); flusherr(); }
@@ -2302,10 +2287,10 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN L_jid, long *pjid, FACT *fact)
       /* Need more, try next prime ideal */
       if (rel < cache->end) break;
       /* We have found enough. Return */
-      avma = av; *pjid = jid;
-      return;
+      avma = av; return;
     }
   }
+  if (DEBUGLEVEL) msgtimer("for remaining ideals");
 }
 
 /* remark: F->KCZ changes if be_honest() fails */
@@ -3177,10 +3162,10 @@ GEN
 Buchall_param(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long prec)
 {
   pari_sp av0 = avma, av, av2;
-  long PRECREG, N, R1, R2, RU, LIMC, LIMC2, lim, zc, i, jid;
+  long PRECREG, N, R1, R2, RU, LIMC, LIMC2, lim, zc, i;
   long nreldep, sfb_trials, need, old_need = -1, precdouble = 0, precadd = 0;
   double drc, LOGD, LOGD2;
-  GEN fu, zu, nf, D, A, W, R, Res, z, h, L_jid, PERM;
+  GEN fu, zu, nf, D, A, W, R, Res, z, h, PERM;
   GEN res, L, resc, B, C, C0, lambda, dep, clg1, clg2, Vbase;
   const char *precpb = NULL;
   const long minsFB = 3, RELSUP = 5;
@@ -3253,8 +3238,8 @@ START:
   }
 
   /* Random relations */
-  W = L_jid = NULL;
-  jid = sfb_trials = nreldep = 0;
+  W = NULL;
+  sfb_trials = nreldep = 0;
   need = cache.end - cache.last;
   if (need > 0)
   {
@@ -3266,12 +3251,12 @@ MORE:
       F.sfb_chg = sfb_INCREASE;
     }
     if (F.sfb_chg) {
-      if (!subFB_change(&F, nf, L_jid)) goto START;
-      jid = nreldep = 0;
+      if (!subFB_change(&F, nf)) goto START;
+      nreldep = 0;
     }
-    if (F.newpow) powFBgen(&F, &cache, nf);
-    if (!F.sfb_chg) rnd_rel(&cache,&F, nf, L_jid, &jid, fact);
-    L_jid = NULL;
+    if (F.newpow) powFBgen(&cache, &F, nf);
+    if (!F.sfb_chg) rnd_rel(&cache, &F, nf, fact);
+    F.L_jid = F.perm;
   }
 PRECPB:
   if (precpb)
@@ -3316,8 +3301,8 @@ PRECPB:
     need = lg(dep)>1? lg(dep[1])-1: lg(B[1])-1;
     if (need)
     { /* dependent rows */
-      L_jid = vecslice(F.perm, 1, need);
-      vecsmall_sort(L_jid); jid = 0;
+      F.L_jid = vecslice(F.perm, 1, need);
+      vecsmall_sort(F.L_jid); 
       need += RU - 1; /* need more columns for units */
       if (need == old_need) F.sfb_chg = sfb_CHANGE;
       old_need = need;
@@ -3350,10 +3335,10 @@ PRECPB:
 
   if (F.KCZ2 > F.KCZ)
   {
-    if (F.newpow) powFBgen(&F, NULL, nf);
+    if (F.newpow) powFBgen(NULL, &F, nf);
     if (F.sfb_chg) {
-      if (!subFB_change(&F, nf, L_jid)) goto START;
-      if (F.newpow) powFBgen(&F, NULL, nf);
+      if (!subFB_change(&F, nf)) goto START;
+      if (F.newpow) powFBgen(NULL, &F, nf);
     }
     if (!be_honest(&F, nf, fact)) goto START;
   }
