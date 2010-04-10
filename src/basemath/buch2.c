@@ -2016,7 +2016,6 @@ already_known(RELCACHE_t *cache, REL_t *rel)
   if (bs == l) return -1; /* zero relation */
 
   for (r = rel - 1; r > cache->base; r--)
-  {
     if (bs == r->nz) /* = index of first non zero elt in cols */
     {
       GEN coll = r->R;
@@ -2024,7 +2023,6 @@ already_known(RELCACHE_t *cache, REL_t *rel)
       do b++; while (b < l && cols[b] == coll[b]);
       if (b == l) return 1;
     }
-  }
   rel->nz = bs; return 0;
 }
 
@@ -2224,7 +2222,7 @@ static void
 rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN L_jid, long *pjid, FACT *fact)
 {
   long nbG = lg(F->vecG)-1, lgsub = lg(F->subFB), jlist = 1, jid = *pjid;
-  long i, j, cptlist = 0, cptzer = 0;
+  long i, j, cptlist = 0;
   pari_sp av, av1;
   GEN ideal, Nideal, m, ex = cgetg(lgsub, t_VECSMALL);
   const long maxcptlist = 3;
@@ -2250,7 +2248,7 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN L_jid, long *pjid, FACT *fact)
           if (DEBUGLEVEL) msgtimer("for remaining ideals");
           return;
         }
-         cptlist = 0;
+        cptlist = 0;
       }
       if (!jid) jid = 1;
     }
@@ -2276,7 +2274,7 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN L_jid, long *pjid, FACT *fact)
       }
     } while (ideal == P); /* If ex  = 0, try another */
     ideal = remove_content(ideal);
-    if (gequal1(gcoeff(ideal,1,1))) continue;
+    if (is_pm1(gcoeff(ideal,1,1))) continue; /* ideal = Z_K */
 
     Nideal = ZM_det_triangular(ideal);
     if (DEBUGLEVEL>1) fprintferr("(%ld)", jid);
@@ -2294,11 +2292,6 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN L_jid, long *pjid, FACT *fact)
       if (already_known(cache, rel))
       { /* forget it */
         if (DEBUGLEVEL>1) dbg_cancelrel(jid,j,rel->R);
-        if (++cptzer > MAXRELSUP)
-        {
-           if (DEBUGLEVEL==1) dbg_cancelrel(jid,j,rel->R);
-           cptzer=0;
-        }
         pari_free((void*)rel->R); rel--;
         continue;
       }
@@ -2307,7 +2300,7 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN L_jid, long *pjid, FACT *fact)
       rel->pow = F->pow; cache->last = rel;
       if (DEBUGLEVEL) dbg_newrel(cache);
       /* Need more, try next prime ideal */
-      if (rel < cache->end) { cptzer = 0; break; }
+      if (rel < cache->end) break;
       /* We have found enough. Return */
       avma = av; *pjid = jid;
       return;
