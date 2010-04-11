@@ -1041,6 +1041,7 @@ SPLIT(FB_t *F, GEN nf, GEN x, GEN Vbase, FACT *fact)
     I = gel(id,1); NI = ZM_det_triangular(I);
     for (j=1; j<ru; j++)
     {
+      pari_sp av2 = avma;
       y = idealpseudomin_nonscalar(I, gel(vecG,j));
       if (factorgen(F, nf, I, NI, y, fact))
       {
@@ -1048,6 +1049,7 @@ SPLIT(FB_t *F, GEN nf, GEN x, GEN Vbase, FACT *fact)
           if (ex[i]) add_to_fact(Vbase_to_FB(F,gel(Vbase,i)), ex[i], fact);
         return famat_mul(gel(id,2), y);
       }
+      avma = av2;
     }
     avma = av;
     if (++nbtest > nbtest_lim)
