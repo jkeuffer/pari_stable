@@ -2092,22 +2092,19 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
   minim_alloc(N+1, &q, &x, &y, &z, &v);
   for (av = avma; noideal; noideal--, avma = av)
   {
+    GEN r, u, gx, ideal = gel(F->LP,noideal), inc = const_vecsmall(N, 1);
     long j, k, skipfirst, nbrelideal = 0, dependent = 0, try_factor = 0;
-    GEN IDEAL, ideal, r, u, gx, inc = const_vecsmall(N, 1);
     pari_sp av2;
 
-    ideal = gel(F->LP,noideal);
     if (DEBUGLEVEL>1)
-      fprintferr("\n*** Ideal no %ld: [%Ps, %Ps, %Ps, %Ps]\n",
-                 noideal, ideal[1], ideal[2], ideal[3], ideal[4]);
-    /* Preliminary LLL-reduction */
-    IDEAL = ZM_lll(idealhnf_two(nf,ideal), 0.75, LLL_INPLACE);
-    u = ZM_lll(ZM_mul(F->G0, IDEAL), 0.99, LLL_IM);
-    IDEAL = ZM_mul(IDEAL,u); /* approximate T2-LLL reduction */
-    r = Q_from_QR(RgM_mul(G, IDEAL), prec); /* Cholesky for T2 | ideal */
+      fprintferr("\n*** Ideal no %ld: %Ps\n", noideal, vecslice(ideal,1,4));
+    ideal = idealhnf_two(nf, ideal);
+    u = ZM_lll(ZM_mul(F->G0, ideal), 0.99, LLL_IM);
+    ideal = ZM_mul(ideal,u); /* approximate T2-LLL reduction */
+    r = Q_from_QR(RgM_mul(G, ideal), prec); /* Cholesky for T2 | ideal */
     if (!r) pari_err(bugparier, "small_norm (precision too low)");
 
-    skipfirst = ZV_isscalar(gel(IDEAL,1))? 1: 0; /* 1 probable */
+    skipfirst = ZV_isscalar(gel(ideal,1))? 1: 0; /* 1 probable */
     for (k=1; k<=N; k++)
     {
       v[k] = gtodouble(gcoeff(r,k,k));
@@ -2160,7 +2157,7 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
 
       /* element complete */
       if (zv_content(x) !=1) continue; /* not primitive */
-      gx = ZM_zc_mul(IDEAL,x);
+      gx = ZM_zc_mul(ideal,x);
       if (ZV_isscalar(gx)) continue;
 
       {
@@ -2185,7 +2182,7 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
       /* make sure we get maximal rank first, then allow all relations */
       if (rel - cache->base > 1 && rel - cache->base <= F->KC
                                 && ! addcolumn_mod(rel->R,invp,L, mod_p))
-      { /* Q-dependent from previous ones: forget it */
+      { /* probably Q-dependent from previous ones: forget it */
         pari_free((void*)rel->R); rel--;
         if (DEBUGLEVEL>1) fprintferr("*");
         if (++dependent > maxtry_DEP) break;
