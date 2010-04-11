@@ -993,21 +993,23 @@ SPLIT(FB_t *F, GEN nf, GEN x, GEN Vbase, FACT *fact)
 {
   GEN vecG, z, ex, y, x0, Nx = ZM_det_triangular(x);
   long nbtest_lim, nbtest, i, j, ru, lgsub;
+  pari_sp av;
 
   /* try without reduction if x is small.
-   * N.B can_factor destroys its NI argument */
+   * N.B. can_factor() destroys its NI argument */
   if (gexpo(gcoeff(x,1,1)) < 100 &&
       can_factor(F, nf, x, NULL, icopy(Nx), fact)) return NULL;
 
+  av = avma;
   y = idealpseudomin_nonscalar(x, nf_get_roundG(nf));
   if (factorgen(F, nf, x, Nx, y, fact)) return y;
+  avma = av;
 
   /* reduce in various directions */
   ru = lg(nf_get_roots(nf));
   vecG = cgetg(ru, t_VEC);
   for (j=1; j<ru; j++)
   {
-    pari_sp av;
     gel(vecG,j) = nf_get_Gtwist1(nf, j);
     av = avma;
     y = idealpseudomin_nonscalar(x, gel(vecG,j));
@@ -1023,8 +1025,8 @@ SPLIT(FB_t *F, GEN nf, GEN x, GEN Vbase, FACT *fact)
   nbtest = 1; nbtest_lim = 4;
   for(;;)
   {
-    pari_sp av = avma;
     GEN I, NI, id = x0;
+    av = avma;
     if (DEBUGLEVEL>2) fprintferr("# ideals tried = %ld\n",nbtest);
     for (i=1; i<lgsub; i++)
     {
