@@ -813,19 +813,19 @@ getfu(GEN nf, GEN *ptA, long force, long *pte, long prec)
   p2 = PiI2n(1,prec); for (   ; i<=RU; i++) gel(vec,i) = p2;
   for (j=1; j<RU; j++)
   {
-    p1 = gel(y,j); p2 = QXQ_inv(p1, T);
-    if (gcmp(RgX_fpnorml2(p2,DEFAULTPREC),
-             RgX_fpnorml2(p1,DEFAULTPREC)) < 0)
+    GEN u = gel(y,j), v = QXQ_inv(u, T);
+    if (gcmp(RgX_fpnorml2(v,DEFAULTPREC),
+             RgX_fpnorml2(u,DEFAULTPREC)) < 0)
     {
-      gel(A,j) = gneg(gel(A,j));
-      p1 = p2;
+      gel(A,j) = RgC_neg(gel(A,j));
+      u = v;
     }
-    if (gsigne(leading_term(p1)) < 0)
+    if (gsigne(leading_term(u)) < 0)
     {
-      gel(A,j) = gadd(gel(A,j), vec);
-      p1 = gneg(p1);
+      gel(A,j) = RgC_add(gel(A,j), vec);
+      u = RgX_neg(u);
     }
-    gel(y,j) = p1;
+    gel(y,j) = u;
   }
   if (DEBUGLEVEL) msgtimer("getfu");
   *ptA = A; return y;
