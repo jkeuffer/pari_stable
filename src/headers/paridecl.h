@@ -1473,6 +1473,7 @@ void    set_lex(long vn, GEN x);
 
 GEN     FF_1(GEN a);
 GEN     FF_Z_Z_muldiv(GEN x, GEN y, GEN z);
+GEN     FF_Q_add(GEN x, GEN y);
 GEN     FF_Z_add(GEN a, GEN b);
 GEN     FF_Z_mul(GEN a, GEN b);
 GEN     FF_add(GEN a, GEN b);

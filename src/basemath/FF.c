@@ -283,6 +283,28 @@ FF_Z_add(GEN x, GEN y)
 }
 
 GEN
+FF_Q_add(GEN x, GEN y)
+{
+  ulong pp;
+  GEN r, T, p, z=_initFF(x,&T,&p,&pp);
+  switch(x[1])
+  {
+  case t_FF_FpXQ:
+    {
+      pari_sp av=avma;
+      r=gerepileupto(av,FpX_Fp_add(gel(x,2),Rg_to_Fp(y,p),p));
+      break;
+    }
+  case t_FF_F2xq:
+    r=Rg_to_Fl(y,pp)?F2x_1_add(gel(x,2)):vecsmall_copy(gel(x,2));
+    break;
+  default:
+    r=Flx_Fl_add(gel(x,2),Rg_to_Fl(y,pp),pp);
+  }
+  return _mkFF(x,z,r);
+}
+
+GEN
 FF_neg(GEN x)
 {
   ulong pp;

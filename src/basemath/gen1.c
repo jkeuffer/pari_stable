@@ -1016,7 +1016,11 @@ gadd(GEN x, GEN y)
           if (!signe(x[1])) return gcopy(y);
           return addQp(x,y);
         case t_QUAD: return addRq(x, y);
+        case t_FFELT: return FF_Q_add(y, x);
       }
+
+    case t_FFELT:
+      pari_err(operf,"+",x,y);
 
     case t_COMPLEX:
       switch(ty)

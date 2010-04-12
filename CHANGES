@@ -217,6 +217,7 @@ BA164- precision(0.E100) returned an invalid object.
   165- nbits2nlong, nbits2prec, nbits2nchar : avoid overflow [#1037]
   166- normalization problems in RgX_Rg_add & friends, leading to t_POL
        with sign incorrectly set to 0, e.g. O(2)*x + 1 [#1042]
+  167- t_FFELT + t_FRAC -> SEGV (missing case in gadd)
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
