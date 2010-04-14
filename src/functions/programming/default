@@ -1,7 +1,7 @@
 Function: default
 Section: programming/specific
 C-Name: default0
-Prototype: D"",r,D"",s,D0,L,
+Prototype: D"",r,D"",s,
 Help: default({key},{val}): returns the current value of the
  default key. If val is present, set opt to val first. If no argument is
  given, print a list of all defaults as well as their values.
