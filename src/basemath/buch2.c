@@ -2261,7 +2261,7 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, FACT *fact)
     GEN Nideal, ideal;
     pari_sp av1;
     long i, j;
-    
+
     if (DEBUGLEVEL>1) fprintferr("(%ld)", jid);
     ideal = get_random_ideal(F, gel(F->LP,jid), nf, ex);
     Nideal = ZM_det_triangular(ideal);
@@ -3304,7 +3304,7 @@ PRECPB:
     if (need)
     { /* dependent rows */
       F.L_jid = vecslice(F.perm, 1, need);
-      vecsmall_sort(F.L_jid); 
+      vecsmall_sort(F.L_jid);
       need += RU - 1; /* need more columns for units */
       if (need == old_need) F.sfb_chg = sfb_CHANGE;
       old_need = need;

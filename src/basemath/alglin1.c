@@ -2920,7 +2920,7 @@ gaussmoduloall(GEN M, GEN D, GEN Y, GEN *ptu1)
   H = ZM_hnfall(shallowconcat(M,delta), &U, 1);
   Y = hnf_solve(H,Y); if (!Y) return gen_0;
   l = lg(H); /* may be smaller than lM if some moduli are 0 */
-  n = l-1; 
+  n = l-1;
   m = lg(U)-1 - n;
   u1 = cgetg(m+1,t_MAT);
   u2 = cgetg(n+1,t_MAT);

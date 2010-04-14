@@ -988,11 +988,11 @@ ZC_reducemodlll(GEN x,GEN y)
   pari_sp av = avma;
   GEN z = ZC_reducemodmatrix(x, ZM_lll(y, 0.75, LLL_INPLACE));
   return gerepilecopy(av, z);
-} 
+}
 GEN
 ZM_reducemodlll(GEN x,GEN y)
 {
   pari_sp av = avma;
   GEN z = ZM_reducemodmatrix(x, ZM_lll(y, 0.75, LLL_INPLACE));
   return gerepilecopy(av, z);
-} 
+}

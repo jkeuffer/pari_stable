@@ -514,7 +514,7 @@ bnrisprincipal(GEN bnr, GEN x, long flag)
   GEN bnf, nf, bid, U, El, ep, L, idep, ex, cycray, cycbid, alpha;
 
   checkbnr(bnr);
-  cycray = bnr_get_cyc(bnr); 
+  cycray = bnr_get_cyc(bnr);
   if (lg(cycray) == 1 && !(flag & nf_GEN)) return cgetg(1,t_COL);
 
   bnf = bnr_get_bnf(bnr); nf = bnf_get_nf(bnf);
