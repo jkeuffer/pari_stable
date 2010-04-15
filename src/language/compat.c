@@ -364,7 +364,7 @@ entree oldfonctions[]={
 {"hess",1,(void*)hess,8,"G","hess(x)=Hessenberg form of x."},
 {"hilb",30,(void*) hilbert,4,"lGGG","hilb(x,y,p)=Hilbert symbol at p of x,y (integers or fractions)."},
 {"hilbert",11,(void*)mathilbert,8,"L","hilbert(n)=Hilbert matrix of order n (n C-integer)."},
-{"hilbp",20,(void*) hilbert,4,"lGG","hilbp(x,y)=Hilbert symbol of x,y (where x or y is integermod or p-adic)."},
+{"hilbp",20,(void*) hilbert,4,"lGGDG","hilbp(x,y)=Hilbert symbol of x,y (where x or y is integermod or p-adic)."},
 {"hvector",22,(void*)vecteur,9,"GVE","hvector(n,X,expr)=row vector with n components of expression expr, the variable X ranging from 1 to n."},
 {"hyperu",3,(void*)hyperu,3,"GGGp","hyperu(a,b,x)=U-confluent hypergeometric function."},
 {"i",0,(void*)gen_I,2,"","i=i()=square root of -1."},
