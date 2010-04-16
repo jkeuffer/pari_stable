@@ -374,7 +374,8 @@ powFBgen(RELCACHE_t *cache, FB_t *F, GEN nf)
   {
     GEN M, m, alg, id2, vp = gel(F->LP, F->subFB[i]);
     id2 = cgetg(a+1,t_VEC); gel(Id2,i) = id2;
-    gel(id2,1) = mkvec2(pr_get_p(vp), pr_get_gen(vp));
+    
+    gel(id2,1) = mkvec2(pr_get_p(vp), zk_scalar_or_multable(nf,pr_get_gen(vp)));
     alg = cgetg(a+1,t_VEC); gel(Alg,i) = alg; gel(alg,1) = gen_1;
     vp = idealhnf_two(nf,vp);
     for (j=2; j<=a; j++)
@@ -387,6 +388,7 @@ powFBgen(RELCACHE_t *cache, FB_t *F, GEN nf)
         break;
       }
       if (ZZV_equal(J, gel(id2,j-1))) { j = 1; break; }
+      gel(J,2) = zk_scalar_or_multable(nf, gel(J,2));
       gel(id2,j) = J;
       gel(alg,j) = m;
     }
