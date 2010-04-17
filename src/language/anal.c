@@ -270,7 +270,7 @@ check_proto(const char *code)
     case 'V':
     case '=':
     case ',': break;
-    case '\n': return arity; /* Before the mnemonic */
+    case '\n': break; /* Before the mnemonic */
 
     case 'm':
     case 'l':
@@ -278,6 +278,7 @@ check_proto(const char *code)
     case 'v': pari_err(talker2, "this code has to come first", s-1, code);
     default: pari_err(talker2, "unknown parser code", s-1, code);
   }
+  if (arity > 20) pari_err(impl,"functions with more than 20 parameters");
   return arity;
 }
 

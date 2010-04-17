@@ -1067,22 +1067,50 @@ closure_eval(GEN C)
         zerovalue(ep);
         break;
       }
-#define ARGS st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4],st[sp+5],st[sp+6],st[sp+7]
+
+#define EVAL_f(f) \
+  switch (ep->arity) \
+  { \
+    case 0: f(); break; \
+    case 1: sp--; f(st[sp]); break; \
+    case 2: sp-=2; f(st[sp],st[sp+1]); break; \
+    case 3: sp-=3; f(st[sp],st[sp+1],st[sp+2]); break; \
+    case 4: sp-=4; f(st[sp],st[sp+1],st[sp+2],st[sp+3]); break; \
+    case 5: sp-=5; f(st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4]); break; \
+    case 6: sp-=6; f(st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4],st[sp+5]); break; \
+    case 7: sp-=7; f(st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4],st[sp+5],st[sp+6]); break; \
+    case 8: sp-=8; f(st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4],st[sp+5],st[sp+6],st[sp+7]); break; \
+    case 9: sp-=9; f(st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4],st[sp+5],st[sp+6],st[sp+7],st[sp+8]); break; \
+    case 10: sp-=10; f(st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4],st[sp+5],st[sp+6],st[sp+7],st[sp+8],st[sp+9]); break; \
+    case 11: sp-=11; f(st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4],st[sp+5],st[sp+6],st[sp+7],st[sp+8],st[sp+9],st[sp+10]); break; \
+    case 12: sp-=12; f(st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4],st[sp+5],st[sp+6],st[sp+7],st[sp+8],st[sp+9],st[sp+10],st[sp+11]); break; \
+    case 13: sp-=13; f(st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4],st[sp+5],st[sp+6],st[sp+7],st[sp+8],st[sp+9],st[sp+10],st[sp+11],st[sp+12]); break; \
+    case 14: sp-=14; f(st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4],st[sp+5],st[sp+6],st[sp+7],st[sp+8],st[sp+9],st[sp+10],st[sp+11],st[sp+12],st[sp+13]); break; \
+    case 15: sp-=15; f(st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4],st[sp+5],st[sp+6],st[sp+7],st[sp+8],st[sp+9],st[sp+10],st[sp+11],st[sp+12],st[sp+13],st[sp+14]); break; \
+    case 16: sp-=16; f(st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4],st[sp+5],st[sp+6],st[sp+7],st[sp+8],st[sp+9],st[sp+10],st[sp+11],st[sp+12],st[sp+13],st[sp+14],st[sp+15]); break; \
+    case 17: sp-=17; f(st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4],st[sp+5],st[sp+6],st[sp+7],st[sp+8],st[sp+9],st[sp+10],st[sp+11],st[sp+12],st[sp+13],st[sp+14],st[sp+15],st[sp+16]); break; \
+    case 18: sp-=18; f(st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4],st[sp+5],st[sp+6],st[sp+7],st[sp+8],st[sp+9],st[sp+10],st[sp+11],st[sp+12],st[sp+13],st[sp+14],st[sp+15],st[sp+16],st[sp+17]); break; \
+    case 19: sp-=19; f(st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4],st[sp+5],st[sp+6],st[sp+7],st[sp+8],st[sp+9],st[sp+10],st[sp+11],st[sp+12],st[sp+13],st[sp+14],st[sp+15],st[sp+16],st[sp+17],st[sp+19]); break; \
+    case 20: sp-=20; f(st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4],st[sp+5],st[sp+6],st[sp+7],st[sp+8],st[sp+9],st[sp+10],st[sp+11],st[sp+12],st[sp+13],st[sp+14],st[sp+15],st[sp+16],st[sp+17],st[sp+19],st[sp+20]); break; \
+    default: goto endeval; /* ignore */ \
+  }
+
     case OCcallgen:
       {
         entree *ep = (entree *)operand;
         GEN res;
-        sp-=ep->arity;
-        res = ((GEN (*)(ANYARG))ep->value)(ARGS);
+        /* Macro Madness : evaluate function ep->value on arguments
+         * st[sp-ep->arity .. sp]. Set res = result. */
+        EVAL_f(res = ((GEN (*)(ANYARG))ep->value));
         if (br_status) goto endeval;
         gel(st,sp++)=res;
         break;
       }
-    case OCcallgen2:
+    case OCcallgen2: /*same for ep->arity = 2. Is this optimization worth it ?*/
       {
         entree *ep = (entree *)operand;
         GEN res;
-        sp-=ep->arity;
+        sp-=2;
         res = ((GEN (*)(GEN,GEN))ep->value)(gel(st,sp),gel(st,sp+1));
         if (br_status) goto endeval;
         gel(st,sp++)=res;
@@ -1092,8 +1120,7 @@ closure_eval(GEN C)
       {
         entree *ep = (entree *)operand;
         long res;
-        sp-=ep->arity;
-        res = ((long (*)(ANYARG))ep->value)(ARGS);
+        EVAL_f(res = ((long (*)(ANYARG))ep->value));
         if (br_status) goto endeval;
         st[sp++] = res;
         break;
@@ -1102,8 +1129,7 @@ closure_eval(GEN C)
       {
         entree *ep = (entree *)operand;
         long res;
-        sp-=ep->arity;
-        res = ((int (*)(ANYARG))ep->value)(ARGS);
+        EVAL_f(res = ((int (*)(ANYARG))ep->value));
         if (br_status) goto endeval;
         st[sp++] = res;
         break;
@@ -1111,12 +1137,12 @@ closure_eval(GEN C)
     case OCcallvoid:
       {
         entree *ep = (entree *)operand;
-        sp-=ep->arity;
-        ((void (*)(ANYARG))ep->value)(ARGS);
+        EVAL_f(((void (*)(ANYARG))ep->value));
         if (br_status) goto endeval;
         break;
       }
-#undef ARGS
+#undef EVAL_f
+
     case OCcalluser:
       {
         long n=operand;
