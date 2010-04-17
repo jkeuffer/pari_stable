@@ -1170,11 +1170,17 @@ needs to know about the function prototype. It contains a sequence of the
 following atoms:
 
 \settabs\+\indent&\kbd{Dxxx}\quad&\cr
-\noindent $\bullet$ Syntax requirements, used by functions like
- \kbd{for}, \kbd{sum}, etc.:
+
+\noindent $\bullet$ Return type: \kbd{GEN} by default (must be valid for
+\kbd{gerepileupto}), otherwise the following can appear as the \emph{first}
+char of the code string:
 %
-\+& \kbd{=} & separator \kbd{=} required at this point (between two
-arguments)\cr
+\+& \kbd{i} & return \kbd{int}\cr
+\+& \kbd{l} & return \kbd{long}\cr
+\+& \kbd{v} & return \kbd{void}\cr
+\+& \kbd{m} & return \kbd{GEN}. Here it is allowed to directly return
+a component of the input (obviously not suitable for \kbd{gerepileupto}).
+This is used for member functions, to avoid costly copies.\cr
 
 \noindent$\bullet$ Mandatory arguments, appearing in the same order as the
 input arguments they describe:
@@ -1204,10 +1210,9 @@ can be efficiently evaluated using the \kbd{closure\_eval}$xxx$ functions.
 \noindent$\bullet$ Optional arguments:
 %
 \+& \kbd{s*} & any number of strings, possibly 0 (see \kbd{s})\cr
-\+& \kbd{D\var{xxx}} &  argument has a default value\cr
+\+& \kbd{D\var{xxx}} &  argument can be omitted and has a default value\cr
 
-The \kbd{s*} code is technical and you probably do not need it, but we give
-its description for completeness. It reads all remaining arguments in
+The \kbd{s*} code is technical. It reads all remaining arguments in
 \tev{string context} (see \secref{se:strings}), and sends a
 (\kbd{NULL}-terminated) list of \kbd{GEN*} pointing to these. The automatic
 concatenation rules in string context are implemented so that adjacent strings
@@ -1246,17 +1251,14 @@ do not use the resulting \kbd{long}\cr
 \+& \kbd{P} &  series precision (default \kbd{seriesprecision},
  global variable \kbd{precdl} for the library)\cr
 
-\noindent $\bullet$ Return type: \kbd{GEN} by default (must be valid for
-\kbd{gerepileupto}), otherwise the following can appear at the start of the
-code string:
+\noindent $\bullet$ Syntax requirements, used by functions like
+ \kbd{for}, \kbd{sum}, etc.:
 %
-\+& \kbd{i} & return \kbd{int}\cr
-\+& \kbd{l} & return \kbd{long}\cr
-\+& \kbd{v} & return \kbd{void}\cr
-\+& \kbd{m} & return \kbd{GEN}. Here it is allowable to return
-a component of the input (used for member functions).\cr
+\+& \kbd{=} & separator \kbd{=} required at this point (between two
+arguments)\cr
 
-No more than 8 arguments to the C function can be given.
+\misctitle{Hardcoded limit.} C functions using more than 8 arguments are not
+supported. Use vectors if you really need that many parameters.
 
 When the function is called under \kbd{gp}, the prototype is scanned and each
 time an atom corresponding to a mandatory argument is met, a user-given
@@ -1313,22 +1315,11 @@ module. \kbd{libname} is how the function is named in the library,
 usually the same name as one visible from C.
 
 Read that file from your \kbd{gp} session, for instance from your
-\idx{preferences file} for instance (\secref{se:gprc}), and that's it. You
+\idx{preferences file} (\secref{se:gprc}), and that's it. You
 can now use the new function \var{gpname} under \kbd{gp}, and we would very
 much like to hear about it! \smallskip
 
-There is a corresponding library interface for this functionality, letting
-you expand the GP parser/evaluator available in the library with new
-functions from your C source code! You may then
-evaluate a GP expression sequence involving calls to these new function.
-
-\fun{entree *}{install}{void *f, char *gpname, char *code}
-
-\noindent where \kbd{f} is the (address of the) function (cast to
-\kbd{void*}), \kbd{gpname} is the name by which you want to access your
-function from within your GP expressions, and \kbd{code} is as above.
-
-\misctitle{Example}
+\misctitle{Example.}
 A complete description could look like this:
 \bprog
 {
@@ -1359,6 +1350,21 @@ NULL} is interpreted \emph{by the function} as an empty vector. Note that
 since \kbd{NULL} is never a valid \kbd{GEN} pointer, this trick always
 enables you to distinguish between a default value and actual input: the
 user could explicitly supply an empty vector!
+
+\subsec{Library interface for \kbd{install}}
+
+There is a corresponding library interface for this \kbd{install}
+functionality, letting you expand the GP parser/evaluator available in the
+library with new functions from your C source code. Functions such as
+\tet{gp_read_str} may then evaluate a GP expression sequence involving calls
+to these new function!
+
+\fun{entree *}{install}{void *f, char *gpname, char *code}
+
+\noindent where \kbd{f} is the (address of the) function (cast to
+\kbd{void*}), \kbd{gpname} is the name by which you want to access your
+function from within your GP expressions, and \kbd{code} is as above.
+
 
 \subsec{Integration by patching \kbd{gp}}
 
@@ -3212,7 +3218,7 @@ all columns.
 \fun{GEN}{ZM_to_F2m}{GEN x}
 
 \fun{void}{F2v_add_inplace}{GEN x, GEN y} replaces $x$ by $x+y$. It is
-allowable for $y$ to be shorter than $x$.
+allowed for $y$ to be shorter than $x$.
 
 \fun{GEN}{F2m_deplin}{GEN x}
 
