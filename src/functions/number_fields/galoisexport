@@ -18,7 +18,7 @@ Doc: \var{gal} being be a Galois group as output by \tet{galoisinit},
  ? galoisidentify(G)
  %4 = [6, 1]
  @eprog\noindent
- This command also accepts subgroups returned by \kbd{galoissubgroups}. 
+ This command also accepts subgroups returned by \kbd{galoissubgroups}.
 
  To \emph{import} a GAP permutation into gp (for \tet{galoissubfields} for
  instance), the following GAP function may be useful :

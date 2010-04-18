@@ -374,7 +374,7 @@ powFBgen(RELCACHE_t *cache, FB_t *F, GEN nf)
   {
     GEN M, m, alg, id2, vp = gel(F->LP, F->subFB[i]);
     id2 = cgetg(a+1,t_VEC); gel(Id2,i) = id2;
-    
+
     gel(id2,1) = mkvec2(pr_get_p(vp), zk_scalar_or_multable(nf,pr_get_gen(vp)));
     alg = cgetg(a+1,t_VEC); gel(Alg,i) = alg; gel(alg,1) = gen_1;
     vp = idealhnf_two(nf,vp);
