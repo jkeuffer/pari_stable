@@ -1,0 +1,14 @@
+#! /bin/sh
+CFILES="`echo src/*/*.[chy] src/*/*/*.[ch] |sed -e 's,src/language/parse.c,,'`"
+OFILES="doc/*.tex src/test/in/* src/functions/*/*"
+SCRIPTS="config/* src/test/dotest"
+err=0;
+if grep ' $' $CFILES $OFILES $SCRIPTS; then
+  echo "BUG: trailing spaces found."
+  err=1;
+fi
+if grep '	' $CFILES $OFILES; then
+  echo "BUG: TAB found."
+  err=1;
+fi
+exit $err
