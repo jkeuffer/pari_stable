@@ -864,7 +864,7 @@ compilefunc(entree *ep, long n, int mode, long flag)
   long lnl=first_safe_arg(arg, COsafelex);
   long nbpointers=0, nbopcodes;
   long nb=lg(arg)-1, lev=0;
-  long ev[8];
+  long ev[20];
   if (x>=OPnboperator)
     str=tree[x].str;
   else

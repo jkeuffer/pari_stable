@@ -59,6 +59,12 @@ Description:
  (C!long)       l
  (C!GEN)
 
+Function: _proto_max_args
+Class: gp2c_internal
+Help: Max number of arguments supported by install.
+Description:
+ (20)
+
 Function: _proto_code
 Class: gp2c_internal
 Help: Code for argument of a function
