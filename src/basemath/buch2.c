@@ -1965,13 +1965,17 @@ powFB_fill(RELCACHE_t *cache, GEN M)
   avma = av;
 }
 
-/* assumes that the relation is non trivial (fact[1] exists) */
 static void
 set_fact(REL_t *rel, FB_t *F, FACT *fact)
 {
-  long i;
-  GEN c = rel->R = col_0(F->KC); rel->nz = fact[1].pr;
-  for (i=1; i<=fact[0].pr; i++) c[fact[i].pr] = fact[i].ex;
+  long i, n = fact[0].pr;
+  GEN c = rel->R = col_0(F->KC);
+  if (!n) /* trivial factorization */
+    rel->nz = F->KC;
+  else {
+    rel->nz = fact[1].pr;
+    for (i=1; i<=n; i++) c[fact[i].pr] = fact[i].ex;
+  }
 }
 
 /* If V depends linearly from the columns of the matrix, return 0.
