@@ -2279,11 +2279,12 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, FACT *fact)
       /* can factor ideal, record relation; update rel->nz if needed */
       set_fact(++rel, F, fact); rel->R[jid]++;
       if (jid < rel->nz) rel->nz = jid;
-      for (i=1; i<lgsub; i++) {
-        long c = F->subFB[i];
-        rel->R[c] += ex[i];
-        if (c < rel->nz) rel->nz = c;
-      }
+      for (i=1; i<lgsub; i++)
+        if (ex[i]) {
+          long c = F->subFB[i];
+          rel->R[c] += ex[i];
+          if (c < rel->nz) rel->nz = c;
+        }
       if (already_known(cache, rel))
       { /* forget it */
         if (DEBUGLEVEL>1) dbg_cancelrel(jid,j,rel->R);
