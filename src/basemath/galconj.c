@@ -2416,6 +2416,13 @@ chk_perm(GEN perm, long n)
     pari_err(typeer, "galoisfixedfield");
 }
 
+static int
+is_group(GEN g)
+{
+  return typ(g)==t_VEC && lg(g)==3 && typ(g[1])==t_VEC
+      && typ(g[2])==t_VECSMALL;
+}
+
 GEN
 galoisfixedfield(GEN gal, GEN perm, long flag, long y)
 {
@@ -2429,6 +2436,7 @@ galoisfixedfield(GEN gal, GEN perm, long flag, long y)
   mod = gal_get_mod(gal);
   if (typ(perm) == t_VEC)
   {
+    if (is_group(perm)) perm = gel(perm, 1);
     for (i = 1; i < lg(perm); i++) chk_perm(gel(perm,i), n);
     O = vecperm_orbits(perm, n);
   }
@@ -2484,9 +2492,7 @@ galois_group(GEN gal) { return mkvec2(gal_get_gen(gal), gal_get_orders(gal)); }
 GEN
 checkgroup(GEN g, GEN *S)
 {
-  if (typ(g)==t_VEC && lg(g)==3
-      && typ(g[1])==t_VEC
-      && typ(g[2])==t_VECSMALL) { *S = NULL; return g; }
+  if (is_group(g)) { *S = NULL; return g; }
   g  = checkgal(g);
   *S = gal_get_group(g); return galois_group(g);
 }
