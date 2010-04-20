@@ -1626,20 +1626,18 @@ hnf_invimage(GEN A, GEN b)
 {
   pari_sp av = avma;
   long n = lg(A)-1, m, i, k;
-  GEN u, t, r;
+  GEN u, r;
 
   if (!n) return NULL;
-  m = lg(A[1])-1;
+  m = lg(A[1])-1; /* m >= n */
   u = cgetg(n+1, t_COL);
-  for (i = n, k = m; i > 0; i--, k--)
+  for (i = n, k = m; k > 0; k--)
   {
     pari_sp av2 = avma;
     long j;
-    GEN Aki;
-    t = gel(b,k);
+    GEN t = gel(b,k), Aki = gcoeff(A,k,i);
     if (typ(t) != t_INT) pari_err(typeer,"hnf_invimage");
-    for (j=i+1; j<=n; j++) t = subii(t, mulii(gcoeff(A,i,j),gel(u,j)));
-    Aki = gcoeff(A,k,i);
+    for (j=i+1; j<=n; j++) t = subii(t, mulii(gcoeff(A,k,j),gel(u,j)));
     if (!signe(Aki))
     {
       if (signe(t)) { avma = av;return NULL; }
@@ -1648,6 +1646,18 @@ hnf_invimage(GEN A, GEN b)
     t = dvmdii(t, Aki, &r);
     if (r != gen_0) { avma = av; return NULL; }
     gel(u,i) = gerepileuptoint(av2, t);
+    if (--i == 0) break;
+  }
+  /* If there is a solution, it must be u. Check remaining equations */
+  for (; k > 0; k--)
+  {
+    pari_sp av2 = avma;
+    long j;
+    GEN t = gel(b,k);
+    if (typ(t) != t_INT) pari_err(typeer,"hnf_invimage");
+    for (j=1; j<=n; j++) t = subii(t, mulii(gcoeff(A,k,j),gel(u,j)));
+    if (signe(t)) { avma = av;return NULL; }
+    avma = av2;
   }
   return u;
 }
