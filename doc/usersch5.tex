@@ -7671,6 +7671,12 @@ components of the \typ{VECSMALL} \kbd{x} and return a permutation stored in a
 
 \fun{void}{vecsmall_sort}{GEN v} sorts the \typ{VECSMALL} \kbd{v} in place.
 
+\fun{long}{vecsmall_max}{GEN v} returns the maximum of the elements of
+\typ{VECSMALL} \kbd{v}, assumed non-empty.
+
+\fun{long}{vecsmall_min}{GEN v} returns the minimum of the elements of
+\typ{VECSMALL} \kbd{v}, assumed non-empty.
+
 \fun{long}{vecsmall_isin}{GEN v, long x} returns the first index $i$
 such that \kbd{v[$i$]} is equal to \kbd{x}. Naive search in linear time, does
 not assume that \kbd{v} is sorted.

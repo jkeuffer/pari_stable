@@ -1540,12 +1540,8 @@ vecmax(GEN x)
       }
       return gcopy(s);
     }
-    case t_VECSMALL: {
-      long t = x[1];
-      for (i=2; i<lx; i++)
-        if (x[i] > t) t = x[i];
-      return stoi(t);
-    }
+    case t_VECSMALL:
+      return stoi(vecsmall_max(x));
     default: return gcopy(x);
   }
 }
@@ -1576,12 +1572,8 @@ vecmin(GEN x)
       }
       return gcopy(s);
     }
-    case t_VECSMALL: {
-      long t = x[1];
-      for (i=2; i<lx; i++)
-        if (x[i] < t) t = x[i];
-      return stoi(t);
-    }
+    case t_VECSMALL:
+      return stoi(vecsmall_min(x));
     default: return gcopy(x);
   }
 }

@@ -6,3 +6,6 @@ Help: vecmin(x): minimum of the elements of the vector/matrix x
 Doc: if $x$ is a vector or a matrix, returns the minimum
  of the elements of $x$, otherwise returns a copy of $x$. Error if $x$ is
  empty.
+Description:
+  (vecsmall):small vecsmall_min($1)
+  (gen):gen        vecmin($1)

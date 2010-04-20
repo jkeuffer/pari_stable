@@ -3059,6 +3059,8 @@ INLINE GEN    vecsmall_ei(long n, long i);
 INLINE long   vecsmall_isin(GEN v, long x);
 INLINE GEN    vecsmall_lengthen(GEN v, long n);
 INLINE int    vecsmall_lexcmp(GEN x, GEN y);
+INLINE long   vecsmall_max(GEN v);
+INLINE long   vecsmall_min(GEN v);
 INLINE long   vecsmall_pack(GEN V, long base, long mod);
 INLINE int    vecsmall_prefixcmp(GEN x, GEN y);
 INLINE GEN    vecsmall_prepend(GEN V, long s);

@@ -440,6 +440,24 @@ vecsmall_pack(GEN V, long base, long mod)
   return s;
 }
 
+INLINE long
+vecsmall_max(GEN x)
+{
+  long i, t = x[1], lx = lg(x);
+  for (i=2; i<lx; i++)
+    if (x[i] > t) t = x[i];
+  return t;
+}
+
+INLINE long
+vecsmall_min(GEN x)
+{
+  long i, t = x[1], lx =lg(x);
+  for (i=2; i<lx; i++)
+    if (x[i] < t) t = x[i];
+  return t;
+}
+
 INLINE int
 ZV_isscalar(GEN x)
 {
