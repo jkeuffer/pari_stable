@@ -1965,6 +1965,7 @@ powFB_fill(RELCACHE_t *cache, GEN M)
   avma = av;
 }
 
+/* assumes that the relation is non trivial (fact[1] exists) */
 static void
 set_fact(REL_t *rel, FB_t *F, FACT *fact)
 {
@@ -2018,11 +2019,7 @@ already_known(RELCACHE_t *cache, REL_t *rel)
 {
   REL_t *r;
   GEN cols = rel->R;
-  long bs, l = lg(cols);
-
-  bs = 1; while (bs < l && !cols[bs]) bs++;
-  if (bs == l) return -1; /* zero relation */
-
+  long bs = rel->nz, l = lg(cols);
   for (r = rel - 1; r > cache->base; r--)
     if (bs == r->nz) /* = index of first non zero elt in cols */
     {
@@ -2275,9 +2272,14 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, FACT *fact)
         if (DEBUGLEVEL>1) { fprintferr("."); flusherr(); }
         continue;
       }
-      /* can factor ideal, record relation */
+      /* can factor ideal, record relation; update rel->nz if needed */
       set_fact(++rel, F, fact); rel->R[jid]++;
-      for (i=1; i<lgsub; i++) rel->R[ F->subFB[i] ] += ex[i];
+      if (jid < rel->nz) rel->nz = jid;
+      for (i=1; i<lgsub; i++) {
+        long c = F->subFB[i];
+        rel->R[c] += ex[i];
+        if (c < rel->nz) rel->nz = c;
+      }
       if (already_known(cache, rel))
       { /* forget it */
         if (DEBUGLEVEL>1) dbg_cancelrel(jid,j,rel->R);
