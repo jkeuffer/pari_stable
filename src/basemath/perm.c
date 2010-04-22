@@ -541,6 +541,28 @@ group_set(GEN G, long n)
   return res;
 }
 
+static int
+sgcmp(GEN a, GEN b) { return vecsmall_lexcmp(gel(a,1),gel(b,1)); }
+
+GEN
+subgroups_tableset(GEN S, long n)
+{
+  long i, l = lg(S);
+  GEN  v = cgetg(l, t_VEC);
+  for(i=1; i<l; i++)
+    gel(v,i) = mkvec2(group_set(gel(S,i), n), mkvecsmall(i));
+  gen_sort_inplace(v,(void*)sgcmp,cmp_nodata, NULL);
+  return v;
+}
+
+long
+tableset_find_index(GEN tbl, GEN set)
+{
+  long i = tablesearch(tbl,mkvec2(set,mkvecsmall(0)),sgcmp);
+  if (!i) return 0;
+  return mael3(tbl,i,2,1);
+}
+
 GEN
 trivialgroup(void)
 {

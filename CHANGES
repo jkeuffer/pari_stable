@@ -674,6 +674,7 @@ BA 53- low-level accessors functions gal_get_* for galoisinit objects.
    56- library function ZC_reducemodmatrix, ZM_reducemodmatrix,
        ZC_reducemodlll, ZM_reducemodlll
 BA 57- libpari functions vecsmall_max and vecsmall_min.
+BA 58- GP functions idealfrobenius and idealramgroups
 
   Removed
     1- obsolete GP functions printp, printp1. Either replace them by

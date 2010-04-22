@@ -7137,7 +7137,14 @@ quotient map $G\rightarrow G/H$ for some group $G$ normalizing $H$ and $S$ is
 a subgroup of $G/H$, return the inverse image of $S$ by $C$.
 
 \fun{GEN}{group_subgroups}{GEN grp} returns the list of subgroups of the
-small group \var{grp}.
+small group \var{grp} as a \typ{VEC}.
+
+\fun{GEN}{subgroups_tableset}{GEN S, long n} where $S$ is a vector of subgroups
+of domain $n$, returns a table which matchs the set of elements of the
+subgroups against the index of the subgroups.
+
+\fun{long}{tableset_find_index}{GEN tbl, GEN set} searchs the set \kbd{set} in
+the table \kbd{tbl} and returns its associated index, or $0$ if not found.
 
 \fun{GEN}{groupelts_abelian_group}{GEN elts} where \var{elts} is the list of
 elements of an \emph{Abelian} small group, returns the corresponding
