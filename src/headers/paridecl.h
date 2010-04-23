@@ -166,6 +166,7 @@ GEN     FlxqX_sqr(GEN x, GEN T, ulong p);
 GEN     FlxqX_divrem(GEN x, GEN y, GEN T, ulong p, GEN *pr);
 GEN     FlxqXQ_pow(GEN x, GEN n, GEN S, GEN T, ulong p);
 GEN     FlxqXV_prod(GEN V, GEN T, ulong p);
+GEN     RgX_to_Flx(GEN x, ulong p);
 GEN     Z_to_Flx(GEN x, ulong p, long v);
 GEN     ZX_to_Flx(GEN x, ulong p);
 GEN     ZXV_to_FlxV(GEN v, ulong p);

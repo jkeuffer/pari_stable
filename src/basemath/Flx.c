@@ -168,11 +168,19 @@ Z_to_Flx(GEN x, ulong p, long v)
 GEN
 ZX_to_Flx(GEN x, ulong p)
 {
-  long i;
-  long lx = lg(x);
+  long i, lx = lg(x);
   GEN a = cgetg(lx, t_VECSMALL);
   a[1]=((ulong)x[1])&VARNBITS;
   for (i=2; i<lx; i++) a[i] = umodiu(gel(x,i), p);
+  return Flx_renormalize(a,lx);
+}
+GEN
+RgX_to_Flx(GEN x, ulong p)
+{
+  long i, lx = lg(x);
+  GEN a = cgetg(lx, t_VECSMALL);
+  a[1]=((ulong)x[1])&VARNBITS;
+  for (i=2; i<lx; i++) a[i] = Rg_to_Fl(gel(x,i), p);
   return Flx_renormalize(a,lx);
 }
 
