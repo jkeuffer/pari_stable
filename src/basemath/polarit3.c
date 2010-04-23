@@ -111,8 +111,8 @@ Rg_to_FpXQ(GEN x, GEN T, GEN p)
 GEN
 RgX_to_FpX(GEN x, GEN p)
 {
-  long i, l = lg(x);
-  GEN z = cgetg(l, t_POL); z[1] = x[1];
+  long i, l;
+  GEN z = cgetg_copy(x, &l); z[1] = x[1];
   for (i = 2; i < l; i++) gel(z,i) = Rg_to_Fp(gel(x,i), p);
   return normalizepol_lg(z, l);
 }
