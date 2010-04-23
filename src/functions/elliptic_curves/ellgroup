@@ -1,8 +1,29 @@
 Function: ellgroup
 Section: elliptic_curves
 C-Name: ellgroup
-Prototype: GG
-Help: ellgroup(E,p): computes the structure of the group E(Fp)
+Prototype: GDG
+Help: ellgroup(E,{p}): computes the structure of the group E(Fp)
  Assume the equation is minimal at p.
-Doc: computes the structure of the group $E(\F_p)$
- Assume the equation is minimal at p.
+Doc: computes the structure of the group $E(\F_p) \sim \Z/d_1\Z \times
+ \Z/d_2\Z$, with $d_2\mid d_1$. The prime $p$ may be omitted if the curve
+ was defined over $\F_p$ (\typ{INTMOD} coefficients) or $\Q_p$ (\typ{PADIC}
+ coefficients). Otherwise the curve must be defined over $\Q$, and $p$ must
+ be explicitly given. Over $\Q$ or $\Q_p$, the equation is assumed to be
+ minimal at $p$.
+ \bprog
+ ? E = ellinit([0,0,0,0,1]);  \\ defined over Q
+ ? ellgroup(E, 3)  \\ 3 necessary here
+ %2 = [4]    \\ cyclic
+ ? ellgroup(E, 7) 
+ %3 = [6, 2] \\ non-cyclic
+
+ ? E = ellinit([0,0,0,0,1] * Mod(1,11));  \\ defined over F_11
+ ? ellgroup(E)   \\ no need to repeat 11
+ %5 = [12]
+ ? ellgroup(E, 11)   \\ ... but it also works
+ %6 = [12]
+ ? ellgroup(E, 13) \\ ouch, inconsistent input !
+    ***   at top-level: ellgroup(E,13)
+    ***                 ^--------------
+    *** ellgroup: inconsistent moduli in Rg_to_Fp: 11, 13.
+ @eprog

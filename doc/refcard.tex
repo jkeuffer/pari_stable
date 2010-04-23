@@ -677,7 +677,7 @@ Points are \kbd{[x,y]}, the origin is \kbd{[0]}.
 \leavevmode\strut\hskip1em
 $a_1,a_2,a_3,a_4,a_6,b_2,b_4,b_6,b_8,c_4,c_6,disc,j$. This data can be
 recovered by typing \kbd{\var{ell}.a1},$\dots$,\kbd{\var{ell}.j}.
-If $\var{fl}$ omitted, also
+If $\fl$ omitted, also
 \hfill\break
 \beginindentedkeys
 \li{$E$ defined over $\RR$}{}
@@ -695,26 +695,37 @@ If $\var{fl}$ omitted, also
 \endindentedkeys
 \li{change curve $E$ using $v=$\kbd{[}$u,r,s,t$\kbd{]}}{ellchangecurve$(ell,v)$}
 \li{change point $z$ using $v=$\kbd{[}$u,r,s,t$\kbd{]}}{ellchangepoint$(z,v)$}
-\li{cond, min mod, Tamagawa num \kbd{[}$N,v,c$\kbd{]}}{ellglobalred$(ell)$}
-\li{Kodaira type of $p$-fiber of $E$}{elllocalred$(ell,p)$}
 \li{add points $z_1+z_2$}{elladd$(ell,z_1,z_2)$}
 \li{subtract points $z_1-z_2$}{ellsub$(ell,z_1,z_2)$}
 \li{compute $n\cdot z$}{ellpow$(ell,z,n)$}
 \li{check if $z$ is on $E$}{ellisoncurve$(ell,z)$}
 \li{order of torsion point $z$}{ellorder$(ell,z)$}
-\li{torsion subgroup with generators}{elltors$(ell)$}
 \li{$y$-coordinates of point(s) for $x$}{ellordinate$(ell,x)$}
+\li{point $[\wp(z),\wp'(z)]$ corresp. to $z$}{ellztopoint$(ell,z)$}
+\li{complex $z$ such that $p=[\wp(z),\wp'(z)]$}{ellpointtoz$(ell,p)$}
+
+\subsec{Curves over finite fields, Pairings}
+\li{random point on $E$}{random$(ell)$}
+\li{structure $\ZZ/d_1\ZZ\times \ZZ/d_2\ZZ$ of $E(\FF_p)$}{ellgroup$(ell,p)$}
+\li{Weil pairing of $m$-torsion pts $x,y$}{ellweilpairing$(ell,x,y, m)$}
+\li{Tate pairing of $x,y$; $x$ $m$-torsion}{elltatepairing$(ell,x,y, m)$}
+
+\subsec{Curves over $\QQ$ and the $L$-function}
 \li{canonical bilinear form taken at $z_1$, $z_2$}{ellbil$(ell,z_1,z_2)$}
 \li{canonical height of $z$}{ellheight$(ell,z,\{\fl\})$}
 \li{height regulator matrix for pts in $x$}{ellheightmatrix$(ell,x)$}
+\li{cond, min mod, Tamagawa num \kbd{[}$N,v,c$\kbd{]}}{ellglobalred$(ell)$}
+\li{Kodaira type of $p$-fiber of $E$}{elllocalred$(ell,p)$}
+\li{minimal model of $E/\QQ$} {ellminimalmodel$(ell,\{$\&$v\})$}
 \li{$p$th coeff $a_p$ of $L$-function, $p$ prime}{ellap$(ell,p)$}
 \li{$k$th coeff $a_k$ of $L$-function}{ellak$(ell,k)$}
 \li{vector of first $n$ $a_k$'s in $L$-function}{ellan$(ell,n)$}
 \li{$L(E,s)$, set $A\approx1$}{elllseries$(ell,s,\{A\})$}
+\li{order of vanishing at $1$}{ellanalyticrank$(ell,\{\var{eps}\})$}
+\li{$L^{(r)}(E,1)$}{ellL1$(ell,r)$}
 \li{root number for $L(E,.)$ at $p$}{ellrootno$(ell,\{p\})$}
+\li{torsion subgroup with generators}{elltors$(ell)$}
 \li{modular parametrization of $E$}{elltaniyama$(ell)$}
-\li{point $[\wp(z),\wp'(z)]$ corresp. to $z$}{ellztopoint$(ell,z)$}
-\li{complex $z$ such that $p=[\wp(z),\wp'(z)]$}{ellpointtoz$(ell,p)$}
 
 \subsec{Elldata package, Cremona's database:}
 \li{db code $\leftrightarrow$ $[\var{conductor}, \var{class}, \var{index}]$}{ellconvertname$(s)$}
@@ -736,9 +747,7 @@ If $\var{fl}$ omitted, also
 \li{Weber's $f$ functions}{weber$(x,\{\fl\})$}
 \li{Riemann's zeta $\zeta(s)=\sum n^{-s}$}{zeta$(s)$}
 %
-\shortcopyrightnotice
-\newcolumn
-
+\bigskip
 \section{Graphic Functions}
 \li{crude graph of \expr\ between $a$ and $b$}{plot$(X\,$=$\;a,b,expr)$}
 \subsec{High-resolution plot {\rm (immediate plot)}}
@@ -776,6 +785,7 @@ If $\var{fl}$ omitted, also
 \li{as {\tt ploth}}{psploth$(X\,$=$\;a,b,expr,\{\fl\},\{n\})$}
 \li{as {\tt plothraw}}{psplothraw$(lx,ly,\{\fl\})$}
 \li{as {\tt plotdraw}}{psdraw$($[[$w_1,x_1,y_1$]$,\dots$]$)$}
+\shortcopyrightnotice
 \newcolumn
 
 \section{Binary Quadratic Forms}

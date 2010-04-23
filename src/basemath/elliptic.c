@@ -3042,13 +3042,30 @@ CM_CardEFp(GEN E, GEN p)
   return ap? subii(addis(p,1), ap): gen_0;
 }
 
+/* assume e is at least a 'small ell' */
+static GEN
+get_p(GEN e)
+{
+  GEN j = ell_get_j(e);
+  switch(typ(j))
+  {
+    case t_INTMOD: return gel(j,1);
+    case t_PADIC: return gel(j,2);
+  }
+  pari_err(talker,"cannot determine the prime p in elliptic curve function");
+  return NULL; /*notreached*/
+}
+
 GEN
 ellap(GEN e, GEN p)
 {
   GEN a;
   long lp;
   checksmallell(e);
-  if (typ(p)!=t_INT || signe(p) <= 0) pari_err(talker,"not a prime in ellap");
+  if (!p)
+    p = get_p(e);
+  else
+    if (typ(p)!=t_INT || signe(p) <= 0) pari_err(talker,"not a prime in ellap");
   if ( (a = easy_ap(e, p)) ) return a;
   lp = expi(p);
   if (lp < 30) return stoi(ellap2(e, itou(p)));
@@ -4712,7 +4729,7 @@ elltatepairing(GEN E, GEN t, GEN s, GEN m)
   pari_sp ltop=avma;
   GEN w;
   checksmallell(E); checkellpt(t); checkellpt(s);
-  if (typ(m)!=t_INT) pari_err(typeer,"ellweilpairing");
+  if (typ(m)!=t_INT) pari_err(typeer,"elltatepairing");
   if (ell_is_inf(s) || ell_is_inf(t)) return gen_1;
   while(1)
   {
@@ -4726,7 +4743,7 @@ elltatepairing(GEN E, GEN t, GEN s, GEN m)
     a = ellffmul(E, mkvec2(t, gen_1), m, rs, r);
     if (a==gen_0) continue;
     if (!ell_is_inf(gel(a,1)))
-      pari_err(talker,"Points of wrong order in ellweilpairing");
+      pari_err(talker,"Points of wrong order in elltatepairing");
     w = gel(a, 2);
     return gerepilecopy(ltop, w);
   }
@@ -4742,38 +4759,34 @@ ell_to_a4a6(GEN E, GEN p)
   return mkvec2(Fp_neg(Fp_mulu(c4, 27, p), p), Fp_neg(Fp_mulu(c6, 54, p), p));
 }
 
-/* Standard polynomial of 2-division */
-static GEN
-elldivpol2(GEN e, GEN x)
-{
-  return gadd(gmulgs(ellRHS(e, x), 4), gsqr(ellLHS0(e, x)));
-}
-
 GEN
 ellgroup(GEN E, GEN p)
 {
-  pari_sp av = avma, av2;
-  GEN m, z, d, N0, N1;
+  pari_sp av = avma;
+  GEN N, N0, N1, r, F, F1, e, a4, a6;
   long i, j, l1;
-  GEN N, r, F, F1;
-  GEN e, a4, a6;
-  if (typ(p)!=t_INT) pari_err(typeer,"ellgroup");
+  if (!p)
+    p = get_p(E);
+  else
+    if (typ(p)!=t_INT) pari_err(typeer,"ellgroup");
   N = subii(addis(p, 1), ellap(E, p));
   r = gcdii(N, subis(p, 1));
-  if (equaliu(r, 1)) goto ellgroup_cyclic;
-  /* This take care of p=2 */
+  if (is_pm1(r)) goto ellgroup_cyclic; /* Takes care of p=2 */
   if (equaliu(p, 3))
-  {
-    /* The only possible non-cyclic group is [2,2] which happens 9 times */
+  { /* The only possible non-cyclic group is [2,2] which happens 9 times */
+    ulong b2, b4, b6;
     if (!equaliu(N, 4)) goto ellgroup_cyclic;
-    /* If the group is not cyclic, elldivpol2 must have 3 roots else 1 root*/
-    if (!gequal0(elldivpol2(E,gmodulss(0,3)))
-     || !gequal0(elldivpol2(E,gmodulss(1,3))))
-      goto ellgroup_cyclic;
+    /* If the group is not cyclic, T = 4x^3 + b2 x^2 + 2b4 x + b6
+     * must have 3 roots else 1 root. Test T(0) = T(1) = 0 mod 3 */
+    b6 = Rg_to_Fl(ell_get_b2(E), 3);
+    if (b6) goto ellgroup_cyclic;
+    /* b6 = T(0) = 0 mod 3. Test T(1) */
+    b2 = Rg_to_Fl(ell_get_b2(E), 3);
+    b4 = Rg_to_Fl(ell_get_b2(E), 3);
+    if ((1 + b2 + (b4<<1)) % 3) goto ellgroup_cyclic;
     return gerepileupto(av, mkvec2s(2, 2));
-  } /* Now assume p>3 */
-  e = ell_to_a4a6(E, p); a4 = gel(e, 1); a6 = gel(e, 2);
-  F1 = gel(factor(r), 1); l1 = lg(F1);
+  } /* Now assume p > 3 */
+  F1 = gel(Z_factor(r), 1); l1 = lg(F1);
   F = cgetg(3, t_MAT);
   gel(F,1) = cgetg(l1, t_COL);
   gel(F,2) = cgetg(l1, t_COL);
@@ -4787,25 +4800,27 @@ ellgroup(GEN E, GEN p)
   setlg(F[1],j); setlg(F[2],j);
   if (j==1) goto ellgroup_cyclic;
   N0 = factorback(F); N1 = diviiexact(N, N0);
-  av2 = avma;
+  e = ell_to_a4a6(E, p); a4 = gel(e, 1); a6 = gel(e, 2);
   while(1)
   {
-    GEN P = random_FpE(a4, a6, p);
-    GEN Q = random_FpE(a4, a6, p);
-    GEN Pp = FpE_mul(P, N1, a4, p);
-    GEN Qp = FpE_mul(Q, N1, a4, p);
-    GEN s = FpE_order(Pp, F, a4, p);
-    GEN t = FpE_order(Qp, F, a4, p);
-    if (equalii(s, N0) || equalii(t, N0))
-      goto ellgroup_cyclic;
+    pari_sp av2 = avma;
+    GEN P, Q, d, s, t, m, z;
+
+    P = FpE_mul(random_FpE(a4,a6,p), N1, a4, p);
+    s = FpE_order(P, F, a4, p); if (equalii(s, N0)) goto ellgroup_cyclic;
+
+    Q = FpE_mul(random_FpE(a4,a6,p), N1, a4, p);
+    t = FpE_order(Q, F, a4, p); if (equalii(t, N0)) goto ellgroup_cyclic;
+
     m = lcmii(s, t);
-    z = FpE_weilpairing(Pp, Qp, m, a4, p);
+    z = FpE_weilpairing(P, Q, m, a4, p);
     d = Fp_order(z, F, p);
-    if (equalii(mulii(m, d), N0)) break;
+    /* structure is [N/d, d] iff m d == N0. Note that N/d = N1 m */
+    if (is_pm1(d) && equalii(m, N0)) goto ellgroup_cyclic;
+    if (equalii(mulii(m, d), N0))
+      return gerepilecopy(av, mkvec2(mulii(N1,m), d));
     avma = av2;
   }
-  if (cmpis(d, 1) > 0)
-    return gerepilecopy(av, mkvec2(diviiexact(N, d),d));
 ellgroup_cyclic:
   return gerepileupto(av, mkveccopy(N));
 }

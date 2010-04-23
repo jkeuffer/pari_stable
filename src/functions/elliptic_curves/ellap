@@ -1,21 +1,43 @@
 Function: ellap
 Section: elliptic_curves
 C-Name: ellap
-Prototype: GG
-Help: ellap(E,p): computes a_p for the elliptic curve E using
+Prototype: GDG
+Help: ellap(E,{p}): computes a_p for the elliptic curve E using
  Shanks-Mestre's method, or SEA algorithm if the package seadata is installed.
  Assume the equation is minimal at p.
 Doc: computes the trace of Frobenius $a_p$ for the elliptic curve $E$ and the
  prime number $p$. This is defined by the equation $\#E(\F_p) = p+1 - a_p$,
  where $\#E(\F_p)$ stands for the number of points of the curve $E$ over the
- finite field $\F_p$. If $E/\F_p$ has CM by a principal imaginary quadratic
- order we use an explicit formula (involving essentially Kronecker symbols and
- Cornacchia's algorithm, hence very fast: $O(\log p)^2$). Otherwise, we use
- Shanks-Mestre's baby-step/giant-step method, which runs in time $O(p^{1/4})$
- using $O(p^{1/4})$ storage, hence becomes unreasonable when $p$ has about
- 30~digits. If the \tet{seadata} package is installed, the \tet{SEA} algorithm
- becomes available and primes of the order of 200~digits become feasible.
+ finite field $\F_p$. 
 
  No checking is done that $p$ is indeed prime. $E$ must be a \var{smallell} as
- output by \kbd{ellinit}, defined over $\Q$, $\F_p$ or $\Q_p$. $E$ must be
- given by a Weierstrass equation \emph{minimal} at $p$.
+ output by \kbd{ellinit}, defined over $\Q$, $\Q_p$, or $\F_p$. The prime $p$
+ may be omitted if the curve was defined over $\F_p$ (\typ{INTMOD}
+ coefficients) or $\Q_p$ (\typ{PADIC} coefficients). Otherwise the curve must
+ be defined over $\Q$, and $p$ must be explicitly given. Over $\Q$ or
+ $\Q_p$, the equation is assumed to be minimal at $p$.
+ \bprog
+ ? E = ellinit([0,0,0,0,1]);  \\ defined over Q
+ ? ellap(E, 3)  \\ 3 necessary here
+ %2 = 0    \\ #E(F_3) = 3+1 - 0 = 4
+ ? ellap(E, 7) 
+ %3 = -4   \\ #E(F_7) = 12
+ 
+ ? E = ellinit([0,0,0,0,1] * Mod(1,11));  \\ defined over F_11
+ ? ellap(E)       \\ no need to repeat 11
+ %5 = 0
+ ? ellap(E, 11)   \\ ... but it also works
+ %6 = 0
+ ? ellgroup(E, 13) \\ ouch, inconsistent input !
+    ***   at top-level: ellap(E,13)
+    ***                 ^-----------
+    *** ellap: inconsistent moduli in Rg_to_Fp: 11, 13.
+ @eprog
+ \misctitle{Algorithms used} If $E/\F_p$ has CM by a principal imaginary
+ quadratic order we use an explicit formula (involving essentially Kronecker
+ symbols and Cornacchia's algorithm, hence very fast: $O(\log p)^2$).
+ Otherwise, we use Shanks-Mestre's baby-step/giant-step method, which runs in
+ time $O(p^{1/4})$ using $O(p^{1/4})$ storage, hence becomes unreasonable when
+ $p$ has about 30~digits. If the \tet{seadata} package is installed, the
+ \tet{SEA} algorithm becomes available and primes of the order of 200~digits
+ become feasible.

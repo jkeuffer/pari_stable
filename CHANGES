@@ -499,6 +499,8 @@ BA120- galoisapply now accept automorphisms in t_COL format.
   123- cleaned up the code used by the GP evaluator to call PARI (and
        installed) functions. Functions can now have 20 arguments [#795]
 BA124- galoisfixedfield now accept subgroups.
+  125- ellap(E, p) second argument now optional if E has t_INTMOD or t_PADIC
+       coefficients.
 
   Added
     1- many new benches (make test-all)
