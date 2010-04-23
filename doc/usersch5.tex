@@ -4344,8 +4344,11 @@ usually more efficient than computations using a priori bounds.
 
 \subsubsec{To single precision}
 
+\fun{GEN}{RgX_to_Flx}{GEN x, ulong p}, \kbd{x} a \typ{POL}, returns the
+\kbd{Flx} obtained by applying \kbd{Rg\_to\_Fl} coefficientwise.
+
 \fun{GEN}{ZX_to_Flx}{GEN x, ulong p} reduce \kbd{ZX}~\kbd{x} modulo \kbd{p}
-(yielding an \kbd{Flx}).
+(yielding an \kbd{Flx}). Faster than \kbd{RgX\_to\_Flx}.
 
 \fun{GEN}{ZV_to_Flv}{GEN x, ulong p} reduce \kbd{ZV}~\kbd{x} modulo \kbd{p}
 (yielding an \kbd{Flv}).
