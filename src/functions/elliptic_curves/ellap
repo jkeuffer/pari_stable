@@ -8,7 +8,7 @@ Help: ellap(E,{p}): computes a_p for the elliptic curve E using
 Doc: computes the trace of Frobenius $a_p$ for the elliptic curve $E$ and the
  prime number $p$. This is defined by the equation $\#E(\F_p) = p+1 - a_p$,
  where $\#E(\F_p)$ stands for the number of points of the curve $E$ over the
- finite field $\F_p$. 
+ finite field $\F_p$.
 
  No checking is done that $p$ is indeed prime. $E$ must be a \var{smallell} as
  output by \kbd{ellinit}, defined over $\Q$, $\Q_p$, or $\F_p$. The prime $p$
@@ -20,9 +20,9 @@ Doc: computes the trace of Frobenius $a_p$ for the elliptic curve $E$ and the
  ? E = ellinit([0,0,0,0,1]);  \\ defined over Q
  ? ellap(E, 3)  \\ 3 necessary here
  %2 = 0    \\ #E(F_3) = 3+1 - 0 = 4
- ? ellap(E, 7) 
+ ? ellap(E, 7)
  %3 = -4   \\ #E(F_7) = 12
- 
+
  ? E = ellinit([0,0,0,0,1] * Mod(1,11));  \\ defined over F_11
  ? ellap(E)       \\ no need to repeat 11
  %5 = 0

@@ -14,7 +14,7 @@ Doc: computes the structure of the group $E(\F_p) \sim \Z/d_1\Z \times
  ? E = ellinit([0,0,0,0,1]);  \\ defined over Q
  ? ellgroup(E, 3)  \\ 3 necessary here
  %2 = [4]    \\ cyclic
- ? ellgroup(E, 7) 
+ ? ellgroup(E, 7)
  %3 = [6, 2] \\ non-cyclic
 
  ? E = ellinit([0,0,0,0,1] * Mod(1,11));  \\ defined over F_11
