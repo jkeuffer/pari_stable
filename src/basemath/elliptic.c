@@ -4778,11 +4778,11 @@ ellgroup(GEN E, GEN p)
     if (!equaliu(N, 4)) goto ellgroup_cyclic;
     /* If the group is not cyclic, T = 4x^3 + b2 x^2 + 2b4 x + b6
      * must have 3 roots else 1 root. Test T(0) = T(1) = 0 mod 3 */
-    b6 = Rg_to_Fl(ell_get_b2(E), 3);
+    b6 = Rg_to_Fl(ell_get_b6(E), 3);
     if (b6) goto ellgroup_cyclic;
     /* b6 = T(0) = 0 mod 3. Test T(1) */
     b2 = Rg_to_Fl(ell_get_b2(E), 3);
-    b4 = Rg_to_Fl(ell_get_b2(E), 3);
+    b4 = Rg_to_Fl(ell_get_b4(E), 3);
     if ((1 + b2 + (b4<<1)) % 3) goto ellgroup_cyclic;
     return gerepileupto(av, mkvec2s(2, 2));
   } /* Now assume p > 3 */
