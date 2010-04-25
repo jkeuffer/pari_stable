@@ -1190,9 +1190,11 @@ GEN
 ZM_hnflll(GEN A, GEN *ptB, int remove)
 {
   pari_sp av = avma, lim = stack_lim(av,3);
-  long m1 = 1, n1 = 1; /* alpha = m1/n1. Maybe 3/4 here ? */
-  long do_swap, i, n, k, kmax;
-  GEN z, B, lambda, D;
+#ifdef HNFLLL_QUALITY
+  const long m1 = 1, n1 = 1; /* alpha = m1/n1. Maybe 3/4 here ? */
+#endif
+  long n, k, kmax;
+  GEN B, lambda, D;
 
   n = lg(A);
   A = ZM_copy(fix_rows(A)); /* ZM_copy for in place findi_normalize() */
@@ -1203,14 +1205,19 @@ ZM_hnflll(GEN A, GEN *ptB, int remove)
   while (k < n)
   {
     long row0, row1;
+    int do_swap;
     reduce2(A,B,k,k-1,&row0,&row1,lambda,D);
     if (row0)
       do_swap = (!row1 || row0 <= row1);
     else if (!row1)
     { /* row0 == row1 == 0 */
       pari_sp av1 = avma;
-      z = addii(mulii(gel(D,k-2),gel(D,k)), sqri(gcoeff(lambda,k-1,k)));
+      GEN z = addii(mulii(gel(D,k-2),gel(D,k)), sqri(gcoeff(lambda,k-1,k)));
+#ifdef HNFLLL_QUALITY
       do_swap = (cmpii(mului(n1,z), mului(m1,sqri(gel(D,k-1)))) < 0);
+#else /* assume m1 = n1 = 1 */
+      do_swap = (cmpii(z, sqri(gel(D,k-1))) < 0);
+#endif
       avma = av1;
     }
     else
@@ -1222,6 +1229,7 @@ ZM_hnflll(GEN A, GEN *ptB, int remove)
     }
     else
     {
+      long i;
       for (i=k-2; i; i--)
       {
         long row0, row1;
@@ -1249,6 +1257,7 @@ ZM_hnflll(GEN A, GEN *ptB, int remove)
   A = fix_rows(A);
   if (remove)
   {
+    long i;
     for (i = 1; i < n; i++)
       if (!ZV_cmp0(gel(A,i))) break;
     remove_0cols(i-1, &A, &B, remove);
@@ -1293,17 +1302,17 @@ reduce1(GEN A, GEN B, long k, long j, GEN lambda, GEN D)
   }
 }
 
+/* assume A is a ZV */
 GEN
 extendedgcd(GEN A)
 {
-  long m1 = 1, n1 = 1; /* alpha = m1/n1. Maybe 3/4 here ? */
+#ifdef HNFLLL_QUALITY
+  const long m1 = 1, n1 = 1; /* alpha = m1/n1. Maybe 3/4 here ? */
+#endif
   pari_sp av = avma;
-  long do_swap,i,n,k;
-  GEN z, B, lambda, D;
+  long k, n = lg(A);
+  GEN B, lambda, D;
 
-  n = lg(A);
-  for (i=1; i<n; i++)
-    if (typ(A[i]) != t_INT) pari_err(typeer,"extendedgcd");
   A = leafcopy(A);
   B = matid(n-1);
   lambda = zeromatcopy(n-1,n-1);
@@ -1311,13 +1320,19 @@ extendedgcd(GEN A)
   k = 2;
   while (k < n)
   {
+    int do_swap;
+
     reduce1(A,B,k,k-1,lambda,D);
     if (signe(A[k-1])) do_swap = 1;
     else if (!signe(A[k]))
     {
       pari_sp av1 = avma;
-      z = addii(mulii(gel(D,k-2),gel(D,k)), sqri(gcoeff(lambda,k-1,k)));
+      GEN z = addii(mulii(gel(D,k-2),gel(D,k)), sqri(gcoeff(lambda,k-1,k)));
+#ifdef HNFLLL_QUALITY
       do_swap = (cmpii(mului(n1,z), mului(m1,sqri(gel(D,k-1)))) < 0);
+#else /* assume m1 = n1 = 1 */
+      do_swap = (cmpii(z, sqri(gel(D,k-1))) < 0);
+#endif
       avma = av1;
     }
     else do_swap = 0;
@@ -1329,6 +1344,7 @@ extendedgcd(GEN A)
     }
     else
     {
+      long i;
       for (i=k-2; i; i--) reduce1(A,B,k,i,lambda,D);
       k++;
     }
