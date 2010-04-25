@@ -1158,21 +1158,20 @@ hnfswap(GEN A, GEN B, long k, GEN lambda, GEN D)
   gel(D,k-1) = diviiexact(addii(p1,p2), gel(D,k-1));
 }
 
-/* reverse row order in matrix A */
+/* reverse row order in matrix A, IN PLACE */
 static GEN
-fix_rows(GEN A)
+reverse_rows(GEN A)
 {
-  long i,j, h,n = lg(A);
-  GEN cB,cA,B = cgetg(n,t_MAT);
-  if (n == 1) return B;
+  long i, j, h, n = lg(A);
+  if (n == 1) return A;
   h = lg(A[1]);
   for (j=1; j<n; j++)
   {
-    cB = cgetg(h, t_COL);
-    cA = gel(A,j); gel(B,j) = cB;
-    for (i=h>>1; i; i--) { cB[h-i] = cA[i]; cB[i] = cA[h-i]; }
+    GEN c = gel(A,j);
+    /* start at (h-1) >>1 : if h = 2i even, no need to swap c[i] and itself */
+    for (i=(h-1)>>1; i; i--) swap(gel(c,i), gel(c,h-i));
   }
-  return B;
+  return A;
 }
 
 /* remove the first r columns */
@@ -1197,7 +1196,7 @@ ZM_hnflll(GEN A, GEN *ptB, int remove)
   GEN B, lambda, D;
 
   n = lg(A);
-  A = ZM_copy(fix_rows(A)); /* ZM_copy for in place findi_normalize() */
+  A = reverse_rows(ZM_copy(A)); /* ZM_copy for in place findi_normalize() */
   B = ptB? matid(n-1): NULL;
   D = const_vec(n, gen_1) + 1;
   lambda = zeromatcopy(n-1,n-1);
@@ -1254,7 +1253,7 @@ ZM_hnflll(GEN A, GEN *ptB, int remove)
   }
   /* handle trivial case: return negative diag coefficient otherwise */
   if (n == 2) (void)findi_normalize(gel(A,1), B,1,lambda);
-  A = fix_rows(A);
+  A = reverse_rows(A);
   if (remove)
   {
     long i;
