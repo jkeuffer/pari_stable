@@ -4765,6 +4765,7 @@ ellgroup(GEN E, GEN p)
   pari_sp av = avma;
   GEN N, N0, N1, r, F, F1, e, a4, a6;
   long i, j, l1;
+  checksmallell(E);
   if (!p)
     p = get_p(E);
   else
