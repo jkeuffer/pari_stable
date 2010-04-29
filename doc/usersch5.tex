@@ -1179,15 +1179,15 @@ char of the code string:
 \+& \kbd{l} & return \kbd{long}\cr
 \+& \kbd{v} & return \kbd{void}\cr
 \+& \kbd{m} & return \kbd{GEN}. Here it is allowed to directly return
-a component of the input (obviously not suitable for \kbd{gerepileupto}).
-This is used for member functions, to avoid costly copies.\cr
+a component of the input (obviously \cr
+\+&&\quad  not suitable for \kbd{gerepileupto}). Used for member functions, to avoid costly copies.\cr
 
 \noindent$\bullet$ Mandatory arguments, appearing in the same order as the
 input arguments they describe:
 %
 \+& \kbd{G} & \kbd{GEN}\cr
 \+& \kbd{\&}& \kbd{*GEN}\cr
-\+& \kbd{L} & long {\rm (we implicitly identify \kbd{int} with \kbd{long})}\cr
+\+& \kbd{L} & long {\rm (we implicitly typecast \kbd{int} to \kbd{long})}\cr
 \+& \kbd{V} & loop variable\cr
 \+& \kbd{n} & variable, expects a \idx{variable number} (a \kbd{long}, not an
 \kbd{*entree})\cr
@@ -1197,8 +1197,9 @@ input arguments they describe:
 be quoted using '\kbd{\bs}'\cr
 \+&&\quad Example: \kbd{aa"b\bs n)"c} yields the string \kbd{"aab\bs{n})c"}\cr
 \+& \kbd{s} & expanded string. Example: \kbd{Pi"x"2} yields \kbd{"3.142x2"}\cr
-\+&& Unquoted components can be of any PARI type, converted to string following\cr
-\+&& current output format\cr
+\+&&\quad Unquoted components can be of any PARI type, converted to string 
+          following\cr
+\+&&\quad current output format\cr
 \+& \kbd{I} & closure whose value is ignored, as in \kbd{for} loops,\cr
 \+&&\quad to be processed by \fun{void}{closure_evalvoid}{GEN C}\cr
 \+& \kbd{E} & closure whose value is used, as in \kbd{sum} loops,\cr
@@ -1207,12 +1208,26 @@ be quoted using '\kbd{\bs}'\cr
 \noindent A \tev{closure} is a GP function in compiled (bytecode) form. It
 can be efficiently evaluated using the \kbd{closure\_eval}$xxx$ functions.
 
-\noindent$\bullet$ Optional arguments:
+\noindent$\bullet$ Automatic arguments:
+%
+\+& \kbd{f} &  Fake \kbd{*long}. C function requires a pointer but we
+do not use the resulting \kbd{long}\cr
+\+& \kbd{p} &  real precision (default \kbd{realprecision})\cr
+\+& \kbd{P} &  series precision (default \kbd{seriesprecision},
+ global variable \kbd{precdl} for the library)\cr
+
+\noindent $\bullet$ Syntax requirements, used by functions like
+ \kbd{for}, \kbd{sum}, etc.:
+%
+\+& \kbd{=} & separator \kbd{=} required at this point (between two
+arguments)\cr
+
+\noindent$\bullet$ Optional arguments and default values:
 %
 \+& \kbd{s*} & any number of strings, possibly 0 (see \kbd{s})\cr
 \+& \kbd{D\var{xxx}} &  argument can be omitted and has a default value\cr
 
-The \kbd{s*} code is technical. It reads all remaining arguments in
+The \kbd{s*} code reads all remaining arguments in
 \tev{string context} (see \secref{se:strings}), and sends a
 (\kbd{NULL}-terminated) list of \kbd{GEN*} pointing to these. The automatic
 concatenation rules in string context are implemented so that adjacent strings
@@ -1242,20 +1257,6 @@ special notations are available:
 \+&\kbd{DI}& optional closure, send \kbd{NULL} if argument omitted.\cr
 
 \+&\kbd{Dn}& optional variable number, $-1$ if omitted.\cr
-
-\noindent$\bullet$ Automatic arguments:
-%
-\+& \kbd{f} &  Fake \kbd{*long}. C function requires a pointer but we
-do not use the resulting \kbd{long}\cr
-\+& \kbd{p} &  real precision (default \kbd{realprecision})\cr
-\+& \kbd{P} &  series precision (default \kbd{seriesprecision},
- global variable \kbd{precdl} for the library)\cr
-
-\noindent $\bullet$ Syntax requirements, used by functions like
- \kbd{for}, \kbd{sum}, etc.:
-%
-\+& \kbd{=} & separator \kbd{=} required at this point (between two
-arguments)\cr
 
 \misctitle{Hardcoded limit.} C functions using more than 20 arguments are not
 supported. Use vectors if you really need that many parameters.
