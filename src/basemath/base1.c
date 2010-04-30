@@ -2008,6 +2008,7 @@ polred_init(nfbasic_t *T, nffp_t *F, CG_data *d)
   /* || polchar ||_oo < 2^e ~ 2 (n * rho)^n, rho = max modulus of root */
   log2rho = ro ? (double)gexpo(ro): cauchy_bound(T->x) / LOG2;
   e = n * (long)(log2rho + log2((double)n)) + 1;
+  if (e < 0) e = 0; /* can occur if n = 1 */
   prec = chk_gen_prec(n, e);
   get_nf_fp_compo(T, F, ro, prec);
   d->v = varn(T->x);
