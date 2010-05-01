@@ -56,7 +56,7 @@ Finally, an optional argument (between braces) followed by a star, like
 $\{\var{x}\}*$, means that any number of such arguments (possibly none) can
 be given. This is in particular used by the various \kbd{print} routines.
 
-\misctitle{Flags}. A \tev{flag} is an argument which, rather than conveying
+\misctitle{Flags} A \tev{flag} is an argument which, rather than conveying
 actual information to the routine, instructs it to change its default
 behavior, e.g.~return more or less information. All such
 flags are optional, and will be called \fl\ in the function descriptions to
@@ -74,7 +74,7 @@ are set to $0$). This is announced as ``The binary digits of $\fl$ mean 1:
 $p_0$, 2: $p_1$, 4: $p_2$'', and so on, using the available consecutive
 powers of~$2$.
 
-\misctitle{Mnemonics for flags}. Numeric flags as mentioned above are
+\misctitle{Mnemonics for flags} Numeric flags as mentioned above are
 obscure, error-prone, and quite rigid: should the authors
 want to adopt a new flag numbering scheme (for instance when noticing
 flags with the same meaning but different numeric values across a set of
@@ -109,7 +109,7 @@ $2=\kbd{Recursive}$, \dots}
 i.e.~everything unset). People used to the bit-or notation in languages like
 C may also use the form \kbd{"Parametric | no\_Recursive"}.
 
-\misctitle{Pointers}.\varsidx{pointer} If a parameter in the function
+\misctitle{Pointers} \varsidx{pointer} If a parameter in the function
 prototype is prefixed with a \& sign, as in
 
 \key{foo}$(x,\&e)$
@@ -120,7 +120,7 @@ sign has to be typed in explicitly. As of version \vers, this \tev{pointer}
 argument is optional for all documented functions, hence the \& will always
 appear between brackets as in \kbd{Z\_issquare}$(x,\{\&e\})$.
 
-\misctitle{About library programming}.
+\misctitle{About library programming}
 The \var{library} function \kbd{foo}, as defined at the beginning of this
 section, is seen to have two mandatory arguments, $x$ and \fl: no function
 seen in the present chapter has been implemented so as to accept a variable
@@ -425,7 +425,7 @@ same result as $\kbd{sqr}(x)$ since the two operands are known to be
 \emph{identical}. The same statement holds true for $p$-adics raised to the
 power $n$, where $v_p(n) > 0$.
 
-\misctitle{Remark:} if we wanted to be strictly consistent with
+\misctitle{Remark} If we wanted to be strictly consistent with
 the PARI philosophy, we should have $x*y = (4 \mod 8)$ and $\kbd{sqr}(x) =
 (4 \mod 32)$ when both $x$ and $y$ are congruent to $2$ modulo $4$.
 However, since intmod is an exact object, PARI assumes that the modulus
@@ -995,7 +995,7 @@ ideal in the factor base. Set it to $0$ to disable the search for small norm
 relations. Otherwise, reasonable values are between 4 and 20. The default is
 4.
 
-\misctitle{Warning.} Make sure you understand the above! By default, most of
+\misctitle{Warning} Make sure you understand the above! By default, most of
 the \kbd{bnf} routines depend on the correctness of the GRH. In particular,
 any of the class number, class group structure, class group generators,
 regulator and fundamental units may be wrong, independently of each other.
@@ -1004,7 +1004,7 @@ that the units given generate a subgroup of finite index in the full unit
 group. You must use \kbd{bnfcertify} to certify the computations
 unconditionally.
 
-\misctitle{Remarks.}
+\misctitle{Remarks}
 
 You do not need to supply the technical parameters (under the library you
 still need to send at least an empty vector, coded as \kbd{NULL}). However,
@@ -1073,7 +1073,7 @@ named
 @eprog\noindent
 see the Libpari manual for details.
 
-\misctitle{Numerical integration.}\sidx{numerical integration}
+\misctitle{Numerical integration}\sidx{numerical integration}
 Starting with version 2.2.9 the ``double exponential'' univariate
 integration method is implemented in \tet{intnum} and its variants. Romberg
 integration is still available under the name \kbd{intnumromb}, but
@@ -1189,7 +1189,7 @@ GP, since they are made for number theorists. As usual, $X$ will denote any
 simple variable name, and \var{seq} will always denote a sequence of
 expressions, including the empty sequence.
 
-\misctitle{Caveat:} in constructs like
+\misctitle{Caveat} In constructs like
 \bprog
     for (X = a,b, seq)
 @eprog\noindent

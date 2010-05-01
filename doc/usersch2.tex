@@ -265,7 +265,7 @@ We see here how to input values of the different data types known to PARI.
 Recall that blanks are ignored in any expression which is not a string (see
 below).
 
-\misctitle{A note on efficiency.}
+\misctitle{A note on efficiency}
 The following types are provided for convenience, not for speed:
 \typ{INTMOD}, \typ{FRAC}, \typ{PADIC}, \typ{QUAD}, \typ{POLMOD},
 \typ{RFRAC}. Indeed, they always perform a reduction of some kind after
@@ -312,8 +312,7 @@ $-\tet{realprecision}$), see \secref{se:whatzero}, behaving like the machine
 epsilon for the current default accuracy: any float of smaller absolute value
 is indistinguishable from $0$.
 
-
-\misctitle{Note on output formats.} A zero real number is printed in \kbd{e}
+\misctitle{Note on output formats} A zero real number is printed in \kbd{e}
 format as $0.Exx$ where $xx$ is the (usually negative) \emph{decimal}
 exponent of the number (cf.~\secref{se:whatzero}). This allows the user to
 check the accuracy of that particular zero.
@@ -482,7 +481,7 @@ If $p$ is a \typ{POLMOD}, the following members functions are defined:
 \kbd{p.mod}: return the modulus.
 
 \label{se:rempolmod}
-\misctitle{Important remark.}\sidx{variable (priority)}
+\misctitle{Important remark}\sidx{variable (priority)}
 Mathematically, the variables\sidx{variable} occurring in a polmod are not
 free variables. But internally, a congruence class in $R[t]/(y)$ is
 represented by its representative  of lowest degree, which is a \typ{POL} in
@@ -576,7 +575,7 @@ function (in \kbd{X}, say), and add \kbd{O(X\pow $k$)} to it. The discussion
 in the \typ{POL} section about variables remains valid; a constructor
 \tet{Ser} replaces \tet{Pol} and \tet{Polrev}.
 
-\misctitle{Caveat.} Power series with inexact coefficients sometimes have a
+\misctitle{Caveat} Power series with inexact coefficients sometimes have a
 non-intuitive behavior: if $k$ significant terms are requested, an inexact
 zero is counted as significant, even if it is the coefficient of lowest
 degree. This means that useful higher order terms may be disregarded.
@@ -670,7 +669,7 @@ is a matrix of matrices of \dots, an expression such as \kbd{M[1,1][,3][4] =
 1} is perfectly valid (and actually identical to \kbd{M[1,1][4,3] = 1}),
 assuming that all matrices along the way have compatible dimensions.
 
-\misctitle{Technical note (design flaw).} Matrices are internally represented
+\misctitle{Technical note (design flaw)} Matrices are internally represented
 as a vector of columns. All matrices with $0$ columns are thus represented
 by the same object (internally, an empty vector), and there is no way to
 distinguish between them. Thus it is not possible to create or represent
@@ -958,7 +957,7 @@ is invalid. These assignment operators are right-associative:
 \kbd{->} (function definition): \kbd{(\var{vars})->\var{expr}} returns a
 function object, of type \typ{CLOSURE}.
 
-\misctitle{Remark:} Use the \var{op}\kbd{=} operators as often as possible
+\misctitle{Remark} Use the \var{op}\kbd{=} operators as often as possible
 since they make complex assignments more legible: one needs not parse
 complicated expressions twice to make sure they are indeed identical. Compare
 \bprog
@@ -967,7 +966,7 @@ v[i+j-1] = v[i+j-1] + 1    -->    v[i+j-1]++
 M[i,i+j] = M[i,i+j] * 2    -->    M[i,i+j] *= 2
 @eprog
 
-\misctitle{Remark:} Less important but still interesting. The
+\misctitle{Remark} Less important but still interesting. The
 \kbd{++}, \kbd{--} and \var{op}\kbd{=} operators are slightly more efficient:
 \bprog
 ? a = 10^6;
@@ -1095,7 +1094,7 @@ ordering of common variable names in all your \kbd{gp} sessions, e.g read in a f
 x;y;z;t;a;b;c;d;
 @eprog
 
-\misctitle{Important note:} PARI allows Euclidean division of multivariate
+\misctitle{Important note} PARI allows Euclidean division of multivariate
 polynomials, but assumes that the computation takes place in the fraction
 field of the coefficient ring (if it is not an integral domain, the result
 will a priori not make sense). This can become tricky; for instance
@@ -1189,7 +1188,7 @@ confusing concepts. Skip to the last subsection for practical advice, if the
 next discussion does not make sense to you. After learning about user
 functions, study the example in \secref{se:bewarescope} then come back.
 
-\misctitle{Definitions}. % rather not make it a section to allow for ??my
+\misctitle{Definitions} % rather not make it a section to allow for ??my
 
 A \emph{scope} is an enclosing context where names and values are associated.
 A user's function body, the body of a loop, an individual command line, all
@@ -1414,7 +1413,7 @@ variable name for different parameters of your function:
   ***                                ^----
 @eprog
 
-\misctitle{Finishing touch}.
+\misctitle{Finishing touch}
 You can add a specific help message for your function using \kbd{addhelp},
 but the online help system already handles it. By default \kbd{?\var{name}}
 will print the definition of the function \var{name}: the list of arguments,
@@ -1422,14 +1421,14 @@ as well as their default values, the text of \var{seq} as you input it.
 Just as \b{c} prints the list of all built-in commands, \b{u} outputs the
 list of all user-defined functions.
 
-\misctitle{Backward compatibility (lexical scope)}. Lexically scoped
+\misctitle{Backward compatibility (lexical scope)} Lexically scoped
 variables were introduced in version~2.4.2. Before that, the formal
 parameters were dynamically scoped. If your script depends on this behavior,
 you may use the following trick: replace the initial \kbd{f(x) =} \ by
 \bprog
 f(x_orig) = local(x = x_orig)
 @eprog
-\misctitle{Backward compatibility (disjoint namespaces)}. Before version
+\misctitle{Backward compatibility (disjoint namespaces)} Before version
 2.4.2, variables and functions lived in disjoint namespaces and it was not
 possible to have a variable and a function share the same name. Hence the
 need for a \kbd{kill} function allowing to reuse symbols. This is no longer
@@ -1456,7 +1455,7 @@ There is nothing wrong with the following sequence of assignments:
 Previously used names can be recycled as above: you are just redefining the
 variable. The previous definition is lost of course.
 
-\misctitle{Important technical note.} Built-in functions are a special case
+\misctitle{Important technical note} Built-in functions are a special case
 since they are read-only (you cannot overwrite their default meaning),
 and they use features not available to user functions, in particular pointer
 arguments. In the present version \vers{}, it is possible to assign a built-in
@@ -1528,7 +1527,7 @@ them), separated by colons.
 0:2:3
 @eprog
 
-\misctitle{Example}. We conclude with an amusing example, intended to
+\misctitle{Example} We conclude with an amusing example, intended to
 illustrate both user-defined functions and the power of the \kbd{sumalt}
 function. Although the \idx{Riemann zeta-function} is included (as
 \kbd{zeta}) among the standard functions, let us assume that we want to check
@@ -1597,14 +1596,14 @@ FirstPrimeDiv(x) =
 }
 ? FirstPrimeDiv(10)
 %1 = 0
-@eprog\noindent \misctitle{Hint:} the function body is equivalent to
+@eprog\noindent \misctitle{Hint} The function body is equivalent to
 \bprog
 { my(newp = 0);
   forprime(p=2, x, if (x%p == 0, break));
   newp
 }
 @eprog\noindent
-\misctitle{Detailed explanation:} The index \kbd{p} in the \kbd{forprime}
+\misctitle{Detailed explanation} The index \kbd{p} in the \kbd{forprime}
 loop is lexically scoped to the loop and is not visible to the outside world.
 Hence, it will not survive the \kbd{break} statement. More precisely, at this
 point the loop index is restored to its preceding value. The initial
@@ -1786,7 +1785,7 @@ cannot redefine the built-in member functions, so attempting to redefine
 \kbd{x.j} as above would in fact produce an error; you would have to call it
 e.g.~\kbd{x.myj} in order for \kbd{gp} to accept it.
 
-\misctitle{Rationale}. In most cases, member functions are simple accessors
+\misctitle{Rationale} In most cases, member functions are simple accessors
 of the form
 \bprog
   x.a = x[1];
@@ -1807,9 +1806,9 @@ risk. The $j$-invariant is a good example: it would clearly not be a good
 idea to define \kbd{j(E) = E[13]}, because clashes with loop indices are
 likely.
 
-\misctitle{Note}. Typing \b{um} will output all user-defined member functions.
+\misctitle{Note} Typing \b{um} will output all user-defined member functions.
 
-\misctitle{Technical warning}. Do not apply a member whose name starts with
+\misctitle{Technical warning} Do not apply a member whose name starts with
 \kbd{e} or \kbd{E} to an integer constant, where it would be confused with
 the usual floating point exponent. E.g compare
 \bprog
@@ -1889,7 +1888,7 @@ output (i.e.~the string whose content is aaa), but in a fortuitous way. This
 \kbd{aaa}, which is of course printed as \kbd{aaa}, and thus will expand to
 the three letters you were expecting.
 
-\misctitle{Warning:} expression involving strings are not handled in a
+\misctitle{Warning} Expression involving strings are not handled in a
 special way; even in string context, the largest possible expression is
 evaluated, hence \kbd{print("a"[1])} is incorrect since \kbd{"a"} is not an
 object whose first component can be extracted. On the other hand
@@ -1914,7 +1913,7 @@ specify the types of arguments they expect: either generic PARI objects
 keyword case, only a very small set of words will actually be meaningful
 (the \kbd{default} function is a prominent example).
 
-\misctitle{Reference:} The arguments of the following functions are processed
+\misctitle{Reference} The arguments of the following functions are processed
 in string context:
 
 \settabs\+\indent&\cr
@@ -2157,13 +2156,13 @@ Even though loop indices are automatically lexically scoped and no longer
 exist when the break loop is run, enough debugging information is retained in
 the bytecode to reconstruct the evaluation context.
 
-\misctitle{Note:} if you do not like this behavior, you may disable it by
+\misctitle{Note} If you do not like this behavior, you may disable it by
 setting the default \tet{breakloop} to 0 in for \kbd{gprc}. A runtime error
 will send you back to the prompt. Note that the break loop is automatically
 disabled when running \kbd{gp} in non interactive mode, i.e.~when the
 program's standard input is not attached to a terminal.
 
-\misctitle{Technical Note:} When you enter a break loop due to a PARI stack
+\misctitle{Technical Note} When you enter a break loop due to a PARI stack
 overflow, the PARI stack is reset so that you can run commands (otherwise the
 stack would immediately overflow again). Still, as explained above, you do
 not lose the value of any \kbd{gp} variable in the process.
@@ -2284,14 +2283,14 @@ as their current values (see \b{d}). Just after the default name, we give
 between parentheses the initial value when \kbd{gp} starts, assuming you did
 not tamper with factory settings using command-line switches or a~\tet{gprc}.
 
-\misctitle{Note:} the suffixes \kbd{k}, \kbd{M} or \kbd{G} can be appended to
+\misctitle{Note} The suffixes \kbd{k}, \kbd{M} or \kbd{G} can be appended to
 a \var{value} which is a numeric argument, with the effect of multiplying it
 by $10^3$, $10^6$ and $10^9$ respectively. Case is not taken into account
 there, so for instance \kbd{30k} and \kbd{30K} both stand for $30000$. This
 is mostly useful to modify or set the defaults \kbd{primelimit} or
 \kbd{stacksize} which typically involve a lot of trailing zeroes.
 
-\misctitle{(somewhat technical) Note:} As we saw in \secref{se:strings},
+\misctitle{(somewhat technical) Note} As we saw in \secref{se:strings},
 the second argument to \kbd{default} is subject to string context
 expansion, which means you can use run-time values. In other words, something
 like
@@ -2379,7 +2378,7 @@ escape sequences as is, since Emacs will refuse to interpret them).
 You must customize color highlighting from the PariEmacs side, see its
 documentation.
 
-\misctitle{Technical note:}
+\misctitle{Technical note}
 If you use an old \kbd{readline} library (version number less than 2.0),
 you should do as in the example above and leave $a_3$ and $a_4$ (prompt
 and input line) strictly alone. Since old versions of \kbd{readline} did
@@ -2824,7 +2823,7 @@ environment) containing the full user's manual. \kbd{??tutorial} and
 \kbd{??refcard} do the same with the \idx{tutorial} and \idx{reference card}
 respectively.
 
-\misctitle{Technical note:} this functionality is provided by an
+\misctitle{Technical note} This functionality is provided by an
 external \kbd{perl} script that you are free to use outside any \kbd{gp} session
 (and modify to your liking, if you are perl-knowledgeable). It is called
 \tet{gphelp}, lies in the \kbd{doc} subdirectory of your distribution
@@ -3153,7 +3152,7 @@ $endif
 \noindent\kbd{C-x C-r} will re-read this init file, incorporating any
 changes made to it during the current session.
 
-\misctitle{Note:} By default, \kbd{(} and \kbd{[} are bound to the function
+\misctitle{Note} By default, \kbd{(} and \kbd{[} are bound to the function
 \kbd{pari-matched-insert} which, if ``electric parentheses'' are enabled
 (default: off) will automatically insert the matching closure (respectively
 \kbd{)} and \kbd{]}). This behavior can be toggled on and off by giving
@@ -3162,7 +3161,7 @@ want, e.g to copy-paste some text into the calculator. If you do not want a
 toggle, you can use \kbd{M--0} / \kbd{M--1} to specifically switch it on or
 off).
 
-\misctitle{Note:} In some versions of readline (2.1 for instance), the
+\misctitle{Note} In some versions of readline (2.1 for instance), the
 \kbd{Alt} or \kbd{Meta} key can give funny results (output 8-bit accented
 characters for instance). If you do not want to fall back to the \kbd{Esc}
 combination, put the following two lines in your \kbd{.inputrc}:

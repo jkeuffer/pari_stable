@@ -212,7 +212,7 @@ modulo $m$. Here $x, y, m$ are \typ{INT}s (this is not checked). The operation
 is more efficient if the inputs $x$, $y$ are reduced modulo $m$, but this is not a
 necessary condition.
 
-\misctitle{Important Note.} These specialized functions are of course more
+\misctitle{Important Note} These specialized functions are of course more
 efficient than the generic ones, but note the hidden danger here: the types of the
 objects involved (which is not checked) must be severely controlled, e.g.~using
 \kbd{addii} on a \typ{FRAC} argument will cause disasters. Type mismatches may
@@ -442,7 +442,7 @@ so you must not access any pointer which previously pointed into the zone
 below \kbd{ltop}. If you need to recover more than one object, use the
 \kbd{gerepileall} function below.
 
-\misctitle{Remark}.
+\misctitle{Remark}
 As a consequence of the preceding explanation, if a PARI object is to be
 relocated by \hbox{gerepile} then, apart from universal objects, the chunks
 of memory used by its components should be in consecutive memory locations.
@@ -568,7 +568,7 @@ is guaranteed to return an object suitable for \kbd{gerepileupto}:
 @eprog\noindent
 Make sure you understand exactly what has happened before you go on!
 
-\misctitle{Remark on assignments and gerepile}: When the tree structure and
+\misctitle{Remark on assignments and gerepile} When the tree structure and
 the size of the PARI objects which will appear in a computation are under
 control, one may allocate sufficiently large objects at the beginning,
 use assignment statements, then simply restore \kbd{avma}. Coming back to the
@@ -583,7 +583,7 @@ fitting into \kbd{DEFAULTPREC} words, we can program without using
 \kbd{gerepile} though, and certainly more cumbersome to use. As a rule,
 assignment statements should generally be avoided.
 
-\misctitle{Variations on a theme}: it is often necessary to do several
+\misctitle{Variations on a theme} it is often necessary to do several
 \kbd{gerepile}s during a computation. However, the fewer the better. The only
 condition for \kbd{gerepile} to work is that the garbage be connected. If the
 computation can be arranged so that there is a minimal number of connected
@@ -648,7 +648,7 @@ and efficient version (with respect to time and memory use) is as follows
 which avoids updating the container \kbd{z} and cleans up its components
 individually, as soon as they are computed.
 
-\misctitle{One last example}. Let us compute the product of two complex
+\misctitle{One last example} Let us compute the product of two complex
 numbers $x$ and $y$, using the $3M$ method which requires 3 multiplications
 instead of the obvious 4. Let $z = x*y$, and set $x = x_r + i*x_i$ and
 similarly for $y$ and $z$. We compute $p_1 = x_r*y_r$, $p_2=x_i*y_i$,
@@ -666,7 +666,7 @@ gel(z, 1) = gsub(p1,p2);
 gel(z, 2) = gsub(p3,p4); z = gerepile(ltop,lbot,z);
 @eprog
 
-\misctitle{Exercise}. Write a function which multiplies a matrix by a column
+\misctitle{Exercise} Write a function which multiplies a matrix by a column
 vector. Hint: start with a \kbd{cgetg} of the result, and use \kbd{gerepile}
 whenever a coefficient of the result vector is computed. You can look at the
 answer in \kbd{src/basemath/RgV.c:RgM\_RgC\_mul()}.
@@ -765,7 +765,7 @@ and \typ{QFR}. However for the sake of efficiency,
 \kbd{cgetg} does not check this: disasters will occur if you give an incorrect
 length for those types.
 
-\misctitle{Notes}: 1)  The main use of this function is create efficiently
+\misctitle{Notes} 1)  The main use of this function is create efficiently
 a constant object, or to prepare for later assignments (see
 \secref{se:assign}). Most of the time you will use \kbd{GEN} objects as they
 are created and returned by PARI functions. In this case you do not need to
@@ -785,7 +785,7 @@ use \kbd{cgetg} to create space to hold them.
 \noindent creates a \typ{COMPLEX} whose real and imaginary part are
 \typ{REAL}s allocated by \kbd{cgetr(prec)}.
 
-\misctitle{Examples}: 1) Both \kbd{z = cgeti(DEFAULTPREC)} and
+\misctitle{Examples} 1) Both \kbd{z = cgeti(DEFAULTPREC)} and
 \kbd{cgetg(DEFAULTPREC, t\_INT)} create a \typ{INT} whose ``precision'' is
 \kbd{bit\_accuracy(DEFAULTPREC)} = 64. This means \kbd{z} can hold rational
 integers of absolute value less than $2^{64}$. Note that in both cases, the
@@ -854,7 +854,7 @@ returns the \typ{VEC} whose $n$ coefficients (\kbd{GEN}) follow.
 \fun{GEN}{mkcoln}{long n, ...}
 returns the \typ{COL} whose $n$ coefficients (\kbd{GEN}) follow.
 
-\misctitle{Warning}: Contrary to the policy of general PARI functions, the
+\misctitle{Warning} Contrary to the policy of general PARI functions, the
 latter three functions do \emph{not} copy their arguments, nor do they produce
 an object a priori suitable for \tet{gerepileupto}. For instance
 \bprog
@@ -896,7 +896,7 @@ are just moving a pointer around. However, physically modifying either
 \kbd{x} or \kbd{y} (for instance, \kbd{x[1] = 0}) also changes the other
 one, which is usually not desirable. \label{se:assign}
 
-\misctitle{Very important note}: Using the functions described in this
+\misctitle{Very important note} Using the functions described in this
 paragraph is inefficient and often awkward: one of the \tet{gerepile}
 functions (see~\secref{se:garbage}) should be preferred. See the paragraph
 end for one exception to this rule.
@@ -940,12 +940,12 @@ of type \typ{INT}) using
 
 \fun{void}{gaffsg}{long s, GEN y}
 
-\misctitle{Note}: due to the requirements mentioned above, it is usually
+\misctitle{Note} Due to the requirements mentioned above, it is usually
 a bad idea to use \tet{gaffect} statements. There is one exception: for simple
 objects (e.g.~leaves) whose size is controlled, they can be easier to use than
 \kbd{gerepile}, and about as efficient.
 
-\misctitle{Coercion}. It is often useful to coerce an inexact object to a
+\misctitle{Coercion} It is often useful to coerce an inexact object to a
 given precision. For instance at the beginning of a routine where precision
 can be kept to a minimum; otherwise the precision of the input is used in all
 subsequent computations, which is inefficient if the latter is known to
@@ -1056,7 +1056,7 @@ an advanced example in \secref{se:prog}).
 
 \fun{void}{unsetisclone}{GEN z} clears the \emph{clone} bit.
 
-\misctitle{Remark.} The clone bit is there so that \kbd{gunclone} can check
+\misctitle{Remark} The clone bit is there so that \kbd{gunclone} can check
 it is deleting an object which was allocated by \kbd{gclone}. Miscellaneous
 vector entries are often cloned by \kbd{gp} so that a GP statement like
 \kbd{v[1] = x} does not involve copying the whole of \kbd{v}: the component
@@ -1377,7 +1377,7 @@ internal use.
 main variable even when \kbd{x} is not a polynomial (a rational function for
 instance). By convention, the degree of $0$ is~$-1$.
 
-\misctitle{Important remark}. A zero polynomial can be characterized by the
+\misctitle{Important remark} A zero polynomial can be characterized by the
 fact that its sign is~0. However, its length may be greater than 2, meaning
 that all the coefficients of the polynomial are equal to zero, but the
 leading term \kbd{z[lg(z)-1]} is not an exact integer zero. More precisely,
@@ -1454,7 +1454,7 @@ compared to a straightforward linked list implementation (it requires more
 memory, as well as many unnecessary copies). Hence we do not describe it
 here and refer to the Developer's Guide.
 
-\misctitle{Implementation note}: for the types including an exponent (or a
+\misctitle{Implementation note} For the types including an exponent (or a
 valuation), we actually store a biased non-negative exponent (bit-ORing the
 biased exponent to the codeword), obtained by adding a constant to the true
 exponent: either \kbd{HIGHEXPOBIT} (for \typ{REAL}) or \kbd{HIGHVALPBIT} (for
@@ -1534,7 +1534,7 @@ GEN gy = pol_x(v);
 The function raises an exception if the name is already in use for an
 \tet{install}ed or built-in function, or an alias.
 
-\misctitle{Caveat}: you can use \tet{gp_read_str}
+\misctitle{Caveat} You can use \tet{gp_read_str}
 (see~\secref{se:gp_read_str}) to execute a GP command and create GP
 variables on the fly as needed:
 \bprog
@@ -1634,7 +1634,7 @@ It has the following syntax:\label{se:gp_read_str}
 \noindent
 Note that \kbd{gp}'s metacommands are not recognized.
 
-\misctitle{Note.} The obsolete form
+\misctitle{Note} The obsolete form
 
 \fun{GEN}{readseq}{char *t}
 

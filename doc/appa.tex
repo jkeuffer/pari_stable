@@ -22,7 +22,7 @@ suite.) You can certainly compile PARI with a different compiler, but
 the PARI kernel takes advantage of optimizations provided by \kbd{gcc}.
 This results in at least 20\% speedup on most architectures.
 
-\misctitle{Optional packages.} The following programs and libraries are useful
+\misctitle{Optional packages} The following programs and libraries are useful
 in conjunction with \kbd{gp}, but not mandatory. In any case, get them before
 proceeding if you want the functionalities they provide. All of them are free.
 The download page on our website
@@ -92,7 +92,7 @@ If you are using GMP, tune it first, then PARI. Make sure you tune PARI on
 the machine that will actually run your computations, and do not use a
 heavily loaded machine for tunings.
 
-\misctitle{Technical note:} \kbd{Configure} accepts many other flags
+\misctitle{Technical note} \kbd{Configure} accepts many other flags
 besides \kbd{--prefix}. See \kbd{Configure --help} for a complete list. In
 particular, there are sets of flags related to GNU MP (\kbd{--with-gmp*}) and
 GNU readline library (\kbd{--with-readline*}).
@@ -281,13 +281,13 @@ You can also invoke \kbd{Configure} with one of the following arguments:
 
    \kbd{--with-readline-include=\emph{path to \kbd{readline.h}}}
 
-\misctitle{Technical note:} Configure can build GP on different architectures
+\misctitle{Technical note} Configure can build GP on different architectures
 simultaneously from the same toplevel sources. Instead of the \kbd{readline}
 link alluded above, you can create \kbd{readline-{\sl osname}-{\sl arch}},
 using the same naming conventions as for the \kbd{O$xxx$} directory,
 e.g \kbd{readline-linux-i686}.
 
-\misctitle{Known problems:}
+\misctitle{Known problems}
 
 $\bullet$ on Linux: Linux distributions have separate \kbd{readline} and
 \kbd{readline-devel} packages. You need both of them installed to

@@ -511,7 +511,7 @@ in addition to the dimensions of the vector or matrix, to indicate
 explicitly the names of these variables. You may omit the variables and
 the final expression to get zero entries, as in \kbd{matrix(10,20)}.
 
-\misctitle{Warning.} The letter \kbd{I} is reserved for the complex number
+\misctitle{Warning} The letter \kbd{I} is reserved for the complex number
 equal to the square root of $-1$. Hence it is forbidden to use it as a
 variable. Try typing \kbd{vector(10,I, I\pow 2)}, the error message that you
 get clearly indicates that \kbd{gp} does not consider \kbd{I} as a variable.
@@ -2216,7 +2216,7 @@ about ideals later on.
   If we want all the symmetric functions of \kbd{u} and not only the norm, we
 type \kbd{charpoly(u)}. Note that this gives the characteristic polynomial of
 \kbd{u}, and not in general the minimal polynomial.
-\misctitle{Exercise.} How does one get the minimal polynomial from this?
+\misctitle{Exercise} How does one get the minimal polynomial from this?
 Find a simpler expression for \kbd{u}. \smallskip
 
   Now let's work on the field itself. The \kbd{nfinit} command already
@@ -2537,7 +2537,7 @@ these relations, type
 Lo and behold, \kbd{u = $\zeta^2\epsilon^2$} and \kbd{u2 =
 $\zeta^{4}\epsilon^1$}.
 
-\misctitle{Note:} since the fundamental unit obtained depends on the random
+\misctitle{Note} Since the fundamental unit obtained depends on the random
 seed, you could have obtained another unit than $\epsilon$, had you not reset
 the random seed before the computation. This was the purpose of the initial
 \kbd{setrand} instruction, which was otherwise unnecessary.\medskip
