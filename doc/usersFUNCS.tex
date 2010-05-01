@@ -867,7 +867,7 @@ are indicated between parentheses: \smallskip
 
 \sidx{member functions}
 \settabs\+xxxxxxx&(\var{bnr},x&\var{bnf},x&nf\hskip2pt&)x&: &\cr
-\+\tet{bid}    &(\var{bnr},&&&)&: & bid ideal structure.\cr
+\+\tet{bid}    &(\var{bnr}&&&)&: & bid ideal structure.\cr
 
 \+\tet{bnf}    &(\var{bnr},& \var{bnf}&&)&: & Buchmann's number field.\cr
 
@@ -889,13 +889,16 @@ following three subclasses:\cr
 
 \+\tet{disc} &(\var{bnr},& \var{bnf},& \var{nf}&)&: & discriminant.\cr
 
-\+\tet{fu}   &(\var{bnr},& \var{bnf},& \var{nf}&)&: &
- \idx{fundamental units}.\cr
+\+\tet{fu}   &(\var{bnr},& \var{bnf}&&)&: & \idx{fundamental units}.\cr
 
 \+\tet{index}   &(\var{bnr},& \var{bnf},& \var{nf}&)&: &
  \idx{index} of the power order in the ring of integers.\cr
 
+\+\tet{mod}   &(\var{bnr}&&&)&: & modulus.\cr
+
 \+\tet{nf}   &(\var{bnr},& \var{bnf},& \var{nf}&)&: & number field.\cr
+
+\+\tet{pol}   &(\var{bnr},& \var{bnf},& \var{nf}&)&: & defining polynomial.\cr
 
 \+\tet{r1} &(\var{bnr},& \var{bnf},& \var{nf}&)&: & the number
 of real embeddings.\cr
@@ -903,23 +906,34 @@ of real embeddings.\cr
 \+\tet{r2} &(\var{bnr},& \var{bnf},& \var{nf}&)&: & the number
 of pairs of complex embeddings.\cr
 
-\+\tet{reg}  &(\var{bnr},& \var{bnf},&&)&: & regulator.\cr
+\+\tet{reg}  &(\var{bnr},& \var{bnf}&&)&: & regulator.\cr
 
 \+\tet{roots}&(\var{bnr},& \var{bnf},& \var{nf}&)&: & roots of the
 polynomial generating the field.\cr
 
+\+\tet{sign} &(\var{bnr},& \var{bnf},& \var{nf}&)&: & signature $[r1,r2]$.\cr
+
 \+\tet{t2}   &(\var{bnr},& \var{bnf},& \var{nf}&)&: & the T2 matrix (see
 \kbd{nfinit}).\cr
 
-\+\tet{tu}   &(\var{bnr},& \var{bnf},&&)&: & a generator for the torsion
+\+\tet{tu}   &(\var{bnr},& \var{bnf}&&)&: & a generator for the torsion
 units.\cr
 
-\+\tet{tufu} &(\var{bnr},& \var{bnf},&&)&: &
- $[w,u_1,...,u_r]$, $(u_i)$ is a vector of
-fundamental units, $w$ generates the torsion units.\cr
 
 \+\tet{zk}   &(\var{bnr},& \var{bnf},& \var{nf}&)&: & integral basis, i.e.~a
 $\Z$-basis of the maximal order.\cr
+
+\+\tet{zkst}   &(\var{bnr}&&&)&: & structure of $(\Z_K/m)^*$.\cr
+
+\misctitle{Deprecated} The following member functions are still available, but deprecated and should not be used in new scripts :
+\+\tet{futu} &(\var{bnr},& \var{bnf},&&)&: &
+ $[u_1,...,u_r,w]$, $(u_i)$ is a vector of fundamental units,\cr
+\+&&&&&& $w$ generates the torsion units.\cr
+
+\+\tet{tufu} &(\var{bnr},& \var{bnf},&&)&: &
+ $[w,u_1,...,u_r]$, $(u_i)$ is a vector of fundamental units,\cr
+\+&&&&&& $w$ generates the torsion units.\cr
+
 
   For instance, assume that $\var{bnf} = \kbd{bnfinit}(\var{pol})$, for some
 polynomial. Then \kbd{\var{bnf}.clgp} retrieves the class group, and

@@ -477,7 +477,7 @@ member_commands(void)
 Member functions, followed by relevant objects\n\n\
 a1-a6, b2-b8, c4-c6 : coeff. of the curve.            ell\n\
 area : area                                           ell\n\
-bid  : big ideal                                                    bnr\n\
+bid  : big ideal                     bid,                           bnr\n\
 bnf  : big number field                                        bnf, bnr\n\
 clgp : class group                   bid,                      bnf, bnr\n\
 cyc  : cyclic decomposition (SNF)    bid,       clgp,          bnf, bnr\n\
@@ -491,13 +491,13 @@ j    : j-invariant                                    ell\n");
 /* split: some compilers can't handle long constant strings */
   pari_puts("\
 mod  : modulus                       bid,                           bnr\n\
-nf   : number field                                            bnf, bnr\n\
+nf   : number field                                        nf, bnf, bnr\n\
 no   : number of elements            bid,       clgp,          bnf, bnr\n\
-omega, eta: [omega1,omega2] and [eta1, eta2]          ell\n\
+omega, eta: [w1,w2] and [eta1, eta2]                  ell\n\
 p    : rational prime below prid          prid\n\
 pol  : defining polynomial                                 nf, bnf, bnr\n\
 reg  : regulator                                               bnf, bnr\n\
-roots: roots                                          ell  nf, bnf, bnr\n\
+roots: roots                                          ell, nf, bnf, bnr\n\
 sign,r1,r2 : signature                                     nf, bnf, bnr\n\
 t2   : t2 matrix                                           nf, bnf, bnr\n\
 tate : Tate's [u^2, u, q]                             ell\n\

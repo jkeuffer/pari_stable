@@ -818,13 +818,14 @@ A number field $K$ is given by a monic irreducible $f\in\ZZ[X]$.\hfill\break
 \subsec{nf members:}
 \beginindentedkeys
 \key{polynomial defining \var{nf}, $f(\theta)=0$}{\var{nf}.pol}
-\key{number of real/complex places}{\var{nf}.r1, \var{nf}.r2}
+\key{number of real/complex places}{\var{nf}.r1, \var{nf}.r2, \var{nf.sign}}
 \key{discriminant of \var{nf}}{\var{nf}.disc}
 \key{$T_2$ matrix}{\var{nf}.t2}
 \key{vector of roots of $f$}{\var{nf}.roots}
 \key{integral basis of $\ZZ_K$ as powers of $\theta$}{\var{nf}.zk}
 \key{different}{\var{nf}.diff}
 \key{codifferent}{\var{nf}.codiff}
+\key{index}{\var{nf}.index}
 \endindentedkeys
 \li{recompute \var{nf}\ using current precision}{nfnewprec$(nf)$}
 \li{init relative \var{rnf}\ given by $g=0$ over $K$}{rnfinit$(\var{nf},g)$}
@@ -837,7 +838,6 @@ A number field $K$ is given by a monic irreducible $f\in\ZZ[X]$.\hfill\break
 \key{regulator}{\var{bnf}.reg}
 \key{fundamental units}{\var{bnf}.fu}
 \key{torsion units}{\var{bnf}.tu}
-\key{$[tu,fu]$}{\var{bnf}.tufu}
 \endindentedkeys
 \li{compute a \var{bnf}\ from small \var{bnf}}{bnfinit$(\var{sbnf})$}
 %
@@ -847,6 +847,8 @@ A number field $K$ is given by a monic irreducible $f\in\ZZ[X]$.\hfill\break
 \subsec{bnr members: {\rm same as \var{bnf}, plus}}
 \beginindentedkeys
 \key{underlying \var{bnf}}{\var{bnr}.bnf}
+\key{big ideal structure}{\var{bnr}.bid}
+\key{modulus}{\var{bnr}.mod}
 \key{structure of $(\ZZ_K/m)^*$}{\var{bnr}.zkst}
 \endindentedkeys
 
