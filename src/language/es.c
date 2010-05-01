@@ -3753,6 +3753,7 @@ switchout(const char *name)
 
 #define BIN_GEN 0
 #define NAM_GEN 1
+#define VAR_GEN 2
 
 static long
 rd_long(FILE *f)
@@ -3811,9 +3812,9 @@ writeGEN(GEN x, FILE *f)
 void
 writenamedGEN(GEN x, const char *s, FILE *f)
 {
-  fputc(NAM_GEN,f);
+  fputc(x ? NAM_GEN : VAR_GEN,f);
   wrstr(s, f);
-  wrGEN(x, f);
+  if (x) wrGEN(x, f);
 }
 
 /* read a GEN from file f */
@@ -3844,12 +3845,21 @@ readobj(FILE *f, int *ptc)
       x = rdGEN(f);
       break;
     case NAM_GEN:
+    case VAR_GEN:
     {
       char *s = rdstr(f);
       if (!s) pari_err(talker,"malformed binary file (no name)");
-      x = rdGEN(f);
-      fprintferr("setting %s\n",s);
-      changevalue(fetch_named_var(s), x);
+      if (c == NAM_GEN)
+      {
+	  x = rdGEN(f);
+	  fprintferr("setting %s\n",s);
+	  changevalue(fetch_named_var(s), x);
+      }
+      else
+      {
+	  pari_var_create(fetch_entry(s, strlen(s)));
+	  x = gnil;
+      }
       break;
     }
     case EOF: break;
