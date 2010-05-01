@@ -1,5 +1,5 @@
 #! /bin/sh
-CFILES="`echo src/*/*.[chy] src/*/*/*.[ch] |sed -e 's,src/language/parse.c,,'`"
+CFILES="`echo src/*/*.[chy] src/*/*/*.[ch] |sed -e 's,src/language/parse\.[ch],,g'`"
 OFILES="doc/*.tex src/test/in/* src/functions/*/*"
 SCRIPTS="config/* src/test/dotest"
 err=0;
