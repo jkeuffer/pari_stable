@@ -23,7 +23,7 @@ this Emacs shell are indicated by an EMACS sign in the left margin.
 
 To start the calculator, the general command line syntax is:
 
-\kbd{gp [-s \var{stacksize}] [-p \var{primelimit}] [\var{files}]}
+\kbd{gp [-s \var{parisize}] [-p \var{primelimit}] [\var{files}]}
 
 \noindent
 where items within brackets are optional. The [\var{files}] argument is a
@@ -1716,7 +1716,7 @@ init(x) = add(y) = x+y; mul(y) = x*y;
 function body contains everything until the end of the expression. Hence
 executing \kbd{init} defines the wrong function \kbd{add} (itself defining
 a function \kbd{mul}). The way out is to
-use parentheses for grouping, to that enclosed subexpressions be
+use parentheses for grouping, so that enclosed subexpressions will be
 evaluated independently:
 \bprog
 ? init(x) = ( add(y) = x+y ); ( mul(y) = x*y );
@@ -2250,7 +2250,7 @@ based on. The first is William Stein's Python-based SAGE\footnote{*}{see
 \kbd{http://sagemath.org/}} system. The second is the \tet{Math::Pari} Perl
 module (see any CPAN mirror), written by Ilya Zakharevich.
 Finally, Michael Stoll has integrated PARI into \tet{CLISP}\footnote{***}{see
-\kbd{http://clisp.cons.org}}, which is a Common Lisp implementation by Bruno
+\kbd{http://clisp.cons.org/}}, which is a Common Lisp implementation by Bruno
 Haible, Marcus Daniels and others; this interface has been updated for pari-2
 by Sam Steingold.
 
@@ -2288,7 +2288,7 @@ a \var{value} which is a numeric argument, with the effect of multiplying it
 by $10^3$, $10^6$ and $10^9$ respectively. Case is not taken into account
 there, so for instance \kbd{30k} and \kbd{30K} both stand for $30000$. This
 is mostly useful to modify or set the defaults \kbd{primelimit} or
-\kbd{stacksize} which typically involve a lot of trailing zeroes.
+\kbd{parisize} which typically involve a lot of trailing zeroes.
 
 \misctitle{(somewhat technical) Note} As we saw in \secref{se:strings},
 the second argument to \kbd{default} is subject to string context

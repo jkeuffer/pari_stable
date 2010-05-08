@@ -229,7 +229,7 @@ auxiliary table containing $O(\sqrt{N})$ group elements.
 such that $g^k = x$. This requires $O(\sqrt{N})$ group operations in average
 and $O(1)$ storage.
 
-\fun{GEN}{gen_plog}{GEN x,GEN g,GEN N, void *E, const struct bb_group
+\fun{GEN}{gen_plog}{GEN x,GEN g,GEN N, void *E, const struct bb_group}
 Assuming that $g$ has prime order $N$, compute an integer $k$ such that
 $g^k = x$, using either \kbd{gen\_Shanks\_log} or \kbd{gen\_Pollard\_log}.
 

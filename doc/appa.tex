@@ -256,7 +256,7 @@ PARI L1 kernel.
 \kbd{$L_0$-$L_1$}.
 
 \noindent$\bullet$ A \emph{name} not containing a dash '\kbd{-}' is an alias.
-An alias stands for \kbd{\emph{name}-none}, but \kbd{gmp} stand for
+An alias stands for \kbd{\emph{name}-none}, but \kbd{gmp} stands for
 \kbd{auto-gmp}.
 
 \noindent$\bullet$ The default kernel is \kbd{auto-none}.
@@ -329,7 +329,7 @@ affect \kbd{gp-sta}.
 
 $\bullet$ Some implementations of the \kbd{diff} utility (on HPUX for
 instance) output \kbd{No differences encountered} or some similar
-message instead of the expected empty input. Thus producing a spurious
+message instead of the expected empty input, thus producing a spurious
 \kbd{[BUG]} message.
 
 \subsubsec{Some more testing} [{\sl Optional\/}]
@@ -338,7 +338,7 @@ You can test GP in compatibility mode with \kbd{make test-compat}. If you
 want to test the graphic routines, use \kbd{make test-ploth}. You will
 have to click on the mouse button after seeing each image. There will be
 eight of them, probably shown twice (try to resize at least one of them
-as a further test). More generaly, typing \kbd{make} without argument
+as a further test). More generally, typing \kbd{make} without argument
 will print the list of available extra tests among all available targets.
 
 The \kbd{make bench} and \kbd{make test-compat} runs produce a Postscript
@@ -346,14 +346,14 @@ file \kbd{pari.ps} in \kbd{O$xxx$} which you can send to a Postscript
 printer. The output should bear some similarity to the screen images.
 
 \subsubsec{Heavy-duty testing} [{\sl Optional\/}]
-There are a few extra tests which should be useful only for developpers.
+There are a few extra tests which should be useful only for developers.
 
 \kbd{make test-kernel} checks whether the low-level kernel seems to work,
 and provides simple diagnostics if it does not. Only useful if \kbd{make
 bench} fails horribly, e.g.~things like \kbd{1+1} do not work.
 
 \kbd{make test-all} runs all available test suites. Slow. Some of the
-test requires the extra packages to be installed.
+tests require the extra packages to be installed.
 
 \section{Installation} When everything looks fine, type
 
@@ -497,7 +497,7 @@ maintains an archive of mailing lists dedicated to PARI, documentation
 System (BTS). Bug reports should be submitted online to the BTS, which may be
 accessed from the navigation bar on the home page or directly at
 \bprog
-  http://pari.math.u-bordeaux.fr/Bugs
+  http://pari.math.u-bordeaux.fr/Bugs/
 @eprog\noindent
 Further information can be found at that address but, to report a
 configuration problem, make sure to include the relevant \kbd{*.dif} files in
@@ -517,7 +517,7 @@ submissions. (The BTS forwards the mail it receives to this list.)
  $\bullet$ \kbd{pari-users}: for everything else.
 
 \noindent You may send an email to the last two without being subscribed.
-(You will have to confirm that your message is not unsollicited bulk email,
+(You will have to confirm that your message is not unsolicited bulk email,
 aka \emph{Spam}.) To subscribe, send empty messages respectively to
 \def\@{@}
 \bprog
