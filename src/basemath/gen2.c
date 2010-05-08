@@ -1396,7 +1396,7 @@ gneg_i(GEN x)
       y[1] = evalprecp(precp(x)) | evalvalp(valp(x));
       gel(y,2) = gel(x,2);
       gel(y,3) = gel(x,3);
-      gel(y,4) = subii(gel(x,3),gel(x,4)); break;
+      gel(y,4) = signe(gel(x,4))? subii(gel(x,3),gel(x,4)): gen_0; break;
 
     case t_POLMOD: y=cgetg(3,t_POLMOD);
       gel(y,1) = gel(x,1);
