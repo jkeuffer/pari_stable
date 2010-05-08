@@ -2467,6 +2467,17 @@ closest_lift(GEN a, GEN b, GEN h)
   return addii(a, mulii(b, diviiround(subii(h,a), b)));
 }
 
+static long
+get_table_size(GEN pordmin, GEN B)
+{
+  pari_sp av = avma;
+  GEN t = ceilr( sqrtr( divri(itor(pordmin, DEFAULTPREC), B) ) );
+  if (is_bigint(t)) 
+    pari_err(talker,"prime too large: please install the 'seadata' package");
+  avma = av;
+  return itos(t) >> 1;
+}
+
 /* compute a_p using Shanks/Mestre + Montgomery's trick. Assume p > 457 */
 static GEN
 ellap1(GEN e, GEN p)
@@ -2517,7 +2528,7 @@ ellap1(GEN e, GEN p)
     fh = FpE_mul(f, h, a4, p);
     if (ell_is_inf(fh)) goto FOUND;
 
-    s = itos( gceil(gsqrt(gdiv(pordmin,B),DEFAULTPREC)) ) >> 1;
+    s = get_table_size(pordmin, B);
     CODE = evaltyp(t_VECSMALL) | evallg(s+1);
     /* look for h s.t f^h = 0 */
     if (!tx)
