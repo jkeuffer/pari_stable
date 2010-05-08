@@ -139,7 +139,8 @@ static GEN
 divTp(GEN x, GEN y) { pari_sp av = avma;
   return gerepileupto(av, divpp(cvtop2(x,y), y));
 }
-/* x PADIC, x / y by converting y to padic */
+/* x PADIC, x / y by converting y to padic. Assume x != 0; otherwise y
+ * converted to O(p^e) and division by 0 */
 static GEN
 divpT(GEN x, GEN y) { pari_sp av = avma;
   return gerepileupto(av, divpp(x, cvtop2(y,x)));
