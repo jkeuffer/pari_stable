@@ -3851,14 +3851,14 @@ readobj(FILE *f, int *ptc)
       if (!s) pari_err(talker,"malformed binary file (no name)");
       if (c == NAM_GEN)
       {
-	  x = rdGEN(f);
-	  fprintferr("setting %s\n",s);
-	  changevalue(fetch_named_var(s), x);
+        x = rdGEN(f);
+        fprintferr("setting %s\n",s);
+        changevalue(fetch_named_var(s), x);
       }
       else
       {
-	  pari_var_create(fetch_entry(s, strlen(s)));
-	  x = gnil;
+        pari_var_create(fetch_entry(s, strlen(s)));
+        x = gnil;
       }
       break;
     }

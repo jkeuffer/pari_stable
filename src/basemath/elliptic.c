@@ -2472,7 +2472,7 @@ get_table_size(GEN pordmin, GEN B)
 {
   pari_sp av = avma;
   GEN t = ceilr( sqrtr( divri(itor(pordmin, DEFAULTPREC), B) ) );
-  if (is_bigint(t)) 
+  if (is_bigint(t))
     pari_err(talker,"prime too large: please install the 'seadata' package");
   avma = av;
   return itos(t) >> 1;
