@@ -644,21 +644,16 @@ RgX_add(GEN x, GEN y)
 {
   long i, lx = lg(x), ly = lg(y);
   GEN z;
-  if (lx == ly) {
-    z = cgetg(lx, t_POL); z[1] = x[1];
-    for (i=2; i < lx; i++) gel(z,i) = gadd(gel(x,i),gel(y,i));
-    return normalizepol_lg(z, lx);
-  }
-  if (ly < lx) {
+  if (ly <= lx) {
     z = cgetg(lx,t_POL); z[1] = x[1];
     for (i=2; i < ly; i++) gel(z,i) = gadd(gel(x,i),gel(y,i));
     for (   ; i < lx; i++) gel(z,i) = gcopy(gel(x,i));
-    if (!signe(x)) z = normalizepol_lg(z, lx);
+    z = normalizepol_lg(z, lx);
   } else {
     z = cgetg(ly,t_POL); z[1] = y[1];
     for (i=2; i < lx; i++) gel(z,i) = gadd(gel(x,i),gel(y,i));
     for (   ; i < ly; i++) gel(z,i) = gcopy(gel(y,i));
-    if (!signe(y)) z = normalizepol_lg(z, ly);
+    z = normalizepol_lg(z, ly);
   }
   return z;
 }
@@ -667,21 +662,16 @@ RgX_sub(GEN x, GEN y)
 {
   long i, lx = lg(x), ly = lg(y);
   GEN z;
-  if (lx == ly) {
-    z = cgetg(lx, t_POL); z[1] = x[1];
-    for (i=2; i < lx; i++) gel(z,i) = gsub(gel(x,i),gel(y,i));
-    return normalizepol_lg(z, lx);
-  }
-  if (ly < lx) {
+  if (ly <= lx) {
     z = cgetg(lx,t_POL); z[1] = x[1];
     for (i=2; i < ly; i++) gel(z,i) = gsub(gel(x,i),gel(y,i));
     for (   ; i < lx; i++) gel(z,i) = gcopy(gel(x,i));
-    if (!signe(x)) z = normalizepol_lg(z, lx);
+    z = normalizepol_lg(z, lx);
   } else {
     z = cgetg(ly,t_POL); z[1] = y[1];
     for (i=2; i < lx; i++) gel(z,i) = gsub(gel(x,i),gel(y,i));
     for (   ; i < ly; i++) gel(z,i) = gneg(gel(y,i));
-    if (!signe(y)) z = normalizepol_lg(z, ly);
+    z = normalizepol_lg(z, ly);
   }
   return z;
 }
