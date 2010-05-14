@@ -1448,7 +1448,7 @@ gp_read_line(filtre_t *F, const char *PROMPT)
 #endif
     {
       if (!PROMPT) PROMPT = color_prompt( expand_prompt(GP_DATA->prompt, F) );
-      pari_puts(PROMPT);
+      pari_puts(PROMPT); pari_flush();
       res = get_line_from_file(PROMPT,F,pari_infile);
     }
     if (!disable_color) { term_color(c_NONE); pari_flush(); }
