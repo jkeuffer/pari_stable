@@ -1049,8 +1049,9 @@ pari_err(int numerr, ...)
     pariErr->puts("  [hint] you can increase GP stack with allocatemem()\n");
   }
   pariOut = out;
+  flusherr();
   if (cb_pari_handle_exception &&
-      cb_pari_handle_exception(numerr)) { flusherr(); return; }
+      cb_pari_handle_exception(numerr)) return;
   err_recover(numerr);
 }
 
