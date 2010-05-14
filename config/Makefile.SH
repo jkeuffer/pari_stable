@@ -210,7 +210,7 @@ EXPORT_CREATE = $export_create
 EXPORT_LIB    = $export_lib
 EXPORT_LIB_CREATE = $export_lib_create
 DLLD_IGNORE   = $dlld_ignore
-NM = `$CC -print-prog-name=nm 2>/dev/null`
+DLLTOOL = `$CC -print-prog-name=dlltool 2>/dev/null`
 
 RUNPTH       = $RUNPTH
 RUNPTH_FINAL = $RUNPTH_FINAL
@@ -521,11 +521,8 @@ EOT
     cat >> $file << EOT
 
 \$(EXPORT_FILE): \$(OBJS)
-	echo LIBRARY \$(LIBPARI) > \$@
-	echo EXPORTS >> \$@
-	\$(NM) --defined-only \$(OBJS) | grep -E '[0-9a-f]+ [A-Z] [^.]' | cut -d ' ' -f 3 | cut -c '2-' >> \$@
-	\$(NM) --defined-only \$(OBJS) | grep -E '[0-9a-f]+ [BCDGRS] [^.]' | cut -d ' ' -f 3 | cut -c '2-' | sed -e 's/\(.*\)/\1 DATA/'>> \$@
-
+	\$(DLLTOOL) --export-all-symbols -k -z \$@.tmp \$(OBJS)
+	echo "LIBRARY \$(LIBPARI)" > \$@ && cat \$@.tmp >> \$@ && rm \$@.tmp
 EOT
     ;;
     esac
