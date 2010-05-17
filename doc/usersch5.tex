@@ -90,7 +90,7 @@ tampered with by PARI signal handler.
 \fun{void}{pari_stackcheck_init}{void *stackbase} controls the system stack
 exhaustion checking code in the GP interpreter. This should be used when the
 system stack base address change or when the address seen by \kbd{pari\_init}
-is too far from the base address. If stackbase is \kbd{NUL}L, disable the
+is too far from the base address. If stackbase is \kbd{NULL}, disable the
 check, else set the base address to stackbase. It is normally used this way
 \bprog
 int thread_start (...)
