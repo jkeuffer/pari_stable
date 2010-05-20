@@ -1228,15 +1228,14 @@ ggamd(GEN x, long prec)
 static long
 nboft(long k, long p)
 {
-  long s,n;
-  for (s=0,n=0; n-s<k; s += u_lval(++n, p));
+  long s, n;
+  for (s=0,n=0; n-s < k; s += u_lval(++n, p));
   return n;
 }
 
 /* Using Dwork's expansion, compute \Gamma(px+1)=-\Gamma(px) with x a unit.
- * See p$-Adic Gamma Functions and Dwork Cohomology, Maurizio Boyarsky
- * Transactions of the American Mathematical Society,
- * Vol. 257, No. 2. (Feb., 1980), pp. 359-369.
+ * See p-Adic Gamma Functions and Dwork Cohomology, Maurizio Boyarsky
+ * Transactions of the AMS, Vol. 257, No. 2. (Feb., 1980), pp. 359-369.
  * Inspired by a GP script by Fernando Rodriguez-Villegas */
 static GEN
 gadw(GEN x, long p)
@@ -1262,7 +1261,6 @@ gadw(GEN x, long p)
     s = gadd(s, gmul(c, t));
     if ((k&0xFL)==0) gerepileall(ltop, 3, &u,&s,&t);
   }
-
   return gneg(s);
 }
 
@@ -1278,12 +1276,10 @@ gammap_Dwork(GEN x, long p)
   long j;
   if (k)
   {
-    x = gdivgs(gsubgs(x, k), p);
-    k--;
-    p1 = gadw(x, p);
-    if (odd(k)) p1 = gneg(p1);
-    for (j = 1; j <= k; ++j)
-      p1 = gmul(p1, gaddgs(gmulsg(p, x), j));
+    GEN x_k = gsubgs(x,k);
+    x = gdivgs(x_k, p);
+    p1 = gadw(x, p); if (!odd(k)) p1 = gneg(p1);
+    for (j = 1; j < k; ++j) p1 = gmul(p1, gaddgs(x_k, j));
   }
   else
     p1 = gneg(gadw(gdivgs(x, p), p));
