@@ -2395,8 +2395,9 @@ clean_cols(GEN A, int *precpb)
 }
 
 static long
-compute_multiple_of_R_pivot(GEN x, GEN x0/*unused*/, GEN c)
+compute_multiple_of_R_pivot(GEN X, GEN x0/*unused*/, long ix, GEN c)
 {
+  GEN x = gel(X,ix);
   long i, k = 0, ex = - (long)HIGHEXPOBIT, lx = lg(x);
   (void)x0;
   for (i=1; i<lx; i++)
@@ -2442,7 +2443,7 @@ compute_multiple_of_R(GEN A, long RU, long N, long *pneed, GEN *ptL)
   mdet = shallowconcat(T, mdet); /* det(Span(mdet)) = N * R */
 
   /* could be using indexrank(), but need custom "get_pivot" function */
-  d = RgM_pivots(mdet, &r, &compute_multiple_of_R_pivot);
+  d = RgM_pivots(mdet, NULL, &r, &compute_multiple_of_R_pivot);
   /* # of independent columns == unit rank ? */
   if (lg(mdet)-1 - r != RU)
   {

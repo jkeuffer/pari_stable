@@ -507,6 +507,9 @@ BA120- galoisapply now accept automorphisms in t_COL format.
 BA124- galoisfixedfield now accept subgroups.
   125- ellap(E, p) second argument now optional if E has t_INTMOD or t_PADIC
        coefficients.
+  126- generalize the "generic pivot" strategy to all linear algebra (support
+       RgM_ѕolve and det() in addition to existing functions); implement
+       maximal pivot strategy for p-adics [#1054]
 
   Added
     1- many new benches (make test-all)

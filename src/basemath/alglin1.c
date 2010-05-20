@@ -503,25 +503,6 @@ RgM_diagonal(GEN m)
 /*                       Solve A*X=B (Gauss pivot)                 */
 /*                                                                 */
 /*******************************************************************/
-/* Assume x is a non-empty matrix. Return 0 if maximal pivot should not be
- * used, 1 otherwise */
-static int
-use_maximal_pivot(GEN x)
-{
-  int res = 0;
-  long i, j, hx, lx = lg(x);
-  if (lx == 1) return 0;
-  hx = lg(x[1]);
-  for (j=1; j<lx; j++)
-    for (i=1; i<hx; i++)
-    {
-      GEN c = gcoeff(x,i,j);
-      if (!is_scalar_t(typ(c))) return 0;
-      if (precision(c)) res = 1;
-    }
-  return res;
-}
-
 /* x ~ 0 compared to reference y */
 int
 approx_0(GEN x, GEN y)
@@ -532,37 +513,123 @@ approx_0(GEN x, GEN y)
   return gequal0(x) ||
          (tx == t_REAL && gexpo(y) - gexpo(x) > bit_accuracy(lg(x)));
 }
-
 /* x a column, x0 same column in the original input matrix (for reference),
  * c list of pivots so far */
 static long
-gauss_get_pivot_max(GEN x, GEN x0, GEN c)
+gauss_get_pivot_max(GEN X, GEN X0, long ix, GEN c)
 {
+  GEN p, r, x = gel(X,ix), x0 = gel(X0,ix);
   long i, k = 0, ex = - (long)HIGHEXPOBIT, lx = lg(x);
-  GEN p, r;
-  for (i=1; i<lx; i++)
-    if (!c[i])
+  if (c)
+  {
+    for (i=1; i<lx; i++)
+      if (!c[i])
+      {
+        long e = gexpo(gel(x,i));
+        if (e > ex) { ex = e; k = i; }
+      }
+  }
+  else
+  {
+    for (i=ix; i<lx; i++)
     {
       long e = gexpo(gel(x,i));
       if (e > ex) { ex = e; k = i; }
     }
+  }
   if (!k) return lx;
   p = gel(x,k);
   r = gel(x0,k); if (isrationalzero(r)) r = x0;
   return approx_0(p, r)? lx: k;
 }
 static long
-gauss_get_pivot_NZ(GEN x, GEN x0/*unused*/, GEN c)
+gauss_get_pivot_padic(GEN X, GEN p, long ix, GEN c)
 {
+  GEN x = gel(X, ix);
+  long i, k = 0, ex = (long)HIGHVALPBIT, lx = lg(x);
+  if (c)
+  {
+    for (i=1; i<lx; i++)
+      if (!c[i] && !gequal0(gel(x,i)))
+      {
+        long e = ggval(gel(x,i), p);
+        if (e < ex) { ex = e; k = i; }
+      }
+  }
+  else
+  {
+    for (i=ix; i<lx; i++)
+      if (!gequal0(gel(x,i)))
+      {
+        long e = ggval(gel(x,i), p);
+        if (e < ex) { ex = e; k = i; }
+      }
+  }
+  return k? k: lx;
+}
+static long
+gauss_get_pivot_NZ(GEN X, GEN x0/*unused*/, long ix, GEN c)
+{
+  GEN x = gel(X, ix);
   long i, lx = lg(x);
   (void)x0;
-  for (i=1; i<lx; i++)
-    if (!c[i] && !gequal0(gel(x,i))) return i;
+  if (c)
+  {
+    for (i=1; i<lx; i++)
+      if (!c[i] && !gequal0(gel(x,i))) return i;
+  }
+  else
+  {
+    for (i=ix; i<lx; i++)
+      if (!gequal0(gel(x,i))) return i;
+  }
   return lx;
 }
+
+/* Return pivot seeking function appropriate for the domain of the RgM x
+ * (first non zero pivot, maximal pivot...) */
 static pivot_fun
-get_pivot_fun(GEN x)
-{ return use_maximal_pivot(x)? &gauss_get_pivot_max: &gauss_get_pivot_NZ; }
+get_pivot_fun(GEN x, GEN *data)
+{
+  long i, j, hx, lx = lg(x);
+  int res = t_INT;
+  GEN p = NULL;
+
+  *data = NULL;
+  if (lx == 1) return &gauss_get_pivot_NZ;
+  hx = lg(x[1]);
+  for (j=1; j<lx; j++)
+  {
+    GEN xj = gel(x,j);
+    for (i=1; i<hx; i++)
+    {
+      GEN c = gel(xj,i);
+      switch(typ(c))
+      {
+        case t_REAL:
+          res = t_REAL;
+          break;
+        case t_COMPLEX : 
+          if (typ(gel(c,1)) == t_REAL || typ(gel(c,2)) == t_REAL) res = t_REAL;
+          break;
+        case t_INT: case t_INTMOD: case t_FRAC: case t_FFELT: case t_QUAD:
+        case t_POLMOD: /* exact types */
+          break;
+        case t_PADIC:
+          p = gel(c,2);
+          res = t_PADIC;
+          break;
+        default: return &gauss_get_pivot_NZ;
+      }
+    }
+  }
+  switch(res)
+  {
+    case t_REAL: *data = x; return &gauss_get_pivot_max;
+    case t_PADIC: *data = p; return &gauss_get_pivot_padic;
+    default: return &gauss_get_pivot_NZ;
+  }
+}
 
 static GEN
 get_col(GEN a, GEN b, GEN p, long li)
@@ -785,45 +852,30 @@ RgM_solve(GEN a, GEN b)
 {
   pari_sp av = avma, lim = stack_lim(av,1);
   long i, j, k, li, bco, aco;
-  int inexact, iscol;
-  GEN p, u;
+  int iscol;
+  pivot_fun pivot;
+  GEN p, u, data;
 
   if (is_modular_solve(a,b,&u)) return gerepileupto(av, u);
   avma = av;
   if (!init_gauss(a, &b, &aco, &li, &iscol)) return cgetg(1, t_MAT);
+  pivot = get_pivot_fun(a, &data);
   a = RgM_shallowcopy(a);
   bco = lg(b)-1;
-  inexact = use_maximal_pivot(a);
-  if(DEBUGLEVEL>4) fprintferr("Entering gauss with inexact=%ld\n",inexact);
+  if(DEBUGLEVEL>4) fprintferr("Entering gauss\n");
 
   p = NULL; /* gcc -Wall */
   for (i=1; i<=aco; i++)
   {
     /* k is the line where we find the pivot */
-    p = gcoeff(a,i,i); k = i;
-    if (inexact) /* maximal pivot */
-    {
-      long e, ex = gexpo(p);
-      for (j=i+1; j<=li; j++)
-      {
-        e = gexpo(gcoeff(a,j,i));
-        if (e > ex) { ex=e; k=j; }
-      }
-      if (gequal0(gcoeff(a,k,i))) return NULL;
-    }
-    else if (gequal0(p)) /* first non-zero pivot */
-    {
-      do k++; while (k<=li && gequal0(gcoeff(a,k,i)));
-      if (k>li) return NULL;
-    }
-
-    /* if (k!=i), exchange the lines s.t. k = i */
+    k = pivot(a, data, i, NULL);
+    if (k > li) return NULL;
     if (k != i)
-    {
+    { /* exchange the lines s.t. k = i */
       for (j=i; j<=aco; j++) swap(gcoeff(a,i,j), gcoeff(a,k,j));
       for (j=1; j<=bco; j++) swap(gcoeff(b,i,j), gcoeff(b,k,j));
-      p = gcoeff(a,i,i);
     }
+    p = gcoeff(a,i,i);
     if (i == aco) break;
 
     for (k=i+1; k<=li; k++)
@@ -1495,7 +1547,7 @@ deplin(GEN x0)
         if (i!=l[j]) gel(ck,i) = gsub(gmul(piv, gel(ck,i)), gmul(q, gel(cj,i)));
     }
 
-    i = gauss_get_pivot_NZ(ck, NULL, c);
+    i = gauss_get_pivot_NZ(x, NULL, k, c);
     if (i > nl) break;
 
     d[k] = ck[i];
@@ -1523,31 +1575,25 @@ deplin(GEN x0)
 /*                                                                 */
 /*******************************************************************/
 /* return the transform of x under a standard Gauss pivot. r = dim ker(x).
- * d[k] contains the index of the first non-zero pivot in column k
- * If a != NULL, use x - a Id instead (for eigen) */
+ * d[k] contains the index of the first non-zero pivot in column k */
 static GEN
-gauss_pivot_ker(GEN x0, GEN a, GEN *dd, long *rr)
+gauss_pivot_ker(GEN x0, GEN *dd, long *rr)
 {
-  GEN x, c, d, p;
+  GEN x, c, d, p, data;
   pari_sp av, lim;
   long i, j, k, r, t, n, m;
   pivot_fun pivot;
 
   n=lg(x0)-1; if (!n) { *dd=NULL; *rr=0; return cgetg(1,t_MAT); }
   m=lg(x0[1])-1; r=0;
+  pivot = get_pivot_fun(x0, &data);
   x = RgM_shallowcopy(x0);
-  if (a)
-  {
-    if (n != m) pari_err(consister,"gauss_pivot_ker");
-    for (k=1; k<=n; k++) gcoeff(x,k,k) = gsub(gcoeff(x,k,k), a);
-  }
-  pivot = get_pivot_fun(x);
   c = const_vecsmall(m, 0);
-  d=cgetg(n+1,t_VECSMALL);
+  d = cgetg(n+1,t_VECSMALL);
   av=avma; lim=stack_lim(av,1);
   for (k=1; k<=n; k++)
   {
-    j = pivot(gel(x,k), gel(x0,k), c);
+    j = pivot(x, data, k, c);
     if (j > m)
     {
       r++; d[k]=0;
@@ -1576,7 +1622,7 @@ gauss_pivot_ker(GEN x0, GEN a, GEN *dd, long *rr)
 /* r = dim ker(x).
  * Returns d: d[k] contains the index of the first non-zero pivot in column k */
 GEN
-RgM_pivots(GEN x0, long *rr, pivot_fun pivot)
+RgM_pivots(GEN x0, GEN data, long *rr, pivot_fun pivot)
 {
   GEN x, c, d, p;
   long i, j, k, r, t, m, n = lg(x0)-1;
@@ -1591,7 +1637,7 @@ RgM_pivots(GEN x0, long *rr, pivot_fun pivot)
   av = avma; lim = stack_lim(av,1);
   for (k=1; k<=n; k++)
   {
-    j = pivot(gel(x,k), gel(x0,k), c);
+    j = pivot(x, data, k, c);
     if (j > m) { r++; d[k] = 0; }
     else
     {
@@ -1612,17 +1658,20 @@ RgM_pivots(GEN x0, long *rr, pivot_fun pivot)
   *rr = r; avma = (pari_sp)d; return d;
 }
 static GEN
-gauss_pivot(GEN x, long *rr) { return RgM_pivots(x, rr, get_pivot_fun(x)); }
+gauss_pivot(GEN x, long *rr) { 
+  GEN data;
+  pivot_fun pivot = get_pivot_fun(x, &data);
+  return RgM_pivots(x, data, rr, pivot); }
 
-/* compute ker(x - aI) */
+/* compute ker(x) */
 static GEN
-ker_aux(GEN x, GEN a)
+ker_aux(GEN x)
 {
   pari_sp av = avma;
   GEN d,y;
   long i,j,k,r,n;
 
-  x = gauss_pivot_ker(x,a,&d,&r);
+  x = gauss_pivot_ker(x,&d,&r);
   if (!r) { avma=av; return cgetg(1,t_MAT); }
   n = lg(x)-1; y=cgetg(r+1,t_MAT);
   for (j=k=1; j<=r; j++,k++)
@@ -1648,7 +1697,7 @@ ker(GEN x) {
   GEN X = x, p = NULL;
   if (is_FpM(&x, &p))
     return gerepileupto(av, FpM_to_mod(FpM_ker(x, p), p));
-  avma = av; return ker_aux(X,NULL);
+  avma = av; return ker_aux(X);
 }
 GEN
 matker0(GEN x,long flag)
@@ -2693,10 +2742,10 @@ eigen(GEN x, long prec)
   for(;;)
   {
     r3 = grndtoi(r2, &e); if (e < ex) r2 = r3;
-    ssesp = ker_aux(x,r2); l = lg(ssesp);
+    ssesp = ker_aux(RgM_Rg_add_shallow(x, gneg(r2))); l = lg(ssesp);
     if (l == 1 || ly + (l-1) > n)
       pari_err(talker2, "missing eigenspace. Compute the matrix to higher accuracy, then restart eigen at the current precision",NULL,NULL);
-    for (i=1; i<l; ) y[ly++]=ssesp[i++]; /* done with this eigenspace */
+    for (i=1; i<l; i++,ly++) gel(y,ly) = gel(ssesp,i); /* eigenspace done */
 
     r1=r2; /* try to find a different eigenvalue */
     do
@@ -2731,9 +2780,8 @@ det0(GEN a,long flag)
   return NULL; /* not reached */
 }
 
-/* Exact types: choose the first non-zero pivot. Otherwise: maximal pivot */
 static GEN
-det_simple_gauss(GEN a, int inexact)
+det_simple_gauss(GEN a, GEN data, pivot_fun pivot)
 {
   pari_sp av = avma, lim = stack_lim(av,1);
   long i,j,k, s = 1, nbco = lg(a)-1;
@@ -2742,30 +2790,10 @@ det_simple_gauss(GEN a, int inexact)
   a = RgM_shallowcopy(a);
   for (i=1; i<nbco; i++)
   {
-    p=gcoeff(a,i,i); k=i;
-    if (inexact)
-    {
-      long e, ex = gexpo(p);
-      GEN p1;
-
-      for (j=i+1; j<=nbco; j++)
-      {
-        e = gexpo(gcoeff(a,i,j));
-        if (e > ex) { ex=e; k=j; }
-      }
-      p1 = gcoeff(a,i,k);
-      if (gequal0(p1)) return gerepilecopy(av, p1);
-    }
-    else if (gequal0(p))
-    {
-      do k++; while(k<=nbco && gequal0(gcoeff(a,i,k)));
-      if (k>nbco) return gerepilecopy(av, p);
-    }
-    if (k != i)
-    {
-      swap(gel(a,i), gel(a,k)); s = -s;
-      p = gcoeff(a,i,i);
-    }
+    k = pivot(a, data, i, NULL);
+    if (k > nbco) return gerepilecopy(av, gcoeff(a,i,i));
+    if (k != i) { swap(gel(a,i), gel(a,k)); s = -s; }
+    p = gcoeff(a,i,i);
 
     x = gmul(x,p);
     for (k=i+1; k<=nbco; k++)
@@ -2787,18 +2815,21 @@ det_simple_gauss(GEN a, int inexact)
       }
     }
   }
-  if (s<0) x = gneg_i(x);
-  return gerepileupto(av, gmul(x,gcoeff(a,nbco,nbco)));
+  if (s < 0) x = gneg_i(x);
+  return gerepileupto(av, gmul(x, gcoeff(a,nbco,nbco)));
 }
 
 GEN
 det2(GEN a)
 {
+  GEN data;
+  pivot_fun pivot;
   long nbco = lg(a)-1;
   if (typ(a)!=t_MAT) pari_err(mattype1,"det2");
   if (!nbco) return gen_1;
   if (nbco != lg(a[1])-1) pari_err(mattype1,"det2");
-  return det_simple_gauss(a, use_maximal_pivot(a));
+  pivot = get_pivot_fun(a, &data);
+  return det_simple_gauss(a, data, pivot);
 }
 
 static GEN
@@ -2816,12 +2847,14 @@ det(GEN a)
 {
   pari_sp av, lim;
   long nbco = lg(a)-1,i,j,k,s;
-  GEN p,pprec;
+  GEN p, pprec, data;
+  pivot_fun pivot;
 
   if (typ(a)!=t_MAT) pari_err(mattype1,"det");
   if (!nbco) return gen_1;
   if (nbco != lg(a[1])-1) pari_err(mattype1,"det");
-  if (use_maximal_pivot(a)) return det_simple_gauss(a,1);
+  pivot = get_pivot_fun(a, &data);
+  if (pivot != gauss_get_pivot_NZ) return det_simple_gauss(a, data, pivot);
   if (DEBUGLEVEL > 7) (void)timer2();
 
   av = avma; lim = stack_lim(av,2);
