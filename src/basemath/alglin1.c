@@ -609,7 +609,7 @@ get_pivot_fun(GEN x, GEN *data)
         case t_REAL:
           res = t_REAL;
           break;
-        case t_COMPLEX : 
+        case t_COMPLEX:
           if (typ(gel(c,1)) == t_REAL || typ(gel(c,2)) == t_REAL) res = t_REAL;
           break;
         case t_INT: case t_INTMOD: case t_FRAC: case t_FFELT: case t_QUAD:
@@ -1658,7 +1658,7 @@ RgM_pivots(GEN x0, GEN data, long *rr, pivot_fun pivot)
   *rr = r; avma = (pari_sp)d; return d;
 }
 static GEN
-gauss_pivot(GEN x, long *rr) { 
+gauss_pivot(GEN x, long *rr) {
   GEN data;
   pivot_fun pivot = get_pivot_fun(x, &data);
   return RgM_pivots(x, data, rr, pivot); }
