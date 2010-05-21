@@ -1671,6 +1671,7 @@ gp_handle_exception(long numerr)
   return 0;
 }
 
+#ifdef SIGALRM
 static void
 gp_alarm_handler(int sig)
 {
@@ -1682,6 +1683,7 @@ gp_alarm_handler(int sig)
   else gp_alarm_fun();
   return;
 }
+#endif /* SIGALRM */
 
 /********************************************************************/
 /*                                                                  */
