@@ -32,7 +32,10 @@ if ($LDused -v 2>&1 | grep GNU > /dev/null); then GNULDused=yes; fi
 
 tmp=
 if test "$GNULDused" = "yes"; then
-  tmp=--export-dynamic
+  case "$osname" in
+    mingw) ;; # PE does not support --export-dynamic
+    *) tmp=--export-dynamic ;;
+  esac
 else
   case "$osname-$arch" in
     aix-*)  tmp=-brtl ;; # in case we link against a shared library
