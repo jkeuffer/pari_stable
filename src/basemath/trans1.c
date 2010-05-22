@@ -1174,7 +1174,7 @@ Qp_log(GEN x)
 static GEN Qp_exp_safe(GEN x);
 
 /*compute the p^e th root of x p-adic, assume x != 0 */
-GEN
+static GEN
 Qp_sqrtn_ram(GEN x, long e)
 {
   pari_sp ltop=avma;
@@ -1199,7 +1199,7 @@ Qp_sqrtn_ram(GEN x, long e)
 }
 
 /*compute the nth root of x p-adic p prime with n*/
-GEN
+static GEN
 Qp_sqrtn_unram(GEN x, GEN n, GEN *zetan)
 {
   pari_sp av;

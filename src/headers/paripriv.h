@@ -665,8 +665,6 @@ GEN     znstar_small(GEN zn);
 
 GEN     Qp_sqrt(GEN x);
 GEN     Qp_sqrtn(GEN x, GEN n, GEN *zetan);
-GEN     Qp_sqrtn_ram(GEN x, long e);
-GEN     Qp_sqrtn_unram(GEN x, GEN n, GEN *zetan);
 void    pari_init_floats(void);
 void    pari_close_floats(void);
 GEN     rootsof1complex(GEN n, long prec);
