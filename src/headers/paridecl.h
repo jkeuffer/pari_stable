@@ -2467,6 +2467,7 @@ ulong   upowuu(ulong p, ulong k);
 
 /* trans2.c */
 
+GEN     Qp_gamma(GEN x);
 GEN     bernfrac(long n);
 GEN     bernreal(long n, long prec);
 GEN     gach(GEN x, long prec);

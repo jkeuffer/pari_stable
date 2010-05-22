@@ -1268,7 +1268,7 @@ gadw(GEN x, long p)
 /*This is a O(p*e*log(pe)) algorithm, should be used when p small
  * If p==2 this is a O(pe) algorithm. */
 static GEN
-gammap_Dwork(GEN x, long p)
+Qp_gamma_Dwork(GEN x, long p)
 {
   pari_sp ltop = avma;
   long k = padic_to_Fl(x, p);
@@ -1286,10 +1286,10 @@ gammap_Dwork(GEN x, long p)
   return gerepileupto(ltop, p1);
 }
 
-/* Compute gammap using the definition. This is a O(x*M(log(pe))) algorithm.
+/* Compute Qp_gamma using the definition. This is a O(x*M(log(pe))) algorithm.
  * This should be used if x is very small. */
 static GEN
-gammap_Morita(long n, GEN p, long e)
+Qp_gamma_Morita(long n, GEN p, long e)
 {
   pari_sp ltop=avma;
   GEN p2 = gaddsg((n&1)?-1:1, zeropadic(p, e));
@@ -1307,19 +1307,19 @@ gammap_Morita(long n, GEN p, long e)
 
 /* x\in\N: Gamma(-x)=(-1)^(1+x+x\p)*Gamma(1+x) */
 static GEN
-gammap_neg_Morita(long n, GEN p, long e)
+Qp_gamma_neg_Morita(long n, GEN p, long e)
 {
-  GEN g = ginv(gammap_Morita(n+1, p, e));
+  GEN g = ginv(Qp_gamma_Morita(n+1, p, e));
   return ((n^sdivsi(n,p)) & 1)? g: gneg(g);
 }
 
 /* p-adic Gamma function for x a p-adic integer */
 /* If n < p*e : use Morita's definition.
  * Else : use Dwork's expansion.
- * If both n and p are : itos(p) will fail.
- * TODO: handle p=2 better (gammap_Dwork is slow for p=2). */
-static GEN
-gammap(GEN x)
+ * If both n and p are big : itos(p) will fail.
+ * TODO: handle p=2 better (Qp_gamma_Dwork is slow for p=2). */
+GEN
+Qp_gamma(GEN x)
 {
   GEN n, m, N, p = gel(x,2);
   long s, e = precp(x);
@@ -1330,8 +1330,8 @@ gammap(GEN x)
   N = cmpii(n,m)<=0?n:m;
   s = itos_or_0(N);
   if (s && cmpsi(s, muliu(p,e)) < 0) /* s < p*e */
-    return (N == n) ? gammap_Morita(s,p,e): gammap_neg_Morita(s,p,e);
-  return gammap_Dwork(x, itos(p));
+    return (N == n) ? Qp_gamma_Morita(s,p,e): Qp_gamma_neg_Morita(s,p,e);
+  return Qp_gamma_Dwork(x, itos(p));
 }
 
 GEN
@@ -1361,7 +1361,7 @@ ggamma(GEN x, long prec)
       }
       return gammahs(m-1, prec);
 
-    case t_PADIC: return gammap(x);
+    case t_PADIC: return Qp_gamma(x);
     case t_INTMOD: pari_err(typeer,"ggamma");
     default:
       av = avma; if (!(y = toser_i(x))) break;
