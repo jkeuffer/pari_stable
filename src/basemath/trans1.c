@@ -904,7 +904,7 @@ gpow(GEN x, GEN n, long prec)
 static GEN
 sqrt_2adic(GEN x, long pp)
 {
-  GEN z = mod16(x)==1? gen_1: utoipos(3);
+  GEN z = mod16(x)==(signe(x)>=0?1:15)?gen_1: utoipos(3);
   long zp;
   pari_sp av, lim;
 
@@ -939,7 +939,7 @@ Up_sqrt(GEN x, GEN p, long e)
   pari_sp av = avma;
   if (equaliu(p,2))
   {
-    long r = mod8(x);
+    long r = signe(x)>=0?mod8(x):8-mod8(x);
     if (e <= 3)
     {
       switch(e) {
