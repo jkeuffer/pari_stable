@@ -932,14 +932,37 @@ sqrt_2adic(GEN x, long pp)
   }
 }
 
-/* x unit defined modulo modx = p^pp, p != 2, pp > 0 */
+/* x unit defined modulo p^e, e > 0 */
 static GEN
-sqrt_padic(GEN x, GEN modx, long pp, GEN p)
+Up_sqrt(GEN x, GEN p, long e)
 {
-  GEN z = Fp_sqrt(x, p);
-  if (!z) pari_err(sqrter5);
-  if (pp <= 1) return z;
-  return Zp_sqrtlift(x, z, p, pp);
+  pari_sp av = avma;
+  if (equaliu(p,2))
+  {
+    long r = mod8(x);
+    if (e <= 3)
+    {
+      switch(e) {
+      case 1: break;
+      case 2: if ((r&3) == 1) break;
+      case 3: if (r == 1) break;
+              return NULL;
+      }
+      return gen_1;
+    }
+    else
+    {
+      if (r != 1) return NULL;
+      return gerepileuptoint(av, sqrt_2adic(x, e));
+    }
+  }
+  else
+  {
+    GEN z = Fp_sqrt(x, p);
+    if (!z) return NULL;
+    if (e <= 1) return z;
+    return gerepileuptoint(av, Zp_sqrtlift(x, z, p, e));
+  }
 }
 
 GEN
@@ -947,7 +970,6 @@ Qp_sqrt(GEN x)
 {
   long pp, e = valp(x);
   GEN z,y,mod, p = gel(x,2);
-  pari_sp av;
 
   if (gequal0(x)) return zeropadic(p, (e+1) >> 1);
   if (e & 1) pari_err(talker,"odd exponent in p-adic sqrt");
@@ -956,36 +978,15 @@ Qp_sqrt(GEN x)
   pp = precp(x);
   mod = gel(x,3);
   x   = gel(x,4); /* lift to t_INT */
-  e >>= 1; av = avma;
+  e >>= 1;
+  z = Up_sqrt(x, p, pp);
+  if (!z) pari_err(sqrter5);
   if (equaliu(p,2))
   {
-    long r = mod8(x);
-    if (pp <= 3)
-    {
-      switch(pp) {
-        case 1: break;
-        case 2: if ((r&3) == 1) break;
-        case 3: if (r == 1) break;
-        default: pari_err(sqrter5);
-      }
-      z = gen_1;
-      pp = 1;
-    }
-    else
-    {
-      if (r != 1) pari_err(sqrter5);
-      z = sqrt_2adic(x, pp);
-      z = gerepileuptoint(av, z);
-      pp--;
-    }
+    pp  = (pp <= 3) ? 1 : pp-1;
     mod = int2n(pp);
   }
-  else /* p != 2 */
-  {
-    z = sqrt_padic(x, mod, pp, p);
-    z = gerepileuptoint(av, z);
-    mod = icopy(mod);
-  }
+  else mod = icopy(mod);
   y[1] = evalprecp(pp) | evalvalp(e);
   gel(y,2) = icopy(p);
   gel(y,3) = mod;
