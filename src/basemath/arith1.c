@@ -575,7 +575,7 @@ gissquareall(GEN x, GEN *pt)
         if (odd(v)) { avma = av; return gen_0; }
         t = cvtop(b, gel(P,i), e - v);
         if (gissquare(t) != gen_1) { avma = av; return gen_0; }
-        t = gtrunc(padic_sqrt(t));
+        t = gtrunc(Qp_sqrt(t));
         if (v) t = mulii(t, powiu(p, v>>1));
         gel(L,i) = mkintmod(t, powiu(p, e));
       }
@@ -829,7 +829,7 @@ ispower(GEN x, GEN K, GEN *pt)
       return FF_ispower(x, K, pt);
 
     case t_PADIC:
-      z = padic_sqrtn(x, K, NULL);
+      z = Qp_sqrtn(x, K, NULL);
       if (!z) return 0;
       if (pt) *pt = z;
       return 1;

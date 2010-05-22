@@ -663,10 +663,10 @@ GEN     znstar_small(GEN zn);
 
 /* trans1.c */
 
-GEN     padic_sqrt(GEN x);
-GEN     padic_sqrtn(GEN x, GEN n, GEN *zetan);
-GEN     padic_sqrtn_ram(GEN x, long e);
-GEN     padic_sqrtn_unram(GEN x, GEN n, GEN *zetan);
+GEN     Qp_sqrt(GEN x);
+GEN     Qp_sqrtn(GEN x, GEN n, GEN *zetan);
+GEN     Qp_sqrtn_ram(GEN x, long e);
+GEN     Qp_sqrtn_unram(GEN x, GEN n, GEN *zetan);
 void    pari_init_floats(void);
 void    pari_close_floats(void);
 GEN     rootsof1complex(GEN n, long prec);

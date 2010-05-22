@@ -882,7 +882,7 @@ gpow(GEN x, GEN n, long prec)
       return y;
 
     case t_PADIC:
-      z = equaliu(d, 2)? padic_sqrt(x): padic_sqrtn(x, d, NULL);
+      z = equaliu(d, 2)? Qp_sqrt(x): Qp_sqrtn(x, d, NULL);
       if (!z) pari_err(talker, "gpow: nth-root does not exist");
       return gerepileupto(av, powgi(z, a));
 
@@ -926,7 +926,7 @@ sqrt_2adic(GEN x, long pp)
 
     if (low_stack(lim,stack_lim(av,2)))
     {
-      if (DEBUGMEM > 1) pari_warn(warnmem,"padic_sqrt");
+      if (DEBUGMEM > 1) pari_warn(warnmem,"Qp_sqrt");
       z = gerepileuptoint(av,z);
     }
   }
@@ -943,7 +943,7 @@ sqrt_padic(GEN x, GEN modx, long pp, GEN p)
 }
 
 GEN
-padic_sqrt(GEN x)
+Qp_sqrt(GEN x)
 {
   long pp, e = valp(x);
   GEN z,y,mod, p = gel(x,2);
@@ -1067,7 +1067,7 @@ gsqrt(GEN x, long prec)
       return y;
 
     case t_PADIC:
-      return padic_sqrt(x);
+      return Qp_sqrt(x);
 
     case t_FFELT: return FF_sqrt(x);
 
@@ -1175,7 +1175,7 @@ static GEN Qp_exp_safe(GEN x);
 
 /*compute the p^e th root of x p-adic, assume x != 0 */
 GEN
-padic_sqrtn_ram(GEN x, long e)
+Qp_sqrtn_ram(GEN x, long e)
 {
   pari_sp ltop=avma;
   GEN a, p = gel(x,2), n = powiu(p,e);
@@ -1200,7 +1200,7 @@ padic_sqrtn_ram(GEN x, long e)
 
 /*compute the nth root of x p-adic p prime with n*/
 GEN
-padic_sqrtn_unram(GEN x, GEN n, GEN *zetan)
+Qp_sqrtn_unram(GEN x, GEN n, GEN *zetan)
 {
   pari_sp av;
   GEN Z, a, r, p = gel(x,2);
@@ -1226,7 +1226,7 @@ padic_sqrtn_unram(GEN x, GEN n, GEN *zetan)
 }
 
 GEN
-padic_sqrtn(GEN x, GEN n, GEN *zetan)
+Qp_sqrtn(GEN x, GEN n, GEN *zetan)
 {
   pari_sp av = avma, tetpil;
   GEN q, p = gel(x,2);
@@ -1239,7 +1239,7 @@ padic_sqrtn(GEN x, GEN n, GEN *zetan)
   }
   /* treat the ramified part using logarithms */
   e = Z_pvalrem(n, p, &q);
-  if (e) { x = padic_sqrtn_ram(x,e); if (!x) return NULL; }
+  if (e) { x = Qp_sqrtn_ram(x,e); if (!x) return NULL; }
   if (is_pm1(q))
   { /* finished */
     if (signe(q) < 0) x = ginv(x);
@@ -1251,7 +1251,7 @@ padic_sqrtn(GEN x, GEN n, GEN *zetan)
   }
   tetpil = avma;
   /* use hensel lift for unramified case */
-  x = padic_sqrtn_unram(x, q, zetan);
+  x = Qp_sqrtn_unram(x, q, zetan);
   if (!x) return NULL;
   if (zetan)
   {
@@ -1304,7 +1304,7 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
     return y;
 
   case t_PADIC:
-    y = padic_sqrtn(x,n,zetan);
+    y = Qp_sqrtn(x,n,zetan);
     if (!y) {
       if (zetan) return gen_0;
       pari_err(talker,"nth-root does not exist in gsqrtn");
@@ -1766,7 +1766,7 @@ agm1(GEN x, long prec)
       {
         a = a1;
         a1 = gmul2n(gadd(a,b1),-1);
-        b1 = padic_sqrt(gmul(a,b1));
+        b1 = Qp_sqrt(gmul(a,b1));
         p1 = gsub(b1,a1); ep = valp(p1)-valp(b1);
         if (ep<=0) { b1 = gneg_i(b1); p1 = gsub(b1,a1); ep=valp(p1)-valp(b1); }
       }

@@ -237,13 +237,13 @@ do_padic_agm(GEN *ptx, GEN a1, GEN b1, GEN p)
   {
     GEN d;
     a = a1; b = b1;
-    b1 = gprec(padic_sqrt(gmul(a,b)),mi);
+    b1 = gprec(Qp_sqrt(gmul(a,b)),mi);
     bmod1 = modii(gel(b1,4),p);
     if (!equalii(bmod1,bmod)) b1 = gneg_i(b1);
     a1 = gprec(gmul2n(gadd(gadd(a,b),gmul2n(b1,1)),-2),mi);
     d = gsub(a1,b1);
     if (gequal0(d)) break;
-    p1 = padic_sqrt(gdiv(gadd(x,d),x));
+    p1 = Qp_sqrt(gdiv(gadd(x,d),x));
     if (! gequal1(modii(gel(p1,4),p))) p1 = gneg_i(p1);
     x = gmul(x, gsqr(gmul2n(gaddsg(1,p1),-1)));
   }
@@ -290,7 +290,7 @@ ellinit_padic(GEN x, GEN p, long prec)
   setvalp(e1, valp(e1)+alpha);
 
   e1 = gsub(e1, gdivgs(b2,12));
-  w = padic_sqrt(gmul2n(gadd(b4,gmul(e1,gadd(b2,gmulsg(6,e1)))),1));
+  w = Qp_sqrt(gmul2n(gadd(b4,gmul(e1,gadd(b2,gmulsg(6,e1)))),1));
 
   p1 = gaddgs(gdiv(gmulsg(3,e0),w),1);
   if (valp(p1) <= 0) w = gneg_i(w);
@@ -302,14 +302,14 @@ ellinit_padic(GEN x, GEN p, long prec)
 
   p1 = ginv(gmul2n(gmul(u2,x1),1));
   w = gaddsg(1,p1);
-  q = padic_sqrt(gmul(p1, gaddgs(p1,2))); /* sqrt(w^2 - 1) */
+  q = Qp_sqrt(gmul(p1, gaddgs(p1,2))); /* sqrt(w^2 - 1) */
   p1 = gadd(w,q);
   q = gequal0(p1)? gsub(w,q): p1;
   if (valp(q) < 0) q = ginv(q);
 
   gel(y,14) = mkvec(e1);
   gel(y,15) = u2;
-  gel(y,16) = ((valp(u2)&1) || kronecker(gel(u2,4),p) <= 0)? gen_0: padic_sqrt(u2);
+  gel(y,16) = ((valp(u2)&1) || kronecker(gel(u2,4),p) <= 0)? gen_0: Qp_sqrt(u2);
   gel(y,17) = q;
   gel(y,19) = gen_0; return y;
 }
@@ -1046,7 +1046,7 @@ zell(GEN e, GEN z, long prec)
     u2 = do_padic_agm(&x1,a,b,gel(D,2));
     if (!gequal0(gel(e,16)))
     {
-      t = padic_sqrt(gaddsg(1, gdiv(x1,a)));
+      t = Qp_sqrt(gaddsg(1, gdiv(x1,a)));
       t = gdiv(gaddsg(-1,t), gaddsg(1,t));
     }
     else t = gaddsg(2, ginv(gmul(u2,x1)));

@@ -1832,7 +1832,7 @@ qtop(GEN x, GEN p, long d)
   b = gel(P,3);
   av = avma; D = quad_disc(x);
   if (equaliu(p,2)) d += 2;
-  z = gmul2n(gsub(padic_sqrt(cvtop(D,p,d)), b), -1);
+  z = gmul2n(gsub(Qp_sqrt(cvtop(D,p,d)), b), -1);
   return gerepileupto(av, gadd(u, gmul(v, z)));
 }
 static GEN
@@ -1841,7 +1841,7 @@ ctop(GEN x, GEN p, long d)
   pari_sp av = avma;
   GEN z, u = gel(x,1), v = gel(x,2);
   if (isrationalzero(v)) return cvtop(u, p, d);
-  z = padic_sqrt(cvtop(gen_m1, p, d - ggval(v, p))); /* = I */
+  z = Qp_sqrt(cvtop(gen_m1, p, d - ggval(v, p))); /* = I */
   return gerepileupto(av, gadd(u, gmul(v, z)) );
 }
 
