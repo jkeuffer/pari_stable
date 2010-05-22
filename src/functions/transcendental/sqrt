@@ -17,3 +17,5 @@ Doc: principal branch of the square root of $x$,
  first $p$-adic digit (or its unique $p$-adic digit in the case of
  intmods) is in the interval $[0,p/2]$. When the argument is an
  intmod a non-prime (or a non-prime-adic), the result is undefined.
+Variant: For a \typ{PADIC} $x$, the function
+ \fun{GEN}{Qp_sqrt}{GEN x} is also available.

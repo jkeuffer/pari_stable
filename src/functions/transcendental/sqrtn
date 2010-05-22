@@ -43,3 +43,5 @@ Doc: principal branch of the $n$th root of $x$,
  }
  addhelp(sqrtnall,"sqrtnall(x,n):compute the vector of nth-roots of x");
  @eprog\noindent
+Variant: For a \typ{PADIC} $x$, the function
+ \fun{GEN}{Qp_sqrt}{GEN x, GEN n, GEN *z} is also available.

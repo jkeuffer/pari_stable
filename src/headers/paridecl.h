@@ -2424,6 +2424,8 @@ GEN     PiI2(long prec);
 GEN     PiI2n(long n, long prec);
 GEN     Qp_exp(GEN x);
 GEN     Qp_log(GEN x);
+GEN     Qp_sqrt(GEN x);
+GEN     Qp_sqrtn(GEN x, GEN n, GEN *zetan);
 GEN     agm(GEN x, GEN y, long prec);
 GEN     consteuler(long prec);
 GEN     constlog2(long prec);

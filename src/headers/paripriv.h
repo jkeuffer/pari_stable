@@ -663,8 +663,6 @@ GEN     znstar_small(GEN zn);
 
 /* trans1.c */
 
-GEN     Qp_sqrt(GEN x);
-GEN     Qp_sqrtn(GEN x, GEN n, GEN *zetan);
 void    pari_init_floats(void);
 void    pari_close_floats(void);
 GEN     rootsof1complex(GEN n, long prec);
