@@ -2784,6 +2784,10 @@ root of $\kbd{x}$ modulo \kbd{p} (smallest non-negative residue), where
 Return \kbd{NULL} if \kbd{x} is not an \kbd{n}-th power residue. Otherwise,
 if \kbd{zn} is non-\kbd{NULL} set it to a primitive \kbd{n}-th root of $1$.
 
+\fun{GEN}{Zn_sqrt}{GEN x, GEN n} returns one of the square roots of \kbd{x}
+modulo \kbd{n} (possibly not prime), where \kbd{x}, \kbd{n} are \typ{INT}s.
+Return \kbd{NULL} if no such square root exist.
+
 \fun{long}{kross}{long x, long y} returns the \idx{Kronecker symbol} $(x|y)$,
 i.e.$-1$, $0$ or $1$. If \kbd{y} is an odd prime, this is the \idx{Legendre
 symbol}. (Contrary to \kbd{krouu}, \kbd{kross} also supports $\kbd{y} = 0$)

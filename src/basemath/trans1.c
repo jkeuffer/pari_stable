@@ -993,6 +993,45 @@ Qp_sqrt(GEN x)
   gel(y,4) = z; return y;
 }
 
+GEN
+Zn_sqrt(GEN d, GEN fn)
+{
+  pari_sp ltop = avma, btop, st_lim;
+  GEN b = gen_0, m = gen_1;
+  long j, np;
+  if (typ(d) != t_INT)
+    pari_err(typeer, "Zn_sqrt");
+  if (typ(fn) == t_INT)
+    fn = Z_factor(absi(fn));
+  else if (!is_Z_factor(fn))
+    pari_err(typeer, "Zn_sqrt");
+  np = lg(gel(fn, 1))-1;
+  btop = avma; st_lim = stack_lim(btop, 1);
+  for (j = 1; j <= np; ++j)
+  {
+    GEN  bp, mp, pr, r;
+    GEN  p = gcoeff(fn, j, 1);
+    long e = itos(gcoeff(fn, j, 2));
+    long v = Z_pvalrem(d,p,&r);
+    if (v >= e) bp =gen_0;
+    else
+    {
+      if (odd(v)) pari_err(talker, "no roots");
+      v >>= 1;
+      bp = Up_sqrt(r, p, e-v);
+      if (!bp)   pari_err(talker, "no roots");
+      if (v) bp = mulii(bp, powiu(p, v));
+    }
+    mp = powiu(p, e);
+    pr = mulii(m, mp);
+    b = Z_chinese_coprime(b, bp, m, mp, pr);
+    m = pr;
+    if (low_stack(st_lim, stack_lim(btop, 1)))
+      gerepileall(btop, 2, &b, &m);
+  }
+  return gerepileupto(ltop, b);
+}
+
 static GEN
 sqrt_ser(GEN b, long prec)
 {
