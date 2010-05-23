@@ -90,8 +90,8 @@ SPARCv7(HWS210) ???  Linux-2.2.5     gcc           98488!      -  2.0.16(14)DE
 Intel/x86_64 in 64bit mode
 Core2Duo    3400MHz  Linux-2.6.20-16 gcc-4.1.2       134     136  2.3.2     RN
 AMD Opteron 2400MHz  Linux-2.6.12-1  gcc-4.0.1       198     204  2.2.11    PZ
-AMD Opteron 2200MHz  Linux-2.6.11-6  gcc-3.4.3       206     221  2.3.0     
-AMD Opteron 2000MHz  Linux-2.4.22    gcc-3.3.2       290     290  2.2.8     
+AMD Opteron 2200MHz  Linux-2.6.11-6  gcc-3.4.3       206     221  2.3.0
+AMD Opteron 2000MHz  Linux-2.4.22    gcc-3.3.2       290     290  2.2.8
 AMD Athlon 64 3000+  Linux-2.6.15    gcc-4.1.0       300     287  2.3.0     JB
 AMD Opteron 1333MHz  Linux-2.6.5     gcc-3.3         413     419  2.2.8     BA
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -100,7 +100,7 @@ AMD Opteron 1333MHz  Linux-2.6.5     gcc-3.3         536     539  2.2.8     BA
 AMD Athlon  XP2400+  Linux-2.4.21    gcc-3.2         428     398  2.2.5 (41)MH
 AMD Athlon  XP1800+  Linux-2.4.17    gcc-3.0.4       616     616  2.2.3 (30)PE
 AMD Athlon  MP1800+  Linux-2.4.9     gcc-2.96        696     688  2.2.3 (29)HC
-AMD Athlon  1250MHz  Linux-2.4.2     gcc-2.96        597     591  2.2.10a   HV  
+AMD Athlon  1250MHz  Linux-2.4.2     gcc-2.96        597     591  2.2.10a   HV
 AMD Athlon  1200MHz  Linux-2.4.7     gcc-2.96       1002     992  2.1.2     CL
 AMD Athlon  1100MHz  Linux-2.4.2-2   gcc            1078    1076  2.1.1     DP
 AMD Duron   1200MHz  Linux-2.4.19    gcc-3.2         789     800  2.2.4     QL
@@ -116,11 +116,11 @@ AMD K6       233Mhz  Linux-2.2.14    gcc            6968    7158  2.0.18    QL
 IBM/Cyrix    200MHz  Linux-2.0.35    gcc           13190   13729  2.0.15    AP
 
 PentiumIV   3000MHz  Linux-2.6.22-1  gcc-4.1.2       376     370  2.3.3     RM
-PentiumIV   3000MHz  Linux-2.6.11-1  gcc-3.4.3       291     296  2.2.11    PZ	
-PentiumM    1600MHz  Linux-2.6.8     gcc-3.3.4       461     460  2.2.8     JD  
+PentiumIV   3000MHz  Linux-2.6.11-1  gcc-3.4.3       291     296  2.2.11    PZ
+PentiumM    1600MHz  Linux-2.6.8     gcc-3.3.4       461     460  2.2.8     JD
 PentiumIV   2800MHz  Linux-2.6.11    gcc-3.4.1       402     398  2.3.0
-PentiumIV   2000MHz  Linux-2.4.20    gcc-3.3	     794     962  2.2.6 (42)ID
-PentiumIV   2000MHz  Linux-2.4.18    gcc-3.2	     849     835  2.1.5 (25)FU
+PentiumIV   2000MHz  Linux-2.4.20    gcc-3.3         794     962  2.2.6 (42)ID
+PentiumIV   2000MHz  Linux-2.4.18    gcc-3.2         849     835  2.1.5 (25)FU
 PentiumIV   1800MHz  WinXP + Cygwin  gcc-3.2        1384!      -  2.2.5 (38)DC
 PentiumIV   1695MHz  FreeBSD 4.6.2   gcc-2.95.3      904     918  2.2.5     MW
 PentiumIV   1600MHz  Linux-2.4.18-3  gcc-2.96        930     926  2.2.5
