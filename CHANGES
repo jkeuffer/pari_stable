@@ -143,7 +143,7 @@ IZ101- missing `const's in groupid.c cause massive copying to stack.
        RgX-only routines ]
 BA107- Fix detection for ppc64 running in 32bit mode.
   108- Fp_div used remii instead of modii: Mod(3,5)-1/3 -> Mod(0, 5) [#893]
-  109- trying to prevent accuracy problems in thue() cauѕed oo loop
+  109- trying to prevent accuracy problems in thue() caused oo loop
   110- wrong results in matsnf with t_POL entries [#901]
        minpoly(matrix(4,4,i,j,i/j)) -> x^3 - 4*x^2 + x
   111- thue(thueinit(x^3-100,1), 25) -> "Short continued fraction"
@@ -508,7 +508,7 @@ BA124- galoisfixedfield now accept subgroups.
   125- ellap(E, p) second argument now optional if E has t_INTMOD or t_PADIC
        coefficients.
   126- generalize the "generic pivot" strategy to all linear algebra (support
-       RgM_ѕolve and det() in addition to existing functions); implement
+       RgM_solve and det() in addition to existing functions); implement
        maximal pivot strategy for p-adics [#1054]
 BA127- padic_sqrt -> Qp_sqrt, padic_sqrtn -> Qp_sqrtn, gammap -> Qp_gamma
 
