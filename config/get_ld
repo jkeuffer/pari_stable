@@ -33,7 +33,7 @@ if ($LDused -v 2>&1 | grep GNU > /dev/null); then GNULDused=yes; fi
 tmp=
 if test "$GNULDused" = "yes"; then
   case "$osname" in
-    mingw) ;; # PE does not support --export-dynamic
+    cygwin|mingw) ;; # PE does not support --export-dynamic
     *) tmp=--export-dynamic ;;
   esac
 else
