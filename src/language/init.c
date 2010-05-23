@@ -922,8 +922,9 @@ pari_sigint(const char *s)
   pari_puts(s); pari_putc('.');
   term_color(c_NONE);
   pariOut = out;
+  flusherr();
   if (cb_pari_handle_exception &&
-      cb_pari_handle_exception(-1)) { flusherr(); return; }
+      cb_pari_handle_exception(-1)) return;
   err_recover(talker);
 }
 
