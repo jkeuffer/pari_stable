@@ -84,9 +84,7 @@ new_chunk(size_t x) /* x is a number of longs */
 {
   GEN z = ((GEN) avma) - x;
   if (x > (avma-bot) / sizeof(long)) pari_err(errpile);
-#if defined(_WIN32) || defined(__CYGWIN32__)
-  if (win32ctrlc) dowin32ctrlc();
-#endif
+  CHECK_CTRLC
   avma = (pari_sp)z;
 
 #ifdef MEMSTEP

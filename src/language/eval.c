@@ -718,6 +718,7 @@ closure_eval(GEN C)
     long operand=oper[pc];
     if (sp<0) pari_err(bugparier,"closure_eval, stack underflow");
     st_alloc(16);
+    CHECK_CTRLC
     switch(opcode)
     {
     case OCpushlong:

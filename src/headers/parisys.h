@@ -78,4 +78,7 @@ BEGINEXTERN
   extern int win32ctrlc;
   void dowin32ctrlc(void);
 ENDEXTERN
+#define CHECK_CTRLC if (win32ctrlc) dowin32ctrlc(); 
+#else
+#define CHECK_CTRLC
 #endif
