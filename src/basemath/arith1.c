@@ -3246,12 +3246,13 @@ GEN
 hclassno(GEN x)
 {
   ulong a, b, b2, d, h;
+  long s;
   int f;
 
   if (typ(x) != t_INT) pari_err(typeer,"hclassno");
-  a = signe(x);
-  if (a < 0) return gen_0;
-  if (!a) return gdivgs(gen_1, -12);
+  s = signe(x);
+  if (s < 0) return gen_0;
+  if (!s) return gdivgs(gen_1, -12);
 
   a = mod4(x); if (a == 1 || a == 2) return gen_0;
 
