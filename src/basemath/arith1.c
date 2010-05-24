@@ -1949,7 +1949,7 @@ _Fp_pow(void *E, GEN x, GEN n) { return Fp_pow(x,n,(GEN)E); }
 static GEN
 _Fp_rand(void *E) { return addis(randomi(subis((GEN)E,1)),1); }
 
-const static struct bb_group Fp_star={_Fp_mul,_Fp_pow,_Fp_rand,mod2BIL,
+static const struct bb_group Fp_star={_Fp_mul,_Fp_pow,_Fp_rand,mod2BIL,
                                       cmpii,gequal1};
 
 /*********************************************************************/

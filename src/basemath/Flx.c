@@ -1689,7 +1689,7 @@ _Flxq_hash(GEN x)
   return h;
 }
 
-const static struct bb_group Flxq_star={_Flxq_mul,_Flxq_pow,_Flxq_rand,_Flxq_hash,vecsmall_lexcmp,Flx_cmp1};
+static const struct bb_group Flxq_star={_Flxq_mul,_Flxq_pow,_Flxq_rand,_Flxq_hash,vecsmall_lexcmp,Flx_cmp1};
 
 GEN
 Flxq_order(GEN a, GEN ord, GEN T, ulong p)
