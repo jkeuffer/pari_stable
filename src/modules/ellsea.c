@@ -1093,7 +1093,7 @@ get_lgatkin(GEN compile_atkin, long k)
 }
 
 static GEN
-champion(GEN atkin, long k, ulong ell, GEN bound_champ)
+champion(GEN atkin, long k, GEN bound_champ)
 {
   const long two_k = 1L<<k;
   pari_sp ltop = avma, btop;
@@ -1434,7 +1434,7 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
     }
     get_extra_l = 1;
     bound_champ = truedivii(bound, gel(tr, 2));
-    best_champ = champion(compile_atkin, nb_atkin, ell, bound_champ);
+    best_champ = champion(compile_atkin, nb_atkin, bound_champ);
     if (DEBUGLEVEL>=2)
       fprintferr("Remaining %Ps possibilities.\n", gel(best_champ, 2));
     if (low_stack(st_lim, stack_lim(btop, 1)))
