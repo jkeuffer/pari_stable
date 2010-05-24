@@ -1934,7 +1934,7 @@ is_357_power(GEN x, GEN *pt, ulong *mask)
     if (*mask&4) fprintferr(" 7th");
     fprintferr(" power?\n\tmodulo: resid. (remaining possibilities)\n");
   }
-  residue = (lx == 3)? x[2]: umodiu(x, 211*209*61*203);
+  residue = (lx == 3)? (ulong)x[2]: umodiu(x, 211*209*61*203);
 
 #define check_res(N, shift) {\
   resbyte = residue%N; if ((ulong)resbyte > (N>>1)) resbyte = N - resbyte;\
@@ -1948,7 +1948,7 @@ is_357_power(GEN x, GEN *pt, ulong *mask)
   if (*mask & 3) check_res(209UL, 3);
   if (*mask & 3) check_res( 61UL, 6);
   if (*mask & 5) check_res(203UL, 9);
-  residue = (lx == 3)? x[2]: umodiu(x, 117*31*43*71);
+  residue = (lx == 3)? (ulong)x[2]: umodiu(x, 117*31*43*71);
   if (*mask & 1) check_res(117UL,12);
   if (*mask & 3) check_res( 31UL,15);
   if (*mask & 5) check_res( 43UL,18);
