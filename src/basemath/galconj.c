@@ -973,7 +973,7 @@ fixedfieldfactmod(GEN Sp, GEN p, GEN Tmod)
 }
 
 static GEN
-fixedfieldsurmer(GEN O, GEN mod, GEN l, GEN p, long v, GEN NS, GEN W)
+fixedfieldsurmer(GEN mod, GEN l, GEN p, long v, GEN NS, GEN W)
 {
   const long step=3;
   long i, j, n = lg(W)-1, m = 1L<<((n-1)<<1);
@@ -1032,7 +1032,7 @@ fixedfieldsympol(GEN O, GEN mod, GEN l, GEN p, long v)
       while (vec_isconst(L)) L = sympol_eval_newtonsum(e++, O, mod);
     W[i] = e-1; gel(NS,i) = L;
     if (sympol_is1to1_lg(NS,i+1))
-      sym = fixedfieldsurmer(O,mod,l,p,v,NS,vecsmall_shorten(W,i));
+      sym = fixedfieldsurmer(mod,l,p,v,NS,vecsmall_shorten(W,i));
   }
   if (!sym) pari_err(talker,"p too small in fixedfieldsympol");
   if (DEBUGLEVEL>=2) fprintferr("FixedField: Found: %Ps\n",gel(sym,1));
@@ -1280,7 +1280,7 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l)
 }
 
 static GEN
-a4galoisgen(GEN T, struct galois_test *td)
+a4galoisgen(struct galois_test *td)
 {
   const long n = 12;
   pari_sp ltop = avma, av, av2;
@@ -2020,7 +2020,7 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
     if (DEBUGLEVEL >= 4) fprintferr("GaloisConj:Testing A4 first\n");
     inittest(L, M, gb->bornesol, gb->ladicsol, &td);
     lbot = avma;
-    PG = a4galoisgen(T, &td);
+    PG = a4galoisgen(&td);
     freetest(&td);
     if (PG != gen_0) return gerepile(ltop, lbot, PG);
     avma = av;
