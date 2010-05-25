@@ -1938,7 +1938,7 @@ mybestlift_bound(GEN C, long d, GEN Npr)
 /* Returns the roots of the n_cyclo-th cyclotomic polynomial
  * if it splits, NULL otherwise */
 static GEN
-nfcyclo_root(GEN nf, long n_cyclo, prklift_t *P, GEN C0)
+nfcyclo_root(GEN nf, long n_cyclo, prklift_t *P)
 {
   pari_sp av = avma;
   GEN init_fa = NULL; /* factors mod pr */
@@ -2074,7 +2074,7 @@ rootsof1(GEN nf)
     { /* find p^k-th roots */
       long pk = upowuu(p,k);
       if (pk==2) continue; /* no need to test second roots ! */
-      z = nfcyclo_root(nf,pk,&P,C0);
+      z = nfcyclo_root(nf,pk,&P);
       if (DEBUGLEVEL>2) msgTIMER(&ti, "for factoring Phi_%ld^%ld", p,k);
       if (z) {
         if (DEBUGLEVEL>2) fprintferr("  %ld-th root of unity found.\n", pk);
