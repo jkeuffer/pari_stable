@@ -1296,7 +1296,7 @@ makeprimetoideal(GEN UV, GEN u,GEN mv, GEN x)
 { return ZC_hnfrem(makeprimetoideal_i(u, mv, x), UV); }
 
 static GEN
-makeprimetoidealvec(GEN nf, GEN UV, GEN u,GEN mv, GEN gen)
+makeprimetoidealvec(GEN UV, GEN u,GEN mv, GEN gen)
 {
   long i, ly;
   GEN y = cgetg_copy(gen, &ly);
@@ -1959,8 +1959,8 @@ join_bid(GEN nf, GEN bid1, GEN bid2)
       mu = subsi(1,mv);
     else
       mu = RgM_Rg_add(ZM_neg(mv), gen_1); /* mult by u = 1-v */
-    gen = shallowconcat(makeprimetoidealvec(nf,x,u,mv, gel(G1,3)),
-                        makeprimetoidealvec(nf,x,v,mu, gel(G2,3)));
+    gen = shallowconcat(makeprimetoidealvec(x,u,mv, gel(G1,3)),
+                        makeprimetoidealvec(x,v,mu, gel(G2,3)));
   }
   y = cgetg(6,t_VEC);
   gel(y,1) = mkvec2(x, gel(f1,2));
