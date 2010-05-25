@@ -302,7 +302,7 @@ tauoffamat(GEN x, tau_s *tau)
 }
 
 static GEN
-tauofideal(GEN nfz, GEN id, tau_s *tau)
+tauofideal(GEN id, tau_s *tau)
 {
   return ZM_hnfmodid(RgM_mul(tau->zk, id), gcoeff(id, 1,1));
 }
@@ -1169,7 +1169,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   Tc=cgetg(rc+1,t_MAT);
   for (j=1; j<=rc; j++)
   {
-    p1 = tauofideal(nfz, gel(gen,j), tau);
+    p1 = tauofideal(gel(gen,j), tau);
     p1 = isprincipalell(bnfz, p1, cycgen,u,gell,rc);
     Tc[j]  = p1[1];
     vecB[j]= p1[2];
