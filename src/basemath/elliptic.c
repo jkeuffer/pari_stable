@@ -4411,7 +4411,7 @@ ellL1_i(struct ellld *el, long r, long prec)
   el->bnd = cutoff_point(r, el->X, el->emX, el->epsbit, prec);
   el->rootbnd = itou(sqrtint(el->bnd)) + 1;
 
-  el->p  = primes_zv(2*el->rootbnd); lp = lg(el->p);
+  el->p  = primes_zv(uprimepi(el->rootbnd-1)); lp = lg(el->p);
   el->ap = ellld_ap(el);
   el->an = const_vecsmall(el->rootbnd, 0);
   el->an[1] = 1;

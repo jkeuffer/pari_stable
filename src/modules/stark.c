@@ -409,7 +409,7 @@ static GEN InitChar(GEN bnr, GEN listCR, long prec);
    complexity and precision required using quickpol. Fill data[5] with
    listCR */
 static long
-CplxModulus(GEN data, long *newprec, long prec)
+CplxModulus(GEN data, long *newprec)
 {
   long pr, ex, dprec = DEFAULTPREC;
   pari_sp av;
@@ -447,7 +447,7 @@ CplxModulus(GEN data, long *newprec, long prec)
    corresponding quadratic extension and m is of minimal norm. Return
    bnr(m), D, quotient Ck(m) / D and Clk(m) / C */
 static GEN
-FindModulus(GEN bnr, GEN dtQ, long *newprec, long prec)
+FindModulus(GEN bnr, GEN dtQ, long *newprec)
 {
   const long limnorm = 400;
   long n, i, narch, nbp, maxnorm, minnorm, N, nbidnn, s, c, j, nbcand;
@@ -552,7 +552,7 @@ FindModulus(GEN bnr, GEN dtQ, long *newprec, long prec)
             if (DEBUGLEVEL>1)
               fprintferr("\nTrying modulus = %Ps and subgroup = %Ps\n",
                          bnr_get_mod(bnrm), D);
-            cpl = CplxModulus(p2, &pr, prec);
+            cpl = CplxModulus(p2, &pr);
             if (oldcpl < 0 || cpl < oldcpl)
             {
               *newprec = pr;
@@ -2508,7 +2508,7 @@ bnrstark(GEN bnr, GEN subgrp, long prec)
 
   /* find a suitable extension N */
   dtQ = InitQuotient(subgrp);
-  data  = FindModulus(bnr, dtQ, &newprec, prec);
+  data  = FindModulus(bnr, dtQ, &newprec);
   if (!data)
   {
     GEN vec, H, cyc = gel(dtQ,2), U = gel(dtQ,3), M = RgM_inv(U);
@@ -2770,7 +2770,7 @@ quadhilbertreal(GEN D, long prec)
       pari_warn(warnprec, "quadhilbertreal", prec);
     } TRY {
       /* find the modulus defining N */
-      data = FindModulus(bnr, dtQ, &newprec, prec);
+      data = FindModulus(bnr, dtQ, &newprec);
       if (DEBUGLEVEL) msgtimer("FindModulus");
       if (!data)
       {
