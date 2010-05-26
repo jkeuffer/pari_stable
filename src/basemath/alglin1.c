@@ -2792,7 +2792,11 @@ det_simple_gauss(GEN a, GEN data, pivot_fun pivot)
   {
     k = pivot(a, data, i, NULL);
     if (k > nbco) return gerepilecopy(av, gcoeff(a,i,i));
-    if (k != i) { swap(gel(a,i), gel(a,k)); s = -s; }
+    if (k != i)
+    { /* exchange the lines s.t. k = i */
+      for (j=i; j<=nbco; j++) swap(gcoeff(a,i,j), gcoeff(a,k,j));
+      s = -s;
+    }
     p = gcoeff(a,i,i);
 
     x = gmul(x,p);
