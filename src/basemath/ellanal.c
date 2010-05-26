@@ -399,7 +399,6 @@ ellld_L1(void *E, GEN *psum, GEN n, GEN a, long j)
 }
 
 /* Basic data independent from r (E, N, X, eX, emX) already filled,
- * as well as ap: either NULL or a clone, which we destroy.
  * Returns a t_REAL */
 static GEN
 ellL1_i(struct ellld *el, struct bg_data *bg, long r, GEN ap, long prec)
@@ -439,7 +438,7 @@ ellL1(GEN E, long r, long prec)
   struct bg_data bg;
   long parity;
 
-  init_el(&el, E, &parity, prec); bg.ap=NULL;
+  init_el(&el, E, &parity, prec);
   if (parity != (r & 1)) return gen_0;
   return gerepileuptoleaf(av, ellL1_i(&el, &bg, r, NULL, prec));
 }
@@ -450,7 +449,7 @@ ellanalyticrank(GEN e, GEN eps, long prec)
   struct ellld el;
   struct bg_data bg;
   long rk;
-  pari_sp av = avma;
+  pari_sp av = avma, av2;
   GEN ap = NULL;
   pari_timer T;
 
@@ -462,19 +461,18 @@ ellanalyticrank(GEN e, GEN eps, long prec)
       if (typ(eps) != t_REAL) pari_err(typeer, "ellanalyticrank");
     }
   init_el(&el, e, &rk, prec); /* set rk to rank parity (0 or 1) */
-  bg.ap=NULL;
   if (DEBUGLEVEL) {
     fprintferr("ellanalyticrank: CURVE = %Ps\n", e);
     fprintferr("Rank is %s\n", rk == 0? "even": "odd");
     fprintferr("eps = %Ps\nconductor = %Ps\n", eps, el.N);
     TIMERstart(&T);
   }
+  av2 = avma;
   for(;; rk += 2)
   {
-    pari_sp av2 = avma;
-    GEN Lr1 = ellL1_i(&el, &bg, rk, ap, prec); if(ap) gunclone(ap);
+    GEN Lr1 = ellL1_i(&el, &bg, rk, ap, prec);
     if (DEBUGLEVEL) msgTIMER(&T, "L^(%ld)=%Ps", rk, Lr1);
     if (absr_cmp(Lr1, eps) > 0) return gerepilecopy(av, mkvec2(stoi(rk), Lr1));
-    ap = gclone(bg.ap); avma = av2;
+    ap = gerepilecopy(av2, bg.ap);
   }
 }
