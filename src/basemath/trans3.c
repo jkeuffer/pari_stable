@@ -689,9 +689,7 @@ incgam2(GEN s, GEN x, long prec)
   return gerepileupto(av, gmul(y, gaddsg(1,S)));
 }
 
-/* use exp(-x) * (x^s/s) * sum_{k >= 0} x^k / prod(i=1,k, s+i)
- * ( =  exp(-x) * x^s * sum_{k >= 0} x^k / k!(k+s) but the above is more
- * efficient ) */
+/* use exp(-x) * (x^s/s) * sum_{k >= 0} x^k / prod(i=1,k, s+i) */
 GEN
 incgamc(GEN s, GEN x, long prec)
 {
@@ -729,11 +727,12 @@ incgamc(GEN s, GEN x, long prec)
 GEN
 incgam0(GEN s, GEN x, GEN g, long prec)
 {
-  pari_sp av = avma;
+  pari_sp av;
   long es, e;
   GEN z;
 
-  if (gequal0(x)) { avma = av; return g? gcopy(g): ggamma(s,prec); }
+  if (gequal0(x)) return g? gcopy(g): ggamma(s,prec);
+  av = avma;
   es = gexpo(s); e = maxss(es, 0);
   if (gsigne(real_i(s)) <= 0 || gexpo(x) > e)
     z = incgam2(s,x,prec);
