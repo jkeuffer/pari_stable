@@ -1308,6 +1308,11 @@ GEN sd_timer(const char *v, long flag);
 GEN setdefault(const char *s, const char *v, long flag);
 long setrealprecision(long n, long *prec);
 
+/* ellanal.c */
+
+GEN     ellanalyticrank(GEN e, GEN eps, long prec);
+GEN     ellL1(GEN e, long r, long prec);
+
 /* elldata.c */
 
 GEN     ellconvertname(GEN s);
@@ -1328,8 +1333,8 @@ void    checkell_padic(GEN e);
 void    checksmallell(GEN e);
 void    checkellpt(GEN z);
 void    checkell5(GEN e);
+GEN     ell_to_small_red(GEN e, GEN *N);
 GEN     ellap(GEN e, GEN p);
-GEN     ellanalyticrank(GEN e, GEN eps, long prec);
 GEN     ellchangecurve(GEN e, GEN ch);
 GEN     elldivpol(GEN e, long n, long v);
 GEN     elleisnum(GEN om, long k, long flag, long prec);
@@ -1342,7 +1347,6 @@ GEN     ellinit0(GEN x,long flag,long prec);
 GEN     ellinit_padic(GEN x, GEN p, long prec);
 GEN     ellinit_real(GEN x, long prec);
 GEN     ellisoncurve(GEN e, GEN z);
-GEN     ellL1(GEN e, long r, long prec);
 GEN     elllseries(GEN e, GEN s, GEN A, long prec);
 GEN     elllocalred(GEN e, GEN p1);
 GEN     elllog(GEN e, GEN a, GEN g, GEN o);
@@ -1351,6 +1355,7 @@ GEN     ellorder(GEN e, GEN p, GEN o);
 GEN     ellordinate(GEN e, GEN x, long prec);
 GEN     ellrandom(GEN e);
 long    ellrootno(GEN e, GEN p);
+long    ellrootno_global(GEN e, GEN N);
 GEN     ellsigma(GEN om, GEN z, long flag, long prec);
 GEN     elltaniyama(GEN e, long prec);
 GEN     elltatepairing(GEN E, GEN t, GEN s, GEN m);
