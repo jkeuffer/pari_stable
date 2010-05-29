@@ -1596,8 +1596,7 @@ break_loop(int numerr)
   gp_context_save(&rec);
   term_color(c_ERR); pari_putc('\n');
   if (sigint)
-    print_errcontext("Break loop: type <Return> or Control-d to continue",
-                     NULL, NULL);
+    print_errcontext("Break loop: type <Return> to continue", NULL, NULL);
   else
     print_errcontext("Break loop: type <Return> three times, or Control-d, to go back to GP)", NULL, NULL);
   term_color(c_NONE);
@@ -1626,7 +1625,14 @@ break_loop(int numerr)
     }
     if (! gp_read_line(&F, prompt))
     {
-      if (popinfile()) { go_on = 0; break; }
+      if (pari_infile != stdin) 
+      { /* were reading a file from the break loop, and are done : close it */
+        if (popinfile()) { go_on = 0; break; /* should not happen */ }
+      }
+      else
+      { /* user typed <C-D> in break loop : exit the debuger */
+        go_on = 0; break;
+      }
       continue;
     }
     /* Empty input --> continue computation
@@ -1636,10 +1642,7 @@ break_loop(int numerr)
 #if defined(_WIN32) || defined(__CYGWIN32__)
     win32ctrlc = 0;
 #endif
-    if (check_meta(b->buf))
-    {
-      continue;
-    }
+    if (check_meta(b->buf)) continue;
     x = readseq(b->buf);
     if (x == gnil || is_silent(b->buf)) continue;
 
