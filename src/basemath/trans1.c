@@ -1016,11 +1016,10 @@ Zn_sqrt(GEN d, GEN fn)
     if (v >= e) bp =gen_0;
     else
     {
-      if (odd(v)) pari_err(talker, "no roots");
-      v >>= 1;
+      if (odd(v)) return NULL;
       bp = Up_sqrt(r, p, e-v);
-      if (!bp)   pari_err(talker, "no roots");
-      if (v) bp = mulii(bp, powiu(p, v));
+      if (!bp)    return NULL;
+      if (v) bp = mulii(bp, powiu(p, v>>1L));
     }
     mp = powiu(p, e);
     pr = mulii(m, mp);
