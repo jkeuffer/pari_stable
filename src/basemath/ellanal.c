@@ -40,11 +40,8 @@ static void
 gen_BG_add(void *E, bg_fun *fun, struct bg_data *bg, GEN *psum, GEN n, long i, GEN a, GEN lasta)
 {
   long j;
-
-  if (lgefint(n) == 3) {
-    ulong nn = n[2];
-    if (nn <= bg->rootbnd) bg->an[nn] = itos(a);
-  }
+  ulong nn = itou_or_0(n);
+  if (nn && nn <= bg->rootbnd) bg->an[nn] = itos(a);
 
   if (signe(a))
   {
@@ -354,13 +351,13 @@ init_Gr(struct ellld *el, long prec)
   else if (el->r == 1) el->gcache = mpveceint1(el->X, el->eX, el->rootbnd);
   else
   {
-    long m, j;
+    long m, j, l = el->rootbnd;
     GEN G;
     m = number_of_terms_Sx(mulri(el->X, el->bnd), el->epsbit);
     el->alpha = init_alpha(el->r, prec);
     el->A = init_A(el->r, m, prec);
-    G = cgetg(el->rootbnd+1, t_VEC);
-    for (j = 1; j <= el->rootbnd; j++) gel(G,j) = compute_Gr_Sx(el, NULL, j);
+    G = cgetg(l+1, t_VEC);
+    for (j = 1; j <= l; j++) gel(G,j) = compute_Gr_Sx(el, NULL, j);
     el->gcache = G;
   }
 }
