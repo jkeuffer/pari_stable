@@ -594,7 +594,7 @@ is_node_zero(long n)
 }
 
 static GEN
-listtogen(long n, long f)
+listtogen(long n, Ffunc f)
 {
   GEN z;
   long x,i,nb;
