@@ -1625,7 +1625,7 @@ break_loop(int numerr)
     }
     if (! gp_read_line(&F, prompt))
     {
-      if (pari_infile != stdin) 
+      if (pari_infile != stdin)
       { /* were reading a file from the break loop, and are done : close it */
         if (popinfile()) { go_on = 0; break; /* should not happen */ }
       }
