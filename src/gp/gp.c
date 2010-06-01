@@ -1600,10 +1600,7 @@ break_loop(int numerr)
   else
     print_errcontext("Break loop: type <Return> three times, or Control-d, to go back to GP)", NULL, NULL);
   term_color(c_NONE);
-  if (sigint)
-    pari_puts("[type <Return> in empty line to continue]\n");
-  else
-    killallfiles(0);
+  if (!sigint) killallfiles(0);
   if (s_env.n==2)
     prompt=BREAK_LOOP_PROMPT;
   else
