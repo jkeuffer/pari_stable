@@ -526,10 +526,6 @@ GEN     polgaloisnamesbig(long n, long k);
 /* gen1.c */
 
 int     ff_poltype(GEN *x, GEN *p, GEN *pol);
-int     is_Fp(GEN *x, GEN *p);
-int     is_FpC(GEN *x, GEN *p);
-int     is_FpM(GEN *x, GEN *p);
-int     is_FpX(GEN *x, GEN *p);
 GEN     gred_frac2(GEN x1, GEN x2);
 GEN     gred_rfrac2(GEN x1, GEN x2);
 GEN     gred_rfrac_simple(GEN n, GEN d);
@@ -616,8 +612,6 @@ GEN     FpM_Frobenius_pow(GEN M, long d, GEN T, GEN p);
 GEN     FpXYQQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p);
 GEN     FpX_compositum(GEN A, GEN B, GEN p);
 GEN     FpX_direct_compositum(GEN A, GEN B, GEN p);
-GEN     RgX_to_FpXQX(GEN x, GEN T, GEN p);
-GEN     Rg_to_FpXQ(GEN x, GEN T, GEN p);
 ulong   ZX_ZXY_ResBound(GEN A, GEN B, GEN dB);
 GEN     ffinit_Artin_Shreier(GEN ip, long l);
 GEN     ffinit_rand(GEN p, long n);

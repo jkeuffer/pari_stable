@@ -21,6 +21,103 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /***********************************************************************/
 #include "pari.h"
 #include "paripriv.h"
+
+/************************************************************************
+ **                                                                    **
+ **                      Ring membership                               **
+ **                                                                    **
+ ************************************************************************/
+
+int
+Rg_is_Fp(GEN x, GEN *pp)
+{
+  GEN mod;
+  switch(typ(x))
+  {
+  case t_INTMOD:
+    mod = gel(x,1);
+    if (!*pp) *pp = mod;
+    else if (mod != *pp && !equalii(mod, *pp))
+    {
+      if (DEBUGMEM) pari_warn(warner,"different moduli in Rg_is_Fp");
+      return 0;
+    }
+    return 1;
+  case t_INT:
+    return 1;
+  default: return 0;
+  }
+}
+
+int
+RgX_is_FpX(GEN x, GEN *pp)
+{
+  long i, lx = lg(x);
+  for (i=2; i<lx; i++)
+    if (!Rg_is_Fp(gel(x, i), pp))
+      return 0;
+  return 1;
+}
+
+int
+RgV_is_FpV(GEN x, GEN *pp)
+{
+  long i, lx = lg(x);
+  for (i=1; i<lx; i++)
+    if (!Rg_is_Fp(gel(x,i), pp)) return 0;
+  return 1;
+}
+
+int
+RgM_is_FpM(GEN x, GEN *pp)
+{
+  long i, lx = lg(x);
+  for (i=1; i<lx; i++)
+    if (!RgV_is_FpV(gel(x, i), pp)) return 0;
+  return 1;
+}
+
+int
+Rg_is_FpXQ(GEN x, GEN *pT, GEN *pp)
+{
+  GEN pol, mod;
+  switch(typ(x))
+  {
+  case t_INTMOD:
+    return Rg_is_Fp(x, pp);
+  case t_INT:
+    return 1;
+  case t_POL:
+    return RgX_is_FpX(x, pp);
+  case t_POLMOD:
+    mod = gel(x,1); pol = gel(x, 2);
+    if (!RgX_is_FpX(mod, pp)) return 0;
+    if (typ(pol)==t_POL)
+    {
+      if (!RgX_is_FpX(pol, pp)) return 0;
+    }
+    else if (!Rg_is_Fp(pol, pp)) return 0;
+    if (!*pT) *pT = mod;
+    else if (mod != *pT && !gequal(mod, *pT))
+    {
+      if (DEBUGMEM) pari_warn(warner,"different moduli in Rg_is_FpXQ");
+      return 0;
+    }
+    return 1;
+
+  default: return 0;
+  }
+}
+
+int
+RgX_is_FpXQX(GEN x, GEN *pT, GEN *pp)
+{
+  long i, lx = lg(x);
+  for (i = 2; i < lx; i++)
+    if (!Rg_is_FpXQ(gel(x,i), pT, pp)) return 0;
+  return 1;
+}
+
 /************************************************************************
  **                                                                    **
  **                      Ring conversion                               **
@@ -132,6 +229,15 @@ RgC_to_FpC(GEN x, GEN p)
   long i, l = lg(x);
   GEN z = cgetg(l, t_COL);
   for (i = 1; i < l; i++) gel(z,i) = Rg_to_Fp(gel(x,i), p);
+  return z;
+}
+
+GEN
+RgM_to_FpM(GEN x, GEN p)
+{
+  long i, l = lg(x);
+  GEN z = cgetg(l, t_MAT);
+  for (i = 1; i < l; i++) gel(z,i) = RgC_to_FpC(gel(x,i), p);
   return z;
 }
 

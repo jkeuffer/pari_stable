@@ -631,17 +631,18 @@ pow_polmod(GEN x, GEN n)
     a = powgi(a, n);
   else {
     pari_sp av = avma;
-    GEN p = NULL, X = a;
-    if (is_FpX(&T, &p) && is_FpX(&X, &p))
+    GEN p = NULL;
+    if (RgX_is_FpX(T, &p) && RgX_is_FpX(a, &p) && p)
     {
+      T = RgX_to_FpX(T, p); a = RgX_to_FpX(a, p);
       if (lgefint(p) == 3)
       {
         ulong pp = p[2];
-        a = Flxq_pow(ZX_to_Flx(X, pp), n, ZX_to_Flx(T, pp), pp);
+        a = Flxq_pow(ZX_to_Flx(a, pp), n, ZX_to_Flx(T, pp), pp);
         a = Flx_to_ZX(a);
       }
       else
-        a = FpXQ_pow(X, n, T, p);
+        a = FpXQ_pow(a, n, T, p);
       a = FpX_to_mod(a, p);
       a = gerepileupto(av, a);
     }

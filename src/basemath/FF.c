@@ -943,12 +943,13 @@ FFX_roots(GEN P, GEN x)
 GEN
 ffgen(GEN T, long v)
 {
-  GEN A, p, ff;
+  GEN A, p = NULL, ff;
   long d;
   if (typ(T) != t_POL) pari_err(typeer,"ffgen");
   d = degpol(T); p = NULL;
-  if (d < 1 || !is_FpX(&T, &p)) pari_err(typeer,"ffgen");
+  if (d < 1 || !RgX_is_FpX(T, &p) || !p) pari_err(typeer,"ffgen");
   ff = cgetg(5,t_FFELT);
+  T = RgX_to_FpX(T, p);
   if (v < 0) v = varn(T);
   if (lgefint(p)==3)
   {
@@ -972,7 +973,7 @@ ffgen(GEN T, long v)
   else
   {
     ff[1] = t_FF_FpXQ;
-    T = ZX_copy(T); setvarn(T,v);
+    setvarn(T,v);
     A = pol_x(v); if (d == 1) A = FpX_rem(A, T, p);
     p = icopy(p);
   }

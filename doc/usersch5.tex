@@ -2998,7 +2998,56 @@ understood over $\Z/p\Z$. An \kbd{FqM} is a matrix with \kbd{Fq} coefficients
 (with respect to given \kbd{T}, \kbd{p}), not necessarily reduced (i.e
 arbitrary \typ{INT}s and \kbd{ZX}s in the same variable as \kbd{T}).
 
-\subsubsec{Basic operations}
+\subsubsec{Conversions}
+
+\fun{int}{Rg_is_Fp}{GEN z, GEN *p}, checks if \kbd{z} can be mapped to
+$\Z/p\Z$: a \typ{INT} or a \typ{INTMOD} whose modulus is equal to \kbd{*p},
+(if \kbd{*p} not \kbd{NULL}), in that case return $1$, else $0$. If a modulus
+is found it is put in \kbd{*p}, else \kbd{*p} is left unchanged.
+
+\fun{int}{RgV_is_FpV}{GEN z, GEN *p}, \kbd{z} a \typ{VEC} (resp. \typ{COL}),
+checks if it can be mapped to a \kbd{FpV} (resp. \kbd{FpC}), by checking
+\kbd{Rg\_is\_Fp} coefficientwise.
+
+\fun{int}{RgM_is_FpM}{GEN z, GEN *p}, \kbd{z} a \typ{MAT},
+checks if it can be mapped to a \kbd{FpM}, by checking \kbd{RgV\_is\_FpV}
+columnwise.
+
+\fun{GEN}{Rg_to_Fp}{GEN z, GEN p}, \kbd{z} a scalar which can be mapped to
+$\Z/p\Z$: a \typ{INT}, a \typ{INTMOD} whose modulus is divisible by $p$,
+a \typ{FRAC} whose denominator is coprime to $p$, or a \typ{PADIC} with
+underlying prime $\ell$ satisfying $p = \ell^n$ for some $n$ (less than the
+accuracy of the input). Returns \kbd{lift(z * Mod(1,p))}, normalized.
+
+\fun{GEN}{padic_to_Fp}{GEN x, GEN p} special case of \tet{Rg_to_Fp},
+for a $x$ a \typ{PADIC}.
+
+\fun{GEN}{RgV_to_FpV}{GEN z, GEN p}, \kbd{z} a \typ{VEC} or \typ{COL},
+returns the \kbd{FpV} (as a \typ{VEC}) obtained by applying \kbd{Rg\_to\_Fp}
+coefficientwise.
+
+\fun{GEN}{RgC_to_FpC}{GEN z, GEN p}, \kbd{z} a \typ{VEC} or \typ{COL},
+returns the \kbd{FpC} (as a \typ{COL}) obtained by applying \kbd{Rg\_to\_Fp}
+coefficientwise.
+
+\fun{GEN}{RgM_to_FpM}{GEN z, GEN p}, \kbd{z} a \typ{MAT},
+returns the \kbd{FpM} obtained by applying \kbd{RgC\_to\_FpC}
+columnwise.
+
+The functions above are generally used as follow:
+\bprog
+GEN add(GEN x, GEN y)
+{
+  GEN p = NULL;
+  if (Rg_is_Fp(x, &p) && Rg_is_Fp(y, &p) && p)
+  {
+    x = Rg_to_Fp(x, p); y = Rg_to_Fp(y, p);
+    z = Fp_add(x, y, p);
+    return Fp_to_mod(z);
+  }
+  else return gadd(x, y);
+}
+@eprog
 
 \fun{GEN}{FpC_red}{GEN z, GEN p}, \kbd{z} a \kbd{ZC}. Returns \kbd{lift(Col(z) *
 Mod(1,p))}, hence a \typ{COL}.
@@ -3008,6 +3057,8 @@ Mod(1,p))}, hence a \typ{VEC}
 
 \fun{GEN}{FpM_red}{GEN z, GEN p}, \kbd{z} a \kbd{ZM}. Returns \kbd{lift(z *
 Mod(1,p))}, which is an \kbd{FpM}.
+
+\subsubsec{Basic operations}
 
 \fun{GEN}{FpC_center}{GEN z, GEN p, GEN pov2} returns a \typ{COL} whose
 entries are the \kbd{Fp\_center} of the \kbd{gel(z,i)}.
@@ -3246,28 +3297,15 @@ coefficients are \kbd{Fp} objects. Unless mentioned otherwise, all outputs
 in this section are \kbd{FpX}s. All operations are understood to take place
 in $(\Z/\kbd{p}\Z)[X]$.
 
-\subsubsec{Basic operations}. In what follows \kbd{p} is always a \typ{INT},
+\subsubsec{Conversions}. In what follows \kbd{p} is always a \typ{INT},
 not necessarily prime.
 
-\fun{GEN}{Rg_to_Fp}{GEN z, GEN p}, \kbd{z} a scalar which can be mapped to
-$\Z/p\Z$: a \typ{INT}, a \typ{INTMOD} whose modulus is divisible by $p$,
-a \typ{FRAC} whose denominator is coprime to $p$, or a \typ{PADIC} with
-underlying prime $\ell$ satisfying $p = \ell^n$ for some $n$ (less than the
-accuracy of the input). Returns \kbd{lift(z * Mod(1,p))}, normalized.
-
-\fun{GEN}{padic_to_Fp}{GEN x, GEN p} special case of \tet{Rg_to_Fp},
-for a $x$ a \typ{PADIC}.
+\fun{int}{RgX_is_FpX}{GEN z, GEN *p}, \kbd{z} a \typ{POL},
+checks if it can be mapped to a \kbd{FpX}, by checking \kbd{Rg\_is\_Fp}
+coefficientwise.
 
 \fun{GEN}{RgX_to_FpX}{GEN z, GEN p}, \kbd{z} a \typ{POL}, returns the
 \kbd{FpX} obtained by applying \kbd{Rg\_to\_Fp} coefficientwise.
-
-\fun{GEN}{RgV_to_FpV}{GEN z, GEN p}, \kbd{z} a \typ{VEC} or \typ{COL},
-returns the \kbd{FpV} (as a \typ{VEC}) obtained by applying \kbd{Rg\_to\_Fp}
-coefficientwise.
-
-\fun{GEN}{RgC_to_FpC}{GEN z, GEN p}, \kbd{z} a \typ{VEC} or \typ{COL},
-returns the \kbd{FpC} (as a \typ{COL}) obtained by applying \kbd{Rg\_to\_Fp}
-coefficientwise.
 
 \fun{GEN}{FpX_red}{GEN z, GEN p}, \kbd{z} a \kbd{ZX}, returns \kbd{lift(z *
 Mod(1,p))}, normalized.
@@ -3275,6 +3313,9 @@ Mod(1,p))}, normalized.
 \fun{GEN}{FpXV_red}{GEN z, GEN p}, \kbd{z} a \typ{VEC} of \kbd{ZX}. Applies
 \kbd{FpX\_red} componentwise and returns the result (and we obtain a vector
 of \kbd{FpX}s).
+
+\subsubsec{Basic operations}. In what follows \kbd{p} is always a \typ{INT},
+not necessarily prime.
 
 \noindent Now, except for \kbd{p}, the operands and outputs are all \kbd{FpX}
 objects. Results are undefined on other inputs.
@@ -3452,6 +3493,19 @@ behind on the stack (their output is still suitable for \kbd{gerepileupto}).
 Besides \kbd{T} and \kbd{p}, arguments are either \kbd{FpXQ} or \kbd{Fq}
 depending on the function name. (All \kbd{Fq} routines accept \kbd{FpXQ}s by
 definition, not the other way round.)
+
+\fun{GEN}{Rg_is_FpXQ}{GEN z, GEN *T, GEN *p}, checks if \kbd{z} is a \kbd{GEN}
+which can be mapped to $\F_p[X]/(T)$: anything for which \kbd{Rg\_is\_Fp} return
+$1$, a \typ{POL} for which \kbd{RgX\_to\_FpX} return $1$, a \typ{POLMOD}
+whose modulus is equal to \kbd{*T} if \kbd{*T} is not \kbd{NULL} (once mapped
+to a \kbd{FpX}).
+If an integer modulus is found it is put in \kbd{*p}, else \kbd{*p} is left
+unchanged. If a polynomial modulus is found it is put in \kbd{*T}, else
+\kbd{*T} is left unchanged.
+
+\fun{int}{RgX_is_FpXQX}{GEN z, GEN *T, GEN *p}, \kbd{z} a \typ{POL},
+checks if it can be mapped to a \kbd{FpXQX}, by checking \kbd{Rg\_is\_FpXQ}
+coefficientwise.
 
 \fun{GEN}{Rg_to_FpXQ}{GEN z, GEN T, GEN p}, \kbd{z} a \kbd{GEN} which can be
 mapped to $\F_p[X]/(T)$: anything \kbd{Rg\_to\_Fp} can be applied to,
@@ -4060,6 +4114,9 @@ Those functions are mostly needed for interface reasons: \typ{INTMOD}s should
 not be used in library mode since the modular kernel is more flexible and more
 efficient, but GP users do not have access to the modular kernel.
 We document them for completeness:
+
+\fun{GEN}{Fp_to_mod}{GEN z, GEN p}, \kbd{z} a \typ{INT}. Returns \kbd{z *
+Mod(1,p)}, normalized. Hence the returned value is a \typ{INTMOD}.
 
 \fun{GEN}{FpX_to_mod}{GEN z, GEN p}, \kbd{z} a \kbd{ZX}. Returns \kbd{z *
 Mod(1,p)}, normalized. Hence the returned value has \typ{INTMOD} coefficients.
