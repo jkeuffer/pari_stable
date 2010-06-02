@@ -1628,6 +1628,7 @@ break_loop(int numerr)
       }
       else
       { /* user typed <C-D> in break loop : exit the debuger */
+        (void)popinfile();
         go_on = 0; break;
       }
       continue;
