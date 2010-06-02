@@ -825,13 +825,13 @@ get_ro_perm(PERM S1, PERM S2, long d, resolv *R, buildroot *BR)
     moreprec(BR);
   }
   if (e > -10 || typ(roi) == t_COMPLEX) return NULL;
-  /* compute with 64 more bits */
-  BR->pr += DEFAULTPREC-2;
+  /* compute with 128 more bits */
+  BR->pr += MEDDEFAULTPREC-2;
   moreprec(BR);
   ro = get_ro(BR->N, gel(BR->r, d), S1,S2,R);
-  BR->pr -= DEFAULTPREC-2;
+  BR->pr -= MEDDEFAULTPREC-2;
   fixprec(BR);
-  /* ro much closer to roi ? */
+  /* ro closer to roi (32 more bits) ? */
   return (gexpo(gsub(ro, roi)) < e - 32) ? roi: NULL;
 }
 
