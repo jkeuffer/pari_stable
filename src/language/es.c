@@ -4309,15 +4309,13 @@ static void
 swap_slash(char *s)
 {
 #ifdef __EMX__
-    if (!unix_shell())
+  if (!unix_shell())
 #endif
-#if defined(__EMX__) || defined(WINCE) || defined(_WIN32)
-    {
-      char *t;
-      for (t=s; *t; t++)
-        if (*t == '/') *t = '\\';
-    }
-#endif
+  {
+    char *t;
+    for (t=s; *t; t++)
+      if (*t == '/') *t = '\\';
+  }
 }
 
 static char *
@@ -4337,7 +4335,9 @@ init_unique(const char *s)
   buf = (char*) pari_malloc(lpre + 1 + 8 + lsuf + 1);
   strcpy(buf, pre);
   if (buf[lpre-1] != '/') { (void)strcat(buf, "/"); lpre++; }
+#if defined(__EMX__) || defined(WINCE) || defined(_WIN32)
   swap_slash(buf);
+#endif
 
   sprintf(buf + lpre, "%.8s%s", s, suf);
   return buf;
