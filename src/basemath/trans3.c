@@ -1419,7 +1419,7 @@ pol_mod_xn(GEN P, long n)
 /* compute the values of the twisted partial
    zeta function Z_f(a, c, s) for a in va */
 GEN
-twistpartialzeta(GEN p, GEN q, long f, long c, GEN va, GEN cff)
+twistpartialzeta(GEN q, long f, long c, GEN va, GEN cff)
 {
   long j, k, lva = lg(va)-1, N = lg(cff)-1;
   pari_sp av, av2, lim;
@@ -1660,7 +1660,7 @@ zetap(GEN s)
   va = identity_perm(f - 1);
   if (DEBUGLEVEL > 1)
     fprintferr("zetap: computing values of twisted partial zeta functions\n");
-  val = twistpartialzeta(gp, q, f, c, va, cff);
+  val = twistpartialzeta(q, f, c, va, cff);
 
   /* sum over all a's the coefficients of the twisted
      partial zeta functions and integrate */
