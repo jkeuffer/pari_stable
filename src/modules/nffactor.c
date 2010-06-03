@@ -1920,18 +1920,16 @@ nf_pick_prime_for_units(GEN nf, prklift_t *P)
 /* *Heuristic* exponent k such that the fundamental domain of pr^k
  * should contain the ball of radius C */
 static double
-mybestlift_bound(GEN C, long d, GEN Npr)
+mybestlift_bound(GEN C)
 {
   C = gtofp(C,DEFAULTPREC);
-#if 0
+#if 0 /* d = nf degree, Npr = Norm(pr) */
   const double alpha = 0.99; /* LLL parameter */
   const double y = 1 / (alpha - 0.25); /* = 2 if alpha = 3/4 */
   double t;
   t = rtodbl(mplog(gmul2n(divru(C,d), 4))) * 0.5 + (d-1) * log(1.5 * sqrt(y));
   return ceil((t * d) / log(gtodouble(Npr))); /* proved upper bound */
-  return ceil(d * log( gtodouble(C)) / log(gtodouble(Npr)));
 #endif
-  /* TODO: make experiments ! */
   return ceil(log(gtodouble(C)) / 0.2) + 3;
 }
 
@@ -2061,8 +2059,7 @@ rootsof1(GEN nf)
   C0 = gmulsg(nfdegree, L2_bound(nf, gen_1));
   /* lift and reduce pr^k */
   if (DEBUGLEVEL>2) fprintferr("Lift pr^k; GSmin wanted: %Ps\n",C0);
-  bestlift_init((long)mybestlift_bound(C0, nfdegree, P.q),
-                nf, P.pr, C0, P.L);
+  bestlift_init((long)mybestlift_bound(C0), nf, P.pr, C0, P.L);
   if (DEBUGLEVEL>2) TIMERstart(&ti);
 
   /* Step 4 : actual computation of roots */
