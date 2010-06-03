@@ -859,7 +859,7 @@ QpX_remove_denom(GEN x, GEN p, GEN *pdx, long *pv)
 
 /* p^v * f o g mod (T,q). q = p^vq  */
 static GEN
-compmod(GEN p, GEN f, GEN g, GEN T, GEN q, long vq, long v)
+compmod(GEN p, GEN f, GEN g, GEN T, GEN q, long v)
 {
   GEN D = NULL, z, df, dg, qD;
   long vD = 0, vdf, vdg;
@@ -921,8 +921,7 @@ dbasis(GEN p, GEN f, long mf, GEN a, GEN U)
   for (i=1; i<n; i++)
   {
     if (i == dU)
-      ha = compmod(p, U, mkvec3(a,da,stoi(vda)), f, pdp,
-                   (mf>>1) + 1, (mf>>1) - 1);
+      ha = compmod(p, U, mkvec3(a,da,stoi(vda)), f, pdp, (mf>>1) - 1);
     else
     {
       ha = FpXQ_mul(ha, a, f, D);
@@ -1325,7 +1324,7 @@ getprime(decomp_t *S, GEN phi, GEN chip, GEN nup, long *Lp, long *Ep,
   q = powiu(S->p, s); qp = mulii(q, S->p);
   nup = FpXQ_pow(nup, utoipos(r), S->chi, qp);
   if (!phi) return RgX_Rg_div(nup, q); /* phi = X : no composition */
-  return compmod(S->p, nup, phi, S->chi, qp, s+1, -s);
+  return compmod(S->p, nup, phi, S->chi, qp, -s);
 }
 
 static void
@@ -1334,7 +1333,7 @@ kill_cache(decomp_t *S) { S->precns = NULL; }
 /* S->phi := T o T0 mod (p, f) */
 static void
 composemod(decomp_t *S, GEN T, GEN T0) {
-  S->phi = compmod(S->p, T, T0, S->f, S->p, 1, 0);
+  S->phi = compmod(S->p, T, T0, S->f, S->p, 0);
 }
 
 static int
@@ -1362,7 +1361,7 @@ update_phi(decomp_t *S, long *ptl, long flag)
     S->vpsc = maxss(S->vpsf, S->vpsc + 1);
     S->psc = (S->vpsc == S->vpsf)? S->psf: mulii(S->psc, S->p);
 
-    PHI = S->phi0? compmod(S->p, S->phi, S->phi0, S->f, S->psc, S->vpsc, 0)
+    PHI = S->phi0? compmod(S->p, S->phi, S->phi0, S->f, S->psc, 0)
                  : S->phi;
     PHI = gadd(PHI, ZX_Z_mul(X, mului(k, S->p)));
     S->chi = mycaract(S, S->f, PHI, S->psc, pdf);
@@ -1370,7 +1369,7 @@ update_phi(decomp_t *S, long *ptl, long flag)
   psc = mulii(sqri(prc), S->p);
   S->chi = FpX_red(S->chi, psc);
   if (!PHI) /* ok above for k = 1 */
-    PHI = S->phi0? compmod(S->p, S->phi, S->phi0, S->f, psc, 2*S->vpsc+1, 0)
+    PHI = S->phi0? compmod(S->p, S->phi, S->phi0, S->f, psc, 0)
                  : S->phi;
   S->phi = PHI;
 
@@ -2930,7 +2929,7 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
 }
 
 static void
-check_pol(GEN *px, long v)
+check_pol(GEN *px)
 {
   GEN x = *px;
   long i, lx = lg(x);
@@ -2963,7 +2962,7 @@ rnf_fix_pol(GEN T, GEN P, int lift)
         if (varn(c) != vT)
           pari_err(talker,"incorrect variable in rnf function");
         if (lg(c) >= lg(T)) c = RgX_rem(c,T);
-        check_pol(&c, vT);
+        check_pol(&c);
         if (!lift && typ(c) == t_POL) c = mkpolmod(c, T);
         break;
       case t_POLMOD:
