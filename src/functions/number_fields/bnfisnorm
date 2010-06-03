@@ -1,7 +1,7 @@
 Function: bnfisnorm
 Section: number_fields
 C-Name: bnfisnorm
-Prototype: GGD1,L,p
+Prototype: GGD1,L,
 Help: bnfisnorm(bnf,x,{flag=1}): Tries to tell whether x (in Q) is the norm
  of some fractional y (in bnf). Returns a vector [a,b] where x=Norm(a)*b.
  Looks for a solution which is a S-unit, with S a certain list of primes (in

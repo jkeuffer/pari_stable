@@ -1240,7 +1240,7 @@ GEN     subgrouplist0(GEN bnr, GEN indexbound, long all);
 
 /* buch4.c */
 
-GEN     bnfisnorm(GEN bnf,GEN x,long flag,long PREC);
+GEN     bnfisnorm(GEN bnf,GEN x,long flag);
 GEN     rnfisnorm(GEN S, GEN x, long flag);
 GEN     rnfisnorminit(GEN bnf, GEN relpol, int galois);
 GEN     bnfissunit(GEN bnf,GEN suni,GEN x);

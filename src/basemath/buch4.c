@@ -799,7 +799,7 @@ rnfisnorm(GEN T, GEN x, long flag)
 }
 
 GEN
-bnfisnorm(GEN bnf,GEN x,long flag,long PREC)
+bnfisnorm(GEN bnf, GEN x, long flag)
 {
   pari_sp av = avma;
   GEN T = rnfisnorminit(pol_x(MAXVARN), bnf, flag == 0? 1: 2);

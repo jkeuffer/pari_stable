@@ -246,6 +246,7 @@ This file lists the incompatible changes between Version 2.x and older versions
   - remove RgM_ishnf (use ZM_ishnf instead).
   - rename leftright_pow to gen_pow, leftright_pow_u to gen_powu.
   - remove unused 'prec' argument in rnfinitalg(). Rename rnfinitalg -> rnfinit
+  - remove unused 'prec' argument in bnfisnorm()
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
