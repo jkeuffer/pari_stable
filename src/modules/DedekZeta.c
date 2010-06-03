@@ -1,4 +1,4 @@
-/* $Id: base1.c 10459 2008-07-13 16:24:07Z kb $
+/* $Id$
 
 Copyright (C) 2000  The PARI group.
 
