@@ -58,7 +58,7 @@
 ? tab=sumnuminit(2);
 ? b=sumnum(n=1,2,1/(n^3+n+1),tab);
 ? a-b
--1.004064579 E-306 + 0.E-320*I
+-1.004064579 E-306 + 0.E-331*I
 ? sumnum(n=1,2,1/(n^3+n+1),tab,1)-a
 1.004064579 E-306
 ? c=sumnum(n=1,2,1/(n^2+1),tab,1);
@@ -84,4 +84,4 @@
 ? a-b
 -1.390671162 E-308
 ? print("Total time spent: ",gettime);
-Total time spent: 43858
+Total time spent: 66492
