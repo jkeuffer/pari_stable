@@ -880,7 +880,7 @@ gpreadbin(const char *s, int *vector)
 }
 
 static void
-escape(char *tch)
+escape(char *tch, int ismain)
 {
   const char *s;
   char c;
@@ -975,6 +975,7 @@ escape(char *tch)
     case 'q': gp_quit(0); break;
     case 'r':
       s = get_sep(s);
+      if (!ismain) { read0(s); break; }
       switchin(s);
       if (file_is_binary(pari_infile))
       {
@@ -1071,13 +1072,13 @@ chron(char *s)
 /* return 0: can't interpret *buf as a metacommand
  *        1: did interpret *buf as a metacommand or empty command */
 static int
-check_meta(char *buf)
+check_meta(char *buf, int ismain)
 {
   switch(*buf++)
   {
     case '?': aide(buf, h_REGULAR); break;
     case '#': return chron(buf);
-    case '\\': escape(buf); break;
+    case '\\': escape(buf, ismain); break;
     case '\0': break;
     default: return 0;
   }
@@ -1530,7 +1531,7 @@ gp_main_loop(long flag)
       if (ismain) continue;
       pop_buffer(); return z;
     }
-    if (check_meta(b->buf)) continue;
+    if (check_meta(b->buf, ismain)) continue;
 
     avma = av;
     if (ismain)
@@ -1640,7 +1641,7 @@ break_loop(int numerr)
 #if defined(_WIN32) || defined(__CYGWIN32__)
     win32ctrlc = 0;
 #endif
-    if (check_meta(b->buf)) continue;
+    if (check_meta(b->buf, 0)) continue;
     x = readseq(b->buf);
     if (x == gnil || is_silent(b->buf)) continue;
 
