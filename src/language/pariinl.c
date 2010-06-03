@@ -1,4 +1,4 @@
-/* $Id: mpinl.c 7873 2006-04-14 15:56:31Z kb $
+/* $Id$
 
 Copyright (C) 2000  The PARI group.
 
