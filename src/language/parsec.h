@@ -1,4 +1,5 @@
-/*
+/* $Id$
+
 Copyright (C) 2006-2008  The PARI group.
 
 This file is part of the PARI package.
@@ -24,6 +25,7 @@ static THREAD GEN pari_lasterror;
 
 static void pari_error(YYLTYPE *yylloc, char **lex, const char *s)
 {
+  (void) yylloc; (void) lex;
   if (pari_lasterror) cgiv(pari_lasterror);
   pari_lasterror=strtoGENstr(s);
 }
