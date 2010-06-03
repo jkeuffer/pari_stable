@@ -1,4 +1,4 @@
-/* $Id: polarit2.c 10436 2008-07-11 14:08:05Z kb $
+/* $Id$
 
 Copyright (C) 2000  The PARI group.
 
