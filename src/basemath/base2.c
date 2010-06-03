@@ -821,7 +821,7 @@ update_den(GEN p, GEN *e, GEN *d, long *vd, GEN *z)
 
 /* return denominator, a power of p */
 static GEN
-QpX_denom(GEN x, GEN p)
+QpX_denom(GEN x)
 {
   long i, l = lg(x);
   GEN maxd = gen_1;
@@ -833,13 +833,13 @@ QpX_denom(GEN x, GEN p)
   return maxd;
 }
 static GEN
-QpXV_denom(GEN x, GEN p)
+QpXV_denom(GEN x)
 {
   long l = lg(x), i;
   GEN maxd = gen_1;
   for (i = 1; i < l; i++)
   {
-    GEN d = QpX_denom(gel(x,i), p);
+    GEN d = QpX_denom(gel(x,i));
     if (cmpii(d, maxd) > 0) maxd = d;
   }
   return maxd;
@@ -848,7 +848,7 @@ QpXV_denom(GEN x, GEN p)
 static GEN
 QpX_remove_denom(GEN x, GEN p, GEN *pdx, long *pv)
 {
-  *pdx = QpX_denom(x, p);
+  *pdx = QpX_denom(x);
   if (*pdx == gen_1) { *pv = 0; *pdx = NULL; }
   else {
     x = Q_muli_to_int(x,*pdx);
@@ -1039,8 +1039,8 @@ Decomp(decomp_t *S, long flag)
     D = de;
     ib1 = get_partial_order_as_pols(p,f1); n1 = lg(ib1)-1;
     ib2 = get_partial_order_as_pols(p,f2); n2 = lg(ib2)-1; n = n1+n2;
-    d1 = QpXV_denom(ib1, p);
-    d2 = QpXV_denom(ib2, p); if (cmpii(d1, d2) < 0) d1 = d2;
+    d1 = QpXV_denom(ib1);
+    d2 = QpXV_denom(ib2); if (cmpii(d1, d2) < 0) d1 = d2;
     if (d1 != gen_1) {
       ib1 = Q_muli_to_int(ib1, d1);
       ib2 = Q_muli_to_int(ib2, d1);
