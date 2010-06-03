@@ -175,9 +175,6 @@ Misc:
 5  write an analog of the 'echo' default which would print code as it is
    _executed_, not as it is read
 
-5  remove limitation to 8 arguments for static functions (argvec[9])
-   [ how to do this ??? ]
-
 4  extend forprime(n=a,b,...) so that b can go over primelimit [cut [a,b]
    in large intervals, sieve out multiple of small primes there, then use
    isprime() on the rest]
