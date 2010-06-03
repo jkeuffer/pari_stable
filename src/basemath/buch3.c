@@ -1878,7 +1878,7 @@ typedef struct _disc_data {
 } disc_data;
 
 static GEN
-get_discray(disc_data *D, GEN V, GEN x, GEN z, long N)
+get_discray(disc_data *D, GEN V, GEN z, long N)
 {
   GEN idealrel = D->idealrelinit;
   GEN mod = gel(z,3), Fa = gel(z,1);
@@ -1935,7 +1935,7 @@ discrayabslist(GEN bnf, GEN L)
     gel(D,i) = d = cgetg(lz,t_VEC);
     for (j=1; j<lz; j++) {
       gel(d,j) = get_discdata(gel(z,j), h);
-      gel(v,j) = get_discray(&ID, D, gel(z,j), gel(d,j), i);
+      gel(v,j) = get_discray(&ID, D, gel(d,j), i);
     }
   }
   return gerepilecopy(av, V);

@@ -280,7 +280,7 @@ subFBgen(FB_t *F, GEN nf, double PROD, long minsFB)
   avma = av; return 1;
 }
 static int
-subFB_change(FB_t *F, GEN nf)
+subFB_change(FB_t *F)
 {
   long i, iyes, minsFB, lv = F->KC + 1, l = lg(F->subFB)-1;
   pari_sp av = avma;
@@ -1342,7 +1342,7 @@ init_red_mod_units(GEN bnf, long prec)
 
 /* z computed above. Return unit exponents that would reduce col (arch) */
 GEN
-red_mod_units(GEN col, GEN z, long prec)
+red_mod_units(GEN col, GEN z)
 {
   long i,RU;
   GEN x,mat,N2;
@@ -1419,7 +1419,7 @@ isprincipalarch(GEN bnf, GEN col, GEN kNx, GEN e, GEN dx, long *pe)
   if (RU > 1)
   { /* reduce mod units */
     GEN u, z = init_red_mod_units(bnf,prec);
-    u = red_mod_units(col,z,prec);
+    u = red_mod_units(col,z);
     if (!u && z) return NULL;
     if (u) col = RgC_add(col, RgM_RgC_mul(logfu, u));
   }
@@ -3263,7 +3263,7 @@ MORE:
       F.sfb_chg = sfb_INCREASE;
     }
     if (F.sfb_chg) {
-      if (!subFB_change(&F, nf)) goto START;
+      if (!subFB_change(&F)) goto START;
       nreldep = 0;
     }
     if (F.newpow) powFBgen(&cache, &F, nf);
@@ -3349,7 +3349,7 @@ PRECPB:
   {
     if (F.newpow) powFBgen(NULL, &F, nf);
     if (F.sfb_chg) {
-      if (!subFB_change(&F, nf)) goto START;
+      if (!subFB_change(&F)) goto START;
       if (F.newpow) powFBgen(NULL, &F, nf);
     }
     if (!be_honest(&F, nf, fact)) goto START;
