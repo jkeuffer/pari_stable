@@ -1987,27 +1987,28 @@ addmulimp(GEN x, GEN y, GEN z)
 }
 /* yk + vk * (xk + zk)^2 < borne1, approximately */
 static int
-check_bound(GEN borne1, long epsbit, GEN xk, GEN yk, GEN zk, GEN vk)
+check_bound(GEN borne1, GEN xk, GEN yk, GEN zk, GEN vk)
 {
   pari_sp av = avma;
   long i;
   GEN t = mpadd(xk, zk);
-  if (isintzero(t))
-    i = mpcmp(yk, borne1);
-  else
-  {
-    t = mpmul(vk, mpsqr(t));
-    i = mpcmp(mpsub(mpadd(t,yk), borne1), gmul2n(t,-epsbit));
-  }
+  if (!isintzero(t)) yk = mpadd(yk, mpmul(vk, mpsqr(t)));
+  i = mpcmp(yk, borne1);
   avma = av; return (i <= 0);
 }
 
 static GEN
-add_fudge(GEN x, long epsbit)
-{ return mpadd(x, real2n(mpexpo(x) - epsbit, 3)); }
+add_fudge(GEN x) {
+  if (typ(x) == t_INT) return addir(x, real2n(-32,3));
+  if (!signe(x)) return x;
+  return addrr(x, real2n(expo(x) - (bit_accuracy(lg(x)) >> 1), 3));
+}
 static GEN
-sub_fudge(GEN x, long epsbit)
-{ return mpsub(x, real2n(mpexpo(x) - epsbit, 3)); }
+sub_fudge(GEN x) {
+  if (typ(x) == t_INT) return subir(x, real2n(-32,3));
+  if (!signe(x)) return x;
+  return subrr(x, real2n(expo(x) - (bit_accuracy(lg(x)) >> 1), 3));
+}
 /* q is the Gauss reduction of the quadratic form */
 /* general program for positive definit quadratic forms (real coeffs).
  * Enumerate vectors whose norm is less than BORNE, minimal vectors
@@ -2018,7 +2019,6 @@ static GEN
 smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
 {
   long N = lg(q), n = N-1, i, j, k, s, stockmax, checkcnt = 1;
-  const long epsbit = bit_accuracy( gprecision(q) ) >> 1;
   pari_sp av, av1, lim;
   GEN inc, S, x, y, z, v, p1, alpha, norms;
   GEN norme1, normax1, borne1, borne2;
@@ -2049,9 +2049,9 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
     borne2 = mulrr(norme1,alpha);
   } else {
     norme1 = gel(v,1);
-    borne2 = sub_fudge(norme1,epsbit);
+    borne2 = sub_fudge(norme1);
   }
-  borne1 = add_fudge(norme1,epsbit);
+  borne1 = add_fudge(norme1);
   if (DEBUGLEVEL>2)
     fprintferr("smallvectors looking for norm < %P.4G\n",borne1);
   s = 0; k = n;
@@ -2088,11 +2088,9 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
       {
         if (!fl)
         {
-          if (check_bound(borne1, epsbit, gel(x,k),gel(y,k),gel(z,k),gel(v,k)))
-            break;
+          if (check_bound(borne1, gel(x,k),gel(y,k),gel(z,k),gel(v,k))) break;
           step(x,y,inc,k);
-          if (check_bound(borne1, epsbit, gel(x,k),gel(y,k),gel(z,k),gel(v,k)))
-            break;
+          if (check_bound(borne1, gel(x,k),gel(y,k),gel(z,k),gel(v,k))) break;
         }
         fl = 0; inc[k] = 1;
         if (++k > n) goto END;
@@ -2123,7 +2121,7 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
       {
         if (!check(data,x)) { checkcnt++ ; continue; /* main */}
         if (DEBUGLEVEL>4) fprintferr("New bound: %Ps", norme1);
-        borne1 = add_fudge(norme1, epsbit);
+        borne1 = add_fudge(norme1);
         borne2 = mulrr(borne1, alpha);
         s = 0; checkcnt = 0;
       }
@@ -2134,8 +2132,8 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
       {
         if (mpcmp(norme1, borne2) < 0)
         {
-          borne1 = add_fudge(norme1, epsbit);
-          borne2 = sub_fudge(norme1, epsbit);
+          borne1 = add_fudge(norme1);
+          borne2 = sub_fudge(norme1);
           s = 0;
         }
       }
@@ -2162,7 +2160,7 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
           long k = per[i];
           if (check(data,gel(S,k))) {
             norme1 = gel(norms,k);
-            borne1 = add_fudge(norme1,epsbit);
+            borne1 = add_fudge(norme1);
             break;
           }
         }
@@ -2174,7 +2172,7 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
         avma = av2;
         if (s)
         {
-          borne1 = add_fudge(norme1, epsbit);
+          borne1 = add_fudge(norme1);
           borne2 = mulrr(borne1, alpha);
           checkcnt = 0;
         }
@@ -2216,7 +2214,7 @@ END:
       if (j && mpcmp(norme1, borne1) > 0) break;
       if ((p = check(data,gel(S,t))))
       {
-        if (!j) borne1 = add_fudge(norme1,epsbit);
+        if (!j) borne1 = add_fudge(norme1);
         j++; gel(pols,j) = p; alph[j]=S[t];
       }
     }
