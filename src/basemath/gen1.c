@@ -2654,11 +2654,16 @@ gdiv(GEN x, GEN y)
       av = avma; y = RgM_inv(y);
       if (!y) pari_err(matinv1);
       return gerepileupto(av, gmul(x, y));
+    case t_LIST: case t_STR: case t_VECSMALL: case t_CLOSURE:
+      pari_err(operf,"/",x,y);
   }
-  if (is_matvec_t(tx)) {
-    z = cgetg_copy(x, &lx);
-    for (i=1; i<lx; i++) gel(z,i) = gdiv(gel(x,i),y);
-    return z;
+  switch(tx) {
+    case t_VEC: case t_COL: case t_MAT:
+      z = cgetg_copy(x, &lx);
+      for (i=1; i<lx; i++) gel(z,i) = gdiv(gel(x,i),y);
+      return z;
+    case t_LIST: case t_STR: case t_VECSMALL: case t_CLOSURE:
+      pari_err(operf,"/",x,y);
   }
 
   vy = gvar(y);
