@@ -52,12 +52,12 @@ dbg gp.dbg::
 	@dir=\`config/objdir\`.dbg; echo "Making gp in \$\$dir";\\
 	 if test ! -d \$\$dir; then echo "Please run Configure -g first!"; exit 1; fi;\\
 	cd \$\$dir && \$(MAKE) gp
-	
+
 prf gp.prf::
 	@dir=\`config/objdir\`.prf; echo "Making gp in \$\$dir";\\
 	 if test ! -d \$\$dir; then echo "Please run Configure -pg first!"; exit 1; fi;\\
 	cd \$\$dir && \$(MAKE) gp
-	
+
 doc docps docpdf gpman cleandoc::
 	cd doc && \$(MAKE) \$@
 

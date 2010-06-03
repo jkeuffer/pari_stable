@@ -11,4 +11,8 @@ if grep '	' $CFILES $OFILES; then
   echo "BUG: TAB found."
   err=1;
 fi
+if grep '	$' $SCRIPTS; then
+  echo "BUG: TAB found in scripts."
+  err=1;
+fi
 exit $err
