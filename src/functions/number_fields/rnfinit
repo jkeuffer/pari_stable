@@ -1,7 +1,7 @@
 Function: rnfinit
 Section: number_fields
-C-Name: rnfinitalg
-Prototype: GGp
+C-Name: rnfinit
+Prototype: GG
 Help: rnfinit(nf,pol): pol being a non constant irreducible polynomial
  defined over the number field nf, initializes a vector of data necessary for
  working in relative number fields (rnf functions). See manual for technical

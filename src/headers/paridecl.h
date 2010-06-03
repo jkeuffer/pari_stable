@@ -1064,7 +1064,7 @@ GEN     rnfidealnormrel(GEN rnf, GEN x);
 GEN     rnfidealreltoabs(GEN rnf, GEN x);
 GEN     rnfidealtwoelement(GEN rnf,GEN x);
 GEN     rnfidealup(GEN rnf, GEN x);
-GEN     rnfinitalg(GEN nf,GEN pol,long prec);
+GEN     rnfinit(GEN nf,GEN pol);
 
 /* bb_group.c */
 

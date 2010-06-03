@@ -512,6 +512,7 @@ BA124- galoisfixedfield now accept subgroups.
        RgM_solve and det() in addition to existing functions); implement
        maximal pivot strategy for p-adics [#1054]
 BA127- padic_sqrt -> Qp_sqrt, padic_sqrtn -> Qp_sqrtn, gammap -> Qp_gamma
+  128- rename rnfinitalg -> rnfinit
 
   Added
     1- many new benches (make test-all)

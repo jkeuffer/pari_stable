@@ -156,7 +156,7 @@ check_and_build_norms(GEN rnf) {
 }
 
 GEN
-rnfinitalg(GEN nf, GEN pol, long prec)
+rnfinit(GEN nf, GEN pol)
 {
   pari_sp av = avma;
   GEN rnf, bas, D,d,f, B;
