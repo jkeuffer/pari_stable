@@ -230,7 +230,7 @@ bad_subFB(FB_t *F, long t)
  * Fill F->perm (if != NULL): primes ideals sorted by increasing norm (except
  * the ones in subFB come first [dense rows for hnfspec]) */
 static int
-subFBgen(FB_t *F, GEN nf, double PROD, long minsFB)
+subFBgen(FB_t *F, double PROD, long minsFB)
 {
   GEN y, perm, yes, no;
   long i, j, k, iyes, ino, lv = F->KC + 1;
@@ -3240,7 +3240,7 @@ START:
   fact = (FACT*)stackmalloc((F.KC+1)*sizeof(FACT));
   if (!Res) goto START;
   GRHcheck = NULL;
-  if (!subFBgen(&F, nf, minss(lim,LIMC2) + 0.5, minsFB)) goto START;
+  if (!subFBgen(&F, minss(lim,LIMC2) + 0.5, minsFB)) goto START;
   PERM = leafcopy(F.perm); /* to be restored in case of precision increase */
   av2 = avma;
   init_rel(&cache, &F, RELSUP + RU-1); /* trivial relations */
