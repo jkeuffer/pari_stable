@@ -1,4 +1,4 @@
-/* $Id: FpV.c 9633 2008-02-12 10:23:12Z kb $
+/* $Id$
 
 Copyright (C) 2000  The PARI group.
 

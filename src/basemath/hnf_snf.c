@@ -1,4 +1,4 @@
-/* $Id: alglin2.c 10570 2008-07-23 23:08:49Z kb $
+/* $Id$
 
 Copyright (C) 2000  The PARI group.
 

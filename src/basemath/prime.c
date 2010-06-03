@@ -1,4 +1,4 @@
-/* $Id: ifactor1.c 10528 2008-07-21 21:42:09Z kb $
+/* $Id$
 
 Copyright (C) 2000  The PARI group.
 
