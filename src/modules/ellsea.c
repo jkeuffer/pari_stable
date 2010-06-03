@@ -1,4 +1,4 @@
-/* $Id: ellsea.c 9561 2008-01-30 14:30:52Z kb $
+/* $Id$
 
 Copyright (C) 2008  The PARI group.
 
