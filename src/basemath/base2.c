@@ -2713,9 +2713,9 @@ rnfdedekind_i(GEN nf, GEN P, GEN pr, long vdisc, long only_maximal)
   return mkvec3(vt < 2? gen_1: gen_0, base, stoi(vt));
 }
 
-/* [L:K] = n, [K:Q] = m */
+/* [L:K] = n */
 static GEN
-triv_order(long n, long m)
+triv_order(long n)
 {
   GEN z = cgetg(3, t_VEC);
   gel(z,1) = matid(n);
@@ -2775,7 +2775,7 @@ rnfdedekind(GEN nf, GEN P, GEN pr, long flag)
     d = degpol(P);
     z = cgetg(4, t_VEC);
     gel(z,1) = gen_1;
-    gel(z,2) = triv_order(d, nf_get_degree(nf));
+    gel(z,2) = triv_order(d);
     gel(z,3) = stoi(v);
   }
   return z;
@@ -3025,7 +3025,7 @@ rnfallbase(GEN nf, GEN *ppol, GEN *pD, GEN *pd, GEN *pf)
     long e = itos(gel(E,i));
     if (e > 1) z = rnfjoinmodules(nf, z, rnfordmax(nf, pol, gel(P,i), e));
   }
-  if (!z) z = triv_order(n, N);
+  if (!z) z = triv_order(n);
   A = gel(z,1); d = get_d(nf, pol, A);
   I = gel(z,2);
 
