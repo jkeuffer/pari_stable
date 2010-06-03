@@ -555,6 +555,7 @@ skipstring(char **lex)
 int
 pari_lex(union token_value *yylval, struct node_loc *yylloc, char **lex)
 {
+  (void) yylval;
   yylloc->start=*lex;
   if (!**lex)
   {

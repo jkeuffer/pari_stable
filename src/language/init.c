@@ -668,7 +668,7 @@ pari_exit(void)
 }
 
 static void
-dflt_err_recover(long errnum) { pari_exit(); }
+dflt_err_recover(long errnum) { (void) errnum; pari_exit(); }
 
 /* initialize PARI data. Initialize [new|old]fun to NULL for default set. */
 void
