@@ -861,9 +861,9 @@ eltmul(void *nf, GEN x, GEN y) { return nfmul((GEN) nf, x, y); }
 static GEN
 eltpow(void *nf, GEN x, GEN n) { return nfpow((GEN) nf, x, n); }
 static GEN
-mul(void *a, GEN x, GEN y) { return gmul(x,y);}
+mul(void *a, GEN x, GEN y) { (void)a; return gmul(x,y);}
 static GEN
-powi(void *a, GEN x, GEN y) { return powgi(x,y);}
+powi(void *a, GEN x, GEN y) { (void)a; return powgi(x,y);}
 
 #if 0
 static GEN
