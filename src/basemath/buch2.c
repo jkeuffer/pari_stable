@@ -216,14 +216,14 @@ reallocate(RELCACHE_t *M, long len)
 
 #define pr_get_smallp(pr) gel(pr,1)[2]
 
-/* don't take P|p if P ramified, or all other Q|p already there */
+/* don't take P|p all other Q|p are already there */
 static int
-ok_subFB(FB_t *F, long t, GEN D)
+bad_subFB(FB_t *F, long t)
 {
   GEN LP, P = gel(F->LP,t);
   long p = pr_get_smallp(P);
   LP = F->LV[p];
-  return (!isclone(LP) || t != F->iLP[p] + lg(LP)-1);
+  return (isclone(LP) && t == F->iLP[p] + lg(LP)-1);
 }
 
 /* set subFB, reset F->pow
@@ -232,7 +232,7 @@ ok_subFB(FB_t *F, long t, GEN D)
 static int
 subFBgen(FB_t *F, GEN nf, double PROD, long minsFB)
 {
-  GEN y, perm, yes, no, D = nf_get_disc(nf);
+  GEN y, perm, yes, no;
   long i, j, k, iyes, ino, lv = F->KC + 1;
   double prod;
   pari_sp av;
@@ -261,7 +261,7 @@ subFBgen(FB_t *F, GEN nf, double PROD, long minsFB)
   for (i = 1; i < lv; i++)
   {
     long t = perm[i];
-    if (!ok_subFB(F, t, D)) { no[ino++] = t; continue; }
+    if (bad_subFB(F, t)) { no[ino++] = t; continue; }
 
     yes[iyes++] = t;
     prod *= (double)itos(gel(y,t));
