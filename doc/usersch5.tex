@@ -5359,7 +5359,12 @@ assumed to be \typ{POL}s in the same variable.
 
 \fun{GEN}{RgX_extgcd}{GEN x, GEN y, GEN *u, GEN *v} returns
 $d = \text{GCD}(\kbd{x},\kbd{y})$, and sets \kbd{*u}, \kbd{*v} to the Bezout
-coefficients such that $\kbd{*ux} + \kbd{*vy} = d$.
+coefficients such that $\kbd{*ux} + \kbd{*vy} = d$. Uses a generic
+subresultant algorithm.
+
+\fun{GEN}{RgX_extgcd_simple}{GEN x, GEN y, GEN *u, GEN *v} as
+\tet{RgX_extgcd} using a standard extended Euclidean algorithm. Usually
+slower than \tet{RgX_extgcd}.
 
 \fun{GEN}{RgX_disc}{GEN x} returns the discriminant of the \typ{POL} \kbd{x}
 with respect to its main variable.

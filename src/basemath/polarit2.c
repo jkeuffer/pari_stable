@@ -1480,7 +1480,8 @@ RgX_extgcd_simple(GEN a, GEN b, GEN *pu, GEN *pv)
   u = RgX_div(u,a);
 
   gerepileall(av, 3, &u,&v,&d);
-  return d;
+  *pu = u;
+  *pv = v; return d;
 }
 /*******************************************************************/
 /*                                                                 */
