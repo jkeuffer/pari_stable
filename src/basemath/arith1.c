@@ -2059,7 +2059,8 @@ static GEN
 _Fp_easylog(void *E, GEN x, GEN g, GEN ord)
 {
   pari_sp av = avma;
-  GEN p1,p=(GEN)E;
+  GEN p1, p = (GEN)E;
+  (void)g;
   if (is_pm1(x)) return gen_0;
   /* p > 2 */
   p1 = addsi(-1, p);
