@@ -1519,7 +1519,6 @@ gp_main_loop(long flag)
         if (!ismain && er > 0) {
           /* true error not from main instance. Cleanup then let caller sort
            * it out */
-          (void)popinfile();
           pop_buffer(); return NULL;
         }
       }
@@ -1601,7 +1600,6 @@ break_loop(int numerr)
   else
     print_errcontext("Break loop: type <Return> three times, or Control-d, to go back to GP)", NULL, NULL);
   term_color(c_NONE);
-  if (!sigint) killallfiles(0);
   if (s_env.n==2)
     prompt=BREAK_LOOP_PROMPT;
   else
@@ -1629,7 +1627,6 @@ break_loop(int numerr)
       }
       else
       { /* user typed <C-D> in break loop : exit the debuger */
-        (void)popinfile();
         go_on = 0; break;
       }
       continue;

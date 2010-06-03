@@ -49,6 +49,16 @@ typedef struct stackzone
   struct pari_mainstack st;
 } stackzone;
 
+typedef struct pariFILE {
+  FILE *file;
+  int type;
+  const char *name;
+  struct pariFILE* prev;
+  struct pariFILE* next;
+} pariFILE;
+/* pariFILE.type */
+enum { mf_IN  = 1, mf_PIPE = 2, mf_FALSE = 4, mf_OUT = 8, mf_PERM = 16 };
+
 typedef struct entree {
   const char *name;
   ulong valence;
@@ -92,6 +102,7 @@ struct gp_context
   long listloc;
   struct pari_evalstate eval;
   struct pari_parsestate parse;
+  pariFILE *file;
 };
 
 typedef struct PariOUT {
@@ -99,16 +110,6 @@ typedef struct PariOUT {
   void (*puts)(const char*);
   void (*flush)(void);
 } PariOUT;
-
-typedef struct pariFILE {
-  FILE *file;
-  int type;
-  const char *name;
-  struct pariFILE* prev;
-  struct pariFILE* next;
-} pariFILE;
-/* pariFILE.type */
-enum { mf_IN  = 1, mf_PIPE = 2, mf_FALSE = 4, mf_OUT = 8, mf_PERM = 16 };
 
 /* hashtables */
 typedef struct hashentry {

@@ -3014,6 +3014,10 @@ static char *last_filename = NULL;
 static pariFILE *last_tmp_file = NULL;
 /* stack of "permanent" (output) files */
 static pariFILE *last_file = NULL;
+
+pariFILE *
+pari_last_tmp_file() { return last_tmp_file; }
+
 #if defined(UNIX) || defined(__EMX__)
 #  include <fcntl.h>
 #  include <sys/stat.h> /* for open */

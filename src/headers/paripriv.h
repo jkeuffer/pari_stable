@@ -250,6 +250,7 @@ int    pop_val_if_newer(entree *ep, long loc);
 void   gclone_refc(GEN x);
 
 /* Interfaces (GP, etc.) */
+pariFILE *pari_last_tmp_file();
 void  print_errcontext(const char *msg, const char *s, const char *entry);
 void* get_stack(double fraction, long min);
 void  init_graph(void);

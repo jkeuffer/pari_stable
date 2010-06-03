@@ -762,6 +762,7 @@ pari_close(void)
 void
 gp_context_save(struct gp_context* rec)
 {
+  rec->file = pari_last_tmp_file();
   rec->listloc = next_block;
   evalstate_save(&rec->eval);
   parsestate_save(&rec->parse);
@@ -770,6 +771,7 @@ gp_context_save(struct gp_context* rec)
 void
 gp_context_restore(struct gp_context* rec)
 {
+  pariFILE *f;
   long i;
 
   if (!(GP_DATA->flags & RECOVER)) pari_exit();
@@ -780,6 +782,16 @@ gp_context_restore(struct gp_context* rec)
   if (DEBUGMEM>2) fprintferr("entering recover(), loc = %ld\n", rec->listloc);
   evalstate_restore(&rec->eval);
   parsestate_restore(&rec->parse);
+
+  /* delete all "temp" files open since last reference point */
+  f = pari_last_tmp_file();
+  while (f)
+  {
+    pariFILE *g = f->prev;
+    if (f == rec->file) break;
+    pari_fclose(f); f = g;
+  }
+
   for (i = 0; i < functions_tblsz; i++)
   {
     entree *ep = functions_hash[i];
