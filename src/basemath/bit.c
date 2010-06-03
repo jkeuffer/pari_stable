@@ -1,4 +1,4 @@
-/* $Id: arith2.c 10393 2008-07-07 15:22:56Z kb $
+/* $Id$
 
 Copyright (C) 2000  The PARI group.
 
