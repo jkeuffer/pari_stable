@@ -10,7 +10,7 @@ Doc: this very special operation
  $16*\ceil{x/16}$ bytes is allocated. If $x=0$, the size of
  the new stack is twice the size of the old one. The old stack is discarded.
 
- \misctitle{Warning.} This function should be typed at the \kbd{gp} prompt in
+ \misctitle{Warning} This function should be typed at the \kbd{gp} prompt in
  interactive usage, or left by itself at the start of batch files.
  It cannot be used meaningfully in loop-like constructs, or as part of a
  larger expression sequence, e.g

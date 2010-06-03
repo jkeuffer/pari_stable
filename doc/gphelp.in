@@ -824,8 +824,8 @@ sub basic_subst {
   s/\\p(?![a-zA-Z])/$tr{startbold}p$tr{endbold}$1/g;
   s/\\point\{([^\}]*)\}/$tr{startbold}* $1$tr{endbold}/g;
   s/(\\bullet|\\item)/$tr{startbold}*$tr{endbold}/g;
-  s/\\misctitle\{([^\}]*)\}/$tr{startbold}$1$tr.{endbold}/g;
-  s/\\subsec\{([^\}]*)\}/$tr{startbold}$1$tr{endbold}/g unless $to_pod;
+  s/\\misctitle\{([^\}]*)\}/$tr{startbold}$1.$tr{endbold}/g;
+  s/\\subsec\{([^\}]*)\}/$tr{startbold}$1.$tr{endbold}/g unless $to_pod;
   s/\\teb\{([^\}]*)\}/\\sidx{$1}$tr{startbold}$1$tr{endbold}/g;
   s/\\tet\{([^\}]*)\}/\\sidx{$1}$tr{startcode}$1$tr{endcode}/g;
   s/\\tev\{([^\}]*)\}/\\sidx{$1}$tr{startit}$1$tr{endit}/g;

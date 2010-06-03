@@ -24,7 +24,7 @@ Doc: relative version of
  default when the relative discriminant is smooth, and much faster otherwise.
  See \secref{se:polredabs}.
 
- \misctitle{Remark.} In the present implementation, this is both faster and
+ \misctitle{Remark} In the present implementation, this is both faster and
  much more efficient than \kbd{rnfpolred}, the difference being more
  dramatic than in the absolute case. This is because the implementation of
  \kbd{rnfpolred} is based on (a partial implementation of) an incomplete

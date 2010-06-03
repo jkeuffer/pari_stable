@@ -30,7 +30,7 @@ Doc: tries to
  %1 = 0
  @eprog
 
- \misctitle{Note:} The interface is currently not adequate for trapping
+ \misctitle{Note} The interface is currently not adequate for trapping
  individual exceptions. In the current version \vers, the following keywords
  are recognized, but the name list will be expanded and changed in the
  future (all library mode errors can be trapped: it's a matter of defining

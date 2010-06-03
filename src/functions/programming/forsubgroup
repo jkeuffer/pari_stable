@@ -40,6 +40,6 @@ Doc: evaluates \var{seq} for
  determinant. See \tet{galoissubcyclo} and \tet{galoisfixedfield} for
  applications to \idx{Galois} theory.
 
- \misctitle{Warning:} the present implementation cannot treat a group $G$, if
+ \misctitle{Warning} The present implementation cannot treat a group $G$, if
  one of its $p$-Sylow subgroups has a cyclic factor with more than $2^{31}$,
  resp.~$2^{63}$ elements on a $32$-bit, resp.~$64$-bit architecture.

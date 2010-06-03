@@ -36,7 +36,7 @@ Doc:
  %2 = [1, 2, 3]
  @eprog\noindent
 
- \misctitle{Warning:} this is \emph{not} a substitution function. It will not
+ \misctitle{Warning} This is \emph{not} a substitution function. It will not
  transform an object containing variables of higher priority than~$v$.
  \bprog
  ? Pol(x + y, y)

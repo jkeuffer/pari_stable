@@ -14,11 +14,11 @@ Doc: numerical
  ceiling of $a$ to $+\infty$, where \var{expr} is assumed to be a holomorphic
  function for $\Re(X)\ge sig$ (or $sig[1]$).
 
- \misctitle{Warning.} This function uses the \kbd{intnum} routines and is
+ \misctitle{Warning} This function uses the \kbd{intnum} routines and is
  orders of magnitude slower than \kbd{sumalt}. It is only given for
  completeness and should not be used in practice.
 
- \misctitle{Warning2.} The expression \var{expr} must \emph{not} include the
+ \misctitle{Warning 2} The expression \var{expr} must \emph{not} include the
  $(-1)^X$ coefficient. Thus $\kbd{sumalt}(n=a,(-1)^nf(n))$ is (approximately)
  equal to $\kbd{sumnumalt}(n=a,sig,f(n))$.
 

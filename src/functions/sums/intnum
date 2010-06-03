@@ -54,7 +54,7 @@ Doc: numerical integration
  accuracy), in particular for multivariate integrals, since we then skip
  expensive precomputations.
 
- \misctitle{Specifying the behavior at endpoints.}
+ \misctitle{Specifying the behavior at endpoints}
  This is done as follows. An endpoint $a$ is either given as such (a scalar,
  real or complex, or $[\pm1]$ for $\pm\infty$), or as a two component vector
  $[a,\alpha]$, to indicate the behavior of the integrand in a neighborhood
@@ -118,7 +118,7 @@ Doc: numerical integration
  $\sin(kx)$, means that very function, and not a translated version such as
  $\cos(kx+a)$.
 
- \misctitle{Note.} If $f(x)=\cos(kx)g(x)$ where $g(x)$ tends to zero
+ \misctitle{Note} If $f(x)=\cos(kx)g(x)$ where $g(x)$ tends to zero
  exponentially fast as $\exp(-\alpha x)$, it is up to the user to choose
  between $[[\pm1],\alpha]$ and $[[\pm1],k* I]$, but a good rule of thumb is that
  if the oscillations are much weaker than the exponential decrease, choose
@@ -144,7 +144,7 @@ Doc: numerical integration
  ? oo = [1]  \\@com for clarity
  @eprog
 
- \misctitle{Apparent singularities.} Even if the function $f(x)$ represented
+ \misctitle{Apparent singularities} Even if the function $f(x)$ represented
  by \var{expr} has no singularities, it may be important to define the
  function differently near special points. For instance, if $f(x) = 1
  /(\exp(x)-1) - \exp(-x)/x$, then $\int_0^\infty f(x)\,dx=\gamma$, Euler's
@@ -169,7 +169,7 @@ Doc: numerical integration
  It is up to the user to determine constants such as the $10^{-18}$ and $7$
  used above.
 
- \misctitle{True singularities.} With true singularities the result is worse.
+ \misctitle{True singularities} With true singularities the result is worse.
  For instance
 
  \bprog
@@ -180,7 +180,7 @@ Doc: numerical integration
  %2 = 0.E-105 \\@com better
  @eprog
 
- \misctitle{Oscillating functions.}
+ \misctitle{Oscillating functions}
 
  \bprog
  ? intnum(x = 0, oo, sin(x) / x) - Pi/2
@@ -223,7 +223,7 @@ Doc: numerical integration
  %6 = 5.45... E-107 \\@com OK this time.
  @eprog
 
- \misctitle{Warning.} Like \tet{sumalt}, \kbd{intnum} often assigns a
+ \misctitle{Warning} Like \tet{sumalt}, \kbd{intnum} often assigns a
  reasonable value to diverging integrals. Use these values at your own risk!
  For example:
 
@@ -236,7 +236,7 @@ Doc: numerical integration
  a priori valid only for $0 < \Re(s) < 2$, but the right hand side provides an
  analytic continuation which may be evaluated at $s = -2$\dots
 
- \misctitle{Multivariate integration.}
+ \misctitle{Multivariate integration}
  Using successive univariate integration with respect to different formal
  parameters, it is immediate to do naive multivariate integration. But it is
  important to use a suitable \kbd{intnuminit} to precompute data for the

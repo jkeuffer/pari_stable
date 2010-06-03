@@ -9,7 +9,7 @@ Doc: creates a vector containing, as rational numbers,
  This routine is obsolete. Use \kbd{bernfrac} instead each time you need a
  Bernoulli number in exact form.
 
- \misctitle{Note:} this routine is implemented using repeated independent
+ \misctitle{Note} This routine is implemented using repeated independent
  calls to \kbd{bernfrac}, which is faster than the standard recursion in exact
  arithmetic. It is only kept for backward compatibility: it is not faster than
  individual calls to \kbd{bernfrac}, its output uses a lot of memory space,

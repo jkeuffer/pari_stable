@@ -13,7 +13,7 @@ Doc: \var{znf} being a number
  function instead (i.e.~the product of the Dedekind zeta function by its gamma
  and exponential factors).
 
- \misctitle{CAVEAT.} This implementation is not satisfactory and must be
+ \misctitle{CAVEAT} This implementation is not satisfactory and must be
  rewritten. In particular
 
  \item The accuracy of the result depends in an essential way on the

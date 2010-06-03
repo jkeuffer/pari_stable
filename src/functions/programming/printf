@@ -21,7 +21,7 @@ Doc: This function is based on the C library command of the same name.
  the conversion specifier (among \kbd{d},\kbd{i}, \kbd{o}, \kbd{u},
  \kbd{x},\kbd{X}, \kbd{p}, \kbd{e},\kbd{E}, \kbd{f}, \kbd{g},\kbd{G}, \kbd{s}).
 
- \misctitle{The flag characters.} The character \kbd{\%} is followed by zero or
+ \misctitle{The flag characters} The character \kbd{\%} is followed by zero or
  more of the following flags:
 
  \item \kbd{\#}: The value is converted to an ``alternate form''. For
@@ -56,7 +56,7 @@ Doc: This function is based on the C library command of the same name.
  \item \kbd{+}: A sign (+ or -) is placed before a number produced by a
  signed conversion. A \kbd{+} overrides a space if both are used.
 
- \misctitle{The field width.} An optional decimal digit string (whose first
+ \misctitle{The field width} An optional decimal digit string (whose first
  digit is non-zero) specifying a \emph{minimum} field width. If the value has
  fewer characters than the field width, it is padded with spaces on the left
  (or right, if the left-adjustment flag has been given). In no case does a
@@ -65,7 +65,7 @@ Doc: This function is based on the C library command of the same name.
  Instead of a decimal digit string, one may write \kbd{*} to specify that the
  field width is given in the next argument.
 
- \misctitle{The precision.} An optional precision in the form of a period
+ \misctitle{The precision} An optional precision in the form of a period
  (`\kbd{.}') followed by a decimal digit string. This gives
  the number of digits to appear after the radix character for \kbd{e},
  \kbd{E}, \kbd{f}, and \kbd{F} conversions, the maximum number of significant
@@ -74,7 +74,7 @@ Doc: This function is based on the C library command of the same name.
  Instead of a decimal digit string, one may write \kbd{*} to specify that the
  field width is given in the next argument.
 
- \misctitle{The length modifier.} This is ignored under \kbd{gp}, but
+ \misctitle{The length modifier} This is ignored under \kbd{gp}, but
  necessary for \kbd{libpari} programming. Description given here for
  completeness:
 
@@ -82,7 +82,7 @@ Doc: This function is based on the C library command of the same name.
 
  \item \kbd{P}: argument is a \kbd{GEN}.
 
- \misctitle{The conversion specifier.} A character that specifies the type of
+ \misctitle{The conversion specifier} A character that specifies the type of
  conversion to be applied.
 
  \item \kbd{d}, \kbd{i}: A signed integer.
@@ -165,7 +165,7 @@ Doc: This function is based on the C library command of the same name.
 
  [ 0.33  0.25  0.20]
  @eprog
- \misctitle{Technical note:} our implementation of \tet{printf}
+ \misctitle{Technical note} Our implementation of \tet{printf}
  deviates from the C89 and C99 standards in a few places:
 
  \item whenever a precision is missing, the current \kbd{realprecision} is

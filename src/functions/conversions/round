@@ -22,7 +22,7 @@ Doc: If $x$ is in $\R$, rounds $x$ to the nearest integer (rounding to
  compared to its precision (i.e.~$e>0$), the result is undefined and an error
  occurs if $e$ was not given.
 
- \misctitle{Important remark:} contrary to the other truncation functions,
+ \misctitle{Important remark} Contrary to the other truncation functions,
  this function operates on every coefficient at every level of a PARI object.
  For example
  $$\text{truncate}\left(\dfrac{2.4*X^2-1.7}{X}\right)=2.4*X,$$

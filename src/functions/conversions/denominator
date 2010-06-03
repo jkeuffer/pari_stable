@@ -21,6 +21,6 @@ Doc:
  of the denominators of its components (a common denominator) is computed.
  This also applies for \typ{COMPLEX}s and \typ{QUAD}s.
 
- \misctitle{Warning:} multivariate objects are created according to variable
+ \misctitle{Warning} Multivariate objects are created according to variable
  priorities, with possibly surprising side effects ($x/y$ is a polynomial, but
  $y/x$ is a rational function). See \secref{se:priority}.

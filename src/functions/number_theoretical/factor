@@ -16,7 +16,7 @@ Doc: general factorization function, where $x$ is a
  dividing $x$ (rational or Gaussian primes, irreducible polynomials),
  and the second the exponents. By convention, $0$ is factored as $0^1$.
 
- \misctitle{$\Q$ and $\Q(i)$.}
+ \misctitle{$\Q$ and $\Q(i)$}
  See \tet{factorint} for more information about the algorithms used.
  The rational or Gaussian primes are in fact \var{pseudoprimes}
  (see \kbd{ispseudoprime}), a priori not rigorously proven primes. In fact,
@@ -94,7 +94,7 @@ Doc: general factorization function, where $x$ is a
  [5704689200685129054721 1]
  @eprog
 
- \misctitle{Rational functions.}
+ \misctitle{Rational functions}
  The polynomials or rational functions to be factored must have scalar
  coefficients. In particular PARI does not know how to factor
  \emph{multivariate} polynomials. See \tet{factormod} and \tet{factorff} for

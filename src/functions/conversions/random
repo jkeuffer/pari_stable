@@ -47,7 +47,7 @@ Doc:
  the exact same values will be generated. The same seed is used at each
  startup, reseed the generator yourself if this is a problem.
 
- \misctitle{Technical note.}
+ \misctitle{Technical note}
  Up to
  version 2.4 included, the internal generator produced pseudo-random numbers
  by means of linear congruences, which were not well distributed in arithmetic

@@ -16,13 +16,13 @@ Doc: ordinary class number of the quadratic
  If $\fl=1$, compute the class number using \idx{Euler product}s and the
  functional equation. However, it is in $O(|D|^{1/2})$.
 
- \misctitle{Important warning.} For $D < 0$, this function may give incorrect
+ \misctitle{Important warning} For $D < 0$, this function may give incorrect
  results when the class group has many cyclic factors,
  because implementing \idx{Shanks}'s method in full generality slows it down
  immensely. It is therefore strongly recommended to double-check results using
  either the version with $\fl = 1$ or the function \kbd{quadclassunit}.
 
- \misctitle{Warning.} Contrary to what its name implies, this routine does not
+ \misctitle{Warning} Contrary to what its name implies, this routine does not
  compute the number of classes of binary primitive forms of discriminant $D$,
  which is equal to the \emph{narrow} class number. The two notions are the same
  when $D < 0$ or the fundamental unit $\varepsilon$ has negative norm; when $D

@@ -20,6 +20,6 @@ Doc:
  \typ{PADIC} or \typ{INTMOD} has  denominator $1$, its numerator is
  itself.
 
- \misctitle{Warning:} multivariate objects are created according to variable
+ \misctitle{Warning} Multivariate objects are created according to variable
  priorities, with possibly surprising side effects ($x/y$ is a polynomial, but
  $y/x$ is a rational function). See \secref{se:priority}.

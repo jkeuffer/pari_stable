@@ -404,7 +404,7 @@ returns \kbd{\key{gexpo}(x)} multiplied by $\log_{10}(2)$. This gives a crude
 estimate for the maximal number of decimal digits of the components
 of~\kbd{x}.
 
-\subsec{Eval type-dependent information}.
+\subsec{Eval type-dependent information}
 These routines convert type-dependent information to bitmask to fill the
 codewords of \kbd{GEN} objects (see \secref{se:impl}). E.g for a
 \typ{REAL}~\kbd{z}:
@@ -450,7 +450,7 @@ overflow check.
 (second codeword \typ{INT}). This should be less or equal than the length
 of the \typ{INT}, hence there is no overflow check for the effective length.
 
-\subsec{Set type-dependent information}.
+\subsec{Set type-dependent information}
 Use these functions and macros with extreme care since usually the
 corresponding information is set otherwise, and the components and further
 codeword fields (which are left unchanged) may not be compatible with the new
@@ -498,7 +498,7 @@ respectively.
 \fun{void}{setvarn}{GEN x, long s} sets the variable number of the \typ{POL}
 or \typ{SER}~\kbd{x} to~\kbd{s} (where $0\le \kbd{s}\le\kbd{MAXVARN}$).
 
-\subsec{Type groups}\label{se:typegroup}.
+\subsec{Type groups}\label{se:typegroup}
 In the following functions, \kbd{t} denotes the type of a \kbd{GEN}.
 They used to be implemented as macros, which could evaluate their argument
 twice; \emph{no longer}: it is not inefficient to write
@@ -544,7 +544,7 @@ a \typ{POLMOD}.
 \kbd{gmul}) do not make sense for $t$ : corresponds to types
 \typ{LIST}, \typ{STR}, \typ{VECSMALL}, \typ{CLOSURE}
 
-\subsec{Accessors and components}.\label{se:accessors}
+\subsec{Accessors and components}\label{se:accessors}
 The first two functions return \kbd{GEN} components as copies on the stack:
 
 \fun{GEN}{compo}{GEN x, long n} creates a copy of the \kbd{n}-th true
@@ -786,7 +786,7 @@ specific to the multiprecision kernel in use. The \kbd{GENbin} type stores
 whether leaves are stored in canonical form, so \kbd{bin\_copy} can call
 the right variant.
 
-\subsec{Garbage collection}.
+\subsec{Garbage collection}
 See \secref{se:garbage} for a detailed explanation and many examples.
 
 \fun{void}{cgiv}{GEN x} frees object \kbd{x}, assuming it is the last created
@@ -863,7 +863,7 @@ non-recursive type (\kbd{is\_recursive\_t(typ(q))} is non-zero). Contrary to
 \kbd{gerepileuptoint} and \kbd{gerepileupto}, \kbd{gerepileuptoleaf} leaves
 length and effective length of a \typ{INT} unchanged.
 
-\subsec{Garbage collection : advanced use}.
+\subsec{Garbage collection : advanced use}
 
 \fun{void}{stackdummy}{pari_sp av, pari_sp ltop} inhibits the memory area
 between \kbd{av} \emph{included} and \kbd{ltop} \emph{excluded} with respect to
@@ -1095,7 +1095,7 @@ rename a user variable: use \kbd{fetch\_named\_var} to get a user variable of
 the right name in the first place.
 
 \section{Adding functions to PARI}
-\subsec{Nota Bene}.
+\subsec{Nota Bene}
 %
 As mentioned in the \kbd{COPYING} file, modified versions of the PARI package
 can be distributed under the conditions of the GNU General Public License. If
@@ -1125,7 +1125,7 @@ efficiency.
 Finally the last type is to add new functions to PARI. We explain here how
 to do this, so that in particular the new function can be called from \kbd{gp}.
 
-\subsec{Coding guidelines}.\label{se:coding_guidelines}
+\subsec{Coding guidelines}\label{se:coding_guidelines}
 \noindent
 Code your function in a file of its own, using as a guide other functions
 in the PARI sources. One important thing to remember is to clean the stack
@@ -1163,7 +1163,7 @@ creation of the library. If possible, compile it as a shared library (see
 the \kbd{Makefile} coming with the \kbd{extgcd} example in the
 distribution). It is however still inaccessible from \kbd{gp}.\smallskip
 
-\subsec{Interlude: parser codes}.
+\subsec{Interlude: parser codes}
 \label{se:gp.interface}
 A \idx{parser code} is a character string describing all the GP parser
 needs to know about the function prototype. It contains a sequence of the
@@ -1419,7 +1419,7 @@ and recompile \kbd{gp}.
 
 \section{Level 0 kernel (operations on ulongs)}
 
-\subsec{Micro-kernel}.
+\subsec{Micro-kernel}
 The Level 0 kernel simulates basic operations of the 68020 processor on which
 PARI was originally implemented. They need ``global'' \kbd{ulong} variables
 \kbd{overflow} (which will contain only 0 or 1) and \kbd{hiremainder} to
@@ -1490,7 +1490,7 @@ i.e.~\kbd{$x$ >> $y$}, where we assume that $0\leq y\leq\B$. The global variable
 \kbd{hiremainder} receives the bits that were shifted out,
 i.e.~\kbd{$x$ << $(\B - y)$}.
 
-\subsec{Modular kernel}.
+\subsec{Modular kernel}
 The following routines are not part of the level 0 kernel per se, but
 implement modular operations on words in terms of the above. They are written
 so that no overflow may occur. Let $m \geq 1$ be the modulus; all operands
@@ -1681,7 +1681,7 @@ to a non-negative \typ{REAL} of precision \kbd{prec}.
 The string \kbd{s} consists exclusively of digits and optional decimal
 point and exponent (no leading sign).
 
-\subsec{Assignment}.
+\subsec{Assignment}
 In this section, the \kbd{z} argument in the \kbd{z}-functions must be of type
 \typ{INT} or~\typ{REAL}.
 
@@ -2001,7 +2001,7 @@ This function is not stack-clean.
 \fun{long}{ZX_lval}{GEN x, ulong p} as \kbd{ZX\_pval},
 except that \kbd{p} is an \kbd{ulong} ($\kbd{p} > 1$).
 
-\subsec{Generic unary operators}. Let ``\op'' be a unary operation among
+\subsec{Generic unary operators} Let ``\op'' be a unary operation among
 
 \item \key{neg}: negation ($-x$).
 
@@ -2117,7 +2117,7 @@ and~\kbd{y}. The result is $1$ if $|\kbd{x}| = |\kbd{y}|$, $0$ otherwise.
 \fun{int}{absr_cmp}{GEN x, GEN y} compares the \typ{REAL}s \kbd{x} and~\kbd{y}.
 The result is the sign of $|\kbd{x}| - |\kbd{y}|$.
 
-\subsec{Generic binary operators}.\label{se:genbinop} The operators in this
+\subsec{Generic binary operators}\label{se:genbinop} The operators in this
 section have arguments of C-type \kbd{GEN}, \kbd{long}, and \kbd{ulong}, and
 only \typ{INT} and \typ{REAL} \kbd{GEN}s are allowed. We say an argument is a
 real type if it is a \typ{REAL} \kbd{GEN}, and an integer type otherwise. The
@@ -2324,7 +2324,7 @@ precision \kbd{prec}.
 \typ{REAL} of precision \kbd{prec}.
 
 
-\subsec{Division with remainder}. The following functions return two objects,
+\subsec{Division with remainder} The following functions return two objects,
 unless specifically asked for only one of them~--- a quotient and a remainder.
 The quotient is returned and the remainder is returned through the variable
 whose address is passed as the \kbd{r} argument. The term \emph{true
@@ -2391,7 +2391,7 @@ non-negative remainder.
 \fun{GEN}{truedvmdsi}{long x, GEN y, GEN *z}, as \kbd{dvmdsi} but with a
 non-negative remainder.
 
-\subsec{Modulo to longs}. The following variants of \kbd{modii} do not
+\subsec{Modulo to longs} The following variants of \kbd{modii} do not
 clutter the stack:
 
 \fun{long}{smodis}{GEN x, long y} computes the true Euclidean
@@ -2709,7 +2709,7 @@ in $0, 1, \dots p-1$.
 \fun{GEN}{randomr}{long prec} returns a random \typ{REAL} in $[0,1[$, with
 precision \kbd{prec}.
 
-\subsec{Modular operations}. In this subsection, all \kbd{GEN}s are \typ{INT}.
+\subsec{Modular operations} In this subsection, all \kbd{GEN}s are \typ{INT}
 
 \fun{GEN}{Fp_neg}{GEN a, GEN m} returns $-$\kbd{a} modulo \kbd{m} (smallest
 non-negative residue).
@@ -2990,7 +2990,7 @@ with \typ{INTMOD} and \typ{POLMOD} coefficients and using generic routines,
 at a considerable loss of efficiency. Also, specialized routines are
 available that have no obvious generic equivalent.
 
-\subsec{\kbd{FpC} / \kbd{FpV}, \kbd{FpM}, \kbd{FqM}}. A \kbd{ZV}
+\subsec{\kbd{FpC} / \kbd{FpV}, \kbd{FpM}, \kbd{FqM}} A \kbd{ZV}
 (resp.~a~\kbd{ZM}) is a \typ{VEC} or \typ{COL} (resp.~\typ{MAT}) with
 \typ{INT} coefficients. An \kbd{FpV} or \kbd{FpM}, with respect to a given
 \typ{INT}~\kbd{p}, is the same with \kbd{Fp} coordinates; operations are
@@ -3113,7 +3113,7 @@ $x$ and $y$ (assumed to have the same length).
 \fun{GEN}{FpV_dotsquare}{GEN x, GEN p} scalar product of $x$ with itself.
 has \typ{INT} entries.
 
-\subsubsec{\kbd{Fp}-linear algebra}. The implementations are not
+\subsubsec{\kbd{Fp}-linear algebra} The implementations are not
 asymptotically efficient ($O(n^3)$ standard algorithms).
 
 \fun{GEN}{FpM_deplin}{GEN x, GEN p} returns a non-trivial kernel vector,
@@ -3147,7 +3147,7 @@ or \kbd{NULL} if none exist.
 
 \fun{GEN}{FqM_suppl}{GEN x, GEN T, GEN p} as \kbd{suppl}
 
-\subsec{\kbd{Flc} / \kbd{Flv}, \kbd{Flm}}. See \kbd{FpV}, \kbd{FpM}
+\subsec{\kbd{Flc} / \kbd{Flv}, \kbd{Flm}} See \kbd{FpV}, \kbd{FpM}
 operations.
 
 \fun{GEN}{Flv_copy}{GEN x} returns a copy of \kbd{x}.
@@ -3231,7 +3231,7 @@ the square \kbd{Flm} $m$, as a \kbd{Flx}.
 
 \fun{GEN}{Flm_hess}{GEN x, ulong p} characteristic polynomial of $x$.
 
-\subsec{\kbd{F2c} / \kbd{F2v}, \kbd{F2m}}.  An \kbd{F2v}~\kbd{v} is a
+\subsec{\kbd{F2c} / \kbd{F2v}, \kbd{F2m}}  An \kbd{F2v}~\kbd{v} is a
 \typ{VECSMALL} representing a vector over $\F_2$. Specifically \kbd{z[0]} is
 the usual codeword, \kbd{z[1]} is the number of components of $v$ and the
 coefficients are given by the bits of remaining words by increasing indices.
@@ -3285,11 +3285,11 @@ allowed for $y$ to be shorter than $x$.
 \kbd{deplin=0}) or \kbd{F2m\_deplin} (if \kbd{deplin=1}) , in place
 (destroys~\kbd{x}).
 
-\subsec{\kbd{FlxqV}, \kbd{FlxqM}}. See \kbd{FqV}, \kbd{FqM} operations.
+\subsec{\kbd{FlxqV}, \kbd{FlxqM}} See \kbd{FqV}, \kbd{FqM} operations.
 
 \fun{GEN}{FlxqM_ker}{GEN x, GEN T, ulong p}
 
-\subsec{\kbd{FpX}}. Let \kbd{p} an understood \typ{INT}, to be given in
+\subsec{\kbd{FpX}} Let \kbd{p} an understood \typ{INT}, to be given in
 the function arguments; in practice \kbd{p} is not assumed to be prime, but
 be wary. An \kbd{Fp} object is a \typ{INT} belonging to $[0,
 \kbd{p}-1]$, an \kbd{FpX} is a \typ{POL} in a fixed variable whose
@@ -3297,7 +3297,7 @@ coefficients are \kbd{Fp} objects. Unless mentioned otherwise, all outputs
 in this section are \kbd{FpX}s. All operations are understood to take place
 in $(\Z/\kbd{p}\Z)[X]$.
 
-\subsubsec{Conversions}. In what follows \kbd{p} is always a \typ{INT},
+\subsubsec{Conversions} In what follows \kbd{p} is always a \typ{INT},
 not necessarily prime.
 
 \fun{int}{RgX_is_FpX}{GEN z, GEN *p}, \kbd{z} a \typ{POL},
@@ -3314,7 +3314,7 @@ Mod(1,p))}, normalized.
 \kbd{FpX\_red} componentwise and returns the result (and we obtain a vector
 of \kbd{FpX}s).
 
-\subsubsec{Basic operations}. In what follows \kbd{p} is always a \typ{INT},
+\subsubsec{Basic operations} In what follows \kbd{p} is always a \typ{INT},
 not necessarily prime.
 
 \noindent Now, except for \kbd{p}, the operands and outputs are all \kbd{FpX}
@@ -3480,7 +3480,7 @@ whose coefficients are either \typ{POL}s in $\Z[Y]$ or \typ{INT}s.
 Returns $\text{Res}_X(a, b)$ in $\F_p[Y]$ as an \kbd{FpY}. The function
 assumes that $X$ has lower priority than $Y$.
 
-\subsec{\kbd{FpXQ}, \kbd{Fq}}. Let \kbd{p} a \typ{INT} and \kbd{T} an
+\subsec{\kbd{FpXQ}, \kbd{Fq}} Let \kbd{p} a \typ{INT} and \kbd{T} an
 \kbd{FpX} for \kbd{p}, both to be given in the function arguments; an \kbd{FpXQ}
 object is an \kbd{FpX} whose degree is strictly less than the degree of
 \kbd{T}. An \kbd{Fq} is either an \kbd{FpXQ} or an \kbd{Fp}. Both represent
@@ -3628,7 +3628,7 @@ $\kbd{f}(\kbd{x})$.
 $\kbd{f}(\kbd{x})$, assuming that \kbd{V} was computed by
 $\kbd{FpXQ\_powers}(\kbd{x}, n, \kbd{T}, \kbd{p})$.
 
-\subsec{\kbd{FpXX}}.
+\subsec{\kbd{FpXX}}
 Contrary to what the name implies, an \kbd{FpXQX} is a \typ{POL} whose
 coefficients are either \typ{INT}s or \typ{FpX}s. This reduce memory
 overhead at the expense of consistency.
@@ -3642,7 +3642,7 @@ all components reduced modulo \kbd{p}.
 \fun{GEN}{FpXX_renormalize}{GEN x, long l}, as \kbd{normalizepol}, where
 $\kbd{l} = \kbd{lg(x)}$, in place.
 
-\subsec{\kbd{FpXQX}, \kbd{FqX}}.
+\subsec{\kbd{FpXQX}, \kbd{FqX}}
 Contrary to what the name implies, an \kbd{FpXQX} is a \typ{POL} whose
 coefficients are \kbd{Fq}s. So the only difference between \kbd{FqX} and
 \kbd{FpXQX} routines is that $\kbd{T} = \kbd{NULL}$ is not allowed in the
@@ -3924,7 +3924,7 @@ returning an \kbd{Flx} in variable $v$.
 \fun{GEN}{Flv_roots_to_pol}{GEN a, ulong p, long sv} as
 \kbd{FpV\_roots\_to\_pol} returning an \kbd{Flx} in variable $v$.
 
-\subsec{\kbd{Flxq}}. See \kbd{FpXQ} operations.
+\subsec{\kbd{Flxq}} See \kbd{FpXQ} operations.
 
 \fun{GEN}{Flxq_mul}{GEN x, GEN y, GEN T, ulong p}
 
@@ -3982,7 +3982,7 @@ $p$. If \kbd{po} is not \kbd{NULL} it is set to $[o,\var{fa}]$, where $o$ is the
 order of the multiplicative group of the finite field, and \var{fa} is
 its factorization.
 
-\subsec{\kbd{FlxX}}. See \kbd{FpXX} operations.
+\subsec{\kbd{FlxX}} See \kbd{FpXX} operations.
 
 \fun{GEN}{FlxX_add}{GEN P, GEN Q, ulong p}
 
@@ -4001,7 +4001,7 @@ in the main variable of \kbd{b}.
 
 \fun{GEN}{FlxX_shift}{GEN a, long n}
 
-\subsec{\kbd{FlxqX}}. See \kbd{FpXQX} operations.
+\subsec{\kbd{FlxqX}} See \kbd{FpXQX} operations.
 
 \fun{GEN}{FlxqX_mul}{GEN x, GEN y, GEN T, ulong p}
 
@@ -4079,7 +4079,7 @@ in variable \kbd{v}, of degree less than~\kbd{d}.
 
 \fun{GEN}{F2x_gcd}{GEN a, GEN b}
 
-\subsec{\kbd{F2xq}}. See \kbd{FpXQ} operations.
+\subsec{\kbd{F2xq}} See \kbd{FpXQ} operations.
 
 \fun{GEN}{F2xq_mul}{GEN x, GEN y, GEN pol}
 
@@ -4582,7 +4582,7 @@ reduced Tate pairing of the point of $m$-torsion $P$ and the point $Q$.
 Weil pairing of the points of $m$-torsion $P$ and $Q$.
 
 \section{Integral, rational and generic linear algebra}
-\subsec{\kbd{ZC} / \kbd{ZV}, \kbd{ZM}}. A \kbd{ZV} (resp.~a~\kbd{ZM},
+\subsec{\kbd{ZC} / \kbd{ZV}, \kbd{ZM}} A \kbd{ZV} (resp.~a~\kbd{ZM},
 resp.~a~\kbd{ZX}) is a \typ{VEC} or \typ{COL} (resp.~\typ{MAT},
 resp.~\typ{POL}) with \typ{INT} coefficients.
 
@@ -5182,7 +5182,7 @@ polynomial to which \kbd{Q\_remove\_denom} can be applied is fine.
 \fun{GEN}{QXQ_reverse}{GEN f, GEN T} as \kbd{RgXQ\_reverse}, assuming $f$
 is a \kbd{QX}.
 
-\subsec{\kbd{zx}}.
+\subsec{\kbd{zx}}
 
 \fun{GEN}{zero_zx}{long sv} returns a zero \kbd{zx} in variable $v$.
 
@@ -5194,7 +5194,7 @@ $\kbd{l} = \kbd{lg(x)}$, in place.
 \fun{GEN}{zx_shift}{GEN T, long n} returns \kbd{T}
 multiplied by $\kbd{x}^n$, assuming $n\geq 0$.
 
-\subsec{\kbd{RgX}}.
+\subsec{\kbd{RgX}}
 
 \fun{long}{RgX_type}{GEN x, GEN *ptp, GEN *ptpol, long *ptprec} returns
 the ``natural'' base ring over which the polynomial $x$ is defined. Raise an
@@ -6239,7 +6239,7 @@ instead of \kbd{gcmp} as the underlying comparison routine.
 \fun{GEN}{indexvecsort}{GEN x, GEN k}, as \kbd{vecsort}, but only
 returns the permutation that would sort the vector \kbd{x}.
 
-\subsec{Generic sort and search}. The following routines allow to use an
+\subsec{Generic sort and search} The following routines allow to use an
 arbitrary comparison function \kbd{int (*cmp)(void* data, GEN x, GEN y)},
 such that \kbd{cmp(data,x,y)} returns a negative result if $x
 < y$, a positive one if $x > y$ and 0 if $x = y$. The \kbd{data} argument is

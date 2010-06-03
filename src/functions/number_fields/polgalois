@@ -79,7 +79,7 @@ Doc: \idx{Galois} group of the non-constant
  $S_7=[5040,-1,7]$.
  \smallskip
 
- \misctitle{Warning:} The method used is that of resolvent polynomials and is
+ \misctitle{Warning} The method used is that of resolvent polynomials and is
  sensitive to the current precision. The precision is updated internally but,
  in very rare cases, a wrong result may be returned if the initial precision
  was not sufficient.

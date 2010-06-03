@@ -96,7 +96,7 @@ need the above things to function properly. So if you forget the call to
 
 \section{Important technical notes}
 
-\subsec{Backward compatibility}. The PARI function names evolved over time,
+\subsec{Backward compatibility} The PARI function names evolved over time,
 and deprecated functions are eventually deleted.  The file \kbd{pariold.h}
 contains macros implementing a weak form of backward compatibility.
 In particular, whenever the name of a documented function changes, a
@@ -114,7 +114,7 @@ so that you don't need to modify the program files themselves.
 
 Of course, it's better to fix the program if you can!
 
-\subsec{Types}.
+\subsec{Types}
 
 \noindent
 Although PARI objects all have the C type \kbd{GEN}, we will freely use
@@ -127,7 +127,7 @@ declares a C variable of type \kbd{GEN}, but its ``value'' will be said to
 have type \typ{INT}, \typ{REAL}, etc. The meaning should always be clear from
 the context.
 
-\subsec{Type recursivity}.
+\subsec{Type recursivity}
 
 \noindent
 Conceptually, most PARI types are recursive. But the \kbd{GEN} type is a
@@ -159,7 +159,7 @@ implementation of \typ{MAT}s as horizontal lists of vertical vectors,
 \kbd{gcoeff(x,y)} is actually equivalent to \kbd{gmael(y,x)}. One should use
 \kbd{gcoeff} in matrix context, and \kbd{gmael} otherwise.
 
-\subsec{Variations on basic functions}.\label{se:low_level} In the library
+\subsec{Variations on basic functions}\label{se:low_level} In the library
 syntax descriptions in Chapter~3, we have only given the basic names of the
 functions. For example \kbd{gadd}$(x,y)$ assumes that $x$ and $y$ are
 \kbd{GEN}s, and \emph{creates} the result $x+y$ on the PARI stack. For most
@@ -226,7 +226,7 @@ are integer types (\typ{INT} but also C \kbd{long} and \kbd{ulong}) and a
 always yields a \typ{REAL} is you use \kbd{mulir}, where \kbd{gmul} returns the
 \typ{INT} \kbd{gen\_0} if the integer is $0$.
 
-\subsec{Portability: 32-bit / 64-bit architectures}.
+\subsec{Portability: 32-bit / 64-bit architectures}
 
 \noindent
 PARI supports both 32-bit and 64-bit based machines, but not simultaneously!
@@ -314,7 +314,7 @@ the user tries to interrupt a computation, the calculator may crash
 
 \section{Garbage collection}\label{se:garbage}\sidx{garbage collecting}
 
-\subsec{Why and how}.
+\subsec{Why and how}
 
 \noindent
 As we have seen, \kbd{pari\_init} allocates a big range of
@@ -520,7 +520,7 @@ elements of \kbd{gptr} without any further copying. This is subject to the
 same restrictions as \kbd{gerepile}, the only difference being that more than
 one address gets updated.
 
-\subsec{Examples}.
+\subsec{Examples}
 
 \subsubsec{gerepile}
 
@@ -717,7 +717,7 @@ iteration, we only do it when it seems to have become necessary. The macro
 (2^{n-1}+1)$ of the remaining stack space is exhausted ($1/2$ for $n=1$,
 $2/3$ for $n=2$).
 
-\subsec{Comments}.
+\subsec{Comments}
 
 First, \kbd{gerepile} has turned out to be a flexible and fast garbage
 collector for number-theoretic computations, which compares favorably with
@@ -738,7 +738,7 @@ rest is much easier.
 
 \section{Creation of PARI objects, assignments, conversions}
 
-\subsec{Creation of PARI objects}.\sidx{creation}
+\subsec{Creation of PARI objects}\sidx{creation}
 The basic function which creates a PARI object is
 
 \fun{GEN}{cgetg}{long l, long t}
@@ -889,7 +889,7 @@ by the tree representing~\kbd{x}, i.e.~\kbd{gsizeword(x)} multiplied by
 \kbd{sizeof(long)}. This is normally useless since PARI functions use
 a number of \emph{words} as input for lengths and precisions.
 
-\subsec{Assignments}.
+\subsec{Assignments}
 Firstly, if \kbd{x} and \kbd{y} are both declared as \kbd{GEN} (i.e.~pointers
 to something), the ordinary C assignment \kbd{y = x} makes perfect sense: we
 are just moving a pointer around. However, physically modifying either
@@ -957,7 +957,7 @@ is easier and more efficient to call
 a \typ{REAL} or \typ{COMPLEX} whose components are \typ{REAL} of length
 \kbd{prec}.
 
-\subsec{Copy}. It is also very useful to \idx{copy} a PARI object, not
+\subsec{Copy} It is also very useful to \idx{copy} a PARI object, not
 just by moving around a pointer as in the \kbd{y = x} example, but by
 creating a copy of the whole tree structure, without pre-allocating a
 possibly complicated \kbd{y} to use with \kbd{gaffect}. The function which
@@ -976,7 +976,7 @@ for \tet{gerepileupto} !
 Make sure at this point that you understand the difference between \kbd{y =
 x}, \kbd{y = gcopy(x)}, \kbd{y = shallowcopy(x)} and \kbd{gaffect(x,y)}.
 
-\subsec{Clones}.\sidx{clone}\label{se:clone}
+\subsec{Clones}\sidx{clone}\label{se:clone}
 Sometimes, it is more efficient to create a \emph{persistent} copy of a PARI
 object. This is not created on the stack but on the heap, hence unaffected by
 \tet{gerepile} and friends. The function which does this is called
@@ -991,7 +991,7 @@ A clone can be removed from the heap (thus destroyed) using
 \noindent No PARI object should keep references to a clone which has been
 destroyed!
 
-\subsec{Conversions}.\sidx{conversions}
+\subsec{Conversions}\sidx{conversions}
 The following functions convert C objects to PARI objects (creating them on
 the stack as usual):
 
@@ -1620,7 +1620,7 @@ deleted.
 Two important aspects have not yet been explained which are specific to
 library mode: input and output of PARI objects.
 
-\subsec{Input}.
+\subsec{Input}
 
 \noindent
 For \idx{input}, PARI provides a powerful high level function
@@ -1661,7 +1661,7 @@ file (from \tet{writebin}) containing more than one object, a \typ{VEC}
 containing them all is returned. This is because binary objects bypass the
 parser, hence reading them has no useful side effect.
 
-\subsec{Output to screen or file, output to string}.\sidx{output}
+\subsec{Output to screen or file, output to string}\sidx{output}
 
 General output functions return nothing but print a character string as a
 side effect. Low level routines are available to write on PARI output stream
@@ -1754,7 +1754,7 @@ seen so far:
 
 \fun{char *}{pari_vsprintf}{const char *fmt, va_list ap}
 
-\subsec{Output contexts}.
+\subsec{Output contexts}
 
 The behavior of the functions \tet{pari_putc}, \tet{pari_puts},
 \tet{pari_flush} and \tet{pari_printf} can be customized by modifying
@@ -1800,7 +1800,7 @@ Note that these functions are quite complicated, maintaining stacks of files
 to allow smooth error recovery and \kbd{gp} interaction. You will be better
 off not using them.
 
-\subsec{Errors}.\sidx{error}\kbdsidx{talker}
+\subsec{Errors}\sidx{error}\kbdsidx{talker}
 
 \noindent
 If you want your functions to issue error messages, you can use the general
@@ -1859,7 +1859,7 @@ The valid \emph{warning} keywords are \tet{warner} (general), \tet{warnprec}
     pari_warn(warnfile, "close", "afile");  /* error when closing "afile" */
 @eprog
 
-\subsec{Debugging output}.\sidx{debugging}\sidx{format}\label{se:dbg_output}
+\subsec{Debugging output}\sidx{debugging}\sidx{format}\label{se:dbg_output}
 
 For debugging output, you can use the standard output
 functions, \tet{output} and \tet{pari_printf} mainly. Corresponding to the
@@ -1904,7 +1904,7 @@ This pair is useful when your code uses high level functions like
 \kbd{DEBUGLEVEL}s. You may want to brace the corresponding function calls
 with a \kbd{dbg\_block()} and \kbd{dbg\_release()} pair to suppress those.
 
-\subsec{Timers and timing output}.
+\subsec{Timers and timing output}
 
 \noindent
 To profile your functions, you can use the PARI timer. The functions
