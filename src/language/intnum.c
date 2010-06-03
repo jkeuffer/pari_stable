@@ -624,7 +624,7 @@ sumnuminit(GEN sig, long m, long sgn, long prec)
 
 /* compute $\int_a^b f(t)dt$ with [a,b] compact and f nonsingular. */
 static GEN
-intn(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN tab, long prec)
+intn(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN tab)
 {
   GEN tabx0, tabw0, tabxp, tabwp;
   GEN bpa, bma, bmb, S, SP, SM;
@@ -702,7 +702,7 @@ intnsing(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN tab, long prec)
    (pi/h)t/(1-exp(-sinh(t))) for oscillating functions. */
 
 static GEN
-intninfpm(void *E, GEN (*eval)(GEN, void*), GEN a, long si, GEN tab, long prec)
+intninfpm(void *E, GEN (*eval)(GEN, void*), GEN a, long si, GEN tab)
 {
   GEN tabx0, tabw0, tabxp, tabwp, tabxm, tabwm;
   GEN S, SP, SM;
@@ -739,7 +739,7 @@ intninfpm(void *E, GEN (*eval)(GEN, void*), GEN a, long si, GEN tab, long prec)
  * satisfies f(-x) = conj(f(x)).
  * Usually flag < 0, but flag > 0 is used in sumnumall. */
 static GEN
-intninfinfintern(void *E, GEN (*eval)(GEN, void*), GEN tab, long flag, long prec)
+intninfinfintern(void *E, GEN (*eval)(GEN, void*), GEN tab, long flag)
 {
   GEN tabx0, tabw0, tabxp, tabwp, tabwm;
   GEN S, SP, SM;
@@ -752,7 +752,7 @@ intninfinfintern(void *E, GEN (*eval)(GEN, void*), GEN tab, long flag, long prec
   tabxp = TABxp(tab); tabwp = TABwp(tab); L = lg(tabxp);
   tabwm = TABwm(tab);
   spf = (lg(tabwm) == lg(tabwp));
-  S = flag > 0 ? real_0(prec + 1) : gmul(tabw0, eval(tabx0, E));
+  S = flag > 0 ? gen_0 : gmul(tabw0, eval(tabx0, E));
   if (spf) S = gmul2n(real_i(S), -1);
   for (k = 1; k <= m; k++)
   {
@@ -776,9 +776,9 @@ intninfinfintern(void *E, GEN (*eval)(GEN, void*), GEN tab, long flag, long prec
 }
 
 static GEN
-intninfinf(void *E, GEN (*eval)(GEN, void*), GEN tab, long prec)
+intninfinf(void *E, GEN (*eval)(GEN, void*), GEN tab)
 {
-  return intninfinfintern(E, eval, tab, -1, prec);
+  return intninfinfintern(E, eval, tab, -1);
 }
 
 /* general num integration routine int_a^b f(t)dt, where a and b are as follows:
@@ -1266,7 +1266,7 @@ intnum_i(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN tab, long prec)
 
   if (codea == f_REG && typ(a) == t_VEC) a = gel(a,1);
   if (codeb == f_REG && typ(b) == t_VEC) b = gel(b,1);
-  if (codea == f_REG && codeb == f_REG) return intn(E, eval, a, b, tab, prec);
+  if (codea == f_REG && codeb == f_REG) return intn(E, eval, a, b, tab);
   if (labs(codea) > labs(codeb)) { swap(a, b); lswap(codea, codeb); sgns = -1; }
   /* now labs(codea) <= labs(codeb) */
   if (codeb == f_SING)
@@ -1287,7 +1287,7 @@ intnum_i(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN tab, long prec)
   if (codea == f_REG && labs(codeb) != f_YOSCC
       && (labs(codeb) != f_YOSCS || gequal0(a)))
   {
-    S = intninfpm(E, eval, a, tmpi, tab, prec);
+    S = intninfpm(E, eval, a, tmpi, tab);
     return sgns*tmpi < 0 ? gneg(S) : S;
   }
   pi2 = Pi2n(1, prec); pis2 = Pi2n(-1, prec);
@@ -1306,8 +1306,8 @@ intnum_i(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN tab, long prec)
     tm = gmul(pi2p, tm);
     if (labs(codeb) == f_YOSCC) tm = gsub(tm, pis2p);
     res1 = codea==f_SING? intnsing(E, eval, a,  tm,  gel(tab,1), prec)
-                        : intn    (E, eval, a,  tm,  gel(tab,1), prec);
-    res2 = intninfpm(E, eval, tm, tmpi,gel(tab,2), prec);
+                        : intn    (E, eval, a,  tm,  gel(tab,1));
+    res2 = intninfpm(E, eval, tm, tmpi,gel(tab,2));
     if (tmpi < 0) res2 = gneg(res2);
     res1 = gadd(res1, res2);
     return sgns < 0 ? gneg(res1) : res1;
@@ -1325,25 +1325,25 @@ intnum_i(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN tab, long prec)
   kmb = f_getycplx(b, prec);
   if ((codea == f_YSLOW && codeb == f_YSLOW)
    || (codea == f_YFAST && codeb == f_YFAST && gequal(kma, kmb)))
-    S = intninfinf(E, eval, tab, prec);
+    S = intninfinf(E, eval, tab);
   else
   {
     GEN coupea = (codea == f_YOSCC)? gmul(pis2, kma): gen_0;
     GEN coupeb = (codeb == f_YOSCC)? gmul(pis2, kmb): gen_0;
     GEN coupe = codea == f_YOSCC ? coupea : coupeb;
-    SN = intninfpm(E, eval, coupe, -1, gel(tab,1), prec);
+    SN = intninfpm(E, eval, coupe, -1, gel(tab,1));
     if (codea != f_YOSCC)
-      SP = intninfpm(E, eval, coupeb, 1, gel(tab,2), prec);
+      SP = intninfpm(E, eval, coupeb, 1, gel(tab,2));
     else
     {
       if (codeb != f_YOSCC) pari_err(bugparier, "code error in intnum");
       if (gequal(kma, kmb))
-        SP = intninfpm(E, eval, coupeb, 1, gel(tab,2), prec);
+        SP = intninfpm(E, eval, coupeb, 1, gel(tab,2));
       else
       {
         tab = gel(tab,2);
-        SP = intninfpm(E, eval, coupeb, 1, gel(tab,2), prec);
-        SP = gadd(SP, intn(E, eval, coupea, coupeb, gel(tab,1), prec));
+        SP = intninfpm(E, eval, coupeb, 1, gel(tab,2));
+        SP = gadd(SP, intn(E, eval, coupea, coupeb, gel(tab,1)));
       }
     }
     S = gadd(SN, SP);
@@ -1782,17 +1782,17 @@ sumnumall(void *E, GEN (*eval)(GEN, void*), GEN a, GEN sig, GEN tab, long flag, 
   D.prec = prec;
   if (!flii)
     S = intnum_i(&D, sgn > 0? (flag ? &auxsum1 : &auxsum0)
-                             : (flag ? &auxsumalt1 : &auxsumalt0),
+                            : (flag ? &auxsumalt1 : &auxsumalt0),
                       gen_0, b, tab, prec);
   else
   {
     if (flag)
     {
       GEN emp = leafcopy(tab); TABwm(emp) = TABwp(emp);
-      S = gmul2n(intninfinf(&D, sgn > 0? &auxsum1: &auxsumalt1, emp, prec),-1);
+      S = gmul2n(intninfinf(&D, sgn > 0? &auxsum1: &auxsumalt1, emp),-1);
     }
     else
-      S = intninfinfintern(&D, &auxsum, tab, sgn, prec);
+      S = intninfinfintern(&D, &auxsum, tab, sgn);
   }
   if (flag) S = gneg(S);
   else
