@@ -1446,6 +1446,10 @@ gsubst(GEN x, long v, GEN y)
       z = cgetg_copy(x, &lx);
       for (i=1; i<lx; i++) gel(z,i) = gsubst(gel(x,i),v,y);
       return z;
+    case t_LIST:
+      z = listcreate();
+      list_data(z) = list_data(x)? gsubst(list_data(x),v,y): NULL;
+      return z;
   }
   return gcopy(x);
 }

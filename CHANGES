@@ -225,6 +225,7 @@ BA164- precision(0.E100) returned an invalid object.
        - remove extra digit in Morita's algorithm [ e.g. gamma(1/2+O(3^10)) ]
        - better threshold between Morita and Dwork's algorithm
 BA171- qfbhclassno(x) was wrong for x<0
+  172- subst(t_LIST,x,y) returned a copy without substituting [#969]
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
