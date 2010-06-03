@@ -1,4 +1,4 @@
-/* $Id: ZX.c 9634 2008-02-12 14:48:34Z kb $
+/* $Id$
 
 Copyright (C) 2007  The PARI group.
 
