@@ -3,7 +3,7 @@ it provides network-transparent source control. For ordinary users it provides
 a convenient way to obtain patched versions in between releases. Subversion
 clients are available for all major platforms: Unix, MacOS, Windows, see
 
-  http://subversion.tigris.org/project_packages.html
+  http://subversion.apache.org/packages.html
 
 In particular, the svn command-line client is readily available in all Linux
 distributions.
