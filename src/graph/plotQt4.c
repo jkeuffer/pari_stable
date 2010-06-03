@@ -1,4 +1,4 @@
-/* $Id: plotQt.c,v 1.18 2007-12-30 20:34:17 kb Exp $
+/* $Id$
 
 Copyright (C) 2000  The PARI group.
 
