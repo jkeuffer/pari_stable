@@ -25,5 +25,7 @@ l=List([10,9,8,7,6,5]); g(l)
 l
 
 subst(List([x,x^2+y]),x,1)
+substvec(List([x,y]), [x,y], [y,x])
+substpol(List([x^2,x^3]), x^2, y)
 
 getheap()[1]

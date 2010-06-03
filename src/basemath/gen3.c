@@ -1077,6 +1077,10 @@ mod_r(GEN x, long v, GEN T)
       y = cgetg_copy(x, &lx);
       for (i = 1; i < lx; i++) gel(y,i) = mod_r(gel(x,i),v,T);
       return y;
+    case t_LIST:
+      y = listcreate();
+      list_data(y) = list_data(x)? mod_r(list_data(x),v,T): NULL;
+      return y;
   }
   pari_err(typeer,"substpol");
   return NULL;/*not reached*/
@@ -1182,6 +1186,19 @@ gdeflate(GEN x, long v, long d)
       gel(z,i) = gdeflate(gel(x,i),v,d);
       if (!z[i]) return NULL;
     }
+    return z;
+  }
+  if (tx == t_LIST)
+  {
+    z = listcreate();
+    if (list_data(x))
+    {
+      GEN y = gdeflate(list_data(x),v,d);
+      if (!y) return NULL;
+      list_data(z) = y;
+    }
+    else
+      list_data(z) = NULL;
     return z;
   }
   pari_err(typeer,"gdeflate");

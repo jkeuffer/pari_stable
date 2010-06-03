@@ -23,7 +23,8 @@ Doc: replace the simple variable $y$ by the argument $z$ in the ``polynomial''
    *** subst: forbidden substitution by a non square matrix.
  @eprog\noindent
  If $x$ is a power series, $z$ must be either a polynomial, a power
- series, or a rational function.
+ series, or a rational function. Finally, if $x$ is a vector,
+ matrix or list, the substitution is applied to each individual entry.
 
  Use the function \kbd{substvec} to replace several variables at once,
  or the function \kbd{substpol} to replace a polynomial expression.

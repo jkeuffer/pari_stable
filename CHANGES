@@ -226,6 +226,7 @@ BA164- precision(0.E100) returned an invalid object.
        - better threshold between Morita and Dwork's algorithm
 BA171- qfbhclassno(x) was wrong for x<0
   172- subst(t_LIST,x,y) returned a copy without substituting [#969]
+       substvec & substpol didn't work on t_LISTs
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
