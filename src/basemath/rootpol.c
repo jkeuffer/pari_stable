@@ -1820,7 +1820,7 @@ mygprec_special(GEN x, long bit)
 }
 
 static GEN
-fix_roots1(GEN r, GEN *m, long bit)
+fix_roots1(GEN r)
 {
   long i, l = lg(r);
   GEN allr = cgetg(l, t_VEC);
@@ -1836,7 +1836,7 @@ fix_roots(GEN r, GEN *m, long h, long bit)
 {
   long i, j, k, l, prec;
   GEN allr, ro1;
-  if (h == 1) return fix_roots1(r, m, bit);
+  if (h == 1) return fix_roots1(r);
   ro1 = initRUgen(h, bit);
   prec = nbits2prec(bit);
   l = lg(r)-1;
