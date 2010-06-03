@@ -4305,6 +4305,7 @@ get_file(char *buf, int test(const char *))
   return 0;
 }
 
+#if defined(__EMX__) || defined(WINCE) || defined(_WIN32)
 static void
 swap_slash(char *s)
 {
@@ -4317,6 +4318,7 @@ swap_slash(char *s)
       if (*t == '/') *t = '\\';
   }
 }
+#endif
 
 static char *
 init_unique(const char *s)
