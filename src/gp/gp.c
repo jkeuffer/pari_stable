@@ -1600,12 +1600,12 @@ break_loop(int numerr)
   else
     print_errcontext("Break loop: type <Return> three times, or Control-d, to go back to GP)", NULL, NULL);
   term_color(c_NONE);
-  if (s_env.n==2)
-    prompt=BREAK_LOOP_PROMPT;
+  if (s_env.n == 2)
+    prompt = BREAK_LOOP_PROMPT;
   else
   {
-    sprintf(promptbuf,BREAK_LOOP_PROMPTM,s_env.n-1);
-    prompt=promptbuf;
+    sprintf(promptbuf, BREAK_LOOP_PROMPTM, s_env.n-1);
+    prompt = promptbuf;
   }
   oldinfile = pari_infile;
   pari_infile = stdin;
@@ -1619,6 +1619,7 @@ break_loop(int numerr)
       gp_context_restore(&rec);
       closure_err();
     }
+    term_color(c_NONE);
     if (! gp_read_line(&F, prompt))
     {
       if (pari_infile != stdin)
@@ -1642,8 +1643,9 @@ break_loop(int numerr)
     x = readseq(b->buf);
     if (x == gnil || is_silent(b->buf)) continue;
 
-    term_color(c_OUTPUT); gen_output(x, GP_DATA->fmt);
-    term_color(c_NONE); pari_putc('\n');
+    term_color(c_OUTPUT);
+    gen_output(x, GP_DATA->fmt);
+    pari_putc('\n');
   }
   s_env.n=nenv;
   pari_infile = oldinfile;
