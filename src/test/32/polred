@@ -10,4 +10,6 @@ x^3 + Mod(y^2 - 2, y^3 - y - 1)*x^2 + Mod(-y + 1, y^3 - y - 1)*x + Mod(y - 1
   *** nfinit: Warning: non-monic polynomial. Result of the form [nf,c].
 x^2 - 3646554366
 304
-Total time spent: 9980
+x^4 + 1000000000000000000000*x^2 + 1
+x^4 + 146077*x^2 + 2629386
+Total time spent: 2640
