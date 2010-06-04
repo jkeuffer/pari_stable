@@ -531,7 +531,11 @@ getentry(long n)
 {
   n = detag(n);
   if (tree[n].f!=Fentry)
+  {
+    if (tree[n].f==Fseq)
+      compile_err("unexpected character: ';'", tree[tree[n].y].str-1);
     compile_varerr(tree[n].str);
+  }
   return getfunc(n);
 }
 
@@ -1578,7 +1582,7 @@ compilenode(long n, int mode, long flag)
     compilemat(n, mode);
     return;
   case Frefarg:
-    compile_err("unexpected &",tree[n].str);
+    compile_err("unexpected character '&':",tree[n].str);
     return;
   case Fentry:
     {
@@ -1955,7 +1959,7 @@ optimizenode(long n)
     optimizemat(n);
     return;
   case Frefarg:
-    compile_err("unexpected &",tree[n].str);
+    compile_err("unexpected character '&':",tree[n].str);
     return;
   case Ffunction:
     {
