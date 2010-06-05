@@ -684,14 +684,14 @@ BA 48- function RgXQ_ratlift for reconstruction of rational functions.
 VB 50- mingw support
 VB 51- plotwin32 graphic engine
    52- plotQt4 graphic engine
-BA 53- low-level accessors functions gal_get_* for galoisinit objects.
+BA 53- low-level accessors functions gal_get_* for galoisinit objects
    54- libpari functions cvstop2, z_lval, z_lvalrem, z_pvalrem
    55- GP function externstr()
    56- library function ZC_reducemodmatrix, ZM_reducemodmatrix,
        ZC_reducemodlll, ZM_reducemodlll
-BA 57- libpari functions vecsmall_max and vecsmall_min.
+BA 57- libpari functions vecsmall_max and vecsmall_min
 BA 58- GP functions idealfrobenius and idealramgroups
-BA 59- library function Zn_sqrt
+BA 59- library functions Zn_sqrt, Zn_issquare
 
   Removed
     1- obsolete GP functions printp, printp1. Either replace them by

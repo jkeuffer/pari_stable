@@ -946,6 +946,7 @@ Up_sqrt(GEN x, GEN p, long e)
       switch(e) {
       case 1: break;
       case 2: if ((r&3) == 1) break;
+              return NULL;
       case 3: if (r == 1) break;
               return NULL;
       }
@@ -964,6 +965,20 @@ Up_sqrt(GEN x, GEN p, long e)
     if (e <= 1) return z;
     return gerepileuptoint(av, Zp_sqrtlift(x, z, p, e));
   }
+}
+
+/* x unit defined modulo p^e, e > 0 */
+static int
+Up_issquare(GEN x, GEN p, long e)
+{
+  if (equaliu(p,2))
+  {
+    long r = signe(x)>=0?mod8(x):8-mod8(x);
+    if (e==1) return 1;
+    if (e==2) return (r&3L) == 1;
+    return r == 1;
+  }
+  return kronecker(x,p)==1;
 }
 
 GEN
@@ -1030,6 +1045,32 @@ Zn_sqrt(GEN d, GEN fn)
       gerepileall(btop, 2, &b, &m);
   }
   return gerepileupto(ltop, b);
+}
+
+long
+Zn_issquare(GEN d, GEN fn)
+{
+  long j, np;
+  if (typ(d) != t_INT)
+    pari_err(typeer, "Zn_issquare");
+  if (typ(fn) == t_INT)
+    fn = Z_factor(absi(fn));
+  else if (!is_Z_factor(fn))
+    pari_err(typeer, "Zn_issquare");
+  np = lg(gel(fn, 1))-1;
+  for (j = 1; j <= np; ++j)
+  {
+    GEN  r, p = gcoeff(fn, j, 1);
+    long e = itos(gcoeff(fn, j, 2));
+    long v = Z_pvalrem(d,p,&r);
+    if (v < e)
+    {
+      if (odd(v)) return 0;
+      if (!Up_issquare(r, p, e-v))
+        return 0;
+    }
+  }
+  return 1;
 }
 
 static GEN

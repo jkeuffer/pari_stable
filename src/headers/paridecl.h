@@ -2441,6 +2441,7 @@ GEN     Qp_exp(GEN x);
 GEN     Qp_log(GEN x);
 GEN     Qp_sqrt(GEN x);
 GEN     Qp_sqrtn(GEN x, GEN n, GEN *zetan);
+long    Zn_issquare(GEN x, GEN n);
 GEN     Zn_sqrt(GEN x, GEN n);
 GEN     agm(GEN x, GEN y, long prec);
 GEN     consteuler(long prec);
