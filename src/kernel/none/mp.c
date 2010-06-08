@@ -1308,6 +1308,7 @@ mulliifft_params(long len, long *k, long *mod, long *bs, long *n, ulong *ord)
 
 /* Zf_: arithmetic in ring Z/MZ where M= 2^(BITS_IN_LONG*mod)+1
  * for some mod.
+ * Do not garbage collect.
  */
 
 static GEN
@@ -1345,13 +1346,8 @@ Zf_red_destroy(GEN z, GEN M)
   return z;
 }
 
-static GEN
-Zf_shift(GEN a, ulong s, GEN M)
-{
-  pari_sp av = avma;
-  GEN z = Zf_red_destroy(shifti(a, s), M);
-  return gerepileuptoint(av, z);
-}
+INLINE GEN
+Zf_shift(GEN a, ulong s, GEN M) { return Zf_red_destroy(shifti(a, s), M); }
 
 /*
  Multiply by sqrt(2)^s
@@ -1361,7 +1357,6 @@ Zf_shift(GEN a, ulong s, GEN M)
 static GEN
 Zf_mulsqrt2(GEN a, ulong s, ulong ord, GEN M)
 {
-  pari_sp av = avma;
   ulong hord = ord>>1;
   if (!signe(a)) return gen_0;
   if (odd(s)) /* Multiply by 2^(s/2) */
@@ -1372,27 +1367,16 @@ Zf_mulsqrt2(GEN a, ulong s, ulong ord, GEN M)
     s--;
   }
   if (s < hord)
-    a = Zf_shift(a, s>>1, M);
+    return Zf_shift(a, s>>1, M);
   else
-    a = subii(M,Zf_shift(a, (s-hord)>>1, M));
-  return gerepileuptoint(av, a);
+    return subii(M,Zf_shift(a, (s-hord)>>1, M));
 }
 
-static GEN
-Zf_sqr(GEN a, GEN M)
-{
-  pari_sp av = avma;
-  GEN z = Zf_red_destroy(sqri(a), M);
-  return gerepileuptoint(av, z);
-}
+INLINE GEN
+Zf_sqr(GEN a, GEN M) { return Zf_red_destroy(sqri(a), M); }
 
-static GEN
-Zf_mul(GEN a, GEN b, GEN M)
-{
-  pari_sp av = avma;
-  GEN z = Zf_red_destroy(mulii(a,b), M);
-  return gerepileuptoint(av, z);
-}
+INLINE GEN
+Zf_mul(GEN a, GEN b, GEN M) { return Zf_red_destroy(mulii(a,b), M); }
 
 /* In place, bit reversing FFT */
 static void
