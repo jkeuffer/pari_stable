@@ -3717,6 +3717,12 @@ coefficients are \kbd{ZX}s or \typ{INT}s, reduce them to \kbd{FpXQ}s.
 \fun{GEN}{FpXQYQ_pow}{GEN x, GEN n, GEN S, GEN T, GEN p}, \kbd{x} and
 \kbd{T} being \kbd{FpXQX}s, returns $\kbd{x}^\kbd{n}$ modulo \kbd{S}.
 
+\fun{GEN}{FqXQ_mul}{GEN x, GEN y, GEN S, GEN T, GEN p}, \kbd{x}, \kbd{y} and
+\kbd{T} being \kbd{FqX}s, returns $\kbd{x}\*\kbd{y}$ modulo \kbd{S}.
+
+\fun{GEN}{FqXQ_sqr}{GEN x, GEN S, GEN T, GEN p}, \kbd{x} and
+\kbd{T} being \kbd{FqX}s, returns $\kbd{x}^2$ modulo \kbd{S}.
+
 \fun{GEN}{FqXQ_pow}{GEN x, GEN n, GEN S, GEN T, GEN p}, \kbd{x} and
 \kbd{T} being \kbd{FqX}s, returns $\kbd{x}^\kbd{n}$ modulo \kbd{S}.
 
