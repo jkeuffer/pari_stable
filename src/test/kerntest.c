@@ -6,6 +6,7 @@ size_t memused = 0;
 ulong  DEBUGLEVEL,DEBUGMEM = 0;
 const double LOG10_2 = 0.;
 const long lontyp[] = {0};
+VOLATILE int PARI_SIGINT_block, PARI_SIGINT_pending;
 
 void specinit()
 {
