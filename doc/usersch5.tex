@@ -3699,15 +3699,23 @@ coefficients are \kbd{ZX}s or \typ{INT}s, reduce them to \kbd{FpXQ}s.
 
 \fun{GEN}{FpXQX_divrem}{GEN x, GEN y, GEN T, GEN p, GEN *pr}
 
+\fun{GEN}{FpXQX_rem}{GEN x, GEN y, GEN T, GEN p}
+
+\fun{GEN}{FpXQXV_prod}{GEN V, GEN T, GEN p}, \kbd{V} being a vector of
+\kbd{FpXQX}, returns their product.
+
 \fun{GEN}{FpXQX_gcd}{GEN x, GEN y, GEN T, GEN p}
 
 \fun{GEN}{FpXQX_extgcd}{GEN x, GEN y, GEN T, GEN p, GEN *ptu, GEN *ptv}
 
+\fun{GEN}{FpXQYQ_mul}{GEN x, GEN y, GEN S, GEN T, GEN p}, \kbd{x}, \kbd{y} and
+\kbd{T} being \kbd{FpXQX}s, returns $\kbd{x}\*\kbd{y}$ modulo \kbd{S}.
+
+\fun{GEN}{FpXQYQ_sqr}{GEN x, GEN S, GEN T, GEN p}, \kbd{x} and
+\kbd{T} being \kbd{FpXQX}s, returns $\kbd{x}^2$ modulo \kbd{S}.
+
 \fun{GEN}{FpXQYQ_pow}{GEN x, GEN n, GEN S, GEN T, GEN p}, \kbd{x} and
 \kbd{T} being \kbd{FpXQX}s, returns $\kbd{x}^\kbd{n}$ modulo \kbd{S}.
-
-\fun{GEN}{FpXQXV_prod}{GEN V, GEN T, GEN p}, \kbd{V} being a vector of
-\kbd{FpXQX}, returns their product.
 
 \fun{GEN}{FqXQ_pow}{GEN x, GEN n, GEN S, GEN T, GEN p}, \kbd{x} and
 \kbd{T} being \kbd{FqX}s, returns $\kbd{x}^\kbd{n}$ modulo \kbd{S}.

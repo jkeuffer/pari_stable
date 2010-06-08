@@ -684,6 +684,21 @@ FpXYQQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p)
   return gerepileupto(av, y);
 }
 
+GEN
+FpXQYQ_mul(GEN x, GEN y, GEN S, GEN T, GEN p) {
+  GEN kx = mod_to_Kronecker(x, T);
+  GEN ky = mod_to_Kronecker(y, T);
+  GEN t = Kronecker_to_FpXQX(ZX_mul(kx, ky), T, p);
+  return FpXQX_rem(t, S, T, p);
+}
+
+GEN
+FpXQYQ_sqr(GEN x, GEN S, GEN T, GEN p) {
+  GEN kx = mod_to_Kronecker(x, T);
+  GEN t = Kronecker_to_FpXQX(ZX_sqr(kx), T, p);
+  return FpXQX_rem(t, S, T, p);
+}
+
 typedef struct {
   GEN T, p, S;
 } kronecker_muldata;
@@ -692,9 +707,9 @@ static GEN
 _FpXQYQ_red(void *data, GEN x)
 {
   kronecker_muldata *D = (kronecker_muldata*)data;
-  GEN t = Kronecker_to_FpXQX(x, D->T,D->p);
-  t = FpXQX_divrem(t, D->S,D->T,D->p, ONLY_REM);
-  return mod_to_Kronecker(t,D->T);
+  GEN t = Kronecker_to_FpXQX(x, D->T, D->p);
+  t = FpXQX_rem(t, D->S, D->T, D->p);
+  return mod_to_Kronecker(t, D->T);
 }
 static GEN
 _FpXQYQ_mul(void *data, GEN x, GEN y) {
@@ -880,7 +895,7 @@ FqX_div(GEN x, GEN y, GEN T, GEN p)
 GEN
 FqX_rem(GEN x, GEN y, GEN T, GEN p)
 {
-  return T? FpXQX_divrem(x,y,T,p,ONLY_REM): FpX_divrem(x,y,p,ONLY_REM);
+  return T? FpXQX_rem(x,y,T,p): FpX_rem(x,y,p);
 }
 GEN
 FqX_divrem(GEN x, GEN y, GEN T, GEN p, GEN *z)
@@ -1669,6 +1684,12 @@ FpXQX_divrem(GEN x, GEN y, GEN T, GEN p, GEN *pr)
   if (!sx) (void)FpXQX_renormalize(rem, lr);
   if (pr == ONLY_REM) return gerepileupto(av0,rem);
   *pr = rem; return z-2;
+}
+
+GEN
+FpXQX_rem(GEN x, GEN y, GEN T, GEN p)
+{
+  return FpXQX_divrem(x, y, T, p, ONLY_REM);
 }
 
 /* x and y in Z[Y][X], return lift(gcd(x mod T,p, y mod T,p)). Set u and v st
