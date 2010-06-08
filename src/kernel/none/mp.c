@@ -1304,9 +1304,6 @@ mulliifft_params(long len, long *k, long *mod, long *bs, long *n, ulong *ord)
       *mod=((*mod+(1L<<r)-1)>>r)<<r;
   } while(*mod>=3**bs);
   *ord= 4**mod*BITS_IN_LONG;
-  if (DEBUGLEVEL>=9)
-    fprintferr("len=%ld k=%ld mod=%ld, bs=%ld, n=%ld ord=%ld\n",
-                len,*k,*mod,*bs,*n,*ord);
 }
 
 /* Zf_: arithmetic in ring Z/MZ where M= 2^(BITS_IN_LONG*mod)+1
@@ -1506,25 +1503,20 @@ sqrispec_fft(GEN a, long na)
   GEN  FFT, M;
   long i;
   ulong o, ord;
-  pari_timer T;
 
   mulliifft_params(len,&k,&mod,&bs,&n,&ord);
   o = ord>>k;
   M = int2n(mod*BITS_IN_LONG);
   M[2+mod] = 1;
-  if (DEBUGLEVEL>=9) TIMER(&T);
   FFT = muliifft_spliti(a, na, bs, n, mod);
   muliifft_dit(o, ord, M, FFT, 0, n);
-  if (DEBUGLEVEL>=9) msgTIMER(&T,"FFT");
   av = avma;
   for(i=1; i<=n; i++)
   {
     affii(Zf_sqr(gel(FFT,i), M), gel(FFT,i));
     avma=av;
   }
-  if (DEBUGLEVEL>=9) msgTIMER(&T,"sqr");
   muliifft_dis(ord-o, ord, M, FFT, 0, n);
-  if (DEBUGLEVEL>=9) msgTIMER(&T,"IFT");
   for(i=1; i<=n; i++)
   {
     affii(Zf_shift(gel(FFT,i), (ord>>1)-k, M), gel(FFT,i));
@@ -1542,29 +1534,24 @@ muliispec_fft(GEN a, GEN b, long na, long nb)
   GEN FFT, FFTb, M;
   long i;
   ulong o, ord;
-  pari_timer T;
 
   mulliifft_params(len,&k,&mod,&bs,&n,&ord);
   o = ord>>k;
   M = int2n(mod*BITS_IN_LONG);
   M[2+mod] = 1;
-  if (DEBUGLEVEL>=9) TIMER(&T);
   FFT = muliifft_spliti(a, na, bs, n, mod);
   av=avma;
   muliifft_dit(o, ord, M, FFT, 0, n);
   FFTb = muliifft_spliti(b, nb, bs, n, mod);
   av2 = avma;
   muliifft_dit(o, ord, M, FFTb, 0, n);
-  if (DEBUGLEVEL>=9) msgTIMER(&T,"FFT");
   for(i=1; i<=n; i++)
   {
     affii(Zf_mul(gel(FFT,i), gel(FFTb,i), M), gel(FFT,i));
     avma=av2;
   }
   avma=av;
-  if (DEBUGLEVEL>=9) msgTIMER(&T,"mul");
   muliifft_dis(ord-o, ord, M, FFT, 0, n);
-  if (DEBUGLEVEL>=9) msgTIMER(&T,"IFT");
   for(i=1; i<=n; i++)
   {
     affii(Zf_shift(gel(FFT,i),(ord>>1)-k,M), gel(FFT,i));
