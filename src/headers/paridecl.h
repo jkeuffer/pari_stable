@@ -2310,6 +2310,7 @@ GEN     FqX_red(GEN z, GEN T, GEN p);
 GEN     FqX_rem(GEN x, GEN y, GEN T, GEN p);
 GEN     FqX_sqr(GEN x, GEN T, GEN p);
 GEN     FqX_translate(GEN P, GEN c, GEN T, GEN p);
+GEN     FqXQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p);
 GEN     QX_disc(GEN x);
 GEN     QX_gcd(GEN a,GEN b);
 GEN     QX_resultant(GEN A, GEN B);

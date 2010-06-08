@@ -887,6 +887,13 @@ FqX_divrem(GEN x, GEN y, GEN T, GEN p, GEN *z)
 {
   return T? FpXQX_divrem(x,y,T,p,z): FpX_divrem(x,y,p,z);
 }
+
+GEN
+FqXQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p)
+{
+  return T? FpXQYQ_pow(x,n,S,T,p): FpXQ_pow(x,n,T,p);
+}
+
 /* P(X + c), c an Fq */
 GEN
 FqX_translate(GEN P, GEN c, GEN T, GEN p)

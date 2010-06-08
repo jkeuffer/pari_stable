@@ -3709,6 +3709,9 @@ coefficients are \kbd{ZX}s or \typ{INT}s, reduce them to \kbd{FpXQ}s.
 \fun{GEN}{FpXQXV_prod}{GEN V, GEN T, GEN p}, \kbd{V} being a vector of
 \kbd{FpXQX}, returns their product.
 
+\fun{GEN}{FqXQ_pow}{GEN x, GEN n, GEN S, GEN T, GEN p}, \kbd{x} and
+\kbd{T} being \kbd{FqX}s, returns $\kbd{x}^\kbd{n}$ modulo \kbd{S}.
+
 \fun{GEN}{FqV_roots_to_pol}{GEN V, GEN T, GEN p, long v},
 \kbd{V} being a vector of \kbd{Fq}s, returns the monic \kbd{FqX}
 $\prod_i (\kbd{pol\_x[v]} - \kbd{V[i]})$.
