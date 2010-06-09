@@ -1614,6 +1614,7 @@ int     gequal(GEN x, GEN y);
 int     gequalsg(long s, GEN x);
 long    gexpo(GEN x);
 long    ggval(GEN x, GEN p);
+int     gidentical(GEN x, GEN y);
 long    glength(GEN x);
 GEN     gmax(GEN x, GEN y);
 GEN     gmaxgs(GEN x, long y);

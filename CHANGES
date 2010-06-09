@@ -694,6 +694,7 @@ BA 53- low-level accessors functions gal_get_* for galoisinit objects
 BA 57- libpari functions vecsmall_max and vecsmall_min
 BA 58- GP functions idealfrobenius and idealramgroups
 BA 59- library functions Zn_sqrt, Zn_issquare
+   60- library function gidentical
 
   Removed
     1- obsolete GP functions printp, printp1. Either replace them by

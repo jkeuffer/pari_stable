@@ -76,15 +76,15 @@ int
 FF_samefield(GEN x, GEN y)
 {
   return x[1] == y[1] && equalii(gel(x,4),gel(y,4))
-                      && gequal(gel(x,3),gel(y,3));
+                      && gidentical(gel(x,3),gel(y,3));
 }
 
 int
 FF_equal(GEN x, GEN y)
 {
   return x[1] == y[1] && equalii(gel(x,4),gel(y,4))
-                      && gequal(gel(x,3),gel(y,3))
-                      && gequal(gel(x,2),gel(y,2));
+                      && gidentical(gel(x,3),gel(y,3))
+                      && gidentical(gel(x,2),gel(y,2));
 }
 
 int

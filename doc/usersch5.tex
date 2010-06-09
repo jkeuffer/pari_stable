@@ -6112,6 +6112,12 @@ means that \kbd{x - y} was successfully computed and that
 \typ{COL} and an empty \typ{VEC} are not equal but are both equal to
 \kbd{gen\_0}.
 
+\fun{long}{gidentical}{GEN x, GEN y} returns 1 (true) if \kbd{x} is identical
+to~\kbd{y}, 0~otherwise. In particular, the types and length of \kbd{x} and
+\kbd{y} must be equal. This test is much stricter than \tet{gequal}, in
+particular, \typ{REAL} with different accuracies are tested different. This
+relation is transitive.
+
 \subsec{Comparison with a small integer}
 
 \fun{int}{isexactzero}{GEN x} returns 1 (true) if \kbd{x} is exactly equal

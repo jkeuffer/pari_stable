@@ -594,6 +594,89 @@ lexcmp(GEN x, GEN y)
 /*****************************************************************/
 /* x,y t_POL */
 static int
+polidentical(GEN x, GEN y)
+{
+  long lx;
+  if (x[1] != y[1]) return 0;
+  lx = lg(x); if (lg(y) != lg(x)) return 0;
+  for (lx--; lx >= 2; lx--) if (!gidentical(gel(x,lx), gel(y,lx))) return 0;
+  return 1;
+}
+
+/* typ(x) = typ(y) = t_VEC/COL/MAT */
+static int
+vecidentical(GEN x, GEN y)
+{
+  long i;
+  if ((x[0] ^ y[0]) & (TYPBITS|LGBITS)) return 0;
+  for (i = lg(x)-1; i; i--)
+    if (! gidentical(gel(x,i),gel(y,i)) ) return 0;
+  return 1;
+}
+static int
+identicalrr(GEN x, GEN y)
+{
+  long i, lx = lg(x);
+  if (lg(y) != lx) return 0;
+  i=2; while (i<lx && x[i]==y[i]) i++;
+  return (i == lx);
+}
+
+int
+gidentical(GEN x, GEN y)
+{
+  long tx;
+
+  if (x == y) return 1;
+  tx = typ(x); if (typ(y) != tx) return 0;
+  switch(tx)
+  {
+    case t_INT:
+      return equalii(x,y);
+
+    case t_REAL:
+      return identicalrr(x,y);
+
+    case t_FRAC: case t_INTMOD:
+      return equalii(gel(x,2), gel(y,2)) && equalii(gel(x,1), gel(y,1));
+
+    case t_COMPLEX:
+      return gidentical(gel(x,2),gel(y,2)) && gidentical(gel(x,1),gel(y,1));
+    case t_POLMOD:
+      return gidentical(gel(x,2),gel(y,2)) && polidentical(gel(x,1),gel(y,1));
+    case t_POL:
+      return polidentical(x,y);
+
+    case t_FFELT:
+      return FF_equal(x,y);
+
+    case t_QFR:
+          if (!identicalrr(gel(x,4),gel(y,4))) return 0; /* fall through */
+    case t_QFI:
+      return equalii(gel(x,1),gel(y,1))
+          && equalii(gel(x,2),gel(y,2))
+          && equalii(gel(x,3),gel(y,3));
+
+    case t_QUAD:
+      return ZX_equal(gel(x,1),gel(y,1))
+          && gidentical(gel(x,2),gel(y,2))
+          && gidentical(gel(x,3),gel(y,3));
+
+    case t_RFRAC:
+      return gidentical(gel(x,1),gel(y,1)) && gidentical(gel(x,2),gel(y,2));
+
+    case t_STR:
+      return !strcmp(GSTR(x),GSTR(y));
+    case t_VEC: case t_COL: case t_MAT:
+      return vecidentical(x,y);
+    case t_VECSMALL:
+      return zv_equal(x,y);
+  }
+  return 0;
+}
+
+/* x,y t_POL */
+static int
 polequal(GEN x, GEN y)
 {
   long lx, ly;
