@@ -3007,13 +3007,13 @@ fprintferr(const char* fmt, ...)
 /**                            FILES                              **/
 /*******************************************************************/
 /* to cache '~' expansion */
-static char *homedir = NULL;
+static THREAD char *homedir;
 /* last file read successfully from try_name() */
-static char *last_filename = NULL;
+static THREAD char *last_filename;
 /* stack of temporary files (includes all infiles + some output) */
-static pariFILE *last_tmp_file = NULL;
+static THREAD pariFILE *last_tmp_file;
 /* stack of "permanent" (output) files */
-static pariFILE *last_file = NULL;
+static THREAD pariFILE *last_file;
 
 pariFILE *
 pari_last_tmp_file() { return last_tmp_file; }
@@ -3188,18 +3188,30 @@ kill_file_stack(pariFILE **s)
 }
 
 void
-killallfiles(int leaving)
+killallfiles(void)
 {
-  if (leaving)
-  {
-    popinfile(); /* look for leaks */
-    kill_file_stack(&last_file);
-    if (last_filename) pari_free(last_filename);
-    if (homedir) pari_free(homedir);
-    if (pari_logfile) { fclose(pari_logfile); pari_logfile = NULL; }
-  }
   kill_file_stack(&last_tmp_file);
   pari_infile = stdin;
+}
+
+void
+pari_init_files(void)
+{
+  last_filename = NULL;
+  last_tmp_file = NULL;
+  homedir = NULL;
+  last_file=NULL;
+}
+
+void
+pari_close_files(void)
+{
+  popinfile(); /* look for leaks */
+  kill_file_stack(&last_file);
+  if (last_filename) pari_free(last_filename);
+  if (homedir) pari_free(homedir);
+  if (pari_logfile) { fclose(pari_logfile); pari_logfile = NULL; }
+  killallfiles();
 }
 
 static int

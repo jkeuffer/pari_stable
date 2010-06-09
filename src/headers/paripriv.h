@@ -500,7 +500,7 @@ void    pari_init_seadata(void);
 
 const char * eng_ord(long i);
 char *  env_ok(const char *s);
-void    killallfiles(int check);
+void    killallfiles(void);
 pariFILE* newfile(FILE *f, const char *name, int type);
 int     popinfile(void);
 GEN     readobj(FILE *f, int *ptc);

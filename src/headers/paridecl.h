@@ -1421,6 +1421,8 @@ pariFILE* pari_fopengz(const char *s);
 void    pari_fprintf(FILE *file, const char *fmt, ...);
 GEN     pari_get_hist(long p);
 char*   pari_get_homedir(const char *user);
+void    pari_init_files(void);
+void    pari_close_files(void);
 int     pari_is_dir(const char *name);
 int     pari_is_file(const char *name);
 ulong   pari_nb_hist(void);

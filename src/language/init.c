@@ -637,6 +637,7 @@ pari_thread_init(void)
   pari_init_parser();
   pari_init_compiler();
   pari_init_evaluator();
+  pari_init_files();
 }
 
 void
@@ -647,6 +648,7 @@ pari_thread_close(void)
   pari_close_parser();
   pari_close_seadata();
   pari_close_floats();
+  pari_close_files();
 }
 
 GEN
@@ -730,7 +732,6 @@ pari_close_opts(ulong init_opts)
   pari_thread_close();
 
   while (cur_block) killblock(cur_block);
-  killallfiles(1);
   free((void*)functions_hash);
   free((void*)bot);
   free((void*)diffptr);
@@ -852,7 +853,7 @@ err_recover(long numerr)
   parsestate_reset();
   initout(0);
   dbg_release();
-  killallfiles(0);
+  killallfiles();
   s_ERR_CATCH.n = 0; /* untrapped error: kill all error handlers */
   global_err_data = NULL;
   fprintferr("\n"); flusherr();
