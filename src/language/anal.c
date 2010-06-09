@@ -600,7 +600,10 @@ pari_lex(union token_value *yylval, struct node_loc *yylloc, char **lex)
     switch (**lex)
     {
     case '=':
-      *lex+=2; yylloc->end = *lex; return KEQ;
+      if ((*lex)[2]=='=')
+      { *lex+=3; yylloc->end = *lex; return KID; }
+      else
+      { *lex+=2; yylloc->end = *lex; return KEQ; }
     case '>':
       *lex+=2; yylloc->end = *lex; return KGE;
     case '<':

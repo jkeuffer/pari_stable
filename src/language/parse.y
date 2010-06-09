@@ -40,6 +40,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 %token KMODE "%="
 %token KAND  "&&"
 %token KOR   "||"
+%token KID   "==="
 %token KEQ   "=="
 %token KNE   "!="
 %token KGE   ">="
@@ -134,6 +135,7 @@ expr: KINTEGER %prec INT  {$$=newintnode(&@1);}
     | expr '|'   expr  {$$=newopcall(OPor,$1,$3,&@$);}
     | expr "&&"  expr  {$$=newopcall(OPand,$1,$3,&@$);}
     | expr '&'   expr  {$$=newopcall(OPand,$1,$3,&@$);}
+    | expr "===" expr  {$$=newopcall(OPid,$1,$3,&@$);}
     | expr "=="  expr  {$$=newopcall(OPeq,$1,$3,&@$);}
     | expr "!="  expr  {$$=newopcall(OPne,$1,$3,&@$);}
     | expr ">="  expr  {$$=newopcall(OPge,$1,$3,&@$);}
