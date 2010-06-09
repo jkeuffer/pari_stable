@@ -86,10 +86,25 @@ const long CATCH_ALL = 1;
 /*********************************************************************/
 /*#define DEBUG*/
 static THREAD long next_block;
-static THREAD GEN cur_block=NULL; /* current block in block list */
+static THREAD GEN cur_block; /* current block in block list */
 #ifdef DEBUG
-static THREAD long NUM = 0;
+static THREAD long NUM;
 #endif
+
+static void
+pari_init_blocks(void)
+{
+  next_block = 0; cur_block = 0;
+#ifdef DEBUG
+  NUM = 0;
+#endif
+}
+
+static void
+pari_close_blocks(void)
+{
+  while (cur_block) killblock(cur_block);
+}
 
 /* Return x, where:
  * x[-4]: reference count
@@ -497,7 +512,6 @@ pari_init_defaults(void)
   if (!pari_datadir) pari_datadir = (char*)GPDATADIR;
   if (pari_datadir) pari_datadir = pari_strdup(pari_datadir);
 
-  next_block = 0;
   for (i=0; i<c_LAST; i++) gp_colors[i] = c_NONE;
   pari_colormap = NULL; pari_graphcolors = NULL;
   (void)sd_graphcolormap("[\"white\",\"black\",\"blue\",\"violetred\",\"red\",\"green\",\"grey\",\"gainsboro\"]", d_SILENT);
@@ -632,6 +646,7 @@ pari_thread_free(struct pari_thread *t)
 void
 pari_thread_init(void)
 {
+  pari_init_blocks();
   pari_init_errcatch();
   pari_init_rand();
   pari_init_floats();
@@ -645,12 +660,13 @@ pari_thread_init(void)
 void
 pari_thread_close(void)
 {
+  pari_close_files();
   pari_close_evaluator();
   pari_close_compiler();
   pari_close_parser();
   pari_close_seadata();
   pari_close_floats();
-  pari_close_files();
+  pari_close_blocks();
 }
 
 GEN
@@ -733,7 +749,6 @@ pari_close_opts(ulong init_opts)
   free((void*)primetab);
   pari_thread_close();
 
-  while (cur_block) killblock(cur_block);
   free((void*)functions_hash);
   free((void*)bot);
   free((void*)diffptr);
