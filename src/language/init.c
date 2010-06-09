@@ -50,7 +50,6 @@ entree  **varentries;
 
 THREAD pari_sp bot, top, avma;
 THREAD size_t memused;
-void   *global_err_data = NULL;
 
 static void ** MODULES, ** OLDMODULES;
 static pari_stack s_MODULES, s_OLDMODULES;
@@ -76,6 +75,8 @@ typedef struct {
 
 static THREAD pari_stack s_ERR_CATCH;
 static THREAD cell *ERR_CATCH;
+THREAD void *global_err_data;
+
 const long CATCH_ALL = 1;
 
 /*********************************************************************/
@@ -583,6 +584,7 @@ static void
 pari_init_errcatch(void)
 {
   stack_init(&s_ERR_CATCH, sizeof(cell), (void**)&ERR_CATCH);
+  global_err_data = NULL;
 }
 
 /*********************************************************************/
