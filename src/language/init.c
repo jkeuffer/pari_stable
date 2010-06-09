@@ -44,7 +44,7 @@ ulong   DEBUGFILES, DEBUGLEVEL, DEBUGMEM;
 ulong   compatible, precreal, precdl, logstyle;
 gp_data *GP_DATA;
 
-GEN pari_colormap = NULL, pari_graphcolors = NULL;
+GEN pari_colormap, pari_graphcolors;
 
 entree  **varentries;
 
@@ -498,6 +498,7 @@ pari_init_defaults(void)
 
   next_block = 0;
   for (i=0; i<c_LAST; i++) gp_colors[i] = c_NONE;
+  pari_colormap = NULL; pari_graphcolors = NULL;
   (void)sd_graphcolormap("[\"white\",\"black\",\"blue\",\"violetred\",\"red\",\"green\",\"grey\",\"gainsboro\"]", d_SILENT);
   (void)sd_graphcolors("[4, 5]", d_SILENT);
 }
