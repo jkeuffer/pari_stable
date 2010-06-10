@@ -519,7 +519,7 @@ dbg_all(const char *phase, long s, long n)
 /* Imaginary Quadratic fields */
 
 static void
-imag_relations(struct buch_quad *B, long need, long *pc, long lim, ulong LIMC, GEN mat)
+imag_relations(struct buch_quad *B, long need, long *pc, ulong LIMC, GEN mat)
 {
   long lgsub = lg(B->subFB), current = *pc, nbtest = 0, s = 0;
   long i, fpc;
@@ -960,7 +960,7 @@ MORE:
       gel(mat,i) = const_vecsmall(BQ.KC, 0);
       gel(extraC,i) = gen_0;
     }
-    imag_relations(&BQ, need - triv, &current, s,LIMC,mat + triv);
+    imag_relations(&BQ, need - triv, &current, LIMC,mat + triv);
   }
 
   if (!W)

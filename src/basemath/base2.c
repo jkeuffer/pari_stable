@@ -3004,7 +3004,7 @@ get_d(GEN nf, GEN pol, GEN A)
 GEN
 rnfallbase(GEN nf, GEN *ppol, GEN *pD, GEN *pd, GEN *pf)
 {
-  long i, n, N, l;
+  long i, n, l;
   GEN A, nfT, fa, E, P, I, z, d, D, disc, pol = *ppol;
 
   nf = checknf(nf); nfT = nf_get_pol(nf);
@@ -3012,7 +3012,6 @@ rnfallbase(GEN nf, GEN *ppol, GEN *pD, GEN *pd, GEN *pf)
   if (!gequal1(leading_term(pol)))
     pari_err(impl,"non-monic relative polynomials");
 
-  N = degpol(nfT);
   n = degpol(pol);
   disc = RgX_disc(pol); pol = lift_intern(pol);
   fa = idealfactor(nf, disc);
