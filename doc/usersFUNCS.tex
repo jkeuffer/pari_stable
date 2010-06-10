@@ -400,7 +400,7 @@ precision is taken from the \kbd{prec} parameter which every transcendental
 function has.  As in \kbd{gp}, this \kbd{prec} is not used when the
 argument to a function is already inexact.
 Note that the argument \var{prec} stands for the length in words of a real
-number, including codewords.
+number, including codewords. Hence we must have $\var{prec} \geq 3$.
 
 Some accuracies attainable on 32-bit machines cannot be attained
 on 64-bit machines for parity reasons. For example the default \kbd{gp} accuracy
