@@ -258,7 +258,7 @@ the precision of~\kbd{x}. Since the parameter \kbd{prec} sets the size of the
 inexact result counted in (\kbd{long}) \emph{words} (including codewords),
 the same value of \kbd{prec} will yield different results on 32-bit and
 64-bit machines. Real numbers have two codewords (see~\secref{se:impl}), so
-the formula for computing the bit accuracy is 
+the formula for computing the bit accuracy is
 $$ \tet{bit_accuracy}(\kbd{prec}) = (\kbd{prec} - 2) * \tet{BITS_IN_LONG}$$
 (this is actually the definition of an inline function). The corresponding
 accuracy expressed in decimal digits would be
