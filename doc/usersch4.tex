@@ -251,15 +251,17 @@ see formula below) \cr\+
 
 \kbd{GEN \key{gexp}(GEN x, long prec)}.
 
-\noindent The last argument \kbd{prec} is only used if \kbd{x} is an exact
-object, otherwise the relative precision is determined by the precision
-of~\kbd{x}. But since \kbd{prec} sets the size of the inexact result counted
-in (\kbd{long}) \emph{words} (including codewords), the same value of
-\kbd{prec} will yield different results on 32-bit and 64-bit machines. Real
-numbers have two codewords (see~\secref{se:impl}), so the formula for
-computing the bit accuracy is $$ \tet{bit_accuracy}(\kbd{prec}) = (\kbd{prec}
-- 2) * \tet{BITS_IN_LONG}$$ (this is actually the definition of an inline
-function). The corresponding accuracy expressed in decimal digits would be
+\noindent The last argument \kbd{prec} is an integer $\geq 3$, corresponding
+to the default floating point precision required. It is \emph{only} used if
+\kbd{x} is an exact object, otherwise the relative precision is determined by
+the precision of~\kbd{x}. Since the parameter \kbd{prec} sets the size of the
+inexact result counted in (\kbd{long}) \emph{words} (including codewords),
+the same value of \kbd{prec} will yield different results on 32-bit and
+64-bit machines. Real numbers have two codewords (see~\secref{se:impl}), so
+the formula for computing the bit accuracy is 
+$$ \tet{bit_accuracy}(\kbd{prec}) = (\kbd{prec} - 2) * \tet{BITS_IN_LONG}$$
+(this is actually the definition of an inline function). The corresponding
+accuracy expressed in decimal digits would be
 %
 $$ \kbd{bit\_accuracy(prec)} * \log(2) / \log(10).$$
 %
