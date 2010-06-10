@@ -2446,6 +2446,7 @@ FlxYqQ_redswap(GEN x, GEN S, GEN mg, GEN T, ulong p)
   long m=degpol(T);
   long w = S[1];
   GEN V = FlxX_swap(x,n,w);
+  (void) mg; /*TODO really use mg*/
   V = FlxqX_red(V,T,p);
   V = FlxX_swap(V,m,w);
   return gerepilecopy(ltop,V);
