@@ -562,6 +562,8 @@ utridiv_bound(ulong n)
     l = ((ulong)expu(n) + 1 - 16) << 10;
     return minuu(p, l);
   }
+#else
+  (void)n;
 #endif
   return 1UL<<14;
 }
