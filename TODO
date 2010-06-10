@@ -21,8 +21,6 @@ Unless specified otherwise, examples assume 32bit machine and default precision
    This convention should be encapsulated; then we may declare [;] invalid
    input.
 
-4  gcmp/gegal not transitive: [] == 0, [0] == 0, but [0] != []
-
 4  ellinit over Q_2 doesn't work (AGM loses too much precision)
 
 4  ellpointtoz over Q_p makes no difference between P and -P (corrected over
