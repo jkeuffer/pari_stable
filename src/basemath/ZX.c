@@ -271,6 +271,15 @@ ZX_equal(GEN V, GEN W)
   return 1;
 }
 
+static long
+ZX_valspec(GEN x, long nx)
+{
+  long vx;
+  for (vx = 0; vx<nx ; vx++)
+    if (signe(gel(x,vx))) break;
+  return vx;
+}
+
 long
 ZX_val(GEN x)
 {
@@ -334,10 +343,10 @@ ZX_eval2BILspec(GEN x, long k, long nx)
 }
 
 static long
-ZX_expi(GEN x)
+ZX_expispec(GEN x, long nx)
 {
-  long i, m = 0, l = lg(x);
-  for(i = 2; i < l; i++)
+  long i, m = 0;
+  for(i = 0; i < nx; i++)
   {
     long e = expi(gel(x,i));
     if (e > m) m = e;
@@ -427,40 +436,31 @@ ZX_sqrspec_basecase(GEN x, long nx, long v)
   z -= v+2; return z;
 }
 
-/* copy a ZX equal to 0, faster than ZX_copy */
 static GEN
-ZX0_copy(GEN x) { GEN y = cgetg(2, t_POL); y[1] = x[1]; return y; }
-
-static GEN
-ZX1_sqr(GEN x)
+Z_sqrshiftspec_ZX(GEN x, long vx)
 {
-  long nx = lgpol(x);
-  long nz = 2*nx-1;
+  long nz = 2*vx+1;
   GEN z = cgetg(2+nz, t_POL);
   long i;
-  z[1] = x[1];
   for(i=2;i<nz+1;i++) gel(z,i) = gen_0;
-  gel(z,nz+1) = sqri(gel(x,nx+1));
+  gel(z,nz+1) = sqri(x);
   return z;
 }
 
 static GEN
-ZX1_ZX_mul(GEN x, GEN y, long vy)
+Z_ZX_mulshiftspec(GEN x, GEN y, long ny, long vz)
 {
-  long nx = lgpol(x), ny = lgpol(y);
-  long vz = nx-1+vy;
-  long nz = nx+ny-1;
-  GEN u = gel(x,nx+1);
+  long nz = vz+ny;
   GEN z = cgetg(2+nz, t_POL);
   long i;
   z[1] = y[1];
-  for (i=0;  i<vz; i++)   gel(z,i+2)    = gen_0;
-  for (i=vy; i<ny; i++) gel(z,nx+1+i) = mulii(u, gel(y,i+2));
+  for (i=0; i<vz; i++)   gel(z,i+2)    = gen_0;
+  for (i=0; i<ny; i++) gel(z,i+vz+2) = mulii(x, gel(y,i));
   return z;
 }
 
 GEN
-ZX_sqr(GEN x)
+ZX_sqrspec(GEN x, long nx)
 {
 #ifdef PARI_KERNEL_GMP
   const long low[]={ 17, 32, 96, 112, 160, 128, 128, 160, 160, 160, 160, 160, 176, 192, 192, 192, 192, 192, 224, 224, 224, 240, 240, 240, 272, 288, 288, 240, 288, 304, 304, 304, 304, 304, 304, 352, 352, 368, 352, 352, 352, 368, 368, 432, 432, 496, 432, 496, 496};
@@ -471,39 +471,54 @@ ZX_sqr(GEN x)
 #endif
   const long nblow = sizeof(low)/sizeof(*low);
   pari_sp av;
-  long nx = lgpol(x), ex, vx;
+  long ex, vx;
   GEN z;
-  if (!nx) return ZX0_copy(x);
-  vx = ZX_val(x); nx-=vx;
-  if (nx==1) return ZX1_sqr(x);
+  if (!nx) return cgetg(2, t_POL);
+  vx = ZX_valspec(x,nx); nx-=vx; x+=vx;
+  if (nx==1) return Z_sqrshiftspec_ZX(gel(x, 0), vx);
   av = avma;
-  ex = ZX_expi(x);
+  ex = ZX_expispec(x,nx);
   if (nx-2 < nblow && low[nx-2]<=ex && ex<=high[nx-2])
-    z = ZX_sqrspec_basecase(x+2+vx, nx, 2*vx);
+    z = ZX_sqrspec_basecase(x, nx, 2*vx);
   else
-    z = ZX_sqrspec_sqri(x+2+vx, nx, ex, 2*vx);
-  z[1] = x[1];
+    z = ZX_sqrspec_sqri(x, nx, ex, 2*vx);
   return gerepileupto(av, z);
 }
 
 GEN
-ZX_mul(GEN x, GEN y)
+ZX_sqr(GEN x)
+{
+  GEN z = ZX_sqrspec(x+2, lgpol(x));
+  z[1] = x[1];
+  if (!lgpol(z)) z[1] &= VARNBITS;
+  return z;
+}
+
+GEN
+ZX_mulspec(GEN x, GEN y, long nx, long ny)
 {
   pari_sp av;
-  long nx, ny, ex, ey, vx, vy;
+  long ex, ey, vx, vy;
+  GEN z;
+  if (!nx || !ny) return cgetg(2, t_POL);
+  vx = ZX_valspec(x,nx); nx-=vx; x += vx;
+  vy = ZX_valspec(y,ny); ny-=vy; y += vy;
+  if (nx==1) return Z_ZX_mulshiftspec(gel(x,0), y, ny, vx+vy);
+  if (ny==1) return Z_ZX_mulshiftspec(gel(y,0), x, nx, vy+vx);
+  av = avma;
+  ex = ZX_expispec(x, nx); ey = ZX_expispec(y, ny);
+  z  = ZX_mulspec_mulii(x,y,nx,ny,ex,ey,vx+vy);
+  return gerepileupto(av, z);
+}
+GEN
+ZX_mul(GEN x, GEN y)
+{
   GEN z;
   if (x == y) return ZX_sqr(x);
-  nx = lgpol(x); if (!nx) return ZX0_copy(x);
-  ny = lgpol(y); if (!ny) return ZX0_copy(y);
-  vx = ZX_val(x); nx-=vx;
-  vy = ZX_val(y); ny-=vy;
-  if (nx==1) return ZX1_ZX_mul(x, y, vy);
-  if (ny==1) return ZX1_ZX_mul(y, x, vx);
-  av = avma;
-  ex = ZX_expi(x); ey = ZX_expi(y);
-  z  = ZX_mulspec_mulii(x+2+vx,y+2+vy,nx,ny,ex,ey,vx+vy);
+  z = ZX_mulspec(x+2,y+2,lgpol(x),lgpol(y));
   z[1] = x[1];
-  return gerepileupto(av, z);
+  if (!lgpol(z)) z[1] &= VARNBITS;
+  return z;
 }
 
 /* x,y two ZX in the same variable; assume y is monic */
