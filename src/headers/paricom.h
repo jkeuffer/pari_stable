@@ -45,8 +45,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
   jmp_buf __env;             \
   if ((pari_errno = setjmp(__env)))
 
-#define RETRY { __catcherr = err_catch(__err, &__env);
-#define TRY else RETRY
+#define RETRY else __catcherr = err_catch(__err, &__env); {
+#define TRY else { __catcherr = err_catch(__err, &__env);
 
 #define CATCH_RELEASE() err_leave(__catcherr)
 #define ENDCATCH } CATCH_RELEASE(); }
