@@ -1773,7 +1773,7 @@ padicff(GEN x,GEN p,long pr)
     e = mkcol2(utoi(v), gen_1);
     g = mkcol2(p, q);
   }
-  nfmaxord(&S, x, 0, mkmat2(g,e));
+  nfmaxord(&S, x, nf_ROUND2, mkmat2(g,e));
 
   nf = cgetg(10,t_VEC);
   gel(nf,1) = x;
