@@ -212,8 +212,6 @@ int     FpX_is_squarefree(GEN f, GEN p);
 GEN     FpX_mul(GEN x, GEN y, GEN p);
 GEN     FpX_neg(GEN x, GEN p);
 GEN     FpX_normalize(GEN z, GEN p);
-GEN     random_FpX(long d, long v, GEN p);
-GEN     FpXV_red(GEN z, GEN p);
 GEN     FpX_red(GEN z, GEN p);
 GEN     FpX_rescale(GEN P, GEN h, GEN p);
 GEN     FpX_resultant(GEN a, GEN b, GEN p);
@@ -238,8 +236,10 @@ GEN     FpXQ_sqr(GEN y, GEN T, GEN p);
 GEN     FpXQ_sqrtn(GEN a, GEN n, GEN T, GEN p, GEN *zetan);
 GEN     FpXQC_to_mod(GEN z, GEN T, GEN p);
 GEN     FpXV_prod(GEN V, GEN p);
+GEN     FpXV_red(GEN z, GEN p);
 GEN     FqV_inv(GEN x, GEN T, GEN p);
 GEN     gener_FpXQ(GEN T, GEN p, GEN *o);
+GEN     random_FpX(long d, long v, GEN p);
 
 /* FpV.c */
 
