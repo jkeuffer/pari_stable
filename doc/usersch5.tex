@@ -3295,11 +3295,11 @@ allowed for $y$ to be shorter than $x$.
 
 \subsec{\kbd{FpX}} Let \kbd{p} an understood \typ{INT}, to be given in
 the function arguments; in practice \kbd{p} is not assumed to be prime, but
-be wary. An \kbd{Fp} object is a \typ{INT} belonging to $[0,
-\kbd{p}-1]$, an \kbd{FpX} is a \typ{POL} in a fixed variable whose
-coefficients are \kbd{Fp} objects. Unless mentioned otherwise, all outputs
-in this section are \kbd{FpX}s. All operations are understood to take place
-in $(\Z/\kbd{p}\Z)[X]$.
+be wary. Recall than an \kbd{Fp} object is a \typ{INT}, preferrably belonging
+to $[0, \kbd{p}-1]$; an \kbd{FpX} is a \typ{POL} in a fixed variable whose
+coefficients are \kbd{Fp} objects. Unless mentioned otherwise, all outputs in
+this section are \kbd{FpX}s. All operations are understood to take place in
+$(\Z/\kbd{p}\Z)[X]$.
 
 \subsubsec{Conversions} In what follows \kbd{p} is always a \typ{INT},
 not necessarily prime.
