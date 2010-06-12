@@ -473,7 +473,7 @@ ZX_sqrspec(GEN x, long nx)
   pari_sp av;
   long ex, vx;
   GEN z;
-  if (!nx) return cgetg(2, t_POL);
+  if (!nx) return zeropol(0);
   vx = ZX_valspec(x,nx); nx-=vx; x+=vx;
   if (nx==1) return Z_sqrshiftspec_ZX(gel(x, 0), vx);
   av = avma;
@@ -500,7 +500,7 @@ ZX_mulspec(GEN x, GEN y, long nx, long ny)
   pari_sp av;
   long ex, ey, vx, vy;
   GEN z;
-  if (!nx || !ny) return cgetg(2, t_POL);
+  if (!nx || !ny) return zeropol(0);
   vx = ZX_valspec(x,nx); nx-=vx; x += vx;
   vy = ZX_valspec(y,ny); ny-=vy; y += vy;
   if (nx==1) return Z_ZX_mulshiftspec(gel(x,0), y, ny, vx+vy);
