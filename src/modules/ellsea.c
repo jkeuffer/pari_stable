@@ -1151,8 +1151,8 @@ compute_diff(GEN v)
 static int
 cmp_atkin(void*E, GEN a, GEN b)
 {
-  (void) E;
   long ta=typ(a)==t_INT, tb=typ(b)==t_INT, c;
+  (void) E;
   if (ta || tb) return ta-tb;
   c = lg(gel(a,2)) - lg(gel(b,2));
   if (c) return c;
