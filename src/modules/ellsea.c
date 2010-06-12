@@ -272,8 +272,8 @@ static void
 init_eigen(struct eigen_ellinit *Edat, GEN a4, GEN a6, GEN h, GEN p)
 {
   pari_sp ltop = avma;
-  GEN RHS  = mkpoln(4, gen_1, gen_0, a4, a6);
-  GEN DRHS = mkpoln(3, utoi(3), gen_0, a4);
+  GEN RHS  = FpX_rem(mkpoln(4, gen_1, gen_0, a4, a6), h, p);
+  GEN DRHS = FpX_rem(mkpoln(3, utoi(3), gen_0, a4), h, p);
   GEN lambda = FpXQ_div(DRHS, FpX_Fp_mul(RHS, utoi(4), p), h, p);
   GEN C = FpX_sub(FpXQ_mul(lambda, DRHS, h, p), monomial(gen_2,1,0), p);
   GEN D = FpXQ_mul(FpX_Fp_mul(lambda, gen_2, p),FpX_sub(pol_x(0), C, p), h, p);
