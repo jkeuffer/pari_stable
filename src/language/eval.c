@@ -449,6 +449,9 @@ pop_lex(long n)
   s_trace.n--;
 }
 
+static pari_stack s_relocs;
+static entree **relocs;
+
 void
 pari_init_evaluator(void)
 {
@@ -464,6 +467,7 @@ pari_init_evaluator(void)
   pari_stack_init(&s_lvars,sizeof(*lvars),(void**)&lvars);
   pari_stack_init(&s_trace,sizeof(*trace),(void**)&trace);
   br_res = NULL;
+  pari_stack_init(&s_relocs,sizeof(*relocs),(void**)&relocs);
 }
 void
 pari_close_evaluator(void)
@@ -1715,4 +1719,207 @@ closure_disassemble(GEN C)
       break;
     }
   }
+}
+
+static int
+OC_may_have_entree(op_code opcode)
+{
+  switch(opcode)
+  {
+  case OCpushlong:
+  case OCpushgen:
+  case OCpushgnil:
+  case OCpushreal:
+  case OCpushstoi:
+  case OCpushlex:
+  case OCstorelex:
+  case OCsimpleptrlex:
+  case OCnewptrlex:
+  case OCpushptr:
+  case OCstackgen:
+  case OCendptr:
+  case OCprecreal:
+  case OCprecdl:
+  case OCstoi:
+  case OCitos:
+  case OCtostr:
+  case OCvarn:
+  case OCcopy:
+  case OCcopyifclone:
+  case OCcompo1:
+  case OCcompo1ptr:
+  case OCcompo2:
+  case OCcompo2ptr:
+  case OCcompoC:
+  case OCcompoCptr:
+  case OCcompoL:
+  case OCcompoLptr:
+  case OCcheckargs:
+  case OCcheckargs0:
+  case OCgetargs:
+  case OCdefaultarg:
+  case OCdefaultgen:
+  case OCdefaultlong:
+  case OCcalluser:
+  case OCvec:
+  case OCcol:
+  case OCmat:
+  case OCnewframe:
+  case OCsaveframe:
+  case OCpop:
+  case OCavma:
+  case OCgerepile:
+  case OCcowvarlex:
+    break;
+  case OCpushvar:
+  case OCpushdyn:
+  case OCstoredyn:
+  case OCsimpleptrdyn:
+  case OCnewptrdyn:
+  case OClocalvar:
+  case OClocalvar0:
+  case OCcallgen:
+  case OCcallgen2:
+  case OCcalllong:
+  case OCcallint:
+  case OCcallvoid:
+  case OCcowvardyn:
+    return 1;
+  }
+  return 0;
+}
+
+static void
+closure_relink(GEN C, hashtable *table)
+{
+  char * code;
+  GEN oper, fram;
+  long i, j;
+  code=GSTR(gel(C,2))-1;
+  oper=gel(C,3);
+  for(i=1;i<lg(oper);i++)
+    if (OC_may_have_entree(code[i]))
+      oper[i] = (long) hash_search(table,(void*) oper[i])->val;
+  fram = gmael(C,5,3);
+  for (i=1;i<lg(fram);i++)
+    for (j=1;j<lg(fram[i]);j++)
+      mael(fram,i,j) = (long) hash_search(table,(void*) mael(fram,i,j))->val;
+}
+
+static void
+gen_relink(GEN x, hashtable *table)
+{
+  long i, lx, tx = typ(x);
+  switch(tx)
+  {
+    case t_CLOSURE:
+      closure_relink(x, table);
+      gen_relink(gel(x,4), table);
+      if (lg(x)==8) gen_relink(gel(x,7), table);
+      break;
+    case t_LIST:
+      gen_relink(list_data(x), table);
+      break;
+    case t_VEC: case t_COL: case t_MAT: case t_ERROR:
+      lx = lg(x);
+      for (i= lontyp[tx]; i<lx; i++) gen_relink(gel(x,i), table);
+  }
+}
+
+static void
+closure_unlink(GEN C)
+{
+  char * code;
+  GEN oper, fram;
+  long i, j;
+  code=GSTR(gel(C,2))-1;
+  oper=gel(C,3);
+  for(i=1;i<lg(oper);i++)
+    if (OC_may_have_entree(code[i]))
+    {
+      long n = pari_stack_new(&s_relocs);
+      relocs[n] = (entree *) oper[i];
+    }
+  fram = gmael(C,5,3);
+  for (i=1;i<lg(fram);i++)
+    for (j=1;j<lg(fram[i]);j++)
+    {
+      long n = pari_stack_new(&s_relocs);
+      relocs[n] = (entree *) mael(fram,i,j);
+    }
+}
+
+static void
+gen_unlink(GEN x)
+{
+  long i, lx, tx = typ(x);
+  switch(tx)
+  {
+    case t_CLOSURE:
+      closure_unlink(x);
+      gen_unlink(gel(x,4));
+      if (lg(x)==8) gen_unlink(gel(x,7));
+      break;
+    case t_LIST:
+      gen_unlink(list_data(x));
+      break;
+    case t_VEC: case t_COL: case t_MAT: case t_ERROR:
+      lx = lg(x);
+      for (i = lontyp[tx]; i<lx; i++) gen_unlink(gel(x,i));
+  }
+}
+
+GEN
+copybin_unlink(GEN C)
+{
+  long i, l , n, nold = s_relocs.n;
+  GEN v, w, V, res;
+  gen_unlink(C);
+  n = s_relocs.n-nold;
+  v = cgetg(n+1, t_VECSMALL);
+  for(i=0; i<n; i++)
+    v[i+1] = (long) relocs[i];
+  s_relocs.n = nold;
+  w = vecsmall_uniq(v); l = lg(w);
+  res = cgetg(3,t_VEC);
+  V = cgetg(l, t_VEC);
+  for(i=1; i<l; i++)
+  {
+    entree *ep = (entree*) w[i];
+    gel(V,i) = strtoGENstr(ep->name);
+  }
+  gel(res,1) = vecsmall_copy(w);
+  gel(res,2) = V;
+  return res;
+}
+
+static ulong
+hash_id(void *x) { return (ulong)x; }
+static int
+eq_id(void *x, void *y) { return x == y; }
+
+/* e = t_VECSMALL of entree *ep [ addresses ],
+ * names = t_VEC of strtoGENstr(ep.names),
+ * Return hashtable : ep => is_entry(ep.name) */
+static hashtable *
+hash_from_link(GEN e, GEN names)
+{
+  long i, l = lg(e);
+  hashtable *h = hash_create(l-1, &hash_id, &eq_id, 1);
+  if (lg(names) != l) pari_err_DIM("hash_from_link");
+  for (i = 1; i < l; i++)
+  {
+    char *s = GSTR(gel(names,i));
+    hash_insert(h, (void*)e[i], (void*)fetch_entry(s, strlen(s)));
+  }
+  return h;
+}
+
+void
+bincopy_relink(GEN C, GEN V)
+{
+  pari_sp av = avma;
+  hashtable *table = hash_from_link(gel(V,1),gel(V,2));
+  gen_relink(C, table);
+  avma = av;
 }

@@ -1555,6 +1555,7 @@ void    writetex(const char *s, GEN g);
 
 /* eval.c */
 
+void    bincopy_relink(GEN C, GEN vi);
 GEN     break0(long n);
 GEN     closure_callgen1(GEN C, GEN x);
 GEN     closure_callgen2(GEN C, GEN x, GEN y);
@@ -1570,6 +1571,7 @@ GEN     closure_evalnobrk(GEN C);
 GEN     closure_evalres(GEN C);
 void    closure_evalvoid(GEN C);
 GEN     closure_trapgen(GEN C, long numerr);
+GEN     copybin_unlink(GEN C);
 GEN     get_lex(long vn);
 GEN     gp_call(void *E, GEN x);
 long    gp_callbool(void *E, GEN x);
