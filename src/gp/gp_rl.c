@@ -773,8 +773,6 @@ init_readline(void)
 
   Bind('h', rl_short_help, emacs_meta_keymap);
   Bind('H', rl_long_help,  emacs_meta_keymap);
-  Bind('h', rl_short_help, vi_movement_keymap);
-  Bind('H', rl_long_help,  vi_movement_keymap);
 #  ifdef HAS_RL_GENERIC_BIND
 #define KSbind(s,f,k) rl_generic_bind(ISFUNC, (s), (char*)(f), (k))
 

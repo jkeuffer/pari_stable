@@ -517,6 +517,8 @@ BA124- galoisfixedfield now accept subgroups.
        maximal pivot strategy for p-adics [#1054]
 BA127- padic_sqrt -> Qp_sqrt, padic_sqrtn -> Qp_sqrtn, gammap -> Qp_gamma
   128- rename rnfinitalg -> rnfinit
+  129- [readline + vi-mode] h/H no longer clobbered by online help. 'h' will
+       now act as expected (= 'move left one character')
 
   Added
     1- many new benches (make test-all)
