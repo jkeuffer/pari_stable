@@ -897,7 +897,10 @@ returning 1 for \kbd{true} and 0 for \kbd{false}. For instance,
 
 \kbd{==}: test for (exact) equality.
 
-\kbd{===}: test whether two objects are identical component-wise.
+\kbd{===}: test whether two objects are identical component-wise. This is
+stricter than \kbd{==} : for instance, the integer 0, a 0 polynomial or a
+vector with 0 entries, are all tested equal by \kbd{==}, but they are not
+identical.
 
 \point{Priority 3}
 %
