@@ -775,8 +775,8 @@ Fq_sub(GEN x, GEN y, GEN T/*unused*/, GEN p)
   switch((typ(x)==t_POL)|((typ(y)==t_POL)<<1))
   {
     case 0: return Fp_sub(x,y,p);
-    case 1: return FpX_Fp_add(x,Fp_neg(y,p),p);
-    case 2: return FpX_Fp_add(FpX_neg(y,p),x,p);
+    case 1: return FpX_Fp_sub(x,y,p);
+    case 2: return Fp_FpX_sub(x,y,p);
     case 3: return FpX_sub(x,y,p);
   }
   return NULL;

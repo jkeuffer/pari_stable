@@ -341,7 +341,7 @@ BezoutPropagate(GEN link, GEN v, GEN w, GEN pe, GEN U, GEN f, long j)
     R = FpX_sub(U, Q, pe);
   }
   else
-    R = FpX_Fp_add_shallow(FpX_neg(Q, pe), gen_1, pe);
+    R = Fp_FpX_sub(gen_1, Q, pe);
   gel(w,j+1) = Q; /*  0 mod U v[j],  1 mod (1-U) v[j+1] */
   gel(w,j) = R; /*  1 mod U v[j],  0 mod (1-U) v[j+1] */
   BezoutPropagate(link, v, w, pe, R, f, link[j  ]);
