@@ -199,6 +199,8 @@ GEN     FpX_Fp_add(GEN x, GEN y, GEN p);
 GEN     FpX_Fp_add_shallow(GEN y,GEN x,GEN p);
 GEN     FpX_Fp_mul(GEN x, GEN y, GEN p);
 GEN     FpX_Fp_mul_to_monic(GEN y,GEN x,GEN p);
+GEN     FpX_Fp_sub(GEN x, GEN y, GEN p);
+GEN     FpX_Fp_sub_shallow(GEN y,GEN x,GEN p);
 GEN     FpX_add(GEN x, GEN y, GEN p);
 GEN     FpX_center(GEN x, GEN p, GEN pov2);
 GEN     FpX_chinese_coprime(GEN x,GEN y,GEN Tx,GEN Ty,GEN Tz,GEN p);

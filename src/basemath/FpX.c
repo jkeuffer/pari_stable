@@ -110,6 +110,32 @@ FpX_Fp_add_shallow(GEN y,GEN x,GEN p)
     for(i=3;i<lz;i++) gel(z,i) = gel(y,i);
   return z;
 }
+GEN
+FpX_Fp_sub(GEN y,GEN x,GEN p)
+{
+  long i, lz = lg(y);
+  GEN z;
+  if (lz == 2) return scalar_ZX(x,varn(y));
+  z = cgetg(lz,t_POL); z[1] = y[1];
+  gel(z,2) = Fp_sub(gel(y,2),x, p);
+  if (lz == 3) z = FpX_renormalize(z,lz);
+  else
+    for(i=3;i<lz;i++) gel(z,i) = icopy(gel(y,i));
+  return z;
+}
+GEN
+FpX_Fp_sub_shallow(GEN y,GEN x,GEN p)
+{
+  long i, lz = lg(y);
+  GEN z;
+  if (lz == 2) return scalar_ZX_shallow(x,varn(y));
+  z = cgetg(lz,t_POL); z[1] = y[1];
+  gel(z,2) = Fp_sub(gel(y,2),x, p);
+  if (lz == 3) z = FpX_renormalize(z,lz);
+  else
+    for(i=3;i<lz;i++) gel(z,i) = gel(y,i);
+  return z;
+}
 
 GEN
 FpX_neg(GEN x,GEN p)
