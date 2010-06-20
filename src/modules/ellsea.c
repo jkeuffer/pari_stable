@@ -1434,7 +1434,7 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
       continue;
     }
     get_extra_l = 1;
-    bound_champ = truedivii(bound, gel(tr, 2));
+    bound_champ = truedivii(bound, gel(tr, 1));
     best_champ = champion(compile_atkin, nb_atkin, bound_champ);
     if (DEBUGLEVEL>=2)
       fprintferr("Remaining %Ps possibilities.\n", gel(best_champ, 2));
