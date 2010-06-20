@@ -618,6 +618,7 @@ identicalrr(GEN x, GEN y)
 {
   long i, lx = lg(x);
   if (lg(y) != lx) return 0;
+  if (x[1] != y[1]) return 0;
   i=2; while (i<lx && x[i]==y[i]) i++;
   return (i == lx);
 }
