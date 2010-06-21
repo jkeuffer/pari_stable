@@ -1074,16 +1074,6 @@ set_cost(GEN B, long b, GEN cost_vec, long *pi)
 }
 
 static GEN
-prod_lgatkin(GEN compile_atkin, long k)
-{
-  pari_sp av = avma;
-  long i;
-  GEN p = gen_1;
-  for (i = 1; i <= k; i++) p = mulis(p, lg(gmael(compile_atkin, i, 2)) - 1);
-  return gerepileuptoint(av, p);
-}
-
-static GEN
 get_lgatkin(GEN compile_atkin, long k)
 {
   GEN v = cgetg(k+1, t_VECSMALL);
@@ -1306,12 +1296,13 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
 {
   const long MAX_ATKIN = 21;
   pari_sp ltop = avma, btop, st_lim;
-  long i, nb_atkin, lp, M, get_extra_l;
-  GEN compile_atkin;
-  GEN tr, bound, prod_atkin, trace_mod, bound_bsgs, growth_factor, best_champ;
-  GEN res;
+  long i, nb_atkin, lp, M;
+  GEN compile_atkin, tr, bound, bound_bsgs, champ;
+  GEN prod_atkin = gen_1, max_traces = gen_0;
   GEN a4 = modii(mulis(Rg_to_Fp(gel(E,10), p), -27), p);
   GEN a6 = modii(mulis(Rg_to_Fp(gel(E,11), p), -54), p);
+  double bound_gr = 1.;
+  const double growth_factor = 1.26;
   long ell = 2;
   byteptr primepointer = diffptr + 1;
 
@@ -1324,7 +1315,7 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
       tr = mkintmodu(i, 4);
       break;
     case 1:
-      tr = mkintmod(gen_0,gen_2);
+      tr = mkintmod(gen_0, gen_2);
       break;
     default : /* 0 */
       tr = mkintmod(gen_1, gen_2);
@@ -1347,20 +1338,22 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
     bound_bsgs = mulru(divrr(powru(dbltor(1.052), lp), dbltor(16.65)), M);
   else if (lp <= 306)
     bound_bsgs = mulru(mulrr(powru(dbltor(1.035), lp), dbltor(1.35)), M);
-  else bound_bsgs = muluu(50000, M);
-  growth_factor = dbltor(1.26);
-  prod_atkin = gen_1;
+  else
+    bound_bsgs = mulru(mulrr(powru(dbltor(1.035), 307), dbltor(1.35)), M);
   compile_atkin = zerovec(MAX_ATKIN); nb_atkin = 0;
   btop = avma; st_lim = stack_lim(btop, 1);
-  do {
-    GEN ellkt;
-    long kt;
+  while (1)
+  {
+    long kt = 1;
+    GEN ellkt, trace_mod;
     NEXT_PRIME_VIADIFF(ell, primepointer);
     trace_mod = find_trace(a4, a6, ell, p, &kt, EARLY_ABORT);
     if (trace_mod==gen_0)
     {
+      GEN bound_atkin = truedivii(bound, gel(tr, 1));
       pari_warn(warner,"no more modular polynomials available!");
-      goto end_sea;
+      champ = champion(compile_atkin, nb_atkin, bound_atkin);
+      break;
     }
     if (!trace_mod) continue;
     ellkt = powuu(ell, kt);
@@ -1375,76 +1368,39 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
     }
     else
     {
-      /* compute possible values for the trace using Atkin method. */
       add_atkin(compile_atkin, mkvec2(ellkt, trace_mod), &nb_atkin);
       prod_atkin = value(-1, compile_atkin, nb_atkin);
     }
-    if (low_stack(st_lim, stack_lim(btop, 1)))
-      gerepileall(btop, 3, &tr, &compile_atkin, &prod_atkin);
-  } while (cmpii(mulii(gel(tr, 1), prod_atkin) , bound) <= 0);
-  best_champ = mkvec2(utoi((1UL<<nb_atkin)-1),
-                      prod_lgatkin(compile_atkin, nb_atkin));
-  /*If the number of possible traces is too large, we treat a new prime */
-  if (DEBUGLEVEL && gcmp(gel(best_champ, 2), bound_bsgs) >= 0)
-    fprintferr("Too many possibilities for the trace: %Ps. "
-               "Look for new primes\n", gel(best_champ, 2));
-  btop = avma; st_lim = stack_lim(btop, 1);
-  get_extra_l = 1;
-  bound_bsgs = gdiv(bound_bsgs, growth_factor);
-  while (1)
-  {
-    long kt;
-    GEN ellkt;
-    GEN bound_champ;
-    NEXT_PRIME_VIADIFF(ell, primepointer);
-    bound_bsgs = gmul(bound_bsgs, growth_factor);
-    if (gcmp(gel(best_champ, 2), bound_bsgs) < 0) break;
-    trace_mod = find_trace(a4, a6, ell, p , &kt, EARLY_ABORT);
-    if (trace_mod==gen_0)
+    if (cmpii(mulii(gel(tr, 1), prod_atkin), bound) > 0)
     {
-      pari_warn(warner,"no more modular polynomials available!");
-      goto end_sea;
-    }
-    if (!trace_mod) continue;
-    ellkt = powuu(ell, kt);
-    if (lg(trace_mod) == 2)
-    {
-      if (EARLY_ABORT && dvdiu(addis(p, 1 - trace_mod[1]), ell))
+      GEN bound_tr = mulrr(bound_bsgs, dbltor(bound_gr));
+      bound_gr *= growth_factor;
+      if (signe(max_traces))
       {
-        if (DEBUGLEVEL) fprintferr("\nAborting: #E(Fp) divisible by %ld\n",ell);
-        avma = ltop; return gen_0;
+        max_traces = truedivii(mulis(max_traces,2*(lg(trace_mod)-1)), ellkt);
+        if (DEBUGLEVEL>=3)
+          fprintferr("At least %Ps remaining possibilities.\n",max_traces);
       }
-      tr = crt(ellkt, stoi(trace_mod[1]), tr);
+      if (!signe(max_traces) || cmpir(max_traces, bound_tr) < 0)
+      {
+        GEN bound_atkin = truedivii(bound, gel(tr, 1));
+        champ = champion(compile_atkin, nb_atkin, bound_atkin);
+        max_traces = gel(champ,2);
+        if (cmpir(max_traces, bound_tr) < 0) break;
+        if (DEBUGLEVEL>=2)
+          fprintferr("%Ps remaining possibilities.\n", max_traces);
+      }
     }
-    else
-      add_atkin(compile_atkin, mkvec2(ellkt, trace_mod), &nb_atkin);
-    /*Let us now treat an other prime if we are too far from the bound_bsgs */
-    if (get_extra_l
-        && gcmpgs(gdiv(gel(best_champ, 2), bound_bsgs), 5) >= 0
-        && (lg(trace_mod) > 3 || gcmp(gdiv(gel(best_champ, 2), bound_bsgs),
-            gdivgs(sqrs(ell), 25)) >= 0))
-    {
-      get_extra_l = 0;
-      continue;
-    }
-    get_extra_l = 1;
-    bound_champ = truedivii(bound, gel(tr, 1));
-    best_champ = champion(compile_atkin, nb_atkin, bound_champ);
-    if (DEBUGLEVEL>=2)
-      fprintferr("Remaining %Ps possibilities.\n", gel(best_champ, 2));
     if (low_stack(st_lim, stack_lim(btop, 1)))
-      gerepileall(btop, 4, &tr, &compile_atkin, &bound_bsgs, &best_champ);
+      gerepileall(btop, 4, &tr, &compile_atkin, &max_traces, &prod_atkin);
   }
-  compile_atkin = shallowextract(compile_atkin, gel(best_champ, 1));
-end_sea:
-  if (lg(compile_atkin)==1)
-    return gerepileuptoint(ltop,centerlift(tr));
-  if (DEBUGLEVEL)
+  if (!nb_atkin) return gerepileuptoint(ltop, centerlift(tr));
+  else
   {
-    GEN pos = prod_lgatkin(compile_atkin, lg(compile_atkin)-1);
-    fprintferr("\nComputation of traces done. Entering match-and-sort algorithm.");
-    fprintferr("\nIt remains %Ps possibilities for the trace.\n", pos);
+    GEN res, cat = shallowextract(compile_atkin, gel(champ, 1));
+    if (DEBUGLEVEL)
+      fprintferr("Match and sort for %Ps possibilities.\n",gel(champ, 2));
+    res = match_and_sort(cat, gel(tr,1), gel(tr,2), a4,a6,p);
+    return gerepileuptoint(ltop, subii(addis(p, 1), res));
   }
-  res = match_and_sort(compile_atkin, gel(tr,1), gel(tr,2), a4,a6,p);
-  return gerepileuptoint(ltop, subii(addis(p, 1), res));
 }
