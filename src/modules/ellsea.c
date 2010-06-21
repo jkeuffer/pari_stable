@@ -1203,12 +1203,6 @@ match_and_sort(GEN compile_atkin, GEN Mu, GEN u, GEN a4, GEN a6, GEN p)
   GEN P, Pb, Pg, point, diff, pre, table, table_ind;
   long best_i, i, lbaby, lgiant, lp = lg(p), k = lg(compile_atkin)-1;
 
-  if (!k)
-  { /*no Atkin prime: Mu >= 4*sqrt(p). */
-    GEN card = subii(pp1, u);
-    card = mkvec2(card, addii(card, Mu));
-    return choose_card(card, a4, a6, p);
-  }
   if (k == 1)
   { /*only one Atkin prime, check the cardinality with random points */
     GEN r = gel(compile_atkin, 1), r1 = gel(r,1), r2 = gel(r,2);
@@ -1387,7 +1381,7 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
     }
     if (low_stack(st_lim, stack_lim(btop, 1)))
       gerepileall(btop, 3, &tr, &compile_atkin, &prod_atkin);
-  } while (cmpii(mulii(gel(tr, 2), prod_atkin) , bound) <= 0);
+  } while (cmpii(mulii(gel(tr, 1), prod_atkin) , bound) <= 0);
   best_champ = mkvec2(utoi((1UL<<nb_atkin)-1),
                       prod_lgatkin(compile_atkin, nb_atkin));
   /*If the number of possible traces is too large, we treat a new prime */
@@ -1443,6 +1437,8 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
   }
   compile_atkin = shallowextract(compile_atkin, gel(best_champ, 1));
 end_sea:
+  if (lg(compile_atkin)==1)
+    return gerepileuptoint(ltop,centerlift(tr));
   if (DEBUGLEVEL)
   {
     GEN pos = prod_lgatkin(compile_atkin, lg(compile_atkin)-1);
