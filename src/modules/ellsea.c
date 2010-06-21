@@ -722,7 +722,7 @@ study_modular_eqn(long ell, GEN mpoly, GEN p, enum mod_type *mt, long *ptr_r)
 
 /*Returns the trace modulo ell^k when ell is an Elkies prime */
 static GEN
-find_trace_Elkies_power(GEN a4, GEN a6, ulong ell, long k, struct meqn *MEQN, GEN g, GEN tr, GEN p, long EARLY_ABORT, pari_timer *T)
+find_trace_Elkies_power(GEN a4, GEN a6, ulong ell, long k, struct meqn *MEQN, GEN g, GEN tr, GEN p, long smallfact, pari_timer *T)
 {
   pari_sp ltop = avma, btop, st_lim;
   GEN tmp, Eba4, Eba6, Eca4, Eca6, Ib, kpoly;
@@ -740,7 +740,7 @@ find_trace_Elkies_power(GEN a4, GEN a6, ulong ell, long k, struct meqn *MEQN, GE
   Ib = pol_x(0);
   lambda = find_eigen_value(a4, a6, ell, kpoly, p, tr);
   if (DEBUGLEVEL>1) fprintferr(" [%ld ms]", TIMER(T));
-  if (EARLY_ABORT)
+  if (smallfact && ell>smallfact)
   {
     ulong pell = pellk%ell;
     ulong ap = Fl_add(lambda, Fl_div(pell, lambda, ell), ell);
@@ -821,7 +821,7 @@ find_trace_lp1_roots(long ell, GEN p)
 
 /*trace modulo ell^k: [], [t] or [t1,...,td] */
 static GEN
-find_trace(GEN a4, GEN a6, ulong ell, GEN p, long *ptr_kt, long EARLY_ABORT)
+find_trace(GEN a4, GEN a6, ulong ell, GEN p, long *ptr_kt, long smallfact)
 {
   pari_sp ltop = avma;
   GEN  g, meqnj, tr, tr2;
@@ -857,12 +857,12 @@ find_trace(GEN a4, GEN a6, ulong ell, GEN p, long *ptr_kt, long EARLY_ABORT)
     kt = k = 1;
     /* Must take k = 1 because we can't apply Hensel: no guarantee that a
      * root mod ell^2 exists */
-    tr = find_trace_Elkies_power(a4,a6,ell, k, &MEQN, g, tr2, p, EARLY_ABORT, &T);
+    tr = find_trace_Elkies_power(a4,a6,ell, k, &MEQN, g, tr2, p, smallfact, &T);
     if (!tr) tr = tr2;
     break;
   case MTElkies:
     /* Contrary to MTone_root, may look mod higher powers of ell */
-    tr = find_trace_Elkies_power(a4,a6,ell, k, &MEQN, g, NULL, p, EARLY_ABORT, &T);
+    tr = find_trace_Elkies_power(a4,a6,ell, k, &MEQN, g, NULL, p, smallfact, &T);
     if (!tr) { avma = ltop; return NULL; }
     break;
   case MTroots:
@@ -1287,12 +1287,13 @@ match_and_sort(GEN compile_atkin, GEN Mu, GEN u, GEN a4, GEN a6, GEN p)
 }
 
 /* E is an elliptic curve defined over Z or over Fp in ellinit format, defined
-* by the equation E: y^2 + a1*x*y + a2*y = x^3 + a2*x^2 + a4*x + a6
-* p is a prime number
-* set EARLY_ABORT to stop whenever a small factor of the order is detected.
-*   Useful when searching for a good curve for cryptographic applications */
+ * by the equation E: y^2 + a1*x*y + a2*y = x^3 + a2*x^2 + a4*x + a6
+ * p is a prime number
+ * set smallfact to stop whenever a small factor > smallfact of the order is
+ * detected. Useful when searching for a good curve for cryptographic
+ * applications */
 GEN
-ellsea(GEN E, GEN p, long EARLY_ABORT)
+ellsea(GEN E, GEN p, long smallfact)
 {
   const long MAX_ATKIN = 21;
   pari_sp ltop = avma, btop, st_lim;
@@ -1321,7 +1322,7 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
       tr = mkintmod(gen_1, gen_2);
       break;
   }
-  if (EARLY_ABORT && gel(tr,2) != gen_1)
+  if (smallfact==1 && gel(tr,2) != gen_1)
   {
     if (DEBUGLEVEL) fprintferr("Aborting: #E(Fp) divisible by 2\n");
     avma = ltop; return gen_0;
@@ -1347,7 +1348,7 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
     long kt = 1;
     GEN ellkt, trace_mod;
     NEXT_PRIME_VIADIFF(ell, primepointer);
-    trace_mod = find_trace(a4, a6, ell, p, &kt, EARLY_ABORT);
+    trace_mod = find_trace(a4, a6, ell, p, &kt, smallfact);
     if (trace_mod==gen_0)
     {
       GEN bound_atkin = truedivii(bound, gel(tr, 1));
@@ -1359,7 +1360,7 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
     ellkt = powuu(ell, kt);
     if (lg(trace_mod) == 2)
     {
-      if (EARLY_ABORT && dvdiu(addis(p, 1 - trace_mod[1]), ell))
+      if (smallfact && ell>smallfact && dvdiu(addis(p, 1 - trace_mod[1]), ell))
       {
         if (DEBUGLEVEL) fprintferr("\nAborting: #E(Fp) divisible by %ld\n",ell);
         avma = ltop; return gen_0;
