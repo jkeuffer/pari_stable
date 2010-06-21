@@ -924,13 +924,13 @@ separation(GEN cnt)
   return best_i;
 }
 
-/* chinese(Mod(a,A), Mod(b,B)), A,B coprime */
+/* chinese(Mod(a,A), tr), A,tr.mod coprime */
 static GEN
-crt(GEN A, GEN a, GEN B, GEN b)
+crt(GEN A, GEN a, GEN tr)
 {
-  GEN v = cgetg(3, t_VEC), AB = mulii(A, B);
+  GEN v = cgetg(3, t_INTMOD), AB = mulii(A, gel(tr, 1));
   gel(v,1) = AB;
-  gel(v,2) = Z_chinese_coprime(a,b, A,B, AB);
+  gel(v,2) = Z_chinese_coprime(a, gel(tr, 2), A, gel(tr, 1), AB);
   return v;
 }
 
@@ -1327,13 +1327,13 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
   {
     case 3: /* bonus time: 4 | #E(Fp) = p+1 - a_p */
       i = mod4(p)+1; if (i == 4) i = 0;
-      tr = mkvec2(utoipos(4), utoi(i));
+      tr = mkintmodu(i, 4);
       break;
     case 1:
-      tr = mkvec2(gen_2, gen_0);
+      tr = mkintmod(gen_0,gen_2);
       break;
     default : /* 0 */
-      tr = mkvec2(gen_2, gen_1);
+      tr = mkintmod(gen_1, gen_2);
       break;
   }
   if (EARLY_ABORT && gel(tr,2) != gen_1)
@@ -1377,7 +1377,7 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
         if (DEBUGLEVEL) fprintferr("\nAborting: #E(Fp) divisible by %ld\n",ell);
         avma = ltop; return gen_0;
       }
-      tr = crt(ellkt, stoi(trace_mod[1]), gel(tr,1), gel(tr,2));
+      tr = crt(ellkt, stoi(trace_mod[1]), tr);
     }
     else
     {
@@ -1420,7 +1420,7 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
         if (DEBUGLEVEL) fprintferr("\nAborting: #E(Fp) divisible by %ld\n",ell);
         avma = ltop; return gen_0;
       }
-      tr = crt(ellkt, stoi(trace_mod[1]), gel(tr,1), gel(tr,2));
+      tr = crt(ellkt, stoi(trace_mod[1]), tr);
     }
     else
       add_atkin(compile_atkin, mkvec2(ellkt, trace_mod), &nb_atkin);
