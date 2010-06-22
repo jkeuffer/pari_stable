@@ -223,7 +223,7 @@ is dropped in kernel routines of Level $1$, where it is replaced by the much
 simpler rule: the result is a \typ{INT} if and only if all arguments
 are integer types (\typ{INT} but also C \kbd{long} and \kbd{ulong}) and a
 \typ{REAL} otherwise. For instance, multiplying a \typ{REAL} by a \typ{INT}
-always yields a \typ{REAL} is you use \kbd{mulir}, where \kbd{gmul} returns the
+always yields a \typ{REAL} if you use \kbd{mulir}, where \kbd{gmul} returns the
 \typ{INT} \kbd{gen\_0} if the integer is $0$.
 
 \subsec{Portability: 32-bit / 64-bit architectures}
@@ -1032,7 +1032,7 @@ simultaneously in your mind if you want to write correct PARI programs.
 
 Common to all the types is the first codeword \kbd{z[0]}, which we do not
 have to worry about since this is taken care of by \kbd{cgetg}. Its precise
-structure depends on the machine you are using, but it always contain the
+structure depends on the machine you are using, but it always contains the
 following data: the \emph{internal type number}\sidx{type number} associated
 to the symbolic type name, the \emph{length} of the root in longwords, and a
 technical bit which indicates whether the object is a clone or not (see
