@@ -722,7 +722,7 @@ study_modular_eqn(long ell, GEN mpoly, GEN p, enum mod_type *mt, long *ptr_r)
 
 /*Returns the trace modulo ell^k when ell is an Elkies prime */
 static GEN
-find_trace_Elkies_power(GEN a4, GEN a6, ulong ell, long k, struct meqn *MEQN, GEN g, GEN tr, GEN p, long smallfact, pari_timer *T)
+find_trace_Elkies_power(GEN a4, GEN a6, ulong ell, long k, struct meqn *MEQN, GEN g, GEN tr, GEN p, ulong smallfact, pari_timer *T)
 {
   pari_sp ltop = avma, btop, st_lim;
   GEN tmp, Eba4, Eba6, Eca4, Eca6, Ib, kpoly;
@@ -821,7 +821,7 @@ find_trace_lp1_roots(long ell, GEN p)
 
 /*trace modulo ell^k: [], [t] or [t1,...,td] */
 static GEN
-find_trace(GEN a4, GEN a6, ulong ell, GEN p, long *ptr_kt, long smallfact)
+find_trace(GEN a4, GEN a6, ulong ell, GEN p, long *ptr_kt, ulong smallfact)
 {
   pari_sp ltop = avma;
   GEN  g, meqnj, tr, tr2;
