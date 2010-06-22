@@ -399,9 +399,9 @@ GEN     Flx_recipspec(GEN x, long l, long n);
 GEN     Flx_sqrspec(GEN a, ulong p, long na);
 GEN     Flx_subspec(GEN x, GEN y, ulong p, long lx, long ly);
 GEN     Kronecker_to_FlxqX(GEN z, GEN T, ulong p);
-GEN     FlxqX_invmontgomery(GEN T, GEN Q, ulong p);
+GEN     FlxqX_invMontgomery(GEN T, GEN Q, ulong p);
 GEN     FlxqX_mulspec(GEN x, GEN y, GEN T, ulong p, long lx, long ly);
-GEN     FlxqX_rem_montgomery(GEN x, GEN mg, GEN T, GEN Q, ulong p);
+GEN     FlxqX_rem_Montgomery(GEN x, GEN mg, GEN T, GEN Q, ulong p);
 
 /* Qfb.c */
 

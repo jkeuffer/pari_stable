@@ -804,7 +804,7 @@ Flx_pow(GEN x, long n, ulong p)
  * x/polrecip(P)+O(x^n)
  */
 static GEN
-Flx_invmontgomery_basecase(GEN T, ulong p)
+Flx_invMontgomery_basecase(GEN T, ulong p)
 {
   long i, l=lg(T)-1, k;
   GEN r=cgetg(l,t_VECSMALL); r[1]=T[1];
@@ -840,7 +840,7 @@ Flx_lgrenormalizespec(GEN x, long lx)
   return i+1;
 }
 static GEN
-Flx_invmontgomery_newton(GEN T, ulong p)
+Flx_invMontgomery_newton(GEN T, ulong p)
 {
   long nold, lx, lz, lq, l = degpol(T);
   GEN q, y, z, x = const_vecsmall(l+1, 0) + 2;
@@ -896,7 +896,7 @@ Flx_invmontgomery_newton(GEN T, ulong p)
 
 /* x/polrecip(T)+O(x^deg(T)) */
 GEN
-Flx_invmontgomery(GEN T, ulong p)
+Flx_invMontgomery(GEN T, ulong p)
 {
   pari_sp ltop=avma;
   long l=lg(T);
@@ -910,11 +910,11 @@ Flx_invmontgomery(GEN T, ulong p)
       ci=Fl_inv(c,p);
       T=Flx_Fl_mul(T, ci, p);
     }
-    r=Flx_invmontgomery_basecase(T,p);
+    r=Flx_invMontgomery_basecase(T,p);
     if (c!=1) r=Flx_Fl_mul(r,ci,p);
   }
   else
-    r=Flx_invmontgomery_newton(T,p);
+    r=Flx_invMontgomery_newton(T,p);
   return gerepileuptoleaf(ltop, r);
 }
 
@@ -922,7 +922,7 @@ Flx_invmontgomery(GEN T, ulong p)
  * and mg is the Montgomery inverse of T.
  */
 GEN
-Flx_rem_montgomery(GEN x, GEN mg, GEN T, ulong p)
+Flx_rem_Montgomery(GEN x, GEN mg, GEN T, ulong p)
 {
   pari_sp ltop=avma;
   GEN z;
@@ -1025,8 +1025,8 @@ Flx_rem(GEN x, GEN y, ulong p)
   else
   {
     pari_sp av=avma;
-    GEN mg = Flx_invmontgomery(y, p);
-    return gerepileupto(av, Flx_rem_montgomery(x, mg, y, p));
+    GEN mg = Flx_invMontgomery(y, p);
+    return gerepileupto(av, Flx_rem_Montgomery(x, mg, y, p));
   }
 }
 
@@ -1518,7 +1518,7 @@ Flxq_mul_mg(GEN x,GEN y,GEN mg,GEN T,ulong p)
 {
   GEN z = Flx_mul(x,y,p);
   if (lg(T) > lg(z)) return z;
-  return Flx_rem_montgomery(z, mg, T, p);
+  return Flx_rem_Montgomery(z, mg, T, p);
 }
 
 /* Square of y in Z/pZ[X]/(T), as t_VECSMALL. */
@@ -1527,7 +1527,7 @@ Flxq_sqr_mg(GEN y,GEN mg,GEN T,ulong p)
 {
   GEN z = Flx_sqr(y,p);
   if (lg(T) > lg(z)) return z;
-  return Flx_rem_montgomery(z, mg, T, p);
+  return Flx_rem_Montgomery(z, mg, T, p);
 }
 
 typedef struct {
@@ -1537,13 +1537,13 @@ typedef struct {
 } Flxq_muldata;
 
 static GEN
-_sqr_montgomery(void *data, GEN x)
+_sqr_Montgomery(void *data, GEN x)
 {
   Flxq_muldata *D = (Flxq_muldata*)data;
   return Flxq_sqr_mg(x,D->mg, D->pol, D->p);
 }
 static GEN
-_mul_montgomery(void *data, GEN x, GEN y)
+_mul_Montgomery(void *data, GEN x, GEN y)
 {
   Flxq_muldata *D = (Flxq_muldata*)data;
   return Flxq_mul_mg(x,y,D->mg, D->pol, D->p);
@@ -1580,8 +1580,8 @@ Flxq_pow(GEN x, GEN n, GEN pol, ulong p)
   /* not tuned*/
   if (degpol(pol) >= Flx_POW_MONTGOMERY_LIMIT)
   {
-    D.mg  = Flx_invmontgomery(pol,p);
-    y = gen_pow(x, n, (void*)&D, &_sqr_montgomery, &_mul_montgomery);
+    D.mg  = Flx_invMontgomery(pol,p);
+    y = gen_pow(x, n, (void*)&D, &_sqr_Montgomery, &_mul_Montgomery);
   }
   else
     y = gen_pow(x, n, (void*)&D, &_Flxq_sqr, &_Flxq_mul);
@@ -1622,7 +1622,7 @@ Flxq_div(GEN x,GEN y,GEN T,ulong p)
 GEN
 Flxq_powers(GEN x, long l, GEN T, ulong p)
 {
-  GEN mg=Flx_invmontgomery(T,p);
+  GEN mg=Flx_invMontgomery(T,p);
   GEN V = cgetg(l+2,t_VEC);
   long i, v = T[1];
   gel(V,1) = pol1_Flx(v);  if (l==0) return V;
@@ -2331,7 +2331,7 @@ FlxqX_divrem(GEN x, GEN y, GEN T, ulong p, GEN *pr)
 }
 
 static GEN
-FlxqX_invmontgomery_basecase(GEN T, GEN Q, ulong p)
+FlxqX_invMontgomery_basecase(GEN T, GEN Q, ulong p)
 {
   long i, l=lg(T)-1, k;
   long sv=Q[1];
@@ -2352,7 +2352,7 @@ FlxqX_invmontgomery_basecase(GEN T, GEN Q, ulong p)
 
 /* x/polrecip(P)+O(x^n) */
 GEN
-FlxqX_invmontgomery(GEN T, GEN Q, ulong p)
+FlxqX_invMontgomery(GEN T, GEN Q, ulong p)
 {
   pari_sp ltop=avma;
   long l=lg(T);
@@ -2364,13 +2364,13 @@ FlxqX_invmontgomery(GEN T, GEN Q, ulong p)
     ci=Flxq_inv(c,Q,p);
     T=FlxqX_Flxq_mul(T, ci, Q, p);
   }
-  r=FlxqX_invmontgomery_basecase(T,Q,p);
+  r=FlxqX_invMontgomery_basecase(T,Q,p);
   if (ci) r=FlxqX_Flxq_mul(r,ci,Q,p);
   return gerepileupto(ltop, r);
 }
 
 GEN
-FlxqX_rem_montgomery(GEN x, GEN mg, GEN T, GEN Q, ulong p)
+FlxqX_rem_Montgomery(GEN x, GEN mg, GEN T, GEN Q, ulong p)
 {
   pari_sp ltop=avma;
   GEN z;
@@ -2504,20 +2504,20 @@ FlxqXQ_sqr(void *data, GEN x) {
 
 #if 0
 static GEN
-FlxqXQ_red_montgomery(void *data, GEN x)
+FlxqXQ_red_Montgomery(void *data, GEN x)
 {
   FlxqX_kronecker_muldata *D = (FlxqX_kronecker_muldata*)data;
   GEN t = Kronecker_to_FlxqX(x, D->T,D->p);
-  t = FlxqX_rem_montgomery(t, D->S,D->mg,D->T,D->p);
+  t = FlxqX_rem_Montgomery(t, D->S,D->mg,D->T,D->p);
   return zxX_to_Kronecker(t,D->T);
 }
 static GEN
-FlxqXQ_mul_montgomery(void *data, GEN x, GEN y) {
-  return FlxqXQ_red_montgomery(data, Flx_mul(x,y,((FlxqX_kronecker_muldata*) data)->p));
+FlxqXQ_mul_Montgomery(void *data, GEN x, GEN y) {
+  return FlxqXQ_red_Montgomery(data, Flx_mul(x,y,((FlxqX_kronecker_muldata*) data)->p));
 }
 static GEN
-FlxqXQ_sqr_montgomery(void *data, GEN x) {
-  return FlxqXQ_red_montgomery(data, Flx_sqr(x,((FlxqX_kronecker_muldata*) data)->p));
+FlxqXQ_sqr_Montgomery(void *data, GEN x) {
+  return FlxqXQ_red_Montgomery(data, Flx_sqr(x,((FlxqX_kronecker_muldata*) data)->p));
 }
 #endif
 
@@ -2537,9 +2537,9 @@ FlxqXQ_pow(GEN x, GEN n, GEN S, GEN T, ulong p)
   if (lgpol(S[2]) && degpol(S) >= FlxqXQ_POW_MONTGOMERY_LIMIT)
   {
     /* We do not handle polynomials multiple of x yet */
-    D.mg  = FlxqX_invmontgomery(S,T,p);
+    D.mg  = FlxqX_invMontgomery(S,T,p);
     y = gen_pow(zxX_to_Kronecker(x,T), n,
-        (void*)&D, &FlxqXQ_sqr_montgomery, &FlxqXQ_mul_montgomery);
+        (void*)&D, &FlxqXQ_sqr_Montgomery, &FlxqXQ_mul_Montgomery);
     y = gen_pow(zxX_to_Kronecker(x,T), n,
         (void*)&D, &FlxqXQ_sqr, &FlxqXQ_mul);
   }

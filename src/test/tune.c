@@ -200,9 +200,9 @@ static double speed_Flx_karasqr(speed_param *s)
 { ulong p = DFLT_mod; enable(s); TIME_FUN(Flx_sqr(s->x, p)); }
 
 static double speed_Flx_inv(speed_param *s)
-{ ulong p = DFLT_mod; disable(s); TIME_FUN(Flx_invmontgomery(s->x, p)); }
+{ ulong p = DFLT_mod; disable(s); TIME_FUN(Flx_invMontgomery(s->x, p)); }
 static double speed_Flx_invnewton(speed_param *s)
-{ ulong p = DFLT_mod; enable(s); TIME_FUN(Flx_invmontgomery(s->x, p)); }
+{ ulong p = DFLT_mod; enable(s); TIME_FUN(Flx_invMontgomery(s->x, p)); }
 
 static double speed_Flx_mul(speed_param *s)
 { ulong p = DFLT_mod; disable(s); TIME_FUN(Flx_mul(s->x, s->y, p)); }

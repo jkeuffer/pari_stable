@@ -3900,11 +3900,11 @@ given two \kbd{Flx} \kbd{a} and \kbd{b},
 returns their resultant and sets Bezout coefficients (if the resultant is 0,
 the latter are not set).
 
-\fun{GEN}{Flx_invmontgomery}{GEN T, ulong p}, returns the Montgomery inverse
+\fun{GEN}{Flx_invMontgomery}{GEN T, ulong p}, returns the Montgomery inverse
 of \kbd{T}, i.e.~\kbd{truncate(x / polrecip(T)+O(x\pow n))}. Assumes
 $\kbd{T}(0) \neq 0$.
 
-\fun{GEN}{Flx_rem_montgomery}{GEN x, GEN mg, GEN T, ulong p}, returns
+\fun{GEN}{Flx_rem_Montgomery}{GEN x, GEN mg, GEN T, ulong p}, returns
 \kbd{x} modulo \kbd{T}, where \kbd{mg} is the Montgomery inverse of \kbd{T}.
 
 \fun{GEN}{Flx_renormalize}{GEN x, long l}, as \kbd{FpX\_renormalize}, where
