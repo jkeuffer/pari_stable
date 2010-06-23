@@ -1,7 +1,7 @@
 default(realprecision,38);
 do(p) = {
   my(v = [-3,3,2,0,1/2+I]);
-  my(znf = zetakinit(p)); 
+  my(znf = zetakinit(p));
   for(i=1,#v, print(zetak(znf,v[i])));
 }
 
