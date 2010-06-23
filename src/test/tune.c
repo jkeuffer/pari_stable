@@ -25,7 +25,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 int option_trace = 0;
 double Step_Factor = .01; /* small steps by default */
-ulong DFLT_mod = 17UL;
+#ifdef LONG_IS_64BIT
+ulong DFLT_mod = 18446744073709551557UL;
+#else
+ulong DFLT_mod = 4294967291UL;
+#endif
 
 typedef struct {
   ulong reps, type;
@@ -283,10 +287,9 @@ static tune_param param[] = {
 {0,   var(LOGAGMCX_LIMIT),         t_REAL,3,0, speed_logcx,speed_logcxagm,0.05},
 {0,   var(AGM_ATAN_LIMIT),         t_REAL,20,0, speed_atan,speed_atanagm,0.05},
 {GMP, var(INVMOD_GMP_LIMIT),       t_INT, 3,0, speed_invmod,speed_invmodgmp},
-{0,   var(Flx_MUL_LIMIT),          t_Flx, 4,0, speed_Flx_mul,speed_Flx_karamul},
-{0,   var(Flx_SQR_LIMIT),          t_Flx, 4,0, speed_Flx_sqr,speed_Flx_karasqr},
-{0,   var(Flx_INVMONTGOMERY_LIMIT),t_NFlx,10,30000,
-                                   speed_Flx_inv,speed_Flx_invnewton,0.3},
+{0,   var(Flx_MUL_LIMIT),          t_Flx,4,70, speed_Flx_mul,speed_Flx_karamul},
+{0,   var(Flx_SQR_LIMIT),          t_Flx,4,70, speed_Flx_sqr,speed_Flx_karasqr},
+{0,   var(Flx_INVMONTGOMERY_LIMIT),t_NFlx,10,0, speed_Flx_inv,speed_Flx_invnewton,0.1},
 {0,  var(Flx_POW_MONTGOMERY_LIMIT),t_NFlx,1,0,
                                    speed_Flxq_pow_redc,speed_Flxq_pow_mod},
 {0,  var(Flx_REM_MONTGOMERY_LIMIT),t_NFlx,10,0, speed_Flx_rem,speed_Flx_rem_mg,0.1},
