@@ -138,8 +138,8 @@ get_i0(long r1, long r2, GEN B, GEN limx)
     if (!r1)      t = mulrr(t, powru(mpfactr(i  , DEFAULTPREC), r2));
     else if (!r2) t = mulrr(t, powru(mpfactr(i/2, DEFAULTPREC), r1));
     else {
-      GEN u1 = mpfactr(i  , DEFAULTPREC);
-      GEN u2 = mpfactr(i/2, DEFAULTPREC);
+      GEN u1 = mpfactr(i/2, DEFAULTPREC);
+      GEN u2 = mpfactr(i,   DEFAULTPREC);
       if (r1 == r2) t = mulrr(t, powru(mulrr(u1,u2), r1));
       else t = mulrr(t, mulrr(powru(u1,r1), powru(u2,r2)));
     }
@@ -387,15 +387,13 @@ slambdak(GEN znf, long s, long flag, long prec)
   GEN gar, val, valm, valk, valkm;
   long r1, r2, r, i0, i, k, N0;
 
-  znf_get_sign(znf, &r1, &r2);
+  znf_get_sign(znf, &r1, &r2); r = r1+r2;
   resi   = gel(znf,2);
   C      = gel(znf,4);
   cst    = gel(znf,5);
   cstlog = gel(znf,6);
   coef   = gel(znf,8);
   coeflog= gel(znf,9);
-  r1 = mael(znf,1,1);
-  r2 = mael(znf,1,2); r = r1+r2;
   i0 = lg(gel(C,1))-1;
   N0 = lg(coef)-1;
 
