@@ -135,6 +135,9 @@ rand_g(long n, long type)
 
 #define  enable(s) (*(s->var)=lg(s->x)-2)/* enable  asymptotically fastest */
 #define disable(s) (*(s->var)=lg(s->x)+1)/* disable asymptotically fastest */
+#define  enable2(s,t) (*(s->var)=t-2)/* enable  asymptotically fastest */
+#define disable2(s,t) (*(s->var)=t+1)/* disable asymptotically fastest */
+
 
 static double speed_mulrr(speed_param *s)
 { disable(s); TIME_FUN(mulrr(s->x, s->y)); }
@@ -211,11 +214,11 @@ static double speed_Flx_karamul(speed_param *s)
 
 static double speed_Flx_rem(speed_param *s)
 { ulong p = DFLT_mod;
-  GEN x = rand_NFlx((degpol(s->x)-1)*2); disable(s);
+  GEN x = rand_NFlx((degpol(s->x)-1)*2); disable2(s,degpol(s->x)+1);
   TIME_FUN(Flx_rem(x, s->x, p)); }
 static double speed_Flx_rem_mg(speed_param *s)
 { ulong p = DFLT_mod;
-  GEN x = rand_NFlx((degpol(s->x)-1)*2); enable(s);
+  GEN x = rand_NFlx((degpol(s->x)-1)*2);  enable2(s,degpol(s->x)-3);
   TIME_FUN(Flx_rem(x, s->x, p)); }
 
 #define INIT_RED(s, op)                                 \
