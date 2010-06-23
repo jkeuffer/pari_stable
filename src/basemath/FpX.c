@@ -633,6 +633,155 @@ FqV_inv(GEN x, GEN T, GEN p)
 
 /***********************************************************************/
 /**                                                                   **/
+/**                  Montgomery reduction                            **/
+/**                                                                   **/
+/***********************************************************************/
+
+static GEN
+FpX_invMontgomery_basecase(GEN T, GEN p)
+{
+  long i, l=lg(T)-1, lr = l-1, k;
+  GEN r=cgetg(lr, t_POL); r[1]=T[1];
+  gel(r,2) = gen_1;
+  for (i=3; i<lr; i++)
+  {
+    pari_sp av = avma;
+    GEN u = gel(T,l-i+2);
+    for (k=3; k<i; k++)
+      u = addii(u, mulii(gel(T,l-i+k), gel(r,k)));
+    gel(r,i) = gerepileupto(av, modii(negi(u), p));
+  }
+  return FpX_renormalize(r,lr);
+}
+
+/* Return new lgpol */
+static long
+ZX_lgrenormalizespec(GEN x, long lx)
+{
+  long i;
+  for (i = lx-1; i>=0; i--)
+    if (signe(gel(x,i))) break;
+  return i+1;
+}
+
+INLINE GEN
+FpX_recipspec(GEN x, long l, long n)
+{
+  return RgX_recipspec_shallow(x, l, n);
+}
+
+static GEN
+FpX_mulspec(GEN a, GEN b, GEN p, long na, long nb)
+{
+  return FpX_red(ZX_mulspec(a, b, na, nb), p);
+}
+
+static GEN
+FpX_invMontgomery_Newton(GEN T, GEN p)
+{
+  pari_sp av = avma;
+  long nold, lx, lz, lq, l = degpol(T), i, lQ;
+  GEN q, y, z, x = cgetg(l+2, t_POL) + 2;
+  ulong mask = quadratic_prec_mask(l-2); /* assume l > 2 */
+  for (i=0;i<l;i++) gel(x,i) = gen_0;
+  q = FpX_recipspec(T+2,l+1,l+1); lQ = lgpol(q); q+=2;
+  /* We work on _spec_ FpX's, all the l[xzq] below are lgpol's */
+
+  /* initialize */
+  gel(x,0) = Fp_inv(gel(q,0), p);
+  if (lQ>1 && signe(gel(q,1)))
+  {
+    GEN u = gel(q, 1);
+    if (!equali1(gel(x,0))) u = Fp_mul(u, Fp_sqr(gel(x,0), p), p);
+    gel(x,1) = Fp_neg(u, p); lx = 2;
+  }
+  else
+    lx = 1;
+  nold = 1;
+  for (; mask > 1; )
+  { /* set x -= x(x*q - 1) + O(t^(nnew + 1)), knowing x*q = 1 + O(t^(nold+1)) */
+    long i, lnew, nnew = nold << 1;
+
+    if (mask & 1) nnew--;
+    mask >>= 1;
+
+    lnew = nnew + 1;
+    lq = ZX_lgrenormalizespec(q, minss(lQ,lnew));
+    z = FpX_mulspec(x, q, p, lx, lq); /* FIXME: high product */
+    lz = lgpol(z); if (lz > lnew) lz = lnew;
+    z += 2;
+    /* subtract 1 [=>first nold words are 0]: renormalize so that z(0) != 0 */
+    for (i = nold; i < lz; i++) if (signe(gel(z,i))) break;
+    nold = nnew;
+    if (i >= lz) continue; /* z-1 = 0(t^(nnew + 1)) */
+
+    /* z + i represents (x*q - 1) / t^i */
+    lz = ZX_lgrenormalizespec (z+i, lz-i);
+    z = FpX_mulspec(x, z+i, p, lx, lz); /* FIXME: low product */
+    lz = lgpol(z); z += 2;
+    if (lz > lnew-i) lz = ZX_lgrenormalizespec(z, lnew-i);
+
+    lx = lz+ i;
+    y  = x + i; /* x -= z * t^i, in place */
+    for (i = 0; i < lz; i++) gel(y,i) = Fp_neg(gel(z,i), p);
+  }
+  x -= 2; setlg(x, lx + 2); x[1] = T[1];
+  return gerepilecopy(av, x);
+}
+
+/* 1/polrecip(T)+O(x^(deg(T)-1)) */
+GEN
+FpX_invMontgomery(GEN T, GEN p)
+{
+  pari_sp ltop = avma;
+  long l = lg(T);
+  GEN r;
+  if (l<5) return zeropol(T[1]);
+  if (l<FpX_INVMONTGOMERY_LIMIT)
+  {
+    GEN c = gel(T,l-1), ci=gen_1;
+    if (!equali1(c))
+    {
+      ci = Fp_inv(c, p);
+      T = FpX_Fp_mul(T, ci, p);
+      r = FpX_invMontgomery_basecase(T, p);
+      r = FpX_Fp_mul(r, ci, p);
+    } else
+      r = FpX_invMontgomery_basecase(T, p);
+  }
+  else
+    r = FpX_invMontgomery_Newton(T, p);
+  return gerepileupto(ltop, r);
+}
+
+/* Compute x mod T where degpol(x)<=2*(degpol(T)-1) i.e. lgpol(x)<2*lgpol(T)-2
+ * and mg is the Montgomery inverse of T.
+ */
+GEN
+FpX_rem_Montgomery(GEN x, GEN mg, GEN T, GEN p)
+{
+  pari_sp ltop=avma;
+  GEN z;
+  long l  = lgpol(x);
+  long lt = degpol(T); /*We discard the leading term*/
+  long ld, lm, lT, lmg;
+  if (l<=lt)
+    return ZX_copy(x);
+  ld = l-lt;
+  lm = minss(ld, lgpol(mg));
+  lT  = ZX_lgrenormalizespec(T+2,lt);
+  lmg = ZX_lgrenormalizespec(mg+2,lm);
+  z = FpX_recipspec(x+2+lt,ld,ld);              /* z = rec(x)     lz<=ld*/
+  z = FpX_mulspec(z+2,mg+2,p,lgpol(z),lmg);    /* z = rec(x) * mg lz<=ld+lm*/
+  z = FpX_recipspec(z+2,minss(ld,lgpol(z)),ld);/* z = rec (rec(x) * mg) lz<=ld*/
+  z = FpX_mulspec(z+2,T+2,p,lgpol(z),lT);      /* z *= pol        lz<=ld+lt*/
+  z = FpX_subspec(x+2,z+2,p,lt,minss(lt,lgpol(z)));/* z = x - z   lz<=lt */
+  z[1] = x[1];
+  return gerepileupto(ltop, z);
+}
+
+/***********************************************************************/
+/**                                                                   **/
 /**                              FpXQ                                 **/
 /**                                                                   **/
 /***********************************************************************/

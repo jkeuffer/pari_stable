@@ -615,6 +615,18 @@ RgX_deriv(GEN x)
   y[1] = x[1]; return normalizepol_lg(y,i);
 }
 
+GEN
+RgX_recipspec_shallow(GEN x, long l, long n)
+{
+  long i;
+  GEN z=cgetg(n+2,t_POL)+2;
+  for(i=0; i<l; i++)
+    gel(z,n-i-1) = gel(x,i);
+  for(   ; i<n; i++)
+    gel(z, n-i-1) = gen_0;
+  return normalizepol_lg(z-2,n+2);
+}
+
 /* return coefficients s.t x = x_0 X^n + ... + x_n */
 GEN
 RgX_recip(GEN x)

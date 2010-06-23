@@ -3402,12 +3402,19 @@ by the \kbd{Fp}~\kbd{x}.
 \fun{GEN}{FpX_Fp_mul_to_monic}{GEN y,GEN x,GEN p} returns $y*x$ assuming the
 result is monic of the same degree as $y$ (in particular $x\neq 0$).
 
-
 \subsubsec{Miscellaneous operations}
 
 \fun{GEN}{FpX_normalize}{GEN z, GEN p} divides the \kbd{FpX}~\kbd{z} by its
 leading coefficient. If the latter is~$1$, \kbd{z} itself is returned, not a
 copy. If not, the inverse remains uncollected on the stack.
+
+\fun{GEN}{FpX_invMontgomery}{GEN T, GEN p}, returns the Montgomery inverse
+$M$ of $T$ defined by $M(x)\*x^n\*T(1/x)\equiv 1\pmod{x^{n-1}}$ where $n$ is
+the degree of $T$.
+
+\fun{GEN}{FpX_rem_Montgomery}{GEN x, GEN mg, GEN T, GEN p}, returns
+\kbd{x} modulo \kbd{T}, assuming that $\deg x\leq 2\*(\deg{T} - 1)$ where
+\kbd{mg} is the Montgomery inverse of \kbd{T}.
 
 \fun{GEN}{FpX_rescale}{GEN P, GEN h, GEN p} returns $h^{\deg(P)} P(x/h)$.
 \kbd{P} is an \kbd{FpX} and \kbd{h} is a non-zero \kbd{Fp} (the routine would

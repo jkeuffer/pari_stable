@@ -252,6 +252,11 @@ static double speed_Flxq_pow_mod(speed_param *s) {
   disable(s); TIME_FUN( Flxq_pow(polx_Flx(0), utoipos(p), s->y, p) );
 }
 
+static double speed_FpX_inv(speed_param *s)
+{ GEN p = subis(powuu(3,1280),3340); disable(s); TIME_FUN(FpX_invMontgomery(s->x, p)); }
+static double speed_FpX_invnewton(speed_param *s)
+{ GEN p = subis(powuu(3,1280),3340); enable(s); TIME_FUN(FpX_invMontgomery(s->x, p)); }
+
 /* small coeffs: earlier thresholds for more complicated rings */
 static double speed_RgX_sqr(speed_param *s)
 { disable(s); TIME_FUN(RgX_sqr(s->x)); }
@@ -293,6 +298,7 @@ static tune_param param[] = {
 {0,  var(Flx_POW_MONTGOMERY_LIMIT),t_NFlx,1,0,
                                    speed_Flxq_pow_redc,speed_Flxq_pow_mod},
 {0,  var(Flx_REM_MONTGOMERY_LIMIT),t_NFlx,10,0, speed_Flx_rem,speed_Flx_rem_mg,0.1},
+{0,  var(FpX_INVMONTGOMERY_LIMIT),t_FpX,10,0, speed_FpX_inv,speed_FpX_invnewton,0.05},
 {0,  var(RgX_MUL_LIMIT),          t_FpX, 4,0, speed_RgX_mul,speed_RgX_karamul},
 {0,  var(RgX_SQR_LIMIT),          t_FpX, 4,0, speed_RgX_sqr,speed_RgX_karasqr},
 };
