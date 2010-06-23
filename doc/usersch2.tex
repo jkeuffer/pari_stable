@@ -2108,16 +2108,21 @@ commands is kept, and line editing is available as usual. If you type in a
 command that results in an error, you are sent back to the break loop prompt
 (errors do \var{not} terminate the loop).
 
-To get out of a break loop, you can type
-\kbd{C-d} (\kbd{EOF}) or enter no input \emph{three times} consecutively
-(hit \kbd{Return} thrice), any of which will let \kbd{gp}
-perform its usual cleanup, and send you back to the \kbd{gp} prompt. If the
-break loop was started by a user interrupt (and not by an error),
-inputting an empty line, i.e hitting the \kbd{<Return>} key at the
-\kbd{break>} prompt, resumes the temporarily interrupted computation.
-A single empty line has no effect in case of a fatal error, to avoid
-getting get out of the loop prematurely, thereby losing valuable debugging
-data.
+To get out of a break loop, you can use \tet{next}, \tet{break}, \tet{return},
+or type \kbd{C-d} (\kbd{EOF}), or enter no input \emph{three times}
+consecutively (hit \kbd{Return} thrice), any of which will let \kbd{gp} perform
+its usual cleanup, and send you back to the \kbd{gp} prompt. Note that
+\kbd{C-d} is slightly dangerous, since typing it \emph{twice} will not only
+send you back to the \kbd{gp} prompt, but to your shell prompt ! (Since
+\kbd{C-d} at the \kbd{gp} prompt exits the gp session.)
+
+If the break loop was started by a user interrupt (and not by an error),
+inputting an empty line, i.e hitting the \kbd{<Return>} key at the \kbd{break>}
+prompt, resumes the temporarily interrupted computation. A single empty line
+has no effect in case of a fatal error, to avoid getting get out of the loop
+prematurely, thereby losing valuable debugging data. Any of \tet{next},
+\tet{break}, \tet{return}, or \kbd{C-d} will abort the computation and send you
+back to  the \kbd{gp} prompt as above.
 
 Break loops are useful as a debugging tool. You may inspect the values of
 \kbd{gp} variables to understand why an error occurred, or change

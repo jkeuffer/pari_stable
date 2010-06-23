@@ -537,6 +537,21 @@ closure_return(GEN C)
   return gerepileupto(ltop,gel(st,--sp));
 }
 
+/* for the break_loop debugger. Not memory clean */
+GEN
+closure_evalgp(GEN C, long *status)
+{
+  closure_eval(C);
+  *status = br_status;
+  if (br_status)
+  {
+    GEN z = br_res? gcopy(br_res): gnil;
+    reset_break();
+    return z;
+  }
+  return gel(st,--sp);
+}
+
 INLINE long
 closure_varn(GEN x)
 {

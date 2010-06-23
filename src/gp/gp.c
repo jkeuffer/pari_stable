@@ -1609,10 +1609,12 @@ break_loop(int numerr)
   }
   oldinfile = pari_infile;
   pari_infile = stdin;
+  pari_sp av = avma;
   for(;;)
   {
     GEN x;
-    long er;
+    long er, br_status;
+    avma = av;
     if ((er=setjmp(env[nenv])))
     {
       if (er<0) { s_env.n=1; longjmp(env[s_env.n-1], er); }
@@ -1620,32 +1622,36 @@ break_loop(int numerr)
       closure_err();
     }
     term_color(c_NONE);
-    if (! gp_read_line(&F, prompt))
+    if (gp_read_line(&F, prompt))
     {
-      if (pari_infile != stdin)
-      { /* were reading a file from the break loop, and are done : close it */
-        if (popinfile()) { go_on = 0; break; /* should not happen */ }
-      }
-      else
-      { /* user typed <C-D> in break loop : exit the debuger */
-        go_on = 0; break;
-      }
-      continue;
-    }
-    /* Empty input --> continue computation
-     * - if break loop initiated by ^C (will continue)
-     * - or 3 consecutive empty inputs (will abort) */
-    if (*(b->buf)) cnt = 0; else if (++cnt >= 3 || sigint) break;
+      /* Empty input --> continue computation
+       * - if break loop initiated by ^C (will continue)
+       * - or 3 consecutive empty inputs (will abort) */
+      if (*(b->buf)) cnt = 0; else if (++cnt >= 3 || sigint) break;
 #if defined(_WIN32) || defined(__CYGWIN32__)
-    win32ctrlc = 0;
+      win32ctrlc = 0;
 #endif
-    if (check_meta(b->buf, 0)) continue;
-    x = readseq(b->buf);
-    if (x == gnil || is_silent(b->buf)) continue;
+      if (check_meta(b->buf, 0)) continue;
+      x = closure_evalgp(pari_compile_str(b->buf,0), &br_status);
+      if (br_status) goto GP_EOF;
 
-    term_color(c_OUTPUT);
-    gen_output(x, GP_DATA->fmt);
-    pari_putc('\n');
+      if (x == gnil || is_silent(b->buf)) continue;
+
+      term_color(c_OUTPUT);
+      gen_output(x, GP_DATA->fmt);
+      pari_putc('\n'); continue;
+    }
+
+    /* EOF or break/next/return */
+GP_EOF:
+    if (pari_infile != stdin)
+    { /* were reading a file from the break loop, and are done : close it */
+      if (popinfile()) { go_on = 0; break; /* should not happen */ }
+    }
+    else
+    { /* user typed <C-D> in break loop : exit the debuger */
+      go_on = 0; break;
+    }
   }
   s_env.n=nenv;
   pari_infile = oldinfile;
