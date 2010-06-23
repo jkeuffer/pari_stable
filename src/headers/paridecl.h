@@ -1891,7 +1891,6 @@ void    pari_thread_init(void);
 GEN     pari_thread_start(struct pari_thread *t);
 GEN     pari_version(void);
 void    pari_warn(int numerr, ...);
-stackzone* switch_stack(stackzone *z, long n);
 GEN     trap0(const char *e, GEN f, GEN r);
 void    shiftaddress(GEN x, long dec);
 void    shiftaddress_canon(GEN x, long dec);

@@ -769,6 +769,7 @@ BA 61- GP operator === that use gidentical
 BA 43- bitvec family function. Use F2v instead.
 BA 44- useless prototype code 'S'. Use 'r' instead.
 BA 45- useless function delete_named_var.
+   46- obsolete and dangerous switch_stack() [#1013]
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.2 (released 22/12/2007):

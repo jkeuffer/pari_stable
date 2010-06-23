@@ -1658,34 +1658,6 @@ allocatemoremem(size_t newsize)
   return s;
 }
 
-/* alternate stack management routine */
-stackzone *
-switch_stack(stackzone *z, long n)
-{
-  if (!z)
-  { /* create parallel stack */
-    size_t size = n*sizeof(long) + sizeof(stackzone);
-    z = (stackzone*) pari_malloc(size);
-    z->zonetop = ((pari_sp)z) + size;
-    return z;
-  }
-
-  if (n)
-  { /* switch to parallel stack */
-    z->st.bot     = bot;
-    z->st.top     = top;
-    z->st.avma    = avma;
-    z->st.memused = memused;
-    bot     = (pari_sp) (z+1);
-    top     = z->zonetop;
-    avma    = top;
-    memused = DISABLE_MEMUSED;
-  }
-  else /* back to normalcy */
-    pari_stack_use(&z->st);
-  return NULL;
-}
-
 void
 fill_stack(void)
 {

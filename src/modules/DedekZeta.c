@@ -180,10 +180,8 @@ initzeta(GEN T, long prec)
   GEN VOID;
   long N0, i0, r1, r2, r, R, N, i, j, k, n, bit = bit_accuracy(prec) + 6;
 
-
   pari_sp av, av2;
   long court[] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3),0};
-  stackzone *zone, *zone0, *zone1;
 
   /*************** residue & constants ***************/
   T = get_bnfpol(T, &bnf, &nf);
@@ -226,16 +224,13 @@ initzeta(GEN T, long prec)
   i0 = zeta_get_i0(r1, r2, bit + 4, limx);
 
   /* Array of i/cst (i=1..N0) */
-  av = avma; i = prec*N0;
-  zone  = switch_stack(NULL,i + 2*(N0+1) + 6*prec);
-  zone1 = switch_stack(NULL,2*i);
-  zone0 = switch_stack(NULL,2*i);
-  (void)switch_stack(zone,1);
+  av = avma;
   tabcstn  = cgetg(N0+1,t_VEC);
   tabcstni = cgetg(N0+1,t_VEC);
   p1 = invr(cst);
   for (i=1; i<=N0; i++) gel(tabcstni,i) = gel(tabcstn,i) = mulur(i,p1);
-  (void)switch_stack(zone,0);
+  tabcstn  = gclone(tabcstn);
+  tabcstni = gclone(tabcstni);
 
   /********** compute a(i,j) **********/
   zet = cgetg(R,t_VEC); gel(zet,1) = mpeuler(prec);
@@ -350,7 +345,6 @@ initzeta(GEN T, long prec)
   av2 = avma;
   for (i=1; i<=i0; i++)
   {
-    stackzone *z;
     for (k=1; k<=r; k++)
     {
       GEN A = gel(aij,i) + k; /* A[j] = aij[i, j+k] */
@@ -370,18 +364,13 @@ initzeta(GEN T, long prec)
       av2 = avma;
     }
     if (i > 1 && i < i0) {
-      /* use a parallel stack */
-      z = i&1? zone1: zone0;
-      (void)switch_stack(z, 1);
       for (n=1; n<=N0; n++)
-        if (coef[n]) gel(tabcstni,n) = mpmul(gel(tabcstni,n),gel(tabcstn,n));
-      /* come back */
-      (void)switch_stack(z, 0);
+        if (coef[n]) mpmulz(gel(tabcstni,n), gel(tabcstn,n), gel(tabcstni,n));
     }
   }
   gel(znf,4) = C;
   if (DEBUGLEVEL>1) msgtimer("Cik");
-  pari_free((void*)zone); pari_free((void*)zone1); pari_free((void*)zone0);
+  gunclone(tabcstn); gunclone(tabcstni);
   pari_free((void*)coef); return znf;
 }
 

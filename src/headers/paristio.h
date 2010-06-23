@@ -43,12 +43,6 @@ struct pari_thread
   GEN data;
 };
 
-typedef struct stackzone
-{
-  pari_sp zonetop;
-  struct pari_mainstack st;
-} stackzone;
-
 typedef struct pariFILE {
   FILE *file;
   int type;
