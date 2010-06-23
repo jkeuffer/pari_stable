@@ -1582,7 +1582,7 @@ break_loop(int numerr)
   static FILE *oldinfile = NULL;
   filtre_t F;
   Buffer *b;
-  int sigint = numerr<0, go_on = sigint, cnt = 0;
+  int sigint = numerr<0, go_on = sigint;
   struct gp_context rec;
   const char *prompt;
   char promptbuf[MAX_PROMPT_LEN + 24];
@@ -1596,9 +1596,9 @@ break_loop(int numerr)
   gp_context_save(&rec);
   term_color(c_ERR); pari_putc('\n');
   if (sigint)
-    print_errcontext("Break loop: type <Return> to continue", NULL, NULL);
+    print_errcontext("Break loop: type <Return> to continue; 'break' to go back to GP", NULL, NULL);
   else
-    print_errcontext("Break loop: type <Return> three times, or Control-d, to go back to GP)", NULL, NULL);
+    print_errcontext("Break loop: type 'break' to go back to GP)", NULL, NULL);
   term_color(c_NONE);
   if (s_env.n == 2)
     prompt = BREAK_LOOP_PROMPT;
@@ -1624,10 +1624,9 @@ break_loop(int numerr)
     term_color(c_NONE);
     if (gp_read_line(&F, prompt))
     {
-      /* Empty input --> continue computation
-       * - if break loop initiated by ^C (will continue)
-       * - or 3 consecutive empty inputs (will abort) */
-      if (*(b->buf)) cnt = 0; else if (++cnt >= 3 || sigint) break;
+      /* Empty input --> continue computation if break loop initiated
+       * by ^C (will continue) */
+      if (! *(b->buf) && sigint) break;
 #if defined(_WIN32) || defined(__CYGWIN32__)
       win32ctrlc = 0;
 #endif
