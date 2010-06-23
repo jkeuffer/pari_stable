@@ -1587,6 +1587,7 @@ break_loop(int numerr)
   const char *prompt;
   char promptbuf[MAX_PROMPT_LEN + 24];
   long nenv;
+  pari_sp av;
 
   if (numerr == talker2) return 0;
   if (numerr == errpile) { evalstate_clone(); avma = top; }
@@ -1609,7 +1610,7 @@ break_loop(int numerr)
   }
   oldinfile = pari_infile;
   pari_infile = stdin;
-  pari_sp av = avma;
+  av = avma;
   for(;;)
   {
     GEN x;
