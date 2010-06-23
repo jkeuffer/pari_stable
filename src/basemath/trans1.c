@@ -2131,7 +2131,7 @@ glog(GEN x, long prec)
 
     case t_COMPLEX:
       if (gequal0(gel(x,2))) return glog(gel(x,1), prec);
-      if (prec > LOGAGMCX_LIMIT) return logagmcx(x, prec);
+      if (prec >= LOGAGMCX_LIMIT) return logagmcx(x, prec);
       y = cgetg(3,t_COMPLEX);
       gel(y,2) = garg(x,prec);
       av = avma; p1 = glog(cxnorm(x),prec); tetpil = avma;
