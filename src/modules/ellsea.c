@@ -354,10 +354,11 @@ static ulong
 find_eigen_value(GEN a4, GEN a6, ulong ell, GEN h, GEN p, GEN tr)
 {
   pari_sp ltop = avma;
-  GEN BP, Dr;
+  GEN BP, Dr, nGr;
   ulong t;
   struct eigen_ellinit Edat;
   init_eigen(&Edat, a4, a6, h, p);
+  nGr = FpX_neg(Edat.Gr, p);
   Dr = BP = mkvec2(pol_x(0), pol_1(0));
   /*[0,Gr], BP, Dr are not points on the curve. */
   /*To obtain the corresponding points, multiply the y-coordinates by Y */
@@ -367,8 +368,7 @@ find_eigen_value(GEN a4, GEN a6, ulong ell, GEN h, GEN p, GEN tr)
     for (t = 1; t <= (ell>>1); t++)
     {
       if (ZX_equal(gel(Dr,2), Edat.Gr)) { avma = ltop; return t; }
-      if (ZX_equal(gel(Dr,2), FpX_neg(Edat.Gr, p)))
-                                         { avma = ltop; return ell-t; }
+      if (ZX_equal(gel(Dr,2), nGr))     { avma = ltop; return ell-t; }
       Dr = gerepileupto(btop, eigen_elladd((void*)&Edat, Dr, BP));
     }
     pari_err(bugparier,"find_eigen_value_power");
