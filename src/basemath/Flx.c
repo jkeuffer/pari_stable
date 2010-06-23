@@ -835,7 +835,7 @@ Flx_lgrenormalizespec(GEN x, long lx)
     if (x[i]) break;
   return i+1;
 }
-GEN
+static GEN
 Flx_invMontgomery_Newton(GEN T, ulong p)
 {
   long nold, lx, lz, lq, l = degpol(T), lQ;
