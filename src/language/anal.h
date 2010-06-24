@@ -147,7 +147,6 @@ void optimizenode(long n);
 void closure_context(GEN C, long lpc);
 const char * closure_func_err(void);
 GEN  gp_closure(long n);
-GEN closure_evalgp(GEN C, long *status);
 long eval_mnemonic(GEN str, const char *tmplate);
 
 INLINE long

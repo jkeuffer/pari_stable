@@ -1473,6 +1473,7 @@ GEN     closure_callgenall(GEN C, long n, ...);
 GEN     closure_callgenvec(GEN C, GEN args);
 void    closure_disassemble(GEN n);
 void    closure_err(void);
+GEN     closure_evalbrk(GEN C, long *status);
 GEN     closure_evalgen(GEN C);
 GEN     closure_evalnobrk(GEN C);
 GEN     closure_evalres(GEN C);

@@ -1632,7 +1632,7 @@ break_loop(int numerr)
       win32ctrlc = 0;
 #endif
       if (check_meta(b->buf, 0)) continue;
-      x = closure_evalgp(pari_compile_str(b->buf,0), &br_status);
+      x = closure_evalbrk(pari_compile_str(b->buf,0), &br_status);
       if (br_status) goto GP_EOF;
 
       if (x == gnil || is_silent(b->buf)) continue;

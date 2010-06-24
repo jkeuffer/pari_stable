@@ -7891,7 +7891,7 @@ has arity $\geq \kbd{lg(args)-1}$.
 \kbd{C} with argument \kbd{x}, \kbd{y}. Assumes \kbd{C} has arity $\geq 2$.
 
 The following technical functions are used to evaluate \emph{inline}
-closures, after pushing lexical arguments on the evaluator stack.
+closures and closures of arity 0.
 
 The control flow statements (break, next and return) will cause the
 evaluation of the closure to be interrupted; this is called below a
@@ -7911,18 +7911,24 @@ or \kbd{NULL} if a flow change occurred.
 an exception if a flow change occurs. Meant for pseudo-iterators where
 interrupting the closure is meaningless, e.g.~\kbd{intnum} or \kbd{sumninm}.
 
-\fun{GEN}{closure_evalres}{GEN code} evaluates a closure and returns the result.
-The difference with \kbd{closure\_evalgen} being that, if the flow end by a
-\kbd{return} statement, the result will be the returned value instead of
-\kbd{NULL}.
-
 \fun{void}{closure_evalvoid}{GEN code} evaluates a closure whose return
 value is ignored. The caller has to deal with eventual flow changes by
 calling \kbd{loop\_break}.
 
+The remaining functions below are for exceptionnal situations:
+
+\fun{GEN}{closure_evalres}{GEN code} evaluates a closure and returns the result.
+The difference with \kbd{closure\_evalgen} being that, if the flow end by a
+\kbd{return} statement, the result will be the returned value instead of
+\kbd{NULL}. Used by the main GP loop.
+
+\fun{GEN}{closure_evalbrk}{GEN code, long *status} as \kbd{closure\_evalgen}
+but set \kbd{status} to a non-zero value if a flow change occurred. This
+variant is not stack clean. Used by the break loop.
+
 \fun{GEN}{closure_trapgen}{long numerr, GEN code} evaluates closure, while
 trapping error \kbd{numerr}. Return \kbd{(GEN)1L} if error trapped, and the
-result otherwise, or \kbd{NULL} if a flow change occurred.
+result otherwise, or \kbd{NULL} if a flow change occurred. Used by trap.
 
 \subsec{Functions to handle control flow changes}
 

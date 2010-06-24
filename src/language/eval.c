@@ -539,7 +539,7 @@ closure_return(GEN C)
 
 /* for the break_loop debugger. Not memory clean */
 GEN
-closure_evalgp(GEN C, long *status)
+closure_evalbrk(GEN C, long *status)
 {
   closure_eval(C);
   *status = br_status;
