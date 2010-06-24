@@ -569,56 +569,6 @@ pol_x_powers(long N, long v)
   return L;
 }
 
-GEN
-FpXQX_gcd(GEN P, GEN Q, GEN T, GEN p)
-{
-  pari_sp av2, av = avma, st_lim;
-  long dg;
-  GEN U, q;
-  if (lgefint(p) == 3)
-  {
-    ulong pp = (ulong)p[2];
-    GEN Pl, Ql, Tl;
-    Pl = ZXX_to_FlxX(P, pp, varn(T));
-    if (!signe(Pl)) { avma = av; return gcopy(Q); }
-    Ql = ZXX_to_FlxX(Q, pp, varn(T));
-    if (!signe(Ql)) { avma = av; return gcopy(P); }
-    Tl = ZX_to_Flx(T, pp);
-    U = FlxqX_safegcd(Pl, Ql, Tl, pp);
-    if (!U) pari_err(talker, "non-invertible polynomial in FpXQX_gcd");
-    return gerepileupto(av, FlxX_to_ZXX(U));
-  }
-  P = FpXX_red(P, p); av2 = avma;
-  Q = FpXX_red(Q, p);
-  if (!signe(P)) return gerepileupto(av, Q);
-  if (!signe(Q)) { avma = av2; return P; }
-  T = FpX_red(T, p);
-
-  av2 = avma; st_lim = stack_lim(av2, 1);
-  dg = lg(P)-lg(Q);
-  if (dg < 0) { swap(P, Q); dg = -dg; }
-  for(;;)
-  {
-    U = Fq_inv(leading_term(Q), T, p);
-    do /* set P := P % Q */
-    {
-      q = Fq_mul(U, Fq_neg(leading_term(P), T, p), T, p);
-      P = FpXX_add(P, FqX_Fq_mul(RgX_shift_shallow(Q, dg), q, T, p), p);
-      dg = lg(P)-lg(Q);
-    } while (dg >= 0);
-    if (!signe(P)) break;
-
-    if (low_stack(st_lim, stack_lim(av2, 1)))
-    {
-      if (DEBUGMEM>1) pari_warn(warnmem,"FpXQX_gcd");
-      gerepileall(av2, 2, &P,&Q);
-    }
-    swap(P, Q); dg = -dg;
-  }
-  Q = FqX_Fq_mul(Q, U, T, p); /* normalize GCD */
-  return gerepileupto(av, Q);
-}
-
 /* x and y in Z[Y][X]. Assume T irreducible mod p */
 GEN
 FpXQX_divrem(GEN x, GEN y, GEN T, GEN p, GEN *pr)
@@ -729,6 +679,56 @@ GEN
 FpXQX_rem(GEN x, GEN y, GEN T, GEN p)
 {
   return FpXQX_divrem(x, y, T, p, ONLY_REM);
+}
+
+GEN
+FpXQX_gcd(GEN P, GEN Q, GEN T, GEN p)
+{
+  pari_sp av2, av = avma, st_lim;
+  long dg;
+  GEN U, q;
+  if (lgefint(p) == 3)
+  {
+    ulong pp = (ulong)p[2];
+    GEN Pl, Ql, Tl;
+    Pl = ZXX_to_FlxX(P, pp, varn(T));
+    if (!signe(Pl)) { avma = av; return gcopy(Q); }
+    Ql = ZXX_to_FlxX(Q, pp, varn(T));
+    if (!signe(Ql)) { avma = av; return gcopy(P); }
+    Tl = ZX_to_Flx(T, pp);
+    U = FlxqX_safegcd(Pl, Ql, Tl, pp);
+    if (!U) pari_err(talker, "non-invertible polynomial in FpXQX_gcd");
+    return gerepileupto(av, FlxX_to_ZXX(U));
+  }
+  P = FpXX_red(P, p); av2 = avma;
+  Q = FpXX_red(Q, p);
+  if (!signe(P)) return gerepileupto(av, Q);
+  if (!signe(Q)) { avma = av2; return P; }
+  T = FpX_red(T, p);
+
+  av2 = avma; st_lim = stack_lim(av2, 1);
+  dg = lg(P)-lg(Q);
+  if (dg < 0) { swap(P, Q); dg = -dg; }
+  for(;;)
+  {
+    U = Fq_inv(leading_term(Q), T, p);
+    do /* set P := P % Q */
+    {
+      q = Fq_mul(U, Fq_neg(leading_term(P), T, p), T, p);
+      P = FpXX_add(P, FqX_Fq_mul(RgX_shift_shallow(Q, dg), q, T, p), p);
+      dg = lg(P)-lg(Q);
+    } while (dg >= 0);
+    if (!signe(P)) break;
+
+    if (low_stack(st_lim, stack_lim(av2, 1)))
+    {
+      if (DEBUGMEM>1) pari_warn(warnmem,"FpXQX_gcd");
+      gerepileall(av2, 2, &P,&Q);
+    }
+    swap(P, Q); dg = -dg;
+  }
+  Q = FqX_Fq_mul(Q, U, T, p); /* normalize GCD */
+  return gerepileupto(av, Q);
 }
 
 /* x and y in Z[Y][X], return lift(gcd(x mod T,p, y mod T,p)). Set u and v st
