@@ -7895,8 +7895,8 @@ closures, after pushing lexical arguments on the evaluator stack.
 
 The control flow statements (break, next and return) will cause the
 evaluation of the closure to be interrupted; this is called below a
-\emph{flow change}. When that occurs, the functions below generally returns
-\kbd{NULL}. The caller can then adopt three positions:
+\emph{flow change}. When that occurs, the functions below generally
+ return \kbd{NULL}. The caller can then adopt three positions:
 
 \item raises an exception (\kbd{closure\_evalnobrk}).
 
