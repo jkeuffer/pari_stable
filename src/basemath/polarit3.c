@@ -619,6 +619,150 @@ FpXQX_gcd(GEN P, GEN Q, GEN T, GEN p)
   return gerepileupto(av, Q);
 }
 
+/* x and y in Z[Y][X]. Assume T irreducible mod p */
+GEN
+FpXQX_divrem(GEN x, GEN y, GEN T, GEN p, GEN *pr)
+{
+  long vx, dx, dy, dz, i, j, sx, lr;
+  pari_sp av0, av, tetpil;
+  GEN z,p1,rem,lead;
+
+  if (!T) return FpX_divrem(x,y,p,pr);
+  if (!signe(y)) pari_err(gdiver);
+  vx=varn(x); dy=degpol(y); dx=degpol(x);
+  if (dx < dy)
+  {
+    if (pr)
+    {
+      av0 = avma; x = FpXQX_red(x, T, p);
+      if (pr == ONLY_DIVIDES) { avma=av0; return signe(x)? NULL: zeropol(vx); }
+      if (pr == ONLY_REM) return x;
+      *pr = x;
+    }
+    return zeropol(vx);
+  }
+  lead = leading_term(y);
+  if (!dy) /* y is constant */
+  {
+    if (pr && pr != ONLY_DIVIDES)
+    {
+      if (pr == ONLY_REM) return zeropol(vx);
+      *pr = zeropol(vx);
+    }
+    av0 = avma; x = FqX_normalize(x, T,p); tetpil = avma;
+    return gerepile(av0,tetpil,FpXQX_red(x,T,p));
+  }
+  av0 = avma; dz = dx-dy;
+  if (lgefint(p) == 3)
+  { /* assume ab != 0 mod p */
+    {
+      GEN *gptr[2];
+      ulong pp = (ulong)p[2];
+      long v = varn(T);
+      GEN a = ZXX_to_FlxX(x, pp, v);
+      GEN b = ZXX_to_FlxX(y, pp, v);
+      GEN t = ZX_to_Flx(T, pp);
+      z = FlxqX_divrem(a,b,t,pp,pr);
+      tetpil=avma;
+      z = FlxX_to_ZXX(z);
+      if (pr && pr != ONLY_DIVIDES && pr != ONLY_REM)
+        *pr = FlxX_to_ZXX(*pr);
+      else return gerepile(av0,tetpil,z);
+      gptr[0]=pr; gptr[1]=&z;
+      gerepilemanysp(av0,tetpil,gptr,2);
+      return z;
+    }
+  }
+  lead = gequal1(lead)? NULL: gclone(Fq_inv(lead,T,p));
+  avma = av0;
+  z = cgetg(dz+3,t_POL); z[1] = x[1];
+  x += 2; y += 2; z += 2;
+
+  p1 = gel(x,dx); av = avma;
+  gel(z,dz) = lead? gerepileupto(av, Fq_mul(p1,lead, T, p)): gcopy(p1);
+  for (i=dx-1; i>=dy; i--)
+  {
+    av=avma; p1=gel(x,i);
+    for (j=i-dy+1; j<=i && j<=dz; j++)
+      p1 = Fq_sub(p1, Fq_mul(gel(z,j),gel(y,i-j),NULL,p),NULL,p);
+    if (lead) p1 = Fq_mul(p1, lead, NULL,p);
+    tetpil=avma; gel(z,i-dy) = gerepile(av,tetpil,Fq_red(p1,T,p));
+  }
+  if (!pr) { if (lead) gunclone(lead); return z-2; }
+
+  rem = (GEN)avma; av = (pari_sp)new_chunk(dx+3);
+  for (sx=0; ; i--)
+  {
+    p1 = gel(x,i);
+    for (j=0; j<=i && j<=dz; j++)
+      p1 = Fq_sub(p1, Fq_mul(gel(z,j),gel(y,i-j),NULL,p),NULL,p);
+    tetpil=avma; p1 = Fq_red(p1, T, p); if (signe(p1)) { sx = 1; break; }
+    if (!i) break;
+    avma=av;
+  }
+  if (pr == ONLY_DIVIDES)
+  {
+    if (lead) gunclone(lead);
+    if (sx) { avma=av0; return NULL; }
+    avma = (pari_sp)rem; return z-2;
+  }
+  lr=i+3; rem -= lr;
+  rem[0] = evaltyp(t_POL) | evallg(lr);
+  rem[1] = z[-1];
+  p1 = gerepile((pari_sp)rem,tetpil,p1);
+  rem += 2; gel(rem,i) = p1;
+  for (i--; i>=0; i--)
+  {
+    av=avma; p1 = gel(x,i);
+    for (j=0; j<=i && j<=dz; j++)
+      p1 = Fq_sub(p1, Fq_mul(gel(z,j),gel(y,i-j), NULL,p), NULL,p);
+    tetpil=avma; gel(rem,i) = gerepile(av,tetpil, Fq_red(p1, T, p));
+  }
+  rem -= 2;
+  if (lead) gunclone(lead);
+  if (!sx) (void)FpXQX_renormalize(rem, lr);
+  if (pr == ONLY_REM) return gerepileupto(av0,rem);
+  *pr = rem; return z-2;
+}
+
+GEN
+FpXQX_rem(GEN x, GEN y, GEN T, GEN p)
+{
+  return FpXQX_divrem(x, y, T, p, ONLY_REM);
+}
+
+/* x and y in Z[Y][X], return lift(gcd(x mod T,p, y mod T,p)). Set u and v st
+ * ux + vy = gcd (mod T,p) */
+GEN
+FpXQX_extgcd(GEN x, GEN y, GEN T, GEN p, GEN *ptu, GEN *ptv)
+{
+  GEN a,b,q,r,u,v,d,d1,v1;
+  pari_sp ltop=avma, lbot;
+
+  a = FpXQX_red(x, T, p);
+  b = FpXQX_red(y, T, p);
+  d = a; d1 = b; v = gen_0; v1 = gen_1;
+  while (signe(d1))
+  {
+    q = FpXQX_divrem(d,d1,T,p, &r);
+    v = gsub(v, gmul(q,v1));
+    v = FpXQX_red(v,T,p);
+    u=v; v=v1; v1=u;
+    u=r; d=d1; d1=u;
+  }
+  u = gsub(d, gmul(b,v));
+  u = FpXQX_red(u,T, p);
+  lbot = avma;
+  u = FpXQX_divrem(u,a,T,p,NULL);
+  d = gcopy(d);
+  v = gcopy(v);
+  {
+    GEN *gptr[3]; gptr[0] = &d; gptr[1] = &u; gptr[2] = &v;
+    gerepilemanysp(ltop,lbot,gptr,3);
+  }
+  *ptu = u; *ptv = v; return d;
+}
+
 /*******************************************************************/
 /*                                                                 */
 /*                       (Fp[X]/T(X))[Y] / S(Y)                    */
@@ -1588,154 +1732,6 @@ mod_to_Kronecker(GEN P, GEN Q)
 /*                          MODULAR GCD                            */
 /*                                                                 */
 /*******************************************************************/
-/*FIXME: Unify the following 3 divrem routines. Treat the case x,y (lifted) in
- * R[X], y non constant. Given: (lifted) [inv(), mul()], (delayed) red() in R */
-
-
-/* x and y in Z[Y][X]. Assume T irreducible mod p */
-GEN
-FpXQX_divrem(GEN x, GEN y, GEN T, GEN p, GEN *pr)
-{
-  long vx, dx, dy, dz, i, j, sx, lr;
-  pari_sp av0, av, tetpil;
-  GEN z,p1,rem,lead;
-
-  if (!T) return FpX_divrem(x,y,p,pr);
-  if (!signe(y)) pari_err(gdiver);
-  vx=varn(x); dy=degpol(y); dx=degpol(x);
-  if (dx < dy)
-  {
-    if (pr)
-    {
-      av0 = avma; x = FpXQX_red(x, T, p);
-      if (pr == ONLY_DIVIDES) { avma=av0; return signe(x)? NULL: zeropol(vx); }
-      if (pr == ONLY_REM) return x;
-      *pr = x;
-    }
-    return zeropol(vx);
-  }
-  lead = leading_term(y);
-  if (!dy) /* y is constant */
-  {
-    if (pr && pr != ONLY_DIVIDES)
-    {
-      if (pr == ONLY_REM) return zeropol(vx);
-      *pr = zeropol(vx);
-    }
-    av0 = avma; x = FqX_normalize(x, T,p); tetpil = avma;
-    return gerepile(av0,tetpil,FpXQX_red(x,T,p));
-  }
-  av0 = avma; dz = dx-dy;
-  if (lgefint(p) == 3)
-  { /* assume ab != 0 mod p */
-    {
-      GEN *gptr[2];
-      ulong pp = (ulong)p[2];
-      long v = varn(T);
-      GEN a = ZXX_to_FlxX(x, pp, v);
-      GEN b = ZXX_to_FlxX(y, pp, v);
-      GEN t = ZX_to_Flx(T, pp);
-      z = FlxqX_divrem(a,b,t,pp,pr);
-      tetpil=avma;
-      z = FlxX_to_ZXX(z);
-      if (pr && pr != ONLY_DIVIDES && pr != ONLY_REM)
-        *pr = FlxX_to_ZXX(*pr);
-      else return gerepile(av0,tetpil,z);
-      gptr[0]=pr; gptr[1]=&z;
-      gerepilemanysp(av0,tetpil,gptr,2);
-      return z;
-    }
-  }
-  lead = gequal1(lead)? NULL: gclone(Fq_inv(lead,T,p));
-  avma = av0;
-  z = cgetg(dz+3,t_POL); z[1] = x[1];
-  x += 2; y += 2; z += 2;
-
-  p1 = gel(x,dx); av = avma;
-  gel(z,dz) = lead? gerepileupto(av, Fq_mul(p1,lead, T, p)): gcopy(p1);
-  for (i=dx-1; i>=dy; i--)
-  {
-    av=avma; p1=gel(x,i);
-    for (j=i-dy+1; j<=i && j<=dz; j++)
-      p1 = Fq_sub(p1, Fq_mul(gel(z,j),gel(y,i-j),NULL,p),NULL,p);
-    if (lead) p1 = Fq_mul(p1, lead, NULL,p);
-    tetpil=avma; gel(z,i-dy) = gerepile(av,tetpil,Fq_red(p1,T,p));
-  }
-  if (!pr) { if (lead) gunclone(lead); return z-2; }
-
-  rem = (GEN)avma; av = (pari_sp)new_chunk(dx+3);
-  for (sx=0; ; i--)
-  {
-    p1 = gel(x,i);
-    for (j=0; j<=i && j<=dz; j++)
-      p1 = Fq_sub(p1, Fq_mul(gel(z,j),gel(y,i-j),NULL,p),NULL,p);
-    tetpil=avma; p1 = Fq_red(p1, T, p); if (signe(p1)) { sx = 1; break; }
-    if (!i) break;
-    avma=av;
-  }
-  if (pr == ONLY_DIVIDES)
-  {
-    if (lead) gunclone(lead);
-    if (sx) { avma=av0; return NULL; }
-    avma = (pari_sp)rem; return z-2;
-  }
-  lr=i+3; rem -= lr;
-  rem[0] = evaltyp(t_POL) | evallg(lr);
-  rem[1] = z[-1];
-  p1 = gerepile((pari_sp)rem,tetpil,p1);
-  rem += 2; gel(rem,i) = p1;
-  for (i--; i>=0; i--)
-  {
-    av=avma; p1 = gel(x,i);
-    for (j=0; j<=i && j<=dz; j++)
-      p1 = Fq_sub(p1, Fq_mul(gel(z,j),gel(y,i-j), NULL,p), NULL,p);
-    tetpil=avma; gel(rem,i) = gerepile(av,tetpil, Fq_red(p1, T, p));
-  }
-  rem -= 2;
-  if (lead) gunclone(lead);
-  if (!sx) (void)FpXQX_renormalize(rem, lr);
-  if (pr == ONLY_REM) return gerepileupto(av0,rem);
-  *pr = rem; return z-2;
-}
-
-GEN
-FpXQX_rem(GEN x, GEN y, GEN T, GEN p)
-{
-  return FpXQX_divrem(x, y, T, p, ONLY_REM);
-}
-
-/* x and y in Z[Y][X], return lift(gcd(x mod T,p, y mod T,p)). Set u and v st
- * ux + vy = gcd (mod T,p) */
-GEN
-FpXQX_extgcd(GEN x, GEN y, GEN T, GEN p, GEN *ptu, GEN *ptv)
-{
-  GEN a,b,q,r,u,v,d,d1,v1;
-  pari_sp ltop=avma, lbot;
-
-  a = FpXQX_red(x, T, p);
-  b = FpXQX_red(y, T, p);
-  d = a; d1 = b; v = gen_0; v1 = gen_1;
-  while (signe(d1))
-  {
-    q = FpXQX_divrem(d,d1,T,p, &r);
-    v = gsub(v, gmul(q,v1));
-    v = FpXQX_red(v,T,p);
-    u=v; v=v1; v1=u;
-    u=r; d=d1; d1=u;
-  }
-  u = gsub(d, gmul(b,v));
-  u = FpXQX_red(u,T, p);
-  lbot = avma;
-  u = FpXQX_divrem(u,a,T,p,NULL);
-  d = gcopy(d);
-  v = gcopy(v);
-  {
-    GEN *gptr[3]; gptr[0] = &d; gptr[1] = &u; gptr[2] = &v;
-    gerepilemanysp(ltop,lbot,gptr,3);
-  }
-  *ptu = u; *ptv = v; return d;
-}
-
 /* return z = a mod q, b mod p (p,q) = 1. qinv = 1/q mod p */
 static GEN
 Fl_chinese_coprime(GEN a, ulong b, GEN q, ulong p, ulong qinv, GEN pq)
