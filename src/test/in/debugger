@@ -9,8 +9,5 @@ check(B)=
 }
 check(1000);
 [i, p, N, bi, B]
-
-
-
-
+break
 [i, p, N, bi, B]

@@ -10,12 +10,12 @@
   ***   in function check: ...y(p=i+20,N=p^2);if(i==41,error("check:",N)))
   ***                                                  ^-------------------
   ***   user error: check:3721
-  ***   Break loop: type <Return> three times, or Control-d, to go back to G
-P)
+  ***   Break loop: type 'break' to go back to GP
 ? [i,p,N,bi,B]
-
 [41, 61, 3721, [1000000], 1000]
+? break
+
 ? [i,p,N,bi,B]
 [i, p, N, bi, B]
 ? print("Total time spent: ",gettime);
-Total time spent: 8
+Total time spent: 4

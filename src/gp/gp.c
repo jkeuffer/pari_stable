@@ -1599,7 +1599,7 @@ break_loop(int numerr)
   if (sigint)
     print_errcontext("Break loop: type <Return> to continue; 'break' to go back to GP", NULL, NULL);
   else
-    print_errcontext("Break loop: type 'break' to go back to GP)", NULL, NULL);
+    print_errcontext("Break loop: type 'break' to go back to GP", NULL, NULL);
   term_color(c_NONE);
   if (s_env.n == 2)
     prompt = BREAK_LOOP_PROMPT;
