@@ -22,7 +22,7 @@ extern int  bfffo(ulong x);
 
 #ifdef LONG_IS_64BIT
 #  define bfffo(x) \
-({\
+({ __extension__ \
   static int __bfffo_tabshi[16]={4,3,2,2,1,1,1,1,0,0,0,0,0,0,0,0};\
   int __value = BITS_IN_LONG - 4; \
   ulong __arg1=(x); \
@@ -34,7 +34,7 @@ extern int  bfffo(ulong x);
 })
 #else
 #  define bfffo(x) \
-({\
+({ __extension__ \
   static int __bfffo_tabshi[16]={4,3,2,2,1,1,1,1,0,0,0,0,0,0,0,0};\
   int __value = BITS_IN_LONG - 4; \
   ulong __arg1=(x); \

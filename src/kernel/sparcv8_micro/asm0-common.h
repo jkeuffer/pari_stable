@@ -24,7 +24,7 @@ NOASM bfffo
 #define LOCAL_OVERFLOW     ulong overflow
 
 #define addll(a,b) \
-({ ulong __value, __arg1 = (a), __arg2 = (b); \
+({ __extension__ ulong __value, __arg1 = (a), __arg2 = (b); \
    __asm__ ( "addcc %2,%3,%0; \
           addx  %%g0,%%g0,%1" \
          : "=r" (__value), "=r" (overflow) \
@@ -33,7 +33,7 @@ NOASM bfffo
 __value; })
 
 #define addllx(a,b) \
-({ ulong __value, __arg1 = (a), __arg2 = (b); \
+({ __extension__ ulong __value, __arg1 = (a), __arg2 = (b); \
    __asm__ ( "subcc %%g0,%1,%%g0; \
           addxcc %2,%3,%0; \
           addx  %%g0,%%g0,%1" \
@@ -43,7 +43,7 @@ __value; })
 __value; })
 
 #define subll(a,b) \
-({ ulong __value, __arg1 = (a), __arg2 = (b); \
+({ __extension__ ulong __value, __arg1 = (a), __arg2 = (b); \
    __asm__ ( "subcc %2,%3,%0; \
           addx  %%g0,%%g0,%1" \
          : "=r" (__value), "=r" (overflow) \
@@ -52,7 +52,7 @@ __value; })
 __value; })
 
 #define subllx(a,b) \
-({ ulong __value, __arg1 = (a), __arg2 = (b); \
+({ __extension__ ulong __value, __arg1 = (a), __arg2 = (b); \
    __asm__ ( "subcc %%g0,%1,%%g0; \
           subxcc %2,%3,%0; \
           addx  %%g0,%%g0,%1" \
@@ -62,7 +62,7 @@ __value; })
 __value; })
 
 #define mulll(a,b) \
-({ ulong __value, __arg1 = (a), __arg2 = (b); \
+({ __extension__ ulong __value, __arg1 = (a), __arg2 = (b); \
    __asm__ ( "umul %2,%3,%0; \
           rd  %%y,%1" \
          : "=r" (__value), "=r" (hiremainder) \
@@ -70,7 +70,7 @@ __value; })
 __value;})
 
 #define addmul(a,b) \
-({ ulong __value, __arg1 = (a), __arg2 = (b), __tmp; \
+({ __extension__ ulong __value, __arg1 = (a), __arg2 = (b), __tmp; \
    __asm__ ( "umul %3,%4,%0; \
           rd  %%y,%2; \
           addcc %0,%1,%0; \

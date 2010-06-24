@@ -39,9 +39,9 @@ extern ulong hiremainder;
 #undef LOCAL_HIREMAINDER
 #define LOCAL_HIREMAINDER register ulong hiremainder
 
-#define divll(n0, d)                                                         \
-({                                                                         \
-  ulong __d1, __d0, __q1, __q0, __r1, __r0, __m, __n1, __n0;                \
+#define divll(n0, d)                                                    \
+({ __extension__                                                        \
+  ulong __d1, __d0, __q1, __q0, __r1, __r0, __m, __n1, __n0;            \
   ulong __k, __d;                                                       \
                                                                         \
   __n1 = hiremainder; __n0 = n0; __d = d;                               \

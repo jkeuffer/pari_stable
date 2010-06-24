@@ -21,7 +21,7 @@ NOASM divll
 #define LOCAL_OVERFLOW     register ulong overflow
 
 #define addll(a, b)\
-({ ulong __value, __arg1 = (a), __arg2 = (b); \
+({ __extension__ ulong __value, __arg1 = (a), __arg2 = (b); \
    __asm__ ("addc %0,%2,%3\n\txor %1,%2,%2\n\taddze %1,%4\n\t" \
    : "=&r" (__value), "=r" (overflow) \
    : "r" (__arg1), "r" (__arg2), "1" ((ulong) 0)); \
@@ -29,7 +29,7 @@ NOASM divll
 })
 
 #define addllx(a, b)\
-({ ulong __value, __arg1 = (a), __arg2 = (b); \
+({ __extension__ ulong __value, __arg1 = (a), __arg2 = (b); \
  __asm__ ("addc %0,%3,%4\n\tli %1,0\n\taddze %1,%4\n\taddc %0,%2,%5\n\taddze %1,%4\n\t" \
    : "=&r" (__value), "=r" (overflow) \
    : "r" (__arg1), "r" (__arg2), "1" (overflow), "0" ((ulong) 0)); \
@@ -37,13 +37,13 @@ __value; \
 })
 
 #define bfffo(a) \
-({ ulong __a = (a), __value; \
+({ __extension__ ulong __a = (a), __value; \
     __asm__ ("cntlzd %0, %1" : "=r" (__value) : "r" (__a)); \
     __value; \
 })
 
 #define subll(a, b)\
-({ ulong __value, __arg1 = (a), __arg2 = (b); \
+({ __extension__ ulong __value, __arg1 = (a), __arg2 = (b); \
   __asm__ ("subfc %0,%3,%2\n\tli %1,0\n\taddme %1,%4\n\tneg %1,%4" \
    : "=&r" (__value), "=r" (overflow) \
    : "r" (__arg1), "r" (__arg2), "1" ((ulong)0)); \
@@ -51,7 +51,7 @@ __value; \
 })
 
 #define subllx(a, b)\
-({ ulong __value, __arg1 = (a), __arg2 = (b); \
+({ __extension__ ulong __value, __arg1 = (a), __arg2 = (b); \
 __asm__ ("subfc %0,%5,%2\n\tli %1,0\n\taddme %1,%5\n\tsubfc %0,%3,%4\n\taddme %1,%5\n\tneg %1,%5" \
    : "=r" (__value), "=r" (overflow) \
    : "r" (__arg1), "r" (__arg2), "0" ((ulong)0), "1" (overflow)); \
@@ -59,7 +59,7 @@ __asm__ ("subfc %0,%5,%2\n\tli %1,0\n\taddme %1,%5\n\tsubfc %0,%3,%4\n\taddme %1
 })
 
 #define mulll(a, b) \
-({ ulong __value, __arg1 = (a), __arg2 = (b); \
+({ __extension__ ulong __value, __arg1 = (a), __arg2 = (b); \
  __asm__ ("mulhdu %1,%2,%3\n\tmulld %0,%2,%3\n\t" \
    : "=r" (__value), "=&r" (hiremainder) \
    : "r" (__arg1), "r" (__arg2)); \
@@ -67,7 +67,7 @@ __asm__ ("subfc %0,%5,%2\n\tli %1,0\n\taddme %1,%5\n\tsubfc %0,%3,%4\n\taddme %1
 })
 
 #define addmul(a, b) \
-({ ulong __value, __arg1 = (a), __arg2 = (b), __temp; \
+({ __extension__ ulong __value, __arg1 = (a), __arg2 = (b), __temp; \
  __asm__ ("mulld %0,%3,%4\n\tmulhdu %2,%3,%4\n\taddc %0,%5,%6\n\taddze %1,%7\n\t" \
    : "=&r" (__value), "=r" (hiremainder), "=r" (__temp) \
    : "r" (__arg1), "r" (__arg2), "0" ((ulong) 0), "1" (hiremainder), "2" ((ulong) 0)); \

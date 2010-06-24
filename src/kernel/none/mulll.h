@@ -45,7 +45,7 @@ extern long addmul(ulong x, ulong y);
 #define LOCAL_HIREMAINDER register ulong hiremainder
 
 #define mulll(x, y) \
-({ \
+({ __extension__ \
   const ulong __x = (x), __y = (y);\
   const ulong __xlo = LOWWORD(__x), __xhi = HIGHWORD(__x); \
   const ulong __ylo = LOWWORD(__y), __yhi = HIGHWORD(__y); \
@@ -67,7 +67,7 @@ extern long addmul(ulong x, ulong y);
 })
 
 #define addmul(x, y) \
-({ \
+({ __extension__                                           \
   const ulong __x = (x), __y = (y);\
   const ulong __xlo = LOWWORD(__x), __xhi = HIGHWORD(__x); \
   const ulong __ylo = LOWWORD(__y), __yhi = HIGHWORD(__y); \
