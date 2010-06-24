@@ -24,7 +24,7 @@ NOASM addll divll
 #define LOCAL_HIREMAINDER  register ulong hiremainder
 
 #define bfffo(a)                                                        \
-({ __extension__ ulong __arg1 = (a), __tmp, _a, _c;                     \
+__extension__ ({ ulong __arg1 = (a), __tmp, _a, _c;                     \
     __asm__ ("mux1 %0 = %1, @rev" : "=r" (__tmp) : "r" (__arg1));       \
     __asm__ ("czx1.l %0 = %1" : "=r" (_a) : "r" (-__tmp | __tmp));      \
     _c = (_a - 1) << 3;                                                 \
@@ -38,7 +38,7 @@ NOASM addll divll
 })
 
 #define mulll(a, b)                                                     \
-({ __extension__                                                        \
+__extension__ ({                                                        \
   ulong __arg1 = (a), __arg2 = (b), __value;                            \
   __asm__ ("xma.hu %0 = %2, %3, f0\n\t;;\n\txma.l %1 = %2, %3, f0"      \
            : "=&f" (hiremainder), "=f" (__value)                        \
@@ -47,7 +47,7 @@ NOASM addll divll
 })
 
 #define addmul(a, b)                                                    \
-({ __extension__                                                        \
+__extension__ ({                                                        \
   ulong __arg1 = (a), __arg2 = (b), __value;                            \
   __asm__ ("xma.hu %0 = %2, %3, %4\n\txma.l %1 = %2, %3, %4"            \
            : "=&f" (hiremainder), "=f" (__value)                        \

@@ -4,7 +4,7 @@
 extern ulong invert_word(ulong);
 
 #define sub_ddmmss(sh, sl, ah, al, bh, bl) \
-({  __extension__                          \
+__extension__ ({                          \
     ulong __x;                             \
     __x = (al) - (bl);                     \
     (sh) = (ah) - (bh) - (__x > (al));     \
@@ -12,7 +12,7 @@ extern ulong invert_word(ulong);
 })
 
 #define divll(x, y)                                      \
-({ __extension__                                         \
+__extension__ ({                                         \
   register ulong _di, _x = (x), _y = (y), _q, _ql, _r;   \
   register ulong _xh, _xl, _k, __hire;                   \
                                                          \

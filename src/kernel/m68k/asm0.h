@@ -26,7 +26,7 @@ ASM addll mulll bfffo divll
 #define LOCAL_OVERFLOW     register ulong overflow
 
 #define addll(a,b)                                              \
-({ __extension__ ulong __value, __arg1 = (a), __arg2 = (b);     \
+__extension__ ({ ulong __value, __arg1 = (a), __arg2 = (b);     \
    __asm__ ("add.l %2,%0 ; addx.l %1,%1"                        \
         : "=&d" (__value), "=d" (overflow)                      \
         : "rm" (__arg1), "0" (__arg2), "1" (0UL)                \
@@ -35,7 +35,7 @@ ASM addll mulll bfffo divll
 })
 
 #define addllx(a,b)                                             \
-({ __extension__ ulong __value, __arg1 = (a), __arg2 = (b), __temp; \
+__extension__ ({ ulong __value, __arg1 = (a), __arg2 = (b), __temp; \
    __asm__ ("neg.l %2 ; addx.l %4,%0 ; addx.l %1,%1"            \
         : "=d" (__value), "=d" (overflow), "=d" (__temp)        \
         : "0" (__arg1), "d" (__arg2), "2" (overflow), "1" (0UL) \
@@ -44,7 +44,7 @@ ASM addll mulll bfffo divll
 })
 
 #define subll(a,b)                                              \
-({ __extension__ ulong __value, __arg1 = (a), __arg2 = (b);     \
+__extension__ ({ ulong __value, __arg1 = (a), __arg2 = (b);     \
    __asm__ ("sub.l %3,%0 ; addx.l %1,%1"                        \
         : "=&d" (__value), "=d" (overflow)                      \
         : "0" (__arg1), "rm" (__arg2), "1" (0UL)                \
@@ -53,7 +53,7 @@ ASM addll mulll bfffo divll
 })
 
 #define subllx(a,b)                                             \
-({ __extension__ ulong __value, __arg1 = (a), __arg2 = (b), __temp; \
+__extension__ ({ ulong __value, __arg1 = (a), __arg2 = (b), __temp; \
    __asm__ ("neg.l %2 ; subx.l %4,%0 ; addx.l %1,%1"            \
         : "=d" (__value), "=d" (overflow), "=d" (__temp)        \
         : "0" (__arg1), "d" (__arg2), "2" (overflow), "1" (0UL) \
@@ -62,7 +62,7 @@ ASM addll mulll bfffo divll
 })
 
 #define mulll(a, b)                                                     \
-({ __extension__                                                        \
+__extension__ ({                                                        \
   ulong __arg1 = (a), __arg2 = (b), __value;                            \
   __asm__ ("mulu.l %2, %0:%1"                                           \
            : "=d" (hiremainder), "=d" (__value)                         \
@@ -72,7 +72,7 @@ ASM addll mulll bfffo divll
 })
 
 #define addmul(a, b)                                                    \
-({ __extension__                                                        \
+__extension__ ({                                                        \
   ulong __arg1 = (a), __arg2 = (b), __value;                            \
   __asm__ ("mulu.l %2, %0:%1; add.l %4,%1; addx.l %5,%0"                \
            : "=&d" (hiremainder), "=&d" (__value)                       \
@@ -82,7 +82,7 @@ ASM addll mulll bfffo divll
 })
 
 #define bfffo(a)                                                        \
-({ __extension__                                                        \
+__extension__ ({                                                        \
   ulong __arg1 = (a), __value;                                          \
   __asm__ ("bfffo %1{#0:#0}, %0"                                        \
            : "=d" (__value)                                             \
@@ -92,7 +92,7 @@ ASM addll mulll bfffo divll
 })
 
 #define divll(a, b)                                                     \
-({ __extension__                                                        \
+__extension__ ({                                                        \
   ulong __arg2 = (b), __value =(a);                                     \
   __asm__ ("divu.l %2, %0:%1"                                           \
            : "+d" (hiremainder), "+d" (__value)                         \

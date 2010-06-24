@@ -16,7 +16,7 @@ ASM divll
 */
 #ifdef ASMINLINE
 #define divll(a,b) \
-({ __extension__ ulong __value, __arg1 = (a), __arg2 = (b), __tmp; \
+__extension__ ({ ulong __value, __arg1 = (a), __arg2 = (b), __tmp; \
   __asm__( "mov %1, %%y; nop;nop;nop;\n\t\
 udivcc  %3,%4,%0;\n\tumul    %0,%4,%2;\n\tsub     %3,%2,%1"\
         : "=&r" (__value), "=&r" (hiremainder), "=&r" (__tmp) \

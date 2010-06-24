@@ -35,14 +35,14 @@ extern long subllx(ulong x, ulong y);
 #define LOCAL_OVERFLOW register ulong overflow
 
 #define addll(a, b)                                             \
-({ __extension__                                                \
+__extension__ ({                                                \
    ulong __arg1 = (a), __arg2 = (b), __value = __arg1 + __arg2; \
    overflow = (__value < __arg1);                               \
    __value;                                                     \
 })
 
 #define addllx(a, b)                                          \
-({ __extension__                                              \
+__extension__ ({                                              \
    ulong __arg1 = (a), __arg2 = (b), __value, __tmp = __arg1 + overflow;\
    overflow = (__tmp < __arg1);                               \
    __value = __tmp + __arg2;                                  \
@@ -51,14 +51,14 @@ extern long subllx(ulong x, ulong y);
 })
 
 #define subll(a, b)                                           \
-({ __extension__                                              \
+__extension__ ({                                              \
    ulong __arg1 = (a), __arg2 = (b);                          \
    overflow = (__arg2 > __arg1);                              \
    __arg1 - __arg2;                                           \
 })
 
 #define subllx(a, b)                                  \
-({ __extension__                                      \
+__extension__ ({                                      \
    ulong __arg1 = (a), __arg2 = (b), __value, __tmp = __arg1 - overflow;\
    overflow = (__arg1 < overflow);                    \
    __value = __tmp - __arg2;                          \

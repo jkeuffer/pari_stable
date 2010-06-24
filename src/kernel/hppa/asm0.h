@@ -28,7 +28,7 @@ NOASM bfffo divll
 #define LOCAL_OVERFLOW     register ulong overflow
 
 #define addll(a,b) \
-({ __extension__ ulong __value, __arg1 = (a), __arg2 = (b); \
+__extension__ ({ ulong __value, __arg1 = (a), __arg2 = (b); \
    __asm__ ("add %2,%3,%0\n\taddc %%r0,%%r0,%1" \
         : "=r" (__value), "=r" (overflow) \
         : "r" (__arg1), "r" (__arg2) \
@@ -37,7 +37,7 @@ NOASM bfffo divll
 })
 
 #define addllx(a,b) \
-({ __extension__ ulong __value, __arg1 = (a), __arg2 = (b); \
+__extension__ ({ ulong __value, __arg1 = (a), __arg2 = (b); \
    __asm__ ("sub %4,%5,%%r0\n\taddc %2,%3,%0\n\taddc %%r0,%%r0,%1" \
         : "=r" (__value), "=r" (overflow) \
         : "r" (__arg1), "r" (__arg2), "r" (overflow), "r" ((ulong) 1)\
@@ -46,7 +46,7 @@ NOASM bfffo divll
 })
 
 #define subll(a,b) \
-({ __extension__ ulong __value, __arg1 = (a), __arg2 = (b); \
+__extension__ ({ ulong __value, __arg1 = (a), __arg2 = (b); \
    __asm__ ("sub %2,%3,%0\n\taddc %%r0,%%r0,%1\n\tsubi 1,%1,%1" \
         : "=r" (__value), "=r" (overflow) \
         : "r" (__arg1), "r" (__arg2) \
@@ -55,7 +55,7 @@ NOASM bfffo divll
 })
 
 #define subllx(a,b) \
-({ __extension__ ulong __value, __arg1 = (a), __arg2 = (b); \
+__extension__ ({ ulong __value, __arg1 = (a), __arg2 = (b); \
    __asm__ ("sub %%r0,%4,%%r0\n\tsubb %2,%3,%0\n\taddc %%r0,%%r0,%1\n\tsubi 1,%1,%1" \
         : "=r" (__value), "=r" (overflow) \
         : "r" (__arg1), "r" (__arg2), "r" (overflow)\
@@ -64,7 +64,7 @@ NOASM bfffo divll
 })
 
 #define mulll(a,b) \
-({ __extension__ ulong __arg1 = (a), __arg2 = (b); \
+__extension__ ({ ulong __arg1 = (a), __arg2 = (b); \
    union {double z; ulong x[2];} __vtab; \
    __asm__ ("xmpyu %1,%2,%0" \
         : "=f" (__vtab.z) \
@@ -75,7 +75,7 @@ NOASM bfffo divll
 })
 
 #define addmul(a,b) \
-({ __extension__ ulong __value, __arg1 = (a), __arg2 = (b); \
+__extension__ ({ ulong __value, __arg1 = (a), __arg2 = (b); \
     union {double z; ulong x[2];} __vtab; \
     __asm__ ("xmpyu %1,%2,%0" \
         : "=f" (__vtab.z) \

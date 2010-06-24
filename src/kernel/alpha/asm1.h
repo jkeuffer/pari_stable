@@ -34,7 +34,7 @@ extern ulong invert_word(ulong);
 #ifdef __GNUC__
 
 #define divll(x, y)                                      \
-({ __extension__                                         \
+__extension__ ({                                         \
   register ulong _di, _x = (x), _y = (y), _q, _ql, _r;   \
   register ulong _xh, _xl, _k, __hire;                   \
                                                          \
