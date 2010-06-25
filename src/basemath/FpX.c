@@ -404,7 +404,7 @@ FpX_gcd_check(GEN x, GEN y, GEN p)
   {
     GEN lead = leading_term(b);
     GEN g = gcdii(lead,p);
-    if (!equali1(g)) return gerepileupto(av,g);
+    if (!equali1(g)) return gerepileuptoint(av,g);
     c = FpX_rem(a,b,p); a=b; b=c;
   }
   avma = av; return gen_1;

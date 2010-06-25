@@ -410,10 +410,9 @@ FpXX_red(GEN z, GEN p)
     {
       pari_sp av = avma;
       c = FpX_red(zi,p);
-      if (lg(c) <= 3)
-      {
-        if (lg(c)==2) { avma = av; c = gen_0;}
-        else c = gerepilecopy(av, gel(c,2));
+      switch(lg(c)) {
+        case 2: avma = av; c = gen_0; break;
+        case 3: c = gerepilecopy(av, gel(c,2)); break;
       }
     }
     gel(res,i) = c;
@@ -430,6 +429,19 @@ FpXX_add(GEN x, GEN y, GEN p)
   if (ly>lx) swapspec(x,y, lx,ly);
   lz = lx; z = cgetg(lz, t_POL); z[1]=x[1];
   for (i=2; i<ly; i++) gel(z,i) = Fq_add(gel(x,i), gel(y,i), NULL, p);
+  for (   ; i<lx; i++) gel(z,i) = gcopy(gel(x,i));
+  return FpXX_renormalize(z, lz);
+}
+GEN
+FpXX_sub(GEN x, GEN y, GEN p)
+{
+  long i,lz;
+  GEN z;
+  long lx=lg(x);
+  long ly=lg(y);
+  if (ly>lx) swapspec(x,y, lx,ly);
+  lz = lx; z = cgetg(lz, t_POL); z[1]=x[1];
+  for (i=2; i<ly; i++) gel(z,i) = Fq_sub(gel(x,i), gel(y,i), NULL, p);
   for (   ; i<lx; i++) gel(z,i) = gcopy(gel(x,i));
   return FpXX_renormalize(z, lz);
 }
@@ -1020,51 +1032,6 @@ Fq_red(GEN x, GEN T, GEN p)
 /*                             Fq[X]                               */
 /*                                                                 */
 /*******************************************************************/
-
-GEN
-FqX_mul(GEN x, GEN y, GEN T, GEN p)
-{
-  return T? FpXQX_mul(x, y, T, p): FpX_mul(x, y, p);
-}
-GEN
-FqX_sqr(GEN x, GEN T, GEN p)
-{
-  return T? FpXQX_sqr(x, T, p): FpX_sqr(x, p);
-}
-GEN
-FqX_div(GEN x, GEN y, GEN T, GEN p)
-{
-  return T? FpXQX_divrem(x,y,T,p,NULL): FpX_divrem(x,y,p,NULL);
-}
-GEN
-FqX_rem(GEN x, GEN y, GEN T, GEN p)
-{
-  return T? FpXQX_rem(x,y,T,p): FpX_rem(x,y,p);
-}
-GEN
-FqX_divrem(GEN x, GEN y, GEN T, GEN p, GEN *z)
-{
-  return T? FpXQX_divrem(x,y,T,p,z): FpX_divrem(x,y,p,z);
-}
-
-GEN
-FqXQ_mul(GEN x, GEN y, GEN S, GEN T, GEN p)
-{
-  return T? FpXQYQ_mul(x,y,S,T,p): FpXQ_mul(x,y,S,p);
-}
-
-GEN
-FqXQ_sqr(GEN x, GEN S, GEN T, GEN p)
-{
-  return T? FpXQYQ_sqr(x,S,T,p): FpXQ_sqr(x,S,p);
-}
-
-GEN
-FqXQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p)
-{
-  return T? FpXQYQ_pow(x,n,S,T,p): FpXQ_pow(x,n,S,p);
-}
-
 /* P(X + c), c an Fq */
 GEN
 FqX_translate(GEN P, GEN c, GEN T, GEN p)
