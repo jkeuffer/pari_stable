@@ -1354,9 +1354,12 @@ ellsea(GEN E, GEN p, long smallfact)
     trace_mod = find_trace(a4, a6, ell, p, &kt, smallfact);
     if (trace_mod==gen_0)
     {
-      GEN bound_atkin = truedivii(bound, gel(tr, 1));
+      if (nb_atkin)
+      {
+        GEN bound_atkin = truedivii(bound, gel(tr, 1));
+        champ = champion(compile_atkin, nb_atkin, bound_atkin);
+      }
       pari_warn(warner,"no more modular polynomials available!");
-      champ = champion(compile_atkin, nb_atkin, bound_atkin);
       break;
     }
     if (!trace_mod) continue;
@@ -1377,7 +1380,9 @@ ellsea(GEN E, GEN p, long smallfact)
     }
     if (cmpii(mulii(gel(tr, 1), prod_atkin), bound) > 0)
     {
-      GEN bound_tr = mulrr(bound_bsgs, dbltor(bound_gr));
+      GEN bound_tr;
+      if (!nb_atkin) break;
+      bound_tr = mulrr(bound_bsgs, dbltor(bound_gr));
       bound_gr *= growth_factor;
       if (signe(max_traces))
       {
@@ -1385,7 +1390,7 @@ ellsea(GEN E, GEN p, long smallfact)
         if (DEBUGLEVEL>=3)
           fprintferr("At least %Ps remaining possibilities.\n",max_traces);
       }
-      if (!signe(max_traces) || cmpir(max_traces, bound_tr) < 0)
+      if (cmpir(max_traces, bound_tr) < 0)
       {
         GEN bound_atkin = truedivii(bound, gel(tr, 1));
         champ = champion(compile_atkin, nb_atkin, bound_atkin);
