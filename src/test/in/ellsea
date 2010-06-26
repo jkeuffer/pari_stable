@@ -1,3 +1,7 @@
+{
+  trap("talker",print("this test requires the package seadata");quit(),
+       ellmodulareqn(5))
+}
 do(i,v)=
 {
   E = ellinit([0,0,0,v[2],v[3]]*Mod(1,v[1]));

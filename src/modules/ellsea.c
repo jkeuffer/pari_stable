@@ -100,10 +100,11 @@ ellmodulareqn(long ell, long vx, long vy)
   if (ell<0) pari_err(talker,"level must be positive");
   if (!uisprime(ell)) pari_err(talker,"level must be prime");
 
-  get_seadata(0);
+  if (!modular_eqn && !get_seadata(0))
+    pari_err(talker,"ellmodulareqn requires the package seadata");
   res = cgetg(3, t_VEC);
   if (!get_modular_eqn(&meqn, ell, vx, vy))
-    pari_err(talker,"no such modular equations available");
+    pari_err(talker,"modular equation of level %ld is not available", ell);
   gel(res,1) = meqn.eq; gel(res,2) = stoi(meqn.type=='A');
   return res;
 }
