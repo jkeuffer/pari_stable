@@ -1089,7 +1089,10 @@ champion(GEN atkin, long k, GEN bound_champ)
   pari_sp ltop = avma, btop;
   long i, j, n, i1, i2;
   GEN B, Bp, cost_vec, res = NULL;
+
   cost_vec = get_lgatkin(atkin, k);
+  if (k == 1) return mkvec2(gen_1, utoipos(cost_vec[1]));
+
   B  = const_vecsmall(two_k, 0);
   Bp = const_vecsmall(two_k, 0);
   Bp[2] = 1;
