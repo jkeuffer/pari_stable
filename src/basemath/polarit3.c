@@ -439,10 +439,18 @@ FpXX_sub(GEN x, GEN y, GEN p)
   GEN z;
   long lx=lg(x);
   long ly=lg(y);
-  if (ly>lx) swapspec(x,y, lx,ly);
-  lz = lx; z = cgetg(lz, t_POL); z[1]=x[1];
-  for (i=2; i<ly; i++) gel(z,i) = Fq_sub(gel(x,i), gel(y,i), NULL, p);
-  for (   ; i<lx; i++) gel(z,i) = gcopy(gel(x,i));
+  if (ly <= lx)
+  {
+    lz = lx; z = cgetg(lz, t_POL); z[1]=x[1];
+    for (i=2; i<ly; i++) gel(z,i) = Fq_sub(gel(x,i), gel(y,i), NULL, p);
+    for (   ; i<lx; i++) gel(z,i) = gcopy(gel(x,i));
+  }
+  else
+  {
+    lz = ly; z = cgetg(lz, t_POL); z[1]=x[1];
+    for (i=2; i<lx; i++) gel(z,i) = Fq_sub(gel(x,i), gel(y,i), NULL, p);
+    for (   ; i<ly; i++) gel(z,i) = Fq_neg(gel(y,i), NULL, p);
+  }
   return FpXX_renormalize(z, lz);
 }
 
@@ -748,24 +756,23 @@ FpXQX_gcd(GEN P, GEN Q, GEN T, GEN p)
 GEN
 FpXQX_extgcd(GEN x, GEN y, GEN T, GEN p, GEN *ptu, GEN *ptv)
 {
-  GEN a,b,q,r,u,v,d,d1,v1;
+  GEN a, b, q, r, u, v, d, d1, v1;
+  long vx = varn(x);
   pari_sp ltop=avma, lbot;
 
   a = FpXQX_red(x, T, p);
   b = FpXQX_red(y, T, p);
-  d = a; d1 = b; v = gen_0; v1 = gen_1;
+  d = a; d1 = b; v = zeropol(vx); v1 = pol_1(vx);
   while (signe(d1))
   {
-    q = FpXQX_divrem(d,d1,T,p, &r);
-    v = gsub(v, gmul(q,v1));
-    v = FpXQX_red(v,T,p);
+    q = FqX_divrem(d,d1,T,p, &r);
+    v = FqX_sub(v, FqX_mul(q,v1, T,p), T,p);
     u=v; v=v1; v1=u;
     u=r; d=d1; d1=u;
   }
-  u = gsub(d, gmul(b,v));
-  u = FpXQX_red(u,T, p);
+  u = FqX_sub(d, FqX_mul(b,v, T,p), T,p);
   lbot = avma;
-  u = FpXQX_divrem(u,a,T,p,NULL);
+  u = FqX_div(u,a, T,p);
   d = gcopy(d);
   v = gcopy(v);
   {
