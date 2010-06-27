@@ -2282,6 +2282,7 @@ GEN     FpXQX_rem(GEN x, GEN y, GEN T, GEN p);
 GEN     FpXQX_sqr(GEN x, GEN T, GEN p);
 GEN     FpXQX_extgcd(GEN x, GEN y, GEN T, GEN p, GEN *ptu, GEN *ptv);
 GEN     FpXQX_divrem(GEN x, GEN y, GEN T, GEN p, GEN *pr);
+GEN     FpXQX_FpXQ_mul(GEN P, GEN U, GEN T, GEN p);
 GEN     FpXQXV_prod(GEN V, GEN Tp, GEN p);
 GEN     FpXQYQ_mul(GEN x, GEN y, GEN S, GEN T, GEN p);
 GEN     FpXQYQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p);

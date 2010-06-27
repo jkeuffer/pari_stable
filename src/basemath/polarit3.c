@@ -517,6 +517,18 @@ FpXQX_sqr(GEN x, GEN T, GEN p)
 }
 
 GEN
+FpXQX_FpXQ_mul(GEN P, GEN U, GEN T, GEN p)
+{
+  long i, lP;
+  GEN res;
+  res = cgetg_copy(P, &lP); res[1] = P[1];
+  for(i=2; i<lP; i++)
+    gel(res,i) = typ(gel(P,i))==t_INT? FpX_Fp_mul(U, gel(P,i), p):
+                                       FpXQ_mul(U, gel(P,i), T,p);
+  return FpXQX_renormalize(res,lP);
+}
+
+GEN
 FqX_Fp_mul(GEN P, GEN U, GEN T, GEN p)
 {
   long i, lP;
@@ -527,13 +539,10 @@ FqX_Fp_mul(GEN P, GEN U, GEN T, GEN p)
 GEN
 FqX_Fq_mul(GEN P, GEN U, GEN T, GEN p)
 {
-  long i, lP;
-  GEN res;
   if (typ(U) == t_INT) return FqX_Fp_mul(P, U, T, p);
-  res = cgetg_copy(P, &lP); res[1] = P[1];
-  for(i=2; i<lP; i++) gel(res,i) = Fq_mul(U,gel(P,i), T,p);
-  return FpXQX_renormalize(res,lP);
+  return FpXQX_FpXQ_mul(P, U, T, p);
 }
+
 GEN
 FqX_Fq_mul_to_monic(GEN P, GEN U, GEN T, GEN p)
 {
