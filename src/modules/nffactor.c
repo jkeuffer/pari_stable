@@ -472,8 +472,9 @@ fact_from_sqff(GEN rep, GEN A, GEN B, GEN y, GEN T, GEN bad)
       quo = FpXY_evalx(Q_primpart(A), r, p);
       for (j=n; j>=2; j--)
       {
-        GEN fact = FpXY_evalx(gel(y,j), r, p);
+        GEN junk, fact = Q_remove_denom(gel(y,j), &junk);
         long e = 0;
+        fact = FpXY_evalx(fact, r, p);
         for(;; e++)
         {
           GEN q = FpX_divrem(quo,fact,p,ONLY_DIVIDES);
