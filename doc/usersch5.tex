@@ -7926,7 +7926,7 @@ The difference with \kbd{closure\_evalgen} being that, if the flow end by a
 \kbd{return} statement, the result will be the returned value instead of
 \kbd{NULL}. Used by the main GP loop.
 
-\fun{GEN}{closure_evalbrk}{GEN code, long *status} as \kbd{closure\_evalgen}
+\fun{GEN}{closure_evalbrk}{GEN code, long *status} as \kbd{closure\_evalres}
 but set \kbd{status} to a non-zero value if a flow change occurred. This
 variant is not stack clean. Used by the break loop.
 
