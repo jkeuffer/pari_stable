@@ -1234,8 +1234,6 @@ FpX_split_Berlekamp(GEN *t, GEN p)
   return d;
 }
 
-GEN
-FqX_gcd(GEN P,GEN Q,GEN T,GEN p) {return T? FpXQX_gcd(P,Q,T,p): FpX_gcd(P,Q,p);}
 long
 FqX_is_squarefree(GEN P, GEN T, GEN p)
 {
