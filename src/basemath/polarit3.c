@@ -791,6 +791,36 @@ FpXQX_extgcd(GEN x, GEN y, GEN T, GEN p, GEN *ptu, GEN *ptv)
   *ptu = u; *ptv = v; return d;
 }
 
+/* Inverse of x in Z/pZ[X]/(pol) or NULL if inverse doesn't exist
+ * return lift(1 / (x mod (p,pol))) */
+GEN
+FpXQXQ_invsafe(GEN x, GEN S, GEN T, GEN p)
+{
+  GEN z, U, V;
+
+  z = FpXQX_extgcd(x, S, T, p, &U, &V);
+  if (degpol(z)) return NULL;
+  z = FpXQ_invsafe(gel(z,2), T, p);
+  if (!z) return NULL;
+  return FpXQX_FpXQ_mul(U, z, T, p);
+}
+
+GEN
+FpXQXQ_inv(GEN x, GEN S, GEN T,GEN p)
+{
+  pari_sp av = avma;
+  GEN U = FpXQXQ_invsafe(x, S, T, p);
+  if (!U) pari_err(talker,"non invertible polynomial in FpXQXQ_inv");
+  return gerepileupto(av, U);
+}
+
+GEN
+FpXQXQ_div(GEN x,GEN y,GEN S, GEN T,GEN p)
+{
+  pari_sp av = avma;
+  return gerepileupto(av, FpXQXQ_mul(x, FpXQXQ_inv(y,S,T,p),S,T,p));
+}
+
 /*******************************************************************/
 /*                                                                 */
 /*                       (Fp[X]/T(X))[Y] / S(Y)                    */

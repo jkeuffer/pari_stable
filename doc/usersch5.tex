@@ -3734,6 +3734,15 @@ coefficients are \kbd{ZX}s or \typ{INT}s, reduce them to \kbd{FpXQ}s.
 
 \fun{GEN}{FpXQX_extgcd}{GEN x, GEN y, GEN T, GEN p, GEN *ptu, GEN *ptv}
 
+\fun{GEN}{FpXQXQ_div}{GEN x, GEN y, GEN S, GEN T, GEN p}, \kbd{x}, \kbd{y} and
+\kbd{S} being \kbd{FpXQX}s, returns $\kbd{x}*\kbd{y}^{-1}$ modulo \kbd{S}.
+
+\fun{GEN}{FpXQXQ_inv}{GEN x, GEN S, GEN T, GEN p}, \kbd{x} and
+\kbd{S} being \kbd{FpXQX}s, returns $\kbd{x}^{-1}$ modulo \kbd{S}.
+
+\fun{GEN}{FpXQ_invsafe}{GEN x, GEN S, GEN T,GEN p}, as \kbd{FpXQXQ\_inv},
+returning \kbd{NULL} if \kbd{x} is not invertible.
+
 \fun{GEN}{FpXQXQ_mul}{GEN x, GEN y, GEN S, GEN T, GEN p}, \kbd{x}, \kbd{y} and
 \kbd{S} being \kbd{FpXQX}s, returns $\kbd{x}\*\kbd{y}$ modulo \kbd{S}.
 
