@@ -3734,13 +3734,13 @@ coefficients are \kbd{ZX}s or \typ{INT}s, reduce them to \kbd{FpXQ}s.
 
 \fun{GEN}{FpXQX_extgcd}{GEN x, GEN y, GEN T, GEN p, GEN *ptu, GEN *ptv}
 
-\fun{GEN}{FpXQYQ_mul}{GEN x, GEN y, GEN S, GEN T, GEN p}, \kbd{x}, \kbd{y} and
+\fun{GEN}{FpXQXQ_mul}{GEN x, GEN y, GEN S, GEN T, GEN p}, \kbd{x}, \kbd{y} and
 \kbd{T} being \kbd{FpXQX}s, returns $\kbd{x}\*\kbd{y}$ modulo \kbd{S}.
 
-\fun{GEN}{FpXQYQ_sqr}{GEN x, GEN S, GEN T, GEN p}, \kbd{x} and
+\fun{GEN}{FpXQXQ_sqr}{GEN x, GEN S, GEN T, GEN p}, \kbd{x} and
 \kbd{T} being \kbd{FpXQX}s, returns $\kbd{x}^2$ modulo \kbd{S}.
 
-\fun{GEN}{FpXQYQ_pow}{GEN x, GEN n, GEN S, GEN T, GEN p}, \kbd{x} and
+\fun{GEN}{FpXQXQ_pow}{GEN x, GEN n, GEN S, GEN T, GEN p}, \kbd{x} and
 \kbd{T} being \kbd{FpXQX}s, returns $\kbd{x}^\kbd{n}$ modulo \kbd{S}.
 
 \fun{GEN}{FqXQ_mul}{GEN x, GEN y, GEN S, GEN T, GEN p}, \kbd{x}, \kbd{y} and
@@ -3935,7 +3935,7 @@ valuation of \kbd{x}. In particular, if the valuation is $0$, set \kbd{*Z}
 to $x$, not a copy.
 
 \fun{GEN}{FlxYqQ_pow}{GEN x, GEN n, GEN S, GEN T, ulong p}, as
-\kbd{FpXQYQ\_pow}.
+\kbd{FpXYQQ\_pow}.
 
 
 \fun{GEN}{Flx_div_by_X_x}{GEN A, ulong a, ulong p, ulong *rem}, returns the

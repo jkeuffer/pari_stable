@@ -1586,13 +1586,13 @@ FqX_gcd(GEN P,GEN Q,GEN T,GEN p)
 {return T? FpXQX_gcd(P,Q,T,p): FpX_gcd(P,Q,p);}
 INLINE GEN
 FqXQ_mul(GEN x, GEN y, GEN S, GEN T, GEN p)
-{ return T? FpXQYQ_mul(x,y,S,T,p): FpXQ_mul(x,y,S,p); }
+{ return T? FpXQXQ_mul(x,y,S,T,p): FpXQ_mul(x,y,S,p); }
 INLINE GEN
 FqXQ_sqr(GEN x, GEN S, GEN T, GEN p)
-{ return T? FpXQYQ_sqr(x,S,T,p): FpXQ_sqr(x,S,p); }
+{ return T? FpXQXQ_sqr(x,S,T,p): FpXQ_sqr(x,S,p); }
 INLINE GEN
 FqXQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p)
-{ return T? FpXQYQ_pow(x,n,S,T,p): FpXQ_pow(x,n,S,p); }
+{ return T? FpXQXQ_pow(x,n,S,T,p): FpXQ_pow(x,n,S,p); }
 
 /* F2v */
 

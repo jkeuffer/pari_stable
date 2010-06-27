@@ -857,7 +857,7 @@ FpXYQQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p)
 }
 
 GEN
-FpXQYQ_mul(GEN x, GEN y, GEN S, GEN T, GEN p) {
+FpXQXQ_mul(GEN x, GEN y, GEN S, GEN T, GEN p) {
   GEN kx = mod_to_Kronecker(x, T);
   GEN ky = mod_to_Kronecker(y, T);
   GEN t = Kronecker_to_FpXQX(ZX_mul(kx, ky), T, p);
@@ -865,7 +865,7 @@ FpXQYQ_mul(GEN x, GEN y, GEN S, GEN T, GEN p) {
 }
 
 GEN
-FpXQYQ_sqr(GEN x, GEN S, GEN T, GEN p) {
+FpXQXQ_sqr(GEN x, GEN S, GEN T, GEN p) {
   GEN kx = mod_to_Kronecker(x, T);
   GEN t = Kronecker_to_FpXQX(ZX_sqr(kx), T, p);
   return FpXQX_rem(t, S, T, p);
@@ -876,7 +876,7 @@ typedef struct {
 } kronecker_muldata;
 
 static GEN
-_FpXQYQ_red(void *data, GEN x)
+_FpXQXQ_red(void *data, GEN x)
 {
   kronecker_muldata *D = (kronecker_muldata*)data;
   GEN t = Kronecker_to_FpXQX(x, D->T, D->p);
@@ -884,17 +884,17 @@ _FpXQYQ_red(void *data, GEN x)
   return mod_to_Kronecker(t, D->T);
 }
 static GEN
-_FpXQYQ_mul(void *data, GEN x, GEN y) {
-  return _FpXQYQ_red(data, ZX_mul(x,y));
+_FpXQXQ_mul(void *data, GEN x, GEN y) {
+  return _FpXQXQ_red(data, ZX_mul(x,y));
 }
 static GEN
-_FpXQYQ_sqr(void *data, GEN x) {
-  return _FpXQYQ_red(data, ZX_sqr(x));
+_FpXQXQ_sqr(void *data, GEN x) {
+  return _FpXQXQ_red(data, ZX_sqr(x));
 }
 
 /* x over Fq, return lift(x^n) mod S */
 GEN
-FpXQYQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p)
+FpXQXQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p)
 {
   pari_sp ltop = avma;
   GEN y;
@@ -915,7 +915,7 @@ FpXQYQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p)
     D.S = S;
     D.T = T;
     D.p = p;
-    y = gen_pow(mod_to_Kronecker(x,T), n, (void*)&D,&_FpXQYQ_sqr,&_FpXQYQ_mul);
+    y = gen_pow(mod_to_Kronecker(x,T), n, (void*)&D,&_FpXQXQ_sqr,&_FpXQXQ_mul);
     y = Kronecker_to_FpXQX(y, T,p);
   }
   return gerepileupto(ltop, y);

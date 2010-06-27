@@ -539,8 +539,8 @@ FqX_Berlekamp_ker(GEN u, GEN T, GEN q, GEN p)
   pari_timer Ti;
   if (DEBUGLEVEL>=4) TIMERstart(&Ti);
   Q = cgetg(N+1,t_MAT); gel(Q,1) = zerocol(N);
-  w = v = FpXQYQ_pow(pol_x(varn(u)), q, u, T, p);
-  if (DEBUGLEVEL>=4) msgTIMER(&Ti, "FpXQYQ_pow");
+  w = v = FpXQXQ_pow(pol_x(varn(u)), q, u, T, p);
+  if (DEBUGLEVEL>=4) msgTIMER(&Ti, "FpXQXQ_pow");
   for (j=2; j<=N; j++)
   {
     p1 = RgX_to_RgV(w, N);
@@ -583,7 +583,7 @@ FqX_split_part(GEN f, GEN T, GEN p)
   GEN z, X = pol_x(varn(f));
   if (n <= 1) return f;
   f = FpXQX_red(f, T, p);
-  z = FpXQYQ_pow(X, powiu(p, degpol(T)), f, T, p);
+  z = FpXQXQ_pow(X, powiu(p, degpol(T)), f, T, p);
   z = gsub(z, X);
   return FqX_gcd(z, f, T, p);
 }
@@ -1275,7 +1275,7 @@ FqX_split_Berlekamp(GEN *t, GEN q, GEN T, GEN p)
         pari_sp av = avma;
         b = FqX_rem(polt, a, T,p);
         if (!degpol(b)) { avma=av; continue; }
-        b = FpXQYQ_pow(b,qo2, a,T,p);
+        b = FpXQXQ_pow(b,qo2, a,T,p);
         if (!degpol(b)) { avma=av; continue; }
         gel(b,2) = gadd(gel(b,2), gen_1);
         b = FqX_gcd(a,b, T,p); lb = degpol(b);
@@ -2026,7 +2026,7 @@ FqX_split(GEN *t, long d, GEN q, GEN S, GEN T, GEN p)
     }
     else
     {
-      w = FpXQYQ_pow(w, shifti(q,-1), *t, T, p);
+      w = FpXQXQ_pow(w, shifti(q,-1), *t, T, p);
       /* w in {-1,0,1}^r */
       if (degpol(w) <= 0) continue;
       gel(w,2) = gadd(gel(w,2), gen_1);
@@ -2101,7 +2101,7 @@ init_spec_FqXQ_pow(GEN X, GEN q, GEN u, GEN T, GEN p)
   GEN x, S = cgetg(n, t_VEC);
 
   if (n == 1) return S;
-  x = FpXQYQ_pow(X, q, u, T, p);
+  x = FpXQXQ_pow(X, q, u, T, p);
   gel(S,1) = x;
   if ((degpol(x)<<1) < degpol(T)) {
     for (i=2; i < n; i++)
