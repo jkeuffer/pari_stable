@@ -2387,6 +2387,12 @@ FlxqX_rem_Montgomery(GEN x, GEN mg, GEN T, GEN Q, ulong p)
 }
 
 GEN
+FlxqX_rem(GEN x, GEN y, GEN T, ulong p)
+{
+  return FlxqX_divrem(x,y,T,p,ONLY_REM);
+}
+
+GEN
 FlxqX_safegcd(GEN P, GEN Q, GEN T, ulong p)
 {
   pari_sp btop, ltop = avma, st_lim;
@@ -2485,7 +2491,7 @@ FlxqXQ_red(void *data, GEN x)
 {
   FlxqX_kronecker_muldata *D = (FlxqX_kronecker_muldata*)data;
   GEN t = Kronecker_to_FlxqX(x, D->T,D->p);
-  t = FlxqX_divrem(t, D->S,D->T,D->p, ONLY_REM);
+  t = FlxqX_rem(t, D->S,D->T,D->p);
   return zxX_to_Kronecker(t,D->T);
 }
 static GEN
