@@ -552,7 +552,7 @@ BA127- padic_sqrt -> Qp_sqrt, padic_sqrtn -> Qp_sqrtn, gammap -> Qp_gamma
        FqX_roots, FpX_factorff, FpX_rootsff
        FpXQX_rem, FpXQXQ_mul, FpXQXQ_sqr, FpXQXQ_pow
        FpXQXQ_inv, FpXQXQ_invsafe, FpXQXQ_div
-       FqXQ_mul, FqXQ_sqr, FqXQ_pow, FqXQ_inv, FqXQ_invsafe
+       FqXQ_mul, FqXQ_sqr, FqXQ_pow, FqXQ_inv, FqXQ_invsafe, FqXQ_div
        FqX_extgcd
        ZC_ZV_mul, ZM_is_identity, ZM_copy, ZM_neg, ZM_add, ZM_mul, ZM_pow
        ZM_max_lg, ZM_sub, ZM_ZC_mul, ZXV_Z_mul, ZM_Z_mul, ZV_Z_mul, ZV_isscalar,

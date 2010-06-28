@@ -1588,6 +1588,9 @@ FqX_extgcd(GEN P,GEN Q,GEN T,GEN p, GEN *U, GEN *V)
 { return T? FpXQX_extgcd(P,Q,T,p,U,V): FpX_extgcd(P,Q,p,U,V); }
 
 INLINE GEN
+FqXQ_div(GEN x, GEN y, GEN S, GEN T, GEN p)
+{ return T? FpXQXQ_div(x,y,S,T,p): FpXQ_div(x,y,S,p); }
+INLINE GEN
 FqXQ_inv(GEN x, GEN S, GEN T, GEN p)
 { return T? FpXQXQ_inv(x,S,T,p): FpXQ_inv(x,S,p); }
 INLINE GEN

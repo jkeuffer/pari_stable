@@ -2863,6 +2863,7 @@ INLINE GEN    FqX_rem(GEN x, GEN y, GEN T, GEN p);
 INLINE GEN    FqX_sqr(GEN x, GEN T, GEN p);
 INLINE GEN    FqX_sub(GEN x,GEN y,GEN T,GEN p);
 
+INLINE GEN    FqXQ_div(GEN x, GEN y, GEN S, GEN T, GEN p);
 INLINE GEN    FqXQ_inv(GEN x, GEN S, GEN T, GEN p);
 INLINE GEN    FqXQ_invsafe(GEN x, GEN S, GEN T, GEN p);
 INLINE GEN    FqXQ_mul(GEN x, GEN y, GEN S, GEN T, GEN p);
