@@ -30,6 +30,7 @@ ulong DFLT_mod = 18446744073709551557UL;
 #else
 ulong DFLT_mod = 4294967291UL;
 #endif
+GEN LARGE_mod;
 
 typedef struct {
   ulong reps, type;
@@ -101,11 +102,20 @@ rand_Flx(long n)
 
 /* normalized Flx, degree n */
 static GEN
+rand_NFpX(GEN mod,long n)
+{
+  pari_sp av = avma;
+  GEN x = gadd(monomial(gen_1,n,0), random_FpX(n, 0, mod));
+  return gerepileupto(av, x);
+}
+
+/* normalized Flx, degree n */
+static GEN
 rand_NFlx(long n)
 {
   pari_sp av = avma;
-  GEN x = gadd(monomial(gen_1,n,0), random_FpX(n, 0, utoipos(DFLT_mod)));
-  return gerepileuptoleaf(av, ZX_to_Flx(x, DFLT_mod));
+  GEN mod = utoipos(DFLT_mod);
+  return gerepileuptoleaf(av, ZX_to_Flx(rand_NFpX(mod,n),DFLT_mod));
 }
 
 #define t_Flx  100
@@ -253,9 +263,18 @@ static double speed_Flxq_pow_mod(speed_param *s) {
 }
 
 static double speed_FpX_inv(speed_param *s)
-{ GEN p = subis(powuu(3,1280),3340); disable(s); TIME_FUN(FpX_invMontgomery(s->x, p)); }
+{ GEN p = LARGE_mod; disable(s); TIME_FUN(FpX_invMontgomery(s->x, p)); }
 static double speed_FpX_invnewton(speed_param *s)
-{ GEN p = subis(powuu(3,1280),3340); enable(s); TIME_FUN(FpX_invMontgomery(s->x, p)); }
+{ GEN p = LARGE_mod; enable(s); TIME_FUN(FpX_invMontgomery(s->x, p)); }
+
+static double speed_FpX_rem(speed_param *s)
+{ GEN p = LARGE_mod;
+  GEN x = rand_NFpX(LARGE_mod,(degpol(s->x)-1)*2); disable2(s,degpol(s->x)+1);
+  TIME_FUN(FpX_rem(x, s->x, p)); }
+static double speed_FpX_rem_mg(speed_param *s)
+{ GEN p = LARGE_mod;
+  GEN x = rand_NFpX(LARGE_mod,(degpol(s->x)-1)*2); enable2(s,degpol(s->x)-3);
+  TIME_FUN(FpX_rem(x, s->x, p)); }
 
 /* small coeffs: earlier thresholds for more complicated rings */
 static double speed_RgX_sqr(speed_param *s)
@@ -295,10 +314,10 @@ static tune_param param[] = {
 {0,   var(Flx_MUL_LIMIT),          t_Flx,4,70, speed_Flx_mul,speed_Flx_karamul},
 {0,   var(Flx_SQR_LIMIT),          t_Flx,4,70, speed_Flx_sqr,speed_Flx_karasqr},
 {0,   var(Flx_INVMONTGOMERY_LIMIT),t_NFlx,10,0, speed_Flx_inv,speed_Flx_invnewton,0.1},
-{0,  var(Flx_POW_MONTGOMERY_LIMIT),t_NFlx,1,0,
-                                   speed_Flxq_pow_redc,speed_Flxq_pow_mod},
 {0,  var(Flx_REM_MONTGOMERY_LIMIT),t_NFlx,10,0, speed_Flx_rem,speed_Flx_rem_mg,0.1},
+{0,  var(Flx_POW_MONTGOMERY_LIMIT),t_NFlx,1,0, speed_Flxq_pow_redc,speed_Flxq_pow_mod},
 {0,  var(FpX_INVMONTGOMERY_LIMIT),t_FpX,10,0, speed_FpX_inv,speed_FpX_invnewton,0.05},
+{0,  var(FpX_REM_MONTGOMERY_LIMIT),t_FpX,10,0, speed_FpX_rem,speed_FpX_rem_mg,0.05},
 {0,  var(RgX_MUL_LIMIT),          t_FpX, 4,0, speed_RgX_mul,speed_RgX_karamul},
 {0,  var(RgX_SQR_LIMIT),          t_FpX, 4,0, speed_RgX_sqr,speed_RgX_karasqr},
 };
@@ -516,6 +535,7 @@ main(int argc, char **argv)
   int i, r, n = 0;
   GEN v;
   pari_init(4000000, 2);
+  LARGE_mod=subis(powuu(3,128),62);
   v = new_chunk(argc);
   for (i = 1; i < argc; i++)
   {

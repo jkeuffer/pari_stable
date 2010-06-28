@@ -1425,8 +1425,6 @@ RgXQX_rem(GEN x, GEN y, GEN T) { return RgXQX_divrem(x,y,T,ONLY_REM); }
 INLINE GEN
 FpX_div(GEN x, GEN y, GEN p) { return FpX_divrem(x,y,p, NULL); }
 INLINE GEN
-FpX_rem(GEN x, GEN y, GEN p) { return FpX_divrem(x,y,p, ONLY_REM); }
-INLINE GEN
 Flx_div(GEN x, GEN y, ulong p) { return Flx_divrem(x,y,p, NULL); }
 INLINE GEN
 FpV_FpC_mul(GEN x, GEN y, GEN p) { return FpV_dotproduct(x,y,p); }

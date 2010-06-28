@@ -780,6 +780,21 @@ FpX_rem_Montgomery(GEN x, GEN mg, GEN T, GEN p)
   return gerepileupto(ltop, z);
 }
 
+GEN
+FpX_rem(GEN x, GEN y, GEN p)
+{
+  long dy = degpol(y), dx = degpol(x), d = dx-dy;
+  if (d < 0) return ZX_copy(x);
+  if (d <= FpX_REM_MONTGOMERY_LIMIT || d>dy-2)
+    return FpX_divrem(x,y,p,ONLY_REM);
+  else
+  {
+    pari_sp av=avma;
+    GEN mg = FpX_invMontgomery(y, p);
+    return gerepileupto(av, FpX_rem_Montgomery(x, mg, y, p));
+  }
+}
+
 /***********************************************************************/
 /**                                                                   **/
 /**                              FpXQ                                 **/
