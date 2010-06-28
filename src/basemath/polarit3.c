@@ -482,8 +482,6 @@ Kronecker_to_FpXQX(GEN Z, GEN T, GEN p)
 }
 
 GEN
-FqX_red(GEN z, GEN T, GEN p) { return T? FpXQX_red(z, T, p): FpXX_red(z, p); }
-GEN
 FpXQX_red(GEN z, GEN T, GEN p)
 {
   long i, l = lg(z);

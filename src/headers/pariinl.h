@@ -1562,9 +1562,11 @@ ZV_dvd(GEN x, GEN y)
 
 /* Fq */
 INLINE GEN
-FqX_add(GEN x,GEN y,/*unused*/GEN T,GEN p) { return FpXX_add(x,y,p); }
+FqX_red(GEN z, GEN T, GEN p) { return T? FpXQX_red(z, T, p): FpX_red(z, p); }
 INLINE GEN
-FqX_sub(GEN x,GEN y,/*unused*/GEN T,GEN p) { return FpXX_sub(x,y,p); }
+FqX_add(GEN x,GEN y,GEN T,GEN p) { return T? FpXX_add(x,y,p): FpX_add(x,y,p); }
+INLINE GEN
+FqX_sub(GEN x,GEN y,GEN T,GEN p) { return T? FpXX_sub(x,y,p): FpX_sub(x,y,p); }
 INLINE GEN
 FqX_mul(GEN x, GEN y, GEN T, GEN p)
 { return T? FpXQX_mul(x, y, T, p): FpX_mul(x, y, p); }
