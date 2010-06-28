@@ -2856,11 +2856,15 @@ INLINE long   rnf_get_degree(GEN rnf);
 INLINE GEN    FqX_add(GEN x,GEN y,GEN T,GEN p);
 INLINE GEN    FqX_div(GEN x, GEN y, GEN T, GEN p);
 INLINE GEN    FqX_divrem(GEN x, GEN y, GEN T, GEN p, GEN *z);
+INLINE GEN    FqX_extgcd(GEN P,GEN Q,GEN T,GEN p, GEN *U, GEN *V);
 INLINE GEN    FqX_gcd(GEN P, GEN Q, GEN T, GEN p);
 INLINE GEN    FqX_mul(GEN x, GEN y, GEN T, GEN p);
 INLINE GEN    FqX_rem(GEN x, GEN y, GEN T, GEN p);
 INLINE GEN    FqX_sqr(GEN x, GEN T, GEN p);
 INLINE GEN    FqX_sub(GEN x,GEN y,GEN T,GEN p);
+
+INLINE GEN    FqXQ_inv(GEN x, GEN S, GEN T, GEN p);
+INLINE GEN    FqXQ_invsafe(GEN x, GEN S, GEN T, GEN p);
 INLINE GEN    FqXQ_mul(GEN x, GEN y, GEN S, GEN T, GEN p);
 INLINE GEN    FqXQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p);
 INLINE GEN    FqXQ_sqr(GEN x, GEN S, GEN T, GEN p);

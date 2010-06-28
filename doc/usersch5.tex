@@ -3711,6 +3711,8 @@ defined modulo $(p, T)$, and let $P$ be an \kbd{FqX}; returns the translated
 
 \fun{GEN}{FqX_gcd}{GEN P, GEN Q, GEN T, GEN p}
 
+\fun{GEN}{FqX_extgcd}{GEN x, GEN y, GEN T, GEN p, GEN *ptu, GEN *ptv}
+
 \fun{GEN}{FqX_eval}{GEN x, GEN y, GEN T, GEN p} evaluates the \kbd{FqX}~\kbd{x}
 at the \kbd{Fq}~\kbd{y}. The result is an~\kbd{Fq}.
 
@@ -3740,7 +3742,7 @@ coefficients are \kbd{ZX}s or \typ{INT}s, reduce them to \kbd{FpXQ}s.
 \fun{GEN}{FpXQXQ_inv}{GEN x, GEN S, GEN T, GEN p}, \kbd{x} and
 \kbd{S} being \kbd{FpXQX}s, returns $\kbd{x}^{-1}$ modulo \kbd{S}.
 
-\fun{GEN}{FpXQ_invsafe}{GEN x, GEN S, GEN T,GEN p}, as \kbd{FpXQXQ\_inv},
+\fun{GEN}{FpXQXQ_invsafe}{GEN x, GEN S, GEN T,GEN p}, as \kbd{FpXQXQ\_inv},
 returning \kbd{NULL} if \kbd{x} is not invertible.
 
 \fun{GEN}{FpXQXQ_mul}{GEN x, GEN y, GEN S, GEN T, GEN p}, \kbd{x}, \kbd{y} and
@@ -3754,6 +3756,12 @@ returning \kbd{NULL} if \kbd{x} is not invertible.
 
 \fun{GEN}{FqXQ_mul}{GEN x, GEN y, GEN S, GEN T, GEN p}, \kbd{x}, \kbd{y} and
 \kbd{S} being \kbd{FqX}s, returns $\kbd{x}\*\kbd{y}$ modulo \kbd{S}.
+
+\fun{GEN}{FqXQ_inv}{GEN x, GEN S, GEN T, GEN p}, \kbd{x} and
+\kbd{S} being \kbd{FqX}s, returns $\kbd{x}^{-1}$ modulo \kbd{S}.
+
+\fun{GEN}{FqXQ_invsafe}{GEN x, GEN S, GEN T, GEN p} , as \kbd{FqXQ\_inv},
+returning \kbd{NULL} if \kbd{x} is not invertible.
 
 \fun{GEN}{FqXQ_sqr}{GEN x, GEN S, GEN T, GEN p}, \kbd{x} and
 \kbd{S} being \kbd{FqX}s, returns $\kbd{x}^2$ modulo \kbd{S}.
