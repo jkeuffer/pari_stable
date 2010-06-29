@@ -1178,6 +1178,10 @@ remsBIL(long n) { return n & (BITS_IN_LONG-1); }
 /**                                                                 **/
 /*********************************************************************/
 /* Assume m > 0, more efficient if 0 <= a, b < m */
+
+INLINE GEN
+Fp_red(GEN a, GEN m) { return modii(a, m); }
+
 INLINE GEN
 Fp_add(GEN a, GEN b, GEN m)
 {
@@ -1560,6 +1564,11 @@ ZV_dvd(GEN x, GEN y)
 
 /* Fq */
 INLINE GEN
+Fq_red(GEN x, GEN T, GEN p)
+{ return typ(x)==t_INT? Fp_red(x,p): FpXQ_red(x,T,p); }
+
+/* FqX */
+INLINE GEN
 FqX_red(GEN z, GEN T, GEN p) { return T? FpXQX_red(z, T, p): FpX_red(z, p); }
 INLINE GEN
 FqX_add(GEN x,GEN y,GEN T,GEN p) { return T? FpXX_add(x,y,p): FpX_add(x,y,p); }
@@ -1587,6 +1596,7 @@ INLINE GEN
 FqX_extgcd(GEN P,GEN Q,GEN T,GEN p, GEN *U, GEN *V)
 { return T? FpXQX_extgcd(P,Q,T,p,U,V): FpX_extgcd(P,Q,p,U,V); }
 
+/*FqXQ*/
 INLINE GEN
 FqXQ_div(GEN x, GEN y, GEN S, GEN T, GEN p)
 { return T? FpXQXQ_div(x,y,S,T,p): FpXQ_div(x,y,S,p); }

@@ -2711,6 +2711,9 @@ precision \kbd{prec}.
 
 \subsec{Modular operations} In this subsection, all \kbd{GEN}s are \typ{INT}
 
+\fun{GEN}{Fp_red}{GEN a, GEN m} returns $\kbd{a} modulo \kbd{m}$ (smallest
+non-negative residue). (This is identical to modii).
+
 \fun{GEN}{Fp_neg}{GEN a, GEN m} returns $-$\kbd{a} modulo \kbd{m} (smallest
 non-negative residue).
 
@@ -3555,6 +3558,9 @@ $\kbd{T} = \kbd{NULL}$, as \kbd{FpXX\_red(x, p)}.)
 \fun{GEN}{FqV_red}{GEN x, GEN T, GEN p}, \kbd{x} a vector of \kbd{ZX}s or
 \typ{INT}s, reduce them to \kbd{Fq}s. (If $\kbd{T} = \kbd{NULL}$, only
 reduce components mod \kbd{p} to \kbd{FpX}s or \kbd{Fp}s.)
+
+\fun{GEN}{FpXQ_red}{GEN y, GEN x, GEN T,GEN p} \kbd{x} a \typ{POL}
+whose coefficients are \typ{INT}s, reduce them to \kbd{FpXQ}s.
 
 \fun{GEN}{FpXQ_mul}{GEN y, GEN x, GEN T,GEN p}
 

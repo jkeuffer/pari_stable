@@ -804,6 +804,13 @@ FpX_rem(GEN x, GEN y, GEN p)
 /* FpXQ are elements of Fp[X]/(T), represented by FpX*/
 
 GEN
+FpXQ_red(GEN x, GEN T, GEN p)
+{
+  GEN z = FpX_red(x,p);
+  return FpX_rem(z, T,p);
+}
+
+GEN
 FpXQ_mul(GEN x,GEN y,GEN T,GEN p)
 {
   GEN z = FpX_mul(x,y,p);

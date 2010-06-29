@@ -490,7 +490,7 @@ FpXQX_red(GEN z, GEN T, GEN p)
     if (typ(z[i]) == t_INT)
       gel(res,i) = modii(gel(z,i),p);
     else
-      gel(res,i) = FpX_rem(gel(z,i),T,p);
+      gel(res,i) = FpXQ_red(gel(z,i),T,p);
   return FpXQX_renormalize(res,lg(res));
 }
 
@@ -1056,18 +1056,6 @@ Fq_pow(GEN x, GEN n, GEN pol, GEN p)
 {
   if (typ(x) == t_INT) return Fp_pow(x,n,p);
   return FpXQ_pow(x,n,pol,p);
-}
-
-GEN
-Fq_red(GEN x, GEN T, GEN p)
-{
-  pari_sp ltop=avma;
-  switch(typ(x)==t_POL)
-  {
-    case 0: return modii(x,p);
-    case 1: return gerepileupto(ltop,FpX_rem(FpX_red(x,p),T,p));
-  }
-  return NULL;
 }
 
 
