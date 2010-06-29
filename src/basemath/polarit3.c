@@ -1143,13 +1143,7 @@ FqV_red(GEN z, GEN T, GEN p)
 {
   long i, l = lg(z);
   GEN res = cgetg(l, typ(z));
-  for(i=1;i<l;i++)
-    if (typ(z[i]) == t_INT)
-      gel(res,i) = modii(gel(z,i),p);
-    else if (T)
-      gel(res,i) = FpX_rem(gel(z,i),T,p);
-    else
-      gel(res,i) = FpX_red(gel(z,i),p);
+  for(i=1;i<l;i++) gel(res,i) = Fq_red(gel(z,i),T,p);
   return res;
 }
 
