@@ -2345,6 +2345,16 @@ FlxqX_invMontgomery_basecase(GEN T, GEN Q, ulong p)
   return r;
 }
 
+/* Return new lgpol */
+static long
+FlxX_lgrenormalizespec(GEN x, long lx)
+{
+  long i;
+  for (i = lx-1; i>=0; i--)
+    if (!lgpol(gel(x,i))) break;
+  return i+1;
+}
+
 /* x/polrecip(P)+O(x^n) */
 GEN
 FlxqX_invMontgomery(GEN T, GEN Q, ulong p)
@@ -2372,16 +2382,18 @@ FlxqX_rem_Montgomery(GEN x, GEN mg, GEN T, GEN Q, ulong p)
   long vs=Q[1];
   long l=lgpol(x);
   long lt=degpol(T); /*We discard the leading term*/
-  long lead=lt-1;
-  long ld=l-lt+1;
-  long lm=minss(ld,lgpol(mg));
+  long ld, lm, lT, lmg;
   if (l<=lt)
     return gcopy(x);
-  z=FlxX_recipspec(x+2+lead,ld,ld,vs);         /* z = rec(x)      lz<=ld*/
-  z=FlxqX_mulspec(z+2,mg+2,Q,p,lgpol(z),lm);   /* z = rec(x) * mg lz<=ld+lm*/
-  z=FlxX_recipspec(z+2,minss(ld,lgpol(z)),ld,vs);/*z= rec (rec(x) * mg) lz<=ld*/
-  z=FlxqX_mulspec(z+2,T+2,Q,p,lgpol(z),lt);    /* z*= pol         lz<=ld+lt*/
-  z=FlxX_subspec(x+2,z+2,p,lt,minss(lt,lgpol(z)));/*z = x - z       lz<=lt */
+  ld = l-lt;
+  lm = minss(ld, lgpol(mg));
+  lT  = FlxX_lgrenormalizespec(T+2,lt);
+  lmg = FlxX_lgrenormalizespec(mg+2,lm);
+  z = FlxX_recipspec(x+2+lt,ld,ld,vs);         /* z = rec(x)       lz<=ld*/
+  z = FlxqX_mulspec(z+2,mg+2,Q,p,lgpol(z),lmg); /* z = rec(x) * mg lz<=ld+lm*/
+  z = FlxX_recipspec(z+2,minss(ld,lgpol(z)),ld,vs);/*z= rec(rec(x)*mg) lz<=ld*/
+  z = FlxqX_mulspec(z+2,T+2,Q,p,lgpol(z),lt);    /* z*= pol        lz<=ld+lt*/
+  z = FlxX_subspec(x+2,z+2,p,lt,minss(lt,lgpol(z)));/*z = x - z    lz<=lt */
   z[1]=T[1];
   return gerepileupto(ltop,z);
 }
