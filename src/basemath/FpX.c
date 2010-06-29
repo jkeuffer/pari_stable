@@ -84,12 +84,32 @@ FpX_add(GEN x,GEN y,GEN p)
   return z;
 }
 
+static GEN
+Fp_red_FpX(GEN x, GEN p, long v)
+{
+  GEN z;
+  if (!signe(x)) return zeropol(v);
+  z = cgetg(3, t_POL);
+  z[1] = evalsigne(1) | evalvarn(v);
+  gel(z,2) = Fp_red(x,p); return z;
+}
+
+static GEN
+Fp_neg_FpX(GEN x, GEN p, long v)
+{
+  GEN z;
+  if (!signe(x)) return zeropol(v);
+  z = cgetg(3, t_POL);
+  z[1] = evalsigne(1) | evalvarn(v);
+  gel(z,2) = Fp_neg(x,p); return z;
+}
+
 GEN
 FpX_Fp_add(GEN y,GEN x,GEN p)
 {
   long i, lz = lg(y);
   GEN z;
-  if (lz == 2) return scalar_ZX(x,varn(y));
+  if (lz == 2) return Fp_red_FpX(x,p,varn(y));
   z = cgetg(lz,t_POL); z[1] = y[1];
   gel(z,2) = Fp_add(gel(y,2),x, p);
   if (lz == 3) z = FpX_renormalize(z,lz);
@@ -115,7 +135,7 @@ FpX_Fp_sub(GEN y,GEN x,GEN p)
 {
   long i, lz = lg(y);
   GEN z;
-  if (lz == 2) return scalar_ZX(x,varn(y));
+  if (lz == 2) return Fp_neg_FpX(x,p,varn(y));
   z = cgetg(lz,t_POL); z[1] = y[1];
   gel(z,2) = Fp_sub(gel(y,2),x, p);
   if (lz == 3) z = FpX_renormalize(z,lz);
@@ -128,7 +148,7 @@ FpX_Fp_sub_shallow(GEN y,GEN x,GEN p)
 {
   long i, lz = lg(y);
   GEN z;
-  if (lz == 2) return scalar_ZX_shallow(x,varn(y));
+  if (lz == 2) return Fp_neg_FpX(x,p,varn(y));
   z = cgetg(lz,t_POL); z[1] = y[1];
   gel(z,2) = Fp_sub(gel(y,2),x, p);
   if (lz == 3) z = FpX_renormalize(z,lz);

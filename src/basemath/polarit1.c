@@ -584,7 +584,7 @@ FqX_split_part(GEN f, GEN T, GEN p)
   if (n <= 1) return f;
   f = FpXQX_red(f, T, p);
   z = FpXQXQ_pow(X, powiu(p, degpol(T)), f, T, p);
-  z = gsub(z, X);
+  z = FpXX_sub(z, X , p);
   return FqX_gcd(z, f, T, p);
 }
 
@@ -2184,7 +2184,7 @@ FqX_split_deg1(GEN *pz, GEN u, GEN q, GEN T, GEN p)
   S = init_spec_FqXQ_pow(X, q, u, T, p);
   vectrunc_append(z, S);
   v = spec_FqXQ_pow(v, S, T, p);
-  g = FqX_gcd(gsub(v,X),u, T,p);
+  g = FqX_gcd(FpXX_sub(v,X,p),u, T,p);
   dg = degpol(g);
   if (dg > 0) add(z, g, dg);
   return dg;
@@ -2205,7 +2205,7 @@ FqX_split_by_degree(GEN *pz, GEN u, GEN q, GEN T, GEN p)
   for (d=1; d <= N>>1; d++)
   {
     v = spec_FqXQ_pow(v, S, T, p);
-    g = FqX_gcd(gsub(v,X),u, T,p);
+    g = FqX_gcd(FpXX_sub(v,X,p),u, T,p);
     dg = degpol(g); if (dg <= 0) continue;
     /* all factors of g have degree d */
     add(z, g, dg / d); nb += dg / d;
@@ -2323,7 +2323,7 @@ FqX_sqf_split(GEN *t0, GEN q, GEN T, GEN p)
   for (d=1; d <= N>>1; d++)
   {
     v = spec_FqXQ_pow(v, S, T, p);
-    g = FqX_gcd(gsub(v,X),u, T,p);
+    g = FqX_gcd(FpXX_sub(v,X,p),u, T,p);
     dg = degpol(g); if (dg <= 0) continue;
 
     /* all factors of g have degree d */
