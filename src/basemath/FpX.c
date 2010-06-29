@@ -784,7 +784,7 @@ GEN
 FpX_rem(GEN x, GEN y, GEN p)
 {
   long dy = degpol(y), dx = degpol(x), d = dx-dy;
-  if (d < 0) return ZX_copy(x);
+  if (d < 0) return FpX_red(x,p);
   if (d <= FpX_REM_MONTGOMERY_LIMIT || d>dy-2)
     return FpX_divrem(x,y,p,ONLY_REM);
   else
