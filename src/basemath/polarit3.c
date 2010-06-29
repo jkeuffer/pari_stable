@@ -454,6 +454,19 @@ FpXX_sub(GEN x, GEN y, GEN p)
   return FpXX_renormalize(z, lz);
 }
 
+GEN
+FpXX_Fp_mul(GEN P, GEN u, GEN p)
+{
+  long i, lP;
+  GEN res = cgetg_copy(P, &lP); res[1] = P[1];
+  for(i=2; i<lP; i++)
+  {
+    GEN x = gel(P,i);
+    gel(res,i) = typ(x)==t_INT? Fp_mul(x,u,p): FpX_Fp_mul(x,u,p);
+  }
+  return FpXX_renormalize(res,lP);
+}
+
 /*******************************************************************/
 /*                                                                 */
 /*                             (Fp[X]/(Q))[Y]                      */
@@ -524,21 +537,6 @@ FpXQX_FpXQ_mul(GEN P, GEN U, GEN T, GEN p)
     gel(res,i) = typ(gel(P,i))==t_INT? FpX_Fp_mul(U, gel(P,i), p):
                                        FpXQ_mul(U, gel(P,i), T,p);
   return FpXQX_renormalize(res,lP);
-}
-
-GEN
-FqX_Fp_mul(GEN P, GEN U, GEN T, GEN p)
-{
-  long i, lP;
-  GEN res = cgetg_copy(P, &lP); res[1] = P[1];
-  for(i=2; i<lP; i++) gel(res,i) = Fq_Fp_mul(gel(P,i),U, T,p);
-  return FpXQX_renormalize(res,lP);
-}
-GEN
-FqX_Fq_mul(GEN P, GEN U, GEN T, GEN p)
-{
-  if (typ(U) == t_INT) return FqX_Fp_mul(P, U, T, p);
-  return FpXQX_FpXQ_mul(P, U, T, p);
 }
 
 GEN
@@ -795,12 +793,12 @@ GEN
 FpXQXQ_invsafe(GEN x, GEN S, GEN T, GEN p)
 {
   GEN z, U, V;
-
   z = FpXQX_extgcd(x, S, T, p, &U, &V);
   if (degpol(z)) return NULL;
-  z = FpXQ_invsafe(gel(z,2), T, p);
+  z = gel(z,2);
+  z = typ(z)==t_INT ? Fp_invsafe(z,p) : FpXQ_invsafe(z,T,p);
   if (!z) return NULL;
-  return FpXQX_FpXQ_mul(U, z, T, p);
+  return typ(z)==t_INT ? FpXX_Fp_mul(U, z, p): FpXQX_FpXQ_mul(U, z, T, p);
 }
 
 GEN

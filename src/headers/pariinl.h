@@ -1575,6 +1575,12 @@ FqX_add(GEN x,GEN y,GEN T,GEN p) { return T? FpXX_add(x,y,p): FpX_add(x,y,p); }
 INLINE GEN
 FqX_sub(GEN x,GEN y,GEN T,GEN p) { return T? FpXX_sub(x,y,p): FpX_sub(x,y,p); }
 INLINE GEN
+FqX_Fp_mul(GEN P, GEN u, GEN T, GEN p)
+{ return T? FpXX_Fp_mul(P, u, p): FpX_Fp_mul(P, u, p); }
+INLINE GEN
+FqX_Fq_mul(GEN P, GEN U, GEN T, GEN p)
+{ return typ(U)==t_INT ? FqX_Fp_mul(P, U, T, p): FpXQX_FpXQ_mul(P, U, T, p); }
+INLINE GEN
 FqX_mul(GEN x, GEN y, GEN T, GEN p)
 { return T? FpXQX_mul(x, y, T, p): FpX_mul(x, y, p); }
 INLINE GEN

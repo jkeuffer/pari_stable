@@ -3399,8 +3399,8 @@ suitable for \kbd{gerepileupto})
 \fun{GEN}{Fp_FpX_sub}{GEN x,GEN y,GEN p} returns $x - y$, where $x$ is
 a \typ{INT} and $y$ an \kbd{FpX}.
 
-\fun{GEN}{FpX_Fp_mul}{GEN y, GEN x, GEN p} multiplies the \kbd{FpX}~\kbd{y}
-by the \kbd{Fp}~\kbd{x}.
+\fun{GEN}{FpX_Fp_mul}{GEN x, GEN y, GEN p} multiplies the \kbd{FpX}~\kbd{x}
+by the \kbd{Fp}~\kbd{y}.
 
 \fun{GEN}{FpX_Fp_mul_to_monic}{GEN y,GEN x,GEN p} returns $y*x$ assuming the
 result is monic of the same degree as $y$ (in particular $x\neq 0$).
@@ -3663,14 +3663,19 @@ Contrary to what the name implies, an \kbd{FpXX} is a \typ{POL} whose
 coefficients are either \typ{INT}s or \typ{FpX}s. This reduces memory
 overhead at the expense of consistency.
 
-\fun{GEN}{FpXX_add}{GEN x, GEN y, GEN p} adds \kbd{x} and \kbd{y}.
-
 \fun{GEN}{FpXX_red}{GEN z, GEN p}, \kbd{z} a \typ{POL} whose coefficients are
 either \kbd{ZX}s or \typ{INT}s. Returns the \typ{POL} equal to \kbd{z} with
 all components reduced modulo \kbd{p}.
 
 \fun{GEN}{FpXX_renormalize}{GEN x, long l}, as \kbd{normalizepol}, where
 $\kbd{l} = \kbd{lg(x)}$, in place.
+
+\fun{GEN}{FpXX_add}{GEN x, GEN y, GEN p} adds \kbd{x} and \kbd{y}.
+
+\fun{GEN}{FpXX_sub}{GEN x, GEN y, GEN p} returns $\kbd{x}-\kbd{y}$.
+
+\fun{GEN}{FpXX_Fp_mul}{GEN x, GEN y, GEN p} multiplies the \kbd{FpXX}~\kbd{x}
+by the \kbd{Fp}~\kbd{y}.
 
 \subsec{\kbd{FpXQX}, \kbd{FqX}}
 Contrary to what the name implies, an \kbd{FpXQX} is a \typ{POL} whose

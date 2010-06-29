@@ -2294,6 +2294,7 @@ GEN     FpXQXQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p);
 GEN     FpXQXQ_sqr(GEN x, GEN S, GEN T, GEN p);
 GEN     FpXQXV_prod(GEN V, GEN Tp, GEN p);
 GEN     FpXV_FpC_mul(GEN V, GEN W, GEN p);
+GEN     FpXX_Fp_mul(GEN x, GEN y, GEN p);
 GEN     FpXX_add(GEN x, GEN y, GEN p);
 GEN     FpXX_red(GEN z, GEN p);
 GEN     FpXX_sub(GEN x, GEN y, GEN p);
@@ -2316,8 +2317,6 @@ GEN     FqM_to_FlxM(GEN x, GEN T, GEN pp);
 GEN     FqV_roots_to_pol(GEN V, GEN T, GEN p, long v);
 GEN     FqV_red(GEN z, GEN T, GEN p);
 GEN     FqV_to_FlxV(GEN v, GEN T, GEN pp);
-GEN     FqX_Fp_mul(GEN P, GEN U, GEN T, GEN p);
-GEN     FqX_Fq_mul(GEN P, GEN U, GEN T, GEN p);
 GEN     FqX_Fq_mul_to_monic(GEN P, GEN U, GEN T, GEN p);
 GEN     FqX_eval(GEN x, GEN y, GEN T, GEN p);
 GEN     FqX_normalize(GEN z, GEN T, GEN p);
@@ -2856,6 +2855,8 @@ INLINE long   rnf_get_degree(GEN rnf);
 
 INLINE GEN    Fq_red(GEN x, GEN T, GEN p);
 
+INLINE GEN    FqX_Fp_mul(GEN P, GEN U, GEN T, GEN p);
+INLINE GEN    FqX_Fq_mul(GEN P, GEN U, GEN T, GEN p);
 INLINE GEN    FqX_add(GEN x,GEN y,GEN T,GEN p);
 INLINE GEN    FqX_div(GEN x, GEN y, GEN T, GEN p);
 INLINE GEN    FqX_divrem(GEN x, GEN y, GEN T, GEN p, GEN *z);
