@@ -74,7 +74,7 @@ F2x_to_ZX(GEN x)
   for(i=2,k=2;i<lg(x);i++)
     for(j=0; j<BITS_IN_LONG && k<l; j++,k++)
       gel(z,k)=(x[i]&(1UL<<j))?gen_1:gen_0;
-  z[1]=evalsigne(l>=0)|x[1];
+  z[1]=evalsigne(l>=3)|x[1];
   return z;
 }
 
