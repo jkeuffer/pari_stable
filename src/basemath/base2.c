@@ -694,7 +694,7 @@ ZpX_sylvester_hnf(GEN f1, GEN f2, GEN pm)
 {
   long j, n = degpol(f1);
   GEN h, a = cgetg(n+1,t_MAT);
-  h = FpX_rem(f2,f1,pm);
+  h = FpXQ_red(f2,f1,pm);
   for (j=1;; j++)
   {
     gel(a,j) = RgX_to_RgV(h, n);
@@ -2171,7 +2171,7 @@ get_proj_modT(GEN basis, GEN T, GEN p)
     if (typ(w) != t_INT)
     {
       w = Q_primitive_part(w, &cx);
-      w = FpX_rem(w, T, p);
+      w = FpXQ_red(w, T, p);
       if (cx) w = FpX_Fp_mul(w, Rg_to_Fp(cx, p), p);
     }
     gel(z,i) = RgX_to_RgV(w, f); /* w_i mod (T,p) */
