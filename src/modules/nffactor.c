@@ -959,7 +959,7 @@ nfcmbf(nfcmbf_t *T, long klim, long *pmaxK, int *done)
       t2 = gsqr(t1);
       if (d > 1) t2 = gsub(t2, gmul2n(gel(P,d-2), 1));
       /* t2 = S_2 Newton sum */
-      t2 = typ(t2)!=t_INT? FpX_rem(t2, Tpk, pk): modii(t2, pk);
+      t2 = Fq_red(t2, Tpk, pk);
       if (D.lt)
       {
         if (typ(t2)!=t_INT) {
