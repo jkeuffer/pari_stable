@@ -1302,6 +1302,7 @@ ellsea(GEN E, GEN p, long smallfact)
   const long MAX_ATKIN = 21;
   pari_sp ltop = avma, btop, st_lim;
   long i, nb_atkin, lp, M;
+  GEN res, cat;
   GEN compile_atkin, tr, bound, bound_bsgs, champ;
   GEN prod_atkin = gen_1, max_traces = gen_0;
   GEN a4 = modii(mulis(Rg_to_Fp(gel(E,10), p), -27), p);
@@ -1382,7 +1383,7 @@ ellsea(GEN E, GEN p, long smallfact)
     if (cmpii(mulii(gel(tr, 1), prod_atkin), bound) > 0)
     {
       GEN bound_tr;
-      if (!nb_atkin) break;
+      if (!nb_atkin) return gerepileuptoint(ltop, centerlift(tr));
       bound_tr = mulrr(bound_bsgs, dbltor(bound_gr));
       bound_gr *= growth_factor;
       if (signe(max_traces))
@@ -1404,13 +1405,9 @@ ellsea(GEN E, GEN p, long smallfact)
     if (low_stack(st_lim, stack_lim(btop, 1)))
       gerepileall(btop, 4, &tr, &compile_atkin, &max_traces, &prod_atkin);
   }
-  if (!nb_atkin) return gerepileuptoint(ltop, centerlift(tr));
-  else
-  {
-    GEN res, cat = shallowextract(compile_atkin, gel(champ, 1));
-    if (DEBUGLEVEL)
-      fprintferr("Match and sort for %Ps possibilities.\n",gel(champ, 2));
-    res = match_and_sort(cat, gel(tr,1), gel(tr,2), a4,a6,p);
-    return gerepileuptoint(ltop, subii(addis(p, 1), res));
-  }
+  cat = shallowextract(compile_atkin, gel(champ, 1));
+  if (DEBUGLEVEL)
+    fprintferr("Match and sort for %Ps possibilities.\n",gel(champ, 2));
+  res = match_and_sort(cat, gel(tr,1), gel(tr,2), a4,a6,p);
+  return gerepileuptoint(ltop, subii(addis(p, 1), res));
 }
