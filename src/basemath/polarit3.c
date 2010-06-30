@@ -624,8 +624,9 @@ FpXQX_divrem(GEN x, GEN y, GEN T, GEN p, GEN *pr)
       if (pr == ONLY_REM) return zeropol(vx);
       *pr = zeropol(vx);
     }
-    av0 = avma; x = FqX_normalize(x, T,p); tetpil = avma;
-    return gerepile(av0,tetpil,FpXQX_red(x,T,p));
+    if (gequal1(lead)) return FpXQX_red(x,T,p);
+    av0 = avma; x = FqX_Fq_mul(x, Fq_inv(lead, T,p), T,p);
+    return gerepileupto(av0,x);
   }
   av0 = avma; dz = dx-dy;
   if (lgefint(p) == 3)

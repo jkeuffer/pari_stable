@@ -275,9 +275,9 @@ FpX_divrem(GEN x, GEN y, GEN p, GEN *pr)
       if (pr == ONLY_REM) return zeropol(vx);
       *pr = zeropol(vx);
     }
-    av0 = avma; z = FpX_normalize(x, p);
-    if (z==x) return ZX_copy(z);
-    else return gerepileupto(av0, z);
+    av0 = avma;
+    if (equali1(lead)) return FpX_red(x, p);
+    else return gerepileupto(av0, FpX_Fp_mul(x, Fp_inv(lead,p), p));
   }
   av0 = avma; dz = dx-dy;
   if (lgefint(p) == 3)

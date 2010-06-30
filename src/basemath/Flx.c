@@ -1039,12 +1039,9 @@ Flx_divrem(GEN x, GEN y, ulong p, GEN *pr)
   dy = degpol(y);
   if (!dy)
   {
-    if (y[2] == 1UL)
-      q = vecsmall_copy(x);
-    else
-      q = Flx_Fl_mul(x, Fl_inv(y[2], p), p);
     if (pr && pr != ONLY_DIVIDES) *pr = zero_Flx(sv);
-    return q;
+    if (y[2] == 1UL) return vecsmall_copy(x);
+    return Flx_Fl_mul(x, Fl_inv(y[2], p), p);
   }
   dx = degpol(x);
   dz = dx-dy;
@@ -2269,11 +2266,12 @@ FlxqX_divrem(GEN x, GEN y, GEN T, ulong p, GEN *pr)
       if (pr == ONLY_REM) return zeropol(vx);
       *pr = zeropol(vx);
     }
-    av0 = avma; x = FlxqX_normalize(x,T,p); tetpil = avma;
-    return gerepile(av0,tetpil,FlxqX_red(x,T,p));
+    if (Flx_cmp1(lead)) return vecsmall_copy(x);
+    av0 = avma;
+    return gerepileupto(av0,FlxqX_Flxq_mul(x,Flxq_inv(lead,T,p),T,p));
   }
   av0 = avma; dz = dx-dy;
-  lead = (!degpol(lead) && lead[2]==1)? NULL: gclone(Flxq_inv(lead,T,p));
+  lead = Flx_cmp1(lead)? NULL: gclone(Flxq_inv(lead,T,p));
   avma = av0;
   z = cgetg(dz+3,t_POL); z[1] = x[1];
   x += 2; y += 2; z += 2;
