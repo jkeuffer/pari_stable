@@ -482,6 +482,10 @@ test-all: $exec
 	@\$(DOTEST) $test_extra
 dotest-all::
 	@\$(DOTEST) $test_extra
+dyntest-all: gp-dyn
+	@env dotestSUF=dyn make test-all
+statest-all: gp-sta
+	@env dotestSUF=sta make test-all
 EOT
 for i in $test_extra $test_extra_out; do
   cat >> $file << EOT
