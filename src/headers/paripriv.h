@@ -611,7 +611,6 @@ GEN     FpX_gcd_check(GEN x, GEN y, GEN p);
 
 GEN     Flm_Frobenius_pow(GEN M, long d, GEN T, ulong p);
 GEN     FpM_Frobenius_pow(GEN M, long d, GEN T, GEN p);
-GEN     FpXYQQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p);
 GEN     FpX_compositum(GEN A, GEN B, GEN p);
 GEN     FpX_direct_compositum(GEN A, GEN B, GEN p);
 ulong   ZX_ZXY_ResBound(GEN A, GEN B, GEN dB);
