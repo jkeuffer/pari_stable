@@ -495,15 +495,6 @@ Kronecker_to_FpXQX(GEN Z, GEN T, GEN p)
 }
 
 GEN
-FqX_normalize(GEN z, GEN T, GEN p)
-{
-  GEN p1 = leading_term(z);
-  if (lg(z) == 2 || gequal1(p1)) return z;
-  if (!T) return FpX_normalize(z,p);
-  return FqX_Fq_mul(z, Fq_inv(p1,T,p), T,p);
-}
-
-GEN
 FpXQX_red(GEN z, GEN T, GEN p)
 {
   long i, l = lg(z);
@@ -555,6 +546,16 @@ FqX_Fq_mul_to_monic(GEN P, GEN U, GEN T, GEN p)
   GEN res = cgetg_copy(P, &lP); res[1] = P[1];
   for(i=2; i<lP-1; i++) gel(res,i) = Fq_mul(U,gel(P,i), T,p);
   gel(res,lP-1) = gen_1; return res;
+}
+
+GEN
+FqX_normalize(GEN z, GEN T, GEN p)
+{
+  GEN p1;
+  if (!T) return FpX_normalize(z,p);
+  p1 = leading_term(z);
+  if (lg(z) == 2 || gequal1(p1)) return z;
+  return FqX_Fq_mul_to_monic(z, Fq_inv(p1,T,p), T,p);
 }
 
 /* a X^d */
