@@ -495,6 +495,15 @@ Kronecker_to_FpXQX(GEN Z, GEN T, GEN p)
 }
 
 GEN
+FqX_normalize(GEN z, GEN T, GEN p)
+{
+  GEN p1 = leading_term(z);
+  if (lg(z) == 2 || gequal1(p1)) return z;
+  if (!T) return FpX_normalize(z,p);
+  return FqX_Fq_mul(z, Fq_inv(p1,T,p), T,p);
+}
+
+GEN
 FpXQX_red(GEN z, GEN T, GEN p)
 {
   long i, l = lg(z);
@@ -710,51 +719,25 @@ FpXQX_rem(GEN x, GEN y, GEN T, GEN p)
 GEN
 FpXQX_gcd(GEN P, GEN Q, GEN T, GEN p)
 {
-  pari_sp av2, av = avma, st_lim;
-  long dg;
-  GEN U, q;
+  pari_sp av=avma, av0;
+  GEN R;
   if (lgefint(p) == 3)
   {
     ulong pp = (ulong)p[2];
-    GEN Pl, Ql, Tl;
+    GEN Pl, Ql, Tl, U;
     Pl = ZXX_to_FlxX(P, pp, varn(T));
-    if (!signe(Pl)) { avma = av; return gcopy(Q); }
     Ql = ZXX_to_FlxX(Q, pp, varn(T));
-    if (!signe(Ql)) { avma = av; return gcopy(P); }
     Tl = ZX_to_Flx(T, pp);
-    U = FlxqX_safegcd(Pl, Ql, Tl, pp);
-    if (!U) pari_err(talker, "non-invertible polynomial in FpXQX_gcd");
+    U  = FlxqX_normalize(FlxqX_gcd(Pl, Ql, Tl, pp),Tl,pp);
     return gerepileupto(av, FlxX_to_ZXX(U));
   }
-  P = FpXX_red(P, p); av2 = avma;
+  P = FpXX_red(P, p); av0 = avma;
   Q = FpXX_red(Q, p);
-  if (!signe(P)) return gerepileupto(av, Q);
-  if (!signe(Q)) { avma = av2; return P; }
-  T = FpX_red(T, p);
-
-  av2 = avma; st_lim = stack_lim(av2, 1);
-  dg = lg(P)-lg(Q);
-  if (dg < 0) { swap(P, Q); dg = -dg; }
-  for(;;)
+  while (signe(Q))
   {
-    U = Fq_inv(leading_term(Q), T, p);
-    do /* set P := P % Q */
-    {
-      q = Fq_mul(U, Fq_neg(leading_term(P), T, p), T, p);
-      P = FpXX_add(P, FqX_Fq_mul(RgX_shift_shallow(Q, dg), q, T, p), p);
-      dg = lg(P)-lg(Q);
-    } while (dg >= 0);
-    if (!signe(P)) break;
-
-    if (low_stack(st_lim, stack_lim(av2, 1)))
-    {
-      if (DEBUGMEM>1) pari_warn(warnmem,"FpXQX_gcd");
-      gerepileall(av2, 2, &P,&Q);
-    }
-    swap(P, Q); dg = -dg;
+    av0 = avma; R = FpXQX_rem(P,Q,T,p); P=Q; Q=R;
   }
-  Q = FqX_Fq_mul(Q, U, T, p); /* normalize GCD */
-  return gerepileupto(av, Q);
+  avma = av0; return gerepileupto(av, FqX_normalize(P,T,p));
 }
 
 /* x and y in Z[Y][X], return lift(gcd(x mod T,p, y mod T,p)). Set u and v st
@@ -1655,15 +1638,6 @@ FpX_factorff_irred(GEN P, GEN Q, GEN l)
       gel(res,i) = RgM_to_RgXX(gel(V,i),vp,vq);
   }
   return gerepilecopy(ltop,res);
-}
-
-GEN
-FqX_normalize(GEN z, GEN T, GEN p)
-{
-  GEN p1 = leading_term(z);
-  if (lg(z) == 2 || gequal1(p1)) return z;
-  if (!T) return FpX_normalize(z,p);
-  return FqX_Fq_mul(z, Fq_inv(p1,T,p), T,p);
 }
 
 /* z in R[Y] representing an elt in R[X,Y] mod T(Y) in Kronecker form,

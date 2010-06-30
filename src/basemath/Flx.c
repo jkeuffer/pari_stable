@@ -2403,39 +2403,44 @@ FlxqX_rem(GEN x, GEN y, GEN T, ulong p)
 }
 
 GEN
+FlxqX_gcd(GEN x, GEN y, GEN T, ulong p)
+{
+  GEN a,b,c;
+  pari_sp av0, av=avma;
+
+  a = FlxqX_red(x, T, p); av0 = avma;
+  b = FlxqX_red(y, T, p);
+  while (signe(b))
+  {
+    av0 = avma; c = FlxqX_rem(a,b,T,p); a=b; b=c;
+  }
+  avma = av0; return gerepileupto(av, a);
+}
+
+GEN
 FlxqX_safegcd(GEN P, GEN Q, GEN T, ulong p)
 {
   pari_sp btop, ltop = avma, st_lim;
-  long dg;
-  GEN U, q;
+  GEN U;
   if (!signe(P)) return gcopy(Q);
   if (!signe(Q)) return gcopy(P);
   btop = avma; st_lim = stack_lim(btop, 1);
-  dg = lg(P)-lg(Q);
-  if (dg < 0) { swap(P, Q); dg = -dg; }
   for(;;)
   {
     U = Flxq_invsafe(leading_term(Q), T, p);
     if (!U) { avma = ltop; return NULL; }
-    do /* set P := P % Q */
-    {
-      q = Flxq_mul(U, Flx_neg(leading_term(P), p), T, p);
-      P = FlxX_add(P, FlxqX_Flxq_mul(FlxX_shift(Q, dg), q, T, p), p);
-      dg = lg(P)-lg(Q);
-    } while (dg >= 0);
+    Q = FlxqX_Flxq_mul_to_monic(Q,U,T,p);
+    P = FlxqX_rem(P,Q,T,p);
     if (!signe(P)) break;
-
     if (low_stack(st_lim, stack_lim(btop, 1)))
     {
       if (DEBUGMEM>1) pari_warn(warnmem,"FlxqX_safegcd");
       gerepileall(btop, 2, &P,&Q);
     }
-    swap(P, Q); dg = -dg;
+    swap(P, Q);
   }
-  Q = FlxqX_Flxq_mul(Q, U, T, p); /* normalize GCD */
   return gerepileupto(ltop, Q);
 }
-
 /*******************************************************************/
 /*                                                                 */
 /*                       (Fl[X]/T(X))[Y] / S(Y)                    */

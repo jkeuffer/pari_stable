@@ -159,6 +159,7 @@ GEN     FlxqV_roots_to_pol(GEN V, GEN T, ulong p, long v);
 GEN     FlxqX_Flxq_mul(GEN P, GEN U, GEN T, ulong p);
 GEN     FlxqX_Flxq_mul_to_monic(GEN P, GEN U, GEN T, ulong p);
 GEN     FlxqX_divrem(GEN x, GEN y, GEN T, ulong p, GEN *pr);
+GEN     FlxqX_gcd(GEN P, GEN Q, GEN T, ulong p);
 GEN     FlxqX_mul(GEN x, GEN y, GEN T, ulong p);
 GEN     FlxqX_normalize(GEN z, GEN T, ulong p);
 GEN     FlxqX_red(GEN z, GEN T, ulong p);

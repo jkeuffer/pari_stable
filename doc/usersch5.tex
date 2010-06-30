@@ -4093,6 +4093,8 @@ in the main variable of \kbd{b}.
 returns $P*U$ assuming the result is monic of the same degree as $P$ (in
 particular $U\neq 0$).
 
+\fun{GEN}{FlxqX_red}{GEN z, GEN T, ulong p}
+
 \fun{GEN}{FlxqX_normalize}{GEN z, GEN T, ulong p}
 
 \fun{GEN}{FlxqX_sqr}{GEN x, GEN T, ulong p}
@@ -4101,14 +4103,15 @@ particular $U\neq 0$).
 
 \fun{GEN}{FlxqX_rem}{GEN x, GEN y, GEN T, ulong p}
 
-\fun{GEN}{FlxqX_red}{GEN z, GEN T, ulong p}
+\fun{GEN}{FlxqX_gcd}{GEN x, GEN y, GEN p} returns a (not necessarily monic)
+greatest common divisor of $x$  and $y$.
 
 \fun{GEN}{FlxqXV_prod}{GEN V, GEN T, ulong p}
 
 \fun{GEN}{FlxqXQ_pow}{GEN x, GEN n, GEN S, GEN T, ulong p}
 
-\fun{GEN}{FlxqX_safegcd}{GEN P, GEN Q, GEN T, ulong p} Returns the gcd of $P$
-and $Q$ if Euclid's algorithm succeeds and \kbd{NULL} otherwise. In
+\fun{GEN}{FlxqX_safegcd}{GEN P, GEN Q, GEN T, ulong p} Returns the \emph{monic}
+GCD of $P$ and $Q$ if Euclid's algorithm succeeds and \kbd{NULL} otherwise. In
 particular, if $p$ is not prime or $T$ is not irreducible over $\F_p[X]$, the
 routine may still be used (but will fail if non-invertible leading terms
 occur).
