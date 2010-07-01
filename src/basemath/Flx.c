@@ -1524,7 +1524,7 @@ Flxq_sqr_mg(GEN y,GEN mg,GEN T,ulong p)
 
 typedef struct {
   GEN mg;
-  GEN pol;
+  GEN T;
   ulong p;
 } Flxq_muldata;
 
@@ -1532,47 +1532,45 @@ static GEN
 _sqr_Montgomery(void *data, GEN x)
 {
   Flxq_muldata *D = (Flxq_muldata*)data;
-  return Flxq_sqr_mg(x,D->mg, D->pol, D->p);
+  return Flxq_sqr_mg(x,D->mg, D->T, D->p);
 }
 static GEN
 _mul_Montgomery(void *data, GEN x, GEN y)
 {
   Flxq_muldata *D = (Flxq_muldata*)data;
-  return Flxq_mul_mg(x,y,D->mg, D->pol, D->p);
+  return Flxq_mul_mg(x,y,D->mg, D->T, D->p);
 }
 
 static GEN
 _Flxq_sqr(void *data, GEN x)
 {
   Flxq_muldata *D = (Flxq_muldata*)data;
-  return Flxq_sqr(x, D->pol, D->p);
+  return Flxq_sqr(x, D->T, D->p);
 }
 static GEN
 _Flxq_mul(void *data, GEN x, GEN y)
 {
   Flxq_muldata *D = (Flxq_muldata*)data;
-  return Flxq_mul(x,y, D->pol, D->p);
+  return Flxq_mul(x,y, D->T, D->p);
 }
 
-/* n-Power of x in Z/pZ[X]/(pol), as t_VECSMALL. */
+/* n-Power of x in Z/pZ[X]/(T), as t_VECSMALL. */
 GEN
-Flxq_pow(GEN x, GEN n, GEN pol, ulong p)
+Flxq_pow(GEN x, GEN n, GEN T, ulong p)
 {
   pari_sp av = avma;
   Flxq_muldata D;
   GEN y;
-  if (!signe(n)) return pol1_Flx(pol[1]);
-  if (signe(n) < 0)
-    x=Flxq_inv(x,pol,p);
-  else
-    x=Flx_rem(x, pol, p);
-  if (is_pm1(n)) return x;
-  D.pol = pol;
-  D.p   = p;
-  /* not tuned*/
-  if (degpol(pol) >= Flx_POW_MONTGOMERY_LIMIT)
+  long s = signe(n);
+  if (!s) return pol1_Flx(T[1]);
+  if (s < 0)
+    x = Flxq_inv(x,T,p);
+  if (is_pm1(n)) return s < 0 ? x : vecsmall_copy(x);
+  D.T = T;
+  D.p = p;
+  if (degpol(T) >= Flx_POW_MONTGOMERY_LIMIT)
   {
-    D.mg  = Flx_invMontgomery(pol,p);
+    D.mg  = Flx_invMontgomery(T,p);
     y = gen_pow(x, n, (void*)&D, &_sqr_Montgomery, &_mul_Montgomery);
   }
   else
@@ -1654,7 +1652,7 @@ static GEN
 _Flxq_pow(void *data, GEN x, GEN n)
 {
   Flxq_muldata *D = (Flxq_muldata*)data;
-  return Flxq_pow(x,n, D->pol, D->p);
+  return Flxq_pow(x,n, D->T, D->p);
 }
 
 static GEN
@@ -1666,7 +1664,7 @@ _Flxq_rand(void *data)
   do
   {
     avma = av;
-    z = random_Flx(degpol(D->pol),D->pol[1],D->p);
+    z = random_Flx(degpol(D->T),D->T[1],D->p);
   } while (lgpol(z)==0);
   return z;
 }
@@ -1687,7 +1685,7 @@ GEN
 Flxq_order(GEN a, GEN ord, GEN T, ulong p)
 {
   Flxq_muldata E;
-  E.pol=T; E.p=p;
+  E.T=T; E.p=p;
   return gen_eltorder(a,ord,(void*)&E,&Flxq_star);
 }
 
@@ -1695,7 +1693,7 @@ GEN
 Flxq_log(GEN a, GEN g, GEN ord, GEN T, ulong p)
 {
   Flxq_muldata E;
-  E.pol=T; E.p=p;
+  E.T=T; E.p=p;
   return gen_PH_log(a,g,ord,(void*)&E,&Flxq_star,NULL);
 }
 
@@ -1709,7 +1707,7 @@ Flxq_sqrtn(GEN a, GEN n, GEN T, ulong p, GEN *zeta)
       *zeta=pol1_Flx(T[1]);
     return zero_Flx(T[1]);
   }
-  E.pol=T; E.p=p;
+  E.T=T; E.p=p;
   return gen_Shanks_sqrtn(a,n,addis(powuu(p,degpol(T)),-1),zeta,(void*)&E,&Flxq_star);
 }
 
