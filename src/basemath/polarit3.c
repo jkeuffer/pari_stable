@@ -729,7 +729,7 @@ FpXQX_gcd(GEN P, GEN Q, GEN T, GEN p)
     Pl = ZXX_to_FlxX(P, pp, varn(T));
     Ql = ZXX_to_FlxX(Q, pp, varn(T));
     Tl = ZX_to_Flx(T, pp);
-    U  = FlxqX_normalize(FlxqX_gcd(Pl, Ql, Tl, pp),Tl,pp);
+    U  = FlxqX_gcd(Pl, Ql, Tl, pp);
     return gerepileupto(av, FlxX_to_ZXX(U));
   }
   P = FpXX_red(P, p); av0 = avma;
@@ -738,7 +738,7 @@ FpXQX_gcd(GEN P, GEN Q, GEN T, GEN p)
   {
     av0 = avma; R = FpXQX_rem(P,Q,T,p); P=Q; Q=R;
   }
-  avma = av0; return gerepileupto(av, FqX_normalize(P,T,p));
+  avma = av0; return gerepileupto(av, P);
 }
 
 /* x and y in Z[Y][X], return lift(gcd(x mod T,p, y mod T,p)). Set u and v st

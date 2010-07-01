@@ -2683,7 +2683,7 @@ rnfdedekind_i(GEN nf, GEN P, GEN pr, long vdisc, long only_maximal)
     k = gdiv(RgXQX_RgXQ_mul(k, tau, nfT), p);
   }
   k = nfX_to_FqX(k, nf, modpr);
-  k  = FqX_gcd(FqX_gcd(g,h,  T,p), k, T,p);
+  k  = FqX_normalize(FqX_gcd(FqX_gcd(g,h,  T,p), k, T,p), T,p);
   d = degpol(k);  /* <= m */
   if (!d) return NULL; /* pr-maximal */
   if (only_maximal) return gen_0; /* not maximal */

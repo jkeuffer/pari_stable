@@ -2034,7 +2034,7 @@ FqX_split(GEN *t, long d, GEN q, GEN S, GEN T, GEN p)
     w = FqX_gcd(*t,w, T,p); l = degpol(w);
     if (l && l != dt) break;
   }
-  w = gerepileupto(av,w);
+  w = gerepileupto(av,FqX_normalize(w,T,p));
   if (DEBUGLEVEL > 6)
     fprintferr("[FqX_split] splitting time: %ld (%ld trials)\n",timer2(),cnt);
   l /= d; t[l] = FqX_div(*t,w, T,p); *t = w;
@@ -2083,7 +2083,7 @@ FqX_split_Trager(GEN A, GEN T, GEN p)
   for (i=lx-1; i>1; i--)
   {
     GEN f = gel(fa,i), F = lift_intern(poleval(f, x0));
-    F = FqX_gcd(u, F, T, p);
+    F = FqX_normalize(FqX_gcd(u, F, T, p), T, p);
     if (typ(F) != t_POL || degpol(F) == 0)
       pari_err(talker,"reducible modulus in FqX_split_Trager");
     u = FqX_div(u, F, T, p);
@@ -2186,7 +2186,7 @@ FqX_split_deg1(GEN *pz, GEN u, GEN q, GEN T, GEN p)
   v = spec_FqXQ_pow(v, S, T, p);
   g = FqX_gcd(FpXX_sub(v,X,p),u, T,p);
   dg = degpol(g);
-  if (dg > 0) add(z, g, dg);
+  if (dg > 0) add(z, FqX_normalize(g,T,p), dg);
   return dg;
 }
 
@@ -2208,7 +2208,7 @@ FqX_split_by_degree(GEN *pz, GEN u, GEN q, GEN T, GEN p)
     g = FqX_gcd(FpXX_sub(v,X,p),u, T,p);
     dg = degpol(g); if (dg <= 0) continue;
     /* all factors of g have degree d */
-    add(z, g, dg / d); nb += dg / d;
+    add(z, FqX_normalize(g, T,p), dg / d); nb += dg / d;
     N -= dg;
     if (N)
     {
@@ -2216,7 +2216,7 @@ FqX_split_by_degree(GEN *pz, GEN u, GEN q, GEN T, GEN p)
       v = FqX_rem(v,u, T,p);
     }
   }
-  if (N) { add(z, u, 1); nb++; }
+  if (N) { add(z, FqX_normalize(u, T,p), 1); nb++; }
   return nb;
 }
 
@@ -2323,7 +2323,7 @@ FqX_sqf_split(GEN *t0, GEN q, GEN T, GEN p)
   for (d=1; d <= N>>1; d++)
   {
     v = spec_FqXQ_pow(v, S, T, p);
-    g = FqX_gcd(FpXX_sub(v,X,p),u, T,p);
+    g = FqX_normalize(FqX_gcd(FpXX_sub(v,X,p),u, T,p),T,p);
     dg = degpol(g); if (dg <= 0) continue;
 
     /* all factors of g have degree d */
