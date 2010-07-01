@@ -2510,6 +2510,26 @@ FlxqXQ_sqr(GEN x, GEN S, GEN T, ulong p) {
   return FlxqX_rem(FlxqX_sqr(x,T,p),S,T,p);
 }
 
+GEN
+FlxqXQ_invsafe(GEN x, GEN S, GEN T, ulong p)
+{
+  GEN z, U, V;
+  z = FlxqX_extgcd(x, S, T, p, &U, &V);
+  if (degpol(z)) return NULL;
+  z = Flxq_invsafe(gel(z,2),T,p);
+  if (!z) return NULL;
+  return FlxqX_Flxq_mul(U, z, T, p);
+}
+
+GEN
+FlxqXQ_inv(GEN x, GEN S, GEN T,ulong p)
+{
+  pari_sp av = avma;
+  GEN U = FlxqXQ_invsafe(x, S, T, p);
+  if (!U) pari_err(talker,"non invertible polynomial in FlxqXQ_inv");
+  return gerepileupto(av, U);
+}
+
 typedef struct {
   GEN T, S;
   ulong p;
