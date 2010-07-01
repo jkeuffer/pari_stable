@@ -748,27 +748,34 @@ FpXQX_extgcd(GEN x, GEN y, GEN T, GEN p, GEN *ptu, GEN *ptv)
 {
   GEN a, b, q, r, u, v, d, d1, v1;
   long vx = varn(x);
-  pari_sp ltop=avma, lbot;
-
-  a = FpXQX_red(x, T, p);
-  b = FpXQX_red(y, T, p);
-  d = a; d1 = b; v = zeropol(vx); v1 = pol_1(vx);
-  while (signe(d1))
+  pari_sp ltop=avma;
+  if (lgefint(p) == 3)
   {
-    q = FqX_divrem(d,d1,T,p, &r);
-    v = FqX_sub(v, FqX_mul(q,v1, T,p), T,p);
-    u=v; v=v1; v1=u;
-    u=r; d=d1; d1=u;
+    ulong pp = (ulong)p[2];
+    GEN Pl, Ql, Tl, Dl, Ul, Vl;
+    Pl = ZXX_to_FlxX(x, pp, varn(T));
+    Ql = ZXX_to_FlxX(y, pp, varn(T));
+    Tl = ZX_to_Flx(T, pp);
+    Dl = FlxqX_extgcd(Pl, Ql, Tl, pp, &Ul, &Vl);
+    u = FlxX_to_ZXX(Ul); v = FlxX_to_ZXX(Vl);
+    d = FlxX_to_ZXX(Dl);
   }
-  u = FqX_sub(d, FqX_mul(b,v, T,p), T,p);
-  lbot = avma;
-  u = FqX_div(u,a, T,p);
-  d = gcopy(d);
-  v = gcopy(v);
+  else
   {
-    GEN *gptr[3]; gptr[0] = &d; gptr[1] = &u; gptr[2] = &v;
-    gerepilemanysp(ltop,lbot,gptr,3);
+    a = FpXQX_red(x, T, p);
+    b = FpXQX_red(y, T, p);
+    d = a; d1 = b; v = zeropol(vx); v1 = pol_1(vx);
+    while (signe(d1))
+    {
+      q = FqX_divrem(d,d1,T,p, &r);
+      v = FqX_sub(v, FqX_mul(q,v1, T,p), T,p);
+      u=v; v=v1; v1=u;
+      u=r; d=d1; d1=u;
+    }
+    u = FqX_sub(d, FqX_mul(b,v, T,p), T,p);
+    u = FqX_div(u,a, T,p);
   }
+  gerepileall(ltop,3,&d,&u,&v);
   *ptu = u; *ptv = v; return d;
 }
 

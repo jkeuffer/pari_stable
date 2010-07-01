@@ -573,10 +573,12 @@ BA127- padic_sqrt -> Qp_sqrt, padic_sqrtn -> Qp_sqrtn, gammap -> Qp_gamma
        Fp_mulu,
        FpV_inv, FpXQ_inv, FqV_inv,
        FpXY_eval, FpXY_evalx, FpXY_evaly,
-       Flx_Fl_mul_to_monic, FlxqX_Flxq_mul_to_monic, FlxqX_rem, FlxqX_gcd
-       FpX_Fp_sub, FpX_Fp_sub_shallow
-       FpX_Fp_mul_to_monic, FqX_Fq_mul_to_monic
-       FpXX_Fp_mul
+       Flx_Fl_mul_to_monic, FlxqX_Flxq_mul_to_monic, FlxqX_rem,
+       FlxqX_gcd, FlxqX_extgcd,
+       pol1_FlxX,
+       FpX_Fp_sub, FpX_Fp_sub_shallow,
+       FpX_Fp_mul_to_monic, FqX_Fq_mul_to_monic,
+       FpXX_Fp_mul,
        RgM_check_ZM, RgM_det_trianguar, RgM_isdiagonal,
        RgV_check_ZV, RgV_neg, RgV_add, RgV_sub, RgV_Rg_mul,
        RgC_neg, RgC_add, RgC_sub, RgC_Rg_div, RgC_Rg_mul,

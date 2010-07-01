@@ -1885,6 +1885,14 @@ FlxX_renormalize(GEN /*in place*/ x, long lx)
   setlg(x, i+1); setsigne(x, i!=1); return x;
 }
 
+GEN
+pol1_FlxX(long v, long sv)
+{
+  GEN z = cgetg(3, t_POL);
+  z[1] = evalsigne(1) | evalvarn(v);
+  gel(z,2) = pol1_Flx(sv); return z;
+}
+
 /*Lift coefficient of B to constant Flx, to give a FlxY*/
 GEN
 Fly_to_FlxY(GEN B, long sv)
@@ -2052,8 +2060,6 @@ FlxX_subspec(GEN x, GEN y, ulong p, long lx, long ly)
  return FlxX_renormalize(z-2, lz);
 }
 
-
-/*Unused/untested*/
 GEN
 FlxX_sub(GEN x, GEN y, ulong p)
 {
@@ -2422,8 +2428,8 @@ FlxqX_safegcd(GEN P, GEN Q, GEN T, ulong p)
 {
   pari_sp btop, ltop = avma, st_lim;
   GEN U;
-  if (!signe(P)) return gcopy(Q);
-  if (!signe(Q)) return gcopy(P);
+  if (!signe(P)) return vecsmall_copy(Q);
+  if (!signe(Q)) return vecsmall_copy(P);
   btop = avma; st_lim = stack_lim(btop, 1);
   for(;;)
   {
@@ -2441,6 +2447,28 @@ FlxqX_safegcd(GEN P, GEN Q, GEN T, ulong p)
   }
   return gerepileupto(ltop, Q);
 }
+
+GEN
+FlxqX_extgcd(GEN a, GEN b, GEN T, ulong p, GEN *ptu, GEN *ptv)
+{
+  GEN q, r, u, v, d, d1, v1;
+  long vx = varn(a);
+  pari_sp ltop=avma;
+
+  d = a; d1 = b; v = zeropol(vx); v1 = pol1_FlxX(vx,T[1]);
+  while (signe(d1))
+  {
+    q = FlxqX_divrem(d,d1,T,p, &r);
+    v = FlxX_sub(v, FlxqX_mul(q,v1, T,p), p);
+    u=v; v=v1; v1=u;
+    u=r; d=d1; d1=u;
+  }
+  u = FlxX_sub(d, FlxqX_mul(b,v, T,p), p);
+  u = FlxqX_divrem(u,a, T,p, NULL);
+  gerepileall(ltop,3,&d,&u,&v);
+  *ptu = u; *ptv = v; return d;
+}
+
 /*******************************************************************/
 /*                                                                 */
 /*                       (Fl[X]/T(X))[Y] / S(Y)                    */

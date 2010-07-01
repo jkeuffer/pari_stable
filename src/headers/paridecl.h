@@ -159,6 +159,7 @@ GEN     FlxqV_roots_to_pol(GEN V, GEN T, ulong p, long v);
 GEN     FlxqX_Flxq_mul(GEN P, GEN U, GEN T, ulong p);
 GEN     FlxqX_Flxq_mul_to_monic(GEN P, GEN U, GEN T, ulong p);
 GEN     FlxqX_divrem(GEN x, GEN y, GEN T, ulong p, GEN *pr);
+GEN     FlxqX_extgcd(GEN a, GEN b, GEN T, ulong p, GEN *ptu, GEN *ptv);
 GEN     FlxqX_gcd(GEN P, GEN Q, GEN T, ulong p);
 GEN     FlxqX_mul(GEN x, GEN y, GEN T, ulong p);
 GEN     FlxqX_normalize(GEN z, GEN T, ulong p);
@@ -176,6 +177,7 @@ GEN     ZXX_to_FlxX(GEN B, ulong p, long v);
 GEN     ZXXV_to_FlxXV(GEN V, ulong p, long v);
 GEN     gener_Flxq(GEN T, ulong p, GEN *o);
 GEN     pol1_Flx(long sv);
+GEN     pol1_FlxX(long v, long sv);
 GEN     polx_Flx(long sv);
 GEN     random_Flx(long d1, long v, ulong p);
 

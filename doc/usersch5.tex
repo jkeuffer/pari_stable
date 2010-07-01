@@ -4066,6 +4066,9 @@ its factorization.
 
 \subsec{\kbd{FlxX}} See \kbd{FpXX} operations.
 
+\fun{GEN}{pol1_FlxX}{long vX, long sx} returns the unit \kbd{FlxX} as a
+\typ{POL} in variable \kbd{vX} which only coefficient is \kbd{pol1\_Flx(sx)}.
+
 \fun{GEN}{FlxX_add}{GEN P, GEN Q, ulong p}
 
 \fun{GEN}{FlxY_Flx_div}{GEN x, GEN y, ulong p}
@@ -4103,8 +4106,10 @@ particular $U\neq 0$).
 
 \fun{GEN}{FlxqX_rem}{GEN x, GEN y, GEN T, ulong p}
 
-\fun{GEN}{FlxqX_gcd}{GEN x, GEN y, GEN p} returns a (not necessarily monic)
+\fun{GEN}{FlxqX_gcd}{GEN x, GEN y, ulong p} returns a (not necessarily monic)
 greatest common divisor of $x$  and $y$.
+
+\fun{GEN}{FlxqX_extgcd}{GEN x, GEN y, GEN T, ulong p, GEN *ptu, GEN *ptv}
 
 \fun{GEN}{FlxqXV_prod}{GEN V, GEN T, ulong p}
 
