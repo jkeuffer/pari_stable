@@ -4113,13 +4113,20 @@ greatest common divisor of $x$  and $y$.
 
 \fun{GEN}{FlxqXV_prod}{GEN V, GEN T, ulong p}
 
-\fun{GEN}{FlxqXQ_pow}{GEN x, GEN n, GEN S, GEN T, ulong p}
 
 \fun{GEN}{FlxqX_safegcd}{GEN P, GEN Q, GEN T, ulong p} Returns the \emph{monic}
 GCD of $P$ and $Q$ if Euclid's algorithm succeeds and \kbd{NULL} otherwise. In
 particular, if $p$ is not prime or $T$ is not irreducible over $\F_p[X]$, the
 routine may still be used (but will fail if non-invertible leading terms
 occur).
+
+\subsec{\kbd{FlxqXQ}} See \kbd{FpXQXQ} operations.
+
+\fun{GEN}{FlxqXQ_mul}{GEN x, GEN y, GEN S, GEN T, ulong p}
+
+\fun{GEN}{FlxqXQ_sqr}{GEN x, GEN S, GEN T, ulong p}
+
+\fun{GEN}{FlxqXQ_pow}{GEN x, GEN n, GEN S, GEN T, ulong p}
 
 \subsec{\kbd{F2x}} An \kbd{F2x}~\kbd{z} is a \typ{VECSMALL}
 representing a polynomial over $\F_2[X]$. Specifically
