@@ -917,6 +917,10 @@ FpXQXQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p)
   pari_sp ltop = avma;
   GEN y;
   kronecker_muldata D;
+  long s = signe(n);
+  if (!s) return pol_1(varn(x));
+  if (is_pm1(n)) /* +/- 1 */
+    return (s < 0)? FpXQXQ_inv(x,S,T,p): gcopy(x);
   if (lgefint(p) == 3)
   {
     ulong pp = p[2];
@@ -933,6 +937,8 @@ FpXQXQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p)
     D.S = S;
     D.T = T;
     D.p = p;
+    y = gen_pow(mod_to_Kronecker(x,T), n, (void*)&D,&_FpXQXQ_sqr,&_FpXQXQ_mul);
+    if (s < 0) x = FpXQXQ_inv(x,S,T,p);
     y = gen_pow(mod_to_Kronecker(x,T), n, (void*)&D,&_FpXQXQ_sqr,&_FpXQXQ_mul);
     y = Kronecker_to_FpXQX(y, T,p);
   }
