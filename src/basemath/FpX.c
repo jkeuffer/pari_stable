@@ -875,25 +875,25 @@ FpXQ_div(GEN x,GEN y,GEN T,GEN p)
 }
 
 typedef struct {
-  GEN pol, p;
+  GEN T, p;
 } FpX_muldata;
 
 static GEN
 _FpXQ_sqr(void *data, GEN x)
 {
   FpX_muldata *D = (FpX_muldata*)data;
-  return FpXQ_sqr(x, D->pol, D->p);
+  return FpXQ_sqr(x, D->T, D->p);
 }
 static GEN
 _FpXQ_mul(void *data, GEN x, GEN y)
 {
   FpX_muldata *D = (FpX_muldata*)data;
-  return FpXQ_mul(x,y, D->pol, D->p);
+  return FpXQ_mul(x,y, D->T, D->p);
 }
 
 /* x,pol in Z[X], p in Z, n in Z, compute lift(x^n mod (p, pol)) */
 GEN
-FpXQ_pow(GEN x, GEN n, GEN pol, GEN p)
+FpXQ_pow(GEN x, GEN n, GEN T, GEN p)
 {
   FpX_muldata D;
   pari_sp av;
@@ -902,20 +902,20 @@ FpXQ_pow(GEN x, GEN n, GEN pol, GEN p)
 
   if (!s) return pol_1(varn(x));
   if (is_pm1(n)) /* +/- 1 */
-    return (s < 0)? FpXQ_inv(x,pol,p): ZX_copy(x);
+    return (s < 0)? FpXQ_inv(x,T,p): FpXQ_red(x,T,p);
   av = avma;
   if (!is_bigint(p))
   {
     ulong pp = p[2];
-    pol = ZX_to_Flx(pol, pp);
-    x   = ZX_to_Flx(x,   pp);
-    y = Flx_to_ZX( Flxq_pow(x, n, pol, pp) );
+    T = ZX_to_Flx(T, pp);
+    x = ZX_to_Flx(x, pp);
+    y = Flx_to_ZX( Flxq_pow(x, n, T, pp) );
   }
   else
   {
-    D.pol = pol;
-    D.p   = p;
-    if (s < 0) x = FpXQ_inv(x,pol,p);
+    D.T = T;
+    D.p = p;
+    if (s < 0) x = FpXQ_inv(x,T,p);
     y = gen_pow(x, n, (void*)&D, &_FpXQ_sqr, &_FpXQ_mul);
   }
   return gerepileupto(av, y);
@@ -1025,7 +1025,7 @@ static GEN
 _FpXQ_pow(void *data, GEN x, GEN y)
 {
   FpX_muldata *D = (FpX_muldata*)data;
-  return FpXQ_pow(x,y, D->pol, D->p);
+  return FpXQ_pow(x,y, D->T, D->p);
 }
 
 static ulong
@@ -1047,7 +1047,7 @@ _FpXQ_rand(void *data)
   do
   {
     avma=av;
-    z=random_FpX(degpol(D->pol),varn(D->pol),D->p);
+    z=random_FpX(degpol(D->T),varn(D->T),D->p);
   } while (!signe(z));
   return z;
 }
@@ -1067,7 +1067,7 @@ FpXQ_order(GEN a, GEN ord, GEN T, GEN p)
   else
   {
     FpX_muldata s;
-    s.pol=T; s.p=p;
+    s.T=T; s.p=p;
     return gen_eltorder(a,ord, (void*)&s,&FpXQ_star);
   }
 }
@@ -1077,7 +1077,7 @@ _FpXQ_easylog(void *E, GEN a, GEN g, GEN ord)
 {
   FpX_muldata *s=(FpX_muldata*) E;
   if (degpol(a)) return NULL;
-  return Fp_FpXQ_log(constant_term(a),g,ord,s->pol,s->p);
+  return Fp_FpXQ_log(constant_term(a),g,ord,s->T,s->p);
 }
 
 GEN
@@ -1093,7 +1093,7 @@ FpXQ_log(GEN a, GEN g, GEN ord, GEN T, GEN p)
   else
   {
     FpX_muldata s;
-    s.pol=T; s.p=p;
+    s.T=T; s.p=p;
     return gen_PH_log(a,g,ord, (void*)&s,&FpXQ_star,_FpXQ_easylog);
   }
 }
@@ -1125,7 +1125,7 @@ FpXQ_sqrtn(GEN a, GEN n, GEN T, GEN p, GEN *zeta)
   else
   {
     FpX_muldata s;
-    s.pol=T; s.p=p;
+    s.T=T; s.p=p;
     return gen_Shanks_sqrtn(a,n,addis(powiu(p,degpol(T)),-1),zeta,
                             (void*)&s,&FpXQ_star);
   }
