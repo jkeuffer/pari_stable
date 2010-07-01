@@ -2549,6 +2549,10 @@ GEN
 FlxqXQ_pow(GEN x, GEN n, GEN S, GEN T, ulong p)
 {
   FlxqXQ_muldata D;
+  long s = signe(n);
+  if (!s) return pol1_FlxX(varn(S),T[1]);
+  if (s < 0) x = FlxqXQ_inv(x,S,T,p);
+  if (is_pm1(n)) return s < 0 ? x : gcopy(x);
   D.S = S;
   D.T = T;
   D.p = p;
