@@ -2512,41 +2512,29 @@ FlxqXQ_sqr(GEN x, GEN S, GEN T, ulong p) {
 
 typedef struct {
   GEN T, S;
-  GEN mg;
   ulong p;
-} FlxqX_kronecker_muldata;
+} FlxqXQ_muldata;
 
 static GEN
-_FlxqXQ_red(void *data, GEN x)
-{
-  FlxqX_kronecker_muldata *D = (FlxqX_kronecker_muldata*)data;
-  GEN t = Kronecker_to_FlxqX(x, D->T,D->p);
-  t = FlxqX_rem(t, D->S,D->T,D->p);
-  return zxX_to_Kronecker(t,D->T);
-}
-static GEN
 _FlxqXQ_mul(void *data, GEN x, GEN y) {
-  return _FlxqXQ_red(data, Flx_mul(x,y,((FlxqX_kronecker_muldata*) data)->p));
+  FlxqXQ_muldata *d = (FlxqXQ_muldata*) data;
+  return FlxqXQ_mul(x,y, d->S,d->T, d->p);
 }
 static GEN
 _FlxqXQ_sqr(void *data, GEN x) {
-  return _FlxqXQ_red(data, Flx_sqr(x,((FlxqX_kronecker_muldata*) data)->p));
+  FlxqXQ_muldata *d = (FlxqXQ_muldata*) data;
+  return FlxqXQ_sqr(x, d->S,d->T, d->p);
 }
 
 /* x over Fq, return lift(x^n) mod S */
 GEN
 FlxqXQ_pow(GEN x, GEN n, GEN S, GEN T, ulong p)
 {
-  pari_sp av0 = avma;
-  GEN y;
-  FlxqX_kronecker_muldata D;
+  FlxqXQ_muldata D;
   D.S = S;
   D.T = T;
   D.p = p;
-  y = gen_pow(zxX_to_Kronecker(x,T), n,
-        (void*)&D, &_FlxqXQ_sqr, &_FlxqXQ_mul);
-  y = Kronecker_to_FlxqX(y, T,p);
-  return gerepileupto(av0, y);
+  return gen_pow(x, n, (void*)&D, &_FlxqXQ_sqr, &_FlxqXQ_mul);
 }
 
 /*******************************************************************/
