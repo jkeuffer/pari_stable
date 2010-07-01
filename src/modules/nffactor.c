@@ -962,13 +962,8 @@ nfcmbf(nfcmbf_t *T, long klim, long *pmaxK, int *done)
       t2 = Fq_red(t2, Tpk, pk);
       if (D.lt)
       {
-        if (typ(t2)!=t_INT) {
-          t1 = FpX_Fp_mul(t1, ltdn, pk);
-          t2 = FpX_Fp_mul(t2, lt2dn, pk);
-        } else {
-          t1 = Fp_mul(t1, ltdn, pk);
-          t2 = Fp_mul(t2, lt2dn, pk);
-        }
+        t1 = Fq_Fp_mul(t1, ltdn, Tpk, pk);
+        t2 = Fq_Fp_mul(t2, lt2dn, Tpk, pk);
       }
       gel(trace1,i) = gclone( nf_bestlift(t1, NULL, T->L) );
       gel(trace2,i) = gclone( nf_bestlift(t2, NULL, T->L) ); avma = av;
