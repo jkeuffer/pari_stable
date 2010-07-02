@@ -1015,7 +1015,7 @@ Flx_rem(GEN x, GEN y, ulong p)
 {
   long dy = degpol(y), dx = degpol(x), d = dx-dy;
   if (d < 0) return Flx_copy(x);
-  if (d <= Flx_REM_MONTGOMERY_LIMIT || dy <= Flx_REM_MONTGOMERY_LIMIT || d>dy-2)
+  if (d < Flx_REM_MONTGOMERY_LIMIT || d>dy-2)
     return Flx_rem_basecase(x,y,p);
   else
   {
