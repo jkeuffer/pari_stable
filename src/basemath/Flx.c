@@ -1568,7 +1568,7 @@ Flxq_pow(GEN x, GEN n, GEN T, ulong p)
   if (is_pm1(n)) return s < 0 ? x : vecsmall_copy(x);
   D.T = T;
   D.p = p;
-  if (degpol(T) >= Flx_POW_MONTGOMERY_LIMIT)
+  if (lg(T) >= Flx_POW_MONTGOMERY_LIMIT)
   {
     D.mg  = Flx_invMontgomery(T,p);
     y = gen_pow(x, n, (void*)&D, &_sqr_Montgomery, &_mul_Montgomery);
