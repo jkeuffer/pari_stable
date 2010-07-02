@@ -1354,16 +1354,7 @@ ellsea(GEN E, GEN p, long smallfact)
     GEN ellkt, trace_mod;
     NEXT_PRIME_VIADIFF(ell, primepointer);
     trace_mod = find_trace(a4, a6, ell, p, &kt, smallfact);
-    if (trace_mod==gen_0)
-    {
-      if (nb_atkin)
-      {
-        GEN bound_atkin = truedivii(bound, gel(tr, 1));
-        champ = champion(compile_atkin, nb_atkin, bound_atkin);
-      }
-      pari_warn(warner,"no more modular polynomials available!");
-      break;
-    }
+    if (trace_mod==gen_0) pari_err(talker,"no enough modular polynomials");
     if (!trace_mod) continue;
     ellkt = powuu(ell, kt);
     if (lg(trace_mod) == 2)
