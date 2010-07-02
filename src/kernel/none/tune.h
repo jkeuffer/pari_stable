@@ -20,5 +20,6 @@
 #define __Flx_POW_MONTGOMERY_LIMIT 1000
 #define __FpX_INVMONTGOMERY_LIMIT  100
 #define __FpX_REM_MONTGOMERY_LIMIT 657
+#define __FpX_POW_MONTGOMERY_LIMIT 200
 #define __RgX_MUL_LIMIT         10
 #define __RgX_SQR_LIMIT          6

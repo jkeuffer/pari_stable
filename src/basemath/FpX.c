@@ -874,9 +874,39 @@ FpXQ_div(GEN x,GEN y,GEN T,GEN p)
   return gerepileupto(av, FpXQ_mul(x,FpXQ_inv(y,T,p),T,p));
 }
 
+static GEN
+FpXQ_mul_mg(GEN x,GEN y,GEN mg,GEN T,GEN p)
+{
+  GEN z = FpX_mul(x,y,p);
+  if (lg(T) > lg(z)) return z;
+  return FpX_rem_Montgomery(z, mg, T, p);
+}
+
+/* Square of y in Z/pZ[X]/(T), as t_VECSMALL. */
+static GEN
+FpXQ_sqr_mg(GEN y,GEN mg,GEN T,GEN p)
+{
+  GEN z = FpX_sqr(y,p);
+  if (lg(T) > lg(z)) return z;
+  return FpX_rem_Montgomery(z, mg, T, p);
+}
+
 typedef struct {
-  GEN T, p;
+  GEN T, p, mg;
 } FpX_muldata;
+
+static GEN
+_sqr_montgomery(void *data, GEN x)
+{
+  FpX_muldata *D = (FpX_muldata*)data;
+  return FpXQ_sqr_mg(x,D->mg, D->T, D->p);
+}
+static GEN
+_mul_montgomery(void *data, GEN x, GEN y)
+{
+  FpX_muldata *D = (FpX_muldata*)data;
+  return FpXQ_mul_mg(x,y,D->mg, D->T, D->p);
+}
 
 static GEN
 _FpXQ_sqr(void *data, GEN x)
@@ -899,7 +929,6 @@ FpXQ_pow(GEN x, GEN n, GEN T, GEN p)
   pari_sp av;
   long s = signe(n);
   GEN y;
-
   if (!s) return pol_1(varn(x));
   if (is_pm1(n)) /* +/- 1 */
     return (s < 0)? FpXQ_inv(x,T,p): FpXQ_red(x,T,p);
@@ -913,10 +942,25 @@ FpXQ_pow(GEN x, GEN n, GEN T, GEN p)
   }
   else
   {
+    long lx = lgpol(x), lT = lgpol(T);
     D.T = T;
     D.p = p;
     if (s < 0) x = FpXQ_inv(x,T,p);
-    y = gen_pow(x, n, (void*)&D, &_FpXQ_sqr, &_FpXQ_mul);
+    if (lT+2>FpX_POW_MONTGOMERY_LIMIT)
+    {
+      D.mg  = FpX_invMontgomery(T,p);
+      if (lx>=lT)
+      {
+        if (lx<2*lT-2) x = FpX_rem_Montgomery(x,D.mg,T,p);
+        else x = FpX_rem(x,T,p);
+      }
+      y = gen_pow(x, n, (void*)&D, &_sqr_montgomery, &_mul_montgomery);
+    }
+    else
+    {
+      if (lx>=lT) x = FpX_rem(x,T,p);
+      y = gen_pow(x, n, (void*)&D, &_FpXQ_sqr, &_FpXQ_mul);
+    }
   }
   return gerepileupto(av, y);
 }
