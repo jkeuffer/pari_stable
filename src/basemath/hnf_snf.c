@@ -821,7 +821,7 @@ hnf_i(GEN A, int remove)
   if (remove)
   { /* remove 0 columns */
     for (i=1,j=1; j<=n; j++)
-      if (!ZV_cmp0(gel(A,j))) A[i++] = A[j];
+      if (!ZV_equal0(gel(A,j))) A[i++] = A[j];
     setlg(A,i);
   }
   return gerepileupto(av0, ZM_copy(A));
@@ -1258,7 +1258,7 @@ ZM_hnflll(GEN A, GEN *ptB, int remove)
   {
     long i;
     for (i = 1; i < n; i++)
-      if (!ZV_cmp0(gel(A,i))) break;
+      if (!ZV_equal0(gel(A,i))) break;
     remove_0cols(i-1, &A, &B, remove);
   }
   gerepileall(av, B? 2: 1, &A, &B);

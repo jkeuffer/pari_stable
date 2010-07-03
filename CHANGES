@@ -255,6 +255,7 @@ BA  3- builtin-in GP functions can now be used as closures.
        gcmp0 -> gequal0, gcmp1 -> gequal1, gcmp_1 -> gequalm1
        Flx_cmp1->Flx_equal1, F2x_cmp1->F2x_equal1, FF_cmp1->FF_equal1
        FF_cmp0->FF_equal0, FF_cmp_1->FF_equalm1
+       ZX_cmp0 -> ZX_equal0
        gener -> znprimroot, ggener -> znprimroot0
        greffe -> RgX_to_ser (+ change prototype)
        hil0 -> hilbert, hilii -> hilbertii [ delete useless hil() ]

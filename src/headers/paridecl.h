@@ -455,7 +455,7 @@ GEN     ZMrow_ZC_mul(GEN x, GEN y, long i);
 GEN     ZV_ZM_mul(GEN x, GEN y);
 int     ZV_abscmp(GEN x, GEN y);
 int     ZV_cmp(GEN x, GEN y);
-int     ZV_cmp0(GEN V);
+int     ZV_equal0(GEN V);
 GEN     ZV_content(GEN x);
 GEN     ZV_dotproduct(GEN x,GEN y);
 GEN     ZV_dotsquare(GEN x);

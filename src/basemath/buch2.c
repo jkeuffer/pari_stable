@@ -1516,7 +1516,7 @@ isprincipalall(GEN bnf, GEN x, long *ptprec, long flag)
   Q = gdiv(ZM_det_triangular(x), get_norm_fact(gen, ex, &d));
   col = isprincipalarch(bnf, col, Q, gen_1, d, &e);
   if (col && !fact_ok(nf,x, col,gen,ex)) col = NULL;
-  if (!col && !ZV_cmp0(ex))
+  if (!col && !ZV_equal0(ex))
   {
     p1 = isprincipalfact(bnf, x, gen, ZC_neg(ex), flag);
     if (typ(p1) != t_VEC) return p1;

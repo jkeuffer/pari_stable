@@ -707,7 +707,7 @@ zv_cmp0(GEN V)
 }
 
 int
-ZV_cmp0(GEN V)
+ZV_equal0(GEN V)
 {
   long l = lg(V);
   while (--l > 0)

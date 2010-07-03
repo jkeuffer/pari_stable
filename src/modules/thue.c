@@ -1280,7 +1280,7 @@ get_sol_abs(struct sol_abs *T, GEN bnf, GEN a, GEN *ptPR)
     {
       GEN c = isprincipal(bnf, gel(PR,i));
       gel(T->rel,i) = c;
-      if (triv && !ZV_cmp0(c)) triv = 0; /* non trivial relations in Cl(K)*/
+      if (triv && !ZV_equal0(c)) triv = 0; /* non trivial relations in Cl(K)*/
     }
     /* triv = 1: all ideals dividing a are principal */
     if (triv) T->rel = T->partrel = NULL;
