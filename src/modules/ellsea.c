@@ -1354,7 +1354,7 @@ ellsea(GEN E, GEN p, long smallfact)
     GEN ellkt, trace_mod;
     NEXT_PRIME_VIADIFF(ell, primepointer);
     trace_mod = find_trace(a4, a6, ell, p, &kt, smallfact);
-    if (trace_mod==gen_0) pari_err(talker,"no enough modular polynomials");
+    if (trace_mod==gen_0) pari_err(talker,"not enough modular polynomials");
     if (!trace_mod) continue;
     ellkt = powuu(ell, kt);
     if (lg(trace_mod) == 2)

@@ -937,7 +937,6 @@ FpXQXQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p)
     D.S = S;
     D.T = T;
     D.p = p;
-    y = gen_pow(mod_to_Kronecker(x,T), n, (void*)&D,&_FpXQXQ_sqr,&_FpXQXQ_mul);
     if (s < 0) x = FpXQXQ_inv(x,S,T,p);
     y = gen_pow(mod_to_Kronecker(x,T), n, (void*)&D,&_FpXQXQ_sqr,&_FpXQXQ_mul);
     y = Kronecker_to_FpXQX(y, T,p);
