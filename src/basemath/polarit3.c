@@ -2487,9 +2487,9 @@ INIT:
         { /* multiply by ((-1)^deg B lc(B))^(deg A - deg a) */
           GEN c = gel(b,lb-1); /* lc(B) */
           if (!odd(lb)) c = Flx_neg(c, p); /* deg B = lb - 3 */
-          if (!Flx_cmp1(c)) {
+          if (!Flx_equal1(c)) {
             c = Flx_pow(c, dropa, p);
-            if (!Flx_cmp1(c)) Hp = Flx_mul(Hp, c, p);
+            if (!Flx_equal1(c)) Hp = Flx_mul(Hp, c, p);
           }
         }
         else if (dropb)

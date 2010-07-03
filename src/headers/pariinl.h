@@ -1447,7 +1447,7 @@ zero_F2x(long sv) { return zero_Flx(sv); }
 INLINE GEN
 pol1_F2x(long sv) { return pol1_Flx(sv); }
 INLINE int
-F2x_cmp1(GEN x) { return Flx_cmp1(x); }
+F2x_equal1(GEN x) { return Flx_equal1(x); }
 INLINE GEN
 Flv_copy(GEN x) { return leafcopy(x); }
 INLINE GEN
@@ -1455,7 +1455,7 @@ Flx_copy(GEN x) { return leafcopy(x); }
 INLINE GEN
 vecsmall_copy(GEN x) { return leafcopy(x); }
 INLINE int
-Flx_cmp1(GEN x) { return degpol(x)==0 && x[2] == 1; }
+Flx_equal1(GEN x) { return degpol(x)==0 && x[2] == 1; }
 
 INLINE GEN
 FpX_renormalize(GEN x, long lx)   { return ZX_renormalize(x,lx); }

@@ -1679,7 +1679,7 @@ _Flxq_hash(GEN x)
   return h;
 }
 
-static const struct bb_group Flxq_star={_Flxq_mul,_Flxq_pow,_Flxq_rand,_Flxq_hash,vecsmall_lexcmp,Flx_cmp1};
+static const struct bb_group Flxq_star={_Flxq_mul,_Flxq_pow,_Flxq_rand,_Flxq_hash,vecsmall_lexcmp,Flx_equal1};
 
 GEN
 Flxq_order(GEN a, GEN ord, GEN T, ulong p)
@@ -2270,12 +2270,12 @@ FlxqX_divrem(GEN x, GEN y, GEN T, ulong p, GEN *pr)
       if (pr == ONLY_REM) return zeropol(vx);
       *pr = zeropol(vx);
     }
-    if (Flx_cmp1(lead)) return vecsmall_copy(x);
+    if (Flx_equal1(lead)) return vecsmall_copy(x);
     av0 = avma;
     return gerepileupto(av0,FlxqX_Flxq_mul(x,Flxq_inv(lead,T,p),T,p));
   }
   av0 = avma; dz = dx-dy;
-  lead = Flx_cmp1(lead)? NULL: gclone(Flxq_inv(lead,T,p));
+  lead = Flx_equal1(lead)? NULL: gclone(Flxq_inv(lead,T,p));
   avma = av0;
   z = cgetg(dz+3,t_POL); z[1] = x[1];
   x += 2; y += 2; z += 2;

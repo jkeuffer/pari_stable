@@ -254,7 +254,7 @@ gen_Shanks_log(GEN x, GEN g0,GEN q, void *E, const struct bb_group *grp)
   for (p1=x, i=1;;i++)
   {
     av1 = avma;
-    if (grp->cmp1(p1)) { avma = av; return stoi(i-1); }
+    if (grp->equal1(p1)) { avma = av; return stoi(i-1); }
     gel(smalltable,i) = p1; if (i==lbaby) break;
     p1 = gerepileupto(av1, grp->mul(E,p1,g0inv));
   }
@@ -292,7 +292,7 @@ gen_plog(GEN x, GEN g, GEN p, void *E, const struct bb_group *grp,
     GEN e = easy(E, x, g, p);
     if (e) return e;
   }
-  if (grp->cmp1(x)) return gen_0;
+  if (grp->equal1(x)) return gen_0;
   if (!grp->cmp(x,g)) return gen_1;
   if (grp->hash==NULL || expi(p)<32) return gen_Shanks_log(x,g,p,E,grp);
   return gen_Pollard_log(x, g, p, E, grp);
@@ -419,12 +419,12 @@ gen_eltorder(GEN a, GEN o, void *E, const struct bb_group *grp)
     long j, e = itos(gcoeff(m,i,2));
     t = diviiexact(o, powiu(p,e));
     y = grp->pow(E, a, t);
-    if (grp->cmp1(y)) o = t;
+    if (grp->equal1(y)) o = t;
     else {
       for (j = 1; j < e; j++)
       {
         y = grp->pow(E, y, p);
-        if (grp->cmp1(y)) break;
+        if (grp->equal1(y)) break;
       }
       if (j < e) {
         if (j > 1) p = powiu(p, j);
@@ -454,11 +454,11 @@ gen_lgener(GEN l, long e, GEN r,GEN *zeta, void *E, const struct bb_group *grp)
   for (;; avma = av1)
   {
     m1 = m = grp->pow(E, grp->rand(E), r);
-    if (grp->cmp1(m)) continue;
+    if (grp->equal1(m)) continue;
     for (i=1; i<e; i++)
     {
       m = grp->pow(E,m,l);
-      if (grp->cmp1(m)) break;
+      if (grp->equal1(m)) break;
     }
     if (i==e) break;
   }
@@ -481,7 +481,7 @@ gen_Shanks_sqrtl(GEN a, GEN l, GEN q,long e, GEN r, GEN y, GEN m,void *E, const 
   v = grp->pow(E,a,u2);
   w = grp->pow(E,a,Fp_mul(negi(u1),r,q));
   lim = stack_lim(av,1);
-  while (!grp->cmp1(w))
+  while (!grp->equal1(w))
   {
     k = 0;
     p1 = w;
@@ -489,7 +489,7 @@ gen_Shanks_sqrtl(GEN a, GEN l, GEN q,long e, GEN r, GEN y, GEN m,void *E, const 
     {
       z = p1; p1 = grp->pow(E,p1,l);
       k++;
-    } while(!grp->cmp1(p1));
+    } while(!grp->equal1(p1));
     if (k==e) { avma = av; return NULL; }
     dl = negi(gen_plog(z,m,l,E,grp,NULL));
     p1 = grp->pow(E,y, Fp_mul(dl,powiu(l,e-k-1),q));
@@ -526,7 +526,7 @@ gen_Shanks_sqrtn(GEN a, GEN n, GEN q, GEN *zetan, void *E, const struct bb_group
     if (zetan) *zetan = grp->pow(E,a,gen_0);
     return gcopy(a);
   }
-  is_1 = grp->cmp1(a);
+  is_1 = grp->equal1(a);
   if (is_1 && !zetan) return gcopy(a);
 
   m = bezout(n,q,&u1,&u2);

@@ -3877,7 +3877,7 @@ for a $x$ a \typ{PADIC}.
 \fun{GEN}{Flx_red}{GEN z, ulong p} converts from \kbd{zx} with
 non-negative coefficients to \kbd{Flx} (by reducing them mod \kbd{p}).
 
-\fun{int}{Flx_cmp1}{GEN x} returns 1 (true) if the \kbd{Flx x} is equal to~1,
+\fun{int}{Flx_equal1}{GEN x} returns 1 (true) if the \kbd{Flx x} is equal to~1,
 0~(false) otherwise.
 
 \fun{GEN}{Flx_copy}{GEN x} returns a copy of \kbd{x}.
@@ -4160,7 +4160,7 @@ in variable \kbd{v}, of degree less than~\kbd{d}.
 
 \fun{long}{F2x_degree}{GEN x} returns the degree of the \kbd{F2x x}. The degree of $0$ is defined as $-1$.
 
-\fun{int}{F2x_cmp1}{GEN x}
+\fun{int}{F2x_equal1}{GEN x}
 
 \fun{GEN}{F2x_1_add}{GEN y} returns \kbd{y+1} where \kbd{y} is a \kbd{Flx}.
 
@@ -6940,7 +6940,7 @@ display $g$.
 \fun{GEN}{FF_zero}{GEN a} returns the zero element of the definition field of
 the \typ{FFELT} element \kbd{a}.
 
-\fun{int}{FF_cmp0}{GEN a}, \fun{int}{FF_cmp1}{GEN a}, \fun{int}{FF_cmp_1}{GEN
+\fun{int}{FF_cmp0}{GEN a}, \fun{int}{FF_equal1}{GEN a}, \fun{int}{FF_cmp_1}{GEN
 a} returns $1$ if the \typ{FFELT} \kbd{a} is equal to $0$ (resp. $1$, resp.
 $-1$) else $0$.
 

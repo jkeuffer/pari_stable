@@ -418,7 +418,7 @@ gequal1(GEN x)
       return gequal1(gel(x,2));
 
     case t_FFELT:
-      return FF_cmp1(x);
+      return FF_equal1(x);
 
     case t_FRAC:
       return 0;

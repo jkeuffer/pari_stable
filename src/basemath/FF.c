@@ -94,7 +94,7 @@ FF_cmp0(GEN x)
 }
 
 int
-FF_cmp1(GEN x)
+FF_equal1(GEN x)
 {
   GEN A = gel(x,2);
   switch(x[1])

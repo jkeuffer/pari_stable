@@ -199,7 +199,7 @@ available to handle group elements:
       GEN (*pow)(void*, GEN, GEN);
       GEN (*rand)(void*);
       int (*cmp)(GEN, GEN);
-      int (*cmp1)(GEN);
+      int (*equal1)(GEN);
     };
 @eprog
 \kbd{mul(E,x,y)} returns the product $xy$.
@@ -211,7 +211,7 @@ available to handle group elements:
 \kbd{cmp(x,y)} implements a total ordering on the group elements
 (return value $-1$, $0$ or $1$).
 
-\kbd{cmp1(x)} returns one if $x$ is the neutral element in the group,
+\kbd{equal1(x)} returns one if $x$ is the neutral element in the group,
 and zero otherwise.
 
 A group is thus described by a \kbd{const bb\_struct} as above and auxiliary
