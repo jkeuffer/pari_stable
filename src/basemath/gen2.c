@@ -291,7 +291,7 @@ isexactzero(GEN g)
     case t_COMPLEX:
       return isexactzero(gel(g,1)) && isexactzero(gel(g,2));
     case t_FFELT:
-      return FF_cmp0(g);
+      return FF_equal0(g);
     case t_QUAD:
       return isexactzero(gel(g,2)) && isexactzero(gel(g,3));
     case t_POLMOD:
@@ -344,7 +344,7 @@ gequal0(GEN x)
       return !signe(gel(x,2));
 
     case t_FFELT:
-      return FF_cmp0(x);
+      return FF_equal0(x);
 
     case t_COMPLEX:
      /* is 0 iff norm(x) would be 0 (can happen with Re(x) and Im(x) != 0
@@ -461,7 +461,7 @@ gequalm1(GEN x)
       return 0;
 
     case t_FFELT:
-      return FF_cmp_1(x);
+      return FF_equalm1(x);
 
     case t_COMPLEX:
       return gequalm1(gel(x,1)) && gequal0(gel(x,2));

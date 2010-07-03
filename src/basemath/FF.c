@@ -88,7 +88,7 @@ FF_equal(GEN x, GEN y)
 }
 
 int
-FF_cmp0(GEN x)
+FF_equal0(GEN x)
 {
   return lgpol(gel(x,2))==0;
 }
@@ -115,7 +115,7 @@ Fp_cmp_1(GEN x, GEN p)
 }
 
 int
-FF_cmp_1(GEN x)
+FF_equalm1(GEN x)
 {
   ulong pp;
   GEN T, p, y = gel(x,2);
@@ -585,7 +585,7 @@ FF_ispower(GEN x, GEN K, GEN *pt)
   pari_sp av = avma;
   if (!K) pari_err(talker,"missing exponent in FF_ispower");
 
-  if (FF_cmp0(x)) { if (pt) *pt = gcopy(x); return 1; }
+  if (FF_equal0(x)) { if (pt) *pt = gcopy(x); return 1; }
   _getFF(x, &T, &p, &pp);
   if (pt) *pt = cgetg(5,t_FFELT);
   switch(x[1])

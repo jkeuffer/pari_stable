@@ -2240,7 +2240,7 @@ isnull(GEN g)
     case t_COMPLEX:
       return isnull(gel(g,1)) && isnull(gel(g,2));
     case t_FFELT:
-      return FF_cmp0(g);
+      return FF_equal0(g);
     case t_QUAD:
       return isnull(gel(g,2)) && isnull(gel(g,3));
     case t_FRAC: case t_RFRAC:
