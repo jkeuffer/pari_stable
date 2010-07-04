@@ -898,19 +898,21 @@ Flx_invMontgomery(GEN T, ulong p)
   long l=lg(T);
   GEN r;
   if (l<5) return zero_Flx(T[1]);
-  if (l<Flx_INVMONTGOMERY_LIMIT)
+  if (l<=Flx_INVMONTGOMERY_LIMIT)
   {
     ulong c=T[l-1], ci=1;
     if (c!=1)
     {
       ci=Fl_inv(c,p);
       T=Flx_Fl_mul(T, ci, p);
+      r=Flx_invMontgomery_basecase(T,p);
+      r=Flx_Fl_mul(r,ci,p);
     }
-    r=Flx_invMontgomery_basecase(T,p);
-    if (c!=1) r=Flx_Fl_mul(r,ci,p);
+    else
+      r=Flx_invMontgomery_basecase(T,p);
   }
   else
-    r=Flx_invMontgomery_Newton(T,p);
+    r = Flx_invMontgomery_Newton(T,p);
   return gerepileuptoleaf(ltop, r);
 }
 
@@ -2357,6 +2359,61 @@ FlxX_lgrenormalizespec(GEN x, long lx)
   return i+1;
 }
 
+static GEN
+FlxqX_invMontgomery_Newton(GEN S, GEN T, ulong p)
+{
+  pari_sp av = avma;
+  long nold, lx, lz, lq, l = degpol(S), i, lQ;
+  GEN q, y, z, x = cgetg(l+2, t_POL) + 2;
+  ulong mask = quadratic_prec_mask(l-2); /* assume l > 2 */
+  for (i=0;i<l;i++) gel(x,i) = gen_0;
+  q = FlxX_recipspec(S+2,l+1,l+1,T[1]); lQ = lgpol(q); q+=2;
+  /* We work on _spec_ FlxX's, all the l[xzq] below are lgpol's */
+
+  /* initialize */
+  gel(x,0) = Flxq_inv(gel(q,0),T, p);
+  if (lQ>1 && signe(gel(q,1)))
+  {
+    GEN u = gel(q, 1);
+    if (!equali1(gel(x,0))) u = Flxq_mul(u, Flxq_sqr(gel(x,0), T,p), T,p);
+    gel(x,1) = Flx_neg(u, p); lx = 2;
+  }
+  else
+    lx = 1;
+  nold = 1;
+  for (; mask > 1; )
+  { /* set x -= x(x*q - 1) + O(t^(nnew + 1)), knowing x*q = 1 + O(t^(nold+1)) */
+    long i, lnew, nnew = nold << 1;
+
+    if (mask & 1) nnew--;
+    mask >>= 1;
+
+    lnew = nnew + 1;
+    lq = FlxX_lgrenormalizespec(q, minss(lQ,lnew));
+    z = FlxqX_mulspec(x, q, T, p, lx, lq); /* FIXME: high product */
+    lz = lgpol(z); if (lz > lnew) lz = lnew;
+    z += 2;
+    /* subtract 1 [=>first nold words are 0]: renormalize so that z(0) != 0 */
+    for (i = nold; i < lz; i++) if (signe(gel(z,i))) break;
+    nold = nnew;
+    if (i >= lz) continue; /* z-1 = 0(t^(nnew + 1)) */
+
+    /* z + i represents (x*q - 1) / t^i */
+    lz = FlxX_lgrenormalizespec (z+i, lz-i);
+    z = FlxqX_mulspec(x, z+i, T,p, lx, lz); /* FIXME: low product */
+    lz = lgpol(z); z += 2;
+    if (lz > lnew-i) lz = FlxX_lgrenormalizespec(z, lnew-i);
+
+    lx = lz+ i;
+    y  = x + i; /* x -= z * t^i, in place */
+    for (i = 0; i < lz; i++) gel(y,i) = Flx_neg(gel(z,i), p);
+  }
+  x -= 2; setlg(x, lx + 2); x[1] = T[1];
+  return gerepilecopy(av, x);
+}
+
+static const long FlxqX_INVMONTGOMERY_LIMIT = 5;
+
 /* x/polrecip(P)+O(x^n) */
 GEN
 FlxqX_invMontgomery(GEN T, GEN Q, ulong p)
@@ -2366,13 +2423,18 @@ FlxqX_invMontgomery(GEN T, GEN Q, ulong p)
   GEN r;
   GEN c=gel(T,l-1), ci=NULL;
   if (l<5) return zero_Flx(T[1]);
-  if (degpol(c) || c[2]!=1)
+  if (l<=FlxqX_INVMONTGOMERY_LIMIT)
   {
-    ci=Flxq_inv(c,Q,p);
-    T=FlxqX_Flxq_mul(T, ci, Q, p);
-  }
-  r=FlxqX_invMontgomery_basecase(T,Q,p);
-  if (ci) r=FlxqX_Flxq_mul(r,ci,Q,p);
+    if (!Flx_equal1(c))
+    {
+      ci= Flxq_inv(c,Q,p);
+      T = FlxqX_Flxq_mul(T, ci, Q, p);
+      r = FlxqX_invMontgomery_basecase(T,Q,p);
+      r = FlxqX_Flxq_mul(r,ci,Q,p);
+    } else
+      r = FlxqX_invMontgomery_basecase(T,Q,p);
+  } else
+    r = FlxqX_invMontgomery_Newton(T,Q,p);
   return gerepileupto(ltop, r);
 }
 

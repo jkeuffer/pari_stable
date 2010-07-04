@@ -757,7 +757,7 @@ FpX_invMontgomery(GEN T, GEN p)
   long l = lg(T);
   GEN r;
   if (l<5) return zeropol(T[1]);
-  if (l<FpX_INVMONTGOMERY_LIMIT)
+  if (l<=FpX_INVMONTGOMERY_LIMIT)
   {
     GEN c = gel(T,l-1), ci=gen_1;
     if (!equali1(c))
