@@ -977,14 +977,28 @@ FpXQ_powers(GEN x, long l, GEN T, GEN p)
     long pp = p[2];
     return FlxC_to_ZXC(Flxq_powers(ZX_to_Flx(x, pp), l, ZX_to_Flx(T,pp), pp));
   }
-  gel(V,3) = FpXQ_sqr(x,T,p);
-  if ((degpol(x)<<1) < degpol(T)) {
-    for(i = 4; i < l+2; i++)
-      gel(V,i) = FpXQ_mul(gel(V,i-1),x,T,p);
-  } else { /* use squarings if degree(x) is large */
-    for(i = 4; i < l+2; i++)
-      gel(V,i) = odd(i)? FpXQ_sqr(gel(V, (i+1)>>1),T,p)
+  if (lg(T)>FpX_POW_MONTGOMERY_LIMIT)
+  {
+    GEN mg = FpX_invMontgomery(T,p);
+    gel(V,3) = FpXQ_sqr_mg(x,mg,T,p);
+    if ((degpol(x)<<1) < degpol(T)) {
+      for(i = 4; i < l+2; i++)
+        gel(V,i) = FpXQ_mul_mg(gel(V,i-1),x,mg,T,p);
+    } else { /* use squarings if degree(x) is large */
+      for(i = 4; i < l+2; i++)
+        gel(V,i) = odd(i)? FpXQ_sqr_mg(gel(V, (i+1)>>1),mg,T,p)
+                       : FpXQ_mul_mg(gel(V, i-1),x,mg,T,p);
+    }
+  } else {
+    gel(V,3) = FpXQ_sqr(x,T,p);
+    if ((degpol(x)<<1) < degpol(T)) {
+      for(i = 4; i < l+2; i++)
+        gel(V,i) = FpXQ_mul(gel(V,i-1),x,T,p);
+    } else { /* use squarings if degree(x) is large */
+      for(i = 4; i < l+2; i++)
+        gel(V,i) = odd(i)? FpXQ_sqr(gel(V, (i+1)>>1),T,p)
                        : FpXQ_mul(gel(V, i-1),x,T,p);
+    }
   }
   return V;
 }
