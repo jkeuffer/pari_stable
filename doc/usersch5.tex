@@ -3562,6 +3562,10 @@ reduce components mod \kbd{p} to \kbd{FpX}s or \kbd{Fp}s.)
 \fun{GEN}{FpXQ_red}{GEN x, GEN T,GEN p} \kbd{x} a \typ{POL}
 whose coefficients are \typ{INT}s, reduce them to \kbd{FpXQ}s.
 
+\fun{GEN}{FpXQ_add}{GEN x, GEN y, GEN T,GEN p}
+
+\fun{GEN}{FpXQ_sub}{GEN x, GEN y, GEN T,GEN p}
+
 \fun{GEN}{FpXQ_mul}{GEN x, GEN y, GEN T,GEN p}
 
 \fun{GEN}{FpXQ_sqr}{GEN x, GEN T, GEN p}
@@ -3764,6 +3768,12 @@ returning \kbd{NULL} if \kbd{x} is not invertible.
 
 \fun{GEN}{FpXQXQ_pow}{GEN x, GEN n, GEN S, GEN T, GEN p}, \kbd{x} and
 \kbd{S} being \kbd{FpXQX}s, returns $\kbd{x}^\kbd{n}$ modulo \kbd{S}.
+
+\fun{GEN}{FqXQ_add}{GEN x, GEN y, GEN S, GEN T, GEN p}, \kbd{x}, \kbd{y} and
+\kbd{S} being \kbd{FqX}s, returns $\kbd{x} + \kbd{y}$ modulo \kbd{S}.
+
+\fun{GEN}{FqXQ_sub}{GEN x, GEN y, GEN S, GEN T, GEN p}, \kbd{x}, \kbd{y} and
+\kbd{S} being \kbd{FqX}s, returns $\kbd{x} - \kbd{y}$ modulo \kbd{S}.
 
 \fun{GEN}{FqXQ_mul}{GEN x, GEN y, GEN S, GEN T, GEN p}, \kbd{x}, \kbd{y} and
 \kbd{S} being \kbd{FqX}s, returns $\kbd{x}\*\kbd{y}$ modulo \kbd{S}.
@@ -4007,6 +4017,10 @@ returning an \kbd{Flx} in variable $v$.
 \kbd{FpV\_roots\_to\_pol} returning an \kbd{Flx} in variable $v$.
 
 \subsec{\kbd{Flxq}} See \kbd{FpXQ} operations.
+
+\fun{GEN}{Flxq_add}{GEN x, GEN y, GEN T, ulong p}
+
+\fun{GEN}{Flxq_sub}{GEN x, GEN y, GEN T, ulong p}
 
 \fun{GEN}{Flxq_mul}{GEN x, GEN y, GEN T, ulong p}
 

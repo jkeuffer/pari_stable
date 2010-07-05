@@ -552,6 +552,7 @@ BA127- padic_sqrt -> Qp_sqrt, padic_sqrtn -> Qp_sqrtn, gammap -> Qp_gamma
        Fp_ratlift, FpM_ratlift, FpX_ratlift
        FpM_FpC_mul_FpX
        Fp_red, FpXQ_red
+       Flxq_add, Flxq_sub, FpXQ_add, FpXQ_sub, FqXQ_add, FqXQ_sub
        FqX_add, FqX_sub
        FqX_roots, FpX_factorff, FpX_rootsff
        FpXQX_rem, FpXQXQ_mul, FpXQXQ_sqr, FpXQXQ_pow

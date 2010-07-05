@@ -1604,6 +1604,12 @@ FqX_extgcd(GEN P,GEN Q,GEN T,GEN p, GEN *U, GEN *V)
 
 /*FqXQ*/
 INLINE GEN
+FqXQ_add(GEN x, GEN y, GEN S/*unused*/, GEN T, GEN p)
+{ (void)S; return T? FpXX_add(x,y,p): FpX_add(x,y,p); }
+INLINE GEN
+FqXQ_sub(GEN x, GEN y, GEN S/*unused*/, GEN T, GEN p)
+{ (void)S; return T? FpXX_sub(x,y,p): FpX_sub(x,y,p); }
+INLINE GEN
 FqXQ_div(GEN x, GEN y, GEN S, GEN T, GEN p)
 { return T? FpXQXQ_div(x,y,S,T,p): FpXQ_div(x,y,S,p); }
 INLINE GEN
@@ -1621,6 +1627,22 @@ FqXQ_sqr(GEN x, GEN S, GEN T, GEN p)
 INLINE GEN
 FqXQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p)
 { return T? FpXQXQ_pow(x,n,S,T,p): FpXQ_pow(x,n,S,p); }
+
+/*FpXQ*/
+INLINE GEN
+FpXQ_add(GEN x,GEN y,GEN T/*unused*/,GEN p)
+{ (void)T; return FpX_add(x,y,p); }
+INLINE GEN
+FpXQ_sub(GEN x,GEN y,GEN T/*unused*/,GEN p)
+{ (void)T; return FpX_sub(x,y,p); }
+
+/*Flxq*/
+INLINE GEN
+Flxq_add(GEN x,GEN y,GEN T/*unused*/,ulong p)
+{ (void)T; return Flx_add(x,y,p); }
+INLINE GEN
+Flxq_sub(GEN x,GEN y,GEN T/*unused*/,ulong p)
+{ (void)T; return Flx_sub(x,y,p); }
 
 /* F2v */
 

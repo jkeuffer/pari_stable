@@ -2861,6 +2861,8 @@ INLINE int    pr_is_inert(GEN P);
 INLINE GEN    pr_norm(GEN pr);
 INLINE long   rnf_get_degree(GEN rnf);
 
+INLINE GEN    Flxq_add(GEN x,GEN y,GEN T,ulong p);
+INLINE GEN    Flxq_sub(GEN x,GEN y,GEN T,ulong p);
 INLINE GEN    Fq_red(GEN x, GEN T, GEN p);
 
 INLINE GEN    FqX_Fp_mul(GEN P, GEN U, GEN T, GEN p);
@@ -2876,12 +2878,14 @@ INLINE GEN    FqX_rem(GEN x, GEN y, GEN T, GEN p);
 INLINE GEN    FqX_sqr(GEN x, GEN T, GEN p);
 INLINE GEN    FqX_sub(GEN x,GEN y,GEN T,GEN p);
 
+INLINE GEN    FqXQ_add(GEN x, GEN y, GEN S, GEN T, GEN p);
 INLINE GEN    FqXQ_div(GEN x, GEN y, GEN S, GEN T, GEN p);
 INLINE GEN    FqXQ_inv(GEN x, GEN S, GEN T, GEN p);
 INLINE GEN    FqXQ_invsafe(GEN x, GEN S, GEN T, GEN p);
 INLINE GEN    FqXQ_mul(GEN x, GEN y, GEN S, GEN T, GEN p);
 INLINE GEN    FqXQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p);
 INLINE GEN    FqXQ_sqr(GEN x, GEN S, GEN T, GEN p);
+INLINE GEN    FqXQ_sub(GEN x, GEN y, GEN S, GEN T, GEN p);
 
 INLINE ulong  F2m_coeff(GEN x, long a, long b);
 INLINE void   F2m_flip(GEN x, long a, long b);
