@@ -3369,8 +3369,8 @@ This function is not memory-clean, but nevertheless suitable for
 \kbd{gerepileupto}.
 
 \fun{GEN}{FpX_extgcd}{GEN x, GEN y, GEN p, GEN *u, GEN *v} returns
-$d = \text{GCD}(\kbd{x},\kbd{y})$, and sets \kbd{*u}, \kbd{*v} to the Bezout
-coefficients such that $\kbd{*ux} + \kbd{*vy} = d$.
+$d = \text{GCD}(\kbd{x},\kbd{y})$ (not necessarily monic), and sets \kbd{*u},
+\kbd{*v} to the Bezout coefficients such that $\kbd{*ux} + \kbd{*vy} = d$.
 
 \fun{GEN}{FpX_center}{GEN z, GEN p, GEN pov2} returns the polynomial whose
 coefficient belong to the symmetric residue system. Assumes the coefficients
@@ -3724,9 +3724,13 @@ by its leading term.
 defined modulo $(p, T)$, and let $P$ be an \kbd{FqX}; returns the translated
 \kbd{FqX} of $P(X+c)$.
 
-\fun{GEN}{FqX_gcd}{GEN P, GEN Q, GEN T, GEN p}
+\fun{GEN}{FqX_gcd}{GEN P, GEN Q, GEN T, GEN p} returns a (not necessarily
+monic) greatest common divisor of $x$  and $y$.
 
 \fun{GEN}{FqX_extgcd}{GEN x, GEN y, GEN T, GEN p, GEN *ptu, GEN *ptv}
+returns $d = \text{GCD}(\kbd{x},\kbd{y})$ (not necessarily monic), and sets
+\kbd{*u}, \kbd{*v} to the Bezout coefficients such that $\kbd{*ux} +
+\kbd{*vy} = d$.
 
 \fun{GEN}{FqX_eval}{GEN x, GEN y, GEN T, GEN p} evaluates the \kbd{FqX}~\kbd{x}
 at the \kbd{Fq}~\kbd{y}. The result is an~\kbd{Fq}.
