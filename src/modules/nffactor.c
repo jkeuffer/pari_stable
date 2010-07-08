@@ -956,10 +956,9 @@ nfcmbf(nfcmbf_t *T, long klim, long *pmaxK, int *done)
 
       deg[i] = d; P += 2;
       t1 = gel(P,d-1);/* = - S_1 */
-      t2 = gsqr(t1);
-      if (d > 1) t2 = gsub(t2, gmul2n(gel(P,d-2), 1));
+      t2 = Fq_sqr(t1, Tpk, pk);
+      if (d > 1) t2 = Fq_sub(t2, gmul2n(gel(P,d-2), 1), Tpk, pk);
       /* t2 = S_2 Newton sum */
-      t2 = Fq_red(t2, Tpk, pk);
       if (D.lt)
       {
         t1 = Fq_Fp_mul(t1, ltdn, Tpk, pk);
