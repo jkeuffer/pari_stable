@@ -59,20 +59,14 @@ BuildTree(GEN link, GEN V, GEN W, GEN a, GEN T, GEN p)
     swap(gel(V,j+1), gel(V,minp));
     lswap(link[j+1], link[minp]);
 
-    if (T)
-      gel(V,i) = FpXQX_mul(gel(V,j), gel(V,j+1), T, p);
-    else
-      gel(V,i) = FpX_mul(gel(V,j), gel(V,j+1), p);
+    gel(V,i) = FqX_mul(gel(V,j), gel(V,j+1), T, p);
     link[i] = j;
   }
 
   for (j=1; j <= 2*k-3; j+=2)
   {
     GEN d, u, v;
-    if (T)
-      d = FpXQX_extgcd(gel(V,j), gel(V,j+1), T, p, &u, &v);
-    else
-      d = FpX_extgcd(gel(V,j), gel(V,j+1), p, &u, &v);
+    d = FqX_extgcd(gel(V,j), gel(V,j+1), T, p, &u, &v);
     if (degpol(d) > 0) pari_err(talker, "relatively prime polynomials expected");
     d = gel(d,2);
     if (!gequal1(d))
@@ -266,7 +260,7 @@ MultiLift(GEN f, GEN a, GEN T, GEN p, long e0, long flag)
     v = cgetg(2*k-2 + 1, t_VEC);
     w = cgetg(2*k-2 + 1, t_VEC);
     link=cgetg(2*k-2 + 1, t_VECSMALL);
-    BuildTree(link, v, w, a, T, p);
+    BuildTree(link, v, w, a, T? FpX_red(T,p): NULL, p);
     if (DEBUGLEVEL > 3) msgTIMER(&Ti, "building tree");
   }
   mask = quadratic_prec_mask(e0);
