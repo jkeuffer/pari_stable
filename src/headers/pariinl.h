@@ -1567,6 +1567,14 @@ INLINE GEN
 Fq_red(GEN x, GEN T, GEN p)
 { return typ(x)==t_INT? Fp_red(x,p): FpXQ_red(x,T,p); }
 
+/* FpXQX */
+INLINE GEN
+FpXQX_rem(GEN x, GEN y, GEN T, GEN p)
+{ return FpXQX_divrem(x, y, T, p, ONLY_REM); }
+INLINE GEN
+FpXQX_div(GEN x, GEN y, GEN T, GEN p)
+{ return FpXQX_divrem(x, y, T, p, NULL); }
+
 /* FqX */
 INLINE GEN
 FqX_red(GEN z, GEN T, GEN p) { return T? FpXQX_red(z, T, p): FpX_red(z, p); }

@@ -2289,7 +2289,6 @@ GEN     FpXQ_ffisom_inv(GEN S,GEN Tp, GEN p);
 GEN     FpXQX_gcd(GEN P, GEN Q, GEN T, GEN p);
 GEN     FpXQX_mul(GEN x, GEN y, GEN T, GEN p);
 GEN     FpXQX_red(GEN z, GEN T, GEN p);
-GEN     FpXQX_rem(GEN x, GEN y, GEN T, GEN p);
 GEN     FpXQX_sqr(GEN x, GEN T, GEN p);
 GEN     FpXQX_extgcd(GEN x, GEN y, GEN T, GEN p, GEN *ptu, GEN *ptv);
 GEN     FpXQX_divrem(GEN x, GEN y, GEN T, GEN p, GEN *pr);
@@ -2863,8 +2862,10 @@ INLINE long   rnf_get_degree(GEN rnf);
 
 INLINE GEN    Flxq_add(GEN x,GEN y,GEN T,ulong p);
 INLINE GEN    Flxq_sub(GEN x,GEN y,GEN T,ulong p);
-INLINE GEN    Fq_red(GEN x, GEN T, GEN p);
+INLINE GEN    FpXQX_div(GEN x, GEN y, GEN T, GEN p);
+INLINE GEN    FpXQX_rem(GEN x, GEN y, GEN T, GEN p);
 
+INLINE GEN    Fq_red(GEN x, GEN T, GEN p);
 INLINE GEN    FqX_Fp_mul(GEN P, GEN U, GEN T, GEN p);
 INLINE GEN    FqX_Fq_mul(GEN P, GEN U, GEN T, GEN p);
 INLINE GEN    FqX_add(GEN x,GEN y,GEN T,GEN p);

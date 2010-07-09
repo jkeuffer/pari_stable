@@ -712,12 +712,6 @@ FpXQX_divrem(GEN x, GEN y, GEN T, GEN p, GEN *pr)
 }
 
 GEN
-FpXQX_rem(GEN x, GEN y, GEN T, GEN p)
-{
-  return FpXQX_divrem(x, y, T, p, ONLY_REM);
-}
-
-GEN
 FpXQX_gcd(GEN P, GEN Q, GEN T, GEN p)
 {
   pari_sp av=avma, av0;
