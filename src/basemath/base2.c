@@ -27,7 +27,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 static void
 nfmaxord_check_args(nfmaxord_t *S, GEN T, long flag, GEN fa)
 {
-  GEN dT;
+  GEN dT, P;
+  long l;
 
   if (DEBUGLEVEL) (void)timer2();
   if (typ(T)!=t_POL) pari_err(notpoler,"nfmaxord");
@@ -42,7 +43,9 @@ nfmaxord_check_args(nfmaxord_t *S, GEN T, long flag, GEN fa)
     fa = Z_factor_limit(absi(dT), (flag & nf_PARTIALFACT) == 0);
   }
   S->dT = dT;
-  S->dTP = gel(fa,1);
+  P = gel(fa,1); l = lg(P);
+  if (l > 1 && is_pm1(gel(P,1))) P = vecslice(P, 2, --l);
+  S->dTP = P;
   S->dTE = vec_to_vecsmall(gel(fa,2));
   if (DEBUGLEVEL) msgtimer("disc. factorisation");
 }
@@ -550,6 +553,7 @@ nfmaxord(nfmaxord_t *S, GEN T, long flag, GEN fa)
   for (i=1; i<lP; i++)
   {
     VOLATILE pari_sp av;
+    /* includes the silly case where P[i] = -1 */
     if (E[i] == 1) { ordmax = shallowconcat(ordmax, gen_1); continue; }
     av = avma;
     CATCH(invmoder) { /* caught false prime, update factorization */
@@ -585,6 +589,7 @@ update_fact(GEN d, GEN f)
   if (typ(f)!=t_MAT || lg(f)!=3)
     pari_err(talker,"not a factorisation in nfbasis");
   l = lg(P);
+  if (l > 1 && is_pm1(gel(P,1))) P = vecslice(P, 2, --l);
   Q = cgetg(l,t_COL);
   E = cgetg(l,t_COL); iq = 1;
   for (i=1; i<l; i++)
@@ -594,6 +599,7 @@ update_fact(GEN d, GEN f)
   }
   setlg(Q,iq);
   setlg(E,iq);
+  if (signe(d) < 0) d = negi(d);
   return merge_factor_i(Z_factor(d), mkmat2(Q,E));
 }
 
@@ -610,7 +616,7 @@ _nfbasis(GEN x0, long flag, GEN fa, GEN *pbas, GEN *pdK)
   RgX_check_ZX(x0, "nfbasis");
 
   x = ZX_Q_normalize(x0, &lead);
-  if (fa && lead != gen_1) fa = update_fact(ZX_disc(x), fa);
+  if (fa && !isint1(lead)) fa = update_fact(ZX_disc(x), fa);
   if (flag & compat_PARTIAL) fl |= nf_PARTIALFACT;
   if (flag & compat_ROUND2)  fl |= nf_ROUND2;
   nfmaxord(&S, x, fl, fa);
