@@ -68,3 +68,5 @@ do(a^2+13,polcyclo(13,13*x^2))
 \\ Bug #1070
 do(y^2-5,x^5-x^4-7*x^3+x^2+7*x-3)
 
+\\ Bug #1075
+nffactor(polcyclo(21,y), x^2-y^7)
