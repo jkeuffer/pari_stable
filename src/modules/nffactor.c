@@ -171,7 +171,7 @@ nfgcd_all(GEN P, GEN Q, GEN T, GEN den, GEN *Pnew)
     if (dR == 0) { avma = ltop; if (Pnew) *Pnew = P; return pol_1(vP); }
     if (mod && dR > dM) continue; /* p divides Res(P/gcd, Q/gcd). Discard. */
 
-    R = RgXX_to_RgM(FlxX_to_ZXX(R), dT);
+     R = RgXX_to_RgM(FlxX_to_ZXX(R), dT);
     /* previous primes divided Res(P/gcd, Q/gcd)? Discard them. */
     if (!mod || dR < dM) { M = R; mod = utoipos(p); dM = dR; continue; }
     if (low_stack(st_lim, stack_lim(btop, 1)))
@@ -1752,7 +1752,8 @@ nfsqff(GEN nf, GEN pol, long fl, GEN den)
   {
     GEN z;
     if (DEBUGLEVEL>2) fprintferr("Using Trager's method\n");
-    z = nfsqff_trager(Q_primpart(pol), nfpol, mulii(den, nf_get_index(nf)));
+    if (typ(nf) != t_POL) den =  mulii(den, nf_get_index(nf));
+    z = nfsqff_trager(Q_primpart(pol), nfpol, den);
     if (fl != FACTORS) {
       long i, l = lg(z);
       for (i = 1; i < l; i++)
