@@ -230,6 +230,7 @@ BA171- qfbhclassno(x) was wrong for x<0
 BA173- RETRY macro was incorrect and could cause crash [#1064]
 BA174- factorpadic(,,,1) was actually using ROUND4 [#1064 again]
   175- nfbasis(x^2+1,,factor(-4)) --> oo loop [#1072]
+  176- factorpadic: incorrect conversion from ZX to ZpX [#1073]
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]

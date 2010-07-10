@@ -1429,7 +1429,10 @@ Z_to_Zp(GEN x, GEN p, GEN pr, long r)
 
   if (!sx) return gen_0;
   v = Z_pvalrem(x,p,&x);
-  r -= v; if (r <= 0) return gen_0;
+  if (v) {
+    r -= v; if (r <= 0) return gen_0;
+    pr = powiu(p,r);
+  }
   y = cgetg(5,t_PADIC);
   y[1] = evalprecp(r)|evalvalp(v);
   gel(y,2) = p;
