@@ -171,7 +171,7 @@ nfgcd_all(GEN P, GEN Q, GEN T, GEN den, GEN *Pnew)
     if (dR == 0) { avma = ltop; if (Pnew) *Pnew = P; return pol_1(vP); }
     if (mod && dR > dM) continue; /* p divides Res(P/gcd, Q/gcd). Discard. */
 
-     R = RgXX_to_RgM(FlxX_to_ZXX(R), dT);
+    R = RgXX_to_RgM(FlxX_to_ZXX(R), dT);
     /* previous primes divided Res(P/gcd, Q/gcd)? Discard them. */
     if (!mod || dR < dM) { M = R; mod = utoipos(p); dM = dR; continue; }
     if (low_stack(st_lim, stack_lim(btop, 1)))
