@@ -196,7 +196,7 @@ FpX_sub(GEN x,GEN y,GEN p)
 {
   GEN z = FpX_subspec(x+2,y+2,p,lgpol(x),lgpol(y));
   z[1] = x[1];
-  if (!lgpol(z)) z[1] &= VARNBITS;
+  setsigne(z,lgpol(z)!=0);
   return z;
 }
 
