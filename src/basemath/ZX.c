@@ -428,7 +428,7 @@ ZX_sqrspec_basecase(GEN x, long nx, long v)
 
   lz = (nx << 1) + 1; nz = lz-2;
   lz += v;
-  z = cgetg(lz,t_POL) + 2;
+  z = cgetg(lz,t_POL); z[1] = evalsigne(1); z += 2;
   for (i=0; i<v; i++) gel(z++, 0) = gen_0;
   for (i=0; i<nx; i++)
     gel(z,i) = ZX_sqrspec_basecase_limb(x, 0, i);
@@ -440,7 +440,7 @@ static GEN
 Z_sqrshiftspec_ZX(GEN x, long vx)
 {
   long nz = 2*vx+1;
-  GEN z = cgetg(2+nz, t_POL);
+  GEN z = cgetg(2+nz, t_POL); z[1] = evalsigne(1);
   long i;
   for(i=2;i<nz+1;i++) gel(z,i) = gen_0;
   gel(z,nz+1) = sqri(x);
@@ -453,7 +453,7 @@ Z_ZX_mulshiftspec(GEN x, GEN y, long ny, long vz)
   long nz = vz+ny;
   GEN z = cgetg(2+nz, t_POL);
   long i;
-  z[1] = y[1];
+  z[1] = evalsigne(1);
   for (i=0; i<vz; i++)   gel(z,i+2)    = gen_0;
   for (i=0; i<ny; i++) gel(z,i+vz+2) = mulii(x, gel(y,i));
   return z;
@@ -490,7 +490,6 @@ ZX_sqr(GEN x)
 {
   GEN z = ZX_sqrspec(x+2, lgpol(x));
   z[1] = x[1];
-  if (!lgpol(z)) z[1] &= VARNBITS;
   return z;
 }
 
@@ -517,7 +516,7 @@ ZX_mul(GEN x, GEN y)
   if (x == y) return ZX_sqr(x);
   z = ZX_mulspec(x+2,y+2,lgpol(x),lgpol(y));
   z[1] = x[1];
-  if (!lgpol(z)) z[1] &= VARNBITS;
+  if (!signe(y)) z[1] &= VARNBITS;
   return z;
 }
 

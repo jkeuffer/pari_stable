@@ -175,14 +175,14 @@ FpX_subspec(GEN x,GEN y,GEN p, long nx, long ny)
   if (nx >= ny)
   {
     lz = nx+2;
-    z = cgetg(lz,t_POL)+2;
+    z = cgetg(lz,t_POL); z[1] = 0; z += 2;
     for (i=0; i<ny; i++) gel(z,i) = Fp_sub(gel(x,i),gel(y,i), p);
     for (   ; i<nx; i++) gel(z,i) = modii(gel(x,i), p);
   }
   else
   {
     lz = ny+2;
-    z = cgetg(lz,t_POL)+2;
+    z = cgetg(lz,t_POL); z[1] = 0; z += 2;
     for (i=0; i<nx; i++) gel(z,i) = Fp_sub(gel(x,i),gel(y,i), p);
     for (   ; i<ny; i++) gel(z,i) = Fp_neg(gel(y,i), p);
   }
@@ -195,8 +195,7 @@ GEN
 FpX_sub(GEN x,GEN y,GEN p)
 {
   GEN z = FpX_subspec(x+2,y+2,p,lgpol(x),lgpol(y));
-  z[1] = x[1];
-  setsigne(z,lgpol(z)!=0);
+  setvarn(z, varn(x));
   return z;
 }
 
