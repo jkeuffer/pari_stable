@@ -439,9 +439,9 @@ ZX_sqrspec_basecase(GEN x, long nx, long v)
 static GEN
 Z_sqrshiftspec_ZX(GEN x, long vx)
 {
-  long nz = 2*vx+1;
-  GEN z = cgetg(2+nz, t_POL); z[1] = evalsigne(1);
-  long i;
+  long i, nz = 2*vx+1;
+  GEN z = cgetg(2+nz, t_POL);
+  z[1] = evalsigne(1);
   for(i=2;i<nz+1;i++) gel(z,i) = gen_0;
   gel(z,nz+1) = sqri(x);
   return z;
@@ -450,9 +450,8 @@ Z_sqrshiftspec_ZX(GEN x, long vx)
 static GEN
 Z_ZX_mulshiftspec(GEN x, GEN y, long ny, long vz)
 {
-  long nz = vz+ny;
+  long i, nz = vz+ny;
   GEN z = cgetg(2+nz, t_POL);
-  long i;
   z[1] = evalsigne(1);
   for (i=0; i<vz; i++)   gel(z,i+2)    = gen_0;
   for (i=0; i<ny; i++) gel(z,i+vz+2) = mulii(x, gel(y,i));
