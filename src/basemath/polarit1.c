@@ -2141,7 +2141,8 @@ spec_FqXQ_pow(GEN x, GEN S, GEN T, GEN p)
       if (!degpol(c)) d = FpX_Fp_mul(d, gel(c,2), p);
       else d = FpX_mul(d, c, p);
     }
-    z = FpX_add(z, d, p);
+    z = typ(z)==t_INT? FpX_Fp_add(d, z, p)
+                     : FpX_add(d, z, p);
     if (low_stack(lim, stack_lim(av,1)))
     {
       if(DEBUGMEM>1) pari_warn(warnmem,"spec_FqXQ_pow");
