@@ -1052,8 +1052,7 @@ gkronecker(GEN x, GEN y) { return map_proto_lGG(kronecker,x,y); }
 long
 kronecker(GEN x, GEN y)
 {
-  const pari_sp av = avma;
-  GEN z;
+  pari_sp av = avma, lim;
   long s = 1, r;
   ulong xu, yu;
 
@@ -1071,9 +1070,11 @@ kronecker(GEN x, GEN y)
     if (odd(r) && gome(x)) s = -s;
     y = shifti(y,-r);
   }
+  lim = stack_lim(av,2);
   x = modii(x,y);
   while (lgefint(x) > 3) /* x < y */
   {
+    GEN z;
     r = vali(x);
     if (r)
     {
@@ -1083,6 +1084,11 @@ kronecker(GEN x, GEN y)
     /* x=3 mod 4 && y=3 mod 4 ? (both are odd here) */
     if (mod2BIL(x) & mod2BIL(y) & 2) s = -s;
     z = remii(y,x); y = x; x = z;
+    if (low_stack(lim, stack_lim(av,2)))
+    {
+      if(DEBUGMEM>1) pari_warn(warnmem,"kronecker");
+      gerepileall(av, 2, &x, &y);
+    }
   }
   xu = itou(x);
   if (!xu) return is_pm1(y)? s: 0;
