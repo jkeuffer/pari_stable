@@ -717,13 +717,7 @@ static void
 compilesmall(long n, long x, long mode)
 {
   if (mode==Ggen)
-  {
-    GEN stog[]={gen_m2, gen_m1, gen_0, gen_1, gen_2};
-    if (x>=-2 && x<=2)
-      op_push(OCpushlong, (long) stog[x+2], n);
-    else
-      op_push(OCpushstoi, x, n);
-  }
+    op_push(OCpushstoi, x, n);
   else
   {
     op_push(OCpushlong, x, n);

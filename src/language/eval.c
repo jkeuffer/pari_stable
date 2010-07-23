@@ -1453,20 +1453,7 @@ closure_disassemble(GEN C)
     switch(opcode)
     {
     case OCpushlong:
-      if (operand==(long)gnil)
-        pari_printf("pushlong\tgnil\n");
-      else if (operand==(long)gen_m2)
-        pari_printf("pushlong\tgen_m2\n");
-      else if (operand==(long)gen_m1)
-        pari_printf("pushlong\tgen_m1\n");
-      else if (operand==(long)gen_0)
-        pari_printf("pushlong\tgen_0\n");
-      else if (operand==(long)gen_1)
-        pari_printf("pushlong\tgen_1\n");
-      else if (operand==(long)gen_2)
-        pari_printf("pushlong\tgen_2\n");
-      else
-        pari_printf("pushlong\t%ld\n",operand);
+      pari_printf("pushlong\t%ld\n",operand);
       break;
     case OCpushgen:
       pari_printf("pushgen\t\t%ld\n",operand);
