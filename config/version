@@ -23,6 +23,10 @@ else if test -d "$TOP/.git"; then
 else if test -d "$TOP/CVS"; then
  status="$status CHANGES-"`$head 1 "$TOP/CHANGES" | awk '{print $4}'`
  patchlevel_verbose="[ $status ]"
+else if test -r "svnversion"; then
+ status="$status svn-"`cat svnversion`
+ patchlevel_verbose="[ $status ]"
+     fi
     fi
   fi
 fi

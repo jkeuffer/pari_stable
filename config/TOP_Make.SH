@@ -34,6 +34,7 @@ dft target::
 	@echo "	dbg	                Compile gp binary suitable for debugging"
 	@echo "	prf	                Compile gp binary suitable for profiling"
 	@echo "	distrib,alpha,beta,release  Create a new distribution"
+	@echo "	svnsnapshot             Create a svnsnapshot"
 	@echo "	ctags			Generate VI/VIM tags file in ./src"
 	@echo "	etags			Generate Emacs  tags file in ./src"
 	@echo "	tune	                Generate tuning utility"
@@ -75,6 +76,8 @@ beta: tag
 	$config_dir/settar \$(VERS) beta
 release: tag
 	$config_dir/settar \$(VERS) released
+svnsnapshot:
+	$config_dir/settar \$(VERS) svnsnapshot
 
 dosdistrib: gpman
 	-zip -kr GPB${dosversion}.ZIP GP.EXE README README.DOS ../EMX/README.DOC ../RSX/README.TXT
