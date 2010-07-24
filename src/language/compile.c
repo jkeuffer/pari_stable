@@ -318,8 +318,8 @@ closure_context(GEN C, long lpc)
       var_push((entree*)e[k], Lmy);
     return;
   }
-  while (j<lfr && frpc[j]==0) j++;
-  for(pc=1; pc<=lpc; pc++)
+  if (lg(C)<8) while (j<lfr && frpc[j]==0) j++;
+  for(pc=0; pc<=lpc; pc++)
   {
     if (pc>0 && (code[pc]==OClocalvar || code[pc]==OClocalvar0))
       var_push((entree*)oper[pc],Llocal);
@@ -575,7 +575,7 @@ ctxmvar(void)
       n++;
   if (n==0) return 0;
   ctx = cgetg(n+1,t_VECSMALL);
-  for(n=0, i=s_lvar.n-1;i>=0;i--)
+  for(n=0, i=0; i<s_lvar.n; i++)
     if(localvars[i].type==Lmy)
       ctx[++n]=(long)localvars[i].ep;
   frame_push(ctx);
