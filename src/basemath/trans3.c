@@ -2336,18 +2336,22 @@ dedekind_sum(GEN a, GEN b)
   return gerepileupto(av, S);
 }
 
-/* returns the true value of eta(x) for Im(x) > 0, using reduction to
- * standard fundamental domain */
-GEN
-trueeta(GEN x, long prec)
+/* eta(x); assume Im x >> 0 (e.g. x in SL2's standardfundamental domain)*/
+static GEN
+eta_reduced(GEN x, long prec)
 {
-  long tx = typ(x), s;
-  pari_sp av = avma;
-  GEN q24, U,a,b,c,d, e;
+  GEN z = gexp(gmul(divru(Pi2n(-2,prec),3), mulcxI(x)), prec); /* e(x/24) */
+  if (24 * gexpo(z) >= -bit_accuracy(prec))
+    z = gmul(z, inteta( gpowgs(z,24) ));
+  return z;
+}
 
-  if (!is_scalar_t(tx)) pari_err(typeer,"trueeta");
-  x = upper_half(x, &prec);
-  x = redtausl2(x, &U);
+/* x = U.z. Return [s,t] such that eta(z) = eta(x) * sqrt(s) * exp(I Pi t) */
+static GEN
+eta_correction(GEN x, GEN U)
+{
+  GEN a,b,c,d, s,t;
+  long sc;
   a = gcoeff(U,1,1);
   b = gcoeff(U,1,2);
   c = gcoeff(U,2,1);
@@ -2356,29 +2360,43 @@ trueeta(GEN x, long prec)
   swap(a,d);
   togglesign_safe(&b);
   togglesign_safe(&c);
-  s = signe(c);
-  if (!s) {
+  sc = signe(c);
+  if (!sc) {
     if (signe(d) < 0) togglesign_safe(&b);
-    /* e = exp(I Pi b/12) */
-    e = eiPi(gdivgs(utoi(umodiu(b, 24)), 12), prec);
+    s = gen_1;
+    t = gdivgs(utoi(umodiu(b, 24)), 12);
   } else {
-    GEN t;
-    if (s < 0) {
+    if (sc < 0) {
       togglesign_safe(&a);
       togglesign_safe(&b);
       togglesign_safe(&c);
       togglesign_safe(&d);
     } /* now c > 0 */
+    s = mulcxmI(gadd(gmul(c,x), d));
     t = gadd(gdiv(addii(a,d),muliu(c,12)), dedekind_sum(negi(d),c));
-    e = gsqrt(mulcxmI(gadd(gmul(c,x), d)), prec);
-    if (!isintzero(t)) e = gmul(e, eiPi(t, prec));
-    /* e = exp(I Pi (((a+d)/12c) + s(-d,c)) ) sqrt(-i(cx+d))  */
+    /* correction : exp(I Pi (((a+d)/12c) + s(-d,c)) ) sqrt(-i(cx+d))  */
   }
-  q24 = gexp(gmul(divru(Pi2n(-2,prec),3), mulcxI(x)), prec); /* e(x/24) */
-  e = gmul(q24, e);
-  if (24 * gexpo(q24) >= -bit_accuracy(prec))
-    e = gmul(e, inteta( gpowgs(q24,24) ));
-  return gerepileupto(av, e);
+  return mkvec2(s, t);
+}
+
+/* returns the true value of eta(x) for Im(x) > 0, using reduction to
+ * standard fundamental domain */
+GEN
+trueeta(GEN x, long prec)
+{
+  pari_sp av = avma;
+  GEN U, st, s, t;
+
+  if (!is_scalar_t(typ(x))) pari_err(typeer,"trueeta");
+  x = upper_half(x, &prec);
+  x = redtausl2(x, &U);
+  st = eta_correction(x, U);
+  x = eta_reduced(x, prec);
+  s = gel(st, 1);
+  t = gel(st, 2);
+  x = gmul(x, eiPi(t, prec));
+  if (s != gen_1) x = gmul(x, gsqrt(s, prec));
+  return gerepileupto(av, x);
 }
 
 GEN
@@ -2410,27 +2428,72 @@ jell(GEN x, long prec)
   return gerepileupto(av, gpowgs(p1,3));
 }
 
+/* sqrt(2) eta(2x) / eta(x) */
 GEN
 weberf2(GEN x, long prec)
 {
   pari_sp av = avma;
-  GEN a = sqrtr(real2n(1, prec));
-  GEN b = gdiv(trueeta(gmul2n(x,1),prec), trueeta(x,prec));
-  return gerepileupto(av, gmul(a,b));
+  GEN z, t, a,b, Ua,Ub, s_a, s_b, st_a,st_b;
+  if (!is_scalar_t(typ(x))) pari_err(typeer,"weberf2");
+  x = upper_half(x, &prec);
+  a = redtausl2(x, &Ua);
+  b = redtausl2(gmul2n(x,1), &Ub);
+  if (gequal(a,b)) /* not infrequent */
+    z = gen_1;
+  else
+    z = gdiv(eta_reduced(b,prec), eta_reduced(a,prec));
+  st_a = eta_correction(a, Ua); s_a = gel(st_a, 1);
+  st_b = eta_correction(b, Ub); s_b = gel(st_b, 1);
+  t = gsub(gel(st_b,2), gel(st_a,2));
+  z = gmul(z, eiPi(t, prec));
+  if (s_b != gen_1) z = gmul(z, gsqrt(s_b, prec));
+  if (s_a != gen_1) z = gdiv(z, gsqrt(s_a, prec));
+  return gerepileupto(av, gmul(z, sqrtr(real2n(1, prec))));
 }
+
+/* eta(x/2) / eta(x) */
 GEN
 weberf1(GEN x, long prec)
 {
   pari_sp av = avma;
-  return gerepileupto(av, gdiv(trueeta(gmul2n(x,-1),prec), trueeta(x,prec)));
+  GEN z, t, a,b, Ua,Ub, s_a, s_b, st_a,st_b;
+  if (!is_scalar_t(typ(x))) pari_err(typeer,"weberf1");
+  x = upper_half(x, &prec);
+  a = redtausl2(x, &Ua);
+  b = redtausl2(gmul2n(x,-1), &Ub);
+  if (gequal(a,b)) /* not infrequent */
+    z = gen_1;
+  else
+    z = gdiv(eta_reduced(b,prec), eta_reduced(a,prec));
+  st_a = eta_correction(a, Ua); s_a = gel(st_a, 1);
+  st_b = eta_correction(b, Ub); s_b = gel(st_b, 1);
+  t = gsub(gel(st_b,2), gel(st_a,2));
+  z = gmul(z, eiPi(t, prec));
+  if (s_b != gen_1) z = gmul(z, gsqrt(s_b, prec));
+  if (s_a != gen_1) z = gdiv(z, gsqrt(s_a, prec));
+  return gerepileupto(av, z);
 }
+/* e(-1/24) * eta((x+1)/2) / eta(x) */
 GEN
 weberf(GEN x, long prec)
 {
   pari_sp av = avma;
-  GEN a = gdiv(trueeta(gmul2n(gaddgs(x,1),-1),prec),trueeta(x,prec));
-  GEN b = exp_Ir(divrs(Pi2n(-3,prec),-3)); /* e(-1/24)*/
-  return gerepileupto(av, gmul(a,b));
+  GEN z, t, a,b, Ua,Ub, s_a, s_b, st_a,st_b;
+  if (!is_scalar_t(typ(x))) pari_err(typeer,"weberf");
+  x = upper_half(x, &prec);
+  a = redtausl2(x, &Ua);
+  b = redtausl2(gmul2n(gaddgs(x,1),-1), &Ub);
+  if (gequal(a,b)) /* not infrequent */
+    z = gen_1;
+  else
+    z = gdiv(eta_reduced(b,prec), eta_reduced(a,prec));
+  st_a = eta_correction(a, Ua); s_a = gel(st_a, 1);
+  st_b = eta_correction(b, Ub); s_b = gel(st_b, 1);
+  t = gsub(gsub(gel(st_b,2), gel(st_a,2)), mkfrac(gen_1, utoipos(24)));
+  z = gmul(z, eiPi(t, prec));
+  if (s_b != gen_1) z = gmul(z, gsqrt(s_b, prec));
+  if (s_a != gen_1) z = gdiv(z, gsqrt(s_a, prec));
+  return gerepileupto(av, z);
 }
 GEN
 weber0(GEN x, long flag,long prec)
