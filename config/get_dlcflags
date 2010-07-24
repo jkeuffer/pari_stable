@@ -1,6 +1,9 @@
 _dl_list="DLCFLAGS"
 if test -n "$__gnuc__"; then
-    DLCFLAGS=-fPIC
+  case $osname in
+    cygwin|mingw) DLCFLAGS=;;
+    *) DLCFLAGS=-fPIC;;
+  esac
 else #assume native compiler
   case "$osname" in
     hpux) DLCFLAGS=+z;;
