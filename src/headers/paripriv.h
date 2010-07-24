@@ -409,6 +409,7 @@ GEN     FlxqX_rem_Montgomery(GEN x, GEN mg, GEN T, GEN Q, ulong p);
 GEN     redimagsl2(GEN q, GEN *U);
 GEN     redrealsl2(GEN V);
 GEN     redrealsl2step(GEN A);
+GEN     redtausl2(GEN t, GEN *U);
 
 /* alglin1.c */
 typedef long (*pivot_fun)(GEN,GEN,long,GEN);

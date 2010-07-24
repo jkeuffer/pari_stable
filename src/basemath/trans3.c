@@ -2253,12 +2253,15 @@ eta(GEN x, long prec)
 static GEN
 sqrt32(long prec) { GEN z = sqrtr_abs(stor(3,prec)); setexpo(z, -1); return z; }
 
-/* exp(i x), x = k pi/12, assume 0 <= k < 24 */
+/* exp(i x), x = k pi/12 */
 static GEN
 e12(ulong k, long prec)
 {
   int s, sPi, sPiov2;
   GEN z, t;
+  k %= 24;
+  if (!k) return gen_1;
+  if (k == 12) return gen_m1;
   if (k >12) { s = 1; k = 24 - k; } else s = 0; /* x -> 2pi - x */
   if (k > 6) { sPi = 1; k = 12 - k; } else sPi = 0; /* x -> pi  - x */
   if (k > 3) { sPiov2 = 1; k = 6 - k; } else sPiov2 = 0; /* x -> pi/2 - x */
@@ -2281,37 +2284,101 @@ e12(ulong k, long prec)
   if (s)   togglesign(gel(z,2));
   return z;
 }
+/* expi(i Pi z), z a t_INT or t_FRAC */
+static GEN
+eiPi(GEN z, long prec)
+{
+  GEN n, d;
+  ulong q, r;
+  if (typ(z) == t_INT) return mpodd(z)? gen_m1: gen_1;
+  n = gel(z,1);
+  d = gel(z,2);
+  q = udivui_rem(12, d, &r);
+  if (!r) /* relatively frequent case */
+    return e12(q * umodiu(n, 24), prec);
+  n = centermodii(n, shifti(d,1), d);
+  return exp_Ir(divri(mulri(mppi(prec), n), d));
+
+}
+
+/* a, b t_INT, b > 0, s(a,b) = sum(n = 1, b-1, (n/b)*(frac(a*n/b) - 1/2))
+ * Naive quadratic algorithm using reciprocity */
+GEN
+dedekind_sum(GEN a, GEN b)
+{
+  pari_sp av = avma;
+  GEN S = gen_0, last;
+  long s = 1;
+  /* s(a,b) + s(b,a) = ((a-b)^2 - ab + 1) / 12ab
+   * s(1,b) = (b-1)(b-2)/12b, s(0,b) = (1-b)/4 */
+  a = modii(a,b);
+  for(;;)
+  {
+    GEN ab, c;
+    if (equali1(a)) { 
+      last = gdiv(mulii(subis(b,1), subis(b,2)), muliu(b,12)); 
+      break;
+    }
+    /* impossible except first time if (a,b) = 1 */
+    if (!signe(a)) { 
+      last = gmul2n(subsi(1,b), -2);
+      break;
+    }
+    swap(a, b);
+    ab = mulii(a,b);
+    c = addis(subii(sqri(subii(a,b)), ab), 1);
+    c = gdiv(c, muliu(ab,12));
+    S = s > 0? gadd(S, c): gsub(S, c);
+    a = modii(a,b);
+    s = -s;
+  }
+  S = s > 0? gadd(S, last): gsub(S, last);
+  return gerepileupto(av, S);
+}
 
 /* returns the true value of eta(x) for Im(x) > 0, using reduction to
  * standard fundamental domain */
 GEN
 trueeta(GEN x, long prec)
 {
-  long tx = typ(x);
-  ulong Nmod24;
+  long tx = typ(x), s;
   pari_sp av = avma;
-  GEN q24, N, n, m, run;
+  GEN q24, U,a,b,c,d, e;
 
   if (!is_scalar_t(tx)) pari_err(typeer,"trueeta");
   x = upper_half(x, &prec);
-  run = dbltor(1 - 1e-8);
-  m = gen_1;
-  N = gen_0;
-  for(;;)
-  {
-    n = ground( real_i(x) );
-    if (signe(n)) { x = gsub(x,n); N = addii(N, n); }
-    if (gcmp(cxnorm(x), run) > 0) break;
-    x = gdivsg(-1,x);
-    m = gmul(m, gsqrt(mulcxmI(x), prec));
+  x = redtausl2(x, &U);
+  a = gcoeff(U,1,1);
+  b = gcoeff(U,1,2);
+  c = gcoeff(U,2,1);
+  d = gcoeff(U,2,2);
+  /* replace U by U^(-1) */
+  swap(a,d);
+  togglesign_safe(&b);
+  togglesign_safe(&c);
+  s = signe(c);
+  if (!s) {
+    if (signe(d) < 0) togglesign_safe(&b);
+    /* e = exp(I Pi b/12) */
+    e = eiPi(gdivgs(utoi(umodiu(b, 24)), 12), prec);
+  } else {
+    GEN t;
+    if (s < 0) {
+      togglesign_safe(&a);
+      togglesign_safe(&b);
+      togglesign_safe(&c);
+      togglesign_safe(&d);
+    } /* now c > 0 */
+    t = gadd(gdiv(addii(a,d),muliu(c,12)), dedekind_sum(negi(d),c));
+    e = gsqrt(mulcxmI(gadd(gmul(c,x), d)), prec);
+    if (!isintzero(t)) e = gmul(e, eiPi(t, prec));
+    /* e = exp(I Pi (((a+d)/12c) + s(-d,c)) ) sqrt(-i(cx+d))  */
   }
-  Nmod24 = umodiu(N, 24);
-  if (Nmod24) m = gmul(m, e12(Nmod24, prec));
   q24 = gexp(gmul(divru(Pi2n(-2,prec),3), mulcxI(x)), prec); /* e(x/24) */
-  m = gmul(q24, m);
+  e = gmul(q24, e);
   if (24 * gexpo(q24) >= -bit_accuracy(prec))
-    m = gmul(m, inteta( gpowgs(q24,24) ));
-  return gerepileupto(av, m);
+    e = gmul(e, inteta( gpowgs(q24,24) ));
+  return gerepileupto(av, e);
 }
 
 GEN

@@ -1122,9 +1122,10 @@ typedef struct {
 /* compute gamma in SL_2(Z) gamma(t) is in the usual
    fundamental domain. Internal function no check, no garbage. */
 static void
-set_gamma(SL2_red *T)
+set_gamma(GEN t, GEN *pa, GEN *pb, GEN *pc, GEN *pd)
 {
-  GEN t = T->tau, a, b, c, d, run = dbltor(1. - 1e-8);
+  GEN a, b, c, d, run = dbltor(1. - 1e-8);
+  pari_sp av = avma, lim = stack_lim(av, 1); 
 
   a = d = gen_1;
   b = c = gen_0;
@@ -1133,17 +1134,37 @@ set_gamma(SL2_red *T)
     GEN m, n = ground(real_i(t));
     if (signe(n))
     { /* apply T^n */
-      togglesign_safe(&n); t = gadd(t,n);
-      a = addii(a, mulii(n,c));
-      b = addii(b, mulii(n,d));
+      t = gsub(t,n);
+      a = subii(a, mulii(n,c));
+      b = subii(b, mulii(n,d));
     }
     m = cxnorm(t); if (gcmp(m,run) > 0) break;
     t = gneg_i(gdiv(gconj(t), m)); /* apply S */
     togglesign_safe(&c); swap(a,c);
     togglesign_safe(&d); swap(b,d);
+    if (low_stack(lim, stack_lim(av, 1))) {
+      if (DEBUGMEM>1) pari_warn(warnmem, "redimagsl2");
+      gerepileall(av, 5, &t, &a,&b,&c,&d);
+    }
   }
-  T->a = a; T->b = b;
-  T->c = c; T->d = d;
+  *pa = a;
+  *pb = b;
+  *pc = c;
+  *pd = d;
+}
+/* Im t > 0. Return U.t in PSl2(Z)'s standard fundamental domain. 
+ * Set *pU to U. */
+GEN 
+redtausl2(GEN t, GEN *pU)
+{
+  pari_sp av = avma;
+  GEN U, a,b,c,d;
+  set_gamma(t, &a, &b, &c, &d);
+  U = mkmat2(mkcol2(a,c), mkcol2(b,d));
+  t = gdiv(gadd(gmul(a,t), b),
+           gadd(gmul(c,t), d));
+  gerepileall(av, 2, &t, &U);
+  *pU = U; return t;
 }
 
 /* swap w1, w2 so that Im(t := w1/w2) > 0. Set tau = representative of t in
@@ -1157,7 +1178,7 @@ red_modSL2(SL2_red *T)
   if (!s) pari_err(talker,"w1 and w2 R-linearly dependent in elliptic function");
   T->swap = (s < 0);
   if (T->swap) { swap(T->w1, T->w2); T->tau = ginv(T->tau); }
-  set_gamma(T);
+  set_gamma(T->tau, &T->a, &T->b, &T->c, &T->d);
   /* update lattice */
   T->W1 = gadd(gmul(T->a,T->w1), gmul(T->b,T->w2));
   T->W2 = gadd(gmul(T->c,T->w1), gmul(T->d,T->w2));
