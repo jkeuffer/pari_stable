@@ -1125,7 +1125,7 @@ static void
 set_gamma(GEN t, GEN *pa, GEN *pb, GEN *pc, GEN *pd)
 {
   GEN a, b, c, d, run = dbltor(1. - 1e-8);
-  pari_sp av = avma, lim = stack_lim(av, 1); 
+  pari_sp av = avma, lim = stack_lim(av, 1);
 
   a = d = gen_1;
   b = c = gen_0;
@@ -1152,9 +1152,9 @@ set_gamma(GEN t, GEN *pa, GEN *pb, GEN *pc, GEN *pd)
   *pc = c;
   *pd = d;
 }
-/* Im t > 0. Return U.t in PSl2(Z)'s standard fundamental domain. 
+/* Im t > 0. Return U.t in PSl2(Z)'s standard fundamental domain.
  * Set *pU to U. */
-GEN 
+GEN
 redtausl2(GEN t, GEN *pU)
 {
   pari_sp av = avma;

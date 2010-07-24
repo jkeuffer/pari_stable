@@ -2315,12 +2315,12 @@ dedekind_sum(GEN a, GEN b)
   for(;;)
   {
     GEN ab, c;
-    if (equali1(a)) { 
-      last = gdiv(mulii(subis(b,1), subis(b,2)), muliu(b,12)); 
+    if (equali1(a)) {
+      last = gdiv(mulii(subis(b,1), subis(b,2)), muliu(b,12));
       break;
     }
     /* impossible except first time if (a,b) = 1 */
-    if (!signe(a)) { 
+    if (!signe(a)) {
       last = gmul2n(subsi(1,b), -2);
       break;
     }
