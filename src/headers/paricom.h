@@ -63,7 +63,7 @@ extern ulong DEBUGFILES, DEBUGLEVEL, DEBUGMEM, precdl;
 extern THREAD GEN  bernzone;
 extern GEN primetab;
 extern GEN gen_m1,gen_1,gen_2,gen_m2,ghalf,gen_0,gnil;
-extern VOLATILE int PARI_SIGINT_block, PARI_SIGINT_pending;
+extern VOLATILE THREAD int PARI_SIGINT_block, PARI_SIGINT_pending;
 
 extern const long lontyp[];
 extern THREAD void* global_err_data;
