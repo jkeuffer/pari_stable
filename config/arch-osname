@@ -72,6 +72,8 @@ if test -n "$myuname"; then
   gnu*)     # Cover GNU/Hurd, GNU/kFreeBSD and other GNU userland
             arch=`uname -m`;
             case $arch in i386-*) arch=i386;;esac;;
+  aix)      arch=`uname -p`;
+            case $arch in powerpc) arch=ppc;;esac;;
   esac
 fi
 echo $arch-$osname
