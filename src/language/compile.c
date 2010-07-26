@@ -1153,6 +1153,7 @@ compilefunc(entree *ep, long n, int mode, long flag)
               }
               checkdups(varg,vep);
               frame_push(vep);
+              lev=0;
             }
             if (tree[a].f==Fnoarg)
               compilecast(a,Gvoid,type);
@@ -1243,12 +1244,13 @@ compilefunc(entree *ep, long n, int mode, long flag)
         j++;
         switch(c)
         {
-        case 'G':
-        case '&':
         case 'E':
         case 'I':
+          lev=0; /*FALL THROUGH*/
         case 'r':
         case 's':
+        case 'G':
+        case '&':
           op_push(OCpushlong,0,n);
           break;
         case 'n':
