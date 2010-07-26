@@ -2981,6 +2981,7 @@ init_pq(GEN D, struct gpq_data *T)
 static GEN
 gpq(GEN form, struct gpq_data *T, long prec)
 {
+  pari_sp av = avma;
   long a = form[1], b = form[2], c = form[3];
   long p = T->p, q = T->q;
   GEN form2, w, z;
@@ -3022,8 +3023,8 @@ gpq(GEN form, struct gpq_data *T, long prec)
   /* gcd(2a, u) = 2,  w = u mod 2pq, -b mod 2a */
   w = Z_chinese(T->u, stoi(-b), T->pq2, utoipos(a << 1));
   z = double_eta_quotient(utoipos(a), w, T->D, T->p, T->q, T->pq, T->sqd);
-  if (real && typ(z) == t_COMPLEX) z = gel(z, 1);
-  return z;
+  if (real && typ(z) == t_COMPLEX) z = gcopy(gel(z, 1));
+  return gerepileupto(av, z);
 }
 
 /* returns an equation for the Hilbert class field of Q(sqrt(D)), D < 0
