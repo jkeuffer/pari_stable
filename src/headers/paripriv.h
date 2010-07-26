@@ -673,6 +673,7 @@ double  darg(double s, double t);
 
 GEN     bernreal_using_zeta(long n, GEN iz, long prec);
 GEN     czeta(GEN s0, long prec);
+GEN     double_eta_quotient(GEN a, GEN w, GEN D, long p, long q, GEN pq, GEN sqrtD);
 GEN     inv_szeta_euler(long n, double lba, long prec);
 GEN     polylogd0(long m, GEN x, long flag, long prec);
 GEN     twistpartialzeta(GEN q, long f, long c, GEN va, GEN cff);

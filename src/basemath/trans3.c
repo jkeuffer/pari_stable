@@ -2076,6 +2076,82 @@ upper_half(GEN x, long *prec)
   return x;
 }
 
+/* sqrt(3)/2 */
+static GEN
+sqrt32(long prec) { GEN z = sqrtr_abs(stor(3,prec)); setexpo(z, -1); return z; }
+/* exp(i x), x = k pi/12 */
+static GEN
+e12(ulong k, long prec)
+{
+  int s, sPi, sPiov2;
+  GEN z, t;
+  k %= 24;
+  if (!k) return gen_1;
+  if (k == 12) return gen_m1;
+  if (k >12) { s = 1; k = 24 - k; } else s = 0; /* x -> 2pi - x */
+  if (k > 6) { sPi = 1; k = 12 - k; } else sPi = 0; /* x -> pi  - x */
+  if (k > 3) { sPiov2 = 1; k = 6 - k; } else sPiov2 = 0; /* x -> pi/2 - x */
+  z = cgetg(3, t_COMPLEX);
+  switch(k)
+  {
+    case 0: gel(z,1) = icopy(gen_1); gel(z,2) = gen_0; break;
+    case 1: t = gmul2n(addrs(sqrt32(prec), 1), -1);
+      gel(z,1) = sqrtr(t);
+      gel(z,2) = gmul2n(invr(gel(z,1)), -2); break;
+
+    case 2: gel(z,1) = sqrt32(prec);
+            gel(z,2) = real2n(-1, prec); break;
+
+    case 3: gel(z,1) = sqrtr_abs(real2n(-1,prec));
+            gel(z,2) = rcopy(gel(z,1)); break;
+  }
+  if (sPiov2) swap(gel(z,1), gel(z,2));
+  if (sPi) togglesign(gel(z,1));
+  if (s)   togglesign(gel(z,2));
+  return z;
+}
+/* z a t_FRAC */
+static GEN
+eiPi_frac(GEN z, long prec)
+{
+  GEN n, d;
+  ulong q, r;
+  n = gel(z,1);
+  d = gel(z,2);
+  q = udivui_rem(12, d, &r);
+  if (!r) /* relatively frequent case */
+    return e12(q * umodiu(n, 24), prec);
+  n = centermodii(n, shifti(d,1), d);
+  return exp_Ir(divri(mulri(mppi(prec), n), d));
+}
+/* exp(i Pi z), z a t_INT or t_FRAC */
+static GEN
+exp_IPiQ(GEN z, long prec)
+{
+  if (typ(z) == t_INT) return mpodd(z)? gen_m1: gen_1;
+  return eiPi_frac(z, prec);
+}
+/* z a t_COMPLEX */
+static GEN
+exp_IPiC(GEN z, long prec)
+{
+  GEN r, x = gel(z,1), y = gel(z,2);
+  GEN pi, mpi = mppi(prec);
+  togglesign(mpi); /* mpi = -Pi */
+  r = gexp(gmul(mpi, y), prec);
+  switch(typ(x))
+  {
+    case t_INT:
+      if (mpodd(x)) togglesign(r);
+      return r;
+    case t_FRAC:
+      return gmul(r, eiPi_frac(x, prec));
+    default:
+      pi = mpi; togglesign(mpi); /* pi = Pi */
+      return gmul(r, exp_Ir(gmul(pi, x)));
+  }
+}
+
 static GEN
 qq(GEN x, long prec)
 {
@@ -2085,7 +2161,7 @@ qq(GEN x, long prec)
   {
     if (tx == t_PADIC) return x;
     x = upper_half(x, &prec);
-    return gexp(gmul(mulcxI(x), Pi2n(1,prec)), prec); /* e(x) */
+    return exp_IPiC(gmul2n(x,1), prec); /* e(x) */
   }
   if (! ( x = toser_i(x)) ) pari_err(talker,"bad argument for modular function");
   return x;
@@ -2249,58 +2325,6 @@ eta(GEN x, long prec)
   return gerepileupto(av, z);
 }
 
-/* sqrt(3)/2 */
-static GEN
-sqrt32(long prec) { GEN z = sqrtr_abs(stor(3,prec)); setexpo(z, -1); return z; }
-
-/* exp(i x), x = k pi/12 */
-static GEN
-e12(ulong k, long prec)
-{
-  int s, sPi, sPiov2;
-  GEN z, t;
-  k %= 24;
-  if (!k) return gen_1;
-  if (k == 12) return gen_m1;
-  if (k >12) { s = 1; k = 24 - k; } else s = 0; /* x -> 2pi - x */
-  if (k > 6) { sPi = 1; k = 12 - k; } else sPi = 0; /* x -> pi  - x */
-  if (k > 3) { sPiov2 = 1; k = 6 - k; } else sPiov2 = 0; /* x -> pi/2 - x */
-  z = cgetg(3, t_COMPLEX);
-  switch(k)
-  {
-    case 0: gel(z,1) = icopy(gen_1); gel(z,2) = gen_0; break;
-    case 1: t = gmul2n(addrs(sqrt32(prec), 1), -1);
-      gel(z,1) = sqrtr(t);
-      gel(z,2) = gmul2n(invr(gel(z,1)), -2); break;
-
-    case 2: gel(z,1) = sqrt32(prec);
-            gel(z,2) = real2n(-1, prec); break;
-
-    case 3: gel(z,1) = sqrtr_abs(real2n(-1,prec));
-            gel(z,2) = rcopy(gel(z,1)); break;
-  }
-  if (sPiov2) swap(gel(z,1), gel(z,2));
-  if (sPi) togglesign(gel(z,1));
-  if (s)   togglesign(gel(z,2));
-  return z;
-}
-/* expi(i Pi z), z a t_INT or t_FRAC */
-static GEN
-eiPi(GEN z, long prec)
-{
-  GEN n, d;
-  ulong q, r;
-  if (typ(z) == t_INT) return mpodd(z)? gen_m1: gen_1;
-  n = gel(z,1);
-  d = gel(z,2);
-  q = udivui_rem(12, d, &r);
-  if (!r) /* relatively frequent case */
-    return e12(q * umodiu(n, 24), prec);
-  n = centermodii(n, shifti(d,1), d);
-  return exp_Ir(divri(mulri(mppi(prec), n), d));
-
-}
-
 /* a, b t_INT, b > 0, s(a,b) = sum(n = 1, b-1, (n/b)*(frac(a*n/b) - 1/2))
  * Naive quadratic algorithm using reciprocity */
 GEN
@@ -2336,19 +2360,20 @@ dedekind_sum(GEN a, GEN b)
   return gerepileupto(av, S);
 }
 
-/* eta(x); assume Im x >> 0 (e.g. x in SL2's standardfundamental domain)*/
+/* eta(x); assume Im x >> 0 (e.g. x in SL2's standard fundamental domain) */
 static GEN
 eta_reduced(GEN x, long prec)
 {
-  GEN z = gexp(gmul(divru(Pi2n(-2,prec),3), mulcxI(x)), prec); /* e(x/24) */
+  GEN z = exp_IPiC(gdivgs(x, 12), prec); /* e(x/24) */
   if (24 * gexpo(z) >= -bit_accuracy(prec))
     z = gmul(z, inteta( gpowgs(z,24) ));
   return z;
 }
 
-/* x = U.z. Return [s,t] such that eta(z) = eta(x) * sqrt(s) * exp(I Pi t) */
+/* x = U.z (flag = 1), or x = U^(-1).z (flag = 0)
+ * Return [s,t] such that eta(z) = eta(x) * sqrt(s) * exp(I Pi t) */
 static GEN
-eta_correction(GEN x, GEN U)
+eta_correction(GEN x, GEN U, long flag)
 {
   GEN a,b,c,d, s,t;
   long sc;
@@ -2357,9 +2382,11 @@ eta_correction(GEN x, GEN U)
   c = gcoeff(U,2,1);
   d = gcoeff(U,2,2);
   /* replace U by U^(-1) */
-  swap(a,d);
-  togglesign_safe(&b);
-  togglesign_safe(&c);
+  if (flag) {
+    swap(a,d);
+    togglesign_safe(&b);
+    togglesign_safe(&c);
+  }
   sc = signe(c);
   if (!sc) {
     if (signe(d) < 0) togglesign_safe(&b);
@@ -2390,19 +2417,25 @@ trueeta(GEN x, long prec)
   if (!is_scalar_t(typ(x))) pari_err(typeer,"trueeta");
   x = upper_half(x, &prec);
   x = redtausl2(x, &U);
-  st = eta_correction(x, U);
+  st = eta_correction(x, U, 1);
   x = eta_reduced(x, prec);
   s = gel(st, 1);
   t = gel(st, 2);
-  x = gmul(x, eiPi(t, prec));
+  x = gmul(x, exp_IPiQ(t, prec));
   if (s != gen_1) x = gmul(x, gsqrt(s, prec));
   return gerepileupto(av, x);
 }
 
 GEN
 eta0(GEN x, long flag,long prec)
+{ return flag? trueeta(x,prec): eta(x,prec); }
+
+/* U = [a,b;c,d], return c*z +d */
+static GEN
+aut_factor(GEN U, GEN z)
 {
-  return flag? trueeta(x,prec): eta(x,prec);
+  GEN c = gcoeff(U,2,1), d = gcoeff(U,2,2);
+  return gadd(gmul(c,z), d);
 }
 
 GEN
@@ -2410,11 +2443,11 @@ jell(GEN x, long prec)
 {
   long tx = typ(x);
   pari_sp av = avma;
-  GEN p1;
+  GEN x2, h, a,b, Ua,Ub;
 
   if (!is_scalar_t(tx) || tx == t_PADIC)
   {
-    GEN p2, q = qq(x,prec);
+    GEN p1, p2, q = qq(x,prec);
     p1 = gdiv(inteta(gsqr(q)), inteta(q));
     p1 = gmul2n(gsqr(p1),1);
     p1 = gmul(q,gpowgs(p1,12));
@@ -2422,10 +2455,80 @@ jell(GEN x, long prec)
     p1 = gmulsg(48,p1);
     return gerepileupto(av, gadd(p2,p1));
   }
-  p1 = gdiv(trueeta(gmul2n(x,1),prec), trueeta(x,prec));
-  p1 = gsqr(gsqr(gsqr(p1)));
-  p1 = gadd(gmul2n(gsqr(p1),8), ginv(p1));
-  return gerepileupto(av, gpowgs(p1,3));
+  /* Let h = Delta(2x) / Delta(x), then j(x) = (1 + 256h)^3 / h */
+  x = upper_half(x, &prec);
+  a = redtausl2(x, &Ua);
+  x2 = gmul2n(x,1);
+  b = redtausl2(x2, &Ub);
+  if (gequal(a,b)) { /* not infrequent, simplifies! */
+    GEN t = gdiv(aut_factor(Ua,x), aut_factor(Ub,x2));
+    h = gpowgs(t, 12);
+  } else {
+    /* cf eta_reduced, raiѕed to power 24 */
+    GEN q_b = exp_IPiC(gmul2n(b,1), prec); /* e(b) */
+    GEN q_a = exp_IPiC(gmul2n(a,1), prec); /* e(a) */
+    GEN t = gdiv(gmul(aut_factor(Ua,x),  gsqr(inteta(q_b))),
+                 gmul(aut_factor(Ub,x2), gsqr(inteta(q_a))));
+    h = gmul(gdiv(q_b,q_a), gpowgs(t, 12));
+  }
+  return gerepileupto(av, gdiv(gpowgs(gaddgs(gmul2n(h,8), 1), 3), h));
+}
+
+static GEN
+to_form(GEN a, GEN w, GEN C)
+{ return mkvec3(a, w, diviiexact(C, a)); }
+static GEN
+form_to_quad(GEN f, GEN sqrtD)
+{
+  long a = itos(gel(f,1)), a2 = a << 1;
+  GEN b = gel(f,2);
+  return mkcomplex(gdivgs(b, -a2), gdivgs(sqrtD, a2));
+}
+static GEN
+eta_form(GEN f, GEN sqrtD, GEN *s_t, long prec)
+{
+  GEN U, t = form_to_quad(redimagsl2(f, &U), sqrtD);
+  *s_t = eta_correction(t, U, 0);
+  return eta_reduced(t, prec);
+}
+
+/* eta(t/p)eta(t/q) / (eta(t)eta(t/pq)), t = (-w + sqrt(D)) / 2a */
+GEN
+double_eta_quotient(GEN a, GEN w, GEN D, long p, long q, GEN pq, GEN sqrtD)
+{
+  GEN C = shifti(subii(sqri(w), D), -2);
+  GEN d, t, z, zp, zq, zpq, s_t, s_tp, s_tpq, s, sp, spq;
+  long prec = lg(sqrtD);
+
+  z = eta_form(to_form(a, w, C), sqrtD, &s_t, prec);
+  s = gel(s_t, 1);
+  zp = eta_form(to_form(mului(p, a), w, C), sqrtD, &s_tp, prec);
+  sp = gel(s_tp, 1);
+  zpq = eta_form(to_form(mulii(pq, a), w, C), sqrtD, &s_tpq, prec);
+  spq = gel(s_tpq, 1);
+  if (p == q) {
+    z = gdiv(gsqr(zp), gmul(z, zpq));
+    t = gsub(gmul2n(gel(s_tp,2), 1),
+             gadd(gel(s_t,2), gel(s_tpq,2)));
+    if (sp != gen_1) z = gmul(z, sp);
+  } else {
+    GEN s_tq, sq;
+    zq = eta_form(to_form(mului(q, a), w, C), sqrtD, &s_tq, prec);
+    sq = gel(s_tq, 1);
+    z = gdiv(gmul(zp, zq), gmul(z, zpq));
+    t = gsub(gadd(gel(s_tp,2), gel(s_tq,2)),
+             gadd(gel(s_t,2), gel(s_tpq,2)));
+    if (sp != gen_1) z = gmul(z, gsqrt(sp, prec));
+    if (sq != gen_1) z = gmul(z, gsqrt(sq, prec));
+  }
+  d = NULL;
+  if (s != gen_1) d = gsqrt(s, prec);
+  if (spq != gen_1) {
+    GEN x = gsqrt(spq, prec);
+    d = d? gmul(d, x): x;
+  }
+  if (d) z = gdiv(z, d);
+  return gmul(z, exp_IPiQ(t, prec));
 }
 
 /* sqrt(2) eta(2x) / eta(x) */
@@ -2442,10 +2545,10 @@ weberf2(GEN x, long prec)
     z = gen_1;
   else
     z = gdiv(eta_reduced(b,prec), eta_reduced(a,prec));
-  st_a = eta_correction(a, Ua); s_a = gel(st_a, 1);
-  st_b = eta_correction(b, Ub); s_b = gel(st_b, 1);
+  st_a = eta_correction(a, Ua, 1); s_a = gel(st_a, 1);
+  st_b = eta_correction(b, Ub, 1); s_b = gel(st_b, 1);
   t = gsub(gel(st_b,2), gel(st_a,2));
-  z = gmul(z, eiPi(t, prec));
+  z = gmul(z, exp_IPiQ(t, prec));
   if (s_b != gen_1) z = gmul(z, gsqrt(s_b, prec));
   if (s_a != gen_1) z = gdiv(z, gsqrt(s_a, prec));
   return gerepileupto(av, gmul(z, sqrtr(real2n(1, prec))));
@@ -2465,10 +2568,10 @@ weberf1(GEN x, long prec)
     z = gen_1;
   else
     z = gdiv(eta_reduced(b,prec), eta_reduced(a,prec));
-  st_a = eta_correction(a, Ua); s_a = gel(st_a, 1);
-  st_b = eta_correction(b, Ub); s_b = gel(st_b, 1);
+  st_a = eta_correction(a, Ua, 1); s_a = gel(st_a, 1);
+  st_b = eta_correction(b, Ub, 1); s_b = gel(st_b, 1);
   t = gsub(gel(st_b,2), gel(st_a,2));
-  z = gmul(z, eiPi(t, prec));
+  z = gmul(z, exp_IPiQ(t, prec));
   if (s_b != gen_1) z = gmul(z, gsqrt(s_b, prec));
   if (s_a != gen_1) z = gdiv(z, gsqrt(s_a, prec));
   return gerepileupto(av, z);
@@ -2487,10 +2590,10 @@ weberf(GEN x, long prec)
     z = gen_1;
   else
     z = gdiv(eta_reduced(b,prec), eta_reduced(a,prec));
-  st_a = eta_correction(a, Ua); s_a = gel(st_a, 1);
-  st_b = eta_correction(b, Ub); s_b = gel(st_b, 1);
+  st_a = eta_correction(a, Ua, 1); s_a = gel(st_a, 1);
+  st_b = eta_correction(b, Ub, 1); s_b = gel(st_b, 1);
   t = gsub(gsub(gel(st_b,2), gel(st_a,2)), mkfrac(gen_1, utoipos(24)));
-  z = gmul(z, eiPi(t, prec));
+  z = gmul(z, exp_IPiQ(t, prec));
   if (s_b != gen_1) z = gmul(z, gsqrt(s_b, prec));
   if (s_a != gen_1) z = gdiv(z, gsqrt(s_a, prec));
   return gerepileupto(av, z);

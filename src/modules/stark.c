@@ -2889,7 +2889,7 @@ GCD24(long n)
 struct gpq_data {
   long p, q;
   GEN sqd; /* sqrt(D), t_REAL */
-  GEN u;
+  GEN u, D;
   GEN pq, pq2; /* p*q, 2*p*q */
   GEN qfpq ; /* class of \P * \Q */
 };
@@ -2899,7 +2899,7 @@ struct gpq_data {
  *   Ensure that e = 24 / gcd(24, (p-1)(q-1)) = 1 */
 /* D t_INT, discriminant */
 static void
-get_pq(GEN D, struct gpq_data *T)
+init_pq(GEN D, struct gpq_data *T)
 {
   const long Np = 6547;
   GEN listp = cgetg(Np + 1, t_VECSMALL); /* primes p */
@@ -2911,6 +2911,7 @@ get_pq(GEN D, struct gpq_data *T)
   byteptr d = diffptr;
 
   if (maxq > 50000) maxq = 50000;
+  T->D = D;
   T->p = T->q = 0;
   for(;;)
   {
@@ -2978,14 +2979,14 @@ get_pq(GEN D, struct gpq_data *T)
 }
 
 static GEN
-gpq(GEN form, struct gpq_data *D, long prec)
+gpq(GEN form, struct gpq_data *T, long prec)
 {
-  long a = form[1], b = form[2], c = form[3], a2;
-  long p = D->p, q = D->q;
-  GEN form2, w, al, p1,p2,p3,p4;
+  long a = form[1], b = form[2], c = form[3];
+  long p = T->p, q = T->q;
+  GEN form2, w, z;
   int fl, real = 0;
 
-  form2 = qficomp(D->qfpq, mkvec3(stoi(a), stoi(-b), stoi(c)));
+  form2 = qficomp(T->qfpq, mkvec3s(a, -b, c));
   /* form2 and form yield complex conjugate roots : only compute for the
    * lexicographically smallest of the 2 */
   fl = cmpis(gel(form2,1), a);
@@ -3018,17 +3019,11 @@ gpq(GEN form, struct gpq_data *D, long prec)
   }
   /* now (a,b,c) ~ form and (a,pq) = 1 */
 
-  a2 = a << 1; /* gcd(a2, u) = 2 */
-  /* w = u mod 2pq, -b mod 2a */
-  w = Z_chinese(D->u, stoi(-b), D->pq2, utoipos(a2));
-  al = mkcomplex(gdivgs(w, -a2), gdivgs(D->sqd, a2));
-  p1 = trueeta(gdivgs(al,p), prec);
-  p2 = p == q? p1: trueeta(gdivgs(al,q), prec);
-  p3 = trueeta(gdiv(al, D->pq), prec);
-  p4 = trueeta(al, prec);
-  p4 = gdiv(gmul(p1,p2), gmul(p3,p4));
-  if (real && typ(p4) == t_COMPLEX) p4 = gel(p4, 1);
-  return p4;
+  /* gcd(2a, u) = 2,  w = u mod 2pq, -b mod 2a */
+  w = Z_chinese(T->u, stoi(-b), T->pq2, utoipos(a << 1));
+  z = double_eta_quotient(utoipos(a), w, T->D, T->p, T->q, T->pq, T->sqd);
+  if (real && typ(z) == t_COMPLEX) z = gel(z, 1);
+  return z;
 }
 
 /* returns an equation for the Hilbert class field of Q(sqrt(D)), D < 0
@@ -3064,7 +3059,7 @@ quadhilbertimag(GEN D)
     if (i > lim) return GenusFieldQuadImag(D);
   }
   if (DEBUGLEVEL>1) msgtimer("class number = %ld",h);
-  get_pq(D, &T);
+  init_pq(D, &T);
   qfp = primeform_u(D, T.p);
   T.pq =  muluu(T.p, T.q);
   T.pq2 = shifti(T.pq,1);
