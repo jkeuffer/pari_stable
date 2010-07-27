@@ -2430,6 +2430,7 @@ GEN
 eta0(GEN x, long flag,long prec)
 { return flag? trueeta(x,prec): eta(x,prec); }
 
+#if 0
 /* U = [a,b;c,d], return c*z +d */
 static GEN
 aut_factor(GEN U, GEN z)
@@ -2437,17 +2438,19 @@ aut_factor(GEN U, GEN z)
   GEN c = gcoeff(U,2,1), d = gcoeff(U,2,2);
   return signe(c)? gadd(gmul(c,z), d): d;
 }
+#endif
 
 GEN
 jell(GEN x, long prec)
 {
   long tx = typ(x);
   pari_sp av = avma;
-  GEN x2, h, a,b, Ua,Ub;
+  GEN q, h, U;
 
   if (!is_scalar_t(tx) || tx == t_PADIC)
   {
-    GEN p1, p2, q = qq(x,prec);
+    GEN p1, p2;
+    q = qq(x,prec);
     p1 = gdiv(inteta(gsqr(q)), inteta(q));
     p1 = gmul2n(gsqr(p1),1);
     p1 = gmul(q,gpowgs(p1,12));
@@ -2457,45 +2460,23 @@ jell(GEN x, long prec)
   }
   /* Let h = Delta(2x) / Delta(x), then j(x) = (1 + 256h)^3 / h */
   x = upper_half(x, &prec);
-  a = redtausl2(x, &Ua);
-  x2 = gmul2n(x,1);
-  b = redtausl2(x2, &Ub);
-  if (gequal(a,b)) { /* not infrequent, simplifies! */
-    GEN t = gdiv(aut_factor(Ua,x), aut_factor(Ub,x2));
-    h = gpowgs(t, 12);
-  } else {
-    /* cf eta_reduced, raiѕed to power 24
+  x = redtausl2(x, &U); /* forget about Ua : j has weight 0 */
+  { /* cf eta_reduced, raiѕed to power 24
      * Compute
-     *   t = gdiv(gmul(f_a,  gsqr(inteta(q_b))),
-     *            gmul(f_b, gsqr(inteta(q_a))));
+     *   t = (inteta(q(2x)) / inteta(q(x))) ^ 24;
      * then
-     *   h = gmul(gdiv(q_b,q_a), gpowgs(t, 12));
+     *   h = t * (q(2x) / q(x) = t * q(x);
      * but inteta(q) costly and useless if expo(q) << 1  => inteta(q) = 1.
      * log_2 ( exp(-2Pi Im tau) ) < -bit_accuracy(prec)
      * <=> Im tau > bit_accuracy(prec) * log(2) / 2Pi */
     long C = bit_accuracy_mul(prec, LOG2/(2*PI));
-    GEN t, f_a = aut_factor(Ua,x), f_b = aut_factor(Ub,x2);
-    int za = (gcmpgs(gel(a,2), C) > 0); /* then eta(q_a) = 1 */
-    int zb = (gcmpgs(gel(b,2), C) > 0);
-    if (za && zb)
-    { /* no need to compute q_a & q_b, only q_b/q_a */
-      GEN q_b_a = exp_IPiC(gmul2n(gsub(b,a),1), prec); /* e(b-a) */
-      h = gmul(q_b_a, gpowgs(gdiv(f_a,f_b), 12));
-    }
+    q = exp_IPiC(gmul2n(x,1), prec); /* e(x) */
+    if (gcmpgs(gel(x,2), C) > 0) /* eta(q(x)) = 1 : no need to compute q(2x) */
+      h = q;
     else
     {
-      GEN q_a = exp_IPiC(gmul2n(a,1), prec); /* e(a) */
-      GEN q_b = exp_IPiC(gmul2n(b,1), prec); /* e(b) */
-      if (za) {
-          t = gdiv(gmul(f_a,  gsqr(inteta(q_b))), f_b);
-      } else {
-        if (zb)
-          t = gdiv(f_a, gmul(f_b, gsqr(inteta(q_a))));
-        else
-          t = gdiv(gmul(f_a, gsqr(inteta(q_b))),
-                   gmul(f_b, gsqr(inteta(q_a))));
-      }
-      h = gmul(gdiv(q_b,q_a), gpowgs(t, 12));
+      GEN t = gdiv(inteta(gsqr(q)), inteta(q));
+      h = gmul(q, gpowgs(t, 24));
     }
   }
   /* real_1 important ! gaddgs(, 1) could increase the accuracy ! */
