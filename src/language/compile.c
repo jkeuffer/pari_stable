@@ -490,31 +490,34 @@ get_ret_type(const char **p, long arity, Gtype *t, long *flag)
  * mode: Gsmall, Ggen, Gvar, Gvoid
  */
 static void
-compilecast(long n, int type, int mode)
+compilecast_loc(int type, int mode, const char *loc)
 {
   if (type==mode) return;
   switch (mode)
   {
   case Gsmall:
-    if (type==Ggen)        op_push(OCitos,-1,n);
-    else if (type==Gvoid)  op_push(OCpushlong,0,n);
-    else compile_err("this should be a small integer",tree[n].str);
+    if (type==Ggen)        op_push_loc(OCitos,-1,loc);
+    else if (type==Gvoid)  op_push_loc(OCpushlong,0,loc);
+    else compile_err("this should be a small integer",loc);
     break;
   case Ggen:
-    if (type==Gsmall)      op_push(OCstoi,0,n);
-    else if (type==Gvoid)  op_push(OCpushlong,(long)gnil,n);
+    if (type==Gsmall)      op_push_loc(OCstoi,0,loc);
+    else if (type==Gvoid)  op_push_loc(OCpushlong,(long)gnil,loc);
     break;
   case Gvoid:
-    op_push(OCpop, 1,n);
+    op_push_loc(OCpop, 1,loc);
     break;
   case Gvar:
-    if (type==Ggen)        op_push(OCvarn,-1,n);
-    else compile_varerr(tree[n].str);
+    if (type==Ggen)        op_push_loc(OCvarn,-1,loc);
+    else compile_varerr(loc);
      break;
   default:
     pari_err(bugparier,"compilecast, type unknown %ld",mode);
   }
 }
+
+static void
+compilecast(long n, int type, int mode) { return compilecast_loc(type, mode, tree[n].str); }
 
 static entree *
 getfunc(long n)
@@ -1299,7 +1302,7 @@ compilefunc(entree *ep, long n, int mode, long flag)
 }
 
 static GEN
-genclosure(long n, entree *ep)
+genclosure(entree *ep, const char *loc)
 {
   struct codepos pos;
   long nb=0;
@@ -1344,9 +1347,9 @@ genclosure(long n, entree *ep)
   if (*code==0 || (EpSTATIC(ep) && maskarg==0))
     return gen_0;
   getcodepos(&pos);
-  dbgstart=tree[n].str;
-  if (maskarg)  op_push(OCcheckargs,maskarg,n);
-  if (maskarg0) op_push(OCcheckargs0,maskarg0,n);
+  dbgstart = loc;
+  if (maskarg)  op_push_loc(OCcheckargs,maskarg,loc);
+  if (maskarg0) op_push_loc(OCcheckargs0,maskarg0,loc);
   p=code;
   while ((mod=parseproto(&p,&c,NULL))!=PPend)
   {
@@ -1356,18 +1359,18 @@ genclosure(long n, entree *ep)
       switch(c)
       {
       case 'p':
-        op_push(OCprecreal,0,n);
+        op_push_loc(OCprecreal,0,loc);
         break;
       case 'P':
-        op_push(OCprecdl,0,n);
+        op_push_loc(OCprecdl,0,loc);
         break;
       case 'C':
-        op_push(OCpushgen,data_push(pack_localvars()),n);
+        op_push_loc(OCpushgen,data_push(pack_localvars()),loc);
         break;
       case 'f':
         {
           static long foo;
-          op_push(OCpushlong,(long)&foo,n);
+          op_push_loc(OCpushlong,(long)&foo,loc);
           break;
         }
       }
@@ -1387,10 +1390,10 @@ genclosure(long n, entree *ep)
         break;
       case 'M':
       case 'L':
-        op_push(OCitos,-index,n);
+        op_push_loc(OCitos,-index,loc);
         break;
       case 'n':
-        op_push(OCvarn,-index,n);
+        op_push_loc(OCvarn,-index,loc);
         break;
       case '&': case '*':
       case 'I':
@@ -1400,7 +1403,7 @@ genclosure(long n, entree *ep)
         return NULL;
       case 'r':
       case 's':
-        op_push(OCtostr,-index,n);
+        op_push_loc(OCtostr,-index,loc);
         break;
       }
       break;
@@ -1416,7 +1419,7 @@ genclosure(long n, entree *ep)
       case 'V':
         break;
       case 'n':
-        op_push(OCvarn,-index,n);
+        op_push_loc(OCvarn,-index,loc);
         break;
       default:
         pari_err(talker,"Unknown prototype code `D%c' for `%s'",c,ep->name);
@@ -1429,12 +1432,12 @@ genclosure(long n, entree *ep)
         return NULL;
       case 'L':
       case 'M':
-        op_push(OCpushlong,strtol(q+1,NULL,10),n);
-        op_push(OCdefaultitos,-index,n);
+        op_push_loc(OCpushlong,strtol(q+1,NULL,10),loc);
+        op_push_loc(OCdefaultitos,-index,loc);
         break;
       case 'r':
       case 's':
-        op_push(OCtostr,-index,n);
+        op_push_loc(OCtostr,-index,loc);
         break;
       default:
         pari_err(talker,
@@ -1456,9 +1459,9 @@ genclosure(long n, entree *ep)
     index--;
     q = p;
   }
-  op_push(ret_op, (long) ep, n);
-  if (ret_flag==FLnocopy) op_push(OCcopy,0,n);
-  compilecast(n, ret_typ, Ggen);
+  op_push_loc(ret_op, (long) ep, loc);
+  if (ret_flag==FLnocopy) op_push_loc(OCcopy,0,loc);
+  compilecast_loc(ret_typ, Ggen, loc);
   return getfunction(&pos,nb+arity,0,strtoGENstr(ep->name));
 }
 
@@ -1468,7 +1471,7 @@ closurefunc(entree *ep, long n, long mode)
   pari_sp ltop=avma;
   GEN C;
   if (!ep->value) compile_err("unknown function",tree[n].str);
-  C = genclosure(n, ep);
+  C = genclosure(ep,tree[n].str);
   if (!C) compile_err("sorry, closure not implemented",tree[n].str);
   if (C==gen_0)
   {
