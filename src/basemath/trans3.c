@@ -2435,7 +2435,7 @@ static GEN
 aut_factor(GEN U, GEN z)
 {
   GEN c = gcoeff(U,2,1), d = gcoeff(U,2,2);
-  return gadd(gmul(c,z), d);
+  return signe(c)? gadd(gmul(c,z), d): d;
 }
 
 GEN
@@ -2464,14 +2464,42 @@ jell(GEN x, long prec)
     GEN t = gdiv(aut_factor(Ua,x), aut_factor(Ub,x2));
     h = gpowgs(t, 12);
   } else {
-    /* cf eta_reduced, raiѕed to power 24 */
-    GEN q_b = exp_IPiC(gmul2n(b,1), prec); /* e(b) */
-    GEN q_a = exp_IPiC(gmul2n(a,1), prec); /* e(a) */
-    GEN t = gdiv(gmul(aut_factor(Ua,x),  gsqr(inteta(q_b))),
-                 gmul(aut_factor(Ub,x2), gsqr(inteta(q_a))));
-    h = gmul(gdiv(q_b,q_a), gpowgs(t, 12));
+    /* cf eta_reduced, raiѕed to power 24
+     * Compute 
+     *   t = gdiv(gmul(f_a,  gsqr(inteta(q_b))),
+     *            gmul(f_b, gsqr(inteta(q_a)))); 
+     * then 
+     *   h = gmul(gdiv(q_b,q_a), gpowgs(t, 12));
+     * but inteta(q) costly and useless if expo(q) << 1  => inteta(q) = 1.
+     * log_2 ( exp(-2Pi Im tau) ) < -bit_accuracy(prec)
+     * <=> Im tau > bit_accuracy(prec) * log(2) / 2Pi */
+    long C = bit_accuracy_mul(prec, LOG2/(2*PI));
+    GEN t, f_a = aut_factor(Ua,x), f_b = aut_factor(Ub,x2);
+    int za = (gcmpgs(gel(a,2), C) > 0); /* then eta(q_a) = 1 */
+    int zb = (gcmpgs(gel(b,2), C) > 0);
+    if (za && zb)
+    { /* no need to compute q_a & q_b, only q_b/q_a */
+      GEN q_b_a = exp_IPiC(gmul2n(gsub(b,a),1), prec); /* e(b-a) */
+      h = gmul(q_b_a, gpowgs(gdiv(f_a,f_b), 12));
+    }
+    else
+    {
+      GEN q_a = exp_IPiC(gmul2n(a,1), prec); /* e(a) */
+      GEN q_b = exp_IPiC(gmul2n(b,1), prec); /* e(b) */
+      if (za) {
+          t = gdiv(gmul(f_a,  gsqr(inteta(q_b))), f_b);
+      } else {
+        if (zb)
+          t = gdiv(f_a, gmul(f_b, gsqr(inteta(q_a)))); 
+        else
+          t = gdiv(gmul(f_a, gsqr(inteta(q_b))),
+                   gmul(f_b, gsqr(inteta(q_a)))); 
+      }
+      h = gmul(gdiv(q_b,q_a), gpowgs(t, 12));
+    }
   }
-  return gerepileupto(av, gdiv(gpowgs(gaddgs(gmul2n(h,8), 1), 3), h));
+  /* real_1 important ! gaddgs(, 1) could increase the accuracy ! */
+  return gerepileupto(av, gdiv(gpowgs(gadd(gmul2n(h,8), real_1(prec)), 3), h));
 }
 
 static GEN
