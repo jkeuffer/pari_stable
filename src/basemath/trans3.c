@@ -2546,7 +2546,6 @@ weberf2(GEN x, long prec)
 {
   pari_sp av = avma;
   GEN z, t, a,b, Ua,Ub, s_a, s_b, st_a,st_b;
-  if (!is_scalar_t(typ(x))) pari_err(typeer,"weberf2");
   x = upper_half(x, &prec);
   a = redtausl2(x, &Ua);
   b = redtausl2(gmul2n(x,1), &Ub);
@@ -2569,7 +2568,6 @@ weberf1(GEN x, long prec)
 {
   pari_sp av = avma;
   GEN z, t, a,b, Ua,Ub, s_a, s_b, st_a,st_b;
-  if (!is_scalar_t(typ(x))) pari_err(typeer,"weberf1");
   x = upper_half(x, &prec);
   a = redtausl2(x, &Ua);
   b = redtausl2(gmul2n(x,-1), &Ub);
@@ -2591,7 +2589,6 @@ weberf(GEN x, long prec)
 {
   pari_sp av = avma;
   GEN z, t, a,b, Ua,Ub, s_a, s_b, st_a,st_b;
-  if (!is_scalar_t(typ(x))) pari_err(typeer,"weberf");
   x = upper_half(x, &prec);
   a = redtausl2(x, &Ua);
   b = redtausl2(gmul2n(gaddgs(x,1),-1), &Ub);
