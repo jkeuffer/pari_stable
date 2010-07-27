@@ -1727,6 +1727,7 @@ read_main(const char *s)
     else z = gp_main_loop(gp_RECOVER);
   }
   if (!z) fprintferr("... skipping file '%s'\n", s);
+  avma = top;
 }
 
 GEN
