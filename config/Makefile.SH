@@ -332,7 +332,9 @@ cleandesc:
 cleantune:
 	-\$(RM) tune tune-sta tune.o
 
-clean: cleanobj cleantune cleantest cleandesc
+cleanall: cleanobj cleantune cleantest cleandesc
+
+clean: cleanall
 
 # sleep 3 to avoid problems with NFS and slightly out of synch
 # fileserver/host. We are recompiling everything anyway.

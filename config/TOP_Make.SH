@@ -44,7 +44,7 @@ all::
 	@-cd doc && \$(MAKE) doc
 	@\$(MAKE) gp
 
-gp bench test-kernel test-all $top_test_extra $top_dotest_extra install cleanobj cleantest install-bin install-doc install-docpdf install-data install-lib-sta install-bin-sta dobench dyntest-all statest-all tune::
+gp bench test-kernel test-all $top_test_extra $top_dotest_extra install cleanall cleanobj cleantest install-bin install-doc install-docpdf install-data install-lib-sta install-bin-sta dobench dyntest-all statest-all tune::
 	@dir=\`config/objdir\`; echo "Making \$@ in \$\$dir";\\
 	 if test ! -d \$\$dir; then echo "Please run Configure first!"; exit 1; fi;\\
 	cd \$\$dir && \$(MAKE) \$@
@@ -62,7 +62,7 @@ prf gp.prf::
 doc docps docpdf gpman cleandoc::
 	cd doc && \$(MAKE) \$@
 
-clean:: cleandoc cleanobj
+clean:: cleandoc cleanall
 
 distrib:
 	$config_dir/settar \$(VERS) $__status__
