@@ -527,6 +527,8 @@ BA127- padic_sqrt -> Qp_sqrt, padic_sqrtn -> Qp_sqrtn, gammap -> Qp_gamma
   130- any of break / next / return now get out of the break loop debugger
        (as they used to in 2.3)
   131- typing <Return> thrice no longer gets out of the break loop : use break
+  132- faster eta(,1), weber() and quadhilbert() [ rewrite using eta's
+       functional equation explicitely ]
 
   Added
     1- many new benches (make test-all)
