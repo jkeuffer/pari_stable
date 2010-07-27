@@ -280,9 +280,6 @@ all: $exec lib-sta
 lib-sta: \$(LIBPARI_STA)
 lib-dyn: \$(LIBPARI_DYN)
 
-paricfg.h: ../CHANGES
-	-sh $cfg/setversion
-
 \$(LIBPARI_STA): $add_funclist \$(OBJS)
 	-\$(RM) \$@
 	\$(AR) r \$@ \$(OBJS)
@@ -599,6 +596,19 @@ else
   cat >> $file <<EOT
 parilvl0.h: \$(L0MODS)
 	$cfg/genkernel $kern0/asm0.h > parilvl0.h
+EOT
+fi
+
+if test -e $TOP/.svn/entries; then
+  vcfile="../.svn/entries"
+else if test -e $TOP/.git/index; then
+  vcfile="../.git/index"
+  fi
+fi
+if test -n "$vcfile"; then
+  cat >> $file <<EOT
+paricfg.h: $vcfile
+	-sh $cfg/setversion
 EOT
 fi
 
