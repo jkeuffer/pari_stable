@@ -2465,10 +2465,10 @@ jell(GEN x, long prec)
     h = gpowgs(t, 12);
   } else {
     /* cf eta_reduced, raiѕed to power 24
-     * Compute 
+     * Compute
      *   t = gdiv(gmul(f_a,  gsqr(inteta(q_b))),
-     *            gmul(f_b, gsqr(inteta(q_a)))); 
-     * then 
+     *            gmul(f_b, gsqr(inteta(q_a))));
+     * then
      *   h = gmul(gdiv(q_b,q_a), gpowgs(t, 12));
      * but inteta(q) costly and useless if expo(q) << 1  => inteta(q) = 1.
      * log_2 ( exp(-2Pi Im tau) ) < -bit_accuracy(prec)
@@ -2490,10 +2490,10 @@ jell(GEN x, long prec)
           t = gdiv(gmul(f_a,  gsqr(inteta(q_b))), f_b);
       } else {
         if (zb)
-          t = gdiv(f_a, gmul(f_b, gsqr(inteta(q_a)))); 
+          t = gdiv(f_a, gmul(f_b, gsqr(inteta(q_a))));
         else
           t = gdiv(gmul(f_a, gsqr(inteta(q_b))),
-                   gmul(f_b, gsqr(inteta(q_a)))); 
+                   gmul(f_b, gsqr(inteta(q_a))));
       }
       h = gmul(gdiv(q_b,q_a), gpowgs(t, 12));
     }
