@@ -782,6 +782,8 @@ void
 gp_context_save(struct gp_context* rec)
 {
   rec->file = pari_last_tmp_file();
+  if (DEBUGFILES>1)
+    fprintferr("gp_context_save: %s\n", rec->file ? rec->file->name: "NULL");
   rec->listloc = next_block;
   evalstate_save(&rec->eval);
   parsestate_save(&rec->parse);
@@ -804,12 +806,27 @@ gp_context_restore(struct gp_context* rec)
 
   /* delete all "temp" files open since last reference point */
   f = pari_last_tmp_file();
+  if (DEBUGFILES>1) fprintferr("gp_context_restore: deleting open files...\n");
   while (f)
   {
     pariFILE *g = f->prev;
     if (f == rec->file) break;
     pari_fclose(f); f = g;
   }
+  for (; f; f = f->prev) {
+    if (f->type & mf_IN) { 
+      pari_infile = f->file; 
+      if (DEBUGFILES>1)
+        fprintferr("restoring pari_infile to %s\n", f->name);
+      break;
+    }
+  }
+  if (!f) {
+    pari_infile = stdin;
+    if (DEBUGFILES>1)
+      fprintferr("gp_context_restore: restoring pari_infile to stdin\n");
+  }
+  if (DEBUGFILES>1) fprintferr("done\n");
 
   for (i = 0; i < functions_tblsz; i++)
   {
