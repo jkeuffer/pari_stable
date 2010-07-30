@@ -118,7 +118,7 @@ qfr3_pf(struct qfr_data *S, long p)
 
 /* Warning: ex[0] not set in general */
 static GEN
-init_form(struct buch_quad *B, long *ex,
+init_form(struct buch_quad *B, GEN ex,
           GEN (*comp)(GEN,GEN,struct qfr_data *S))
 {
   long i, l = lg(B->powsubFB);
@@ -132,13 +132,13 @@ init_form(struct buch_quad *B, long *ex,
   return F;
 }
 static GEN
-qfr5_factorback(struct buch_quad *B, long *ex) { return init_form(B, ex, &QFR5_comp); }
+qfr5_factorback(struct buch_quad *B, GEN ex) { return init_form(B, ex, &QFR5_comp); }
 
 static GEN
 QFI_comp(GEN x, GEN y, struct qfr_data *S) { (void)S; return qficomp(x,y); }
 
 static GEN
-qfi_factorback(struct buch_quad *B, long *ex) { return init_form(B, ex, &QFI_comp); }
+qfi_factorback(struct buch_quad *B, GEN ex) { return init_form(B, ex, &QFI_comp); }
 
 static GEN
 random_form(struct buch_quad *B, GEN ex,
@@ -236,7 +236,7 @@ END:
 
 /* Check for a "large prime relation" involving q; q may not be prime */
 static long *
-largeprime(struct buch_quad *B, long q, long *ex, long np, long nrho)
+largeprime(struct buch_quad *B, long q, GEN ex, long np, long nrho)
 {
   const long hashv = hash(q);
   long *pt, i, l = lg(B->subFB);
