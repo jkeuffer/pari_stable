@@ -814,8 +814,8 @@ gp_context_restore(struct gp_context* rec)
     pari_fclose(f); f = g;
   }
   for (; f; f = f->prev) {
-    if (f->type & mf_IN) { 
-      pari_infile = f->file; 
+    if (f->type & mf_IN) {
+      pari_infile = f->file;
       if (DEBUGFILES>1)
         fprintferr("restoring pari_infile to %s\n", f->name);
       break;
