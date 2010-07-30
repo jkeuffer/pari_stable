@@ -41,7 +41,8 @@ struct buch_quad
 {
   ulong limhash;
   long KC, KC2, PRECREG;
-  long *primfact, *exprimfact, *FB, *numFB, **hashtab;
+  long *primfact, *exprimfact, **hashtab;
+  GEN FB, numFB;
   GEN powsubFB, vperm, subFB, badprim;
   struct qfr_data *QFR;
 };
