@@ -2875,6 +2875,12 @@ where $x_1$, $x_2$ are the two halves of $x$.
 $(x,y)$ at the prime $p$ (\kbd{NULL} for the place at infinity); $x$ and $y$
 are \typ{INT}s.
 
+\fun{GEN}{sumdedekind}{GEN h, GEN k} returns the Dedekind sum associated to
+the \typ{INT} $h$ and $k$, $k > 0$.
+
+\fun{GEN}{sumdedekind_coprime}{GEN h, GEN k} as \kbd{sumdedekind}, except
+that $h$ and $k$ are assumed to be coprime \typ{INT}s.
+
 \newpage
 \chapter{Level 2 kernel}
 

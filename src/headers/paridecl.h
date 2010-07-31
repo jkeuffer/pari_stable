@@ -2547,6 +2547,8 @@ GEN     nbessel(GEN n, GEN z, long prec);
 GEN     jell(GEN x, long prec);
 GEN     kbessel(GEN nu, GEN gx, long prec);
 GEN     polylog0(long m, GEN x, long flag, long prec);
+GEN     sumdedekind_coprime(GEN h, GEN k);
+GEN     sumdedekind(GEN h, GEN k);
 GEN     szeta(long x, long prec);
 GEN     theta(GEN q, GEN z, long prec);
 GEN     thetanullk(GEN q, long k, long prec);

@@ -2325,39 +2325,39 @@ eta(GEN x, long prec)
   return gerepileupto(av, z);
 }
 
-/* a, b t_INT, b > 0, s(a,b) = sum(n = 1, b-1, (n/b)*(frac(a*n/b) - 1/2))
- * Naive quadratic algorithm using reciprocity */
+/* s(h,k) = sum(n = 1, k-1, (n/k)*(frac(h*n/k) - 1/2))
+ * Knuth's algorithm. h integer, k integer > 0, (h,k) = 1 */
 GEN
-dedekind_sum(GEN a, GEN b)
+sumdedekind_coprime(GEN h, GEN k)
 {
   pari_sp av = avma;
-  GEN S = gen_0, last;
-  long s = 1;
-  /* s(a,b) + s(b,a) = ((a-b)^2 - ab + 1) / 12ab
-   * s(1,b) = (b-1)(b-2)/12b, s(0,b) = (1-b)/4 */
-  a = modii(a,b);
-  for(;;)
-  {
-    GEN ab, c;
-    if (equali1(a)) {
-      last = gdiv(mulii(subis(b,1), subis(b,2)), muliu(b,12));
-      break;
-    }
-    /* impossible except first time if (a,b) = 1 */
-    if (!signe(a)) {
-      last = gmul2n(subsi(1,b), -2);
-      break;
-    }
-    swap(a, b);
-    ab = mulii(a,b);
-    c = addis(subii(sqri(subii(a,b)), ab), 1);
-    c = gdiv(c, muliu(ab,12));
-    S = s > 0? gadd(S, c): gsub(S, c);
-    a = modii(a,b);
-    s = -s;
+  GEN s2, s1 = gen_0, p = gen_1, pp = gen_0, s = gen_1;
+  s2 = h = modii(h, k);
+  while (signe(h)) {
+    GEN r, nexth, a = dvmdii(k, h, &nexth);
+    if (is_pm1(h)) s2 = addii(s2, mulii(p, s));
+    s1 = addii(s1, mulii(a, s));
+    togglesign_safe(&s);
+    k = h; h = nexth;
+    r = addii(mulii(a,p), pp); pp = p; p = r;
   }
-  S = s > 0? gadd(S, last): gsub(S, last);
-  return gerepileupto(av, S);
+  if (signe(s) < 0) s1 = subis(s1, 3);
+  return gerepileupto(av, gdiv(addii(mulii(p,s1), s2), muliu(p,12)));
+}
+GEN
+sumdedekind(GEN h, GEN k)
+{
+  pari_sp av = avma;
+  GEN d;
+  if (typ(h) != t_INT || typ(k) != t_INT) pari_err(typeer, "sumdedekind");
+  d = gcdii(h,k);
+  if (!is_pm1(d))
+    avma = av;
+  else {
+    h = diviiexact(h, d);
+    k = diviiexact(k, d);
+  }
+  return gerepileupto(av, sumdedekind_coprime(h,k));
 }
 
 /* eta(x); assume Im x >> 0 (e.g. x in SL2's standard fundamental domain) */
@@ -2400,7 +2400,7 @@ eta_correction(GEN x, GEN U, long flag)
       togglesign_safe(&d);
     } /* now c > 0 */
     s = mulcxmI(gadd(gmul(c,x), d));
-    t = gadd(gdiv(addii(a,d),muliu(c,12)), dedekind_sum(negi(d),c));
+    t = gadd(gdiv(addii(a,d),muliu(c,12)), sumdedekind_coprime(negi(d),c));
     /* correction : exp(I Pi (((a+d)/12c) + s(-d,c)) ) sqrt(-i(cx+d))  */
   }
   return mkvec2(s, t);
