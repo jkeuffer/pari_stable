@@ -3062,14 +3062,16 @@ pari_kill_file(pariFILE *f)
 {
   if ((f->type & mf_PIPE) == 0)
   {
-    if (fclose(f->file)) pari_warn(warnfile, "close", f->name);
+    if (f->file != stdin && fclose(f->file))
+      pari_warn(warnfile, "close", f->name);
   }
 #ifdef HAVE_PIPES
   else
   {
     if (f->type & mf_FALSE)
     {
-      if (fclose(f->file)) pari_warn(warnfile, "close", f->name);
+      if (f->file != stdin && fclose(f->file))
+        pari_warn(warnfile, "close", f->name);
       if (unlink(f->name)) pari_warn(warnfile, "delete", f->name);
     }
     else

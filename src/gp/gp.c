@@ -1579,7 +1579,6 @@ gp_alarm_fun(void) {
 int
 break_loop(int numerr)
 {
-  static FILE *oldinfile = NULL;
   filtre_t F;
   Buffer *b;
   int sigint = numerr<0, go_on = sigint;
@@ -1595,6 +1594,7 @@ break_loop(int numerr)
   b = filtered_buffer(&F);
   nenv=stack_new(&s_env);
   gp_context_save(&rec);
+  pari_infile = newfile(stdin, "stdin", mf_IN)->file;
   term_color(c_ERR); pari_putc('\n');
   if (sigint)
     print_errcontext("Break loop: type <Return> to continue; 'break' to go back to GP", NULL, NULL);
@@ -1608,8 +1608,6 @@ break_loop(int numerr)
     sprintf(promptbuf, BREAK_LOOP_PROMPTM, s_env.n-1);
     prompt = promptbuf;
   }
-  oldinfile = pari_infile;
-  pari_infile = stdin;
   av = avma;
   for(;;)
   {
@@ -1621,6 +1619,7 @@ break_loop(int numerr)
       if (er<0) { s_env.n=1; longjmp(env[s_env.n-1], er); }
       gp_context_restore(&rec);
       closure_err();
+      pari_infile = newfile(stdin, "stdin", mf_IN)->file;
     }
     term_color(c_NONE);
     if (gp_read_line(&F, prompt))
@@ -1654,7 +1653,7 @@ GP_EOF:
     }
   }
   s_env.n=nenv;
-  pari_infile = oldinfile;
+  gp_context_restore(&rec);
   pop_buffer(); return go_on;
 }
 
