@@ -290,11 +290,18 @@ transc(GEN (*f)(GEN,long), GEN x, long prec)
 /*                            POWERING                             */
 /*                                                                 */
 /*******************************************************************/
+/* x a t_REAL 0, return exp(x) */
+static GEN
+mpexp0(GEN x)
+{
+  long e = expo(x);
+  return e >= 0? real_0_bit(e): real_1(nbits2prec(-e));
+}
 static GEN
 powr0(GEN x)
 {
   long lx = lg(x);
-  return lx == 2? mpexp(x): real_1(lx);
+  return (lx == 2 || !signe(x)) ? mpexp0(x): real_1(lx);
 }
 /* to be called by the generic function gpowgs(x,s) when s = 0 */
 static GEN
@@ -1574,10 +1581,7 @@ mpexp(GEN x)
 
   if (l <= maxss(EXPNEWTON_LIMIT, (1L<<s) + 2))
   {
-    if (l == 2) {
-      long e = expo(x);
-      return e >= 0? real_0_bit(e): real_1(nbits2prec(-e));
-    }
+    if (l == 2 || !signe(x)) return mpexp0(x);
     return mpexp_basecase(x);
   }
   z = cgetr(l); /* room for result */
