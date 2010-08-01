@@ -515,42 +515,63 @@ nupow(GEN x, GEN n)
 
 /* Reduction */
 
+static GEN
+dvmdii_round(GEN b, GEN a, GEN *r)
+{
+  GEN a2 = shifti(a, 1), q = dvmdii(b, a2, r);
+  if (signe(b) >= 0) {
+    if (absi_cmp(*r, a) > 0) { q = addis(q,  1); *r = subii(*r, a2); }
+  } else { /* r <= 0 */
+    if (absi_cmp(*r, a) >= 0){ q = addis(q, -1); *r = addii(*r, a2); }
+  }
+  return q;
+}
 /* reduce b mod 2*a. Update b,c */
-#define REDB_i(a,b,c)\
-  GEN r, a2 = shifti(a, 1), q = dvmdii(b, a2, &r);\
-  if (signe(b) >= 0) {\
-    if (absi_cmp(r, a) > 0) { q = addis(q,  1); r = subii(r, a2); }\
-  } else { /* r <= 0 */\
-    if (absi_cmp(r, a) >= 0){ q = addis(q, -1); r = addii(r, a2); }\
-  }\
-  c = subii(c, mulii(q, shifti(addii(b, r),-1)));\
-  b = r;
-
-#define REDBU(a,b,c, u1,u2) { REDB_i(a,b,c); u2 = subii(u2, mulii(q, u1)); }
-#define REDB(a,b,c) { REDB_i(a,b,c); }
+static void
+REDB(GEN a, GEN *b, GEN *c)
+{
+  GEN r, q = dvmdii_round(*b, a, &r);
+  *c = subii(*c, mulii(q, shifti(addii(*b, r),-1)));
+  *b = r;
+}
+static void
+REDBU(GEN a, GEN *b, GEN *c, GEN u1, GEN *u2)
+{ /* REDB(a,b,c) */
+  GEN r, q = dvmdii_round(*b, a, &r);
+  *c = subii(*c, mulii(q, shifti(addii(*b, r),-1)));
+  *b = r;
+  *u2 = subii(*u2, mulii(q, u1));
+}
 
 /* q t_QFI, return reduced representative and set base change U in Sl2(Z) */
 GEN
 redimagsl2(GEN q, GEN *U)
 {
   GEN Q = cgetg(4, t_QFI);
-  pari_sp av = avma, lim = stack_lim(av, 1);
+  pari_sp av = avma, av2, lim = stack_lim(av, 1);
   GEN z, u1,u2,v1,v2, a = gel(q,1), b = gel(q,2), c = gel(q,3);
   long cmp;
   /* upper bound for size of final (a,b,c) */
   (void)new_chunk(lgefint(a) + lgefint(b) + lgefint(c) + 3);
-  u1 = gen_1;
-  u2 = gen_0; cmp = absi_cmp(a, b);
-  if (cmp <= 0 && (cmp || signe(b) < 0)) REDBU(a,b,c, u1,u2);
+  av2 = avma;
+  u1 = gen_1; u2 = gen_0;
+  cmp = absi_cmp(a, b);
+  if (cmp < 0) 
+    REDBU(a,&b,&c, u1,&u2);
+  else if (cmp == 0 && signe(b) < 0)
+  { /* b = -a */
+    b = negi(b);
+    u2 = gen_1;
+  }
   for(;;)
   {
     cmp = absi_cmp(a, c); if (cmp <= 0) break;
     swap(a,c); b = negi(b);
     z = u1; u1 = u2; u2 = negi(z);
-    REDBU(a,b,c, u1,u2);
+    REDBU(a,&b,&c, u1,&u2);
     if (low_stack(lim, stack_lim(av, 1))) {
       if (DEBUGMEM>1) pari_warn(warnmem, "redimagsl2");
-      gerepileall(av, 5, &a,&b,&c, &u1,&u2);
+      gerepileall(av2, 5, &a,&b,&c, &u1,&u2);
     }
   }
   if (cmp == 0 && signe(b) < 0)
@@ -581,21 +602,25 @@ GEN
 redimag(GEN q)
 {
   GEN Q = cgetg(4, t_QFI);
-  pari_sp av = avma, lim = stack_lim(av, 1);
+  pari_sp av = avma, av2, lim = stack_lim(av, 1);
   GEN a = gel(q,1), b = gel(q,2), c = gel(q,3);
   long cmp;
   /* upper bound for size of final (a,b,c) */
   (void)new_chunk(lgefint(a) + lgefint(b) + lgefint(c) + 3);
+  av2 = avma;
   cmp = absi_cmp(a, b);
-  if (cmp <= 0 && (cmp || signe(b) < 0)) REDB(a,b,c);
+  if (cmp < 0)
+    REDB(a,&b,&c);
+  else if (cmp == 0 && signe(b) < 0)
+    b = negi(b);
   for(;;)
   {
     cmp = absi_cmp(a, c); if (cmp <= 0) break;
     swap(a,c); b = negi(b); /* apply rho */
-    REDB(a,b,c);
+    REDB(a,&b,&c);
     if (low_stack(lim, stack_lim(av, 1))) {
       if (DEBUGMEM>1) pari_warn(warnmem, "redimag");
-      gerepileall(av, 3, &a,&b,&c);
+      gerepileall(av2, 3, &a,&b,&c);
     }
   }
   if (cmp == 0 && signe(b) < 0) b = negi(b);
@@ -622,7 +647,7 @@ rhoimag(GEN x)
   x = cgetg(4, t_QFI);
   (void)new_chunk(lgefint(a) + lgefint(b) + lgefint(c) + 3);
   swap(a,c); b = negi(b);
-  REDB(a, b, c); avma = (pari_sp)x;
+  REDB(a, &b, &c); avma = (pari_sp)x;
   gel(x,1) = icopy(a);
   gel(x,2) = icopy(b);
   gel(x,3) = icopy(c); return x;
