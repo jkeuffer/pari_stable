@@ -502,6 +502,7 @@ void    pari_init_seadata(void);
 
 const char * eng_ord(long i);
 char *  env_ok(const char *s);
+void    filestate_restore(pariFILE *F);
 void    killallfiles(void);
 pariFILE* newfile(FILE *f, const char *name, int type);
 int     popinfile(void);

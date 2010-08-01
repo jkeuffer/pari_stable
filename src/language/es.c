@@ -3177,6 +3177,34 @@ popinfile(void)
   pari_infile = stdin; return 0;
 }
 
+/* delete all "temp" files open since last reference point F */
+void
+filestate_restore(pariFILE *F)
+{
+  pariFILE *f = pari_last_tmp_file();
+  if (DEBUGFILES>1) fprintferr("gp_context_restore: deleting open files...\n");
+  while (f)
+  {
+    pariFILE *g = f->prev;
+    if (f == F) break;
+    pari_fclose(f); f = g;
+  }
+  for (; f; f = f->prev) {
+    if (f->type & mf_IN) {
+      pari_infile = f->file;
+      if (DEBUGFILES>1)
+        fprintferr("restoring pari_infile to %s\n", f->name);
+      break;
+    }
+  }
+  if (!f) {
+    pari_infile = stdin;
+    if (DEBUGFILES>1)
+      fprintferr("gp_context_restore: restoring pari_infile to stdin\n");
+  }
+  if (DEBUGFILES>1) fprintferr("done\n");
+}
+
 static void
 kill_file_stack(pariFILE **s)
 {

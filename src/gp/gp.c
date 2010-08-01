@@ -1505,9 +1505,12 @@ gp_main_loop(long flag)
       /* recover: jump from error [ > 0 ] or allocatemem [ -1 ] */
       if ((er = setjmp(env[s_env.n-1])))
       {
-        if (er>=0) gp_context_restore(&rec);
-        else gp_context_save(&rec);
-
+        if (er>=0)
+          gp_context_restore(&rec);
+        else {
+          filestate_restore(rec.file);
+          gp_context_save(&rec);
+        }
         if (ismain && er > 0) {
           char *s = (char*)global_err_data;
           if (s && *s) fprintferr("%Ps\n", readseq(s));
