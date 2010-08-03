@@ -556,7 +556,7 @@ redimagsl2(GEN q, GEN *U)
   av2 = avma;
   u1 = gen_1; u2 = gen_0;
   cmp = absi_cmp(a, b);
-  if (cmp < 0) 
+  if (cmp < 0)
     REDBU(a,&b,&c, u1,&u2);
   else if (cmp == 0 && signe(b) < 0)
   { /* b = -a */
