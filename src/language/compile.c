@@ -180,13 +180,10 @@ getfunction(struct codepos *pos, long arity, long nbmvar, GEN text)
   gel(cl,2) = cgetg(nchar2nlong(lop)+1, t_STR);
   gel(cl,3) = cgetg(lop,  t_VECSMALL);
   gel(cl,4) = cgetg(ldat, t_VEC);
-  gel(cl,5) = cgetg(4,  t_VEC);
   dbg = cgetg(lop,  t_VECSMALL);
   frpc = cgetg(lfram,  t_VECSMALL);
   fram = cgetg(lfram,  t_VEC);
-  gmael(cl,5,1) = dbg;
-  gmael(cl,5,2) = frpc;
-  gmael(cl,5,3) = fram;
+  gel(cl,5) = mkvec3(dbg, frpc, fram);
   if (text) gel(cl,6) = text;
   if (nbmvar) gel(cl,7) = zerovec(nbmvar);
   s=GSTR(gel(cl,2))-1;
