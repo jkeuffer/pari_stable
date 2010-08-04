@@ -202,10 +202,18 @@ pop_buffer(void)
 
 /* kill all buffers until B is met or nothing is left */
 static void
-kill_all_buffers(Buffer *B)
+kill_buffers_upto(Buffer *B)
 {
   while (s_bufstack.n) {
     if (bufstack[ s_bufstack.n-1 ] == B) break;
+    pop_buffer();
+  }
+}
+static void
+kill_buffers_upto_including(Buffer *B)
+{
+  while (s_bufstack.n) {
+    if (bufstack[ s_bufstack.n-1 ] == B) { pop_buffer(); break; }
     pop_buffer();
   }
 }
@@ -863,7 +871,7 @@ gp_quit(long exitcode)
 {
   free_graph();
   pari_close();
-  kill_all_buffers(NULL);
+  kill_buffers_upto(NULL);
   term_color(c_NONE);
   pariputs_opt("Goodbye!\n");
   if (GP_DATA->flags & TEXMACS) tm_end_output();
@@ -1505,25 +1513,21 @@ gp_main_loop(long flag)
       /* recover: jump from error [ > 0 ] or allocatemem [ -1 ] */
       if ((er = setjmp(env[s_env.n-1])))
       {
-        if (er>=0)
+        if (er > 0) { /* true error */
+          char *s;
           gp_context_restore(&rec);
-        else {
-          filestate_restore(rec.file);
-          gp_context_save(&rec);
-        }
-        if (ismain && er > 0) {
-          char *s = (char*)global_err_data;
+          /* true error not from main instance, let caller sort it out */
+          if (!ismain) { kill_buffers_upto_including(b); return NULL; }
+          s = (char*)global_err_data;
           if (s && *s) fprintferr("%Ps\n", readseq(s));
           GP_DATA->fmt->prettyp = outtyp;
           prune_history(GP_DATA->hist, tloc);
+        } else { /* allocatemem */
+          filestate_restore(rec.file);
+          gp_context_save(&rec);
         }
         avma = av = top;
-        kill_all_buffers(b);
-        if (!ismain && er > 0) {
-          /* true error not from main instance. Cleanup then let caller sort
-           * it out */
-          pop_buffer(); return NULL;
-        }
+        kill_buffers_upto(b);
       }
     }
 
