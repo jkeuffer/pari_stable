@@ -80,6 +80,8 @@ get_modular_eqn(struct meqn *M, ulong ell, long vx, long vy)
 {
   GEN eqn;
   long idx = uprimepi(ell)-1;
+  if (!modular_eqn && !get_seadata(0))
+    pari_err(talker,"ellmodulareqn requires the package seadata");
   if (idx && idx<lg(modular_eqn))
     eqn = gel(modular_eqn, idx);
   else eqn = get_seadata(ell);
@@ -100,8 +102,6 @@ ellmodulareqn(long ell, long vx, long vy)
   if (ell<0) pari_err(talker,"level must be positive");
   if (!uisprime(ell)) pari_err(talker,"level must be prime");
 
-  if (!modular_eqn && !get_seadata(0))
-    pari_err(talker,"ellmodulareqn requires the package seadata");
   res = cgetg(3, t_VEC);
   if (!get_modular_eqn(&meqn, ell, vx, vy))
     pari_err(talker,"modular equation of level %ld is not available", ell);
