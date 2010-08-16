@@ -1194,7 +1194,7 @@ gen_z_divides(GEN x, ulong q, long imin)
     if (!signe(xi)) { gel(y,i) = xi; continue; }
     gel(y,i) = diviu_rem(xi, q, &r);
     if (r) { avma = (pari_sp)(y+l); return NULL; }
-    affectsign(xi, gel(y,i));
+    affectsign_safe(xi, &gel(y,i));
   }
   return y;
 }
@@ -1336,7 +1336,7 @@ gen_lvalrem(GEN x, ulong p, GEN *px, long imin)
     {
       ulong r; gel(y,i) = diviu_rem(gel(x,i), p, &r);
       if (r) { *px = x; return v; }
-      affectsign(gel(x,i), gel(y,i));
+      affectsign_safe(gel(x,i), &gel(y,i));
     }
     swap(x, y);
   }

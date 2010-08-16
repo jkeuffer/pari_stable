@@ -202,6 +202,12 @@ affectsign(GEN x, GEN y)
 {
   y[1] = (x[1] & SIGNBITS) | (y[1] & ~SIGNBITS);
 }
+/* copies sign in place, except for universal constants */
+INLINE void
+affectsign_safe(GEN x, GEN *py)
+{
+  if (((*py)[1] ^ x[1]) & HIGHBIT) togglesign_safe(py);
+}
 /*******************************************************************/
 /*                                                                 */
 /*                     GEN -> LONG, LONG -> GEN                    */
