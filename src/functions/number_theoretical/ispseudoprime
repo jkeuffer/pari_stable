@@ -25,9 +25,8 @@ Doc: true (1) if $x$ is a strong pseudo
 
  There are no known composite numbers passing this test, although it is
  expected that infinitely many such numbers exist. In particular, all
- composites $\leq 10^{15}$ are correctly detected (checked using
- Galway's list of strong 2-pseudoprimes at
- \kbd{http://oldweb.cecm.sfu.ca/pseudoprime/}).
+ composites $\leq 2^{64}$ are correctly detected (checked using
+ \kbd{http://www.cecm.sfu.ca/Pseudoprimes/index-2-to-64.html}).
 
  If $\fl > 0$, checks whether $x$ is a strong Miller-Rabin pseudo prime  for
  $\fl$ randomly chosen bases (with end-matching to catch square roots of $-1$).

@@ -529,6 +529,8 @@ BA127- padic_sqrt -> Qp_sqrt, padic_sqrtn -> Qp_sqrtn, gammap -> Qp_gamma
   131- typing <Return> thrice no longer gets out of the break loop : use break
   132- faster eta(,1), weber() and quadhilbert() [ rewrite using eta's
        functional equation explicitely ]
+  133- checked that no 2-strong pseudoprime passes BSPW primality test up to
+       2^64 (use Feitsma's list, extending Galway's)
 
   Added
     1- many new benches (make test-all)

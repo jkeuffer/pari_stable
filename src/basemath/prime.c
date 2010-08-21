@@ -542,24 +542,16 @@ BPSW_psp_nosmalldiv(GEN N)
 /**                                                                   **/
 /***********************************************************************/
 /* Assume x BPSW pseudoprime. Check whether it's small enough to be certified
- * prime (< 10^15). Reference for strong 2-pseudoprimes: William Galway's list
- * at http://oldweb.cecm.sfu.ca/pseudoprime/, extending Richard Pinch (<10^13)*/
+ * prime (< 2^64). Reference for strong 2-pseudoprimes:
+ *   http://www.cecm.sfu.ca/Pseudoprimes/index-2-to-64.html */
 static int
 BPSW_isprime_small(GEN x)
 {
   long l = lgefint(x);
 #ifdef LONG_IS_64BIT
-  return (l == 3 && x[2] < 1000000000000000); /* 10^15 */
+  return (l == 3);
 #else
-  if (l < 4) return 1;
-  if (l == 4)
-  {
-    pari_sp av = avma;
-    long t = cmpii(x, uu32toi(0x38d7eUL, 0xa4c68000UL)); /* 10^15 */
-    avma = av;
-    if (t < 0) return 1;
-  }
-  return 0;
+  return (l <= 4);
 #endif
 }
 
