@@ -663,7 +663,7 @@ aide0(const char *s0, int flag)
   }
   /* Get meaningful answer on '\ps 5' (e.g. from <F1>) */
   if (*s == '\\') { char *t = s+1; skip_alpha(t); *t = '\0'; }
-  if (isalpha(*s)) cut_trailing_garbage(s);
+  if (isalpha((int)*s)) cut_trailing_garbage(s);
 
   if (flag & h_APROPOS) { external_help(s,-1); return; }
   if (long_help && (n = ok_external_help(&s))) { external_help(s,n); return; }

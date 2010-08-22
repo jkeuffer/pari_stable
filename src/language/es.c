@@ -622,7 +622,7 @@ absrtostr_width_frac(GEN x, int width_frac)
 static char *
 absrtostr(GEN x, int sp, char FORMAT, long wanted_dec)
 {
-  const char format = tolower(FORMAT), exp_char = (format == FORMAT)? 'e': 'E';
+  const char format = (char)tolower((int)FORMAT), exp_char = (format == FORMAT)? 'e': 'E';
   long beta, ls, point, lx, sx = signe(x), ex = expo(x);
   char *s, *buf, *buf0;
   GEN z;
@@ -2545,7 +2545,7 @@ bruti_intern(GEN g, pariout_t *T, outString *S, int addsign)
     {
       pari_sp av = avma;
       if (addsign && signe(g) < 0) str_putc(S, '-');
-      str_puts(S, absrtostr(g, T->sp, toupper(T->format), T->sigd) );
+      str_puts(S, absrtostr(g, T->sp, (char)toupper((int)T->format), T->sigd) );
       avma = av; break;
     }
 

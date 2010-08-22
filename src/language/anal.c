@@ -502,7 +502,7 @@ skipexponent(char **lex)
   {
     ++*lex;
     if ( **lex=='+' || **lex=='-' ) ++*lex;
-    if (!isdigit(**lex))
+    if (!isdigit((int)**lex))
     {
       *lex=old;
       return KINTEGER;
