@@ -599,9 +599,9 @@ parilvl0.h: \$(L0MODS)
 EOT
 fi
 
-if test -e $TOP/.svn/entries; then
+if test -f $TOP/.svn/entries; then
   vcfile="../.svn/entries"
-else if test -e $TOP/.git/index; then
+else if test -f $TOP/.git/index; then
   vcfile="../.git/index"
   fi
 fi
