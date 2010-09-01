@@ -131,6 +131,7 @@ rand_g(long n, long type)
     case t_REAL: return rand_REAL(n);
     case t_Flx:  return rand_Flx(n);
     case t_NFlx: return rand_NFlx(n);
+    case t_FpX:  return rand_FpX(n);
     case t_NFpX: return rand_NFpX(LARGE_mod,n);
   }
   return NULL;
