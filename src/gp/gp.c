@@ -1962,6 +1962,7 @@ main(int argc, char **argv)
   cb_pari_ask_confirm = gp_ask_confirm;
   gp_expand_path(GP_DATA->path);
 
+  TIMERstart(GP_DATA->T);
   if (!(GP_DATA->flags & QUIET)) gp_head();
   if (s_A.n)
   {
