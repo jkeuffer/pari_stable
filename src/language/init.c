@@ -785,6 +785,7 @@ gp_context_save(struct gp_context* rec)
   if (DEBUGFILES>1)
     fprintferr("gp_context_save: %s\n", rec->file ? rec->file->name: "NULL");
   rec->listloc = next_block;
+  rec->err_catch = s_ERR_CATCH.n;
   evalstate_save(&rec->eval);
   parsestate_save(&rec->parse);
 }
@@ -803,6 +804,7 @@ gp_context_restore(struct gp_context* rec)
   evalstate_restore(&rec->eval);
   parsestate_restore(&rec->parse);
   filestate_restore(rec->file);
+  s_ERR_CATCH.n = rec->err_catch;
 
   for (i = 0; i < functions_tblsz; i++)
   {
@@ -862,9 +864,9 @@ err_recover(long numerr)
   evalstate_reset();
   parsestate_reset();
   initout(0);
-  dbg_release();
   killallfiles();
-  s_ERR_CATCH.n = 0; /* untrapped error: kill all error handlers */
+  s_ERR_CATCH.n = 0;
+  dbg_release();
   global_err_data = NULL;
   fprintferr("\n"); flusherr();
 
