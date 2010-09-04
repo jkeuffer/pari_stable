@@ -165,7 +165,7 @@ if test -n "$tune"; then
   echo "Building and tuning PARI (this may take a while)"
   echo
   (cd $objdir; rm -f parilvl1.h pariinl.h;\
-  make tune; tune -t > tune.h;\
+  make tune; tune -t > tune.h.new && mv tune.h.new tune.h;\
   rm -f parilvl1.h pariinl.h; make gp)
 else
   echo $n "Shall we try to build pari $version.$patch ($status) now (y/n)? $c"
