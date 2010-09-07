@@ -2614,13 +2614,13 @@ _gtoser(GEN x, long v, long prec)
       if (i == lx)
       {
         GEN z = cgetg(3, t_SER);
-        z[1] = evalsigne(0) | _evalvalp(i-2) | evalvarn(v);
+        z[1] = evalsigne(0) | evalvalp(i-2) | evalvarn(v);
         gel(z,2) = gcopy(y); return z;
       }
 
       lx -= i-2; x += i-2;
       y = cgetg(lx,t_SER);
-      y[1] = evalsigne(1) | _evalvalp(i-1) | evalvarn(v);
+      y[1] = evalsigne(1) | evalvalp(i-1) | evalvarn(v);
       for (j=2; j<lx; j++) gel(y,j) = gcopy(gel(x,j));
       break;
 
