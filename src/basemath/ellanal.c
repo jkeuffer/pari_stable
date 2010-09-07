@@ -434,7 +434,7 @@ ellL1(GEN E, long r, long prec)
   struct ellld el;
   struct bg_data bg;
   long parity;
-
+  if (r<0) pari_err(talker,"derivative order must be nonnegative");
   init_el(&el, E, &parity, prec);
   if (parity != (r & 1)) return gen_0;
   return gerepileuptoleaf(av, ellL1_i(&el, &bg, r, NULL, prec));
