@@ -3174,9 +3174,9 @@ GEN
 Buchall_param(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long prec)
 {
   pari_sp av0 = avma, av, av2;
-  long PRECREG, N, R1, R2, RU, LIMC, LIMC2, lim, zc, i;
+  long PRECREG, N, R1, R2, RU, LIMC, LIMC2, zc, i;
   long nreldep, sfb_trials, need, old_need = -1, precdouble = 0, precadd = 0;
-  double drc, LOGD, LOGD2;
+  double lim, drc, LOGD, LOGD2;
   GEN fu, zu, nf, D, A, W, R, Res, z, h, PERM;
   GEN res, L, resc, B, C, C0, lambda, dep, clg1, clg2, Vbase;
   const char *precpb = NULL;
@@ -3211,8 +3211,8 @@ Buchall_param(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long
   D = absi(nf_get_disc(nf)); drc = gtodouble(D);
   if (DEBUGLEVEL) fprintferr("R1 = %ld, R2 = %ld\nD = %Ps\n",R1,R2, D);
   LOGD = log(drc); LOGD2 = LOGD*LOGD;
-  lim = (long) (exp(-N + R2 * log(4/PI)) * sqrt(2*PI*N*drc));
-  if (lim < 3) lim = 3;
+  lim = exp(-N + R2 * log(4/PI)) * sqrt(2*PI*N*drc);
+  if (lim < 3.) lim = 3.;
   if (cbach > 12.) {
     if (cbach2 < cbach) cbach2 = cbach;
     cbach = 12.;
@@ -3240,7 +3240,7 @@ START:
   fact = (FACT*)stackmalloc((F.KC+1)*sizeof(FACT));
   if (!Res) goto START;
   GRHcheck = NULL;
-  if (!subFBgen(&F, minss(lim,LIMC2) + 0.5, minsFB)) goto START;
+  if (!subFBgen(&F, mindd(lim,LIMC2) + 0.5, minsFB)) goto START;
   PERM = leafcopy(F.perm); /* to be restored in case of precision increase */
   av2 = avma;
   init_rel(&cache, &F, RELSUP + RU-1); /* trivial relations */
