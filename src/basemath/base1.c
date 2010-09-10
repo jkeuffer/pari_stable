@@ -1080,7 +1080,7 @@ tests_OK(GEN a, GEN nfa, GEN b, GEN nfb, long fliso)
     if (fliso)
       return (r1a == r1b && equalii(nf_get_disc(nfa), nf_get_disc(nfb)));
     else
-      return (r1a <= r1b * q &&
+      return (r1b <= r1a * q &&
               dvdii(nf_get_disc(nfb), powiu(nf_get_disc(nfa), q)));
   }
   da = nfa? nf_get_disc(nfa): ZX_disc(a);
