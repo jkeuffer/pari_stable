@@ -599,9 +599,9 @@ sd_secure(const char *v, long flag)
 
 static THREAD long dbg = -1;
 void
-dbg_block() { if (DEBUGLEVEL) { dbg = DEBUGLEVEL; DEBUGLEVEL = 0; } }
+dbg_block(void) { if (DEBUGLEVEL) { dbg = DEBUGLEVEL; DEBUGLEVEL = 0; } }
 void
-dbg_release() { if (dbg >= 0) { DEBUGLEVEL = dbg; dbg = -1; } }
+dbg_release(void) { if (dbg >= 0) { DEBUGLEVEL = dbg; dbg = -1; } }
 
 GEN
 sd_debug(const char *v, long flag)
