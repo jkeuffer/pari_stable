@@ -98,6 +98,7 @@ struct gp_context
   struct pari_evalstate eval;
   struct pari_parsestate parse;
   pariFILE *file;
+  void *err_data;
 };
 
 typedef struct PariOUT {

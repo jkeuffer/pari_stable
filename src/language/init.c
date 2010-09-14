@@ -786,6 +786,7 @@ gp_context_save(struct gp_context* rec)
     fprintferr("gp_context_save: %s\n", rec->file ? rec->file->name: "NULL");
   rec->listloc = next_block;
   rec->err_catch = s_ERR_CATCH.n;
+  rec->err_data  = global_err_data;
   evalstate_save(&rec->eval);
   parsestate_save(&rec->parse);
 }
@@ -805,6 +806,7 @@ gp_context_restore(struct gp_context* rec)
   parsestate_restore(&rec->parse);
   filestate_restore(rec->file);
   s_ERR_CATCH.n = rec->err_catch;
+  global_err_data = rec->err_data;
 
   for (i = 0; i < functions_tblsz; i++)
   {
