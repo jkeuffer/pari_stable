@@ -1514,7 +1514,6 @@ gp_main_loop(long flag)
       if ((er = setjmp(env[s_env.n-1])))
       {
         if (er > 0) { /* true error */
-          char *s;
           gp_context_restore(&rec);
           /* true error not from main instance, let caller sort it out */
           if (!ismain) { kill_buffers_upto_including(b); return NULL; }
