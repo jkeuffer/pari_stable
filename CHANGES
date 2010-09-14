@@ -232,6 +232,7 @@ BA174- factorpadic(,,,1) was actually using ROUND4 [#1064 again]
   175- nfbasis(x^2+1,,factor(-4)) --> oo loop [#1072]
   176- factorpadic: incorrect conversion from ZX to ZpX [#1073]
   177- bnfinit() : possible overflow in double -> long conversion [#1099]
+  178- various inconsistencies in polinterpolate() [#1096]
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]

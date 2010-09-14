@@ -1002,6 +1002,7 @@ polint_i(GEN X, GEN Y, GEN x, long n, GEN *ptdy)
   long i, m, ns = 0;
   pari_sp av = avma;
   GEN y, c, d, dy = NULL; /* gcc -Wall */
+  int no_dy = 1;
 
   if (!X)
   {
@@ -1010,10 +1011,10 @@ polint_i(GEN X, GEN Y, GEN x, long n, GEN *ptdy)
     X++;
   }
   switch(typ(x)) /* FIXME: should only be done if x,X,Y contain t_REALs */
-  {
     case t_INT: case t_REAL: case t_FRAC: case t_COMPLEX: case t_QUAD:
     {
       GEN D = NULL;
+      no_dy = 0;
       for (i=0; i<n; i++)
       {
         GEN t = gabs(gsub(x,gel(X,i)), DEFAULTPREC);
@@ -1021,7 +1022,6 @@ polint_i(GEN X, GEN Y, GEN x, long n, GEN *ptdy)
       }
       /* X[ns] is closest to x */
     }
-  }
   c = new_chunk(n);
   d = new_chunk(n); for (i=0; i<n; i++) c[i] = d[i] = Y[i];
   y = gel(d,ns--);
@@ -1040,6 +1040,7 @@ polint_i(GEN X, GEN Y, GEN x, long n, GEN *ptdy)
     y = gadd(y,dy);
   }
   if (!ptdy) return gerepileupto(av, y);
+  if (no_dy) { *ptdy = gen_0; return gerepileupto(av, y); }
   *ptdy = dy;
   gerepileall(av, 2, &y, ptdy);
   return y;
@@ -1058,9 +1059,12 @@ polint(GEN X, GEN Y, GEN x, GEN *ptdy)
     pari_err(talker,"different lengths in polinterpolate");
   if (lx <= 2)
   {
-    if (lx == 1) pari_err(talker,"no data in polinterpolate");
-    Y = gcopy(gel(Y,1)); if (ptdy) *ptdy = Y;
-    return Y;
+    if (ptdy) *ptdy = gen_0;
+    if (lx == 1) return zeropol(0);
+    Y = gel(Y,1);
+    if (gvar(Y) == 0)
+      pari_err(talker,"polynomials in 'x in polinterpolate's data");
+    return scalarpol(gel(Y,1), 0);
   }
   if (!x) x = pol_x(0);
   return polint_i(X? X+1: NULL,Y+1,x,lx-1,ptdy);
