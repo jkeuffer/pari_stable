@@ -1518,8 +1518,6 @@ gp_main_loop(long flag)
           gp_context_restore(&rec);
           /* true error not from main instance, let caller sort it out */
           if (!ismain) { kill_buffers_upto_including(b); return NULL; }
-          s = (char*)global_err_data;
-          if (s && *s) fprintferr("%Ps\n", readseq(s));
           GP_DATA->fmt->prettyp = outtyp;
           prune_history(GP_DATA->hist, tloc);
         } else { /* allocatemem */
