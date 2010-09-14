@@ -1197,12 +1197,6 @@ testprimes(GEN bnf, GEN BOUND)
 /**** logarithmic embeddings ****/
 static GEN famat_to_arch(GEN nf, GEN fa, long prec);
 static GEN
-mylog(GEN x, long prec)
-{
-  if (gequal0(x)) pari_err(precer,"get_arch");
-  return glog(x,prec);
-}
-static GEN
 triv_arch(GEN nf) { return zerovec(lg(nf_get_roots(nf))-1); }
 
 /* Get archimedean components: [e_i Log( sigma_i(X) )], where X = primpart(x),
@@ -1217,9 +1211,10 @@ get_arch(GEN nf, GEN x, long prec)
   if (typ(x) != t_COL) return triv_arch(nf);
   x = RgM_RgC_mul(nf_get_M(nf), Q_primpart(x));
   l = lg(x);
+  for (i=1; i < l; i++) if (gequal0(gabs(gel(x,i),prec))) return NULL;
   v = cgetg(l,t_VEC); R1 = nf_get_r1(nf);
-  for (i=1; i<=R1; i++) gel(v,i) = mylog(gel(x,i),prec);
-  for (   ; i < l; i++) gel(v,i) = gmul2n(mylog(gel(x,i),prec),1);
+  for (i=1; i<=R1; i++) gel(v,i) = glog(gel(x,i),prec);
+  for (   ; i < l; i++) gel(v,i) = gmul2n(glog(gel(x,i),prec),1);
   return v;
 }
 static GEN
@@ -1237,7 +1232,8 @@ famat_to_arch(GEN nf, GEN fa, long prec)
     GEN t, x = nf_to_scalar_or_basis(nf, gel(g,i));
     /* multiplicative arch would be better (save logs), but exponents overflow
      * [ could keep track of expo separately, but not worth it ] */
-    t = get_arch(nf,x,prec); if (gel(t,1) == gen_0) continue; /* rational */
+    t = get_arch(nf,x,prec); if (!t) return NULL;
+    if (gel(t,1) == gen_0) continue; /* rational */
     t = RgV_Rg_mul(t, gel(e,i));
     y = y? RgV_add(y,t): t;
   }
@@ -1510,11 +1506,15 @@ isprincipalall(GEN bnf, GEN x, long *ptprec, long flag)
     if (lW) col = gadd(col, act_arch(A, ga));
     if (c)  col = gadd(col, act_arch(Q, GD));
   }
-  if (xar) col = gadd(col, get_arch(nf, xar, prec));
+  if (xar)
+  {
+    GEN t = get_arch(nf, xar, prec);
+    col = t? gadd(col, t):NULL;
+  }
 
   /* find coords on Zk; Q = N (x / \prod gj^ej) = N(alpha), denom(alpha) | d */
   Q = gdiv(ZM_det_triangular(x), get_norm_fact(gen, ex, &d));
-  col = isprincipalarch(bnf, col, Q, gen_1, d, &e);
+  col = col?isprincipalarch(bnf, col, Q, gen_1, d, &e):NULL;
   if (col && !fact_ok(nf,x, col,gen,ex)) col = NULL;
   if (!col && !ZV_equal0(ex))
   {
@@ -2582,7 +2582,7 @@ static void
 class_group_gen(GEN nf,GEN W,GEN C,GEN Vbase,long prec, GEN nf0,
                 GEN *ptclg1,GEN *ptclg2)
 {
-  GEN z,G,Ga,ga,GD,cyc,X,Y,D,U,V,Ur,Ui,Uir,I,J;
+  GEN z,G,Ga,ga,GD,cyc,X,Y,D,U,V,Ur,Ui,Uir,I,J,arch;
   long i,j,lo,lo0;
 
   if (DEBUGLEVEL)
@@ -2628,7 +2628,9 @@ class_group_gen(GEN nf,GEN W,GEN C,GEN Vbase,long prec, GEN nf0,
       neg_row(Ur,j); gel(X,j) = ZC_neg(gel(X,j));
     }
     G[j] = J[1]; /* generator, order cyc[j] */
-    gel(Ga,j) = gneg(famat_to_arch(nf, gel(J,2), prec));
+    arch = famat_to_arch(nf, gel(J,2), prec);
+    if (!arch) pari_err(precer,"class_group_gen");
+    gel(Ga,j) = gneg(arch);
   }
   /* at this point Y = PY, Ur = PUr, V = VP, X = XP */
 
@@ -2814,6 +2816,7 @@ get_archclean(GEN nf, GEN x, long prec, int units)
   for (k=1; k<la; k++)
   {
     GEN c = get_arch(nf, gel(x,k), prec);
+    if (!c) return NULL;
     if (!units) {
       c = cleanarch(c, N, prec);
       if (!c) return NULL;
@@ -2833,7 +2836,7 @@ my_class_group_gen(GEN bnf, long prec, GEN nf0, GEN *ptcl, GEN *ptcl2)
 GEN
 bnfnewprec_shallow(GEN bnf, long prec)
 {
-  GEN nf0 = bnf_get_nf(bnf), nf, res, funits, mun, matal, clgp, clgp2, y;
+  GEN nf0 = bnf_get_nf(bnf), nf, res, funits, mun, gac, matal, clgp, clgp2, y;
   long r1, r2, prec1;
 
   nf_get_sign(nf0, &r1, &r2);
@@ -2842,19 +2845,25 @@ bnfnewprec_shallow(GEN bnf, long prec)
   prec1 = prec;
   if (r1 + r2 > 1) {
     long e = gexpo(bnf_get_logfu(bnf)) + 1 - TWOPOTBITS_IN_LONG;
-    if (e >= 0) prec += 1L << e;
+    if (e >= 0) prec += (e>>TWOPOTBITS_IN_LONG);
   }
   if (DEBUGLEVEL && prec1!=prec) pari_warn(warnprec,"bnfnewprec",prec);
-  nf = nfnewprec_shallow(nf0,prec);
-  mun = get_archclean(nf,funits,prec,1);
-  if (!mun) pari_err(precer,"bnfnewprec");
-  if (prec != prec1) { mun = gprec_w(mun,prec1); prec = prec1; }
   matal = check_and_build_matal(bnf);
-
+  for(;;)
+  {
+    pari_sp av=avma;
+    nf = nfnewprec_shallow(nf0,prec);
+    mun = get_archclean(nf,funits,prec,1);
+    gac = get_archclean(nf,matal,prec,0);
+    if (mun && gac) break;
+    prec++; avma = av;
+    if (DEBUGLEVEL) pari_warn(warnprec,"bnfnewprec(extra)",prec);
+  }
+  if (prec != prec1)
+    { mun = gprec_w(mun,prec1); gac = gprec_w(gac,prec1); prec = prec1; }
   y = leafcopy(bnf);
   gel(y,3) = mun;
-  gel(y,4) = get_archclean(nf,matal,prec,0);
-  if (!gel(y,4)) pari_err(precer,"bnfnewprec");
+  gel(y,4) = gac;
   gel(y,7) = nf;
   my_class_group_gen(y,prec,nf0, &clgp,&clgp2);
   res = leafcopy(gel(bnf,8));
