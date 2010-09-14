@@ -3340,14 +3340,11 @@ polcompositum0(GEN A, GEN B, long flall)
   if (flall)
   { /* a,b,c root of A,B,C = compositum, c = b - k a */
     long i, l = lg(C);
-    GEN a, b, H0 = gel(LPRS,1), H1 = gel(LPRS,2);
+    GEN a, b, mH0 = RgX_neg(gel(LPRS,1)), H1 = gel(LPRS,2);
     for (i=1; i<l; i++)
-    { /* invmod possibly very costly */
-      GEN D = gel(C,i), invH1 = QXQ_inv(H1, D);
-      if (typ(H0) == t_POL)
-        a = RgXQ_mul(RgX_neg(H0), invH1, D);
-      else /* scalar */
-        a = RgX_Rg_mul(invH1, gneg(H0));
+    {
+      GEN D = gel(C,i); 
+      a = RgXQ_mul(mH0, QXQ_inv(H1, D), D);
       b = gadd(pol_x(v), gmulsg(k,a));
       gel(C,i) = mkvec4(D, mkpolmod(a,D), mkpolmod(b,D), stoi(-k));
     }

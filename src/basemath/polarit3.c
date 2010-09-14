@@ -2347,7 +2347,7 @@ check_theta(ulong bound) {
 byteptr
 init_modular(ulong *p) { *p = 27449; return diffptr + 3000; }
 
-/* Assume A in Z[Y], B in Q[X][Y], and Res_Y(A, B) in Z[X].
+/* Assume A in Z[Y], B in Q[Y][X], and Res_Y(A, B) in Z[X].
  * If lambda = NULL, return Res_Y(A,B).
  * Otherwise, find a small lambda (start from *lambda, use the sequence above)
  * such that R(X) = Res_Y(A(Y), B(X + lambda Y)) is squarefree, reset *lambda
@@ -2409,8 +2409,10 @@ INIT:
     { /* implies checksqfree */
       H = resultant_all(A,B,&q);
       if (typ(q) != t_POL || degpol(q)!=1) goto INIT;
-      H0 = gel(q,2); if (typ(H0) == t_POL) setvarn(H0,vX);
-      H1 = gel(q,3); if (typ(H1) == t_POL) setvarn(H1,vX);
+      H0 = gel(q,2); 
+      if (typ(H0) == t_POL) setvarn(H0,vX); else H0 = scalarpol(H0,vX);
+      H1 = gel(q,3); 
+      if (typ(H1) == t_POL) setvarn(H1,vX); else H1 = scalarpol(H1,vX);
     }
     else
       H = resultant(A,B);
