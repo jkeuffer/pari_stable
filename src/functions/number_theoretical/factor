@@ -127,3 +127,15 @@ Variant: This function should only be used by the \kbd{gp} interface. Use
  directly \fun{GEN}{factor}{GEN x} or \fun{GEN}{boundfact}{GEN x, long lim}.
  The obsolete function \fun{GEN}{factor0}{GEN x, long lim} is kept for
  backward compatibility.
+
+Function: _factor_Aurifeuille
+Section: programming/internals
+C-Name: factor_Aurifeuille
+Prototype: GL
+Help: _factor_Aurifeuille(a,d): return an algebraic factor of Phi_d(a), a != 0
+
+Function: _factor_Aurifeuille_prime
+Section: programming/internals
+C-Name: factor_Aurifeuille_prime
+Prototype: GL
+Help: _factor_Aurifeuille_prime(p,d): return an algebraic factor of Phi_d(p), p prime

@@ -1,4 +1,4 @@
-install(factor_Aurifeuille,GL)
+alias(factor_Aurifeuille,"_factor_Aurifeuille")
 do(d, a) = polcyclo(d, a) / factor_Aurifeuille(a, d);
 
 do(35, -7*3^2)
@@ -14,8 +14,7 @@ do(4,8)
 
 do(100,2)
 
-
-install(factor_Aurifeuille_prime,GL)
+alias(factor_Aurifeuille_prime,"_factor_Aurifeuille_prime")
 do(d, a) = polcyclo(d, a) / factor_Aurifeuille_prime(a, d);
 do(12, 2)
 do(15, 5)
