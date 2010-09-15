@@ -1064,7 +1064,7 @@ polint(GEN X, GEN Y, GEN x, GEN *ptdy)
     Y = gel(Y,1);
     if (gvar(Y) == 0)
       pari_err(talker,"polynomials in 'x in polinterpolate's data");
-    return scalarpol(gel(Y,1), 0);
+    return scalarpol(Y, 0);
   }
   if (!x) x = pol_x(0);
   return polint_i(X? X+1: NULL,Y+1,x,lx-1,ptdy);
