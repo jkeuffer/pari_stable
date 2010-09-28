@@ -2409,9 +2409,9 @@ INIT:
     { /* implies checksqfree */
       H = resultant_all(A,B,&q);
       if (typ(q) != t_POL || degpol(q)!=1) goto INIT;
-      H0 = gel(q,2); 
+      H0 = gel(q,2);
       if (typ(H0) == t_POL) setvarn(H0,vX); else H0 = scalarpol(H0,vX);
-      H1 = gel(q,3); 
+      H1 = gel(q,3);
       if (typ(H1) == t_POL) setvarn(H1,vX); else H1 = scalarpol(H1,vX);
     }
     else

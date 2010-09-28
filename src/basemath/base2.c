@@ -3343,7 +3343,7 @@ polcompositum0(GEN A, GEN B, long flall)
     GEN a, b, mH0 = RgX_neg(gel(LPRS,1)), H1 = gel(LPRS,2);
     for (i=1; i<l; i++)
     {
-      GEN D = gel(C,i); 
+      GEN D = gel(C,i);
       a = RgXQ_mul(mH0, QXQ_inv(H1, D), D);
       b = gadd(pol_x(v), gmulsg(k,a));
       gel(C,i) = mkvec4(D, mkpolmod(a,D), mkpolmod(b,D), stoi(-k));
