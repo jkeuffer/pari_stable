@@ -2433,7 +2433,7 @@ compute_multiple_of_R(GEN A, long RU, long N, long *pneed, GEN *ptL)
   if (lg(mdet) < RU)
   {
     if (DEBUGLEVEL)
-      fprintferr("Unit group rank %ld < %ld\n",lg(mdet)-1, RU);
+      fprintferr("Unit group rank <= %ld < %ld\n",lg(mdet)-1, RU);
     *pneed = RU - (lg(mdet)-1);
     avma = av; return NULL;
   }
@@ -2448,7 +2448,7 @@ compute_multiple_of_R(GEN A, long RU, long N, long *pneed, GEN *ptL)
   if (lg(mdet)-1 - r != RU)
   {
     if (DEBUGLEVEL)
-      fprintferr("Unit group rank %ld < %ld\n",lg(mdet)-1 - r, RU);
+      fprintferr("Unit group rank  = %ld < %ld\n",lg(mdet)-1 - r, RU);
     *pneed = RU - (lg(mdet)-1-r);
     avma = av; return NULL;
   }
