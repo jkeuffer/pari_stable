@@ -142,7 +142,7 @@ hnffinal(GEN matgen,GEN perm,GEN* ptdep,GEN* ptB,GEN* ptC)
 
   /* s = # extra redundant generators taken from H
    *          zc  col-s  co   zc = col - lnz
-   *       [ 0 |dep |     ]    i = lnze + lnz - s = lig - s
+   *       [ 0 |dep |     ]    i = nlze + lnz - s = lig - s
    *  nlze [--------|  B' ]
    *       [ 0 | H' |     ]    H' = H minus the s rows with a 1 on diagonal
    *     i [--------|-----] lig-s           (= "1-rows")
