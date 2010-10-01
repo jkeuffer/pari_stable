@@ -840,12 +840,11 @@ ellordinate_i(GEN e, GEN x, long prec)
     }
     return y;
   }
-  if (td == t_FFELT)
-  { /* treat separately: may be of characteristic 2 */
-    GEN P = gel(FFX_factor(mkpoln(3, gen_1, b, gneg(a)), D), 1);
-    long l = lg(P);
-    if (l == 1) { avma = av; return cgetg(1,t_VEC); }
-    return gerepileupto(av, roots_from_deg1(P));
+  if (td == t_FFELT && equaliu(FF_p_i(D),2))
+  {
+    GEN F = FFX_roots(mkpoln(3, gen_1, b, gneg(a)), D);
+    if (lg(F) == 1) { avma = av; return cgetg(1,t_VEC); }
+    return gerepileupto(av, F);
   }
 
   if (gequal0(D)) {
@@ -861,6 +860,9 @@ ellordinate_i(GEN e, GEN x, long prec)
       break;
     case t_FRAC:
       if (gissquareall(D,&d) == gen_0) { avma = av; return cgetg(1,t_VEC); }
+      break;
+    case t_FFELT:
+      if (!FF_issquareall(D,&d)) { avma = av; return cgetg(1,t_VEC); }
       break;
     case t_INTMOD:
       if (kronecker(gel(D,2),gel(D,1)) < 0) {
