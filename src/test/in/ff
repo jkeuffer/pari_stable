@@ -58,3 +58,5 @@ t = ffgen(ffinit(3,3),'t); do((x^3+x^2+x-1)*t^0, t.p, t.mod)
 polrootsff(x^4+1,2,y^2+y+1)
 
 t = ffgen(ffinit(7,4)); fflog(t^6,t^2)
+
+t = ffgen(ffinit(2,64))^((2^64-1)\5);1/t

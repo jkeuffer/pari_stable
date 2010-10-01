@@ -379,7 +379,7 @@ F2x_rem(GEN x, GEN y)
   {
     F2x_addshiftip(x,y,dx-dy);
     while (lx>2 && x[lx-1]==0) lx--;
-    dx=F2x_degree_lg(x,lx);
+    dx = F2x_degree_lg(x,lx);
   }
   return F2x_renormalize(x, lx);
 }
@@ -413,7 +413,7 @@ F2x_divrem(GEN x, GEN y, GEN *pr)
   {
     F2x_set(z,dx-dy);
     F2x_addshiftip(x,y,dx-dy);
-    if (x[lx-1]==0) lx--;
+    while (lx>2 && x[lx-1]==0) lx--;
     dx = F2x_degree_lg(x,lx);
   }
   z = F2x_renormalize(z, lg(z));

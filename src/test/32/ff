@@ -108,5 +108,9 @@ Mod(4294967310, 4294967311), Mod(1, 4294967311)*x^3 + Mod(1, 4294967311)*x^2
   ***   at top-level: t=ffgen(ffinit(7,4));fflog(t^6,t^2)
   ***                                      ^--------------
   *** fflog: gen_Shanks_log: supplied order (= 5) is incorrect.
+? t=ffgen(ffinit(2,64))^((2^64-1)\5);1/t
+x^58 + x^57 + x^56 + x^52 + x^51 + x^49 + x^46 + x^45 + x^42 + x^39 + x^36 +
+ x^35 + x^32 + x^30 + x^29 + x^25 + x^23 + x^22 + x^21 + x^20 + x^19 + x^12 
++ x^8 + x^7 + x^6 + x^2
 ? print("Total time spent: ",gettime);
-Total time spent: 804
+Total time spent: 440
