@@ -727,6 +727,7 @@ BA 59- library functions Zn_sqrt, Zn_issquare
    60- library function gidentical
 BA 61- GP operator === that use gidentical
    62- GP function sumdedekind()
+JD 63- [gphelp] support for bzip2 compressed documentation.
 
   Removed
     1- obsolete GP functions printp, printp1. Either replace them by
