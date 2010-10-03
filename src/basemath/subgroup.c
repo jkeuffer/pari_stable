@@ -156,6 +156,10 @@ treatsub(subgp_iter *T, GEN H)
   }
 }
 
+/* x a t_INT, x++. Could be optimized... */
+static void
+inc(GEN x) { affii(addis(x,1), x); }
+
 /* assume t>0 and l>1 */
 static void
 dogroup(subgp_iter *T)
@@ -194,19 +198,19 @@ dogroup(subgp_iter *T)
   av = avma; 
   for(;;)
   {
-    affii(addis(a[n-1],1), a[n-1]); /* a[n-1]++ */
+    inc(a[n-1]);
     if (cmpii(a[n-1], maxa[n-1]) > 0)
     {
       j=n-2; while (j>=0 && equalii(a[j], maxa[j])) j--;
       if (j < 0) return;
 
-      affii(addis(a[j],1), a[j]); /* a[j]++ */
+      inc(a[j]);
       for (k=j+1; k<n; k++) affsi(1, a[k]);
     }
     for (i=1; i<=t; i++)
     {
-      for (r=1; r<i; r++) affui(0, H[i][c[r]]);
-      affii(powlist[L[c[r]] - M[r]], H[r][c[r]]);
+      for (r=1; r<i; r++) H[i][c[r]] = gen_0;
+      H[i][c[r]] = powlist[L[c[r]] - M[r]]; 
       for (r=i+1; r<=l; r++)
       {
         GEN e = g[i][r];
@@ -214,7 +218,7 @@ dogroup(subgp_iter *T)
           e = mulii(e, powlist[L[c[r]] - M[i]+1]);
         else if (L[c[r]] >= M[i])
           e = mulii(e, powlist[L[c[r]] - M[i]]);
-        affii(e, H[i][c[r]]);
+        H[i][c[r]] = e;
       }
     }
     treatsub(T, (GEN)H); avma = av;
@@ -245,7 +249,7 @@ static void
 dopsubtyp(subgp_iter *T)
 {
   pari_sp av = avma;
-  long i,r, LEN, l = len(T->L), t = len(T->M);
+  long i,r, l = len(T->L), t = len(T->M);
 
   if (!t) { treatsub(T, mkmat( zerocol(l) )); avma = av; return; }
   if (l==1) /* imply t = 1 */
@@ -269,12 +273,7 @@ dopsubtyp(subgp_iter *T)
     T->maxc[i] = r-1;
   }
   T->H = (GEN**)cgetg(t+1, t_MAT);
-  LEN = lgefint(gel(T->cyc,1));
-  for (i=1; i<=t; i++)
-  {
-    T->H[i] = (GEN*)cgetg(l+1, t_COL);
-    for (r=1; r<=l; r++) T->H[i][r] = cgeti(LEN);
-  }
+  for (i=1; i<=t; i++) T->H[i] = (GEN*)cgetg(l+1, t_COL);
   for (i=1; i<=l; i++) T->available[i]=1;
   for (i=1; i<=t; i++) T->c[i]=0;
   /* go through all column selections */
