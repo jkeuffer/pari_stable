@@ -214,10 +214,11 @@ dogroup(subgp_iter *T)
       for (r=i+1; r<=l; r++)
       {
         GEN e = g[i][r];
+        long d = L[c[r]] - M[i];
         if (c[r] < c[i])
-          e = mulii(e, powlist[L[c[r]] - M[i]+1]);
-        else if (L[c[r]] >= M[i])
-          e = mulii(e, powlist[L[c[r]] - M[i]]);
+          e = mulii(e, powlist[d+1]);
+        else if (d > 0)
+          e = mulii(e, powlist[d]);
         H[i][c[r]] = e;
       }
     }
