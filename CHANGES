@@ -235,6 +235,8 @@ BA174- factorpadic(,,,1) was actually using ROUND4 [#1064 again]
   178- various inconsistencies in polinterpolate() [#1096]
   179- rnfequation() broken when called over the prime field Q [#1079]
 BA180- F2x_divrem could call bfffo(0) which is not defined.
+  181- remove restriction on forsubgroup / subgrouplist that cyclic factors
+       of all p-Sylows should have less than 2^32 / 2^64 elements
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]

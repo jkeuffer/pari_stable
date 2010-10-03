@@ -19,6 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 typedef struct slist {
   struct slist *next;
   long *data;
+  long prec;
 } slist;
 
 typedef struct {
@@ -39,8 +40,9 @@ typedef struct {
  * type(H) = mu --> H = Z/p^mu[1] x ... x Z/p^mu[len(mu)] */
 typedef struct subgp_iter {
   long *M, *L; /* mu = p-subgroup type, lambda = p-group type */
-  long *powlist; /* [i] = p^i, i = 0.. */
-  long *c, *maxc, *a, *maxa, **g, **maxg;
+  GEN *powlist; /* [i] = p^i, i = 0.. */
+  long *c, *maxc;
+  GEN *a, *maxa, **g, **maxg;
   long *available;
   GEN **H; /* p-subgroup of type mu, in matrix form */
   GEN cyc; /* cyclic factors of G */
@@ -101,12 +103,28 @@ std_fun(GEN x, void *data)
 static void
 addcell(sublist_t *S, GEN H)
 {
-  long *pt,i,j, k = 0, n = lg(H)-1;
-  slist *cell = (slist*) pari_malloc(sizeof(slist) + n*(n+1)/2 * sizeof(long));
+  long *pt,i,j,L, n = lg(H)-1;
+  slist *cell;
+  
 
-  S->list->next = cell; cell->data = pt = (long*) (cell + 1);
+  L = 3;
   for (j=1; j<=n; j++)
-    for(i=1; i<=j; i++) pt[k++] = itou(gcoeff(H,i,j));
+    for(i=1; i<=j; i++) { 
+      long l = lgefint(gcoeff(H,i,j)); 
+      if (l > L) L = l;
+    }
+  L -= 2;
+  cell = (slist*) pari_malloc(sizeof(slist) 
+                              + ((n*(n+1)) >> 1) * sizeof(long) * L);
+  S->list->next = cell; cell->data = pt = (long*) (cell + 1);
+  cell->prec = L;
+  for (j=1; j<=n; j++)
+    for(i=1; i<=j; i++) {
+      GEN z = gcoeff(H,i,j);
+      long h, lz = lgefint(z) - 2;
+      for (h = 0; h < L - lz; h++) *pt++ = 0;
+      for (h = 0; h < lz; h++) *pt++ = z[h+2];
+    }
   S->list = cell;
   S->count++;
 }
@@ -142,15 +160,15 @@ treatsub(subgp_iter *T, GEN H)
 static void
 dogroup(subgp_iter *T)
 {
-  const long *powlist = T->powlist;
+  const GEN *powlist = T->powlist;
   long *M = T->M;
   long *L = T->L;
   long *c = T->c;
-  long  *a = T->a,  *maxa = T->maxa;
-  long **g = T->g, **maxg = T->maxg;
+  GEN *a = T->a,  *maxa = T->maxa;
+  GEN **g = T->g, **maxg = T->maxg;
   GEN **H = T->H;
   pari_sp av;
-  long e,i,j,k,r,n,t2,ind, t = len(M), l = len(L);
+  long i,j,k,r,n,t2,ind, t = len(M), l = len(L);
 
   t2 = (l==t)? t-1: t;
   n = t2 * l - (t2*(t2+1))/2; /* number of gamma_ij */
@@ -170,29 +188,33 @@ dogroup(subgp_iter *T)
       else if (L[c[r]] < M[i]) maxg[i][r] = powlist[L[c[r]]-M[r]];
       else                     maxg[i][r] = powlist[M[i]-M[r]];
   }
-  av = avma; a[n-1]=0; for (i=0; i<n-1; i++) a[i]=1;
+  /* allocate correct lg */
+  for (i = 0; i<= n-1; i++) a[i] = icopy(maxa[i]);
+  affui(0, a[n-1]); for (i=0; i<n-1; i++) affui(1, a[i]);
+  av = avma; 
   for(;;)
   {
-    a[n-1]++;
-    if (a[n-1] > maxa[n-1])
+    affii(addis(a[n-1],1), a[n-1]); /* a[n-1]++ */
+    if (cmpii(a[n-1], maxa[n-1]) > 0)
     {
-      j=n-2; while (j>=0 && a[j]==maxa[j]) j--;
-      if (j < 0) { avma = av; return; }
+      j=n-2; while (j>=0 && equalii(a[j], maxa[j])) j--;
+      if (j < 0) return;
 
-      a[j]++; for (k=j+1; k<n; k++) a[k]=1;
+      affii(addis(a[j],1), a[j]); /* a[j]++ */
+      for (k=j+1; k<n; k++) affsi(1, a[k]);
     }
     for (i=1; i<=t; i++)
     {
       for (r=1; r<i; r++) affui(0, H[i][c[r]]);
-      affui(powlist[L[c[r]] - M[r]], H[r][c[r]]);
+      affii(powlist[L[c[r]] - M[r]], H[r][c[r]]);
       for (r=i+1; r<=l; r++)
       {
+        GEN e = g[i][r];
         if (c[r] < c[i])
-          e = g[i][r] * powlist[L[c[r]] - M[i]+1];
-        else
-          if (L[c[r]] < M[i]) e = g[i][r];
-          else e = g[i][r] * powlist[L[c[r]] - M[i]];
-        affui(e, H[i][c[r]]);
+          e = mulii(e, powlist[L[c[r]] - M[i]+1]);
+        else if (L[c[r]] >= M[i])
+          e = mulii(e, powlist[L[c[r]] - M[i]]);
+        affii(e, H[i][c[r]]);
       }
     }
     treatsub(T, (GEN)H); avma = av;
@@ -205,7 +227,10 @@ loop(subgp_iter *T, long r)
 {
   long j;
 
-  if (r > len(T->M)) { dogroup(T); return; }
+  if (r > len(T->M)) { 
+    pari_sp av = avma; dogroup(T); avma = av;
+    return; 
+  }
 
   if (r!=1 && (T->M[r-1] == T->M[r])) j = T->c[r-1]+1; else j = 1;
   for (  ; j<=T->maxc[r]; j++)
@@ -220,21 +245,21 @@ static void
 dopsubtyp(subgp_iter *T)
 {
   pari_sp av = avma;
-  long i,r, l = len(T->L), t = len(T->M);
+  long i,r, LEN, l = len(T->L), t = len(T->M);
 
   if (!t) { treatsub(T, mkmat( zerocol(l) )); avma = av; return; }
   if (l==1) /* imply t = 1 */
   {
-    GEN p1 = gtomat(utoi(T->powlist[T->L[1]-T->M[1]]));
+    GEN p1 = gtomat(T->powlist[T->L[1]-T->M[1]]);
     treatsub(T, p1); avma = av; return;
   }
   T->c         = new_chunk(l+1); setlen(T->c, l);
   T->maxc      = new_chunk(l+1);
   T->available = new_chunk(l+1);
-  T->a   = new_chunk(l*(t+1));
-  T->maxa= new_chunk(l*(t+1));
-  T->g    = (long**)new_chunk(t+1);
-  T->maxg = (long**)new_chunk(t+1);
+  T->a   = (GEN*)new_chunk(l*(t+1));
+  T->maxa= (GEN*)new_chunk(l*(t+1));
+  T->g    = (GEN**)new_chunk(t+1);
+  T->maxg = (GEN**)new_chunk(t+1);
 
   if (DEBUGLEVEL) { fprintferr("  subgroup:"); printtyp(T->M); }
   for (i=1; i<=t; i++)
@@ -244,10 +269,11 @@ dopsubtyp(subgp_iter *T)
     T->maxc[i] = r-1;
   }
   T->H = (GEN**)cgetg(t+1, t_MAT);
+  LEN = lgefint(gel(T->cyc,1));
   for (i=1; i<=t; i++)
   {
     T->H[i] = (GEN*)cgetg(l+1, t_COL);
-    for (r=1; r<=l; r++) T->H[i][r] = cgeti(3);
+    for (r=1; r<=l; r++) T->H[i][r] = cgeti(LEN);
   }
   for (i=1; i<=l; i++) T->available[i]=1;
   for (i=1; i<=t; i++) T->c[i]=0;
@@ -401,16 +427,12 @@ expand_sub(GEN x, long n)
 }
 
 static GEN
-init_powlist(long k, ulong p)
+init_powlist(long k, GEN p)
 {
   GEN z = new_chunk(k+1);
   long i;
-  z[0] = 1; z[1] = p;
-  for (i=1; i<=k; i++)
-  {
-    GEN t = muluu(p, z[i-1]);
-    z[i] = itou(t);
-  }
+  gel(z,0) = gen_1; gel(z,1) = p;
+  for (i=1; i<=k; i++) gel(z,i) = mulii(p, gel(z,i-1));
   return z;
 }
 
@@ -460,7 +482,7 @@ subgroup_engine(subgp_iter *T)
   L = gel(listL,imax); p = gel(primlist,imax);
   k = L[1];
   T->L = L;
-  T->powlist = init_powlist(k, itou(p));
+  T->powlist = (GEN*)init_powlist(k, p);
   B = T->bound;
   parse_bound(T);
 
@@ -470,7 +492,7 @@ subgroup_engine(subgp_iter *T)
     if (T->boundtype == b_EXACT)
     {
       (void)Z_pvalrem(T->bound,p,&B);
-      if (!gequal1(B)) { avma = av; return; }
+      if (!is_pm1(B)) { avma = av; return; }
     }
   }
   else
@@ -479,8 +501,8 @@ subgroup_engine(subgp_iter *T)
     long lsubq;
     for (i=1; i<n; i++)
     {
-      gel(cycI,i) = divis(gel(cycI,i), T->powlist[L[i]]);
-      if (gequal1(gel(cycI,i))) break;
+      gel(cycI,i) = divii(gel(cycI,i), T->powlist[L[i]]);
+      if (is_pm1(gel(cycI,i))) break;
     }
     setlg(cycI, i); /* cyclic factors of I */
     if (T->boundtype == b_EXACT)
@@ -502,7 +524,7 @@ subgroup_engine(subgp_iter *T)
     }
     /* lift subgroups of I to G */
     for (i=1; i<lsubq; i++)
-      gel(T->subq,i) = gmulsg(T->powlist[k],gel(T->subq,i));
+      gel(T->subq,i) = gmul(T->powlist[k],gel(T->subq,i));
     if (DEBUGLEVEL>2)
       fprintferr("(lifted) subgp of prime to %Ps part:\n%Ps\n",p, T->subq);
   }
@@ -563,13 +585,28 @@ forsubgroup(GEN cyc, GEN bound, GEN code)
 }
 
 static GEN
+packtoi(long *pt, long L)
+{
+  long i, l;
+  GEN z;
+  for (i=0; i<L; i++, pt++)
+    if (*pt) break;
+  L -= i;
+  if (!L) return gen_0;
+  l = L+2; z = cgeti(l);
+  z[1] = evalsigne(1) | evallgefint(l);
+  for (i = 2; i<l; i++) z[i] = *pt++;
+  return z;
+}
+
+static GEN
 subgrouplist_i(GEN cyc, GEN bound, GEN expoI, GEN gen)
 {
   pari_sp av = avma;
   subgp_iter T;
   sublist_t S;
   slist *list, *sublist;
-  long ii,i,j,k,nbsub,n,N;
+  long ii,i,j,nbsub,n,N;
   GEN z,H;
 
   cyc = get_snf(cyc, &N);
@@ -594,12 +631,15 @@ subgrouplist_i(GEN cyc, GEN bound, GEN expoI, GEN gen)
   z = cgetg(nbsub+1,t_VEC);
   for (ii=1; ii<=nbsub; ii++)
   {
+    long *pt, L;
     list = sublist; sublist = list->next; pari_free(list);
-    H = cgetg(N+1,t_MAT); gel(z,ii) = H; k=0;
+    pt = sublist->data;
+    L = sublist->prec;
+    H = cgetg(N+1,t_MAT); gel(z,ii) = H;
     for (j=1; j<=n; j++)
     {
       gel(H,j) = cgetg(N+1, t_COL);
-      for (i=1; i<=j; i++) gcoeff(H,i,j) = utoi(sublist->data[k++]);
+      for (i=1; i<=j; i++) { gcoeff(H,i,j) = packtoi(pt, L); pt += L; }
       for (   ; i<=N; i++) gcoeff(H,i,j) = gen_0;
     }
     for (   ; j<=N; j++) gel(H,j) = col_ei(N, j);
