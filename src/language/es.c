@@ -1356,14 +1356,14 @@ term_get_color(long n)
 static int
 term_width_intern(void)
 {
-  if (GP_DATA->flags & TEST) return 0;
+  if (GP_DATA->flags & gpd_TEST) return 0;
 #ifdef _WIN32
   return win32_terminal_width();
 #endif
 #ifdef HAS_TIOCGWINSZ
   {
     struct winsize s;
-    if (!(GP_DATA->flags & (EMACS|TEXMACS))
+    if (!(GP_DATA->flags & (gpd_EMACS|gpd_TEXMACS))
      && !ioctl(0, TIOCGWINSZ, &s)) return s.ws_col;
   }
 #endif
@@ -1383,14 +1383,14 @@ term_width_intern(void)
 static int
 term_height_intern(void)
 {
-  if (GP_DATA->flags & TEST) return 0;
+  if (GP_DATA->flags & gpd_TEST) return 0;
 #ifdef _WIN32
   return win32_terminal_height();
 #endif
 #ifdef HAS_TIOCGWINSZ
   {
     struct winsize s;
-    if (!(GP_DATA->flags & (EMACS|TEXMACS))
+    if (!(GP_DATA->flags & (gpd_EMACS|gpd_TEXMACS))
      && !ioctl(0, TIOCGWINSZ, &s)) return s.ws_row;
   }
 #endif
@@ -2416,7 +2416,7 @@ times_texnome(outString *S, const char *v, long d)
 {
   if (d)
   {
-    if (GP_DATA->flags & TEXMACS) str_puts(S, "\\*"); else str_putc(S, ' ');
+    if (GP_DATA->flags & gpd_TEXMACS) str_puts(S, "\\*"); else str_putc(S, ' ');
     texnome(S,v,d);
   }
 }
@@ -4128,7 +4128,7 @@ void warning0(GEN g) { pari_warn(user, g); }
 static char *
 wr_check(const char *s) {
   char *t = path_expand(s);
-  if (GP_DATA->flags & SECURE)
+  if (GP_DATA->flags & gpd_SECURE)
   {
     char *msg = pari_sprintf("[secure mode]: about to write to '%s'",t);
     pari_ask_confirm(msg);

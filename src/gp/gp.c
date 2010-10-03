@@ -229,7 +229,7 @@ static void
 hit_return(void)
 {
   int c;
-  if (GP_DATA->flags & (EMACS|TEXMACS)) return;
+  if (GP_DATA->flags & (gpd_EMACS|gpd_TEXMACS)) return;
   disable_exception_handler = 1;
   pari_puts("---- (type RETURN to continue) ----");
   /* if called from a readline callback, may be in a funny TTY mode */
@@ -778,7 +778,7 @@ what_readline(void)
   }
   s = stackmalloc(3 + strlen(ver) + 8 + strlen(extra));
   (void)sprintf(s, "v%s %s%s", ver,
-            (GP_DATA->flags & USE_READLINE)? "enabled": "disabled",
+            (GP_DATA->flags & gpd_USE_READLINE)? "enabled": "disabled",
             extra);
 #else
   s = "not compiled in";
@@ -844,7 +844,7 @@ static void
 gp_head(void)
 {
 #ifdef READLINE
-  if (GP_DATA->flags & TEXMACS)
+  if (GP_DATA->flags & gpd_TEXMACS)
     printf("%ccommand:(cas-supports-completions-set! \"pari\")%c\n",
            DATA_BEGIN, DATA_END);
 #endif
@@ -864,7 +864,7 @@ License, and comes WITHOUT ANY WARRANTY WHATSOEVER.");
 /**                         METACOMMANDS                           **/
 /**                                                                **/
 /********************************************************************/
-#define pariputs_opt(s) if (!(GP_DATA->flags & QUIET)) pari_puts(s)
+#define pariputs_opt(s) if (!(GP_DATA->flags & gpd_QUIET)) pari_puts(s)
 
 void
 gp_quit(long exitcode)
@@ -874,7 +874,7 @@ gp_quit(long exitcode)
   kill_buffers_upto(NULL);
   term_color(c_NONE);
   pariputs_opt("Goodbye!\n");
-  if (GP_DATA->flags & TEXMACS) tm_end_output();
+  if (GP_DATA->flags & gpd_TEXMACS) tm_end_output();
   exit(exitcode);
 }
 
@@ -933,7 +933,7 @@ escape(char *tch, int ismain)
 
           G.hist = &h; h.total = 0; /* no hist number */
           G.fmt  = &f; f.prettyp = f_PRETTY;
-          G.flags &= ~(TEST|TEXMACS);
+          G.flags &= ~(gpd_TEST|gpd_TEXMACS);
           G.lim_lines = 0;
           gp_output(x, &G); break;
         }
@@ -952,7 +952,7 @@ escape(char *tch, int ismain)
     case 'd': (void)setdefault("",NULL,d_SILENT); break;
     case 'e':
       s = get_sep(s);
-      if (!*s) s = (GP_DATA->flags & ECHO)? "0": "1";
+      if (!*s) s = (GP_DATA->flags & gpd_ECHO)? "0": "1";
       (void)sd_echo(s,d_ACKNOWLEDGE); break;
     case 'g':
       switch (*s)
@@ -1005,7 +1005,7 @@ escape(char *tch, int ismain)
     case 'v': print_version(); break;
     case 'y':
       s = get_sep(s);
-      if (!*s) s = (GP_DATA->flags & SIMPLIFY)? "0": "1";
+      if (!*s) s = (GP_DATA->flags & gpd_SIMPLIFY)? "0": "1";
       (void)sd_simplify(s,d_ACKNOWLEDGE); break;
     default: pari_err(talker2,"unexpected character", tch,tch-1);
   }
@@ -1014,7 +1014,7 @@ escape(char *tch, int ismain)
 enum { ti_NOPRINT, ti_REGULAR, ti_LAST, ti_INTERRUPT, ti_ALARM };
 /* flag:
  *   ti_NOPRINT   don't print
- *   ti_REGULAR   print elapsed time (flags & CHRONO)
+ *   ti_REGULAR   print elapsed time (flags & gpd_CHRONO)
  *   ti_LAST      print last elapsed time (##)
  *   ti_INTERRUPT received a SIGINT
  */
@@ -1073,7 +1073,7 @@ chron(char *s)
     if (*s) return 0;
     pari_puts(gp_format_time(ti_LAST));
   }
-  else { GP_DATA->flags ^= CHRONO; (void)sd_timer("",d_ACKNOWLEDGE); }
+  else { GP_DATA->flags ^= gpd_CHRONO; (void)sd_timer("",d_ACKNOWLEDGE); }
   return 1;
 }
 
@@ -1124,7 +1124,7 @@ static FILE *
 gprc_chk(const char *s)
 {
   FILE *f = fopen(s, "r");
-  if (f && !(GP_DATA->flags & QUIET)) fprintferr("Reading GPRC: %s ...", s);
+  if (f && !(GP_DATA->flags & gpd_QUIET)) fprintferr("Reading GPRC: %s ...", s);
   return f;
 }
 
@@ -1206,11 +1206,11 @@ get_preproc_value(char **s)
 {
   if (!strncmp(*s,"EMACS",5)) {
     *s += 5;
-    return GP_DATA->flags & (EMACS|TEXMACS);
+    return GP_DATA->flags & (gpd_EMACS|gpd_TEXMACS);
   }
   if (!strncmp(*s,"READL",5)) {
     *s += 5;
-    return GP_DATA->flags & USE_READLINE;
+    return GP_DATA->flags & gpd_USE_READLINE;
   }
   if (!strncmp(*s,"VERSION",7)) {
     int less = 0, orequal = 0;
@@ -1329,7 +1329,7 @@ gp_initrc(pari_stack *p_A, char *path)
   }
   s_env.n--;
   pop_buffer();
-  if (!(GP_DATA->flags & QUIET)) fprintferr("Done.\n\n");
+  if (!(GP_DATA->flags & gpd_QUIET)) fprintferr("Done.\n\n");
   fclose(file);
 }
 
@@ -1343,12 +1343,12 @@ brace_color(char *s, int c, int force)
 {
   if (disable_color || (gp_colors[c] == c_NONE && !force)) return;
 #ifdef RL_PROMPT_START_IGNORE
-  if (GP_DATA->flags & USE_READLINE)
+  if (GP_DATA->flags & gpd_USE_READLINE)
     *s++ = RL_PROMPT_START_IGNORE;
 #endif
   strcpy(s, term_get_color(c));
 #ifdef RL_PROMPT_START_IGNORE
-  if (GP_DATA->flags & USE_READLINE)
+  if (GP_DATA->flags & gpd_USE_READLINE)
   {
     s+=strlen(s);
     *s++ = RL_PROMPT_END_IGNORE;
@@ -1363,7 +1363,7 @@ color_prompt(const char *prompt)
   static char buf[MAX_PROMPT_LEN + 24]; /* + room for color codes */
   char *s;
 
-  if (GP_DATA->flags & TEST) return prompt;
+  if (GP_DATA->flags & gpd_TEST) return prompt;
   s = buf; *s = 0;
   /* escape sequences bug readline, so use special bracing (if available) */
   brace_color(s, c_PROMPT, 0);
@@ -1397,7 +1397,7 @@ update_logfile(const char *prompt, const char *s)
 static int
 get_line_from_file(const char *PROMPT, filtre_t *F, FILE *file)
 {
-  const int Texmacs_stdin = ((GP_DATA->flags & TEXMACS) && file == stdin);
+  const int Texmacs_stdin = ((GP_DATA->flags & gpd_TEXMACS) && file == stdin);
   char *s;
   input_method IM;
 
@@ -1414,13 +1414,13 @@ get_line_from_file(const char *PROMPT, filtre_t *F, FILE *file)
   s = ((Buffer*)F->buf)->buf;
   if (*s && PROMPT) /* don't echo if from gprc */
   {
-    if (GP_DATA->flags & ECHO)
+    if (GP_DATA->flags & gpd_ECHO)
       { pari_puts(PROMPT); pari_puts(s); pari_putc('\n'); }
     else if (pari_logfile)
       update_logfile(PROMPT, s);
     pari_flush();
   }
-  if (GP_DATA->flags & TEXMACS)
+  if (GP_DATA->flags & gpd_TEXMACS)
   {
     tm_did_complete = 0;
     if (Texmacs_stdin && *s == DATA_BEGIN)
@@ -1434,7 +1434,7 @@ get_line_from_file(const char *PROMPT, filtre_t *F, FILE *file)
 static int
 is_interactive(void)
 {
-  ulong f = GP_DATA->flags&(TEXMACS|TEST);
+  ulong f = GP_DATA->flags&(gpd_TEXMACS|gpd_TEST);
   return pari_infile == stdin && (!f || pari_stdin_isatty());
 }
 
@@ -1450,7 +1450,7 @@ gp_read_line(filtre_t *F, const char *PROMPT)
   if (is_interactive())
   {
 #ifdef READLINE
-    if (GP_DATA->flags & USE_READLINE)
+    if (GP_DATA->flags & gpd_USE_READLINE)
       res = get_line_from_readline(PROMPT? PROMPT: GP_DATA->prompt,
                                    GP_DATA->prompt_cont, F);
     else
@@ -1545,19 +1545,19 @@ gp_main_loop(long flag)
       TIMERstart(GP_DATA->T);
       pari_set_last_newline(1);
     }
-    z = closure_evalres(pari_compile_str(b->buf, GP_DATA->flags & STRICTMATCH));
+    z = closure_evalres(pari_compile_str(b->buf, GP_DATA->flags & gpd_STRICTMATCH));
     if (! ismain) continue;
     alarm0(0);
 
     if (!pari_last_was_newline()) pari_putc('\n');
 
-    if (GP_DATA->flags & CHRONO)
+    if (GP_DATA->flags & gpd_CHRONO)
       pari_puts(gp_format_time(ti_REGULAR));
     else
       (void)gp_format_time(ti_NOPRINT);
     if (z == gnil) continue;
 
-    if (GP_DATA->flags & SIMPLIFY) z = simplify_shallow(z);
+    if (GP_DATA->flags & gpd_SIMPLIFY) z = simplify_shallow(z);
     z = pari_add_hist(z);
     if (! is_silent(b->buf) ) gp_output(z, GP_DATA);
   }
@@ -1570,13 +1570,13 @@ gp_main_loop(long flag)
 /********************************************************************/
 void
 gp_sigint_fun(void) {
-  if (GP_DATA->flags & TEXMACS) tm_start_output();
+  if (GP_DATA->flags & gpd_TEXMACS) tm_start_output();
   pari_sigint(gp_format_time(ti_INTERRUPT));
 }
 
 void
 gp_alarm_fun(void) {
-  if (GP_DATA->flags & TEXMACS) tm_start_output();
+  if (GP_DATA->flags & gpd_TEXMACS) tm_start_output();
   pari_err(alarmer, gp_format_time(ti_ALARM));
 }
 
@@ -1673,7 +1673,7 @@ int
 gp_handle_exception(long numerr)
 {
   if (disable_exception_handler) disable_exception_handler = 0;
-  else if ((GP_DATA->flags & BREAKLOOP) && break_loop(numerr)) return 1;
+  else if ((GP_DATA->flags & gpd_BREAKLOOP) && break_loop(numerr)) return 1;
   if (s_env.n>=1) {
     fprintferr("\n"); flusherr();
     gp_err_recover(numerr>=0? numerr: talker);
@@ -1703,7 +1703,7 @@ gp_alarm_handler(int sig)
 static void
 check_secure(const char *s)
 {
-  if (GP_DATA->flags & SECURE)
+  if (GP_DATA->flags & gpd_SECURE)
     pari_err(talker, "[secure mode]: system commands not allowed\nTried to run '%s'",s);
 }
 
@@ -1863,12 +1863,12 @@ read_opt(pari_stack *p_A, long argc, char **argv)
 
       case 'e':
         if (strncmp(t,"macs",4)) usage(argv[0]); /* obsolete */
-        f |= EMACS; break;
+        f |= gpd_EMACS; break;
       case 'q':
-        f |= QUIET; break;
+        f |= gpd_QUIET; break;
       case 't':
         if (strncmp(t,"est",3)) usage(argv[0]); /* obsolete */
-        f |= TEST; break;
+        f |= gpd_TEST; break;
       case 'f':
         initrc = 0; break;
       case '-':
@@ -1877,10 +1877,10 @@ read_opt(pari_stack *p_A, long argc, char **argv)
           init_trivial_stack(); print_version();
           pari_free((void*)bot); exit(0);
         }
-        if (strcmp(t, "texmacs") == 0) { f |= TEXMACS; break; }
-        if (strcmp(t, "emacs") == 0) { f |= EMACS; break; }
-        if (strcmp(t, "test") == 0) { f |= TEST; break; }
-        if (strcmp(t, "quiet") == 0) { f |= QUIET; break; }
+        if (strcmp(t, "texmacs") == 0) { f |= gpd_TEXMACS; break; }
+        if (strcmp(t, "emacs") == 0) { f |= gpd_EMACS; break; }
+        if (strcmp(t, "test") == 0) { f |= gpd_TEST; break; }
+        if (strcmp(t, "quiet") == 0) { f |= gpd_QUIET; break; }
         if (strcmp(t, "fast") == 0) { initrc = 0; break; }
         if (strncmp(t, "primelimit",10) == 0) {p = read_arg_equal(&i,t+10,argc,argv); break; }
         if (strncmp(t, "stacksize",9) == 0) {s = read_arg_equal(&i,t+9,argc,argv); break; }
@@ -1891,14 +1891,14 @@ read_opt(pari_stack *p_A, long argc, char **argv)
   }
   if (!hastty)
   {
-    if (!(GP_DATA->flags & EMACS)) f &= ~BREAKLOOP;
-    readline_state = 0; f &= ~USE_READLINE;
+    if (!(GP_DATA->flags & gpd_EMACS)) f &= ~gpd_BREAKLOOP;
+    readline_state = 0; f &= ~gpd_USE_READLINE;
     GP_DATA->prompt[0] = 0;
   }
-  if (f & TEXMACS) tm_start_output();
+  if (f & gpd_TEXMACS) tm_start_output();
   GP_DATA->flags = f;
-  if (f & TEST) {
-    GP_DATA->flags &= ~BREAKLOOP;
+  if (f & gpd_TEST) {
+    GP_DATA->flags &= ~gpd_BREAKLOOP;
     init80col();
   } else if (initrc)
     gp_initrc(p_A, argv[0]);
@@ -1908,7 +1908,7 @@ read_opt(pari_stack *p_A, long argc, char **argv)
   if (p) (void)sd_primelimit(p, d_INITRC);
   if (s) (void)sd_parisize(s, d_INITRC);
 
-  if (GP_DATA->flags & (EMACS|TEXMACS|TEST)) disable_color = 1;
+  if (GP_DATA->flags & (gpd_EMACS|gpd_TEXMACS|gpd_TEST)) disable_color = 1;
   pari_outfile = stdout;
 }
 
@@ -1960,7 +1960,7 @@ main(int argc, char **argv)
   gp_expand_path(GP_DATA->path);
 
   TIMERstart(GP_DATA->T);
-  if (!(GP_DATA->flags & QUIET)) gp_head();
+  if (!(GP_DATA->flags & gpd_QUIET)) gp_head();
   if (s_A.n)
   {
     FILE *l = pari_logfile;
@@ -2031,7 +2031,7 @@ tex2mail_output(GEN z, long n)
     char c_hist[16], c_out[16];
     strcpy(c_hist, term_get_color(c_HIST));
     strcpy(c_out , term_get_color(c_OUTPUT));
-    if (!(GP_DATA->flags & QUIET))
+    if (!(GP_DATA->flags & gpd_QUIET))
     {
       char s[128];
       if (*c_hist || *c_out)
@@ -2099,7 +2099,7 @@ normal_output(GEN z, long n)
   if (n)
   {
     char buf[64];
-    if (!(GP_DATA->flags & QUIET))
+    if (!(GP_DATA->flags & gpd_QUIET))
     {
       term_color(c_HIST);
       sprintf(buf, "%%%ld = ", n);
@@ -2121,11 +2121,11 @@ normal_output(GEN z, long n)
 void
 gp_output(GEN z, gp_data *G)
 {
-  if (G->flags & TEST) {
+  if (G->flags & gpd_TEST) {
     init80col();
     gen_output(z, G->fmt); pari_putc('\n');
   }
-  else if (G->flags & TEXMACS)
+  else if (G->flags & gpd_TEXMACS)
     texmacs_output(z, G->hist->total);
   else if (G->fmt->prettyp != f_PRETTY || !tex2mail_output(z, G->hist->total))
     normal_output(z, G->hist->total);

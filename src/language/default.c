@@ -383,7 +383,7 @@ GEN
 sd_colors(const char *v, long flag)
 {
   long c,l;
-  if (*v && !(GP_DATA->flags & (EMACS|TEXMACS)))
+  if (*v && !(GP_DATA->flags & (gpd_EMACS|gpd_TEXMACS)))
   {
     char *v0, *s;
     disable_color=1;
@@ -592,9 +592,9 @@ sd_compatible(const char *v, long flag)
 GEN
 sd_secure(const char *v, long flag)
 {
-  if (*v && (GP_DATA->flags & SECURE))
+  if (*v && (GP_DATA->flags & gpd_SECURE))
     pari_ask_confirm("[secure mode]: About to modify the 'secure' flag");
-  return sd_gptoggle(v,flag,"secure", SECURE);
+  return sd_gptoggle(v,flag,"secure", gpd_SECURE);
 }
 
 static THREAD long dbg = -1;
@@ -618,7 +618,7 @@ sd_rl(const char *v, long flag)
   GEN res = sd_ulong(v,flag,"readline", &readline_state, 0, 7, msg);
 
   if (o_readline_state != readline_state)
-    (void)sd_gptoggle(readline_state? "1": "0", d_SILENT, "readline", USE_READLINE);
+    (void)sd_gptoggle(readline_state? "1": "0", d_SILENT, "readline", gpd_USE_READLINE);
   return res;
 }
 
@@ -632,15 +632,15 @@ sd_debugmem(const char *v, long flag)
 
 GEN
 sd_breakloop(const char *v, long flag)
-{ return sd_gptoggle(v,flag,"breakloop", BREAKLOOP); }
+{ return sd_gptoggle(v,flag,"breakloop", gpd_BREAKLOOP); }
 
 GEN
 sd_echo(const char *v, long flag)
-{ return sd_gptoggle(v,flag,"echo", ECHO); }
+{ return sd_gptoggle(v,flag,"echo", gpd_ECHO); }
 
 GEN
 sd_recover(const char *v, long flag)
-{ return sd_gptoggle(v,flag,"recover", RECOVER); }
+{ return sd_gptoggle(v,flag,"recover", gpd_RECOVER); }
 
 GEN
 sd_lines(const char *v, long flag)
@@ -793,15 +793,15 @@ sd_primelimit(const char *v, long flag)
 
 GEN
 sd_simplify(const char *v, long flag)
-{ return sd_gptoggle(v,flag,"simplify", SIMPLIFY); }
+{ return sd_gptoggle(v,flag,"simplify", gpd_SIMPLIFY); }
 
 GEN
 sd_strictmatch(const char *v, long flag)
-{ return sd_gptoggle(v,flag,"strictmatch", STRICTMATCH); }
+{ return sd_gptoggle(v,flag,"strictmatch", gpd_STRICTMATCH); }
 
 GEN
 sd_timer(const char *v, long flag)
-{ return sd_gptoggle(v,flag,"timer", CHRONO); }
+{ return sd_gptoggle(v,flag,"timer", gpd_CHRONO); }
 
 static GEN
 sd_filename(const char *v, long flag, const char *s, char **f)
@@ -814,7 +814,7 @@ sd_filename(const char *v, long flag, const char *s, char **f)
     l = strlen(ev) + 256;
     str = (char *) malloc(l);
     do_strftime(ev,str, l-1); pari_free(ev);
-    if (GP_DATA->flags & SECURE)
+    if (GP_DATA->flags & gpd_SECURE)
     {
       char *msg=pari_sprintf("[secure mode]: About to change %s to '%s'",s,str);
       pari_ask_confirm(msg);
@@ -865,7 +865,7 @@ sd_help(const char *v, long flag)
   const char *str;
   if (*v)
   {
-    if (GP_DATA->flags & SECURE) err_secure("help",v);
+    if (GP_DATA->flags & gpd_SECURE) err_secure("help",v);
     if (GP_DATA->help) pari_free((void*)GP_DATA->help);
     GP_DATA->help = path_expand(v);
   }
@@ -913,12 +913,12 @@ GEN
 sd_prettyprinter(const char *v, long flag)
 {
   gp_pp *pp = GP_DATA->pp;
-  if (*v && !(GP_DATA->flags & TEXMACS))
+  if (*v && !(GP_DATA->flags & gpd_TEXMACS))
   {
     char *old = pp->cmd;
     int cancel = (!strcmp(v,"no"));
 
-    if (GP_DATA->flags & SECURE) err_secure("prettyprinter",v);
+    if (GP_DATA->flags & gpd_SECURE) err_secure("prettyprinter",v);
     if (!strcmp(v,"yes")) v = DFT_PRETTYPRINTER;
     if (old && strcmp(old,v) && pp->file)
     {
@@ -1060,9 +1060,9 @@ default_gp_data(void)
   static pari_timer __T;
 
   D->flags = (
-    BREAKLOOP | STRICTMATCH | SIMPLIFY | RECOVER
+    gpd_BREAKLOOP | gpd_STRICTMATCH | gpd_SIMPLIFY | gpd_RECOVER
 #ifdef READLINE
-    | USE_READLINE
+    | gpd_USE_READLINE
 #endif
   );
   D->lim_lines = 0;

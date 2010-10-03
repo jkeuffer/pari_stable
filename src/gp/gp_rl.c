@@ -184,7 +184,7 @@ pari_rl_matched_insert(int count, int key)
   if (count <= 0)
     return change_state("electric parens", DO_MATCHED_INSERT, count);
   while (paropen[i] && paropen[i] != key) i++;
-  if (!paropen[i] || !(readline_state & DO_MATCHED_INSERT) || GP_DATA->flags & EMACS)
+  if (!paropen[i] || !(readline_state & DO_MATCHED_INSERT) || GP_DATA->flags & gpd_EMACS)
     return ((RLCI)rl_insert)(count,key);
   rl_begin_undo_group();
   ((RLCI)rl_insert)(count,key);
@@ -364,7 +364,7 @@ get_matches(int code, const char *text, GF f)
 {
   char **matches = COMPLETION_MATCHES(text, f);
   if (matches && !matches[1]) treat_single(code, matches);
-  if (GP_DATA->flags & EMACS) matches = matches_for_emacs(text,matches);
+  if (GP_DATA->flags & gpd_EMACS) matches = matches_for_emacs(text,matches);
   return matches;
 }
 
@@ -680,7 +680,7 @@ pari_completion(char *text, int START, int END)
           char **ret = (char**)pari_malloc(sizeof(char*)*2);
           str[e-s] = 0;
           ret[0] = str; ret[1] = NULL;
-          if (GP_DATA->flags & EMACS) ret = matches_for_emacs("",ret);
+          if (GP_DATA->flags & gpd_EMACS) ret = matches_for_emacs("",ret);
           return ret;
         }
       }
@@ -744,7 +744,7 @@ init_readline(void)
 
   /* we always want the whole list of completions under emacs */
 #ifdef HAS_RL_COMPLETION_QUERY_ITEMS
-  if (GP_DATA->flags & EMACS) rl_completion_query_items = 0x8fff;
+  if (GP_DATA->flags & gpd_EMACS) rl_completion_query_items = 0x8fff;
 #endif
 #ifdef HAS_RL_BIND_KEY_IN_MAP
 #  ifdef _RL_FUNCTION_TYPEDEF
@@ -964,7 +964,7 @@ get_line_from_readline(const char *prompt, const char *prompt_cont, filtre_t *F)
       }
       gp_add_history(s);
     }
-    if (GP_DATA->flags & ECHO)
+    if (GP_DATA->flags & gpd_ECHO)
       { pari_puts(color_prompt(prompt)); pari_puts(s); pari_putc('\n'); }
     if (pari_logfile) update_logfile(expand_prompt(IM.prompt, F), s);
   }
