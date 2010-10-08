@@ -105,16 +105,15 @@ addcell(sublist_t *S, GEN H)
 {
   long *pt,i,j,L, n = lg(H)-1;
   slist *cell;
-  
 
   L = 3;
   for (j=1; j<=n; j++)
-    for(i=1; i<=j; i++) { 
-      long l = lgefint(gcoeff(H,i,j)); 
+    for(i=1; i<=j; i++) {
+      long l = lgefint(gcoeff(H,i,j));
       if (l > L) L = l;
     }
   L -= 2;
-  cell = (slist*) pari_malloc(sizeof(slist) 
+  cell = (slist*) pari_malloc(sizeof(slist)
                               + ((n*(n+1)) >> 1) * sizeof(long) * L);
   S->list->next = cell; cell->data = pt = (long*) (cell + 1);
   cell->prec = L;
@@ -195,7 +194,7 @@ dogroup(subgp_iter *T)
   /* allocate correct lg */
   for (i = 0; i<= n-1; i++) a[i] = icopy(maxa[i]);
   affui(0, a[n-1]); for (i=0; i<n-1; i++) affui(1, a[i]);
-  av = avma; 
+  av = avma;
   for(;;)
   {
     inc(a[n-1]);
@@ -210,7 +209,7 @@ dogroup(subgp_iter *T)
     for (i=1; i<=t; i++)
     {
       for (r=1; r<i; r++) H[i][c[r]] = gen_0;
-      H[i][c[r]] = powlist[L[c[r]] - M[r]]; 
+      H[i][c[r]] = powlist[L[c[r]] - M[r]];
       for (r=i+1; r<=l; r++)
       {
         GEN e = g[i][r];
@@ -232,9 +231,9 @@ loop(subgp_iter *T, long r)
 {
   long j;
 
-  if (r > len(T->M)) { 
+  if (r > len(T->M)) {
     pari_sp av = avma; dogroup(T); avma = av;
-    return; 
+    return;
   }
 
   if (r!=1 && (T->M[r-1] == T->M[r])) j = T->c[r-1]+1; else j = 1;
