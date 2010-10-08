@@ -341,7 +341,7 @@ ZX_primitive_to_monic(GEN pol, GEN *ptlc)
   long i,j, n = degpol(pol);
   GEN lc = leading_term(pol), fa, P, E, a, POL;
 
-  if (signe(lc) < 0) 
+  if (signe(lc) < 0)
     POL = ZX_neg(pol);
   else
     POL = leafcopy(pol);
