@@ -468,7 +468,8 @@ equal to the length of~\kbd{x}.
 \fun{void}{setsigne}{GEN x, long s} sets the sign of~\kbd{x} to~\kbd{s}.
 If \kbd{x} is a \typ{INT} or \typ{REAL}, \kbd{s} must be equal to $-1$, 0
 or~1, and if \kbd{x} is a \typ{POL} or \typ{SER}, \kbd{s} must be equal to 0
-or~1.
+or~1. No sanity check is made; in particular, setting the sign of a 
+$0$ \typ{INT} to $\pm1$ creates an invalid object.
 
 \fun{void}{togglesign}{GEN x} sets the sign $s$ of~\kbd{x} to $-s$, in place.
 
@@ -479,11 +480,15 @@ replace \kbd{*x} by its negation (e.g.~replace \kbd{gen\_1} by \kbd{gen\_m1}).
 \fun{void}{setabssign}{GEN x} sets the sign $s$ of~\kbd{x} to $|s|$, in place.
 
 \fun{void}{affectsign}{GEN x, GEN y} shortcut for \kbd{setsigne(y, signe(x))}.
+No sanity check is made; in particular, setting the sign of a 
+$0$ \typ{INT} to $\pm1$ creates an invalid object.
 
 \fun{void}{affectsign_safe}{GEN x, GEN *y} sets the sign of~\kbd{*y} to that
 of~\kbd{x}, in place, unless \kbd{*y} is one of the integer universal
 constants in which case replace \kbd{*y} by its negation if needed
-(e.g.~replace \kbd{gen\_1} by \kbd{gen\_m1} if \kbd{x} is negative).
+(e.g.~replace \kbd{gen\_1} by \kbd{gen\_m1} if \kbd{x} is negative). No other
+sanity check is made; in particular, setting the sign of a $0$
+\typ{INT} to $\pm1$ creates an invalid object.
 
 \fun{void}{normalize_frac}{GEN z} assuming $z$ is of the form \kbd{mkfrac(a,b)}
 with $b\neq 0$, make sure that $b > 0$ by changing the sign of $a$ in place if
