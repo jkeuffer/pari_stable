@@ -1968,7 +1968,7 @@ optimizenode(long n)
     optimizemat(n);
     return;
   case Frefarg:
-    compile_err("unexpected character '&':",tree[n].str);
+    compile_err("unexpected character '&'",tree[n].str);
     return;
   case Ffunction:
     {
