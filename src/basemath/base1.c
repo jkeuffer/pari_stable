@@ -339,13 +339,16 @@ GEN
 ZX_primitive_to_monic(GEN pol, GEN *ptlc)
 {
   long i,j, n = degpol(pol);
-  GEN lc, fa, P, E, a, POL = leafcopy(pol);
+  GEN lc = leading_term(pol), fa, P, E, a, POL;
 
-  a = POL + 2; lc = gel(a,n);
-  if (signe(lc) < 0) { POL = ZX_neg(POL); a = POL+2; lc = gel(a,n); }
+  if (signe(lc) < 0) 
+    POL = ZX_neg(pol);
+  else
+    POL = leafcopy(pol);
+  a = POL+2; lc = gel(a,n);
   if (is_pm1(lc)) {
     if (ptlc) *ptlc = gen_1;
-    return pol;
+    return POL;
   }
   fa = Z_factor_limit(lc,0); lc = gen_1;
   P = gel(fa,1);
