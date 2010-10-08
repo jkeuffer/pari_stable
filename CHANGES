@@ -1,7 +1,7 @@
 # $Id$
 Bug numbers refer to the BTS at http://pari.math.u-bordeaux.fr/Bugs/
 
-Done for version 2.4.3 (released ??/??/2008):
+Done for version 2.4.3 (released 08/10/2010):
 
   Fixed
     1- \h m-n no longer worked
