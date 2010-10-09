@@ -220,6 +220,9 @@ static double speed_remiimul(speed_param *s) {
   GEN sM = init_remiimul(s->y);
   GEN op; INIT_RED(s, op);
   TIME_FUN( remiimul(op, s->y, sM) ); }
+static double speed_modred(speed_param *s) {
+  return (s->size < MONTGOMERY_LIMIT)? speed_redc(s): speed_modii(s);
+};
 
 static double speed_divrr(speed_param *s)
 { disable(s); TIME_FUN(divrr(s->x, s->y)); }
@@ -317,7 +320,7 @@ static tune_param param[] = {
 {PARI,var(FFT_SQRI_LIMIT),         t_INT, 1000,100000, speed_sqri,speed_karasqri,0.02},
 {0,   var(KARATSUBA_MULR_LIMIT),   t_REAL,4,0, speed_mulrr,speed_karamulrr},
 {PARI,var(MONTGOMERY_LIMIT),       t_INT, 3,0, speed_redc,speed_modii},
-{0,   var(REMIIMUL_LIMIT),         t_INT, 3,0, speed_modii,speed_remiimul},
+{0,   var(REMIIMUL_LIMIT),         t_INT, 3,0, speed_modred,speed_remiimul},
 {0,   var(INVNEWTON_LIMIT),        t_REAL,66,0, speed_inv,speed_invnewton,0.03},
 {GMP, var(DIVRR_GMP_LIMIT),        t_REAL,4,0, speed_divrr,speed_divrrgmp},
 {0,   var(EXPNEWTON_LIMIT),        t_REAL,66,0, speed_exp,speed_expnewton},
