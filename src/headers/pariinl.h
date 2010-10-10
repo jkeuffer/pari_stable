@@ -146,6 +146,8 @@ INLINE GEN
 mkmat2(GEN x, GEN y) { retmkmat2(x,y); }
 INLINE GEN
 mkmatcopy(GEN x) { GEN v = cgetg(2, t_MAT); gel(v,1) = gcopy(x); return v; }
+INLINE GEN
+mkerr(long x) { GEN v = cgetg(2, t_ERROR); v[1] = x; return v; }
 /* pol */
 INLINE GEN
 pol_x(long v) {

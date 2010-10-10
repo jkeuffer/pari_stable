@@ -3655,7 +3655,7 @@ simplify_shallow(GEN x)
   {
     case t_INT: case t_REAL: case t_INTMOD: case t_FRAC: case t_FFELT:
     case t_PADIC: case t_QFR: case t_QFI: case t_LIST: case t_STR: case t_VECSMALL:
-    case t_CLOSURE:
+    case t_CLOSURE: case t_ERROR:
       return x;
     case t_COMPLEX: return isintzero(gel(x,2))? gel(x,1): x;
     case t_QUAD:    return isintzero(gel(x,3))? gel(x,2): x;

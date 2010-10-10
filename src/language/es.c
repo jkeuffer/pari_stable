@@ -1885,6 +1885,7 @@ type_name(long t)
     case t_STR    : s="t_STR";     break;
     case t_VECSMALL:s="t_VECSMALL";break;
     case t_CLOSURE: s="t_CLOSURE"; break;
+    case t_ERROR:   s="t_ERROR";   break;
     default: pari_err(talker,"unknown type %ld",t);
       s = NULL; /* not reached */
   }
@@ -4229,7 +4230,13 @@ void print   (GEN g) { print0(g, f_RAW);       pari_putc('\n'); pari_flush(); }
 void printtex(GEN g) { print0(g, f_TEX);       pari_putc('\n'); pari_flush(); }
 void print1  (GEN g) { print0(g, f_RAW);       pari_flush(); }
 
-void error0(GEN g) { pari_err(user, g); }
+void
+error0(GEN g)
+{
+  if (lg(g)==2 && typ(gel(g,1))==t_ERROR) pari_err(0, gel(g,1));
+  else pari_err(user, g);
+}
+
 void warning0(GEN g) { pari_warn(user, g); }
 
 static char *

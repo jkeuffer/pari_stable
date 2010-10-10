@@ -979,6 +979,22 @@ pari_sigint(const char *time_s)
   err_recover(talker);
 }
 
+#define retmkerr2(x,y)\
+  do { GEN _v = cgetg(3, t_ERROR);\
+       _v[1] = (x);\
+       gel(_v,2) = (y); return _v; } while(0)
+#define retmkerr3(x,y,z)\
+  do { GEN _v = cgetg(4, t_ERROR);\
+       _v[1] = (x);\
+       gel(_v,2) = (y);\
+       gel(_v,3) = (z); return _v; } while(0)
+#define retmkerr4(x,y,z,t)\
+  do { GEN _v = cgetg(5, t_ERROR);\
+       _v[1] = (x);\
+       gel(_v,2) = (y);\
+       gel(_v,3) = (z);\
+       gel(_v,4) = (t); return _v; } while(0)
+
 /* if numerr=errpile, return NULL */
 static GEN
 pari_err2GEN(int numerr, va_list ap)
@@ -990,21 +1006,21 @@ pari_err2GEN(int numerr, va_list ap)
       const char *msg = va_arg(ap, char*);
       const char *s = va_arg(ap,char *);
       const char *entry = va_arg(ap,char *);
-      retmkvec3(stoi(numerr),strtoGENstr(msg), mkvecsmall2((long)s,(long)entry));
+      retmkerr3(numerr,strtoGENstr(msg), mkvecsmall2((long)s,(long)entry));
     }
   case talker: case alarmer:
     {
       const char *ch1 = va_arg(ap, char*);
-      retmkvec3(stoi(numerr), strtoGENstr(ch1), gvsprintf(ch1,ap));
+      retmkerr3(numerr, strtoGENstr(ch1), gvsprintf(ch1,ap));
     }
   case user:
   case invmoder:
   case notfuncer:
-    return mkvec2(stoi(numerr),va_arg(ap, GEN));
+    retmkerr2(numerr,va_arg(ap, GEN));
   case openfiler:
   {
     const char *f = va_arg(ap, const char*);
-    retmkvec3(stoi(numerr), strtoGENstr(f), strtoGENstr(va_arg(ap, char*)));
+    retmkerr3(numerr, strtoGENstr(f), strtoGENstr(va_arg(ap, char*)));
   }
   case overflower:
   case impl:
@@ -1012,27 +1028,33 @@ pari_err2GEN(int numerr, va_list ap)
   case constpoler: case redpoler:
   case zeropoler: case consister: case flagerr: case precer:
   case bugparier:
-    retmkvec2(stoi(numerr), strtoGENstr(va_arg(ap, char*)));
+    retmkerr2(numerr, strtoGENstr(va_arg(ap, char*)));
   case operi: case operf:
     {
       const char *op = va_arg(ap, const char*);
       GEN x = va_arg(ap, GEN);
       GEN y = va_arg(ap, GEN);
-      return mkvec4(stoi(numerr),strtoGENstr(op),x,y);
+      retmkerr4(numerr,strtoGENstr(op),x,y);
     }
   case primer1:
-    retmkvec2(stoi(numerr), utoi(va_arg(ap, ulong)));
+    retmkerr2(numerr, utoi(va_arg(ap, ulong)));
   case errpile:
     return NULL;
   default:
-    return mkvecs(numerr);
+    return mkerr(numerr);
   }
+}
+
+long
+err_get_num(GEN e)
+{
+  return e? e[1]: errpile;
 }
 
 static void
 pari_err_display(GEN err)
 {
-  long numerr=err?itos(gel(err,1)):errpile;
+  long numerr=err_get_num(err);
   if (numerr==syntaxer)
   {
     const char *msg = GSTR(gel(err,2));
@@ -1216,7 +1238,7 @@ trap0(const char *e, GEN r, GEN f)
 /*                                                                 */
 /*******************************************************************/
 /* lontyp[tx] = 0 (non recursive type) or number of codewords for type tx */
-const  long lontyp[] = { 0,0,0,1,1,2,1,2,1,1, 2,2,0,1,1,1,1,1,1,1, 2,0,0,2 };
+const  long lontyp[] = { 0,0,0,1,1,2,1,2,1,1, 2,2,0,1,1,1,1,1,1,1, 2,0,0,2,2 };
 
 static GEN
 list_internal_copy(GEN z, long nmax)
