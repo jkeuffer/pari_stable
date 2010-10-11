@@ -177,7 +177,7 @@ BA122- src/kernel/ix86/asm0.h had an incorrect #line entry.
   125- weird error message in ellpointtoz on loss of accuracy [#962]
   126- ^C before inital prompt appears ==> SEGV [#965]
 BA127- ellsea(,,1) did not work
-BA128- COMPAT file was missing some functions renamed in 2.3: 
+BA128- COMPAT file was missing some functions renamed in 2.3:
        flisexpr, flisseq -> gp_read_str; lisGEN  -> gp_read_stream
 AF129- fix for documentation of polcoeff, extern and readvec
 BA130- 1/matrix(2,2,i,j,Mod(0, 2)) -> SEGV
@@ -202,7 +202,7 @@ IZ145- [readline] 'foo)' + M-C-b -> infinite loop
 BA147- nfisideal did not reject invalid hnf ideal matrices [#999]
   148- v=vectorv(1);concat([matrix(0,0),v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v])
        -> SEGV [#1002]
-BA149- minpoly([-5,0,-1,1;0,-5,-1,-1;1,1,-5,0;-1,1,0,-5]/3) 
+BA149- minpoly([-5,0,-1,1;0,-5,-1,-1;1,1,-5,0;-1,1,0,-5]/3)
        -> wrong result[#994]
 BA150- 2/O(5) -> O(5^-1) (should raise an error) [#1009]
   151-  factor(13533236897) -> I/O Warning [#1012]
@@ -448,7 +448,7 @@ BA 41- user variables can now be aliased [#790]
        of t_STR, but if components can be directly compared, ordinary vectors
        are simpler and faster ]
    79- allow arbitrary nf entries in relative matrices; nfhnf and nfhnfmod
-       return matrices whose entries may be t_INT or t_FRAC besides the 
+       return matrices whose entries may be t_INT or t_FRAC besides the
        traditionnal nfalgtobasis form. Allow ideals in arbitrary form [was:
        necessarily HNF]
    80- linear algebra routines: determines first whether we are over Z/NZ
@@ -459,7 +459,7 @@ BA 41- user variables can now be aliased [#790]
    82- Mat(t_QFI or t_QFR) now returns the associated 2x2 symmetric matrix
    83- [library] rename Buchall -> Buchall_param and export a new Buchall
        with a simplified interface.
-   84- trap() no longer allows installing default error handlers. 
+   84- trap() no longer allows installing default error handlers.
    85- GP's break loop is now *enabled* by default [ set breakloop = 0 in your
        gprc to disable it ], and no longer controlled by trap(). To get out
        of a break loop, hit Return three times (next, return, break are no
@@ -495,12 +495,12 @@ BA 92- make test-xxx: trap SIGINT in benching script to exit on <C-C>
   103- added an optional "order" argument to znlog, fflog, elllog, znorder,
        fforder, ellorder, whose preferred format is [ord, factor(ord)] and
        ord is the order of the group
-  104- factor(t_INT/t_FRAC, lim) used to trial divide by primes up to 
+  104- factor(t_INT/t_FRAC, lim) used to trial divide by primes up to
        min(lim, primelimit). Now we trial divide up to lim and raise an error
-       if lim > primelimit. [ Having the routine return an obviously "wrong" 
+       if lim > primelimit. [ Having the routine return an obviously "wrong"
        result depending on an invisible parameter was not a good idea. ]
   105- factor(t_INT/t_FRAC, 1) was the same as factor(t_INT/t_FRAC, 0). Now
-       abide by the input value and leave (..., 0) as the single special case 
+       abide by the input value and leave (..., 0) as the single special case
        (shortcut for "the largest precomputed prime")
 BA106- [native kernel] Schoenhage-Strassen multiplication/squaring
   107- factorff(A, p, T): make p & T optional if A has t_FFELT coefficients
@@ -518,7 +518,7 @@ BA115- Rename RgXQ_u_pow to RgXQ_powu
   116- Darwin: add -search_paths_first to LDFLAGS (try to solve the Editline
        / Readline conflict in a user-friendly way)
 BA117- [enable-tls] Library soname changed to libpari[-gmp]-tls[-2.4].so.N.
-  118- integrate a final polredabs in quadhilbertreal() 
+  118- integrate a final polredabs in quadhilbertreal()
 BA119- Rename leftright_pow to gen_pow, leftright_pow_u to gen_pow_u and
        implement sliding window powering.
 BA120- galoisapply now accept automorphisms in t_COL format.
@@ -630,7 +630,7 @@ BA127- padic_sqrt -> Qp_sqrt, padic_sqrtn -> Qp_sqrtn, gammap -> Qp_gamma
        scalar_ZX, scalar_ZX_shallow, deg1pol, deg1pol_shallow
        togglesign_safe, setabssign,
        zero_Flm, zero_Flv, zero_zm, zero_zv, zm_copy, zv_cmp0, zv_copy,
-       zv_equal, zv_content, zx_renormalize, 
+       zv_equal, zv_content, zx_renormalize,
        identity_perm, cyclic_perm, perm_mul, perm_commute, perm_inv, perm_pow,
        cyc_pow_perm, cyc_pow, perm_cycles, perm_order, vecperm_orbits
        bitvec_test_set,
@@ -653,7 +653,7 @@ BA127- padic_sqrt -> Qp_sqrt, padic_sqrtn -> Qp_sqrtn, gammap -> Qp_gamma
        nfsign_arch, nfsign_units, nfsign_from_logarch, Buchquad, Buchall,
        Idealstar, idealaddtoone_i, idealcoprimefact,
        nfinvmodideal, nfpowmodideal, idealsqr, nfpow_u
-       numberofconjugates, 
+       numberofconjugates,
        bnrisconductor0, bnrdisc0, bnrconductor0,
        bnrsurjection, ABC_to_bnr, idealred, idealred0 (was ideallllred),
        idealred_elt, idealred_elt0
@@ -698,7 +698,7 @@ RM 18- partitions()
 JD 26- GP function warning()
    27- new flag to charpoly [ integral matrix, modular algorithm ]
 BA 28- GP function galoisisnormal()
-BA 29- F2x functions family for polynomials over GF(2) and 
+BA 29- F2x functions family for polynomials over GF(2) and
 BA 30- t_FFELT subtype_FF_F2xq for GF(2^n)
 BA 31- F2v/F2m functions family and F2m_ker for linear algebra over GF(2)
 BA 32- extra debugging data in t_CLOSURE and debugging facility.
