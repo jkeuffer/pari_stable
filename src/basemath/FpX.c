@@ -386,7 +386,7 @@ GEN
 FpX_gcd(GEN x, GEN y, GEN p)
 {
   GEN a,b,c;
-  pari_sp av0, av;
+  pari_sp av0, av, lim;
 
   if (lgefint(p)==3)
   {
@@ -398,12 +398,17 @@ FpX_gcd(GEN x, GEN y, GEN p)
     a = Flx_gcd_i(a,b, pp);
     avma = av; return Flx_to_ZX(a);
   }
-  av0=avma;
+  av0=avma; lim = stack_lim(av0,2);
   a = FpX_red(x, p); av = avma;
   b = FpX_red(y, p);
   while (signe(b))
   {
     av = avma; c = FpX_rem(a,b,p); a=b; b=c;
+    if (low_stack(lim,stack_lim(av0,2)))
+    {
+      if (DEBUGMEM>1) pari_warn(warnmem,"FpX_gcd (d = %ld)",degpol(c));
+      gerepileall(av0,2, &a,&b);
+    }
   }
   avma = av; return gerepileupto(av0, a);
 }
