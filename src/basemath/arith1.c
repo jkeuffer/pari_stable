@@ -1796,27 +1796,28 @@ Fl_powu(ulong x, ulong n0, ulong p)
 static long
 Fp_select_red(GEN *y, ulong k, GEN N, long lN, muldata *D)
 {
-  long use_montgomery = mod2(N) && lN < MONTGOMERY_LIMIT;
   D->N = N;
-  if (use_montgomery)
+  if (lN > REMIIMUL_LIMIT  && (k==0 || ((double)k)*expi(*y) > 2 + expi(N)))
+  {
+    D->mul2 = &_muli2red;
+    D->res = &_remiimul;
+    D->iM = init_remiimul(N);
+    return 0;
+  }
+  else if (mod2(N) && lN < MONTGOMERY_LIMIT)
   {
     *y = remii(shifti(*y, bit_accuracy(lN)), N);
     D->mul2 = &_muli2montred;
     D->res = &_montred;
     D->inv = init_montdata(N);
-  }
-  else if (lN > REMIIMUL_LIMIT  && (k==0 || ((double)k)*expi(*y) > 2 + expi(N)))
-  {
-    D->mul2 = &_muli2red;
-    D->res = &_remiimul;
-    D->iM = init_remiimul(N);
+    return 1;
   }
   else
   {
     D->mul2 = &_muli2red;
     D->res = &_remii;
+    return 0;
   }
-  return use_montgomery;
 }
 
 GEN
