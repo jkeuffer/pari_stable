@@ -3,6 +3,10 @@ Bug numbers refer to the BTS at http://pari.math.u-bordeaux.fr/Bugs/
 
 Done for version 2.4.4 (released ??/12/2010):
 
+  Fixed
+BA 1- FpX_gcd did not garbage-collect for large input.
+BA 2- 'make all' failed to build the documentation.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.3 (released 08/10/2010):
 

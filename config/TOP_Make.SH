@@ -41,8 +41,8 @@ dft target::
 	@echo "	test-all	        Thorough regression tests (slow)"
 
 all::
-	@-cd doc && \$(MAKE) doc
 	@\$(MAKE) gp
+	@-cd doc && \$(MAKE) doc
 
 gp bench test-kernel test-all $top_test_extra $top_dotest_extra install cleanall cleanobj cleantest install-bin install-doc install-docpdf install-data install-lib-sta install-bin-sta dobench dyntest-all statest-all tune::
 	@dir=\`config/objdir\`; echo "Making \$@ in \$\$dir";\\
