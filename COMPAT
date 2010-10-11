@@ -4,7 +4,7 @@ This file lists the incompatible changes between Version 2.x and older versions
   - The "break loop" is now *on* by default, and no longer controlled by
     trap(), but by the default breakloop. To get out of a break loop, hit
     Return three times (next, return, break are no longer accepted)
-  - trap() no longer allows installing default error handlers. 
+  - trap() no longer allows installing default error handlers.
   - GP's break loop is now *enabled* by default [ set breakloop = 0 in your
     gprc to disable it ]
   - random() now uses Brent's XORGEN (replaces congruential linear generator)
@@ -108,12 +108,12 @@ This file lists the incompatible changes between Version 2.x and older versions
     messages attached to z, and works for aliases and installed functions too ]
   - removed optional flag to rnfconductor, use rnfisabelian.
   - changed the "zetakinit" format: bnf no longer included
-  - factor(t_INT/t_FRAC, lim) used to trial divide by primes up to 
+  - factor(t_INT/t_FRAC, lim) used to trial divide by primes up to
     min(lim, primelimit). Now we trial divide up to lim and raise an error
-    if lim > primelimit. [ Having the routine return an obviously "wrong" 
+    if lim > primelimit. [ Having the routine return an obviously "wrong"
     result depending on an invisible parameter was not a good idea. ]
   - factor(t_INT/t_FRAC, 1) was the same as factor(t_INT/t_FRAC, 0). Now
-    abide by the input value and leave (..., 0) as the single special case 
+    abide by the input value and leave (..., 0) as the single special case
     (shortcut for "the largest precomputed prime")
   - listsort(L) no longer returns the list L: it now returns nothing.
     (No point in sorting in place if we must immediately copy the result.)
@@ -174,7 +174,7 @@ This file lists the incompatible changes between Version 2.x and older versions
   - rename factorpadic4 -> factorpadic, factorpadic2 now static
   - the "prec" parameter has disappeared in all floating point LLL various
   - remove obsolete function factpol()
-  - rename library functions nfhermite -> nfhnf, nfhermitemod -> nfhnfmod, 
+  - rename library functions nfhermite -> nfhnf, nfhermitemod -> nfhnfmod,
     nfsmith -> nfsnf
   - rename subres -> resultant, subresall -> resultant_all.
   - remove obsolete discsr. Use RgX_disc (or quad_disc, qfb_disc...)

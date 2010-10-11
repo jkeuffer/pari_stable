@@ -71,12 +71,12 @@ Algebraic number Theory:
      bnfinit, bnfisprincipal, bnrinit (and related functions, e.g. bnrconductor
      or bnrdisc), rnfkummer, thue (fast enumeration of small solutions, don't
      assume the full unit group is known).
-  
+
    * A set of fast routines for Galois theory (galoisininit, nfgaloisconj,
      galoisisabelian, galoisfixedfield, galoissubfields, galoissubcyclo for
      abelian fields, galoisidentify to identify large Galois fields up to
      degree 127).
-    
+
      'galdata' package [ to be downloaded separately ]: polgalois is safer
      and orders of magnitudes faster in tough cases, output is now
      human readable
@@ -97,10 +97,10 @@ Miscellaneous:
      variations on the Ooura-Mori "double exponential" method. See ??intnum
      Library interface to all these functions and standard iterators (e.g.
      forvec)
-   
+
    * Error messages now mention the GP function where the error occured.
 
-   * Input/output and convenience functions: Str(a,1,c) --> "a1c", 
+   * Input/output and convenience functions: Str(a,1,c) --> "a1c",
      Strexpand("~") --> "/home/a2x/belabas", substvec (parallel substitutions),
      substpol(expr, x^2, y), writebin (write objets in binary format for
      fast retrieval), readvec (load a file's content into a vector)
@@ -112,10 +112,10 @@ Miscellaneous:
 
    * PARI/GP is now released under the GNU General Public License.
 
-   * PARI now has a CVS server which is intended for PARI lovers who want 
+   * PARI now has a CVS server which is intended for PARI lovers who want
      the very latest bleeding edge release (see the CVS.txt file).
 
-   * Argument checks have been added to prevent unpredictable results when 
+   * Argument checks have been added to prevent unpredictable results when
      the input is incorrect.
 
    * Errors can be trapped to avoid abort and recover computations.
@@ -142,16 +142,16 @@ Miscellaneous:
      - Galois extensions of Q: Fixed fields, Galois conjugates using
        Allombert's algorithm.
 
-   * Class group, ray-class group: 
+   * Class group, ray-class group:
      - improved bnf/bnr functions (faster, numerically stabler), in
        particular bnfisprincipal
      - computations of explicit defining equations of abelian extensions of
-       imaginery quadratic fields (using complex multiplication) of totally 
+       imaginery quadratic fields (using complex multiplication) of totally
        real abelian extensions (using Stark units).
 
    * Elliptic functions: Weierstrass and Weber functions.
 
-   * Plotting: support of gnuplot, new functions (possiblity to plot directly 
+   * Plotting: support of gnuplot, new functions (possiblity to plot directly
      in a file).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.0 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

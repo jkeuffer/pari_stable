@@ -13,7 +13,7 @@ Priority classification (first column): [subjective and debatable]
 -    unclassified
 
 ***************************   BUGS (general)     ****************************
-Unless specified otherwise, examples assume 32bit machine and default precision 
+Unless specified otherwise, examples assume 32bit machine and default precision
 
 4  factorback should not accept [;] since matrix(0,2) is the only valid
    form of an empty matrix input, corresponding e.g to factor(1). But the
@@ -48,7 +48,7 @@ Unless specified otherwise, examples assume 32bit machine and default precision
      output = 3 (external prettyprint)
    ? 1
    ?  \\ THEN, %1 = 1 is printed.
- 
+
    gphelp is not affected by the problem since it prints an 'ugly_kludge'
    string to tell the caller (gp) that it is finished [it should use 'wait'
    instead, but less portable]. tex2mail just uses a delay loop [prettyp_wait()].
@@ -57,7 +57,7 @@ Unless specified otherwise, examples assume 32bit machine and default precision
 
 2  under GP after an error, memory is only recovered from "entire variables".
    Individual components of lists/vectors/matrices are left alone if the
-   GLOBAL object wasn't modified during the last cycle (i.e only v[x] = ... 
+   GLOBAL object wasn't modified during the last cycle (i.e only v[x] = ...
    occured)
 
 ***************************  DOCUMENTATION    ****************************
@@ -161,7 +161,7 @@ Misc:
 
 ***************************   GP DESIGN       ****************************
 
--  rework the semantics of "trap". 
+-  rework the semantics of "trap".
 
 -  Allow GP to trap an OS signal. Suppose that gp runs, say in nohup mode, and
    it takes several days to complete the program. In meantime several things
@@ -182,7 +182,7 @@ Misc:
 3  a type t_FILE [current: stream re-opened/flushed/closed after every single
    write(): disaster when one wants to write often to the same file]
 
-0  add a possibility to increase the maximal recursion depth (need to 
+0  add a possibility to increase the maximal recursion depth (need to
    increase the GP process stack: use setrlimit(RLIMIT_STACK,) + fork)
    [ was never requested and wouldn't be portable. Do it yourself before
    launching gp ]
