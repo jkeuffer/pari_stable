@@ -80,7 +80,7 @@ FpX_add(GEN x,GEN y,GEN p)
   for (i=2; i<ly; i++) gel(z,i) = Fp_add(gel(x,i),gel(y,i), p);
   for (   ; i<lx; i++) gel(z,i) = modii(gel(x,i), p);
   z = ZX_renormalize(z, lx);
-  if (!lgpol(z)) { avma = (pari_sp)(z + lx); return zeropol(varn(x)); }
+  if (!lgpol(z)) { avma = (pari_sp)(z + lx); return pol_0(varn(x)); }
   return z;
 }
 
@@ -88,7 +88,7 @@ static GEN
 Fp_red_FpX(GEN x, GEN p, long v)
 {
   GEN z;
-  if (!signe(x)) return zeropol(v);
+  if (!signe(x)) return pol_0(v);
   z = cgetg(3, t_POL);
   z[1] = evalsigne(1) | evalvarn(v);
   gel(z,2) = Fp_red(x,p); return z;
@@ -98,7 +98,7 @@ static GEN
 Fp_neg_FpX(GEN x, GEN p, long v)
 {
   GEN z;
-  if (!signe(x)) return zeropol(v);
+  if (!signe(x)) return pol_0(v);
   z = cgetg(3, t_POL);
   z[1] = evalsigne(1) | evalvarn(v);
   gel(z,2) = Fp_neg(x,p); return z;
@@ -187,7 +187,7 @@ FpX_subspec(GEN x,GEN y,GEN p, long nx, long ny)
     for (   ; i<ny; i++) gel(z,i) = Fp_neg(gel(y,i), p);
   }
   z = FpX_renormalize(z-2, lz);
-  if (!lgpol(z)) { avma = (pari_sp)(z + lz); return zeropol(0); }
+  if (!lgpol(z)) { avma = (pari_sp)(z + lz); return pol_0(0); }
   return z;
 }
 
@@ -207,14 +207,14 @@ Fp_FpX_sub(GEN x, GEN y, GEN p)
   if (ly <= 3) {
     z = cgetg(3, t_POL);
     x = (ly == 3)? Fp_sub(x, gel(y,2), p): modii(x, p);
-    if (!signe(x)) { avma = (pari_sp)(z + 3); return zeropol(varn(y)); }
+    if (!signe(x)) { avma = (pari_sp)(z + 3); return pol_0(varn(y)); }
     z[1] = y[1]; gel(z,2) = x; return z;
   }
   z = cgetg(ly,t_POL);
   gel(z,2) = Fp_sub(x, gel(y,2), p);
   for (i = 3; i < ly; i++) gel(z,i) = Fp_neg(gel(y,i), p);
   z = ZX_renormalize(z, ly);
-  if (!lgpol(z)) { avma = (pari_sp)(z + ly); return zeropol(varn(x)); }
+  if (!lgpol(z)) { avma = (pari_sp)(z + ly); return pol_0(varn(x)); }
   z[1] = y[1]; return z;
 }
 
@@ -229,7 +229,7 @@ FpX_Fp_mul(GEN y,GEN x,GEN p)
 {
   GEN z;
   long i, l;
-  if (!signe(x)) return zeropol(varn(y));
+  if (!signe(x)) return pol_0(varn(y));
   z = cgetg_copy(y, &l); z[1] = y[1];
   for(i=2; i<l; i++) gel(z,i) = Fp_mul(gel(y,i), x, p);
   return ZX_renormalize(z, l);
@@ -260,19 +260,19 @@ FpX_divrem(GEN x, GEN y, GEN p, GEN *pr)
     if (pr)
     {
       av0 = avma; x = FpX_red(x, p);
-      if (pr == ONLY_DIVIDES) { avma=av0; return signe(x)? NULL: zeropol(vx); }
+      if (pr == ONLY_DIVIDES) { avma=av0; return signe(x)? NULL: pol_0(vx); }
       if (pr == ONLY_REM) return x;
       *pr = x;
     }
-    return zeropol(vx);
+    return pol_0(vx);
   }
   lead = leading_term(y);
   if (!dy) /* y is constant */
   {
     if (pr && pr != ONLY_DIVIDES)
     {
-      if (pr == ONLY_REM) return zeropol(vx);
-      *pr = zeropol(vx);
+      if (pr == ONLY_REM) return pol_0(vx);
+      *pr = pol_0(vx);
     }
     av0 = avma;
     if (equali1(lead)) return FpX_red(x, p);
@@ -457,7 +457,7 @@ FpX_extgcd(GEN x, GEN y, GEN p, GEN *ptu, GEN *ptv)
     a = FpX_red(x, p);
     b = FpX_red(y, p);
     d = a; d1 = b;
-    v = zeropol(vx); v1 = scalar_ZX_shallow(gen_1,vx);
+    v = pol_0(vx); v1 = scalar_ZX_shallow(gen_1,vx);
     while (signe(d1))
     {
       q = FpX_divrem(d,d1,p, &r);
@@ -760,7 +760,7 @@ FpX_invMontgomery(GEN T, GEN p)
   pari_sp ltop = avma;
   long l = lg(T);
   GEN r;
-  if (l<5) return zeropol(T[1]);
+  if (l<5) return pol_0(T[1]);
   if (l<=FpX_INVMONTGOMERY_LIMIT)
   {
     GEN c = gel(T,l-1), ci=gen_1;
@@ -1168,7 +1168,7 @@ FpXQ_sqrtn(GEN a, GEN n, GEN T, GEN p, GEN *zeta)
     long v=varn(T);
     if (zeta)
       *zeta=pol_1(v);
-    return zeropol(v);
+    return pol_0(v);
   }
   if (lgefint(p)==3)
   {

@@ -126,7 +126,12 @@ pol_1(long v) {
   p[1] = evalsigne(1)|evalvarn(v);
   gel(p,2) = gen_1; return p;
 }
-
+INLINE GEN
+pol_0(long v)
+{
+  GEN x = cgetg(2,t_POL);
+  x[1] = evalvarn(v); return x;
+}
 INLINE GEN
 const_vec(long n, GEN x)
 {
@@ -173,11 +178,7 @@ zeroser(long v, long e)
 }
 /* 0 * pol_x(v) */
 INLINE GEN
-zeropol(long v)
-{
-  GEN x = cgetg(2,t_POL);
-  x[1] = evalvarn(v); return x;
-}
+zeropol(long v) { return pol_0(v); }
 /* vector(n) */
 INLINE GEN
 zerocol(long n)

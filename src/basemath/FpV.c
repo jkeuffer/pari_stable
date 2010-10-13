@@ -422,7 +422,7 @@ FpM_FpC_mul_FpX(GEN x, GEN y, GEN p, long v)
   long i, l, lx = lg(x);
   GEN z;
   /* if (lx != lg(y)) pari_err(operi,"*",x,y); */
-  if (lx==1) return zeropol(v);
+  if (lx==1) return pol_0(v);
   l = lg(x[1]);
   z = new_chunk(l+1);
   for (i=l-1; i; i--)
@@ -438,7 +438,7 @@ FpM_FpC_mul_FpX(GEN x, GEN y, GEN p, long v)
     }
     avma = av;
   }
-  if (!i) { avma = (pari_sp)(z + l+1); return zeropol(v); }
+  if (!i) { avma = (pari_sp)(z + l+1); return pol_0(v); }
   z[0] = evaltyp(t_POL) | evallg(i+2);
   z[1] = evalsigne(1) | evalvarn(v);
   for (; i; i--)

@@ -92,7 +92,7 @@ ZX_add(GEN x, GEN y)
   for (i=2; i<ly; i++) gel(z,i) = addii(gel(x,i),gel(y,i));
   for (   ; i<lx; i++) gel(z,i) = icopy(gel(x,i));
   if (lx == ly) z = ZX_renormalize(z, lx);
-  if (!lgpol(z)) { avma = (pari_sp)(z + lx); return zeropol(varn(x)); }
+  if (!lgpol(z)) { avma = (pari_sp)(z + lx); return pol_0(varn(x)); }
   return z;
 }
 
@@ -108,7 +108,7 @@ ZX_sub(GEN x,GEN y)
     if (lx == ly)
     {
       z = ZX_renormalize(z, lx);
-      if (!lgpol(z)) { avma = (pari_sp)(z + lx); z = zeropol(varn(x)); }
+      if (!lgpol(z)) { avma = (pari_sp)(z + lx); z = pol_0(varn(x)); }
     }
     else
       for (   ; i<lx; i++) gel(z,i) = icopy(gel(x,i));
@@ -148,7 +148,7 @@ GEN
 scalar_ZX(GEN x, long v)
 {
   GEN z;
-  if (!signe(x)) return zeropol(v);
+  if (!signe(x)) return pol_0(v);
   z = cgetg(3, t_POL);
   z[1] = evalsigne(1) | evalvarn(v);
   gel(z,2) = icopy(x); return z;
@@ -158,7 +158,7 @@ GEN
 scalar_ZX_shallow(GEN x, long v)
 {
   GEN z;
-  if (!signe(x)) return zeropol(v);
+  if (!signe(x)) return pol_0(v);
   z = cgetg(3, t_POL);
   z[1] = evalsigne(1) | evalvarn(v);
   gel(z,2) = x; return z;
@@ -186,7 +186,7 @@ ZX_Z_sub(GEN y, GEN x)
   { /* scalarpol(negi(x), v) */
     long v = varn(y);
     avma = (pari_sp)(z + 2);
-    if (!signe(x)) return zeropol(v);
+    if (!signe(x)) return pol_0(v);
     z = cgetg(3,t_POL);
     z[1] = evalvarn(v) | evalsigne(1);
     gel(z,2) = negi(x); return z;
@@ -225,7 +225,7 @@ ZX_Z_mul(GEN y,GEN x)
 {
   GEN z;
   long i, l;
-  if (!signe(x)) return zeropol(varn(y));
+  if (!signe(x)) return pol_0(varn(y));
   l = lg(y); z = cgetg(l,t_POL); z[1] = y[1];
   for(i=2; i<l; i++) gel(z,i) = mulii(gel(y,i),x);
   return z;
@@ -255,7 +255,7 @@ ZX_deriv(GEN x)
   long i,lx = lg(x)-1;
   GEN y;
 
-  if (lx<3) return zeropol(varn(x));
+  if (lx<3) return pol_0(varn(x));
   y = cgetg(lx,t_POL);
   for (i=2; i<lx ; i++) gel(y,i) = mului(i-1,gel(x,i+1));
   y[1] = x[1]; return y;
@@ -293,7 +293,7 @@ long
 ZX_valrem(GEN x, GEN *Z)
 {
   long vx;
-  if (!signe(x)) { *Z = zeropol(varn(x)); return LONG_MAX; }
+  if (!signe(x)) { *Z = pol_0(varn(x)); return LONG_MAX; }
   for (vx = 0;; vx++)
     if (signe(gel(x,2+vx))) break;
   *Z = RgX_shift_shallow(x, -vx);
@@ -472,7 +472,7 @@ ZX_sqrspec(GEN x, long nx)
   pari_sp av;
   long ex, vx;
   GEN z;
-  if (!nx) return zeropol(0);
+  if (!nx) return pol_0(0);
   vx = ZX_valspec(x,nx); nx-=vx; x+=vx;
   if (nx==1) return Z_sqrshiftspec_ZX(gel(x, 0), vx);
   av = avma;
@@ -498,7 +498,7 @@ ZX_mulspec(GEN x, GEN y, long nx, long ny)
   pari_sp av;
   long ex, ey, vx, vy;
   GEN z;
-  if (!nx || !ny) return zeropol(0);
+  if (!nx || !ny) return pol_0(0);
   vx = ZX_valspec(x,nx); nx-=vx; x += vx;
   vy = ZX_valspec(y,ny); ny-=vy; y += vy;
   if (nx==1) return Z_ZX_mulshiftspec(gel(x,0), y, ny, vx+vy);
@@ -531,7 +531,7 @@ ZX_rem(GEN x, GEN y)
   dy = degpol(y);
   dx = degpol(x);
   if (dx < dy) return ZX_copy(x);
-  if (!dy) return zeropol(vx); /* y is constant */
+  if (!dy) return pol_0(vx); /* y is constant */
   av0 = avma; dz = dx-dy;
   z=cgetg(dz+3,t_POL); z[1] = x[1];
   x += 2; y += 2; z += 2;

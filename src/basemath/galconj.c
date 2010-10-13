@@ -946,7 +946,7 @@ sympol_aut_evalmod(GEN sym, long g, GEN sigma, GEN Tp, GEN p)
   sigma = RgX_to_FpX(sigma, p);
   pows  = FpXQ_powers(sigma,npows,Tp,p);
   f = pol_x(varn(sigma));
-  s = zeropol(varn(sigma));
+  s = pol_0(varn(sigma));
   for(i=1; i<=g;i++)
   {
     if (i > 1) f = FpX_FpXQV_eval(f,pows,Tp,p);

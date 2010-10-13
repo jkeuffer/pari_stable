@@ -146,7 +146,7 @@ nfgcd_all(GEN P, GEN Q, GEN T, GEN den, GEN *Pnew)
   ulong p;
   byteptr primepointer;
 
-  if (!signe(P)) { if (Pnew) *Pnew = zeropol(vT); return gcopy(Q); }
+  if (!signe(P)) { if (Pnew) *Pnew = pol_0(vT); return gcopy(Q); }
   if (!signe(Q)) { if (Pnew) *Pnew = pol_1(vT);   return gcopy(P); }
   /*Compute denominators*/
   if (!den) den = ZX_disc(T);
@@ -428,7 +428,7 @@ static GEN
 zerofact(long v)
 {
   GEN z = cgetg(3, t_MAT);
-  gel(z,1) = mkcol(zeropol(v));
+  gel(z,1) = mkcol(pol_0(v));
   gel(z,2) = mkcol(gen_1); return z;
 }
 

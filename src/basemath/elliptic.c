@@ -4406,7 +4406,7 @@ static GEN
 elldivpol4(GEN e, long n, long v)
 {
   GEN b2,b4,b6,b8, res;
-  if (n==0) return zeropol(v);
+  if (n==0) return pol_0(v);
   if (n<=2) return pol_1(v);
   b2  = ell_get_b2(e); b4  = ell_get_b4(e);
   b6  = ell_get_b6(e); b8  = ell_get_b8(e);

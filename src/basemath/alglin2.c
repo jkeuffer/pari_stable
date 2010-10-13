@@ -372,7 +372,7 @@ carhess(GEN x, long v)
   for (r = 1; r < lx; r++)
   {
     pari_sp av2 = avma;
-    GEN z, a = gen_1, b = zeropol(v);
+    GEN z, a = gen_1, b = pol_0(v);
     for (i = r-1; i; i--)
     {
       a = gmul(a, gcoeff(H,i+1,i));

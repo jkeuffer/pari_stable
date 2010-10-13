@@ -723,7 +723,7 @@ ZpX_gcd(GEN f1, GEN f2, GEN pm)
     if (!equalii(t, pm))
       return gerepileupto(av, RgX_Rg_div(RgV_to_RgX(gel(a,c), v), t));
   }
-  avma = av; return zeropol(v);
+  avma = av; return pol_0(v);
 }
 
 /* Return m > 0, such that p^m ~ 2^32 for initial value of m; p > 1 */
@@ -1252,7 +1252,7 @@ mycaract(decomp_t *S, GEN f, GEN a, GEN pp, GEN pdr)
   GEN d, chi, prec1, prec2, prec3, ns;
   long vd, n = degpol(f);
 
-  if (gequal0(a)) return zeropol(varn(f));
+  if (gequal0(a)) return pol_0(varn(f));
 
   a = QpX_remove_denom(a, S->p, &d, &vd);
   prec1 = pp;

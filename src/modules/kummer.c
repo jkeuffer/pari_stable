@@ -939,7 +939,7 @@ split_pol(GEN x, long v, long a, long b)
   GEN y = x + a, z;
 
   if (l < b) b = l;
-  if (a > b || varn(x) != v) return zeropol(v);
+  if (a > b || varn(x) != v) return pol_0(v);
   l = b-a + 3;
   z = cgetg(l, t_POL); z[1] = x[1];
   for (i = 2; i < l; i++) z[i] = y[i];

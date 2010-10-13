@@ -185,7 +185,7 @@ RgX_s_mulspec(GEN x, long nx, long s)
 {
   GEN z, t;
   long i;
-  if (!s || !nx) return zeropol(0);
+  if (!s || !nx) return pol_0(0);
   z = cgetg(nx+2, t_POL); z[1] = evalsigne(1)|evalvarn(0); t = z + 2;
   for (i=0; i < nx; i++) gel(t,i) = gmulgs(gel(x,i), s);
   return z;
@@ -196,7 +196,7 @@ RgX_shiftspec(GEN x, long nx, long s)
 {
   GEN z, t;
   long i;
-  if (!nx) return zeropol(0);
+  if (!nx) return pol_0(0);
   z = cgetg(nx+2, t_POL); z[1] = evalsigne(1)|evalvarn(0); t = z + 2;
   for (i=0; i < nx; i++) gel(t,i) = gmul2n(gel(x,i), s);
   return z;
@@ -210,7 +210,7 @@ karasquare(GEN P, long nP)
   long n0, n1, i, l, N, N0, N1, n = nP - 1; /* degree(P) */
   pari_sp av;
 
-  if (n <= KARASQUARE_LIMIT) return nP? CX_square_spec(P, nP): zeropol(0);
+  if (n <= KARASQUARE_LIMIT) return nP? CX_square_spec(P, nP): pol_0(0);
   av = avma;
   n0 = (n>>1) + 1; n1 = nP - n0;
   s0 = karasquare(P, n0); Q = P + n0;
@@ -237,7 +237,7 @@ cook_square(GEN P, long nP)
   long n0, n3, i, j, n = nP - 1;
   pari_sp av;
 
-  if (n <= COOKSQUARE_LIMIT) return  nP? karasquare(P, nP): zeropol(0);
+  if (n <= COOKSQUARE_LIMIT) return  nP? karasquare(P, nP): pol_0(0);
   av = avma;
 
   n0 = (n+1) >> 2; n3 = n+1 - 3*n0;

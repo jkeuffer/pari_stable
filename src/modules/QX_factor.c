@@ -1095,8 +1095,8 @@ ZX_gcd_all(GEN A, GEN B, GEN *Anew)
   pari_sp ltop, av, avlim;
   byteptr d;
 
-  if (!signe(A)) { if (Anew) *Anew = zeropol(vA); return ZX_copy(B); }
-  if (!signe(B)) { if (Anew) *Anew = pol_1(vA);   return ZX_copy(A); }
+  if (!signe(A)) { if (Anew) *Anew = pol_0(vA); return ZX_copy(B); }
+  if (!signe(B)) { if (Anew) *Anew = pol_1(vA); return ZX_copy(A); }
   valA = ZX_valrem(A, &A);
   valX = minss(valA, ZX_valrem(B, &B));
   ltop = avma;

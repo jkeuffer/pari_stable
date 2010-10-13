@@ -2073,7 +2073,7 @@ static GEN
 zero_extgcd(GEN y, GEN *U, GEN *V, long vx)
 {
   GEN x=content(y);
-  *U=zeropol(vx); *V = scalarpol(ginv(x), vx); return gmul(y,*V);
+  *U=pol_0(vx); *V = scalarpol(ginv(x), vx); return gmul(y,*V);
 }
 
 static int
@@ -2105,13 +2105,13 @@ RgX_extgcd(GEN x, GEN y, GEN *U, GEN *V)
   if (!signe(x))
   {
     if (signe(y)) return zero_extgcd(y,U,V,vx);
-    *U = zeropol(vx); *V = zeropol(vx);
-    return zeropol(vx);
+    *U = pol_0(vx); *V = pol_0(vx);
+    return pol_0(vx);
   }
   if (!signe(y)) return zero_extgcd(x,V,U,vx);
   dx = degpol(x); dy = degpol(y);
   if (dx < dy) { pswap(U,V); lswap(dx,dy); swap(x,y); }
-  if (dy==0) { *U=zeropol(vx); *V=ginv(y); return pol_1(vx); }
+  if (dy==0) { *U=pol_0(vx); *V=ginv(y); return pol_1(vx); }
 
   av = avma;
   u = x = primitive_part(x, &cu);
@@ -2138,7 +2138,7 @@ RgX_extgcd(GEN x, GEN y, GEN *U, GEN *V)
   else /* y | x */
   {
     vze = cv ? RgX_Rg_div(pol_1(vx),cv): pol_1(vx);
-    uze = zeropol(vx);
+    uze = pol_0(vx);
     p1 = gen_1;
   }
   if (must_negate(v)) p1 = gneg(p1);
@@ -2186,7 +2186,7 @@ RgXQ_ratlift(GEN x, GEN T, long amax, long bmax, GEN *P, GEN *Q)
   }
   if (uze == gen_0)
   {
-    avma = av; *P = zeropol(vx); *Q = pol_1(vx);
+    avma = av; *P = pol_0(vx); *Q = pol_1(vx);
     return 1;
   }
   if (cu) uze = RgX_Rg_div(uze,cu);
@@ -2244,7 +2244,7 @@ RgX_Rg_mul_i(GEN y, GEN x, long ly)
 {
   long i;
   GEN z;
-  if (isrationalzero(x)) return zeropol(varn(y));
+  if (isrationalzero(x)) return pol_0(varn(y));
   z = cgetg(ly,t_POL); z[1] = y[1];
   for (i = 2; i < ly; i++) gel(z,i) = gmul(x,gel(y,i));
   return z;
@@ -2392,7 +2392,7 @@ resultant_all(GEN P, GEN Q, GEN *sol)
 /*                                                                 */
 /*******************************************************************/
 static GEN
-_zeropol(void)
+_pol_0(void)
 {
   GEN x = cgetg(3,t_POL);
   x[1] = 0;
@@ -2416,8 +2416,8 @@ sylvestermatrix_i(GEN x, GEN y)
   long j,d,dx,dy;
   GEN M;
 
-  dx = degpol(x); if (dx < 0) { dx = 0; x = _zeropol(); }
-  dy = degpol(y); if (dy < 0) { dy = 0; y = _zeropol(); }
+  dx = degpol(x); if (dx < 0) { dx = 0; x = _pol_0(); }
+  dy = degpol(y); if (dy < 0) { dy = 0; y = _pol_0(); }
   d = dx+dy; M = cgetg(d+1,t_MAT);
   for (j=1; j<=dy; j++) gel(M,j)    = sylvester_col(x,j,d,j+dx);
   for (j=1; j<=dx; j++) gel(M,j+dy) = sylvester_col(y,j,d,j+dy);
@@ -2941,9 +2941,9 @@ scalar_bezout(GEN x, GEN y, GEN *U, GEN *V)
 {
   long vx=varn(x);
   int xis0 = signe(x)==0, yis0 = gequal0(y);
-  if (xis0 && yis0) { *U = *V = zeropol(vx); return zeropol(vx); }
-  if (yis0) { *U=pol_1(vx); *V = zeropol(vx); return gcopy(x);}
-  *U=zeropol(vx); *V= ginv(y); return pol_1(vx);
+  if (xis0 && yis0) { *U = *V = pol_0(vx); return pol_0(vx); }
+  if (yis0) { *U=pol_1(vx); *V = pol_0(vx); return gcopy(x);}
+  *U=pol_0(vx); *V= ginv(y); return pol_1(vx);
 }
 /* Assume x==0, y!=0 */
 static GEN

@@ -49,10 +49,10 @@ poldivrem(GEN x, GEN y, GEN *pr)
     if (!signe(y)) pari_err(gdiver);
     if (!degpol(y)) /* constant */
     {
-      if (pr == ONLY_REM) return zeropol(vy);
+      if (pr == ONLY_REM) return pol_0(vy);
       p1 = gdiv(x, gel(y,2));
       if (pr == ONLY_DIVIDES) return p1;
-      if (pr) *pr = zeropol(vy);
+      if (pr) *pr = pol_0(vy);
       return p1;
     }
     if (pr == ONLY_REM) return gcopy(x);
@@ -66,7 +66,7 @@ poldivrem(GEN x, GEN y, GEN *pr)
   {
     if (pr && pr != ONLY_DIVIDES)
     {
-      p1 = zeropol(vx); if (pr == ONLY_REM) return p1;
+      p1 = pol_0(vx); if (pr == ONLY_REM) return p1;
       *pr = p1;
     }
     return gdiv(x,y);
@@ -106,12 +106,12 @@ grem(GEN x, GEN y)
   if (is_scalar_t(tx) || varncmp(vx, vy) > 0)
   {
     if (!signe(y)) pari_err(gdiver);
-    if (!degpol(y)) return zeropol(vy); /* constant */
+    if (!degpol(y)) return pol_0(vy); /* constant */
     return gcopy(x);
   }
   if (tx != t_POL) pari_err(typeer,"euclidean division (poldivrem)");
 
-  if (varncmp(vx, vy) < 0) return zeropol(vx);
+  if (varncmp(vx, vy) < 0) return pol_0(vx);
   return RgX_rem(x, y);
 }
 

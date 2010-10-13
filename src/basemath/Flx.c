@@ -2081,7 +2081,7 @@ FlxX_sub(GEN x, GEN y, ulong p)
     for (i=2; i<lx; i++) gel(z,i) = Flx_sub(gel(x,i),gel(y,i),p);
     for (   ; i<ly; i++) gel(z,i) = Flx_neg(gel(y,i),p);
   }
-  if (!lgpol(z)) { avma = (pari_sp)(z + lz); z = zeropol(varn(x)); }
+  if (!lgpol(z)) { avma = (pari_sp)(z + lz); z = pol_0(varn(x)); }
   return z;
 }
 
@@ -2257,20 +2257,20 @@ FlxqX_divrem(GEN x, GEN y, GEN T, ulong p, GEN *pr)
       if (pr == ONLY_DIVIDES)
       {
         avma=av0;
-        return signe(x)? NULL: zeropol(vx);
+        return signe(x)? NULL: pol_0(vx);
       }
       if (pr == ONLY_REM) return x;
       *pr = x;
     }
-    return zeropol(vx);
+    return pol_0(vx);
   }
   lead = leading_term(y);
   if (!dy) /* y is constant */
   {
     if (pr && pr != ONLY_DIVIDES)
     {
-      if (pr == ONLY_REM) return zeropol(vx);
-      *pr = zeropol(vx);
+      if (pr == ONLY_REM) return pol_0(vx);
+      *pr = pol_0(vx);
     }
     if (Flx_equal1(lead)) return vecsmall_copy(x);
     av0 = avma;
@@ -2515,7 +2515,7 @@ FlxqX_extgcd(GEN a, GEN b, GEN T, ulong p, GEN *ptu, GEN *ptv)
   long vx = varn(a);
   pari_sp ltop=avma;
 
-  d = a; d1 = b; v = zeropol(vx); v1 = pol1_FlxX(vx,T[1]);
+  d = a; d1 = b; v = pol_0(vx); v1 = pol1_FlxX(vx,T[1]);
   while (signe(d1))
   {
     q = FlxqX_divrem(d,d1,T,p, &r);

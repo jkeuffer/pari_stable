@@ -324,7 +324,7 @@ FpX_FpXQV_eval(GEN P, GEN V, GEN T, GEN p)
   long l = lg(V)-1, d = degpol(P);
   GEN z, u;
 
-  if (d < 0) return zeropol(varn(T));
+  if (d < 0) return pol_0(varn(T));
   if (d < l)
   {
     z = FpXQ_eval_powers(P,V,0,d,p);
@@ -358,7 +358,7 @@ FpX_FpXQ_eval(GEN Q, GEN x, GEN T, GEN p)
   pari_sp av = avma;
   GEN z;
   long d = degpol(Q), rtd;
-  if (d < 0) return zeropol(varn(Q));
+  if (d < 0) return pol_0(varn(Q));
   rtd = (long) sqrt((double)d);
   z = FpX_FpXQV_eval(Q, FpXQ_powers(x,rtd,T,p), T,p);
   return gerepileupto(av, z);
@@ -620,19 +620,19 @@ FpXQX_divrem(GEN x, GEN y, GEN T, GEN p, GEN *pr)
     if (pr)
     {
       av0 = avma; x = FpXQX_red(x, T, p);
-      if (pr == ONLY_DIVIDES) { avma=av0; return signe(x)? NULL: zeropol(vx); }
+      if (pr == ONLY_DIVIDES) { avma=av0; return signe(x)? NULL: pol_0(vx); }
       if (pr == ONLY_REM) return x;
       *pr = x;
     }
-    return zeropol(vx);
+    return pol_0(vx);
   }
   lead = leading_term(y);
   if (!dy) /* y is constant */
   {
     if (pr && pr != ONLY_DIVIDES)
     {
-      if (pr == ONLY_REM) return zeropol(vx);
-      *pr = zeropol(vx);
+      if (pr == ONLY_REM) return pol_0(vx);
+      *pr = pol_0(vx);
     }
     if (gequal1(lead)) return FpXQX_red(x,T,p);
     av0 = avma; x = FqX_Fq_mul(x, Fq_inv(lead, T,p), T,p);
@@ -758,7 +758,7 @@ FpXQX_extgcd(GEN x, GEN y, GEN T, GEN p, GEN *ptu, GEN *ptv)
   {
     a = FpXQX_red(x, T, p);
     b = FpXQX_red(y, T, p);
-    d = a; d1 = b; v = zeropol(vx); v1 = pol_1(vx);
+    d = a; d1 = b; v = pol_0(vx); v1 = pol_1(vx);
     while (signe(d1))
     {
       q = FqX_divrem(d,d1,T,p, &r);
@@ -1406,8 +1406,8 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
   e = u_pvalrem(n, l, &pg);
   if(!MA) MA = FpXQ_matrix_pow(FpXQ_pow(pol_x(vp),l,P,l),np,np,P,l);
   if(!MB) MB = FpXQ_matrix_pow(FpXQ_pow(pol_x(vq),l,Q,l),nq,nq,Q,l);
-  A = Ap = zeropol(vp);
-  B = Bp = zeropol(vq);
+  A = Ap = pol_0(vp);
+  B = Bp = pol_0(vq);
   if (pg > 1)
   {
     GEN ipg = utoipos(pg);
@@ -1922,7 +1922,7 @@ polint_triv(GEN xa, GEN ya)
       P = gerepileupto(av, P);
     }
   }
-  return P? P: zeropol(0);
+  return P? P: pol_0(0);
 }
 
 GEN
@@ -1952,7 +1952,7 @@ FpV_polint(GEN xa, GEN ya, GEN p, long v)
       if (!P) avma = av; else P = gerepileupto(av, P);
     }
   }
-  return P? P: zeropol(v);
+  return P? P: pol_0(v);
 }
 
 static void
@@ -2038,7 +2038,7 @@ FpXY_evaly(GEN Q, GEN y, GEN p, long vx)
   pari_sp av = avma;
   long i, lb = lg(Q);
   GEN z;
-  if (lb == 2) return zeropol(vx);
+  if (lb == 2) return pol_0(vx);
   z = gel(Q, lb-1);
   if (lb == 3 || !signe(y)) return typ(z)==t_INT? scalar_ZX(z, vx): ZX_copy(z);
 
@@ -2264,7 +2264,7 @@ swap_vars(GEN b0, long v)
 {
   long i, n = poldegree(b0, v);
   GEN b, x;
-  if (n < 0) return zeropol(v);
+  if (n < 0) return pol_0(v);
   b = cgetg(n+3, t_POL); x = b + 2;
   b[1] = evalsigne(1) | evalvarn(v);
   for (i=0; i<=n; i++) gel(x,i) = polcoeff_i(b0, i, v);

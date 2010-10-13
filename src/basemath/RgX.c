@@ -96,7 +96,7 @@ RgX_RgXQV_eval(GEN P, GEN V, GEN T)
   long l = lg(V)-1, d = degpol(P);
   GEN z, u;
 
-  if (d < 0) return zeropol(varn(T));
+  if (d < 0) return pol_0(varn(T));
   if (d < l)
   {
     z = RgXQ_eval_powers(P,V,0,d);
@@ -131,7 +131,7 @@ RgX_RgXQ_eval(GEN Q, GEN x, GEN T)
   GEN z;
   long d = degpol(Q), rtd;
   if (typ(Q)!=t_POL || typ(x)!=t_POL) pari_err(typeer,"RgX_RgXQ_eval");
-  if (d < 0) return zeropol(varn(Q));
+  if (d < 0) return pol_0(varn(Q));
   rtd = (long) sqrt((double)d);
   z = RgX_RgXQV_eval(Q, RgXQ_powers(x, rtd, T), T);
   return gerepileupto(av, z);
@@ -203,7 +203,7 @@ RgX_deflate(GEN x0, long d)
   GEN z, y, x;
   long i,id, dy, dx = degpol(x0);
   if (d <= 1) return x0;
-  if (dx < 0) return zeropol(varn(x0));
+  if (dx < 0) return pol_0(varn(x0));
   dy = dx/d;
   y = cgetg(dy+3, t_POL); y[1] = x0[1];
   z = y + 2;
@@ -373,7 +373,7 @@ RgV_to_RgX(GEN x, long v)
   GEN p;
 
   while (--k && gequal0(gel(x,k)));
-  if (!k) return zeropol(v);
+  if (!k) return pol_0(v);
   i = k+2; p = cgetg(i,t_POL);
   p[1] = evalsigne(1) | evalvarn(v);
   x--; for (k=2; k<i; k++) p[k] = x[k];
@@ -474,7 +474,7 @@ RgX_modXn_shallow(GEN a, long n)
 {
   long i, L, l = lg(a);
   GEN  b;
-  if (l == 2 || !n) return zeropol(varn(a));
+  if (l == 2 || !n) return pol_0(varn(a));
   if (n < 0) pari_err(talker,"n < 0 in RgX_modXn");
   L = n+2; if (L > l) L = l;
   b = cgetg(L, t_POL); b[1] = a[1];
@@ -492,7 +492,7 @@ RgX_shift_shallow(GEN a, long n)
   l += n;
   if (n < 0)
   {
-    if (l <= 2) return zeropol(varn(a));
+    if (l <= 2) return pol_0(varn(a));
     b = cgetg(l, t_POL); b[1] = a[1];
     a -= n;
     for (i=2; i<l; i++) gel(b,i) = gel(a,i);
@@ -514,7 +514,7 @@ RgX_shift(GEN a, long n)
   l += n;
   if (n < 0)
   {
-    if (l <= 2) return zeropol(varn(a));
+    if (l <= 2) return pol_0(varn(a));
     b = cgetg(l, t_POL); b[1] = a[1];
     a -= n;
     for (i=2; i<l; i++) gel(b,i) = gcopy(gel(a,i));
@@ -556,7 +556,7 @@ long
 RgX_valrem(GEN x, GEN *Z)
 {
   long v, i, lx = lg(x);
-  if (lx == 2) { *Z = zeropol(varn(x)); return LONG_MAX; }
+  if (lx == 2) { *Z = pol_0(varn(x)); return LONG_MAX; }
   for (i = 2; i < lx; i++)
     if (!isexactzero(gel(x,i))) break;
   if (i == lx) i--; /* possible with non-rational zeros */
@@ -568,7 +568,7 @@ long
 RgX_valrem_inexact(GEN x, GEN *Z)
 {
   long v;
-  if (!signe(x)) { if (Z) *Z = zeropol(varn(x)); return LONG_MAX; }
+  if (!signe(x)) { if (Z) *Z = pol_0(varn(x)); return LONG_MAX; }
   for (v = 0;; v++)
     if (!gequal0(gel(x,2+v))) break;
   if (Z) *Z = RgX_shift_shallow(x, -v);
@@ -609,7 +609,7 @@ RgX_deriv(GEN x)
   long i,lx = lg(x)-1;
   GEN y;
 
-  if (lx<3) return zeropol(varn(x));
+  if (lx<3) return pol_0(varn(x));
   y = cgetg(lx,t_POL); gel(y,2) = gcopy(gel(x,3));
   for (i=3; i<lx ; i++) gel(y,i) = gmulsg(i-1,gel(x,i+1));
   y[1] = x[1]; return normalizepol_lg(y,i);
@@ -728,7 +728,7 @@ RgX_Rg_sub(GEN y, GEN x)
   if (lz == 2)
   { /* scalarpol(gneg(x),varn(y)) optimized */
     long v = varn(y);
-    if (isrationalzero(x)) return zeropol(v);
+    if (isrationalzero(x)) return pol_0(v);
     z = cgetg(3,t_POL);
     z[1] = gequal0(x)? evalvarn(v)
                    : evalvarn(v) | evalsigne(1);
@@ -922,7 +922,7 @@ RgX_mulspec(GEN a, GEN b, long na, long nb)
   while (na && isrationalzero(gel(a,0))) { a++; na--; v++; }
   while (nb && isrationalzero(gel(b,0))) { b++; nb--; v++; }
   if (na < nb) swapspec(a,b, na,nb);
-  if (!nb) return zeropol(0);
+  if (!nb) return pol_0(0);
 
   if (nb < RgX_MUL_LIMIT) return RgX_mulspec_basecase(a,b,na,nb, v);
   RgX_shift_inplace_init(v);
@@ -988,7 +988,7 @@ RgX_sqrspec_basecase(GEN x, long nx, long v)
   long i, lz, nz;
   GEN z;
 
-  if (!nx) return zeropol(0);
+  if (!nx) return pol_0(0);
   lz = (nx << 1) + 1, nz = lz-2;
   lz += v;
   z = cgetg(lz,t_POL) + 2;
@@ -1110,8 +1110,8 @@ RgX_divrem(GEN x, GEN y, GEN *pr)
   {
     if (pr && pr != ONLY_DIVIDES)
     {
-      if (pr == ONLY_REM) return zeropol(varn(x));
-      *pr = zeropol(varn(x));
+      if (pr == ONLY_REM) return pol_0(varn(x));
+      *pr = pol_0(varn(x));
     }
     return RgX_Rg_div(x, y_lead);
   }
@@ -1124,7 +1124,7 @@ RgX_divrem(GEN x, GEN y, GEN *pr)
       if (pr == ONLY_REM) return gcopy(x);
       *pr = gcopy(x);
     }
-    return zeropol(varn(x));
+    return pol_0(varn(x));
   }
 
   /* x,y in R[X], y non constant */
@@ -1246,15 +1246,15 @@ RgXQX_divrem(GEN x, GEN y, GEN T, GEN *pr)
       if (pr == ONLY_REM) return x;
       *pr = x;
     }
-    return zeropol(vx);
+    return pol_0(vx);
   }
   lead = leading_term(y);
   if (!dy) /* y is constant */
   {
     if (pr && pr != ONLY_DIVIDES)
     {
-      if (pr == ONLY_REM) return zeropol(vx);
-      *pr = zeropol(vx);
+      if (pr == ONLY_REM) return pol_0(vx);
+      *pr = pol_0(vx);
     }
     if (gequal1(lead)) return gcopy(x);
     av0 = avma; x = gmul(x, ginvmod(lead,T)); tetpil = avma;
@@ -1366,7 +1366,7 @@ RgXQX_pseudorem(GEN x, GEN y, GEN T)
       gerepilecoeffs(av2,x,dx+1);
     }
   }
-  if (dx < 0) return zeropol(vx);
+  if (dx < 0) return pol_0(vx);
   lx = dx+3; x -= 2;
   x[0] = evaltyp(t_POL) | evallg(lx);
   x[1] = evalsigne(1) | evalvarn(vx);
@@ -1447,7 +1447,7 @@ RgXQX_pseudodivrem(GEN x, GEN y, GEN T, GEN *ptr)
   }
   while (dx >= 0 && gequal0(gel(x,0))) { x++; dx--; }
   if (dx < 0)
-    x = zeropol(vx);
+    x = pol_0(vx);
   else
   {
     lx = dx+3; x -= 2;
@@ -1482,7 +1482,7 @@ GEN
 RgX_Rg_mul(GEN y, GEN x) {
   long i, ly;
   GEN z;
-  if (isrationalzero(x)) return zeropol(varn(y));
+  if (isrationalzero(x)) return pol_0(varn(y));
   z = cgetg_copy(y, &ly); z[1] = y[1];
   if (ly == 2) return z;
   for (i = 2; i < ly; i++) gel(z,i) = gmul(x,gel(y,i));
@@ -1492,7 +1492,7 @@ GEN
 RgX_muls(GEN y, long x) {
   long i, ly;
   GEN z;
-  if (!x) return zeropol(varn(y));
+  if (!x) return pol_0(varn(y));
   z = cgetg_copy(y, &ly); z[1] = y[1];
   if (ly == 2) return z;
   for (i = 2; i < ly; i++) gel(z,i) = gmulsg(x,gel(y,i));

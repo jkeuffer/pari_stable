@@ -5935,13 +5935,7 @@ in variable \kbd{v} and precision \kbd{prec}, whose constant coefficient is
 (a copy of) \kbd{x}, in other words $\kbd{x} + O(\kbd{v}^\kbd{prec})$.
 Assumes that \kbd{x} is non-zero.
 
-\fun{GEN}{zeropol}{long v} creates a $0$ \typ{POL} in variable \kbd{v}.
-
-\fun{GEN}{scalarpol}{GEN x, long v} creates a constant \typ{POL} in variable
-\kbd{v}, whose constant coefficient is (a copy of) \kbd{x}.
-
-\fun{GEN}{deg1pol}{GEN a, GEN b,long v} creates the degree 1 \typ{POL}
-$a + b \kbd{pol\_x}(v)$
+\fun{GEN}{pol_0}{long v} Returns the constant polynomial $0$ in variable $v$.
 
 \fun{GEN}{pol_1}{long v} Returns the constant polynomial $1$ in variable $v$.
 
@@ -5949,6 +5943,14 @@ $a + b \kbd{pol\_x}(v)$
 
 \fun{GEN}{pol_x_powers}{long N, long v} returns the powers of
 \kbd{pol\_x(v)}, of degree $0$ to $N$, in a vector with $N+1$ components.
+
+\fun{GEN}{scalarpol}{GEN x, long v} creates a constant \typ{POL} in variable
+\kbd{v}, whose constant coefficient is (a copy of) \kbd{x}.
+
+\fun{GEN}{deg1pol}{GEN a, GEN b,long v} creates the degree 1 \typ{POL}
+$a + b \kbd{pol\_x}(v)$
+
+\fun{GEN}{zeropol}{long v} is identical \kbd{pol\_0}.
 
 \fun{GEN}{zerocol}{long n} creates a \typ{COL} with \kbd{n} components set to
 \kbd{gen\_0}.
