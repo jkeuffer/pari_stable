@@ -462,9 +462,6 @@ galois_res(long d, long n, long s, long k)
       case 6:
         kk = (k == 6 || k == 2)? 2: 1;
         break;
-      case 3:
-        kk = (k == 2)? 1: 2;
-        break;
       default:
         kk = 1;
     }
