@@ -1209,12 +1209,17 @@ Flx_inflate(GEN x0, long d)
 GEN
 Flx_gcd_i(GEN a, GEN b, ulong p)
 {
-  GEN c;
+  pari_sp av = avma, lim = stack_lim(av,2);
   if (lg(b) > lg(a)) swap(a, b);
   while (lgpol(b))
   {
-    c = Flx_rem(a,b,p);
+    GEN c = Flx_rem(a,b,p);
     a = b; b = c;
+    if (low_stack(lim,stack_lim(av,2)))
+    {
+      if (DEBUGMEM>1) pari_warn(warnmem,"Flx_gcd (d = %ld)",degpol(c));
+      gerepileall(av,2, &a,&b);
+    }
   }
   return a;
 }
