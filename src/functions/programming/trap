@@ -42,6 +42,8 @@ Doc: tries to
 
  \kbd{archer}: not available on this architecture or operating system
 
+ \kbd{syntaxer}: syntax error
+
  \kbd{errpile}: the PARI stack overflows
 
  \kbd{gdiver}: division by 0

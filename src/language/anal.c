@@ -226,7 +226,7 @@ GEN
 compile_str(const char *s)
 {
   char *t = filtre(s, (compatible == OLDALL));
-  GEN x = pari_compile_str(t, 0);
+  GEN x = pari_compile_str(t, 1);
   pari_free(t); return x;
 }
 

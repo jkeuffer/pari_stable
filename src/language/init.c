@@ -77,7 +77,7 @@ static THREAD pari_stack s_ERR_CATCH;
 static THREAD cell *ERR_CATCH;
 THREAD void *global_err_data;
 
-const long CATCH_ALL = 1;
+const long CATCH_ALL = -1;
 
 /*********************************************************************/
 /*                                                                   */
@@ -851,7 +851,7 @@ err_leave(long n) { if (n >= 0) s_ERR_CATCH.n = n; }
 static cell *
 err_seek(long n)
 {
-  if (n <= bugparier) return NULL;
+  if (n == bugparier) return NULL;
   for( ; s_ERR_CATCH.n; s_ERR_CATCH.n--)
   {
     cell *t = &ERR_CATCH[ s_ERR_CATCH.n-1 ];
@@ -1099,6 +1099,7 @@ trap0(const char *e, GEN r, GEN f)
   else if (!strcmp(e,"alarmer")) numerr = alarmer;
   else if (!strcmp(e,"talker")) numerr = talker;
   else if (!strcmp(e,"user")) numerr = user;
+  else if (!strcmp(e,"syntaxer")) numerr = talker2;
   else if (*e) pari_err(impl,"this trap keyword");
   /* TODO: complete the list */
 
@@ -1106,7 +1107,6 @@ trap0(const char *e, GEN r, GEN f)
     pari_warn(warner,"default handlers are no longer supported --> ignored");
     return gnil;
   }
-  /* explicit recovery text */
   x = closure_trapgen(f, numerr);
   if (x == (GEN)1L) x = r? closure_evalgen(r): gnil;
   return x;
