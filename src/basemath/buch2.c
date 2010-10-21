@@ -1458,6 +1458,7 @@ isprincipalall(GEN bnf, GEN x, long *ptprec, long flag)
   FB_t F;
   GEN Vbase = get_Vbase(bnf);
   GEN L = recover_partFB(&F, Vbase, lg(x)-1);
+  pari_sp av;
   FACT *fact;
 
   U = gel(clg2,1);
@@ -1468,6 +1469,8 @@ isprincipalall(GEN bnf, GEN x, long *ptprec, long flag)
 
   /* factor x */
   x = Q_primitive_part(x, &xc);
+  av = avma;
+
   fact = (FACT*)stackmalloc((F.KC+1)*sizeof(FACT));
   xar = split_ideal(nf, &F, x, Vbase, L, fact);
   lW = lg(W)-1; Wex = const_vecsmall(lW, 0);
@@ -1494,9 +1497,9 @@ isprincipalall(GEN bnf, GEN x, long *ptprec, long flag)
   for (i=1; i<=c; i++)
     gel(Q,i) = truedvmdii(gel(Q,i), gel(cyc,i), (GEN*)(ex+i));
   if ((flag & nf_GEN_IF_PRINCIPAL))
-    { if (!gequal0(ex)) return gen_0; }
+    { if (!ZV_equal0(ex)) return gen_0; }
   else if (!(flag & (nf_GEN|nf_GENMAT)))
-    return gcopy(ex);
+    return ZC_copy(ex);
 
   /* compute arch component of the missing principal ideal */
   { /* g A = G Ur A + [ga]A, Ur A = D Q + R as above (R = ex)
@@ -1518,6 +1521,8 @@ isprincipalall(GEN bnf, GEN x, long *ptprec, long flag)
   if (col && !fact_ok(nf,x, col,gen,ex)) col = NULL;
   if (!col && !ZV_equal0(ex))
   {
+    /* in case isprincipalfact calls bnfinit() due to prec trouble...*/
+    ex = gerepilecopy(av, ex);
     p1 = isprincipalfact(bnf, x, gen, ZC_neg(ex), flag);
     if (typ(p1) != t_VEC) return p1;
     col = gel(p1,2);
@@ -2815,13 +2820,14 @@ get_archclean(GEN nf, GEN x, long prec, int units)
   N = nf_get_degree(nf);
   for (k=1; k<la; k++)
   {
+    pari_sp av = avma;
     GEN c = get_arch(nf, gel(x,k), prec);
     if (!c) return NULL;
     if (!units) {
       c = cleanarch(c, N, prec);
       if (!c) return NULL;
     }
-    gel(M,k) = c;
+    gel(M,k) = gerepilecopy(av, c);
   }
   return M;
 }
