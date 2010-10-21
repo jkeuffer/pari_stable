@@ -358,17 +358,23 @@ Flx_Fl_mul_to_monic(GEN y, ulong x, ulong p)
   z[l-1] = 1; return z;
 }
 
-/* Return a*x^n, assuming n >= 0 */
+/* Return a*x^n if n>=0 and a\x^(-n) if n<0 */
 GEN
 Flx_shift(GEN a, long n)
 {
   long i, l = lg(a);
   GEN  b;
-  if (l==2) return vecsmall_copy(a);
+  if (l==2 || !n) return vecsmall_copy(a);
+  if (l+n<=2) return zero_Flx(a[1]);
   b = cgetg(l+n, t_VECSMALL);
   b[1] = a[1];
-  for (i=0; i<n; i++) b[2+i] = 0;
-  for (i=2; i<l; i++) b[i+n] = a[i];
+  if (n < 0)
+    for (i=2-n; i<l; i++) b[i+n] = a[i];
+  else
+  {
+    for (i=0; i<n; i++) b[2+i] = 0;
+    for (i=2; i<l; i++) b[i+n] = a[i];
+  }
   return b;
 }
 

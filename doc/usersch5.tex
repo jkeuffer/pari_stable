@@ -3991,8 +3991,8 @@ the Montgomery inverse of \kbd{T}.
 \fun{GEN}{Flx_renormalize}{GEN x, long l}, as \kbd{FpX\_renormalize}, where
 $\kbd{l} = \kbd{lg(x)}$, in place.
 
-\fun{GEN}{Flx_shift}{GEN T, long n}, returns \kbd{T} multiplied by
-$\kbd{x}^n$, assuming $n\geq 0$.
+\fun{GEN}{Flx_shift}{GEN T, long n} returns $\kbd{T} * x^n$ if $n\geq 0$,
+and $\kbd{T} \bs x^{-n}$ otherwise.
 
 \fun{long}{Flx_val}{GEN x} returns the valuation of \kbd{x}, i.e. the
 multiplicity of the $0$ root.
