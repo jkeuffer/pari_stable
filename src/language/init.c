@@ -33,6 +33,30 @@ const double LOG10_2 = 0.3010299956639812; /* log_10(2) */
 const double LOG2_10 = 3.321928094887362;  /* log_2(10) */
 
 GEN     gnil, gen_0, gen_1, gen_m1, gen_2, gen_m2, ghalf;
+
+static const long readonly_constants[] = {
+  evaltyp(t_INT) | _evallg(2),  /* gen_0 */
+  evallgefint(2),
+  evaltyp(t_INT) | _evallg(2),  /* gnil */
+  evallgefint(2),
+  evaltyp(t_INT) | _evallg(3),  /* gen_1 */
+  evalsigne(1) | evallgefint(3),
+  1,
+  evaltyp(t_INT) | _evallg(3),  /* gen_2 */
+  evalsigne(1) | evallgefint(3),
+  2,
+  evaltyp(t_INT) | _evallg(3),  /* gen_m1 */
+  evalsigne(-1) | evallgefint(3),
+  1,
+  evaltyp(t_INT) | _evallg(3),  /* gen_m2 */
+  evalsigne(-1) | evallgefint(3),
+  2,
+};
+static const long readonly_ghalf[] = {
+  evaltyp(t_FRAC) | _evallg(3), /* ghalf */
+  (long)(readonly_constants+4),
+  (long)(readonly_constants+7)
+};
 THREAD GEN    bernzone;
 GEN     primetab; /* private primetable */
 byteptr diffptr;
@@ -421,35 +445,13 @@ pari_sig_init(void (*f)(int))
 static void
 init_universal_constants(void)
 {
-  /* 2 (gnil) + 2 (gen_0)
-   * + 3 (gen_1) + 3 (gen_m1) + 3 (gen_2) + 3 (gen_m2)
-   * + 3 (half) */
-  static long universal_constants[19];
-  GEN p = (GEN) universal_constants;
-  gen_0 = p; p+=2; gnil = p; p+=2;
-  gen_0[0] = gnil[0] = evaltyp(t_INT) | _evallg(2);
-  gen_0[1] = gnil[1] = evallgefint(2);
-
-  gen_1 = p; p+=3;
-  gen_2 = p; p+=3;
-  gen_1[0] = gen_2[0] = evaltyp(t_INT) | _evallg(3);
-  gen_1[1] = gen_2[1] = evalsigne(1) | evallgefint(3);
-  gen_1[2] = 1; gen_2[2]= 2;
-
-  gen_m1 = p; p+=3;
-  gen_m1[0] = evaltyp(t_INT) | _evallg(3);
-  gen_m1[1] = evalsigne(-1) | evallgefint(3);
-  gen_m1[2] = 1;
-
-  gen_m2 = p; p+=3;
-  gen_m2[0] = evaltyp(t_INT) | _evallg(3);
-  gen_m2[1] = evalsigne(-1) | evallgefint(3);
-  gen_m2[2] = 2;
-
-  ghalf = p;
-  ghalf[0] = evaltyp(t_FRAC) | _evallg(3);
-  gel(ghalf,1) = gen_1;
-  gel(ghalf,2) = gen_2;
+  gen_0  = (GEN)readonly_constants;
+  gnil   = (GEN)readonly_constants+2;
+  gen_1  = (GEN)readonly_constants+4;
+  gen_2  = (GEN)readonly_constants+7;
+  gen_m1 = (GEN)readonly_constants+10;
+  gen_m2 = (GEN)readonly_constants+13;
+  ghalf  = (GEN)readonly_ghalf;
 }
 
 static size_t
