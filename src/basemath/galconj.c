@@ -1619,11 +1619,11 @@ s4galoisgen(struct galois_lift *gl)
       for (j2 = 0; j2 < 4; j2++, avma = av2)
       {
         u2 = lincomb(gel(Bcoeff,sg[3]),gel(Bcoeff,sg[4]), pauto,j2);
-        u2 = FpX_rem(ZX_add(u1, u2), TQ,Q); av3 = avma;
+        u2 = FpX_rem(FpX_add(u1, u2, Q), TQ,Q); av3 = avma;
         for (j3 = 0; j3 < 4; j3++, avma = av3)
         {
           u3 = lincomb(gel(Bcoeff,sg[1]),gel(Bcoeff,sg[2]), pauto,j3);
-          u3 = FpX_rem(ZX_add(u2, u3), TQ,Q);
+          u3 = FpX_rem(FpX_add(u2, u3, Q), TQ,Q);
           if (DEBUGLEVEL >= 4)
             fprintferr("S4GaloisConj:Testing %d/3:%d/4:%d/4:%d/4:%Ps\n",
                        i,j1,j2,j3, sg);
@@ -1660,7 +1660,7 @@ suites4:
         GEN uu;
         pj[6] = (w + pj[3]) & 3;
         uu = lincomb(gel(Bcoeff,sg[5]),gel(Bcoeff,sg[6]), pauto, pj[6]);
-        uu = FpX_rem(uu, TQ, Q);
+        uu = FpX_rem(FpX_red(uu,Q), TQ, Q);
         av3 = avma;
         for (i = 0; i < 4; i++, avma = av3)
         {
@@ -1672,7 +1672,7 @@ suites4:
                        j-1, w >> 1, l, i, sg, pj);
           u = ZX_add(lincomb(gel(Bcoeff,sg[1]),gel(Bcoeff,sg[3]), pauto,pj[4]),
                      lincomb(gel(Bcoeff,sg[2]),gel(Bcoeff,sg[4]), pauto,pj[5]));
-          u = FpX_rem(ZX_add(uu,u), TQ, Q);
+          u = FpX_rem(FpX_add(uu,u,Q), TQ, Q);
           if (s4test(u, liftpow, gl, tau)) goto suites4_2;
         }
       }
@@ -1699,7 +1699,7 @@ suites4_2:
       i = (h + abc - g) & 3;
       u = ZX_add(   lincomb(gel(Bcoeff,sg[1]), gel(Bcoeff,sg[4]), pauto, g),
                     lincomb(gel(Bcoeff,sg[2]), gel(Bcoeff,sg[5]), pauto, h));
-      u = ZX_add(u, lincomb(gel(Bcoeff,sg[3]), gel(Bcoeff,sg[6]), pauto, i));
+      u = FpX_add(u, lincomb(gel(Bcoeff,sg[3]), gel(Bcoeff,sg[6]), pauto, i),Q);
       u = FpX_rem(u, TQ, Q);
       if (DEBUGLEVEL >= 4)
         fprintferr("S4GaloisConj:Testing %d/8 %d:%d:%d\n", j,g,h,i);
