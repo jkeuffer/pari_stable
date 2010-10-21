@@ -1212,8 +1212,8 @@ Flx_inflate(GEN x0, long d)
 }
 
 /*Do not garbage collect*/
-GEN
-Flx_gcd_i(GEN a, GEN b, ulong p)
+static GEN
+Flx_gcd_basecase(GEN a, GEN b, ulong p)
 {
   pari_sp av = avma, lim = stack_lim(av,2);
   if (lg(b) > lg(a)) swap(a, b);
@@ -1234,14 +1234,14 @@ GEN
 Flx_gcd(GEN a, GEN b, ulong p)
 {
   pari_sp av = avma;
-  return gerepileuptoleaf(av, Flx_gcd_i(a,b,p));
+  return gerepileuptoleaf(av, Flx_gcd_basecase(a,b,p));
 }
 
 int
 Flx_is_squarefree(GEN z, ulong p)
 {
   pari_sp av = avma;
-  GEN d = Flx_gcd_i(z, Flx_deriv(z,p) , p);
+  GEN d = Flx_gcd(z, Flx_deriv(z,p) , p);
   long res= (degpol(d) == 0);
   avma = av; return res;
 }

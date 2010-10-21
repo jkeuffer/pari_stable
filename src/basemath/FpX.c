@@ -395,7 +395,7 @@ FpX_gcd(GEN x, GEN y, GEN p)
     (void)new_chunk((lg(x) + lg(y)) << 2); /* scratch space */
     a = ZX_to_Flx(x, pp);
     b = ZX_to_Flx(y, pp);
-    a = Flx_gcd_i(a,b, pp);
+    a = Flx_gcd(a,b, pp);
     avma = av; return Flx_to_ZX(a);
   }
   av0=avma; lim = stack_lim(av0,2);

@@ -1119,7 +1119,7 @@ ZX_gcd_all(GEN A, GEN B, GEN *Anew)
     NEXT_PRIME_VIADIFF_CHECK(p,d);
     if (g && !umodiu(g,p)) continue;
     a = ZX_to_Flx(A, p);
-    b = ZX_to_Flx(B, p); Hp = Flx_gcd_i(a,b, p);
+    b = ZX_to_Flx(B, p); Hp = Flx_gcd(a,b, p);
     m = degpol(Hp);
     if (m == 0) { /* coprime. DONE */
       avma = ltop;
