@@ -1547,11 +1547,11 @@ GEN
 lcmii(GEN x, GEN y)
 {
   pari_sp av;
-  GEN p1,p2;
-  if (!signe(x)) return gen_0;
+  GEN a, b;
+  if (!signe(x) || !signe(y)) return gen_0;
   av = avma;
-  p1 = gcdii(x,y); if (!is_pm1(p1)) y = diviiexact(y,p1);
-  p2 = mulii(x,y); setabssign(p2); return gerepileuptoint(av, p2);
+  a = gcdii(x,y); if (!is_pm1(a)) y = diviiexact(y,a);
+  b = mulii(x,y); setabssign(b); return gerepileuptoint(av, b);
 }
 
 /*********************************************************************/
