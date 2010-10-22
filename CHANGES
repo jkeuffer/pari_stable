@@ -8,6 +8,14 @@ BA 1- FpX_gcd did not garbage-collect for large input.
 BA 2- 'make all' failed to build the documentation.
    3- typo in polgalois() when new_galois_format is 0 : returned [3,1,2]
       instead of [3,1,1] for C_3
+   4- rnfkummer was using too much stack.
+
+  Changed
+LGr1- universal constants (gen_0,gen_1, etc.) are now read-only
+
+  Added
+BA 1- trap keyword "syntaxer" to trap syntax error from eval.
+BA 2- Flx_shift now support negative shift
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.3 (released 08/10/2010):
