@@ -719,10 +719,9 @@ polgalois(GEN x, long prec)
 
 #undef _res
 
-/* Evaluate pol in a using nfelt arithmetic and Horner rule */
-
+/* Evaluate pol in s using nfelt arithmetic and Horner rule */
 GEN
-nfpoleval(GEN nf, GEN pol, GEN a)
+nfpoleval(GEN nf, GEN pol, GEN s)
 {
   pari_sp av=avma;
   long i=lg(pol)-1;
@@ -730,7 +729,7 @@ nfpoleval(GEN nf, GEN pol, GEN a)
   if (i==1) return gen_0;
   res = nf_to_scalar_or_basis(nf, gel(pol,i));
   for (i-- ; i>=2; i--)
-    res = nfadd(nf, nfmul(nf, a, res), gel(pol,i));
+    res = nfadd(nf, nfmul(nf, s, res), gel(pol,i));
   return gerepileupto(av, res);
 }
 
@@ -751,12 +750,12 @@ FpX_FpC_nfpoleval(GEN nf, GEN pol, GEN a, GEN p)
   return gerepileupto(av, res);
 }
 
+/* compute s(x) */
 static GEN
 ZC_galoisapply(GEN nf, GEN x, GEN s)
 {
   x = nf_to_scalar_or_alg(nf, x);
-  if (typ(x) != t_POL) return scalarcol(x, degpol(nf_get_pol(nf)));
-  return nfpoleval(nf,x,s);
+  return typ(x) == t_POL? nfpoleval(nf,x,s): gcopy(x);
 }
 
 static GEN
@@ -791,55 +790,80 @@ pr_galoisapply(GEN nf, GEN pr, GEN aut)
   return mkvec5(p, u, gel(pr,3), gel(pr,4), b);
 }
 
+/* fa : famat or standard algebraic number, aut automorphism in ZC form
+ * simplified from general galoisapply */
 static GEN
-fa_galoisapply(GEN nf, GEN fa, GEN aut)
+elt_galoisapply(GEN nf, GEN aut, GEN x)
 {
-  long i, lx = lg(fa);
-  GEN G, g;
-  if (typ(fa) != t_MAT) pari_err(typeer, "galoisapply");
-  if (lx == 1) return cgetg(1, t_MAT);
-  if (lx != 3) pari_err(typeer, "galoisapply");
-  g = gel(fa,1); G = cgetg_copy(g, &lx);
-  for (i = 1; i < lx; i++) gel(G,i) = galoisapply(nf, aut, gel(g,i));
-  return mkmat2(g, ZC_copy(gel(fa,2)));
+  pari_sp av = avma;
+  switch(typ(x))
+  {
+    case t_INT:  return icopy(x);
+    case t_FRAC: return gcopy(x);
+
+    case t_POLMOD: x = gel(x,2); /* fall through */
+    case t_POL: {
+      GEN y = basistoalg(nf,ZC_galoisapply(nf,x, aut));
+      return gerepileupto(av,y);
+    }
+    case t_COL:
+      return gerepileupto(av, ZC_galoisapply(nf,x, aut));
+    case t_MAT: {
+      GEN G, g;
+      long i, lx;
+      switch(lg(x)) {
+        case 1: return cgetg(1, t_MAT);
+        case 3: break;
+        default: pari_err(typeer, "galoisapply");
+      }
+      g = gel(x,1); G = cgetg_copy(g, &lx);
+      for (i = 1; i < lx; i++) gel(G,i) = galoisapply(nf, aut, gel(g,i));
+      return mkmat2(g, ZC_copy(gel(x,2)));
+    }
+  }
+  pari_err(typeer,"galoisapply");
+  return NULL; /* not reached */
 }
 
 GEN
 galoisapply(GEN nf, GEN aut, GEN x)
 {
   pari_sp av = avma;
-  long lx, j, N;
-  GEN y, T;
+  long lx, j;
+  GEN y;
 
-  nf = checknf(nf); T = nf_get_pol(nf);
-  aut = algtobasis(nf, aut);
+  nf = checknf(nf);
   switch(typ(x))
   {
-    case t_INT: case t_INTMOD: case t_FRAC:
-      avma = av; return gcopy(x);
+    case t_INT:  return icopy(x);
+    case t_FRAC: return gcopy(x);
 
     case t_POLMOD: x = gel(x,2); /* fall through */
     case t_POL:
-      y = basistoalg(nf,ZC_galoisapply(nf,x, aut));
+      aut = algtobasis(nf, aut);
+      y = basistoalg(nf, ZC_galoisapply(nf,x, aut));
       return gerepileupto(av,y);
 
     case t_VEC:
+      aut = algtobasis(nf, aut);
       switch(lg(x))
       {
         case 6: return gerepilecopy(av, pr_galoisapply(nf, x, aut));
         case 3: y = cgetg(3,t_VEC);
           gel(y,1) = galoisapply(nf, aut, gel(x,1));
-          gel(y,2) = fa_galoisapply(nf, aut, gel(x,2));
+          gel(y,2) = elt_galoisapply(nf, aut, gel(x,2));
           return gerepileupto(av, y);
       }
       break;
 
     case t_COL:
+      aut = algtobasis(nf, aut);
       return gerepileupto(av, ZC_galoisapply(nf,x, aut));
 
-    case t_MAT:
-      lx=lg(x); if (lx==1) return cgetg(1,t_MAT);
-      N = degpol(T); if (lg(x[1])!=N+1) break;
+    case t_MAT: /* ideal */
+      lx = lg(x); if (lx==1) return cgetg(1,t_MAT);
+      if (lg(x[1])-1 != nf_get_degree(nf)) break;
+      aut = algtobasis(nf, aut);
       y = cgetg(lx,t_MAT);
       for (j=1; j<lx; j++) gel(y,j) = ZC_galoisapply(nf,gel(x,j), aut);
       return gerepileupto(av, idealhnf_shallow(nf,y));
