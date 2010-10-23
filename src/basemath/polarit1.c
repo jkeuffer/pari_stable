@@ -1072,7 +1072,7 @@ FpX_factcantor(GEN f, GEN pp, long flag)
   pari_sp av = avma;
   GEN z = FpX_factcantor_i(FpX_factmod_init(f,pp),pp,flag);
   if (flag == 2) { avma = av; return z; }
-  return gerepileupto(av, z);
+  return gerepilecopy(av, z);
 }
 GEN
 factcantor0(GEN f, GEN pp, long flag)
