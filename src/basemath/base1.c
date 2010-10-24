@@ -755,7 +755,7 @@ static GEN
 ZC_galoisapply(GEN nf, GEN x, GEN s)
 {
   x = nf_to_scalar_or_alg(nf, x);
-  return typ(x) == t_POL? nfpoleval(nf,x,s): gcopy(x);
+  return typ(x) == t_POL? nfpoleval(nf,x,s): scalarcol(x, nf_get_degree(nf));
 }
 
 static GEN
