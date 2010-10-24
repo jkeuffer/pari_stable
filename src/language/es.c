@@ -4071,13 +4071,13 @@ dopr_arg_vector(GEN arg_vector, const char* fmt, ...)
 }
 /* GP only */
 void
-printf0(GEN gfmt, GEN args)
-{ char *s = dopr_arg_vector(args, (const char*)gfmt);
+printf0(const char *fmt, GEN args)
+{ char *s = dopr_arg_vector(args, fmt);
   pari_puts(s); free(s); }
 /* GP only */
 GEN
-Strprintf(GEN gfmt, GEN args)
-{ char *s = dopr_arg_vector(args, (const char *)gfmt);
+Strprintf(const char *fmt, GEN args)
+{ char *s = dopr_arg_vector(args, fmt);
   GEN z = strtoGENstr(s); free(s); return z; }
 
 void
