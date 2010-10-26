@@ -9,6 +9,8 @@ BA 2- 'make all' failed to build the documentation.
    3- typo in polgalois() when new_galois_format is 0 : returned [3,1,2]
       instead of [3,1,1] for C_3
    4- rnfkummer was using too much stack.
+   5- nfgaloisapply did not work on extended ideals.
+   6- Strprintf and printf0 prototypes were wrong.
 
   Changed
 LGr1- universal constants (gen_0,gen_1, etc.) are now read-only
