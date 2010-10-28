@@ -1116,7 +1116,7 @@ QM_minors_coprime(GEN x, GEN D)
       if (low_stack(lim, stack_lim(av1,1)))
       {
         if (DEBUGMEM>1) pari_warn(warnmem,"QM_minors_coprime, prime p = %Ps", p);
-        x = gerepilecopy(av1, x);
+        x = gerepilecopy(av1, x); pov2 = shifti(p, -1);
       }
     }
   }
