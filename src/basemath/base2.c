@@ -1187,7 +1187,7 @@ newtonsums(GEN p, GEN a, GEN da, long vda, GEN chi, long c, GEN pp, GEN ns)
     if (low_stack(lim, stack_lim(av, 1)))
     {
       if(DEBUGMEM>1) pari_warn(warnmem, "newtonsums");
-      gerepileall(av, 4, &pa, &va, &pp, &dpa);
+      gerepileall(av, dpa?4:3, &pa, &va, &pp, &dpa);
     }
   }
   return va;
