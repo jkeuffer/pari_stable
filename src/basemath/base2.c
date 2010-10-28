@@ -1589,7 +1589,7 @@ loop(decomp_t *S, long nv, long Ea, long Fa)
     if (low_stack(limit,stack_lim(av2,1)))
     {
       if (DEBUGMEM > 1) pari_warn(warnmem, "nilord");
-      gerepileall(av2, S->invnu? 3: 1, &beta, &(S->invnu), &(S->Dinvnu));
+      gerepileall(av2, S->invnu? 5: 3, &beta, &(S->precns), &(S->ns), &(S->invnu), &(S->Dinvnu));
     }
   }
 }
