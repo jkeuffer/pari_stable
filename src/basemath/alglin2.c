@@ -317,7 +317,7 @@ hess(GEN x)
       if (low_stack(lim, stack_lim(av,2)))
       {
         if (DEBUGMEM>1) pari_warn(warnmem,"hess, m = %ld", m);
-        x = gerepilecopy(av, x);
+        gerepileall(av,2, &x, &t);
       }
     }
   }
