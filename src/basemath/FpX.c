@@ -403,12 +403,12 @@ FpX_gcd(GEN x, GEN y, GEN p)
   b = FpX_red(y, p);
   while (signe(b))
   {
-    av = avma; c = FpX_rem(a,b,p); a=b; b=c;
     if (low_stack(lim,stack_lim(av0,2)))
     {
-      if (DEBUGMEM>1) pari_warn(warnmem,"FpX_gcd (d = %ld)",degpol(c));
+      if (DEBUGMEM>1) pari_warn(warnmem,"FpX_gcd (d = %ld)",degpol(b));
       gerepileall(av0,2, &a,&b);
     }
+    av = avma; c = FpX_rem(a,b,p); a=b; b=c;
   }
   avma = av; return gerepileupto(av0, a);
 }
