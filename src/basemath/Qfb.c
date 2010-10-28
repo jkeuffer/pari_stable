@@ -1230,7 +1230,7 @@ redrealsl2(GEN V)
     if (low_stack(st_lim, stack_lim(btop, 1)))
     {
       if (DEBUGMEM>1) pari_warn(warnmem,"redrealsl2");
-      gerepileall(ltop, 7, &a,&b,&c,&u1,&u2,&v1,&v2);
+      gerepileall(btop, 7, &a,&b,&c,&u1,&u2,&v1,&v2);
     }
   }
   M = mkmat2(mkcol2(u1,u2), mkcol2(v1,v2));
