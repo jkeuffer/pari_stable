@@ -2291,7 +2291,7 @@ nextSousResultant(GEN P, GEN Q, GEN Z, GEN s)
     if (low_stack(lim,stack_lim(av,1)))
     {
       if(DEBUGMEM>1) pari_warn(warnmem,"nextSousResultant j = %ld/%ld",j,p);
-      gerepileall(av,2,&A,&H);
+      gerepileall(av,A?2:1,&H,&A);
     }
   }
   if (q+2 < lP) lP = reductum_lg(P, q+3);
