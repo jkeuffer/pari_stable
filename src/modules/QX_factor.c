@@ -1147,7 +1147,7 @@ ZX_gcd_all(GEN A, GEN B, GEN *Anew)
     if (low_stack(avlim, stack_lim(av,1)))
     {
       if (DEBUGMEM>1) pari_warn(warnmem,"QX_gcd");
-      gerepileall(av, 2, &H, &q);
+      gerepileall(av, 3, &H, &q, &Hp);
     }
 
     qp = muliu(q,p);
