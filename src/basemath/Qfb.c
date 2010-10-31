@@ -552,7 +552,7 @@ redimagsl2(GEN q, GEN *U)
   GEN z, u1,u2,v1,v2, a = gel(q,1), b = gel(q,2), c = gel(q,3);
   long cmp;
   /* upper bound for size of final (a,b,c) */
-  (void)new_chunk(lgefint(a) + lgefint(b) + lgefint(c) + 3);
+  (void)new_chunk(2*(lgefint(a) + lgefint(b) + lgefint(c) + 3));
   av2 = avma;
   u1 = gen_1; u2 = gen_0;
   cmp = absi_cmp(a, b);
