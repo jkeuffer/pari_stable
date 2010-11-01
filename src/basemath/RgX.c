@@ -1332,7 +1332,7 @@ rem(GEN c, GEN T)
   return c;
 }
 
-/* assume dx >= dy, y non constant, T either NULL or a t_POL. */
+/* T either NULL or a t_POL. */
 GEN
 RgXQX_pseudorem(GEN x, GEN y, GEN T)
 {
@@ -1344,8 +1344,9 @@ RgXQX_pseudorem(GEN x, GEN y, GEN T)
   dy = degpol(y); y_lead = gel(y,dy+2);
   /* if monic, no point in using pseudo-division */
   if (gequal1(y_lead)) return T? RgXQX_rem(x, y, T): RgX_rem(x, y);
-  (void)new_chunk(2);
   dx = degpol(x);
+  if (dx < dy) return gcopy(x);
+  (void)new_chunk(2);
   x = RgX_recip_shallow(x)+2;
   y = RgX_recip_shallow(y)+2;
   /* pay attention to sparse divisors */
@@ -1400,8 +1401,7 @@ RgXQX_pseudorem(GEN x, GEN y, GEN T)
 GEN
 RgX_pseudorem(GEN x, GEN y) { return RgXQX_pseudorem(x,y, NULL); }
 
-/* assume dx >= dy, y non constant
- * Compute z,r s.t lc(y)^(dx-dy+1) x = z y + r */
+/* Compute z,r s.t lc(y)^(dx-dy+1) x = z y + r */
 GEN
 RgXQX_pseudodivrem(GEN x, GEN y, GEN T, GEN *ptr)
 {
@@ -1412,8 +1412,9 @@ RgXQX_pseudodivrem(GEN x, GEN y, GEN T, GEN *ptr)
   if (!signe(y)) pari_err(gdiver);
   dy = degpol(y); y_lead = gel(y,dy+2);
   if (gequal1(y_lead)) return T? RgXQX_divrem(x,y, T, ptr): RgX_divrem(x,y, ptr);
-  (void)new_chunk(2);
   dx = degpol(x);
+  if (dx < dy) { *ptr = gcopy(x); return pol_0(varn(x)); }
+  (void)new_chunk(2);
   x = RgX_recip_shallow(x)+2;
   y = RgX_recip_shallow(y)+2;
   /* pay attention to sparse divisors */
