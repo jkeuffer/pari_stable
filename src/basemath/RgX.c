@@ -1120,7 +1120,7 @@ RgX_divrem(GEN x, GEN y, GEN *pr)
   {
     if (pr)
     {
-      if (pr == ONLY_DIVIDES) return gequal0(x)? gen_0: NULL;
+      if (pr == ONLY_DIVIDES) return signe(x)? NULL: pol_0(varn(x));
       if (pr == ONLY_REM) return gcopy(x);
       *pr = gcopy(x);
     }
@@ -1150,18 +1150,27 @@ RgX_divrem(GEN x, GEN y, GEN *pr)
       p2 = f(gel(x,dx+2),y_lead);
       if (!isexactzero(p2) || (--dx < 0)) break;
     }
-    if (dx < 0) /* x was in fact zero */
+    if (dx < dy) /* leading coeff of x was in fact zero */
     {
-      if (pr == ONLY_DIVIDES) return gen_0;
-      x = gerepileupto(av, p2);
       if (pr)
       {
+        if (pr == ONLY_DIVIDES) return (dx < 0)? pol_0(varn(x)) : NULL;
+        if (dx < 0)
+          x = gerepilecopy(av, scalarpol(p2, varn(x)));
+        else
+        {
+          z = cgetg(dx + 3, t_POL);
+          z[1] = x[1];
+          for (i = 2; i < dx + 3; i++) gel(z,i) = gel(x,i);
+          x = gerepilecopy(av, z);
+        }
         if (pr == ONLY_REM) return x;
         *pr = x;
       }
-      return x;
+      return pol_0(varn(x));
     }
   }
+  /* dx >= dy */
   avy = avma;
   dz = dx-dy;
   z = cgetg(dz+3,t_POL); z[1] = x[1];

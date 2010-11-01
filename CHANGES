@@ -11,6 +11,8 @@ BA 2- 'make all' failed to build the documentation.
    4- rnfkummer was using too much stack.
    5- nfgaloisapply did not work on extended ideals.
    6- Strprintf and printf0 prototypes were wrong.
+   7- Mod(4*x+1,Mod(1,2)*x) -> SEGV [#1116]
+
 
   Changed
 LGr1- universal constants (gen_0,gen_1, etc.) are now read-only
