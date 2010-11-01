@@ -1444,7 +1444,7 @@ RgX_gcd_simple(GEN x, GEN y)
 
   for(;;)
   {
-    av1 = avma; r = grem(x,y);
+    av1 = avma; r = RgX_rem(x,y);
     if (pol_approx0(r, x, exact))
     {
       avma = av1;
