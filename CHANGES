@@ -12,6 +12,7 @@ BA 2- 'make all' failed to build the documentation.
    5- nfgaloisapply did not work on extended ideals.
    6- Strprintf and printf0 prototypes were wrong.
    7- Mod(4*x+1,Mod(1,2)*x) -> SEGV [#1116]
+   8- gcd(t_INTMOD, t_FRAC) -> SEGV
 
 
   Changed

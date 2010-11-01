@@ -1217,7 +1217,7 @@ ggcd(GEN x, GEN y)
           case t_FRAC:
             av = avma; p1=gcdii(gel(x,1),gel(y,2)); avma = av;
             if (!is_pm1(p1)) pari_err(operi,"g",x,y);
-            return gcdiq(gel(y,1), x);
+            return ggcd(gel(y,1), x);
 
           case t_COMPLEX: case t_QUAD:
             return triv_cont_gcd(y,x);
