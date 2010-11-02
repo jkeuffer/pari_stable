@@ -957,11 +957,14 @@ qfgaussred(GEN a) { return gaussred(a,0); }
 GEN
 qfsign(GEN a) { return gaussred(a,1); }
 
+/* x -= s(y+u*x) */
+/* y += s(x-u*y), simultaneously */
 static void
 rot(GEN x, GEN y, GEN s, GEN u) {
-  GEN x1 = subrr(x,mulrr(s,addrr(y,mulrr(u,x))));
-  GEN y1 = addrr(y,mulrr(s,subrr(x,mulrr(u,y))));
-  affrr(x1,x); affrr(y1,y);
+  GEN x1 = subrr(x, mulrr(s,addrr(y,mulrr(u,x))));
+  GEN y1 = addrr(y, mulrr(s,subrr(x,mulrr(u,y))));
+  affrr(x1,x);
+  affrr(y1,y);
 }
 
 /* Diagonalization of a REAL symetric matrix. Return a vector [L, r]:
@@ -972,7 +975,7 @@ jacobi(GEN a, long prec)
 {
   pari_sp av1;
   long de, e, e1, e2, i, j, p, q, l = lg(a);
-  GEN c, s, t, u, ja, L, r, unr, x, y;
+  GEN c, ja, L, r, L2, r2, unr;
 
   if (typ(a) != t_MAT) pari_err(mattype1,"jacobi");
   ja = cgetg(3,t_VEC);
@@ -984,8 +987,9 @@ jacobi(GEN a, long prec)
   e1 = HIGHEXPOBIT-1;
   for (j=1; j<l; j++)
   {
-    gel(L,j) = gtofp(gcoeff(a,j,j), prec);
-    e = expo(L[j]); if (e < e1) e1 = e;
+    GEN z = gtofp(gcoeff(a,j,j), prec);
+    gel(L,j) = z;
+    e = expo(z); if (e < e1) e1 = e;
   }
   for (j=1; j<l; j++)
   {
@@ -1001,8 +1005,10 @@ jacobi(GEN a, long prec)
     gel(c,j) = cgetg(j,t_COL);
     for (i=1; i<j; i++)
     {
-      gcoeff(c,i,j) = gtofp(gcoeff(a,i,j), prec);
-      e = expo(gcoeff(c,i,j)); if (e > e2) { e2 = e; p = i; q = j; }
+      GEN z = gtofp(gcoeff(a,i,j), prec);
+      gcoeff(c,i,j) = z;
+      if (!signe(z)) continue;
+      e = expo(z); if (e > e2) { e2 = e; p = i; q = j; }
     }
   }
   a = c; unr = real_1(prec);
@@ -1013,18 +1019,25 @@ jacobi(GEN a, long prec)
   while (e1-e2 < de)
   {
     pari_sp av2 = avma;
+    GEN x, y, t, c, s, u;
     /* compute associated rotation in the plane formed by basis vectors number
      * p and q */
-    x = divrr(subrr(gel(L,q),gel(L,p)), shiftr(gcoeff(a,p,q),1));
-    y = sqrtr(addrr(unr, sqrr(x)));
-    t = invr((signe(x)>0)? addrr(x,y): subrr(x,y));
+    x = subrr(gel(L,q),gel(L,p));
+    if (signe(x))
+    {
+      x = divrr(x, shiftr(gcoeff(a,p,q),1));
+      y = sqrtr(addrr(unr, sqrr(x)));
+      t = invr((signe(x)>0)? addrr(x,y): subrr(x,y));
+    }
+    else
+      y = t = unr;
     c = sqrtr(addrr(unr,sqrr(t)));
     s = divrr(t,c);
     u = divrr(t,addrr(unr,c));
 
     /* compute successive transforms of a and the matrix of accumulated
      * rotations (r) */
-    for (i=1; i<p; i++)   rot(gcoeff(a,i,p), gcoeff(a,i,q), s,u);
+    for (i=1;   i<p; i++) rot(gcoeff(a,i,p), gcoeff(a,i,q), s,u);
     for (i=p+1; i<q; i++) rot(gcoeff(a,p,i), gcoeff(a,i,q), s,u);
     for (i=q+1; i<l; i++) rot(gcoeff(a,p,i), gcoeff(a,q,i), s,u);
     y = gcoeff(a,p,q);
@@ -1033,16 +1046,28 @@ jacobi(GEN a, long prec)
     y = gel(L,q); addrrz(y,t, y);
     for (i=1; i<l; i++) rot(gcoeff(r,i,p), gcoeff(r,i,q), s,u);
 
-    e2 = expo(gcoeff(a,1,2)); p = 1; q = 2;
+    e2 = -(long)HIGHEXPOBIT; p = q = 1;
     for (j=1; j<l; j++)
     {
       for (i=1; i<j; i++)
-        if ((e=expo(gcoeff(a,i,j))) > e2) { e2=e; p=i; q=j; }
+      {
+        GEN z = gcoeff(a,i,j);
+        if (!signe(z)) continue;
+        e = expo(z); if (e > e2) { e2=e; p=i; q=j; }
+      }
       for (i=j+1; i<l; i++)
-        if ((e=expo(gcoeff(a,j,i))) > e2) { e2=e; p=j; q=i; }
+      {
+        GEN z = gcoeff(a,j,i);
+        if (!signe(z)) continue;
+        e = expo(z); if (e > e2) { e2=e; p=j; q=i; }
+      }
     }
     avma = av2;
   }
+  /* sort eigenvalues from smallest to largest */
+  c = indexsort(L);
+  r2 = vecpermute(r, c); for (i=1; i<l; i++) gel(r,i) = gel(r2,i);
+  L2 = vecpermute(L, c); for (i=1; i<l; i++) gel(L,i) = gel(L2,i);
   avma = av1; return ja;
 }
 

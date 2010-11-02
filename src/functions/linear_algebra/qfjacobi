@@ -5,6 +5,7 @@ Prototype: Gp
 Help: qfjacobi(x): eigenvalues and orthogonal matrix of eigenvectors of the
  real symmetric matrix x.
 Doc: $x$ being a real symmetric matrix, this gives a
- vector having two components: the first one is the vector of eigenvalues of
- $x$, the second is the corresponding orthogonal matrix of eigenvectors of
- $x$. The method used is Jacobi's method for symmetric matrices.
+ vector having two components: the first one is the vector of (real)
+ eigenvalues of $x$, sorted in increasing order, the second is the
+ corresponding orthogonal matrix of eigenvectors of $x$. The method used is
+ Jacobi's method for symmetric matrices.

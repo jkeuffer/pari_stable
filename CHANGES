@@ -13,10 +13,12 @@ BA 2- 'make all' failed to build the documentation.
    6- Strprintf and printf0 prototypes were wrong.
    7- Mod(4*x+1,Mod(1,2)*x) -> SEGV [#1116]
    8- gcd(t_INTMOD, t_FRAC) -> SEGV
-
+   9- qfjacobi failed on a matrix of zeros (or in presence of 0s of large
+      exponent) [#990]
 
   Changed
 LGr1- universal constants (gen_0,gen_1, etc.) are now read-only
+   2- qfjacobi : sort eigenvalues by increasing order
 
   Added
 BA 1- trap keyword "syntaxer" to trap syntax error from eval.
