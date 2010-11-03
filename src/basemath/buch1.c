@@ -903,23 +903,23 @@ Buchquad(GEN D, double cbach, double cbach2, long prec)
 
 /* LIMC = Max(cbach*(log D)^2, exp(sqrt(log D loglog D) / 8)) */
 START:
-  if (!FIRST) cbach = check_bach(cbach,6.);
-  FIRST = 0; avma = av;
-  if (BQ.subFB) gunclone(BQ.subFB);
-  if (BQ.powsubFB) gunclone(BQ.powsubFB);
-  clearhash(BQ.hashtab);
-  nreldep = nrelsup = 0;
-  LIMC = (ulong)(cbach*LOGD2);
-  if (LIMC < cp) { LIMC = cp; cbach = (double)LIMC / LOGD2; }
-  LIMC2 = (ulong)(maxdd(cbach,cbach2)*LOGD2);
-  if (LIMC2 < LIMC) LIMC2 = LIMC;
-  if (BQ.PRECREG) qfr_data_init(QFR.D, BQ.PRECREG, &QFR);
+    if (!FIRST) cbach = check_bach(cbach,6.);
+    FIRST = 0; avma = av;
+    if (BQ.subFB) gunclone(BQ.subFB);
+    if (BQ.powsubFB) gunclone(BQ.powsubFB);
+    clearhash(BQ.hashtab);
+    nreldep = nrelsup = 0;
+    LIMC = (ulong)(cbach*LOGD2);
+    if (LIMC < cp) { LIMC = cp; cbach = (double)LIMC / LOGD2; }
+    LIMC2 = (ulong)(maxdd(cbach,cbach2)*LOGD2);
+    if (LIMC2 < LIMC) LIMC2 = LIMC;
+    if (BQ.PRECREG) qfr_data_init(QFR.D, BQ.PRECREG, &QFR);
 
-  Res = FBquad(&BQ, LIMC2, LIMC, GRHcheck);
-  if (!Res) goto START;
-  GRHcheck = NULL;
-  BQ.subFB = subFBquad(&BQ, QFR.D, lim + 0.5);
-  if (!BQ.subFB) goto START;
+    Res = FBquad(&BQ, LIMC2, LIMC, GRHcheck);
+    if (!Res) goto START;
+    GRHcheck = NULL;
+    BQ.subFB = subFBquad(&BQ, QFR.D, lim + 0.5);
+    if (!BQ.subFB) goto START;
   nsubFB = lg(BQ.subFB) - 1;
   BQ.powsubFB = powsubFBquad(&BQ,CBUCH+1);
   BQ.limhash = (LIMC & HIGHMASK)? (HIGHBIT>>1): LIMC*LIMC;
@@ -931,69 +931,69 @@ START:
   av2 = avma;
 
 MORE:
-  if ((nreldep & 3) == 1 || (nrelsup & 7) == 1) {
-    if (DEBUGLEVEL) fprintferr("*** Changing sub factor base\n");
-    gunclone(BQ.subFB);
-    gunclone(BQ.powsubFB);
-    BQ.subFB = gclone(vecslice(BQ.vperm, 1, nsubFB));
-    BQ.powsubFB = powsubFBquad(&BQ,CBUCH+1);
-    clearhash(BQ.hashtab);
-  }
-  need += 2;
-  mat    = cgetg(need+1, t_MAT);
-  extraC = cgetg(need+1, t_VEC);
-  if (!W) { /* first time */
-    C = extraC;
-    triv = trivial_relations(&BQ, mat, C);
-    if (DEBUGLEVEL) fprintferr("KC = %ld, need %ld relations\n", BQ.KC, need);
-  } else {
-    triv = 0;
-    if (DEBUGLEVEL) fprintferr("...need %ld more relations\n", need);
-  }
-  if (BQ.PRECREG) {
-    for (i = triv+1; i<=need; i++) {
-      gel(mat,i) = const_vecsmall(BQ.KC, 0);
-      gel(extraC,i) = cgetr(BQ.PRECREG);
+    if ((nreldep & 3) == 1 || (nrelsup & 7) == 1) {
+      if (DEBUGLEVEL) fprintferr("*** Changing sub factor base\n");
+      gunclone(BQ.subFB);
+      gunclone(BQ.powsubFB);
+      BQ.subFB = gclone(vecslice(BQ.vperm, 1, nsubFB));
+      BQ.powsubFB = powsubFBquad(&BQ,CBUCH+1);
+      clearhash(BQ.hashtab);
     }
-    real_relations(&BQ, need - triv, &current, s,LIMC,mat + triv,extraC + triv);
-  } else {
-    for (i = triv+1; i<=need; i++) {
-      gel(mat,i) = const_vecsmall(BQ.KC, 0);
-      gel(extraC,i) = gen_0;
+    need += 2;
+    mat    = cgetg(need+1, t_MAT);
+    extraC = cgetg(need+1, t_VEC);
+    if (!W) { /* first time */
+      C = extraC;
+      triv = trivial_relations(&BQ, mat, C);
+      if (DEBUGLEVEL) fprintferr("KC = %ld, need %ld relations\n", BQ.KC, need);
+    } else {
+      triv = 0;
+      if (DEBUGLEVEL) fprintferr("...need %ld more relations\n", need);
     }
-    imag_relations(&BQ, need - triv, &current, LIMC,mat + triv);
-  }
-
-  if (!W)
-    W = hnfspec_i(mat,BQ.vperm,&dep,&B,&C,nsubFB);
-  else
-    W = hnfadd_i(W,BQ.vperm,&dep,&B,&C, mat,extraC);
-  gerepileall(av2, 4, &W,&C,&B,&dep);
-  need = lg(dep)>1? lg(dep[1])-1: lg(B[1])-1;
-  if (need)
-  {
-    if (++nreldep > 15 && cbach < 1) goto START;
-    goto MORE;
-  }
-
-  h = ZM_det_triangular(W);
-  if (DEBUGLEVEL) fprintferr("\n#### Tentative class number: %Ps\n", h);
-
-  z = mulrr(Res, resc); /* ~ hR if enough relations, a multiple otherwise */
-  switch(get_R(&BQ, C, (lg(C)-1) - (lg(B)-1) - (lg(W)-1), divir(h,z), &R))
-  {
-    case fupb_PRECI:
-      BQ.PRECREG = (BQ.PRECREG<<1)-2;
-      cbach /= 2; goto START;
-
-    case fupb_RELAT:
-      if (++nrelsup <= 7 || cbach > 1) {
-        need = minss(BQ.KC, nrelsup);
-        if (cbach > 1 && nsubFB < 3 && lg(BQ.vperm) > 3) nsubFB++;
-        goto MORE;
+    if (BQ.PRECREG) {
+      for (i = triv+1; i<=need; i++) {
+        gel(mat,i) = const_vecsmall(BQ.KC, 0);
+        gel(extraC,i) = cgetr(BQ.PRECREG);
       }
-      goto START;
-  }
+      real_relations(&BQ, need - triv, &current, s,LIMC,mat + triv,extraC + triv);
+    } else {
+      for (i = triv+1; i<=need; i++) {
+        gel(mat,i) = const_vecsmall(BQ.KC, 0);
+        gel(extraC,i) = gen_0;
+      }
+      imag_relations(&BQ, need - triv, &current, LIMC,mat + triv);
+    }
+
+    if (!W)
+      W = hnfspec_i(mat,BQ.vperm,&dep,&B,&C,nsubFB);
+    else
+      W = hnfadd_i(W,BQ.vperm,&dep,&B,&C, mat,extraC);
+    gerepileall(av2, 4, &W,&C,&B,&dep);
+    need = lg(dep)>1? lg(dep[1])-1: lg(B[1])-1;
+    if (need)
+    {
+      if (++nreldep > 15 && cbach < 1) goto START;
+      goto MORE;
+    }
+
+    h = ZM_det_triangular(W);
+    if (DEBUGLEVEL) fprintferr("\n#### Tentative class number: %Ps\n", h);
+
+    z = mulrr(Res, resc); /* ~ hR if enough relations, a multiple otherwise */
+    switch(get_R(&BQ, C, (lg(C)-1) - (lg(B)-1) - (lg(W)-1), divir(h,z), &R))
+    {
+      case fupb_PRECI:
+        BQ.PRECREG = (BQ.PRECREG<<1)-2;
+        cbach /= 2; goto START;
+
+      case fupb_RELAT:
+        if (++nrelsup <= 7 || cbach > 1) {
+          need = minss(BQ.KC, nrelsup);
+          if (cbach > 1 && nsubFB < 3 && lg(BQ.vperm) > 3) nsubFB++;
+          goto MORE;
+        }
+        goto START;
+    }
   /* DONE */
   if (!quad_be_honest(&BQ)) goto START;
   clearhash(BQ.hashtab);

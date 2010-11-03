@@ -3236,17 +3236,17 @@ Buchall_param(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long
   init_GRHcheck(GRHcheck, N, R1, LOGD);
 
 START:
-  if (!FIRST) cbach = check_bach(cbach,12.);
-  FIRST = 0; avma = av;
-  if (cache.base) delete_cache(&cache);
-  if (F.subFB) delete_FB(&F);
-  LIMC = (long)(cbach*LOGD2);
-  if (LIMC < 20) { LIMC = 20; cbach = (double)LIMC / LOGD2; }
-  LIMC2 = maxss(3 * N, (long)(cbach2*LOGD2));
-  if (LIMC2 < LIMC) LIMC2 = LIMC;
-  if (DEBUGLEVEL) { fprintferr("LIMC = %ld, LIMC2 = %ld\n",LIMC,LIMC2); }
+    if (!FIRST) cbach = check_bach(cbach,12.);
+    FIRST = 0; avma = av;
+    if (cache.base) delete_cache(&cache);
+    if (F.subFB) delete_FB(&F);
+    LIMC = (long)(cbach*LOGD2);
+    if (LIMC < 20) { LIMC = 20; cbach = (double)LIMC / LOGD2; }
+    LIMC2 = maxss(3 * N, (long)(cbach2*LOGD2));
+    if (LIMC2 < LIMC) LIMC2 = LIMC;
+    if (DEBUGLEVEL) { fprintferr("LIMC = %ld, LIMC2 = %ld\n",LIMC,LIMC2); }
 
-  Res = FBgen(&F, nf, N, LIMC2, LIMC, GRHcheck);
+    Res = FBgen(&F, nf, N, LIMC2, LIMC, GRHcheck);
   fact = (FACT*)stackmalloc((F.KC+1)*sizeof(FACT));
   if (!Res) goto START;
   GRHcheck = NULL;
@@ -3265,155 +3265,155 @@ START:
   /* Random relations */
   W = NULL;
   sfb_trials = nreldep = 0;
-  if (need > 0)
-  {
-    if (DEBUGLEVEL) fprintferr("\n#### Looking for random relations\n");
+      if (need > 0)
+      {
+        if (DEBUGLEVEL) fprintferr("\n#### Looking for random relations\n");
 MORE:
-    pre_allocate(&cache, need); cache.end = cache.last + need;
-    if (++nreldep > MAXRELSUP) {
-      if (++sfb_trials > SFB_MAX && cbach < 2) goto START;
-      F.sfb_chg = sfb_INCREASE;
-    }
-    if (F.sfb_chg) {
-      if (!subFB_change(&F)) goto START;
-      nreldep = 0;
-    }
-    if (F.newpow) powFBgen(&cache, &F, nf);
-    if (!F.sfb_chg) rnd_rel(&cache, &F, nf, fact);
-    F.L_jid = F.perm;
-  }
+        pre_allocate(&cache, need); cache.end = cache.last + need;
+        if (++nreldep > MAXRELSUP) {
+          if (++sfb_trials > SFB_MAX && cbach < 2) goto START;
+          F.sfb_chg = sfb_INCREASE;
+        }
+        if (F.sfb_chg) {
+          if (!subFB_change(&F)) goto START;
+          nreldep = 0;
+        }
+        if (F.newpow) powFBgen(&cache, &F, nf);
+        if (!F.sfb_chg) rnd_rel(&cache, &F, nf, fact);
+        F.L_jid = F.perm;
+      }
 PRECPB:
-  if (precpb)
-  {
-    pari_sp av3 = avma;
-    GEN nf0 = nf;
-    if (precadd) { PRECREG += precadd; precadd = 0; }
-    else           PRECREG = (PRECREG<<1)-2;
-    if (DEBUGLEVEL)
-    {
-      char str[64]; sprintf(str,"Buchall_param (%s)",precpb);
-      pari_warn(warnprec,str,PRECREG);
-    }
-    nf = gclone( nfnewprec_shallow(nf, PRECREG) );
-    if (precdouble) gunclone(nf0);
-    avma = av3; precdouble++; precpb = NULL;
+      if (precpb)
+      {
+        pari_sp av3 = avma;
+        GEN nf0 = nf;
+        if (precadd) { PRECREG += precadd; precadd = 0; }
+        else           PRECREG = (PRECREG<<1)-2;
+        if (DEBUGLEVEL)
+        {
+          char str[64]; sprintf(str,"Buchall_param (%s)",precpb);
+          pari_warn(warnprec,str,PRECREG);
+        }
+        nf = gclone( nfnewprec_shallow(nf, PRECREG) );
+        if (precdouble) gunclone(nf0);
+        avma = av3; precdouble++; precpb = NULL;
 
-    if (F.pow && F.pow->arc) { gunclone(F.pow->arc); F.pow->arc = NULL; }
-    for (i = 1; i < lg(PERM); i++) F.perm[i] = PERM[i];
-    cache.chk = cache.base; W = NULL; /* recompute arch components + reduce */
-  }
-  { /* Reduce relation matrices */
-    long l = cache.last - cache.chk + 1, j;
-    GEN M = nf_get_M(nf), mat = cgetg(l, t_MAT), emb = cgetg(l, t_MAT);
-    int first = (W == NULL); /* never reduced before */
-    REL_t *rel;
+        if (F.pow && F.pow->arc) { gunclone(F.pow->arc); F.pow->arc = NULL; }
+        for (i = 1; i < lg(PERM); i++) F.perm[i] = PERM[i];
+        cache.chk = cache.base; W = NULL; /* recompute arch components + reduce */
+      }
+      { /* Reduce relation matrices */
+        long l = cache.last - cache.chk + 1, j;
+        GEN M = nf_get_M(nf), mat = cgetg(l, t_MAT), emb = cgetg(l, t_MAT);
+        int first = (W == NULL); /* never reduced before */
+        REL_t *rel;
 
-    if (F.pow && !F.pow->arc) powFB_fill(&F, M);
-    for (j=1,rel = cache.chk + 1; j < l; rel++,j++)
-    {
-      gel(mat,j) = rel->R;
-      gel(emb,j) = get_log_embed(rel, M, RU, R1, PRECREG);
-    }
-    if (first) {
-      C = emb;
-      W = hnfspec_i(mat, F.perm, &dep, &B, &C, lg(F.subFB)-1);
-    }
-    else
-      W = hnfadd_i(W, F.perm, &dep, &B, &C, mat, emb);
-    gerepileall(av2, 4, &W,&C,&B,&dep);
-    cache.chk = cache.last;
-    need = lg(dep)>1? lg(dep[1])-1: lg(B[1])-1;
-    zc = (cache.last - cache.base) - (lg(B)-1) - (lg(W)-1);
-    if (zc < RU-1)
-    {
-      /* need more columns for units */
-      need += RU-1 - zc;
-      if (need > F.KC) need = F.KC;
-    }
-    if (need)
-    { /* dependent rows */
-      F.L_jid = vecslice(F.perm, 1, need);
-      vecsmall_sort(F.L_jid);
-      if (need == old_need) F.sfb_chg = sfb_CHANGE;
-      old_need = need;
+        if (F.pow && !F.pow->arc) powFB_fill(&F, M);
+        for (j=1,rel = cache.chk + 1; j < l; rel++,j++)
+        {
+          gel(mat,j) = rel->R;
+          gel(emb,j) = get_log_embed(rel, M, RU, R1, PRECREG);
+        }
+        if (first) {
+          C = emb;
+          W = hnfspec_i(mat, F.perm, &dep, &B, &C, lg(F.subFB)-1);
+        }
+        else
+          W = hnfadd_i(W, F.perm, &dep, &B, &C, mat, emb);
+        gerepileall(av2, 4, &W,&C,&B,&dep);
+        cache.chk = cache.last;
+        need = lg(dep)>1? lg(dep[1])-1: lg(B[1])-1;
+        zc = (cache.last - cache.base) - (lg(B)-1) - (lg(W)-1);
+        if (zc < RU-1)
+        {
+          /* need more columns for units */
+          need += RU-1 - zc;
+          if (need > F.KC) need = F.KC;
+        }
+        if (need)
+        { /* dependent rows */
+          F.L_jid = vecslice(F.perm, 1, need);
+          vecsmall_sort(F.L_jid);
+          if (need == old_need) F.sfb_chg = sfb_CHANGE;
+          old_need = need;
+          goto MORE;
+        }
+      }
+    A = vecslice(C, 1, zc); /* cols corresponding to units */
+    R = compute_multiple_of_R(A, RU, N, &need, &lambda);
+    if (!lambda) { precpb = "bestappr"; goto PRECPB; }
+    if (!R)
+    { /* not full rank for units */
+      if (DEBUGLEVEL) fprintferr("regulator is zero.\n");
+      if (!need)
+      {
+        precpb = "regulator";
+        goto PRECPB;
+      }
       goto MORE;
     }
-  }
-  A = vecslice(C, 1, zc); /* cols corresponding to units */
-  R = compute_multiple_of_R(A, RU, N, &need, &lambda);
-  if (!lambda) { precpb = "bestappr"; goto PRECPB; }
-  if (!R)
-  { /* not full rank for units */
-    if (DEBUGLEVEL) fprintferr("regulator is zero.\n");
-    if (!need)
+
+    h = ZM_det_triangular(W);
+    if (DEBUGLEVEL) fprintferr("\n#### Tentative class number: %Ps\n", h);
+
+    z = mulrr(Res, resc); /* ~ hR if enough relations, a multiple otherwise */
+    switch (compute_R(lambda, divir(h,z), &L, &R))
     {
-      precpb = "regulator";
-      goto PRECPB;
+      case fupb_RELAT:
+        goto MORE; /* not enough relations */
+      case fupb_PRECI: /* prec problem unless we cheat on Bach constant */
+        if ((precdouble&7) < 7 || cbach>2) { precpb = "compute_R"; goto PRECPB; }
+        goto START;
     }
-    goto MORE;
-  }
+    /* DONE */
 
-  h = ZM_det_triangular(W);
-  if (DEBUGLEVEL) fprintferr("\n#### Tentative class number: %Ps\n", h);
-
-  z = mulrr(Res, resc); /* ~ hR if enough relations, a multiple otherwise */
-  switch (compute_R(lambda, divir(h,z), &L, &R))
-  {
-    case fupb_RELAT:
-      goto MORE; /* not enough relations */
-    case fupb_PRECI: /* prec problem unless we cheat on Bach constant */
-      if ((precdouble&7) < 7 || cbach>2) { precpb = "compute_R"; goto PRECPB; }
-      goto START;
-  }
-  /* DONE */
-
-  if (F.KCZ2 > F.KCZ)
-  {
-    if (F.newpow) powFBgen(NULL, &F, nf);
-    if (F.sfb_chg) {
-      if (!subFB_change(&F)) goto START;
+    if (F.KCZ2 > F.KCZ)
+    {
       if (F.newpow) powFBgen(NULL, &F, nf);
+      if (F.sfb_chg) {
+        if (!subFB_change(&F)) goto START;
+        if (F.newpow) powFBgen(NULL, &F, nf);
+      }
+      if (!be_honest(&F, nf, fact)) goto START;
     }
-    if (!be_honest(&F, nf, fact)) goto START;
-  }
-  F.KCZ2 = 0; /* be honest only once */
+    F.KCZ2 = 0; /* be honest only once */
 
-  /* fundamental units */
-  {
-    pari_sp av3 = avma;
-    GEN AU, U, H, v = extract_full_lattice(L); /* L may be very large */
-    long e;
-    if (v)
+    /* fundamental units */
     {
-      A = vecpermute(A, v);
-      L = vecpermute(L, v);
+      pari_sp av3 = avma;
+      GEN AU, U, H, v = extract_full_lattice(L); /* L may be very large */
+      long e;
+      if (v)
+      {
+        A = vecpermute(A, v);
+        L = vecpermute(L, v);
+      }
+      /* arch. components of fund. units */
+      H = ZM_hnflll(L, &U, 1); U = vecslice(U, lg(U)-(RU-1), lg(U)-1);
+      U = ZM_mul(U, ZM_lll(H, 0.99, LLL_IM));
+      AU = RgM_mul(A, U);
+      A = cleanarch(AU, N, PRECREG);
+      if (DEBUGLEVEL) msgtimer("cleanarch");
+      if (!A) {
+        precadd = (DEFAULTPREC-2) + divsBIL( gexpo(AU) ) - gprecision(AU);
+        if (precadd <= 0) precadd = 1;
+        precpb = "cleanarch"; goto PRECPB;
+      }
+      fu = getfu(nf, &A, flun & nf_FORCE, &e, PRECREG);
+      if (e <= 0 && (flun & nf_FORCE))
+      {
+        if (e < 0) precadd = (DEFAULTPREC-2) + divsBIL( (-e) );
+        avma = av3; precpb = "getfu"; goto PRECPB;
+      }
     }
-    /* arch. components of fund. units */
-    H = ZM_hnflll(L, &U, 1); U = vecslice(U, lg(U)-(RU-1), lg(U)-1);
-    U = ZM_mul(U, ZM_lll(H, 0.99, LLL_IM));
-    AU = RgM_mul(A, U);
-    A = cleanarch(AU, N, PRECREG);
-    if (DEBUGLEVEL) msgtimer("cleanarch");
-    if (!A) {
-      precadd = (DEFAULTPREC-2) + divsBIL( gexpo(AU) ) - gprecision(AU);
+    /* class group generators */
+    i = lg(C)-zc; C += zc; C[0] = evaltyp(t_MAT)|evallg(i);
+    C0 = C; C = cleanarch(C, N, PRECREG);
+    if (!C) {
+      precadd = (DEFAULTPREC-2) + divsBIL( gexpo(C0) ) - gprecision(C0);
       if (precadd <= 0) precadd = 1;
       precpb = "cleanarch"; goto PRECPB;
     }
-    fu = getfu(nf, &A, flun & nf_FORCE, &e, PRECREG);
-    if (e <= 0 && (flun & nf_FORCE))
-    {
-      if (e < 0) precadd = (DEFAULTPREC-2) + divsBIL( (-e) );
-      avma = av3; precpb = "getfu"; goto PRECPB;
-    }
-  }
-  /* class group generators */
-  i = lg(C)-zc; C += zc; C[0] = evaltyp(t_MAT)|evallg(i);
-  C0 = C; C = cleanarch(C, N, PRECREG);
-  if (!C) {
-    precadd = (DEFAULTPREC-2) + divsBIL( gexpo(C0) ) - gprecision(C0);
-    if (precadd <= 0) precadd = 1;
-    precpb = "cleanarch"; goto PRECPB;
-  }
 
   delete_cache(&cache); delete_FB(&F);
   Vbase = vecpermute(F.LP, F.perm);
