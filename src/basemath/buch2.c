@@ -3257,12 +3257,14 @@ START:
   if (nbrelpid > 0) {
     small_norm(&cache, &F, nf, nbrelpid, LOGD, LIMC2, fact);
     avma = av2;
+    need = 0;
   }
+  else
+    need = cache.end - cache.last;
 
   /* Random relations */
   W = NULL;
   sfb_trials = nreldep = 0;
-  need = cache.end - cache.last;
   if (need > 0)
   {
     if (DEBUGLEVEL) fprintferr("\n#### Looking for random relations\n");
