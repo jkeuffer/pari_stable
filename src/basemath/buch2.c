@@ -3323,17 +3323,22 @@ PRECPB:
     gerepileall(av2, 4, &W,&C,&B,&dep);
     cache.chk = cache.last;
     need = lg(dep)>1? lg(dep[1])-1: lg(B[1])-1;
+    zc = (cache.last - cache.base) - (lg(B)-1) - (lg(W)-1);
+    if (zc < RU-1)
+    {
+      /* need more columns for units */
+      need += RU-1 - zc;
+      if (need > F.KC) need = F.KC;
+    }
     if (need)
     { /* dependent rows */
       F.L_jid = vecslice(F.perm, 1, need);
       vecsmall_sort(F.L_jid);
-      need += RU - 1; /* need more columns for units */
       if (need == old_need) F.sfb_chg = sfb_CHANGE;
       old_need = need;
       goto MORE;
     }
   }
-  zc = (cache.last - cache.base) - (lg(B)-1) - (lg(W)-1);
   A = vecslice(C, 1, zc); /* cols corresponding to units */
   R = compute_multiple_of_R(A, RU, N, &need, &lambda);
   if (!lambda) { precpb = "bestappr"; goto PRECPB; }
