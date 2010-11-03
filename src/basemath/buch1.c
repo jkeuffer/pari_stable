@@ -903,6 +903,8 @@ Buchquad(GEN D, double cbach, double cbach2, long prec)
 
 /* LIMC = Max(cbach*(log D)^2, exp(sqrt(log D loglog D) / 8)) */
 START:
+  do
+  {
     if (!FIRST) cbach = check_bach(cbach,6.);
     FIRST = 0; avma = av;
     if (BQ.subFB) gunclone(BQ.subFB);
@@ -916,10 +918,8 @@ START:
     if (BQ.PRECREG) qfr_data_init(QFR.D, BQ.PRECREG, &QFR);
 
     Res = FBquad(&BQ, LIMC2, LIMC, GRHcheck);
-    if (!Res) goto START;
-    GRHcheck = NULL;
-    BQ.subFB = subFBquad(&BQ, QFR.D, lim + 0.5);
-    if (!BQ.subFB) goto START;
+  }
+  while (!Res || !(BQ.subFB = subFBquad(&BQ, QFR.D, lim + 0.5)));
   nsubFB = lg(BQ.subFB) - 1;
   BQ.powsubFB = powsubFBquad(&BQ,CBUCH+1);
   BQ.limhash = (LIMC & HIGHMASK)? (HIGHBIT>>1): LIMC*LIMC;
@@ -930,7 +930,8 @@ START:
   s = nsubFB + RELSUP;
   av2 = avma;
 
-MORE:
+  do
+  {
     if ((nreldep & 3) == 1 || (nrelsup & 7) == 1) {
       if (DEBUGLEVEL) fprintferr("*** Changing sub factor base\n");
       gunclone(BQ.subFB);
@@ -973,7 +974,7 @@ MORE:
     if (need)
     {
       if (++nreldep > 15 && cbach < 1) goto START;
-      goto MORE;
+      continue;
     }
 
     h = ZM_det_triangular(W);
@@ -987,13 +988,12 @@ MORE:
         cbach /= 2; goto START;
 
       case fupb_RELAT:
-        if (++nrelsup <= 7 || cbach > 1) {
-          need = minss(BQ.KC, nrelsup);
-          if (cbach > 1 && nsubFB < 3 && lg(BQ.vperm) > 3) nsubFB++;
-          goto MORE;
-        }
-        goto START;
+        if (++nrelsup > 7 && cbach <= 1) goto START;
+        need = minss(BQ.KC, nrelsup);
+        if (cbach > 1 && nsubFB < 3 && lg(BQ.vperm) > 3) nsubFB++;
     }
+  }
+  while (need);
   /* DONE */
   if (!quad_be_honest(&BQ)) goto START;
   clearhash(BQ.hashtab);

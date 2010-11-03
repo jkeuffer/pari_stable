@@ -442,12 +442,13 @@ init_GRHcheck(GRHcheck_t *S, long N, long R1, double LOGD)
   const double c3 = 3.801387092431; /* Euler + log(8*Pi)*/
   S->cN = R1*c2 + N*c1;
   S->cD = LOGD - N*c3 - R1*PI/2;
+  S->checkok = 0;
 }
 
 int
 GRHok(GRHcheck_t *S, double L, double SA, double SB)
 {
-  if (!S || S->cD + (S->cN + 2*SB) / L - 2*SA < -1e-8) return 1;
+  if (S->checkok || S->cD + (S->cN + 2*SB) / L - 2*SA < -1e-8) return 1;
   if (DEBUGLEVEL) fprintferr("*** GRH check negative! ***\n");
   return 0;
 }
@@ -507,7 +508,7 @@ FBgen(FB_t *F, GEN nf, long N, long C2, long C1, GRHcheck_t *S)
       k += nb;
       a = mulii(a, powuu(nor,   nb));
       b = mulii(b, powuu(nor-1, nb));
-      if (S)
+      if (!S->checkok)
       {
         double logp = log((double)p);
         double logNP = f*logp, q = 1/sqrt((double)nor);
@@ -558,7 +559,7 @@ FBgen(FB_t *F, GEN nf, long N, long C2, long C1, GRHcheck_t *S)
   }
   if (!GRHok(S, L, SA, SB)) return NULL;
   F->perm = NULL;
-  F->L_jid = NULL; return Res;
+  F->L_jid = NULL; S->checkok = 1; return Res;
 }
 
 /*  SMOOTH IDEALS */
@@ -3194,7 +3195,7 @@ Buchall_param(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long
   int FIRST = 1;
   RELCACHE_t cache;
   FB_t F;
-  GRHcheck_t G, *GRHcheck = &G;
+  GRHcheck_t GRHcheck;
   FACT *fact;
 
   if (DEBUGLEVEL) (void)timer2();
@@ -3233,9 +3234,11 @@ Buchall_param(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long
   resc = gdiv(mulri(gsqrt(D,DEFAULTPREC), gel(zu,1)),
               gmul2n(powru(mppi(DEFAULTPREC), R2), RU));
   av = avma; cache.base = NULL; F.subFB = NULL;
-  init_GRHcheck(GRHcheck, N, R1, LOGD);
+  init_GRHcheck(&GRHcheck, N, R1, LOGD);
 
 START:
+  do
+  {
     if (!FIRST) cbach = check_bach(cbach,12.);
     FIRST = 0; avma = av;
     if (cache.base) delete_cache(&cache);
@@ -3246,11 +3249,10 @@ START:
     if (LIMC2 < LIMC) LIMC2 = LIMC;
     if (DEBUGLEVEL) { fprintferr("LIMC = %ld, LIMC2 = %ld\n",LIMC,LIMC2); }
 
-    Res = FBgen(&F, nf, N, LIMC2, LIMC, GRHcheck);
+    Res = FBgen(&F, nf, N, LIMC2, LIMC, &GRHcheck);
+  }
+  while (!Res || !subFBgen(&F, mindd(lim,LIMC2) + 0.5, minsFB));
   fact = (FACT*)stackmalloc((F.KC+1)*sizeof(FACT));
-  if (!Res) goto START;
-  GRHcheck = NULL;
-  if (!subFBgen(&F, mindd(lim,LIMC2) + 0.5, minsFB)) goto START;
   PERM = leafcopy(F.perm); /* to be restored in case of precision increase */
   av2 = avma;
   init_rel(&cache, &F, RELSUP + RU-1); /* trivial relations */
@@ -3265,10 +3267,13 @@ START:
   /* Random relations */
   W = NULL;
   sfb_trials = nreldep = 0;
+  do
+  {
+    do
+    {
       if (need > 0)
       {
         if (DEBUGLEVEL) fprintferr("\n#### Looking for random relations\n");
-MORE:
         pre_allocate(&cache, need); cache.end = cache.last + need;
         if (++nreldep > MAXRELSUP) {
           if (++sfb_trials > SFB_MAX && cbach < 2) goto START;
@@ -3282,7 +3287,6 @@ MORE:
         if (!F.sfb_chg) rnd_rel(&cache, &F, nf, fact);
         F.L_jid = F.perm;
       }
-PRECPB:
       if (precpb)
       {
         pari_sp av3 = avma;
@@ -3336,21 +3340,18 @@ PRECPB:
           vecsmall_sort(F.L_jid);
           if (need == old_need) F.sfb_chg = sfb_CHANGE;
           old_need = need;
-          goto MORE;
         }
       }
+    }
+    while (need);
     A = vecslice(C, 1, zc); /* cols corresponding to units */
     R = compute_multiple_of_R(A, RU, N, &need, &lambda);
-    if (!lambda) { precpb = "bestappr"; goto PRECPB; }
+    if (!lambda) { precpb = "bestappr"; continue; }
     if (!R)
     { /* not full rank for units */
       if (DEBUGLEVEL) fprintferr("regulator is zero.\n");
-      if (!need)
-      {
-        precpb = "regulator";
-        goto PRECPB;
-      }
-      goto MORE;
+      if (!need) precpb = "regulator";
+      continue;
     }
 
     h = ZM_det_triangular(W);
@@ -3360,10 +3361,12 @@ PRECPB:
     switch (compute_R(lambda, divir(h,z), &L, &R))
     {
       case fupb_RELAT:
-        goto MORE; /* not enough relations */
+        need = 1; /* not enough relations */
+        continue;
       case fupb_PRECI: /* prec problem unless we cheat on Bach constant */
-        if ((precdouble&7) < 7 || cbach>2) { precpb = "compute_R"; goto PRECPB; }
-        goto START;
+        if ((precdouble&7) == 7 && cbach<=2) goto START;
+        precpb = "compute_R";
+        continue;
     }
     /* DONE */
 
@@ -3397,13 +3400,13 @@ PRECPB:
       if (!A) {
         precadd = (DEFAULTPREC-2) + divsBIL( gexpo(AU) ) - gprecision(AU);
         if (precadd <= 0) precadd = 1;
-        precpb = "cleanarch"; goto PRECPB;
+        precpb = "cleanarch"; continue;
       }
       fu = getfu(nf, &A, flun & nf_FORCE, &e, PRECREG);
       if (e <= 0 && (flun & nf_FORCE))
       {
         if (e < 0) precadd = (DEFAULTPREC-2) + divsBIL( (-e) );
-        avma = av3; precpb = "getfu"; goto PRECPB;
+        avma = av3; precpb = "getfu"; continue;
       }
     }
     /* class group generators */
@@ -3412,8 +3415,10 @@ PRECPB:
     if (!C) {
       precadd = (DEFAULTPREC-2) + divsBIL( gexpo(C0) ) - gprecision(C0);
       if (precadd <= 0) precadd = 1;
-      precpb = "cleanarch"; goto PRECPB;
+      precpb = "cleanarch";
     }
+  }
+  while (need || precpb);
 
   delete_cache(&cache); delete_FB(&F);
   Vbase = vecpermute(F.LP, F.perm);
