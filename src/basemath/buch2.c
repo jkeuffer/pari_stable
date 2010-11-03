@@ -2423,7 +2423,6 @@ compute_multiple_of_R(GEN A, long RU, long N, long *pneed, GEN *ptL)
   int precpb;
   pari_sp av = avma;
 
-  *pneed = 1;
   if (RU == 1) { *ptL = zeromat(0, lg(A)-1); return gen_1; }
 
   if (DEBUGLEVEL) fprintferr("\n#### Computing regulator multiple\n");
@@ -2466,7 +2465,7 @@ compute_multiple_of_R(GEN A, long RU, long N, long *pneed, GEN *ptL)
    * index in the full lattice. First column is T */
   kR = divru(det2(Im_mdet), N);
   /* R > 0.2 uniformly */
-  if (!signe(kR) || expo(kR) < -3) { avma=av; return NULL; }
+  if (!signe(kR) || expo(kR) < -3) { avma=av; *pneed = 0; return NULL; }
 
   setabssign(kR);
   L = RgM_inv(Im_mdet);
@@ -3339,6 +3338,11 @@ PRECPB:
   if (!R)
   { /* not full rank for units */
     if (DEBUGLEVEL) fprintferr("regulator is zero.\n");
+    if (!need)
+    {
+      precpb = "regulator";
+      goto PRECPB;
+    }
     goto MORE;
   }
 
