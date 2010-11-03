@@ -1938,18 +1938,14 @@ get_log_embed(REL_t *rel, GEN M, long RU, long R1, long prec)
 }
 
 static void
-powFB_fill(RELCACHE_t *cache, GEN M)
+powFB_fill(FB_t *F, GEN M)
 {
-  powFB_t *old = NULL, *pow;
+  powFB_t *pow;
   pari_sp av = avma;
-  REL_t *rel;
-  for (rel = cache->base + 1; rel <= cache->last; rel++)
+  for (pow = F->pow; pow; pow = pow->prev)
   {
     long i, j, l;
     GEN Alg, Arc;
-    if (!rel->ex) continue;
-    pow = rel->pow; if (pow == old) continue;
-    old = pow;
     if (pow->arc) gunclone(pow->arc);
     Alg = pow->alg; Arc = cgetg_copy(Alg, &l);
     for (i = 1; i < l; i++)
@@ -3311,7 +3307,7 @@ PRECPB:
     int first = (W == NULL); /* never reduced before */
     REL_t *rel;
 
-    if (F.pow && !F.pow->arc) powFB_fill(&cache, M);
+    if (F.pow && !F.pow->arc) powFB_fill(&F, M);
     for (j=1,rel = cache.chk + 1; j < l; rel++,j++)
     {
       gel(mat,j) = rel->R;
