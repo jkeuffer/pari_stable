@@ -2228,7 +2228,6 @@ div_ser(GEN x, GEN y, long vx)
 {
   long i, j, l = valp(x) - valp(y), lx = lg(x), ly = lg(y);
   GEN y_lead, p1, p2, z;
-  pari_sp av;
 
   if (!signe(y)) pari_err(gdiver);
   if (lx == 2) return zeroser(vx, l);
@@ -2236,34 +2235,33 @@ div_ser(GEN x, GEN y, long vx)
   if (gequal0(y_lead)) /* normalize denominator if leading term is 0 */
   {
     pari_warn(warner,"normalizing a series with 0 leading term");
-    for (i=3,y++; i<ly; i++,y++)
+    for (l--, ly--,y++; ly > 2; l--, ly--, y++)
     {
-      y_lead = gel(y,2); ly--; l--;
+      y_lead = gel(y,2);
       if (!gequal0(y_lead)) break;
     }
+    if (ly <= 2) pari_err(gdiver);
   }
   if (ly < lx) lx = ly;
-  p2 = (GEN)pari_malloc(lx*sizeof(long));
-  av = avma;
+  p2 = cgetg(lx, t_VECSMALL); /* left on stack for efficiency */
   for (i=3; i<lx; i++)
   {
     p1 = gel(y,i);
-    gel(p2,i) = isrationalzero(p1)? NULL: gclone(gneg_i(p1));
+    if (isrationalzero(p1)) p1 = NULL;
+    gel(p2,i) = p1;
   }
-  avma = av;
   z = cgetg(lx,t_SER);
   z[1] = evalvalp(l) | evalvarn(vx) | evalsigne(1);
   gel(z,2) = gdiv(gel(x,2), y_lead);
   for (i=3; i<lx; i++)
   {
-    av = avma; p1 = gel(x,i);
+    pari_sp av = avma;
+    p1 = gel(x,i);
     for (j=2, l=i; j<i; j++, l--)
-      if (p2[l]) p1 = gadd(p1, gmul(gel(z,j), gel(p2,l)));
+      if (p2[l]) p1 = gsub(p1, gmul(gel(z,j), gel(p2,l)));
     gel(z,i) = gerepileupto(av, gdiv(p1, y_lead));
   }
-  for (i=3; i<lx; i++)
-    if (p2[i]) gunclone(gel(p2,i));
-  pari_free(p2); return normalize(z);
+  return normalize(z);
 }
 /* x,y compatible PADIC */
 static GEN
