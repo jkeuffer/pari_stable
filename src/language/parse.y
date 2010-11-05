@@ -82,6 +82,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 sequnused: seq       {$$=$1;}
          | seq error {$$=$1; pari_unused_chars=@1.end;YYABORT;}
+;
 
 seq: /**/ %prec SEQ  {$$=newnode(Fnoarg,-1,-1,&@$);}
    | expr %prec SEQ  {$$=$1;}
