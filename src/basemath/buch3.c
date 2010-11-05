@@ -2295,8 +2295,11 @@ STORE:  gel(discall,karch+1) = res;
       gel(sousdisc,j) = res;
       if (low_stack(lim, stack_lim(av1,1)))
       {
+        long jj;
         if(DEBUGMEM>1) pari_warn(warnmem,"[2]: discrayabslistarch");
+        for (jj=j+1; jj<ls; jj++) gel(sousdisc,jj) = gen_0; /* dummy */
         Disc = gerepilecopy(av1, Disc);
+        sousdisc = bigel(Disc,ii);
       }
     }
   }
