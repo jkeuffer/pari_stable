@@ -1926,7 +1926,10 @@ ctop(GEN x, GEN p, long d)
   GEN z, u = gel(x,1), v = gel(x,2);
   if (isrationalzero(v)) return cvtop(u, p, d);
   z = Qp_sqrt(cvtop(gen_m1, p, d - ggval(v, p))); /* = I */
-  return gerepileupto(av, gadd(u, gmul(v, z)) );
+  z = gadd(u, gmul(v, z));
+  if (typ(z) != t_PADIC) /* t_INTMOD for t_COMPLEX of t_INTMODs... */
+    z = cvtop(z, p, d);
+  return gerepileupto(av, z);
 }
 
 /* cvtop2(stoi(s), y) */
@@ -1964,10 +1967,8 @@ cvtop2(GEN x, GEN y)
       gel(z,4) = modii(x, gel(y,3)); return z;
 
     case t_INTMOD:
-      if (!signe(x[2])) return zeropadic(p, d);
-      v = Z_pval(gel(x,1),p);
-      if (v <= d) return cvtop2(gel(x,2), y);
-      return cvtop(gel(x,2), p, d);
+      v = Z_pval(gel(x,1),p); if (v > d) v = d;
+      return cvtop(gel(x,2), p, v);
 
     case t_FRAC: { GEN num = gel(x,1), den = gel(x,2);
       if (!signe(num)) return zeropadic(p, d);
@@ -2009,7 +2010,6 @@ cvtop(GEN x, GEN p, long d)
       gel(z,4) = modii(x, gel(z,3)); return z; /* not memory-clean */
 
     case t_INTMOD:
-      if (!signe(x[2])) return zeropadic(p, d);
       v = Z_pval(gel(x,1),p); if (v > d) v = d;
       return cvtop(gel(x,2), p, v);
 

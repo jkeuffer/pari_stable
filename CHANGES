@@ -16,6 +16,7 @@ BA 2- 'make all' failed to build the documentation.
    9- qfjacobi failed on a matrix of zeros (or in presence of 0s of large
       exponent) [#990]
   10- t_SER / t_SER where denominator has 0 leading term -> SEGV [#1120]
+  11- (t_COMPLEX of t_INTMOD) + t_PADIC -> SEGV [#1121]
 
   Changed
 LGr1- universal constants (gen_0,gen_1, etc.) are now read-only
