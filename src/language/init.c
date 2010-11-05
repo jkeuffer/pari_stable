@@ -652,7 +652,6 @@ pari_thread_init(void)
   pari_init_errcatch();
   pari_init_rand();
   pari_init_floats();
-  pari_init_seadata();
   pari_init_parser();
   pari_init_compiler();
   pari_init_evaluator();
@@ -666,7 +665,6 @@ pari_thread_close(void)
   pari_close_evaluator();
   pari_close_compiler();
   pari_close_parser();
-  pari_close_seadata();
   pari_close_floats();
   pari_close_blocks();
 }
@@ -720,6 +718,7 @@ pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts)
   primetab = cgetalloc(t_VEC, 1);
   varentries = (entree**) pari_calloc((MAXVARN+1)*sizeof(entree*));
   pari_thread_init();
+  pari_init_seadata();
   pari_init_functions();
   pari_var_init();
   try_to_recover = 1;
@@ -749,6 +748,7 @@ pari_close_opts(ulong init_opts)
   }
   free((void*)varentries);
   free((void*)primetab);
+  pari_close_seadata();
   pari_thread_close();
 
   free((void*)functions_hash);
