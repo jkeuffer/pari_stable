@@ -699,8 +699,7 @@ pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts)
 
   cb_pari_whatnow = NULL;
   cb_pari_sigint = dflt_sigint_fun;
-  cb_pari_handle_exception = NULL;
-  cb_pari_err_recover = dflt_err_recover;
+  if ((init_opts&INIT_JMPm)) cb_pari_err_recover = dflt_err_recover;
 
   pari_stackcheck_init(&u);
   if ((init_opts&INIT_DFTm)) {
