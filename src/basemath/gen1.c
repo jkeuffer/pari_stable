@@ -2194,7 +2194,7 @@ static GEN
 div_scal_pol(GEN x, GEN y) {
   long ly = lg(y);
   pari_sp av;
-  if (ly == 3) return gdiv(x,gel(y,2));
+  if (ly == 3) return scalarpol(gdiv(x,gel(y,2)), varn(y));
   if (isrationalzero(x)) return zeropol(varn(y));
   av = avma;
   return gerepileupto(av, gred_rfrac_simple(x,y));
