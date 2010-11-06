@@ -1917,7 +1917,11 @@ qtop(GEN x, GEN p, long d)
   av = avma; D = quad_disc(x);
   if (equaliu(p,2)) d += 2;
   z = gmul2n(gsub(Qp_sqrt(cvtop(D,p,d)), b), -1);
-  return gerepileupto(av, gadd(u, gmul(v, z)));
+
+  z = gadd(u, gmul(v, z));
+  if (typ(z) != t_PADIC) /* t_INTMOD for t_QUAD of t_INTMODs... */
+    z = cvtop(z, p, d);
+  return gerepileupto(av, z);
 }
 static GEN
 ctop(GEN x, GEN p, long d)
@@ -1926,6 +1930,7 @@ ctop(GEN x, GEN p, long d)
   GEN z, u = gel(x,1), v = gel(x,2);
   if (isrationalzero(v)) return cvtop(u, p, d);
   z = Qp_sqrt(cvtop(gen_m1, p, d - ggval(v, p))); /* = I */
+
   z = gadd(u, gmul(v, z));
   if (typ(z) != t_PADIC) /* t_INTMOD for t_COMPLEX of t_INTMODs... */
     z = cvtop(z, p, d);
