@@ -266,11 +266,12 @@ gred_rfrac_simple(GEN n, GEN d)
   gel(z,2) = RgX_Rg_mul(d, cd); return z;
 }
 
+/* in rare cases x may be a t_POL, after 0/x for instance -> pol_0() */
 static GEN
 fix_rfrac(GEN x, long d)
 {
   GEN z, N, D;
-  if (!d) return x;
+  if (!d || typ(x) == t_POL) return x;
   z = cgetg(3, t_RFRAC);
   N = gel(x,1);
   D = gel(x,2);
