@@ -1145,7 +1145,8 @@ compilefunc(entree *ep, long n, int mode, long flag)
             long a=arg[j++];
             if (tree[a].f==Fentry)
             {
-              op_push(OCpushgen, data_push(strntoGENstr(tree[tree[a].x].str,tree[tree[a].x].len)),n);
+              op_push(OCpushgen, data_push(strntoGENstr(tree[tree[a].x].str,
+                                                        tree[tree[a].x].len)),n);
               op_push(OCtostr, -1,n);
             }
             else
@@ -1238,10 +1239,13 @@ compilefunc(entree *ep, long n, int mode, long flag)
           break;
         case 'r':
         case 's':
-          if (q[1]=='"' && q[2]=='"')
-            op_push(OCpushlong,(long)"",n);
-          else
-            compile_err("function prototype not supported",tree[n].str);
+          {
+            long len = p-4-q;
+            if (q[1]!='"' || q[len]!='"')
+              compile_err("default argument must be a string",tree[n].str);
+            op_push(OCpushgen,data_push(strntoGENexp(q+1,len)),n);
+            op_push(OCtostr, -1, n);
+          }
           break;
         default:
           pari_err(talker,"Unknown prototype code `%c' for `%.*s'",c,
