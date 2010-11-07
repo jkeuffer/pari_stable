@@ -1817,21 +1817,21 @@ pari_version(void) {
 }
 
 /* List of GP functions:
+ * generated from the description system.
  * ---------------------
  * Format (struct entree) :
  *   char *name    : name (under GP).
- *   ulong valence : used to form arg list, now often handled by code.
+ *   ulong valence : (EpNEW, EpALIAS,EpVAR, EpINSTALL)|EpSTATIC
  *   void *value   : For PREDEFINED FUNCTIONS: C function to call.
  *                   For USER FUNCTIONS: pointer to defining data (block) =
  *                    entree*: NULL, list of entree (arguments), NULL
  *                    char*  : function text
  *   long menu     : which help section do we belong to (See below).
  *   char *code    : argument list (See below).
- *   entree *next  : next entree (init to NULL, used in hashing code).
  *   char *help    : short help text (init to NULL).
- *   void *args    : For USER FUNCTIONS: default arguments (NULL terminated).
- *                   For VARIABLES: (esp. loop indexes): push_val history.
- *                   (while processing a loop, ep->value may not be a block)
+ *   void *pvalue  : push_val history.
+ *   long arity    : maximum number of arguments.
+ *   entree *next  : next entree (init to NULL, used in hashing code).
  * menu:
  * -----
  *  1: Standard monadic or dyadic OPERATORS
@@ -1875,6 +1875,7 @@ pari_version(void) {
  *     Special syntax:
  *       if type = G, &, I or V:  D[G&IV] all send NULL.
  *       if type = n: Dn sends -1.
+ *       if type = &: argument must be prepened by '&'.
  *
  *     The user-given args are read first, then completed by the defaults
  *
@@ -1893,17 +1894,5 @@ pari_version(void) {
  *       Should be the first char in the code.
  *
  ****************************************************************************
- * If new codes are added, change identifier and skipidentifier.
- *
- * Currently the following functions have no code word, but a valence code.
- * 'O' 50, 'if' 80, 'until' 82, 'while' 81, 'global' 88,
- * Valences:
- * 0  for functions without mandatory args.
- * 1  for functions with mandatory args.
- * 50 'O'
- * 80 'if'
- * 82 'until'
- * 81 'while'
- * 88 'global'
  */
 #include "init.h"
