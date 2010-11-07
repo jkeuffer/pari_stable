@@ -597,6 +597,15 @@ is_node_zero(long n)
   return (tree[n].f==Fsmall && tree[n].x==0);
 }
 
+static void
+str_defproto(const char *p, const char *q, const char *loc)
+{
+  long len = p-4-q;
+  if (q[1]!='"' || q[len]!='"')
+    compile_err("default argument must be a string",loc);
+  op_push_loc(OCpushgen,data_push(strntoGENexp(q+1,len)),loc);
+}
+
 static GEN
 listtogen(long n, Ffunc f)
 {
@@ -1239,13 +1248,8 @@ compilefunc(entree *ep, long n, int mode, long flag)
           break;
         case 'r':
         case 's':
-          {
-            long len = p-4-q;
-            if (q[1]!='"' || q[len]!='"')
-              compile_err("default argument must be a string",tree[n].str);
-            op_push(OCpushgen,data_push(strntoGENexp(q+1,len)),n);
-            op_push(OCtostr, -1, n);
-          }
+          str_defproto(p, q, tree[n].str);
+          op_push(OCtostr, -1, n);
           break;
         default:
           pari_err(talker,"Unknown prototype code `%c' for `%.*s'",c,
@@ -1437,14 +1441,20 @@ genclosure(entree *ep, const char *loc, GEN data, int check)
       switch(c)
       {
       case 'G':
-        return NULL;
+        op_push_loc(OCpushgen,data_push(strntoGENstr(q+1,p-4-q)),loc);
+        op_push_loc(OCcallgen,(long)is_entry("_geval"),loc);
+        op_push_loc(OCdefaultval,-index,loc);
+        break;
       case 'L':
       case 'M':
-        op_push_loc(OCpushlong,strtol(q+1,NULL,10),loc);
-        op_push_loc(OCdefaultitos,-index,loc);
+        op_push_loc(OCpushstoi,strtol(q+1,NULL,10),loc);
+        op_push_loc(OCdefaultval,-index,loc);
+        op_push_loc(OCitos,-index,loc);
         break;
       case 'r':
       case 's':
+        str_defproto(p, q, loc);
+        op_push_loc(OCdefaultval,-index,loc);
         op_push_loc(OCtostr,-index,loc);
         break;
       default:
