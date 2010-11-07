@@ -1303,7 +1303,7 @@ compilefunc(entree *ep, long n, int mode, long flag)
 }
 
 static GEN
-genclosure(entree *ep, const char *loc, GEN data)
+genclosure(entree *ep, const char *loc, GEN data, int check)
 {
   struct codepos pos;
   long nb=0;
@@ -1345,7 +1345,7 @@ genclosure(entree *ep, const char *loc, GEN data)
       }
     }
   }
-  if (*code==0 || (EpSTATIC(ep) && maskarg==0))
+  if (check && EpSTATIC(ep) && maskarg==0)
     return gen_0;
   getcodepos(&pos);
   dbgstart = loc;
@@ -1476,7 +1476,7 @@ genclosure(entree *ep, const char *loc, GEN data)
 GEN
 snm_closure(entree *ep, GEN data)
 {
-  GEN C = genclosure(ep,ep->name,data);
+  GEN C = genclosure(ep,ep->name,data,0);
   if (data) gel(C,4) = data;
   return C;
 }
@@ -1487,7 +1487,7 @@ closurefunc(entree *ep, long n, long mode)
   pari_sp ltop=avma;
   GEN C;
   if (!ep->value) compile_err("unknown function",tree[n].str);
-  C = genclosure(ep,tree[n].str,NULL);
+  C = genclosure(ep,tree[n].str,NULL,1);
   if (!C) compile_err("sorry, closure not implemented",tree[n].str);
   if (C==gen_0)
   {
