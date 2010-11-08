@@ -366,14 +366,14 @@ static void
 community(void)
 {
   pari_sp av = avma;
-  char *s = stackmalloc(strlen(GPDATADIR) + 1024);
+  char *s = stackmalloc(strlen(pari_datadir) + 1024);
 
   (void)sprintf(s, "The standard distribution of GP/PARI includes a \
 reference manual, a tutorial, a reference card and quite a few examples. They \
 should have been installed in the directory '%s'. If not, ask the person \
 who installed PARI on your system where they can be found. You can also \
-download them from the PARI WWW site 'http://pari.math.u-bordeaux.fr/'.",
-GPDATADIR);
+download them from the PARI WWW site 'http://pari.math.u-bordeaux.fr/'."
+                 , pari_datadir);
   print_text(s); avma = av;
 
   pari_puts("\nThree mailing lists are devoted to PARI:\n\

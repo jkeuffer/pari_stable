@@ -15,6 +15,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /* Written by Vasili Burdo */
 
+char* win32_datadir(void);
 void win32_ansi_fputs(const char* s, void* f);
 int win32_terminal_width(void);
 int win32_terminal_height(void);

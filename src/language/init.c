@@ -23,6 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "paripriv.h"
 #include "anal.h"
 #ifdef _WIN32
+#  include "../systems/mingw/mingw.h"
 #  ifndef WINCE
 #    include <process.h>
 #  endif
@@ -511,9 +512,16 @@ pari_init_defaults(void)
   pari_logfile = NULL;
 
   pari_datadir = os_getenv("GP_DATA_DIR");
-  if (!pari_datadir) pari_datadir = (char*)GPDATADIR;
-  if (pari_datadir) pari_datadir = pari_strdup(pari_datadir);
-
+  if (!pari_datadir)
+  {
+#ifdef _WIN32
+    if (pari_datadir[0]=='@' && pari_datadir[1]==0)
+      pari_datadir = win32_datadir();
+    else
+#endif
+      pari_datadir = pari_strdup(GPDATADIR);
+  }
+  else               pari_datadir = pari_strdup(pari_datadir);
   for (i=0; i<c_LAST; i++) gp_colors[i] = c_NONE;
   pari_colormap = NULL; pari_graphcolors = NULL;
   (void)sd_graphcolormap("[\"white\",\"black\",\"blue\",\"violetred\",\"red\",\"green\",\"grey\",\"gainsboro\"]", d_SILENT);

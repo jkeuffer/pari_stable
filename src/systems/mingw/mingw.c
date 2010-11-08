@@ -19,6 +19,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include <stdio.h>
 #include "mingw.h"
 
+char* win32_datadir(void)
+{
+  char datadir[1024];
+  char* slash;
+  GetModuleFileNameA(0, datadir, sizeof(datadir) );
+  slash = strrchr(datadir, '\\');
+  if( slash ) *(slash+1) = 0;
+  strcat(datadir, "data");
+  return strdup(datadir);
+}
+
 static WORD
 win32_console_color(unsigned long c)
 {

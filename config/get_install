@@ -48,7 +48,7 @@ dflt=${dfltdatadir:-$dfltdata}; . ./myread; datadir=$ans
 for i in prefix share_prefix bindir libdir includedir mandir sysdatadir datadir ; do
   eval "dflt=\"\$$i\""
   case $dflt in
-      /*) ;;
+       @|/*) ;;
        *) eval "$i='$TOP/$dflt'";;
   esac
 done
