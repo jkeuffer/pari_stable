@@ -474,7 +474,7 @@ if [a',b']~=M*[a,b]~ then degpol(a')>= (lgpol(a)>>1) >degpol(b1)
 static GEN
 FpX_halfgcd_i(GEN x, GEN y, GEN p)
 {
-  if (degpol(x)<=50) return FpX_halfgcd_basecase(x,y,p);
+  if (lg(x)<=FpX_HALFGCD_LIMIT) return FpX_halfgcd_basecase(x,y,p);
   return FpX_halfgcd_split(x,y,p);
 }
 
@@ -525,7 +525,7 @@ FpX_gcd(GEN x, GEN y, GEN p)
   x = FpX_red(x, p); av0 = avma;
   y = FpX_red(y, p);
   if (!signe(y)) { avma = av0; return x; }
-  while (degpol(y)>=100)
+  while (lg(y)>FpX_GCD_LIMIT)
   {
     GEN c = FpXM_FpX_mul2(FpX_halfgcd(x,y, p), x, y, p);
     x = gel(c,1); y = gel(c,2);
@@ -586,7 +586,7 @@ FpX_extgcd_halfgcd(GEN x, GEN y, GEN p, GEN *ptu, GEN *ptv)
 {
   pari_sp av=avma;
   GEN u,v,R = matid2_FpXM(varn(x));
-  while (degpol(y)>=50)
+  while (lg(y)>FpX_EXTGCD_LIMIT)
   {
     GEN M = FpX_halfgcd(x,y, p);
     GEN c = FpXM_FpX_mul2(M, x,y, p);
@@ -621,7 +621,7 @@ FpX_extgcd(GEN x, GEN y, GEN p, GEN *ptu, GEN *ptv)
   {
     x = FpX_red(x, p);
     y = FpX_red(y, p);
-    if (degpol(y)>=100)
+    if (lg(y)>FpX_EXTGCD_LIMIT)
       d = FpX_extgcd_halfgcd(x, y, p, ptu, ptv);
     else
       d = FpX_extgcd_basecase(x, y, p, ptu, ptv);

@@ -16,6 +16,9 @@ extern long Flx_POW_MONTGOMERY_LIMIT;
 extern long FpX_INVMONTGOMERY_LIMIT;
 extern long FpX_REM_MONTGOMERY_LIMIT;
 extern long FpX_POW_MONTGOMERY_LIMIT;
+extern long FpX_HALFGCD_LIMIT;
+extern long FpX_GCD_LIMIT;
+extern long FpX_EXTGCD_LIMIT;
 extern long EXPNEWTON_LIMIT;
 extern long INVNEWTON_LIMIT;
 extern long LOGAGM_LIMIT;
@@ -48,6 +51,9 @@ extern long RgX_MUL_LIMIT;
 #  define FpX_INVMONTGOMERY_LIMIT  __FpX_INVMONTGOMERY_LIMIT
 #  define FpX_REM_MONTGOMERY_LIMIT __FpX_REM_MONTGOMERY_LIMIT
 #  define FpX_POW_MONTGOMERY_LIMIT __FpX_POW_MONTGOMERY_LIMIT
+#  define FpX_HALFGCD_LIMIT        __FpX_HALFGCD_LIMIT
+#  define FpX_GCD_LIMIT            __FpX_GCD_LIMIT
+#  define FpX_EXTGCD_LIMIT         __FpX_EXTGCD_LIMIT
 #  define RgX_SQR_LIMIT            __RgX_SQR_LIMIT
 #  define RgX_MUL_LIMIT            __RgX_MUL_LIMIT
 #endif

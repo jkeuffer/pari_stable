@@ -293,6 +293,19 @@ static double speed_FpXQ_pow_mg(speed_param *s) {
   GEN x = rand_NFpX(p,degpol(s->x)-1);
   enable(s);  TIME_FUN( FpXQ_pow(x, p, s->x, p) );
 }
+static double speed_FpX_halfgcd_basecase(speed_param *s)
+{ GEN p = LARGE_mod; disable(s); TIME_FUN(FpX_halfgcd(s->x, s->y, p)); }
+static double speed_FpX_halfgcd(speed_param *s)
+{ GEN p = LARGE_mod; enable(s); TIME_FUN(FpX_halfgcd(s->x, s->y, p)); }
+static double speed_FpX_gcd_basecase(speed_param *s)
+{ GEN p = LARGE_mod; disable(s); TIME_FUN(FpX_gcd(s->x, s->y, p)); }
+static double speed_FpX_gcd(speed_param *s)
+{ GEN p = LARGE_mod; enable(s); TIME_FUN(FpX_gcd(s->x, s->y, p)); }
+static double speed_FpX_extgcd_basecase(speed_param *s)
+{ GEN u,v,p = LARGE_mod; disable(s); TIME_FUN(FpX_extgcd(s->x, s->y, p, &u, &v)); }
+static double speed_FpX_extgcd(speed_param *s)
+{ GEN u,v,p = LARGE_mod; enable(s); TIME_FUN(FpX_extgcd(s->x, s->y, p, &u, &v)); }
+
 /* small coeffs: earlier thresholds for more complicated rings */
 static double speed_RgX_sqr(speed_param *s)
 { disable(s); TIME_FUN(RgX_sqr(s->x)); }
@@ -336,6 +349,9 @@ static tune_param param[] = {
 {0,  var(FpX_INVMONTGOMERY_LIMIT),t_NFpX,10,0, speed_FpX_inv,speed_FpX_invnewton,0.05},
 {0,  var(FpX_REM_MONTGOMERY_LIMIT),t_NFpX,10,0, speed_FpX_rem,speed_FpX_rem_mg,0.05},
 {0,  var(FpX_POW_MONTGOMERY_LIMIT),t_NFpX,10,0, speed_FpXQ_pow,speed_FpXQ_pow_mg},
+{0,  var(FpX_HALFGCD_LIMIT),      t_FpX,10,0, speed_FpX_halfgcd_basecase,speed_FpX_halfgcd},
+{0,  var(FpX_GCD_LIMIT),          t_FpX,10,0, speed_FpX_gcd_basecase,speed_FpX_gcd},
+{0,  var(FpX_EXTGCD_LIMIT),       t_FpX,10,0, speed_FpX_extgcd_basecase,speed_FpX_extgcd},
 {0,  var(RgX_MUL_LIMIT),          t_FpX, 4,0, speed_RgX_mul,speed_RgX_karamul},
 {0,  var(RgX_SQR_LIMIT),          t_FpX, 4,0, speed_RgX_sqr,speed_RgX_karasqr},
 };
