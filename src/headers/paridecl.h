@@ -217,6 +217,7 @@ GEN     FpX_div_by_X_x(GEN a, GEN x, GEN p, GEN *r);
 GEN     FpX_eval(GEN x,GEN y,GEN p);
 GEN     FpX_extgcd(GEN x, GEN y, GEN p, GEN *ptu, GEN *ptv);
 GEN     FpX_gcd(GEN x, GEN y, GEN p);
+GEN     FpX_halfgcd(GEN x, GEN y, GEN p);
 GEN     FpX_invMontgomery(GEN T, GEN p);
 int     FpX_is_squarefree(GEN f, GEN p);
 GEN     FpX_mul(GEN x, GEN y, GEN p);

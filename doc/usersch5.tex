@@ -3377,12 +3377,16 @@ in~\kbd{*r}. In particular, if \kbd{t} is irreducible, this returns the
 valuation at \kbd{t} of~\kbd{x}, and \kbd{*r} is the prime-to-\kbd{t} part
 of~\kbd{x}.
 
-\fun{GEN}{FpX_gcd}{GEN x, GEN y, GEN p} returns a (not necessarily monic)
-greatest common divisor of $x$  and $y$.
-
 \fun{GEN}{FpX_deriv}{GEN x, GEN p} returns the derivative of \kbd{x}.
 This function is not memory-clean, but nevertheless suitable for
 \kbd{gerepileupto}.
+
+\fun{GEN}{FpX_gcd}{GEN x, GEN y, GEN p} returns a (not necessarily monic)
+greatest common divisor of $x$  and $y$.
+
+\fun{GEN}{FpX_halfgcd}{GEN x, GEN y, GEN p} returns a two-by-two \kbd{FpXM} $M$ with determinant
+$\pm 1$ such that the image $(a,b)$ of $(x,y)$ by $M$ has the property that
+$\deg a \geq {\deg x \over 2} > \deg b$.
 
 \fun{GEN}{FpX_extgcd}{GEN x, GEN y, GEN p, GEN *u, GEN *v} returns
 $d = \text{GCD}(\kbd{x},\kbd{y})$ (not necessarily monic), and sets \kbd{*u},
