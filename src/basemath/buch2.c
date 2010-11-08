@@ -3188,7 +3188,7 @@ Buchall_param(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long
   long PRECREG, N, R1, R2, RU, LIMC, LIMC2, zc, i;
   long nreldep, sfb_trials, need, old_need = -1, precdouble = 0, precadd = 0;
   double lim, drc, LOGD, LOGD2;
-  GEN fu, zu, nf, D, A, W, R, Res, z, h, PERM;
+  GEN zu, nf, D, A, W, R, Res, z, h, PERM, fu = NULL /*-Wall*/;
   GEN res, L, resc, B, C, C0, lambda, dep, clg1, clg2, Vbase;
   const char *precpb = NULL;
   const long minsFB = 3, RELSUP = 5;
@@ -3417,8 +3417,7 @@ START:
       if (precadd <= 0) precadd = 1;
       precpb = "cleanarch";
     }
-  }
-  while (need || precpb);
+  } while (need || precpb);
 
   delete_cache(&cache); delete_FB(&F);
   Vbase = vecpermute(F.LP, F.perm);
