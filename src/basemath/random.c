@@ -177,6 +177,17 @@ randomr(long prec)
   avma = av; return x;
 }
 
+static GEN
+polrandom(GEN N) /* assume N!=0 */
+{
+  long i, d = lg(N);
+  GEN z = leading_term(N);
+  GEN y = cgetg(d,t_POL);
+  y[1] = evalsigne(1) | evalvarn(varn(N));
+  for (i=2; i<d; i++) gel(y,i) = genrand(z);
+  return normalizepol_lg(y,d);
+}
+
 GEN
 genrand(GEN N)
 {
@@ -195,6 +206,9 @@ genrand(GEN N)
       gel(z,2) = randomi(gel(N,1)); return z;
     case t_FFELT:
       return ffrandom(N);
+    case t_POL:
+      if (signe(N)==0) return pol_0(varn(N));
+      return polrandom(N);
     case t_VEC:
       return ellrandom(N);
     default:
