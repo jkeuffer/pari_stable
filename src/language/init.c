@@ -515,13 +515,13 @@ pari_init_defaults(void)
   if (!pari_datadir)
   {
 #ifdef _WIN32
-    if (pari_datadir[0]=='@' && pari_datadir[1]==0)
+    if (GPDATADIR[0]=='@' && GPDATADIR[1]==0)
       pari_datadir = win32_datadir();
     else
 #endif
       pari_datadir = pari_strdup(GPDATADIR);
   }
-  else               pari_datadir = pari_strdup(pari_datadir);
+  else pari_datadir= pari_strdup(pari_datadir);
   for (i=0; i<c_LAST; i++) gp_colors[i] = c_NONE;
   pari_colormap = NULL; pari_graphcolors = NULL;
   (void)sd_graphcolormap("[\"white\",\"black\",\"blue\",\"violetred\",\"red\",\"green\",\"grey\",\"gainsboro\"]", d_SILENT);
