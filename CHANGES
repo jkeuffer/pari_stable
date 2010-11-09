@@ -32,6 +32,7 @@ BA 2- Flx_shift now support negative shift
 BA 3- [gp2c] add description _(_) for closure evaluation
 BA 4- PARI function FpX_halfgcd() and subquadratic FpX_gcd(), FpX_extgcd()
 BA 5- random() now allow to draw random polynomials
+BA 6- [libpari] function pol_0, pol0_Flx, pol0_F2x
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.3 (released 08/10/2010):

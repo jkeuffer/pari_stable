@@ -142,26 +142,18 @@ FlxM_to_ZXM(GEN z)
 /**          Conversion to Flx                                        **/
 /**                                                                   **/
 /***********************************************************************/
-/* pol1_Flx=pol1_zx*/
-GEN
-pol1_Flx(long sv) { return mkvecsmall2(sv, 1); }
-
-/* polx_Flx=polx_zx*/
-GEN
-polx_Flx(long sv) { return mkvecsmall3(sv, 0, 1); }
-
 /* Take an integer and return a scalar polynomial mod p,  with evalvarn=vs */
 GEN
 Fl_to_Flx(ulong x, long sv)
 {
-  return x? mkvecsmall2(sv, x): zero_Flx(sv);
+  return x? mkvecsmall2(sv, x): pol0_Flx(sv);
 }
 
 GEN
 Z_to_Flx(GEN x, ulong p, long v)
 {
   long sv = evalvarn(v), u = umodiu(x,p);
-  return u? mkvecsmall2(sv, u): zero_Flx(sv);
+  return u? mkvecsmall2(sv, u): pol0_Flx(sv);
 }
 
 /* return x[0 .. dx] mod p as t_VECSMALL. Assume x a t_POL*/
@@ -337,7 +329,7 @@ Flx_Fl_mul(GEN y, ulong x, ulong p)
 {
   GEN z;
   long i, l;
-  if (!x) return zero_Flx(y[1]);
+  if (!x) return pol0_Flx(y[1]);
   z = cgetg_copy(y, &l); z[1] = y[1];
   if (HIGHWORD(x | p))
     for(i=2; i<l; i++) z[i] = Fl_mul(y[i], x, p);
@@ -365,7 +357,7 @@ Flx_shift(GEN a, long n)
   long i, l = lg(a);
   GEN  b;
   if (l==2 || !n) return vecsmall_copy(a);
-  if (l+n<=2) return zero_Flx(a[1]);
+  if (l+n<=2) return pol0_Flx(a[1]);
   b = cgetg(l+n, t_VECSMALL);
   b[1] = a[1];
   if (n < 0)
@@ -597,7 +589,7 @@ Flx_mulspec(GEN a, GEN b, ulong p, long na, long nb)
   while (na && !a[0]) { a++; na--; v++; }
   while (nb && !b[0]) { b++; nb--; v++; }
   if (na < nb) swapspec(a,b, na,nb);
-  if (!nb) return zero_Flx(0);
+  if (!nb) return pol0_Flx(0);
 
   av = avma;
   switch (maxlengthcoeffpol(p,nb))
@@ -669,7 +661,7 @@ Flx_sqrspec_basecase(GEN x, ulong p, long nx)
   ulong p1;
   GEN z;
 
-  if (!nx) return zero_Flx(0);
+  if (!nx) return pol0_Flx(0);
   lz = (nx << 1) + 1, nz = lz-2;
   z = cgetg(lz, t_VECSMALL) + 2;
   if (SMALL_ULONG(p))
@@ -741,7 +733,7 @@ Flx_sqrspec(GEN a, ulong p, long na)
   pari_sp av;
 
   while (na && !a[0]) { a++; na--; v += 2; }
-  if (!na) return zero_Flx(0);
+  if (!na) return pol0_Flx(0);
 
   av = avma;
   switch(maxlengthcoeffpol(p,na))
@@ -903,7 +895,7 @@ Flx_invMontgomery(GEN T, ulong p)
   pari_sp ltop=avma;
   long l=lg(T);
   GEN r;
-  if (l<5) return zero_Flx(T[1]);
+  if (l<5) return pol0_Flx(T[1]);
   if (l<=Flx_INVMONTGOMERY_LIMIT)
   {
     ulong c=T[l-1], ci=1;
@@ -960,7 +952,7 @@ Flx_rem_basecase(GEN x, GEN y, ulong p)
   ulong p1,inv;
   long vs=x[1];
 
-  dy = degpol(y); if (!dy) return zero_Flx(x[1]);
+  dy = degpol(y); if (!dy) return pol0_Flx(x[1]);
   dx = degpol(x);
   dz = dx-dy; if (dz < 0) return vecsmall_copy(x);
   x += 2; y += 2;
@@ -1047,7 +1039,7 @@ Flx_divrem(GEN x, GEN y, ulong p, GEN *pr)
   dy = degpol(y);
   if (!dy)
   {
-    if (pr && pr != ONLY_DIVIDES) *pr = zero_Flx(sv);
+    if (pr && pr != ONLY_DIVIDES) *pr = pol0_Flx(sv);
     if (y[2] == 1UL) return vecsmall_copy(x);
     return Flx_Fl_mul(x, Fl_inv(y[2], p), p);
   }
@@ -1055,7 +1047,7 @@ Flx_divrem(GEN x, GEN y, ulong p, GEN *pr)
   dz = dx-dy;
   if (dz < 0)
   {
-    q = zero_Flx(sv);
+    q = pol0_Flx(sv);
     if (pr && pr != ONLY_DIVIDES) *pr = vecsmall_copy(x);
     return q;
   }
@@ -1190,7 +1182,7 @@ Flx_deflate(GEN x0, long d)
   GEN z, y, x;
   long i,id, dy, dx = degpol(x0);
   if (d <= 1) return vecsmall_copy(x0);
-  if (dx < 0) return zero_Flx(x0[1]);
+  if (dx < 0) return pol0_Flx(x0[1]);
   dy = dx/d;
   y = cgetg(dy+3, t_VECSMALL); y[1] = x0[1];
   z = y + 2;
@@ -1251,7 +1243,7 @@ Flx_extgcd(GEN a, GEN b, ulong p, GEN *ptu, GEN *ptv)
 {
   GEN q,z,u,v, x = a, y = b;
 
-  u = zero_Flx(a[1]);
+  u = pol0_Flx(a[1]);
   v = pol1_Flx(a[1]); /* v = 1 */
   while (lgpol(y))
   {
@@ -1321,7 +1313,7 @@ Flx_extresultant(GEN a, GEN b, ulong p, GEN *ptU, GEN *ptV)
   /* dx <= dy */
   if (dx < 0) return 0;
 
-  u = zero_Flx(vs);
+  u = pol0_Flx(vs);
   v = pol1_Flx(vs); /* v = 1 */
   while (dy)
   { /* b u = x (a), b v = y (a) */
@@ -1718,7 +1710,7 @@ Flxq_sqrtn(GEN a, GEN n, GEN T, ulong p, GEN *zeta)
   {
     if (zeta)
       *zeta=pol1_Flx(T[1]);
-    return zero_Flx(T[1]);
+    return pol0_Flx(T[1]);
   }
   E.T=T; E.p=p;
   return gen_Shanks_sqrtn(a,n,addis(powuu(p,degpol(T)),-1),zeta,(void*)&E,&Flxq_star);
@@ -2127,7 +2119,7 @@ FlxX_shift(GEN a, long n)
   vs = mael(a,2,1);
   b = cgetg(l+n, t_POL);
   b[1] = a[1];
-  for (i=0; i<n; i++) gel(b,2+i) = zero_Flx(vs);
+  for (i=0; i<n; i++) gel(b,2+i) = pol0_Flx(vs);
   for (i=2; i<l; i++) b[i+n] = a[i];
   return b;
 }
@@ -2140,7 +2132,7 @@ FlxX_recipspec(GEN x, long l, long n, long vs)
   for(i=0; i<l; i++)
     gel(z,n-i-1) = vecsmall_copy(gel(x,i));
   for(   ; i<n; i++)
-    gel(z,n-i-1) = zero_Flx(vs);
+    gel(z,n-i-1) = pol0_Flx(vs);
   return FlxX_renormalize(z-2,n+2);
 }
 
@@ -2346,12 +2338,12 @@ FlxqX_invMontgomery_basecase(GEN T, GEN Q, ulong p)
   long i, l=lg(T)-1, k;
   long sv=Q[1];
   GEN r=cgetg(l,t_POL); r[1]=T[1];
-  gel(r,2) = zero_Flx(sv);
+  gel(r,2) = pol0_Flx(sv);
   gel(r,3) = pol1_Flx(sv);
   for (i=4;i<l;i++)
   {
     pari_sp ltop=avma;
-    GEN z = zero_Flx(sv);
+    GEN z = pol0_Flx(sv);
     for (k=3;k<i;k++)
       z = Flx_sub(z,Flxq_mul(gel(T,l-i+k),gel(r,k),Q,p),p);
     gel(r,i) = gerepileupto(ltop, z);
@@ -2433,7 +2425,7 @@ FlxqX_invMontgomery(GEN T, GEN Q, ulong p)
   long l=lg(T);
   GEN r;
   GEN c=gel(T,l-1), ci=NULL;
-  if (l<5) return zero_Flx(T[1]);
+  if (l<5) return pol0_Flx(T[1]);
   if (l<=FlxqX_INVMONTGOMERY_LIMIT)
   {
     if (!Flx_equal1(c))

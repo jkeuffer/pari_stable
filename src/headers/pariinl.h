@@ -206,11 +206,7 @@ zeromat(long m, long n)
 }
 /* = zero_zx, sv is a evalvarn()*/
 INLINE GEN
-zero_Flx(long sv)
-{
-  GEN x = cgetg(2, t_VECSMALL);
-  x[1] = sv; return x;
-}
+zero_Flx(long sv) { return pol0_Flx(sv); }
 INLINE GEN
 zero_Flv(long n)
 {
@@ -1436,6 +1432,12 @@ FpV_FpC_mul(GEN x, GEN y, GEN p) { return FpV_dotproduct(x,y,p); }
 INLINE GEN
 F2x_div(GEN x, GEN y) { return F2x_divrem(x,y, NULL); }
 INLINE GEN
+pol0_Flx(long sv) { return mkvecsmall(sv); }
+INLINE GEN
+pol1_Flx(long sv) { return mkvecsmall2(sv, 1); }
+INLINE GEN
+polx_Flx(long sv) { return mkvecsmall3(sv, 0, 1); }
+INLINE GEN
 zero_zx(long sv) { return zero_Flx(sv); }
 INLINE GEN
 polx_zx(long sv) { return polx_Flx(sv); }
@@ -1446,7 +1448,11 @@ zx_renormalize(GEN x, long l) { return Flx_renormalize(x,l); }
 INLINE GEN
 zero_F2x(long sv) { return zero_Flx(sv); }
 INLINE GEN
+pol0_F2x(long sv) { return pol0_Flx(sv); }
+INLINE GEN
 pol1_F2x(long sv) { return pol1_Flx(sv); }
+INLINE GEN
+polx_F2x(long sv) { return mkvecsmall2(sv, 2); }
 INLINE int
 F2x_equal1(GEN x) { return Flx_equal1(x); }
 INLINE GEN

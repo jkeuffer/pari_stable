@@ -33,11 +33,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
    where the a_i are bits.
 
    signe(x) is not valid. Use degpol(x)>=0 instead.
-   Note: F2x(0)=Flx(0 mod 2) ans F2x(1)=Flx(1 mod 2)
+   Note: pol0_F2x=pol0_Flx and pol1_F2x=pol1_Flx
 */
-
-GEN
-polx_F2x(long sv) { return mkvecsmall2(sv, 2); }
 
 INLINE long
 F2x_degree_lg(GEN x, long l)
@@ -278,7 +275,7 @@ F2x_mulspec(GEN a, GEN b, long na, long nb)
   while (na && !a[0]) { a++; na-=1; v++; }
   while (nb && !b[0]) { b++; nb-=1; v++; }
   if (na < nb) swapspec(a,b, na,nb);
-  if (!nb) return zero_Flx(0);
+  if (!nb) return pol0_F2x(0);
 
   av = avma;
   if (na <=1) return F2x_shiftip(av,F2x_mul1(*a,*b),v);
@@ -372,7 +369,7 @@ F2x_rem(GEN x, GEN y)
 {
   long dx,dy;
   long lx=lg(x);
-  dy = F2x_degree(y); if (!dy) return zero_Flx(x[1]);
+  dy = F2x_degree(y); if (!dy) return pol0_F2x(x[1]);
   dx = F2x_degree_lg(x,lx);
   x  = vecsmall_copy(x);
   while (dx>=dy)
@@ -395,7 +392,7 @@ F2x_divrem(GEN x, GEN y, GEN *pr)
   if (!dy)
   {
     z = vecsmall_copy(x);
-    if (pr && pr != ONLY_DIVIDES) *pr = zero_Flx(vs);
+    if (pr && pr != ONLY_DIVIDES) *pr = pol0_F2x(vs);
     return z;
   }
   dx = F2x_degree_lg(x,lx);
@@ -403,7 +400,7 @@ F2x_divrem(GEN x, GEN y, GEN *pr)
   if (dz < 0)
   {
     if (pr == ONLY_DIVIDES) return dx < 0? vecsmall_copy(x): NULL;
-    z = zero_Flx(vs);
+    z = pol0_F2x(vs);
     if (pr) *pr = vecsmall_copy(x);
     return z;
   }
@@ -445,7 +442,7 @@ F2x_extgcd(GEN a, GEN b, GEN *ptu, GEN *ptv)
 {
   GEN q,z,u,v, x = a, y = b;
 
-  u = zero_Flx(a[1]);
+  u = pol0_F2x(a[1]);
   v = pol1_F2x(a[1]); /* v = 1 */
   while (lgpol(y))
   {
@@ -624,7 +621,7 @@ F2xq_sqrtn(GEN a, GEN n, GEN T, GEN *zeta)
   {
     if (zeta)
       *zeta=pol1_F2x(T[1]);
-    return zero_Flx(T[1]);
+    return pol0_F2x(T[1]);
   }
   return gen_Shanks_sqrtn(a,n,addis(powuu(2,F2x_degree(T)),-1),zeta,(void*)T,&F2xq_star);
 }

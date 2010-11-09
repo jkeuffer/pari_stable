@@ -78,7 +78,6 @@ GEN     ZM_to_F2m(GEN x);
 GEN     ZV_to_F2v(GEN x);
 GEN     ZX_to_F2x(GEN x);
 GEN     gener_F2xq(GEN T, GEN *po);
-GEN     polx_F2x(long sv);
 GEN     random_F2x(long d, long vs);
 
 /* Flx.c */
@@ -179,9 +178,7 @@ GEN     ZXV_to_FlxV(GEN v, ulong p);
 GEN     ZXX_to_FlxX(GEN B, ulong p, long v);
 GEN     ZXXV_to_FlxXV(GEN V, ulong p, long v);
 GEN     gener_Flxq(GEN T, ulong p, GEN *o);
-GEN     pol1_Flx(long sv);
 GEN     pol1_FlxX(long v, long sv);
-GEN     polx_Flx(long sv);
 GEN     random_Flx(long d1, long v, ulong p);
 
 /* FpE.c */
@@ -3080,10 +3077,15 @@ INLINE void*  pari_realloc(void *pointer,size_t size);
 INLINE GEN    perm_conj(GEN s, GEN t);
 INLINE GEN    perm_inv(GEN x);
 INLINE GEN    perm_mul(GEN s, GEN t);
-INLINE GEN    pol1_F2x(long sv);
 INLINE GEN    pol_0(long v);
 INLINE GEN    pol_1(long v);
 INLINE GEN    pol_x(long v);
+INLINE GEN    pol0_F2x(long sv);
+INLINE GEN    pol1_F2x(long sv);
+INLINE GEN    polx_F2x(long sv);
+INLINE GEN    pol0_Flx(long sv);
+INLINE GEN    pol1_Flx(long sv);
+INLINE GEN    polx_Flx(long sv);
 INLINE GEN    polx_zx(long sv);
 INLINE GEN    powii(GEN x, GEN n);
 INLINE GEN    powIs(long n);
