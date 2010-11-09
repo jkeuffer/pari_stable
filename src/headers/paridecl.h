@@ -104,6 +104,7 @@ ulong   Flx_eval(GEN x, ulong y, ulong p);
 GEN     Flx_extgcd(GEN a, GEN b, ulong p, GEN *ptu, GEN *ptv);
 ulong   Flx_extresultant(GEN a, GEN b, ulong p, GEN *ptU, GEN *ptV);
 GEN     Flx_gcd(GEN a, GEN b, ulong p);
+GEN     Flx_halfgcd(GEN a, GEN b, ulong p);
 GEN     Flx_inflate(GEN x0, long d);
 GEN     Flx_invMontgomery(GEN T, ulong p);
 int     Flx_is_squarefree(GEN z, ulong p);

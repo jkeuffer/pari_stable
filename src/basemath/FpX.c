@@ -481,14 +481,21 @@ FpX_halfgcd_i(GEN x, GEN y, GEN p)
 GEN
 FpX_halfgcd(GEN x, GEN y, GEN p)
 {
-  pari_sp av;
+  pari_sp av = avma;
   GEN M,q,r;
-  if (degpol(y)<degpol(x)) return FpX_halfgcd_i(x,y,p);
-  av = avma;
-  q = FpX_divrem(y,x,p,&r);
-  M = FpX_halfgcd_i(x,r,p);
-  gcoeff(M,1,1) = FpX_sub(gcoeff(M,1,1), FpX_mul(q, gcoeff(M,1,2), p), p);
-  gcoeff(M,2,1) = FpX_sub(gcoeff(M,2,1), FpX_mul(q, gcoeff(M,2,2), p), p);
+  if (lgefint(p)==3)
+  {
+    ulong pp=p[2];
+    M = FlxM_to_ZXM(Flx_halfgcd(ZX_to_Flx(x, pp),ZX_to_Flx(y, pp), pp));
+  }
+  else
+  {
+    if (degpol(y)<degpol(x)) return FpX_halfgcd_i(x,y,p);
+    q = FpX_divrem(y,x,p,&r);
+    M = FpX_halfgcd_i(x,r,p);
+    gcoeff(M,1,1) = FpX_sub(gcoeff(M,1,1), FpX_mul(q, gcoeff(M,1,2), p), p);
+    gcoeff(M,2,1) = FpX_sub(gcoeff(M,2,1), FpX_mul(q, gcoeff(M,2,2), p), p);
+  }
   return gerepilecopy(av, M);
 }
 

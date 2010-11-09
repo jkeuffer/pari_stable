@@ -18,6 +18,9 @@
 #define __Flx_INVMONTGOMERY_LIMIT  400
 #define __Flx_REM_MONTGOMERY_LIMIT 66
 #define __Flx_POW_MONTGOMERY_LIMIT 100
+#define __Flx_HALFGCD_LIMIT     52
+#define __Flx_GCD_LIMIT         321
+#define __Flx_EXTGCD_LIMIT      96
 #define __FpX_INVMONTGOMERY_LIMIT  100
 #define __FpX_REM_MONTGOMERY_LIMIT 200
 #define __FpX_POW_MONTGOMERY_LIMIT 150

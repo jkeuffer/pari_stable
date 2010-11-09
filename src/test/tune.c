@@ -269,6 +269,19 @@ static double speed_Flxq_pow_mg(speed_param *s) {
   enable(s);  TIME_FUN( Flxq_pow(x, utoipos(p), s->x, p) );
 }
 
+static double speed_Flx_halfgcd_basecase(speed_param *s)
+{ ulong p = DFLT_mod; disable(s); TIME_FUN(Flx_halfgcd(s->x, s->y, p)); }
+static double speed_Flx_halfgcd(speed_param *s)
+{ ulong p = DFLT_mod; enable(s); TIME_FUN(Flx_halfgcd(s->x, s->y, p)); }
+static double speed_Flx_gcd_basecase(speed_param *s)
+{ ulong p = DFLT_mod; disable(s); TIME_FUN(Flx_gcd(s->x, s->y, p)); }
+static double speed_Flx_gcd(speed_param *s)
+{ ulong p = DFLT_mod; enable(s); TIME_FUN(Flx_gcd(s->x, s->y, p)); }
+static double speed_Flx_extgcd_basecase(speed_param *s)
+{ GEN u,v; ulong p = DFLT_mod; disable(s); TIME_FUN(Flx_extgcd(s->x, s->y, p, &u, &v)); }
+static double speed_Flx_extgcd(speed_param *s)
+{ GEN u,v; ulong p = DFLT_mod; enable(s); TIME_FUN(Flx_extgcd(s->x, s->y, p, &u, &v)); }
+
 static double speed_FpX_inv(speed_param *s)
 { GEN p = LARGE_mod; disable(s); TIME_FUN(FpX_invMontgomery(s->x, p)); }
 static double speed_FpX_invnewton(speed_param *s)
@@ -346,6 +359,9 @@ static tune_param param[] = {
 {0,   var(Flx_INVMONTGOMERY_LIMIT),t_NFlx,10,0, speed_Flx_inv,speed_Flx_invnewton,0.1},
 {0,  var(Flx_REM_MONTGOMERY_LIMIT),t_NFlx,10,0, speed_Flx_rem,speed_Flx_rem_mg,0.1},
 {0,  var(Flx_POW_MONTGOMERY_LIMIT),t_NFlx,10,0, speed_Flxq_pow,speed_Flxq_pow_mg},
+{0,  var(Flx_HALFGCD_LIMIT),      t_Flx,10,0, speed_Flx_halfgcd_basecase,speed_Flx_halfgcd},
+{0,  var(Flx_GCD_LIMIT),          t_Flx,10,0, speed_Flx_gcd_basecase,speed_Flx_gcd},
+{0,  var(Flx_EXTGCD_LIMIT),       t_Flx,10,0, speed_Flx_extgcd_basecase,speed_Flx_extgcd},
 {0,  var(FpX_INVMONTGOMERY_LIMIT),t_NFpX,10,0, speed_FpX_inv,speed_FpX_invnewton,0.05},
 {0,  var(FpX_REM_MONTGOMERY_LIMIT),t_NFpX,10,0, speed_FpX_rem,speed_FpX_rem_mg,0.05},
 {0,  var(FpX_POW_MONTGOMERY_LIMIT),t_NFpX,10,0, speed_FpXQ_pow,speed_FpXQ_pow_mg},

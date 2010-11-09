@@ -3950,6 +3950,10 @@ assuming the result is monic of the same degree as $y$ (in particular $x\neq
 \fun{GEN}{Flx_gcd}{GEN a, GEN b, ulong p} returns a (not necessarily monic)
 greatest common divisor of $x$  and $y$.
 
+\fun{GEN}{Flx_halfgcd}{GEN x, GEN y, GEN p} returns a two-by-two \kbd{FlxM} $M$ with determinant
+$\pm 1$ such that the image $(a,b)$ of $(x,y)$ by $M$ has the property that
+$\deg a \geq {\deg x \over 2} > \deg b$.
+
 \fun{GEN}{Flx_extgcd}{GEN a, GEN b, ulong p, GEN *ptu, GEN *ptv}
 
 \fun{GEN}{Flx_pow}{GEN x, long n, ulong p}
