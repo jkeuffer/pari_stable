@@ -571,7 +571,7 @@ FpX_extgcd_basecase(GEN a, GEN b, GEN p, GEN *ptu, GEN *ptv)
     u=r; d=d1; d1=u;
     if (low_stack(lim,stack_lim(av,2)))
     {
-      if (DEBUGMEM>1) pari_warn(warnmem,"FpX_halfgcd (d = %ld)",degpol(b));
+      if (DEBUGMEM>1) pari_warn(warnmem,"FpX_extgcd (d = %ld)",degpol(d));
       gerepileall(av,5, &d,&d1,&u,&v,&v1);
     }
   }
