@@ -17,7 +17,7 @@ darwin) MODLD=$CC;
 *)      MODLD="$DLLD";
         MODLDFLAGS=`echo "$DLLDFLAGS" | \
    sed -e 's/,*-[^ \t-]*[ \t,=]*\\$(LIBPARI_SONAME)//' \
-       -e 's/--out-implib=\$(LIBPARI_SO)\$(_A),\?//'`;;
+       -e 's/,--out-implib=\$(LIBPARI_SO)\$(_A)//'`;;
 esac;
 
 modules_build=`echo "$CC -c -o %s.o $CFLAGS $DLCFLAGS -I\"$includedir\" %s.c \
