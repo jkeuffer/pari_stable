@@ -502,7 +502,7 @@ FpX_halfgcd(GEN x, GEN y, GEN p)
 static GEN
 FpX_gcd_basecase(GEN a, GEN b, GEN p)
 {
-  pari_sp av, av0=avma, lim = stack_lim(av0,2);
+  pari_sp av = avma, av0=avma, lim = stack_lim(av0,2);
   while (signe(b))
   {
     GEN c;
