@@ -31,7 +31,10 @@ echo $n ..."executables (gp, gphelp) ? $c"
 dflt=${dfltbindir:-$prefix/bin}; . ./myread; bindir=$ans
 
 echo $n ..."libraries (libpari) ? $c"
-dflt=${dfltlibdir:-$prefix/lib}; . ./myread; libdir=$ans
+case $osname in
+mingw) dflt=${dfltlibdir:-$prefix/bin};;
+*) dflt=${dfltlibdir:-$prefix/lib};;
+esac; . ./myread; libdir=$ans
 
 echo $n ..."include files ? $c"
 dflt=${dlftincludedir:-$prefix/include}; . ./myread; includedir=$ans
