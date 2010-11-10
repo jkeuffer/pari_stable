@@ -853,7 +853,7 @@ Buchquad(GEN D, double cbach, double cbach2, long prec)
   const long RELSUP = 5;
   long i, s, current, triv, nrelsup, nreldep, need, nsubFB;
   ulong LIMC, LIMC2, cp;
-  GEN h, W, cyc, res, gen, dep, mat, C, extraC, B, R, resc, Res, z;
+  GEN W, cyc, res, gen, dep, mat, C, extraC, B, R, resc, Res, z, h = NULL; /*-Wall*/
   double drc, lim, LOGD, LOGD2;
   GRHcheck_t G, *GRHcheck = &G;
   struct qfr_data QFR;
