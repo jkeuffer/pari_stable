@@ -165,7 +165,7 @@ zeropadic(GEN p, long e)
   GEN y = cgetg(5,t_PADIC);
   gel(y,4) = gen_0;
   gel(y,3) = gen_1;
-  copyifstack(p,gel(y,2));
+  gel(y,2) = icopy(p);
   y[1] = evalvalp(e) | evalprecp(0);
   return y;
 }
