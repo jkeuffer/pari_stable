@@ -20,7 +20,8 @@ BA  2- 'make all' failed to build the documentation.
    12- (t_QUAD of t_INTMOD) + t_PADIC -> SEGV [#1122]
 LGr13- bnfinit: various performance improvement.
 BA 14- several instance of random garbage collection were broken.
-BA 15- [install]: better support for default value in prototype code.
+BA 15- [install]: support for Dexpr,G, and D"str",s, in prototype code.
+BA 16- [gp2c]: foo(x:mp)=... did not work.
 
   Changed
 LGr1- universal constants (gen_0,gen_1, etc.) are now read-only

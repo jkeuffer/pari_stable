@@ -4,7 +4,7 @@ Help: Code to check types. If not void, will be used as if(...).
 Description:
  (int):bool:parens              typ($1) != t_INT
  (real):bool:parens             typ($1) != t_REAL
- (mp):negbool                   is_intreal($1)
+ (mp):negbool                   is_intreal_t(typ($1))
  (vec):negbool                  is_matvec_t(typ($1))
  (vecsmall):bool:parens         typ($1) != t_VECSMALL
  (pol):bool:parens              typ($1) != t_POL
