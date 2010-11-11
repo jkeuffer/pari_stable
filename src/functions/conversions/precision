@@ -4,6 +4,16 @@ C-Name: precision0
 Prototype: GD0,L,
 Help: precision(x,{n}): change the precision of x to be n. If n is omitted,
  output real precision of object x.
+Description:
+ (real):small          prec2ndec(gprecision($1))
+ (gen):int             precision0($1, 0)
+ (real,0):small        prec2ndec(gprecision($1))
+ (gen,0):int           precision0($1, 0)
+ (real,#small):real    rtor($1, ndec2prec($2))
+ (gen,#small):gen      gprec($1, $2)
+ (real,small):real     precision0($1, $2)
+ (gen,small):gen       precision0($1, $2)
+
 Doc: gives the precision in decimal digits of the PARI object $x$. If $x$ is
  an exact object, the largest single precision integer is returned.
  \bprog
