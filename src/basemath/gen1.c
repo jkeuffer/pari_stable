@@ -202,6 +202,21 @@ div_intmod_same(GEN z, GEN X, GEN x, GEN y)
 /*                                                                 */
 /* (static routines are not memory clean, but OK for gerepileupto) */
 /*******************************************************************/
+/* Compute the denominator of (1/y) * (n/d) = n/yd, y a "scalar".
+ * Sanity check : avoid (1/2) / (Mod(1,2)*x + 1) "=" 1 / (0 * x + 1) */
+static GEN 
+rfrac_denom_mul_scal(GEN d, GEN y)
+{
+  GEN D = RgX_Rg_mul(d, y);
+  if (lg(D) != lg(d))
+  { /* try to generate a meaningful diagnostic */
+    D = gdiv(leading_term(d), y); /* should fail */
+    /* better than nothing */
+    pari_err(talker,"%Ps is not invertible in gred_rfrac()", y);
+  }
+  return D;
+}
+
 /* d a t_POL, n a coprime t_POL of same var or "scalar". Not memory clean */
 GEN
 gred_rfrac_simple(GEN n, GEN d)
@@ -263,14 +278,7 @@ gred_rfrac_simple(GEN n, GEN d)
   }
   z = cgetg(3,t_RFRAC);
   gel(z,1) = gmul(n, cn);
-  gel(z,2) = RgX_Rg_mul(d, cd);
-  /* Sanity check: (1/2) / (Mod(1,2)*x + 1) "=" 1 / (0 * x + 1) */
-  if (degpol(gel(z,2)) != dd)
-  { /* should fail : try to generate a meaningful diagnostic */
-    z = gdiv(leading_term(d), cd);
-    /* better than nothing */
-    pari_err(talker,"%Ps is not invertible in gred_rfrac()", cd);
-  }
+  gel(z,2) = rfrac_denom_mul_scal(d, cd);
   return z;
 }
 
@@ -2165,7 +2173,8 @@ static GEN
 div_rfrac_scal(GEN x, GEN y)
 {
   pari_sp av = avma;
-  return gerepileupto(av, gred_rfrac_simple(gel(x,1),gmul(y, gel(x,2))));
+  GEN d = rfrac_denom_mul_scal(gel(x,2), y);
+  return gerepileupto(av, gred_rfrac_simple(gel(x,1), d));
 }
 static GEN
 div_scal_rfrac(GEN x, GEN y)
