@@ -263,7 +263,11 @@ gred_rfrac_simple(GEN n, GEN d)
   }
   z = cgetg(3,t_RFRAC);
   gel(z,1) = gmul(n, cn);
-  gel(z,2) = RgX_Rg_mul(d, cd); return z;
+  gel(z,2) = RgX_Rg_mul(d, cd);
+  /* Sanity check: (1/2) / (Mod(1,2)*x + 1) ==> 1 / (0 * x + 1) */
+  if (degpol(gel(z,2)) != dd)
+    pari_err(talker,"%Ps is not invertible in gred_rfrac()", cd);
+  return z;
 }
 
 /* in rare cases x may be a t_POL, after 0/x for instance -> pol_0() */
