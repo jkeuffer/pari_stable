@@ -22,6 +22,9 @@ LGr13- bnfinit: various performance improvement.
 BA 14- several instance of random garbage collection were broken.
 BA 15- [install]: support for Dexpr,G, and D"str",s, in prototype code.
 BA 16- [gp2c]: foo(x:mp)=... did not work.
+   17- when the divisor's leading term was 0, RgX_divrem(,,&rem) created rem
+       before the quotient (invalidating the use of cgiv() suggested in the
+       documentation) [#1129]
 
   Changed
 LGr1- universal constants (gen_0,gen_1, etc.) are now read-only

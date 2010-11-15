@@ -1108,23 +1108,20 @@ RgX_divrem(GEN x, GEN y, GEN *pr)
   }
   if (!dy) /* y is constant */
   {
-    if (pr && pr != ONLY_DIVIDES)
-    {
-      if (pr == ONLY_REM) return pol_0(varn(x));
-      *pr = pol_0(varn(x));
-    }
-    return RgX_Rg_div(x, y_lead);
+    if (pr == ONLY_REM) return pol_0(varn(x));
+    z = RgX_Rg_div(x, y_lead);
+    if (pr == ONLY_DIVIDES) return z;
+    if (pr) *pr = pol_0(varn(x));
+    return z;
   }
   dx = degpol(x);
   if (dx < dy)
   {
-    if (pr)
-    {
-      if (pr == ONLY_DIVIDES) return signe(x)? NULL: pol_0(varn(x));
-      if (pr == ONLY_REM) return gcopy(x);
-      *pr = gcopy(x);
-    }
-    return pol_0(varn(x));
+    if (pr == ONLY_REM) return gcopy(x);
+    if (pr == ONLY_DIVIDES) return signe(x)? NULL: pol_0(varn(x));
+    z = pol_0(varn(x));
+    if (pr) *pr = gcopy(x);
+    return z;
   }
 
   /* x,y in R[X], y non constant */
@@ -1152,22 +1149,45 @@ RgX_divrem(GEN x, GEN y, GEN *pr)
     }
     if (dx < dy) /* leading coeff of x was in fact zero */
     {
-      if (pr)
+      if (pr == ONLY_DIVIDES) return (dx < 0)? pol_0(varn(x)) : NULL;
+      if (pr == ONLY_REM)
       {
-        if (pr == ONLY_DIVIDES) return (dx < 0)? pol_0(varn(x)) : NULL;
         if (dx < 0)
-          x = gerepilecopy(av, scalarpol(p2, varn(x)));
+          return gerepilecopy(av, scalarpol(p2, varn(x)));
         else
         {
-          z = cgetg(dx + 3, t_POL);
-          z[1] = x[1];
-          for (i = 2; i < dx + 3; i++) gel(z,i) = gel(x,i);
-          x = gerepilecopy(av, z);
+          GEN t;
+          avma = av;
+          t = cgetg(dx + 3, t_POL); t[1] = x[1];
+          for (i = 2; i < dx + 3; i++) gel(t,i) = gcopy(gel(x,i));
+          return t;
         }
-        if (pr == ONLY_REM) return x;
+      }
+      if (pr) /* cf ONLY_REM above */
+      {
+        if (dx < 0) 
+        {
+          z = pol_0(varn(x));
+          x = scalarpol(p2, varn(x));
+          gerepileall(av, 2, &z, &x);
+        }
+        else
+        {
+          GEN t;
+          avma = av;
+          z = pol_0(varn(x));
+          t = cgetg(dx + 3, t_POL); t[1] = x[1];
+          for (i = 2; i < dx + 3; i++) gel(t,i) = gcopy(gel(x,i));
+          x = t;
+        }
         *pr = x;
       }
-      return pol_0(varn(x));
+      else 
+      {
+        avma = av;
+        z = pol_0(varn(x));
+      }
+      return z;
     }
   }
   /* dx >= dy */
