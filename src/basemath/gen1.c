@@ -204,7 +204,7 @@ div_intmod_same(GEN z, GEN X, GEN x, GEN y)
 /*******************************************************************/
 /* Compute the denominator of (1/y) * (n/d) = n/yd, y a "scalar".
  * Sanity check : avoid (1/2) / (Mod(1,2)*x + 1) "=" 1 / (0 * x + 1) */
-static GEN 
+static GEN
 rfrac_denom_mul_scal(GEN d, GEN y)
 {
   GEN D = RgX_Rg_mul(d, y);

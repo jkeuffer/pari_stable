@@ -1165,7 +1165,7 @@ RgX_divrem(GEN x, GEN y, GEN *pr)
       }
       if (pr) /* cf ONLY_REM above */
       {
-        if (dx < 0) 
+        if (dx < 0)
         {
           z = pol_0(varn(x));
           x = scalarpol(p2, varn(x));
@@ -1182,7 +1182,7 @@ RgX_divrem(GEN x, GEN y, GEN *pr)
         }
         *pr = x;
       }
-      else 
+      else
       {
         avma = av;
         z = pol_0(varn(x));
