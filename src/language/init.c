@@ -1536,7 +1536,7 @@ dec_gerepile(pari_sp *x, pari_sp av0, pari_sp av, pari_sp tetpil, size_t dec)
   if (*x < av && *x >= av0)
   { /* update address if in stack */
     if (*x < tetpil) *x += dec;
-    else pari_err(talker, "significant pointers lost in gerepile! (please report)");
+    else pari_err(bugparier, "gerepile, significant pointers lost");
   }
 }
 
