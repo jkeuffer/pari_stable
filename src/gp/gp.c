@@ -1939,8 +1939,8 @@ main(int argc, char **argv)
   pari_init_defaults();
   stack_init(&s_A,sizeof(*A),(void**)&A);
   stack_init(&s_bufstack, sizeof(Buffer*), (void**)&bufstack);
-  pari_init_opts(1000000 * sizeof(long), 500000, INIT_SIGm);
   cb_pari_err_recover = gp_err_recover;
+  pari_init_opts(1000000 * sizeof(long), 500000, INIT_SIGm);
   read_opt(&s_A, argc,argv);
 #ifdef SIGALRM
   (void)os_signal(SIGALRM,gp_alarm_handler);
