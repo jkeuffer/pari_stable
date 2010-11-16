@@ -20,3 +20,9 @@ Function: _const_real
 Class: gp2c_internal
 Description:
  (str):real:prec       strtor($1, prec)
+
+Function: _const_gpfunc
+Class: gp2c_internal
+Description:
+ (str):gpfunc       $1
+

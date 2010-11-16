@@ -35,6 +35,8 @@ Description:
  (var)          long
  (pol)          GEN
  (gen)          GEN
+ (closure)      GEN
+ (gpfunc)       char*
  (genstr)       GEN
  (str)          char*
  (bptr)         byteptr

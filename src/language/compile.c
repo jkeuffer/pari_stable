@@ -1491,6 +1491,21 @@ snm_closure(entree *ep, GEN data)
   return C;
 }
 
+GEN
+strtoclosure(const char *s)
+{
+  pari_sp av = avma;
+  entree *ep = is_entry(s);
+  GEN C;
+  if (!ep) pari_err(talker,"no function named \"%s\"",s);
+  ep = do_alias(ep);
+  if ((!EpSTATIC(ep) && EpVALENCE(ep)!=EpINSTALL) || !ep->value)
+    pari_err(talker,"not a function: \"%s\"",s);
+  C = genclosure(ep,ep->name,NULL,0);
+  if (!C) pari_err(talker,"function prototype unsupported: \"%s\"",s);
+  return gerepilecopy(av, C);
+}
+
 static void
 closurefunc(entree *ep, long n, long mode)
 {

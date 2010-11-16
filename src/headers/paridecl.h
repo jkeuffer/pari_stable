@@ -1266,10 +1266,11 @@ long    nf_hyperell_locally_soluble(GEN nf,GEN pol,GEN p);
 
 /* compile.c */
 
-GEN  closure_deriv(GEN G);
-long localvars_find(GEN pack, entree *ep);
-GEN  localvars_read_str(const char *str, GEN pack);
-GEN  snm_closure(entree *ep, GEN data);
+GEN     closure_deriv(GEN G);
+long    localvars_find(GEN pack, entree *ep);
+GEN     localvars_read_str(const char *str, GEN pack);
+GEN     snm_closure(entree *ep, GEN data);
+GEN     strtoclosure(const char *s);
 
 /* concat.c */
 
