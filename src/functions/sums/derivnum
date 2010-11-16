@@ -20,10 +20,10 @@ Doc: numerical derivation of \var{expr} with respect to $X$ at $X=a$.
 
  \synt{derivnum}{void *E, GEN (*eval)(GEN,void*), GEN a, long prec}.
 
-Function: _derivnum
+Function: _derivfun
 Section: programming/internals
-C-Name: derivnum1
+C-Name: derivfun0
 Prototype: GGp
-Help: _derivnum(closure,[args]) numerical derivation of closure with respect to
+Help: _derivfun(closure,[args]) numerical derivation of closure with respect to
  the first variable at (args).
 

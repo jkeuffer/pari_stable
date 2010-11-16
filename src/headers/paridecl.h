@@ -2429,6 +2429,7 @@ GEN     bnrstark(GEN bnr, GEN subgroup, long prec);
 /* sumiter.c */
 
 GEN     derivnum(void *E, GEN (*eval)(GEN,void*), GEN x, long prec);
+GEN     derivfun(void *E, GEN (*eval)(GEN,void*), GEN x, long prec);
 GEN     direuler(void *E, GEN (*eval)(GEN,void*), GEN ga, GEN gb, GEN c);
 GEN     forvec_start(GEN x, long flag, GEN *d, GEN (**next)(GEN,GEN));
 GEN     polzag(long n, long m);

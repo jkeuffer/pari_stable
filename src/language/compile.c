@@ -1749,7 +1749,7 @@ closure_deriv(GEN G)
   }
   op_push_loc(OCpop,1,code);
   op_push_loc(OCprecreal,0,code);
-  op_push_loc(OCcallgen,(long)is_entry("_derivnum"),code);
+  op_push_loc(OCcallgen,(long)is_entry("_derivfun"),code);
   return gerepilecopy(ltop, getfunction(&pos,arity,0,text));
 }
 

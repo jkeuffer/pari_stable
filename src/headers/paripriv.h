@@ -73,7 +73,7 @@ GEN  gsub1e(GEN *x);
 GEN  gshift_right(GEN x, long n);
 
 GEN  derivnum0(GEN a, GEN code, long prec);
-GEN  derivnum1(GEN code, GEN args, long prec);
+GEN  derivfun0(GEN code, GEN args, long prec);
 GEN  direuler0(GEN a, GEN b, GEN code, GEN c);
 GEN  divsum(GEN num, GEN code);
 void fordiv(GEN a, GEN code);

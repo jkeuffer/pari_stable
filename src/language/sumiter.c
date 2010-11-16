@@ -1191,7 +1191,6 @@ derivnum(void *E, GEN (*eval)(GEN,void*), GEN x, long prec)
   GEN eps,a,b, y;
   long fpr, pr, l, e, ex;
   pari_sp av = avma;
-  if (!is_const_t(typ(x))) pari_err(impl, "formal derivation");
   fpr = precision(x)-2; /* required final prec (in sig. words) */
   if (fpr == -2) fpr = prec-2;
   ex = gexpo(x);
@@ -1208,9 +1207,28 @@ derivnum(void *E, GEN (*eval)(GEN,void*), GEN x, long prec)
 }
 
 GEN
+derivfun(void *E, GEN (*eval)(GEN,void*), GEN x, long prec)
+{
+  pari_sp av = avma;
+  long vx;
+  switch(typ(x))
+  {
+  case t_REAL: case t_INT: case t_FRAC: case t_COMPLEX:
+    return derivnum(E,eval, x, prec);
+  case t_POL:
+    x = RgX_to_ser(x, precdl+2+1); /* +1 because deriv reduce the precision by 1 */
+  case t_SER: /* FALL THROUGH */
+    vx = varn(x);
+    return gerepileupto(av, gdiv(deriv(eval(x, E),vx), deriv(x,vx)));
+  default: pari_err(typeer, "formal derivation");
+    return NULL; /*NOT REACHED*/
+  }
+}
+
+GEN
 derivnum0(GEN a, GEN code, long prec)
 {
-  EXPR_WRAP(code, derivnum (EXPR_ARG,a,prec));
+  EXPR_WRAP(code, derivfun (EXPR_ARG,a,prec));
 }
 
 struct deriv_data
@@ -1227,9 +1245,9 @@ static GEN deriv_eval(GEN x, void *E)
 }
 
 GEN
-derivnum1(GEN code, GEN args, long prec)
+derivfun0(GEN code, GEN args, long prec)
 {
   struct deriv_data E;
   E.code=code; E.args=args;
-  return derivnum((void*)&E, deriv_eval, gel(args,1), prec);
+  return derivfun((void*)&E, deriv_eval, gel(args,1), prec);
 }
