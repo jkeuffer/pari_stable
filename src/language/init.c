@@ -1615,7 +1615,7 @@ dbg_gerepile(pari_sp av)
     pari_printf(" [%ld] %Ps:", x - (GEN)avma, x);
     if (! is_recursive_t(tx)) { pari_putc('\n'); x += lx; continue; }
     a = (GEN*)x + lontyp[tx]; x += lx;
-    for (  ; a < (GEN*)x; a++) 
+    for (  ; a < (GEN*)x; a++)
     {
       if (*a == gen_0)
         pari_puts("  gen_0");
