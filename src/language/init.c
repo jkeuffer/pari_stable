@@ -1907,6 +1907,7 @@ pari_version(void) {
  *     The user-given args are read first, then completed by the defaults
  *
  * Return type (first char or immediately after 'x'): GEN by default, otherwise
+ *  m Return GEN but is can point to the input (member function).
  *  l Return long
  *  i Return int
  *  v Return void
