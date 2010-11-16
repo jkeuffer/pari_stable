@@ -1610,12 +1610,31 @@ dbg_gerepile(pari_sp av)
   while (x < (GEN)av)
   {
     const long tx = typ(x), lx = lg(x);
-    GEN a;
+    GEN *a;
 
     pari_printf(" [%ld] %Ps:", x - (GEN)avma, x);
     if (! is_recursive_t(tx)) { pari_putc('\n'); x += lx; continue; }
-    a = x + lontyp[tx]; x += lx;
-    for (  ; a < x; a++) pari_printf("  %Ps,", *a);
+    a = (GEN*)x + lontyp[tx]; x += lx;
+    for (  ; a < (GEN*)x; a++) 
+    {
+      if (*a == gen_0)
+        pari_puts("  gen_0");
+      else if (*a == gen_1)
+        pari_puts("  gen_1");
+      else if (*a == gen_m1)
+        pari_puts("  gen_m1");
+      else if (*a == gen_2)
+        pari_puts("  gen_2");
+      else if (*a == gen_m2)
+        pari_puts("  gen_m2");
+      else if (*a == ghalf)
+        pari_puts("  ghalf");
+      else if (isclone(*a))
+        pari_printf("  %Ps (clone)", *a);
+      else
+        pari_printf("  %Ps [%ld]", *a, *a - (GEN)avma);
+      if (a+1 < (GEN*)x) pari_putc(',');
+    }
     pari_printf("\n");
   }
 }
