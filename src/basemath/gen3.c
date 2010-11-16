@@ -2534,26 +2534,30 @@ coefstoser(GEN x, long v, long prec)
   return y;
 }
 
-/* assume x a scalar or t_POL. Not stack-clean */
+/* x a t_POL. Not stack-clean */
 GEN
 poltoser(GEN x, long v, long prec)
 {
-  long tx = typ(x), vx = varn(x);
+  long vx = varn(x);
   GEN y;
 
-  if (is_scalar_t(tx) || varncmp(vx, v) > 0) return scalarser(x, v, prec);
+  if (varncmp(vx, v) > 0) return scalarser(x, v, prec);
   if (varncmp(vx, v) < 0) return coefstoser(x, v, prec);
   if (!lgpol(x)) return zeroser(v, prec);
   y = RgX_to_ser(x, prec+2);
   setvarn(y, v); return y;
 }
 
-/* x a t_RFRAC[N]. Not stack-clean */
+/* x a t_RFRAC. Not stack-clean */
 GEN
 rfractoser(GEN x, long v, long prec)
 {
-  return gdiv(poltoser(gel(x,1), v, prec),
-              poltoser(gel(x,2), v, prec));
+  GEN n = gel(x,1);
+  if (is_scalar_t(typ(x)))
+    n = scalarser(n, v, prec);
+  else
+    n = poltoser(n, v, prec);
+  return gdiv(n, poltoser(gel(x,2), v, prec));
 }
 
 GEN
