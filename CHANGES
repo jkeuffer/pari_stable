@@ -25,6 +25,7 @@ BA 16- [gp2c]: foo(x:mp)=... did not work.
    17- when the divisor's leading term was 0, RgX_divrem(,,&rem) created rem
        before the quotient (invalidating the use of cgiv() suggested in the
        documentation) [#1129]
+   18- gadd(t_COMPLEX of t_REAL, t_QUAD = 0) -> SEGV [#1131]
 
   Changed
 LGr1- universal constants (gen_0,gen_1, etc.) are now read-only

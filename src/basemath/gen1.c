@@ -1047,7 +1047,7 @@ gadd(GEN x, GEN y)
           return Zp_nosquare_m1(gel(y,2))? addRc(y, x): addTp(x, y);
         case t_QUAD:
           lx = precision(x); if (!lx) pari_err(operi,"+",x,y);
-          return gequal0(y)? rcopy(x): addqf(y, x, lx);
+          return gequal0(y)? gcopy(x): addqf(y, x, lx);
       }
 
     case t_PADIC: /* ty == t_QUAD */
