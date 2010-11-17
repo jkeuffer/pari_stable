@@ -1149,7 +1149,10 @@ RgX_divrem(GEN x, GEN y, GEN *pr)
     }
     if (dx < dy) /* leading coeff of x was in fact zero */
     {
-      if (pr == ONLY_DIVIDES) return (dx < 0)? pol_0(varn(x)) : NULL;
+      if (pr == ONLY_DIVIDES) {
+        avma = av;
+        return (dx < 0)? pol_0(varn(x)) : NULL;
+      }
       if (pr == ONLY_REM)
       {
         if (dx < 0)
@@ -1167,9 +1170,11 @@ RgX_divrem(GEN x, GEN y, GEN *pr)
       {
         if (dx < 0)
         {
+          p2 = gclone(p2);
+          avma = av;
           z = pol_0(varn(x));
           x = scalarpol(p2, varn(x));
-          gerepileall(av, 2, &z, &x);
+          gunclone(p2);
         }
         else
         {
