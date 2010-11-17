@@ -3620,7 +3620,7 @@ elltaniyama(GEN e, long prec)
   checksmallell(e); x = cgetg(prec+3,t_SER);
   x[1] = evalsigne(1) | _evalvalp(-2) | evalvarn(0);
   gel(x,2) = gen_1;
-  d = ginv(gtoser(anell(e,prec+1), 0)); setvalp(d,-1);
+  d = ginv(gtoser(anell(e,prec+1), 0, prec)); setvalp(d,-1);
   /* 2y(t) + a1x + a3 = d tx'(t). Solve for x(t),y(t):
    * 4y^2 = 4x^3 + b2 x^2 + 2b4 x + b6 */
 
