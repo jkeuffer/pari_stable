@@ -2551,7 +2551,7 @@ GEN
 rfractoser(GEN x, long v, long prec)
 {
   GEN n = gel(x,1);
-  if (is_scalar_t(typ(x)))
+  if (is_scalar_t(typ(n)))
     n = scalarser(n, v, prec);
   else
     n = poltoser(n, v, prec);
