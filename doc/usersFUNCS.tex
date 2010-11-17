@@ -399,7 +399,7 @@ Note also that the principal branch is always chosen.
 \item If the argument is either an integer, a rational, an exact complex
 number or a quadratic number, it is first converted to a real
 or complex number using the current \idx{precision} held in the default
-\kbd{realprecision}.  This precision (the number of decimal digits) can be
+\tet{realprecision}.  This precision (the number of decimal digits) can be
 changed using \b{p} or \kbd{default(realprecision,...)}).
 After this conversion, the computation proceeds as above for real or complex
 arguments.
@@ -444,15 +444,22 @@ differently.
 
 \item If the argument is a polynomial, a power series or a rational function,
 it is, if necessary, first converted to a power series using the current
-precision held in the variable \tet{precdl}. Under \kbd{gp} this again is
-transparent to the user. When programming in library mode, however, the
-global variable \kbd{precdl} must be set before calling the function if the
-argument has an exact type (i.e.~not a power series). Here \kbd{precdl} is
-not an argument of the function, but a global variable.
+series precision, held in the default \tet{seriesprecision}. This precision
+(the number of significant terms) can be changed using \b{ps} or
+\kbd{default(seriesprecision,...)}. Then the Taylor series expansion of the
+function around $X=0$ (where $X$ is the main variable) is computed to a
+number of terms depending on the number of terms of the argument and the
+function being computed.
 
-Then the Taylor series expansion of the function around $X=0$ (where $X$ is
-the main variable) is computed to a number of terms depending on the number
-of terms of the argument and the function being computed.
+Under \kbd{gp} this again is transparent to the user. When programming in
+library mode, however, it is \emph{strongly} advised to perform on explicit
+conversion to a power series first, as in \kbd{x = gtoser(x, seriesprec)},
+where the number of ѕignificant terms \kbd{seriesprec} can be specified
+explicitly. If you do not do this, a global variable \kbd{precdl} is used
+instead, to convert polynomials and rational functions to a power series with
+a reasonable number of terms; tampering with the value of this global
+variable is \emph{deprecated} and strongly discouraged.
+
 
 \item If the argument is a vector or a matrix, the result is the
 componentwise evaluation of the function. In particular, transcendental

@@ -2522,15 +2522,13 @@ scalarser(GEN x, long v, long prec)
   return y;
 }
 
-static GEN _gtoser(GEN x, long v, long prec);
-
 /* assume x a t_[SER|POL], apply gtoser to all coeffs */
 static GEN
 coefstoser(GEN x, long v, long prec)
 {
   long i, lx;
   GEN y = cgetg_copy(x, &lx); y[1] = x[1];
-  for (i=2; i<lx; i++) gel(y,i) = _gtoser(gel(x,i), v, prec);
+  for (i=2; i<lx; i++) gel(y,i) = gtoser(gel(x,i), v, prec);
   return y;
 }
 
@@ -2572,8 +2570,8 @@ toser_i(GEN x)
   return NULL;
 }
 
-static GEN
-_gtoser(GEN x, long v, long prec)
+GEN
+gtoser(GEN x, long v, long prec)
 {
   long tx=typ(x), lx, i, j, l;
   pari_sp av;
@@ -2633,9 +2631,6 @@ _gtoser(GEN x, long v, long prec)
   }
   return y;
 }
-
-GEN
-gtoser(GEN x, long v) { return _gtoser(x,v,precdl); }
 
 GEN
 gtovec(GEN x)

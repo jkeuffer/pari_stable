@@ -30,6 +30,7 @@ BA 16- [gp2c]: foo(x:mp)=... did not work.
   Changed
 LGr1- universal constants (gen_0,gen_1, etc.) are now read-only
    2- qfjacobi : sort eigenvalues by increasing order
+   3- gtoser : add a third precdl argument.
 
   Added
 BA 1- trap keyword "syntaxer" to trap syntax error from eval.

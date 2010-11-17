@@ -1737,7 +1737,7 @@ GEN     gsubstvec(GEN x, GEN v, GEN y);
 GEN     gtocol(GEN x);
 GEN     gtopoly(GEN x, long v);
 GEN     gtopolyrev(GEN x, long v);
-GEN     gtoser(GEN x, long v);
+GEN     gtoser(GEN x, long v, long precdl);
 GEN     gtovec(GEN x);
 GEN     gtovecrev(GEN x);
 GEN     gtovecsmall(GEN x);
