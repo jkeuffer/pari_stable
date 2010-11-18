@@ -413,6 +413,7 @@ parseproto(char const **q, char *c, const char *str)
     case 'I':
     case 'E':
     case 'n':
+    case 'P':
       *c=p[1];
       *q=p+2;
       return PPdefault;
@@ -1064,7 +1065,7 @@ compilefunc(entree *ep, long n, int mode, long flag)
             }
             break;
           }
-        case 'L': /*Fall through*/
+        case 'P': case 'L': /*Fall through*/
           compilenode(arg[j++],Gsmall,0);
           break;
         case 'n':
@@ -1228,6 +1229,9 @@ compilefunc(entree *ep, long n, int mode, long flag)
           break;
         case 'V':
           ev[lev++] = -1;
+          break;
+        case 'P':
+          op_push(OCprecdl,0,n);
           break;
         default:
           pari_err(talker,"Unknown prototype code `%c' for `%.*s'",c,
@@ -1432,6 +1436,12 @@ genclosure(entree *ep, const char *loc, GEN data, int check)
         break;
       case 'n':
         op_push_loc(OCvarn,-index,loc);
+        break;
+      case 'P':
+        op_push_loc(OCprecdl,0,loc);
+        op_push_loc(OCstoi,0,loc);
+        op_push_loc(OCdefaultval,-index,loc);
+        op_push_loc(OCitos,-index,loc);
         break;
       default:
         pari_err(talker,"Unknown prototype code `D%c' for `%s'",c,ep->name);
@@ -1866,6 +1876,7 @@ optimizefunc(entree *ep, long n)
         case 'n':
         case 'M':
         case 'L':
+        case 'P':
           optimizenode(arg[j]);
           fl&=tree[arg[j++]].flags;
           break;

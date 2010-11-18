@@ -259,7 +259,7 @@ check_proto(const char *code)
       break;
     case 'D':
       if (*s == 'G' || *s == '&' || *s == 'n' || *s == 'I' || *s == 'E'
-                    || *s == 'V')
+                    || *s == 'V' || *s == 'P')
       {
         if (*s != 'V') arity++;
         s++; break;
