@@ -1110,13 +1110,13 @@ gadd(GEN x, GEN y)
       {
         GEN n, d;
         long vn, vd;
+        av = avma;
         n = gel(y,1); vn = gval(n, vy);
         d = gel(y,2); vd = RgX_valrem(d, &d);
 
         l = lg(x) + valp(x) - (vn - vd);
         if (l < 3) return gcopy(x);
 
-        av = avma;
         /* take advantage of y = t^n ! */
         if (degpol(d))
           y = gdiv(n, RgX_to_ser_inexact(d,l));
