@@ -924,13 +924,11 @@ ellpow_CM(GEN e, GEN z, GEN n)
 
   if (typ(N) != t_INT)
     pari_err(typeer,"powell (non integral CM exponent)");
-  ln = itos_or_0( shifti(addsi(1, N), 2) );
+  ln = itos_or_0(shifti(addsi(1, N), 3));
   if (!ln) pari_err(talker, "norm too large in CM");
-  vn = (ln-4)>>2;
+  vn = ((ln>>1)-4)>>2;
   z1 = weipell(e, ln);
   z2 = gsubst(z1, 0, monomial(n, 1, 0));
-  b2ov12 = gdivgs(ell_get_b2(e), 12); /* x - b2/12 */
-  grdx = gadd(gel(z,1), b2ov12);
   p0 = gen_0; p1 = gen_1;
   q0 = gen_1; q1 = gen_0;
   do
@@ -952,6 +950,8 @@ ellpow_CM(GEN e, GEN z, GEN n)
   if (degpol(p1) > vn || signe(z2))
     pari_err(talker,"not a complex multiplication in powell");
   q1p = RgX_deriv(q1);
+  b2ov12 = gdivgs(ell_get_b2(e), 12); /* x - b2/12 */
+  grdx = gadd(gel(z,1), b2ov12);
   q1 = poleval(q1, grdx);
   if (gequal0(q1)) return ellinf();
 
@@ -986,12 +986,12 @@ ellpow_Z(GEN e, GEN z, GEN n)
   if (is_pm1(n)) return z;
   return gen_pow(z, n, (void*)e, &_sqr, &_mul);
 }
-/* [a + bw] z, a,b integral */
+/* [a + w] z, a integral */
 static GEN
-ellpow_CM_aux(GEN e, GEN z, GEN a, GEN b, GEN w)
+ellpow_CM_aux(GEN e, GEN z, GEN a, GEN w)
 {
-  GEN A = ellpow_Z(e,z,a), B = ellpow_Z(e,z,b);
-  if (!ell_is_inf(B)) B = ellpow_CM(e, B, w);
+  GEN A = ellpow_Z(e,z,a);
+  GEN B = ellpow_CM(e,z,w);
   return addell(e, A, B);
 }
 GEN
@@ -1007,11 +1007,11 @@ powell(GEN e, GEN z, GEN n)
     case t_QUAD: {
       GEN pol = gel(n,1), a = gel(n,2), b = gel(n,3);
       if (signe(pol[2]) < 0) pari_err(typeer,"ellpow_CM");
-      return gerepileupto(av, ellpow_CM_aux(e,z,a,b,mkquad(pol, gen_0,gen_1)));
+      return gerepileupto(av, ellpow_CM_aux(e,z,a,mkquad(pol, gen_0,b)));
     }
     case t_COMPLEX: {
       GEN a = gel(n,1), b = gel(n,2);
-      return gerepileupto(av, ellpow_CM_aux(e,z,a,b, gen_I()));
+      return gerepileupto(av, ellpow_CM_aux(e,z,a,mkcomplex(gen_0,b)));
     }
   }
   pari_err(typeer,"powell (non integral, non CM exponent)");
@@ -1536,26 +1536,29 @@ pointell(GEN e, GEN z, long prec)
 static GEN
 _weipell(GEN c4, GEN c6, long PREC)
 {
-  long i, k, l, precres = 2*PREC;
+  long i, k, l;
   pari_sp av;
-  GEN t, res = cgetg(precres+2,t_SER), *P = (GEN*)(res + 2);
+  GEN t, res = cgetg(PREC+2,t_SER), *P = (GEN*)(res + 2);
 
   res[1] = evalsigne(1) | _evalvalp(-2) | evalvarn(0);
   if (!PREC) { setsigne(res,0); return res; }
 
-  for (i=1; i<precres; i+=2) P[i]= gen_0;
+  for (i=1; i<PREC; i+=2) P[i]= gen_0;
   switch(PREC)
   {
     default:P[6] = gdivgs(c6,6048);
-    case 3: P[4] = gdivgs(c4, 240);
-    case 2: P[2] = gen_0;
+    case 6:
+    case 5: P[4] = gdivgs(c4, 240);
+    case 4:
+    case 3: P[2] = gen_0;
+    case 2:
     case 1: P[0] = gen_1;
     case 0: break;
   }
-  if (PREC == 4) return res;
+  if (PREC <= 8) return res;
   av = avma;
   P[8] = gerepileupto(av, gdivgs(gsqr(P[4]), 3));
-  for (k=5; k<PREC; k++)
+  for (k=5; k<(PREC>>1); k++)
   {
     av = avma;
     t = gmul(P[4], P[(k-2)<<1]);
@@ -1591,15 +1594,8 @@ weipell0(GEN e, long prec, long PREC)
   return _weipell(c4,c6,PREC);
 }
 
-/* assume x a t_POL */
-static int
-is_simple_var(GEN x)
-{
-  return (degpol(x) == 1 && gequal0(gel(x,2)) && gequal1(gel(x,3)));
-}
-
 GEN
-ellwp0(GEN w, GEN z, long flag, long prec, long PREC)
+ellwp0(GEN w, GEN z, long flag, long PREC, long prec)
 {
   GEN v;
   pari_sp av = avma;
@@ -1608,7 +1604,7 @@ ellwp0(GEN w, GEN z, long flag, long prec, long PREC)
   if (!z) return weipell0(w,prec,PREC);
   if (typ(z)==t_POL)
   {
-    if (!is_simple_var(z)) pari_err(talker,"expecting a simple variable in ellwp");
+    if (!gcmpX(z)) pari_err(talker,"expecting a simple variable in ellwp");
     v = weipell0(w,prec,PREC); setvarn(v, varn(z));
     return v;
   }

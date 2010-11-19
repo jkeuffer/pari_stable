@@ -30,7 +30,13 @@ BA 16- [gp2c]: foo(x:mp)=... did not work.
   Changed
 LGr1- universal constants (gen_0,gen_1, etc.) are now read-only
    2- qfjacobi : sort eigenvalues by increasing order
-   3- gtoser : add a third precdl argument.
+   3- [libpari] gtoser : add a third precdl argument.
+   4- [libpari] swap the last 2 arguments of ellwp0 (prec and precdl)
+   5- ellwp now outputs a number of terms equal to the default seriesprecision,
+      instead of *twice* that number.
+   6- Ser, ellwp, taylor, elltaniyama: add an optional 'precdl' argument (by
+      default equal to 'seriesprecision'). One no longer has to rely on (and
+      change locally) a global variable to handle conversion to power series.
 
   Added
 BA 1- trap keyword "syntaxer" to trap syntax error from eval.

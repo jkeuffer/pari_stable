@@ -24,7 +24,7 @@ ellordinate(acurve,1)
 ellpointtoz(acurve,apoint)
 ellztopoint(acurve,%)
 ellpow(acurve,apoint,10)
-ellwp(acurve)
+ellwp(acurve,,,32)
 q*Ser(ellan(acurve,100),q)
 \\
 bcurve=ellinit([0,0,0,-3,0])

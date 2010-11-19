@@ -65,6 +65,7 @@ while (<FILE>)
             $c = $proto[$i++];
             if ($c eq 'G') {$args .= ", GEN " . shift(@ARGS) ." = NULL"; next;}
             if ($c eq '&') {$args .= ", GEN *". shift(@ARGS) ." = NULL"; next;}
+            if ($c eq 'P') {$args .= ", long precdl"; next;}
             if ($c eq 'n') {
               my ($v) = shift(@ARGS);
               $args .= ", long $v = -1";
