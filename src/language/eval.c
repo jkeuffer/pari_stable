@@ -1232,7 +1232,14 @@ closure_eval(GEN C)
         if ((operand&1L) && gel(st,j))
           pari_err(talker,"argument type not implemented");
       break;
-    case OCdefaultval:
+    case OCdefaultlong:
+      sp--;
+      if (st[sp+operand])
+        st[sp+operand]=gtos(gel(st,sp+operand));
+      else
+        st[sp+operand]=st[sp];
+      break;
+    case OCdefaultgen:
       sp--;
       if (!st[sp+operand])
         st[sp+operand]=st[sp];
@@ -1567,8 +1574,11 @@ closure_disassemble(GEN C)
     case OCcheckargs0:
       pari_printf("checkargs0\t0x%lx\n",operand);
       break;
-    case OCdefaultval:
-      pari_printf("defaultval\t%ld\n",operand);
+    case OCdefaultlong:
+      pari_printf("defaultlong\t%ld\n",operand);
+      break;
+    case OCdefaultgen:
+      pari_printf("defaultgen\t%ld\n",operand);
       break;
     case OCgetargs:
       pari_printf("getargs\t\t%ld\n",operand);

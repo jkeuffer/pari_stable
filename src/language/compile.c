@@ -1439,9 +1439,7 @@ genclosure(entree *ep, const char *loc, GEN data, int check)
         break;
       case 'P':
         op_push_loc(OCprecdl,0,loc);
-        op_push_loc(OCstoi,0,loc);
-        op_push_loc(OCdefaultval,-index,loc);
-        op_push_loc(OCitos,-index,loc);
+        op_push_loc(OCdefaultlong,-index,loc);
         break;
       default:
         pari_err(talker,"Unknown prototype code `D%c' for `%s'",c,ep->name);
@@ -1453,18 +1451,17 @@ genclosure(entree *ep, const char *loc, GEN data, int check)
       case 'G':
         op_push_loc(OCpushgen,data_push(strntoGENstr(q+1,p-4-q)),loc);
         op_push_loc(OCcallgen,(long)is_entry("_geval"),loc);
-        op_push_loc(OCdefaultval,-index,loc);
+        op_push_loc(OCdefaultgen,-index,loc);
         break;
       case 'L':
       case 'M':
-        op_push_loc(OCpushstoi,strtol(q+1,NULL,10),loc);
-        op_push_loc(OCdefaultval,-index,loc);
-        op_push_loc(OCitos,-index,loc);
+        op_push_loc(OCpushlong,strtol(q+1,NULL,10),loc);
+        op_push_loc(OCdefaultlong,-index,loc);
         break;
       case 'r':
       case 's':
         str_defproto(p, q, loc);
-        op_push_loc(OCdefaultval,-index,loc);
+        op_push_loc(OCdefaultgen,-index,loc);
         op_push_loc(OCtostr,-index,loc);
         break;
       default:
