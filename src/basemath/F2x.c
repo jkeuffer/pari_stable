@@ -32,7 +32,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
    where the a_i are bits.
 
-   signe(x) is not valid. Use degpol(x)>=0 instead.
+   signe(x) is not valid. Use lgpol(x)!=0 instead.
    Note: pol0_F2x=pol0_Flx and pol1_F2x=pol1_Flx
 */
 
@@ -485,7 +485,7 @@ GEN
 F2xq_invsafe(GEN x, GEN T)
 {
   GEN V, z = F2x_extgcd(T, x, NULL, &V);
-  if (degpol(z)) return NULL;
+  if (F2x_degree(z)) return NULL;
   return V;
 }
 
@@ -543,7 +543,7 @@ F2xq_powers(GEN x, long l, GEN T)
   gel(V,1) = pol1_F2x(v);  if (l==0) return V;
   gel(V,2) = vecsmall_copy(x); if (l==1) return V;
   gel(V,3) = F2xq_sqr(x,T);
-  if ((degpol(x)<<1) < degpol(T)) {
+  if ((F2x_degree(x)<<1) < F2x_degree(T)) {
     for(i = 4; i < l+2; i++)
       gel(V,i) = F2xq_mul(gel(V,i-1),x,T);
   } else {
@@ -662,7 +662,7 @@ gener_F2xq(GEN T, GEN *po)
     for (i = 1; i < j; i++)
     {
       GEN a = F2xq_pow(g, gel(L2,i), T);
-      if (!degpol(a) && (((ulong)a[2])&1UL) == 1UL) break;
+      if (F2x_equal1(a)) break;
     }
     if (i == j) break;
   }
