@@ -2128,8 +2128,17 @@ glog(GEN x, long prec)
       gel(y,1) = logr_abs(x);
       gel(y,2) = mppi(lg(x)); return y;
 
-    case t_COMPLEX:
-      if (gequal0(gel(x,2))) return glog(gel(x,1), prec);
+    case t_COMPLEX: 
+      y = gel(x,2);
+      switch(typ(y))
+      {
+        case t_INT:
+        case t_REAL: /* purely real */
+          if (!signe(y)) return glog(gel(x,1), prec);
+        case t_RFRAC: break;
+        case t_INTMOD:
+        case t_PADIC: pari_err(typeer,"glog");
+      }
       if (prec >= LOGAGMCX_LIMIT) return logagmcx(x, prec);
       y = cgetg(3,t_COMPLEX);
       gel(y,2) = garg(x,prec);
