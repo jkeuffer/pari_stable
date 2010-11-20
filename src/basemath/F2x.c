@@ -494,7 +494,7 @@ F2xq_inv(GEN x,GEN T)
 {
   pari_sp av=avma;
   GEN U = F2xq_invsafe(x, T);
-  if (!U) pari_err(talker,"non invertible polynomial in F2xq_inv");
+  if (!U) pari_err(gdiver);
   return gerepileuptoleaf(av, U);
 }
 

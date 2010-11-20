@@ -3384,7 +3384,7 @@ simplify_shallow(GEN x)
       for (i=1; i<lx; i++) gel(y,i) = simplify_shallow(gel(x,i));
       return y;
   }
-  pari_err(typeer,"simplify_shallow");
+  pari_err(bugparier,"simplify_shallow, type unknown");
   return NULL; /* not reached */
 }
 

@@ -1028,7 +1028,7 @@ FpXQ_inv(GEN x,GEN T,GEN p)
 {
   pari_sp av = avma;
   GEN U = FpXQ_invsafe(x, T, p);
-  if (!U) pari_err(talker,"non invertible polynomial in FpXQ_inv");
+  if (!U) pari_err(gdiver);
   return gerepileupto(av, U);
 }
 

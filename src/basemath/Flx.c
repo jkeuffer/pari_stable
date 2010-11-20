@@ -1762,7 +1762,7 @@ Flxq_inv(GEN x,GEN T,ulong p)
 {
   pari_sp av=avma;
   GEN U = Flxq_invsafe(x, T, p);
-  if (!U) pari_err(talker,"non invertible polynomial in Flxq_inv");
+  if (!U) pari_err(gdiver);
   return gerepileuptoleaf(av, U);
 }
 
@@ -2741,7 +2741,7 @@ FlxqXQ_inv(GEN x, GEN S, GEN T,ulong p)
 {
   pari_sp av = avma;
   GEN U = FlxqXQ_invsafe(x, S, T, p);
-  if (!U) pari_err(talker,"non invertible polynomial in FlxqXQ_inv");
+  if (!U) pari_err(gdiver);
   return gerepileupto(av, U);
 }
 
