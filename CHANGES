@@ -27,7 +27,8 @@ BA 16- [gp2c]: foo(x:mp)=... did not work.
        documentation) [#1129]
    18- gadd(t_COMPLEX of t_REAL, t_QUAD = 0) -> SEGV [#1131]
    19- log(11+11^2+O(11^3)) -> bug in log_p [#1136]
-   20- (ffgen(ffinit(2,10))*0)^-1 -> oo-loop
+BA 20- (ffgen(ffinit(2,10))*0)^-1 -> oo-loop
+BA 21- ispseudoprime(-3,0) != ispseudoprime(-3,1)
 
   Changed
 LGr1- universal constants (gen_0,gen_1, etc.) are now read-only
