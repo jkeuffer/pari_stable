@@ -142,20 +142,13 @@ gassoc_proto(GEN f(GEN,GEN), GEN x, GEN y)
 /*                    CREATION OF A P-ADIC GEN                     */
 /*                                                                 */
 /*******************************************************************/
-/* y[4] not filled */
-static GEN
-cgetp2(GEN x, long vx)
-{
-  GEN y = cgetg(5,t_PADIC);
-  y[1] = evalprecp(precp(x)) | evalvalp(vx);
-  gel(y,2) = icopy(gel(x,2));
-  gel(y,3) = icopy(gel(x,3)); return y;
-}
-
 GEN
 cgetp(GEN x)
 {
-  GEN y = cgetp2(x, 0);
+  GEN y = cgetg(5,t_PADIC);
+  y[1] = evalprecp(precp(x)) | _evalvalp(0);
+  gel(y,2) = icopy(gel(x,2));
+  gel(y,3) = icopy(gel(x,3));
   gel(y,4) = cgeti(lgefint(x[3])); return y;
 }
 
@@ -1422,7 +1415,10 @@ gneg(GEN x)
 
     case t_PADIC:
       if (!signe(gel(x,4))) return gcopy(x);
-      y = cgetp2(x,valp(x));
+      y = cgetg(5, t_PADIC);
+      y[1] = x[1];
+      gel(y,2) = icopy(gel(y,2));
+      gel(y,3) = icopy(gel(y,3));
       gel(y,4) = subii(gel(x,3),gel(x,4));
       break;
 
@@ -1477,7 +1473,7 @@ gneg_i(GEN x)
       gel(y,2) = gneg_i(gel(x,2)); break;
 
     case t_PADIC: y = cgetg(5,t_PADIC);
-      y[1] = evalprecp(precp(x)) | evalvalp(valp(x));
+      y[1] = x[1];
       gel(y,2) = gel(x,2);
       gel(y,3) = gel(x,3);
       gel(y,4) = signe(gel(x,4))? subii(gel(x,3),gel(x,4)): gen_0; break;
