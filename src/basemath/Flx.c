@@ -2627,12 +2627,6 @@ FlxqX_rem_Montgomery(GEN x, GEN mg, GEN T, GEN Q, ulong p)
 }
 
 GEN
-FlxqX_rem(GEN x, GEN y, GEN T, ulong p)
-{
-  return FlxqX_divrem(x,y,T,p,ONLY_REM);
-}
-
-GEN
 FlxqX_gcd(GEN x, GEN y, GEN T, ulong p)
 {
   GEN a,b,c;
@@ -2688,7 +2682,7 @@ FlxqX_extgcd(GEN a, GEN b, GEN T, ulong p, GEN *ptu, GEN *ptv)
     u=r; d=d1; d1=u;
   }
   u = FlxX_sub(d, FlxqX_mul(b,v, T,p), p);
-  u = FlxqX_divrem(u,a, T,p, NULL);
+  u = FlxqX_div(u,a, T,p);
   gerepileall(ltop,3,&d,&u,&v);
   *ptu = u; *ptv = v; return d;
 }

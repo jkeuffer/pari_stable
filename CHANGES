@@ -48,8 +48,9 @@ BA 3- [gp2c] add description _(_) for closure evaluation
 BA 4- PARI function FpX_halfgcd() and subquadratic FpX_gcd(), FpX_extgcd()
 BA 5- PARI function Flx_halfgcd() and subquadratic Flx_gcd(), Flx_extgcd()
 BA 6- random() now allow to draw random polynomials
-BA 7- [libpari] function pol_0, pol0_Flx, pol0_F2x
+BA 7- PARI functions pol_0, pol0_Flx, pol0_F2x
 VB 8- [mingw] --datadir=@ option to Configure
+BA 9- PARI functions FlxqX_div
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.3 (released 08/10/2010):

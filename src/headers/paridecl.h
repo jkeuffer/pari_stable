@@ -163,7 +163,6 @@ GEN     FlxqX_gcd(GEN P, GEN Q, GEN T, ulong p);
 GEN     FlxqX_mul(GEN x, GEN y, GEN T, ulong p);
 GEN     FlxqX_normalize(GEN z, GEN T, ulong p);
 GEN     FlxqX_red(GEN z, GEN T, ulong p);
-GEN     FlxqX_rem(GEN x, GEN y, GEN T, ulong p);
 GEN     FlxqX_safegcd(GEN P, GEN Q, GEN T, ulong p);
 GEN     FlxqX_sqr(GEN x, GEN T, ulong p);
 GEN     FlxqXQ_inv(GEN x, GEN S, GEN T, ulong p);
@@ -2868,6 +2867,8 @@ INLINE GEN    Flxq_add(GEN x,GEN y,GEN T,ulong p);
 INLINE GEN    Flxq_sub(GEN x,GEN y,GEN T,ulong p);
 INLINE GEN    FpXQX_div(GEN x, GEN y, GEN T, GEN p);
 INLINE GEN    FpXQX_rem(GEN x, GEN y, GEN T, GEN p);
+INLINE GEN    FlxqX_div(GEN x, GEN y, GEN T, ulong p);
+INLINE GEN    FlxqX_rem(GEN x, GEN y, GEN T, ulong p);
 
 INLINE GEN    Fq_red(GEN x, GEN T, GEN p);
 INLINE GEN    FqX_Fp_mul(GEN P, GEN U, GEN T, GEN p);

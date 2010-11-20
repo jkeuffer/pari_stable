@@ -1428,9 +1428,9 @@ FpX_div(GEN x, GEN y, GEN p) { return FpX_divrem(x,y,p, NULL); }
 INLINE GEN
 Flx_div(GEN x, GEN y, ulong p) { return Flx_divrem(x,y,p, NULL); }
 INLINE GEN
-FpV_FpC_mul(GEN x, GEN y, GEN p) { return FpV_dotproduct(x,y,p); }
-INLINE GEN
 F2x_div(GEN x, GEN y) { return F2x_divrem(x,y, NULL); }
+INLINE GEN
+FpV_FpC_mul(GEN x, GEN y, GEN p) { return FpV_dotproduct(x,y,p); }
 INLINE GEN
 pol0_Flx(long sv) { return mkvecsmall(sv); }
 INLINE GEN
@@ -1576,11 +1576,13 @@ Fq_red(GEN x, GEN T, GEN p)
 
 /* FpXQX */
 INLINE GEN
-FpXQX_rem(GEN x, GEN y, GEN T, GEN p)
-{ return FpXQX_divrem(x, y, T, p, ONLY_REM); }
+FpXQX_rem(GEN x, GEN y, GEN T, GEN p) { return FpXQX_divrem(x, y, T, p, ONLY_REM); }
 INLINE GEN
-FpXQX_div(GEN x, GEN y, GEN T, GEN p)
-{ return FpXQX_divrem(x, y, T, p, NULL); }
+FpXQX_div(GEN x, GEN y, GEN T, GEN p) { return FpXQX_divrem(x, y, T, p, NULL); }
+INLINE GEN
+FlxqX_rem(GEN x, GEN y, GEN T, ulong p) { return FlxqX_divrem(x, y, T, p, ONLY_REM); }
+INLINE GEN
+FlxqX_div(GEN x, GEN y, GEN T, ulong p) { return FlxqX_divrem(x, y, T, p, NULL); }
 
 /* FqX */
 INLINE GEN
