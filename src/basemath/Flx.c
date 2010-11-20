@@ -1379,10 +1379,8 @@ Flx_extgcd_basecase(GEN a, GEN b, ulong p, GEN *ptu, GEN *ptv)
       gerepileall(av,5, &d,&d1,&u,&v,&v1);
     }
   }
-  u = Flx_sub(d,Flx_mul(b,v,p),p);
-  u = Flx_div(u,a,p);
-  gerepileall(av,3,&d,&u,&v);
-  *ptu = u; *ptv = v; return d;
+  if (ptu) *ptu = Flx_div(Flx_sub(d, Flx_mul(b,v,p), p), a, p);
+  *ptv = v; return d;
 }
 
 static GEN
@@ -1399,7 +1397,7 @@ Flx_extgcd_halfgcd(GEN x, GEN y, ulong p, GEN *ptu, GEN *ptv)
     gerepileall(av,3,&x,&y,&R);
   }
   y = Flx_extgcd_basecase(x,y,p,&u,&v);
-  *ptu = Flx_addmulmul(u,v,gcoeff(R,1,1),gcoeff(R,2,1),p);
+  if (ptu) *ptu = Flx_addmulmul(u,v,gcoeff(R,1,1),gcoeff(R,2,1),p);
   *ptv = Flx_addmulmul(u,v,gcoeff(R,1,2),gcoeff(R,2,2),p);
   return y;
 }
@@ -1415,7 +1413,7 @@ Flx_extgcd(GEN x, GEN y, ulong p, GEN *ptu, GEN *ptv)
     d = Flx_extgcd_halfgcd(x, y, p, ptu, ptv);
   else
     d = Flx_extgcd_basecase(x, y, p, ptu, ptv);
-  gerepileall(ltop,3,&d,ptu,ptv);
+  gerepileall(ltop,ptu?3:2,&d,ptv,ptu);
   return d;
 }
 
@@ -1751,12 +1749,11 @@ Flxq_pow(GEN x, GEN n, GEN T, ulong p)
 GEN
 Flxq_invsafe(GEN x, GEN T, ulong p)
 {
-  GEN U, V;
-  GEN z = Flx_extgcd(x, T, p, &U, &V);
+  GEN V, z = Flx_extgcd(T, x, p, NULL, &V);
   ulong iz;
   if (degpol(z)) return NULL;
   iz = Fl_inv ((ulong)z[2], p);
-  return Flx_Fl_mul(U, iz, p);
+  return Flx_Fl_mul(V, iz, p);
 }
 
 GEN

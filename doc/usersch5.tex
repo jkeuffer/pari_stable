@@ -3399,6 +3399,8 @@ $\deg a \geq {\deg x \over 2} > \deg b$.
 \fun{GEN}{FpX_extgcd}{GEN x, GEN y, GEN p, GEN *u, GEN *v} returns
 $d = \text{GCD}(\kbd{x},\kbd{y})$ (not necessarily monic), and sets \kbd{*u},
 \kbd{*v} to the Bezout coefficients such that $\kbd{*ux} + \kbd{*vy} = d$.
+If \kbd{*u} is set to \kbd{NULL}, it is not computed which is a bit faster.
+This is useful when computing the inverse of $y$ modulo $x$.
 
 \fun{GEN}{FpX_center}{GEN z, GEN p, GEN pov2} returns the polynomial whose
 coefficient belong to the symmetric residue system. Assumes the coefficients

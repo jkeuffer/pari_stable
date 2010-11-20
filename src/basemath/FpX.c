@@ -582,10 +582,8 @@ FpX_extgcd_basecase(GEN a, GEN b, GEN p, GEN *ptu, GEN *ptv)
       gerepileall(av,5, &d,&d1,&u,&v,&v1);
     }
   }
-  u = FpX_sub(d,FpX_mul(b,v,p),p);
-  u = FpX_div(u,a,p);
-  gerepileall(av,3,&d,&u,&v);
-  *ptu = u; *ptv = v; return d;
+  if (ptu) *ptu = FpX_div(FpX_sub(d,FpX_mul(b,v,p),p),a,p);
+  *ptv = v; return d;
 }
 
 static GEN
@@ -602,7 +600,7 @@ FpX_extgcd_halfgcd(GEN x, GEN y, GEN p, GEN *ptu, GEN *ptv)
     gerepileall(av,3,&x,&y,&R);
   }
   y = FpX_extgcd_basecase(x,y,p,&u,&v);
-  *ptu = FpX_addmulmul(u,v,gcoeff(R,1,1),gcoeff(R,2,1),p);
+  if (ptu) *ptu = FpX_addmulmul(u,v,gcoeff(R,1,1),gcoeff(R,2,1),p);
   *ptv = FpX_addmulmul(u,v,gcoeff(R,1,2),gcoeff(R,2,2),p);
   return y;
 }
@@ -621,7 +619,7 @@ FpX_extgcd(GEN x, GEN y, GEN p, GEN *ptu, GEN *ptv)
     y = ZX_to_Flx(y, pp);
     d = Flx_extgcd(x,y, pp, ptu,ptv);
     d = Flx_to_ZX(d);
-    *ptu=Flx_to_ZX(*ptu);
+    if (ptu) *ptu=Flx_to_ZX(*ptu);
     *ptv=Flx_to_ZX(*ptv);
   }
   else
@@ -633,7 +631,7 @@ FpX_extgcd(GEN x, GEN y, GEN p, GEN *ptu, GEN *ptv)
     else
       d = FpX_extgcd_basecase(x, y, p, ptu, ptv);
   }
-  gerepileall(ltop,3,&d,ptu,ptv);
+  gerepileall(ltop,ptu?3:2,&d,ptv,ptu);
   return d;
 }
 
@@ -1018,13 +1016,11 @@ FpXQ_sqr(GEN x, GEN T, GEN p)
 GEN
 FpXQ_invsafe(GEN x, GEN T, GEN p)
 {
-  GEN z, U, V;
-
-  z = FpX_extgcd(x, T, p, &U, &V);
+  GEN V, z = FpX_extgcd(T, x, p, NULL, &V);
   if (degpol(z)) return NULL;
   z = Fp_invsafe(gel(z,2), p);
   if (!z) return NULL;
-  return FpX_Fp_mul(U, z, p);
+  return FpX_Fp_mul(V, z, p);
 }
 
 GEN
