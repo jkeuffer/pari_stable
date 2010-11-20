@@ -2678,10 +2678,10 @@ FlxqX_extgcd(GEN a, GEN b, GEN T, ulong p, GEN *ptu, GEN *ptv)
     u=v; v=v1; v1=u;
     u=r; d=d1; d1=u;
   }
-  u = FlxX_sub(d, FlxqX_mul(b,v, T,p), p);
-  u = FlxqX_div(u,a, T,p);
-  gerepileall(ltop,3,&d,&u,&v);
-  *ptu = u; *ptv = v; return d;
+  if (ptu) *ptu = FlxqX_div(FlxX_sub(d, FlxqX_mul(b,v, T,p), p), a, T,p);
+  *ptv = v;
+  gerepileall(ltop,ptu?3:2,&d,ptv,ptu);
+  return d;
 }
 
 struct _FlxqX {ulong p; GEN T;};
@@ -2728,12 +2728,11 @@ FlxqXQ_sqr(GEN x, GEN S, GEN T, ulong p) {
 GEN
 FlxqXQ_invsafe(GEN x, GEN S, GEN T, ulong p)
 {
-  GEN z, U, V;
-  z = FlxqX_extgcd(x, S, T, p, &U, &V);
+  GEN V, z = FlxqX_extgcd(S, x, T, p, NULL, &V);
   if (degpol(z)) return NULL;
   z = Flxq_invsafe(gel(z,2),T,p);
   if (!z) return NULL;
-  return FlxqX_Flxq_mul(U, z, T, p);
+  return FlxqX_Flxq_mul(V, z, T, p);
 }
 
 GEN

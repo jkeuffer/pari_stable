@@ -746,12 +746,13 @@ FpXQX_extgcd(GEN x, GEN y, GEN T, GEN p, GEN *ptu, GEN *ptv)
   if (lgefint(p) == 3)
   {
     ulong pp = (ulong)p[2];
-    GEN Pl, Ql, Tl, Dl, Ul, Vl;
+    GEN Pl, Ql, Tl, Dl;
     Pl = ZXX_to_FlxX(x, pp, varn(T));
     Ql = ZXX_to_FlxX(y, pp, varn(T));
     Tl = ZX_to_Flx(T, pp);
-    Dl = FlxqX_extgcd(Pl, Ql, Tl, pp, &Ul, &Vl);
-    u = FlxX_to_ZXX(Ul); v = FlxX_to_ZXX(Vl);
+    Dl = FlxqX_extgcd(Pl, Ql, Tl, pp, ptu, ptv);
+    if (ptu) *ptu = FlxX_to_ZXX(*ptu);
+    *ptv = FlxX_to_ZXX(*ptv);
     d = FlxX_to_ZXX(Dl);
   }
   else
@@ -766,11 +767,11 @@ FpXQX_extgcd(GEN x, GEN y, GEN T, GEN p, GEN *ptu, GEN *ptv)
       u=v; v=v1; v1=u;
       u=r; d=d1; d1=u;
     }
-    u = FqX_sub(d, FqX_mul(b,v, T,p), T,p);
-    u = FqX_div(u,a, T,p);
+    if (ptu) *ptu = FqX_div(FqX_sub(d, FqX_mul(b,v, T,p), T,p),a, T,p);
+    *ptv = v;
   }
-  gerepileall(ltop,3,&d,&u,&v);
-  *ptu = u; *ptv = v; return d;
+  gerepileall(ltop,ptu?3:2,&d,ptv,ptu);
+  return d;
 }
 
 /* Inverse of x in Z/pZ[X]/(pol) or NULL if inverse doesn't exist
@@ -778,13 +779,12 @@ FpXQX_extgcd(GEN x, GEN y, GEN T, GEN p, GEN *ptu, GEN *ptv)
 GEN
 FpXQXQ_invsafe(GEN x, GEN S, GEN T, GEN p)
 {
-  GEN z, U, V;
-  z = FpXQX_extgcd(x, S, T, p, &U, &V);
+  GEN V, z = FpXQX_extgcd(S, x, T, p, NULL, &V);
   if (degpol(z)) return NULL;
   z = gel(z,2);
   z = typ(z)==t_INT ? Fp_invsafe(z,p) : FpXQ_invsafe(z,T,p);
   if (!z) return NULL;
-  return typ(z)==t_INT ? FpXX_Fp_mul(U, z, p): FpXQX_FpXQ_mul(U, z, T, p);
+  return typ(z)==t_INT ? FpXX_Fp_mul(V, z, p): FpXQX_FpXQ_mul(V, z, T, p);
 }
 
 GEN

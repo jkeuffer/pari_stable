@@ -2128,7 +2128,7 @@ glog(GEN x, long prec)
       gel(y,1) = logr_abs(x);
       gel(y,2) = mppi(lg(x)); return y;
 
-    case t_COMPLEX: 
+    case t_COMPLEX:
       y = gel(x,2);
       switch(typ(y))
       {
