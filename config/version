@@ -8,29 +8,32 @@ VersionMinor='4'
 patch='4'
 
 # Status: alpha, beta, released, development
-status=development
+stat=development
+statversion=
 
 # soname of stable libpari.so is libpari.so.$soname_num
 soname_num=$patch
 
 patchlevel_verbose=
 if test -d "$TOP/.svn"; then
- status="$status svn-"`svnversion $TOP`
- patchlevel_verbose="[ $status ]"
+  statversion="svn-"`svnversion $TOP`
 else if test -d "$TOP/.git"; then
- status="$status git-"`git log -1 --pretty=format:%h -- $TOP`
- patchlevel_verbose="[ $status ]"
+  statversion="git-"`git log -1 --pretty=format:%h -- $TOP`
 else if test -d "$TOP/CVS"; then
- status="$status CHANGES-"`$head 1 "$TOP/CHANGES" | awk '{print $4}'`
- patchlevel_verbose="[ $status ]"
+  statversion="CHANGES-"`$head 1 "$TOP/CHANGES" | awk '{print $4}'`
 else if test -r "svnversion"; then
- status="$status svn-"`cat svnversion`
- patchlevel_verbose="[ $status ]"
-     fi
+  statversion="svn-"`cat svnversion`
+      fi
     fi
   fi
 fi
 
+if test -n "$statversion"; then
+  status="$stat $statversion"
+  patchlevel_verbose="[ $status ]"
+else
+  status="$stat"
+fi
 version=$VersionMajor.$VersionMinor
 pari_release="$version.$patch"
 if test `expr $VersionMinor % 2` = 1; then

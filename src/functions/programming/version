@@ -1,11 +1,21 @@
 Function: version
 Section: programming/specific
 C-Name: pari_version
-Prototype:
-Help: version(): returns the PARI version as [major,minor,patch].
-Doc: Returns the current version number as a \typ{VEC} with three integer
- components: major version number, minor version number and patchlevel.
- To check against a particular version number, you can use:
+Prototype: 
+Help: version(): returns the PARI version as [major,minor,patch,status,RCSversion].
+Doc: returns the current version number as a \typ{VEC}
+ with three integer components (major version number, minor version number
+ and patchlevel), followed by two string components: status (\kbd{release},
+ \kbd{development}, \kbd{alpha}, \kbd{beta}, \dots) and a version string
+ related to the status (\kbd{svn-}\emph{revision} if compiled from a
+ subversion repository, \kbd{git-}\emph{commit} if compiled from a git
+ repository, \dots).
+
+ Unless you are working with multiple development versions, you probably do
+ not care about the last two components. The \kbd{lex} function offers a
+ clever way to check against a particular version number, since it will
+ compare each successive vector entry, numerically or as strings, and will
+ not mind if the vectors it compares have different lengths :
  \bprog
     if (lex(version(), [2,2,0]) >= 0,
       \\ code to be executed if we are running 2.2.0 or more recent.
@@ -13,3 +23,14 @@ Doc: Returns the current version number as a \typ{VEC} with three integer
       \\ compatibility code
     );
  @eprog
+ In particular the first line of the gp introductory message can be emulated by
+ \bprog
+    v = version();
+    n = Str(v[1], ".", v[2], ".", v[3]);
+    s = if (#v[5], Str(v[4], " ", v[5]), v[4]);
+    print("GP/PARI CALCULATOR Version ", n, " (", s, ")");
+  @eprog\noindent If you \emph{are} working with many development versions of
+  PARI/GP, the last two components can be profitably included in the name of
+  your logfile, for instance.
+Variant: Also available is \fun{GEN}{pari_version}{void} corresponding to
+  \kbd{flag} = 0.

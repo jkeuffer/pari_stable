@@ -37,6 +37,8 @@ LGr1- universal constants (gen_0,gen_1, etc.) are now read-only
    6- Ser, ellwp, taylor, elltaniyama: add an optional 'precdl' argument (by
       default equal to 'seriesprecision'). One no longer has to rely on (and
       change locally) a global variable to handle conversion to power series.
+LGr7- add information to the version() output [backward compatible if version()
+      used as recommanded in the documentation] [#1130]
 
   Added
 BA 1- trap keyword "syntaxer" to trap syntax error from eval.

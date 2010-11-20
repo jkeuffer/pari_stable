@@ -706,14 +706,22 @@ associated to release $M.m.p$. Each code identifies a unique PARI release,
 and corresponds to the natural total order on the set of releases (bigger
 code number means more recent release).
 
-\noindent \tet{PARI_VERSION_SHIFT} The number of bits used to store each of
+\noindent \tet{PARI_VERSION_SHIFT} is the number of bits used to store each of
 the integers $M$, $m$, $p$ in the version code.
+
+\noindent \tet{PARI_STATUS} contains the release's status (\kbd{release},
+\kbd{development}, \kbd{alpha}, \kbd{beta}, \dots).
+
+\noindent \tet{PARI_RCSVERSION} is a version  string related to the
+revision control system used to handle your sources, if any. For instance
+\kbd{svn-}\emph{revision} if compiled from a subversion repository,
+\kbd{git-}\emph{commit} if compiled from a git repository, etc.
 
 The two character strings \kbd{PARIVERSION} and \kbd{PARIINFO}, correspond to
 the first two lines printed by \kbd{gp} just before the Copyright message.
 
 \fun{GEN}{pari_version}{} returns the version number as a PARI object, a
-\typ{VEC} with \typ{INT} components.
+\typ{VEC} with 3 \typ{INT} and 2 \typ{STR} components.
 
 
 \section{Handling the PARI stack}

@@ -1832,7 +1832,7 @@ gettime(void) { return timer(); }
 /*******************************************************************/
 GEN
 pari_version(void) {
-  GEN v = cgetg(4, t_VEC);
+  GEN v = cgetg(6, t_VEC);
   const ulong mask = (1UL<<PARI_VERSION_SHIFT) - 1;
   ulong major, minor, patch, n = PARI_VERSION_CODE;
   patch = n & mask; n >>= PARI_VERSION_SHIFT;
@@ -1840,7 +1840,10 @@ pari_version(void) {
   major = n;
   gel(v,1) = utoi(major);
   gel(v,2) = utoi(minor);
-  gel(v,3) = utoi(patch); return v;
+  gel(v,3) = utoi(patch);
+  gel(v,4) = strtoGENstr(PARI_STATUS); 
+  gel(v,5) = strtoGENstr(PARI_RCSVERSION);
+  return v;
 }
 
 /* List of GP functions:
