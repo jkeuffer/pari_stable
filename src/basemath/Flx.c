@@ -1035,8 +1035,9 @@ Flx_divrem(GEN x, GEN y, ulong p, GEN *pr)
   ulong p1,inv;
   long sv=x[1];
 
-  if (pr == ONLY_REM) return Flx_rem(x, y, p);
   dy = degpol(y);
+  if (dy<0) pari_err(gdiver);
+  if (pr == ONLY_REM) return Flx_rem(x, y, p);
   if (!dy)
   {
     if (pr && pr != ONLY_DIVIDES) *pr = pol0_Flx(sv);

@@ -387,8 +387,9 @@ F2x_divrem(GEN x, GEN y, GEN *pr)
   long dx, dy, dz, lx = lg(x), vs = x[1];
   GEN z;
 
-  if (pr == ONLY_REM) return F2x_rem(x, y);
   dy = F2x_degree(y);
+  if (dy<0) pari_err(gdiver);
+  if (pr == ONLY_REM) return F2x_rem(x, y);
   if (!dy)
   {
     z = vecsmall_copy(x);
