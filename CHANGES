@@ -26,6 +26,7 @@ BA 16- [gp2c]: foo(x:mp)=... did not work.
        before the quotient (invalidating the use of cgiv() suggested in the
        documentation) [#1129]
    18- gadd(t_COMPLEX of t_REAL, t_QUAD = 0) -> SEGV [#1131]
+   19- log(11+11^2+O(11^3)) -> bug in log_p [#1136]
 
   Changed
 LGr1- universal constants (gen_0,gen_1, etc.) are now read-only

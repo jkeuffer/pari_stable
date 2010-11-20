@@ -1239,19 +1239,14 @@ Qp_log(GEN x)
   GEN y, p = gel(x,2), a = gel(x,4);
 
   if (!signe(a)) pari_err(talker,"zero argument in Qp_log");
+  y = leafcopy(x); setvalp(y,0);
   if (equaliu(p,2))
-  {
-    y = gsqr(x); setvalp(y,0);
-    y = palogaux(y);
-  }
+    y = palogaux(gsqr(y));
   else if (gequal1(modii(a, p)))
-  {
-    y = gmul2n(palogaux(x), 1);
-  }
+    y = gmul2n(palogaux(y), 1);
   else
   { /* compute log(x^(p-1)) / (p-1) */
-    GEN mod = gel(x,3), p1 = subis(p,1);
-    y = cgetp(x);
+    GEN mod = gel(y,3), p1 = subis(p,1);
     gel(y,4) = Fp_pow(a, p1, mod);
     p1 = diviiexact(subsi(1,mod), p1); /* 1/(p-1) */
     y = gmul(palogaux(y), shifti(p1,1));
