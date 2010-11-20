@@ -265,7 +265,7 @@ check_proto(const char *code)
         s++; break;
       }
       old = s; while (*s && *s != ',') s++;
-      if (*s != ',') pari_err(talker2, "missing comma", old, code);
+      if (*s != ',') pari_err(syntaxer, "missing comma", old, code);
       break;
     case 'V':
     case '=':
@@ -275,8 +275,8 @@ check_proto(const char *code)
     case 'm':
     case 'l':
     case 'i':
-    case 'v': pari_err(talker2, "this code has to come first", s-1, code);
-    default: pari_err(talker2, "unknown parser code", s-1, code);
+    case 'v': pari_err(syntaxer, "this code has to come first", s-1, code);
+    default: pari_err(syntaxer, "unknown parser code", s-1, code);
   }
   if (arity > 20) pari_err(impl,"functions with more than 20 parameters");
   return arity;
@@ -331,7 +331,7 @@ install(void *f, char *name, char *code)
     char *s = name;
     if (isalpha((int)*s))
       while (is_keyword_char(*++s)) /* empty */;
-    if (*s) pari_err(talker2,"not a valid identifier", s, name);
+    if (*s) pari_err(syntaxer,"not a valid identifier", s, name);
     if (!ep) ep = installep(name, strlen(name), functions_hash + hash);
     ep->value=f; ep->valence=EpINSTALL;
   }

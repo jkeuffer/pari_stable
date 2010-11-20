@@ -76,10 +76,10 @@ my_int(char *s)
 
   while (isdigit((int)*p)) {
     ulong m;
-    if (n > (~0UL / 10)) pari_err(talker2,"integer too large",s,s);
+    if (n > (~0UL / 10)) pari_err(syntaxer,"integer too large",s,s);
     n *= 10; m = n;
     n += *p++ - '0';
-    if (n < m) pari_err(talker2,"integer too large",s,s);
+    if (n < m) pari_err(syntaxer,"integer too large",s,s);
   }
   if (n)
   {
@@ -89,9 +89,9 @@ my_int(char *s)
       case 'm': case 'M': n = safe_mul(n,1000000UL);    p++; break;
       case 'g': case 'G': n = safe_mul(n,1000000000UL); p++; break;
     }
-    if (!n) pari_err(talker2,"integer too large",s,s);
+    if (!n) pari_err(syntaxer,"integer too large",s,s);
   }
-  if (*p) pari_err(talker2,"I was expecting an integer here", s, s);
+  if (*p) pari_err(syntaxer,"I was expecting an integer here", s, s);
   return n;
 }
 
@@ -106,7 +106,7 @@ get_int(const char *s, long dflt)
   if (!isdigit((int)*p)) return dflt;
 
   n = (long)my_int(p);
-  if (n < 0) pari_err(talker2,"integer too large",s,s);
+  if (n < 0) pari_err(syntaxer,"integer too large",s,s);
   return minus? -n: n;
 }
 
@@ -114,7 +114,7 @@ ulong
 get_uint(const char *s)
 {
   char *p = get_sep(s);
-  if (*p == '-') pari_err(talker2,"arguments must be positive integers",s,s);
+  if (*p == '-') pari_err(syntaxer,"arguments must be positive integers",s,s);
   return my_int(p);
 }
 
@@ -210,7 +210,7 @@ sd_toggle(const char *v, long flag, const char *s, int *ptn)
     {
       char *t = stackmalloc(64 + strlen(s));
       (void)sprintf(t, "default: incorrect value for %s [0:off / 1:on]", s);
-      pari_err(talker2, t, v,v);
+      pari_err(syntaxer, t, v,v);
     }
     state = *ptn = n;
   }
@@ -249,7 +249,7 @@ sd_ulong_init(const char *v, const char *s, ulong *ptn, ulong Min, ulong Max)
       char *buf = stackmalloc(strlen(s) + 2 * 20 + 40);
       (void)sprintf(buf, "default: incorrect value for %s [%lu-%lu]",
                     s, Min, Max);
-      pari_err(talker2, buf, v,v);
+      pari_err(syntaxer, buf, v,v);
     }
     *ptn = n;
   }
@@ -324,7 +324,7 @@ sd_format(const char *v, long flag)
   {
     char c = *v;
     if (c!='e' && c!='f' && c!='g')
-      pari_err(talker2,"default: inexistent format",v,v);
+      pari_err(syntaxer,"default: inexistent format",v,v);
     fmt->format = c; v++;
 
     if (isdigit((int)*v))
@@ -363,7 +363,7 @@ gp_get_color(char **st)
       long i = 0;
       for (a[0] = s = ++v; *s && *s != ']'; s++)
         if (*s == ',') { *s = 0; a[++i] = s+1; }
-      if (*s != ']') pari_err(talker2,"expected character: ']'",s, *st);
+      if (*s != ']') pari_err(syntaxer,"expected character: ']'",s, *st);
       *s = 0; for (i++; i<3; i++) a[i] = "";
       /*    properties    |   color    | background */
       c = (atoi(a[2])<<8) | atoi(a[0]) | (atoi(a[1])<<4);
@@ -451,20 +451,20 @@ sd_graphcolormap(const char *v, long flag)
   {
     char *t = filtre(v, 0);
     if (*t != '[' || t[strlen(t)-1] != ']')
-      pari_err(talker2, "incorrect value for graphcolormap", t, t);
+      pari_err(syntaxer, "incorrect value for graphcolormap", t, t);
     for (s = 0, p = t+1, l = 2, a=0; *p; p++)
       if (*p == '[')
       {
         a++;
         while (*++p != ']')
           if (!*p || *p == '[')
-            pari_err(talker2, "incorrect value for graphcolormap", p, t);
+            pari_err(syntaxer, "incorrect value for graphcolormap", p, t);
       }
       else if (*p == '"')
       {
         s += sizeof(long)+1;
         while (*p && *++p != '"') s++;
-        if (!*p) pari_err(talker2, "incorrect value for graphcolormap", p, t);
+        if (!*p) pari_err(syntaxer, "incorrect value for graphcolormap", p, t);
         s = (s+sizeof(long)-1) & ~(sizeof(long)-1);
       }
       else if (*p == ',')
@@ -497,7 +497,7 @@ sd_graphcolormap(const char *v, long flag)
         {
           char buf[100];
           sprintf(buf, "incorrect value for graphcolormap[%ld]: ", i);
-          pari_err(talker2, buf, p, t);
+          pari_err(syntaxer, buf, p, t);
         }
         *p = '\0';
         lp[1] = atocolor(ap[0]);
@@ -511,7 +511,7 @@ sd_graphcolormap(const char *v, long flag)
         i++;
         break;
       default:
-        pari_err(talker2, "incorrect value for graphcolormap", p, t);
+        pari_err(syntaxer, "incorrect value for graphcolormap", p, t);
       }
     free(t);
   }
@@ -545,8 +545,8 @@ sd_graphcolors(const char *v, long flag)
     for (p = t+1, l=2; *p != ']'; p++)
       if (*p == ',') l++;
       else if (*p < '0' || *p > '9')
-        pari_err(talker2, "incorrect value for graphcolors", p, t);
-    if (*++p) pari_err(talker2, "incorrect value for graphcolors", p, t);
+        pari_err(syntaxer, "incorrect value for graphcolors", p, t);
+    if (*++p) pari_err(syntaxer, "incorrect value for graphcolors", p, t);
     if (pari_graphcolors) pari_free(pari_graphcolors);
     pari_graphcolors = cgetalloc(t_VECSMALL, l);
     for (p = t+1, i=0; *p; p++)

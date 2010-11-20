@@ -992,7 +992,7 @@ pari_err(int numerr, ...)
     }
   }
   err_init();
-  if (numerr == talker2)
+  if (numerr == syntaxer)
   {
     const char *msg = va_arg(ap, char*);
     const char *s = va_arg(ap,char *);
@@ -1108,7 +1108,7 @@ trap0(const char *e, GEN r, GEN f)
   else if (!strcmp(e,"alarmer")) numerr = alarmer;
   else if (!strcmp(e,"talker")) numerr = talker;
   else if (!strcmp(e,"user")) numerr = user;
-  else if (!strcmp(e,"syntaxer")) numerr = talker2;
+  else if (!strcmp(e,"syntaxer")) numerr = syntaxer;
   else if (*e) pari_err(impl,"this trap keyword");
   /* TODO: complete the list */
 

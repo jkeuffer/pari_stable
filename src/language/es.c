@@ -4181,7 +4181,7 @@ gp_history(gp_hist *H, long p, char *old, char *entry)
   GEN z;
 
   if (!t)
-    pari_err(old?talker2:talker,"The result history is empty", old, entry);
+    pari_err(old?syntaxer:talker,"The result history is empty", old, entry);
 
   if (p <= 0) p += t; /* count |p| entries starting from last */
   if (p <= 0 || p <= (long)(t - s) || (ulong)p > t)
@@ -4190,14 +4190,14 @@ gp_history(gp_hist *H, long p, char *old, char *entry)
     long pmin = (long)(t - s) + 1;
     if (pmin <= 0) pmin = 1;
     sprintf(str, "History result %%%ld not available [%%%ld-%%%lu]", p,pmin,t);
-    pari_err(talker2, str, old, entry);
+    pari_err(syntaxer, str, old, entry);
   }
   z = H->res[ (p-1) % s ];
   if (!z)
   {
     char *str = stackmalloc(128);
     sprintf(str, "History result %%%ld has been deleted (histsize changed)", p);
-    pari_err(talker2, str, old, entry);
+    pari_err(syntaxer, str, old, entry);
   }
   return z;
 }

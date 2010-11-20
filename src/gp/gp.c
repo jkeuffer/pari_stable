@@ -652,7 +652,7 @@ aide0(const char *s0, int flag)
   if (isdigit((int)*s))
   {
     n = atoi(s);
-    if (n < 0 || n > 15) pari_err(talker2,"no such section in help: ?",s,s);
+    if (n < 0 || n > 15) pari_err(syntaxer,"no such section in help: ?",s,s);
     if (n == 12)
       community();
     else if (long_help)
@@ -1007,7 +1007,7 @@ escape(char *tch, int ismain)
       s = get_sep(s);
       if (!*s) s = (GP_DATA->flags & gpd_SIMPLIFY)? "0": "1";
       (void)sd_simplify(s,d_ACKNOWLEDGE); break;
-    default: pari_err(talker2,"unexpected character", tch,tch-1);
+    default: pari_err(syntaxer,"unexpected character", tch,tch-1);
   }
 }
 
@@ -1101,7 +1101,7 @@ check_meta(char *buf, int ismain)
 /* LOCATE GPRC */
 
 static int get_line_from_file(const char *prompt, filtre_t *F, FILE *file);
-#define err_gprc(s,t,u) { fprintferr("\n"); pari_err(talker2,s,t,u); }
+#define err_gprc(s,t,u) { fprintferr("\n"); pari_err(syntaxer,s,t,u); }
 
 /* return $HOME or the closest we can find */
 static const char *
@@ -1592,7 +1592,7 @@ break_loop(int numerr)
   long nenv;
   pari_sp av;
 
-  if (numerr == talker2) return 0;
+  if (numerr == syntaxer) return 0;
   if (numerr == errpile) { evalstate_clone(); avma = top; }
 
   b = filtered_buffer(&F);
