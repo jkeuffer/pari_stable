@@ -259,8 +259,6 @@ F2x_mul1(ulong x, ulong y)
   return z;
 }
 
-GEN F2x_mul(GEN x, GEN y);
-
 /* fast product (Karatsuba) of polynomials a,b. These are not real GENs, a+2,
  * b+2 were sent instead. na, nb = number of terms of a, b.
  * Only c, c0, c1, c2 are genuine GEN.
@@ -427,35 +425,46 @@ F2x_divrem(GEN x, GEN y, GEN *pr)
 GEN
 F2x_gcd(GEN a, GEN b)
 {
-  pari_sp av=avma;
-  GEN c;
+  pari_sp av = avma, lim = stack_lim(av,2);
   if (lg(b) > lg(a)) swap(a, b);
   while (lgpol(b))
   {
-    c = F2x_rem(a,b);
+    GEN c = F2x_rem(a,b);
     a = b; b = c;
+    if (low_stack(lim,stack_lim(av,2)))
+    {
+      if (DEBUGMEM>1) pari_warn(warnmem,"F2x_gcd (d = %ld)",F2x_degree(c));
+      gerepileall(av,2, &a,&b);
+    }
   }
-  return gerepileuptoleaf(av,a);
+  if (low_stack(lim,stack_lim(av,2))) a = gerepileuptoleaf(av, a);
+  return a;
 }
 
 GEN
 F2x_extgcd(GEN a, GEN b, GEN *ptu, GEN *ptv)
 {
-  GEN q,z,u,v, x = a, y = b;
-
-  u = pol0_F2x(a[1]);
-  v = pol1_F2x(a[1]); /* v = 1 */
-  while (lgpol(y))
+  pari_sp av=avma, lim = stack_lim(av,2);
+  GEN u,v,d,d1,v1;
+  long vx = a[1];
+  d = a; d1 = b;
+  v = pol0_F2x(vx); v1 = pol1_F2x(vx);
+  while (lgpol(d1))
   {
-    q = F2x_divrem(x,y,&z);
-    x = y; y = z; /* (x,y) = (y, x - q y) */
-    z = F2x_add(u, F2x_mul(q,v));
-    u = v; v = z; /* (u,v) = (v, u - q v) */
+    GEN r, q = F2x_divrem(d,d1, &r);
+    v = F2x_add(v,F2x_mul(q,v1));
+    u=v; v=v1; v1=u;
+    u=r; d=d1; d1=u;
+    if (low_stack(lim,stack_lim(av,2)))
+    {
+      if (DEBUGMEM>1) pari_warn(warnmem,"F2x_extgcd (d = %ld)",F2x_degree(d));
+      gerepileall(av,5, &d,&d1,&u,&v,&v1);
+    }
   }
-  z = F2x_add(x, F2x_mul(b,u));
-  z = F2x_div(z,a);
-  *ptu = z;
-  *ptv = u; return x;
+  if (ptu) *ptu = F2x_div(F2x_add(d, F2x_mul(b,v)), a);
+  *ptv = v;
+  if (low_stack(lim,stack_lim(av,2))) gerepileall(av,ptu?3:2,&d,ptv,ptu);
+  return d;
 }
 
 GEN
@@ -475,10 +484,9 @@ F2xq_sqr(GEN x,GEN pol)
 GEN
 F2xq_invsafe(GEN x, GEN T)
 {
-  GEN U, V;
-  GEN z = F2x_extgcd(x, T, &U, &V);
+  GEN V, z = F2x_extgcd(T, x, NULL, &V);
   if (degpol(z)) return NULL;
-  return U;
+  return V;
 }
 
 GEN
