@@ -1417,8 +1417,8 @@ gneg(GEN x)
       if (!signe(gel(x,4))) return gcopy(x);
       y = cgetg(5, t_PADIC);
       y[1] = x[1];
-      gel(y,2) = icopy(gel(y,2));
-      gel(y,3) = icopy(gel(y,3));
+      gel(y,2) = icopy(gel(x,2));
+      gel(y,3) = icopy(gel(x,3));
       gel(y,4) = subii(gel(x,3),gel(x,4));
       break;
 
