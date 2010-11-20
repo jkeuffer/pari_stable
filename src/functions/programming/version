@@ -1,7 +1,7 @@
 Function: version
 Section: programming/specific
 C-Name: pari_version
-Prototype: 
+Prototype:
 Help: version(): returns the PARI version as [major,minor,patch,status,RCSversion].
 Doc: returns the current version number as a \typ{VEC}
  with three integer components (major version number, minor version number

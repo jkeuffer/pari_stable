@@ -1841,7 +1841,7 @@ pari_version(void) {
   gel(v,1) = utoi(major);
   gel(v,2) = utoi(minor);
   gel(v,3) = utoi(patch);
-  gel(v,4) = strtoGENstr(PARI_STATUS); 
+  gel(v,4) = strtoGENstr(PARI_STATUS);
   gel(v,5) = strtoGENstr(PARI_RCSVERSION);
   return v;
 }
