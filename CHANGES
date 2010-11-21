@@ -42,6 +42,8 @@ LGr1- universal constants (gen_0,gen_1, etc.) are now read-only
       change locally) a global variable to handle conversion to power series.
 LGr7- add information to the version() output [backward compatible if version()
       used as recommanded in the documentation] [#1130]
+   8- O(x^0) is now printed as is, not as O(1). t_SER and t_PADIC are now
+      treated in the same way.
 
   Added
 BA 1- trap keyword "syntaxer" to trap syntax error from eval.

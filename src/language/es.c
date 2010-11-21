@@ -2603,7 +2603,7 @@ bruti_intern(GEN g, pariout_t *T, outString *S, int addsign)
         }
         sp_sign_sp(T,S,1);
       }
-      str_puts(S, "O("); monome(S,v,i); str_putc(S, ')'); break;
+      str_puts(S, "O("); VpowE(S, v, i); str_putc(S, ')'); break;
 
     case t_PADIC:
     {
