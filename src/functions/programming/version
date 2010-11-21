@@ -2,35 +2,43 @@ Function: version
 Section: programming/specific
 C-Name: pari_version
 Prototype:
-Help: version(): returns the PARI version as [major,minor,patch,status,RCSversion].
-Doc: returns the current version number as a \typ{VEC}
- with three integer components (major version number, minor version number
- and patchlevel), followed by two string components: status (\kbd{release},
- \kbd{development}, \kbd{alpha}, \kbd{beta}, \dots) and a version string
- related to the status (\kbd{svn-}\emph{revision} if compiled from a
- subversion repository, \kbd{git-}\emph{commit} if compiled from a git
- repository, \dots).
+Help: version(): returns the PARI version as [major,minor,patch] or [major,minor,patch,status,RCSversion].
+Doc: returns the current version number as a \typ{VEC} with three integer
+ components (major version number, minor version number and patchlevel);
+ if your
+ sources were obtained through one of our revision control systems (CVS, svn,
+ git\dots), this will be followed by a more precise version string
+ (\kbd{svn-}\emph{revision} if compiled from a subversion repository,
+ \kbd{git-}\emph{commit} if compiled from a git repository, \dots).
 
- Unless you are working with multiple development versions, you probably do
- not care about the last two components. The \kbd{lex} function offers a
- clever way to check against a particular version number, since it will
- compare each successive vector entry, numerically or as strings, and will
- not mind if the vectors it compares have different lengths :
+ This function is present in all versions of PARI following releases 2.3.4
+ (stable) and 2.4.3 (testing).
+
+ Unless you are working with multiple development versions, you probably only
+ care about the 3 first numeric components. In any case, the \kbd{lex} function
+ offers a clever way to check against a particular version number, since it will
+ compare each successive vector entry, numerically or as strings, and will not
+ mind if the vectors it compares have different lengths :
  \bprog
-    if (lex(version(), [2,2,0]) >= 0,
-      \\ code to be executed if we are running 2.2.0 or more recent.
+    if (lex(version(), [2,3,5]) >= 0,
+      \\ code to be executed if we are running 2.3.5 or more recent.
     ,
       \\ compatibility code
     );
+ @eprog\noindent On a number of different machines, \kbd{version()} could return either of
+ \bprog
+  %1 = [2, 3, 4]    \\ released version, stable branch
+  %1 = [2, 4, 3]    \\ released version, testing branch
+  %1 = [2, 4, 4, "svn-12746"] \\ development
  @eprog
- In particular the first line of the gp introductory message can be emulated by
+
+ In particular the first line of the gp introductory message can be essentially
+ emulated by
  \bprog
     v = version();
     n = Str(v[1], ".", v[2], ".", v[3]);
-    s = if (#v[5], Str(v[4], " ", v[5]), v[4]);
+    s = if (#v > 3, v[4], "");
     print("GP/PARI CALCULATOR Version ", n, " (", s, ")");
   @eprog\noindent If you \emph{are} working with many development versions of
-  PARI/GP, the last two components can be profitably included in the name of
+  PARI/GP, the last component can be profitably included in the name of
   your logfile, for instance.
-Variant: Also available is \fun{GEN}{pari_version}{void} corresponding to
-  \kbd{flag} = 0.
