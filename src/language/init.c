@@ -515,11 +515,11 @@ pari_init_defaults(void)
   if (!pari_datadir)
   {
 #ifdef _WIN32
-    if (GPDATADIR[0]=='@' && GPDATADIR[1]==0)
+    if (paricfg_datadir[0]=='@' && paricfg_datadir[1]==0)
       pari_datadir = win32_datadir();
     else
 #endif
-      pari_datadir = pari_strdup(GPDATADIR);
+      pari_datadir = pari_strdup(paricfg_datadir);
   }
   else pari_datadir= pari_strdup(pari_datadir);
   for (i=0; i<c_LAST; i++) gp_colors[i] = c_NONE;
@@ -1831,26 +1831,22 @@ gettime(void) { return timer(); }
 /*                                                                 */
 /*******************************************************************/
 GEN
-pari_version(void) {
-  if (*PARI_RCSVERSION) {
+pari_version(void)
+{
+  const ulong mask = (1UL<<PARI_VERSION_SHIFT) - 1;
+  ulong major, minor, patch, n = paricfg_version_code;
+  patch = n & mask; n >>= PARI_VERSION_SHIFT;
+  minor = n & mask; n >>= PARI_VERSION_SHIFT;
+  major = n;
+  if (*paricfg_vcsversion) {
     GEN v = cgetg(5, t_VEC);
-    const ulong mask = (1UL<<PARI_VERSION_SHIFT) - 1;
-    ulong major, minor, patch, n = PARI_VERSION_CODE;
-    patch = n & mask; n >>= PARI_VERSION_SHIFT;
-    minor = n & mask; n >>= PARI_VERSION_SHIFT;
-    major = n;
     gel(v,1) = utoi(major);
     gel(v,2) = utoi(minor);
     gel(v,3) = utoi(patch);
-    gel(v,4) = strtoGENstr(PARI_RCSVERSION);
+    gel(v,4) = strtoGENstr(paricfg_vcsversion);
     return v;
   } else {
     GEN v = cgetg(4, t_VEC);
-    const ulong mask = (1UL<<PARI_VERSION_SHIFT) - 1;
-    ulong major, minor, patch, n = PARI_VERSION_CODE;
-    patch = n & mask; n >>= PARI_VERSION_SHIFT;
-    minor = n & mask; n >>= PARI_VERSION_SHIFT;
-    major = n;
     gel(v,1) = utoi(major);
     gel(v,2) = utoi(minor);
     gel(v,3) = utoi(patch);

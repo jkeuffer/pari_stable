@@ -635,15 +635,18 @@ for dir in basemath modules language gp graph systems; do
   case "$f" in
   gp|gp_rl)
     cflags="$cflags -I$src/language \$(RLINCLUDE)"
-    depend="$ANAL_H $src/gp/gp.h ./paricfg.h"
+    depend="$ANAL_H $src/gp/gp.h"
     ;;
   gp_init)
     cflags="$cflags -I$src/graph"
     depend="$RECT_H $src/gp/gp_init.h $ANAL_H"
     ;;
   default)
-    depend="$ANAL_H ./paricfg.h"
+    depend="$ANAL_H"
     cflags="$cflags \$(DLCFLAGS)"
+    ;;
+  paricfg)
+    depend="./paricfg.h"
     ;;
   plotport)
     cflags="$cflags -I$src/graph"

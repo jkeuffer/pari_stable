@@ -790,7 +790,7 @@ static void
 print_shortversion(void)
 {
   const ulong mask = (1UL<<PARI_VERSION_SHIFT) - 1;
-  ulong n = PARI_VERSION_CODE, major, minor, patch;
+  ulong n = paricfg_version_code, major, minor, patch;
 
   patch = n & mask; n >>= PARI_VERSION_SHIFT;
   minor = n & mask; n >>= PARI_VERSION_SHIFT;
@@ -827,8 +827,8 @@ print_version(void)
   pari_sp av = avma;
   char *buf, *ver = what_cc();
 
-  center(PARIVERSION);
-  center(PARIINFO);
+  center(paricfg_version);
+  center(paricfg_buildinfo);
   buf = stackmalloc(strlen(__DATE__) +  32 + (ver? strlen(ver): 0));
   if (ver) (void)sprintf(buf, "compiled: %s, %s", __DATE__, ver);
   else     (void)sprintf(buf, "compiled: %s", __DATE__);
@@ -1223,7 +1223,7 @@ get_preproc_value(char **s)
       default: return -1;
     }
     if (**s == '=') { (*s)++; orequal = 1; }
-    d = PARI_VERSION_CODE - read_version(s);
+    d = paricfg_version_code - read_version(s);
     if (!d) return orequal;
     return less? (d < 0): (d > 0);
   }

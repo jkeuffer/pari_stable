@@ -698,7 +698,7 @@ These are \kbd{double} approximations to useful constants:
 
 \subsec{PARI version numbers}
 
-\noindent \tet{PARI_VERSION_CODE} encodes in a single \kbd{long}, the Major
+\noindent \tet{paricfg_version_code} encodes in a single \kbd{long}, the Major
 and minor version numbers as well as the patchlevel.
 
 \fun{long}{PARI_VERSION}{long M, long m, long p} produces the version code
@@ -709,20 +709,16 @@ code number means more recent release).
 \noindent \tet{PARI_VERSION_SHIFT} is the number of bits used to store each of
 the integers $M$, $m$, $p$ in the version code.
 
-\noindent \tet{PARI_STATUS} contains the release's status (\kbd{release},
-\kbd{development}, \kbd{alpha}, \kbd{beta}, \dots).
-
-\noindent \tet{PARI_RCSVERSION} is a version  string related to the
+\noindent \tet{paricfg_vcsversion} is a version string related to the
 revision control system used to handle your sources, if any. For instance
 \kbd{svn-}\emph{revision} if compiled from a subversion repository,
 \kbd{git-}\emph{commit} if compiled from a git repository, etc.
 
-The two character strings \kbd{PARIVERSION} and \kbd{PARIINFO}, correspond to
+The two character strings \kbd{paricfg\_version} and \kbd{paricfg\_buildinfo}, correspond to
 the first two lines printed by \kbd{gp} just before the Copyright message.
 
 \fun{GEN}{pari_version}{} returns the version number as a PARI object, a
-\typ{VEC} with 3 \typ{INT} and 2 \typ{STR} components.
-
+\typ{VEC} with three \typ{INT} and one \typ{STR} components.
 
 \section{Handling the PARI stack}
 
