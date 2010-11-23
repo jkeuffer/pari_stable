@@ -3,8 +3,8 @@
 1
 ? my(bound=100,step=20,halt=41);check(B)=my(bi=[B^2]);for(i=1,bound,my(p=i+s
 tep,N=p^2);if(i==halt,error("check:",N)))
-(B)->my(bi=[B^2]);for(i=1,bound,my(p=i+step,N=p^2);if(i==halt,error("check:"
-,N)))
+(B)->my(bound=100,step=20,halt=41);my(bi=[B^2]);for(i=1,bound,my(p=i+step,N=
+p^2);if(i==halt,error("check:",N)))
 ? check(1000);
   ***   at top-level: check(1000)
   ***                 ^-----------
@@ -19,4 +19,4 @@ tep,N=p^2);if(i==halt,error("check:",N)))
 ? [bound,step,halt,i,p,N,bi,B]
 [bound, step, halt, i, p, N, bi, B]
 ? print("Total time spent: ",gettime);
-Total time spent: 0
+Total time spent: 4

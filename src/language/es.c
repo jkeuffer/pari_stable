@@ -2671,7 +2671,24 @@ bruti_intern(GEN g, pariout_t *T, outString *S, int addsign)
         else
         {
           str_putc(S,'(');   str_puts(S,GSTR(gmael(g,6,1)));
-          str_puts(S,")->"); str_puts(S,GSTR(gmael(g,6,2)));
+          str_puts(S,")->");
+          if (lg(g)>=8 && lg(gel(g,7))>1 && lg(mael(g,5,3))>=2)
+          {
+            str_puts(S,"my(");
+            GEN v = gel(g,7), d = gmael3(g,5,3,1);
+            long l = lg(v);
+            for(i=1; i<l; i++)
+            {
+              entree *ep = (entree*) gel(d,i);
+              if (i>1)
+                str_putc(S,',');
+              str_puts(S,ep->name);
+              str_putc(S,'=');
+              bruti(gel(v,l-i),T,S);
+            }
+            str_puts(S,");");
+          }
+          str_puts(S,GSTR(gmael(g,6,2)));
         }
       }
       else
