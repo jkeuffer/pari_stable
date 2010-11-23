@@ -2100,11 +2100,11 @@ GEN     rootsof1_kannan(GEN nf);
 
 /* paricfg.c */
 
-const char *paricfg_datadir;
-const char *paricfg_version;
-const char *paricfg_buildinfo;
-const long  paricfg_version_code;
-const char *paricfg_vcsversion;
+extern const char *paricfg_datadir;
+extern const char *paricfg_version;
+extern const char *paricfg_buildinfo;
+extern const long  paricfg_version_code;
+extern const char *paricfg_vcsversion;
 
 /* part.c */
 
