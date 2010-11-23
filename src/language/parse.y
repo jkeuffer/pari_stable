@@ -86,7 +86,7 @@ sequnused: seq       {$$=$1;}
 
 seq: /**/ %prec SEQ  {$$=newnode(Fnoarg,-1,-1,&@$);}
    | expr %prec SEQ  {$$=$1;}
-   | seq ';'         {$$=$1;}
+   | seq ';'         {$$=$1;@$.end--;}
    | seq ';' expr    {$$=newnode(Fseq,$1,$3,&@$);}
 ;
 
