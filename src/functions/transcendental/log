@@ -6,7 +6,10 @@ Help: log(x): natural logarithm of x.
 Description:
  (gen):gen:prec        glog($1, prec)
 Doc: principal branch of the natural logarithm of
- $x$, i.e.~such that $\text{Im(log}(x))\in{} ]-\pi,\pi]$. The result is complex
+ $x \in \C^*$, i.e.~such that $\text{Im(log}(x))\in{} ]-\pi,\pi]$.
+ The branch cut lies
+ along the negative real axis, continuous with quadrant 2, i.e.~such that
+ $\lim_{b\to 0^+} \log (a+bi) = \log a$ for $a \in\R^*$. The result is complex
  (with imaginary part equal to $\pi$) if $x\in \R$ and $x < 0$. In general,
  the algorithm uses the formula
  $$\log(x) \approx {\pi\over 2\text{agm}(1, 4/s)} - m \log 2, $$

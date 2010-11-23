@@ -1,0 +1,5 @@
+atan: 0.0 + I*-1.0 is a pole ?
+atan: 0.0 + I*1.0 is a pole ?
+atanh: -1.0 + I*0.0 is a pole ?
+atanh: 1.0 + I*0.0 is a pole ?
+Total time spent: 3980

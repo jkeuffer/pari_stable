@@ -6,16 +6,14 @@ Help: sqrt(x): square root of x.
 Description:
  (real):gen           sqrtr($1)
  (gen):gen:prec       gsqrt($1, prec)
-Doc: principal branch of the square root of $x$,
- i.e.~such that $\text{Arg}(\text{sqrt}(x))\in{} ]-\pi/2, \pi/2]$, or in other
- words such that $\Re(\text{sqrt}(x))>0$ or $\Re(\text{sqrt}(x))=0$ and
- $\Im(\text{sqrt}(x))\ge 0$. If $x\in \R$ and $x<0$, then the result is
- complex with positive imaginary part.
+Doc: principal branch of the square root of $x$, defined as $\sqrt{x} =
+ \exp(\log x / 2)$. In particular, we have
+ $\text{Arg}(\text{sqrt}(x))\in{} ]-\pi/2, \pi/2]$, and if $x\in \R$ and $x<0$,
+ then the result is complex with positive imaginary part.
 
- Intmod a prime and $p$-adics are allowed as arguments. In that case,
+ Intmod a prime $p$ and $p$-adics are allowed as arguments. In that case,
  the square root (if it exists) which is returned is the one whose
- first $p$-adic digit (or its unique $p$-adic digit in the case of
- intmods) is in the interval $[0,p/2]$. When the argument is an
+ first $p$-adic digit is in the interval $[0,p/2]$. When the argument is an
  intmod a non-prime (or a non-prime-adic), the result is undefined.
 Variant: For a \typ{PADIC} $x$, the function
  \fun{GEN}{Qp_sqrt}{GEN x} is also available.

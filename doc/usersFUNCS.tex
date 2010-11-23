@@ -393,8 +393,9 @@ not matter, because $x$ only had a precision of $19$ digits.
 @eprog
 
 Note that even if the argument is real, the result may be complex
-(e.g.~$\text{acos}(2.0)$ or $\text{acosh}(0.0)$).
-Note also that the principal branch is always chosen.
+(e.g.~$\text{acos}(2.0)$ or $\text{acosh}(0.0)$). See each individual
+function help for the definition of the branch cuts and choice of principal
+value.
 
 \item If the argument is either an integer, a rational, an exact complex
 number or a quadratic number, it is first converted to a real
@@ -420,7 +421,7 @@ the value 5, but this cannot be attained on 64-bit machines.
 then the function is evaluated for every possible complex embedding of that
 algebraic number.  A column vector of results is returned, with one component
 for each complex embedding.  Therefore, the number of components equals
-the degree of the polynomial defining the number field.
+the degree of the \typ{POLMOD} modulus.
 
 \item If the argument is an intmod or a $p$-adic, at present only a
 few functions like \kbd{sqrt} (square root), \kbd{sqr} (square), \kbd{log},

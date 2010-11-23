@@ -1349,6 +1349,7 @@ sqrtnr(GEN x, long n) { return mpexp(divrs(mplog(x), n)); }
 /*                         MISCELLANEOUS                           */
 /*                                                                 */
 /*******************************************************************/
+INLINE int ismpzero(GEN x) { return is_intreal_t(typ(x)) && !signe(x); }
 INLINE int isintzero(GEN x) { return typ(x) == t_INT && !signe(x); }
 INLINE int isint1(GEN x) { return typ(x)==t_INT && equali1(x); }
 INLINE int isintm1(GEN x){ return typ(x)==t_INT && equalim1(x);}

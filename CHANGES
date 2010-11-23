@@ -44,6 +44,11 @@ LGr7- add information to the version() output [backward compatible if version()
       used as recommanded in the documentation] [#1130]
    8- O(x^0) is now printed as is, not as O(1). t_SER and t_PADIC are now
       treated in the same way.
+   9- inverse trigonometric functions (acos,asin,atan,acosh,asinh,atanh):
+      values on the branch cuts changed to conform to standards, e.g.
+      "implementations shall map a cut so the function is continuous as the cut
+      is approached coming around the finite endpoint of the cut in a counter
+      clockwise direction." (ISO C99) [initial patch Richard Kreckel, #1084]
 
   Added
 BA 1- trap keyword "syntaxer" to trap syntax error from eval.
@@ -55,6 +60,7 @@ BA 6- random() now allow to draw random polynomials
 BA 7- PARI functions pol_0, pol0_Flx, pol0_F2x
 VB 8- [mingw] --datadir=@ option to Configure
 BA 9- PARI functions FlxqX_div
+  10- PARI function ismpzero
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.3 (released 08/10/2010):

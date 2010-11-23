@@ -141,7 +141,8 @@ gatan(GEN x, long prec)
     case t_REAL:
       return mpatan(x);
 
-    case t_COMPLEX:
+    case t_COMPLEX: /* atan(x) = -i atanh(ix) */
+      if (ismpzero(gel(x,2))) return gatan(gel(x,1), prec);
       av = avma; return gerepilecopy(av, mulcxmI(gath(mulcxI(x),prec)));
 
     case t_INTMOD: case t_PADIC: pari_err(typeer,"gatan");
@@ -197,10 +198,11 @@ gasin(GEN x, long prec)
       y = cgetg(3,t_COMPLEX);
       gel(y,1) = Pi2n(-1, lg(x));
       gel(y,2) = mpach(x);
-      if (sx < 0) { togglesign(gel(y,1)); togglesign(gel(y,2)); }
+      if (sx < 0) togglesign(gel(y,1)); else togglesign(gel(y,2));
       return y;
 
-    case t_COMPLEX:
+    case t_COMPLEX: /* asin(z) = -i asinh(iz) */
+      if (ismpzero(gel(x,2))) return gasin(gel(x,1), prec);
       av = avma;
       return gerepilecopy(av, mulcxmI(gash(mulcxI(x), prec)));
 
@@ -269,12 +271,16 @@ gacos(GEN x, long prec)
       if (expo(x) < 0) return mpacos(x);
 
       y = cgetg(3,t_COMPLEX); p1 = mpach(x);
-      if (sx < 0) gel(y,1) = mppi(lg(x));
-      else { gel(y,1) = gen_0; togglesign(p1); }
+      if (sx < 0) { gel(y,1) = mppi(lg(x)); togglesign(p1); }
+      else gel(y,1) = gen_0;
       gel(y,2) = p1; return y;
 
-    case t_COMPLEX: av = avma;
-      return gerepilecopy(av, mulcxmI(gach(x,prec)));
+    case t_COMPLEX:
+      if (ismpzero(gel(x,2))) return gacos(gel(x,1), prec);
+      av = avma;
+      p1 = gadd(x, mulcxI(gsqrt(gsubsg(1,gsqr(x)), prec)));
+      y = glog(p1,prec); /* log(x + I*sqrt(1-x^2)) */
+      return gerepilecopy(av, mulcxmI(y));
 
     case t_INTMOD: case t_PADIC: pari_err(typeer,"gacos");
     case t_SER:
@@ -530,7 +536,7 @@ gth(GEN x, long prec)
 }
 /********************************************************************/
 /**                                                                **/
-/**                     ARG-HYPERBOLIC SINE                        **/
+/**                     AREA HYPERBOLIC SINE                       **/
 /**                                                                **/
 /********************************************************************/
 
@@ -552,31 +558,23 @@ mpash(GEN x)
 GEN
 gash(GEN x, long prec)
 {
-  long sx, sy, sz;
   pari_sp av;
   GEN a, y, p1;
 
-  if (gequal0(x)) return gcopy(x);
   switch(typ(x))
   {
     case t_REAL:
+      if (!signe(x)) return rcopy(x);
       return mpash(x);
 
-    case t_COMPLEX: av = avma;
+    case t_COMPLEX:
+      if (ismpzero(gel(x,2))) return gash(gel(x,1), prec);
+      av = avma;
+      if (ismpzero(gel(x,1))) /* avoid cancellation */
+        return gerepilecopy(av, mulcxI(gasin(gel(x,2), prec)));
       p1 = gadd(x, gsqrt(gaddsg(1,gsqr(x)), prec));
-      y = glog(p1,prec);
-      sz = (typ(y)==t_COMPLEX)? gsigne(gel(y,1)): gsigne(y);
-      if (typ(p1) == t_COMPLEX) {
-        sx = gsigne(gel(p1,1));
-        sy = gsigne(gel(p1,2));
-      } else {
-        sx = gsigne(p1);
-        sy = 0;
-      }
-      if (sx > 0 || (!sx && sy*sz<=0)) return gerepileupto(av, y);
-
-      p1 = mppi(prec); if (sy<0) setsigne(p1,-1);
-      return gerepileupto(av, gsub(mkcomplex(gen_0,p1), y));
+      y = glog(p1,prec); /* log (x + sqrt(1+x^2)) */
+      return gerepileupto(av, y);
     case t_INTMOD: case t_PADIC: pari_err(typeer,"gash");
     default:
       av = avma; if (!(y = toser_i(x))) break;
@@ -598,7 +596,7 @@ gash(GEN x, long prec)
 }
 /********************************************************************/
 /**                                                                **/
-/**                     ARG-HYPERBOLIC COSINE                      **/
+/**                     AREA HYPERBOLIC COSINE                     **/
 /**                                                                **/
 /********************************************************************/
 
@@ -630,17 +628,18 @@ gach(GEN x, long prec)
       if (s == 0) b = acos0(e);
       else if (e < 0) b = mpacos(x); /* -1 < x < 1 */
       else {
-        if (!absrnz_egal1(x)) { a = mpach(x); togglesign(a); }
+        if (!absrnz_egal1(x)) a = mpach(x);
         b = mppi(lg(x));
       }
       gel(y,1) = a;
       gel(y,2) = b; return y;
     }
     case t_COMPLEX:
+      if (ismpzero(gel(x,2))) return gach(gel(x,1), prec);
       av = avma;
-      p1 = gadd(x, gsqrt(gaddsg(-1,gsqr(x)), prec)); /* x + sqrt(x^2-1) */
-      y = glog(p1,prec);
-      if (typ(y) == t_COMPLEX && signe(y[2]) < 0) y = gneg(y);
+      p1 = gadd(x, gsqrt(gaddsg(-1,gsqr(x)), prec));
+      y = glog(p1,prec); /* log(x + sqrt(x^2-1)) */
+      if (signe(real_i(y)) < 0) y = gneg(y);
       return gerepileupto(av, y);
 
     case t_INTMOD: case t_PADIC: pari_err(typeer,"gach");
@@ -674,7 +673,7 @@ gach(GEN x, long prec)
 }
 /********************************************************************/
 /**                                                                **/
-/**                     ARG-HYPERBOLIC TANGENT                     **/
+/**                     AREA HYPERBOLIC TANGENT                    **/
 /**                                                                **/
 /********************************************************************/
 
@@ -694,26 +693,33 @@ mpath(GEN x)
 GEN
 gath(GEN x, long prec)
 {
+  long sx;
   pari_sp av;
   GEN a, y, z;
 
   switch(typ(x))
   {
     case t_REAL:
-      if (!signe(x)) return real_0_bit(expo(x));
+      sx = signe(x);
+      if (!sx) return real_0_bit(expo(x));
       if (expo(x) < 0) return mpath(x);
 
       y = cgetg(3,t_COMPLEX);
       av = avma;
-      z = invr( subrs(x,1) ); setexpo(z, expo(z)+1); /* 2/(x-1)*/
+      z = subrs(x,1);
+      if (!signe(z)) pari_err(talker,"singular argument in atanh");
+      z = invr(z); setexpo(z, expo(z)+1); /* 2/(x-1)*/
       z = addrs(z,1);
       if (!signe(z)) pari_err(talker,"singular argument in atanh");
       z = logr_abs(z);
-      setexpo(z, expo(z)-1);
+      setexpo(z, expo(z)-1); /* (1/2)log((1+x)/(x-1)) */
       gel(y,1) = gerepileuptoleaf(av, z);
-      gel(y,2) = Pi2n(-1, lg(x)); return y;
+      gel(y,2) = Pi2n(-1, lg(x));
+      if (sx > 0) togglesign(gel(y,2));
+      return y;
 
-    case t_COMPLEX:
+    case t_COMPLEX: /* 2/(1-z) - 1 = (1+z) / (1-z) */
+      if (ismpzero(gel(x,2))) return gath(gel(x,1), prec);
       av = avma; z = glog( gaddgs(gdivsg(2,gsubsg(1,x)),-1), prec );
       return gerepileupto(av, gmul2n(z,-1));
 

@@ -6277,6 +6277,9 @@ to an integer~0 (excluding \typ{INTMOD}s like \kbd{Mod(0,2)}), and 0~(false)
 otherwise. Contrary to \kbd{isintzero}, this includes recursive objects, for
 instance vectors, whose components are $0$.
 
+\fun{int}{ismpzero}{GEN x} returns 1 (true) if \kbd{x} is a \typ{INT} or
+a \typ{REAL} equal to~0.
+
 \fun{int}{isintzero}{GEN x} returns 1 (true) if \kbd{x} is a \typ{INT}
 equal to~0.
 

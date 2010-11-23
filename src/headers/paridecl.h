@@ -3036,6 +3036,7 @@ INLINE int    is_vec_t(long t);
 INLINE int    isint1(GEN x);
 INLINE int    isintm1(GEN x);
 INLINE int    isintzero(GEN x);
+INLINE int    ismpzero(GEN x);
 INLINE int    isonstack(GEN x);
 INLINE void   killblock(GEN x);
 INLINE GEN    leading_term(GEN x);
