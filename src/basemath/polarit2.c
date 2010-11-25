@@ -2596,6 +2596,7 @@ isinexactall(GEN x, int *simple, int *rational)
 static int
 inexact(GEN x, int *simple, int *rational)
 {
+  int junk;
   switch(typ(x))
   {
     case t_INT: case t_FRAC: return 0;
@@ -2612,19 +2613,19 @@ inexact(GEN x, int *simple, int *rational)
           || inexact(gel(x,2), simple, rational);
     case t_QUAD:
       *rational = *simple = 0;
-      return inexact(gel(x,2), simple, rational)
-          || inexact(gel(x,3), simple, rational);
+      return inexact(gel(x,2), &junk, rational)
+          || inexact(gel(x,3), &junk, rational);
 
     case t_POLMOD:
       *rational = 0;
       return isinexactall(gel(x,1), simple, rational);
     case t_POL:
       *rational = *simple = 0;
-      return isinexactall(x, simple, rational);
+      return isinexactall(x, &junk, rational);
     case t_RFRAC:
       *rational = *simple = 0;
-      return inexact(gel(x,1), simple, rational)
-          || inexact(gel(x,2), simple, rational);
+      return inexact(gel(x,1), &junk, rational)
+          || inexact(gel(x,2), &junk, rational);
   }
   *rational = *simple = 0; return 0;
 }
