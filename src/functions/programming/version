@@ -2,11 +2,11 @@ Function: version
 Section: programming/specific
 C-Name: pari_version
 Prototype:
-Help: version(): returns the PARI version as [major,minor,patch] or [major,minor,patch,status,RCSversion].
+Help: version(): returns the PARI version as [major,minor,patch] or [major,minor,patch,VCSversion].
 Doc: returns the current version number as a \typ{VEC} with three integer
  components (major version number, minor version number and patchlevel);
  if your
- sources were obtained through one of our revision control systems (CVS, svn,
+ sources were obtained through one of our version control systems (CVS, svn,
  git\dots), this will be followed by a more precise version string
  (\kbd{svn-}\emph{revision} if compiled from a subversion repository,
  \kbd{git-}\emph{commit} if compiled from a git repository, \dots).
