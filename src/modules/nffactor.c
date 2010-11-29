@@ -450,13 +450,13 @@ fact_from_sqff(GEN rep, GEN A, GEN B, GEN y, GEN T, GEN bad)
     { /* compute valuations mod a prime of degree 1 (avoid coeff explosion) */
       pari_sp av1 = avma;
       long j;
-      GEN quo, p, r, Bp, E = cgetalloc(t_VECSMALL,n+1);
+      GEN quo, p, r, Bp, lb = leading_term(B), E = cgetalloc(t_VECSMALL,n+1);
       byteptr pt = diffptr;
       ulong pp = 0;
       for (;; avma = av1)
       {
         NEXT_PRIME_VIADIFF_CHECK(pp, pt);
-        if (! umodiu(bad,pp)) continue;
+        if (! umodiu(bad,pp) || !umodiu(lb, pp)) continue;
         p = utoipos(pp);
         r = FpX_oneroot(T, p);
         if (!r) continue;
