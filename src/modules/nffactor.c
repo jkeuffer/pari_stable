@@ -262,15 +262,21 @@ RgX_int_normalize(GEN P)
   return RgX_Rg_div(P, P0);
 }
 
+/* discard change of variable if nf is of the form [nf,c] as return by nfinit
+ * for non-monic polynomials */
 static GEN
-get_den(GEN *nf, GEN T)
+proper_nf(GEN nf)
+{ return (lg(nf) == 3)? gel(nf,1): nf; }
+
+static GEN
+get_den(GEN *pnf, GEN T)
 {
   GEN den = gen_1;
-  if (!*nf)
+  if (!*pnf)
   {
     GEN fa, P, q, D;
-    *nf = nfinitall(T, nf_PARTIALFACT, DEFAULTPREC);
-    D = gel(*nf, 3);
+    *pnf = nfinitall(T, nf_PARTIALFACT, DEFAULTPREC);
+    D = nf_get_disc(proper_nf(*pnf));
     if (is_pm1(D)) return gen_1;
     fa = Z_factor_limit(D, 0);
     P = gel(fa,1); q = gel(P, lg(P)-1);
@@ -279,21 +285,43 @@ get_den(GEN *nf, GEN T)
   return den;
 }
 
+/* set B = A/gcd(A,A'), squarefree */
 static GEN
-get_nfsqff_data(GEN *nf, GEN T, GEN A, GEN *B, GEN *ptbad)
+get_nfsqff_data(GEN *pnf, GEN *pT, GEN *pA, GEN *pB, GEN *ptbad)
 {
-  GEN den, bad;
-  if (nfsqff_use_Trager(degpol(T), degpol(A)))
+  GEN den, bad, A = *pA, T = *pT;
+  long n = degpol(T);
+  if (nfsqff_use_Trager(n, degpol(A)))
   {
-    *nf = T; bad = den = ZX_disc(T);
+    *pnf = T; bad = den = ZX_disc(T);
     if (is_pm1(leading_term(T))) den = indexpartial(T, den);
   }
   else
   {
-    den = get_den(nf, T);
-    bad = nf_get_index(*nf); if (den != gen_1) bad = mulii(bad, den);
+    GEN nf;
+    den = get_den(pnf, T);
+    nf = proper_nf(*pnf);
+    bad = nf_get_index(nf);
+    if (den != gen_1) bad = mulii(bad, den);
+    if (nf != *pnf) { /* t_POL defining base field changed (not monic) */ 
+      long i, l;
+      GEN a = cgetg_copy(A, &l);
+      GEN rev = gel(*pnf,2), pow, dpow;
+
+      *pT = T = nf_get_pol(nf); /* need to update T */
+      pow = QXQ_powers(lift_intern(rev), n-1, T);
+      pow = Q_remove_denom(pow, &dpow);
+      a[1] = A[1];
+      for (i=2; i<l; i++) {
+        GEN c = gel(A,i);
+        if (typ(c) == t_POL) c = QX_ZXQV_eval(c, pow, dpow);
+        gel(a,i) = c;
+      }
+      *pA = A = Q_primpart(a); /* need to update A */
+      *pnf = nf; /* now discard change of variable */
+    }
   }
-  (void)nfgcd_all(A, RgX_deriv(A), T, bad, B);
+  (void)nfgcd_all(A, RgX_deriv(A), T, bad, pB);
   if( ptbad) *ptbad = bad;
   return den;
 }
@@ -312,7 +340,7 @@ GEN
 nfroots(GEN nf,GEN pol)
 {
   pari_sp av = avma;
-  GEN A, T, den;
+  GEN z, A, B, T, den;
   long d;
 
   if (!nf) return nfrootsQ(pol);
@@ -330,13 +358,13 @@ nfroots(GEN nf,GEN pol)
   if (degpol(T) == 1) return gerepileupto(av, nfrootsQ(simplify_shallow(A)));
 
   A = Q_primpart(A);
-  den = get_nfsqff_data(&nf, T, A, &A, NULL);
-  if (degpol(A) != d) A = Q_primpart( QXQX_normalize(A, T) );
-  ensure_lt_INT(A);
-  A = nfsqff(nf,A, ROOTS, den);
-  A = gerepileupto(av, QXQV_to_mod(A, T));
-  gen_sort_inplace(A, (void*)&cmp_RgX, &cmp_nodata, NULL);
-  return A;
+  den = get_nfsqff_data(&nf, &T, &A, &B, NULL);
+  if (degpol(B) != d) B = Q_primpart( QXQX_normalize(B, T) );
+  ensure_lt_INT(B);
+  z = nfsqff(nf,B, ROOTS, den);
+  z = gerepileupto(av, QXQV_to_mod(z, T));
+  gen_sort_inplace(z, (void*)&cmp_RgX, &cmp_nodata, NULL);
+  return z;
 }
 
 /* assume x is squarefree monic in nf.zk[X] */
@@ -519,7 +547,7 @@ nffactor(GEN nf,GEN pol)
   }
   if (degpol(T) == 1) return gerepileupto(av, QX_factor(simplify_shallow(A)));
 
-  den = get_nfsqff_data(&nf, T, A, &B, &bad);
+  den = get_nfsqff_data(&nf, &T, &A, &B, &bad);
   if (DEBUGLEVEL>2) msgTIMER(&ti, "squarefree test");
   if (degpol(B) != dA) B = Q_primpart( QXQX_normalize(B, T) );
   ensure_lt_INT(B);
