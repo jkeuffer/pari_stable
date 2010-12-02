@@ -65,8 +65,11 @@ eltreltoabs(GEN rnfeq, GEN x)
     long tc = typ(c);
     switch(tc)
     {
-      case t_POLMOD: c = gel(c,2); /* fall through */
-      case t_POL:    c = RgX_RgXQ_eval(c, alpha, polabs); break;
+      case t_POLMOD: c = gel(c,2);
+        if (typ(c) != t_POL) break;
+        c = RgX_RgXQ_eval(c, alpha, polabs); break;
+      case t_POL: 
+        c = RgX_RgXQ_eval(c, alpha, polabs); break;
       default:
         if (!is_const_t(tc)) pari_err(talker, "incorrect data in eltreltoabs");
     }
