@@ -618,8 +618,9 @@ pr_append(GEN nf, GEN rel, GEN p, GEN *prod, GEN *S1, GEN *S2)
   *S2 = shallowconcat(*S2, idealprimedec(rel,p));
 }
 
+/* N a t_INT */
 static void
-fa_pr_append(GEN nf,GEN rel,GEN N,GEN *prod,GEN *S1,GEN *S2)
+Zfa_pr_append(GEN nf,GEN rel,GEN N,GEN *prod,GEN *S1,GEN *S2)
 {
   if (!is_pm1(N))
   {
@@ -627,6 +628,18 @@ fa_pr_append(GEN nf,GEN rel,GEN N,GEN *prod,GEN *S1,GEN *S2)
     long i, l = lg(v);
     for (i=1; i<l; i++) pr_append(nf,rel,gel(v,i),prod,S1,S2);
   }
+}
+/* N a t_INT or t_FRAC */
+static void
+fa_pr_append(GEN nf,GEN rel,GEN N,GEN *prod,GEN *S1,GEN *S2)
+{
+  if (typ(N) == t_FRAC)
+  {
+    Zfa_pr_append(nf,rel,gel(N,1),prod,S1,S2);
+    Zfa_pr_append(nf,rel,gel(N,2),prod,S1,S2);
+  }
+  else
+    Zfa_pr_append(nf,rel,N,prod,S1,S2);
 }
 
 static GEN
