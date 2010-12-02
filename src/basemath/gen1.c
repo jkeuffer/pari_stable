@@ -1115,7 +1115,7 @@ gadd(GEN x, GEN y)
         d = gel(y,2); vd = RgX_valrem(d, &d);
 
         l = lg(x) + valp(x) - (vn - vd);
-        if (l < 3) return gcopy(x);
+        if (l < 3) { avma = av; return gcopy(x); }
 
         /* take advantage of y = t^n ! */
         if (degpol(d))
