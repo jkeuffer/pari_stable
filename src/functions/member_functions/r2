@@ -4,5 +4,5 @@ C-Name: member_r2
 Prototype: mG
 Help: _.r2
 Description:
- (nf):int:copy                  gmael($1, 2, 2)
- (gen):int                      member_r2($1)
+ (nf):small                     nf_get_r2($1)
+ (gen):int:copy                 member_r2($1)

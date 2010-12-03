@@ -5,4 +5,4 @@ Prototype: mG
 Help: _.index
 Description:
  (nf):int:copy                  nf_get_index($1)
- (gen):int                      member_index($1)
+ (gen):int:copy                 member_index($1)

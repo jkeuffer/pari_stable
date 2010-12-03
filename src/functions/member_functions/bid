@@ -4,4 +4,5 @@ C-Name: member_bid
 Prototype: mG
 Help: _.bid
 Description:
- (gen):gen                      member_bid($1)
+ (bnr):gen:copy                 bnr_get_bid($1)
+ (gen):gen:copy                 member_bid($1)

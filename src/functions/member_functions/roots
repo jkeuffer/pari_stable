@@ -4,8 +4,8 @@ C-Name: member_roots
 Prototype: mG
 Help: _.roots
 Description:
- (gal):gen:copy                 gel($1, 3)
- (bell):gen:copy                ell_get_roots($1)
- (nf):gen:copy                  nf_get_roots($1)
- (gen):gen                      member_roots($1)
+ (gal):vec:copy                 gal_get_roots($1)
+ (bell):vec:copy                ell_get_roots($1)
+ (nf):vec:copy                  nf_get_roots($1)
+ (gen):vec:copy                 member_roots($1)
 

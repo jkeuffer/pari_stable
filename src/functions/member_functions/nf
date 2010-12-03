@@ -5,4 +5,4 @@ C-Name: member_nf
 Prototype: mG
 Description:
  (nf):nf:parens                $1
- (gen):nf               member_nf($1)
+ (gen):nf:copy                 member_nf($1)

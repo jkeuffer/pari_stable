@@ -5,4 +5,4 @@ C-Name: member_sign
 Prototype: mG
 Description:
  (nf):vec:copy                  gel($1, 2)
- (gen):vec                      member_sign($1)
+ (gen):vec:copy                 member_sign($1)

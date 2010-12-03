@@ -6,5 +6,5 @@ Help: _.disc
 Description:
  (nf):int:copy                  nf_get_disc($1)
  (ell):gen:copy                 ell_get_disc($1)
- (gen):gen                      member_disc($1)
+ (gen):gen:copy                 member_disc($1)
 

@@ -4,6 +4,6 @@ Section: member_functions
 C-Name: member_pol
 Prototype: mG
 Description:
- (gal):gen:copy                 gel($1, 1)
+ (gal):gen:copy                 gal_get_pol($1)
  (nf):gen:copy                  nf_get_pol($1)
- (gen):gen                      member_pol($1)
+ (gen):gen:copy                 member_pol($1)

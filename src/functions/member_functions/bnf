@@ -6,4 +6,4 @@ Prototype: mG
 Description:
  (bnf):bnf:parens               $1
  (bnr):bnf:copy:parens          $bnf:1
- (gen):bnf                      member_bnf($1)
+ (gen):bnf:copy                 member_bnf($1)

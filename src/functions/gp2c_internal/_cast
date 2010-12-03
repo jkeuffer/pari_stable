@@ -123,13 +123,13 @@ Description:
 
  (#str):typ  ${1 str_format}
 
- (bnf):nf:parens       gel($1, 7)
+ (bnf):nf              bnf_get_nf($1)
  (gen):nf
- (bnr):bnf:parens      gel($1, 1)
+ (bnr):bnf             bnr_get_bnf($1)
  (gen):bnf
  (gen):bnr
- (bnf):clgp:parens     gmael($1, 8, 1)
- (bnr):clgp:parens     gel($1, 5)
+ (bnf):clgp            bnf_get_clgp($1)
+ (bnr):clgp            gel($1, 5)
  (gen):clgp
  (bell):ell
  (gen):ell
