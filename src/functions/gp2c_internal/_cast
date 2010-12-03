@@ -129,7 +129,7 @@ Description:
  (gen):bnf
  (gen):bnr
  (bnf):clgp            bnf_get_clgp($1)
- (bnr):clgp            gel($1, 5)
+ (bnr):clgp            bnr_get_clgp($1)
  (gen):clgp
  (bell):ell
  (gen):ell

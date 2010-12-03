@@ -2807,6 +2807,7 @@ INLINE GEN    bnf_get_reg(GEN bnf);
 INLINE GEN    bnf_get_tuU(GEN bnf);
 INLINE long   bnf_get_tuN(GEN bnf);
 INLINE GEN    bnr_get_bnf(GEN bnr);
+INLINE GEN    bnr_get_clgp(GEN bnr);
 INLINE GEN    bnr_get_cyc(GEN bnr);
 INLINE GEN    bnr_get_gen(GEN bnr);
 INLINE GEN    bnr_get_gen_nocheck(GEN bnr);

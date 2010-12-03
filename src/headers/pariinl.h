@@ -1951,6 +1951,8 @@ bnr_get_mod(GEN bnr) { return gmael(bnr,2,1); }
 INLINE GEN
 bnr_get_nf(GEN bnr) { return gmael(bnr,1,7); }
 INLINE GEN
+bnr_get_clgp(GEN bnr) { return gel(bnr,5); }
+INLINE GEN
 bnr_get_no(GEN bnr) { return gmael(bnr,5,1); }
 INLINE GEN
 bnr_get_cyc(GEN bnr) { return gmael(bnr,5,2); }
@@ -1958,7 +1960,7 @@ INLINE GEN
 bnr_get_gen_nocheck(GEN bnr) { return gmael(bnr,5,3); }
 INLINE GEN
 bnr_get_gen(GEN bnr) {
-  GEN G = gel(bnr,5);
+  GEN G = bnr_get_clgp(bnr);
   if (lg(G) !=  4)
     pari_err(talker,"missing bnr generators: please use bnrinit(,,1)");
   return gel(G,3);
