@@ -1900,7 +1900,7 @@ nf_get_roundG(GEN nf) { return gmael(nf,5,3); }
 INLINE GEN
 nf_get_Tr(GEN nf) { return gmael(nf,5,4); }
 INLINE GEN
-nf_get_TrInv(GEN nf) { return gmael(nf,5,5); }
+nf_get_diff(GEN nf) { return gmael(nf,5,5); }
 INLINE GEN
 nf_get_roots(GEN nf) { return gel(nf,6); }
 INLINE GEN

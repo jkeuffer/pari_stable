@@ -1126,7 +1126,7 @@ testprimes(GEN bnf, GEN BOUND)
 
   if (!is_pm1(f))
   {
-    GEN D = nf_get_TrInv(nf), L;
+    GEN D = nf_get_diff(nf), L;
     if (DEBUGLEVEL>1) fprintferr("**** Testing Different = %Ps\n",D);
     L = bnfisprincipal0(bnf, D, nf_FORCE);
     if (DEBUGLEVEL>1) fprintferr("     is %Ps\n", L);

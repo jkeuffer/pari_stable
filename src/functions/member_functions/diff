@@ -4,5 +4,5 @@ Section: member_functions
 C-Name: member_diff
 Prototype: mG
 Description:
- (nf):gen:copy                  gmael($1, 5, 5)
+ (nf):gen:copy                  nf_get_diff($1)
  (gen):gen:copy                 member_diff($1)

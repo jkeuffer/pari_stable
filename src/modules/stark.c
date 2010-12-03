@@ -616,7 +616,7 @@ ArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
   nChar = ic;
 
   nf    = bnr_get_nf(bnr);
-  diff  = nf_get_TrInv(nf);
+  diff  = nf_get_diff(nf);
   T     = nf_get_Tr(nf);
   cond  = bnr_get_mod(bnr);
   cond0 = gel(cond,1); condZ = gcoeff(cond0,1,1);

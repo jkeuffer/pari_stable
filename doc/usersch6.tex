@@ -174,7 +174,7 @@ to nearest integers, specifically \tet{RM_round_maxrank}$(G)$.
 \fun{GEN}{nf_get_Tr}{GEN nf} returns the matrix of the Trace quadratic form
 on the basis $(w_1,\ldots,w_n)$: its $(i,j)$ entry is $\text{Tr} w_i w_j$.
 
-\fun{GEN}{nf_get_TrInv}{GEN nf} returns the primitive part of the inverse of
+\fun{GEN}{nf_get_diff}{GEN nf} returns the primitive part of the inverse of
 the above Trace matrix.
 
 \fun{long}{nf_get_prec}{GEN nf} returns the precision (in words) to which the
@@ -226,6 +226,8 @@ These functions expect a true \var{bnr} argument.
 \fun{GEN}{bnr_get_bnf}{GEN bnr} returns the underlying \var{bnf}.
 
 \fun{GEN}{bnr_get_nf}{GEN bnr} returns the underlying \var{nf}.
+
+\fun{GEN}{bnr_get_clgp}{GEN bnr} returns the ray class group.
 
 \fun{GEN}{bnr_get_no}{GEN bnr} returns the ray class number.
 

@@ -2850,7 +2850,7 @@ INLINE GEN    idealred(GEN nf, GEN I);
 INLINE GEN    nf_get_M(GEN nf);
 INLINE GEN    nf_get_G(GEN nf);
 INLINE GEN    nf_get_Tr(GEN nf);
-INLINE GEN    nf_get_TrInv(GEN nf);
+INLINE GEN    nf_get_diff(GEN nf);
 INLINE long   nf_get_degree(GEN nf);
 INLINE GEN    nf_get_disc(GEN nf);
 INLINE GEN    nf_get_index(GEN nf);

@@ -50,6 +50,7 @@ LGr7- add information to the version() output [backward compatible if version()
       "implementations shall map a cut so the function is continuous as the cut
       is approached coming around the finite endpoint of the cut in a counter
       clockwise direction." (ISO C99) [initial patch Richard Kreckel, #1084]
+BA 10- PARI function nf_get_TrInv renamed to nf_get_diff
 
   Added
 BA  1- trap keyword "syntaxer" to trap syntax error from eval.
