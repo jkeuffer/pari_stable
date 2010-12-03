@@ -303,7 +303,7 @@ get_nfsqff_data(GEN *pnf, GEN *pT, GEN *pA, GEN *pB, GEN *ptbad)
     nf = proper_nf(*pnf);
     bad = nf_get_index(nf);
     if (den != gen_1) bad = mulii(bad, den);
-    if (nf != *pnf) { /* t_POL defining base field changed (not monic) */ 
+    if (nf != *pnf) { /* t_POL defining base field changed (not monic) */
       long i, l;
       GEN a = cgetg_copy(A, &l);
       GEN rev = gel(*pnf,2), pow, dpow;
