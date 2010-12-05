@@ -117,10 +117,12 @@ GEN
 Qfb0(GEN x, GEN y, GEN z, GEN d, long prec)
 {
   pari_sp av = avma;
+  GEN D;
   long s;
   if (typ(x)!=t_INT || typ(y)!=t_INT || typ(z)!=t_INT) pari_err(typeer,"Qfb");
-  s = signe(qfb_disc3(x,y,z)); avma = av;
-  if (!s) pari_err(talker,"zero discriminant in Qfb");
+  D = qfb_disc3(x,y,z);
+  if (Z_issquare(D)) pari_err(talker,"square discriminant in Qfb");
+  s = signe(D); avma = av;
   if (s < 0) return qfi(x, y, z);
 
   d = d? gtofp(d,prec): real_0(prec);
