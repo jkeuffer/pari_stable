@@ -3650,7 +3650,7 @@ pari_get_infile(const char *name, FILE *file)
 #endif
   ))
   { /* compressed file (compress or gzip) */
-    char *cmd = stackmalloc(strlen(ZCAT) + l + 2);
+    char *cmd = stackmalloc(strlen(ZCAT) + l + 4);
     sprintf(cmd,"%s \"%s\"",ZCAT,name);
     fclose(file);
     return try_pipe(cmd, mf_IN);
