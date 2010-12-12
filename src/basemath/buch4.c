@@ -203,8 +203,8 @@ lemma6nf(GEN nf, GEN T, GEN pr, long nu, GEN x, GEN modpr)
   gpx = poleval(RgX_deriv(T), x);
   mu = gequal0(gpx)? la+nu+1: nfval(nf,gpx,pr);
   avma = av;
-  if (la > mu<<1) return 1;
-  if (la >= nu<<1  && mu >= nu) return 0;
+  if (la > (mu<<1)) return 1;
+  if (la >= (nu<<1)  && mu >= nu) return 0;
   return -1;
 }
 /* pr above 2 */
@@ -220,7 +220,7 @@ lemma7nf(GEN nf, GEN T, GEN pr, long nu, GEN x, GEN zinit)
   la = nfval(nf,gx,pr);
   mu = gequal0(gpx)? la+nu+1: nfval(nf,gpx,pr);
 
-  if (la > mu<<1) return 1;
+  if (la > (mu<<1)) return 1;
   if (nu > mu)
   {
     if (la&1) return -1;
@@ -236,7 +236,8 @@ lemma7nf(GEN nf, GEN T, GEN pr, long nu, GEN x, GEN zinit)
   if (q > pr_get_e(pr)<<1)  return -1;
 
   /* gx /= pi^la, pi a pr-uniformizer */
-  gx = gmul2n(nfmul(nf, gx, nfpow_u(nf, pr_get_tau(pr), la)), -la);
+  if (la)
+    gx = gmul2n(nfmul(nf, gx, nfpow_u(nf, pr_get_tau(pr), la)), -la);
   if (!check2(nf, gx, zinit)) res = -1;
   return res;
 }
@@ -309,7 +310,7 @@ nf_hyperell_locally_soluble(GEN nf,GEN T,GEN pr)
 
   if (equaliu(pr_get_p(pr), 2))
   { /* tough case */
-    zinit = Idealstar(nf, idealpows(nf,pr,1+2*nfval(nf,gen_2,pr)), nf_INIT);
+    zinit = Idealstar(nf, idealpows(nf,pr,1+2*pr_get_e(pr)), nf_INIT);
     if (psquare2nf(nf,constant_term(T),pr,zinit)) return 1;
     if (psquare2nf(nf, leading_term(T),pr,zinit)) return 1;
   }
