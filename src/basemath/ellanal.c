@@ -137,20 +137,23 @@ gen_BG_rec(void *E, bg_fun *fun, struct bg_data *bg, GEN sum0)
 
 /* Implementation by C. Delaunay and X.-F. Roblot
    after a GP script of Tom Womack and John Cremona
-   and the corresponding section of Henri Cohen's book GTM 239 */
+   and the corresponding section of Henri Cohen's book GTM 239
+   Generic Buhler-Gross iteration and baby-step-giant-step implementation
+   by Bill Allombert.
+*/
 
 struct ellld {
   GEN E, N; /* ell, conductor */
   GEN bnd; /* t_INT; will need all an for n <= bnd */
-  ulong rootbnd; /* sqrt(bnd) */
+  ulong rootbnd; /* floor(sqrt(bnd)) */
+  ulong bgbnd; /* rootbnd+1 */
   long r; /* we are comuting L^{(r)}(1) */
   GEN X; /* t_REAL, 2Pi / sqrt(N) */
   GEN eX; /* t_REAL, exp(X) */
   GEN emX; /* t_REAL, exp(-X) */
-  GEN gcache; /* t_VEC of t_REALs */
+  GEN gcache, gjcache, baby, giant; /* t_VEC of t_REALs */
   GEN alpha; /* t_VEC of t_REALs, except alpha[1] = gen_1 */
   GEN A; /* t_VEC of t_REALs, A[1] = 1 */
-  GEN gjcache;
   long epsbit;
 };
 
@@ -344,10 +347,16 @@ compute_Gr_Sx(struct ellld *el, GEN m, ulong sm)
   return gerepileuptoleaf(av, odd(r)? subrr(p4, p3): subrr(p3, p4));
 }
 
-static void
+static GEN
 init_Gr(struct ellld *el, long prec)
 {
-  if (el->r == 0)      el->gcache = mpvecpow(el->emX, el->rootbnd);
+  if (el->r == 0)
+  {
+    el->bgbnd = el->rootbnd+1;
+    el->baby  = mpvecpow(el->emX, el->bgbnd);
+    el->giant = mpvecpow(gel(el->baby,el->bgbnd), el->bgbnd);
+    return gel(el->baby, 1);
+  }
   else if (el->r == 1) el->gcache = mpveceint1(el->X, el->eX, el->rootbnd);
   else
   {
@@ -360,6 +369,7 @@ init_Gr(struct ellld *el, long prec)
     for (j = 1; j <= l; j++) gel(G,j) = compute_Gr_Sx(el, NULL, j);
     el->gcache = G;
   }
+  return gel(el->gcache, 1);
 }
 
 /* m t_INT, returns a t_REAL */
@@ -367,7 +377,6 @@ static GEN
 ellld_G(struct ellld *el, GEN m)
 {
   if (cmpiu(m, el->rootbnd) <= 0) return gel(el->gcache, itos(m));
-  if (el->r == 0) return powgi(el->emX, m);
   if (el->r == 1) return mpeint1(mulir(m, el->X), powgi(el->eX,m));
   return compute_Gr_Sx(el, m, 0); /* r >= 2 */
 }
@@ -377,10 +386,7 @@ ellld_G(struct ellld *el, GEN m)
 static GEN
 ellld_Gmulti(struct ellld *el, GEN p, long jmax)
 {
-  if (el->r == 0)
-    el->gjcache = mpvecpow(powgi(el->emX, p), jmax);
-  else
-    el->gjcache = mpveceint1(mulir(p,el->X), powgi(el->eX,p), jmax);
+  el->gjcache = mpveceint1(mulir(p,el->X), powgi(el->eX,p), jmax);
   return gel(el->gjcache, 1);
 }
 
@@ -395,6 +401,24 @@ ellld_L1(void *E, GEN *psum, GEN n, GEN a, long j)
   *psum = addrr(*psum, divri(mulir(a, G), n));
 }
 
+static GEN
+ellld_L1r0_G(struct ellld *el, GEN n)
+{
+  GEN q, r;
+  if (cmpiu(n, el->bgbnd) <= 0) return gel(el->baby, itou(n));
+  q = truedvmdis(n,el->bgbnd,&r);
+  if (signe(r)==0) return gel(el->giant, itou(q));
+  return gmul(gel(el->baby, itou(r)), gel(el->giant, itou(q)));
+}
+
+static void
+ellld_L1r0(void *E, GEN *psum, GEN n, GEN a, long j)
+{
+  struct ellld *el = (struct ellld *) E;
+  GEN G = ellld_L1r0_G(el, n);
+  *psum = addrr(*psum, divri(mulir(a, G), n));
+}
+
 /* Basic data independent from r (E, N, X, eX, emX) already filled,
  * Returns a t_REAL */
 static GEN
@@ -406,9 +430,9 @@ ellL1_i(struct ellld *el, struct bg_data *bg, long r, GEN ap, long prec)
   el->bnd = cutoff_point(r, el->X, el->emX, el->epsbit, prec);
   gen_BG_init(bg,el->E,el->N,el->bnd,ap);
   el->rootbnd = bg->rootbnd;
-  init_Gr(el, prec);
+  sum = init_Gr(el, prec);
   if (DEBUGLEVEL>=3) fprintferr("el_bnd = %Ps, N=%Ps\n", el->bnd, el->N);
-  sum = gen_BG_rec(el, ellld_L1, bg, gel(el->gcache, 1));
+  sum = gen_BG_rec(el, r?ellld_L1:ellld_L1r0, bg, sum);
   return mulri(shiftr(sum, 1), mpfact(r));
 }
 
