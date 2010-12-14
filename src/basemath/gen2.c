@@ -616,6 +616,16 @@ identicalrr(GEN x, GEN y)
   return (i == lx);
 }
 
+static int
+closure_identical(GEN x, GEN y)
+{
+  if (lg(x)!=lg(y) || x[1]!=y[1]) return 0;
+  if (!gidentical(gel(x,2),gel(y,2)) || !gidentical(gel(x,3),gel(y,3))
+   || !gidentical(gel(x,4),gel(y,4))) return 0;
+  if (lg(x)<8) return 1;
+  return gidentical(gel(x,7),gel(y,7));
+}
+
 int
 gidentical(GEN x, GEN y)
 {
@@ -665,6 +675,8 @@ gidentical(GEN x, GEN y)
       return vecidentical(x,y);
     case t_VECSMALL:
       return zv_equal(x,y);
+    case t_CLOSURE:
+      return closure_identical(x,y);
   }
   return 0;
 }
@@ -766,6 +778,8 @@ gequal(GEN x, GEN y)
         return vecequal(x,y);
       case t_VECSMALL:
         return zv_equal(x,y);
+      case t_CLOSURE:
+        return closure_identical(x,y);
     }
   (void)&av; /* emulate volatile */
   av = avma; i = gequal_try(x, y);

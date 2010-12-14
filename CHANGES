@@ -31,6 +31,7 @@ BA 20- (ffgen(ffinit(2,10))*0)^-1 -> oo-loop
 BA 21- ispseudoprime(-3,0) != ispseudoprime(-3,1)
 BA 22- text form of a closure now include the closure context.
 BA 23- reading compressed files could corrupt the stack.
+BA 24- t_CLOSURE==t_CLOSURE and t_CLOSURE===t_CLOSURE did not work.
 
   Changed
 LGr1- universal constants (gen_0,gen_1, etc.) are now read-only
