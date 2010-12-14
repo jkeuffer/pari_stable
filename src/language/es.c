@@ -2527,6 +2527,26 @@ print_0_or_pm1(GEN g, outString *S, int addsign)
   }
   return 0;
 }
+static void
+print_context(GEN g, pariout_t *T, outString *S, long tex)
+{
+  if (lg(g)>=8 && lg(gel(g,7))>1 && lg(mael(g,5,3))>=2)
+  {
+    GEN v = gel(g,7), d = gmael3(g,5,3,1);
+    long i, l = lg(v);
+    str_puts(S,"my(");
+    for(i=1; i<l; i++)
+    {
+      entree *ep = (entree*) gel(d,i);
+      if (i>1)
+        str_putc(S,',');
+      str_puts(S,ep->name);
+      str_putc(S,'=');
+      if (tex) texi(gel(v,l-i),T,S); else bruti(gel(v,l-i),T,S);
+    }
+    str_puts(S,");");
+  }
+}
 
 static void
 bruti_intern(GEN g, pariout_t *T, outString *S, int addsign)
@@ -2672,22 +2692,7 @@ bruti_intern(GEN g, pariout_t *T, outString *S, int addsign)
         {
           str_putc(S,'(');   str_puts(S,GSTR(gmael(g,6,1)));
           str_puts(S,")->");
-          if (lg(g)>=8 && lg(gel(g,7))>1 && lg(mael(g,5,3))>=2)
-          {
-            GEN v = gel(g,7), d = gmael3(g,5,3,1);
-            long l = lg(v);
-            str_puts(S,"my(");
-            for(i=1; i<l; i++)
-            {
-              entree *ep = (entree*) gel(d,i);
-              if (i>1)
-                str_putc(S,',');
-              str_puts(S,ep->name);
-              str_putc(S,'=');
-              bruti(gel(v,l-i),T,S);
-            }
-            str_puts(S,");");
-          }
+          print_context(g, T, S, 0);
           str_puts(S,GSTR(gmael(g,6,2)));
         }
       }
@@ -2921,7 +2926,8 @@ texi_sign(GEN g, pariout_t *T, outString *S, int addsign)
         else
         {
           str_putc(S,'(');          str_puts(S,GSTR(gmael(g,6,1)));
-          str_puts(S,")\\mapsto "); str_puts(S,GSTR(gmael(g,6,2)));
+          str_puts(S,")\\mapsto ");
+          print_context(g, T, S ,1); str_puts(S,GSTR(gmael(g,6,2)));
         }
       }
       else
