@@ -78,11 +78,12 @@ error-reporting and debugging. See \secref{se:dbgclosure} for details.
 
 Additionally, for functions and true closures,
 
-\item \kbd{z[6]} points to a \typ{VEC} with two components which are \typ{STR}.
+\item \kbd{z[6]} usually points to a \typ{VEC} with two components which are \typ{STR}.
 The first one displays the list of arguments of the closure without the
 enclosing parentheses, the second one the GP code of the function at the
 right of the \kbd{->} token. They are used to display the closure, either in
-implicit or explicit form.
+implicit or explicit form. However for closures that were not generated from GP
+code, \kbd{z[6]} can point to a \typ{STR} instead.
 
 Additionally, for true closure,
 
