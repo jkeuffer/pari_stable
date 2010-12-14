@@ -1753,11 +1753,9 @@ closure_deriv(GEN G)
   }
   else
   {
-    code = GSTR(gmael(G,6,2));
-    text = cgetg(3, t_VEC);
-    gel(text,1) = gcopy(gmael(G,6,1));
-    gel(text,2) = cgetg(1+nchar2nlong(4+strlen(code)),t_STR);
-    sprintf(GSTR(gel(text,2)),"(%s)'",code);
+    code = GSTR(GENtoGENstr(G));
+    text = cgetg(1+nchar2nlong(4+strlen(code)),t_STR);
+    sprintf(GSTR(text),"(%s)'",code);
   }
   getcodepos(&pos);
   dbgstart=code;
