@@ -593,7 +593,7 @@ END:
 static GEN
 ArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
 {
-  long ic, i, j, nz, N, nChar = lg(LCHI)-1;
+  long ic, i, j, nz, nChar = lg(LCHI)-1;
   pari_sp av = avma, av2, lim;
   GEN sqrtnc, dc, cond, condZ, cond0, cond1, lambda, nf, T;
   GEN cyc, vN, vB, diff, vt, idg, idh, zid, gen, z, nchi;
@@ -621,7 +621,6 @@ ArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
   cond  = bnr_get_mod(bnr);
   cond0 = gel(cond,1); condZ = gcoeff(cond0,1,1);
   cond1 = vec01_to_indices(gel(cond,2));
-  N     = nf_get_degree(nf);
 
   sqrtnc = gsqrt(idealnorm(nf, cond0), prec);
   dc  = idealmul(nf, diff, cond0);
