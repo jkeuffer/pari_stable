@@ -274,12 +274,10 @@ check_array_index(long c, long max)
 {
   if (c < 1 || c >= max)
   {
-    char s[80];
-    sprintf(s,"array index (%ld) out of allowed range ",c);
-    if (max == 1) strcat(s, "[none]");
-    else if (max == 2) strcat(s, "[1]");
-    else sprintf(s,"%s[1-%ld]",s,max-1);
-    pari_err(talker,s);
+    if (max <= 2)
+      pari_err(talker,"array index (%ld) out of allowed range [%s]",c,max==1?"none":"1");
+    else
+      pari_err(talker,"array index (%ld) out of allowed range [1-%ld]",c,max-1);
   }
 }
 
