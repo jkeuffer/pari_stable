@@ -2157,7 +2157,7 @@ RgXQ_ratlift(GEN x, GEN T, long amax, long bmax, GEN *P, GEN *Q)
 {
   pari_sp av, av2, tetpil, lim;
   long dr, signh; /* junk */
-  long dx, dT, vx;
+  long vx;
   GEN g, h, p1, cu, cv, u, v, um1, uze, *gptr[2];
 
   if (typ(x)!=t_POL || typ(T)!=t_POL || varncmp(varn(x),varn(T)))
@@ -2166,7 +2166,6 @@ RgXQ_ratlift(GEN x, GEN T, long amax, long bmax, GEN *P, GEN *Q)
     pari_err(talker, "ratlift: must have amax+bmax < deg(T)");
   if (!signe(T)) pari_err(zeropoler,"RgXQ_ratlift");
   vx = varn(T);
-  dx = degpol(x); dT = degpol(T);
 
   av = avma;
   u = x = primitive_part(x, &cu);
