@@ -2166,12 +2166,6 @@ isabsolutepol(GEN f)
   return 1;
 }
 
-typedef struct {
-  GEN S, L, Xq;
-  GEN q;    /* p^deg(T) */
-  GEN p, T; /* split mod (p, T(X)) */
-} FqX_split_t;
-
 static void
 add(GEN z, GEN g, long d) { vectrunc_append(z, mkvec2(utoipos(d), g)); }
 /* return number of roots of u; assume deg u >= 0 */
