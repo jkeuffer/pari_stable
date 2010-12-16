@@ -1041,14 +1041,14 @@ idealramgroups(GEN nf, GEN gal, GEN pr)
 {
   pari_sp av = avma;
   GEN tbl, idx, res, set, sub;
-  long i, j, e, f, n, maxm, p;
+  long i, j, e, n, maxm, p;
   ulong et;
   checknf(nf);
   checkgal(gal);
   checkprid(pr);
   if (!gequal(nf_get_pol(nf), gal_get_pol(gal)))
     pari_err(talker,"incompatible data in idealramgroups");
-  e = pr_get_e(pr); f = pr_get_f(pr); n = nf_get_degree(nf);
+  e = pr_get_e(pr); n = nf_get_degree(nf);
   p = itos(pr_get_p(pr));
   if (e%p) return idealramgroupstame(nf, gal, pr);
   (void) u_lvalrem(e,p,&et);
