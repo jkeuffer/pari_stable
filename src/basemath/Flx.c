@@ -2618,7 +2618,7 @@ FlxqX_rem_Montgomery(GEN x, GEN mg, GEN T, GEN Q, ulong p)
   z = FlxX_recipspec(x+2+lt,ld,ld,vs);         /* z = rec(x)       lz<=ld*/
   z = FlxqX_mulspec(z+2,mg+2,Q,p,lgpol(z),lmg); /* z = rec(x) * mg lz<=ld+lm*/
   z = FlxX_recipspec(z+2,minss(ld,lgpol(z)),ld,vs);/*z= rec(rec(x)*mg) lz<=ld*/
-  z = FlxqX_mulspec(z+2,T+2,Q,p,lgpol(z),lt);    /* z*= pol        lz<=ld+lt*/
+  z = FlxqX_mulspec(z+2,T+2,Q,p,lgpol(z),lT);    /* z*= pol        lz<=ld+lt*/
   z = FlxX_subspec(x+2,z+2,p,lt,minss(lt,lgpol(z)));/*z = x - z    lz<=lt */
   z[1]=T[1];
   return gerepileupto(ltop,z);
