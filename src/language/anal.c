@@ -785,7 +785,7 @@ void pari_var_init(void) {
   (void)fetch_named_var("x");
 }
 long pari_var_next(void) { return nvar; }
-long pari_var_next_temp() { return max_avail; }
+long pari_var_next_temp(void) { return max_avail; }
 static long
 pari_var_pop(long v)
 {

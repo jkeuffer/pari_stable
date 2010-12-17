@@ -119,7 +119,7 @@ static THREAD long NUM;
 static void
 pari_init_blocks(void)
 {
-  next_block = 0; cur_block = 0;
+  next_block = 0; cur_block = NULL;
 #ifdef DEBUG
   NUM = 0;
 #endif

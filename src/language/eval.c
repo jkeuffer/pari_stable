@@ -236,7 +236,7 @@ copyvalue(entree *ep)
 }
 
 INLINE void
-err_var() { pari_err(talker, "variable name expected"); }
+err_var(void) { pari_err(talker, "variable name expected"); }
 
 INLINE void
 checkvalue(entree *ep)

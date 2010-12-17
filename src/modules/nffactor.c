@@ -1987,7 +1987,7 @@ guess_roots(GEN nf)
 }
 
 static GEN
-trivroots() { return mkvec2(gen_2, gen_m1); }
+trivroots(void) { return mkvec2(gen_2, gen_m1); }
 /* Number of roots of unity in number field [nf]. */
 GEN
 rootsof1(GEN nf)

@@ -2244,7 +2244,7 @@ mat_ideal_two_elt2(GEN nf, GEN x, GEN a)
 }
 
 static void
-not_in_ideal() {
+not_in_ideal(void) {
   pari_err(talker,"element not in ideal in idealtwoelt2");
 }
 
