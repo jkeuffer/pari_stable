@@ -1858,7 +1858,7 @@ ell_is_padic(GEN x) { return lg(x) == 20 && typ(gel(x,19)) == t_INT; }
 INLINE int
 ell_is_real(GEN x) { return lg(x) == 20 && typ(gel(x,19)) != t_INT; }
 INLINE GEN
-ellinf() { return mkvec(gen_0); }
+ellinf(void) { return mkvec(gen_0); }
 
 /*******************************************************************/
 /*                                                                 */

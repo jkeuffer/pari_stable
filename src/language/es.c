@@ -531,7 +531,7 @@ wr_dec(char *buf, char *z, long point)
 }
 
 static char *
-zerotostr()
+zerotostr(void)
 {
   char *s = (char*)new_chunk(1);
   s[0] = '0';
@@ -1442,7 +1442,7 @@ puts80(const char *s) { while (*s) putc80(*s++); }
 PariOUT pariOut80= {putc80, puts80, normalOutF};
 
 void
-init80col() { col_index = 0; pariOut = &pariOut80; }
+init80col(void) { col_index = 0; pariOut = &pariOut80; }
 
 /* output stopped after max_line have been printed, for default(lines,).
  * n = length of prefix already printed (print up to max_lin lines) */
@@ -3039,7 +3039,7 @@ static THREAD pariFILE *last_tmp_file;
 static THREAD pariFILE *last_file;
 
 pariFILE *
-pari_last_tmp_file() { return last_tmp_file; }
+pari_last_tmp_file(void) { return last_tmp_file; }
 
 #if defined(UNIX) || defined(__EMX__)
 #  include <fcntl.h>
@@ -3722,7 +3722,7 @@ try_name(char *name)
   return file;
 }
 static void
-switchin_last()
+switchin_last(void)
 {
   char *s = last_filename;
   FILE *file;
@@ -4174,7 +4174,7 @@ wr_init(const char *s)
 
 /* End writing to file s, go back to stdout */
 static void
-wr_finish()
+wr_finish(void)
 {
   pari_flush(); switchout(NULL);
   pari_set_last_newline(wr_last_was_newline);
