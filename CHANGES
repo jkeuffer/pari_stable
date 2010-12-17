@@ -32,6 +32,7 @@ BA 21- ispseudoprime(-3,0) != ispseudoprime(-3,1)
 BA 22- text form of a closure now include the closure context.
 BA 23- reading compressed files could corrupt the stack.
 BA 24- t_CLOSURE==t_CLOSURE and t_CLOSURE===t_CLOSURE did not work.
+   25- gequal1(0.*x + 1) returned 0
 
   Changed
 LGr1- universal constants (gen_0,gen_1, etc.) are now read-only
@@ -54,6 +55,7 @@ LGr7- add information to the version() output [backward compatible if version()
       clockwise direction." (ISO C99) [initial patch Richard Kreckel, #1084]
 BA 10-[libpari] nf_get_TrInv renamed to nf_get_diff
    11- Qfb() : forbid square discriminants (-> corrupted objects [#1145])
+   12- allow gequal1 / gequalm1 to return 'true' for t_SER
 
   Added
 BA  1- trap keyword "syntaxer" to trap syntax error from eval.

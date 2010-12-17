@@ -395,7 +395,27 @@ absrnz_egal2n(GEN x) {
 int
 absrnz_egal1(GEN x) { return !expo(x) && absrnz_egal2n(x); }
 
-/* returns 1 whenever x = 1, 0 otherwise */
+/* x a t_POL or t_SER, considered as having valuation v; let X(t) = t^(-v) x(t)
+ * return 1 (true) if coeff(X,i) = 0 for all i != 0 and test(coeff(X, 0))
+ * is true. Return 0 (false) otherwise, or if x == 0 */
+static int
+is_monomial_test(GEN x, long v, int(*test)(GEN))
+{
+  long d, i, l;
+  if (!signe(x)) return 0;
+  if (v > 0) return 0;
+  l = lg(x); d = 2-v;
+  if (l <= d) return 0;
+  /* 2 <= d < l */
+  if (!test(gel(x,d))) return 0;
+  for (i = 2; i < d; i++)
+    if (!gequal0(gel(x,i))) return 0;
+  for (i = d+1; i < l; i++)
+    if (!gequal0(gel(x,i))) return 0;
+  return 1;
+}
+
+/* returns 1 whenever x = 1, and 0 otherwise */
 int
 gequal1(GEN x)
 {
@@ -425,8 +445,10 @@ gequal1(GEN x)
     case t_QUAD:
       return gequal1(gel(x,2)) && gequal0(gel(x,3));
 
-    case t_POL:
-      return lg(x)==3 && gequal1(gel(x,2));
+    case t_POL: return is_monomial_test(x, 0, &gequal1);
+    case t_SER: return is_monomial_test(x, valp(x), &gequal1);
+
+    case t_RFRAC: return gequal(gel(x,1), gel(x,2));
   }
   return 0;
 }
@@ -469,8 +491,11 @@ gequalm1(GEN x)
       av=avma; p1 = gaddgs(gel(x,2), 1);
       y = signe(p1) && !gequal(p1,gel(x,1)); avma=av; return !y;
 
-    case t_POL:
-      return lg(x)==3 && gequalm1(gel(x,2));
+    case t_POL: return is_monomial_test(x, 0, &gequalm1);
+    case t_SER: return is_monomial_test(x, valp(x), &gequalm1);
+
+    case t_RFRAC: 
+      av=avma; y=gequal(gel(x,1), gneg_i(gel(x,2))); avma=av; return y;
   }
   return 0;
 }
