@@ -3064,14 +3064,6 @@ easy_ap(GEN E, GEN p)
   return CM_ellap(E, p);
 }
 
-/* for ellsea() */
-GEN
-CM_CardEFp(GEN E, GEN p)
-{
-  GEN ap = easy_ap(E, p);
-  return ap? subii(addis(p,1), ap): gen_0;
-}
-
 /* assume e is at least a 'small ell' */
 static GEN
 get_p(GEN e)

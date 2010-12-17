@@ -68,6 +68,9 @@ BA  9- PARI functions FlxqX_div
    10- PARI function ismpzero
 BA 11- PARI function bnr_get_clgp
 
+  Removed
+BA  1- PARI function CM_CardEFp (ellsea script deprecated).
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.3 (released 08/10/2010):
 
