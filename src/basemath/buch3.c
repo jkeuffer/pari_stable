@@ -1084,7 +1084,7 @@ struct check_pr {
   GEN cyc;
   GEN cycgen;
   GEN bad; /* p | bad <--> p | some element occurring in cycgen */
-} check_pr;
+};
 
 static void
 check_prime(ulong p, GEN bnf, struct check_pr *S)
