@@ -515,7 +515,7 @@ compilecast_loc(int type, int mode, const char *loc)
 }
 
 static void
-compilecast(long n, int type, int mode) { return compilecast_loc(type, mode, tree[n].str); }
+compilecast(long n, int type, int mode) { compilecast_loc(type, mode, tree[n].str); }
 
 static entree *
 getfunc(long n)
