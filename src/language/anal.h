@@ -59,7 +59,6 @@ extern entree functions_basic[];
 
 /* Variables containing the list of specific GP functions */
 extern entree  functions_gp[];
-extern entree  functions_highlevel[];
 
 /* Variables containing the list of old PARI fonctions (up to 1.39.15) */
 extern entree  oldfonctions[], functions_oldgp[];

@@ -53,4 +53,6 @@ GEN  read0(const char *s);
 void system0(const char *cmd);
 int  whatnow(const char *s, int silent);
 
+extern entree  functions_highlevel[];
+
 ENDEXTERN
