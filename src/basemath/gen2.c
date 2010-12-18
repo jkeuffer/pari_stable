@@ -494,7 +494,7 @@ gequalm1(GEN x)
     case t_POL: return is_monomial_test(x, 0, &gequalm1);
     case t_SER: return is_monomial_test(x, valp(x), &gequalm1);
 
-    case t_RFRAC: 
+    case t_RFRAC:
       av=avma; y=gequal(gel(x,1), gneg_i(gel(x,2))); avma=av; return y;
   }
   return 0;
