@@ -1527,7 +1527,7 @@ mytra(GEN a, GEN x, long flag)
     case f_YOSCS: case f_YOSCC:
       pari_err(impl,"Fourier transform of oscillating functions");
   }
-  return 0;
+  return NULL;
 }
 
 static GEN

@@ -748,7 +748,7 @@ FpX_resultant(GEN a, GEN b, GEN p)
     lb = gel(b,db+2);
     c = FpX_rem(a,b, p);
     a = b; b = c; dc = degpol(c);
-    if (dc < 0) { avma = av; return 0; }
+    if (dc < 0) { avma = av; return NULL; }
 
     if (both_odd(da,db)) res = subii(p, res);
     if (!equali1(lb)) res = Fp_mul(res, Fp_powu(lb, da - dc, p), p);

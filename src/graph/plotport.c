@@ -274,7 +274,7 @@ Rchain(PariRect *e, RectObj *z)
 {
   if (!RHead(e)) RHead(e) = z; else RoNext(RTail(e)) = z;
   RTail(e) = z;
-  RoNext(z) = 0;
+  RoNext(z) = NULL;
 }
 
 void
@@ -1333,7 +1333,7 @@ rectplothin(GEN a, GEN b, GEN code, long prec, ulong flags,
   else
     nbpoints = testpoints;
 
-  sig = gcmp(b,a); if (!sig) return 0;
+  sig = gcmp(b,a); if (!sig) return NULL;
   if (sig<0) swap(a, b);
   dx = divru(gtofp(gsub(b,a),prec), testpoints-1);
 
@@ -1357,7 +1357,7 @@ rectplothin(GEN a, GEN b, GEN code, long prec, ulong flags,
       nc = nl = 1;
     } else {
       nl = lg(t)-1;
-      if (!nl) { avma=av; return 0; }
+      if (!nl) { avma=av; return NULL; }
       if (param && !cplx) {
         nc = nl/2;
         if (odd(nl))

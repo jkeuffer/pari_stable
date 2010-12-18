@@ -1199,7 +1199,7 @@ Flx_inflate(GEN x0, long d)
   dy = dx*d;
   y = cgetg(dy+3, t_VECSMALL); y[1] = x0[1];
   z = y + 2;
-  for (i=0; i<=dy; i++) gel(z,i) = 0;
+  for (i=0; i<=dy; i++) z[i] = 0;
   for (i=id=0; i<=dx; i++,id+=d) z[id] = x[i];
   return y;
 }

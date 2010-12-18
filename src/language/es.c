@@ -1299,7 +1299,7 @@ term_color(long c)
 {
   FILE *o_logfile = pari_logfile;
 
-  if (logstyle != logstyle_color) pari_logfile = 0; /* Ugly hack */
+  if (logstyle != logstyle_color) pari_logfile = NULL; /* Ugly hack */
   /* _not_ pari_puts, because of last_was_newline */
   pariOut->puts(term_get_color(c));
   pari_logfile = o_logfile;

@@ -282,24 +282,13 @@ check_proto(const char *code)
   return arity;
 }
 
-static void
-init_initial_value(entree *ep)
-{
-  gel(ep,0)  = 0;
-  gel(ep,1)  = 0;
-  gel(ep,2)  = 0;
-  gel(ep,3)  = 0;
-}
-
 static entree *
 installep(const char *name, long len, entree **table)
 {
   const long add = 4*sizeof(long);
-  entree *ep = (entree *) pari_malloc(sizeof(entree) + add + len+1);
+  entree *ep = (entree *) pari_calloc(sizeof(entree) + add + len+1);
   entree *ep1 = initial_value(ep);
   char *u = (char *) ep1 + add;
-
-  init_initial_value(ep1);
   ep->name    = u; strncpy(u, name,len); u[len]=0;
   ep->valence = EpNEW;
   ep->value   = NULL;
