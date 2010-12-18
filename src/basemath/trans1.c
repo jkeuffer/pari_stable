@@ -22,11 +22,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "paripriv.h"
 
 #ifdef LONG_IS_64BIT
-static const long SQRTVERYBIGINT = 3037000500; /* ceil(sqrt(LONG_MAX)) */
-static const long CBRTVERYBIGINT = 2097152;    /* ceil(cbrt(LONG_MAX)) */
+static const long SQRTVERYBIGINT = 3037000500L; /* ceil(sqrt(LONG_MAX)) */
+static const long CBRTVERYBIGINT = 2097152L;    /* ceil(cbrt(LONG_MAX)) */
 #else
-static const long SQRTVERYBIGINT = 46341;
-static const long CBRTVERYBIGINT =  1291;
+static const long SQRTVERYBIGINT = 46341L;
+static const long CBRTVERYBIGINT =  1291L;
 #endif
 
 static THREAD GEN geuler, glog2, gpi;

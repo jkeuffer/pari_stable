@@ -906,9 +906,9 @@ GEN
 divgunu(GEN x, ulong i)
 {
 #ifdef LONG_IS_64BIT
-  if (i < 3037000500) /* i(i+1) < 2^63 */
+  if (i < 3037000500L) /* i(i+1) < 2^63 */
 #else
-  if (i < 46341) /* i(i+1) < 2^31 */
+  if (i < 46341L) /* i(i+1) < 2^31 */
 #endif
     return gdivgs(x, i*(i+1));
   else
