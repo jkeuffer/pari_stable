@@ -378,10 +378,6 @@ sieve_chunk(byteptr known_primes, ulong s, byteptr data, ulong count)
     }
 }
 
-/* Do not inline sieve_chunk()!  It fits into registers in ix86 non-inlined */
-void (*sieve_chunk_p)(byteptr known_primes, ulong s, byteptr data, ulong count)
-    = sieve_chunk;
-
 /* Here's the workhorse.  This is recursive, although normally the first
    recursive call will bottom out and invoke initprimes1() at once.
    (Not static;  might conceivably be useful to someone in library mode) */
@@ -448,7 +444,7 @@ initprimes0(ulong maxnum, long *lenp, ulong *lastp)
     was_delta = *p_prime_above;
     *p_prime_above = 0;                 /* Put a 0 sentinel for sieve_chunk */
 
-    (*sieve_chunk_p)(p1, curlow, p, asize);
+    sieve_chunk(p1, curlow, p, asize);
 
     *p_prime_above = was_delta;         /* Restore */
     p[asize] = 0;                       /* Put a 0 sentinel for ZZZ */
