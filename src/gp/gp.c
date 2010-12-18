@@ -237,7 +237,7 @@ hit_return(void)
   pari_putc('\n');
   disable_exception_handler = 0;
 }
-void
+static void
 gp_ask_confirm(const char *s)
 {
   fprintferr(s);
@@ -1568,19 +1568,19 @@ gp_main_loop(long flag)
 /*                      EXCEPTION HANDLER                           */
 /*                                                                  */
 /********************************************************************/
-void
+static void
 gp_sigint_fun(void) {
   if (GP_DATA->flags & gpd_TEXMACS) tm_start_output();
   pari_sigint(gp_format_time(ti_INTERRUPT));
 }
 
-void
+static void
 gp_alarm_fun(void) {
   if (GP_DATA->flags & gpd_TEXMACS) tm_start_output();
   pari_err(alarmer, gp_format_time(ti_ALARM));
 }
 
-int
+static int
 break_loop(int numerr)
 {
   filtre_t F;
@@ -1662,14 +1662,14 @@ GP_EOF:
 }
 
 /* numerr < 0: from SIGINT */
-void
+static void
 gp_err_recover(long numerr)
 {
   longjmp(env[s_env.n-1], numerr);
 }
 
 /* numerr < 0: from SIGINT */
-int
+static int
 gp_handle_exception(long numerr)
 {
   if (disable_exception_handler) disable_exception_handler = 0;
