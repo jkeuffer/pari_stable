@@ -809,13 +809,6 @@ mpdiv(GEN x, GEN y)
 /*                          Z/nZ, n ULONG                          */
 /*                                                                 */
 /*******************************************************************/
-/* same as Fl_add, assume p <= 2^(BIL - 1), so that overflow can't occur */
-INLINE ulong
-Fl_add_noofl(ulong a, ulong b, ulong p)
-{
-  ulong res = a + b;
-  return (res >= p) ? res - p : res;
-}
 INLINE ulong
 Fl_add(ulong a, ulong b, ulong p)
 {
