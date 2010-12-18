@@ -1032,7 +1032,7 @@ Z_pvalrem_DC(GEN x, GEN q, GEN *py)
   *py = z; return v + 2;
 }
 
-const long VAL_DC_THRESHOLD = 16;
+static const long VAL_DC_THRESHOLD = 16;
 
 long
 Z_lval(GEN x, ulong p)
