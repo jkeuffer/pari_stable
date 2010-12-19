@@ -2319,6 +2319,7 @@ polredabs_aux(nfbasic_t *T, GEN *u)
 
   prec = polred_init(T, &F, &d);
   d.bound = T2_from_embed(F.ro, T->r1);
+  if (lg(d.bound) > prec) d.bound = rtor(d.bound, prec);
   for (;;)
   {
     GEN R = R_from_QR(F.G, prec);
@@ -2363,6 +2364,8 @@ polredabs0(GEN x, long flag)
       if (ZX_canon_neg(gel(y,i))) gel(a,i) = ZC_neg(gel(a,i));
     remove_duplicates(y,a);
     l = lg(a);
+    if (l == 1)
+      pari_err(bugparier, "polredabs (missing vector)");
   }
   if (DEBUGLEVEL) fprintferr("Found %ld minimal polynomials.\n",l-1);
   if (flag & nf_ALL) {
