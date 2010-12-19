@@ -328,6 +328,26 @@ nf_hyperell_locally_soluble(GEN nf,GEN T,GEN pr)
   avma = av; return 0;
 }
 
+/* return a * denom(a)^2 */
+static GEN
+den_remove(GEN nf, GEN a)
+{
+  GEN da;
+  a = nf_to_scalar_or_basis(nf, a);
+  switch(typ(a))
+  {
+    case t_INT: return a;
+    case t_FRAC: return mulii(gel(a,1), gel(a,2));
+    case t_COL:
+      a = Q_remove_denom(a, &da);
+      if (da) a = ZC_Z_mul(a, da);
+      a = nf_to_scalar_or_alg(nf, a);
+      return a;
+    default: pari_err(typeer,"nfhilbert");
+      return NULL;/*not reached*/
+  }
+}
+
 static long
 hilb2nf(GEN nf,GEN a,GEN b,GEN p)
 {
@@ -335,8 +355,8 @@ hilb2nf(GEN nf,GEN a,GEN b,GEN p)
   long rep;
   GEN pol;
 
-  a = nf_to_scalar_or_alg(nf, a);
-  b = nf_to_scalar_or_alg(nf, b);
+  a = den_remove(nf, a);
+  b = den_remove(nf, b);
   pol = mkpoln(3, a, gen_0, b);
   /* varn(nf.pol) = 0, pol is not a valid GEN  [as in Pol([x,x], x)].
    * But it is only used as a placeholder, hence it is not a problem */
