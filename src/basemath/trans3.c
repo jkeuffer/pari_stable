@@ -1288,14 +1288,12 @@ czeta(GEN s0, long prec)
 
   if (DEBUGLEVEL>2) (void)timer2();
   s = trans_fix_arg(&prec,&s0,&sig,&av,&res);
-  if (gequal0(s)) { avma = av0; y = real2n(-1, prec); setsigne(y,-1); return y; }
+  if (typ(s0) == t_INT) return gerepileupto(av, gzeta(s0, prec));
   u = gsubgs(s, 1); /* temp */
   if (gexpo(u) < -5 || (gexpo(s) > -5 && (signe(sig) <= 0 || expo(sig) < -1)))
   { /* s <--> 1-s */
     GEN t;
-    if (typ(s0) == t_INT) { i = itos(s0); avma = av0; return szeta(i, prec); }
     s = gneg(u); sig = real_i(s);
-
     /* Gamma(s) (2Pi)^-s 2 cos(Pi s/2) */
     t = gmul(ggamma(gprec_w(s,prec),prec), gpow(Pi2n(1,prec), gneg(s), prec));
     funeq_factor = gmul2n(gmul(t, gcos(gmul(Pi2n(-1,prec),s), prec)), 1);
@@ -1309,19 +1307,9 @@ czeta(GEN s0, long prec)
   prec++; unr = real_1(prec); /* one extra word of precision */
 
   tab = (GEN*)cgetg(nn, t_VEC); /* table of q^(-s), q = p^e */
-  d = diffptr + 1;
-  if (typ(s0) == t_INT)
-  { /* no explog for 1/p^s */
-    ulong k = itou(s0);
-    for (p=2; p < (ulong)nn;) {
-      tab[p] = divrr(unr, rpowuu(p, k, prec));
-      NEXT_PRIME_VIADIFF(p,d);
-    }
-    a = divrr(unr, rpowuu((ulong)nn, k, prec));
-  }
-  else
   { /* general case */
     GEN ms = gneg(s), rp = cgetr(prec);
+    d = diffptr + 1;
     for (p=2; p < (ulong)nn;)
     {
       affur(p, rp);
@@ -1331,7 +1319,7 @@ czeta(GEN s0, long prec)
     affsr(nn, rp);
     a = gexp(gmul(ms, mplog(rp)), prec);
   }
-  sqn = (ulong)sqrt(nn-1.); maxprime_check(sqn);
+  sqn = (ulong)sqrt(nn-1.);
   d = diffptr + 2; /* fill in odd prime powers */
   for (p=3; p <= sqn; )
   {
@@ -1344,6 +1332,7 @@ czeta(GEN s0, long prec)
   tabn = cgetg(nn, t_VECSMALL); ct = 0;
   for (i = nn-1; i; i>>=1) tabn[++ct] = (i-1)>>1;
   sim = y = unr;
+  /* compute 1 + 2^-s + ... + n^-s = P(2^-s) using Horner's scheme */
   for (i=ct; i > 1; i--)
   {
     long j;
@@ -1358,23 +1347,6 @@ czeta(GEN s0, long prec)
 
   invn2 = divri(unr, mulss(nn,nn)); lim2 = lim<<1;
   tes = bernreal(lim2, prec);
-  if (typ(s0) == t_INT)
-  {
-    av2 = avma; avlim = stack_lim(av2,3);
-    for (i=lim2-2; i>=2; i-=2)
-    { /* using single prec (when (s0 + i) < 2^31) not faster (even at \p28) */
-      u = mulri(mulrr(tes,invn2), mulii(addsi(i,s0), addsi(i-1,s0)));
-      tes = addrr(bernreal(i,prec), divrunu(u, i+1)); /* u / (i+1)(i+2) */
-      if (low_stack(avlim,stack_lim(av2,3)))
-      {
-        if(DEBUGMEM>1) pari_warn(warnmem,"czeta");
-        tes = gerepileuptoleaf(av2, tes);
-      }
-    }
-    u = gmul(gmul(tes,invn2), gmul2n(mulii(s0, addsi(-1,s0)), -1));
-    tes = gmulsg(nn, gaddsg(1, u));
-  }
-  else /* typ(s0) != t_INT */
   {
     GEN s1, s2, s3, s4, s5;
     s1 = gsub(gmul2n(s,1), unr);
