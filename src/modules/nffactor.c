@@ -345,6 +345,7 @@ nfroots(GEN nf,GEN pol)
 
   if (!nf) return nfrootsQ(pol);
   T = get_nfpol(nf, &nf);
+  RgX_check_ZX(T,"nfroots");
   A = rnf_fix_pol(T,pol,1);
   d = degpol(A);
   if (d < 0) pari_err(zeropoler, "nfroots");
@@ -531,6 +532,7 @@ nffactor(GEN nf,GEN pol)
 
   if (DEBUGLEVEL>2) { TIMERstart(&ti); fprintferr("\nEntering nffactor:\n"); }
   T = get_nfpol(nf, &nf);
+  RgX_check_ZX(T,"nffactor");
   A = rnf_fix_pol(T,pol,1);
   dA = degpol(A);
   if (dA <= 0) {
@@ -1695,6 +1697,7 @@ polfnf(GEN a, GEN T)
 
   if (typ(a)!=t_POL || typ(T)!=t_POL) pari_err(typeer,"polfnf");
   T = Q_primpart(T); tmonic = is_pm1(leading_term(T));
+  RgX_check_ZX(T,"polfnf");
   A = Q_primpart( QXQX_normalize(rnf_fix_pol(T,a,1), T) );
   dA = degpol(A);
   if (dA <= 0)

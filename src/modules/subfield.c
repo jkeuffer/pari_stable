@@ -908,6 +908,7 @@ nfsubfields(GEN nf, long d)
   if (!d) return subfieldsall(nf);
 
   pol = get_nfpol(nf, &nf); /* in order to treat trivial cases */
+  RgX_check_ZX(pol,"nfsubfields");
   v0 = varn(pol); N = degpol(pol);
   if (d == N) return gerepilecopy(av, _subfield(pol, pol_x(v0)));
   if (d == 1) return gerepilecopy(av, _subfield(pol_x(v0), pol));

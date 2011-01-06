@@ -237,7 +237,8 @@ vandermondeinverse(GEN L, GEN T, GEN den, GEN prep)
   return gerepileupto(ltop, gmul(den, M));
 }
 
-/* Compute bound for the coefficients of automorphisms */
+/* Compute bound for the coefficients of automorphisms. 
+ * T a ZX, dn a t_INT denominator or NULL */
 GEN
 initgaloisborne(GEN T, GEN dn, long prec, GEN *ptL, GEN *ptprep, GEN *ptdis)
 {
