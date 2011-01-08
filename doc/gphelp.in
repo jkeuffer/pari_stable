@@ -980,17 +980,15 @@ sub TeXprint_topod {
   s/(\\(?:section|subsec(?:ref|idx|op)?)\s*{(?:(?:[^{}]+(?=[{}])|{[^{}]+})+)})\.?\s*\\(label|sidx)/$1\n\\$2/;
 
   # last if /\\subsec[\\{}ref]*[\\\${]$help[}\\\$]/o;
-  s/\\chapter\s*{((?:[^{}]|\{[^{}]*\})*)}\s*/\n\n$tr{podleader}head1 NAME\n\nlibPARI - $1\n\n$tr{podleader}head1 DESCRIPTION\n\n/;
-  s/\\appendix\s*{((?:[^{}]|\{[^{}]*\})*)}\s*/\n\n$tr{podleader}head1 NAME\n\nAppendix - $1\n\n$tr{podleader}head1 DESCRIPTION\n\n/;
+  s/\\chapter\s*{((?:[^{}]|\{[^{}]*\})*)}\s*/\n\n$tr{podleader}head1 NAME\n\nlibPARI - $1\n\n/;
+  s/\\appendix\s*{((?:[^{}]|\{[^{}]*\})*)}\s*/\n\n$tr{podleader}head1 NAME\n\nAppendix - $1\n\n/;
   s/\\section\s*{((?:[^{}]|\{[^{}]*\})*)}\s*/"\n\n$tr{podleader}head1 " . indexify($1) . "\n\n"/e;
 
   # Try to delimit by :
   s/\\subsec(?:ref|idx|op)?(?:unix)?\s*{(([^{}]+(?=[{}])|{[^{}]+})+)}((\W*default:)?[^\n:]*):\s*/"\n\n$tr{podleader}head2 " . indexify("$1$3") . "\n\n"/e;
   s/\\subsec(?:ref|idx|op)?(?:unix)?\s*{(([^{}]+(?=[{}])|{[^{}]+})+)}([^\n:]*):\s*/"\n\n$tr{podleader}head2 " . indexify("$1$3") . "\n\n"/e;
-  s/\\subsubsec(?:ref|idx|op)?(?:unix)?\s*{(([^{}]+(?=[{}])|{[^{}]+})+)}([^:]*):\s*/"\n\n$tr{podleader}item " . indexify("$1$3") . "\n\n"/e;
-#  s/\\subsubsec\s*{(([^{}]+(?=[{}])|{[^{}]+})+)}\s*$/"\n\n$tr{podleader}item " . indexify("$1") . "\n\n"/e;
-  s/\\subsubsec\s*{(([^{}]+(?=[{}])|{[^{}]+})+)}(.*)$/"\n\n$tr{podleader}item " . indexify("$1") . "$3\n\n"/me;
-#  s/\\subseckbd\s*{(([^{}]+(?=[{}])|{[^{}]+})+)}:\s*/"\n\n$tr{podleader}head2 " . indexify("$1") . "\n\n"/e;
+  s/\\subsubsec(?:ref|idx|op)?(?:unix)?\s*{(([^{}]+(?=[{}])|{[^{}]+})+)}([^:]*):\s*/"\n\n$tr{podleader}head3 " . indexify("$1$3") . "\n\n"/e;
+  s/\\subsubsec\s*{(([^{}]+(?=[{}])|{[^{}]+})+)}(.*)$/"\n\n$tr{podleader}head3 " . indexify("$1") . "$3\n\n"/me;
   s/\\subseckbd\s*{(([^{}]+(?=[{}])|{[^{}]+})+)}([^:]*):\s*/"\n\n$tr{podleader}head2 " . indexify("$1$3") . "\n\n"/e;
   # Try to delimit by ' '
   s/\\subsec(?:ref|idx|op)?(?:unix)?\s*{(([^{}]+(?=[{}])|{[^{}]+})+)}(\S*)\s+/"\n\n$tr{podleader}head2 " . indexify("$1$3") . "\n\n"/e;
