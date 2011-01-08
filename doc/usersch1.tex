@@ -211,8 +211,9 @@ small finite field, etc.
 Every PARI object (called \tet{GEN} in the sequel) belongs to one of these
 basic types. Let us have a closer look.
 
-\subsec{Integers and reals}:\sidx{integer}\sidx{real number} they are of
+\subsec{Integers and reals}: they are of
 arbitrary and varying length (each number carrying in its internal
+\sidx{integer}\sidx{real number}
 representation its own length or precision) with the following mild
 restrictions (given for 32-bit machines, the restrictions for 64-bit machines
 being so weak as to be considered nonexistent): integers must be in absolute
@@ -232,9 +233,8 @@ should} enable it.
 
 Integers and real numbers are non-recursive types.
 
-\subsec{Intmods, rational numbers, $p$-adic numbers, polmods, and rational
-functions}:\sidx{intmod}\sidx{rational number}\sidx{p-adic number}
-\sidx{polmod} these are recursive, but in a restricted way.
+\subsec{Intmods, rational numbers, $p$-adic numbers, polmods, and rational functions}: these are recursive, but in a restricted way.
+\sidx{intmod}\sidx{rational number}\sidx{p-adic number}\sidx{polmod}
 
 For intmods or polmods, there are two components: the modulus, which must
 be of type integer (resp.\ polynomial), and the representative number (resp.\
