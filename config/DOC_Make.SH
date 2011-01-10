@@ -90,7 +90,7 @@ gpman: gp.1
 	nroff -man gp.1 | unix2dos -ascii > gp.man
 
 clean:
-	rm -f *.log *.dvi *.idx *.ps *.pdf *.aux *.toc *.std *.dumbpod *.3
+	rm -f *.log *.dvi *.idx *.ps *.pdf *.aux *.toc *.std *.dumbpod *.3 *.tmp *.html
 
 cleandoc: clean
 
@@ -120,7 +120,7 @@ dumbpod: appa.dumbpod usersch1.dumbpod usersch2.dumbpod usersch3.dumbpod
 
 manpages: dumbpod appa.3 usersch1.3 usersch2.3 usersch3.3
 
-html: dumbpod appa.html appb.html appd.html usersch1.html usersch2.html usersch3.html
+html: dumbpod appa.html appb.html appd.html usersch1.html usersch2.html usersch3.html usersch4.html usersch5.html usersch6.html usersch7.html
 
 .dumbpod.3:
 	pod2man --section=3 --center="PARI/GP Manual, part \$*" --release=$version.$patch --lax \$*.dumbpod > tmp_man && mv tmp_man \$*.3
