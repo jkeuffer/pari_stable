@@ -67,14 +67,14 @@ clean:: cleandoc cleanall
 distrib:
 	$config_dir/settar \$(VERS) $__status__
 
-tag:
+svntag:
 	@echo svn copy \$(SVN)/trunk \$(SVN)/tags/\$(TAG)
 
-alpha: tag
+alpha: svntag
 	$config_dir/settar \$(VERS) alpha
-beta: tag
+beta: svntag
 	$config_dir/settar \$(VERS) beta
-release: tag
+release: svntag
 	$config_dir/settar \$(VERS) released
 svnsnapshot:
 	$config_dir/settar \$(VERS) svnsnapshot
