@@ -3,7 +3,7 @@ Section: linear_algebra
 C-Name: qflll0
 Prototype: GD0,L,
 Help: qflll(x,{flag=0}): LLL reduction of the vectors forming the matrix x
- (gives the unimodular transformation matrix T such that x*T). flag is
+ (gives the unimodular transformation matrix T such that x*T is LLL-reduced). flag is
  optional, and can be 0: default, 1: assumes x is integral, 2: assumes x is
  integral, returns a partially reduced basis,
  4: assumes x is integral, returns [K,T] where K is the integer kernel of x
