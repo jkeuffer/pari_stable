@@ -33,6 +33,8 @@ BA 22- text form of a closure now include the closure context.
 BA 23- reading compressed files could corrupt the stack.
 BA 24- t_CLOSURE==t_CLOSURE and t_CLOSURE===t_CLOSURE did not work.
    25- gequal1(0.*x + 1) returned 0
+   26- ispower((100!)^2) -> 0 [#1155] Affected pure powers divisible by more
+       than 22 of the 26 primes <= 101. (introduced in 2.4.3)
 
   Changed
 LGr1- universal constants (gen_0,gen_1, etc.) are now read-only

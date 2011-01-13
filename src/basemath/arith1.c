@@ -914,8 +914,8 @@ Z_isanypower(GEN x, GEN *pty)
 
   x = absi(x); /* Z_lvalrem_stop assigns to x */
   k = 1;
-  P = cgetg(t_VECSMALL, 26 + 1);
-  E = cgetg(t_VECSMALL, 26 + 1);
+  P = cgetg(26 + 1, t_VECSMALL);
+  E = cgetg(26 + 1, t_VECSMALL);
   /* trial division */
   for(l = 1;;)
   {
@@ -930,7 +930,10 @@ Z_isanypower(GEN x, GEN *pty)
       E[l] = v; l++;
       e = cgcd(e, v); if (e == 1) goto END;
     }
-    if (stop) { if (is_pm1(x)) k = e; goto END; }
+    if (stop) { 
+      if (is_pm1(x)) k = e;
+      goto END; 
+    }
   }
 
   if (e)
