@@ -4,21 +4,22 @@ use PARI::822;
 $class=$ARGV[0];
 
 %secnumber=(
-  'operators'          =>  1 ,
-  'conversions'        =>  2 ,
-  'transcendental'     =>  3 ,
-  'number_theoretical' =>  4 ,
-  'elliptic_curves'    =>  5 ,
-  'number_fields'      =>  6 ,
-  'polynomials'        =>  7 ,
-  'linear_algebra'     =>  8 ,
-  'sums'               =>  9 ,
-  'graphic'            => 10 ,
-  'programming/control'        => 11 ,
-  'programming/specific'       => 11 ,
-  'symbolic_operators' => 13 ,
-  'member_functions'   => 14 ,
-  'programming/internals'      => 15
+  'operators'             =>  1,
+  'conversions'           =>  2,
+  'transcendental'        =>  3,
+  'number_theoretical'    =>  4,
+  'elliptic_curves'       =>  5,
+  'number_fields'         =>  6,
+  'polynomials'           =>  7,
+  'linear_algebra'        =>  8,
+  'sums'                  =>  9,
+  'graphic'               => 10,
+  'programming/control'   => 11,
+  'programming/specific'  => 11,
+  'symbolic_operators'    => 13,
+  'member_functions'      => 14,
+  'programming/internals' => 15,
+  'default'               => 16,
 );
 
 print <<EOF;
@@ -34,6 +35,7 @@ foreach my $name (sort keys %funcs)
       next if ($func{'Class'} ne $class);
       my $gpname=$func{'Function'};
       $gpname =~ s/\\/\\\\/g;
+      $gpname =~ s/^_def_//;
       defined($func{'Section'})
         or die("$name: mandatory field Section is missing");
       my $sec=$secnumber{$func{'Section'}};

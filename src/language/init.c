@@ -79,7 +79,7 @@ THREAD size_t memused;
 static void ** MODULES, ** OLDMODULES;
 static pari_stack s_MODULES, s_OLDMODULES;
 const long functions_tblsz = 135; /* size of functions_hash */
-entree **functions_hash;
+entree **functions_hash, **defaults_hash;
 
 void *foreignHandler;                       /* Handler for foreign commands.   */
 char foreignExprSwitch = 3;               /* Just some unprobable char.      */
@@ -586,7 +586,9 @@ pari_init_functions(void)
   stack_pushp(&s_OLDMODULES,oldfonctions);
   functions_hash = (entree**) pari_calloc(sizeof(entree*)*functions_tblsz);
   pari_fill_hashtable(functions_hash,
-                      new_fun_set? functions_basic:oldfonctions);
+                      new_fun_set? functions_basic: oldfonctions);
+  defaults_hash = (entree**) pari_calloc(sizeof(entree*)*functions_tblsz);
+  pari_fill_hashtable(defaults_hash, functions_default);
 }
 
 void
@@ -1936,3 +1938,4 @@ pari_version(void)
  ****************************************************************************
  */
 #include "init.h"
+#include "default.h"

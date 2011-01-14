@@ -2,9 +2,11 @@ svn list -R -r COMMITTED | grep -v '/$'
 # generated files
 echo Odos/paricfg.h
 echo doc/usersch3.tex
+echo src/language/default.h
 echo src/language/init.h
 echo src/language/parse.c
 echo src/language/parse.h
+echo src/gp/gp_default.h
 echo src/gp/gp_init.h
 echo src/gp/highlvl.h
 echo src/gp/whatnow.h

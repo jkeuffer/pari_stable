@@ -368,29 +368,16 @@ get_matches(int code, const char *text, GF f)
   return matches;
 }
 
-#define DFLT 0
-#define ENTREE 1
 static char *
-generator(void *list, const char *text, int *nn, int len, int typ)
+generator(void *list, const char *text, int *nn, int len)
 {
   const char *def = NULL;
   int n = *nn;
 
   /* Return the next name which partially matches from list.*/
-  switch(typ)
-  {
-    case DFLT :
-      do
-        def = (((default_type *) list)[n++]).name;
-      while (def && strncmp(def,text,len));
-      break;
-
-    case ENTREE :
-      do
-        def = (((entree *) list)[n++]).name;
-      while (def && strncmp(def,text,len));
-  }
-
+  do
+    def = (((entree *) list)[n++]).name;
+  while (def && strncmp(def,text,len));
   *nn = n;
   if (def)
   {
@@ -408,21 +395,12 @@ old_generator(const char *text,int state)
   if (!state) { res = (char*)"a"; n=0; len=strlen(text); }
   if (res)
   {
-    res = generator((void *)oldfonctions,text,&n,len,ENTREE);
+    res = generator((void *)oldfonctions,text,&n,len);
     if (res) return res;
     n=0;
   }
-  return generator((void *)functions_oldgp,text,&n,len,ENTREE);
+  return generator((void *)functions_oldgp,text,&n,len);
 }
-static char *
-default_generator(const char *text,int state)
-{
-  static int n,len;
-
-  if (!state) { n=0; len=strlen(text); }
-  return generator(gp_default_list,text,&n,len,DFLT);
-}
-
 static char *
 add_prefix(const char *name, const char *text, long junk)
 {
@@ -440,7 +418,7 @@ init_prefix(const char *text, int *len, int *junk, char **TEXT)
   *len  = l - j;
 }
 static int
-is_internal(entree *ep) { return ep->menu >= 13; }
+is_internal(entree *ep) { return ep->menu >= 13 && ep->menu <= 15; }
 
 /* Generator function for command completion.  STATE lets us know whether
  * to start from scratch; without any state (i.e. STATE == 0), then we
@@ -519,6 +497,9 @@ member_generator(const char *text, int state)
 static char *
 command_generator(const char *text, int state)
 { return hashtable_generator(text,state, functions_hash); }
+static char *
+default_generator(const char *text,int state)
+{ return hashtable_generator(text,state, defaults_hash); }
 
 static char *
 ext_help_generator(const char *text, int state)

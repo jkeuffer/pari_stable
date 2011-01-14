@@ -27,6 +27,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 static void whatnow0(char *s) { whatnow(s,0); }
 
 #include "gp_init.h"
+#include "gp_default.h"
 
 /* Backward Compatibility */
 

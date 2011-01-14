@@ -1,0 +1,21 @@
+Function: _def_realprecision
+Class: default
+Section: default
+C-Name: sd_realprecision
+Prototype:
+Help:
+Doc:
+ \subsecidx{realprecision} : the number of significant digits and, at the same
+ time, the number of printed digits of real numbers (see~\b{p}). Note that
+ PARI internal precision works on a word basis (32 or 64 bits), hence may not
+ coincide with the number of decimal digits you input. For instance to get 2
+ decimal digits you need one word of precision which, on a 32-bit machine,
+ actually gives you 9 digits ($9 < \log_{10}(2^{32}) < 10$):
+
+ \bprog
+ ? default(realprecision, 2)
+       realprecision = 9 significant digits (2 digits displayed)
+ @eprog
+
+ The default value is \kbd{28}, resp.~\kbd{38} on a 32-bit, resp~.64-bit,
+ machine.

@@ -53,14 +53,18 @@ extern entree * (*foreignAutoload)(const char*, long len);
 extern void (*foreignFuncFree)(entree *);
 
 extern const long functions_tblsz;  /* hashcodes table size */
-/* Variables containing the list of PARI functions */
+/* list of PARI functions */
 extern entree **functions_hash;    /* functions hashtable */
+extern entree **defaults_hash;    /* defaults hashtable */
 extern entree functions_basic[];
 
-/* Variables containing the list of specific GP functions */
+/* list of PARI defaults */
+extern entree functions_default[];
+/* list of GP-specific defaults */
+extern entree functions_gp_default[];
+/* list of GP-specific functions */
 extern entree  functions_gp[];
-
-/* Variables containing the list of old PARI fonctions (up to 1.39.15) */
+/* list of old PARI fonctions (up to 1.39.15) */
 extern entree  oldfonctions[], functions_oldgp[];
 
 /* colors */
@@ -96,12 +100,6 @@ extern char *current_histfile;
 extern ulong readline_state;
 #define DO_MATCHED_INSERT        2
 #define DO_ARGS_COMPLETE        4
-
-typedef struct default_type {
-  const char *name;
-  void *fun;
-} default_type;
-extern default_type gp_default_list[];
 
 /* prompts */
 #define DFT_PROMPT "? "

@@ -1,0 +1,14 @@
+Function: _def_timer
+Class: default
+Section: default
+C-Name: sd_timer
+Prototype:
+Help:
+Doc: this toggle is either 1 (on) or 0 (off). If on, every instruction
+ sequence (anything ended by a
+ newline in your input) is timed, to some accuracy depending on the hardware
+ and operating system. The time measured is the user \idx{CPU time},
+ \emph{not} including the time for printing the results (see \kbd{\#} and
+ \kbd{\#\#}).
+
+ The default value is \kbd{0}.

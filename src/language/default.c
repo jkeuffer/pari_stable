@@ -610,7 +610,7 @@ sd_debug(const char *v, long flag)
 ulong readline_state = DO_ARGS_COMPLETE;
 
 GEN
-sd_rl(const char *v, long flag)
+sd_readline(const char *v, long flag)
 {
   const char *msg[] = {NULL,
         "(bits 0x2/0x4 control matched-insert/arg-complete)"};
@@ -821,7 +821,7 @@ sd_filename(const char *v, long flag, const char *s, char **f)
     }
     if (file) pari_free(file);
     *f = file = pari_strdup(str);
-    pari_free(str); 
+    pari_free(str);
   }
   else if (!file) file = "<undefined>";
   if (flag == d_RETURN) return strtoGENstr(file);
@@ -842,7 +842,7 @@ sd_logfile(const char *v, long flag)
 }
 GEN
 sd_histfile(const char *v, long flag)
-{ 
+{
   GEN r = sd_filename(v, flag, "histfile", &current_histfile);
   return r;
 }
@@ -987,73 +987,51 @@ expand_prompt(const char *prompt, filtre_t *F)
   return s;
 }
 
-default_type gp_default_list[] =
+static int
+compare_name(const void *s1, const void *s2) {
+  entree *e1 = *(entree**)s1, *e2 = *(entree**)s2;
+  return strcmp(e1->name, e2->name);
+}
+static void
+defaults_list(pari_stack *s)
 {
-  {"breakloop",(void*)sd_breakloop},
-  {"colors",(void*)sd_colors},
-  {"compatible",(void*)sd_compatible},
-  {"datadir",(void*)sd_datadir},
-  {"debug",(void*)sd_debug},
-  {"debugfiles",(void*)sd_debugfiles},
-  {"debugmem",(void*)sd_debugmem},
-  {"echo",(void*)sd_echo},
-  {"factor_add_primes",(void*)sd_factor_add_primes},
-  {"factor_proven",(void*)sd_factor_proven},
-  {"format",(void*)sd_format},
-  {"graphcolormap",(void*)sd_graphcolormap},
-  {"graphcolors",(void*)sd_graphcolors},
-  {"help",(void*)sd_help},
-  {"histsize",(void*)sd_histsize},
-  {"histfile",(void*)sd_histfile},
-  {"lines",(void*)sd_lines},
-  {"log",(void*)sd_log},
-  {"logfile",(void*)sd_logfile},
-  {"new_galois_format",(void*)sd_new_galois_format},
-  {"output",(void*)sd_output},
-  {"parisize",(void*)sd_parisize},
-  {"path",(void*)sd_path},
-  {"prettyprinter",(void*)sd_prettyprinter},
-  {"primelimit",(void*)sd_primelimit},
-  {"prompt",(void*)sd_prompt},
-  {"prompt_cont",(void*)sd_prompt_cont},
-  {"psfile",(void*)sd_psfile},
-  {"realprecision",(void*)sd_realprecision},
-  {"readline",(void*)sd_rl},
-  {"recover",(void*)sd_recover},
-  {"secure",(void*)sd_secure},
-  {"seriesprecision",(void*)sd_seriesprecision},
-  {"simplify",(void*)sd_simplify},
-  {"strictmatch",(void*)sd_strictmatch},
-  {"TeXstyle",(void *)sd_TeXstyle},
-  {"timer",(void *)sd_timer},
-  {NULL,NULL} /* sentinel */
-};
+  entree *ep;
+  long i;
+  for (i = 0; i < functions_tblsz; i++)
+    for (ep = defaults_hash[i]; ep; ep = ep->next)
+      if (ep->menu == 16) stack_pushp(s, ep);
+}
+static GEN
+call_f2(entree *ep, const char *v, long flag)
+{ return ((GEN (*)(const char*,long))ep->value)(v, flag); }
 
 GEN
 setdefault(const char *s, const char *v, long flag)
 {
-  default_type *dft = gp_default_list;
-
-  if (!*s) {
-    for (dft = gp_default_list; dft->fun; dft++)
-      ((void (*)(const char*,long)) dft->fun)("", d_ACKNOWLEDGE);
+  entree *ep;
+  if (!*s)
+  { /* list all defaults */
+    pari_stack st;
+    entree **L;
+    long i;
+    stack_init(&st, sizeof(*L), (void**)&L);
+    defaults_list(&st);
+    qsort (L, st.n, sizeof(*L), compare_name);
+    for (i = 0; i < st.n; i++) (void)call_f2(L[i], "", d_ACKNOWLEDGE);
+    stack_delete(&st);
     return gnil;
   }
-  for (; dft->fun; dft++)
-    if (!strcmp(s,dft->name))
-      return ((GEN (*)(const char*,long)) dft->fun)(v,flag);
-  pari_err(talker,"unknown default: %s",s);
-  return NULL; /* not reached */
+  ep = is_entry_intern(s, defaults_hash, NULL);
+  if (!ep)
+  {
+    pari_err(talker,"unknown default: %s",s);
+    return NULL; /* not reached */
+  }
+  return call_f2(ep, v, flag);
 }
 int
 pari_is_default(const char *s)
-{
-  default_type *dft = gp_default_list;
-
-  for (; dft->fun; dft++)
-    if (!strcmp(s,dft->name)) return 1;
-  return 0;
-}
+{ return !!is_entry_intern(s, defaults_hash, NULL); }
 
 GEN
 default0(const char *a, const char *b) { return setdefault(a,b, d_RETURN); }

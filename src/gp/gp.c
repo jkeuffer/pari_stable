@@ -297,12 +297,12 @@ print_fun_list(char **list, long nbli)
 static void
 commands(long n)
 {
-  const size_t LIST_LEN = 1023UL;
-  size_t size = LIST_LEN, s = 0;
   long i;
   entree *ep;
-  char **list = (char **) pari_malloc((size+1)*sizeof(char *));
+  char **t_L;
+  pari_stack s_L;
 
+  stack_init(&s_L, sizeof(*t_L), (void**)&t_L);
   for (i = 0; i < functions_tblsz; i++)
     for (ep = functions_hash[i]; ep; ep = ep->next)
     {
@@ -315,19 +315,11 @@ commands(long n)
         case EpNEW: continue;
       }
       m = ep->menu;
-      if ((n < 0 && m && m < 13) || m == n)
-      {
-        list[s] = (char*)ep->name;
-        if (++s >= size)
-        {
-          size += LIST_LEN+1;
-          list = (char**) pari_realloc(list, size*sizeof(char *));
-        }
-      }
+      if ((n < 0 && m && m < 13) || m == n) stack_pushp(&s_L, (void*)ep->name);
     }
-  list[s] = NULL;
-  print_fun_list(list, term_height()-4);
-  pari_free(list);
+  stack_pushp(&s_L, NULL);
+  print_fun_list(t_L, term_height()-4);
+  stack_delete(&s_L);
 }
 
 static void

@@ -1,0 +1,18 @@
+Function: _def_primelimit
+Class: default
+Section: default
+C-Name: sd_primelimit
+Prototype:
+Help:
+Doc: \kbd{gp} precomputes a list of
+ all primes less than \kbd{primelimit} at initialization time. These are used
+ by many arithmetic functions, usually for trial division purposes. If you do
+ not plan to invoke any of them, you can just set this to 1. The maximal value
+ is a little less than $2^{32}$ (resp $2^{64}$) on a 32-bit (resp.~64-bit)
+ machine.
+
+ Since almost all arithmetic functions eventually require some table of prime
+ numbers, PARI currently guarantees that the first 6547 primes, up to and
+ including 65557, are precomputed, even if \kbd{primelimit} is $1$.
+
+ The default value is \kbd{500k}.

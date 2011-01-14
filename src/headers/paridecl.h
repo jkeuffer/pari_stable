@@ -1316,7 +1316,7 @@ GEN sd_prompt_cont(const char *v, long flag);
 GEN sd_psfile(const char *v, long flag);
 GEN sd_realprecision(const char *v, long flag);
 GEN sd_recover(const char *v, long flag);
-GEN sd_rl(const char *v, long flag);
+GEN sd_readline(const char *v, long flag);
 GEN sd_secure(const char *v, long flag);
 GEN sd_seriesprecision(const char *v, long flag);
 GEN sd_simplify(const char *v, long flag);

@@ -25,7 +25,8 @@ Description:
 Doc: returns the default corresponding to keyword \var{key}. If \var{val} is
  present, sets the default to \var{val} first (which is subject to string
  expansion first). Typing \kbd{default()} (or \b{d}) yields the complete
- default list as well as their current values. See \secref{se:defaults} for a
+ default list as well as their current values. See \secref{se:defaults} for an
+ introduction to GP defaults, \secref{se:gp_defaults} for a
  list of available defaults, and \secref{se:meta} for some shortcut
  alternatives. Note that the shortcuts are meant for interactive use and
  usually display more information than \kbd{default}.
