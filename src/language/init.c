@@ -62,7 +62,7 @@ THREAD GEN    bernzone;
 GEN     primetab; /* private primetable */
 byteptr diffptr;
 FILE    *pari_outfile, *pari_errfile, *pari_logfile, *pari_infile;
-char    *current_logfile, *current_psfile, *pari_datadir;
+char    *current_logfile, *current_psfile, *current_histfile, *pari_datadir;
 long    gp_colors[c_LAST];
 int     disable_color;
 ulong   DEBUGFILES, DEBUGLEVEL, DEBUGMEM;
@@ -509,6 +509,7 @@ pari_init_defaults(void)
 
   current_psfile = pari_strdup("pari.ps");
   current_logfile= pari_strdup("pari.log");
+  current_histfile = NULL;
   pari_logfile = NULL;
 
   pari_datadir = os_getenv("GP_DATA_DIR");

@@ -1301,6 +1301,7 @@ GEN sd_graphcolormap(const char *v, long flag);
 GEN sd_graphcolors(const char *v, long flag);
 GEN sd_help(const char *v, long flag);
 GEN sd_histsize(const char *v, long flag);
+GEN sd_histfile(const char *v, long flag);
 GEN sd_lines(const char *v, long flag);
 GEN sd_log(const char *v, long flag);
 GEN sd_logfile(const char *v, long flag);

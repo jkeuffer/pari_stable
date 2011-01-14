@@ -92,6 +92,7 @@ ulong get_uint(const char *s);
 int  gp_init_functions(void);
 
 extern char *current_logfile;
+extern char *current_histfile;
 extern ulong readline_state;
 #define DO_MATCHED_INSERT        2
 #define DO_ARGS_COMPLETE        4

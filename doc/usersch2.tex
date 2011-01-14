@@ -2543,6 +2543,12 @@ extended help is invoked, usually through a \kbd{??} or \kbd{???} request
 (see \secref{se:exthelp}), or \kbd{M-H} under readline (see
 \secref{se:readline}).
 
+\subsecidx{histfile} (disabled by default): name of a file where
+\kbd{gp} will keep a history of all \emph{input} commands (results are
+omitted). If this file exists when the value of \kbd{histfile} changes,
+it is read in and becomes part of the session history. Thus, setting this
+default in your gprc saves your readline history between sessions.
+
 \subsecidx{histsize} (default \kbd{5000}): \kbd{gp} keeps a history of the last
 \kbd{histsize} results computed so far, which you can recover using the
 \kbd{\%} notation (see \secref{se:history}). When this number is exceeded,

@@ -725,6 +725,7 @@ init_readline(void)
 
   if (init_done) return;
   init_done = 1;
+  if (read_history(current_histfile)) write_history(current_histfile);
 
   /* Allow conditional parsing of the ~/.inputrc file. */
   rl_readline_name = "Pari-GP";
@@ -901,7 +902,7 @@ history_is_new(char *s)
 static void
 gp_add_history(char *s)
 {
-  if (history_is_new(s)) add_history(s);
+  if (history_is_new(s)) { add_history(s); append_history(1,current_histfile); }
 }
 
 /* Read line; returns a malloc()ed string of the user input or NULL on EOF.

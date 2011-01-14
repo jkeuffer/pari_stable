@@ -806,12 +806,11 @@ sd_timer(const char *v, long flag)
 static GEN
 sd_filename(const char *v, long flag, const char *s, char **f)
 {
+  char *file = *f;
   if (*v)
   {
-    char *str, *old = *f;
-    long l;
-    char *ev = path_expand(v);
-    l = strlen(ev) + 256;
+    char *str, *ev = path_expand(v);
+    long l = strlen(ev) + 256;
     str = (char *) malloc(l);
     do_strftime(ev,str, l-1); pari_free(ev);
     if (GP_DATA->flags & gpd_SECURE)
@@ -820,10 +819,13 @@ sd_filename(const char *v, long flag, const char *s, char **f)
       pari_ask_confirm(msg);
       pari_free(msg);
     }
-    *f = pari_strdup(str); pari_free(str); pari_free(old);
+    if (file) pari_free(file);
+    *f = file = pari_strdup(str);
+    pari_free(str); 
   }
-  if (flag == d_RETURN) return strtoGENstr(*f);
-  if (flag == d_ACKNOWLEDGE) pari_printf("   %s = \"%s\"\n",s,*f);
+  else if (!file) file = "<undefined>";
+  if (flag == d_RETURN) return strtoGENstr(file);
+  if (flag == d_ACKNOWLEDGE) pari_printf("   %s = \"%s\"\n",s,file);
   return gnil;
 }
 
@@ -836,6 +838,12 @@ sd_logfile(const char *v, long flag)
     FILE *log = open_logfile(current_logfile);
     fclose(pari_logfile); pari_logfile = log;
   }
+  return r;
+}
+GEN
+sd_histfile(const char *v, long flag)
+{ 
+  GEN r = sd_filename(v, flag, "histfile", &current_histfile);
   return r;
 }
 
@@ -996,6 +1004,7 @@ default_type gp_default_list[] =
   {"graphcolors",(void*)sd_graphcolors},
   {"help",(void*)sd_help},
   {"histsize",(void*)sd_histsize},
+  {"histfile",(void*)sd_histfile},
   {"lines",(void*)sd_lines},
   {"log",(void*)sd_log},
   {"logfile",(void*)sd_logfile},

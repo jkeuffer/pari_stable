@@ -75,6 +75,7 @@ VB  8- [mingw] --datadir=@ option to Configure
 BA  9- PARI functions FlxqX_div
    10- PARI function ismpzero
 BA 11- PARI function bnr_get_clgp
+   12- new default 'histfile' (to save readline history in between sessions)
 
   Removed
 BA  1- PARI function CM_CardEFp (ellsea script deprecated).
