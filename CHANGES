@@ -58,6 +58,10 @@ LGr7- add information to the version() output [backward compatible if version()
 BA 10-[libpari] nf_get_TrInv renamed to nf_get_diff
    11- Qfb() : forbid square discriminants (-> corrupted objects [#1145])
    12- allow gequal1 / gequalm1 to return 'true' for t_SER
+   13- follow-up to (2.4.3, C104) [#1156]: 
+       - stop using the undocumented feature Z_factor_limit(x,1) = Z_factor(x).
+       - abide by the "lim" parameter in all cases :
+          factor(100,1 or 2) -> [10; 2] (was [2,2; 5,2])
 
   Added
 BA  1- trap keyword "syntaxer" to trap syntax error from eval.

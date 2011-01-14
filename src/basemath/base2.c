@@ -40,7 +40,10 @@ nfmaxord_check_args(nfmaxord_t *S, GEN T, long flag, GEN fa)
     if (!signe(dT)) pari_err(talker,"reducible polynomial in nfmaxord");
   } else {
     dT = ZX_disc(T);
-    fa = Z_factor_limit(absi(dT), (flag & nf_PARTIALFACT) == 0);
+    if (flag & nf_PARTIALFACT)
+      fa = Z_factor_limit(absi(dT), 0);
+    else
+      fa = Z_factor(absi(dT));
   }
   S->dT = dT;
   P = gel(fa,1); l = lg(P);
@@ -565,8 +568,7 @@ nfmaxord(nfmaxord_t *S, GEN T, long flag, GEN fa)
 
       u = get_coprimes(p, u); l = lg(u);
       /* no small factors, but often a prime power */
-      for (k = 1; k < l; k++)
-        gel(u,k) = gcoeff(Z_factor_limit(gel(u,k), 2),1,1);
+      for (k = 1; k < l; k++) (void)Z_isanypower(gel(u,k), &gel(u,k));
       gel(P,i) = gel(u,1);
       P = shallowconcat(P, vecslice(u, 2, l-1));
       av = avma;

@@ -544,7 +544,7 @@ default_bound(GEN n)
 static ulong
 tridiv_bound(GEN n)
 {
-  ulong p = maxprime(), l = default_bound(n);
+  ulong p = maxprime() + 1, l = default_bound(n);
   return minuu(p, l);
 }
 
@@ -583,6 +583,7 @@ aux_end(GEN n, long nb)
   return sort_factor(z, (void*)&absi_cmp, cmp_nodata);
 }
 
+/* all != 0 : only look for prime divisors < all */
 static GEN
 ifactor(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
         GEN state, ulong all, long hint)
@@ -602,22 +603,24 @@ ifactor(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
   if (is_pm1(n)) return aux_end(NULL,nb);
 
   n = gclone(n); setabssign(n);
-  i = vali(n);
-  if (i)
-  {
-    STOREu(2, i);
-    av = avma; affii(shifti(n,-i), n); avma = av;
-  }
-  if (is_pm1(n)) return aux_end(n,nb);
-
   /* trial division bound */
-  p = maxprime();
-  if (!all) lim = p; /* smallfact() */
-  else if (all > 1) {
-    if (all > p) pari_err(primer1, all);
+  if (all) {
+    if (all > maxprime() + 1) pari_err(primer1, all);
     lim = all; /* use supplied limit */
   }
-  else { lim = tridiv_bound(n); if (lim > p) lim = p; }
+  else
+    lim = tridiv_bound(n); 
+
+  if (lim > 2)
+  {
+    i = vali(n);
+    if (i)
+    {
+      STOREu(2, i);
+      av = avma; affii(shifti(n,-i), n); avma = av;
+    }
+    if (is_pm1(n)) return aux_end(n,nb);
+  }
 
   /* trial division */
   p = 2;
@@ -653,7 +656,7 @@ ifactor(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
       }
     }
 
-  if (all != 1)
+  if (all)
   { /* smallfact: look for easy pure powers then stop. Cf Z_isanypower */
     GEN x = n, y;
     ulong mask = 7, ex0 = 11;
@@ -718,15 +721,17 @@ GEN
 factorint(GEN n, long flag)
 {
   if (typ(n) != t_INT) pari_err(arither1);
-  return ifactor(n,NULL,NULL, 1,flag);
+  return ifactor(n,NULL,NULL, 0,flag);
 }
 
 GEN
 Z_factor_limit(GEN n, ulong all)
-{ return ifactor(n,NULL,NULL, all,decomp_default_hint); }
+{ 
+  if (!all) all = maxprime() + 1;
+  return ifactor(n,NULL,NULL, all,decomp_default_hint); }
 GEN
 Z_factor(GEN n)
-{ return ifactor(n,NULL,NULL, 1,decomp_default_hint); }
+{ return ifactor(n,NULL,NULL, 0,decomp_default_hint); }
 
 int
 is_Z_factor(GEN f)
@@ -755,7 +760,7 @@ Z_factor_until(GEN n, GEN limit)
   * Currently state[1] is discarded in initial call to ifac_break_limit */
   gel(state,1) = icopy(n);
   gel(state,2) = gcopy(limit);
-  return ifactor(n, &ifac_break_limit, state, 1, decomp_default_hint);
+  return ifactor(n, &ifac_break_limit, state, 0, decomp_default_hint);
 }
 
 GEN
@@ -1381,44 +1386,56 @@ divisorsu(ulong n)
   return gerepileupto(av, t);
 }
 
-GEN
-corepartial(GEN n, long all)
+static GEN
+corefa(GEN n, GEN fa)
 {
-  pari_sp av = avma;
+  GEN P = gel(fa,1), E = gel(fa,2), c = gen_1;
   long i;
-  GEN fa, P, E, c = gen_1;
-
-  if (typ(n) != t_INT) pari_err(typeer,"corepartial");
-  fa = Z_factor_limit(n,all);
-  P = gel(fa,1);
-  E = gel(fa,2);
   for (i=1; i<lg(P); i++)
     if (mod2(gel(E,i))) c = mulii(c,gel(P,i));
-  return gerepileuptoint(av, c);
+  return c;
 }
-
-GEN
-core2partial(GEN n, long all)
+static GEN
+core2fa(GEN n, GEN fa)
 {
-  pari_sp av = avma;
+  GEN P = gel(fa,1), E = gel(fa,2), c = gen_1, f = gen_1;
   long i;
-  GEN fa, P, E, c = gen_1, f = gen_1;
-
-  if (typ(n) != t_INT) pari_err(typeer,"core2partial");
-  fa = Z_factor_limit(n,all);
-  P = gel(fa,1);
-  E = gel(fa,2);
   for (i=1; i<lg(P); i++)
   {
     long e = itos(gel(E,i));
     if (e & 1)  c = mulii(c, gel(P,i));
     if (e != 1) f = mulii(f, powiu(gel(P,i), e >> 1));
   }
-  return gerepilecopy(av, mkvec2(c,f));
+  return mkvec2(c,f);
 }
-
-GEN core(GEN n)  { return corepartial(n,1); }
-GEN core2(GEN n) { return core2partial(n,1); }
+GEN
+corepartial(GEN n, long all)
+{
+  pari_sp av = avma;
+  if (typ(n) != t_INT) pari_err(typeer,"corepartial");
+  return gerepileuptoint(av, corefa(n, Z_factor_limit(n,all)));
+}
+GEN
+core2partial(GEN n, long all)
+{
+  pari_sp av = avma;
+  if (typ(n) != t_INT) pari_err(typeer,"core2partial");
+  return gerepilecopy(av, core2fa(n, Z_factor_limit(n,all)));
+}
+GEN
+core(GEN n)
+{
+  pari_sp av = avma;
+  if (typ(n) != t_INT) pari_err(typeer,"core");
+  return gerepileuptoint(av, corefa(n, Z_factor(n)));
+}
+GEN
+core2(GEN n)
+{
+  pari_sp av = avma;
+  if (typ(n) != t_INT) pari_err(typeer,"core");
+  return gerepilecopy(av, core2fa(n, Z_factor(n)));
+}
 
 GEN
 core0(GEN n,long flag) { return flag? core2(n): core(n); }
