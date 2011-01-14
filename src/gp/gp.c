@@ -444,7 +444,7 @@ slash_commands(void)
 ##      : print time for last result\n\
 \\\\      : comment up to end of line\n\
 \\a {n}  : print result in raw format (readable by PARI)\n\
-\\b {n}  : print result in beautified format\n\
+\\B {n}  : print result in beautified format\n\
 \\c      : list all commands (same effect as ?*)\n\
 \\d      : print all defaults\n\
 \\e {n}  : enable/disable echo (set echo=n)\n\
