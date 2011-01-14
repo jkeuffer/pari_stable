@@ -558,11 +558,9 @@ EOT
 
 if test -n "$add_funclist"; then
   cat >> $file << EOT
-desc:: $src/language/init.h $src/gp/gp_init.h $src/gp/highlvl.h $src/gp/whatnow.h
 
 $src/funclist::
-	@-cd $desc && find ../functions -name CVS -prune -o -name .\\* -prune -o -type f -print | env LANG= LC_COLLATE= LC_ALL= sort | xargs cksum > funclist\$(TMPSUF)
-	@-sh $cfg/mv-if-diff $desc/funclist\$(TMPSUF) $src/funclist
+	@-$cfg/genfunclist $desc
 
 $desc/\$(DESC): $src/funclist $desc/merge_822 $desc/PARI/822.pm
 	cd $desc && \$(PERL) merge_822 ../funclist > def\$(TMPSUF)

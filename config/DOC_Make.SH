@@ -1,3 +1,12 @@
+# Path to directories
+cfg=../$config_dir
+data=../$data_dir
+doc=../$doc_dir
+desc=../$desc_dir
+ex=../$examples_dir
+misc=../$misc_dir
+src=../$src_dir
+
 cat > doc/Makefile << EOT
 #  This file was created by Configure. Any change made to it will be lost
 #  next time configure is run.
@@ -26,9 +35,6 @@ paricfg.tex: paricfg.tex.in
 
 %.dvi: %.tex \$(MACROS)
 	tex \$<
-
-usersch3.tex: ../src/desc/doc_make ../src/desc/pari.desc usersFUNCS.tex
-	cd ../src/desc && \$(PERL) doc_make > ../../doc/usersch3.tex
 
 libpari.pdf: \$(PARI_TEX) \$(MACROS)
 	-rm -f libpari.std
@@ -125,3 +131,14 @@ html: dumbpod appa.html appb.html appd.html usersch1.html usersch2.html usersch3
 .dumbpod.3:
 	pod2man --section=3 --center="PARI/GP Manual, part \$*" --release=$version.$patch --lax \$*.dumbpod > tmp_man && mv tmp_man \$*.3
 EOT
+
+if test -n "$add_funclist"; then
+  cat >> doc/Makefile << EOT
+
+$src/funclist::
+	@-$cfg/genfunclist $desc
+
+usersch3.tex: $add_funclist ../src/desc/doc_make usersFUNCS.tex
+	cd ../src/desc && \$(PERL) doc_make > ../../doc/usersch3.tex
+EOT
+fi
