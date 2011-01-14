@@ -1079,8 +1079,9 @@ on their use.
 Some types have a second codeword, used differently by each type, and
 we will describe it as we now consider each of them in turn.
 
-\subsec{Type \typ{INT} (integer)}:\sidx{integer}\kbdsidx{t_INT} this type has
-a second codeword \kbd{z[1]} which contains the following information:
+\subsec{Type \typ{INT} (integer)}:
+\sidx{integer}\kbdsidx{t_INT}this type has a second codeword \kbd{z[1]} which
+contains the following information:
 
 the sign of \kbd{z}: coded as $1$, $0$ or $-1$ if $\kbd{z} > 0$, $\kbd{z} = 0$,
 $\kbd{z} < 0$ respectively.
@@ -1197,10 +1198,11 @@ These functions directly access the binary data and are thus much faster than
 the generic modulo functions. Besides, they return long integers instead of
 \kbd{GEN}s, so they do not clutter up the stack.
 
-\subsec{Type \typ{REAL} (real number)}:\kbdsidx{t_REAL}\sidx{real number}
-this type has a second codeword z[1] which also encodes its sign, obtained
-or set using the same functions as for a \typ{INT}, and a binary exponent.
-This exponent is handled using the following macros:
+\subsec{Type \typ{REAL} (real number)}:
+\kbdsidx{t_REAL}\sidx{real number}this type has a second codeword z[1] which
+also encodes its sign, obtained or set using the same functions as for a
+\typ{INT}, and a binary exponent. This exponent is handled using the
+following macros:
 
 \fun{long}{expo}{GEN z} returns the exponent of \kbd{z}.
 This is defined even when \kbd{z} is equal to zero, see
@@ -1302,15 +1304,15 @@ a\typ{INT} representing the $p$-adic unit associated to \kbd{z} modulo
 $$ \kbd{z} = p^{\text{valp(z)}} * (\kbd{z[4]} + O(\kbd{z[3]})),\quad
 \text{where}\quad \kbd{z[3]} = O(p^{\text{precp(z)}}). $$
 
-\subsec{Type \typ{QUAD} (quadratic number)}:\sidx{quadratic
-number}\kbdsidx{t_QUAD} \kbd{z[1]} points to the canonical polynomial $P$
-defining the quadratic field (as output by \tet{quadpoly}), \kbd{z[2]} to the
-``real part'' and \kbd{z[3]} to the ``imaginary part''. The latter are of
-type \typ{INT}, \typ{FRAC}, \typ{INTMOD}, or \typ{PADIC} and are to be taken
-as the coefficients of \kbd{z} with respect to the canonical basis $(1,X)$ or
-$\Q[X]/(P(X))$, see~\secref{se:compquad}. Exact complex numbers may be
-implemented as quadratics, but \typ{COMPLEX} is in general more versatile
-(\typ{REAL} components are allowed) and more efficient.
+\subsec{Type \typ{QUAD} (quadratic number)}:
+\sidx{quadratic number}\kbdsidx{t_QUAD}\kbd{z[1]} points to the canonical
+polynomial $P$ defining the quadratic field (as output by \tet{quadpoly}),
+\kbd{z[2]} to the ``real part'' and \kbd{z[3]} to the ``imaginary part''. The
+latter are of type \typ{INT}, \typ{FRAC}, \typ{INTMOD}, or \typ{PADIC} and
+are to be taken as the coefficients of \kbd{z} with respect to the canonical
+basis $(1,X)$ or $\Q[X]/(P(X))$, see~\secref{se:compquad}. Exact complex
+numbers may be implemented as quadratics, but \typ{COMPLEX} is in general
+more versatile (\typ{REAL} components are allowed) and more efficient.
 
 Operations involving a \typ{QUAD} and \typ{COMPLEX} are implemented by
 converting the \typ{QUAD} to a \typ{REAL} (or \typ{COMPLEX} with \typ{REAL}
@@ -1387,14 +1389,14 @@ leading term \kbd{z[lg(z)-1]} is not an exact integer zero. More precisely,
 and \kbd{isrationalzero(x)} is false for the leading coefficient. The same
 remark applies to \typ{SER}s.
 
-\subsec{Type \typ{SER} (power series)}:\kbdsidx{t_SER}\sidx{power series}
-This type also has a second codeword, which encodes a ``\emph{sign}'', i.e.~0
-if the power series is 0, and 1 if not, a \emph{variable number} as for
-polynomials, and an \emph{exponent}. This information can be handled with the
-following functions: \teb{signe}, \teb{setsigne}, \teb{varn}, \teb{setvarn}
-as for polynomials, and \teb{valp}, \teb{setvalp} for the exponent as for
-$p$-adic numbers. Beware: do \emph{not} use \teb{expo} and \teb{setexpo} on
-power series.
+\subsec{Type \typ{SER} (power series)}:
+\kbdsidx{t_SER}\sidx{power series}This type also has a second codeword, which
+encodes a ``\emph{sign}'', i.e.~0 if the power series is 0, and 1 if not, a
+\emph{variable number} as for polynomials, and an \emph{exponent}. This
+information can be handled with the following functions: \teb{signe},
+\teb{setsigne}, \teb{varn}, \teb{setvarn} as for polynomials, and \teb{valp},
+\teb{setvalp} for the exponent as for $p$-adic numbers. Beware: do \emph{not}
+use \teb{expo} and \teb{setexpo} on power series.
 
 The coefficients \kbd{z[2]}, \kbd{z[3]},\dots \kbd{z[lg(z)-1]} point to
 the coefficients of \kbd{z} in ascending order. As for polynomials
@@ -1463,8 +1465,9 @@ exponent: either \kbd{HIGHEXPOBIT} (for \typ{REAL}) or \kbd{HIGHVALPBIT} (for
 \typ{PADIC} and \typ{SER}). Of course, this is encapsulated by the
 exponent/valuation-handling macros and needs not concern the library user.
 
-\section{PARI variables}\label{se:vars} \subsec{Multivariate
-objects}\sidx{variable (priority)}
+\section{PARI variables}\label{se:vars}
+\subsec{Multivariate objects}
+\sidx{variable (priority)}
 
 \noindent We now consider variables and formal computations, and give the
 technical details corresponding to the general discussion in
