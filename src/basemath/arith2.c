@@ -609,7 +609,7 @@ ifactor(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
     lim = all; /* use supplied limit */
   }
   else
-    lim = tridiv_bound(n); 
+    lim = tridiv_bound(n);
 
   if (lim > 2)
   {
@@ -726,7 +726,7 @@ factorint(GEN n, long flag)
 
 GEN
 Z_factor_limit(GEN n, ulong all)
-{ 
+{
   if (!all) all = maxprime() + 1;
   return ifactor(n,NULL,NULL, all,decomp_default_hint); }
 GEN

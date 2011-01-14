@@ -930,9 +930,9 @@ Z_isanypower(GEN x, GEN *pty)
       E[l] = v; l++;
       e = cgcd(e, v); if (e == 1) goto END;
     }
-    if (stop) { 
+    if (stop) {
       if (is_pm1(x)) k = e;
-      goto END; 
+      goto END;
     }
   }
 
