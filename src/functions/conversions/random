@@ -60,7 +60,7 @@ Doc:
  by means of linear congruences, which were not well distributed in arithmetic
  progressions. We now
  use Brent's XORGEN algorithm, based on Feedback Shift Registers, see
- \kbd{http://wwwmaths.anu.edu.au/~brent/random.html}. The generator has period
+ \kbd{http://wwwmaths.anu.edu.au/\til{}brent/random.html}. The generator has period
  $2^{4096}-1$, passes the Crush battery of statistical tests of L'Ecuyer and
  Simard, but is not suitable for cryptographic purposes: one can reconstruct
  the state vector from a small sample of consecutive values, thus predicting
