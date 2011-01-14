@@ -682,12 +682,11 @@ aide0(const char *s0, int flag)
   }
   if (!ep)
   {
-    n = pari_is_default(s)? 2: 3;
     if (long_help)
-      external_help(s,n);
+      external_help(s,3);
     else
     {
-      if (n == 2)
+      if (pari_is_default(s))
         aide_print(s,"default");
       else if (!cb_pari_whatnow(s,1))
         aide_print(s,"unknown identifier");
