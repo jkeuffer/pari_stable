@@ -525,8 +525,6 @@ pari_init_defaults(void)
   else pari_datadir= pari_strdup(pari_datadir);
   for (i=0; i<c_LAST; i++) gp_colors[i] = c_NONE;
   pari_colormap = NULL; pari_graphcolors = NULL;
-  (void)sd_graphcolormap("[\"white\",\"black\",\"blue\",\"violetred\",\"red\",\"green\",\"grey\",\"gainsboro\"]", d_SILENT);
-  (void)sd_graphcolors("[4, 5]", d_SILENT);
 }
 
 /*********************************************************************/
