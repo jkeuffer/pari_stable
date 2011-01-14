@@ -533,36 +533,25 @@ fplll(GEN *ptrB, GEN *ptrU, GEN *ptrr, double DELTA, double ETA, long flag, long
   return U? U: B;
 }
 
-static long
-good_prec(long d, double delta, double eta)
-{
-  double t = eta+1, rho = t*t / (delta - eta*eta);
-  long goodprec = (ulong) (7.0 + 0.2*d + d*log2(rho)
-      +  2.0 * log ((double) d) - log2( (eta-0.5)*(1.0-delta) ));
-  return nbits2prec(goodprec);
-}
-
 /* Assume x a ZM, if ptB != NULL, set it to Gram-Schmidt (squared) norms */
 GEN
 ZM_lll_norms(GEN x, double DELTA, long flag, GEN *B)
 {
   pari_sp ltop = avma;
   const double ETA = 0.51;
-  long p,prec, d, n = lg(x)-1;
+  long p, d, n = lg(x)-1;
   GEN U;
   if (n <= 1) return lll_trivial(x, flag);
   d = lg(gel(x,1))-1;
-  prec = good_prec(d,DELTA,ETA);
   x = RgM_shallowcopy(x);
   U = (flag & LLL_INPLACE)? NULL: matid(n);
-  for (p = minss(3,prec); p <= prec; p++)
+  for (p = 3; ; p++)
   {
     GEN m = fplll(&x, &U, B, DELTA, ETA, flag, p);
     if (m) return m;
     gerepileall(ltop, U? 2: 1, &x, &U);
   }
-  pari_err(bugparier,"ZM_lll");
-  return NULL;
+  return NULL; /* NOT REACHED */
 }
 
 /********************************************************************/

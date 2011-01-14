@@ -35,6 +35,7 @@ BA 24- t_CLOSURE==t_CLOSURE and t_CLOSURE===t_CLOSURE did not work.
    25- gequal1(0.*x + 1) returned 0
    26- ispower((100!)^2) -> 0 [#1155] Affected pure powers divisible by more
        than 22 of the 26 primes <= 101. (introduced in 2.4.3)
+BA 27- LLL could fail (rarely) due to unsufficient precision [#1154]
 
   Changed
 LGr1- universal constants (gen_0,gen_1, etc.) are now read-only
