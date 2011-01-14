@@ -8,7 +8,7 @@ Doc: there are three possible values: 0
  (=~\var{raw}), 1 (=~\var{prettymatrix}), or 3
  (=~\var{external} \var{prettyprint}). This
  means that, independently of the default \kbd{format} for reals which we
- explained above, you can print results in three ways: 
+ explained above, you can print results in three ways:
 
  $\bullet$ \tev{raw format}, i.e.~a format which is equivalent to what you
  input, including explicit multiplication signs, and everything typed on a
