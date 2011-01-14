@@ -14,6 +14,7 @@ cat > doc/Makefile << EOT
 SHELL = $make_sh
 PERL  = $perl
 
+DESC          = pari.desc
 MACROS= paricfg.tex parimacro.tex
 USERS_TEX=\$(MACROS) appa.tex users.tex usersch1.tex usersch2.tex usersch3.tex
 PARI_TEX=\$(MACROS) libpari.tex appb.tex appd.tex usersch4.tex usersch5.tex usersch6.tex usersch7.tex
@@ -138,7 +139,11 @@ if test -n "$add_funclist"; then
 $src/funclist::
 	@-$cfg/genfunclist $desc
 
-usersch3.tex: $add_funclist ../src/desc/doc_make usersFUNCS.tex
+$desc/\$(DESC): $src/funclist $desc/merge_822 $desc/PARI/822.pm
+	cd $desc && \$(PERL) merge_822 ../funclist > def\$(TMPSUF)
+	mv $desc/def\$(TMPSUF) \$@
+
+usersch3.tex: $desc/\$(DESC) ../src/desc/doc_make usersFUNCS.tex
 	cd ../src/desc && \$(PERL) doc_make > ../../doc/usersch3.tex
 EOT
 fi
