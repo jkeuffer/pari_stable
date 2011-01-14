@@ -1,5 +1,5 @@
 Function: _def_psfile
-Class: default
+Class: gp_default
 Section: default
 C-Name: sd_psfile
 Prototype:

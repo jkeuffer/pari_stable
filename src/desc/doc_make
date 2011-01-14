@@ -35,7 +35,12 @@ while (<FILE>)
         $doc .= library_syntax($fun, $args);
       }
       s/_def_//;
-      print "\n\\subsecidx{$_}$v: \\label{se:$_}$doc\n";
+      my ($secname) = $_;
+      if ($secname =~ s/_/\\_/g) {
+        print "\n\\subsec{$secname}$v: \\kbdsidx{$_}\\label{se:$_}$doc\n";
+      } else {
+        print "\n\\subsecidx{$secname}$v: \\label{se:$_}$doc\n";
+      }
     }
   }
   print;

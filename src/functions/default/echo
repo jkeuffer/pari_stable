@@ -1,5 +1,5 @@
 Function: _def_echo
-Class: default
+Class: gp_default
 Section: default
 C-Name: sd_echo
 Prototype:
