@@ -560,7 +560,7 @@ sd_string(const char *v, long flag, const char *s, char **pstr)
     *pstr = old = pari_strdup(str);
     pari_free(str);
   }
-  else if (!old) old = "<undefined>";
+  else if (!old) old = (char*)"<undefined>";
   if (flag == d_RETURN) return strtoGENstr(old);
   if (flag == d_ACKNOWLEDGE) pari_printf("   %s = \"%s\"\n",s,old);
   return gnil;
@@ -589,10 +589,6 @@ sd_factor_proven(const char *v, long flag)
 GEN
 sd_new_galois_format(const char *v, long flag)
 { return sd_toggle(v,flag,"new_galois_format", &new_galois_format); }
-
-GEN
-sd_psfile(const char *v, long flag)
-{ return sd_string(v, flag, "psfile", &current_psfile); }
 
 GEN
 sd_datadir(const char *v, long flag)

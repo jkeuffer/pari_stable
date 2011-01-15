@@ -2423,6 +2423,10 @@ sd_histfile(const char *v, long flag)
   GEN r = sd_string(v, flag, "histfile", &current_histfile);
   return r;
 }
+GEN
+sd_psfile(const char *v, long flag)
+{ return sd_string(v, flag, "psfile", &current_psfile); }
+
 
 GEN
 sd_lines(const char *v, long flag)
