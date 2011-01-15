@@ -309,8 +309,6 @@ GEN
 sd_debug(const char *v, long flag)
 { return sd_ulong(v,flag,"debug",&DEBUGLEVEL, 0,20,NULL); }
 
-ulong readline_state = DO_ARGS_COMPLETE;
-
 GEN
 sd_debugfiles(const char *v, long flag)
 { return sd_ulong(v,flag,"debugfiles",&DEBUGFILES, 0,20,NULL); }

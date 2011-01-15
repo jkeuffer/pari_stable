@@ -93,6 +93,10 @@ ENDEXTERN
 #endif
 /**************************************************************************/
 
+enum { DO_MATCHED_INSERT = 2, DO_ARGS_COMPLETE = 4 };
+static ulong readline_state = DO_ARGS_COMPLETE;
+static char *current_histfile = NULL;
+
 static int pari_rl_back;
 static int did_init_matched = 0;
 static entree *current_ep = NULL;
@@ -699,15 +703,28 @@ rl_short_help(int count, int key)
 static int
 rl_long_help(int count, int key) { (void)count; return rl_short_help(-1,key); }
 
+static void
+init_histfile()
+{
+  if (current_histfile && read_history(current_histfile))
+    write_history(current_histfile);
+}
+
 void
 init_readline(void)
 {
   static int init_done = 0;
 
   if (init_done) return;
-  GP_DATA->use_readline = 1;
+  if (pari_stdin_isatty())
+    GP_DATA->use_readline = 1;
+  else
+  {
+    GP_DATA->use_readline = 0;
+    readline_state = 0;
+  }
   init_done = 1;
-  if (read_history(current_histfile)) write_history(current_histfile);
+  init_histfile();
 
   /* Allow conditional parsing of the ~/.inputrc file. */
   rl_readline_name = "Pari-GP";
@@ -783,6 +800,29 @@ init_readline(void)
   Bind(155, pari_rl_backward_sexp, emacs_dos_keymap); /* Alt-Left */
   Bind(157, pari_rl_forward_sexp,  emacs_dos_keymap); /* Alt-Right*/
 #endif
+}
+
+/* readline-specific defaults */
+GEN
+sd_readline(const char *v, long flag)
+{
+  const char *msg[] = {NULL,
+        "(bits 0x2/0x4 control matched-insert/arg-complete)"};
+  ulong o_readline_state = readline_state;
+  GEN res = sd_ulong(v,flag,"readline", &readline_state, 0, 7, msg);
+
+  if (o_readline_state != readline_state)
+    (void)sd_toggle(readline_state? "1": "0", d_SILENT, "readline", &(GP_DATA->use_readline));
+  return res;
+}
+GEN
+sd_histfile(const char *v, long flag)
+{
+  char *old = current_histfile;
+  GEN r = sd_string(v, flag, "histfile", &current_histfile);
+  if (current_histfile != old && (!old || strcmp(old,current_histfile)))
+    init_histfile();
+  return r;
 }
 
 static void

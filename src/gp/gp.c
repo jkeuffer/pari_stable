@@ -1893,7 +1893,6 @@ read_opt(pari_stack *p_A, long argc, char **argv)
   if (!hastty)
   {
     if (!(GP_DATA->flags & gpd_EMACS)) GP_DATA->breakloop = 0;
-    readline_state = 0;
     GP_DATA->use_readline = 0;
     GP_DATA->prompt[0] = 0;
   }
@@ -2407,19 +2406,6 @@ sd_prompt_cont(const char *v, long flag)
 { return sd_prompt_set(v, flag, "_cont", GP_DATA->prompt_cont); }
 
 GEN
-sd_readline(const char *v, long flag)
-{
-  const char *msg[] = {NULL,
-        "(bits 0x2/0x4 control matched-insert/arg-complete)"};
-  ulong o_readline_state = readline_state;
-  GEN res = sd_ulong(v,flag,"readline", &readline_state, 0, 7, msg);
-
-  if (o_readline_state != readline_state)
-    (void)sd_toggle(readline_state? "1": "0", d_SILENT, "readline", &(GP_DATA->use_readline));
-  return res;
-}
-
-GEN
 sd_breakloop(const char *v, long flag)
 { return sd_toggle(v,flag,"breakloop", &(GP_DATA->breakloop)); }
 GEN
@@ -2429,12 +2415,6 @@ GEN
 sd_timer(const char *v, long flag)
 { return sd_toggle(v,flag,"timer", &(GP_DATA->chrono)); }
 
-GEN
-sd_histfile(const char *v, long flag)
-{
-  GEN r = sd_string(v, flag, "histfile", &current_histfile);
-  return r;
-}
 GEN
 sd_psfile(const char *v, long flag)
 { return sd_string(v, flag, "psfile", &current_psfile); }
