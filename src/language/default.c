@@ -16,10 +16,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "paripriv.h"
 #include "anal.h"
 
-#ifdef HAS_STRFTIME
-#  include <time.h>
-#endif
-
 /* Simple-minded parsing utilities. These are forbidden to use the GP stack
  * which may not exist at this point [e.g upon GP initialization]  */
 
@@ -169,17 +165,6 @@ init_pp(gp_data *D)
   gp_pp *p = D->pp;
   p->cmd = pari_strdup(DFT_PRETTYPRINTER);
   p->file = NULL;
-}
-
-static void
-do_strftime(const char *s, char *buf, long max)
-{
-#ifdef HAS_STRFTIME
-  time_t t = time(NULL);
-  (void)strftime(buf,max,s,localtime(&t));
-#else
-  strcpy(buf,s);
-#endif
 }
 
 /**************************************************************************/
@@ -549,7 +534,7 @@ sd_string(const char *v, long flag, const char *s, char **pstr)
     char *str, *ev = path_expand(v);
     long l = strlen(ev) + 256;
     str = (char *) malloc(l);
-    do_strftime(ev,str, l-1); pari_free(ev);
+    strftime_expand(ev,str, l-1); pari_free(ev);
     if (GP_DATA->secure)
     {
       char *msg=pari_sprintf("[secure mode]: About to change %s to '%s'",s,str);
@@ -660,16 +645,6 @@ sd_prettyprinter(const char *v, long flag)
   if (flag == d_ACKNOWLEDGE)
     pari_printf("   prettyprinter = \"%s\"\n",pp->cmd? pp->cmd: "");
   return gnil;
-}
-
-const char *
-expand_prompt(const char *prompt, filtre_t *F)
-{
-  static char buf[MAX_PROMPT_LEN];
-  char *s = buf;
-  if (F->in_comment) return COMMENTPROMPT;
-  do_strftime(prompt, s, MAX_PROMPT_LEN-1);
-  return s;
 }
 
 static int

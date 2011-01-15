@@ -364,7 +364,6 @@ GEN  gp_history(gp_hist *H, long p, char *old, char *entry);
 void delete_dirs(gp_path *p);
 void gp_expand_path(gp_path *p);
 const char *pari_default_path(void);
-const char *expand_prompt(const char *prompt, filtre_t *F);
 
 typedef struct input_method {
 /* mandatory */

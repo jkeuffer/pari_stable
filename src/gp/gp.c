@@ -1363,6 +1363,16 @@ color_prompt(const char *prompt)
   brace_color(s, c_INPUT, 1); return buf;
 }
 
+const char *
+expand_prompt(const char *prompt, filtre_t *F)
+{
+  static char buf[MAX_PROMPT_LEN];
+  char *s = buf;
+  if (F->in_comment) return COMMENTPROMPT;
+  strftime_expand(prompt, s, MAX_PROMPT_LEN-1);
+  return s;
+}
+
 void
 update_logfile(const char *prompt, const char *s)
 {

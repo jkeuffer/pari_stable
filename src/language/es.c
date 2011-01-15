@@ -3589,6 +3589,20 @@ path_expand(const char *s)
 #endif
 }
 
+#ifdef HAS_STRFTIME
+#  include <time.h>
+void
+strftime_expand(const char *s, char *buf, long max)
+{
+  time_t t = time(NULL);
+  (void)strftime(buf,max,s,localtime(&t));
+}
+#else
+void
+strftime_expand(const char *s, char *buf, long max)
+{ strcpy(buf,s); }
+#endif
+
 void
 delete_dirs(gp_path *p)
 {
@@ -4151,7 +4165,7 @@ void warning0(GEN g) { pari_warn(user, g); }
 static char *
 wr_check(const char *s) {
   char *t = path_expand(s);
-  if (GP_DATA->flags & gpd_SECURE)
+  if (GP_DATA->secure)
   {
     char *msg = pari_sprintf("[secure mode]: about to write to '%s'",t);
     pari_ask_confirm(msg);

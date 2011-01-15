@@ -1452,6 +1452,7 @@ void    print1(GEN g);
 void    printf0(const char *fmt, GEN args);
 void    printtex(GEN g);
 char*   stack_strdup(const char *s);
+void    strftime_expand(const char *s, char *buf, long max);
 GEN     Strprintf(const char *fmt, GEN args);
 void    switchin(const char *name);
 void    switchout(const char *name);

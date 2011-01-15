@@ -65,6 +65,7 @@ GEN sd_prompt_cont(const char *v, long flag);
 GEN sd_psfile(const char *v, long flag);
 GEN sd_readline(const char *v, long flag);
 GEN sd_timer(const char *v, long flag);
+const char *expand_prompt(const char *prompt, filtre_t *F);
 
 extern entree  functions_highlevel[];
 

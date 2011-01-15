@@ -7518,6 +7518,14 @@ if the operation fails.
 \fun{char*}{path_expand}{const char *s} perform tilde and environment expansion
 on $s$. Returns a \kbd{malloc}'ed buffer.
 
+\fun{void}{strftime_expand}{const char *s, char *buf, long max} perform
+time expansion on $s$, storing the result (at most \kbd{max} chars) in
+buffer \kbd{buf}. Trivial wrapper around
+\bprog
+  time_t t = time(NULL);
+  strftime(but, max, s, localtime(&t);
+@eprog
+
 \fun{char*}{pari_get_homedir}{const char *user} expands \kbd{\til user}
 constructs, returning the home directory of user \kbd{user}, or \kbd{NULL} if
 it could not be determined (in particular if the operating system has no such
