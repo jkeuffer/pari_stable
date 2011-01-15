@@ -1956,7 +1956,8 @@ FpV_polint(GEN xa, GEN ya, GEN p, long v)
 }
 
 static void
-Flv_polint_all(GEN xa, GEN ya, GEN C0, GEN C1, ulong p)
+Flv_polint_all(GEN xa, GEN ya, GEN C0, GEN C1, ulong p,
+               GEN *pHp, GEN *pH0p, GEN *pH1p)
 {
   GEN T,Q = Flv_roots_to_pol(xa, p, 0);
   GEN dP  = NULL,  P = NULL;
@@ -1985,9 +1986,9 @@ Flv_polint_all(GEN xa, GEN ya, GEN C0, GEN C1, ulong p)
       P1= P1? Flx_add(P1, dP1, p): dP1;
     }
   }
-  gel(ya,1) = (P ? P : zero_Flx(0));
-  gel(C0,1) = (P0? P0: zero_Flx(0));
-  gel(C1,1) = (P1? P1: zero_Flx(0));
+  *pHp  = (P ? P : zero_Flx(0));
+  *pH0p = (P0? P0: zero_Flx(0));
+  *pH1p = (P1? P1: zero_Flx(0));
 }
 
 /* Q a vector of polynomials representing B in Fp[X][Y], evaluate at X = x,
@@ -2466,10 +2467,7 @@ INIT:
         x[++i] = n; y[i] = Flx_resultant_all(a, ev, C0+i, C1+i, dglist, p);
         if (!C1[i]) i--; /* C1(i) = 0. No way to recover C0(i) */
       }
-      Flv_polint_all(x,y,C0,C1, p);
-      Hp = gel(y,1);
-      H0p= gel(C0,1);
-      H1p= gel(C1,1);
+      Flv_polint_all(x,y,C0,C1, p, &Hp, &H0p, &H1p);
     }
     else
     {
