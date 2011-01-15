@@ -335,8 +335,7 @@ typedef struct {
   pari_timer *T;
 } gp_data;
   /* GP_DATA->flags */
-enum { gpd_QUIET=1, gpd_TEST=2,
-       gpd_SECURE=128, gpd_EMACS=256, gpd_TEXMACS=512};
+enum { gpd_QUIET=1, gpd_TEST=2, gpd_EMACS=256, gpd_TEXMACS=512};
 
 extern gp_data *GP_DATA;
 

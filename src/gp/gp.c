@@ -1694,7 +1694,7 @@ gp_alarm_handler(int sig)
 static void
 check_secure(const char *s)
 {
-  if (GP_DATA->flags & gpd_SECURE)
+  if (GP_DATA->secure)
     pari_err(talker, "[secure mode]: system commands not allowed\nTried to run '%s'",s);
 }
 
@@ -2366,7 +2366,7 @@ sd_help(const char *v, long flag)
   const char *str;
   if (*v)
   {
-    if (GP_DATA->flags & gpd_SECURE)
+    if (GP_DATA->secure)
       pari_err(talker,"[secure mode]: can't modify 'help' default (to %s)",v);
     if (GP_DATA->help) pari_free((void*)GP_DATA->help);
     GP_DATA->help = path_expand(v);

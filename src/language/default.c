@@ -632,7 +632,7 @@ sd_prettyprinter(const char *v, long flag)
     char *old = pp->cmd;
     int cancel = (!strcmp(v,"no"));
 
-    if (GP_DATA->flags & gpd_SECURE)
+    if (GP_DATA->secure)
       pari_err(talker,"[secure mode]: can't modify 'prettyprinter' default (to %s)",v);
     if (!strcmp(v,"yes")) v = DFT_PRETTYPRINTER;
     if (old && strcmp(old,v) && pp->file)
