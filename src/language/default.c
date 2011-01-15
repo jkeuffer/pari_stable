@@ -119,55 +119,6 @@ get_uint(const char *s)
 /*                            DEFAULTS                              */
 /*                                                                  */
 /********************************************************************/
-static void
-init_hist(gp_data *D, size_t l, ulong total)
-{
-  gp_hist *H = D->hist;
-  H->total = total;
-  H->size = l;
-  H->res = (GEN *) pari_calloc(l * sizeof(GEN));
-}
-
-static void
-init_path(gp_data *D)
-{
-  gp_path *path = D->path;
-  path->PATH = pari_strdup(pari_default_path());
-  path->dirs = NULL;
-}
-
-static void
-init_help(gp_data *D)
-{
-  char *h = os_getenv("GPHELP");
-# ifdef GPHELP
-  if (!h) h = (char*)GPHELP;
-# endif
-  if (h) h = pari_strdup(h);
-  D->help = h;
-}
-
-static void
-init_fmt(gp_data *D)
-{
-#ifdef LONG_IS_64BIT
-  static pariout_t DFLT_OUTPUT = { 'g', 38, 1, f_PRETTYMAT, 0 };
-#else
-  static pariout_t DFLT_OUTPUT = { 'g', 28, 1, f_PRETTYMAT, 0 };
-#endif
-  D->fmt = &DFLT_OUTPUT;
-}
-
-static const char *DFT_PRETTYPRINTER = "tex2mail -TeX -noindent -ragged -by_par";
-static void
-init_pp(gp_data *D)
-{
-  gp_pp *p = D->pp;
-  p->cmd = pari_strdup(DFT_PRETTYPRINTER);
-  p->file = NULL;
-}
-
-/**************************************************************************/
 
 long
 getrealprecision(void)
@@ -372,6 +323,15 @@ GEN
 sd_recover(const char *v, long flag)
 { return sd_toggle(v,flag,"recover", &(GP_DATA->recover)); }
 
+/* set D->hist to size = s / total = t */
+static void
+init_hist(gp_data *D, size_t s, ulong t)
+{
+  gp_hist *H = D->hist;
+  H->total = t;
+  H->size = s;
+  H->res = (GEN *) pari_calloc(s * sizeof(GEN));
+}
 GEN
 sd_histsize(const char *v, long flag)
 {
@@ -608,6 +568,7 @@ sd_path(const char *v, long flag)
   return gnil;
 }
 
+static const char *DFT_PRETTYPRINTER = "tex2mail -TeX -noindent -ragged -by_par";
 GEN
 sd_prettyprinter(const char *v, long flag)
 {
@@ -647,11 +608,13 @@ sd_prettyprinter(const char *v, long flag)
   return gnil;
 }
 
+/* compare entrees s1 s2 according to the associated function name */
 static int
 compare_name(const void *s1, const void *s2) {
   entree *e1 = *(entree**)s1, *e2 = *(entree**)s2;
   return strcmp(e1->name, e2->name);
 }
+/* return all entries with class '16' */
 static void
 defaults_list(pari_stack *s)
 {
@@ -661,10 +624,10 @@ defaults_list(pari_stack *s)
     for (ep = defaults_hash[i]; ep; ep = ep->next)
       if (ep->menu == 16) stack_pushp(s, ep);
 }
+/* ep associated to function f of arity 2. Call f(v,flag) */
 static GEN
 call_f2(entree *ep, const char *v, long flag)
 { return ((GEN (*)(const char*,long))ep->value)(v, flag); }
-
 GEN
 setdefault(const char *s, const char *v, long flag)
 {
@@ -695,6 +658,53 @@ pari_is_default(const char *s)
 
 GEN
 default0(const char *a, const char *b) { return setdefault(a,b, d_RETURN); }
+
+/********************************************************************/
+/*                                                                  */
+/*                     INITIALIZE GP_DATA                           */
+/*                                                                  */
+/********************************************************************/
+/* initialize D->path */
+static void
+init_path(gp_data *D)
+{
+  gp_path *path = D->path;
+  path->PATH = pari_strdup(pari_default_path());
+  path->dirs = NULL;
+}
+
+/* initialize D->help */
+static void
+init_help(gp_data *D)
+{
+  char *h = os_getenv("GPHELP");
+# ifdef GPHELP
+  if (!h) h = (char*)GPHELP;
+# endif
+  if (h) h = pari_strdup(h);
+  D->help = h;
+}
+
+/* initialize D->fmt */
+static void
+init_fmt(gp_data *D)
+{
+#ifdef LONG_IS_64BIT
+  static pariout_t DFLT_OUTPUT = { 'g', 38, 1, f_PRETTYMAT, 0 };
+#else
+  static pariout_t DFLT_OUTPUT = { 'g', 28, 1, f_PRETTYMAT, 0 };
+#endif
+  D->fmt = &DFLT_OUTPUT;
+}
+
+/* initialize D->pp */
+static void
+init_pp(gp_data *D)
+{
+  gp_pp *p = D->pp;
+  p->cmd = pari_strdup(DFT_PRETTYPRINTER);
+  p->file = NULL;
+}
 
 gp_data *
 default_gp_data(void)
