@@ -28,6 +28,7 @@ static void whatnow0(char *s) { whatnow(s,0); }
 
 #include "gp_init.h"
 #include "gp_default.h"
+#include "gp_rl_default.h"
 
 /* Backward Compatibility */
 

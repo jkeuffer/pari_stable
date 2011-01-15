@@ -431,8 +431,8 @@ sd_log(const char *v, long flag)
 GEN
 sd_TeXstyle(const char *v, long flag)
 {
-  const char *msg[] = { NULL,
-        "(bits 0x2/0x4 control output of \\left/\\PARIbreak)"};
+  const char *msg[] = { "(bits 0x2/0x4 control output of \\left/\\PARIbreak)",
+                        NULL };
   ulong n = GP_DATA->fmt->TeXstyle;
   GEN z = sd_ulong(v,flag,"TeXstyle", &n, 0, 7, msg);
   GP_DATA->fmt->TeXstyle = n; return z;

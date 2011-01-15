@@ -577,6 +577,10 @@ $src/gp/gp_default.h: $desc/\$(DESC) \$(DESC_HELP_GEN)
 	cd $desc && \$(PERL) gen_proto gp_default \$(DESC) > gp_default\$(TMPSUF)
 	mv $desc/gp_default\$(TMPSUF) \$@
 
+$src/gp/gp_rl_default.h: $desc/\$(DESC) \$(DESC_HELP_GEN)
+	cd $desc && \$(PERL) gen_proto gp_rl_default \$(DESC) > gp_rl_default\$(TMPSUF)
+	mv $desc/gp_rl_default\$(TMPSUF) \$@
+
 $src/gp/gp_init.h: $desc/\$(DESC) \$(DESC_HELP_GEN)
 	cd $desc && \$(PERL) gen_proto gp \$(DESC) > gp_init\$(TMPSUF)
 	mv $desc/gp_init\$(TMPSUF) \$@
@@ -638,9 +642,13 @@ for dir in basemath modules language gp graph systems; do
   cflags="\$(CFLAGS) \$(CPPFLAGS)"
   compile='$(CC)'
   case "$f" in
-  gp|gp_rl)
+  gp)
     cflags="$cflags -I$src/language \$(RLINCLUDE)"
     depend="$ANAL_H $src/gp/gp.h"
+    ;;
+  gp_rl)
+    cflags="$cflags -I$src/language \$(RLINCLUDE)"
+    depend="$ANAL_H $src/gp/gp_rl_default.h $src/gp/gp.h"
     ;;
   gp_init)
     cflags="$cflags -I$src/graph"

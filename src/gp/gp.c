@@ -1943,8 +1943,10 @@ main(int argc, char **argv)
   stack_init(&s_bufstack, sizeof(Buffer*), (void**)&bufstack);
   cb_pari_err_recover = gp_err_recover;
   pari_init_opts(1000000 * sizeof(long), 500000, INIT_SIGm);
-
-  pari_fill_hashtable(defaults_hash, functions_gp_default);
+#ifdef READLINE
+  pari_add_defaults_module(functions_gp_rl_default);
+#endif
+  pari_add_defaults_module(functions_gp_default);
   (void)sd_graphcolormap("[\"white\",\"black\",\"blue\",\"violetred\",\"red\",\"green\",\"grey\",\"gainsboro\"]", d_SILENT);
   (void)sd_graphcolors("[4, 5]", d_SILENT);
 

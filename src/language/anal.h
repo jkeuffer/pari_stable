@@ -60,12 +60,8 @@ extern entree functions_basic[];
 
 /* list of PARI defaults */
 extern entree functions_default[];
-/* list of GP-specific defaults */
-extern entree functions_gp_default[];
-/* list of GP-specific functions */
-extern entree  functions_gp[];
 /* list of old PARI fonctions (up to 1.39.15) */
-extern entree  oldfonctions[], functions_oldgp[];
+extern entree  oldfonctions[];
 
 /* colors */
 extern long    gp_colors[];

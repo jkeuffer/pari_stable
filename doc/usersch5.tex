@@ -127,13 +127,13 @@ structure. Built-in PARI routines are grouped in \emph{modules}, which
 are arrays of \kbd{entree} structs, the last of which satisfy
 \kbd{name = NULL} (sentinel).
 
-There are currently five modules in GP: general functions
-(\tet{functions_basic}), gp-specific functions (\tet{functions_gp}),
-gp-specific highlevel functions (\tet{functions_highlevel}),
- and two modules of obsolete functions. The function
-\kbd{pari\_init} initializes the interpreter and declares all symbols
-in \kbd{functions\_basic}. You may declare further functions on a case by
-case basis or as a whole module using
+There are currently five modules in PARI/GP: general functions
+(\tet{functions_basic}, known to \kbd{libpari}), gp-specific functions
+(\tet{functions_gp}), gp-specific highlevel functions
+(\tet{functions_highlevel}), and two modules of obsolete functions. The
+function \kbd{pari\_init} initializes the interpreter and declares all
+symbols in \kbd{functions\_basic}. You may declare further functions on a
+case by case basis or as a whole module using
 
 \fun{void}{pari_add_function}{entree *ep} adds a single routine to the
 table of symbols in the interpreter. It assumes \kbd{pari\_init} has been
@@ -144,7 +144,7 @@ called.
 \kbd{pari\_init} has been called.
 
 \noindent For instance, gp implements a number of private routines, which
-it adds to the default set via the call
+it adds to the default set via the calls
 \bprog
   pari_add_module(functions_gp);
   pari_add_module(functions_highlevel);
@@ -153,7 +153,21 @@ it adds to the default set via the call
 \fun{void}{pari_add_oldmodule}{entree *mod} adds all the routines in module
 \kbd{mod} to the table of symbols in the interpreter when running in
 "PARI 1.xx compatible" mode (see \kbd{default(compatible)}) . It assumes
+that
 \kbd{pari\_init} has been called.
+
+A GP \kbd{default} is likewise associated to a helper routine, that is run
+when the value is consulted, or changed by \tet{default0} or \tet{setdefault}.
+Such routines are grouped into modules: \tet{functions_default} containing all
+defaults that make sense in libpari context, \tet{functions_gp_rl_default}
+containing defaults that are \kbd{gp}-specific and do not make sense unless 
+we use \kbd{libreadline}, and \tet{functions_gp_default} containing all other 
+\kbd{gp}-specific defaults.
+
+\fun{void}{pari_add_defaults_module}{entree *mod} adds all the defaults in
+module \kbd{mod} to the interpreter. It assumes that \kbd{pari\_init} has
+been called. From this point on, all defaults in module \kbd{mod} are known
+to \tet{setdefault} and friends.
 
 \subsec{Public callbacks}
 

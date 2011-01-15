@@ -586,7 +586,7 @@ pari_init_functions(void)
   pari_fill_hashtable(functions_hash,
                       new_fun_set? functions_basic: oldfonctions);
   defaults_hash = (entree**) pari_calloc(sizeof(entree*)*functions_tblsz);
-  pari_fill_hashtable(defaults_hash, functions_default);
+  pari_add_defaults_module(functions_default);
 }
 
 void
@@ -596,6 +596,10 @@ pari_add_module(entree *ep)
     pari_fill_hashtable(functions_hash, ep);
   stack_pushp(&s_MODULES, ep);
 }
+
+void
+pari_add_defaults_module(entree *ep)
+{ pari_fill_hashtable(defaults_hash, ep); }
 
 void
 pari_add_oldmodule(entree *ep)

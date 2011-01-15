@@ -1,5 +1,5 @@
 Function: _def_readline
-Class: gp_default
+Class: gp_rl_default
 Section: default
 C-Name: sd_readline
 Prototype:

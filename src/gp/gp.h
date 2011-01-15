@@ -68,5 +68,11 @@ GEN sd_timer(const char *v, long flag);
 const char *expand_prompt(const char *prompt, filtre_t *F);
 
 extern entree  functions_highlevel[];
+/* list of GP-specific defaults */
+extern entree functions_gp_default[], functions_gp_rl_default[];
+/* list of GP-specific functions */
+extern entree  functions_gp[];
+/* list of old GP-specific fonctions (up to 1.39.15) */
+extern entree functions_oldgp[];
 
 ENDEXTERN
