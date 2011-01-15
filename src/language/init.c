@@ -806,7 +806,7 @@ gp_context_restore(struct gp_context* rec)
 {
   long i;
 
-  if (!(GP_DATA->flags & gpd_RECOVER)) pari_exit();
+  if (!(GP_DATA->recover)) pari_exit();
   if (!try_to_recover) return;
   /* disable gp_context_restore() and SIGINT */
   try_to_recover = 0;

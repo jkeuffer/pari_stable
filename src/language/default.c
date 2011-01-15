@@ -198,7 +198,7 @@ setrealprecision(long n, long *prec)
   return n;
 }
 
-static GEN
+GEN
 sd_toggle(const char *v, long flag, const char *s, int *ptn)
 {
   int state = *ptn;
@@ -225,19 +225,6 @@ sd_toggle(const char *v, long flag, const char *s, int *ptn)
   return gnil;
 }
 
-static GEN
-sd_gptoggle(const char *v, long flag, const char *s, ulong FLAG)
-{
-  int n = (GP_DATA->flags & FLAG)? 1: 0, old = n;
-  GEN z = sd_toggle(v, flag, s, &n);
-  if (n != old)
-  {
-    if (n) GP_DATA->flags |=  FLAG;
-    else   GP_DATA->flags &= ~FLAG;
-  }
-  return z;
-}
-
 static void
 sd_ulong_init(const char *v, const char *s, ulong *ptn, ulong Min, ulong Max)
 {
@@ -255,7 +242,7 @@ sd_ulong_init(const char *v, const char *s, ulong *ptn, ulong Min, ulong Max)
   }
 }
 
-static GEN
+GEN
 sd_ulong(const char *v, long flag, const char *s, ulong *ptn, ulong Min, ulong Max,
          const char **msg)
 {
@@ -269,12 +256,16 @@ sd_ulong(const char *v, long flag, const char *s, ulong *ptn, ulong Min, ulong M
       if (!*v || *ptn != n) {
         if (msg)
         {
-          if (!*msg) msg++; /* single msg, always printed */
-          else       msg += *ptn; /* one per possible value */
-          pari_printf("   %s = %lu %s\n", s, *ptn, *msg);
+          ulong i;
+          for (i = 0; i < *ptn; i++) {
+            if (!msg[i]) { i--; break; }
+          }
+          if (i >= 0) {
+            pari_printf("   %s = %lu %s\n", s, *ptn, msg[i]);
+            return gnil;
+          }
         }
-        else
-          pari_printf("   %s = %lu\n", s, *ptn);
+        pari_printf("   %s = %lu\n", s, *ptn);
       }
       break;
   }
@@ -312,7 +303,7 @@ sd_realprecision(const char *v, long flag)
 GEN
 sd_seriesprecision(const char *v, long flag)
 {
-  const char *msg[] = {NULL, "significant terms"};
+  const char *msg[] = {"significant terms", NULL};
   return sd_ulong(v,flag,"seriesprecision",&precdl, 1,LGBITS,msg);
 }
 
@@ -347,231 +338,6 @@ sd_format(const char *v, long flag)
   return gnil;
 }
 
-static long
-gp_get_color(char **st)
-{
-  char *s, *v = *st;
-  int trans;
-  long c;
-  if (isdigit((int)*v))
-    { c = atol(v); trans = 1; } /* color on transparent background */
-  else
-  {
-    if (*v == '[')
-    {
-      const char *a[3];
-      long i = 0;
-      for (a[0] = s = ++v; *s && *s != ']'; s++)
-        if (*s == ',') { *s = 0; a[++i] = s+1; }
-      if (*s != ']') pari_err(syntaxer,"expected character: ']'",s, *st);
-      *s = 0; for (i++; i<3; i++) a[i] = "";
-      /*    properties    |   color    | background */
-      c = (atoi(a[2])<<8) | atoi(a[0]) | (atoi(a[1])<<4);
-      trans = (*(a[1]) == 0);
-      v = s + 1;
-    }
-    else { c = c_NONE; trans = 0; }
-  }
-  if (trans) c = c | (1L<<12);
-  while (*v && *v++ != ',') /* empty */;
-  if (c != c_NONE) disable_color = 0;
-  *st = v; return c;
-}
-
-/* 1: error, 2: history, 3: prompt, 4: input, 5: output, 6: help, 7: timer */
-GEN
-sd_colors(const char *v, long flag)
-{
-  long c,l;
-  if (*v && !(GP_DATA->flags & (gpd_EMACS|gpd_TEXMACS)))
-  {
-    char *v0, *s;
-    disable_color=1;
-    l = strlen(v);
-    if (l <= 2 && strncmp(v, "no", l) == 0)
-      v = "";
-    if (l <= 6 && strncmp(v, "darkbg", l) == 0)
-      v = "1, 5, 3, 7, 6, 2, 3"; /* Assume recent ReadLine. */
-    if (l <= 7 && strncmp(v, "lightbg", l) == 0)
-      v = "1, 6, 3, 4, 5, 2, 3"; /* Assume recent ReadLine. */
-    if (l <= 6 && strncmp(v, "boldfg", l) == 0)        /* Good for darkbg consoles */
-      v = "[1,,1], [5,,1], [3,,1], [7,,1], [6,,1], , [2,,1]";
-    v0 = s = filtre(v, 0);
-    for (c=c_ERR; c < c_LAST; c++)
-      gp_colors[c] = gp_get_color(&s);
-    pari_free(v0);
-  }
-  if (flag == d_ACKNOWLEDGE || flag == d_RETURN)
-  {
-    char s[128], *t = s;
-    long col[3], n;
-    for (*t=0,c=c_ERR; c < c_LAST; c++)
-    {
-      n = gp_colors[c];
-      if (n == c_NONE)
-        sprintf(t,"no");
-      else
-      {
-        decode_color(n,col);
-        if (n & (1L<<12))
-        {
-          if (col[0])
-            sprintf(t,"[%ld,,%ld]",col[1],col[0]);
-          else
-            sprintf(t,"%ld",col[1]);
-        }
-        else
-          sprintf(t,"[%ld,%ld,%ld]",col[1],col[2],col[0]);
-      }
-      t += strlen(t);
-      if (c < c_LAST - 1) { *t++=','; *t++=' '; }
-    }
-    if (flag==d_RETURN) return strtoGENstr(s);
-    pari_printf("   colors = \"%s\"\n",s);
-  }
-  return gnil;
-}
-
-static long
-atocolor(const char *s)
-{
-  long l = atol(s);
-  if (l <   0) l =   0;
-  if (l > 255) l = 255;
-  return l;
-}
-
-GEN
-sd_graphcolormap(const char *v, long flag)
-{
-  char *p, *q;
-  long i, j, l, a, s, *lp;
-
-  if (*v)
-  {
-    char *t = filtre(v, 0);
-    if (*t != '[' || t[strlen(t)-1] != ']')
-      pari_err(syntaxer, "incorrect value for graphcolormap", t, t);
-    for (s = 0, p = t+1, l = 2, a=0; *p; p++)
-      if (*p == '[')
-      {
-        a++;
-        while (*++p != ']')
-          if (!*p || *p == '[')
-            pari_err(syntaxer, "incorrect value for graphcolormap", p, t);
-      }
-      else if (*p == '"')
-      {
-        s += sizeof(long)+1;
-        while (*p && *++p != '"') s++;
-        if (!*p) pari_err(syntaxer, "incorrect value for graphcolormap", p, t);
-        s = (s+sizeof(long)-1) & ~(sizeof(long)-1);
-      }
-      else if (*p == ',')
-        l++;
-    if (l < 4)
-      pari_err(talker, "too few colors (< 4) in graphcolormap");
-    if (pari_colormap) pari_free(pari_colormap);
-    pari_colormap = (GEN)pari_malloc((l+4*a)*sizeof(long) + s);
-    pari_colormap[0] = evaltyp(t_VEC)|evallg(l);
-    for (p = t+1, i = 1, lp = pari_colormap+l; i < l; p++)
-      switch(*p)
-      {
-      case '"':
-        gel(pari_colormap, i) = lp;
-        q = ++p; while (*q != '"') q++;
-        *q = 0;
-        j = 1 + nchar2nlong(q-p+1);
-        lp[0] = evaltyp(t_STR)|evallg(j);
-        strncpy(GSTR(lp), p, q-p+1);
-        lp += j; p = q;
-        break;
-      case '[': {
-        const char *ap[3];
-        gel(pari_colormap, i) = lp;
-        lp[0] = evaltyp(t_VECSMALL)|_evallg(4);
-        for (ap[0] = ++p, j=0; *p && *p != ']'; p++)
-          if (*p == ',' && j<2) { *p++ = 0; ap[++j] = p; }
-        while (j<2) ap[++j] = "0";
-        if (j>2 || *p != ']')
-        {
-          char buf[100];
-          sprintf(buf, "incorrect value for graphcolormap[%ld]: ", i);
-          pari_err(syntaxer, buf, p, t);
-        }
-        *p = '\0';
-        lp[1] = atocolor(ap[0]);
-        lp[2] = atocolor(ap[1]);
-        lp[3] = atocolor(ap[2]);
-        lp += 4;
-        break;
-      }
-      case ',':
-      case ']':
-        i++;
-        break;
-      default:
-        pari_err(syntaxer, "incorrect value for graphcolormap", p, t);
-      }
-    free(t);
-  }
-  if (flag == d_RETURN || flag == d_ACKNOWLEDGE)
-  {
-    GEN cols = cgetg(lg(pari_colormap), t_VEC);
-    long i;
-
-    for (i = 1; i < lg(cols); i++)
-    {
-      GEN c = gel(pari_colormap, i);
-      if (typ(c) == t_STR)
-        gel(cols, i) = gcopy(c);
-      else
-        gel(cols, i) = vecsmall_to_vec(c);
-    }
-    if (flag == d_RETURN) return cols;
-    pari_printf("   graphcolormap = %Ps\n", cols);
-  }
-  return gnil;
-}
-
-GEN
-sd_graphcolors(const char *v, long flag)
-{
-  long i, l;
-  char *p;
-
-  if (*v) {
-    char *t = filtre(v, 0);
-    for (p = t+1, l=2; *p != ']'; p++)
-      if (*p == ',') l++;
-      else if (*p < '0' || *p > '9')
-        pari_err(syntaxer, "incorrect value for graphcolors", p, t);
-    if (*++p) pari_err(syntaxer, "incorrect value for graphcolors", p, t);
-    if (pari_graphcolors) pari_free(pari_graphcolors);
-    pari_graphcolors = cgetalloc(t_VECSMALL, l);
-    for (p = t+1, i=0; *p; p++)
-    {
-      long n = 0;
-      while (*p >= '0' && *p <= '9')
-      {
-        n *= 10;
-        n += *p-'0';
-        p++;
-      }
-      pari_graphcolors[++i] = n;
-    }
-    free(t);
-  }
-  switch(flag)
-  {
-  case d_RETURN:
-    return vecsmall_to_vec(pari_graphcolors);
-  case d_ACKNOWLEDGE:
-    pari_printf("   graphcolors = %Ps\n", vecsmall_to_vec(pari_graphcolors));
-  }
-  return gnil;
-}
-
 GEN
 sd_compatible(const char *v, long flag)
 {
@@ -592,9 +358,9 @@ sd_compatible(const char *v, long flag)
 GEN
 sd_secure(const char *v, long flag)
 {
-  if (*v && (GP_DATA->flags & gpd_SECURE))
+  if (*v && (GP_DATA->secure))
     pari_ask_confirm("[secure mode]: About to modify the 'secure' flag");
-  return sd_gptoggle(v,flag,"secure", gpd_SECURE);
+  return sd_toggle(v,flag,"secure", &(GP_DATA->secure));
 }
 
 static THREAD long dbg = -1;
@@ -610,19 +376,6 @@ sd_debug(const char *v, long flag)
 ulong readline_state = DO_ARGS_COMPLETE;
 
 GEN
-sd_readline(const char *v, long flag)
-{
-  const char *msg[] = {NULL,
-        "(bits 0x2/0x4 control matched-insert/arg-complete)"};
-  ulong o_readline_state = readline_state;
-  GEN res = sd_ulong(v,flag,"readline", &readline_state, 0, 7, msg);
-
-  if (o_readline_state != readline_state)
-    (void)sd_gptoggle(readline_state? "1": "0", d_SILENT, "readline", gpd_USE_READLINE);
-  return res;
-}
-
-GEN
 sd_debugfiles(const char *v, long flag)
 { return sd_ulong(v,flag,"debugfiles",&DEBUGFILES, 0,20,NULL); }
 
@@ -631,20 +384,8 @@ sd_debugmem(const char *v, long flag)
 { return sd_ulong(v,flag,"debugmem",&DEBUGMEM, 0,20,NULL); }
 
 GEN
-sd_breakloop(const char *v, long flag)
-{ return sd_gptoggle(v,flag,"breakloop", gpd_BREAKLOOP); }
-
-GEN
-sd_echo(const char *v, long flag)
-{ return sd_gptoggle(v,flag,"echo", gpd_ECHO); }
-
-GEN
 sd_recover(const char *v, long flag)
-{ return sd_gptoggle(v,flag,"recover", gpd_RECOVER); }
-
-GEN
-sd_lines(const char *v, long flag)
-{ return sd_ulong(v,flag,"lines",&(GP_DATA->lim_lines), 0,LONG_MAX,NULL); }
+{ return sd_toggle(v,flag,"recover", &(GP_DATA->recover)); }
 
 GEN
 sd_histsize(const char *v, long flag)
@@ -793,57 +534,47 @@ sd_primelimit(const char *v, long flag)
 
 GEN
 sd_simplify(const char *v, long flag)
-{ return sd_gptoggle(v,flag,"simplify", gpd_SIMPLIFY); }
+{ return sd_toggle(v,flag,"simplify", &(GP_DATA->simplify)); }
 
 GEN
 sd_strictmatch(const char *v, long flag)
-{ return sd_gptoggle(v,flag,"strictmatch", gpd_STRICTMATCH); }
+{ return sd_toggle(v,flag,"strictmatch", &(GP_DATA->strictmatch)); }
 
 GEN
-sd_timer(const char *v, long flag)
-{ return sd_gptoggle(v,flag,"timer", gpd_CHRONO); }
-
-static GEN
-sd_filename(const char *v, long flag, const char *s, char **f)
+sd_string(const char *v, long flag, const char *s, char **pstr)
 {
-  char *file = *f;
+  char *old = *pstr;
   if (*v)
   {
     char *str, *ev = path_expand(v);
     long l = strlen(ev) + 256;
     str = (char *) malloc(l);
     do_strftime(ev,str, l-1); pari_free(ev);
-    if (GP_DATA->flags & gpd_SECURE)
+    if (GP_DATA->secure)
     {
       char *msg=pari_sprintf("[secure mode]: About to change %s to '%s'",s,str);
       pari_ask_confirm(msg);
       pari_free(msg);
     }
-    if (file) pari_free(file);
-    *f = file = pari_strdup(str);
+    if (old) pari_free(old);
+    *pstr = old = pari_strdup(str);
     pari_free(str);
   }
-  else if (!file) file = "<undefined>";
-  if (flag == d_RETURN) return strtoGENstr(file);
-  if (flag == d_ACKNOWLEDGE) pari_printf("   %s = \"%s\"\n",s,file);
+  else if (!old) old = "<undefined>";
+  if (flag == d_RETURN) return strtoGENstr(old);
+  if (flag == d_ACKNOWLEDGE) pari_printf("   %s = \"%s\"\n",s,old);
   return gnil;
 }
 
 GEN
 sd_logfile(const char *v, long flag)
 {
-  GEN r = sd_filename(v, flag, "logfile", &current_logfile);
+  GEN r = sd_string(v, flag, "logfile", &current_logfile);
   if (*v && pari_logfile)
   {
     FILE *log = open_logfile(current_logfile);
     fclose(pari_logfile); pari_logfile = log;
   }
-  return r;
-}
-GEN
-sd_histfile(const char *v, long flag)
-{
-  GEN r = sd_filename(v, flag, "histfile", &current_histfile);
   return r;
 }
 
@@ -861,28 +592,7 @@ sd_new_galois_format(const char *v, long flag)
 
 GEN
 sd_psfile(const char *v, long flag)
-{ return sd_filename(v, flag, "psfile", &current_psfile); }
-
-static void
-err_secure(const char *d, const char *v)
-{ pari_err(talker,"[secure mode]: can't modify '%s' default (to %s)",d,v); }
-
-GEN
-sd_help(const char *v, long flag)
-{
-  const char *str;
-  if (*v)
-  {
-    if (GP_DATA->flags & gpd_SECURE) err_secure("help",v);
-    if (GP_DATA->help) pari_free((void*)GP_DATA->help);
-    GP_DATA->help = path_expand(v);
-  }
-  str = GP_DATA->help? GP_DATA->help: "none";
-  if (flag == d_RETURN) return strtoGENstr(str);
-  if (flag == d_ACKNOWLEDGE)
-    pari_printf("   help = \"%s\"\n", str);
-  return gnil;
-}
+{ return sd_string(v, flag, "psfile", &current_psfile); }
 
 GEN
 sd_datadir(const char *v, long flag)
@@ -926,7 +636,8 @@ sd_prettyprinter(const char *v, long flag)
     char *old = pp->cmd;
     int cancel = (!strcmp(v,"no"));
 
-    if (GP_DATA->flags & gpd_SECURE) err_secure("prettyprinter",v);
+    if (GP_DATA->flags & gpd_SECURE)
+      pari_err(talker,"[secure mode]: can't modify 'prettyprinter' default (to %s)",v);
     if (!strcmp(v,"yes")) v = DFT_PRETTYPRINTER;
     if (old && strcmp(old,v) && pp->file)
     {
@@ -953,28 +664,6 @@ sd_prettyprinter(const char *v, long flag)
   if (flag == d_ACKNOWLEDGE)
     pari_printf("   prettyprinter = \"%s\"\n",pp->cmd? pp->cmd: "");
   return gnil;
-}
-
-static GEN
-sd_prompt_set(const char *v, long flag, const char *how, char *p)
-{
-  if (*v) strncpy(p,v,MAX_PROMPT_LEN);
-  if (flag == d_RETURN) return strtoGENstr(p);
-  if (flag == d_ACKNOWLEDGE)
-    pari_printf("   prompt%s = \"%s\"\n", how, p);
-  return gnil;
-}
-
-GEN
-sd_prompt(const char *v, long flag)
-{
-  return sd_prompt_set(v, flag, "", GP_DATA->prompt);
-}
-
-GEN
-sd_prompt_cont(const char *v, long flag)
-{
-  return sd_prompt_set(v, flag, "_cont", GP_DATA->prompt_cont);
 }
 
 const char *
@@ -1046,12 +735,20 @@ default_gp_data(void)
   static gp_path __PATH;
   static pari_timer __T;
 
-  D->flags = (
-    gpd_BREAKLOOP | gpd_STRICTMATCH | gpd_SIMPLIFY | gpd_RECOVER
+  D->flags       = 0;
+
+  D->echo        = 0;
+  D->breakloop   = 1;
+  D->strictmatch = 1;
+  D->simplify    = 1;
+  D->recover     = 1;
+  D->secure      = 0;
+  D->chrono      = 0;
 #ifdef READLINE
-    | gpd_USE_READLINE
+  D->use_readline = 1;
+#else
+  D->use_readline = 0;
 #endif
-  );
   D->lim_lines = 0;
   D->T    = &__T;
   D->hist = &__HIST;

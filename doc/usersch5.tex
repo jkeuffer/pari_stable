@@ -8105,23 +8105,19 @@ We shall describe these functions below: an non-empty $v$ means that we change
 the value of the default to $v$, possibly after some translation work. The
 flag is one of
 
-\item \tet{d_INITRC} called while reading the \kbd{gprc} (print and return
-nothing, possibly defer until \kbd{gp} actually starts).
+\item \tet{d_INITRC} called while reading the \kbd{gprc} : print and return
+\kbd{gnil}, possibly defer until \kbd{gp} actually starts.
 
 \item \tet{d_RETURN} return the current value, as a \typ{INT} if possible, as
 a \typ{STR} otherwise.
 
-\item \tet{d_ACKNOWLEDGE} print the current value.
+\item \tet{d_ACKNOWLEDGE} print the current value, return \kbd{gnil}.
 
 \item \tet{d_SILENT} print nothing, return \kbd{gnil}.
 
 \noindent Low-level functions called by \kbd{setdefault}:
 
 \fun{GEN}{sd_TeXstyle}{const char *v, long flag}
-
-\fun{GEN}{sd_breakloop}{const char *v, long flag}
-
-\fun{GEN}{sd_colors}{const char *v, long flag}
 
 \fun{GEN}{sd_compatible}{const char *v, long flag}
 
@@ -8133,23 +8129,13 @@ a \typ{STR} otherwise.
 
 \fun{GEN}{sd_debugmem}{const char *v, long flag}
 
-\fun{GEN}{sd_echo}{const char *v, long flag}
-
 \fun{GEN}{sd_factor_add_primes}{const char *v, long flag}
 
 \fun{GEN}{sd_factor_proven}{const char *v, long flag}
 
 \fun{GEN}{sd_format}{const char *v, long flag}
 
-\fun{GEN}{sd_graphcolormap}{const char *v, long flag}
-
-\fun{GEN}{sd_graphcolors}{const char *v, long flag}
-
-\fun{GEN}{sd_help}{const char *v, long flag}
-
 \fun{GEN}{sd_histsize}{const char *v, long flag}
-
-\fun{GEN}{sd_lines}{const char *v, long flag}
 
 \fun{GEN}{sd_log}{const char *v, long flag}
 
@@ -8167,17 +8153,9 @@ a \typ{STR} otherwise.
 
 \fun{GEN}{sd_primelimit}{const char *v, long flag}
 
-\fun{GEN}{sd_prompt}{const char *v, long flag}
-
-\fun{GEN}{sd_prompt_cont}{const char *v, long flag}
-
-\fun{GEN}{sd_psfile}{const char *v, long flag}
-
 \fun{GEN}{sd_realprecision}{const char *v, long flag}
 
 \fun{GEN}{sd_recover}{const char *v, long flag}
-
-\fun{GEN}{sd_readline}{const char *v, long flag}
 
 \fun{GEN}{sd_secure}{const char *v, long flag}
 
@@ -8187,5 +8165,74 @@ a \typ{STR} otherwise.
 
 \fun{GEN}{sd_strictmatch}{const char *v, long flag}
 
-\fun{GEN}{sd_timer}{const char *v, long flag}
-\newpage
+\noindent Generic functions used to implement defaults: most of the above
+routines are implemented in terms of the following generic ones. In all
+routines below
+
+\item \kbd{v} and \kbd{flag} are the arguments passed to \kbd{default} :
+\kbd{v} is a new value (or the empty string: no change), and \kbd{flag} is one
+of \tet{d_INITRC}, \tet{d_RETURN}, etc.
+
+\item \kbd{s} is the name of the default being changed, used to display error
+messages or acknowledgements.
+
+\fun{GEN}{sd_toggle}{const char *v, long flag, const char *s, int *ptn}
+
+\item if \kbd{v} is neither \kbd{"0"} nor \kbd{"1"}, an error is raised using
+\tet{pari_err}.
+
+\item \kbd{ptn} points to the current numerical value of the toggle (1 or 0),
+and is set to the new value (when \kbd{v} is non-empty).
+
+For instance, here is how the timer default is implemented internally:
+\bprog
+GEN
+sd_timer(const char *v, long flag)
+{ return sd_toggle(v,flag,"timer", &(GP_DATA->chrono)); }
+@eprog
+
+The exact behaviour and return value depends on \kbd{flag}:
+
+\item \tet{d_RETURN}: returns the new toggle value, as a \kbd{GEN}.
+
+\item \tet{d_ACKNOWLEDGE}: prints a message indicating the new toggle value 
+and return \kbd{gnil}.
+
+\item other cases: print nothing and return \kbd{gnil}.
+
+
+\fun{GEN}{sd_ulong}{const char *v, long flag, const char *s, ulong *ptn, ulong Min, ulong Max, const char **msg}
+
+\item \kbd{ptn} points to the current numerical value of the toggle, and is set
+to the new value (when \kbd{v} is non-empty).
+
+\item \kbd{Min} and \kbd{Max} point to the minimum and maximum values allowed
+for the default.
+
+\item \kbd{v} must translate to an integer in the allowed ranger, a suffix
+among 
+\kbd{k}/\kbd{K} ($\times 10^3$),
+\kbd{m}/\kbd{M} ($\times 10^6$),
+or
+\kbd{g}/\kbd{G} ($\times 10^9$) is allowed, but no arithmetic expression.
+
+\item \kbd{msg} is a \kbd[NULL]-terminated array of messages or \kbd{NULL}
+(ignored). If \kbd{msg} is not \kbd{NULL}, \kbd{msg}$[i]$ contains
+a message associated to the value $i$ of the default. The last entry in the
+\kbd{msg} array is used as a message associated to all subsequent ones.
+
+The exact behaviour and return value depends on \kbd{flag}:
+
+\item \tet{d_RETURN}: returns the new toggle value, as a \kbd{GEN}.
+
+\item \tet{d_ACKNOWLEDGE}: prints a message indicating the new value,
+possibly a message associated to it via the \kbd{msg} argument, and return
+\kbd{gnil}.
+
+\item other cases: print nothing and return \kbd{gnil}.
+
+\fun{GEN}{sd_string}{const char *v, long flag, const char *s, char **pstr}
+\item \kbd{v} is subjet to environment expansion, then time expansion.
+
+\item \kbd{pstr} points to the current string value, and is set to the new
+value (when \kbd{v} is non-empty).

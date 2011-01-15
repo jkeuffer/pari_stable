@@ -1,5 +1,5 @@
 Function: _def_prompt_cont
-Class: default
+Class: gp_default
 Section: default
 C-Name: sd_prompt_cont
 Prototype:

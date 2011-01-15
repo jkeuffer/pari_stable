@@ -328,14 +328,15 @@ typedef struct {
   gp_pp *pp;
   gp_path *path;
   pariout_t *fmt;
-  ulong flags, lim_lines;
+  ulong lim_lines, flags;
+  int echo, breakloop, use_readline; /* GP-specific */
+  int recover, secure, simplify, strictmatch, chrono; /* libpari ? */
   char *help, *prompt, *prompt_cont;
   pari_timer *T;
 } gp_data;
   /* GP_DATA->flags */
-enum { gpd_QUIET=1, gpd_TEST=2, gpd_SIMPLIFY=4, gpd_CHRONO=8, gpd_ECHO=16, gpd_STRICTMATCH=32,
-       gpd_USE_READLINE=64, gpd_SECURE=128, gpd_EMACS=256, gpd_TEXMACS=512, gpd_BREAKLOOP=1024,
-       gpd_RECOVER=2048};
+enum { gpd_QUIET=1, gpd_TEST=2,
+       gpd_SECURE=128, gpd_EMACS=256, gpd_TEXMACS=512};
 
 extern gp_data *GP_DATA;
 

@@ -769,7 +769,7 @@ what_readline(void)
   }
   s = stackmalloc(3 + strlen(ver) + 8 + strlen(extra));
   (void)sprintf(s, "v%s %s%s", ver,
-            (GP_DATA->flags & gpd_USE_READLINE)? "enabled": "disabled",
+            (GP_DATA->use_readline)? "enabled": "disabled",
             extra);
 #else
   s = "not compiled in";
@@ -943,7 +943,7 @@ escape(char *tch, int ismain)
     case 'd': (void)setdefault("",NULL,d_SILENT); break;
     case 'e':
       s = get_sep(s);
-      if (!*s) s = (GP_DATA->flags & gpd_ECHO)? "0": "1";
+      if (!*s) s = (GP_DATA->echo)? "0": "1";
       (void)sd_echo(s,d_ACKNOWLEDGE); break;
     case 'g':
       switch (*s)
@@ -996,7 +996,7 @@ escape(char *tch, int ismain)
     case 'v': print_version(); break;
     case 'y':
       s = get_sep(s);
-      if (!*s) s = (GP_DATA->flags & gpd_SIMPLIFY)? "0": "1";
+      if (!*s) s = (GP_DATA->simplify)? "0": "1";
       (void)sd_simplify(s,d_ACKNOWLEDGE); break;
     default: pari_err(syntaxer,"unexpected character", tch,tch-1);
   }
@@ -1005,7 +1005,7 @@ escape(char *tch, int ismain)
 enum { ti_NOPRINT, ti_REGULAR, ti_LAST, ti_INTERRUPT, ti_ALARM };
 /* flag:
  *   ti_NOPRINT   don't print
- *   ti_REGULAR   print elapsed time (flags & gpd_CHRONO)
+ *   ti_REGULAR   print elapsed time (chrono)
  *   ti_LAST      print last elapsed time (##)
  *   ti_INTERRUPT received a SIGINT
  */
@@ -1064,7 +1064,7 @@ chron(char *s)
     if (*s) return 0;
     pari_puts(gp_format_time(ti_LAST));
   }
-  else { GP_DATA->flags ^= gpd_CHRONO; (void)sd_timer("",d_ACKNOWLEDGE); }
+  else { GP_DATA->chrono ^= 1; (void)sd_timer("",d_ACKNOWLEDGE); }
   return 1;
 }
 
@@ -1201,7 +1201,7 @@ get_preproc_value(char **s)
   }
   if (!strncmp(*s,"READL",5)) {
     *s += 5;
-    return GP_DATA->flags & gpd_USE_READLINE;
+    return GP_DATA->use_readline;
   }
   if (!strncmp(*s,"VERSION",7)) {
     int less = 0, orequal = 0;
@@ -1334,12 +1334,12 @@ brace_color(char *s, int c, int force)
 {
   if (disable_color || (gp_colors[c] == c_NONE && !force)) return;
 #ifdef RL_PROMPT_START_IGNORE
-  if (GP_DATA->flags & gpd_USE_READLINE)
+  if (GP_DATA->use_readline)
     *s++ = RL_PROMPT_START_IGNORE;
 #endif
   strcpy(s, term_get_color(c));
 #ifdef RL_PROMPT_START_IGNORE
-  if (GP_DATA->flags & gpd_USE_READLINE)
+  if (GP_DATA->use_readline)
   {
     s+=strlen(s);
     *s++ = RL_PROMPT_END_IGNORE;
@@ -1405,7 +1405,7 @@ get_line_from_file(const char *PROMPT, filtre_t *F, FILE *file)
   s = ((Buffer*)F->buf)->buf;
   if (*s && PROMPT) /* don't echo if from gprc */
   {
-    if (GP_DATA->flags & gpd_ECHO)
+    if (GP_DATA->echo)
       { pari_puts(PROMPT); pari_puts(s); pari_putc('\n'); }
     else if (pari_logfile)
       update_logfile(PROMPT, s);
@@ -1441,7 +1441,7 @@ gp_read_line(filtre_t *F, const char *PROMPT)
   if (is_interactive())
   {
 #ifdef READLINE
-    if (GP_DATA->flags & gpd_USE_READLINE)
+    if (GP_DATA->use_readline)
       res = get_line_from_readline(PROMPT? PROMPT: GP_DATA->prompt,
                                    GP_DATA->prompt_cont, F);
     else
@@ -1536,19 +1536,19 @@ gp_main_loop(long flag)
       TIMERstart(GP_DATA->T);
       pari_set_last_newline(1);
     }
-    z = closure_evalres(pari_compile_str(b->buf, GP_DATA->flags & gpd_STRICTMATCH));
+    z = closure_evalres(pari_compile_str(b->buf, GP_DATA->strictmatch));
     if (! ismain) continue;
     alarm0(0);
 
     if (!pari_last_was_newline()) pari_putc('\n');
 
-    if (GP_DATA->flags & gpd_CHRONO)
+    if (GP_DATA->chrono)
       pari_puts(gp_format_time(ti_REGULAR));
     else
       (void)gp_format_time(ti_NOPRINT);
     if (z == gnil) continue;
 
-    if (GP_DATA->flags & gpd_SIMPLIFY) z = simplify_shallow(z);
+    if (GP_DATA->simplify) z = simplify_shallow(z);
     z = pari_add_hist(z);
     if (! is_silent(b->buf) ) gp_output(z, GP_DATA);
   }
@@ -1664,7 +1664,7 @@ static int
 gp_handle_exception(long numerr)
 {
   if (disable_exception_handler) disable_exception_handler = 0;
-  else if ((GP_DATA->flags & gpd_BREAKLOOP) && break_loop(numerr)) return 1;
+  else if ((GP_DATA->breakloop) && break_loop(numerr)) return 1;
   if (s_env.n>=1) {
     fprintferr("\n"); flusherr();
     gp_err_recover(numerr>=0? numerr: talker);
@@ -1882,14 +1882,15 @@ read_opt(pari_stack *p_A, long argc, char **argv)
   }
   if (!hastty)
   {
-    if (!(GP_DATA->flags & gpd_EMACS)) f &= ~gpd_BREAKLOOP;
-    readline_state = 0; f &= ~gpd_USE_READLINE;
+    if (!(GP_DATA->flags & gpd_EMACS)) GP_DATA->breakloop = 0;
+    readline_state = 0;
+    GP_DATA->use_readline = 0;
     GP_DATA->prompt[0] = 0;
   }
   if (f & gpd_TEXMACS) tm_start_output();
   GP_DATA->flags = f;
   if (f & gpd_TEST) {
-    GP_DATA->flags &= ~gpd_BREAKLOOP;
+    GP_DATA->breakloop = 0;
     init80col();
   } else if (initrc)
     gp_initrc(p_A, argv[0]);
@@ -2127,3 +2128,302 @@ gp_output(GEN z, gp_data *G)
     normal_output(z, G->hist->total);
   pari_flush();
 }
+
+/*******************************************************************/
+/**                                                               **/
+/**                     GP-SPECIFIC DEFAULTS                      **/
+/**                                                               **/
+/*******************************************************************/
+
+static long
+gp_get_color(char **st)
+{
+  char *s, *v = *st;
+  int trans;
+  long c;
+  if (isdigit((int)*v))
+    { c = atol(v); trans = 1; } /* color on transparent background */
+  else
+  {
+    if (*v == '[')
+    {
+      const char *a[3];
+      long i = 0;
+      for (a[0] = s = ++v; *s && *s != ']'; s++)
+        if (*s == ',') { *s = 0; a[++i] = s+1; }
+      if (*s != ']') pari_err(syntaxer,"expected character: ']'",s, *st);
+      *s = 0; for (i++; i<3; i++) a[i] = "";
+      /*    properties    |   color    | background */
+      c = (atoi(a[2])<<8) | atoi(a[0]) | (atoi(a[1])<<4);
+      trans = (*(a[1]) == 0);
+      v = s + 1;
+    }
+    else { c = c_NONE; trans = 0; }
+  }
+  if (trans) c = c | (1L<<12);
+  while (*v && *v++ != ',') /* empty */;
+  if (c != c_NONE) disable_color = 0;
+  *st = v; return c;
+}
+
+/* 1: error, 2: history, 3: prompt, 4: input, 5: output, 6: help, 7: timer */
+GEN
+sd_colors(const char *v, long flag)
+{
+  long c,l;
+  if (*v && !(GP_DATA->flags & (gpd_EMACS|gpd_TEXMACS)))
+  {
+    char *v0, *s;
+    disable_color=1;
+    l = strlen(v);
+    if (l <= 2 && strncmp(v, "no", l) == 0)
+      v = "";
+    if (l <= 6 && strncmp(v, "darkbg", l) == 0)
+      v = "1, 5, 3, 7, 6, 2, 3"; /* Assume recent ReadLine. */
+    if (l <= 7 && strncmp(v, "lightbg", l) == 0)
+      v = "1, 6, 3, 4, 5, 2, 3"; /* Assume recent ReadLine. */
+    if (l <= 6 && strncmp(v, "boldfg", l) == 0)        /* Good for darkbg consoles */
+      v = "[1,,1], [5,,1], [3,,1], [7,,1], [6,,1], , [2,,1]";
+    v0 = s = filtre(v, 0);
+    for (c=c_ERR; c < c_LAST; c++)
+      gp_colors[c] = gp_get_color(&s);
+    pari_free(v0);
+  }
+  if (flag == d_ACKNOWLEDGE || flag == d_RETURN)
+  {
+    char s[128], *t = s;
+    long col[3], n;
+    for (*t=0,c=c_ERR; c < c_LAST; c++)
+    {
+      n = gp_colors[c];
+      if (n == c_NONE)
+        sprintf(t,"no");
+      else
+      {
+        decode_color(n,col);
+        if (n & (1L<<12))
+        {
+          if (col[0])
+            sprintf(t,"[%ld,,%ld]",col[1],col[0]);
+          else
+            sprintf(t,"%ld",col[1]);
+        }
+        else
+          sprintf(t,"[%ld,%ld,%ld]",col[1],col[2],col[0]);
+      }
+      t += strlen(t);
+      if (c < c_LAST - 1) { *t++=','; *t++=' '; }
+    }
+    if (flag==d_RETURN) return strtoGENstr(s);
+    pari_printf("   colors = \"%s\"\n",s);
+  }
+  return gnil;
+}
+
+static long
+atocolor(const char *s)
+{
+  long l = atol(s);
+  if (l <   0) l =   0;
+  if (l > 255) l = 255;
+  return l;
+}
+
+GEN
+sd_graphcolormap(const char *v, long flag)
+{
+  char *p, *q;
+  long i, j, l, a, s, *lp;
+
+  if (*v)
+  {
+    char *t = filtre(v, 0);
+    if (*t != '[' || t[strlen(t)-1] != ']')
+      pari_err(syntaxer, "incorrect value for graphcolormap", t, t);
+    for (s = 0, p = t+1, l = 2, a=0; *p; p++)
+      if (*p == '[')
+      {
+        a++;
+        while (*++p != ']')
+          if (!*p || *p == '[')
+            pari_err(syntaxer, "incorrect value for graphcolormap", p, t);
+      }
+      else if (*p == '"')
+      {
+        s += sizeof(long)+1;
+        while (*p && *++p != '"') s++;
+        if (!*p) pari_err(syntaxer, "incorrect value for graphcolormap", p, t);
+        s = (s+sizeof(long)-1) & ~(sizeof(long)-1);
+      }
+      else if (*p == ',')
+        l++;
+    if (l < 4)
+      pari_err(talker, "too few colors (< 4) in graphcolormap");
+    if (pari_colormap) pari_free(pari_colormap);
+    pari_colormap = (GEN)pari_malloc((l+4*a)*sizeof(long) + s);
+    pari_colormap[0] = evaltyp(t_VEC)|evallg(l);
+    for (p = t+1, i = 1, lp = pari_colormap+l; i < l; p++)
+      switch(*p)
+      {
+      case '"':
+        gel(pari_colormap, i) = lp;
+        q = ++p; while (*q != '"') q++;
+        *q = 0;
+        j = 1 + nchar2nlong(q-p+1);
+        lp[0] = evaltyp(t_STR)|evallg(j);
+        strncpy(GSTR(lp), p, q-p+1);
+        lp += j; p = q;
+        break;
+      case '[': {
+        const char *ap[3];
+        gel(pari_colormap, i) = lp;
+        lp[0] = evaltyp(t_VECSMALL)|_evallg(4);
+        for (ap[0] = ++p, j=0; *p && *p != ']'; p++)
+          if (*p == ',' && j<2) { *p++ = 0; ap[++j] = p; }
+        while (j<2) ap[++j] = "0";
+        if (j>2 || *p != ']')
+        {
+          char buf[100];
+          sprintf(buf, "incorrect value for graphcolormap[%ld]: ", i);
+          pari_err(syntaxer, buf, p, t);
+        }
+        *p = '\0';
+        lp[1] = atocolor(ap[0]);
+        lp[2] = atocolor(ap[1]);
+        lp[3] = atocolor(ap[2]);
+        lp += 4;
+        break;
+      }
+      case ',':
+      case ']':
+        i++;
+        break;
+      default:
+        pari_err(syntaxer, "incorrect value for graphcolormap", p, t);
+      }
+    free(t);
+  }
+  if (flag == d_RETURN || flag == d_ACKNOWLEDGE)
+  {
+    GEN cols = cgetg(lg(pari_colormap), t_VEC);
+    long i;
+
+    for (i = 1; i < lg(cols); i++)
+    {
+      GEN c = gel(pari_colormap, i);
+      if (typ(c) == t_STR)
+        gel(cols, i) = gcopy(c);
+      else
+        gel(cols, i) = vecsmall_to_vec(c);
+    }
+    if (flag == d_RETURN) return cols;
+    pari_printf("   graphcolormap = %Ps\n", cols);
+  }
+  return gnil;
+}
+
+GEN
+sd_graphcolors(const char *v, long flag)
+{
+  long i, l;
+  char *p;
+
+  if (*v) {
+    char *t = filtre(v, 0);
+    for (p = t+1, l=2; *p != ']'; p++)
+      if (*p == ',') l++;
+      else if (*p < '0' || *p > '9')
+        pari_err(syntaxer, "incorrect value for graphcolors", p, t);
+    if (*++p) pari_err(syntaxer, "incorrect value for graphcolors", p, t);
+    if (pari_graphcolors) pari_free(pari_graphcolors);
+    pari_graphcolors = cgetalloc(t_VECSMALL, l);
+    for (p = t+1, i=0; *p; p++)
+    {
+      long n = 0;
+      while (*p >= '0' && *p <= '9')
+      {
+        n *= 10;
+        n += *p-'0';
+        p++;
+      }
+      pari_graphcolors[++i] = n;
+    }
+    free(t);
+  }
+  switch(flag)
+  {
+  case d_RETURN:
+    return vecsmall_to_vec(pari_graphcolors);
+  case d_ACKNOWLEDGE:
+    pari_printf("   graphcolors = %Ps\n", vecsmall_to_vec(pari_graphcolors));
+  }
+  return gnil;
+}
+
+GEN
+sd_help(const char *v, long flag)
+{
+  const char *str;
+  if (*v)
+  {
+    if (GP_DATA->flags & gpd_SECURE)
+      pari_err(talker,"[secure mode]: can't modify 'help' default (to %s)",v);
+    if (GP_DATA->help) pari_free((void*)GP_DATA->help);
+    GP_DATA->help = path_expand(v);
+  }
+  str = GP_DATA->help? GP_DATA->help: "none";
+  if (flag == d_RETURN) return strtoGENstr(str);
+  if (flag == d_ACKNOWLEDGE)
+    pari_printf("   help = \"%s\"\n", str);
+  return gnil;
+}
+
+static GEN
+sd_prompt_set(const char *v, long flag, const char *how, char *p)
+{
+  if (*v) strncpy(p,v,MAX_PROMPT_LEN);
+  if (flag == d_RETURN) return strtoGENstr(p);
+  if (flag == d_ACKNOWLEDGE)
+    pari_printf("   prompt%s = \"%s\"\n", how, p);
+  return gnil;
+}
+GEN
+sd_prompt(const char *v, long flag)
+{ return sd_prompt_set(v, flag, "", GP_DATA->prompt); }
+GEN
+sd_prompt_cont(const char *v, long flag)
+{ return sd_prompt_set(v, flag, "_cont", GP_DATA->prompt_cont); }
+
+GEN
+sd_readline(const char *v, long flag)
+{
+  const char *msg[] = {NULL,
+        "(bits 0x2/0x4 control matched-insert/arg-complete)"};
+  ulong o_readline_state = readline_state;
+  GEN res = sd_ulong(v,flag,"readline", &readline_state, 0, 7, msg);
+
+  if (o_readline_state != readline_state)
+    (void)sd_toggle(readline_state? "1": "0", d_SILENT, "readline", &(GP_DATA->use_readline));
+  return res;
+}
+
+GEN
+sd_breakloop(const char *v, long flag)
+{ return sd_toggle(v,flag,"breakloop", &(GP_DATA->breakloop)); }
+GEN
+sd_echo(const char *v, long flag)
+{ return sd_toggle(v,flag,"echo", &(GP_DATA->echo)); }
+GEN
+sd_timer(const char *v, long flag)
+{ return sd_toggle(v,flag,"timer", &(GP_DATA->chrono)); }
+
+GEN
+sd_histfile(const char *v, long flag)
+{
+  GEN r = sd_string(v, flag, "histfile", &current_histfile);
+  return r;
+}
+
+GEN
+sd_lines(const char *v, long flag)
+{ return sd_ulong(v,flag,"lines",&(GP_DATA->lim_lines), 0,LONG_MAX,NULL); }

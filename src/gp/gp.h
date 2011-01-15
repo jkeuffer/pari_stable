@@ -52,6 +52,19 @@ GEN  input0(void);
 GEN  read0(const char *s);
 void system0(const char *cmd);
 int  whatnow(const char *s, int silent);
+GEN sd_breakloop(const char *v, long flag);
+GEN sd_colors(const char *v, long flag);
+GEN sd_echo(const char *v, long flag);
+GEN sd_graphcolormap(const char *v, long flag);
+GEN sd_graphcolors(const char *v, long flag);
+GEN sd_help(const char *v, long flag);
+GEN sd_histfile(const char *v, long flag);
+GEN sd_lines(const char *v, long flag);
+GEN sd_prompt(const char *v, long flag);
+GEN sd_prompt_cont(const char *v, long flag);
+GEN sd_psfile(const char *v, long flag);
+GEN sd_readline(const char *v, long flag);
+GEN sd_timer(const char *v, long flag);
 
 extern entree  functions_highlevel[];
 

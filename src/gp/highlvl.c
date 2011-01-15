@@ -102,7 +102,7 @@ install0(char *name, char *code, char *gpname, char *lib) { pari_err(archer); }
 void
 gpinstall(char *s, char *code, char *gpname, char *lib)
 {
-  if (GP_DATA->flags & gpd_SECURE)
+  if (GP_DATA->secure)
   {
     char *msg = pari_sprintf("[secure mode]: about to install '%s'", s);
     pari_ask_confirm(msg);
