@@ -705,6 +705,7 @@ init_readline(void)
   static int init_done = 0;
 
   if (init_done) return;
+  GP_DATA->use_readline = 1;
   init_done = 1;
   if (read_history(current_histfile)) write_history(current_histfile);
 

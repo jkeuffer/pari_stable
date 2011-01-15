@@ -725,12 +725,8 @@ default_gp_data(void)
   D->recover     = 1;
   D->secure      = 0;
   D->chrono      = 0;
-#ifdef READLINE
-  D->use_readline = 1;
-#else
-  D->use_readline = 0;
-#endif
-  D->lim_lines = 0;
+  D->use_readline= 0;
+  D->lim_lines   = 0;
   D->T    = &__T;
   D->hist = &__HIST;
   D->pp   = &__PP;
