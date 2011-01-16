@@ -220,12 +220,12 @@ calls
 \fun{void}{gp_context_save}{struct gp_context* rec} save the current GP
 context.
 
-\fun{void}{gp_context_restore}{struct gp_context* rec} restore the current
-GP context. The new context need to be an ancestor of the current context.
+\fun{void}{gp_context_restore}{struct gp_context* rec} restore a GP context.
+The new context must be an ancestor of the current context.
 
 \subsec{GP history}
 
-Theses functions allow to control the GP history (the \kbd{\%} operator).
+These functions allow to control the GP history (the \kbd{\%} operator).
 
 \fun{GEN}{pari_add_hist}{GEN x} adds \kbd{x} as the last history entry.
 
