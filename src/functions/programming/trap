@@ -1,7 +1,7 @@
 Function: trap
 Section: programming/specific
 C-Name: trap0
-Prototype: D"",r,DEDE
+Prototype: DrDEDE
 Help: trap({e}, {rec}, seq): try to execute seq, trapping runtime error e (all
  of them if e ommitted); sequence rec is executed if the error occurs and
  is the result of the command.

@@ -414,6 +414,8 @@ parseproto(char const **q, char *c, const char *str)
     case 'E':
     case 'n':
     case 'P':
+    case 'r':
+    case 's':
       *c=p[1];
       *q=p+2;
       return PPdefault;
@@ -1222,6 +1224,8 @@ compilefunc(entree *ep, long n, int mode, long flag)
         case '&':
         case 'E':
         case 'I':
+        case 'r':
+        case 's':
           op_push(OCpushlong,0,n);
           break;
         case 'n':
@@ -1433,6 +1437,8 @@ genclosure(entree *ep, const char *loc, GEN data, int check)
       case 'E':
       case 'I':
       case 'V':
+      case 'r':
+      case 's':
         break;
       case 'n':
         op_push_loc(OCvarn,-index,loc);

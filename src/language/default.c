@@ -626,7 +626,7 @@ GEN
 setdefault(const char *s, const char *v, long flag)
 {
   entree *ep;
-  if (!*s)
+  if (!s||!*s)
   { /* list all defaults */
     pari_stack st;
     entree **L;

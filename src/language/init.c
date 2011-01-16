@@ -1102,7 +1102,8 @@ trap0(const char *e, GEN r, GEN f)
 {
   long numerr = CATCH_ALL;
   GEN x;
-       if (!strcmp(e,"errpile")) numerr = errpile;
+  if (!e || !*e) numerr = CATCH_ALL;
+  else if (!strcmp(e,"errpile")) numerr = errpile;
   else if (!strcmp(e,"typeer")) numerr = typeer;
   else if (!strcmp(e,"gdiver")) numerr = gdiver;
   else if (!strcmp(e,"impl")) numerr = impl;
@@ -1112,7 +1113,7 @@ trap0(const char *e, GEN r, GEN f)
   else if (!strcmp(e,"talker")) numerr = talker;
   else if (!strcmp(e,"user")) numerr = user;
   else if (!strcmp(e,"syntaxer")) numerr = syntaxer;
-  else if (*e) pari_err(impl,"this trap keyword");
+  else pari_err(impl,"this trap keyword");
   /* TODO: complete the list */
 
   if (!f) {
@@ -1914,7 +1915,7 @@ pari_version(void)
  *  D  Has a default value. Format is "Dvalue,type," (the ending comma is
  *     mandatory). Ex: D0,L, (arg is long, 0 by default).
  *     Special syntax:
- *       if type = G, &, I or V:  D[G&IV] all send NULL.
+ *       if type = G, &, r, s, I or V:  D[G&rsIV] all send NULL.
  *       if type = n: Dn sends -1.
  *       if type = &: argument must be prepened by '&'.
  *
