@@ -329,8 +329,8 @@ typedef struct {
   gp_path *path;
   pariout_t *fmt;
   ulong lim_lines, flags;
-  int echo, breakloop, use_readline; /* GP-specific */
-  int recover, secure, simplify, strictmatch, chrono; /* libpari ? */
+  int echo, breakloop, recover, use_readline; /* GP-specific */
+  int secure, simplify, strictmatch, chrono; /* libpari ? */
   char *help, *prompt, *prompt_cont;
   pari_timer *T;
 } gp_data;

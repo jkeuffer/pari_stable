@@ -1304,7 +1304,6 @@ GEN sd_path(const char *v, long flag);
 GEN sd_prettyprinter(const char *v, long flag);
 GEN sd_primelimit(const char *v, long flag);
 GEN sd_realprecision(const char *v, long flag);
-GEN sd_recover(const char *v, long flag);
 GEN sd_secure(const char *v, long flag);
 GEN sd_seriesprecision(const char *v, long flag);
 GEN sd_simplify(const char *v, long flag);

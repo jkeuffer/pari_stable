@@ -317,10 +317,6 @@ GEN
 sd_debugmem(const char *v, long flag)
 { return sd_ulong(v,flag,"debugmem",&DEBUGMEM, 0,20,NULL); }
 
-GEN
-sd_recover(const char *v, long flag)
-{ return sd_toggle(v,flag,"recover", &(GP_DATA->recover)); }
-
 /* set D->hist to size = s / total = t */
 static void
 init_hist(gp_data *D, size_t s, ulong t)
@@ -716,15 +712,17 @@ default_gp_data(void)
 
   D->flags       = 0;
 
-  D->echo        = 0;
+  /* GP-specific */
   D->breakloop   = 1;
+  D->echo        = 0;
+  D->lim_lines   = 0;
+  D->recover     = 1;
+  D->chrono      = 0;
+
   D->strictmatch = 1;
   D->simplify    = 1;
-  D->recover     = 1;
   D->secure      = 0;
-  D->chrono      = 0;
   D->use_readline= 0;
-  D->lim_lines   = 0;
   D->T    = &__T;
   D->hist = &__HIST;
   D->pp   = &__PP;

@@ -1515,6 +1515,7 @@ gp_main_loop(long flag)
       if ((er = setjmp(env[s_env.n-1])))
       {
         if (er > 0) { /* true error */
+          if (!(GP_DATA->recover)) exit(1);
           gp_context_restore(&rec);
           /* true error not from main instance, let caller sort it out */
           if (!ismain) { kill_buffers_upto_including(b); return NULL; }
@@ -2414,6 +2415,9 @@ sd_echo(const char *v, long flag)
 GEN
 sd_timer(const char *v, long flag)
 { return sd_toggle(v,flag,"timer", &(GP_DATA->chrono)); }
+GEN
+sd_recover(const char *v, long flag)
+{ return sd_toggle(v,flag,"recover", &(GP_DATA->recover)); }
 
 GEN
 sd_psfile(const char *v, long flag)
