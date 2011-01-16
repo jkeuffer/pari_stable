@@ -1895,7 +1895,6 @@ pari_version(void)
  *  E  closure whose value is used, like in sum() loop
  *  G  GEN
  *  L  long
- *  S  symbol (i.e GP function name) as a entree *
  *  V  lexical variable
  *  C  lexical context
  *  n  variable number

@@ -62,19 +62,20 @@ sub library_syntax { my ($fun, $args) = @_;
     if ($c eq 'l') { $type = "long"; next; }
     if ($c eq 'v') { $type = "void"; next; }
 
-    if ($c eq 'G') {$args .= ", GEN " . shift(@ARGS); next;}
+    if ($c =~ /^[GWIE]$/) {$args .= ", GEN " . shift(@ARGS); next;}
     if ($c eq 'L') {$args .= ", long " . shift(@ARGS); next;}
     if ($c eq 'n') {my ($v) = shift(@ARGS); push @vars,"\\kbd{$v}";
                     $args .= ", long " . $v; next;}
-    if ($c =~ /^[rs]$/) {$args .= ", char *" . shift(@ARGS); next;}
-    if ($c eq 'S') {$args .= ", entree *" . shift(@ARGS); next;}
+    if ($c =~ /^[rs]$/) {$args .= ", const char *" . shift(@ARGS); next;}
 
     if ($c eq 'p') {$args .= ", long prec"; next;}
     if ($c eq 'P') {$args .= ", long precdl"; next;}
+    if ($c eq 'C') {$args .= ", GEN ctx"; next;}
     if ($c eq '') { next; }
     if ($c eq 'D') {
       $c = $proto[$i++];
       if ($c eq 'G') {$args .= ", GEN " . shift(@ARGS) ." = NULL"; next;}
+      if ($c =~ /^[rs]$/) {$args .= ", const char *" . shift(@ARGS) ." = NULL"; next;}
       if ($c eq '&') {$args .= ", GEN *". shift(@ARGS) ." = NULL"; next;}
       if ($c eq 'P') {$args .= ", long precdl"; next;}
       if ($c eq 'n') {
@@ -87,7 +88,7 @@ sub library_syntax { my ($fun, $args) = @_;
         next;
       }
       if ($c =~ /^[EI]$/) {
-        $args .= ", char *". shift(@ARGS) ." = NULL"; next;
+        $args .= ", GEN ". shift(@ARGS) ." = NULL"; next;
       }
       while (($c = $proto[$i++]) ne ',') {}
     }

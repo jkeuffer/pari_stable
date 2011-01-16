@@ -30,5 +30,3 @@ Doc: returns the default corresponding to keyword \var{key}. If \var{val} is
  list of available defaults, and \secref{se:meta} for some shortcut
  alternatives. Note that the shortcuts are meant for interactive use and
  usually display more information than \kbd{default}.
-
- \synt{default0}{const char *key, const char *val}.
