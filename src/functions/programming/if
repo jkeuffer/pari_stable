@@ -26,7 +26,7 @@ Doc: evaluates the expression sequence \var{seq1} if $a$ is non-zero, otherwise
  that, contrary to other operators, the evaluation of the arguments is stopped
  as soon as the final truth value has been determined. For instance
  \bprog
- if (reallydoit && longcomplicatedfunction(), ...)%
+ if (reallydoit && longcomplicatedfunction(), ...)
  @eprog
  \noindent is a perfectly safe statement.
 
