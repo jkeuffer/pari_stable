@@ -890,13 +890,13 @@ escape(char *tch, int ismain)
     while (*s)
       if (*s++ == '=')
       {
-        const char *f = NULL;
+        GEN (*f)(const char *v, long flag) = NULL;
         long len = (s-tch) - 1;
-        if      (!strncmp(tch,"precision",len))    f = "realprecision";
-        else if (!strncmp(tch,"serieslength",len)) f = "seriesprecision";
-        else if (!strncmp(tch,"format",len))       f = "format";
-        else if (!strncmp(tch,"prompt",len))       f = "prompt";
-        if (f) { (void)setdefault(f, s, d_ACKNOWLEDGE); return; }
+        if      (!strncmp(tch,"precision",len))    f = sd_realprecision;
+        else if (!strncmp(tch,"serieslength",len)) f = sd_seriesprecision;
+        else if (!strncmp(tch,"format",len))       f = sd_format;
+        else if (!strncmp(tch,"prompt",len))       f = sd_prompt;
+        if (f) { (void)f(s, d_ACKNOWLEDGE); return; }
         break;
       }
   }
