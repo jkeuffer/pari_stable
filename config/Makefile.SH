@@ -648,11 +648,11 @@ for dir in basemath modules language gp graph systems; do
     ;;
   gp_rl)
     cflags="$cflags -I$src/language \$(RLINCLUDE)"
-    depend="$ANAL_H $src/gp/gp_rl_default.h $src/gp/gp.h"
+    depend="$ANAL_H $src/gp/gp.h"
     ;;
   gp_init)
     cflags="$cflags -I$src/graph"
-    depend="$RECT_H $src/gp/gp_init.h $src/gp/gp_default.h $ANAL_H"
+    depend="$RECT_H $src/gp/gp_init.h $src/gp/gp_rl_default.h $src/gp/gp_default.h $ANAL_H"
     ;;
   default)
     depend="$ANAL_H"
