@@ -1730,6 +1730,16 @@ diffop(GEN x, GEN v, GEN dv)
   return NULL; /* not reached */
 }
 
+GEN
+diffop0(GEN x, GEN v, GEN dv, long n)
+{
+  pari_sp av=avma;
+  long i;
+  for(i=1; i<=n; i++)
+    x = gerepileupto(av, diffop(x,v,dv));
+  return x;
+}
+
 /********************************************************************/
 /**                                                                **/
 /**                         TAYLOR SERIES                          **/

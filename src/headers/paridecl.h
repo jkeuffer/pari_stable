@@ -1682,6 +1682,7 @@ GEN     denom(GEN x);
 GEN     deriv(GEN x, long v);
 GEN     derivser(GEN x);
 GEN     diffop(GEN x, GEN v, GEN dv);
+GEN     diffop0(GEN x, GEN v, GEN dv, long n);
 GEN     diviiround(GEN x, GEN y);
 GEN     divrem(GEN x, GEN y, long v);
 GEN     floor_safe(GEN x);
