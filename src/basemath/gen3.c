@@ -1656,6 +1656,72 @@ deriv(GEN x, long v)
   return NULL; /* not reached */
 }
 
+static long
+lookup(GEN v, long vx)
+{
+  long i ,l = lg(v);
+  for(i=1; i<l; i++)
+    if (varn(gel(v,i)) == vx) return i;
+  return 0;
+}
+
+GEN
+diffop(GEN x, GEN v, GEN dv)
+{
+  pari_sp av;
+  long i, idx, lx, tx = typ(x), vx;
+  GEN y;
+  if (!is_vec_t(typ(v)) || !is_vec_t(typ(dv)))
+    pari_err(typeer,"diffop");
+  if (lg(v)!=lg(dv))
+    pari_err(talker,"2nd and 3rd arguments length mismatch");
+  if (is_const_t(tx)) return gen_0;
+  switch(tx)
+  {
+    case t_POLMOD:
+      av = avma;
+      y = gmodulo(diffop(gel(x,2),v,dv), gel(x,1));
+      return gerepileupto(av, y);
+
+    case t_POL:
+      if (signe(x)==0) return gen_0;
+      vx  = varn(x); idx = lookup(v,vx);
+      av = avma; lx = lg(x);
+      y = diffop(gel(x,lx-1),v,dv);
+      for (i=lx-2; i>=2; i--) y = gadd(gmul(y,pol_x(vx)),diffop(gel(x,i),v,dv));
+      if (idx) y = gadd(y, gmul(gel(dv,idx),RgX_deriv(x)));
+      return gerepileupto(av, y);
+
+    case t_SER:
+      if (signe(x)==0) return gen_0;
+      vx  = varn(x); idx = lookup(v,vx);
+      if (!idx) return gen_0;
+      av = avma;
+      y = cgetg_copy(x, &lx); y[1] = x[1];
+      for (i=2; i<lx; i++) gel(y,i) = diffop(gel(x,i),v,dv);
+      y = normalize(y); /* y is probably invalid */
+      y = gsubst(y, vx, pol_x(vx)); /* Fix that */
+      y = gadd(y, gmul(gel(dv,idx),derivser(x)));
+      return gerepileupto(av, y);
+
+    case t_RFRAC: {
+      GEN a = gel(x,1), b = gel(x,2), ap, bp;
+      av = avma;
+      ap = diffop(a, v, dv); bp = diffop(b, v, dv);
+      y = gsub(gdiv(ap,b),gdiv(gmul(a,bp),gsqr(b)));
+      return gerepileupto(av, y);
+    }
+
+    case t_VEC: case t_COL: case t_MAT:
+      y = cgetg_copy(x, &lx);
+      for (i=1; i<lx; i++) gel(y,i) = diffop(gel(x,i),v,dv);
+      return y;
+
+  }
+  pari_err(typeer,"diffop");
+  return NULL; /* not reached */
+}
+
 /********************************************************************/
 /**                                                                **/
 /**                         TAYLOR SERIES                          **/
