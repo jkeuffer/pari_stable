@@ -138,7 +138,7 @@ GEN
 sd_toggle(const char *v, long flag, const char *s, int *ptn)
 {
   int state = *ptn;
-  if (*v)
+  if (v)
   {
     int n = (int)get_int(v,0);
     if (n == state) return gnil;
@@ -164,7 +164,7 @@ sd_toggle(const char *v, long flag, const char *s, int *ptn)
 static void
 sd_ulong_init(const char *v, const char *s, ulong *ptn, ulong Min, ulong Max)
 {
-  if (*v)
+  if (v)
   {
     ulong n = get_uint(v);
     if (n > Max || n < Min)
@@ -189,14 +189,14 @@ sd_ulong(const char *v, long flag, const char *s, ulong *ptn, ulong Min, ulong M
     case d_RETURN:
       return utoi(*ptn);
     case d_ACKNOWLEDGE:
-      if (!*v || *ptn != n) {
+      if (!v || *ptn != n) {
         if (msg)
         {
           ulong i;
           for (i = 0; i < *ptn; i++) {
             if (!msg[i]) { i--; break; }
           }
-          if (i >= 0) {
+          if (i != (ulong)-1) {
             pari_printf("   %s = %lu %s\n", s, *ptn, msg[i]);
             return gnil;
           }
@@ -212,7 +212,7 @@ GEN
 sd_realprecision(const char *v, long flag)
 {
   pariout_t *fmt = GP_DATA->fmt;
-  if (*v)
+  if (v)
   {
     ulong newnb = fmt->sigd, prec;
     sd_ulong_init(v, "realprecision", &newnb, 1, prec2ndec(LGBITS));
@@ -247,7 +247,7 @@ GEN
 sd_format(const char *v, long flag)
 {
   pariout_t *fmt = GP_DATA->fmt;
-  if (*v)
+  if (v)
   {
     char c = *v;
     if (c!='e' && c!='f' && c!='g')
@@ -294,7 +294,7 @@ sd_compatible(const char *v, long flag)
 GEN
 sd_secure(const char *v, long flag)
 {
-  if (*v && (GP_DATA->secure))
+  if (v && GP_DATA->secure)
     pari_ask_confirm("[secure mode]: About to modify the 'secure' flag");
   return sd_toggle(v,flag,"secure", &(GP_DATA->secure));
 }
@@ -483,7 +483,7 @@ GEN
 sd_string(const char *v, long flag, const char *s, char **pstr)
 {
   char *old = *pstr;
-  if (*v)
+  if (v)
   {
     char *str, *ev = path_expand(v);
     long l = strlen(ev) + 256;
@@ -509,7 +509,7 @@ GEN
 sd_logfile(const char *v, long flag)
 {
   GEN r = sd_string(v, flag, "logfile", &current_logfile);
-  if (*v && pari_logfile)
+  if (v && pari_logfile)
   {
     FILE *log = open_logfile(current_logfile);
     fclose(pari_logfile); pari_logfile = log;
@@ -533,7 +533,7 @@ GEN
 sd_datadir(const char *v, long flag)
 {
   const char *str;
-  if (*v)
+  if (v)
   {
     if (pari_datadir) pari_free(pari_datadir);
     pari_datadir = path_expand(v);
@@ -549,7 +549,7 @@ GEN
 sd_path(const char *v, long flag)
 {
   gp_path *p = GP_DATA->path;
-  if (*v)
+  if (v)
   {
     pari_free((void*)p->PATH);
     p->PATH = pari_strdup(v);
@@ -567,7 +567,7 @@ GEN
 sd_prettyprinter(const char *v, long flag)
 {
   gp_pp *pp = GP_DATA->pp;
-  if (*v && !(GP_DATA->flags & gpd_TEXMACS))
+  if (v && !(GP_DATA->flags & gpd_TEXMACS))
   {
     char *old = pp->cmd;
     int cancel = (!strcmp(v,"no"));
@@ -626,7 +626,7 @@ GEN
 setdefault(const char *s, const char *v, long flag)
 {
   entree *ep;
-  if (!s||!*s)
+  if (!s)
   { /* list all defaults */
     pari_stack st;
     entree **L;
@@ -634,7 +634,7 @@ setdefault(const char *s, const char *v, long flag)
     stack_init(&st, sizeof(*L), (void**)&L);
     defaults_list(&st);
     qsort (L, st.n, sizeof(*L), compare_name);
-    for (i = 0; i < st.n; i++) (void)call_f2(L[i], "", d_ACKNOWLEDGE);
+    for (i = 0; i < st.n; i++) (void)call_f2(L[i], NULL, d_ACKNOWLEDGE);
     stack_delete(&st);
     return gnil;
   }

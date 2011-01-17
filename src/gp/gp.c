@@ -940,7 +940,7 @@ escape(char *tch, int ismain)
     }
 
     case 'c': commands(-1); break;
-    case 'd': (void)setdefault("",NULL,d_SILENT); break;
+    case 'd': (void)setdefault(NULL,NULL,d_SILENT); break;
     case 'e':
       s = get_sep(s);
       if (!*s) s = (GP_DATA->echo)? "0": "1";
@@ -2182,7 +2182,7 @@ GEN
 sd_colors(const char *v, long flag)
 {
   long c,l;
-  if (*v && !(GP_DATA->flags & (gpd_EMACS|gpd_TEXMACS)))
+  if (v && !(GP_DATA->flags & (gpd_EMACS|gpd_TEXMACS)))
   {
     char *v0, *s;
     disable_color=1;
@@ -2246,7 +2246,7 @@ sd_graphcolormap(const char *v, long flag)
   char *p, *q;
   long i, j, l, a, s, *lp;
 
-  if (*v)
+  if (v)
   {
     char *t = filtre(v, 0);
     if (*t != '[' || t[strlen(t)-1] != ']')
@@ -2339,7 +2339,7 @@ sd_graphcolors(const char *v, long flag)
   long i, l;
   char *p;
 
-  if (*v) {
+  if (v) {
     char *t = filtre(v, 0);
     for (p = t+1, l=2; *p != ']'; p++)
       if (*p == ',') l++;
@@ -2375,7 +2375,7 @@ GEN
 sd_help(const char *v, long flag)
 {
   const char *str;
-  if (*v)
+  if (v)
   {
     if (GP_DATA->secure)
       pari_err(talker,"[secure mode]: can't modify 'help' default (to %s)",v);
@@ -2392,7 +2392,7 @@ sd_help(const char *v, long flag)
 static GEN
 sd_prompt_set(const char *v, long flag, const char *how, char *p)
 {
-  if (*v) strncpy(p,v,MAX_PROMPT_LEN);
+  if (v) strncpy(p,v,MAX_PROMPT_LEN);
   if (flag == d_RETURN) return strtoGENstr(p);
   if (flag == d_ACKNOWLEDGE)
     pari_printf("   prompt%s = \"%s\"\n", how, p);

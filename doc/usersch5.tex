@@ -8121,15 +8121,16 @@ overhead since it does not copy \kbd{data}.
 of a default, $0$ otherwise.
 
 \fun{GEN}{setdefault}{const char *s, const char *v, long flag} is the
-low-level function underlying \kbd{default0}. If $s$ is empty, call all
-default setting functions with empty string argument and flag
+low-level function underlying \kbd{default0}. If $s$ is \kbd{NULL}, call all
+default setting functions with string argument \kbd{NULL} and flag
 \tet{d_ACKNOWLEDGE}. Otherwise, check whether $s$ corresponds to a default
 and call the corresponding default setting function with arguments $v$ and
 \fl.
 
-We shall describe these functions below: an non-empty $v$ means that we change
-the value of the default to $v$, possibly after some translation work. The
-flag is one of
+We shall describe these functions below: if $v$ is \kbd{NULL}, we only look
+at the default value (and possibly print or return it, depending on
+\kbd{flag}); otherwise the value of the default to $v$, possibly after some
+translation work. The flag is one of
 
 \item \tet{d_INITRC} called while reading the \kbd{gprc} : print and return
 \kbd{gnil}, possibly defer until \kbd{gp} actually starts.
