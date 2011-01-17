@@ -116,6 +116,7 @@ typedef struct REL_t {
   GEN m; /* pseudo-minimum yielding the relation */
   GEN ex; /* exponents of subFB elts used to find R */
   powFB_t *pow; /* powsubFB associated to ex [ shared between rels ] */
+  GEN junk[3]; /*make sure sizeof(struct) is a power of two.*/
 } REL_t;
 
 typedef struct RELCACHE_t {
