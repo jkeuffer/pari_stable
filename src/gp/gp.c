@@ -1576,11 +1576,13 @@ gp_sigint_fun(void) {
   pari_sigint(gp_format_time(ti_INTERRUPT));
 }
 
+#ifdef SIGALRM
 static void
 gp_alarm_fun(void) {
   if (GP_DATA->flags & gpd_TEXMACS) tm_start_output();
   pari_err(alarmer, gp_format_time(ti_ALARM));
 }
+#endif /* SIGALRM */
 
 static int
 break_loop(int numerr)
