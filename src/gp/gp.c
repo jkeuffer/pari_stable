@@ -1943,9 +1943,6 @@ main(int argc, char **argv)
   stack_init(&s_bufstack, sizeof(Buffer*), (void**)&bufstack);
   cb_pari_err_recover = gp_err_recover;
   pari_init_opts(1000000 * sizeof(long), 500000, INIT_SIGm);
-#ifdef READLINE
-  pari_add_defaults_module(functions_gp_rl_default);
-#endif
   pari_add_defaults_module(functions_gp_default);
   (void)sd_graphcolormap("[\"white\",\"black\",\"blue\",\"violetred\",\"red\",\"green\",\"grey\",\"gainsboro\"]", d_SILENT);
   (void)sd_graphcolors("[4, 5]", d_SILENT);
@@ -2418,6 +2415,15 @@ sd_timer(const char *v, long flag)
 GEN
 sd_recover(const char *v, long flag)
 { return sd_toggle(v,flag,"recover", &(GP_DATA->recover)); }
+
+#ifndef READLINE /* default not implemented */
+GEN
+sd_readline(const char *v, long flag)
+{ (void)v; (void)flag; return gnil; }
+GEN
+sd_histfile(const char *v, long flag)
+{ (void)v; (void)flag; return gnil; }
+#endif
 
 GEN
 sd_psfile(const char *v, long flag)
