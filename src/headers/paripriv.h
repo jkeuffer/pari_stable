@@ -160,7 +160,7 @@ GEN extendedgcd(GEN A);
 
 /* miscellaneous linear algebra */
 GEN  imagecomplspec(GEN x, long *nlze);
-void rowselect_p(GEN A, GEN B, GEN p, long init);
+INLINE void rowselect_p(GEN A, GEN B, GEN p, long init);
 
 GEN  dim1proj(GEN prh);
 GEN  detcyc(GEN cyc, long *L);
@@ -244,7 +244,7 @@ void   debug_stack(void);
 void   fill_stack(void);
 void   init_dalloc(void);
 double *dalloc(size_t n);
-void   gerepilecoeffs2(pari_sp av, GEN x, int n, GEN y, int o);
+INLINE void   gerepilecoeffs2(pari_sp av, GEN x, int n, GEN y, int o);
 void   minim_alloc(long n, double ***q, GEN *x, double **y,  double **z, double **v);
 int    pop_entree_block(entree *ep, long loc);
 int    pop_val_if_newer(entree *ep, long loc);
@@ -413,7 +413,7 @@ GEN     redtausl2(GEN t, GEN *U);
 /* alglin1.c */
 typedef long (*pivot_fun)(GEN,GEN,long,GEN);
 GEN RgM_pivots(GEN x0, GEN data, long *rr, pivot_fun pivot);
-void    vecselect_p(GEN A, GEN B, GEN p, long init, long lB);
+INLINE void vecselect_p(GEN A, GEN B, GEN p, long init, long lB);
 
 /* arith1.c */
 
