@@ -1674,15 +1674,23 @@ diffop(GEN x, GEN v, GEN dv)
   if (!is_vec_t(typ(v)) || !is_vec_t(typ(dv)))
     pari_err(typeer,"diffop");
   if (lg(v)!=lg(dv))
-    pari_err(talker,"2nd and 3rd arguments length mismatch");
+    pari_err(talker,"different number of variables and values");
   if (is_const_t(tx)) return gen_0;
   switch(tx)
   {
     case t_POLMOD:
       av = avma;
-      y = gmodulo(diffop(gel(x,2),v,dv), gel(x,1));
+      vx  = varn(gel(x,1)); idx = lookup(v,vx);
+      if (idx) /*Assume the users now what they are doing */
+        y = gmodulo(diffop(gel(x,2),v,dv), gel(x,1));
+      else
+      {
+        GEN m = gel(x,1), pol=gel(x,2);
+        GEN u = gneg(gdiv(diffop(m,v,dv),RgX_deriv(m)));
+        y = gadd(diffop(pol,v,dv), gmul(u,RgX_deriv(pol)));
+        y = gmodulo(y, gel(x,1));
+      }
       return gerepileupto(av, y);
-
     case t_POL:
       if (signe(x)==0) return gen_0;
       vx  = varn(x); idx = lookup(v,vx);

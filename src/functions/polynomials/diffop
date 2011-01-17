@@ -3,32 +3,32 @@ Section: polynomials
 C-Name: diffop
 Prototype: GGG
 Help: diffop(x,v,d): apply the differential operator D to x, where D is defined
- by D(v[i])=d[i], where v is a vector of variables, and d is a vector of the same length.
+ by D(v[i])=d[i], where v is a vector of variable names. D is 0 for variables 
+ outside of v unless they appear as modulus of a POLMOD.
 Doc:
  Let $v$ be a vector of variables, and $d$ a vector of the same length, 
  return the image of $x$ byt the differential operator $D$ that assumes 
  the value \kbd{d[i]} on the variable \kbd{v[i]}.
  The value of $D$ on a scalar type is zero, and $D$ applies componentwise to a vector
- or matrix. 
+ or matrix. When applied to a \typ{POLMOD}, if no value is provided for the variable
+ of the modulus, such value is derived using the implicit function theorem.
  
  Some examples:
  This function can be used to differentiate formal expressions:
- Let $E=\exp(X^2)$, then we have $E'=2*X*E$. We can derivate $X*exp(X^2)$ as follow:
+ If $E=\exp(X^2)$ then we have $E'=2*X*E$. We can derivate $X*exp(X^2)$ as follow:
  \bprog
  ? diffop(E*X,[X,E],[1,2*X*E])
  %1 = (2*X^2 + 1)*E
  @eprog
-
- Compute the derivatives of tan(x) in term of sin(x) and cos(x):
+ Let \kbd{Sin} and \kbd{Cos} be two function such that $\kbd{Sin}^2+\kbd{Cos}^2=1$
+ and $\kbd{Cos}'=-\kbd{Sin}$. We can differentiate $\kbd{Sin}/\kbd{Cos}$ as follow,
+ PARI inferring the value of $\kbd{Sin}'$ from the equation:
  \bprog
- tank(k)=
- {
-   my(t=Mod('Sin/'Cos,'Sin^2+'Cos^2-1));
-   for(i=1,k,t=diffop(t,['Sin,'Cos],['Cos,-'Sin]));
-   lift(t);
- }
+ ? diffop(Mod('Sin/'Cos,'Sin^2+'Cos^2-1),['Cos],[-'Sin])
+ %1 = Mod(1/Cos^2, Sin^2 + (Cos^2 - 1))
+
  @eprog
- Compute the Bell polynomials via the Faa di Bruno formula:
+ Compute the Bell polynomials (both complete and partial) via the Faa di Bruno formula:
  \bprog
  Bell(k,n=-1)=
  {
