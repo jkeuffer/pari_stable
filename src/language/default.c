@@ -243,6 +243,91 @@ sd_seriesprecision(const char *v, long flag)
   return sd_ulong(v,flag,"seriesprecision",&precdl, 1,LGBITS,msg);
 }
 
+static long
+gp_get_color(char **st)
+{
+  char *s, *v = *st;
+  int trans;
+  long c;
+  if (isdigit((int)*v))
+    { c = atol(v); trans = 1; } /* color on transparent background */
+  else
+  {
+    if (*v == '[')
+    {
+      const char *a[3];
+      long i = 0;
+      for (a[0] = s = ++v; *s && *s != ']'; s++)
+        if (*s == ',') { *s = 0; a[++i] = s+1; }
+      if (*s != ']') pari_err(syntaxer,"expected character: ']'",s, *st);
+      *s = 0; for (i++; i<3; i++) a[i] = "";
+      /*    properties    |   color    | background */
+      c = (atoi(a[2])<<8) | atoi(a[0]) | (atoi(a[1])<<4);
+      trans = (*(a[1]) == 0);
+      v = s + 1;
+    }
+    else { c = c_NONE; trans = 0; }
+  }
+  if (trans) c = c | (1L<<12);
+  while (*v && *v++ != ',') /* empty */;
+  if (c != c_NONE) disable_color = 0;
+  *st = v; return c;
+}
+
+/* 1: error, 2: history, 3: prompt, 4: input, 5: output, 6: help, 7: timer */
+GEN
+sd_colors(const char *v, long flag)
+{
+  long c,l;
+  if (v && !(GP_DATA->flags & (gpd_EMACS|gpd_TEXMACS)))
+  {
+    char *v0, *s;
+    disable_color=1;
+    l = strlen(v);
+    if (l <= 2 && strncmp(v, "no", l) == 0)
+      v = "";
+    if (l <= 6 && strncmp(v, "darkbg", l) == 0)
+      v = "1, 5, 3, 7, 6, 2, 3"; /* Assume recent ReadLine. */
+    if (l <= 7 && strncmp(v, "lightbg", l) == 0)
+      v = "1, 6, 3, 4, 5, 2, 3"; /* Assume recent ReadLine. */
+    if (l <= 6 && strncmp(v, "boldfg", l) == 0)        /* Good for darkbg consoles */
+      v = "[1,,1], [5,,1], [3,,1], [7,,1], [6,,1], , [2,,1]";
+    v0 = s = filtre(v, 0);
+    for (c=c_ERR; c < c_LAST; c++)
+      gp_colors[c] = gp_get_color(&s);
+    pari_free(v0);
+  }
+  if (flag == d_ACKNOWLEDGE || flag == d_RETURN)
+  {
+    char s[128], *t = s;
+    long col[3], n;
+    for (*t=0,c=c_ERR; c < c_LAST; c++)
+    {
+      n = gp_colors[c];
+      if (n == c_NONE)
+        sprintf(t,"no");
+      else
+      {
+        decode_color(n,col);
+        if (n & (1L<<12))
+        {
+          if (col[0])
+            sprintf(t,"[%ld,,%ld]",col[1],col[0]);
+          else
+            sprintf(t,"%ld",col[1]);
+        }
+        else
+          sprintf(t,"[%ld,%ld,%ld]",col[1],col[2],col[0]);
+      }
+      t += strlen(t);
+      if (c < c_LAST - 1) { *t++=','; *t++=' '; }
+    }
+    if (flag==d_RETURN) return strtoGENstr(s);
+    pari_printf("   colors = \"%s\"\n",s);
+  }
+  return gnil;
+}
+
 GEN
 sd_format(const char *v, long flag)
 {

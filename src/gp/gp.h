@@ -53,7 +53,6 @@ GEN  read0(const char *s);
 void system0(const char *cmd);
 int  whatnow(const char *s, int silent);
 GEN sd_breakloop(const char *v, long flag);
-GEN sd_colors(const char *v, long flag);
 GEN sd_echo(const char *v, long flag);
 GEN sd_graphcolormap(const char *v, long flag);
 GEN sd_graphcolors(const char *v, long flag);
