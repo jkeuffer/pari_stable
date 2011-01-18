@@ -788,7 +788,6 @@ init_pp(gp_data *D)
 gp_data *
 default_gp_data(void)
 {
-  static char Prompt[MAX_PROMPT_LEN], Prompt_cont[MAX_PROMPT_LEN];
   static gp_data __GPDATA, *D = &__GPDATA;
   static gp_hist __HIST;
   static gp_pp   __PP;
@@ -817,7 +816,5 @@ default_gp_data(void)
   init_hist(D, 5000, 0);
   init_path(D);
   init_pp(D);
-  strcpy(Prompt,      DFT_PROMPT); D->prompt = Prompt;
-  strcpy(Prompt_cont, CONTPROMPT); D->prompt_cont = Prompt_cont;
   return D;
 }

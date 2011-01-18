@@ -93,15 +93,6 @@ int  gp_init_functions(void);
 
 extern char *current_logfile;
 
-/* prompts */
-#define DFT_PROMPT "? "
-#define BREAK_LOOP_PROMPT "break> "
-#define BREAK_LOOP_PROMPTM "break[%ld]> "
-#define COMMENTPROMPT "comment> "
-#define CONTPROMPT ""
-#define DFT_INPROMPT ""
-#define MAX_PROMPT_LEN 128
-
 /* general printing */
 void print_prefixed_text(const char *s, const char *prefix, const char *str);
 #define print_text(s) print_prefixed_text((s),NULL,NULL);

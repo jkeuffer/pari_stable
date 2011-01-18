@@ -1326,9 +1326,21 @@ gp_initrc(pari_stack *p_A, char *path)
 
 /********************************************************************/
 /*                                                                  */
-/*                           GP MAIN LOOP                           */
+/*                             PROMPTS                              */
 /*                                                                  */
 /********************************************************************/
+static const char *DFT_PROMPT = "? ";
+static const char *CONTPROMPT = "";
+static const char *COMMENTPROMPT = "comment> ";
+static const char *DFT_INPROMPT = "";
+static const char *BREAK_LOOP_PROMPT = "break> ";
+static const char *BREAK_LOOP_PROMPTM = "break[%ld]> ";
+
+#define MAX_PROMPT_LEN 128
+static char Prompt[MAX_PROMPT_LEN], Prompt_cont[MAX_PROMPT_LEN];
+
+/* if prompt is coloured, we must to tell readline to ignore the
+ * corresponding ANSI escape sequences */
 static void
 brace_color(char *s, int c, int force)
 {
@@ -1373,6 +1385,11 @@ expand_prompt(const char *prompt, filtre_t *F)
   return s;
 }
 
+/********************************************************************/
+/*                                                                  */
+/*                           GP MAIN LOOP                           */
+/*                                                                  */
+/********************************************************************/
 void
 update_logfile(const char *prompt, const char *s)
 {
@@ -1452,12 +1469,11 @@ gp_read_line(filtre_t *F, const char *PROMPT)
   {
 #ifdef READLINE
     if (GP_DATA->use_readline)
-      res = get_line_from_readline(PROMPT? PROMPT: GP_DATA->prompt,
-                                   GP_DATA->prompt_cont, F);
+      res = get_line_from_readline(PROMPT? PROMPT: Prompt, Prompt_cont, F);
     else
 #endif
     {
-      if (!PROMPT) PROMPT = color_prompt( expand_prompt(GP_DATA->prompt, F) );
+      if (!PROMPT) PROMPT = color_prompt( expand_prompt(Prompt, F) );
       pari_puts(PROMPT); pari_flush();
       res = get_line_from_file(PROMPT,F,pari_infile);
     }
@@ -1897,7 +1913,7 @@ read_opt(pari_stack *p_A, long argc, char **argv)
   {
     if (!(GP_DATA->flags & gpd_EMACS)) GP_DATA->breakloop = 0;
     GP_DATA->use_readline = 0;
-    GP_DATA->prompt[0] = 0;
+    Prompt[0] = 0;
   }
   if (f & gpd_TEXMACS) tm_start_output();
   GP_DATA->flags = f;
@@ -1948,6 +1964,8 @@ main(int argc, char **argv)
   pari_add_defaults_module(functions_gp_default);
   (void)sd_graphcolormap("[\"white\",\"black\",\"blue\",\"violetred\",\"red\",\"green\",\"grey\",\"gainsboro\"]", d_SILENT);
   (void)sd_graphcolors("[4, 5]", d_SILENT);
+  strcpy(Prompt,      DFT_PROMPT);
+  strcpy(Prompt_cont, CONTPROMPT);
 
   read_opt(&s_A, argc,argv);
 #ifdef SIGALRM
@@ -2315,10 +2333,10 @@ sd_prompt_set(const char *v, long flag, const char *how, char *p)
 }
 GEN
 sd_prompt(const char *v, long flag)
-{ return sd_prompt_set(v, flag, "", GP_DATA->prompt); }
+{ return sd_prompt_set(v, flag, "", Prompt); }
 GEN
 sd_prompt_cont(const char *v, long flag)
-{ return sd_prompt_set(v, flag, "_cont", GP_DATA->prompt_cont); }
+{ return sd_prompt_set(v, flag, "_cont", Prompt_cont); }
 
 GEN
 sd_breakloop(const char *v, long flag)

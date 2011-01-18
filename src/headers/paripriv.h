@@ -331,7 +331,7 @@ typedef struct {
   ulong lim_lines, flags;
   int echo, breakloop, recover, use_readline; /* GP-specific */
   int secure, simplify, strictmatch, chrono; /* libpari ? */
-  char *help, *prompt, *prompt_cont;
+  char *help;
   pari_timer *T;
 } gp_data;
   /* GP_DATA->flags */
