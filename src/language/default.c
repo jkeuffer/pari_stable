@@ -752,18 +752,6 @@ init_path(gp_data *D)
   path->dirs = NULL;
 }
 
-/* initialize D->help */
-static void
-init_help(gp_data *D)
-{
-  char *h = os_getenv("GPHELP");
-# ifdef GPHELP
-  if (!h) h = (char*)GPHELP;
-# endif
-  if (h) h = pari_strdup(h);
-  D->help = h;
-}
-
 /* initialize D->fmt */
 static void
 init_fmt(gp_data *D)
@@ -811,7 +799,6 @@ default_gp_data(void)
   D->hist = &__HIST;
   D->pp   = &__PP;
   D->path = &__PATH;
-  init_help(D);
   init_fmt(D);
   init_hist(D, 5000, 0);
   init_path(D);

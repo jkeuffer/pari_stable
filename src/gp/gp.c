@@ -224,6 +224,18 @@ kill_buffers_upto_including(Buffer *B)
 /**                                                                **/
 /********************************************************************/
 static int disable_exception_handler = 0;
+static char *Help;
+
+static char *
+init_help()
+{
+  char *h = os_getenv("GPHELP");
+# ifdef GPHELP
+  if (!h) h = (char*)GPHELP;
+# endif
+  if (h) h = pari_strdup(h);
+  return h;
+}
 
 static void
 hit_return(void)
@@ -246,12 +258,7 @@ gp_ask_confirm(const char *s)
 }
 
 static int
-has_ext_help(void)
-{
-  if (GP_DATA->help && *(GP_DATA->help))
-      return 1;
-  return 0;
-}
+has_ext_help(void) { return (Help && *Help); }
 
 static int
 compare_str(char **s1, char **s2) { return strcmp(*s1, *s2); }
@@ -563,16 +570,15 @@ external_help(const char *s, int num)
   pariFILE *z;
   FILE *f;
 
-  if (!GP_DATA->help || !*(GP_DATA->help))
-    pari_err(talker,"no external help program");
+  if (!has_ext_help()) pari_err(talker,"no external help program");
   t = filter_quotes(s);
-  str = (char*)pari_malloc(strlen(GP_DATA->help) + strlen(t) + 64);
+  str = (char*)pari_malloc(strlen(Help) + strlen(t) + 64);
   *ar = 0;
   if (num < 0)
     opt = "-k";
   else if (t[strlen(t)-1] != '@')
     sprintf(ar,"@%d",num);
-  sprintf(str,"%s -fromgp %s %c%s%s%c",GP_DATA->help,opt, SHELL_Q,t,ar,SHELL_Q);
+  sprintf(str,"%s -fromgp %s %c%s%s%c",Help,opt, SHELL_Q,t,ar,SHELL_Q);
   z = try_pipe(str,0); f = z->file;
   pari_free(str);
   pari_free(t);
@@ -860,6 +866,7 @@ License, and comes WITHOUT ANY WARRANTY WHATSOEVER.");
 void
 gp_quit(long exitcode)
 {
+  if (Help) free((void*)Help);
   free_graph();
   pari_close();
   kill_buffers_upto(NULL);
@@ -1966,6 +1973,7 @@ main(int argc, char **argv)
   (void)sd_graphcolors("[4, 5]", d_SILENT);
   strcpy(Prompt,      DFT_PROMPT);
   strcpy(Prompt_cont, CONTPROMPT);
+  Help = init_help();
 
   read_opt(&s_A, argc,argv);
 #ifdef SIGALRM
@@ -2312,10 +2320,10 @@ sd_help(const char *v, long flag)
   {
     if (GP_DATA->secure)
       pari_err(talker,"[secure mode]: can't modify 'help' default (to %s)",v);
-    if (GP_DATA->help) pari_free((void*)GP_DATA->help);
-    GP_DATA->help = path_expand(v);
+    if (Help) pari_free((void*)Help);
+    Help = path_expand(v);
   }
-  str = GP_DATA->help? GP_DATA->help: "none";
+  str = Help? Help: "none";
   if (flag == d_RETURN) return strtoGENstr(str);
   if (flag == d_ACKNOWLEDGE)
     pari_printf("   help = \"%s\"\n", str);

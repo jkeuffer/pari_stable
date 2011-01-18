@@ -774,7 +774,6 @@ pari_close_opts(ulong init_opts)
   { /* delete GP_DATA */
     if (GP_DATA->hist->res) free((void*)GP_DATA->hist->res);
     if (GP_DATA->pp->cmd) free((void*)GP_DATA->pp->cmd);
-    if (GP_DATA->help) free((void*)GP_DATA->help);
     delete_dirs(GP_DATA->path);
     free((void*)GP_DATA->path->PATH);
   }
