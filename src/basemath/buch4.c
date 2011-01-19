@@ -699,7 +699,7 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
 
   rnfeq = NULL; /* no reltoabs needed */
   if (nf_get_degree(nf) == 1) { /* over Q */
-    polabs = lift(relpol); k = gen_0;
+    polabs = simplify_shallow(lift(relpol)); k = gen_0;
   } else if (galois == 2) { /* needs reltoabs */
     rnfeq = rnfequation2(bnf, relpol);
     polabs = gel(rnfeq,1);
