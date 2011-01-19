@@ -2978,7 +2978,7 @@ init_pq(GEN D, struct gpq_data *T)
 }
 
 static GEN
-gpq(GEN form, struct gpq_data *T, long prec)
+gpq(GEN form, struct gpq_data *T)
 {
   pari_sp av = avma;
   long a = form[1], b = form[2], c = form[3];
@@ -3088,7 +3088,7 @@ quadhilbertimag(GEN D)
     T.sqd = sqrtr_abs(itor(D, prec));
     for (i=1; i<=h; i++)
     {
-      GEN s = gpq(gel(L,i), &T, prec);
+      GEN s = gpq(gel(L,i), &T);
       if (DEBUGLEVEL>3) fprintferr("%ld ", i);
       if (!s) continue;
       if (typ(s) != t_COMPLEX) gel(Pr, ++r1) = s; /* real root */
