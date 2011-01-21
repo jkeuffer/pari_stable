@@ -574,7 +574,7 @@ gp_init_functions(void)
   return gp_init_entrees(new_fun_set? &s_MODULES: &s_OLDMODULES, functions_hash);
 }
 
-entree functions_basic[], functions_default[];
+extern entree functions_basic[], functions_default[];
 static void
 pari_init_functions(void)
 {
