@@ -17,7 +17,7 @@ while (<FILE>)
       my ($args)  = $fun->{Help};
       my ($v);
       $args =~ s/ *:.*//s;
-      if ($args =~ /^\w+=\w+\(\)/) { $args = $v = ''; }
+      if (!$args || $args =~ /^\w+=\w+\(\)/) { $args = $v = ''; }
       else
       {
         $args =~ s/^[^(]*\((.*)\)/$1/; # args proper
