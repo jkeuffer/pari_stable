@@ -37,6 +37,7 @@ BA 24- t_CLOSURE==t_CLOSURE and t_CLOSURE===t_CLOSURE did not work.
        than 22 of the 26 primes <= 101. (introduced in 2.4.3)
 BA 27- LLL could fail (rarely) due to unsufficient precision [#1154]
    28- rnfisnorminit(y,x^2-Mod(2+y,y)): polynomial not in Z[X] in nfinit [#1157]
+   29- factorff failed to merge identical irreducible factos [#1159]
 
   Changed
 LGr1- universal constants (gen_0,gen_1, etc.) are now read-only

@@ -2372,7 +2372,7 @@ FpX_factorff(GEN P, GEN p, GEN T)
 static GEN
 FqX_factor_i(GEN f, GEN T, GEN p)
 {
-  long pg, j, k, d, e, N, nbfact, pk;
+  long pg, j, k, d, e, N, lfact, pk;
   GEN E, f2, f3, df1, df2, g1, u, q, *t;
 
   if (!signe(f)) pari_err(zeropoler,"FqX_factor");
@@ -2387,7 +2387,7 @@ FqX_factor_i(GEN f, GEN T, GEN p)
   E = cgetg(d+1, t_VECSMALL);
 
   q = powiu(p, degpol(T));
-  e = nbfact = 1;
+  e = lfact = 1;
   pk = 1;
   f3 = NULL;
   df1 = FqX_deriv(f, T, p);
@@ -2417,43 +2417,47 @@ FqX_factor_i(GEN f, GEN T, GEN p)
     /* u is square-free (product of irreducibles of multiplicity e) */
     N = degpol(u);
     if (N) {
-      nb0 = nbfact;
-      t[nbfact] = FqX_normalize(u, T,p);
-      if (N == 1) nbfact++;
+      nb0 = lfact;
+      t[lfact] = FqX_normalize(u, T,p);
+      if (N == 1) lfact++;
       else
       {
 #if 0
-        nbfact += FqX_split_Berlekamp(t+nbfact, q, T, p);
+        lfact += FqX_split_Berlekamp(t+lfact, q, T, p);
 #else
-        GEN P = FqX_split_Trager(t[nbfact], T, p);
+        GEN P = FqX_split_Trager(t[lfact], T, p);
         if (P) {
-          for (j = 1; j < lg(P); j++) t[nbfact++] = gel(P,j);
+          for (j = 1; j < lg(P); j++) t[lfact++] = gel(P,j);
         } else {
           if (DEBUGLEVEL) pari_warn(warner, "FqX_split_Trager failed!");
-          nbfact += FqX_sqf_split(t+nbfact, q, T, p);
+          lfact += FqX_sqf_split(t+lfact, q, T, p);
         }
 #endif
       }
-      for (j = nb0; j < nbfact; j++) E[j] = e;
+      for (j = nb0; j < lfact; j++) E[j] = e;
     }
 
     if (!degpol(f2)) break;
     f = f2; df1 = df2; e += pk;
   }
-
-  for (j=1; j<nbfact; j++)
+  setlg(t, lfact);
+  setlg(E, lfact);
+  for (j=1; j<lfact; j++) gel(t,j) = FqX_normalize(gel(t,j), T,p);
+  (void)sort_factor_pol(mkvec2((GEN)t, E), cmp_RgX);
+  k = 1;
+  for (j = 2; j < lfact; j++)
   {
-    t[j] = FqX_normalize(gel(t,j), T,p);
-    for (k=1; k<j; k++)
-      if (RgX_equal(gel(t,j), gel(t,k)))
-      {
-        E[k] += E[j]; nbfact--;
-        E[j] = E[nbfact];
-        gel(t,j) = gel(t,nbfact); break;
-      }
+    if (RgX_equal(gel(t,j), gel(t,k)))
+      E[k] += E[j];
+    else
+    { /* new factor */
+      k++;
+      E[k] = E[j];
+      gel(t,k) = gel(t,j);
+    }
   }
-  setlg(t, nbfact);
-  setlg(E, nbfact); return sort_factor_pol(mkvec2((GEN)t, E), cmp_RgX);
+  setlg(t, k+1);
+  setlg(E, k+1); return mkvec2((GEN)t, E);
 }
 
 static void
