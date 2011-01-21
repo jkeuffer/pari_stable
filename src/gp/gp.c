@@ -957,7 +957,7 @@ escape(char *tch, int ismain)
       {
         case 'm': (void)sd_debugmem(++s,d_ACKNOWLEDGE); break;
         case 'f': (void)sd_debugfiles(++s,d_ACKNOWLEDGE); break;
-        default : (void)sd_debug(s,d_ACKNOWLEDGE); break;
+        default : (void)sd_debug(*s? s: NULL,d_ACKNOWLEDGE); break;
       }
       break;
     case 'h': print_functions_hash(s); break;
@@ -970,12 +970,12 @@ escape(char *tch, int ismain)
       }
       (void)sd_log(pari_logfile?"0":"1",d_ACKNOWLEDGE);
       break;
-    case 'o': (void)sd_output(s,d_ACKNOWLEDGE); break;
+    case 'o': (void)sd_output(*s? s: NULL,d_ACKNOWLEDGE); break;
     case 'p':
       switch (*s)
       {
         case 's': (void)sd_seriesprecision(++s,d_ACKNOWLEDGE); break;
-        default : (void)sd_realprecision(s,d_ACKNOWLEDGE); break;
+        default : (void)sd_realprecision(*s? s: NULL,d_ACKNOWLEDGE); break;
       }
       break;
     case 'q': gp_quit(0); break;
