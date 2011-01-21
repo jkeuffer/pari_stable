@@ -37,7 +37,6 @@ GEN gp_eval(GEN x, void *dat);
 /* functions */
 void   changevalue(entree *ep, GEN val);
 void    freeep(entree *ep);
-entree* is_entry_intern(const char *s, entree **table, long *hash);
 void   pari_fill_hashtable(entree **table, entree *ep);
 
 void compile_err(const char *msg, const char *str);

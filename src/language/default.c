@@ -14,7 +14,6 @@ with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "paripriv.h"
-#include "anal.h"
 
 /* Simple-minded parsing utilities. These are forbidden to use the GP stack
  * which may not exist at this point [e.g upon GP initialization]  */

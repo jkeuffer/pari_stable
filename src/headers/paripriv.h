@@ -259,6 +259,7 @@ INLINE long
 is_keyword_char(char c) { return (isalnum((int)c) || c=='_'); }
 
 /* Interfaces (GP, etc.) */
+entree* is_entry_intern(const char *s, entree **table, long *hash);
 entree* do_alias(entree *ep);
 char* get_sep(const char *t);
 long get_int(const char *s, long dflt);

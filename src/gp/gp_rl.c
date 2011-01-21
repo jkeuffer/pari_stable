@@ -23,7 +23,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #ifdef READLINE
 
 #include "paripriv.h"
-#include "../language/anal.h"
 #include "gp.h"
 
 typedef int (*RLCI)(int, int); /* rl_complete and rl_insert functions */

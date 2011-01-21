@@ -660,18 +660,17 @@ for dir in basemath modules language gp graph systems; do
   case "$f" in
   gp)
     cflags="$cflags -I$src/language \$(RLINCLUDE)"
-    depend="$ANAL_H $src/gp/gp.h"
+    depend="$src/gp/gp.h"
     ;;
   gp_rl)
     cflags="$cflags -I$src/language \$(RLINCLUDE)"
-    depend="$ANAL_H $src/gp/gp.h"
+    depend="$src/gp/gp.h"
     ;;
   gp_init)
     cflags="$cflags -I$src/graph"
-    depend="$RECT_H $src/gp/gp_init.h $src/gp/gp_default.h $ANAL_H"
+    depend="$RECT_H $src/gp/gp_init.h $src/gp/gp_default.h"
     ;;
   default)
-    depend="$ANAL_H"
     cflags="$cflags \$(DLCFLAGS)"
     ;;
   paricfg)
@@ -709,7 +708,7 @@ for dir in basemath modules language gp graph systems; do
     cflags="$cflags \$(DLCFLAGS)"
     ;;
   whatnow)
-    depend="$ANAL_H $src/gp/whatnow.h"
+    depend="$src/gp/whatnow.h"
     ;;
   init)
     depend="$ANAL_H $src/language/init.h $src/language/default.h"
