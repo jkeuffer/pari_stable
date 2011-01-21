@@ -262,12 +262,14 @@ TOPLDDYN   = "$TOP/$objdir"
 # Description system
 DESC          = pari.desc
 DESC_HELP_GEN = $desc/gen_proto $desc/PARI/822.pm
-TMPSUF        = -$osname-$arch-$$.tmp
+TMPSUF        = $osname-$arch.tmp
 
 DOTEST=$dotest
 
 OBJS   = $OBJS
 OBJSGP = $OBJSGP
+
+.PHONY: gp dft clean
 
 gp: gp-$dft ../gp$suffix$exe_suff $libdft
 
@@ -332,6 +334,7 @@ cleantune:
 cleanall: cleanobj cleantune cleantest cleandesc
 
 clean: cleanall
+
 
 # sleep 3 to avoid problems with NFS and slightly out of synch
 # fileserver/host. We are recompiling everything anyway.
@@ -557,40 +560,56 @@ $src/language/parse.c: $src/language/parse.h
 EOT
 
 if test -n "$add_funclist"; then
-  cat >> $file << EOT
+# files generated using external scripts
+HUGELINE="
 $src/funclist::
-	@-$cfg/genfunclist $desc
+	@-$cfg/genfunclist $desc"
+suffix='$$$$-$(TMPSUF)'
+list="funclist whatnow init default gp_default gp_init highlvl"
+for name in $list; do
+  case $name in
+  funclist)
+    target="$desc/\$(DESC)"
+    depend="$src/funclist $desc/merge_822 $desc/PARI/822.pm"
+    script="merge_822 ../funclist"
+  ;;
+  whatnow)
+    target=$src/gp/whatnow.h
+    depend="$desc/whatnow $src/whatnow"
+    script=whatnow
+  ;;
+  init)
+    target=$src/language/init.h
+    depend="$desc/\$(DESC) \$(DESC_HELP_GEN)"
+    script="gen_proto basic \$(DESC)"
+  ;;
+  default)
+    target=$src/language/default.h
+    depend="$desc/\$(DESC) \$(DESC_HELP_GEN)"
+    script="gen_proto default \$(DESC)"
+  ;;
+  gp_default) 
+    target=$src/gp/gp_default.h
+    depend="$desc/\$(DESC) \$(DESC_HELP_GEN)"
+    script="gen_proto gp_default \$(DESC)"
+  ;;
+  gp_init)
+    target=$src/gp/gp_init.h
+    depend="$desc/\$(DESC) \$(DESC_HELP_GEN)"
+    script="gen_proto gp \$(DESC)"
+  ;;
+  highlvl)
+    target=$src/gp/highlvl.h
+    depend="$desc/\$(DESC) \$(DESC_HELP_GEN)"
+    script="gen_proto highlevel \$(DESC)"
+  ;;
+  esac
+HUGELINE="$HUGELINE
+$target: $depend
+	f=$name-$suffix; (cd $desc && \$(PERL) $script > \$\$f) && mv $desc/\$\$f \$@"
+done
+echo "$HUGELINE" >> $file
 
-$desc/\$(DESC): $src/funclist $desc/merge_822 $desc/PARI/822.pm
-	cd $desc && \$(PERL) merge_822 ../funclist > def\$(TMPSUF)
-	mv $desc/def\$(TMPSUF) \$@
-
-$src/language/init.h: $desc/\$(DESC) \$(DESC_HELP_GEN)
-	cd $desc && \$(PERL) gen_proto basic \$(DESC) > init\$(TMPSUF)
-	mv $desc/init\$(TMPSUF) \$@
-
-$src/language/default.h: $desc/\$(DESC) \$(DESC_HELP_GEN)
-	cd $desc && \$(PERL) gen_proto default \$(DESC) > default\$(TMPSUF)
-	mv $desc/default\$(TMPSUF) \$@
-
-$src/gp/gp_default.h: $desc/\$(DESC) \$(DESC_HELP_GEN)
-	cd $desc && \$(PERL) gen_proto gp_default \$(DESC) > gp_default\$(TMPSUF)
-	mv $desc/gp_default\$(TMPSUF) \$@
-
-$src/gp/gp_init.h: $desc/\$(DESC) \$(DESC_HELP_GEN)
-	cd $desc && \$(PERL) gen_proto gp \$(DESC) > gp_init\$(TMPSUF)
-	mv $desc/gp_init\$(TMPSUF) \$@
-
-$src/gp/highlvl.h: $desc/\$(DESC) \$(DESC_HELP_GEN)
-	cd $desc && \$(PERL) gen_proto highlevel \$(DESC) > highlvl\$(TMPSUF)
-	mv $desc/highlvl\$(TMPSUF) \$@
-
-$src/gp/whatnow.h: $desc/whatnow $src/whatnow
-	cd $desc && \$(PERL) whatnow > whatnow\$(TMPSUF)
-	mv $desc/whatnow\$(TMPSUF) \$@
-
-L0MODS=$kern0/asm0.h $knone/addll.h $knone/mulll.h $knone/bfffo.h $knone/divll.h
-EOT
 fi
 
 # Level 0
@@ -599,6 +618,7 @@ if test -s $f; then
   . $f
 else
   cat >> $file <<EOT
+L0MODS=$kern0/asm0.h $knone/addll.h $knone/mulll.h $knone/bfffo.h $knone/divll.h
 parilvl0.h: \$(L0MODS)
 	$cfg/genkernel $kern0/asm0.h > parilvl0.h
 EOT
@@ -722,5 +742,3 @@ $f\$(_O): .headers $depend $source
 done
 # avoid execing too many "cat". MS-DOS can't handle it
 echo "$HUGELINE" >> $file
-
-echo ".PHONY: gp dft clean"  >> $file
