@@ -67,6 +67,7 @@ BA 10-[libpari] nf_get_TrInv renamed to nf_get_diff
           factor(100,1 or 2) -> [10; 2] (was [2,2; 5,2])
    14- include GP defaults in the function description system + use standard
        hashtables instead of ad hoc types
+   15- cleanup and document term_color() and term_get_color()
 
   Added
 BA  1- trap keyword "syntaxer" to trap syntax error from eval.

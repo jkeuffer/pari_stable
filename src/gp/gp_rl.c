@@ -120,12 +120,7 @@ change_state(const char *msg, ulong flag, int count)
         readline_state = 1;
   }
   SAVE_PROMPT();
-#if 0                                /* Does not work well... */
-  rl_message("%s[%s: %s] %s", term_get_color(c_PROMPT),
-             msg, c? "on": "off", term_get_color(c_INPUT));
-#else
   rl_message("[%s: %s] ", msg, c? "on": "off");
-#endif
   c = rl_read_key();
   RESTORE_PROMPT();
   rl_clear_message();

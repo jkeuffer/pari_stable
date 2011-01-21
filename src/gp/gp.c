@@ -1034,7 +1034,7 @@ gp_format_time(long flag)
     default: return NULL;
   }
   strcpy(buf,pre); s = buf+strlen(pre);
-  strcpy(s, term_get_color(c_TIME)); s+=strlen(s);
+  term_get_color(s, c_TIME); s+=strlen(s);
   if (delay >= 3600000)
   {
     sprintf(s, "%ldh, ", delay / 3600000); s+=strlen(s);
@@ -1056,7 +1056,7 @@ gp_format_time(long flag)
     }
   }
   sprintf(s, "%ld ms", delay); s+=strlen(s);
-  strcpy(s, term_get_color(c_NONE));
+  term_get_color(s, c_NONE);
   if (flag != ti_INTERRUPT) { s+=strlen(s); *s++='.'; *s++='\n'; *s=0; }
   return buf;
 }
@@ -1355,7 +1355,7 @@ brace_color(char *s, int c, int force)
   if (GP_DATA->use_readline)
     *s++ = RL_PROMPT_START_IGNORE;
 #endif
-  strcpy(s, term_get_color(c));
+  term_get_color(s, c);
 #ifdef RL_PROMPT_START_IGNORE
   if (GP_DATA->use_readline)
   {
@@ -1400,20 +1400,21 @@ void
 update_logfile(const char *prompt, const char *s)
 {
   switch (logstyle) {
-  case logstyle_TeX:
-    fprintf(pari_logfile,
-            "\\PARIpromptSTART|%s\\PARIpromptEND|%s\\PARIinputEND|%%\n",
-            prompt,s);
+    case logstyle_TeX:
+      fprintf(pari_logfile,
+              "\\PARIpromptSTART|%s\\PARIpromptEND|%s\\PARIinputEND|%%\n",
+              prompt,s);
     break;
-  case logstyle_plain:
-    fprintf(pari_logfile, "%s%s\n",prompt,s);
+    case logstyle_plain:
+      fprintf(pari_logfile,"%s%s\n",prompt,s);
     break;
-  case logstyle_color:
-    /* Can't do in one pass, since term_get_color() returns a static */
-    fprintf(pari_logfile, "%s%s", term_get_color(c_PROMPT), prompt);
-    fprintf(pari_logfile, "%s%s", term_get_color(c_INPUT), s);
-    fprintf(pari_logfile, "%s\n", term_get_color(c_NONE));
-    break;
+    case logstyle_color: {
+      pari_sp av = avma;
+      fprintf(pari_logfile,"%s%s%s%s%s\n",term_get_color(NULL,c_PROMPT), prompt,
+                                          term_get_color(NULL,c_INPUT), s,
+                                          term_get_color(NULL,c_NONE));
+      avma = av; break;
+    }
   }
 }
 
@@ -2061,9 +2062,9 @@ tex2mail_output(GEN z, long n)
   /* history number */
   if (n)
   {
-    char c_hist[16], c_out[16];
-    strcpy(c_hist, term_get_color(c_HIST));
-    strcpy(c_out , term_get_color(c_OUTPUT));
+    pari_sp av = avma;
+    const char *c_hist = term_get_color(NULL, c_HIST);
+    const char *c_out = term_get_color(NULL, c_OUTPUT);
     if (!(GP_DATA->flags & gpd_QUIET))
     {
       char s[128];
@@ -2087,6 +2088,7 @@ tex2mail_output(GEN z, long n)
         break;
       }
     }
+    avma = av;
   }
   /* output */
   gen_output(z, &T);

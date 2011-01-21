@@ -280,15 +280,11 @@ void  pari_set_last_newline(int last);
 void  print_functions_hash(const char *s);
 void  print_all_user_fun(int member);
 GEN   readbin(const char *name, FILE *f, int *vector);
-void  term_color(long c);
-const char *term_get_color(long c);
 int   term_height(void);
 int   term_width(void);
 void  whatnow_new_syntax(const char *f, long n);
 /* gp_colors */
 void decode_color(long n, long *c);
-enum { c_ERR, c_HIST, c_PROMPT, c_INPUT, c_OUTPUT, c_HELP, c_TIME, c_LAST,
-       c_NONE = 0xffffUL };
 extern GEN pari_colormap, pari_graphcolors;
 
 /* defaults */

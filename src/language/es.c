@@ -1292,19 +1292,6 @@ nextch:
   return S->string;
 }
 
-/* start printing in "color" c */
-/* terminal has to support ANSI color escape sequences */
-void
-term_color(long c)
-{
-  FILE *o_logfile = pari_logfile;
-
-  if (logstyle != logstyle_color) pari_logfile = NULL; /* Ugly hack */
-  /* _not_ pari_puts, because of last_was_newline */
-  pariOut->puts(term_get_color(c));
-  pari_logfile = o_logfile;
-}
-
 void
 decode_color(long n, long *c)
 {
@@ -1313,34 +1300,66 @@ decode_color(long n, long *c)
   c[0] = n & 0xf; /* attribute */
 }
 
-#ifdef ESC
-#  undef ESC
-#endif
-#define ESC  (0x1f & '[') /* C-[ = escape */
-
-const char *
-term_get_color(long n)
+#define COLOR_LEN 16
+/* start printing in "color" c */
+/* terminal has to support ANSI color escape sequences */
+void
+term_color(long c)
 {
-  static char s[16];
-  long c[3], a;
+  static char s[COLOR_LEN];
+  FILE *o_logfile = pari_logfile;
 
-  if (disable_color) return "";
+  if (logstyle != logstyle_color) pari_logfile = NULL; /* Ugly hack */
+  /* _not_ pari_puts, because of last_was_newline */
+  pariOut->puts(term_get_color(s, c));
+  pari_logfile = o_logfile;
+}
+
+static const char esc = (0x1f & '['); /* C-[ = escape */
+
+char *
+term_get_color(char *s, long n)
+{
+  long c[3], a;
+  if (!s) s = stackmalloc(COLOR_LEN);
+
+  if (disable_color) { *s = 0; return s; }
   if (n == c_NONE || (a = gp_colors[n]) == c_NONE)
-    sprintf(s, "%c[0m",ESC); /* reset */
+    sprintf(s, "%c[0m", esc); /* reset */
   else
   {
     decode_color(a,c);
     if (c[1]<8) c[1] += 30; else c[1] += 82;
     if (a & (1L<<12)) /* transparent background */
-      sprintf(s, "%c[%ld;%ldm", ESC, c[0], c[1]);
+      sprintf(s, "%c[%ld;%ldm", esc, c[0], c[1]);
     else
     {
       if (c[2]<8) c[2] += 40; else c[2] += 92;
-      sprintf(s, "%c[%ld;%ld;%ldm", ESC, c[0], c[1], c[2]);
+      sprintf(s, "%c[%ld;%ld;%ldm", esc, c[0], c[1], c[2]);
     }
   }
   return s;
 }
+
+static long
+strlen_real(const char *s)
+{
+  const char *t = s;
+  long len = 0;
+  while (*t)
+  {
+    if (t[0] == esc && t[1] == '[')
+    { /* skip ANSI escape sequence */
+      t += 2;
+      while (*t && *t++ != 'm') /* empty */;
+      continue;
+    }
+    t++; len++;
+  }
+  return len;
+}
+
+#undef COLOR_LEN
 
 /********************************************************************/
 /**                                                                **/
@@ -1462,7 +1481,8 @@ lim_lines_output(char *s, long n, long max_lin)
     if (lin >= max_lin)
       if (c == '\n' || col >= width-5)
       {
-        normalOutS(term_get_color(c_ERR));
+        pari_sp av = avma;
+        normalOutS(term_get_color(NULL, c_ERR)); avma = av;
         normalOutS("[+++]"); return;
       }
     if (c == '\n')         { col = -1; lin++; }
@@ -1476,24 +1496,6 @@ static void
 new_line(const char *prefix)
 {
   pari_putc('\n'); if (prefix) pari_puts(prefix);
-}
-
-static long
-strlen_real(const char *s)
-{
-  const char *t = s;
-  long len = 0;
-  while (*t)
-  {
-    if (t[0] == ESC && t[1] == '[')
-    { /* skip ANSI escape sequence */
-      t += 2;
-      while (*t && *t++ != 'm') /* empty */;
-      continue;
-    }
-    t++; len++;
-  }
-  return len;
 }
 
 #define is_blank(c) ((c) == ' ' || (c) == '\n' || (c) == '\t')
@@ -1587,7 +1589,7 @@ print_errcontext(const char *msg, const char *s, const char *entry)
   else
   {
     if (past > MAX_PAST) { past = MAX_PAST; strcpy(t, "..."); t += 3; }
-    strcpy(t, term_get_color(c_OUTPUT));
+    term_get_color(t, c_OUTPUT);
     t += strlen(t);
     strncpy(t, s - past, past); t[past] = 0;
   }
@@ -1596,7 +1598,7 @@ print_errcontext(const char *msg, const char *s, const char *entry)
   t = str; if (!past) *t++ = ' ';
   strncpy(t, s, STR_LEN); t[STR_LEN] = 0;
   /* prefix '***' */
-  strcpy(pre, term_get_color(c_ERR));
+  term_get_color(pre, c_ERR);
   strcat(pre, "  ***   ");
   /* now print */
   print_prefixed_text(buf, pre, str);

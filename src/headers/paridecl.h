@@ -1456,6 +1456,8 @@ void    strftime_expand(const char *s, char *buf, long max);
 GEN     Strprintf(const char *fmt, GEN args);
 void    switchin(const char *name);
 void    switchout(const char *name);
+void    term_color(long c);
+char*   term_get_color(char *s, long c);
 void    texe(GEN g, char format, long dec);
 const char* type_name(long t);
 void    warning0(GEN g);

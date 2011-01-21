@@ -1759,6 +1759,46 @@ seen so far:
 
 \fun{char *}{pari_vsprintf}{const char *fmt, va_list ap}
 
+\subsec{PARI colors}
+In this section we describe the low-level functions used to implement GP's
+color scheme, associated to the \tet{colors} default. The following symbolic
+names are associated to gp's output strings:
+
+\item \tet{c_ERR} an error message
+
+\item \tet{c_HIST} a history number (as in \kbd{\%1 = ...})
+
+\item \tet{c_PROMPT} a prompt
+
+\item \tet{c_INPUT} an input line (minus the prompt part)
+
+\item \tet{c_OUTPUT} an output
+
+\item \tet{c_HELP} a help message
+
+\item \tet{c_TIME} a timer
+
+\item \tet{c_NONE} everything else
+
+\emph{If} the \tet{colors} default is set to a non-empty value, before gp
+outputs a string, it first outputs an ANSI colors escape sequence ---
+understood by most terminals ---, according to the \kbd{colors}
+specifications. As long as this is in effect, the following strings chars is
+rendered in color, possibly in bold or underlined (see \secref{se:colors}).
+
+\fun{void}{term_color}{long c} prints (as if using \tet{pari_puts}) the ANSI
+color escape sequence associated to output object \kbd{c}. If \kbd{c} is
+\tet{c_NONE}, revert to defaut printing style.
+
+\fun{char*}{term_get_color}{char *s, long c} returns as a character
+string the ANSI color escape sequence associated to output object \kbd{c}.
+If \kbd{c} is \tet{c_NONE}, the value used to revert to defaut printing
+style is returned.
+
+The argument \kbd{s} is either \kbd{NULL} (string allocated on the PARI
+stack), or preallocated storage (in which case, it must be able to hold
+at least 16 chars, including the final \kbd{\bs 0}).
+
 \subsec{Output contexts}
 
 The behavior of the functions \tet{pari_putc}, \tet{pari_puts},

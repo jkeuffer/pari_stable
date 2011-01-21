@@ -143,8 +143,10 @@ enum logstyles {
     logstyle_TeX         /* 3 */
 };
 
-#define TEXSTYLE_PAREN        2
-#define TEXSTYLE_BREAK        4
+enum { c_ERR, c_HIST, c_PROMPT, c_INPUT, c_OUTPUT, c_HELP, c_TIME, c_LAST,
+       c_NONE = 0xffffUL };
+
+enum { TEXSTYLE_PAREN=2, TEXSTYLE_BREAK=4 };
 
 extern THREAD pari_sp avma, bot, top;
 #define DISABLE_MEMUSED (size_t)-1
