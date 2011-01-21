@@ -34,11 +34,8 @@ GEN gp_eval(GEN x, void *dat);
 #define bl_prev(x) (((GEN*)x)[-2])
 #define bl_num(x)  (((GEN)x)[-1])
 
-void pari_sigint(const char *s);
-
 /* functions */
 void   changevalue(entree *ep, GEN val);
-entree* do_alias(entree *ep);
 void    freeep(entree *ep);
 entree* is_entry_intern(const char *s, entree **table, long *hash);
 void   pari_fill_hashtable(entree **table, entree *ep);
@@ -52,56 +49,13 @@ extern char foreignExprSwitch;
 extern entree * (*foreignAutoload)(const char*, long len);
 extern void (*foreignFuncFree)(entree *);
 
-extern const long functions_tblsz;  /* hashcodes table size */
-/* list of PARI functions */
-extern entree **functions_hash;    /* functions hashtable */
-extern entree **defaults_hash;    /* defaults hashtable */
-extern entree functions_basic[];
-
-/* list of PARI defaults */
-extern entree functions_default[];
-/* list of old PARI fonctions (up to 1.39.15) */
-extern entree  oldfonctions[];
-
-/* colors */
-extern long    gp_colors[];
-extern int     disable_color;
-
-/* backward compatibility */
-extern ulong compatible;
-enum { NONE, WARN, OLDFUN, OLDALL };
-#define new_fun_set (compatible == NONE || compatible == WARN)
-
 #ifdef STACK_CHECK
 extern THREAD void *PARI_stack_limit;
 #endif
 
-/* entrees */
-#define EpVALENCE(ep) ((ep)->valence & 0xFF)
-#define EpSTATIC(ep) ((ep)->valence & 0x100)
-#define EpSETSTATIC(ep) ((ep)->valence |= 0x100)
-enum { EpNEW = 100, EpALIAS, EpVAR, EpINSTALL };
-#define initial_value(ep) ((ep)+1)
-
 extern entree  **varentries;
 
-/* defaults  */
-char* get_sep(const char *t);
-long get_int(const char *s, long dflt);
-ulong get_uint(const char *s);
-int  gp_init_functions(void);
-
-extern char *current_logfile;
-
-/* general printing */
-void print_prefixed_text(const char *s, const char *prefix, const char *str);
-#define print_text(s) print_prefixed_text((s),NULL,NULL);
-
-/* GP output && output format */
-enum { f_RAW = 0, f_PRETTYMAT = 1, f_PRETTY = 3, f_TEX = 4 };
-
-void gpwritebin(const char *s, GEN x);
-void print0(GEN g, long flag);
+ENDEXTERN
 
 struct node_loc
 {
@@ -123,14 +77,8 @@ void pari_close_evaluator(void);
 void pari_init_parser(void);
 void pari_init_compiler(void);
 void pari_init_evaluator(void);
-GEN  pari_compile_str(char *lex, int strict);
 void optimizenode(long n);
 void closure_context(GEN C, long lpc);
 const char * closure_func_err(void);
 GEN  gp_closure(long n);
 long eval_mnemonic(GEN str, const char *tmplate);
-
-INLINE long
-is_keyword_char(char c) { return (isalnum((int)c) || c=='_'); }
-
-ENDEXTERN

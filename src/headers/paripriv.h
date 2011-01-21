@@ -250,9 +250,24 @@ int    pop_entree_block(entree *ep, long loc);
 int    pop_val_if_newer(entree *ep, long loc);
 void   gclone_refc(GEN x);
 
+/* general printing */
+void print_errcontext(const char *msg, const char *s, const char *entry);
+void print_prefixed_text(const char *s, const char *prefix, const char *str);
+INLINE void
+print_text(const char *s) { print_prefixed_text((s),NULL,NULL); }
+INLINE long
+is_keyword_char(char c) { return (isalnum((int)c) || c=='_'); }
+
 /* Interfaces (GP, etc.) */
+entree* do_alias(entree *ep);
+char* get_sep(const char *t);
+long get_int(const char *s, long dflt);
+ulong get_uint(const char *s);
+int  gp_init_functions(void);
+GEN  pari_compile_str(char *lex, int strict);
+
+void pari_sigint(const char *s);
 pariFILE *pari_last_tmp_file();
-void  print_errcontext(const char *msg, const char *s, const char *entry);
 void* get_stack(double fraction, long min);
 void  init_graph(void);
 void  free_graph(void);
@@ -333,11 +348,39 @@ typedef struct {
   int secure, simplify, strictmatch, chrono; /* libpari ? */
   pari_timer *T;
 } gp_data;
+extern gp_data *GP_DATA;
   /* GP_DATA->flags */
 enum { gpd_QUIET=1, gpd_TEST=2, gpd_EMACS=256, gpd_TEXMACS=512};
 
-extern gp_data *GP_DATA;
+/* GP output && output format */
+enum { f_RAW = 0, f_PRETTYMAT = 1, f_PRETTY = 3, f_TEX = 4 };
+void gpwritebin(const char *s, GEN x);
+void print0(GEN g, long flag);
+extern char *current_logfile;
 
+/* colors */
+extern long    gp_colors[];
+extern int     disable_color;
+
+/* backward compatibility */
+extern ulong compatible;
+enum { NONE, WARN, OLDFUN, OLDALL };
+#define new_fun_set (compatible == NONE || compatible == WARN)
+
+/* entrees */
+#define EpVALENCE(ep) ((ep)->valence & 0xFF)
+#define EpSTATIC(ep) ((ep)->valence & 0x100)
+#define EpSETSTATIC(ep) ((ep)->valence |= 0x100)
+enum { EpNEW = 100, EpALIAS, EpVAR, EpINSTALL };
+#define initial_value(ep) ((ep)+1)
+
+/* functions lists */
+extern const long functions_tblsz;  /* hashcodes table size */
+extern entree **functions_hash;   /* functions hashtable */
+extern entree **defaults_hash;    /* defaults hashtable */
+extern entree oldfonctions[];
+
+/* buffers */
 typedef struct Buffer {
   char *buf;
   ulong len;
