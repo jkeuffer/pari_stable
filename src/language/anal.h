@@ -54,8 +54,6 @@ extern THREAD void *PARI_stack_limit;
 
 extern entree  **varentries;
 
-ENDEXTERN
-
 struct node_loc
 {
   const char *start,*end;
@@ -81,3 +79,5 @@ void closure_context(GEN C, long lpc);
 const char * closure_func_err(void);
 GEN  gp_closure(long n);
 long eval_mnemonic(GEN str, const char *tmplate);
+
+ENDEXTERN
