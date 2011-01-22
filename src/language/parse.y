@@ -115,12 +115,12 @@ expr: KINTEGER %prec INT  {$$=newintnode(&@1);}
     | history           {$$=$1;}
     | expr '(' listarg ')'  {$$=newnode(Fcall,$1,$3,&@$);}
     | funcid            {$$=$1;}
-    | lvalue %prec LVAL        {$$=$1;}
+    | lvalue %prec LVAL {$$=$1;}
     | matrix            {$$=$1;}
     | definition        {$$=$1;}
     | lvalue '=' expr {$$=newnode(Faffect,$1,$3,&@$);}
-    | lvalue "++" {$$=newopcall(OPpp,$1,-1,&@$);}
-    | lvalue "--" {$$=newopcall(OPss,$1,-1,&@$);}
+    | lvalue "++"     {$$=newopcall(OPpp,$1,-1,&@$);}
+    | lvalue "--"     {$$=newopcall(OPss,$1,-1,&@$);}
     | lvalue "*="   expr {$$=newopcall(OPme,$1,$3,&@$);}
     | lvalue "/="   expr {$$=newopcall(OPde,$1,$3,&@$);}
     | lvalue "\\/=" expr {$$=newopcall(OPdre,$1,$3,&@$);}
@@ -130,8 +130,8 @@ expr: KINTEGER %prec INT  {$$=newintnode(&@1);}
     | lvalue ">>="  expr {$$=newopcall(OPsre,$1,$3,&@$);}
     | lvalue "+="   expr {$$=newopcall(OPpe,$1,$3,&@$);}
     | lvalue "-="   expr {$$=newopcall(OPse,$1,$3,&@$);}
-    | '!' expr                {$$=newopcall(OPnb,$2,-1,&@$);}
-    | '#' expr                {$$=newopcall(OPlength,$2,-1,&@$);}
+    | '!' expr         {$$=newopcall(OPnb,$2,-1,&@$);}
+    | '#' expr         {$$=newopcall(OPlength,$2,-1,&@$);}
     | expr "||"  expr  {$$=newopcall(OPor,$1,$3,&@$);}
     | expr '|'   expr  {$$=newopcall(OPor,$1,$3,&@$);}
     | expr "&&"  expr  {$$=newopcall(OPand,$1,$3,&@$);}
@@ -152,7 +152,6 @@ expr: KINTEGER %prec INT  {$$=newintnode(&@1);}
     | expr '\\'  expr  {$$=newopcall(OPeuc,$1,$3,&@$);}
     | expr '/'   expr  {$$=newopcall(OPd,$1,$3,&@$);}
     | expr '*'   expr  {$$=newopcall(OPm,$1,$3,&@$);}
-  /*| '+' expr %prec SIGN {$$=newopcall(OPpl,$2,-1);}*/
     | '+' expr %prec SIGN {$$=$2;}
     | '-' expr %prec SIGN {$$=newopcall(OPn,$2,-1,&@$);}
     | expr '^' expr {$$=newopcall(OPpow,$1,$3,&@$);}
@@ -198,8 +197,7 @@ listarg: arg {$$=$1;}
 funcid: KENTRY '(' listarg ')' {$$=newnode(Ffunction,newconst(CSTentry,&@1),$3,&@$);}
 ;
 
-memberid:
-     expr '.' KENTRY {$$=newnode(Ffunction,newconst(CSTmember,&@3),$1,&@$);}
+memberid: expr '.' KENTRY {$$=newnode(Ffunction,newconst(CSTmember,&@3),$1,&@$);}
 ;
 
 definition: KENTRY '(' listarg ')' '=' seq %prec DEFFUNC
