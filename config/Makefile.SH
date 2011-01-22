@@ -588,7 +588,7 @@ for name in $list; do
     depend="$desc/\$(DESC) \$(DESC_HELP_GEN)"
     script="gen_proto default \$(DESC)"
   ;;
-  gp_default) 
+  gp_default)
     target=$src/gp/gp_default.h
     depend="$desc/\$(DESC) \$(DESC_HELP_GEN)"
     script="gen_proto gp_default \$(DESC)"
