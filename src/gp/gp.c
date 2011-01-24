@@ -1070,7 +1070,7 @@ chron(char *s)
     if (*s) return 0;
     pari_puts(gp_format_time(ti_LAST));
   }
-  else { GP_DATA->chrono ^= 1; (void)sd_timer("",d_ACKNOWLEDGE); }
+  else { GP_DATA->chrono ^= 1; (void)sd_timer(NULL,d_ACKNOWLEDGE); }
   return 1;
 }
 
