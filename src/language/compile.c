@@ -1505,7 +1505,7 @@ snm_closure(entree *ep, GEN data)
 }
 
 GEN
-strtoclosure(const char *s)
+strtofunction(const char *s)
 {
   pari_sp av = avma;
   entree *ep = is_entry(s);

@@ -113,7 +113,7 @@ Description:
  (genstr):gen
  (closure):gen
 
- (gpfunc):closure strtoclosure($1)
+ (gpfunc):closure strtofunction($1)
 
  (gen):genstr GENtoGENstr($1)
  (str):genstr strtoGENstr($1)
