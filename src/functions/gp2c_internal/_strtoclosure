@@ -1,0 +1,5 @@
+Function: _strtoclosure
+Class: gp2c_internal
+Description:
+ (str):gen               strtofunction($1)
+ (str,gen,...):gen       strtoclosure($1, mkvecn(${nbarg 1 sub}, ${3 code}))

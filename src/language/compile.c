@@ -1455,8 +1455,7 @@ genclosure(entree *ep, const char *loc, GEN data, int check)
       switch(c)
       {
       case 'G':
-        op_push_loc(OCpushgen,data_push(strntoGENstr(q+1,p-4-q)),loc);
-        op_push_loc(OCcallgen,(long)is_entry("_geval"),loc);
+        op_push_loc(OCpushstoi,strtol(q+1,NULL,10),loc);
         op_push_loc(OCdefaultgen,-index,loc);
         break;
       case 'L':
@@ -1505,7 +1504,7 @@ snm_closure(entree *ep, GEN data)
 }
 
 GEN
-strtofunction(const char *s)
+strtoclosure(const char *s, GEN v)
 {
   pari_sp av = avma;
   entree *ep = is_entry(s);
@@ -1514,9 +1513,15 @@ strtofunction(const char *s)
   ep = do_alias(ep);
   if ((!EpSTATIC(ep) && EpVALENCE(ep)!=EpINSTALL) || !ep->value)
     pari_err(talker,"not a function: \"%s\"",s);
-  C = genclosure(ep,ep->name,NULL,0);
+  C = snm_closure(ep,v);
   if (!C) pari_err(talker,"function prototype unsupported: \"%s\"",s);
   return gerepilecopy(av, C);
+}
+
+GEN
+strtofunction(const char *s)
+{
+  return strtoclosure(s, NULL);
 }
 
 static void
