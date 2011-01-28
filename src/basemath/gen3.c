@@ -3413,6 +3413,7 @@ geval_gp(GEN x, GEN t)
       return y;
 
     case t_CLOSURE:
+      if (x[1]) pari_err(impl,"eval on functions with parameters");
       return closure_evalres(x);
   }
   pari_err(typeer,"geval");
