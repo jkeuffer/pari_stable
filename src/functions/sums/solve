@@ -11,4 +11,4 @@ Doc: find a real root of expression
  This routine uses Brent's method and can fail miserably if \var{expr} is
  not defined in the whole of $[a,b]$ (try \kbd{solve(x=1, 2, tan(x))}).
 
- \synt{zbrent}{void *E,GEN (*eval)(GEN,void*),GEN a,GEN b,long prec}.
+ \synt{zbrent}{void *E,GEN (*eval)(void*,GEN),GEN a,GEN b,long prec}.

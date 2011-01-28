@@ -12,4 +12,4 @@ Doc: numerical
  necessarily at infinity, but if they are, oscillations (i.e. $[[\pm1],\alpha
  I]$) are forbidden.
 
- \synt{intfouriercos}{void *E, GEN (*eval)(GEN,void*), GEN a, GEN b, GEN z, GEN tab, long prec}.
+ \synt{intfouriercos}{void *E, GEN (*eval)(void*,GEN), GEN a, GEN b, GEN z, GEN tab, long prec}.

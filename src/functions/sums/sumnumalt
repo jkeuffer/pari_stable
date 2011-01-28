@@ -47,4 +47,4 @@ Doc: numerical
  %1 = -1.66... E-308 \\@com perfect
  @eprog
 
- \synt{sumnumalt}{void *E, GEN (*eval)(GEN,void*), GEN a, GEN sig, GEN tab, long flag, long prec}.
+ \synt{sumnumalt}{void *E, GEN (*eval)(void*,GEN), GEN a, GEN sig, GEN tab, long flag, long prec}.

@@ -2117,7 +2117,7 @@ excluded). Returns return the smallest prime $\geq a$, and update \kbd{ptr}.
 Numerical routines code a function (to be integrated, summed, zeroed, etc.)
 with two parameters named
 \bprog
-  GEN (*eval)(GEN,void*)
+  GEN (*eval)(void*, GEN)
   void *E;
 @eprog\noindent
 The second is meant to contain all auxiliary data needed by your function.
@@ -2125,7 +2125,7 @@ The first is such that \kbd{eval(x, E)} returns your function evaluated at
 \kbd{x}. For instance, one may code the family of functions
 $f_t: x \to (x+t)^2$ via
 \bprog
-GEN fun(GEN x, void *t) { return gsqr(gadd(x, (GEN)t)); }
+GEN fun(void *t, GEN x) { return gsqr(gadd(x, (GEN)t)); }
 @eprog\noindent
 One can then integrate $f_1$ between $a$ and $b$ with the call
 \bprog

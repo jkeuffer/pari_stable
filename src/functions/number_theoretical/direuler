@@ -20,4 +20,4 @@ Doc: computes the \idx{Dirichlet series} associated to the \idx{Euler
  %1 = [1, 3, 4, 7, 6, 12, 8, 15, 13, 18]
  @eprog
 
- \synt{direuler}{void *E, GEN (*eval)(GEN,void*), GEN a, GEN b}
+ \synt{direuler}{void *E, GEN (*eval)(void*,GEN), GEN a, GEN b}

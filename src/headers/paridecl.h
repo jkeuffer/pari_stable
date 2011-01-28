@@ -1910,21 +1910,21 @@ void    traverseheap( void(*f)(GEN, void *), void *data );
 
 /* intnum.c */
 
-GEN     intcirc(void *E, GEN (*eval) (GEN, void *), GEN a, GEN R, GEN tab, long prec);
-GEN     intfouriercos(void *E, GEN (*eval) (GEN, void *), GEN a, GEN b, GEN x, GEN tab, long prec);
-GEN     intfourierexp(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN x, GEN tab, long prec);
-GEN     intfouriersin(void *E, GEN (*eval) (GEN, void *), GEN a, GEN b, GEN x, GEN tab, long prec);
-GEN     intfuncinit(void *E, GEN (*eval) (GEN, void *), GEN a, GEN b, long m, long flag, long prec);
-GEN     intlaplaceinv(void *E, GEN (*eval) (GEN, void *), GEN sig, GEN x, GEN tab, long prec);
-GEN     intmellininv(void *E, GEN (*eval) (GEN, void *), GEN sig, GEN x, GEN tab, long prec);
+GEN     intcirc(void *E, GEN (*eval) (void *, GEN), GEN a, GEN R, GEN tab, long prec);
+GEN     intfouriercos(void *E, GEN (*eval) (void *, GEN), GEN a, GEN b, GEN x, GEN tab, long prec);
+GEN     intfourierexp(void *E, GEN (*eval)(void *, GEN), GEN a, GEN b, GEN x, GEN tab, long prec);
+GEN     intfouriersin(void *E, GEN (*eval) (void *, GEN), GEN a, GEN b, GEN x, GEN tab, long prec);
+GEN     intfuncinit(void *E, GEN (*eval) (void *, GEN), GEN a, GEN b, long m, long flag, long prec);
+GEN     intlaplaceinv(void *E, GEN (*eval) (void *, GEN), GEN sig, GEN x, GEN tab, long prec);
+GEN     intmellininv(void *E, GEN (*eval) (void *, GEN), GEN sig, GEN x, GEN tab, long prec);
 GEN     intmellininvshort(GEN sig, GEN x, GEN tab, long prec);
-GEN     intnum(void *E, GEN (*eval) (GEN, void *), GEN a, GEN b, GEN tab, long prec);
+GEN     intnum(void *E, GEN (*eval) (void *, GEN), GEN a, GEN b, GEN tab, long prec);
 GEN     intnuminit(GEN a, GEN b, long m, long prec);
-GEN     intnuminitgen(void *E, GEN (*eval) (GEN, void *), GEN a, GEN b, long m, long flext, long prec);
-GEN     intnumromb(void *E, GEN (*eval) (GEN, void *), GEN a, GEN b, long flag, long prec);
+GEN     intnuminitgen(void *E, GEN (*eval) (void *, GEN), GEN a, GEN b, long m, long flext, long prec);
+GEN     intnumromb(void *E, GEN (*eval) (void *, GEN), GEN a, GEN b, long flag, long prec);
 long    intnumstep(long prec);
-GEN     sumnum(void *E, GEN (*f) (GEN, void *), GEN a, GEN sig, GEN tab, long flag, long prec);
-GEN     sumnumalt(void *E, GEN (*f) (GEN, void *), GEN a, GEN s, GEN tab, long flag, long prec);
+GEN     sumnum(void *E, GEN (*f) (void *, GEN), GEN a, GEN sig, GEN tab, long flag, long prec);
+GEN     sumnumalt(void *E, GEN (*f) (void *, GEN), GEN a, GEN s, GEN tab, long flag, long prec);
 GEN     sumnuminit(GEN sig, long m, long sgn, long prec);
 
 /* krasner.c */
@@ -2424,7 +2424,7 @@ GEN     nfsubfields(GEN nf, long d);
 /* subgroup.c */
 
 GEN     subgrouplist(GEN cyc, GEN bound);
-void    traversesubgroups(GEN cyc, GEN B, void fun(GEN,void*), void *E);
+void    traversesubgroups(GEN cyc, GEN B, void fun(GEN,void *), void *E);
 
 /* stark.c */
 
@@ -2434,20 +2434,20 @@ GEN     bnrstark(GEN bnr, GEN subgroup, long prec);
 
 /* sumiter.c */
 
-GEN     derivnum(void *E, GEN (*eval)(GEN,void*), GEN x, long prec);
-GEN     derivfun(void *E, GEN (*eval)(GEN,void*), GEN x, long prec);
-GEN     direuler(void *E, GEN (*eval)(GEN,void*), GEN ga, GEN gb, GEN c);
+GEN     derivnum(void *E, GEN (*eval)(void *, GEN), GEN x, long prec);
+GEN     derivfun(void *E, GEN (*eval)(void *, GEN), GEN x, long prec);
+GEN     direuler(void *E, GEN (*eval)(void *, GEN), GEN ga, GEN gb, GEN c);
 GEN     forvec_start(GEN x, long flag, GEN *d, GEN (**next)(GEN,GEN));
 GEN     polzag(long n, long m);
-GEN     prodeuler(void *E, GEN (*eval)(GEN,void*), GEN ga, GEN gb, long prec);
-GEN     prodinf(void *E, GEN (*eval)(GEN,void*), GEN a, long prec);
-GEN     prodinf1(void *E, GEN (*eval)(GEN,void*), GEN a, long prec);
-GEN     sumalt(void *E, GEN (*eval)(GEN,void*), GEN a, long prec);
-GEN     sumalt2(void *E, GEN (*eval)(GEN,void*), GEN a, long prec);
-GEN     sumpos(void *E, GEN (*eval)(GEN,void*), GEN a, long prec);
-GEN     sumpos2(void *E, GEN (*eval)(GEN,void*), GEN a, long prec);
-GEN     suminf(void *E, GEN (*eval)(GEN,void*), GEN a, long prec);
-GEN     zbrent(void *E, GEN (*eval)(GEN,void*), GEN a, GEN b, long prec);
+GEN     prodeuler(void *E, GEN (*eval)(void *, GEN), GEN ga, GEN gb, long prec);
+GEN     prodinf(void *E, GEN (*eval)(void *, GEN), GEN a, long prec);
+GEN     prodinf1(void *E, GEN (*eval)(void *, GEN), GEN a, long prec);
+GEN     sumalt(void *E, GEN (*eval)(void *, GEN), GEN a, long prec);
+GEN     sumalt2(void *E, GEN (*eval)(void *, GEN), GEN a, long prec);
+GEN     sumpos(void *E, GEN (*eval)(void *, GEN), GEN a, long prec);
+GEN     sumpos2(void *E, GEN (*eval)(void *, GEN), GEN a, long prec);
+GEN     suminf(void *E, GEN (*eval)(void *, GEN), GEN a, long prec);
+GEN     zbrent(void *E, GEN (*eval)(void *, GEN), GEN a, GEN b, long prec);
 
 /* thue.c */
 

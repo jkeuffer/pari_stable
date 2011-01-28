@@ -45,5 +45,5 @@ Doc: numerical summation of the series \var{expr}, which should be an
  %4 = -8.39147638 E-1000   \\ @com faster and more accurate
  @eprog
 
- \synt{sumalt}{void *E, GEN (*eval)(GEN,void*),GEN a,long prec}. Also
+ \synt{sumalt}{void *E, GEN (*eval)(void*,GEN),GEN a,long prec}. Also
  available is \tet{sumalt2} with the same arguments ($\fl = 1$).

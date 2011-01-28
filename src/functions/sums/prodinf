@@ -13,5 +13,5 @@ Doc: \idx{infinite product} of
 
  If $\fl=1$, do the product of the ($1+\var{expr}$) instead.
 
- \synt{prodinf}{void *E, GEN (*eval)(GEN, void*), GEN a, long prec}
+ \synt{prodinf}{void *E, GEN (*eval)(void*,GEN), GEN a, long prec}
  ($\fl=0$), or \tet{prodinf1} with the same arguments ($\fl=1$).

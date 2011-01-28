@@ -21,5 +21,5 @@ Doc: numerical summation of the series \var{expr}, which must be a series of
 
  If $\fl=1$, use slightly different polynomials. Sometimes faster.
 
- \synt{sumpos}{void *E, GEN (*eval)(GEN,void*),GEN a,long prec}. Also
+ \synt{sumpos}{void *E, GEN (*eval)(void*,GEN),GEN a,long prec}. Also
  available is \tet{sumpos2} with the same arguments ($\fl = 1$).

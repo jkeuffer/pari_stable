@@ -120,4 +120,4 @@ Doc: numerical summation of \var{expr}, the variable $X$ taking integer values
  %6 = -1.9... E-305 \\@com now perfect, but slow.
  @eprog
 
- \synt{sumnum}{void *E, GEN (*eval)(GEN,void*), GEN a,GEN sig,GEN tab,long flag, long prec}.
+ \synt{sumnum}{void *E, GEN (*eval)(void*,GEN), GEN a,GEN sig,GEN tab,long flag, long prec}.

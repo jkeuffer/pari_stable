@@ -15,4 +15,4 @@ Doc: initialize tables for integrations from $a$ to $b$ using abscissas
  or 2, multiply the reserved table length by $4^{\fl}$, to avoid corresponding
  error.
 
- \synt{intnuminitgen}{void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, long m, long flag, long prec}
+ \synt{intnuminitgen}{void *E, GEN (*eval)(void*,GEN), GEN a, GEN b, long m, long flag, long prec}

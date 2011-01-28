@@ -18,7 +18,7 @@ Doc: numerical derivation of \var{expr} with respect to $X$ at $X=a$.
  @eprog\noindent
  which would not work in library mode.
 
- \synt{derivnum}{void *E, GEN (*eval)(GEN,void*), GEN a, long prec}.
+ \synt{derivnum}{void *E, GEN (*eval)(void*,GEN), GEN a, long prec}.
 
 Function: _derivfun
 Section: programming/internals

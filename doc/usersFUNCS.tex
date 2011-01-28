@@ -1084,8 +1084,8 @@ functions are mainly useful for GP programming. On the other hand, numerical
 routines code a function (to be integrated, summed, etc.) with two parameters
 named
 \bprog
-  GEN (*eval)(GEN,void*)
-  void *E;  \\ context: eval(x, E) must evaluate your function at x.
+  GEN (*eval)(void*,GEN)
+  void *E;  \\ context: eval(E, x) must evaluate your function at x.
 @eprog\noindent
 see the Libpari manual for details.
 

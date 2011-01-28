@@ -280,5 +280,5 @@ Doc: numerical integration
  %3 = -7.23... E-60 \\@com $64 = 2^6$ times faster, lost $45$ decimals.
  @eprog
 
- \synt{intnum}{void *E, GEN (*eval)(GEN,void*), GEN a,GEN b,GEN tab, long prec},
+ \synt{intnum}{void *E, GEN (*eval)(void*,GEN), GEN a,GEN b,GEN tab, long prec},
  where an omitted \var{tab} is coded as \kbd{NULL}.

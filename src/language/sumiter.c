@@ -506,7 +506,7 @@ somme(GEN a, GEN b, GEN code, GEN x)
 }
 
 GEN
-suminf(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
+suminf(void *E, GEN (*eval)(void *, GEN), GEN a, long prec)
 {
   long fl, G;
   pari_sp av0 = avma, av, lim;
@@ -518,7 +518,7 @@ suminf(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
   fl=0; G = bit_accuracy(prec) + 5;
   for(;;)
   {
-    p1 = eval(a, E); x = gadd(x,p1); a = incloop(a);
+    p1 = eval(E, a); x = gadd(x,p1); a = incloop(a);
     if (gequal0(p1) || gexpo(p1) <= gexpo(x)-G)
       { if (++fl==3) break; }
     else
@@ -587,7 +587,7 @@ produit(GEN a, GEN b, GEN code, GEN x)
 }
 
 GEN
-prodinf(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
+prodinf(void *E, GEN (*eval)(void *, GEN), GEN a, long prec)
 {
   pari_sp av0 = avma, av, lim;
   long fl,G;
@@ -599,7 +599,7 @@ prodinf(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
   fl=0; G = -bit_accuracy(prec)-5;
   for(;;)
   {
-    p1 = eval(a, E); if (gequal0(p1)) { x = p1; break; }
+    p1 = eval(E, a); if (gequal0(p1)) { x = p1; break; }
     x = gmul(x,p1); a = incloop(a);
     p1 = gsubgs(p1, 1);
     if (gequal0(p1) || gexpo(p1) <= G) { if (++fl==3) break; } else fl=0;
@@ -612,7 +612,7 @@ prodinf(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
   return gerepilecopy(av0,x);
 }
 GEN
-prodinf1(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
+prodinf1(void *E, GEN (*eval)(void *, GEN), GEN a, long prec)
 {
   pari_sp av0 = avma, av, lim;
   long fl,G;
@@ -624,7 +624,7 @@ prodinf1(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
   fl=0; G = -bit_accuracy(prec)-5;
   for(;;)
   {
-    p2 = eval(a, E); p1 = gaddgs(p2,1);
+    p2 = eval(E, a); p1 = gaddgs(p2,1);
     if (gequal0(p1)) { x = p1; break; }
     x = gmul(x,p1); a = incloop(a);
     if (gequal0(p2) || gexpo(p2) <= G) { if (++fl==3) break; } else fl=0;
@@ -649,7 +649,7 @@ prodinf0(GEN a, GEN code, long flag, long prec)
 }
 
 GEN
-prodeuler(void *E, GEN (*eval)(GEN,void*), GEN ga, GEN gb, long prec)
+prodeuler(void *E, GEN (*eval)(void *, GEN), GEN ga, GEN gb, long prec)
 {
   long p[] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0};
   ulong a, b;
@@ -665,7 +665,7 @@ prodeuler(void *E, GEN (*eval)(GEN,void*), GEN ga, GEN gb, long prec)
   lim = stack_lim(avma,1);
   while ((ulong)prime[2] < b)
   {
-    x = gmul(x, eval(prime, E));
+    x = gmul(x, eval(E, prime));
     if (low_stack(lim, stack_lim(av,1)))
     {
       if (DEBUGMEM>1) pari_warn(warnmem,"prodeuler");
@@ -673,7 +673,7 @@ prodeuler(void *E, GEN (*eval)(GEN,void*), GEN ga, GEN gb, long prec)
     }
     NEXT_PRIME_VIADIFF(prime[2], d);
   }
-  if ((ulong)prime[2] == b) x = gmul(x, eval(prime, E));
+  if ((ulong)prime[2] == b) x = gmul(x, eval(E, prime));
   return gerepilecopy(av0,x);
 }
 GEN
@@ -681,7 +681,7 @@ prodeuler0(GEN a, GEN b, GEN code, long prec)
 { EXPR_WRAP(code, prodeuler(EXPR_ARG, a, b, prec)); }
 
 GEN
-direuler(void *E, GEN (*eval)(GEN,void*), GEN ga, GEN gb, GEN c)
+direuler(void *E, GEN (*eval)(void *, GEN), GEN ga, GEN gb, GEN c)
 {
   long pp[] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0};
   ulong a, b, i, k, n, p;
@@ -699,7 +699,7 @@ direuler(void *E, GEN (*eval)(GEN,void*), GEN ga, GEN gb, GEN c)
   x = zerovec(n); gel(x,1) = gen_1; p = prime[2];
   while (p <= b)
   {
-    s = eval(prime, E);
+    s = eval(E, prime);
     polnum = numer(s);
     polden = denom(s);
     tx = typ(polnum);
@@ -929,7 +929,7 @@ polzagreel(long n, long m, long prec)
 #pragma optimize("g",on)
 #endif
 GEN
-sumalt(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
+sumalt(void *E, GEN (*eval)(void *, GEN), GEN a, long prec)
 {
   long k, N;
   pari_sp av = avma;
@@ -944,7 +944,7 @@ sumalt(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
   s = gen_0;
   for (k=0; ; k++)
   {
-    c = gadd(az,c); s = gadd(s, gmul(c, eval(a, E)));
+    c = gadd(az,c); s = gadd(s, gmul(c, eval(E, a)));
     az = diviiexact(mulii(mulss(N-k,N+k),shifti(az,1)),mulss(k+1,k+k+1));
     if (k==N-1) break;
     a = addsi(1,a);
@@ -953,7 +953,7 @@ sumalt(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
 }
 
 GEN
-sumalt2(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
+sumalt2(void *E, GEN (*eval)(void *, GEN), GEN a, long prec)
 {
   long k, N;
   pari_sp av = avma;
@@ -967,7 +967,7 @@ sumalt2(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
   s = gen_0;
   for (k=0; k<=N; k++)
   {
-    s = gadd(s, gmul(gel(pol,k+2), eval(a, E)));
+    s = gadd(s, gmul(gel(pol,k+2), eval(E, a)));
     if (k == N) break;
     a = addsi(1,a);
   }
@@ -987,7 +987,7 @@ sumalt0(GEN a, GEN code, long flag, long prec)
 }
 
 GEN
-sumpos(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
+sumpos(void *E, GEN (*eval)(void *, GEN), GEN a, long prec)
 {
   long k, kk, N, G;
   pari_sp av = avma;
@@ -1016,14 +1016,14 @@ sumpos(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
       {
 
         long ex;
-        affgr(eval(addii(r,a), E), reel);
+        affgr(eval(E, addii(r,a)), reel);
         ex = expo(reel) + kk; setexpo(reel,ex);
         x = mpadd(x,reel); if (kk && ex < G) break;
         r = shifti(r,1);
       }
       x = gerepileupto(av2, x);
       if (2*k < N) stock[2*k+1] = x;
-      affgr(eval(addsi(k+1,a), E), reel);
+      affgr(eval(E, addsi(k+1,a)), reel);
       x = addrr(reel, gmul2n(x,1));
     }
     c = addir(az,c);
@@ -1034,7 +1034,7 @@ sumpos(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
 }
 
 GEN
-sumpos2(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
+sumpos2(void *E, GEN (*eval)(void *, GEN), GEN a, long prec)
 {
   long k, kk, N, G;
   pari_sp av = avma;
@@ -1055,14 +1055,14 @@ sumpos2(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
       for(kk=0;;kk++)
       {
         long ex;
-        affgr(eval(addii(r,a), E), reel);
+        affgr(eval(E, addii(r,a)), reel);
         ex = expo(reel) + kk; setexpo(reel,ex);
         x = mpadd(x,reel); if (kk && ex < G) break;
         r = shifti(r,1);
       }
       x = gerepileupto(av2, x);
       if (2*k-1 < N) stock[2*k] = x;
-      affgr(eval(addsi(k,a), E), reel);
+      affgr(eval(E, addsi(k,a)), reel);
       stock[k] = addrr(reel, gmul2n(x,1));
     }
   s = gen_0;
@@ -1096,7 +1096,7 @@ sumpos0(GEN a, GEN code, long flag, long prec)
 /********************************************************************/
 /* Brent's method, [a,b] bracketing interval */
 GEN
-zbrent(void *E, GEN (*eval)(GEN,void*), GEN a, GEN b, long prec)
+zbrent(void *E, GEN (*eval)(void *, GEN), GEN a, GEN b, long prec)
 {
   long sig, iter, itmax;
   pari_sp av = avma;
@@ -1107,8 +1107,8 @@ zbrent(void *E, GEN (*eval)(GEN,void*), GEN a, GEN b, long prec)
   if (!sig) return gerepileupto(av, a);
   if (sig < 0) { c=a; a=b; b=c; } else c = b;
 
-  fa = eval(a, E);
-  fb = eval(b, E);
+  fa = eval(E, a);
+  fb = eval(E, b);
   if (gsigne(fa)*gsigne(fb) > 0) pari_err(talker,"roots must be bracketed in solve");
   itmax = (prec * (2*BITS_IN_LONG)) + 1;
   tol = real2n(5-bit_accuracy(prec), 3);
@@ -1155,7 +1155,7 @@ zbrent(void *E, GEN (*eval)(GEN,void*), GEN a, GEN b, long prec)
     if (gcmp(gabs(d,0),tol1) > 0) b = gadd(b,d);
     else if (gsigne(xm) > 0)      b = addrr(b,tol1);
     else                          b = subrr(b,tol1);
-    fb = eval(b, E);
+    fb = eval(E, b);
   }
   if (iter > itmax) pari_err(talker,"too many iterations in solve");
   return gerepileuptoleaf(av, rcopy(b));
@@ -1186,7 +1186,7 @@ zbrent0(GEN a, GEN b, GEN code, long prec)
  * For f'(x), x far from 0: prec(LHS) = pr - e - expo(x)
  * --> pr = 3/2 fpr + expo(x) */
 GEN
-derivnum(void *E, GEN (*eval)(GEN,void*), GEN x, long prec)
+derivnum(void *E, GEN (*eval)(void *, GEN), GEN x, long prec)
 {
   GEN eps,a,b, y;
   long fpr, pr, l, e, ex;
@@ -1200,14 +1200,14 @@ derivnum(void *E, GEN (*eval)(GEN,void*), GEN x, long prec)
   e = fpr * (BITS_IN_LONG/2); /* 1/2 required prec (in sig. bits) */
 
   eps = real2n(-e, l);
-  y = gtofp(gsub(x, eps), l); a = eval(y, E);
-  y = gtofp(gadd(x, eps), l); b = eval(y, E);
+  y = gtofp(gsub(x, eps), l); a = eval(E, y);
+  y = gtofp(gadd(x, eps), l); b = eval(E, y);
   setexpo(eps, e-1);
   return gerepileupto(av, gmul(gsub(b,a), eps));
 }
 
 GEN
-derivfun(void *E, GEN (*eval)(GEN,void*), GEN x, long prec)
+derivfun(void *E, GEN (*eval)(void *, GEN), GEN x, long prec)
 {
   pari_sp av = avma;
   long vx;
@@ -1219,7 +1219,7 @@ derivfun(void *E, GEN (*eval)(GEN,void*), GEN x, long prec)
     x = RgX_to_ser(x, precdl+2+1); /* +1 because deriv reduce the precision by 1 */
   case t_SER: /* FALL THROUGH */
     vx = varn(x);
-    return gerepileupto(av, gdiv(deriv(eval(x, E),vx), deriv(x,vx)));
+    return gerepileupto(av, gdiv(deriv(eval(E, x),vx), deriv(x,vx)));
   default: pari_err(typeer, "formal derivation");
     return NULL; /*NOT REACHED*/
   }
@@ -1237,7 +1237,7 @@ struct deriv_data
   GEN args;
 };
 
-static GEN deriv_eval(GEN x, void *E)
+static GEN deriv_eval(void *E, GEN x)
 {
  struct deriv_data *data=(struct deriv_data *)E;
  gel(data->args,1)=x;

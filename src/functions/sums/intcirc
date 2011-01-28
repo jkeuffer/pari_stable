@@ -18,4 +18,4 @@ Doc: numerical
  %1 = -2.398082982 E-104 - 7.94487211 E-107*I
  @eprog
 
- \synt{intcirc}{void *E, GEN (*eval)(GEN,void*), GEN a,GEN R,GEN tab, long prec}.
+ \synt{intcirc}{void *E, GEN (*eval)(void*,GEN), GEN a,GEN R,GEN tab, long prec}.

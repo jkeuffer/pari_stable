@@ -37,4 +37,4 @@ Doc: numerical
  time = 51,300 ms. \\@com slow because of $\Gamma(s)^3$.
  @eprog\noindent
 
- \synt{intmellininv}{void *E, GEN (*eval)(GEN,void*), GEN sig, GEN z, GEN tab, long prec}.
+ \synt{intmellininv}{void *E, GEN (*eval)(void*,GEN), GEN sig, GEN z, GEN tab, long prec}.

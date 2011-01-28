@@ -42,7 +42,7 @@ Doc: numerical integration of
  $\int_0^\infty e^{-x^2}\,dx$ to 28 decimal digits, then one should set
  infinity equal to 10 for example, and certainly not to 1e1000.
 
- \synt{intnumromb}{void *E, GEN (*eval)(GEN,void*), GEN a, GEN b, long flag, long prec},
+ \synt{intnumromb}{void *E, GEN (*eval)(void*,GEN), GEN a, GEN b, long flag, long prec},
  where $\kbd{eval}(x, E)$ returns the value of the function at $x$.
  You may store any additional information required by \kbd{eval} in $E$, or set
  it to \kbd{NULL}.

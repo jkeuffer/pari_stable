@@ -9,4 +9,4 @@ Doc: product of expression \var{expr},
  \kbd{realprecision}), the formal parameter $X$ ranging over the prime numbers
  between $a$ and $b$.\sidx{Euler product}
 
- \synt{prodeuler}{void *E, GEN (*eval)(GEN,void*), GEN a,GEN b, long prec}.
+ \synt{prodeuler}{void *E, GEN (*eval)(void*,GEN), GEN a,GEN b, long prec}.

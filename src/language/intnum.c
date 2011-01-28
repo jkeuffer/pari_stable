@@ -22,15 +22,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**                                                                **/
 /********************************************************************/
 typedef struct {
-  GEN (*f)(GEN,void *);
   void *E;
+  GEN (*f)(void *E, GEN);
 } invfun;
 
 /* f(x) */
 GEN
-gp_eval(GEN x, void *dat)
+gp_eval(void *E, GEN x)
 {
-  GEN code = (GEN)dat;
+  GEN code = (GEN)E;
   set_lex(-1,x);
   return closure_evalnobrk(code);
 }
@@ -43,9 +43,9 @@ typedef struct {
 } exprdoub;
 
 static GEN
-gp_eval2(GEN x, GEN y, void *dat)
+gp_eval2(GEN x, GEN y, void *E)
 {
-  exprdoub *E = (exprdoub*)dat;
+  exprdoub *E = (exprdoub*)E;
   E->epx->value = x;
   E->epy->value = y;
   return closure_evalnobrk(E->code);
@@ -54,11 +54,11 @@ gp_eval2(GEN x, GEN y, void *dat)
 
 /* 1/x^2 f(1/x) */
 static GEN
-_invf(GEN x, void *dat)
+_invf(void *E, GEN x)
 {
-  invfun *S = (invfun*)dat;
+  invfun *S = (invfun*)E;
   GEN y = ginv(x);
-  return gmul(S->f(y, S->E), gsqr(y));
+  return gmul(S->f(S->E, y), gsqr(y));
 }
 
 static GEN
@@ -76,7 +76,7 @@ interp(GEN h, GEN s, long j, long lim, long KLOC)
 }
 
 static GEN
-qrom3(void *dat, GEN (*eval)(GEN,void *), GEN a, GEN b, long prec)
+qrom3(void *E, GEN (*eval)(void *, GEN), GEN a, GEN b, long prec)
 {
   const long JMAX = 25, KLOC = 4;
   GEN ss,s,h,p1,p2,qlint,del,x,sum;
@@ -92,8 +92,8 @@ qrom3(void *dat, GEN (*eval)(GEN,void *), GEN a, GEN b, long prec)
   h = new_chunk(JMAX+KLOC-1);
   gel(h,0) = real_1(prec);
 
-  p1 = eval(a, dat); if (p1 == a) p1 = rcopy(p1);
-  p2 = eval(b, dat);
+  p1 = eval(E, a); if (p1 == a) p1 = rcopy(p1);
+  p2 = eval(E, b);
   gel(s,0) = gmul2n(gmul(qlint,gadd(p1,p2)),-1);
   for (it=1,j=1; j<JMAX; j++, it<<=1) /* it = 2^(j-1) */
   {
@@ -104,7 +104,7 @@ qrom3(void *dat, GEN (*eval)(GEN,void *), GEN a, GEN b, long prec)
     av2 = avma;
     for (sum = gen_0, j1 = 1; j1 <= it; j1++, x = addrr(x,del))
     {
-      sum = gadd(sum, eval(x, dat));
+      sum = gadd(sum, eval(E, x));
       if ((j1 & 0x1ff) == 0) gerepileall(av2, 2, &sum,&x);
     }
     sum = gmul(sum,del);
@@ -118,7 +118,7 @@ qrom3(void *dat, GEN (*eval)(GEN,void *), GEN a, GEN b, long prec)
 }
 
 static GEN
-qrom2(void *dat, GEN (*eval)(GEN,void *), GEN a, GEN b, long prec)
+qrom2(void *E, GEN (*eval)(void *, GEN), GEN a, GEN b, long prec)
 {
   const long JMAX = 16, KLOC = 4;
   GEN ss,s,h,p1,qlint,del,ddel,x,sum;
@@ -135,7 +135,7 @@ qrom2(void *dat, GEN (*eval)(GEN,void *), GEN a, GEN b, long prec)
   gel(h,0) = real_1(prec);
 
   p1 = shiftr(addrr(a,b),-1);
-  gel(s,0) = gmul(qlint, eval(p1, dat));
+  gel(s,0) = gmul(qlint, eval(E, p1));
   for (it=1, j=1; j<JMAX; j++, it*=3) /* it = 3^(j-1) */
   {
     pari_sp av, av2;
@@ -145,8 +145,8 @@ qrom2(void *dat, GEN (*eval)(GEN,void *), GEN a, GEN b, long prec)
     av2 = avma;
     for (sum = gen_0, j1 = 1; j1 <= it; j1++)
     {
-      sum = gadd(sum, eval(x, dat)); x = addrr(x,ddel);
-      sum = gadd(sum, eval(x, dat)); x = addrr(x,del);
+      sum = gadd(sum, eval(E, x)); x = addrr(x,ddel);
+      sum = gadd(sum, eval(E, x)); x = addrr(x,del);
       if ((j1 & 0x1ff) == 0) gerepileall(av2, 2, &sum,&x);
     }
     sum = gmul(sum,del); p1 = gdivgs(gel(s,j-1),3);
@@ -161,7 +161,7 @@ qrom2(void *dat, GEN (*eval)(GEN,void *), GEN a, GEN b, long prec)
 
 /* integrate after change of variables x --> 1/x */
 static GEN
-qromi(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, long prec)
+qromi(void *E, GEN (*eval)(void*, GEN), GEN a, GEN b, long prec)
 {
   GEN A = ginv(b), B = ginv(a);
   invfun S;
@@ -171,7 +171,7 @@ qromi(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, long prec)
 
 /* a < b, assume b "small" (< 100 say) */
 static GEN
-rom_bsmall(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, long prec)
+rom_bsmall(void *E, GEN (*eval)(void*, GEN), GEN a, GEN b, long prec)
 {
   if (gcmpgs(a,-100) >= 0) return qrom2(E,eval,a,b,prec);
   if (b == gen_1 || gcmpgs(b, -1) >= 0) /* a < -100, b >= -1 */
@@ -182,7 +182,7 @@ rom_bsmall(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, long prec)
 }
 
 static GEN
-rombint(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, long prec)
+rombint(void *E, GEN (*eval)(void*, GEN), GEN a, GEN b, long prec)
 {
   long l = gcmp(b,a);
   GEN z;
@@ -624,7 +624,7 @@ sumnuminit(GEN sig, long m, long sgn, long prec)
 
 /* compute $\int_a^b f(t)dt$ with [a,b] compact and f nonsingular. */
 static GEN
-intn(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN tab)
+intn(void *E, GEN (*eval)(void*, GEN), GEN a, GEN b, GEN tab)
 {
   GEN tabx0, tabw0, tabxp, tabwp;
   GEN bpa, bma, bmb, S, SP, SM;
@@ -641,7 +641,7 @@ intn(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN tab)
   bmb = gmul(bma, tabx0); /* (b-a)/2 phi(0) */
   av = avma;
   /* phi'(0) f( (b+a)/2 + (b-a)/2 * phi(0) ) */
-  S = gmul(tabw0, eval(gadd(bpa, bmb), E));
+  S = gmul(tabw0, eval(E, gadd(bpa, bmb)));
   for (k = 1; k <= m; k++)
   {
     long pas = 1L<<(m-k);
@@ -649,8 +649,8 @@ intn(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN tab)
       if (i & pas || k == 1)
       {
         bmb = gmul(bma, gel(tabxp,i));
-        SP = eval(gsub(bpa, bmb), E);
-        SM = eval(gadd(bpa, bmb), E);
+        SP = eval(E, gsub(bpa, bmb));
+        SM = eval(E, gadd(bpa, bmb));
         S = gadd(S, gmul(gel(tabwp,i), gadd(SP, SM)));
         if ((i & 0x7f) == 1) S = gerepileupto(av, S);
       }
@@ -662,7 +662,7 @@ intn(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN tab)
  *  singularity with exponent a[2] at lower extremity, b regular.
  *  Use tanh(sinh(t)). */
 static GEN
-intnsing(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN tab, long prec)
+intnsing(void *E, GEN (*eval)(void*, GEN), GEN a, GEN b, GEN tab, long prec)
 {
   GEN tabx0, tabw0, tabxp, tabwp, ea, ba, bm, bp, S, tra, SP, SM;
   long m, k, L, i;
@@ -676,7 +676,7 @@ intnsing(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN tab, long prec)
   ea = ginv(gaddsg(1, gel(a,2)));
   ba = gdiv(gsub(b, tra), gpow(gen_2, ea, prec));
   av = avma;
-  S = gmul(gmul(tabw0, ba), eval(gadd(gmul(ba, gaddsg(1, tabx0)), tra), E));
+  S = gmul(gmul(tabw0, ba), eval(E, gadd(gmul(ba, gaddsg(1, tabx0)), tra)));
   for (k = 1; k <= m; k++)
   {
     long pas = 1L<<(m-k);
@@ -687,8 +687,8 @@ intnsing(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN tab, long prec)
         GEN m = subsr(1, gel(tabxp,i));
         bp = gmul(ba, gpow(p, ea, prec));
         bm = gmul(ba, gpow(m, ea, prec));
-        SP = gmul(gdiv(bp, p), eval(gadd(bp, tra), E));
-        SM = gmul(gdiv(bm, m), eval(gadd(bm, tra), E));
+        SP = gmul(gdiv(bp, p), eval(E, gadd(bp, tra)));
+        SM = gmul(gdiv(bm, m), eval(E, gadd(bm, tra)));
         S = gadd(S, gmul(gel(tabwp,i), gadd(SP, SM)));
         if ((i & 0x7f) == 1) S = gerepileupto(av, S);
       }
@@ -702,7 +702,7 @@ intnsing(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN tab, long prec)
    (pi/h)t/(1-exp(-sinh(t))) for oscillating functions. */
 
 static GEN
-intninfpm(void *E, GEN (*eval)(GEN, void*), GEN a, long si, GEN tab)
+intninfpm(void *E, GEN (*eval)(void*, GEN), GEN a, long si, GEN tab)
 {
   GEN tabx0, tabw0, tabxp, tabwp, tabxm, tabwm;
   GEN S, SP, SM;
@@ -716,15 +716,15 @@ intninfpm(void *E, GEN (*eval)(GEN, void*), GEN a, long si, GEN tab)
   tabxm = TABxm(tab); tabwm = TABwm(tab);
   if (si < 0) { tabxp = gneg(tabxp); tabxm = gneg(tabxm); }
   av = avma;
-  S = gmul(tabw0, eval(gadd(a, gmulsg(si, tabx0)), E));
+  S = gmul(tabw0, eval(E, gadd(a, gmulsg(si, tabx0))));
   for (k = 1; k <= m; k++)
   {
     h++; pas = 1L<<(m-k);
     for (i = pas; i < L; i += pas)
       if (i & pas || k == 1)
       {
-        SP = eval(gadd(a, gel(tabxp,i)), E);
-        SM = eval(gadd(a, gel(tabxm,i)), E);
+        SP = eval(E, gadd(a, gel(tabxp,i)));
+        SM = eval(E, gadd(a, gel(tabxm,i)));
         S = gadd(S, gadd(gmul(gel(tabwp,i), SP), gmul(gel(tabwm,i), SM)));
         if ((i & 0x7f) == 1) S = gerepileupto(av, S);
       }
@@ -739,7 +739,7 @@ intninfpm(void *E, GEN (*eval)(GEN, void*), GEN a, long si, GEN tab)
  * satisfies f(-x) = conj(f(x)).
  * Usually flag < 0, but flag > 0 is used in sumnumall. */
 static GEN
-intninfinfintern(void *E, GEN (*eval)(GEN, void*), GEN tab, long flag)
+intninfinfintern(void *E, GEN (*eval)(void*, GEN), GEN tab, long flag)
 {
   GEN tabx0, tabw0, tabxp, tabwp, tabwm;
   GEN S, SP, SM;
@@ -752,7 +752,7 @@ intninfinfintern(void *E, GEN (*eval)(GEN, void*), GEN tab, long flag)
   tabxp = TABxp(tab); tabwp = TABwp(tab); L = lg(tabxp);
   tabwm = TABwm(tab);
   spf = (lg(tabwm) == lg(tabwp));
-  S = flag > 0 ? gen_0 : gmul(tabw0, eval(tabx0, E));
+  S = flag > 0 ? gen_0 : gmul(tabw0, eval(E, tabx0));
   if (spf) S = gmul2n(real_i(S), -1);
   for (k = 1; k <= m; k++)
   {
@@ -760,11 +760,11 @@ intninfinfintern(void *E, GEN (*eval)(GEN, void*), GEN tab, long flag)
     for (i = pas; i < L; i += pas)
       if (i & pas || k == 1)
       {
-        SP = eval(gel(tabxp,i), E);
+        SP = eval(E, gel(tabxp,i));
         if (spf) S = gadd(S, real_i(gmul(gel(tabwp,i), SP)));
         else
         {
-          SM = eval(negr(gel(tabxp,i)), E);
+          SM = eval(E, negr(gel(tabxp,i)));
           if (flag > 0) SM = gneg(SM);
           S = gadd(S, gmul(gel(tabwp,i), gadd(SP, SM)));
         }
@@ -776,7 +776,7 @@ intninfinfintern(void *E, GEN (*eval)(GEN, void*), GEN tab, long flag)
 }
 
 static GEN
-intninfinf(void *E, GEN (*eval)(GEN, void*), GEN tab)
+intninfinf(void *E, GEN (*eval)(void*, GEN), GEN tab)
 {
   return intninfinfintern(E, eval, tab, -1);
 }
@@ -1052,9 +1052,9 @@ sumnuminit0(GEN a, GEN tab, long sgn, long prec)
 
 /* here always eps = 2^(-k). */
 static GEN
-myderiv_num(void *E, GEN (*eval)(GEN, void*), GEN a, GEN eps, long k, long prec)
+myderiv_num(void *E, GEN (*eval)(void*, GEN), GEN a, GEN eps, long k, long prec)
 {
-  GEN tmp = gmul2n(gsub(eval(gadd(a,eps), E), eval(gsub(a,eps), E)), k - 1);
+  GEN tmp = gmul2n(gsub(eval(E, gadd(a,eps)), eval(E, gsub(a,eps))), k - 1);
   return gprec_w(tmp, prec);
 }
 
@@ -1096,10 +1096,10 @@ enum {
 #define not_odd(fl) ((fl) == f_SEMI || (fl) == f_OSC1)
 
 static GEN
-ffprime(void *E, GEN (*eval)(GEN, void*), GEN xpr, GEN xprn, GEN eps, long h, long precl)
+ffprime(void *E, GEN (*eval)(void*, GEN), GEN xpr, GEN xprn, GEN eps, long h, long precl)
 {
   GEN z = cgetg(3, t_VEC);
-  gel(z,1) = eval(xpr, E);
+  gel(z,1) = eval(E, xpr);
   gel(z,2) = myderiv_num(E, eval, xprn, eps, h, precl);
   return z;
 }
@@ -1118,7 +1118,7 @@ ffmodify(GEN tmp, GEN ab, long flag)
 }
 
 GEN
-intnuminitgen(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, long m,
+intnuminitgen(void *E, GEN (*eval)(void*, GEN), GEN a, GEN b, long m,
               long flext, long prec)
 {
   pari_sp ltop = avma;
@@ -1144,7 +1144,7 @@ intnuminitgen(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, long m,
   h = bit_accuracy(precl)/2;
   eps = real2n(-h, newprec);
 
-  if (not_osc(flag) || !gequal1(eval(gen_0, E)))
+  if (not_osc(flag) || !gequal1(eval(E, gen_0)))
   {
     ab = real_0(precl);
     tmpxw = ffprime(E, eval, ab, real_0(newprec), eps, h, precl);
@@ -1154,7 +1154,7 @@ intnuminitgen(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, long m,
   }
   else
   {
-    tmpxw = gdiv(pol_x(0), gsubsg(1, eval(gadd(pol_x(0), zeroser(0, 4)), E)));
+    tmpxw = gdiv(pol_x(0), gsubsg(1, eval(E, gadd(pol_x(0), zeroser(0, 4)))));
     D.tabx0 = gprec_w(polcoeff0(tmpxw, 0, 0), precl);
     D.tabw0 = gprec_w(polcoeff0(tmpxw, 1, 0), precl);
   }
@@ -1200,23 +1200,23 @@ intnuminitgen(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, long m,
 /* Assigns the values of the function weighted by w[k] at quadrature points x[k]
  * [replacing the weights]. Return the index of the last non-zero coeff */
 static long
-weight(void *E, GEN (*eval)(GEN,void*), GEN x, GEN w)
+weight(void *E, GEN (*eval)(void *, GEN), GEN x, GEN w)
 {
   long k, l = lg(x);
-  for (k = 1; k < l; k++) gel(w,k) = gmul(gel(w,k), eval(gel(x,k), E));
+  for (k = 1; k < l; k++) gel(w,k) = gmul(gel(w,k), eval(E, gel(x,k)));
   k--; while (k >= 1) if (!gequal0(gel(w,k--))) break;
   return k;
 }
 /* compute the necessary tabs, weights multiplied by f(t).
  * If flag set, assumes that f(-t) = conj(f(t)). */
 static GEN
-intfuncinitintern(void *E, GEN (*eval)(GEN, void*), GEN tab, long flag)
+intfuncinitintern(void *E, GEN (*eval)(void*, GEN), GEN tab, long flag)
 {
   GEN tabxp = TABxp(tab), tabwp = TABwp(tab);
   GEN tabxm = TABxm(tab), tabwm = TABwm(tab);
   long L = weight(E, eval, tabxp, tabwp), L0 = lg(tabxp);
 
-  TABw0(tab) = gmul(TABw0(tab), eval(TABx0(tab), E));
+  TABw0(tab) = gmul(TABw0(tab), eval(E, TABx0(tab)));
   if (lg(tabxm) > 1) (void)weight(E, eval, tabxm, tabwm);
   else
   {
@@ -1242,7 +1242,7 @@ intfuncinitintern(void *E, GEN (*eval)(GEN, void*), GEN tab, long flag)
 }
 
 GEN
-intfuncinit(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, long m, long flag, long prec)
+intfuncinit(void *E, GEN (*eval)(void*, GEN), GEN a, GEN b, long m, long flag, long prec)
 {
   pari_sp ltop = avma;
   GEN T, tab = intnuminit(a, b, m, prec);
@@ -1258,7 +1258,7 @@ intfuncinit(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, long m, long flag, l
 }
 
 static GEN
-intnum_i(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN tab, long prec)
+intnum_i(void *E, GEN (*eval)(void*, GEN), GEN a, GEN b, GEN tab, long prec)
 {
   GEN tmp, S = gen_0, res1, res2, tm, pi2, pi2p, pis2, pis2p, kma, kmb;
   GEN SP, SN;
@@ -1353,7 +1353,7 @@ intnum_i(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN tab, long prec)
 }
 
 GEN
-intnum(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN tab, long prec)
+intnum(void *E, GEN (*eval)(void*, GEN), GEN a, GEN b, GEN tab, long prec)
 {
   pari_sp ltop = avma;
   long l = prec + 1;
@@ -1367,22 +1367,22 @@ intnum(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN tab, long prec)
 
 typedef struct auxint_s {
   GEN a, R, pi;
-  GEN (*f)(GEN, void*);
+  GEN (*f)(void*, GEN);
   long prec;
   void *E;
 } auxint_t;
 
 static GEN
-auxcirc(GEN t, void *E)
+auxcirc(void *E, GEN t)
 {
   auxint_t *D = (auxint_t*) E;
   GEN s, c, z;
   mpsincos(mulrr(t, D->pi), &s, &c); z = mkcomplex(c,s);
-  return gmul(z, D->f(gadd(D->a, gmul(D->R, z)), D->E));
+  return gmul(z, D->f(D->E, gadd(D->a, gmul(D->R, z))));
 }
 
 GEN
-intcirc(void *E, GEN (*eval)(GEN, void*), GEN a, GEN R, GEN tab, long prec)
+intcirc(void *E, GEN (*eval)(void*, GEN), GEN a, GEN R, GEN tab, long prec)
 {
   auxint_t D;
   GEN z;
@@ -1403,29 +1403,29 @@ static GEN
 gettmpN(GEN tmpP) { return mkvec2(gneg(gel(tmpP,1)), gel(tmpP,2)); }
 
 static GEN
-auxinvcos(GEN t, void *E)
+auxinvcos(void *E, GEN t)
 {
   auxint_t *D = (auxint_t*) E;
   GEN tmp = gcos(gmul(D->R, t), D->prec);
-  return gmul(tmp, D->f(gadd(D->a, mulcxI(t)), D->E));
+  return gmul(tmp, D->f(D->E, gadd(D->a, mulcxI(t))));
 }
 static GEN
-auxinvsin(GEN t, void *E)
+auxinvsin(void *E, GEN t)
 {
   auxint_t *D = (auxint_t*) E;
   GEN tmp = gsin(gmul(D->R, t), D->prec);
-  return gmul(tmp, D->f(gadd(D->a, mulcxI(t)), D->E));
+  return gmul(tmp, D->f(D->E, gadd(D->a, mulcxI(t))));
 }
 static GEN
-auxinvexp(GEN t, void *E)
+auxinvexp(void *E, GEN t)
 {
   auxint_t *D = (auxint_t*) E;
   GEN tmp = gexp(gmul(D->R, t), D->prec);
-  return gmul(tmp, D->f(gadd(D->a, mulcxI(t)), D->E));
+  return gmul(tmp, D->f(D->E, gadd(D->a, mulcxI(t))));
 }
 
 static GEN
-intinvintern(void *E, GEN (*eval)(GEN, void*), GEN sig, GEN x, GEN tab, long flag, long prec)
+intinvintern(void *E, GEN (*eval)(void*, GEN), GEN sig, GEN x, GEN tab, long flag, long prec)
 {
   auxint_t D;
   GEN z, zR, zI, tmpP, tmpN;
@@ -1462,7 +1462,7 @@ intinvintern(void *E, GEN (*eval)(GEN, void*), GEN sig, GEN x, GEN tab, long fla
 /* If sig = [sigR, e]: if e = 0, slowly decreasing, if e > 0, exponentially
  * decreasing like exp(-e*t). If sig is real, identical to [sig, 1]. */
 GEN
-intmellininv(void *E, GEN (*eval)(GEN, void*), GEN sig, GEN x, GEN tab, long prec)
+intmellininv(void *E, GEN (*eval)(void*, GEN), GEN sig, GEN x, GEN tab, long prec)
 {
   return intinvintern(E, eval, sig, gneg(glog(x, prec)), tab, 1, prec);
 }
@@ -1470,7 +1470,7 @@ intmellininv(void *E, GEN (*eval)(GEN, void*), GEN sig, GEN x, GEN tab, long pre
 /* If sig = [sigR, e]: if e = 0, slowly decreasing, if e > 0, exponentially
  * decreasing like exp(-e*t). If sig is real, identical to [sig, 0]. */
 GEN
-intlaplaceinv(void *E, GEN (*eval)(GEN, void*), GEN sig, GEN x, GEN tab, long prec)
+intlaplaceinv(void *E, GEN (*eval)(void*, GEN), GEN sig, GEN x, GEN tab, long prec)
 {
   return intinvintern(E, eval, sig, x, tab, 0, prec);
 }
@@ -1482,7 +1482,7 @@ typedef struct auxmel_s {
 } auxmel_t;
 
 static GEN
-auxmelshort(GEN t, void *E)
+auxmelshort(void *E, GEN t)
 {
   auxmel_t *D = (auxmel_t*) E;
   return gexp(gmul(D->L, t), D->prec);
@@ -1531,21 +1531,21 @@ mytra(GEN a, GEN x, long flag)
 }
 
 static GEN
-auxfoursin(GEN t, void *E)
+auxfoursin(void *E, GEN t)
 {
   auxint_t *D = (auxint_t*) E;
-  return gmul(gsin(gmul(t, D->a), D->prec), D->f(t, D->E));
+  return gmul(gsin(gmul(t, D->a), D->prec), D->f(D->E, t));
 }
 
 static GEN
-auxfourcos(GEN t, void *E)
+auxfourcos(void *E, GEN t)
 {
   auxint_t *D = (auxint_t*) E;
-  return gmul(gcos(gmul(t, D->a), D->prec), D->f(t, D->E));
+  return gmul(gcos(gmul(t, D->a), D->prec), D->f(D->E, t));
 }
 
 GEN
-intfouriersin(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN x, GEN tab, long prec)
+intfouriersin(void *E, GEN (*eval)(void*, GEN), GEN a, GEN b, GEN x, GEN tab, long prec)
 {
   auxint_t D;
   GEN z, tmp;
@@ -1562,7 +1562,7 @@ intfouriersin(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN x, GEN tab, lo
 }
 
 GEN
-intfouriercos(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN x, GEN tab, long prec)
+intfouriercos(void *E, GEN (*eval)(void*, GEN), GEN a, GEN b, GEN x, GEN tab, long prec)
 {
   auxint_t D;
   GEN z, tmp;
@@ -1579,7 +1579,7 @@ intfouriercos(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN x, GEN tab, lo
 }
 
 GEN
-intfourierexp(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN x, GEN tab,
+intfourierexp(void *E, GEN (*eval)(void*, GEN), GEN a, GEN b, GEN x, GEN tab,
               long prec)
 {
   pari_sp ltop = avma;
@@ -1589,7 +1589,7 @@ intfourierexp(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN x, GEN tab,
 }
 
 GEN
-intnumromb(void *E, GEN (*eval)(GEN,void*), GEN a, GEN b, long flag, long prec)
+intnumromb(void *E, GEN (*eval)(void *, GEN), GEN a, GEN b, long flag, long prec)
 {
   pari_sp av = avma;
   GEN z;
@@ -1644,14 +1644,14 @@ intfuncinit0(GEN a, GEN b, GEN code, long flag, long m, long prec)
 
 typedef struct auxf_s {
   GEN x;
-  GEN (*f)(GEN, GEN, void*);
+  GEN (*f)(void *, GEN, GEN);
   void *E;
 } auxf_t;
 
 typedef struct indi_s {
-  GEN (*c)(GEN, void*);
-  GEN (*d)(GEN, void*);
-  GEN (*f)(GEN, GEN, void*);
+  GEN (*c)(void*, GEN);
+  GEN (*d)(void*, GEN);
+  GEN (*f)(void *, GEN, GEN);
   void *Ec;
   void *Ed;
   void *Ef;
@@ -1663,7 +1663,7 @@ static GEN
 auxf(GEN y, void *E)
 {
   auxf_t *D = (auxf_t*) E;
-  return D->f(D->x, y, D->E);
+  return D->f(D->E, D->x, y);
 }
 
 static GEN
@@ -1680,7 +1680,7 @@ intnumdoubintern(GEN x, void *E)
 }
 
 GEN
-intnumdoub(void *Ef, GEN (*evalf)(GEN, GEN, void*), void *Ec, GEN (*evalc)(GEN, void*), void *Ed, GEN (*evald)(GEN, void*), GEN a, GEN b, GEN tabext, GEN tabint, long prec)
+intnumdoub(void *Ef, GEN (*evalf)(void *, GEN, GEN), void *Ec, GEN (*evalc)(void*, GEN), void *Ed, GEN (*evald)(void*, GEN), GEN a, GEN b, GEN tabext, GEN tabint, long prec)
 {
   indi_t E;
 
@@ -1718,40 +1718,40 @@ intnumdoub0(GEN a, GEN b, int nc, int nd, int nf, GEN tabext, GEN tabint, long p
  * Variant of Abel-Plana. */
 
 static GEN
-auxsum(GEN t, void *E)
+auxsum(void *E, GEN t)
 {
   auxint_t *D = (auxint_t*) E;
   GEN z = mkcomplex(D->a, t);
-  return D->f(z, D->E);
+  return D->f(D->E, z);
 }
 /* assume that conj(f(z)) = f(conj(z)) */
 static GEN
-auxsumintern1(GEN t, void *E, long sgn)
+auxsumintern1(void *E, GEN t, long sgn)
 {
   auxint_t *D = (auxint_t*) E;
-  GEN z = mkcomplex(D->a, t), u = D->f(z, D->E);
+  GEN z = mkcomplex(D->a, t), u = D->f(D->E, z);
   return sgn > 0 ? imag_i(u): real_i(u);
 }
 /* no assumption */
 static GEN
-auxsumintern(GEN t, void *E, long sgn)
+auxsumintern(void *E, GEN t, long sgn)
 {
   auxint_t *D = (auxint_t*) E;
   GEN u,v, z = mkcomplex(D->a, t);
-  u = D->f(z, D->E); gel(z,2) = gneg(t);
-  v = D->f(z, D->E); return sgn > 0 ? gsub(u, v) : gadd(u, v);
+  u = D->f(D->E, z); gel(z,2) = gneg(t);
+  v = D->f(D->E, z); return sgn > 0 ? gsub(u, v) : gadd(u, v);
 }
 static GEN
-auxsum0(GEN t, void *E) { return auxsumintern(t, E, 1); }
+auxsum0(void *E, GEN t) { return auxsumintern(E, t, 1); }
 static GEN
-auxsum1(GEN t, void *E) { return auxsumintern1(t, E, 1); }
+auxsum1(void *E, GEN t) { return auxsumintern1(E, t, 1); }
 static GEN
-auxsumalt0(GEN t, void *E) { return auxsumintern(t, E, -1); }
+auxsumalt0(void *E, GEN t) { return auxsumintern(E, t, -1); }
 static GEN
-auxsumalt1(GEN t, void *E) { return auxsumintern1(t, E, -1); }
+auxsumalt1(void *E, GEN t) { return auxsumintern1(E, t, -1); }
 
 static GEN
-sumnumall(void *E, GEN (*eval)(GEN, void*), GEN a, GEN sig, GEN tab, long flag, long sgn, long prec)
+sumnumall(void *E, GEN (*eval)(void*, GEN), GEN a, GEN sig, GEN tab, long flag, long sgn, long prec)
 {
   GEN SI, S, nsig, b, signew;
   long si = 1, flii;
@@ -1772,7 +1772,7 @@ sumnumall(void *E, GEN (*eval)(GEN, void*), GEN a, GEN sig, GEN tab, long flag, 
   SI = real_0(prec);
   while (cmpii(a, nsig) <= 0)
   {
-    SI = (si < 0) ? gsub(SI, eval(a, E)) : gadd(SI, eval(a, E));
+    SI = (si < 0) ? gsub(SI, eval(E, a)) : gadd(SI, eval(E, a));
     a = addsi(1, a); if (sgn < 0) si = -si;
   }
   D.a = gadd(nsig, ghalf);
@@ -1803,10 +1803,10 @@ sumnumall(void *E, GEN (*eval)(GEN, void*), GEN a, GEN sig, GEN tab, long flag, 
   return gerepileupto(ltop, gadd(SI, S));
 }
 GEN
-sumnum(void *E, GEN (*f)(GEN,void*), GEN a,GEN sig,GEN tab,long flag,long prec)
+sumnum(void *E, GEN (*f)(void *, GEN), GEN a,GEN sig,GEN tab,long flag,long prec)
 { return sumnumall(E,f,a,sig,tab,flag,1,prec); }
 GEN
-sumnumalt(void *E, GEN (*f)(GEN,void*),GEN a,GEN s,GEN tab,long flag,long prec)
+sumnumalt(void *E, GEN (*f)(void *, GEN),GEN a,GEN s,GEN tab,long flag,long prec)
 { return sumnumall(E,f,a,s,tab,flag,-1,prec); }
 
 GEN

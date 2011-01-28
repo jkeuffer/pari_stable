@@ -26,4 +26,4 @@ Doc: \idx{infinite sum} of expression
  %1 = -2.524354897 E-29
  @eprog
 
- \synt{suminf}{void *E, GEN (*eval)(GEN,void*), GEN a, long prec}.
+ \synt{suminf}{void *E, GEN (*eval)(void*,GEN), GEN a, long prec}.
