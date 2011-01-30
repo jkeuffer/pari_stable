@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <pari/pari.h>
 #include <readline/readline.h>
+#include <readline/history.h>
 #include <setjmp.h>
 
 char * prompt = NULL;
@@ -17,13 +18,15 @@ GEN sd_prompt(const char *v, long flag)
 void gp_err_recover(long numerr) { longjmp(env, numerr); }
 void gp_quit(long exitcode) { exit(exitcode); }
 void help(const char *s)
-{ 
+{
   entree *ep = is_entry(s);
   if (ep && ep->help)
     pari_printf("%s\n",ep->help);
-  else 
+  else
     pari_printf("Function %s not found\n",s);
 }
+
+#define col(a) term_get_color(NULL, a)
 
 int main(int argc, char **argv)
 {
@@ -37,19 +40,29 @@ int main(int argc, char **argv)
   pari_init(8000000,500000);
   pari_add_module(functions_gp);
   pari_add_defaults_module(default_gp);
+  sd_colors("lightbg",d_INITRC);
   sd_prompt("? ",d_INITRC);
   pari_printf("Welcome to minigp!\n");
   cb_pari_err_recover = gp_err_recover;
   (void)setjmp(env);
   while(1)
   {
-    char *in = readline(prompt);
     GEN z;
+    char *pr = pari_sprintf("%s%s%s",col(c_PROMPT),prompt,col(c_INPUT));
+    char *in = readline(pr);
     if (!in) break;
     if (!*in) continue;
+    add_history(in);
     z = gp_read_str(in);
     if (z != gnil)
-      pari_printf("%%%lu = %Ps\n",pari_nb_hist(),pari_add_hist(z));
+    {
+      pari_add_hist(z);
+      if (in[strlen(in)-1]!=';')
+      {
+        pari_printf("%s%%%lu = %s",col(c_HIST),pari_nb_hist(),col(c_OUTPUT));
+        output(z);
+      }
+    }
     free(in); avma=top;
   }
   return 0;
