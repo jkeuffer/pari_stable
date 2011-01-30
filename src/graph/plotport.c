@@ -1292,8 +1292,8 @@ param_recursion(dblPointList *pl,GEN code,GEN tleft,double xleft,
   }
   else
   {
-    xx = gtodouble(gel(p1,1));
-    yy = gtodouble(gel(p1,2));
+    xx = gtodouble(real_i(p1));
+    yy = gtodouble(imag_i(p1));
   }
 
   if (dx && dy && fabs(xleft+xright-2*xx) < dx*RECUR_PREC

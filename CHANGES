@@ -38,6 +38,7 @@ BA 24- t_CLOSURE==t_CLOSURE and t_CLOSURE===t_CLOSURE did not work.
 BA 27- LLL could fail (rarely) due to unsufficient precision [#1154]
    28- rnfisnorminit(y,x^2-Mod(2+y,y)): polynomial not in Z[X] in nfinit [#1157]
    29- factorff failed to merge identical irreducible factors [#1159]
+BA 30- ploth(x=0,1,0,"Complex|Recursive") -> SEGV [#1163]
 
   Changed
 LGr1- universal constants (gen_0,gen_1, etc.) are now read-only
