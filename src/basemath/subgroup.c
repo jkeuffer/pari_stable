@@ -54,7 +54,7 @@ typedef struct subgp_iter {
   long count; /* number of p-subgroups so far [updated when M completed] */
   GEN expoI; /* exponent of I */
 
-  void(*fun)(GEN, void *); /* callback applied to each subgroup */
+  void(*fun)(void*, GEN); /* callback applied to each subgroup */
   void *fundata; /* data for fun */
 } subgp_iter;
 
@@ -91,10 +91,10 @@ conjugate(long *typ)
 }
 /* --- subgp_iter 'fun' associated to forsubgroup -------------- */
 static void
-std_fun(GEN x, void *data)
+std_fun(void *E, GEN x)
 {
   pari_sp ltop=avma;
-  GEN code = (GEN)data;
+  GEN code = (GEN)E;
   set_lex(-1,x);
   closure_evalvoid(code);
   avma=ltop;
@@ -129,9 +129,9 @@ addcell(sublist_t *S, GEN H)
 }
 
 static void
-list_fun(GEN x, void *data)
+list_fun(void *E, GEN x)
 {
-  sublist_t *S = (sublist_t*)data;
+  sublist_t *S = (sublist_t*)E;
   GEN H = ZM_hnf(shallowconcat(S->hnfgroup,x));
   if (!S->gen || subgroup_conductor_ok(H, S->gen)) {
     addcell(S, H);
@@ -144,13 +144,13 @@ static void
 treatsub(subgp_iter *T, GEN H)
 {
   long i;
-  if (!T->subq) { T->fun(H, T->fundata); T->countsub++; }
+  if (!T->subq) { T->fun(T->fundata, H); T->countsub++; }
   else
   { /* not a p group, add the trivial part */
     GEN Hp = gmul(T->expoI, H); /* lift H to G */
     long n = lg(T->subqpart)-1;
     for (i=1; i<=n; i++)
-      T->fun(shallowconcat(Hp, gel(T->subqpart,i)), T->fundata);
+      T->fun(T->fundata, shallowconcat(Hp, gel(T->subqpart,i)));
     T->countsub += n;
   }
 }
@@ -457,7 +457,7 @@ subgroup_engine(subgp_iter *T)
     switch(T->boundtype)
     {
       case b_EXACT: if (!is_pm1(T->bound)) break;
-      default: T->fun(cyc, T->fundata);
+      default: T->fun(T->fundata, cyc);
     }
     avma = av; return;
   }
@@ -563,23 +563,23 @@ get_snf(GEN x, long *N)
 }
 
 void
-traversesubgroups(GEN cyc, GEN bound, void fun(GEN, void*), void *data)
+forsubgroup(void *E, void call(void*, GEN), GEN cyc, GEN bound)
 {
   subgp_iter T;
   long N;
 
-  T.fun = fun;
+  T.fun = call;
   T.cyc = get_snf(cyc,&N); if (!T.cyc) pari_err(typeer,"forsubgroup");
   T.bound = bound;
-  T.fundata = data;
+  T.fundata = E;
   subgroup_engine(&T);
 }
 
 void
-forsubgroup(GEN cyc, GEN bound, GEN code)
+forsubgroup0(GEN cyc, GEN bound, GEN code)
 {
   push_lex(gen_0, code);
-  traversesubgroups(cyc, bound, &std_fun, (void*)code);
+  forsubgroup((void*)code, &std_fun, cyc, bound);
   pop_lex(1);
 }
 

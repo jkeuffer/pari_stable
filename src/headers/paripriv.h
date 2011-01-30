@@ -80,7 +80,7 @@ void fordiv(GEN a, GEN code);
 void forell(long a, long b, GEN code);
 void forprime(GEN a, GEN b, GEN code);
 void forstep(GEN a, GEN b, GEN s, GEN code);
-void forsubgroup(GEN cyc, GEN bound, GEN code);
+void forsubgroup0(GEN cyc, GEN bound, GEN code);
 void forvec(GEN x, GEN code, long flag);
 GEN  intcirc0(GEN a, GEN R, GEN code, GEN tab, long prec);
 GEN  intfourcos0(GEN a, GEN b, GEN x, GEN code, GEN tab, long prec);
