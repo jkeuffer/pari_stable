@@ -68,6 +68,8 @@ BA 10-[libpari] nf_get_TrInv renamed to nf_get_diff
    14- include GP defaults in the function description system + use standard
        hashtables instead of ad hoc types
    15- cleanup and document term_color() and term_get_color()
+BA 16- prototype of summations functions now is fun(void *E, GEN call(void*, GEN),...)
+BA 17- traversesubgroups renamed to forsubgroup.
 
   Added
 BA  1- trap keyword "syntaxer" to trap syntax error from eval.

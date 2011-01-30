@@ -2008,9 +2008,9 @@ the code should be straightforward to copy and adapt to your needs.
 \item \tet{forsubgroup} is currently not implemented as an iterator but as a
  traversal procedure with callbacks.
 
-\fun{void}{traversesubgroups}{GEN G, GEN B, void fun(GEN, void*), void *E}
+\fun{void}{forsubgroup}{void *E, void fun(void*, GEN), GEN G, GEN B}
 goes through the same subgroups as \tet{forsubgroup(H = G, B,)}, calling
-\tet{fun(H, E)} for each subgroup $H$.
+\tet{fun(E, H)} for each subgroup $H$.
 
 \item \tet{forprime}, for which we refer you to the next subsection.
 

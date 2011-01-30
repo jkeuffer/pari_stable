@@ -255,6 +255,8 @@ This file lists the incompatible changes between Version 2.x and older versions
   - remove unused 'prec' argument in bnfisnorm()
   - add a third precdl argument to gtoser()
   - the last 2 arguments of ellwp0 (prec and precdl) have been swapped
+  - prototype of "summation" functions (suminf,intnum,prodinf,etc.) now is
+    fun(void *E, GEN call(void*, GEN),...)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
