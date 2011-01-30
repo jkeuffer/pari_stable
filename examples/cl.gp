@@ -17,7 +17,7 @@ f(a,b)=
       n /= p^l;
       j = ind[p]; cp = v[j][2];
       while((a+b*cp)%p,
-	j++; cp = v[j][2]
+        j++; cp = v[j][2]
       );
       mv[j]=l
     )
@@ -48,7 +48,7 @@ clareg(pol, plim=19, lima=50, extra=5)=
   );
 
   print("discriminant = " nf.disc ", signature = " nf.sign);
- 
+
   lireg = (poldegree(pol) + r1) / 2; /* r1 + r2 */
   re=vector(lireg,j,
     if (j<=r1, real(r[j]) , r[j])
@@ -61,10 +61,10 @@ clareg(pol, plim=19, lima=50, extra=5)=
     for(l=1,#e,
       fa = lift(w[l,1]);
       if (poldegree(fa) == 1,
-	if (!find,
-	  find=1; ind[p]=#v+1
-	);
-	v = concat(v, [[p,-polcoeff(fa,0),e[l]]])
+        if (!find,
+          find=1; ind[p]=#v+1
+        );
+        v = concat(v, [[p,-polcoeff(fa,0),e[l]]])
       )
     )
   );
@@ -102,7 +102,7 @@ clareg(pol, plim=19, lima=50, extra=5)=
       R = 0;
       for(j=lireg-1,coreg,
         a = matdet(vecextract(mreg1, Str(j-lireg+2 ".." j)));
-	R = rgcd(a,R)
+        R = rgcd(a,R)
       )
     )
   );

@@ -41,7 +41,7 @@ main(void)
   pari_thread_alloc(&pth1,4000000,N1);
   pari_thread_alloc(&pth2,4000000,N2);
   pari_thread_alloc(&pth3,4000000,M);
-  /* pthread_create() and pthread_join() are standard POSIX-thread 
+  /* pthread_create() and pthread_join() are standard POSIX-thread
    * functions to start and get the result of threads. */
   pthread_create(&th1,NULL, &myfactor, (void*)&pth1);
   pthread_create(&th2,NULL, &myfactor, (void*)&pth2);

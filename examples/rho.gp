@@ -24,7 +24,7 @@ rho(n)=
 
 rhobrent(n)=
 { my(x,y,x1,k,l,p,c,g);
-  
+
   x1 = x = y = 2;
   k = l = p = 1;
   c = 0;

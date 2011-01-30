@@ -1,7 +1,7 @@
 \\ adapted from an original idea by Ilya Zakharevich
 
 \\ generate an RGB color triple from a "magnitude" between 0 and 255
-\\ (low = close to a cold blue, high = close to a hot red). 
+\\ (low = close to a cold blue, high = close to a hot red).
 \\ To generate simple colormaps.
 rgb(mag) =
 { my(x = mag/255.);
@@ -15,7 +15,7 @@ default(graphcolors, vector(25,i,i+2));
 
 \\ plot Taylor polynomials of f (sin by default),
 \\ of index  first + i*step <= ordlim, for x in [xmin,xmax].
-plot_taylor(f = x->sin(x), xmin=-5, xmax=5, ordlim=16, first=1, step=1) = 
+plot_taylor(f = x->sin(x), xmin=-5, xmax=5, ordlim=16, first=1, step=1) =
 {
   my(T,s,t,w,h,dw,dh,cw,ch,gh, extrasize = 0.6);
   my(Taylor_array);

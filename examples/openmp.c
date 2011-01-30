@@ -24,15 +24,15 @@ main(void)
       case 1:
         (void)pari_thread_start(&pth1);
         F1 = factor(N1);
-        break; 
+        break;
       case 2:
         (void)pari_thread_start(&pth2);
         F2 = factor(N2);
-        break; 
+        break;
       case 3:
         (void)pari_thread_start(&pth3);
         D = det(M);
-        break; 
+        break;
     }
   }
   pari_printf("F1=%Ps\nF2=%Ps\nlog(D)=%Ps\n", F1, F2, glog(D,3));

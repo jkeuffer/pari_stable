@@ -7,7 +7,7 @@
 \\
 \\ File: classno.gp
 \\
-\\ Original Author: Fernando Rodriguez-Villegas 
+\\ Original Author: Fernando Rodriguez-Villegas
 \\                  villegas@math.utexas.edu
 \\                  University of Texas at Austin
 \\
