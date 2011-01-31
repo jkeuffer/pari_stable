@@ -1514,11 +1514,10 @@ ZM_hnfall(GEN A, GEN *ptB, long remove)
       for (i=h[j]; i>li; i--)
       {
         a = gcoeff(A,i,j);
-        if (!signe(a)) continue;
-
-        k = c[i]; /* zero a = Aij  using  Aik */
-        ZC_elem(a,gcoeff(A,i,k), A,B,j,k);
-        ZM_reduce(A,B, i,k);
+        k = c[i];
+        /* zero a = Aij  using  Aik */
+        if (signe(a)) ZC_elem(a,gcoeff(A,i,k), A,B,j,k);
+        ZM_reduce(A,B, i,k); /* ensure reduced entries */
         if (low_stack(lim, stack_lim(av1,1)))
         {
           if (DEBUGMEM>1) pari_warn(warnmem,"hnfall[1], li = %ld", li);
@@ -1557,7 +1556,7 @@ ZM_hnfall(GEN A, GEN *ptB, long remove)
       a = gcoeff(A,i,j);
       k = c[i];
       if (signe(a)) ZC_elem(a,gcoeff(A,i,k), A,B, j,k);
-      ZM_reduce(A,B, i,k); /* ensure non-negative entries, even if a = 0 */
+      ZM_reduce(A,B, i,k); /* ensure reduced entries, even if a = 0 */
       if (low_stack(lim, stack_lim(av1,1)))
       {
         if (DEBUGMEM>1) pari_warn(warnmem,"hnfall[3], j = %ld", j);
