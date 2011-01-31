@@ -2002,11 +2002,13 @@ iterators are mainly useful for GP programming. Here are the others:
 \item \tet{fordiv} is a trivial iteration over a list produced by
 \tet{divisors}.
 
-\item \tet{forell} is not yet provided with a usable public interface, but
-the code should be straightforward to copy and adapt to your needs.
+\item \tet{forell} and \tet{forsubgroup} are currently not implemented as an
+iterator but as a procedure with callbacks.
 
-\item \tet{forsubgroup} is currently not implemented as an iterator but as a
- traversal procedure with callbacks.
+\fun{void}{forell}{void *E, long fun(void*, GEN), GEN a, GEN b}
+goes through the same curves as \tet{forell(ell,a,b,)}, calling
+\tet{fun(E, ell)} for each curves \kbd{ell}, stopping if \kbd{fun} return a
+non-zero value.
 
 \fun{void}{forsubgroup}{void *E, void fun(void*, GEN), GEN G, GEN B}
 goes through the same subgroups as \tet{forsubgroup(H = G, B,)}, calling

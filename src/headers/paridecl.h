@@ -1323,6 +1323,7 @@ GEN     ellL1(GEN e, long r, long prec);
 
 /* elldata.c */
 
+void    forell(void *E, long call(void*, GEN), long a, long b);
 GEN     ellconvertname(GEN s);
 GEN     ellgenerators(GEN E);
 GEN     ellidentify(GEN E);

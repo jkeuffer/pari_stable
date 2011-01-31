@@ -57,7 +57,6 @@ GEN  andpari(GEN a, GEN b);
 GEN  orpari(GEN a, GEN b);
 void ifpari_void(GEN g, GEN a, GEN b);
 GEN  geval_gp(GEN x, GEN t);
-GEN  gp_eval(void *dat, GEN x);
 
 GEN  gadde(GEN *x, GEN y);
 GEN  gadd1e(GEN *x);
@@ -73,12 +72,15 @@ GEN  gsube(GEN *x, GEN y);
 GEN  gsub1e(GEN *x);
 GEN  gshift_right(GEN x, long n);
 
+GEN  gp_eval(void *dat, GEN x);
+long gp_evalvoid(void *E, GEN x);
+
 GEN  derivnum0(GEN a, GEN code, long prec);
 GEN  derivfun0(GEN code, GEN args, long prec);
 GEN  direuler0(GEN a, GEN b, GEN code, GEN c);
 GEN  divsum(GEN num, GEN code);
 void fordiv(GEN a, GEN code);
-void forell(long a, long b, GEN code);
+void forell0(long a, long b, GEN code);
 void forprime(GEN a, GEN b, GEN code);
 void forstep(GEN a, GEN b, GEN s, GEN code);
 void forsubgroup0(GEN cyc, GEN bound, GEN code);

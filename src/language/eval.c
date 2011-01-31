@@ -1372,6 +1372,15 @@ closure_evalvoid(GEN C)
   avma=ltop;
 }
 
+long
+gp_evalvoid(void *E, GEN x)
+{
+  GEN code = (GEN)E;
+  set_lex(-1,x);
+  closure_evalvoid(code);
+  return loop_break();
+}
+
 GEN
 closure_evalres(GEN C)
 {
