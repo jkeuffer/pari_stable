@@ -1356,6 +1356,14 @@ closure_evalnobrk(GEN C)
   return gerepileupto(ltop,gel(st,--sp));
 }
 
+GEN
+gp_eval(void *E, GEN x)
+{
+  GEN code = (GEN)E;
+  set_lex(-1,x);
+  return closure_evalnobrk(code);
+}
+
 void
 closure_evalvoid(GEN C)
 {

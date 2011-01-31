@@ -20,7 +20,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*************************************************************************/
 BEGINEXTERN
 /* GP control structures */
-GEN gp_eval(void *dat, GEN x);
 #define EXPR_WRAP(code, call) \
 { GEN z; GEN __E = code; \
   push_lex(gen_0, __E); z = call; pop_lex(1); return z; }

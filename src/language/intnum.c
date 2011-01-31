@@ -26,32 +26,6 @@ typedef struct {
   GEN (*f)(void *E, GEN);
 } invfun;
 
-/* f(x) */
-GEN
-gp_eval(void *E, GEN x)
-{
-  GEN code = (GEN)E;
-  set_lex(-1,x);
-  return closure_evalnobrk(code);
-}
-
-#if 0
-typedef struct {
-  entree *epx;
-  entree *epy;
-  GEN code;
-} exprdoub;
-
-static GEN
-gp_eval2(GEN x, GEN y, void *E)
-{
-  exprdoub *E = (exprdoub*)E;
-  E->epx->value = x;
-  E->epy->value = y;
-  return closure_evalnobrk(E->code);
-}
-#endif
-
 /* 1/x^2 f(1/x) */
 static GEN
 _invf(void *E, GEN x)
