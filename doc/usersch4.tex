@@ -2007,12 +2007,13 @@ iterator but as a procedure with callbacks.
 
 \fun{void}{forell}{void *E, long fun(void*, GEN), GEN a, GEN b}
 goes through the same curves as \tet{forell(ell,a,b,)}, calling
-\tet{fun(E, ell)} for each curves \kbd{ell}, stopping if \kbd{fun} return a
+\tet{fun(E, ell)} for each curves \kbd{ell}, stopping if \kbd{fun} returns a
 non-zero value.
 
-\fun{void}{forsubgroup}{void *E, void fun(void*, GEN), GEN G, GEN B}
+\fun{void}{forsubgroup}{void *E, long fun(void*, GEN), GEN G, GEN B}
 goes through the same subgroups as \tet{forsubgroup(H = G, B,)}, calling
-\tet{fun(E, H)} for each subgroup $H$.
+\tet{fun(E, H)} for each subgroup $H$, stopping if \kbd{fun} returns a
+non-zero value.
 
 \item \tet{forprime}, for which we refer you to the next subsection.
 

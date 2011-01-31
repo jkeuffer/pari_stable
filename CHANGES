@@ -39,7 +39,8 @@ BA 27- LLL could fail (rarely) due to unsufficient precision [#1154]
    28- rnfisnorminit(y,x^2-Mod(2+y,y)): polynomial not in Z[X] in nfinit [#1157]
    29- factorff failed to merge identical irreducible factors [#1159]
 BA 30- ploth(x=0,1,0,"Complex|Recursive") -> SEGV [#1163]
-   31- mathnf(dim > 8) could return a non-HNT upper triangular matrix [#1153]
+   31- mathnf(dim > 8) could return a non-HNF upper triangular matrix [#1153]
+BA 32- forsubgroup() did not handle break/next/return.
 
   Changed
 LGr1- universal constants (gen_0,gen_1, etc.) are now read-only

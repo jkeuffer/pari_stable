@@ -1323,12 +1323,12 @@ GEN     ellL1(GEN e, long r, long prec);
 
 /* elldata.c */
 
-void    forell(void *E, long call(void*, GEN), long a, long b);
 GEN     ellconvertname(GEN s);
 GEN     ellgenerators(GEN E);
 GEN     ellidentify(GEN E);
 GEN     ellsearch(GEN A);
 GEN     ellsearchcurve(GEN name);
+void    forell(void *E, long call(void*, GEN), long a, long b);
 
 /* elliptic.c */
 
@@ -2425,7 +2425,7 @@ GEN     nfsubfields(GEN nf, long d);
 /* subgroup.c */
 
 GEN     subgrouplist(GEN cyc, GEN bound);
-void    forsubgroup(void *E, void fun(void*,GEN), GEN cyc, GEN B);
+void    forsubgroup(void *E, long fun(void*,GEN), GEN cyc, GEN B);
 
 /* stark.c */
 

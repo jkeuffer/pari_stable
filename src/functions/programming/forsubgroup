@@ -39,3 +39,5 @@ Doc: evaluates \var{seq} for
  Note that in this last representation, the index $[G:H]$ is given by the
  determinant. See \tet{galoissubcyclo} and \tet{galoisfixedfield} for
  applications to \idx{Galois} theory.
+
+ \synt{forsubgroup}{void *data, long (*call)(void*,GEN), GEN G, GEN bound}.
