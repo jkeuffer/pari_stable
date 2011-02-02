@@ -748,7 +748,7 @@ compilevec(long n, long mode, op_code op)
   op_push(op,l,n);
   for (i=1;i<l;i++)
   {
-    compilenode(arg[i],Ggen,0);
+    compilenode(arg[i],Ggen,FLreturn);
     op_push(OCstackgen,i,n);
   }
   avma=ltop;
@@ -782,7 +782,7 @@ compilemat(long n, long mode)
     for(j=1;j<lgcol;j++)
     {
       k-=lglin;
-      compilenode(col[j], Ggen, 0);
+      compilenode(col[j], Ggen, FLreturn);
       op_push(OCstackgen,k,n);
     }
   }
@@ -953,11 +953,10 @@ compilefunc(entree *ep, long n, int mode, long flag)
     avma=ltop;
     return;
   }
-  /*We generate dummy code for global() for backward compatibility*/
+  /*We generate dummy code for global() for compatibility with gp2c*/
   else if (is_func_named(x,"global"))
   {
     long i;
-    pari_warn(warner,"global(...) is deprecated");
     for (i=1;i<=nb;i++)
     {
       long a=arg[i];
@@ -1182,7 +1181,7 @@ compilefunc(entree *ep, long n, int mode, long flag)
               op_push(OCvec, nb+1, a);
               for(l=1; l<=nb; l++)
               {
-                compilenode(g[l], Ggen, 0);
+                compilenode(g[l], Ggen, FLreturn);
                 op_push(OCstackgen,l, a);
               }
               op_push(OCpop, 1, a);
@@ -1281,7 +1280,7 @@ compilefunc(entree *ep, long n, int mode, long flag)
             for(m=1,k=1;k<=n;k++)
               for(l=1;l<lg(g[k]);l++,m++)
               {
-                compilenode(mael(g,k,l),Ggen,0);
+                compilenode(mael(g,k,l),Ggen,FLreturn);
                 op_push(OCstackgen,m,mael(g,k,l));
               }
             op_push_loc(OCpop, 1, str);
