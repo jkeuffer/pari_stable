@@ -198,10 +198,11 @@ getfunction(struct codepos *pos, long arity, long nbmvar, GEN text)
   s_operand.n=pos->opcode;
   s_dbginfo.n=pos->opcode;
   for(i=1;i<ldat;i++)
-  {
-    gmael(cl, 4, i) = gcopy(data[i+pos->data-1]);
-    gunclone(data[i+pos->data-1]);
-  }
+    if(data[i+pos->data-1])
+    {
+      gmael(cl, 4, i) = gcopy(data[i+pos->data-1]);
+      gunclone(data[i+pos->data-1]);
+    }
   s_data.n=pos->data;
   s_lvar.n=pos->localvars;
   for(i=1;i<lfram;i++)
@@ -262,7 +263,7 @@ static long
 data_push(GEN x)
 {
   long n=stack_new(&s_data);
-  data[n] = gclone(x);
+  data[n] = x?gclone(x):x;
   return n-offset;
 }
 
@@ -1363,8 +1364,10 @@ genclosure(entree *ep, const char *loc, GEN data, int check)
   if (data)
   {
     long i, n =lg(data)-1;
+    if (n > arity)
+      pari_err(talker,"too many parameters for closure `%s'", ep->name);
     for(i=1; i<= n; i++)
-      op_push_loc(OCpushgen,i,loc);
+      op_push_loc(OCpushgen,data_push(NULL),loc);
     arity -= n;
   }
   if (maskarg)  op_push_loc(OCcheckargs,maskarg,loc);
@@ -1497,13 +1500,16 @@ genclosure(entree *ep, const char *loc, GEN data, int check)
 GEN
 snm_closure(entree *ep, GEN data)
 {
+  long i;
   GEN C = genclosure(ep,ep->name,data,0);
-  if (data) gel(C,4) = data;
+  if (data)
+    for(i=1; i<lg(data); i++)
+      gmael(C,4,i) = gel(data,i);
   return C;
 }
 
 GEN
-strtoclosure(const char *s, GEN v)
+strtoclosure(const char *s, GEN data)
 {
   pari_sp av = avma;
   entree *ep = is_entry(s);
@@ -1512,7 +1518,7 @@ strtoclosure(const char *s, GEN v)
   ep = do_alias(ep);
   if ((!EpSTATIC(ep) && EpVALENCE(ep)!=EpINSTALL) || !ep->value)
     pari_err(talker,"not a function: \"%s\"",s);
-  C = snm_closure(ep,v);
+  C = snm_closure(ep, data);
   if (!C) pari_err(talker,"function prototype unsupported: \"%s\"",s);
   return gerepilecopy(av, C);
 }
