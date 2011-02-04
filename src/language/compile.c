@@ -1517,7 +1517,7 @@ strtoclosure(const char *s, GEN data)
   if (!ep) pari_err(talker,"no function named \"%s\"",s);
   ep = do_alias(ep);
   if ((!EpSTATIC(ep) && EpVALENCE(ep)!=EpINSTALL) || !ep->value)
-    pari_err(talker,"not a function: \"%s\"",s);
+    pari_err(talker,"not a built-in/install'ed function: \"%s\"",s);
   C = snm_closure(ep, data);
   if (!C) pari_err(talker,"function prototype unsupported: \"%s\"",s);
   return gerepilecopy(av, C);

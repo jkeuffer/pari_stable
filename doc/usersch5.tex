@@ -8108,12 +8108,19 @@ match the number of variables allocated through \kbd{push\_lex}.
 numerical derivative of the closure \kbd{code}.
 
 \fun{GEN}{snm_closure}{entree *ep, GEN data}
-
 Let \kbd{data} be a vector of length $m$, \kbd{ep} be an \kbd{entree} pointing
 to a C function $f$ of arity $n+m$, returns a \typ{CLOSURE} object $g$ of arity
 $n$ such that $g(x_1,\ldots,x_n)=f(x_1,\ldots,x_n,gel(data,1),...,gel(data,m))$.
 If \kbd{data} is \kbd{NULL}, then $m=0$ is assumed.  This function has a low
 overhead since it does not copy \kbd{data}.
+
+\fun{GEN}{strtofunction}{char *str} returns a closure corresponding to the
+built-in or install'ed function named \kbd{str}.
+
+\fun{GEN}{strtoclosure}{char *str, GEN data} returns a closure corresponding to the
+built-in or install'ed function named \kbd{str} with the last parameters set to
+the components of the vector \kbd{data}, see \tet{snm_closure}. This function
+has an higher overhead since it copies \kbd{data} and does more input validation.
 
 \section{Defaults}
 
