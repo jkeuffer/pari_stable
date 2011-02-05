@@ -356,7 +356,7 @@ time = 1,116 ms.
 And much more efficient (but harder to setup) to use homomorphic imaging
 schemes and modular computations. As the simple example below indicates, if you
 only need modular information, it is very worthwhile to work with
-\typ{INTMOD}s directly, rather than deal with \typ{RFRAC}s all the way through:
+\typ{INTMOD}s directly, rather than deal with \typ{FRAC}s all the way through:
 \bprog
 ? p = nextprime(10^7);
 ? sum(i=1, 10^5, 1/i) % p
@@ -474,7 +474,7 @@ the $p$-adic field $\Q_p$, or \idx{finite field}s.
 
 Note that this type is available for convenience, not for speed: each
 elementary operation involves a reduction modulo $y$.
-If $p$ is a \typ{POLMOD}, the following members functions are defined:
+If $p$ is a \typ{POLMOD}, the following member functions are defined:
 
 \kbd{p.pol}: return a representative of the polynomial class of minimal degree.
 
@@ -662,8 +662,8 @@ If \kbd{M} is a matrix, \kbd{M[i,j]} refers to its $(i,j)$-th entry,
 \kbd{M[i,]} to its $i$-th row, and
 \kbd{M[,j]} to its $j$-th column; but \kbd{M[i]} is meaningless and triggers
 an error. You can assign a result to \kbd{M[i,j]}, \kbd{M[i,]} or
-\kbd{M[,j]}; provided that the expression is a row or column vector of the
-right dimension in the later two cases. This process is recursive, so if
+\kbd{M[,j]}, provided that the expression is a row or column vector of the
+right dimension in the latter two cases. This process is recursive, so if
 \kbd{M}
 is a matrix of matrices of \dots, an expression such as \kbd{M[1,1][,3][4] =
 1} is perfectly valid (and actually identical to \kbd{M[1,1][4,3] = 1}),
@@ -726,7 +726,7 @@ as permutations. Most \kbd{gp} functions will refuse to operate on these
 objects.
 
 \subsec{Functions} (\tet{t_CLOSURE}): we will explain this at length in
-\secref{se:user_defined}. For the time being, suffices it to say that
+\secref{se:user_defined}. For the time being, suffice it to say that
 functions can be assigned to variables, as any other object, and the
 following equivalent basic forms are available to create new ones
 \bprog
@@ -847,7 +847,7 @@ at a scalar $x$; this is defined as $(f(x+\varepsilon) - f(x-\varepsilon)) /
 
 \kbd{!} (unary, postfix): factorial. $x\kbd{!}=x(x-1)\cdots 1$.
 
-\kbd{!} (unary, prefix): logical \var{not}. \kbd{!$x$} return $1$ if $x$ is
+\kbd{!} (unary, prefix): logical \var{not}. \kbd{!$x$} returns $1$ if $x$ is
 equal to $0$ (specifically, if \kbd{gequal0($x$)==1}), and $0$ otherwise.
 
 \point{Priority 9}
@@ -872,8 +872,8 @@ equal to $0$ (specifically, if \kbd{gequal0($x$)==1}), and $0$ otherwise.
 
 \kbd{\bs}, \kbd{\%}: Euclidean quotient and remainder, i.e.~if $x =
 qy + r$, then $\kbd{x \b{ } y} = q$, $\kbd{x\%y} = r$. If $x$ and $y$
-are scalars, $q$ is an integer and $r$ satisfies $0\le r < y$; if $x$ and $y$
-are polynomials, $q$ and $r$ are polynomials such that $\deg r< \deg y$ and
+are scalars, then $q$ is an integer and $r$ satisfies $0\le r < y$; if $x$ and $y$
+are polynomials, then $q$ and $r$ are polynomials such that $\deg r< \deg y$ and
 the leading terms of $r$ and $x$ have the same sign.
 
 \kbd{\bs/}: rounded Euclidean quotient for integers (rounded towards
@@ -2074,7 +2074,7 @@ program, adding a number of extra statements and tests to try and narrow down
 the problem.
 
 A slightly different situation, still related to error recovery, is when you
-you actually foresee that some error may occur, are unable to prevent it, but
+actually foresee that some error may occur, are unable to prevent it, but
 quite capable of recovering from it, given the chance. Examples include lazy
 factorization (cf.~\tet{addprimes}), where you knowingly use a pseudo prime
 $N$ as if it were prime; you may then encounter an ``impossible'' situation,
@@ -2252,7 +2252,7 @@ foreign functions for use under \kbd{gp}, which can of course be written
 using other libraries than PARI. Thus you may code only critical parts
 of your program in C, and still maintain most of the program as a GP script.
 
-We are aware of four PARI-related Free Software packages to embed PARI in
+We are aware of three PARI-related Free Software packages to embed PARI in
 other languages. We \emph{neither endorse nor support} any of them, but you
 may want to give them a try if you are familiar with the languages they are
 based on. The first is William Stein's Python-based SAGE\footnote{*}{see
