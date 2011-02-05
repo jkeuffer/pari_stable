@@ -1315,10 +1315,10 @@ compilefunc(entree *ep, long n, int mode, long flag)
 }
 
 static GEN
-genclosure(entree *ep, const char *loc, GEN data, int check)
+genclosure(entree *ep, const char *loc, long  nbdata, int check)
 {
   struct codepos pos;
-  long nb=0;
+  long i, nb=0;
   const char *code=ep->code,*p,*q;
   char c;
   long index=ep->arity;
@@ -1361,15 +1361,11 @@ genclosure(entree *ep, const char *loc, GEN data, int check)
     return gen_0;
   getcodepos(&pos);
   dbgstart = loc;
-  if (data)
-  {
-    long i, n =lg(data)-1;
-    if (n > arity)
-      pari_err(talker,"too many parameters for closure `%s'", ep->name);
-    for(i=1; i<= n; i++)
-      op_push_loc(OCpushgen,data_push(NULL),loc);
-    arity -= n;
-  }
+  if (nbdata > arity)
+    pari_err(talker,"too many parameters for closure `%s'", ep->name);
+  for(i=1; i<= nbdata; i++)
+    op_push_loc(OCpushgen,data_push(NULL),loc);
+  arity -= nbdata;
   if (maskarg)  op_push_loc(OCcheckargs,maskarg,loc);
   if (maskarg0) op_push_loc(OCcheckargs0,maskarg0,loc);
   p=code;
@@ -1473,7 +1469,7 @@ genclosure(entree *ep, const char *loc, GEN data, int check)
         break;
       default:
         pari_err(talker,
-                 "Unknown prototype code `D...,%c,' for `%s'",c,ep->name);
+            "Unknown prototype code `D...,%c,' for `%s'",c,ep->name);
       }
       break;
     case PPstar:
@@ -1486,7 +1482,7 @@ genclosure(entree *ep, const char *loc, GEN data, int check)
       }
       break;
     default:
-       return NULL;
+      return NULL;
     }
     index--;
     q = p;
@@ -1501,15 +1497,15 @@ GEN
 snm_closure(entree *ep, GEN data)
 {
   long i;
-  GEN C = genclosure(ep,ep->name,data,0);
-  if (data)
-    for(i=1; i<lg(data); i++)
-      gmael(C,4,i) = gel(data,i);
+  long n = data ? lg(data)-1: 0;
+  GEN C = genclosure(ep,ep->name,n,0);
+  for(i=1; i<=n; i++)
+    gmael(C,4,i) = gel(data,i);
   return C;
 }
 
 GEN
-strtoclosure(const char *s, GEN data)
+strtoclosure(const char *s, long n,  ...)
 {
   pari_sp av = avma;
   entree *ep = is_entry(s);
@@ -1518,15 +1514,24 @@ strtoclosure(const char *s, GEN data)
   ep = do_alias(ep);
   if ((!EpSTATIC(ep) && EpVALENCE(ep)!=EpINSTALL) || !ep->value)
     pari_err(talker,"not a built-in/install'ed function: \"%s\"",s);
-  C = snm_closure(ep, data);
+  C = genclosure(ep,ep->name,n,0);
   if (!C) pari_err(talker,"function prototype unsupported: \"%s\"",s);
+  else
+  {
+    va_list ap;
+    long i;
+    va_start(ap,n);
+    for(i=1; i<=n; i++)
+      gmael(C,4,i) = va_arg(ap, GEN);
+    va_end(ap);
+  }
   return gerepilecopy(av, C);
 }
 
 GEN
 strtofunction(const char *s)
 {
-  return strtoclosure(s, NULL);
+  return strtoclosure(s, 0);
 }
 
 static void
@@ -1535,7 +1540,7 @@ closurefunc(entree *ep, long n, long mode)
   pari_sp ltop=avma;
   GEN C;
   if (!ep->value) compile_err("unknown function",tree[n].str);
-  C = genclosure(ep,tree[n].str,NULL,1);
+  C = genclosure(ep,tree[n].str,0,1);
   if (!C) compile_err("sorry, closure not implemented",tree[n].str);
   if (C==gen_0)
   {

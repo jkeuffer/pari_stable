@@ -8117,10 +8117,18 @@ overhead since it does not copy \kbd{data}.
 \fun{GEN}{strtofunction}{char *str} returns a closure corresponding to the
 built-in or install'ed function named \kbd{str}.
 
-\fun{GEN}{strtoclosure}{char *str, GEN data} returns a closure corresponding to the
-built-in or install'ed function named \kbd{str} with the last parameters set to
-the components of the vector \kbd{data}, see \tet{snm_closure}. This function
-has an higher overhead since it copies \kbd{data} and does more input validation.
+\fun{GEN}{strtoclosure}{char *str, long n, ...} returns a closure corresponding to the
+built-in or install'ed function named \kbd{str} with the $n$ last parameters set to
+the $n$ \kbd{GEN}s following $n$, see \tet{snm_closure}. This function
+has an higher overhead since it copies the parameters and does more input validation.
+
+In the example code below, \kbd{agm1} is set to the function \kbd{x->agm(x,1)} and
+\kbd{res} is set to \kbd{agm(2,1)}.
+
+\bprog
+  GEN agm1 = strtoclosure("agm",1, gen_1);
+  GEN res = closure_callgen1(agm1, gen_2);
+@eprog
 
 \section{Defaults}
 
