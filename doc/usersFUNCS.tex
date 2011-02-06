@@ -731,7 +731,7 @@ is given by a row vector $\chi = [a_1,\ldots,a_n]$ such that
 $\chi(\prod g_i^{n_i}) = \exp(2i\pi\sum a_i n_i / d_i)$.
 
 \item given such a structure, a \tev{subgroup} $H$ is input as a square
-matrix in HNF, whose column express generators of $H$ on the given generators
+matrix in HNF, whose columns express generators of $H$ on the given generators
 $g_i$. Note that the determinant of that matrix is equal to the index $(G:H)$.
 
 \subsec{Relative extensions}
@@ -967,7 +967,7 @@ due to Hafner-McCurley, \idx{Buchmann} and Cohen-Diaz-Olivier. The general
 call to the functions concerning class groups of general number fields
 (i.e.~excluding \kbd{quadclassunit}) involves a polynomial $P$ and a
 technical vector
-$$\var{tech} = [c1, c2, \var{nrpid} ],$$
+$$\var{tech} = [c_1, c_2, \var{nrpid} ],$$
 where the parameters are to be understood as follows:
 
 $P$ is the defining polynomial for the number field, which must be in
@@ -984,7 +984,7 @@ these parameters. Indeed, from version 2.4.0 on,
 \item the results are always rigorous under \idx{GRH} (before that version,
 they relied on a heuristic strengthening, hence the need for overrides).
 
-\item the influence of these parameters of execution time and stack size is
+\item the influence of these parameters on execution time and stack size is
 marginal. They \emph{can} be useful to fine-tune and experiment with the
 \kbd{bnfinit} code, but you will be better off modifying all tuning
 parameters in the C code (there are many more than just those three).
@@ -995,7 +995,7 @@ The numbers $c_1 \leq c_2$ are positive real numbers. For $i = 1,2$, let $B_i
 whose norm is less than $B$. We want $S(B_1)$ to generate $\Cl(K)$ and hope
 that $S(B_2)$ can be \emph{proven} to generate $\Cl(K)$.
 
-More precisely, $S(B_1)$ is a factorbase used it to compute a tentative
+More precisely, $S(B_1)$ is a factorbase used to compute a tentative
 $\Cl(K)$ by generators and relations. We then check explicitly, using
 essentially \kbd{bnfisprincipal}, that the elements of $S(B_2)$ belong to the
 span of $S(B_1)$. Under the assumption that $S(B_2)$ generates $\Cl(K)$, we
@@ -1026,8 +1026,8 @@ You do not need to supply the technical parameters (under the library you
 still need to send at least an empty vector, coded as \kbd{NULL}). However,
 should you choose to set some of them, they \emph{must} be given in the
 requested order. For example, if you want to specify a given value of
-\var{nrpid}, you must give some values as well for $c$ and $c_2$, and provide
-a vector $[c,c_2,\var{nrpid}]$.
+\var{nrpid}, you must give some values as well for $c_1$ and $c_2$, and provide
+a vector $[c_1,c_2,\var{nrpid}]$.
 
 Note also that you can use an $\var{nf}$ instead of $P$, which avoids
 recomputing the integral basis and analogous quantities.
