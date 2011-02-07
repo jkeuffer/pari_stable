@@ -37,12 +37,13 @@ Doc: general factorization function, where $x$ is a
  will perform a rigorous primality proof for each pseudoprime factor.
 
  A \typ{INT} argument \var{lim} can be added, meaning that we look only for
- prime factors $p < \var{lim}$, which must be non-negative and satisfy
+ prime factors $p < \var{lim}$. The limit \var{lim} must be non-negative and
+ satisfy
  $\var{lim} \leq \kbd{primelimit} + 1$; setting $\var{lim}=0$ is the same
  as setting it to $\kbd{primelimit} + 1$. In this case, all but the last
  factor
  are proven primes, but the remaining factor may actually be a proven composite!
- If the remaining factor is less than \var{lim}, then it is prime.
+ If the remaining factor is less than $\var{lim}^2$, then it is prime.
  \bprog
  ? factor(2^2^7 +1, 10^5)
  %3 =
