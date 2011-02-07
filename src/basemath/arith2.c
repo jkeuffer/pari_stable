@@ -533,7 +533,7 @@ static const long decomp_default_hint = 0;
 
 /* where to stop trial dividing in factorization */
 static ulong
-default_bound(GEN n)
+tridiv_bound(GEN n)
 {
   ulong l = (ulong)expi(n) + 1;
   if (l <= 32)  return 1UL<<14;
@@ -542,22 +542,11 @@ default_bound(GEN n)
 }
 
 static ulong
-tridiv_bound(GEN n)
-{
-  ulong p = maxprime() + 1, l = default_bound(n);
-  return minuu(p, l);
-}
-
-static ulong
 utridiv_bound(ulong n)
 {
 #ifdef LONG_IS_64BIT
   if (n & HIGHMASK)
-  {
-    ulong p = maxprime(), l;
-    l = ((ulong)expu(n) + 1 - 16) << 10;
-    return minuu(p, l);
-  }
+    return ((ulong)expu(n) + 1 - 16) << 10;
 #else
   (void)n;
 #endif
@@ -627,6 +616,7 @@ ifactor(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
   for(;;)
   {
     int stop;
+    if (!*d) break;
     NEXT_PRIME_VIADIFF(p,d);
     if (p >= lim) break;
 
@@ -965,6 +955,7 @@ moebius(GEN n)
   while (p < lim)
   {
     int stop;
+    if (!*d) break;
     NEXT_PRIME_VIADIFF(p,d);
     v = Z_lvalrem_stop(n, p, &stop);
     if (v > 1) { avma = av; return 0; }
@@ -999,6 +990,7 @@ Z_issquarefree(GEN x)
   while (p < lim)
   {
     int stop;
+    if (!*d) break;
     NEXT_PRIME_VIADIFF(p,d);
     v = Z_lvalrem_stop(x, p, &stop);
     if (v > 1) { avma = av; return 0; }
@@ -1048,6 +1040,7 @@ omega(GEN n)
   while (p < lim)
   {
     int stop;
+    if (!*d) break;
     NEXT_PRIME_VIADIFF(p,d);
     v = Z_lvalrem_stop(n, p, &stop);
     if (v) nb++;
@@ -1080,6 +1073,7 @@ bigomega(GEN n)
   while (p < lim)
   {
     int stop;
+    if (!*d) break;
     NEXT_PRIME_VIADIFF(p,d);
     v = Z_lvalrem_stop(n, p, &stop);
     nb += v;
@@ -1111,6 +1105,7 @@ eulerphiu(ulong n)
   while (p < lim)
   {
     int stop;
+    if (!*d) break;
     NEXT_PRIME_VIADIFF(p,d);
     v = u_lvalrem_stop(&n, p, &stop);
     if (v) {
@@ -1148,6 +1143,7 @@ eulerphi(GEN n)
   while (p < lim)
   {
     int stop;
+    if (!*d) break;
     NEXT_PRIME_VIADIFF(p,d);
     v = Z_lvalrem_stop(n, p, &stop);
     if (v) {
@@ -1187,6 +1183,7 @@ numbdiv(GEN n)
   while (p < lim)
   {
     int stop;
+    if (!*d) break;
     NEXT_PRIME_VIADIFF(p,d);
     v = Z_lvalrem_stop(n, p, &stop);
     if (v) m = muliu(m, v+1);
@@ -1223,6 +1220,7 @@ sumdiv(GEN n)
   while (p < lim)
   {
     int stop;
+    if (!*d) break;
     NEXT_PRIME_VIADIFF(p,d);
     v = Z_lvalrem_stop(n, p, &stop);
     if (v)
@@ -1276,6 +1274,7 @@ sumdivk(GEN n, long k)
   while (p < lim)
   {
     int stop;
+    if (!*d) break;
     NEXT_PRIME_VIADIFF(p,d);
     v = Z_lvalrem_stop(n, p, &stop);
     if (v)
