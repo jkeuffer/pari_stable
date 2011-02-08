@@ -1817,6 +1817,38 @@ ZM_incremental_CRT(GEN *pH, GEN Hp, GEN q, GEN qp, ulong p)
   return stable;
 }
 
+/* record the degrees of Euclidean remainders (make them as large as
+ * possible : smaller values correspond to a degenerate sequence) */
+static void
+Flx_resultant_set_dglist(GEN a, GEN b, GEN dglist, ulong p)
+{
+  long da,db,dc,cnt,ind;
+  ulong lb;
+  pari_sp av = avma;
+
+  if (lgpol(a)==0 || lgpol(b)==0) return;
+  da = degpol(a);
+  db = degpol(b);
+  if (db > da)
+  { swapspec(a,b, da,db); }
+  else if (!da) return;
+  cnt = ind = 0;
+  while (db)
+  {
+    GEN c = Flx_rem(a,b, p);
+    lb = b[db+2];
+    a = b; b = c; dc = degpol(c);
+    if (dc < 0) break;
+
+    ind++;
+    if (dc > dglist[ind]) dglist[ind] = dc;
+    if (++cnt == 4) { cnt = 0; avma = av; }
+    da = db; /* = degpol(a) */
+    db = dc; /* = degpol(b) */
+  }
+  if (ind+1 > lg(dglist)) setlg(dglist,ind+1);
+  avma = av; return;
+}
 /* assuming the PRS finishes on a degree 1 polynomial C0 + C1X, with "generic"
  * degree sequence as given by dglist, set *Ci and return resultant(a,b) */
 static ulong
@@ -1826,7 +1858,7 @@ Flx_resultant_all(GEN a, GEN b, long *C0, long *C1, GEN dglist, ulong p)
   ulong lb, cx = 1, res = 1UL;
   pari_sp av;
 
-  if (C0) { *C0 = 1; *C1 = 0; }
+  *C0 = 1; *C1 = 0;
   if (lgpol(a)==0 || lgpol(b)==0) return 0;
   da = degpol(a);
   db = degpol(b);
@@ -1844,33 +1876,20 @@ Flx_resultant_all(GEN a, GEN b, long *C0, long *C1, GEN dglist, ulong p)
     a = b; b = c; dc = degpol(c);
     if (dc < 0) { avma = av; return 0; }
 
-    ind++;
-    if (C0)
-    { /* check that Euclidean remainder sequence doesn't degenerate */
-      if (dc != dglist[ind]) { avma = av; return 0; }
-      /* update resultant */
-      if (both_odd(da,db)) res = p-res;
-      if (lb != 1)
-      {
-        ulong t = Fl_powu(lb, da - dc, p);
-        res = Fl_mul(res, t, p);
-        if (dc) cx = Fl_mul(cx, t, p);
-      }
-    }
-    else
+    ind++; /* check that Euclidean remainder sequence doesn't degenerate */
+    if (dc != dglist[ind]) { avma = av; return 0; }
+    /* update resultant */
+    if (both_odd(da,db)) res = p-res;
+    if (lb != 1)
     {
-      if (dc > dglist[ind]) dglist[ind] = dc;
+      ulong t = Fl_powu(lb, da - dc, p);
+      res = Fl_mul(res, t, p);
+      if (dc) cx = Fl_mul(cx, t, p);
     }
     if (++cnt == 4) { cnt = 0; avma = av; }
     da = db; /* = degpol(a) */
     db = dc; /* = degpol(b) */
   }
-  if (!C0)
-  {
-    if (ind+1 > lg(dglist)) setlg(dglist,ind+1);
-    return 0;
-  }
-
   if (da == 1) /* last non-constant polynomial has degree 1 */
   {
     *C0 = Fl_mul(cx, a[2], p);
@@ -2446,7 +2465,7 @@ INIT:
         for (n=0; n <= dres; n++)
         {
           ev = FlxY_evalx_drop(b, n, p);
-          (void)Flx_resultant_all(a, ev, NULL, NULL, dglist, p);
+          Flx_resultant_set_dglist(a, ev, dglist, p);
           if (lg(dglist)-1 == goal) break;
         }
         /* last pol in ERS has degree > 1 ? */
