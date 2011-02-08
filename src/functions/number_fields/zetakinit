@@ -8,7 +8,7 @@ Doc: computes a number of initialization data
  concerning the number field associated to \kbd{bnf} so as to be able
  to compute the \idx{Dedekind} zeta and lambda functions, respectively
  $\kbd{zetak}(x)$ and $\kbd{zetak}(x,1)$, at the current real precision. If
- you do not need the \kbd{bnfinit} data somewhere else, to may call it
+ you do not need the \kbd{bnfinit} data somewhere else, you may call it
  with an irreducible polynomial instead of a \var{bnf}: it will call
  \kbd{bnfinit} itself.
 

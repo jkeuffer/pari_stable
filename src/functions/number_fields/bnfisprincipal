@@ -58,7 +58,7 @@ Doc: $\var{bnf}$ being the \sidx{principal ideal}
  increase the precision and recompute needed quantities until $t$ can be
  computed. Warning: setting this may induce \emph{very} lengthy computations.
 Variant: Instead of the above hardcoded numerical flags, one should
- rather use an or-er combination of the symbolic flags \tet{nf_GEN} (include
+ rather use an or-ed combination of the symbolic flags \tet{nf_GEN} (include
  generators, possibly a place holder if too difficult) and \tet{nf_FORCE}
  (insist on finding the generators).
 

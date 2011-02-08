@@ -13,7 +13,7 @@ Doc: \idx{LLL} reduction of
 
  This function finds a ``small'' $a$ in $I$ (see the end for technical details).
  The result is the Hermite normal form of
- the ``reduced'' ideal $J = r I/a$, where $r$ the unique rational number such
+ the ``reduced'' ideal $J = r I/a$, where $r$ is the unique rational number such
  that $J$ is integral and primitive. (This is usually not a reduced ideal in
  the sense of \idx{Buchmann}.)
  \bprog
@@ -48,7 +48,7 @@ Doc: \idx{LLL} reduction of
  where as usual the $\sigma_i$ are the (real and) complex embeddings and
  $\varepsilon_i = 1$, resp.~$2$, for a real, resp.~complex place. The element
  $a$ is simply the first vector in the LLL basis. The only reason you may want
- to try to charge some directions and set some $v_i\neq 0$ is to randomize
+ to try to change some directions and set some $v_i\neq 0$ is to randomize
  the elements found for a fixed ideal, which is heuristically useful in index
  calculus algorithms like \tet{bnfinit} and \tet{bnfisprincipal}.
 

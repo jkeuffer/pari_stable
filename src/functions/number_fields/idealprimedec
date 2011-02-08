@@ -14,9 +14,9 @@ Doc: computes the prime ideal
  prime ideals above $p$ in the number field $\var{nf}$. The representation
  $\kbd{pr}=[p,a,e,f,b]$ of a prime ideal means the following: $a$ and $b$ are
  algebraic integers in the maximal order $\Z_K$; the prime ideal is
- equal to $\goth{p} = p\Z_K + a\Z_K$
- $e$ is the ramification index, $f$ is the residual index,
- and $b$ is such that $\goth{p}^{-1}=\Z_K+ b/ p\Z_K$ which is used internally
+ equal to $\goth{p} = p\Z_K + a\Z_K$;
+ $e$ is the ramification index; $f$ is the residual index;
+ and $b$ is such that $\goth{p}^{-1}=\Z_K+ b/ p\Z_K$, which is used internally
  to compute valuations. The algebraic number $a$ is guaranteed to have a
  valuation equal to 1 at the prime ideal (this is automatic if $e>1$).
 

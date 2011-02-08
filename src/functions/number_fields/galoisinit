@@ -17,7 +17,7 @@ Doc: computes the Galois group
  returns 0 otherwise. Hence this permits to quickly check whether a polynomial
  of order strictly less than $36$ is Galois or not.
 
- The algorithm used in an improved version of the paper
+ The algorithm used is an improved version of the paper
  ``An efficient algorithm for the computation of Galois automorphisms'',
  Bill Allombert, Math.~Comp, vol.~73, 245, 2001, pp.~359--375.
 
