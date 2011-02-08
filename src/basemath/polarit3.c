@@ -1849,13 +1849,15 @@ Flx_resultant_set_dglist(GEN a, GEN b, GEN dglist, ulong p)
   if (ind+1 > lg(dglist)) setlg(dglist,ind+1);
   avma = av; return;
 }
-/* assuming the PRS finishes on a degree 1 polynomial C0 + C1X, with "generic"
- * degree sequence as given by dglist, set *Ci and return resultant(a,b) */
+/* assuming the PRS finishes on a degree 1 polynomial C0 + C1X, with
+ * "generic" degree sequence as given by dglist, set *Ci and return
+ * resultant(a,b). Modular version of Collins's subresultant */
 static ulong
 Flx_resultant_all(GEN a, GEN b, long *C0, long *C1, GEN dglist, ulong p)
 {
   long da,db,dc,cnt,ind;
-  ulong lb, cx = 1, res = 1UL;
+  ulong lb, res, g = 1UL, h = 1UL, ca = 1UL, cb = 1UL;
+  int s = 1;
   pari_sp av;
 
   *C0 = 1; *C1 = 0;
@@ -1865,38 +1867,54 @@ Flx_resultant_all(GEN a, GEN b, long *C0, long *C1, GEN dglist, ulong p)
   if (db > da)
   {
     swapspec(a,b, da,db);
-    if (both_odd(da,db)) res = p-res;
+    if (both_odd(da,db)) s = -s;
   }
-  else if (!da) return 1; /* = res * a[2] ^ db, since 0 <= db <= da = 0 */
+  else if (!da) return 1; /* = a[2] ^ db, since 0 <= db <= da = 0 */
   cnt = ind = 0; av = avma;
   while (db)
-  {
+  { /* sub-resultant algo., applied to ca * a and cb * b, ca,cb scalars,
+     * da = deg a, db = deg b */
     GEN c = Flx_rem(a,b, p);
-    lb = b[db+2];
+    long delta = da - db;
+
+    if (both_odd(da,db)) s = -s;
+    lb = Fl_mul(b[db+2], cb, p);
     a = b; b = c; dc = degpol(c);
     if (dc < 0) { avma = av; return 0; }
 
-    ind++; /* check that Euclidean remainder sequence doesn't degenerate */
-    if (dc != dglist[ind]) { avma = av; return 0; }
-    /* update resultant */
-    if (both_odd(da,db)) res = p-res;
-    if (lb != 1)
-    {
-      ulong t = Fl_powu(lb, da - dc, p);
-      res = Fl_mul(res, t, p);
-      if (dc) cx = Fl_mul(cx, t, p);
+    ind++;
+    if (dc != dglist[ind]) { avma = av; return 0; } /* degenerates */
+    if (g == h)
+    { /* frequent */
+      ulong cc = Fl_mul(ca, Fl_powu(Fl_div(lb,g,p), delta+1, p), p);
+      ca = cb;
+      cb = cc;
     }
-    if (++cnt == 4) { cnt = 0; avma = av; }
+    else
+    {
+      ulong cc = Fl_mul(ca, Fl_powu(lb, delta+1, p), p);
+      ulong ghdelta = Fl_mul(g, Fl_powu(h, delta, p), p);
+      ca = cb;
+      cb = Fl_div(cc, ghdelta, p);
+    }
     da = db; /* = degpol(a) */
     db = dc; /* = degpol(b) */
+
+    g = lb;
+    if (delta == 1)
+      h = g; /* frequent */
+    else
+      h = Fl_mul(h, Fl_powu(Fl_div(g,h,p), delta, p), p);
+
+    if (++cnt == 4) { cnt = 0; avma = av; }
   }
-  if (da == 1) /* last non-constant polynomial has degree 1 */
-  {
-    *C0 = Fl_mul(cx, a[2], p);
-    *C1 = Fl_mul(cx, a[3], p);
-    lb = b[2];
-  } else lb = Fl_powu(b[2], da, p);
-  avma = av; return Fl_mul(res, lb, p);
+  if (da > 1) return 0; /* Failure */
+  /* last non-constant polynomial has degree 1 */
+  *C0 = Fl_mul(ca, a[2], p);
+  *C1 = Fl_mul(ca, a[3], p);
+  res = Fl_mul(cb, b[2], p);
+  if (s == -1) res = p - res;
+  avma = av; return res;
 }
 
 /* u P(X) + v P(-X) */

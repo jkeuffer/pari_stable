@@ -41,6 +41,7 @@ BA 27- LLL could fail (rarely) due to unsufficient precision [#1154]
 BA 30- ploth(x=0,1,0,"Complex|Recursive") -> SEGV [#1163]
    31- mathnf(dim > 8) could return a non-HNF upper triangular matrix [#1153]
 BA 32- forsubgroup() did not handle break/next/return.
+   33- modular resultant, e.g. rnfequation(polcyclo(17,y), x+y^6,1) [#1151]
 
   Changed
 LGr1- universal constants (gen_0,gen_1, etc.) are now read-only
