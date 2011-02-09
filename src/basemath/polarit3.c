@@ -1822,9 +1822,9 @@ ZM_incremental_CRT(GEN *pH, GEN Hp, GEN q, GEN qp, ulong p)
 static void
 Flx_resultant_set_dglist(GEN a, GEN b, GEN dglist, ulong p)
 {
-  long da,db,dc,cnt,ind;
+  long da,db,dc, ind;
   ulong lb;
-  pari_sp av = avma;
+  pari_sp av = avma, lim = stack_lim(av, 2);
 
   if (lgpol(a)==0 || lgpol(b)==0) return;
   da = degpol(a);
@@ -1832,7 +1832,7 @@ Flx_resultant_set_dglist(GEN a, GEN b, GEN dglist, ulong p)
   if (db > da)
   { swapspec(a,b, da,db); }
   else if (!da) return;
-  cnt = ind = 0;
+  ind = 0;
   while (db)
   {
     GEN c = Flx_rem(a,b, p);
@@ -1842,7 +1842,11 @@ Flx_resultant_set_dglist(GEN a, GEN b, GEN dglist, ulong p)
 
     ind++;
     if (dc > dglist[ind]) dglist[ind] = dc;
-    if (++cnt == 4) { cnt = 0; avma = av; }
+    if (low_stack(lim,stack_lim(av,2)))
+    {
+      if (DEBUGMEM>1) pari_warn(warnmem,"Flx_resultant_all");
+      gerepileall(av, 2, &a,&b);
+    }
     da = db; /* = degpol(a) */
     db = dc; /* = degpol(b) */
   }
@@ -1855,10 +1859,10 @@ Flx_resultant_set_dglist(GEN a, GEN b, GEN dglist, ulong p)
 static ulong
 Flx_resultant_all(GEN a, GEN b, long *C0, long *C1, GEN dglist, ulong p)
 {
-  long da,db,dc,cnt,ind;
+  long da,db,dc, ind;
   ulong lb, res, g = 1UL, h = 1UL, ca = 1UL, cb = 1UL;
   int s = 1;
-  pari_sp av;
+  pari_sp av = avma, lim = stack_lim(av,2);
 
   *C0 = 1; *C1 = 0;
   if (lgpol(a)==0 || lgpol(b)==0) return 0;
@@ -1870,7 +1874,7 @@ Flx_resultant_all(GEN a, GEN b, long *C0, long *C1, GEN dglist, ulong p)
     if (both_odd(da,db)) s = -s;
   }
   else if (!da) return 1; /* = a[2] ^ db, since 0 <= db <= da = 0 */
-  cnt = ind = 0; av = avma;
+  ind = 0;
   while (db)
   { /* sub-resultant algo., applied to ca * a and cb * b, ca,cb scalars,
      * da = deg a, db = deg b */
@@ -1880,8 +1884,6 @@ Flx_resultant_all(GEN a, GEN b, long *C0, long *C1, GEN dglist, ulong p)
     if (both_odd(da,db)) s = -s;
     lb = Fl_mul(b[db+2], cb, p);
     a = b; b = c; dc = degpol(c);
-    if (dc < 0) { avma = av; return 0; }
-
     ind++;
     if (dc != dglist[ind]) { avma = av; return 0; } /* degenerates */
     if (g == h)
@@ -1906,7 +1908,11 @@ Flx_resultant_all(GEN a, GEN b, long *C0, long *C1, GEN dglist, ulong p)
     else
       h = Fl_mul(h, Fl_powu(Fl_div(g,h,p), delta, p), p);
 
-    if (++cnt == 4) { cnt = 0; avma = av; }
+    if (low_stack(lim,stack_lim(av,2)))
+    {
+      if (DEBUGMEM>1) pari_warn(warnmem,"Flx_resultant_all");
+      gerepileall(av, 2, &a,&b);
+    }
   }
   if (da > 1) return 0; /* Failure */
   /* last non-constant polynomial has degree 1 */
