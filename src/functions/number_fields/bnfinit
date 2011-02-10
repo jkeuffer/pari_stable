@@ -15,7 +15,7 @@ Description:
 Doc: initializes a
  \var{bnf} structure. Used in programs such as \kbd{bnfisprincipal},
  \kbd{bnfisunit} or \kbd{bnfnarrow}. By default, the results are conditional
- on a heuristic strengthening of the GRH, see \ref{se:GRHbnf}. The result is a
+ on the GRH, see \ref{se:GRHbnf}. The result is a
  10-component vector \var{bnf}.
 
  This implements \idx{Buchmann}'s sub-exponential algorithm for computing the
@@ -36,7 +36,8 @@ Doc: initializes a
  implemented internally but not publicly accessible yet.
 
  $\var{tech}$ is a technical vector (empty by default, see \ref{se:GRHbnf}).
- Careful use of this parameter may speed up your computations considerably.
+ Careful use of this parameter may speed up your computations,
+ but it is mostly obsolete and you should leave it alone.
 
  \smallskip
 
