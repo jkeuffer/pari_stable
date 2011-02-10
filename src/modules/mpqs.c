@@ -1637,7 +1637,6 @@ mpqs_self_init(mpqs_handle_t *h)
   const ulong size_of_FB = h->size_of_FB + 1;
   mpqs_FB_entry_t *FB = h->FB;
   mpqs_inv_A_H_t *inv_A_H = h->inv_A_H;
-  /* mpqs_uint32_t *bin_index = &(h->bin_index); ---unused */
   const pari_sp av = avma;
   GEN p1, p2;
   GEN A = h->A;
