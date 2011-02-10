@@ -196,10 +196,11 @@ This call-back is called after PARI has cleaned-up from an error.
 The error number is passed as argument, unless the PARI stack
 has been destroyed, in which case it is called with argument $-1$.
 
-\doc{cb_pari_whatnow}{int (*cb_pari_whatnow)(const char *s, int flag)}
+\doc{cb_pari_whatnow}{int (*cb_pari_whatnow)(PariOUT *out, const char *s, int flag)}
 initialized to \kbd{NULL}. If not \kbd{NULL}, must check whether
 $s$ existed in older versions of \kbd{pari} (the \kbd{gp} callback
-checks against \kbd{pari-1.39.15}).
+checks against \kbd{pari-1.39.15}). All output must be done via \kbd{out}
+methods.
 
 \item $\fl = 0$: should print verbosely the answer, including help text if
 available.

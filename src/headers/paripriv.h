@@ -254,10 +254,12 @@ int    pop_val_if_newer(entree *ep, long loc);
 void   gclone_refc(GEN x);
 
 /* general printing */
-void print_errcontext(const char *msg, const char *s, const char *entry);
-void print_prefixed_text(const char *s, const char *prefix, const char *str);
+void print_errcontext(PariOUT *out, const char *msg, const char *s, const char *entry);
+void print_prefixed_text(PariOUT *out, const char *s, const char *prefix, const char *str);
 INLINE void
-print_text(const char *s) { print_prefixed_text((s),NULL,NULL); }
+print_text(const char *s) { print_prefixed_text(pariOut, s,NULL,NULL); }
+INLINE void
+pariOut_print_text(PariOUT *out, const char *s) { print_prefixed_text(out, s,NULL,NULL); }
 INLINE long
 is_keyword_char(char c) { return (isalnum((int)c) || c=='_'); }
 

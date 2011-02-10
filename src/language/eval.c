@@ -672,8 +672,8 @@ closure_err(void)
       member = offset>0 && (s[-1] == '.');
       /* avoid "in function foo: foo" */
       if (!next_fun || strcmp(next_fun, s)) {
-        print_errcontext(next_label, s, sbase);
-        pari_putc('\n');
+        print_errcontext(pariErr, next_label, s, sbase);
+        pariOut_putc(pariErr, '\n');
       }
       pari_free(next_label);
       if (i == lastfun) break;

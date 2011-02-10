@@ -89,7 +89,7 @@ void (*foreignFuncFree)(entree *);    /* How to free external entree.    */
 
 void (*cb_pari_ask_confirm)(const char *);
 int  (*cb_pari_handle_exception)(long);
-int  (*cb_pari_whatnow)(const char *, int);
+int  (*cb_pari_whatnow)(PariOUT *out, const char *, int);
 void (*cb_pari_sigint)(void);
 void (*cb_pari_err_recover)(long);
 
@@ -882,7 +882,8 @@ err_recover(long numerr)
   s_ERR_CATCH.n = 0;
   dbg_release();
   global_err_data = NULL;
-  fprintferr("\n"); flusherr();
+  pariOut_puts(pariErr, "\n");
+  pariErr->flush();
 
   cb_pari_err_recover(numerr);
 }
@@ -894,26 +895,24 @@ err_init(void)
   if (!pari_last_was_newline()) pari_putc('\n');
   pariOut->flush();
   pariErr->flush();
-  pariOut = pariErr;
-  term_color(c_ERR);
+  pariOut_term_color(pariErr, c_ERR);
 }
 
 static void
 err_init_msg(int numerr)
 {
   const char *gp_function_name;
-  pari_puts("  *** ");
+  pariOut_puts(pariErr, "  *** ");
   if (numerr != user && (gp_function_name = closure_func_err()))
-    pari_printf("%s: ", gp_function_name);
+    pariOut_printf(pariErr, "%s: ", gp_function_name);
   else
-    pari_puts("  ");
+    pariOut_puts(pariErr, "  ");
 }
 
 void
 pari_warn(int numerr, ...)
 {
   char *ch1;
-  PariOUT *out = pariOut;
   va_list ap;
 
   va_start(ap,numerr);
@@ -923,46 +922,46 @@ pari_warn(int numerr, ...)
   switch (numerr)
   {
     case user:
-      pari_puts("user warning: ");
-      print0(va_arg(ap, GEN), f_RAW);
+      pariOut_puts(pariErr, "user warning: ");
+      pariOut_print0(pariErr, va_arg(ap, GEN), f_RAW);
       break;
 
     case warnmem:
-      pari_puts("collecting garbage in "); ch1=va_arg(ap, char*);
-      pari_vprintf(ch1,ap); pari_putc('.');
+      pariOut_puts(pariErr, "collecting garbage in "); ch1=va_arg(ap, char*);
+      pariOut_vprintf(pariErr, ch1,ap); pariOut_putc(pariErr, '.');
       break;
 
     case warner:
-      pari_puts("Warning: "); ch1=va_arg(ap, char*);
-      pari_vprintf(ch1,ap); pari_putc('.');
+      pariOut_puts(pariErr, "Warning: "); ch1=va_arg(ap, char*);
+      pariOut_vprintf(pariErr, ch1,ap); pariOut_putc(pariErr, '.');
       break;
 
     case warnprec:
-      pari_vprintf("Warning: increasing prec in %s; new prec = %ld",ap);
+      pariOut_vprintf(pariErr, "Warning: increasing prec in %s; new prec = %ld",
+                      ap);
       break;
 
     case warnfile:
-      pari_puts("Warning: failed to "),
+      pariOut_puts(pariErr, "Warning: failed to "),
       ch1 = va_arg(ap, char*);
-      pari_printf("%s: %s", ch1, va_arg(ap, char*));
+      pariOut_printf(pariErr, "%s: %s", ch1, va_arg(ap, char*));
       break;
   }
-  term_color(c_NONE); va_end(ap);
-  pari_putc('\n');
-  pariOut = out;
-  flusherr();
+  va_end(ap);
+  pariOut_term_color(pariErr, c_NONE);
+  pariOut_putc(pariErr, '\n');
+  pariErr->flush();
 }
 void
 pari_sigint(const char *s)
 {
-  PariOUT *out = pariOut;
   err_init();
   closure_err();
   err_init_msg(talker);
-  pari_puts(s); pari_putc('.');
-  term_color(c_NONE);
-  pariOut = out;
-  flusherr();
+  pariOut_puts(pariErr, s); 
+  pariOut_putc(pariErr, '.');
+  pariOut_term_color(pariErr, c_NONE);
+  pariErr->flush();
   if (cb_pari_handle_exception &&
       cb_pari_handle_exception(-1)) return;
   err_recover(talker);
@@ -971,9 +970,7 @@ pari_sigint(const char *s)
 void
 pari_err(int numerr, ...)
 {
-  PariOUT *out = pariOut;
   va_list ap;
-
   va_start(ap,numerr);
 
   global_err_data = NULL;
@@ -999,32 +996,37 @@ pari_err(int numerr, ...)
   {
     const char *msg = va_arg(ap, char*);
     const char *s = va_arg(ap,char *);
-    print_errcontext(msg,s,va_arg(ap,char *));
+    print_errcontext(pariErr, msg,s,va_arg(ap,char *));
   }
   else
   {
     closure_err();
-    err_init_msg(numerr); pari_puts(errmessage[numerr]);
+    err_init_msg(numerr);
+    pariOut_puts(pariErr, errmessage[numerr]);
     switch (numerr)
     {
       case talker: case alarmer: {
         const char *ch1 = va_arg(ap, char*);
-        pari_vprintf(ch1,ap); pari_putc('.'); break;
+        pariOut_vprintf(pariErr, ch1,ap);
+        pariOut_putc(pariErr, '.'); 
+        break;
       }
       case user:
-        pari_puts("user error: ");
-        print0(va_arg(ap, GEN), f_RAW);
+        pariOut_puts(pariErr, "user error: ");
+        pariOut_print0(pariErr, va_arg(ap, GEN), f_RAW);
         break;
       case invmoder:
-        pari_printf("impossible inverse modulo: %Ps.", va_arg(ap, GEN));
+        pariOut_printf(pariErr, "impossible inverse modulo: %Ps."
+                              , va_arg(ap, GEN));
         break;
       case openfiler: {
         const char *type = va_arg(ap, char*);
-        pari_printf("error opening %s file: `%s'.", type, va_arg(ap,char*));
+        pariOut_printf(pariErr, "error opening %s file: `%s'."
+                              , type, va_arg(ap,char*));
         break;
       }
       case overflower:
-        pari_printf("overflow in %s.", va_arg(ap, char*));
+        pariOut_printf(pariErr, "overflow in %s.", va_arg(ap, char*));
         break;
       case notfuncer:
       {
@@ -1033,33 +1035,36 @@ pari_err(int numerr, ...)
         {
           entree *ep = varentries[varn(fun)];
           const char *s = ep->name;
-          if (cb_pari_whatnow) cb_pari_whatnow(s,1);
+          if (cb_pari_whatnow) cb_pari_whatnow(pariErr, s,1);
         }
         break;
       }
 
       case impl:
-        pari_printf("sorry, %s is not yet implemented.", va_arg(ap, char*));
+        pariOut_printf(pariErr, "sorry, %s is not yet implemented."
+                              , va_arg(ap, char*));
         break;
       case typeer: case mattype1: case negexper:
       case constpoler: case notpoler: case redpoler:
       case zeropoler: case consister: case flagerr: case precer:
-        pari_printf(" in %s.",va_arg(ap, char*)); break;
+        pariOut_printf(pariErr, " in %s.",va_arg(ap, char*)); break;
 
       case bugparier:
-        pari_printf("bug in %s, please report",va_arg(ap, char*)); break;
+        pariOut_printf(pariErr, "bug in %s, please report"
+                              , va_arg(ap, char*));
+        break;
 
       case operi: case operf:
       {
         const char *f, *op = va_arg(ap, const char*);
         GEN x = va_arg(ap, GEN);
         GEN y = va_arg(ap, GEN);
-        pari_puts(numerr == operi? "impossible": "forbidden");
+        pariOut_puts(pariErr, numerr == operi? "impossible": "forbidden");
         switch(*op)
         {
           case '+': f = "addition"; break;
           case '-':
-            pari_printf(" negation - %s.",type_name(typ(x)));
+            pariOut_printf(pariErr, " negation - %s.",type_name(typ(x)));
             f = NULL; break;
           case '*': f = "multiplication"; break;
           case '/': case '%': case '\\': f = "division"; break;
@@ -1067,18 +1072,20 @@ pari_err(int numerr, ...)
           default: op = "-->"; f = "assignment"; break;
         }
         if (f)
-          pari_printf(" %s %s %s %s.",f,type_name(typ(x)),op,type_name(typ(y)));
+          pariOut_printf(pariErr, " %s %s %s %s."
+                                , f,type_name(typ(x)),op,type_name(typ(y)));
         break;
       }
 
       case primer1: {
         ulong c = va_arg(ap, ulong);
-        if (c) pari_printf(", need primelimit ~ %lu.", c);
+        if (c) pariOut_printf(pariErr, ", need primelimit ~ %lu.", c);
         break;
       }
     }
   }
-  term_color(c_NONE); va_end(ap);
+  pariOut_term_color(pariErr, c_NONE);
+  va_end(ap);
   if (numerr==errpile)
   {
     size_t d = top - bot;
@@ -1089,8 +1096,7 @@ pari_err(int numerr, ...)
     pariErr->puts(buf);
     pariErr->puts("  [hint] you can increase GP stack with allocatemem()\n");
   }
-  pariOut = out;
-  flusherr();
+  pariErr->flush();
   if (cb_pari_handle_exception &&
       cb_pari_handle_exception(numerr)) return;
   err_recover(numerr);
@@ -1806,24 +1812,24 @@ void
 msgTIMER(pari_timer *T, const char *format, ...)
 {
   va_list args;
-  PariOUT *out = pariOut; pariOut = pariErr;
-
-  pari_puts("Time "); va_start(args, format);
-  pari_vprintf(format,args); va_end(args);
-  pari_printf(": %ld\n", TIMER(T)); pari_flush();
-  pariOut = out;
+  pariOut_puts(pariErr, "Time ");
+  va_start(args, format);
+  pariOut_vprintf(pariErr, format,args);
+  va_end(args);
+  pariOut_printf(pariErr, ": %ld\n", TIMER(T)); 
+  pariErr->flush();
 }
 
 void
 msgtimer(const char *format, ...)
 {
   va_list args;
-  PariOUT *out = pariOut; pariOut = pariErr;
-
-  pari_puts("Time "); va_start(args, format);
-  pari_vprintf(format,args); va_end(args);
-  pari_printf(": %ld\n", timer2()); pari_flush();
-  pariOut = out;
+  pariOut_puts(pariErr, "Time ");
+  va_start(args, format);
+  pariOut_vprintf(pariErr, format,args);
+  va_end(args);
+  pariOut_printf(pariErr, ": %ld\n", timer2());
+  pariErr->flush();
 }
 
 long

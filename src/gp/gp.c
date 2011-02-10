@@ -693,7 +693,7 @@ aide0(const char *s0, int flag)
     {
       if (pari_is_default(s))
         aide_print(s,"default");
-      else if (!cb_pari_whatnow(s,1))
+      else if (!cb_pari_whatnow(pariOut, s,1))
         aide_print(s,"unknown identifier");
     }
     return;
@@ -1628,9 +1628,9 @@ break_loop(int numerr)
   pari_infile = newfile(stdin, "stdin", mf_IN)->file;
   term_color(c_ERR); pari_putc('\n');
   if (sigint)
-    print_errcontext("Break loop: type <Return> to continue; 'break' to go back to GP", NULL, NULL);
+    print_errcontext(pariOut, "Break loop: type <Return> to continue; 'break' to go back to GP", NULL, NULL);
   else
-    print_errcontext("Break loop: type 'break' to go back to GP", NULL, NULL);
+    print_errcontext(pariOut, "Break loop: type 'break' to go back to GP", NULL, NULL);
   term_color(c_NONE);
   if (s_env.n == 2)
     prompt = BREAK_LOOP_PROMPT;

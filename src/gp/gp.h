@@ -51,7 +51,7 @@ void gp_quit(long exitcode);
 GEN  input0(void);
 GEN  read0(const char *s);
 void system0(const char *cmd);
-int  whatnow(const char *s, int silent);
+int  whatnow(PariOUT *out, const char *s, int silent);
 GEN sd_breakloop(const char *v, long flag);
 GEN sd_echo(const char *v, long flag);
 GEN sd_graphcolormap(const char *v, long flag);

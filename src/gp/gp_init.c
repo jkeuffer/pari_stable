@@ -23,7 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "../graph/rect.h"
 #include "gp.h"
 
-static void whatnow0(char *s) { whatnow(s,0); }
+static void whatnow0(char *s) { whatnow(pariOut, s,0); }
 
 #include "gp_init.h"
 #include "gp_default.h"

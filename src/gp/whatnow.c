@@ -30,18 +30,19 @@ typedef struct whatnow_t
 #include "whatnow.h"
 
 static void
-msg(const char *s)
+msg(PariOUT *out, const char *s)
 {
-  term_color(c_HELP);
-  print_text(s); pari_putc('\n');
-  term_color(c_NONE);
+  pariOut_term_color(out, c_HELP);
+  pariOut_print_text(out, s);
+  pariOut_putc(out, '\n');
+  pariOut_term_color(out, c_NONE);
 }
 /* If flag = 0 (default): check if s existed in 1.39.15 and print verbosely
  * the answer.
  * Else: return 1 if function changed, 0 otherwise, and print help message
  * plus the above. */
 int
-whatnow(const char *s, int flag)
+whatnow(PariOUT *out, const char *s, int flag)
 {
   int n;
   const char *def;
@@ -66,26 +67,28 @@ whatnow(const char *s, int flag)
    * whatnow() is never used in a case where speed would be necessary */
   if (!def)
   {
-    if (!flag) msg("As far as I can recall, this function never existed");
+    if (!flag)
+      msg(out, "As far as I can recall, this function never existed");
     return 0;
   }
 
   wp = whatnowlist[n-1]; def = wp.name;
   if (def == SAME)
   {
-    if (!flag) msg("This function did not change");
+    if (!flag)
+      msg(out, "This function did not change");
     return 0;
   }
   if (flag)
   {
-    term_color(c_NONE);
-    print_text("\nA function with that name existed in GP-1.39.15; to run in backward compatibility mode, type \"default(compatible,3)\", or set \"compatible = 3\" in your GPRC file.");
-    pari_putc('\n');
+    pariOut_term_color(out, c_NONE);
+    pariOut_print_text(out, "\nA function with that name existed in GP-1.39.15; to run in backward compatibility mode, type \"default(compatible,3)\", or set \"compatible = 3\" in your GPRC file.");
+    pariOut_putc(out, '\n');
   }
 
   if (def == REMOV)
   {
-    msg("This function was suppressed");
+    msg(out, "This function was suppressed");
     return 0;
   }
   if (!strcmp(def,"x*y")) ep = NULL;
@@ -93,8 +96,9 @@ whatnow(const char *s, int flag)
     ep = is_entry(wp.name);
     if (!ep) pari_err(bugparier,"whatnow");
   }
-  pari_puts("New syntax: "); term_color(c_ERR);
-  pari_printf("%s%s ===> %s%s\n\n", s, wp.oldarg, wp.name, wp.newarg);
-  if (ep) msg(ep->help);
-  term_color(c_NONE); return 1;
+  pariOut_puts(out, "New syntax: ");
+  pariOut_term_color(out, c_ERR);
+  pariOut_printf(out, "%s%s ===> %s%s\n\n", s, wp.oldarg, wp.name, wp.newarg);
+  if (ep) msg(out, ep->help);
+  pariOut_term_color(out, c_NONE); return 1;
 }

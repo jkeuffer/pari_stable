@@ -68,7 +68,7 @@ extern VOLATILE THREAD int PARI_SIGINT_block, PARI_SIGINT_pending;
 extern const long lontyp[];
 extern THREAD void* global_err_data;
 extern void (*cb_pari_ask_confirm)(const char *);
-extern int  (*cb_pari_whatnow)(const char *, int);
+extern int  (*cb_pari_whatnow)(PariOUT *out, const char *, int);
 extern void (*cb_pari_sigint)(void);
 extern int (*cb_pari_handle_exception)(long);
 extern void (*cb_pari_err_recover)(long);

@@ -439,12 +439,16 @@ static void
 set_last_newline(char c) { last_was_newline = (c == '\n'); }
 
 void
-pari_putc(char c) { set_last_newline(c); pariOut->putch(c); }
+pariOut_putc(PariOUT *out, char c) { set_last_newline(c); out->putch(c); }
+void
+pari_putc(char c) { pariOut_putc(pariOut, c); }
 
 void
-pari_puts(const char *s) {
-  if (*s) {  set_last_newline(s[strlen(s)-1]); pariOut->puts(s); }
+pariOut_puts(PariOUT *out, const char *s) {
+  if (*s) {  set_last_newline(s[strlen(s)-1]); out->puts(s); }
 }
+void
+pari_puts(const char *s) { pariOut_puts(pariOut, s); }
 
 int
 pari_last_was_newline(void) { return last_was_newline; }
@@ -1304,16 +1308,16 @@ decode_color(long n, long *c)
 /* start printing in "color" c */
 /* terminal has to support ANSI color escape sequences */
 void
-term_color(long c)
+pariOut_term_color(PariOUT *out, long c)
 {
   static char s[COLOR_LEN];
   FILE *o_logfile = pari_logfile;
-
   if (logstyle != logstyle_color) pari_logfile = NULL; /* Ugly hack */
-  /* _not_ pari_puts, because of last_was_newline */
-  pariOut->puts(term_get_color(s, c));
+  out->puts(term_get_color(s, c));
   pari_logfile = o_logfile;
 }
+void
+term_color(long c) { pariOut_term_color(pariOut, c); }
 
 static const char esc = (0x1f & '['); /* C-[ = escape */
 
@@ -1493,9 +1497,9 @@ lim_lines_output(char *s, long n, long max_lin)
 }
 
 static void
-new_line(const char *prefix)
+new_line(PariOUT *out, const char *prefix)
 {
-  pari_putc('\n'); if (prefix) pari_puts(prefix);
+  pariOut_putc(out, '\n'); if (prefix) pariOut_puts(out, prefix);
 }
 
 #define is_blank(c) ((c) == ' ' || (c) == '\n' || (c) == '\t')
@@ -1505,14 +1509,15 @@ new_line(const char *prefix)
  * If str is NULL, omit the arrow, end the text with '\n'.
  * If prefix is NULL, use "" */
 void
-print_prefixed_text(const char *s, const char *prefix, const char *str)
+print_prefixed_text(PariOUT *out, const char *s, const char *prefix, 
+                    const char *str)
 {
   const long prelen = prefix? strlen_real(prefix): 0;
   const long W = term_width(), ls = strlen(s);
   long linelen = prelen;
   char *word = (char*)pari_malloc(ls + 3);
 
-  if (prefix) pari_puts(prefix);
+  if (prefix) pariOut_puts(out, prefix);
   for(;;)
   {
     long len;
@@ -1522,43 +1527,44 @@ print_prefixed_text(const char *s, const char *prefix, const char *str)
     *u = 0; /* finish "word" */
     len = strlen_real(word);
     linelen += len;
-    if (linelen >= W) { new_line(prefix); linelen = prelen + len; }
-    pari_puts(word);
+    if (linelen >= W) { new_line(out, prefix); linelen = prelen + len; }
+    pariOut_puts(out, word);
     while (is_blank(*s)) {
       switch (*s) {
         case ' ': break;
         case '\t':
-          linelen = (linelen & ~7UL) + 8; pari_putc('\t');
+          linelen = (linelen & ~7UL) + 8; pariOut_putc(out, '\t');
           blank = 1; break;
         case '\n':
           linelen = W;
           blank = 1; break;
       }
-      if (linelen >= W) { new_line(prefix); linelen = prelen; }
+      if (linelen >= W) { new_line(out, prefix); linelen = prelen; }
       s++;
     }
     if (!*s) break;
-    if (!blank) { pari_putc(' '); linelen++; }
+    if (!blank) { pariOut_putc(out, ' '); linelen++; }
   }
   if (!str)
-    pari_putc('\n');
+    pariOut_putc(out, '\n');
   else
   {
     long i,len = strlen_real(str);
     int space = (*str == ' ' && str[1]);
     if (linelen + len >= W)
     {
-      new_line(prefix); linelen = prelen;
+      new_line(out, prefix); linelen = prelen;
       if (space) { str++; len--; space = 0; }
     }
-    term_color(c_OUTPUT);
-    pari_puts(str); if (!len || str[len-1] != '\n') pari_putc('\n');
+    pariOut_term_color(out, c_OUTPUT);
+    pariOut_puts(out, str);
+    if (!len || str[len-1] != '\n') pariOut_putc(out, '\n');
     if (space) { linelen++; len--; }
-    term_color(c_ERR);
-    if (prefix) { pari_puts(prefix); linelen -= prelen; }
-    for (i=0; i<linelen; i++) pari_putc(' ');
-    pari_putc('^');
-    for (i=0; i<len; i++) pari_putc('-');
+    pariOut_term_color(out, c_ERR);
+    if (prefix) { pariOut_puts(out, prefix); linelen -= prelen; }
+    for (i=0; i<linelen; i++) pariOut_putc(out, ' ');
+    pariOut_putc(out, '^');
+    for (i=0; i<len; i++) pariOut_putc(out, '-');
   }
   pari_free(word);
 }
@@ -1570,14 +1576,15 @@ print_prefixed_text(const char *s, const char *prefix, const char *str)
  *   s points to the offending chars.
  *   entry tells how much we can go back from s[0] */
 void
-print_errcontext(const char *msg, const char *s, const char *entry)
+print_errcontext(PariOUT *out,
+                 const char *msg, const char *s, const char *entry)
 {
   const long MAX_PAST = 25;
   long past = s - entry, lmsg;
   char str[STR_LEN + 1 + 1], pre[MAX_TERM_COLOR + 8 + 1];
   char *buf, *t;
 
-  if (!s || !entry) { print_prefixed_text(msg,"  ***   ",NULL); return; }
+  if (!s || !entry) { print_prefixed_text(out, msg,"  ***   ",NULL); return; }
 
   /* message + context */
   lmsg = strlen(msg);
@@ -1601,7 +1608,7 @@ print_errcontext(const char *msg, const char *s, const char *entry)
   term_get_color(pre, c_ERR);
   strcat(pre, "  ***   ");
   /* now print */
-  print_prefixed_text(buf, pre, str);
+  print_prefixed_text(out, buf, pre, str);
   pari_free(buf);
 }
 
@@ -3021,11 +3028,8 @@ outmat(GEN x)
 void
 fprintferr(const char* fmt, ...)
 {
-  va_list args;
-  PariOUT *out = pariOut; pariOut = pariErr;
-
-  va_start(args, fmt); pari_vprintf(fmt,args);
-  va_end(args); pariOut = out;
+  va_list args; va_start(args, fmt);
+  pariOut_vprintf(pariErr,fmt,args); va_end(args);
 }
 
 /*******************************************************************/
@@ -4084,7 +4088,7 @@ readbin(const char *name, FILE *f, int *vector)
 /*******************************************************************/
 /* print a vector of GENs */
 void
-print0(GEN g, long flag)
+pariOut_print0(PariOUT *OUT, GEN g, long flag)
 {
   OUT_FUN out = get_fun(flag);
   long i, l = lg(g);
@@ -4092,11 +4096,16 @@ print0(GEN g, long flag)
   {
     GEN x = gel(g,i);
     if (typ(x)==t_STR)
-      pari_puts(GSTR(x)); /* text surrounded by "" otherwise */
+      pariOut_puts(OUT, GSTR(x)); /* text surrounded by "" otherwise */
     else
-      gen_output_fun(x, GP_DATA->fmt, out);
+    {
+      char *s = GENtostr_fun(x, GP_DATA->fmt, out);
+      pariOut_puts(OUT, s); free(s);
+    }
   }
 }
+void
+print0(GEN g, long flag) { pariOut_print0(pariOut, g, flag); }
 
 /* dummy needed to pass a (empty!) va_list to sm_dopr */
 static char *
@@ -4120,10 +4129,20 @@ Strprintf(const char *fmt, GEN args)
   GEN z = strtoGENstr(s); free(s); return z; }
 
 void
-pari_vprintf(const char *fmt, va_list ap)
+pariOut_vprintf(PariOUT *out, const char *fmt, va_list ap)
 {
   char *s = sm_dopr(fmt, NULL, ap);
-  pari_puts(s); free(s);
+  pariOut_puts(out, s); free(s);
+}
+void
+pari_vprintf(const char *fmt, va_list ap) { pariOut_vprintf(pariOut, fmt, ap); }
+
+/* variadic version of printf0 */
+void
+pariOut_printf(PariOUT *out, const char *fmt, ...)
+{
+  va_list args; va_start(args,fmt);
+  pariOut_vprintf(out,fmt,args); va_end(args);
 }
 void
 pari_printf(const char *fmt, ...) /* variadic version of printf0 */
