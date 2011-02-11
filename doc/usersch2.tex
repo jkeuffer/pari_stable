@@ -1347,6 +1347,7 @@ instance, constructions like \kbd{funcs[i](x)} are perfectly valid,
 assuming \kbd{funcs} is an array of functions.
 
 \subsec{Defining a function}\label{se:userfundef}
+
 A user function is defined as follows:
 
   \kbd{(\var{list of formal variables}) -> \var{seq}}.
@@ -1813,18 +1814,13 @@ likely.
 
 \misctitle{Note} Typing \b{um} will output all user-defined member functions.
 
-\misctitle{Technical warning} Do not apply a member whose name starts with
-\kbd{e} or \kbd{E} to an integer constant, where it would be confused with
-the usual floating point exponent. E.g compare
-\bprog
-  ? x.e2 = x+1
-  ? 1.e2
-  %1 = 100.000000000 \\@com taken to mean $1.0E2$.
-  ? (1).e2
-  %2 = 2
-  ? 1.0.e2
-  %3 = 2.00000000000
-@eprog
+\misctitle{Member function names} A valid name starts with a letter followed
+by any number of keyword characters: \kbd{\_} or alphanumeric characters
+([\kbd{A-Za-z0-9}]). The built-in member function names are reserved and
+cannot be used (see the list with \kbd{?.}). Finally, names starting with
+\kbd{e} or \kbd{E} followed by a digit are forbidden, due to a clash with
+the floating point exponent notation : we understand \kbd{1.e2} as
+$100.000\dots$, not as extracting member \kbd{e2} of object \kbd{1}.
 
 \section{Strings and Keywords}\sidx{string}\sidx{keyword}
 \label{se:strings}
