@@ -414,6 +414,30 @@ is_monomial_test(GEN x, long v, int(*test)(GEN))
     if (!gequal0(gel(x,i))) return 0;
   return 1;
 }
+static int
+col_test(GEN x, int(*test)(GEN))
+{
+  long i, l = lg(x);
+  if (!l) return 0;
+  if (!test(gel(x,1))) return 0;
+  for (i = 2; i < l; i++)
+    if (!gequal0(gel(x,i))) return 0;
+  return 1;
+}
+static int
+mat_test(GEN x, int(*test)(GEN))
+{
+  long i, j, l = lg(x);
+  if (!l || l != lg(gel(x,1))) return 0;
+  for (i = 1; i < l; i++)
+    for (j = 1; j < l; j++)
+      if (i == j) {
+        if (!test(gcoeff(x,i,i))) return 0;
+      } else {
+        if (!gequal0(gcoeff(x,i,j))) return 0;
+      }
+  return 1;
+}
 
 /* returns 1 whenever x = 1, and 0 otherwise */
 int
@@ -449,6 +473,8 @@ gequal1(GEN x)
     case t_SER: return is_monomial_test(x, valp(x), &gequal1);
 
     case t_RFRAC: return gequal(gel(x,1), gel(x,2));
+    case t_COL: return col_test(x, &gequal1);
+    case t_MAT: return mat_test(x, &gequal1);
   }
   return 0;
 }
@@ -496,6 +522,8 @@ gequalm1(GEN x)
 
     case t_RFRAC:
       av=avma; y=gequal(gel(x,1), gneg_i(gel(x,2))); avma=av; return y;
+    case t_COL: return col_test(x, &gequalm1);
+    case t_MAT: return mat_test(x, &gequalm1);
   }
   return 0;
 }
