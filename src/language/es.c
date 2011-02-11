@@ -4088,19 +4088,19 @@ readbin(const char *name, FILE *f, int *vector)
 /*******************************************************************/
 /* print a vector of GENs */
 void
-pariOut_print0(PariOUT *OUT, GEN g, long flag)
+pariOut_print0(PariOUT *out, GEN g, long flag)
 {
-  OUT_FUN out = get_fun(flag);
+  OUT_FUN f = get_fun(flag);
   long i, l = lg(g);
   for (i = 1; i < l; i++)
   {
     GEN x = gel(g,i);
     if (typ(x)==t_STR)
-      pariOut_puts(OUT, GSTR(x)); /* text surrounded by "" otherwise */
+      pariOut_puts(out, GSTR(x)); /* text surrounded by "" otherwise */
     else
     {
-      char *s = GENtostr_fun(x, GP_DATA->fmt, out);
-      pariOut_puts(OUT, s); free(s);
+      char *s = GENtostr_fun(x, GP_DATA->fmt, f);
+      pariOut_puts(out, s); free(s);
     }
   }
 }

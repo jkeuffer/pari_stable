@@ -1449,7 +1449,7 @@ void    pari_vfprintf(FILE *file, const char *fmt, va_list ap);
 void    pari_vprintf(const char *fmt, va_list ap);
 char*   pari_vsprintf(const char *fmt, va_list ap);
 char*   path_expand(const char *s);
-void    pariOut_print0(PariOUT *OUT, GEN g, long flag);
+void    pariOut_print0(PariOUT *out, GEN g, long flag);
 void    pariOut_printf(PariOUT *out, const char *fmt, ...);
 void    pariOut_putc(PariOUT *out, char c);
 void    pariOut_puts(PariOUT *out, const char *s);
