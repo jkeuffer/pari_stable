@@ -2766,7 +2766,10 @@ quadhilbertreal(GEN D, long prec)
     VOLATILE GEN pol = NULL;
     CATCH(precer) {
       prec += EXTRA_PREC;
-      pari_warn(warnprec, "quadhilbertreal", prec);
+      if (DEBUGLEVEL) pari_warn(warnprec, "quadhilbertreal", prec);
+      bnr = bnrnewprec_shallow(bnr, prec);
+      bnf = bnr_get_bnf(bnr);
+      nf  = bnf_get_nf(bnf);
     } TRY {
       /* find the modulus defining N */
       data = FindModulus(bnr, dtQ, &newprec);

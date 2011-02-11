@@ -1399,12 +1399,25 @@ prec_arch(GEN bnf)
   return DEFAULTPREC;
 }
 
+static long
+needed_bitprec(GEN x)
+{
+  long e = 0, i, f, l = lg(x);
+  for (i = 1; i < l; i++)
+  {
+    GEN c = gel(x,i);
+    f = gexpo(c) - bit_accuracy(gprecision(c));
+    if (f > e) e = f;
+  }
+  return f;
+}
+
 /* col = archimedian components of x, Nx = kNx^e its norm (e > 0, usually = 1),
  * dx a bound for its denominator. Return x or NULL (fail) */
 GEN
 isprincipalarch(GEN bnf, GEN col, GEN kNx, GEN e, GEN dx, long *pe)
 {
-  GEN nf, x, logfu, s, M;
+  GEN nf, x, y, logfu, s, M;
   long N, R1, RU, i, prec = gprecision(col);
   bnf = checkbnf(bnf); nf = bnf_get_nf(bnf); M = nf_get_M(nf);
   if (!prec) prec = prec_arch(bnf);
@@ -1426,8 +1439,14 @@ isprincipalarch(GEN bnf, GEN col, GEN kNx, GEN e, GEN dx, long *pe)
   for (   ; i<=RU; i++) gel(col,i) = gexp(gadd(s, gmul2n(gel(col,i),-1)),prec);
   /* d.alpha such that x = alpha \prod gj^ej */
   x = RgM_solve_realimag(M,col); if (!x) return NULL;
-  x = grndtoi(RgC_Rg_mul(x, dx), pe);
-  return (*pe > -5)? NULL: RgC_Rg_div(x, dx);
+  x = RgC_Rg_mul(x, dx);
+  y = grndtoi(x, pe);
+  if (*pe > -5)
+  {
+    *pe = needed_bitprec(x);
+    return NULL;
+  }
+  return RgC_Rg_div(y, dx);
 }
 
 /* y = C \prod g[i]^e[i] ? */
@@ -2854,12 +2873,15 @@ bnfnewprec_shallow(GEN bnf, long prec)
   matal = check_and_build_matal(bnf);
   for(;;)
   {
-    pari_sp av=avma;
+    pari_sp av = avma;
     nf = nfnewprec_shallow(nf0,prec);
     mun = get_archclean(nf,funits,prec,1);
-    gac = get_archclean(nf,matal,prec,0);
-    if (mun && gac) break;
-    prec++; avma = av;
+    if (mun)
+    {
+      gac = get_archclean(nf,matal,prec,0);
+      if (gac) break;
+    }
+    avma = av; prec = (prec-1)<<1;
     if (DEBUGLEVEL) pari_warn(warnprec,"bnfnewprec(extra)",prec);
   }
   if (prec != prec1)
