@@ -2,42 +2,49 @@
 
 #include <omp.h>       /* Include OpenMP headers */
 
+#define MAXTHREADS 3  /* Max number of parallel threads */
+
 int
 main(void)
 {
   GEN M,N1,N2, F1,F2,D;
-  struct pari_thread pth1, pth2, pth3;
+  struct pari_thread pth[MAXTHREADS];
+  int numth = omp_get_max_threads(), i;
   /* Initialise the main PARI stack and global objects (gen_0, etc.) */
   pari_init(4000000,500000);
+  if (numth > MAXTHREADS)
+  {
+    numth = MAXTHREADS;
+    omp_set_num_threads(numth);
+  }
   /* Compute in the main PARI stack */
   N1 = addis(int2n(256), 1); /* 2^256 + 1 */
   N2 = subis(int2n(193), 1); /* 2^193 - 1 */
   M = mathilbert(80);
   /*Allocate pari thread structures */
-  pari_thread_alloc(&pth1,4000000,NULL);
-  pari_thread_alloc(&pth2,4000000,NULL);
-  pari_thread_alloc(&pth3,4000000,NULL);
-#pragma omp parallel num_threads(4)
+  for (i = 1; i < numth; i++) pari_thread_alloc(&pth[i],4000000,NULL);
+#pragma omp parallel
   {
-    switch(omp_get_thread_num())
+    int this_th = omp_get_thread_num();
+    if (this_th) (void)pari_thread_start(&pth[this_th]);
+#pragma omp sections
     {
-      case 1:
-        (void)pari_thread_start(&pth1);
+#pragma omp section
+      {
         F1 = factor(N1);
-        break;
-      case 2:
-        (void)pari_thread_start(&pth2);
+      }
+#pragma omp section
+      {
         F2 = factor(N2);
-        break;
-      case 3:
-        (void)pari_thread_start(&pth3);
+      }
+#pragma omp section
+      {
         D = det(M);
-        break;
-    }
-  }
+      }
+    } /* omp sections */
+    if (this_th) pari_thread_close();
+  } /* omp parallel */
   pari_printf("F1=%Ps\nF2=%Ps\nlog(D)=%Ps\n", F1, F2, glog(D,3));
-  pari_thread_free(&pth1);
-  pari_thread_free(&pth2);
-  pari_thread_free(&pth3);
+  for (i = 1; i < numth; i++) pari_thread_free(&pth[i]);
   return 0;
 }
