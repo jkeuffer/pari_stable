@@ -1509,7 +1509,7 @@ new_line(PariOUT *out, const char *prefix)
  * If str is NULL, omit the arrow, end the text with '\n'.
  * If prefix is NULL, use "" */
 void
-print_prefixed_text(PariOUT *out, const char *s, const char *prefix, 
+print_prefixed_text(PariOUT *out, const char *s, const char *prefix,
                     const char *str)
 {
   const long prelen = prefix? strlen_real(prefix): 0;

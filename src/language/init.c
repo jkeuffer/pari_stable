@@ -958,7 +958,7 @@ pari_sigint(const char *s)
   err_init();
   closure_err();
   err_init_msg(talker);
-  pariOut_puts(pariErr, s); 
+  pariOut_puts(pariErr, s);
   pariOut_putc(pariErr, '.');
   pariOut_term_color(pariErr, c_NONE);
   pariErr->flush();
@@ -1008,7 +1008,7 @@ pari_err(int numerr, ...)
       case talker: case alarmer: {
         const char *ch1 = va_arg(ap, char*);
         pariOut_vprintf(pariErr, ch1,ap);
-        pariOut_putc(pariErr, '.'); 
+        pariOut_putc(pariErr, '.');
         break;
       }
       case user:
@@ -1816,7 +1816,7 @@ msgTIMER(pari_timer *T, const char *format, ...)
   va_start(args, format);
   pariOut_vprintf(pariErr, format,args);
   va_end(args);
-  pariOut_printf(pariErr, ": %ld\n", TIMER(T)); 
+  pariOut_printf(pariErr, ": %ld\n", TIMER(T));
   pariErr->flush();
 }
 
