@@ -675,6 +675,7 @@ for dir in basemath modules language gp graph systems; do
     ;;
   paricfg)
     depend="./paricfg.h"
+    cflags="$cflags \$(DLCFLAGS)"
     ;;
   plotport)
     cflags="$cflags -I$src/graph"
