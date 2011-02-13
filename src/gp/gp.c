@@ -1396,7 +1396,7 @@ expand_prompt(const char *prompt, filtre_t *F)
 /*                           GP MAIN LOOP                           */
 /*                                                                  */
 /********************************************************************/
-void
+static void
 update_logfile(const char *prompt, const char *s)
 {
   switch (logstyle) {
@@ -1418,9 +1418,17 @@ update_logfile(const char *prompt, const char *s)
   }
 }
 
-/* PROMPT = NULL --> from gprc. Return 1 if new input, and 0 if EOF */
+void
+echo_and_log(const char *prompt, const char *s)
+{
+  if (GP_DATA->echo) { pari_puts(prompt); pari_puts(s); pari_putc('\n'); }
+  else if (pari_logfile) update_logfile(prompt, s);
+  pari_flush();
+}
+
+/* prompt = NULL --> from gprc. Return 1 if new input, and 0 if EOF */
 static int
-get_line_from_file(const char *PROMPT, filtre_t *F, FILE *file)
+get_line_from_file(const char *prompt, filtre_t *F, FILE *file)
 {
   const int Texmacs_stdin = ((GP_DATA->flags & gpd_TEXMACS) && file == stdin);
   char *s;
@@ -1437,14 +1445,8 @@ get_line_from_file(const char *PROMPT, filtre_t *F, FILE *file)
   }
 
   s = ((Buffer*)F->buf)->buf;
-  if (*s && PROMPT) /* don't echo if from gprc */
-  {
-    if (GP_DATA->echo)
-      { pari_puts(PROMPT); pari_puts(s); pari_putc('\n'); }
-    else if (pari_logfile)
-      update_logfile(PROMPT, s);
-    pari_flush();
-  }
+  /* don't log if from gprc or empty input */
+  if (*s && prompt) echo_and_log(prompt, s);
   if (GP_DATA->flags & gpd_TEXMACS)
   {
     tm_did_complete = 0;
@@ -1463,7 +1465,8 @@ is_interactive(void)
   return pari_infile == stdin && (!f || pari_stdin_isatty());
 }
 
-/* return 0 if no line could be read (EOF) */
+/* return 0 if no line could be read (EOF). If PROMPT = NULL, expand and
+ * color default prompt; otherwise, use PROMPT as-is. */
 static int
 gp_read_line(filtre_t *F, const char *PROMPT)
 {
@@ -1474,15 +1477,15 @@ gp_read_line(filtre_t *F, const char *PROMPT)
   if (b->len > 100000) fix_buffer(b, 100000);
   if (is_interactive())
   {
+    const char *p = PROMPT? PROMPT: color_prompt(expand_prompt(Prompt, F));
 #ifdef READLINE
     if (GP_DATA->use_readline)
-      res = get_line_from_readline(PROMPT? PROMPT: Prompt, Prompt_cont, F);
+      res = get_line_from_readline(p, Prompt_cont, F);
     else
 #endif
     {
-      if (!PROMPT) PROMPT = color_prompt( expand_prompt(Prompt, F) );
-      pari_puts(PROMPT); pari_flush();
-      res = get_line_from_file(PROMPT,F,pari_infile);
+      pari_puts(p); pari_flush();
+      res = get_line_from_file(p, F, pari_infile);
     }
     if (!disable_color) { term_color(c_NONE); pari_flush(); }
   }

@@ -26,6 +26,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "../systems/mingw/mingw.h"
 #endif
 
+static const char esc = (0x1f & '['); /* C-[ = escape */
+
 typedef struct outString {
   char *string; /* start of the output buffer */
   char *end;    /* end of the output buffer */
@@ -375,60 +377,49 @@ input_loop(filtre_t *F, input_method *IM)
 /**                                                                **/
 /********************************************************************/
 PariOUT *pariOut, *pariErr;
+static void
+_fputs(const char *s, FILE *f ) {
+#ifdef _WIN32
+   win32_ansi_fputs(s, f);
+#else
+  fputs(s, f);
+#endif
+}
+static void
+_putc_log(char c) { if (pari_logfile) (void)putc(c, pari_logfile); }
+static void
+_puts_log(const char *s) {
+  if (pari_logfile) {
+    if (*s != esc || logstyle == logstyle_color)
+      (void)fputs(s, pari_logfile);
+  }
+}
+static void
+_flush_log() { (void)fflush(pari_logfile); }
 
 static void
-normalOutC(char c)
-{
-  putc(c, pari_outfile);
-  if (pari_logfile) putc(c, pari_logfile);
-}
+normalOutC(char c) { putc(c, pari_outfile); _putc_log(c); }
 static void
-normalOutS(const char *s)
-{
-#ifdef _WIN32
-   win32_ansi_fputs(s, pari_outfile);
-#else
-  fputs(s, pari_outfile);
-#endif
-  if (pari_logfile) { fputs(s, pari_logfile); }
-}
+normalOutS(const char *s) { _fputs(s, pari_outfile); _puts_log(s); }
 static void
-normalOutF(void)
-{
-  fflush(pari_outfile);
-  if (pari_logfile) fflush(pari_logfile);
-}
+normalOutF(void) { fflush(pari_outfile); _flush_log(); }
 static PariOUT defaultOut = {normalOutC, normalOutS, normalOutF};
 
 static void
-normalErrC(char c)
-{
-  putc(c, pari_errfile);
-  if (pari_logfile) putc(c, pari_logfile);
-}
+normalErrC(char c) { putc(c, pari_errfile); _putc_log(c); }
 static void
-normalErrS(const char *s)
-{
-#ifdef _WIN32
-   win32_ansi_fputs(s, pari_errfile);
-#else
-  fputs(s, pari_errfile);
-#endif
-  if (pari_logfile) fputs(s, pari_logfile);
-}
+normalErrS(const char *s) { _fputs(s, pari_errfile); _puts_log(s); }
 static void
-normalErrF(void)
-{
-  fflush(pari_errfile);
-  if (pari_logfile) fflush(pari_logfile);
-}
+normalErrF(void) { fflush(pari_errfile); _flush_log(); }
 static PariOUT defaultErr = {normalErrC, normalErrS, normalErrF};
 
 /**                         GENERIC PRINTING                       **/
 void
 initout(int initerr)
 {
-  pari_infile = stdin; pari_outfile = stdout; pari_errfile = stderr;
+  pari_infile = stdin;
+  pari_outfile = stdout;
+  pari_errfile = stderr;
   pariOut = &defaultOut;
   if (initerr) pariErr = &defaultErr;
 }
@@ -1311,15 +1302,10 @@ void
 pariOut_term_color(PariOUT *out, long c)
 {
   static char s[COLOR_LEN];
-  FILE *o_logfile = pari_logfile;
-  if (logstyle != logstyle_color) pari_logfile = NULL; /* Ugly hack */
   out->puts(term_get_color(s, c));
-  pari_logfile = o_logfile;
 }
 void
 term_color(long c) { pariOut_term_color(pariOut, c); }
-
-static const char esc = (0x1f & '['); /* C-[ = escape */
 
 char *
 term_get_color(char *s, long n)

@@ -935,10 +935,11 @@ gprl_input(char **endp, int first, input_method *IM, filtre_t *F)
   Buffer *b = F->buf;
   ulong used = *endp - b->buf;
   ulong left = b->len - used, l;
-  const char *prompt = expand_prompt(first? IM->prompt: IM->prompt_cont, F);
+  const char *prompt = first? IM->prompt
+                            : color_prompt(expand_prompt(IM->prompt_cont, F));
   char *s, *t;
 
-  if (! (s = readline(color_prompt(prompt))) ) return NULL; /* EOF */
+  if (! (s = readline(prompt)) ) return NULL; /* EOF */
   gp_add_history(s); /* Makes a copy */
   l = strlen(s) + 1;
   /* put back \n that readline stripped. This is needed for
@@ -987,9 +988,7 @@ get_line_from_readline(const char *prompt, const char *prompt_cont, filtre_t *F)
       }
       gp_add_history(s);
     }
-    if (GP_DATA->echo)
-      { pari_puts(color_prompt(prompt)); pari_puts(s); pari_putc('\n'); }
-    if (pari_logfile) update_logfile(expand_prompt(IM.prompt, F), s);
+    echo_and_log(prompt, s);
   }
   return 1;
 }

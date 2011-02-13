@@ -21,10 +21,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 BEGINEXTERN
 
 void aide(const char *s, long flag);
+void echo_and_log(const char *prompt, const char *s);
 int  get_line_from_readline(const char *prompt, const char *prompt_cont, filtre_t *F);
 void gp_output(GEN z, gp_data *G);
 void init_readline(void);
-void update_logfile(const char *prompt, const char *s);
 void texmacs_completion(const char *s, long pos);
 const char *color_prompt(const char *prompt);
 void print_fun_list(char **list, long nbli);
