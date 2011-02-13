@@ -810,7 +810,6 @@ gequal(GEN x, GEN y)
         return FF_equal(x,y);
 
       case t_QFR:
-            if (!gequal(gel(x,4),gel(y,4))) return 0; /* fall through */
       case t_QFI:
         return equalii(gel(x,1),gel(y,1))
             && equalii(gel(x,2),gel(y,2))

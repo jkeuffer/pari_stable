@@ -77,6 +77,8 @@ BA 10-[libpari] nf_get_TrInv renamed to nf_get_diff
    15- cleanup and document term_color() and term_get_color()
 BA 16- prototype of summations functions now is fun(void *E, GEN call(void*, GEN),...)
 BA 17- traversesubgroups renamed to forsubgroup.
+   18- t_QFR with the same coefficients but different distance component are
+       now tested equal by == (they are still different according to ===).
 
   Added
 BA  1- trap keyword "syntaxer" to trap syntax error from eval.

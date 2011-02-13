@@ -616,17 +616,17 @@ said about fractions in \secref{se:FRAC} remains valid here.
 \subsec{Binary quadratic forms of positive or negative discriminant}%
 \sidx{binary quadratic form}
 (\tet{t_QFR} and \tet{t_QFI}):
-these are input using the function \kbd{Qfb} (see Chapter~3). For example
-\kbd{Qfb(1,2,3)} creates the binary form $x^2+2xy+3y^2$. It is imaginary (of
-internal type \typ{QFI}) since $2^2 - 4\times 3 = -8$ is negative. Although
-imaginary forms could be positive or negative definite, only positive
-definite forms are implemented.
+these are input using the function \kbd{Qfb}. For example \kbd{Qfb(1,2,3)}
+creates the binary form $x^2+2xy+3y^2$. It is imaginary (of internal type
+\typ{QFI}) since its discriminant $2^2 - 4\times 3 = -8$ is negative.
+Although imaginary forms could be positive or negative definite, only
+positive definite forms are implemented.
 
-In the case of forms with positive discriminant (\typ{QFR}), you may add
-an optional fourth component (related to the regulator, more precisely to
-Shanks and Lenstra's ``distance''), which must be a real number. See also the
+In the case of forms with positive discriminant (\typ{QFR}), you may add an
+optional fourth component (related to the regulator, more precisely to Shanks
+and Lenstra's ``distance''), which must be a real number. See also the
 function \kbd{qfbprimeform} which directly creates a prime form of given
-discriminant (see Chapter~3).
+discriminant.
 
 \subsec{Row and column vectors}\sidx{row vector}\sidx{column vector}
 (\tet{t_VEC} and \tet{t_COL}): to enter a row vector, type the components
@@ -895,7 +895,8 @@ returning 1 for \kbd{true} and 0 for \kbd{false}. For instance,
 
 \kbd{<>}, \kbd{!=}: test for (exact) inequality.
 
-\kbd{==}: test for (exact) equality.
+\kbd{==}: test for (exact) equality. \typ{QFR} having the same coefficients
+but a different distance component are tested as equal.
 
 \kbd{===}: test whether two objects are identical component-wise. This is
 stricter than \kbd{==} : for instance, the integer 0, a 0 polynomial or a
