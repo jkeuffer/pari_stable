@@ -738,18 +738,18 @@ cleanarch(GEN x, long N, long prec)
 }
 
 static GEN
-not_given(long force, long reason)
+not_given(long reason)
 {
-  switch(reason)
-  {
-    case fupb_LARGE:
-      pari_warn(warner,"fundamental units too large, not given");
-      break;
-    case fupb_PRECI:
-      if (!force)
+  if (DEBUGLEVEL)
+    switch(reason)
+    {
+      case fupb_LARGE:
+        pari_warn(warner,"fundamental units too large, not given");
+        break;
+      case fupb_PRECI:
         pari_warn(warner,"insufficient precision for fundamental units, not given");
-      break;
-  }
+        break;
+    }
   return cgetg(1,t_MAT);
 }
 
@@ -771,7 +771,7 @@ expgexpo(GEN x)
 }
 
 static GEN
-getfu(GEN nf, GEN *ptA, long force, long *pte, long prec)
+getfu(GEN nf, GEN *ptA, long *pte, long prec)
 {
   GEN p1, p2, u, y, matep, A, vec, T = nf_get_pol(nf), M = nf_get_M(nf);
   long e, i, j, R1, RU, N = degpol(T);
@@ -791,23 +791,20 @@ getfu(GEN nf, GEN *ptA, long force, long *pte, long prec)
     for (   ; i<=RU; i++) gel(c,i) = gadd(s, gmul2n(gel(Aj,i),-1));
   }
   u = lll(real_i(matep));
-  if (typ(u) != t_MAT) return not_given(force, fupb_PRECI);
+  if (typ(u) != t_MAT) return not_given(fupb_PRECI);
 
   y = RgM_mul(matep,u);
-  if (expgexpo(y) > 20) {
-    if (force) pari_err(talker, "bnfinit: fundamental units too large");
-    *pte = LONG_MAX; return not_given(force, fupb_LARGE);
-  }
+  if (expgexpo(y) > 20) { *pte = LONG_MAX; return not_given(fupb_LARGE); }
 
   if (prec <= 0) prec = gprecision(A);
   y = RgM_solve_realimag(M, gexp(y,prec));
-  if (!y) return not_given(force, fupb_PRECI);
+  if (!y) return not_given(fupb_PRECI);
   y = grndtoi(y, &e);
   *pte = -e;
-  if (e >= 0) return not_given(force, fupb_PRECI);
+  if (e >= 0) return not_given(fupb_PRECI);
   for (j=1; j<RU; j++)
     if (!gequal1(idealnorm(nf, gel(y,j)))) break;
-  if (j < RU) { *pte = 0; return not_given(force, fupb_PRECI); }
+  if (j < RU) { *pte = 0; return not_given(fupb_PRECI); }
   A = RgM_mul(A,u);
 
   /* y[i] are unit generators. Normalize: smallest L2 norm + lead coeff > 0 */
@@ -844,7 +841,7 @@ init_units(GEN BNF)
   {
     pari_sp av = avma;
     GEN nf = bnf_get_nf(bnf), A = bnf_get_logfu(bnf);
-    funits = gerepilecopy(av, getfu(nf, &A, nf_FORCE, &l, 0));
+    funits = gerepilecopy(av, getfu(nf, &A, &l, 0));
     if (typ(funits) == t_MAT)
       pari_err(talker, "bnf accuracy too low to compute units on the fly");
   }
@@ -3425,9 +3422,11 @@ START:
         if (precadd <= 0) precadd = 1;
         precpb = "cleanarch"; continue;
       }
-      fu = getfu(nf, &A, flun & nf_FORCE, &e, PRECREG);
-      if (e <= 0 && (flun & nf_FORCE))
-      {
+      fu = getfu(nf, &A, &e, PRECREG);
+      if ((flun & nf_FORCE) && typ(fu) == t_MAT)
+      { /* units not found but we want them */
+        if (e > 0)
+          pari_err(talker, "bnfinit: fundamental units too large");
         if (e < 0) precadd = (DEFAULTPREC-2) + divsBIL( (-e) );
         avma = av3; precpb = "getfu"; continue;
       }

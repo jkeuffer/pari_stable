@@ -23,8 +23,7 @@ Doc: initializes a
  general algebraic number field $K$ defined by the irreducible polynomial $P$
  with integer coefficients.
 
- If the precision becomes insufficient, \kbd{gp} outputs a warning
- (\kbd{fundamental units too large, not given}) and does not strive to compute
+ If the precision becomes insufficient, \kbd{gp} does not strive to compute
  the units by default ($\fl=0$).
 
  When $\fl=1$, we insist on finding the fundamental units exactly. Be
