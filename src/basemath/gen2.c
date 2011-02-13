@@ -418,7 +418,7 @@ static int
 col_test(GEN x, int(*test)(GEN))
 {
   long i, l = lg(x);
-  if (!l) return 0;
+  if (l == 1) return 0;
   if (!test(gel(x,1))) return 0;
   for (i = 2; i < l; i++)
     if (!gequal0(gel(x,i))) return 0;
@@ -428,7 +428,7 @@ static int
 mat_test(GEN x, int(*test)(GEN))
 {
   long i, j, l = lg(x);
-  if (!l || l != lg(gel(x,1))) return 0;
+  if (l == 1 || l != lg(gel(x,1))) return 0;
   for (i = 1; i < l; i++)
     for (j = 1; j < l; j++)
       if (i == j) {
