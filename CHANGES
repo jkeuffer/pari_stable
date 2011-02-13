@@ -43,6 +43,8 @@ BA 30- ploth(x=0,1,0,"Complex|Recursive") -> SEGV [#1163]
 BA 32- forsubgroup() did not handle break/next/return.
    33- modular resultant, e.g. rnfequation(polcyclo(17,y), x+y^6,1) [#1151]
    34- gequal1(x) / gequalm1(x) did not implement gequal(x, 1) for t_COL/t_MAT
+   35- matsize(vecextract(M,0,y)) -> [;] instead of matrix with 0 and the
+       requested number of columns [#1170]
 
   Changed
 LGr1- universal constants (gen_0,gen_1, etc.) are now read-only

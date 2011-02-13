@@ -240,6 +240,19 @@ shallowextract(GEN x, GEN L)
   return NULL; /* not reached */
 }
 
+static int
+select_0_rows(GEN l)
+{
+  switch(typ(l))
+  {
+    case t_INT:
+      return (!signe(l));
+    case t_VEC: case t_COL: case t_VECSMALL:
+      return (lg(l) == 1);
+  }
+  return 0;
+}
+
 GEN
 extract0(GEN x, GEN l1, GEN l2)
 {
@@ -255,7 +268,9 @@ extract0(GEN x, GEN l1, GEN l2)
   else
   {
     if (typ(x) != t_MAT) pari_err(typeer,"extract");
-    y = shallowextract( shallowtrans( shallowextract(x,l2) ), l1 );
+    y = shallowextract(x,l2);
+    if (select_0_rows(l1)) { avma = av; return zeromat(0, lg(y)-1); }
+    y = shallowextract(shallowtrans(y), l1);
     av2 = avma;
     y = gtrans(y);
   }
