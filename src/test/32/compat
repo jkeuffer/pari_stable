@@ -357,7 +357,6 @@ mod(x^3 + 5, x^5 - 5*x^3 + 5*x + 25)
 [[x^2 + x - 1, x^2 - x - 1]]
 
 ? setrand(1);buchgenfu(x^2-x-100000)
-  *** buchgenfu: Warning: insufficient precision for fundamental units, not given.
 
 [x^2 - x - 100000]
 
@@ -2654,4 +2653,4 @@ mod(391, 3120), mod(2081, 3120)]]
 ? getheap()
 [600, 111013]
 ? print("Total time spent: ",gettime);
-Total time spent: 395
+Total time spent: 390
