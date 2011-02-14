@@ -8,3 +8,5 @@ vecextract(matid(3),"2..","..")
 vecextract(matid(3),"-2..","-1..")
 matsize(vecextract(matid(3), 0, 3))
 matsize(vecextract(matid(3), [], 3))
+matsize(vecextract(matid(6), 3, 0))
+

@@ -144,6 +144,43 @@ get_range(char *s, long *a, long *b, long *cmpl, long lx)
   *b = *a; return 1;
 }
 
+static int
+extract_selector_ok(long lx, GEN L)
+{
+  long i, l;
+  switch (typ(L))
+  {
+    case t_INT: {
+      long maxj;
+      if (!signe(L)) return 1;
+      l = lgefint(L)-1; 
+      maxj = BITS_IN_LONG - bfffo(*int_MSW(L));
+      return ((l-2) * BITS_IN_LONG + maxj < lx);
+    }
+    case t_STR: {
+      long first, last, cmpl;
+      return get_range(GSTR(L), &first, &last, &cmpl, lx);
+    }
+    case t_VEC: case t_COL:
+      l = lg(L);
+      for (i=1; i<l; i++)
+      {
+        long j = itos(gel(L,i));
+        if (j>=lx || j<=0) return 0;
+      }
+      return 1;
+    case t_VECSMALL:
+      l = lg(L);
+      for (i=1; i<l; i++)
+      {
+        long j = L[i];
+        if (j>=lx || j<=0) return 0;
+      }
+      return 1;
+  }
+  return 0;
+}
+
 GEN
 shallowextract(GEN x, GEN L)
 {
@@ -240,8 +277,9 @@ shallowextract(GEN x, GEN L)
   return NULL; /* not reached */
 }
 
+/* does the component selector l select 0 component ? */
 static int
-select_0_rows(GEN l)
+select_0(GEN l)
 {
   switch(typ(l))
   {
@@ -269,7 +307,13 @@ extract0(GEN x, GEN l1, GEN l2)
   {
     if (typ(x) != t_MAT) pari_err(typeer,"extract");
     y = shallowextract(x,l2);
-    if (select_0_rows(l1)) { avma = av; return zeromat(0, lg(y)-1); }
+    if (select_0(l1)) { avma = av; return zeromat(0, lg(y)-1); }
+    if (lg(y) == 1 && lg(x) > 1)
+    {
+      if (!extract_selector_ok(lg(gel(x,1)), l1))
+        pari_err(talker,"incorrect mask in vecextract");
+      avma = av; return cgetg(1, t_MAT);
+    }
     y = shallowextract(shallowtrans(y), l1);
     av2 = avma;
     y = gtrans(y);
