@@ -503,7 +503,7 @@ compilecast_loc(int type, int mode, const char *loc)
     break;
   case Ggen:
     if (type==Gsmall)      op_push_loc(OCstoi,0,loc);
-    else if (type==Gvoid)  op_push_loc(OCpushlong,(long)gnil,loc);
+    else if (type==Gvoid)  op_push_loc(OCpushgnil,0,loc);
     break;
   case Gvoid:
     op_push_loc(OCpop, 1,loc);

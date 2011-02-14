@@ -737,6 +737,9 @@ closure_eval(GEN C)
     case OCpushlong:
       st[sp++]=operand;
       break;
+    case OCpushgnil:
+      gel(st,sp++)=gnil;
+      break;
     case OCpushgen:
       gel(st,sp++)=gel(data,operand);
       break;
@@ -1474,6 +1477,9 @@ closure_disassemble(GEN C)
     {
     case OCpushlong:
       pari_printf("pushlong\t%ld\n",operand);
+      break;
+    case OCpushgnil:
+      pari_printf("pushgnil\n");
       break;
     case OCpushgen:
       pari_printf("pushgen\t\t%ld\n",operand);

@@ -16,7 +16,7 @@ BEGINEXTERN
 
 typedef enum {Gvoid, Gsmall, Gvec, Gvar, Ggen, Gclosure} Gtype;
 
-typedef enum {OCpushlong='A',OCpushgen,OCpushreal,OCpushstoi,OCpushvar,
+typedef enum {OCpushlong='A',OCpushgnil,OCpushgen,OCpushreal,OCpushstoi,OCpushvar,
               OCpop,
               OCstoi,OCitos,OCtostr,OCvarn,OCcopy,OCcopyifclone,
               OCprecreal,OCprecdl,
