@@ -1642,6 +1642,7 @@ break_loop(int numerr)
     sprintf(promptbuf, BREAK_LOOP_PROMPTM, s_env.n-1);
     prompt = promptbuf;
   }
+  prompt = color_prompt(prompt);
   av = avma;
   for(;;)
   {
