@@ -153,7 +153,7 @@ extract_selector_ok(long lx, GEN L)
     case t_INT: {
       long maxj;
       if (!signe(L)) return 1;
-      l = lgefint(L)-1; 
+      l = lgefint(L)-1;
       maxj = BITS_IN_LONG - bfffo(*int_MSW(L));
       return ((l-2) * BITS_IN_LONG + maxj < lx);
     }
