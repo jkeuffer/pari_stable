@@ -2,6 +2,7 @@ Function: _tovec
 Class: gp2c_internal
 Help: Create a vector holding the arguments (shallow)
 Description:
+ ():vec                  cgetg(1, t_VEC)
  (gen):vec               mkvec($1)
  (gen,gen):vec           mkvec2($1, $2)
  (gen,gen,gen):vec       mkvec3($1, $2, $3)
