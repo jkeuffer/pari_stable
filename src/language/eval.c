@@ -1359,29 +1359,12 @@ closure_evalnobrk(GEN C)
   return gerepileupto(ltop,gel(st,--sp));
 }
 
-GEN
-gp_eval(void *E, GEN x)
-{
-  GEN code = (GEN)E;
-  set_lex(-1,x);
-  return closure_evalnobrk(code);
-}
-
 void
 closure_evalvoid(GEN C)
 {
   pari_sp ltop=avma;
   closure_eval(C);
   avma=ltop;
-}
-
-long
-gp_evalvoid(void *E, GEN x)
-{
-  GEN code = (GEN)E;
-  set_lex(-1,x);
-  closure_evalvoid(code);
-  return loop_break();
 }
 
 GEN
@@ -1395,6 +1378,15 @@ closure_returnupto(GEN C)
 {
   pari_sp av=avma;
   return copyupto(closure_return(C),(GEN)av);
+}
+
+void
+closure_callvoid1(GEN C, GEN x)
+{
+  long i;
+  gel(st,sp++)=x;
+  for(i=2; i<=C[1]; i++) gel(st,sp++) = NULL;
+  closure_evalvoid(C);
 }
 
 GEN
@@ -1438,6 +1430,38 @@ closure_callgenall(GEN C, long n, ...)
   for(      ; i<=C[1]; i++) gel(st,sp++) = NULL;
   va_end(ap);
   return closure_returnupto(C);
+}
+
+GEN
+gp_eval(void *E, GEN x)
+{
+  GEN code = (GEN)E;
+  set_lex(-1,x);
+  return closure_evalnobrk(code);
+}
+
+long
+gp_evalvoid(void *E, GEN x)
+{
+  GEN code = (GEN)E;
+  set_lex(-1,x);
+  closure_evalvoid(code);
+  return loop_break();
+}
+
+GEN
+gp_call(void *E, GEN x)
+{
+  GEN code = (GEN)E;
+  return closure_callgen1(code, x);
+}
+
+long
+gp_callvoid(void *E, GEN x)
+{
+  GEN code = (GEN)E;
+  closure_callvoid1(code, x);
+  return loop_break();
 }
 
 INLINE const char *
