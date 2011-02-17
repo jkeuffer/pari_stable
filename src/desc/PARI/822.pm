@@ -113,7 +113,7 @@ output a database to STREAM in canonical 822 format.
 
 sub write
 {
-        my @order=("Function","Class","Section","C-Name","Prototype","Type","Help","Description");
+        my @order=("Function","Class","Section","C-Name","Prototype","Wrapper","Type","Help","Description","Doc");
         my %knowfields=map {$_ => 1}  @order;
 	my %data=%{shift()};
         my $STREAM=shift;
