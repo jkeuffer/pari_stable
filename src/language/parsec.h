@@ -20,6 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "tree.h"
 
 static THREAD int pari_once;
+static THREAD long pari_discarded;
 static THREAD const char *pari_lex_start, *pari_unused_chars;
 static THREAD GEN pari_lasterror;
 
@@ -87,6 +88,7 @@ parsestate_reset(void)
   pari_lex_start = NULL;
   pari_unused_chars=NULL;
   pari_once=1;
+  pari_discarded=0;
   pari_lasterror=NULL;
 }
 void
@@ -96,6 +98,7 @@ parsestate_save(struct pari_parsestate *state)
   state->lex_start = pari_lex_start;
   state->unused_chars = pari_unused_chars;
   state->once = pari_once;
+  state->discarded = pari_discarded;
   state->lasterror = pari_lasterror;
 }
 void
@@ -105,6 +108,7 @@ parsestate_restore(struct pari_parsestate *state)
   pari_lex_start = state->lex_start;
   pari_unused_chars = state->unused_chars;
   pari_once = state->once;
+  pari_discarded = state->discarded;
   pari_lasterror = state->lasterror;
 }
 
@@ -116,9 +120,10 @@ pari_compile_str(char *lex, int strict)
   struct pari_parsestate state;
   parsestate_save(&state);
   pari_lex_start = lex;
-  if (pari_parse(&lex))
+  pari_discarded = 0;
+  if (pari_parse(&lex) || pari_discarded!=1)
   {
-    if (pari_unused_chars)
+    if (pari_unused_chars && pari_discarded==1)
       unused_chars(pari_unused_chars,strict);
     else
       compile_err(GSTR(pari_lasterror),lex-1);

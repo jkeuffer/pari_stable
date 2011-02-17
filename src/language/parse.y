@@ -78,6 +78,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 %type <val> matrixelts matrixlines arg listarg definition
 %type <val> funcid memberid
 %type <val> backticks history
+%destructor { pari_discarded++; } <val>
 %%
 
 sequnused: seq       {$$=$1;}
@@ -181,7 +182,7 @@ matrix: '[' ']'             {$$=newnode(Fvec,-1,-1,&@$);}
       | '[' ';' ']'         {$$=newnode(Fmat,-1,-1,&@$);}
       | '[' matrixelts ']'  {$$=newnode(Fvec,$2,-1,&@$);}
       | '[' matrixlines ']' {$$=newnode(Fmat,$2,-1,&@$);}
-      | '[' error ']'       {YYABORT;}
+      | '[' error ']'       {$$=-1; YYABORT;}
 ;
 
 arg: seq        {$$=$1;}

@@ -69,6 +69,7 @@ struct pari_parsestate
 {
   long node;
   int once;
+  long discarded;
   const char *lex_start, *unused_chars;
   GEN lasterror;
 };
