@@ -2,6 +2,9 @@ Function: suminf
 Section: sums
 C-Name: suminf0
 Prototype: V=GEp
+Wrapper: _wrap_G
+Description:
+  (gen,gen):gen:prec suminf(${2 cookie}, ${2 wrapper}, $1, prec)
 Help: suminf(X=a,expr): infinite sum (X goes from a to infinity) of real or
  complex expression expr.
 Doc: \idx{infinite sum} of expression

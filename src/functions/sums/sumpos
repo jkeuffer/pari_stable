@@ -2,6 +2,10 @@ Function: sumpos
 Section: sums
 C-Name: sumpos0
 Prototype: V=GED0,L,p
+Wrapper: _wrap_G
+Description:
+  (gen,gen,?0):gen:prec sumpos(${2 cookie}, ${2 wrapper}, $1, prec)
+  (gen,gen,1):gen:prec sumpos2(${2 cookie}, ${2 wrapper}, $1, prec)
 Help: sumpos(X=a,expr,{flag=0}): sum of positive (or negative) series expr,
  the formal
  variable X starting at a. flag is optional, and can be 0: default, or 1:

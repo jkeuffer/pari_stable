@@ -2,6 +2,9 @@ Function: intlaplaceinv
 Section: sums
 C-Name: intlaplaceinv0
 Prototype: V=GGEDGp
+Wrapper: _wrap_G
+Description:
+  (gen,gen,gen,?gen):gen:prec intlaplaceinv(${3 cookie}, ${3 wrapper}, $1, $2, $4, prec)
 Help: intlaplaceinv(X=sig,z,expr,{tab}): numerical integration on the line
  real(X) = sig of expr(X)exp(zX)dz/(2*I*Pi), i.e. inverse Laplace transform of
  expr at z. tab is as in intnum.

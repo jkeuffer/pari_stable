@@ -2,6 +2,9 @@ Function: intnum
 Section: sums
 C-Name: intnum0
 Prototype: V=GGEDGp
+Wrapper: _wrap_G
+Description:
+  (gen,gen,gen,?gen):gen:prec intnum(${3 cookie}, ${3 wrapper}, $1, $2, $4, prec)
 Help: intnum(X=a,b,expr,{tab}): numerical integration of expr from a to b with
  respect to X. Plus/minus infinity is coded as [+1]/ [-1]. Finally tab is
  either omitted (let the program choose the integration step), a positive

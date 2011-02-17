@@ -2,6 +2,9 @@ Function: intcirc
 Section: sums
 C-Name: intcirc0
 Prototype: V=GGEDGp
+Wrapper: _wrap_G
+Description:
+  (gen,gen,gen,?gen):gen:prec intcirc(${3 cookie}, ${3 wrapper}, $1, $2, $4, prec)
 Help: intcirc(X=a,R,expr,{tab}): numerical integration of expr on the circle
  |z-a|=R, divided by 2*I*Pi. tab is as in intnum.
 Doc: numerical

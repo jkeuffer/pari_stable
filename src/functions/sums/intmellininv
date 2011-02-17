@@ -2,6 +2,9 @@ Function: intmellininv
 Section: sums
 C-Name: intmellininv0
 Prototype: V=GGEDGp
+Wrapper: _wrap_G
+Description:
+  (gen,gen,gen,?gen):gen:prec intmellininv(${3 cookie}, ${3 wrapper}, $1, $2, $4, prec)
 Help: intmellininv(X=sig,z,expr,{tab}): numerical integration on the
  line real(X) = sig (or sig[1]) of expr(X)z^(-X)dX/(2*I*Pi), i.e. inverse Mellin
  transform of s at x. sig is coded as follows: either it is real, and then

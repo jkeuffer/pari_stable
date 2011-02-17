@@ -2,6 +2,10 @@ Function: sumalt
 Section: sums
 C-Name: sumalt0
 Prototype: V=GED0,L,p
+Wrapper: _wrap_G
+Description:
+  (gen,gen,?0):gen:prec sumalt(${2 cookie}, ${2 wrapper}, $1, prec)
+  (gen,gen,1):gen:prec sumalt2(${2 cookie}, ${2 wrapper}, $1, prec)
 Help: sumalt(X=a,expr,{flag=0}): Cohen-Villegas-Zagier's acceleration of
  alternating series expr, X starting at a. flag is optional, and can be 0:
  default, or 1: uses a slightly different method using Zagier's polynomials.

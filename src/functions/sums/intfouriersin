@@ -2,6 +2,9 @@ Function: intfouriersin
 Section: sums
 C-Name: intfoursin0
 Prototype: V=GGGEDGp
+Wrapper: _wrap_G
+Description:
+  (gen,gen,gen,gen,?gen):gen:prec intfouriercos(${4 cookie}, ${4 wrapper}, $1, $2, $3, $5, prec)
 Help: intfouriersin(X=a,b,z,expr,{tab}): numerical integration from a to b
  of sin(2*Pi*z*X)*expr(X) from a to b, where a, b, and tab are as in intnum.
  This is the sine-Fourier transform if a=-infty and b=+infty.
