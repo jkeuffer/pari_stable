@@ -8036,6 +8036,10 @@ has arity $\geq \kbd{lg(args)-1}$.
 \fun{GEN}{closure_callgen2}{GEN C, GEN x, GEN y} evaluate the \typ{CLOSURE}
 \kbd{C} with argument \kbd{x}, \kbd{y}. Assumes \kbd{C} has arity $\geq 2$.
 
+\fun{void}{closure_callvoid1}{GEN C, GEN x} evaluate the \typ{CLOSURE}
+\kbd{C} with argument \kbd{x} and discard the result. Assumes \kbd{C}
+has arity $\geq 1$.
+
 The following technical functions are used to evaluate \emph{inline}
 closures and closures of arity 0.
 
