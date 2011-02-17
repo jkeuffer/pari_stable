@@ -1,0 +1,9 @@
+Function: _wrap_G
+Class: gp2c_internal
+C-Name: gp_call
+Prototype: G
+
+Function: _wrap_lG
+Class: gp2c_internal
+C-Name: gp_callvoid
+Prototype: lG
