@@ -428,7 +428,8 @@ static int
 mat_test(GEN x, int(*test)(GEN))
 {
   long i, j, l = lg(x);
-  if (l == 1 || l != lg(gel(x,1))) return 0;
+  if (l == 1) return 1;
+  if (l != lg(gel(x,1))) return 0;
   for (i = 1; i < l; i++)
     for (j = 1; j < l; j++)
       if (i == j) {
