@@ -78,7 +78,7 @@ GEN
 idealhnf_two(GEN nf, GEN v)
 {
   GEN p = gel(v,1), pi = gel(v,2), m = zk_scalar_or_multable(nf, pi);
-  if (typ(m) == t_INT) return scalarmat(p, nf_get_degree(nf));
+  if (typ(m) == t_INT) return scalarmat(gcdii(m,p), nf_get_degree(nf));
   return ZM_hnfmodid(m, p);
 }
 
