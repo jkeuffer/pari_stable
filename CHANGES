@@ -45,6 +45,7 @@ BA 32- forsubgroup() did not handle break/next/return.
    34- gequal1(x) / gequalm1(x) did not implement gequal(x, 1) for t_COL/t_MAT
    35- matsize(vecextract(M,0,y)) -> [;] instead of matrix with 0 and the
        requested number of columns [#1170]
+   36- readline completion : allow commas ',' in directory names [#105]
 
   Changed
 LGr1- universal constants (gen_0,gen_1, etc.) are now read-only

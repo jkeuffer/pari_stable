@@ -724,7 +724,7 @@ init_readline(void)
   rl_readline_name = "Pari-GP";
 
   /* added ~, ? and , */
-  rl_basic_word_break_characters = " \t\n\"\\'`@$><=;|&{(?,~";
+  rl_basic_word_break_characters = " \t\n\"\\'`@$><=;|&{(?~";
   rl_special_prefixes = "~";
 
   /* custom completer */
