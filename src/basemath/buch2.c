@@ -2603,8 +2603,6 @@ class_group_gen(GEN nf,GEN W,GEN C,GEN Vbase,long prec, GEN nf0,
   GEN z,G,Ga,ga,GD,cyc,X,Y,D,U,V,Ur,Ui,Uir,I,J,arch;
   long i,j,lo,lo0;
 
-  if (DEBUGLEVEL)
-    { fprintferr("\n#### Computing class group generators\n"); (void)timer2(); }
   D = ZM_snfall(W,&U,&V); /* UWV = D, D diagonal, G = g Ui (G=new gens, g=old) */
   Ui = RgM_inv(U);
   lo0 = lo = lg(D);
@@ -2676,7 +2674,6 @@ class_group_gen(GEN nf,GEN W,GEN C,GEN Vbase,long prec, GEN nf0,
   }
   *ptclg1 = mkvec3(ZM_det_triangular(W), cyc, G);
   *ptclg2 = mkvec3(Ur, ga,GD);
-  if (DEBUGLEVEL) msgtimer("classgroup generators");
 }
 
 /* SMALLBUCHINIT */
@@ -2881,8 +2878,6 @@ bnfnewprec_shallow(GEN bnf, long prec)
     avma = av; prec = (prec-1)<<1;
     if (DEBUGLEVEL) pari_warn(warnprec,"bnfnewprec(extra)",prec);
   }
-  if (prec != prec1)
-    { mun = gprec_w(mun,prec1); gac = gprec_w(gac,prec1); prec = prec1; }
   y = leafcopy(bnf);
   gel(y,3) = mun;
   gel(y,4) = gac;
@@ -3443,7 +3438,10 @@ START:
 
   delete_cache(&cache); delete_FB(&F);
   Vbase = vecpermute(F.LP, F.perm);
+  if (DEBUGLEVEL)
+    { fprintferr("\n#### Computing class group generators\n"); (void)timer2(); }
   class_group_gen(nf,W,C,Vbase,PRECREG,NULL, &clg1, &clg2);
+  if (DEBUGLEVEL) msgtimer("classgroup generators");
   res = get_clfu(clg1, R, zu, fu);
   res = buchall_end(nf,res,clg2,W,B,A,C,Vbase);
   res = gerepilecopy(av0, res); if (precdouble) gunclone(nf);
