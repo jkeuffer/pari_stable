@@ -78,7 +78,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 %type <val> matrixelts matrixlines arg listarg definition
 %type <val> funcid memberid
 %type <val> backticks history
-%destructor { pari_discarded++; } <val>
+%destructor { pari_discarded++; } seq sequnused matrix matrix_index expr lvalue matrixelts matrixlines arg listarg definition funcid memberid backticks history
 %%
 
 sequnused: seq       {$$=$1;}
