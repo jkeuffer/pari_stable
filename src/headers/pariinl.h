@@ -863,10 +863,6 @@ gerepileuptoint(pari_sp av, GEN x)
 INLINE GEN
 gerepileupto(pari_sp av, GEN x)
 {
-  /* Probably a mistake if av < x, but not necessarily. */
-#if 0
-  pari_warn(warner,"av < x in gerepileupto");
-#endif
   if (!isonstack(x) || (GEN)av<=x) { avma = av; return x; }
   switch(typ(x))
   { /* non-default = !is_recursive_t(tq) */
