@@ -1399,14 +1399,14 @@ prec_arch(GEN bnf)
 static long
 needed_bitprec(GEN x)
 {
-  long e = 0, i, f, l = lg(x);
+  long i, e = 0, l = lg(x);
   for (i = 1; i < l; i++)
   {
     GEN c = gel(x,i);
-    f = gexpo(c) - bit_accuracy(gprecision(c));
+    long f = gexpo(c) - bit_accuracy(gprecision(c));
     if (f > e) e = f;
   }
-  return f;
+  return e;
 }
 
 /* col = archimedian components of x, Nx = kNx^e its norm (e > 0, usually = 1),
