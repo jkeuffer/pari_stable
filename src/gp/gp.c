@@ -1399,6 +1399,7 @@ expand_prompt(const char *prompt, filtre_t *F)
 static void
 update_logfile(const char *prompt, const char *s)
 {
+  if (!pari_logfile) return;
   switch (logstyle) {
     case logstyle_TeX:
       fprintf(pari_logfile,
@@ -1422,7 +1423,7 @@ void
 echo_and_log(const char *prompt, const char *s)
 {
   if (GP_DATA->echo) { pari_puts(prompt); pari_puts(s); pari_putc('\n'); }
-  else if (pari_logfile) update_logfile(prompt, s);
+  else update_logfile(prompt, s);
   pari_flush();
 }
 
