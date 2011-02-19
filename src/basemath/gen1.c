@@ -2670,6 +2670,7 @@ gdiv(GEN x, GEN y)
       av = avma; y = RgM_inv(y);
       if (!y) pari_err(matinv1);
       return gerepileupto(av, gmul(x, y));
+    case t_VEC: case t_COL:
     case t_LIST: case t_STR: case t_VECSMALL: case t_CLOSURE:
       pari_err(operf,"/",x,y);
   }
