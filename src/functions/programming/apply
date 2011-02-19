@@ -30,3 +30,5 @@ Doc: Apply the \typ{CLOSURE} \kbd{f} to the entries of \kbd{A}. If \kbd{A}
  ? apply(lift, L);
  %2 = List([1, 2])
  @eprog
+
+ \synt{genapply}{void *E, GEN (*fun)(void*,GEN), GEN a}.

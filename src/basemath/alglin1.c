@@ -323,12 +323,11 @@ extract0(GEN x, GEN l1, GEN l2)
 }
 
 GEN
-select0(GEN f, GEN A)
+genselect(void *E, GEN (*f)(void* E, GEN x), GEN A)
 {
   long i, l, nb = 0, t = typ(A);
   GEN B, v;/* v left on stack for efficiency */
   pari_sp av;
-  if (typ(f) != t_CLOSURE || f[1] < 1) pari_err(typeer, "select");
   if (t == t_LIST)
   {
     GEN L;
@@ -337,7 +336,7 @@ select0(GEN f, GEN A)
     L = cgetg(3, t_LIST);
     l = lg(A); v = cgetg(l, t_VECSMALL); av = avma;
     for (i = 1; i < l; i++) {
-      if (! gequal0( closure_callgen1(f, gel(A,i)) )) v[++nb] = i;
+      if (! gequal0(f(E, gel(A,i)) )) v[++nb] = i;
       avma = av;
     }
     B = cgetg(nb+1, t_VEC);
@@ -350,7 +349,7 @@ select0(GEN f, GEN A)
 
   l = lg(A); v = cgetg(l, t_VECSMALL); av = avma;
   for (i = 1; i < l; i++) {
-    if (! gequal0( closure_callgen1(f, gel(A,i)) )) v[++nb] = i;
+    if (! gequal0( f(E, gel(A,i)) )) v[++nb] = i;
     avma = av;
   }
   B = cgetg(nb+1, t);
@@ -359,20 +358,26 @@ select0(GEN f, GEN A)
 }
 
 GEN
-apply0(GEN f, GEN x)
+select0(GEN f, GEN x)
+{
+  if (typ(f) != t_CLOSURE || f[1] < 1) pari_err(typeer, "select");
+  return genselect((void *) f, gp_call, x);
+}
+
+GEN
+genapply(void *E, GEN (*f)(void* E, GEN x), GEN x)
 {
   long i, lx, tx = typ(x);
   GEN y;
-  if (typ(f) != t_CLOSURE || f[1] < 1) pari_err(typeer, "apply");
-  if (is_scalar_t(tx)) return closure_callgen1(f, x);
+  if (is_scalar_t(tx)) return f(E, x);
   switch(tx) {
     case t_POL:
       y = cgetg_copy(x, &lx); y[1] = x[1];
-      for (i=2; i<lx; i++) gel(y,i) = closure_callgen1(f, gel(x,i));
+      for (i=2; i<lx; i++) gel(y,i) = f(E, gel(x,i));
       return normalizepol_lg(y, lx);
     case t_SER:
       y = cgetg_copy(x, &lx); y[1] = x[1];
-      for (i=2; i<lx; i++) gel(y,i) = closure_callgen1(f, gel(x,i));
+      for (i=2; i<lx; i++) gel(y,i) = f(E, gel(x,i));
       return normalize(y);
     case t_LIST: {
       GEN L;
@@ -380,22 +385,29 @@ apply0(GEN f, GEN x)
       if (!x) return listcreate();
       L = cgetg(3, t_LIST);
       y = cgetg_copy(x, &lx);
-      for (i = 1; i < lx; i++) gel(y,i) = closure_callgen1(f, gel(x,i));
+      for (i = 1; i < lx; i++) gel(y,i) = f(E, gel(x,i));
       list_nmax(L) = lx-1;
       list_data(L) = y; return L;
     }
     case t_MAT:
       y = cgetg_copy(x, &lx);
-      for (i = 1; i < lx; i++) gel(y,i) = apply0(f, gel(x,i));
+      for (i = 1; i < lx; i++) gel(y,i) = genapply(E, f, gel(x,i));
       return y;
 
     case t_VEC: case t_COL:
       y = cgetg_copy(x, &lx);
-      for (i = 1; i < lx; i++) gel(y,i) = closure_callgen1(f, gel(x,i));
+      for (i = 1; i < lx; i++) gel(y,i) = f(E, gel(x,i));
       return y;
   }
   pari_err(typeer,"apply");
   return NULL; /* not reached */
+}
+
+GEN
+apply0(GEN f, GEN x)
+{
+  if (typ(f) != t_CLOSURE || f[1] < 1) pari_err(typeer, "apply");
+  return genapply((void *) f, gp_call, x);
 }
 
 /*******************************************************************/
