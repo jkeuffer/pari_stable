@@ -328,7 +328,7 @@ nf_hyperell_locally_soluble(GEN nf,GEN T,GEN pr)
   avma = av; return 0;
 }
 
-/* return a * denom(a)^2 */
+/* return a * denom(a)^2, as an 'liftalg' */
 static GEN
 den_remove(GEN nf, GEN a)
 {
@@ -341,7 +341,7 @@ den_remove(GEN nf, GEN a)
     case t_COL:
       a = Q_remove_denom(a, &da);
       if (da) a = ZC_Z_mul(a, da);
-      a = nf_to_scalar_or_alg(nf, a);
+      a = coltoliftalg(nf, a);
       return a;
     default: pari_err(typeer,"nfhilbert");
       return NULL;/*not reached*/
@@ -410,7 +410,7 @@ nfhilbert(GEN nf, GEN a, GEN b)
 {
   pari_sp av = avma;
   long i, l;
-  GEN S, sa, sb;
+  GEN S, S2, Sa, Sb, sa, sb;
 
   nf = checknf(nf);
   a = nf_to_scalar_or_basis(nf, a);
@@ -428,7 +428,12 @@ nfhilbert(GEN nf, GEN a, GEN b)
 
   /* local solutions in finite completions ? (pr | 2ab)
    * primes above 2 are toughest. Try the others first */
-  S = gel(idealfactor(nf, nfmul(nf, gmul2n(a,1),b)), 1);
+  Sa = idealfactor(nf, a);
+  Sb = idealfactor(nf, b);
+  S2 = idealfactor(nf, gen_2);
+  S = merge_factor(Sa, Sb, (void*)&cmp_prime_ideal, &cmp_nodata);
+  S = merge_factor(S,  S2, (void*)&cmp_prime_ideal, &cmp_nodata);
+  S = gel(S,1);
   /* product of all hilbertp is 1 ==> remove one prime (above 2!) */
   for (i=lg(S)-1; i>1; i--)
     if (nfhilbertp(nf,a,b,gel(S,i)) < 0)
