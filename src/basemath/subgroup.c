@@ -173,7 +173,7 @@ dogroup(subgp_iter *T)
     if (T->available[i]) c[r++] = i;
     if (r > l) break;
   }
-  if (DEBUGLEVEL>2) { fprintferr("    column selection:"); printtyp(c); }
+  if (DEBUGLEVEL>6) { fprintferr("    column selection:"); printtyp(c); }
   /* a/g and maxa/maxg access the same data indexed differently */
   for (ind=0,i=1; i<=t; ind+=(l-i),i++)
   {
@@ -258,7 +258,7 @@ dopsubtyp(subgp_iter *T)
   T->g    = (GEN**)new_chunk(t+1);
   T->maxg = (GEN**)new_chunk(t+1);
 
-  if (DEBUGLEVEL) { fprintferr("  subgroup:"); printtyp(T->M); }
+  if (DEBUGLEVEL>4) { fprintferr("  subgroup:"); printtyp(T->M); }
   for (i=1; i<=t; i++)
   {
     for (r=1; r<=l; r++)
@@ -287,7 +287,7 @@ dopsub(subgp_iter *T, GEN p, GEN indexsubq)
   long *M, *L = T->L;
   long w,i,j,k,lsubq, wG = weight(L), wmin = 0, wmax = wG, n = len(L);
 
-  if (DEBUGLEVEL) { fprintferr("\ngroup:"); printtyp(L); }
+  if (DEBUGLEVEL>4) { fprintferr("\ngroup:"); printtyp(L); }
   T->count = 0;
   switch(T->boundtype)
   {
@@ -337,13 +337,13 @@ dopsub(subgp_iter *T, GEN p, GEN indexsubq)
             T->subqpart[k++] = T->subq[i];
         setlg(T->subqpart, k); avma = av;
       }
-      if (DEBUGLEVEL)
+      if (DEBUGLEVEL>4)
       {
         long *Lp = conjugate(L);
         long *Mp = conjugate(M);
         GEN BINMAT = matqpascal(len(L)+1, p);
 
-        if (DEBUGLEVEL > 3)
+        if (DEBUGLEVEL>7)
         {
           fprintferr("    lambda = "); printtyp(L);
           fprintferr("    lambda'= "); printtyp(Lp);
@@ -361,7 +361,7 @@ dopsub(subgp_iter *T, GEN p, GEN indexsubq)
       T->countsub = 0; dopsubtyp(T);
       T->count += T->countsub;
 
-      if (DEBUGLEVEL)
+      if (DEBUGLEVEL>4)
       {
         fprintferr("  countsub = %ld\n", T->countsub);
         msgtimer("for this type");
@@ -455,7 +455,7 @@ subgroup_engine(subgp_iter *T)
     avma = av; return;
   }
   if (!signe(cyc[1])) pari_err(talker,"infinite group in forsubgroup");
-  if (DEBUGLEVEL) (void)timer2();
+  if (DEBUGLEVEL>4) (void)timer2();
   fa = Z_factor(gel(cyc,1)); primlist = gel(fa,1);
   nbprim = lg(primlist);
   listL = new_chunk(n); imax = k = 0;
@@ -517,11 +517,11 @@ subgroup_engine(subgp_iter *T)
     /* lift subgroups of I to G */
     for (i=1; i<lsubq; i++)
       gel(T->subq,i) = gmul(T->powlist[k],gel(T->subq,i));
-    if (DEBUGLEVEL>2)
+    if (DEBUGLEVEL>6)
       fprintferr("(lifted) subgp of prime to %Ps part:\n%Ps\n",p, T->subq);
   }
   dopsub(T, p,indexsubq);
-  if (DEBUGLEVEL) fprintferr("nb subgroup = %ld\n",T->count);
+  if (DEBUGLEVEL>4) fprintferr("nb subgroup = %ld\n",T->count);
   avma = av;
 }
 
