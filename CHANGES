@@ -46,6 +46,7 @@ BA 32- forsubgroup() did not handle break/next/return.
    35- matsize(vecextract(M,0,y)) -> [;] instead of matrix with 0 and the
        requested number of columns [#1170]
    36- readline completion : allow commas ',' in directory names [#105]
+   37- List() == List() returned 0.
 
   Changed
 LGr1- universal constants (gen_0,gen_1, etc.) are now read-only
@@ -96,6 +97,7 @@ BA  9- PARI functions FlxqX_div
    10- PARI function ismpzero
 BA 11- PARI function bnr_get_clgp
    12- new default 'histfile' (to save readline history in between sessions)
+   13- PARI function cmp_universal
 
   Removed
 BA  1- PARI function CM_CardEFp (ellsea script deprecated).

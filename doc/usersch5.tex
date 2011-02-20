@@ -6488,6 +6488,11 @@ implementation for the common case \kbd{gen\_search(T,x,0,cmp,cmp\_nodata)}.
 
 \subsec{Further useful comparison functions}
 
+\fun{int}{cmp_universal}{GEN x, GEN y} a somewhat arbitrary universal
+comparison function, devoid of sensible mathematical meaning. It is
+transitive, and returns 0 if and only if \kbd{gidentical(x,y)} is true.
+Useful to sort and search vectors of arbitrary data.
+
 \fun{int}{cmp_nodata}{void *data, GEN x, GEN y}. This function is a hack
 used to pass an existing basic comparison function lacking the \kbd{data}
 argument, i.e. with prototype \kbd{int (*cmp)(GEN x, GEN y)}. Instead of

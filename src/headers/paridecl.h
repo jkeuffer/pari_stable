@@ -1121,6 +1121,7 @@ int     cmp_nodata(void *data, GEN x, GEN y);
 int     cmp_prime_ideal(GEN x, GEN y);
 int     cmp_prime_over_p(GEN x, GEN y);
 int     cmp_RgX(GEN x, GEN y);
+int     cmp_universal(GEN x, GEN y);
 GEN     convol(GEN x, GEN y);
 int     gen_cmp_RgX(void *data, GEN x, GEN y);
 GEN     polcyclo(long n, long v);

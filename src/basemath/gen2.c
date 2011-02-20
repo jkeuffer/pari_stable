@@ -533,6 +533,70 @@ int
 gcmpX(GEN x) { return typ(x) == t_POL && lg(x) == 4
                       && isintzero(gel(x,2)) && isint1(gel(x,3)); }
 
+static int cmp_str(const char *x, const char *y)
+{
+  int f = strcmp(x, y);
+  return f > 0? 1
+              : f? -1: 0;
+}
+
+static int cmp_universal_rec(GEN x, GEN y, long i0)
+{
+  long i, lx = lg(x), ly = lg(y);
+  if (lx < ly) return -1;
+  if (lx > ly) return 1;
+  for (i = i0; i < lx; i++)
+  {
+    int f = cmp_universal(gel(x,i), gel(y,i));
+    if (f) return f;
+  }
+  return 0;
+}
+/* Universal "meaningless" comparison function. Transitive, returns 0 iff
+ * gidentical(x,y) */
+int cmp_universal(GEN x, GEN y)
+{
+  long lx, ly, i, tx = typ(x), ty = typ(y);
+
+  if (tx < ty) return -1;
+  if (ty < tx) return 1;
+  switch(tx)
+  {
+    case t_INT: return cmpii(x,y);
+    case t_STR: return cmp_str(GSTR(x),GSTR(y));
+    case t_REAL:
+    case t_VECSMALL:
+      lx = lg(x);
+      ly = lg(y);
+      if (lx < ly) return -1;
+      if (lx > ly) return 1;
+      for (i = 1; i < lx; i++)
+      {
+        if (x[i] < y[i]) return -1;
+        if (x[i] > y[i]) return 1;
+      }
+      return 0;
+
+    case t_POL:
+    case t_SER:
+    case t_FFELT:
+    case t_CLOSURE:
+      if (x[1] < y[1]) return -1;
+      if (x[1] > y[1]) return 1;
+      return cmp_universal_rec(x, y, 2);
+
+    case t_LIST:
+      x = list_data(x);
+      y = list_data(y);
+      if (!x) return y? -1: 0;
+      if (!y) return 1;
+      return cmp_universal_rec(x, y, 1);
+
+    default:
+      return cmp_universal_rec(x, y, lontyp[tx]);
+  }
+}
+
 /* returns the sign of x - y when it makes sense. 0 otherwise */
 int
 gcmp(GEN x, GEN y)
@@ -547,9 +611,7 @@ gcmp(GEN x, GEN y)
     if (tx==t_STR)
     {
       if (ty != t_STR) return 1;
-      f = strcmp(GSTR(x),GSTR(y));
-      return f > 0? 1
-                  : f? -1: 0;
+      return cmp_str(GSTR(x), GSTR(y));
     }
     if (tx != t_FRAC)
     {
@@ -731,6 +793,12 @@ gidentical(GEN x, GEN y)
       return zv_equal(x,y);
     case t_CLOSURE:
       return closure_identical(x,y);
+    case t_LIST:
+      x = list_data(x);
+      y = list_data(y);
+      if (!x) return y? 0: 1;
+      if (!y) return 0;
+      return vecidentical(x, y);
   }
   return 0;
 }
@@ -831,6 +899,12 @@ gequal(GEN x, GEN y)
         return vecequal(x,y);
       case t_VECSMALL:
         return zv_equal(x,y);
+      case t_LIST:
+        x = list_data(x);
+        y = list_data(y);
+        if (!x) return y? 0: 1;
+        if (!y) return 0;
+        return gequal(x, y);
       case t_CLOSURE:
         return closure_identical(x,y);
     }
