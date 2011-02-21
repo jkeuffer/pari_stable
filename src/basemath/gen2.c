@@ -533,14 +533,16 @@ int
 gcmpX(GEN x) { return typ(x) == t_POL && lg(x) == 4
                       && isintzero(gel(x,2)) && isint1(gel(x,3)); }
 
-static int cmp_str(const char *x, const char *y)
+static int
+cmp_str(const char *x, const char *y)
 {
   int f = strcmp(x, y);
   return f > 0? 1
               : f? -1: 0;
 }
 
-static int cmp_universal_rec(GEN x, GEN y, long i0)
+static int
+cmp_universal_rec(GEN x, GEN y, long i0)
 {
   long i, lx = lg(x), ly = lg(y);
   if (lx < ly) return -1;
@@ -554,7 +556,8 @@ static int cmp_universal_rec(GEN x, GEN y, long i0)
 }
 /* Universal "meaningless" comparison function. Transitive, returns 0 iff
  * gidentical(x,y) */
-int cmp_universal(GEN x, GEN y)
+int
+cmp_universal(GEN x, GEN y)
 {
   long lx, ly, i, tx = typ(x), ty = typ(y);
 
