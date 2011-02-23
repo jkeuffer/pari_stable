@@ -1279,7 +1279,7 @@ Flx_halfgcd_split(GEN x, GEN y, ulong p)
   GEN R, S, V;
   GEN y1, r, q;
   long l = lgpol(x), n = l>>1, k;
-  if (l<=n) return matid2_FlxM(x[1]);
+  if (lgpol(y)<=n) return matid2_FlxM(x[1]);
   R = Flx_halfgcd(Flx_shift(x,-n),Flx_shift(y,-n),p);
   V = FlxM_Flx_mul2(R,x,y,p); y1 = gel(V,2);
   if (lgpol(y1)<=n) return gerepilecopy(av, R);
@@ -1290,7 +1290,7 @@ Flx_halfgcd_split(GEN x, GEN y, ulong p)
 }
 
 /* Return M in GL_2(Fl[X]) such that:
-if [a',b']~=M*[a,b]~ then degpol(a')>= (lgpol(a)>>1) >degpol(b1)
+if [a',b']~=M*[a,b]~ then degpol(a')>= (lgpol(a)>>1) >degpol(b')
 */
 
 static GEN

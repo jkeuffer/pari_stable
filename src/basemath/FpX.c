@@ -457,7 +457,7 @@ FpX_halfgcd_split(GEN x, GEN y, GEN p)
   GEN R, S, V;
   GEN y1, r, q;
   long l = lgpol(x), n = l>>1, k;
-  if (l<=n) return matid2_FpXM(varn(x));
+  if (lgpol(y)<=n) return matid2_FpXM(varn(x));
   R = FpX_halfgcd(RgX_shift(x,-n),RgX_shift(y,-n),p);
   V = FpXM_FpX_mul2(R,x,y,p); y1 = gel(V,2);
   if (lgpol(y1)<=n) return gerepilecopy(av, R);
@@ -468,7 +468,7 @@ FpX_halfgcd_split(GEN x, GEN y, GEN p)
 }
 
 /* Return M in GL_2(Fp[X]) such that:
-if [a',b']~=M*[a,b]~ then degpol(a')>= (lgpol(a)>>1) >degpol(b1)
+if [a',b']~=M*[a,b]~ then degpol(a')>= (lgpol(a)>>1) >degpol(b')
 */
 
 static GEN
