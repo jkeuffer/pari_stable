@@ -121,12 +121,14 @@ pari_compile_str(char *lex, int strict)
   parsestate_save(&state);
   pari_lex_start = lex;
   pari_discarded = 0;
-  if (pari_parse(&lex) || pari_discarded!=1)
+  if (pari_parse(&lex) || pari_discarded)
   {
-    if (pari_unused_chars && pari_discarded==1)
+    if (pari_unused_chars && !pari_discarded)
       unused_chars(pari_unused_chars,strict);
-    else
+    else if (pari_lasterror)
       compile_err(GSTR(pari_lasterror),lex-1);
+    else /* should not happen */
+      compile_err("syntax error",lex-1);
   }
   avma=ltop;
   optimizenode(s_node.n-1);
