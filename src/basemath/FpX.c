@@ -429,15 +429,15 @@ FpXM_mul2(GEN M, GEN N, GEN p)
   return res;
 }
 
-/* Return M*[0,1;1,-q] */
+/* Return [0,1;1,-q]*M */
 static GEN
-FpXM_FpX_qmul(GEN M, GEN q, GEN p)
+FpX_FpXM_qmul(GEN q, GEN M, GEN p)
 {
   GEN u, v, res = cgetg(3, t_MAT);
-  gel(res,1) = gel(M,2);
-  u = FpX_sub(gcoeff(M,1,1), FpX_mul(gcoeff(M,1,2), q, p), p);
-  v = FpX_sub(gcoeff(M,2,1), FpX_mul(gcoeff(M,2,2), q, p), p);
-  gel(res,2) = mkcol2(u,v);
+  u = FpX_sub(gcoeff(M,1,1), FpX_mul(gcoeff(M,2,1), q, p), p);
+  gel(res,1) = mkcol2(gcoeff(M,2,1), u);
+  v = FpX_sub(gcoeff(M,1,2), FpX_mul(gcoeff(M,2,2), q, p), p);
+  gel(res,2) = mkcol2(gcoeff(M,2,2), v);
   return res;
 }
 
@@ -464,7 +464,7 @@ FpX_halfgcd_split(GEN x, GEN y, GEN p)
   q = FpX_divrem(gel(V,1), y1, p, &r);
   k = 2*n-degpol(y1);
   S = FpX_halfgcd(RgX_shift(y1,-k), RgX_shift(r,-k),p);
-  return gerepileupto(av, FpXM_mul2(FpXM_FpX_qmul(S,q,p),R,p));
+  return gerepileupto(av, FpXM_mul2(S,FpX_FpXM_qmul(q,R,p),p));
 }
 
 /* Return M in GL_2(Fp[X]) such that:
@@ -534,7 +534,13 @@ FpX_gcd(GEN x, GEN y, GEN p)
   if (!signe(y)) { avma = av0; return x; }
   while (lg(y)>FpX_GCD_LIMIT)
   {
-    GEN c = FpXM_FpX_mul2(FpX_halfgcd(x,y, p), x, y, p);
+    GEN c;
+    if (lgpol(y)<=(lgpol(x)>>1))
+    {
+      GEN r = FpX_rem(x, y, p);
+      x = y; y = r;
+    }
+    c = FpXM_FpX_mul2(FpX_halfgcd(x,y, p), x, y, p);
     x = gel(c,1); y = gel(c,2);
     gerepileall(av,2,&x,&y);
   }
@@ -593,8 +599,15 @@ FpX_extgcd_halfgcd(GEN x, GEN y, GEN p, GEN *ptu, GEN *ptv)
   GEN u,v,R = matid2_FpXM(varn(x));
   while (lg(y)>FpX_EXTGCD_LIMIT)
   {
-    GEN M = FpX_halfgcd(x,y, p);
-    GEN c = FpXM_FpX_mul2(M, x,y, p);
+    GEN M, c;
+    if (lgpol(y)<=(lgpol(x)>>1))
+    {
+      GEN r, q = FpX_divrem(x, y, p, &r);
+      x = y; y = r;
+      R = FpX_FpXM_qmul(q, R, p);
+    }
+    M = FpX_halfgcd(x,y, p);
+    c = FpXM_FpX_mul2(M, x,y, p);
     R = FpXM_mul2(M, R, p);
     x = gel(c,1); y = gel(c,2);
     gerepileall(av,3,&x,&y,&R);
