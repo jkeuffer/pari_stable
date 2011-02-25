@@ -29,4 +29,4 @@ Doc: Given a vector, list or matrix \kbd{A} and a \typ{CLOSURE} \kbd{f},
  ? select(x->!isprime(x), vector(50,i,i^2+1))
  @eprog
 
- \synt{genselect}{void *E, GEN (*fun)(void*,GEN), GEN a}.
+ \synt{genselect}{void *E, long (*fun)(void*,GEN), GEN a}.

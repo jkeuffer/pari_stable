@@ -323,7 +323,7 @@ extract0(GEN x, GEN l1, GEN l2)
 }
 
 GEN
-genselect(void *E, GEN (*f)(void* E, GEN x), GEN A)
+genselect(void *E, long (*f)(void* E, GEN x), GEN A)
 {
   long i, l, nb = 0, t = typ(A);
   GEN B, v;/* v left on stack for efficiency */
@@ -336,7 +336,7 @@ genselect(void *E, GEN (*f)(void* E, GEN x), GEN A)
     L = cgetg(3, t_LIST);
     l = lg(A); v = cgetg(l, t_VECSMALL); av = avma;
     for (i = 1; i < l; i++) {
-      if (! gequal0(f(E, gel(A,i)) )) v[++nb] = i;
+      if (f(E, gel(A,i))) v[++nb] = i;
       avma = av;
     }
     B = cgetg(nb+1, t_VEC);
@@ -349,7 +349,7 @@ genselect(void *E, GEN (*f)(void* E, GEN x), GEN A)
 
   l = lg(A); v = cgetg(l, t_VECSMALL); av = avma;
   for (i = 1; i < l; i++) {
-    if (! gequal0( f(E, gel(A,i)) )) v[++nb] = i;
+    if (f(E, gel(A,i))) v[++nb] = i;
     avma = av;
   }
   B = cgetg(nb+1, t);
@@ -361,7 +361,7 @@ GEN
 select0(GEN f, GEN x)
 {
   if (typ(f) != t_CLOSURE || f[1] < 1) pari_err(typeer, "select");
-  return genselect((void *) f, gp_call, x);
+  return genselect((void *) f, gp_callbool, x);
 }
 
 GEN

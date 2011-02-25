@@ -1457,6 +1457,13 @@ gp_call(void *E, GEN x)
 }
 
 long
+gp_callbool(void *E, GEN x)
+{
+  GEN code = (GEN)E;
+  return !gequal0(closure_callgen1(code, x));
+}
+
+long
 gp_callvoid(void *E, GEN x)
 {
   GEN code = (GEN)E;
