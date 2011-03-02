@@ -2048,10 +2048,10 @@ already_known(RELCACHE_t *cache, REL_t *rel)
     {
       GEN coll = r->R;
       long b = bs;
-      do b++; while (b < l && cols[b] == coll[b]);
+      while (b < l && cols[b] == coll[b]) b++;
       if (b == l) return 1;
     }
-  rel->nz = bs; return 0;
+  return 0;
 }
 
 /* compute the rank of A in M_n,r(Z) (C long), where rank(A) = r <= n.
