@@ -1386,7 +1386,7 @@ divisorsu(ulong n)
 }
 
 static GEN
-corefa(GEN n, GEN fa)
+corefa(GEN fa)
 {
   GEN P = gel(fa,1), E = gel(fa,2), c = gen_1;
   long i;
@@ -1395,7 +1395,7 @@ corefa(GEN n, GEN fa)
   return c;
 }
 static GEN
-core2fa(GEN n, GEN fa)
+core2fa(GEN fa)
 {
   GEN P = gel(fa,1), E = gel(fa,2), c = gen_1, f = gen_1;
   long i;
@@ -1412,28 +1412,28 @@ corepartial(GEN n, long all)
 {
   pari_sp av = avma;
   if (typ(n) != t_INT) pari_err(typeer,"corepartial");
-  return gerepileuptoint(av, corefa(n, Z_factor_limit(n,all)));
+  return gerepileuptoint(av, corefa(Z_factor_limit(n,all)));
 }
 GEN
 core2partial(GEN n, long all)
 {
   pari_sp av = avma;
   if (typ(n) != t_INT) pari_err(typeer,"core2partial");
-  return gerepilecopy(av, core2fa(n, Z_factor_limit(n,all)));
+  return gerepilecopy(av, core2fa(Z_factor_limit(n,all)));
 }
 GEN
 core(GEN n)
 {
   pari_sp av = avma;
   if (typ(n) != t_INT) pari_err(typeer,"core");
-  return gerepileuptoint(av, corefa(n, Z_factor(n)));
+  return gerepileuptoint(av, corefa(Z_factor(n)));
 }
 GEN
 core2(GEN n)
 {
   pari_sp av = avma;
   if (typ(n) != t_INT) pari_err(typeer,"core");
-  return gerepilecopy(av, core2fa(n, Z_factor(n)));
+  return gerepilecopy(av, core2fa(Z_factor(n)));
 }
 
 GEN
