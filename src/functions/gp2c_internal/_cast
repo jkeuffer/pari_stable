@@ -12,6 +12,7 @@ Description:
  (empty, vecsmall, gen)
  (empty, vec, gen)
  (empty, list, gen)
+ (empty, closure, gen)
  (empty, bnr, bnf, nf, vec)
  (empty, bnr, bnf, clgp, vec)
  (empty, bell, ell, vec)
@@ -83,6 +84,7 @@ Description:
  (#small):lg:parens            ${1 1 value add}
  (small):lg:parens             $(1)+1
 
+ (gen):closure
  (gen):vecsmall
 
  (nf):vec
