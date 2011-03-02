@@ -416,6 +416,7 @@ ellld_L1r0(void *E, GEN *psum, GEN n, GEN a, long j)
 {
   struct ellld *el = (struct ellld *) E;
   GEN G = ellld_L1r0_G(el, n);
+  (void) j;
   *psum = addrr(*psum, divri(mulir(a, G), n));
 }
 
