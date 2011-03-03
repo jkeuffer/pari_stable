@@ -2,9 +2,6 @@ Function: intmellininv
 Section: sums
 C-Name: intmellininv0
 Prototype: V=GGEDGp
-Wrapper: _wrap_G
-Description:
-  (gen,gen,gen,?gen):gen:prec intmellininv(${3 cookie}, ${3 wrapper}, $1, $2, $4, prec)
 Help: intmellininv(X=sig,z,expr,{tab}): numerical integration on the
  line real(X) = sig (or sig[1]) of expr(X)z^(-X)dX/(2*I*Pi), i.e. inverse Mellin
  transform of s at x. sig is coded as follows: either it is real, and then
@@ -12,6 +9,9 @@ Help: intmellininv(X=sig,z,expr,{tab}): numerical integration on the
  the abscissa of integration, and al = 0 for slowly decreasing functions, or
  al > 0 if s(z) decreases like exp(-al*z). tab is as in intnum. Use
  intmellininvshort if several values must be computed.
+Wrapper: (,,G)
+Description:
+  (gen,gen,gen,?gen):gen:prec intmellininv(${3 cookie}, ${3 wrapper}, $1, $2, $4, prec)
 Doc: numerical
  integration of $(2i\pi)^{-1}\var{expr}(X)z^{-X}$ with respect to $X$ on the
  line $\Re(X)=sig$,  in other words, inverse Mellin transform of

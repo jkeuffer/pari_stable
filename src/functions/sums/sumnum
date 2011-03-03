@@ -2,15 +2,15 @@ Function: sumnum
 Section: sums
 C-Name: sumnum0
 Prototype: V=GGEDGD0,L,p
-Wrapper: _wrap_G
-Description:
-  (gen,gen,gen,?gen,?small):gen:prec sumnum(${3 cookie}, ${3 wrapper}, $1, $2, $4, $5, prec)
 Help: sumnum(X=a,sig,expr,{tab},{flag=0}): numerical summation of expr from
  X = ceiling(a) to +infinity. sig is either a scalar or a two-component vector
  coding the function's decrease rate at infinity. It is assumed that the
  scalar part of sig is to the right of all poles of expr. If present, tab
  must be initialized by sumnuminit. If flag is nonzero, assumes that
  conj(expr(z)) = expr(conj(z)).
+Wrapper: (,,G)
+Description:
+  (gen,gen,gen,?gen,?small):gen:prec sumnum(${3 cookie}, ${3 wrapper}, $1, $2, $4, $5, prec)
 Doc: numerical summation of \var{expr}, the variable $X$ taking integer values
  from ceiling of $a$ to $+\infty$, where \var{expr} is assumed to be a
  holomorphic function $f(X)$ for $\Re(X)\ge \sigma$.

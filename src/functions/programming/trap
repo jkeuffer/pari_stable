@@ -5,6 +5,9 @@ Prototype: DrDEDE
 Help: trap({e}, {rec}, seq): try to execute seq, trapping runtime error e (all
  of them if e ommitted); sequence rec is executed if the error occurs and
  is the result of the command.
+Wrapper: (,_,_)
+Description:
+ (str,?closure,?closure):gen trap0($1, $2, $3)
 Doc: tries to
  evaluate \var{seq}, trapping runtime error $e$, that is effectively preventing
  it from aborting computations in the usual way; the recovery sequence

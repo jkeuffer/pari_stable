@@ -2,12 +2,12 @@ Function: prodinf
 Section: sums
 C-Name: prodinf0
 Prototype: V=GED0,L,p
-Wrapper: _wrap_G
-Description:
-  (gen,gen,?small):gen:prec prodinf(${2 cookie}, ${2 wrapper}, $1, $3, prec)
 Help: prodinf(X=a,expr,{flag=0}): infinite product (X goes from a to
  infinity) of real or complex expression. flag can be 0 (default) or 1, in
  which case compute the product of the 1+expr instead.
+Wrapper: (,G)
+Description:
+  (gen,gen,?small):gen:prec prodinf(${2 cookie}, ${2 wrapper}, $1, $3, prec)
 Doc: \idx{infinite product} of
  expression \var{expr}, the formal parameter $X$ starting at $a$. The evaluation
  stops when the relative error of the expression minus 1 is less than the

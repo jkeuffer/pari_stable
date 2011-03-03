@@ -2,11 +2,11 @@ Function: derivnum
 Section: sums
 C-Name: derivnum0
 Prototype: V=GEp
-Wrapper: _wrap_G
-Description:
-  (gen,gen):gen:prec derivnum(${2 cookie}, ${2 wrapper}, $1, prec)
 Help: derivnum(X=a,expr): numerical derivation of expr with respect to
  X at X = a.
+Wrapper: (,G)
+Description:
+  (gen,gen):gen:prec derivnum(${2 cookie}, ${2 wrapper}, $1, prec)
 Doc: numerical derivation of \var{expr} with respect to $X$ at $X=a$.
 
  \bprog

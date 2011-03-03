@@ -2,11 +2,11 @@ Function: solve
 Section: sums
 C-Name: zbrent0
 Prototype: V=GGEp
-Wrapper: _wrap_G
-Description:
-  (gen,gen,gen):gen:prec zbrent(${3 cookie}, ${3 wrapper}, $1, $2, prec)
 Help: solve(X=a,b,expr): real root of expression expr (X between a and b),
  where expr(a)*expr(b)<=0.
+Wrapper: (,,G)
+Description:
+  (gen,gen,gen):gen:prec zbrent(${3 cookie}, ${3 wrapper}, $1, $2, prec)
 Doc: find a real root of expression
  \var{expr} between $a$ and $b$, under the condition
  $\var{expr}(X=a) * \var{expr}(X=b) \le 0$. (You will get an error message

@@ -5,6 +5,9 @@ Prototype: vV=GDGI
 Help: forsubgroup(H=G,{bound},seq): execute seq for each subgroup H of the
  abelian group G (in SNF form), whose index is bounded by bound. H is given
  as a left divisor of G in HNF form.
+Wrapper: (,,vG)
+Description:
+ (gen,?gen,closure):void  forsubgroup(${3 cookie}, ${3 wrapper}, $1, $2)
 Doc: evaluates \var{seq} for
  each subgroup $H$ of the \emph{abelian} group $G$ (given in
  SNF\sidx{Smith normal form} form or as a vector of elementary divisors),

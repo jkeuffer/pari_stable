@@ -2,9 +2,6 @@ Function: sumnumalt
 Section: sums
 C-Name: sumnumalt0
 Prototype: V=GGEDGD0,L,p
-Wrapper: _wrap_G
-Description:
-  (gen,gen,gen,?gen,?small):gen:prec sumnumalt(${3 cookie}, ${3 wrapper}, $1, $2, $4, $5, prec)
 Help: sumnumalt(X=a,sig,expr,{tab},{flag=0}): numerical summation of (-1)^X
  expr(X)
  from X = ceiling(a) to +infinity. Note that the (-1)^X must not be included.
@@ -12,6 +9,9 @@ Help: sumnumalt(X=a,sig,expr,{tab},{flag=0}): numerical summation of (-1)^X
  scalar part is larger than all the real parts of the poles of expr. Uses intnum,
  hence tab is as in intnum. If flag is nonzero, assumes that the function to
  be summed satisfies conj(f(z))=f(conj(z)), and then up to twice faster.
+Wrapper: (,,G)
+Description:
+  (gen,gen,gen,?gen,?small):gen:prec sumnumalt(${3 cookie}, ${3 wrapper}, $1, $2, $4, $5, prec)
 Doc: numerical
  summation of $(-1)^X\var{expr}(X)$, the variable $X$ taking integer values from
  ceiling of $a$ to $+\infty$, where \var{expr} is assumed to be a holomorphic

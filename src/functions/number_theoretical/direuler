@@ -2,13 +2,13 @@ Function: direuler
 Section: number_theoretical
 C-Name: direuler0
 Prototype: V=GGEDG
-Wrapper: _wrap_G
-Description:
-  (gen,gen,gen,?gen):gen direuler(${3 cookie}, ${3 wrapper}, $1, $2, $4)
 Help: direuler(p=a,b,expr,{c}): Dirichlet Euler product of expression expr
  from p=a to p=b, limited to b terms. Expr should be a polynomial or rational
  function in p and X, and X is understood to mean p^(-s). If c is present,
  output only the first c terms.
+Wrapper: (,,G)
+Description:
+  (gen,gen,gen,?gen):gen direuler(${3 cookie}, ${3 wrapper}, $1, $2, $4)
 Doc: computes the \idx{Dirichlet series} associated to the \idx{Euler
  product} of expression \var{expr} as $p$ ranges through the primes from $a$
  to $b$. \var{expr} must be a polynomial or rational function in another

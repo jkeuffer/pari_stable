@@ -2,14 +2,14 @@ Function: intnumromb
 Section: sums
 C-Name: intnumromb0
 Prototype: V=GGED0,L,p
-Wrapper: _wrap_G
-Description:
-  (gen,gen,gen,?small):gen:prec intnumromb(${3 cookie}, ${3 wrapper}, $1, $2, $4, prec)
 Help: intnumromb(X=a,b,expr,{flag=0}): numerical integration of expr (smooth in
  ]a,b[) from a to b with respect to X. flag is optional and mean 0: default.
  expr can be evaluated exactly on [a,b]; 1: general function; 2: a or b can be
  plus or minus infinity (chosen suitably), but of same sign; 3: expr has only
  limits at a or b.
+Wrapper: (,,G)
+Description:
+  (gen,gen,gen,?small):gen:prec intnumromb(${3 cookie}, ${3 wrapper}, $1, $2, $4, prec)
 Doc: numerical integration of
  \var{expr} (smooth in $]a,b[$), with respect to $X$. This function is
  deprecated, use \tet{intnum} instead.
