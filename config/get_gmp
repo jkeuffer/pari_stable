@@ -11,13 +11,7 @@ if test "$kernlvl1" = "gmp"; then
 fi
 
 if test -n "$gmp"; then
-  pth="$with_gmp_include\
-      /usr/local/include\
-      /usr/include\
-      /opt/include\
-      /opt/local/include\
-      /opt/gnu/include\
-  "
+  pth="$with_gmp_include $basic_include_path"
   x=`./locate 'gmp.h' '' $pth`
   case $x in
    ?:/*|/*) gmp_include=`dirname $x`

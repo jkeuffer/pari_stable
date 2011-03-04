@@ -18,40 +18,15 @@ if test -n "$with_readline"; then
   with_readline_include="$with_readline_include $with_readline/include/readline"
 fi
 if test -z "$without_readline"; then
-  readline_add="$GP_READLINE $TOP/readline-$osname-$arch $TOP/readline"
-  pth="$with_readline_lib $readline_add $libpth"
+  pth="$with_readline_lib $libpth"
   lib=readline; . ./locatelib
   rl_fullname=$try
 fi
 
 if test -n "$readline"; then
 # Readline -- Headers
-  incpth="`echo $C_INCLUDE_PATH | sed -e \"s%\([^$dir_sep]*\)$dir_sep*%\1 \1/readline %g\"`"
-  case "$osname" in
-    os2);;
-    cygwin*) incpth="$incpth\
-      $cygtop/usr/local/include/readline\
-      $cygtop/usr/local/include\
-      $cygtop/usr/include/readline\
-      $cygtop/usr/include\
-      $cygtop/H-${arch}-cygwin32/${arch}-cygwin32/include\
-      ";;
-    *) incpth="$incpth\
-      /usr/local/include/readline\
-      /usr/include/readline\
-      /opt/include/readline\
-      /opt/local/include/readline\
-      /opt/gnu/include/readline\
-      /usr/unsupported/include/readline\
-      /usr/local/include\
-      /usr/include\
-      /opt/include\
-      /opt/local/include\
-      /opt/gnu/include\
-      ";;
-  esac
-  pth="$with_readline_include $readline_add $incpth"
-  x=`./locate 'readline.h' '' $pth`
+  pth="$with_readline_include $basic_include_path"
+  x=`./locate 'readline/readline.h' '' $pth`
   CPPF_defined=
   case $x in
    ?:/*|/*) rl_include=`dirname $x`
@@ -136,8 +111,6 @@ if test -n "$readline"; then
   if (echo $rl_include | grep "readline$" > /dev/null); then
     rl_include=`dirname $rl_include`
     RLINCLUDE="-I$rl_include"
-  else # in case headers are not installed correctly
-    RLINCLUDE="-I$rl_include -DREADLINE_LIBRARY"
   fi
   RLLIBS="-L$readline -lreadline"
   if test -n "$rl_ncurses"; then

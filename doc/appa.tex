@@ -265,15 +265,7 @@ An alias stands for \kbd{\emph{name}-none}, but \kbd{gmp} stands for
 \subsec{Problems related to readline:}
 \kbd{Configure} does not try very hard to find the \kbd{readline} library and
 include files. If they are not in a standard place, it will not find them.
-Nonetheless, it first searches the distribution toplevel for a \kbd{readline}
-directory. Thus, if you just want to give \kbd{readline} a try, as you
-probably should, you can get the source and compile it there (you do not need
-to install it). You can also use this feature together with a symbolic link,
-named \kbd{readline}, in the PARI toplevel directory if you have compiled the
-readline library somewhere else, without installing it to one of its standard
-locations.
-
-You can also invoke \kbd{Configure} with one of the following arguments:
+You can invoke \kbd{Configure} with one of the following arguments:
 
    \kbd{--with-readline[=\emph{prefix to \kbd{lib/libreadline}.xx and
 \kbd{include/readline.h}}]}
@@ -281,12 +273,6 @@ You can also invoke \kbd{Configure} with one of the following arguments:
    \kbd{--with-readline-lib=\emph{path to \kbd{libreadline}.xx}}
 
    \kbd{--with-readline-include=\emph{path to \kbd{readline.h}}}
-
-\misctitle{Technical note} Configure can build GP on different architectures
-simultaneously from the same toplevel sources. Instead of the \kbd{readline}
-link alluded above, you can create \kbd{readline-{\sl osname}-{\sl arch}},
-using the same naming conventions as for the \kbd{O$xxx$} directory,
-e.g \kbd{readline-linux-i686}.
 
 \misctitle{Known problems}
 

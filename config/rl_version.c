@@ -1,9 +1,5 @@
 #include <stdio.h>
-#   ifdef READLINE_LIBRARY
-#     include <readline.h>
-#   else
-#     include <readline/readline.h>
-#   endif
+#include <readline/readline.h>
 
 #ifndef HAS_RL_LIBRARY_VERSION
 extern char *rl_library_version; /* Might be mismatched header, try anyway! */

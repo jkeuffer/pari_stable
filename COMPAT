@@ -125,6 +125,8 @@ This file lists the incompatible changes between Version 2.x and older versions
     clockwise direction." (ISO C99)
   - bnfinit no longer outputs a warning when fundamental units couldn't be
     computed (annoying and rather useless) [#1166]
+  -[Configure] no longer support a link to an uninstalled readline library
+   in PARI toplevel
 
 * Specific to the PARI library:
 ===============================

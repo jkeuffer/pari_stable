@@ -35,16 +35,9 @@ BEGINEXTERN
 #  define PREFER_STDARG
 #endif
 
-#ifdef READLINE_LIBRARY
-#  include <readline.h>
-#  ifdef HAS_HISTORY_H
-#    include <history.h>
-#  endif
-#else
-#  include <readline/readline.h>
-#  ifdef HAS_HISTORY_H
-#    include <readline/history.h>
-#  endif
+#include <readline/readline.h>
+#ifdef HAS_HISTORY_H
+#  include <readline/history.h>
 #endif
 
 #ifndef HAS_HISTORY_H

@@ -47,6 +47,7 @@ BA 32- forsubgroup() did not handle break/next/return.
        requested number of columns [#1170]
    36- readline completion : allow commas ',' in directory names [#105]
    37- List() == List() returned 0.
+   38- [Configure] C_INCLUDE_PATH was not used when looking for libgmp
 
   Changed
 LGr1- universal constants (gen_0,gen_1, etc.) are now read-only
@@ -83,6 +84,8 @@ BA 17- traversesubgroups renamed to forsubgroup.
        now tested equal by == (they are still different according to ===).
    19- bnfinit no longer outputs a warning when fundamental units couldn't be
        computed (annoying and rather useless) [#1166]
+   20-[Configure] no longer support a link to an uninstalled readline library
+      in PARI toplevel
 
   Added
 BA  1- trap keyword "syntaxer" to trap syntax error from eval.

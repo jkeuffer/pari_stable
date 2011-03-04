@@ -31,11 +31,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #ifdef READLINE
 BEGINEXTERN
-#  ifdef READLINE_LIBRARY
-#    include <readline.h>
-#  else
-#    include <readline/readline.h>
-#  endif
+#  include <readline/readline.h>
 ENDEXTERN
 #endif
 

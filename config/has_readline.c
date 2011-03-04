@@ -1,6 +1,2 @@
-#ifdef READLINE_LIBRARY
-#  include <readline.h>
-#else
-#  include <readline/readline.h>
-#endif
+#include <readline/readline.h>
 main() { char *s = readline("?"); }

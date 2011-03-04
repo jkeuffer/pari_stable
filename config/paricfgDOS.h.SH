@@ -42,7 +42,6 @@ cat > $file << EOT
 #ifdef __EMX__
 #  define STACK_CHECK
 #  define READLINE
-#  define READLINE_LIBRARY
 #  define HAS_RL_MESSAGE
 #  define CPPFunction_defined
 /* in readline 1, no arguments for rl_refresh_line() */
