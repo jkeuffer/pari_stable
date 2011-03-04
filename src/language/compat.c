@@ -60,11 +60,14 @@ _factpol(GEN x, long t/*unused*/, long hint/*unused*/) {
 static void
 suppressed(void) {pari_err(talker,"this function no longer exists");}
 
-#define BUCH_PROTO "GD0.3,G,D0.3,G,D5,G,D1,G,D4,L,D3,L,p"
+#define BUCH_PROTO "GDGDGD5,G,D1,G,D4,L,D3,L,p"
 #define B_ARGS GEN g1,GEN g2,GEN g3,GEN g4,GEN g5,long l1,long l2,long prec
 #define B_ARG1 g1,gtodouble(g2),gtodouble(g3),l1
 #define B_CALL(flag) Buchall_param(B_ARG1,(flag),prec)
 #define B_UNUSED (void)g4,(void)g5,(void)l2
+
+#define B_DEFAULT if (!g2) g2 = dbltor(.3); \
+                  if (!g3) g3 = dbltor(.3)
 
 #define CLASSUNIT(flag) \
   pari_sp av = avma; \
@@ -74,13 +77,13 @@ suppressed(void) {pari_err(talker,"this function no longer exists");}
   return gerepilecopy(av, mkmat(shallowconcat(x, gel(bnf,8))));
 
 static GEN
-buchgenfu(B_ARGS) { CLASSUNIT(0); }
+buchgenfu(B_ARGS) { B_DEFAULT; CLASSUNIT(0); }
 static GEN
-buchgenforcefu(B_ARGS) { CLASSUNIT(nf_FORCE); }
+buchgenforcefu(B_ARGS) { B_DEFAULT; CLASSUNIT(nf_FORCE); }
 static GEN
-buchinitfu(B_ARGS) { B_UNUSED; return B_CALL(0); }
+buchinitfu(B_ARGS) { B_DEFAULT; B_UNUSED; return B_CALL(0); }
 static GEN
-buchinitforcefu(B_ARGS) { B_UNUSED; return B_CALL(nf_FORCE); }
+buchinitforcefu(B_ARGS) { B_DEFAULT; B_UNUSED; return B_CALL(nf_FORCE); }
 static GEN
 smallbuchinit(B_ARGS) { (void)g2,(void)g3,(void)l1,B_UNUSED; return bnfcompress(Buchall(g1, 0, prec)); }
 static GEN
@@ -312,7 +315,6 @@ entree oldfonctions[]={
 {"eta",1,(void*)eta,3,"Gp","eta(x)=eta function without the q^(1/24)."},
 {"euler",0,(void*)mpeuler,3,"p","euler=euler()=euler's constant with current precision."},
 {"eval",1,(void*)geval_gp,7,"GC","eval(x)=evaluation of x, replacing variables by their value."},
-{"_geval",1,(void*)geval,7,"G","eval(x)=evaluation of x, replacing variables by their value."},
 {"exp",1,(void*)gexp,3,"Gp","exp(x)=exponential of x."},
 {"extract",2,(void*)extract0,8,"GGDG","extract(x,y)=extraction of the components of the vector x according to the vector or mask y, from left to right (1, 2, 4, 8, ...for the first, second, third, fourth,...component)."},
 {"fact",11,(void*)mpfactr,4,"Lp","fact(x)=factorial of x (x C-integer), the result being given as a real number."},

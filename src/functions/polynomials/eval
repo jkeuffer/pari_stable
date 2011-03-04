@@ -1,9 +1,3 @@
-Function: _geval
-Section: programming/internals
-C-Name: geval
-Prototype: G
-Help: eval(x): evaluation of x, replacing variables by their value.
-
 Function: eval
 Section: polynomials
 C-Name: geval_gp

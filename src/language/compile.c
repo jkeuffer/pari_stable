@@ -1247,8 +1247,7 @@ compilefunc(entree *ep, long n, int mode, long flag)
         switch(c)
         {
         case 'G':
-          op_push(OCpushgen,data_push(strntoGENstr(q+1,p-4-q)),n);
-          op_push(OCcallgen,(long)is_entry("_geval"),n);
+          op_push(OCpushstoi,strtol(q+1,NULL,10),n);
           break;
         case 'L':
         case 'M':
