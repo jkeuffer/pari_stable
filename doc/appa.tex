@@ -22,7 +22,7 @@ suite.) You can certainly compile PARI with a different compiler, but
 the PARI kernel takes advantage of optimizations provided by \kbd{gcc}.
 This results in at least 20\% speedup on most architectures.
 
-\misctitle{Optional packages} The following programs and libraries are useful
+\misctitle{Optional libraries and programs} The following programs and libraries are useful
 in conjunction with \kbd{gp}, but not mandatory. In any case, get them before
 proceeding if you want the functionalities they provide. All of them are free.
 The download page on our website
@@ -35,8 +35,7 @@ incompatible, so the resulting PARI library SONAME is libpari-gmp.
 
   $\bullet$ GNU \kbd{readline} library. This provides line editing under GP,
 an automatic context-dependent completion, and an editable history of
-commands. Note that it is incompatible with SUN commandtools (yet another
-reason to dump Suntools for X Windows).
+commands.
 
   $\bullet$ GNU \kbd{emacs} and the \tet{PariEmacs} package. GP can be run in
 an Emacs buffer, with all the obvious advantages if you are familiar with
@@ -46,9 +45,9 @@ provides a better automatic completion than is provided by Emacs's GP-mode.
   $\bullet$ GNU \kbd{gzip/gunzip/gzcat} package enables GP to read compressed
 data.
 
-  $\bullet$ \kbd{perl} provides extended online help (full text from this
-manual) about functions and concepts, which can be used under GP or
-independently.
+  $\bullet$ \kbd{perl} provides extended online help (full text from the
+manual) about functions and concepts. The script handline this online help
+can be used under GP or independently.
 
   $\bullet$ A colour-capable \kbd{xterm}, which enables GP to use different
 (user configurable) colours for its output. All \kbd{xterm} programs which
@@ -65,24 +64,26 @@ Then, type
 without outside help. Note that if you want to install the end product in
 some nonstandard place, you can use the \kbd{--prefix} option, as in
 
-\kbd{./Configure --prefix=/an/exotic/directory}
+\kbd{./Configure --prefix=}\var{/an/exotic/directory}
 
 \noindent (the default prefix is \kbd{/usr/local}). For example, to build a
 package for a Linux distribution, you may want to use
 
 \kbd{./Configure --prefix=/usr}
 
-This phase extracts some files and creates a directory \kbd{O$xxx$} where the
-object files and executables will be built. The $xxx$ part depends on your
-architecture and operating system, thus you can build GP for several
-different machines from the same source tree (the builds are
-independent and can be done simultaneously).
+This phase extracts some files and creates a directory
+\kbd{O}\var{osname}\kbd{-}\var{arch} where the
+object files and executables will be built (\var{build directory}). The
+\var{osname} and \var{arch} components depends on your architecture and
+operating system, thus you can build GP for several different machines from
+the same source tree (the builds are independent and can be done
+simultaneously).
 
 \kbd{./Configure --tune}
 
 \noindent fine tunes the library for the host used for compilation. This
 adjusts thresholds by running a large number of comparative tests
-and creates a file \kbd{tune.h} in the \kbd{O$xxx$} directory, that will be
+and creates a file \kbd{tune.h} in the build directory, that will be
 used from now on, overriding the ones in \kbd{src/kernel/none/} and
 \kbd{src/kernel/gmp/}. It will take a while: about 30 minutes on a 2GHz
 machine. Expect a small performance boost, perhaps a 10\% speed increase
@@ -115,7 +116,7 @@ documentation, type
 \kbd{make gp}
 
 \noindent in the toplevel directory. If your \kbd{make} program supports
-parallel make, you can speed up the process by going to the \kbd{O$xxx$}
+parallel make, you can speed up the process by going to the build
 directory that \kbd{Configure} created and doing a parallel make here, for
 instance \kbd{make -j4} with GNU make. It should even work from the toplevel
 directory.
@@ -352,8 +353,15 @@ There are a few extra tests which should be useful only for developers.
 and provides simple diagnostics if it does not. Only useful if \kbd{make
 bench} fails horribly, e.g.~things like \kbd{1+1} do not work.
 
-\kbd{make test-all} runs all available test suites. Slow. Some of the
-tests require the extra packages to be installed.
+\kbd{make test-all} runs all available test suites. Thorough, but slow. Some
+of the tests require extra packages (\kbd{elldata}, \kbd{galdata}, etc.)
+to be available. If you want to test such an extra package \emph{before}
+\kbd{make install} (which would install it to its final location, where
+\kbd{gp} expects to find it), run
+\bprog
+  env GP_DATA_DIR=$PWD/data make test-all
+@eprog\noindent from the PARI toplevel directory, otherwise the test will
+fail.
 
 \section{Installation} When everything looks fine, type
 
