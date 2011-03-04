@@ -70,7 +70,7 @@ if test "$GNULDused" = yes; then
   runpathprefix='-rpath '
 else # guess...
   case "$osname" in
-    gnu|osf1|linux|cygwin*|freebsd|netbsd) runpathprefix='-rpath ' ;;
+    darwin|gnu|osf1|linux|cygwin*|freebsd|netbsd) runpathprefix='-rpath ' ;;
     solaris) runpathprefix='-R ' ;;
     hpux) runpathprefix='+b ' ;;
     aix) runpathprefix='-blibpath:' ;;
