@@ -69,12 +69,12 @@ suppressed(void) {pari_err(talker,"this function no longer exists");}
 #define B_DEFAULT if (!g2) g2 = dbltor(.3); \
                   if (!g3) g3 = dbltor(.3)
 
-#define CLASSUNIT(flag) \
+#define CLASSUNIT(flag) do { \
   pari_sp av = avma; \
   GEN bnf = B_CALL(flag), nf = bnf_get_nf(bnf), x; \
   B_UNUSED; \
   x = mkvec4(gel(nf,1), gel(nf,2), mkvec2(gel(nf,3), gel(nf,4)), gel(nf,7));\
-  return gerepilecopy(av, mkmat(shallowconcat(x, gel(bnf,8))));
+  return gerepilecopy(av, mkmat(shallowconcat(x, gel(bnf,8)))); } while(0)
 
 static GEN
 buchgenfu(B_ARGS) { B_DEFAULT; CLASSUNIT(0); }
