@@ -20,7 +20,7 @@ BA  2- 'make all' failed to build the documentation.
    12- (t_QUAD of t_INTMOD) + t_PADIC -> SEGV [#1122]
 LGr13- bnfinit: various performance improvement.
 BA 14- several instance of random garbage collection were broken.
-BA 15- [install]: support for Dexpr,G, and D"str",s, in prototype code.
+BA 15- [install]: support for D0,G, and D"str",s, in prototype code.
 BA 16- [gp2c]: foo(x:mp)=... did not work.
    17- when the divisor's leading term was 0, RgX_divrem(,,&rem) created rem
        before the quotient (invalidating the use of cgiv() suggested in the
@@ -35,7 +35,7 @@ BA 24- t_CLOSURE==t_CLOSURE and t_CLOSURE===t_CLOSURE did not work.
    25- gequal1(0.*x + 1) returned 0
    26- ispower((100!)^2) -> 0 [#1155] Affected pure powers divisible by more
        than 22 of the 26 primes <= 101. (introduced in 2.4.3)
-BA 27- LLL could fail (rarely) due to unsufficient precision [#1154]
+BA 27- LLL could fail (rarely) due to insufficient precision [#1154]
    28- rnfisnorminit(y,x^2-Mod(2+y,y)): polynomial not in Z[X] in nfinit [#1157]
    29- factorff failed to merge identical irreducible factors [#1159]
 BA 30- ploth(x=0,1,0,"Complex|Recursive") -> SEGV [#1163]
@@ -60,7 +60,7 @@ LGr1- universal constants (gen_0,gen_1, etc.) are now read-only
       default equal to 'seriesprecision'). One no longer has to rely on (and
       change locally) a global variable to handle conversion to power series.
 LGr7- add information to the version() output [backward compatible if version()
-      used as recommanded in the documentation] [#1130]
+      used as recommended in the documentation] [#1130]
    8- O(x^0) is now printed as is, not as O(1). t_SER and t_PADIC are now
       treated in the same way.
    9- inverse trigonometric functions (acos,asin,atan,acosh,asinh,atanh):
@@ -101,7 +101,7 @@ BA  9- PARI functions FlxqX_div
 BA 11- PARI function bnr_get_clgp
    12- new default 'histfile' (to save readline history in between sessions)
    13- PARI function cmp_universal
-BA 14- [gp2c] add decriptions to support intnum/suminf type functions.
+BA 14- [gp2c] add descriptions to support intnum/suminf type functions.
 
   Removed
 BA  1- PARI function CM_CardEFp (ellsea script deprecated).
