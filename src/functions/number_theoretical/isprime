@@ -32,7 +32,7 @@ Doc: true (1) if $x$ is a prime
  \item 0 if $x$ is composite,
 
  \item 1 if $x$ is small enough that passing Baillie-PSW test guarantees
- its primality (currently $x < 10^{15}$),
+ its primality (currently $x < 2^{64}$, as checked by Jan Feitsma),
 
  \item $2$ if $x$ is a large prime whose primality could only sensibly be
  proven (given the algorithms implemented in PARI) using the APRCL test.
