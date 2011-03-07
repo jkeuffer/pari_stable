@@ -847,8 +847,9 @@ LargeSols(GEN P, GEN tnf, GEN rhs, GEN ne, GEN *pS)
   if (!ne)
   {
     ne = bnfisintnorm(bnf, rhs);
-    if (!is_pm1(gel(csts, 7)) && !is_pm1(bnf_get_no(bnf)) && !is_pm1(rhs))
-      pari_warn(warner, "The result returned by 'thue' is conditional on the GRH");
+    if (DEBUGLEVEL)
+      if (!is_pm1(gel(csts, 7)) && !is_pm1(bnf_get_no(bnf)) && !is_pm1(rhs))
+        pari_warn(warner, "The result returned by 'thue' is conditional on the GRH");
   }
   else if (typ(ne) != t_VEC) pari_err(typeer, "thue");
   if (lg(ne)==1) return NULL;

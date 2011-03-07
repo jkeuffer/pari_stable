@@ -86,6 +86,8 @@ BA 17- traversesubgroups renamed to forsubgroup.
        computed (annoying and rather useless) [#1166]
    20-[Configure] no longer support a link to an uninstalled readline library
       in PARI toplevel
+   21- thue() no longer outputs a Warning when the result is conditional on
+       the GRH.
 
   Added
 BA  1- trap keyword "syntaxer" to trap syntax error from eval.

@@ -127,6 +127,8 @@ This file lists the incompatible changes between Version 2.x and older versions
     computed (annoying and rather useless) [#1166]
   -[Configure] no longer support a link to an uninstalled readline library
    in PARI toplevel
+  - thue() no longer outputs a Warning when the result is conditional on
+    the GRH.
 
 * Specific to the PARI library:
 ===============================
