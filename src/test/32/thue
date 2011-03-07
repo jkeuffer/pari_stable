@@ -2,13 +2,11 @@
 []
 [[0, -1]]
 [[-4, 3], [4, 3], [-4, -3], [4, -3]]
-  *** thue: Warning: Non trivial conditional class group.
-  *** The result returned by 'thue' is conditional on the GRH.
+  *** thue: Warning: The result returned by 'thue' is conditional on the GRH.
 [[1, 1]]
 [[1, 0], [-1, 0], [1, 1], [0, 1], [-1, -1], [0, -1]]
 [[1868, 514], [-4, -2]]
-  *** thue: Warning: Non trivial conditional class group.
-  *** The result returned by 'thue' is conditional on the GRH.
+  *** thue: Warning: The result returned by 'thue' is conditional on the GRH.
 []
 [[5, 1]]
 [[1, 1]]
@@ -17,4 +15,4 @@
   ***                 ^-------------
   *** thueinit: constant polynomial in thueinit.
 [[2, 2], [-2, -2], [4, 1], [-4, -1]]
-Total time spent: 3104
+Total time spent: 1728
