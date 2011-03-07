@@ -26,7 +26,6 @@ int  get_line_from_readline(const char *prompt, const char *prompt_cont, filtre_
 void gp_output(GEN z, gp_data *G);
 void init_readline(void);
 void texmacs_completion(const char *s, long pos);
-const char *color_prompt(const char *prompt);
 void print_fun_list(char **list, long nbli);
 
 /* aide() */
@@ -65,7 +64,8 @@ GEN sd_psfile(const char *v, long flag);
 GEN sd_readline(const char *v, long flag);
 GEN sd_recover(const char *v, long flag);
 GEN sd_timer(const char *v, long flag);
-const char *expand_prompt(const char *prompt, filtre_t *F);
+#define MAX_PROMPT_LEN 128
+const char *do_prompt(char *buf, const char *prompt, filtre_t *F);
 
 extern entree  functions_highlevel[];
 /* list of GP-specific defaults */

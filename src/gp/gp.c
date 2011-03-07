@@ -1335,13 +1335,10 @@ static const char *DFT_PROMPT = "? ";
 static const char *CONTPROMPT = "";
 static const char *COMMENTPROMPT = "comment> ";
 static const char *DFT_INPROMPT = "";
-static const char *BREAK_LOOP_PROMPT = "break> ";
-static const char *BREAK_LOOP_PROMPTM = "break[%ld]> ";
 
-#define MAX_PROMPT_LEN 128
 static char Prompt[MAX_PROMPT_LEN], Prompt_cont[MAX_PROMPT_LEN];
 
-/* if prompt is coloured, we must to tell readline to ignore the
+/* if prompt is coloured, we must tell readline to ignore the
  * corresponding ANSI escape sequences */
 static void
 brace_color(char *s, int c, int force)
@@ -1362,10 +1359,9 @@ brace_color(char *s, int c, int force)
 #endif
 }
 
-const char *
-color_prompt(const char *prompt)
+static const char *
+color_prompt(char *buf, const char *prompt)
 {
-  static char buf[MAX_PROMPT_LEN + 24]; /* + room for color codes */
   char *s;
 
   if (GP_DATA->flags & gpd_TEST) return prompt;
@@ -1377,14 +1373,20 @@ color_prompt(const char *prompt)
   brace_color(s, c_INPUT, 1); return buf;
 }
 
-const char *
-expand_prompt(const char *prompt, filtre_t *F)
+static const char *
+expand_prompt(char *buf, const char *prompt, filtre_t *F)
 {
-  static char buf[MAX_PROMPT_LEN];
-  char *s = buf;
-  if (F->in_comment) return COMMENTPROMPT;
-  strftime_expand(prompt, s, MAX_PROMPT_LEN-1);
-  return s;
+  if (F && F->in_comment) return COMMENTPROMPT;
+  strftime_expand(prompt, buf, MAX_PROMPT_LEN-1);
+  return buf;
+}
+
+const char *
+do_prompt(char *buf, const char *prompt, filtre_t *F)
+{
+  char b[MAX_PROMPT_LEN];
+  const char *s = expand_prompt(b, prompt, F);
+  return color_prompt(buf, s);
 }
 
 /********************************************************************/
@@ -1474,7 +1476,8 @@ gp_read_line(filtre_t *F, const char *PROMPT)
   if (b->len > 100000) fix_buffer(b, 100000);
   if (is_interactive())
   {
-    const char *p = PROMPT? PROMPT: color_prompt(expand_prompt(Prompt, F));
+    char buf[MAX_PROMPT_LEN + 24];
+    const char *p = PROMPT? PROMPT: do_prompt(buf, Prompt, F);
 #ifdef READLINE
     if (GP_DATA->use_readline)
       res = get_line_from_readline(p, Prompt_cont, F);
@@ -1607,6 +1610,16 @@ gp_alarm_fun(void) {
 }
 #endif /* SIGALRM */
 
+static const char *
+break_loop_prompt(char *buf, long n)
+{
+  char s[128];
+  if (n == 1)
+    strcpy(s, "break> ");
+  else
+    sprintf(s, "break[%ld]> ", n);
+  return do_prompt(buf, s, NULL);
+}
 static int
 break_loop(int numerr)
 {
@@ -1632,14 +1645,7 @@ break_loop(int numerr)
   else
     print_errcontext(pariOut, "Break loop: type 'break' to go back to GP", NULL, NULL);
   term_color(c_NONE);
-  if (s_env.n == 2)
-    prompt = BREAK_LOOP_PROMPT;
-  else
-  {
-    sprintf(promptbuf, BREAK_LOOP_PROMPTM, s_env.n-1);
-    prompt = promptbuf;
-  }
-  prompt = color_prompt(prompt);
+  prompt = break_loop_prompt(promptbuf, s_env.n-1);
   av = avma;
   for(;;)
   {

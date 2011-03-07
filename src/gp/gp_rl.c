@@ -925,11 +925,12 @@ gp_add_history(char *s)
 static char *
 gprl_input(char **endp, int first, input_method *IM, filtre_t *F)
 {
+  char buf[MAX_PROMPT_LEN + 24];
   Buffer *b = F->buf;
   ulong used = *endp - b->buf;
   ulong left = b->len - used, l;
   const char *prompt = first? IM->prompt
-                            : color_prompt(expand_prompt(IM->prompt_cont, F));
+                            : do_prompt(buf, IM->prompt_cont, F);
   char *s, *t;
 
   if (! (s = readline(prompt)) ) return NULL; /* EOF */
