@@ -104,6 +104,7 @@ BA 11- PARI function bnr_get_clgp
    12- new default 'histfile' (to save readline history in between sessions)
    13- PARI function cmp_universal
 BA 14- [gp2c] add descriptions to support intnum/suminf type functions.
+BA 15- function diffop
 
   Removed
 BA  1- PARI function CM_CardEFp (ellsea script deprecated).
