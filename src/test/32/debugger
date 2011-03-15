@@ -12,11 +12,11 @@ p^2);if(i==halt,error("check:",N)))
   ***                                                  ^-------------------
   ***   user error: check:3721
   ***   Break loop: type 'break' to go back to GP
-? [bound,step,halt,i,p,N,bi,B]
+break> [bound,step,halt,i,p,N,bi,B]
 [100, 20, 41, 41, 61, 3721, [1000000], 1000]
-? break
+break> break
 
 ? [bound,step,halt,i,p,N,bi,B]
 [bound, step, halt, i, p, N, bi, B]
 ? print("Total time spent: ",gettime);
-Total time spent: 4
+Total time spent: 0
