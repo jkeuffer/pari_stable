@@ -1331,6 +1331,7 @@ gp_initrc(pari_stack *p_A, char *path)
 /*                             PROMPTS                              */
 /*                                                                  */
 /********************************************************************/
+static int gp_is_interactive = 0;
 static const char *DFT_PROMPT = "? ";
 static const char *CONTPROMPT = "";
 static const char *COMMENTPROMPT = "comment> ";
@@ -1362,10 +1363,8 @@ brace_color(char *s, int c, int force)
 static const char *
 color_prompt(char *buf, const char *prompt)
 {
-  char *s;
-
-  if (GP_DATA->flags & gpd_TEST) return prompt;
-  s = buf; *s = 0;
+  char *s = buf;
+  *s = 0;
   /* escape sequences bug readline, so use special bracing (if available) */
   brace_color(s, c_PROMPT, 0);
   s += strlen(s); strcpy(s, prompt);
@@ -1384,9 +1383,13 @@ expand_prompt(char *buf, const char *prompt, filtre_t *F)
 const char *
 do_prompt(char *buf, const char *prompt, filtre_t *F)
 {
-  char b[MAX_PROMPT_LEN];
-  const char *s = expand_prompt(b, prompt, F);
-  return color_prompt(buf, s);
+  if (GP_DATA->flags & gpd_TEST) return prompt;
+  else
+  {
+    char b[MAX_PROMPT_LEN];
+    const char *s = expand_prompt(b, prompt, F);
+    return color_prompt(buf, s);
+  }
 }
 
 /********************************************************************/
@@ -1461,7 +1464,7 @@ static int
 is_interactive(void)
 {
   ulong f = GP_DATA->flags&(gpd_TEXMACS|gpd_TEST);
-  return pari_infile == stdin && !f && pari_stdin_isatty();
+  return pari_infile == stdin && !f && gp_is_interactive;
 }
 
 /* return 0 if no line could be read (EOF). If PROMPT = NULL, expand and
@@ -1470,27 +1473,33 @@ static int
 gp_read_line(filtre_t *F, const char *PROMPT)
 {
   Buffer *b = (Buffer*)F->buf;
-  int res;
+  char buf[MAX_PROMPT_LEN + 24];
+  const char *p;
+  int res, interactive;
   disable_exception_handler = 1;
   F->downcase = (compatible == OLDALL);
   if (b->len > 100000) fix_buffer(b, 100000);
-  if (is_interactive())
+  interactive = is_interactive();
+  if (interactive || pari_logfile || GP_DATA->echo)
+    p = PROMPT? PROMPT: do_prompt(buf, Prompt, F);
+  else
+    p = DFT_PROMPT;
+
+  if (interactive)
   {
-    char buf[MAX_PROMPT_LEN + 24];
-    const char *p = PROMPT? PROMPT: do_prompt(buf, Prompt, F);
 #ifdef READLINE
     if (GP_DATA->use_readline)
-      res = get_line_from_readline(p, Prompt_cont, F);
-    else
-#endif
     {
-      pari_puts(p); pari_flush();
-      res = get_line_from_file(p, F, pari_infile);
+      res = get_line_from_readline(p, Prompt_cont, F);
+      goto END;
     }
-    if (!disable_color) { term_color(c_NONE); pari_flush(); }
+#endif
+    pari_puts(p); pari_flush();
   }
-  else
-    res = get_line_from_file(DFT_PROMPT,F,pari_infile);
+  res = get_line_from_file(p, F, pari_infile);
+
+END:
+  if (!disable_color) { term_color(c_NONE); pari_flush(); }
   disable_exception_handler = 0;
   return res;
 }
@@ -1876,7 +1885,6 @@ read_opt(pari_stack *p_A, long argc, char **argv)
   char *b = NULL, *p = NULL, *s = NULL;
   ulong f = GP_DATA->flags;
   long i = 1, initrc = 1;
-  long hastty = pari_stdin_isatty();
 
   (void)&p; (void)&b; (void)&s; /* -Wall gcc-2.95 */
 
@@ -1923,11 +1931,10 @@ read_opt(pari_stack *p_A, long argc, char **argv)
         usage(argv[0]);
     }
   }
-  if (!hastty)
+  if (!gp_is_interactive)
   {
     if (!(GP_DATA->flags & gpd_EMACS)) GP_DATA->breakloop = 0;
     GP_DATA->use_readline = 0;
-    Prompt[0] = 0;
   }
   if (f & gpd_TEXMACS) tm_start_output();
   GP_DATA->flags = f;
@@ -1970,6 +1977,7 @@ main(int argc, char **argv)
     puts("### Errors on startup, exiting...\n\n");
     exit(1);
   }
+  gp_is_interactive = pari_stdin_isatty();
   pari_init_defaults();
   stack_init(&s_A,sizeof(*A),(void**)&A);
   stack_init(&s_bufstack, sizeof(Buffer*), (void**)&bufstack);
@@ -1992,6 +2000,7 @@ main(int argc, char **argv)
 
   init_graph();
 #ifdef READLINE
+  GP_DATA->use_readline = gp_is_interactive;
   init_readline();
 #endif
   cb_pari_whatnow = whatnow;

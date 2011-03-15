@@ -703,13 +703,7 @@ init_readline(void)
   static int init_done = 0;
 
   if (init_done) return;
-  if (pari_stdin_isatty())
-    GP_DATA->use_readline = 1;
-  else
-  {
-    GP_DATA->use_readline = 0;
-    readline_state = 0;
-  }
+  if (! GP_DATA->use_readline) readline_state = 0;
   init_done = 1;
   init_histfile();
 
