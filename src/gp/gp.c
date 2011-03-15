@@ -1461,7 +1461,7 @@ static int
 is_interactive(void)
 {
   ulong f = GP_DATA->flags&(gpd_TEXMACS|gpd_TEST);
-  return pari_infile == stdin && (!f || pari_stdin_isatty());
+  return pari_infile == stdin && !f && pari_stdin_isatty();
 }
 
 /* return 0 if no line could be read (EOF). If PROMPT = NULL, expand and
