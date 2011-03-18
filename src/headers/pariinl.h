@@ -223,6 +223,14 @@ zero_Flm(long m, long n)
   long i; for (i=1; i<=n; i++) gel(y,i) = v;
   return y;
 }
+/* matrix(m, n) */
+INLINE GEN
+zero_Flm_copy(long m, long n)
+{
+  GEN y = cgetg(n+1,t_MAT);
+  long i; for (i=1; i<=n; i++) gel(y,i) = zero_Flv(m);
+  return y;
+}
 
 INLINE GEN
 zero_F2v(long m)

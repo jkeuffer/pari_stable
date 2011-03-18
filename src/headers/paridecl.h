@@ -3189,6 +3189,7 @@ INLINE GEN    zero_F2m_copy(long n, long m);
 INLINE GEN    zero_F2v(long m);
 INLINE GEN    zero_F2x(long sv);
 INLINE GEN    zero_Flm(long m, long n);
+INLINE GEN    zero_Flm_copy(long m, long n);
 INLINE GEN    zero_Flv(long n);
 INLINE GEN    zero_Flx(long sv);
 INLINE GEN    zero_zm(long x, long y);

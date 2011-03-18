@@ -105,6 +105,7 @@ BA 11- PARI function bnr_get_clgp
    13- PARI function cmp_universal
 BA 14- [gp2c] add descriptions to support intnum/suminf type functions.
 BA 15- function diffop
+   16- PARI function zero_Flm_copy
 
   Removed
 BA  1- PARI function CM_CardEFp (ellsea script deprecated).
