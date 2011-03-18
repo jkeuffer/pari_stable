@@ -547,9 +547,8 @@ mathnfspec(GEN x, GEN *ptperm, GEN *ptdep, GEN *ptB, GEN *ptC)
   GEN z, perm;
   if (lx == 1) return cgetg(1, t_MAT);
   ly = lg(x[1]);
+  *ptperm = perm = identity_perm(ly-1);
   z = cgetg(lx,t_MAT);
-  perm = cgetg(ly,t_VECSMALL); *ptperm = perm;
-  for (i=1; i<ly; i++) perm[i] = i;
   for (i=1; i<lx; i++)
   {
     GEN C = cgetg(ly,t_COL), D = gel(x,i);
