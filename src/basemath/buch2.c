@@ -354,73 +354,6 @@ ZZV_equal(GEN x, GEN y) {
   return equalii(gel(x,1),gel(y,1)) && ZV_equal(gel(x,2), gel(y,2));
 }
 
-/* Compute powers of prime ideals (P^0,...,P^a) in subFB (a > 1) */
-static void
-powFBgen(RELCACHE_t *cache, FB_t *F, GEN nf)
-{
-  const long a = 1L<<RANDOM_BITS;
-  pari_sp av = avma;
-  long i, j, n = lg(F->subFB);
-  GEN Id2, Alg, Ord;
-  powFB_t *old = F->pow, *New;
-
-  if (DEBUGLEVEL) fprintferr("Computing powers for subFB: %Ps\n",F->subFB);
-  F->pow = New = (powFB_t*) pari_malloc(sizeof(powFB_t));
-  Id2 = cgetg(n, t_VEC);
-  Alg = cgetg(n, t_VEC);
-  Ord = cgetg(n, t_VECSMALL);
-  New->arc = NULL;
-  if (cache) pre_allocate(cache, n);
-  for (i=1; i<n; i++)
-  {
-    GEN M, m, alg, id2, vp = gel(F->LP, F->subFB[i]);
-    id2 = cgetg(a+1,t_VEC); gel(Id2,i) = id2;
-
-    gel(id2,1) = mkvec2(pr_get_p(vp), zk_scalar_or_multable(nf,pr_get_gen(vp)));
-    alg = cgetg(a+1,t_VEC); gel(Alg,i) = alg; gel(alg,1) = gen_1;
-    vp = idealhnf_two(nf,vp);
-    for (j=2; j<=a; j++)
-    {
-      GEN J = red(nf, idealmul_HNF(nf,vp,gel(id2,j-1)), F->G0, &m);
-      if (DEBUGLEVEL>1) fprintferr(" %ld",j);
-      if (!J)
-      {
-        if (j == 2 && !red(nf, vp, F->G0, &M)) { j = 1; m = M; }
-        break;
-      }
-      if (ZZV_equal(J, gel(id2,j-1))) { j = 1; break; }
-      gel(J,2) = zk_scalar_or_multable(nf, gel(J,2));
-      gel(id2,j) = J;
-      gel(alg,j) = m;
-    }
-    if (cache && j <= a)
-    { /* vp^j principal */
-      long k;
-      REL_t *rel = cache->last + 1;
-      rel->R = col_0(F->KC); rel->nz = F->subFB[i];
-      rel->R[ rel->nz ] = j;
-      for (k = 2; k < j; k++) m = nfmul(nf, m, gel(alg,k));
-      rel->m = gclone(m);
-      rel->ex = NULL;
-      rel->pow = New;
-      cache->last = rel;
-      if (DEBUGLEVEL) dbg_newrel(cache);
-    }
-    /* trouble with subFB: include ideal even though it's principal */
-    if (j == 1) j = 2;
-    setlg(id2, j);
-    setlg(alg, j); Ord[i] = j;
-    if (DEBUGLEVEL>1) fprintferr("\n");
-  }
-  New->prev = old;
-  New->id2 = gclone(Id2);
-  New->ord = gclone(Ord);
-  New->alg = gclone(Alg); avma = av;
-  if (DEBUGLEVEL) msgtimer("powFBgen");
-  F->sfb_chg = 0;
-  F->newpow = 0;
-}
-
 static GEN
 countf(GEN LP)
 {
@@ -1997,6 +1930,25 @@ set_fact(REL_t *rel, FB_t *F, FACT *fact)
   }
 }
 
+/* Check if we already have a column mat[i] equal to mat[s]
+ * General check for colinearity useless since exceedingly rare */
+static int
+already_known(RELCACHE_t *cache, REL_t *rel)
+{
+  REL_t *r;
+  GEN cols = rel->R;
+  long bs = rel->nz, l = lg(cols);
+  for (r = rel - 1; r > cache->base; r--)
+    if (bs == r->nz) /* = index of first non zero elt in cols */
+    {
+      GEN coll = r->R;
+      long b = bs;
+      while (b < l && cols[b] == coll[b]) b++;
+      if (b == l) return 1;
+    }
+  return 0;
+}
+
 /* If V depends linearly from the columns of the matrix, return 0.
  * Otherwise, update INVP and L and return 1. Compute mod p (much faster)
  * so some kernel vector might not be genuine. */
@@ -2035,25 +1987,6 @@ addcolumn_mod(GEN V, GEN invp, GEN L, ulong p)
   avma = av; return 1;
 }
 
-/* Check if we already have a column mat[i] equal to mat[s]
- * General check for colinearity useless since exceedingly rare */
-static int
-already_known(RELCACHE_t *cache, REL_t *rel)
-{
-  REL_t *r;
-  GEN cols = rel->R;
-  long bs = rel->nz, l = lg(cols);
-  for (r = rel - 1; r > cache->base; r--)
-    if (bs == r->nz) /* = index of first non zero elt in cols */
-    {
-      GEN coll = r->R;
-      long b = bs;
-      while (b < l && cols[b] == coll[b]) b++;
-      if (b == l) return 1;
-    }
-  return 0;
-}
-
 /* compute the rank of A in M_n,r(Z) (C long), where rank(A) = r <= n.
  * Starting from the identity (canonical basis of Q^n), we obtain a base
  * change matrix P by taking the independent columns of A and vectors from
@@ -2067,6 +2000,73 @@ relationrank(RELCACHE_t *cache, GEN L, ulong p)
   REL_t *rel = cache->base + 1;
   for (; rel <= cache->last; rel++) (void)addcolumn_mod(rel->R, invp, L, p);
   return invp;
+}
+
+/* Compute powers of prime ideals (P^0,...,P^a) in subFB (a > 1) */
+static void
+powFBgen(RELCACHE_t *cache, FB_t *F, GEN nf)
+{
+  const long a = 1L<<RANDOM_BITS;
+  pari_sp av = avma;
+  long i, j, n = lg(F->subFB);
+  GEN Id2, Alg, Ord;
+  powFB_t *old = F->pow, *New;
+
+  if (DEBUGLEVEL) fprintferr("Computing powers for subFB: %Ps\n",F->subFB);
+  F->pow = New = (powFB_t*) pari_malloc(sizeof(powFB_t));
+  Id2 = cgetg(n, t_VEC);
+  Alg = cgetg(n, t_VEC);
+  Ord = cgetg(n, t_VECSMALL);
+  New->arc = NULL;
+  if (cache) pre_allocate(cache, n);
+  for (i=1; i<n; i++)
+  {
+    GEN M, m, alg, id2, vp = gel(F->LP, F->subFB[i]);
+    id2 = cgetg(a+1,t_VEC); gel(Id2,i) = id2;
+
+    gel(id2,1) = mkvec2(pr_get_p(vp), zk_scalar_or_multable(nf,pr_get_gen(vp)));
+    alg = cgetg(a+1,t_VEC); gel(Alg,i) = alg; gel(alg,1) = gen_1;
+    vp = idealhnf_two(nf,vp);
+    for (j=2; j<=a; j++)
+    {
+      GEN J = red(nf, idealmul_HNF(nf,vp,gel(id2,j-1)), F->G0, &m);
+      if (DEBUGLEVEL>1) fprintferr(" %ld",j);
+      if (!J)
+      {
+        if (j == 2 && !red(nf, vp, F->G0, &M)) { j = 1; m = M; }
+        break;
+      }
+      if (ZZV_equal(J, gel(id2,j-1))) { j = 1; break; }
+      gel(J,2) = zk_scalar_or_multable(nf, gel(J,2));
+      gel(id2,j) = J;
+      gel(alg,j) = m;
+    }
+    if (cache && j <= a)
+    { /* vp^j principal */
+      long k;
+      REL_t *rel = cache->last + 1;
+      rel->R = col_0(F->KC); rel->nz = F->subFB[i];
+      rel->R[ rel->nz ] = j;
+      for (k = 2; k < j; k++) m = nfmul(nf, m, gel(alg,k));
+      rel->m = gclone(m);
+      rel->ex = NULL;
+      rel->pow = New;
+      cache->last = rel;
+      if (DEBUGLEVEL) dbg_newrel(cache);
+    }
+    /* trouble with subFB: include ideal even though it's principal */
+    if (j == 1) j = 2;
+    setlg(id2, j);
+    setlg(alg, j); Ord[i] = j;
+    if (DEBUGLEVEL>1) fprintferr("\n");
+  }
+  New->prev = old;
+  New->id2 = gclone(Id2);
+  New->ord = gclone(Ord);
+  New->alg = gclone(Alg); avma = av;
+  if (DEBUGLEVEL) msgtimer("powFBgen");
+  F->sfb_chg = 0;
+  F->newpow = 0;
 }
 
 INLINE void
