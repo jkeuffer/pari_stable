@@ -111,10 +111,10 @@ typedef struct FB_t {
 enum { sfb_CHANGE = 1, sfb_INCREASE = 2 };
 
 typedef struct REL_t {
-  GEN R; /* relation vector as t_VECSMALL */
+  GEN R; /* relation vector as t_VECSMALL; clone */
   long nz; /* index of first non-zero elt in R (hash) */
-  GEN m; /* pseudo-minimum yielding the relation */
-  GEN ex; /* exponents of subFB elts used to find R */
+  GEN m; /* pseudo-minimum yielding the relation; clone */
+  GEN ex; /* exponents of subFB elts used to find R; clone */
   powFB_t *pow; /* powsubFB associated to ex [ shared between rels ] */
   GEN junk[3]; /*make sure sizeof(struct) is a power of two.*/
 } REL_t;
@@ -125,6 +125,8 @@ typedef struct RELCACHE_t {
   REL_t *last; /* last rel found so far */
   REL_t *end; /* target for last relation. base <= last <= end */
   size_t len; /* number of rels pre-allocated in base */
+  GEN basis; /* mod p basis (generating family actually) */
+  ulong missing; /* missing vectors in generating family above */
 } RELCACHE_t;
 
 static void
@@ -166,7 +168,7 @@ delete_cache(RELCACHE_t *M)
   REL_t *rel;
   for (rel = M->base+1; rel <= M->last; rel++)
   {
-    pari_free((void*)rel->R);
+    gunclone(rel->R);
     if (!rel->m) continue;
     gunclone(rel->m);
     if (!rel->ex) continue;
@@ -189,15 +191,6 @@ delete_FB(FB_t *F)
     S = S->prev; pari_free((void*)T);
   }
   gunclone(F->subFB);
-}
-
-INLINE GEN
-col_0(long n)
-{
-   GEN c = (GEN)calloc(n + 1, sizeof(long));
-   if (!c) pari_err(memer);
-   c[0] = evaltyp(t_VECSMALL) | evallg(n + 1);
-   return c;
 }
 
 static void
@@ -1917,29 +1910,44 @@ powFB_fill(FB_t *F, GEN M)
   avma = av;
 }
 
-static void
-set_fact(REL_t *rel, FB_t *F, FACT *fact)
+/* return the relation column associated to a smooth factorization.
+ * Set *pnz = the index of its first non-zero coeff */
+static GEN
+set_fact(FB_t *F, FACT *fact, GEN ex, long *pnz)
 {
   long i, n = fact[0].pr;
-  GEN c = rel->R = col_0(F->KC);
+  long nz;
+  GEN c = zero_Flv(F->KC);
   if (!n) /* trivial factorization */
-    rel->nz = F->KC;
+    *pnz = F->KC;
   else {
-    rel->nz = fact[1].pr;
+    nz = fact[1].pr;
+    if (fact[n].pr < nz) /* Possible with jid in rnd_rel */
+      nz = fact[n].pr;
     for (i=1; i<=n; i++) c[fact[i].pr] = fact[i].ex;
+    if (ex)
+    {
+      for (i=1; i<lg(ex); i++)
+        if (ex[i]) {
+          long v = F->subFB[i];
+          c[v] += ex[i];
+          if (v < nz) nz = v;
+        }
+    }
+    *pnz = nz;
   }
+  return c;
 }
 
-/* Check if we already have a column mat[i] equal to mat[s]
+/* Is cols already in the cache ? bs = index of first non zero coeff in cols
  * General check for colinearity useless since exceedingly rare */
 static int
-already_known(RELCACHE_t *cache, REL_t *rel)
+already_known(RELCACHE_t *cache, long bs, GEN cols)
 {
   REL_t *r;
-  GEN cols = rel->R;
-  long bs = rel->nz, l = lg(cols);
-  for (r = rel - 1; r > cache->base; r--)
-    if (bs == r->nz) /* = index of first non zero elt in cols */
+  long l = lg(cols);
+  for (r = cache->last; r > cache->base; r--)
+    if (bs == r->nz)
     {
       GEN coll = r->R;
       long b = bs;
@@ -1949,57 +1957,92 @@ already_known(RELCACHE_t *cache, REL_t *rel)
   return 0;
 }
 
-/* If V depends linearly from the columns of the matrix, return 0.
- * Otherwise, update INVP and L and return 1. Compute mod p (much faster)
+/* Add relation R to cache, nz = index of first non zero coeff in R.
+ * If relation is a linear combination of the previous ones, return 0.
+ * Otherwise, update basis and return > 0. Compute mod p (much faster)
  * so some kernel vector might not be genuine. */
 static int
-addcolumn_mod(GEN V, GEN invp, GEN L, ulong p)
+add_rel(RELCACHE_t *cache, GEN R, long nz, GEN m, REL_t **relp)
 {
-  pari_sp av = avma;
-  GEN a = Flm_Flc_mul(invp, V, p);
-  long i,j,k, n = lg(invp);
-  ulong invak;
+  const ulong p = 27449UL;
+  long i, k, n = lg(R)-1, prnewrel = nz < 0;
 
+  if (prnewrel) nz = -nz;
+  if (already_known(cache, nz, R)) return -1;
   if (DEBUGLEVEL>6)
   {
-    fprintferr("adding vector = %Ps\n",V);
-    fprintferr("vector in new basis = %Ps\n",a);
-    fprintferr("list = %Ps\n",L);
-    fprintferr("base change =\n%Ps\n", invp);
+    fprintferr("adding vector = %Ps\n",R);
+    fprintferr("generators =\n%Ps\n", cache->basis);
   }
-  k = 1; while (k<n && (L[k] || !a[k])) k++;
-  if (k == n) { avma = av; return 0; }
-  invak = Fl_inv((ulong)a[k], p);
-  L[k] = 1;
-  for (i=k+1; i<n; i++)
-    if (a[i]) a[i] = p - ((a[i] * invak) % p);
-  for (j=1; j<=k; j++)
+  if (cache->missing)
   {
-    GEN c = gel(invp,j);
-    ulong ck = (ulong)c[k];
-    if (!ck) continue;
-    c[k] = (ck * invak) % p;
-    if (j==k)
-      for (i=k+1; i<n; i++) c[i] = (a[i] * ck) % p;
-    else
-      for (i=k+1; i<n; i++) c[i] = (c[i] + a[i] * ck) % p;
+    GEN a = leafcopy(R), basis = cache->basis;
+    k = lg(a);
+    do --k; while (!a[k]);
+    while (k)
+    {
+      GEN c = gel(basis, k);
+      if (c[k])
+      {
+        long ak = a[k];
+        for (i=1; i < k; i++) if (c[i]) a[i] = (a[i] + ak*(p-c[i])) % p;
+        a[k] = 0;
+        do --k; while (!a[k]); /* k cannot go below 0: codeword is a sentinel */
+      }
+      else
+      {
+        ulong invak = Fl_inv((ulong)a[k], p);
+        /* Cleanup a */
+        for (i = k; i-- > 1; )
+        {
+          long j, ai = a[i];
+          c = gel(basis, i);
+          if (!ai || !c[i]) continue;
+          ai = p-ai;
+          for (j = 1; j < i; j++) if (c[j]) a[j] = (a[j] + ai*c[j]) % p;
+          a[i] = 0;
+        }
+        /* Insert a/a[k] as k-th column */
+        c = gel(basis, k);
+        for (i = 1; i<k; i++) if (a[i]) c[i] = (a[i] * invak) % p;
+        c[k] = 1; a = c;
+        /* Cleanup above k */
+        for (i = k+1; i<n; i++)
+        {
+          long j, ck;
+          c = gel(basis, i);
+          ck = c[k];
+          if (!ck) continue;
+          ck = p-ck;
+          for (j = 1; j < k; j++) if (a[j]) c[j] = (c[j] + ck*a[j]) % p;
+          c[k] = 0;
+        }
+        cache->missing--;
+        break;
+      }
+    }
   }
-  avma = av; return 1;
-}
+  else
+    k = (cache->last - cache->base) + 1;
+  if (k)
+  {
+    REL_t *rel;
 
-/* compute the rank of A in M_n,r(Z) (C long), where rank(A) = r <= n.
- * Starting from the identity (canonical basis of Q^n), we obtain a base
- * change matrix P by taking the independent columns of A and vectors from
- * the canonical basis. Update invp = 1/P, and L in {0,1}^n, with L[i] = 0
- * if P[i] = e_i, and 1 if P[i] = A_i (i-th column of A)
- */
-static GEN
-relationrank(RELCACHE_t *cache, GEN L, ulong p)
-{
-  GEN invp = matid_Flm(lg(L) - 1);
-  REL_t *rel = cache->base + 1;
-  for (; rel <= cache->last; rel++) (void)addcolumn_mod(rel->R, invp, L, p);
-  return invp;
+    rel = ++cache->last;
+    rel->R  = gclone(R);
+    rel->m  =  m ? gclone(m) : NULL;
+    rel->nz = nz;
+    rel->ex = NULL;
+    if (relp) *relp = rel;
+    if (DEBUGLEVEL)
+    {
+      if (prnewrel)
+        dbg_newrel(cache);
+      else
+        dbg_rel(rel - cache->base, R);
+    }
+  }
+  return k;
 }
 
 /* Compute powers of prime ideals (P^0,...,P^a) in subFB (a > 1) */
@@ -2043,16 +2086,12 @@ powFBgen(RELCACHE_t *cache, FB_t *F, GEN nf)
     }
     if (cache && j <= a)
     { /* vp^j principal */
-      long k;
-      REL_t *rel = cache->last + 1;
-      rel->R = col_0(F->KC); rel->nz = F->subFB[i];
-      rel->R[ rel->nz ] = j;
+      long k, nz;
+      GEN R;
+      R = zero_Flv(F->KC); nz = F->subFB[i];
+      R[nz] = j;
       for (k = 2; k < j; k++) m = nfmul(nf, m, gel(alg,k));
-      rel->m = gclone(m);
-      rel->ex = NULL;
-      rel->pow = New;
-      cache->last = rel;
-      if (DEBUGLEVEL) dbg_newrel(cache);
+      add_rel(cache, R, -nz, m, NULL);
     }
     /* trouble with subFB: include ideal even though it's principal */
     if (j == 1) j = 2;
@@ -2088,14 +2127,11 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
 {
   const long N = nf_get_degree(nf), R1 = nf_get_r1(nf), prec = nf_get_prec(nf);
   const long BMULT = 8;
-  const ulong mod_p = 27449UL;
   const long maxtry_DEP  = 20, maxtry_FACT = 500;
   double *y, *z, **q, *v, BOUND;
   pari_sp av;
   long nbsmallnorm, nbfact, precbound, noideal = F->KC;
   GEN x, M = nf_get_M(nf), G = nf_get_G(nf);
-  GEN L = const_vecsmall(F->KC, 0), invp = relationrank(cache, L, mod_p);
-  REL_t *rel = cache->last;
 
   if (DEBUGLEVEL)
     fprintferr("\n#### Looking for %ld relations (small norms)\n",
@@ -2145,6 +2181,8 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
     k = N; y[N] = z[N] = 0; x[N] = 0;
     for (av2 = avma;; avma = av2, step(x,y,inc,k))
     {
+      GEN R;
+      long nz;
       do
       { /* look for primitive element of small norm, cf minim00 */
         int fl = 0;
@@ -2200,29 +2238,24 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
       }
 
       /* smooth element */
-      set_fact(++rel, F, fact);
+      R = set_fact(F, fact, NULL, &nz);
       /* make sure we get maximal rank first, then allow all relations */
-      if (rel - cache->base > 1 && rel - cache->base <= F->KC
-                                && ! addcolumn_mod(rel->R,invp,L, mod_p))
+      if (add_rel(cache, R, nz, gx, NULL) <= 0)
       { /* probably Q-dependent from previous ones: forget it */
-        pari_free((void*)rel->R); rel--;
         if (DEBUGLEVEL>1) fprintferr("*");
         if (++dependent > maxtry_DEP) break;
         continue;
       }
-      rel->m = gclone(gx);
-      rel->ex= NULL;
       dependent = 0;
 
-      if (DEBUGLEVEL) { nbfact++; dbg_rel(rel - cache->base, rel->R); }
-      if (rel >= cache->end) goto END; /* we have enough */
+      if (DEBUGLEVEL) nbfact++;
+      if (cache->last >= cache->end) goto END; /* we have enough */
       if (++nbrelideal == nbrelpid) break;
     }
 ENDIDEAL:
     if (DEBUGLEVEL>1) msgtimer("for this ideal");
   }
 END:
-  cache->last = rel;
   if (DEBUGLEVEL)
   {
     fprintferr("\n"); msgtimer("small norm relations");
@@ -2266,23 +2299,25 @@ get_random_ideal(FB_t *F, GEN A, GEN nf, GEN ex)
 static void
 rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, FACT *fact)
 {
-  long jlist, nbG = lg(F->vecG)-1, lgsub = lg(F->subFB);
-  GEN L_jid = F->L_jid, ex = cgetg(lgsub, t_VECSMALL);
+  GEN L_jid = F->L_jid, ex;
+  powFB_t *pow = F->pow;
+  const long nbG = lg(F->vecG)-1, lgsub = lg(F->subFB), l_jid = lg(L_jid);
+  long jlist;
   pari_sp av;
 
   /* will compute P[ L_jid[i] ] * (random product from subFB) */
   if (DEBUGLEVEL) {
     long d = cache->end - cache->last;
     fprintferr("\n(more relations needed: %ld)\n", d > 0? d: 1);
-    if (lg(L_jid) < F->KC) fprintferr("looking hard for %Ps\n",L_jid);
+    if (l_jid < F->KC) fprintferr("looking hard for %Ps\n",L_jid);
   }
-  for (av = avma, jlist = 1; jlist < lg(L_jid); jlist++, avma = av)
+  ex = cgetg(lgsub, t_VECSMALL);
+  for (av = avma, jlist = 1; jlist < l_jid; jlist++, avma = av)
   {
     const long jid = L_jid[jlist];
-    REL_t *rel = cache->last;
     GEN Nideal, ideal;
     pari_sp av1;
-    long i, j;
+    long j;
 
     if (DEBUGLEVEL>1) fprintferr("(%ld)", jid);
     ideal = get_random_ideal(F, gel(F->LP,jid), nf, ex);
@@ -2290,32 +2325,34 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, FACT *fact)
     for (av1 = avma, j = 1; j <= nbG; j++, avma = av1)
     { /* reduce along various directions */
       GEN m = idealpseudomin_nonscalar(ideal, gel(F->vecG,j));
+      GEN R;
+      REL_t *rel;
+      long nz;
       if (!factorgen(F,nf,ideal,Nideal,m,fact))
       {
         if (DEBUGLEVEL>1) { fprintferr("."); flusherr(); }
         continue;
       }
-      /* can factor ideal, record relation; update rel->nz if needed */
-      set_fact(++rel, F, fact); rel->R[jid]++;
-      if (jid < rel->nz) rel->nz = jid;
-      for (i=1; i<lgsub; i++)
-        if (ex[i]) {
-          long c = F->subFB[i];
-          rel->R[c] += ex[i];
-          if (c < rel->nz) rel->nz = c;
-        }
-      if (already_known(cache, rel))
-      { /* forget it */
-        if (DEBUGLEVEL>1) dbg_cancelrel(jid,j,rel->R);
-        pari_free((void*)rel->R); rel--;
-        continue;
+      /* can factor ideal, record relation */
+      add_to_fact(jid, 1, fact);
+      R = set_fact(F, fact, ex, &nz);
+      /* If relation is linearly dependent of the previous ones, we do not
+       * include it (to speed up hnfspec/add). However we just go to the next
+       * ideal as if we had included it (to finish rnd_rel earlier and make an
+       * hnfspec/add round). */
+      switch (add_rel(cache, R, -nz, m, &rel))
+      {
+        case -1: /* forget it */
+          if (DEBUGLEVEL>1) dbg_cancelrel(jid,j,R);
+          continue;
+        case 0:
+          break;
+        default:
+          rel->ex = gclone(ex);
+          rel->pow = pow;
       }
-      rel->m = gclone(m);
-      rel->ex = gclone(ex);
-      rel->pow = F->pow; cache->last = rel;
-      if (DEBUGLEVEL) dbg_newrel(cache);
       /* Need more, try next prime ideal */
-      if (rel < cache->end) break;
+      if (cache->last < cache->end) break;
       /* We have found enough. Return */
       avma = av; return;
     }
@@ -3124,31 +3161,25 @@ init_rel(RELCACHE_t *cache, FB_t *F, long add_need)
   const long n = F->KC + add_need; /* expected # of needed relations */
   long i, j, k, p;
   GEN c, P;
-  REL_t *rel;
+  GEN R;
 
   if (DEBUGLEVEL) fprintferr("KCZ = %ld, KC = %ld, n = %ld\n", F->KCZ,F->KC,n);
   reallocate(cache, 10*n + 50); /* make room for lots of relations */
   cache->chk = cache->base;
   cache->end = cache->base + n;
-  for (rel = cache->base + 1, i = 1; i <= F->KCZ; i++)
+  cache->last = cache->base;
+  cache->missing = lg(cache->basis) - 1;
+  for (i = 1; i <= F->KCZ; i++)
   { /* trivial relations (p) = prod P^e */
     p = F->FB[i]; P = F->LV[p];
     if (!isclone(P)) continue;
 
     /* all prime divisors in FB */
-    c = col_0(F->KC); k = F->iLP[p];
-    rel->nz = k+1;
-    rel->R  = c; c += k;
-    rel->ex = NULL;
-    rel->m  = NULL;
-    rel->pow= NULL; /* = F->pow */
+    c = zero_Flv(F->KC); k = F->iLP[p];
+    R = c; c += k;
     for (j = lg(P)-1; j; j--) c[j] = pr_get_e(gel(P,j));
-    rel++;
+    add_rel(cache, R, k+1, /*m*/NULL, NULL);
   }
-  cache->last = rel - 1;
-  if (DEBUGLEVEL)
-    for (i = 1, rel = cache->base + 1; rel <= cache->last; rel++, i++)
-      dbg_rel(i, rel->R);
 }
 
 static void
@@ -3269,6 +3300,7 @@ START:
   while (!Res || !subFBgen(&F, mindd(lim,LIMC2) + 0.5, minsFB));
   fact = (FACT*)stackmalloc((F.KC+1)*sizeof(FACT));
   PERM = leafcopy(F.perm); /* to be restored in case of precision increase */
+  cache.basis = zero_Flm_copy(F.KC,F.KC);
   av2 = avma;
   init_rel(&cache, &F, RELSUP + RU-1); /* trivial relations */
   if (nbrelpid > 0) {
@@ -3342,6 +3374,19 @@ START:
         gerepileall(av2, 4, &W,&C,&B,&dep);
         cache.chk = cache.last;
         need = lg(dep)>1? lg(dep[1])-1: lg(B[1])-1;
+        /* FIXME: replace by err(bugparier,"") */
+        if (!need && cache.missing)
+        { /* The test above will never be true, but add_rel implicitely assumes
+           * that if we have maximal rank for the ideal lattice, then
+           * cache.missing == 0. Better safe than sorry. */
+          for (i = 1; cache.missing; i++)
+            if (!mael(cache.basis, i, i))
+            {
+              mael(cache.basis, i, i) = 1;
+              cache.missing--;
+              for (j = i+1; j <= F.KC; j++) mael(cache.basis, j, i) = 0;
+            }
+        }
         zc = (cache.last - cache.base) - (lg(B)-1) - (lg(W)-1);
         if (zc < RU-1)
         {
