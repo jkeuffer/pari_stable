@@ -203,11 +203,6 @@ unclone_subFB(FB_t *F, long all)
     for (i = 1; i < lg(subFB); i++)
     {
       id = subFB[i];
-      if (all && gel(powP, id) != gen_0)
-      {
-        gunclone(gel(powP, id));
-        gel(powP, id) = gen_0;
-      }
       if (gel(arcP, id) != gen_0)
       {
         gunclone(gel(arcP, id));
@@ -216,6 +211,16 @@ unclone_subFB(FB_t *F, long all)
     }
     subold = sub->old;
     if (all) pari_free(sub);
+  }
+  if (all)
+  { /* can't do it in a simple way above because of the Galois action, 
+       see WARNING in powFBgen */
+    for (id = 1; id <= F->KC; id++)
+      if (gel(powP, id) != gen_0)
+      {
+        gunclone(gel(powP, id));
+        gel(powP, id) = gen_0;
+      }
   }
 }
 
@@ -279,8 +284,8 @@ static void
 FB_aut_perm(FB_t *F, GEN nf, GEN auts, GEN cyclic)
 {
   pari_sp av0 = avma;
-  long i=1, imin, j, l, m, KC = F->KC, p, f, nauts = lg(auts);
-  GEN P, minidx = zero_Flv(KC), perm = zero_Flm_copy(KC, nauts-1);
+  long i, KC = F->KC, nauts = lg(auts);
+  GEN minidx = zero_Flv(KC), perm = zero_Flm_copy(KC, nauts-1);
 
   if (nauts == 1)
   {
@@ -289,6 +294,7 @@ FB_aut_perm(FB_t *F, GEN nf, GEN auts, GEN cyclic)
   }
   else
   {
+    long j, m;
     F->orbits = 0;
     for (m = 1; m < lg(cyclic); m++)
     {
@@ -299,9 +305,8 @@ FB_aut_perm(FB_t *F, GEN nf, GEN auts, GEN cyclic)
       while (i <= KC)
       {
         pari_sp av2 = avma;
-        GEN seen = zero_Flv(KC);
-        imin = i;
-        P = gel(F->LP, i);
+        GEN seen = zero_Flv(KC), P = gel(F->LP, i);
+        long imin = i, p, f, l;
         p = pr_get_p(P)[2];
         f = pr_get_f(P);
         do
@@ -312,14 +317,11 @@ FB_aut_perm(FB_t *F, GEN nf, GEN auts, GEN cyclic)
         while (p == pr_get_p(P)[2] && f == pr_get_f(P));
         for (j = imin; j < i; j++)
         {
-          GEN img = gmul(aut, pr_get_gen(gel(F->LP, j)));
-
+          GEN img = ZM_ZC_mul(aut, pr_get_gen(gel(F->LP, j)));
           for (l = imin; l < i; l++)
             if (!seen[l] && nfval(nf, img, gel(F->LP, l)))
             {
-              seen[l] = 1;
-              permk0[j] = l;
-              break;
+              seen[l] = 1; permk0[j] = l; break;
             }
         }
         avma = av2;
@@ -2322,11 +2324,14 @@ powFBgen(RELCACHE_t *cache, FB_t *F, GEN nf, GEN auts)
           for (l = 1; l < lg(id2); l++)
           {
             GEN id2l = gel(id2, l);
-            gel(id2,l)=mkvec2(gel(id2l,1),gmul(gmul(aut,gel(id2l,2)),invaut));
+            gel(id2,l) = mkvec2(gel(id2l,1),
+                                ZM_mul(ZM_mul(aut,gel(id2l,2)),invaut));
           }
           for (l = 1; l < lg(alg); l++)
-            if (typ(gel(alg, l))==t_COL) gel(alg, l) = gmul(aut, gel(alg, l));
+            if (typ(gel(alg, l))==t_COL)
+              gel(alg, l) = RgM_RgC_mul(aut, gel(alg, l));
           F->ord[sigmaid] = j;
+          /* WARNING: to be freed also un unclone_subFB */
           gel(F->powP, sigmaid) = gclone(sigmapowP);
         }
       }
@@ -3481,7 +3486,7 @@ automorphism_perms(GEN M, GEN auts, GEN cyclic, long N)
   {
     GEN thiscyc = gel(cyclic, l);
     long k = thiscyc[1];
-    GEN Nt = gmul(shallowtrans(gel(auts, k)), Mt);
+    GEN Nt = RgM_mul(shallowtrans(gel(auts, k)), Mt);
     GEN perm = gel(perms, k), permprec;
     for (i = 1; i < r1plusr2; i++)
     {
@@ -3513,15 +3518,13 @@ automorphism_perms(GEN M, GEN auts, GEN cyclic, long N)
   return perms;
 }
 
-/*
- * Determine the field automorphisms and its matrix in the integral basis.
- */
+/* Determine the field automorphisms and its matrix in the integral basis. */
 static GEN
 automorphism_matrices(GEN nf, long v, long N, GEN *invp, GEN *cycp)
 {
   pari_sp av = avma;
   GEN auts = galoisconj(nf, NULL), mats, cyclic, cyclicidx;
-  GEN invs, zk = nf_get_zk(nf);
+  GEN invs;
   long nauts = lg(auts)-1, i, j, k, l;
 
   cyclic = cgetg(nauts+1, t_VEC);
@@ -3571,13 +3574,12 @@ automorphism_matrices(GEN nf, long v, long N, GEN *invp, GEN *cycp)
   {
     GEN cyc = gel(cyclic, j);
     long id = cyc[1];
-    GEN M = cgetg(N+1, t_MAT), aut = gel(auts, id), Mi = M;
+    GEN M, Mi, aut = gel(auts, id);
 
-    for (k = 1; k <= N; k++) gel(M, k) = ZC_galoisapply(nf, gel(zk, k), aut);
-    gel(mats, id) = M;
+    gel(mats, id) = Mi = M = nfgaloismatrix(nf, aut);
     for (i = 2; i < lg(cyc); i++)
     {
-      Mi = gmul(Mi, M);
+      Mi = ZM_mul(Mi, M);
       gel(mats, cyc[i]) = Mi;
     }
   }
@@ -3806,8 +3808,7 @@ START:
            * rnd_rel will tend to give a relation involving the first element
            * of L_jid. We thus permute which element is the first of L_jid in
            * order to increase the probability of finding a good relation, i.e.
-           * one that increases the relation lattice.
-           */
+           * one that increases the relation lattice. */
           if (lg(W) > 2)
           {
             F.L_jid = gcopy(F.perm);

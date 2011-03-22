@@ -750,6 +750,14 @@ FpX_FpC_nfpoleval(GEN nf, GEN pol, GEN a, GEN p)
   return gerepileupto(av, res);
 }
 
+/* compute s(x) */
+static GEN
+ZC_galoisapply(GEN nf, GEN s, GEN x)
+{
+  x = nf_to_scalar_or_alg(nf, x);
+  return typ(x) == t_POL? nfpoleval(nf,x,s): scalarcol(x, nf_get_degree(nf));
+}
+
 static GEN
 QX_galoisapplymod(GEN nf, GEN pol, GEN S, GEN p)
 {
@@ -795,11 +803,11 @@ elt_galoisapply(GEN nf, GEN aut, GEN x)
 
     case t_POLMOD: x = gel(x,2); /* fall through */
     case t_POL: {
-      GEN y = basistoalg(nf,ZC_galoisapply(nf,x, aut));
+      GEN y = basistoalg(nf,ZC_galoisapply(nf, aut, x));
       return gerepileupto(av,y);
     }
     case t_COL:
-      return gerepileupto(av, ZC_galoisapply(nf,x, aut));
+      return gerepileupto(av, ZC_galoisapply(nf, aut, x));
     case t_MAT: {
       GEN G, g;
       long i, lx;
@@ -833,7 +841,7 @@ galoisapply(GEN nf, GEN aut, GEN x)
     case t_POLMOD: x = gel(x,2); /* fall through */
     case t_POL:
       aut = algtobasis(nf, aut);
-      y = basistoalg(nf, ZC_galoisapply(nf,x, aut));
+      y = basistoalg(nf, ZC_galoisapply(nf, aut, x));
       return gerepileupto(av,y);
 
     case t_VEC:
@@ -850,18 +858,32 @@ galoisapply(GEN nf, GEN aut, GEN x)
 
     case t_COL:
       aut = algtobasis(nf, aut);
-      return gerepileupto(av, ZC_galoisapply(nf,x, aut));
+      return gerepileupto(av, ZC_galoisapply(nf, aut, x));
 
     case t_MAT: /* ideal */
       lx = lg(x); if (lx==1) return cgetg(1,t_MAT);
       if (lg(x[1])-1 != nf_get_degree(nf)) break;
       aut = algtobasis(nf, aut);
       y = cgetg(lx,t_MAT);
-      for (j=1; j<lx; j++) gel(y,j) = ZC_galoisapply(nf,gel(x,j), aut);
+      for (j=1; j<lx; j++) gel(y,j) = ZC_galoisapply(nf, aut, gel(x,j));
       return gerepileupto(av, idealhnf_shallow(nf,y));
   }
   pari_err(typeer,"galoisapply");
   return NULL; /* not reached */
+}
+
+GEN
+nfgaloismatrix(GEN nf, GEN s)
+{
+  GEN zk, M;
+  long k, l;
+  nf = checknf(nf);
+  zk = nf_get_zk(nf);
+  if (typ(s) != t_COL) s = algtobasis(nf, s); /* left on stack for efficiency */
+  l = lg(s); M = cgetg(l, t_MAT);
+  gel(M, 1) = col_ei(l-1, 1); /* s(1) = 1 */
+  for (k = 2; k < l; k++) gel(M, k) = ZC_galoisapply(nf, s, gel(zk, k));
+  return M;
 }
 
 static GEN

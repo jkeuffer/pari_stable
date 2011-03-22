@@ -1331,6 +1331,21 @@ documentation of \tet{galoisinit} for the meaning of the member functions.
 
 \fun{GEN}{gal_get_orders}{GEN gal} returns \kbd{gal.orders}.
 
+\subsec{Miscellaneous functions}
+
+\fun{GEN}{nfgaloismatrix}{GEN nf, GEN s} returns the \kbd{ZM} associated to
+the automorphism $s$, seen as a linear operator expressend on the number
+field integer basis. This allows to use 
+\bprog
+  M = nfgaloismatrix(nf, s);
+  sx = ZM_ZC_mul(M, x);   /* or RgM_RgC_mul(M, x) if x is not integral */
+@eprog\noindent
+instead of
+\bprog
+  sx = nfgaloisapply(nf, s, x);
+@eprog\noindent
+for an algebraic integer $x$.
+
 \section{Quadratic number fields and quadratic forms}
 
 \subsec{Checks}

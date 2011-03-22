@@ -855,6 +855,7 @@ GEN     idealfrobenius(GEN nf, GEN gal, GEN pr);
 GEN     idealramgroups(GEN nf, GEN gal, GEN pr);
 GEN     nf_get_allroots(GEN nf);
 long    nf_get_prec(GEN x);
+GEN     nfgaloismatrix(GEN nf, GEN s);
 GEN     nfinit(GEN x, long prec);
 GEN     nfinit0(GEN x, long flag, long prec);
 GEN     nfinitall(GEN x, long flag, long prec);
