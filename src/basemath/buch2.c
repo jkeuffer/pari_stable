@@ -125,6 +125,7 @@ typedef struct RELCACHE_t {
   REL_t *last; /* last rel found so far */
   REL_t *end; /* target for last relation. base <= last <= end */
   size_t len; /* number of rels pre-allocated in base */
+  long relsup; /* how many linearly dependent relations to we allow */
   GEN basis; /* mod p basis (generating family actually) */
   ulong missing; /* missing vectors in generating family above */
 } RELCACHE_t;
@@ -2024,13 +2025,18 @@ add_rel(RELCACHE_t *cache, GEN R, long nz, GEN m, REL_t **relp)
   }
   else
     k = (cache->last - cache->base) + 1;
-  if (k)
+  if (k || cache->relsup > 0)
   {
     REL_t *rel;
 
     rel = ++cache->last;
+    if (!k)
+    {
+      cache->relsup--;
+      k = (rel - cache->base) + cache->missing;
+    }
     rel->R  = gclone(R);
-    rel->m  =  m ? gclone(m) : NULL;
+    rel->m  =  m ? gclone( m) : NULL;
     rel->nz = nz;
     rel->ex = NULL;
     if (relp) *relp = rel;
@@ -3167,6 +3173,7 @@ init_rel(RELCACHE_t *cache, FB_t *F, long add_need)
   reallocate(cache, 10*n + 50); /* make room for lots of relations */
   cache->chk = cache->base;
   cache->end = cache->base + n;
+  cache->relsup = add_need;
   cache->last = cache->base;
   cache->missing = lg(cache->basis) - 1;
   for (i = 1; i <= F->KCZ; i++)
