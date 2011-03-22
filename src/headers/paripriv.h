@@ -553,6 +553,13 @@ void    writenamedGEN(GEN x, const char *s, FILE *f);
 /* galconj.c */
 
 GEN     galoiscosets(GEN O, GEN perm);
+/* compute s(x) */
+INLINE GEN
+ZC_galoisapply(GEN nf, GEN x, GEN s)
+{
+  x = nf_to_scalar_or_alg(nf, x);
+  return typ(x) == t_POL? nfpoleval(nf,x,s): scalarcol(x, nf_get_degree(nf));
+}
 long    intheadlong(GEN x, GEN mod);
 long    isomborne(GEN P, GEN den, GEN p);
 GEN     listznstarelts(long m, long p);

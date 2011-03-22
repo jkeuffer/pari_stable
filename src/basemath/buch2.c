@@ -74,21 +74,17 @@ typedef struct FACT {
     long pr, ex;
 } FACT;
 
+typedef struct subFB_t {
+  GEN subFB;
+  struct subFB_t *old;
+} subFB_t;
+
 /* a factor base contains only non-inert primes
  * KC = # of P in factor base (p <= n, NP <= n2)
  * KC2= # of P assumed to generate class group (NP <= n2)
  *
  * KCZ = # of rational primes under ideals counted by KC
  * KCZ2= same for KC2 */
-
-typedef struct powFB_t {
-  GEN id2; /* id2[1] = P */
-  GEN alg; /* alg[1] = 1, (id2[i],alg[i]) = red( id2[i-1] * P ) */
-  GEN ord; /* ord[i] = known exponent of P in Cl(K) */
-  GEN arc; /* arc[i] = multiplicative arch component of x
-              such that id2[i] = x P^(i-1) */
-  struct powFB_t *prev; /* previously used powFB */
-} powFB_t;
 
 typedef struct FB_t {
   GEN FB; /* FB[i] = i-th rational prime used in factor base */
@@ -97,15 +93,28 @@ typedef struct FB_t {
             * isclone() is set for LV[p] iff all P|p are in FB
             * LV[i], i not prime or i > n2, is undefined! */
   GEN iLP; /* iLP[p] = i such that LV[p] = [LP[i],...] */
+  GEN powP; /* powP[i] = powers of ideal i, as follows:
+    gmael(powP,i,1) = id2; id2[1] = P
+    gmael(powP,i,2) = alg; alg[1] = 1, (id2[j],alg[j]) = red( id2[j-1] * P ) */
+  GEN arcP; /* archimedean components (complement of powP):
+    gel(arcP,i)     = arc; arc[j] = multiplicative arch component of x
+                such that id2[j] = x P^(j-1) */
+  GEN ord; /* ord[i] = known exponent of P in Cl(K) */
   GEN L_jid; /* indexes of "useful" prime ideals for rnd_rel */
   long KC, KCZ, KCZ2;
   GEN subFB; /* LP o subFB =  part of FB used to build random relations */
   int sfb_chg; /* need to change subFB ? */
   int newpow; /* need to compute powFB */
-  powFB_t *pow;/* array of [P^0,...,P^{k_P}], P in LP o subFB */
+  int newarc; /* need to compute archimedean components */
   GEN perm; /* permutation of LP used to represent relations [updated by
                hnfspec/hnfadd: dense rows come first] */
   GEN vecG, G0;
+  GEN idealperm; /* permutation of ideals under field automorphisms */
+  GEN minidx; /* minidx[i] min ideal in orbit of LP[i] under field autom */
+  long orbits; /* number of ideal orbits */
+  subFB_t *allsubFB; /* all subFB's used */
+  GEN embperm; /* permutations of the complex embeddings */
+  GEN invs; /* inverse of automorphism */
 } FB_t;
 
 enum { sfb_CHANGE = 1, sfb_INCREASE = 2 };
@@ -115,8 +124,10 @@ typedef struct REL_t {
   long nz; /* index of first non-zero elt in R (hash) */
   GEN m; /* pseudo-minimum yielding the relation; clone */
   GEN ex; /* exponents of subFB elts used to find R; clone */
-  powFB_t *pow; /* powsubFB associated to ex [ shared between rels ] */
-  GEN junk[3]; /*make sure sizeof(struct) is a power of two.*/
+  GEN subFB; /* subFB associated to ex [ shared between rels ] */
+  long relorig; /* relation this one is an image of */
+  long relaut; /* automorphim used to compute this relation from the original */
+  GEN junk[1]; /*make sure sizeof(struct) is a power of two.*/
 } REL_t;
 
 typedef struct RELCACHE_t {
@@ -179,19 +190,41 @@ delete_cache(RELCACHE_t *M)
 }
 
 static void
+unclone_subFB(FB_t *F, long all)
+{
+  subFB_t *sub, *subold;
+  GEN powP = F->powP;
+  GEN arcP = F->arcP;
+  long i, id;
+
+  for (sub = F->allsubFB; sub; sub = subold)
+  {
+    GEN subFB = sub->subFB;
+    for (i = 1; i < lg(subFB); i++)
+    {
+      id = subFB[i];
+      if (all && gel(powP, id) != gen_0)
+      {
+        gunclone(gel(powP, id));
+        gel(powP, id) = gen_0;
+      }
+      if (gel(arcP, id) != gen_0)
+      {
+        gunclone(gel(arcP, id));
+        gel(arcP, id) = gen_0;
+      }
+    }
+    subold = sub->old;
+    if (all) pari_free(sub);
+  }
+}
+
+static void
 delete_FB(FB_t *F)
 {
-  powFB_t *S = F->pow;
-  while (S)
-  {
-    powFB_t *T = S;
-    gunclone(S->id2);
-    gunclone(S->alg);
-    gunclone(S->ord);
-    if (S->arc) gunclone(S->arc);
-    S = S->prev; pari_free((void*)T);
-  }
-  gunclone(F->subFB);
+  unclone_subFB(F, 1);
+  gunclone(F->minidx);
+  gunclone(F->idealperm);
 }
 
 static void
@@ -221,11 +254,101 @@ bad_subFB(FB_t *F, long t)
   return (isclone(LP) && t == F->iLP[p] + lg(LP)-1);
 }
 
-/* set subFB, reset F->pow
+static void
+assign_subFB(FB_t *F, GEN yes, long iyes)
+{
+  subFB_t *sub;
+  long i, lv;
+
+  /* single malloc for struct + GEN */
+  lv = sizeof(subFB_t) + iyes*sizeof(long);
+  sub = (subFB_t *)pari_malloc(lv);
+  sub->subFB = (GEN)&sub[1];
+  sub->old = F->allsubFB;
+  F->allsubFB = sub;
+  for (i = 0; i < iyes; i++) sub->subFB[i] = yes[i];
+  F->subFB = sub->subFB;
+  F->newpow = 1;
+  F->newarc = 1;
+}
+
+/*
+ * Determine the permutation of the ideals made by each field automorphism.
+ */
+static void
+FB_aut_perm(FB_t *F, GEN nf, GEN auts, GEN cyclic)
+{
+  pari_sp av0 = avma;
+  long i=1, imin, j, l, m, KC = F->KC, p, f, nauts = lg(auts);
+  GEN P, minidx = zero_Flv(KC), perm = zero_Flm_copy(KC, nauts-1);
+
+  if (nauts == 1)
+  {
+    for (i = 1; i <= KC; i++) minidx[i] = i;
+    F->orbits = KC;
+  }
+  else
+  {
+    F->orbits = 0;
+    for (m = 1; m < lg(cyclic); m++)
+    {
+      GEN thiscyc = gel(cyclic, m);
+      long k0 = thiscyc[1];
+      GEN aut = gel(auts, k0), permk0 = gel(perm, k0), ppermk;
+      i = 1;
+      while (i <= KC)
+      {
+        pari_sp av2 = avma;
+        GEN seen = zero_Flv(KC);
+        imin = i;
+        P = gel(F->LP, i);
+        p = pr_get_p(P)[2];
+        f = pr_get_f(P);
+        do
+        {
+          if (++i > KC) break;
+          P = gel(F->LP, i);
+        }
+        while (p == pr_get_p(P)[2] && f == pr_get_f(P));
+        for (j = imin; j < i; j++)
+        {
+          GEN img = gmul(aut, pr_get_gen(gel(F->LP, j)));
+
+          for (l = imin; l < i; l++)
+            if (!seen[l] && nfval(nf, img, gel(F->LP, l)))
+            {
+              seen[l] = 1;
+              permk0[j] = l;
+              break;
+            }
+        }
+        avma = av2;
+      }
+      for (ppermk = permk0, i = 2; i < lg(thiscyc); i++)
+      {
+        GEN permk = gel(perm, thiscyc[i]);
+        for (j = 1; j <= KC; j++) permk[j] = permk0[ppermk[j]];
+        ppermk = permk;
+      }
+    }
+    for (j = 1; j <= KC; j++)
+    {
+      if (minidx[j]) continue;
+      F->orbits++;
+      minidx[j] = j;
+      for (i = 1; i < nauts; i++) minidx[coeff(perm, j, i)] = j;
+    }
+  }
+  F->minidx = gclone(minidx);
+  F->idealperm = gclone(perm);
+  avma = av0;
+}
+
+/* set subFB.
  * Fill F->perm (if != NULL): primes ideals sorted by increasing norm (except
  * the ones in subFB come first [dense rows for hnfspec]) */
 static int
-subFBgen(FB_t *F, double PROD, long minsFB)
+subFBgen(FB_t *F, GEN nf, GEN auts, GEN cyclic, double PROD, long minsFB)
 {
   GEN y, perm, yes, no;
   long i, j, k, iyes, ino, lv = F->KC + 1;
@@ -267,11 +390,11 @@ subFBgen(FB_t *F, double PROD, long minsFB)
   for (j=1; j<iyes; j++)     F->perm[j] = yes[j];
   for (i=1; i<ino; i++, j++) F->perm[j] =  no[i];
   for (   ; j<lv; j++)       F->perm[j] =  perm[j];
-  F->subFB = gclone(yes);
-  F->newpow = 1;
-  F->pow = NULL;
+  F->allsubFB = NULL;
+  FB_aut_perm(F, nf, auts, cyclic);
+  assign_subFB(F, yes, iyes);
   if (DEBUGLEVEL)
-    msgtimer("sub factorbase (%ld elements)",lg(F->subFB)-1);
+    msgtimer("sub factorbase (%ld elements) and ideal permutations",lg(F->subFB)-1);
   avma = av; return 1;
 }
 static int
@@ -309,14 +432,11 @@ subFB_change(FB_t *F)
   if (zv_equal(F->subFB, yes))
   {
     if (DEBUGLEVEL) fprintferr("*** NOT Changing sub factor base\n");
-    F->newpow = 0;
   }
   else
   {
     if (DEBUGLEVEL) fprintferr("*** Changing sub factor base\n");
-    gunclone(F->subFB);
-    F->subFB = gclone(yes);
-    F->newpow = 1;
+    assign_subFB(F, yes, iyes);
   }
   F->sfb_chg = 0;
   avma = av; return 1;
@@ -1858,7 +1978,7 @@ signunits(GEN bnf)
 }
 
 static GEN
-get_log_embed(REL_t *rel, GEN M, long RU, long R1, long prec)
+get_log_embed(FB_t *F, REL_t *rel, GEN M, long RU, long R1, long prec)
 {
   GEN arch, C, z = rel->m;
   long i;
@@ -1866,12 +1986,12 @@ get_log_embed(REL_t *rel, GEN M, long RU, long R1, long prec)
   arch = typ(z) == t_COL? RgM_RgC_mul(M, z): RgC_Rg_mul(gel(M,1), z);
   if (rel->ex)
   {
-    GEN t, ex = rel->ex, x = NULL;
+    GEN t, ex = rel->ex, subFB = rel->subFB, x = NULL;
     long l = lg(ex);
     for (i=1; i<l; i++)
       if (ex[i])
       {
-        t = gmael(rel->pow->arc, i, ex[i]);
+        t = gmael(F->arcP, subFB[i], ex[i]);
         x = x? vecmul(x, t): t; /* arch components in MULTIPLICATIVE form */
       }
     if (x) arch = vecmul(x, arch);
@@ -1882,32 +2002,59 @@ get_log_embed(REL_t *rel, GEN M, long RU, long R1, long prec)
   return C;
 }
 
+static GEN
+perm_log_embed(GEN C, GEN perm)
+{
+  long i, n;
+  GEN Cnew = cgetg_copy(C, &n);
+  for (i = 1; i < n; i++)
+  {
+    long v = perm[i];
+    if (v > 0)
+      gel(Cnew, i) = gel(C, v);
+    else
+      gel(Cnew, i) = gconj(gel(C, -v));
+  }
+  return Cnew;
+}
+
 static void
 powFB_fill(FB_t *F, GEN M)
 {
-  powFB_t *pow;
+  long i;
+  subFB_t *sub;
+  GEN arcP = F->arcP;
   pari_sp av = avma;
-  for (pow = F->pow; pow; pow = pow->prev)
+  unclone_subFB(F, 0);
+  for (sub = F->allsubFB; sub; sub = sub->old)
   {
-    long i, j, l;
-    GEN Alg, Arc;
-    if (pow->arc) gunclone(pow->arc);
-    Alg = pow->alg; Arc = cgetg_copy(Alg, &l);
-    for (i = 1; i < l; i++)
+    GEN subFB = sub->subFB;
+    for (i = 1; i < lg(subFB); i++)
     {
-      GEN z, t = gel(Alg,i);
-      long lt = lg(t);
-      z = cgetg(lt, t_VEC);
-      gel(Arc,i) = z; if (lt == 1) continue;
-      z[1] = M[1];  /* leave t[1] = 1 alone ! */
-      for (j = 2; j < lt; j++)
-        gel(z,j) = typ(t[j]) == t_COL? RgM_RgC_mul(M, gel(t,j))
-                                     : RgC_Rg_mul(gel(M,1), gel(t,j));
-      for (j = 3; j < lt; j++)
-        gel(z,j) = vecmul(gel(z,j), gel(z,j-1));
+      GEN powP;
+      long id = subFB[i];
+      powP = gel(F->powP, id);
+      if (gel(arcP, id) == gen_0)
+      {
+        long j;
+        GEN z, t = gel(powP, 2);
+        long lt = lg(t);
+
+        z = cgetg(lt, t_VEC);
+        if (lt > 1)
+        {
+          z[1] = M[1];  /* leave t[1] = 1 alone ! */
+          for (j = 2; j < lt; j++)
+            gel(z,j) = typ(t[j]) == t_COL? RgM_RgC_mul(M, gel(t,j))
+                                         : RgC_Rg_mul(gel(M,1), gel(t,j));
+          for (j = 3; j < lt; j++)
+            gel(z,j) = vecmul(gel(z,j), gel(z,j-1));
+        }
+        gel(arcP, id) = gclone(z);
+      }
     }
-    pow->arc = gclone(Arc);
   }
+  F->newarc = 0;
   avma = av;
 }
 
@@ -1963,12 +2110,11 @@ already_known(RELCACHE_t *cache, long bs, GEN cols)
  * Otherwise, update basis and return > 0. Compute mod p (much faster)
  * so some kernel vector might not be genuine. */
 static int
-add_rel(RELCACHE_t *cache, GEN R, long nz, GEN m, REL_t **relp)
+add_rel_i(RELCACHE_t *cache, GEN R, long nz, GEN m, long orig, long aut, REL_t **relp, long prnewrel)
 {
   const ulong p = 27449UL;
-  long i, k, n = lg(R)-1, prnewrel = nz < 0;
+  long i, k, n = lg(R)-1;
 
-  if (prnewrel) nz = -nz;
   if (already_known(cache, nz, R)) return -1;
   if (DEBUGLEVEL>6)
   {
@@ -2036,9 +2182,16 @@ add_rel(RELCACHE_t *cache, GEN R, long nz, GEN m, REL_t **relp)
       k = (rel - cache->base) + cache->missing;
     }
     rel->R  = gclone(R);
-    rel->m  =  m ? gclone( m) : NULL;
+    rel->m  =  m ? gclone(m) : NULL;
     rel->nz = nz;
     rel->ex = NULL;
+    if (aut)
+    {
+      rel->relorig = (rel - cache->base) - orig;
+      rel->relaut = aut;
+    }
+    else
+      rel->relaut = 0;
     if (relp) *relp = rel;
     if (DEBUGLEVEL)
     {
@@ -2051,64 +2204,135 @@ add_rel(RELCACHE_t *cache, GEN R, long nz, GEN m, REL_t **relp)
   return k;
 }
 
+static int
+add_rel(RELCACHE_t *cache, FB_t *F, GEN R, long nz, GEN m, REL_t **relp)
+{
+  REL_t *rel;
+  long k, l, prnewrel = nz < 0, reln;
+  const long nauts = lg(F->idealperm), KC = F->KC;
+
+  if (prnewrel) nz = -nz;
+  k = add_rel_i(cache, R, nz, m, 0, 0, &rel, prnewrel);
+  if (k > 0 && m)
+  {
+    GEN Rl = cgetg(KC+1, t_VECSMALL);
+    if (relp) *relp = rel;
+    reln = rel - cache->base;
+    for (l = 1; l < nauts; l++)
+    {
+      GEN perml = gel(F->idealperm, l);
+      long i, nzl = perml[nz];
+
+      for (i = 1; i <= KC; i++) Rl[i] = 0;
+      for (i = nz; i <= KC; i++)
+        if (R[i])
+        {
+          long v = perml[i];
+
+          if (v < nzl) nzl = v;
+          Rl[v] = R[i];
+        }
+      (void)add_rel_i(cache, Rl, nzl, NULL, reln, l, NULL, prnewrel);
+    }
+  }
+  return k;
+}
+
+/* Compute powers of prime ideal (P^0,...,P^a) (a > 1) */
+static void
+powPgen(FB_t *F, GEN nf, GEN vp, GEN *ppowP, GEN *pm, long a)
+{
+  GEN M, m, alg, id2, powP = cgetg(3, t_VEC);
+  long j;
+
+  id2 = cgetg(a+1,t_VEC); gel(powP, 1) = id2;
+  gel(id2,1) = mkvec2(pr_get_p(vp), zk_scalar_or_multable(nf,pr_get_gen(vp)));
+  alg = cgetg(a+1,t_VEC); gel(powP, 2) = alg; gel(alg,1) = gen_1;
+  vp = idealhnf_two(nf,vp);
+  for (j=2; j<=a; j++)
+  {
+    GEN J = red(nf, idealmul_HNF(nf,vp,gel(id2,j-1)), F->G0, &m);
+    if (DEBUGLEVEL>1) fprintferr(" %ld",j);
+    if (!J)
+    {
+      if (j == 2 && !red(nf, vp, F->G0, &M)) { j = 1; m = M; }
+      break;
+    }
+    if (ZZV_equal(J, gel(id2,j-1))) { j = 1; break; }
+    gel(J,2) = zk_scalar_or_multable(nf, gel(J,2));
+    gel(id2,j) = J;
+    gel(alg,j) = m;
+  }
+  setlg(id2, j);
+  setlg(alg, j);
+  *ppowP = powP;
+  *pm = m;
+  if (DEBUGLEVEL>1) fprintferr("\n");
+}
+
+
 /* Compute powers of prime ideals (P^0,...,P^a) in subFB (a > 1) */
 static void
-powFBgen(RELCACHE_t *cache, FB_t *F, GEN nf)
+powFBgen(RELCACHE_t *cache, FB_t *F, GEN nf, GEN auts)
 {
   const long a = 1L<<RANDOM_BITS;
   pari_sp av = avma;
-  long i, j, n = lg(F->subFB);
-  GEN Id2, Alg, Ord;
-  powFB_t *old = F->pow, *New;
+  GEN subFB = F->subFB, idealperm = F->idealperm, R;
+  long i, j, k, l, id, n = lg(F->subFB), naut = lg(auts);
 
-  if (DEBUGLEVEL) fprintferr("Computing powers for subFB: %Ps\n",F->subFB);
-  F->pow = New = (powFB_t*) pari_malloc(sizeof(powFB_t));
-  Id2 = cgetg(n, t_VEC);
-  Alg = cgetg(n, t_VEC);
-  Ord = cgetg(n, t_VECSMALL);
-  New->arc = NULL;
-  if (cache) pre_allocate(cache, n);
+  if (DEBUGLEVEL) fprintferr("Computing powers for subFB: %Ps\n",subFB);
+  if (cache) pre_allocate(cache, n*naut);
   for (i=1; i<n; i++)
   {
-    GEN M, m, alg, id2, vp = gel(F->LP, F->subFB[i]);
-    id2 = cgetg(a+1,t_VEC); gel(Id2,i) = id2;
-
-    gel(id2,1) = mkvec2(pr_get_p(vp), zk_scalar_or_multable(nf,pr_get_gen(vp)));
-    alg = cgetg(a+1,t_VEC); gel(Alg,i) = alg; gel(alg,1) = gen_1;
-    vp = idealhnf_two(nf,vp);
-    for (j=2; j<=a; j++)
+    id = subFB[i];
+    if (!F->ord[id])
     {
-      GEN J = red(nf, idealmul_HNF(nf,vp,gel(id2,j-1)), F->G0, &m);
-      if (DEBUGLEVEL>1) fprintferr(" %ld",j);
-      if (!J)
-      {
-        if (j == 2 && !red(nf, vp, F->G0, &M)) { j = 1; m = M; }
-        break;
+      GEN alg, m, powP;
+
+      powPgen(F, nf, gel(F->LP, id), &powP, &m, a);
+      alg = gel(powP, 2);
+      j = lg(alg);
+      F->ord[id] = j;
+      if (cache && j <= a)
+      { /* vp^j principal */
+        R = zero_Flv(F->KC);
+        R[ id ] = j;
+        for (l = 2; l < j; l++) m = nfmul(nf, m, gel(alg,l));
+        add_rel(cache, F, R, -id, m, NULL);
+        R[ id ] = 0;
+        if (j == 1)
+        { /* trouble with subFB: include ideal even though it's principal */
+          setlg(alg, 2);
+          F->ord[id] = 2;
+          setlg(gel(powP, 1), 2);
+        }
       }
-      if (ZZV_equal(J, gel(id2,j-1))) { j = 1; break; }
-      gel(J,2) = zk_scalar_or_multable(nf, gel(J,2));
-      gel(id2,j) = J;
-      gel(alg,j) = m;
+      gel(F->powP, id) = gclone(powP);
+      for (k = 1; k < naut; k++)
+      {
+        long sigmaid = coeff(idealperm, id, k);
+        GEN aut = gel(auts, k), invaut = gel(auts, F->invs[k]);
+
+        if (!F->ord[sigmaid])
+        {
+          GEN id2 = shallowcopy(gel(powP, 1));
+          GEN alg = shallowcopy(gel(powP, 2));
+          GEN sigmapowP = mkvec2(id2, alg);
+
+          for (l = 1; l < lg(id2); l++)
+          {
+            GEN id2l = gel(id2, l);
+            gel(id2,l)=mkvec2(gel(id2l,1),gmul(gmul(aut,gel(id2l,2)),invaut));
+          }
+          for (l = 1; l < lg(alg); l++)
+            if (typ(gel(alg, l))==t_COL) gel(alg, l) = gmul(aut, gel(alg, l));
+          F->ord[sigmaid] = j;
+          gel(F->powP, sigmaid) = gclone(sigmapowP);
+        }
+      }
     }
-    if (cache && j <= a)
-    { /* vp^j principal */
-      long k, nz;
-      GEN R;
-      R = zero_Flv(F->KC); nz = F->subFB[i];
-      R[nz] = j;
-      for (k = 2; k < j; k++) m = nfmul(nf, m, gel(alg,k));
-      add_rel(cache, R, -nz, m, NULL);
-    }
-    /* trouble with subFB: include ideal even though it's principal */
-    if (j == 1) j = 2;
-    setlg(id2, j);
-    setlg(alg, j); Ord[i] = j;
-    if (DEBUGLEVEL>1) fprintferr("\n");
   }
-  New->prev = old;
-  New->id2 = gclone(Id2);
-  New->ord = gclone(Ord);
-  New->alg = gclone(Alg); avma = av;
+  avma = av;
   if (DEBUGLEVEL) msgtimer("powFBgen");
   F->sfb_chg = 0;
   F->newpow = 0;
@@ -2128,16 +2352,16 @@ step(GEN x, double *y, GEN inc, long k)
 }
 
 static void
-small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
+small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, GEN auts, long nbrelpid,
            double LOGD, double LIMC2, FACT *fact)
 {
   const long N = nf_get_degree(nf), R1 = nf_get_r1(nf), prec = nf_get_prec(nf);
   const long BMULT = 8;
-  const long maxtry_DEP  = 20, maxtry_FACT = 500;
+  const long maxtry_DEP  = 20, maxtry_FACT = lg(auts) > 1 ? 1000 : 500;
   double *y, *z, **q, *v, BOUND;
   pari_sp av;
-  long nbsmallnorm, nbfact, precbound, noideal = F->KC;
-  GEN x, M = nf_get_M(nf), G = nf_get_G(nf);
+  GEN x, M = nf_get_M(nf), G = nf_get_G(nf), L_jid = F->L_jid;
+  long nbsmallnorm, nbfact, precbound, noideal = lg(L_jid);
 
   if (DEBUGLEVEL)
     fprintferr("\n#### Looking for %ld relations (small norms)\n",
@@ -2154,14 +2378,14 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
   if (precbound < prec) M = gprec_w(M, precbound);
 
   minim_alloc(N+1, &q, &x, &y, &z, &v);
-  for (av = avma; noideal; noideal--, avma = av)
+  for (av = avma; --noideal; avma = av)
   {
-    GEN r, u, gx, ideal = gel(F->LP,noideal), inc = const_vecsmall(N, 1);
+    GEN r, u, gx, ideal=gel(F->LP,L_jid[noideal]), inc=const_vecsmall(N, 1);
     long j, k, skipfirst, nbrelideal = 0, dependent = 0, try_factor = 0;
     pari_sp av2;
 
     if (DEBUGLEVEL>1)
-      fprintferr("\n*** Ideal no %ld: %Ps\n", noideal, vecslice(ideal,1,4));
+      fprintferr("\n*** Ideal no %ld: %Ps\n", L_jid[noideal], vecslice(ideal,1,4));
     ideal = idealhnf_two(nf, ideal);
     u = ZM_lll(ZM_mul(F->G0, ideal), 0.99, LLL_IM);
     ideal = ZM_mul(ideal,u); /* approximate T2-LLL reduction */
@@ -2246,7 +2470,7 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
       /* smooth element */
       R = set_fact(F, fact, NULL, &nz);
       /* make sure we get maximal rank first, then allow all relations */
-      if (add_rel(cache, R, nz, gx, NULL) <= 0)
+      if (add_rel(cache, F, R, nz, gx, NULL) <= 0)
       { /* probably Q-dependent from previous ones: forget it */
         if (DEBUGLEVEL>1) fprintferr("*");
         if (++dependent > maxtry_DEP) break;
@@ -2292,8 +2516,9 @@ get_random_ideal(FB_t *F, GEN A, GEN nf, GEN ex)
     ideal = P = idealhnf_two(nf, A);
     for (i=1; i<l; i++)
     { /* reduce mod apparent order */
-      ex[i] = random_bits(RANDOM_BITS) % F->pow->ord[i];
-      if (ex[i]) ideal = idealmul_HNF(nf,ideal, gmael(F->pow->id2,i,ex[i]));
+      long id = F->subFB[i];
+      ex[i] = random_bits(RANDOM_BITS) % F->ord[id];
+      if (ex[i]) ideal = idealmul_HNF(nf,ideal, gmael3(F->powP,id,1,ex[i]));
     }
     if (ideal != P) { /* If ex  != 0 */
       ideal = remove_content(ideal);
@@ -2303,10 +2528,10 @@ get_random_ideal(FB_t *F, GEN A, GEN nf, GEN ex)
 }
 
 static void
-rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, FACT *fact)
+rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN auts, FACT *fact)
 {
   GEN L_jid = F->L_jid, ex;
-  powFB_t *pow = F->pow;
+  GEN subFB = F->subFB;
   const long nbG = lg(F->vecG)-1, lgsub = lg(F->subFB), l_jid = lg(L_jid);
   long jlist;
   pari_sp av;
@@ -2315,17 +2540,21 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, FACT *fact)
   if (DEBUGLEVEL) {
     long d = cache->end - cache->last;
     fprintferr("\n(more relations needed: %ld)\n", d > 0? d: 1);
-    if (l_jid < F->KC) fprintferr("looking hard for %Ps\n",L_jid);
+    if (l_jid <= F->orbits) fprintferr("looking hard for %Ps\n",L_jid);
   }
   ex = cgetg(lgsub, t_VECSMALL);
   for (av = avma, jlist = 1; jlist < l_jid; jlist++, avma = av)
   {
-    const long jid = L_jid[jlist];
+    long jid = L_jid[jlist];
     GEN Nideal, ideal;
     pari_sp av1;
-    long j;
+    long j, l;
 
     if (DEBUGLEVEL>1) fprintferr("(%ld)", jid);
+    /* If subFB is not Galois-stable, all ideals in the orbit of jid are not
+     * equivalent (subFB is probably not Galois stable) */
+    l = random_Fl(lg(auts));
+    if (l) jid = coeff(F->idealperm, jid, l);
     ideal = get_random_ideal(F, gel(F->LP,jid), nf, ex);
     Nideal = ZM_det_triangular(ideal);
     for (av1 = avma, j = 1; j <= nbG; j++, avma = av1)
@@ -2346,7 +2575,7 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, FACT *fact)
        * include it (to speed up hnfspec/add). However we just go to the next
        * ideal as if we had included it (to finish rnd_rel earlier and make an
        * hnfspec/add round). */
-      switch (add_rel(cache, R, -nz, m, &rel))
+      switch (add_rel(cache, F, R, -nz, m, &rel))
       {
         case -1: /* forget it */
           if (DEBUGLEVEL>1) dbg_cancelrel(jid,j,R);
@@ -2355,7 +2584,7 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, FACT *fact)
           break;
         default:
           rel->ex = gclone(ex);
-          rel->pow = pow;
+          rel->subFB = subFB;
       }
       /* Need more, try next prime ideal */
       if (cache->last < cache->end) break;
@@ -2397,8 +2626,9 @@ be_honest(FB_t *F, GEN nf, FACT *fact)
         ideal = ideal0;
         for (i=1; i<lgsub; i++)
         {
-          ex = random_bits(RANDOM_BITS) % F->pow->ord[i];
-          if (ex) ideal = idealmul_HNF(nf,ideal, gmael(F->pow->id2,i,ex));
+          long id = F->subFB[i];
+          ex = random_bits(RANDOM_BITS) % F->ord[id];
+          if (ex) ideal = idealmul_HNF(nf,ideal, gmael3(F->powP,id,1,ex));
         }
         ideal = remove_content(ideal);
         Nideal = ZM_det_triangular(ideal);
@@ -2473,7 +2703,7 @@ compute_multiple_of_R_pivot(GEN X, GEN x0/*unused*/, long ix, GEN c)
 
 /* A = complex logarithmic embeddings of units (u_j) found so far,
  * RU = R1+R2 = unit rank, N = field degree
- * need = max(1, unit rank defect)
+ * need = unit rank defect
  * L = NULL (prec problem) or B^(-1) * A with approximate rational entries
  * (as t_REAL), B a submatrix of A, with (probably) maximal rank RU */
 static GEN
@@ -3185,7 +3415,7 @@ init_rel(RELCACHE_t *cache, FB_t *F, long add_need)
     c = zero_Flv(F->KC); k = F->iLP[p];
     R = c; c += k;
     for (j = lg(P)-1; j; j--) c[j] = pr_get_e(gel(P,j));
-    add_rel(cache, R, k+1, /*m*/NULL, NULL);
+    add_rel(cache, F, R, k+1, /*m*/NULL, NULL);
   }
 }
 
@@ -3234,6 +3464,151 @@ compute_vecG(GEN nf, FB_t *F, long n)
   F->G0 = G0; F->vecG = vecG;
 }
 
+static GEN
+automorphism_perms(GEN M, GEN auts, GEN cyclic, long N)
+{
+  pari_sp av;
+  const long r1plusr2 = lg(gel(M, 1)), r1 = 2*r1plusr2-N-2, r2 = r1plusr2-r1-1;
+  long nauts = lg(auts), ncyc = lg(cyclic), i, j, l, m;
+  GEN Mt, perms = cgetg(nauts, t_VEC);
+
+  for (l = 1; l < nauts; l++)
+    gel(perms, l) = cgetg(r1plusr2, t_VECSMALL);
+  av = avma;
+  Mt = shallowtrans(M);
+  Mt = shallowconcat(Mt, gconj(vecslice(Mt, r1+1, r1+r2)));
+  for (l = 1; l < ncyc; l++)
+  {
+    GEN thiscyc = gel(cyclic, l);
+    long k = thiscyc[1];
+    GEN Nt = gmul(shallowtrans(gel(auts, k)), Mt);
+    GEN perm = gel(perms, k), permprec;
+    for (i = 1; i < r1plusr2; i++)
+    {
+      GEN vec = gel(Nt, i), minnorm;
+      minnorm = gnorml2(gsub(vec, gel(Mt, 1)));
+      perm[i] = 1;
+      for (j = 2; j <= N; j++)
+      {
+        GEN thisnorm = gnorml2(gsub(vec, gel(Mt, j)));
+        if (gcmp(thisnorm, minnorm) < 0)
+        {
+          minnorm = thisnorm;
+          perm[i] = j >= r1plusr2 ? r2-j : j;
+        }
+      }
+    }
+    for (permprec = perm, m = 2; m < lg(thiscyc); m++)
+    {
+      GEN thisperm = gel(perms, thiscyc[m]);
+      for (i = 1; i < r1plusr2; i++)
+      {
+        long pp = labs(permprec[i]);
+        thisperm[i] = permprec[i] < 0 ? -perm[pp] : perm[pp];
+      }
+      permprec = thisperm;
+    }
+  }
+  avma = av;
+  return perms;
+}
+
+/*
+ * Determine the field automorphisms and its matrix in the integral basis.
+ */
+static GEN
+automorphism_matrices(GEN nf, long v, long N, GEN *invp, GEN *cycp)
+{
+  pari_sp av = avma;
+  GEN auts = galoisconj(nf, NULL), mats, cyclic, cyclicidx;
+  GEN invs, zk = nf_get_zk(nf);
+  long nauts = lg(auts)-1, i, j, k, l;
+
+  cyclic = cgetg(nauts+1, t_VEC);
+  cyclicidx = zero_Flv(nauts);
+  invs = zero_Flv(nauts-1);
+  for (l = 1; l <= nauts; l++)
+  {
+    GEN aut = gel(auts, l);
+    if (degpol(aut) == 1 && isint1(leading_term(aut)) &&
+        isintzero(constant_term(aut)))
+    {
+      swap(gel(auts, l), gel(auts, nauts));
+      break;
+    }
+  }
+  for (l = 1; l <= nauts; l++) gel(auts, l) = algtobasis(nf, gel(auts, l));
+  /* Compute maximal cyclic subgroups */
+  for (l = nauts; --l > 0; )
+    if (!cyclicidx[l])
+    {
+      GEN elt = gel(auts, l), aut = elt, cyc = cgetg(nauts+1, t_VECSMALL);
+      cyclicidx[l] = l;
+      cyc[1] = l;
+      j = 1;
+      do
+      {
+        elt = galoisapply(nf, elt, aut);
+        for (k = 1; k <= nauts; k++) if (gequal(elt, gel(auts, k))) break;
+        cyclicidx[k] = l;
+        cyc[++j] = k;
+      }
+      while (k != nauts);
+      setlg(cyc, j);
+      gel(cyclic, l) = cyc;
+      /* Store the inverses */
+      for (i = 1; i <= j/2; i++)
+      {
+        invs[cyc[i]] = cyc[j-i];
+        invs[cyc[j-i]] = cyc[i];
+      }
+    }
+  for (i = j = 1; i < nauts; i++)
+    if (cyclicidx[i] == i) cyclic[j++] = cyclic[i];
+  setlg(cyclic, j);
+  mats = cgetg(nauts, t_VEC);
+  while (--j > 0)
+  {
+    GEN cyc = gel(cyclic, j);
+    long id = cyc[1];
+    GEN M = cgetg(N+1, t_MAT), aut = gel(auts, id), Mi = M;
+
+    for (k = 1; k <= N; k++) gel(M, k) = ZC_galoisapply(nf, gel(zk, k), aut);
+    gel(mats, id) = M;
+    for (i = 2; i < lg(cyc); i++)
+    {
+      Mi = gmul(Mi, M);
+      gel(mats, cyc[i]) = Mi;
+    }
+  }
+  gerepileall(av, 3, &mats, &invs, &cyclic);
+  *invp = invs;
+  *cycp = cyclic;
+  return mats;
+}
+
+static GEN
+trim_list(FB_t *F)
+{
+  pari_sp av = avma;
+  GEN list = F->L_jid ? F->L_jid : F->perm, present = zero_Flv(F->KC);
+  long i, j, imax = lg(F->L_jid);
+  GEN minidx = F->minidx, idx = cgetg(lg(list), t_VECSMALL);
+
+  for (i = j = 1; i < imax; i++)
+  {
+    long id = minidx[list[i]];
+
+    if (!present[id])
+    {
+      idx[j++] = id;
+      present[id] = 1;
+    }
+  }
+  setlg(idx, j);
+  return gerepileuptoleaf(av, idx);
+}
+
 GEN
 Buchall_param(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long prec)
 {
@@ -3243,6 +3618,7 @@ Buchall_param(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long
   double lim, drc, LOGD, LOGD2;
   GEN zu, nf, D, A, W, R, Res, z, h, PERM, fu = NULL /*-Wall*/;
   GEN res, L, resc, B, C, C0, lambda, dep, clg1, clg2, Vbase;
+  GEN auts, cyclic;
   const char *precpb = NULL;
   const long minsFB = 3, RELSUP = 5;
   int FIRST = 1;
@@ -3269,6 +3645,11 @@ Buchall_param(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long
   zu = rootsof1(nf);
   gel(zu,2) = nf_to_scalar_or_alg(nf, gel(zu,2));
   if (DEBUGLEVEL) msgtimer("nfinit & rootsof1");
+
+  auts = automorphism_matrices(nf, varn(P), N, &F.invs, &cyclic);
+  if (DEBUGLEVEL) msgtimer("automorphisms");
+  F.embperm = automorphism_perms(nf_get_M(nf), auts, cyclic, N);
+  if (DEBUGLEVEL) msgtimer("complex embedding permutations");
 
   nf_get_sign(nf, &R1, &R2); RU = R1+R2;
   compute_vecG(nf, &F, minss(RU, 9));
@@ -3304,14 +3685,19 @@ START:
 
     Res = FBgen(&F, nf, N, LIMC2, LIMC, &GRHcheck);
   }
-  while (!Res || !subFBgen(&F, mindd(lim,LIMC2) + 0.5, minsFB));
+  while (!Res || !subFBgen(&F,nf,auts,cyclic,mindd(lim,LIMC2) + 0.5,minsFB));
   fact = (FACT*)stackmalloc((F.KC+1)*sizeof(FACT));
   PERM = leafcopy(F.perm); /* to be restored in case of precision increase */
   cache.basis = zero_Flm_copy(F.KC,F.KC);
+  F.powP = zerovec(F.KC);
+  F.ord = zero_Flv(F.KC);
+  F.arcP = zerovec(F.KC);
   av2 = avma;
   init_rel(&cache, &F, RELSUP + RU-1); /* trivial relations */
   if (nbrelpid > 0) {
-    small_norm(&cache, &F, nf, nbrelpid, LOGD, LIMC2, fact);
+    F.L_jid = trim_list(&F);
+    small_norm(&cache, &F, nf, auts, nbrelpid, LOGD, LIMC2, fact);
+    F.L_jid = F.perm;
     avma = av2;
     need = 0;
   }
@@ -3328,7 +3714,7 @@ START:
       if (need > 0)
       {
         if (DEBUGLEVEL) fprintferr("\n#### Looking for random relations\n");
-        pre_allocate(&cache, need); cache.end = cache.last + need;
+        pre_allocate(&cache, need+lg(auts)-1); cache.end = cache.last + need;
         if (++nreldep > MAXRELSUP) {
           if (++sfb_trials > SFB_MAX && cbach < 2) goto START;
           F.sfb_chg = sfb_INCREASE;
@@ -3337,8 +3723,9 @@ START:
           if (!subFB_change(&F)) goto START;
           nreldep = 0;
         }
-        if (F.newpow) powFBgen(&cache, &F, nf);
-        if (!F.sfb_chg) rnd_rel(&cache, &F, nf, fact);
+        if (F.newpow) powFBgen(&cache, &F, nf, auts);
+        F.L_jid = trim_list(&F);
+        if (!F.sfb_chg) rnd_rel(&cache, &F, nf, auts, fact);
         F.L_jid = F.perm;
       }
       if (precpb)
@@ -3356,7 +3743,7 @@ START:
         if (precdouble) gunclone(nf0);
         avma = av3; precdouble++; precpb = NULL;
 
-        if (F.pow && F.pow->arc) { gunclone(F.pow->arc); F.pow->arc = NULL; }
+        F.newarc = 1;
         for (i = 1; i < lg(PERM); i++) F.perm[i] = PERM[i];
         cache.chk = cache.base; W = NULL; /* recompute arch components + reduce */
       }
@@ -3366,11 +3753,15 @@ START:
         int first = (W == NULL); /* never reduced before */
         REL_t *rel;
 
-        if (F.pow && !F.pow->arc) powFB_fill(&F, M);
+        if (F.newarc && !F.newpow) powFB_fill(&F, M);
         for (j=1,rel = cache.chk + 1; j < l; rel++,j++)
         {
           gel(mat,j) = rel->R;
-          gel(emb,j) = get_log_embed(rel, M, RU, R1, PRECREG);
+          if (!rel->relaut)
+            gel(emb,j) = get_log_embed(&F, rel, M, RU, R1, PRECREG);
+          else
+            gel(emb,j) = perm_log_embed(gel(emb, j-rel->relorig),
+                                        gel(F.embperm, rel->relaut));
         }
         if (first) {
           C = emb;
@@ -3408,6 +3799,23 @@ START:
           if (need == old_need) F.sfb_chg = sfb_CHANGE;
           old_need = need;
         }
+        else
+        {
+          /* If the relation lattice is too small, check will be > 1 and we
+           * will do a new run of rnd_rel asking for 1 relation. However
+           * rnd_rel will tend to give a relation involving the first element
+           * of L_jid. We thus permute which element is the first of L_jid in
+           * order to increase the probability of finding a good relation, i.e.
+           * one that increases the relation lattice.
+           */
+          if (lg(W) > 2)
+          {
+            F.L_jid = gcopy(F.perm);
+            lswap(F.L_jid[1], F.L_jid[1+(nreldep%(lg(W) - 1))]);
+          }
+          else
+            F.L_jid = F.perm;
+        }
       }
     }
     while (need);
@@ -3439,10 +3847,10 @@ START:
 
     if (F.KCZ2 > F.KCZ)
     {
-      if (F.newpow) powFBgen(NULL, &F, nf);
+      if (F.newpow) powFBgen(NULL, &F, nf, auts);
       if (F.sfb_chg) {
         if (!subFB_change(&F)) goto START;
-        if (F.newpow) powFBgen(NULL, &F, nf);
+        if (F.newpow) powFBgen(NULL, &F, nf, auts);
       }
       if (!be_honest(&F, nf, fact)) goto START;
     }
