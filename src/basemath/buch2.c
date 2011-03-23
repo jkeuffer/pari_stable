@@ -2358,7 +2358,7 @@ step(GEN x, double *y, GEN inc, long k)
 
 static void
 small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, GEN auts, long nbrelpid,
-           double LOGD, double LIMC2, FACT *fact)
+           double LOGD, double LIMC2, FACT *fact, GEN p0)
 {
   const long N = nf_get_degree(nf), R1 = nf_get_r1(nf), prec = nf_get_prec(nf);
   const long BMULT = 8;
@@ -2367,10 +2367,11 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, GEN auts, long nbrelpid,
   pari_sp av;
   GEN x, M = nf_get_M(nf), G = nf_get_G(nf), L_jid = F->L_jid;
   long nbsmallnorm, nbfact, precbound, noideal = lg(L_jid);
+  REL_t *last = cache->last;
 
   if (DEBUGLEVEL)
     fprintferr("\n#### Looking for %ld relations (small norms)\n",
-               cache->end - cache->base);
+               cache->end - last);
   nbsmallnorm = nbfact = 0;
 
  /* LLL reduction produces v0 in I such that
@@ -2391,7 +2392,10 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, GEN auts, long nbrelpid,
 
     if (DEBUGLEVEL>1)
       fprintferr("\n*** Ideal no %ld: %Ps\n", L_jid[noideal], vecslice(ideal,1,4));
-    ideal = idealhnf_two(nf, ideal);
+    if (p0)
+      ideal = idealmul(nf, p0, ideal);
+    else
+      ideal = idealhnf_two(nf, ideal);
     u = ZM_lll(ZM_mul(F->G0, ideal), 0.99, LLL_IM);
     ideal = ZM_mul(ideal,u); /* approximate T2-LLL reduction */
     r = Q_from_QR(RgM_mul(G, ideal), prec); /* Cholesky for T2 | ideal */
@@ -2493,9 +2497,10 @@ ENDIDEAL:
 END:
   if (DEBUGLEVEL)
   {
-    fprintferr("\n"); msgtimer("small norm relations");
+    if (cache->last != last) fprintferr("\n");
+    msgtimer("small norm relations");
     fprintferr("  small norms gave %ld relations.\n",
-               cache->last - cache->base);
+               cache->last - last);
     if (nbsmallnorm)
       fprintferr("  nb. fact./nb. small norm = %ld/%ld = %.3f\n",
                   nbfact,nbsmallnorm,((double)nbfact)/nbsmallnorm);
@@ -3617,10 +3622,11 @@ Buchall_param(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long
   pari_sp av0 = avma, av, av2;
   long PRECREG, N, R1, R2, RU, LIMC, LIMC2, zc, i;
   long nreldep, sfb_trials, need, old_need = -1, precdouble = 0, precadd = 0;
+  long done_small;
   double lim, drc, LOGD, LOGD2;
   GEN zu, nf, D, A, W, R, Res, z, h, PERM, fu = NULL /*-Wall*/;
   GEN res, L, resc, B, C, C0, lambda, dep, clg1, clg2, Vbase;
-  GEN auts, cyclic;
+  GEN auts, cyclic, small_mult;
   const char *precpb = NULL;
   const long minsFB = 3, RELSUP = 5;
   int FIRST = 1;
@@ -3694,19 +3700,13 @@ START:
   F.powP = zerovec(F.KC);
   F.ord = zero_Flv(F.KC);
   F.arcP = zerovec(F.KC);
+  small_mult = zero_Flv(F.KC);
+  done_small = 0;
+  R = NULL;
   av2 = avma;
   init_rel(&cache, &F, RELSUP + RU-1); /* trivial relations */
-  if (nbrelpid > 0) {
-    F.L_jid = trim_list(&F);
-    small_norm(&cache, &F, nf, auts, nbrelpid, LOGD, LIMC2, fact);
-    F.L_jid = F.perm;
-    avma = av2;
-    need = 0;
-  }
-  else
-    need = cache.end - cache.last;
+  need = cache.end - cache.last;
 
-  /* Random relations */
   W = NULL;
   sfb_trials = nreldep = 0;
   do
@@ -3715,8 +3715,41 @@ START:
     {
       if (need > 0)
       {
-        if (DEBUGLEVEL) fprintferr("\n#### Looking for random relations\n");
+        long oneed = cache.end - cache.last;
+        /* Test below can be true if elts != NULL */
+        if (need < oneed) need = oneed;
         pre_allocate(&cache, need+lg(auts)-1); cache.end = cache.last + need;
+        F.L_jid = trim_list(&F);
+      }
+      if (need > 0 && nbrelpid > 0 && !R && done_small <= F.KC &&
+          cache.last < cache.base + 2*F.KC /* heuristic */)
+      {
+        pari_sp av3 = avma;
+        GEN p0 = NULL;
+        if (done_small)
+        {
+          long j = 0, lim;
+          for (i = F.KC; i >= 1; i--) if (!small_mult[j = F.perm[i]]) break;
+          small_mult[j]++;
+          p0 = gel(F.LP, j);
+          lim = F.minidx[j];
+          /* Prevent considering both P_iP_j and P_jP_i in small_norm */
+          for (i = j = 1; i < lg(F.L_jid); i++)
+            if (F.L_jid[i] >= lim) F.L_jid[j++] = F.L_jid[i];
+          setlg(F.L_jid, j);
+        }
+        if (lg(F.L_jid) > 1)
+          small_norm(&cache, &F, nf, auts, nbrelpid, LOGD, LIMC2, fact, p0);
+        F.L_jid = F.perm;
+        avma = av3;
+        need = 0;
+        done_small++;
+        F.sfb_chg = 0;
+      }
+      if (need > 0)
+      {
+        /* Random relations */
+        if (DEBUGLEVEL) fprintferr("\n#### Looking for random relations\n");
         if (++nreldep > MAXRELSUP) {
           if (++sfb_trials > SFB_MAX && cbach < 2) goto START;
           F.sfb_chg = sfb_INCREASE;
@@ -3726,7 +3759,6 @@ START:
           nreldep = 0;
         }
         if (F.newpow) powFBgen(&cache, &F, nf, auts);
-        F.L_jid = trim_list(&F);
         if (!F.sfb_chg) rnd_rel(&cache, &F, nf, auts, fact);
         F.L_jid = F.perm;
       }
@@ -3787,7 +3819,7 @@ START:
               for (j = i+1; j <= F.KC; j++) mael(cache.basis, j, i) = 0;
             }
         }
-        zc = (cache.last - cache.base) - (lg(B)-1) - (lg(W)-1);
+        zc = (lg(C)-1) - (lg(B)-1) - (lg(W)-1);
         if (zc < RU-1)
         {
           /* need more columns for units */
@@ -3798,14 +3830,14 @@ START:
         { /* dependent rows */
           F.L_jid = vecslice(F.perm, 1, need);
           vecsmall_sort(F.L_jid);
-          if (need == old_need) F.sfb_chg = sfb_CHANGE;
+          if (need == old_need && !F.newpow) F.sfb_chg = sfb_CHANGE;
           old_need = need;
         }
         else
         {
           /* If the relation lattice is too small, check will be > 1 and we
-           * will do a new run of rnd_rel asking for 1 relation. However
-           * rnd_rel will tend to give a relation involving the first element
+           * will do a new run of small_norm/rnd_rel asking for 1 relation.
+           * However they tend to give a relation involving the first element
            * of L_jid. We thus permute which element is the first of L_jid in
            * order to increase the probability of finding a good relation, i.e.
            * one that increases the relation lattice. */
