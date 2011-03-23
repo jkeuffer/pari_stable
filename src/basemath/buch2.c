@@ -93,13 +93,7 @@ typedef struct FB_t {
             * isclone() is set for LV[p] iff all P|p are in FB
             * LV[i], i not prime or i > n2, is undefined! */
   GEN iLP; /* iLP[p] = i such that LV[p] = [LP[i],...] */
-  GEN powP; /* powP[i] = powers of ideal i, as follows:
-    gmael(powP,i,1) = id2; id2[1] = P
-    gmael(powP,i,2) = alg; alg[1] = 1, (id2[j],alg[j]) = red( id2[j-1] * P ) */
-  GEN arcP; /* archimedean components (complement of powP):
-    gel(arcP,i)     = arc; arc[j] = multiplicative arch component of x
-                such that id2[j] = x P^(j-1) */
-  GEN ord; /* ord[i] = known exponent of P in Cl(K) */
+  GEN id2; /* id2[i] = powers of ideal i */
   GEN L_jid; /* indexes of "useful" prime ideals for rnd_rel */
   long KC, KCZ, KCZ2;
   GEN subFB; /* LP o subFB =  part of FB used to build random relations */
@@ -123,8 +117,6 @@ typedef struct REL_t {
   GEN R; /* relation vector as t_VECSMALL; clone */
   long nz; /* index of first non-zero elt in R (hash) */
   GEN m; /* pseudo-minimum yielding the relation; clone */
-  GEN ex; /* exponents of subFB elts used to find R; clone */
-  GEN subFB; /* subFB associated to ex [ shared between rels ] */
   long relorig; /* relation this one is an image of */
   long relaut; /* automorphim used to compute this relation from the original */
   GEN junk[1]; /*make sure sizeof(struct) is a power of two.*/
@@ -183,51 +175,32 @@ delete_cache(RELCACHE_t *M)
     gunclone(rel->R);
     if (!rel->m) continue;
     gunclone(rel->m);
-    if (!rel->ex) continue;
-    gunclone(rel->ex);
   }
   pari_free((void*)M->base); M->base = NULL;
 }
 
 static void
-unclone_subFB(FB_t *F, long all)
+unclone_subFB(FB_t *F)
 {
-  subFB_t *sub, *subold;
-  GEN powP = F->powP;
-  GEN arcP = F->arcP;
-  long i, id;
+  subFB_t *sub = F->allsubFB;
+  GEN id2 = F->id2;
+  long id;
 
-  for (sub = F->allsubFB; sub; sub = subold)
-  {
-    GEN subFB = sub->subFB;
-    for (i = 1; i < lg(subFB); i++)
+  while(sub) { subFB_t *s = sub; sub = s->old; pari_free(s); }
+  /* can't do it in a simple way above because of the Galois action,
+     see WARNING in powFBgen */
+  for (id = 1; id <= F->KC; id++)
+    if (gel(id2, id) != gen_0)
     {
-      id = subFB[i];
-      if (gel(arcP, id) != gen_0)
-      {
-        gunclone(gel(arcP, id));
-        gel(arcP, id) = gen_0;
-      }
+      gunclone(gel(id2, id));
+      gel(id2, id) = gen_0;
     }
-    subold = sub->old;
-    if (all) pari_free(sub);
-  }
-  if (all)
-  { /* can't do it in a simple way above because of the Galois action, 
-       see WARNING in powFBgen */
-    for (id = 1; id <= F->KC; id++)
-      if (gel(powP, id) != gen_0)
-      {
-        gunclone(gel(powP, id));
-        gel(powP, id) = gen_0;
-      }
-  }
 }
 
 static void
 delete_FB(FB_t *F)
 {
-  unclone_subFB(F, 1);
+  unclone_subFB(F);
   gunclone(F->minidx);
   gunclone(F->idealperm);
 }
@@ -463,11 +436,6 @@ pre_allocate(RELCACHE_t *cache, size_t n)
 {
   size_t len = (cache->last - cache->base) + n;
   if (len >= cache->len) reallocate(cache, len << 1);
-}
-/* x,y are or the form [Z, ZV]. Are they equal ? */
-static int
-ZZV_equal(GEN x, GEN y) {
-  return equalii(gel(x,1),gel(y,1)) && ZV_equal(gel(x,2), gel(y,2));
 }
 
 static GEN
@@ -1986,18 +1954,6 @@ get_log_embed(FB_t *F, REL_t *rel, GEN M, long RU, long R1, long prec)
   long i;
   if (!z) return zerocol(RU);
   arch = typ(z) == t_COL? RgM_RgC_mul(M, z): RgC_Rg_mul(gel(M,1), z);
-  if (rel->ex)
-  {
-    GEN t, ex = rel->ex, subFB = rel->subFB, x = NULL;
-    long l = lg(ex);
-    for (i=1; i<l; i++)
-      if (ex[i])
-      {
-        t = gmael(F->arcP, subFB[i], ex[i]);
-        x = x? vecmul(x, t): t; /* arch components in MULTIPLICATIVE form */
-      }
-    if (x) arch = vecmul(x, arch);
-  }
   C = cgetg(RU+1, t_COL); arch = glog(arch, prec);
   for (i=1; i<=R1; i++) C[i] = arch[i];
   for (   ; i<=RU; i++) gel(C,i) = gmul2n(gel(arch,i), 1);
@@ -2020,48 +1976,6 @@ perm_log_embed(GEN C, GEN perm)
   return Cnew;
 }
 
-static void
-powFB_fill(FB_t *F, GEN M)
-{
-  long i;
-  subFB_t *sub;
-  GEN arcP = F->arcP;
-  pari_sp av = avma;
-  unclone_subFB(F, 0);
-  for (sub = F->allsubFB; sub; sub = sub->old)
-  {
-    GEN subFB = sub->subFB;
-    for (i = 1; i < lg(subFB); i++)
-    {
-      GEN powP;
-      long id = subFB[i];
-      powP = gel(F->powP, id);
-      if (gel(arcP, id) == gen_0)
-      {
-        long j;
-        GEN z, t = gel(powP, 2);
-        long lt = lg(t);
-
-        z = cgetg(lt, t_VEC);
-        if (lt > 1)
-        {
-          z[1] = M[1];  /* leave t[1] = 1 alone ! */
-          for (j = 2; j < lt; j++)
-            gel(z,j) = typ(t[j]) == t_COL? RgM_RgC_mul(M, gel(t,j))
-                                         : RgC_Rg_mul(gel(M,1), gel(t,j));
-          for (j = 3; j < lt; j++)
-            gel(z,j) = vecmul(gel(z,j), gel(z,j-1));
-        }
-        gel(arcP, id) = gclone(z);
-      }
-    }
-  }
-  F->newarc = 0;
-  avma = av;
-}
-
-/* return the relation column associated to a smooth factorization.
- * Set *pnz = the index of its first non-zero coeff */
 static GEN
 set_fact(FB_t *F, FACT *fact, GEN ex, long *pnz)
 {
@@ -2118,6 +2032,7 @@ add_rel_i(RELCACHE_t *cache, GEN R, long nz, GEN m, long orig, long aut, REL_t *
   long i, k, n = lg(R)-1;
 
   if (already_known(cache, nz, R)) return -1;
+  if (cache->last >= cache->base + cache->len) return 0;
   if (DEBUGLEVEL>6)
   {
     fprintferr("adding vector = %Ps\n",R);
@@ -2186,7 +2101,6 @@ add_rel_i(RELCACHE_t *cache, GEN R, long nz, GEN m, long orig, long aut, REL_t *
     rel->R  = gclone(R);
     rel->m  =  m ? gclone(m) : NULL;
     rel->nz = nz;
-    rel->ex = NULL;
     if (aut)
     {
       rel->relorig = (rel - cache->base) - orig;
@@ -2207,7 +2121,7 @@ add_rel_i(RELCACHE_t *cache, GEN R, long nz, GEN m, long orig, long aut, REL_t *
 }
 
 static int
-add_rel(RELCACHE_t *cache, FB_t *F, GEN R, long nz, GEN m, REL_t **relp)
+add_rel(RELCACHE_t *cache, FB_t *F, GEN R, long nz, GEN m)
 {
   REL_t *rel;
   long k, l, prnewrel = nz < 0, reln;
@@ -2218,7 +2132,6 @@ add_rel(RELCACHE_t *cache, FB_t *F, GEN R, long nz, GEN m, REL_t **relp)
   if (k > 0 && m)
   {
     GEN Rl = cgetg(KC+1, t_VECSMALL);
-    if (relp) *relp = rel;
     reln = rel - cache->base;
     for (l = 1; l < nauts; l++)
     {
@@ -2242,33 +2155,24 @@ add_rel(RELCACHE_t *cache, FB_t *F, GEN R, long nz, GEN m, REL_t **relp)
 
 /* Compute powers of prime ideal (P^0,...,P^a) (a > 1) */
 static void
-powPgen(FB_t *F, GEN nf, GEN vp, GEN *ppowP, GEN *pm, long a)
+powPgen(FB_t *F, GEN nf, GEN vp, GEN *ppowP, long a)
 {
-  GEN M, m, alg, id2, powP = cgetg(3, t_VEC);
+  GEN id2, J;
   long j;
 
-  id2 = cgetg(a+1,t_VEC); gel(powP, 1) = id2;
-  gel(id2,1) = mkvec2(pr_get_p(vp), zk_scalar_or_multable(nf,pr_get_gen(vp)));
-  alg = cgetg(a+1,t_VEC); gel(powP, 2) = alg; gel(alg,1) = gen_1;
+  id2 = cgetg(a+1,t_VEC);
+  J = mkvec2(pr_get_p(vp), zk_scalar_or_multable(nf,pr_get_gen(vp)));
+  gel(id2,1) = J;
   vp = idealhnf_two(nf,vp);
   for (j=2; j<=a; j++)
   {
-    GEN J = red(nf, idealmul_HNF(nf,vp,gel(id2,j-1)), F->G0, &m);
-    if (DEBUGLEVEL>1) fprintferr(" %ld",j);
-    if (!J)
-    {
-      if (j == 2 && !red(nf, vp, F->G0, &M)) { j = 1; m = M; }
-      break;
-    }
-    if (ZZV_equal(J, gel(id2,j-1))) { j = 1; break; }
-    gel(J,2) = zk_scalar_or_multable(nf, gel(J,2));
+    if (DEBUGLEVEL>1) fprintferr(" %ld", j);
+    J = idealtwoelt(nf, idealmul_HNF(nf, vp, J));
+    gel(J, 2) = zk_scalar_or_multable(nf, gel(J,2));
     gel(id2,j) = J;
-    gel(alg,j) = m;
   }
   setlg(id2, j);
-  setlg(alg, j);
-  *ppowP = powP;
-  *pm = m;
+  *ppowP = id2;
   if (DEBUGLEVEL>1) fprintferr("\n");
 }
 
@@ -2279,60 +2183,40 @@ powFBgen(RELCACHE_t *cache, FB_t *F, GEN nf, GEN auts)
 {
   const long a = 1L<<RANDOM_BITS;
   pari_sp av = avma;
-  GEN subFB = F->subFB, idealperm = F->idealperm, R;
-  long i, j, k, l, id, n = lg(F->subFB), naut = lg(auts);
+  GEN subFB = F->subFB, idealperm = F->idealperm;
+  long i, k, l, id, n = lg(F->subFB), naut = lg(auts);
 
   if (DEBUGLEVEL) fprintferr("Computing powers for subFB: %Ps\n",subFB);
   if (cache) pre_allocate(cache, n*naut);
   for (i=1; i<n; i++)
   {
     id = subFB[i];
-    if (!F->ord[id])
+    if (gel(F->id2, id) == gen_0)
     {
-      GEN alg, m, powP;
+      GEN id2;
 
-      powPgen(F, nf, gel(F->LP, id), &powP, &m, a);
-      alg = gel(powP, 2);
-      j = lg(alg);
-      F->ord[id] = j;
-      if (cache && j <= a)
-      { /* vp^j principal */
-        R = zero_Flv(F->KC);
-        R[ id ] = j;
-        for (l = 2; l < j; l++) m = nfmul(nf, m, gel(alg,l));
-        add_rel(cache, F, R, -id, m, NULL);
-        R[ id ] = 0;
-        if (j == 1)
-        { /* trouble with subFB: include ideal even though it's principal */
-          setlg(alg, 2);
-          F->ord[id] = 2;
-          setlg(gel(powP, 1), 2);
-        }
-      }
-      gel(F->powP, id) = gclone(powP);
+      if (DEBUGLEVEL>1) fprintferr("%ld: 1", id);
+      powPgen(F, nf, gel(F->LP, id), &id2, a);
+      gel(F->id2, id) = gclone(id2);
       for (k = 1; k < naut; k++)
       {
         long sigmaid = coeff(idealperm, id, k);
         GEN aut = gel(auts, k), invaut = gel(auts, F->invs[k]);
 
-        if (!F->ord[sigmaid])
+        if (gel(F->id2, sigmaid) == gen_0)
         {
-          GEN id2 = shallowcopy(gel(powP, 1));
-          GEN alg = shallowcopy(gel(powP, 2));
-          GEN sigmapowP = mkvec2(id2, alg);
+          long lid2;
+          GEN sigmaid2 = cgetg_copy(id2, &lid2);
 
-          for (l = 1; l < lg(id2); l++)
+          if (DEBUGLEVEL>1) fprintferr("%ld: automorphism\n", sigmaid);
+          for (l = 1; l < lid2; l++)
           {
             GEN id2l = gel(id2, l);
-            gel(id2,l) = mkvec2(gel(id2l,1),
-                                ZM_mul(ZM_mul(aut,gel(id2l,2)),invaut));
+            gel(sigmaid2, l) =
+              mkvec2(gel(id2l, 1), ZM_mul(ZM_mul(aut, gel(id2l, 2)), invaut));
           }
-          for (l = 1; l < lg(alg); l++)
-            if (typ(gel(alg, l))==t_COL)
-              gel(alg, l) = RgM_RgC_mul(aut, gel(alg, l));
-          F->ord[sigmaid] = j;
-          /* WARNING: to be freed also un unclone_subFB */
-          gel(F->powP, sigmaid) = gclone(sigmapowP);
+          /* WARNING: to be freed also in unclone_subFB */
+          gel(F->id2, sigmaid) = gclone(sigmaid2);
         }
       }
     }
@@ -2479,7 +2363,7 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, GEN auts, long nbrelpid,
       /* smooth element */
       R = set_fact(F, fact, NULL, &nz);
       /* make sure we get maximal rank first, then allow all relations */
-      if (add_rel(cache, F, R, nz, gx, NULL) <= 0)
+      if (add_rel(cache, F, R, nz, gx) <= 0)
       { /* probably Q-dependent from previous ones: forget it */
         if (DEBUGLEVEL>1) fprintferr("*");
         if (++dependent > maxtry_DEP) break;
@@ -2517,18 +2401,18 @@ remove_content(GEN I)
 }
 
 static GEN
-get_random_ideal(FB_t *F, GEN A, GEN nf, GEN ex)
+get_random_ideal(FB_t *F, GEN nf, GEN ex)
 {
   long l = lg(ex);
   for (;;) {
     GEN ideal, P;
     long i;
-    ideal = P = idealhnf_two(nf, A);
+    ideal = P = idealhnf_principal(nf, gen_1);
     for (i=1; i<l; i++)
     { /* reduce mod apparent order */
       long id = F->subFB[i];
-      ex[i] = random_bits(RANDOM_BITS) % F->ord[id];
-      if (ex[i]) ideal = idealmul_HNF(nf,ideal, gmael3(F->powP,id,1,ex[i]));
+      ex[i] = random_bits(RANDOM_BITS);
+      if (ex[i]) ideal = idealmul_HNF(nf,ideal, gmael(F->id2,id,ex[i]));
     }
     if (ideal != P) { /* If ex  != 0 */
       ideal = remove_content(ideal);
@@ -2540,8 +2424,8 @@ get_random_ideal(FB_t *F, GEN A, GEN nf, GEN ex)
 static void
 rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN auts, FACT *fact)
 {
-  GEN L_jid = F->L_jid, ex;
-  GEN subFB = F->subFB;
+  GEN L_jid = F->L_jid;
+  GEN ex, baseideal, m1, M = nf_get_M(nf);
   const long nbG = lg(F->vecG)-1, lgsub = lg(F->subFB), l_jid = lg(L_jid);
   long jlist;
   pari_sp av;
@@ -2553,6 +2437,13 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN auts, FACT *fact)
     if (l_jid <= F->orbits) fprintferr("looking hard for %Ps\n",L_jid);
   }
   ex = cgetg(lgsub, t_VECSMALL);
+  baseideal = get_random_ideal(F, nf, ex);
+  baseideal = red(nf, baseideal, F->G0, &m1);
+  m1 = gdiv(m1, content(m1));
+  if (baseideal)
+    baseideal = idealhnf_two(nf, baseideal);
+  else
+    baseideal = scalarmat_shallow(gen_1, lg(M) - 1);
   for (av = avma, jlist = 1; jlist < l_jid; jlist++, avma = av)
   {
     long jid = L_jid[jlist];
@@ -2565,13 +2456,12 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN auts, FACT *fact)
      * equivalent (subFB is probably not Galois stable) */
     l = random_Fl(lg(auts));
     if (l) jid = coeff(F->idealperm, jid, l);
-    ideal = get_random_ideal(F, gel(F->LP,jid), nf, ex);
+    ideal = idealmul(nf, baseideal, idealhnf_two(nf, gel(F->LP,jid)));
     Nideal = ZM_det_triangular(ideal);
     for (av1 = avma, j = 1; j <= nbG; j++, avma = av1)
     { /* reduce along various directions */
       GEN m = idealpseudomin_nonscalar(ideal, gel(F->vecG,j));
       GEN R;
-      REL_t *rel;
       long nz;
       if (!factorgen(F,nf,ideal,Nideal,m,fact))
       {
@@ -2585,16 +2475,13 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN auts, FACT *fact)
        * include it (to speed up hnfspec/add). However we just go to the next
        * ideal as if we had included it (to finish rnd_rel earlier and make an
        * hnfspec/add round). */
-      switch (add_rel(cache, F, R, -nz, m, &rel))
+      switch (add_rel(cache, F, R, -nz, nfmul(nf, m, m1)))
       {
         case -1: /* forget it */
           if (DEBUGLEVEL>1) dbg_cancelrel(jid,j,R);
           continue;
         case 0:
           break;
-        default:
-          rel->ex = gclone(ex);
-          rel->subFB = subFB;
       }
       /* Need more, try next prime ideal */
       if (cache->last < cache->end) break;
@@ -2637,8 +2524,8 @@ be_honest(FB_t *F, GEN nf, FACT *fact)
         for (i=1; i<lgsub; i++)
         {
           long id = F->subFB[i];
-          ex = random_bits(RANDOM_BITS) % F->ord[id];
-          if (ex) ideal = idealmul_HNF(nf,ideal, gmael3(F->powP,id,1,ex));
+          ex = random_bits(RANDOM_BITS);
+          if (ex) ideal = idealmul_HNF(nf,ideal, gmael(F->id2,id,ex));
         }
         ideal = remove_content(ideal);
         Nideal = ZM_det_triangular(ideal);
@@ -3425,7 +3312,7 @@ init_rel(RELCACHE_t *cache, FB_t *F, long add_need)
     c = zero_Flv(F->KC); k = F->iLP[p];
     R = c; c += k;
     for (j = lg(P)-1; j; j--) c[j] = pr_get_e(gel(P,j));
-    add_rel(cache, F, R, k+1, /*m*/NULL, NULL);
+    add_rel(cache, F, R, k+1, /*m*/NULL);
   }
 }
 
@@ -3697,9 +3584,7 @@ START:
   fact = (FACT*)stackmalloc((F.KC+1)*sizeof(FACT));
   PERM = leafcopy(F.perm); /* to be restored in case of precision increase */
   cache.basis = zero_Flm_copy(F.KC,F.KC);
-  F.powP = zerovec(F.KC);
-  F.ord = zero_Flv(F.KC);
-  F.arcP = zerovec(F.KC);
+  F.id2 = zerovec(F.KC);
   small_mult = zero_Flv(F.KC);
   done_small = 0;
   R = NULL;
@@ -3829,7 +3714,6 @@ START:
         int first = (W == NULL); /* never reduced before */
         REL_t *rel;
 
-        if (F.newarc && !F.newpow) powFB_fill(&F, M);
         for (j=1,rel = cache.chk + 1; j < l; rel++,j++)
         {
           gel(mat,j) = rel->R;
