@@ -2362,7 +2362,7 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, GEN auts, long nbrelpid,
 {
   const long N = nf_get_degree(nf), R1 = nf_get_r1(nf), prec = nf_get_prec(nf);
   const long BMULT = 8;
-  const long maxtry_DEP  = 20, maxtry_FACT = lg(auts) > 1 ? 1000 : 500;
+  const long maxtry_DEP  = 20, maxtry_FACT = 500;
   double *y, *z, **q, *v, BOUND;
   pari_sp av;
   GEN x, M = nf_get_M(nf), G = nf_get_G(nf), L_jid = F->L_jid;
@@ -3718,14 +3718,40 @@ START:
         long oneed = cache.end - cache.last;
         /* Test below can be true if elts != NULL */
         if (need < oneed) need = oneed;
-        pre_allocate(&cache, need+lg(auts)-1); cache.end = cache.last + need;
+        pre_allocate(&cache, need+lg(auts)-1+(R ? lg(W)-1 : 0));
+        cache.end = cache.last + need;
         F.L_jid = trim_list(&F);
       }
-      if (need > 0 && nbrelpid > 0 && !R && done_small <= F.KC &&
+      if (need > 0 && nbrelpid > 0 && done_small <= F.KC && (!R || lg(W)>1) &&
           cache.last < cache.base + 2*F.KC /* heuristic */)
       {
         pari_sp av3 = avma;
-        GEN p0 = NULL;
+        GEN p0 = NULL, L_jid = F.L_jid, aut0 = auts;
+        if (R)
+        {
+          /*
+           * We have full rank for class group and unit, however those
+           * lattices are too small. The following tries to improve the
+           * prime group lattice: it specifically looks for relations
+           * involving the primes generating the class group.
+           */
+          long l;
+          /* We need lg(W)-1 relations. */
+          F.L_jid = vecslice(F.perm, 1, lg(W) - 1);
+          cache.end = cache.last + lg(W) - 1;
+          /* We lie to the add_rel subsystem, telling it we miss relations
+           * involving the primes generating the class group (and only those).
+           */
+          cache.missing = lg(W) - 1;
+          for (l = 1; l < lg(W); l++)
+            mael(cache.basis, F.perm[l], F.perm[l]) = 0;
+          /* We lie to the small_norm subsystem, telling it there are no
+           * automorphisms (automorphisms tend to create lattices that are
+           * twice the size of the full lattice: if a relation is p1+p2=0
+           * where p1 and p2 are in the same odd-sized orbit, then the images
+           * of this relation will lead to p1=...=pn and 2p1=0). */
+          auts = cgetg(1, t_VEC);
+        }
         if (done_small)
         {
           long j = 0, lim;
@@ -3733,16 +3759,32 @@ START:
           small_mult[j]++;
           p0 = gel(F.LP, j);
           lim = F.minidx[j];
-          /* Prevent considering both P_iP_j and P_jP_i in small_norm */
-          for (i = j = 1; i < lg(F.L_jid); i++)
-            if (F.L_jid[i] >= lim) F.L_jid[j++] = F.L_jid[i];
-          setlg(F.L_jid, j);
+          if (!R)
+          {
+            /* Prevent considering both P_iP_j and P_jP_i in small_norm */
+            for (i = j = 1; i < lg(F.L_jid); i++)
+              if (F.L_jid[i] >= lim) F.L_jid[j++] = F.L_jid[i];
+            setlg(F.L_jid, j);
+          }
         }
         if (lg(F.L_jid) > 1)
           small_norm(&cache, &F, nf, auts, nbrelpid, LOGD, LIMC2, fact, p0);
-        F.L_jid = F.perm;
         avma = av3;
-        need = 0;
+        if (R)
+        {
+          long l;
+          auts = aut0;
+          F.L_jid = L_jid;
+          cache.end = cache.last + need;
+          for (l = 1; l < lg(W); l++)
+            mael(cache.basis, F.perm[l], F.perm[l]) = 1;
+          cache.missing = 0;
+        }
+        else
+        {
+          F.L_jid = F.perm;
+          need = 0;
+        }
         done_small++;
         F.sfb_chg = 0;
       }
