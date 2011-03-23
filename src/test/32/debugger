@@ -25,5 +25,26 @@ break> [p,i]
 [120, 1]
 break> break
 
+? fun(N)=check(N^2+1);
+? fun(20);
+  ***   at top-level: fun(20)
+  ***                 ^-------
+  ***   in function fun: check(N^2+1)
+  ***                    ^------------
+  ***   in function check: ...i+step,N=p^2);if(i==halt,error("check:",N)))
+  ***                                                  ^-------------------
+  ***   user error: check:3721
+  ***   Break loop: type 'break' to go back to GP
+break> N
+3721
+break> dbg_up(4)
+  ***   at top-level: fun(20)
+  ***                 ^-------
+  ***   in function fun: check(N^2+1)
+  ***                    ^------------
+break> N
+20
+break> break
+
 ? print("Total time spent: ",gettime);
 Total time spent: 0

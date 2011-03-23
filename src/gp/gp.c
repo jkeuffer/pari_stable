@@ -1669,7 +1669,7 @@ break_loop_prompt(char *buf, long n)
   return do_prompt(buf, s, NULL);
 }
 
-static long frame_level=0;
+static long frame_level=0, dbg_level = 0;
 
 static int
 break_loop(int numerr)
@@ -1689,7 +1689,8 @@ break_loop(int numerr)
   b = filtered_buffer(&F);
   nenv=pari_stack_new(&s_env);
   gp_context_save(&rec);
-  frame_level = closure_context(oldframe_level);
+  dbg_level = 0;
+  frame_level = closure_context(oldframe_level, dbg_level);
   pari_infile = newfile(stdin, "stdin", mf_IN)->file;
   term_color(c_ERR); pari_putc('\n');
   if (sigint)
@@ -1708,8 +1709,8 @@ break_loop(int numerr)
     {
       if (er<0) { s_env.n=1; longjmp(env[s_env.n-1], er); }
       gp_context_restore(&rec);
-      closure_err();
-      frame_level = closure_context(oldframe_level);
+      closure_err(dbg_level);
+      (void) closure_context(oldframe_level, dbg_level);
       pari_infile = newfile(stdin, "stdin", mf_IN)->file;
     }
     term_color(c_NONE);
@@ -1754,6 +1755,24 @@ static void
 gp_err_recover(long numerr)
 {
   longjmp(env[s_env.n-1], numerr);
+}
+
+void
+dbg_up(long k)
+{
+  if (k<0) k=0;
+  dbg_level += k;
+  if (dbg_level>frame_level) dbg_level=frame_level;
+  gp_err_recover(e_NONE);
+}
+
+void
+dbg_down(long k)
+{
+  if (k<0) k=0;
+  dbg_level -= k;
+  if (dbg_level<0) dbg_level=0;
+  gp_err_recover(e_NONE);
 }
 
 /* numerr < 0: from SIGINT */

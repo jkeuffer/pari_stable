@@ -301,7 +301,7 @@ pack_localvars(void)
 }
 
 void
-push_frame(GEN C, long lpc)
+push_frame(GEN C, long lpc, long dummy)
 {
   char *code=GSTR(gel(C,2))-1;
   GEN oper=gel(C,3);
@@ -313,7 +313,7 @@ push_frame(GEN C, long lpc)
     long k;
     GEN e = gel(fram, 1);
     for(k=1; k<lg(e); k++)
-      var_push((entree*)e[k], Lmy);
+      var_push(dummy?NULL:(entree*)e[k], Lmy);
     return;
   }
   if (lg(C)<8) while (j<lfr && frpc[j]==0) j++;
@@ -326,7 +326,7 @@ push_frame(GEN C, long lpc)
       long k;
       GEN e = gel(fram,j);
       for(k=1; k<lg(e); k++)
-        var_push((entree*)e[k], Lmy);
+        var_push(dummy?NULL:(entree*)e[k], Lmy);
       j++;
     }
   }

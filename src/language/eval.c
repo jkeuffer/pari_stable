@@ -334,7 +334,7 @@ struct trace
   GEN closure;
 };
 
-static THREAD long sp, rp;
+static THREAD long sp, rp, dbg_level;
 static THREAD long *st;
 static THREAD gp_pointer *ptrs;
 static THREAD entree **lvars;
@@ -619,10 +619,10 @@ get_next_label(const char *s, int member, char **next_fun)
 }
 
 void
-closure_err(void)
+closure_err(long level)
 {
   GEN base;
-  const long lastfun = s_trace.n - 1;
+  const long lastfun = s_trace.n - 1 - level;
   char *next_label, *next_fun;
   long i = maxss(0, lastfun - 19);
   if (lastfun < 0) return; /*e.g. when called by gp_main_loop's simplify */
@@ -664,15 +664,17 @@ closure_err(void)
 }
 
 long
-closure_context(long start)
+closure_context(long start, long level)
 {
-  const long lastfun = s_trace.n - 1;
+  const long lastfun = s_trace.n - 1 - level;
   long i, fun = lastfun;
   if (fun<0) return lastfun;
   while (fun>start && lg(trace[fun].closure)==6) fun--;
-  for (i=fun; i<=lastfun; i++)
-    push_frame(trace[i].closure, trace[i].pc);
-  return lastfun;
+  for (i=fun; i <= lastfun; i++)
+    push_frame(trace[i].closure, trace[i].pc,0);
+  for (  ; i < s_trace.n; i++)
+    push_frame(trace[i].closure, trace[i].pc,1);
+  return s_trace.n-level;
 }
 
 INLINE void
@@ -1310,6 +1312,7 @@ evalstate_reset(void)
 {
   sp = 0;
   rp = 0;
+  dbg_level = 0;
   restore_vars(s_var.n, s_lvars.n);
   s_trace.n = 0;
   reset_break();

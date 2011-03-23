@@ -929,7 +929,7 @@ void
 pari_sigint(const char *time_s)
 {
   err_init();
-  closure_err();
+  closure_err(0);
   err_init_msg(e_MISC);
   out_puts(pariErr, "user interrupt after ");
   out_puts(pariErr, time_s);
@@ -1210,7 +1210,7 @@ pari_err(int numerr, ...)
   if (*iferr_env)
     longjmp(*iferr_env, numerr);
   err_init();
-  if (numerr != e_SYNTAX) closure_err();
+  if (numerr != e_SYNTAX) closure_err(0);
   pari_err_display(global_err_data);
   out_term_color(pariErr, c_NONE);
   va_end(ap);

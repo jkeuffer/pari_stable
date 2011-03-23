@@ -14,3 +14,9 @@ break
 my(p=120);for(i=1,100,1/0)
 [p,i]
 break
+fun(N)=check(N^2+1);
+fun(20);
+N
+dbg_up(4)
+N
+break
