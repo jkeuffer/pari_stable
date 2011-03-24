@@ -1833,7 +1833,9 @@ system0(const char *s)
 {
 /*FIXME: HAS_SYSTEM */
 #if defined(UNIX) || defined(__EMX__) || defined(_WIN32)
-  check_secure(s); system(s);
+  check_secure(s);
+  if (system(s) < 0)
+    pari_err(talker, "system(\"%s\") failed", s);
 #else
   pari_err(archer);
 #endif
