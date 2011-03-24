@@ -969,8 +969,10 @@ escape(char *tch, int ismain)
     case 'p':
       switch (*s)
       {
-        case 's': (void)sd_seriesprecision(++s,d_ACKNOWLEDGE); break;
-        default : (void)sd_realprecision(*s? s: NULL,d_ACKNOWLEDGE); break;
+        case 's': s++;
+          (void)sd_seriesprecision(*s? s: NULL,d_ACKNOWLEDGE); break;
+        default :
+          (void)sd_realprecision(*s? s: NULL,d_ACKNOWLEDGE); break;
       }
       break;
     case 'q': gp_quit(0); break;
