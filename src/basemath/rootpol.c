@@ -2004,11 +2004,11 @@ roots_aux(GEN p, long l, long clean)
   {
     if (gequal0(p)) pari_err(zeropoler,"roots");
     if (!isvalidcoeff(p)) pari_err(typeer,"roots");
-    return cgetg(1,t_VEC); /* constant polynomial */
+    return cgetg(1,t_COL); /* constant polynomial */
   }
   if (!signe(p)) pari_err(zeropoler,"roots");
   if (!isvalidpol(p)) pari_err(talker,"invalid coefficients in roots");
-  if (lg(p) == 3) return cgetg(1,t_VEC); /* constant polynomial */
+  if (lg(p) == 3) return cgetg(1,t_COL); /* constant polynomial */
 
   if (l < 3) l = 3;
   L = roots_com(p, bit_accuracy(l)); n = lg(L);
