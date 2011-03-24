@@ -426,7 +426,7 @@ red(GEN nf, GEN I, GEN G0, GEN *pm)
   GEN m, y;
   y = idealred0(nf, init_famat(I), G0);
   m = gel(y,2);
-  y = gel(y,1); *pm = lg(m)==1? gen_1: gmael(m, 1, 1);
+  y = gel(y,1); *pm = lg(m)==1? gen_1: Q_primpart(gmael(m, 1, 1));
   return is_pm1(gcoeff(y,1,1))? NULL: idealtwoelt(nf,y);
 }
 
@@ -2428,7 +2428,7 @@ static void
 rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN auts, FACT *fact)
 {
   GEN L_jid = F->L_jid;
-  GEN ex, baseideal, m1, M = nf_get_M(nf);
+  GEN ex, baseideal, m1;
   const long nbG = lg(F->vecG)-1, lgsub = lg(F->subFB), l_jid = lg(L_jid);
   long jlist;
   pari_sp av;
@@ -2442,11 +2442,7 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN auts, FACT *fact)
   ex = cgetg(lgsub, t_VECSMALL);
   baseideal = get_random_ideal(F, nf, ex);
   baseideal = red(nf, baseideal, F->G0, &m1);
-  m1 = gdiv(m1, content(m1));
-  if (baseideal)
-    baseideal = idealhnf_two(nf, baseideal);
-  else
-    baseideal = scalarmat_shallow(gen_1, lg(M) - 1);
+  if (baseideal) baseideal = idealhnf_two(nf, baseideal);
   for (av = avma, jlist = 1; jlist < l_jid; jlist++, avma = av)
   {
     long jid = L_jid[jlist];
@@ -2459,7 +2455,11 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN auts, FACT *fact)
      * equivalent (subFB is probably not Galois stable) */
     l = random_Fl(lg(auts));
     if (l) jid = coeff(F->idealperm, jid, l);
-    ideal = idealmul(nf, baseideal, idealhnf_two(nf, gel(F->LP,jid)));
+    ideal = gel(F->LP,jid);
+    if (baseideal)
+      ideal = idealmul_HNF(nf, baseideal, ideal);
+    else
+      ideal = idealhnf_two(nf, ideal);
     Nideal = ZM_det_triangular(ideal);
     for (av1 = avma, j = 1; j <= nbG; j++, avma = av1)
     { /* reduce along various directions */
