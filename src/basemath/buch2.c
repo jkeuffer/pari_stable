@@ -2405,16 +2405,19 @@ get_random_ideal(FB_t *F, GEN nf, GEN ex)
 {
   long l = lg(ex);
   for (;;) {
-    GEN ideal, P;
+    GEN ideal = idealhnf_principal(nf, gen_1);
     long i;
-    ideal = P = idealhnf_principal(nf, gen_1);
     for (i=1; i<l; i++)
-    { /* reduce mod apparent order */
+    {
       long id = F->subFB[i];
       ex[i] = random_bits(RANDOM_BITS);
-      if (ex[i]) ideal = idealmul_HNF(nf,ideal, gmael(F->id2,id,ex[i]));
+      if (ex[i])
+      {
+        GEN a = gmael(F->id2,id,ex[i]);
+        ideal = ideal? idealmul_HNF(nf,ideal, a): idealhnf_two(nf,a);
+      }
     }
-    if (ideal != P) { /* If ex  != 0 */
+    if (ideal) { /* ex  != 0 */
       ideal = remove_content(ideal);
       if (!is_pm1(gcoeff(ideal,1,1))) return ideal; /* ideal != Z_K */
     }
