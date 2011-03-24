@@ -58,6 +58,15 @@ trunc2nr(GEN x, long n)
   return trunc2nr_lg(x, lx, ex - bit_accuracy(lx) + 1);
 }
 
+/* x a t_REAL, x = i/2^e, i a t_INT */
+GEN
+mantissa_real(GEN x, long *e)
+{
+  long lx = lg(x);
+  *e = bit_accuracy(lx)-1-expo(x);
+  return trunc2nr_lg(x, lx, 0);
+}
+
 GEN
 mului(ulong x, GEN y)
 {

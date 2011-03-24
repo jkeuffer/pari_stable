@@ -1226,7 +1226,11 @@ $\kbd{z[2]},\dots, \kbd{z[lg(z)-1]}$.
 More precisely, let $m$ be the integer (\kbd{z[2]},\dots, \kbd{z[lg(z)-1]})
 in base \kbd{2\pow BITS\_IN\_LONG}; here, \kbd{z[2]} is the most significant
 longword and is normalized, i.e.~its most significant bit is~1. Then we have
-$M := m \cdot 2^{1 - \kbd{bit\_accuracy(lg(z))}}$.
+$M := m / 2^{\kbd{bit\_accuracy(lg(z))} - 1 - \kbd{expo}(z)}$.
+
+\fun{GEN}{mantissa_real}{GEN z, long *e} returns the mantissa $m$ of $z$, and
+sets \kbd{*e} to the exponent $\kbd{bit\_accuracy(lg(z))}-1-\kbd{expo}(z)$,
+so that $z = m / 2^e$.
 
 Thus, the real number $3.5$ to accuracy \kbd{bit\_accuracy(lg(z))} is
 represented as \kbd{z[0]} (encoding $\kbd{type} = \typ{REAL}$, \kbd{lg(z)}),
