@@ -2736,20 +2736,22 @@ compute_R(GEN lambda, GEN z, GEN *ptL, GEN *ptkR)
   *ptkR = R; *ptL = L; return fupb_NONE;
 }
 
+/* norm of an extended ideal I, whose 1st component is in integral HNF */
+static GEN
+idnorm(GEN I) { return ZM_det_triangular(gel(I,1)); }
+
 /* find the smallest (wrt norm) among I, I^-1 and red(I^-1) */
 static GEN
 inverse_if_smaller(GEN nf, GEN I)
 {
-  GEN J, d, dmin, I1;
+  GEN d, dmin, I1;
 
-  J = gel(I,1);
-  dmin = ZM_det_triangular(J); I1 = idealinv(nf,I);
-  J = gel(I1,1); J = Q_remove_denom(J, NULL); gel(I1,1) = J;
-  d = ZM_det_triangular(J); if (cmpii(d,dmin) < 0) {I=I1; dmin=d;}
+  dmin = idnorm(I);
+  I1 = idealinv(nf,I); gel(I1,1) = Q_remove_denom(gel(I1,1), NULL);
+  d = idnorm(I1); if (cmpii(d,dmin) < 0) {I=I1; dmin=d;}
   /* try reducing (often _increases_ the norm) */
   I1 = idealred(nf,I1);
-  J = gel(I1,1);
-  d = ZM_det_triangular(J); if (cmpii(d,dmin) < 0) I=I1;
+  d = idnorm(I1); if (cmpii(d,dmin) < 0) I=I1;
   return I;
 }
 
