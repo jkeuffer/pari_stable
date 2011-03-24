@@ -39,25 +39,23 @@ Doc: tries to
  future (all library mode errors can be trapped: it's a matter of defining
  the keywords to \kbd{gp}):
 
- \kbd{accurer}: accuracy problem
-
  \kbd{alarmer}: alarm time-out
 
  \kbd{archer}: not available on this architecture or operating system
-
- \kbd{syntaxer}: syntax error
 
  \kbd{errpile}: the PARI stack overflows
 
  \kbd{gdiver}: division by 0
 
- \kbd{invmoder}: impossible inverse modulo
-
  \kbd{impl}: not yet implemented
+
+ \kbd{invmoder}: impossible inverse modulo
 
  \kbd{overflower}: all forms of arithmetic overflow, including length
  or exponent overflow (when a larger value is supplied than the
  implementation can handle).
+
+ \kbd{syntaxer}: syntax error
 
  \kbd{talker}: miscellaneous error
 

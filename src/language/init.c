@@ -1109,16 +1109,17 @@ trap0(const char *e, GEN r, GEN f)
   long numerr = CATCH_ALL;
   GEN x;
   if (!e || !*e) numerr = CATCH_ALL;
+  else if (!strcmp(e,"alarmer")) numerr = alarmer;
+  else if (!strcmp(e,"archer")) numerr = archer;
   else if (!strcmp(e,"errpile")) numerr = errpile;
-  else if (!strcmp(e,"typeer")) numerr = typeer;
   else if (!strcmp(e,"gdiver")) numerr = gdiver;
   else if (!strcmp(e,"impl")) numerr = impl;
   else if (!strcmp(e,"invmoder")) numerr = invmoder;
-  else if (!strcmp(e,"archer")) numerr = archer;
-  else if (!strcmp(e,"alarmer")) numerr = alarmer;
-  else if (!strcmp(e,"talker")) numerr = talker;
-  else if (!strcmp(e,"user")) numerr = user;
+  else if (!strcmp(e,"overflower")) numerr = overflower;
   else if (!strcmp(e,"syntaxer")) numerr = syntaxer;
+  else if (!strcmp(e,"talker")) numerr = talker;
+  else if (!strcmp(e,"typeer")) numerr = typeer;
+  else if (!strcmp(e,"user")) numerr = user;
   else pari_err(impl,"this trap keyword");
   /* TODO: complete the list */
 
