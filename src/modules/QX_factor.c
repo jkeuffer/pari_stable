@@ -1048,7 +1048,9 @@ nfrootsQ(GEN x)
 
   if (typ(x)!=t_POL) pari_err(notpoler,"nfrootsQ");
   if (!signe(x)) pari_err(zeropoler,"nfrootsQ");
-  val = ZX_valrem(Q_primpart(x), &x);
+  x = Q_primpart(x);
+  if (!RgX_is_ZX(x)) pari_err(typeer,"nfrootsQ");
+  val = ZX_valrem(x, &x);
   (void)ZX_gcd_all(x, ZX_deriv(x), &x);
   z = DDF(x, 1);
   if (val) z = shallowconcat(z, gen_0);
