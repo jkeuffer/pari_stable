@@ -300,7 +300,7 @@ function will be able to operate on it.
 \subsec{Length conversions}
 
 These routines convert a non-negative length to different units. Their
-behaviour is undefined at negative integers.
+behavior is undefined at negative integers.
 
 \fun{long}{ndec2nlong}{long x} converts a number of decimal digits to a number
 of words. Returns $ 1 + \kbd{floor}(x \times \B \log_2 10)$.
@@ -8248,7 +8248,7 @@ sd_timer(const char *v, long flag)
 { return sd_toggle(v,flag,"timer", &(GP_DATA->chrono)); }
 @eprog
 
-The exact behaviour and return value depends on \kbd{flag}:
+The exact behavior and return value depends on \kbd{flag}:
 
 \item \tet{d_RETURN}: returns the new toggle value, as a \kbd{GEN}.
 
@@ -8278,7 +8278,7 @@ or
 a message associated to the value $i$ of the default. The last entry in the
 \kbd{msg} array is used as a message associated to all subsequent ones.
 
-The exact behaviour and return value depends on \kbd{flag}:
+The exact behavior and return value depends on \kbd{flag}:
 
 \item \tet{d_RETURN}: returns the new toggle value, as a \kbd{GEN}.
 
