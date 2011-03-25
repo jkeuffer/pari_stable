@@ -182,19 +182,34 @@ delete_cache(RELCACHE_t *M)
 static void
 unclone_subFB(FB_t *F)
 {
-  subFB_t *sub = F->allsubFB;
-  GEN id2 = F->id2;
-  long id;
+  subFB_t *sub, *subold;
+  GEN id2 = F->id2, idealperm = F->idealperm;
+  long i;
+  const long lperm = lg(idealperm);
 
-  while(sub) { subFB_t *s = sub; sub = s->old; pari_free(s); }
-  /* can't do it in a simple way above because of the Galois action,
-     see WARNING in powFBgen */
-  for (id = 1; id <= F->KC; id++)
-    if (gel(id2, id) != gen_0)
+  for (sub = F->allsubFB; sub; sub = subold)
+  {
+    GEN subFB = sub->subFB;
+    for (i = 1; i < lg(subFB); i++)
     {
+      long k, id = subFB[i];
+      if (gel(id2, id) == gen_0) continue;
+
       gunclone(gel(id2, id));
       gel(id2, id) = gen_0;
+      for (k = 1; k < lperm; k++)
+      {
+        long sigmaid = coeff(idealperm, id, k);
+        if (gel(id2, sigmaid) != gen_0)
+        {
+          gunclone(gel(id2, sigmaid));
+          gel(id2, sigmaid) = gen_0;
+        }
+      }
     }
+    subold = sub->old;
+    pari_free(sub);
+  }
 }
 
 static void
@@ -2215,7 +2230,6 @@ powFBgen(RELCACHE_t *cache, FB_t *F, GEN nf, GEN auts)
             gel(sigmaid2, l) =
               mkvec2(gel(id2l, 1), ZM_mul(ZM_mul(aut, gel(id2l, 2)), invaut));
           }
-          /* WARNING: to be freed also in unclone_subFB */
           gel(F->id2, sigmaid) = gclone(sigmaid2);
         }
       }
