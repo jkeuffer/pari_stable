@@ -811,7 +811,7 @@ static int
 polequal(GEN x, GEN y)
 {
   long lx, ly;
-  if (x[1] != y[1]) return 0;
+  if ((x[1] ^ y[1]) & (VARNBITS | SIGNBITS)) return 0;
   lx = lg(x); ly = lg(y);
   while (lx > ly) if (!gequal0(gel(x,--lx))) return 0;
   while (ly > lx) if (!gequal0(gel(y,--ly))) return 0;
