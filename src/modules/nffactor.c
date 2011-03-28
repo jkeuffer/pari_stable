@@ -530,7 +530,7 @@ nffactor(GEN nf,GEN pol)
   long dA;
   pari_timer ti;
 
-  if (DEBUGLEVEL>2) { TIMERstart(&ti); fprintferr("\nEntering nffactor:\n"); }
+  if (DEBUGLEVEL>2) { timer_start(&ti); fprintferr("\nEntering nffactor:\n"); }
   T = get_nfpol(nf, &nf);
   RgX_check_ZX(T,"nffactor");
   A = rnf_fix_pol(T,pol,1);
@@ -550,7 +550,7 @@ nffactor(GEN nf,GEN pol)
   if (degpol(T) == 1) return gerepileupto(av, QX_factor(simplify_shallow(A)));
 
   den = get_nfsqff_data(&nf, &T, &A, &B, &bad);
-  if (DEBUGLEVEL>2) msgTIMER(&ti, "squarefree test");
+  if (DEBUGLEVEL>2) timer_printf(&ti, "squarefree test");
   if (degpol(B) != dA) B = Q_primpart( QXQX_normalize(B, T) );
   ensure_lt_INT(B);
   y = nfsqff(nf,B, 0, den);
@@ -934,7 +934,7 @@ nfcmbf(nfcmbf_t *T, long klim, long *pmaxK, int *done)
   div_data D;
   pari_timer ti;
 
-  TIMERstart(&ti);
+  timer_start(&ti);
 
   *pmaxK = cmbf_maxK(lfamod);
   init_div_data(&D, pol, T->L->topowden);
@@ -1069,7 +1069,7 @@ nextK:
       update_target(&D, pol);
       if (DEBUGLEVEL > 2)
       {
-        fprintferr("\n"); msgTIMER(&ti, "to find factor %Ps",y);
+        fprintferr("\n"); timer_printf(&ti, "to find factor %Ps",y);
         fprintferr("remaining modular factor(s): %ld\n", lfamod);
       }
       continue;
@@ -1265,7 +1265,7 @@ bestlift_init(long a, GEN nf, GEN pr, GEN C, nflift_t *L)
   GEN prk, PRK, B, GSmin, pk;
   pari_timer ti;
 
-  TIMERstart(&ti);
+  timer_start(&ti);
   if (!a) a = (long)bestlift_bound(C, d, alpha, pr_norm(pr));
 
   for (;; avma = av, a += (a==1)? 1: (a>>1)) /* roughly a *= 1.5 */
@@ -1281,7 +1281,7 @@ bestlift_init(long a, GEN nf, GEN pr, GEN C, nflift_t *L)
   gerepileall(av2, 2, &PRK, &GSmin);
   if (DEBUGLEVEL>2)
     fprintferr("for this exponent, GSmin = %Ps\nTime reduction: %ld\n",
-      GSmin, TIMER(&ti));
+      GSmin, timer_delay(&ti));
   L->k = a;
   L->den = L->pk = pk;
   L->prk = PRK;
@@ -1384,7 +1384,7 @@ nf_LLL_cmbf(nfcmbf_t *T, long rec)
     }
 
     /* compute truncation parameter */
-    if (DEBUGLEVEL>2) { TIMERstart(&ti2); TIMERstart(&TI); }
+    if (DEBUGLEVEL>2) { timer_start(&ti2); timer_start(&TI); }
     oldCM_L = CM_L;
     av2 = avma;
     b = delta = 0; /* -Wall */
@@ -1422,14 +1422,14 @@ AGAIN:
     CM_L = LLL_check_progress(Bnorm, n0, m, b == bmin, /*dbg:*/ &ti_LLL);
     if (DEBUGLEVEL>2)
       fprintferr("LLL_cmbf: (a,b) =%4ld,%4ld; r =%3ld -->%3ld, time = %ld\n",
-                 a,b, lg(m)-1, CM_L? lg(CM_L)-1: 1, TIMER(&TI));
+                 a,b, lg(m)-1, CM_L? lg(CM_L)-1: 1, timer_delay(&TI));
     if (!CM_L) { list = mkcol(RgX_int_normalize(P)); break; }
     if (b > bmin)
     {
       CM_L = gerepilecopy(av2, CM_L);
       goto AGAIN;
     }
-    if (DEBUGLEVEL>2) msgTIMER(&ti2, "for this trace");
+    if (DEBUGLEVEL>2) timer_printf(&ti2, "for this trace");
 
     i = lg(CM_L) - 1;
     if (i == r && ZM_equal(CM_L, oldCM_L))
@@ -1448,9 +1448,9 @@ AGAIN:
     if (i <= r && i*rec < n0)
     {
       pari_timer ti;
-      if (DEBUGLEVEL>2) TIMERstart(&ti);
+      if (DEBUGLEVEL>2) timer_start(&ti);
       list = nf_chk_factors(T, P, Q_div_to_int(CM_L,utoipos(C)), famod, L->pk);
-      if (DEBUGLEVEL>2) ti_CF += TIMER(&ti);
+      if (DEBUGLEVEL>2) ti_CF += timer_delay(&ti);
       if (list) break;
     }
     CM_L = gerepilecopy(av2, CM_L);
@@ -1475,11 +1475,11 @@ nf_combine_factors(nfcmbf_t *T, GEN polred, long klim)
   int done;
   pari_timer ti;
 
-  if (DEBUGLEVEL>2) TIMERstart(&ti);
+  if (DEBUGLEVEL>2) timer_start(&ti);
   T->fact = ZpX_liftfact(polred, T->fact, L->Tpk, L->p, L->k, L->pk);
-  if (DEBUGLEVEL>2) msgTIMER(&ti, "Hensel lift");
+  if (DEBUGLEVEL>2) timer_printf(&ti, "Hensel lift");
   res = nfcmbf(T, klim, &maxK, &done);
-  if (DEBUGLEVEL>2) msgTIMER(&ti, "Naive recombination");
+  if (DEBUGLEVEL>2) timer_printf(&ti, "Naive recombination");
   if (!done)
   {
     long l = lg(res)-1;
@@ -1590,7 +1590,7 @@ nf_pick_prime(long ct, GEN nf, GEN polbase, long fl,
   ulong pp = 0;
   pari_timer ti_pr;
 
-  if (DEBUGLEVEL>3) TIMERstart(&ti_pr);
+  if (DEBUGLEVEL>3) timer_start(&ti_pr);
   *lt  = leading_term(polbase); /* t_INT */
   if (gequal1(*lt)) *lt = NULL;
   *pr = NULL;
@@ -1653,7 +1653,7 @@ nf_pick_prime(long ct, GEN nf, GEN polbase, long fl,
     else avma = av2;
     if (DEBUGLEVEL>3)
       fprintferr("%3ld %s at prime\n  %Ps\nTime: %ld\n",
-                 anbf, fl == FACTORS?"factors": "roots", apr, TIMER(&ti_pr));
+                 anbf, fl == FACTORS?"factors": "roots", apr, timer_delay(&ti_pr));
     if (--ct <= 0) return nbf;
   }
 }
@@ -1739,7 +1739,7 @@ nfsqff(GEN nf, GEN pol, long fl, GEN den)
   nflift_t L;
   pari_timer ti, ti_tot;
 
-  if (DEBUGLEVEL>2) { TIMERstart(&ti); TIMERstart(&ti_tot); }
+  if (DEBUGLEVEL>2) { timer_start(&ti); timer_start(&ti_tot); }
   n = degpol(nfpol);
   /* deg = 1 => irreducible */
   if (dpol == 1) return mkvec(QXQX_normalize(pol, nfpol));
@@ -1774,7 +1774,7 @@ nfsqff(GEN nf, GEN pol, long fl, GEN den)
   }
 
   if (DEBUGLEVEL>2) {
-    msgTIMER(&ti, "choice of a prime ideal");
+    timer_printf(&ti, "choice of a prime ideal");
     fprintferr("Prime ideal chosen: %Ps\n", pr);
   }
   L.tozk = nf_get_invzk(nf);
@@ -1792,7 +1792,7 @@ nfsqff(GEN nf, GEN pol, long fl, GEN den)
   T.BS_2 = mulrr(T.ZC, N2); /* bound for |S_2|^2 on chosen Z-basis */
 
   if (DEBUGLEVEL>2) {
-    msgTIMER(&ti, "bound computation");
+    timer_printf(&ti, "bound computation");
     fprintferr("  1) T_2 bound for %s: %Ps\n",
                fl == FACTORS?"factor": "root", C0);
     fprintferr("  2) Conversion from T_2 --> | |^2 bound : %Ps\n", T.ZC);
@@ -1802,7 +1802,7 @@ nfsqff(GEN nf, GEN pol, long fl, GEN den)
   L.p = pr_get_p(pr);
   if (L.Tp && degpol(L.Tp) == 1) L.Tp = NULL;
   bestlift_init(0, nf, pr, T.bound, &L);
-  if (DEBUGLEVEL>2) TIMERstart(&ti);
+  if (DEBUGLEVEL>2) timer_start(&ti);
   polred = ZqX_normalize(polbase, lt, &L); /* monic */
 
   if (fl != FACTORS) {
@@ -1826,7 +1826,7 @@ nfsqff(GEN nf, GEN pol, long fl, GEN den)
     gen_sort_inplace(res, (void*)&cmp_RgX, &gen_cmp_RgX, NULL);
     T.fact  = gerepilecopy(av, res);
   }
-  if (DEBUGLEVEL>2) msgTIMER(&ti, "splitting mod %Ps", pr);
+  if (DEBUGLEVEL>2) timer_printf(&ti, "splitting mod %Ps", pr);
   T.pr = pr;
   T.L  = &L;
   T.polbase = polbase;
@@ -1834,7 +1834,7 @@ nfsqff(GEN nf, GEN pol, long fl, GEN den)
   T.nf    = nf;
   res = nf_combine_factors(&T, polred, dpol-1);
   if (DEBUGLEVEL>2)
-    fprintferr("Total Time: %ld\n===========\n", TIMER(&ti_tot));
+    fprintferr("Total Time: %ld\n===========\n", timer_delay(&ti_tot));
   return res;
 }
 
@@ -2006,10 +2006,10 @@ rootsof1(GEN nf)
   if (nf_get_r1(nf)) return trivroots();
 
   /* Step 1 : guess number of roots and discard trivial case 2 */
-  if (DEBUGLEVEL>2) TIMERstart(&ti);
+  if (DEBUGLEVEL>2) timer_start(&ti);
   nbguessed = guess_roots(nf);
   if (DEBUGLEVEL>2)
-    msgTIMER(&ti, "guessing roots of 1 [guess = %ld]", nbguessed);
+    timer_printf(&ti, "guessing roots of 1 [guess = %ld]", nbguessed);
   if (nbguessed == 2) return trivroots();
 
   nfdegree = nf_get_degree(nf);
@@ -2035,14 +2035,14 @@ rootsof1(GEN nf)
     LE[i] = 0;
   }
   if (DEBUGLEVEL>2)
-    msgTIMER(&ti, "adding ramification conditions [guess = %ld]", nbguessed);
+    timer_printf(&ti, "adding ramification conditions [guess = %ld]", nbguessed);
   if (nbguessed == 2) return trivroots();
 
   /* Step 2 : choose a prime ideal for local lifting */
   av = avma;
   P.L = &L; nf_pick_prime_for_units(nf, &P);
   if (DEBUGLEVEL>2)
-    msgTIMER(&ti, "choosing prime %Ps, degree %ld",
+    timer_printf(&ti, "choosing prime %Ps, degree %ld",
              P.L->p, P.L->Tp? degpol(P.L->Tp): 1);
 
   /* Step 3 : compute a reduced pr^k allowing lifting of local solutions */
@@ -2051,7 +2051,7 @@ rootsof1(GEN nf)
   /* lift and reduce pr^k */
   if (DEBUGLEVEL>2) fprintferr("Lift pr^k; GSmin wanted: %Ps\n",C0);
   bestlift_init((long)mybestlift_bound(C0), nf, P.pr, C0, P.L);
-  if (DEBUGLEVEL>2) TIMERstart(&ti);
+  if (DEBUGLEVEL>2) timer_start(&ti);
 
   /* Step 4 : actual computation of roots */
   nbroots = 2; prim_root = gen_m1;
@@ -2063,7 +2063,7 @@ rootsof1(GEN nf)
       long pk = upowuu(p,k);
       if (pk==2) continue; /* no need to test second roots ! */
       z = nfcyclo_root(nf,pk,&P);
-      if (DEBUGLEVEL>2) msgTIMER(&ti, "for factoring Phi_%ld^%ld", p,k);
+      if (DEBUGLEVEL>2) timer_printf(&ti, "for factoring Phi_%ld^%ld", p,k);
       if (z) {
         if (DEBUGLEVEL>2) fprintferr("  %ld-th root of unity found.\n", pk);
         if (p==2) { nbroots = pk; prim_root = z; }

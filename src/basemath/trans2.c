@@ -778,7 +778,7 @@ mpbern(long nb, long prec)
   if (DEBUGLEVEL) {
     fprintferr("caching Bernoulli numbers 2*%ld to 2*%ld, prec = %ld\n",
                i,nb,prec);
-    TIMERstart(&T);
+    timer_start(&T);
   }
 
   if (i == 1 && nb > 0)
@@ -803,7 +803,7 @@ mpbern(long nb, long prec)
     setexpo(S, expo(S) - 2*i);
     set_bern(c0, i, S); /* S = B_2i */
   }
-  if (DEBUGLEVEL) msgTIMER(&T, "Bernoulli");
+  if (DEBUGLEVEL) timer_printf(&T, "Bernoulli");
   if (bernzone) killblock(bernzone);
   avma = av; bernzone = B;
 }

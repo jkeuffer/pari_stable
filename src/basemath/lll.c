@@ -390,7 +390,7 @@ fplll(GEN *ptrB, GEN *ptrU, GEN *ptrr, double DELTA, double ETA, long flag, long
 
   if(DEBUGLEVEL>=4)
   {
-    TIMERstart(&T);
+    timer_start(&T);
     fprintferr("Entering L^2: LLL-parameters (%P.3f,%.3Pf), working precision %d words\n",delta,eta, prec);
   }
 
@@ -507,7 +507,7 @@ fplll(GEN *ptrB, GEN *ptrU, GEN *ptrr, double DELTA, double ETA, long flag, long
     }
   }
 
-  if (DEBUGLEVEL>=4) msgTIMER(&T,"LLL");
+  if (DEBUGLEVEL>=4) timer_printf(&T,"LLL");
   if (ptrr) *ptrr = RgM_diagonal_shallow(r);
   if (!U)
   {

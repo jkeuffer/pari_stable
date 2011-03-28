@@ -1017,7 +1017,7 @@ gp_format_time(long flag)
 {
   static char buf[64];
   static long last = 0;
-  long delay = (flag == ti_LAST)? last: TIMER(GP_DATA->T);
+  long delay = (flag == ti_LAST)? last: timer_delay(GP_DATA->T);
   char *s;
   const char *pre;
 
@@ -1580,7 +1580,7 @@ gp_main_loop(long flag)
 #if defined(_WIN32) || defined(__CYGWIN32__)
       win32ctrlc = 0;
 #endif
-      TIMERstart(GP_DATA->T);
+      timer_start(GP_DATA->T);
       pari_set_last_newline(1);
     }
     z = closure_evalres(pari_compile_str(b->buf, GP_DATA->strictmatch));
@@ -1592,7 +1592,7 @@ gp_main_loop(long flag)
     if (GP_DATA->chrono)
       pari_puts(gp_format_time(ti_REGULAR));
     else
-      TIMERstart(GP_DATA->T);
+      timer_start(GP_DATA->T);
     if (z == gnil) continue;
 
     if (GP_DATA->simplify) z = simplify_shallow(z);
@@ -2012,7 +2012,7 @@ main(int argc, char **argv)
   cb_pari_ask_confirm = gp_ask_confirm;
   gp_expand_path(GP_DATA->path);
 
-  TIMERstart(GP_DATA->T);
+  timer_start(GP_DATA->T);
   if (!(GP_DATA->flags & gpd_QUIET)) gp_head();
   if (s_A.n)
   {

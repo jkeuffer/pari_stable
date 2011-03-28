@@ -487,13 +487,13 @@ ellanalyticrank(GEN e, GEN eps, long prec)
     fprintferr("ellanalyticrank: CURVE = %Ps\n", e);
     fprintferr("Rank is %s\n", rk == 0? "even": "odd");
     fprintferr("eps = %Ps\nconductor = %Ps\n", eps, el.N);
-    TIMERstart(&T);
+    timer_start(&T);
   }
   av2 = avma;
   for(;; rk += 2)
   {
     GEN Lr1 = ellL1_i(&el, &bg, rk, ap, prec);
-    if (DEBUGLEVEL) msgTIMER(&T, "L^(%ld)=%Ps", rk, Lr1);
+    if (DEBUGLEVEL) timer_printf(&T, "L^(%ld)=%Ps", rk, Lr1);
     if (absr_cmp(Lr1, eps) > 0) return gerepilecopy(av, mkvec2(stoi(rk), Lr1));
     ap = gerepilecopy(av2, bg.ap);
   }

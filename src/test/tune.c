@@ -66,8 +66,8 @@ double speed_endtime(void);
 static pari_timer __T;
 static double speed_unittime = 1e-4;
 static int    speed_precision= 1000;
-static void speed_starttime() { TIMERstart(&__T); }
-static double speed_endtime() { return (double)TIMER(&__T)/1000.; }
+static void speed_starttime() { timer_start(&__T); }
+static double speed_endtime() { return (double)timer_delay(&__T)/1000.; }
 #endif
 
 /* ========================================================== */

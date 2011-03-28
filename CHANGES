@@ -89,6 +89,8 @@ BA 17- traversesubgroups renamed to forsubgroup.
       in PARI toplevel
    21- thue() no longer outputs a Warning when the result is conditional on
        the GRH.
+   22- [libpari] rename TIMER -> timer_delay, TIMERread -> timer_get,
+       TIMERstart -> timer_start, msgTIMER -> timer_printf
 
   Added
 BA  1- trap keyword "syntaxer" to trap syntax error from eval.

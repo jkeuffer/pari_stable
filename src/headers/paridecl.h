@@ -1867,9 +1867,9 @@ ulong   unextprime(ulong n);
 
 /* init.c */
 
-long    TIMER(pari_timer *T);
-long    TIMERread(pari_timer *T);
-void    TIMERstart(pari_timer *T);
+long    timer_delay(pari_timer *T);
+long    timer_get(pari_timer *T);
+void    timer_start(pari_timer *T);
 long    allocatemoremem(size_t newsize);
 int     chk_gerepileupto(GEN x);
 GENbin* copy_bin(GEN x);
@@ -1896,7 +1896,7 @@ long    gsizebyte(GEN x);
 void    gunclone(GEN x);
 void    gunclone_deep(GEN x);
 GEN     listcopy(GEN x);
-void    msgTIMER(pari_timer *T, const char *format, ...);
+void    timer_printf(pari_timer *T, const char *format, ...);
 void    msgtimer(const char *format, ...);
 GEN     newblock(size_t n);
 void    pari_add_function(entree *ep);

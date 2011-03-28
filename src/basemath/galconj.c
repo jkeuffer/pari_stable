@@ -245,7 +245,7 @@ initgaloisborne(GEN T, GEN dn, long prec, GEN *ptL, GEN *ptprep, GEN *ptdis)
   GEN L, prep, den, nf, r;
   pari_timer ti;
 
-  if (DEBUGLEVEL>=4) TIMERstart(&ti);
+  if (DEBUGLEVEL>=4) timer_start(&ti);
   T = get_nfpol(T, &nf);
   r = nf ? nf_get_roots(nf) : NULL;
   if (nf &&  lg(gel(r, 1)) >= prec)
@@ -267,7 +267,7 @@ initgaloisborne(GEN T, GEN dn, long prec, GEN *ptL, GEN *ptprep, GEN *ptdis)
   }
   else
     L = cleanroots(T, prec);
-  if (DEBUGLEVEL>=4) msgTIMER(&ti,"roots");
+  if (DEBUGLEVEL>=4) timer_printf(&ti,"roots");
   prep = vandermondeinverseprep(L);
   if (!dn)
   {
@@ -316,9 +316,9 @@ galoisborne(GEN T, GEN dn, struct galois_borne *gb)
   prec = ZX_max_lg(T);
   den = initgaloisborne(T,dn,prec, &L,&prep,NULL);
   if (!dn) den = gclone(den);
-  if (DEBUGLEVEL>=4) TIMERstart(&ti);
+  if (DEBUGLEVEL>=4) timer_start(&ti);
   M = vandermondeinverse(L, RgX_gtofp(T, prec), den, prep);
-  if (DEBUGLEVEL>=4) msgTIMER(&ti,"vandermondeinverse");
+  if (DEBUGLEVEL>=4) timer_printf(&ti,"vandermondeinverse");
   borne = matrixnorm(M, prec);
   borneroots = gsupnorm(L, prec); /*t_REAL*/
   n = degpol(T);

@@ -501,14 +501,14 @@ F2x_Berlekamp_ker(GEN u)
   long j,N = F2x_degree(u);
   GEN Q, XP;
   pari_timer T;
-  TIMERstart(&T);
+  timer_start(&T);
   XP = F2xq_sqr(polx_F2x(u[1]),u);
   Q  = F2xq_matrix_pow(XP,N,N,u);
   for (j=1; j<=N; j++)
     F2m_flip(Q,j,j);
-  if(DEBUGLEVEL>=9) msgTIMER(&T,"Berlekamp matrix");
+  if(DEBUGLEVEL>=9) timer_printf(&T,"Berlekamp matrix");
   Q = F2m_ker_sp(Q,0);
-  if(DEBUGLEVEL>=9) msgTIMER(&T,"kernel");
+  if(DEBUGLEVEL>=9) timer_printf(&T,"kernel");
   return gerepileupto(ltop,Q);
 }
 
@@ -519,14 +519,14 @@ Flx_Berlekamp_ker(GEN u, ulong l)
   long j,N = degpol(u);
   GEN Q, XP;
   pari_timer T;
-  TIMERstart(&T);
+  timer_start(&T);
   XP = Flxq_pow(polx_Flx(u[1]),utoipos(l),u,l);
   Q  = Flxq_matrix_pow(XP,N,N,u,l);
   for (j=1; j<=N; j++)
     coeff(Q,j,j) = Fl_sub(coeff(Q,j,j),1,l);
-  if(DEBUGLEVEL>=9) msgTIMER(&T,"Berlekamp matrix");
+  if(DEBUGLEVEL>=9) timer_printf(&T,"Berlekamp matrix");
   Q = Flm_ker_sp(Q,l,0);
-  if(DEBUGLEVEL>=9) msgTIMER(&T,"kernel");
+  if(DEBUGLEVEL>=9) timer_printf(&T,"kernel");
   return gerepileupto(ltop,Q);
 }
 
@@ -537,10 +537,10 @@ FqX_Berlekamp_ker(GEN u, GEN T, GEN q, GEN p)
   long j,N = degpol(u);
   GEN v,w,Q,p1;
   pari_timer Ti;
-  if (DEBUGLEVEL>=4) TIMERstart(&Ti);
+  if (DEBUGLEVEL>=4) timer_start(&Ti);
   Q = cgetg(N+1,t_MAT); gel(Q,1) = zerocol(N);
   w = v = FpXQXQ_pow(pol_x(varn(u)), q, u, T, p);
-  if (DEBUGLEVEL>=4) msgTIMER(&Ti, "FpXQXQ_pow");
+  if (DEBUGLEVEL>=4) timer_printf(&Ti, "FpXQXQ_pow");
   for (j=2; j<=N; j++)
   {
     p1 = RgX_to_RgV(w, N);
@@ -552,9 +552,9 @@ FqX_Berlekamp_ker(GEN u, GEN T, GEN q, GEN p)
       w = gerepileupto(av, FpXQX_divrem(FpXQX_mul(w,v, T,p), u,T,p,ONLY_REM));
     }
   }
-  if (DEBUGLEVEL>=4) msgTIMER(&Ti, "Berlekamp_matrix");
+  if (DEBUGLEVEL>=4) timer_printf(&Ti, "Berlekamp_matrix");
   p1 = FqM_ker(Q,T,p);
-  if (DEBUGLEVEL>=4) msgTIMER(&Ti, "Berlekamp_ker");
+  if (DEBUGLEVEL>=4) timer_printf(&Ti, "Berlekamp_ker");
   return gerepileupto(ltop,p1);
 }
 
@@ -681,7 +681,7 @@ Flx_Frobenius(GEN u, ulong p)
   GEN v,w,Q;
   pari_timer T;
 
-  if (DEBUGLEVEL > 7) TIMERstart(&T);
+  if (DEBUGLEVEL > 7) timer_start(&T);
   Q = cgetg(N+1,t_MAT);
   gel(Q,1) = const_vecsmall(N, 0);
   coeff(Q,1,1) = 1;
@@ -695,7 +695,7 @@ Flx_Frobenius(GEN u, ulong p)
       w = gerepileupto(av, Flxq_mul(w, v, u, p));
     }
   }
-  if (DEBUGLEVEL > 7) msgTIMER(&T, "frobenius");
+  if (DEBUGLEVEL > 7) timer_printf(&T, "frobenius");
   return Q;
 }
 

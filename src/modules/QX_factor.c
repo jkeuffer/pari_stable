@@ -540,9 +540,9 @@ LLL_check_progress(GEN Bnorm, long n0, GEN m, int final, long *ti_LLL)
   long i, R;
   pari_timer T;
 
-  if (DEBUGLEVEL>2) TIMERstart(&T);
+  if (DEBUGLEVEL>2) timer_start(&T);
   u = ZM_lll_norms(m, final? 0.999: 0.75, LLL_INPLACE, &norm);
-  if (DEBUGLEVEL>2) *ti_LLL += TIMER(&T);
+  if (DEBUGLEVEL>2) *ti_LLL += timer_delay(&T);
   for (R=lg(m)-1; R > 0; R--)
     if (cmprr(gel(norm,R), Bnorm) < 0) break;
   for (i=1; i<=R; i++) setlg(u[i], n0+1);
@@ -643,7 +643,7 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
     }
 
     /* compute truncation parameter */
-    if (DEBUGLEVEL>2) { TIMERstart(&ti2); TIMERstart(&TI); }
+    if (DEBUGLEVEL>2) { timer_start(&ti2); timer_start(&TI); }
     oldCM_L = CM_L;
     av2 = avma;
     delta = b = 0; /* -Wall */
@@ -681,14 +681,14 @@ AGAIN:
     CM_L = LLL_check_progress(Bnorm, n0, m, b == bmin, /*dbg:*/ &ti_LLL);
     if (DEBUGLEVEL>2)
       fprintferr("LLL_cmbf: (a,b) =%4ld,%4ld; r =%3ld -->%3ld, time = %ld\n",
-                 a,b, lg(m)-1, CM_L? lg(CM_L)-1: 1, TIMER(&TI));
+                 a,b, lg(m)-1, CM_L? lg(CM_L)-1: 1, timer_delay(&TI));
     if (!CM_L) { list = mkcol(P); break; }
     if (b > bmin)
     {
       CM_L = gerepilecopy(av2, CM_L);
       goto AGAIN;
     }
-    if (DEBUGLEVEL>2) msgTIMER(&ti2, "for this block of traces");
+    if (DEBUGLEVEL>2) timer_printf(&ti2, "for this block of traces");
 
     i = lg(CM_L) - 1;
     if (i == r && ZM_equal(CM_L, oldCM_L))
@@ -707,9 +707,9 @@ AGAIN:
     if (i <= r && i*rec < n0)
     {
       pari_timer ti;
-      if (DEBUGLEVEL>2) TIMERstart(&ti);
+      if (DEBUGLEVEL>2) timer_start(&ti);
       list = chk_factors(P, Q_div_to_int(CM_L,utoipos(C)), bound, famod, pa);
-      if (DEBUGLEVEL>2) ti_CF += TIMER(&ti);
+      if (DEBUGLEVEL>2) ti_CF += timer_delay(&ti);
       if (list) break;
       if (DEBUGLEVEL>2) fprintferr("LLL_cmbf: chk_factors failed");
     }
@@ -768,11 +768,11 @@ combine_factors(GEN target, GEN famod, GEN p, long klim)
 
   (void)cmbf_precs(p, A, B, &a, &b, &pa, &pb);
 
-  if (DEBUGLEVEL>2) TIMERstart(&T);
+  if (DEBUGLEVEL>2) timer_start(&T);
   famod = ZpX_liftfact(target,famod,NULL,p,a,pa);
-  if (DEBUGLEVEL>2) msgTIMER(&T, "Hensel lift (mod %Ps^%ld)", p,a);
+  if (DEBUGLEVEL>2) timer_printf(&T, "Hensel lift (mod %Ps^%ld)", p,a);
   L = cmbf(target, famod, A, p, a, b, klim, &maxK, &done);
-  if (DEBUGLEVEL>2) msgTIMER(&T, "Naive recombination");
+  if (DEBUGLEVEL>2) timer_printf(&T, "Naive recombination");
 
   res     = gel(L,1);
   listmod = gel(L,2); l = lg(listmod)-1;
@@ -782,7 +782,7 @@ combine_factors(GEN target, GEN famod, GEN p, long klim)
     if (l!=1) A = factor_bound(gel(res,l));
     if (DEBUGLEVEL > 4) fprintferr("last factor still to be checked\n");
     L = LLL_cmbf(gel(res,l), famod, p, pa, A, a, maxK);
-    if (DEBUGLEVEL>2) msgTIMER(&T,"Knapsack");
+    if (DEBUGLEVEL>2) timer_printf(&T,"Knapsack");
     /* remove last elt, possibly unfactored. Add all new ones. */
     setlg(res, l); res = shallowconcat(res, L);
   }
@@ -799,7 +799,7 @@ DDF_roots(GEN pol, GEN polp, GEN p)
   pari_sp av, lim;
   pari_timer T;
 
-  if (DEBUGLEVEL>2) TIMERstart(&T);
+  if (DEBUGLEVEL>2) timer_start(&T);
   lc = absi(leading_term(pol));
   if (is_pm1(lc)) lc = NULL;
   lcpol = lc? ZX_Z_mul(pol, lc): pol;
@@ -808,7 +808,7 @@ DDF_roots(GEN pol, GEN polp, GEN p)
   if (lc) bound = mulii(lc, bound);
   e = logint(addis(shifti(bound, 1), 1), p, &pe);
   pes2 = shifti(pe, -1);
-  if (DEBUGLEVEL>2) msgTIMER(&T, "Root bound");
+  if (DEBUGLEVEL>2) timer_printf(&T, "Root bound");
 
   av = avma; lim = stack_lim(av,2);
   z = FpX_roots(polp, p);
@@ -824,7 +824,7 @@ DDF_roots(GEN pol, GEN polp, GEN p)
     z = ZpX_liftroots(pol, z, p, e);
     z = deg1_from_roots(z, v);
   }
-  if (DEBUGLEVEL>2) msgTIMER(&T, "Hensel lift (mod %Ps^%ld)", p,e);
+  if (DEBUGLEVEL>2) timer_printf(&T, "Hensel lift (mod %Ps^%ld)", p,e);
 
   for (m=1, i=1; i <= lz; i++)
   {
@@ -849,7 +849,7 @@ DDF_roots(GEN pol, GEN polp, GEN p)
 
     }
   }
-  if (DEBUGLEVEL>2) msgTIMER(&T, "Recombination");
+  if (DEBUGLEVEL>2) timer_printf(&T, "Recombination");
   z[0] = evaltyp(t_VEC) | evallg(m); return z;
 }
 
@@ -866,7 +866,7 @@ DDF(GEN a, int fl)
   const long MAXNP = 7;
   pari_timer T, T2;
 
-  if (DEBUGLEVEL>2) { TIMERstart(&T); TIMERstart(&T2); }
+  if (DEBUGLEVEL>2) { timer_start(&T); timer_start(&T2); }
   nmax = da+1;
   chosenp = 0;
   lead = gel(a,da+2); if (equali1(lead)) lead = NULL;
@@ -881,7 +881,7 @@ DDF(GEN a, int fl)
     nfacp = fl? Flx_nbroots(z, p): Flx_nbfact(z, p);
     if (DEBUGLEVEL>4)
       fprintferr("...tried prime %3ld (%-3ld %s). Time = %ld\n",
-                  p, nfacp, fl?"roots": "factors", TIMER(&T2));
+                  p, nfacp, fl?"roots": "factors", timer_delay(&T2));
     if (nfacp < nmax)
     {
       if (nfacp <= 1)
@@ -904,13 +904,13 @@ DDF(GEN a, int fl)
     pari_err(bugparier,"DDF: wrong numbers of factors");
   if (DEBUGLEVEL>2)
   {
-    if (DEBUGLEVEL>4) msgTIMER(&T2, "splitting mod p = %ld", chosenp);
-    ti = TIMER(&T);
+    if (DEBUGLEVEL>4) timer_printf(&T2, "splitting mod p = %ld", chosenp);
+    ti = timer_delay(&T);
     fprintferr("Time setup: %ld\n", ti);
   }
   z = combine_factors(a, famod, prime, da-1);
   if (DEBUGLEVEL>2)
-    fprintferr("Total Time: %ld\n===========\n", ti + TIMER(&T));
+    fprintferr("Total Time: %ld\n===========\n", ti + timer_delay(&T));
   return gerepilecopy(av, z);
 }
 

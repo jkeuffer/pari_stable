@@ -714,7 +714,7 @@ WildlyRamifiedCase(KRASNER_t *data)
 
   if (DEBUGLEVEL>0) {
     fprintferr("There are %ld extensions to find and %Ps polynomials to consider\n", nbext, nbpol);
-    TIMERstart(&T);
+    timer_start(&T);
   }
 
   vfd = (FAD_t**)new_chunk(nbext);
@@ -757,7 +757,7 @@ WildlyRamifiedCase(KRASNER_t *data)
       ct++;
       if (DEBUGLEVEL>1)
         fprintferr("%ld more extension%s\t(%ld/%ld, %ldms)\n",
-                   nb, (nb == 1)? "": "s", fd, nbext, TIMER(&T));
+                   nb, (nb == 1)? "": "s", fd, nbext, timer_delay(&T));
     }
     avma = av2;
   }

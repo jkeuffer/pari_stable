@@ -740,7 +740,7 @@ find_trace_Elkies_power(GEN a4, GEN a6, ulong ell, long k, struct meqn *MEQN, GE
   kpoly = gel(tmp, 3);
   Ib = pol_x(0);
   lambda = find_eigen_value(a4, a6, ell, kpoly, p, tr);
-  if (DEBUGLEVEL>1) fprintferr(" [%ld ms]", TIMER(T));
+  if (DEBUGLEVEL>1) fprintferr(" [%ld ms]", timer_delay(T));
   if (smallfact && ell>smallfact)
   {
     ulong pell = pellk%ell;
@@ -763,7 +763,7 @@ find_trace_Elkies_power(GEN a4, GEN a6, ulong ell, long k, struct meqn *MEQN, GE
     Ib = gel(tmp, 5);
     if (low_stack(st_lim, stack_lim(btop, 1)))
       gerepileall(btop, 6, &Eba4, &Eba6, &Eca4, &Eca6, &kpoly, &Ib);
-    if (DEBUGLEVEL>1) fprintferr(" [%ld ms]", TIMER(T));
+    if (DEBUGLEVEL>1) fprintferr(" [%ld ms]", timer_delay(T));
   }
   avma = ltop;
   return mkvecsmall(Fl_add(lambda, Fl_div(pellk, lambda, ellk), ellk));
@@ -845,7 +845,7 @@ find_trace(GEN a4, GEN a6, ulong ell, GEN p, long *ptr_kt, ulong smallfact)
   kt = k;
   if (!get_modular_eqn(&MEQN, ell, 0, MAXVARN)) return gen_0;
   if (DEBUGLEVEL)
-  { fprintferr("Process prime %5ld. ", ell); TIMERstart(&T); }
+  { fprintferr("Process prime %5ld. ", ell); timer_start(&T); }
   meqnj = FpXY_evalx(MEQN.eq, a4a6_j(a4, a6, p), p);
   g = study_modular_eqn(ell, meqnj, p, &mt, &r);
   /* If l is an Elkies prime, search for a factor of the l-division polynomial.
@@ -883,7 +883,7 @@ find_trace(GEN a4, GEN a6, ulong ell, GEN p, long *ptr_kt, ulong smallfact)
     if (n > 1 || mt == MTAtkin)
     {
       fprintferr("%3ld trace(s)",n);
-      if (DEBUGLEVEL>1) fprintferr(" [%ld ms]", TIMER(&T));
+      if (DEBUGLEVEL>1) fprintferr(" [%ld ms]", timer_delay(&T));
     }
     fprintferr("\n");
   }

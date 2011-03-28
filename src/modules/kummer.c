@@ -980,7 +980,7 @@ compute_polrel(GEN nfz, toK_s *T, GEN be, long g, long ell)
   r[1] = 1;
   for (i=2; i<=m; i++) r[i] = (r[i-1] * g) % ell;
   powtaubet = powtau(be, m, T->tau);
-  if (DEBUGLEVEL>1) { fprintferr("Computing Newton sums: "); TIMERstart(&ti); }
+  if (DEBUGLEVEL>1) { fprintferr("Computing Newton sums: "); timer_start(&ti); }
   prim_invbe = Q_primitive_part(nfinv(nfz, be), &C_invbe);
   powtau_prim_invbe = powtau(prim_invbe, m, T->tau);
 
@@ -1031,7 +1031,7 @@ compute_polrel(GEN nfz, toK_s *T, GEN be, long g, long ell)
     z = downtoK(T, gmulgs(z, ell));
     if (C_Rk) z = gmul(z, C_Rk);
     gerepileall(av, C_Rk? 3: 2, &z, &prim_Rk, &C_Rk);
-    if (DEBUGLEVEL>1) { fprintferr("%ld(%ld) ", k, TIMER(&ti)); flusherr(); }
+    if (DEBUGLEVEL>1) { fprintferr("%ld(%ld) ", k, timer_delay(&ti)); flusherr(); }
     gel(S,k) = z;
   }
   if (DEBUGLEVEL>1) fprintferr("\n");
@@ -1112,7 +1112,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   GEN mat=NULL;
   long firstpass = all<0;
 
-  if (DEBUGLEVEL) TIMERstart(&t);
+  if (DEBUGLEVEL) timer_start(&t);
   checkbnr(bnr);
   bnf = bnr_get_bnf(bnr);
   nf  = bnf_get_nf(bnf);
@@ -1120,7 +1120,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   if (!vnf) pari_err(talker,"main variable in kummer must not be x");
   /* step 7 */
   p1 = bnrconductor(bnr, subgroup, 2);
-  if (DEBUGLEVEL) msgTIMER(&t, "[rnfkummer] conductor");
+  if (DEBUGLEVEL) timer_printf(&t, "[rnfkummer] conductor");
   bnr      = gel(p1,2);
   subgroup = gel(p1,3);
   gell = get_gell(bnr,subgroup,all<-1?-all:all);
@@ -1138,7 +1138,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   compositum_red(&COMPO, polnf, polcyclo(ell,vnf));
   /* step 2 */
   if (DEBUGLEVEL>2) fprintferr("Step 2\n");
-  if (DEBUGLEVEL) msgTIMER(&t, "[rnfkummer] compositum");
+  if (DEBUGLEVEL) timer_printf(&t, "[rnfkummer] compositum");
   degK  = degpol(polnf);
   degKz = degpol(COMPO.R);
   m = degKz / degK;
@@ -1150,7 +1150,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   if (DEBUGLEVEL>2) fprintferr("Step 3\n");
   /* could factor disc(R) using th. 2.1.6. */
   bnfz = Buchall(COMPO.R, nf_FORCE, prec);
-  if (DEBUGLEVEL) msgTIMER(&t, "[rnfkummer] bnfinit(Kz)");
+  if (DEBUGLEVEL) timer_printf(&t, "[rnfkummer] bnfinit(Kz)");
   cycgen = check_and_build_cycgen(bnfz);
   nfz = bnf_get_nf(bnfz);
   cyc = bnf_get_cyc(bnfz); rc = prank(cyc,ell);
@@ -1158,7 +1158,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   u = get_u(cyc, rc, gell);
 
   vselmer = get_Selmer(bnfz, cycgen, rc);
-  if (DEBUGLEVEL) msgTIMER(&t, "[rnfkummer] Selmer group");
+  if (DEBUGLEVEL) timer_printf(&t, "[rnfkummer] Selmer group");
   ru = (degKz>>1)-1;
   rv = rc+ru+1;
   tau = get_tau(&_tau, nfz, &COMPO, g);
@@ -1293,7 +1293,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   dK = lg(K)-1;
   y = cgetg(dK+1,t_VECSMALL);
   if (all) res = cgetg(1, t_VEC);
-  if (DEBUGLEVEL) msgTIMER(&t, "[rnfkummer] candidate list");
+  if (DEBUGLEVEL) timer_printf(&t, "[rnfkummer] candidate list");
   if (all < 0) { ncyc = dK; rk = 0; mat = zero_Flm(lg(M)-1, ncyc); }
 
   do {

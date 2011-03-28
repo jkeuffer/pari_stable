@@ -1715,7 +1715,7 @@ getstack(void) { return top-avma; }
 
 /*******************************************************************/
 /*                                                                 */
-/*                               TIMER                             */
+/*                               timer_delay                             */
 /*                                                                 */
 /*******************************************************************/
 
@@ -1723,11 +1723,8 @@ getstack(void) { return top-avma; }
 static long
 _get_time(pari_timer *T, long Ticks, long TickPerSecond)
 {
-  long s  = Ticks / TickPerSecond;
-  long us = (long) ((Ticks % TickPerSecond) * (1000000. / TickPerSecond));
-  long delay = 1000 * (s - T->s) + (us - T->us) / 1000;
-  T->us = us;
-  T->s  = s; return delay;
+  T->us = (long) ((Ticks % TickPerSecond) * (1000000. / TickPerSecond));
+  T->s  = Ticks / TickPerSecond;
 }
 #endif
 
@@ -1736,105 +1733,100 @@ _get_time(pari_timer *T, long Ticks, long TickPerSecond)
 # include <sys/times.h>
 # include <sys/time.h>
 # include <time.h>
-long
-TIMER(pari_timer *T)
+void
+timer_start(pari_timer *T)
 {
-  struct tms t; times(&t);
-  return _get_time(T, t.tms_utime,
 #ifdef _SC_CLK_TCK
-                      sysconf(_SC_CLK_TCK)
+  long tck = sysconf(_SC_CLK_TCK);
 #else
-                      CLK_TCK
+  long tck = CLK_TCK;
 #endif
-  );
+  struct tms t; times(&t);
+  _get_time(T, t.tms_utime, tck);
 }
 #elif defined(USE_GETRUSAGE)
 
 # include <sys/time.h>
 # include <sys/resource.h>
-long
-TIMER(pari_timer *T)
+void
+timer_start(pari_timer *T)
 {
   struct rusage r;
-  struct timeval t;
-  long delay;
-
-  getrusage(RUSAGE_SELF,&r); t = r.ru_utime;
-  delay = 1000 * (t.tv_sec - T->s) + (t.tv_usec - T->us) / 1000;
-  T->us = t.tv_usec;
-  T->s  = t.tv_sec; return delay;
+  getrusage(RUSAGE_SELF,&r);
+  T->us = r.ru_utime.tv_usec;
+  T->s  = r.ru_utime.tv_sec;
 }
 #elif defined(USE_FTIME)
 
 # include <sys/timeb.h>
-long
-TIMER(pari_timer *T)
+void
+timer_start(pari_timer *T)
 {
   struct timeb t;
-  long delay;
-
   ftime(&t);
-  delay = 1000 * (t.time - T->s) + (t.millitm - T->us / 1000);
   T->us = t.millitm * 1000;
-  T->s  = t.time; return delay;
+  T->s  = t.time;
 }
 #elif defined(WINCE)
-long
-TIMER(pari_timer *T)
-{
-  return _get_time(T, GetTickCount(), 1000);
-}
+void
+timer_start(pari_timer *T)
+{ _get_time(T, GetTickCount(), 1000); }
 #else
 
 # include <time.h>
 # ifndef CLOCKS_PER_SEC
 #   define CLOCKS_PER_SEC 1000000 /* may be false on YOUR system */
 # endif
-long
-TIMER(pari_timer *T)
-{
-  return _get_time(T, clock(), CLOCKS_PER_SEC);
-}
+void
+timer_start(pari_timer *T)
+{ _get_time(T, clock(), CLOCKS_PER_SEC); }
 #endif
-void
-TIMERstart(pari_timer *T) { T->s = 0; T->us = 0; (void)TIMER(T); }
+
 long
-TIMERread(pari_timer *T) {
-  long s = T->s, us = T->us, delay = TIMER(T);
-  T->s = s; T->us = us; return delay;
+timer_delay(pari_timer *T)
+{
+  long s = T->s, us = T->us; timer_start(T);
+  return 1000 * (T->s - s) + (T->us - us) / 1000;
 }
 
 long
-timer(void)   { static THREAD pari_timer T; return TIMER(&T);}
-long
-timer2(void)  { static THREAD pari_timer T; return TIMER(&T);}
-
-void
-msgTIMER(pari_timer *T, const char *format, ...)
+timer_get(pari_timer *T)
 {
-  va_list args;
+  pari_timer t; timer_start(&t);
+  return 1000 * (t.s - T->s) + (t.us - T->us) / 1000;
+}
+
+static void
+timer_vprintf(pari_timer *T, const char *format, va_list args)
+{
   pariOut_puts(pariErr, "Time ");
-  va_start(args, format);
   pariOut_vprintf(pariErr, format,args);
-  va_end(args);
-  pariOut_printf(pariErr, ": %ld\n", TIMER(T));
+  pariOut_printf(pariErr, ": %ld\n", timer_delay(T));
   pariErr->flush();
 }
+void
+timer_printf(pari_timer *T, const char *format, ...)
+{
+  va_list args; va_start(args, format);
+  timer_vprintf(T, format, args);
+  va_end(args);
+}
 
+long
+timer(void)  { static THREAD pari_timer T; return timer_delay(&T);}
+long
+gettime(void)  { static THREAD pari_timer T; return timer_delay(&T);}
+
+static THREAD pari_timer timer2_T;
+long
+timer2(void) {  return timer_delay(&timer2_T);}
 void
 msgtimer(const char *format, ...)
 {
-  va_list args;
-  pariOut_puts(pariErr, "Time ");
-  va_start(args, format);
-  pariOut_vprintf(pariErr, format,args);
+  va_list args; va_start(args, format);
+  timer_vprintf(&timer2_T, format, args);
   va_end(args);
-  pariOut_printf(pariErr, ": %ld\n", timer2());
-  pariErr->flush();
 }
-
-long
-gettime(void) { return timer(); }
 
 /*******************************************************************/
 /*                                                                 */

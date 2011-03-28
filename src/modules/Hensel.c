@@ -246,7 +246,7 @@ MultiLift(GEN f, GEN a, GEN T, GEN p, long e0, long flag)
   if (k < 2 || e0 < 1) pari_err(talker, "MultiLift: bad args");
   if (e0 == 1) return a;
 
-  if (DEBUGLEVEL > 3) TIMERstart(&Ti);
+  if (DEBUGLEVEL > 3) timer_start(&Ti);
   if (typ(a[1]) == t_INT)
   { /* a = TreeLift structure */
     e = itos(gel(a,1));
@@ -261,7 +261,7 @@ MultiLift(GEN f, GEN a, GEN T, GEN p, long e0, long flag)
     w = cgetg(2*k-2 + 1, t_VEC);
     link=cgetg(2*k-2 + 1, t_VECSMALL);
     BuildTree(link, v, w, a, T? FpX_red(T,p): NULL, p);
-    if (DEBUGLEVEL > 3) msgTIMER(&Ti, "building tree");
+    if (DEBUGLEVEL > 3) timer_printf(&Ti, "building tree");
   }
   mask = quadratic_prec_mask(e0);
   eold = 1;
@@ -291,7 +291,7 @@ MultiLift(GEN f, GEN a, GEN T, GEN p, long e0, long flag)
       else
         ZpX_RecTreeLift(link, v, w, pd, peold, penew, f, lgpol(v),
                         (flag == 0 && mask == 1));
-      if (DEBUGLEVEL > 3) msgTIMER(&Ti, "lifting to prec %ld", enew);
+      if (DEBUGLEVEL > 3) timer_printf(&Ti, "lifting to prec %ld", enew);
     }
     eold = enew;
   }
