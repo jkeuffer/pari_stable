@@ -357,6 +357,9 @@ polsubcyclo_cyclic(long n, long d, long m ,long z, long g, GEN powz, GEN le)
   GEN V = cgetg(d+1,t_VEC);
   ulong base = 1;
   long i,k;
+  pari_timer ti;
+  if (DEBUGLEVEL >= 6) timer_start(&ti);
+  if (DEBUGLEVEL >= 6) timer_printf(&ti, "polsubcyclo_cyclic");
   for (i=1; i<=d; i++, base = Fl_mul(base,z,n))
   {
     pari_sp av = avma;
@@ -370,6 +373,7 @@ polsubcyclo_cyclic(long n, long d, long m ,long z, long g, GEN powz, GEN le)
     if (le) s = modii(s, le);
     gel(V,i) = gerepileupto(av, s);
   }
+  if (DEBUGLEVEL >= 6) timer_printf(&ti, "polsubcyclo_cyclic");
   return V;
 }
 
@@ -423,7 +427,8 @@ polsubcyclo_start(long n, long d, long o, GEN borne, long *ptr_val,long *ptr_l)
   pari_sp av;
   GEN le, z, gl;
   long i, l, e, val;
-  if (DEBUGLEVEL >= 1) (void)timer2();
+  pari_timer ti;
+  if (DEBUGLEVEL >= 1) timer_start(&ti);
   l = n+1; e = 1;
   while(!uisprime(l)) { l += n; e++; }
   if (DEBUGLEVEL >= 4) fprintferr("Subcyclo: prime l=%ld\n",l);
@@ -440,7 +445,7 @@ polsubcyclo_start(long n, long d, long o, GEN borne, long *ptr_val,long *ptr_l)
   le = powiu(gl,val);
   z = utoipos( Fl_powu(pgener_Fl(l), e, l) );
   z = Zp_sqrtnlift(gen_1,utoipos(n),z,gl,val);
-  if (DEBUGLEVEL >= 1) msgtimer("Zp_sqrtnlift");
+  if (DEBUGLEVEL >= 1) timer_printf(&ti, "Zp_sqrtnlift");
   *ptr_val = val;
   *ptr_l = l;
   return gmodulo(z,le);
@@ -487,7 +492,8 @@ polsubcyclo_roots(long n, GEN zl)
   long i, lle = lg(le)*3; /*Assume dvmdii use lx+ly space*/
   long m = (long)(1+sqrt((double) n));
   GEN bab, gig, powz = cgetg(3,t_VEC);
-
+  pari_timer ti;
+  if (DEBUGLEVEL >= 6) timer_start(&ti);
   bab = cgetg(m+1,t_VEC);
   gel(bab,1) = gen_1;
   gel(bab,2) = icopy(z);
@@ -496,6 +502,7 @@ polsubcyclo_roots(long n, GEN zl)
   gel(gig,1) = gen_1;
   gel(gig,2) = muliimod_sz(z,gel(bab,m),le,lle);;
   for (i=3; i<=m; i++) gel(gig,i) = muliimod_sz(gel(gig,2),gel(gig,i-1),le,lle);
+  if (DEBUGLEVEL >= 6) timer_printf(&ti, "polsubcyclo_roots");
   gel(powz,1) = bab;
   gel(powz,2) = gig; return powz;
 }
@@ -572,6 +579,7 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
   pari_sp ltop= avma, av;
   GEN H, V, B, zl, L, T, le, powz, O, Z = NULL;
   long i, card, phi_n, val,l, n, cnd, complex=1;
+  pari_timer ti;
 
   if (flag<0 || flag>2) pari_err(flagerr,"galoissubcyclo");
   if (v < 0) v = 0;
@@ -650,9 +658,9 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
   /* field is real iff z -> conj(z) = z^-1 = z^(n-1) is in H */
   complex = !F2v_coeff(gel(H,3),n-1);
   if (DEBUGLEVEL >= 6) fprintferr("Subcyclo: complex=%ld\n",complex);
-  if (DEBUGLEVEL >= 1) (void)timer2();
+  if (DEBUGLEVEL >= 1) timer_start(&ti);
   cnd = znstar_conductor(n,H);
-  if (DEBUGLEVEL >= 1) msgtimer("znstar_conductor");
+  if (DEBUGLEVEL >= 1) timer_printf(&ti, "znstar_conductor");
   if (flag == 1)  { avma=ltop; return stoi(cnd); }
   if (cnd == 1)
   {
@@ -673,7 +681,7 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
     return gscycloconductor(polcyclo(n,v),n,flag);
   }
   O = znstar_cosets(n, phi_n, H);
-  if (DEBUGLEVEL >= 1) msgtimer("znstar_cosets");
+  if (DEBUGLEVEL >= 1) timer_printf(&ti, "znstar_cosets");
   if (DEBUGLEVEL >= 6) fprintferr("Subcyclo: orbits=%Ps\n",O);
   if (DEBUGLEVEL >= 4)
     fprintferr("Subcyclo: %ld orbits with %ld elements each\n",phi_n/card,card);
@@ -685,7 +693,9 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
   powz = polsubcyclo_roots(n,zl);
   le = gel(zl,1);
   L = polsubcyclo_orbits(n,H,O,powz,le);
+  if (DEBUGLEVEL >= 6) timer_start(&ti);
   T = FpV_roots_to_pol(L,le,v);
+  if (DEBUGLEVEL >= 6) timer_printf(&ti, "roots_to_pol");
   T = FpX_center(T,le,shifti(le,-1));
   return gerepileupto(ltop, gscycloconductor(T,n,flag));
 }
@@ -697,6 +707,7 @@ polsubcyclo_g(long n, long d, GEN Z, long v)
   pari_sp ltop = avma;
   long o, p, r, g, gd, l , val;
   GEN zl, L, T, le, B, powz;
+  pari_timer ti;
   if (v<0) v = 0;
   if (d==1) return deg1pol_shallow(gen_1,gen_m1,v);
   if (d<=0 || n<=0) pari_err(typeer,"polsubcyclo");
@@ -719,11 +730,10 @@ polsubcyclo_g(long n, long d, GEN Z, long v)
   zl = polsubcyclo_start(n,d,o,B,&val,&l);
   le = gel(zl,1);
   powz = polsubcyclo_roots(n,zl);
-  if (DEBUGLEVEL >= 6) msgtimer("polsubcyclo_roots");
   L = polsubcyclo_cyclic(n,d,o,g,gd,powz,le);
-  if (DEBUGLEVEL >= 6) msgtimer("polsubcyclo_cyclic");
+  if (DEBUGLEVEL >= 6) timer_start(&ti);
   T = FpV_roots_to_pol(L,le,v);
-  if (DEBUGLEVEL >= 6) msgtimer("roots_to_pol");
+  if (DEBUGLEVEL >= 6) timer_printf(&ti, "roots_to_pol");
   return gerepileupto(ltop, FpX_center(T,le,shifti(le,-1)));
 }
 
