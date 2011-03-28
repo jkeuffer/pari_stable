@@ -78,6 +78,9 @@ static const long BNF_RELPID = 4;
 static const long BMULT = 8;
 static const long maxtry_DEP = 20;
 static const long maxtry_FACT = 500;
+/* rnd_rel */
+static const long RND_REL_RELPID = 1;
+static const long PREVENT_LLL_IN_RND_REL = 1;
 /* random relations */
 static const long MINSFB = 3;
 static const long MAXRELSUP = 50;
@@ -149,6 +152,21 @@ typedef struct RELCACHE_t {
   GEN basis; /* mod p basis (generating family actually) */
   ulong missing; /* missing vectors in generating family above */
 } RELCACHE_t;
+
+typedef struct FP_t {
+  double **q;
+  GEN x;
+  double *y;
+  double *z;
+  double *v;
+} FP_t;
+
+typedef struct RNDREL_t {
+  GEN Nideal;
+  long jid;
+  GEN ex;
+  GEN m1;
+} RNDREL_t;
 
 static void
 wr_rel(GEN col)
@@ -453,12 +471,12 @@ red(GEN nf, GEN I, GEN G0, GEN *pm)
   m = gel(y,2);
   y = gel(y,1); *pm = lg(m)==1? gen_1: Q_primpart(gmael(m, 1, 1));
   norm2 = typ(y) == t_MAT ? ZM_det_triangular(y) : idealnorm(nf, y);
-  if (gcmp(norm, norm2) < 0)
+  if (gcmp(norm, norm2) < 0 || is_pm1(gcoeff(y,1,1)))
   {
     *pm = gen_1;
     y = I;
   }
-  return is_pm1(gcoeff(y,1,1))? NULL: idealtwoelt(nf,y);
+  return idealtwoelt(nf,y);
 }
 
 /* make sure enough room to store n more relations */
@@ -2265,15 +2283,130 @@ step(GEN x, double *y, GEN inc, long k)
   }
 }
 
+INLINE long
+Fincke_Pohst_ideal(RELCACHE_t *cache, FB_t *F, GEN nf, long N, GEN M, long R1,
+    GEN G, GEN ideal0, FACT *fact, long nbrelpid, FP_t *fp,
+    RNDREL_t *rr, long prec, long *nbsmallnorm, long *nbfact)
+{
+  pari_sp av;
+  GEN r, u, gx, inc=const_vecsmall(N, 1), ideal;
+  double BOUND;
+  long j, k, skipfirst, nbrelideal = 0, dependent = 0, try_factor = 0;
+  const long maxtry_DEP  = 20, maxtry_FACT = 500;
+
+  u = ZM_lll(ZM_mul(F->G0, ideal0), 0.99, LLL_IM);
+  ideal = ZM_mul(ideal0,u); /* approximate T2-LLL reduction */
+  r = Q_from_QR(RgM_mul(G, ideal), prec); /* Cholesky for T2 | ideal */
+  if (!r) pari_err_BUG("small_norm (precision too low)");
+
+  skipfirst = ZV_isscalar(gel(ideal,1))? 1: 0; /* 1 probable */
+  for (k=1; k<=N; k++)
+  {
+    fp->v[k] = gtodouble(gcoeff(r,k,k));
+    for (j=1; j<k; j++) fp->q[j][k] = gtodouble(gcoeff(r,j,k));
+    if (DEBUGLEVEL>3) err_printf("fp->v[%ld]=%.4g ",k,fp->v[k]);
+  }
+  BOUND = mindd(BMULT*fp->v[1], 2*(fp->v[2]+fp->v[1]*fp->q[1][2]*fp->q[1][2]));
+  /* BOUND at most BMULT fp->x smallest known vector */
+  if (DEBUGLEVEL>1)
+  {
+    if (DEBUGLEVEL>3) err_printf("\n");
+    err_printf("BOUND = %.4g\n",BOUND); err_flush();
+  }
+  BOUND *= 1 + 1e-6;
+  k = N; fp->y[N] = fp->z[N] = 0; fp->x[N] = 0;
+  for (av = avma;; avma = av, step(fp->x,fp->y,inc,k))
+  {
+    GEN R;
+    long nz;
+    do
+    { /* look for primitive element of small norm, cf minim00 */
+      int fl = 0;
+      double p;
+      if (k > 1)
+      {
+        long l = k-1;
+        fp->z[l] = 0;
+        for (j=k; j<=N; j++) fp->z[l] += fp->q[l][j]*fp->x[j];
+        p = (double)fp->x[k] + fp->z[k];
+        fp->y[l] = fp->y[k] + p*p*fp->v[k];
+        if (l <= skipfirst && !fp->y[1]) fl = 1;
+        fp->x[l] = (long)floor(-fp->z[l] + 0.5);
+        k = l;
+      }
+      for(;; step(fp->x,fp->y,inc,k))
+      {
+        if (!fl)
+        {
+          p = (double)fp->x[k] + fp->z[k];
+          if (fp->y[k] + p*p*fp->v[k] <= BOUND) break;
+
+          step(fp->x,fp->y,inc,k);
+
+          p = (double)fp->x[k] + fp->z[k];
+          if (fp->y[k] + p*p*fp->v[k] <= BOUND) break;
+        }
+        fl = 0; inc[k] = 1;
+        if (++k > N) return 0;
+      }
+    } while (k > 1);
+
+    /* element complete */
+    if (zv_content(fp->x) !=1) continue; /* not primitive */
+    gx = ZM_zc_mul(ideal,fp->x);
+    if (ZV_isscalar(gx)) continue;
+    if (++try_factor > maxtry_FACT) return 0;
+
+    if (rr)
+    {
+      if (!factorgen(F,nf,ideal0,rr->Nideal,gx,fact))
+         continue;
+      add_to_fact(rr->jid, 1, fact);
+      gx = nfmul(nf, rr->m1, gx);
+    }
+    else
+    {
+      GEN Nx, xembed = RgM_RgC_mul(M, gx);
+      long e;
+      if (nbsmallnorm) (*nbsmallnorm)++;
+      Nx = grndtoi(norm_by_embed(R1,xembed), &e);
+      if (e >= 0) {
+        if (DEBUGLEVEL > 1) { err_printf("+"); err_flush(); }
+        continue;
+      }
+      setabssign(Nx);
+      if (!can_factor(F, nf, NULL, gx, Nx, fact)) {
+        if (DEBUGLEVEL > 1) { err_printf("."); err_flush(); }
+        continue;
+      }
+    }
+
+    /* smooth element */
+    R = set_fact(F, fact, rr ? rr->ex : NULL, &nz);
+    /* make sure we get maximal rank first, then allow all relations */
+    if (add_rel(cache, F, R, nz, gx, rr ? 1 : 0) <= 0)
+    { /* probably Q-dependent from previous ones: forget it */
+      if (DEBUGLEVEL>1) err_printf("*");
+      if (++dependent > maxtry_DEP) break;
+      continue;
+    }
+    dependent = 0;
+    if (DEBUGLEVEL && nbfact) (*nbfact)++;
+    if (cache->last >= cache->end) return 1; /* we have enough */
+    if (++nbrelideal == nbrelpid) break;
+  }
+  return 0;
+}
+
 static void
 small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
            double LOGD, double LIMC2, FACT *fact, GEN p0)
 {
   pari_timer T;
   const long N = nf_get_degree(nf), R1 = nf_get_r1(nf), prec = nf_get_prec(nf);
-  double *y, *z, **q, *v, BOUND;
+  FP_t fp;
   pari_sp av;
-  GEN x, M = nf_get_M(nf), G = nf_get_G(nf), L_jid = F->L_jid;
+  GEN M = nf_get_M(nf), G = nf_get_G(nf), L_jid = F->L_jid;
   long nbsmallnorm, nbfact, precbound, noideal = lg(L_jid);
   REL_t *last = cache->last;
 
@@ -2294,12 +2427,10 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
       / LOG2)); /* enough to compute norms */
   if (precbound < prec) M = gprec_w(M, precbound);
 
-  minim_alloc(N+1, &q, &x, &y, &z, &v);
+  minim_alloc(N+1, &fp.q, &fp.x, &fp.y, &fp.z, &fp.v);
   for (av = avma; --noideal; avma = av)
   {
-    GEN r, u, gx, ideal=gel(F->LP,L_jid[noideal]), inc=const_vecsmall(N, 1);
-    long j, k, skipfirst, nbrelideal = 0, dependent = 0, try_factor = 0;
-    pari_sp av2;
+    GEN ideal=gel(F->LP,L_jid[noideal]);
 
     if (DEBUGLEVEL>1)
       err_printf("\n*** Ideal no %ld: %Ps\n", L_jid[noideal], vecslice(ideal,1,4));
@@ -2307,103 +2438,11 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
       ideal = idealmul(nf, p0, ideal);
     else
       ideal = idealhnf_two(nf, ideal);
-    u = ZM_lll(ZM_mul(F->G0, ideal), 0.99, LLL_IM);
-    ideal = ZM_mul(ideal,u); /* approximate T2-LLL reduction */
-    r = Q_from_QR(RgM_mul(G, ideal), prec); /* Cholesky for T2 | ideal */
-    if (!r) pari_err_BUG("small_norm (precision too low)");
-
-    skipfirst = ZV_isscalar(gel(ideal,1))? 1: 0; /* 1 probable */
-    for (k=1; k<=N; k++)
-    {
-      v[k] = gtodouble(gcoeff(r,k,k));
-      for (j=1; j<k; j++) q[j][k] = gtodouble(gcoeff(r,j,k));
-      if (DEBUGLEVEL>3) err_printf("v[%ld]=%.4g ",k,v[k]);
-    }
-    BOUND = mindd(BMULT * v[1], 2 * (v[2] + v[1]*q[1][2]*q[1][2]));
-    /* BOUND at most BMULT x smallest known vector */
-    if (DEBUGLEVEL>1)
-    {
-      if (DEBUGLEVEL>3) err_printf("\n");
-      err_printf("BOUND = %.4g\n",BOUND); err_flush();
-    }
-    BOUND *= 1 + 1e-6;
-    k = N; y[N] = z[N] = 0; x[N] = 0;
-    for (av2 = avma;; avma = av2, step(x,y,inc,k))
-    {
-      GEN R;
-      long nz;
-      do
-      { /* look for primitive element of small norm, cf minim00 */
-        int fl = 0;
-        double p;
-        if (k > 1)
-        {
-          long l = k-1;
-          z[l] = 0;
-          for (j=k; j<=N; j++) z[l] += q[l][j]*x[j];
-          p = (double)x[k] + z[k];
-          y[l] = y[k] + p*p*v[k];
-          if (l <= skipfirst && !y[1]) fl = 1;
-          x[l] = (long)floor(-z[l] + 0.5);
-          k = l;
-        }
-        for(;; step(x,y,inc,k))
-        {
-          if (!fl)
-          {
-            p = (double)x[k] + z[k];
-            if (y[k] + p*p*v[k] <= BOUND) break;
-
-            step(x,y,inc,k);
-
-            p = (double)x[k] + z[k];
-            if (y[k] + p*p*v[k] <= BOUND) break;
-          }
-          fl = 0; inc[k] = 1;
-          if (++k > N) goto ENDIDEAL;
-        }
-      } while (k > 1);
-
-      /* element complete */
-      if (zv_content(x) !=1) continue; /* not primitive */
-      gx = ZM_zc_mul(ideal,x);
-      if (ZV_isscalar(gx)) continue;
-
-      {
-        GEN Nx, xembed = RgM_RgC_mul(M, gx);
-        long e;
-        nbsmallnorm++;
-        if (++try_factor > maxtry_FACT) goto ENDIDEAL;
-        Nx = grndtoi(norm_by_embed(R1,xembed), &e);
-        if (e >= 0) {
-          if (DEBUGLEVEL > 1) { err_printf("+"); err_flush(); }
-          continue;
-        }
-        setabssign(Nx);
-        if (!can_factor(F, nf, NULL, gx, Nx, fact)) {
-          if (DEBUGLEVEL > 1) { err_printf("."); err_flush(); }
-          continue;
-        }
-      }
-
-      /* smooth element */
-      R = set_fact(F, fact, NULL, &nz);
-      /* make sure we get maximal rank first, then allow all relations */
-      if (add_rel(cache, F, R, nz, gx, 0) <= 0)
-      { /* probably Q-dependent from previous ones: forget it */
-        if (DEBUGLEVEL>1) err_printf("*");
-        if (++dependent > maxtry_DEP) break;
-        continue;
-      }
-      dependent = 0;
-      if (DEBUGLEVEL) nbfact++;
-      if (cache->last >= cache->end) goto END; /* we have enough */
-      if (++nbrelideal == nbrelpid) break;
-    }
-ENDIDEAL:
+    if (Fincke_Pohst_ideal(cache, F, nf, N, M, R1, G, ideal, fact,
+          nbrelpid, &fp, NULL, prec, &nbsmallnorm, &nbfact))
+      break;
     if (DEBUGLEVEL>1) timer_printf(&T, "for this ideal");
   }
-END:
   if (DEBUGLEVEL)
   {
     if (cache->last != last) err_printf("\n");
@@ -2453,9 +2492,12 @@ static void
 rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, FACT *fact)
 {
   pari_timer T;
-  GEN L_jid = F->L_jid;
-  GEN ex, baseideal, m1;
+  const GEN L_jid = F->L_jid, M = nf_get_M(nf), G = F->G0;
+  GEN baseideal;
+  RNDREL_t rr;
+  FP_t fp;
   const long nbG = lg(F->vecG)-1, lgsub = lg(F->subFB), l_jid = lg(L_jid);
+  const long N = nf_get_degree(nf), R1 = nf_get_r1(nf), prec = nf_get_prec(nf);
   long jlist;
   pari_sp av;
 
@@ -2466,39 +2508,44 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, FACT *fact)
     err_printf("\n(more relations needed: %ld)\n", d > 0? d: 1);
     if (l_jid <= F->orbits) err_printf("looking hard for %Ps\n",L_jid);
   }
-  ex = cgetg(lgsub, t_VECSMALL);
-  baseideal = get_random_ideal(F, nf, ex);
-  baseideal = red(nf, baseideal, F->G0, &m1);
-  if (baseideal) baseideal = idealhnf_two(nf, baseideal);
+  rr.ex = cgetg(lgsub, t_VECSMALL);
+  baseideal = get_random_ideal(F, nf, rr.ex);
+  baseideal = red(nf, baseideal, F->G0, &rr.m1);
+  baseideal = idealhnf_two(nf, baseideal);
+  minim_alloc(N+1, &fp.q, &fp.x, &fp.y, &fp.z, &fp.v);
   for (av = avma, jlist = 1; jlist < l_jid; jlist++, avma = av)
   {
-    long j, jid = L_jid[jlist];
-    GEN Nideal, ideal = gel(F->LP,jid);
+    long j;
+    GEN ideal;
     pari_sp av1;
+    REL_t *last = cache->last;
 
-    if (DEBUGLEVEL>1) err_printf("(%ld)", jid);
-    if (baseideal)
-      ideal = idealmul_HNF(nf, baseideal, ideal);
-    else
-      ideal = idealhnf_two(nf, ideal);
-    Nideal = ZM_det_triangular(ideal);
+    rr.jid = L_jid[jlist];
+    if (DEBUGLEVEL>1) err_printf("(%ld)", rr.jid);
+    ideal = gel(F->LP,rr.jid);
+    ideal = idealmul_HNF(nf, baseideal, ideal);
+    rr.Nideal = ZM_det_triangular(ideal);
+    if (Fincke_Pohst_ideal(cache, F, nf, N, M, R1, G, ideal, fact,
+                              RND_REL_RELPID, &fp, &rr, prec, NULL, NULL))
+      break;
+    if (PREVENT_LLL_IN_RND_REL || cache->last != last) continue;
     for (av1 = avma, j = 1; j <= nbG; j++, avma = av1)
     { /* reduce along various directions */
       GEN m = idealpseudomin_nonscalar(ideal, gel(F->vecG,j));
       GEN R;
       long nz;
-      if (!factorgen(F,nf,ideal,Nideal,m,fact))
+      if (!factorgen(F,nf,ideal,rr.Nideal,m,fact))
       {
         if (DEBUGLEVEL>1) { err_printf("."); err_flush(); }
         continue;
       }
       /* can factor ideal, record relation */
-      add_to_fact(jid, 1, fact);
-      R = set_fact(F, fact, ex, &nz);
-      switch (add_rel(cache, F, R, nz, nfmul(nf, m, m1), 1))
+      add_to_fact(rr.jid, 1, fact);
+      R = set_fact(F, fact, rr.ex, &nz);
+      switch (add_rel(cache, F, R, nz, nfmul(nf, m, rr.m1), 1))
       {
         case -1: /* forget it */
-          if (DEBUGLEVEL>1) dbg_cancelrel(jid,j,R);
+          if (DEBUGLEVEL>1) dbg_cancelrel(rr.jid,j,R);
           continue;
       }
       if (DEBUGLEVEL) timer_printf(&T, "for this relation");
