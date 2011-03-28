@@ -543,7 +543,6 @@ choose_prime(primedata *S, GEN pol, GEN dpol)
   GEN Z, p, ff, oldff, n, oldn;
   pari_sp av;
 
-  if (DEBUGLEVEL) (void)timer2();
   p = utoipos(2);
   while (p[2] <= minp) NEXT_PRIME_VIADIFF(p[2], di);
   oldlcm = 0;
