@@ -426,8 +426,9 @@ monomorphismratlift(GEN P, GEN S, struct galois_lift *gl, GEN frob)
   long e = gl->e, level = 1, rt;
   ulong mask;
   GEN *gptr[2];
+  pari_timer ti;
 
-  if (DEBUGLEVEL == 1) (void)timer2();
+  if (DEBUGLEVEL == 1) timer_start(&ti);
   rt = brent_kung_optpow(degpol(Q),1);
   mask = quadratic_prec_mask(e);
   Pr = FpX_red(P,q);
@@ -437,7 +438,7 @@ monomorphismratlift(GEN P, GEN S, struct galois_lift *gl, GEN frob)
   gptr[1] = &Wr;
   for (;;)
   {
-    if (DEBUGLEVEL>=2) { level = (level<<1) - (mask & 1); (void)timer2(); }
+    if (DEBUGLEVEL>=2) { level = (level<<1) - (mask & 1); timer_start(&ti); }
     q = sqri(q);
     if (mask & 1) q = diviiexact(q, p);
     mask >>= 1;
@@ -456,14 +457,14 @@ monomorphismratlift(GEN P, GEN S, struct galois_lift *gl, GEN frob)
     S = FpXQ_mul(Wr, FpX_FpXQV_eval(Pr, Spow, Qr, q),Qr,q);
     lbot = avma;
     S = FpX_sub(Sr, S, q);
-    if (DEBUGLEVEL >= 4) msgtimer("MonomorphismLift: lift to prec %d",level);
+    if (DEBUGLEVEL >= 4) timer_printf(&ti, "MonomorphismLift: lift to prec %d",level);
     if (mask == 1) break;
     Wr = ZX_copy(Wr);
     gerepilemanysp(ltop, lbot, gptr, 2);
     if (qold && frob && monoratlift(S,q,diviiexact(qold,p),gl,frob)) return NULL;
     qold = q; Prold = Pr; Qrold = Qr;
   }
-  if (DEBUGLEVEL == 1) msgtimer("monomorphismlift()");
+  if (DEBUGLEVEL == 1) timer_printf(&ti, "monomorphismlift()");
   return S;
 }
 
@@ -516,14 +517,15 @@ inittestlift(GEN plift, GEN Tmod, struct galois_lift *gl,
     pari_sp av = avma, ltop;
     long i, nautpow = brent_kung_optpow(gt->n-1,gt->f-2);
     GEN autpow;
-    if (DEBUGLEVEL >= 1) (void)timer2();
+    pari_timer ti;
+    if (DEBUGLEVEL >= 1) timer_start(&ti);
     autpow = FpXQ_powers(plift,nautpow,gl->TQ,gl->Q);
     ltop = avma;
     for (i = 3; i <= gt->f; i++)
       gel(gt->pauto,i) = FpX_FpXQV_eval(gel(gt->pauto,i-1),autpow,gl->TQ,gl->Q);
     /*Somewhat paranoid with memory, but this function use a lot of stack.*/
     gerepilecoeffssp(av, ltop, gt->pauto + 3, gt->f-2);
-    if (DEBUGLEVEL >= 1) msgtimer("Frobenius power");
+    if (DEBUGLEVEL >= 1) timer_printf(&ti, "Frobenius power");
   }
 }
 
@@ -579,6 +581,7 @@ frobeniusliftall(GEN sg, long el, GEN *psi, struct galois_lift *gl,
   long N1, N2, R1, Ni, Z, ord = gt->f, c_idx = gt->g-1;
   long hop = 0;
   GEN NN, NQ;
+  pari_timer ti;
 
   *psi = pf = cgetg(m, t_VECSMALL);
   ltop2 = avma;
@@ -594,7 +597,7 @@ frobeniusliftall(GEN sg, long el, GEN *psi, struct galois_lift *gl,
     avma = ltop; *psi = NULL; return 0;
   }
   N2=itos(NQ); if(!N2) N1=R1;
-  if (DEBUGLEVEL>=4) (void)timer2();
+  if (DEBUGLEVEL>=4) timer_start(&ti);
   avma = ltop2;
   C = gt->C;
   Cd= gt->Cd;
@@ -635,7 +638,7 @@ frobeniusliftall(GEN sg, long el, GEN *psi, struct galois_lift *gl,
         {
           if (DEBUGLEVEL >= 4)
           {
-            msgtimer("");
+            timer_printf(&ti, "");
             fprintferr("GaloisConj: %d hops on %Ps tests\n",hop,addis(mulss(Ni,N1),i));
           }
           avma = ltop2; return 1;
@@ -645,14 +648,14 @@ frobeniusliftall(GEN sg, long el, GEN *psi, struct galois_lift *gl,
       else hop++;
     }
     if (DEBUGLEVEL >= 4 && i % maxss(N1/20, 1) == 0)
-      msgtimer("GaloisConj:Testing %Ps", addis(mulss(Ni,N1),i));
+      timer_printf(&ti, "GaloisConj:Testing %Ps", addis(mulss(Ni,N1),i));
     avma = av;
     if (i == N1-1)
     {
       if (Ni==N2-1) N1 = R1;
       if (Ni==N2) break;
       Ni++; i = 0;
-      if (DEBUGLEVEL>=4) (void)timer2();
+      if (DEBUGLEVEL>=4) timer_start(&ti);
     }
     for (j = 2; j < m && pf[j-1] >= pf[j]; j++);
     for (k = 1; k < j-k && pf[k] != pf[j-k]; k++) { lswap(pf[k], pf[j-k]); }
@@ -773,7 +776,8 @@ testpermutation(GEN F, GEN B, GEN x, long s, long e, long cut,
   long a, b, c, d, n, p1, p2, p3, p4, p5, p6, l1, l2, N1, N2, R1;
   long V, i, j, cx, hop = 0, start = 0;
   GEN pf, ar, G, W, NN, NQ;
-  if (DEBUGLEVEL >= 1) (void)timer2();
+  pari_timer ti;
+  if (DEBUGLEVEL >= 1) timer_start(&ti);
   a = lg(F)-1; b = lg(F[1])-1;
   c = lg(B)-1; d = lg(B[1])-1;
   n = a*b;
@@ -858,7 +862,7 @@ testpermutation(GEN F, GEN B, GEN x, long s, long e, long cut,
         if (DEBUGLEVEL >= 1)
         {
           GEN nb = addis(mulss(l2,N1),l1);
-          msgtimer("testpermutation(%Ps)", nb);
+          timer_printf(&ti, "testpermutation(%Ps)", nb);
           if (DEBUGLEVEL >= 2 && hop)
             fprintferr("GaloisConj:%d hop over %Ps iterations\n", hop, nb);
         }
@@ -869,7 +873,7 @@ testpermutation(GEN F, GEN B, GEN x, long s, long e, long cut,
   }
   if (DEBUGLEVEL >= 1)
   {
-    msgtimer("testpermutation(%Ps)", NN);
+    timer_printf(&ti, "testpermutation(%Ps)", NN);
     if (DEBUGLEVEL >= 2 && hop)
       fprintferr("GaloisConj:%d hop over %Ps iterations\n", hop, NN);
   }
@@ -1174,8 +1178,8 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l)
   GEN F, Fp, Fe, Fpe, O;
   long np, order, plift, nbmax, nbtest, deg;
   byteptr primepointer, pp;
-
-  if (DEBUGLEVEL >= 1) (void)timer2();
+  pari_timer ti;
+  if (DEBUGLEVEL >= 1) timer_start(&ti);
   n = degpol(T);
   O = const_vecsmall(n, 0);
   F = factoru_pow(n);
@@ -1276,7 +1280,7 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l)
   if (DEBUGLEVEL >= 4)
     fprintferr("GaloisAnalysis:p=%ld l=%ld group=%ld deg=%ld ord=%ld\n",
                plift, O[1], group, deg, order);
-  if (DEBUGLEVEL >= 1) msgtimer("galoisanalysis()");
+  if (DEBUGLEVEL >= 1) timer_printf(&ti, "galoisanalysis()");
   avma = ltop; return 1;
 }
 
@@ -1500,7 +1504,8 @@ s4test(GEN u, GEN liftpow, struct galois_lift *gl, GEN phi)
   pari_sp av = avma;
   GEN res, Q, Q2;
   long bl, i, d = lg(u)-2;
-  if (DEBUGLEVEL >= 6) (void)timer2();
+  pari_timer ti;
+  if (DEBUGLEVEL >= 6) timer_start(&ti);
   if (!d) return 0;
   Q = gl->Q; Q2 = shifti(Q,-1);
   res = gel(u,2);
@@ -1519,7 +1524,7 @@ s4test(GEN u, GEN liftpow, struct galois_lift *gl, GEN phi)
   if (gl->den != gen_1) res = FpX_Fp_mul(res, gl->den, Q);
   res = FpX_center(res, Q, shifti(Q,-1));
   bl = poltopermtest(res, gl, phi);
-  if (DEBUGLEVEL >= 6) msgtimer("s4test()");
+  if (DEBUGLEVEL >= 6) timer_printf(&ti, "s4test()");
   avma = av; return bl;
 }
 
@@ -2157,6 +2162,7 @@ galoisconj4_main(GEN T, GEN den, long flag)
   struct galois_analysis ga;
   struct galois_borne gb;
   long n;
+  pari_timer ti;
 
   T = get_nfpol(T, &nf); n = degpol(T);
   if (nf)
@@ -2186,13 +2192,13 @@ galoisconj4_main(GEN T, GEN den, long flag)
     den = absi(den);
   }
   gb.l = utoipos(ga.l);
-  if (DEBUGLEVEL >= 1) (void)timer2();
+  if (DEBUGLEVEL >= 1) timer_start(&ti);
   den = galoisborne(T, den, &gb);
-  if (DEBUGLEVEL >= 1) msgtimer("galoisborne()");
+  if (DEBUGLEVEL >= 1) timer_printf(&ti, "galoisborne()");
   L = rootpadicfast(T, gb.l, gb.valabs);
-  if (DEBUGLEVEL >= 1) msgtimer("rootpadicfast()");
+  if (DEBUGLEVEL >= 1) timer_printf(&ti, "rootpadicfast()");
   M = vandermondeinversemod(L, T, den, gb.ladicabs);
-  if (DEBUGLEVEL >= 1) msgtimer("vandermondeinversemod()");
+  if (DEBUGLEVEL >= 1) timer_printf(&ti, "vandermondeinversemod()");
   if (n == 1)
   {
     G = cgetg(3, t_VEC);
@@ -2203,7 +2209,7 @@ galoisconj4_main(GEN T, GEN den, long flag)
     G = galoisgen(T, L, M, den, &gb, &ga);
   if (DEBUGLEVEL >= 6) fprintferr("GaloisConj:%Ps\n", G);
   if (G == gen_0) { avma = ltop; return gen_0; }
-  if (DEBUGLEVEL >= 1) (void)timer2();
+  if (DEBUGLEVEL >= 1) timer_start(&ti);
   if (flag)
   {
     GEN grp = cgetg(9, t_VEC);
@@ -2217,7 +2223,7 @@ galoisconj4_main(GEN T, GEN den, long flag)
     gel(grp,8) = gcopy(gel(G,2)); return gerepileupto(ltop, grp);
   }
   aut = galoisgrouptopol(group_elts(G, n),L,M,den,gb.ladicsol, varn(T));
-  if (DEBUGLEVEL >= 1) msgtimer("Computation of polynomials");
+  if (DEBUGLEVEL >= 1) timer_printf(&ti, "Computation of polynomials");
   return gerepileupto(ltop, gen_sort(aut, (void*)&gcmp, &gen_cmp_RgX));
 }
 
