@@ -434,6 +434,7 @@ charpoly_bound(GEN M)
 GEN
 ZM_charpoly(GEN M)
 {
+  pari_timer T;
   pari_sp av = avma;
   long l = lg(M), n = l-1, bit;
   GEN q = NULL, H = NULL, Hp;
@@ -444,7 +445,7 @@ ZM_charpoly(GEN M)
   bit = (long)charpoly_bound(M) + 1;
   if (DEBUGLEVEL>5) {
     fprintferr("ZM_charpoly: bit-bound 2^%ld\n", bit);
-    (void)timer2();
+    timer_start(&T);
   }
   d = init_modular(&p);
   for(;;)
@@ -455,7 +456,7 @@ ZM_charpoly(GEN M)
     {
       H = ZX_init_CRT(Hp, p, 0);
       if (DEBUGLEVEL>5)
-        msgtimer("charpoly mod %lu, bound = 2^%ld", p, expu(p));
+        timer_printf(&T, "charpoly mod %lu, bound = 2^%ld", p, expu(p));
       if (expu(p) > bit) break;
       q = utoipos(p);
     }
@@ -464,8 +465,8 @@ ZM_charpoly(GEN M)
       GEN qp = muliu(q, p);
       int stable = ZX_incremental_CRT(&H, Hp, q,qp, p);
       if (DEBUGLEVEL>5)
-        msgtimer("charpoly mod %lu (stable=%ld), bound = 2^%ld",
-                 p, stable, expi(qp));
+        timer_printf(&T, "charpoly mod %lu (stable=%ld), bound = 2^%ld",
+                     p, stable, expi(qp));
       if (stable && expi(qp) > bit) break;
       q = qp;
     }

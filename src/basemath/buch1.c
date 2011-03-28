@@ -342,11 +342,6 @@ FBquad(struct buch_quad *B, long C2, long C1, GRHcheck_t *S)
   if (!GRHok(S, L, SA, SB)) return NULL;
   B->KC2 = i;
   setlg(B->FB, B->KC2+1);
-  if (DEBUGLEVEL)
-  {
-    msgtimer("factor base");
-    if (DEBUGLEVEL>7) fprintferr("FB = %Ps\n", B->FB);
-  }
   LIM = (expi(D) < 16)? 100: 1000;
   while (p < LIM)
   {
@@ -392,7 +387,6 @@ subFBquad(struct buch_quad *B, GEN D, double PROD)
   i = lgsub;
   for (j = 1; j < ino;i++,j++) B->vperm[i] = no[j];
   for (     ; i < lv; i++)     B->vperm[i] = i;
-  if (DEBUGLEVEL) msgtimer("B->subFBquad (%ld elt.)", lgsub-1);
   no = gclone(vecslice(B->vperm, 1, lgsub-1));
   avma = av; return no;
 }
@@ -425,7 +419,6 @@ powsubFBquad(struct buch_quad *B, long n)
       for (j=2; j<=n; j++) gel(y,j) = qficomp(gel(y,j-1), F);
     }
   }
-  if (DEBUGLEVEL) msgtimer("B->powsubFBquad");
   x = gclone(x); avma = av; return x;
 }
 
@@ -462,7 +455,6 @@ get_clgp(struct buch_quad *B, GEN W, GEN *ptD, long prec)
   GEN res, init, u1, D = ZM_snf_group(W,NULL,&u1), Z = prec? real_0(prec): NULL;
   long i, j, l = lg(W), c = lg(D);
 
-  if (DEBUGLEVEL) msgtimer("smith/class group");
   res=cgetg(c,t_VEC); init = cgetg(l,t_VEC);
   for (i=1; i<l; i++) gel(init,i) = primeform_u(B->QFR->D, B->FB[B->vperm[i]]);
   for (j=1; j<c; j++)
@@ -491,7 +483,6 @@ get_clgp(struct buch_quad *B, GEN W, GEN *ptD, long prec)
     }
     gel(res,j) = g;
   }
-  if (DEBUGLEVEL) msgtimer("generators");
   *ptD = D; return res;
 }
 
@@ -512,9 +503,10 @@ trivial_relations(struct buch_quad *B, GEN mat, GEN C)
 }
 
 static void
-dbg_all(const char *phase, long s, long n)
+dbg_all(pari_timer *T, const char *phase, long s, long n)
 {
-  fprintferr("\nTime %s rel [#rel/#test = %ld/%ld]: %ld\n", phase,s,n,timer2());
+  fprintferr("\n");
+  timer_printf(T, "%s rel [#rel/#test = %ld/%ld]", phase,s,n);
 }
 
 /* Imaginary Quadratic fields */
@@ -522,12 +514,14 @@ dbg_all(const char *phase, long s, long n)
 static void
 imag_relations(struct buch_quad *B, long need, long *pc, ulong LIMC, GEN mat)
 {
+  pari_timer T;
   long lgsub = lg(B->subFB), current = *pc, nbtest = 0, s = 0;
   long i, fpc;
   pari_sp av;
   GEN col, form, ex = cgetg(lgsub, t_VECSMALL);
 
   if (!current) current = 1;
+  if (DEBUGLEVEL) timer_start(&T);
   av = avma;
   for(;;)
   {
@@ -580,7 +574,7 @@ imag_relations(struct buch_quad *B, long need, long *pc, ulong LIMC, GEN mat)
     col[current]--;
     if (++current > B->KC) current = 1;
   }
-  if (DEBUGLEVEL) dbg_all("random", s, nbtest);
+  if (DEBUGLEVEL) dbg_all(&T, "random", s, nbtest);
   *pc = current;
 }
 
@@ -609,6 +603,7 @@ imag_be_honest(struct buch_quad *B)
 static void
 real_relations(struct buch_quad *B, long need, long *pc, long lim, ulong LIMC, GEN mat, GEN C)
 {
+  pari_timer T;
   long lgsub = lg(B->subFB), prec = B->PRECREG, current = *pc, nbtest=0, s=0;
   long i, fpc, endcycle, rhoacc, rho;
   /* in a 2nd phase, don't include FB[current] but run along the cyle
@@ -617,6 +612,7 @@ real_relations(struct buch_quad *B, long need, long *pc, long lim, ulong LIMC, G
   pari_sp av, av1, limstack;
   GEN d, col, form, form0, form1, ex = cgetg(lgsub, t_VECSMALL);
 
+  if (DEBUGLEVEL) timer_start(&T);
   if (!current) current = 1;
   if (lim > need) lim = need;
   av = avma; limstack = stack_lim(av,1);
@@ -625,7 +621,7 @@ real_relations(struct buch_quad *B, long need, long *pc, long lim, ulong LIMC, G
     if (s >= need) break;
     if (first && s >= lim) {
       first = 0;
-      if (DEBUGLEVEL) dbg_all("initial", s, nbtest);
+      if (DEBUGLEVEL) dbg_all(&T, "initial", s, nbtest);
     }
     avma = av; form = qfr3_random(B, ex);
     if (!first)
@@ -753,7 +749,7 @@ CYCLE:
       if (++current > B->KC) current = 1;
     }
   }
-  if (DEBUGLEVEL) dbg_all("random", s, nbtest);
+  if (DEBUGLEVEL) dbg_all(&T, "random", s, nbtest);
   *pc = current;
 }
 
@@ -842,13 +838,14 @@ quad_be_honest(struct buch_quad *B)
   if (DEBUGLEVEL)
     fprintferr("be honest for primes from %ld to %ld\n", B->FB[B->KC+1],B->FB[B->KC2]);
   r = B->PRECREG? real_be_honest(B): imag_be_honest(B);
-  if (DEBUGLEVEL) { fprintferr("\n"); msgtimer("be honest"); }
+  if (DEBUGLEVEL) fprintferr("\n");
   return r;
 }
 
 GEN
 Buchquad(GEN D, double cbach, double cbach2, long prec)
 {
+  pari_timer T;
   pari_sp av0 = avma, av, av2;
   const long RELSUP = 5;
   long i, s, current, triv, nrelsup, nreldep, need, nsubFB;
@@ -875,7 +872,7 @@ Buchquad(GEN D, double cbach, double cbach2, long prec)
   } else {
     BQ.PRECREG = maxss(prec+1, MEDDEFAULTPREC + 2*(expi(QFR.D)/BITS_IN_LONG));
   }
-  if (DEBUGLEVEL) (void)timer2();
+  if (DEBUGLEVEL) timer_start(&T);
   BQ.primfact   = new_chunk(100);
   BQ.exprimfact = new_chunk(100);
   BQ.hashtab = (long**) new_chunk(HASHT);
@@ -918,10 +915,13 @@ START:
     if (BQ.PRECREG) qfr_data_init(QFR.D, BQ.PRECREG, &QFR);
 
     Res = FBquad(&BQ, LIMC2, LIMC, GRHcheck);
+    if (DEBUGLEVEL) timer_printf(&T, "factor base");
   }
   while (!Res || !(BQ.subFB = subFBquad(&BQ, QFR.D, lim + 0.5)));
+  if (DEBUGLEVEL) timer_printf(&T, "subFBquad (%ld elt.)", lg(BQ.subFB));
   nsubFB = lg(BQ.subFB) - 1;
   BQ.powsubFB = powsubFBquad(&BQ,CBUCH+1);
+  if (DEBUGLEVEL) timer_printf(&T, "powsubFBquad");
   BQ.limhash = (LIMC & HIGHMASK)? (HIGHBIT>>1): LIMC*LIMC;
 
   need = BQ.KC + RELSUP - 2;
@@ -938,6 +938,7 @@ START:
       gunclone(BQ.powsubFB);
       BQ.subFB = gclone(vecslice(BQ.vperm, 1, nsubFB));
       BQ.powsubFB = powsubFBquad(&BQ,CBUCH+1);
+      if (DEBUGLEVEL) timer_printf(&T, "powsubFBquad");
       clearhash(BQ.hashtab);
     }
     need += 2;
@@ -996,6 +997,7 @@ START:
   while (need);
   /* DONE */
   if (!quad_be_honest(&BQ)) goto START;
+  if (DEBUGLEVEL) timer_printf(&T, "be honest");
   clearhash(BQ.hashtab);
 
   gen = get_clgp(&BQ,W,&cyc,BQ.PRECREG);

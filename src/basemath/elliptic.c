@@ -2501,6 +2501,7 @@ get_table_size(GEN pordmin, GEN B)
 static GEN
 ellap1(GEN e, GEN p)
 {
+  pari_timer T;
   long *tx, *ty, *ti, pfinal, i, j, s, KRO, KROold, nb;
   ulong x;
   pari_sp av = avma, av2;
@@ -2508,7 +2509,7 @@ ellap1(GEN e, GEN p)
   tx = NULL;
   ty = ti = NULL; /* gcc -Wall */
 
-  if (DEBUGLEVEL) (void)timer2();
+  if (DEBUGLEVEL) timer_start(&T);
   c4 = Rg_to_Fp(gdivgs(ell_get_c4(e),  -48), p);
   c6 = Rg_to_Fp(gdivgs(ell_get_c6(e), -864), p);
   /* once #E(Fp) is know mod B >= pordmin, it is completely determined */
@@ -2616,7 +2617,7 @@ ellap1(GEN e, GEN p)
     }
     P = FpE_add(gel(pts,j-1),mfh,a4,p); /* = (s-1).F */
     if (ell_is_inf(P)) { h = mului(s-1,B); goto FOUND; }
-    if (DEBUGLEVEL) msgtimer("[ellap1] baby steps, s = %ld",s);
+    if (DEBUGLEVEL) timer_printf(&T, "[ellap1] baby steps, s = %ld",s);
 
     /* giant steps: fg = s.F */
     fg = FpE_add(P,F,a4,p);
@@ -2631,7 +2632,7 @@ ellap1(GEN e, GEN p)
     /* tx is sorted. ti = ty sorted */
     for (i=1; i<=s; i++) { ty[i] = ti[i]; ti[i] = p1[i]; }
     /* ty is sorted. ti = permutation sorting tx */
-    if (DEBUGLEVEL) msgtimer("[ellap1] sorting");
+    if (DEBUGLEVEL) timer_printf(&T, "[ellap1] sorting");
     avma = av2;
 
     gaffect(fg, gel(pts,1));
@@ -2667,7 +2668,7 @@ ellap1(GEN e, GEN p)
           if (ty[r] == k2 || ty[r] == pfinal - k2)
           { /* [h+j2] f == +/- ftest (= [i.s] f)? */
             j2 = ti[r] - 1;
-            if (DEBUGLEVEL) msgtimer("[ellap1] giant steps, i = %ld",i);
+            if (DEBUGLEVEL) timer_printf(&T, "[ellap1] giant steps, i = %ld",i);
             P = FpE_add(FpE_mul(F,stoi(j2),a4,p),fh,a4,p);
             if (equalii(gel(P,1), gel(ftest,1)))
             {

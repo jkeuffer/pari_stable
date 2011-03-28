@@ -968,13 +968,14 @@ makebasis(GEN nf, GEN pol, GEN rnfeq)
 GEN
 rnfpolredabs(GEN nf, GEN relpol, long flag)
 {
+  pari_timer ti;
   GEN red, bas, elt, pol, T, a;
   long fl = (flag & nf_ADDZK)? nf_ADDZK: nf_RAW;
   pari_sp av = avma;
 
   if (typ(relpol)!=t_POL) pari_err(typeer,"rnfpolredabs");
   nf = checknf(nf);
-  if (DEBUGLEVEL>1) (void)timer2();
+  if (DEBUGLEVEL>1) timer_start(&ti);
   T = nf_get_pol(nf);
   relpol = rnf_fix_pol(T, relpol, 0);
   if ((flag & nf_ADDZK) && !(flag & nf_ABSOLUTE))
@@ -995,7 +996,7 @@ rnfpolredabs(GEN nf, GEN relpol, long flag)
     bas = makebasis(nf, rel, eq);
     if (DEBUGLEVEL>1)
     {
-      msgtimer("absolute basis");
+      timer_printf(&ti, "absolute basis");
       fprintferr("original absolute generator: %Ps\n", gel(eq,1));
     }
   }

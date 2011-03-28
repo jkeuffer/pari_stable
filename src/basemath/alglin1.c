@@ -2928,6 +2928,7 @@ mydiv(GEN x, GEN y)
 GEN
 det(GEN a)
 {
+  pari_timer T;
   pari_sp av, lim;
   long nbco = lg(a)-1,i,j,k,s;
   GEN p, pprec, data;
@@ -2938,7 +2939,7 @@ det(GEN a)
   if (nbco != lg(a[1])-1) pari_err(mattype1,"det");
   pivot = get_pivot_fun(a, &data);
   if (pivot != gauss_get_pivot_NZ) return det_simple_gauss(a, data, pivot);
-  if (DEBUGLEVEL > 7) (void)timer2();
+  if (DEBUGLEVEL > 7) timer_start(&T);
 
   av = avma; lim = stack_lim(av,2);
   a = RgM_shallowcopy(a); s = 1;
@@ -2989,7 +2990,7 @@ det(GEN a)
         gerepileall(av,2, &a,&pprec); p = gcoeff(a,i,i); ci = gel(a,i);
       }
     }
-    if (DEBUGLEVEL > 7) msgtimer("det, col %ld / %ld",i,nbco-1);
+    if (DEBUGLEVEL > 7) timer_printf(&T, "det, col %ld / %ld",i,nbco-1);
   }
   p = gcoeff(a,nbco,nbco);
   p = (s < 0)? gneg(p): gcopy(p);

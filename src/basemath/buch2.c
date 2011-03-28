@@ -154,7 +154,7 @@ dbg_newrel(RELCACHE_t *cache)
 {
   fprintferr("\n++++ cglob = %ld: new relation (need %ld)",
              cache->last - cache->base, cache->end - cache->base);
-  wr_rel(cache->last->R); msgtimer("for this relation");
+  wr_rel(cache->last->R);
 }
 
 static void
@@ -383,8 +383,6 @@ subFBgen(FB_t *F, GEN nf, GEN auts, GEN cyclic, double PROD, long minsFB)
   F->allsubFB = NULL;
   FB_aut_perm(F, nf, auts, cyclic);
   assign_subFB(F, yes, iyes);
-  if (DEBUGLEVEL)
-    msgtimer("sub factorbase (%ld elements) and ideal permutations",lg(F->subFB)-1);
   avma = av; return 1;
 }
 static int
@@ -578,9 +576,9 @@ FBgen(FB_t *F, GEN nf, long N, long C2, long C1, GRHcheck_t *S)
   }
   if (! F->KC) return NULL;
   setlg(F->FB, F->KCZ+1); F->KCZ2 = i;
-  if (DEBUGLEVEL)
+  if (DEBUGLEVEL>1)
   {
-    if (DEBUGLEVEL>1) fprintferr("\n");
+    fprintferr("\n");
     if (DEBUGLEVEL>6)
     {
       fprintferr("########## FACTORBASE ##########\n\n");
@@ -588,7 +586,6 @@ FBgen(FB_t *F, GEN nf, long N, long C2, long C1, GRHcheck_t *S)
                   ip, F->KC, F->KCZ, F->KCZ2);
       for (i=1; i<=F->KCZ; i++) fprintferr("++ LV[%ld] = %Ps",i,F->LV[F->FB[i]]);
     }
-    msgtimer("factor base");
   }
   if (!GRHok(S, L, SA, SB)) return NULL;
   F->perm = NULL;
@@ -860,7 +857,6 @@ getfu(GEN nf, GEN *ptA, long *pte, long prec)
     }
     gel(y,j) = u;
   }
-  if (DEBUGLEVEL) msgtimer("getfu");
   *ptA = A; return y;
 }
 
@@ -2236,7 +2232,6 @@ powFBgen(RELCACHE_t *cache, FB_t *F, GEN nf, GEN auts)
     }
   }
   avma = av;
-  if (DEBUGLEVEL) msgtimer("powFBgen");
   F->sfb_chg = 0;
   F->newpow = 0;
 }
@@ -2258,6 +2253,7 @@ static void
 small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, GEN auts, long nbrelpid,
            double LOGD, double LIMC2, FACT *fact, GEN p0)
 {
+  pari_timer T;
   const long N = nf_get_degree(nf), R1 = nf_get_r1(nf), prec = nf_get_prec(nf);
   const long BMULT = 8;
   const long maxtry_DEP  = 20, maxtry_FACT = 500;
@@ -2268,8 +2264,11 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, GEN auts, long nbrelpid,
   REL_t *last = cache->last;
 
   if (DEBUGLEVEL)
+  {
+    timer_start(&T);
     fprintferr("\n#### Looking for %ld relations (small norms)\n",
                cache->end - last);
+  }
   nbsmallnorm = nbfact = 0;
 
  /* LLL reduction produces v0 in I such that
@@ -2384,19 +2383,18 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, GEN auts, long nbrelpid,
         continue;
       }
       dependent = 0;
-
       if (DEBUGLEVEL) nbfact++;
       if (cache->last >= cache->end) goto END; /* we have enough */
       if (++nbrelideal == nbrelpid) break;
     }
 ENDIDEAL:
-    if (DEBUGLEVEL>1) msgtimer("for this ideal");
+    if (DEBUGLEVEL>1) timer_printf(&T, "for this ideal");
   }
 END:
   if (DEBUGLEVEL)
   {
     if (cache->last != last) fprintferr("\n");
-    msgtimer("small norm relations");
+    timer_printf(&T, "small norm relations");
     fprintferr("  small norms gave %ld relations.\n",
                cache->last - last);
     if (nbsmallnorm)
@@ -2441,6 +2439,7 @@ get_random_ideal(FB_t *F, GEN nf, GEN ex)
 static void
 rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN auts, FACT *fact)
 {
+  pari_timer T;
   GEN L_jid = F->L_jid;
   GEN ex, baseideal, m1;
   const long nbG = lg(F->vecG)-1, lgsub = lg(F->subFB), l_jid = lg(L_jid);
@@ -2450,6 +2449,7 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN auts, FACT *fact)
   /* will compute P[ L_jid[i] ] * (random product from subFB) */
   if (DEBUGLEVEL) {
     long d = cache->end - cache->last;
+    timer_start(&T);
     fprintferr("\n(more relations needed: %ld)\n", d > 0? d: 1);
     if (l_jid <= F->orbits) fprintferr("looking hard for %Ps\n",L_jid);
   }
@@ -2500,13 +2500,14 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN auts, FACT *fact)
         case 0:
           break;
       }
+      if (DEBUGLEVEL) timer_printf(&T, "for this relation");
       /* Need more, try next prime ideal */
       if (cache->last < cache->end) break;
       /* We have found enough. Return */
       avma = av; return;
     }
   }
-  if (DEBUGLEVEL) msgtimer("for remaining ideals");
+  if (DEBUGLEVEL) timer_printf(&T, "for remaining ideals");
 }
 
 /* remark: F->KCZ changes if be_honest() fails */
@@ -2561,11 +2562,7 @@ be_honest(FB_t *F, GEN nf, FACT *fact)
     }
     F->KCZ++; /* SUCCESS, "enlarge" factorbase */
   }
-  if (DEBUGLEVEL)
-  {
-    if (DEBUGLEVEL>1) fprintferr("\n");
-    msgtimer("be honest");
-  }
+  if (DEBUGLEVEL>1) fprintferr("\n");
   F->KCZ = KCZ0; avma = av; return 1;
 }
 
@@ -2734,7 +2731,6 @@ compute_R(GEN lambda, GEN z, GEN *ptL, GEN *ptkR)
   c = gmul(R,z); /* should be n (= 1 if we are done) */
   if (DEBUGLEVEL)
   {
-    msgtimer("bestappr/regulator");
     fprintferr("\n#### Tentative regulator : %Ps\n", gprec_w(R,3));
     fprintferr("\n ***** check = %Ps\n",gprec_w(c,3));
   }
@@ -2789,9 +2785,11 @@ static void
 class_group_gen(GEN nf,GEN W,GEN C,GEN Vbase,long prec, GEN nf0,
                 GEN *ptclg1,GEN *ptclg2)
 {
+  pari_timer T;
   GEN z,G,Ga,ga,GD,cyc,X,Y,D,U,V,Ur,Ui,Uir,I,J,arch;
   long i,j,lo,lo0;
 
+  if (DEBUGLEVEL) timer_start(&T);
   D = ZM_snfall(W,&U,&V); /* UWV = D, D diagonal, G = g Ui (G=new gens, g=old) */
   Ui = RgM_inv(U);
   lo0 = lo = lg(D);
@@ -2863,6 +2861,7 @@ class_group_gen(GEN nf,GEN W,GEN C,GEN Vbase,long prec, GEN nf0,
   }
   *ptclg1 = mkvec3(ZM_det_triangular(W), cyc, G);
   *ptclg2 = mkvec3(Ur, ga,GD);
+  if (DEBUGLEVEL) timer_printf(&T, "classgroup generators");
 }
 
 /* SMALLBUCHINIT */
@@ -3376,7 +3375,6 @@ compute_vecG(GEN nf, FB_t *F, long n)
   vecG = cgetg(1 + n*(n+1)/2,t_VEC);
   for (ind=j=1; j<=n; j++)
     for (i=1; i<=j; i++) gel(vecG,ind++) = shift_G(G0,Gtw0,i,j,r1);
-  if (DEBUGLEVEL) msgtimer("weighted G matrices");
   F->G0 = G0; F->vecG = vecG;
 }
 
@@ -3525,6 +3523,7 @@ trim_list(FB_t *F)
 GEN
 Buchall_param(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long prec)
 {
+  pari_timer T;
   pari_sp av0 = avma, av, av2;
   long PRECREG, N, R1, R2, RU, LIMC, LIMC2, zc, i;
   long nreldep, sfb_trials, need, old_need = -1, precdouble = 0, precadd = 0;
@@ -3541,7 +3540,7 @@ Buchall_param(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long
   GRHcheck_t GRHcheck;
   FACT *fact;
 
-  if (DEBUGLEVEL) (void)timer2();
+  if (DEBUGLEVEL) timer_start(&T);
   P = get_nfpol(P, &nf);
   if (nf)
     PRECREG = nf_get_prec(nf);
@@ -3558,15 +3557,16 @@ Buchall_param(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long
   if (N <= 1) return gerepilecopy(av0, Buchall_deg1(nf));
   zu = rootsof1(nf);
   gel(zu,2) = nf_to_scalar_or_alg(nf, gel(zu,2));
-  if (DEBUGLEVEL) msgtimer("nfinit & rootsof1");
+  if (DEBUGLEVEL) timer_printf(&T, "nfinit & rootsof1");
 
   auts = automorphism_matrices(nf, varn(P), N, &F.invs, &cyclic);
-  if (DEBUGLEVEL) msgtimer("automorphisms");
+  if (DEBUGLEVEL) timer_printf(&T, "automorphisms");
   F.embperm = automorphism_perms(nf_get_M(nf), auts, cyclic, N);
-  if (DEBUGLEVEL) msgtimer("complex embedding permutations");
+  if (DEBUGLEVEL) timer_printf(&T, "complex embedding permutations");
 
   nf_get_sign(nf, &R1, &R2); RU = R1+R2;
   compute_vecG(nf, &F, minss(RU, 9));
+  if (DEBUGLEVEL) timer_printf(&T, "weighted G matrices");
   D = absi(nf_get_disc(nf)); drc = gtodouble(D);
   if (DEBUGLEVEL) fprintferr("R1 = %ld, R2 = %ld\nD = %Ps\n",R1,R2, D);
   LOGD = log(drc); LOGD2 = LOGD*LOGD;
@@ -3585,6 +3585,7 @@ Buchall_param(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long
   init_GRHcheck(&GRHcheck, N, R1, LOGD);
 
 START:
+  if (DEBUGLEVEL) timer_start(&T);
   do
   {
     if (!FIRST) cbach = check_bach(cbach,12.);
@@ -3600,6 +3601,9 @@ START:
     Res = FBgen(&F, nf, N, LIMC2, LIMC, &GRHcheck);
   }
   while (!Res || !subFBgen(&F,nf,auts,cyclic,mindd(lim,LIMC2) + 0.5,minsFB));
+  if (DEBUGLEVEL)
+    timer_printf(&T, "factorbase (#subFB = %ld) and ideal permutations",
+                     lg(F.subFB)-1);
   fact = (FACT*)stackmalloc((F.KC+1)*sizeof(FACT));
   PERM = leafcopy(F.perm); /* to be restored in case of precision increase */
   cache.basis = zero_Flm_copy(F.KC,F.KC);
@@ -3633,27 +3637,24 @@ START:
         GEN p0 = NULL, L_jid = F.L_jid, aut0 = auts;
         if (R)
         {
-          /*
-           * We have full rank for class group and unit, however those
+          /* We have full rank for class group and unit, however those
            * lattices are too small. The following tries to improve the
            * prime group lattice: it specifically looks for relations
-           * involving the primes generating the class group.
-           */
+           * involving the primes generating the class group. */
           long l;
           /* We need lg(W)-1 relations. */
           F.L_jid = vecslice(F.perm, 1, lg(W) - 1);
           cache.end = cache.last + lg(W) - 1;
-          /* We lie to the add_rel subsystem, telling it we miss relations
-           * involving the primes generating the class group (and only those).
-           */
+          /* Lie to the add_rel subsystem: pretend we miss relations involving
+           * the primes generating the class group (and only those). */
           cache.missing = lg(W) - 1;
           for (l = 1; l < lg(W); l++)
             mael(cache.basis, F.perm[l], F.perm[l]) = 0;
-          /* We lie to the small_norm subsystem, telling it there are no
-           * automorphisms (automorphisms tend to create lattices that are
-           * twice the size of the full lattice: if a relation is p1+p2=0
-           * where p1 and p2 are in the same odd-sized orbit, then the images
-           * of this relation will lead to p1=...=pn and 2p1=0). */
+          /* Lie to the small_norm subsystem: pretend there are no automorphisms
+           * (automorphisms tend to create lattices that are twice the size of
+           * the full lattice: if a relation is p1+p2=0 where p1 and p2 are in
+           * the same odd-sized orbit, then the images of this relation will
+           * lead to p1=...=pn and 2p1=0). */
           auts = cgetg(1, t_VEC);
         }
         if (done_small)
@@ -3704,7 +3705,11 @@ START:
           if (!subFB_change(&F)) goto START;
           nreldep = 0;
         }
-        if (F.newpow) powFBgen(&cache, &F, nf, auts);
+        if (F.newpow) {
+          if (DEBUGLEVEL) timer_start(&T);
+          powFBgen(&cache, &F, nf, auts);
+          if (DEBUGLEVEL) timer_printf(&T, "powFBgen");
+        }
         if (!F.sfb_chg) rnd_rel(&cache, &F, nf, auts, fact);
         F.L_jid = F.perm;
       }
@@ -3733,6 +3738,7 @@ START:
         int first = (W == NULL); /* never reduced before */
         REL_t *rel;
 
+        timer_start(&T);
         for (j=1,rel = cache.chk + 1; j < l; rel++,j++)
         {
           gel(mat,j) = rel->R;
@@ -3742,12 +3748,19 @@ START:
             gel(emb,j) = perm_log_embed(gel(emb, j-rel->relorig),
                                         gel(F.embperm, rel->relaut));
         }
+        if (DEBUGLEVEL) timer_printf(&T, "floating point embeddings");
         if (first) {
           C = emb;
           W = hnfspec_i(mat, F.perm, &dep, &B, &C, lg(F.subFB)-1);
+          if (DEBUGLEVEL)
+            timer_printf(&T, "hnfspec [%ld x %ld]", lg(F.perm)-1, lg(mat)-1);
         }
         else
+        {
           W = hnfadd_i(W, F.perm, &dep, &B, &C, mat, emb);
+          if (DEBUGLEVEL)
+            timer_printf(&T, "hnfadd (%ld + %ld)", lg(mat)-1, lg(dep)-1);
+        }
         gerepileall(av2, 4, &W,&C,&B,&dep);
         cache.chk = cache.last;
         need = lg(dep)>1? lg(dep[1])-1: lg(B[1])-1;
@@ -3823,14 +3836,13 @@ START:
     }
     /* DONE */
 
+    if (DEBUGLEVEL) timer_start(&T);
     if (F.KCZ2 > F.KCZ)
     {
+      if (F.sfb_chg && !subFB_change(&F)) goto START;
       if (F.newpow) powFBgen(NULL, &F, nf, auts);
-      if (F.sfb_chg) {
-        if (!subFB_change(&F)) goto START;
-        if (F.newpow) powFBgen(NULL, &F, nf, auts);
-      }
       if (!be_honest(&F, nf, fact)) goto START;
+      if (DEBUGLEVEL) timer_printf(&T, "be honest");
     }
     F.KCZ2 = 0; /* be honest only once */
 
@@ -3849,13 +3861,14 @@ START:
       U = ZM_mul(U, ZM_lll(H, 0.99, LLL_IM));
       AU = RgM_mul(A, U);
       A = cleanarch(AU, N, PRECREG);
-      if (DEBUGLEVEL) msgtimer("cleanarch");
+      if (DEBUGLEVEL) timer_printf(&T, "cleanarch");
       if (!A) {
         precadd = (DEFAULTPREC-2) + divsBIL( gexpo(AU) ) - gprecision(AU);
         if (precadd <= 0) precadd = 1;
         precpb = "cleanarch"; continue;
       }
       fu = getfu(nf, &A, &e, PRECREG);
+      if (DEBUGLEVEL) timer_printf(&T, "getfu");
       if ((flun & nf_FORCE) && typ(fu) == t_MAT)
       { /* units not found but we want them */
         if (e > 0)
@@ -3876,10 +3889,7 @@ START:
 
   delete_cache(&cache); delete_FB(&F);
   Vbase = vecpermute(F.LP, F.perm);
-  if (DEBUGLEVEL)
-    { fprintferr("\n#### Computing class group generators\n"); (void)timer2(); }
   class_group_gen(nf,W,C,Vbase,PRECREG,NULL, &clg1, &clg2);
-  if (DEBUGLEVEL) msgtimer("classgroup generators");
   res = get_clfu(clg1, R, zu, fu);
   res = buchall_end(nf,res,clg2,W,B,A,C,Vbase);
   res = gerepilecopy(av0, res); if (precdouble) gunclone(nf);

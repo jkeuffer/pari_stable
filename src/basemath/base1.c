@@ -1434,7 +1434,6 @@ make_M(nffp_t *F, int trunc)
     M     = gprec_w(M, F->prec);
     F->ro = gprec_w(ro,F->prec);
   }
-  if (DEBUGLEVEL>4) msgtimer("matrix M");
   F->M = M;
 }
 
@@ -1531,7 +1530,6 @@ nfbasic_to_nf(nfbasic_t *T, GEN ro, long prec)
   gel(mat,2) = F.G;
 
   nf_set_multable(nf, T->bas, F.basden);
-  if (DEBUGLEVEL) msgtimer("mult. table");
 
   Tr = get_Tr(gel(nf,9), x, F.basden);
   absdK = T->dK; if (signe(absdK) < 0) absdK = negi(absdK);
@@ -1553,7 +1551,6 @@ nfbasic_to_nf(nfbasic_t *T, GEN ro, long prec)
   gel(mat,3) = RM_round_maxrank(F.G);
   gel(mat,4) = Tr;
   gel(mat,5) = D;
-  if (DEBUGLEVEL) msgtimer("matrices");
   return nf;
 }
 
@@ -1669,7 +1666,6 @@ set_LLL_basis(nfbasic_t *T, GEN *pro, double DELTA)
     B = RgV_RgM_mul(B, get_red_G(T, pro));
   T->bas = B;
   T->basden = get_bas_den(B);
-  if (DEBUGLEVEL) msgtimer("LLL basis");
 }
 
 static int
@@ -1759,7 +1755,7 @@ is_polbas(GEN x)
           && typ(gel(x,1))==t_POL && lg(gel(x,2))-1 == degpol(gel(x,1)));
 }
 
-void
+static void
 nfbasic_add_disc(nfbasic_t *T)
 {
   if (!T->index) T->index = get_nfindex(T->bas);
@@ -1767,7 +1763,7 @@ nfbasic_add_disc(nfbasic_t *T)
   if (!T->dK) T->dK = diviiexact(T->dx, sqri(T->index));
 }
 
-void
+static void
 nfbasic_init(GEN x, long flag, GEN fa, nfbasic_t *T)
 {
   GEN bas, dK, dx, index;
@@ -1775,7 +1771,6 @@ nfbasic_init(GEN x, long flag, GEN fa, nfbasic_t *T)
 
   T->basden = NULL;
   T->lead   = gen_1;
-  if (DEBUGLEVEL) (void)timer2();
   if (typ(x) == t_POL)
   {
     nfmaxord_t S;
@@ -1785,7 +1780,6 @@ nfbasic_init(GEN x, long flag, GEN fa, nfbasic_t *T)
     if (flag & nf_RED || !gequal1(gel(x,lg(x)-1)))
       x = ZX_Q_normalize(x, &(T->lead));
     nfmaxord(&S, x, flag, fa);
-    if (DEBUGLEVEL) msgtimer("round4");
     index = S.index;
     dx = S.dT;
     dK = S.dK;
@@ -1842,7 +1836,6 @@ nfinitall(GEN x, long flag, long prec)
   if (flag & nf_RED)
   {
     GEN ro, rev = nfpolred(&T, &ro);
-    if (DEBUGLEVEL) msgtimer("polred");
     nf = nfbasic_to_nf(&T, ro, prec);
     if (flag & nf_ORIG)
     {

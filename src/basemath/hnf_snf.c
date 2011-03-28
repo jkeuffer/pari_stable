@@ -82,16 +82,6 @@ hnffinal(GEN matgen,GEN perm,GEN* ptdep,GEN* ptB,GEN* ptC)
   lnz = lg(matgen[1])-1; /* was called lnz-1 - nr in hnfspec */
   nlze = lg(dep[1])-1;
   lig = nlze + lnz;
-  if (DEBUGLEVEL>5)
-  {
-    fprintferr("Entering hnffinal:\n");
-    if (DEBUGLEVEL>6)
-    {
-      if (nlze) fprintferr("dep = %Ps\n",dep);
-      fprintferr("mit = %Ps\n",matgen);
-      fprintferr("B = %Ps\n",B);
-    }
-  }
   /* H: lnz x lnz [disregarding initial 0 cols], U: col x col */
   H = ZM_hnflll(matgen, &U, 0);
   H += (lg(H)-1 - lnz); H[0] = evaltyp(t_MAT) | evallg(lnz+1);
@@ -107,7 +97,6 @@ hnffinal(GEN matgen,GEN perm,GEN* ptdep,GEN* ptB,GEN* ptC)
   setlg(C, col+1); p1 = gmul(C,U);
   for (j=1; j<=col; j++) Cnew[j] = p1[j];
   for (   ; j<co ; j++)  Cnew[j] = C[j];
-  if (DEBUGLEVEL>5) fprintferr("    hnflll done\n");
 
   /* Clean up B using new H */
   for (s=0,i=lnz; i; i--)
@@ -138,7 +127,6 @@ hnffinal(GEN matgen,GEN perm,GEN* ptdep,GEN* ptB,GEN* ptC)
     else
       p2[++i1] = p2[i];
   for (i=i1+1; i<=lnz; i++) p2[i] = p1[i];
-  if (DEBUGLEVEL>5) fprintferr("    first pass in hnffinal done\n");
 
   /* s = # extra redundant generators taken from H
    *          zc  col-s  co   zc = col - lnz
@@ -180,15 +168,6 @@ hnffinal(GEN matgen,GEN perm,GEN* ptdep,GEN* ptB,GEN* ptC)
     z += nlze; p1 += nlze;
     for (i=k=1; k<=lnz; i++)
       if (!diagH1[i]) p1[k++] = z[i];
-  }
-  if (DEBUGLEVEL>5)
-  {
-    fprintferr("Leaving hnffinal\n");
-    if (DEBUGLEVEL>6)
-    {
-      if (nlze) fprintferr("dep = %Ps\n",depnew);
-      fprintferr("mit = %Ps\nB = %Ps\nC = %Ps\n", Hnew, Bnew, C);
-    }
   }
   *ptdep = depnew;
   *ptC = C;
@@ -500,8 +479,6 @@ END2: /* clean up mat: remove everything to the right of the 1s on diagonal */
   *ptdep = dep;
   *ptB = B;
   H = hnffinal(matbnew, perm, ptdep, ptB, &C);
-  if (DEBUGLEVEL)
-    msgtimer("hnfspec [%ld x %ld] --> [%ld x %ld]",li-1,co-1, lig-1,col-1);
   if (CO > co)
   { /* treat the rest, N cols at a time (hnflll slow otherwise) */
     const long N = 300;
@@ -634,11 +611,6 @@ hnfadd_i(GEN H, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, /* cf hnfspec */
   if (DEBUGLEVEL>5) fprintferr("    2nd phase done\n");
   H = hnffinal(matb,perm,ptdep,ptB,&Cnew);
   *ptC = shallowconcat(vecslice(C, 1, col-lH), Cnew);
-  if (DEBUGLEVEL)
-  {
-    msgtimer("hnfadd (%ld + %ld)", lg(extratop)-1, lg(dep)-1);
-    if (DEBUGLEVEL>7) fprintferr("H = %Ps\nC = %Ps\n",H,*ptC);
-  }
   return H;
 }
 

@@ -471,8 +471,6 @@ long    set_optimize(long what, GEN g);
 
 /* base1.c */
 
-void    nfbasic_add_disc(nfbasic_t *T);
-void    nfbasic_init(GEN x, long flag, GEN fa, nfbasic_t *T);
 GEN     nffromhnfbasis(GEN nf, GEN x);
 GEN     nftohnfbasis(GEN nf, GEN x);
 

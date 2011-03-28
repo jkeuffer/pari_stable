@@ -30,7 +30,6 @@ nfmaxord_check_args(nfmaxord_t *S, GEN T, long flag, GEN fa)
   GEN dT, P;
   long l;
 
-  if (DEBUGLEVEL) (void)timer2();
   if (typ(T)!=t_POL) pari_err(notpoler,"nfmaxord");
   if (degpol(T) <= 0) pari_err(constpoler,"nfmaxord");
 
@@ -50,7 +49,6 @@ nfmaxord_check_args(nfmaxord_t *S, GEN T, long flag, GEN fa)
   if (l > 1 && is_pm1(gel(P,1))) P = vecslice(P, 2, --l);
   S->dTP = P;
   S->dTE = vec_to_vecsmall(gel(fa,2));
-  if (DEBUGLEVEL) msgtimer("disc. factorisation");
 }
 
 static int
@@ -548,7 +546,12 @@ nfmaxord(nfmaxord_t *S, GEN T, long flag, GEN fa)
   VOLATILE GEN P, E, ordmax;
   VOLATILE long lP, i, k;
 
-  nfmaxord_check_args(S, T, flag, fa);
+  {
+    pari_timer t;
+    if (DEBUGLEVEL) timer_start(&t);
+    nfmaxord_check_args(S, T, flag, fa);
+    if (DEBUGLEVEL) timer_printf(&t, "disc. factorisation");
+  }
   if (flag & nf_ROUND2) { allbase2(S, T); return; }
   P = S->dTP; lP = lg(P);
   E = S->dTE;
