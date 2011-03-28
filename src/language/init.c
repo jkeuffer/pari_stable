@@ -1719,33 +1719,7 @@ getstack(void) { return top-avma; }
 /*                                                                 */
 /*******************************************************************/
 
-#if !defined(USE_GETRUSAGE) && !defined(USE_FTIME)
-static long
-_get_time(pari_timer *T, long Ticks, long TickPerSecond)
-{
-  T->us = (long) ((Ticks % TickPerSecond) * (1000000. / TickPerSecond));
-  T->s  = Ticks / TickPerSecond;
-}
-#endif
-
-#ifdef USE_TIMES
-
-# include <sys/times.h>
-# include <sys/time.h>
-# include <time.h>
-void
-timer_start(pari_timer *T)
-{
-#ifdef _SC_CLK_TCK
-  long tck = sysconf(_SC_CLK_TCK);
-#else
-  long tck = CLK_TCK;
-#endif
-  struct tms t; times(&t);
-  _get_time(T, t.tms_utime, tck);
-}
-#elif defined(USE_GETRUSAGE)
-
+#if defined(USE_GETRUSAGE)
 # include <sys/time.h>
 # include <sys/resource.h>
 void
@@ -1767,19 +1741,44 @@ timer_start(pari_timer *T)
   T->us = t.millitm * 1000;
   T->s  = t.time;
 }
-#elif defined(WINCE)
+
+#else
+
+static long
+_get_time(pari_timer *T, long Ticks, long TickPerSecond)
+{
+  T->us = (long) ((Ticks % TickPerSecond) * (1000000. / TickPerSecond));
+  T->s  = Ticks / TickPerSecond;
+}
+
+# ifdef USE_TIMES
+#  include <sys/times.h>
+#  include <sys/time.h>
+#  include <time.h>
+void
+timer_start(pari_timer *T)
+{
+# ifdef _SC_CLK_TCK
+  long tck = sysconf(_SC_CLK_TCK);
+# else
+  long tck = CLK_TCK;
+# endif
+  struct tms t; times(&t);
+  _get_time(T, t.tms_utime, tck);
+}
+# elif defined(WINCE)
 void
 timer_start(pari_timer *T)
 { _get_time(T, GetTickCount(), 1000); }
-#else
-
-# include <time.h>
-# ifndef CLOCKS_PER_SEC
+# else
+#  include <time.h>
+#  ifndef CLOCKS_PER_SEC
 #   define CLOCKS_PER_SEC 1000000 /* may be false on YOUR system */
-# endif
+#  endif
 void
 timer_start(pari_timer *T)
 { _get_time(T, clock(), CLOCKS_PER_SEC); }
+# endif
 #endif
 
 long
