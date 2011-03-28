@@ -1968,6 +1968,8 @@ QuadGetST(GEN bnr, GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
   long ncond, n, j, k, n0;
   GEN N0, C, T, S, cf, cfh, an, degs;
   LISTray LIST;
+  pari_timer ti;
+  if (DEBUGLEVEL) timer_start(&ti);
 
   /* allocate memory for answer */
   *pS = S = cgetg(cl+1, t_VEC);
@@ -2041,7 +2043,7 @@ QuadGetST(GEN bnr, GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
     if (DEBUGLEVEL>1) fprintferr("\n");
     avma = av1;
   }
-  if (DEBUGLEVEL) msgtimer("S & T");
+  if (DEBUGLEVEL) timer_printf(&ti, "S & T");
   avma = av;
 }
 
@@ -2141,10 +2143,10 @@ GetST(GEN bnr, GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
   GEN N0, C, T, S, an, degs, limx;
   LISTray LIST;
   ST_t cScT;
+  pari_timer ti;
+  if (DEBUGLEVEL) timer_start(&ti);
 
   nf  = checknf(bnr);
-
-  if (DEBUGLEVEL) (void)timer2();
   /* allocate memory for answer */
   *pS = S = cgetg(cl+1, t_VEC);
   *pT = T = cgetg(cl+1, t_VEC);
@@ -2227,7 +2229,7 @@ GetST(GEN bnr, GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
     if (DEBUGLEVEL>1) fprintferr("\n");
     avma = av1;
   }
-  if (DEBUGLEVEL) msgtimer("S&T");
+  if (DEBUGLEVEL) timer_printf(&ti, "S&T");
   clear_cScT(&cScT, n0);
   avma = av;
 }
@@ -2313,6 +2315,8 @@ AllStark(GEN data,  GEN nf,  long flag,  long newprec)
   GEN bnr = gel(data,1), p1, p2, S, T, polrelnum, polrel, Lp, W, veczeta;
   GEN vChar, degs, C, dataCR, cond1, L1, an;
   LISTray LIST;
+  pari_timer ti;
+  if (DEBUGLEVEL) timer_start(&ti);
 
   nf_get_sign(nf, &r1,&r2);
   N     = nf_get_degree(nf);
@@ -2330,7 +2334,7 @@ AllStark(GEN data,  GEN nf,  long flag,  long newprec)
 LABDOUB:
   av = avma;
   W = ComputeAllArtinNumbers(dataCR, vChar, (flag >= 0), newprec);
-  if (DEBUGLEVEL) msgtimer("Compute W");
+  if (DEBUGLEVEL) timer_printf(&ti, "Compute W");
   Lp = cgetg(cl + 1, t_VEC);
   if (!flag)
   {
@@ -2403,7 +2407,7 @@ LABDOUB:
       if (!flag)
         fprintferr("Checking the square-root of the Stark unit...\n");
     }
-    msgtimer("Compute %s", flag? "quickpol": "polrelnum");
+    timer_printf(&ti, "Compute %s", flag? "quickpol": "polrelnum");
   }
 
   if (flag)
@@ -2422,7 +2426,7 @@ LABDOUB:
         fprintferr("It's not a square...\n");
         fprintferr("polrelnum = %Ps\n", polrelnum);
       }
-      msgtimer("Compute polrelnum");
+      timer_printf(&ti, "Compute polrelnum");
     }
     polrel = RecCoeff(nf, polrelnum, v, newprec);
   }
@@ -2449,7 +2453,7 @@ LABDOUB:
 
   if (DEBUGLEVEL) {
     if (DEBUGLEVEL>1) fprintferr("polrel = %Ps\n", polrel);
-    msgtimer("Recpolnum");
+    timer_printf(&ti, "Recpolnum");
   }
   return gerepilecopy(av, polrel);
 }
@@ -2502,8 +2506,6 @@ bnrstark(GEN bnr, GEN subgrp, long prec)
   /* check the class field */
   if (!gequal0(gel(bnr_get_mod(bnr), 2)))
     pari_err(talker, "class field not totally real in bnrstark");
-
-  if (DEBUGLEVEL) (void)timer2();
 
   /* find a suitable extension N */
   dtQ = InitQuotient(subgrp);
@@ -2745,17 +2747,18 @@ quadhilbertreal(GEN D, long prec)
   long newprec;
   GEN bnf;
   VOLATILE GEN bnr, dtQ, data, nf, cyc, M;
+  pari_timer ti;
+  if (DEBUGLEVEL) timer_start(&ti);
 
   (void)&prec; /* prevent longjmp clobbering it */
   (void)&bnf;  /* prevent longjmp clobbering it, avoid warning due to
                 * quadray_init call : discards qualifiers from pointer type */
-  if (DEBUGLEVEL) (void)timer2();
   quadray_init(&D, NULL, &bnf, prec);
   cyc = bnf_get_cyc(bnf);
   if (lg(cyc) == 1) { avma = av; return pol_x(0); }
   /* if the exponent of the class group is 2, use Genus Theory */
   if (equaliu(gel(cyc,1), 2)) return gerepileupto(av, GenusFieldQuadReal(D));
-  if (DEBUGLEVEL) msgtimer("Compute Cl(k)");
+  if (DEBUGLEVEL) timer_printf(&ti, "Compute Cl(k)");
 
   bnr  = Buchray(bnf, gen_1, nf_INIT|nf_GEN);
   M = diagonal_shallow(bnr_get_cyc(bnr));
@@ -2773,7 +2776,7 @@ quadhilbertreal(GEN D, long prec)
     } TRY {
       /* find the modulus defining N */
       data = FindModulus(bnr, dtQ, &newprec);
-      if (DEBUGLEVEL) msgtimer("FindModulus");
+      if (DEBUGLEVEL) timer_printf(&ti, "FindModulus");
       if (!data)
       {
         long i, l = lg(M);
@@ -3038,8 +3041,9 @@ quadhilbertimag(GEN D)
   pari_sp av = avma;
   long h, i, prec;
   struct gpq_data T;
+  pari_timer ti;
+  if (DEBUGLEVEL>1) timer_start(&ti);
 
-  if (DEBUGLEVEL>1) (void)timer2();
   if (lgefint(D) == 3)
     switch (D[2]) { /* = |D|; special cases where e > 1 */
       case 3:
@@ -3061,7 +3065,7 @@ quadhilbertimag(GEN D)
       if (!uhasexp2(gel(L,i))) break;
     if (i > lim) return GenusFieldQuadImag(D);
   }
-  if (DEBUGLEVEL>1) msgtimer("class number = %ld",h);
+  if (DEBUGLEVEL>1) timer_printf(&ti, "class number = %ld",h);
   init_pq(D, &T);
   qfp = primeform_u(D, T.p);
   T.pq =  muluu(T.p, T.q);
@@ -3098,12 +3102,12 @@ quadhilbertimag(GEN D)
       else                     gel(Pi, ++r2) = s;
       ex = gexpo(s); if (ex > 0) exmax += ex;
     }
-    if (DEBUGLEVEL>1) msgtimer("roots");
+    if (DEBUGLEVEL>1) timer_printf(&ti, "roots");
     setlg(Pr, r1+1);
     setlg(Pi, r2+1);
     P = roots_to_pol_r1(shallowconcat(Pr,Pi), 0, r1);
     P = grndtoi(P,&exmax);
-    if (DEBUGLEVEL>1) msgtimer("product, error bits = %ld",exmax);
+    if (DEBUGLEVEL>1) timer_printf(&ti, "product, error bits = %ld",exmax);
     if (exmax <= -10) break;
     avma = av0; prec += (DEFAULTPREC-2) + nbits2nlong(exmax);
     if (DEBUGLEVEL) pari_warn(warnprec,"quadhilbertimag",prec);
