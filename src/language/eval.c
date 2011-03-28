@@ -647,10 +647,10 @@ closure_err(void)
   {
     GEN C = trace[i].closure;
     if (lg(C) >= 7) base=gel(C,6);
-    if ((i==lastfun || lg(trace[i+1].closure)>=7) && trace[i].pc)
+    if ((i==lastfun || lg(trace[i+1].closure)>=7))
     {
       /* After a SIGINT, pc can be slightly off: ensure 0 <= pc < lg() */
-      long pc = minss(*trace[i].pc, lg(mael(C,5,1))-1);
+      long pc = trace[i].pc ? minss(*trace[i].pc, lg(mael(C,5,1))-1): 1;
       long offset = pc? mael3(C,5,1,pc): 0;
       int member;
       const char *s, *sbase;
