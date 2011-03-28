@@ -2043,7 +2043,6 @@ QuadGetST(GEN bnr, GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
     if (DEBUGLEVEL>1) fprintferr("\n");
     avma = av1;
   }
-  if (DEBUGLEVEL) timer_printf(&ti, "S & T");
   avma = av;
 }
 
@@ -2229,7 +2228,6 @@ GetST(GEN bnr, GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
     if (DEBUGLEVEL>1) fprintferr("\n");
     avma = av1;
   }
-  if (DEBUGLEVEL) timer_printf(&ti, "S&T");
   clear_cScT(&cScT, n0);
   avma = av;
 }
@@ -2316,7 +2314,6 @@ AllStark(GEN data,  GEN nf,  long flag,  long newprec)
   GEN vChar, degs, C, dataCR, cond1, L1, an;
   LISTray LIST;
   pari_timer ti;
-  if (DEBUGLEVEL) timer_start(&ti);
 
   nf_get_sign(nf, &r1,&r2);
   N     = nf_get_degree(nf);
@@ -2332,9 +2329,10 @@ AllStark(GEN data,  GEN nf,  long flag,  long newprec)
   h  = itos(ZM_det_triangular(gel(data,2))) >> 1;
 
 LABDOUB:
+  if (DEBUGLEVEL) timer_start(&ti);
   av = avma;
   W = ComputeAllArtinNumbers(dataCR, vChar, (flag >= 0), newprec);
-  if (DEBUGLEVEL) timer_printf(&ti, "Compute W");
+  if (DEBUGLEVEL) timer_printf(&ti,"Compute W");
   Lp = cgetg(cl + 1, t_VEC);
   if (!flag)
   {
@@ -2342,6 +2340,7 @@ LABDOUB:
       QuadGetST(bnr, &S,&T,dataCR,vChar,newprec);
     else
       GetST(bnr, &S, &T, dataCR, vChar, newprec);
+    if (DEBUGLEVEL) timer_printf(&ti, "S&T");
     for (i = 1; i <= cl; i++)
       Lp[i] = GetValue(gel(dataCR,i), gel(W,i), gel(S,i), gel(T,i),
                        2, newprec)[2];
@@ -2758,7 +2757,6 @@ quadhilbertreal(GEN D, long prec)
   if (lg(cyc) == 1) { avma = av; return pol_x(0); }
   /* if the exponent of the class group is 2, use Genus Theory */
   if (equaliu(gel(cyc,1), 2)) return gerepileupto(av, GenusFieldQuadReal(D));
-  if (DEBUGLEVEL) timer_printf(&ti, "Compute Cl(k)");
 
   bnr  = Buchray(bnf, gen_1, nf_INIT|nf_GEN);
   M = diagonal_shallow(bnr_get_cyc(bnr));
@@ -2775,8 +2773,10 @@ quadhilbertreal(GEN D, long prec)
       nf  = bnf_get_nf(bnf);
     } TRY {
       /* find the modulus defining N */
+      pari_timer T;
+      if (DEBUGLEVEL) timer_start(&T);
       data = FindModulus(bnr, dtQ, &newprec);
-      if (DEBUGLEVEL) timer_printf(&ti, "FindModulus");
+      if (DEBUGLEVEL) timer_printf(&T,"FindModulus");
       if (!data)
       {
         long i, l = lg(M);
@@ -3042,8 +3042,8 @@ quadhilbertimag(GEN D)
   long h, i, prec;
   struct gpq_data T;
   pari_timer ti;
-  if (DEBUGLEVEL>1) timer_start(&ti);
 
+  if (DEBUGLEVEL>1) timer_start(&ti);
   if (lgefint(D) == 3)
     switch (D[2]) { /* = |D|; special cases where e > 1 */
       case 3:
@@ -3065,7 +3065,7 @@ quadhilbertimag(GEN D)
       if (!uhasexp2(gel(L,i))) break;
     if (i > lim) return GenusFieldQuadImag(D);
   }
-  if (DEBUGLEVEL>1) timer_printf(&ti, "class number = %ld",h);
+  if (DEBUGLEVEL>1) timer_printf(&ti,"class number = %ld",h);
   init_pq(D, &T);
   qfp = primeform_u(D, T.p);
   T.pq =  muluu(T.p, T.q);
@@ -3102,12 +3102,12 @@ quadhilbertimag(GEN D)
       else                     gel(Pi, ++r2) = s;
       ex = gexpo(s); if (ex > 0) exmax += ex;
     }
-    if (DEBUGLEVEL>1) timer_printf(&ti, "roots");
+    if (DEBUGLEVEL>1) timer_printf(&ti,"roots");
     setlg(Pr, r1+1);
     setlg(Pi, r2+1);
     P = roots_to_pol_r1(shallowconcat(Pr,Pi), 0, r1);
     P = grndtoi(P,&exmax);
-    if (DEBUGLEVEL>1) timer_printf(&ti, "product, error bits = %ld",exmax);
+    if (DEBUGLEVEL>1) timer_printf(&ti,"product, error bits = %ld",exmax);
     if (exmax <= -10) break;
     avma = av0; prec += (DEFAULTPREC-2) + nbits2nlong(exmax);
     if (DEBUGLEVEL) pari_warn(warnprec,"quadhilbertimag",prec);

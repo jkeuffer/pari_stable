@@ -1290,7 +1290,7 @@ ZM_inv(GEN M, GEN dM)
       stable = ZM_incremental_CRT(&H, Hp, q,qp, p);
       q = qp;
     }
-    if (DEBUGLEVEL>5) msgtimer("inverse mod %ld (stable=%ld)", p,stable);
+    if (DEBUGLEVEL>5) fprintferr("inverse mod %ld (stable=%ld)", p,stable);
     if (stable) {/* DONE ? */
       if (dM)
       { if (RgM_isscalar(ZM_mul(M, H), dM)) break; }
@@ -1304,7 +1304,7 @@ ZM_inv(GEN M, GEN dM)
       gerepileall(av2, 2, &H, &q);
     }
   }
-  if (DEBUGLEVEL>5) msgtimer("ZM_inv done");
+  if (DEBUGLEVEL>5) fprintferr("ZM_inv done");
   return gerepilecopy(av, H);
 }
 

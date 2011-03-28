@@ -2005,11 +2005,12 @@ FqX_split(GEN *t, long d, GEN q, GEN S, GEN T, GEN p)
 {
   long l, v, is2, cnt, dt = degpol(*t), dT = degpol(T);
   pari_sp av;
+  pari_timer ti;
   GEN w,w0;
 
   if (dt == d) return;
   v = varn(*t);
-  if (DEBUGLEVEL > 6) (void)timer2();
+  if (DEBUGLEVEL > 6) timer_start(&ti);
   av = avma; is2 = equaliu(p, 2);
   for(cnt = 1;;cnt++, avma = av)
   { /* splits *t with probability ~ 1 - 2^(1-r) */
@@ -2039,7 +2040,8 @@ FqX_split(GEN *t, long d, GEN q, GEN S, GEN T, GEN p)
   }
   w = gerepileupto(av,FqX_normalize(w,T,p));
   if (DEBUGLEVEL > 6)
-    fprintferr("[FqX_split] splitting time: %ld (%ld trials)\n",timer2(),cnt);
+    fprintferr("[FqX_split] splitting time: %ld (%ld trials)\n",
+               timer_delay(&ti),cnt);
   l /= d; t[l] = FqX_div(*t,w, T,p); *t = w;
   FqX_split(t+l,d,q,S,T,p);
   FqX_split(t  ,d,q,S,T,p);

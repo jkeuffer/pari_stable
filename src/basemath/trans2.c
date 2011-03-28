@@ -959,8 +959,9 @@ cxgamma(GEN s0, int dolog, long prec)
   long i, lim, nn, esig, et;
   pari_sp av, av2, avlim;
   int funeq = 0;
+  pari_timer T;
 
-  if (DEBUGLEVEL>5) (void)timer2();
+  if (DEBUGLEVEL>5) timer_start(&T);
   s = trans_fix_arg(&prec,&s0,&sig,&av,&res);
 
   esig = expo(sig);
@@ -1106,13 +1107,13 @@ cxgamma(GEN s0, int dolog, long prec)
       }
     }
   }
-  if (DEBUGLEVEL>5) msgtimer("product from 0 to N-1");
+  if (DEBUGLEVEL>5) timer_printf(&T,"product from 0 to N-1");
 
   nnx = gaddgs(s, nn);
   a = ginv(nnx); invn2 = gsqr(a);
   av2 = avma; avlim = stack_lim(av2,3);
   tes = divrunu(bernreal(2*lim,prec), 2*lim-1); /* B2l / (2l-1) 2l*/
-  if (DEBUGLEVEL>5) msgtimer("Bernoullis");
+  if (DEBUGLEVEL>5) timer_printf(&T,"Bernoullis");
   for (i = 2*lim-2; i > 1; i -= 2)
   {
     u = divrunu(bernreal(i,prec), i-1); /* Bi / i(i-1) */
@@ -1123,7 +1124,7 @@ cxgamma(GEN s0, int dolog, long prec)
       tes = gerepileupto(av2, tes);
     }
   }
-  if (DEBUGLEVEL>5) msgtimer("Bernoulli sum");
+  if (DEBUGLEVEL>5) timer_printf(&T,"Bernoulli sum");
 
   p1 = gsub(gmul(gsub(nnx, ghalf), glog(nnx,prec)), nnx);
   p1 = gadd(p1, gmul(tes, a));
@@ -1438,8 +1439,9 @@ cxpsi(GEN s0, long prec)
   long lim,nn,k;
   const long la = 3;
   int funeq = 0;
+  pari_timer T;
 
-  if (DEBUGLEVEL>2) (void)timer2();
+  if (DEBUGLEVEL>2) timer_start(&T);
   s = trans_fix_arg(&prec,&s0,&sig,&av,&res);
   if (signe(sig) <= 0) { funeq = 1; s = gsub(gen_1, s); sig = real_i(s); }
   if (typ(s0) == t_INT && signe(s0) <= 0)
@@ -1495,7 +1497,7 @@ cxpsi(GEN s0, long prec)
     if ((k & 127) == 0) sum = gerepileupto(av2, sum);
   }
   z = gsub(glog(gaddgs(s, nn), prec), sum);
-  if (DEBUGLEVEL>2) msgtimer("sum from 0 to N-1");
+  if (DEBUGLEVEL>2) timer_printf(&T,"sum from 0 to N-1");
 
   in2 = gsqr(a);
   av2 = avma; tes = divru(bernreal(2*lim, prec), 2*lim);
@@ -1504,7 +1506,7 @@ cxpsi(GEN s0, long prec)
     tes = gadd(gmul(in2,tes), divru(bernreal(k, prec), k));
     if ((k & 255) == 0) tes = gerepileupto(av2, tes);
   }
-  if (DEBUGLEVEL>2) msgtimer("Bernoulli sum");
+  if (DEBUGLEVEL>2) timer_printf(&T,"Bernoulli sum");
   z = gsub(z, gmul(in2,tes));
   if (funeq)
   {

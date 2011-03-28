@@ -64,7 +64,6 @@ buchnarrow(GEN bnf)
 
   met = ZM_snf_group(R,NULL,&u1);
   lo = lg(R); c = lg(met);
-  if (DEBUGLEVEL>3) msgtimer("smith/class group");
 
   basecl = cgetg(c,t_VEC);
   for (j=1; j<c; j++)

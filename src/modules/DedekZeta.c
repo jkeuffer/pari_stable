@@ -179,6 +179,7 @@ initzeta(GEN T, long prec)
   GEN c_even, ck_even, c_odd, ck_odd, serie_even, serie_odd, serie_exp;
   GEN VOID;
   long N0, i0, r1, r2, r, R, N, i, j, k, n, bit = bit_accuracy(prec) + 6;
+  pari_timer ti;
 
   pari_sp av, av2;
   long court[] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3),0};
@@ -233,6 +234,7 @@ initzeta(GEN T, long prec)
   tabcstni = gclone(tabcstni);
 
   /********** compute a(i,j) **********/
+  if (DEBUGLEVEL>1) timer_start(&ti);
   zet = cgetg(R,t_VEC); gel(zet,1) = mpeuler(prec);
   for (i=2; i<R; i++) gel(zet,i) = szeta(i, prec);
 
@@ -296,7 +298,7 @@ initzeta(GEN T, long prec)
     }
   }
   aij = gerepilecopy(av, aij);
-  if (DEBUGLEVEL>1) msgtimer("a(i,j)");
+  if (DEBUGLEVEL>1) timer_printf(&ti,"a(i,j)");
   gel(znf,1) = mkvecsmall2(r1,r2);
   gel(znf,2) = resi;
   gel(znf,5) = cst;
@@ -305,7 +307,7 @@ initzeta(GEN T, long prec)
 
   /************* Calcul du nombre d'ideaux de norme donnee *************/
   coef = dirzetak0(nf,N0); tabj = cgetg(N0+1,t_MAT);
-  if (DEBUGLEVEL>1) msgtimer("coef");
+  if (DEBUGLEVEL>1) timer_printf(&ti,"coef");
   colzero = zerocol(r+1);
   for (i=1; i<=N0; i++)
     if (coef[i])
@@ -323,7 +325,7 @@ initzeta(GEN T, long prec)
     }
     else
       gel(tabj,i) = colzero;
-  if (DEBUGLEVEL>1) msgtimer("a(n)");
+  if (DEBUGLEVEL>1) timer_printf(&ti,"a(n)");
 
   coeflog=cgetg(N0+1,t_VEC); gel(coeflog,1) = VOID;
   for (i=2; i<=N0; i++)
@@ -333,7 +335,7 @@ initzeta(GEN T, long prec)
       setsigne(p1, -1); gel(coeflog,i) = p1;
     }
     else gel(coeflog,i) = VOID;
-  if (DEBUGLEVEL>1) msgtimer("log(n)");
+  if (DEBUGLEVEL>1) timer_printf(&ti,"log(n)");
 
   gel(znf,3) = tabj;
   gel(znf,8) = vecsmall_copy(coef);
@@ -369,7 +371,7 @@ initzeta(GEN T, long prec)
     }
   }
   gel(znf,4) = C;
-  if (DEBUGLEVEL>1) msgtimer("Cik");
+  if (DEBUGLEVEL>1) timer_printf(&ti,"Cik");
   gunclone(tabcstn); gunclone(tabcstni);
   pari_free((void*)coef); return znf;
 }

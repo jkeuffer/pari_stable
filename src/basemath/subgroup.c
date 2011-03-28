@@ -364,7 +364,6 @@ dopsub(subgp_iter *T, GEN p, GEN indexsubq)
       if (DEBUGLEVEL>4)
       {
         fprintferr("  countsub = %ld\n", T->countsub);
-        msgtimer("for this type");
         if (T->subq) p1 = muliu(p1,lg(T->subqpart)-1);
         if (!equaliu(p1,T->countsub))
         {
@@ -455,7 +454,6 @@ subgroup_engine(subgp_iter *T)
     avma = av; return;
   }
   if (!signe(cyc[1])) pari_err(talker,"infinite group in forsubgroup");
-  if (DEBUGLEVEL>4) (void)timer2();
   fa = Z_factor(gel(cyc,1)); primlist = gel(fa,1);
   nbprim = lg(primlist);
   listL = new_chunk(n); imax = k = 0;

@@ -2838,6 +2838,7 @@ mpqs_i(mpqs_handle_t *handle)
 
   pariFILE *pFNEW, *pLPNEW, *pCOMB, *pFREL, *pLPREL;
   char *dir, *COMB_str, *FREL_str, *FNEW_str, *LPREL_str, *LPNEW_str, *TMP_str;
+  pari_timer T;
 
 /* END: global variables to disappear as soon as possible */
 
@@ -2847,7 +2848,7 @@ mpqs_i(mpqs_handle_t *handle)
 
   if (DEBUGLEVEL >= 4)
   {
-    (void)timer2();
+    timer_start(&T);
     fprintferr("MPQS: number to factor N = %Ps\n", N);
   }
 
@@ -3035,7 +3036,7 @@ mpqs_i(mpqs_handle_t *handle)
     {
       if (DEBUGLEVEL >= 4)
         fprintferr("\nMPQS: passing the %3.1f%% sort point, time = %ld ms\n",
-                   sort_interval/10., timer2());
+                   sort_interval/10., timer_delay(&T));
       else
         fprintferr("\nMPQS: passing the %3.1f%% sort point\n",
                    sort_interval/10.);
@@ -3064,7 +3065,7 @@ mpqs_i(mpqs_handle_t *handle)
         if (DEBUGLEVEL >= 4)
         {
           fprintferr("\nMPQS: split N whilst combining, time = %ld ms\n",
-                     timer2());
+                     timer_delay(&T));
           fprintferr("MPQS: found factor = %Ps\n", fact);
         }
         pari_fclose(pLPNEW);
@@ -3139,7 +3140,7 @@ mpqs_i(mpqs_handle_t *handle)
     if (DEBUGLEVEL >= 4)
     {
       fprintferr("MPQS: done sorting%s, time = %ld ms\n",
-                 tp > 0 ? " and combining" : "", timer2());
+                 tp > 0 ? " and combining" : "", timer_delay(&T));
       fprintferr("MPQS: found %3.1f%% of the required relations\n",
                  percentage/10.);
       if (DEBUGLEVEL >= 5)
@@ -3185,7 +3186,7 @@ mpqs_i(mpqs_handle_t *handle)
     { /* solution found */
       if (DEBUGLEVEL >= 4)
       {
-        fprintferr("\nMPQS: time in Gauss and gcds = %ld ms\n", timer2());
+        fprintferr("\nMPQS: time in Gauss and gcds = %ld ms\n", timer_delay(&T));
         if (typ(fact) == t_INT) fprintferr("MPQS: found factor = %Ps\n", fact);
         else
         {
@@ -3218,7 +3219,7 @@ mpqs_i(mpqs_handle_t *handle)
     {
       if (DEBUGLEVEL >= 4)
       {
-        fprintferr("\nMPQS: time in Gauss and gcds = %ld ms\n", timer2());
+        fprintferr("\nMPQS: time in Gauss and gcds = %ld ms\n",timer_delay(&T));
         fprintferr("MPQS: no factors found.\n");
         if (percentage <= MPQS_ADMIT_DEFEAT)
           fprintferr("\nMPQS: restarting sieving ...\n");

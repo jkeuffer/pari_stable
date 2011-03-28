@@ -729,6 +729,7 @@ polsubcyclo_g(long n, long d, GEN Z, long v)
   B = polsubcyclo_complex_bound(ltop,L,3);
   zl = polsubcyclo_start(n,d,o,B,&val,&l);
   le = gel(zl,1);
+  if (DEBUGLEVEL >= 6) timer_start(&ti);
   powz = polsubcyclo_roots(n,zl);
   L = polsubcyclo_cyclic(n,d,o,g,gd,powz,le);
   if (DEBUGLEVEL >= 6) timer_start(&ti);

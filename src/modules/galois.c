@@ -300,7 +300,6 @@ galopen(const char *pre, long n, long n1, long n2)
   (void)sprintf(s, "%s/galdata/%s%ld_%ld_%ld", pari_datadir, pre, n, n1, n2);
   f = pari_fopengz(s);
   if (!f) pari_err(talker,"galois files not available\n[missing %s]",s);
-  if (DEBUGLEVEL > 3) msgtimer("opening %s",s);
   avma = av; return f;
 }
 
@@ -329,7 +328,7 @@ read_obj(PERM *g, pariFILE *f, long n, long m)
     g[i][j] = bin(ch[k++]);
     if (++j>m) { j=1; if (++i>n) break; }
   }
-  pari_fclose(f); if (DEBUGLEVEL > 3) msgtimer("read_object");
+  pari_fclose(f);
 }
 #undef BUFFS
 

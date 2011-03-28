@@ -1968,10 +1968,9 @@ prints \kbd{Time}, then the remaining arguments as specified by
 \kbd{format} (which is a PARI format), then the output of \kbd{timer2}.
 
 This mechanism is simple to use but not foolproof. If some other function
-uses these timers, and many PARI functions do use \kbd{timer2} when
-\tet{DEBUGLEVEL} is high enough, the timings will be meaningless. To handle
-timing in a reentrant way, PARI defines a dedicated data type,
-\tet{pari_timer}. The functions
+uses these timers, the timings will be meaningless. To handle timing in a
+reentrant way, PARI defines a dedicated data type, \tet{pari_timer}. The
+functions
 
 \fun{void}{timer_start}{pari_timer *T}
 

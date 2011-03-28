@@ -755,6 +755,7 @@ ellfacteur(GEN N, int insist)
   GEN *X,*XAUX,*XT,*XD,*XG,*YG,*XH,*XB,*XB2,*Xh,*Yh,*Xb;
   GEN res = cgeti(tf), gl;
   pari_sp av1, avtmp, av = avma;
+  pari_timer T;
   int rflag;
 
   /* determine where we'll start, how long we'll persist, and how many
@@ -819,7 +820,7 @@ ellfacteur(GEN N, int insist)
 
   if (DEBUGLEVEL >= 4)
   {
-    (void)timer2();
+    timer_start(&T);
     fprintferr("ECM: working on %ld curves at a time; initializing", nbc);
     if (!insist)
     {
@@ -876,7 +877,7 @@ ellfacteur(GEN N, int insist)
 
     if (DEBUGLEVEL >= 4) {
       fprintferr("ECM: time = %6ld ms\nECM: dsn = %2ld,\tB1 = %4lu,",
-                 timer2(), dsn, B1);
+                 timer_delay(&T), dsn, B1);
       fprintferr("\tB2 = %6lu,\tgss = %4ld*420\n", B2, gss);
     }
     p = 0;
@@ -914,7 +915,7 @@ ellfacteur(GEN N, int insist)
       avma = av;
     }
     if (DEBUGLEVEL >= 4) {
-      fprintferr("ECM: time = %6ld ms, B1 phase done, ", timer2());
+      fprintferr("ECM: time = %6ld ms, B1 phase done, ", timer_delay(&T));
       fprintferr("p = %lu, setting up for B2\n", p);
     }
 
@@ -988,7 +989,7 @@ ellfacteur(GEN N, int insist)
 
     if (DEBUGLEVEL >= 4)
       fprintferr("ECM: time = %6ld ms, entering B2 phase, p = %lu\n",
-                 timer2(), p);
+                 timer_delay(&T), p);
 
     /* inner loop over small sets of 4 curves at a time */
     for (i = nbc - 4; i >= 0; i -= 4)
@@ -1152,7 +1153,7 @@ ellfacteur(GEN N, int insist)
     {
       if (DEBUGLEVEL >= 4) {
         fprintferr("ECM: time = %6ld ms,\tellfacteur giving up.\n",
-                   timer2());
+                   timer_delay(&T));
         flusherr();
       }
       res = NULL; goto ret;
@@ -1163,7 +1164,7 @@ fin:
   affii(gl, res);
   if (DEBUGLEVEL >= 4) {
     fprintferr("ECM: time = %6ld ms,\tp <= %6lu,\n\tfound factor = %Ps\n",
-               timer2(), p, res);
+               timer_delay(&T), p, res);
     flusherr();
   }
 ret:
@@ -1195,11 +1196,11 @@ INIT(GEN x, GEN v, GEN e, GEN c) {
 }
 
 static void
-rho_dbg(long c, long msg_mask)
+rho_dbg(pari_timer *T, long c, long msg_mask)
 {
   if (c & msg_mask) return;
   fprintferr("Rho: time = %6ld ms,\t%3ld round%s\n",
-             timer2(), c, (c==1?"":"s"));
+             timer_delay(T), c, (c==1?"":"s"));
   flusherr();
 }
 
@@ -1225,8 +1226,9 @@ pollardbrent(GEN n)
   long c0, c, k, k1, l;
   pari_sp GGG, avP, avx, av = avma;
   GEN x, x1, y, P, g, g1, res;
+  pari_timer T;
 
-  if (DEBUGLEVEL >= 4) (void)timer2(); /* clear timer */
+  if (DEBUGLEVEL >= 4) timer_start(&T);
 
   if (tf >= 4)
     size = expi(n) + 1;
@@ -1309,13 +1311,13 @@ PB_RETRY:
         if (DEBUGLEVEL >= 4)
         {
           fprintferr("Rho: time = %6ld ms,\tPollard-Brent giving up.\n",
-                     timer2());
+                     timer_delay(&T));
           flusherr();
         }
         avma = av; return NULL;
       }
       P = gen_1;                        /* not necessary, but saves 1 mulii/round */
-      if (DEBUGLEVEL >= 4) rho_dbg(c0-(c>>5), msg_mask);
+      if (DEBUGLEVEL >= 4) rho_dbg(&T, c0-(c>>5), msg_mask);
       affii(x,y);
     }
 
@@ -1340,7 +1342,7 @@ PB_RETRY:
       if (DEBUGLEVEL >= 4)
       {
         fprintferr("Rho: time = %6ld ms,\tPollard-Brent giving up.\n",
-                   timer2());
+                   timer_delay(&T));
         flusherr();
       }
       avma = av; return NULL;
@@ -1359,7 +1361,7 @@ PB_RETRY:
     if (DEBUGLEVEL >= 4 && (l>>7) > msg_mask)
     {
       fprintferr("Rho: time = %6ld ms,\t%3ld rounds, back to normal mode\n",
-                 timer2(), c0-(c>>5));
+                 timer_delay(&T), c0-(c>>5));
       flusherr();
     }
 
@@ -1375,7 +1377,7 @@ fin:
     {
       if (DEBUGLEVEL >= 4)
       {
-        rho_dbg(c0-(c>>5), 0);
+        rho_dbg(&T, c0-(c>>5), 0);
         fprintferr("\tfound factor = %Ps\n",g);
         flusherr();
       }
@@ -1398,7 +1400,7 @@ fin:
     avma = avx; y = addsi(delta,y);
     g = gcdii(subii(x1, y), g1); if (!is_pm1(g)) break;
 
-    if (DEBUGLEVEL >= 4 && (--c & 0x1f) == 0) rho_dbg(c0-(c>>5), msg_mask);
+    if (DEBUGLEVEL >= 4 && (--c & 0x1f) == 0) rho_dbg(&T, c0-(c>>5), msg_mask);
   }
 
   avma = av; /* safe */
@@ -1408,7 +1410,7 @@ fin:
     { /* out of luck */
       if (DEBUGLEVEL >= 4)
       {
-        rho_dbg(c0-(c>>5), 0);
+        rho_dbg(&T, c0-(c>>5), 0);
         fprintferr("\tPollard-Brent failed.\n"); flusherr();
       }
       if (++retries >= 4) return NULL;
@@ -1417,7 +1419,7 @@ fin:
     /* half lucky: we've split n, but g1 equals either g or n */
     if (DEBUGLEVEL >= 4)
     {
-      rho_dbg(c0-(c>>5), 0);
+      rho_dbg(&T, c0-(c>>5), 0);
       fprintferr("\tfound %sfactor = %Ps\n", (g1!=n ? "composite " : ""), g);
       flusherr();
     }
@@ -1436,7 +1438,7 @@ fin:
   INIT(res+7, diviiexact(n,g1), gen_1, NULL);
   if (DEBUGLEVEL >= 4)
   {
-    rho_dbg(c0-(c>>5), 0);
+    rho_dbg(&T, c0-(c>>5), 0);
     fprintferr("\tfound factors = %Ps, %Ps,\n\tand %Ps\n", res[1], res[4], res[7]);
     flusherr();
   }
@@ -1519,11 +1521,11 @@ squfof_ambig(long a, long B, long dd, GEN D)
   {
     if (q > 1)
       fprintferr("SQUFOF: found factor %ld from ambiguous form\n"
-                 "\tafter %ld steps on the ambiguous cycle, time = %ld ms\n",
-                 q / ugcd(q,15), cnt, timer2());
+                 "\tafter %ld steps on the ambiguous cycle\n",
+                 q / ugcd(q,15), cnt);
     else
       fprintferr("SQUFOF: ...found nothing on the ambiguous cycle\n"
-                 "\tafter %ld steps there, time = %ld ms\n", cnt, timer2());
+                 "\tafter %ld steps there\n", cnt);
     if (DEBUGLEVEL >= 6) fprintferr("SQUFOF: squfof_ambig returned %ld\n", q);
   }
   return q;
@@ -1599,12 +1601,9 @@ squfof(GEN n)
    * out having found a square form  (or when the blacklist overflows, which
    * shouldn't happen). */
   if (DEBUGLEVEL >= 4)
-  {
     fprintferr("SQUFOF: entering main loop with forms\n"
                "\t(1, %ld, %ld) and (1, %ld, %ld)\n\tof discriminants\n"
                "\t%Ps and %Ps, respectively\n", b1, -c1, b2, -c2, D1, D2);
-    (void)timer2();
-  }
 
   /* MAIN LOOP: walk around the principal cycle looking for a square form.
    * Blacklist small leading coefficients.
@@ -1683,8 +1682,7 @@ squfof(GEN n)
       { /* square form */
         if (DEBUGLEVEL >= 4)
           fprintferr("SQUFOF: square form (%ld^2, %ld, %ld) on first cycle\n"
-                     "\tafter %ld iterations, time = %ld ms\n",
-                     a, b1, -c1, cnt, timer2());
+                     "\tafter %ld iterations\n", a, b1, -c1, cnt);
         if (a <= L1)
         { /* blacklisted? */
           long j;
@@ -1725,8 +1723,7 @@ squfof(GEN n)
       { /* square form */
         if (DEBUGLEVEL >= 4)
           fprintferr("SQUFOF: square form (%ld^2, %ld, %ld) on second cycle\n"
-                     "\tafter %ld iterations, time = %ld ms\n",
-                     a, b2, -c2, cnt, timer2());
+                     "\tafter %ld iterations\n", a, b2, -c2, cnt);
         if (a <= L2)
         { /* blacklisted? */
           long j;
@@ -1756,7 +1753,7 @@ squfof(GEN n)
   } /* end main loop */
 
   /* both discriminants turned out to be useless. */
-  if (DEBUGLEVEL>=4) fprintferr("SQUFOF: giving up, time = %ld ms\n", timer2());
+  if (DEBUGLEVEL>=4) fprintferr("SQUFOF: giving up\n");
   avma = av; return NULL;
 }
 
