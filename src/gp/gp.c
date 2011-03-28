@@ -1006,13 +1006,12 @@ escape(char *tch, int ismain)
   }
 }
 
-enum { ti_NOPRINT, ti_REGULAR, ti_LAST, ti_INTERRUPT, ti_ALARM };
+enum { ti_REGULAR, ti_LAST, ti_INTERRUPT, ti_ALARM };
 /* flag:
- *   ti_NOPRINT   don't print
- *   ti_REGULAR   print elapsed time (chrono)
- *   ti_LAST      print last elapsed time (##)
+ *   ti_ALARM     from alarm()
  *   ti_INTERRUPT received a SIGINT
- */
+ *   ti_LAST      print last elapsed time (##)
+ *   ti_REGULAR   print elapsed time (chrono)  */
 static char *
 gp_format_time(long flag)
 {
@@ -1593,7 +1592,7 @@ gp_main_loop(long flag)
     if (GP_DATA->chrono)
       pari_puts(gp_format_time(ti_REGULAR));
     else
-      (void)gp_format_time(ti_NOPRINT);
+      TIMERstart(GP_DATA->T);
     if (z == gnil) continue;
 
     if (GP_DATA->simplify) z = simplify_shallow(z);
