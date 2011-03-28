@@ -212,15 +212,13 @@ void
 changevalue(entree *ep, GEN x)
 {
   var_cell *v = (var_cell*) ep->pvalue;
-  BLOCK_SIGINT_START
   if (v == INITIAL) new_val_cell(ep, x, COPY_VAL);
   else
   {
-    x = gclone(x); /* beware: gunclone_deep may destroy old x */
-    if (v->flag == COPY_VAL) gunclone_deep((GEN)ep->value); else v->flag = COPY_VAL;
-    ep->value = (void*)x;
+    GEN old_val = (GEN) ep->value; /* beware: gunclone_deep may destroy old x */
+    ep->value = (void *) gclone(x);
+    if (v->flag == COPY_VAL) gunclone_deep(old_val); else v->flag = COPY_VAL;
   }
-  BLOCK_SIGINT_END
 }
 
 INLINE GEN
@@ -362,9 +360,9 @@ static void
 changelex(long vn, GEN x)
 {
   struct var_lex *v=var+s_var.n+vn;
-  x = gclone(x); /* beware: gunclone_deep may destroy old x */
-  if (v->flag == COPY_VAL) gunclone_deep(v->value); else v->flag = COPY_VAL;
-  v->value = x;
+  GEN old_val = v->value;
+  v->value = gclone(x);
+  if (v->flag == COPY_VAL) gunclone_deep(old_val); else v->flag = COPY_VAL;
 }
 
 INLINE GEN
@@ -373,8 +371,8 @@ copylex(long vn)
   struct var_lex *v = var+s_var.n+vn;
   if (v->flag!=COPY_VAL)
   {
-    v->flag  = COPY_VAL;
     v->value = gclone(v->value);
+    v->flag  = COPY_VAL;
   }
   return v->value;
 }
