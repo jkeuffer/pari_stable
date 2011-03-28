@@ -117,7 +117,7 @@ typedef struct REL_t {
   GEN m; /* pseudo-minimum yielding the relation; clone */
   long relorig; /* relation this one is an image of */
   long relaut; /* automorphim used to compute this relation from the original */
-  GEN junk[1]; /*make sure sizeof(struct) is a power of two.*/
+  GEN junk[3]; /*make sure sizeof(struct) is a power of two.*/
 } REL_t;
 
 typedef struct RELCACHE_t {
@@ -2435,7 +2435,7 @@ get_random_ideal(FB_t *F, GEN nf, GEN ex)
 }
 
 static void
-rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN auts, FACT *fact)
+rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, FACT *fact)
 {
   pari_timer T;
   GEN L_jid = F->L_jid;
@@ -2485,8 +2485,6 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN auts, FACT *fact)
         case -1: /* forget it */
           if (DEBUGLEVEL>1) dbg_cancelrel(jid,j,R);
           continue;
-        case 0:
-          break;
       }
       if (DEBUGLEVEL) timer_printf(&T, "for this relation");
       /* Need more, try next prime ideal */
@@ -2608,7 +2606,7 @@ compute_multiple_of_R_pivot(GEN X, GEN x0/*unused*/, long ix, GEN c)
 static GEN
 compute_multiple_of_R(GEN A, long RU, long N, long *pneed, GEN *ptL)
 {
-  GEN T, d, mdet, Im_mdet, Im_expo, kR, xreal, L;
+  GEN T, d, mdet, Im_mdet, kR, xreal, L;
   long i, j, r, R1 = 2*RU - N;
   int precpb;
   pari_sp av = avma;
@@ -2620,13 +2618,6 @@ compute_multiple_of_R(GEN A, long RU, long N, long *pneed, GEN *ptL)
   mdet = clean_cols(xreal, &precpb);
   /* will cause precision to increase on later failure, but we may succeed! */
   *ptL = precpb? NULL: gen_1;
-  if (lg(mdet) < RU)
-  {
-    if (DEBUGLEVEL)
-      err_printf("Unit group rank <= %ld < %ld\n",lg(mdet)-1, RU);
-    *pneed = RU - (lg(mdet)-1);
-    avma = av; return NULL;
-  }
   T = cgetg(RU+1,t_COL);
   for (i=1; i<=R1; i++) gel(T,i) = gen_1;
   for (   ; i<=RU; i++) gel(T,i) = gen_2;
@@ -2638,16 +2629,14 @@ compute_multiple_of_R(GEN A, long RU, long N, long *pneed, GEN *ptL)
   if (lg(mdet)-1 - r != RU)
   {
     if (DEBUGLEVEL)
-      err_printf("Unit group rank  = %ld < %ld\n",lg(mdet)-1 - r, RU);
+      err_printf("Unit group rank = %ld < %ld\n",lg(mdet)-1 - r, RU);
     *pneed = RU - (lg(mdet)-1-r);
     avma = av; return NULL;
   }
 
   Im_mdet = cgetg(RU+1, t_MAT); /* extract independent columns */
-  Im_expo = cgetg(RU+1, t_VECSMALL); /* ... and exponents (from renormalize) */
   /* N.B: d[1] = 1, corresponding to T above */
   gel(Im_mdet, 1) = T;
-  Im_expo[1] = 0;
   for (i = j = 2; i <= RU; j++)
     if (d[j]) gel(Im_mdet, i++) = gel(mdet,j);
 
@@ -3490,17 +3479,17 @@ static GEN
 trim_list(FB_t *F)
 {
   pari_sp av = avma;
-  GEN list = F->L_jid ? F->L_jid : F->perm, present = zero_Flv(F->KC);
-  long i, j, imax = minss(lg(list), F->KC + 1);
+  GEN L_jid = F->L_jid, present = zero_Flv(F->KC);
+  long i, j, imax = minss(lg(L_jid), F->KC + 1);
   GEN minidx = F->minidx, idx = cgetg(imax, t_VECSMALL);
 
   for (i = j = 1; i < imax; i++)
   {
-    long id = minidx[list[i]];
+    long id = minidx[L_jid[i]];
 
     if (!present[id])
     {
-      idx[j++] = list[i];
+      idx[j++] = L_jid[i];
       present[id] = 1;
     }
   }
@@ -3614,7 +3603,8 @@ START:
       if (need > 0)
       {
         long oneed = cache.end - cache.last;
-        /* Test below can be true if elts != NULL */
+        /* Test below can be true if small_norm did not find enough linearly
+         * dependent relations */
         if (need < oneed) need = oneed;
         pre_allocate(&cache, need+lg(auts)-1+(R ? lg(W)-1 : 0));
         cache.end = cache.last + need;
@@ -3624,28 +3614,21 @@ START:
           cache.last < cache.base + 2*F.KC /* heuristic */)
       {
         pari_sp av3 = avma;
-        GEN p0 = NULL, L_jid = F.L_jid, aut0 = auts;
+        GEN p0 = NULL, L_jid = F.L_jid;
         if (R)
         {
           /* We have full rank for class group and unit, however those
            * lattices are too small. The following tries to improve the
            * prime group lattice: it specifically looks for relations
            * involving the primes generating the class group. */
-          long l;
+          long l = lg(W) - 1;
           /* We need lg(W)-1 relations. */
-          F.L_jid = vecslice(F.perm, 1, lg(W) - 1);
-          cache.end = cache.last + lg(W) - 1;
+          F.L_jid = vecslice(F.perm, 1, l);
+          cache.end = cache.last + l;
           /* Lie to the add_rel subsystem: pretend we miss relations involving
            * the primes generating the class group (and only those). */
-          cache.missing = lg(W) - 1;
-          for (l = 1; l < lg(W); l++)
-            mael(cache.basis, F.perm[l], F.perm[l]) = 0;
-          /* Lie to the small_norm subsystem: pretend there are no automorphisms
-           * (automorphisms tend to create lattices that are twice the size of
-           * the full lattice: if a relation is p1+p2=0 where p1 and p2 are in
-           * the same odd-sized orbit, then the images of this relation will
-           * lead to p1=...=pn and 2p1=0). */
-          auts = cgetg(1, t_VEC);
+          cache.missing = l;
+          for ( ; l > 0; l--) mael(cache.basis, F.perm[l], F.perm[l]) = 0;
         }
         if (done_small)
         {
@@ -3666,12 +3649,10 @@ START:
         avma = av3;
         if (R)
         {
-          long l;
-          auts = aut0;
+          long l = lg(W) - 1;
           F.L_jid = L_jid;
           cache.end = cache.last + need;
-          for (l = 1; l < lg(W); l++)
-            mael(cache.basis, F.perm[l], F.perm[l]) = 1;
+          for ( ; l > 0; l--) mael(cache.basis, F.perm[l], F.perm[l]) = 1;
           cache.missing = 0;
         }
         else
@@ -3698,7 +3679,7 @@ START:
           powFBgen(&cache, &F, nf, auts);
           if (DEBUGLEVEL) timer_printf(&T, "powFBgen");
         }
-        if (!F.sfb_chg) rnd_rel(&cache, &F, nf, auts, fact);
+        if (!F.sfb_chg) rnd_rel(&cache, &F, nf, fact);
         F.L_jid = F.perm;
       }
       if (precpb)
