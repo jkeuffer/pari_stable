@@ -1340,14 +1340,15 @@ intersect_ker(GEN P, GEN MA, GEN U, GEN l)
   pari_sp ltop = avma;
   long i, vp = varn(P), vu = varn(U), r = degpol(U);
   GEN A, R, ib0;
-  if (DEBUGLEVEL>=4) (void)timer2();
+  pari_timer ti;
+  if (DEBUGLEVEL>=4) timer_start(&ti);
   if (lgefint(l)==3)
   {
     ulong p = l[2];
     GEN M, V = Flm_Frobenius(ZM_to_Flm(MA, p), r, p, evalvarn(vu));
-    if (DEBUGLEVEL>=4) msgtimer("pol[Frobenius]");
+    if (DEBUGLEVEL>=4) timer_printf(&ti, "pol[Frobenius]");
     M = FlxqV_Flx_Frobenius(V, ZX_to_Flx(U, p), ZX_to_Flx(P, p), p);
-    if (DEBUGLEVEL>=4) msgtimer("U[Frobenius]");
+    if (DEBUGLEVEL>=4) timer_printf(&ti, "U[Frobenius]");
     if (p==2)
       A = F2m_to_ZM(F2m_ker(Flm_to_F2m(M)));
     else
@@ -1356,10 +1357,10 @@ intersect_ker(GEN P, GEN MA, GEN U, GEN l)
   else
   {
     GEN V = FpM_Frobenius(MA,r,l,vu);
-    if (DEBUGLEVEL>=4) msgtimer("pol[Frobenius]");
+    if (DEBUGLEVEL>=4) timer_printf(&ti, "pol[Frobenius]");
     A = FpM_ker(FpXQV_FpX_Frobenius(V, U, P, l), l);
   }
-  if (DEBUGLEVEL>=4) msgtimer("matrix polcyclo");
+  if (DEBUGLEVEL>=4) timer_printf(&ti, "matrix polcyclo");
   if (lg(A)!=r+1)
     pari_err(talker,"ZZ_%Ps[%Ps]/(%Ps) is not a field in FpX_ffintersect"
         ,l,pol_x(vp),P);
@@ -1399,6 +1400,7 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
   ulong pg;
   GEN A, B, Ap, Bp;
   GEN *gptr[2];
+  pari_timer ti;
   vp = varn(P); np = degpol(P);
   vq = varn(Q); nq = degpol(Q);
   if (np<=0 || nq<=0 || n<=0 || np%n!=0 || nq%n!=0)
@@ -1420,7 +1422,7 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
       z = pgener_Fp_local(l, gel(Z_factor(utoipos(t)), 1));
       z = Fp_pow(z, diviuexact(subis(l,1), pg), l); /* prim. pg-th root of 1 */
       z = negi(z);
-      if (DEBUGLEVEL>=4) (void)timer2();
+      if (DEBUGLEVEL>=4) timer_start(&ti);
       A = FpM_ker(RgM_Rg_add_shallow(MA, z),l);
       if (lg(A)!=2)
         pari_err(talker,"ZZ_%Ps[%Ps]/(%Ps) is not a field in FpX_ffintersect"
@@ -1433,7 +1435,7 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
             ,l,pol_x(vq),Q);
       B = RgV_to_RgX(gel(B,1),vq);
 
-      if (DEBUGLEVEL>=4) msgtimer("FpM_ker");
+      if (DEBUGLEVEL>=4) timer_printf(&ti, "FpM_ker");
       An = gel(FpXQ_pow(A,ipg,P,l),2);
       Bn = gel(FpXQ_pow(B,ipg,Q,l),2);
       if (!invmod(Bn,l,&z))
@@ -1442,7 +1444,7 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
       L = Fp_sqrtn(z,ipg,l,NULL);
       if ( !L )
         pari_err(talker,"Polynomials not irreducible in FpX_ffintersect");
-      if (DEBUGLEVEL>=4) msgtimer("Fp_sqrtn");
+      if (DEBUGLEVEL>=4) timer_printf(&ti, "Fp_sqrtn");
       B = FpX_Fp_mul(B,L,l);
     }
     else
@@ -1451,15 +1453,15 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
       U = gmael(FpX_factor(polcyclo(pg,MAXVARN),l),1,1);
       A = intersect_ker(P, MA, U, l);
       B = intersect_ker(Q, MB, U, l);
-      if (DEBUGLEVEL>=4) (void)timer2();
+      if (DEBUGLEVEL>=4) timer_start(&ti);
       An = gel(FpXYQQ_pow(A,ipg,U,P,l),2);
       Bn = gel(FpXYQQ_pow(B,ipg,U,Q,l),2);
-      if (DEBUGLEVEL>=4) msgtimer("pows [P,Q]");
+      if (DEBUGLEVEL>=4) timer_printf(&ti, "pows [P,Q]");
       z = Fq_inv(Bn,U,l);
       z = Fq_mul(An,z,U,l);
       if (typ(z)==t_INT) z = scalarpol(z,MAXVARN);
       L = FpXQ_sqrtn(z,ipg,U,l,NULL);
-      if (DEBUGLEVEL>=4) msgtimer("FpXQ_sqrtn");
+      if (DEBUGLEVEL>=4) timer_printf(&ti, "FpXQ_sqrtn");
       if (!L) pari_err(talker,"Polynomials not irreducible in FpX_ffintersect");
       B = FqX_Fq_mul(B,L,U,l);
       B = gsubst(B,MAXVARN,gen_0);
