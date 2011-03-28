@@ -1630,6 +1630,9 @@ break_loop_prompt(char *buf, long n)
     sprintf(s, "break[%ld]> ", n);
   return do_prompt(buf, s, NULL);
 }
+
+static long frame_level=0;
+
 static int
 break_loop(int numerr)
 {
@@ -1639,7 +1642,7 @@ break_loop(int numerr)
   struct gp_context rec;
   const char *prompt;
   char promptbuf[MAX_PROMPT_LEN + 24];
-  long nenv;
+  long nenv, oldframe_level = frame_level;
   pari_sp av;
 
   if (numerr == syntaxer) return 0;
@@ -1648,6 +1651,7 @@ break_loop(int numerr)
   b = filtered_buffer(&F);
   nenv=stack_new(&s_env);
   gp_context_save(&rec);
+  frame_level = closure_context(oldframe_level);
   pari_infile = newfile(stdin, "stdin", mf_IN)->file;
   term_color(c_ERR); pari_putc('\n');
   if (sigint)
@@ -1667,6 +1671,7 @@ break_loop(int numerr)
       if (er<0) { s_env.n=1; longjmp(env[s_env.n-1], er); }
       gp_context_restore(&rec);
       closure_err();
+      frame_level = closure_context(oldframe_level);
       pari_infile = newfile(stdin, "stdin", mf_IN)->file;
     }
     term_color(c_NONE);
@@ -1701,6 +1706,7 @@ GP_EOF:
     }
   }
   s_env.n=nenv;
+  frame_level = oldframe_level;
   gp_context_restore(&rec);
   pop_buffer(); return go_on;
 }

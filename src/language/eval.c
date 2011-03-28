@@ -637,17 +637,8 @@ closure_err(void)
   GEN base;
   const long lastfun = s_trace.n - 1;
   char *next_label, *next_fun;
-  long i, fun = lastfun;
-
-  if (fun < 0) return; /*e.g. when called by gp_main_loop's simplify */
-  while (lg(trace[fun].closure)==6) fun--;
-  for (i=fun; i<=lastfun; i++)
-  {
-    long *pc=trace[i].pc;
-    closure_context(trace[i].closure, pc?*pc:-1);
-  }
-
-  i = maxss(0, lastfun - 19);
+  long i = maxss(0, lastfun - 19);
+  if (lastfun < 0) return; /*e.g. when called by gp_main_loop's simplify */
   if (i > 0) while (lg(trace[i].closure)==6) i--;
   base = gel(trace[i].closure,6); /* gcc -Wall*/
   next_label = pari_strdup(i == 0? "at top-level": "[...] at");
@@ -683,6 +674,21 @@ closure_err(void)
       }
     }
   }
+}
+
+long
+closure_context(long start)
+{
+  const long lastfun = s_trace.n - 1;
+  long i, fun = lastfun;
+
+  while (fun>start+1 && lg(trace[fun].closure)==6) fun--;
+  for (i=fun; i<=lastfun; i++)
+  {
+    long *pc=trace[i].pc;
+    push_frame(trace[i].closure, pc?*pc:-1);
+  }
+  return lastfun;
 }
 
 INLINE void

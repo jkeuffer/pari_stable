@@ -336,6 +336,8 @@ void evalstate_reset(void);
 void evalstate_restore(struct pari_evalstate *state);
 void evalstate_save(struct pari_evalstate *state);
 
+void debug_context(void);
+
 /* GP_DATA */
 typedef struct {
   gp_hist *hist;

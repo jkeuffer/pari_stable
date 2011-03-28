@@ -74,7 +74,7 @@ void pari_init_parser(void);
 void pari_init_compiler(void);
 void pari_init_evaluator(void);
 void optimizenode(long n);
-void closure_context(GEN C, long lpc);
+void push_frame(GEN C, long lpc);
 const char * closure_func_err(void);
 GEN  gp_closure(long n);
 long eval_mnemonic(GEN str, const char *tmplate);

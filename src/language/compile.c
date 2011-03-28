@@ -301,7 +301,7 @@ pack_localvars(void)
 }
 
 void
-closure_context(GEN C, long lpc)
+push_frame(GEN C, long lpc)
 {
   char *code=GSTR(gel(C,2))-1;
   GEN oper=gel(C,3);
@@ -329,6 +329,18 @@ closure_context(GEN C, long lpc)
         var_push((entree*)e[k], Lmy);
       j++;
     }
+  }
+}
+
+void
+debug_context(void)
+{
+  long i;
+  for(i=0;i<s_lvar.n;i++)
+  {
+    entree *ep = localvars[i].ep;
+    Ltype type = localvars[i].type;
+    fprintferr("%ld: %s: %s\n",i,(type==Lmy?"my":"local"),(ep?ep->name:"NULL"));
   }
 }
 
