@@ -1,0 +1,11 @@
+/Makefile
+/gphelp
+/paricfg.tex
+/usersch3.tex
+/*.pdf
+/*.idx
+/*.aux
+/*.dvi
+/*.log
+/*.toc
+/refcard.ps
