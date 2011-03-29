@@ -1974,7 +1974,7 @@ function is equivalent to the following code
   fprintferr(": %ld", timer_delay(T));
 @eprog\noindent Resets the timer as a side effect.
 
-They are used as follows:
+\noindent They are used as follows:
 \bprog
   pari_timer T;
   timer_start(&T); /* initialize timer */
@@ -1990,6 +1990,20 @@ or
     timer_printf(&T, "for i = %ld (L[i] = %Ps)", i, gel(L,i));
   }
 @eprog
+
+The following functions provided the same functionnality, in a
+non-reentrant way, and are now deprecated.
+
+\fun{long}{timer}{void}
+
+\fun{long}{timer2}{void}
+
+\fun{void}{msgtimer}{const char *format, ...}
+
+The following function implements \kbd{gp}'s timer and should not be used in
+libpari programs:
+\fun{long}{gettime}{void} equivalent to \tet{timer_delay}$(T)$ associated to a
+private timer $T$.
 
 \section{Iterators, Numerical integration, Sums, Products}
 \subsec{Iterators}
