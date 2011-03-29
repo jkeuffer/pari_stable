@@ -953,13 +953,13 @@ pari_warn(int numerr, ...)
   pariErr->flush();
 }
 void
-pari_sigint(const char *s)
+pari_sigint(const char *time_s)
 {
   err_init();
   closure_err();
   err_init_msg(talker);
-  pariOut_puts(pariErr, s);
-  pariOut_putc(pariErr, '.');
+  pariOut_puts(pariErr, "user interrupt after ");
+  pariOut_puts(pariErr, time_s);
   pariOut_term_color(pariErr, c_NONE);
   pariErr->flush();
   if (cb_pari_handle_exception &&
@@ -1005,12 +1005,20 @@ pari_err(int numerr, ...)
     pariOut_puts(pariErr, errmessage[numerr]);
     switch (numerr)
     {
-      case talker: case alarmer: {
+      case talker: {
         const char *ch1 = va_arg(ap, char*);
         pariOut_vprintf(pariErr, ch1,ap);
         pariOut_putc(pariErr, '.');
         break;
       }
+      case alarmer: {
+        const char *ch1 = va_arg(ap, char*);
+        pariOut_puts(pariErr, "alarm interrupt after ");
+        pariOut_vprintf(pariErr, ch1,ap);
+        pariOut_putc(pariErr, '.');
+        break;
+      }
+
       case user:
         pariOut_puts(pariErr, "user error: ");
         pariOut_print0(pariErr, va_arg(ap, GEN), f_RAW);

@@ -348,6 +348,7 @@ typedef struct {
   int echo, breakloop, recover, use_readline; /* GP-specific */
   int secure, simplify, strictmatch, chrono; /* libpari ? */
   pari_timer *T;
+  long last_time; /* duration of last interactive gp command */
 } gp_data;
 extern gp_data *GP_DATA;
   /* GP_DATA->flags */

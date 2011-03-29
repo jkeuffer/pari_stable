@@ -794,6 +794,7 @@ default_gp_data(void)
   D->simplify    = 1;
   D->secure      = 0;
   D->use_readline= 0;
+  D->last_time   = 0;
   D->T    = &__T;
   D->hist = &__HIST;
   D->pp   = &__PP;

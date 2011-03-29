@@ -1006,31 +1006,13 @@ escape(char *tch, int ismain)
   }
 }
 
-enum { ti_NOPRINT, ti_REGULAR, ti_LAST, ti_INTERRUPT, ti_ALARM };
-/* flag:
- *   ti_NOPRINT   don't print
- *   ti_REGULAR   print elapsed time (chrono)
- *   ti_LAST      print last elapsed time (##)
- *   ti_INTERRUPT received a SIGINT */
+/* Format a time of 'delay' ms */
 static char *
-gp_format_time(long flag)
+gp_format_time(long delay)
 {
   static char buf[64];
-  static long last = 0;
-  long delay = (flag == ti_LAST)? last: timer_delay(GP_DATA->T);
-  char *s;
-  const char *pre;
+  char *s = buf;
 
-  last = delay;
-  switch(flag)
-  {
-    case ti_REGULAR:   pre = "time = "; break;
-    case ti_INTERRUPT: pre = "user interrupt after "; break;
-    case ti_ALARM: pre = "alarm interrupt after "; break;
-    case ti_LAST:      pre = "  ***   last result computed in "; break;
-    default: return NULL;
-  }
-  strcpy(buf,pre); s = buf+strlen(pre);
   term_get_color(s, c_TIME); s+=strlen(s);
   if (delay >= 3600000)
   {
@@ -1053,9 +1035,8 @@ gp_format_time(long flag)
     }
   }
   sprintf(s, "%ld ms", delay); s+=strlen(s);
-  term_get_color(s, c_NONE);
-  if (flag != ti_INTERRUPT) { s+=strlen(s); *s++='.'; *s++='\n'; *s=0; }
-  return buf;
+  term_get_color(s, c_NONE); s+=strlen(s);
+  *s++ = '.'; *s++ = '\n'; *s = 0; return buf;
 }
 
 static int
@@ -1065,7 +1046,8 @@ chron(char *s)
   { /* if "#" or "##" timer metacommand. Otherwise let the parser get it */
     if (*s == '#') s++;
     if (*s) return 0;
-    pari_puts(gp_format_time(ti_LAST));
+    pari_puts( "  ***   last result computed in " );
+    pari_puts( gp_format_time(GP_DATA->last_time) );
   }
   else { GP_DATA->chrono ^= 1; (void)sd_timer(NULL,d_ACKNOWLEDGE); }
   return 1;
@@ -1589,10 +1571,12 @@ gp_main_loop(long flag)
 
     if (!pari_last_was_newline()) pari_putc('\n');
 
+    GP_DATA->last_time = timer_delay(GP_DATA->T);
     if (GP_DATA->chrono)
-      pari_puts(gp_format_time(ti_REGULAR));
-    else
-      (void)gp_format_time(ti_NOPRINT);
+    {
+      pari_puts( "time = " );
+      pari_puts( gp_format_time(GP_DATA->last_time) );
+    }
     if (z == gnil) continue;
 
     if (GP_DATA->simplify) z = simplify_shallow(z);
@@ -1609,14 +1593,14 @@ gp_main_loop(long flag)
 static void
 gp_sigint_fun(void) {
   if (GP_DATA->flags & gpd_TEXMACS) tm_start_output();
-  pari_sigint(gp_format_time(ti_INTERRUPT));
+  pari_sigint( gp_format_time(timer_delay(GP_DATA->T)) );
 }
 
 #ifdef SIGALRM
 static void
 gp_alarm_fun(void) {
   if (GP_DATA->flags & gpd_TEXMACS) tm_start_output();
-  pari_err(alarmer, gp_format_time(ti_ALARM));
+  pari_err(alarmer, gp_format_time(timer_get(GP_DATA->T)));
 }
 #endif /* SIGALRM */
 
