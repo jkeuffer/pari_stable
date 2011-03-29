@@ -1955,37 +1955,31 @@ with a \kbd{dbg\_block()} and \kbd{dbg\_release()} pair to suppress those.
 
 \subsec{Timers and timing output}
 
-\noindent
-To profile your functions, you can use the PARI timer. The functions
-\fun{long}{timer}{} and \fun{long}{timer2}{} return the elapsed time since
-the last call of the same function (in milliseconds). Two different
-functions (identical except for their independent time-of-last-call
-memories!) are provided so you can have both global timing and fine tuned
-profiling.
+\noindent To handle timings in a reentrant way, PARI defines a dedicated data
+type, \tet{pari_timer}, together with the following methods:
 
-You can also use \fun{void}{msgtimer}{char *format,...}, which prints
-prints \kbd{Time}, then the remaining arguments as specified by
-\kbd{format} (which is a PARI format), then the output of \kbd{timer2}.
+\fun{void}{timer_start}{pari_timer *T} start (or reset) a timer.
 
-This mechanism is simple to use but not foolproof. If some other function
-uses these timers, the timings will be meaningless. To handle timing in a
-reentrant way, PARI defines a dedicated data type, \tet{pari_timer}. The
-functions
+\fun{long}{timer_delay}{pari_timer *T} returns the number of milliseconds
+elapsed since the timer was last reset. Resets the timer as a side effect.
 
-\fun{void}{timer_start}{pari_timer *T}
+\fun{long}{timer_get}{pari_timer *T} returns the number of milliseconds
+elapsed since the timer was last reset. Does \emph{not} reset the timer.
 
-\fun{long}{timer_delay}{pari_timer *T}
+\fun{long}{timer_printf}{pari_timer *T, char *format,...} This diagnostics
+function is equivalent to the following code
+\bprog
+  fprintferr("Time ")
+  ... prints remaining arguments according to format ...
+  fprintferr(": %ld", timer_delay(T));
+@eprog\noindent Resets the timer as a side effect.
 
-\fun{long}{timer_printf}{pari_timer *T, char *format,...}
-
-\noindent provide an equivalent to \kbd{timer} and \kbd{msgtimer}, except
-they use a unique timer \kbd{T} containing all the information needed, so
-that no other function can mess with your timings. They are used as follows:
+They are used as follows:
 \bprog
   pari_timer T;
   timer_start(&T); /* initialize timer */
   ...
-  printf("Total time: %ld\n", timer_delay(&T));
+  printf("Total time: %ldms\n", timer_delay(&T));
 @eprog\noindent
 or
 \bprog
@@ -1993,7 +1987,7 @@ or
   timer_start(&T);
   for (i = 1; i < 10; i++) {
     ...
-    timer_printf(&T, "for i = %ld (L[i] = %Ps)", i, L[i]);
+    timer_printf(&T, "for i = %ld (L[i] = %Ps)", i, gel(L,i));
   }
 @eprog
 
