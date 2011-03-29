@@ -1593,7 +1593,7 @@ gp_main_loop(long flag)
 static void
 gp_sigint_fun(void) {
   if (GP_DATA->flags & gpd_TEXMACS) tm_start_output();
-  pari_sigint( gp_format_time(timer_delay(GP_DATA->T)) );
+  pari_sigint( gp_format_time(timer_get(GP_DATA->T)) );
 }
 
 #ifdef SIGALRM

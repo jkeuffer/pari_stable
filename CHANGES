@@ -49,6 +49,7 @@ BA 32- forsubgroup() did not handle break/next/return.
    37- List() == List() returned 0.
    38- [Configure] C_INCLUDE_PATH was not used when looking for libgmp
 BA 39- polroots(1) returned [] instead of []~.
+   40- a succession of <C-C> in breakloop context would reinitialize timer
 
   Changed
 LGr1- universal constants (gen_0,gen_1, etc.) are now read-only
