@@ -1959,7 +1959,7 @@ signunits(GEN bnf)
 }
 
 static GEN
-get_log_embed(FB_t *F, REL_t *rel, GEN M, long RU, long R1, long prec)
+get_log_embed(REL_t *rel, GEN M, long RU, long R1, long prec)
 {
   GEN arch, C, z = rel->m;
   long i;
@@ -2166,7 +2166,7 @@ add_rel(RELCACHE_t *cache, FB_t *F, GEN R, long nz, GEN m)
 
 /* Compute powers of prime ideal (P^0,...,P^a) (a > 1) */
 static void
-powPgen(FB_t *F, GEN nf, GEN vp, GEN *ppowP, long a)
+powPgen(GEN nf, GEN vp, GEN *ppowP, long a)
 {
   GEN id2, J;
   long j;
@@ -2207,7 +2207,7 @@ powFBgen(RELCACHE_t *cache, FB_t *F, GEN nf, GEN auts)
       GEN id2;
 
       if (DEBUGLEVEL>1) fprintferr("%ld: 1", id);
-      powPgen(F, nf, gel(F->LP, id), &id2, a);
+      powPgen(nf, gel(F->LP, id), &id2, a);
       gel(F->id2, id) = gclone(id2);
       for (k = 1; k < naut; k++)
       {
@@ -2250,7 +2250,7 @@ step(GEN x, double *y, GEN inc, long k)
 }
 
 static void
-small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, GEN auts, long nbrelpid,
+small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
            double LOGD, double LIMC2, FACT *fact, GEN p0)
 {
   pari_timer T;
@@ -3429,7 +3429,7 @@ automorphism_perms(GEN M, GEN auts, GEN cyclic, long N)
 
 /* Determine the field automorphisms and its matrix in the integral basis. */
 static GEN
-automorphism_matrices(GEN nf, long v, long N, GEN *invp, GEN *cycp)
+automorphism_matrices(GEN nf, GEN *invp, GEN *cycp)
 {
   pari_sp av = avma;
   GEN auts = galoisconj(nf, NULL), mats, cyclic, cyclicidx;
@@ -3559,7 +3559,7 @@ Buchall_param(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long
   gel(zu,2) = nf_to_scalar_or_alg(nf, gel(zu,2));
   if (DEBUGLEVEL) timer_printf(&T, "nfinit & rootsof1");
 
-  auts = automorphism_matrices(nf, varn(P), N, &F.invs, &cyclic);
+  auts = automorphism_matrices(nf, &F.invs, &cyclic);
   if (DEBUGLEVEL) timer_printf(&T, "automorphisms");
   F.embperm = automorphism_perms(nf_get_M(nf), auts, cyclic, N);
   if (DEBUGLEVEL) timer_printf(&T, "complex embedding permutations");
@@ -3673,7 +3673,7 @@ START:
           }
         }
         if (lg(F.L_jid) > 1)
-          small_norm(&cache, &F, nf, auts, nbrelpid, LOGD, LIMC2, fact, p0);
+          small_norm(&cache, &F, nf, nbrelpid, LOGD, LIMC2, fact, p0);
         avma = av3;
         if (R)
         {
@@ -3743,7 +3743,7 @@ START:
         {
           gel(mat,j) = rel->R;
           if (!rel->relaut)
-            gel(emb,j) = get_log_embed(&F, rel, M, RU, R1, PRECREG);
+            gel(emb,j) = get_log_embed(rel, M, RU, R1, PRECREG);
           else
             gel(emb,j) = perm_log_embed(gel(emb, j-rel->relorig),
                                         gel(F.embperm, rel->relaut));
