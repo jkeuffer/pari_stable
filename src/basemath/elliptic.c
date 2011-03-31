@@ -4292,25 +4292,22 @@ GEN
 elltatepairing(GEN E, GEN t, GEN s, GEN m)
 {
   pari_sp ltop=avma;
-  GEN w;
   checksmallell(E); checkellpt(t); checkellpt(s);
   if (typ(m)!=t_INT) pari_err(typeer,"elltatepairing");
   if (ell_is_inf(s) || ell_is_inf(t)) return gen_1;
   while(1)
   {
-    GEN r, rs, tr, a;
+    GEN r, rs, a;
     avma = ltop;
     r  = ellrandom(E);
     rs = addell(E, r, s);
-    tr = subell(E, t, r);
-    if (ell_is_inf(rs) || ell_is_inf(tr) || ell_is_inf(r) || gequal(rs, t))
+    if (ell_is_inf(rs) || gequal(t,r) || ell_is_inf(r) || gequal(rs, t))
       continue;
     a = ellffmul(E, mkvec2(t, gen_1), m, rs, r);
     if (a==gen_0) continue;
     if (!ell_is_inf(gel(a,1)))
       pari_err(talker,"Points of wrong order in elltatepairing");
-    w = gel(a, 2);
-    return gerepilecopy(ltop, w);
+    return gerepilecopy(ltop, gel(a, 2));
   }
 }
 
