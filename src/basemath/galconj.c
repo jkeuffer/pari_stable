@@ -20,12 +20,38 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**                           GALOIS CONJUGATES                         **/
 /**                                                                     **/
 /*************************************************************************/
+
+static int is2sparse(GEN x)
+{
+  long i, l = lg(x);
+  if (odd(l-3)) return 0;
+  for(i=3; i<l; i+=2)
+    if (signe(gel(x,i)))
+      return 0;
+  return 1;
+}
+
 static GEN
 galoisconj1(GEN nf)
 {
   GEN x = get_nfpol(nf, &nf), y, z;
-  long i, lz, v = varn(x);
+  long i, lz, v = varn(x), nbmax;
   pari_sp av = avma;
+  RgX_check_ZX(x, "nfgaloisconj");
+  nbmax = numberofconjugates(x, 2);
+  if (nbmax==1)
+  {
+    GEN res = cgetg(2,t_COL);
+    gel(res,1) = pol_x(v);
+    return res;
+  }
+  if (nbmax==2 && is2sparse(x))
+  {
+    GEN res = cgetg(3,t_COL);
+    gel(res,1) = deg1pol_shallow(gen_m1, gen_0, v);
+    gel(res,2) = pol_x(v);
+    return res;
+  }
   if (v == 0)
   {
     long w = fetch_user_var("y");
