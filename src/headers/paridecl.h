@@ -2070,6 +2070,7 @@ GEN     int2u(ulong n);
 GEN     int_normalize(GEN x, long known_zero_words);
 int     invmod(GEN a, GEN b, GEN *res);
 ulong   invmod2BIL(ulong b);
+GEN     mantissa_real(GEN x, long *e);
 GEN     modii(GEN x, GEN y);
 void    modiiz(GEN x, GEN y, GEN z);
 GEN     mulii(GEN x, GEN y);
