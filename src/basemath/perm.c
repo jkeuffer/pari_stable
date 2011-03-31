@@ -597,7 +597,7 @@ group_quotient(GEN G, GEN H)
 {
   pari_sp ltop = avma;
   GEN  p2, p3;
-  long i, j, k, a = 1;
+  long i, j, a = 1;
   long n = group_domain(G), o = group_order(H);
   GEN  elt = group_elts(G,n), el;
   long le = lg(elt)-1;
@@ -608,7 +608,7 @@ group_quotient(GEN G, GEN H)
   el = const_vecsmall(n, 0);
   for (i = 1; i<=le; i++)
     el[mael(elt,i,1)]=i;
-  for (i = 1, k = 1; i <= l; ++i)
+  for (i = 1; i <= l; ++i)
   {
     GEN V;
     while(F2v_coeff(used,a)) a++;

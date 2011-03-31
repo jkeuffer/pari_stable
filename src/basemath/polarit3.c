@@ -1825,7 +1825,6 @@ static void
 Flx_resultant_set_dglist(GEN a, GEN b, GEN dglist, ulong p)
 {
   long da,db,dc, ind;
-  ulong lb;
   pari_sp av = avma, lim = stack_lim(av, 2);
 
   if (lgpol(a)==0 || lgpol(b)==0) return;
@@ -1838,7 +1837,6 @@ Flx_resultant_set_dglist(GEN a, GEN b, GEN dglist, ulong p)
   while (db)
   {
     GEN c = Flx_rem(a,b, p);
-    lb = b[db+2];
     a = b; b = c; dc = degpol(c);
     if (dc < 0) break;
 

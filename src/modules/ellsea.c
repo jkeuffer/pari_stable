@@ -1087,7 +1087,7 @@ static GEN
 champion(GEN atkin, long k, GEN bound_champ)
 {
   const long two_k = 1L<<k;
-  pari_sp ltop = avma, btop;
+  pari_sp ltop = avma;
   long i, j, n, i1, i2;
   GEN B, Bp, cost_vec, res = NULL;
 
@@ -1097,7 +1097,6 @@ champion(GEN atkin, long k, GEN bound_champ)
   B  = const_vecsmall(two_k, 0);
   Bp = const_vecsmall(two_k, 0);
   Bp[2] = 1;
-  btop = avma;
   for (n = 2, j = 2; j <= k; j++)
   {
     long b;

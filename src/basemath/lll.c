@@ -539,10 +539,9 @@ ZM_lll_norms(GEN x, double DELTA, long flag, GEN *B)
 {
   pari_sp ltop = avma;
   const double ETA = 0.51;
-  long p, d, n = lg(x)-1;
+  long p, n = lg(x)-1;
   GEN U;
   if (n <= 1) return lll_trivial(x, flag);
-  d = lg(gel(x,1))-1;
   x = RgM_shallowcopy(x);
   U = (flag & LLL_INPLACE)? NULL: matid(n);
   for (p = 3; ; p++)

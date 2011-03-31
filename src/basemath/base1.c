@@ -913,7 +913,7 @@ idealfrobenius(GEN nf, GEN gal, GEN pr)
 {
   pari_sp av = avma;
   GEN S=NULL, g=NULL; /*-Wall*/
-  GEN T, p, a, b, modpr, grp;
+  GEN T, p, a, b, modpr;
   long f, n, s;
   checknf(nf);
   checkgal(gal);
@@ -925,7 +925,6 @@ idealfrobenius(GEN nf, GEN gal, GEN pr)
   f = pr_get_f(pr); n = nf_get_degree(nf);
   if (f==1) { avma = av; return identity_perm(n); }
   modpr = nf_to_Fq_init(nf,&pr,&T,&p);
-  grp = gal_get_group(gal);
   g = idealquasifrob(nf, gal, pr, NULL, &S);
   a = pol_x(nf_get_varn(nf));
   b = nf_to_Fq(nf, QX_galoisapplymod(nf, modpr_genFq(modpr), S, p), modpr);
