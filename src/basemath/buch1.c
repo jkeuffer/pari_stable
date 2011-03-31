@@ -858,6 +858,7 @@ Buchquad(GEN D, double cbach, double cbach2, long prec)
   int FIRST = 1;
 
   check_quaddisc(D, &s, /*junk*/&i, "Buchquad");
+  R = NULL; /* -Wall */
   BQ.QFR = &QFR;
   QFR.D = D;
   if (s < 0)

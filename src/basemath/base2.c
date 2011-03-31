@@ -1748,7 +1748,11 @@ init_norm(norm_S *S, GEN nf, GEN p)
   GEN T = nf_get_pol(nf);
   long N = degpol(T);
 
-  S->M = NULL;
+  S->M = NULL; /* -Wall */
+  S->r1 = 0;   /* -Wall */
+  S->D = NULL; /* -Wall */
+  S->w = NULL; /* -Wall */
+  S->T = NULL; /* -Wall */
   if (typ(nf[5]) == t_VEC) /* beware dummy nf from padicff */
   {
     GEN M = nf_get_M(nf);
