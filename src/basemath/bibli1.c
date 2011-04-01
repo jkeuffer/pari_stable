@@ -644,7 +644,7 @@ lindep2(GEN x, long bit)
   GEN re, im, M;
 
   if (! is_vec_t(tx)) pari_err(typeer,"lindep2");
-  if (lx<=2) return cgetg(1,t_VEC);
+  if (lx<=2) return cgetg(1,t_COL);
   if (bit < 0) pari_err(talker, "negative accuracy in lindep2");
   if (!bit)
   {
@@ -662,7 +662,7 @@ lindep2(GEN x, long bit)
   re = real_i(x);
   im = imag_i(x);
   /* independent over R ? */
-  if (lx == 3 && real_indep(re,im,bit)) { avma = av; return cgetg(1, t_VEC); }
+  if (lx == 3 && real_indep(re,im,bit)) { avma = av; return cgetg(1, t_COL); }
   if (gequal0(im)) im = NULL;
   ly = im? lx+2: lx+1;
   M = cgetg(lx,t_MAT);
@@ -694,13 +694,13 @@ lindep(GEN x)
   EXP = 2*n - bit_accuracy(prec);
 
   if (! is_vec_t(typ(x))) pari_err(typeer,"lindep");
-  if (n <= 1) return cgetg(1,t_VEC);
+  if (n <= 1) return cgetg(1,t_COL);
   x = RgC_gtofp(x, prec);
   re = real_i(x);
   im = imag_i(x);
   /* independent over R ? */
   if (n == 2 && real_indep(re,im,bit_accuracy(prec)))
-    { avma = av; return cgetg(1, t_VEC); }
+    { avma = av; return cgetg(1, t_COL); }
   if (EXP > -10) pari_err(precer,"lindep");
 
   qzer = cgetg(lx, t_VECSMALL);
@@ -1509,7 +1509,7 @@ plindep(GEN x)
   pari_sp av = avma;
   GEN p = NULL, pn,p1,m,a;
 
-  if (nx < 2) return cgetg(1,t_VEC);
+  if (nx < 2) return cgetg(1,t_COL);
   for (i=1; i<=nx; i++)
   {
     p1 = gel(x,i);
