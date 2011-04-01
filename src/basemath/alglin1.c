@@ -932,7 +932,7 @@ RgM_solve(GEN a, GEN b)
 
   if (is_modular_solve(a,b,&u)) return gerepileupto(av, u);
   avma = av;
-  if (!init_gauss(a, &b, &aco, &li, &iscol)) return cgetg(1, t_MAT);
+  if (!init_gauss(a, &b, &aco, &li, &iscol)) return cgetg(1, iscol?t_COL:t_MAT);
   pivot = get_pivot_fun(a, &data);
   a = RgM_shallowcopy(a);
   bco = lg(b)-1;
@@ -1137,7 +1137,7 @@ FpM_gauss(GEN a, GEN b, GEN p)
   int iscol;
   GEN u;
 
-  if (!init_gauss(a, &b, &aco, &li, &iscol)) return cgetg(1, t_MAT);
+  if (!init_gauss(a, &b, &aco, &li, &iscol)) return cgetg(1, iscol?t_COL:t_MAT);
   if (lgefint(p) == 3)
   {
     ulong pp = (ulong)p[2];
@@ -1200,7 +1200,7 @@ FqM_gauss(GEN a, GEN b, GEN T, GEN p)
   GEN u;
 
   if (!T) return FpM_gauss(a,b,p);
-  if (!init_gauss(a, &b, &aco, &li, &iscol)) return cgetg(1, t_MAT);
+  if (!init_gauss(a, &b, &aco, &li, &iscol)) return cgetg(1, iscol?t_COL:t_MAT);
 
   lim = stack_lim(av,1);
   a = RgM_shallowcopy(a);
