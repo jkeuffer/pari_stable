@@ -282,7 +282,7 @@ FpX_quad_root(GEN x, GEN p, int unknown)
   return Fp_mul(u, subii(s,b), p);
 }
 static GEN
-otherroot(GEN x, GEN r, GEN p)
+FpX_otherroot(GEN x, GEN r, GEN p)
 {
   GEN s = addii(gel(x,3), r);
   if (!signe(s)) return s;
@@ -311,7 +311,7 @@ FpX_roots_i(GEN f, GEN p)
     GEN s, r = FpX_quad_root(f, p, 1);
     if (r) {
       gel(y, j++) = r;
-      s = otherroot(f,r, p);
+      s = FpX_otherroot(f,r, p);
       if (!equalii(r, s)) gel(y, j++) = s;
     }
     setlg(y, j); return sort(y);
@@ -339,7 +339,7 @@ FpX_roots_i(GEN f, GEN p)
     {
       GEN r = FpX_quad_root(a, p, 0);
       gel(y, j++) = r;
-      gel(y, j++) = otherroot(a,r, p);
+      gel(y, j++) = FpX_otherroot(a,r, p);
     }
     else for (pol0[2]=1; ; pol0[2]++)
     {
@@ -961,7 +961,7 @@ FpX_factor_2(GEN f, GEN p, long d)
   r = FpX_quad_root(f, p, 1);
   if (!r) return mkvec2(mkcol(f), mkvecsmall(1));
   v = varn(f);
-  s = otherroot(f, r, p);
+  s = FpX_otherroot(f, r, p);
   if (signe(r)) r = subii(p, r);
   if (signe(s)) s = subii(p, s);
   sgn = cmpii(s, r); if (sgn < 0) swap(s,r);
@@ -1209,7 +1209,7 @@ FpX_split_Berlekamp(GEN *t, GEN p)
         GEN r = FpX_quad_root(a,p,1);
         if (r)
         {
-          t[i] = deg1pol_shallow(gen_1, subii(p,r), vu); r = otherroot(a,r,p);
+          t[i] = deg1pol_shallow(gen_1, subii(p,r), vu); r = FpX_otherroot(a,r,p);
           t[L] = deg1pol_shallow(gen_1, subii(p,r), vu); L++;
         }
         set_irred(i);
