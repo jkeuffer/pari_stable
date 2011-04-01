@@ -59,7 +59,7 @@ INLINE void
 F2x_set(GEN x,long v)
 {
    ulong* u=(ulong*)&x[2+divsBIL(v)];
-   *u^=1UL<<remsBIL(v);
+   *u|=1UL<<remsBIL(v);
 }
 
 GEN
