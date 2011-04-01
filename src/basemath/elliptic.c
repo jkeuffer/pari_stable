@@ -1053,7 +1053,7 @@ zell(GEN e, GEN z, long prec)
   pari_sp av = avma;
   GEN t, u, p1, p2, a, b, x1, u2, D;
 
-  checkell_real(e); checkellpt(z);
+  checkell(e); checkellpt(z);
   D = ell_get_disc(e);
   ty = typ(D); if (ty == t_INTMOD) pari_err(typeer,"zell");
   if (ell_is_inf(z)) return (ty==t_PADIC)? gen_1: gen_0;
@@ -3326,7 +3326,6 @@ hell(GEN e, GEN a, long prec)
   GEN pi2 = Pi2n(1, prec), w1 = gel(e,15), w2 = gel(e,16);
   GEN p1, y, z, q, pi2surw, qn, ps;
 
-  checkell_real(e);
   pi2surw = gdiv(pi2, w1);
   z = gmul(real_i(zell(e,a,prec)), pi2surw);
   q = real_i( expIxy(mpneg(pi2surw), w2, prec) );
