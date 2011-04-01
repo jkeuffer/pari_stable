@@ -14,3 +14,5 @@ minpoly([a+4/51*d,29/51*d,55/17*d,-9/17*d;-11/51*d,a+35/51*d,-11/17*d,12/17*d;23
      print(matfrobenius(mathilbert(i),2)));
 }
 lindep([1,2,3], -3)
+matsnf(matdiagonal([x,0,x]), 2)
+matsnf(matdiagonal([1+x,0,x]), 2)

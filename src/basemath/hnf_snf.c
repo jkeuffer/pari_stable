@@ -1755,6 +1755,30 @@ bezout_step(GEN *pa, GEN *pb, GEN *pu, GEN *pv)
 static int
 negcmpii(void *E, GEN x, GEN y) { (void)E; return -cmpii(x,y); }
 
+/* does b = x[i,i] divide all entries in x[1..i-1,1..i-1] ? If so, return 0;
+ * else return the index of a problematic row */
+static long
+ZM_snf_no_divide(GEN x, long i)
+{
+  GEN b = gcoeff(x,i,i);
+  long j, k;
+
+  if (!signe(b))
+  { /* impossible in the current implementation : x square of maximal rank */
+    for (k = 1; k < i; k++)
+      for (j = 1; j < i; j++)
+        if (signe(gcoeff(x,k,j))) return k;
+    return 0;
+  }
+  if (is_pm1(b)) return 0;
+  for (k=1; k<i; k++)
+  {
+    for (j=1; j<i; j++)
+      if (signe(remii(gcoeff(x,k,j),b))) return k;
+  }
+  return 0;
+}
+
 /* Return the SNF D of matrix X. If ptU/ptV non-NULL set them to U/V
  * to that D = UXV */
 GEN
@@ -1893,15 +1917,8 @@ ZM_snfall_i(GEN x, GEN *ptU, GEN *ptV, int return_vec)
       }
       if (!c)
       {
-        b = gcoeff(x,i,i); if (!signe(b) || is_pm1(b)) break;
-
-        for (k=1; k<i; k++)
-        {
-          for (j=1; j<i; j++)
-            if (signe(remii(gcoeff(x,k,j),b))) break;
-          if (j != i) break;
-        }
-        if (k == i) break;
+        k = ZM_snf_no_divide(x, i);
+        if (!k) break;
 
         /* x[k,j] != 0 mod b */
         for (j=1; j<=i; j++)
@@ -2054,6 +2071,36 @@ gbezout_step(GEN *pa, GEN *pb, GEN *pu, GEN *pv, long vx)
   *pb = b; return d;
 }
 
+/* does b = x[i,i] divide all entries in x[1..i-1,1..i-1] ? If so, return 0;
+ * else return the index of a problematic row */
+static long
+gsnf_no_divide(GEN x, long i, long vx)
+{
+  GEN b = gcoeff(x,i,i);
+  long j, k;
+
+  if (gcmp0(b))
+  {
+    for (k = 1; k < i; k++)
+      for (j = 1; j < i; j++)
+        if (!gcmp0(gcoeff(x,k,j))) return k;
+    return 0;
+  }
+
+  if (!is_RgX(b,vx) || degpol(b)<=0) return 0;
+  for (k = 1; k < i; k++)
+    for (j = 1; j < i; j++)
+    {
+      GEN z = gcoeff(x,k,j), r;
+      if (!is_RgX(z,vx)) z = scalarpol(z, vx);
+      r = RgX_rem(z, b);
+      if (signe(r) && (! isinexactreal(r) ||
+             gexpo(r) > 16 + gexpo(b) - bit_accuracy(gprecision(r)))
+         ) return k;
+    }
+  return 0;
+}
+
 static GEN
 gsmithall_i(GEN x,long all)
 {
@@ -2062,7 +2109,7 @@ gsmithall_i(GEN x,long all)
   GEN z, u, v, U, V;
   long vx = gvar(x);
   if (typ(x)!=t_MAT) pari_err(typeer,"gsmithall");
-  if (vx==NO_VARIABLE) return all?smithall(x):smith(x);
+  if (vx==NO_VARIABLE) return all? smithall(x): smith(x);
   n = lg(x)-1;
   if (!n) return trivsmith(all);
   if (lg(x[1]) != n+1) pari_err(mattype1,"gsmithall");
@@ -2108,22 +2155,8 @@ gsmithall_i(GEN x,long all)
       }
       if (!c)
       {
-        b = gcoeff(x,i,i); if (!is_RgX(b,vx) || degpol(b)<=0) break;
-
-        for (k=1; k<i; k++)
-        {
-          for (j=1; j<i; j++)
-          {
-            GEN z = gcoeff(x,k,j), r;
-            if (!is_RgX(z,vx)) z = scalarpol(z, vx);
-            r = RgX_rem(z, b);
-            if (signe(r) && (! isinexactreal(r) ||
-                   gexpo(r) > 16 + gexpo(b) - bit_accuracy(gprecision(r)))
-               ) break;
-          }
-          if (j != i) break;
-        }
-        if (k == i) break;
+        k = gsnf_no_divide(x, i, vx);
+        if (!k) break;
 
         for (j=1; j<=i; j++)
           gcoeff(x,i,j) = gadd(gcoeff(x,i,j),gcoeff(x,k,j));
