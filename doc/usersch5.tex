@@ -3285,13 +3285,13 @@ the square \kbd{Flm} $m$, as a \kbd{Flx}.
 the usual codeword, \kbd{z[1]} is the number of components of $v$ and the
 coefficients are given by the bits of remaining words by increasing indices.
 
-\fun{ulong}{F2v_coeff}{GEN x, long i} returns the coefficient $i$ of $x$.
+\fun{ulong}{F2v_coeff}{GEN x, long i} returns the coefficient $i\ge 1$ of $x$.
 
-\fun{void}{F2v_clear}{GEN x, long i} sets the coefficient $i$ of $x$ to $0$.
+\fun{void}{F2v_clear}{GEN x, long i} sets the coefficient $i\ge 1$ of $x$ to $0$.
 
-\fun{void}{F2v_flip}{GEN x, long i} adds $1$ to the coefficient $i$ of $x$.
+\fun{void}{F2v_flip}{GEN x, long i} adds $1$ to the coefficient $i\ge 1$ of $x$.
 
-\fun{void}{F2v_set}{GEN x, long i} sets the coefficient $i$ of $x$ to $1$.
+\fun{void}{F2v_set}{GEN x, long i} sets the coefficient $i\ge 1$ of $x$ to $1$.
 
 \fun{ulong}{F2m_coeff}{GEN x, long i, long j} returns the coefficient $(i,j)$
 of $x$.
@@ -4217,6 +4217,14 @@ variable $v$ and the coefficients are given by the bits of remaining
 words by increasing degree.
 
 \subsubsec{Basic operations}
+
+\fun{ulong}{F2x_coeff}{GEN x, long i} returns the coefficient $i\ge 0$ of $x$.
+
+\fun{void}{F2x_clear}{GEN x, long i} sets the coefficient $i\ge 0$ of $x$ to $0$.
+
+\fun{void}{F2x_flip}{GEN x, long i} adds $1$ to the coefficient $i\ge 0$ of $x$.
+
+\fun{void}{F2x_set}{GEN x, long i} sets the coefficient $i\ge 0$ of $x$ to $1$.
 
 \fun{GEN}{Flx_to_F2x}{GEN x}
 

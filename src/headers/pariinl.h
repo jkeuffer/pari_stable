@@ -1666,35 +1666,51 @@ INLINE GEN
 Flxq_sub(GEN x,GEN y,GEN T/*unused*/,ulong p)
 { (void)T; return Flx_sub(x,y,p); }
 
+/* F2x */
+
+INLINE ulong
+F2x_coeff(GEN x,long v)
+{
+   ulong u=(ulong)x[2+divsBIL(v)];
+   return (u>>remsBIL(v))&1UL;
+}
+
+INLINE void
+F2x_clear(GEN x,long v)
+{
+   ulong* u=(ulong*)&x[2+divsBIL(v)];
+   *u&=~(1UL<<remsBIL(v));
+}
+
+INLINE void
+F2x_set(GEN x,long v)
+{
+   ulong* u=(ulong*)&x[2+divsBIL(v)];
+   *u|=1UL<<remsBIL(v);
+}
+
+INLINE void
+F2x_flip(GEN x,long v)
+{
+   ulong* u=(ulong*)&x[2+divsBIL(v)];
+   *u^=1UL<<remsBIL(v);
+}
+
 /* F2v */
 
 INLINE ulong
-F2v_coeff(GEN x,long v)
-{
-   ulong u=(ulong)x[2+divsBIL(v-1)];
-   return (u>>remsBIL(v-1))&1UL;
-}
+F2v_coeff(GEN x,long v) { return F2x_coeff(x,v-1); }
 
 INLINE void
-F2v_clear(GEN x,long v)
-{
-   ulong* u=(ulong*)&x[2+divsBIL(v-1)];
-   *u&=~(1UL<<remsBIL(v-1));
-}
+F2v_clear(GEN x,long v) { return F2x_clear(x,v-1); }
 
 INLINE void
-F2v_set(GEN x,long v)
-{
-   ulong* u=(ulong*)&x[2+divsBIL(v-1)];
-   *u|=1UL<<remsBIL(v-1);
-}
+F2v_set(GEN x,long v)   { return F2x_set(x,v-1); }
 
 INLINE void
-F2v_flip(GEN x,long v)
-{
-   ulong* u=(ulong*)&x[2+divsBIL(v-1)];
-   *u^=1UL<<remsBIL(v-1);
-}
+F2v_flip(GEN x,long v) {return F2x_flip(x,v-1); }
+
+/* F2m */
 
 INLINE ulong
 F2m_coeff(GEN x, long a, long b) { return F2v_coeff(gel(x,b), a); }

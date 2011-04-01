@@ -112,7 +112,7 @@ BA 14- [gp2c] add descriptions to support intnum/suminf type functions.
 BA 15- function diffop
    16- PARI function zero_Flm_copy
    17- PARI function mantissa_real
-BA 18- PARI functions F2v_clear, F2m_clear, Z_to_F2x
+BA 18- PARI functions F2v_clear, F2m_clear, Z_to_F2x, F2x_set, F2x_clear, F2x_flip, F2x_coeff
 
   Removed
 BA  1- PARI function CM_CardEFp (ellsea script deprecated).

@@ -48,20 +48,6 @@ F2x_degree(GEN x)
   return F2x_degree_lg(x, lg(x));
 }
 
-INLINE ulong
-F2x_coeff(GEN x,long v)
-{
-   ulong u=(ulong)x[2+divsBIL(v)];
-   return (u>>remsBIL(v))&1UL;
-}
-
-INLINE void
-F2x_set(GEN x,long v)
-{
-   ulong* u=(ulong*)&x[2+divsBIL(v)];
-   *u|=1UL<<remsBIL(v);
-}
-
 GEN
 F2x_to_ZX(GEN x)
 {
