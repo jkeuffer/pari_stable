@@ -1286,7 +1286,7 @@ extendedgcd(GEN A)
   A = leafcopy(A);
   B = matid(n-1);
   lambda = zeromatcopy(n-1,n-1);
-  D = const_vec(n, gen_1);
+  D = const_vec(n, gen_1) + 1;
   k = 2;
   while (k < n)
   {
