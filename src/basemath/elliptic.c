@@ -36,6 +36,10 @@ void
 checkell(GEN e)
 { if (typ(e)!=t_VEC || lg(e) < 20)
     pari_err(talker, "not an elliptic curve (ell) in ellxxx"); }
+static void
+checksmallell_real(GEN e)
+{ if (typ(e)!=t_VEC || (lg(e) >= 20 && !ell_is_real(e)))
+    pari_err(talker, "not an elliptic curve (smallell) over R in ellxxx"); }
 void
 checkell_real(GEN e)
 { if (typ(e)!=t_VEC || !ell_is_real(e))
@@ -3446,7 +3450,7 @@ ellheightoo(GEN e, GEN z, long prec)
 {
   GEN e1, h, x = gel(z,1);
   pari_sp av = avma;
-  checksmallell(e);
+  checksmallell_real(e);
   e1 = ell_realrootprec(e, prec);
   if (gcmp(x, e1) < 0) /* z not on neutral component */
   {
@@ -3468,7 +3472,7 @@ ellheight0(GEN e, GEN a, long flag, long prec)
   GEN Lp, x, y, z, phi2, psi2, psi3;
 
   if (flag > 2 || flag < 0) pari_err(flagerr,"ellheight");
-  checkell_real(e); if (!is_matvec_t(tx)) pari_err(typeer, "ellgheight");
+  checksmallell_real(e); if (!is_matvec_t(tx)) pari_err(typeer, "ellgheight");
   lx = lg(a); if (lx==1) return cgetg(1,tx);
   tx = typ(a[1]);
   if (is_matvec_t(tx))
