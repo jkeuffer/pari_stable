@@ -548,7 +548,22 @@ FF_sqrtn(GEN x, GEN n, GEN *zetan)
 GEN
 FF_sqrt(GEN x)
 {
-  return FF_sqrtn(x,gen_2,NULL);
+  ulong pp;
+  GEN r, T, p, y=_initFF(x,&T,&p,&pp);
+  switch (x[1])
+  {
+  case t_FF_FpXQ:
+    r=FpXQ_sqrtn(gel(x,2),gen_2,T,p,NULL);
+    break;
+  case t_FF_F2xq:
+    r=F2xq_sqrt(gel(x,2),T);
+    break;
+  default:
+    r=Flxq_sqrtn(gel(x,2),gen_2,T,pp,NULL);
+  }
+  if (!r)
+    pari_err(talker,"squareroot does not exist in FF_sqrt");
+  return _mkFF(x, y, r);
 }
 
 long

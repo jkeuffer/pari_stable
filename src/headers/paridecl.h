@@ -70,6 +70,7 @@ GEN     F2xq_order(GEN a, GEN ord, GEN T);
 GEN     F2xq_pow(GEN x, GEN n, GEN pol);
 GEN     F2xq_powers(GEN x, long l, GEN T);
 GEN     F2xq_sqr(GEN x,GEN pol);
+GEN     F2xq_sqrt(GEN a, GEN T);
 GEN     F2xq_sqrtn(GEN a, GEN n, GEN T, GEN *zeta);
 GEN     Flm_to_F2m(GEN x);
 GEN     Flv_to_F2v(GEN x);

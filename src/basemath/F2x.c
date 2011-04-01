@@ -616,6 +616,23 @@ F2xq_log(GEN a, GEN g, GEN ord, GEN T)
 }
 
 GEN
+F2xq_sqrt(GEN a, GEN T)
+{
+  pari_sp av = avma, lim = stack_lim(av,2);
+  long i,N = F2x_degree(T);
+  for(i=1;i<N;i++)
+  {
+    a = F2xq_sqr(a,T);
+    if (low_stack(lim,stack_lim(av,2)))
+    {
+      if (DEBUGMEM>1) pari_warn(warnmem,"F2xq_sqrt (i = %ld)",i);
+      a = gerepileuptoleaf(av, a);
+    }
+  }
+  return gerepileuptoleaf(av, a);
+}
+
+GEN
 F2xq_sqrtn(GEN a, GEN n, GEN T, GEN *zeta)
 {
   if (!lgpol(a))
