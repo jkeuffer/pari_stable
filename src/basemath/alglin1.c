@@ -1605,7 +1605,7 @@ deplin(GEN x0)
     if (t != t_VEC) pari_err(typeer,"deplin");
     x = gtomat(x0);
   }
-  nc = lg(x)-1; if (!nc) pari_err(talker,"empty matrix in deplin");
+  nc = lg(x)-1; if (!nc) { avma=av; return cgetg(1,t_COL); }
   nl = lg(x[1])-1;
   d = const_vec(nl, gen_1); /* pivot list */
   c = const_vecsmall(nl, 0);
