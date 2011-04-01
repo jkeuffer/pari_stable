@@ -49,8 +49,6 @@ checkch(GEN z)
 { if (typ(z)!=t_VEC || lg(z) != 5)
     pari_err(talker,"not a coordinate change in ellxxx"); }
 
-INLINE GEN ell_realroot(GEN e) { return gmael(e,14,1); }
-
 /* 4 X^3 + b2 X^2 + 2b4 X + b6 */
 static GEN
 RHSpol(GEN e)
@@ -60,6 +58,22 @@ RHSpol(GEN e)
   gel(z,3) = gmul2n(ell_get_b4(e),1);
   gel(z,4) = ell_get_b2(e);
   gel(z,5) = utoipos(4); return z;
+}
+
+static int
+invcmp(void *E, GEN x, GEN y) { (void)E; return -gcmp(x,y); }
+
+INLINE GEN ell_realroot(GEN e) { return gmael(e,14,1); }
+
+GEN ell_realrootprec(GEN e, long prec)
+{
+  GEN R;
+  if (lg(e)>14 && lg(ell_realroot(e))>=prec)
+    return ell_realroot(e);
+  R = cleanroots(RHSpol(e), prec);
+  /* sort roots in decreasing order */
+  if (gsigne(ell_get_disc(e)) > 0) gen_sort_inplace(R, NULL, &invcmp, NULL);
+  return gel(R,1);
 }
 
 /* x^3 + a2 x^2 + a4 x + a6 */
@@ -165,10 +179,11 @@ ellprint(GEN e)
 }
 
 /* compute a,b such that E1: y^2 = x(x-a)(x-b) ~ E0 */
+/* e1 = ell_realroot(e) */
 static GEN
-new_coords(GEN e, GEN x, GEN *pta, GEN *ptb, int flag, long prec)
+new_coords(GEN e, GEN x, GEN e1, GEN *pta, GEN *ptb, int flag, long prec)
 {
-  GEN b2 = ell_get_b2(e), e1 = ell_realroot(e), a, b, p1, p2, w;
+  GEN b2 = ell_get_b2(e), a, b, p1, p2, w;
   long ty = typ(e1);
 
   p2 = gmul2n(gadd(gmulsg(12,e1), b2), -2); /* = (12 e1 + b2) / 4 */
@@ -314,9 +329,6 @@ ellinit_padic(GEN x, GEN p, long prec)
   gel(y,19) = gen_0; return y;
 }
 
-static int
-invcmp(void *E, GEN x, GEN y) { (void)E; return -gcmp(x,y); }
-
 static void
 set_dummy(GEN y) {
   gel(y,14)=gel(y,15)=gel(y,16)=gel(y,17)=gel(y,18)=gel(y,19) = gen_0;
@@ -375,7 +387,7 @@ ellinit_real(GEN x, long prec)
   if (gsigne(D) > 0) gen_sort_inplace(R, NULL, &invcmp, NULL);
   gel(y,14) = R;
 
-  (void)new_coords(y, NULL, &a1, &b1, 0, 0);
+  (void)new_coords(y, NULL, gel(R,1), &a1, &b1, 0, 0);
   u2 = do_agm(&x1,a1,b1); /* 1/4M */
 
   pi2 = Pi2n(1, prec);
@@ -1042,7 +1054,7 @@ zell(GEN e, GEN z, long prec)
   ty = typ(D); if (ty == t_INTMOD) pari_err(typeer,"zell");
   if (ell_is_inf(z)) return (ty==t_PADIC)? gen_1: gen_0;
 
-  x1 = new_coords(e,gel(z,1),&a,&b,1, prec);
+  x1 = new_coords(e,gel(z,1),ell_realroot(e), &a,&b,1, prec);
   if (ty==t_PADIC)
   {
     u2 = do_padic_agm(&x1,a,b,gel(D,2));
@@ -3374,12 +3386,12 @@ hell2(GEN e, GEN x, long prec)
 /* exp( h_oo(z) ), assume z on neutral component.
  * If flag, return exp(4 h_oo(z)) instead */
 static GEN
-exphellagm(GEN e, GEN z, int flag, long prec)
+exphellagm(GEN e, GEN z, GEN e1, int flag, long prec)
 {
   GEN x_a, a, b, r, V = cgetg(1, t_VEC), x = gel(z,1);
   long n, ex = 5-bit_accuracy(prec);
 
-  x = new_coords(e, x, &a,&b, 0, prec);
+  x = new_coords(e, x, e1, &a,&b, 0, prec);
   x_a = gsub(x, a);
   if (gsigne(a) > 0)
   {
@@ -3419,14 +3431,14 @@ exphellagm(GEN e, GEN z, int flag, long prec)
 static GEN
 exp4hellagm(GEN e, GEN z, long prec)
 {
-  GEN e1 = ell_realroot(e), x = gel(z,1);
+  GEN e1 = ell_realrootprec(e, prec), x = gel(z,1);
   if (gcmp(x, e1) < 0) /* z not on neutral component */
   {
-    GEN eh = exphellagm(e, addell(e, z,z), 0, prec);
+    GEN eh = exphellagm(e, addell(e, z,z), e1, 0, prec);
     /* h_oo(2P) = 4h_oo(P) - log |2y + a1x + a3| */
     return gmul(eh, gabs(d_ellLHS(e, z), prec));
   }
-  return exphellagm(e, z, 1, prec);
+  return exphellagm(e, z, e1, 1, prec);
 }
 
 GEN
@@ -3435,15 +3447,15 @@ ellheightoo(GEN e, GEN z, long prec)
   GEN e1, h, x = gel(z,1);
   pari_sp av = avma;
   checksmallell(e);
-  e1 = ell_realroot(e);
+  e1 = ell_realrootprec(e, prec);
   if (gcmp(x, e1) < 0) /* z not on neutral component */
   {
-    GEN eh = exphellagm(e, addell(e, z,z), 0, prec);
+    GEN eh = exphellagm(e, addell(e, z,z), e1, 0, prec);
     /* h_oo(2P) = 4h_oo(P) - log |2y + a1x + a3| */
     h = gmul(eh, gabs(d_ellLHS(e, z), prec));
   }
   else
-    h = exphellagm(e, z, 1, prec);
+    h = exphellagm(e, z, e1, 1, prec);
   return gerepileuptoleaf(av, gmul2n(mplog(h), -2));
 }
 
