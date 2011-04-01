@@ -1676,6 +1676,13 @@ F2v_coeff(GEN x,long v)
 }
 
 INLINE void
+F2v_clear(GEN x,long v)
+{
+   ulong* u=(ulong*)&x[2+divsBIL(v-1)];
+   *u&=~(1UL<<remsBIL(v-1));
+}
+
+INLINE void
 F2v_set(GEN x,long v)
 {
    ulong* u=(ulong*)&x[2+divsBIL(v-1)];
@@ -1691,6 +1698,9 @@ F2v_flip(GEN x,long v)
 
 INLINE ulong
 F2m_coeff(GEN x, long a, long b) { return F2v_coeff(gel(x,b), a); }
+
+INLINE void
+F2m_clear(GEN x, long a, long b) { F2v_clear(gel(x,b), a); }
 
 INLINE void
 F2m_set(GEN x, long a, long b) { F2v_set(gel(x,b), a); }

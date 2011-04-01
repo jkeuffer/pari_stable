@@ -2926,8 +2926,10 @@ INLINE GEN    FqXQ_sqr(GEN x, GEN S, GEN T, GEN p);
 INLINE GEN    FqXQ_sub(GEN x, GEN y, GEN S, GEN T, GEN p);
 
 INLINE ulong  F2m_coeff(GEN x, long a, long b);
+INLINE void   F2m_clear(GEN x, long a, long b);
 INLINE void   F2m_flip(GEN x, long a, long b);
 INLINE void   F2m_set(GEN x, long a, long b);
+INLINE void   F2v_clear(GEN x,long v);
 INLINE ulong  F2v_coeff(GEN x,long v);
 INLINE void   F2v_flip(GEN x,long v);
 INLINE void   F2v_set(GEN x,long v);

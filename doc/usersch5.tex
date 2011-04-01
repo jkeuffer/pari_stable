@@ -3287,12 +3287,17 @@ coefficients are given by the bits of remaining words by increasing indices.
 
 \fun{ulong}{F2v_coeff}{GEN x, long i} returns the coefficient $i$ of $x$.
 
+\fun{void}{F2v_clear}{GEN x, long i} sets the coefficient $i$ of $x$ to $0$.
+
 \fun{void}{F2v_flip}{GEN x, long i} adds $1$ to the coefficient $i$ of $x$.
 
 \fun{void}{F2v_set}{GEN x, long i} sets the coefficient $i$ of $x$ to $1$.
 
 \fun{ulong}{F2m_coeff}{GEN x, long i, long j} returns the coefficient $(i,j)$
 of $x$.
+
+\fun{void}{F2m_clear}{GEN x, long i, long j} sets the coefficient $(i,j)$ of $x$
+to $0$.
 
 \fun{void}{F2m_flip}{GEN x, long i, long j} adds $1$ to the coefficient $(i,j)$
 of $x$.
