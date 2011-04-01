@@ -681,7 +681,7 @@ closure_context(long start)
 {
   const long lastfun = s_trace.n - 1;
   long i, fun = lastfun;
-
+  if (fun<0) return lastfun;
   while (fun>start+1 && lg(trace[fun].closure)==6) fun--;
   for (i=fun; i<=lastfun; i++)
   {
