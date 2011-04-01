@@ -1984,12 +1984,12 @@ to_Fq_fact(GEN P, GEN E, GEN T, GEN p, pari_sp av)
   return y;
 }
 static GEN
-to_Fq_vec(GEN P, GEN T, GEN p, pari_sp av)
+to_FqC(GEN P, GEN T, GEN p, pari_sp av)
 {
   GEN u;
   long j, l = lg(P), nbf = lg(P);
 
-  u = cgetg(nbf,t_VEC);
+  u = cgetg(nbf,t_COL);
   for (j=1; j<l; j++)
     gel(u,j) = simplify_shallow(gel(P,j)); /* may contain pols of degree 0 */
   u = gerepilecopy(av, u);
@@ -2222,10 +2222,10 @@ FqX_split_by_degree(GEN *pz, GEN u, GEN q, GEN T, GEN p)
 
 /* see roots_from_deg1() */
 static GEN
-FqXV_roots_from_deg1(GEN x, GEN T, GEN p)
+FqXC_roots_from_deg1(GEN x, GEN T, GEN p)
 {
   long i,l = lg(x);
-  GEN r = cgetg(l,t_VEC);
+  GEN r = cgetg(l,t_COL);
   for (i=1; i<l; i++) { GEN P = gel(x,i); gel(r,i) = Fq_neg(gel(P,2), T, p); }
   return r;
 }
@@ -2234,7 +2234,7 @@ static GEN
 FqX_split_equal(GEN L, GEN S, GEN T, GEN p)
 {
   long n = itos(gel(L,1));
-  GEN u = gel(L,2), z = cgetg(n + 1, t_VEC);
+  GEN u = gel(L,2), z = cgetg(n + 1, t_COL);
   gel(z,1) = u;
   FqX_split((GEN*)(z+1), degpol(u) / n, powiu(p, degpol(T)), S, T, p);
   return z;
@@ -2263,7 +2263,7 @@ FpX_rootsff_i(GEN P, GEN p, GEN T)
   GEN V, F = gel(FpX_factor(P,p), 1);
   long i, lfact = 1, nmax = lgpol(P), n = lg(F), dT = degpol(T);
 
-  V = cgetg(nmax,t_VEC);
+  V = cgetg(nmax,t_COL);
   for(i=1;i<n;i++)
   {
     GEN R, Fi = gel(F,i);
@@ -2294,12 +2294,12 @@ FqX_roots_i(GEN f, GEN T, GEN p)
   if (isabsolutepol(f)) return FpX_rootsff_i(simplify_shallow(f), p, T);
   switch( FqX_split_deg1(&R, f, powiu(p, degpol(T)), T, p) )
   {
-  case 0: return cgetg(1, t_VEC);
+  case 0: return cgetg(1, t_COL);
   case 1: if (lg(R) == 1) { R = mkvec(f); break; }
             /* fall through */
   default: R = FqX_split_roots(R, T, p, NULL);
   }
-  R = FqXV_roots_from_deg1(R, T, p);
+  R = FqXC_roots_from_deg1(R, T, p);
   gen_sort_inplace(R, (void*) &cmp_RgX, &cmp_nodata, NULL);
   return R;
 }
@@ -2506,7 +2506,7 @@ polrootsff(GEN f, GEN p, GEN T)
     return FFX_roots(f,T);
   }
   ffcheck(&av, &f, &T, p); z = FqX_roots_i(f, T, p);
-  return to_Fq_vec(z, T,p, av);
+  return to_FqC(z, T,p, av);
 }
 
 /* factorization of x modulo (T,p). Assume x already reduced */

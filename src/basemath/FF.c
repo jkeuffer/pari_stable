@@ -850,7 +850,7 @@ to_FF_pol(GEN x, GEN ff)
 }
 /* in place */
 static GEN
-to_FF_vec(GEN x, GEN ff)
+to_FF_col(GEN x, GEN ff)
 {
   long i, lx = lg(x);
   for (i=1; i<lx; i++) gel(x,i) = to_FF(gel(x,i), ff);
@@ -952,7 +952,7 @@ FFX_roots(GEN P, GEN x)
 
   P = FFX_init_fix_varn(P, x, &T, &p);
   r = FqX_roots(P, T,p);
-  return gerepilecopy(av, to_FF_vec(r, x));
+  return gerepilecopy(av, to_FF_col(r, x));
 }
 
 GEN
