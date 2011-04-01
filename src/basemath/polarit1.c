@@ -2502,7 +2502,7 @@ polrootsff(GEN f, GEN p, GEN T)
     if (typ(f) != t_POL) pari_err(typeer, "polrootsff");
     T = p = NULL;
     t = RgX_type(f, &p, &T, &pa);
-    if (t != t_FFELT) pari_err(typeer, "factorff");
+    if (t != t_FFELT) pari_err(typeer, "polrootsff");
     return FFX_roots(f,T);
   }
   ffcheck(&av, &f, &T, p); z = FqX_roots_i(f, T, p);
