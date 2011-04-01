@@ -74,6 +74,7 @@ GEN     F2xq_sqrtn(GEN a, GEN n, GEN T, GEN *zeta);
 GEN     Flm_to_F2m(GEN x);
 GEN     Flv_to_F2v(GEN x);
 GEN     Flx_to_F2x(GEN x);
+GEN     Z_to_F2x(GEN x, long sv);
 GEN     ZM_to_F2m(GEN x);
 GEN     ZV_to_F2v(GEN x);
 GEN     ZX_to_F2x(GEN x);

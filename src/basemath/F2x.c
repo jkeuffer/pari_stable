@@ -89,6 +89,12 @@ F2x_to_Flx(GEN x)
 }
 
 GEN
+Z_to_F2x(GEN x, long sv)
+{
+  return mpodd(x) ? pol1_F2x(sv): pol0_F2x(sv);
+}
+
+GEN
 ZX_to_F2x(GEN x)
 {
   long l=nbits2prec(lgpol(x));
