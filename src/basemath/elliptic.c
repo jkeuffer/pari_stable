@@ -67,9 +67,11 @@ RHSpol(GEN e)
 static int
 invcmp(void *E, GEN x, GEN y) { (void)E; return -gcmp(x,y); }
 
-INLINE GEN ell_realroot(GEN e) { return gmael(e,14,1); }
+INLINE GEN
+ell_realroot(GEN e) { return gmael(e,14,1); }
 
-GEN ell_realrootprec(GEN e, long prec)
+static GEN
+ell_realrootprec(GEN e, long prec)
 {
   GEN R;
   if (lg(e)>14 && lg(ell_realroot(e))>=prec)
