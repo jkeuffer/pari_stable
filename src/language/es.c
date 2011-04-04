@@ -1942,6 +1942,7 @@ dbg(GEN x, long nb, long bl)
   {
     pari_printf("(lmax=%ld):", list_nmax(x));
     x = list_data(x); lx = x? lg(x): 1;
+    tx = t_VEC; /* print list_data as vec */
   } else if (tx == t_CLOSURE)
     pari_printf("(arity=%ld):", x[1]);
   for (i=1; i<lx; i++) dbg_word(x[i]);
@@ -1992,8 +1993,6 @@ dbg(GEN x, long nb, long bl)
       }
       break;
 
-    case t_LIST:
-      x = list_data(x); lx = x ? lg(x): 1;
     case t_QFR: case t_QFI: case t_VEC: case t_COL:
       for (i=1; i<lx; i++)
       {
