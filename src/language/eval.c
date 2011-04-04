@@ -81,22 +81,6 @@ break0(long n)
   br_status = br_BREAK; return NULL;
 }
 
-void
-allocatemem0(GEN z)
-{
-  ulong newsize;
-  if (!z) newsize = 0;
-  else {
-    if (typ(z) != t_INT) pari_err(typeer,"allocatemem");
-    newsize = itou(z);
-    if (signe(z) < 0) pari_err(talker,"negative size in allocatemem");
-  }
-  evalstate_reset();
-  (void)allocatemoremem(newsize);
-  global_err_data = NULL;
-  cb_pari_err_recover(-1);
-}
-
 /*******************************************************************/
 /*                                                                 */
 /*                            VARIABLES                            */

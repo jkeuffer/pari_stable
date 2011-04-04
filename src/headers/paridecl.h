@@ -1486,7 +1486,6 @@ void    writetex(const char *s, GEN g);
 
 /* eval.c */
 
-void    allocatemem0(GEN z);
 GEN     break0(long n);
 GEN     closure_callgen1(GEN C, GEN x);
 GEN     closure_callgen2(GEN C, GEN x, GEN y);
@@ -1874,10 +1873,10 @@ ulong   unextprime(ulong n);
 
 /* init.c */
 
+void    allocatemem(ulong newsize);
 long    timer_delay(pari_timer *T);
 long    timer_get(pari_timer *T);
 void    timer_start(pari_timer *T);
-long    allocatemoremem(size_t newsize);
 int     chk_gerepileupto(GEN x);
 GENbin* copy_bin(GEN x);
 GENbin* copy_bin_canon(GEN x);

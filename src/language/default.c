@@ -537,7 +537,7 @@ sd_parisize(const char *v, long flag)
     if (flag == d_INITRC)
       pari_init_stack(n, size);
     else
-      allocatemem0(r);
+      allocatemem(n);
   }
   return r;
 }

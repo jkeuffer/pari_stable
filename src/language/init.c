@@ -486,6 +486,20 @@ pari_init_stack(size_t size, size_t old)
   memused = 0;
 }
 
+void
+allocatemem(ulong newsize)
+{
+  size_t s, old = top - bot;
+
+  evalstate_reset();
+  if (!newsize) newsize = old << 1;
+  pari_init_stack(newsize, old);
+  s = top - bot;
+  pari_warn(warner,"new stack size = %lu (%.3f Mbytes)", s, s/1048576.);
+  global_err_data = NULL;
+  cb_pari_err_recover(-1);
+}
+
 /*********************************************************************/
 /*                           INIT DEFAULTS                           */
 /*********************************************************************/
@@ -1689,17 +1703,6 @@ gerepile(pari_sp av, pari_sp tetpil, GEN q)
     for (  ; a < x; a++) dec_gerepile((pari_sp*)a, av0, av, tetpil, dec);
   }
   return q;
-}
-
-long
-allocatemoremem(size_t newsize)
-{
-  size_t s, old = top - bot;
-  if (!newsize) newsize = old << 1;
-  pari_init_stack(newsize, old);
-  s = top - bot;
-  pari_warn(warner,"new stack size = %lu (%.3f Mbytes)", s, s/1048576.);
-  return s;
 }
 
 void

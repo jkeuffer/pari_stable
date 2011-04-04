@@ -25,6 +25,19 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 static void whatnow0(char *s) { whatnow(pariOut, s,0); }
 
+static void
+allocatemem0(GEN z)
+{
+  ulong newsize;
+  if (!z) newsize = 0;
+  else {
+    if (typ(z) != t_INT) pari_err(typeer,"allocatemem");
+    newsize = itou(z);
+    if (signe(z) < 0) pari_err(talker,"negative size in allocatemem");
+  }
+  allocatemem(newsize);
+}
+
 #include "gp_init.h"
 #include "gp_default.h"
 

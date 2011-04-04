@@ -95,6 +95,7 @@ BA 17- traversesubgroups renamed to forsubgroup.
        TIMERstart -> timer_start, msgTIMER -> timer_printf
 BA 23- polrootsff now returns a t_COL
    24- default(a, b) used to return "b". Now returns gnil
+   25- [libpari] remove allocatemem0 [make it private to GP], write allocatemem
 
   Added
 BA  1- trap keyword "syntaxer" to trap syntax error from eval.
