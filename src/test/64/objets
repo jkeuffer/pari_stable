@@ -121,6 +121,6 @@ O(x^12)
   ***                                 ^---
   *** _^_: impossible inverse modulo: Mod(131, 49649).
 ? getheap
-[59, 785]
+[59, 784]
 ? print("Total time spent: ",gettime);
 Total time spent: 0

@@ -1908,7 +1908,7 @@ constlog2(long prec)
   av = avma;
   l = prec+1;
   n = bit_accuracy(l) >> 1;
-  y = divrr(Pi2n(-1, l), agm1r_abs( real2n(2 - n, l) ));
+  y = divrr(Pi2n(-1, prec), agm1r_abs( real2n(2 - n, l) ));
   affrr(divru(y,n), tmplog2);
   if (glog2) gunclone(glog2);
   avma = av; return glog2 = tmplog2;
