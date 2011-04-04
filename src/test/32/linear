@@ -727,6 +727,6 @@ Vecsmall([4, 3, 2, 1])
 [[6, 17, 13, 14, 18]~ [5, 6, 20, 21, 1]~ [0, 16, 8, 7, 5]~]
 
 ? getheap
-[110, 11661]
+[109, 11654]
 ? print("Total time spent: ",gettime);
-Total time spent: 11
+Total time spent: 8

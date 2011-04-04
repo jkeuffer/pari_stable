@@ -735,7 +735,7 @@ pari_is_default(const char *s)
 { return !!is_entry_intern(s, defaults_hash, NULL); }
 
 GEN
-default0(const char *a, const char *b) { return setdefault(a,b, d_RETURN); }
+default0(const char *a, const char *b) { return setdefault(a,b, b? d_SILENT: d_RETURN); }
 
 /********************************************************************/
 /*                                                                  */

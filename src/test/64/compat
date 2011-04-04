@@ -1,7 +1,6 @@
    echo = 1 (on)
 ? default(compatible,3)
   *** default: Warning: user functions re-initialized.
-3
 ? gettime;+3
 3
 ? -5
@@ -917,7 +916,7 @@ mod(x^5, x^6 + 108)
 ? gcd(12345678,87654321)
 9
 ? getheap()
-[209, 44705]
+[208, 44698]
 ? getrand()
 Vecsmall([-696235626332558091, -7363039021536514678, -3123062006620239999, -
 2510915082749224356, -5278885121447018503, 8033304491650294704, 333461878925
@@ -2661,6 +2660,6 @@ mod(391, 3120), mod(2081, 3120)]]
 ? getstack()
 200
 ? getheap()
-[600, 100293]
+[599, 100286]
 ? print("Total time spent: ",gettime);
-Total time spent: 184
+Total time spent: 176
