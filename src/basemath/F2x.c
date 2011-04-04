@@ -353,6 +353,31 @@ F2x_addshiftip(GEN x, GEN y, ulong d)
       x[i+dl] ^= y[i];
 }
 
+/* assume d>=0 */
+static GEN
+F2x_shift(GEN y, ulong d)
+{
+  ulong db, dl=dvmduBIL(d, &db);
+  long i, ly = lg(y), lx = ly+dl+(!!db);
+  GEN x = cgetg(lx, t_VECSMALL);
+  for(i=2; i<2+dl; i++) x[i] = 0;
+  if (db)
+  {
+    ulong dc=BITS_IN_LONG-db;
+    ulong r=0;
+    for(i=2; i<ly; i++)
+    {
+      x[i+dl] = (((ulong)y[i])<<db)|r;
+      r = ((ulong)y[i])>>dc;
+    }
+    x[i+dl] = r;
+  }
+  else
+    for(i=2; i<ly; i++)
+      x[i+dl] = y[i];
+  return F2x_renormalize(x,lx);
+}
+
 /* separate from F2x_divrem for maximal speed. */
 GEN
 F2x_rem(GEN x, GEN y)
@@ -412,6 +437,16 @@ F2x_divrem(GEN x, GEN y, GEN *pr)
     avma = (pari_sp)(z + lg(z)); return NULL;
   }
   *pr = x; return z;
+}
+
+GEN
+F2x_deriv(GEN z)
+{
+  const ulong mask = ULONG_MAX/3UL;
+  long i,l = lg(z);
+  GEN x = cgetg(l, t_VECSMALL); x[1] = z[1];
+  for (i=2; i<l; i++) x[i] = (((ulong)z[i])>>1)&mask;
+  return F2x_renormalize(x,l);
 }
 
 GEN
@@ -551,6 +586,18 @@ GEN
 F2xq_matrix_pow(GEN y, long n, long m, GEN P)
 {
   return F2xV_to_F2m(F2xq_powers(y,m-1,P),n);
+}
+
+ulong
+F2xq_trace(GEN x, GEN T)
+{
+  pari_sp av = avma;
+  ulong t;
+  GEN z = F2x_mul(x, F2x_deriv(T));
+  z = F2x_div(F2x_shift(z, 1), T);
+  t = lgpol(z)?F2x_coeff(z,0):0;
+  avma=av;
+  return t;
 }
 
 GEN

@@ -4272,6 +4272,8 @@ in variable \kbd{v}, of degree less than~\kbd{d}.
 
 \fun{GEN}{F2x_renormalize}{GEN x, long lx}
 
+\fun{GEN}{F2x_deriv}{GEN x}
+
 \fun{GEN}{F2x_extgcd}{GEN a, GEN b, GEN *ptu, GEN *ptv}
 
 \fun{GEN}{F2x_gcd}{GEN a, GEN b}
@@ -4289,6 +4291,8 @@ in variable \kbd{v}, of degree less than~\kbd{d}.
 \fun{GEN}{F2xq_invsafe}{GEN x, GEN T}
 
 \fun{GEN}{F2xq_pow}{GEN x, GEN n, GEN pol}
+
+\fun{ulong}{F2xq_trace}{GEN x, GEN T}
 
 \fun{GEN}{F2xq_conjvec}{GEN x, GEN T} returns the vector of conjugates
 $[x,x^2,x^{2^2},\ldots,x^{2^{n-1}}]$ where $n$ is the degree of $T$.

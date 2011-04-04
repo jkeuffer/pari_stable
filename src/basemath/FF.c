@@ -664,7 +664,7 @@ GEN
 FF_trace(GEN x)
 {
   ulong pp;
-  GEN r,T,p;
+  GEN T,p;
   pari_sp av;
   _getFF(x,&T,&p,&pp);
   av = avma;
@@ -673,12 +673,10 @@ FF_trace(GEN x)
   case t_FF_FpXQ:
     return FpXQ_trace(gel(x,2),T,p);
   case t_FF_F2xq:
-    r = quicktrace(F2x_to_ZX(gel(x,2)), polsym(F2x_to_ZX(T), F2x_degree(T)-1));
-    break;
+    return F2xq_trace(gel(x,2),T)?gen_1:gen_0;
   default:
     return utoi(Flxq_trace(gel(x,2),T,pp));
   }
-  return gerepileupto(av, modii(r,p));
 }
 
 GEN
