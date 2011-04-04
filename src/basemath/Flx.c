@@ -1897,6 +1897,18 @@ Flxq_norm(GEN x, GEN T, ulong p)
   return Fl_div(y, Fl_powu(L, (ulong)degpol(x), p), p);
 }
 
+ulong
+Flxq_trace(GEN x, GEN T, ulong p)
+{
+  pari_sp av = avma;
+  ulong t;
+  GEN z = Flx_mul(x, Flx_deriv(T, p), p);
+  z = Flx_div(Flx_shift(z, 1), T, p);
+  t = lgpol(z)?z[2]:0;
+  avma=av;
+  return t;
+}
+
 /*x must be reduced*/
 GEN
 Flxq_charpoly(GEN x, GEN T, ulong p)

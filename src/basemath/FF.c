@@ -671,13 +671,12 @@ FF_trace(GEN x)
   switch(x[1])
   {
   case t_FF_FpXQ:
-    r = quicktrace(gel(x,2), polsym(T, degpol(T)-1));
-    break;
+    return FpXQ_trace(gel(x,2),T,p);
   case t_FF_F2xq:
     r = quicktrace(F2x_to_ZX(gel(x,2)), polsym(F2x_to_ZX(T), F2x_degree(T)-1));
     break;
   default:
-    r = quicktrace(Flx_to_ZX(gel(x,2)), polsym(Flx_to_ZX(T), degpol(T)-1));
+    return utoi(Flxq_trace(gel(x,2),T,pp));
   }
   return gerepileupto(av, modii(r,p));
 }

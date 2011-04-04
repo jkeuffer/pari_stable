@@ -1378,6 +1378,15 @@ FpXQ_norm(GEN x, GEN T, GEN p)
 }
 
 GEN
+FpXQ_trace(GEN x, GEN T, GEN p)
+{
+  pari_sp av = avma;
+  GEN z = FpX_mul(x, FpX_deriv(T, p), p);
+  z = FpX_div(RgX_shift_shallow(z, 1), T, p);
+  return gerepileuptoint(av, constant_term(z));
+}
+
+GEN
 FpXQ_charpoly(GEN x, GEN T, GEN p)
 {
   pari_sp ltop=avma;

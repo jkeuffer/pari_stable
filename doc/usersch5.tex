@@ -3692,6 +3692,8 @@ of \kbd{x}
 
 \fun{GEN}{FpXQ_norm}{GEN x, GEN T, GEN p} returns the norm of \kbd{x}
 
+\fun{GEN}{FpXQ_trace}{GEN x, GEN T, GEN p} returns the trace of \kbd{x}
+
 \fun{GEN}{FpXQ_conjvec}{GEN x, GEN T, GEN p} returns the vector of conjugates
 $[x,x^p,x^{p^2},\ldots,x^{p^{n-1}}]$ where $n$ is the degree of $T$.
 
@@ -4129,7 +4131,9 @@ polynomial of \kbd{x}
 \fun{GEN}{Flxq_minpoly}{GEN x, GEN T, ulong p} returns the minimal polynomial
 of \kbd{x}
 
-\fun{GEN}{Flxq_norm}{GEN x, GEN T, ulong p} returns the norm of \kbd{x}
+\fun{ulong}{Flxq_norm}{GEN x, GEN T, ulong p} returns the norm of \kbd{x}
+
+\fun{ulong}{Flxq_trace}{GEN x, GEN T, ulong p} returns the trace of \kbd{x}
 
 \fun{GEN}{Flxq_conjvec}{GEN x, GEN T, ulong p} returns the conjugates
 $[x,x^p,x^{p^2},\ldots,x^{p^{n-1}}]$ where $n$ is the degree of $T$.
