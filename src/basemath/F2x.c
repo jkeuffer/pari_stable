@@ -62,6 +62,15 @@ F2x_to_ZX(GEN x)
 }
 
 GEN
+F2xC_to_ZXC(GEN v)
+{
+  long j, N = lg(v);
+  GEN y = cgetg(N, t_COL);
+  for (j=1; j<N; j++) gel(y,j) = F2x_to_ZX(gel(v,j));
+  return y;
+}
+
+GEN
 F2x_to_Flx(GEN x)
 {
   long l=3+F2x_degree(x);
@@ -729,6 +738,27 @@ gener_F2xq(GEN T, GEN *po)
   }
   return g;
 }
+
+GEN
+ZXX_to_F2xX(GEN B, long v)
+{
+  long lb=lg(B);
+  long i;
+  GEN b=cgetg(lb,t_POL);
+  b[1]=evalsigne(1)|(((ulong)B[1])&VARNBITS);
+  for (i=2; i<lb; i++)
+    switch (typ(B[i]))
+    {
+    case t_INT:
+      gel(b,i) = Z_to_F2x(gel(B,i), v);
+      break;
+    case t_POL:
+      gel(b,i) = ZX_to_F2x(gel(B,i));
+      break;
+    }
+  return FlxX_renormalize(b, lb);
+}
+
 /***********************************************************************/
 /**                                                                   **/
 /**                             F2v                                   **/

@@ -2286,12 +2286,73 @@ FpX_rootsff(GEN P, GEN p, GEN T)
 }
 
 static GEN
+F2xq_Artin_Schreier(GEN a, GEN T)
+{
+  pari_sp ltop=avma;
+  long j,N = F2x_degree(T);
+  GEN Q, XP;
+  pari_timer ti;
+  timer_start(&ti);
+  XP = F2xq_sqr(polx_F2x(T[1]),T);
+  Q  = F2xq_matrix_pow(XP,N,N,T);
+  for (j=1; j<=N; j++)
+    F2m_flip(Q,j,j);
+  if(DEBUGLEVEL>=9) timer_printf(&ti,"Berlekamp matrix");
+  F2v_add_inplace(gel(Q,1),a);
+  Q = F2m_ker_sp(Q,0);
+  if(DEBUGLEVEL>=9) timer_printf(&ti,"kernel");
+  if (lg(Q)!=2) return NULL;
+  Q = gel(Q,1);
+  Q[1] = T[1];
+  return gerepileuptoleaf(ltop, Q);
+}
+
+static GEN
+F2xqX_quad_roots(GEN P, GEN T)
+{
+  GEN b= gel(P,3), c = gel(P,2);
+  if (degpol(b)>=0)
+  {
+    GEN z, d = F2xq_div(c, F2xq_sqr(b,T),T);
+    if (F2xq_trace(d,T))
+      return cgetg(1, t_COL);
+    z = F2xq_mul(b, F2xq_Artin_Schreier(d, T), T);
+    return mkcol2(z, F2x_add(b, z));
+  }
+  else
+    return mkcol(F2xq_sqrt(c, T));
+}
+
+static GEN
+FqX_quad_roots(GEN x, GEN T, GEN p)
+{
+  GEN s, u, D, nb, b = gel(x,3), c = gel(x,2);
+  if (equaliu(p, 2))
+  {
+    GEN f2 = ZXX_to_F2xX(x,T[1]);
+    s = F2xqX_quad_roots(f2, ZX_to_F2x(T));
+    return F2xC_to_ZXC(s);
+  }
+  D = Fq_sub(Fq_sqr(b,T,p), Fq_Fp_mul(c,utoi(4),T,p), T,p);
+  u = addis(shifti(p,-1), 1); /* = 1/2 */
+  nb = Fq_neg(b,T,p);
+  if (signe(D)==0)
+    return mkcol(Fq_Fp_mul(nb,u,T, p));
+  s = Fq_sqrt(D,T,p);
+  if (!s) return cgetg(1, t_COL);
+  s = Fq_Fp_mul(Fq_add(s,nb,T,p),u,T, p);
+  return mkcol2(s,Fq_sub(nb,s,T,p));
+}
+
+static GEN
 FqX_roots_i(GEN f, GEN T, GEN p)
 {
   GEN R;
   f = FqX_normalize(f, T, p);
   if (!signe(f)) pari_err(zeropoler,"FqX_roots");
   if (isabsolutepol(f)) return FpX_rootsff_i(simplify_shallow(f), p, T);
+  if (degpol(f)==2)
+    return gen_sort(FqX_quad_roots(f,T,p), (void*) &cmp_RgX, &cmp_nodata);
   switch( FqX_split_deg1(&R, f, powiu(p, degpol(T)), T, p) )
   {
   case 0: return cgetg(1, t_COL);
@@ -2303,6 +2364,7 @@ FqX_roots_i(GEN f, GEN T, GEN p)
   gen_sort_inplace(R, (void*) &cmp_RgX, &cmp_nodata, NULL);
   return R;
 }
+
 GEN
 FqX_roots(GEN x, GEN T, GEN p)
 {

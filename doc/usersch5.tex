@@ -3684,6 +3684,9 @@ stack, besides the $N$ in the result.
 
 \fun{GEN}{Fq_pow}{GEN x, GEN n, GEN pol, GEN p} returns $\kbd{x}^\kbd{n}$.
 
+\fun{GEN}{Fq_sqrt}{GEN x, GEN T, GEN p} returns a square root of \kbd{x}.
+Return \kbd{NULL} if \kbd{x} is not a square.
+
 \fun{GEN}{FpXQ_charpoly}{GEN x, GEN T, GEN p} returns the characteristic
 polynomial of \kbd{x}
 
@@ -4236,6 +4239,8 @@ words by increasing degree.
 
 \fun{GEN}{ZX_to_F2x}{GEN x}
 
+\fun{GEN}{ZXX_to_F2xX}{GEN x, long v}
+
 \fun{GEN}{F2x_to_Flx}{GEN x}
 
 \fun{GEN}{F2x_to_ZX}{GEN x}
@@ -4749,6 +4754,10 @@ constant \kbd{Flx} in variable $v$.
 \fun{GEN}{F2x_to_F2v}{GEN x, long n} converts from \kbd{F2x} to \kbd{F2v}
 with \kbd{n} components (assumed larger than the number of coefficients of
 \kbd{x}).
+
+\fun{GEN}{F2xC_to_ZXC}{GEN x}, converts a vector of \kbd{F2x} to a column
+vector of polynomials with \typ{INT} coefficients (repeated calls to
+\kbd{F2x\_to\_ZX}).
 
 \fun{GEN}{F2xV_to_F2m}{GEN v, long n} \kbd{F2x\_to\_F2v} to each polynomials
 to get an \kbd{F2m} with \kbd{n} rows.

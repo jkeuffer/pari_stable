@@ -1047,6 +1047,15 @@ Fq_pow(GEN x, GEN n, GEN pol, GEN p)
   return FpXQ_pow(x,n,pol,p);
 }
 
+GEN
+Fq_sqrt(GEN x, GEN T, GEN p)
+{
+  if (typ(x) == t_POL)
+    return FpXQ_sqrtn(x,gen_2,T,p,NULL);
+  else
+    return Fp_sqrt(x,p);
+  return NULL;
+}
 
 /*******************************************************************/
 /*                                                                 */
