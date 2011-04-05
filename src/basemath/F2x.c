@@ -345,12 +345,12 @@ INLINE void
 F2x_addshiftip(GEN x, GEN y, ulong d)
 {
   ulong db, dl=dvmduBIL(d, &db);
-  long i;
+  long i, ly = lg(y);
   if (db)
   {
     ulong dc=BITS_IN_LONG-db;
     ulong r=0;
-    for(i=2; i<lg(y); i++)
+    for(i=2; i<ly; i++)
     {
       x[i+dl] ^= (((ulong)y[i])<<db)|r;
       r = ((ulong)y[i])>>dc;
@@ -358,7 +358,7 @@ F2x_addshiftip(GEN x, GEN y, ulong d)
     if (r) x[i+dl] ^= r;
   }
   else
-    for(i=2; i<lg(y); i++)
+    for(i=2; i<ly; i++)
       x[i+dl] ^= y[i];
 }
 
