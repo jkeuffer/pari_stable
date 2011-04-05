@@ -846,7 +846,13 @@ qfr5_init(GEN x, struct qfr_data *S)
   if (!S->sqrtD) S->sqrtD = sqrtr(itor(S->D,prec));
   else if (typ(S->sqrtD) != t_REAL) pari_err(arither1);
 
-  if (!S->isqrtD) S->isqrtD = truncr(S->sqrtD);
+  if (!S->isqrtD)
+  {
+    pari_sp av=avma;
+    long e;
+    S->isqrtD = grndtoi(S->sqrtD,&e);
+    if (e>-2) { avma = av; S->isqrtD = sqrti(S->D); }
+  }
   else if (typ(S->isqrtD) != t_INT) pari_err(arither1);
   return x;
 }

@@ -51,6 +51,7 @@ BA 32- forsubgroup() did not handle break/next/return.
 BA 39- polroots(1) returned [] instead of []~.
    40- a succession of <C-C> in breakloop context would reinitialize timer
    41- matsnf(matdiagonal([x,0])) --> [x,0] instead of [0,x]
+BA 42- qfbred(large discriminant, small prec): precision too low in truncr [#1173]
 
   Changed
 LGr1- universal constants (gen_0,gen_1, etc.) are now read-only
