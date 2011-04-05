@@ -698,7 +698,7 @@ incgamc(GEN s, GEN x, long prec)
   pari_sp av = avma, av2, avlim;
 
   if (typ(x) != t_REAL) x = gtofp(x, prec);
-  if (gequal0(x)) return rcopy(x);
+  if (gequal0(x)) return gcopy(x);
 
   l = precision(x); n = -bit_accuracy(l)-1;
   i = typ(s); b = s;
@@ -900,22 +900,90 @@ mpvecpow(GEN e, long n)
   return G;
 }
 
+/* erfc via numerical integration : assume real(x)>=1 */
+#define DEN 30 /* bits that fit in both long and double mantissa */
+static GEN
+cxerfc_r1(GEN x, long prec)
+{
+  GEN h, h2, eh2, denom, res, lambda;
+  long npoints, u, v;
+  const double D = bit_accuracy_mul(prec, LOG2);
+  pari_sp av = avma;
+  npoints = ceil(D/PI)+1;
+  {
+    double t = exp(-2*pow(PI,2)/D); /* ~exp(-2*h^2) */
+    u = floor(t*(1L<<DEN));
+    v = DEN;
+    /* define exp(-2*h^2) to be u*2^(-v) */
+  }
+  prec++;
+  x = gtofp(x,prec);
+  eh2 = sqrtr_abs(rtor(shiftr(dbltor(u),-v),prec));
+  h2 = negr(logr_abs(eh2));
+  h = sqrtr_abs(h2);
+  lambda = gdiv(x,h);
+  denom = gsqr(lambda);
+  { /* res = h/x + 2*x*h*sum(k=1,npoints,exp(-(k*h)^2)/(lambda^2+k^2)); */
+    GEN Uk; /* = exp(-(kh)^2) */
+    GEN Vk = eh2;/* = exp(-(2k+1)h^2) */
+    pari_sp av2 = avma;
+    long k;
+    /* k = 0 moved out for efficiency */
+    denom = gaddsg(1,denom);
+    Uk = Vk;
+    Vk = mulur(u,Vk); setexpo(Vk, expo(Vk)-v);
+    res = gdiv(Uk, denom);
+    for (k = 1; k < npoints; k++)
+    {
+      if ((k & 255) == 0) gerepileall(av2,4,&denom,&Uk,&Vk,&res);
+      denom = gaddsg(2*k+1,denom);
+      Uk = mpmul(Uk,Vk);
+      Vk = mulur(u,Vk); setexpo(Vk, expo(Vk)-v);
+      res = gadd(res, gdiv(Uk, denom));
+    }
+  }
+  res = gmul(res, gshift(lambda,1));
+  /* 0 term : */
+  res = gadd(res, ginv(lambda));
+  res = gmul(res, gdiv(gexp(gneg(gsqr(x)), prec), mppi(prec)));
+  if (rtodbl(real_i(x)) < sqrt(D))
+  {
+    GEN t = gmul(divrr(Pi2n(1,prec),h), x);
+    if (typ(x) == t_REAL)
+      t = mpexp1(t); /* stabler */
+    else
+      t = gsubgs(gexp(t, prec), 1);
+    res = gsub(res, gdivsg(2, t));
+  }
+  return gerepileupto(av,res);
+}
+
 GEN
 gerfc(GEN x, long prec)
 {
+  GEN z, xr, res;
   pari_sp av;
-  GEN z, sqrtpi;
 
-  if (typ(x) != t_REAL) {
-    x = gtofp(x, prec);
-    if (typ(x) != t_REAL) pari_err(typeer,"erfc");
+  x = trans_fix_arg(&prec,&x,&xr,&av,&res);
+  if (signe(xr) >= 0) {
+    if (cmprs(xr, 1) > 0) /* use numerical integration */
+      z = cxerfc_r1(x, prec);
+    else
+    { /* erfc(x) = incgam(1/2,x^2)/sqrt(Pi) */
+      GEN sqrtpi = sqrtr(mppi(prec));
+      z = incgam0(ghalf, gsqr(x), sqrtpi, prec);
+      z = gdiv(z, sqrtpi);
+    }
   }
-  if (!signe(x)) return real_1(prec);
-  av = avma; sqrtpi = sqrtr(mppi(lg(x)));
-  z = incgam0(ghalf, sqrr(x), sqrtpi, prec);
-  z = divrr(z, sqrtpi);
-  if (signe(x) < 0) z = subsr(2,z);
-  return gerepileupto(av,z);
+  else
+  { /* erfc(-x)=2-erfc(x) */
+    /* FIXME could decrease prec
+    long size = ceil((pow(rtodbl(gimag(x)),2)-pow(rtodbl(greal(x)),2))/(LOG2*BITS_IN_LONG));
+    prec = size > 0 ? prec : prec + size;
+    */
+    z = gsubsg(2, gerfc(gneg(x), prec));
+  }
+  avma = av; return affc_fixlg(z, res);
 }
 
 /***********************************************************************/
