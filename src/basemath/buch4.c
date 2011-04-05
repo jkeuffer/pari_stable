@@ -195,12 +195,12 @@ lemma6nf(GEN nf, GEN T, GEN pr, long nu, GEN x, GEN modpr)
 {
   pari_sp av = avma;
   long la, mu;
-  GEN gpx, gx = poleval(T, x);
+  GEN gpx, gx = nfpoleval(nf, T, x);
 
   if (psquarenf(nf,gx,pr,modpr)) return 1;
 
   la = nfval(nf,gx,pr);
-  gpx = poleval(RgX_deriv(T), x);
+  gpx = nfpoleval(nf, RgX_deriv(T), x);
   mu = gequal0(gpx)? la+nu+1: nfval(nf,gpx,pr);
   avma = av;
   if (la > (mu<<1)) return 1;
@@ -212,12 +212,13 @@ static long
 lemma7nf(GEN nf, GEN T, GEN pr, long nu, GEN x, GEN zinit)
 {
   long res, la, mu, q;
-  GEN gpx, gx = poleval(T, x);
+  GEN gpx, gx = nfpoleval(nf, T, x);
 
   if (psquare2nf(nf,gx,pr,zinit)) return 1;
 
-  gpx = poleval(RgX_deriv(T), x);
-  la = nfval(nf,gx,pr);
+  gpx = nfpoleval(nf, RgX_deriv(T), x);
+  /* gx /= pi^la, pi a pr-uniformizer */
+  la = int_elt_val(nf, gx, pr_get_p(pr), pr_get_tau(pr), &gx);
   mu = gequal0(gpx)? la+nu+1: nfval(nf,gpx,pr);
 
   if (la > (mu<<1)) return 1;
@@ -234,14 +235,15 @@ lemma7nf(GEN nf, GEN T, GEN pr, long nu, GEN x, GEN zinit)
     q = nu2-la; res = 0;
   }
   if (q > pr_get_e(pr)<<1)  return -1;
+  if (q == 1) return res;
 
-  /* gx /= pi^la, pi a pr-uniformizer */
-  if (la)
-    gx = gmul2n(nfmul(nf, gx, nfpow_u(nf, pr_get_tau(pr), la)), -la);
+  /* is gx a square mod pi^q ? FIXME : highly inefficient */
+  zinit = zidealstarinit(nf, idealpows(nf,pr,q));
   if (!check2(nf, gx, zinit)) res = -1;
   return res;
 }
-/* zinit either a bid (pr | 2) or a modpr structure (pr | p odd) */
+/* zinit either a bid (pr | 2) or a modpr structure (pr | p odd).
+   pnu = pi^nu, pi a uniformizer */
 static long
 zpsolnf(GEN nf,GEN T,GEN pr,long nu,GEN pnu,GEN x0,GEN repr,GEN zinit)
 {
@@ -254,45 +256,47 @@ zpsolnf(GEN nf,GEN T,GEN pr,long nu,GEN pnu,GEN x0,GEN repr,GEN zinit)
   avma = av;
   if (res== 1) return 1;
   if (res==-1) return 0;
-  pnup = gmul(pnu, coltoalg(nf, pr_get_gen(pr)));
+  pnup = nfmul(nf, pnu, pr_get_gen(pr));
   nu++;
   for (i=1; i<lg(repr); i++)
   {
-    GEN x = gadd(x0,gmul(pnu,gel(repr,i)));
+    GEN x = nfadd(nf, x0, nfmul(nf,pnu,gel(repr,i)));
     if (zpsolnf(nf,T,pr,nu,pnup,x,repr,zinit)) { avma = av; return 1; }
   }
   avma = av; return 0;
 }
 
+/* Let y = copy(x); y[k] := j; return y */
+static GEN
+ZC_add_coeff(GEN x, long k, long j)
+{ GEN y = shallowcopy(x); gel(y, k) = utoi(j); return y; }
+
 /* system of representatives for Zk/pr */
 static GEN
 repres(GEN nf, GEN pr)
 {
-  long i, j, k, f = pr_get_f(pr), p, pf, pi;
-  GEN g, rep, bas = nf_get_zk(nf);
+  long f = pr_get_f(pr), N = nf_get_degree(nf), p = itos(pr_get_p(pr));
+  long i, j, k, pi, pf = upowuu(p, f);
+  GEN rep, perm = cgetg(f+1, t_VECSMALL);
 
-  g = cgetg(f+1, t_VEC);
-  gel(g,1) = gel(bas,1);
+  perm[1] = 1;
   if (f > 1) {
-    GEN mat = idealhnf_two(nf,pr);
+    GEN H = idealhnf_two(nf,pr);
     for (i = k = 2; k <= f; i++)
-      if (!is_pm1(gcoeff(mat,i,i))) gel(g,k++) = gel(bas,i);
-  }
-
-  p = itos(pr_get_p(pr));
-  pf = upowuu(p, f);
-  rep = cgetg(pf+1,t_VEC);
-  gel(rep,1) = gen_0; pi = 1;
-  for (i=1; i<=f; i++,pi*=p)
-  {
-    GEN gi = gel(g,i), jgi = gi;
-    for (j=1; j<p; j++)
     {
-      for (k=1; k<=pi; k++) gel(rep, j*pi+k) = gadd(gel(rep,k), jgi);
-      if (j < p-1) jgi = gadd(jgi, gi); /* j*g[i] */
+      if (is_pm1(gcoeff(H,i,i))) continue;
+      perm[k++] = i;
     }
   }
-  return gmodulo(rep, nf_get_pol(nf));
+  rep = cgetg(pf+1,t_VEC);
+  gel(rep,1) = zerocol(N);
+  for (pi=i=1; i<=f; i++,pi*=p)
+  {
+    long t = perm[i];
+    for (j=1; j<p; j++)
+      for (k=1; k<=pi; k++) gel(rep, j*pi+k) = ZC_add_coeff(gel(rep,k), t, j);
+  }
+  return rep;
 }
 
 /* = 1 if equation y^2 = z^deg(T) * T(x/z) has a pr-adic rational solution
@@ -307,6 +311,8 @@ nf_hyperell_locally_soluble(GEN nf,GEN T,GEN pr)
   if (typ(T)!=t_POL) pari_err(notpoler,"nf_hyperell_locally_soluble");
   if (gequal0(T)) return 1;
   checkprid(pr); nf = checknf(nf);
+  pr = shallowcopy(pr);
+  gel(pr,5) = zk_scalar_or_multable(nf, pr_get_tau(pr));
 
   if (equaliu(pr_get_p(pr), 2))
   { /* tough case */
@@ -322,7 +328,7 @@ nf_hyperell_locally_soluble(GEN nf,GEN T,GEN pr)
   }
   repr = repres(nf,pr);
   if (zpsolnf(nf,T,pr,0,gen_1,gen_0,repr,zinit)) { avma=av; return 1; }
-  p1 = coltoalg(nf, pr_get_gen(pr));
+  p1 = pr_get_gen(pr);
   if (zpsolnf(nf,RgX_recip_shallow(T),pr,1,p1,gen_0,repr,zinit)) { avma=av; return 1; }
 
   avma = av; return 0;

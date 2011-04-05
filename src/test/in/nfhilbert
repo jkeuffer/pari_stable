@@ -17,4 +17,20 @@ nf=nfinit(y^2+3);
 nfhilbert(nf,[3,0]~,[3,0]~,idealprimedec(nf,2)[1])
 
 
+\\ #1147
+K = nfinit(x^5-23);
+p = idealprimedec(K, 2)[1];
+nfhilbert(K,x,-x^2-5*x,p)
 
+K = nfinit(x^8 + 2*x^7 + 3*x^6 + 3*x^4 + 3*x^2 + 2*x + 3);
+p = idealprimedec(K, 2)[1];
+{
+for (j = 1,10,
+  setrand(j);
+  a = vectorv(8,i,random(7));
+  b = vectorv(8,i,random(7));
+  c = vectorv(8,i,random(7));
+  d = nfeltmul(K,b,c);
+  print([nfhilbert(K, a,b,p), nfhilbert(K, a,c,p), nfhilbert(K, a,d,p)])
+)
+}
