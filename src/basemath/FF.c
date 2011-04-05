@@ -665,9 +665,7 @@ FF_trace(GEN x)
 {
   ulong pp;
   GEN T,p;
-  pari_sp av;
   _getFF(x,&T,&p,&pp);
-  av = avma;
   switch(x[1])
   {
   case t_FF_FpXQ:
