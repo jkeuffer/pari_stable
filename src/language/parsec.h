@@ -37,7 +37,6 @@ THREAD node *pari_tree;
 void
 pari_init_parser(void)
 {
-  pari_sp ltop=avma;
   long i;
   const char *opname[]={"_||_", "_&&_", "_===_", "_==_", "_!=_", "_>=_", "_>_", "_<=_", "_<_", "_-_","_+_","_<<_", "_>>_", "_%_", "_\\/_", "_\\_", "_/_", "_*_","_^_","__","_=_","_--","_++","_-=_", "_+=_", "_<<=_", "_>>=_", "_%=_", "_\\/=_", "_\\=_", "_/=_", "_*=_","+_","-_","!_","_!","_'","_~","%","#_","",""};
 
@@ -53,7 +52,6 @@ pari_init_parser(void)
     pari_tree[i].len  = strlen(opname[i]);
     pari_tree[i].flags= 0;
   }
-  avma=ltop;
 }
 void
 pari_close_parser(void) { stack_delete(&s_node); }
