@@ -980,7 +980,9 @@ gerfc(GEN x, long prec)
     long size = ceil((pow(rtodbl(gimag(x)),2)-pow(rtodbl(greal(x)),2))/(LOG2*BITS_IN_LONG));
     prec = size > 0 ? prec : prec + size;
     */
-    z = gsubsg(2, gerfc(gneg(x), prec));
+    /* NOT gsubsg(2, ...) : would create a result of
+     * huge accuracy if re(x)>>1, rounded to 2 by subsequent affc_fixlg... */
+    z = gsub(real2n(1,prec+1), gerfc(gneg(x), prec));
   }
   avma = av; return affc_fixlg(z, res);
 }
