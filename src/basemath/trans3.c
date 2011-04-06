@@ -912,7 +912,7 @@ cxerfc_r1(GEN x, long prec)
   {
     double t = exp(-2*PI*PI/D); /* ~exp(-2*h^2) */
     v = 30; /* bits that fit in both long and double mantissa */
-    u = floor(t*(1L<<v));
+    u = (long)floor(t*(1L<<v));
     /* define exp(-2*h^2) to be u*2^(-v) */
   }
   prec++;
