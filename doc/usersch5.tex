@@ -190,7 +190,7 @@ Function called when \kbd{SIGINT} is raised. By default, raises
   pari_err(talker, "user interrupt");
 @eprog
 
-\doc{cb_pari_err_recover}{extern void (*cb_pari_handle_exception)(long)}
+\doc{cb_pari_err_recover}{extern void (*cb_pari_err_recover)(long)}
 initialized to \kbd{pari\_exit()}. This call-back must not return.
 This call-back is called after PARI has cleaned-up from an error.
 The error number is passed as argument, unless the PARI stack
