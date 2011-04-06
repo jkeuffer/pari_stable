@@ -901,19 +901,18 @@ mpvecpow(GEN e, long n)
 }
 
 /* erfc via numerical integration : assume real(x)>=1 */
-#define DEN 30 /* bits that fit in both long and double mantissa */
 static GEN
 cxerfc_r1(GEN x, long prec)
 {
   GEN h, h2, eh2, denom, res, lambda;
-  long npoints, u, v;
+  long u, v;
   const double D = bit_accuracy_mul(prec, LOG2);
+  const long npoints = ceil(D/PI)+1;
   pari_sp av = avma;
-  npoints = ceil(D/PI)+1;
   {
-    double t = exp(-2*pow(PI,2)/D); /* ~exp(-2*h^2) */
-    u = floor(t*(1L<<DEN));
-    v = DEN;
+    double t = exp(-2*PI*PI/D); /* ~exp(-2*h^2) */
+    v = 30; /* bits that fit in both long and double mantissa */
+    u = floor(t*(1L<<v));
     /* define exp(-2*h^2) to be u*2^(-v) */
   }
   prec++;
