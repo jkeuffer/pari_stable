@@ -256,7 +256,7 @@ mulrrz_i(GEN z, GEN x, GEN y, long lz, long flag, long sz)
     }
     if (garde & HIGHBIT)
     { /* round to nearest */
-      i = lz; do z[--i]++; while (z[i]==0 && i > 1);
+      i = lz; do z[--i]++; while (i>1 && z[i]==0);
       if (i == 1) { z[2] = (long)HIGHBIT; ez++; }
     }
     z[1] = evalsigne(sz)|evalexpo(ez);
@@ -333,7 +333,7 @@ mulrrz_i(GEN z, GEN x, GEN y, long lz, long flag, long sz)
   }
   if (garde & HIGHBIT)
   { /* round to nearest */
-    i = lz; do z[--i]++; while (z[i]==0 && i > 2);
+    i = lz; do z[--i]++; while (i>2 && z[i]==0);
     if (z[i] == 0) { z[2] = (long)HIGHBIT; ez++; }
   }
   z[1] = evalsigne(sz) | evalexpo(ez);

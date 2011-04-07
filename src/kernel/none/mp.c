@@ -1571,7 +1571,7 @@ addshiftw(GEN x, GEN y, long d)
   else
   {
     y0 = yd-a; while (yd > y0) *--zd = *--yd; /* copy last a words of y */
-    while (zd >= z0) *--zd = 0;    /* complete with 0s */
+    while (zd > z0) *--zd = 0;    /* complete with 0s */
     z = icopy(x);
   }
   lz = lgefint(z)+d;
@@ -1594,7 +1594,7 @@ muliispec(GEN a, GEN b, long na, long nb)
   if (nb >= FFT_MULI_LIMIT)      return muliispec_fft(a,b,na,nb);
   i=(na>>1); n0=na-i; na=i;
   av=avma; a0=a+na; n0a=n0;
-  while (!*a0 && n0a) { a0++; n0a--; }
+  while (n0a && !*a0) { a0++; n0a--; }
 
   if (n0a && nb > n0)
   { /* nb <= na <= n0 */
@@ -1604,7 +1604,7 @@ muliispec(GEN a, GEN b, long na, long nb)
     nb -= n0;
     c = muliispec(a,b,na,nb);
     b0 = b+nb; n0b = n0;
-    while (!*b0 && n0b) { b0++; n0b--; }
+    while (n0b && !*b0) { b0++; n0b--; }
     if (n0b)
     {
       c0 = muliispec(a0,b0, n0a,n0b);
@@ -1675,7 +1675,7 @@ sqrispec(GEN a, long na)
   if (na >= FFT_SQRI_LIMIT) return sqrispec_fft(a,na);
   i=(na>>1); n0=na-i; na=i;
   av=avma; a0=a+na; n0a=n0;
-  while (!*a0 && n0a) { a0++; n0a--; }
+  while (n0a && !*a0) { a0++; n0a--; }
   c = sqrispec(a,na);
   if (n0a)
   {
