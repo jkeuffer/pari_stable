@@ -2305,8 +2305,7 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
       for (j=1; j<k; j++) q[j][k] = gtodouble(gcoeff(r,j,k));
       if (DEBUGLEVEL>3) fprintferr("v[%ld]=%.4g ",k,v[k]);
     }
-    BOUND = maxdd(v[1], v[2] + v[1]*q[1][2]*q[1][2]);
-    BOUND *= BMULT;
+    BOUND = mindd(BMULT * v[1], 2 * (v[2] + v[1]*q[1][2]*q[1][2]));
     /* BOUND at most BMULT x smallest known vector */
     if (DEBUGLEVEL>1)
     {
