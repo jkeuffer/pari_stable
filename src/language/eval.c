@@ -886,17 +886,18 @@ closure_eval(GEN C)
     case OCgerepile:
     {
       pari_sp av, av2;
+      GEN x;
       sp--;
       av = st[sp-1];
-      av2 = st[sp];
+      x = gel(st,sp);
+      av2 = (pari_sp)(x + lg(x));
       if (av - av2 > 1000000)
       {
         if (DEBUGMEM>=2)
           pari_warn(warnmem,"eval: recovering %ld bytes", av - av2);
-        gel(st,sp-1) = gerepileupto(av, gel(st,sp));
+        x = gerepileupto(av, x);
       }
-      else
-        gel(st,sp-1) = gel(st,sp);
+      gel(st,sp-1) = x;
       break;
     }
     case OCcopyifclone:
