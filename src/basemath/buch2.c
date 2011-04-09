@@ -71,6 +71,8 @@ static const long RANDOM_BITS = 4;
 /* Buchall */
 static const double BNF_C1 = 0.3, BNF_C2 = 0.3;
 static const long RELSUP = 5;
+static const long FAIL_DIVISOR = 32;
+static const long MINFAIL = 10;
 /* small_norm */
 static const long BNF_RELPID = 4;
 static const long BMULT = 8;
@@ -3507,11 +3509,11 @@ Buchall_param(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long
   pari_sp av0 = avma, av, av2;
   long PRECREG, N, R1, R2, RU, LIMC, LIMC2, zc, i;
   long nreldep, sfb_trials, need, old_need = -1, precdouble = 0, precadd = 0;
-  long done_small;
+  long done_small, small_fail, fail_limit, squash_index;
   double lim, drc, LOGD, LOGD2;
   GEN zu, nf, D, A, W, R, Res, z, h, PERM, fu = NULL /*-Wall*/;
   GEN res, L, resc, B, C, C0, lambda, dep, clg1, clg2, Vbase;
-  GEN auts, cyclic, small_mult;
+  GEN auts, cyclic;
   const char *precpb = NULL;
   int FIRST = 1;
   RELCACHE_t cache;
@@ -3587,9 +3589,9 @@ START:
   PERM = leafcopy(F.perm); /* to be restored in case of precision increase */
   cache.basis = zero_Flm_copy(F.KC,F.KC);
   F.id2 = zerovec(F.KC);
-  small_mult = zero_Flv(F.KC);
-  done_small = 0;
-  R = NULL;
+  done_small = 0; small_fail = 0; squash_index = 0;
+  fail_limit = F.KC + 1;
+  R = NULL; A = NULL;
   av2 = avma;
   init_rel(&cache, &F, RELSUP + RU-1); /* trivial relations */
   need = cache.end - cache.last;
@@ -3611,33 +3613,34 @@ START:
         cache.end = cache.last + need;
         F.L_jid = trim_list(&F);
       }
-      if (need > 0 && nbrelpid > 0 && done_small <= F.KC && (!R || lg(W)>1) &&
-          cache.last < cache.base + 2*F.KC /* heuristic */)
+      if (need > 0 && nbrelpid > 0 && (done_small <= F.KC+1 || A) &&
+          small_fail <= fail_limit &&
+          cache.last < cache.base + 2*F.KC+2*RU+RELSUP /* heuristic */)
       {
         pari_sp av3 = avma;
-        GEN p0 = NULL, L_jid = F.L_jid;
-        if (R)
+        GEN p0 = NULL;
+        long j, k;
+        REL_t *last = cache.last;
+        if (R && lg(W) > 1 && (done_small % 2))
         {
           /* We have full rank for class group and unit, however those
            * lattices are too small. The following tries to improve the
            * prime group lattice: it specifically looks for relations
            * involving the primes generating the class group. */
           long l = lg(W) - 1;
-          /* We need lg(W)-1 relations. */
-          F.L_jid = vecslice(F.perm, 1, l);
-          cache.end = cache.last + l;
+          /* We need lg(W)-1 relations to squash the class group. */
+          F.L_jid = vecslice(F.perm, 1, l); cache.end = cache.last + l;
           /* Lie to the add_rel subsystem: pretend we miss relations involving
            * the primes generating the class group (and only those). */
           cache.missing = l;
           for ( ; l > 0; l--) mael(cache.basis, F.perm[l], F.perm[l]) = 0;
         }
-        if (done_small)
+        j = done_small % (F.KC+1);
+        if (j)
         {
-          long j = 0, k;
-          for (i = F.KC; i >= 1; i--) if (!small_mult[j = F.perm[i]]) break;
-          small_mult[j]++;
+          j = PERM[F.KC + 1 - j];
           p0 = gel(F.LP, j);
-          if (!R)
+          if (!A)
           {
             /* Prevent considering both P_iP_j and P_jP_i in small_norm */
             for (i = k = 1; i < lg(F.L_jid); i++)
@@ -3648,21 +3651,20 @@ START:
         if (lg(F.L_jid) > 1)
           small_norm(&cache, &F, nf, nbrelpid, LOGD, LIMC2, fact, p0);
         avma = av3;
-        if (R)
+        if (!A && cache.last != last)
+          small_fail = 0;
+        else
+          small_fail++;
+        if (R && lg(W) > 1 && (done_small % 2))
         {
           long l = lg(W) - 1;
-          F.L_jid = L_jid;
-          cache.end = cache.last + need;
           for ( ; l > 0; l--) mael(cache.basis, F.perm[l], F.perm[l]) = 1;
           cache.missing = 0;
         }
-        else
-        {
-          F.L_jid = F.perm;
-          need = 0;
-        }
+        F.L_jid = F.perm;
+        need = 0; cache.end = cache.last;
         done_small++;
-        F.sfb_chg = 0;
+        if (!need) F.sfb_chg = 0;
       }
       if (need > 0)
       {
@@ -3774,18 +3776,28 @@ START:
          * of L_jid. We thus permute which element is the first of L_jid in
          * order to increase the probability of finding a good relation, i.e.
          * one that increases the relation lattice. */
-        if (lg(W) > 2)
+        if (lg(W) > 2 && squash_index % (lg(W) - 1))
         {
+          long j, l = lg(W) - 1;
           F.L_jid = gcopy(F.perm);
-          lswap(F.L_jid[1], F.L_jid[1+(nreldep%(lg(W) - 1))]);
+          for (j = 1; j <= l; j++)
+            F.L_jid[j] = F.perm[1 + (j + squash_index - 1) % l];
         }
         else
           F.L_jid = F.perm;
+        squash_index++;
       }
     }
     while (need);
+    if (!A)
+    {
+      small_fail = 0; fail_limit = maxss(F.KC / FAIL_DIVISOR, MINFAIL);
+      old_need = 0;
+    }
     A = vecslice(C, 1, zc); /* cols corresponding to units */
     R = compute_multiple_of_R(A, RU, N, &need, &lambda);
+    if (need < old_need) small_fail = 0;
+    old_need = need;
     if (!lambda) { precpb = "bestappr"; continue; }
     if (!R)
     { /* not full rank for units */
