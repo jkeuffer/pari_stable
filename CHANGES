@@ -54,6 +54,7 @@ BA 39- polroots(1) returned [] instead of []~.
 BA 42- qfbred(large discriminant, small prec): precision too low in truncr [#1173]
 PMo43- erfc(large x) was slow and inaccurate [#364]
    44- erfc() : allow t_COMPLEX inputs
+   45- stack corruption in ifac_decomp_break() [#1115]
 
   Changed
 LGr1- universal constants (gen_0,gen_1, etc.) are now read-only

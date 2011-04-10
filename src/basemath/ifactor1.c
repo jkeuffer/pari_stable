@@ -15,7 +15,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "paripriv.h"
 
-
 /***********************************************************************/
 /**                                                                   **/
 /**                       PRIMES IN SUCCESSION                        **/
@@ -2235,11 +2234,11 @@ is_pth_power(GEN x, GEN *pt, ulong *curexp, ulong cutoffbits)
  * would already know where 'here' is, so we don't want to search for it again.
  * We do not preserve this from one user-interface call to the next. */
 
-static GEN ifac_find(GEN *partial, GEN *where);
+static GEN ifac_find(GEN partial, GEN where);
 /* Return GEN pointing at the first nonempty slot strictly behind the current
  * *where, or NULL if such doesn't exist.  Can be used to skip a range of
  * vacant slots, or to initialize *where in the first place (pass partial in
- * both args).  Does not modify its argument pointers. */
+ * both args). */
 
 void ifac_realloc(GEN *partial, GEN *where, long new_lg);
 /* Move to a larger main vector, updating *where if it points into it, and
@@ -2331,10 +2330,6 @@ long ifac_decomp(GEN n, long hint);
 
 /*** implementation ***/
 
-#define ifac_initial_length (3 + 7*3) /* codeword, moebius, hint, 7 slots */
-/* (more than enough in most cases -- a 512-bit product of distinct 8-bit
- * primes needs at most 7 slots at a time) */
-
 #define LAST(x) x+lg(x)-3
 #define FIRST(x) x+3
 
@@ -2357,7 +2352,7 @@ COPY(GEN x, GEN y) {
   CLASS(y) = CLASS(x);
 }
 
-/* diagnostics */
+/* Diagnostics */
 static void
 ifac_factor_dbg(GEN x)
 {
@@ -2366,22 +2361,44 @@ ifac_factor_dbg(GEN x)
   else if (c == gen_1) fprintferr("IFAC: factor %Ps\n\tis prime\n", v);
   else if (c == gen_0) fprintferr("IFAC: factor %Ps\n\tis composite\n", v);
 }
-#ifdef IFAC_DEBUG
 static void
-ifac_check(GEN *partial, GEN *where)
+ifac_check(GEN partial, GEN where)
 {
-  if (!*partial || typ(*partial) != t_VEC) pari_err(typeer, "ifac_xxx");
-  if (lg(*partial) < ifac_initial_length)
-    pari_err(talker, "partial impossibly short");
-  if (!(*where) || *where < FIRST(*partial) || *where > LAST(*partial))
-    pari_err(talker, "'*where' out of bounds");
+  if (!where || where < FIRST(partial) || where > LAST(partial))
+    pari_err(talker, "'where' out of bounds");
 }
-#endif
+static void
+ifac_print(GEN part, GEN where)
+{
+  long l = lg(part);
+  GEN p;
+
+  fprintferr("ifac partial factorization structure: %ld slots, ", (l-3)/3);
+  if (MOEBIUS(part)) fprintferr("Moebius mode, ");
+  fprintferr("hint = %ld\n", itos(HINT(part)));
+  ifac_check(part, where);
+  for (p = part+3; p < part + l; p += 3)
+  {
+    GEN v = VALUE(p), e = EXPON(p), c = CLASS(p);
+    char *s = "";
+    if (!v) { fprintferr("[empty slot]\n"); continue; }
+    if (c == NULL) s = "unknown";
+    else if (c == gen_0) s = "composite";
+    else if (c == gen_1) s = "unfinished prime";
+    else if (c == gen_2) s = "prime";
+    else pari_err(bugparier, "unknown factor class");
+    fprintferr("[%Ps, %Ps, %s]\n", v, e, s);
+  }
+  fprintferr("Done.\n");
+}
 
 /* assume n a non-zero t_INT */
 GEN
 ifac_start(GEN n, long moebius, long hint)
 {
+  const long ifac_initial_length = 3 + 7*3;
+  /* codeword, moebius, hint, 7 slots -- a 512-bit product of distinct 8-bit
+   * primes needs at most 7 slots at a time) */
   GEN here, part = cgetg(ifac_initial_length, t_VEC);
 
   MOEBIUS(part) = moebius? gen_1 : NULL;
@@ -2398,14 +2415,14 @@ ifac_start(GEN n, long moebius, long hint)
 }
 
 static GEN
-ifac_find(GEN *partial, GEN *where)
+ifac_find(GEN partial, GEN where)
 {
-  GEN scan, end = *partial + lg(*partial);
+  GEN scan, end = partial + lg(partial);
 
 #ifdef IFAC_DEBUG
-  ifac_check(*partial, *where);
+  ifac_check(partial, where);
 #endif
-  for (scan = *where+3; scan < end; scan += 3)
+  for (scan = where+3; scan < end; scan += 3)
     if (VALUE(scan)) return scan;
   return NULL;
 }
@@ -2956,7 +2973,7 @@ ifac_insert_multiplet(GEN *partial, GEN *where, GEN facvec)
 static GEN
 ifac_main(GEN *partial)
 {
-  GEN here = ifac_find(partial, partial);
+  GEN here = ifac_find(*partial, *partial);
   long nf;
 
   if (!here) return gen_1; /* nothing left */
@@ -3105,9 +3122,16 @@ ifac_decomp_break(GEN n, long (*ifac_break)(GEN n,GEN pairs,GEN here,GEN state),
     if (here == gen_1) break;
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) pari_warn(warnmem,"[2] ifac_decomp");
+      long offset;
+      if(DEBUGMEM>1)
+      {
+        pari_warn(warnmem,"[2] ifac_decomp");
+        ifac_print(part, here);
+      }
       ifac_realloc(&part, &here, 0);
+      offset = here - part;
       part = gerepileupto((pari_sp)workspc, part);
+      here = part + offset;
     }
     nb++;
     pairs = icopy_avma(VALUE(here), (pari_sp)pairs);
