@@ -2,7 +2,7 @@ Function: galoisisnormal
 Section: number_fields
 C-Name: galoisisnormal
 Prototype: lGG
-Help: galoisisabelian(gal,subgrp): gal being as output by galoisinit,
+Help: galoisisnormal(gal,subgrp): gal being as output by galoisinit,
  and subgrp a subgroup of gal as output by galoissubgroups,
  return 1 if subgrp is a normal subgroup of gal, else return 0.
 Doc: \var{gal} being as output by \kbd{galoisinit}, and \var{subgrp} a subgroup
