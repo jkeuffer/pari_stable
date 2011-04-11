@@ -935,16 +935,19 @@ red_montgomery(GEN T, GEN N, ulong inv)
   if (k == 1)
   { /* as below, special cased for efficiency */
     ulong n = (ulong)N[2];
-    t = (ulong)T[d+1];
-    m = t * inv;
-    (void)addll(mulll(m, n), t); /* = 0 */
-    t = hiremainder + overflow;
-    if (d == 2)
-    {
-      t = addll((ulong)T[2], t);
+    if (d == 1) {
+      hiremainder = (ulong)T[2];
+      m = hiremainder * inv;
+      (void)addmul(m, n); /* t + m*n = 0 */
+      return utoi(hiremainder);
+    } else { /* d = 2 */
+      hiremainder = (ulong)T[3];
+      m = hiremainder * inv;
+      (void)addmul(m, n); /* t + m*n = 0 */
+      t = addll(hiremainder, (ulong)T[2]);
       if (overflow) t -= n; /* t > n doesn't fit in 1 word */
+      return utoi(t);
     }
-    return utoi(t);
   }
   /* assume k >= 2 */
   av = avma; scratch = new_chunk(k<<1); /* >= k + 2: result fits */
@@ -963,18 +966,18 @@ red_montgomery(GEN T, GEN N, ulong inv)
   {
     Td = Te; /* one beyond end of (new) T mantissa */
     Nd = Ne;
-    m = *--Td * inv; /* solve T + m N = O(B) */
+    hiremainder = *--Td;
+    m = hiremainder * inv; /* solve T + m N = O(B) */
 
     /* set T := (T + mN) / B */
     Te = Td;
-    (void)addll(mulll(m, *--Nd), *Td); /* = 0 */
+    (void)addmul(m, *--Nd); /* = 0 */
     for (j=1; j<k; j++)
     {
-      hiremainder += overflow;
       t = addll(addmul(m, *--Nd), *--Td); *Td = t;
+      hiremainder += overflow;
     }
-    overflow += hiremainder;
-    t = addll(overflow, *--Td); *Td = t + carry;
+    t = addll(hiremainder, *--Td); *Td = t + carry;
     carry = (overflow || (carry && *Td == 0));
   }
   if (carry)
