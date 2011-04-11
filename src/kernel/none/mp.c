@@ -929,6 +929,7 @@ red_montgomery(GEN T, GEN N, ulong inv)
 
   if (k == 0) return gen_0;
   d = NLIMBS(T); /* <= 2*k */
+  if (d == 0) return gen_0;
 #ifdef DEBUG
   if (d > 2*k) pari_err(bugparier,"red_montgomery");
 #endif
@@ -992,7 +993,7 @@ red_montgomery(GEN T, GEN N, ulong inv)
   Td = (GEN)av;
   while (! *scratch && Te > scratch) scratch++; /* strip leading 0s */
   while (Te > scratch) *--Td = *--Te;
-  k = (GEN)av - Td; if (!k) return gen_0;
+  k = (GEN)av - Td; if (!k) { avma = av; return gen_0; }
   k += 2;
   *--Td = evalsigne(1) | evallgefint(k);
   *--Td = evaltyp(t_INT) | evallg(k);
