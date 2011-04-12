@@ -950,8 +950,8 @@ escape(char *tch, int ismain)
     case 'g':
       switch (*s)
       {
-        case 'm': (void)sd_debugmem(++s,d_ACKNOWLEDGE); break;
-        case 'f': (void)sd_debugfiles(++s,d_ACKNOWLEDGE); break;
+        case 'm': s++; (void)sd_debugmem(*s? s: NULL,d_ACKNOWLEDGE); break;
+        case 'f': s++; (void)sd_debugfiles(*s? s: NULL,d_ACKNOWLEDGE); break;
         default : (void)sd_debug(*s? s: NULL,d_ACKNOWLEDGE); break;
       }
       break;
