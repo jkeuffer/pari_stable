@@ -942,9 +942,96 @@ DIVIDE: /* quotient is non-zero */
 GEN
 red_montgomery(GEN T, GEN N, ulong inv)
 {
-  (void)T; (void)N; (void)inv;
-  pari_err(impl, "Montgomery reduction in gmp kernel");
-  return NULL; /* not reached */
+  pari_sp av;
+  GEN Te, Td, Ne, Nd, scratch;
+  ulong i, j, m, t, d, k = NLIMBS(N);
+  int carry;
+  LOCAL_HIREMAINDER;
+  LOCAL_OVERFLOW;
+
+  if (k == 0) return gen_0;
+  d = NLIMBS(T); /* <= 2*k */
+  if (d == 0) return gen_0;
+#ifdef DEBUG
+  if (d > 2*k) pari_err(bugparier,"red_montgomery");
+#endif
+  if (k == 1)
+  { /* as below, special cased for efficiency */
+    ulong n = (ulong)N[2];
+    if (d == 1) {
+      hiremainder = (ulong)T[2];
+      m = hiremainder * inv;
+      (void)addmul(m, n); /* t + m*n = 0 */
+      return utoi(hiremainder);
+    } else { /* d = 2 */
+      hiremainder = (ulong)T[2];
+      m = hiremainder * inv;
+      (void)addmul(m, n); /* t + m*n = 0 */
+      t = addll(hiremainder, (ulong)T[3]);
+      if (overflow) t -= n; /* t > n doesn't fit in 1 word */
+      return utoi(t);
+    }
+  }
+  /* assume k >= 2 */
+  av = avma; scratch = new_chunk(k<<1); /* >= k + 2: result fits */
+
+  /* copy T to scratch space (pad with zeroes to 2k words) */
+  Td = scratch;
+  Te = T + 2;
+  for (i=0; i < d     ; i++) *Td++ = *Te++;
+  for (   ; i < (k<<1); i++) *Td++ = 0;
+
+  Te = scratch - 1; /* 1 beyond end of current T mantissa (in scratch) */
+  Ne = N + 1;       /* 1 beyond end of N mantissa */
+
+  carry = 0;
+  for (i=0; i<k; i++) /* set T := T/B nod N, k times */
+  {
+    Td = Te; /* one beyond end of (new) T mantissa */
+    Nd = Ne;
+    hiremainder = *++Td;
+    m = hiremainder * inv; /* solve T + m N = O(B) */
+
+    /* set T := (T + mN) / B */
+    Te = Td;
+    (void)addmul(m, *++Nd); /* = 0 */
+    for (j=1; j<k; j++)
+    {
+      t = addll(addmul(m, *++Nd), *++Td);
+      *Td = t;
+      hiremainder += overflow;
+    }
+    t = addll(hiremainder, *++Td); *Td = t + carry;
+    carry = (overflow || (carry && *Td == 0));
+  }
+  if (carry)
+  { /* Td > N overflows (k+1 words), set Td := Td - N */
+    Td = Te;
+    Nd = Ne;
+    t = subll(*++Td, *++Nd); *Td = t;
+    while (Td < (GEN)av) { t = subllx(*++Td, *++Nd); *Td = t; }
+  }
+
+  /* copy result */
+  Td = (GEN)av - 1; /* *Td = high word of final result */
+  while (*Td == 0 && Te < Td) Td--; /* strip leading 0s */
+  k = Td - Te; if (!k) { avma = av; return gen_0; }
+  Td = (GEN)av - k; /* will write mantissa there */
+  (void)memmove(Td, Te+1, k*sizeof(long));
+  Td -= 2;
+  Td[0] = evaltyp(t_INT) | evallg(k+2);
+  Td[1] = evalsigne(1) | evallgefint(k+2);
+#ifdef DEBUG
+{
+  long l = NLIMBS(N), s = BITS_IN_LONG*l;
+  GEN R = int2n(s);
+  GEN res = remii(mulii(T, Fp_inv(R, N)), N);
+  if (k > lgefint(N)
+    || !equalii(remii(Td,N),res)
+    || cmpii(Td, addii(shifti(T, -s), N)) >= 0) pari_err(bugparier,"red_montgomery");
+}
+#endif
+  avma = (pari_sp)Td; return Td;
 }
 
 /* EXACT INTEGER DIVISION */
