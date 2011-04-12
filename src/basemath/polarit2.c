@@ -2633,9 +2633,13 @@ inexact(GEN x, int *simple, int *rational)
 static GEN
 gcdmonome(GEN x, GEN y)
 {
-  long dx = degpol(x), e = RgX_val(y);
+  long dx = degpol(x), e = RgX_valrem(y, &y);
+  long i, l = lg(y);
   pari_sp av = avma;
-  GEN t = ggcd(gel(x,dx+2), content(y)); /* gcd(lc(x), cont(y)) */
+  GEN t, v = cgetg(l, t_VEC);
+  gel(v,1) = gel(x,dx+2);
+  for (i = 2; i < l; i++) gel(v,i) = gel(y,i);
+  t = content(v); /* gcd(lc(x), cont(y)) */
   if (dx < e) e = dx;
   return gerepileupto(av, monomialcopy(t, e, varn(x)));
 }
