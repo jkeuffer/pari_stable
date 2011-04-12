@@ -959,7 +959,7 @@ red_montgomery(GEN T, GEN N, ulong inv)
   for (i=0; i < d     ; i++) *--Td = *--Te;
   for (   ; i < (k<<1); i++) *--Td = 0;
 
-  Te = (GEN)av; /* 1 beyond end of T mantissa */
+  Te = (GEN)av; /* 1 beyond end of current T mantissa (in scratch) */
   Ne = N + k+2; /* 1 beyond end of N mantissa */
 
   carry = 0;
@@ -975,7 +975,8 @@ red_montgomery(GEN T, GEN N, ulong inv)
     (void)addmul(m, *--Nd); /* = 0 */
     for (j=1; j<k; j++)
     {
-      t = addll(addmul(m, *--Nd), *--Td); *Td = t;
+      t = addll(addmul(m, *--Nd), *--Td);
+      *Td = t;
       hiremainder += overflow;
     }
     t = addll(hiremainder, *--Td); *Td = t + carry;
@@ -991,7 +992,7 @@ red_montgomery(GEN T, GEN N, ulong inv)
 
   /* copy result */
   Td = (GEN)av;
-  while (! *scratch && Te > scratch) scratch++; /* strip leading 0s */
+  while (*scratch == 0 && Te > scratch) scratch++; /* strip leading 0s */
   while (Te > scratch) *--Td = *--Te;
   k = (GEN)av - Td; if (!k) { avma = av; return gen_0; }
   k += 2;
