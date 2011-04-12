@@ -1145,7 +1145,7 @@ ZX_gcd_all(GEN A, GEN B, GEN *Anew)
       H = ZX_init_CRT(Hp,p,vA);
       q = utoipos(p); n = m; continue;
     }
-    if (DEBUGLEVEL>5) fprintferr("gcd mod %lu (bound 2^%ld)", p,expi(q));
+    if (DEBUGLEVEL>5) fprintferr("gcd mod %lu (bound 2^%ld)\n", p,expi(q));
     if (low_stack(avlim, stack_lim(av,1)))
     {
       if (DEBUGMEM>1) pari_warn(warnmem,"QX_gcd");
