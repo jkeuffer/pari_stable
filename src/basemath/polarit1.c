@@ -673,32 +673,6 @@ Flm_Flx_mul(GEN x, GEN y, ulong p)
   *z-- = vs; return z;
 }
 
-/* assume deg(u) > 0 */
-static GEN
-Flx_Frobenius(GEN u, ulong p)
-{
-  long j,N = degpol(u);
-  GEN v,w,Q;
-  pari_timer T;
-
-  if (DEBUGLEVEL > 7) timer_start(&T);
-  Q = cgetg(N+1,t_MAT);
-  gel(Q,1) = const_vecsmall(N, 0);
-  coeff(Q,1,1) = 1;
-  w = v = Flxq_pow(polx_Flx(u[1]), utoipos(p), u, p);
-  for (j=2; j<=N; j++)
-  {
-    gel(Q,j) = Flx_to_Flv(w, N);
-    if (j < N)
-    {
-      pari_sp av = avma;
-      w = gerepileupto(av, Flxq_mul(w, v, u, p));
-    }
-  }
-  if (DEBUGLEVEL > 7) timer_printf(&T, "frobenius");
-  return Q;
-}
-
 /* z must be squarefree mod p*/
 GEN
 Flx_nbfact_by_degree(GEN z, long *nb, ulong p)
@@ -706,7 +680,9 @@ Flx_nbfact_by_degree(GEN z, long *nb, ulong p)
   long lgg, d = 0, e = degpol(z);
   GEN D = const_vecsmall(e, 0);
   pari_sp av = avma;
-  GEN g, w, MP = Flx_Frobenius(z, p), PolX = polx_Flx(z[1]);
+  GEN g, w,  PolX = polx_Flx(z[1]);
+  GEN XP = Flxq_pow(PolX,utoipos(p),z,p);
+  GEN MP = Flxq_matrix_pow(XP,e,e,z,p);
 
   w = PolX; *nb = 0;
   while (d < (e>>1))
