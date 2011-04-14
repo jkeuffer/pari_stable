@@ -315,7 +315,7 @@ tune: mpinl.h tune-sta
 tune-dyn: tune.o \$(LIBPARI_DYN)
 	\$(LD) \$(LDFLAGS) \$(RUNPTH) -o \$@ \$< \$(GMPOBJS) -L. \$(LDDYN) \$(STA_LIBS)
 tune-sta: tune.o \$(LIBPARI_STA)
-	\$(LD) \$(LDFLAGS) -o \$@ \$< \$(GMPOBJS) ./\$(LIBPARI_STA) \$(STA_LIBS)
+	\$(LD) \$(LDFLAGS) \$(RUNPTH) -o \$@ \$< \$(GMPOBJS) ./\$(LIBPARI_STA) \$(STA_LIBS)
 
 gp-sta: $add_funclist \$(OBJS) \$(OBJSGP)
 	\$(RM) \$@
