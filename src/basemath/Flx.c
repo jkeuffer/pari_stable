@@ -595,7 +595,7 @@ Flx_mulspec(GEN a, GEN b, ulong p, long na, long nb)
   switch (maxlengthcoeffpol(p,nb))
   {
   case 0:
-    if (na>10)
+    if (na>Flx_MUL_HALFMULII_LIMIT)
       return Flx_shiftip(av,Flx_mulspec_halfmulii(a,b,p,na,nb), v);
     break;
   case 1:
@@ -739,7 +739,7 @@ Flx_sqrspec(GEN a, ulong p, long na)
   switch(maxlengthcoeffpol(p,na))
   {
   case 0:
-    if (na>10)
+    if (na>Flx_SQR_HALFSQRI_LIMIT)
       return Flx_shiftip(av, Flx_sqrspec_halfsqri(a,p,na), v);
     break;
   case 1:

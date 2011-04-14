@@ -15,6 +15,8 @@
 #define __INVMOD_GMP_LIMIT      -1 /* unused */
 #define __Flx_MUL_KARATSUBA_LIMIT  100
 #define __Flx_SQR_KARATSUBA_LIMIT  200
+#define __Flx_MUL_HALFMULII_LIMIT  10
+#define __Flx_SQR_HALFSQRI_LIMIT   10
 #define __Flx_INVMONTGOMERY_LIMIT  6000
 #define __Flx_REM_MONTGOMERY_LIMIT 3500
 #define __Flx_POW_MONTGOMERY_LIMIT 1000
