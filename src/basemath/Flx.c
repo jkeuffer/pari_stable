@@ -611,7 +611,7 @@ Flx_mulspec(GEN a, GEN b, ulong p, long na, long nb)
       return Flx_shiftip(av,Flx_mulspec_mulii_inflate(a,b,3,p,na,nb), v);
     break;
   }
-  if (nb < Flx_MUL_LIMIT)
+  if (nb < Flx_MUL_KARATSUBA_LIMIT)
     return Flx_shiftip(av,Flx_mulspec_basecase(a,b,p,na,nb), v);
   i=(na>>1); n0=na-i; na=i;
   a0=a+n0; n0a=n0;
@@ -755,7 +755,7 @@ Flx_sqrspec(GEN a, ulong p, long na)
       return Flx_shiftip(av, Flx_sqrspec_sqri_inflate(a,3,p,na), v);
     break;
   }
-  if (na < Flx_SQR_LIMIT)
+  if (na < Flx_SQR_KARATSUBA_LIMIT)
     return Flx_shiftip(av, Flx_sqrspec_basecase(a,p,na), v);
   i=(na>>1); n0=na-i; na=i;
   a0=a+n0; n0a=n0;
