@@ -1800,7 +1800,7 @@ static long
 Fp_select_red(GEN *y, ulong k, GEN N, long lN, muldata *D)
 {
   D->N = N;
-  if (lN > REMIIMUL_LIMIT  && (k==0 || ((double)k)*expi(*y) > 2 + expi(N)))
+  if (lN >= REMIIMUL_LIMIT  && (k==0 || ((double)k)*expi(*y) > 2 + expi(N)))
   {
     D->mul2 = &_muli2red;
     D->res = &_remiimul;

@@ -68,13 +68,14 @@ static double speed_endtime() { return (double)timer_delay(&__T)/1000.; }
 #endif
 
 /* ========================================================== */
-/* int, n words */
+/* int, n words, odd */
 static GEN
 rand_INT(long n)
 {
   pari_sp av = avma;
   GEN x, N = int2n(n*BITS_IN_LONG);
   do x = randomi(N); while (lgefint(x) != n+2);
+  if (!mpodd(x)) x = addis(x,1); /*For Montgomery REDC */
   return gerepileuptoint(av, x);
 }
 /* real, n words */
@@ -211,26 +212,11 @@ static double speed_dsqri (speed_param *s)
 static double speed_esqri (speed_param *s)
 { enable(s);  TIME_FUN(sqri(s->x)); }
 
-#define INIT_RED(s, op)                                 \
-  long i, lx = lg(s->x);                                \
-  op = cgetipos(2*lx - 2);                                 \
-  for (i=2; i<lx; i++) op[i]      = s->x[i];            \
-  for (i=2; i<lx; i++) op[lx-2+i] = s->x[i];            \
-  *int_LSW(s->y) |= 1; /* make sure modulus is odd */
-static double speed_redc(speed_param *s) {
-  ulong inv = (ulong)-invmod2BIL(mod2BIL(s->y));
-  GEN op; INIT_RED(s, op);
-  TIME_FUN( red_montgomery(op, s->y, inv) ); };
-static double speed_modii(speed_param *s) {
-  GEN op; INIT_RED(s, op);
-  TIME_FUN( remii(op, s->y) ); };
-static double speed_remiimul(speed_param *s) {
-  GEN sM = init_remiimul(s->y);
-  GEN op; INIT_RED(s, op);
-  TIME_FUN( remiimul(op, s->y, sM) ); }
-static double speed_modred(speed_param *s) {
-  return (s->size < MONTGOMERY_LIMIT)? speed_redc(s): speed_modii(s);
-};
+static double speed_Fp_dpow(speed_param *s)
+{ disable(s); TIME_FUN( Fp_pow(s->x, subis(s->y,1), s->y)); }
+
+static double speed_Fp_epow(speed_param *s)
+{ enable(s);  TIME_FUN( Fp_pow(s->x, subis(s->y,1), s->y)); }
 
 static double speed_divrr(speed_param *s)
 { disable(s); TIME_FUN(divrr(s->x, s->y)); }
@@ -353,8 +339,8 @@ static tune_param param[] = {
 {PARI,var(FFT_MULI_LIMIT),         t_INT, 1000,100000, speed_dmulii,speed_emulii,0.02},
 {PARI,var(FFT_SQRI_LIMIT),         t_INT, 1000,100000, speed_dsqri,speed_esqri,0.02},
 {0,   var(KARATSUBA_MULR_LIMIT),   t_REAL,4,0, speed_mulrr,speed_karamulrr},
-{0,   var(MONTGOMERY_LIMIT),       t_INT, 3,0, speed_redc,speed_modii},
-{0,   var(REMIIMUL_LIMIT),         t_INT, 3,0, speed_modred,speed_remiimul},
+{0,   var(MONTGOMERY_LIMIT),       t_INT, 3,0, speed_Fp_dpow,speed_Fp_epow,0,0,&REMIIMUL_LIMIT},
+{0,   var(REMIIMUL_LIMIT),         t_INT, 3,0, speed_Fp_dpow,speed_Fp_epow},
 {0,   var(INVNEWTON_LIMIT),        t_REAL,66,0, speed_inv,speed_invnewton,0.03},
 {GMP, var(DIVRR_GMP_LIMIT),        t_REAL,4,0, speed_divrr,speed_divrrgmp},
 {0,   var(EXPNEWTON_LIMIT),        t_REAL,66,0, speed_exp,speed_expnewton},
