@@ -25,11 +25,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 int option_trace = 0;
 double Step_Factor = .01; /* small steps by default */
-#ifdef LONG_IS_64BIT
-ulong DFLT_mod = 18446744073709551557UL;
-#else
-ulong DFLT_mod = 4294967291UL;
-#endif
+ulong DFLT_mod;
 GEN LARGE_mod;
 
 typedef struct {
@@ -585,6 +581,7 @@ main(int argc, char **argv)
   int i, r, n = 0;
   GEN v;
   pari_init(4000000, 2);
+  (void) init_modular(&DFLT_mod);
   LARGE_mod=subis(powuu(3,128),62);
   v = new_chunk(argc);
   for (i = 1; i < argc; i++)
