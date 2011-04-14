@@ -2923,29 +2923,41 @@ mydiv(GEN x, GEN y)
   return gdiv(x,y);
 }
 
-/* determinant in a ring A: all computations are done within A
- * (Gauss-Bareiss algorithm) */
+/* shallow, remove coeff of index j */
 GEN
-det(GEN a)
+vecsplice(GEN a, long j)
 {
-  pari_timer T;
-  pari_sp av, lim;
-  long nbco = lg(a)-1,i,j,k,s;
-  GEN p, pprec, data;
-  pivot_fun pivot;
+  long i, k, l = lg(a);
+  GEN b;
+  if (l == 1) pari_err(talker, "incorrect component in vecsplice");
+  b = cgetg(l-1, typ(a));
+  for (i = k = 1; i < l; i++)
+    if (i != j) gel(b, k++) = gel(a,i);
+  return b;
+}
+/* shallow */
+GEN
+RgM_minor(GEN a, long i, long j)
+{
+  GEN b = vecsplice(a, j);
+  long k, l = lg(b);
+  for (k = 1; k < l; k++) gel(b,k) = vecsplice(gel(b,k), i);
+  return b;
+}
 
-  if (typ(a)!=t_MAT) pari_err(mattype1,"det");
-  if (!nbco) return gen_1;
-  if (nbco != lg(a[1])-1) pari_err(mattype1,"det");
-  pivot = get_pivot_fun(a, &data);
-  if (pivot != gauss_get_pivot_NZ) return det_simple_gauss(a, data, pivot);
-  if (DEBUGLEVEL > 7) timer_start(&T);
+/* Assumes a a square t_MAT of dimension n > 0. Returns det(a) using
+ * Gauss-Bareiss. */
+static GEN
+det_bareiss(GEN a)
+{
+  pari_sp av = avma, lim = stack_lim(av,2);
+  long nbco = lg(a)-1,i,j,k,s = 1;
+  GEN p, pprec;
 
-  av = avma; lim = stack_lim(av,2);
-  a = RgM_shallowcopy(a); s = 1;
+  a = RgM_shallowcopy(a);
   for (pprec=gen_1,i=1; i<nbco; i++,pprec=p)
   {
-    GEN ci, ck, m, p1;
+    GEN ci, ck, m;
     int diveuc = (gequal1(pprec)==0);
 
     p = gcoeff(a,i,i);
@@ -2970,7 +2982,7 @@ det(GEN a)
         else
           for (j=i+1; j<=nbco; j++)
           {
-            p1 = gmul(p, gel(ck,j));
+            GEN p1 = gmul(p, gel(ck,j));
             if (diveuc) p1 = mydiv(p1,pprec);
             gel(ck,j) = p1;
           }
@@ -2979,23 +2991,163 @@ det(GEN a)
       {
         for (j=i+1; j<=nbco; j++)
         {
-          p1 = gsub(gmul(p,gel(ck,j)), gmul(m,gel(ci,j)));
+          pari_sp av2 = avma;
+          GEN p1 = gsub(gmul(p,gel(ck,j)), gmul(m,gel(ci,j)));
           if (diveuc) p1 = mydiv(p1,pprec);
-          gel(ck,j) = p1;
+          gel(ck,j) = gerepileupto(av2, p1);
+          if (low_stack(lim,stack_lim(av,2)))
+          {
+            if(DEBUGMEM>1) pari_warn(warnmem,"det. col = %ld",i);
+            gerepileall(av,2, &a,&pprec);
+            ci = gel(a,i);
+            ck = gel(a,k); m = gel(ck,i);
+            p = gcoeff(a,i,i);
+          }
         }
       }
-      if (low_stack(lim,stack_lim(av,2)))
-      {
-        if(DEBUGMEM>1) pari_warn(warnmem,"det. col = %ld",i);
-        gerepileall(av,2, &a,&pprec); p = gcoeff(a,i,i); ci = gel(a,i);
-      }
     }
-    if (DEBUGLEVEL > 7) timer_printf(&T, "det, col %ld / %ld",i,nbco-1);
   }
   p = gcoeff(a,nbco,nbco);
   p = (s < 0)? gneg(p): gcopy(p);
   return gerepileupto(av, p);
 }
+
+/* count non-zero entries in col j, at most 'max' of them.
+ * Return their indices */
+static GEN
+col_count_non_zero(GEN a, long j, long max)
+{
+  GEN v = cgetg(max+1, t_VECSMALL);
+  GEN c = gel(a,j);
+  long i, l = lg(a), k = 1;
+  for (i = 1; i < l; i++)
+    if (!gequal0(gel(c,i)))
+    {
+      if (k > max) return NULL; /* fail */
+      v[k++] = i;
+    }
+  setlg(v, k); return v;
+}
+/* count non-zero entries in row i, at most 'max' of them.
+ * Return their indices */
+static GEN
+row_count_non_zero(GEN a, long i, long max)
+{
+  GEN v = cgetg(max+1, t_VECSMALL);
+  long j, l = lg(a), k = 1;
+  for (j = 1; j < l; j++)
+    if (!gequal0(gcoeff(a,i,j)))
+    {
+      if (k > max) return NULL; /* fail */
+      v[k++] = i;
+    }
+  setlg(v, k); return v;
+}
+
+static GEN det_develop(GEN a, long max, double bound);
+/* (-1)^(i+j) a[i,j] * det RgM_minor(a,i,j) */
+static GEN
+coeff_det(GEN a, long i, long j, long max, double bound)
+{
+  GEN c = gcoeff(a, i, j);
+  c = gmul(c, det_develop(RgM_minor(a, i,j), max, bound));
+  if (odd(i+j)) c = gneg(c);
+  return c;
+}
+/* a square t_MAT, 'bound' a rough upper bound for the number of
+ * multiplications we are willing to pay while developing rows/columns before
+ * switching to Gaussian elimination */
+static GEN
+det_develop(GEN M, long max, double bound)
+{
+  pari_sp av = avma;
+  long i,j, n = lg(M)-1, lbest = max+2, best_col = 0, best_row = 0;
+  GEN best = NULL;
+
+  if (bound < 1.) return det_bareiss(M); /* too costly now */
+
+  switch(n)
+  {
+    case 0: return gen_1;
+    case 1: return gcopy(gcoeff(M,1,1));
+    case 2: {
+      GEN a = gcoeff(M,1,1), b = gcoeff(M,1,2);
+      GEN c = gcoeff(M,2,1), d = gcoeff(M,2,2);
+      return gerepileupto(av, gsub(gmul(a,d), gmul(b,c)));
+    }
+  }
+  for (j = 1; j <= n; j++)
+  {
+    pari_sp av2 = avma;
+    GEN v = col_count_non_zero(M, j, max);
+    long lv;
+    if (!v || (lv = lg(v)) >= lbest) { avma = av2; continue; }
+    if (lv == 1) { avma = av; return gen_0; }
+    if (lv == 2) {
+      avma = av;
+      return gerepileupto(av, coeff_det(M,v[1],j,max,bound));
+    }
+    best = v; lbest = lv; best_col = j;
+  }
+  for (i = 1; i <= n; i++)
+  {
+    pari_sp av2 = avma;
+    GEN v = row_count_non_zero(M, i, max);
+    long lv;
+    if (!v || (lv = lg(v)) >= lbest) { avma = av2; continue; }
+    if (lv == 1) { avma = av; return gen_0; }
+    if (lv == 2) {
+      avma = av;
+      return gerepileupto(av, coeff_det(M,i,v[1],max,bound));
+    }
+    best = v; lbest = lv; best_row = i;
+  }
+  if (2*(lbest-1) > n) return det_bareiss(M); /* too dense */
+  if (best_row)
+  {
+    GEN s = NULL;
+    long k;
+    bound /= (lbest-1);
+    for (k = 1; k < lbest; k++)
+    {
+      GEN c = coeff_det(M, best_row, best[k], max, bound);
+      s = s? gadd(s, c): c;
+    }
+    return gerepileupto(av, s);
+  }
+  if (best_col)
+  {
+    GEN s = NULL;
+    long k;
+    bound /= (lbest-1);
+    for (k = 1; k < lbest; k++)
+    {
+      GEN c = coeff_det(M, best[k], best_col, max, bound);
+      s = s? gadd(s, c): c;
+    }
+    return gerepileupto(av, s);
+  }
+  return det_bareiss(M);
+}
+
+GEN
+det(GEN a)
+{
+  long n = lg(a)-1;
+  double B;
+  GEN data;
+  pivot_fun pivot;
+
+  if (typ(a)!=t_MAT) pari_err(mattype1,"det");
+  if (!n) return gen_1;
+  if (n != lg(a[1])-1) pari_err(mattype1,"det");
+  if (n == 1) return gcopy(gcoeff(a,1,1));
+  pivot = get_pivot_fun(a, &data);
+  if (pivot != gauss_get_pivot_NZ) return det_simple_gauss(a, data, pivot);
+  B = (double)n; B = B*B; B = B*B;
+  return det_develop(a, 7, B);
+}
+
 
 /* return a solution of congruence system sum M_{ i,j } X_j = Y_i mod D_i
  * If ptu1 != NULL, put in *ptu1 a Z-basis of the homogeneous system */
