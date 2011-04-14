@@ -1335,19 +1335,8 @@ gsubst(GEN x, long v, GEN y)
           return normalizepol_lg(z,lx);
         }
         /* general case */
-        av = avma; X = pol_x(vx);
-        av2 = avma; lim = stack_lim(av2,1);
-        z = gsubst(gel(x,lx-1),v,y);
-        for (i=lx-2; i>=2; i--)
-        {
-          z = gadd(gmul(z,X), gsubst(gel(x,i),v,y));
-          if (low_stack(lim, stack_lim(av,1)))
-          {
-            if(DEBUGMEM>1) pari_warn(warnmem,"gsubst (i = %ld)", i);
-            z = gerepileupto(av2, z);
-          }
-        }
-        return gerepileupto(av,z);
+        av = avma; x = swap_vars(x, v);
+        return gerepileupto(av, poleval(x,y));
       }
       /* v <= vx */
       if (ty!=t_MAT)
