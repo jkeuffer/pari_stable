@@ -1190,6 +1190,7 @@ GEN     ZV_indexsort(GEN L);
 long    ZV_search(GEN x, GEN y);
 GEN     ZV_sort(GEN L);
 GEN     ZV_sort_uniq(GEN L);
+GEN     ZV_union_shallow(GEN x, GEN y);
 
 /* bit.c */
 
@@ -2406,6 +2407,7 @@ GEN     mod_to_Kronecker(GEN P, GEN Q);
 long    BPSW_isprime(GEN x);
 long    BPSW_psp(GEN N);
 GEN     addprimes(GEN primes);
+GEN     addpseudoprimes(GEN p);
 GEN     gisprime(GEN x, long flag);
 GEN     gispseudoprime(GEN x, long flag);
 long    isprime(GEN x);
@@ -2416,6 +2418,7 @@ GEN     primepi(GEN x);
 GEN     primes(long n);
 GEN     primes_zv(long m);
 GEN     removeprimes(GEN primes);
+GEN     removepseudoprimes(GEN primes);
 int     uisprime(ulong n);
 ulong   uprime(long n);
 ulong   uprimepi(ulong n);

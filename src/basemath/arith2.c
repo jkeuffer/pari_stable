@@ -572,6 +572,26 @@ aux_end(GEN n, long nb)
   return sort_factor(z, (void*)&absi_cmp, cmp_nodata);
 }
 
+static void
+STORE(long *nb, GEN x, long e) { (*nb)++; (void)x; (void)utoipos(e); }
+static void
+STOREu(long *nb, ulong x, long e) { STORE(nb, utoipos(x), e); }
+static void
+STOREi(long *nb, GEN x, long e) { STORE(nb, icopy(x), e); }
+static int
+special_primes(GEN n, GEN pp, long *nb, GEN T)
+{
+  long i, l = lg(T);
+  for (i = 1; i < l; i++)
+    if (dvdiiz(n,gel(T,i), n))
+    {
+      long k = 1; while (dvdiiz(n,gel(T,i), n)) k++;
+      STOREi(nb, gel(T,i), k);
+      if (absi_cmp(pp, n) > 0) return 1;
+    }
+  return 0;
+}
+
 /* all != 0 : only look for prime divisors < all */
 static GEN
 ifactor(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
@@ -579,16 +599,13 @@ ifactor(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
 {
   pari_sp av;
   long pp[] = { evaltyp(t_INT)|_evallg(4), 0,0,0 };
-  long nb = 0, i, lp;
+  long nb = 0, i;
   ulong p, k, lim;
   byteptr d = diffptr+1; /* start at p = 3 */
-#define STORE(x,e) { nb++; (void)x; (void)utoipos(e); }
-#define STOREu(x,e) STORE(utoipos(x), e)
-#define STOREi(x,e) STORE(icopy(x),   e)
 
   i = signe(n); if (!i) pari_err(talker, "zero argument in factorint");
   (void)cgetg(3,t_MAT);
-  if (i < 0) STORE(utoineg(1), 1);
+  if (i < 0) STORE(&nb, utoineg(1), 1);
   if (is_pm1(n)) return aux_end(NULL,nb);
 
   n = gclone(n); setabssign(n);
@@ -605,7 +622,7 @@ ifactor(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
     i = vali(n);
     if (i)
     {
-      STOREu(2, i);
+      STOREu(&nb, 2, i);
       av = avma; affii(shifti(n,-i), n); avma = av;
     }
     if (is_pm1(n)) return aux_end(n,nb);
@@ -621,10 +638,10 @@ ifactor(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
     if (p >= lim) break;
 
     k = Z_lvalrem_stop(n, p, &stop);
-    if (k) STOREu(p, k);
+    if (k) STOREu(&nb, p, k);
     if (stop)
     {
-      if (!is_pm1(n)) STOREi(n, 1);
+      if (!is_pm1(n)) STOREi(&nb, n, 1);
       return aux_end(n,nb);
     }
   }
@@ -633,18 +650,12 @@ ifactor(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
   av = avma; affii(sqru(p), pp); avma = av;
 
   /* trial divide by the "special primes" (usually huge composites) */
-  lp = lg(primetab);
-  for (i=1; i<lp; i++)
-    if (dvdiiz(n,gel(primetab,i), n))
-    {
-      long k = 1; while (dvdiiz(n,gel(primetab,i), n)) k++;
-      STOREi(gel(primetab,i), k);
-      if (absi_cmp(pp, n) > 0)
-      {
-        if (!is_pm1(n)) STOREi(n, 1);
-        return aux_end(n,nb);
-      }
-    }
+  if (special_primes(n, pp, &nb, primetab) ||
+      special_primes(n, pp, &nb, pseudoprimetab))
+  {
+    if (!is_pm1(n)) STOREi(&nb, n, 1);
+    return aux_end(n,nb);
+  }
 
   if (all)
   { /* smallfact: look for easy pure powers then stop. Cf Z_isanypower */
@@ -657,7 +668,7 @@ ifactor(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
     /* stop when x^(1/k) < 2^14 */
     while ( (ex = is_pth_power(x, &y, &ex0, 15)) ) { k *= ex; x = y; }
     if (k > 1) affii(x, n);
-    avma = av; STOREi(n, k);
+    avma = av; STOREi(&nb, n, k);
     if (DEBUGLEVEL >= 2) {
       pari_warn(warner, "IFAC: untested integer declared prime");
       fprintferr("\t%Ps\n", n);
@@ -666,7 +677,7 @@ ifactor(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
   }
 
   /* test primality */
-  if (BPSW_psp_nosmalldiv(n)) { STOREi(n, 1); return aux_end(n,nb); }
+  if (BPSW_psp_nosmalldiv(n)) { STOREi(&nb, n, 1); return aux_end(n,nb); }
 
   /* now we have a large composite */
   if (ifac_break && (*ifac_break)(n,NULL,NULL,state)) /*initialize ifac_break*/

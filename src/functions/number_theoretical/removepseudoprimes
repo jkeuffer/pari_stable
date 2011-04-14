@@ -1,0 +1,13 @@
+Function: removepseudoprimes
+Section: number_theoretical
+C-Name: removepseudoprimes
+Prototype: DG
+Help: removepseudoprimes({x=[]}): remove entries in the vector x from the
+ pseudoprime table. x can also be a single integer. List the current primes if
+ x is omitted.
+
+Doc: removes the pseudoprimes listed in $x$ from
+ the prime number table. In particular
+ \kbd{removepseudoprimes(addpseudoprimes())} empties the extra pseudoprime
+ table. $x$ can also be a single integer. List the current table if $x$
+ is omitted.

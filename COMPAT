@@ -129,6 +129,11 @@ This file lists the incompatible changes between Version 2.x and older versions
    in PARI toplevel
   - thue() no longer outputs a Warning when the result is conditional on
     the GRH.
+  - addprimes() now includes its argument as-is (used to take gcds,
+    making an insertion linear in the table size instead of O(1); filling
+    an inially empty table was quadratic in the final table size). They
+    must be true primes, otherwise number theoretic routines may return
+    wrong values. [#322]
 
 * Specific to the PARI library:
 ===============================

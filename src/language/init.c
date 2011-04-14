@@ -59,7 +59,7 @@ static const long readonly_ghalf[] = {
   (long)(readonly_constants+7)
 };
 THREAD GEN    bernzone;
-GEN     primetab; /* private primetable */
+GEN     primetab, pseudoprimetab; /* private primetables */
 byteptr diffptr;
 FILE    *pari_outfile, *pari_errfile, *pari_logfile, *pari_infile;
 char    *current_logfile, *current_psfile, *pari_datadir;
@@ -741,6 +741,7 @@ pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts)
   init_universal_constants();
   if (pari_kernel_init()) pari_err(talker,"Cannot initialize kernel");
 
+  pseudoprimetab = cgetalloc(t_VEC, 1);
   primetab = cgetalloc(t_VEC, 1);
   varentries = (entree**) pari_calloc((MAXVARN+1)*sizeof(entree*));
   pari_thread_init();
@@ -773,6 +774,7 @@ pari_close_opts(ulong init_opts)
     }
   }
   free((void*)varentries);
+  free((void*)pseudoprimetab);
   free((void*)primetab);
   pari_close_seadata();
   pari_thread_close();

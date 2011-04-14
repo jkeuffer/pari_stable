@@ -1777,6 +1777,30 @@ setunion(GEN x, GEN y)
   setlg(z, k);
   return gerepilecopy(av, z);
 }
+/* in case of equal keys in x,y, take the key from x */
+GEN
+ZV_union_shallow(GEN x, GEN y)
+{
+  long i, j, k, lx = lg(x), ly = lg(y);
+  GEN z = cgetg(lx + ly - 1, t_VEC);
+  i = j = k = 1;
+  while (i<lx && j<ly)
+  {
+    int s = cmpii(gel(x,i), gel(y,j));
+    if (s < 0)
+      z[k++] = x[i++];
+    else if (s > 0)
+      z[k++] = y[j++];
+    else {
+      z[k++] = x[i++];
+      j++;
+    }
+  }
+  while (i<lx) z[k++] = x[i++];
+  while (j<ly) z[k++] = y[j++];
+  setlg(z, k); return z;
+}
+
 
 GEN
 setintersect(GEN x, GEN y)

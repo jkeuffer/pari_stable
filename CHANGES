@@ -102,6 +102,11 @@ BA 23- polrootsff now returns a t_COL
    25- [libpari] remove allocatemem0 [make it private to GP], write allocatemem
    26- matdet() : allow Guass-Bareiss to develop somewhat wrt. rows/columns
        [ cf test O1 in Lewis-Wester's bench ]
+   27- addprimes() now includes its argument as-is (used to take gcds,
+       making an insertion linear in the table size instead of O(1); filling
+       an inially empty table was quadratic in the final table size). They
+       must be true primes, otherwise number theoretic routines may return
+       wrong values. [#322]
 
   Added
 BA  1- trap keyword "syntaxer" to trap syntax error from eval.
@@ -124,6 +129,7 @@ BA 15- function diffop
 BA 18- PARI functions F2v_clear, F2m_clear, Z_to_F2x, F2x_set, F2x_clear, F2x_flip, F2x_coeff
 BA 19- PARI functions F2xq_sqrt, F2x_deriv
 BA 20- PARI functions FpXQ_trace, Flxq_trace, F2xq_trace
+   21- functions addpseudoprimes(), removepseudoprimes() [#322]
 
   Removed
 BA  1- PARI function CM_CardEFp (ellsea script deprecated).

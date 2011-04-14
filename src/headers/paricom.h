@@ -61,7 +61,7 @@ extern const double LOG2, LOG10_2, LOG2_10;
 extern int new_galois_format, factor_add_primes, factor_proven;
 extern ulong DEBUGFILES, DEBUGLEVEL, DEBUGMEM, precdl;
 extern THREAD GEN  bernzone;
-extern GEN primetab;
+extern GEN primetab, pseudoprimetab;
 extern GEN gen_m1,gen_1,gen_2,gen_m2,ghalf,gen_0,gnil;
 extern VOLATILE THREAD int PARI_SIGINT_block, PARI_SIGINT_pending;
 

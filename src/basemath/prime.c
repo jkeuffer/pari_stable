@@ -817,94 +817,85 @@ primes_zv(long m)
 /**                       PRIVATE PRIME TABLE                         **/
 /**                                                                   **/
 /***********************************************************************/
-
+/* delete dummy NULL entries */
 static void
-cleanprimetab(void)
+cleanprimetab(GEN T)
 {
-  long i,j, lp = lg(primetab);
-
-  for (i=j=1; i < lp; i++)
-    if (primetab[i]) primetab[j++] = primetab[i];
-  setlg(primetab,j);
+  long i,j, l = lg(T);
+  for (i = j = 1; i < l; i++)
+    if (T[i]) T[j++] = T[i];
+  setlg(T,j);
 }
-
-/* p is a single element or a row vector with "primes" to add to primetab.
- * If p shares a non-trivial factor with another element in primetab, take it
- * into account. */
-GEN
-addprimes(GEN p)
-{
-  pari_sp av;
-  long i,k,tx,lp;
-  GEN L;
-
-  if (!p) return primetab;
-  tx = typ(p);
-  if (is_vec_t(tx))
-  {
-    for (i=1; i < lg(p); i++) (void)addprimes(gel(p,i));
-    return primetab;
-  }
-  if (tx != t_INT) pari_err(typeer,"addprime");
-  if (is_pm1(p)) return primetab;
-  av = avma; i = signe(p);
-  if (i == 0) pari_err(talker,"can't accept 0 in addprimes");
-  if (i < 0) p = absi(p);
-
-  lp = lg(primetab);
-  L = cgetg(2*lp,t_VEC); k = 1;
-  for (i=1; i < lp; i++)
-  {
-    GEN n = gel(primetab,i), d = gcdii(n, p);
-    if (! is_pm1(d))
-    {
-      if (!equalii(p,d)) gel(L,k++) = d;
-      gel(L,k++) = diviiexact(n,d);
-      gunclone(n); primetab[i] = 0;
-    }
-  }
-  primetab = (GEN) pari_realloc(primetab, (lp+1)*sizeof(long));
-  gel(primetab,i) = gclone(p); setlg(primetab, lp+1);
-  if (k > 1) { cleanprimetab(); setlg(L,k); (void)addprimes(L); }
-  avma = av; return primetab;
-}
-
-static GEN
-removeprime(GEN prime)
+/* remove p from T */
+static void
+rmprime(GEN T, GEN p)
 {
   long i;
-
-  if (typ(prime) != t_INT) pari_err(typeer,"removeprime");
-  for (i=lg(primetab) - 1; i; i--)
-    if (absi_equal(gel(primetab,i), prime))
-    {
-      gunclone(gel(primetab,i)); primetab[i]=0;
-      cleanprimetab(); break;
-    }
-  if (!i) pari_err(talker,"prime %Ps is not in primetable", prime);
-  return primetab;
+  if (typ(p) != t_INT) pari_err(typeer,"rmprime");
+  i = ZV_search(T, p);
+  if (!i) pari_err(talker,"prime %Ps is not in primetable", p);
+  gunclone(gel(T,i)); gel(T,i) = NULL;
+  cleanprimetab(T);
 }
 
+/* p is NULL, or a single element or a row vector with "primes" to add to prime table. */
+static GEN
+addp(GEN *T, GEN p)
+{
+  pari_sp av = avma;
+  long i, l;
+  GEN v;
+
+  if (!p || lg(p) == 1) return *T;
+  if (!is_vec_t(typ(p))) p = mkvec(p);
+
+  RgV_check_ZV(p, "addprimes");
+  v = gen_indexsort_uniq(p, (void*)&cmpii, &cmp_nodata);
+  p = vecpermute(p, v);
+  if (cmpii(gel(p,1), gen_1) <= 0) pari_err(talker,"entries must be > 1 in addprimes");
+  p = ZV_union_shallow(*T, p);
+  l = lg(p);
+  for (i = 1; i < l; i++)
+  {
+    GEN c = gel(p,i);
+    if (!isclone(c)) gel(p,i) = gclone(c);
+  }
+  if (l != lg(*T))
+  {
+    GEN old = *T, t = cgetalloc(t_VEC, l);
+    for (i = 1; i < l; i++) gel(t,i) = gel(p,i);
+    *T = t; free(old);
+  }
+  avma = av; return *T;
+}
 GEN
-removeprimes(GEN prime)
+addprimes(GEN p) { return addp(&primetab, p); }
+GEN
+addpseudoprimes(GEN p) { return addp(&pseudoprimetab, p); }
+
+static GEN
+rmprimes(GEN T, GEN prime)
 {
   long i,tx;
 
-  if (!prime) return primetab;
+  if (!prime) return T;
   tx = typ(prime);
   if (is_vec_t(tx))
   {
-    if (prime == primetab)
+    if (prime == T)
     {
       for (i=1; i < lg(prime); i++) gunclone(gel(prime,i));
       setlg(prime, 1);
     }
     else
     {
-      for (i=1; i < lg(prime); i++) (void)removeprime(gel(prime,i));
+      for (i=1; i < lg(prime); i++) rmprime(T, gel(prime,i));
     }
-    return primetab;
+    return T;
   }
-  return removeprime(prime);
+  rmprime(T, prime); return T;
 }
-
+GEN
+removeprimes(GEN prime) { return rmprimes(primetab, prime); }
+GEN
+removepseudoprimes(GEN prime) { return rmprimes(pseudoprimetab, prime); }
