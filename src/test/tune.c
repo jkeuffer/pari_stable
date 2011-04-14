@@ -30,7 +30,7 @@ GEN LARGE_mod;
 
 typedef struct {
   ulong reps, type;
-  long *var, size;
+  long *var, *var_disable, size;
   GEN x, y;
 } speed_param;
 
@@ -47,6 +47,7 @@ typedef struct {
   speed_function_t  fun2;
   double            step_factor; /* how much to step sizes (rounded down) */
   double            stop_factor;
+  long              *var_disable;
 } tune_param;
 
 /* ========================================================== */
@@ -145,20 +146,31 @@ rand_g(long n, long type)
   return speed_endtime();                \
 }
 
-#define  enable(s) (*(s->var)=lg(s->x)-2)/* enable  asymptotically fastest */
-#define disable(s) (*(s->var)=lg(s->x)+1)/* disable asymptotically fastest */
+#define  m_enable(s,var) (*(s->var)=lg(s->x)-2)/* enable  asymptotically fastest */
+#define m_disable(s,var) (*(s->var)=lg(s->x)+1)/* disable asymptotically fastest */
 #define  enable2(s,t) (*(s->var)=t-2)/* enable  asymptotically fastest */
 #define disable2(s,t) (*(s->var)=t+1)/* disable asymptotically fastest */
 
+static void enable(speed_param *s)
+{
+  m_enable(s,var);
+  if (s->var_disable) m_disable(s,var_disable);
+}
+
+static void disable(speed_param *s)
+{
+   m_disable(s,var);
+  if (s->var_disable) m_disable(s,var_disable);
+}
 
 static double speed_mulrr(speed_param *s)
 { disable(s); TIME_FUN(mulrr(s->x, s->y)); }
 static double speed_karamulrr(speed_param *s)
 { enable(s);  TIME_FUN(mulrr(s->x, s->y)); }
 
-static double speed_mulii(speed_param *s)
+static double speed_dmulii(speed_param *s)
 { disable(s); TIME_FUN(mulii(s->x, s->y)); }
-static double speed_karamulii(speed_param *s)
+static double speed_emulii(speed_param *s)
 { enable(s); TIME_FUN(mulii(s->x, s->y)); }
 
 static double speed_exp(speed_param *s)
@@ -194,9 +206,9 @@ static double speed_atanagm(speed_param *s)
   gatan(s->x, 0);
   TIME_FUN(gatan(s->x, 0)); }
 
-static double speed_sqri (speed_param *s)
+static double speed_dsqri (speed_param *s)
 { disable(s); TIME_FUN(sqri(s->x)); }
-static double speed_karasqri (speed_param *s)
+static double speed_esqri (speed_param *s)
 { enable(s);  TIME_FUN(sqri(s->x)); }
 
 #define INIT_RED(s, op)                                 \
@@ -230,9 +242,9 @@ static double speed_invmod(speed_param *s)
 static double speed_invmodgmp(speed_param *s)
 { GEN T; enable(s); TIME_FUN(invmod(s->x, s->y, &T)); }
 
-static double speed_Flx_sqr(speed_param *s)
+static double speed_Flx_dsqr(speed_param *s)
 { ulong p = DFLT_mod; disable(s); TIME_FUN(Flx_sqr(s->x, p)); }
-static double speed_Flx_karasqr(speed_param *s)
+static double speed_Flx_esqr(speed_param *s)
 { ulong p = DFLT_mod; enable(s); TIME_FUN(Flx_sqr(s->x, p)); }
 
 static double speed_Flx_inv(speed_param *s)
@@ -240,9 +252,9 @@ static double speed_Flx_inv(speed_param *s)
 static double speed_Flx_invnewton(speed_param *s)
 { ulong p = DFLT_mod; enable(s); TIME_FUN(Flx_invMontgomery(s->x, p)); }
 
-static double speed_Flx_mul(speed_param *s)
+static double speed_Flx_dmul(speed_param *s)
 { ulong p = DFLT_mod; disable(s); TIME_FUN(Flx_mul(s->x, s->y, p)); }
-static double speed_Flx_karamul(speed_param *s)
+static double speed_Flx_emul(speed_param *s)
 { ulong p = DFLT_mod; enable(s); TIME_FUN(Flx_mul(s->x, s->y, p)); }
 
 static double speed_Flx_rem(speed_param *s)
@@ -336,10 +348,10 @@ enum { PARI = 1, GMP = 2 };
  * occur first */
 #define var(a) # a, &a
 static tune_param param[] = {
-{PARI,var(KARATSUBA_MULI_LIMIT),   t_INT, 4,0, speed_mulii,speed_karamulii},
-{PARI,var(KARATSUBA_SQRI_LIMIT),   t_INT, 4,0, speed_sqri,speed_karasqri},
-{PARI,var(FFT_MULI_LIMIT),         t_INT, 1000,100000, speed_mulii,speed_karamulii,0.02},
-{PARI,var(FFT_SQRI_LIMIT),         t_INT, 1000,100000, speed_sqri,speed_karasqri,0.02},
+{PARI,var(KARATSUBA_MULI_LIMIT),   t_INT, 4,0, speed_dmulii,speed_emulii,0,0,&FFT_MULI_LIMIT},
+{PARI,var(KARATSUBA_SQRI_LIMIT),   t_INT, 4,0, speed_dsqri,speed_esqri,0,0,&FFT_SQRI_LIMIT},
+{PARI,var(FFT_MULI_LIMIT),         t_INT, 1000,100000, speed_dmulii,speed_emulii,0.02},
+{PARI,var(FFT_SQRI_LIMIT),         t_INT, 1000,100000, speed_dsqri,speed_esqri,0.02},
 {0,   var(KARATSUBA_MULR_LIMIT),   t_REAL,4,0, speed_mulrr,speed_karamulrr},
 {0,   var(MONTGOMERY_LIMIT),       t_INT, 3,0, speed_redc,speed_modii},
 {0,   var(REMIIMUL_LIMIT),         t_INT, 3,0, speed_modred,speed_remiimul},
@@ -350,8 +362,12 @@ static tune_param param[] = {
 {0,   var(LOGAGMCX_LIMIT),         t_REAL,3,0, speed_logcx,speed_logcxagm,0.05},
 {0,   var(AGM_ATAN_LIMIT),         t_REAL,20,0, speed_atan,speed_atanagm,0.05},
 {GMP, var(INVMOD_GMP_LIMIT),       t_INT, 3,0, speed_invmod,speed_invmodgmp},
-{0,   var(Flx_MUL_KARATSUBA_LIMIT),t_Flx,4,70, speed_Flx_mul,speed_Flx_karamul},
-{0,   var(Flx_SQR_KARATSUBA_LIMIT),t_Flx,4,70, speed_Flx_sqr,speed_Flx_karasqr},
+{0,   var(Flx_MUL_KARATSUBA_LIMIT),t_Flx,5,0, speed_Flx_dmul,speed_Flx_emul,0,0,
+                                                             &Flx_MUL_MULII_LIMIT},
+{0,   var(Flx_SQR_KARATSUBA_LIMIT),t_Flx,5,0, speed_Flx_dsqr,speed_Flx_esqr,0,0,
+                                                             &Flx_SQR_SQRI_LIMIT},
+{0,   var(Flx_MUL_MULII_LIMIT),t_Flx,5,0, speed_Flx_dmul,speed_Flx_emul},
+{0,   var(Flx_SQR_SQRI_LIMIT), t_Flx,5,0, speed_Flx_dsqr,speed_Flx_esqr},
 {0,   var(Flx_INVMONTGOMERY_LIMIT),t_NFlx,10,0, speed_Flx_inv,speed_Flx_invnewton,0.1},
 {0,  var(Flx_REM_MONTGOMERY_LIMIT),t_NFlx,10,0, speed_Flx_rem,speed_Flx_rem_mg,0.1},
 {0,  var(Flx_POW_MONTGOMERY_LIMIT),t_NFlx,10,0, speed_Flxq_pow,speed_Flxq_pow_mg},
@@ -500,6 +516,7 @@ Test(tune_param *param)
   s.type = param->type;
   s.size = param->min_size;
   s.var  = param->var;
+  s.var_disable  = param->var_disable;
   ndat = since_positive = since_change = thresh = 0;
   if (option_trace >= 1)
     diag("Setting %s... (default %ld)\n", param->name, *(param->var));
