@@ -578,9 +578,6 @@ GEN     rfractoser(GEN x, long v, long prec);
 /* ifactor1.c */
 
 GEN     ellfacteur(GEN n, int insist);
-GEN     ifac_primary_factor(GEN *partial, long *exponent);
-void    ifac_realloc(GEN *partial, GEN *where, long new_lg);
-GEN     ifac_start(GEN n, int moebius);
 GEN     pollardbrent(GEN n);
 ulong   snextpr(ulong p, byteptr *d, long *rcn, long *q, long k);
 GEN     squfof(GEN n);

@@ -1210,8 +1210,6 @@ rho_dbg(pari_timer *T, long c, long msg_mask)
  * rapidly after we pass 80 bits.-- Changed this to adjust for the presence of
  * squfof, which will finish input up to 59 bits quickly. */
 
-#define tune_pb_min 14                /* even 15 seems too much. */
-
 /* Return NULL when we run out of time, or a single t_INT containing a
  * nontrivial factor of n, or a vector of t_INTs, each triple of successive
  * entries containing a factor, an exponent (equal to one),  and a factor
@@ -1221,6 +1219,7 @@ rho_dbg(pari_timer *T, long c, long msg_mask)
 GEN
 pollardbrent(GEN n)
 {
+  const long tune_pb_min = 14 /* even 15 seems too much. */
   long tf = lgefint(n), size = 0, delta, retries = 0, msg_mask;
   long c0, c, k, k1, l;
   pari_sp GGG, avP, avx, av = avma;
@@ -2242,7 +2241,7 @@ static GEN ifac_find(GEN partial, GEN where);
  * vacant slots, or to initialize *where in the first place (pass partial in
  * both args). */
 
-void ifac_realloc(GEN *partial, GEN *where, long new_lg);
+static void ifac_realloc(GEN *partial, GEN *where, long new_lg);
 /* Move to a larger main vector, updating *where if it points into it, and
  * *partial in any case. Can be used as a specialized gcopy before
  * a gerepileupto() (pass 0 as the new length). Normally, one would pass
@@ -2316,19 +2315,6 @@ static GEN ifac_main(GEN *partial);
  * ifac_main() and then to a succession of ifac_crack()s and ifac_divide()s,
  * with (typically) none of the latter finding anything. */
 
-/** user interface: **/
-GEN ifac_start_hint(GEN n, int moebius, long hint);
-/* return initial data structure, see ifac_crack() for the hint argument */
-GEN ifac_start(GEN n, int moebius);
-/* return initial data structure */
-
-GEN ifac_primary_factor(GEN *partial, long *exponent);
-/* run main loop until primary factor is found, return the prime and assign the
- * exponent. If nothing left, return gen_1 and set exponent to 0; if in Moebius
- * mode and a square factor is discovered, return gen_0 and set exponent to 0 */
-
-/*** implementation ***/
-
 #define LAST(x) x+lg(x)-3
 #define FIRST(x) x+3
 
@@ -2393,7 +2379,8 @@ ifac_print(GEN part, GEN where)
 
 static const long decomp_default_hint = 0;
 /* assume n a non-zero t_INT */
-GEN
+/* return initial data structure, see ifac_crack() for the hint argument */
+static GEN
 ifac_start_hint(GEN n, int moebius, long hint)
 {
   const long ifac_initial_length = 3 + 7*3;
@@ -2413,7 +2400,7 @@ ifac_start_hint(GEN n, int moebius, long hint)
   while ((here -= 3) > part) INIT0(here);
   return part;
 }
-GEN
+static GEN
 ifac_start(GEN n, int moebius)
 { return ifac_start_hint(n,moebius,decomp_default_hint); }
 
@@ -2454,7 +2441,7 @@ ifac_defrag(GEN *partial, GEN *where)
  * make it longer to avoid being called again a microsecond later. It is safe
  * to call this with NULL for the where argument;  if it doesn't point anywhere
  * within the old structure, it is left alone */
-void
+static void
 ifac_realloc(GEN *partial, GEN *where, long new_lg)
 {
   long old_lg = lg(*partial);
@@ -3055,19 +3042,6 @@ ifac_main(GEN *partial)
     if (lgefint(p)>3 || (ulong)p[2] > 0x1000000UL) (void)addprimes(p);
   }
   return here;
-}
-
-/* Caller of the following should worry about stack management */
-GEN
-ifac_primary_factor(GEN *partial, long *exponent)
-{
-  GEN res, here = ifac_main(partial);
-
-  if      (here == gen_1) { *exponent = 0; return gen_1; }
-  else if (here == gen_0) { *exponent = 0; return gen_0; }
-  res = VALUE(here);
-  *exponent = itos(EXPON(here));
-  INIT0(here); return res;
 }
 
 /* Encapsulated routines */
