@@ -2406,7 +2406,7 @@ ifac_start_hint(GEN n, int moebius, long hint)
   if (isonstack(n)) n = absi(n);
   /* make copy, because we'll later want to replace it in place.
    * If it's not on stack, then we assume it is a clone made for us by
-   * auxdecomp1, and we assume the sign has already been set positive */
+   * ifactor, and we assume the sign has already been set positive */
   /* fill first slot at the top end */
   here = part + ifac_initial_length - 3; /* LAST(part) */
   INIT(here, n,gen_1,gen_0); /* n^1: composite */
@@ -3076,7 +3076,7 @@ ifac_primary_factor(GEN *partial, long *exponent)
  * need our data structure somewhere, and we don't know in advance how many
  * primes will turn up.  The following discipline achieves this:  When
  * ifac_decomp() is called, n should point at an object older than the oldest
- * small prime/exponent pair  (auxdecomp1() guarantees this).
+ * small prime/exponent pair  (ifactor() guarantees this).
  * We allocate sufficient space to accommodate several pairs -- eleven pairs
  * ought to fit in a space not much larger than n itself -- before calling
  * ifac_start().  If we manage to complete the factorization before we run out
@@ -3089,28 +3089,23 @@ ifac_primary_factor(GEN *partial, long *exponent)
  * pairs space to the old one. This whole affair translates into a surprisingly
  * compact routine. */
 
-/* ifac_decomp:
+/* ifac_decomp: find primary factors of n until ifac_break() return true, or n
+ * is factored if ifac_break is NULL.
  *
- * Find primary factors of n until ifac_break return true, or n is factored if
- * ifac_break is NULL.
- */
-/* ifac_break: return 1: stop factoring, 0 continue.
+ * ifac_break: return 1: stop factoring, 0 continue.
  *
- * state is private data for ifac_breack(), which must not leave anything on
+ * state is private data for ifac_break(), which must not leave anything on
  * the stack (except in state).
- * ifac_break is called in auxdecomp1 with here = NULL to register n, then
+ * ifac_break is called in ifactor with here = NULL to register n, then
  * whenever a new factor is found. */
 
-long
+static long
 ifac_decomp(GEN n, long (*ifac_break)(GEN n,GEN pairs,GEN here,GEN state),
             GEN state, long hint)
 {
   pari_sp av = avma, lim = stack_lim(av, 1);
   long nb = 0;
   GEN part, here, workspc, pairs = (GEN)av;
-
-  if (!n || typ(n) != t_INT) pari_err(typeer, "ifac_decomp");
-  if (!signe(n)) pari_err(talker, "factoring 0 in ifac_decomp");
 
   /* workspc will be doled out in pairs of smaller t_INTs. For n = prod p^{e_p}
    * (p not necessarily prime), need room to store all p and e_p [ cgeti(3) ],
