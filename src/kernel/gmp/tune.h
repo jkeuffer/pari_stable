@@ -4,8 +4,8 @@
 #define __KARATSUBA_MULR_LIMIT   8
 #define __FFT_MULI_LIMIT        -1 /* unused */
 #define __FFT_SQRI_LIMIT        -1 /* unused */
-#define __MONTGOMERY_LIMIT      22
-#define __REMIIMUL_LIMIT       608
+#define __Fp_POW_REDC_LIMIT     22
+#define __Fp_POW_BARRETT_LIMIT 608
 #define __DIVRR_GMP_LIMIT        4
 #define __EXPNEWTON_LIMIT       77
 #define __INVNEWTON_LIMIT      803

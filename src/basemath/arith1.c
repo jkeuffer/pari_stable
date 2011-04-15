@@ -1825,7 +1825,7 @@ static long
 Fp_select_red(GEN *y, ulong k, GEN N, long lN, muldata *D)
 {
   D->N = N;
-  if (lN >= REMIIMUL_LIMIT && (k==0 || ((double)k)*expi(*y) > 2 + expi(N)))
+  if (lN >= Fp_POW_BARRETT_LIMIT && (k==0 || ((double)k)*expi(*y) > 2 + expi(N)))
   {
     D->mul2 = &_muli2red;
     D->res = &_remiibar;
@@ -1833,7 +1833,7 @@ Fp_select_red(GEN *y, ulong k, GEN N, long lN, muldata *D)
     D->iM = Fp_invmBarrett(N, D->s);
     return 0;
   }
-  else if (mod2(N) && lN < MONTGOMERY_LIMIT)
+  else if (mod2(N) && lN < Fp_POW_REDC_LIMIT)
   {
     *y = remii(shifti(*y, bit_accuracy(lN)), N);
     D->mul2 = &_muli2montred;

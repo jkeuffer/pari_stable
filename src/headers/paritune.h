@@ -6,8 +6,8 @@ extern long KARATSUBA_MULI_LIMIT;
 extern long KARATSUBA_MULR_LIMIT;
 extern long FFT_SQRI_LIMIT;
 extern long FFT_MULI_LIMIT;
-extern long MONTGOMERY_LIMIT;
-extern long REMIIMUL_LIMIT;
+extern long Fp_POW_REDC_LIMIT;
+extern long Fp_POW_BARRETT_LIMIT;
 extern long INVMOD_GMP_LIMIT;
 extern long DIVRR_GMP_LIMIT;
 extern long Flx_MUL_KARATSUBA_LIMIT;
@@ -41,8 +41,8 @@ extern long RgX_MUL_LIMIT;
 #  define KARATSUBA_MULR_LIMIT     __KARATSUBA_MULR_LIMIT
 #  define FFT_SQRI_LIMIT           __FFT_SQRI_LIMIT
 #  define FFT_MULI_LIMIT           __FFT_MULI_LIMIT
-#  define MONTGOMERY_LIMIT         __MONTGOMERY_LIMIT
-#  define REMIIMUL_LIMIT           __REMIIMUL_LIMIT
+#  define Fp_POW_REDC_LIMIT        __Fp_POW_REDC_LIMIT
+#  define Fp_POW_BARRETT_LIMIT     __Fp_POW_BARRETT_LIMIT
 #  define INVMOD_GMP_LIMIT         __INVMOD_GMP_LIMIT
 #  define DIVRR_GMP_LIMIT          __DIVRR_GMP_LIMIT
 #  define EXPNEWTON_LIMIT          __EXPNEWTON_LIMIT
