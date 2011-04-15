@@ -568,44 +568,50 @@ Z_smoothen(GEN N, GEN L, GEN *pP, GEN *pe)
 GEN
 factoru(ulong n)
 {
-  pari_sp ltop = avma;
-  GEN F = Z_factor(utoi(n)), P = gel(F,1), E = gel(F,2);
-  long i, l = lg(P);
   GEN f = cgetg(3,t_VEC);
-  GEN p = cgetg(l,t_VECSMALL);
-  GEN e = cgetg(l,t_VECSMALL);
-  gel(f,1) = p;
-  gel(f,2) = e;
+  pari_sp av = avma;
+  GEN F, P, E, p, e;
+  long i, l;
+  /* enough room to store <= 15 primes and exponents (OK if n < 2^64) */
+  (void)new_chunk((15 + 1)*2);
+  F = Z_factor(utoi(n));
+  P = gel(F,1);
+  E = gel(F,2); l = lg(P);
+  avma = av;
+  p = cgetg(l,t_VECSMALL); gel(f,1) = p;
+  e = cgetg(l,t_VECSMALL); gel(f,2) = e;
   for (i = 1; i < l; i++)
   {
     p[i] = itou(gel(P,i));
     e[i] = itou(gel(E,i));
   }
-  return gerepileupto(ltop,f);
+  return f;
 }
 /* Factor n and output [p,e,c] where
  * p, e and c are vecsmall with n = prod{p[i]^e[i]} and c[i] = p[i]^e[i] */
 GEN
 factoru_pow(ulong n)
 {
-  pari_sp ltop = avma;
-  GEN F = Z_factor(utoi(n)), P = gel(F,1), E = gel(F,2);
-  long i, l = lg(P);
   GEN f = cgetg(4,t_VEC);
-  GEN p = cgetg(l,t_VECSMALL);
-  GEN e = cgetg(l,t_VECSMALL);
-  GEN c = cgetg(l,t_VECSMALL);
-  pari_sp lbot = avma;
-  gel(f,1) = p;
-  gel(f,2) = e;
-  gel(f,3) = c;
+  pari_sp av = avma;
+  GEN F, P, E, p, e, c;
+  long i, l;
+  /* enough room to store <= 15 * [p,e,p^e] (OK if n < 2^64) */
+  (void)new_chunk((15 + 1)*3);
+  F = Z_factor(utoi(n));
+  P = gel(F,1);
+  E = gel(F,2); l = lg(P);
+  avma = av;
+  gel(f,1) = p = cgetg(l,t_VECSMALL);
+  gel(f,2) = e = cgetg(l,t_VECSMALL);
+  gel(f,3) = c = cgetg(l,t_VECSMALL);
   for(i = 1; i < l; i++)
   {
     p[i] = itou(gel(P,i));
     e[i] = itou(gel(E,i));
-    c[i] = itou(powiu(gel(P,i), e[i]));
+    c[i] = upowuu(p[i], e[i]);
   }
-  avma = lbot; return gerepileupto(ltop,f);
+  return f;
 }
 
 /* factor p^n - 1, assuming p prime */
