@@ -1219,7 +1219,7 @@ rho_dbg(pari_timer *T, long c, long msg_mask)
 GEN
 pollardbrent(GEN n)
 {
-  const long tune_pb_min = 14 /* even 15 seems too much. */
+  const long tune_pb_min = 14; /* even 15 seems too much. */
   long tf = lgefint(n), size = 0, delta, retries = 0, msg_mask;
   long c0, c, k, k1, l;
   pari_sp GGG, avP, avx, av = avma;
