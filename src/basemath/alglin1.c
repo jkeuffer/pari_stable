@@ -2923,28 +2923,6 @@ mydiv(GEN x, GEN y)
   return gdiv(x,y);
 }
 
-/* shallow, remove coeff of index j */
-GEN
-vecsplice(GEN a, long j)
-{
-  long i, k, l = lg(a);
-  GEN b;
-  if (l == 1) pari_err(talker, "incorrect component in vecsplice");
-  b = cgetg(l-1, typ(a));
-  for (i = k = 1; i < l; i++)
-    if (i != j) gel(b, k++) = gel(a,i);
-  return b;
-}
-/* shallow */
-GEN
-RgM_minor(GEN a, long i, long j)
-{
-  GEN b = vecsplice(a, j);
-  long k, l = lg(b);
-  for (k = 1; k < l; k++) gel(b,k) = vecsplice(gel(b,k), i);
-  return b;
-}
-
 /* Assumes a a square t_MAT of dimension n > 0. Returns det(a) using
  * Gauss-Bareiss. */
 static GEN

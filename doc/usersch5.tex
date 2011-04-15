@@ -7862,6 +7862,9 @@ of the vector or matrix $x$ according to the selection parameter $y$.
 This is the shallow analog of \kbd{extract0(x, y, NULL)}, see \tet{vecextract}.
 \kbdsidx{extract0}
 
+\fun{GEN}{RgM_minor}{GEN A, long i, long j} given a square \typ{MAT} A,
+return the matrix with $i$-th row and $j$-th column removed.
+
 \fun{GEN}{vconcat}{GEN A, GEN B} concatenate vertically the two \typ{MAT} $A$
 and $B$ of compatible dimensions. A \kbd{NULL} pointer is accepted for an
 empty matrix. See \tet{shallowconcat}.
@@ -7895,6 +7898,9 @@ matrix whose rows are $A[p_1,],\dots, A[p_n,]$.
 A[j_2]$. If $A$ is a \typ{MAT}, these correspond to \emph{columns} of $A$.
 The object returned has the same type as $A$ (\typ{VEC}, \typ{COL} or
 \typ{MAT}). Assume $j_1 \leq j_2$.
+
+\fun{GEN}{vecsplice}{GEN A, long j} return $A$ with $j$-th entry removed
+(\typ{VEC}, \typ{COL}) or $j$-th column removed (\typ{MAT}).
 
 \fun{GEN}{vecreverse}{GEN A}. Returns a \kbd{GEN} which has the same
 type as $A$ (\typ{VEC}, \typ{COL} or \typ{MAT}), and whose components

@@ -637,6 +637,28 @@ rowslice(GEN A, long x1, long x2)
   return B;
 }
 
+/* shallow, remove coeff of index j */
+INLINE GEN
+vecsplice(GEN a, long j)
+{
+  long i, k, l = lg(a);
+  GEN b;
+  if (l == 1) pari_err(talker, "incorrect component in vecsplice");
+  b = cgetg(l-1, typ(a));
+  for (i = k = 1; i < l; i++)
+    if (i != j) gel(b, k++) = gel(a,i);
+  return b;
+}
+/* shallow */
+INLINE GEN
+RgM_minor(GEN a, long i, long j)
+{
+  GEN b = vecsplice(a, j);
+  long k, l = lg(b);
+  for (k = 1; k < l; k++) gel(b,k) = vecsplice(gel(b,k), i);
+  return b;
+}
+
 /* A[x0,] */
 INLINE GEN
 row(GEN A, long x0)
