@@ -3089,7 +3089,7 @@ ifac_primary_factor(GEN *partial, long *exponent)
  * pairs space to the old one. This whole affair translates into a surprisingly
  * compact routine. */
 
-/* ifac_decomp_break:
+/* ifac_decomp:
  *
  * Find primary factors of n until ifac_break return true, or n is factored if
  * ifac_break is NULL.
@@ -3102,8 +3102,8 @@ ifac_primary_factor(GEN *partial, long *exponent)
  * whenever a new factor is found. */
 
 long
-ifac_decomp_break(GEN n, long (*ifac_break)(GEN n,GEN pairs,GEN here,GEN state),
-                  GEN state, long hint)
+ifac_decomp(GEN n, long (*ifac_break)(GEN n,GEN pairs,GEN here,GEN state),
+            GEN state, long hint)
 {
   pari_sp av = avma, lim = stack_lim(av, 1);
   long nb = 0;
@@ -3880,7 +3880,7 @@ ifactor(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
       fprintferr("IFAC: (Partial fact.) Initial stop requested.\n");
   }
   else
-    nb += ifac_decomp_break(n, ifac_break, state, hint);
+    nb += ifac_decomp(n, ifac_break, state, hint);
 
   return aux_end(n, nb);
 }
@@ -3899,7 +3899,7 @@ ifac_break_limit(GEN n, GEN pairs/*unused*/, GEN here, GEN state)
     N = n;
   else
   {
-    GEN q = powii(gel(here,0),gel(here,1)); /* primary factor found.*/
+    GEN q = powii(VALUE(here),EXPON(here)); /* primary factor found.*/
     if (DEBUGLEVEL>2) fprintferr("IFAC: Stop: Primary factor: %Ps\n",q);
     N = diviiexact(gel(state,1),q); /* divide unfactored part by q */
   }
