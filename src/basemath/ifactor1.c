@@ -3844,9 +3844,8 @@ ifactor(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
   /* pp = square of biggest p tried so far */
   av = avma; affii(sqru(p), pp); avma = av;
 
-  /* trial divide by the "special primes" (usually huge composites) */
-  if (special_primes(n, pp, &nb, primetab) ||
-      special_primes(n, pp, &nb, pseudoprimetab))
+  /* trial divide by the special primes */
+  if (special_primes(n, pp, &nb, primetab))
   {
     if (!is_pm1(n)) STOREi(&nb, n, 1);
     return aux_end(n,nb);

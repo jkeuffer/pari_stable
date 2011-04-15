@@ -10,8 +10,7 @@ Doc: this toggle is either 1 (on) or 0 (off). By
  set, a primality proof is done for each factor and all results depending on
  integer factorization are fully proven. This flag does not affect partial
  factorization when it is explicitly requested. It also does not affect the
- private tables managed by \tet{addprimes} and \tet{addpseudoprimes}: their
- entries are included as is in factorizations, without being tested for
- primality.
+ private table managed by \tet{addprimes}: its entries are included as is in
+ factorizations, without being tested for primality.
 
  The defaut value is \kbd{0}.

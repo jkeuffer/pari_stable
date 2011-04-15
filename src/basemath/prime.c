@@ -870,8 +870,6 @@ addp(GEN *T, GEN p)
 }
 GEN
 addprimes(GEN p) { return addp(&primetab, p); }
-GEN
-addpseudoprimes(GEN p) { return addp(&pseudoprimetab, p); }
 
 static GEN
 rmprimes(GEN T, GEN prime)
@@ -897,5 +895,3 @@ rmprimes(GEN T, GEN prime)
 }
 GEN
 removeprimes(GEN prime) { return rmprimes(primetab, prime); }
-GEN
-removepseudoprimes(GEN prime) { return rmprimes(pseudoprimetab, prime); }
