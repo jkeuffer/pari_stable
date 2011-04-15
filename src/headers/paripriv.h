@@ -172,13 +172,6 @@ GEN   coprime_part(GEN x, GEN f);
 ulong ucoprime_part(ulong x, ulong f);
 ulong is_kth_power(GEN x, ulong p, GEN *pt, byteptr d);
 long  ifac_decomp_break(GEN n, long (*B)(GEN,GEN,GEN,GEN), GEN s, long hint);
-long  ifac_moebius(GEN n, long hint);
-long  ifac_issquarefree(GEN n, long hint);
-long  ifac_omega(GEN n, long hint);
-long  ifac_bigomega(GEN n, long hint);
-GEN   ifac_totient(GEN n, long hint);
-GEN   ifac_numdiv(GEN n, long hint);
-GEN   ifac_sumdivk(GEN n, long k, long hint);
 GEN   mpqs(GEN N);
 ulong gcduodd(ulong x, ulong y);
 long  Z_lvalrem_stop(GEN n, ulong p, int *stop);
@@ -586,10 +579,10 @@ GEN     rfractoser(GEN x, long v, long prec);
 /* ifactor1.c */
 
 GEN     ellfacteur(GEN n, int insist);
-long    ifac_decomp(GEN n, long hint);
 GEN     ifac_primary_factor(GEN *partial, long *exponent);
 void    ifac_realloc(GEN *partial, GEN *where, long new_lg);
-GEN     ifac_start(GEN n, long moebius, long hint);
+GEN     ifac_start_hint(GEN n, int moebius, long hint);
+GEN     ifac_start(GEN n, int moebius);
 GEN     pollardbrent(GEN n);
 ulong   snextpr(ulong p, byteptr *d, long *rcn, long *q, long k);
 GEN     squfof(GEN n);

@@ -1186,13 +1186,13 @@ ret:
 #define CLASS(x) gel(x,2)
 
 INLINE void
-INIT0(GEN x) { VALUE(x) = EXPON(x) = CLASS(x) = NULL; }
-INLINE void
 INIT(GEN x, GEN v, GEN e, GEN c) {
   VALUE(x) = v;
   EXPON(x) = e;
   CLASS(x) = c;
 }
+INLINE void
+INIT0(GEN x) { INIT(x,NULL,NULL,NULL); }
 
 static void
 rho_dbg(pari_timer *T, long c, long msg_mask)
@@ -2093,7 +2093,7 @@ is_pth_power(GEN x, GEN *pt, ulong *curexp, ulong cutoffbits)
 /***********************************************************************/
 
 /* Direct use:
- *  ifac_start(n,moebius,hint) registers with the iterative factorizer
+ *  ifac_start_hint(n,moebius,hint) registers with the iterative factorizer
  *  - an integer n (without prime factors  < tridiv_bound(n))
  *  - registers whether or not we should terminate early if we find a square
  *    factor,
@@ -2101,6 +2101,8 @@ is_pth_power(GEN x, GEN *pt, ulong *curexp, ulong cutoffbits)
  *  This must always be called first. If input is not composite, oo loop.
  *  The routine decomposes n nontrivially into a product of two factors except
  *  in squarefreeness ('Moebius') mode.
+ *
+ *  ifac_start(n,moebus) same using default hint.
  *
  *  ifac_primary_factor()  returns a prime divisor (not necessarily the
  *    smallest) and the corresponding exponent.
@@ -2315,18 +2317,15 @@ static GEN ifac_main(GEN *partial);
  * with (typically) none of the latter finding anything. */
 
 /** user interface: **/
-GEN ifac_start(GEN n, long moebius, long hint);
+GEN ifac_start_hint(GEN n, int moebius, long hint);
 /* return initial data structure, see ifac_crack() for the hint argument */
+GEN ifac_start(GEN n, int moebius);
+/* return initial data structure */
 
 GEN ifac_primary_factor(GEN *partial, long *exponent);
 /* run main loop until primary factor is found, return the prime and assign the
  * exponent. If nothing left, return gen_1 and set exponent to 0; if in Moebius
  * mode and a square factor is discovered, return gen_0 and set exponent to 0 */
-
-long ifac_decomp(GEN n, long hint);
-/* call ifac_start() and run main loop until factorization is complete,
- * accumulating prime / exponent pairs on the PARI stack to be picked up
- * by aux_end().  Return number of distinct primes found */
 
 /*** implementation ***/
 
@@ -2392,9 +2391,10 @@ ifac_print(GEN part, GEN where)
   fprintferr("Done.\n");
 }
 
+static const long decomp_default_hint = 0;
 /* assume n a non-zero t_INT */
 GEN
-ifac_start(GEN n, long moebius, long hint)
+ifac_start_hint(GEN n, int moebius, long hint)
 {
   const long ifac_initial_length = 3 + 7*3;
   /* codeword, moebius, hint, 7 slots -- a 512-bit product of distinct 8-bit
@@ -2413,6 +2413,9 @@ ifac_start(GEN n, long moebius, long hint)
   while ((here -= 3) > part) INIT0(here);
   return part;
 }
+GEN
+ifac_start(GEN n, int moebius)
+{ return ifac_start_hint(n,moebius,decomp_default_hint); }
 
 static GEN
 ifac_find(GEN partial, GEN where)
@@ -3062,8 +3065,7 @@ ifac_primary_factor(GEN *partial, long *exponent)
 
   if      (here == gen_1) { *exponent = 0; return gen_1; }
   else if (here == gen_0) { *exponent = 0; return gen_0; }
-
-  res = icopy(VALUE(here));
+  res = VALUE(here);
   *exponent = itos(EXPON(here));
   INIT0(here); return res;
 }
@@ -3115,7 +3117,7 @@ ifac_decomp_break(GEN n, long (*ifac_break)(GEN n,GEN pairs,GEN here,GEN state),
    * bounded by
    *    sum_{p | n} ( log_{2^BIL} (p) + 6 ) <= log_{2^BIL} n + 6 log_2 n */
   workspc = new_chunk((expi(n) + 1) * 7);
-  part = ifac_start(n, 0, hint);
+  part = ifac_start_hint(n, 0, hint);
   for (;;)
   {
     here = ifac_main(&part);
@@ -3150,157 +3152,810 @@ ifac_decomp_break(GEN n, long (*ifac_break)(GEN n,GEN pairs,GEN here,GEN state),
   return nb;
 }
 
-long
-ifac_decomp(GEN n, long hint)
-{
-  return ifac_decomp_break(n, NULL, gen_0, hint);
-}
-
+/***********************************************************************/
+/**                                                                   **/
+/**                    BASIC ARITHMETIC FUNCTIONS                     **/
+/**                                                                   **/
+/***********************************************************************/
 /* encapsulated functions; these call ifac_start() themselves, ensure stack
  * housekeeping etc. Call them on any large composite left over after trial
  * division, and multiply/add the result onto whatever you already have from
- * the small factors.  On large primes, they will run into trouble */
-
-#define ifac_memcheck(av,lim,part,here)\
-  INIT0(here);\
-  if (low_stack(lim, stack_lim(av,1)))\
-  {\
-    if(DEBUGMEM>1) pari_warn(warnmem,"ifac_xxx");\
-    ifac_realloc(&part, &here, 0);\
-    part = gerepileupto(av, part);\
+ * the small factors. */
+static void
+ifac_memcheck(pari_sp av,pari_sp lim, GEN *part, GEN *here)
+{
+  INIT0(*here);
+  if (low_stack(lim, stack_lim(av,1)))
+  {
+    if(DEBUGMEM>1) pari_warn(warnmem,"ifac_xxx");
+    ifac_realloc(part, here, 0);
+    *part = gerepileupto(av, *part);
   }
-
-#define ifac_memcheck_extra(av,lim,part,here, extra,res)\
-  INIT0(here);\
-  if (low_stack(lim, stack_lim(av,1)))\
-  {\
-    affii(extra,res); extra=res;\
-    if(DEBUGMEM>1) pari_warn(warnmem,"ifac_xxx");\
-    ifac_realloc(&part, &here, 0);\
-    part = gerepileupto(av, part);\
+}
+static void
+ifac_memcheck_extra(pari_sp av,pari_sp lim, GEN *part, GEN *here,
+                    GEN *extra, GEN res)
+{
+  INIT0(*here);
+  if (low_stack(lim, stack_lim(av,1)))
+  {
+    affii(*extra,res); *extra = res;
+    if(DEBUGMEM>1) pari_warn(warnmem,"ifac_xxx");
+    ifac_realloc(part, here, 0);
+    *part = gerepileupto(av, *part);
   }
+}
 
-long
-ifac_moebius(GEN n, long hint)
+static long
+ifac_moebius(GEN n)
 {
   long mu = 1;
   pari_sp av = avma, lim = stack_lim(av,1);
-  GEN here, part = ifac_start(n, 1, hint);
-
+  GEN part = ifac_start(n, 1);
   for(;;)
   {
-    here = ifac_main(&part);
+    GEN here = ifac_main(&part);
     if (here == gen_0) { avma = av; return 0; }
     if (here == gen_1) { avma = av; return mu; }
     mu = -mu;
-    ifac_memcheck(av, lim, part, here);
+    ifac_memcheck(av, lim, &part, &here);
   }
 }
 
-long
-ifac_issquarefree(GEN n, long hint)
+static long
+ifac_omega(GEN n)
 {
+  long omega = 0;
   pari_sp av = avma, lim = stack_lim(av,1);
-  GEN here, part = ifac_start(n, 1, hint);
-
+  GEN part = ifac_start(n, 0);
   for(;;)
   {
-    here = ifac_main(&part);
-    if (here == gen_0) { avma = av; return 0; }
-    if (here == gen_1) { avma = av; return 1; }
-    ifac_memcheck(av, lim, part, here);
-  }
-}
-
-long
-ifac_omega(GEN n, long hint)
-{
-  long omega=0;
-  pari_sp av=avma, lim=stack_lim(av,1);
-  GEN here, part = ifac_start(n, 0, hint);
-
-  for(;;)
-  {
-    here = ifac_main(&part);
+    GEN here = ifac_main(&part);
     if (here == gen_1) { avma = av; return omega; }
     omega++;
-    ifac_memcheck(av, lim, part, here);
+    ifac_memcheck(av, lim, &part, &here);
   }
 }
 
-long
-ifac_bigomega(GEN n, long hint)
+static long
+ifac_bigomega(GEN n)
 {
   long Omega=0;
   pari_sp av=avma, lim=stack_lim(av,1);
-  GEN here, part = ifac_start(n, 0, hint);
+  GEN part = ifac_start(n, 0);
 
   for(;;)
   {
-    here = ifac_main(&part);
+    GEN here = ifac_main(&part);
     if (here == gen_1) { avma = av; return Omega; }
     Omega += itos(EXPON(here));
-    ifac_memcheck(av, lim, part, here);
+    ifac_memcheck(av, lim, &part, &here);
   }
 }
 
-GEN
-ifac_totient(GEN n, long hint)
+static GEN
+euler_totient(GEN m, GEN p, long v)
 {
-  GEN t = gen_1, phi = cgeti(lgefint(n));
+  m = mulii(m, addsi(-1, p));
+  if (v != 1) m = mulii(m, v == 2? p: powiu(p, v-1));
+  return m;
+}
+static GEN
+ifac_totient(GEN n)
+{
+  GEN m = gen_1, phi = cgeti(lgefint(n));
   pari_sp av=avma, lim=stack_lim(av,1);
-  GEN here, part = ifac_start(n, 0, hint);
+  GEN part = ifac_start(n, 0);
 
   for(;;)
   {
-    ulong e;
-    GEN p;
-    here = ifac_main(&part);
-    if (here == gen_1) { avma = av; affii(t, phi); return phi; }
+    ulong v;
+    GEN p, here = ifac_main(&part);
+    if (here == gen_1) { avma = av; affii(m, phi); return phi; }
     p = VALUE(here);
-    e = itou(EXPON(here));
-    t = mulii(t, addsi(-1, p));
-    if (e != 1) t = mulii(t, e == 2? p: powiu(p, e-1));
-
-    ifac_memcheck_extra(av, lim, part, here,  t,phi);
+    v = itou(EXPON(here));
+    m = euler_totient(m, p, v);
+    ifac_memcheck_extra(av, lim, &part, &here, &m,phi);
   }
 }
 
-GEN
-ifac_numdiv(GEN n, long hint)
+static GEN
+ifac_numdiv(GEN n)
 {
-  GEN t = gen_1, tau = cgeti(lgefint(n));
+  GEN m = gen_1, tau = cgeti(lgefint(n));
   pari_sp av=avma, lim=stack_lim(av,1);
-  GEN here, part = ifac_start(n, 0, hint);
+  GEN part = ifac_start(n, 0);
 
   for(;;)
   {
-    here = ifac_main(&part);
-    if (here == gen_1) { avma = av; affii(t, tau); return tau; }
-    t = muliu(t, 1 + itou(EXPON(here)));
-    ifac_memcheck_extra(av, lim, part, here, t, tau);
+    GEN here = ifac_main(&part);
+    if (here == gen_1) { avma = av; affii(m, tau); return tau; }
+    m = muliu(m, 1 + itou(EXPON(here)));
+    ifac_memcheck_extra(av, lim, &part, &here, &m,tau);
   }
   return gerepileuptoint(av, tau);
 }
 
-GEN
-ifac_sumdivk(GEN n, long k, long hint)
+/* 1 + p + ... + p^v, p != 2^BIL - 1 */
+static GEN
+u_euler_sumdiv(GEN m, ulong p, long v)
 {
-  GEN t = gen_1, S = cgeti(k * lgefint(n)+1); /* S < n^k (log n+1)^{k == 1} */
+  GEN u = utoipos(1 + p); /* can't overflow */
+  for (; v > 1; v--) u = addsi(1, mului(p, u));
+  return mulii(m, u);
+}
+/* 1 + q + ... + q^v */
+static GEN
+euler_sumdiv(GEN m, GEN q, long v)
+{
+  GEN u = addsi(1, q);
+  for (; v > 1; v--) u = addsi(1, mulii(q, u));
+  return mulii(m, u);
+}
+static GEN
+u_euler_sumdivk(GEN m, ulong p, long v, long k)
+{ return euler_sumdiv(m, powuu(p,k), v); }
+static GEN
+euler_sumdivk(GEN m, GEN p, long v, long k)
+{ return euler_sumdiv(m, powiu(p,k), v); }
+static GEN
+ifac_sumdivk(GEN n, long k)
+{
+  GEN m = gen_1, S = cgeti(k * lgefint(n)+1); /* S < n^k (log n+1)^{k == 1} */
   pari_sp av=avma, lim=stack_lim(av,1);
-  GEN here, part = ifac_start(n, 0, hint);
+  GEN part = ifac_start(n, 0);
 
   for(;;)
   {
-    long e;
-    GEN q, u;
-    here = ifac_main(&part);
-    if (here == gen_1) { avma = av; affii(t, S); return S; }
+    long v;
+    GEN p, here = ifac_main(&part);
+    if (here == gen_1) { avma = av; affii(m, S); return S; }
 
-    q = VALUE(here); if (k > 1) q = powiu(q, k);
-    e = itos(EXPON(here));
-    u = addsi(1, q); for (; e > 1; e--) u = addsi(1, mulii(q, u));
-    t = mulii(t, u);
-    ifac_memcheck_extra(av, lim, part, here, t, S);
+    p = VALUE(here);
+    v = itos(EXPON(here));
+    m = euler_sumdivk(m, p, v, k);
+    ifac_memcheck_extra(av, lim, &part, &here, &m,S);
   }
 }
+
+/* where to stop trial dividing in factorization */
+static ulong
+tridiv_bound(GEN n)
+{
+  ulong l = (ulong)expi(n) + 1;
+  if (l <= 32)  return 1UL<<14;
+  if (l <= 512) return (l-16) << 10;
+  return 1UL<<19; /* Rho is generally faster above this */
+}
+
+static ulong
+utridiv_bound(ulong n)
+{
+#ifdef LONG_IS_64BIT
+  if (n & HIGHMASK)
+    return ((ulong)expu(n) + 1 - 16) << 10;
+#else
+  (void)n;
+#endif
+  return 1UL<<14;
+}
+
+GEN
+gmoebius(GEN n) { return map_proto_lG(moebius,n); }
+
+INLINE void
+chk_arith(GEN n) {
+  if (typ(n) != t_INT) pari_err(arither1);
+  if (!signe(n)) pari_err(talker, "zero argument in an arithmetic function");
+}
+
+long
+moebius(GEN n)
+{
+  byteptr d = diffptr+1; /* point at 3 - 2 */
+  pari_sp av = avma;
+  ulong p, lim;
+  long i, l, s, v;
+
+  chk_arith(n); if (is_pm1(n)) return 1;
+  if (equaliu(n, 2)) return -1;
+  p = mod4(n); if (!p) return 0;
+  if (p == 2) { s = -1; n = shifti(n, -1); } else { s = 1; n = icopy(n); }
+  setabssign(n);
+
+  lim = tridiv_bound(n);
+  p = 2;
+  while (p < lim)
+  {
+    int stop;
+    if (!*d) break;
+    NEXT_PRIME_VIADIFF(p,d);
+    v = Z_lvalrem_stop(n, p, &stop);
+    if (v > 1) { avma = av; return 0; }
+    if (v) s = -s;
+    if (stop) { avma = av; return is_pm1(n)? s: -s; }
+  }
+  if (BPSW_psp_nosmalldiv(n)) { avma=av; return -s; }
+  l = lg(primetab);
+  for (i = 1; i < l; i++)
+  {
+    v = Z_pvalrem(n, gel(primetab,i), &n);
+    if (v > 1) { avma = av; return 0; }
+    if (v)
+    {
+      s = -s;
+      if (is_pm1(n)) { avma = av; return s; }
+    }
+  }
+  /* large composite without small factors */
+  v = ifac_moebius(n);
+  avma = av; return (s<0 ? -v : v); /* correct also if v==0 */
+}
+
+GEN
+gissquarefree(GEN x) { return map_proto_lG(issquarefree,x); }
+long
+Z_issquarefree(GEN n) { return moebius(n)? 1: 0; }
+long
+issquarefree(GEN x)
+{
+  pari_sp av;
+  GEN d;
+  switch(typ(x))
+  {
+    case t_INT: return Z_issquarefree(x);
+    case t_POL:
+      if (!signe(x)) return 0;
+      av = avma; d = RgX_gcd(x, RgX_deriv(x));
+      avma = av; return (lg(d) == 3);
+    default: pari_err(typeer,"issquarefree");
+      return 0; /* not reached */
+  }
+}
+
+GEN
+gomega(GEN n) { return map_proto_lG(omega,n); }
+long
+omega(GEN n)
+{
+  byteptr d = diffptr+1;
+  pari_sp av = avma;
+  long i, l, nb, v;
+  ulong p, lim;
+
+  chk_arith(n); if (is_pm1(n)) return 0;
+  v = vali(n); nb = v ? 1 : 0;
+  n = shifti(n, -v);
+  if (is_pm1(n)) return nb;
+  setabssign(n);
+
+  lim = tridiv_bound(n);
+  p = 2;
+  while (p < lim)
+  {
+    int stop;
+    if (!*d) break;
+    NEXT_PRIME_VIADIFF(p,d);
+    v = Z_lvalrem_stop(n, p, &stop);
+    if (v) nb++;
+    if (stop) { avma = av; return is_pm1(n)? nb: nb+1; }
+  }
+  if (BPSW_psp_nosmalldiv(n)) { avma = av; return nb+1; }
+  l = lg(primetab);
+  for (i = 1; i < l; i++)
+  {
+    v = Z_pvalrem(n, gel(primetab,i), &n);
+    if (v)
+    {
+      nb++;
+      if (is_pm1(n)) { avma = av; return nb; }
+    }
+  }
+  /* large composite without small factors */
+  nb += ifac_omega(n);
+  avma = av; return nb;
+}
+
+GEN
+gbigomega(GEN n) { return map_proto_lG(bigomega,n); }
+long
+bigomega(GEN n)
+{
+  byteptr d=diffptr+1;
+  pari_sp av = avma;
+  ulong p, lim;
+  long i, l, nb, v;
+
+  chk_arith(n); if (is_pm1(n)) return 0;
+  nb = v = vali(n); n = shifti(n, -v);
+  if (is_pm1(n)) { avma = av; return nb; }
+  setabssign(n);
+
+  lim = tridiv_bound(n);
+  p = 2;
+  while (p < lim)
+  {
+    int stop;
+    if (!*d) break;
+    NEXT_PRIME_VIADIFF(p,d);
+    v = Z_lvalrem_stop(n, p, &stop);
+    nb += v;
+    if (stop) { avma = av; return is_pm1(n)? nb: nb+1; }
+  }
+  if (BPSW_psp_nosmalldiv(n)) { avma = av; return nb+1; }
+  l = lg(primetab);
+  for (i = 1; i < l; i++)
+  {
+    v = Z_pvalrem(n, gel(primetab,i), &n);
+    if (v)
+    {
+      nb += v;
+      if (is_pm1(n)) { avma = av; return nb; }
+    }
+  }
+  nb += ifac_bigomega(n);
+  avma = av; return nb;
+}
+
+GEN
+geulerphi(GEN n) { return map_proto_G(eulerphi,n); }
+ulong
+eulerphiu(ulong n)
+{
+  byteptr d = diffptr+1;
+  pari_sp av;
+  ulong p, lim, m;
+  long v;
+
+  if (n == 1) return 1;
+  v = vals(n); n >>= v;
+  m = v > 1 ? 1UL << (v-1) : 1;
+  if (n == 1) return m;
+
+  lim = utridiv_bound(n);
+  p = 2;
+  while (p < lim)
+  {
+    int stop;
+    if (!*d) break;
+    NEXT_PRIME_VIADIFF(p,d);
+    v = u_lvalrem_stop(&n, p, &stop);
+    if (v) {
+      m *= p-1;
+      if (v > 1) m *= upowuu(p, v-1);
+    }
+    if (stop) {
+      if (n != 1) m *= n-1;
+      return m;
+    }
+  }
+  if (uisprime_nosmalldiv(n)) return m*(n-1);
+  av = avma;
+  m *= itou( ifac_totient(utoipos(n)) );
+  avma = av; return m;
+}
+GEN
+eulerphi(GEN n)
+{
+  byteptr d = diffptr+1;
+  pari_sp av = avma;
+  GEN m;
+  ulong p, lim;
+  long i, l, v;
+
+  chk_arith(n);
+  if (lgefint(n) == 3) return utoipos(eulerphiu((ulong)n[2]));
+  v = vali(n); n = shifti(n,-v); setabssign(n);
+  m = v > 1 ? int2n(v-1) : gen_1;
+  if (is_pm1(n)) return gerepileuptoint(av,m);
+
+  lim = tridiv_bound(n);
+  p = 2;
+  while (p < lim)
+  {
+    int stop;
+    if (!*d) break;
+    NEXT_PRIME_VIADIFF(p,d);
+    v = Z_lvalrem_stop(n, p, &stop);
+    if (v) {
+      m = muliu(m, p-1);
+      if (v > 2) m = mulii(m, powuu(p, v-1));
+      else if (v == 2) m = muliu(m, p);
+    }
+    if (stop) {
+      if (!is_pm1(n)) m = mulii(m, addis(n,-1));
+      return gerepileuptoint(av,m);
+    }
+  }
+  if (BPSW_psp_nosmalldiv(n)) return gerepileuptoint(av, mulii(m, addis(n,-1)));
+  l = lg(primetab);
+  for (i = 1; i < l; i++)
+  {
+    GEN p = gel(primetab,i);
+    v = Z_pvalrem(n, p, &n);
+    if (v)
+    {
+      m = euler_totient(m, p, v);
+      if (is_pm1(n)) return gerepileuptoint(av,m);
+    }
+  }
+  m = mulii(m, ifac_totient(n));
+  return gerepileuptoint(av,m);
+}
+
+GEN
+gnumbdiv(GEN n) { return map_proto_G(numbdiv,n); }
+GEN
+numbdiv(GEN n)
+{
+  byteptr d = diffptr+1;
+  pari_sp av = avma;
+  GEN m;
+  long i, l, v;
+  ulong p, lim;
+
+  chk_arith(n); if (is_pm1(n)) return gen_1;
+  v = vali(n); n = shifti(n,-v); setabssign(n);
+  m = utoipos(v+1);
+  if (is_pm1(n)) return gerepileuptoint(av,m);
+
+  lim = tridiv_bound(n);
+  p = 2;
+  while (p < lim)
+  {
+    int stop;
+    if (!*d) break;
+    NEXT_PRIME_VIADIFF(p,d);
+    v = Z_lvalrem_stop(n, p, &stop);
+    if (v) m = muliu(m, v+1);
+    if (stop)
+    {
+      if (!is_pm1(n)) m = shifti(m,1);
+      return gerepileuptoint(av,m);
+    }
+  }
+  if(BPSW_psp_nosmalldiv(n)) return gerepileuptoint(av, shifti(m,1));
+  l = lg(primetab);
+  for (i = 1; i < l; i++)
+  {
+    GEN p = gel(primetab,i);
+    v = Z_pvalrem(n, p, &n);
+    if (v)
+    {
+      m = muliu(m, 1 + v);
+      if (is_pm1(n)) return gerepileuptoint(av,m);
+    }
+  }
+  m = mulii(m, ifac_numdiv(n));
+  return gerepileuptoint(av,m);
+}
+
+GEN
+gsumdiv(GEN n) { return map_proto_G(sumdiv,n); }
+GEN
+sumdiv(GEN n)
+{
+  byteptr d = diffptr+1;
+  pari_sp av = avma, av2, limit;
+  GEN m;
+  ulong p, lim;
+  long i, l, v;
+
+  chk_arith(n); if (is_pm1(n)) return gen_1;
+  v = vali(n); n = shifti(n,-v); setabssign(n);
+  m = v ? addsi(-1, int2n(v+1)) : gen_1;
+  if (is_pm1(n)) return gerepileuptoint(av,m);
+
+  lim = tridiv_bound(n);
+  p = 2; av2 = avma; limit = stack_lim(av2,3);
+  while (p < lim)
+  {
+    int stop;
+    if (!*d) break;
+    NEXT_PRIME_VIADIFF(p,d);
+    v = Z_lvalrem_stop(n, p, &stop);
+    if (v) m = u_euler_sumdiv(m, p, v);
+    if (low_stack(limit, stack_lim(av2,3)))
+    {
+      if(DEBUGMEM>1) pari_warn(warnmem,"sumdiv");
+      m = gerepileuptoint(av2, m);
+    }
+    if (stop)
+    {
+      if (!is_pm1(n)) m = euler_sumdiv(m, n, 1);
+      goto end;
+    }
+  }
+  if(BPSW_psp_nosmalldiv(n)) { m = euler_sumdiv(m, n, 1); goto end; }
+  l = lg(primetab);
+  for (i = 1; i < l; i++)
+  {
+    GEN p = gel(primetab,i);
+    v = Z_pvalrem(n, p, &n);
+    if (v)
+    {
+      m = euler_sumdiv(m, p, v);
+      if (is_pm1(n)) return gerepileuptoint(av,m);
+    }
+  }
+  m = mulii(m, ifac_sumdivk(n, 1));
+end:
+  return gerepileuptoint(av,m);
+}
+
+GEN
+gsumdivk(GEN n, long k) { return map_proto_GL(sumdivk,n,k); }
+GEN
+sumdivk(GEN n, long k)
+{
+  byteptr d = diffptr+1;
+  pari_sp av = avma, av2, limit;
+  GEN n1, m;
+  ulong p, lim;
+  long i, l, k1, v;
+
+  if (!k) return numbdiv(n);
+  if (k == 1) return sumdiv(n);
+  chk_arith(n); if (is_pm1(n)) return gen_1;
+  k1 = k; n1 = n;
+  if (k < 0)  k = -k;
+  if (k == 1) { m = sumdiv(n); goto fin; }
+  v = vali(n); n = shifti(n,-v); setabssign(n);
+  m = gen_1;
+  while (v--)  m = addsi(1,shifti(m,k));
+  if (is_pm1(n)) goto fin;
+
+  lim = tridiv_bound(n);
+  p = 2; av2 = avma; limit = stack_lim(av2,3);
+  while (p < lim)
+  {
+    int stop;
+    if (!*d) break;
+    NEXT_PRIME_VIADIFF(p,d);
+    v = Z_lvalrem_stop(n, p, &stop);
+    if (v) m = u_euler_sumdivk(m, p, v, k);
+    if (low_stack(limit, stack_lim(av2,3)))
+    {
+      if(DEBUGMEM>1) pari_warn(warnmem,"sumdiv");
+      m = gerepileuptoint(av2, m);
+    }
+    if (stop)
+    {
+      if (!is_pm1(n)) m = euler_sumdivk(m, n, 1, k);
+      goto fin;
+    }
+  }
+  if (BPSW_psp_nosmalldiv(n)) { m = euler_sumdivk(m, n, 1, k); goto fin; }
+  l = lg(primetab);
+  for (i = 1; i < l; i++)
+  {
+    GEN p = gel(primetab,i);
+    v = Z_pvalrem(n, p, &n);
+    if (v)
+    {
+      m = euler_sumdivk(m, p, v, k);
+      if (is_pm1(n)) goto fin;
+    }
+  }
+  m = mulii(m, ifac_sumdivk(n, k));
+ fin:
+  if (k1 < 0) m = gdiv(m, powiu(n1,k));
+  return gerepileupto(av,m);
+}
+
+/***********************************************************************/
+/**                                                                   **/
+/**       COMPUTING THE MATRIX OF PRIME DIVISORS AND EXPONENTS        **/
+/**                                                                   **/
+/***********************************************************************/
+static GEN
+aux_end(GEN n, long nb)
+{
+  GEN P,E, z = (GEN)avma;
+  long i;
+
+  if (n) gunclone(n);
+  P = cgetg(nb+1,t_COL);
+  E = cgetg(nb+1,t_COL);
+  for (i=nb; i; i--)
+  {
+    gel(E,i) = z; z += lg(z);
+    gel(P,i) = z; z += lg(z);
+  }
+  gel(z,1) = P;
+  gel(z,2) = E;
+  return sort_factor(z, (void*)&absi_cmp, cmp_nodata);
+}
+
+static void
+STORE(long *nb, GEN x, long e) { (*nb)++; (void)x; (void)utoipos(e); }
+static void
+STOREu(long *nb, ulong x, long e) { STORE(nb, utoipos(x), e); }
+static void
+STOREi(long *nb, GEN x, long e) { STORE(nb, icopy(x), e); }
+static int
+special_primes(GEN n, GEN pp, long *nb, GEN T)
+{
+  long i, l = lg(T);
+  for (i = 1; i < l; i++)
+    if (dvdiiz(n,gel(T,i), n))
+    {
+      long k = 1; while (dvdiiz(n,gel(T,i), n)) k++;
+      STOREi(nb, gel(T,i), k);
+      if (absi_cmp(pp, n) > 0) return 1;
+    }
+  return 0;
+}
+
+/* all != 0 : only look for prime divisors < all */
+static GEN
+ifactor(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
+        GEN state, ulong all, long hint)
+{
+  pari_sp av;
+  long pp[] = { evaltyp(t_INT)|_evallg(4), 0,0,0 };
+  long nb = 0, i;
+  ulong p, k, lim;
+  byteptr d = diffptr+1; /* start at p = 3 */
+
+  i = signe(n); if (!i) pari_err(talker, "zero argument in factorint");
+  (void)cgetg(3,t_MAT);
+  if (i < 0) STORE(&nb, utoineg(1), 1);
+  if (is_pm1(n)) return aux_end(NULL,nb);
+
+  n = gclone(n); setabssign(n);
+  /* trial division bound */
+  if (all) {
+    if (all > maxprime() + 1) pari_err(primer1, all);
+    lim = all; /* use supplied limit */
+  }
+  else
+    lim = tridiv_bound(n);
+
+  if (lim > 2)
+  {
+    i = vali(n);
+    if (i)
+    {
+      STOREu(&nb, 2, i);
+      av = avma; affii(shifti(n,-i), n); avma = av;
+    }
+    if (is_pm1(n)) return aux_end(n,nb);
+  }
+
+  /* trial division */
+  p = 2;
+  for(;;)
+  {
+    int stop;
+    if (!*d) break;
+    NEXT_PRIME_VIADIFF(p,d);
+    if (p >= lim) break;
+
+    k = Z_lvalrem_stop(n, p, &stop);
+    if (k) STOREu(&nb, p, k);
+    if (stop)
+    {
+      if (!is_pm1(n)) STOREi(&nb, n, 1);
+      return aux_end(n,nb);
+    }
+  }
+
+  /* pp = square of biggest p tried so far */
+  av = avma; affii(sqru(p), pp); avma = av;
+
+  /* trial divide by the "special primes" (usually huge composites) */
+  if (special_primes(n, pp, &nb, primetab) ||
+      special_primes(n, pp, &nb, pseudoprimetab))
+  {
+    if (!is_pm1(n)) STOREi(&nb, n, 1);
+    return aux_end(n,nb);
+  }
+
+  if (all)
+  { /* smallfact: look for easy pure powers then stop. Cf Z_isanypower */
+    GEN x = n, y;
+    ulong mask = 7, ex0 = 11;
+    long ex, k = 1;
+    av = avma;
+    while (Z_issquareall(x, &y)) { k <<= 1; x = y; }
+    while ( (ex = is_357_power(x, &y, &mask)) ) { k *= ex; x = y; }
+    /* stop when x^(1/k) < 2^14 */
+    while ( (ex = is_pth_power(x, &y, &ex0, 15)) ) { k *= ex; x = y; }
+    if (k > 1) affii(x, n);
+    avma = av; STOREi(&nb, n, k);
+    if (DEBUGLEVEL >= 2) {
+      pari_warn(warner, "IFAC: untested integer declared prime");
+      fprintferr("\t%Ps\n", n);
+    }
+    return aux_end(n,nb);
+  }
+
+  /* test primality */
+  if (BPSW_psp_nosmalldiv(n)) { STOREi(&nb, n, 1); return aux_end(n,nb); }
+
+  /* now we have a large composite */
+  if (ifac_break && (*ifac_break)(n,NULL,NULL,state)) /*initialize ifac_break*/
+  {
+    if (DEBUGLEVEL>2)
+      fprintferr("IFAC: (Partial fact.) Initial stop requested.\n");
+  }
+  else
+    nb += ifac_decomp_break(n, ifac_break, state, hint);
+
+  return aux_end(n, nb);
+}
+
+/* state[1]: current unfactored part.
+ * state[2]: limit. */
+static long
+ifac_break_limit(GEN n, GEN pairs/*unused*/, GEN here, GEN state)
+{
+  pari_sp ltop = avma;
+  GEN N;
+  int res;
+  (void)pairs;
+  if (!here) /* initial call */
+   /*Small primes have been removed, n is the new unfactored part.*/
+    N = n;
+  else
+  {
+    GEN q = powii(gel(here,0),gel(here,1)); /* primary factor found.*/
+    if (DEBUGLEVEL>2) fprintferr("IFAC: Stop: Primary factor: %Ps\n",q);
+    N = diviiexact(gel(state,1),q); /* divide unfactored part by q */
+  }
+  affii(N, gel(state,1)); /* affect()ed to state[1] to preserve stack. */
+  if (DEBUGLEVEL>2) fprintferr("IFAC: Stop: remaining %Ps\n",state[1]);
+  /* check the stopping criterion, then restore stack */
+  res = cmpii(gel(state,1),gel(state,2)) <= 0;
+  avma = ltop; return res;
+}
+
+/* see before ifac_crack() in ifactor1.c for current semantics of 'hint'
+   (factorint's 'flag') */
+GEN
+factorint(GEN n, long flag)
+{
+  if (typ(n) != t_INT) pari_err(arither1);
+  return ifactor(n,NULL,NULL, 0,flag);
+}
+
+GEN
+Z_factor_limit(GEN n, ulong all)
+{
+  if (!all) all = maxprime() + 1;
+  return ifactor(n,NULL,NULL, all,decomp_default_hint); }
+GEN
+Z_factor(GEN n)
+{ return ifactor(n,NULL,NULL, 0,decomp_default_hint); }
+
+int
+is_Z_factor(GEN f)
+{
+  long i, l;
+  GEN P, E;
+  if (typ(f) != t_MAT || lg(f) != 3) return 0;
+  P = gel(f,1);
+  E = gel(f,2); l = lg(P);
+  for (i = 1; i < l; i++)
+  {
+    GEN p = gel(P,i), e = gel(E,i);
+    if (typ(p) != t_INT || signe(p) <= 0 || typ(e) != t_INT || signe(e) <= 0)
+      return 0;
+  }
+  return 1;
+}
+
+/* Factor until the unfactored part is smaller than limit. Return the
+ * factored part. Hence factorback(output) may be smaller than n */
+GEN
+Z_factor_until(GEN n, GEN limit)
+{
+  GEN state = cgetg(3,t_VEC);
+ /* icopy is mainly done to allocate memory for affect().
+  * Currently state[1] is discarded in initial call to ifac_break_limit */
+  gel(state,1) = icopy(n);
+  gel(state,2) = gcopy(limit);
+  return ifactor(n, &ifac_break_limit, state, 0, decomp_default_hint);
+}
+

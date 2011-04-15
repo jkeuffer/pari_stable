@@ -12,5 +12,6 @@ Doc: adds the integers contained in the
  If $x$ is empty or omitted, just returns the current list of extra
  primes.
 
- The entries in $x$ must be primes (there is no internal check). To remove
- primes from the list use \kbd{removeprimes}.
+ The entries in $x$ must be primes: there is no internal check, even if
+ the \tet{factor_proven} default is set. To remove primes from the list use
+ \kbd{removeprimes}.
