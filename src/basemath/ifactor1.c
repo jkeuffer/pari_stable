@@ -2379,7 +2379,7 @@ ifac_print(GEN part, GEN where)
   for (p = part+3; p < part + l; p += 3)
   {
     GEN v = VALUE(p), e = EXPON(p), c = CLASS(p);
-    char *s = "";
+    const char *s = "";
     if (!v) { fprintferr("[empty slot]\n"); continue; }
     if (c == NULL) s = "unknown";
     else if (c == gen_0) s = "composite";
