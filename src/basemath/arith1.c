@@ -1714,18 +1714,43 @@ chinese1_coprime_Z(GEN x) {return gassoc_proto(chinese1_coprime_Z_aux,x,NULL);}
 /**                    MODULAR EXPONENTIATION                       **/
 /**                                                                 **/
 /*********************************************************************/
+
+/* modified Barrett reduction with one fold */
+/* See Fast Modular Reduction, W. Hasenplaugh, G. Gaubatz, V. Gopal, ARITH 18 */
+
+static GEN
+Fp_invmBarrett(GEN p, long s)
+{
+  GEN R, Q = dvmdii(int2n(3*s),p,&R);
+  return mkvec2(Q,R);
+}
+
+static GEN
+Fp_rem_mBarrett(GEN a, GEN B, long s, GEN p)
+{
+  pari_sp av = avma;
+  GEN Q = gel(B, 1), R = gel(B, 2);
+  long sQ = expi(Q);
+  GEN A = addii(remi2n(a, 3*s), mulii(R,shifti(a, -3*s)));
+  GEN q = shifti(mulii(shifti(A, sQ-3*s), Q), -sQ);
+  GEN r = subii(A, mulii(q, p));
+  GEN sr= subii(r,p);     /* Now 0 <= r < 4*p */
+  if (signe(sr)<0) return gerepileuptoint(av, r);
+  r=sr; sr = subii(r,p);  /* Now 0 <= r < 3*p */
+  if (signe(sr)<0) return gerepileuptoint(av, r);
+  r=sr; sr = subii(r,p);  /* Now 0 <= r < 2*p */
+  return gerepileuptoint(av, signe(sr)>=0 ? sr:r);
+}
+
 /* Montgomery reduction */
 
 INLINE ulong
 init_montdata(GEN N) { return (ulong) -invmod2BIL(mod2BIL(N)); }
 
-GEN
-init_remiimul(GEN M) { return invr( itor(M, lgefint(M) + 1) ); } /* 1. / M */
-
 typedef struct muldata {
   GEN N;
   GEN iM;
-  ulong inv;
+  ulong inv, s;
   GEN (*res)(struct muldata *,GEN);
   GEN (*mul2)(struct muldata *,GEN);
 } muldata;
@@ -1741,7 +1766,7 @@ static GEN
 _remii(muldata *D, GEN x) { return remii(x, D->N); }
 
 static GEN
-_remiimul(muldata *D, GEN x) { return remiimul(x, D->N, D->iM); }
+_remiibar(muldata *D, GEN x) { return Fp_rem_mBarrett(x, D->iM, D->s, D->N); }
 
 /* 2x mod N */
 static GEN
@@ -1800,11 +1825,12 @@ static long
 Fp_select_red(GEN *y, ulong k, GEN N, long lN, muldata *D)
 {
   D->N = N;
-  if (lN >= REMIIMUL_LIMIT  && (k==0 || ((double)k)*expi(*y) > 2 + expi(N)))
+  if (lN >= REMIIMUL_LIMIT && (k==0 || ((double)k)*expi(*y) > 2 + expi(N)))
   {
     D->mul2 = &_muli2red;
-    D->res = &_remiimul;
-    D->iM = init_remiimul(N);
+    D->res = &_remiibar;
+    D->s = 1+(expi(N)>>1);
+    D->iM = Fp_invmBarrett(N, D->s);
     return 0;
   }
   else if (mod2(N) && lN < MONTGOMERY_LIMIT)

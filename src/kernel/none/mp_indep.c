@@ -667,38 +667,6 @@ mulii(GEN a,GEN b)
 }
 
 GEN
-remiimul(GEN x, GEN y, GEN invy)
-{
-  GEN r, q;
-  long k;
-  pari_sp av = avma;
-
-  k = cmpii(x, y);
-  if (k <= 0) return k? icopy(x): gen_0;
-  q = mulir(x,invy);
-  q = truncr(q); /* differs from divii(x, y) at most by 1 */
-  r = subii(x, mulii(y,q));
-  if (signe(r) < 0)
-    r = subiispec(y+2,r+2, lgefint(y)-2, lgefint(r)-2); /* y - |r| */
-  else
-  {
-    /* remii(x,y) + y >= r >= remii(x,y) */
-    k = absi_cmp(r, y);
-    if (k >= 0)
-    {
-      if (k == 0) { avma = av; return gen_0; }
-      r = subiispec(r+2, y+2, lgefint(r)-2, lgefint(y)-2);
-    }
-  }
-#if 0
-  q = subii(r,remii(x,y));
-  if (signe(q))
-    pari_err(talker,"bug in remiimul: x = %Ps\ny = %Ps\ndif = %Ps", x,y,q);
-#endif
-  return gerepileuptoint(av, r); /* = remii(x, y) */
-}
-
-GEN
 sqri(GEN a) { return sqrispec(a+2, lgefint(a)-2); }
 
 /* sqrt()'s result may be off by 1 when a is not representable exactly as a
