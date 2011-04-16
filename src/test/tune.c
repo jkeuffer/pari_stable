@@ -87,33 +87,33 @@ static GEN
 rand_FpX(long n)
 {
   GEN x;
-  do x = random_FpX(n+1, 0, utoipos(DFLT_mod)); while (degpol(x) < n);
+  do x = random_FpX(n+1, 0, LARGE_mod); while (degpol(x) < n);
   return x;
 }
 /* Flx, degree n */
 static GEN
 rand_Flx(long n)
 {
-  pari_sp av = avma;
-  GEN x = rand_FpX(n);
-  return gerepileuptoleaf(av, ZX_to_Flx(x, DFLT_mod));
+  GEN x;
+  do x = random_Flx(n+1, 0, DFLT_mod); while (degpol(x) < n);
+  return x;
 }
 
 /* Fhx, degree n */
 static GEN
 rand_Fhx(long n)
 {
-  pari_sp av = avma;
-  GEN x = rand_FpX(n);
-  return gerepileuptoleaf(av, ZX_to_Flx(x, DFLT_hmod));
+  GEN x;
+  do x = random_Flx(n+1, 0, DFLT_hmod); while (degpol(x) < n);
+  return x;
 }
 
 /* normalized Fpx, degree n */
 static GEN
-rand_NFpX(GEN mod,long n)
+rand_NFpX(long n)
 {
   pari_sp av = avma;
-  GEN x = gadd(monomial(gen_1,n,0), random_FpX(n, 0, mod));
+  GEN x = gadd(monomial(gen_1,n,0), random_FpX(n, 0, LARGE_mod));
   return gerepileupto(av, x);
 }
 
@@ -122,8 +122,8 @@ static GEN
 rand_NFlx(long n)
 {
   pari_sp av = avma;
-  GEN mod = utoipos(DFLT_mod);
-  return gerepileuptoleaf(av, ZX_to_Flx(rand_NFpX(mod,n),DFLT_mod));
+  GEN x = Flx_add(Flx_shift(pol1_Flx(0),n), random_Flx(n, 0, DFLT_mod), DFLT_mod);
+  return gerepileuptoleaf(av, x);
 }
 
 #define t_Fhx   99
@@ -142,7 +142,7 @@ rand_g(long n, long type)
     case t_Flx:  return rand_Flx(n);
     case t_NFlx: return rand_NFlx(n);
     case t_FpX:  return rand_FpX(n);
-    case t_NFpX: return rand_NFpX(LARGE_mod,n);
+    case t_NFpX: return rand_NFpX(n);
   }
   return NULL;
 }
@@ -256,12 +256,12 @@ static double speed_FpX_inv(speed_param *s)
 
 static double speed_FpX_rem(speed_param *s)
 {
-  GEN x = rand_NFpX(LARGE_mod,(degpol(s->x)-1)*2);
+  GEN x = rand_NFpX((degpol(s->x)-1)*2);
   TIME_FUN(FpX_rem(x, s->x, s->p));
 }
 
 static double speed_FpXQ_pow(speed_param *s) {
-  GEN x = rand_NFpX(s->p,degpol(s->x)-1);
+  GEN x = rand_NFpX(degpol(s->x)-1);
   TIME_FUN( FpXQ_pow(x, s->p, s->x, s->p) );
 }
 
