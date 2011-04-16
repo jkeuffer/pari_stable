@@ -196,6 +196,7 @@ sd_ulong(const char *v, long flag, const char *s, ulong *ptn, ulong Min, ulong M
             if (!msg[i]) { i--; break; }
           }
           if (i != (ulong)-1) {
+            if (i == *ptn) i = 0;
             pari_printf("   %s = %lu %s\n", s, *ptn, msg[i]);
             return gnil;
           }
