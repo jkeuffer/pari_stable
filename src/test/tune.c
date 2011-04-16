@@ -25,13 +25,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 int option_trace = 0;
 double Step_Factor = .01; /* small steps by default */
-ulong DFLT_mod;
+ulong DFLT_mod, DFLT_hmod;
 GEN LARGE_mod;
 
 typedef struct {
   ulong reps, type;
   long *var, *var_disable, size;
   GEN x, y;
+  ulong l;
+  GEN p;
 } speed_param;
 
 typedef double (*speed_function_t)(speed_param *s);
@@ -98,7 +100,16 @@ rand_Flx(long n)
   return gerepileuptoleaf(av, ZX_to_Flx(x, DFLT_mod));
 }
 
-/* normalized Flx, degree n */
+/* Fhx, degree n */
+static GEN
+rand_Fhx(long n)
+{
+  pari_sp av = avma;
+  GEN x = rand_FpX(n);
+  return gerepileuptoleaf(av, ZX_to_Flx(x, DFLT_hmod));
+}
+
+/* normalized Fpx, degree n */
 static GEN
 rand_NFpX(GEN mod,long n)
 {
@@ -116,6 +127,7 @@ rand_NFlx(long n)
   return gerepileuptoleaf(av, ZX_to_Flx(rand_NFpX(mod,n),DFLT_mod));
 }
 
+#define t_Fhx   99
 #define t_Flx  100
 #define t_NFlx 101
 #define t_FpX  102
@@ -127,12 +139,25 @@ rand_g(long n, long type)
   switch (type) {
     case t_INT:  return rand_INT(n);
     case t_REAL: return rand_REAL(n);
+    case t_Fhx:  return rand_Fhx(n);
     case t_Flx:  return rand_Flx(n);
     case t_NFlx: return rand_NFlx(n);
     case t_FpX:  return rand_FpX(n);
     case t_NFpX: return rand_NFpX(LARGE_mod,n);
   }
   return NULL;
+}
+
+static void
+dftmod(speed_param *s)
+{
+  switch (s->type) {
+    case t_Fhx:  s->l=DFLT_hmod; return;
+    case t_Flx:  s->l=DFLT_mod; return;
+    case t_NFlx: s->l=DFLT_mod; return;
+    case t_FpX:  s->p=LARGE_mod; return;
+    case t_NFpX: s->p=LARGE_mod; return;
+  }
 }
 
 /* ========================================================== */
@@ -229,89 +254,85 @@ static double speed_invmodgmp(speed_param *s)
 { GEN T; enable(s); TIME_FUN(invmod(s->x, s->y, &T)); }
 
 static double speed_Flx_dsqr(speed_param *s)
-{ ulong p = DFLT_mod; disable(s); TIME_FUN(Flx_sqr(s->x, p)); }
+{ disable(s); TIME_FUN(Flx_sqr(s->x, s->l)); }
 static double speed_Flx_esqr(speed_param *s)
-{ ulong p = DFLT_mod; enable(s); TIME_FUN(Flx_sqr(s->x, p)); }
+{ enable(s);  TIME_FUN(Flx_sqr(s->x, s->l)); }
 
 static double speed_Flx_inv(speed_param *s)
-{ ulong p = DFLT_mod; disable(s); TIME_FUN(Flx_invMontgomery(s->x, p)); }
+{ disable(s); TIME_FUN(Flx_invMontgomery(s->x, s->l)); }
 static double speed_Flx_invnewton(speed_param *s)
-{ ulong p = DFLT_mod; enable(s); TIME_FUN(Flx_invMontgomery(s->x, p)); }
+{ enable(s);  TIME_FUN(Flx_invMontgomery(s->x, s->l)); }
 
 static double speed_Flx_dmul(speed_param *s)
-{ ulong p = DFLT_mod; disable(s); TIME_FUN(Flx_mul(s->x, s->y, p)); }
+{ disable(s); TIME_FUN(Flx_mul(s->x, s->y, s->l)); }
 static double speed_Flx_emul(speed_param *s)
-{ ulong p = DFLT_mod; enable(s); TIME_FUN(Flx_mul(s->x, s->y, p)); }
+{ enable(s);  TIME_FUN(Flx_mul(s->x, s->y, s->l)); }
 
-static double speed_Flx_rem(speed_param *s)
-{ ulong p = DFLT_mod;
+static double speed_Flx_rem(speed_param *s) {
   GEN x = rand_NFlx((degpol(s->x)-1)*2); disable2(s,degpol(s->x)+1);
-  TIME_FUN(Flx_rem(x, s->x, p)); }
-static double speed_Flx_rem_mg(speed_param *s)
-{ ulong p = DFLT_mod;
+  TIME_FUN(Flx_rem(x, s->x, s->l));
+}
+static double speed_Flx_rem_mg(speed_param *s) {
   GEN x = rand_NFlx((degpol(s->x)-1)*2);  enable2(s,degpol(s->x)-3);
-  TIME_FUN(Flx_rem(x, s->x, p)); }
+  TIME_FUN(Flx_rem(x, s->x, s->l));
+}
 
 static double speed_Flxq_pow(speed_param *s) {
-  ulong p = DFLT_mod;
   GEN x = rand_Flx(degpol(s->x)-1);
-  disable(s); TIME_FUN( Flxq_pow(x, utoipos(p), s->x, p) );
+  disable(s); TIME_FUN( Flxq_pow(x, utoipos(s->l), s->x, s->l) );
 }
 static double speed_Flxq_pow_mg(speed_param *s) {
-  ulong p = DFLT_mod;
   GEN x = rand_Flx(degpol(s->x)-1);
-  enable(s);  TIME_FUN( Flxq_pow(x, utoipos(p), s->x, p) );
+  enable(s);  TIME_FUN( Flxq_pow(x, utoipos(s->l), s->x, s->l) );
 }
 
 static double speed_Flx_halfgcd_basecase(speed_param *s)
-{ ulong p = DFLT_mod; disable(s); TIME_FUN(Flx_halfgcd(s->x, s->y, p)); }
+{ disable(s); TIME_FUN(Flx_halfgcd(s->x, s->y, s->l)); }
 static double speed_Flx_halfgcd(speed_param *s)
-{ ulong p = DFLT_mod; enable(s); TIME_FUN(Flx_halfgcd(s->x, s->y, p)); }
+{ enable(s); TIME_FUN(Flx_halfgcd(s->x, s->y, s->l)); }
 static double speed_Flx_gcd_basecase(speed_param *s)
-{ ulong p = DFLT_mod; disable(s); TIME_FUN(Flx_gcd(s->x, s->y, p)); }
+{ disable(s); TIME_FUN(Flx_gcd(s->x, s->y, s->l)); }
 static double speed_Flx_gcd(speed_param *s)
-{ ulong p = DFLT_mod; enable(s); TIME_FUN(Flx_gcd(s->x, s->y, p)); }
+{ enable(s); TIME_FUN(Flx_gcd(s->x, s->y, s->l)); }
 static double speed_Flx_extgcd_basecase(speed_param *s)
-{ GEN u,v; ulong p = DFLT_mod; disable(s); TIME_FUN(Flx_extgcd(s->x, s->y, p, &u, &v)); }
+{ GEN u,v; disable(s); TIME_FUN(Flx_extgcd(s->x, s->y, s->l, &u, &v)); }
 static double speed_Flx_extgcd(speed_param *s)
-{ GEN u,v; ulong p = DFLT_mod; enable(s); TIME_FUN(Flx_extgcd(s->x, s->y, p, &u, &v)); }
+{ GEN u,v; enable(s); TIME_FUN(Flx_extgcd(s->x, s->y, s->l, &u, &v)); }
 
 static double speed_FpX_inv(speed_param *s)
-{ GEN p = LARGE_mod; disable(s); TIME_FUN(FpX_invMontgomery(s->x, p)); }
+{ disable(s); TIME_FUN(FpX_invMontgomery(s->x, s->p)); }
 static double speed_FpX_invnewton(speed_param *s)
-{ GEN p = LARGE_mod; enable(s); TIME_FUN(FpX_invMontgomery(s->x, p)); }
+{ enable(s); TIME_FUN(FpX_invMontgomery(s->x, s->p)); }
 
 static double speed_FpX_rem(speed_param *s)
-{ GEN p = LARGE_mod;
+{
   GEN x = rand_NFpX(LARGE_mod,(degpol(s->x)-1)*2); disable2(s,degpol(s->x)+1);
-  TIME_FUN(FpX_rem(x, s->x, p)); }
+  TIME_FUN(FpX_rem(x, s->x, s->p)); }
 static double speed_FpX_rem_mg(speed_param *s)
-{ GEN p = LARGE_mod;
+{
   GEN x = rand_NFpX(LARGE_mod,(degpol(s->x)-1)*2); enable2(s,degpol(s->x)-3);
-  TIME_FUN(FpX_rem(x, s->x, p)); }
+  TIME_FUN(FpX_rem(x, s->x, s->p)); }
 
 static double speed_FpXQ_pow(speed_param *s) {
-  GEN p = LARGE_mod;
-  GEN x = rand_NFpX(p,degpol(s->x)-1);
-  disable(s); TIME_FUN( FpXQ_pow(x, p, s->x, p) );
+  GEN x = rand_NFpX(s->p,degpol(s->x)-1);
+  disable(s); TIME_FUN( FpXQ_pow(x, s->p, s->x, s->p) );
 }
 static double speed_FpXQ_pow_mg(speed_param *s) {
-  GEN p = LARGE_mod;
-  GEN x = rand_NFpX(p,degpol(s->x)-1);
-  enable(s);  TIME_FUN( FpXQ_pow(x, p, s->x, p) );
+  GEN x = rand_NFpX(s->p,degpol(s->x)-1);
+  enable(s);  TIME_FUN( FpXQ_pow(x, s->p, s->x, s->p) );
 }
 static double speed_FpX_halfgcd_basecase(speed_param *s)
-{ GEN p = LARGE_mod; disable(s); TIME_FUN(FpX_halfgcd(s->x, s->y, p)); }
+{ disable(s); TIME_FUN(FpX_halfgcd(s->x, s->y, s->p)); }
 static double speed_FpX_halfgcd(speed_param *s)
-{ GEN p = LARGE_mod; enable(s); TIME_FUN(FpX_halfgcd(s->x, s->y, p)); }
+{ enable(s); TIME_FUN(FpX_halfgcd(s->x, s->y, s->p)); }
 static double speed_FpX_gcd_basecase(speed_param *s)
-{ GEN p = LARGE_mod; disable(s); TIME_FUN(FpX_gcd(s->x, s->y, p)); }
+{ disable(s); TIME_FUN(FpX_gcd(s->x, s->y, s->p)); }
 static double speed_FpX_gcd(speed_param *s)
-{ GEN p = LARGE_mod; enable(s); TIME_FUN(FpX_gcd(s->x, s->y, p)); }
+{ enable(s); TIME_FUN(FpX_gcd(s->x, s->y, s->p)); }
 static double speed_FpX_extgcd_basecase(speed_param *s)
-{ GEN u,v,p = LARGE_mod; disable(s); TIME_FUN(FpX_extgcd(s->x, s->y, p, &u, &v)); }
+{ GEN u,v; disable(s); TIME_FUN(FpX_extgcd(s->x, s->y, s->p, &u, &v)); }
 static double speed_FpX_extgcd(speed_param *s)
-{ GEN u,v,p = LARGE_mod; enable(s); TIME_FUN(FpX_extgcd(s->x, s->y, p, &u, &v)); }
+{ GEN u,v; enable(s); TIME_FUN(FpX_extgcd(s->x, s->y, s->p, &u, &v)); }
 
 /* small coeffs: earlier thresholds for more complicated rings */
 static double speed_RgX_sqr(speed_param *s)
@@ -349,6 +370,8 @@ static tune_param param[] = {
 {0,   var(LOGAGMCX_LIMIT),         t_REAL,3,0, speed_logcx,speed_logcxagm,0.05},
 {0,   var(AGM_ATAN_LIMIT),         t_REAL,20,0, speed_atan,speed_atanagm,0.05},
 {GMP, var(INVMOD_GMP_LIMIT),       t_INT, 3,0, speed_invmod,speed_invmodgmp},
+{0,   var(Flx_MUL_HALFMULII_LIMIT),t_Fhx,3,0, speed_Flx_dmul,speed_Flx_emul},
+{0,   var(Flx_SQR_HALFSQRI_LIMIT), t_Fhx,3,0, speed_Flx_dsqr,speed_Flx_esqr},
 {0,   var(Flx_MUL_KARATSUBA_LIMIT),t_Flx,5,0, speed_Flx_dmul,speed_Flx_emul,0,0,
                                                              &Flx_MUL_MULII_LIMIT},
 {0,   var(Flx_SQR_KARATSUBA_LIMIT),t_Flx,5,0, speed_Flx_dsqr,speed_Flx_esqr,0,0,
@@ -391,6 +414,7 @@ time_fun(speed_function_t fun, speed_param *s)
 
   s->x = rand_g(s->size, s->type);
   s->y = rand_g(s->size, s->type); s->reps = 1;
+  dftmod(s);
   for (i = 0; i < numberof(t); i++)
   {
     for (;;)
@@ -587,6 +611,7 @@ main(int argc, char **argv)
   pari_init(4000000, 2);
   (void) init_modular(&DFLT_mod);
   LARGE_mod=subis(powuu(3,128),62);
+  DFLT_hmod = 97;
   v = new_chunk(argc);
   for (i = 1; i < argc; i++)
   {
