@@ -30,7 +30,7 @@ GEN LARGE_mod;
 
 typedef struct {
   ulong reps, type;
-  long *var, *var_disable, size;
+  long *var, *var_disable, size, enabled;
   GEN x, y;
   ulong l;
   GEN p;
@@ -45,8 +45,7 @@ typedef struct {
   int               type; /* t_INT or t_REAL */
   long              min_size;
   long              max_size;
-  speed_function_t  fun1;
-  speed_function_t  fun2;
+  speed_function_t  fun;
   double            step_factor; /* how much to step sizes (rounded down) */
   double            stop_factor;
   long              *var_disable;
@@ -179,170 +178,113 @@ dftmod(speed_param *s)
 
 static void enable(speed_param *s)
 {
-  m_enable(s,var);
+  m_enable(s,var); s->enabled = 1;
   if (s->var_disable) m_disable(s,var_disable);
 }
 
 static void disable(speed_param *s)
 {
-   m_disable(s,var);
+  m_disable(s,var); s->enabled = 0;
   if (s->var_disable) m_disable(s,var_disable);
 }
 
-static double speed_mulrr(speed_param *s)
-{ disable(s); TIME_FUN(mulrr(s->x, s->y)); }
-static double speed_karamulrr(speed_param *s)
-{ enable(s);  TIME_FUN(mulrr(s->x, s->y)); }
+static void disenable2(speed_param *s, long t)
+{
+  if(s->enabled) enable2(s,t);
+  else disable2(s,t);
+}
 
-static double speed_dmulii(speed_param *s)
-{ disable(s); TIME_FUN(mulii(s->x, s->y)); }
-static double speed_emulii(speed_param *s)
-{ enable(s); TIME_FUN(mulii(s->x, s->y)); }
+static double speed_mulrr(speed_param *s)
+{ TIME_FUN(mulrr(s->x, s->y)); }
+
+static double speed_mulii(speed_param *s)
+{ TIME_FUN(mulii(s->x, s->y)); }
 
 static double speed_exp(speed_param *s)
-{ disable(s); TIME_FUN(mpexp(s->x)); }
-static double speed_expnewton(speed_param *s)
-{ enable(s);  mplog2(lg(s->x)+2); TIME_FUN(mpexp(s->x)); }
+{ TIME_FUN(mpexp(s->x)); }
 
 static double speed_inv(speed_param *s)
-{ disable(s); TIME_FUN(invr(s->x)); }
-static double speed_invnewton(speed_param *s)
-{ enable(s);  TIME_FUN(invr(s->x)); }
+{ TIME_FUN(invr(s->x)); }
 
 static double speed_log(speed_param *s)
-{ disable(s); TIME_FUN(mplog(s->x)); }
-static double speed_logagm(speed_param *s)
-{ enable(s);  TIME_FUN(mplog(s->x)); }
+{ TIME_FUN(mplog(s->x)); }
 
 static double speed_logcx(speed_param *s)
 { GEN z; setexpo(s->x,0); z = mkcomplex(gen_1, s->x);
   glog(z,s->size);
-  disable(s); TIME_FUN(glog(z,s->size)); }
-static double speed_logcxagm(speed_param *s)
-{ GEN z; setexpo(s->x,0); z = mkcomplex(gen_1, s->x);
-  glog(z,s->size);
-  enable(s); TIME_FUN(glog(z,s->size)); }
+  TIME_FUN(glog(z,s->size)); }
 
 static double speed_atan(speed_param *s)
-{ setexpo(s->x, 0); disable(s);
-  gatan(s->x, 0);
-  TIME_FUN(gatan(s->x, 0)); }
-static double speed_atanagm(speed_param *s)
-{ setexpo(s->x, 0); enable(s);
+{ setexpo(s->x, 0);
   gatan(s->x, 0);
   TIME_FUN(gatan(s->x, 0)); }
 
-static double speed_dsqri (speed_param *s)
-{ disable(s); TIME_FUN(sqri(s->x)); }
-static double speed_esqri (speed_param *s)
-{ enable(s);  TIME_FUN(sqri(s->x)); }
+static double speed_sqri (speed_param *s)
+{ TIME_FUN(sqri(s->x)); }
 
-static double speed_Fp_dpow(speed_param *s)
-{ disable(s); TIME_FUN( Fp_pow(s->x, subis(s->y,1), s->y)); }
-
-static double speed_Fp_epow(speed_param *s)
-{ enable(s);  TIME_FUN( Fp_pow(s->x, subis(s->y,1), s->y)); }
+static double speed_Fp_pow(speed_param *s)
+{ TIME_FUN( Fp_pow(s->x, subis(s->y,1), s->y)); }
 
 static double speed_divrr(speed_param *s)
-{ disable(s); TIME_FUN(divrr(s->x, s->y)); }
-static double speed_divrrgmp(speed_param *s)
-{ enable(s); TIME_FUN(divrr(s->x, s->y)); }
+{ TIME_FUN(divrr(s->x, s->y)); }
 
 static double speed_invmod(speed_param *s)
-{ GEN T; disable(s); TIME_FUN(invmod(s->x, s->y, &T)); }
-static double speed_invmodgmp(speed_param *s)
-{ GEN T; enable(s); TIME_FUN(invmod(s->x, s->y, &T)); }
+{ GEN T; TIME_FUN(invmod(s->x, s->y, &T)); }
 
-static double speed_Flx_dsqr(speed_param *s)
-{ disable(s); TIME_FUN(Flx_sqr(s->x, s->l)); }
-static double speed_Flx_esqr(speed_param *s)
-{ enable(s);  TIME_FUN(Flx_sqr(s->x, s->l)); }
+static double speed_Flx_sqr(speed_param *s)
+{ TIME_FUN(Flx_sqr(s->x, s->l)); }
 
 static double speed_Flx_inv(speed_param *s)
-{ disable(s); TIME_FUN(Flx_invMontgomery(s->x, s->l)); }
-static double speed_Flx_invnewton(speed_param *s)
-{ enable(s);  TIME_FUN(Flx_invMontgomery(s->x, s->l)); }
+{ TIME_FUN(Flx_invMontgomery(s->x, s->l)); }
 
-static double speed_Flx_dmul(speed_param *s)
-{ disable(s); TIME_FUN(Flx_mul(s->x, s->y, s->l)); }
-static double speed_Flx_emul(speed_param *s)
-{ enable(s);  TIME_FUN(Flx_mul(s->x, s->y, s->l)); }
+static double speed_Flx_mul(speed_param *s)
+{ TIME_FUN(Flx_mul(s->x, s->y, s->l)); }
 
 static double speed_Flx_rem(speed_param *s) {
-  GEN x = rand_NFlx((degpol(s->x)-1)*2); disable2(s,degpol(s->x)+1);
-  TIME_FUN(Flx_rem(x, s->x, s->l));
-}
-static double speed_Flx_rem_mg(speed_param *s) {
-  GEN x = rand_NFlx((degpol(s->x)-1)*2);  enable2(s,degpol(s->x)-3);
+  GEN x = rand_NFlx((degpol(s->x)-1)*2); disenable2(s,degpol(s->x)+1);
   TIME_FUN(Flx_rem(x, s->x, s->l));
 }
 
 static double speed_Flxq_pow(speed_param *s) {
   GEN x = rand_Flx(degpol(s->x)-1);
-  disable(s); TIME_FUN( Flxq_pow(x, utoipos(s->l), s->x, s->l) );
-}
-static double speed_Flxq_pow_mg(speed_param *s) {
-  GEN x = rand_Flx(degpol(s->x)-1);
-  enable(s);  TIME_FUN( Flxq_pow(x, utoipos(s->l), s->x, s->l) );
+  TIME_FUN( Flxq_pow(x, utoipos(s->l), s->x, s->l) );
 }
 
-static double speed_Flx_halfgcd_basecase(speed_param *s)
-{ disable(s); TIME_FUN(Flx_halfgcd(s->x, s->y, s->l)); }
 static double speed_Flx_halfgcd(speed_param *s)
-{ enable(s); TIME_FUN(Flx_halfgcd(s->x, s->y, s->l)); }
-static double speed_Flx_gcd_basecase(speed_param *s)
-{ disable(s); TIME_FUN(Flx_gcd(s->x, s->y, s->l)); }
+{ TIME_FUN(Flx_halfgcd(s->x, s->y, s->l)); }
+
 static double speed_Flx_gcd(speed_param *s)
-{ enable(s); TIME_FUN(Flx_gcd(s->x, s->y, s->l)); }
-static double speed_Flx_extgcd_basecase(speed_param *s)
-{ GEN u,v; disable(s); TIME_FUN(Flx_extgcd(s->x, s->y, s->l, &u, &v)); }
+{ TIME_FUN(Flx_gcd(s->x, s->y, s->l)); }
+
 static double speed_Flx_extgcd(speed_param *s)
-{ GEN u,v; enable(s); TIME_FUN(Flx_extgcd(s->x, s->y, s->l, &u, &v)); }
+{ GEN u,v; TIME_FUN(Flx_extgcd(s->x, s->y, s->l, &u, &v)); }
 
 static double speed_FpX_inv(speed_param *s)
-{ disable(s); TIME_FUN(FpX_invMontgomery(s->x, s->p)); }
-static double speed_FpX_invnewton(speed_param *s)
-{ enable(s); TIME_FUN(FpX_invMontgomery(s->x, s->p)); }
+{ TIME_FUN(FpX_invMontgomery(s->x, s->p)); }
 
 static double speed_FpX_rem(speed_param *s)
 {
-  GEN x = rand_NFpX(LARGE_mod,(degpol(s->x)-1)*2); disable2(s,degpol(s->x)+1);
-  TIME_FUN(FpX_rem(x, s->x, s->p)); }
-static double speed_FpX_rem_mg(speed_param *s)
-{
-  GEN x = rand_NFpX(LARGE_mod,(degpol(s->x)-1)*2); enable2(s,degpol(s->x)-3);
-  TIME_FUN(FpX_rem(x, s->x, s->p)); }
+  GEN x = rand_NFpX(LARGE_mod,(degpol(s->x)-1)*2); disenable2(s,degpol(s->x)+1);
+  TIME_FUN(FpX_rem(x, s->x, s->p));
+}
 
 static double speed_FpXQ_pow(speed_param *s) {
   GEN x = rand_NFpX(s->p,degpol(s->x)-1);
-  disable(s); TIME_FUN( FpXQ_pow(x, s->p, s->x, s->p) );
+  TIME_FUN( FpXQ_pow(x, s->p, s->x, s->p) );
 }
-static double speed_FpXQ_pow_mg(speed_param *s) {
-  GEN x = rand_NFpX(s->p,degpol(s->x)-1);
-  enable(s);  TIME_FUN( FpXQ_pow(x, s->p, s->x, s->p) );
-}
-static double speed_FpX_halfgcd_basecase(speed_param *s)
-{ disable(s); TIME_FUN(FpX_halfgcd(s->x, s->y, s->p)); }
+
 static double speed_FpX_halfgcd(speed_param *s)
-{ enable(s); TIME_FUN(FpX_halfgcd(s->x, s->y, s->p)); }
-static double speed_FpX_gcd_basecase(speed_param *s)
-{ disable(s); TIME_FUN(FpX_gcd(s->x, s->y, s->p)); }
+{ TIME_FUN(FpX_halfgcd(s->x, s->y, s->p)); }
 static double speed_FpX_gcd(speed_param *s)
-{ enable(s); TIME_FUN(FpX_gcd(s->x, s->y, s->p)); }
-static double speed_FpX_extgcd_basecase(speed_param *s)
-{ GEN u,v; disable(s); TIME_FUN(FpX_extgcd(s->x, s->y, s->p, &u, &v)); }
+{ TIME_FUN(FpX_gcd(s->x, s->y, s->p)); }
 static double speed_FpX_extgcd(speed_param *s)
-{ GEN u,v; enable(s); TIME_FUN(FpX_extgcd(s->x, s->y, s->p, &u, &v)); }
+{ GEN u,v; TIME_FUN(FpX_extgcd(s->x, s->y, s->p, &u, &v)); }
 
 /* small coeffs: earlier thresholds for more complicated rings */
 static double speed_RgX_sqr(speed_param *s)
-{ disable(s); TIME_FUN(RgX_sqr(s->x)); }
-static double speed_RgX_karasqr(speed_param *s)
-{ enable(s); TIME_FUN(RgX_sqr(s->x)); }
+{ TIME_FUN(RgX_sqr(s->x)); }
 static double speed_RgX_mul(speed_param *s)
-{ disable(s); TIME_FUN(RgX_mul(s->x, s->y)); }
-static double speed_RgX_karamul(speed_param *s)
-{ enable(s); TIME_FUN(RgX_mul(s->x, s->y)); }
+{ TIME_FUN(RgX_mul(s->x, s->y)); }
 
 enum { PARI = 1, GMP = 2 };
 #ifdef PARI_KERNEL_GMP
@@ -355,43 +297,40 @@ enum { PARI = 1, GMP = 2 };
  * occur first */
 #define var(a) # a, &a
 static tune_param param[] = {
-{PARI,var(KARATSUBA_MULI_LIMIT),   t_INT, 4,0, speed_dmulii,speed_emulii,0,0,&FFT_MULI_LIMIT},
-{PARI,var(KARATSUBA_SQRI_LIMIT),   t_INT, 4,0, speed_dsqri,speed_esqri,0,0,&FFT_SQRI_LIMIT},
-{PARI,var(FFT_MULI_LIMIT),         t_INT, 1000,100000, speed_dmulii,speed_emulii,0.02},
-{PARI,var(FFT_SQRI_LIMIT),         t_INT, 1000,100000, speed_dsqri,speed_esqri,0.02},
-{0,   var(KARATSUBA_MULR_LIMIT),   t_REAL,4,0, speed_mulrr,speed_karamulrr},
-{0,   var(Fp_POW_REDC_LIMIT),      t_INT, 3,0, speed_Fp_dpow,speed_Fp_epow,0,0,
-                                                             &Fp_POW_BARRETT_LIMIT},
-{0,   var(Fp_POW_BARRETT_LIMIT),   t_INT, 3,0, speed_Fp_dpow,speed_Fp_epow},
-{0,   var(INVNEWTON_LIMIT),        t_REAL,66,0, speed_inv,speed_invnewton,0.03},
-{GMP, var(DIVRR_GMP_LIMIT),        t_REAL,4,0, speed_divrr,speed_divrrgmp},
-{0,   var(EXPNEWTON_LIMIT),        t_REAL,66,0, speed_exp,speed_expnewton},
-{0,   var(LOGAGM_LIMIT),           t_REAL,4,0, speed_log,speed_logagm},
-{0,   var(LOGAGMCX_LIMIT),         t_REAL,3,0, speed_logcx,speed_logcxagm,0.05},
-{0,   var(AGM_ATAN_LIMIT),         t_REAL,20,0, speed_atan,speed_atanagm,0.05},
-{GMP, var(INVMOD_GMP_LIMIT),       t_INT, 3,0, speed_invmod,speed_invmodgmp},
-{0,   var(Flx_MUL_HALFMULII_LIMIT),t_Fhx,3,0, speed_Flx_dmul,speed_Flx_emul},
-{0,   var(Flx_SQR_HALFSQRI_LIMIT), t_Fhx,3,0, speed_Flx_dsqr,speed_Flx_esqr},
-{0,   var(Flx_MUL_KARATSUBA_LIMIT),t_Flx,5,0, speed_Flx_dmul,speed_Flx_emul,0,0,
-                                                             &Flx_MUL_MULII_LIMIT},
-{0,   var(Flx_SQR_KARATSUBA_LIMIT),t_Flx,5,0, speed_Flx_dsqr,speed_Flx_esqr,0,0,
-                                                             &Flx_SQR_SQRI_LIMIT},
-{0,   var(Flx_MUL_MULII_LIMIT),t_Flx,5,0, speed_Flx_dmul,speed_Flx_emul},
-{0,   var(Flx_SQR_SQRI_LIMIT), t_Flx,5,0, speed_Flx_dsqr,speed_Flx_esqr},
-{0,   var(Flx_INVMONTGOMERY_LIMIT),t_NFlx,10,0, speed_Flx_inv,speed_Flx_invnewton,0.1},
-{0,  var(Flx_REM_MONTGOMERY_LIMIT),t_NFlx,10,0, speed_Flx_rem,speed_Flx_rem_mg,0.1},
-{0,  var(Flx_POW_MONTGOMERY_LIMIT),t_NFlx,10,0, speed_Flxq_pow,speed_Flxq_pow_mg},
-{0,  var(Flx_HALFGCD_LIMIT),      t_Flx,10,0, speed_Flx_halfgcd_basecase,speed_Flx_halfgcd},
-{0,  var(Flx_GCD_LIMIT),          t_Flx,10,0, speed_Flx_gcd_basecase,speed_Flx_gcd},
-{0,  var(Flx_EXTGCD_LIMIT),       t_Flx,10,0, speed_Flx_extgcd_basecase,speed_Flx_extgcd},
-{0,  var(FpX_INVMONTGOMERY_LIMIT),t_NFpX,10,0, speed_FpX_inv,speed_FpX_invnewton,0.05},
-{0,  var(FpX_REM_MONTGOMERY_LIMIT),t_NFpX,10,0, speed_FpX_rem,speed_FpX_rem_mg,0.05},
-{0,  var(FpX_POW_MONTGOMERY_LIMIT),t_NFpX,10,0, speed_FpXQ_pow,speed_FpXQ_pow_mg},
-{0,  var(FpX_HALFGCD_LIMIT),      t_FpX,10,0, speed_FpX_halfgcd_basecase,speed_FpX_halfgcd},
-{0,  var(FpX_GCD_LIMIT),          t_FpX,10,0, speed_FpX_gcd_basecase,speed_FpX_gcd},
-{0,  var(FpX_EXTGCD_LIMIT),       t_FpX,10,0, speed_FpX_extgcd_basecase,speed_FpX_extgcd},
-{0,  var(RgX_MUL_LIMIT),          t_FpX, 4,0, speed_RgX_mul,speed_RgX_karamul},
-{0,  var(RgX_SQR_LIMIT),          t_FpX, 4,0, speed_RgX_sqr,speed_RgX_karasqr},
+{PARI,var(KARATSUBA_MULI_LIMIT),   t_INT, 4,0, speed_mulii,0,0,&FFT_MULI_LIMIT},
+{PARI,var(KARATSUBA_SQRI_LIMIT),   t_INT, 4,0, speed_sqri,0,0,&FFT_SQRI_LIMIT},
+{PARI,var(FFT_MULI_LIMIT),         t_INT, 1000,100000, speed_mulii,0.02},
+{PARI,var(FFT_SQRI_LIMIT),         t_INT, 1000,100000, speed_sqri,0.02},
+{0,   var(KARATSUBA_MULR_LIMIT),   t_REAL,4,0, speed_mulrr},
+{0,   var(Fp_POW_REDC_LIMIT),      t_INT, 3,0, speed_Fp_pow,0,0,&Fp_POW_BARRETT_LIMIT},
+{0,   var(Fp_POW_BARRETT_LIMIT),   t_INT, 3,0, speed_Fp_pow},
+{0,   var(INVNEWTON_LIMIT),        t_REAL,66,0, speed_inv,0.03},
+{GMP, var(DIVRR_GMP_LIMIT),        t_REAL,4,0, speed_divrr},
+{0,   var(EXPNEWTON_LIMIT),        t_REAL,66,0, speed_exp},
+{0,   var(LOGAGM_LIMIT),           t_REAL,4,0, speed_log},
+{0,   var(LOGAGMCX_LIMIT),         t_REAL,3,0, speed_logcx,0.05},
+{0,   var(AGM_ATAN_LIMIT),         t_REAL,20,0, speed_atan,0.05},
+{GMP, var(INVMOD_GMP_LIMIT),       t_INT, 3,0, speed_invmod},
+{0,   var(Flx_MUL_HALFMULII_LIMIT),t_Fhx,3,0, speed_Flx_mul},
+{0,   var(Flx_SQR_HALFSQRI_LIMIT), t_Fhx,3,0, speed_Flx_sqr},
+{0,   var(Flx_MUL_KARATSUBA_LIMIT),t_Flx,5,0, speed_Flx_mul,0,0,&Flx_MUL_MULII_LIMIT},
+{0,   var(Flx_SQR_KARATSUBA_LIMIT),t_Flx,5,0, speed_Flx_sqr,0,0,&Flx_SQR_SQRI_LIMIT},
+{0,   var(Flx_MUL_MULII_LIMIT),t_Flx,5,0, speed_Flx_mul},
+{0,   var(Flx_SQR_SQRI_LIMIT), t_Flx,5,0, speed_Flx_sqr},
+{0,   var(Flx_INVMONTGOMERY_LIMIT),t_NFlx,10,0, speed_Flx_inv,0.1},
+{0,  var(Flx_REM_MONTGOMERY_LIMIT),t_NFlx,10,0, speed_Flx_rem,0.1},
+{0,  var(Flx_POW_MONTGOMERY_LIMIT),t_NFlx,10,0, speed_Flxq_pow},
+{0,  var(Flx_HALFGCD_LIMIT),      t_Flx,10,0, speed_Flx_halfgcd},
+{0,  var(Flx_GCD_LIMIT),          t_Flx,10,0, speed_Flx_gcd},
+{0,  var(Flx_EXTGCD_LIMIT),       t_Flx,10,0, speed_Flx_extgcd},
+{0,  var(FpX_INVMONTGOMERY_LIMIT),t_NFpX,10,0, speed_FpX_inv,0.05},
+{0,  var(FpX_REM_MONTGOMERY_LIMIT),t_NFpX,10,0, speed_FpX_rem,0.05},
+{0,  var(FpX_POW_MONTGOMERY_LIMIT),t_NFpX,10,0, speed_FpXQ_pow},
+{0,  var(FpX_HALFGCD_LIMIT),      t_FpX,10,0, speed_FpX_halfgcd},
+{0,  var(FpX_GCD_LIMIT),          t_FpX,10,0, speed_FpX_gcd},
+{0,  var(FpX_EXTGCD_LIMIT),       t_FpX,10,0, speed_FpX_extgcd},
+{0,  var(RgX_MUL_LIMIT),          t_FpX, 4,0, speed_RgX_mul},
+{0,  var(RgX_SQR_LIMIT),          t_FpX, 4,0, speed_RgX_sqr},
 };
 
 /* ========================================================== */
@@ -405,7 +344,7 @@ int
 double_cmp_ptr(double *x, double *y) { return (int)(*x - *y); }
 
 double
-time_fun(speed_function_t fun, speed_param *s)
+time_fun(speed_function_t fun, speed_param *s, long enabled)
 {
   const double TOLERANCE = 1.005; /* 0.5% */
   pari_sp av = avma;
@@ -415,6 +354,7 @@ time_fun(speed_function_t fun, speed_param *s)
   s->x = rand_g(s->size, s->type);
   s->y = rand_g(s->size, s->type); s->reps = 1;
   dftmod(s);
+  if (enabled) enable(s); else disable(s);
   for (i = 0; i < numberof(t); i++)
   {
     for (;;)
@@ -519,7 +459,6 @@ Test(tune_param *param)
   if (param->kernel == AVOID) { print_define(param->name, -1); return; }
 
 #define DEFAULT(x,n)  if (! (param->x))  param->x = (n);
-  DEFAULT(fun2, param->fun1);
   DEFAULT(step_factor, Step_Factor);
   DEFAULT(stop_factor, 1.2);
   DEFAULT(max_size, 10000);
@@ -540,8 +479,8 @@ Test(tune_param *param)
   for(;;)
   {
     double t1, t2, d;
-    t1 = time_fun(param->fun1, &s);
-    t2 = time_fun(param->fun2, &s);
+    t1 = time_fun(param->fun, &s, 0);
+    t2 = time_fun(param->fun, &s, 1);
     if (t2 >= t1) d = (t2 - t1) / t2;
     else          d = (t2 - t1) / t1;
 
