@@ -1481,7 +1481,9 @@ gp_read_line(filtre_t *F, const char *PROMPT)
   }
   res = get_line_from_file(p, F, pari_infile);
 
+#ifdef READLINE
 END:
+#endif
   if (!disable_color) { term_color(c_NONE); pari_flush(); }
   disable_exception_handler = 0;
   return res;

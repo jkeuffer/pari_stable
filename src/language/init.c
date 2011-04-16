@@ -1755,7 +1755,7 @@ timer_start(pari_timer *T)
 
 #else
 
-static long
+static void
 _get_time(pari_timer *T, long Ticks, long TickPerSecond)
 {
   T->us = (long) ((Ticks % TickPerSecond) * (1000000. / TickPerSecond));
