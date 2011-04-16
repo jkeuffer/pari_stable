@@ -837,14 +837,19 @@ GEN
 core0(GEN n,long flag) { return flag? core2(n): core(n); }
 
 static long
-_mod4(GEN c) { long r = mod4(c); if (signe(c) < 0) r = 4-r; return r; }
+_mod4(GEN c) {
+  long r, s = signe(c);
+  if (!s) return 0;
+  r = mod4(c); if (s < 0) r = 4-r;
+  return r;
+}
 
 GEN
 coredisc(GEN n)
 {
   pari_sp av = avma;
   GEN c = core(n);
-  if (_mod4(c)==1) return c;
+  if (_mod4(c)<=1) return c; /* c = 0 or 1 mod 4 */
   return gerepileuptoint(av, shifti(c,2));
 }
 
@@ -854,7 +859,7 @@ coredisc2(GEN n)
   pari_sp av = avma;
   GEN y = core2(n);
   GEN c = gel(y,1), f = gel(y,2);
-  if (_mod4(c)==1) return y;
+  if (_mod4(c)<=1) return y;
   y = cgetg(3,t_VEC);
   gel(y,1) = shifti(c,2);
   gel(y,2) = gmul2n(f,-1); return gerepileupto(av, y);

@@ -55,6 +55,8 @@ BA 42- qfbred(large discriminant, small prec): precision too low in truncr [#117
 PMo43- erfc(large x) was slow and inaccurate [#364]
    44- erfc() : allow t_COMPLEX inputs
    45- stack corruption in ifac_decomp_break() [#1115]
+   46- factor(0) returned 0^1, but factorint(0) raised an error. Allow
+       factorint(0), core(0), coredisc(0), etc.
 
   Changed
 LGr1- universal constants (gen_0,gen_1, etc.) are now read-only

@@ -14,6 +14,8 @@ Doc: a \emph{fundamental discriminant} is an integer of the form $t\equiv 1
  returns the two-element row vector $[d,f]$. If $n$ is congruent to
  0 or 1 modulo 4, $f$ is an integer, and a half-integer otherwise.
 
+ By convention, \kbd{coredisc(0, 1))} returns $[0,1]$.
+
  Note that \tet{quaddisc}$(n)$ returns the same value as \kbd{coredisc}$(n)$,
  and also works with rational inputs $n\in\Q^*$.
 Variant: Also available are \fun{GEN}{coredisc}{GEN n} ($\fl = 0$) and
