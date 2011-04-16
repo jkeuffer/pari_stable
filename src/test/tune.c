@@ -173,8 +173,6 @@ dftmod(speed_param *s)
 
 #define  m_enable(s,var) (*(s->var)=lg(s->x)-2)/* enable  asymptotically fastest */
 #define m_disable(s,var) (*(s->var)=lg(s->x)+1)/* disable asymptotically fastest */
-#define  enable2(s,t) (*(s->var)=t-2)/* enable  asymptotically fastest */
-#define disable2(s,t) (*(s->var)=t+1)/* disable asymptotically fastest */
 
 static void enable(speed_param *s)
 {
@@ -186,12 +184,6 @@ static void disable(speed_param *s)
 {
   m_disable(s,var); s->enabled = 0;
   if (s->var_disable) m_disable(s,var_disable);
-}
-
-static void disenable2(speed_param *s, long t)
-{
-  if(s->enabled) enable2(s,t);
-  else disable2(s,t);
 }
 
 static double speed_mulrr(speed_param *s)
@@ -241,7 +233,7 @@ static double speed_Flx_mul(speed_param *s)
 { TIME_FUN(Flx_mul(s->x, s->y, s->l)); }
 
 static double speed_Flx_rem(speed_param *s) {
-  GEN x = rand_NFlx((degpol(s->x)-1)*2); disenable2(s,degpol(s->x)+1);
+  GEN x = rand_NFlx((degpol(s->x)-1)*2);
   TIME_FUN(Flx_rem(x, s->x, s->l));
 }
 
@@ -264,7 +256,7 @@ static double speed_FpX_inv(speed_param *s)
 
 static double speed_FpX_rem(speed_param *s)
 {
-  GEN x = rand_NFpX(LARGE_mod,(degpol(s->x)-1)*2); disenable2(s,degpol(s->x)+1);
+  GEN x = rand_NFpX(LARGE_mod,(degpol(s->x)-1)*2);
   TIME_FUN(FpX_rem(x, s->x, s->p));
 }
 
@@ -311,12 +303,12 @@ static tune_param param[] = {
 {0,   var(LOGAGMCX_LIMIT),         t_REAL,3,0, speed_logcx,0.05},
 {0,   var(AGM_ATAN_LIMIT),         t_REAL,20,0, speed_atan,0.05},
 {GMP, var(INVMOD_GMP_LIMIT),       t_INT, 3,0, speed_invmod},
-{0,   var(Flx_MUL_HALFMULII_LIMIT),t_Fhx,3,0, speed_Flx_mul},
-{0,   var(Flx_SQR_HALFSQRI_LIMIT), t_Fhx,3,0, speed_Flx_sqr},
 {0,   var(Flx_MUL_KARATSUBA_LIMIT),t_Flx,5,0, speed_Flx_mul,0,0,&Flx_MUL_MULII_LIMIT},
 {0,   var(Flx_SQR_KARATSUBA_LIMIT),t_Flx,5,0, speed_Flx_sqr,0,0,&Flx_SQR_SQRI_LIMIT},
 {0,   var(Flx_MUL_MULII_LIMIT),t_Flx,5,0, speed_Flx_mul},
 {0,   var(Flx_SQR_SQRI_LIMIT), t_Flx,5,0, speed_Flx_sqr},
+{0,   var(Flx_MUL_HALFMULII_LIMIT),t_Fhx,3,0, speed_Flx_mul},
+{0,   var(Flx_SQR_HALFSQRI_LIMIT), t_Fhx,3,0, speed_Flx_sqr},
 {0,   var(Flx_INVMONTGOMERY_LIMIT),t_NFlx,10,0, speed_Flx_inv,0.1},
 {0,  var(Flx_REM_MONTGOMERY_LIMIT),t_NFlx,10,0, speed_Flx_rem,0.1},
 {0,  var(Flx_POW_MONTGOMERY_LIMIT),t_NFlx,10,0, speed_Flxq_pow},
