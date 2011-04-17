@@ -4900,6 +4900,10 @@ entries. Returns a vector with the same type as $L$.
 \fun{GEN}{ZV_indexsort}{GEN L} returns the permutation which, applied to the
 \kbd{ZV} $L$, would sort the vector. The result is a \typ{VECSMALL}.
 
+\fun{GEN}{ZV_union_shallow}{GEN x, GEN y} given two \emph{sorted} ZV (as per
+\tet{ZV_sort}, returns the union of $x$ and $y$. Shallow function. In case two
+entries are equal in $x$ and $y$,  include the one from $x$.
+
 \subsubsec{\kbd{ZM}}
 
 \fun{void}{RgM_check_ZM}{GEN A, const char *s} Assuming \kbd{x} is a \typ{MAT}
