@@ -711,31 +711,6 @@ These are \kbd{double} approximations to useful constants:
 
 \noindent \tet{PI}: $\pi$.
 
-\subsec{PARI version numbers}
-
-\noindent \tet{paricfg_version_code} encodes in a single \kbd{long}, the Major
-and minor version numbers as well as the patchlevel.
-
-\fun{long}{PARI_VERSION}{long M, long m, long p} produces the version code
-associated to release $M.m.p$. Each code identifies a unique PARI release,
-and corresponds to the natural total order on the set of releases (bigger
-code number means more recent release).
-
-\noindent \tet{PARI_VERSION_SHIFT} is the number of bits used to store each of
-the integers $M$, $m$, $p$ in the version code.
-
-\noindent \tet{paricfg_vcsversion} is a version string related to the
-revision control system used to handle your sources, if any. For instance
-\kbd{svn-}\emph{revision} if compiled from a subversion repository,
-\kbd{git-}\emph{commit} if compiled from a git repository, etc.
-
-The two character strings \tet{paricfg_version} and \tet{paricfg_buildinfo},
-correspond to the first two lines printed by \kbd{gp} just before the
-Copyright message.
-
-\fun{GEN}{pari_version}{} returns the version number as a PARI object, a
-\typ{VEC} with three \typ{INT} and one \typ{STR} components.
-
 \section{Handling the PARI stack}
 
 \subsec{Allocating memory on the stack}
@@ -1447,6 +1422,36 @@ Prototype: GD0,L,DGp
 Help: ClassGroupInit(P,{flag=0},{tech=[]}): this routine does @com\dots
 @eprog\noindent
 and recompile \kbd{gp}.
+
+\section{Globals related to PARI configuration}
+\subsec{PARI version numbers}
+
+\noindent \tet{paricfg_version_code} encodes in a single \kbd{long}, the Major
+and minor version numbers as well as the patchlevel.
+
+\fun{long}{PARI_VERSION}{long M, long m, long p} produces the version code
+associated to release $M.m.p$. Each code identifies a unique PARI release,
+and corresponds to the natural total order on the set of releases (bigger
+code number means more recent release).
+
+\noindent \tet{PARI_VERSION_SHIFT} is the number of bits used to store each of
+the integers $M$, $m$, $p$ in the version code.
+
+\noindent \tet{paricfg_vcsversion} is a version string related to the
+revision control system used to handle your sources, if any. For instance
+\kbd{svn-}\emph{revision} if compiled from a subversion repository,
+\kbd{git-}\emph{commit} if compiled from a git repository, etc.
+
+The two character strings \tet{paricfg_version} and \tet{paricfg_buildinfo},
+correspond to the first two lines printed by \kbd{gp} just before the
+Copyright message.
+
+\fun{GEN}{pari_version}{} returns the version number as a PARI object, a
+\typ{VEC} with three \typ{INT} and one \typ{STR} components.
+
+\subsec{Miscellaneous}
+
+\tet{paricfg_datadir}: character string. The location of PARI's \tet{datadir}.
 
 \newpage
 \chapter{Arithmetic kernel: Level 0 and 1}
