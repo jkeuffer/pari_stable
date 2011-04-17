@@ -7547,6 +7547,112 @@ but returns a \typ{STR}, not a malloc'ed string.
 performing tilde and environment expansion on the result. Returns a
 \typ{STR}, not a malloc'ed string.
 
+\section{Output}
+
+\subsec{Output contexts}
+
+An output coutext, of type \tet{PariOUT}, is a \kbd{struct}
+that models a stream and contains the following function pointers:
+\bprog
+void (*putch)(char);           /* fputc()-alike */
+void (*puts)(const char*);     /* fputs()-alike */
+void (*flush)(void);           /* fflush()-alike */
+@eprog\noindent
+The methods \tet{putch} and \tet{puts} are used to print a character
+or a string respectively.  The method \tet{flush} is called to finalize a
+messages.
+
+The generic functions \tet{pari_putc}, \tet{pari_puts}, \tet{pari_flush} and
+\tet{pari_printf} print according to a \emph{default output context}, which
+should be sufficient for most purposes. Lower level functions are available,
+which take an explicit output context as first argument:
+
+\fun{void}{pariOut_putc}{PariOUT *out, char c} essentially equivalent to
+\kbd{out->putc(c)}. In addition, registers whether the last character printed
+was a \kbd{\bs n}.
+
+\fun{void}{pariOut_puts}{PariOUT *out, const char *s} essentially equivalent to
+\kbd{out->puts(s)}. In addition, registers whether the last character printed
+was a \kbd{\bs n}.
+
+The function \kbd{pariOut\_flush} does not exist since it would be identical
+to \kbd{out->flush()}
+
+\fun{void}{pariOut_printf}{PariOUT *out, const char *fmt, ...}
+
+\fun{void}{pariOut_vprintf}{PariOUT *out, const char *fmt, va_list ap}
+
+\fun{int}{pari_last_was_newline}{void} returns a non-zero value if the last
+character printed via \tet{pariOut_putc} or \tet{pariOut_puts} was \kbd{\bs
+n}, and $0$ otherwise.
+
+\fun{void}{pari_set_last_newline}{int last} sets the boolean value
+to be returned by the function \tet{pari_last_was_newline} to \var{last}.
+
+\subsec{Default output context} It is defined by the global variable
+\tet{pariOut} for normal output, and you probably do not want to change it.
+If you \emph{do} intend to change \kbd{pariOut}, diverting output in
+non-trivial ways, this probably means that you are rewriting \kbd{gp}.
+For completeness, we document in this section what the default output context
+does, and how it can be manipulated (without being rewritten and replaced by
+something else altogether).
+
+The defaut value writes output to the \kbd{FILE*} \tet{pari_outfile}
+(initialized to \tet{stdout}).  The low-level methods are actually the
+standard \kbd{putc} / \kbd{fputs}, plus some magic to handle a log file if
+one is open. There is also a default context associated to errors and
+warnings, called \kbd{pariErr}, which prints to the \kbd{FILE*}
+\tet{pari_errfile} (initialized to \tet{stderr}).
+
+Still keeping the default output context you can change
+PARI's standard output, redirecting \tet{pari_outfile} to another file, using
+
+\fun{void}{switchout}{const char *name} where \kbd{name} is a character string
+giving the name of the file you want to write to; the output is
+\emph{appended} at the end of the file. To close the file and revert to
+outputting to \kbd{stdout}, call \kbd{switchout(NULL)}.
+
+\subsec{PARI colors}
+In this section we describe the low-level functions used to implement GP's
+color scheme, associated to the \tet{colors} default. The following symbolic
+names are associated to gp's output strings:
+
+\item \tet{c_ERR} an error message
+
+\item \tet{c_HIST} a history number (as in \kbd{\%1 = ...})
+
+\item \tet{c_PROMPT} a prompt
+
+\item \tet{c_INPUT} an input line (minus the prompt part)
+
+\item \tet{c_OUTPUT} an output
+
+\item \tet{c_HELP} a help message
+
+\item \tet{c_TIME} a timer
+
+\item \tet{c_NONE} everything else
+
+\emph{If} the \tet{colors} default is set to a non-empty value, before gp
+outputs a string, it first outputs an ANSI colors escape sequence ---
+understood by most terminals ---, according to the \kbd{colors}
+specifications. As long as this is in effect, the following strings chars is
+rendered in color, possibly in bold or underlined (see \secref{se:colors}).
+
+\fun{void}{term_color}{long c} prints (as if using \tet{pari_puts}) the ANSI
+color escape sequence associated to output object \kbd{c}. If \kbd{c} is
+\tet{c_NONE}, revert to defaut printing style.
+
+\fun{void}{pariOut_term_color}{PariOUT *out, long c} as \tet{term_color},
+using output context \kbd{out}.
+
+\fun{char*}{term_get_color}{char *s, long c} returns as a character
+string the ANSI color escape sequence associated to output object \kbd{c}.
+If \kbd{c} is \tet{c_NONE}, the value used to revert to defaut printing
+style is returned. The argument \kbd{s} is either \kbd{NULL} (string
+allocated on the PARI stack), or preallocated storage (in which case, it must
+be able to hold at least 16 chars, including the final \kbd{\bs 0}).
+
 \subsec{Obsolete output functions}
 
 These variants of \fun{void}{output}{GEN x}, which prints \kbd{x}, followed by

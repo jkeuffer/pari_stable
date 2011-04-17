@@ -267,8 +267,6 @@ void  free_graph(void);
 void  initout(int initerr);
 void  init80col(void);
 int   pari_kernel_init(void);
-int   pari_last_was_newline(void);
-void  pari_set_last_newline(int last);
 void  print_functions_hash(const char *s);
 void  print_all_user_fun(int member);
 GEN   readbin(const char *name, FILE *f, int *vector);
@@ -345,9 +343,7 @@ extern gp_data *GP_DATA;
 enum { gpd_QUIET=1, gpd_TEST=2, gpd_EMACS=256, gpd_TEXMACS=512};
 
 /* GP output && output format */
-enum { f_RAW = 0, f_PRETTYMAT = 1, f_PRETTY = 3, f_TEX = 4 };
 void gpwritebin(const char *s, GEN x);
-void print0(GEN g, long flag);
 extern char *current_logfile;
 
 /* colors */

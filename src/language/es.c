@@ -252,15 +252,15 @@ GEN
 gp_read_file(char *s)
 {
   GEN x = gnil;
-  switchin(s);
-  if (file_is_binary(pari_infile)) {
+  FILE *f = switchin(s);
+  if (file_is_binary(f)) {
     int junk;
-    x = readbin(s,pari_infile, &junk);
+    x = readbin(s,f, &junk);
   } else {
     Buffer *b = new_buffer();
     x = gnil;
     for (;;) {
-      if (!gp_read_stream_buf(pari_infile, b)) break;
+      if (!gp_read_stream_buf(f, b)) break;
       if (*(b->buf)) x = readseq(b->buf);
     }
     delete_buffer(b);
@@ -296,12 +296,12 @@ GEN
 gp_readvec_file(char *s)
 {
   GEN x = NULL;
-  switchin(s);
-  if (file_is_binary(pari_infile)) {
+  FILE *f = switchin(s);
+  if (file_is_binary(f)) {
     int junk;
-    x = readbin(s,pari_infile,&junk);
+    x = readbin(s,f,&junk);
   } else
-    x = gp_readvec_stream(pari_infile);
+    x = gp_readvec_stream(f);
   popinfile(); return x;
 }
 
@@ -3726,7 +3726,7 @@ try_name(char *name)
   pari_free(name); avma = av;
   return file;
 }
-static void
+static FILE *
 switchin_last(void)
 {
   char *s = last_filename;
@@ -3734,7 +3734,7 @@ switchin_last(void)
   if (!s) pari_err(talker,"You never gave me anything to read!");
   file = try_open(s);
   if (!file) pari_err(openfiler,"input",s);
-  pari_infile = pari_get_infile(s,file)->file;
+  return pari_infile = pari_get_infile(s,file)->file;
 }
 
 /* return 1 if s starts by '/' or './' or '../' */
@@ -3756,15 +3756,16 @@ is_absolute(char *s)
 }
 
 /* If name = "", re-read last file */
-void
+FILE *
 switchin(const char *name)
 {
+  FILE *f;
   char *s;
 
-  if (!*name) { switchin_last(); return; }
+  if (!*name) return switchin_last();
   s = path_expand(name);
   /* if s is an absolute path, don't use dir_list */
-  if (is_absolute(s)) { if (try_name(s)) return; }
+  if (is_absolute(s)) { if ((f = try_name(s))) return f; }
   else
   {
     size_t lens = strlen(s);
@@ -3773,10 +3774,11 @@ switchin(const char *name)
     { /* make room for '/' and '\0', try_name frees it */
       char *t = (char*)pari_malloc(2 + lens + strlen(*tmp));
       sprintf(t,"%s/%s",*tmp,s);
-      if (try_name(t)) return;
+      if ((f = try_name(t))) return f;
     }
   }
   pari_err(openfiler,"input",name);
+  return NULL; /*not reached*/
 }
 
 static int is_magic_ok(FILE *f);
