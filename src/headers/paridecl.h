@@ -2046,7 +2046,6 @@ GEN     addir_sign(GEN x, long sx, GEN y, long sy);
 GEN     addrr_sign(GEN x, long sx, GEN y, long sy);
 GEN     addsi_sign(long x, GEN y, long sy);
 GEN     addsr(long x, GEN y);
-GEN     adduispec_offset(ulong s, GEN x, long offset, long nx);
 GEN     addumului(ulong a, ulong b, GEN Y);
 void    affir(GEN x, GEN y);
 void    affrr(GEN x, GEN y);
