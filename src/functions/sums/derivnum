@@ -10,18 +10,21 @@ Description:
 Doc: numerical derivation of \var{expr} with respect to $X$ at $X=a$.
 
  \bprog
- ? derivnum(x=0,sin(exp(x)))-cos(1)
+ ? derivnum(x=0,sin(exp(x))) - cos(1)
  %1 = -1.262177448 E-29
  @eprog
- Another, more clumsy, approach is
+ A clumsier approach, which would not work in library mode, is
  \bprog
  ? f(x) = sin(exp(x))
  ? f'(0) - cos(1)
  %1 = -1.262177448 E-29
- @eprog\noindent
- which would not work in library mode.
+ @eprog
+ When $a$ is a power series, compute \kbd{derivnum(t=a,f)} as $f'(a) =
+ (f(a))'/a'$.
 
- \synt{derivnum}{void *E, GEN (*eval)(void*,GEN), GEN a, long prec}.
+ \synt{derivnum}{void *E, GEN (*eval)(void*,GEN), GEN a, long prec}. Also
+ available is \fun{GEN}{derivfun}{void *E, GEN (*eval)(void *, GEN), GEN a,
+ long prec}, which also allows power series for $a$.
 
 Function: _derivfun
 Section: programming/internals
