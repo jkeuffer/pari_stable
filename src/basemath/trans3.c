@@ -907,7 +907,7 @@ cxerfc_r1(GEN x, long prec)
   GEN h, h2, eh2, denom, res, lambda;
   long u, v;
   const double D = bit_accuracy_mul(prec, LOG2);
-  const long npoints = ceil(D/PI)+1;
+  const long npoints = (long)ceil(D/PI)+1;
   pari_sp av = avma;
   {
     double t = exp(-2*PI*PI/D); /* ~exp(-2*h^2) */
