@@ -325,6 +325,14 @@ of using \tet{gp_read_file}.
 
 \fun{void}{warning0}{GEN g}. Use \kbd{pari\_warn(user,)}
 
+\subsec{Iterators}
+\fun{GEN}{apply0}{GEN f, GEN A} gp wrapper calling \tet{genapply}, where $f$
+is a \typ{CLOSURE}, applied to $A$. Use \kbd{genapply} latter or a standard C
+loop.
+
+\fun{GEN}{select0}{GEN f, GEN A} gp wrapper calling \tet{genselect}, where $f$
+is a \typ{CLOSURE} selecting from $A$. Use \kbd{genselect} or a standard C loop.
+
 \subsec{Function related to the GP parser}
 
 The GP parser can generate an opcode saving the current lexical context
