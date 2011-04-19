@@ -447,6 +447,7 @@ Test(tune_param *param)
 {
   int since_positive, since_change, thresh, new_thresh;
   speed_param s;
+  long save_var_disable = -1;
 
   if (param->kernel == AVOID) { print_define(param->name, -1); return; }
 
@@ -454,6 +455,7 @@ Test(tune_param *param)
   DEFAULT(step_factor, Step_Factor);
   DEFAULT(stop_factor, 1.2);
   DEFAULT(max_size, 10000);
+  if (param->var_disable) save_var_disable = *(param->var_disable);
 
   s.type = param->type;
   s.size = param->min_size;
@@ -523,6 +525,7 @@ Test(tune_param *param)
   thresh = dat[analyze_dat(1)].size;
   print_define(param->name, thresh);
   *(param->var) = thresh; /* set to optimal value for next tests */
+  if (param->var_disable) *(param->var_disable) = save_var_disable;
 }
 
 void error(char **argv) {
