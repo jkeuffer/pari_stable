@@ -1453,8 +1453,10 @@ gp_call(void *E, GEN x)
 long
 gp_callbool(void *E, GEN x)
 {
+  pari_sp av = avma;
   GEN code = (GEN)E;
-  return !gequal0(closure_callgen1(code, x));
+  long res  = !gequal0(closure_callgen1(code, x));
+  avma = av; return res;
 }
 
 long
