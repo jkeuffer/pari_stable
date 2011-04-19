@@ -4391,6 +4391,7 @@ get_file(char *buf, int test(const char *))
     {
       *end = c;
       if (! test(buf)) return 1;
+      if (DEBUGFILES) fprintferr("I/O: file %s exists!\n", buf);
     }
   }
   return 0;
@@ -4418,9 +4419,7 @@ init_unique(const char *s)
   char *buf, suf[64];
   size_t lpre, lsuf;
 #ifdef UNIX
-  sprintf(suf,".%ld.%ld", (long)getuid(), (long)getpid());
-#else
-  sprintf(suf,".gpa");
+  sprintf(suf,"-%ld-%ld", (long)getuid(), (long)getpid());
 #endif
   lsuf = strlen(suf);
   lpre = strlen(pre);
@@ -4433,6 +4432,7 @@ init_unique(const char *s)
 #endif
 
   sprintf(buf + lpre, "%.8s%s", s, suf);
+  if (DEBUGFILES) fprintferr("I/O: prefix for unique file/dir = %s\n", buf);
   return buf;
 }
 
@@ -4444,7 +4444,6 @@ char*
 pari_unique_filename(const char *s)
 {
   char *buf = init_unique(s);
-
   if (pari_file_exists(buf) && !get_file(buf, pari_file_exists))
     pari_err(talker,"couldn't find a suitable name for a tempfile (%s)",s);
   return buf;
