@@ -8226,7 +8226,7 @@ evaluation of the closure to be interrupted; this is called below a
 or \kbd{NULL} if a flow change occurred.
 
 \fun{GEN}{closure_evalnobrk}{GEN code} as \kbd{closure\_evalgen} but raise
-an exception if a flow change occurs. Meant for pseudo-iterators where
+an exception if a flow change occurs. Meant for iterators where
 interrupting the closure is meaningless, e.g.~\kbd{intnum} or \kbd{sumnum}.
 
 \fun{void}{closure_evalvoid}{GEN code} evaluates a closure whose return
@@ -8255,8 +8255,8 @@ result otherwise, or \kbd{NULL} if a flow change occurred. Used by trap.
 
 \subsec{Functions to deal with lexical local variables}\label{se:pushlex}
 
-Function using the prototype code 'V' need to manually create and delete a
-lexical variable for each code 'V', which will be given a number $-1, -2,
+Function using the prototype code \kbd{`V'} need to manually create and delete a
+lexical variable for each code \kbd{`V'}, which will be given a number $-1, -2,
 \ldots$.
 
 \fun{void}{push_lex}{GEN a, GEN code} creates a new lexical variable whose
@@ -8305,34 +8305,39 @@ In the example code below, \kbd{agm1} is set to the function \kbd{x->agm(x,1)} a
 @eprog
 
 \subsec{Functions used by the gp debugger (break loop)}
-\fun{long}{closure_context}{long start} saves and restore the evaluation
-context in the recursive debugger. Used to assign the correct values to
-lexically scoped variables in a given frame.
+\fun{long}{closure_context}{long s} restores the compilation context
+starting at frame \kbd{s+1}, and returns the index of the topmost frame.
+This allow to compile expressions in the topmost lexical scope.
 
-\fun{void}{closure_err}{void} prints a backtrace of all stack frames.
+\fun{void}{closure_err}{void} prints a backtrace of the last $20$ stack frames.
 
-\subsec{Wrappers for pseudo-iterators}
-Pseudo-iterators like \kbd{intnum} or \kbd{sumnum} take as their first two
-argument a context \kbd{void *E}, and an evaluation function
-\kbd{GEN(*eval)(void*,GEN)}, called at each evaluation point, and returning
-the function value (taking the context into account if necessary). The
-following functions are trivial wrapper around closure evaluation routines:
-they interpret their first argument (context) as a closure, via a simple
-typecast. Then evaluate it at their second argument. (They are for
-instance used by the \kbd{gp2c} compiler.)
+\subsec{Standard wrappers for iterators}
+Two families of standard wrappers are provided to interface iterators like \kbd{intnum}
+or \kbd{sumnum} with GP.
 
-\fun{GEN}{gp_call}{void *E, GEN x} calls \tet{closure_callgen1}.
+\subsubsec{Standard wrappers for inline closures}
+Theses wrappers are used to implement GP functions taking
+inline closures as input. The object \kbd{(GEN)E} must be an inline closure which
+is evaluated with the lexical variable number $-1$ set to $x$.
 
-\fun{long}{gp_callbool}{void *E, GEN x} calls \tet{closure_callgen1};
-returns \kbd{true} if its result is non-zero, and \kbd{false} otherwise.
+\fun{GEN}{gp_eval}{void *E, GEN x} is used for the prototype code \kbd{`E'}.
 
-\fun{long}{gp_callvoid}{void *E, GEN x} calls \tet{closure_callvoid1}, and
-returns the value of \tet{loop_break}.
+\fun{long}{gp_evalvoid}{void *E, GEN x} is used for the prototype code \kbd{`I'}.
+The resulting value is discarded.  Return a non-zero value if a control-flow
+instruction request the iterator to terminate immediatly.
 
-\fun{GEN}{gp_eval}{void *E, GEN x} calls \tet{closure_evalnobrk}.
+\subsubsec{Standard wrappers for true closures}
+Theses wrappers are used to implement GP functions taking
+true closures as input.
 
-\fun{long}{gp_evalvoid}{void *E, GEN x} calls \tet{closure_evalvoid}, and
-returns the value of \tet{loop_break}.
+\fun{GEN}{gp_call}{void *E, GEN x} evaluates the closure \kbd{(GEN)E} on $x$.
+
+\fun{long}{gp_callbool}{void *E, GEN x} evaluates the closure \kbd{(GEN)E} on $x$,
+returns \kbd{1} if its result is non-zero, and \kbd{0} otherwise.
+
+\fun{long}{gp_callvoid}{void *E, GEN x} evaluates the closure \kbd{(GEN)E} on $x$,
+discarding the result. Return a non-zero value if a control-flow
+instruction request the iterator to terminate immediatly.
 
 \section{Defaults}
 
