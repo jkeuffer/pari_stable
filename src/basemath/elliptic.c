@@ -1351,14 +1351,16 @@ reduce_z(GEN z, SL2_red *T)
 /* computes the numerical value of wp(z | L), L = om1 Z + om2 Z
  * return NULL if z in L.  If flall=1, compute also wp' */
 static GEN
-weipellnumall(SL2_red *T, GEN z, long flall, long prec)
+weipellnumall(SL2_red *T, GEN z, long flall, long prec0)
 {
-  long toadd;
+  long toadd, prec;
   pari_sp av=avma, lim, av1;
   GEN p1, pi2, q, u, y, yp, u1, u2, qn, v;
 
   z = reduce_z(z, T);
   if (!z) return NULL;
+  prec = precision(z);
+  if (!prec) { prec = precision(T->tau); if (!prec) prec = prec0; }
 
   /* Now L,z normalized to <1,tau>. z in fund. domain of <1, tau> */
   pi2 = Pi2n(1, prec);
@@ -1411,9 +1413,9 @@ weipellnumall(SL2_red *T, GEN z, long flall, long prec)
 }
 
 GEN
-ellzeta(GEN om, GEN z, long prec)
+ellzeta(GEN om, GEN z, long prec0)
 {
-  long toadd;
+  long toadd, prec;
   pari_sp av = avma, lim, av1;
   GEN Z, pi2, q, u, y, qn, et = NULL;
   SL2_red T;
@@ -1421,6 +1423,8 @@ ellzeta(GEN om, GEN z, long prec)
   if (!get_periods(om, &T)) pari_err(typeer,"ellzeta");
   Z = reduce_z(z, &T);
   if (!Z) pari_err(talker,"can't evaluate ellzeta at a pole");
+  prec = precision(Z);
+  if (!prec) { prec = precision(T.tau); if (!prec) prec = prec0; }
   if (!gequal0(T.x) || !gequal0(T.y))
   {
     et = _elleta(&T,prec);
@@ -1456,9 +1460,9 @@ ellzeta(GEN om, GEN z, long prec)
 
 /* if flag=0, return ellsigma, otherwise return log(ellsigma) */
 GEN
-ellsigma(GEN w, GEN z, long flag, long prec)
+ellsigma(GEN w, GEN z, long flag, long prec0)
 {
-  long toadd;
+  long toadd, prec;
   pari_sp av = avma, lim, av1;
   GEN Z, zinit, p1, pi, pi2, q, u, y, y1, u1, qn, uinv, et, etnew, uhalf;
   int doprod = (flag >= 2), dolog = (flag & 1);
@@ -1471,6 +1475,8 @@ ellsigma(GEN w, GEN z, long flag, long prec)
     if (!dolog) return gen_0;
     pari_err(talker,"can't evaluate log(ellsigma) at lattice point");
   }
+  prec = precision(Z);
+  if (!prec) { prec = precision(T.tau); if (!prec) prec = prec0; }
   et = _elleta(&T, prec);
   etnew = gadd(gmul(T.x,gel(et,1)), gmul(T.y,gel(et,2)));
 

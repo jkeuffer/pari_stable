@@ -57,6 +57,8 @@ PMo43- erfc(large x) was slow and inaccurate [#364]
    45- stack corruption in ifac_decomp_break() [#1115]
    46- factor(0) returned 0^1, but factorint(0) raised an error. Allow
        factorint(0), core(0), coredisc(0), etc.
+   47- ellwp, ellzeta, ellsigma only used realprecision, instead of the input
+       precision [#1184]
 
   Changed
 LGr1- universal constants (gen_0,gen_1, etc.) are now read-only
