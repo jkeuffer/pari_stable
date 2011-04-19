@@ -2089,8 +2089,7 @@ qfi(3, 2, 4)
 ? point(0,225,334)
 ? points(0,vector(10,k,10*k),vector(10,k,5*k*k))
 ? pointell(acurve,zell(acurve,apoint))
-[0.9999999999999999990 - 1.629911759 E-48*I, 2.999999999999999997 + 0.E-18*I
-]
+[1.000000000000000000 - 1.629911759 E-48*I, 3.000000000000000000 + 0.E-37*I]
 ? polint([0,2,3],[0,4,9],5)
 25
 ? polred(x^5-2*x^4-4*x^3-96*x^2-352*x-568)
@@ -2651,6 +2650,6 @@ mod(391, 3120), mod(2081, 3120)]]
 ? getstack()
 104
 ? getheap()
-[599, 110978]
+[599, 110982]
 ? print("Total time spent: ",gettime);
-Total time spent: 232
+Total time spent: 236
