@@ -2045,8 +2045,8 @@ excluded). Returns return the smallest prime $\geq a$, and update \kbd{ptr}.
 Numerical routines code a function (to be integrated, summed, zeroed, etc.)
 with two parameters named
 \bprog
-  GEN (*eval)(void*, GEN)
   void *E;
+  GEN (*eval)(void*, GEN)
 @eprog\noindent
 The second is meant to contain all auxiliary data needed by your function.
 The first is such that \kbd{eval(x, E)} returns your function evaluated at
@@ -2063,9 +2063,6 @@ Since you can set \kbd{E} to a pointer to any \kbd{struct} (typecast to
 \kbd{void*}) the above mechanism handles arbitrary functions. For simple
 functions without extra parameters, you may set \kbd{E = NULL} and ignore
 that argument in your function definition.
-
-\fun{long}{timer_get}{pari_timer *T} returns the time elapsed since the timer
-was started (or last reset), without resetting it.
 
 \section{A complete program}
 \label{se:prog}
