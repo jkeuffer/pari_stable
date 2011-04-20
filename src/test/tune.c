@@ -291,10 +291,10 @@ enum { PARI = 1, GMP = 2 };
 static tune_param param[] = {
 {PARI,var(KARATSUBA_MULI_LIMIT),   t_INT, 4,0, speed_mulii,0,0,&FFT_MULI_LIMIT},
 {PARI,var(KARATSUBA_SQRI_LIMIT),   t_INT, 4,0, speed_sqri,0,0,&FFT_SQRI_LIMIT},
-{PARI,var(FFT_MULI_LIMIT),         t_INT, 1000,100000, speed_mulii,0.02},
-{PARI,var(FFT_SQRI_LIMIT),         t_INT, 1000,100000, speed_sqri,0.02},
+{PARI,var(FFT_MULI_LIMIT),         t_INT, 500,0, speed_mulii,0.02},
+{PARI,var(FFT_SQRI_LIMIT),         t_INT, 500,0, speed_sqri,0.02},
 {0,   var(KARATSUBA_MULR_LIMIT),   t_REAL,4,0, speed_mulrr},
-{0,   var(Fp_POW_REDC_LIMIT),      t_INT, 3,0, speed_Fp_pow,0,0,&Fp_POW_BARRETT_LIMIT},
+{0,   var(Fp_POW_REDC_LIMIT),      t_INT, 3,100, speed_Fp_pow,0,0,&Fp_POW_BARRETT_LIMIT},
 {0,   var(Fp_POW_BARRETT_LIMIT),   t_INT, 3,0, speed_Fp_pow},
 {0,   var(INVNEWTON_LIMIT),        t_REAL,66,0, speed_inv,0.03},
 {GMP, var(DIVRR_GMP_LIMIT),        t_REAL,4,0, speed_divrr},
@@ -309,17 +309,17 @@ static tune_param param[] = {
 {0,   var(Flx_SQR_SQRI_LIMIT), t_Flx,5,0, speed_Flx_sqr},
 {0,   var(Flx_MUL_HALFMULII_LIMIT),t_Fhx,3,0, speed_Flx_mul},
 {0,   var(Flx_SQR_HALFSQRI_LIMIT), t_Fhx,3,0, speed_Flx_sqr},
-{0,   var(Flx_INVMONTGOMERY_LIMIT),t_NFlx,10,0, speed_Flx_inv,0.1},
-{0,  var(Flx_REM_MONTGOMERY_LIMIT),t_NFlx,10,0, speed_Flx_rem,0.1},
+{0,   var(Flx_INVMONTGOMERY_LIMIT),t_NFlx,10,0, speed_Flx_inv,0.05},
+{0,  var(Flx_REM_MONTGOMERY_LIMIT),t_NFlx,10,0, speed_Flx_rem,0.05},
 {0,  var(Flx_POW_MONTGOMERY_LIMIT),t_NFlx,10,0, speed_Flxq_pow},
 {0,  var(Flx_HALFGCD_LIMIT),      t_Flx,10,0, speed_Flx_halfgcd},
-{0,  var(Flx_GCD_LIMIT),          t_Flx,10,0, speed_Flx_gcd},
+{0,  var(Flx_GCD_LIMIT),          t_Flx,10,0, speed_Flx_gcd,0.1},
 {0,  var(Flx_EXTGCD_LIMIT),       t_Flx,10,0, speed_Flx_extgcd},
 {0,  var(FpX_INVMONTGOMERY_LIMIT),t_NFpX,10,0, speed_FpX_inv,0.05},
 {0,  var(FpX_REM_MONTGOMERY_LIMIT),t_NFpX,10,0, speed_FpX_rem,0.05},
 {0,  var(FpX_POW_MONTGOMERY_LIMIT),t_NFpX,10,0, speed_FpXQ_pow},
 {0,  var(FpX_HALFGCD_LIMIT),      t_FpX,10,0, speed_FpX_halfgcd},
-{0,  var(FpX_GCD_LIMIT),          t_FpX,10,0, speed_FpX_gcd},
+{0,  var(FpX_GCD_LIMIT),          t_FpX,10,0, speed_FpX_gcd,0.1},
 {0,  var(FpX_EXTGCD_LIMIT),       t_FpX,10,0, speed_FpX_extgcd},
 {0,  var(RgX_MUL_LIMIT),          t_FpX, 4,0, speed_RgX_mul},
 {0,  var(RgX_SQR_LIMIT),          t_FpX, 4,0, speed_RgX_sqr},
@@ -542,7 +542,7 @@ main(int argc, char **argv)
 {
   int i, r, n = 0;
   GEN v;
-  pari_init(4000000, 2);
+  pari_init(8000000, 2);
   (void) init_modular(&DFLT_mod);
   LARGE_mod=subis(powuu(3,128),62);
   DFLT_hmod = 97;
