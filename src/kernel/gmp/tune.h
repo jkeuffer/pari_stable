@@ -1,8 +1,8 @@
-#define __KARATSUBA_MULI_LIMIT          -1
-#define __KARATSUBA_SQRI_LIMIT          -1
-#define __FFT_MULI_LIMIT                -1
-#define __FFT_SQRI_LIMIT                -1
-#define __KARATSUBA_MULR_LIMIT          15
+#define __MULII_KARATSUBA_LIMIT         -1
+#define __SQRI_KARATSUBA_LIMIT          -1
+#define __MULII_FFT_LIMIT               -1
+#define __SQRI_FFT_LIMIT                -1
+#define __MULRR_MULII_LIMIT             15
 #define __Fp_POW_REDC_LIMIT              6
 #define __Fp_POW_BARRETT_LIMIT          83
 #define __INVNEWTON_LIMIT              464

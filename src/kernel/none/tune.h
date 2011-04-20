@@ -1,9 +1,9 @@
 /* tuned on laurent5.polytechnique.fr (Athlon 2200+) */
-#define __KARATSUBA_MULI_LIMIT  32
-#define __KARATSUBA_SQRI_LIMIT  62
-#define __KARATSUBA_MULR_LIMIT 294
-#define __FFT_MULI_LIMIT       1800
-#define __FFT_SQRI_LIMIT       2000
+#define __MULII_KARATSUBA_LIMIT  32
+#define __SQRI_KARATSUBA_LIMIT  62
+#define __MULRR_MULII_LIMIT 294
+#define __MULII_FFT_LIMIT       1800
+#define __SQRI_FFT_LIMIT       2000
 #define __Fp_POW_REDC_LIMIT      70
 #define __Fp_POW_BARRETT_LIMIT  139
 #define __DIVRR_GMP_LIMIT       -1 /* unused */

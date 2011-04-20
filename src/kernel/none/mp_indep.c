@@ -235,7 +235,7 @@ mulrrz_i(GEN z, GEN x, GEN y, long lz, long flag, long sz)
   LOCAL_HIREMAINDER;
   LOCAL_OVERFLOW;
 
-  if (lz > KARATSUBA_MULR_LIMIT)
+  if (lz > MULRR_MULII_LIMIT)
   {
     pari_sp av = avma;
 #ifdef KARAMULR_VARIANT

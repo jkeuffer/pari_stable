@@ -1595,8 +1595,8 @@ muliispec(GEN a, GEN b, long na, long nb)
   pari_sp av;
 
   if (na < nb) swapspec(a,b, na,nb);
-  if (nb < KARATSUBA_MULI_LIMIT) return muliispec_basecase(a,b,na,nb);
-  if (nb >= FFT_MULI_LIMIT)      return muliispec_fft(a,b,na,nb);
+  if (nb < MULII_KARATSUBA_LIMIT) return muliispec_basecase(a,b,na,nb);
+  if (nb >= MULII_FFT_LIMIT)      return muliispec_fft(a,b,na,nb);
   i=(na>>1); n0=na-i; na=i;
   av=avma; a0=a+na; n0a=n0;
   while (n0a && !*a0) { a0++; n0a--; }
@@ -1676,8 +1676,8 @@ sqrispec(GEN a, long na)
   long n0, n0a, i;
   pari_sp av;
 
-  if (na < KARATSUBA_SQRI_LIMIT) return sqrispec_basecase(a,na);
-  if (na >= FFT_SQRI_LIMIT) return sqrispec_fft(a,na);
+  if (na < SQRI_KARATSUBA_LIMIT) return sqrispec_basecase(a,na);
+  if (na >= SQRI_FFT_LIMIT) return sqrispec_fft(a,na);
   i=(na>>1); n0=na-i; na=i;
   av=avma; a0=a+na; n0a=n0;
   while (n0a && !*a0) { a0++; n0a--; }

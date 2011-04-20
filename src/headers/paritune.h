@@ -1,11 +1,11 @@
 #define PARI_TUNE
 
 #ifdef PARI_TUNE
-extern long KARATSUBA_SQRI_LIMIT;
-extern long KARATSUBA_MULI_LIMIT;
-extern long KARATSUBA_MULR_LIMIT;
-extern long FFT_SQRI_LIMIT;
-extern long FFT_MULI_LIMIT;
+extern long SQRI_KARATSUBA_LIMIT;
+extern long MULII_KARATSUBA_LIMIT;
+extern long MULRR_MULII_LIMIT;
+extern long SQRI_FFT_LIMIT;
+extern long MULII_FFT_LIMIT;
 extern long Fp_POW_REDC_LIMIT;
 extern long Fp_POW_BARRETT_LIMIT;
 extern long INVMOD_GMP_LIMIT;
@@ -36,11 +36,11 @@ extern long AGM_ATAN_LIMIT;
 extern long RgX_SQR_LIMIT;
 extern long RgX_MUL_LIMIT;
 #else
-#  define KARATSUBA_SQRI_LIMIT     __KARATSUBA_SQRI_LIMIT
-#  define KARATSUBA_MULI_LIMIT     __KARATSUBA_MULI_LIMIT
-#  define KARATSUBA_MULR_LIMIT     __KARATSUBA_MULR_LIMIT
-#  define FFT_SQRI_LIMIT           __FFT_SQRI_LIMIT
-#  define FFT_MULI_LIMIT           __FFT_MULI_LIMIT
+#  define SQRI_KARATSUBA_LIMIT     __SQRI_KARATSUBA_LIMIT
+#  define MULII_KARATSUBA_LIMIT    __MULII_KARATSUBA_LIMIT
+#  define MULRR_MULII_LIMIT        __MULRR_MULII_LIMIT
+#  define SQRI_FFT_LIMIT           __SQRI_FFT_LIMIT
+#  define MULII_FFT_LIMIT          __MULII_FFT_LIMIT
 #  define Fp_POW_REDC_LIMIT        __Fp_POW_REDC_LIMIT
 #  define Fp_POW_BARRETT_LIMIT     __Fp_POW_BARRETT_LIMIT
 #  define INVMOD_GMP_LIMIT         __INVMOD_GMP_LIMIT
