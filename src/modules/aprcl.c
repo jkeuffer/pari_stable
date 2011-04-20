@@ -716,7 +716,7 @@ calcglobs(Red *R, ulong t, long *pltab, GEN *pP)
       if (!filltabs(pC[pk], pC[p], R, p,pk, ltab)) return NULL;
     }
   }
-  if (DEBUGLEVEL) fprintferr("\n");
+  if (DEBUGLEVEL) err_printf("\n");
   *pP = P;
   return pC;
 }
@@ -955,7 +955,7 @@ aprcl(GEN N)
     }
   if (Z_issquare(N)) return _res(0,0);
   t = compt(N);
-  if (DEBUGLEVEL) fprintferr("Starting APRCL: Choosing t = %ld\n",t);
+  if (DEBUGLEVEL) err_printf("Starting APRCL: Choosing t = %ld\n",t);
   et = e(t, &globfa);
   if (cmpii(sqri(et),N) < 0) pari_err(bugparier,"aprcl: e(t) too small");
   if (!gequal1(gcdii(N,mului(t,et)))) return _res(1,0);
@@ -977,14 +977,14 @@ aprcl(GEN N)
   av = avma; l = lg(globfa);
   if (DEBUGLEVEL>2)
   {
-    fprintferr("Jacobi sums and tables computed\n");
-    fprintferr("Step4: q-values (# = %ld): ", l-1);
+    err_printf("Jacobi sums and tables computed\n");
+    err_printf("Step4: q-values (# = %ld): ", l-1);
   }
   for (i=l-1; i>0; i--)
   {
     GEN faq = gel(tabfaq,i), P = gel(faq,1), E = gel(faq,2), PE = gel(faq,3);
     long lfaq = lg(P);
-    q = globfa[i]; if (DEBUGLEVEL>2) fprintferr("%ld ",q);
+    q = globfa[i]; if (DEBUGLEVEL>2) err_printf("%ld ",q);
     for (j=1; j<lfaq; j++, avma = av)
     {
       Cache *C;
@@ -1001,7 +1001,7 @@ aprcl(GEN N)
       if (fl == 1) flaglp[p] = 1;
     }
   }
-  if (DEBUGLEVEL>2) fprintferr("\nStep5: testing conditions lp\n");
+  if (DEBUGLEVEL>2) err_printf("\nStep5: testing conditions lp\n");
   for (i=1; i<lfat; i++)
   {
     p = fat[i]; if (flaglp[p]) continue;
@@ -1011,19 +1011,19 @@ aprcl(GEN N)
     if (fl < 0) return _res(fl,p);
     if (fl > ctglob) ctglob = fl; /* DEBUG */
   }
-  if (DEBUGLEVEL>2) fprintferr("Step6: testing potential divisors\n");
+  if (DEBUGLEVEL>2) err_printf("Step6: testing potential divisors\n");
   res = step6(N, t, et);
   if (DEBUGLEVEL>2)
   {
     ulong sc = pC[1]->ctsgt;
-    fprintferr("Individual Fermat powerings:\n");
+    err_printf("Individual Fermat powerings:\n");
     for (i=2; i<lg(pC); i++)
       if (pC[i]) {
-        fprintferr("  %-3ld: %3ld\n", i, pC[i]->ctsgt);
+        err_printf("  %-3ld: %3ld\n", i, pC[i]->ctsgt);
         sc += pC[i]->ctsgt;
       }
-    fprintferr("Number of Fermat powerings = %lu\n",sc);
-    fprintferr("Maximal number of nondeterministic steps = %lu\n",ctglob);
+    err_printf("Number of Fermat powerings = %lu\n",sc);
+    err_printf("Maximal number of nondeterministic steps = %lu\n",ctglob);
   }
   return res;
 }

@@ -370,7 +370,7 @@ gen_PH_log(GEN a, GEN g, GEN ord, void *E, const struct bb_group *grp,
     q = gel(fa,i);
     e = itos(gel(ex,i));
     if (DEBUGLEVEL>5)
-      fprintferr("Pohlig-Hellman: DL mod %Ps^%ld\n",q,e);
+      err_printf("Pohlig-Hellman: DL mod %Ps^%ld\n",q,e);
     qj = new_chunk(e+1);
     gel(qj,0) = gen_1;
     gel(qj,1) = q;

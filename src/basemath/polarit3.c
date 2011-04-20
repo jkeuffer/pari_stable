@@ -346,7 +346,7 @@ FpX_FpXQV_eval(GEN P, GEN V, GEN T, GEN p)
   if (DEBUGLEVEL>=8)
   {
     long cnt = 1 + (degpol(P) - l) / (l-1);
-    fprintferr("FpX_FpXQV_eval: %ld FpXQ_mul [%ld]\n", cnt, l-1);
+    err_printf("FpX_FpXQV_eval: %ld FpXQ_mul [%ld]\n", cnt, l-1);
   }
   return gerepileupto(av, z);
 }
@@ -2452,7 +2452,7 @@ INIT:
   {
     /* # + lambda */
     L = deg1pol_shallow(stoi(lambda), pol_x(MAXVARN), vY);
-    if (DEBUGLEVEL>4) fprintferr("Trying lambda = %ld\n", lambda);
+    if (DEBUGLEVEL>4) err_printf("Trying lambda = %ld\n", lambda);
   }
   B = poleval(B0, L); av2 = avma;
 
@@ -2476,7 +2476,7 @@ INIT:
   H = H0 = H1 = NULL;
   lb = lg(B);
   bound = ZX_ZXY_ResBound(A, B, dB);
-  if (DEBUGLEVEL>4) fprintferr("bound for resultant coeffs: 2^%ld\n",bound);
+  if (DEBUGLEVEL>4) err_printf("bound for resultant coeffs: 2^%ld\n",bound);
   check_theta(bound);
 
   dp = 1;
@@ -2510,7 +2510,7 @@ INIT:
           if (dglist[goal] != 0 || dglist[goal-1] != 1) goto INIT;
         }
         if (DEBUGLEVEL>4)
-          fprintferr("Degree list for ERS (trials: %ld) = %Ps\n",n+1,dglist);
+          err_printf("Degree list for ERS (trials: %ld) = %Ps\n",n+1,dglist);
       }
 
       for (i=0,n = 0; i <= dres; n++)
@@ -2549,7 +2549,7 @@ INIT:
     if (dp != 1) Hp = Flx_Fl_mul(Hp, Fl_powu(Fl_inv(dp,p), degA, p), p);
     if (checksqfree) {
       if (!Flx_is_squarefree(Hp, p)) goto INIT;
-      if (DEBUGLEVEL>4) fprintferr("Final lambda = %ld\n", lambda);
+      if (DEBUGLEVEL>4) err_printf("Final lambda = %ld\n", lambda);
       checksqfree = 0;
     }
 
@@ -2575,7 +2575,7 @@ INIT:
     /* could make it probabilistic for H ? [e.g if stable twice, etc]
      * Probabilistic anyway for H0, H1 */
     if (DEBUGLEVEL>5)
-      fprintferr("resultant mod %ld (bound 2^%ld, stable=%ld)", p,expi(q),stable);
+      err_printf("resultant mod %ld (bound 2^%ld, stable=%ld)", p,expi(q),stable);
     if (stable && (ulong)expi(q) >= bound) break; /* DONE */
     if (low_stack(lim, stack_lim(av,2)))
     {
@@ -2725,7 +2725,7 @@ ZX_resultant_all(GEN A, GEN B, GEN dB, ulong bound)
       if (dB) bound -= (long)(dbllog2(dB)*degA);
     }
   }
-  if (DEBUGLEVEL>4) fprintferr("bound for resultant: 2^%ld\n",bound);
+  if (DEBUGLEVEL>4) err_printf("bound for resultant: 2^%ld\n",bound);
   d = init_modular(&p);
   check_theta(bound);
 
@@ -2771,7 +2771,7 @@ ZX_resultant_all(GEN A, GEN B, GEN dB, ulong bound)
       q = qp;
     }
     if (DEBUGLEVEL>5)
-      fprintferr("resultant mod %ld (bound 2^%ld, stable = %d)",p,expi(q),stable);
+      err_printf("resultant mod %ld (bound 2^%ld, stable = %d)",p,expi(q),stable);
     if (stable && (ulong)expi(q) >= bound) break; /* DONE */
     if (low_stack(lim, stack_lim(av,2)))
     {
@@ -2899,7 +2899,7 @@ QXQ_inv(GEN A, GEN B)
       V = ZX_init_CRT(Vp,p,varn(A));
       q = utoipos(p); continue;
     }
-    if (DEBUGLEVEL>5) fprintferr("QXQ_inv: mod %ld (bound 2^%ld)", p,expi(q));
+    if (DEBUGLEVEL>5) err_printf("QXQ_inv: mod %ld (bound 2^%ld)", p,expi(q));
     qp = muliu(q,p);
     stable = ZX_incremental_CRT(&U, Up, q,qp, p);
     stable&= ZX_incremental_CRT(&V, Vp, q,qp, p);
@@ -2911,7 +2911,7 @@ QXQ_inv(GEN A, GEN B)
         D = D? gmul(D, res): res;
         break;
       } /* DONE */
-      if (DEBUGLEVEL) fprintferr("QXQ_inv: char 0 check failed");
+      if (DEBUGLEVEL) err_printf("QXQ_inv: char 0 check failed");
     }
     q = qp;
     if (low_stack(avlim, stack_lim(av,1)))
@@ -3009,7 +3009,7 @@ fpinit(GEN p, long l)
 {
   ulong n = 1+l;
   while (!fpinit_check(p,n,l)) n += l;
-  if (DEBUGLEVEL>=4) fprintferr("FFInit: using polsubcyclo(%ld, %ld)\n",n,l);
+  if (DEBUGLEVEL>=4) err_printf("FFInit: using polsubcyclo(%ld, %ld)\n",n,l);
   return FpX_red(polsubcyclo(n,l,0),p);
 }
 

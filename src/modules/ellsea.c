@@ -532,7 +532,7 @@ find_isogenous_from_Atkin(GEN a4, GEN a6, long ell, GEN meqn, GEN g, GEN p)
   if (!signe(a) || !signe(b))
   { /* TODO: understand what this means and use the information */
     if (DEBUGLEVEL)
-      fprintferr("find_isogenous_from_Atkin: division by zero at prime %ld", ell);
+      err_printf("find_isogenous_from_Atkin: division by zero at prime %ld", ell);
     avma = ltop; return NULL;
   }
   gprime = Fp_div(a, b, p);
@@ -596,7 +596,7 @@ find_isogenous_from_canonical(GEN a4, GEN a6, long ell, GEN meqn, GEN g, GEN p)
   if (signe(dJ)==0)
   {
     GEN jl;
-    if (DEBUGLEVEL) fprintferr("Division by zero for prime %Ps\n", p);
+    if (DEBUGLEVEL) err_printf("Division by zero for prime %Ps\n", p);
     E4l = Fp_div(E4, sqru(ell), p);
     jl  = Fp_div(Fp_powu(E4l, 3, p), deltal, p);
     E6l = Fp_sqrt(Fp_mul(Fp_sub(jl, utoi(1728), p), deltal, p), p);
@@ -712,11 +712,11 @@ study_modular_eqn(long ell, GEN mpoly, GEN p, enum mod_type *mt, long *ptr_r)
   *ptr_r = r;
   if (DEBUGLEVEL) switch(*mt)
   {
-    case MTone_root: fprintferr("One root\t"); break;
-    case MTElkies: fprintferr("Elkies\t"); break;
-    case MTroots: fprintferr("l+1 roots\t"); break;
-    case MTAtkin: fprintferr("Atkin\t"); break;
-    case MTpathological: fprintferr("Pathological\n"); break;
+    case MTone_root: err_printf("One root\t"); break;
+    case MTElkies: err_printf("Elkies\t"); break;
+    case MTroots: err_printf("l+1 roots\t"); break;
+    case MTAtkin: err_printf("Atkin\t"); break;
+    case MTpathological: err_printf("Pathological\n"); break;
   }
   return gerepilecopy(ltop, g);
 }
@@ -730,7 +730,7 @@ find_trace_Elkies_power(GEN a4, GEN a6, ulong ell, long k, struct meqn *MEQN, GE
   ulong lambda, ellk = upowuu(ell, k), pellk = umodiu(p, ellk);
   long cnt;
 
-  if (DEBUGLEVEL) { fprintferr("Trace mod %ld", ell); }
+  if (DEBUGLEVEL) { err_printf("Trace mod %ld", ell); }
   Eba4 = a4;
   Eba6 = a6;
   tmp = find_isogenous(a4,a6, ell, MEQN, g, p);
@@ -740,7 +740,7 @@ find_trace_Elkies_power(GEN a4, GEN a6, ulong ell, long k, struct meqn *MEQN, GE
   kpoly = gel(tmp, 3);
   Ib = pol_x(0);
   lambda = find_eigen_value(a4, a6, ell, kpoly, p, tr);
-  if (DEBUGLEVEL>1) fprintferr(" [%ld ms]", timer_delay(T));
+  if (DEBUGLEVEL>1) err_printf(" [%ld ms]", timer_delay(T));
   if (smallfact && ell>smallfact)
   {
     ulong pell = pellk%ell;
@@ -751,7 +751,7 @@ find_trace_Elkies_power(GEN a4, GEN a6, ulong ell, long k, struct meqn *MEQN, GE
   for (cnt = 2; cnt <= k; cnt++)
   {
     GEN tmp;
-    if (DEBUGLEVEL) fprintferr(", %Ps", powuu(ell, cnt));
+    if (DEBUGLEVEL) err_printf(", %Ps", powuu(ell, cnt));
     tmp = find_kernel_power(Eba4, Eba6, Eca4, Eca6, ell, MEQN, kpoly, Ib, p);
     if (!tmp) { avma = ltop; return NULL; }
     lambda = find_eigen_value_power(a4, a6, ell, cnt, gel(tmp,3), lambda, p);
@@ -763,7 +763,7 @@ find_trace_Elkies_power(GEN a4, GEN a6, ulong ell, long k, struct meqn *MEQN, GE
     Ib = gel(tmp, 5);
     if (low_stack(st_lim, stack_lim(btop, 1)))
       gerepileall(btop, 6, &Eba4, &Eba6, &Eca4, &Eca6, &kpoly, &Ib);
-    if (DEBUGLEVEL>1) fprintferr(" [%ld ms]", timer_delay(T));
+    if (DEBUGLEVEL>1) err_printf(" [%ld ms]", timer_delay(T));
   }
   avma = ltop;
   return mkvecsmall(Fl_add(lambda, Fl_div(pellk, lambda, ellk), ellk));
@@ -845,7 +845,7 @@ find_trace(GEN a4, GEN a6, ulong ell, GEN p, long *ptr_kt, ulong smallfact)
   kt = k;
   if (!get_modular_eqn(&MEQN, ell, 0, MAXVARN)) return gen_0;
   if (DEBUGLEVEL)
-  { fprintferr("Process prime %5ld. ", ell); timer_start(&T); }
+  { err_printf("Process prime %5ld. ", ell); timer_start(&T); }
   meqnj = FpXY_evalx(MEQN.eq, a4a6_j(a4, a6, p), p);
   g = study_modular_eqn(ell, meqnj, p, &mt, &r);
   /* If l is an Elkies prime, search for a factor of the l-division polynomial.
@@ -882,10 +882,10 @@ find_trace(GEN a4, GEN a6, ulong ell, GEN p, long *ptr_kt, ulong smallfact)
     long n = lg(tr)-1;
     if (n > 1 || mt == MTAtkin)
     {
-      fprintferr("%3ld trace(s)",n);
-      if (DEBUGLEVEL>1) fprintferr(" [%ld ms]", timer_delay(&T));
+      err_printf("%3ld trace(s)",n);
+      if (DEBUGLEVEL>1) err_printf(" [%ld ms]", timer_delay(&T));
     }
-    fprintferr("\n");
+    err_printf("\n");
   }
   *ptr_kt = kt;
   return gerepileupto(ltop, tr);
@@ -1328,7 +1328,7 @@ ellsea(GEN E, GEN p, long smallfact)
   }
   if (smallfact==1 && gel(tr,2) != gen_1)
   {
-    if (DEBUGLEVEL) fprintferr("Aborting: #E(Fp) divisible by 2\n");
+    if (DEBUGLEVEL) err_printf("Aborting: #E(Fp) divisible by 2\n");
     avma = ltop; return gen_0;
   }
 
@@ -1360,7 +1360,7 @@ ellsea(GEN E, GEN p, long smallfact)
     {
       if (smallfact && ell>smallfact && dvdiu(addis(p, 1 - trace_mod[1]), ell))
       {
-        if (DEBUGLEVEL) fprintferr("\nAborting: #E(Fp) divisible by %ld\n",ell);
+        if (DEBUGLEVEL) err_printf("\nAborting: #E(Fp) divisible by %ld\n",ell);
         avma = ltop; return gen_0;
       }
       tr = crt(ellkt, stoi(trace_mod[1]), tr);
@@ -1380,7 +1380,7 @@ ellsea(GEN E, GEN p, long smallfact)
       {
         max_traces = truedivii(mulis(max_traces,2*(lg(trace_mod)-1)), ellkt);
         if (DEBUGLEVEL>=3)
-          fprintferr("At least %Ps remaining possibilities.\n",max_traces);
+          err_printf("At least %Ps remaining possibilities.\n",max_traces);
       }
       if (cmpir(max_traces, bound_tr) < 0)
       {
@@ -1389,7 +1389,7 @@ ellsea(GEN E, GEN p, long smallfact)
         max_traces = gel(champ,2);
         if (cmpir(max_traces, bound_tr) < 0) break;
         if (DEBUGLEVEL>=2)
-          fprintferr("%Ps remaining possibilities.\n", max_traces);
+          err_printf("%Ps remaining possibilities.\n", max_traces);
       }
     }
     if (low_stack(st_lim, stack_lim(btop, 1)))
@@ -1397,7 +1397,7 @@ ellsea(GEN E, GEN p, long smallfact)
   }
   cat = shallowextract(compile_atkin, gel(champ, 1));
   if (DEBUGLEVEL)
-    fprintferr("Match and sort for %Ps possibilities.\n",gel(champ, 2));
+    err_printf("Match and sort for %Ps possibilities.\n",gel(champ, 2));
   res = match_and_sort(cat, gel(tr,1), gel(tr,2), a4,a6,p);
   return gerepileuptoint(ltop, subii(addis(p, 1), res));
 }

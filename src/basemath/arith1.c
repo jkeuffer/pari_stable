@@ -987,7 +987,7 @@ Z_isanypower(GEN x, GEN *pty)
     /* cut off at 4 bits which seems to be about optimum;  for primes
      * >> 10^3 the modular checks are no longer competitively fast */
     while ( (ex = is_pth_power(x, &y, &ex0, 4)) ) { k *= ex; x = y; }
-    if (DEBUGLEVEL>4) fprintferr("Z_isanypower: now k=%ld, x=%Ps\n", k, x);
+    if (DEBUGLEVEL>4) err_printf("Z_isanypower: now k=%ld, x=%Ps\n", k, x);
     do {
       if (!*d) { p = unextprime(ex0); break; }
       NEXT_PRIME_VIADIFF(p,d);

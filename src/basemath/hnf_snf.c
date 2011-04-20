@@ -180,9 +180,9 @@ p_mat(GEN mat, GEN perm, long k)
 {
   pari_sp av = avma;
   perm = vecslice(perm, k+1, lg(perm)-1);
-  fprintferr("Permutation: %Ps\n",perm);
+  err_printf("Permutation: %Ps\n",perm);
   if (DEBUGLEVEL > 6)
-    fprintferr("matgen = %Ps\n", zm_to_ZM( rowpermute(mat, perm) ));
+    err_printf("matgen = %Ps\n", zm_to_ZM( rowpermute(mat, perm) ));
   avma = av;
 }
 
@@ -227,7 +227,7 @@ hnfspec_i(GEN mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
 
   if (DEBUGLEVEL>5)
   {
-    fprintferr("Entering hnfspec\n");
+    err_printf("Entering hnfspec\n");
     p_mat(mat0,perm,0);
   }
   matt = cgetg(co, t_MAT); /* dense part of mat (top) */
@@ -268,7 +268,7 @@ hnfspec_i(GEN mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
 
       default: i--;
     }
-  if (DEBUGLEVEL>5) { fprintferr("    after phase1:\n"); p_mat(mat,perm,0); }
+  if (DEBUGLEVEL>5) { err_printf("    after phase1:\n"); p_mat(mat,perm,0); }
 
 #define absmax(s,z) {long _z; _z = labs(z); if (_z > s) s = _z;}
   /* Get rid of all lines containing only 0 and +/- 1, keeping track of column
@@ -366,7 +366,7 @@ END2: /* clean up mat: remove everything to the right of the 1s on diagonal */
   }
   if (DEBUGLEVEL>5)
   {
-    fprintferr("    after phase2:\n");
+    err_printf("    after phase2:\n");
     p_mat(mat,perm,lk0);
   }
   for (i=li-2; i>lig; i--)
@@ -401,7 +401,7 @@ END2: /* clean up mat: remove everything to the right of the 1s on diagonal */
   }
   for (j=1; j<co; j++) setlg(matb[j], lig-k0+1); /* bottom can be forgotten */
   gerepileall(av, T? 2: 1, &matb, &T);
-  if (DEBUGLEVEL>5) fprintferr("    matb cleaned up (using Id block)\n");
+  if (DEBUGLEVEL>5) err_printf("    matb cleaned up (using Id block)\n");
 
   nlze = lk0 - k0;  /* # of 0 rows */
   lnz = lig-nlze+1; /* 1 + # of non-0 rows (!= 0...0 1 0 ... 0) */
@@ -600,7 +600,7 @@ hnfadd_i(GEN H, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, /* cf hnfspec */
 
   extramat = shallowconcat(extratop, vconcat(dep, H));
   Cnew     = shallowconcat(extraC, vecslice(C, col-lH+1, co));
-  if (DEBUGLEVEL>5) fprintferr("    1st phase done\n");
+  if (DEBUGLEVEL>5) err_printf("    1st phase done\n");
   permpro = imagecomplspec(extramat, &nlze);
   extramat = rowpermute(extramat, permpro);
   *ptB     = rowpermute(B,        permpro);
@@ -609,7 +609,7 @@ hnfadd_i(GEN H, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, /* cf hnfspec */
 
   *ptdep  = rowslice(extramat, 1, nlze);
   matb    = rowslice(extramat, nlze+1, lig);
-  if (DEBUGLEVEL>5) fprintferr("    2nd phase done\n");
+  if (DEBUGLEVEL>5) err_printf("    2nd phase done\n");
   H = hnffinal(matb,perm,ptdep,ptB,&Cnew);
   *ptC = shallowconcat(vecslice(C, 1, col-lH), Cnew);
   return H;
@@ -1520,7 +1520,7 @@ ZM_hnfall(GEN A, GEN *ptB, long remove)
     }
   }
 
-  if (DEBUGLEVEL>5) fprintferr("\nhnfall, final phase: ");
+  if (DEBUGLEVEL>5) err_printf("\nhnfall, final phase: ");
   r--; /* first r cols are in the image the n-r (independent) last ones */
   for (j=1; j<=r; j++)
     for (i=h[j]; i; i--)
@@ -1535,7 +1535,7 @@ ZM_hnfall(GEN A, GEN *ptB, long remove)
         gerepileall(av1, B? 2: 1, &A, &B);
       }
     }
-  if (DEBUGLEVEL>5) fprintferr("\n");
+  if (DEBUGLEVEL>5) err_printf("\n");
   if (remove) remove_0cols(r, &A, &B, remove);
   gerepileall(av, B? 2: 1, &A, &B);
   if (B) *ptB = B;
@@ -1873,10 +1873,10 @@ ZM_snfall_i(GEN x, GEN *ptU, GEN *ptV, int return_vec)
   if (V) V = ZM_mul(V, RgM_solve(x,p1));
   x = p1;
 
-  if (DEBUGLEVEL>7) fprintferr("starting SNF loop");
+  if (DEBUGLEVEL>7) err_printf("starting SNF loop");
   for (i=n; i>1; i--)
   {
-    if (DEBUGLEVEL>7) fprintferr("\ni = %ld: ",i);
+    if (DEBUGLEVEL>7) err_printf("\ni = %ld: ",i);
     for(;;)
     {
       int c = 0;
@@ -1892,7 +1892,7 @@ ZM_snfall_i(GEN x, GEN *ptU, GEN *ptV, int return_vec)
           snf_pile(av, &x,&U,&V);
         }
       }
-      if (DEBUGLEVEL>7) fprintferr("; ");
+      if (DEBUGLEVEL>7) err_printf("; ");
       for (j=i-1; j>=1; j--)
       {
         GEN d;
@@ -1933,7 +1933,7 @@ ZM_snfall_i(GEN x, GEN *ptU, GEN *ptV, int return_vec)
       }
     }
   }
-  if (DEBUGLEVEL>7) fprintferr("\n");
+  if (DEBUGLEVEL>7) err_printf("\n");
   for (k=1; k<=n; k++)
     if (signe(gcoeff(x,k,k)) < 0)
     {

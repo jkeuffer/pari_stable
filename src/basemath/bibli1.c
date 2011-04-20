@@ -313,8 +313,8 @@ lllintpartialall(GEN m, long flag)
   }
   if (DEBUGLEVEL>6)
   {
-    if (tm1) fprintferr("tm1 = %Ps",tm1);
-    fprintferr("mid = %Ps",mid); /* = m * tm1 */
+    if (tm1) err_printf("tm1 = %Ps",tm1);
+    err_printf("mid = %Ps",mid); /* = m * tm1 */
   }
   gerepileall(av, tm1? 2: 1, &mid, &tm1);
   {
@@ -372,7 +372,7 @@ lllintpartialall(GEN m, long flag)
       if (DEBUGLEVEL>6)
       {
         npass++;
-        fprintferr("npass = %ld, red. last time = %ld, log_2(det) ~ %ld\n\n",
+        err_printf("npass = %ld, red. last time = %ld, log_2(det) ~ %ld\n\n",
                     npass, reductions, e);
       }
     } /* for(;;)*/
@@ -424,7 +424,7 @@ check_condition(double beta, double tau, double rho, long d, long delta, long t)
     + rho * t * delta + tau*dim*(dim - 1)/2;
 
   if (DEBUGLEVEL >= 4)
-    fprintferr("delta = %d, t = %d, cond = %.1lf\n", delta, t, cond);
+    err_printf("delta = %d, t = %d, cond = %.1lf\n", delta, t, cond);
 
   return (cond <= 0);
 }
@@ -511,11 +511,11 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
     gel(P,d+2) = bezout(gel(P,d+2), N, &z, &r);
     for (j = 0; j < d; j++) gel(P,j+2) = modii(mulii(gel(P,j+2), z), N);
   }
-  if (DEBUGLEVEL >= 2) fprintferr("Modified P: %Ps\n", P);
+  if (DEBUGLEVEL >= 2) err_printf("Modified P: %Ps\n", P);
 
   choose_params(P, N, X, B, &delta, &t);
   if (DEBUGLEVEL >= 2)
-    fprintferr("Init: trying delta = %d, t = %d\n", delta, t);
+    err_printf("Init: trying delta = %d, t = %d\n", delta, t);
   for(;;)
   {
     dim = d * delta + t;
@@ -565,9 +565,9 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
 
     if (DEBUGLEVEL >= 2)
     {
-      if (DEBUGLEVEL >= 6) fprintferr("Matrix to be reduced:\n%Ps\n", M);
-      fprintferr("Entering LLL\nbitsize bound: %ld\n", expi(Z));
-      fprintferr("expected shvector bitsize: %ld\n", expi(ZM_det_triangular(M))/dim);
+      if (DEBUGLEVEL >= 6) err_printf("Matrix to be reduced:\n%Ps\n", M);
+      err_printf("Entering LLL\nbitsize bound: %ld\n", expi(Z));
+      err_printf("expected shvector bitsize: %ld\n", expi(ZM_det_triangular(M))/dim);
     }
 
     sh = ZM_lll(M, 0.75, LLL_INPLACE);
@@ -580,16 +580,16 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
 
     if (DEBUGLEVEL >= 2)
     {
-      fprintferr("Candidate: %Ps\n", short_pol);
-      fprintferr("bitsize Norm: %ld\n", expi(nsp));
-      fprintferr("bitsize bound: %ld\n", expi(mului(bnd, Z)));
+      err_printf("Candidate: %Ps\n", short_pol);
+      err_printf("bitsize Norm: %ld\n", expi(nsp));
+      err_printf("bitsize bound: %ld\n", expi(mului(bnd, Z)));
     }
     if (cmpii(nsp, mului(bnd, Z)) < 0) break; /* SUCCESS */
 
     /* Failed with the precomputed or supplied value */
     t++; if (t == d) { delta++; t = 1; }
     if (DEBUGLEVEL >= 2)
-      fprintferr("Increasing dim, delta = %d t = %d\n", delta, t);
+      err_printf("Increasing dim, delta = %d t = %d\n", delta, t);
   }
   bnd = itos(divii(nsp, Z)) + 1;
 
@@ -604,7 +604,7 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
   for (i = -bnd + 1; i < bnd; i++)
   {
     r = nfrootsQ(R);
-    if (DEBUGLEVEL >= 2) fprintferr("Roots: %Ps\n", r);
+    if (DEBUGLEVEL >= 2) err_printf("Roots: %Ps\n", r);
 
     for (j = 1; j < lg(r); j++)
     {
@@ -906,7 +906,7 @@ redallbar(pslqL2_M *Mbar, long i, long jsup)
   double *hi = Mbar->H[i], *ai = Mbar->A[i], *hj, *aj;
 
 #ifdef DEBUGPSLQ
-fprintferr("%ld:\n==\n",i);
+err_printf("%ld:\n==\n",i);
 #endif
   for (j=jsup; j>=1; j--)
   {
@@ -914,7 +914,7 @@ fprintferr("%ld:\n==\n",i);
     t = floor(0.5 + hi[j] / hj[j]);
     if (!t) continue;
 #ifdef DEBUGPSLQ
-fprintferr("%15.15e ",t);
+err_printf("%15.15e ",t);
 #endif
     aj = Mbar->A[j];
 
@@ -925,7 +925,7 @@ fprintferr("%15.15e ",t);
       Mbar->B[k][j] += t * Mbar->B[k][i];
     }
 #ifdef DEBUGPSLQ
-fprintferr("  %ld:\n",j); dprintmat(Mbar->H,n,n-1);
+err_printf("  %ld:\n",j); dprintmat(Mbar->H,n,n-1);
 #endif
   }
 }
@@ -1140,9 +1140,9 @@ one_step_gen(pslq_M *M, GEN tabga, long prec)
     if ((M->T->ct&0xff) == 0)
     {
       if (DEBUGLEVEL == 3)
-        fprintferr("time for ct = %ld : %ld\n",M->T->ct, timer_delay(&M->T->t));
+        err_printf("time for ct = %ld : %ld\n",M->T->ct, timer_delay(&M->T->t));
       else
-        fprintferr("time [max,t12,loop,reds,fin] = [%ld, %ld, %ld, %ld, %ld]\n",
+        err_printf("time [max,t12,loop,reds,fin] = [%ld, %ld, %ld, %ld, %ld]\n",
                    M->T->vmind, M->T->t12, M->T->t1234, M->T->reda, M->T->fin);
     }
   }
@@ -1258,23 +1258,23 @@ static void
 dprintvec(double *V, long m)
 {
   long i;
-  fprintferr("[");
-  for (i=1; i<m; i++) fprintferr("%15.15e, ",V[i]);
-  fprintferr("%15.15e]\n",V[m]); pari_flush();
+  err_printf("[");
+  for (i=1; i<m; i++) err_printf("%15.15e, ",V[i]);
+  err_printf("%15.15e]\n",V[m]); pari_flush();
 }
 
 static void
 dprintmat(double **M, long r, long c)
 {
   long i, j;
-  fprintferr("[");
+  err_printf("[");
   for (i=1; i<r; i++)
   {
-    for (j=1; j<c; j++) fprintferr("%15.15e, ",M[i][j]);
-    fprintferr("%15.15e;\n ",M[i][c]);
+    for (j=1; j<c; j++) err_printf("%15.15e, ",M[i][j]);
+    err_printf("%15.15e;\n ",M[i][c]);
   }
-  for (j=1; j<c; j++) fprintferr("%15.15e, ",M[r][j]);
-  fprintferr("%15.15e]\n",M[r][c]); pari_flush();
+  for (j=1; j<c; j++) err_printf("%15.15e, ",M[r][j]);
+  err_printf("%15.15e]\n",M[r][c]); pari_flush();
 }
 #endif
 
@@ -1624,10 +1624,10 @@ addcolumntomatrix(GEN V, GEN invp, GEN L)
 
   if (DEBUGLEVEL>6)
   {
-    fprintferr("adding vector = %Ps\n",V);
-    fprintferr("vector in new basis = %Ps\n",a);
-    fprintferr("list = %Ps\n",L);
-    fprintferr("base change matrix =\n%Ps\n", invp);
+    err_printf("adding vector = %Ps\n",V);
+    err_printf("vector in new basis = %Ps\n",a);
+    err_printf("list = %Ps\n",L);
+    err_printf("base change matrix =\n%Ps\n", invp);
   }
   k = 1; while (k<n && (L[k] || gequal0(gel(a,k)))) k++;
   if (k == n) return 0;
@@ -1854,14 +1854,14 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
           for (j=i; j<=n; j++,I++) V[I] = x[i]*x[j];
         if (! addcolumntomatrix(V,invp,L))
         {
-          if (DEBUGLEVEL>1) { fprintferr("."); flusherr(); }
+          if (DEBUGLEVEL>1) { err_printf("."); err_flush(); }
           s--; avma=av2; continue;
         }
 
-        if (DEBUGLEVEL>1) { fprintferr("*"); flusherr(); }
+        if (DEBUGLEVEL>1) { err_printf("*"); err_flush(); }
         if (s == maxrank)
         {
-          if (DEBUGLEVEL>1) { fprintferr("\n"); flusherr(); }
+          if (DEBUGLEVEL>1) { err_printf("\n"); err_flush(); }
           avma=av0; return stoi(s);
         }
 
@@ -1881,7 +1881,7 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
     case min_VECSMALL2:
       avma=av; return res;
     case min_PERF:
-      if (DEBUGLEVEL>1) { fprintferr("\n"); flusherr(); }
+      if (DEBUGLEVEL>1) { err_printf("\n"); err_flush(); }
       avma=av0; return stoi(s);
   }
   k = minss(s,maxrank);
@@ -2053,7 +2053,7 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
   }
   borne1 = add_fudge(norme1);
   if (DEBUGLEVEL>2)
-    fprintferr("smallvectors looking for norm < %P.4G\n",borne1);
+    err_printf("smallvectors looking for norm < %P.4G\n",borne1);
   s = 0; k = n;
   for(;; step(x,y,inc,k)) /* main */
   {
@@ -2120,7 +2120,7 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
       if (checkcnt < 5 && mpcmp(norme1, borne2) < 0)
       {
         if (!check(data,x)) { checkcnt++ ; continue; /* main */}
-        if (DEBUGLEVEL>4) fprintferr("New bound: %Ps", norme1);
+        if (DEBUGLEVEL>4) err_printf("New bound: %Ps", norme1);
         borne1 = add_fudge(norme1);
         borne2 = mulrr(borne1, alpha);
         s = 0; checkcnt = 0;
@@ -2152,7 +2152,7 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
         pari_sp av2 = avma;
         long imin, imax;
         GEN per = indexsort(norms);
-        if (DEBUGLEVEL>2) fprintferr("sorting... [%ld elts]\n",s);
+        if (DEBUGLEVEL>2) err_printf("sorting... [%ld elts]\n",s);
         /* let N be the minimal norm so far for x satisfying 'check'. Keep
          * all elements of norm N */
         for (i = 1; i <= s; i++)
@@ -2203,7 +2203,7 @@ END:
   if (check)
   {
     GEN per, alph, pols, p;
-    if (DEBUGLEVEL>2) fprintferr("final sort & check...\n");
+    if (DEBUGLEVEL>2) err_printf("final sort & check...\n");
     setlg(norms,stockmax+1); per = indexsort(norms);
     alph = cgetg(stockmax+1,t_VEC);
     pols = cgetg(stockmax+1,t_VEC);
@@ -2261,7 +2261,7 @@ fincke_pohst(GEN a, GEN B0, long stockmax, long PREC, FP_chk_fun *CHECK)
       gel(z,3) = cgetg(1,t_MAT); return z;
     }
     i = gprecision(a); if (i) prec = i;
-    if (DEBUGLEVEL>2) fprintferr("first LLL: prec = %ld\n", prec);
+    if (DEBUGLEVEL>2) err_printf("first LLL: prec = %ld\n", prec);
     u = i? lllfp(a, 0.75, LLL_GRAM): ZM_lll(a, 0.75, LLL_GRAM);
     if (lg(u) != lg(a)) return NULL;
     r = qf_apply_ZM(a,u);
@@ -2283,7 +2283,7 @@ fincke_pohst(GEN a, GEN B0, long stockmax, long PREC, FP_chk_fun *CHECK)
   if (!rinv) return NULL;
   rinvtrans = shallowtrans(rinv);
   if (DEBUGLEVEL>2)
-    fprintferr("Fincke-Pohst, final LLL: prec = %ld\n", gprecision(rinvtrans));
+    err_printf("Fincke-Pohst, final LLL: prec = %ld\n", gprecision(rinvtrans));
   v = lll(rinvtrans);
   if (lg(v) != lg(rinvtrans)) return NULL;
 

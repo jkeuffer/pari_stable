@@ -10,7 +10,7 @@
 #  ifndef MPQS_DEBUG
 #  define MPQS_DEBUG
 #  endif
-#  define PRINT_IF_VERBOSE(x) fprintferr(x)
+#  define PRINT_IF_VERBOSE(x) err_printf(x)
 #else
 #  define PRINT_IF_VERBOSE(x)
 #endif

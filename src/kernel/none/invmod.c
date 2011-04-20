@@ -55,8 +55,8 @@ invmod(GEN a, GEN b, GEN *res)
     }
     g = xgcduu((ulong)(b[2]), d1, 1, &xv, &xv1, &s);
 #ifdef DEBUG_LEHMER
-    fprintferr(" <- %lu,%lu\n", (ulong)(b[2]), (ulong)(d1[2]));
-    fprintferr(" -> %lu,%ld,%lu; %lx\n", g,s,xv1,avma);
+    err_printf(" <- %lu,%lu\n", (ulong)(b[2]), (ulong)(d1[2]));
+    err_printf(" -> %lu,%ld,%lu; %lx\n", g,s,xv1,avma);
 #endif
     avma = av;
     if (g != 1UL) { *res = utoipos(g); return 0; }
@@ -69,7 +69,7 @@ invmod(GEN a, GEN b, GEN *res)
 
   v=gen_0; v1=gen_1;        /* general case */
 #ifdef DEBUG_LEHMER
-  fprintferr("INVERT: -------------------------\n");
+  err_printf("INVERT: -------------------------\n");
   output(d1);
 #endif
   av1 = avma; lim = stack_lim(av,1);
@@ -77,13 +77,13 @@ invmod(GEN a, GEN b, GEN *res)
   while (lgefint(d) > 3 && signe(d1))
   {
 #ifdef DEBUG_LEHMER
-    fprintferr("Calling Lehmer:\n");
+    err_printf("Calling Lehmer:\n");
 #endif
     lhmres = lgcdii((ulong*)d, (ulong*)d1, &xu, &xu1, &xv, &xv1, ULONG_MAX);
     if (lhmres != 0)                /* check progress */
     {                                /* apply matrix */
 #ifdef DEBUG_LEHMER
-      fprintferr("Lehmer returned %d [%lu,%lu;%lu,%lu].\n",
+      err_printf("Lehmer returned %d [%lu,%lu;%lu,%lu].\n",
               lhmres, xu, xu1, xv, xv1);
 #endif
       if ((lhmres == 1) || (lhmres == -1))
@@ -111,7 +111,7 @@ invmod(GEN a, GEN b, GEN *res)
     }
 #ifdef DEBUG_LEHMER
     else
-      fprintferr("Lehmer returned 0.\n");
+      err_printf("Lehmer returned 0.\n");
     output(d); output(d1); output(v); output(v1);
     sleep(1);
 #endif
@@ -120,7 +120,7 @@ invmod(GEN a, GEN b, GEN *res)
     {
       q = dvmdii(d,d1,&r);
 #ifdef DEBUG_LEHMER
-      fprintferr("Full division:\n");
+      err_printf("Full division:\n");
       printf("  q = "); output(q); sleep (1);
 #endif
       a = subii(v,mulii(q,v1));
@@ -143,8 +143,8 @@ invmod(GEN a, GEN b, GEN *res)
     g = xxgcduu((ulong)d[2], (ulong)d1[2], 1, &xu, &xu1, &xv, &xv1, &s);
 #ifdef DEBUG_LEHMER
     output(d);output(d1);output(v);output(v1);
-    fprintferr(" <- %lu,%lu\n", (ulong)d[2], (ulong)d1[2]);
-    fprintferr(" -> %lu,%ld,%lu; %lx\n", g,s,xv1,avma);
+    err_printf(" <- %lu,%lu\n", (ulong)d[2], (ulong)d1[2]);
+    err_printf(" -> %lu,%ld,%lu; %lx\n", g,s,xv1,avma);
 #endif
     if (g != 1UL) { avma = av; *res = utoipos(g); return 0; }
     /* (From the xgcduu() blurb:)
@@ -168,7 +168,7 @@ invmod(GEN a, GEN b, GEN *res)
   if (!equalii(d,gen_1)) { *res = icopy(d); return 0; }
   *res = modii(v,b);
 #ifdef DEBUG_LEHMER
-  output(*res); fprintferr("============================Done.\n");
+  output(*res); err_printf("============================Done.\n");
   sleep(1);
 #endif
   return 1;

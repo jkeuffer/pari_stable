@@ -936,7 +936,7 @@ RgM_solve(GEN a, GEN b)
   pivot = get_pivot_fun(a, &data);
   a = RgM_shallowcopy(a);
   bco = lg(b)-1;
-  if(DEBUGLEVEL>4) fprintferr("Entering gauss\n");
+  if(DEBUGLEVEL>4) err_printf("Entering gauss\n");
 
   p = NULL; /* gcc -Wall */
   for (i=1; i<=aco; i++)
@@ -969,7 +969,7 @@ RgM_solve(GEN a, GEN b)
     }
   }
 
-  if(DEBUGLEVEL>4) fprintferr("Solving the triangular system\n");
+  if(DEBUGLEVEL>4) err_printf("Solving the triangular system\n");
   u = cgetg(bco+1,t_MAT);
   for (j=1; j<=bco; j++) gel(u,j) = get_col(a,gel(b,j),p,aco);
   return gerepilecopy(av, iscol? gel(u,1): u);
@@ -1186,7 +1186,7 @@ FpM_gauss(GEN a, GEN b, GEN p)
     }
   }
 
-  if(DEBUGLEVEL>4) fprintferr("Solving the triangular system\n");
+  if(DEBUGLEVEL>4) err_printf("Solving the triangular system\n");
   u = cgetg(bco+1,t_MAT);
   for (j=1; j<=bco; j++) gel(u,j) = Fp_get_col(a, gel(b,j), aco, p);
   return gerepilecopy(av, iscol? gel(u,1): u);
@@ -1240,7 +1240,7 @@ FqM_gauss(GEN a, GEN b, GEN T, GEN p)
     }
   }
 
-  if(DEBUGLEVEL>4) fprintferr("Solving the triangular system\n");
+  if(DEBUGLEVEL>4) err_printf("Solving the triangular system\n");
   u = cgetg(bco+1,t_MAT);
   for (j=1; j<=bco; j++) gel(u,j) = Fq_get_col(a, gel(b,j), aco, T, p);
   return gerepilecopy(av, iscol? gel(u,1): u);
@@ -1290,7 +1290,7 @@ ZM_inv(GEN M, GEN dM)
       stable = ZM_incremental_CRT(&H, Hp, q,qp, p);
       q = qp;
     }
-    if (DEBUGLEVEL>5) fprintferr("inverse mod %ld (stable=%ld)", p,stable);
+    if (DEBUGLEVEL>5) err_printf("inverse mod %ld (stable=%ld)", p,stable);
     if (stable) {/* DONE ? */
       if (dM)
       { if (RgM_isscalar(ZM_mul(M, H), dM)) break; }
@@ -1304,7 +1304,7 @@ ZM_inv(GEN M, GEN dM)
       gerepileall(av2, 2, &H, &q);
     }
   }
-  if (DEBUGLEVEL>5) fprintferr("ZM_inv done");
+  if (DEBUGLEVEL>5) err_printf("ZM_inv done");
   return gerepilecopy(av, H);
 }
 

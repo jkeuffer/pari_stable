@@ -181,7 +181,7 @@ Babai(pari_sp av, long kappa, GEN *pG, GEN *pB, GEN *pU, GEN mu, GEN r, GEN s,
     if (typ(max3mu)==t_REAL && absr_cmp(max3mu, shiftr(max2mu, 5))<=0)
     {
       *pB = B; *pG = G; *pU = U;
-      if (DEBUGLEVEL>5) fprintferr("prec too low\n");
+      if (DEBUGLEVEL>5) err_printf("prec too low\n");
       return kappa;
     }
 
@@ -391,7 +391,7 @@ fplll(GEN *ptrB, GEN *ptrU, GEN *ptrr, double DELTA, double ETA, long flag, long
   if(DEBUGLEVEL>=4)
   {
     timer_start(&T);
-    fprintferr("Entering L^2: LLL-parameters (%P.3f,%.3Pf), working precision %d words\n",delta,eta, prec);
+    err_printf("Entering L^2: LLL-parameters (%P.3f,%.3Pf), working precision %d words\n",delta,eta, prec);
   }
 
   mu = cgetg(d+1, t_MAT);
@@ -430,7 +430,7 @@ fplll(GEN *ptrB, GEN *ptrU, GEN *ptrr, double DELTA, double ETA, long flag, long
   {
     if (kappa>kappamax)
     {
-      if (DEBUGLEVEL>=4) fprintferr("K%ld ",kappa);
+      if (DEBUGLEVEL>=4) err_printf("K%ld ",kappa);
       kappamax = kappa;
       if (!gram) {
         for (i=zeros+1; i<=kappa; i++)
@@ -459,7 +459,7 @@ fplll(GEN *ptrB, GEN *ptrU, GEN *ptrr, double DELTA, double ETA, long flag, long
       {
         long e = expo(divrr(mulrr(gmael(r,kappa-1,kappa-1), delta),
                             gel(s,kappa-1)));
-        fprintferr("(%ld) ", e);
+        err_printf("(%ld) ", e);
       }
       kappa2 = kappa;
       do {

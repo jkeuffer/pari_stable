@@ -170,7 +170,7 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
     {
       q = dvmdii(d,d1,&r);
 #ifdef DEBUG_LEHMER
-      fprintferr("Full division:\n");
+      err_printf("Full division:\n");
       printf("  q = "); output(q); sleep (1);
 #endif
       a = subii(u,mulii(q,u1));

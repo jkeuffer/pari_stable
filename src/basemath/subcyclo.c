@@ -168,7 +168,7 @@ znstar_conductor(long n, GEN H)
   {
     long p = P[i], e = E[i], q = n;
     if (DEBUGLEVEL>=4)
-      fprintferr("SubCyclo: testing %ld^%ld\n",p,e);
+      err_printf("SubCyclo: testing %ld^%ld\n",p,e);
     for (  ; e>=1; e--)
     {
       long z = 1;
@@ -182,16 +182,16 @@ znstar_conductor(long n, GEN H)
       if ( j < p )
       {
         if (DEBUGLEVEL>=4)
-          fprintferr("SubCyclo: %ld not found\n",z);
+          err_printf("SubCyclo: %ld not found\n",z);
         break;
       }
       cnd /= p;
       if (DEBUGLEVEL>=4)
-        fprintferr("SubCyclo: new conductor:%ld\n",cnd);
+        err_printf("SubCyclo: new conductor:%ld\n",cnd);
     }
   }
   if (DEBUGLEVEL>=6)
-    fprintferr("SubCyclo: conductor:%ld\n",cnd);
+    err_printf("SubCyclo: conductor:%ld\n",cnd);
   avma=ltop;
   return cnd;
 }
@@ -423,17 +423,17 @@ polsubcyclo_start(long n, long d, long o, GEN borne, long *ptr_val,long *ptr_l)
   if (DEBUGLEVEL >= 1) timer_start(&ti);
   l = n+1; e = 1;
   while(!uisprime(l)) { l += n; e++; }
-  if (DEBUGLEVEL >= 4) fprintferr("Subcyclo: prime l=%ld\n",l);
+  if (DEBUGLEVEL >= 4) err_printf("Subcyclo: prime l=%ld\n",l);
   gl = utoipos(l); av = avma;
   if (!borne)
   { /* Use vecmax(Vec((x+o)^d)) = max{binomial(d,i)*o^i ;1<=i<=d} */
     i = d-(1+d)/(1+o);
     borne = mulii(binomial(utoipos(d),i),powuu(o,i));
   }
-  if (DEBUGLEVEL >= 4) fprintferr("Subcyclo: borne=%Ps\n",borne);
+  if (DEBUGLEVEL >= 4) err_printf("Subcyclo: borne=%Ps\n",borne);
   val = logint(shifti(borne,2), gl, NULL);
   avma = av;
-  if (DEBUGLEVEL >= 4) fprintferr("Subcyclo: val=%ld\n",val);
+  if (DEBUGLEVEL >= 4) err_printf("Subcyclo: val=%ld\n",val);
   le = powiu(gl,val);
   z = utoipos( Fl_powu(pgener_Fl(l), e, l) );
   z = Zp_sqrtnlift(gen_1,utoipos(n),z,gl,val);
@@ -642,14 +642,14 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
   H = znstar_generate(n,V);
   if (DEBUGLEVEL >= 6)
   {
-    fprintferr("Subcyclo: elements:");
+    err_printf("Subcyclo: elements:");
     for (i=1;i<n;i++)
-      if (F2v_coeff(gel(H,3),i)) fprintferr(" %ld",i);
-    fprintferr("\n");
+      if (F2v_coeff(gel(H,3),i)) err_printf(" %ld",i);
+    err_printf("\n");
   }
   /* field is real iff z -> conj(z) = z^-1 = z^(n-1) is in H */
   complex = !F2v_coeff(gel(H,3),n-1);
-  if (DEBUGLEVEL >= 6) fprintferr("Subcyclo: complex=%ld\n",complex);
+  if (DEBUGLEVEL >= 6) err_printf("Subcyclo: complex=%ld\n",complex);
   if (DEBUGLEVEL >= 1) timer_start(&ti);
   cnd = znstar_conductor(n,H);
   if (DEBUGLEVEL >= 1) timer_printf(&ti, "znstar_conductor");
@@ -674,9 +674,9 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
   }
   O = znstar_cosets(n, phi_n, H);
   if (DEBUGLEVEL >= 1) timer_printf(&ti, "znstar_cosets");
-  if (DEBUGLEVEL >= 6) fprintferr("Subcyclo: orbits=%Ps\n",O);
+  if (DEBUGLEVEL >= 6) err_printf("Subcyclo: orbits=%Ps\n",O);
   if (DEBUGLEVEL >= 4)
-    fprintferr("Subcyclo: %ld orbits with %ld elements each\n",phi_n/card,card);
+    err_printf("Subcyclo: %ld orbits with %ld elements each\n",phi_n/card,card);
   av = avma;
   powz = polsubcyclo_complex_roots(n,!complex,3);
   L = polsubcyclo_orbits(n,H,O,powz,NULL);

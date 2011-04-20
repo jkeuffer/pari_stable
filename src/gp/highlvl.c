@@ -42,7 +42,7 @@ install0(char *name, char *code, char *gpname, char *lib)
 
   if (!handle)
   {
-    const char *s = dlerror(); if (s) fprintferr("%s\n\n",s);
+    const char *s = dlerror(); if (s) err_printf("%s\n\n",s);
     if (lib) pari_err(talker,"couldn't open dynamic library '%s'",lib);
     pari_err(talker,"couldn't open dynamic symbol table of process");
   }

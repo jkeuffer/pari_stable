@@ -1320,7 +1320,7 @@ zprimestar(GEN nf, GEN pr, GEN ep, GEN x, GEN arch)
   long a, b, e = itos(ep), f = pr_get_f(pr);
   GEN p = pr_get_p(pr), list, g, g0, y, u,v, prh, prb, pre;
 
-  if(DEBUGLEVEL>3) fprintferr("treating pr^%ld, pr = %Ps\n",e,pr);
+  if(DEBUGLEVEL>3) err_printf("treating pr^%ld, pr = %Ps\n",e,pr);
   if (f == 1)
     g = scalarcol_shallow(pgener_Fp(p), nf_get_degree(nf));
   else
@@ -1357,12 +1357,12 @@ zprimestar(GEN nf, GEN pr, GEN ep, GEN x, GEN arch)
 
     b <<= 1;
     /* compute 1 + pr^a / 1 + pr^b, 2a <= b */
-    if(DEBUGLEVEL>3) fprintferr("  treating a = %ld, b = %ld\n",a,b);
+    if(DEBUGLEVEL>3) err_printf("  treating a = %ld, b = %ld\n",a,b);
     prb = (b >= e)? pre: idealpows(nf,pr,b);
     z = zidealij(pra, prb, &U);
     gen = leafcopy(gel(z,2));
     s = cgetg_copy(gen, &l);
-    if(DEBUGLEVEL>3) fprintferr("zidealij done\n");
+    if(DEBUGLEVEL>3) err_printf("zidealij done\n");
     for (i = 1; i < l; i++)
     {
       if (x) gel(gen,i) = makeprimetoideal(x,u,v,gel(gen,i));
@@ -2075,7 +2075,7 @@ Ideallist(GEN bnf, ulong bound, long flag)
   for (p[2] = 0; (ulong)p[2] <= bound; )
   {
     NEXT_PRIME_VIADIFF(p[2], ptdif);
-    if (DEBUGLEVEL>1) { fprintferr("%ld ",p[2]); flusherr(); }
+    if (DEBUGLEVEL>1) { err_printf("%ld ",p[2]); err_flush(); }
     fa = idealprimedec(nf, p);
     for (j=1; j<lg(fa); j++)
     {

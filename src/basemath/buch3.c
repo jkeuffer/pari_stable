@@ -688,7 +688,7 @@ isprimitive(GEN nf)
 static GEN
 dft_bound(void)
 {
-  if (DEBUGLEVEL>1) fprintferr("Default bound for regulator: 0.2\n");
+  if (DEBUGLEVEL>1) err_printf("Default bound for regulator: 0.2\n");
   return dbltor(0.2);
 }
 
@@ -709,7 +709,7 @@ regulatorbound(GEN bnf)
   p1 = sqrr(glog(gdiv(dK,c1),DEFAULTPREC));
   p1 = divru(gmul2n(powru(divru(mulru(p1,3),N*(N*N-1)-6*R2),R),R2), N);
   p1 = sqrtr(gdiv(p1, hermiteconstant(R)));
-  if (DEBUGLEVEL>1) fprintferr("Mahler bound for regulator: %Ps\n",p1);
+  if (DEBUGLEVEL>1) err_printf("Mahler bound for regulator: %Ps\n",p1);
   return gmax(p1, dbltor(0.2));
 }
 
@@ -751,9 +751,9 @@ minimforunits(GEN nf, long BORNE, ulong w)
 
   if (DEBUGLEVEL>=2)
   {
-    fprintferr("Searching minimum of T2-form on units:\n");
-    if (DEBUGLEVEL>2) fprintferr("   BOUND = %ld\n",BORNE);
-    flusherr();
+    err_printf("Searching minimum of T2-form on units:\n");
+    if (DEBUGLEVEL>2) err_printf("   BOUND = %ld\n",BORNE);
+    err_flush();
   }
   r1 = nf_get_r1(nf); n = nf_get_degree(nf);
   minim_alloc(n+1, &q, &x, &y, &z, &v);
@@ -792,7 +792,7 @@ minimforunits(GEN nf, long BORNE, ulong w)
     while (k>1);
     if (!x[1] && y[1]<=eps) break;
 
-    if (DEBUGLEVEL>8){ fprintferr("."); flusherr(); }
+    if (DEBUGLEVEL>8){ err_printf("."); err_flush(); }
     if (++cnt == 5000) return NULL; /* too expensive */
 
     p = (double)x[1] + z[1]; norme = y[1] + p*p*v[1] + eps;
@@ -802,11 +802,11 @@ minimforunits(GEN nf, long BORNE, ulong w)
         || !ZV_isscalar(nfpow_u(nf, zc_to_ZC(x), w))))
     {
       if (norme < normin) normin = norme;
-      if (DEBUGLEVEL>=2) { fprintferr("*"); flusherr(); }
+      if (DEBUGLEVEL>=2) { err_printf("*"); err_flush(); }
     }
 
   }
-  if (DEBUGLEVEL>=2){ fprintferr("\n"); flusherr(); }
+  if (DEBUGLEVEL>=2){ err_printf("\n"); err_flush(); }
   avma = av; u = cgetg(4,t_VEC);
   gel(u,1) = stoi(s<<1);
   gel(u,2) = dbltor(normax);
@@ -855,8 +855,8 @@ compute_M0(GEN M_star,long N)
         M0_pro=gmul2n(mulur(m1,addrr(sqrr(logr_abs(v)),sqrr(logr_abs(w)))), -2);
         if (DEBUGLEVEL>2)
         {
-          fprintferr("[ %ld, %ld, %ld ]: %Ps\n",n1,n2,n3,gprec_w(M0_pro,3));
-          flusherr();
+          err_printf("[ %ld, %ld, %ld ]: %Ps\n",n1,n2,n3,gprec_w(M0_pro,3));
+          err_flush();
         }
         if (!M0 || gcmp(M0_pro,M0) < 0) M0 = M0_pro;
       }
@@ -891,8 +891,8 @@ compute_M0(GEN M_star,long N)
           M0_pro = gmul2n(addrr(p6, mulur(k, sqrr(logr_abs(w)))),-2);
           if (DEBUGLEVEL>2)
           {
-            fprintferr("[ %ld, %ld, %ld ]: %Ps\n",n1,n2,n3,gprec_w(M0_pro,3));
-            flusherr();
+            err_printf("[ %ld, %ld, %ld ]: %Ps\n",n1,n2,n3,gprec_w(M0_pro,3));
+            err_flush();
           }
           if (!M0 || gcmp(M0_pro,M0) < 0) M0 = M0_pro;
         }
@@ -949,8 +949,8 @@ compute_M0(GEN M_star,long N)
               M0_pro = gmul2n(M0_pro,-2);
               if (DEBUGLEVEL>2)
               {
-               fprintferr("[ %ld, %ld, %ld ]: %Ps\n",n1,n2,n3,gprec_w(M0_pro,3));
-               flusherr();
+               err_printf("[ %ld, %ld, %ld ]: %Ps\n",n1,n2,n3,gprec_w(M0_pro,3));
+               err_flush();
               }
               if (!M0 || gcmp(M0_pro,M0) < 0) M0 = M0_pro;
             }
@@ -989,24 +989,24 @@ lowerboundforregulator(GEN bnf, GEN units)
   bound = gel(vecminim,3);
   if (DEBUGLEVEL>1)
   {
-    fprintferr("M* = %Ps\n", bound);
+    err_printf("M* = %Ps\n", bound);
     if (DEBUGLEVEL>2)
     {
       pol = gaddgs(gsub(monomial(gen_1,N,0),monomial(bound,1,0)),N-1);
       p1 = roots(pol,DEFAULTPREC);
       y= real_i(gel(p1, 2 + (N&1)));
       M0 = gmul2n(gmulsg(N*(N-1),sqrr(glog(y,DEFAULTPREC))),-2);
-      fprintferr("pol = %Ps\n",pol);
-      fprintferr("old method: y = %Ps, M0 = %Ps\n",y,gprec_w(M0,3));
+      err_printf("pol = %Ps\n",pol);
+      err_printf("old method: y = %Ps, M0 = %Ps\n",y,gprec_w(M0,3));
     }
   }
   M0 = compute_M0(bound, N);
-  if (DEBUGLEVEL>1) { fprintferr("M0 = %Ps\n",gprec_w(M0,3)); flusherr(); }
+  if (DEBUGLEVEL>1) { err_printf("M0 = %Ps\n",gprec_w(M0,3)); err_flush(); }
   M = gmul2n(divru(gdiv(powrs(M0,RU),hermiteconstant(RU)),N),R2);
   if (cmprr(M, dbltor(0.04)) < 0) return NULL;
   M = sqrtr(M);
   if (DEBUGLEVEL>1)
-    fprintferr("(lower bound for regulator) M = %Ps\n",gprec_w(M,3));
+    err_printf("(lower bound for regulator) M = %Ps\n",gprec_w(M,3));
   return M;
 }
 
@@ -1061,15 +1061,15 @@ primecertify(GEN bnf, GEN beta, ulong p, GEN bad)
       }
       if (DEBUGLEVEL>3)
       {
-        if (i==1) fprintferr("       generator of (Zk/Q)^*: %Ps\n", g);
-        fprintferr("       prime ideal Q: %Ps\n",Q);
-        fprintferr("       column #%ld of the matrix log(b_j/Q): %Ps\n",
+        if (i==1) err_printf("       generator of (Zk/Q)^*: %Ps\n", g);
+        err_printf("       prime ideal Q: %Ps\n",Q);
+        err_printf("       column #%ld of the matrix log(b_j/Q): %Ps\n",
                    nbcol, newcol);
       }
       mat1 = shallowconcat(mat,newcol); ra = rank(mat1);
       if (ra==nbcol) continue;
 
-      if (DEBUGLEVEL>2) fprintferr("       new rank: %ld\n",ra);
+      if (DEBUGLEVEL>2) err_printf("       new rank: %ld\n",ra);
       if (++nbcol == lb) return;
       mat = mat1;
     }
@@ -1092,21 +1092,21 @@ check_prime(ulong p, GEN bnf, struct check_pr *S)
   long i,b, lc = lg(S->cyc), lf = lg(S->fu);
   GEN beta = cgetg(lf+lc, t_VEC);
 
-  if (DEBUGLEVEL>1) fprintferr("  *** testing p = %lu\n",p);
+  if (DEBUGLEVEL>1) err_printf("  *** testing p = %lu\n",p);
   for (b=1; b<lc; b++)
   {
     if (umodiu(gel(S->cyc,b), p)) break; /* p \nmid cyc[b] */
-    if (b==1 && DEBUGLEVEL>2) fprintferr("     p divides h(K)\n");
+    if (b==1 && DEBUGLEVEL>2) err_printf("     p divides h(K)\n");
     gel(beta,b) = gel(S->cycgen,b);
   }
   if (S->w % p == 0)
   {
-    if (DEBUGLEVEL>2) fprintferr("     p divides w(K)\n");
+    if (DEBUGLEVEL>2) err_printf("     p divides w(K)\n");
     gel(beta,b++) = S->mu;
   }
   for (i=1; i<lf; i++) gel(beta,b++) = gel(S->fu,i);
   setlg(beta, b); /* beta = [cycgen[i] if p|cyc[i], tu if p|w, fu] */
-  if (DEBUGLEVEL>3) {fprintferr("     Beta list = %Ps\n",beta); flusherr();}
+  if (DEBUGLEVEL>3) {err_printf("     Beta list = %Ps\n",beta); err_flush();}
   primecertify(bnf,beta,p,S->bad); avma = av;
 }
 
@@ -1162,8 +1162,8 @@ bnfcertify0(GEN bnf, long flag)
   B = bound_unit_index(bnf, S.fu);
   if (DEBUGLEVEL>1)
   {
-    fprintferr("\nPHASE 2: are all primes good ?\n\n");
-    fprintferr("  Testing primes <= %Ps\n\n", B); flusherr();
+    err_printf("\nPHASE 2: are all primes good ?\n\n");
+    err_printf("  Testing primes <= %Ps\n\n", B); err_flush();
   }
   bound = itou_or_0(B);
   if (!bound) pari_err(talker,"sorry, too many primes to check");
@@ -1176,7 +1176,7 @@ bnfcertify0(GEN bnf, long flag)
   {
     GEN f = Z_factor(gel(cyc,1)), P = gel(f,1);
     long l = lg(P);
-    if (DEBUGLEVEL>1) { fprintferr("  Testing primes | h(K)\n\n"); flusherr(); }
+    if (DEBUGLEVEL>1) { err_printf("  Testing primes | h(K)\n\n"); err_flush(); }
     for (i=1; i<l; i++)
     {
       p = itou(gel(P,i));
@@ -2142,7 +2142,7 @@ discrayabslistarch(GEN bnf, GEN arch, long bound)
   for (i=2; i<=bound; i++) bigel(Z,i) = cgetg(1,t_VEC);
   embunit = zlog_units(nf, U, sgnU, bidp);
   bigel(Z,1) = mkvec(zsimp(bidp,embunit));
-  if (DEBUGLEVEL>1) fprintferr("Starting zidealstarunits computations\n");
+  if (DEBUGLEVEL>1) err_printf("Starting zidealstarunits computations\n");
   maxprime_check((ulong)bound);
   /* The goal is to compute Ray (lists of bnrclassno). Z contains "zsimps",
    * simplified bid, from which bnrclassno is easy to compute.
@@ -2154,7 +2154,7 @@ discrayabslistarch(GEN bnf, GEN arch, long bound)
     {
       GEN z;
       flbou = 1;
-      if (DEBUGLEVEL>1) fprintferr("\nStarting bnrclassno computations\n");
+      if (DEBUGLEVEL>1) err_printf("\nStarting bnrclassno computations\n");
       Z = gerepilecopy(av,Z); av1 = avma;
       Ray = bigcgetvec(bound);
       for (i=1; i<=bound; i++)
@@ -2215,14 +2215,14 @@ discrayabslistarch(GEN bnf, GEN arch, long bound)
   }
   if (!flbou) /* occurs iff bound = 1,2,4 */
   {
-    if (DEBUGLEVEL>1) fprintferr("\nStarting bnrclassno computations\n");
+    if (DEBUGLEVEL>1) err_printf("\nStarting bnrclassno computations\n");
     Ray = bigcgetvec(bound);
     for (i=1; i<=bound; i++)
       bigel(Ray,i) = bnrclassnointernarch(bigel(Z,i),h,matarchunit);
   }
   Ray = gerepilecopy(av, Ray);
 
-  if (DEBUGLEVEL>1) fprintferr("Starting discrayabs computations\n");
+  if (DEBUGLEVEL>1) err_printf("Starting discrayabs computations\n");
   if (allarch) nbarch = 1L<<r1;
   else
   {

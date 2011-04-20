@@ -111,6 +111,7 @@ BA 23- polrootsff now returns a t_COL
        an inially empty table was quadratic in the final table size). They
        must be true primes, otherwise number theoretic routines may return
        wrong values. [#322]
+   28- rename fprintferr -> err_printf, flusherr -> err_flush
 
   Added
 BA  1- trap keyword "syntaxer" to trap syntax error from eval.

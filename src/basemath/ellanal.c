@@ -93,7 +93,7 @@ gen_BG_rec(void *E, bg_fun *fun, struct bg_data *bg, GEN sum0)
   pari_sp av = avma;
   GEN sum = gcopy(sum0), p;
   if(DEBUGLEVEL)
-    fprintferr("1st stage, using recursion for p <= %ld\n", bg->p[lp]);
+    err_printf("1st stage, using recursion for p <= %ld\n", bg->p[lp]);
   for (i = 1; i <= lp; i++)
   {
     ulong pp = bg->p[i];
@@ -102,7 +102,7 @@ gen_BG_rec(void *E, bg_fun *fun, struct bg_data *bg, GEN sum0)
     sum = gerepileupto(av, sum);
   }
   p = nextprime(utoipos(bg->p[lp]+1));
-  if (DEBUGLEVEL) fprintferr("2nd stage, looping for p <= %Ps\n", bndov2);
+  if (DEBUGLEVEL) err_printf("2nd stage, looping for p <= %Ps\n", bndov2);
   for (  ; cmpii(p, bndov2)<=0; p = nextprime(addis(p,1)))
   {
     long jmax;
@@ -122,7 +122,7 @@ gen_BG_rec(void *E, bg_fun *fun, struct bg_data *bg, GEN sum0)
     }
     gerepileall(av, 2, &sum, &p);
   }
-  if (DEBUGLEVEL) fprintferr("3nd stage, looping for p <= %Ps\n", bg->bnd);
+  if (DEBUGLEVEL) err_printf("3nd stage, looping for p <= %Ps\n", bg->bnd);
   for (  ; cmpii(p, bg->bnd)<=0; p = nextprime(addis(p,1)))
   {
     GEN a = ellap(bg->E, p);
@@ -426,13 +426,13 @@ static GEN
 ellL1_i(struct ellld *el, struct bg_data *bg, long r, GEN ap, long prec)
 {
   GEN sum;
-  if (DEBUGLEVEL) fprintferr("in ellL1 with r = %ld, prec = %ld\n", r, prec);
+  if (DEBUGLEVEL) err_printf("in ellL1 with r = %ld, prec = %ld\n", r, prec);
   el->r = r;
   el->bnd = cutoff_point(r, el->X, el->emX, el->epsbit, prec);
   gen_BG_init(bg,el->E,el->N,el->bnd,ap);
   el->rootbnd = bg->rootbnd;
   sum = init_Gr(el, prec);
-  if (DEBUGLEVEL>=3) fprintferr("el_bnd = %Ps, N=%Ps\n", el->bnd, el->N);
+  if (DEBUGLEVEL>=3) err_printf("el_bnd = %Ps, N=%Ps\n", el->bnd, el->N);
   sum = gen_BG_rec(el, r?ellld_L1:ellld_L1r0, bg, sum);
   return mulri(shiftr(sum, 1), mpfact(r));
 }
@@ -484,9 +484,9 @@ ellanalyticrank(GEN e, GEN eps, long prec)
     }
   init_el(&el, e, &rk, prec); /* set rk to rank parity (0 or 1) */
   if (DEBUGLEVEL) {
-    fprintferr("ellanalyticrank: CURVE = %Ps\n", e);
-    fprintferr("Rank is %s\n", rk == 0? "even": "odd");
-    fprintferr("eps = %Ps\nconductor = %Ps\n", eps, el.N);
+    err_printf("ellanalyticrank: CURVE = %Ps\n", e);
+    err_printf("Rank is %s\n", rk == 0? "even": "odd");
+    err_printf("eps = %Ps\nconductor = %Ps\n", eps, el.N);
     timer_start(&T);
   }
   av2 = avma;

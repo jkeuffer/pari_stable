@@ -247,8 +247,8 @@ hit_return(void)
 static void
 gp_ask_confirm(const char *s)
 {
-  fprintferr(s);
-  fprintferr(". OK ? (^C if not)\n");
+  err_printf(s);
+  err_printf(". OK ? (^C if not)\n");
   hit_return();
 }
 
@@ -1077,7 +1077,7 @@ check_meta(char *buf, int ismain)
 /* LOCATE GPRC */
 
 static int get_line_from_file(const char *prompt, filtre_t *F, FILE *file);
-#define err_gprc(s,t,u) { fprintferr("\n"); pari_err(syntaxer,s,t,u); }
+#define err_gprc(s,t,u) { err_printf("\n"); pari_err(syntaxer,s,t,u); }
 
 /* return $HOME or the closest we can find */
 static const char *
@@ -1100,7 +1100,7 @@ static FILE *
 gprc_chk(const char *s)
 {
   FILE *f = fopen(s, "r");
-  if (f && !(GP_DATA->flags & gpd_QUIET)) fprintferr("Reading GPRC: %s ...", s);
+  if (f && !(GP_DATA->flags & gpd_QUIET)) err_printf("Reading GPRC: %s ...", s);
   return f;
 }
 
@@ -1259,7 +1259,7 @@ gp_initrc(pari_stack *p_A, char *path)
   (void)stack_new(&s_env);
   for(;;)
   {
-    if (setjmp(env[s_env.n-1])) fprintferr("...skipping line %ld.\n", c);
+    if (setjmp(env[s_env.n-1])) err_printf("...skipping line %ld.\n", c);
     c++;
     if (!get_line_from_file(NULL,&F,file)) break;
     s = b->buf;
@@ -1305,7 +1305,7 @@ gp_initrc(pari_stack *p_A, char *path)
   }
   s_env.n--;
   pop_buffer();
-  if (!(GP_DATA->flags & gpd_QUIET)) fprintferr("Done.\n\n");
+  if (!(GP_DATA->flags & gpd_QUIET)) err_printf("Done.\n\n");
   fclose(file);
 }
 
@@ -1711,7 +1711,7 @@ gp_handle_exception(long numerr)
   if (disable_exception_handler) disable_exception_handler = 0;
   else if ((GP_DATA->breakloop) && break_loop(numerr)) return 1;
   if (s_env.n>=1) {
-    fprintferr("\n"); flusherr();
+    err_printf("\n"); err_flush();
     gp_err_recover(numerr>=0? numerr: talker);
   }
   return 0;
@@ -1765,7 +1765,7 @@ read_main(const char *s)
     }
     else z = gp_main_loop(gp_RECOVER);
   }
-  if (!z) fprintferr("... skipping file '%s'\n", s);
+  if (!z) err_printf("... skipping file '%s'\n", s);
   avma = top;
 }
 
@@ -1814,7 +1814,7 @@ input0(void)
   GEN x;
 
   while (! get_line_from_file(DFT_INPROMPT,&F,pari_infile))
-    if (popinfile()) { fprintferr("no input ???"); gp_quit(1); }
+    if (popinfile()) { err_printf("no input ???"); gp_quit(1); }
   x = readseq(b->buf);
   pop_buffer(); return x;
 }

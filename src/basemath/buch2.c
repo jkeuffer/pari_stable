@@ -137,22 +137,22 @@ static void
 wr_rel(GEN col)
 {
   long i, l = lg(col);
-  fprintferr("\nrel = ");
+  err_printf("\nrel = ");
   for (i=1; i<l; i++)
-    if (col[i]) fprintferr("%ld^%ld ",i,col[i]);
-  fprintferr("\n");
+    if (col[i]) err_printf("%ld^%ld ",i,col[i]);
+  err_printf("\n");
 }
 static void
 dbg_rel(long s, GEN col)
 {
-  if (DEBUGLEVEL == 1) fprintferr("%ld ",s);
-  else { fprintferr("cglob = %ld. ", s); wr_rel(col); }
-  flusherr();
+  if (DEBUGLEVEL == 1) err_printf("%ld ",s);
+  else { err_printf("cglob = %ld. ", s); wr_rel(col); }
+  err_flush();
 }
 static void
 dbg_newrel(RELCACHE_t *cache)
 {
-  fprintferr("\n++++ cglob = %ld: new relation (need %ld)",
+  err_printf("\n++++ cglob = %ld: new relation (need %ld)",
              cache->last - cache->base, cache->end - cache->base);
   wr_rel(cache->last->R);
 }
@@ -160,9 +160,9 @@ dbg_newrel(RELCACHE_t *cache)
 static void
 dbg_cancelrel(long jid, long jdir, GEN col)
 {
-  fprintferr("relation cancelled: ");
-  if (DEBUGLEVEL>3) fprintferr("(jid=%ld,jdir=%ld)",jid,jdir);
-  wr_rel(col); flusherr();
+  err_printf("relation cancelled: ");
+  if (DEBUGLEVEL>3) err_printf("(jid=%ld,jdir=%ld)",jid,jdir);
+  wr_rel(col); err_flush();
 }
 
 
@@ -419,11 +419,11 @@ subFB_change(FB_t *F)
   }
   if (zv_equal(F->subFB, yes))
   {
-    if (DEBUGLEVEL) fprintferr("*** NOT Changing sub factor base\n");
+    if (DEBUGLEVEL) err_printf("*** NOT Changing sub factor base\n");
   }
   else
   {
-    if (DEBUGLEVEL) fprintferr("*** Changing sub factor base\n");
+    if (DEBUGLEVEL) err_printf("*** Changing sub factor base\n");
     assign_subFB(F, yes, iyes);
   }
   F->sfb_chg = 0;
@@ -480,7 +480,7 @@ int
 GRHok(GRHcheck_t *S, double L, double SA, double SB)
 {
   if (S->checkok || S->cD + (S->cN + 2*SB) / L - 2*SA < -1e-8) return 1;
-  if (DEBUGLEVEL) fprintferr("*** GRH check negative! ***\n");
+  if (DEBUGLEVEL) err_printf("*** GRH check negative! ***\n");
   return 0;
 }
 
@@ -518,7 +518,7 @@ FBgen(FB_t *F, GEN nf, long N, long C2, long C1, GRHcheck_t *S)
     if (!F->KC && p > C1) { F->KCZ = i; F->KC = ip; }
     if (p > C2) break;
 
-    if (DEBUGLEVEL>1) { fprintferr(" %ld",p); flusherr(); }
+    if (DEBUGLEVEL>1) { err_printf(" %ld",p); err_flush(); }
     prim[2] = p; LP = idealprimedec(nf,prim);
 
     av1 = avma; a = b = NULL;
@@ -578,13 +578,13 @@ FBgen(FB_t *F, GEN nf, long N, long C2, long C1, GRHcheck_t *S)
   setlg(F->FB, F->KCZ+1); F->KCZ2 = i;
   if (DEBUGLEVEL>1)
   {
-    fprintferr("\n");
+    err_printf("\n");
     if (DEBUGLEVEL>6)
     {
-      fprintferr("########## FACTORBASE ##########\n\n");
-      fprintferr("KC2=%ld, KC=%ld, KCZ=%ld, KCZ2=%ld\n",
+      err_printf("########## FACTORBASE ##########\n\n");
+      err_printf("KC2=%ld, KC=%ld, KCZ=%ld, KCZ2=%ld\n",
                   ip, F->KC, F->KCZ, F->KCZ2);
-      for (i=1; i<=F->KCZ; i++) fprintferr("++ LV[%ld] = %Ps",i,F->LV[F->FB[i]]);
+      for (i=1; i<=F->KCZ; i++) err_printf("++ LV[%ld] = %Ps",i,F->LV[F->FB[i]]);
     }
   }
   if (!GRHok(S, L, SA, SB)) return NULL;
@@ -805,7 +805,7 @@ getfu(GEN nf, GEN *ptA, long *pte, long prec)
   GEN p1, p2, u, y, matep, A, vec, T = nf_get_pol(nf), M = nf_get_M(nf);
   long e, i, j, R1, RU, N = degpol(T);
 
-  if (DEBUGLEVEL) fprintferr("\n#### Computing fundamental units\n");
+  if (DEBUGLEVEL) err_printf("\n#### Computing fundamental units\n");
   R1 = nf_get_r1(nf); RU = (N+R1)>>1;
   if (RU==1) { *pte=LONG_MAX; return cgetg(1,t_VEC); }
 
@@ -1056,7 +1056,7 @@ SPLIT(FB_t *F, GEN nf, GEN x, GEN Vbase, FACT *fact)
   {
     GEN I, NI, id = x0;
     av = avma;
-    if (DEBUGLEVEL>2) fprintferr("# ideals tried = %ld\n",nbtest);
+    if (DEBUGLEVEL>2) err_printf("# ideals tried = %ld\n",nbtest);
     for (i=1; i<lgsub; i++)
     {
       ex[i] = random_bits(RANDOM_BITS);
@@ -1092,7 +1092,7 @@ SPLIT(FB_t *F, GEN nf, GEN x, GEN Vbase, FACT *fact)
         ex = cgetg(lgsub, t_VECSMALL);
       }
       else nbtest_lim = LONG_MAX; /* don't increase further */
-      if (DEBUGLEVEL>2) fprintferr("SPLIT: increasing factor base [%ld]\n",lgsub);
+      if (DEBUGLEVEL>2) err_printf("SPLIT: increasing factor base [%ld]\n",lgsub);
     }
   }
 }
@@ -1153,9 +1153,9 @@ testprimes(GEN bnf, GEN BOUND)
   if (!is_pm1(f))
   {
     GEN D = nf_get_diff(nf), L;
-    if (DEBUGLEVEL>1) fprintferr("**** Testing Different = %Ps\n",D);
+    if (DEBUGLEVEL>1) err_printf("**** Testing Different = %Ps\n",D);
     L = bnfisprincipal0(bnf, D, nf_FORCE);
-    if (DEBUGLEVEL>1) fprintferr("     is %Ps\n", L);
+    if (DEBUGLEVEL>1) err_printf("     is %Ps\n", L);
   }
   /* sort factorbase for tablesearch */
   fb = gen_sort(gel(bnf,5), (void*)&cmp_prime_ideal, cmp_nodata);
@@ -1169,23 +1169,23 @@ testprimes(GEN bnf, GEN BOUND)
   {
     GEN vP = idealprimedec(bnf, utoipos(p));
     long i, l = lg(vP);
-    if (DEBUGLEVEL>1) fprintferr("*** p = %lu\n",p);
+    if (DEBUGLEVEL>1) err_printf("*** p = %lu\n",p);
     /* loop through all P | p if ramified, all but one otherwise */
     if (umodiu(dK,p)) l--;
     for (i=1; i<l; i++)
     {
       GEN P = gel(vP,i);
       long k;
-      if (DEBUGLEVEL>1) fprintferr("  Testing P = %Ps\n",P);
+      if (DEBUGLEVEL>1) err_printf("  Testing P = %Ps\n",P);
       if (cmpii(pr_norm(P), BOUND) >= 0)
       {
-        if (DEBUGLEVEL>1) fprintferr("    Norm(P) > Zimmert bound\n");
+        if (DEBUGLEVEL>1) err_printf("    Norm(P) > Zimmert bound\n");
         break;
       }
       if (p <= pmax && (k = tablesearch(fb, P, &cmp_prime_ideal)))
-      { if (DEBUGLEVEL>1) fprintferr("    #%ld in factor base\n",k); }
+      { if (DEBUGLEVEL>1) err_printf("    #%ld in factor base\n",k); }
       else if (DEBUGLEVEL>1)
-        fprintferr("    is %Ps\n", isprincipal(bnf,P));
+        err_printf("    is %Ps\n", isprincipal(bnf,P));
       else /* faster: don't compute result */
         (void)SPLIT(&F, nf, idealhnf_two(nf,P), Vbase, fact);
     }
@@ -1200,20 +1200,20 @@ testprimes(GEN bnf, GEN BOUND)
   {
     GEN vP = idealprimedec(bnf, gp);
     long i, l = lg(vP);
-    if (DEBUGLEVEL>1) fprintferr("*** p = %Pu\n",gp);
+    if (DEBUGLEVEL>1) err_printf("*** p = %Pu\n",gp);
     /* loop through all P | p if ramified, all but one otherwise */
     if (!dvdii(dK,gp)) l--;
     for (i=1; i<l; i++)
     {
       GEN P = gel(vP,i);
-      if (DEBUGLEVEL>1) fprintferr("  Testing P = %Ps\n",P);
+      if (DEBUGLEVEL>1) err_printf("  Testing P = %Ps\n",P);
       if (cmpii(pr_norm(P), BOUND) >= 0)
       {
-        if (DEBUGLEVEL>1) fprintferr("    Norm(P) > Zimmert bound\n");
+        if (DEBUGLEVEL>1) err_printf("    Norm(P) > Zimmert bound\n");
         break;
       }
       if (DEBUGLEVEL>1)
-        fprintferr("    is %Ps\n", isprincipal(bnf,P));
+        err_printf("    is %Ps\n", isprincipal(bnf,P));
       else /* faster: don't compute result */
         (void)SPLIT(&F, nf, idealhnf_two(nf,P), Vbase, fact);
     }
@@ -2046,8 +2046,8 @@ add_rel_i(RELCACHE_t *cache, GEN R, long nz, GEN m, long orig, long aut, REL_t *
   if (cache->last >= cache->base + cache->len) return 0;
   if (DEBUGLEVEL>6)
   {
-    fprintferr("adding vector = %Ps\n",R);
-    fprintferr("generators =\n%Ps\n", cache->basis);
+    err_printf("adding vector = %Ps\n",R);
+    err_printf("generators =\n%Ps\n", cache->basis);
   }
   if (cache->missing)
   {
@@ -2177,14 +2177,14 @@ powPgen(GEN nf, GEN vp, GEN *ppowP, long a)
   vp = idealhnf_two(nf,vp);
   for (j=2; j<=a; j++)
   {
-    if (DEBUGLEVEL>1) fprintferr(" %ld", j);
+    if (DEBUGLEVEL>1) err_printf(" %ld", j);
     J = idealtwoelt(nf, idealmul_HNF(nf, vp, J));
     gel(J, 2) = zk_scalar_or_multable(nf, gel(J,2));
     gel(id2,j) = J;
   }
   setlg(id2, j);
   *ppowP = id2;
-  if (DEBUGLEVEL>1) fprintferr("\n");
+  if (DEBUGLEVEL>1) err_printf("\n");
 }
 
 
@@ -2197,7 +2197,7 @@ powFBgen(RELCACHE_t *cache, FB_t *F, GEN nf, GEN auts)
   GEN subFB = F->subFB, idealperm = F->idealperm;
   long i, k, l, id, n = lg(F->subFB), naut = lg(auts);
 
-  if (DEBUGLEVEL) fprintferr("Computing powers for subFB: %Ps\n",subFB);
+  if (DEBUGLEVEL) err_printf("Computing powers for subFB: %Ps\n",subFB);
   if (cache) pre_allocate(cache, n*naut);
   for (i=1; i<n; i++)
   {
@@ -2206,7 +2206,7 @@ powFBgen(RELCACHE_t *cache, FB_t *F, GEN nf, GEN auts)
     {
       GEN id2;
 
-      if (DEBUGLEVEL>1) fprintferr("%ld: 1", id);
+      if (DEBUGLEVEL>1) err_printf("%ld: 1", id);
       powPgen(nf, gel(F->LP, id), &id2, a);
       gel(F->id2, id) = gclone(id2);
       for (k = 1; k < naut; k++)
@@ -2219,7 +2219,7 @@ powFBgen(RELCACHE_t *cache, FB_t *F, GEN nf, GEN auts)
           long lid2;
           GEN sigmaid2 = cgetg_copy(id2, &lid2);
 
-          if (DEBUGLEVEL>1) fprintferr("%ld: automorphism\n", sigmaid);
+          if (DEBUGLEVEL>1) err_printf("%ld: automorphism\n", sigmaid);
           for (l = 1; l < lid2; l++)
           {
             GEN id2l = gel(id2, l);
@@ -2266,7 +2266,7 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
   if (DEBUGLEVEL)
   {
     timer_start(&T);
-    fprintferr("\n#### Looking for %ld relations (small norms)\n",
+    err_printf("\n#### Looking for %ld relations (small norms)\n",
                cache->end - last);
   }
   nbsmallnorm = nbfact = 0;
@@ -2288,7 +2288,7 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
     pari_sp av2;
 
     if (DEBUGLEVEL>1)
-      fprintferr("\n*** Ideal no %ld: %Ps\n", L_jid[noideal], vecslice(ideal,1,4));
+      err_printf("\n*** Ideal no %ld: %Ps\n", L_jid[noideal], vecslice(ideal,1,4));
     if (p0)
       ideal = idealmul(nf, p0, ideal);
     else
@@ -2303,14 +2303,14 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
     {
       v[k] = gtodouble(gcoeff(r,k,k));
       for (j=1; j<k; j++) q[j][k] = gtodouble(gcoeff(r,j,k));
-      if (DEBUGLEVEL>3) fprintferr("v[%ld]=%.4g ",k,v[k]);
+      if (DEBUGLEVEL>3) err_printf("v[%ld]=%.4g ",k,v[k]);
     }
     BOUND = mindd(BMULT * v[1], 2 * (v[2] + v[1]*q[1][2]*q[1][2]));
     /* BOUND at most BMULT x smallest known vector */
     if (DEBUGLEVEL>1)
     {
-      if (DEBUGLEVEL>3) fprintferr("\n");
-      fprintferr("BOUND = %.4g\n",BOUND); flusherr();
+      if (DEBUGLEVEL>3) err_printf("\n");
+      err_printf("BOUND = %.4g\n",BOUND); err_flush();
     }
     BOUND *= 1 + 1e-6;
     k = N; y[N] = z[N] = 0; x[N] = 0;
@@ -2362,12 +2362,12 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
         if (++try_factor > maxtry_FACT) goto ENDIDEAL;
         Nx = grndtoi(norm_by_embed(R1,xembed), &e);
         if (e >= 0) {
-          if (DEBUGLEVEL > 1) { fprintferr("+"); flusherr(); }
+          if (DEBUGLEVEL > 1) { err_printf("+"); err_flush(); }
           continue;
         }
         setabssign(Nx);
         if (!can_factor(F, nf, NULL, gx, Nx, fact)) {
-          if (DEBUGLEVEL > 1) { fprintferr("."); flusherr(); }
+          if (DEBUGLEVEL > 1) { err_printf("."); err_flush(); }
           continue;
         }
       }
@@ -2377,7 +2377,7 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
       /* make sure we get maximal rank first, then allow all relations */
       if (add_rel(cache, F, R, nz, gx) <= 0)
       { /* probably Q-dependent from previous ones: forget it */
-        if (DEBUGLEVEL>1) fprintferr("*");
+        if (DEBUGLEVEL>1) err_printf("*");
         if (++dependent > maxtry_DEP) break;
         continue;
       }
@@ -2392,12 +2392,12 @@ ENDIDEAL:
 END:
   if (DEBUGLEVEL)
   {
-    if (cache->last != last) fprintferr("\n");
+    if (cache->last != last) err_printf("\n");
     timer_printf(&T, "small norm relations");
-    fprintferr("  small norms gave %ld relations.\n",
+    err_printf("  small norms gave %ld relations.\n",
                cache->last - last);
     if (nbsmallnorm)
-      fprintferr("  nb. fact./nb. small norm = %ld/%ld = %.3f\n",
+      err_printf("  nb. fact./nb. small norm = %ld/%ld = %.3f\n",
                   nbfact,nbsmallnorm,((double)nbfact)/nbsmallnorm);
   }
 }
@@ -2449,8 +2449,8 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN auts, FACT *fact)
   if (DEBUGLEVEL) {
     long d = cache->end - cache->last;
     timer_start(&T);
-    fprintferr("\n(more relations needed: %ld)\n", d > 0? d: 1);
-    if (l_jid <= F->orbits) fprintferr("looking hard for %Ps\n",L_jid);
+    err_printf("\n(more relations needed: %ld)\n", d > 0? d: 1);
+    if (l_jid <= F->orbits) err_printf("looking hard for %Ps\n",L_jid);
   }
   ex = cgetg(lgsub, t_VECSMALL);
   baseideal = get_random_ideal(F, nf, ex);
@@ -2463,7 +2463,7 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN auts, FACT *fact)
     pari_sp av1;
     long j, l;
 
-    if (DEBUGLEVEL>1) fprintferr("(%ld)", jid);
+    if (DEBUGLEVEL>1) err_printf("(%ld)", jid);
     /* If subFB is not Galois-stable, all ideals in the orbit of jid are not
      * equivalent (subFB is probably not Galois stable) */
     l = random_Fl(lg(auts));
@@ -2481,7 +2481,7 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN auts, FACT *fact)
       long nz;
       if (!factorgen(F,nf,ideal,Nideal,m,fact))
       {
-        if (DEBUGLEVEL>1) { fprintferr("."); flusherr(); }
+        if (DEBUGLEVEL>1) { err_printf("."); err_flush(); }
         continue;
       }
       /* can factor ideal, record relation */
@@ -2519,14 +2519,14 @@ be_honest(FB_t *F, GEN nf, FACT *fact)
   pari_sp av;
 
   if (DEBUGLEVEL) {
-    fprintferr("Be honest for %ld primes from %ld to %ld\n", F->KCZ2 - F->KCZ,
+    err_printf("Be honest for %ld primes from %ld to %ld\n", F->KCZ2 - F->KCZ,
                F->FB[ F->KCZ+1 ], F->FB[ F->KCZ2 ]);
   }
   av = avma;
   for (iz=F->KCZ+1; iz<=F->KCZ2; iz++, avma = av)
   {
     long p = F->FB[iz];
-    if (DEBUGLEVEL>1) fprintferr("%ld ", p);
+    if (DEBUGLEVEL>1) err_printf("%ld ", p);
     P = F->LV[p]; J = lg(P);
     /* all P|p in FB + last is unramified --> check all but last */
     if (isclone(P) && pr_get_e(gel(P,J-1)) == 1) J--;
@@ -2561,7 +2561,7 @@ be_honest(FB_t *F, GEN nf, FACT *fact)
     }
     F->KCZ++; /* SUCCESS, "enlarge" factorbase */
   }
-  if (DEBUGLEVEL>1) fprintferr("\n");
+  if (DEBUGLEVEL>1) err_printf("\n");
   F->KCZ = KCZ0; avma = av; return 1;
 }
 
@@ -2626,7 +2626,7 @@ compute_multiple_of_R(GEN A, long RU, long N, long *pneed, GEN *ptL)
 
   if (RU == 1) { *ptL = zeromat(0, lg(A)-1); return gen_1; }
 
-  if (DEBUGLEVEL) fprintferr("\n#### Computing regulator multiple\n");
+  if (DEBUGLEVEL) err_printf("\n#### Computing regulator multiple\n");
   xreal = real_i(A); /* = (log |sigma_i(u_j)|) */
   mdet = clean_cols(xreal, &precpb);
   /* will cause precision to increase on later failure, but we may succeed! */
@@ -2634,7 +2634,7 @@ compute_multiple_of_R(GEN A, long RU, long N, long *pneed, GEN *ptL)
   if (lg(mdet) < RU)
   {
     if (DEBUGLEVEL)
-      fprintferr("Unit group rank <= %ld < %ld\n",lg(mdet)-1, RU);
+      err_printf("Unit group rank <= %ld < %ld\n",lg(mdet)-1, RU);
     *pneed = RU - (lg(mdet)-1);
     avma = av; return NULL;
   }
@@ -2649,7 +2649,7 @@ compute_multiple_of_R(GEN A, long RU, long N, long *pneed, GEN *ptL)
   if (lg(mdet)-1 - r != RU)
   {
     if (DEBUGLEVEL)
-      fprintferr("Unit group rank  = %ld < %ld\n",lg(mdet)-1 - r, RU);
+      err_printf("Unit group rank  = %ld < %ld\n",lg(mdet)-1 - r, RU);
     *pneed = RU - (lg(mdet)-1-r);
     avma = av; return NULL;
   }
@@ -2706,19 +2706,19 @@ compute_R(GEN lambda, GEN z, GEN *ptL, GEN *ptkR)
   long r, ec;
   GEN L, H, D, den, R, c;
 
-  if (DEBUGLEVEL) { fprintferr("\n#### Computing check\n"); flusherr(); }
+  if (DEBUGLEVEL) { err_printf("\n#### Computing check\n"); err_flush(); }
   D = gmul2n(mpmul(*ptkR,z), 1); /* bound for denom(lambda) */
   if (expo(D) < 0 && rtodbl(D) < 0.95) return fupb_PRECI;
   lambda = bestappr_noer(lambda,D);
   if (!lambda)
   {
-    if (DEBUGLEVEL) fprintferr("truncation error in bestappr\n");
+    if (DEBUGLEVEL) err_printf("truncation error in bestappr\n");
     return fupb_PRECI;
   }
   den = Q_denom(lambda);
   if (mpcmp(den,D) > 0)
   {
-    if (DEBUGLEVEL) fprintferr("D = %Ps\nden = %Ps\n",D,
+    if (DEBUGLEVEL) err_printf("D = %Ps\nden = %Ps\n",D,
                     lgefint(den) <= DEFAULTPREC? den: itor(den,3));
     return fupb_PRECI;
   }
@@ -2730,8 +2730,8 @@ compute_R(GEN lambda, GEN z, GEN *ptL, GEN *ptkR)
   c = gmul(R,z); /* should be n (= 1 if we are done) */
   if (DEBUGLEVEL)
   {
-    fprintferr("\n#### Tentative regulator : %Ps\n", gprec_w(R,3));
-    fprintferr("\n ***** check = %Ps\n",gprec_w(c,3));
+    err_printf("\n#### Tentative regulator : %Ps\n", gprec_w(R,3));
+    err_printf("\n ***** check = %Ps\n",gprec_w(c,3));
   }
   ec = gexpo(c);
   /* safe check for c < 0.75 : avoid underflow in gtodouble() */
@@ -2963,13 +2963,13 @@ makematal(GEN bnf)
     GEN y = isprincipalarch(bnf,gel(WB_C,j), Nx,gen_1, gen_1, &e);
     if (y && fact_ok(nf,y,C,pFB,ex))
     {
-      if (DEBUGLEVEL>1) fprintferr("*%ld ",j);
+      if (DEBUGLEVEL>1) err_printf("*%ld ",j);
       gel(ma,j) = gerepileupto(btop, y); continue;
     }
     y = isprincipalfact_or_fail(bnf, C, pFB, ex);
     if (typ(y) != t_INT)
     {
-      if (DEBUGLEVEL>1) fprintferr("%ld ",j);
+      if (DEBUGLEVEL>1) err_printf("%ld ",j);
       gel(ma,j) = gerepileupto(btop,gel(y,2)); continue;
     }
 
@@ -2979,7 +2979,7 @@ makematal(GEN bnf)
     nf = nfnewprec_shallow(nf,prec);
     bnf = Buchall(nf, nf_FORCE, prec); setrand(c);
   }
-  if (DEBUGLEVEL>1) fprintferr("\n");
+  if (DEBUGLEVEL>1) err_printf("\n");
   return ma;
 }
 
@@ -3313,7 +3313,7 @@ init_rel(RELCACHE_t *cache, FB_t *F, long add_need)
   GEN c, P;
   GEN R;
 
-  if (DEBUGLEVEL) fprintferr("KCZ = %ld, KC = %ld, n = %ld\n", F->KCZ,F->KC,n);
+  if (DEBUGLEVEL) err_printf("KCZ = %ld, KC = %ld, n = %ld\n", F->KCZ,F->KC,n);
   reallocate(cache, 10*n + 50); /* make room for lots of relations */
   cache->chk = cache->base;
   cache->end = cache->base + n;
@@ -3567,7 +3567,7 @@ Buchall_param(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long
   compute_vecG(nf, &F, minss(RU, 9));
   if (DEBUGLEVEL) timer_printf(&T, "weighted G matrices");
   D = absi(nf_get_disc(nf)); drc = gtodouble(D);
-  if (DEBUGLEVEL) fprintferr("R1 = %ld, R2 = %ld\nD = %Ps\n",R1,R2, D);
+  if (DEBUGLEVEL) err_printf("R1 = %ld, R2 = %ld\nD = %Ps\n",R1,R2, D);
   LOGD = log(drc); LOGD2 = LOGD*LOGD;
   lim = exp(-N + R2 * log(4/PI)) * sqrt(2*PI*N*drc);
   if (lim < 3.) lim = 3.;
@@ -3595,7 +3595,7 @@ START:
     if (LIMC < 20) { LIMC = 20; cbach = (double)LIMC / LOGD2; }
     LIMC2 = maxss(3 * N, (long)(cbach2*LOGD2));
     if (LIMC2 < LIMC) LIMC2 = LIMC;
-    if (DEBUGLEVEL) { fprintferr("LIMC = %ld, LIMC2 = %ld\n",LIMC,LIMC2); }
+    if (DEBUGLEVEL) { err_printf("LIMC = %ld, LIMC2 = %ld\n",LIMC,LIMC2); }
 
     Res = FBgen(&F, nf, N, LIMC2, LIMC, &GRHcheck);
   }
@@ -3695,7 +3695,7 @@ START:
       if (need > 0)
       {
         /* Random relations */
-        if (DEBUGLEVEL) fprintferr("\n#### Looking for random relations\n");
+        if (DEBUGLEVEL) err_printf("\n#### Looking for random relations\n");
         if (++nreldep > MAXRELSUP) {
           if (++sfb_trials > SFB_MAX && cbach < 2) goto START;
           F.sfb_chg = sfb_INCREASE;
@@ -3814,13 +3814,13 @@ START:
     if (!lambda) { precpb = "bestappr"; continue; }
     if (!R)
     { /* not full rank for units */
-      if (DEBUGLEVEL) fprintferr("regulator is zero.\n");
+      if (DEBUGLEVEL) err_printf("regulator is zero.\n");
       if (!need) precpb = "regulator";
       continue;
     }
 
     h = ZM_det_triangular(W);
-    if (DEBUGLEVEL) fprintferr("\n#### Tentative class number: %Ps\n", h);
+    if (DEBUGLEVEL) err_printf("\n#### Tentative class number: %Ps\n", h);
 
     z = mulrr(Res, resc); /* ~ hR if enough relations, a multiple otherwise */
     switch (compute_R(lambda, divir(h,z), &L, &R))

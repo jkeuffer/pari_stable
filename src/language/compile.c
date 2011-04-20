@@ -340,7 +340,7 @@ debug_context(void)
   {
     entree *ep = localvars[i].ep;
     Ltype type = localvars[i].type;
-    fprintferr("%ld: %s: %s\n",i,(type==Lmy?"my":"local"),(ep?ep->name:"NULL"));
+    err_printf("%ld: %s: %s\n",i,(type==Lmy?"my":"local"),(ep?ep->name:"NULL"));
   }
 }
 

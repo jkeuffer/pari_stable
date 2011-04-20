@@ -141,7 +141,7 @@ static void
 exiterr(const char *str)
 {
   term_color(c_ERR);
-  fprintferr("\n  *** X fatal error: %s\n",str);
+  err_printf("\n  *** X fatal error: %s\n",str);
   term_color(c_NONE); exit(1);
 }
 

@@ -1736,7 +1736,7 @@ explicit \kbd{FILE*}, or to recover a character string:
 remaining arguments to stream \kbd{file} according to the format
 specification \kbd{fmt}.
 
-\fun{char *}{pari_sprintf}{const char *fmt, ...} produces a string from the
+\fun{char*}{pari_sprintf}{const char *fmt, ...} produces a string from the
 remaining arguments, according to the PARI format \kbd{fmt} (see \tet{printf}).
 This is the \kbd{libpari} equivalent of \tet{Strprintf}, and returns a
 \kbd{malloc}'ed string, which must be freed by the caller. Note that contrary
@@ -1761,7 +1761,7 @@ seen so far:
 
 \fun{void}{pari_vfprintf}{FILE *file, const char *fmt, va_list ap}
 
-\fun{char *}{pari_vsprintf}{const char *fmt, va_list ap}
+\fun{char*}{pari_vsprintf}{const char *fmt, va_list ap}
 
 \subsec{Errors}\sidx{error}\kbdsidx{talker}
 
@@ -1883,9 +1883,9 @@ elapsed since the timer was last reset. Does \emph{not} reset the timer.
 \fun{long}{timer_printf}{pari_timer *T, char *format,...} This diagnostics
 function is equivalent to the following code
 \bprog
-  fprintferr("Time ")
+  err_printf("Time ")
   ... prints remaining arguments according to format ...
-  fprintferr(": %ld", timer_delay(T));
+  err_printf(": %ld", timer_delay(T));
 @eprog\noindent Resets the timer as a side effect.
 
 \noindent They are used as follows:

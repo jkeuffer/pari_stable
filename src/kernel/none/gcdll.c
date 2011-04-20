@@ -438,7 +438,7 @@ cbezout(long a,long b,long *uu,long *vv)
   ulong r,u,u1,v,v1;
 
 #ifdef DEBUG_CBEZOUT
-  fprintferr("> cbezout(%ld,%ld,%p,%p)\n", a, b, (void *)uu, (void *)vv);
+  err_printf("> cbezout(%ld,%ld,%p,%p)\n", a, b, (void *)uu, (void *)vv);
 #endif
   if (!b)
   {
@@ -447,13 +447,13 @@ cbezout(long a,long b,long *uu,long *vv)
     {
       *uu=1L;
 #ifdef DEBUG_CBEZOUT
-      fprintferr("< %ld (%ld, %ld)\n", 1L, *uu, *vv);
+      err_printf("< %ld (%ld, %ld)\n", 1L, *uu, *vv);
 #endif
       return 0L;
     }
     *uu = a < 0 ? -1L : 1L;
 #ifdef DEBUG_CBEZOUT
-    fprintferr("< %ld (%ld, %ld)\n", (long)d, *uu, *vv);
+    err_printf("< %ld (%ld, %ld)\n", (long)d, *uu, *vv);
 #endif
     return (long)d;
   }
@@ -461,7 +461,7 @@ cbezout(long a,long b,long *uu,long *vv)
   {
     *uu = 0L; *vv = b < 0 ? -1L : 1L;
 #ifdef DEBUG_CBEZOUT
-    fprintferr("< %ld (%ld, %ld)\n", (long)d1, *uu, *vv);
+    err_printf("< %ld (%ld, %ld)\n", (long)d1, *uu, *vv);
 #endif
     return (long)d1;
   }
@@ -469,7 +469,7 @@ cbezout(long a,long b,long *uu,long *vv)
   {
     *uu = a; *vv = 0L;
 #ifdef DEBUG_CBEZOUT
-    fprintferr("< %ld (%ld, %ld)\n", 1L, *uu, *vv);
+    err_printf("< %ld (%ld, %ld)\n", 1L, *uu, *vv);
 #endif
     return 1L;
   }
@@ -481,7 +481,7 @@ cbezout(long a,long b,long *uu,long *vv)
     r = d; d = d1; d1 = r;
     t = uu; uu = vv; vv = t;
 #ifdef DEBUG_CBEZOUT
-    fprintferr("  swapping\n");
+    err_printf("  swapping\n");
 #endif
   }
   /* d > d1 > 0 */
@@ -497,7 +497,7 @@ cbezout(long a,long b,long *uu,long *vv)
     *vv = b < 0 ? (long)v : -(long)v;
   }
 #ifdef DEBUG_CBEZOUT
-  fprintferr("< %ld (%ld, %ld)\n", (long)r, *uu, *vv);
+  err_printf("< %ld (%ld, %ld)\n", (long)r, *uu, *vv);
 #endif
   return (long)r;
 }
@@ -651,7 +651,7 @@ lgcdii(ulong* d, ulong* d1,
     dd = *d; ddlo = dm1;
   }
 #ifdef DEBUG_LEHMER
-  fprintferr("  %lx:%lx, %lx:%lx\n", dd, ddlo, dd1, dd1lo);
+  err_printf("  %lx:%lx, %lx:%lx\n", dd, ddlo, dd1, dd1lo);
 #endif
 
   /* First subtraction/division stage.  (If a subtraction initially suffices,
@@ -714,7 +714,7 @@ lgcdii(ulong* d, ulong* d1,
   }
   res = 1;
 #ifdef DEBUG_LEHMER
-  fprintferr("  q = %ld, %lx, %lx\n", xv1, dd1, dd);
+  err_printf("  q = %ld, %lx, %lx\n", xv1, dd1, dd);
 #endif
   if (xv1 > vmax)
   {                                /* gone past the bound already */
@@ -785,7 +785,7 @@ lgcdii(ulong* d, ulong* d1,
         res++;
         dd1 = tmpd; xu = tmpu; xv = tmpv;
 #ifdef DEBUG_LEHMER
-        fprintferr("  q = %ld, %lx, %lx [%lu,%lu;%lu,%lu]\n",
+        err_printf("  q = %ld, %lx, %lx [%lu,%lu;%lu,%lu]\n",
                    q, dd, dd1, xu1, xu, xv1, xv);
 #endif
         if (xv > vmax)
@@ -824,7 +824,7 @@ lgcdii(ulong* d, ulong* d1,
         res++;
         dd = tmpd; xu1 = tmpu; xv1 = tmpv;
 #ifdef DEBUG_LEHMER
-        fprintferr("  q = %ld, %lx, %lx [%lu,%lu;%lu,%lu]\n",
+        err_printf("  q = %ld, %lx, %lx [%lu,%lu;%lu,%lu]\n",
                 q, dd1, dd, xu, xu1, xv, xv1);
 #endif
         if (xv1 > vmax)
@@ -871,7 +871,7 @@ lgcdii(ulong* d, ulong* d1,
       ddlo = tmp1;
     }
 #ifdef DEBUG_LEHMER
-    fprintferr("  %lx:%lx, %lx:%lx\n", dd, ddlo, dd1, dd1lo);
+    err_printf("  %lx:%lx, %lx:%lx\n", dd, ddlo, dd1, dd1lo);
 #endif
   } /* end of skip-pable section:  get here also, with res==1, when there
      * was a problem immediately after the very first division. */
@@ -909,7 +909,7 @@ lgcdii(ulong* d, ulong* d1,
    * to return.)
    */
 #ifdef DEBUG_LEHMER
-  fprintferr("(sh)");
+  err_printf("(sh)");
 #endif
 
   if (res&1)
@@ -965,7 +965,7 @@ lgcdii(ulong* d, ulong* d1,
   } /* end reshift */
 
 #ifdef DEBUG_LEHMER
-  fprintferr("  %lx:%lx, %lx:%lx\n", dd, ddlo, dd1, dd1lo);
+  err_printf("  %lx:%lx, %lx:%lx\n", dd, ddlo, dd1, dd1lo);
 #endif
 
   /* The Second Loop.  Rip-off of the first, but we now check for overflow
@@ -1010,7 +1010,7 @@ lgcdii(ulong* d, ulong* d1,
     res++;
     dd1 = tmpd; xu = tmpu; xv = tmpv;
 #ifdef DEBUG_LEHMER
-    fprintferr("  q = %ld, %lx, %lx\n", q, dd, dd1);
+    err_printf("  q = %ld, %lx, %lx\n", q, dd, dd1);
 #endif
     if (xv > vmax)
     {                                /* time to return */
@@ -1053,7 +1053,7 @@ lgcdii(ulong* d, ulong* d1,
     res++; /* commit dd, xu1, xv1 */
     dd = tmpd; xu1 = tmpu; xv1 = tmpv;
 #ifdef DEBUG_LEHMER
-    fprintferr("  q = %ld, %lx, %lx\n", q, dd1, dd);
+    err_printf("  q = %ld, %lx, %lx\n", q, dd1, dd);
 #endif
     if (xv1 > vmax)
     {                                /* time to return */

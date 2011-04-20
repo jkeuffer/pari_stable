@@ -71,11 +71,11 @@ calc_block(blockdata *B, GEN Z, GEN Y, GEN SB)
 
   if (DEBUGLEVEL>3)
   {
-    fprintferr("lg(Z) = %ld, lg(Y) = %ld\n", r,lg(Y));
+    err_printf("lg(Z) = %ld, lg(Y) = %ld\n", r,lg(Y));
     if (DEBUGLEVEL > 5)
     {
-      fprintferr("Z = %Ps\n",Z);
-      fprintferr("Y = %Ps\n",Y);
+      err_printf("Z = %Ps\n",Z);
+      err_printf("Y = %Ps\n",Y);
     }
   }
   lnon = minss(BIL, r);
@@ -215,7 +215,7 @@ print_block_system(blockdata *B, GEN Y, GEN SB)
   long *k, *n, **e, *t;
   GEN D, De, Z, cyperm, perm, VOID = cgetg(1, t_VECSMALL);
 
-  if (DEBUGLEVEL>5) fprintferr("Y = %Ps\n",Y);
+  if (DEBUGLEVEL>5) err_printf("Y = %Ps\n",Y);
   n = new_chunk(N+1);
   D = vectrunc_init(N+1);
   t = new_chunk(r+1);
@@ -250,7 +250,7 @@ print_block_system(blockdata *B, GEN Y, GEN SB)
       gel(Z,ns) = p1;
     }
   }
-  if (DEBUGLEVEL>2) fprintferr("\nns = %ld\n",ns);
+  if (DEBUGLEVEL>2) err_printf("\nns = %ld\n",ns);
   if (!ns) return test_block(B, SB, D);
 
   setlg(Z, ns+1);
@@ -398,7 +398,7 @@ embedding(GEN g, GEN DATA, primedata *S, GEN den, GEN listdelta)
     * [w1,h1] satisfying the same conditions mod p^2, [w1,h1] = [w0,h0] (mod p)
     * (cf. Dixon: J. Austral. Math. Soc., Series A, vol.49, 1990, p.445) */
     if (DEBUGLEVEL>1)
-      fprintferr("lifting embedding mod p^k = %Ps^%ld\n",S->p, Z_pval(q,S->p));
+      err_printf("lifting embedding mod p^k = %Ps^%ld\n",S->p, Z_pval(q,S->p));
 
     /* w1 := w0 - h0 g(w0) mod (T,q) */
     if (wpow) a = FpX_FpXQV_eval(g,wpow, T,q);
@@ -417,7 +417,7 @@ embedding(GEN g, GEN DATA, primedata *S, GEN den, GEN listdelta)
     {
       GEN G = is_pm1(den)? g: RgX_rescale(g,den);
       if (gequal0(RgX_RgXQ_eval(G, w1_Q, T))) break;
-      if (DEBUGLEVEL) fprintferr("coeff too big for embedding\n");
+      if (DEBUGLEVEL) err_printf("coeff too big for embedding\n");
       return NULL;
     }
     gerepileall(av, 5, &w1,&h0,&w1_Q,&q,&p);
@@ -560,14 +560,14 @@ choose_prime(primedata *S, GEN pol, GEN dpol)
     for (j=2; j<=r; j++) { n[j] = degpol(gel(ff,j)); lcm = clcm(lcm, n[j]); }
     if (lcm <= oldlcm) continue; /* false when oldlcm = 0 */
 
-    if (DEBUGLEVEL) fprintferr("p = %ld,\tlcm = %ld,\torbits: %Ps\n",p[2],lcm,n);
+    if (DEBUGLEVEL) err_printf("p = %ld,\tlcm = %ld,\torbits: %Ps\n",p[2],lcm,n);
     pp = p[2];
     oldn = n;
     oldff = ff;
     oldlcm = lcm; if (r == 1) break;
     av = avma;
   }
-  if (DEBUGLEVEL) fprintferr("Chosen prime: p = %ld\n", pp);
+  if (DEBUGLEVEL) err_printf("Chosen prime: p = %ld\n", pp);
   S->ff = oldff;
   S->lcm= oldlcm;
   S->p  = utoipos(pp);
@@ -629,7 +629,7 @@ compute_data(blockdata *B)
   GEN p = S->p, T = S->T, ff = S->ff, DATA = B->DATA;
   long i, j, l, e, N, lff = lg(ff);
 
-  if (DEBUGLEVEL>1) fprintferr("Entering compute_data()\n\n");
+  if (DEBUGLEVEL>1) err_printf("Entering compute_data()\n\n");
   pol = B->PD->pol; N = degpol(pol);
   roo = B->PD->roo;
   if (DATA)
@@ -638,7 +638,7 @@ compute_data(blockdata *B)
     GEN TR = addis(gel(DATA,5), 1);
     GEN mTR = negi(TR), interp, bezoutC;
 
-    if (DEBUGLEVEL>1) fprintferr("... update (translate) an existing DATA\n\n");
+    if (DEBUGLEVEL>1) err_printf("... update (translate) an existing DATA\n\n");
 
     gel(DATA,5) = TR;
     pol = RgX_translate(gel(DATA,1), gen_m1);
@@ -704,10 +704,10 @@ compute_data(blockdata *B)
   gel(DATA,7) = mulii(shifti(ceil_safe(p1), 1), B->PD->den);
 
   if (DEBUGLEVEL>1) {
-    fprintferr("f = %Ps\n",DATA[1]);
-    fprintferr("p = %Ps, lift to p^%ld\n", p, e);
-    fprintferr("2 * Hadamard bound * ind = %Ps\n",DATA[7]);
-    fprintferr("2 * M = %Ps\n",DATA[8]);
+    err_printf("f = %Ps\n",DATA[1]);
+    err_printf("p = %Ps, lift to p^%ld\n", p, e);
+    err_printf("2 * Hadamard bound * ind = %Ps\n",DATA[7]);
+    err_printf("2 * M = %Ps\n",DATA[8]);
   }
   if (B->DATA) {
     DATA = gclone(DATA);
@@ -742,7 +742,7 @@ subfield(GEN A, blockdata *B)
     for (j=2; j<=d; j++)
       p1 = Fq_mul(p1, gel(fhk,Ai[j]), T, pe);
     gel(delta,i) = p1;
-    if (DEBUGLEVEL>5) fprintferr("delta[%ld] = %Ps\n",i,p1);
+    if (DEBUGLEVEL>5) err_printf("delta[%ld] = %Ps\n",i,p1);
     /* g = prod (X - delta[i])
      * if g o h = 0 (pol), we'll have h(Ai[j]) = delta[i] for all j */
     /* fk[k] belongs to block number whichdelta[k] */
@@ -752,29 +752,29 @@ subfield(GEN A, blockdata *B)
   }
   d_1_term = centermod(d_1_term, pe); /* Tr(g) */
   if (absi_cmp(d_1_term, gel(M,3)) > 0) {
-    if (DEBUGLEVEL>1) fprintferr("d-1 test failed\n");
+    if (DEBUGLEVEL>1) err_printf("d-1 test failed\n");
     return NULL;
   }
   g = FqV_roots_to_pol(delta, T, pe, 0);
   g = centermod(polsimplify(g), pe); /* assume g in Z[X] */
   if (!ok_coeffs(g,M)) {
-    if (DEBUGLEVEL>2) fprintferr("pol. found = %Ps\n",g);
-    if (DEBUGLEVEL>1) fprintferr("coeff too big for pol g(x)\n");
+    if (DEBUGLEVEL>2) err_printf("pol. found = %Ps\n",g);
+    if (DEBUGLEVEL>1) err_printf("coeff too big for pol g(x)\n");
     return NULL;
   }
   if (!FpX_is_squarefree(g, p)) {
-    if (DEBUGLEVEL>2) fprintferr("pol. found = %Ps\n",g);
-    if (DEBUGLEVEL>1) fprintferr("changing f(x): p divides disc(g)\n");
+    if (DEBUGLEVEL>2) err_printf("pol. found = %Ps\n",g);
+    if (DEBUGLEVEL>1) err_printf("changing f(x): p divides disc(g)\n");
     compute_data(B);
     return subfield(A, B);
   }
 
   lf = lg(firstroot); listdelta = cgetg(lf, t_VEC);
   for (i=1; i<lf; i++) listdelta[i] = delta[whichdelta[firstroot[i]]];
-  if (DEBUGLEVEL) fprintferr("candidate = %Ps\n", g);
+  if (DEBUGLEVEL) err_printf("candidate = %Ps\n", g);
   e = embedding(g, B->DATA, B->S, B->PD->den, listdelta);
   if (!e) return NULL;
-  if (DEBUGLEVEL) fprintferr("... OK!\n");
+  if (DEBUGLEVEL) err_printf("... OK!\n");
   return _subfield(g, e);
 }
 
@@ -800,11 +800,11 @@ subfields_of_given_degree(blockdata *B)
   pari_sp av = avma;
   GEN L;
 
-  if (DEBUGLEVEL) fprintferr("\n* Look for subfields of degree %ld\n\n", B->d);
+  if (DEBUGLEVEL) err_printf("\n* Look for subfields of degree %ld\n\n", B->d);
   B->DATA = NULL; compute_data(B);
   L = calc_block(B, B->S->Z, cgetg(1,t_VEC), NULL);
   if (DEBUGLEVEL>9)
-    fprintferr("\nSubfields of degree %ld: %Ps\n", B->d, L? L: cgetg(1,t_VEC));
+    err_printf("\nSubfields of degree %ld: %Ps\n", B->d, L? L: cgetg(1,t_VEC));
   if (isclone(B->DATA)) gunclone(B->DATA);
   avma = av; return L;
 }
@@ -870,7 +870,7 @@ subfieldsall(GEN nf)
 
   v0 = varn(pol); N = degpol(pol);
   dg = divisors(utoipos(N)); ld = lg(dg)-1;
-  if (DEBUGLEVEL) fprintferr("\n***** Entering subfields\n\npol = %Ps\n",pol);
+  if (DEBUGLEVEL) err_printf("\n***** Entering subfields\n\npol = %Ps\n",pol);
 
 
   LSB = _subfield(pol_x(0), gen_0);
@@ -890,7 +890,7 @@ subfieldsall(GEN nf)
     (void)delete_var(); /* from choose_prime */
   }
   LSB = shallowconcat(LSB, _subfield(pol, pol_x(0)));
-  if (DEBUGLEVEL) fprintferr("\n***** Leaving subfields\n\n");
+  if (DEBUGLEVEL) err_printf("\n***** Leaving subfields\n\n");
   return fix_var(gerepilecopy(av, LSB), v0);
 }
 

@@ -433,7 +433,7 @@ CplxModulus(GEN data, long *newprec)
     if (DEBUGLEVEL>1) pari_warn(warnprec, "CplxModulus", dprec);
   }
   ex = gexpo(cpl); avma = av;
-  if (DEBUGLEVEL>1) fprintferr("cpl = 2^%ld\n", ex);
+  if (DEBUGLEVEL>1) err_printf("cpl = 2^%ld\n", ex);
 
   gel(data,5) = listCR;
   *newprec = dprec; return ex;
@@ -491,7 +491,7 @@ FindModulus(GEN bnr, GEN dtQ, long *newprec)
   if (lg(dtQ[2]) == 2) iscyc = 1;
 
   if (DEBUGLEVEL>1)
-    fprintferr("Looking for a modulus of norm: ");
+    err_printf("Looking for a modulus of norm: ");
 
   for(;;)
   {
@@ -502,7 +502,7 @@ FindModulus(GEN bnr, GEN dtQ, long *newprec)
     av1 = avma;
     for (n = minnorm; n <= maxnorm; n++)
     {
-      if (DEBUGLEVEL>1) fprintferr(" %ld", n);
+      if (DEBUGLEVEL>1) err_printf(" %ld", n);
       avma = av1;
 
       idnormn = gel(listid,n);
@@ -550,7 +550,7 @@ FindModulus(GEN bnr, GEN dtQ, long *newprec)
             gel(p2,3) = InitQuotient(D);
             gel(p2,4) = InitQuotient(ImC);
             if (DEBUGLEVEL>1)
-              fprintferr("\nTrying modulus = %Ps and subgroup = %Ps\n",
+              err_printf("\nTrying modulus = %Ps and subgroup = %Ps\n",
                          bnr_get_mod(bnrm), D);
             cpl = CplxModulus(p2, &pr);
             if (oldcpl < 0 || cpl < oldcpl)
@@ -562,7 +562,7 @@ FindModulus(GEN bnr, GEN dtQ, long *newprec)
             }
             if (oldcpl < rb) goto END; /* OK */
 
-            if (DEBUGLEVEL>1) fprintferr("Trying to find another modulus...");
+            if (DEBUGLEVEL>1) err_printf("Trying to find another modulus...");
             first = 0;
           }
         }
@@ -577,7 +577,7 @@ FindModulus(GEN bnr, GEN dtQ, long *newprec)
   }
 END:
   if (DEBUGLEVEL>1)
-    fprintferr("No, we're done!\nModulus = %Ps and subgroup = %Ps\n",
+    err_printf("No, we're done!\nModulus = %Ps and subgroup = %Ps\n",
                bnr_get_mod(gel(rep,1)), gel(rep,2));
   gel(rep,5) = InitChar(gel(rep,1), gel(rep,5), *newprec);
   return gerepilecopy(av, rep);
@@ -744,7 +744,7 @@ ComputeAllArtinNumbers(GEN dataCR, GEN vChar, int check, long prec)
     long l = lg(LChar);
 
     if (DEBUGLEVEL>1)
-      fprintferr("* Root Number: cond. no %ld/%ld (%ld chars)\n", j, J, l-1);
+      err_printf("* Root Number: cond. no %ld/%ld (%ld chars)\n", j, J, l-1);
     LCHI = cgetg(l, t_VEC);
     for (k = 1; k < l; k++) gel(LCHI,k) = ch_CHI0(gel(ldata,k));
     WbyCond = ArtinNumber(bnr, LCHI, check, prec);
@@ -1111,9 +1111,9 @@ pan(int **an, long n, long deg)
   long i,j;
   for (i = 1; i <= n; i++)
   {
-    fprintferr("n = %ld: ",i);
-    for (j = 0; j < deg; j++) fprintferr("%d ",an[i][j]);
-    fprintferr("\n");
+    err_printf("n = %ld: ",i);
+    for (j = 0; j < deg; j++) err_printf("%d ",an[i][j]);
+    err_printf("\n");
   }
 }
 #endif
@@ -1277,7 +1277,7 @@ CorrectCoeff(GEN dtcr, int** an, int** reduc, long n, long deg)
   diff = ch_diff(dtcr); lg = lg(diff) - 1;
   if (!lg) return;
 
-  if (DEBUGLEVEL>2) fprintferr("diff(CHI) = %Ps", diff);
+  if (DEBUGLEVEL>2) err_printf("diff(CHI) = %Ps", diff);
   bnrc =  ch_bnr(dtcr);
   init_CHI_alg(&C, ch_CHI0(dtcr));
 
@@ -1420,7 +1420,7 @@ InitPrimes(GEN bnr, long N0, LISTray *R)
   for (p = 2; p <= N0; prime[2] = p)
   {
     pari_sp av = avma;
-    if (DEBUGLEVEL>1 && (p & 2047) == 1) fprintferr("%ld ", p);
+    if (DEBUGLEVEL>1 && (p & 2047) == 1) err_printf("%ld ", p);
     tabpr = idealprimedec(nf, prime);
     for (j = 1; j < lg(tabpr); j++)
     {
@@ -1769,7 +1769,7 @@ LABrcf: ct++;
   if (l == 1)
     return coltoalg(nf, gel(cand,1));
 
-  if (DEBUGLEVEL>1) fprintferr("RecCoeff3: no solution found!\n");
+  if (DEBUGLEVEL>1) err_printf("RecCoeff3: no solution found!\n");
   return NULL;
 }
 
@@ -1831,7 +1831,7 @@ RecCoeff(GEN nf,  GEN pol,  long v, long prec)
     long cf = md + (j%2? j/2: -j/2);
     GEN t, bound = shifti(binomial(utoipos(cl), cf), cl-cf);
 
-    if (DEBUGLEVEL>1) fprintferr("RecCoeff (cf = %ld, B = %Ps)\n", cf, bound);
+    if (DEBUGLEVEL>1) err_printf("RecCoeff (cf = %ld, B = %Ps)\n", cf, bound);
     d.beta = real_i( gel(pol,cf+2) );
     d.B    = bound;
     if (! (t = RecCoeff2(nf, &d, prec)) ) return NULL;
@@ -1996,7 +1996,7 @@ QuadGetST(GEN bnr, GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
   }
   if ((ulong)n0 > maxprime())
     pari_err(talker, "Not enough precomputed primes (need all p <= %ld)", n0);
-  if (DEBUGLEVEL>1) fprintferr("N0 = %ld\n", n0);
+  if (DEBUGLEVEL>1) err_printf("N0 = %ld\n", n0);
   InitPrimesQuad(bnr, n0, &LIST);
 
   cfh = sqrtr(mppi(prec));
@@ -2011,7 +2011,7 @@ QuadGetST(GEN bnr, GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
     GEN veint1, vcn;
 
     if (DEBUGLEVEL>1)
-      fprintferr("* conductor no %ld/%ld (N = %ld)\n\tInit: ", j,ncond,NN);
+      err_printf("* conductor no %ld/%ld (N = %ld)\n\tInit: ", j,ncond,NN);
     if (lg(ec2) > prec) ec2 = rtor(ec2, prec);
     veint1 = mpveceint1(rtor(c2, prec), ec2, NN);
     vcn = mpvecpow(invr(ec2), NN);
@@ -2027,7 +2027,7 @@ QuadGetST(GEN bnr, GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
       long c = 0;
 
       if (DEBUGLEVEL>1)
-        fprintferr("\tcharacter no: %ld (%ld/%ld)\n", t,k,nChar);
+        err_printf("\tcharacter no: %ld (%ld/%ld)\n", t,k,nChar);
       matan = computean(gel(dataCR,t), &LIST, NN, d);
       for (n = 1; n <= NN; n++)
         if ((an = EvalCoeff(z, matan[n], d)))
@@ -2040,7 +2040,7 @@ QuadGetST(GEN bnr, GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
       gaffect(gmul(cf,  gconj(p2)),   gel(T,t));
       FreeMat(matan,NN); avma = av2;
     }
-    if (DEBUGLEVEL>1) fprintferr("\n");
+    if (DEBUGLEVEL>1) err_printf("\n");
     avma = av1;
   }
   avma = av;
@@ -2197,7 +2197,7 @@ GetST(GEN bnr, GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
     const long nChar = lg(LChar)-1, NN = N0[jc];
 
     if (DEBUGLEVEL>1)
-      fprintferr("* conductor no %ld/%ld (N = %ld)\n\tInit: ", jc,ncond,NN);
+      err_printf("* conductor no %ld/%ld (N = %ld)\n\tInit: ", jc,ncond,NN);
 
     cScT.c1 = gel(C,jc);
     init_cScT(&cScT, gel(dataCR, LChar[1]), NN, prec2);
@@ -2211,7 +2211,7 @@ GetST(GEN bnr, GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
       int **matan;
 
       if (DEBUGLEVEL>1)
-        fprintferr("\tcharacter no: %ld (%ld/%ld)\n", t,k,nChar);
+        err_printf("\tcharacter no: %ld (%ld/%ld)\n", t,k,nChar);
       matan = ComputeCoeff(gel(dataCR,t), &LIST, NN, d);
       for (n = 1; n <= NN; n++)
         if ((an = EvalCoeff(z, matan[n], d)))
@@ -2225,7 +2225,7 @@ GetST(GEN bnr, GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
       gaffect(gconj(p2), gel(T,t));
       FreeMat(matan, NN); avma = av2;
     }
-    if (DEBUGLEVEL>1) fprintferr("\n");
+    if (DEBUGLEVEL>1) err_printf("\n");
     avma = av1;
   }
   clear_cScT(&cScT, n0);
@@ -2351,7 +2351,7 @@ LABDOUB:
     for (i = 1; i <= cl; i++) gel(C,i) = ch_C(gel(dataCR, i));
     n = zeta_get_N0(vecmax(C), zeta_get_limx(r1, r2, bit_accuracy(newprec)));
     if (n > BND) n = BND;
-    if (DEBUGLEVEL) fprintferr("N0 in QuickPol: %ld \n", n);
+    if (DEBUGLEVEL) err_printf("N0 in QuickPol: %ld \n", n);
     InitPrimes(bnr, n, &LIST);
 
     L1 = cgetg(cl+1, t_VEC);
@@ -2401,10 +2401,10 @@ LABDOUB:
   if (DEBUGLEVEL)
   {
     if (DEBUGLEVEL>1) {
-      fprintferr("polrelnum = %Ps\n", polrelnum);
-      fprintferr("zetavalues = %Ps\n", veczeta);
+      err_printf("polrelnum = %Ps\n", polrelnum);
+      err_printf("zetavalues = %Ps\n", veczeta);
       if (!flag)
-        fprintferr("Checking the square-root of the Stark unit...\n");
+        err_printf("Checking the square-root of the Stark unit...\n");
     }
     timer_printf(&ti, "Compute %s", flag? "quickpol": "polrelnum");
   }
@@ -2422,8 +2422,8 @@ LABDOUB:
     if (DEBUGLEVEL)
     {
       if (DEBUGLEVEL>1) {
-        fprintferr("It's not a square...\n");
-        fprintferr("polrelnum = %Ps\n", polrelnum);
+        err_printf("It's not a square...\n");
+        err_printf("polrelnum = %Ps\n", polrelnum);
       }
       timer_printf(&ti, "Compute polrelnum");
     }
@@ -2451,7 +2451,7 @@ LABDOUB:
   }
 
   if (DEBUGLEVEL) {
-    if (DEBUGLEVEL>1) fprintferr("polrel = %Ps\n", polrel);
+    if (DEBUGLEVEL>1) err_printf("polrel = %Ps\n", polrel);
     timer_printf(&ti, "Recpolnum");
   }
   return gerepilecopy(av, polrel);
@@ -2529,7 +2529,7 @@ bnrstark(GEN bnr, GEN subgrp, long prec)
 
   if (newprec > prec)
   {
-    if (DEBUGLEVEL>1) fprintferr("new precision: %ld\n", newprec);
+    if (DEBUGLEVEL>1) err_printf("new precision: %ld\n", newprec);
     nf = nfnewprec_shallow(nf, newprec);
   }
   return gerepileupto(av, AllStark(data, nf, 0, newprec));
@@ -2794,7 +2794,7 @@ quadhilbertreal(GEN D, long prec)
 
       if (newprec > prec)
       {
-        if (DEBUGLEVEL>1) fprintferr("new precision: %ld\n", newprec);
+        if (DEBUGLEVEL>1) err_printf("new precision: %ld\n", newprec);
         nf = nfnewprec_shallow(nf, newprec);
       }
       pol = AllStark(data, nf, 0, newprec);
@@ -2956,7 +2956,7 @@ init_pq(GEN D, struct gpq_data *T)
       if (b > best) {
         store = 0; /* (p,q) always better than (q,r) for r >= q */
         best = b; T->q = q; T->p = p;
-        if (DEBUGLEVEL>2) fprintferr("p,q = %ld,%ld\n", p, q);
+        if (DEBUGLEVEL>2) err_printf("p,q = %ld,%ld\n", p, q);
       }
       /* won't improve with this q as largest member */
       if (best > 0) break;
@@ -2971,7 +2971,7 @@ init_pq(GEN D, struct gpq_data *T)
         double b = (t*q) / (q-1); /* q(q+1) / (q-1)^2 */
         if (b > best) {
           best = b; T->q = T->p = q;
-          if (DEBUGLEVEL>2) fprintferr("p,q = %ld,%ld\n", q, q);
+          if (DEBUGLEVEL>2) err_printf("p,q = %ld,%ld\n", q, q);
         }
       }
     }
@@ -2980,7 +2980,7 @@ init_pq(GEN D, struct gpq_data *T)
     if ((listp[1]+1)*t <= (listp[1]-1)*best) break;
   }
   if (DEBUGLEVEL>1)
-    fprintferr("(p, q) = %ld, %ld; gain = %f\n", T->p, T->q, 12*best);
+    err_printf("(p, q) = %ld, %ld; gain = %f\n", T->p, T->q, 12*best);
 }
 
 static GEN
@@ -3096,7 +3096,7 @@ quadhilbertimag(GEN D)
     for (i=1; i<=h; i++)
     {
       GEN s = gpq(gel(L,i), &T);
-      if (DEBUGLEVEL>3) fprintferr("%ld ", i);
+      if (DEBUGLEVEL>3) err_printf("%ld ", i);
       if (!s) continue;
       if (typ(s) != t_COMPLEX) gel(Pr, ++r1) = s; /* real root */
       else                     gel(Pi, ++r2) = s;
@@ -3155,13 +3155,13 @@ get_lambda(GEN bnr)
   for (i=1; i<lu; i++)
     gel(u,i) = ZC_hnfrem(gel(u,i), f); /* roots of 1, mod f */
   if (DEBUGLEVEL>1)
-    fprintferr("quadray: looking for [a,b] != unit mod 2f\n[a,b] = ");
+    err_printf("quadray: looking for [a,b] != unit mod 2f\n[a,b] = ");
   for (a=0; a<f2; a++)
     for (b=0; b<f2; b++)
     {
       GEN la = deg1pol_shallow(stoi(a), stoi(b), v); /* ax + b */
       if (umodiu(gnorm(mkpolmod(la, pol)), f2) != 1) continue;
-      if (DEBUGLEVEL>1) fprintferr("[%ld,%ld] ",a,b);
+      if (DEBUGLEVEL>1) err_printf("[%ld,%ld] ",a,b);
 
       labas = poltobasis(nf, la);
       lamodf = ZC_hnfrem(labas, f);
@@ -3170,8 +3170,8 @@ get_lambda(GEN bnr)
       if (i < lu) continue; /* la = unit mod f */
       if (DEBUGLEVEL)
       {
-        if (DEBUGLEVEL>1) fprintferr("\n");
-        fprintferr("lambda = %Ps\n",la);
+        if (DEBUGLEVEL>1) err_printf("\n");
+        err_printf("lambda = %Ps\n",la);
       }
       return labas;
     }

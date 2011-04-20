@@ -646,7 +646,7 @@ closure_err(void)
       /* avoid "in function foo: foo" */
       if (!next_fun || strcmp(next_fun, s)) {
         print_errcontext(pariErr, next_label, s, sbase);
-        pariOut_putc(pariErr, '\n');
+        out_putc(pariErr, '\n');
       }
       pari_free(next_label);
       if (i == lastfun) break;

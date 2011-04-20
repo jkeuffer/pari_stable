@@ -281,13 +281,13 @@ gp_readvec_stream(FILE *fi)
     if (!*(b->buf)) continue;
     if (i>n)
     {
-      if (DEBUGLEVEL) fprintferr("gp_readvec_stream: reaching %ld entries\n",n);
+      if (DEBUGLEVEL) err_printf("gp_readvec_stream: reaching %ld entries\n",n);
       n <<= 1;
       z = vec_lengthen(z,n);
     }
     gel(z,i++) = readseq(b->buf);
   }
-  if (DEBUGLEVEL) fprintferr("gp_readvec_stream: found %ld entries\n",i-1);
+  if (DEBUGLEVEL) err_printf("gp_readvec_stream: found %ld entries\n",i-1);
   setlg(z,i); delete_buffer(b);
   return gerepilecopy(ltop,z);
 }
@@ -430,16 +430,16 @@ static void
 set_last_newline(char c) { last_was_newline = (c == '\n'); }
 
 void
-pariOut_putc(PariOUT *out, char c) { set_last_newline(c); out->putch(c); }
+out_putc(PariOUT *out, char c) { set_last_newline(c); out->putch(c); }
 void
-pari_putc(char c) { pariOut_putc(pariOut, c); }
+pari_putc(char c) { out_putc(pariOut, c); }
 
 void
-pariOut_puts(PariOUT *out, const char *s) {
+out_puts(PariOUT *out, const char *s) {
   if (*s) {  set_last_newline(s[strlen(s)-1]); out->puts(s); }
 }
 void
-pari_puts(const char *s) { pariOut_puts(pariOut, s); }
+pari_puts(const char *s) { out_puts(pariOut, s); }
 
 int
 pari_last_was_newline(void) { return last_was_newline; }
@@ -450,7 +450,7 @@ void
 pari_flush(void) { pariOut->flush(); }
 
 void
-flusherr(void) { pariErr->flush(); }
+err_flush(void) { pariErr->flush(); }
 
 /* e binary exponent, return exponent in base ten */
 static long
@@ -1299,13 +1299,13 @@ decode_color(long n, long *c)
 /* start printing in "color" c */
 /* terminal has to support ANSI color escape sequences */
 void
-pariOut_term_color(PariOUT *out, long c)
+out_term_color(PariOUT *out, long c)
 {
   static char s[COLOR_LEN];
   out->puts(term_get_color(s, c));
 }
 void
-term_color(long c) { pariOut_term_color(pariOut, c); }
+term_color(long c) { out_term_color(pariOut, c); }
 
 char *
 term_get_color(char *s, long n)
@@ -1485,7 +1485,7 @@ lim_lines_output(char *s, long n, long max_lin)
 static void
 new_line(PariOUT *out, const char *prefix)
 {
-  pariOut_putc(out, '\n'); if (prefix) pariOut_puts(out, prefix);
+  out_putc(out, '\n'); if (prefix) out_puts(out, prefix);
 }
 
 #define is_blank(c) ((c) == ' ' || (c) == '\n' || (c) == '\t')
@@ -1503,7 +1503,7 @@ print_prefixed_text(PariOUT *out, const char *s, const char *prefix,
   long linelen = prelen;
   char *word = (char*)pari_malloc(ls + 3);
 
-  if (prefix) pariOut_puts(out, prefix);
+  if (prefix) out_puts(out, prefix);
   for(;;)
   {
     long len;
@@ -1514,12 +1514,12 @@ print_prefixed_text(PariOUT *out, const char *s, const char *prefix,
     len = strlen_real(word);
     linelen += len;
     if (linelen >= W) { new_line(out, prefix); linelen = prelen + len; }
-    pariOut_puts(out, word);
+    out_puts(out, word);
     while (is_blank(*s)) {
       switch (*s) {
         case ' ': break;
         case '\t':
-          linelen = (linelen & ~7UL) + 8; pariOut_putc(out, '\t');
+          linelen = (linelen & ~7UL) + 8; out_putc(out, '\t');
           blank = 1; break;
         case '\n':
           linelen = W;
@@ -1529,10 +1529,10 @@ print_prefixed_text(PariOUT *out, const char *s, const char *prefix,
       s++;
     }
     if (!*s) break;
-    if (!blank) { pariOut_putc(out, ' '); linelen++; }
+    if (!blank) { out_putc(out, ' '); linelen++; }
   }
   if (!str)
-    pariOut_putc(out, '\n');
+    out_putc(out, '\n');
   else
   {
     long i,len = strlen_real(str);
@@ -1542,15 +1542,15 @@ print_prefixed_text(PariOUT *out, const char *s, const char *prefix,
       new_line(out, prefix); linelen = prelen;
       if (space) { str++; len--; space = 0; }
     }
-    pariOut_term_color(out, c_OUTPUT);
-    pariOut_puts(out, str);
-    if (!len || str[len-1] != '\n') pariOut_putc(out, '\n');
+    out_term_color(out, c_OUTPUT);
+    out_puts(out, str);
+    if (!len || str[len-1] != '\n') out_putc(out, '\n');
     if (space) { linelen++; len--; }
-    pariOut_term_color(out, c_ERR);
-    if (prefix) { pariOut_puts(out, prefix); linelen -= prelen; }
-    for (i=0; i<linelen; i++) pariOut_putc(out, ' ');
-    pariOut_putc(out, '^');
-    for (i=0; i<len; i++) pariOut_putc(out, '-');
+    out_term_color(out, c_ERR);
+    if (prefix) { out_puts(out, prefix); linelen -= prelen; }
+    for (i=0; i<linelen; i++) out_putc(out, ' ');
+    out_putc(out, '^');
+    for (i=0; i<len; i++) out_putc(out, '-');
   }
   pari_free(word);
 }
@@ -3011,10 +3011,10 @@ outmat(GEN x)
 { matbrute(x,'g',-1); pari_putc('\n'); pari_flush(); }
 
 void
-fprintferr(const char* fmt, ...)
+err_printf(const char* fmt, ...)
 {
   va_list args; va_start(args, fmt);
-  pariOut_vprintf(pariErr,fmt,args); va_end(args);
+  out_vprintf(pariErr,fmt,args); va_end(args);
 }
 
 /*******************************************************************/
@@ -3067,7 +3067,7 @@ newfile(FILE *f, const char *name, int type)
   }
   if (file->prev) (file->prev)->next = file;
   if (DEBUGFILES)
-    fprintferr("I/O: new pariFILE %s (code %d) \n",name,type);
+    err_printf("I/O: new pariFILE %s (code %d) \n",name,type);
   return file;
 }
 
@@ -3093,7 +3093,7 @@ pari_kill_file(pariFILE *f)
   }
 #endif
   if (DEBUGFILES)
-    fprintferr("I/O: closing file %s (code %d) \n",f->name,f->type);
+    err_printf("I/O: closing file %s (code %d) \n",f->name,f->type);
   pari_free(f);
 }
 
@@ -3112,7 +3112,7 @@ pari_open_file(FILE *f, const char *s, const char *mode)
 {
   if (!f) pari_err(talker, "could not open requested file %s", s);
   if (DEBUGFILES)
-    fprintferr("I/O: opening file %s (mode %s)\n", s, mode);
+    err_printf("I/O: opening file %s (mode %s)\n", s, mode);
   return newfile(f,s,0);
 }
 
@@ -3152,7 +3152,7 @@ pari_unlink(const char *s)
 {
   if (unlink(s)) pari_warn(warner, "I/O: can\'t remove file %s", s);
   else if (DEBUGFILES)
-    fprintferr("I/O: removed file %s\n", s);
+    err_printf("I/O: removed file %s\n", s);
 }
 
 void
@@ -3196,7 +3196,7 @@ void
 filestate_restore(pariFILE *F)
 {
   pariFILE *f = pari_last_tmp_file();
-  if (DEBUGFILES>1) fprintferr("gp_context_restore: deleting open files...\n");
+  if (DEBUGFILES>1) err_printf("gp_context_restore: deleting open files...\n");
   while (f)
   {
     pariFILE *g = f->prev;
@@ -3207,16 +3207,16 @@ filestate_restore(pariFILE *F)
     if (f->type & mf_IN) {
       pari_infile = f->file;
       if (DEBUGFILES>1)
-        fprintferr("restoring pari_infile to %s\n", f->name);
+        err_printf("restoring pari_infile to %s\n", f->name);
       break;
     }
   }
   if (!f) {
     pari_infile = stdin;
     if (DEBUGFILES>1)
-      fprintferr("gp_context_restore: restoring pari_infile to stdin\n");
+      err_printf("gp_context_restore: restoring pari_infile to stdin\n");
   }
-  if (DEBUGFILES>1) fprintferr("done\n");
+  if (DEBUGFILES>1) err_printf("done\n");
 }
 
 static void
@@ -3261,7 +3261,7 @@ pari_close_files(void)
 static int
 ok_pipe(FILE *f)
 {
-  if (DEBUGFILES) fprintferr("I/O: checking output pipe...\n");
+  if (DEBUGFILES) err_printf("I/O: checking output pipe...\n");
   CATCH(CATCH_ALL) {
     CATCH_RELEASE(); return 0;
   }
@@ -3928,7 +3928,7 @@ readobj(FILE *f, int *ptc)
       if (c == NAM_GEN)
       {
         x = rdGEN(f);
-        fprintferr("setting %s\n",s);
+        err_printf("setting %s\n",s);
         changevalue(fetch_named_var(s), x);
       }
       else
@@ -4075,7 +4075,7 @@ readbin(const char *name, FILE *f, int *vector)
 /*******************************************************************/
 /* print a vector of GENs */
 void
-pariOut_print0(PariOUT *out, GEN g, long flag)
+out_print0(PariOUT *out, GEN g, long flag)
 {
   OUT_FUN f = get_fun(flag);
   long i, l = lg(g);
@@ -4083,16 +4083,16 @@ pariOut_print0(PariOUT *out, GEN g, long flag)
   {
     GEN x = gel(g,i);
     if (typ(x)==t_STR)
-      pariOut_puts(out, GSTR(x)); /* text surrounded by "" otherwise */
+      out_puts(out, GSTR(x)); /* text surrounded by "" otherwise */
     else
     {
       char *s = GENtostr_fun(x, GP_DATA->fmt, f);
-      pariOut_puts(out, s); free(s);
+      out_puts(out, s); free(s);
     }
   }
 }
 void
-print0(GEN g, long flag) { pariOut_print0(pariOut, g, flag); }
+print0(GEN g, long flag) { out_print0(pariOut, g, flag); }
 
 /* dummy needed to pass a (empty!) va_list to sm_dopr */
 static char *
@@ -4116,20 +4116,20 @@ Strprintf(const char *fmt, GEN args)
   GEN z = strtoGENstr(s); free(s); return z; }
 
 void
-pariOut_vprintf(PariOUT *out, const char *fmt, va_list ap)
+out_vprintf(PariOUT *out, const char *fmt, va_list ap)
 {
   char *s = sm_dopr(fmt, NULL, ap);
-  pariOut_puts(out, s); free(s);
+  out_puts(out, s); free(s);
 }
 void
-pari_vprintf(const char *fmt, va_list ap) { pariOut_vprintf(pariOut, fmt, ap); }
+pari_vprintf(const char *fmt, va_list ap) { out_vprintf(pariOut, fmt, ap); }
 
 /* variadic version of printf0 */
 void
-pariOut_printf(PariOUT *out, const char *fmt, ...)
+out_printf(PariOUT *out, const char *fmt, ...)
 {
   va_list args; va_start(args,fmt);
-  pariOut_vprintf(out,fmt,args); va_end(args);
+  out_vprintf(out,fmt,args); va_end(args);
 }
 void
 pari_printf(const char *fmt, ...) /* variadic version of printf0 */
@@ -4391,7 +4391,7 @@ get_file(char *buf, int test(const char *))
     {
       *end = c;
       if (! test(buf)) return 1;
-      if (DEBUGFILES) fprintferr("I/O: file %s exists!\n", buf);
+      if (DEBUGFILES) err_printf("I/O: file %s exists!\n", buf);
     }
   }
   return 0;
@@ -4432,7 +4432,7 @@ init_unique(const char *s)
 #endif
 
   sprintf(buf + lpre, "%.8s%s", s, suf);
-  if (DEBUGFILES) fprintferr("I/O: prefix for unique file/dir = %s\n", buf);
+  if (DEBUGFILES) err_printf("I/O: prefix for unique file/dir = %s\n", buf);
   return buf;
 }
 

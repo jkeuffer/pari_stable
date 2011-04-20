@@ -341,7 +341,7 @@ PrintValuations(GEN pol, GEN mod, GEN p)
 {
   long i, d = degpol(pol);
   for (i = 0; i <= d; i++)
-    fprintferr("%d ", Z_pval(RgXQ_norm(gel(pol, i+2), mod), p));
+    err_printf("%d ", Z_pval(RgXQ_norm(gel(pol, i+2), mod), p));
 }
 
 /* Return the degree of pol mod the prime ideal of top */
@@ -515,7 +515,7 @@ TamelyRamifiedCase(KRASNER_t *data)
   FAD_t fdata;
   long cnt = 0, nb, j;
   GEN vpl;
-  fprintferr("Number of extensions: %ld\n", itos(data->nbext));
+  err_printf("Number of extensions: %ld\n", itos(data->nbext));
 #endif
 
   g   = ugcd(data->e, umodiu(data->qm1, data->e)); /* (e, q-1) */
@@ -537,7 +537,7 @@ TamelyRamifiedCase(KRASNER_t *data)
     NbConjugateFields(data, &fdata);
     nb = fdata.cj;
   }
-  fprintferr("Found %ld field(s)\n", nb);
+  err_printf("Found %ld field(s)\n", nb);
   cnt += nb;
 #endif
 
@@ -567,7 +567,7 @@ TamelyRamifiedCase(KRASNER_t *data)
       }
       NbConjugateFields(data, &fdata);
       nb = fdata.cj;
-      fprintferr("Found %ld field(s)\n", nb);
+      err_printf("Found %ld field(s)\n", nb);
       cnt += nb;
 #endif
       gr = r;
@@ -713,7 +713,7 @@ WildlyRamifiedCase(KRASNER_t *data)
     pari_err(talker,"too many extensions in padicfields");
 
   if (DEBUGLEVEL>0) {
-    fprintferr("There are %ld extensions to find and %Ps polynomials to consider\n", nbext, nbpol);
+    err_printf("There are %ld extensions to find and %Ps polynomials to consider\n", nbext, nbpol);
     timer_start(&T);
   }
 
@@ -728,7 +728,7 @@ WildlyRamifiedCase(KRASNER_t *data)
   {
     /* The best thing seems to be to jump randomly among the polynomials... */
     rpl = RandomPol(data, Omega);
-    if (DEBUGLEVEL>3) fprintferr("considering polynomial %Ps\n", rpl);
+    if (DEBUGLEVEL>3) err_printf("considering polynomial %Ps\n", rpl);
 
 #ifdef CHECK_EXTENSIONS
     {
@@ -756,7 +756,7 @@ WildlyRamifiedCase(KRASNER_t *data)
       fd += nb;
       ct++;
       if (DEBUGLEVEL>1)
-        fprintferr("%ld more extension%s\t(%ld/%ld, %ldms)\n",
+        err_printf("%ld more extension%s\t(%ld/%ld, %ldms)\n",
                    nb, (nb == 1)? "": "s", fd, nbext, timer_delay(&T));
     }
     avma = av2;
@@ -814,7 +814,7 @@ GetRamifiedPol(GEN p, GEN efj, long v, long flag)
   pari_sp av = avma;
 
   if (DEBUGLEVEL>1)
-    fprintferr("  Computing extensions with decomposition [e, f, j] = [%ld, %ld, %ld]\n", e,f,j);
+    err_printf("  Computing extensions with decomposition [e, f, j] = [%ld, %ld, %ld]\n", e,f,j);
   data.p   = p;
   data.e   = e;
   data.f   = f;
@@ -837,7 +837,7 @@ GetRamifiedPol(GEN p, GEN efj, long v, long flag)
                      : FpX_neg(pol_x(v), data.pr);
   data.uplr  = FpX_red(data.upl, data.p);
   data.frob  = FpXQ_pow(pol_x(v), p, data.upl, data.pr);
-  if (DEBUGLEVEL>1) fprintferr("  Unramified part %Ps\n", data.upl);
+  if (DEBUGLEVEL>1) err_printf("  Unramified part %Ps\n", data.upl);
   data.roottable = NULL;
   if (j)
   {

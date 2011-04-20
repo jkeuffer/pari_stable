@@ -1248,7 +1248,7 @@ RgX_RgMV_eval(GEN P, GEN V)
   if (DEBUGLEVEL>=8)
   {
     long cnt = 1 + (degpol(P) - l) / (l-1);
-    fprintferr("RgX_RgMV_eval: %ld RgM_mul [%ld]\n", cnt, l-1);
+    err_printf("RgX_RgMV_eval: %ld RgM_mul [%ld]\n", cnt, l-1);
   }
   return gerepileupto(av, z);
 }

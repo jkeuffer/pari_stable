@@ -822,7 +822,7 @@ divide_conquer_assoc(GEN x, void *data, GEN (*mul)(void *,GEN,GEN))
   while (k > 2)
   {
     if (DEBUGLEVEL>7)
-      fprintferr("prod: remaining objects %ld\n",k-1);
+      err_printf("prod: remaining objects %ld\n",k-1);
     lx = k; k = 1;
     for (i=1; i<lx-1; i+=2)
       gel(x,k++) = mul(data,gel(x,i),gel(x,i+1));
@@ -2690,7 +2690,7 @@ RgX_gcd(GEN x, GEN y)
         if (gequal0(r)) break;
         avma = av1; return gerepileupto(av, scalarpol(d, varn(x)));
       }
-      if (DEBUGLEVEL > 9) fprintferr("RgX_gcd: dr = %ld\n", dr);
+      if (DEBUGLEVEL > 9) err_printf("RgX_gcd: dr = %ld\n", dr);
       du = lg(u); dv = lg(v); degq = du-dv;
       u = v; p1 = g; g = leading_term(u);
       switch(degq)

@@ -32,10 +32,10 @@ typedef struct whatnow_t
 static void
 msg(PariOUT *out, const char *s)
 {
-  pariOut_term_color(out, c_HELP);
-  pariOut_print_text(out, s);
-  pariOut_putc(out, '\n');
-  pariOut_term_color(out, c_NONE);
+  out_term_color(out, c_HELP);
+  out_print_text(out, s);
+  out_putc(out, '\n');
+  out_term_color(out, c_NONE);
 }
 /* If flag = 0 (default): check if s existed in 1.39.15 and print verbosely
  * the answer.
@@ -81,9 +81,9 @@ whatnow(PariOUT *out, const char *s, int flag)
   }
   if (flag)
   {
-    pariOut_term_color(out, c_NONE);
-    pariOut_print_text(out, "\nA function with that name existed in GP-1.39.15; to run in backward compatibility mode, type \"default(compatible,3)\", or set \"compatible = 3\" in your GPRC file.");
-    pariOut_putc(out, '\n');
+    out_term_color(out, c_NONE);
+    out_print_text(out, "\nA function with that name existed in GP-1.39.15; to run in backward compatibility mode, type \"default(compatible,3)\", or set \"compatible = 3\" in your GPRC file.");
+    out_putc(out, '\n');
   }
 
   if (def == REMOV)
@@ -96,9 +96,9 @@ whatnow(PariOUT *out, const char *s, int flag)
     ep = is_entry(wp.name);
     if (!ep) pari_err(bugparier,"whatnow");
   }
-  pariOut_puts(out, "New syntax: ");
-  pariOut_term_color(out, c_ERR);
-  pariOut_printf(out, "%s%s ===> %s%s\n\n", s, wp.oldarg, wp.name, wp.newarg);
+  out_puts(out, "New syntax: ");
+  out_term_color(out, c_ERR);
+  out_printf(out, "%s%s ===> %s%s\n\n", s, wp.oldarg, wp.name, wp.newarg);
   if (ep) msg(out, ep->help);
-  pariOut_term_color(out, c_NONE); return 1;
+  out_term_color(out, c_NONE); return 1;
 }

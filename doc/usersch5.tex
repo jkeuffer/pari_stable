@@ -1154,10 +1154,10 @@ statements, use the following encapsulated variants:
 output stream, according to the conversion specifications in format \kbd{fmt}
 (see \tet{printf}).
 
-\fun{void}{fprintferr}{char *s}: write \kbd{s} to the error stream
-(this function is in fact much more versatile, see \secref{se:dbg_output}).
+\fun{void}{err_printf}{char *s}: as \tet{pari_printf}, writing to PARI's
+current error stream.
 
-\fun{void}{flusherr}{void} flush error stream.
+\fun{void}{err_flush}{void} flush error stream.
 
 Declare all public functions in an appropriate header file, if you
 want to access them from C. The other functions should be declared
@@ -7578,45 +7578,45 @@ The generic functions \tet{pari_putc}, \tet{pari_puts}, \tet{pari_flush} and
 should be sufficient for most purposes. Lower level functions are available,
 which take an explicit output context as first argument:
 
-\fun{void}{pariOut_putc}{PariOUT *out, char c} essentially equivalent to
+\fun{void}{out_putc}{PariOUT *out, char c} essentially equivalent to
 \kbd{out->putc(c)}. In addition, registers whether the last character printed
 was a \kbd{\bs n}.
 
-\fun{void}{pariOut_puts}{PariOUT *out, const char *s} essentially equivalent to
+\fun{void}{out_puts}{PariOUT *out, const char *s} essentially equivalent to
 \kbd{out->puts(s)}. In addition, registers whether the last character printed
 was a \kbd{\bs n}.
 
-The function \kbd{pariOut\_flush} does not exist since it would be identical
-to \kbd{out->flush()}
+\fun{void}{out_printf}{PariOUT *out, const char *fmt, ...}
 
-\fun{void}{pariOut_printf}{PariOUT *out, const char *fmt, ...}
+\fun{void}{out_vprintf}{PariOUT *out, const char *fmt, va_list ap}
 
-\fun{void}{pariOut_vprintf}{PariOUT *out, const char *fmt, va_list ap}
+\noindent N.B. The function \kbd{out\_flush} does not exist since it would be
+identical to \kbd{out->flush()}
 
 \fun{int}{pari_last_was_newline}{void} returns a non-zero value if the last
-character printed via \tet{pariOut_putc} or \tet{pariOut_puts} was \kbd{\bs
+character printed via \tet{out_putc} or \tet{out_puts} was \kbd{\bs
 n}, and $0$ otherwise.
 
 \fun{void}{pari_set_last_newline}{int last} sets the boolean value
 to be returned by the function \tet{pari_last_was_newline} to \var{last}.
 
-\subsec{Default output context} It is defined by the global variable
-\tet{pariOut} for normal output, and you probably do not want to change it.
-If you \emph{do} intend to change \kbd{pariOut}, diverting output in
-non-trivial ways, this probably means that you are rewriting \kbd{gp}.
-For completeness, we document in this section what the default output context
-does, and how it can be manipulated (without being rewritten and replaced by
-something else altogether).
+\subsec{Default output context} They are defined by the global variables
+\tet{pariOut} and \tet{pariErr} for normal outputs and warnings/errors, and you
+probably do not want to change them. If you \emph{do} change them, diverting
+output in non-trivial ways, this probably means that you are rewriting
+\kbd{gp}. For completeness, we document in this section what the default
+output contexts do.
 
-The defaut value writes output to the \kbd{FILE*} \tet{pari_outfile}
-(initialized to \tet{stdout}).  The low-level methods are actually the
-standard \kbd{putc} / \kbd{fputs}, plus some magic to handle a log file if
-one is open. There is also a default context associated to errors and
-warnings, called \kbd{pariErr}, which prints to the \kbd{FILE*}
-\tet{pari_errfile} (initialized to \tet{stderr}).
+\misctitle{pariOut} writes output to the \kbd{FILE*} \tet{pari_outfile},
+initialized to \tet{stdout}.  The low-level methods are actually the standard
+\kbd{putc} / \kbd{fputs}, plus some magic to handle a log file if one is
+open.
 
-Still keeping the default output context you can change
-PARI's standard output, redirecting \tet{pari_outfile} to another file, using
+\misctitle{pariErr} prints to the \kbd{FILE*} \tet{pari_errfile}, initialized
+to \tet{stderr}. The low-level methods are as above.
+
+You can stick with the default \kbd{pariOut} output context and change PARI's
+standard output, redirecting \tet{pari_outfile} to another file, using
 
 \fun{void}{switchout}{const char *name} where \kbd{name} is a character string
 giving the name of the file you want to write to; the output is
@@ -7654,7 +7654,7 @@ rendered in color, possibly in bold or underlined (see \secref{se:colors}).
 color escape sequence associated to output object \kbd{c}. If \kbd{c} is
 \tet{c_NONE}, revert to defaut printing style.
 
-\fun{void}{pariOut_term_color}{PariOUT *out, long c} as \tet{term_color},
+\fun{void}{out_term_color}{PariOUT *out, long c} as \tet{term_color},
 using output context \kbd{out}.
 
 \fun{char*}{term_get_color}{char *s, long c} returns as a character

@@ -776,7 +776,7 @@ mpbern(long nb, long prec)
   }
   else i = 1;
   if (DEBUGLEVEL) {
-    fprintferr("caching Bernoulli numbers 2*%ld to 2*%ld, prec = %ld\n",
+    err_printf("caching Bernoulli numbers 2*%ld to 2*%ld, prec = %ld\n",
                i,nb,prec);
     timer_start(&T);
   }
@@ -1048,7 +1048,7 @@ cxgamma(GEN s0, int dolog, long prec)
     }
     else
       nn = 1;
-    if (DEBUGLEVEL>5) fprintferr("lim, nn: [%ld, %ld], la = %lf\n",lim,nn,la);
+    if (DEBUGLEVEL>5) err_printf("lim, nn: [%ld, %ld], la = %lf\n",lim,nn,la);
   }
   prec++;
 
@@ -1463,7 +1463,7 @@ cxpsi(GEN s0, long prec)
 
     L = gsub(gsqrt(L, 3), rS);
     if (signe(L) > 0) nn = (long)ceil(rtodbl(L)); else nn = 1;
-    if (DEBUGLEVEL>2) fprintferr("lim, nn: [%ld, %ld]\n",lim,nn);
+    if (DEBUGLEVEL>2) err_printf("lim, nn: [%ld, %ld]\n",lim,nn);
   }
   else
   {
@@ -1485,7 +1485,7 @@ cxpsi(GEN s0, long prec)
     if (l < 0.) l = 0.;
     nn = (long)ceil( sqrt(l) - ssig );
     if (nn < 1) nn = 1;
-    if (DEBUGLEVEL>2) fprintferr("lim, nn: [%ld, %ld]\n",lim,nn);
+    if (DEBUGLEVEL>2) err_printf("lim, nn: [%ld, %ld]\n",lim,nn);
   }
   prec++; unr = real_1(prec); /* one extra word of precision */
 

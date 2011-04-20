@@ -694,14 +694,14 @@ Flx_nbfact_by_degree(GEN z, long *nb, ulong p)
 
     e -= lgg;
     D[d] = lgg/d; *nb += D[d];
-    if (DEBUGLEVEL>5) fprintferr("   %3ld fact. of degree %3ld\n", D[d], d);
+    if (DEBUGLEVEL>5) err_printf("   %3ld fact. of degree %3ld\n", D[d], d);
     if (!e) break;
     z = Flx_div(z, g, p);
     w = Flx_rem(w, z, p);
   }
   if (e)
   {
-    if (DEBUGLEVEL>5) fprintferr("   %3ld fact. of degree %3ld\n",1,e);
+    if (DEBUGLEVEL>5) err_printf("   %3ld fact. of degree %3ld\n",1,e);
     D[e] = 1; (*nb)++;
   }
   avma = av; return D;
@@ -2016,7 +2016,7 @@ FqX_split(GEN *t, long d, GEN q, GEN S, GEN T, GEN p)
   }
   w = gerepileupto(av,FqX_normalize(w,T,p));
   if (DEBUGLEVEL > 6)
-    fprintferr("[FqX_split] splitting time: %ld (%ld trials)\n",
+    err_printf("[FqX_split] splitting time: %ld (%ld trials)\n",
                timer_delay(&ti),cnt);
   l /= d; t[l] = FqX_div(*t,w, T,p); *t = w;
   FqX_split(t+l,d,q,S,T,p);
@@ -2054,7 +2054,7 @@ FqX_split_Trager(GEN A, GEN T, GEN p)
     n = NULL;
   }
   if (!n) return NULL;
-  if (DEBUGLEVEL>4) fprintferr("FqX_split_Trager: choosing k = %ld\n",k);
+  if (DEBUGLEVEL>4) err_printf("FqX_split_Trager: choosing k = %ld\n",k);
   /* n guaranteed to be squarefree */
   fa = FpX_factor(n, p); fa = gel(fa,1); lx = lg(fa);
   if (lx == 2) return mkcol(A); /* P^k, P irreducible */

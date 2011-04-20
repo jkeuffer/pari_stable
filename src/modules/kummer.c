@@ -146,7 +146,7 @@ reducebetanaive(GEN bnfz, GEN be, long ell, GEN elllogfu)
     if (!B) break;
     b = B; gel(c,besti) = addis(gel(c,besti), bestk);
   }
-  if (DEBUGLEVEL) fprintferr("naive reduction mod U^l: unit exp. = %Ps\n",c);
+  if (DEBUGLEVEL) err_printf("naive reduction mod U^l: unit exp. = %Ps\n",c);
   return fix_be(bnfz, be, ZC_z_mul(c, ell));
 }
 
@@ -194,7 +194,7 @@ reducebeta(GEN bnfz, GEN be, GEN ell)
   long j,ru, prec = nf_get_prec(bnfz);
   GEN emb, z, u, elllogfu, nf = bnf_get_nf(bnfz);
 
-  if (DEBUGLEVEL>1) fprintferr("reducing beta = %Ps\n",be);
+  if (DEBUGLEVEL>1) err_printf("reducing beta = %Ps\n",be);
   /* reduce mod Q^ell */
   be = reduce_mod_Qell(nf, be, ell);
   /* reduce l-th root */
@@ -206,7 +206,7 @@ reducebeta(GEN bnfz, GEN be, GEN ell)
     /* make be integral */
     be = reduce_mod_Qell(nf, be, ell);
   }
-  if (DEBUGLEVEL>1) fprintferr("beta reduced via ell-th root = %Ps\n",be);
+  if (DEBUGLEVEL>1) err_printf("beta reduced via ell-th root = %Ps\n",be);
 
   for (;;)
   {
@@ -232,7 +232,7 @@ reducebeta(GEN bnfz, GEN be, GEN ell)
       be = fix_be(bnfz, be, ZC_Z_mul(u, ell));
     }
   }
-  if (DEBUGLEVEL>1) fprintferr("beta LLL-reduced mod U^l = %Ps\n",be);
+  if (DEBUGLEVEL>1) err_printf("beta LLL-reduced mod U^l = %Ps\n",be);
   if (typ(be) == t_INT) return be;
   return reducebetanaive(bnfz, be, itos(ell), elllogfu);
 }
@@ -486,7 +486,7 @@ compute_beta(GEN X, GEN vecWB, GEN ell, GEN bnfz)
   gel(BE,2) = centermod(gel(BE,2), ell);
   be = nffactorback(bnfz, BE, NULL);
   be = reducebeta(bnfz, be, ell);
-  if (DEBUGLEVEL>1) fprintferr("beta reduced = %Ps\n",be);
+  if (DEBUGLEVEL>1) err_printf("beta reduced = %Ps\n",be);
   return be;
 }
 
@@ -980,7 +980,7 @@ compute_polrel(GEN nfz, toK_s *T, GEN be, long g, long ell)
   r[1] = 1;
   for (i=2; i<=m; i++) r[i] = (r[i-1] * g) % ell;
   powtaubet = powtau(be, m, T->tau);
-  if (DEBUGLEVEL>1) { fprintferr("Computing Newton sums: "); timer_start(&ti); }
+  if (DEBUGLEVEL>1) { err_printf("Computing Newton sums: "); timer_start(&ti); }
   prim_invbe = Q_primitive_part(nfinv(nfz, be), &C_invbe);
   powtau_prim_invbe = powtau(prim_invbe, m, T->tau);
 
@@ -1031,10 +1031,10 @@ compute_polrel(GEN nfz, toK_s *T, GEN be, long g, long ell)
     z = downtoK(T, gmulgs(z, ell));
     if (C_Rk) z = gmul(z, C_Rk);
     gerepileall(av, C_Rk? 3: 2, &z, &prim_Rk, &C_Rk);
-    if (DEBUGLEVEL>1) { fprintferr("%ld(%ld) ", k, timer_delay(&ti)); flusherr(); }
+    if (DEBUGLEVEL>1) { err_printf("%ld(%ld) ", k, timer_delay(&ti)); err_flush(); }
     gel(S,k) = z;
   }
-  if (DEBUGLEVEL>1) fprintferr("\n");
+  if (DEBUGLEVEL>1) err_printf("\n");
   (void)delete_var(); return pol_from_Newton(S);
 }
 
@@ -1063,7 +1063,7 @@ compositum_red(compo_s *C, GEN P, GEN Q)
   C->p = RgX_RgXQ_eval(p, a, C->R);
   C->q = RgX_RgXQ_eval(q, a, C->R);
   C->rev = QXQ_reverse(a, C->R);
-  if (DEBUGLEVEL>1) fprintferr("polred(compositum) = %Ps\n",C->R);
+  if (DEBUGLEVEL>1) err_printf("polred(compositum) = %Ps\n",C->R);
 }
 
 /* replace P->C^(-deg P) P(xC) for the largest integer C such that coefficients
@@ -1134,10 +1134,10 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   bid = bnr_get_bid(bnr);
   ideal = bid_get_ideal(bid);
   /* step 1 of alg 5.3.5. */
-  if (DEBUGLEVEL>2) fprintferr("Step 1\n");
+  if (DEBUGLEVEL>2) err_printf("Step 1\n");
   compositum_red(&COMPO, polnf, polcyclo(ell,vnf));
   /* step 2 */
-  if (DEBUGLEVEL>2) fprintferr("Step 2\n");
+  if (DEBUGLEVEL>2) err_printf("Step 2\n");
   if (DEBUGLEVEL) timer_printf(&t, "[rnfkummer] compositum");
   degK  = degpol(polnf);
   degKz = degpol(COMPO.R);
@@ -1147,7 +1147,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   if (Fl_powu((ulong)g, m, ell*ell) == 1) g += ell;
   /* ord(g) = m in all (Z/ell^k)^* */
   /* step 3 */
-  if (DEBUGLEVEL>2) fprintferr("Step 3\n");
+  if (DEBUGLEVEL>2) err_printf("Step 3\n");
   /* could factor disc(R) using th. 2.1.6. */
   bnfz = Buchall(COMPO.R, nf_FORCE, prec);
   if (DEBUGLEVEL) timer_printf(&t, "[rnfkummer] bnfinit(Kz)");
@@ -1164,7 +1164,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   tau = get_tau(&_tau, nfz, &COMPO, g);
 
   /* step 4 */
-  if (DEBUGLEVEL>2) fprintferr("Step 4\n");
+  if (DEBUGLEVEL>2) err_printf("Step 4\n");
   vecB=cgetg(rc+1,t_VEC);
   Tc=cgetg(rc+1,t_MAT);
   for (j=1; j<=rc; j++)
@@ -1193,7 +1193,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
     for (i=1; i<=rc; i++) gel(vecC,i) = famat_reduce(gel(vecC,i));
   }
   /* step 5 */
-  if (DEBUGLEVEL>2) fprintferr("Step 5\n");
+  if (DEBUGLEVEL>2) err_printf("Step 5\n");
   Tv = cgetg(rv+1,t_MAT);
   for (j=1; j<=rv; j++)
   {
@@ -1206,10 +1206,10 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   lW = lg(P); vecW = cgetg(lW,t_VEC);
   for (j=1; j<lW; j++) gel(vecW,j) = famat_factorback(vselmer, gel(P,j));
   /* step 6 */
-  if (DEBUGLEVEL>2) fprintferr("Step 6\n");
+  if (DEBUGLEVEL>2) err_printf("Step 6\n");
   Q = FpM_ker(RgM_Rg_add_shallow(shallowtrans(Tc), stoi(-g)), gell);
   /* step 8 */
-  if (DEBUGLEVEL>2) fprintferr("Step 8\n");
+  if (DEBUGLEVEL>2) err_printf("Step 8\n");
   p1 = RgXQ_matrix_pow(COMPO.p, degKz, degK, COMPO.R);
   T.invexpoteta1 = RgM_inv(p1); /* left inverse */
   T.polnf = polnf;
@@ -1225,7 +1225,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
     gothf = bnrconductor(bnrz,subgroupz,0);
   }
   /* step 9, 10, 11 */
-  if (DEBUGLEVEL>2) fprintferr("Step 9, 10 and 11\n");
+  if (DEBUGLEVEL>2) err_printf("Step 9, 10 and 11\n");
   i = build_list_Hecke(&L, nfz, NULL, gothf, gell, tau);
   if (i) return no_sol(all,i);
 
@@ -1234,7 +1234,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   listprSp = shallowconcat(L.Sml2, L.Sl); lSl2 = lg(listprSp)-1;
 
   /* step 12 */
-  if (DEBUGLEVEL>2) fprintferr("Step 12\n");
+  if (DEBUGLEVEL>2) err_printf("Step 12\n");
   vecAp = cgetg(lSp+1, t_VEC);
   vecBp = cgetg(lSp+1, t_VEC);
   matP  = cgetg(lSp+1, t_MAT);
@@ -1255,12 +1255,12 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
     gel(vecAp,j) = ap;
   }
   /* step 13 */
-  if (DEBUGLEVEL>2) fprintferr("Step 13\n");
+  if (DEBUGLEVEL>2) err_printf("Step 13\n");
   vecWA = shallowconcat(vecW, vecAp);
   vecWB = shallowconcat(vecW, vecBp);
 
   /* step 14, 15, and 17 */
-  if (DEBUGLEVEL>2) fprintferr("Step 14, 15 and 17\n");
+  if (DEBUGLEVEL>2) err_printf("Step 14, 15 and 17\n");
   mginv = (m * Fl_inv(g,ell)) % ell;
   vecMsup = cgetg(lSml2+1,t_VEC);
   M = NULL;
@@ -1284,12 +1284,12 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   }
   if (!M) M = zero_Flm(1, lSp + lW - 1);
   /* step 16 */
-  if (DEBUGLEVEL>2) fprintferr("Step 16\n");
+  if (DEBUGLEVEL>2) err_printf("Step 16\n");
   K = Flm_ker(M, ell);
   if (all < 0)
     K = fix_kernel(K, M, vecMsup, lW, ell);
   /* step 18 & ff */
-  if (DEBUGLEVEL>2) fprintferr("Step 18\n");
+  if (DEBUGLEVEL>2) err_printf("Step 18\n");
   dK = lg(K)-1;
   y = cgetg(dK+1,t_VECSMALL);
   if (all) res = cgetg(1, t_VEC);
@@ -1316,7 +1316,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
           be = compute_beta(X, vecWB, gell, bnfz);
           P = compute_polrel(nfz, &T, be, g, ell);
           nfX_Z_normalize(nf, P);
-          if (DEBUGLEVEL>1) fprintferr("polrel(beta) = %Ps\n", P);
+          if (DEBUGLEVEL>1) err_printf("polrel(beta) = %Ps\n", P);
           if (!all) {
             H = rnfnormgroup(bnr, P);
             if (ZM_equal(subgroup, H)) return P; /* DONE */

@@ -174,7 +174,7 @@ check_bach(double cbach, double B)
   else
     cbach += 0.2;
   if (cbach > B) cbach = B;
-  if (DEBUGLEVEL) fprintferr("\n*** Bach constant: %f\n", cbach);
+  if (DEBUGLEVEL) err_printf("\n*** Bach constant: %f\n", cbach);
   return cbach;
 }
 
@@ -505,7 +505,7 @@ trivial_relations(struct buch_quad *B, GEN mat, GEN C)
 static void
 dbg_all(pari_timer *T, const char *phase, long s, long n)
 {
-  fprintferr("\n");
+  err_printf("\n");
   timer_printf(T, "%s rel [#rel/#test = %ld/%ld]", phase,s,n);
 }
 
@@ -532,7 +532,7 @@ imag_relations(struct buch_quad *B, long need, long *pc, ulong LIMC, GEN mat)
     nbtest++; fpc = factorquad(B,form,B->KC,LIMC);
     if (!fpc)
     {
-      if (DEBUGLEVEL>1) fprintferr(".");
+      if (DEBUGLEVEL>1) err_printf(".");
       continue;
     }
     if (fpc > 1)
@@ -542,7 +542,7 @@ imag_relations(struct buch_quad *B, long need, long *pc, ulong LIMC, GEN mat)
       GEN form2;
       if (!fpd)
       {
-        if (DEBUGLEVEL>1) fprintferr(".");
+        if (DEBUGLEVEL>1) err_printf(".");
         continue;
       }
       form2 = qficomp(qfi_factorback(B,fpd), qfi_pf(B->QFR->D, B->FB[fpd[-2]]));
@@ -587,7 +587,7 @@ imag_be_honest(struct buch_quad *B)
 
   while (s<B->KC2)
   {
-    p = B->FB[s+1]; if (DEBUGLEVEL) fprintferr(" %ld",p);
+    p = B->FB[s+1]; if (DEBUGLEVEL) err_printf(" %ld",p);
     F = qficomp(qfi_pf(B->QFR->D, p), qfi_random(B, ex));
     fpc = factorquad(B,F,s,p-1);
     if (fpc == 1) { nbtest=0; s++; }
@@ -663,7 +663,7 @@ CYCLE:
     nbtest++; fpc = factorquad(B,form,B->KC,LIMC);
     if (!fpc)
     {
-      if (DEBUGLEVEL>1) fprintferr(".");
+      if (DEBUGLEVEL>1) err_printf(".");
       goto CYCLE;
     }
     if (fpc > 1)
@@ -673,7 +673,7 @@ CYCLE:
       GEN form2;
       if (!fpd)
       {
-        if (DEBUGLEVEL>1) fprintferr(".");
+        if (DEBUGLEVEL>1) err_printf(".");
         goto CYCLE;
       }
       if (!form1)
@@ -718,7 +718,7 @@ CYCLE:
         d = qfr5_dist(addii(gel(form1,4),gel(form2,4)),
                       mulrr(gel(form1,5),gel(form2,5)), prec);
       }
-      if (DEBUGLEVEL) fprintferr(" %ldP",s);
+      if (DEBUGLEVEL) err_printf(" %ldP",s);
     }
     else
     { /* standard relation */
@@ -735,7 +735,7 @@ CYCLE:
       for (i=1; i<lgsub; i++) col[B->subFB[i]] = -ex[i];
       add_fact(B, col, form1);
       d = qfr5_dist(gel(form1,4), gel(form1,5), prec);
-      if (DEBUGLEVEL) fprintferr(" %ld",s);
+      if (DEBUGLEVEL) err_printf(" %ld",s);
     }
     affrr(d, gel(C,s));
     if (first)
@@ -762,7 +762,7 @@ real_be_honest(struct buch_quad *B)
 
   while (s<B->KC2)
   {
-    p = B->FB[s+1]; if (DEBUGLEVEL) fprintferr(" %ld",p);
+    p = B->FB[s+1]; if (DEBUGLEVEL) err_printf(" %ld",p);
     F = QFR3_comp(qfr3_random(B, ex), qfr3_pf(B->QFR, p), B->QFR);
     for (F0 = F;;)
     {
@@ -820,10 +820,10 @@ get_R(struct buch_quad *B, GEN C, long sreg, GEN z, GEN *ptR)
     }
     if (gexpo(R) <= -3)
     {
-      if (DEBUGLEVEL) fprintferr("regulator is zero.\n");
+      if (DEBUGLEVEL) err_printf("regulator is zero.\n");
       return fupb_RELAT;
     }
-    if (DEBUGLEVEL) fprintferr("#### Tentative regulator: %Ps\n",R);
+    if (DEBUGLEVEL) err_printf("#### Tentative regulator: %Ps\n",R);
   }
   c = gtodouble(gmul(z, R));
   if (c < 0.8 || c > 1.3) return fupb_RELAT;
@@ -836,9 +836,9 @@ quad_be_honest(struct buch_quad *B)
   int r;
   if (B->KC2 <= B->KC) return 1;
   if (DEBUGLEVEL)
-    fprintferr("be honest for primes from %ld to %ld\n", B->FB[B->KC+1],B->FB[B->KC2]);
+    err_printf("be honest for primes from %ld to %ld\n", B->FB[B->KC+1],B->FB[B->KC2]);
   r = B->PRECREG? real_be_honest(B): imag_be_honest(B);
-  if (DEBUGLEVEL) fprintferr("\n");
+  if (DEBUGLEVEL) err_printf("\n");
   return r;
 }
 
@@ -934,7 +934,7 @@ START:
   do
   {
     if ((nreldep & 3) == 1 || (nrelsup & 7) == 1) {
-      if (DEBUGLEVEL) fprintferr("*** Changing sub factor base\n");
+      if (DEBUGLEVEL) err_printf("*** Changing sub factor base\n");
       gunclone(BQ.subFB);
       gunclone(BQ.powsubFB);
       BQ.subFB = gclone(vecslice(BQ.vperm, 1, nsubFB));
@@ -948,10 +948,10 @@ START:
     if (!W) { /* first time */
       C = extraC;
       triv = trivial_relations(&BQ, mat, C);
-      if (DEBUGLEVEL) fprintferr("KC = %ld, need %ld relations\n", BQ.KC, need);
+      if (DEBUGLEVEL) err_printf("KC = %ld, need %ld relations\n", BQ.KC, need);
     } else {
       triv = 0;
-      if (DEBUGLEVEL) fprintferr("...need %ld more relations\n", need);
+      if (DEBUGLEVEL) err_printf("...need %ld more relations\n", need);
     }
     if (BQ.PRECREG) {
       for (i = triv+1; i<=need; i++) {
@@ -980,7 +980,7 @@ START:
     }
 
     h = ZM_det_triangular(W);
-    if (DEBUGLEVEL) fprintferr("\n#### Tentative class number: %Ps\n", h);
+    if (DEBUGLEVEL) err_printf("\n#### Tentative class number: %Ps\n", h);
 
     z = mulrr(Res, resc); /* ~ hR if enough relations, a multiple otherwise */
     switch(get_R(&BQ, C, (lg(C)-1) - (lg(B)-1) - (lg(W)-1), divir(h,z), &R))

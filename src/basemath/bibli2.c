@@ -704,7 +704,7 @@ dirmul(GEN x, GEN y)
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if (DEBUGLEVEL) fprintferr("doubling stack in dirmul\n");
+      if (DEBUGLEVEL) err_printf("doubling stack in dirmul\n");
       z = gerepilecopy(av,z);
     }
   }

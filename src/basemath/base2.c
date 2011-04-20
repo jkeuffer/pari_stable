@@ -142,7 +142,7 @@ allbase_from_ordmax(nfmaxord_t *S, GEN ordmax, GEN P, GEN f)
       a = ZM_hnfmodall(M, da, hnf_MODID|hnf_CENTER);
       centered = 1;
     }
-    if (DEBUGLEVEL>5) fprintferr("Result for prime %Ps is:\n%Ps\n",P[i],b);
+    if (DEBUGLEVEL>5) err_printf("Result for prime %Ps is:\n%Ps\n",P[i],b);
   }
   if (da)
   {
@@ -361,7 +361,7 @@ maxord2(GEN cf, GEN p, long epsilon)
     GEN ppddo2 = shifti(ppdd,-1);
 
     if (DEBUGLEVEL > 3)
-      fprintferr("ROUND2: epsilon = %ld\tavma = %ld\n",epsilon,avma);
+      err_printf("ROUND2: epsilon = %ld\tavma = %ld\n",epsilon,avma);
 
     b=matinv(m,delta);
     for (i=1; i<=n; i++)
@@ -523,7 +523,7 @@ allbase2(nfmaxord_t *S, GEN f)
   {
     GEN p = gel(P, i);
     long e = E[i];
-    if (DEBUGLEVEL) fprintferr("Treating p^k = %Ps^%ld\n", p, e);
+    if (DEBUGLEVEL) err_printf("Treating p^k = %Ps^%ld\n", p, e);
     gel(ordmax,i) = e == 1? gen_1: maxord2(cf, p, e);
   }
   allbase_from_ordmax(S, ordmax, P, f);
@@ -578,7 +578,7 @@ nfmaxord(nfmaxord_t *S, GEN T, long flag, GEN fa)
       N = S->dT; E[i] = Z_pvalrem(N, gel(P,i), &N);
       for (k=lP, lP=lg(P); k < lP; k++) E[k] = Z_pvalrem(N, gel(P,k), &N);
     } RETRY {
-      if (DEBUGLEVEL) fprintferr("Treating p^k = %Ps^%ld\n",P[i],E[i]);
+      if (DEBUGLEVEL) err_printf("Treating p^k = %Ps^%ld\n",P[i],E[i]);
       ordmax = shallowconcat(ordmax, mkvec( maxord(gel(P,i),T,E[i]) ));
     } ENDCATCH;
   }
@@ -667,8 +667,8 @@ dedek(GEN f, long mf, GEN p,GEN g)
   dk = degpol(k);
   if (DEBUGLEVEL>2)
   {
-    fprintferr("  dedek: gcd has degree %ld\n", dk);
-    if (DEBUGLEVEL>5) fprintferr("initial parameters p=%Ps,\n  f=%Ps\n",p,f);
+    err_printf("  dedek: gcd has degree %ld\n", dk);
+    if (DEBUGLEVEL>5) err_printf("initial parameters p=%Ps,\n  f=%Ps\n",p,f);
   }
   if (2*dk >= mf-1) return FpX_div(f,k,p);
   return dk? NULL: f;
@@ -919,8 +919,8 @@ dbasis(GEN p, GEN f, long mf, GEN a, GEN U)
   if (n == 1) return scalarmat(gen_1, 1);
   if (DEBUGLEVEL>5)
   {
-    fprintferr("  entering Dedekind Basis with parameters p=%Ps\n",p);
-    fprintferr("  f = %Ps,\n  a = %Ps\n",f,a);
+    err_printf("  entering Dedekind Basis with parameters p=%Ps\n",p);
+    err_printf("  f = %Ps,\n  a = %Ps\n",f,a);
   }
   pd = powiu(p, mf >> 1); pdp = mulii(pd,p);
   dU = U ? degpol(U): 0;
@@ -941,7 +941,7 @@ dbasis(GEN p, GEN f, long mf, GEN a, GEN U)
     gel(b,i) = RgX_to_RgV(ha,n);
   }
   b = ZM_hnfmodid(b,pd);
-  if (DEBUGLEVEL>5) fprintferr("  new order: %Ps\n",b);
+  if (DEBUGLEVEL>5) err_printf("  new order: %Ps\n",b);
   return RgM_Rg_div(b, pd);
 }
 
@@ -984,9 +984,9 @@ Decomp(decomp_t *S, long flag)
 
   if (DEBUGLEVEL>2)
   {
-    fprintferr("  entering Decomp");
-    if (DEBUGLEVEL>5) fprintferr(", parameters: %Ps^%ld\n  f = %Ps",p, r, S->f);
-    fprintferr("\n");
+    err_printf("  entering Decomp");
+    if (DEBUGLEVEL>5) err_printf(", parameters: %Ps^%ld\n  f = %Ps",p, r, S->f);
+    err_printf("\n");
   }
   if (!FpX_valrem(S->chi, S->nu, p, &b1))
     pari_err(talker, "bug in Decomp (not a factor), is p = %Ps a prime?", p);
@@ -1036,7 +1036,7 @@ Decomp(decomp_t *S, long flag)
   f2 = FpX_center(f2, pr, shifti(pr,-1));
 
   if (DEBUGLEVEL>5)
-    fprintferr("  leaving Decomp: f1 = %Ps\nf2 = %Ps\ne = %Ps\nde= %Ps\n", f1,f2,e,de);
+    err_printf("  leaving Decomp: f1 = %Ps\nf2 = %Ps\ne = %Ps\nde= %Ps\n", f1,f2,e,de);
 
   if (flag) {
     gerepileall(av, 2, &f1, &f2);
@@ -1241,7 +1241,7 @@ manage_cache(decomp_t *S, GEN f, GEN pp)
   if (! S->precns || cmpii(S->precns, t) < 0)
   {
     if (DEBUGLEVEL>4)
-      fprintferr("  Precision for cached Newton sums: %Ps -> %Ps\n",
+      err_printf("  Precision for cached Newton sums: %Ps -> %Ps\n",
                  S->precns? S->precns: gen_0, t);
     S->ns = polsymmodp(f, t);
     S->precns = t;
@@ -1403,7 +1403,7 @@ testb2(decomp_t *S, long D, GEN theta)
   long v = varn(S->chi), dlim = degpol(S->chi)-1;
   GEN T0 = S->phi, chi0 = S->chi;
 
-  if (DEBUGLEVEL>4) fprintferr("  Increasing Fa\n");
+  if (DEBUGLEVEL>4) err_printf("  Increasing Fa\n");
   for (;;)
   {
     S->phi = gadd(theta, random_FpX(dlim, v, S->p));
@@ -1423,7 +1423,7 @@ testc2(decomp_t *S, GEN A, long Ea, GEN T, long Et)
 {
   GEN c, T0 = S->phi;
 
-  if (DEBUGLEVEL>4) fprintferr("  Increasing Ea\n");
+  if (DEBUGLEVEL>4) err_printf("  Increasing Ea\n");
   if (Et == 1) /* same as other branch, split for efficiency */
     c = A; /* Et = 1 => s = 1, r = 0, t = 0 */
   else
@@ -1491,7 +1491,7 @@ loop(decomp_t *S, long nv, long Ea, long Fa)
   chib = chig = NULL; /* -Wall */
   for (;;)
   { /* beta tends to a factor of chi */
-    if (DEBUGLEVEL>4) fprintferr("  beta = %Ps\n", beta);
+    if (DEBUGLEVEL>4) err_printf("  beta = %Ps\n", beta);
 
     R = modii(ZX_resultant(beta, S->chi), S->pmf);
     if (signe(R))
@@ -1507,7 +1507,7 @@ loop(decomp_t *S, long nv, long Ea, long Fa)
     }
     eq = (long)(L / E);
     er = (long)(L*Ea / E - eq*Ea);
-    if (DEBUGLEVEL>4) fprintferr("  (eq,er) = (%ld,%ld)\n", eq,er);
+    if (DEBUGLEVEL>4) err_printf("  (eq,er) = (%ld,%ld)\n", eq,er);
     if (er || !chib)
     { /* gamm might not be an integer ==> chig = NULL */
       gamm = get_gamma(S, beta, eq, er); /* = beta p^-eq  nu^-er (a unit) */
@@ -1610,13 +1610,13 @@ nilord(decomp_t *S, GEN dred, long mf, long flag)
 
   if (DEBUGLEVEL>2)
   {
-    fprintferr("  entering Nilord");
+    err_printf("  entering Nilord");
     if (DEBUGLEVEL>4)
     {
-      fprintferr(" with parameters: %Ps^%ld\n", p, S->df);
-      fprintferr("  fx = %Ps, gx = %Ps", S->f, S->nu);
+      err_printf(" with parameters: %Ps^%ld\n", p, S->df);
+      err_printf("  fx = %Ps, gx = %Ps", S->f, S->nu);
     }
-    fprintferr("\n");
+    err_printf("\n");
   }
 
   S->psc = mulii(sqri(dred), p);
@@ -1654,7 +1654,7 @@ nilord(decomp_t *S, GEN dred, long mf, long flag)
       if (pia) break;
     }
 
-    if (DEBUGLEVEL>4) fprintferr("  (Fa, oE) = (%ld,%ld)\n", Fa, oE);
+    if (DEBUGLEVEL>4) err_printf("  (Fa, oE) = (%ld,%ld)\n", Fa, oE);
     if (oE*Fa == N)
     { /* O = Zp[phi] */
       if (!flag) S->phi = redelt(S->phi, sqri(p), p);
@@ -2814,7 +2814,7 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
   GEN q, q1, p, T, modpr, W, I, MW, C, p1;
   GEN Tauinv, Tau, prhinv, pip, nfT, rnfId;
 
-  if (DEBUGLEVEL>1) fprintferr(" treating %Ps^%ld\n", pr, vdisc);
+  if (DEBUGLEVEL>1) err_printf(" treating %Ps^%ld\n", pr, vdisc);
   modpr = nf_to_Fq_init(nf,&pr,&T,&p);
   av1 = avma;
   p1 = rnfdedekind_i(nf, pol, modpr, vdisc, 0);
@@ -2845,7 +2845,7 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
     GEN I0 = leafcopy(I), W0 = leafcopy(W);
     GEN Wa, Wainv, Waa, Ip, A, Ainv, MWmod, F, pseudo, G;
 
-    if (DEBUGLEVEL>1) fprintferr("    pass no %ld\n",cmpt);
+    if (DEBUGLEVEL>1) err_printf("    pass no %ld\n",cmpt);
     for (j=1; j<=n; j++)
     {
       GEN tau, tauinv;
@@ -2931,7 +2931,7 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
         gel(W,j) = nfC_nf_mul(nf, gel(W,j), gel(Tauinv,j));
         gel(I,j) = idealmul(nf, gel(Tau,j), gel(I,j));
       }
-    if (DEBUGLEVEL>3) fprintferr(" new order:\n%Ps\n%Ps\n", W, I);
+    if (DEBUGLEVEL>3) err_printf(" new order:\n%Ps\n%Ps\n", W, I);
     if (sep <= 3 || gequal(I,I0)) break;
 
     if (low_stack(lim, stack_lim(av1,1)) || (cmpt & 3) == 0)

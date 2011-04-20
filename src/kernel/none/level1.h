@@ -93,7 +93,7 @@ new_chunk(size_t x) /* x is a number of longs */
     if (d > 4*MEMSTEP || d < -4*MEMSTEP)
     {
       memused = (pari_sp)z;
-      fprintferr("...%4.0lf Mbytes used\n",(top-memused)/1048576.);
+      err_printf("...%4.0lf Mbytes used\n",(top-memused)/1048576.);
     }
   }
 #endif

@@ -162,7 +162,7 @@ nfgcd_all(GEN P, GEN Q, GEN T, GEN den, GEN *Pnew)
     NEXT_PRIME_VIADIFF_CHECK(p, primepointer);
     /*Discard primes dividing disc(T) or lc(PQ) */
     if (!umodiu(den, p)) continue;
-    if (DEBUGLEVEL>5) fprintferr("nfgcd: p=%d\n",p);
+    if (DEBUGLEVEL>5) err_printf("nfgcd: p=%d\n",p);
     /*Discard primes when modular gcd does not exist*/
     if ((R = FlxqX_safegcd(ZXX_to_FlxX(P,p,vT),
                            ZXX_to_FlxX(Q,p,vT),
@@ -530,7 +530,7 @@ nffactor(GEN nf,GEN pol)
   long dA;
   pari_timer ti;
 
-  if (DEBUGLEVEL>2) { timer_start(&ti); fprintferr("\nEntering nffactor:\n"); }
+  if (DEBUGLEVEL>2) { timer_start(&ti); err_printf("\nEntering nffactor:\n"); }
   T = get_nfpol(nf, &nf);
   RgX_check_ZX(T,"nffactor");
   A = rnf_fix_pol(T,pol,1);
@@ -554,7 +554,7 @@ nffactor(GEN nf,GEN pol)
   if (degpol(B) != dA) B = Q_primpart( QXQX_normalize(B, T) );
   ensure_lt_INT(B);
   y = nfsqff(nf,B, 0, den);
-  if (DEBUGLEVEL>3) fprintferr("number of factor(s) found: %ld\n", lg(y)-1);
+  if (DEBUGLEVEL>3) err_printf("number of factor(s) found: %ld\n", lg(y)-1);
 
   fact_from_sqff(rep, A, B, y, T, bad);
   return sort_factor_pol(rep, cmp_RgX);
@@ -686,8 +686,8 @@ nf_factor_bound(GEN nf, GEN polbase)
   GEN b = nf_Beauzamy_bound(nf, polbase);
   if (DEBUGLEVEL>2)
   {
-    fprintferr("Mignotte bound: %Ps\n",a);
-    fprintferr("Beauzamy bound: %Ps\n",b);
+    err_printf("Mignotte bound: %Ps\n",a);
+    err_printf("Beauzamy bound: %Ps\n",b);
   }
   return gerepileupto(av, gmin(a, b));
 }
@@ -981,7 +981,7 @@ nfcmbf(nfcmbf_t *T, long klim, long *pmaxK, int *done)
 nextK:
   if (K > *pmaxK || 2*K > lfamod) goto END;
   if (DEBUGLEVEL > 3)
-    fprintferr("\n### K = %d, %Ps combinations\n", K,binomial(utoipos(lfamod), K));
+    err_printf("\n### K = %d, %Ps combinations\n", K,binomial(utoipos(lfamod), K));
   setlg(ind, K+1); ind[1] = 1;
   i = 1; curdeg = deg[ind[1]];
   for(;;)
@@ -1003,7 +1003,7 @@ nextK:
         t = get_trace(ind, T1);
         if (rtodbl(RgC_fpnorml2(t,DEFAULTPREC)) > Bhigh)
         {
-          if (DEBUGLEVEL>6) fprintferr(".");
+          if (DEBUGLEVEL>6) err_printf(".");
           avma = av; goto NEXT;
         }
       }
@@ -1013,7 +1013,7 @@ nextK:
         t = get_trace(ind, T2);
         if (rtodbl(RgC_fpnorml2(t,DEFAULTPREC)) > Bhigh)
         {
-          if (DEBUGLEVEL>3) fprintferr("|");
+          if (DEBUGLEVEL>3) err_printf("|");
           avma = av; goto NEXT;
         }
       }
@@ -1029,7 +1029,7 @@ nextK:
       y = nf_pol_lift(y, bound, T);
       if (!y)
       {
-        if (DEBUGLEVEL>3) fprintferr("@");
+        if (DEBUGLEVEL>3) err_printf("@");
         avma = av; goto NEXT;
       }
       /* y is apparently in O_K[X], in fact in (Z[Y]/nf.pol)[X] due to the
@@ -1037,7 +1037,7 @@ nextK:
       q = RgXQX_divrem(D.C2ltpol, y, nfpol, ONLY_DIVIDES);
       if (!q)
       {
-        if (DEBUGLEVEL>3) fprintferr("*");
+        if (DEBUGLEVEL>3) err_printf("*");
         avma = av; goto NEXT;
       }
       /* pol in O_K[X] with leading coeff lt in Z,
@@ -1069,8 +1069,8 @@ nextK:
       update_target(&D, pol);
       if (DEBUGLEVEL > 2)
       {
-        fprintferr("\n"); timer_printf(&ti, "to find factor %Ps",y);
-        fprintferr("remaining modular factor(s): %ld\n", lfamod);
+        err_printf("\n"); timer_printf(&ti, "to find factor %Ps",y);
+        err_printf("remaining modular factor(s): %ld\n", lfamod);
       }
       continue;
     }
@@ -1099,7 +1099,7 @@ END:
     setlg(famod, lfamod+1);
     gel(fa,cnt++) = pol;
   }
-  if (DEBUGLEVEL>6) fprintferr("\n");
+  if (DEBUGLEVEL>6) err_printf("\n");
   if (cnt == 2) {
     avma = av0;
     return mkvec(T->pol);
@@ -1123,7 +1123,7 @@ nf_chk_factors(nfcmbf_t *T, GEN P, GEN M_L, GEN famod, GEN pk)
 
   piv = special_pivot(M_L);
   if (!piv) return NULL;
-  if (DEBUGLEVEL>3) fprintferr("special_pivot output:\n%Ps\n",piv);
+  if (DEBUGLEVEL>3) err_printf("special_pivot output:\n%Ps\n",piv);
 
   r  = lg(piv)-1;
   list = cgetg(r+1, t_COL);
@@ -1131,7 +1131,7 @@ nf_chk_factors(nfcmbf_t *T, GEN P, GEN M_L, GEN famod, GEN pk)
   for (i = 1;;)
   {
     pari_sp av = avma;
-    if (DEBUGLEVEL) fprintferr("nf_LLL_cmbf: checking factor %ld\n", i);
+    if (DEBUGLEVEL) err_printf("nf_LLL_cmbf: checking factor %ld\n", i);
     y = chk_factors_get(D.lt, famod, gel(piv,i), Tpk, pk);
 
     if (! (y = nf_pol_lift(y, bound, T)) ) return NULL;
@@ -1270,7 +1270,7 @@ bestlift_init(long a, GEN nf, GEN pr, GEN C, nflift_t *L)
 
   for (;; avma = av, a += (a==1)? 1: (a>>1)) /* roughly a *= 1.5 */
   {
-    if (DEBUGLEVEL>2) fprintferr("exponent %ld\n",a);
+    if (DEBUGLEVEL>2) err_printf("exponent %ld\n",a);
     prk = idealpows(nf, pr, a);
     av2 = avma;
     pk = gcoeff(prk,1,1);
@@ -1280,7 +1280,7 @@ bestlift_init(long a, GEN nf, GEN pr, GEN C, nflift_t *L)
   }
   gerepileall(av2, 2, &PRK, &GSmin);
   if (DEBUGLEVEL>2)
-    fprintferr("for this exponent, GSmin = %Ps\nTime reduction: %ld\n",
+    err_printf("for this exponent, GSmin = %Ps\nTime reduction: %ld\n",
       GSmin, timer_delay(&ti));
   L->k = a;
   L->den = L->pk = pk;
@@ -1357,7 +1357,7 @@ nf_LLL_cmbf(nfcmbf_t *T, long rec)
     Btra = mulrr(ZC, mulur(dP*dP, normlp(Br, 2*tnew, dnf)));
     bmin = logint(ceil_safe(sqrtr(Btra)), gen_2, NULL);
     if (DEBUGLEVEL>2)
-      fprintferr("\nLLL_cmbf: %ld potential factors (tmax = %ld, bmin = %ld)\n",
+      err_printf("\nLLL_cmbf: %ld potential factors (tmax = %ld, bmin = %ld)\n",
                  r, tmax, bmin);
 
     /* compute Newton sums (possibly relifting first) */
@@ -1421,7 +1421,7 @@ AGAIN:
     }
     CM_L = LLL_check_progress(Bnorm, n0, m, b == bmin, /*dbg:*/ &ti_LLL);
     if (DEBUGLEVEL>2)
-      fprintferr("LLL_cmbf: (a,b) =%4ld,%4ld; r =%3ld -->%3ld, time = %ld\n",
+      err_printf("LLL_cmbf: (a,b) =%4ld,%4ld; r =%3ld -->%3ld, time = %ld\n",
                  a,b, lg(m)-1, CM_L? lg(CM_L)-1: 1, timer_delay(&TI));
     if (!CM_L) { list = mkcol(RgX_int_normalize(P)); break; }
     if (b > bmin)
@@ -1441,7 +1441,7 @@ AGAIN:
     CM_Lp = FpM_image(CM_L, utoipos(27449)); /* inexpensive test */
     if (lg(CM_Lp) != lg(CM_L))
     {
-      if (DEBUGLEVEL>2) fprintferr("LLL_cmbf: rank decrease\n");
+      if (DEBUGLEVEL>2) err_printf("LLL_cmbf: rank decrease\n");
       CM_L = ZM_hnf(CM_L);
     }
 
@@ -1462,7 +1462,7 @@ AGAIN:
     }
   }
   if (DEBUGLEVEL>2)
-    fprintferr("* Time LLL: %ld\n* Time Check Factor: %ld\n",ti_LLL,ti_CF);
+    err_printf("* Time LLL: %ld\n* Time Check Factor: %ld\n",ti_LLL,ti_CF);
   return list;
 }
 
@@ -1652,7 +1652,7 @@ nf_pick_prime(long ct, GEN nf, GEN polbase, long fl,
     }
     else avma = av2;
     if (DEBUGLEVEL>3)
-      fprintferr("%3ld %s at prime\n  %Ps\nTime: %ld\n",
+      err_printf("%3ld %s at prime\n  %Ps\nTime: %ld\n",
                  anbf, fl == FACTORS?"factors": "roots", apr, timer_delay(&ti_pr));
     if (--ct <= 0) return nbf;
   }
@@ -1665,7 +1665,7 @@ nfsqff_trager(GEN u, GEN T, GEN dent)
   long k = 0, i, lx;
   GEN P, x0, fa, n = ZX_ZXY_rnfequation(T, u, &k);
   int tmonic;
-  if (DEBUGLEVEL>4) fprintferr("nfsqff_trager: choosing k = %ld\n",k);
+  if (DEBUGLEVEL>4) err_printf("nfsqff_trager: choosing k = %ld\n",k);
 
   /* n guaranteed to be squarefree */
   fa = ZX_DDF(Q_primpart(n)); lx = lg(fa);
@@ -1746,7 +1746,7 @@ nfsqff(GEN nf, GEN pol, long fl, GEN den)
   if (typ(nf)==t_POL || nfsqff_use_Trager(n,dpol))
   {
     GEN z;
-    if (DEBUGLEVEL>2) fprintferr("Using Trager's method\n");
+    if (DEBUGLEVEL>2) err_printf("Using Trager's method\n");
     if (typ(nf) != t_POL) den =  mulii(den, nf_get_index(nf));
     z = nfsqff_trager(Q_primpart(pol), nfpol, den);
     if (fl != FACTORS) {
@@ -1775,7 +1775,7 @@ nfsqff(GEN nf, GEN pol, long fl, GEN den)
 
   if (DEBUGLEVEL>2) {
     timer_printf(&ti, "choice of a prime ideal");
-    fprintferr("Prime ideal chosen: %Ps\n", pr);
+    err_printf("Prime ideal chosen: %Ps\n", pr);
   }
   L.tozk = nf_get_invzk(nf);
   L.topow= Q_remove_denom(nf_get_zk(nf), &L.topowden);
@@ -1793,10 +1793,10 @@ nfsqff(GEN nf, GEN pol, long fl, GEN den)
 
   if (DEBUGLEVEL>2) {
     timer_printf(&ti, "bound computation");
-    fprintferr("  1) T_2 bound for %s: %Ps\n",
+    err_printf("  1) T_2 bound for %s: %Ps\n",
                fl == FACTORS?"factor": "root", C0);
-    fprintferr("  2) Conversion from T_2 --> | |^2 bound : %Ps\n", T.ZC);
-    fprintferr("  3) Final bound: %Ps\n", T.bound);
+    err_printf("  2) Conversion from T_2 --> | |^2 bound : %Ps\n", T.ZC);
+    err_printf("  3) Final bound: %Ps\n", T.bound);
   }
 
   L.p = pr_get_p(pr);
@@ -1834,7 +1834,7 @@ nfsqff(GEN nf, GEN pol, long fl, GEN den)
   T.nf    = nf;
   res = nf_combine_factors(&T, polred, dpol-1);
   if (DEBUGLEVEL>2)
-    fprintferr("Total Time: %ld\n===========\n", timer_delay(&ti_tot));
+    err_printf("Total Time: %ld\n===========\n", timer_delay(&ti_tot));
   return res;
 }
 
@@ -1978,14 +1978,14 @@ guess_roots(GEN nf)
     old = nbroots;
     nbroots = nbroots? gcdii(pf_1, nbroots): pf_1;
     if (DEBUGLEVEL>5)
-      fprintferr("p=%ld; gcf(f(P/p))=%ld; nbroots | %Ps",p, gcdf, nbroots);
+      err_printf("p=%ld; gcf(f(P/p))=%ld; nbroots | %Ps",p, gcdf, nbroots);
     /* if same result go on else reset the stop counter [c] */
     if (old && equalii(nbroots,old))
     { if (!is_bigint(nbroots) && ++c > nfdegree + 20) break; }
     else
       c = 0;
   }
-  if (DEBUGLEVEL>5) fprintferr("%ld loops\n",l);
+  if (DEBUGLEVEL>5) err_printf("%ld loops\n",l);
   avma = av; return itos(nbroots);
 }
 
@@ -2049,7 +2049,7 @@ rootsof1(GEN nf)
   /* evaluate maximum L2 norm of a root of unity in nf */
   C0 = gmulsg(nfdegree, L2_bound(nf, gen_1));
   /* lift and reduce pr^k */
-  if (DEBUGLEVEL>2) fprintferr("Lift pr^k; GSmin wanted: %Ps\n",C0);
+  if (DEBUGLEVEL>2) err_printf("Lift pr^k; GSmin wanted: %Ps\n",C0);
   bestlift_init((long)mybestlift_bound(C0), nf, P.pr, C0, P.L);
   if (DEBUGLEVEL>2) timer_start(&ti);
 
@@ -2065,7 +2065,7 @@ rootsof1(GEN nf)
       z = nfcyclo_root(nf,pk,&P);
       if (DEBUGLEVEL>2) timer_printf(&ti, "for factoring Phi_%ld^%ld", p,k);
       if (z) {
-        if (DEBUGLEVEL>2) fprintferr("  %ld-th root of unity found.\n", pk);
+        if (DEBUGLEVEL>2) err_printf("  %ld-th root of unity found.\n", pk);
         if (p==2) { nbroots = pk; prim_root = z; }
         else     { nbroots *= pk; prim_root = nfmul(nf, prim_root,z); }
         break;

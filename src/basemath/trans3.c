@@ -830,7 +830,7 @@ mpveceint1(GEN C, GEN eC, long n)
   /* 1 <= nstop <= n */
 
   if (!eC) eC = mpexp(C);
-  if (DEBUGLEVEL>1) fprintferr("veceint1: (n, nstop) = (%ld, %ld)\n",n, nstop);
+  if (DEBUGLEVEL>1) err_printf("veceint1: (n, nstop) = (%ld, %ld)\n",n, nstop);
   e1 = rcopy(eC); av1 = avma;
   affrr(incgam2_0(C, e1), gel(y,1));
   for(i=2; i <= nstop; i++, avma = av1)
@@ -859,7 +859,7 @@ mpveceint1(GEN C, GEN eC, long n)
     nmin -= 10; if (nmin < nstop) nmin = nstop;
     My = addrr(My, minvn);
     if (DEBUGLEVEL>1 && n < chkpoint)
-      { fprintferr("%ld ",n) ; chkpoint -= nstop/20; }
+      { err_printf("%ld ",n) ; chkpoint -= nstop/20; }
     for (a=1,n--; n>=nmin; n--,a++)
     {
       GEN F = F0, den = stor(-a, prec);
@@ -885,7 +885,7 @@ mpveceint1(GEN C, GEN eC, long n)
     if (n <= nstop) break;
     affrr(mulrr(e1,e2), e1);
   }
-  if (DEBUGLEVEL>1) fprintferr("\n");
+  if (DEBUGLEVEL>1) err_printf("\n");
   avma = av; return y;
 }
 
@@ -1092,7 +1092,7 @@ optim_zeta(GEN S, long prec, long *pp, long *pn)
   }
   *pp = p;
   *pn = (long)ceil(n);
-  if (DEBUGLEVEL) fprintferr("lim, nn: [%ld, %ld]\n", *pp, *pn);
+  if (DEBUGLEVEL) err_printf("lim, nn: [%ld, %ld]\n", *pp, *pn);
 }
 
 /* 1/zeta(n) using Euler product. Assume n > 0.
@@ -1626,7 +1626,7 @@ coeff_of_phi_ms(ulong p, GEN q, long m, GEN s, long N, GEN vz)
   k = N; while(gequal0(gel(cff, k))) k--;
   setlg(cff, k+1);
   if (DEBUGLEVEL > 2)
-    fprintferr("  coeff_of_phi_ms: %ld coefficients kept out of %ld\n",
+    err_printf("  coeff_of_phi_ms: %ld coefficients kept out of %ld\n",
                k, N);
   return gerepileupto(av, cff);
 }
@@ -1685,14 +1685,14 @@ zetap(GEN s)
 
   /* initialize the roots of unity for the computation
      of the Teichmuller character (also the values of f and c) */
-  if (DEBUGLEVEL > 1) fprintferr("zetap: computing (p-1)th roots of 1\n");
+  if (DEBUGLEVEL > 1) err_printf("zetap: computing (p-1)th roots of 1\n");
   vz = init_teich(p, q, prec);
   if (p == 2UL) {  f = 4; c = 3; } else { f = (long)p; c = 2; }
 
   /* compute the first N coefficients of the Mahler expansion
      of phi^(-1)_s skipping the first one (which is zero) */
   if (DEBUGLEVEL > 1)
-    fprintferr("zetap: computing Mahler expansion of phi^(-1)_s\n");
+    err_printf("zetap: computing Mahler expansion of phi^(-1)_s\n");
   cff = coeff_of_phi_ms(p, q, -1, is, N, vz);
 
   /* compute the coefficients of the power series corresponding
@@ -1701,13 +1701,13 @@ zetap(GEN s)
      possibility of later adding p-adic Dirichlet L-functions */
   va = identity_perm(f - 1);
   if (DEBUGLEVEL > 1)
-    fprintferr("zetap: computing values of twisted partial zeta functions\n");
+    err_printf("zetap: computing values of twisted partial zeta functions\n");
   val = twistpartialzeta(q, f, c, va, cff);
 
   /* sum over all a's the coefficients of the twisted
      partial zeta functions and integrate */
   if (DEBUGLEVEL > 1)
-    fprintferr("zetap: multiplying by correcting factor\n");
+    err_printf("zetap: multiplying by correcting factor\n");
 
   /* multiply by the corrective factor */
   cft = gsubgs(gmulsg(c, phi_ms(p, q, -1, is, c, vz)), 1);

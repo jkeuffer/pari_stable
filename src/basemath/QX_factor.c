@@ -158,8 +158,8 @@ factor_bound(GEN S)
   GEN b = Beauzamy_bound(S);
   if (DEBUGLEVEL>2)
   {
-    fprintferr("Mignotte bound: %Ps\n",a);
-    fprintferr("Beauzamy bound: %Ps\n",b);
+    err_printf("Mignotte bound: %Ps\n",a);
+    err_printf("Beauzamy bound: %Ps\n",b);
   }
   return gerepileupto(av, ceil_safe(gmin(a, b)));
 }
@@ -225,7 +225,7 @@ cmbf(GEN pol, GEN famod, GEN bound, GEN p, long a, long b,
 nextK:
   if (K > *pmaxK || 2*K > lfamod) goto END;
   if (DEBUGLEVEL > 3)
-    fprintferr("\n### K = %d, %Ps combinations\n", K,binomial(utoipos(lfamod), K));
+    err_printf("\n### K = %d, %Ps combinations\n", K,binomial(utoipos(lfamod), K));
   setlg(ind, K+1); ind[1] = 1;
   Sbound = (ulong) ((K+1)>>1);
   i = 1; curdeg = deg[ind[1]];
@@ -248,7 +248,7 @@ nextK:
       if (t > spa_bs2) t = spa_b - t;
       if (t > Sbound)
       {
-        if (DEBUGLEVEL>6) fprintferr(".");
+        if (DEBUGLEVEL>6) err_printf(".");
         goto NEXT;
       }
       /* d - 2 test */
@@ -257,7 +257,7 @@ nextK:
       if (t > spa_bs2) t = spa_b - t;
       if (t > Sbound)
       {
-        if (DEBUGLEVEL>6) fprintferr("|");
+        if (DEBUGLEVEL>6) err_printf("|");
         goto NEXT;
       }
 
@@ -272,7 +272,7 @@ nextK:
       }
       if (!signe(y) || remii(constant_term(lcpol), y) != gen_0)
       {
-        if (DEBUGLEVEL>3) fprintferr("T");
+        if (DEBUGLEVEL>3) err_printf("T");
         avma = av; goto NEXT;
       }
       y = lc; /* full computation */
@@ -286,7 +286,7 @@ nextK:
       /* y is the candidate factor */
       if (! (q = ZX_divides_i(lcpol,y,bound)) )
       {
-        if (DEBUGLEVEL>3) fprintferr("*");
+        if (DEBUGLEVEL>3) err_printf("*");
         avma = av; goto NEXT;
       }
       /* found a factor */
@@ -318,7 +318,7 @@ nextK:
       if (lc) lc = absi(leading_term(pol));
       lcpol = lc? ZX_Z_mul(pol, lc): pol;
       if (DEBUGLEVEL>3)
-        fprintferr("\nfound factor %Ps\nremaining modular factor(s): %ld\n",
+        err_printf("\nfound factor %Ps\nremaining modular factor(s): %ld\n",
                    y, lfamod);
       continue;
     }
@@ -345,7 +345,7 @@ END:
     gel(listmod,cnt) = leafcopy(famod);
     gel(fa,cnt++) = pol;
   }
-  if (DEBUGLEVEL>6) fprintferr("\n");
+  if (DEBUGLEVEL>6) err_printf("\n");
   setlg(listmod, cnt);
   setlg(fa, cnt); return mkvec2(fa, listmod);
 }
@@ -502,7 +502,7 @@ chk_factors(GEN P, GEN M_L, GEN bound, GEN famod, GEN pa)
 
   piv = special_pivot(M_L);
   if (!piv) return NULL;
-  if (DEBUGLEVEL>7) fprintferr("special_pivot output:\n%Ps\n",piv);
+  if (DEBUGLEVEL>7) err_printf("special_pivot output:\n%Ps\n",piv);
 
   r  = lg(piv)-1;
   list = cgetg(r+1, t_COL);
@@ -512,7 +512,7 @@ chk_factors(GEN P, GEN M_L, GEN bound, GEN famod, GEN pa)
   paov2 = shifti(pa,-1);
   for (i = 1;;)
   {
-    if (DEBUGLEVEL) fprintferr("LLL_cmbf: checking factor %ld\n",i);
+    if (DEBUGLEVEL) err_printf("LLL_cmbf: checking factor %ld\n",i);
     y = chk_factors_get(lt, famod, gel(piv,i), NULL, pa);
     y = FpX_center(y, pa, paov2);
     if (! (pol = ZX_divides_i(ltpol,y,bound)) ) return NULL;
@@ -611,7 +611,7 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
 
     bmin = (long)ceil(b0 + tnew*logBr);
     if (DEBUGLEVEL>2)
-      fprintferr("\nLLL_cmbf: %ld potential factors (tmax = %ld, bmin = %ld)\n",
+      err_printf("\nLLL_cmbf: %ld potential factors (tmax = %ld, bmin = %ld)\n",
                  r, tmax, bmin);
 
     /* compute Newton sums (possibly relifting first) */
@@ -680,7 +680,7 @@ AGAIN:
 
     CM_L = LLL_check_progress(Bnorm, n0, m, b == bmin, /*dbg:*/ &ti_LLL);
     if (DEBUGLEVEL>2)
-      fprintferr("LLL_cmbf: (a,b) =%4ld,%4ld; r =%3ld -->%3ld, time = %ld\n",
+      err_printf("LLL_cmbf: (a,b) =%4ld,%4ld; r =%3ld -->%3ld, time = %ld\n",
                  a,b, lg(m)-1, CM_L? lg(CM_L)-1: 1, timer_delay(&TI));
     if (!CM_L) { list = mkcol(P); break; }
     if (b > bmin)
@@ -700,7 +700,7 @@ AGAIN:
     CM_Lp = FpM_image(CM_L, utoipos(27449)); /* inexpensive test */
     if (lg(CM_Lp) != lg(CM_L))
     {
-      if (DEBUGLEVEL>2) fprintferr("LLL_cmbf: rank decrease\n");
+      if (DEBUGLEVEL>2) err_printf("LLL_cmbf: rank decrease\n");
       CM_L = ZM_hnf(CM_L);
     }
 
@@ -711,7 +711,7 @@ AGAIN:
       list = chk_factors(P, Q_div_to_int(CM_L,utoipos(C)), bound, famod, pa);
       if (DEBUGLEVEL>2) ti_CF += timer_delay(&ti);
       if (list) break;
-      if (DEBUGLEVEL>2) fprintferr("LLL_cmbf: chk_factors failed");
+      if (DEBUGLEVEL>2) err_printf("LLL_cmbf: chk_factors failed");
     }
     CM_L = gerepilecopy(av2, CM_L);
     if (low_stack(lim, stack_lim(av,1)))
@@ -721,7 +721,7 @@ AGAIN:
     }
   }
   if (DEBUGLEVEL>2)
-    fprintferr("* Time LLL: %ld\n* Time Check Factor: %ld\n",ti_LLL,ti_CF);
+    err_printf("* Time LLL: %ld\n* Time Check Factor: %ld\n",ti_LLL,ti_CF);
   return list;
 }
 
@@ -745,8 +745,8 @@ cmbf_precs(GEN q, GEN A, GEN B, long *pta, long *ptb, GEN *qa, GEN *qb)
     fl = 1;
   }
   if (DEBUGLEVEL > 3) {
-    fprintferr("S_2   bound: %Ps^%ld\n", q,b);
-    fprintferr("coeff bound: %Ps^%ld\n", q,a);
+    err_printf("S_2   bound: %Ps^%ld\n", q,b);
+    err_printf("coeff bound: %Ps^%ld\n", q,a);
   }
   *pta = a;
   *ptb = b; return fl;
@@ -780,7 +780,7 @@ combine_factors(GEN target, GEN famod, GEN p, long klim)
   if (maxK >= 0 && lg(famod)-1 > 2*maxK)
   {
     if (l!=1) A = factor_bound(gel(res,l));
-    if (DEBUGLEVEL > 4) fprintferr("last factor still to be checked\n");
+    if (DEBUGLEVEL > 4) err_printf("last factor still to be checked\n");
     L = LLL_cmbf(gel(res,l), famod, p, pa, A, a, maxK);
     if (DEBUGLEVEL>2) timer_printf(&T,"Knapsack");
     /* remove last elt, possibly unfactored. Add all new ones. */
@@ -880,7 +880,7 @@ DDF(GEN a, int fl)
 
     nfacp = fl? Flx_nbroots(z, p): Flx_nbfact(z, p);
     if (DEBUGLEVEL>4)
-      fprintferr("...tried prime %3ld (%-3ld %s). Time = %ld\n",
+      err_printf("...tried prime %3ld (%-3ld %s). Time = %ld\n",
                   p, nfacp, fl?"roots": "factors", timer_delay(&T2));
     if (nfacp < nmax)
     {
@@ -906,11 +906,11 @@ DDF(GEN a, int fl)
   {
     if (DEBUGLEVEL>4) timer_printf(&T2, "splitting mod p = %ld", chosenp);
     ti = timer_delay(&T);
-    fprintferr("Time setup: %ld\n", ti);
+    err_printf("Time setup: %ld\n", ti);
   }
   z = combine_factors(a, famod, prime, da-1);
   if (DEBUGLEVEL>2)
-    fprintferr("Total Time: %ld\n===========\n", ti + timer_delay(&T));
+    err_printf("Total Time: %ld\n===========\n", ti + timer_delay(&T));
   return gerepilecopy(av, z);
 }
 
@@ -1145,7 +1145,7 @@ ZX_gcd_all(GEN A, GEN B, GEN *Anew)
       H = ZX_init_CRT(Hp,p,vA);
       q = utoipos(p); n = m; continue;
     }
-    if (DEBUGLEVEL>5) fprintferr("gcd mod %lu (bound 2^%ld)\n", p,expi(q));
+    if (DEBUGLEVEL>5) err_printf("gcd mod %lu (bound 2^%ld)\n", p,expi(q));
     if (low_stack(avlim, stack_lim(av,1)))
     {
       if (DEBUGMEM>1) pari_warn(warnmem,"QX_gcd");

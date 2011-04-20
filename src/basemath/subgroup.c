@@ -69,8 +69,8 @@ static void
 printtyp(const long *typ) /*Used only for ddebugging */
 {
   long i, l = len(typ);
-  for (i=1; i<=l; i++) fprintferr(" %ld ",typ[i]);
-  fprintferr("\n");
+  for (i=1; i<=l; i++) err_printf(" %ld ",typ[i]);
+  err_printf("\n");
 }
 
 /* compute conjugate partition of typ */
@@ -173,7 +173,7 @@ dogroup(subgp_iter *T)
     if (T->available[i]) c[r++] = i;
     if (r > l) break;
   }
-  if (DEBUGLEVEL>6) { fprintferr("    column selection:"); printtyp(c); }
+  if (DEBUGLEVEL>6) { err_printf("    column selection:"); printtyp(c); }
   /* a/g and maxa/maxg access the same data indexed differently */
   for (ind=0,i=1; i<=t; ind+=(l-i),i++)
   {
@@ -258,7 +258,7 @@ dopsubtyp(subgp_iter *T)
   T->g    = (GEN**)new_chunk(t+1);
   T->maxg = (GEN**)new_chunk(t+1);
 
-  if (DEBUGLEVEL>4) { fprintferr("  subgroup:"); printtyp(T->M); }
+  if (DEBUGLEVEL>4) { err_printf("  subgroup:"); printtyp(T->M); }
   for (i=1; i<=t; i++)
   {
     for (r=1; r<=l; r++)
@@ -287,7 +287,7 @@ dopsub(subgp_iter *T, GEN p, GEN indexsubq)
   long *M, *L = T->L;
   long w,i,j,k,lsubq, wG = weight(L), wmin = 0, wmax = wG, n = len(L);
 
-  if (DEBUGLEVEL>4) { fprintferr("\ngroup:"); printtyp(L); }
+  if (DEBUGLEVEL>4) { err_printf("\ngroup:"); printtyp(L); }
   T->count = 0;
   switch(T->boundtype)
   {
@@ -345,17 +345,17 @@ dopsub(subgp_iter *T, GEN p, GEN indexsubq)
 
         if (DEBUGLEVEL>7)
         {
-          fprintferr("    lambda = "); printtyp(L);
-          fprintferr("    lambda'= "); printtyp(Lp);
-          fprintferr("    mu = "); printtyp(M);
-          fprintferr("    mu'= "); printtyp(Mp);
+          err_printf("    lambda = "); printtyp(L);
+          err_printf("    lambda'= "); printtyp(Lp);
+          err_printf("    mu = "); printtyp(M);
+          err_printf("    mu'= "); printtyp(Mp);
         }
         for (j=1; j<=len(Mp); j++)
         {
           p1 = mulii(p1, powiu(p, Mp[j+1]*(Lp[j]-Mp[j])));
           p1 = mulii(p1, gcoeff(BINMAT, Lp[j]-Mp[j+1]+1, Mp[j]-Mp[j+1]+1));
         }
-        fprintferr("  alpha_lambda(mu,p) = %Ps\n",p1);
+        err_printf("  alpha_lambda(mu,p) = %Ps\n",p1);
       }
 
       T->countsub = 0; dopsubtyp(T);
@@ -363,11 +363,11 @@ dopsub(subgp_iter *T, GEN p, GEN indexsubq)
 
       if (DEBUGLEVEL>4)
       {
-        fprintferr("  countsub = %ld\n", T->countsub);
+        err_printf("  countsub = %ld\n", T->countsub);
         if (T->subq) p1 = muliu(p1,lg(T->subqpart)-1);
         if (!equaliu(p1,T->countsub))
         {
-          fprintferr("  alpha = %Ps\n",p1);
+          err_printf("  alpha = %Ps\n",p1);
           pari_err(bugparier,"forsubgroup (alpha != countsub)");
         }
       }
@@ -516,10 +516,10 @@ subgroup_engine(subgp_iter *T)
     for (i=1; i<lsubq; i++)
       gel(T->subq,i) = gmul(T->powlist[k],gel(T->subq,i));
     if (DEBUGLEVEL>6)
-      fprintferr("(lifted) subgp of prime to %Ps part:\n%Ps\n",p, T->subq);
+      err_printf("(lifted) subgp of prime to %Ps part:\n%Ps\n",p, T->subq);
   }
   dopsub(T, p,indexsubq);
-  if (DEBUGLEVEL>4) fprintferr("nb subgroup = %ld\n",T->count);
+  if (DEBUGLEVEL>4) err_printf("nb subgroup = %ld\n",T->count);
   avma = av;
 }
 

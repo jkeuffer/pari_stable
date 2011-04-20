@@ -282,7 +282,7 @@ tschirnhaus(GEN x)
   }
   while (degpol(RgX_gcd(u,RgX_deriv(u)))); /* while u not separable */
   if (DEBUGLEVEL>1)
-    fprintferr("Tschirnhaus transform. New pol: %Ps",u);
+    err_printf("Tschirnhaus transform. New pol: %Ps",u);
   avma=av2; return gerepileupto(av,u);
 }
 
@@ -1630,7 +1630,7 @@ get_red_G(nfbasic_t *T, GEN *pro)
     F.prec = prec; make_M_G(&F, 0); G = F.G;
     if (u0) G = RgM_mul(G, u0);
     if (DEBUGLEVEL)
-      fprintferr("get_red_G: starting LLL, prec = %ld (%ld + %ld)\n",
+      err_printf("get_red_G: starting LLL, prec = %ld (%ld + %ld)\n",
                   prec + F.extraprec, prec, F.extraprec);
     if ((u = lllfp(G, 0.99, LLL_KEEP_FIRST)))
     {
@@ -1699,7 +1699,7 @@ nfpolred(nfbasic_t *T, GEN *pro)
     return NULL; /* no improvement */
 
   rev = QXQ_reverse(gel(z,2), x);
-  x = gel(z,1); if (DEBUGLEVEL>1) fprintferr("xbest = %Ps\n",x);
+  x = gel(z,1); if (DEBUGLEVEL>1) err_printf("xbest = %Ps\n",x);
 
   /* update T */
   pow = QXQ_powers(rev, n-1, x);
@@ -1967,7 +1967,7 @@ chk_gen(void *data, GEN x)
   av1 = avma;
   h = ZX_gcd(g, ZX_deriv(g));
   if (degpol(h)) { avma = av; return NULL; }
-  if (DEBUGLEVEL>3) fprintferr("  generator: %Ps\n",g);
+  if (DEBUGLEVEL>3) err_printf("  generator: %Ps\n",g);
   avma = av1; return gerepileupto(av, g);
 }
 
@@ -2070,7 +2070,7 @@ polred_aux(nfbasic_t *T, GEN *pro, long flag)
     if (!ch) ch = ZXQ_charpoly(ai, x, v);
     if (ZX_canon_neg(ch) && orig) ai = RgX_neg(ai);
     if (nfred && degpol(ch) == l-1) return mkvec2(ch, ai);
-    if (DEBUGLEVEL>3) fprintferr("polred: generator %Ps\n", ch);
+    if (DEBUGLEVEL>3) err_printf("polred: generator %Ps\n", ch);
     if (T->lead != gen_1 && orig) ai = RgX_unscale(ai, ginv(T->lead));
     gel(y,i) = ch;
     gel(b,i) = ai;
@@ -2172,11 +2172,11 @@ chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
       GEN B = T2_from_embed(gel(d->ZKembed,i), r1);
       if (gcmp(B,bound) < 0) bound = B ;
       if (!firstprim) firstprim = i; /* index of first primitive element */
-      if (DEBUGLEVEL>2) fprintferr("chk_gen_init: generator %Ps\n",P);
+      if (DEBUGLEVEL>2) err_printf("chk_gen_init: generator %Ps\n",P);
     }
     else
     {
-      if (DEBUGLEVEL>2) fprintferr("chk_gen_init: subfield %Ps\n",P);
+      if (DEBUGLEVEL>2) err_printf("chk_gen_init: subfield %Ps\n",P);
       if (firstprim)
       { /* cycle basis vectors so that primitive elements come last */
         GEN u = d->u, e = d->ZKembed;
@@ -2200,14 +2200,14 @@ chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
   { /* try (a little) to find primitive elements to improve bound */
     GEN x = cgetg(N+1, t_VECSMALL), e, B;
     if (DEBUGLEVEL>1)
-      fprintferr("chk_gen_init: difficult field, trying random elements\n");
+      err_printf("chk_gen_init: difficult field, trying random elements\n");
     for (i = 0; i < 10; i++)
     {
       for (j = 1; j <= N; j++) x[j] = (long)random_Fl(7) - 3;
       e = RgM_zc_mul(d->ZKembed, x);
       P = get_pol(d, e); if (!P) pari_err(precer, "chk_gen_init");
       if (!ZX_is_squarefree(P)) continue;
-      if (DEBUGLEVEL>2) fprintferr("chk_gen_init: generator %Ps\n",P);
+      if (DEBUGLEVEL>2) err_printf("chk_gen_init: generator %Ps\n",P);
       B = T2_from_embed(e, r1);
       if (gcmp(B,bound) < 0) bound = B ;
     }
@@ -2257,13 +2257,13 @@ chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
   }
   /* x_1,...,x_skipfirst generate a strict subfield [unless N=skipfirst=1] */
   chk->skipfirst = skipfirst;
-  if (DEBUGLEVEL>2) fprintferr("chk_gen_init: skipfirst = %ld\n",skipfirst);
+  if (DEBUGLEVEL>2) err_printf("chk_gen_init: skipfirst = %ld\n",skipfirst);
 
   /* should be DEF + gexpo( max_k C^n_k (bound/k)^(k/2) ) */
   bound = gerepileuptoleaf(av, bound);
   prec = chk_gen_prec(N, (gexpo(bound)*N)/2);
   if (DEBUGLEVEL)
-    fprintferr("chk_gen_init: new prec = %ld (initially %ld)\n", prec, d->prec);
+    err_printf("chk_gen_init: new prec = %ld (initially %ld)\n", prec, d->prec);
   if (prec > d->prec) pari_err(bugparier, "polredabs (precision problem)");
   if (prec < d->prec) d->ZKembed = gprec_w(d->ZKembed, prec);
   return bound;
@@ -2373,7 +2373,7 @@ polredabs0(GEN x, long flag)
     if (l == 1)
       pari_err(bugparier, "polredabs (missing vector)");
   }
-  if (DEBUGLEVEL) fprintferr("Found %ld minimal polynomials.\n",l-1);
+  if (DEBUGLEVEL) err_printf("Found %ld minimal polynomials.\n",l-1);
   if (flag & nf_ALL) {
     for (i=1; i<l; i++) gel(y,i) = store(x, gel(y,i), gel(a,i), &T, flag, u);
   } else {

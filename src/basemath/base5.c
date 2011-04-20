@@ -808,14 +808,14 @@ PRECPB:
     gel(mu,j) = zerocol(lx - 1);
     gel(B,j) = gen_0;
   }
-  if (DEBUGLEVEL) fprintferr("k = ");
+  if (DEBUGLEVEL) err_printf("k = ");
   gel(B,1) = real_i(rnfscal(mth,gel(MC,1),gel(MC,1)));
   MCS[1] = MC[1];
   kmax = 1; k = 2;
   do
   {
     GEN Ik_inv = NULL;
-    if (DEBUGLEVEL) fprintferr("%ld ",k);
+    if (DEBUGLEVEL) err_printf("%ld ",k);
     if (k > kmax)
     { /* Incremental Gram-Schmidt */
       kmax = k; MCS[k] = MC[k];
@@ -849,7 +849,7 @@ PRECPB:
   while (k < lx);
   MPOL = gmul(MPOL,h);
   if (H) h = gmul(H, h);
-  if (DEBUGLEVEL) fprintferr("\n");
+  if (DEBUGLEVEL) err_printf("\n");
   MPOL = RgM_to_nfM(nf,MPOL);
   h = RgM_to_nfM(nf,h);
   return gerepilecopy(av, mkvec2(mkvec2(MPOL,I), h));
@@ -925,7 +925,7 @@ makebasis(GEN nf, GEN pol, GEN rnfeq)
   p1 = rnfpseudobasis(nf,pol);
   W = gel(p1,1);
   I = gel(p1,2);
-  if (DEBUGLEVEL>1) fprintferr("relative basis computed\n");
+  if (DEBUGLEVEL>1) err_printf("relative basis computed\n");
 
   A = QXQ_powers(a, n-1, polabs);
   /* ZK = integer basis of K, as elements of L */
@@ -997,12 +997,12 @@ rnfpolredabs(GEN nf, GEN relpol, long flag)
     if (DEBUGLEVEL>1)
     {
       timer_printf(&ti, "absolute basis");
-      fprintferr("original absolute generator: %Ps\n", gel(eq,1));
+      err_printf("original absolute generator: %Ps\n", gel(eq,1));
     }
   }
   red = polredabs0(bas, fl);
   pol = gel(red,1);
-  if (DEBUGLEVEL>1) fprintferr("reduced absolute generator: %Ps\n",pol);
+  if (DEBUGLEVEL>1) err_printf("reduced absolute generator: %Ps\n",pol);
   if (flag & nf_ABSOLUTE)
     return gerepilecopy(av, (flag & nf_ADDZK)? red: pol);
 

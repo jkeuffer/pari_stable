@@ -148,7 +148,7 @@ millerrabin(GEN n, long k)
   for (i=1; i<=k; i++)
   {
     do r = umodui(pari_rand(), n); while (!r);
-    if (DEBUGLEVEL > 4) fprintferr("Miller-Rabin: testing base %ld\n", r);
+    if (DEBUGLEVEL > 4) err_printf("Miller-Rabin: testing base %ld\n", r);
     if (bad_for_base(&S, utoipos(r))) { avma = av; return 0; }
     avma = av2;
   }
@@ -613,7 +613,7 @@ isprimePL(GEN N, long flag)
   if (eps<=0) return eps? gen_0: gen_1;
 
   if (DEBUGLEVEL>3)
-    fprintferr("Pocklington-Lehmer: proving primality of N = %Ps\n", N);
+    err_printf("Pocklington-Lehmer: proving primality of N = %Ps\n", N);
   N = absi(N);
   if (!F)
   {
@@ -623,14 +623,14 @@ isprimePL(GEN N, long flag)
     f = factorback(F); F = gel(F,1);
     if (!equalii(f, N_1) && !BLS_test(N,f)) {
       if (DEBUGLEVEL>3)
-        fprintferr("Pocklington-Lehmer: N-1 not smooth enough --> Failure. Factored up to %Ps (%.3Ps%%)\n", f, divri(itor(f,3), N));
+        err_printf("Pocklington-Lehmer: N-1 not smooth enough --> Failure. Factored up to %Ps (%.3Ps%%)\n", f, divri(itor(f,3), N));
       avma = ltop; return gen_0;
     }
     if (DEBUGLEVEL>3)
-      fprintferr("Pocklington-Lehmer: N-1 factored up to %Ps! (%.3Ps%%)\n", f, divri(itor(f,3), N));
+      err_printf("Pocklington-Lehmer: N-1 factored up to %Ps! (%.3Ps%%)\n", f, divri(itor(f,3), N));
   }
   if (DEBUGLEVEL>3)
-    fprintferr("Pocklington-Lehmer: N-1 smooth enough! Computing certificate\n");
+    err_printf("Pocklington-Lehmer: N-1 smooth enough! Computing certificate\n");
   C = cgetg(4,t_MAT); l = lg(F);
   gel(C,1) = cgetg(l,t_COL);
   gel(C,2) = cgetg(l,t_COL);
@@ -644,7 +644,7 @@ isprimePL(GEN N, long flag)
     gmael(C,1,i) = icopy(p);
     gmael(C,2,i) = utoi(witness);
     if (DEBUGLEVEL>3)
-      fprintferr("Pocklington-Lehmer: recursively proving primality of p = %Ps\n", p);
+      err_printf("Pocklington-Lehmer: recursively proving primality of p = %Ps\n", p);
     if (!flag) r = BPSW_isprime(p)? gen_1: gen_0;
     else
     {

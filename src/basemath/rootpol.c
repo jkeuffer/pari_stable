@@ -1883,7 +1883,7 @@ all_roots(GEN p, long bit)
       if (e < 0) return roots_pol;
     }
     if (DEBUGLEVEL > 7)
-      fprintferr("all_roots: restarting, i = %ld, e = %ld\n", i,e);
+      err_printf("all_roots: restarting, i = %ld, e = %ld\n", i,e);
   }
 }
 
@@ -2415,8 +2415,8 @@ roots2(GEN T, long PREC)
   }
   if (DEBUGLEVEL)
   {
-    fprintferr("too many iterations in roots2() ( laguer() ):\n");
-    fprintferr("     real coefficients polynomial, using zrhqr()\n");
+    err_printf("too many iterations in roots2() ( laguer() ):\n");
+    err_printf("     real coefficients polynomial, using zrhqr()\n");
   }
   return zrhqr(T,PREC);
 }
@@ -2546,7 +2546,7 @@ hqr(GEN mat)
   for (i=2; i<=n; i++) for (j=(i-1); j<=n; j++) anorm += fabs(a[i][j]);
   N = n; t = 0.;
   p = q = r = 0.; /* -Wall */
-  if (DEBUGLEVEL>3) { fprintferr("* Finding eigenvalues\n"); flusherr(); }
+  if (DEBUGLEVEL>3) { err_printf("* Finding eigenvalues\n"); err_flush(); }
   while (N>=1)
   {
     long its = 0;
@@ -2646,7 +2646,7 @@ hqr(GEN mat)
     wr[k+1] = x;
     wi[k+1] = y;
   }
-  if (DEBUGLEVEL>3) { fprintferr("* Eigenvalues computed\n"); flusherr(); }
+  if (DEBUGLEVEL>3) { err_printf("* Eigenvalues computed\n"); err_flush(); }
   eig = cgetg(n+1,t_COL);
   for (i=1; i<=n; i++)
     gel(eig,i) = (wi[i] == 0.)? dbltor(wr[i])
@@ -2679,9 +2679,9 @@ zrhqr(GEN a, long prec)
       newval = gabs(poleval(aa,y),prec2);
       if (gexpo(newval) < ex || (oldval && gcmp(newval,oldval) > 0)) break;
     }
-    if (DEBUGLEVEL>3) fprintferr("%ld ",i);
+    if (DEBUGLEVEL>3) err_printf("%ld ",i);
     gel(rr,i) = gtofp(y, prec);
   }
-  if (DEBUGLEVEL>3) { fprintferr("\npolished roots = %Ps",rr); flusherr(); }
+  if (DEBUGLEVEL>3) { err_printf("\npolished roots = %Ps",rr); err_flush(); }
   return gerepilecopy(av, rr);
 }

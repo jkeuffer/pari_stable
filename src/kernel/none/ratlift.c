@@ -87,7 +87,7 @@ get_vmax(GEN r, long lb, long lbb)
       vmax = 1UL << (lr-1); /* pessimistic but faster than a division */
   }
 #ifdef DEBUG_RATLIFT
-  fprintferr("rl-fs: vmax=%lu\n", vmax);
+  err_printf("rl-fs: vmax=%lu\n", vmax);
 #endif
   return vmax;
 }
@@ -218,7 +218,7 @@ Fp_ratlift(GEN x, GEN m, GEN amax, GEN bmax, GEN *a, GEN *b)
     {
       q = dvmdii(d,d1,&r);
 #ifdef DEBUG_LEHMER
-      fprintferr("Full division:\n  q = %Ps\n", q);
+      err_printf("Full division:\n  q = %Ps\n", q);
 #endif
       d = d1; d1 = r;
       r = addii(v, mulii(q,v1));
@@ -254,8 +254,8 @@ Fp_ratlift(GEN x, GEN m, GEN amax, GEN bmax, GEN *a, GEN *b)
      * Moreover, we aren't done already, or we would have returned by now.
      * Recompute vmax */
 #ifdef DEBUG_RATLIFT
-    fprintferr("rl-fs: d,d1=%Ps,%Ps\n", d, d1);
-    fprintferr("rl-fs: v,v1=%Ps,%Ps\n", v, v1);
+    err_printf("rl-fs: d,d1=%Ps,%Ps\n", d, d1);
+    err_printf("rl-fs: v,v1=%Ps,%Ps\n", v, v1);
 #endif
     r = addii(v,v1);
     if (cmpii(r,bmax) > 0) { avma = av; return 0; } /* done, not found */
@@ -263,7 +263,7 @@ Fp_ratlift(GEN x, GEN m, GEN amax, GEN bmax, GEN *a, GEN *b)
     /* single-word "Lehmer", discarding the gcd or whatever it returns */
     (void)rgcduu((ulong)*int_MSW(d), (ulong)*int_MSW(d1), vmax, &xu, &xu1, &xv, &xv1, &s0);
 #ifdef DEBUG_RATLIFT
-    fprintferr("rl-fs: [%lu,%lu; %lu,%lu] %s\n",
+    err_printf("rl-fs: [%lu,%lu; %lu,%lu] %s\n",
                xu, xu1, xv, xv1, s0 < 0 ? "-" : "+");
 #endif
     if (xv1 == 1) /* avoid multiplications */

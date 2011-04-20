@@ -172,7 +172,7 @@ T_A_Matrices(GEN MatFU, long r, GEN *eps5, long prec)
   else
     eps3 = myround(eps3, 1);
 
-  if (DEBUGLEVEL>1) fprintferr("epsilon_3 -> %Ps\n",eps3);
+  if (DEBUGLEVEL>1) err_printf("epsilon_3 -> %Ps\n",eps3);
   *eps5 = mulur(r, eps3); return A;
 }
 
@@ -247,7 +247,7 @@ inithue(GEN P, GEN bnf, long flag, long prec)
     x0 = sqrtnr(gdiv(int2n(n-1), x0), n);
   }
   if (DEBUGLEVEL>1)
-    fprintferr("c1 = %Ps\nc2 = %Ps\nIndice <= %Ps\n", c1, c2, Ind);
+    err_printf("c1 = %Ps\nc2 = %Ps\nIndice <= %Ps\n", c1, c2, Ind);
 
   ALH = gmul2n(ALH, 1);
   tnf = cgetg(8,t_VEC); csts = cgetg(8,t_VEC);
@@ -315,8 +315,8 @@ Baker(baker_s *BS)
                                   Pi2n(1, prec)))));
 
   if (DEBUGLEVEL>1) {
-    fprintferr("  B0  = %Ps\n",B0);
-    fprintferr("  Baker = %Ps\n",c9);
+    err_printf("  B0  = %Ps\n",B0);
+    err_printf("  Baker = %Ps\n",c9);
   }
   return B0;
 }
@@ -353,7 +353,7 @@ CF_1stPass(GEN *B0, GEN kappa, baker_s *BS)
     l0 = mulrr(l0, Pi2n(1, DEFAULTPREC));
   }
   *B0 = divrr(mplog(divrr(mulir(q,a), l0)), b);
-  if (DEBUGLEVEL>1) fprintferr("    B0 -> %Ps\n",*B0);
+  if (DEBUGLEVEL>1) err_printf("    B0 -> %Ps\n",*B0);
   return 1;
 }
 
@@ -374,7 +374,7 @@ LLL_1stPass(GEN *pB0, GEN kappa, baker_s *BS, GEN *pBx)
   C = grndtoi(mulir(mulii(BS->Ind, kappa),
                     gpow(B0, dbltor(2.2), DEFAULTPREC)), &e);
 
-  if (DEBUGLEVEL > 1) fprintferr("C (bitsize) : %d\n", expi(C));
+  if (DEBUGLEVEL > 1) err_printf("C (bitsize) : %d\n", expi(C));
   lllmat = matid(3);
   if (cmpri(B0, BS->Ind) > 0)
   {
@@ -401,9 +401,9 @@ LLL_1stPass(GEN *pB0, GEN kappa, baker_s *BS, GEN *pBx)
   get_B0Bx(BS, l0, &B0, &Bx);
   if (DEBUGLEVEL>=2)
   {
-    fprintferr("LLL_First_Pass successful\n");
-    fprintferr("B0 -> %Ps\n", B0);
-    fprintferr("x <= %Ps\n", Bx);
+    err_printf("LLL_First_Pass successful\n");
+    err_printf("B0 -> %Ps\n", B0);
+    err_printf("x <= %Ps\n", Bx);
   }
   *pB0 = B0; *pBx = Bx; return 1;
 }
@@ -503,7 +503,7 @@ MiddleSols(GEN *pS, GEN bound, GEN roo, GEN poly, GEN rhs, long s, GEN c1)
       p = addii(mulii(p0, gel(t,j)), pm1); pm1 = p0; p0 = p;
       q = addii(mulii(q0, gel(t,j)), qm1); qm1 = q0; q0 = q;
       if (cmpii(q, bound) > 0) break;
-      if (DEBUGLEVEL >= 2) fprintferr("Checking (+/- %Ps, +/- %Ps)\n",p, q);
+      if (DEBUGLEVEL >= 2) err_printf("Checking (+/- %Ps, +/- %Ps)\n",p, q);
 
       z = poleval(RgX_rescale(poly,q), p); /* = P(p/q) q^dep(P) */
       Q = dvmdii(rhs, z, &R);
@@ -562,7 +562,7 @@ SmallSols(GEN S, GEN x3, GEN poly, GEN rhs)
   long j, l = lg(poly), n = degpol(poly);
   ulong y, By = itou(floorr(x3));
 
-  if (DEBUGLEVEL>1) fprintferr("* Checking for small solutions <= %lu\n", By);
+  if (DEBUGLEVEL>1) err_printf("* Checking for small solutions <= %lu\n", By);
   /* y = 0 first: solve X^n = rhs */
   if (odd(n))
   {
@@ -682,7 +682,7 @@ thueinit(GEN pol, long flag, long prec)
 
     if (flag == 0) PREC = (long)(2.2 * PREC); /* Lazy, to be improved */
     if (PREC < prec) PREC = prec;
-    if (DEBUGLEVEL >=2) fprintferr("prec = %d\n", PREC);
+    if (DEBUGLEVEL >=2) err_printf("prec = %d\n", PREC);
 
     for (;;)
     {
@@ -731,7 +731,7 @@ init_get_B(long i1, long i2, GEN Delta, GEN Lambda, GEN eps5, baker_s *BS,
 
     inverrdelta = shiftr(gabs(gel(fu,2),prec), bit_accuracy(prec)-1);
   }
-  if (DEBUGLEVEL>1) fprintferr("  inverrdelta = %Ps\n",inverrdelta);
+  if (DEBUGLEVEL>1) err_printf("  inverrdelta = %Ps\n",inverrdelta);
   BS->delta = delta;
   BS->lambda = lambda;
   BS->inverrdelta = inverrdelta;
@@ -745,7 +745,7 @@ get_B0(long i1, GEN Delta, GEN Lambda, GEN eps5, long prec, baker_s *BS)
   for(;;) /* i2 from 1 to r unless r = 1 [then i2 = 2] */
   {
     init_get_B(i1,i2, Delta,Lambda,eps5, BS, prec);
-    if (DEBUGLEVEL>1) fprintferr("  Entering CF...\n");
+    if (DEBUGLEVEL>1) err_printf("  Entering CF...\n");
     /* Reduce B0 as long as we make progress: newB0 < oldB0 - 0.1 */
     for (;;)
     {
@@ -757,7 +757,7 @@ get_B0(long i1, GEN Delta, GEN Lambda, GEN eps5, long prec, baker_s *BS)
         int res = CF_1stPass(&B0, kappa, BS);
         if (res < 0) return NULL; /* prec problem */
         if (res) break;
-        if (DEBUGLEVEL>1) fprintferr("CF failed. Increasing kappa\n");
+        if (DEBUGLEVEL>1) err_printf("CF failed. Increasing kappa\n");
       }
       if (cf == 10)
       { /* Semirational or totally rational case */
@@ -771,7 +771,7 @@ get_B0(long i1, GEN Delta, GEN Lambda, GEN eps5, long prec, baker_s *BS)
         if (signe(l0) <= 0) break;
 
         B0 = divrr(mplog(divrr(mulir(gel(Q,3), BS->c15), l0)),  BS->c13);
-        if (DEBUGLEVEL>1) fprintferr("Semirat. reduction: B0 -> %Ps\n",B0);
+        if (DEBUGLEVEL>1) err_printf("Semirat. reduction: B0 -> %Ps\n",B0);
       }
       /* if no progress, stop */
       if (gcmp(oldB0, gadd(B0,dbltor(0.1))) <= 0) return gmin(oldB0, B0);
@@ -791,7 +791,7 @@ get_Bx_LLL(long i1, GEN Delta, GEN Lambda, GEN eps5, long prec, baker_s *BS)
   for(;;) /* i2 from 1 to r unless r = 1 [then i2 = 2] */
   {
     init_get_B(i1,i2, Delta,Lambda,eps5, BS, prec);
-    if (DEBUGLEVEL>1) fprintferr("  Entering LLL...\n");
+    if (DEBUGLEVEL>1) err_printf("  Entering LLL...\n");
     /* Reduce B0 as long as we make progress: newB0 < oldB0 - 0.1 */
     for (;;)
     {
@@ -802,7 +802,7 @@ get_Bx_LLL(long i1, GEN Delta, GEN Lambda, GEN eps5, long prec, baker_s *BS)
       {
         int res = LLL_1stPass(&B0, kappa, BS, &Bx);
         if (res) break;
-        if (DEBUGLEVEL>1) fprintferr("LLL failed. Increasing kappa\n");
+        if (DEBUGLEVEL>1) err_printf("LLL failed. Increasing kappa\n");
       }
 
       /* FIXME: TO BE COMPLETED */
@@ -821,7 +821,7 @@ get_Bx_LLL(long i1, GEN Delta, GEN Lambda, GEN eps5, long prec, baker_s *BS)
 
         get_B0Bx(BS, l0, &B0, &Bx);
         if (DEBUGLEVEL>1)
-          fprintferr("Semirat. reduction: B0 -> %Ps x <= %Ps\n",B0, Bx);
+          err_printf("Semirat. reduction: B0 -> %Ps x <= %Ps\n",B0, Bx);
       }
       /* if no progress, stop */
       if (oldBx && gcmp(oldBx, Bx) <= 0) return oldBx;
@@ -881,9 +881,9 @@ LargeSols(GEN P, GEN tnf, GEN rhs, GEN ne, GEN *pS)
   c14 = mulrr(c4, Vecmax(Vect));
   x2 = gmax(x1, sqrtnr(mulur(10,c14), n));
   if (DEBUGLEVEL>1) {
-    fprintferr("x1 -> %Ps\n",x1);
-    fprintferr("x2 -> %Ps\n",x2);
-    fprintferr("c14 = %Ps\n",c14);
+    err_printf("x1 -> %Ps\n",x1);
+    err_printf("x2 -> %Ps\n",x2);
+    err_printf("c14 = %Ps\n",c14);
   }
 
   dP = ZX_deriv(P); vecdP = cgetg(s+1, t_VEC);
@@ -907,9 +907,9 @@ LargeSols(GEN P, GEN tnf, GEN rhs, GEN ne, GEN *pS)
     BS.c10 = divur(n,c7);
     BS.c13 = divur(n,c5);
     if (DEBUGLEVEL>1) {
-      fprintferr("* real root no %ld/%ld\n", iroot,s);
-      fprintferr("  c10 = %Ps\n",BS.c10);
-      fprintferr("  c13 = %Ps\n",BS.c13);
+      err_printf("* real root no %ld/%ld\n", iroot,s);
+      err_printf("  c10 = %Ps\n",BS.c10);
+      err_printf("  c13 = %Ps\n",BS.c13);
     }
 
     prec = Prec;
@@ -930,7 +930,7 @@ LargeSols(GEN P, GEN tnf, GEN rhs, GEN ne, GEN *pS)
       GEN NE = gel(MatNE,ine), Vect2 = cgetg(r+1,t_COL);
       long k, i1;
 
-      if (DEBUGLEVEL>1) fprintferr("  - norm sol. no %ld/%ld\n",ine,lg(ne)-1);
+      if (DEBUGLEVEL>1) err_printf("  - norm sol. no %ld/%ld\n",ine,lg(ne)-1);
       for (k=1; k<=r; k++)
       {
         if (k == iroot)
@@ -948,10 +948,10 @@ LargeSols(GEN P, GEN tnf, GEN rhs, GEN ne, GEN *pS)
       c15= mulrr(shiftr(c14,1), mpexp(divrr(mulur(n,c6),c5)));
 
       if (DEBUGLEVEL>1) {
-        fprintferr("  c6  = %Ps\n",c6);
-        fprintferr("  c8  = %Ps\n",c8);
-        fprintferr("  c11 = %Ps\n",c11);
-        fprintferr("  c15 = %Ps\n",c15);
+        err_printf("  c6  = %Ps\n",c6);
+        err_printf("  c8  = %Ps\n",c8);
+        err_printf("  c11 = %Ps\n",c11);
+        err_printf("  c15 = %Ps\n",c15);
       }
       BS.c11 = c11;
       BS.c15 = c15;
@@ -1150,9 +1150,9 @@ test_sol(struct sol_abs *T, long i)
   for (   ; k < l;  k++) s[k] = 0;
   if (DEBUGLEVEL>2)
   {
-    fprintferr("sol = %Ps\n",s);
-    if (T->partrel) fprintferr("T->partrel = %Ps\n",T->partrel);
-    flusherr();
+    err_printf("sol = %Ps\n",s);
+    if (T->partrel) err_printf("T->partrel = %Ps\n",T->partrel);
+    err_flush();
   }
 }
 /* partrel[i] <-- partrel[i-1] + u[i] * rel[i] */
@@ -1250,7 +1250,7 @@ get_sol_abs(struct sol_abs *T, GEN bnf, GEN a, GEN *ptPR)
     if (gcd > 1 && vn % gcd)
     {
       if (DEBUGLEVEL>2)
-      { fprintferr("gcd f_P  does not divide n_p\n"); flusherr(); }
+      { err_printf("gcd f_P  does not divide n_p\n"); err_flush(); }
       return 0;
     }
     v = (i==nP)? 0: nPR + lL;
@@ -1314,7 +1314,7 @@ get_unit_1(GEN bnf, GEN *unit)
   GEN v, nf = bnf_get_nf(bnf);
   long i, n = nf_get_degree(nf);
 
-  if (DEBUGLEVEL > 2) fprintferr("looking for a fundamental unit of norm -1\n");
+  if (DEBUGLEVEL > 2) err_printf("looking for a fundamental unit of norm -1\n");
   if (odd(n)) { *unit = gen_m1; return 1; }
   v = nfsign_units(bnf, NULL, 0);
   for (i = 1; i < lg(v); i++)
@@ -1369,7 +1369,7 @@ bnfisintnorm(GEN bnf, GEN a)
       if (! unit) norm_1 = get_unit_1(bnf, &unit);
       if (!norm_1)
       {
-        if (DEBUGLEVEL > 2) fprintferr("%Ps eliminated because of sign\n",x);
+        if (DEBUGLEVEL > 2) err_printf("%Ps eliminated because of sign\n",x);
         continue;
       }
       if (xpol) x = (unit == gen_m1)? RgX_neg(x): RgXQ_mul(unit,x,T);

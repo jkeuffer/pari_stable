@@ -276,7 +276,7 @@ without any separator; entries of type \typ{STR} are printed without enclosing
 quotes. \fl is one of \tet{f_RAW}, \tet{f_PRETTYMAT} or \tet{f_TEX}, using the
 current default output context.
 
-\fun{void}{pariOut_print0}{PariOUT *out, GEN g, long flag} as \tet{print0},
+\fun{void}{out_print0}{PariOUT *out, GEN g, long flag} as \tet{print0},
 using output context \kbd{out}.
 
 \fun{void}{print}{GEN g} equivalent to \kbd{print0(g, f\_RAW)}, followed

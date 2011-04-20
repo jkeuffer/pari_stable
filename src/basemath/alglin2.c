@@ -444,7 +444,7 @@ ZM_charpoly(GEN M)
 
   bit = (long)charpoly_bound(M) + 1;
   if (DEBUGLEVEL>5) {
-    fprintferr("ZM_charpoly: bit-bound 2^%ld\n", bit);
+    err_printf("ZM_charpoly: bit-bound 2^%ld\n", bit);
     timer_start(&T);
   }
   d = init_modular(&p);

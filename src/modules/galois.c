@@ -77,8 +77,8 @@ partitions_galois(long n)
   do_par(T,1,n,n);
   if (DEBUGLEVEL > 7)
   {
-    fprintferr("Partitions of %ld (%ld)\n",n, p);
-    for (i=1; i<=p; i++) fprintferr("i = %ld: %Ps\n",i,gel(T,i));
+    err_printf("Partitions of %ld (%ld)\n",n, p);
+    for (i=1; i<=p; i++) err_printf("i = %ld: %Ps\n",i,gel(T,i));
   }
   T[0] = evallg(p + 1) | evaltyp(t_VEC); return T;
 }
@@ -144,9 +144,9 @@ static void
 printperm(PERM perm)
 {
   long i, n = perm[0];
-  fprintferr("(");
-  for (i=1; i<=n; i++) fprintferr(" %d",perm[i]);
-  fprintferr(" )\n");
+  err_printf("(");
+  for (i=1; i<=n; i++) err_printf(" %d",perm[i]);
+  err_printf(" )\n");
 }
 
 static int
@@ -705,7 +705,7 @@ tschirn(buildroot *BR)
 
   if (l >= BR->N) pari_err(bugparier,"tschirn");
   if (DEBUGLEVEL)
-    fprintferr("\n$$$$$ Tschirnhaus transformation of degree %ld: $$$$$\n",l-1);
+    err_printf("\n$$$$$ Tschirnhaus transformation of degree %ld: $$$$$\n",l-1);
 
   a = gel(BR->coef,l); /* fill with random polynomial of degree <= l-1 */
   do
@@ -768,7 +768,7 @@ moreprec(buildroot *BR)
     if (d < BIGDEFAULTPREC-2) d = BIGDEFAULTPREC-2;
     BR->prmax = maxss(BR->prmax+d, (long)(BR->prmax * 1.2));
     if (DEBUGLEVEL)
-      { fprintferr("$$$$$ New prec = %ld\n",BR->prmax); flusherr(); }
+      { err_printf("$$$$$ New prec = %ld\n",BR->prmax); err_flush(); }
     ro = sortroots(cleanroots(BR->p,BR->prmax), gel(BR->r,1));
     delete_roots(BR);
     vectrunc_append(BR->r, gclone(ro));
@@ -838,11 +838,11 @@ static void
 dbg_rac(long nri,long nbracint,long numi[],GEN racint[],long multi[])
 {
   long k;
-  fprintferr("\t# rational integer roots = %ld:",nbracint-nri);
-  for (k = nri+1; k <= nbracint; k++) fprintferr(" %ld^%ld", numi[k], multi[k]);
-  fprintferr("\n");
-  for (k = nri+1; k <= nbracint; k++) fprintferr("\t%2ld: %Ps\n", numi[k], racint[k]);
-  flusherr();
+  err_printf("\t# rational integer roots = %ld:",nbracint-nri);
+  for (k = nri+1; k <= nbracint; k++) err_printf(" %ld^%ld", numi[k], multi[k]);
+  err_printf("\n");
+  for (k = nri+1; k <= nbracint; k++) err_printf("\t%2ld: %Ps\n", numi[k], racint[k]);
+  err_flush();
 }
 
 #define M 2521
@@ -863,7 +863,7 @@ check_isin(buildroot *BR, resolv *R, GROUP tau, GROUP ss)
   for (nogr=1; nogr<=nbgr; nogr++)
   {
     PERM T = tau[nogr];
-    if (DEBUGLEVEL) fprintferr("    ----> Group # %ld/%ld:\n",nogr,nbgr);
+    if (DEBUGLEVEL) err_printf("    ----> Group # %ld/%ld:\n",nogr,nbgr);
     init = 0; d = 1;
     for (;;)
     {
@@ -931,8 +931,8 @@ check_isin(buildroot *BR, resolv *R, GROUP tau, GROUP ss)
 
 NEXT:
       if (DEBUGLEVEL) {
-        fprintferr("        all integer roots are double roots\n");
-        fprintferr("      Working with polynomial #%ld:\n", d+1);
+        err_printf("        all integer roots are double roots\n");
+        err_printf("      Working with polynomial #%ld:\n", d+1);
       }
       if (++d >= lg(BR->r)) tschirn(BR);
     }
@@ -2258,7 +2258,7 @@ init_isin(long N, long n1, long n2, GROUP *tau, PERM *s0, resolv *R)
 {
   int fl = 1;
   if (DEBUGLEVEL) {
-    fprintferr("\n*** Entering isin_%ld_G_H_(%ld,%ld)\n",N,n1,n2); flusherr();
+    err_printf("\n*** Entering isin_%ld_G_H_(%ld,%ld)\n",N,n1,n2); err_flush();
   }
   switch(N)
   {
@@ -2322,9 +2322,9 @@ isin_G_H(buildroot *BR, long n1, long n2)
     s0 = permmul(ww, s0);
     if (DEBUGLEVEL)
     {
-      fprintferr("\n    Output of isin_%ld_G_H(%ld,%ld): %ld",N,n1,n2,n2);
-      fprintferr("\n    Reordering of the roots: "); printperm(s0);
-      flusherr();
+      err_printf("\n    Output of isin_%ld_G_H(%ld,%ld): %ld",N,n1,n2,n2);
+      err_printf("\n    Reordering of the roots: "); printperm(s0);
+      err_flush();
     }
     for (i = 1; i < l; i++)
     {
@@ -2336,8 +2336,8 @@ isin_G_H(buildroot *BR, long n1, long n2)
   }
   if (DEBUGLEVEL)
   {
-    fprintferr("    Output of isin_%ld_G_H(%ld,%ld): not included.\n",N,n1,n2);
-    flusherr();
+    err_printf("    Output of isin_%ld_G_H(%ld,%ld): not included.\n",N,n1,n2);
+    err_flush();
   }
   avma = av; return 0;
 }
@@ -2386,8 +2386,8 @@ galoisbig(GEN pol, long prec)
 
   if (DEBUGLEVEL)
   {
-    fprintferr("Galoisbig: polynomial #1 = %Ps\n", pol);
-    fprintferr("%s group\n", EVEN? "EVEN": "ODD"); flusherr();
+    err_printf("Galoisbig: polynomial #1 = %Ps\n", pol);
+    err_printf("%s group\n", EVEN? "EVEN": "ODD"); err_flush();
   }
   switch(N)
   {

@@ -122,7 +122,7 @@ zeta_get_N0(GEN C,  GEN limx)
   GEN z = gcvtoi(gdiv(C, limx), &e); /* avoid truncation error */
   if (e >= 0 || is_bigint(z))
     pari_err(talker, "need %Ps coefficients in initzeta: computation impossible", z);
-  if (DEBUGLEVEL>1) fprintferr("\ninitzeta: N0 = %Ps\n", z);
+  if (DEBUGLEVEL>1) err_printf("\ninitzeta: N0 = %Ps\n", z);
   avma = av; return itos(z);
 }
 
@@ -156,7 +156,7 @@ zeta_get_i0(long r1, long r2, long bit, GEN limx)
   GEN B = gmul(sqrtr( divrr(powrs(mppi(DEFAULTPREC), r2-3), limx) ),
                gmul2n(powuu(5, r1), bit + r2));
   long i0 = get_i0(r1, r2, B, limx);
-  if (DEBUGLEVEL>1) { fprintferr("i0 = %ld\n",i0); flusherr(); }
+  if (DEBUGLEVEL>1) { err_printf("i0 = %ld\n",i0); err_flush(); }
   avma = av; return i0;
 }
 
