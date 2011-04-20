@@ -26,3 +26,6 @@ ellanalyticrank(ellinit([0, 0, 1, -7, 6]))
 ellanalyticrank(ellinit([0, 0, 0, -5187, 176830]))
 
 elldivpol(ellinit([1,2,3,5,7]),4)
+
+\\#1185
+ellwp(ellinit([0,-1,1,-10,-20]),,,11)

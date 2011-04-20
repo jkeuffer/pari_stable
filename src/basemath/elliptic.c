@@ -1582,7 +1582,7 @@ _weipell(GEN c4, GEN c6, long PREC)
   if (PREC <= 8) return res;
   av = avma;
   P[8] = gerepileupto(av, gdivgs(gsqr(P[4]), 3));
-  for (k=5; k<(PREC>>1); k++)
+  for (k=5; (k<<1) < PREC; k++)
   {
     av = avma;
     t = gmul(P[4], P[(k-2)<<1]);
@@ -1591,7 +1591,7 @@ _weipell(GEN c4, GEN c6, long PREC)
     if ((k & 1) == 0) t = gadd(gsqr(P[k]), t);
     if (k % 3 == 2)
       t = gdivgs(gmulsg(3, t), (k-3)*(2*k+1));
-    else
+    else /* same value, more efficient */
       t = gdivgs(t, ((k-3)*(2*k+1)) / 3);
     P[k<<1] = gerepileupto(av, t);
   }
