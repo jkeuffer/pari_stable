@@ -597,12 +597,13 @@ Flx_mulspec(GEN a, GEN b, ulong p, long na, long nb)
   case 0:
     if (na>=Flx_MUL_HALFMULII_LIMIT)
       return Flx_shiftip(av,Flx_mulspec_halfmulii(a,b,p,na,nb), v);
+    break;
   case 1:
     if (na>=Flx_MUL_MULII_LIMIT)
       return Flx_shiftip(av,Flx_mulspec_mulii(a,b,p,na,nb), v);
     break;
   case 2:
-    if (na>40)
+    if (na>=Flx_MUL_MULII2_LIMIT)
       return Flx_shiftip(av,Flx_mulspec_mulii_inflate(a,b,2,p,na,nb), v);
     break;
   case 3:
@@ -746,7 +747,7 @@ Flx_sqrspec(GEN a, ulong p, long na)
       return Flx_shiftip(av, Flx_sqrspec_sqri(a,p,na), v);
     break;
   case 2:
-    if (na>40)
+    if (na>=Flx_SQR_SQRI2_LIMIT)
       return Flx_shiftip(av, Flx_sqrspec_sqri_inflate(a,2,p,na), v);
     break;
   case 3:

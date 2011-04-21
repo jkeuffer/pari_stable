@@ -18,6 +18,8 @@
 #define __Flx_SQR_SQRI_LIMIT             5
 #define __Flx_MUL_HALFMULII_LIMIT        6
 #define __Flx_SQR_HALFSQRI_LIMIT         3
+#define __Flx_MUL_MULII2_LIMIT           6
+#define __Flx_SQR_SQRI2_LIMIT            5
 #define __Flx_INVMONTGOMERY_LIMIT      804
 #define __Flx_REM_MONTGOMERY_LIMIT     605
 #define __Flx_POW_MONTGOMERY_LIMIT     216

@@ -25,8 +25,18 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 int option_trace = 0;
 double Step_Factor = .01; /* small steps by default */
-ulong DFLT_mod, DFLT_hmod;
+ulong DFLT_mod1, DFLT_hmod, DFLT_mod2;
 GEN LARGE_mod;
+
+#ifdef LONG_IS_64BIT
+#  define DFLT_mod DFLT_mod1
+#  define Fmod_MUL_MULII_LIMIT Flx_MUL_MULII_LIMIT
+#  define Fmod_SQR_SQRI_LIMIT  Flx_SQR_SQRI_LIMIT
+#  else
+#  define DFLT_mod DFLT_mod2
+#  define Fmod_MUL_MULII_LIMIT Flx_MUL_MULII2_LIMIT
+#  define Fmod_SQR_SQRI_LIMIT  Flx_SQR_SQRI2_LIMIT
+#endif
 
 typedef struct {
   ulong reps, type;
@@ -92,19 +102,10 @@ rand_FpX(long n)
 }
 /* Flx, degree n */
 static GEN
-rand_Flx(long n)
+rand_Flx(long n, ulong l)
 {
   GEN x;
-  do x = random_Flx(n+1, 0, DFLT_mod); while (degpol(x) < n);
-  return x;
-}
-
-/* Fhx, degree n */
-static GEN
-rand_Fhx(long n)
-{
-  GEN x;
-  do x = random_Flx(n+1, 0, DFLT_hmod); while (degpol(x) < n);
+  do x = random_Flx(n+1, 0, l); while (degpol(x) < n);
   return x;
 }
 
@@ -119,18 +120,20 @@ rand_NFpX(long n)
 
 /* normalized Flx, degree n */
 static GEN
-rand_NFlx(long n)
+rand_NFlx(long n, ulong l)
 {
   pari_sp av = avma;
-  GEN x = Flx_add(Flx_shift(pol1_Flx(0),n), random_Flx(n, 0, DFLT_mod), DFLT_mod);
+  GEN x = Flx_add(Flx_shift(pol1_Flx(0),n), random_Flx(n, 0, l), l);
   return gerepileuptoleaf(av, x);
 }
 
 #define t_Fhx   99
 #define t_Flx  100
-#define t_NFlx 101
-#define t_FpX  102
-#define t_NFpX 103
+#define t_Fl1x 101
+#define t_Fl2x 102
+#define t_NFlx 103
+#define t_FpX  104
+#define t_NFpX 105
 
 static GEN
 rand_g(long n, long type)
@@ -138,9 +141,11 @@ rand_g(long n, long type)
   switch (type) {
     case t_INT:  return rand_INT(n);
     case t_REAL: return rand_REAL(n);
-    case t_Fhx:  return rand_Fhx(n);
-    case t_Flx:  return rand_Flx(n);
-    case t_NFlx: return rand_NFlx(n);
+    case t_Fhx:  return rand_Flx(n,DFLT_hmod);
+    case t_Flx:  return rand_Flx(n,DFLT_mod);
+    case t_Fl1x: return rand_Flx(n,DFLT_mod1);
+    case t_Fl2x: return rand_Flx(n,DFLT_mod2);
+    case t_NFlx: return rand_NFlx(n,DFLT_mod);
     case t_FpX:  return rand_FpX(n);
     case t_NFpX: return rand_NFpX(n);
   }
@@ -152,8 +157,10 @@ dftmod(speed_param *s)
 {
   switch (s->type) {
     case t_Fhx:  s->l=DFLT_hmod; return;
-    case t_Flx:  s->l=DFLT_mod; return;
-    case t_NFlx: s->l=DFLT_mod; return;
+    case t_Flx:  s->l=DFLT_mod;  return;
+    case t_Fl1x: s->l=DFLT_mod1; return;
+    case t_Fl2x: s->l=DFLT_mod2; return;
+    case t_NFlx: s->l=DFLT_mod;  return;
     case t_FpX:  s->p=LARGE_mod; return;
     case t_NFpX: s->p=LARGE_mod; return;
   }
@@ -233,12 +240,12 @@ static double speed_Flx_mul(speed_param *s)
 { TIME_FUN(Flx_mul(s->x, s->y, s->l)); }
 
 static double speed_Flx_rem(speed_param *s) {
-  GEN x = rand_NFlx((degpol(s->x)-1)*2);
+  GEN x = rand_NFlx((degpol(s->x)-1)*2, s->l);
   TIME_FUN(Flx_rem(x, s->x, s->l));
 }
 
 static double speed_Flxq_pow(speed_param *s) {
-  GEN x = rand_Flx(degpol(s->x)-1);
+  GEN x = rand_Flx(degpol(s->x)-1, s->l);
   TIME_FUN( Flxq_pow(x, utoipos(s->l), s->x, s->l) );
 }
 
@@ -303,12 +310,14 @@ static tune_param param[] = {
 {0,   var(LOGAGMCX_LIMIT),         t_REAL,3,0, speed_logcx,0.05},
 {0,   var(AGM_ATAN_LIMIT),         t_REAL,20,0, speed_atan,0.05},
 {GMP, var(INVMOD_GMP_LIMIT),       t_INT, 3,0, speed_invmod},
-{0,   var(Flx_MUL_KARATSUBA_LIMIT),t_Flx,5,0, speed_Flx_mul,0,0,&Flx_MUL_MULII_LIMIT},
-{0,   var(Flx_SQR_KARATSUBA_LIMIT),t_Flx,5,0, speed_Flx_sqr,0,0,&Flx_SQR_SQRI_LIMIT},
-{0,   var(Flx_MUL_MULII_LIMIT),    t_Flx,5,0, speed_Flx_mul},
-{0,   var(Flx_SQR_SQRI_LIMIT),     t_Flx,5,0, speed_Flx_sqr},
+{0,   var(Flx_MUL_KARATSUBA_LIMIT),t_Flx,5,0, speed_Flx_mul,0,0,&Fmod_MUL_MULII_LIMIT},
+{0,   var(Flx_SQR_KARATSUBA_LIMIT),t_Flx,5,0, speed_Flx_sqr,0,0,&Fmod_SQR_SQRI_LIMIT},
 {0,   var(Flx_MUL_HALFMULII_LIMIT),t_Fhx,3,0, speed_Flx_mul},
 {0,   var(Flx_SQR_HALFSQRI_LIMIT), t_Fhx,3,0, speed_Flx_sqr},
+{0,   var(Flx_MUL_MULII_LIMIT),    t_Fl1x,5,0, speed_Flx_mul},
+{0,   var(Flx_SQR_SQRI_LIMIT),     t_Fl1x,5,0, speed_Flx_sqr},
+{0,   var(Flx_MUL_MULII2_LIMIT),   t_Fl2x,3,0, speed_Flx_mul},
+{0,   var(Flx_SQR_SQRI2_LIMIT),    t_Fl2x,3,0, speed_Flx_sqr},
 {0,   var(Flx_INVMONTGOMERY_LIMIT),t_NFlx,10,0, speed_Flx_inv,0.05},
 {0,  var(Flx_REM_MONTGOMERY_LIMIT),t_NFlx,10,0, speed_Flx_rem,0.05},
 {0,  var(Flx_POW_MONTGOMERY_LIMIT),t_NFlx,10,0, speed_Flxq_pow},
@@ -546,6 +555,11 @@ main(int argc, char **argv)
   (void) init_modular(&DFLT_mod);
   LARGE_mod=subis(powuu(3,128),62);
   DFLT_hmod = 97;
+#ifdef LONG_IS_64BIT
+  DFLT_mod2 = 281474976710677UL;
+#else
+  DFLT_mod1 = 4099UL;
+#endif
   v = new_chunk(argc);
   for (i = 1; i < argc; i++)
   {
