@@ -1,4 +1,4 @@
-\p38
+default(realprecision,38);
 ellap(ellinit([1,0,1,4,-6]), 2)
 ellap(ellinit([0,0,0,0,17]), 2)
 ellap(ellinit([0, 0, 1, -1, 0]),2486246173)
