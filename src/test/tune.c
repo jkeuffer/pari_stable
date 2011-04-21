@@ -352,9 +352,7 @@ time_fun(speed_function_t fun, speed_param *s, long enabled)
   double t[30];
   ulong i, j, e;
 
-  s->x = rand_g(s->size, s->type);
-  s->y = rand_g(s->size, s->type); s->reps = 1;
-  dftmod(s);
+  s->reps = 1;
   if (enabled) enable(s); else disable(s);
   for (i = 0; i < numberof(t); i++)
   {
@@ -470,6 +468,7 @@ Test(tune_param *param)
   s.size = param->min_size;
   s.var  = param->var;
   s.var_disable  = param->var_disable;
+  dftmod(&s);
   ndat = since_positive = since_change = thresh = 0;
   if (option_trace >= 1)
     diag("Setting %s... (default %ld)\n", param->name, *(param->var));
@@ -481,9 +480,13 @@ Test(tune_param *param)
 
   for(;;)
   {
+    pari_sp av=avma;
     double t1, t2, d;
+    s.x = rand_g(s.size, s.type);
+    s.y = rand_g(s.size, s.type);
     t1 = time_fun(param->fun, &s, 0);
     t2 = time_fun(param->fun, &s, 1);
+    avma = av;
     if (t2 >= t1) d = (t2 - t1) / t2;
     else          d = (t2 - t1) / t1;
 
