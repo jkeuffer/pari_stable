@@ -1,3 +1,4 @@
+#ifdef LONG_IS_64BIT
 #define __MULII_KARATSUBA_LIMIT         18
 #define __SQRI_KARATSUBA_LIMIT          34
 #define __MULII_FFT_LIMIT             1386
@@ -34,3 +35,41 @@
 #define __FpX_EXTGCD_LIMIT             222
 #define __RgX_MUL_LIMIT                  5
 #define __RgX_SQR_LIMIT                 27
+#else
+#define __MULII_KARATSUBA_LIMIT         22
+#define __SQRI_KARATSUBA_LIMIT          52
+#define __MULII_FFT_LIMIT             1786
+#define __SQRI_FFT_LIMIT              2442
+#define __MULRR_MULII_LIMIT            136
+#define __Fp_POW_REDC_LIMIT             99
+#define __Fp_POW_BARRETT_LIMIT         107
+#define __INVNEWTON_LIMIT              584
+#define __DIVRR_GMP_LIMIT               -1
+#define __EXPNEWTON_LIMIT               67
+#define __LOGAGM_LIMIT                  49
+#define __LOGAGMCX_LIMIT                66
+#define __AGM_ATAN_LIMIT               166
+#define __INVMOD_GMP_LIMIT              -1
+#define __Flx_MUL_KARATSUBA_LIMIT       48
+#define __Flx_SQR_KARATSUBA_LIMIT      129
+#define __Flx_MUL_HALFMULII_LIMIT        7
+#define __Flx_SQR_HALFSQRI_LIMIT         5
+#define __Flx_MUL_MULII_LIMIT         1517
+#define __Flx_SQR_SQRI_LIMIT          2770
+#define __Flx_MUL_MULII2_LIMIT        7337
+#define __Flx_SQR_SQRI2_LIMIT         8511
+#define __Flx_INVMONTGOMERY_LIMIT     1228
+#define __Flx_REM_MONTGOMERY_LIMIT     835
+#define __Flx_POW_MONTGOMERY_LIMIT     224
+#define __Flx_HALFGCD_LIMIT            602
+#define __Flx_GCD_LIMIT               9535
+#define __Flx_EXTGCD_LIMIT            1127
+#define __FpX_INVMONTGOMERY_LIMIT      427
+#define __FpX_REM_MONTGOMERY_LIMIT     427
+#define __FpX_POW_MONTGOMERY_LIMIT     188
+#define __FpX_HALFGCD_LIMIT            173
+#define __FpX_GCD_LIMIT               1719
+#define __FpX_EXTGCD_LIMIT             282
+#define __RgX_MUL_LIMIT                  5
+#define __RgX_SQR_LIMIT                 22
+#endif

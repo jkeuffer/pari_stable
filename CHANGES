@@ -59,6 +59,7 @@ PMo43- erfc(large x) was slow and inaccurate [#364]
        factorint(0), core(0), coredisc(0), etc.
    47- ellwp, ellzeta, ellsigma only used realprecision, instead of the input
        precision [#1184]
+BA 48- tuning for 32bit and 64bit, with or without GMP5.
 
   Changed
 LGr1- universal constants (gen_0,gen_1, etc.) are now read-only
