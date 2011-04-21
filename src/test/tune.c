@@ -316,8 +316,8 @@ static tune_param param[] = {
 {0,   var(Flx_SQR_HALFSQRI_LIMIT), t_Fhx,3,0, speed_Flx_sqr},
 {0,   var(Flx_MUL_MULII_LIMIT),    t_Fl1x,5,0, speed_Flx_mul},
 {0,   var(Flx_SQR_SQRI_LIMIT),     t_Fl1x,5,0, speed_Flx_sqr},
-{0,   var(Flx_MUL_MULII2_LIMIT),   t_Fl2x,3,0, speed_Flx_mul},
-{0,   var(Flx_SQR_SQRI2_LIMIT),    t_Fl2x,3,0, speed_Flx_sqr},
+{0,   var(Flx_MUL_MULII2_LIMIT),   t_Fl2x,5,20000, speed_Flx_mul,0.05},
+{0,   var(Flx_SQR_SQRI2_LIMIT),    t_Fl2x,5,20000, speed_Flx_sqr,0.05},
 {0,   var(Flx_INVMONTGOMERY_LIMIT),t_NFlx,10,0, speed_Flx_inv,0.05},
 {0,  var(Flx_REM_MONTGOMERY_LIMIT),t_NFlx,10,0, speed_Flx_rem,0.05},
 {0,  var(Flx_POW_MONTGOMERY_LIMIT),t_NFlx,10,0, speed_Flxq_pow},
@@ -557,11 +557,12 @@ main(int argc, char **argv)
   pari_init(8000000, 2);
   (void) init_modular(&DFLT_mod);
   LARGE_mod=subis(powuu(3,128),62);
-  DFLT_hmod = 97;
 #ifdef LONG_IS_64BIT
+  DFLT_hmod = 257;
   DFLT_mod2 = 281474976710677UL;
 #else
-  DFLT_mod1 = 4099UL;
+  DFLT_hmod = 17;
+  DFLT_mod1 = 1031UL;
 #endif
   v = new_chunk(argc);
   for (i = 1; i < argc; i++)
