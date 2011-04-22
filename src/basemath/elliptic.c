@@ -996,7 +996,6 @@ ellpow_Z(GEN e, GEN z, GEN n)
 {
   long s;
 
-  if (typ(n) != t_INT) pari_err(typeer,"ellpow_Z");
   if (ell_is_inf(z)) return ellinf();
   s = signe(n);
   if (!s) return ellinf();
@@ -1004,12 +1003,109 @@ ellpow_Z(GEN e, GEN z, GEN n)
   if (is_pm1(n)) return z;
   return gen_pow(z, n, (void*)e, &_sqr, &_mul);
 }
-/* [a + w] z, a integral */
+
+/* x a t_REAL, try to round it to an integer */
+enum { OK, LOW_PREC, NO };
+static long
+myroundr(GEN *px)
+{
+  GEN x = *px;
+  long e;
+  if (bit_accuracy(lg(x)) - expo(x) < 5) return LOW_PREC;
+  *px = grndtoi(x, &e);
+  if (e >= -5) return NO;
+  return OK;
+}
+
+/* E has CM by Q, t_COMPLEX or t_QUAD. Return q such that E has CM by Q/q
+ * or gen_1 (couldn't find q > 1)
+ * or NULL (doesn't have CM by Q) */
+static GEN
+CM_factor(GEN E, GEN Q)
+{
+  GEN w1, w2, tau, D, v, x, y, F, dF, q, r, fk, fkb, fkc;
+  long prec;
+
+  if (!ell_is_real(E)) return gen_1;
+  switch(typ(Q))
+  {
+    case t_COMPLEX:
+      D = utoineg(4);
+      v = gel(Q,2);
+      break;
+    case t_QUAD:
+      D = quad_disc(Q);
+      v = gel(Q,3);
+  }
+  /* disc Q = v^2 D, D < 0 fundamental */
+  w1 = gel(E,15);
+  w2 = gel(E,16);
+  tau = gdiv(w2, w1);
+  prec = precision(tau);
+  /* disc tau = -4 k^2 (Im tau)^2 for some integral k
+   * Assuming that E has CM by Q, then disc Q / disc tau = f^2 is a square.
+   * Compute f*k */
+  x = gel(tau,1);
+  y = gel(tau,2); /* tau = x + Iy */
+  fk = gmul(gdiv(v, gmul2n(y, 1)), sqrtr_abs(itor(D, prec)));
+  switch(myroundr(&fk))
+  {
+    case NO: return NULL;
+    case LOW_PREC: return gen_1;
+  }
+  fk = absi(fk);
+
+  fkb = gmul(fk, gmul2n(x,1));
+  switch(myroundr(&fkb))
+  {
+    case NO: return NULL;
+    case LOW_PREC: return gen_1;
+  }
+
+  fkc = gmul(fk, cxnorm(tau));
+  switch(myroundr(&fkc))
+  {
+    case NO: return NULL;
+    case LOW_PREC: return gen_1;
+  }
+
+  /* tau is a root of fk (X^2 - b X + c) \in Z[X],  */
+  F = Q_primpart(mkvec3(fk, fkb, fkc));
+  dF = qfb_disc(F); /* = disc tau, E has CM by orders of disc dF q^2, all q */
+  q = dvmdii(dF, D, &r);
+  if (r != gen_0 || !Z_issquareall(q, &q)) return NULL;
+  /* disc(Q) = disc(tau) (v / q)^2 */
+  v = dvmdii(v, q, &r);
+  if (r != gen_0) return NULL;
+  return v; /* E has CM by Q/q: [Q] = [q] o [Q/q] */
+}
+
+/* [a + w] z, a integral, w pure imaginary */
 static GEN
 ellpow_CM_aux(GEN e, GEN z, GEN a, GEN w)
 {
-  GEN A = ellpow_Z(e,z,a);
-  GEN B = ellpow_CM(e,z,w);
+  GEN A, B, q;
+  if (typ(a) != t_INT) pari_err(typeer,"ellpow_Z");
+  q = CM_factor(e, w);
+  if (!q) pari_err(talker,"not a complex multiplication in powell");
+  if (q != gen_1) w = gdiv(w, q);
+  /* compute [a + q w] z, z has CM by w */
+  if (typ(w) == t_QUAD && is_pm1(gel(gel(w,1), 3)))
+  { /* replace w by w - u, u in Z, so that N(w-u) is minimal
+     * N(w - u) = N w - Tr w u + u^2, minimal for u = Tr w / 2 */
+    GEN u = gtrace(w);
+    if (typ(u) != t_INT) pari_err(typeer,"ellpow_CM");
+    u = shifti(u, -1);
+    if (signe(u))
+    {
+      w = gsub(w, u);
+      a = addii(a, mulii(q,u));
+    }
+    /* [a + w]z = [(a + qu)] z + [q] [(w - u)] z */
+  }
+  A = ellpow_Z(e,z,a);
+  B = ellpow_CM(e,z,w);
+  if (!is_pm1(q)) B = ellpow_Z(e, B, q);
   return addell(e, A, B);
 }
 GEN
@@ -1024,7 +1120,7 @@ powell(GEN e, GEN z, GEN n)
     case t_INT: return gerepilecopy(av, ellpow_Z(e,z,n));
     case t_QUAD: {
       GEN pol = gel(n,1), a = gel(n,2), b = gel(n,3);
-      if (signe(pol[2]) < 0) pari_err(typeer,"ellpow_CM");
+      if (signe(pol[2]) < 0) pari_err(typeer,"ellpow_CM"); /* disc > 0 ? */
       return gerepileupto(av, ellpow_CM_aux(e,z,a,mkquad(pol, gen_0,b)));
     }
     case t_COMPLEX: {

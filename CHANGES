@@ -113,6 +113,8 @@ BA 23- polrootsff now returns a t_COL
        must be true primes, otherwise number theoretic routines may return
        wrong values. [#322]
    28- rename fprintferr -> err_printf, flusherr -> err_flush
+   29- ellpow (CM case). Try to determine the discriminant of the
+       endomorphism ring first [#1186]
 
   Added
 BA  1- trap keyword "syntaxer" to trap syntax error from eval.
