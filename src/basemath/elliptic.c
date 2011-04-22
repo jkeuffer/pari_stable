@@ -1075,9 +1075,9 @@ CM_factor(GEN E, GEN Q)
   q = dvmdii(dF, D, &r);
   if (r != gen_0 || !Z_issquareall(q, &q)) return NULL;
   /* disc(Q) = disc(tau) (v / q)^2 */
-  v = dvmdii(v, q, &r);
+  v = dvmdii(absi(v), q, &r);
   if (r != gen_0) return NULL;
-  return v; /* E has CM by Q/q: [Q] = [q] o [Q/q] */
+  return is_pm1(v)? gen_1: v; /* E has CM by Q/q: [Q] = [q] o [Q/q] */
 }
 
 /* [a + w] z, a integral, w pure imaginary */
@@ -1105,7 +1105,7 @@ ellpow_CM_aux(GEN e, GEN z, GEN a, GEN w)
   }
   A = ellpow_Z(e,z,a);
   B = ellpow_CM(e,z,w);
-  if (!is_pm1(q)) B = ellpow_Z(e, B, q);
+  if (q != gen_1) B = ellpow_Z(e, B, q);
   return addell(e, A, B);
 }
 GEN
