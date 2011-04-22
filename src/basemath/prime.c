@@ -838,7 +838,32 @@ rmprime(GEN T, GEN p)
   cleanprimetab(T);
 }
 
-/* p is NULL, or a single element or a row vector with "primes" to add to prime table. */
+/*stolen from ZV_union_shallow() : clone entries from y */
+static GEN
+addp_union(GEN x, GEN y)
+{
+  long i, j, k, lx = lg(x), ly = lg(y);
+  GEN z = cgetg(lx + ly - 1, t_VEC);
+  i = j = k = 1;
+  while (i<lx && j<ly)
+  {
+    int s = cmpii(gel(x,i), gel(y,j));
+    if (s < 0)
+      gel(z,k++) = gel(x,i++);
+    else if (s > 0)
+      gel(z,k++) = gclone(gel(y,j++));
+    else {
+      gel(z,k++) = gel(x,i++);
+      j++;
+    }
+  }
+  while (i<lx) gel(z,k++) = gel(x,i++);
+  while (j<ly) gel(z,k++) = gclone(gel(y,j++));
+  setlg(z, k); return z;
+}
+
+/* p is NULL, or a single element or a row vector with "primes" to add to
+ * prime table. */
 static GEN
 addp(GEN *T, GEN p)
 {
@@ -852,14 +877,10 @@ addp(GEN *T, GEN p)
   RgV_check_ZV(p, "addprimes");
   v = gen_indexsort_uniq(p, (void*)&cmpii, &cmp_nodata);
   p = vecpermute(p, v);
-  if (cmpii(gel(p,1), gen_1) <= 0) pari_err(talker,"entries must be > 1 in addprimes");
-  p = ZV_union_shallow(*T, p);
+  if (cmpii(gel(p,1), gen_1) <= 0)
+    pari_err(talker,"entries must be > 1 in addprimes");
+  p = addp_union(*T, p);
   l = lg(p);
-  for (i = 1; i < l; i++)
-  {
-    GEN c = gel(p,i);
-    if (!isclone(c)) gel(p,i) = gclone(c);
-  }
   if (l != lg(*T))
   {
     GEN old = *T, t = cgetalloc(t_VEC, l);
