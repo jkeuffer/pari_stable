@@ -3017,7 +3017,7 @@ row_count_non_zero(GEN a, long i, long max)
     if (!gequal0(gcoeff(a,i,j)))
     {
       if (k > max) return NULL; /* fail */
-      v[k++] = i;
+      v[k++] = j;
     }
   setlg(v, k); return v;
 }
@@ -3054,6 +3054,7 @@ det_develop(GEN M, long max, double bound)
       return gerepileupto(av, gsub(gmul(a,d), gmul(b,c)));
     }
   }
+  if (max > ((n+2)>>1)) max = (n+2)>>1;
   for (j = 1; j <= n; j++)
   {
     pari_sp av2 = avma;
@@ -3080,7 +3081,6 @@ det_develop(GEN M, long max, double bound)
     }
     best = v; lbest = lv; best_row = i;
   }
-  if (2*(lbest-1) > n) return det_bareiss(M); /* too dense */
   if (best_row)
   {
     GEN s = NULL;
