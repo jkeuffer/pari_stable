@@ -847,10 +847,15 @@ compilecall(long n, int mode)
   long nb=lg(arg)-1;
   long lnc=first_safe_arg(arg, COsafelex);
   for (j=1;j<=nb;j++)
-    if (tree[arg[j]].f!=Fnoarg)
+  {
+    long x = tree[arg[j]].x, f = tree[arg[j]].f;
+    if (f==Fseq)
+      compile_err("unexpected ';'", tree[x].str+tree[x].len);
+    else if (f!=Fnoarg)
       compilenode(arg[j], Ggen,j>=lnc?FLnocopylex:0);
     else
       op_push(OCpushlong,0,n);
+  }
   op_push(OCcalluser,nb,x);
   compilecast(n,Ggen,mode);
   avma=ltop;
@@ -1040,8 +1045,14 @@ compilefunc(entree *ep, long n, int mode, long flag)
       {
       case PPstd:
         if (j>nb) compile_err("too few arguments", tree[n].str+tree[n].len-1);
-        if (tree[arg[j]].f==Fnoarg && c!='I' && c!='E')
-          compile_err("missing mandatory argument", tree[arg[j]].str);
+        if (c!='I' && c!='E')
+        {
+          long x = tree[arg[j]].x, f = tree[arg[j]].f;
+          if (f==Fnoarg)
+            compile_err("missing mandatory argument", tree[arg[j]].str);
+          if (f==Fseq)
+            compile_err("unexpected ';'", tree[x].str+tree[x].len);
+        }
         switch(c)
         {
         case 'G':
