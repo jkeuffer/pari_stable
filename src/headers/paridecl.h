@@ -518,9 +518,13 @@ GEN     zx_to_ZX(GEN z);
 /* alglin1.c */
 
 GEN     F2m_deplin(GEN x);
+ulong   F2m_det(GEN x);
+ulong   F2m_det_sp(GEN x);
 GEN     F2m_ker(GEN x);
 GEN     F2m_ker_sp(GEN x, long deplin);
 GEN     Flm_deplin(GEN x, ulong p);
+ulong   Flm_det(GEN x, ulong p);
+ulong   Flm_det_sp(GEN x, ulong p);
 GEN     Flm_gauss(GEN a, GEN b, ulong p);
 GEN     Flm_image(GEN x, ulong p);
 GEN     Flm_indexrank(GEN x, ulong p);
@@ -530,6 +534,7 @@ GEN     Flm_ker_sp(GEN x, ulong p, long deplin);
 long    Flm_rank(GEN x, ulong p);
 GEN     FlxqM_ker(GEN x, GEN T, ulong p);
 GEN     FpM_deplin(GEN x, GEN p);
+GEN     FpM_det(GEN x, GEN p);
 GEN     FpM_gauss(GEN a, GEN b, GEN p);
 GEN     FpM_image(GEN x, GEN p);
 GEN     FpM_indexrank(GEN x, GEN p);

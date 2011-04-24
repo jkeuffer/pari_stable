@@ -3171,6 +3171,8 @@ asymptotically efficient ($O(n^3)$ standard algorithms).
 \fun{GEN}{FpM_deplin}{GEN x, GEN p} returns a non-trivial kernel vector,
 or \kbd{NULL} if none exist.
 
+\fun{GEN}{FpM_det}{GEN x, GEN p} as \kbd{det}
+
 \fun{GEN}{FpM_gauss}{GEN a, GEN b, GEN p} as \kbd{gauss}
 
 \fun{GEN}{FpM_image}{GEN x, GEN p} as \kbd{image}
@@ -3264,6 +3266,10 @@ the square \kbd{Flm} $m$, as a \kbd{Flx}.
 
 \fun{GEN}{Flm_deplin}{GEN x, ulong p}
 
+\fun{ulong}{Flm_det}{GEN x, ulong p}
+
+\fun{ulong}{Flm_det_sp}{GEN x, ulong p}, as \kbd{Flm\_det}, in place (destroys~\kbd{x}).
+
 \fun{GEN}{Flm_gauss}{GEN a, GEN b, ulong p}
 
 \fun{GEN}{Flm_indexrank}{GEN x, ulong p}
@@ -3338,6 +3344,10 @@ all columns.
 
 \fun{void}{F2v_add_inplace}{GEN x, GEN y} replaces $x$ by $x+y$. It is
 allowed for $y$ to be shorter than $x$.
+
+\fun{ulong}{F2m_det}{GEN x}
+
+\fun{ulong}{F2m_det_sp}{GEN x}, as \kbd{F2m\_det}, in place (destroys~\kbd{x}).
 
 \fun{GEN}{F2m_deplin}{GEN x}
 

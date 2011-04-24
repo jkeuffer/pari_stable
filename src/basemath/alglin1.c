@@ -2339,6 +2339,124 @@ Flm_ker(GEN x, ulong p) { return Flm_ker_sp(Flm_copy(x), p, 0); }
 GEN
 Flm_deplin(GEN x, ulong p) { return Flm_ker_sp(Flm_copy(x), p, 1); }
 
+ulong
+F2m_det_sp(GEN x) { return !F2m_ker_sp(x, 1); }
+
+ulong
+F2m_det(GEN x)
+{
+  pari_sp av = avma;
+  ulong d = F2m_det_sp(Flm_copy(x));
+  avma = av; return d;
+}
+
+ulong
+Flm_det_sp(GEN a, ulong p)
+{
+  pari_sp av = avma, lim = stack_lim(av,1);
+  long i,j,k, s = 1, nbco = lg(a)-1;
+  ulong q, x = 1;
+
+  for (i=1; i<nbco; i++)
+  {
+    for(k=i; k<=nbco; k++)
+      if (ucoeff(a,k,i)) break;
+    if (k > nbco) { avma=av; return ucoeff(a,i,i); }
+    if (k != i)
+    { /* exchange the lines s.t. k = i */
+      for (j=i; j<=nbco; j++) lswap(ucoeff(a,i,j), ucoeff(a,k,j));
+      s = -s;
+    }
+    q = ucoeff(a,i,i);
+
+    x = Fl_mul(x,q,p);
+    for (k=i+1; k<=nbco; k++)
+    {
+      ulong m = ucoeff(a,i,k);
+      if (!m) continue;
+
+      m = Fl_div(m, q, p);
+      for (j=i+1; j<=nbco; j++)
+      {
+        ucoeff(a,j,k) = Fl_sub(ucoeff(a,j,k), Fl_mul(m,ucoeff(a,j,i), p), p);
+        if (low_stack(lim, stack_lim(av,1)))
+        {
+          if(DEBUGMEM>1) pari_warn(warnmem,"det. col = %ld",i);
+          gerepileall(av,2, &a,&x);
+        }
+      }
+    }
+  }
+  if (s < 0) x = Fl_neg(x, p);
+  avma = av;
+  return Fl_mul(x, ucoeff(a,nbco,nbco), p);
+}
+
+ulong
+Flm_det(GEN x, ulong p)
+{
+  pari_sp av = avma;
+  ulong d = Flm_det_sp(Flm_copy(x), p);
+  avma = av; return d;
+}
+
+GEN
+FpM_det(GEN a, GEN p)
+{
+  pari_sp av = avma, lim = stack_lim(av,1);
+  long i,j,k, s = 1, nbco = lg(a)-1;
+  GEN q, x = gen_1;
+  if (lgefint(p) == 3)
+  {
+    ulong d, pp = (ulong)p[2];
+    if (pp==2)
+      d = F2m_det_sp(ZM_to_F2m(a));
+    else
+      d = Flm_det_sp(ZM_to_Flm(a, pp), pp);
+    avma = av;
+    return utoi(d);
+  }
+
+  a = RgM_shallowcopy(a);
+  for (i=1; i<nbco; i++)
+  {
+    for(k=i; k<=nbco; k++)
+    {
+      gcoeff(a,k,i) = modii(gcoeff(a,k,i), p);
+      if (signe(gcoeff(a,k,i))) break;
+    }
+    if (k > nbco) return gerepileuptoint(av, gcoeff(a,i,i));
+    if (k != i)
+    { /* exchange the lines s.t. k = i */
+      for (j=i; j<=nbco; j++) swap(gcoeff(a,i,j), gcoeff(a,k,j));
+      s = -s;
+    }
+    q = gcoeff(a,i,i);
+
+    x = Fp_mul(x,q,p);
+    for (k=i+1; k<=nbco; k++)
+    {
+      GEN m = modii(gcoeff(a,i,k), p);
+      if (!signe(m)) continue;
+
+      m = Fp_div(m, q, p);
+      for (j=i+1; j<=nbco; j++)
+      {
+        gcoeff(a,j,k) = Fp_sub(gcoeff(a,j,k), Fp_mul(m,gcoeff(a,j,i),p),p);
+        if (low_stack(lim, stack_lim(av,1)))
+        {
+          if(DEBUGMEM>1) pari_warn(warnmem,"det. col = %ld",i);
+          gerepileall(av,2, &a,&x);
+          q = gcoeff(a,i,i);
+          m = gcoeff(a,i,k); m = Fp_div(m, q, p);
+        }
+      }
+    }
+  }
+  if (s < 0) x = gneg_i(x);
+  return gerepileuptoint(av, Fp_mul(x, gcoeff(a,nbco,nbco),p));
+}
+
 static GEN
 Flm_gauss_pivot(GEN x, ulong p, long *rr)
 {
@@ -3113,13 +3231,18 @@ det(GEN a)
 {
   long n = lg(a)-1;
   double B;
-  GEN data;
+  GEN data, p=NULL;
   pivot_fun pivot;
 
   if (typ(a)!=t_MAT) pari_err(mattype1,"det");
   if (!n) return gen_1;
   if (n != lg(a[1])-1) pari_err(mattype1,"det");
   if (n == 1) return gcopy(gcoeff(a,1,1));
+  if (RgM_is_FpM(a, &p) && p)
+  {
+    pari_sp av = avma;
+    return gerepilecopy(av, Fp_to_mod(FpM_det(RgM_to_FpM(a, p), p), p));
+  }
   pivot = get_pivot_fun(a, &data);
   if (pivot != gauss_get_pivot_NZ) return det_simple_gauss(a, data, pivot);
   B = (double)n; B = B*B; B = B*B;
