@@ -7098,11 +7098,9 @@ $-1$) else $0$.
 \typ{FFELT}, and \kbd{x} is a \typ{INT}, the computation being
 performed in the definition field of \kbd{a}.
 
-
-\fun{GEN}{FF_Q_add}{GEN a, GEN y} returns $a + x$, where \kbd{a} is a
-\typ{FFELT}, and \kbd{x} can be converted to the prime field of
-\kbd{a} (via \tet{Rg_to_Fp}). Applies in particular for \kbd{x}
-an integer or a rational number.
+\fun{GEN}{FF_Q_add}{GEN a, GEN x} returns $a+x$, where \kbd{a} is a
+\typ{FFELT}, and \kbd{x} is a \typ{RFRAC}, the computation being
+performed in the definition field of \kbd{a}.
 
 \fun{GEN}{FF_sub}{GEN a, GEN b} returns $a-b$ where \kbd{a} and \kbd{b} are
 \typ{FFELT} having the same definition field.
