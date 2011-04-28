@@ -1734,10 +1734,12 @@ idealintersect(GEN nf, GEN x, GEN y)
   x = idealhnf_shallow(nf,x);
   y = idealhnf_shallow(nf,y);
   if (lg(x) == 1 || lg(y) == 1) { avma = av; return cgetg(1,t_MAT); }
-  x = Q_remove_denom(x, &dx); xZ = gcoeff(x,1,1);
-  y = Q_remove_denom(y, &dy); yZ = gcoeff(y,1,1);
+  x = Q_remove_denom(x, &dx);
+  y = Q_remove_denom(y, &dy);
   if (dx) y = ZM_Z_mul(y, dx);
   if (dy) x = ZM_Z_mul(x, dy);
+  xZ = gcoeff(x,1,1);
+  yZ = gcoeff(y,1,1);
   dx = mul_denom(dx,dy);
   z = ZM_lll(shallowconcat(x,y), 0.99, LLL_KER); lz = lg(z);
   lx = lg(x);
