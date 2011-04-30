@@ -10,7 +10,7 @@ Doc:
  returns a random element in various natural sets depending on the
  argument $N$.
 
- \item \typ{INT}: returns a (pseudo-)integer
+ \item \typ{INT}: returns an integer
  uniformly distributed between $0$ and $N-1$. Omitting the argument
  is equivalent to \kbd{random(2\pow31)}.
 
@@ -28,8 +28,9 @@ Doc:
  In particular, the curves over $\F_2$ with a single point (at infinity!)
  will trigger an infinite loop. Note that this is definitely not a uniform
  distribution over $E(k)$.
- \item \typ{POL} return a random polynomial of degree at most the degree of $N$,
- the coefficients being determinated by applying \kbd{random} to the leading
+
+ \item \typ{POL} return a random polynomial of degree at most the degree of $N$.
+ The coefficients are drawn by applying \kbd{random} to the leading
  coefficient of $N$.
 
  \bprog
