@@ -1036,6 +1036,9 @@ CM_factor(GEN E, GEN Q)
     case t_QUAD:
       D = quad_disc(Q);
       v = gel(Q,3);
+      break;
+    default:
+      return NULL; /*-Wall*/
   }
   /* disc Q = v^2 D, D < 0 fundamental */
   w1 = gel(E,15);
