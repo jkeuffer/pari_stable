@@ -35,10 +35,10 @@ cat >> $file << EOT
 
 #define PARIVERSION "GP/PARI CALCULATOR Version ${version}.${patch} (${status})"
 #define PARIINFO "${pretty}${debuginfo}"
-#define PARI_VERSION_CODE `expr $VersionMajor \\* 65536 + $VersionMinor \\* 256 + $patch`
+#define PARI_VERSION_CODE ${version_code}
 #define PARI_VERSION(a,b,c) (((a) << 16) + ((b) << 8) + (c))
 #define PARI_VERSION_SHIFT 8
-#define PARI_VCSVERSION "${statversion}"
+#define PARI_VCSVERSION "${vcsversion}"
 
 #define PARI_DOUBLE_FORMAT ${doubleformat}
 EOT

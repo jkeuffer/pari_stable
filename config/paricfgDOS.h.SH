@@ -23,10 +23,10 @@ cat > $file << EOT
 #if !defined(PARIINFO)
 #  define PARIINFO "ix86 running Windows 3.2 (ix86 kernel) 32-bit version"
 #endif
-#define PARI_VERSION_CODE `expr $VersionMajor \\* 65536 + $VersionMinor \\* 256 + $patch`
+#define PARI_VERSION_CODE ${version_code}
 #define PARI_VERSION(a,b,c) (((a) << 16) + ((b) << 8) + (c))
 #define PARI_VERSION_SHIFT 8
-#define PARI_VCSVERSION "${statversion}"
+#define PARI_VCSVERSION "${vcsversion}"
 
 #define PARI_DOUBLE_FORMAT 1
 #ifdef _MSC_VER /* MSVC inline directive */

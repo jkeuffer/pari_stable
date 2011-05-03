@@ -632,7 +632,7 @@ else if test -f $TOP/.git/index; then
 fi
 if test -n "$vcfile"; then
   cat >> $file <<EOT
-paricfg.h: $vcfile
+paricfg.h: $vcfile $cfg/version
 	-sh $cfg/setversion
 EOT
 fi
