@@ -1,7 +1,10 @@
 # $Id$
 Bug numbers refer to the BTS at http://pari.math.u-bordeaux.fr/Bugs/
 
-Done for version 2.4.4 (released ??/12/2010):
+Done for version 2.5.0 (released 13/05/2010):
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Done for version 2.4.4 (released 29/04/2011):
 
   Fixed
 BA  1- FpX_gcd did not garbage-collect for large input.
