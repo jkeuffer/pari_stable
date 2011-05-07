@@ -15,7 +15,6 @@ stat=development
 vcsversion=
 
 # soname of stable libpari.so is libpari.so.$soname_num
-soname_num=$patch
 
 patchlevel_verbose=
 if test -d "$TOP/.svn"; then
@@ -41,6 +40,8 @@ version=$VersionMajor.$VersionMinor
 pari_release="$version.$patch"
 if test `expr $VersionMinor % 2` = 1; then
   pari_release_verbose="$pari_release (STABLE)"
+  soname_num=`expr '(' $VersionMinor '+' 1 ')' / 2`
 else
   pari_release_verbose="$pari_release (DEVELOPMENT VERSION)"
+  soname_num=$patch
 fi
