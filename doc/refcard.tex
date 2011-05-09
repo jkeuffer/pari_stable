@@ -223,15 +223,9 @@ Send comments and corrections to \<Karim.Belabas@math.u-bordeaux.fr>
 \newdimen\keyindent
 \def\beginindentedkeys{\keyindent=1em}
 \def\endindentedkeys{\keyindent=0em}
-\def\begindoubleindentedkeys{\keyindent=2em}
-\def\enddoubleindentedkeys{\keyindent=1em}
 \endindentedkeys
 
 \def\kbd#1{{\tt#1}\null} %\null so not an abbrev even if period follows
-
-\def\key#1#2{\leavevmode\hbox to \hsize{\vtop
-  {\hsize=.75\hsize\rightskip=1em
-  \hskip\keyindent\relax#1}\kbd{#2}\hfil}}
 
 \newbox\libox
 \setbox\libox\hbox{\kbd{M-x }}
@@ -268,8 +262,8 @@ Send comments and corrections to \<Karim.Belabas@math.u-bordeaux.fr>
 Note: optional arguments are surrounded by braces $\{\}$.
 
 \section{Starting \& Stopping GP}
-\key{to enter GP, just type its name:}{gp}
-\key{to exit GP, type}{\\q {\rm or }quit}
+\li{to enter GP, just type its name:}{gp}
+\li{to exit GP, type}{\\q {\rm or }quit}
 
 \section{Help}
 \li{describe function}{?{\it function}}
@@ -279,30 +273,30 @@ Note: optional arguments are surrounded by braces $\{\}$.
 \section{Input/Output \& Defaults}
 \li{output previous line, the lines before}
   {\%{\rm, }\%`{\rm, }\%``{\rm, etc.}}
-\key{output from line $n$}{\%$n$}
-\key{separate multiple statements on line}{;}
-\key{extend statement on additional lines}{\\}
-\key{extend statements on several lines}{\{$\seq_1$; $\seq_2$;\}}
-\key{comment}{/* $\dots$ */}
-\key{one-line comment, rest of line ignored}{\\\\ \dots}
+\li{output from line $n$}{\%$n$}
+\li{separate multiple statements on line}{;}
+\li{extend statement on additional lines}{\\}
+\li{extend statements on several lines}{\{$\seq_1$; $\seq_2$;\}}
+\li{comment}{/* $\dots$ */}
+\li{one-line comment, rest of line ignored}{\\\\ \dots}
 \li{set default $d$ to \var{val}} {default$(\{d\},\{\var{val}\},\{\fl\})$}
 \li{mimic behavior of GP 1.39} {default(compatible,3)}
 
 \section{Metacommands}
-\key{toggle timer on/off}{\#}
-\key{print time for last result}{\#\#}
-\key{print \%$n$ in raw format}{\\a $n$}
-\key{print defaults}{\\d}
-\key{set debug level to $n$}{\\g $n$}
-\key{set memory debug level to $n$}{\\gm $n$}
-\key{enable/disable logfile}{\\l $\{${\it filename}$\}$}
-\key{print \%$n$ in pretty matrix format}{\\m}
-\key{set output mode (raw=0, default=1)}{\\o $n$}
-\key{set $n$ significant digits}{\\p $n$}
-\key{set $n$ terms in series}{\\ps $n$}
-\key{quit GP}{\\q}
-\key{print the list of PARI types}{\\t}
-\key{print the list of user-defined functions}{\\u}
+\li{toggle timer on/off}{\#}
+\li{print time for last result}{\#\#}
+\li{print \%$n$ in raw format}{\\a $n$}
+\li{print defaults}{\\d}
+\li{set debug level to $n$}{\\g $n$}
+\li{set memory debug level to $n$}{\\gm $n$}
+\li{enable/disable logfile}{\\l $\{${\it filename}$\}$}
+\li{print \%$n$ in pretty matrix format}{\\m}
+\li{set output mode (raw=0, default=1)}{\\o $n$}
+\li{set $n$ significant digits}{\\p $n$}
+\li{set $n$ terms in series}{\\ps $n$}
+\li{quit GP}{\\q}
+\li{print the list of PARI types}{\\t}
+\li{print the list of user-defined functions}{\\u}
 \li{read file into GP}{\\r {\it filename}}
 \li{write \%$n$ to file}{\\w $n$ {\it filename}}
 
@@ -681,19 +675,18 @@ $a_1,a_2,a_3,a_4,a_6,b_2,b_4,b_6,b_8,c_4,c_6,disc,j$. This data can be
 recovered by typing \kbd{\var{ell}.a1},$\dots$,\kbd{\var{ell}.j}.
 If $\fl$ omitted, also
 \hfill\break
+\li{$\bullet$ $E$ defined over $\RR$}{}
 \beginindentedkeys
-\li{$E$ defined over $\RR$}{}
-\begindoubleindentedkeys
-\key{$x$-coords. of points of order $2$}{\var{ell}.roots}
-\key{real and complex periods}{\var{ell}.omega}
-\key{associated quasi-periods}{\var{ell}.eta}
-\key{volume of complex lattice}{\var{ell}.area}
-\enddoubleindentedkeys
-\li{$E$ defined over $\QQ_p$, $|j|_p>1$}{}
-\begindoubleindentedkeys
-\key{$x$-coord. of unit $2$ torsion point}{\var{ell}.roots}
-\key{Tate's $[u^2, u, q]$}{\var{ell}.tate}
-\key{Mestre's $w$}{\var{ell}.w}
+\li{$x$-coords. of points of order $2$}{\var{ell}.roots}
+\li{real and complex periods}{\var{ell}.omega}
+\li{associated quasi-periods}{\var{ell}.eta}
+\li{volume of complex lattice}{\var{ell}.area}
+\endindentedkeys
+\li{$\bullet$ $E$ defined over $\QQ_p$, $|j|_p>1$}{}
+\beginindentedkeys
+\li{$x$-coord. of unit $2$ torsion point}{\var{ell}.roots}
+\li{Tate's $[u^2, u, q]$}{\var{ell}.tate}
+\li{Mestre's $w$}{\var{ell}.w}
 \endindentedkeys
 \li{change curve $E$ using $v=$\kbd{[}$u,r,s,t$\kbd{]}}{ellchangecurve$(ell,v)$}
 \li{change point $z$ using $v=$\kbd{[}$u,r,s,t$\kbd{]}}{ellchangepoint$(z,v)$}
@@ -793,7 +786,7 @@ If $\fl$ omitted, also
 \section{Binary Quadratic Forms}
 %
 \li{create $ax^2+bxy+cy^2$ (distance $d$) }{Qfb$(a,b,c,\{d\})$}
-\li{reduce $x$ ($s =\sqrt{D}$, $l=\{\fl\}oor{s}$)}
+\li{reduce $x$ ($s =\sqrt{D}$, $l=\floor{s}$)}
   {qfbred$(x,\{\fl\},\{D\},\{l\},\{s\})$}
 \li{composition of forms}{$x$*$y$ {\rm or }qfbnucomp$(x,y,l)$}
 \li{$n$-th power of form}{$x$\pow$n$ {\rm or }qfbnupow$(x,n)$}
@@ -819,15 +812,15 @@ A number field $K$ is given by a monic irreducible $f\in\ZZ[X]$.\hfill\break
 \li{init number field structure \var{nf}}{nfinit$(f,\{\fl\})$}
 \subsec{nf members:}
 \beginindentedkeys
-\key{polynomial defining \var{nf}, $f(\theta)=0$}{\var{nf}.pol}
-\key{number of real/complex places}{\var{nf}.r1, \var{nf}.r2, \var{nf}.sign}
-\key{discriminant of \var{nf}}{\var{nf}.disc}
-\key{$T_2$ matrix}{\var{nf}.t2}
-\key{vector of roots of $f$}{\var{nf}.roots}
-\key{integral basis of $\ZZ_K$ as powers of $\theta$}{\var{nf}.zk}
-\key{different}{\var{nf}.diff}
-\key{codifferent}{\var{nf}.codiff}
-\key{index}{\var{nf}.index}
+\li{polynomial defining \var{nf}, $f(\theta)=0$}{\var{nf}.pol}
+\li{number of real/complex places}{\var{nf}.r1/r2/sign}
+\li{discriminant of \var{nf}}{\var{nf}.disc}
+\li{$T_2$ matrix}{\var{nf}.t2}
+\li{vector of roots of $f$}{\var{nf}.roots}
+\li{integral basis of $\ZZ_K$ as powers of $\theta$}{\var{nf}.zk}
+\li{different}{\var{nf}.diff}
+\li{codifferent}{\var{nf}.codiff}
+\li{index}{\var{nf}.index}
 \endindentedkeys
 \li{recompute \var{nf}\ using current precision}{nfnewprec$(nf)$}
 \li{init relative \var{rnf}\ given by $g=0$ over $K$}{rnfinit$(\var{nf},g)$}
@@ -835,11 +828,11 @@ A number field $K$ is given by a monic irreducible $f\in\ZZ[X]$.\hfill\break
 \li{init\var{bnf} structure}{bnfinit$(f,\{\fl\})$}
 \subsec{bnf members: {\rm same as \var{nf}, plus}}
 \beginindentedkeys
-\key{underlying \var{nf}}{\var{bnf}.nf}
-\key{classgroup}{\var{bnf}.clgp}
-\key{regulator}{\var{bnf}.reg}
-\key{fundamental units}{\var{bnf}.fu}
-\key{torsion units}{\var{bnf}.tu}
+\li{underlying \var{nf}}{\var{bnf}.nf}
+\li{classgroup}{\var{bnf}.clgp}
+\li{regulator}{\var{bnf}.reg}
+\li{fundamental units}{\var{bnf}.fu}
+\li{torsion units}{\var{bnf}.tu}
 \endindentedkeys
 \li{compute a \var{bnf}\ from small \var{bnf}}{bnfinit$(\var{sbnf})$}
 %
@@ -848,10 +841,10 @@ A number field $K$ is given by a monic irreducible $f\in\ZZ[X]$.\hfill\break
 %
 \subsec{bnr members: {\rm same as \var{bnf}, plus}}
 \beginindentedkeys
-\key{underlying \var{bnf}}{\var{bnr}.bnf}
-\key{big ideal structure}{\var{bnr}.bid}
-\key{modulus}{\var{bnr}.mod}
-\key{structure of $(\ZZ_K/m)^*$}{\var{bnr}.zkst}
+\li{underlying \var{bnf}}{\var{bnr}.bnf}
+\li{big ideal structure}{\var{bnr}.bid}
+\li{modulus}{\var{bnr}.mod}
+\li{structure of $(\ZZ_K/m)^*$}{\var{bnr}.zkst}
 \endindentedkeys
 
 \section{Basic Number Field Arithmetic (nf)}
