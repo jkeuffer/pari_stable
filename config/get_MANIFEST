@@ -1,4 +1,4 @@
-svn list -R -r COMMITTED | grep -v '/$'
+svn list -R -r COMMITTED | grep -v '/$' | grep -v '\.gitignore'
 # generated files
 echo Odos/paricfg.h
 echo doc/usersch3.tex
