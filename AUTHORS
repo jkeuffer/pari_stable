@@ -14,16 +14,17 @@ We would like to thank them all here.
 
 Current lead developers:
 
-  Bill ALLOMBERT (Montpellier)
+  Bill ALLOMBERT (Bordeaux)
   Karim BELABAS (Bordeaux)
 
 Major contributors (large modules written or rewritten from scratch):
 
   Bill ALLOMBERT: GP2C, the GP parser, extension of the GP language
-    (my, closures) GMP kernel, modular kernel, ffinit, galois* routines,
-    subcyclo, black-box groups, the elldata and galdata package, PARI
-    description system, FLTK support, Bug tracking system, administration
-    of pari.math.u-bordeaux.fr, the http://pari.math.u-bordeaux.fr website
+    (my, closures), GMP kernel, modular kernel, ffinit, galois* routines,
+    subcyclo, black-box groups, the elldata and galdata package,
+    multithread model, PARI description system, FLTK support, Bug tracking
+    system, administration of pari.math.u-bordeaux.fr, the
+    http://pari.math.u-bordeaux.fr website
   Christian BATUT: 68k multiprecision kernel, Linear algebra, lattices
   Karim BELABAS: current project leader, native multiprecision kernel, modular
     kernel, polynomial arithmetic, polynomial factorization (finite fields,
@@ -42,6 +43,7 @@ Major contributors (large modules written or rewritten from scratch):
   Xavier GOURDON: polroots, initial Karatsuba/Toom Cook/fft implementations
   Louis GRANBOULAN: breakup of monolithic PARI into modules, first GMP
     kernel, first Configure
+  Loic GRENIE: bnfinit() rewrite
   Bruno HAIBLE: micro assembly implementations, DOS/Windows support
   Guillaume HANROT: thue, zncoppersmith
   Pascal LETARD: basic number field (round2, initial round4)
