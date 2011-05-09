@@ -9,6 +9,10 @@
 /* Read lib/gpalias BEFORE gp prompts you for commands.
  * The file contains some standard abbreviations (correct the path first !) */
 
+\\ histfile = ~/.gphistory
+/* saves a history of all input commands in this file, and load it in each new
+ * session's history */
+
 \\ compatible = 0
 /* CAUTION: scripts written in the old (1.x) syntax WILL NOT WORK AS BEFORE.
  * If compatible>1, the OLD functions are the ONLY ONES known to gp, save
