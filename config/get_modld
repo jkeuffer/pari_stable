@@ -3,9 +3,9 @@ _modld_list='EXTRAMODLDFLAGS MODLD MODLDFLAGS modules_build'
 
 # EXTRADLLDFLAGS might refer to $LIBS
 __LIBS=$LIBS
-if test "$static" = n; then LIBS="$LIBS $LDDYN"; fi
+if test "$static" = n; then LIBS="$LIBS -L$libdir $LDDYN"; fi
 case $osname in
-cygwin|mingw) EXTRAMODLDFLAGS="-L$libdir -lpari -Wl,--enable-auto-import";;
+cygwin|mingw) EXTRAMODLDFLAGS="-L$libdir $LDDYN -Wl,--enable-auto-import";;
 *)      EXTRAMODLDFLAGS=`eval echo $EXTRADLLDFLAGS`;;
 esac;
 LIBS=$__LIBS
