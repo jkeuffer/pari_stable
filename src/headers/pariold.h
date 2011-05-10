@@ -15,6 +15,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /* For compatibility with 1.x.x */
 /*functions renamed*/
+#define fprintferr err_printf
 #define msgTIMER timer_printf
 #define TIMER timer_delay
 #define TIMERread timer_get

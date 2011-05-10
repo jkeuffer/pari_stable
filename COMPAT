@@ -137,29 +137,23 @@ This file lists the incompatible changes between Version 2.x and older versions
 
 * Specific to the PARI library:
 ===============================
+  - allocatemoremem() is gone. Use allocatemem().
+  - rename fprintferr() -> err_printf().
   - rename TIMER -> timer_delay, TIMERread -> timer_get, TIMERstart ->
     timer_start, msgTIMER -> timer_printf
-
   - rename gener_Fp -> pgener_Fp, gener_Fl -> pgener_Fp [ contrary to
     'gener', these assume that their argument is prime ]
-
   - rename Flx_rand -> random_Flx, FpX_rand -> random_FpX
-
   - rename cyclo -> polcyclo (GP name), subcyclo -> polsubcyclo (GP name),
     tchebi -> polchebyshev (GP name), legendre -> pollegendre (GP name)
-
   - only scalar types (and vectors/matrices of such) are allowed in gaffect
     and gaffsg.
-
   - pol_x and pol_1 are now functions, not global arrays. Use pol_x(v)
     instead of pol_x[v]. polvar[] and ordvar[] have disappeared
-
   - rename ZY_ZXY_resultant   -> ZX_ZXY_resultant,
            ZY_ZXY_rnfequation -> ZX_ZXY_rnfequation and
            FpY_FpXY_resultant -> FpX_FpXY_resultant
-
   - FpX_ functions no longer accept p==NULL.
-
   - Fl_pow renamed to Fl_powu [ exponent may not be negative ]
   - rename pointch ->  ellchangepoint, coordch -> ellchangecurve,
     ordell -> ellordinate
