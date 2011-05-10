@@ -7,7 +7,6 @@ Help:
 Doc: of the form x$.n$, where x (conversion style)
  is a letter in $\{\kbd{e},\kbd{f},\kbd{g}\}$, and $n$ (precision) is an
  integer; this affects the way real numbers are printed:
- \label{se:format}
 
  \item If the conversion style is \kbd{e}, real numbers are printed in
  \idx{scientific format}, always with an explicit exponent,

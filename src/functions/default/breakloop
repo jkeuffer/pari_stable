@@ -5,7 +5,7 @@ C-Name: sd_breakloop
 Prototype:
 Help:
 Doc: if true, enables the ``break loop'' debugging mode, see
- \secref{se:breakloop}.
+ \secref{se:break_loop}.
 
  The default value is \kbd{1} if we are running an interactive \kbd{gp}
  session, and \kbd{0} otherwise.

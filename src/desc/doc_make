@@ -36,10 +36,12 @@ while (<FILE>)
       }
       s/_def_//;
       my ($secname) = $_;
+      my ($l) = $_;
+      $l = "def,$l" if ($fun->{Section} =~ 'default');
       if ($secname =~ s/_/\\_/g) {
-        print "\n\\subsec{$secname}$v: \\kbdsidx{$_}\\label{se:$_}$doc\n";
+        print "\n\\subsec{$secname}$v: \\kbdsidx{$l}\\label{se:$l}$doc\n";
       } else {
-        print "\n\\subsecidx{$secname}$v: \\label{se:$_}$doc\n";
+        print "\n\\subsecidx{$secname}$v: \\label{se:$l}$doc\n";
       }
     }
   }
@@ -47,7 +49,7 @@ while (<FILE>)
 }
 
 sub library_syntax { my ($fun, $args) = @_;
-  return '' if ($fun->{Class} =~ /^(highlevel|gp|default)$/);
+  return '' if ($fun->{Class} =~ /^(highlevel|gp|default|gp_default)$/);
   my ($Cname) = $fun->{'C-Name'};
   my ($Variant) = $fun->{Variant};
   my (@proto) = split(//, $fun->{Prototype});

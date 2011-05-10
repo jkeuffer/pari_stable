@@ -4,7 +4,7 @@ Section: default
 C-Name: sd_colors
 Prototype:
 Help:
-Doc: this default is only usable if \kbd{gp}\label{se:colors}
+Doc: this default is only usable if \kbd{gp}
  is running within certain color-capable terminals. For instance \kbd{rxvt},
  \kbd{color\_xterm} and modern versions of \kbd{xterm} under X Windows, or
  standard Linux/DOS text consoles. It causes \kbd{gp} to use a small palette of
