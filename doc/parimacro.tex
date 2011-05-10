@@ -219,7 +219,7 @@
 \def\synt{\let\do=\@synt\doverb}
 
 % function prototypes
-\def\funno#1#2#3{\noindent{\tt#1 #2(#3)}} % no index
+\def\funno#1#2#3{\tolerance=300\noindent{\tt#1 #2(#3)}} % no index
 \def\@fun#1#2#3{\gdef\f@nt{tt}\toindex{#2}\funno{#1}{#2}{#3}}
 \def\fun{\let\do=\@fun\doverbbb}
 
