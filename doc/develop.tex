@@ -219,18 +219,21 @@ A group is thus described by a \kbd{const bb\_struct} as above and auxiliary
 data typecast to \kbd{void*}. The following functions operate on black-box
 groups:
 
-\fun{GEN}{gen_Shanks_log}{GEN x,GEN g,GEN N, void *E, const struct bb_group
-*grp} Generic baby-step/giant-step algorithm
-(Shanks's method). Assuming that $g$ has order $N$, compute an integer $k$
-such that $g^k = x$. This requires $O(\sqrt{N})$ group operations and uses an
-auxiliary table containing $O(\sqrt{N})$ group elements.
+\fun{GEN}{gen_Shanks_log}{GEN x, GEN g, GEN N, void *E, const struct bb_group
+*grp} \hbadness 10000\break
+Generic baby-step/giant-step algorithm (Shanks's method). Assuming
+that $g$ has order $N$, compute an integer $k$ such that $g^k = x$. This
+requires $O(\sqrt{N})$ group operations and uses an auxiliary table
+containing $O(\sqrt{N})$ group elements.
 
-\fun{GEN}{gen_Pollard_log}{GEN x,GEN g,GEN N, void *E, const struct bb_group
-*grp} Generic Pollard rho algorithm. Assuming that $g$ has order $N$, compute an integer $k$
-such that $g^k = x$. This requires $O(\sqrt{N})$ group operations in average
-and $O(1)$ storage.
+\fun{GEN}{gen_Pollard_log}{GEN x, GEN g, GEN N, void *E, const struct bb_group
+*grp} \hbadness 10000\break
+Generic Pollard rho algorithm. Assuming that $g$ has order $N$, compute an
+integer $k$ such that $g^k = x$. This requires $O(\sqrt{N})$ group operations
+in average and $O(1)$ storage.
 
-\fun{GEN}{gen_plog}{GEN x,GEN g,GEN N, void *E, const struct bb_group}
+\fun{GEN}{gen_plog}{GEN x, GEN g, GEN N, void *E, const struct bb_group,
+    GEN easy(void*, GEN, GEN, GEN)} \hbadness 10000
 Assuming that $g$ has prime order $N$, compute an integer $k$ such that
 $g^k = x$, using either \kbd{gen\_Shanks\_log} or \kbd{gen\_Pollard\_log}.
 
@@ -243,13 +246,14 @@ field.
 of $x$ and restrict to its field of definition.
 
 \fun{GEN}{gen_Shanks_sqrtn}{GEN a, GEN n, GEN N, GEN *zetan, void *E, const
-struct bb_group *grp} returns one solution of $x^n = a$ in a black-box cyclic
-group of order $N$. Return \kbd{NULL} if no solution exists. If \kbd{zetan}
-is not \kbd{NULL} it is set to an element of exact order $n$.
+struct bb_group *grp} \hbadness 10000 returns one solution of $x^n = a$ in a
+black-box cyclic group of order $N$. Return \kbd{NULL} if no solution exists.
+If \kbd{zetan} is not \kbd{NULL} it is set to an element of exact order $n$.
 
 This function uses \kbd{gen\_plog} for all prime divisors of $\gcd(n,N)$.
 
-\fun{GEN}{gen_PH_log}{GEN a, GEN g, GEN N, void *E, const struct bb_group *grp, GEN easy(void *E, GEN, GEN, GEN)}
+\fun{GEN}{gen_PH_log}{GEN a, GEN g, GEN N, void *E, const struct bb_group
+*grp, GEN easy(void *E, GEN, GEN, GEN)} \hbadness 10000
 Generic Pohlig-Hellman algorithm. Assuming that $g$ has order $N$, compute
 an integer $k$ such that $g^k = x$. This requires $O(p^{1/2+\epsilon})$ group
 operations, where $p$ is the largest prime divisor of $N$, and uses an
