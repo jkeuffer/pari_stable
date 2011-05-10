@@ -211,7 +211,7 @@ non-$0$ result otherwise. May print a help message.
 \misctitle{Utility function}
 
 \fun{void}{pari_ask_confirm}{const char *s} raise an error if the
-associated callback \tet{cb_pari_ask_confirm} is \kbd{NULL}. Otherwise
+callback \tet{cb_pari_ask_confirm} is \kbd{NULL}. Otherwise
 calls
 \bprog
   cb_pari_ask_confirm(s);
@@ -6966,7 +6966,7 @@ the \typ{POL} \kbd{gtovecrev(q)}.
 square matrix $x$.
 
 \fun{GEN}{RgX_RgMV_eval}{GEN f, GEN V} returns
-$\kbd{f}(\kbd{x})$, assuming that \kbd{V} was computed by
+the evaluation $\kbd{f}(\kbd{x})$, assuming that \kbd{V} was computed by
 $\kbd{FpXQ\_powers}(\kbd{x}, n)$ for some $n>1$.
 
 \fun{GEN}{RgX_RgM_eval_col}{GEN q, GEN x, long c} evaluates the \typ{POL} $q$
@@ -7661,8 +7661,8 @@ names are associated to gp's output strings:
 \emph{If} the \tet{colors} default is set to a non-empty value, before gp
 outputs a string, it first outputs an ANSI colors escape sequence ---
 understood by most terminals ---, according to the \kbd{colors}
-specifications. As long as this is in effect, the following strings chars is
-rendered in color, possibly in bold or underlined (see \secref{se:colors}).
+specifications. As long as this is in effect, the following strings are
+rendered in color, possibly in bold or underlined.
 
 \fun{void}{term_color}{long c} prints (as if using \tet{pari_puts}) the ANSI
 color escape sequence associated to output object \kbd{c}. If \kbd{c} is
@@ -8468,7 +8468,8 @@ and return \kbd{gnil}.
 \item other cases: print nothing and return \kbd{gnil}.
 
 
-\fun{GEN}{sd_ulong}{const char *v, long flag, const char *s, ulong *ptn, ulong Min, ulong Max, const char **msg}
+\fun{GEN}{sd_ulong}{const char *v, long flag, const char *s, ulong *ptn,
+ulong Min, ulong Max, const char **msg}\hbadness 10000
 
 \item \kbd{ptn} points to the current numerical value of the toggle, and is set
 to the new value (when \kbd{v} is non-empty).
