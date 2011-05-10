@@ -2952,9 +2952,9 @@ the first plotting.  Let us add another plotting with fewer
 points too:
 \bprog
 plotinit(0, 0.9,0.9, relative)
-plotrecth(0, t=100,110, f(t), "Parametric", 300)
-plotrecth(0, t=100,110, f(t), "Parametric|Splines|Points_too|no_Rescale", 30);
-plotrecth(0, t=100,110, f(t), "Parametric|Splines|Points_too|no_Rescale", 20);
+plotrecth(0, t=100,110, f(t), "Parametric",300)
+plotrecth(0, t=100,110, f(t), "Parametric|Splines|Points_too|no_Rescale",30);
+plotrecth(0, t=100,110, f(t), "Parametric|Splines|Points_too|no_Rescale",20);
 plotdraw([0, 0.05,0.05], relative)
 @eprog
 
@@ -2974,7 +2974,7 @@ plotrecth(0, t=100,110, f(t), "Parametric|no_Lines", 300)
 plotpointsize(0, 1)                 \\@com normal-size markers
 plotlinetype(-1, 1)                 \\@com set color of graph lines
 plotpointtype(-1, 1)                \\@com set color of graph points
-opts = "Parametric|Splines|Points_too|no_Rescale|no_Frame|no_X_axis|no_Y_axis";
+opts="Parametric|Splines|Points_too|no_Rescale|no_Frame|no_X_axis|no_Y_axis";
 plotrecth(0, t=100,110,f(t), opts, 30);
 plotlinetype(-1, 2)                 \\@com set color of graph lines
 plotpointtype(-1, 2)                \\@com set color of graph points
