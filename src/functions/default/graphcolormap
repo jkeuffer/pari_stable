@@ -18,5 +18,6 @@ Doc: a vector of colors, to be
  white"} represent the same color. RGB codes are a little cryptic but often
  easier to generate.
 
- The default value is \kbd{["white", "black", "blue", "violetred", "red",
- "green", "grey", "gainsboro"]}
+ The default value is [\kbd{"white"}, \kbd{"black"}, \kbd{"blue"},
+ \kbd{"violetred"}, \kbd{"red"}, \kbd{"green"}, \kbd{"grey"},
+ \kbd{"gainsboro"}].

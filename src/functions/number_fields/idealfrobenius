@@ -13,13 +13,11 @@ Doc: Let $K$ be the number field defined by $nf$ and assume $K/\Q$ be a
  automorphism $\sigma=\left(\goth{P}\over K/\Q \right)$, i.e the Frobenius
  element associated to $\goth{P}$. If $p$ is the unique prime number
  in $\goth{P}$, then $\sigma(x)\equiv x^p\mod\P$ for all $x\in\Z_K$.
-
  \bprog
- ? nf=nfinit(polcyclo(31));
- ? gal=galoisinit(nf);
- ? pr=idealprimedec(nf,101)[1];
- ? g=idealfrobenius(nf,gal,pr)
- %4 = Vecsmall([13, 14, 29, 27, 19, 30, 10, 21, 17, 12, 24, 8, 9, 20, 26, 25, 22, 5, 11, 4, 7, 1, 16, 18, 3, 6, 2, 15, 23, 28])
+ ? nf = nfinit(polcyclo(31));
+ ? gal = galoisinit(nf);
+ ? pr = idealprimedec(nf,101)[1];
+ ? g = idealfrobenius(nf,gal,pr);
  ? galoispermtopol(gal,g)
  %5 = x^8
  @eprog\noindent This is correct since $101\equiv 8\mod{31}$.

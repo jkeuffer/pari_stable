@@ -51,7 +51,12 @@ Doc: ordinary class number of the quadratic
  @eprog\noindent
  See also \kbd{qfbhclassno}.
 Variant: The following functions are also available:
+
  \fun{GEN}{classno}{GEN D} ($\fl = 0$)
- \fun{GEN}{classno2}{GEN D} ($\fl = 1$). Finally
+
+ \fun{GEN}{classno2}{GEN D} ($\fl = 1$).
+
+ \noindent Finally
+
  \fun{GEN}{hclassno}{GEN D} computes the class number of an imaginary
  quadratic field by counting reduced forms, an $O(|D|)$ algorithm.

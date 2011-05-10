@@ -18,7 +18,6 @@ Doc: \var{bnf} being the number field data
  Note that \var{bnf} need not contain the fundamental unit explicitly:
  \bprog
  ? setrand(1); bnf = bnfinit(x^2-x-100000);
-   *** bnfinit: Warning: insufficient precision for fundamental units, not given.
  ? bnf.fu
    ***   at top-level: bnf.fu
    ***                     ^--
@@ -28,4 +27,6 @@ Doc: \var{bnf} being the number field data
  ? bnfisunit(bnf, u)
  %3 = [-1, Mod(0, 2)]~
  @eprog\noindent The given $u$ is the inverse of the fundamental unit
- implicitly stored in \var{bnf}.
+ implicitly stored in \var{bnf}. In this case, the fundamental unit was not
+ computed and stored in algebraic form since the default accuracy was too
+ low. (Re-run the command at \bs g1 or higher to see such diagnostics.)

@@ -2,10 +2,11 @@ Function: qfbred
 Section: number_theoretical
 C-Name: qfbred0
 Prototype: GD0,L,DGDGDG
-Help: qfbred(x,{flag=0},{D},{isqrtD},{sqrtD}): reduction of the binary
- quadratic form x. All other args. are optional. D, isqrtD and sqrtD, if
- present, supply the values of the discriminant, floor(sqrt(D)) and sqrt(D)
- respectively. If D<0, its value is not used and all references to Shanks's
+Help: qfbred(x,{flag=0},{d},{isd},{sd}): reduction of the binary
+ quadratic form x. All other args. are optional. The arguments d, isd and
+ sd, if
+ present, supply the values of the discriminant, floor(sqrt(d)) and sqrt(d)
+ respectively. If d<0, its value is not used and all references to Shanks's
  distance hereafter are meaningless. flag can be any of 0: default, uses
  Shanks's distance function d; 1: use d, do a single reduction step; 2: do
  not use d; 3: do not use d, single reduction step.
@@ -16,9 +17,9 @@ Doc: reduces the binary quadratic form $x$ (updating Shanks's distance function
 
  \quad 2: don't update \idx{Shanks}'s distance
 
- $D$, \var{isqrtD}, \var{sqrtD}, if present, supply the values of the
- discriminant, $\floor{\sqrt{D}}$, and $\sqrt{D}$ respectively
- (no checking is done of these facts). If $D<0$ these values are useless,
+ The arguments $d$, \var{isd}, \var{sd}, if present, supply the values of the
+ discriminant, $\floor{\sqrt{d}}$, and $\sqrt{d}$ respectively
+ (no checking is done of these facts). If $d<0$ these values are useless,
  and all references to Shanks's distance are irrelevant.
 Variant: Also available are
 
@@ -30,6 +31,6 @@ Variant: Also available are
 
  \fun{GEN}{rhoreal}{GEN x} (= \kbd{qfbred(x,1)}),
 
- \fun{GEN}{redrealnod}{GEN x, GEN isqrtD} (= \kbd{qfbred(x,2,,isqrtD)}),
+ \fun{GEN}{redrealnod}{GEN x, GEN isd} (= \kbd{qfbred(x,2,,isd)}),
 
- \fun{GEN}{rhorealnod}{GEN x, GEN issqrtD} (= \kbd{qfbred(x,3,,isqrtD)}).
+ \fun{GEN}{rhorealnod}{GEN x, GEN isd} (= \kbd{qfbred(x,3,,isd)}).

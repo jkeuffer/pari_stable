@@ -2,18 +2,18 @@ Function: rnfkummer
 Section: number_fields
 C-Name: rnfkummer
 Prototype: GDGD0,L,p
-Help: rnfkummer(bnr,{subgp},{deg=0}): bnr being as output by bnrinit,
+Help: rnfkummer(bnr,{subgp},{d=0}): bnr being as output by bnrinit,
  finds a relative equation for the class field corresponding to the module in
  bnr and the given congruence subgroup (the ray class field if subgp is
- omitted). deg can be zero (default), or positive, and in this case the
- output is the list of all relative equations of degree deg for the given bnr,
+ omitted). d can be zero (default), or positive, and in this case the
+ output is the list of all relative equations of degree d for the given bnr,
  with the same conductor as (bnr, subgp).
 Doc: \var{bnr}
  being as output by \kbd{bnrinit}, finds a relative equation for the
  class field corresponding to the module in \var{bnr} and the given
  congruence subgroup (the full ray class field if \var{subgp} is omitted).
- If \var{deg} is positive, outputs the list of all relative equations of
- degree \var{deg} contained in the ray class field defined by \var{bnr}, with
+ If $d$ is positive, outputs the list of all relative equations of
+ degree $d$ contained in the ray class field defined by \var{bnr}, with
  the \emph{same} conductor as $(\var{bnr}, \var{subgp})$.
 
  \misctitle{Warning} This routine only works for subgroups of prime index. It
