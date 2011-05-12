@@ -49,8 +49,9 @@ case "$osname" in
 	# Actually, the build will fail until the switch to -Zomf
 	dlld_ignore=- ;;
   mingw)
-    export_file='$(LIBPARI).def'
-    ;;
+    export_file='$(LIBPARI).def';;
+  darwin)
+    ld_install_name="-Wl,-dylib_install_name -Wl,\"$libdir\"/\$(LIBPARI_DYN)";;
 esac
 
 PLOTCFLAGS=
@@ -204,6 +205,8 @@ SOLIBPARI    = \$(DLLIB_PREFIX)\$(LIBPARI_BASE).$DLSUFFIX
 LIBPARI_DYN   = \$(SOLIBPARI)$sodest
 LIBPARI_SONAME= \$(SOLIBPARI)$soname
 DL_DFLT_NAME = $DL_DFLT_NAME
+
+LD_INSTALL_NAME  = $ld_install_name
 
 EXPORT_FILE   = $export_file
 EXPORT_CREATE = $export_create
@@ -466,7 +469,7 @@ install-lib-sta: \$(LIBPARI_STA)
 install-lib-dyn-base:
 	-mkdir -p \$(LIBDIR)
 	-\$(RM) \$(LIBDIR)/\$(LIBPARI_DYN) \$(LIBDIR)/\$(LIBPARI_SONAME) \$(LIBDIR)/\$(LIBPARI_SO)
-	\$(DLLD_IGNORE)\$(DLLD) -o \$(LIBDIR)/\$(LIBPARI_DYN) \$(DLLDFLAGS) \$(OBJS) \$(EXTRADLLDFLAGS) \$(GMPLIBS) \$(EXPORT_FILE)
+	\$(DLLD_IGNORE)\$(DLLD) -o \$(LIBDIR)/\$(LIBPARI_DYN) \$(DLLDFLAGS) \$(OBJS) \$(EXTRADLLDFLAGS) \$(GMPLIBS) \$(EXPORT_FILE) \$(LD_INSTALL_NAME)
 install-lib-dyn-link: install-lib-dyn-base
 	-if test "\$(LIBPARI_SONAME)" != "\$(LIBPARI_SO)"; then \
 	  \$(LN) \$(LIBPARI_DYN) \$(LIBDIR)/\$(LIBPARI_SONAME);\
