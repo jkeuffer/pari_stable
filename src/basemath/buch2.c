@@ -2416,7 +2416,7 @@ get_random_ideal(FB_t *F, GEN nf, GEN ex)
 {
   long l = lg(ex);
   for (;;) {
-    GEN ideal = idealhnf_principal(nf, gen_1);
+    GEN ideal = NULL;
     long i;
     for (i=1; i<l; i++)
     {
