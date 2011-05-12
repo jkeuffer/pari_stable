@@ -2037,7 +2037,7 @@ already_known(RELCACHE_t *cache, long bs, GEN cols)
  * Otherwise, update basis and return > 0. Compute mod p (much faster)
  * so some kernel vector might not be genuine. */
 static int
-add_rel_i(RELCACHE_t *cache, GEN R, long nz, GEN m, long orig, long aut, REL_t **relp, long prnewrel)
+add_rel_i(RELCACHE_t *cache, GEN R, long nz, GEN m, long orig, long aut, REL_t **relp, long in_rnd_rel)
 {
   const ulong p = 27449UL;
   long i, k, n = lg(R)-1;
@@ -2099,12 +2099,12 @@ add_rel_i(RELCACHE_t *cache, GEN R, long nz, GEN m, long orig, long aut, REL_t *
   }
   else
     k = (cache->last - cache->base) + 1;
-  if (k || cache->relsup > 0)
+  if (k || cache->relsup > 0 || (m && in_rnd_rel))
   {
     REL_t *rel;
 
     rel = ++cache->last;
-    if (!k)
+    if (!k && cache->relsup)
     {
       cache->relsup--;
       k = (rel - cache->base) + cache->missing;
@@ -2122,7 +2122,7 @@ add_rel_i(RELCACHE_t *cache, GEN R, long nz, GEN m, long orig, long aut, REL_t *
     if (relp) *relp = rel;
     if (DEBUGLEVEL)
     {
-      if (prnewrel)
+      if (in_rnd_rel)
         dbg_newrel(cache);
       else
         dbg_rel(rel - cache->base, R);
@@ -2132,14 +2132,13 @@ add_rel_i(RELCACHE_t *cache, GEN R, long nz, GEN m, long orig, long aut, REL_t *
 }
 
 static int
-add_rel(RELCACHE_t *cache, FB_t *F, GEN R, long nz, GEN m)
+add_rel(RELCACHE_t *cache, FB_t *F, GEN R, long nz, GEN m, long in_rnd_rel)
 {
   REL_t *rel;
-  long k, l, prnewrel = nz < 0, reln;
+  long k, l, reln;
   const long nauts = lg(F->idealperm), KC = F->KC;
 
-  if (prnewrel) nz = -nz;
-  k = add_rel_i(cache, R, nz, m, 0, 0, &rel, prnewrel);
+  k = add_rel_i(cache, R, nz, m, 0, 0, &rel, in_rnd_rel);
   if (k > 0 && m)
   {
     GEN Rl = cgetg(KC+1, t_VECSMALL);
@@ -2158,7 +2157,7 @@ add_rel(RELCACHE_t *cache, FB_t *F, GEN R, long nz, GEN m)
           if (v < nzl) nzl = v;
           Rl[v] = R[i];
         }
-      (void)add_rel_i(cache, Rl, nzl, NULL, reln, l, NULL, prnewrel);
+      (void)add_rel_i(cache, Rl, nzl, NULL, reln, l, NULL, in_rnd_rel);
     }
   }
   return k;
@@ -2375,7 +2374,7 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
       /* smooth element */
       R = set_fact(F, fact, NULL, &nz);
       /* make sure we get maximal rank first, then allow all relations */
-      if (add_rel(cache, F, R, nz, gx) <= 0)
+      if (add_rel(cache, F, R, nz, gx, 0) <= 0)
       { /* probably Q-dependent from previous ones: forget it */
         if (DEBUGLEVEL>1) err_printf("*");
         if (++dependent > maxtry_DEP) break;
@@ -2487,11 +2486,7 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN auts, FACT *fact)
       /* can factor ideal, record relation */
       add_to_fact(jid, 1, fact);
       R = set_fact(F, fact, ex, &nz);
-      /* If relation is linearly dependent of the previous ones, we do not
-       * include it (to speed up hnfspec/add). However we just go to the next
-       * ideal as if we had included it (to finish rnd_rel earlier and make an
-       * hnfspec/add round). */
-      switch (add_rel(cache, F, R, -nz, nfmul(nf, m, m1)))
+      switch (add_rel(cache, F, R, nz, nfmul(nf, m, m1), 1))
       {
         case -1: /* forget it */
           if (DEBUGLEVEL>1) dbg_cancelrel(jid,j,R);
@@ -3329,7 +3324,7 @@ init_rel(RELCACHE_t *cache, FB_t *F, long add_need)
     c = zero_Flv(F->KC); k = F->iLP[p];
     R = c; c += k;
     for (j = lg(P)-1; j; j--) c[j] = pr_get_e(gel(P,j));
-    add_rel(cache, F, R, k+1, /*m*/NULL);
+    add_rel(cache, F, R, k+1, /*m*/NULL, 0);
   }
 }
 
@@ -3765,9 +3760,9 @@ START:
         need = lg(dep)>1? lg(dep[1])-1: lg(B[1])-1;
         /* FIXME: replace by err(bugparier,"") */
         if (!need && cache.missing)
-        { /* The test above will never be true, but add_rel implicitely assumes
-           * that if we have maximal rank for the ideal lattice, then
-           * cache.missing == 0. Better safe than sorry. */
+        { /* The test above will never be true except if 27449|class number,
+           * but the code implicitely assumes that if we have maximal rank
+           * for the ideal lattice, then cache.missing == 0. */
           for (i = 1; cache.missing; i++)
             if (!mael(cache.basis, i, i))
             {
