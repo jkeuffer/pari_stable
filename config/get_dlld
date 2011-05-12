@@ -19,7 +19,8 @@ case "$osname" in
   hpux) soname= ; sodest= ; DLSUFFIX=sl;;
   irix) soname= ; sodest= ;;
   os2|cygwin|mingw)soname= ; sodest= ; DLSUFFIX=dll ;;
-  darwin)soname= ; sodest= ; DLSUFFIX=dylib;;
+  darwin)soname= ; sodest= ; DLSUFFIX=dylib;
+         compat_ver=$VersionMajor.$VersionMinor.0; num_ver=$VersionMajor.$VersionMinor.$patch;;
   *) do_dll=no ;;
 esac
 
@@ -67,7 +68,7 @@ if test -n "$DLLD"; then
   else # DLLD != GNU ld
     case "$osname" in
       aix)     DLLDFLAGS='-r' ;;
-      darwin)  DLLDFLAGS='-flat_namespace -undefined suppress' ;;
+      darwin)  DLLDFLAGS="-flat_namespace -undefined suppress -dylib_compatibility_version $compat_ver -dylib_current_version $num_ver" ;;
       freebsd) DLLDFLAGS='-Bshareable -x' ;;
       hpux)    DLLDFLAGS='-b' ;;
       irix)    DLLDFLAGS='-shared -elf -no_unresolved -all' ;;
