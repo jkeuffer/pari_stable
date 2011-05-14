@@ -66,9 +66,7 @@ check_and_build_obj(GEN S, long tag, GEN (*build)(GEN))
 /*                    GENERAL NUMBER FIELDS                        */
 /*                                                                 */
 /*******************************************************************/
-static const long SFB_MAX = 3;
 static const long RANDOM_BITS = 4;
-static const long MAXRELSUP = 50;
 
 typedef struct FACT {
     long pr, ex;
@@ -3517,6 +3515,7 @@ trim_list(FB_t *F)
 GEN
 Buchall_param(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long prec)
 {
+  const long MAXRELSUP = 50, SFB_MAX = 3;
   pari_timer T;
   pari_sp av0 = avma, av, av2;
   long PRECREG, N, R1, R2, RU, LIMC, LIMC2, zc, i;

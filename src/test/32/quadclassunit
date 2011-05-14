@@ -610,5 +610,13 @@ t(d).cyc));
 -999999999999011 [10976478]
 -999999999999007 [2903838, 2, 2]
 -999999999999003 [4036316, 2]
+? setrand(11);quadclassunit(-8419588).cyc
+[176, 2]
+? setrand(2);quadclassunit(-1459008).cyc
+[16, 4, 2, 2]
+? setrand(7);quadclassunit(-3799812).cyc
+[54, 2, 2, 2]
+? setrand(1);quadclassunit(-13163208).cyc
+[156, 2, 2]
 ? print("Total time spent: ",gettime);
-Total time spent: 15172
+Total time spent: 6564

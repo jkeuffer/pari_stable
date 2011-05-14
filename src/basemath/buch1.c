@@ -322,7 +322,7 @@ FBquad(struct buch_quad *B, long C2, long C1, GRHcheck_t *S)
       default:  /* split */
         i++; B->numFB[p] = i; B->FB[i] = p; break;
     }
-    if (S)
+    if (!S->checkok)
     {
       double logp = log((double)p);
       double logNP = s < 0? 2*logp: logp;
@@ -356,7 +356,7 @@ FBquad(struct buch_quad *B, long C2, long C1, GRHcheck_t *S)
     B->badprim = NULL;
     Res = gerepileuptoleaf(av, Res);
   }
-  return Res;
+  S->checkok = 1; return Res;
 }
 
 /* create B->vperm, return B->subFB */
@@ -842,13 +842,15 @@ quad_be_honest(struct buch_quad *B)
   return r;
 }
 
+
 GEN
 Buchquad(GEN D, double cbach, double cbach2, long prec)
 {
+  const long MAXRELSUP = 7, SFB_MAX = 3;
   pari_timer T;
   pari_sp av0 = avma, av, av2;
   const long RELSUP = 5;
-  long i, s, current, triv, nrelsup, nreldep, need, nsubFB;
+  long i, s, current, triv, sfb_trials, nrelsup, nreldep, need, nsubFB;
   ulong LIMC, LIMC2, cp;
   GEN W, cyc, res, gen, dep, mat, C, extraC, B, R, resc, Res, z, h = NULL; /*-Wall*/
   double drc, lim, LOGD, LOGD2;
@@ -908,7 +910,6 @@ START:
     if (BQ.subFB) gunclone(BQ.subFB);
     if (BQ.powsubFB) gunclone(BQ.powsubFB);
     clearhash(BQ.hashtab);
-    nreldep = nrelsup = 0;
     LIMC = (ulong)(cbach*LOGD2);
     if (LIMC < cp) { LIMC = cp; cbach = (double)LIMC / LOGD2; }
     LIMC2 = (ulong)(maxdd(cbach,cbach2)*LOGD2);
@@ -919,7 +920,8 @@ START:
     if (DEBUGLEVEL) timer_printf(&T, "factor base");
   }
   while (!Res || !(BQ.subFB = subFBquad(&BQ, QFR.D, lim + 0.5)));
-  if (DEBUGLEVEL) timer_printf(&T, "subFBquad (%ld elt.)", lg(BQ.subFB));
+  if (DEBUGLEVEL) timer_printf(&T, "subFBquad = %Ps",
+                               vecpermute(BQ.FB, BQ.subFB));
   nsubFB = lg(BQ.subFB) - 1;
   BQ.powsubFB = powsubFBquad(&BQ,CBUCH+1);
   if (DEBUGLEVEL) timer_printf(&T, "powsubFBquad");
@@ -928,6 +930,7 @@ START:
   need = BQ.KC + RELSUP - 2;
   current = 0;
   W = NULL;
+  sfb_trials = nreldep = nrelsup = 0;
   s = nsubFB + RELSUP;
   av2 = avma;
 
@@ -987,12 +990,15 @@ START:
     {
       case fupb_PRECI:
         BQ.PRECREG = (BQ.PRECREG<<1)-2;
-        cbach /= 2; goto START;
+        FIRST = 1; goto START;
 
       case fupb_RELAT:
-        if (++nrelsup > 7 && cbach <= 1) goto START;
+        if (++nrelsup > MAXRELSUP)
+        {
+          if (++sfb_trials > SFB_MAX && cbach <= 1) goto START;
+          nsubFB++;
+        }
         need = minss(BQ.KC, nrelsup);
-        if (cbach > 1 && nsubFB < 3 && lg(BQ.vperm) > 3) nsubFB++;
     }
   }
   while (need);

@@ -9,3 +9,9 @@ test(D) =
   );
 }
 setrand(1); test(10^15); test(-10^15)
+
+\\ #1195
+setrand(11);quadclassunit(-8419588).cyc
+setrand(2);quadclassunit(-1459008).cyc
+setrand(7);quadclassunit(-3799812).cyc
+setrand(1); quadclassunit(-13163208).cyc
