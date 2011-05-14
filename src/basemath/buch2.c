@@ -447,10 +447,17 @@ init_famat(GEN x) { return mkvec2(x, cgetg(1,t_MAT)); }
 static GEN
 red(GEN nf, GEN I, GEN G0, GEN *pm)
 {
-  GEN m, y;
+  GEN m, y, norm, norm2;
+  norm = typ(I) == t_MAT ? ZM_det_triangular(I) : idealnorm(nf, I);
   y = idealred0(nf, init_famat(I), G0);
   m = gel(y,2);
   y = gel(y,1); *pm = lg(m)==1? gen_1: Q_primpart(gmael(m, 1, 1));
+  norm2 = typ(y) == t_MAT ? ZM_det_triangular(y) : idealnorm(nf, y);
+  if (gcmp(norm, norm2) < 0)
+  {
+    *pm = gen_1;
+    y = I;
+  }
   return is_pm1(gcoeff(y,1,1))? NULL: idealtwoelt(nf,y);
 }
 
