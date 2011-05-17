@@ -137,11 +137,6 @@ if test -n "$__gnuc__"; then
   case "$osname" in
     os2)      cflags="$cflags -Zmt -Zsysv-signals";;
     nextstep) cflags="$cflags -traditional-cpp";;
-    darwin) # don't use broken pre-compiled headers on old Darwin
-      if ($CC -no-cpp-precomp ansi.c 2>/dev/null); then :
-      else
-        cflags="$cflags -no-cpp-precomp"
-      fi;;
   esac
 
   # omit-frame-pointer incompatible with -pg
