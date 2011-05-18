@@ -72,7 +72,7 @@ tutorial.dvi: tutorial.tex \$(MACROS)
 	dvips \$< -o \$@
 
 refcard.ps: refcard.dvi
-	dvips -t landscape -t a4 refcard.dvi -o \$@
+	dvips refcard.dvi -o \$@
 
 %.std: %.idx
 	sed -e 's/!\([1-9]\)!/!00\1!/'\\
