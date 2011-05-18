@@ -996,7 +996,7 @@ START:
         if (++nrelsup > MAXRELSUP)
         {
           if (++sfb_trials > SFB_MAX && cbach <= 1) goto START;
-          nsubFB++;
+          if (nsubFB < minss(10,BQ.KC)) nsubFB++;
         }
         need = minss(BQ.KC, nrelsup);
     }
