@@ -8,6 +8,7 @@ BA  1- DESTDIR did not work. [#1194]
 BA  2- Improve Darwin shared library support.
 LGr 3- bnfinit -> oo-loop if class number is divisible by 27449 [#1197]
 BA  4- [gp2c] error("foo") did not work.
+    5- wrong generators in quadclassunit(D > 0) [ fix qfr3_pow / qfr5_pow ]
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.4 (released 29/04/2011):

@@ -269,7 +269,7 @@ qfr_1_by_disc(GEN D, long prec)
   pari_sp av = avma;
   long r;
 
-  check_quaddisc_real(D, /*junk*/&r, "qfr_1_by_disc");
+  check_quaddisc_real(D, &r, "qfr_1_by_disc");
   gel(y,1) = gen_1; isqrtD = sqrti(D);
   if ((r & 1) != mod2(isqrtD)) /* we know isqrtD > 0 */
     isqrtD = gerepileuptoint(av, addsi(-1,isqrtD));
@@ -285,6 +285,32 @@ qfr_1(GEN x)
   prec = precision(gel(x,4));
   if (!prec) pari_err(talker,"not a t_REAL in 4th component of a t_QFR");
   return qfr_1_by_disc(qfb_disc(x), prec);
+}
+
+static void
+qfr_1_fill(GEN y, struct qfr_data *S)
+{
+  pari_sp av = avma;
+  GEN y2 = S->isqrtD;
+  gel(y,1) = gen_1;
+  if (mod2(S->D) != mod2(y2)) y2 = addsi(-1,y2);
+  gel(y,2) = y2; av = avma;
+  gel(y,3) = gerepileuptoint(av, shifti(subii(sqri(y2), S->D),-2));
+}
+static GEN
+qfr5_1(struct qfr_data *S, long prec)
+{
+  GEN y = cgetg(6, t_VEC);
+  qfr_1_fill(y, S);
+  gel(y,4) = gen_0;
+  gel(y,5) = real_1(prec); return y;
+}
+static GEN
+qfr3_1(struct qfr_data *S)
+{
+  GEN y = cgetg(4, t_VEC);
+  qfr_1_fill(y, S);
+  return y;
 }
 
 static GEN
@@ -935,12 +961,21 @@ qfr3_comp(GEN x, GEN y, struct qfr_data *S)
   return qfr3_red(z, S);
 }
 
-/* assume n != 0, return x^|n|. Not stack-clean */
+/* valid for t_QFR, qfr3, qfr5 */
+static GEN
+qfr_inv(GEN x) {
+  GEN z = shallowcopy(x);
+  gel(z,2) = negi(gel(z,2));
+  return z;
+}
+
+/* return x^n. Not stack-clean */
 GEN
 qfr5_pow(GEN x, GEN n, struct qfr_data *S)
 {
   GEN y = NULL;
-  long i, m;
+  long i, m, s = signe(n);
+  if (!s) return qfr5_1(S, lg(gel(x,5)));
   for (i=lgefint(n)-1; i>1; i--)
   {
     m = n[i];
@@ -953,12 +988,14 @@ qfr5_pow(GEN x, GEN n, struct qfr_data *S)
   }
   return y;
 }
-/* assume n != 0, return x^|n|. Not stack-clean */
+/* return x^n. Not stack-clean */
 GEN
 qfr3_pow(GEN x, GEN n, struct qfr_data *S)
 {
   GEN y = NULL;
-  long i, m;
+  long i, m, s = signe(n);
+  if (!s) return qfr3_1(S);
+  if (s < 0) x = qfr_inv(x);
   for (i=lgefint(n)-1; i>1; i--)
   {
     m = n[i];
@@ -971,25 +1008,17 @@ qfr3_pow(GEN x, GEN n, struct qfr_data *S)
   }
   return y;
 }
-
-static GEN
-qfr_inv(GEN x) {
-  GEN z = cgetg(5, t_QFR);
-  gel(z,1) = gel(x,1);
-  gel(z,2) = negi(gel(x,2));
-  gel(z,3) = gel(x,3);
-  gel(z,4) = gel(x,4); return z;
-}
-/* assume n != 0 */
 GEN
 qfrpow(GEN x, GEN n)
 {
   struct qfr_data S = { NULL, NULL, NULL };
+  long s = signe(n);
   pari_sp av = avma;
   GEN d0;
 
-  if (is_pm1(n)) return signe(n) > 0? redreal(x): ginv(x);
-  if (signe(n) < 0) x = qfr_inv(x);
+  if (!s) return qfr_1(x);
+  if (is_pm1(n)) return s > 0? redreal(x): ginv(x);
+  if (s < 0) x = qfr_inv(x);
   d0 = gel(x,4);
   if (!signe(d0)) {
     x = qfr3_init(x, &S);
