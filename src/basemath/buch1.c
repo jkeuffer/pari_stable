@@ -65,6 +65,17 @@ qfr3_canon(GEN x, struct qfr_data *S)
   return x;
 }
 static GEN
+qfr3_canon_safe(GEN x, struct qfr_data *S)
+{
+  GEN a = gel(x,1), c = gel(x,3);
+  if (signe(a) < 0) {
+    if (absi_equal(a,c)) return qfr3_rho(x, S);
+    gel(x,1) = negi(a);
+    gel(x,3) = negi(c);
+  }
+  return x;
+}
+static GEN
 qfr5_canon(GEN x, struct qfr_data *S)
 {
   GEN a = gel(x,1), c = gel(x,3);
@@ -469,7 +480,7 @@ get_clgp(struct buch_quad *B, GEN W, GEN *ptD, long prec)
         t = qfr3_pow(gel(init,i), u, B->QFR);
         g = g? qfr3_comp(g, t, B->QFR): t;
       }
-      g = qfr3_to_qfr(qfr3_canon(qfr3_red(g, B->QFR), B->QFR), Z);
+      g = qfr3_to_qfr(qfr3_canon_safe(qfr3_red(g, B->QFR), B->QFR), Z);
     }
     else
     {
