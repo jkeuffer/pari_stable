@@ -1,6 +1,6 @@
 !include "MUI.nsh"
-Name "PARI 2.4.3 (ALPHA)"
-!define dll "libpari-gmp-2.4.dll"
+Name "PARI 2.5 (STABLE)"
+!define dll "libpari-gmp.dll"
 
 ;--No need to modify things below --
 !define top ".."
