@@ -3,6 +3,177 @@ This file highlights some of the novelties in PARI/GP 2.x compared to 1.39.15
 Incompatible changes are described in COMPAT. See TODO for possible future
 improvements.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.5 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+[Libpari Build & Configuration]
+  - 'Configure --tune' fine-tunes gp and the PARI library for a given host.
+    On some machines this leads to noticeable performance improvements,
+    esp. when using the GMP multiprecision kernel.
+
+  - 'Configure --enable-tls' makes libpari thread-safe, for multi-threaded
+    applications. See Appendix B in the "User's Guide to the PARI Library"
+
+[Multiprecision Kernel]
+  - The GMP library is now used by default if Configure can find it.
+
+  - Schoenhage-Strassen big integers multiplication to native kernel
+    (very useful if GMP not available)
+
+[Polynomial Arithmetic]
+  - faster multiplication of integer polynomials (Kronecker's trick)
+
+  - subquadratic gcd over prime finite fields
+
+  - special polynomials (polcyclo, polchebyshev, pollegendre...) are orders
+  of magnitude faster ( polcyclo(10^6): 1min 30s (2.3) -> 4ms (2.5) ) and
+  directly allow evaluation at a given point, e.g. polcyclo(n, 2) for Phi_n(2).
+
+  - issquare(t_POL) now works reliably over prime finite fields ( we used
+  to have  issquare(Mod(1,2)*(x^2+1)) -> 0, or error messages in more
+  complicated cases ).
+
+  - charpoly no longer assumes that the characteristic is 0 or large enough
+    (Berkowitz division-free algorithm).
+
+[Linear Algebra]
+  - all LLL variants use an implementation of NGuyen & Stehle's L^2
+    algorithm : stabler, much faster
+
+  - better resultants
+
+[Elliptic curves]
+  - ellap() now uses the SEA algorithm (port of GP's ellsea package).
+  - discrete logarithm [ elllog() ], group structure of E(Fp) [ ellgroup() ],
+  - division polynomials [ elldivpol() ]
+  - Tate and Weil pairings [ elltatepairing() / ellweilpairing() ]
+
+[Number Fields]
+  - Class-field theoretic functions (e.g. bnfinit) no longer cheat on Bach's
+    constant. They now use safe bounds by default, correct under GRH, and no
+    slowdown has been observed.
+  - bnfinit: huge improvements for fields of large degree or admitting
+    non-trivial automorphisms (series of patches by Loic Grenie).
+  - faster quadhilbert(D < 0) [ Hilbert class field via CM ]
+  - Frobenius elements [ idealfrobenius() ]
+  - ramification groups [ idealramgroups() ]
+
+[GP defaults]
+  - new default "factor_proven" to guarantee that all integer factorizations
+    outputs proven primes (the default is to be happy with strong pseudoprimes).
+
+  - new defaults "graphcolormap" and "graphcolors" to allow arbitrary
+    colormaps in hi-res plots.
+
+  - new default 'histfile', to save your typing history in between sessions !
+
+[GP data structures]
+  - Lists now grow as needed, without imposing an awkward maximal length.
+    v = List()  is now sufficient to initialize an empty list, instead of
+    v = listcreate(100) to initialize a list which wouldn't grow past 100
+    elements.
+
+  - New GP type to handle non-prime finite fields in a reasonably efficient
+    way. E.g:
+    ? T = ffinit(7,5); \\ irreducible of degree 5 in F_7[x]
+    ? t = ffgen(T); \\ The element x mod (T,p) in Fp[x] / (T) ~ F_{7^5}
+    %2 = x  \\ this has type t_FFELT
+    ? t^10 \\ handled like Mod(x, T) but faster, and less cumbersome
+    %3 = 5*x^4 + 5*x^2 + 5*x + 6
+    ? fforder(t)
+    %4 = 5602  \\ multiplicative order
+    ? g = ffprimroot(t); \\ primitive element
+    ? fflog(g^1000,g)
+    %6 = 1000
+
+  - In GP-2.3, it was not possible to use the same identifier for
+  variables and functions; in GP-2.5 there is nothing wrong with defining
+    f(x,y)=x^2+y^2
+  then setting f = 1 (thereby deleting the user function). In fact, the
+  distinction between variables and functions has been abolished: anonymous
+  functions (closures) may be defined and assigned to variables, e.g.
+  the old f(x,y) = x^2+y^2 is now an alias for  f = (x,y) -> x^2+y^2
+
+[GP]
+  - the debugger, or "break loop", is now enabled by default
+    [ set breakloop = 0 in your gprc to disable it ], and no longer
+    controlled by trap(). The debugger is more verbose:
+    ? f(x) = g(x);
+    ? g(y) = 1/y;
+    ? f(0)
+      ***   at top-level: f(0)
+      ***                 ^----
+      ***   in function f: g(x)
+      ***                  ^----
+      ***   in function g: 1/y
+      ***                   ^--
+      *** _/_: division by zero
+      ***   Break loop: type 'break' to go back to GP
+    break> y
+    0
+
+  - all GP functions are now understood by GP2C
+
+  - formatted printing : printf(), Strprintf()
+
+  - alarm(n) to abort a lengthy computation after n seconds.
+
+  - === "isidentical" operator, much stricter than ==
+
+  - The introducion of anonymous functions had a number of useful side effects;
+  for instance, it made possible two new functions select() and apply(), as
+  well as arbitrary comparisons in vecsort():
+
+   \\ primes in { i^2+1 : i <= 50 }
+   ? select(x->isprime(x), vector(50,i,i^2+1))
+   %1 = [2, 5, 17, 37, 101, 197, 257, 401, 577, 677, 1297, 1601]
+
+   ? apply(x->x^2, [1,2,3,4])
+   %2 = [1, 4, 9, 16]
+
+   \\ sorts a vector of polynomials by increasing discriminant
+   ? vecsort( v, (x,y) -> sign(poldisc(x) - poldisc(y)) )
+
+[Main Backward Compatibility issues] see the 'COMPAT' file in the distribution
+for the full list.
+  - The main issue with existing GP scripts has to do with the scope of
+    private variables (my vs. local), see section 2.6 in User's Manual.
+    Indeed, variables implicitly scoped to loop or function bodies are now
+    lexically scoped. From GP-2.5 on, in constructs like
+      for(i = 1, 10, g())
+      f(i) = g()
+    the index i is truly local to the loop/function body. It is no longer seen
+    by the function g(), as used to be the case in GP-2.3.
+
+    One can declare lexicaly-scoped variable anywhere using the construct
+    my(x, y, z, t), possibly with initializations: my(x = 1, y = x).
+    The old "local" keyword keeps the same semantic (dynamic scoping) and is
+    mostly obsolete, outside of very specific situations beyond the scope of
+    these release notes.
+
+  - function calls *must* include parentheses. I.e. typing 'f()' calls the
+    function f without arguments as expected, typing 'f' returns an anonymous
+    function with the same definition as f; for instance, v[1] = f is valid,
+    assigning the closure f to the first entry of vector v.
+
+  - private "prime table" (addprimes) must now contain primes only: its
+    entries are now used in all arithmetic functions [new function
+    addpseudoprimes to cover old usage: in factorint() only]
+
+  - The pseudo-random number generator has been changed. The old linear
+    congruential generator has been replaced by Brent's XORGEN, which uses
+    a Linear Feedback Shift Register: pseudo-random sequences are much
+    better behaved, e.g. matdet(matrix(5,5,i,j, random())) is no longer
+    guaranteed to be divisible by 2^90 or so. There is no simple way to
+    emulate GP-2.3 pseudo-random sequences in GP-2.5.
+
+  - PariEmacs is no longer distributed with PARI/GP. The "PARI Emacs shell"
+    is available as a separate package, to be downloaded once if at all.
+
+  - | and & were accepted as aliases for || and && respectively. This
+    construction still works in GP-2.5, but is scheduled to disappear. We
+    strongly advise to update scripts to use the proper '||' and '&&'
+    constructions.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.3 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
    * The GP2C compiler is available at
