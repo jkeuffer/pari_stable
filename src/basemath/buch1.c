@@ -95,7 +95,7 @@ QFR3_comp(GEN x, GEN y, struct qfr_data *S)
 
 /* compute rho^n(x) */
 static GEN
-qrf5_rho_pow(GEN x, long n, struct qfr_data *S)
+qfr5_rho_pow(GEN x, long n, struct qfr_data *S)
 {
   long i;
   pari_sp av = avma, lim = stack_lim(av, 1);
@@ -104,7 +104,7 @@ qrf5_rho_pow(GEN x, long n, struct qfr_data *S)
     x = qfr5_rho(x,S);
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) pari_warn(warnmem,"qrf5_rho_pow");
+      if(DEBUGMEM>1) pari_warn(warnmem,"qfr5_rho_pow");
       x = gerepilecopy(av, x);
     }
   }
@@ -664,6 +664,7 @@ CYCLE:
           if (absi_equal(gel(form,1),gel(form0,1)) &&
                   equalii(gel(form,2),gel(form0,2))) continue;
           form = qfr3_rho(form, B->QFR); rho++;
+          rhoacc++;
         }
         else
           { setsigne(form[1],1); setsigne(form[3],-1); }
@@ -693,13 +694,13 @@ CYCLE:
         if (!first)
           form1 = QFR5_comp(form1, qfr5_pf(B->QFR, B->FB[current], prec), B->QFR);
       }
-      form1 = qrf5_rho_pow(form1, rho, B->QFR);
+      form1 = qfr5_rho_pow(form1, rho, B->QFR);
       rho = 0;
 
       form2 = qfr5_factorback(B,fpd);
       if (fpd[-2])
         form2 = QFR5_comp(form2, qfr5_pf(B->QFR, B->FB[fpd[-2]], prec), B->QFR);
-      form2 = qrf5_rho_pow(form2, fpd[-3], B->QFR);
+      form2 = qfr5_rho_pow(form2, fpd[-3], B->QFR);
       if (!absi_equal(gel(form2,1),gel(form2,3)))
       {
         setsigne(form2[1], 1);
@@ -739,7 +740,7 @@ CYCLE:
         if (!first)
           form1 = QFR5_comp(form1, qfr5_pf(B->QFR, B->FB[current], prec), B->QFR);
       }
-      form1 = qrf5_rho_pow(form1, rho, B->QFR);
+      form1 = qfr5_rho_pow(form1, rho, B->QFR);
       rho = 0;
 
       col = gel(mat,++s);
