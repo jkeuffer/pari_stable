@@ -1194,16 +1194,22 @@ derivnum(void *E, GEN (*eval)(void *, GEN), GEN x, long prec)
   fpr = precision(x)-2; /* required final prec (in sig. words) */
   if (fpr == -2) fpr = prec-2;
   ex = gexpo(x);
-  if (ex < 0) ex = 0; /* at 0 */
+  if (ex < 0) ex = 0; /* near 0 */
   pr = (long)ceil(fpr * 1.5 + (ex / BITS_IN_LONG));
   l = 2+pr;
-  e = fpr * (BITS_IN_LONG/2); /* 1/2 required prec (in sig. bits) */
+  switch(typ(x))
+  {
+    case t_REAL:
+    case t_COMPLEX:
+      x = gprec_w(x, l + 1 + (ex / BITS_IN_LONG));
+  }
 
+  e = fpr * (BITS_IN_LONG/2); /* 1/2 required prec (in sig. bits) */
   eps = real2n(-e, l);
-  y = gtofp(gsub(x, eps), l); a = eval(E, y);
-  y = gtofp(gadd(x, eps), l); b = eval(E, y);
-  setexpo(eps, e-1);
-  return gerepileupto(av, gmul(gsub(b,a), eps));
+  a = eval(E, gsub(x, eps));
+  b = eval(E, gadd(x, eps));
+  y = gmul2n(gsub(b,a), e-1);
+  return gerepileupto(av, gprec_w(y, fpr+2));
 }
 
 GEN
