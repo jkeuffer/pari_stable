@@ -33,30 +33,26 @@ to get these.
 kernel, which is faster than PARI's native one, but unfortunately binary
 incompatible, so the resulting PARI library SONAME is libpari-gmp.
 
-  $\bullet$ GNU \kbd{readline} library. This provides line editing under GP,
-an automatic context-dependent completion, and an editable history of
-commands.
+  $\bullet$ GNU \kbd{readline} library. This provides line editing under
+\kbd{gp}, an automatic context-dependent completion, and an editable history
+of commands.
 
-  $\bullet$ GNU \kbd{emacs} and the \tet{PariEmacs} package. GP can be run in
-an Emacs buffer, with all the obvious advantages if you are familiar with
-this editor. Note that \kbd{readline} is still useful in this case since it
-provides a better automatic completion than is provided by Emacs's GP-mode.
+  $\bullet$ GNU \kbd{emacs} and the \tet{PariEmacs} package. The \kbd{gp}
+calculator can be run in an Emacs buffer, with all the obvious advantages if
+you are familiar with this editor. Note that \kbd{readline} is still useful
+in this case since it provides a better automatic completion than is provided
+by Emacs's GP-mode.
 
-  $\bullet$ GNU \kbd{gzip/gunzip/gzcat} package enables GP to read compressed
-data.
+  $\bullet$ GNU \kbd{gzip/gunzip/gzcat} package enables \kbd{gp} to read
+compressed data.
 
   $\bullet$ \kbd{perl} provides extended online help (full text from the
-manual) about functions and concepts. The script handline this online help
-can be used under GP or independently.
+manual) about functions and concepts. The script handling this online help
+can be used under \kbd{gp} or independently.
 
-  $\bullet$ A colour-capable \kbd{xterm}, which enables GP to use different
-(user configurable) colours for its output. All \kbd{xterm} programs which
-come with current X11 distributions satisfy this requirement.
-\section{Compiling the library and the GP calculator}
+\section{Compiling the library and the \kbd{gp} calculator}
 
-\subsec{Basic configuration:} First, have a look at the \kbd{MACHINES} file
-to see if anything funny applies to your architecture or operating system.
-Then, type
+\subsec{Basic configuration:} Type
 
 \kbd{./Configure}
 
@@ -75,8 +71,8 @@ This phase extracts some files and creates a directory
 \kbd{O}\var{osname}\kbd{-}\var{arch} where the
 object files and executables will be built (\var{build directory}). The
 \var{osname} and \var{arch} components depends on your architecture and
-operating system, thus you can build GP for several different machines from
-the same source tree (the builds are independent and can be done
+operating system, thus you can build PARI/GP for several different machines
+from the same source tree (the builds are independent and can be done
 simultaneously).
 
 \kbd{./Configure --tune}
@@ -106,12 +102,12 @@ failed and follow the instructions in the next section. Look especially for
 the \kbd{gmp}, \kbd{readline} and \kbd{X11} libraries, and the \kbd{perl} and
 \kbd{gunzip} (or \kbd{zcat}) binaries.
 
-\subsec{Compilation:} To compile the GP binary and build the
+\subsec{Compilation:} To compile the \kbd{gp} binary and build the
 documentation, type
 
 \kbd{make all}
 
-\noindent To only compile the GP binary, type
+\noindent To only compile the \kbd{gp} binary, type
 
 \kbd{make gp}
 
@@ -127,12 +123,8 @@ To test the binary, type \kbd{make bench}. This will build a static
 executable (the default, built by \kbd{make gp} is probably dynamic) and
 run a series of comparative tests on those two. To test only the default
 binary, use \kbd{make dobench} which starts the bench immediately.
-
 The static binary should be slightly faster. In any case, this should not
-take more than a few seconds on modern machines. See the file
-\kbd{MACHINES} to get an idea of how much time comparable systems need.
-We would appreciate a short note in the same format in case your system is
-not listed and you nevertheless have a working GP executable.
+take more than a few seconds on modern machines.
 
 If a \kbd{[BUG]} message shows up, something went wrong. The testing utility
 directs you to files containing the differences between the test output and
@@ -145,10 +137,10 @@ In case the default \kbd{Configure} run fails miserably, try
 
 \kbd{./Configure -a}
 
-\noindent (interactive mode) and answer all the questions (there are not that
-many). Of course, \kbd{Configure} still provides defaults for each answer
-but if you accept them all, it will fail just the same, so be wary. In any
-case, we would appreciate a bug report (see the last section).
+\noindent (interactive mode) and answer all the questions: there are about 30
+of them, and default answers are provided. If you accept all default answers,
+\kbd{Configure} will fail just the same, so be wary. In any case, we would
+appreciate a bug report (see the last section).
 
 \subsec{Installation directories:} The precise default destinations are as
 follows: the \kbd{gp} binary, the scripts \kbd{gphelp} and \kbd{tex2mail} go
@@ -219,20 +211,20 @@ searched for libraries.
 \kbd{Configure -g}
 
 \noindent creates a directory \kbd{O$xxx$.dbg} containing a special
-\kbd{Makefile} ensuring that the GP and PARI library built there is
+\kbd{Makefile} ensuring that the \kbd{gp} and PARI library built there is
 suitable for debugging. If you want to
-profile GP or the library, using \kbd{gprof} for instance,
+profile \kbd{gp} or the library, using \kbd{gprof} for instance,
 
 \kbd{Configure -pg}
 
 \noindent will create an \kbd{O$xxx$.prf} directory where a suitable version
 of PARI can be built.
 
-The GP binary built above with \kbd{make all} or \kbd{make gp} is optimized.
-If you have run \kbd{Configure -g} or \kbd{-pg} and want to build a special
-purpose binary, you can \kbd{cd} to the \kbd{.dbg} or \kbd{.prf} directory
-and type \kbd{make gp} there. You can also invoke \kbd{make gp.dbg} or
-\kbd{make gp.prf} directly from the toplevel.
+The \kbd{gp} binary built above with \kbd{make all} or \kbd{make gp} is
+optimized. If you have run \kbd{Configure -g} or \kbd{-pg} and want to build
+a special purpose binary, you can \kbd{cd} to the \kbd{.dbg} or \kbd{.prf}
+directory and type \kbd{make gp} there. You can also invoke \kbd{make gp.dbg}
+or \kbd{make gp.prf} directly from the toplevel.
 
 \subsec{Multiprecision kernel:} The kernel can be fully specified via the
 \kbd{--kernel=\emph{fqkn}} switch. The PARI kernel is build from two kernels,
@@ -321,12 +313,12 @@ message instead of the expected empty input, thus producing a spurious
 
 \subsubsec{Some more testing} [{\sl Optional\/}]
 
-You can test GP in compatibility mode with \kbd{make test-compat}. If you
-want to test the graphic routines, use \kbd{make test-ploth}. You will
+You can test \kbd{gp} in compatibility mode with \kbd{make test-compat}. If
+you want to test the graphic routines, use \kbd{make test-ploth}. You will
 have to click on the mouse button after seeing each image. There will be
-eight of them, probably shown twice (try to resize at least one of them
-as a further test). More generally, typing \kbd{make} without argument
-will print the list of available extra tests among all available targets.
+eight of them, probably shown twice (try to resize at least one of them as a
+further test). More generally, typing \kbd{make} without argument will print
+the list of available extra tests among all available targets.
 
 The \kbd{make bench} and \kbd{make test-compat} runs produce a Postscript
 file \kbd{pari.ps} in \kbd{O$xxx$} which you can send to a Postscript
@@ -367,9 +359,9 @@ you are an avid \kbd{gp} fan, do not forget to delete the old pari libraries
 once in a while).
 
 This installs in the directories chosen at \kbd{Configure} time the default
-GP executable (probably \kbd{gp-dyn}) under the name \kbd{gp}, the default
-PARI library (probably \kbd{libpari.so}), the necessary include files, the
-manual pages, the documentation and help scripts.
+\kbd{gp} executable (probably \kbd{gp-dyn}) under the name \kbd{gp}, the
+default PARI library (probably \kbd{libpari.so}), the necessary include
+files, the manual pages, the documentation and help scripts.
 
 To save on disk space, you can manually \kbd{gzip} some of the documentation
 files if you wish: \kbd{usersch*.tex} and all \kbd{dvi} files (assuming your
@@ -531,7 +523,7 @@ following form (BibTeX format):
 @@manual{PARI2,
     organization = "{The PARI~Group}",
     title        = "{PARI/GP, Version @vers}",
-    year         = 2010,
+    year         = 2011,
     address      = "Bordeaux",
     note         = "available from {\tt http://pari.math.u-bordeaux.fr/}"
 }

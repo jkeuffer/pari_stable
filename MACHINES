@@ -1,3 +1,13 @@
+NOTE : Due to the widespread availability of free and reliable operating
+systems (e.g. GNU/Linux) and C compilers (e.g. gcc), and the gradual
+extinction of "exotic" systems, this file is no longer actively maintained.
+See
+
+  http://pari.math.u-bordeaux1.fr/buildlog.html
+
+for an overview of the development platforms we have access to and actively
+maintain.
+==============================================================================
 This file gives information about architectures/operating systems GP has been
 compiled on. If your configuration is not listed, it means that nobody sent us
 information about it. If indeed GP builds successfuly, we'd be grateful if you

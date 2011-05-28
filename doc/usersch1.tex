@@ -15,7 +15,7 @@ theorists, but has been put to good use in many other different fields, from
 topology or numerical analysis to physics.
 
 Although quite an amount of symbolic manipulation is possible, PARI does
-badly compared to systems like Axiom, Magma, Maple, Mathematica or Maxima, or
+badly compared to systems like Axiom, Magma, Maple, Mathematica, Maxima, or
 Reduce on such tasks, e.g.~multivariate polynomials, formal integration,
 etc. On the other hand, the three main advantages of the system are its
 speed, the possibility of using directly data types which are familiar to
@@ -26,8 +26,8 @@ Non-mathematical strong points include the possibility to program either
 in high-level scripting languages or with the PARI library, a mature system
 (development started in the mid eighties) that was used to conduct and
 disseminate original mathematical research, while building a large user
-community (linked by helpful mailing lists and a tradition of great user
-support from the developers). And, of course, PARI/GP is Free Software,
+community, linked by helpful mailing lists and a tradition of great user
+support from the developers. And, of course, PARI/GP is Free Software,
 covered by the GNU General Public License, either version 2 of the License or
 (at your option) any later version.
 
@@ -49,16 +49,15 @@ The present Chapter 1 gives an overview of the PARI/GP system; \kbd{gp2c} is
 distributed separately and comes with its own manual. Chapter 2 describes the
 \kbd{GP} programming language and the \kbd{gp} calculator. Chapter 3
 describes all routines available in the calculator. Programming in library
-mode is explained in Chapters 4 and 5 in a separate booklet (\emph{User's
-Guide to the PARI library}, \kbd{libpari.dvi}).
+mode is explained in Chapters 4 and 5 in a separate booklet: \emph{User's
+Guide to the PARI library} (\kbd{libpari.dvi}.
 
-\subsectitle{Important note}. A tutorial for \kbd{gp} is provided in the
-standard distribution (\emph{A tutorial for PARI/GP}, \kbd{tutorial.dvi}) and
-you should read this first. You can then start over and read the more boring
-stuff which lies ahead. You can have a quick idea of what is available by
-looking at the \kbd{gp} reference card (\kbd{refcard.dvi} or
-\kbd{refcard.ps}). In case of need, you can refer to the complete
-function description in Chapter 3.
+A tutorial for \kbd{gp} is provided in the standard distribution: \emph{A
+tutorial for PARI/GP} (\kbd{tutorial.dvi}) and you should read this first.
+You can then start over and read the more boring stuff which lies ahead. You
+can have a quick idea of what is available by looking at the \kbd{gp}
+reference card (\kbd{refcard.dvi} or \kbd{refcard.ps}). In case of need, you
+can refer to the complete function description in Chapter 3.
 
 \subsectitle{How to get the latest version?} Everything can be found on
 PARI's home page:
@@ -109,7 +108,7 @@ operands, say 100 decimal digits of accuracy or more. You \emph{should}
 enable it if GMP is present on your system. Parts of the first version are
 still in use within the GMP kernel, but are scheduled to disappear.
 
-An historical version of the PARI/GP kernel, written in 1985, was specific to
+A historical version of the PARI/GP kernel, written in 1985, was specific to
 680x0 based computers, and was entirely written in MC68020 assembly language.
 It ran on SUN-3/xx, Sony News, NeXT cubes and on 680x0 based Macs. It is no
 longer part of the PARI distribution; to run PARI with a 68k assembler
@@ -222,15 +221,6 @@ precision of real numbers is also at most 161614219 significant decimal
 digits, and the binary exponent must be in absolute value less than
 $2^{29}$.
 
-Note that PARI has been optimized so that it works as fast as possible on
-numbers with at most a few thousand decimal digits. In particular, the
-native PARI kernel does not contain asymptotically fast DFT-based techniques
-Hence, although it is possible to use PARI to do computations with $10^7$
-decimal digits, better programs can be written for such huge numbers. At the
-very least the GMP kernel should be used at this point. For reasons of
-backward compatibility, we do not enable GMP by default, but \emph{you
-should} enable it.
-
 Integers and real numbers are non-recursive types.
 
 \subsec{Intmods, rational numbers, $p$-adic numbers, polmods, and rational functions}: these are recursive, but in a restricted way.
@@ -333,8 +323,8 @@ addition of two real numbers $x$ and $y$. The \idx{accuracy} of the result is
 \emph{a priori} unpredictable; it depends on the precisions of $x$ and $y$,
 on their sizes, and also on the size of $x+y$. From this data, PARI works out
 the right precision for the result. Even if it is working in calculator mode
-\kbd{gp} where there is a notion of \idx{default precision}, which is only
-used to convert exact types to inexact ones.
+\kbd{gp}, where there is a notion of \idx{default precision}, its value is
+only used to convert exact types to inexact ones.
 
 In particular, if an operation involves objects of different accuracies, some
 digits will be disregarded by PARI. It is a common source of errors to
@@ -354,14 +344,15 @@ Hence, any number less than $2^e$ may be treated as an exact zero:
 The second principle is that PARI operations are in general quite permissive.
 For instance taking the exponential of a vector should not make sense.
 However, it frequently happens that one wants to apply a given function
-to all elements in a vector. This is easily done using a simple loop,
-but in fact PARI assumes that this is exactly what you want to do when you
-apply a scalar function to a vector. Taking the exponential of a vector
-will do just that, so no work is necessary. Most transcendental functions
-work in the same way\footnote{*}{An ambiguity arises with square matrices.
-PARI always considers that you want to do componentwise function evaluation
-in this context, hence to get for example the standard exponential of a
-square matrix you would need to implement a different function.}.
+to all elements in a vector. This is easily done using a loop,
+or using the \tet{apply} built-in function, but in fact PARI assumes that
+this is exactly what you want to do when you apply a scalar function to a
+vector. Taking the exponential of a vector will do just that, so no work is
+necessary. Most transcendental functions work in the same way\footnote{*}{An
+ambiguity arises with square matrices. PARI always considers that you want to
+do componentwise function evaluation in this context, hence to get for
+example the standard exponential of a square matrix you would need to
+implement a different function.}.
 
 In the same spirit, when objects of different types are combined they
 are first automatically mapped to a suitable ring, where the computation

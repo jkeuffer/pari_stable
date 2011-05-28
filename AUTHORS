@@ -34,7 +34,7 @@ Major contributors (large modules written or rewritten from scratch):
     gphelp, Configure, readline, man pages, documentation layout, reference card
     and user's manuals, the FAQ, the http://pari.math.u-bordeaux.fr website
     the PARI resource pages.
-  Dominique BERNARDI: the original gp, ECM, elliptic curves
+  Dominique BERNARDI: the original gp interpreter, ECM, elliptic curves
   Henri COHEN: original designer and project leader, native multiprecision
     kernel, arithmetic functions, LLL, transcendental functions, number fields,
     elliptic curves
