@@ -209,9 +209,10 @@ rnfelementreltoabs(GEN rnf,GEN x)
 GEN
 get_theta_abstorel(GEN T, GEN pol, GEN k)
 {
-  GEN ky = mkpolmod(deg1pol_shallow(k, gen_0, varn(T)),T);
-  GEN u = deg1pol_shallow(gen_1, ky, varn(pol));
-  return mkpolmod(degpol(pol) > 1? u: RgX_rem(u,pol), pol);
+  GEN u, ky = signe(k)? deg1pol_shallow(k, gen_0, varn(T)): gen_0;
+  u = deg1pol_shallow(gen_1, mkpolmod(ky, T), varn(pol));
+  if (degpol(pol) == 1) u = RgX_rem(u,pol);
+  return mkpolmod(u, pol);
 }
 GEN
 eltabstorel(GEN x, GEN T, GEN pol, GEN k)
