@@ -544,6 +544,7 @@ imag_relations(struct buch_quad *B, long need, long *pc, ulong LIMC, GEN mat)
     if (!fpc)
     {
       if (DEBUGLEVEL>1) err_printf(".");
+      if ((nbtest & 0xff) == 0 && ++current > B->KC) current = 1;
       continue;
     }
     if (fpc > 1)
@@ -643,7 +644,11 @@ real_relations(struct buch_quad *B, long need, long *pc, long lim, ulong LIMC, G
     rho = -1;
 
 CYCLE:
-    if (endcycle || rho > 5000) continue;
+    if (endcycle || rho > 5000)
+    {
+      if (++current > B->KC) current = 1;
+      continue;
+    }
     if (low_stack(limstack, stack_lim(av,1)))
     {
       if(DEBUGMEM>1) pari_warn(warnmem,"real_relations");

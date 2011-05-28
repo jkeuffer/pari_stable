@@ -618,5 +618,7 @@ t(d).cyc));
 [54, 2, 2, 2]
 ? setrand(1);quadclassunit(-13163208).cyc
 [156, 2, 2]
+? setrand(38);quadclassunit(-29920).cyc
+[4, 2, 2, 2]
 ? print("Total time spent: ",gettime);
-Total time spent: 6564
+Total time spent: 6324
