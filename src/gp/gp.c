@@ -1926,11 +1926,13 @@ read_opt(pari_stack *p_A, long argc, char **argv)
         usage(argv[0]);
     }
   }
-  if (!gp_is_interactive)
-  {
-    if (!(GP_DATA->flags & gpd_EMACS)) GP_DATA->breakloop = 0;
-    GP_DATA->use_readline = 0;
-  }
+#ifdef READLINE
+  GP_DATA->use_readline = gp_is_interactive;
+#else
+  GP_DATA->use_readline = 0;
+#endif
+  if (!gp_is_interactive && !(GP_DATA->flags & gpd_EMACS))
+    GP_DATA->breakloop = 0;
   if (f & gpd_TEXMACS) tm_start_output();
   GP_DATA->flags = f;
   if (f & gpd_TEST) {
@@ -1995,7 +1997,6 @@ main(int argc, char **argv)
 
   init_graph();
 #ifdef READLINE
-  GP_DATA->use_readline = gp_is_interactive;
   init_readline();
 #endif
   cb_pari_whatnow = whatnow;
