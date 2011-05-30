@@ -1,14 +1,17 @@
 # $Id$
 Bug numbers refer to the BTS at http://pari.math.u-bordeaux.fr/Bugs/
 
-Done for version 2.5.0 (released 17/05/2011):
+Done for version 2.5.0 (released 31/05/2011):
 
   Fixed
 BA  1- DESTDIR did not work. [#1194]
 BA  2- Improve Darwin shared library support.
 LGr 3- bnfinit -> oo-loop if class number is divisible by 27449 [#1197]
 BA  4- [gp2c] error("foo") did not work.
-    5- wrong generators in quadclassunit(D > 0) [ fix qfr3_pow / qfr5_pow ]
+    5- wrong generators in quadclassunit(D > 0) [ fix qfr3_pow / qfr5_pow ] [#1195]
+    6- setrand(45);quadclassunit(185477) -> SEGV [#1200]
+    7- fix derivnum for large arguments [#1201]
+    8- "#if READL" always evaluated to "FALSE" in gprc [#1202]
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.4 (released 29/04/2011):
