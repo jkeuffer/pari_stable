@@ -66,7 +66,24 @@ check_and_build_obj(GEN S, long tag, GEN (*build)(GEN))
 /*                    GENERAL NUMBER FIELDS                        */
 /*                                                                 */
 /*******************************************************************/
+/* get_random_ideal */
 static const long RANDOM_BITS = 4;
+/* Buchall */
+static const double BNF_C1 = 0.3, BNF_C2 = 0.3;
+static const long RELSUP = 5;
+/* small_norm */
+static const long BNF_RELPID = 4;
+static const long BMULT = 8;
+static const long maxtry_DEP = 20;
+static const long maxtry_FACT = 500;
+/* random relations */
+static const long MINSFB = 3;
+static const long MAXRELSUP = 50;
+static const long SFB_MAX = 3;
+/* add_rel_i */
+static const ulong mod_p = 27449UL;
+/* be_honest */
+static const long maxtry_HONEST = 50;
 
 typedef struct FACT {
     long pr, ex;
@@ -2029,7 +2046,6 @@ already_known(RELCACHE_t *cache, long bs, GEN cols)
 static int
 add_rel_i(RELCACHE_t *cache, GEN R, long nz, GEN m, long orig, long aut, REL_t **relp, long in_rnd_rel)
 {
-  const ulong p = 27449UL;
   long i, k, n = lg(R)-1;
 
   if (already_known(cache, nz, R)) return -1;
@@ -2050,26 +2066,26 @@ add_rel_i(RELCACHE_t *cache, GEN R, long nz, GEN m, long orig, long aut, REL_t *
       if (c[k])
       {
         long ak = a[k];
-        for (i=1; i < k; i++) if (c[i]) a[i] = (a[i] + ak*(p-c[i])) % p;
+        for (i=1; i < k; i++) if (c[i]) a[i] = (a[i] + ak*(mod_p-c[i])) % mod_p;
         a[k] = 0;
         do --k; while (!a[k]); /* k cannot go below 0: codeword is a sentinel */
       }
       else
       {
-        ulong invak = Fl_inv((ulong)a[k], p);
+        ulong invak = Fl_inv((ulong)a[k], mod_p);
         /* Cleanup a */
         for (i = k; i-- > 1; )
         {
           long j, ai = a[i];
           c = gel(basis, i);
           if (!ai || !c[i]) continue;
-          ai = p-ai;
-          for (j = 1; j < i; j++) if (c[j]) a[j] = (a[j] + ai*c[j]) % p;
+          ai = mod_p-ai;
+          for (j = 1; j < i; j++) if (c[j]) a[j] = (a[j] + ai*c[j]) % mod_p;
           a[i] = 0;
         }
         /* Insert a/a[k] as k-th column */
         c = gel(basis, k);
-        for (i = 1; i<k; i++) if (a[i]) c[i] = (a[i] * invak) % p;
+        for (i = 1; i<k; i++) if (a[i]) c[i] = (a[i] * invak) % mod_p;
         c[k] = 1; a = c;
         /* Cleanup above k */
         for (i = k+1; i<n; i++)
@@ -2078,8 +2094,8 @@ add_rel_i(RELCACHE_t *cache, GEN R, long nz, GEN m, long orig, long aut, REL_t *
           c = gel(basis, i);
           ck = c[k];
           if (!ck) continue;
-          ck = p-ck;
-          for (j = 1; j < k; j++) if (a[j]) c[j] = (c[j] + ck*a[j]) % p;
+          ck = mod_p-ck;
+          for (j = 1; j < k; j++) if (a[j]) c[j] = (c[j] + ck*a[j]) % mod_p;
           c[k] = 0;
         }
         cache->missing--;
@@ -2246,8 +2262,6 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
 {
   pari_timer T;
   const long N = nf_get_degree(nf), R1 = nf_get_r1(nf), prec = nf_get_prec(nf);
-  const long BMULT = 8;
-  const long maxtry_DEP  = 20, maxtry_FACT = 500;
   double *y, *z, **q, *v, BOUND;
   pari_sp av;
   GEN x, M = nf_get_M(nf), G = nf_get_G(nf), L_jid = F->L_jid;
@@ -2531,7 +2545,7 @@ be_honest(FB_t *F, GEN nf, FACT *fact)
           if (factorgen(F,nf,ideal,Nideal, m,fact)) break;
         }
         avma = av2; if (k <= nbG) break;
-        if (++nbtest > 50)
+        if (++nbtest > maxtry_HONEST)
         {
           pari_warn(warner,"be_honest() failure on prime %Ps\n", P[j]);
           return 0;
@@ -3181,9 +3195,6 @@ sbnf2bnf(GEN sbnf, long prec)
   y[10] = sbnf[12]; return gerepilecopy(av,y);
 }
 
-static const double BNF_C1 = 0.3, BNF_C2 = 0.3;
-static const long BNF_RELPID = 4;
-
 GEN
 bnfinit0(GEN P, long flag, GEN data, long prec)
 {
@@ -3492,7 +3503,6 @@ trim_list(FB_t *F)
 GEN
 Buchall_param(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long prec)
 {
-  const long MAXRELSUP = 50, SFB_MAX = 3;
   pari_timer T;
   pari_sp av0 = avma, av, av2;
   long PRECREG, N, R1, R2, RU, LIMC, LIMC2, zc, i;
@@ -3503,7 +3513,6 @@ Buchall_param(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long
   GEN res, L, resc, B, C, C0, lambda, dep, clg1, clg2, Vbase;
   GEN auts, cyclic, small_mult;
   const char *precpb = NULL;
-  const long minsFB = 3, RELSUP = 5;
   int FIRST = 1;
   RELCACHE_t cache;
   FB_t F;
@@ -3570,7 +3579,7 @@ START:
 
     Res = FBgen(&F, nf, N, LIMC2, LIMC, &GRHcheck);
   }
-  while (!Res || !subFBgen(&F,nf,auts,cyclic,mindd(lim,LIMC2) + 0.5,minsFB));
+  while (!Res || !subFBgen(&F,nf,auts,cyclic,mindd(lim,LIMC2) + 0.5,MINSFB));
   if (DEBUGLEVEL)
     timer_printf(&T, "factorbase (#subFB = %ld) and ideal permutations",
                      lg(F.subFB)-1);
