@@ -3493,8 +3493,8 @@ trim_list(FB_t *F)
 {
   pari_sp av = avma;
   GEN list = F->L_jid ? F->L_jid : F->perm, present = zero_Flv(F->KC);
-  long i, j, imax = lg(F->L_jid);
-  GEN minidx = F->minidx, idx = cgetg(lg(list), t_VECSMALL);
+  long i, j, imax = minss(lg(list), F->KC + 1);
+  GEN minidx = F->minidx, idx = cgetg(imax, t_VECSMALL);
 
   for (i = j = 1; i < imax; i++)
   {
