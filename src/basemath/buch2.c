@@ -2351,6 +2351,7 @@ Fincke_Pohst_ideal(RELCACHE_t *cache, FB_t *F, GEN nf, long N, GEN M, long R1,
 {
   pari_sp av;
   GEN r, u, gx, inc=const_vecsmall(N, 1), ideal;
+  GEN Nideal = nbrelpid ? NULL : idealnorm(nf, ideal0);
   double BOUND;
   long j, k, skipfirst, nbrelideal = 0, dependent = 0, try_factor = 0;
   const long maxtry_DEP  = 20, maxtry_FACT = 500;
@@ -2418,7 +2419,13 @@ Fincke_Pohst_ideal(RELCACHE_t *cache, FB_t *F, GEN nf, long N, GEN M, long R1,
     if (ZV_isscalar(gx)) continue;
     if (++try_factor > maxtry_FACT) return 0;
 
-    if (rr)
+    if (!nbrelpid)
+    {
+      if (!factorgen(F,nf,ideal0,Nideal,gx,fact))
+         continue;
+      return 1;
+    }
+    else if (rr)
     {
       if (!factorgen(F,nf,ideal0,rr->Nideal,gx,fact))
          continue;
@@ -2621,33 +2628,61 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, FACT *fact)
 
 /* remark: F->KCZ changes if be_honest() fails */
 static int
-be_honest(FB_t *F, GEN nf, FACT *fact)
+be_honest(FB_t *F, GEN nf, GEN auts, FACT *fact)
 {
-  GEN P, ideal, Nideal, m;
-  long ex, i, j, J, k, iz, nbtest;
-  long nbG = lg(F->vecG)-1, lgsub = lg(F->subFB), KCZ0 = F->KCZ;
+  GEN P, done_by_autom;
+  long ex, i, j, J, iz, nbtest;
+  long lgsub = lg(F->subFB), KCZ0 = F->KCZ;
+  long N = nf_get_degree(nf), R1 = nf_get_r1(nf), prec = nf_get_prec(nf);
+  GEN M = nf_get_M(nf), G = nf_get_G(nf);
+  FP_t fp;
   pari_sp av;
 
   if (DEBUGLEVEL) {
     err_printf("Be honest for %ld primes from %ld to %ld\n", F->KCZ2 - F->KCZ,
                F->FB[ F->KCZ+1 ], F->FB[ F->KCZ2 ]);
   }
+  minim_alloc(N+1, &fp.q, &fp.x, &fp.y, &fp.z, &fp.v);
   av = avma;
   for (iz=F->KCZ+1; iz<=F->KCZ2; iz++, avma = av)
   {
     long p = F->FB[iz];
-    if (DEBUGLEVEL>1) err_printf("%ld ", p);
     P = F->LV[p]; J = lg(P);
     /* all P|p in FB + last is unramified --> check all but last */
     if (isclone(P) && pr_get_e(gel(P,J-1)) == 1) J--;
+    if (DEBUGLEVEL>1) err_printf("%ld ", p);
+    done_by_autom = const_vecsmall(J, 0);
 
     for (j=1; j<J; j++)
     {
-      GEN ideal0 = idealhnf_two(nf,gel(P,j));
-      pari_sp av1, av2 = avma;
+      GEN ideal0 = idealhnf_two(nf,gel(P,j)), ideal = ideal0;
+      GEN gen0 = gmael(P, j, 2);
+      pari_sp av2 = avma;
+      if (done_by_autom[j]) continue;
+      for (i = 1; i < lg(auts); i++)
+      {
+        GEN gen = gmul(gel(auts,i), gen0);
+        long k;
+        for (k = j; k < J; k++)
+          if (nfval(nf, gen, gel(P, k)))
+          {
+            done_by_autom[k] = 1;
+            break;
+          }
+      }
       for(nbtest=0;;)
       {
+        if (Fincke_Pohst_ideal(NULL, F, nf, N, M, R1, G, ideal, fact, 0, &fp,
+              NULL, prec, NULL, NULL))
+          break;
+        avma = av2;
+        if (++nbtest > maxtry_HONEST)
+        {
+          pari_warn(warner,"be_honest() failure on prime %Ps\n", P[j]);
+          return 0;
+        }
         ideal = ideal0;
+        if (F->newpow) powFBgen(NULL, F, nf, auts);
         for (i=1; i<lgsub; i++)
         {
           long id = F->subFB[i];
@@ -2655,23 +2690,11 @@ be_honest(FB_t *F, GEN nf, FACT *fact)
           if (ex) ideal = idealmul_HNF(nf,ideal, gmael(F->id2,id,ex));
         }
         ideal = remove_content(ideal);
-        Nideal = ZM_det_triangular(ideal);
-        for (av1 = avma, k = 1; k <= nbG; k++, avma = av1)
-        {
-          m = idealpseudomin_nonscalar(ideal, gel(F->vecG,k));
-          if (factorgen(F,nf,ideal,Nideal, m,fact)) break;
-        }
-        avma = av2; if (k <= nbG) break;
-        if (++nbtest > maxtry_HONEST)
-        {
-          pari_warn(warner,"be_honest() failure on prime %Ps\n", P[j]);
-          return 0;
-        }
       }
+      avma = av2;
     }
     F->KCZ++; /* SUCCESS, "enlarge" factorbase */
   }
-  if (DEBUGLEVEL>1) err_printf("\n");
   F->KCZ = KCZ0; avma = av; return 1;
 }
 
@@ -3971,9 +3994,8 @@ START:
     if (F.KCZ2 > F.KCZ)
     {
       if (F.sfb_chg && !subFB_change(&F)) goto START;
-      if (F.newpow) powFBgen(NULL, &F, nf, auts);
-      if (!be_honest(&F, nf, fact)) goto START;
-      if (DEBUGLEVEL) timer_printf(&T, "be honest");
+      if (!be_honest(&F, nf, auts, fact)) goto START;
+      if (DEBUGLEVEL) timer_printf(&T, "to be honest");
     }
     F.KCZ2 = 0; /* be honest only once */
 
