@@ -388,7 +388,7 @@ subFB_change(FB_t *F)
 {
   long i, iyes, minsFB, lv = F->KC + 1, l = lg(F->subFB)-1;
   pari_sp av = avma;
-  GEN yes, L_jid = F->L_jid;
+  GEN yes, L_jid = F->L_jid, present = const_vecsmall(lv-1, 0);
 
   switch (F->sfb_chg)
   {
@@ -401,7 +401,9 @@ subFB_change(FB_t *F)
   {
     for (i = 1; i < lg(L_jid); i++)
     {
-      yes[iyes++] = L_jid[i];
+      long l = L_jid[i];
+      yes[iyes++] = l;
+      present[l] = 1;
       if (iyes > minsFB) break;
     }
   }
@@ -410,7 +412,9 @@ subFB_change(FB_t *F)
   {
     for ( ; i < lv; i++)
     {
-      yes[iyes++] = F->perm[i];
+      long l = F->perm[i];
+      if (present[l]) continue;
+      yes[iyes++] = l;
       if (iyes > minsFB) break;
     }
     if (i == lv) return 0;
