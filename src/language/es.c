@@ -4420,6 +4420,8 @@ init_unique(const char *s)
   size_t lpre, lsuf;
 #ifdef UNIX
   sprintf(suf,"-%ld-%ld", (long)getuid(), (long)getpid());
+#else
+  suf[0] = 0;
 #endif
   lsuf = strlen(suf);
   lpre = strlen(pre);
