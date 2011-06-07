@@ -274,7 +274,7 @@ initgaloisborne(GEN T, GEN dn, long prec, GEN *ptL, GEN *ptprep, GEN *ptdis)
   if (DEBUGLEVEL>=4) timer_start(&ti);
   T = get_nfpol(T, &nf);
   r = nf ? nf_get_roots(nf) : NULL;
-  if (nf &&  lg(gel(r, 1)) >= prec)
+  if (nf &&  precision(gel(r, 1)) >= prec)
   {
     long r1,r2;
     nf_get_sign(nf, &r1, &r2);
