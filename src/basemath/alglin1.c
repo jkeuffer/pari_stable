@@ -850,15 +850,15 @@ _Fl_add(uGEN b, long k, long i, ulong p)
 static int
 init_gauss(GEN a, GEN *b, long *aco, long *li, int *iscol)
 {
+  *iscol = *b ? (typ(*b) == t_COL): 0;
   *aco = lg(a) - 1;
   if (!*aco) /* a empty */
   {
     if (*b && lg(*b) != 1) pari_err(consister,"gauss");
-    return 0;
+    *li = 0; return 0;
   }
   *li = lg(a[1])-1;
   if (*li < *aco) pari_err(mattype1,"gauss");
-  *iscol = 0;
   if (*b)
   {
     if (*li != *aco) pari_err(mattype1,"gauss");
@@ -868,7 +868,7 @@ init_gauss(GEN a, GEN *b, long *aco, long *li, int *iscol)
         if (lg(*b) == 1) return 0;
         *b = RgM_shallowcopy(*b);
         break;
-      case t_COL: *iscol = 1;
+      case t_COL:
         *b = mkmat( leafcopy(*b) );
         break;
       default: pari_err(typeer,"gauss");
