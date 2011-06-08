@@ -2350,10 +2350,10 @@ F2m_det(GEN x)
   avma = av; return d;
 }
 
+/* in place, destroy x */
 ulong
 Flm_det_sp(GEN a, ulong p)
 {
-  pari_sp av = avma, lim = stack_lim(av,1);
   long i,j,k, s = 1, nbco = lg(a)-1;
   ulong q, x = 1;
 
@@ -2361,7 +2361,7 @@ Flm_det_sp(GEN a, ulong p)
   {
     for(k=i; k<=nbco; k++)
       if (ucoeff(a,k,i)) break;
-    if (k > nbco) { avma=av; return ucoeff(a,i,i); }
+    if (k > nbco) return ucoeff(a,i,i);
     if (k != i)
     { /* exchange the lines s.t. k = i */
       for (j=i; j<=nbco; j++) lswap(ucoeff(a,i,j), ucoeff(a,k,j));
@@ -2377,18 +2377,10 @@ Flm_det_sp(GEN a, ulong p)
 
       m = Fl_div(m, q, p);
       for (j=i+1; j<=nbco; j++)
-      {
         ucoeff(a,j,k) = Fl_sub(ucoeff(a,j,k), Fl_mul(m,ucoeff(a,j,i), p), p);
-        if (low_stack(lim, stack_lim(av,1)))
-        {
-          if(DEBUGMEM>1) pari_warn(warnmem,"det. col = %ld",i);
-          gerepileall(av,2, &a,&x);
-        }
-      }
     }
   }
   if (s < 0) x = Fl_neg(x, p);
-  avma = av;
   return Fl_mul(x, ucoeff(a,nbco,nbco), p);
 }
 
