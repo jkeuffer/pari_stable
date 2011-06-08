@@ -691,7 +691,7 @@ static int
 rl_long_help(int count, int key) { (void)count; return rl_short_help(-1,key); }
 
 static void
-init_histfile()
+init_histfile(void)
 {
   if (current_histfile && read_history(current_histfile))
     write_history(current_histfile);

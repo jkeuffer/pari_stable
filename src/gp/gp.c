@@ -222,7 +222,7 @@ static int disable_exception_handler = 0;
 static char *Help;
 
 static char *
-init_help()
+init_help(void)
 {
   char *h = os_getenv("GPHELP");
 # ifdef GPHELP

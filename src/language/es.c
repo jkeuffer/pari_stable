@@ -395,7 +395,7 @@ _puts_log(const char *s) {
   }
 }
 static void
-_flush_log() { (void)fflush(pari_logfile); }
+_flush_log(void) { (void)fflush(pari_logfile); }
 
 static void
 normalOutC(char c) { putc(c, pari_outfile); _putc_log(c); }
