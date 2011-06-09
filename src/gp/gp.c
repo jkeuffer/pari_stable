@@ -1343,7 +1343,7 @@ brace_color(char *s, int c, int force)
 #endif
 }
 
-static const char *
+static void
 color_prompt(char *buf, const char *prompt)
 {
   char *s = buf;
@@ -1352,7 +1352,7 @@ color_prompt(char *buf, const char *prompt)
   brace_color(s, c_PROMPT, 0);
   s += strlen(s); strcpy(s, prompt);
   s += strlen(s);
-  brace_color(s, c_INPUT, 1); return buf;
+  brace_color(s, c_INPUT, 1);
 }
 
 static const char *
@@ -1366,13 +1366,15 @@ expand_prompt(char *buf, const char *prompt, filtre_t *F)
 const char *
 do_prompt(char *buf, const char *prompt, filtre_t *F)
 {
-  if (GP_DATA->flags & gpd_TEST) return prompt;
+  if (GP_DATA->flags & gpd_TEST)
+    strcpy(buf, prompt);
   else
   {
     char b[MAX_PROMPT_LEN];
     const char *s = expand_prompt(b, prompt, F);
-    return color_prompt(buf, s);
+    color_prompt(buf, s);
   }
+  return buf;
 }
 
 /********************************************************************/
