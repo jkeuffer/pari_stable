@@ -2611,6 +2611,8 @@ INLINE ulong  Fl_sqr(ulong a, ulong p);
 INLINE ulong  Fl_sub(ulong a, ulong b, ulong p);
 INLINE GEN    absi(GEN x);
 INLINE GEN    absr(GEN x);
+INLINE int    absrnz_equal1(GEN x);
+INLINE int    absrnz_equal2n(GEN x);
 INLINE GEN    addii(GEN x, GEN y);
 INLINE void   addiiz(GEN x, GEN y, GEN z);
 INLINE GEN    addir(GEN x, GEN y);

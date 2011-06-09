@@ -420,6 +420,22 @@ equaliu(GEN x, ulong y) { return equalui(y,x); }
 INLINE int
 equalis(GEN x, long y) { return equalsi(y,x); }
 
+/* assume x != 0, is |x| == 2^n ? */
+INLINE int
+absrnz_equal2n(GEN x) {
+  if ((ulong)x[2]==HIGHBIT)
+  {
+    long i, lx = lg(x);
+    for (i = 3; i < lx; i++)
+      if (x[i]) return 0;
+    return 1;
+  }
+  return 0;
+}
+/* assume x != 0, is |x| == 1 ? */
+INLINE int
+absrnz_equal1(GEN x) { return !expo(x) && absrnz_equal2n(x); }
+
 INLINE long
 maxss(long x, long y) { return x>y?x:y; }
 INLINE long

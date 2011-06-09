@@ -1924,7 +1924,7 @@ logagmr_abs(GEN q)
   GEN z, y, Q, _4ovQ;
   pari_sp av;
 
-  if (absrnz_egal2n(q)) return e? mulsr(e, mplog2(prec)): real_0(prec);
+  if (absrnz_equal2n(q)) return e? mulsr(e, mplog2(prec)): real_0(prec);
   z = cgetr(prec); av = avma; prec++;
   lim = bit_accuracy(prec) >> 1;
   Q = rtor(q,prec);

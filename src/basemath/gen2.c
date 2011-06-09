@@ -379,22 +379,6 @@ gequal0(GEN x)
   return 0;
 }
 
-/* assume x != 0, is |x| == 2^n ? */
-int
-absrnz_egal2n(GEN x) {
-  if ((ulong)x[2]==HIGHBIT)
-  {
-    long i, lx = lg(x);
-    for (i = 3; i < lx; i++)
-      if (x[i]) return 0;
-    return 1;
-  }
-  return 0;
-}
-/* assume x != 0, is |x| == 1 ? */
-int
-absrnz_egal1(GEN x) { return !expo(x) && absrnz_egal2n(x); }
-
 /* x a t_POL or t_SER, considered as having valuation v; let X(t) = t^(-v) x(t)
  * return 1 (true) if coeff(X,i) = 0 for all i != 0 and test(coeff(X, 0))
  * is true. Return 0 (false) otherwise, or if x == 0 */
@@ -450,7 +434,7 @@ gequal1(GEN x)
       return is_pm1(x) && signe(x)==1;
 
     case t_REAL:
-      return signe(x) > 0 ? absrnz_egal1(x): 0;
+      return signe(x) > 0 ? absrnz_equal1(x): 0;
 
     case t_INTMOD: case t_POLMOD:
       return gequal1(gel(x,2));
@@ -494,7 +478,7 @@ gequalm1(GEN x)
       return is_pm1(x) && signe(x)== -1;
 
     case t_REAL:
-      return signe(x) < 0 ? absrnz_egal1(x): 0;
+      return signe(x) < 0 ? absrnz_equal1(x): 0;
 
     case t_INTMOD:
       av=avma; y=equalii(addsi(1,gel(x,2)), gel(x,1)); avma=av; return y;

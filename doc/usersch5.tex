@@ -2156,6 +2156,12 @@ and~\kbd{y}. The result is $1$ if $|\kbd{x}| = |\kbd{y}|$, $0$ otherwise.
 \fun{int}{absr_cmp}{GEN x, GEN y} compares the \typ{REAL}s \kbd{x} and~\kbd{y}.
 The result is the sign of $|\kbd{x}| - |\kbd{y}|$.
 
+\fun{int}{absrnz_equal2n}{GEN x} tests whether a non-zero \typ{REAL} \kbd{x}
+is equal to $\pm 2^e$ for some integer $e$.
+
+\fun{int}{absrnz_equal1}{GEN x} tests whether a non-zero \typ{REAL} \kbd{x}
+is equal to $\pm 1$.
+
 \subsec{Generic binary operators}\label{se:genbinop} The operators in this
 section have arguments of C-type \kbd{GEN}, \kbd{long}, and \kbd{ulong}, and
 only \typ{INT} and \typ{REAL} \kbd{GEN}s are allowed. We say an argument is a

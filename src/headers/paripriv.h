@@ -143,10 +143,6 @@ double dnorm(double s, double t);
 double dbllog2(GEN z);
 ulong  usqrtsafe(ulong a);
 
-/* "abs" routines for t_REAL ( disregard sign ) */
-int absrnz_egal1(GEN x);
-int absrnz_egal2n(GEN x);
-
 /* hnf */
 GEN hnfadd(GEN m,GEN p,GEN* ptdep,GEN* ptA,GEN* ptC,GEN extramat,GEN extraC);
 GEN hnfadd_i(GEN m,GEN p,GEN* ptdep,GEN* ptA,GEN* ptC,GEN extramat,GEN extraC);

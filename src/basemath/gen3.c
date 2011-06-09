@@ -2005,7 +2005,7 @@ roundr(GEN x)
   GEN t;
   if (!s || (ex=expo(x)) < -1) return gen_0;
   if (ex == -1) return s>0? gen_1:
-                            absrnz_egal2n(x)? gen_0: gen_m1;
+                            absrnz_equal2n(x)? gen_0: gen_m1;
   av = avma;
   t = addrr(real2n(-1, nbits2prec(ex+1)), x); /* x + 0.5 */
   return gerepileuptoint(av, floorr(t));
@@ -2019,7 +2019,7 @@ roundr_safe(GEN x)
 
   if (!s || (ex = expo(x)) < -1) return gen_0;
   if (ex == -1) return s>0? gen_1:
-                            absrnz_egal2n(x)? gen_0: gen_m1;
+                            absrnz_equal2n(x)? gen_0: gen_m1;
   av = avma;
   t = addrr(real2n(-1,nbits2prec(ex+1)), x); /* x + 0.5 */
 

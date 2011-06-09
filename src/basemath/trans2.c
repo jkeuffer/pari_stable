@@ -62,7 +62,7 @@ mpatan(GEN x)
 
   if (!sx) return real_0_bit(expo(x));
   l = lp = lg(x);
-  if (absrnz_egal1(x)) { /* |x| = 1 */
+  if (absrnz_equal1(x)) { /* |x| = 1 */
     y = Pi2n(-2, l+1); if (sx < 0) setsigne(y,-1);
     return y;
   }
@@ -190,7 +190,7 @@ gasin(GEN x, long prec)
   {
     case t_REAL: sx = signe(x);
       if (!sx) return real_0_bit(expo(x));
-      if (absrnz_egal1(x)) { /* |x| = 1 */
+      if (absrnz_equal1(x)) { /* |x| = 1 */
         if (sx > 0) return Pi2n(-1, lg(x)); /* 1 */
         y = Pi2n(-1, lg(x)); setsigne(y, -1); return y; /* -1 */
       }
@@ -266,7 +266,7 @@ gacos(GEN x, long prec)
   {
     case t_REAL: sx = signe(x);
       if (!sx) return acos0(expo(x));
-      if (absrnz_egal1(x)) /* |x| = 1 */
+      if (absrnz_equal1(x)) /* |x| = 1 */
         return sx > 0? real_0_bit( -(bit_accuracy(lg(x))>>1) ) : mppi(lg(x));
       if (expo(x) < 0) return mpacos(x);
 
@@ -606,7 +606,7 @@ mpach(GEN x)
 {
   pari_sp av = avma;
   GEN z;
-  if (absrnz_egal1(x)) return real_0_bit(- (bit_accuracy(lg(x)) >> 1));
+  if (absrnz_equal1(x)) return real_0_bit(- (bit_accuracy(lg(x)) >> 1));
   z = logr_abs( addrr_sign(x, 1, sqrtr( subrs(sqrr(x), 1) ), 1) );
   return gerepileuptoleaf(av, z);
 }
@@ -628,7 +628,7 @@ gach(GEN x, long prec)
       if (s == 0) b = acos0(e);
       else if (e < 0) b = mpacos(x); /* -1 < x < 1 */
       else {
-        if (!absrnz_egal1(x)) a = mpach(x);
+        if (!absrnz_equal1(x)) a = mpach(x);
         b = mppi(lg(x));
       }
       gel(y,1) = a;
