@@ -1608,7 +1608,6 @@ GEN     gmulsg(long s, GEN y);
 GEN     gsqr(GEN x);
 GEN     gsub(GEN x, GEN y);
 GEN     gsubsg(long x, GEN y);
-GEN     invr(GEN b);
 GEN     inv_ser(GEN b);
 
 /* galpol.c */
@@ -2084,6 +2083,7 @@ GEN     int2u(ulong n);
 GEN     int_normalize(GEN x, long known_zero_words);
 int     invmod(GEN a, GEN b, GEN *res);
 ulong   invmod2BIL(ulong b);
+GEN     invr(GEN b);
 GEN     mantissa_real(GEN x, long *e);
 GEN     modii(GEN x, GEN y);
 void    modiiz(GEN x, GEN y, GEN z);

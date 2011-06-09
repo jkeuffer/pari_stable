@@ -3040,49 +3040,6 @@ gmul2n(GEN x, long n)
 /*                              INVERSE                            */
 /*                                                                 */
 /*******************************************************************/
-/* assume y != 0 */
-static GEN
-invr_basecase(GEN y)
-{
-  long ly = lg(y);
-  GEN z = cgetr(ly);
-  pari_sp av = avma;
-  affrr(divrr(real_1(ly+1), y), z);
-  avma = av; return z;
-}
-
-GEN
-invr(GEN b)
-{
-  const long s = 6;
-  long i, p, l = lg(b);
-  GEN x, a;
-  ulong mask;
-
-  if (l <= maxss(INVNEWTON_LIMIT, (1L<<s) + 2)) {
-    if (l == 2) pari_err(gdiver);
-    return invr_basecase(b);
-  }
-  mask = quadratic_prec_mask(l-2);
-  for(i=0, p=1; i<s; i++) { p <<= 1; if (mask & 1) p--; mask >>= 1; }
-  x = cgetr(l);
-  a = rcopy(b); a[1] = _evalexpo(0) | evalsigne(1);
-  affrr(invr_basecase(rtor(a, p+2)), x);
-  while (mask > 1)
-  {
-    p <<= 1; if (mask & 1) p--;
-    mask >>= 1;
-    setlg(a, p + 2);
-    setlg(x, p + 2);
-    /* TODO: mulrr(a,x) should be a half product (the higher half is known).
-     * mulrr(x, ) already is */
-    affrr(addrr(x, mulrr(x, subsr(1, mulrr(a,x)))), x);
-    avma = (pari_sp)a;
-  }
-  x[1] = (b[1] & SIGNBITS) | evalexpo(expo(x)-expo(b));
-  avma = (pari_sp)x; return x;
-}
-
 GEN
 inv_ser(GEN b)
 {
