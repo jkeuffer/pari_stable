@@ -2453,17 +2453,11 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN auts, FACT *fact)
   if (baseideal) baseideal = idealhnf_two(nf, baseideal);
   for (av = avma, jlist = 1; jlist < l_jid; jlist++, avma = av)
   {
-    long jid = L_jid[jlist];
-    GEN Nideal, ideal;
+    long j, jid = L_jid[jlist];
+    GEN Nideal, ideal = gel(F->LP,jid);
     pari_sp av1;
-    long j, l;
 
     if (DEBUGLEVEL>1) err_printf("(%ld)", jid);
-    /* If subFB is not Galois-stable, all ideals in the orbit of jid are not
-     * equivalent (subFB is probably not Galois stable) */
-    l = random_Fl(lg(auts));
-    if (l) jid = coeff(F->idealperm, jid, l);
-    ideal = gel(F->LP,jid);
     if (baseideal)
       ideal = idealmul_HNF(nf, baseideal, ideal);
     else
@@ -3502,7 +3496,7 @@ trim_list(FB_t *F)
 
     if (!present[id])
     {
-      idx[j++] = id;
+      idx[j++] = list[i];
       present[id] = 1;
     }
   }
@@ -3651,17 +3645,16 @@ START:
         }
         if (done_small)
         {
-          long j = 0, lim;
+          long j = 0, k;
           for (i = F.KC; i >= 1; i--) if (!small_mult[j = F.perm[i]]) break;
           small_mult[j]++;
           p0 = gel(F.LP, j);
-          lim = F.minidx[j];
           if (!R)
           {
             /* Prevent considering both P_iP_j and P_jP_i in small_norm */
-            for (i = j = 1; i < lg(F.L_jid); i++)
-              if (F.L_jid[i] >= lim) F.L_jid[j++] = F.L_jid[i];
-            setlg(F.L_jid, j);
+            for (i = k = 1; i < lg(F.L_jid); i++)
+              if (F.L_jid[i] <= j) F.L_jid[k++] = F.L_jid[i];
+            setlg(F.L_jid, k);
           }
         }
         if (lg(F.L_jid) > 1)
