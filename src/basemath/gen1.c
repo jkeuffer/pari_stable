@@ -706,6 +706,7 @@ add_ser_scal(GEN y, GEN x)
   ly = lg(y);
   l = valp(y);
   if (l < 3-ly) return gcopy(y);
+  /* l + ly >= 3 */
   if (l < 0)
   {
     z = cgetg(ly,t_SER); z[1] = y[1];
@@ -725,9 +726,7 @@ add_ser_scal(GEN y, GEN x)
     if (gequal0(x)) return normalize(z);
     return z;
   }
-  /* l = 0, !isrationalzero(x) */
-  if (ly==2) return zeroser(vy, 0); /* 1 + O(1) --> O(1) */
-
+  /* l = 0, ly >= 3, !isrationalzero(x) */
   av = avma; z = cgetg(ly,t_SER);
   x = gadd(x, gel(y,2));
   if (!isrationalzero(x))
