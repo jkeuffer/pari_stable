@@ -109,9 +109,9 @@ mpatan(GEN x)
     p5 = addsr(1, sqrtr_abs(p5)); setlg(p5,l2);
     affrr(divrr(p2,p5), p2); avma = av;
   }
-  p3 = sqrr(p2); l1 = 4;
-  unr = real_1(l2); setlg(unr,4);
-  p4 = cgetr(l2); setlg(p4,4);
+  p3 = sqrr(p2); l1 = minss(4, l2); /* l1 increases to l2 */
+  unr = real_1(l2); setlg(unr, l1);
+  p4 = cgetr(l2);   setlg(p4, l1);
   affrr(divru(unr,2*n+1), p4);
   s = 0; e = expo(p3); av = avma;
   for (i = n; i > 1; i--) /* n >= 1. i = 1 done outside for efficiency */
