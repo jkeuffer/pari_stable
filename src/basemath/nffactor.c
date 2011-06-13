@@ -921,7 +921,7 @@ static GEN
 nfcmbf(nfcmbf_t *T, long klim, long *pmaxK, int *done)
 {
   GEN pol = T->pol, nf = T->nf, famod = T->fact, dn = T->dn, bound = T->bound;
-  GEN lt, nfpol = nf_get_pol(nf);
+  GEN lt, ltdn, nfpol = nf_get_pol(nf);
   long K = 1, cnt = 1, i,j,k, curdeg, lfamod = lg(famod)-1, dnf = degpol(nfpol);
   pari_sp av0 = avma;
   GEN Tpk = T->L->Tpk, pk = T->L->pk, pks2 = shifti(pk,-1);
@@ -938,14 +938,14 @@ nfcmbf(nfcmbf_t *T, long klim, long *pmaxK, int *done)
 
   *pmaxK = cmbf_maxK(lfamod);
   init_div_data(&D, pol, T->L->topowden);
+  ltdn = mul_content(D.lt, dn);
   lt = D.lt; /* to be restored at the end */
   {
     GEN q = ceil_safe(sqrtr(T->BS_2));
-    GEN t1,t2, ltdn, lt2dn;
+    GEN t1,t2, lt2dn;
     GEN trace1   = cgetg(lfamod+1, t_MAT);
     GEN trace2   = cgetg(lfamod+1, t_MAT);
 
-    ltdn = mul_content(D.lt, dn);
     lt2dn= mul_content(ltdn, D.lt);
 
     for (i=1; i <= lfamod; i++)
@@ -959,7 +959,7 @@ nfcmbf(nfcmbf_t *T, long klim, long *pmaxK, int *done)
       t2 = Fq_sqr(t1, Tpk, pk);
       if (d > 1) t2 = Fq_sub(t2, gmul2n(gel(P,d-2), 1), Tpk, pk);
       /* t2 = S_2 Newton sum */
-      if (D.lt)
+      if (ltdn)
       {
         t1 = Fq_Fp_mul(t1, ltdn, Tpk, pk);
         t2 = Fq_Fp_mul(t2, lt2dn, Tpk, pk);
@@ -1018,7 +1018,7 @@ nextK:
         }
       }
       avma = av;
-      y = D.lt; /* full computation */
+      y = ltdn; /* full computation */
       for (i=1; i<=K; i++)
       {
         GEN q = gel(famod, ind[i]);
