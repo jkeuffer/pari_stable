@@ -125,6 +125,7 @@ AMD K6       266MHz  Linux-2.2.5    pgcc            5861    6001  2.0.16(16)IS
 AMD K6       233Mhz  Linux-2.2.14    gcc            6968    7158  2.0.18    QL
 IBM/Cyrix    200MHz  Linux-2.0.35    gcc           13190   13729  2.0.15    AP
 
+CoreDuo     2160MHz  MacOS X 10.4    gcc-4.0.1       376       -  2.3.0     LG
 PentiumIV   3000MHz  Linux-2.6.22-1  gcc-4.1.2       376     370  2.3.3     RM
 PentiumIV   3000MHz  Linux-2.6.11-1  gcc-3.4.3       291     296  2.2.11    PZ
 PentiumM    1600MHz  Linux-2.6.8     gcc-3.3.4       461     460  2.2.8     JD
@@ -191,8 +192,10 @@ Motorola
  MC68030      25MHz  SunOS-4.0.3     gcc          683736! 685248  2.0.9 (4)
 *MC68030      25MHz  SunOS-4.0.3     gcc         1034136!1038368  2.0.9
 ------------------------------------------------------------------------------
+IBM/Cell
+Sony PS3    3192MHZ  Linux 2.6.18    gcc-4.3.2       620     643  2.4.3     BA
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 IBM/POWER,PowerPC
-CoreDuo     2160MHz  MacOS X 10.4    gcc-4.0.1       376       -  2.3.0     LG
 PPC G5      2000MHz  MacOS X 10.4    gcc-4.0.1       461       -  2.3.0     LG
 PPC G4      1667MHz  MacOS X 10.4    gcc-3.3         543       -  2.3.0     LG
 PPC G4      1000MHz  MacOS X 10.3    gcc-3.3         940       -  2.3.2     BM
