@@ -12,7 +12,13 @@ Doc: discrete logarithm of the finite field element $x$ in base $g$. If
  order of $g$. It may be set as a side effect of calling \tet{ffprimroot}.
 
  If no $o$ is given, assume that $g$ is a primitive root.
- See \tet{znlog} for the limitations of the underlying discrete log algorithms.
+ This function uses
+
+ \item a combination of generic discrete log algorithms (see \tet{znlog})
+
+ \item a cubic sieve index calculus algorithm for larger fields of degree at
+ least $5$.
+
  \bprog
  ? t = ffgen(ffinit(7,5));
  ? o = fforder(t)

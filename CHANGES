@@ -205,6 +205,7 @@ BA 43- accessors functions for t_CLOSURE: closure_arity,closure_codestr,closure_
    44- library functions ZMs_ZC_mul, ZpMs_ZpCs_solve, gen_ZpM_Dixon
 BA 45- [breakloop] GP function breakpoint
 BA 46- GP function ffnbirred
+BA 47- cubic sieve algorithm for Flxq_log
 
   Removed
     1- dropped DOS support

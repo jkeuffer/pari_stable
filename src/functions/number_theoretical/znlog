@@ -23,6 +23,7 @@ Doc: discrete logarithm of $x$ in $(\Z/N\Z)^*$ in base $g$.
  order is incorrect.
 
  This function uses
+
  \item a combination of generic discrete log algorithms (see below).
 
  \item Only in $(\Z/N\Z)^*$ for when $N$ is prime: a linear sieve index calculus
