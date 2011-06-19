@@ -109,8 +109,6 @@ GEN  vecteur(GEN nmax, GEN n);
 GEN  vvecteur(GEN nmax, GEN n);
 GEN  zbrent0(GEN a, GEN b, GEN code, long prec);
 
-long    loop_break(void);
-
 /* multiprecision */
 GEN   addrex01(GEN x);
 GEN   adduispec_offset(ulong s, GEN x, long offset, long nx);
@@ -199,8 +197,6 @@ GEN  ZXQ_charpoly_sqf(GEN A, GEN B, long *lambda, long v);
 GEN  ZX_disc_all(GEN,ulong);
 GEN  ZX_resultant_all(GEN A, GEN B, GEN dB, ulong bound);
 GEN  ZX_ZXY_resultant_all(GEN A, GEN B, long *lambda, GEN *LPRS);
-GEN  RgX_gcd_simple(GEN x, GEN y);
-GEN  RgX_extgcd_simple(GEN a, GEN b, GEN *pu, GEN *pv);
 GEN  RgXQ_minpoly_naive(GEN y, GEN P);
 GEN lift_intern0(GEN x,long v);
 #define lift_intern(x) (lift_intern0((x),-1))
@@ -235,7 +231,6 @@ INLINE void   gerepilecoeffs2(pari_sp av, GEN x, int n, GEN y, int o);
 void   minim_alloc(long n, double ***q, GEN *x, double **y,  double **z, double **v);
 int    pop_entree_block(entree *ep, long loc);
 int    pop_val_if_newer(entree *ep, long loc);
-void   gclone_refc(GEN x);
 
 /* general printing */
 void print_errcontext(PariOUT *out, const char *msg, const char *s, const char *entry);
@@ -558,8 +553,6 @@ int     ff_poltype(GEN *x, GEN *p, GEN *pol);
 GEN     gred_frac2(GEN x1, GEN x2);
 GEN     gred_rfrac2(GEN x1, GEN x2);
 GEN     gred_rfrac_simple(GEN n, GEN d);
-GEN     mulcxI(GEN x);
-GEN     mulcxmI(GEN x);
 GEN     sqr_ser_part(GEN x, long l1, long l2);
 
 /* gen3.c */
@@ -600,7 +593,6 @@ GEN     group_export_MAGMA(GEN G);
 GEN     perm_generate(GEN S, GEN H, long o);
 long    perm_relorder(GEN p, GEN S);
 GEN     perm_to_GAP(GEN p);
-GEN     quotient_subgroup_lift(GEN C, GEN H, GEN S);
 
 /* polarit1.c */
 

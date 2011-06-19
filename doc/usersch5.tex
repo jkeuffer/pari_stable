@@ -5608,6 +5608,9 @@ its main variable.
 \fun{GEN}{RgX_gcd}{GEN x, GEN y} returns the GCD of \kbd{x} and \kbd{y},
 assumed to be \typ{POL}s in the same variable.
 
+\fun{GEN}{RgX_gcd_simple}{GEN x, GEN y} as \tet{RgX_gcd} using a standard
+extended Euclidean algorithm. Usually slower than \tet{RgX_gcd}.
+
 \fun{GEN}{RgX_extgcd}{GEN x, GEN y, GEN *u, GEN *v} returns
 $d = \text{GCD}(\kbd{x},\kbd{y})$, and sets \kbd{*u}, \kbd{*v} to the Bezout
 coefficients such that $\kbd{*ux} + \kbd{*vy} = d$. Uses a generic

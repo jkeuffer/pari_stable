@@ -1517,6 +1517,7 @@ long    gp_callbool(void *E, GEN x);
 long    gp_callvoid(void *E, GEN x);
 GEN     gp_eval(void *E, GEN x);
 long    gp_evalvoid(void *E, GEN x);
+long    loop_break(void);
 GEN     next0(long n);
 void    pop_lex(long n);
 void    push_lex(GEN a, GEN C);
@@ -1594,7 +1595,6 @@ long    numberofconjugates(GEN T, long pdepart);
 GEN     vandermondeinverse(GEN L, GEN T, GEN den, GEN prep);
 
 /* gen1.c */
-
 GEN     conjvec(GEN x,long prec);
 GEN     gadd(GEN x, GEN y);
 GEN     gaddsg(long x, GEN y);
@@ -1609,6 +1609,8 @@ GEN     gsqr(GEN x);
 GEN     gsub(GEN x, GEN y);
 GEN     gsubsg(long x, GEN y);
 GEN     inv_ser(GEN b);
+GEN     mulcxI(GEN x);
+GEN     mulcxmI(GEN x);
 
 /* galpol.c */
 
@@ -1896,6 +1898,7 @@ void    dbg_release(void);
 long    err_catch(long errnum, jmp_buf *penv);
 void    err_leave(long n);
 GEN     gclone(GEN x);
+void    gclone_refc(GEN x);
 GEN     gcopy(GEN x);
 GEN     gcopy_avma(GEN x, pari_sp *AVMA);
 GEN     gcopy_lg(GEN x, long lx);
@@ -2173,6 +2176,7 @@ long    perm_order(GEN perm);
 GEN     perm_pow(GEN perm, long exp);
 GEN     quotient_group(GEN C, GEN G);
 GEN     quotient_perm(GEN C, GEN p);
+GEN     quotient_subgroup_lift(GEN C, GEN H, GEN S);
 GEN     subgroups_tableset(GEN S, long n);
 long    tableset_find_index(GEN tbl, GEN set);
 GEN     trivialgroup(void);
@@ -2258,7 +2262,9 @@ GEN     RgXQ_charpoly(GEN x, GEN T, long v);
 GEN     RgXQ_inv(GEN x, GEN y);
 GEN     RgX_disc(GEN x);
 GEN     RgX_extgcd(GEN x, GEN y, GEN *U, GEN *V);
+GEN     RgX_extgcd_simple(GEN a, GEN b, GEN *pu, GEN *pv);
 GEN     RgX_gcd(GEN x, GEN y);
+GEN     RgX_gcd_simple(GEN x, GEN y);
 int     RgXQ_ratlift(GEN y, GEN x, long amax, long bmax, GEN *P, GEN *Q);
 GEN     RgX_resultant_all(GEN P, GEN Q, GEN *sol);
 long    RgX_type(GEN x, GEN *ptp, GEN *ptpol, long *ptpa);
