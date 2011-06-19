@@ -2005,31 +2005,65 @@ ZM_snfclean(GEN d, GEN u, GEN v)
 GEN
 smithclean(GEN z)
 {
-  long i,j,l,c;
-  GEN u,v,y,d,p1;
+  long i, j, h, l, c, d;
+  GEN U, V, y, D, t;
 
   if (typ(z) != t_VEC) pari_err(typeer,"smithclean");
   l = lg(z); if (l == 1) return cgetg(1,t_VEC);
-  u=gel(z,1);
-  if (l != 4 || typ(u) != t_MAT)
-  {
+  U = gel(z,1);
+  if (l != 4 || typ(U) != t_MAT)
+  { /* assume z = vector of elementary divisors */
     for (c=1; c<l; c++)
       if (gequal1(gel(z,c))) break;
     return gcopy_lg(z, c);
   }
-  v=gel(z,2); d=gel(z,3); l = lg(d);
-  for (c=1; c<l; c++)
-    if (gequal1(gcoeff(d,c,c))) break;
-
-  y=cgetg(4,t_VEC);
-  gel(y,1) = p1 = cgetg(l,t_MAT);
-  for (i=1; i<l; i++) gel(p1,i) = gcopy_lg(gel(u,i), c);
-  gel(y,2) = gcopy_lg(v, c);
-  gel(y,3) = p1 = cgetg(c,t_MAT);
-  for (i=1; i<c; i++)
+  V = gel(z,2);
+  D = gel(z,3);
+  l = lg(D);
+  if (l == 1) return gcopy(z);
+  h = lg(gel(D,1));
+  if (h > l)
+  { /* D = vconcat(zero matrix, diagonal matrix) */
+    for (c=1+h-l, d=1; c<h; c++,d++)
+      if (gequal1(gcoeff(D,c,d))) break;
+  }
+  else if (h < l)
+  { /* D = concat(zero matrix, diagonal matrix) */
+    for (c=1, d=1+l-h; d<l; c++,d++)
+      if (gequal1(gcoeff(D,c,d))) break;
+  }
+  else
+  { /* D diagonal */
+    for (c=1; c<l; c++)
+      if (gequal1(gcoeff(D,c,c))) break;
+    d = c;
+  }
+  /* U was (h-1)x(h-1), V was (l-1)x(l-1), D was (h-1)x(l-1) */
+  y = cgetg(4,t_VEC);
+  /* truncate U to (c-1) x (h-1) */
+  gel(y,1) = t = cgetg(h,t_MAT);
+  for (j=1; j<h; j++) gel(t,j) = gcopy_lg(gel(U,j), c);
+  /* truncate V to (l-1) x (d-1) */
+  gel(y,2) = gcopy_lg(V, d);
+  gel(y,3) = t = zeromatcopy(c-1, d-1);
+  /* truncate D to a (c-1) x (d-1) matrix */
+  if (d > 1)
   {
-    GEN p2 = cgetg(c,t_COL); gel(p1,i) = p2;
-    for (j=1; j<c; j++) gel(p2,j) = i==j? gcopy(gcoeff(d,i,i)): gen_0;
+    if (h > l)
+    {
+      for (i=1+h-l, j=1; i<h; i++,j++)
+        gcoeff(t,i,j) = gcopy(gcoeff(D,i,j));
+    }
+    else if (h < l)
+    {
+      for (i=1, j=1+l-h; j<d; i++,j++)
+        gcoeff(t,i,j) = gcopy(gcoeff(D,i,j));
+    }
+    else
+    {
+      for (j=1; j<d; j++)
+        gcoeff(t,j,j) = gcopy(gcoeff(D,j,j));
+    }
   }
   return y;
 }

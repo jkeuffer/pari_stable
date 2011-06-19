@@ -12,6 +12,7 @@ BA  4- [gp2c] error("foo") did not work.
     6- setrand(45);quadclassunit(185477) -> SEGV [#1200]
     7- fix derivnum for large arguments [#1201]
     8- "#if READL" always evaluated to "FALSE" in gprc [#1202]
+    9- matsnf(non-square matrix, 4) --> SEGV [#1208]
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.4 (released 29/04/2011):
