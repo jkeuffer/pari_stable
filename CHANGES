@@ -13,6 +13,7 @@ BA  4- [gp2c] error("foo") did not work.
     7- fix derivnum for large arguments [#1201]
     8- "#if READL" always evaluated to "FALSE" in gprc [#1202]
     9- matsnf(non-square matrix, 4) --> SEGV [#1208]
+HC 10- fix p-adic Gamma inefficiency for small p: gamma(O(2^20))->no answer
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.4 (released 29/04/2011):

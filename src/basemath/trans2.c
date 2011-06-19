@@ -1231,12 +1231,16 @@ ggamd(GEN x, long prec)
   return transc(ggamd,x,prec);
 }
 
-/* find n such that n-v_p(n!)>=k */
+/* find n such that n+v_p(n!)>=k p^2/(p-1)^2 */
 static long
 nboft(long k, long p)
 {
+  pari_sp av = avma;
   long s, n;
-  for (s=0,n=0; n-s < k; s += u_lval(++n, p));
+
+  k = itos( gceil(gdiv(mulsi(k, sqrs(p)), sqrs(p-1))) );
+  avma = av;
+  for (s=0, n=0; n+s < k; n++, s += u_lval(n, p));
   return n;
 }
 
