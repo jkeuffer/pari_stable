@@ -181,29 +181,19 @@ static void
 unclone_subFB(FB_t *F)
 {
   subFB_t *sub, *subold;
-  GEN id2 = F->id2, idealperm = F->idealperm;
+  GEN id2 = F->id2;
   long i;
-  const long lperm = lg(idealperm);
 
   for (sub = F->allsubFB; sub; sub = subold)
   {
     GEN subFB = sub->subFB;
     for (i = 1; i < lg(subFB); i++)
     {
-      long k, id = subFB[i];
+      long id = subFB[i];
       if (gel(id2, id) == gen_0) continue;
 
       gunclone(gel(id2, id));
       gel(id2, id) = gen_0;
-      for (k = 1; k < lperm; k++)
-      {
-        long sigmaid = coeff(idealperm, id, k);
-        if (gel(id2, sigmaid) != gen_0)
-        {
-          gunclone(gel(id2, sigmaid));
-          gel(id2, sigmaid) = gen_0;
-        }
-      }
     }
     subold = sub->old;
     pari_free(sub);
@@ -2203,34 +2193,36 @@ powFBgen(RELCACHE_t *cache, FB_t *F, GEN nf, GEN auts)
     id = subFB[i];
     if (gel(F->id2, id) == gen_0)
     {
-      GEN id2;
+      GEN id2 = NULL;
 
-      if (DEBUGLEVEL>1) err_printf("%ld: 1", id);
-      powPgen(nf, gel(F->LP, id), &id2, a);
-      gel(F->id2, id) = gclone(id2);
       for (k = 1; k < naut; k++)
       {
         long sigmaid = coeff(idealperm, id, k);
-        GEN aut = gel(auts, k), invaut = gel(auts, F->invs[k]);
-
-        if (gel(F->id2, sigmaid) == gen_0)
+        GEN sigmaid2 = gel(F->id2, sigmaid);
+        if (sigmaid2 != gen_0)
         {
+          GEN aut = gel(auts, k), invaut = gel(auts, F->invs[k]);
           long lid2;
-          GEN sigmaid2 = cgetg_copy(id2, &lid2);
-
-          if (DEBUGLEVEL>1) err_printf("%ld: automorphism\n", sigmaid);
+          id2 = cgetg_copy(sigmaid2, &lid2);
+          if (DEBUGLEVEL>1) err_printf("%ld: automorphism(%ld)\n", id,sigmaid);
           for (l = 1; l < lid2; l++)
           {
-            GEN id2l = gel(id2, l);
-            gel(sigmaid2, l) =
-              mkvec2(gel(id2l, 1), ZM_mul(ZM_mul(aut, gel(id2l, 2)), invaut));
+            GEN id2l = gel(sigmaid2, l);
+            gel(id2, l) =
+              mkvec2(gel(id2l, 1), ZM_mul(ZM_mul(invaut, gel(id2l, 2)), aut));
           }
-          gel(F->id2, sigmaid) = gclone(sigmaid2);
+          break;
         }
       }
+      if (!id2)
+      {
+        if (DEBUGLEVEL>1) err_printf("%ld: 1", id);
+        powPgen(nf, gel(F->LP, id), &id2, a);
+      }
+      gel(F->id2, id) = gclone(id2);
+      avma = av;
     }
   }
-  avma = av;
   F->sfb_chg = 0;
   F->newpow = 0;
 }
