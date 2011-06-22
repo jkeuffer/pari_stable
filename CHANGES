@@ -8,7 +8,9 @@ Done for version 2.6.0 (released ??/??/20??):
        [ because a 0 polynomial could have lg() == 3 ]
 
   Changed
+    1- mathnf: swapped flag 3 and 5.
 
   Added
+    1- mathnf for matrices over K[X] [#41]
 
   Removed

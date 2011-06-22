@@ -2,44 +2,59 @@ Function: mathnf
 Section: linear_algebra
 C-Name: mathnf0
 Prototype: GD0,L,
-Help: mathnf(x,{flag=0}): (upper triangular) Hermite normal form of x, basis
- for the lattice formed by the columns of x. flag is optional whose value
- range from 0 to 4 (0 if omitted), meaning : 0: naive algorithm. 1: as 0, but
- output 2-component vector [H,U] such that H is the HNF of
- x, and U is a unimodular matrix such that XU=H. 3: Batut's algorithm:
- output [H,U,P] where P is a permutation matrix such that P x U = H. 4:
- as 1, using a heuristic variant of LLL reduction along the way.
-Doc: if $x$ is a (not necessarily square)
- matrix with integer entries, finds the \emph{upper triangular}
- \idx{Hermite normal form} of $x$. If the rank of $x$ is equal to its number
- of rows, the result is a square matrix. In general, the columns of the result
- form a basis of the lattice spanned by the columns of $x$.
+Help: mathnf(M,{flag=0}): (upper triangular) Hermite normal form of M, basis
+ for the lattice formed by the columns of M. flag is optional whose value
+ range from 0 to 3 have a binary meaning. Bit 1: complete output, returns
+ a 2-component vector [H,U] such that H is the HNF of M, and U is an
+ invertible matrix such that MU=H. Bit 2: allow polynomial entries, otherwise
+ assume that M is integral. These use a naive algorithm; larger values
+ correspond to more involved algorithms and are restricted to integer
+ matrices; flag = 4: returns [H,U] using LLL reduction along the way;
+ flag = 5: return [H,U,P] where P is a permutation of row indices such that
+ P applied to M U is H.
+Doc: let $R$ be a Euclidean ring, equal to $\Z$ or to $K[X]$ for some field
+ $K$. If $M$ is a (not necessarily square) matrix with entries in $R$, this
+ routine finds the \emph{upper triangular} \idx{Hermite normal form} of $M$.
+ If the rank of $M$ is equal to its number of rows, this is a square
+ matrix. In general, the columns of the result form a basis of the $R$-module
+ spanned by the columns of $M$.
 
- If $\fl=0$, uses the naive algorithm. This is in general fastest but may
- require too much memory as the dimension gets large (bigger than 100, say),
- in which case you may try \kbd{mathnfmod(x, matdetint(x))} when $x$ has
- maximal rank, and \kbd{mathnf(x, 4)} otherwise.
+ The values $0,1,2,3$ of $\fl$ have a binary meaning, analogous to the one
+ in \tet{matsnf}; in this case, binary digits of $\fl$ mean:
 
- If $\fl=1$, outputs a two-component row vector $[H,U]$, where $H$ is the
- Hermite normal form of $x$ defined as above,  and $U$ is the
- unimodular transformation matrix such that $xU=[0|H]$. When the kernel is
- large, $U$ has in general huge coefficients. In the worst case, the
- running time is exponential with respect to the dimension, but the
- routine behaves well in small dimension (less than 50 or 100, say).
+ \item 1 (complete output): if set, outputs $[H,U]$, where $H$ is the Hermite
+ normal form of $M$, and $U$ is a transformation matrix such that $MU=[0|H]$.
+ The matrix $U$ belongs to $\text{GL}(R)$. When $M$ has a large kernel, the
+ entries of $U$ are in general huge.
 
- If $\fl=3$, uses Batut's algorithm and output $[H,U,P]$, such that $H$ and
+ \item 2 (generic input): if set, assume that $R = K[X]$ is a polynomial ring;
+ otherwise, assume that $R = \Z$.
+
+ \noindent For these 4 values, we use a naive algorithm, which behaves well
+ in small dimension only. Larger values correspond to different algorithms,
+ are restricted to \emph{integer} matrices, and all output the unimodular
+ matrix $U$. From now on all matrices have integral entries.
+
+ \item $\fl=4$, returns $[H,U]$ as in ``complete output'' above, using a
+ variant of \idx{LLL} reduction along the way. The matrix $U$ is provably
+ small (in the $L_2$ sense) and in general close to optimal; but the
+ reduction is in general slow, although provably polynomial-time.
+
+ If $\fl=5$, uses Batut's algorithm and output $[H,U,P]$, such that $H$ and
  $U$ are as before and $P$ is a permutation of the rows such that $P$ applied
- to $xU$ gives $H$. This is in general slower than $\fl=1$ but the matrix $U$
- is smaller; it may still be large.
+ to $MU$ gives $H$. This is in general faster than $\fl=4$ but the matrix $U$
+ is usually worse; it is heuristically smaller than with the default
+ algorithm.
 
- If $\fl=4$, as in case 1 above, but uses a variant of \idx{LLL}
- reduction along the way. The matrix $U$ is in general close to optimal (in
- terms of smallest $L_2$ norm), but the reduction is in general slow,
- although provably polynomial-time.
+ When the matrix is dense and the dimension is large (bigger than 100, say),
+ $\fl = 4$ will be fastest. When $M$ has maximal rank, then
+ \bprog
+   H = mathnfmod(M, matdetint(M))
+ @eprog\noindent will be even faster. You can then recover $U$ as $M^{-1}H$.
 
-Variant: Also available are \fun{GEN}{hnf}{GEN x} ($\fl=0$) and
- \fun{GEN}{hnfall}{GEN x} ($\fl=1$). To reduce \emph{huge} (say $400 \times
- 400$ and more) relation matrices (sparse with small entries), you can use
- the pair \kbd{hnfspec} / \kbd{hnfadd}. Since this is quite technical and
- the calling interface may change, they are not documented yet. Look at the
- code in \kbd{basemath/alglin1.c}.
+Variant: Also available are \fun{GEN}{hnf}{GEN M} ($\fl=0$) and
+ \fun{GEN}{hnfall}{GEN M} ($\fl=1$). To reduce \emph{huge} relation matrices
+ (sparse with small entries, say dimension $400$ or more), you can use the
+ pair \kbd{hnfspec} / \kbd{hnfadd}. Since this is quite technical and the
+ calling interface may change, they are not documented yet. Look at the code
+ in \kbd{basemath/hnf\_snf.c}.

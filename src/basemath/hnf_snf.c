@@ -24,13 +24,20 @@ GEN
 mathnf0(GEN x, long flag)
 {
   if (typ(x)!=t_MAT) pari_err(typeer,"mathnf0");
-  RgM_check_ZM(x, "mathnf0");
+
   switch(flag)
   {
-    case 0: return ZM_hnf(x);
-    case 1: return hnfall(x);
-    case 3: return hnfperm(x);
-    case 4: return hnflll(x);
+    case 0: RgM_check_ZM(x, "mathnf0"); return ZM_hnf(x);
+    case 1: RgM_check_ZM(x, "mathnf0"); return hnfall(x);
+    case 2: return RgM_hnfall(x, NULL, 1);
+    case 3:
+    {
+      GEN z = cgetg(3, t_VEC);
+      gel(z,1) = RgM_hnfall(x, (GEN*)(z+2), 1);
+      return z;
+    }
+    case 4: RgM_check_ZM(x, "mathnf0"); return hnflll(x);
+    case 5: RgM_check_ZM(x, "mathnf0"); return hnfperm(x);
     default: pari_err(flagerr,"mathnf");
   }
   return NULL; /* not reached */
@@ -670,6 +677,100 @@ ZC_elem(GEN aj, GEN ak, GEN A, GEN U, long j, long k)
   }
 }
 
+INLINE int
+is_RgX(GEN a, long v) { return typ(a) == t_POL && varn(a)==v; }
+/* set u,v such that au + bv = gcd(a,b), divide a,b by the gcd */
+static GEN
+gbezout_step(GEN *pa, GEN *pb, GEN *pu, GEN *pv, long vx)
+{
+  GEN a = *pa, b = *pb, d;
+  if (gequal0(a))
+  {
+    *pa = gen_0; *pu = gen_0;
+    *pb = gen_1; *pv = gen_1; return b;
+  }
+  a = is_RgX(a,vx)? RgX_renormalize(a): scalarpol(a, vx);
+  b = is_RgX(b,vx)? RgX_renormalize(b): scalarpol(b, vx);
+  d = RgX_extgcd(a,b, pu,pv);
+  if (degpol(d)) { a = RgX_div(a, d); b = RgX_div(b, d); }
+  else if (typ(d[2]) == t_REAL && lg(d[2]) <= 3)
+#if 1
+  { /* possible accuracy problem */
+    GEN D = RgX_gcd_simple(a,b);
+    if (degpol(D)) {
+      D = RgX_Rg_div(D, leading_term(D));
+      a = RgX_div(a, D);
+      b = RgX_div(b, D);
+      d = RgX_extgcd(a,b, pu,pv); /* retry now */
+      d = RgX_mul(d, D);
+    }
+  }
+#else
+  { /* less stable */
+    d = RgX_extgcd_simple(a,b, pu,pv);
+    if (degpol(d)) { a = RgX_div(a, d); b = RgX_div(b, d); }
+  }
+#endif
+  *pa = a;
+  *pb = b; return d;
+}
+static GEN
+col_mul(GEN x, GEN c)
+{
+  if (typ(x) == t_INT)
+  {
+    long s = signe(x);
+    if (!s) return NULL;
+    if (is_pm1(x)) return (s > 0)? c: RgC_neg(c);
+  }
+  return RgC_Rg_mul(c, x);
+}
+static void
+do_zero(GEN x)
+{
+  long i, lx = lg(x);
+  for (i=1; i<lx; i++) gel(x,i) = gen_0;
+}
+
+/* (c1, c2) *= [u,-b; v,a] */
+static void
+update(GEN u, GEN v, GEN a, GEN b, GEN *c1, GEN *c2)
+{
+  GEN p1,p2;
+
+  u = col_mul(u,*c1);
+  v = col_mul(v,*c2);
+  if (u) p1 = v? gadd(u,v): u;
+  else   p1 = v? v: NULL;
+
+  a = col_mul(a,*c2);
+  b = col_mul(gneg_i(b),*c1);
+  if (a) p2 = b? RgC_add(a,b): a;
+  else   p2 = b? b: NULL;
+
+  if (!p1) do_zero(*c1); else *c1 = p1;
+  if (!p2) do_zero(*c2); else *c2 = p2;
+}
+
+/* zero aj = Aij (!= 0)  using  ak = Aik (maybe 0), via linear combination of
+ * A[j] and A[k] of determinant 1. If U != NULL, likewise update its columns */
+static void
+RgC_elem(GEN aj, GEN ak, GEN A, GEN V, long j, long k, long li, long vx)
+{
+  GEN u,v, d = gbezout_step(&aj, &ak, &u, &v, vx);
+  long l;
+  /* (A[,k], A[,j]) *= [v, -aj; u, ak ] */
+  for (l = 1; l < li; l++)
+  {
+    GEN t = gadd(gmul(u,gcoeff(A,l,j)), gmul(v,gcoeff(A,l,k)));
+    gcoeff(A,l,j) = gsub(gmul(ak,gcoeff(A,l,j)), gmul(aj,gcoeff(A,l,k)));
+    gcoeff(A,l,k) = t;
+  }
+  gcoeff(A,li,j) = gen_0;
+  gcoeff(A,li,k) = d;
+  if (V) update(v,u,ak,aj,(GEN*)(V+k),(GEN*)(V+j));
+}
+
 /* reduce A[i,j] mod A[i,j0] for j=j0+1... via column operations */
 static void
 ZM_reduce(GEN A, GEN U, long i, long j0)
@@ -690,6 +791,50 @@ ZM_reduce(GEN A, GEN U, long i, long j0)
     togglesign(q);
     ZC_lincomb1_inplace(gel(A,j), gel(A,j0), q);
     if (U) ZC_lincomb1_inplace(gel(U,j), gel(U,j0), q);
+  }
+}
+
+static GEN
+RgX_normalize(GEN T, GEN *pd)
+{
+  GEN d = leading_term(T);
+  while (gequal0(d) || ( typ(d) == t_REAL && lg(d) == 3
+                       && gexpo(T) - expo(d) > (long)BITS_IN_LONG)) {
+     T = normalizepol_lg(T, lg(T)-1);
+     if (!signe(T)) { *pd = gen_1; return T; }
+     d = leading_term(T);
+  }
+  *pd = d;
+  return RgX_Rg_div(T, d);
+}
+/* reduce A[i,j] mod A[i,j0] for j=j0+1... via column operations */
+static void
+RgM_reduce(GEN A, GEN U, long i, long j0, long vx)
+{
+  long j, lA = lg(A);
+  GEN d, T = gcoeff(A,i,j0);
+  if (is_RgX(T,vx)) {
+    T = RgX_normalize(T, &d);
+    if (degpol(T) == 0) { d = gel(T,2); T = gen_1; }
+  } else {
+    d = T; T = gen_1;
+  }
+  if (U && !gequal1(d)) gel(U,j0) = RgC_Rg_div(gel(U,j0), d);
+  gcoeff(A,i,j0) = T;
+
+  for (j=j0+1; j<lA; j++)
+  {
+    GEN t = gcoeff(A,i,j), q;
+    if (gcmp0(t)) continue;
+    if (T == gen_1)
+      q = t;
+    else if (is_RgX(t,vx))
+      q = RgX_div(t, T);
+    else continue;
+
+    if (gcmp0(q)) continue;
+    gel(A,j) = RgC_sub(gel(A,j), RgC_Rg_mul(gel(A,j0), q));
+    if (U) gel(U,j) = RgC_sub(gel(U,j), RgC_Rg_mul(gel(U,j0), q));
   }
 }
 
@@ -745,13 +890,23 @@ hnfmerge_get_1(GEN A, GEN B)
   return gerepileupto(av, ZM_ZC_mul(A,gel(U,1)));
 }
 
+/* remove the first r columns */
+static void
+remove_0cols(long r, GEN *pA, GEN *pB, long remove)
+{
+  GEN A = *pA, B = *pB;
+  long l = lg(A);
+  A += r; A[0] = evaltyp(t_MAT) | evallg(l-r);
+  if (B && remove == 2) { B += r; B[0] = A[0]; }
+  *pA = A; *pB = B;
+}
+
 /* Inefficient compared to hnfall. 'remove' = throw away lin.dep columns */
 static GEN
 hnf_i(GEN A, int remove)
 {
   pari_sp av0 = avma, av, lim;
-  long s, m, n = lg(A)-1, i, j, k, li, def, ldef;
-  GEN a;
+  long s, m, n = lg(A)-1, j, k, li, def, ldef;
 
   if (!n) return cgetg(1,t_MAT);
   av = avma; A = RgM_shallowcopy(A);
@@ -763,7 +918,7 @@ hnf_i(GEN A, int remove)
   {
     for (j=def-1; j; j--)
     {
-      a = gcoeff(A,li,j);
+      GEN a = gcoeff(A,li,j);
       if (!signe(a)) continue;
 
       /* zero a = Aij  using  b = Aik */
@@ -790,12 +945,8 @@ hnf_i(GEN A, int remove)
       A = gerepilecopy(av, A);
     }
   }
-  if (remove)
-  { /* remove 0 columns */
-    for (i=1,j=1; j<=n; j++)
-      if (!ZV_equal0(gel(A,j))) A[i++] = A[j];
-    setlg(A,i);
-  }
+  /* rank A = n - def */
+  if (remove) { GEN B = NULL; remove_0cols(def, &A, &B, remove); }
   return gerepileupto(av0, ZM_copy(A));
 }
 
@@ -1144,17 +1295,6 @@ reverse_rows(GEN A)
     for (i=(h-1)>>1; i; i--) swap(gel(c,i), gel(c,h-i));
   }
   return A;
-}
-
-/* remove the first r columns */
-static void
-remove_0cols(long r, GEN *pA, GEN *pB, long remove)
-{
-  GEN A = *pA, B = *pB;
-  long l = lg(A);
-  A += r; A[0] = evaltyp(t_MAT) | evallg(l-r);
-  if (B && remove == 2) { B += r; B[0] = A[0]; }
-  *pA = A; *pB = B;
 }
 
 GEN
@@ -1674,45 +1814,6 @@ hnf_solve(GEN A, GEN B)
 /***************************************************************/
 
 static GEN
-col_mul(GEN x, GEN c)
-{
-  if (typ(x) == t_INT)
-  {
-    long s = signe(x);
-    if (!s) return NULL;
-    if (is_pm1(x)) return (s > 0)? c: RgC_neg(c);
-  }
-  return RgC_Rg_mul(c, x);
-}
-
-static void
-do_zero(GEN x)
-{
-  long i, lx = lg(x);
-  for (i=1; i<lx; i++) gel(x,i) = gen_0;
-}
-
-/* c1 <-- u.c1 + v.c2; c2 <-- a.c2 - b.c1 */
-static void
-update(GEN u, GEN v, GEN a, GEN b, GEN *c1, GEN *c2)
-{
-  GEN p1,p2;
-
-  u = col_mul(u,*c1);
-  v = col_mul(v,*c2);
-  if (u) p1 = v? gadd(u,v): u;
-  else   p1 = v? v: NULL;
-
-  a = col_mul(a,*c2);
-  b = col_mul(gneg_i(b),*c1);
-  if (a) p2 = b? RgC_add(a,b): a;
-  else   p2 = b? b: NULL;
-
-  if (!p1) do_zero(*c1); else *c1 = p1;
-  if (!p2) do_zero(*c2); else *c2 = p2;
-}
-
-static GEN
 trivsmith(long all)
 {
   GEN z;
@@ -2068,44 +2169,6 @@ smithclean(GEN z)
   return y;
 }
 
-INLINE int
-is_RgX(GEN a, long v) { return typ(a) == t_POL && varn(a)==v; }
-
-static GEN
-gbezout_step(GEN *pa, GEN *pb, GEN *pu, GEN *pv, long vx)
-{
-  GEN a = *pa, b = *pb, d;
-  if (gequal0(a))
-  {
-    *pa = gen_0; *pu = gen_0;
-    *pb = gen_1; *pv = gen_1; return b;
-  }
-  a = is_RgX(a,vx)? RgX_renormalize(a): scalarpol(a, vx);
-  b = is_RgX(b,vx)? RgX_renormalize(b): scalarpol(b, vx);
-  d = RgX_extgcd(a,b, pu,pv);
-  if (degpol(d)) { a = RgX_div(a, d); b = RgX_div(b, d); }
-  else if (typ(d[2]) == t_REAL && lg(d[2]) <= 3)
-#if 1
-  { /* possible accuracy problem */
-    GEN D = RgX_gcd_simple(a,b);
-    if (degpol(D)) {
-      D = RgX_Rg_div(D, leading_term(D));
-      a = RgX_div(a, D);
-      b = RgX_div(b, D);
-      d = RgX_extgcd(a,b, pu,pv); /* retry now */
-      d = RgX_mul(d, D);
-    }
-  }
-#else
-  { /* less stable */
-    d = RgX_extgcd_simple(a,b, pu,pv);
-    if (degpol(d)) { a = RgX_div(a, d); b = RgX_div(b, d); }
-  }
-#endif
-  *pa = a;
-  *pb = b; return d;
-}
-
 /* does b = x[i,i] divide all entries in x[1..i-1,1..i-1] ? If so, return 0;
  * else return the index of a problematic row */
 static long
@@ -2134,6 +2197,60 @@ gsnf_no_divide(GEN x, long i, long vx)
          ) return k;
     }
   return 0;
+}
+
+/* Hermite Normal Form, with base change matrix if ptB != NULL.
+ * If 'remove' = 1, remove 0 columns (do NOT update *ptB accordingly)
+ * If 'remove' = 2, remove 0 columns and update *ptB accordingly */
+GEN
+RgM_hnfall(GEN A, GEN *pB, long remove)
+{
+  pari_sp av, lim;
+  long li, j, k, m, n, def, ldef;
+  GEN B;
+  long vx = gvar(A);
+
+  n = lg(A)-1;
+  if (vx==NO_VARIABLE || !n)
+  {
+    RgM_check_ZM(A, "mathnf0");
+    return ZM_hnfall(A, pB, remove);
+  }
+  m = lg(A[1]) - 1;
+  av = avma; lim = stack_lim(av,1);
+  A = RgM_shallowcopy(A);
+  B = pB? matid(n): NULL;
+  def = n; ldef = (m>n)? m-n: 0;
+  for (li=m; li>ldef; li--)
+  {
+    GEN T;
+    for (j=def-1; j; j--)
+    {
+      GEN a = gcoeff(A,li,j);
+      if (gequal0(a)) continue;
+
+      k = (j==1)? def: j-1;
+      RgC_elem(a,gcoeff(A,li,k), A,B, j,k, li, vx);
+    }
+    T = gcoeff(A,li,def);
+    if (gcmp0(T))
+    { if (ldef) ldef--; }
+    else
+    {
+      RgM_reduce(A, B, li, def, vx);
+      def--;
+    }
+    if (low_stack(lim, stack_lim(av,1)))
+    {
+      if (DEBUGMEM>1) pari_warn(warnmem,"ghnfall");
+      gerepileall(av, B? 2: 1, &A, &B);
+    }
+  }
+  /* rank A = n - def */
+  if (remove) remove_0cols(def, &A, &B, remove);
+  gerepileall(av, B? 2: 1, &A, &B);
+  if (B) *pB = B;
+  return A;
 }
 
 static GEN
@@ -2206,22 +2323,11 @@ gsmithall_i(GEN x,long all)
   }
   for (k=1; k<=n; k++)
   {
-    GEN T = gcoeff(x,k,k);
-    if (is_RgX(T,vx) && signe(T))
-    {
-      GEN d = leading_term(T);
-      while (gequal0(d) || ( typ(d) == t_REAL && lg(d) == 3
-                           && gexpo(T) - expo(d) > (long)BITS_IN_LONG)) {
-         T = normalizepol_lg(T, lg(T)-1);
-         if (!signe(T)) { gcoeff(x,k,k) = T; continue; }
-         d = leading_term(T);
-      }
-      if (!gequal1(d))
-      {
-        gcoeff(x,k,k) = RgX_Rg_div(T,d);
-        if (all) gel(V,k) = RgC_Rg_div(gel(V,k), d);
-      }
-    }
+    GEN d, T = gcoeff(x,k,k);
+    if (!signe(T)) continue;
+    if (is_RgX(T,vx)) T = RgX_normalize(T, &d); else { d = T; T = gen_1; }
+    if (all && !gequal1(d)) gel(V,k) = RgC_Rg_div(gel(V,k), d);
+    gcoeff(x,k,k) = T;
   }
   z = all? mkvec3(shallowtrans(U), V, x): RgM_diagonal_shallow(x);
   return gerepilecopy(av, z);

@@ -1710,6 +1710,8 @@ elementary divisors.
 \fun{GEN}{gsmithall}{GEN A} the input matrix must be square, returns the
 $[U,V,D]$, $D$ diagonal, such that $UAV = D$.
 
+\fun{GEN}{RgM_hnfall}{GEN A, GEN *pB, long remove} analogous to \tet{ZM_hnfall}.
+
 \fun{GEN}{smithclean}{GEN z} cleanup the output of \kbd{smithall} or
 \kbd{gsmithall} (delete elementary divisors equal to $1$, updating base
 change matrices).
