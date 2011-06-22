@@ -328,4 +328,5 @@ x^2 - 2*a*x + (a^2 - d^2)
 [[1, 0, 0; 0, -2, 1], [;], [;]]
 []
 [matrix(0,1), [1, 0; 0, -2; 0, 1], matrix(0,2)]
-Total time spent: 288
+[Mod(1, 3)*x^4 + Mod(2, 3)*x + Mod(2, 3), 1, 1]
+Total time spent: 280
