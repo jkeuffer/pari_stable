@@ -1953,14 +1953,15 @@ scalar_res(GEN x, GEN y, GEN *U, GEN *V)
   *U = gen_0; return gmul(y, *V);
 }
 
+/* return 0 if the subresultant chain can be interrupted.
+ * Set u = NULL if the resultant is 0. */
 static int
-subres_step(GEN *u, GEN *v, GEN *g, GEN *h, GEN *uze, GEN *um1,
-            long *signh, long *dr)
+subres_step(GEN *u, GEN *v, GEN *g, GEN *h, GEN *uze, GEN *um1, long *signh)
 {
   GEN u0, c, r, q = RgX_pseudodivrem(*u,*v, &r);
-  long du, dv, degq;
+  long du, dv, dr, degq;
 
-  *dr = lg(r); if (*dr == 2) return 0;
+  dr = lg(r); if (!signe(r)) { *u = NULL; return 0; }
   du = degpol(*u);
   dv = degpol(*v);
   degq = du - dv;
@@ -1992,7 +1993,7 @@ subres_step(GEN *u, GEN *v, GEN *g, GEN *h, GEN *uze, GEN *um1,
   *v  = RgX_Rg_divexact(r,c);
   *uze= RgX_Rg_divexact(*uze,c);
   if (both_odd(du, dv)) *signh = -*signh;
-  return (*dr > 3);
+  return (dr > 3);
 }
 
 /* compute U, V s.t Ux + Vy = resultant(x,y) */
@@ -2000,7 +2001,7 @@ GEN
 subresext(GEN x, GEN y, GEN *U, GEN *V)
 {
   pari_sp av, av2, tetpil, lim;
-  long dx, dy, dr, dv, signh, tx = typ(x), ty = typ(y);
+  long dx, dy, dv, signh, tx = typ(x), ty = typ(y);
   GEN r, z, g, h, p1, cu, cv, u, v, um1, uze, vze;
   GEN *gptr[3];
 
@@ -2032,15 +2033,15 @@ subresext(GEN x, GEN y, GEN *U, GEN *V)
   um1 = gen_1; uze = gen_0;
   for(;;)
   {
-    if (!subres_step(&u, &v, &g, &h, &uze, &um1, &signh, &dr)) break;
+    if (!subres_step(&u, &v, &g, &h, &uze, &um1, &signh)) break;
     if (low_stack(lim,stack_lim(av2,1)))
     {
-      if(DEBUGMEM>1) pari_warn(warnmem,"subresext, dr = %ld",dr);
+      if(DEBUGMEM>1) pari_warn(warnmem,"subresext, dr = %ld", degpol(v));
       gerepileall(av2,6, &u,&v,&g,&h,&uze,&um1);
     }
   }
   /* uze an RgX */
-  if (dr == 2) { *U = *V = gen_0; avma = av; return gen_0; }
+  if (!u) { *U = *V = gen_0; avma = av; return gen_0; }
   z = gel(v,2); dv = degpol(v);
   if (dv > 1)
   { /* z = gdivexact(gpowgs(z,dv), gpowgs(h,dv-1)); */
@@ -2095,7 +2096,7 @@ GEN
 RgX_extgcd(GEN x, GEN y, GEN *U, GEN *V)
 {
   pari_sp av, av2, tetpil, lim;
-  long dr, signh; /* junk */
+  long signh; /* junk */
   long dx, dy, vx, tx = typ(x), ty = typ(y);
   GEN z, g, h, p1, cu, cv, u, v, um1, uze, vze, *gptr[3];
 
@@ -2120,10 +2121,10 @@ RgX_extgcd(GEN x, GEN y, GEN *U, GEN *V)
   um1 = gen_1; uze = gen_0;
   for(;;)
   {
-    if (!subres_step(&u, &v, &g, &h, &uze, &um1, &signh, &dr)) break;
+    if (!subres_step(&u, &v, &g, &h, &uze, &um1, &signh)) break;
     if (low_stack(lim,stack_lim(av2,1)))
     {
-      if(DEBUGMEM>1) pari_warn(warnmem,"RgX_extgcd, dr = %ld",dr);
+      if(DEBUGMEM>1) pari_warn(warnmem,"RgX_extgcd, dr = %ld",degpol(v));
       gerepileall(av2,6,&u,&v,&g,&h,&uze,&um1);
     }
   }
@@ -2156,7 +2157,7 @@ int
 RgXQ_ratlift(GEN x, GEN T, long amax, long bmax, GEN *P, GEN *Q)
 {
   pari_sp av, av2, tetpil, lim;
-  long dr, signh; /* junk */
+  long signh; /* junk */
   long vx;
   GEN g, h, p1, cu, cv, u, v, um1, uze, *gptr[2];
 
@@ -2174,12 +2175,12 @@ RgXQ_ratlift(GEN x, GEN T, long amax, long bmax, GEN *P, GEN *Q)
   um1 = gen_1; uze = gen_0;
   for(;;)
   {
-    (void) subres_step(&u, &v, &g, &h, &uze, &um1, &signh, &dr);
-    if (dr==2 || (typ(uze)==t_POL && degpol(uze)>bmax)) { avma=av; return 0; }
+    (void) subres_step(&u, &v, &g, &h, &uze, &um1, &signh);
+    if (!u || (typ(uze)==t_POL && degpol(uze)>bmax)) { avma=av; return 0; }
     if (typ(v)!=t_POL || degpol(v)<=amax) break;
     if (low_stack(lim,stack_lim(av2,1)))
     {
-      if(DEBUGMEM>1) pari_warn(warnmem,"RgXQ_ratlift, dr = %ld",dr);
+      if(DEBUGMEM>1) pari_warn(warnmem,"RgXQ_ratlift, dr = %ld", degpol(v));
       gerepileall(av2,6,&u,&v,&g,&h,&uze,&um1);
     }
   }
@@ -2683,14 +2684,14 @@ RgX_gcd(GEN x, GEN y)
     for(;;)
     {
       GEN r = RgX_pseudorem(u,v);
-      long degq, du, dv, dr=lg(r);
+      long degq, du, dv, dr = lg(r);
 
+      if (!signe(r)) break;
       if (dr <= 3)
       {
-        if (gequal0(r)) break;
         avma = av1; return gerepileupto(av, scalarpol(d, varn(x)));
       }
-      if (DEBUGLEVEL > 9) err_printf("RgX_gcd: dr = %ld\n", dr);
+      if (DEBUGLEVEL > 9) err_printf("RgX_gcd: dr = %ld\n", degpol(r));
       du = lg(u); dv = lg(v); degq = du-dv;
       u = v; p1 = g; g = leading_term(u);
       switch(degq)
