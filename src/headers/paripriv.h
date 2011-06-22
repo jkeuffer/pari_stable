@@ -596,6 +596,7 @@ GEN     perm_to_GAP(GEN p);
 GEN     F2x_Berlekamp_ker(GEN u);
 GEN     Flx_Berlekamp_ker(GEN u, ulong p);
 GEN     FpX_Berlekamp_ker(GEN u, GEN p);
+GEN     Flx_factcantor(GEN f, ulong p, long flag);
 GEN     FpX_factcantor(GEN f, GEN pp, long flag);
 GEN     FqX_Berlekamp_ker(GEN u, GEN T, GEN q, GEN p);
 GEN     FqX_rand(long d1, long v, GEN T, GEN p);
