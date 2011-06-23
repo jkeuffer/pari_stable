@@ -1724,13 +1724,13 @@ INLINE ulong
 F2v_coeff(GEN x,long v) { return F2x_coeff(x,v-1); }
 
 INLINE void
-F2v_clear(GEN x,long v) { return F2x_clear(x,v-1); }
+F2v_clear(GEN x,long v) { F2x_clear(x,v-1); }
 
 INLINE void
-F2v_set(GEN x,long v)   { return F2x_set(x,v-1); }
+F2v_set(GEN x,long v)   { F2x_set(x,v-1); }
 
 INLINE void
-F2v_flip(GEN x,long v) {return F2x_flip(x,v-1); }
+F2v_flip(GEN x,long v) { F2x_flip(x,v-1); }
 
 /* F2m */
 
