@@ -477,7 +477,6 @@ rootmod0(GEN f, GEN p, long flag)
 /*                     FACTORISATION MODULO p                      */
 /*                                                                 */
 /*******************************************************************/
-static GEN spec_FpXQ_pow(GEN x, GEN p, GEN S);
 
 /* Functions giving information on the factorisation. */
 
@@ -814,7 +813,7 @@ split(ulong m, GEN *t, long d, GEN p, GEN q, long r, GEN S)
     {
       w0 = w = FpXQ_pow(pol_x(v), utoi(m-1), *t, gen_2); m += 2;
       for (l=1; l<d; l++)
-        w = ZX_add(w0, spec_FpXQ_pow(w, p, S));
+        w = ZX_add(w0, FpX_FpXQV_eval(w, S, *t, gen_2));
     }
     else
     {
@@ -859,49 +858,6 @@ splitgen(GEN m, GEN *t, long d, GEN  p, GEN q, long r)
   l /= d; t[l]=FpX_div(*t,w,p); *t=w;
   splitgen(m,t+l,d,p,q,r);
   splitgen(m,t,  d,p,q,r);
-}
-
-/* return S = [ x^p, x^2p, ... x^(n-1)p ] mod (p, T), n = degree(T) > 0 */
-static GEN
-init_spec_FpXQ_pow(GEN p, GEN T)
-{
-  long i, n = degpol(T), v = varn(T);
-  GEN S = cgetg(n, t_VEC), x;
-  if (n == 1) return S;
-  x = FpXQ_pow(pol_x(v), p, T, p);
-  gel(S,1) = x;
-  if ((degpol(x)<<1) < degpol(T)) {
-    for (i=2; i < n; i++)
-      gel(S,i) = FpXQ_mul(gel(S,i-1), x, T,p);
-  } else {
-    for (i=2; i < n; i++)
-      gel(S,i) = (i&1)? FpXQ_mul(gel(S,i-1), x, T,p)
-                      : FpXQ_sqr(gel(S,i>>1), T, p);
-  }
-  return S;
-}
-
-/* compute x^p, S is as above */
-static GEN
-spec_FpXQ_pow(GEN x, GEN p, GEN S)
-{
-  long i, dx = degpol(x);
-  pari_sp av = avma, lim = stack_lim(av, 1);
-  GEN x0 = x+2, z = gel(x0,0);
-  if (dx < 0) pari_err(talker, "zero polynomial in FpXQ_pow. %Ps not prime", p);
-  for (i = 1; i <= dx; i++)
-  {
-    GEN d, c = gel(x0,i); /* assume coeffs in [0, p-1] */
-    if (!signe(c)) continue;
-    d = gel(S,i); if (!gequal1(c)) d = ZX_Z_mul(d, c);
-    z = typ(z) == t_INT? ZX_Z_add(d,z): ZX_add(d,z);
-    if (low_stack(lim, stack_lim(av,1)))
-    {
-      if(DEBUGMEM>1) pari_warn(warnmem,"spec_FpXQ_pow");
-      z = gerepileupto(av, z);
-    }
-  }
-  return gerepileupto(av, FpX_red(z, p));
 }
 
 static int
@@ -990,12 +946,12 @@ FpX_factcantor_i(GEN f, GEN pp, long flag)
       if (du <= 0) continue;
 
       /* here u is square-free (product of irred. of multiplicity e * k) */
-      S = init_spec_FpXQ_pow(pp, u);
       pd=gen_1; v=pol_x(vf);
+      S = du==1 ?  cgetg(1, t_VEC): FpXQ_powers(FpXQ_pow(v, pp, u, pp), du-1, u, pp);
       for (d=1; d <= du>>1; d++)
       {
         if (!flag) pd = mulii(pd,pp);
-        v = spec_FpXQ_pow(v, pp, S);
+        v = FpX_FpXQV_eval(v, S, u, pp);
         g = FpX_gcd(ZX_sub(v, pol_x(vf)), u, pp);
         dg = degpol(g);
         if (dg <= 0) continue;
