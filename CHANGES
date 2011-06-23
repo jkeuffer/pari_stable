@@ -6,6 +6,7 @@ Done for version 2.6.0 (released ??/??/20??):
   Fixed
     1- Euclidean chains were confused by t_POLs with t_INTMOD/t_POLMOD coeffs
        [ because a 0 polynomial could have lg() == 3 ]
+    2- numerical instability in ellheightoo [#1204]
 
   Changed
     1- mathnf: swapped flag 3 and 5.
