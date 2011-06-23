@@ -2237,6 +2237,9 @@ RgM_hnfall(GEN A, GEN *pB, long remove)
     { if (ldef) ldef--; }
     else
     {
+      GEN d;
+      gcoeff(A,li,def) = RgX_normalize(T, &d);
+      if (B && !gcmp1(d)) gel(B, def) = RgC_Rg_div(gel(B, def), d);
       RgM_reduce(A, B, li, def, vx);
       def--;
     }
