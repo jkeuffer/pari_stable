@@ -812,12 +812,6 @@ _Fq_submul(GEN b, long k, long i, GEN m, GEN T, GEN p)
   gel(b,i) = Fq_red(gel(b,i), T,p);
   gel(b,k) = gsub(gel(b,k), gmul(m, gel(b,i)));
 }
-static void /* assume m < p && SMALL_ULONG(p) && (! (b[i] & b[k] & HIGHMASK)) */
-_Fl_submul_OK(uGEN b, long k, long i, ulong m, ulong p)
-{
-  b[k] -= m * b[i];
-  if (b[k] & HIGHMASK) b[k] %= p;
-}
 static void /* assume m < p */
 _Fl_submul(uGEN b, long k, long i, ulong m, ulong p)
 {
@@ -1054,7 +1048,7 @@ static GEN
 Flm_gauss_sp(GEN a, GEN b, ulong p)
 {
   long i, j, k, li, bco, aco = lg(a)-1;
-  const int OK_ulong = 0;
+  const int OK_ulong = SMALL_ULONG(p);
   GEN u;
 
   if (!aco) return cgetg(1,t_MAT);
@@ -1090,8 +1084,9 @@ Flm_gauss_sp(GEN a, GEN b, ulong p)
         for (j=i+1; j<=aco; j++) _Fl_sub((uGEN)a[j],k,i, p);
         for (j=1;   j<=bco; j++) _Fl_sub((uGEN)b[j],k,i, p);
       } else if (OK_ulong) {
-        for (j=i+1; j<=aco; j++) _Fl_submul_OK((uGEN)a[j],k,i,m, p);
-        for (j=1;   j<=bco; j++) _Fl_submul_OK((uGEN)b[j],k,i,m, p);
+        m = p - m; /* = -m */
+        for (j=i+1; j<=aco; j++) _Fl_addmul_OK((uGEN)a[j],k,i,m, p);
+        for (j=1;   j<=bco; j++) _Fl_addmul_OK((uGEN)b[j],k,i,m, p);
       } else {
         for (j=i+1; j<=aco; j++) _Fl_submul((uGEN)a[j],k,i,m, p);
         for (j=1;   j<=bco; j++) _Fl_submul((uGEN)b[j],k,i,m, p);
