@@ -830,7 +830,7 @@ mpveceint1(GEN C, GEN eC, long n)
   /* 1 <= nstop <= n */
 
   if (!eC) eC = mpexp(C);
-  if (DEBUGLEVEL>1) err_printf("veceint1: (n, nstop) = (%ld, %ld)\n",n, nstop);
+  if (DEBUGLEVEL>5) err_printf("veceint1: (n, nstop) = (%ld, %ld)\n",n, nstop);
   e1 = rcopy(eC); av1 = avma;
   affrr(incgam2_0(C, e1), gel(y,1));
   for(i=2; i <= nstop; i++, avma = av1)
@@ -858,7 +858,7 @@ mpveceint1(GEN C, GEN eC, long n)
     /* D = [ e1/-n, (-1/n-C) * (e1/-n) ] */
     nmin -= 10; if (nmin < nstop) nmin = nstop;
     My = addrr(My, minvn);
-    if (DEBUGLEVEL>1 && n < chkpoint)
+    if (DEBUGLEVEL>5 && n < chkpoint)
       { err_printf("%ld ",n) ; chkpoint -= nstop/20; }
     for (a=1,n--; n>=nmin; n--,a++)
     {
@@ -885,7 +885,7 @@ mpveceint1(GEN C, GEN eC, long n)
     if (n <= nstop) break;
     affrr(mulrr(e1,e2), e1);
   }
-  if (DEBUGLEVEL>1) err_printf("\n");
+  if (DEBUGLEVEL>5) err_printf("\n");
   avma = av; return y;
 }
 
