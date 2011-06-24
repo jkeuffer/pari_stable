@@ -3744,6 +3744,9 @@ $\kbd{f}(\kbd{x})$.
 $\kbd{f}(\kbd{x})$, assuming that \kbd{V} was computed by
 $\kbd{FpXQ\_powers}(\kbd{x}, n, \kbd{T}, \kbd{p})$.
 
+\fun{GEN}{FpXQ_autpowers}{GEN S, long n, GEN T, GEN p} returns
+$[x,S(x),S(S(x)),\dots,S^{(n)}(x)]$ as a \typ{VEC} of \kbd{FpXQ}s.
+
 \subsec{\kbd{FpXX}}
 Contrary to what the name implies, an \kbd{FpXX} is a \typ{POL} whose
 coefficients are either \typ{INT}s or \typ{FpX}s. This reduces memory

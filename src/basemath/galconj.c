@@ -530,29 +530,14 @@ static void
 inittestlift(GEN plift, GEN Tmod, struct galois_lift *gl,
              struct galois_testlift *gt)
 {
-  long v = varn(gl->T);
+  pari_timer ti;
   gt->n = lg(gl->L) - 1;
   gt->g = lg(Tmod) - 1;
   gt->f = gt->n / gt->g;
   gt->bezoutcoeff = bezout_lift_fact(gl->T, Tmod, gl->p, gl->e);
-  gt->pauto = cgetg(gt->f + 1, t_VEC);
-  gel(gt->pauto,1) = pol_x(v);
-  gel(gt->pauto,2) = gcopy(plift);
-  if (gt->f > 2)
-  {
-    pari_sp av = avma, ltop;
-    long i, nautpow = brent_kung_optpow(gt->n-1,gt->f-2);
-    GEN autpow;
-    pari_timer ti;
-    if (DEBUGLEVEL >= 1) timer_start(&ti);
-    autpow = FpXQ_powers(plift,nautpow,gl->TQ,gl->Q);
-    ltop = avma;
-    for (i = 3; i <= gt->f; i++)
-      gel(gt->pauto,i) = FpX_FpXQV_eval(gel(gt->pauto,i-1),autpow,gl->TQ,gl->Q);
-    /*Somewhat paranoid with memory, but this function use a lot of stack.*/
-    gerepilecoeffssp(av, ltop, gt->pauto + 3, gt->f-2);
-    if (DEBUGLEVEL >= 1) timer_printf(&ti, "Frobenius power");
-  }
+  if (DEBUGLEVEL >= 2) timer_start(&ti);
+  gt->pauto = FpXQ_autpowers(plift, gt->f-1, gl->TQ, gl->Q);
+  if (DEBUGLEVEL >= 2) timer_printf(&ti, "Frobenius power");
 }
 
 /* Explanation of the intheadlong technique:

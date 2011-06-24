@@ -2330,6 +2330,7 @@ GEN     FpX_FpXY_resultant(GEN a, GEN b0, GEN p);
 GEN     FpX_factorff_irred(GEN P, GEN Q, GEN l);
 void    FpX_ffintersect(GEN P,GEN Q,long n,GEN l,GEN *SP,GEN *SQ,GEN MA,GEN MB);
 GEN     FpX_ffisom(GEN P,GEN Q,GEN l);
+GEN     FpXQ_autpowers(GEN aut, long f, GEN T, GEN p);
 GEN     FpXQ_ffisom_inv(GEN S,GEN Tp, GEN p);
 GEN     FpXQX_gcd(GEN P, GEN Q, GEN T, GEN p);
 GEN     FpXQX_mul(GEN x, GEN y, GEN T, GEN p);

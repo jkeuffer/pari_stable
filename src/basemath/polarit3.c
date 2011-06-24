@@ -365,6 +365,22 @@ FpX_FpXQ_eval(GEN Q, GEN x, GEN T, GEN p)
 }
 
 GEN
+FpXQ_autpowers(GEN aut, long f, GEN T, GEN p)
+{
+  pari_sp av = avma;
+  long n = degpol(T);
+  long i, nautpow = brent_kung_optpow(n-1,f-1);
+  long v = varn(T);
+  GEN autpow = FpXQ_powers(aut, nautpow,T,p);
+  GEN V = cgetg(f + 2, t_VEC);
+  gel(V,1) = pol_x(v); if (f==0) return gerepileupto(av, V);
+  gel(V,2) = gcopy(aut);
+  for (i = 3; i <= f+1; i++)
+    gel(V,i) = FpX_FpXQV_eval(gel(V,i-1),autpow,T,p);
+  return gerepileupto(av, V);
+}
+
+GEN
 FqX_eval(GEN x, GEN y, GEN T, GEN p)
 {
   pari_sp av;
