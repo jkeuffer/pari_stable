@@ -105,7 +105,7 @@ gvar2(GEN x)
 static long
 prec0(long e) { return (e < 0)? nbits2prec(-e): 2; }
 static long
-precREAL(GEN x) { return signe(x) ? lg(x): prec0(expo(x)); }
+precREAL(GEN x) { return signe(x) ? realprec(x): prec0(expo(x)); }
 /* t t_REAL, s an exact non-complex type. Return precision(|t| + |s|) */
 static long
 precrealexact(GEN t, GEN s) {
@@ -114,7 +114,7 @@ precrealexact(GEN t, GEN s) {
   if (e < 0) e = 0;
   e -= expo(t);
   if (!signe(t)) return prec0(-e);
-  l = lg(t);
+  l = realprec(t);
   return (e > 0)? l + divsBIL(e): l;
 }
 static long
@@ -135,18 +135,18 @@ precCOMPLEX(GEN z)
     if (!signe(y)) return prec0( minss(ex,ey) );
     if (e <= 0) return prec0(ex);
     lz = nbits2prec(e);
-    ly = lg(y); if (lz > ly) lz = ly;
+    ly = realprec(y); if (lz > ly) lz = ly;
     return lz;
   }
   if (!signe(y)) {
     if (e >= 0) return prec0(ey);
     lz = nbits2prec(-e);
-    lx = lg(x); if (lz > lx) lz = lx;
+    lx = realprec(x); if (lz > lx) lz = lx;
     return lz;
   }
   if (e < 0) { swap(x, y); e = -e; }
-  lx = lg(x);
-  ly = lg(y);
+  lx = realprec(x);
+  ly = realprec(y);
   if (e) {
     long d = divsBIL(e), l = ly-d;
     return (l > lx)? lx + d: ly;
@@ -511,7 +511,7 @@ modr_safe(GEN x, GEN y)
   q = gdiv(x,y); /* t_REAL */
 
   e = expo(q);
-  if (e >= 0 && nbits2prec(e) > lg(x)) return NULL;
+  if (e >= 0 && nbits2prec(e) > realprec(x)) return NULL;
   f = floorr(q);
   if (gsigne(y) < 0 && signe(subri(q,f))) f = addis(f, 1);
   return signe(f)? gsub(x, mulir(f,y)): x;
@@ -2023,7 +2023,7 @@ roundr_safe(GEN x)
   av = avma;
   t = addrr(real2n(-1,nbits2prec(ex+1)), x); /* x + 0.5 */
 
-  lx = lg(x);
+  lx = realprec(x);
   e1 = expo(t) - bit_accuracy(lx) + 1;
   y = trunc2nr_lg(t, lx, e1);
   if (signe(x) < 0) y = addsi(-1,y);
@@ -2098,7 +2098,7 @@ grndtoi(GEN x, long *e)
         if (signe(t) >= 0) { *e = ex; avma = av; return gen_0; }
         *e = expo(addsr(1,x)); avma = av; return gen_m1;
       }
-      lx = lg(x);
+      lx = realprec(x);
       e1 = e1 - bit_accuracy(lx) + 1;
       y = trunc2nr_lg(t, lx, e1);
       if (signe(x) < 0) y = addsi(-1,y);
@@ -2207,7 +2207,7 @@ gcvtoi(GEN x, long *e)
   if (tx == t_REAL)
   {
     ex = expo(x); if (ex < 0) { *e = ex; return gen_0; }
-    lx = lg(x); e1 = ex - bit_accuracy(lx) + 1;
+    lx = realprec(x); e1 = ex - bit_accuracy(lx) + 1;
     y = trunc2nr_lg(x, lx, e1);
     if (e1 <= 0) { pari_sp av = avma; e1 = expo(subri(x,y)); avma = av; }
     *e = e1; return y;

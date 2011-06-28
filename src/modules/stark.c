@@ -2012,7 +2012,7 @@ QuadGetST(GEN bnr, GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
 
     if (DEBUGLEVEL>1)
       err_printf("* conductor no %ld/%ld (N = %ld)\n\tInit: ", j,ncond,NN);
-    if (lg(ec2) > prec) ec2 = rtor(ec2, prec);
+    if (realprec(ec2) > prec) ec2 = rtor(ec2, prec);
     veint1 = mpveceint1(rtor(c2, prec), ec2, NN);
     vcn = mpvecpow(invr(ec2), NN);
     av2 = avma;
@@ -3325,7 +3325,7 @@ computeth2(GEN om, GEN la, long prec)
 
   p1 = gsub(ellphist(om,res,la,prec), ellphist(om,res,gen_1,prec));
   p2 = imag_i(p1);
-  if (gexpo(real_i(p1))>20 || gexpo(p2)> bit_accuracy(minss(prec,lg(p2)))-10)
+  if (gexpo(real_i(p1))>20 || gexpo(p2)> bit_accuracy(minss(prec,realprec(p2)))-10)
     return NULL;
   return gexp(p1,prec);
 }

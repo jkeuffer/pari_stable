@@ -2448,7 +2448,7 @@ gboundcf(GEN x, long k)
     {
       case t_INT: return mkveccopy(x);
       case t_REAL:
-        av = avma; lx = lg(x);
+        av = avma; lx = realprec(x);
         e = bit_accuracy(lx)-1-expo(x);
         if (e < 0) pari_err(talker,"integral part not significant in gboundcf");
         c = trunc2nr_lg(x,lx,0);
@@ -2504,7 +2504,7 @@ sfcont2(GEN b, GEN x, long k)
     if (tx == t_REAL)
     {
       long e = expo(x);
-      if (e > 0 && nbits2prec(e+1) > lg(x)) break;
+      if (e > 0 && nbits2prec(e+1) > realprec(x)) break;
       gel(y,i) = floorr(x);
       p1 = subri(x, gel(y,i));
     }
@@ -2750,8 +2750,8 @@ bestappr(GEN x, GEN k)
       p1 = gen_1; a = p0 = floorr(x);
       q1 = gen_0; q0 = gen_1;
       x = subri(x,a); /* 0 <= x < 1 */
-      lx = lg(x);
-      if (lx == 2) { cgiv(x); return a; }
+      lx = realprec(x);
+      if (lx == 2) { cgiv(x); return a; } /* FIXME: realprec==2 */
       kr = itor(k, lx);
       for(;;)
       {

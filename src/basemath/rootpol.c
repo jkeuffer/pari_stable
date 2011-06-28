@@ -1787,7 +1787,7 @@ mygprecrc_special(GEN x, long prec, long e)
   {
     case t_REAL:
       if (!signe(x)) return real_0_bit(minss(e, expo(x)));
-      return (prec > lg(x))? rtor(x, prec): x;
+      return (prec > realprec(x))? rtor(x, prec): x;
     case t_COMPLEX:
       y = cgetg(3,t_COMPLEX);
       gel(y,1) = mygprecrc_special(gel(x,1),prec,e);

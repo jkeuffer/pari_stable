@@ -27,7 +27,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 static int
 no_prec_pb(GEN x)
 {
-  return (typ(x) != t_REAL || lg(x) >  3
+  return (typ(x) != t_REAL || realprec(x) >  3
                            || expo(x) < BITS_IN_LONG/2);
 }
 /* zero x[1..k-1], fill L = (mu_{i,j}). Return 0 if precision problem

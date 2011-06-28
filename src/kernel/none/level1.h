@@ -333,7 +333,7 @@ cmpir(GEN x, GEN y)
 
   if (!signe(x)) return -signe(y);
   if (!signe(y)) return  signe(x);
-  av=avma; z = itor(x, lg(y)); avma=av;
+  av=avma; z = itor(x, realprec(y)); avma=av;
   return cmprr(z,y); /* cmprr does no memory adjustment */
 }
 INLINE int
@@ -688,7 +688,7 @@ INLINE void
 rdiviiz(GEN x, GEN y, GEN z)
 {
   pari_sp av = avma;
-  long prec = lg(z);
+  long prec = realprec(z);
   affir(x, z);
   if (!is_bigint(y)) {
     affrr(divrs(z, y[2]), z);

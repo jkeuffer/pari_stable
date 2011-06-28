@@ -116,6 +116,8 @@ typedef unsigned long pari_ulong;
 #define setlgefint(x,s) (((ulong*)(x))[1]=\
                           (((ulong*)(x))[1]&(~LGBITS)) | (ulong)evallgefint(s))
 
+#define realprec(x)         ((long)(((ulong*)(x))[0] & LGBITS))
+
 #define expo(x)       ((long) ((((ulong*)(x))[1] & EXPOBITS) - HIGHEXPOBIT))
 #define setexpo(x,s)  (((ulong*)(x))[1]=\
                        (((ulong*)(x))[1]&(~EXPOBITS)) | (ulong)evalexpo(s))

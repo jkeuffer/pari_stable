@@ -111,7 +111,7 @@ constpi(long prec)
   long i, G;
   pari_sp av, av2;
 
-  if (gpi && lg(gpi) >= prec) return gpi;
+  if (gpi && realprec(gpi) >= prec) return gpi;
 
   av = avma; tmppi = newblock(prec);
   *tmppi = evaltyp(t_REAL) | evallg(prec);
@@ -178,7 +178,7 @@ consteuler(long prec)
   long l, n1, n, k, x;
   pari_sp av1, av2;
 
-  if (geuler && lg(geuler) >= prec) return geuler;
+  if (geuler && realprec(geuler) >= prec) return geuler;
 
   av1 = avma; tmpeuler = newblock(prec);
   *tmpeuler = evaltyp(t_REAL) | evallg(prec);
@@ -300,7 +300,7 @@ mpexp0(GEN x)
 static GEN
 powr0(GEN x)
 {
-  long lx = lg(x);
+  long lx = realprec(x); /* FIXME: realprec==2 */
   return (lx == 2 || !signe(x)) ? mpexp0(x): real_1(lx);
 }
 /* to be called by the generic function gpowgs(x,s) when s = 0 */
@@ -1438,7 +1438,7 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
 GEN
 exp1r_abs(GEN x)
 {
-  long l = lg(x), a = expo(x), b = bit_accuracy(l), L, i, n, m, e, B;
+  long l = realprec(x), a = expo(x), b = bit_accuracy(l), L, i, n, m, e, B;
   GEN y, p2, X;
   pari_sp av;
   double d;
@@ -1535,7 +1535,7 @@ modlog2(GEN x, long *sh)
   if (d < 0) q = -q;
   *sh = q;
   if (q) {
-    long l = lg(x) + 1;
+    long l = realprec(x) + 1;
     x = subrr(rtor(x,l), mulsr(q, mplog2(l)));
     if (!signe(x)) return NULL;
   }
@@ -1546,7 +1546,7 @@ static GEN
 mpexp_basecase(GEN x)
 {
   pari_sp av = avma;
-  long sh, l = lg(x);
+  long sh, l = realprec(x);
   GEN y, z;
 
   y = modlog2(x, &sh);
@@ -1555,7 +1555,7 @@ mpexp_basecase(GEN x)
   if (signe(y) < 0) z = invr(z);
   if (sh) {
     setexpo(z, expo(z)+sh);
-    if (lg(z) > l) z = rtor(z, l); /* spurious precision increase */
+    if (realprec(z) > l) z = rtor(z, l); /* spurious precision increase */
   }
 #ifdef DEBUG
 {
@@ -1570,7 +1570,7 @@ GEN
 mpexp(GEN x)
 {
   const long s = 6; /*Initial steps using basecase*/
-  long i, p, l = lg(x), sh;
+  long i, p, l = realprec(x), sh;
   GEN a, t, z;
   ulong mask;
 
@@ -1775,7 +1775,7 @@ agmr_gap(GEN a, GEN b, long L)
 static GEN
 agm1r_abs(GEN x)
 {
-  long l = lg(x), L = 5-bit_accuracy(l);
+  long l = realprec(x), L = 5-bit_accuracy(l);
   GEN a1, b1, y = cgetr(l);
   pari_sp av = avma;
 
@@ -1901,7 +1901,7 @@ constlog2(long prec)
   long l, n;
   GEN y, tmplog2;
 
-  if (glog2 && lg(glog2) >= prec) return glog2;
+  if (glog2 && realprec(glog2) >= prec) return glog2;
 
   tmplog2 = newblock(prec);
   *tmplog2 = evaltyp(t_REAL) | evallg(prec);
@@ -1920,7 +1920,7 @@ mplog2(long prec) { return rtor(constlog2(prec), prec); }
 static GEN
 logagmr_abs(GEN q)
 {
-  long prec = lg(q), lim, e = expo(q);
+  long prec = realprec(q), lim, e = expo(q);
   GEN z, y, Q, _4ovQ;
   pari_sp av;
 
@@ -1941,7 +1941,7 @@ GEN
 logr_abs(GEN X)
 {
   pari_sp ltop;
-  long EX, L, m, k, a, b, l = lg(X);
+  long EX, L, m, k, a, b, l = realprec(X);
   GEN z, x, y;
   ulong u;
   int neg;
@@ -1996,7 +1996,7 @@ logr_abs(GEN X)
   for (k=1; k<=m; k++) x = sqrtr_abs(x);
 
   y = divrr(subrs(x,1), addrs(x,1)); /* = (x-1) / (x+1), close to 0 */
-  L = lg(y); /* should be ~ l+1 - (k-2) */
+  L = realprec(y); /* should be ~ l+1 - (k-2) */
   /* log(x) = log(1+y) - log(1-y) = 2 sum_{k odd} y^k / k
    * Truncate the sum at k = 2n+1, the remainder is
    *   2 sum_{k >= 2n+3} y^k / k < 2y^(2n+3) / (2n+3)(1-y) < y^(2n+3)
@@ -2126,7 +2126,7 @@ glog(GEN x, long prec)
       }
       y = cgetg(3,t_COMPLEX);
       gel(y,1) = logr_abs(x);
-      gel(y,2) = mppi(lg(x)); return y;
+      gel(y,2) = mppi(realprec(x)); return y;
 
     case t_COMPLEX:
       if (ismpzero(gel(x,2))) return glog(gel(x,1), prec);
@@ -2180,14 +2180,14 @@ mpsc1(GEN x, long *ptmod8)
     }
     if (signe(q))
     {
-      x = subrr(x, mulir(q, Pi2n(-1, lg(x)+1))); /* x mod Pi/2  */
+      x = subrr(x, mulir(q, Pi2n(-1, realprec(x)+1))); /* x mod Pi/2  */
       a = expo(x);
       if (!signe(x) && a >= 0) pari_err(precer,"mpsc1");
       n = mod4(q); if (n && signe(q) < 0) n = 4 - n;
     }
   }
   /* a < 0 */
-  l = lg(x);
+  l = realprec(x);
   b = signe(x); *ptmod8 = (b < 0)? 4 + n: n;
   if (!b) return real_0_bit((expo(x)<<1) - 1);
 

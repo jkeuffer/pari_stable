@@ -246,7 +246,7 @@ kbessel1(GEN nu, GEN gx, long prec)
   pari_sp av;
 
   if (typ(nu)==t_COMPLEX) return kbessel2(nu,gx,prec);
-  l = (typ(gx)==t_REAL)? lg(gx): prec;
+  l = (typ(gx)==t_REAL)? realprec(gx): prec;
   ex = gexpo(gx);
   if (ex < 0)
   {
@@ -532,7 +532,7 @@ hyperu(GEN a, GEN b, GEN gx, long prec)
 {
   GEN S, P, T, x, p1, zf, u, a1, mb = gneg(b);
   const int ex = iscomplex(a) || iscomplex(b);
-  long k, n, l = (typ(gx)==t_REAL)? lg(gx): prec, l1 = l+1;
+  long k, n, l = (typ(gx)==t_REAL)? realprec(gx): prec, l1 = l+1;
   GEN y = ex? cgetc(l): cgetr(l);
   pari_sp av = avma;
 
@@ -611,7 +611,7 @@ hyperu(GEN a, GEN b, GEN gx, long prec)
 static GEN
 incgam2_0(GEN x, GEN expx)
 {
-  long l = lg(x), n, i;
+  long l = realprec(x), n, i;
   GEN z;
 
   if (expo(x) >= 4)
@@ -660,7 +660,7 @@ incgam2(GEN s, GEN x, long prec)
   }
   else
   {
-    l = lg(x);
+    l = realprec(x);
     mx = fabs(rtodbl(x));
   }
   m = (bit_accuracy_mul(l,LOG2) + mx)/4;
@@ -813,7 +813,7 @@ veceint1(GEN C, GEN nmax, long prec)
 GEN
 mpveceint1(GEN C, GEN eC, long n)
 {
-  long i, nstop, nmin, G, chkpoint, prec = lg(C);
+  long i, nstop, nmin, G, chkpoint, prec = realprec(C);
   pari_sp av, av1;
   GEN y, e1, e2, F0, unr;
 
@@ -1211,7 +1211,7 @@ szeta_odd(long k, long prec)
 
       z = addrr(z,p1); if ((ep1 = expo(p1)) < li) break;
       l = (ep1 < 0) ? prec+1 : prec+1 + nbits2nlong(ep1);
-      if (l < lg(qn)) setlg(qn, l);
+      if (l < realprec(qn)) setlg(qn, l);
       qn = mulrr(qn,q);
       if (low_stack(limit,stack_lim(av2,1)))
       {
@@ -1246,7 +1246,7 @@ szeta_odd(long k, long prec)
 
       z = addrr(z,p1); if ((ep1 = expo(p1)) < li) break;
       l = (ep1 < 0)? prec+1 : prec+1 + nbits2nlong(ep1);
-      if (l < lg(qn)) setlg(qn, l);
+      if (l < realprec(qn)) setlg(qn, l);
       qn = mulrr(qn,q);
       if (low_stack(limit,stack_lim(av2,1)))
       {
@@ -2549,7 +2549,7 @@ double_eta_quotient(GEN a, GEN w, GEN D, long p, long q, GEN pq, GEN sqrtD)
 {
   GEN C = shifti(subii(sqri(w), D), -2);
   GEN d, t, z, zp, zq, zpq, s_t, s_tp, s_tpq, s, sp, spq;
-  long prec = lg(sqrtD);
+  long prec = realprec(sqrtD);
 
   z = eta_form(to_form(a, w, C), sqrtD, &s_t, prec);
   s = gel(s_t, 1);

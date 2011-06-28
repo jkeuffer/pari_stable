@@ -594,7 +594,7 @@ gprec_wtrunc(GEN x, long pr)
   switch(typ(x))
   {
     case t_REAL:
-      return (signe(x) && lg(x) > pr)? rtor(x,pr): x;
+      return (signe(x) && realprec(x) > pr)? rtor(x,pr): x;
     case t_COMPLEX:
       y = cgetg(3, t_COMPLEX);
       gel(y,1) = gprec_wtrunc(gel(x,1),pr);

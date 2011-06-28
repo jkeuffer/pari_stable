@@ -2325,7 +2325,7 @@ polredabs_aux(nfbasic_t *T, GEN *u)
 
   prec = polred_init(T, &F, &d);
   d.bound = T2_from_embed(F.ro, T->r1);
-  if (lg(d.bound) > prec) d.bound = rtor(d.bound, prec);
+  if (realprec(d.bound) > prec) d.bound = rtor(d.bound, prec);
   for (;;)
   {
     GEN R = R_from_QR(F.G, prec);

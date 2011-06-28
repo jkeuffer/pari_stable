@@ -602,7 +602,7 @@ nf_Mignotte_bound(GEN nf, GEN polbase)
     for (j=1; j <= r1; j++) /* N2[j] = || sigma_j(S) ||_2 */
     {
       gel(N2,j) = sqrtr( RgC_fpnorml2(gel(matGS,j), DEFAULTPREC) );
-      if (lg(N2[j]) < DEFAULTPREC) goto PRECPB;
+      if (realprec(N2[j]) < DEFAULTPREC) goto PRECPB;
     }
     for (   ; j <= n; j+=2)
     {
@@ -610,7 +610,7 @@ nf_Mignotte_bound(GEN nf, GEN polbase)
       GEN q2 = RgC_fpnorml2(gel(matGS,j+1), DEFAULTPREC);
       p1 = gmul2n(addrr(q1, q2), -1);
       gel(N2,j) = gel(N2,j+1) = sqrtr(p1);
-      if (lg(N2[j]) < DEFAULTPREC) goto PRECPB;
+      if (realprec(N2[j]) < DEFAULTPREC) goto PRECPB;
     }
     if (j > n) break; /* done */
 PRECPB:
@@ -659,7 +659,7 @@ nf_Beauzamy_bound(GEN nf, GEN polbase)
     {
       GEN p1 = gnorml2(arch_for_T2_prec(G, gel(POL,i), prec));
       if (!signe(p1)) continue;
-      if (lg(p1) == 3) break;
+      if (realprec(p1) == 3) break;
       /* s += T2(POL[i]) / binomial(d,i) */
       s = addrr(s, gdiv(p1, gel(bin,i+1)));
     }

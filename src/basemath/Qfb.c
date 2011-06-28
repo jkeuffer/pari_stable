@@ -863,7 +863,7 @@ static GEN
 qfr5_init(GEN x, struct qfr_data *S)
 {
   GEN d = gel(x,4);
-  long prec = lg(d), l = nbits2prec(-expo(d));
+  long prec = realprec(d), l = nbits2prec(-expo(d));
   if (l > prec) prec = l;
   if (prec < 3) prec = 3;
   x = qfr_to_qfr5(x,prec);

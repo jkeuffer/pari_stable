@@ -61,7 +61,7 @@ mpatan(GEN x)
   int inv;
 
   if (!sx) return real_0_bit(expo(x));
-  l = lp = lg(x);
+  l = lp = realprec(x);
   if (absrnz_equal1(x)) { /* |x| = 1 */
     y = Pi2n(-2, l+1); if (sx < 0) setsigne(y,-1);
     return y;
@@ -168,9 +168,9 @@ static GEN
 mpasin(GEN x) {
   pari_sp av = avma;
   GEN z, a = sqrtr(subsr(1, sqrr(x)));
-  if (lg(x) > AGM_ATAN_LIMIT)
+  if (realprec(x) > AGM_ATAN_LIMIT)
   {
-    z = logagmcx(mkcomplex(a,x), lg(x));
+    z = logagmcx(mkcomplex(a,x), realprec(x));
     z = gel(z,2);
   }
   else
@@ -191,7 +191,7 @@ gasin(GEN x, long prec)
     case t_REAL: sx = signe(x);
       if (!sx) return real_0_bit(expo(x));
       if (absrnz_equal1(x)) { /* |x| = 1 */
-        if (sx > 0) return Pi2n(-1, lg(x)); /* 1 */
+        if (sx > 0) return Pi2n(-1, realprec(x)); /* 1 */
         y = Pi2n(-1, lg(x)); setsigne(y, -1); return y; /* -1 */
       }
       if (expo(x) < 0) return mpasin(x);
@@ -243,9 +243,9 @@ mpacos(GEN x)
 {
   pari_sp av = avma;
   GEN z, a = sqrtr(subsr(1, sqrr(x)));
-  if (lg(x) > AGM_ATAN_LIMIT)
+  if (realprec(x) > AGM_ATAN_LIMIT)
   {
-    z = logagmcx(mkcomplex(x,a), lg(x));
+    z = logagmcx(mkcomplex(x,a), realprec(x));
     z = gel(z,2);
   }
   else {
@@ -267,7 +267,7 @@ gacos(GEN x, long prec)
     case t_REAL: sx = signe(x);
       if (!sx) return acos0(expo(x));
       if (absrnz_equal1(x)) /* |x| = 1 */
-        return sx > 0? real_0_bit( -(bit_accuracy(lg(x))>>1) ) : mppi(lg(x));
+        return sx > 0? real_0_bit( -(bit_accuracy(realprec(x))>>1) ) : mppi(realprec(x));
       if (expo(x) < 0) return mpacos(x);
 
       y = cgetg(3,t_COMPLEX); p1 = mpach(x);
@@ -318,7 +318,7 @@ mparg(GEN x, GEN y)
     if (sx > 0) return real_0_bit(expo(y) - expo(x));
     return mppi(lg(x));
   }
-  prec = lg(y); if (prec < lg(x)) prec = lg(x);
+  prec = realprec(y); if (prec < realprec(x)) prec = realprec(x);
   if (!sx)
   {
     z = Pi2n(-1, prec); if (sy < 0) setsigne(z,-1);
@@ -364,7 +364,7 @@ garg(GEN x, long prec)
   if (gequal0(x)) pari_err(talker,"zero argument in garg");
   switch(tx)
   {
-    case t_REAL: prec = lg(x); /* fall through */
+    case t_REAL: prec = realprec(x); /* fall through */
     case t_INT: case t_FRAC:
       return (gsigne(x)>0)? real_0(prec): mppi(prec);
 
@@ -441,7 +441,7 @@ mpsh(GEN x)
   GEN z, res;
 
   if (!signe(x)) return real_0_bit(ex);
-  lx = lg(x); res = cgetr(lx); av = avma;
+  lx = realprec(x); res = cgetr(lx); av = avma;
   if (ex < 1 - BITS_IN_LONG) x = rtor(x, lx + nbits2nlong(-ex)-1);
   z = mpexp(x); z = subrr(z, invr(z)); setexpo(z, expo(z)-1);
   affrr(z, res); avma = av; return res;
@@ -488,7 +488,7 @@ mpth(GEN x)
   GEN y;
 
   if (!s) return real_0_bit(expo(x));
-  lx = lg(x);
+  lx = realprec(x);
   if (absr_cmp(x, stor(bit_accuracy(lx), 3)) >= 0) {
     y = real_1(lx);
   } else {
@@ -546,7 +546,7 @@ mpash(GEN x)
 {
   GEN z, res;
   pari_sp av;
-  long lx = lg(x), ex = expo(x);
+  long lx = realprec(x), ex = expo(x);
 
   res = cgetr(lx); av = avma;
   if (ex < 1 - BITS_IN_LONG) x = rtor(x, lx + nbits2nlong(-ex)-1);
@@ -629,7 +629,7 @@ gach(GEN x, long prec)
       else if (e < 0) b = mpacos(x); /* -1 < x < 1 */
       else {
         if (!absrnz_equal1(x)) a = mpach(x);
-        b = mppi(lg(x));
+        b = mppi(realprec(x));
       }
       gel(y,1) = a;
       gel(y,2) = b; return y;
@@ -714,7 +714,7 @@ gath(GEN x, long prec)
       z = logr_abs(z);
       setexpo(z, expo(z)-1); /* (1/2)log((1+x)/(x-1)) */
       gel(y,1) = gerepileuptoleaf(av, z);
-      gel(y,2) = Pi2n(-1, lg(x));
+      gel(y,2) = Pi2n(-1, realprec(x));
       if (sx > 0) togglesign(gel(y,2));
       return y;
 

@@ -74,7 +74,7 @@ static GEN
 ell_realrootprec(GEN e, long prec)
 {
   GEN R;
-  if (lg(e)>14 && lg(ell_realroot(e))>=prec)
+  if (lg(e)>14 && realprec(ell_realroot(e))>=prec)
     return ell_realroot(e);
   R = cleanroots(RHSpol(e), prec);
   /* sort roots in decreasing order */
@@ -224,7 +224,7 @@ new_coords(GEN e, GEN x, GEN e1, GEN *pta, GEN *ptb, int flag, long prec)
 static GEN
 do_agm(GEN *ptx, GEN a1, GEN b1)
 {
-  const long s = signe(b1), l = minss(lg(a1), lg(b1)), G = 6 - bit_accuracy(l);
+  const long s = signe(b1), l = minss(realprec(a1), realprec(b1)), G = 6 - bit_accuracy(l);
   GEN p1, a, b, x;
 
   x = gmul2n(subrr(a1,b1),-2);
@@ -3499,9 +3499,9 @@ static GEN
 exphellagm(GEN e, GEN z, GEN e1, int flag, long prec)
 {
   GEN x_a, a, b, r, V = cgetg(1, t_VEC), x = gel(z,1);
-  long n, ex = 5-bit_accuracy(prec), prec_e = lg(e1);
+  long n, ex = 5-bit_accuracy(prec), prec_e = realprec(e1);
 
-  if (lg(x) < prec_e) x = gprec_w(x, prec_e);
+  if (realprec(x) < prec_e) x = gprec_w(x, prec_e); /* FIXME: x is not always a t_REAL */
   x = new_coords(e, x, e1, &a,&b, 0, prec);
   x_a = gsub(x, a);
   if (gsigne(a) > 0)

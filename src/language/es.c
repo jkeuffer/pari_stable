@@ -577,7 +577,7 @@ absrtostr_width_frac(GEN x, int width_frac)
   if (!sx) return real0tostr_width_frac(width_frac);
 
   /* x != 0 */
-  lx = lg(x);
+  lx = realprec(x);
   beta = width_frac;
   if (beta) /* >= 0 */
   { /* z = |x| 10^beta, 10^b = 5^b * 2^b, 2^b goes into exponent */
@@ -625,7 +625,7 @@ absrtostr(GEN x, int sp, char FORMAT, long wanted_dec)
   if (!sx) return real0tostr(ex, format, exp_char, wanted_dec);
 
   /* x != 0 */
-  lx = lg(x);
+  lx = realprec(x);
   if (wanted_dec >= 0)
   { /* reduce precision if possible */
     long w = ndec2prec(wanted_dec); /* digits -> pari precision in words */

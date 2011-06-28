@@ -199,7 +199,7 @@ genrand(GEN N)
       if (signe(N)<=0) pari_err(talker,"invalid bound in random");
       return randomi(N);
     case t_REAL:
-      return randomr(lg(N));
+      return randomr(realprec(N));
     case t_INTMOD:
       z = cgetg(3, t_INTMOD);
       gel(z,1) = icopy(gel(N,1));

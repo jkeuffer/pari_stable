@@ -445,7 +445,7 @@ init_el(struct ellld *el, GEN E, long *parity, long prec)
   el->E = ell_to_small_red(E, &el->N);
   el->X = divrr(Pi2n(1, prec), sqrtr(itor(el->N, prec))); /* << 1 */
   eX = mpexp(el->X);
-  if (lg(eX) > prec) eX = rtor(eX, prec); /* avoid spurious accuracy increase */
+  if (realprec(eX) > prec) eX = rtor(eX, prec); /* avoid spurious accuracy increase */
   el->eX = eX;
   el->emX = invr(el->eX);
   el->epsbit = bit_accuracy(prec)+1;
