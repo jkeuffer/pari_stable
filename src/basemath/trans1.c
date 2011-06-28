@@ -299,10 +299,7 @@ mpexp0(GEN x)
 }
 static GEN
 powr0(GEN x)
-{
-  long lx = realprec(x); /* FIXME: realprec==2 */
-  return (lx == 2 || !signe(x)) ? mpexp0(x): real_1(lx);
-}
+{ return signe(x)? real_1(realprec(x)): mpexp0(x); }
 /* to be called by the generic function gpowgs(x,s) when s = 0 */
 static GEN
 gpowg0(GEN x)

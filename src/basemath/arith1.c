@@ -2741,7 +2741,6 @@ bestappr(GEN x, GEN k)
       return gerepileupto(av, gdiv(p1,q1));
 
     case t_REAL: {
-      long lx;
       GEN kr;
 
       if (!signe(x)) return gen_0;
@@ -2750,9 +2749,8 @@ bestappr(GEN x, GEN k)
       p1 = gen_1; a = p0 = floorr(x);
       q1 = gen_0; q0 = gen_1;
       x = subri(x,a); /* 0 <= x < 1 */
-      lx = realprec(x);
-      if (lx == 2) { cgiv(x); return a; } /* FIXME: realprec==2 */
-      kr = itor(k, lx);
+      if (!signe(x)) { cgiv(x); return a; }
+      kr = itor(k, realprec(x));
       for(;;)
       {
         x = invr(x); /* > 1 */
