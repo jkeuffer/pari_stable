@@ -3501,7 +3501,7 @@ exphellagm(GEN e, GEN z, GEN e1, int flag, long prec)
   GEN x_a, a, b, r, V = cgetg(1, t_VEC), x = gel(z,1);
   long n, ex = 5-bit_accuracy(prec), prec_e = realprec(e1);
 
-  if (realprec(x) < prec_e) x = gprec_w(x, prec_e); /* FIXME: x is not always a t_REAL */
+  if (typ(x) == t_REAL && realprec(x) < prec_e) x = gprec_w(x, prec_e);
   x = new_coords(e, x, e1, &a,&b, 0, prec);
   x_a = gsub(x, a);
   if (gsigne(a) > 0)
