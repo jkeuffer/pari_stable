@@ -2666,7 +2666,7 @@ bestappr_max(GEN x)
   long e;
   p1 = gen_1; a = p0 = floorr(x); q1 = gen_0; q0 = gen_1;
   x = subri(x,a); /* 0 <= x < 1 */
-  e = bit_accuracy(lg(x)) - expo(x);
+  e = bit_prec(x) - expo(x);
   for(;;)
   {
     long d;

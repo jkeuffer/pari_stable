@@ -1011,7 +1011,7 @@ myroundr(GEN *px)
 {
   GEN x = *px;
   long e;
-  if (bit_accuracy(lg(x)) - expo(x) < 5) return LOW_PREC;
+  if (bit_prec(x) - expo(x) < 5) return LOW_PREC;
   *px = grndtoi(x, &e);
   if (e >= -5) return NO;
   return OK;

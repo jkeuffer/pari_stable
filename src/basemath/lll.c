@@ -754,7 +754,7 @@ rescale_to_int(GEN x)
         case t_REAL:
           exact = 0;
           if (!signe(c)) continue;
-          e = expo(c) - bit_accuracy(lg(c));
+          e = expo(c) - bit_prec(c);
           break;
         case t_INT:
           if (!signe(c)) continue;

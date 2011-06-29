@@ -2169,7 +2169,7 @@ mpsc1(GEN x, long *ptmod8)
       GEN z, pitemp = mppi(nbits2prec(a + 32));
       setexpo(pitemp,-1);
       z = addrr(x,pitemp); /* = x + Pi/4 */
-      if (expo(z) >= bit_accuracy(lg(z)) + 3) pari_err(precer,"mpsc1");
+      if (expo(z) >= bit_prec(z) + 3) pari_err(precer,"mpsc1");
       setexpo(pitemp, 0);
       q = floorr( divrr(z,pitemp) ); /* round ( x / (Pi/2) ) */
     } else {

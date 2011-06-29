@@ -768,7 +768,7 @@ stoFpX(ulong m, ulong p, long v)
 static GEN
 itoFpX(GEN m, GEN p, long v)
 {
-  GEN y = new_chunk(bit_accuracy(lgefint(m))+2);
+  GEN y = new_chunk(bit_prec(m)+2);
   long l = 2;
   do { m = dvmdii(m, p, &gel(y,l)); l++; } while (signe(m));
   y[1] = evalsigne(1) | evalvarn(v);

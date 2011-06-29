@@ -2001,13 +2001,13 @@ static GEN
 add_fudge(GEN x) {
   if (typ(x) == t_INT) return addir(x, real2n(-32,3));
   if (!signe(x)) return x;
-  return addrr(x, real2n(expo(x) - (bit_accuracy(lg(x)) >> 1), 3));
+  return addrr(x, real2n(expo(x) - (bit_prec(x) >> 1), 3));
 }
 static GEN
 sub_fudge(GEN x) {
   if (typ(x) == t_INT) return subir(x, real2n(-32,3));
   if (!signe(x)) return x;
-  return subrr(x, real2n(expo(x) - (bit_accuracy(lg(x)) >> 1), 3));
+  return subrr(x, real2n(expo(x) - (bit_prec(x) >> 1), 3));
 }
 /* q is the Gauss reduction of the quadratic form */
 /* general program for positive definit quadratic forms (real coeffs).

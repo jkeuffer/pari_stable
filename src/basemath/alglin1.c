@@ -582,7 +582,7 @@ approx_0(GEN x, GEN y)
   if (tx == t_COMPLEX)
     return approx_0(gel(x,1), y) && approx_0(gel(x,2), y);
   return gequal0(x) ||
-         (tx == t_REAL && gexpo(y) - gexpo(x) > bit_accuracy(lg(x)));
+         (tx == t_REAL && gexpo(y) - gexpo(x) > bit_prec(x));
 }
 /* x a column, x0 same column in the original input matrix (for reference),
  * c list of pivots so far */

@@ -833,7 +833,7 @@ find_trace(GEN a4, GEN a6, ulong ell, GEN p, long *ptr_kt, ulong smallfact)
 
   if (ell <= 13)
   {
-    long lp = bit_accuracy(lg(p))-bfffo(*int_MSW(p));
+    long lp = bit_prec(p)-bfffo(*int_MSW(p));
     switch(ell)
     {
       case 3: k = 3 + (lp > 160) + (lp > 350); break;
@@ -1336,7 +1336,7 @@ ellsea(GEN E, GEN p, long smallfact)
    *   informations about Elkies primes lie in tr. */
   bound = sqrti(shifti(p, 4));
   M = 1000000;
-  lp = bit_accuracy(lg(p)) - bfffo(*int_MSW(p));
+  lp = bit_prec(p) - bfffo(*int_MSW(p));
   if (lp <= 160)
     bound_bsgs = mulru(divru(powru(dbltor(1.048), lp), 9), M);
   else if (lp <= 192)

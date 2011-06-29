@@ -54,9 +54,9 @@ binaire(GEN x)
       if (!signe(x)) return const_vec(maxss(-ex,0), gen_0);
 
       lx=lg(x); y=cgetg(3,t_VEC);
-      if (ex > bit_accuracy(lx)) pari_err(precer,"binary");
+      if (ex > bit_prec(x)) pari_err(precer,"binary");
       p1 = cgetg(maxss(ex,0)+2,t_VEC);
-      p2 = cgetg(bit_accuracy(lx)-ex,t_VEC);
+      p2 = cgetg(bit_prec(x)-ex,t_VEC);
       gel(y,1) = p1;
       gel(y,2) = p2;
       ly = -ex; ex++; m = HIGHBIT;

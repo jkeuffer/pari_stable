@@ -793,7 +793,7 @@ get_ro(long N, GEN rr, PERM S1, PERM S2, resolv *R)
 static long
 sufprec_r(GEN z)
 {
-  long p = bit_accuracy( lg(z) );
+  long p = bit_prec(z);
   /* bit accuracy of fractional part large enough ? */
   return ( p - expo(z) > maxss(3*32, (long)0.2*p) );
 }

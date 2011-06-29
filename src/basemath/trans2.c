@@ -267,7 +267,7 @@ gacos(GEN x, long prec)
     case t_REAL: sx = signe(x);
       if (!sx) return acos0(expo(x));
       if (absrnz_equal1(x)) /* |x| = 1 */
-        return sx > 0? real_0_bit( -(bit_accuracy(realprec(x))>>1) ) : mppi(realprec(x));
+        return sx > 0? real_0_bit( -(bit_prec(x)>>1) ) : mppi(realprec(x));
       if (expo(x) < 0) return mpacos(x);
 
       y = cgetg(3,t_COMPLEX); p1 = mpach(x);
@@ -606,7 +606,7 @@ mpach(GEN x)
 {
   pari_sp av = avma;
   GEN z;
-  if (absrnz_equal1(x)) return real_0_bit(- (bit_accuracy(lg(x)) >> 1));
+  if (absrnz_equal1(x)) return real_0_bit(- bit_prec(x) >> 1);
   z = logr_abs( addrr_sign(x, 1, sqrtr( subrs(sqrr(x), 1) ), 1) );
   return gerepileuptoleaf(av, z);
 }
