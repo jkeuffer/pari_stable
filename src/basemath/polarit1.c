@@ -1108,7 +1108,7 @@ FpX_split_Berlekamp(GEN *t, GEN p)
     GEN polt;
     if (ps==2)
     {
-      long lb = nbits2prec(l-2);
+      long lb = nbits2lg(l-2);
       GEN pol = const_vecsmall(lb-1,0);
       pol[1] = sv;
       pol[2] = random_Fl(2); /*Assume vker[1]=1*/

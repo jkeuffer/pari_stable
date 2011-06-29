@@ -169,7 +169,7 @@ gbitneg(GEN x, long bits)
     return gerepileuptoint(ltop, ibittrunc(inegate(x), bits));
   }
   xl = lgefint(x);
-  len_out = nbits2prec(bits);
+  len_out = nbits2lg(bits);
   lowbits = bits & (BITS_IN_LONG-1);
   if (len_out > xl) /* Need to grow */
   {

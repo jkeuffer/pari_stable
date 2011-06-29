@@ -92,7 +92,7 @@ Z_to_F2x(GEN x, long sv)
 GEN
 ZX_to_F2x(GEN x)
 {
-  long l=nbits2prec(lgpol(x));
+  long l=nbits2lg(lgpol(x));
   GEN z=cgetg(l,t_VECSMALL);
   long i,j,k;
   z[1]=((ulong)x[1])&VARNBITS;
@@ -111,7 +111,7 @@ ZX_to_F2x(GEN x)
 GEN
 Flx_to_F2x(GEN x)
 {
-  long l=nbits2prec(lgpol(x));
+  long l=nbits2lg(lgpol(x));
   GEN z=cgetg(l,t_VECSMALL);
   long i,j,k;
   z[1]=x[1];
@@ -131,7 +131,7 @@ GEN
 F2x_to_F2v(GEN x, long N)
 {
   long i, l = lg(x);
-  long n = nbits2prec(N);
+  long n = nbits2lg(N);
   GEN z = cgetg(n,t_VECSMALL);
   z[1] = N;
   for (i=2; i<l ; i++) z[i]=x[i];
@@ -622,7 +622,7 @@ F2xq_conjvec(GEN x, GEN T)
 GEN
 random_F2x(long d, long vs)
 {
-  long i, l = nbits2prec(d+1);
+  long i, l = nbits2lg(d+1);
   GEN y = cgetg(l,t_VECSMALL); y[1] = vs;
   for (i=2; i<l; i++) y[i] = pari_rand();
   y[l-1] &= (1UL<<remsBIL(d))-1UL;
@@ -799,7 +799,7 @@ GEN
 ZV_to_F2v(GEN x)
 {
   long l = lg(x)-1;
-  GEN z = cgetg(nbits2prec(l), t_VECSMALL);
+  GEN z = cgetg(nbits2lg(l), t_VECSMALL);
   long i,j,k;
   z[1] = l;
   for(i=1, k=1,j=BITS_IN_LONG;i<=l;i++,j++)
@@ -818,7 +818,7 @@ GEN
 Flv_to_F2v(GEN x)
 {
   long l = lg(x)-1;
-  GEN z = cgetg(nbits2prec(l), t_VECSMALL);
+  GEN z = cgetg(nbits2lg(l), t_VECSMALL);
   long i,j,k;
   z[1] = l;
   for(i=1, k=1,j=BITS_IN_LONG;i<=l;i++,j++)

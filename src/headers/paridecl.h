@@ -3135,6 +3135,7 @@ INLINE GEN    mul_content(GEN cx, GEN cy);
 INLINE GEN    mul_denom(GEN cx, GEN cy);
 INLINE long   nbits2nlong(long x);
 INLINE long   nbits2prec(long x);
+INLINE long   nbits2lg(long x);
 INLINE long   nchar2nlong(long x);
 INLINE long   ndec2nlong(long x);
 INLINE long   ndec2prec(long x);
