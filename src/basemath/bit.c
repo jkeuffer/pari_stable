@@ -34,13 +34,14 @@ binaire(GEN x)
   switch(tx)
   {
     case t_INT:
+    if (!signe(x))
+      return mkvec(gen_0);
+    else
     {
       GEN xp=int_MSW(x);
       lx=lgefint(x);
-      if (lx==2) return mkvec(gen_0);
-      ly = BITS_IN_LONG+1; m=HIGHBIT; u=*xp;
-      while (!(m & u)) { m>>=1; ly--; }
-      y = cgetg(ly + bit_accuracy(lx-1), t_VEC); ly=1;
+      y = cgetg(2 + expi(x), t_VEC); ly=1;
+      m=HIGHBIT>>bfffo(*xp); u=*xp;
       do { gel(y,ly) = m & u ? gen_1 : gen_0; ly++; } while (m>>=1);
       for (i=3; i<lx; i++)
       {
