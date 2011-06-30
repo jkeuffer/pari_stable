@@ -683,9 +683,7 @@ calcglobs(Red *R, ulong t, long *pltab, GEN *pP)
   long ltab, b;
   Cache **pC;
 
-  b = bit_accuracy(lgefint(R->N)) - 1;
-  while ( !bittest(R->N,b) ) b--;
-  b++;
+  b = expi(R->N)+1;
 
   k = 3; while (((k+1)*(k+2) << (k-1)) < b) k++;
   *pltab = ltab = (b/k) + 2;
