@@ -388,7 +388,7 @@ logint(GEN B, GEN y, GEN *ptq)
   }
   /* binary splitting: compute bits of e one by one */
   /* compute pow2[i] = y^(2^i) [i < very crude upper bound for log_2(n)] */
-  pow2 = new_chunk(bit_accuracy(lgefint(B)));
+  pow2 = new_chunk(expi(B)+1);
   gel(pow2,0) = y;
   for (i=0,q=r;; )
   {

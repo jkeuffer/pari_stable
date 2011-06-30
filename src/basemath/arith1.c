@@ -1478,7 +1478,7 @@ Fp_sqrt(GEN a, GEN p)
   /* On average, the algorithm of Cipolla is better than the algorithm of
    * Tonelli and Shanks if and only if e(e-1)>8*log2(n)+20
    * see LNCS 2286 pp 430 [GTL] */
-  if (e*(e-1) > 20 + 8 * bit_accuracy(lgefint(p)))
+  if (e*(e-1) > 20 + 8 * expi(p))
   {
     v = sqrt_Cipolla(a,p);
     if (!v) { avma = av; return NULL; }

@@ -4091,7 +4091,7 @@ torsbound(GEN e)
   pari_sp av = avma;
   byteptr diff = diffptr+1;
   GEN D = ell_get_disc(e);
-  long n = bit_accuracy(lgefint(D)) >> 3;
+  long n = expi(D) >> 3;
   /* n = number of primes to try ~ 1 prime every 8 bits in D */
   b = bold = 5040; /* = 2^4 * 3^2 * 5 * 7 */
   m = 0;
