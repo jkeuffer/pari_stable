@@ -981,10 +981,154 @@ pari_sigint(const char *time_s)
   err_recover(talker);
 }
 
+/* if numerr=errpile, return NULL */
+static GEN
+pari_err2GEN(int numerr, va_list ap)
+{
+  switch (numerr)
+  {
+  case syntaxer:
+    {
+      const char *msg = va_arg(ap, char*);
+      const char *s = va_arg(ap,char *);
+      const char *entry = va_arg(ap,char *);
+      return mkvec3(stoi(numerr),strtoGENstr(msg), mkvecsmall2((long)s,(long)entry));
+    }
+  case talker: case alarmer:
+    {
+      const char *ch1 = va_arg(ap, char*);
+      char *s = pari_vsprintf(ch1,ap);
+      GEN res = mkvec3(stoi(numerr),strtoGENstr(ch1),strtoGENstr(s));
+      free(s);
+      return res;
+    }
+  case user:
+  case invmoder:
+  case notfuncer:
+    return mkvec2(stoi(numerr),va_arg(ap, GEN));
+  case openfiler:
+  case overflower:
+  case impl:
+  case typeer: case mattype1: case negexper:
+  case constpoler: case notpoler: case redpoler:
+  case zeropoler: case consister: case flagerr: case precer:
+  case bugparier:
+    return mkvec2(stoi(numerr),strtoGENstr(va_arg(ap, char*)));
+  case operi: case operf:
+    {
+      const char *op = va_arg(ap, const char*);
+      GEN x = va_arg(ap, GEN);
+      GEN y = va_arg(ap, GEN);
+      return mkvec4(stoi(numerr),strtoGENstr(op),x,y);
+    }
+  case primer1:
+    return mkvec2(stoi(numerr),utoi(va_arg(ap, ulong)));
+  case errpile:
+    return NULL;
+  default:
+    return mkvecs(numerr);
+  }
+}
+
+static void
+pari_err_display(GEN err)
+{
+  long numerr=err?itos(gel(err,1)):errpile;
+  if (numerr==syntaxer)
+  {
+    const char *msg = GSTR(gel(err,2));
+    const char *s     = (const char *) gmael(err,3,1);
+    const char *entry = (const char *) gmael(err,3,2);
+    print_errcontext(pariErr, msg, s, entry);
+    return;
+  }
+  err_init_msg(numerr); out_puts(pariErr, errmessage[numerr]);
+  switch (numerr)
+  {
+  case talker: case alarmer:
+    out_printf(pariErr,"%Ps.",gel(err,3));
+    break;
+  case user:
+    out_puts(pariErr, "user error: ");
+    out_print0(pariErr, gel(err,2), f_RAW);
+    break;
+  case invmoder:
+    out_printf(pariErr,"impossible inverse modulo: %Ps.", gel(err,2));
+    break;
+  case openfiler:
+    out_printf(pariErr,"error opening %Ps file: `%Ps'.", gel(err,2), gel(err,3));
+    break;
+  case overflower:
+    out_printf(pariErr,"overflow in %Ps.", gel(err,2));
+    break;
+  case notfuncer:
+    {
+      GEN fun = gel(err,2);
+      if (gcmpX(fun))
+      {
+        entree *ep = varentries[varn(fun)];
+        const char *s = ep->name;
+        if (cb_pari_whatnow) cb_pari_whatnow(pariErr,s,1);
+      }
+      break;
+    }
+  case impl:
+    out_printf(pariErr,"sorry, %Ps is not yet implemented.", gel(err,2));
+    break;
+  case typeer: case mattype1: case negexper:
+  case constpoler: case notpoler: case redpoler:
+  case zeropoler: case consister: case flagerr: case precer:
+    out_printf(pariErr," in %Ps.", gel(err,2)); break;
+  case bugparier:
+    out_printf(pariErr,"bug in %Ps, please report",gel(err,2)); break;
+  case operi: case operf:
+    {
+      const char *f, *op = GSTR(gel(err,2));
+      GEN x = gel(err,3);
+      GEN y = gel(err,4);
+      out_puts(pariErr, numerr == operi? "impossible": "forbidden");
+      switch(*op)
+      {
+      case '+': f = "addition"; break;
+      case '-':
+                out_printf(pariErr, " negation - %s.",type_name(typ(x)));
+                f = NULL; break;
+      case '*': f = "multiplication"; break;
+      case '/': case '%': case '\\': f = "division"; break;
+      case 'g': op = ","; f = "gcd"; break;
+      default: op = "-->"; f = "assignment"; break;
+      }
+      if (f)
+        out_printf(pariErr, " %s %s %s %s."
+            , f,type_name(typ(x)),op,type_name(typ(y)));
+        break;
+    }
+  case primer1:
+    {
+      ulong c = itou(gel(err,2));
+      if (c) out_printf(pariErr, ", need primelimit ~ %lu.", c);
+      break;
+    }
+  case errpile:
+    {
+      size_t d = top - bot;
+      char buf[256];
+      term_color(c_NONE);
+      /* don't use pari_printf: it needs the PARI stack for %.3f conversion */
+      sprintf(buf, "\n  current stack size: %lu (%.3f Mbytes)\n",
+          (ulong)d, (double)d/1048576.);
+      pariErr->puts(buf);
+      pariErr->puts("  [hint] you can increase GP stack with allocatemem()\n");
+      break;
+    }
+  }
+}
+
 void
 pari_err(int numerr, ...)
 {
   va_list ap;
+
   va_start(ap,numerr);
 
   global_err_data = NULL;
@@ -1006,118 +1150,10 @@ pari_err(int numerr, ...)
     }
   }
   err_init();
-  if (numerr == syntaxer)
-  {
-    const char *msg = va_arg(ap, char*);
-    const char *s = va_arg(ap,char *);
-    print_errcontext(pariErr, msg,s,va_arg(ap,char *));
-  }
-  else
-  {
-    closure_err();
-    err_init_msg(numerr);
-    out_puts(pariErr, errmessage[numerr]);
-    switch (numerr)
-    {
-      case talker: {
-        const char *ch1 = va_arg(ap, char*);
-        out_vprintf(pariErr, ch1,ap);
-        out_putc(pariErr, '.');
-        break;
-      }
-      case alarmer: {
-        const char *ch1 = va_arg(ap, char*);
-        out_puts(pariErr, "alarm interrupt after ");
-        out_vprintf(pariErr, ch1,ap);
-        out_putc(pariErr, '.');
-        break;
-      }
-
-      case user:
-        out_puts(pariErr, "user error: ");
-        out_print0(pariErr, va_arg(ap, GEN), f_RAW);
-        break;
-      case invmoder:
-        out_printf(pariErr, "impossible inverse modulo: %Ps."
-                              , va_arg(ap, GEN));
-        break;
-      case openfiler: {
-        const char *type = va_arg(ap, char*);
-        out_printf(pariErr, "error opening %s file: `%s'."
-                              , type, va_arg(ap,char*));
-        break;
-      }
-      case overflower:
-        out_printf(pariErr, "overflow in %s.", va_arg(ap, char*));
-        break;
-      case notfuncer:
-      {
-        GEN fun = va_arg(ap, GEN);
-        if (gcmpX(fun))
-        {
-          entree *ep = varentries[varn(fun)];
-          const char *s = ep->name;
-          if (cb_pari_whatnow) cb_pari_whatnow(pariErr, s,1);
-        }
-        break;
-      }
-
-      case impl:
-        out_printf(pariErr, "sorry, %s is not yet implemented."
-                              , va_arg(ap, char*));
-        break;
-      case typeer: case mattype1: case negexper:
-      case constpoler: case notpoler: case redpoler:
-      case zeropoler: case consister: case flagerr: case precer:
-        out_printf(pariErr, " in %s.",va_arg(ap, char*)); break;
-
-      case bugparier:
-        out_printf(pariErr, "bug in %s, please report"
-                              , va_arg(ap, char*));
-        break;
-
-      case operi: case operf:
-      {
-        const char *f, *op = va_arg(ap, const char*);
-        GEN x = va_arg(ap, GEN);
-        GEN y = va_arg(ap, GEN);
-        out_puts(pariErr, numerr == operi? "impossible": "forbidden");
-        switch(*op)
-        {
-          case '+': f = "addition"; break;
-          case '-':
-            out_printf(pariErr, " negation - %s.",type_name(typ(x)));
-            f = NULL; break;
-          case '*': f = "multiplication"; break;
-          case '/': case '%': case '\\': f = "division"; break;
-          case 'g': op = ","; f = "gcd"; break;
-          default: op = "-->"; f = "assignment"; break;
-        }
-        if (f)
-          out_printf(pariErr, " %s %s %s %s."
-                                , f,type_name(typ(x)),op,type_name(typ(y)));
-        break;
-      }
-
-      case primer1: {
-        ulong c = va_arg(ap, ulong);
-        if (c) out_printf(pariErr, ", need primelimit ~ %lu.", c);
-        break;
-      }
-    }
-  }
+  if (numerr != syntaxer) closure_err();
+  pari_err_display(pari_err2GEN(numerr,ap));
   out_term_color(pariErr, c_NONE);
   va_end(ap);
-  if (numerr==errpile)
-  {
-    size_t d = top - bot;
-    char buf[256];
-    /* don't use pari_printf: it needs the PARI stack for %.3f conversion */
-    sprintf(buf, "\n  current stack size: %lu (%.3f Mbytes)\n",
-                 (ulong)d, (double)d/1048576.);
-    pariErr->puts(buf);
-    pariErr->puts("  [hint] you can increase GP stack with allocatemem()\n");
-  }
   pariErr->flush();
   if (cb_pari_handle_exception &&
       cb_pari_handle_exception(numerr)) return;
