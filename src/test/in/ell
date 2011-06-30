@@ -25,6 +25,9 @@ ellanalyticrank(ellinit([0, 1, 1, -2, 0]))
 ellanalyticrank(ellinit([0, 0, 1, -7, 6]))
 ellanalyticrank(ellinit([0, 0, 0, -5187, 176830]))
 
+ellheegner(ellinit([0, -1, 1, -33, 93]))
+ellheegner(ellinit([0,0,0,-157^2,0]))
+
 elldivpol(ellinit([1,2,3,5,7]),4)
 
 \\#1185

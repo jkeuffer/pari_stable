@@ -1,0 +1,11 @@
+Function: ellheegner
+Section: elliptic_curves
+C-Name: ellheegner
+Prototype: G
+Help: ellheegner(E): return a rational non-torsion point on the elliptic curve E
+ assumed to be of rank 1.
+Doc: Let $E$ be an elliptic curve over the rationals, assumed to be of (analytic) rank $1$.
+ Returns a non-torsion point of the curve that is a small multiple of a generator.
+ This uses the Heegner point method, described in Cohen GTM 239.
+ The complexity is proportional to the product of the square root of the
+ conductor and the heigth of the point.

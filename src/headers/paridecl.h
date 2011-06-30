@@ -1369,6 +1369,7 @@ GEN     elleta(GEN om, long prec);
 GEN     ellglobalred(GEN e1);
 GEN     ellgroup(GEN E, GEN p);
 GEN     ellheight0(GEN e, GEN a, long flag,long prec);
+GEN     ellheegner(GEN e);
 GEN     ellinit(GEN x, long prec);
 GEN     ellinit0(GEN x,long flag,long prec);
 GEN     ellinit_padic(GEN x, GEN p, long prec);
