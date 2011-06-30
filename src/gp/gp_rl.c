@@ -29,60 +29,10 @@ typedef int (*RLCI)(int, int); /* rl_complete and rl_insert functions */
 typedef char* (*GF)(const char*, int); /* generator function */
 
 BEGINEXTERN
-/***** Try to survive broken readline headers and obsolete versions *****/
-#ifdef HAS_RL_MESSAGE
-#  define USE_VARARGS
-#  define PREFER_STDARG
-#endif
-
 #include <readline/readline.h>
-#ifdef HAS_HISTORY_H
-#  include <readline/history.h>
-#endif
-
-#ifndef HAS_HISTORY_H
-typedef struct HIST_ENTRY__ {char *line; void *data;} HIST_ENTRY;
-extern HIST_ENTRY *history_get(int);
-extern int history_length;
-#endif
-
-#ifdef HAS_RL_SAVE_PROMPT
-#  define SAVE_PROMPT() rl_save_prompt()
-#  define RESTORE_PROMPT() rl_restore_prompt()
-#else
-#  ifdef HAS_UNDERSCORE_RL_SAVE_PROMPT
-extern void* _rl_restore_prompt(void), _rl_save_prompt(void);
-#    define SAVE_PROMPT() _rl_save_prompt()
-#    define RESTORE_PROMPT() _rl_restore_prompt()
-#  else
-#    define SAVE_PROMPT()
-#    define RESTORE_PROMPT()
-#  endif
-#endif
-
-#ifndef HAS_RL_MESSAGE
-extern int rl_message (const char*, ...);
-extern int rl_clear_message(), rl_begin_undo_group(), rl_end_undo_group();
-extern int rl_read_key(), rl_stuff_char();
-extern char *filename_completion_function(char *text,int state);
-extern char *username_completion_function(char *text,int state);
-#endif
-
-extern RLCI rl_last_func;
+#include <readline/history.h>
 ENDEXTERN
 
-#ifdef HAS_RL_COMPLETION_MATCHES
-#  define COMPLETION_MATCHES(a,b) rl_completion_matches((a),(b))
-#  define FILE_COMPLETION rl_filename_completion_function
-#  define USER_COMPLETION rl_username_completion_function
-#  define DING rl_ding
-#else
-#  define COMPLETION_MATCHES(a,b) \
-      (completion_matches((char*)(a),(CPFunction*)(b)))
-#  define FILE_COMPLETION ((GF)filename_completion_function)
-#  define USER_COMPLETION ((GF)username_completion_function)
-#  define DING ding
-#endif
 /**************************************************************************/
 
 enum { DO_MATCHED_INSERT = 2, DO_ARGS_COMPLETE = 4 };
@@ -112,10 +62,10 @@ change_state(const char *msg, ulong flag, int count)
     if (!readline_state && o_readline_state)
         readline_state = 1;
   }
-  SAVE_PROMPT();
+  rl_save_prompt();
   rl_message("[%s: %s] ", msg, c? "on": "off");
   c = rl_read_key();
-  RESTORE_PROMPT();
+  rl_restore_prompt();
   rl_clear_message();
   rl_stuff_char(c); return 1;
 }
@@ -257,7 +207,7 @@ pari_rl_forward_sexp(int count, int key)
     }
     else
     {
-      fail: DING(); return 1;
+      fail: rl_ding(); return 1;
     }
   }
   if (dir != 1 && move_point) rl_point++;
@@ -313,11 +263,7 @@ treat_single(int code, char **matches)
     match_concat(matches,"()");
     pari_rl_back = 1;
     if (rl_point == rl_end)
-#ifdef HAS_COMPLETION_APPEND_CHAR
-      rl_completion_append_character = '\0'; /* Do not append space. */
-#else
-      pari_rl_back = 2;
-#endif
+    rl_completion_append_character = '\0'; /* Do not append space. */
   }
   else if (add_comma(code))
     match_concat(matches,",");
@@ -353,7 +299,7 @@ matches_for_emacs(const char *text, char **matches)
 static char **
 get_matches(int code, const char *text, GF f)
 {
-  char **matches = COMPLETION_MATCHES(text, f);
+  char **matches = rl_completion_matches(text, f);
   if (matches && !matches[1]) treat_single(code, matches);
   if (GP_DATA->flags & gpd_EMACS) matches = matches_for_emacs(text,matches);
   return matches;
@@ -525,17 +471,13 @@ rl_print_aide(char *s, int flag)
   FILE *save = pari_outfile;
 
   rl_point = 0; rl_end = 0; pari_outfile = rl_outstream;
-  SAVE_PROMPT();
+  rl_save_prompt();
   rl_message("%s",""); /* rl_message("") ==> "zero length format" warning */
   aide(s, flag);
-  RESTORE_PROMPT();
+  rl_restore_prompt();
   rl_point = p; rl_end = e; pari_outfile = save;
   rl_clear_message();
-#ifdef RL_REFRESH_LINE_OLDPROTO
-  rl_refresh_line();
-#else
   rl_refresh_line(0,0);
-#endif
 }
 
 /* add a space between \<char> and following text. Attempting completion now
@@ -547,19 +489,11 @@ add_space(int start)
   int p = rl_point + 1;
   rl_point = start + 2;
   rl_insert(1, ' '); rl_point = p;
-#if 0 /* OK, but rings a bell */
-#  ifdef HAS_RL_ATTEMPTED_COMPLETION_OVER
-  rl_attempted_completion_over = 1;
-#  endif
-  return NULL;
-#else /* better: fake an empty completion, but don't append ' ' after it! */
-#  ifdef HAS_COMPLETION_APPEND_CHAR
+  /*better: fake an empty completion, but don't append ' ' after it! */
   rl_completion_append_character = '\0';
-#  endif
   m = (char**)pari_malloc(2 * sizeof(char*));
   m[0] = (char*)pari_malloc(1); *(m[0]) = 0;
   m[1] = NULL; return m;
-#endif
 }
 
 char **
@@ -567,9 +501,7 @@ pari_completion(char *text, int START, int END)
 {
   int i, first=0, start=START;
 
-#ifdef HAS_COMPLETION_APPEND_CHAR
   rl_completion_append_character = ' ';
-#endif
   current_ep = NULL;
 /* If the line does not begin by a backslash, then it is:
  * . an old command ( if preceded by "whatnow(" ).
@@ -581,9 +513,9 @@ pari_completion(char *text, int START, int END)
   while (start && is_keyword_char(rl_line_buffer[start])) start--;
   if (rl_line_buffer[start] == '~')
   {
-    GF f = (GF)USER_COMPLETION;
+    GF f = (GF)rl_username_completion_function;
     for(i=start+1;i<=END;i++)
-      if (rl_line_buffer[i] == '/') { f = (GF)FILE_COMPLETION; break; }
+      if (rl_line_buffer[i] == '/') { f = (GF)rl_filename_completion_function; break; }
     return get_matches(-1, text, f);
   }
 
@@ -592,7 +524,7 @@ pari_completion(char *text, int START, int END)
   {
     case '\\':
       if (first == start) return add_space(start);
-      return get_matches(-1, text, FILE_COMPLETION);
+      return get_matches(-1, text, rl_filename_completion_function);
     case '?':
       if (rl_line_buffer[first+1] == '?')
         return get_matches(-1, text, ext_help_generator);
@@ -619,7 +551,7 @@ pari_completion(char *text, int START, int END)
       return get_matches(-1, text, old_generator);
     if ( strncmp(rl_line_buffer + i,"read",4)  == 0
       || strncmp(rl_line_buffer + i,"write",5) == 0)
-      return get_matches(-1, text, FILE_COMPLETION);
+      return get_matches(-1, text, rl_filename_completion_function);
 
     j = start + 1;
     while (j <= END && isspace((int)rl_line_buffer[j])) j++;
@@ -633,13 +565,6 @@ pari_completion(char *text, int START, int END)
               buf[iend - i] = 0, 1)
          && (ep = is_entry(buf)) && ep->help)
     {
-#if 0 /* duplicate F1 */
-      rl_print_aide(buf,h_RL);
-#  ifdef HAS_RL_ATTEMPTED_COMPLETION_OVER
-      rl_attempted_completion_over = 1;
-#  endif
-      return NULL;
-#else
       const char *s = ep->help;
       while (is_keyword_char(*s)) s++;
       if (*s++ == '(')
@@ -656,7 +581,6 @@ pari_completion(char *text, int START, int END)
           return ret;
         }
       }
-#endif
     }
   }
   for(i = END-1; i >= start; i--)
@@ -715,46 +639,23 @@ init_readline(void)
   rl_special_prefixes = "~";
 
   /* custom completer */
-#ifndef HAS_RL_COMPLETION_FUNC_T
-# ifndef CPPFunction_defined
-#   define CPPFunction Function
-# endif
-# define rl_completion_func_t CPPFunction
-#endif
   rl_attempted_completion_function = (rl_completion_func_t*) pari_completion;
 
   /* we always want the whole list of completions under emacs */
-#ifdef HAS_RL_COMPLETION_QUERY_ITEMS
   if (GP_DATA->flags & gpd_EMACS) rl_completion_query_items = 0x8fff;
-#endif
-#ifdef HAS_RL_BIND_KEY_IN_MAP
-#  ifdef _RL_FUNCTION_TYPEDEF
-#    define Bind(a,b,c) (rl_bind_key_in_map((a),(b),(c)))
-#  else
-#    define Bind(a,b,c) (rl_bind_key_in_map((a), (Function*)(b), (c)))
-#  endif
-#else
-#  define Bind(a,b,c)
-#endif
 
-#ifdef _RL_FUNCTION_TYPEDEF
-#  define Defun(a,b,c) (rl_add_defun((a), (b), (c)))
-#else
-#  define Defun(a,b,c) (rl_add_defun((char*)(a), (Function*)(b), (c)))
-#endif
+  rl_add_defun("short-help", rl_short_help, -1);
+  rl_add_defun("long-help", rl_long_help, -1);
+  rl_add_defun("pari-complete", pari_rl_complete, '\t');
+  rl_add_defun("pari-matched-insert", pari_rl_default_matched_insert, -1);
+  rl_add_defun("pari-matched-insert-suspend", pari_rl_matched_insert_suspend, -1);
+  rl_add_defun("pari-matched-insert-restore", pari_rl_matched_insert_restore, -1);
+  rl_add_defun("pari-forward-sexp", pari_rl_forward_sexp, -1);
+  rl_add_defun("pari-backward-sexp", pari_rl_backward_sexp, -1);
 
-  Defun("short-help", rl_short_help, -1);
-  Defun("long-help", rl_long_help, -1);
-  Defun("pari-complete", pari_rl_complete, '\t');
-  Defun("pari-matched-insert", pari_rl_default_matched_insert, -1);
-  Defun("pari-matched-insert-suspend", pari_rl_matched_insert_suspend, -1);
-  Defun("pari-matched-insert-restore", pari_rl_matched_insert_restore, -1);
-  Defun("pari-forward-sexp", pari_rl_forward_sexp, -1);
-  Defun("pari-backward-sexp", pari_rl_backward_sexp, -1);
+  rl_bind_key_in_map('h', rl_short_help, emacs_meta_keymap);
+  rl_bind_key_in_map('H', rl_long_help,  emacs_meta_keymap);
 
-  Bind('h', rl_short_help, emacs_meta_keymap);
-  Bind('H', rl_long_help,  emacs_meta_keymap);
-#  ifdef HAS_RL_GENERIC_BIND
 #define KSbind(s,f,k) rl_generic_bind(ISFUNC, (s), (char*)(f), (k))
 
   KSbind("OP",   rl_short_help,  emacs_meta_keymap); /* f1, vt100 */
@@ -769,18 +670,10 @@ init_readline(void)
   KSbind("[200~", pari_rl_matched_insert_suspend,  vi_movement_keymap); /* pre-paste xterm */
   KSbind("[201~", pari_rl_matched_insert_restore,  emacs_meta_keymap);  /* post-paste xterm */
   KSbind("[201~", pari_rl_matched_insert_restore,  vi_movement_keymap); /* post-paste xterm */
-#  endif
-  Bind('(', pari_rl_matched_insert, emacs_standard_keymap);
-  Bind('[', pari_rl_matched_insert, emacs_standard_keymap);
-  Bind(6, pari_rl_forward_sexp,  emacs_meta_keymap); /* M-C-f */
-  Bind(2, pari_rl_backward_sexp, emacs_meta_keymap); /* M-C-b */
-
-#ifdef EMACS_DOS_KEYMAP
-  Bind(';', rl_short_help, emacs_dos_keymap); /* F1 */
-  Bind('T', rl_long_help,  emacs_dos_keymap); /* Shift-F1 */
-  Bind(155, pari_rl_backward_sexp, emacs_dos_keymap); /* Alt-Left */
-  Bind(157, pari_rl_forward_sexp,  emacs_dos_keymap); /* Alt-Right*/
-#endif
+  rl_bind_key_in_map('(', pari_rl_matched_insert, emacs_standard_keymap);
+  rl_bind_key_in_map('[', pari_rl_matched_insert, emacs_standard_keymap);
+  rl_bind_key_in_map(6, pari_rl_forward_sexp,  emacs_meta_keymap); /* M-C-f */
+  rl_bind_key_in_map(2, pari_rl_backward_sexp, emacs_meta_keymap); /* M-C-b */
 }
 
 /* readline-specific defaults */

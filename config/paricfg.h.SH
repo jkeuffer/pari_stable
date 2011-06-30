@@ -87,58 +87,9 @@ fi
 
 if test -n "$readline"; then
   cat >> $file <<EOT
-/*  Use GNU readline library */
 #define READLINE "$readline_version"
 EOT
-  if test -n "$rl_appendchar"; then
-    echo '#define HAS_COMPLETION_APPEND_CHAR' >> $file
-  fi
-  if test -n "$rl_genericbind"; then
-    echo '#define HAS_RL_GENERIC_BIND' >> $file
-  fi
-  if test -n "$rl_refresh_line_oldproto"; then
-    echo '#define OLD_RL_REFRESH_LINE' >> $file
-  fi
-  if test -n "$rl_save_prompt"; then
-    echo '#define HAS_RL_SAVE_PROMPT' >> $file
-  else
-    if test -n "$_rl_save_prompt"; then
-      echo '#define HAS_UNDERSCORE_RL_SAVE_PROMPT' >> $file
-    fi
-  fi
-  if test -n "$rl_message"; then
-    echo '#define HAS_RL_MESSAGE' >> $file
-  fi
-  if test -n "$rl_completion_matches"; then
-    echo '#define HAS_RL_COMPLETION_MATCHES' >> $file
-  fi
-  if test -n "$rl_completion_func_t"; then
-    echo '#define HAS_RL_COMPLETION_FUNC_T' >> $file
-  fi
-  if test -n "$rl_history"; then
-    echo '#define HAS_HISTORY_H' >> $file
-  fi
-  if test -n "$rl_attempted_completion_over"; then
-    echo '#define HAS_RL_ATTEMPTED_COMPLETION_OVER' >> $file
-  fi
-  if test -n "$rl_completion_query_items"; then
-    echo '#define HAS_RL_COMPLETION_QUERY_ITEMS' >> $file
-  fi
-  if test -n "$rl_bind_key_in_map"; then
-    echo '#define HAS_RL_BIND_KEY_IN_MAP' >> $file
-  fi
-  if test -n "$rl_library_version"; then
-    echo '#define HAS_RL_LIBRARY_VERSION' >> $file
-  fi
-  if test -n "$rl_fake_library_version"; then
-    echo '#define FAKE_RL_LIBRARY_VERSION' >> $file
-  fi
-  echo >> $file
 fi
-
-case "$CPPF_defined" in
-yes) echo '#define CPPFunction_defined' >> $file;;
-esac
 
 case "$sizeof_long" in
 8) echo '#define LONG_IS_64BIT' >> $file;;
