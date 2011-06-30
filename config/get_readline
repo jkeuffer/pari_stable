@@ -3,8 +3,7 @@ if test "$optimization" = profiling; then
 fi
 
 #exported variables
-_readline_list="readline readline_version readline_enabledp \
-RLINCLUDE RLLIBS"
+_readline_list="readline readline_version RLINCLUDE RLLIBS"
 
 readline=
 if test -n "$with_readline"; then
@@ -127,5 +126,4 @@ if test -z "$readline"; then
   RLINCLUDE=
 else
   echo "Using GNU readline, version $readline_version"
-  readline_enabledp="t";
 fi

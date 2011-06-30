@@ -5,7 +5,6 @@ config_file=
 optimization=full
 target_host=
 which_graphic_lib=auto
-readline_enabledp=nil
 share_prefix=
 prefix=/usr/local
 test -n "$GP_INSTALL_PREFIX" && prefix="$GP_INSTALL_PREFIX"
