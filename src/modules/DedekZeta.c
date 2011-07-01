@@ -178,7 +178,7 @@ initzeta(GEN T, long prec)
   GEN limx, resi,zet,C,coeflog,racpi,aij,tabj,colzero, tabcstn, tabcstni;
   GEN c_even, ck_even, c_odd, ck_odd, serie_even, serie_odd, serie_exp;
   GEN VOID;
-  long N0, i0, r1, r2, r, R, N, i, j, k, n, bit = bit_accuracy(prec) + 6;
+  long N0, i0, r1, r2, r, R, N, i, j, k, n, bit = prec2nbits(prec) + 6;
   pari_timer ti;
 
   pari_sp av, av2;

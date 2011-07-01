@@ -573,7 +573,7 @@ polgalois(GEN x, long prec)
           }
           if (!f) { avma = av; return galois_res(n,20,-1,3); }
 
-          pr = - (bit_accuracy(prec) >> 1);
+          pr = - (prec2nbits(prec) >> 1);
           for (l=1; l<=6; l++)
             if (ee[l] <= pr && gequal0(poleval(p5,gel(w,l)))) break;
           if (l>6) pari_err(bugparier,"galois (bug4)");

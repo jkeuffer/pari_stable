@@ -2449,7 +2449,7 @@ gboundcf(GEN x, long k)
       case t_INT: return mkveccopy(x);
       case t_REAL:
         av = avma; lx = realprec(x);
-        e = bit_accuracy(lx)-1-expo(x);
+        e = prec2nbits(lx)-1-expo(x);
         if (e < 0) pari_err(talker,"integral part not significant in gboundcf");
         c = trunc2nr_lg(x,lx,0);
         y = int2n(e);

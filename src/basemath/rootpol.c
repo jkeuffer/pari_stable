@@ -893,7 +893,7 @@ GEN
 FFTinit(long k, long prec)
 {
   if (k <= 0) pari_err(typeer,"FFTinit");
-  return initRU(1L << k, bit_accuracy(prec)) - 1;
+  return initRU(1L << k, prec2nbits(prec)) - 1;
 }
 
 GEN
@@ -2011,14 +2011,14 @@ roots_aux(GEN p, long l, long clean)
   if (lg(p) == 3) return cgetg(1,t_COL); /* constant polynomial */
 
   if (l < 3) l = 3;
-  L = roots_com(p, bit_accuracy(l)); n = lg(L);
+  L = roots_com(p, prec2nbits(l)); n = lg(L);
   if (!isreal(p))
   {
     res = cgetg(n,t_COL);
     for (i=1; i<n; i++) gel(res,i) = tocomplex(gel(L,i),l);
     return gerepileupto(av,res);
   }
-  e = 5 - bit_accuracy(l);
+  e = 5 - prec2nbits(l);
   rea = cgetg(n,t_COL); s = 0;
   com = cgetg(n,t_COL); t = 0;
   for (i=1; i<n; i++)
@@ -2085,7 +2085,7 @@ static GEN
 rootsold(GEN x, long prec)
 {
   pari_sp av = avma, av0, av1;
-  const long expmin = 12 - bit_accuracy(prec);
+  const long expmin = 12 - prec2nbits(prec);
   long i, j, real, exact, m, deg, deg0, k, h, e;
   GEN y,xc,xd0,xd,xdabs,p2,p7,p11,p12,pa,pax,pb,pp,pq,ps, pi;
   ulong mask0;
@@ -2292,7 +2292,7 @@ roots2(GEN T, long PREC)
     p2 = gneg_i(gdiv(gel(pol,2), gtofp(gel(pol,3), PREC)));
     return gerepilecopy(av,p2);
   }
-  EPS = 12 - bit_accuracy(PREC); /* 2^EPS is "zero" */
+  EPS = 12 - prec2nbits(PREC); /* 2^EPS is "zero" */
   flagrealpol = flagexactpol = 1;
   for (i=2; i<=N+2; i++)
   {
@@ -2660,7 +2660,7 @@ static GEN
 zrhqr(GEN a, long prec)
 {
   pari_sp av = avma;
-  long i, prec2, n = degpol(a), ex = -bit_accuracy(prec);
+  long i, prec2, n = degpol(a), ex = -prec2nbits(prec);
   GEN aa, b, rt, rr, x, dx, y, newval, oldval;
 
   rt = hqr(balanc(matcompanion(a)));

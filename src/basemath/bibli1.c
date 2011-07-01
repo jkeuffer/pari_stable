@@ -691,7 +691,7 @@ lindep(GEN x)
   long EXP, prec = gprecision(x);
 
   if (!prec) prec = DEFAULTPREC;
-  EXP = 2*n - bit_accuracy(prec);
+  EXP = 2*n - prec2nbits(prec);
 
   if (! is_vec_t(typ(x))) pari_err(typeer,"lindep");
   if (n <= 1) return cgetg(1,t_COL);
@@ -1034,7 +1034,7 @@ init_pslq(pslq_M *M, GEN x, long *PREC)
   }
   if (prec < DEFAULTPREC) prec = DEFAULTPREC;
   *PREC = prec;
-  M->EXP = - bit_accuracy(prec) + maxss(n, 8);
+  M->EXP = - prec2nbits(prec) + maxss(n, 8);
   M->flreal = is_zero(imag_i(x), M->EXP, prec);
   if (!M->flreal)
     return lindep(x); /* FIXME */

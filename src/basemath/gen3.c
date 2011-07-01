@@ -2024,7 +2024,7 @@ roundr_safe(GEN x)
   t = addrr(real2n(-1,nbits2prec(ex+1)), x); /* x + 0.5 */
 
   lx = realprec(x);
-  e1 = expo(t) - bit_accuracy(lx) + 1;
+  e1 = expo(t) - prec2nbits(lx) + 1;
   y = trunc2nr_lg(t, lx, e1);
   if (signe(x) < 0) y = addsi(-1,y);
   return gerepileuptoint(av,y);
@@ -2099,7 +2099,7 @@ grndtoi(GEN x, long *e)
         *e = expo(addsr(1,x)); avma = av; return gen_m1;
       }
       lx = realprec(x);
-      e1 = e1 - bit_accuracy(lx) + 1;
+      e1 = e1 - prec2nbits(lx) + 1;
       y = trunc2nr_lg(t, lx, e1);
       if (signe(x) < 0) y = addsi(-1,y);
       y = gerepileuptoint(av,y);
@@ -2207,7 +2207,7 @@ gcvtoi(GEN x, long *e)
   if (tx == t_REAL)
   {
     ex = expo(x); if (ex < 0) { *e = ex; return gen_0; }
-    lx = realprec(x); e1 = ex - bit_accuracy(lx) + 1;
+    lx = realprec(x); e1 = ex - prec2nbits(lx) + 1;
     y = trunc2nr_lg(x, lx, e1);
     if (e1 <= 0) { pari_sp av = avma; e1 = expo(subri(x,y)); avma = av; }
     *e = e1; return y;

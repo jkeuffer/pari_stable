@@ -631,7 +631,7 @@ absrtostr(GEN x, int sp, char FORMAT, long wanted_dec)
     long w = ndec2prec(wanted_dec); /* digits -> pari precision in words */
     if (lx > w) lx = w; /* truncature with guard, no rounding */
   }
-  beta = ex10(bit_accuracy(lx) - ex);
+  beta = ex10(prec2nbits(lx) - ex);
   if (beta)
   { /* z = |x| 10^beta, 10^b = 5^b * 2^b, 2^b goes into exponent */
     if (beta > 0)

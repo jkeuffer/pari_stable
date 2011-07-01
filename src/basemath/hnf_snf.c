@@ -2193,7 +2193,7 @@ gsnf_no_divide(GEN x, long i, long vx)
       if (!is_RgX(z,vx)) z = scalarpol(z, vx);
       r = RgX_rem(z, b);
       if (signe(r) && (! isinexactreal(r) ||
-             gexpo(r) > 16 + gexpo(b) - bit_accuracy(gprecision(r)))
+             gexpo(r) > 16 + gexpo(b) - prec2nbits(gprecision(r)))
          ) return k;
     }
   return 0;

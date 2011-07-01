@@ -724,7 +724,7 @@ ArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
   {
     s0 = gmul(gel(s,ic), EvalChar(lC[ic], classe));
     s0 = gdiv(s0, sqrtnc);
-    if (check && - expo(subrs(gnorm(s0), 1)) < bit_accuracy(prec) >> 1)
+    if (check && - expo(subrs(gnorm(s0), 1)) < prec2nbits(prec) >> 1)
       pari_err(bugparier, "ArtinNumber");
     gel(W, indW[ic]) = gmul(s0, z);
   }
@@ -1715,7 +1715,7 @@ RecCoeff3(GEN nf, RC_data *d, long prec)
   FP_chk_fun chk = { &chk_reccoeff, &chk_reccoeff_init, NULL, NULL, 0 };
   chk.data = (void*)d;
 
-  d->G = minss(-10, -bit_accuracy(prec) >> 4);
+  d->G = minss(-10, -prec2nbits(prec) >> 4);
   BIG = maxss(32, -(d->G << 1));
   tB  = sqrtnr(real2n(BIG-N,DEFAULTPREC), N-1);
   Bd  = grndtoi(gmin(B, tB), &e);
@@ -1781,7 +1781,7 @@ RecCoeff2(GEN nf,  RC_data *d,  long prec)
   GEN vec, M = nf_get_M(nf), beta = d->beta;
   long i, imin, imax, lM = lg(M);
 
-  d->G = minss(-20, -bit_accuracy(prec) >> 4);
+  d->G = minss(-20, -prec2nbits(prec) >> 4);
 
   vec  = shallowconcat(mkvec(gneg(beta)), row(M, d->v));
   imin = (long)bit_accuracy_mul(prec, .225);
@@ -1816,7 +1816,7 @@ RecCoeff(GEN nf,  GEN pol,  long v, long prec)
   for (j = 2; j <= cl+1; j++)
   {
     GEN t = gel(pol, j);
-    if (bit_accuracy(gprecision(t)) - gexpo(t) < 34) return NULL;
+    if (prec2nbits(gprecision(t)) - gexpo(t) < 34) return NULL;
   }
 
   md = cl/2;
@@ -2164,7 +2164,7 @@ GetST(GEN bnr, GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
   C  = cgetg(ncond+1, t_VEC);
   N0 = cgetg(ncond+1, t_VECSMALL);
   n0 = 0;
-  limx = zeta_get_limx(r1, r2, bit_accuracy(prec));
+  limx = zeta_get_limx(r1, r2, prec2nbits(prec));
   for (j = 1; j <= ncond; j++)
   {
     GEN dtcr = gel(dataCR, mael(vChar,j,1)), c = ch_C(dtcr);
@@ -2174,7 +2174,7 @@ GetST(GEN bnr, GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
   }
   if ((ulong)n0 > maxprime())
     pari_err(talker, "Not enough precomputed primes (need all p <= %ld)", n0);
-  i0 = zeta_get_i0(r1, r2, bit_accuracy(prec), limx);
+  i0 = zeta_get_i0(r1, r2, prec2nbits(prec), limx);
   InitPrimes(bnr, n0, &LIST);
 
   prec2 = ((prec-2) << 1) + EXTRA_PREC;
@@ -2349,7 +2349,7 @@ LABDOUB:
   { /* compute a crude approximation of the result */
     C = cgetg(cl + 1, t_VEC);
     for (i = 1; i <= cl; i++) gel(C,i) = ch_C(gel(dataCR, i));
-    n = zeta_get_N0(vecmax(C), zeta_get_limx(r1, r2, bit_accuracy(newprec)));
+    n = zeta_get_N0(vecmax(C), zeta_get_limx(r1, r2, prec2nbits(newprec)));
     if (n > BND) n = BND;
     if (DEBUGLEVEL) err_printf("N0 in QuickPol: %ld \n", n);
     InitPrimes(bnr, n, &LIST);
@@ -3325,7 +3325,7 @@ computeth2(GEN om, GEN la, long prec)
 
   p1 = gsub(ellphist(om,res,la,prec), ellphist(om,res,gen_1,prec));
   p2 = imag_i(p1);
-  if (gexpo(real_i(p1))>20 || gexpo(p2)> bit_accuracy(minss(prec,realprec(p2)))-10)
+  if (gexpo(real_i(p1))>20 || gexpo(p2)> prec2nbits(minss(prec,realprec(p2)))-10)
     return NULL;
   return gexp(p1,prec);
 }

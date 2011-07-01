@@ -1070,7 +1070,7 @@ gtofp(GEN z, long prec)
       if (isintzero(a)) {
         GEN y = cgetg(3, t_COMPLEX);
         b = cxcompotor(b, prec);
-        gel(y,1) = real_0_bit(expo(b) - bit_accuracy(prec));
+        gel(y,1) = real_0_bit(expo(b) - prec2nbits(prec));
         gel(y,2) = b; return y;
       }
       return cxtofp(z, prec);
@@ -1194,6 +1194,8 @@ INLINE double
 bit_accuracy_mul(long x, double y) { return (x-2) * (BITS_IN_LONG*y); }
 INLINE long
 bit_prec(GEN x) { return bit_accuracy(realprec(x)); }
+INLINE long
+prec2nbits(long x) { return bit_accuracy(x); }
 INLINE long
 prec2ndec(long x) { return (long)bit_accuracy_mul(x, LOG10_2); }
 INLINE long

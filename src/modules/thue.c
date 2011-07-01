@@ -149,7 +149,7 @@ static GEN
 T_A_Matrices(GEN MatFU, long r, GEN *eps5, long prec)
 {
   GEN A, p1, m1, IntM, nia, eps3, eps2;
-  long e = bit_accuracy(prec);
+  long e = prec2nbits(prec);
 
   m1 = rowslice(vecslice(MatFU, 1,r), 1,r); /* minor order r */
   m1 = logabs(m1, 3);
@@ -729,7 +729,7 @@ init_get_B(long i1, long i2, GEN Delta, GEN Lambda, GEN eps5, baker_s *BS,
               gdiv(gel(BS->NE,3), gel(BS->NE,2)));
     lambda = divrr(garg(p1,prec), Pi2);
 
-    inverrdelta = shiftr(gabs(gel(fu,2),prec), bit_accuracy(prec)-1);
+    inverrdelta = shiftr(gabs(gel(fu,2),prec), prec2nbits(prec)-1);
   }
   if (DEBUGLEVEL>1) err_printf("  inverrdelta = %Ps\n",inverrdelta);
   BS->delta = delta;

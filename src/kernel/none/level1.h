@@ -290,7 +290,7 @@ itou_or_0(GEN x) {
 INLINE GEN
 real_0_bit(long bitprec) { GEN x=cgetr(2); x[1]=evalexpo(bitprec); return x; }
 INLINE GEN
-real_0(long prec) { return real_0_bit(-bit_accuracy(prec)); }
+real_0(long prec) { return real_0_bit(-prec2nbits(prec)); }
 INLINE GEN
 real_1(long prec) {
   GEN x = cgetr(prec);
@@ -1013,7 +1013,7 @@ affsr(long x, GEN y)
 
   if (!x)
   {
-    y[1] = evalexpo(-bit_accuracy(ly));
+    y[1] = evalexpo(-prec2nbits(ly));
     return;
   }
   if (x < 0) {
@@ -1035,7 +1035,7 @@ affur(ulong x, GEN y)
 
   if (!x)
   {
-    y[1] = evalexpo(-bit_accuracy(ly));
+    y[1] = evalexpo(-prec2nbits(ly));
     return;
   }
   sh = bfffo(x);

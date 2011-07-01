@@ -295,13 +295,13 @@ kbessel1(GEN nu, GEN gx, long prec)
         mulrrz(d,c,d);
         addrrz(e,mulrr(d,u),e); p1=mulrr(d,v);
         addrrz(f,p1,f);
-        if (gexpo(p1) - gexpo(f) <= 1-bit_accuracy(precision(p1))) break;
+        if (gexpo(p1) - gexpo(f) <= 1-prec2nbits(precision(p1))) break;
 
       }
       swap(e, u);
       swap(f, v);
       affrr(mulrr(q,addrs(c,1)), q);
-      if (expo(subrr(q,r)) - expo(r) <= 1-bit_accuracy(lnew)) break;
+      if (expo(subrr(q,r)) - expo(r) <= 1-prec2nbits(lnew)) break;
     }
     u = mulrr(u, gpow(divru(x,n),nu,prec));
   }
@@ -398,7 +398,7 @@ kbesselintern(GEN n, GEN z, long flag, long prec)
       i = precision(n); if (i && prec > i) prec = i;
       ex = gexpo(z);
       /* experimental */
-      if (!flag && !gequal0(n) && ex > bit_accuracy(prec)/16 + gexpo(n))
+      if (!flag && !gequal0(n) && ex > prec2nbits(prec)/16 + gexpo(n))
         return kbessel1(n,z,prec);
       L = 1.3591409 * gtodouble(gabs(z,prec));
       precnew = prec;
@@ -580,13 +580,13 @@ hyperu(GEN a, GEN b, GEN gx, long prec)
         mulrrz(d,c,d);
         gaddz(e,gmul(d,u),e); p1=gmul(d,v);
         gaddz(f,p1,f);
-        if (gequal0(p1) || gexpo(p1) - gexpo(f) <= 1-bit_accuracy(precision(p1)))
+        if (gequal0(p1) || gexpo(p1) - gexpo(f) <= 1-prec2nbits(precision(p1)))
           break;
       }
       swap(e, u);
       swap(f, v);
       affrr(mulrr(q, addrs(c,1)), q);
-      if (expo(subrr(q,x)) - expo(x) <= 1-bit_accuracy(l)) break;
+      if (expo(subrr(q,x)) - expo(x) <= 1-prec2nbits(l)) break;
     }
   }
   else
@@ -626,7 +626,7 @@ incgam2_0(GEN x, GEN expx)
   else
   {
     GEN S, t, H, run = real_1(l+1);
-    n = -bit_accuracy(l)-1;
+    n = -prec2nbits(l)-1;
     x = rtor(x, l+1);
     S = z = t = H = run;
     for (i = 2; expo(t) - expo(S) >= n; i++)
@@ -700,7 +700,7 @@ incgamc(GEN s, GEN x, long prec)
   if (typ(x) != t_REAL) x = gtofp(x, prec);
   if (gequal0(x)) return gcopy(x);
 
-  l = precision(x); n = -bit_accuracy(l)-1;
+  l = precision(x); n = -prec2nbits(l)-1;
   i = typ(s); b = s;
   if (i != t_REAL)
   {
@@ -776,7 +776,7 @@ eint1(GEN x, long prec)
   if (signe(x) >= 0) return gerepileuptoleaf(av, incgam2_0(x, mpexp(x)));
   /* rewritten from code contributed by Manfred Radimersky */
   l  = lg(x);
-  n  = bit_accuracy(l);
+  n  = prec2nbits(l);
   y  = negr(x);
   if (cmprs(y, (3*n)/4) < 0) {
     p1 = t = S = y;
@@ -844,7 +844,7 @@ mpveceint1(GEN C, GEN eC, long n)
   e2 = powru(eC, 10);
   unr = real_1(prec);
   av1 = avma;
-  G = -bit_accuracy(prec);
+  G = -prec2nbits(prec);
   F0 = gel(y,n); chkpoint = n;
   affrr(eint1(mulur(n,C),prec), F0);
   nmin = n;
@@ -1106,7 +1106,7 @@ inv_szeta_euler(long n, double lba, long prec)
   double A = n / (LOG2*BITS_IN_LONG), D;
   ulong p, lim;
 
-  if (n > bit_accuracy(prec)) return real_1(prec);
+  if (n > prec2nbits(prec)) return real_1(prec);
   if (!lba) lba = bit_accuracy_mul(prec, LOG2);
   D = exp((lba - log(n-1)) / (n-1));
   lim = 1 + (ulong)ceil(D);
@@ -1183,7 +1183,7 @@ next_bin(GEN y, long n, long k)
 static GEN
 szeta_odd(long k, long prec)
 {
-  long kk, n, li = -(1+bit_accuracy(prec));
+  long kk, n, li = -(1+prec2nbits(prec));
   pari_sp av = avma, av2, limit;
   GEN y, p1, qn, z, q, pi2 = Pi2n(1, prec), binom= real_1(prec+1);
 
@@ -1292,7 +1292,7 @@ szeta(long k, long prec)
     y = single_bern(k, prec); togglesign(y);
     return gerepileuptoleaf(av, divru(y, k));
   }
-  if (k > bit_accuracy(prec)+1) return real_1(prec);
+  if (k > prec2nbits(prec)+1) return real_1(prec);
   if ((k&1) == 0)
   {
     if (!OK_bern(k >> 1, prec)
@@ -1368,7 +1368,7 @@ czeta(GEN s0, long prec)
     t = gmul(ggamma(gprec_w(s,prec),prec), gpow(Pi2n(1,prec), gneg(s), prec));
     funeq_factor = gmul2n(gmul(t, gcos(gmul(Pi2n(-1,prec),s), prec)), 1);
   }
-  if (gcmpgs(sig, bit_accuracy(prec) + 1) > 0) { /* zeta(s) = 1 */
+  if (gcmpgs(sig, prec2nbits(prec) + 1) > 0) { /* zeta(s) = 1 */
     if (!funeq_factor) { avma = av0; return real_1(prec); }
     return gerepileupto(av0, funeq_factor);
   }
@@ -1852,7 +1852,7 @@ cxpolylog(long m, GEN x, long prec)
     q = gdivgs(gmul(q,z),m+1);
     s = gadd(s, gmul(szeta(-1,prec), real? real_i(q): q));
 
-  z = gsqr(z); li = -(bit_accuracy(prec)+1);
+  z = gsqr(z); li = -(prec2nbits(prec)+1);
   /* n = m+3, m+5, ...; note that zeta(- even integer) = 0 */
   for(n = m+3;; n += 2)
   {
@@ -1889,7 +1889,7 @@ polylog(long m, GEN x, long prec)
     avma = av; return affc_fixlg(y, res);
   }
   X = (e > 0)? ginv(x): x;
-  G = -bit_accuracy(l);
+  G = -prec2nbits(l);
   av1 = avma; limpile = stack_lim(av1,1);
   y = Xn = X;
   for (i=2; ; i++)
@@ -2331,7 +2331,7 @@ inteta(GEN q)
     long l; /* gcc -Wall */
     pari_sp av = avma, lim = stack_lim(av, 3);
 
-    if (is_scalar_t(tx)) l = -bit_accuracy(precision(q));
+    if (is_scalar_t(tx)) l = -prec2nbits(precision(q));
     else
     {
       l = lg(q)-2; tx = 0;
@@ -2407,7 +2407,7 @@ static GEN
 eta_reduced(GEN x, long prec)
 {
   GEN z = exp_IPiC(gdivgs(x, 12), prec); /* e(x/24) */
-  if (24 * gexpo(z) >= -bit_accuracy(prec))
+  if (24 * gexpo(z) >= -prec2nbits(prec))
     z = gmul(z, inteta( gpowgs(z,24) ));
   return z;
 }
@@ -2695,7 +2695,7 @@ theta(GEN q, GEN z, long prec)
     qn = gmul(qn,ps);
     y = gadd(y, gmul(qn, s));
     e = gexpo(s); if (e < 0) e = 0;
-    if (gexpo(qn) + e < -bit_accuracy(prec)) break;
+    if (gexpo(qn) + e < -prec2nbits(prec)) break;
 
     ps = gmul(ps,ps2);
     c = gsub(gmul(cnz, c2z), gmul(snz,s2z));
@@ -2739,7 +2739,7 @@ thetanullk(GEN q, long k, long prec)
     qn = gmul(qn,ps);
     ps = gmul(ps,ps2);
     t = gmul(qn, powuu(n, k)); y = gadd(y, t);
-    if (gexpo(t) < -bit_accuracy(prec)) break;
+    if (gexpo(t) < -prec2nbits(prec)) break;
   }
   p1 = gmul2n(gsqrt(gsqrt(q,prec),prec),1);
   if (k&2) y = gneg_i(y);
@@ -2771,7 +2771,7 @@ vecthetanullk(GEN q, long k, long prec)
       t = gmul(qn, P); gel(y,i) = gadd(gel(y,i), t);
       P = mulii(P, N2);
     }
-    if (gexpo(t) < -bit_accuracy(prec)) break;
+    if (gexpo(t) < -prec2nbits(prec)) break;
   }
   p1 = gmul2n(gsqrt(gsqrt(q,prec),prec),1);
   for (i = 2; i <= k; i+=2) gel(y,i) = gneg_i(gel(y,i));

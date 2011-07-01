@@ -115,7 +115,7 @@ constpi(long prec)
 
   av = avma; tmppi = newblock(prec);
   *tmppi = evaltyp(t_REAL) | evallg(prec);
-  G = - bit_accuracy(prec);
+  G = - prec2nbits(prec);
   prec++;
 
   A = real_1(prec);
@@ -1435,7 +1435,7 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
 GEN
 exp1r_abs(GEN x)
 {
-  long l = realprec(x), a = expo(x), b = bit_accuracy(l), L, i, n, m, e, B;
+  long l = realprec(x), a = expo(x), b = prec2nbits(l), L, i, n, m, e, B;
   GEN y, p2, X;
   pari_sp av;
   double d;
@@ -1772,7 +1772,7 @@ agmr_gap(GEN a, GEN b, long L)
 static GEN
 agm1r_abs(GEN x)
 {
-  long l = realprec(x), L = 5-bit_accuracy(l);
+  long l = realprec(x), L = 5-prec2nbits(l);
   GEN a1, b1, y = cgetr(l);
   pari_sp av = avma;
 
@@ -1800,7 +1800,7 @@ agm1cx(GEN x, long prec)
   pari_sp av = avma, av2;
   long L, l = precision(x); if (!l) l = prec;
 
-  L = 5-bit_accuracy(l);
+  L = 5-prec2nbits(l);
   a1 = gtofp(gmul2n(gadd(real_1(l), x), -1), l); /* avoid loss of accuracy */
   av2 = avma;
   b1 = gsqrt(x, prec);
@@ -1853,7 +1853,7 @@ agm1(GEN x, long prec)
     default:
       av = avma; if (!(y = toser_i(x))) break;
       a1 = y; b1 = gen_1; l = lg(y)-2;
-      l2 = 5-bit_accuracy(prec);
+      l2 = 5-prec2nbits(prec);
       do
       {
         a = a1;
@@ -1904,7 +1904,7 @@ constlog2(long prec)
   *tmplog2 = evaltyp(t_REAL) | evallg(prec);
   av = avma;
   l = prec+1;
-  n = bit_accuracy(l) >> 1;
+  n = prec2nbits(l) >> 1;
   y = divrr(Pi2n(-1, prec), agm1r_abs( real2n(2 - n, l) ));
   affrr(divru(y,n), tmplog2);
   if (glog2) gunclone(glog2);
@@ -1923,7 +1923,7 @@ logagmr_abs(GEN q)
 
   if (absrnz_equal2n(q)) return e? mulsr(e, mplog2(prec)): real_0(prec);
   z = cgetr(prec); av = avma; prec++;
-  lim = bit_accuracy(prec) >> 1;
+  lim = prec2nbits(prec) >> 1;
   Q = rtor(q,prec);
   Q[1] = evalsigne(1) | evalexpo(lim);
 
@@ -1965,7 +1965,7 @@ logr_abs(GEN X)
   if (k == l) return EX? mulsr(EX, mplog2(l)): real_0(l);
   z = cgetr(EX? l: l - (k-2)); ltop = avma;
 
-  a = bit_accuracy(k) + bfffo(u); /* ~ -log2 |1-x| */
+  a = prec2nbits(k) + bfffo(u); /* ~ -log2 |1-x| */
  /* Multiplication is quadratic in this range (l is small, otherwise we
   * use AGM). Set Y = x^(1/2^m), y = (Y - 1) / (Y + 1) and compute truncated
   * series sum y^(2k+1)/(2k+1): the costs is less than
@@ -1979,7 +1979,7 @@ logr_abs(GEN X)
   *     m = min( -a/2 + sqrt(a^2/4 + B),  b - a )
   * NB: e ~ (b/6)^(1/2) as b -> oo */
   L = l+1;
-  b = bit_accuracy(L - (k-2)); /* take loss of accuracy into account */
+  b = prec2nbits(L - (k-2)); /* take loss of accuracy into account */
   /* instead of the above pessimistic estimate for the cost of the sum, use
    * optimistic estimate (BITS_IN_LONG -> 0) */
   d = -a/2.; m = (long)(d + sqrt(d*d + b/6)); /* >= 0 */
@@ -2000,7 +2000,7 @@ logr_abs(GEN X)
    * We want y^(2n+3) < y 2^(-bit_accuracy(L)), hence
    *   n+1 > bit_accuracy(L) /-log_2(y^2) */
   d = -2*dbllog2r(y); /* ~ -log_2(y^2) */
-  k = (long)(2*(bit_accuracy(L) / d));
+  k = (long)(2*(prec2nbits(L) / d));
   k |= 1;
   if (k >= 3)
   {

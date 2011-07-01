@@ -2949,7 +2949,7 @@ eigen(GEN x, long prec)
   if (n != 1 && n != lg(x[1])) pari_err(mattype1,"eigen");
   if (n<=2) return gcopy(x);
 
-  ex = 16 - bit_accuracy(prec);
+  ex = 16 - prec2nbits(prec);
   y=cgetg(n,t_MAT);
   p=caradj(x,0,NULL); rr = cleanroots(p,prec);
   ly=1; k=2; r2=gel(rr,1);

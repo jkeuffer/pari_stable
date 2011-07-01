@@ -3162,6 +3162,7 @@ INLINE GEN    polx_Flx(long sv);
 INLINE GEN    polx_zx(long sv);
 INLINE GEN    powii(GEN x, GEN n);
 INLINE GEN    powIs(long n);
+INLINE long   prec2nbits(long x);
 INLINE long   prec2ndec(long x);
 INLINE GEN    quad_disc(GEN x);
 INLINE GEN    qfb_disc(GEN x);

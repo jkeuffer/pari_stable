@@ -224,7 +224,7 @@ new_coords(GEN e, GEN x, GEN e1, GEN *pta, GEN *ptb, int flag, long prec)
 static GEN
 do_agm(GEN *ptx, GEN a1, GEN b1)
 {
-  const long s = signe(b1), l = minss(realprec(a1), realprec(b1)), G = 6 - bit_accuracy(l);
+  const long s = signe(b1), l = minss(realprec(a1), realprec(b1)), G = 6 - prec2nbits(l);
   GEN p1, a, b, x;
 
   x = gmul2n(subrr(a1,b1),-2);
@@ -749,8 +749,8 @@ oncurve(GEN e, GEN z)
   ex = pr? gexpo(RHS): gexpo(LHS); /* don't take exponent of exact 0 */
   if (!pr || (pl && pl < pr)) pr = pl; /* min among nonzero elts of {pl,pr} */
   expx = gexpo(x);
-  pr = (expx < ex - bit_accuracy(pr) + 15
-     || expx < ellexpo(e) - bit_accuracy(pr) + 5);
+  pr = (expx < ex - prec2nbits(pr) + 15
+     || expx < ellexpo(e) - prec2nbits(pr) + 5);
   avma = av; return pr;
 }
 
@@ -1181,11 +1181,11 @@ zell(GEN e, GEN z, long prec)
     if (gsigne(real_i(b)) != sw) b = gneg_i(b);
     a = gmul2n(gadd(gadd(a0,b0),gmul2n(b,1)),-2);
     d = gsub(a,b);
-    if (gequal0(d) || gexpo(d) < gexpo(a) - bit_accuracy(prec) + 5) break;
+    if (gequal0(d) || gexpo(d) < gexpo(a) - prec2nbits(prec) + 5) break;
     p1 = gsqrt(gdiv(gadd(x0,d),x0),prec);
     x1 = gmul(x0,gsqr(gmul2n(gaddsg(1,p1),-1)));
     d = gsub(x1,x0);
-    if (gequal0(d) || gexpo(d) < gexpo(x1) - bit_accuracy(prec) + 5)
+    if (gequal0(d) || gexpo(d) < gexpo(x1) - prec2nbits(prec) + 5)
     {
       if (fl) break;
       fl = 1;
@@ -1193,7 +1193,7 @@ zell(GEN e, GEN z, long prec)
     else fl = 0;
   }
   u = gdiv(x1,a); t = gaddsg(1,u);
-  if (gequal0(t) || gexpo(t) <  5 - bit_accuracy(prec))
+  if (gequal0(t) || gexpo(t) <  5 - prec2nbits(prec))
     t = gen_m1;
   else
     t = gdiv(u,gsqr(gaddsg(1,gsqrt(t,prec))));
@@ -1344,7 +1344,7 @@ trueE(GEN tau, long k, long prec)
   { /* compute y := sum_{n>0} n^(k-1) q^n / (1-q^n) */
     qn = gmul(q,qn);
     p1 = gdiv(gmul(powuu(n,k-1),qn), gsubsg(1,qn));
-    if (gequal0(p1) || gexpo(p1) <= - bit_accuracy(prec) - 5) break;
+    if (gequal0(p1) || gexpo(p1) <= - prec2nbits(prec) - 5) break;
     y = gadd(y, p1);
     if (low_stack(lim, stack_lim(av,2)))
     {
@@ -1443,7 +1443,7 @@ reduce_z(GEN z, SL2_red *T)
   T->y = ground(real_i(Z));
   Z = gsub(Z, T->y);
   pr = gprecision(Z);
-  if (gequal0(Z) || (pr && gexpo(Z) < 5 - bit_accuracy(pr))) Z = NULL; /*z in L*/
+  if (gequal0(Z) || (pr && gexpo(Z) < 5 - prec2nbits(pr))) Z = NULL; /*z in L*/
   return Z;
 }
 
@@ -1491,7 +1491,7 @@ weipellnumall(SL2_red *T, GEN z, long flall, long prec0)
       yp = gadd(yp, gmul(qn,p1));
     }
     qn = gmul(q,qn);
-    if (gexpo(qn) <= - bit_accuracy(prec) - 5 - toadd) break;
+    if (gexpo(qn) <= - prec2nbits(prec) - 5 - toadd) break;
     if (low_stack(lim, stack_lim(av1,1)))
     {
       if(DEBUGMEM>1) pari_warn(warnmem,"weipellnum");
@@ -1546,7 +1546,7 @@ ellzeta(GEN om, GEN z, long prec0)
     GEN p1 = gadd(gdiv(u,gsubgs(gmul(qn,u),1)), ginv(gsub(u,qn)));
     y = gadd(y, gmul(qn,p1));
     qn = gmul(q,qn);
-    if (gexpo(qn) <= - bit_accuracy(prec) - 5 - toadd) break;
+    if (gexpo(qn) <= - prec2nbits(prec) - 5 - toadd) break;
     if (low_stack(lim, stack_lim(av1,1)))
     {
       if(DEBUGMEM>1) pari_warn(warnmem,"ellzeta");
@@ -1603,7 +1603,7 @@ ellsigma(GEN w, GEN z, long flag, long prec0)
       p1 = gdiv(p1,gsqr(gadd(qn,gen_m1)));
       y = gmul(y,p1);
       qn = gmul(q,qn);
-      if (gexpo(qn) <= - bit_accuracy(prec) - 5 - toadd) break;
+      if (gexpo(qn) <= - prec2nbits(prec) - 5 - toadd) break;
       if (low_stack(lim, stack_lim(av1,1)))
       {
         if(DEBUGMEM>1) pari_warn(warnmem,"ellsigma");
@@ -1627,7 +1627,7 @@ ellsigma(GEN w, GEN z, long flag, long prec0)
       qn  = gmul(q,qn);
       urn = gmul(urn,u);
       urninv = gmul(urninv,uinv);
-      if (gexpo(qn2) + n*toadd <= - bit_accuracy(prec) - 5) break;
+      if (gexpo(qn2) + n*toadd <= - prec2nbits(prec) - 5) break;
       if (low_stack(lim, stack_lim(av1,1)))
       {
         if(DEBUGMEM>1) pari_warn(warnmem,"ellsigma");
@@ -3442,7 +3442,7 @@ hell(GEN e, GEN a, long prec)
     qn = gmul(qn, ps);
     ps = gmul(ps, q);
     y = gadd(y, gmul(qn, gsin(gmulsg(n,z),prec)));
-    if (gexpo(qn) < -bit_accuracy(prec)) break;
+    if (gexpo(qn) < -prec2nbits(prec)) break;
   }
   p1 = gmul(gsqr(gdiv(gmul2n(y,1), d_ellLHS(e,a))), pi2surw);
   p1 = gsqr(gsqr(gdiv(p1, gsqr(gsqr(denom(gel(a,1)))))));
@@ -3466,7 +3466,7 @@ hells(GEN e, GEN Q, long prec)
   t = ginv(gtofp(x, prec));
   b42 = gmul2n(b4,1);
   b62 = gmul2n(b6,1);
-  lim = 15 + bit_accuracy(prec);
+  lim = 15 + prec2nbits(prec);
   for (n = 3; n < lim; n += 2)
   {
     /* 4 + b2 t + 2b4 t^2 + b6 t^3 */
@@ -4112,7 +4112,7 @@ static GEN
 myround(GEN x, long *e)
 {
   GEN y = grndtoi(x,e);
-  if (*e > -5 && bit_accuracy(gprecision(x)) < gexpo(y) - 10)
+  if (*e > -5 && prec2nbits(gprecision(x)) < gexpo(y) - 10)
     pari_err(talker, "ellinit data not accurate enough. Increase precision");
   return y;
 }

@@ -515,7 +515,7 @@ suminf(void *E, GEN (*eval)(void *, GEN), GEN a, long prec)
   if (typ(a) != t_INT) pari_err(talker,"non integral index in suminf");
   a = setloop(a);
   av = avma; lim = stack_lim(av,1);
-  fl=0; G = bit_accuracy(prec) + 5;
+  fl=0; G = prec2nbits(prec) + 5;
   for(;;)
   {
     p1 = eval(E, a); x = gadd(x,p1); a = incloop(a);
@@ -596,7 +596,7 @@ prodinf(void *E, GEN (*eval)(void *, GEN), GEN a, long prec)
   if (typ(a) != t_INT) pari_err(talker,"non integral index in prodinf");
   a = setloop(a);
   av = avma; lim = stack_lim(av,1);
-  fl=0; G = -bit_accuracy(prec)-5;
+  fl=0; G = -prec2nbits(prec)-5;
   for(;;)
   {
     p1 = eval(E, a); if (gequal0(p1)) { x = p1; break; }
@@ -621,7 +621,7 @@ prodinf1(void *E, GEN (*eval)(void *, GEN), GEN a, long prec)
   if (typ(a) != t_INT) pari_err(talker,"non integral index in prodinf1");
   a = setloop(a);
   av = avma; lim = stack_lim(av,1);
-  fl=0; G = -bit_accuracy(prec)-5;
+  fl=0; G = -prec2nbits(prec)-5;
   for(;;)
   {
     p2 = eval(E, a); p1 = gaddgs(p2,1);
@@ -937,7 +937,7 @@ sumalt(void *E, GEN (*eval)(void *, GEN), GEN a, long prec)
 
   if (typ(a) != t_INT) pari_err(talker,"non integral index in sumalt");
   e1 = addsr(3, sqrtr(stor(8,prec)));
-  N = (long)(0.4*(bit_accuracy(prec) + 7));
+  N = (long)(0.4*(prec2nbits(prec)+ 7));
   d = powru(e1,N);
   d = shiftr(addrr(d, invr(d)),-1);
   az = gen_m1; c = d;
@@ -960,7 +960,7 @@ sumalt2(void *E, GEN (*eval)(void *, GEN), GEN a, long prec)
   GEN s, dn, pol;
 
   if (typ(a) != t_INT) pari_err(talker,"non integral index in sumalt");
-  N = (long)(0.31*(bit_accuracy(prec) + 5));
+  N = (long)(0.31*(prec2nbits(prec) + 5));
   pol = polzagreel(N,N>>1,prec+1);
   pol = RgX_div_by_X_x(pol, gen_1, &dn);
   N = degpol(pol);
@@ -997,13 +997,13 @@ sumpos(void *E, GEN (*eval)(void *, GEN), GEN a, long prec)
 
   a = subis(a,1); reel = cgetr(prec);
   e1 = addsr(3, sqrtr(stor(8,prec)));
-  N = (long)(0.4*(bit_accuracy(prec) + 7));
+  N = (long)(0.4*(prec2nbits(prec) + 7));
   d = powru(e1,N);
   d = shiftr(addrr(d, invr(d)),-1);
   az = gen_m1; c = d;
   s = gen_0;
 
-  G = -bit_accuracy(prec) - 5;
+  G = -prec2nbits(prec) - 5;
   stock = (GEN*)new_chunk(N+1); for (k=1; k<=N; k++) stock[k] = NULL;
   for (k=0; k<N; k++)
   {
@@ -1043,9 +1043,9 @@ sumpos2(void *E, GEN (*eval)(void *, GEN), GEN a, long prec)
   if (typ(a) != t_INT) pari_err(talker,"non integral index in sumpos2");
 
   a = subis(a,1); reel = cgetr(prec);
-  N = (long)(0.31*(bit_accuracy(prec) + 5));
+  N = (long)(0.31*(prec2nbits(prec) + 5));
 
-  G = -bit_accuracy(prec) - 5;
+  G = -prec2nbits(prec) - 5;
   stock = (GEN*)new_chunk(N+1); for (k=1; k<=N; k++) stock[k] = NULL;
   for (k=1; k<=N; k++)
     if (odd(k) || !stock[k])
@@ -1111,7 +1111,7 @@ zbrent(void *E, GEN (*eval)(void *, GEN), GEN a, GEN b, long prec)
   fb = eval(E, b);
   if (gsigne(fa)*gsigne(fb) > 0) pari_err(talker,"roots must be bracketed in solve");
   itmax = (prec * (2*BITS_IN_LONG)) + 1;
-  tol = real2n(5-bit_accuracy(prec), 3);
+  tol = real2n(5-prec2nbits(prec), 3);
   fc = fb;
   e = d = NULL; /* gcc -Wall */
   for (iter=1; iter<=itmax; iter++)

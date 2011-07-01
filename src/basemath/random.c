@@ -170,7 +170,7 @@ randomr(long prec)
   GEN x, y;
   if (prec <= 2) return real_0_bit(0);
   x = cgetr(prec); av = avma;
-  b = bit_accuracy(prec);
+  b = prec2nbits(prec);
   y = randomi(int2n(b));
   if (!signe(y)) return real_0_bit(b);
   affir(y, x); setexpo(x, expo(x) - b);

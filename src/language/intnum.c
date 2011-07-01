@@ -85,7 +85,7 @@ qrom3(void *E, GEN (*eval)(void *, GEN), GEN a, GEN b, long prec)
     gel(s,j) = gerepileupto(av, gmul2n(gadd(gel(s,j-1), sum), -1));
     if (DEBUGLEVEL>3) err_printf("qrom3: iteration %ld: %Ps\n", j,s[j]);
 
-    if (j >= KLOC && (ss = interp(h, s, j, bit_accuracy(prec)-j-6, KLOC)))
+    if (j >= KLOC && (ss = interp(h, s, j, prec2nbits(prec)-j-6, KLOC)))
       return gmulsg(sig,ss);
   }
   return NULL;
@@ -127,7 +127,7 @@ qrom2(void *E, GEN (*eval)(void *, GEN), GEN a, GEN b, long prec)
     gel(s,j) = gerepileupto(av, gadd(p1,sum));
     if (DEBUGLEVEL>3) err_printf("qrom2: iteration %ld: %Ps\n", j,s[j]);
 
-    if (j >= KLOC && (ss = interp(h, s, j, bit_accuracy(prec)-(3*j/2)-6, KLOC)))
+    if (j >= KLOC && (ss = interp(h, s, j, prec2nbits(prec)-(3*j/2)-6, KLOC)))
       return gmulsg(sig, ss);
   }
   return NULL;
@@ -289,7 +289,7 @@ intinit_start(intdata *D, long m0, long flext, long prec)
   long m = findmforinit(m0, prec), lim = 20L<<m;
   if (flext > 0) lim = lim << (2*flext);
   D->m = m;
-  D->eps = bit_accuracy(prec);
+  D->eps = prec2nbits(prec);
   D->tabxp = cgetg(lim+1, t_VEC);
   D->tabwp = cgetg(lim+1, t_VEC);
   D->tabxm = cgetg(lim+1, t_VEC);
@@ -549,7 +549,7 @@ sumnuminit(GEN sig, long m, long sgn, long prec)
     tab = intnuminit(mkvec(gen_m1), mkvec(gen_1), m, prec);
   else
     tab = intnuminit(gen_0, b, m, prec);
-  eps = bit_accuracy(prec);
+  eps = prec2nbits(prec);
   t = gmul(pi, TABx0(tab));
   if (sgn < 0) TABw0(tab) = gdiv(TABw0(tab), gch(t, prec));
   else         TABw0(tab) = gmul(TABw0(tab), gth(t, prec));
@@ -1115,7 +1115,7 @@ intnuminitgen(void *E, GEN (*eval)(void*, GEN), GEN a, GEN b, long m,
     flag = (flag == f_SEMI) ? f_INF : f_OSC2;
   }
   newprec = (3*precl - 1)>>1;
-  h = bit_accuracy(precl)/2;
+  h = prec2nbits(precl)/2;
   eps = real2n(-h, newprec);
 
   if (not_osc(flag) || !gequal1(eval(E, gen_0)))

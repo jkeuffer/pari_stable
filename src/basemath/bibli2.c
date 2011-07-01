@@ -562,7 +562,7 @@ gprec_w(GEN x, long pr)
   {
     case t_REAL:
       if (signe(x)) return rtor(x,pr);
-      i = -bit_accuracy(pr);
+      i = -prec2nbits(pr);
       if (i < expo(x)) return real_0_bit(i);
       y = cgetr(2); y[1] = x[1]; return y;
     case t_COMPLEX:
@@ -810,7 +810,7 @@ binomial(GEN n, long k)
   }
 
   prec = precision(n);
-  if (prec && k > 200 + 0.8*bit_accuracy(prec)) {
+  if (prec && k > 200 + 0.8*prec2nbits(prec)) {
     GEN A = mpfactr(k, prec), B = ggamma(gsubgs(n,k-1), prec);
     return gerepileupto(av, gdiv(ggamma(gaddgs(n,1), prec), gmul(A,B)));
   }

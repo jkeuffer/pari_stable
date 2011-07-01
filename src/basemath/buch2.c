@@ -1429,7 +1429,7 @@ needed_bitprec(GEN x)
   for (i = 1; i < l; i++)
   {
     GEN c = gel(x,i);
-    long f = gexpo(c) - bit_accuracy(gprecision(c));
+    long f = gexpo(c) - prec2nbits(gprecision(c));
     if (f > e) e = f;
   }
   return e;

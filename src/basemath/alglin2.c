@@ -1013,7 +1013,7 @@ jacobi(GEN a, long prec)
     }
   }
   a = c; unr = real_1(prec);
-  de = bit_accuracy(prec);
+  de = prec2nbits(prec);
 
  /* e1 = min expo(a[i,i])
   * e2 = max expo(a[i,j]), i != j */

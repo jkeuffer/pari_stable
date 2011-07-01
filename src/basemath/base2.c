@@ -1757,7 +1757,7 @@ init_norm(norm_S *S, GEN nf, GEN p)
   {
     GEN M = nf_get_M(nf);
     long ex = gexpo(M) + gexpo(mului(8 * N, p));
-    if (N * ex <= bit_accuracy(gprecision(M)))
+    if (N * ex <= prec2nbits(gprecision(M)))
     { /* enough prec to use norm_by_embed */
       S->M = M;
       S->r1 = nf_get_r1(nf);

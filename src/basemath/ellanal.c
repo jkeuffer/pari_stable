@@ -271,7 +271,7 @@ number_of_terms_Sx(GEN x, long epsbit)
 static GEN
 cutoff_point(long r, GEN X, GEN emX, long epsbit, long prec)
 {
-  GEN M1 = ceilr(divsr(7*bit_accuracy(prec)+1, X));
+  GEN M1 = ceilr(divsr(7*prec2nbits(prec)+1, X));
   GEN M2 = gen_2, M = M1;
   for(;;)
   {
@@ -481,7 +481,7 @@ ellanalyticrank(GEN e, GEN eps, long prec)
   pari_timer T;
 
   if (!eps)
-    eps = real2n(-bit_accuracy(prec)/2+1, DEFAULTPREC);
+    eps = real2n(-prec2nbits(prec)/2+1, DEFAULTPREC);
   else
     if (typ(eps) != t_REAL) {
       eps = gtofp(eps, DEFAULTPREC);

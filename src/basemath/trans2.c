@@ -83,7 +83,7 @@ mpatan(GEN x)
     alpha = 1.65149612947 - e; /* log_2(Pi) - e */
   else
     alpha = log2(PI / atan(rtodbl(p1)));
-  beta = (double)(bit_accuracy(l)>>1);
+  beta = (double)(prec2nbits(l)>>1);
   delta = 1 + beta - alpha/2;
   if (delta <= 0) { n = 1; m = 0; }
   else
@@ -489,7 +489,7 @@ mpth(GEN x)
 
   if (!s) return real_0_bit(expo(x));
   lx = realprec(x);
-  if (absr_cmp(x, stor(bit_accuracy(lx), 3)) >= 0) {
+  if (absr_cmp(x, stor(prec2nbits(lx), 3)) >= 0) {
     y = real_1(lx);
   } else {
     pari_sp av = avma;
