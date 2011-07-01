@@ -129,17 +129,40 @@ static GEN
 ell_to_small(GEN E) { return (lg(E) <= 14)? E: vecslice(E, 1, 13); }
 
 /* fill y from x[1], ..., x[5] */
-static void
+static int
 initsmall(GEN x, GEN y)
 {
   GEN a1,a2,a3,a4,a6, b2,b4,b6,b8, c4,c6, D, j, a11, a13, a33, b22;
+  long l = lg(x);
 
-  checkell5(x);
-  gel(y,1) = a1 = gel(x,1);
-  gel(y,2) = a2 = gel(x,2);
-  gel(y,3) = a3 = gel(x,3);
-  gel(y,4) = a4 = gel(x,4);
-  gel(y,5) = a6 = gel(x,5);
+  switch(l)
+  {
+    case 1:
+    case 2:
+    case 4:
+    case 5:
+      pari_err(talker, "not an elliptic curve (ell5) in ellxxx");
+      return 0; break; /* not reached */
+    case 3:
+      a1 = a2 = a3 = gen_0;
+      a4 = gel(x,1);
+      a6 = gel(x,2);
+      break;
+    default :  /* l > 5 */
+      a1 = gel(x,1);
+      a2 = gel(x,2);
+      a3 = gel(x,3);
+      a4 = gel(x,4);
+      a6 = gel(x,5);
+      break;
+  }
+  if (typ(x)!=t_VEC)
+    pari_err(talker, "not an elliptic curve (ell5) in ellxxx");
+  gel(y,1) = a1;
+  gel(y,2) = a2;
+  gel(y,3) = a3;
+  gel(y,4) = a4;
+  gel(y,5) = a6;
   a11 = gsqr(a1);
   b2 = gadd(a11, gmul2n(a2,2));
   gel(y,6) = b2; /* a1^2 + 4a2 */
@@ -152,7 +175,7 @@ initsmall(GEN x, GEN y)
   b6 = gadd(a33, gmul2n(a6,2));
   gel(y,8) = b6; /* a3^2 + 4 a6 */
   b8 = gsub(gadd(gmul(a11,a6), gmul(b6, a2)), gmul(a4, gadd(a4,a13)));
-  gel(y,9) = b8; /* a1^2 a6 + 4a6 a2 + a2 a3^2 + 4 a6 - a4(a4 + a1 a3) */
+  gel(y,9) = b8; /* a1^2 a6 + 4a6 a2 + a2 a3^2 - a4(a4 + a1 a3) */
 
   b22 = gsqr(b2);
   c4 = gadd(b22, gmulsg(-24,b4));
@@ -164,10 +187,10 @@ initsmall(GEN x, GEN y)
   D = gsub(gmul(b4, gadd(gmulsg(9,gmul(b2,b6)),gmulsg(-8,gsqr(b4)))),
            gadd(gmul(b22,b8),gmulsg(27,gsqr(b6))));
   gel(y,12) = D;
-  if (gequal0(D)) pari_err(talker,"singular curve in ellinit");
+  if (gequal0(D)) return 0;
 
   j = gdiv(gmul(gsqr(c4),c4), D);
-  gel(y,13) = j;
+  gel(y,13) = j; return 1;
 }
 
 void
@@ -277,7 +300,8 @@ ellinit_padic(GEN x, GEN p, long prec)
   GEN y, j, b2, b4, c4, c6, p1, w, pv, a1, b1, x1, u2, q, e0, e1;
   long i, alpha;
 
-  y = cgetg(20,t_VEC); initsmall(x,y);
+  y = cgetg(20,t_VEC);
+  if (!initsmall(x,y)) return cgetg(1,t_VEC);
   /* convert now, not before initsmall: better accuracy */
   for (i=1; i<=13; i++)
     if (typ(gel(y,i)) != t_PADIC) gel(y,i) = cvtop(gel(y,i), p, prec);
@@ -343,10 +367,10 @@ set_dummy(GEN y) {
 static long
 base_ring(GEN x, GEN *pp, long *prec)
 {
-  long i, e = LONG_MAX;
+  long i, e = LONG_MAX, imax = minss(lg(x), 6);
   GEN p = NULL;
 
-  for (i = 1; i <= 5; i++)
+  for (i = 1; i < imax; i++)
   {
     GEN q = gel(x,i);
     switch(typ(q)) {
@@ -376,7 +400,8 @@ ellinit_real(GEN x, long prec)
   GEN y, D, R, T, w, a1, b1, x1, u2, q, pi2, aw1, w1, w2;
   long PREC, e;
 
-  y = cgetg(20,t_VEC); initsmall(x,y);
+  y = cgetg(20,t_VEC);
+  if (!initsmall(x,y)) return cgetg(1,t_VEC);
   if (!prec) { set_dummy(y); return y; }
 
   D = gel(y,12);
@@ -442,7 +467,7 @@ get_ell(GEN x)
   switch(typ(x))
   {
     case t_STR: return gel(ellsearchcurve(x),2);
-    case t_VEC: switch(lg(x)) { case 6: case 14: case 20: return x; }
+    case t_VEC: switch(lg(x)) { case 3: case 6: case 14: case 20: return x; }
     /*fall through*/
   }
   pari_err(talker, "not an elliptic curve (ell5) in ellxxx");
@@ -453,7 +478,8 @@ smallellinit(GEN x)
 {
   pari_sp av = avma;
   GEN y = cgetg(14,t_VEC);
-  initsmall(get_ell(x),y); return gerepilecopy(av,y);
+  if (!initsmall(get_ell(x),y)) y = cgetg(1,t_VEC);
+  return gerepilecopy(av,y);
 }
 GEN
 ellinit(GEN x, long prec)

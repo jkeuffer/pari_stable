@@ -1,6 +1,6 @@
 default(realprecision,38);
 ellap(ellinit([1,0,1,4,-6]), 2)
-ellap(ellinit([0,0,0,0,17]), 2)
+ellap(ellinit([0,17]), 2)
 ellap(ellinit([0, 0, 1, -1, 0]),2486246173)
 for(x=10,63,p=nextprime(2^x);E=ellinit([0,0,1,2,3]);print(p,":",ellgroup(E,p)))
 
@@ -10,23 +10,23 @@ e=elllog(E,P,Q,242)
 ellpow(E,Q,e) == P
 
 p=655637;
-E=ellinit([0,0,0,123,47]*Mod(1,p));
+E=ellinit([123,47]*Mod(1,p));
 X=1;until(Y!=[],X++;Y=ellordinate(E,X));
 P=[X,Y[1]]; Q=ellpow(E,P,113);
 o=ellorder(E,P, p+1-ellap(E,p))
 e=elllog(E,P,Q,o)
 ellpow(E,Q,e) == P
 
-elltors(ellinit([0,0,0,-2147484185^2,0]))
+elltors(ellinit([-2147484185^2,0]))
 
 ellanalyticrank(ellinit([0, -1, 1, -10, -20]))
 ellanalyticrank(ellinit([0, 0, 1, -1, 0]))
 ellanalyticrank(ellinit([0, 1, 1, -2, 0]))
 ellanalyticrank(ellinit([0, 0, 1, -7, 6]))
-ellanalyticrank(ellinit([0, 0, 0, -5187, 176830]))
+ellanalyticrank(ellinit([-5187, 176830]))
 
 ellheegner(ellinit([0, -1, 1, -33, 93]))
-ellheegner(ellinit([0,0,0,-157^2,0]))
+ellheegner(ellinit([-157^2,0]))
 
 elldivpol(ellinit([1,2,3,5,7]),4)
 
@@ -34,4 +34,4 @@ elldivpol(ellinit([1,2,3,5,7]),4)
 ellwp(ellinit([0,-1,1,-10,-20]),,,11)
 
 \\#1186
-ellpow(ellinit([0,0,0,3,0]), [1,2], -quadgen(-4))
+ellpow(ellinit([3,0]), [1,2], -quadgen(-4))

@@ -1,7 +1,7 @@
 default(realprecision,38);
 \e
-gettime; ellinit([0,0,0,-1,0])
-ellinit([0,0,0,-17,0],1)
+gettime; ellinit([-1,0])
+ellinit([-17,0],1)
 ellsub(%,[-1,4],[-4,2])
 ellj(I)
 \\
@@ -27,7 +27,7 @@ ellpow(acurve,apoint,10)
 ellwp(acurve,,,32)
 q*Ser(ellan(acurve,100),q)
 \\
-bcurve=ellinit([0,0,0,-3,0])
+bcurve=ellinit([-3,0])
 elllocalred(bcurve,2)
 elltaniyama(bcurve)
 \\
@@ -39,7 +39,7 @@ tcurve=ellinit([1,0,1,-19,26]);
 ellorder(tcurve,[1,2])
 elltors(tcurve)
 \\
-mcurve=ellinit([0,0,0,-17,0])
+mcurve=ellinit([-17,0])
 mpoints=[[-1,4],[-4,2]]~
 mhbi=ellbil(mcurve,mpoints,[9,24])
 ma=ellheightmatrix(mcurve,mpoints)

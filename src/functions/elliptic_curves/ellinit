@@ -2,28 +2,33 @@ Function: ellinit
 Section: elliptic_curves
 C-Name: ellinit0
 Prototype: GD0,L,p
-Help: ellinit(x,{flag=0}): x being the vector [a1,a2,a3,a4,a6] defining the
+Help: ellinit(x,{flag=0}): x being a vector [a1,a2,a3,a4,a6] or [a4,a6]
+ defining the
  curve Y^2 + a1.XY + a3.Y = X^3 + a2.X^2 + a4.X + a6, gives the vector:
  [a1,a2,a3,a4,a6,b2,b4,b6,b8,c4,c6,disc,j,[e1,e2,e3],w1,w2,eta1,eta2,area].
  If the curve is defined over a p-adic field, the last six components are
  replaced by root,u^2,u,q,w,0. If optional flag is 1, omit them altogether.
- x can also be a string, in this case the coefficients of the curve with
- matching name are looked in the elldata database if available.
+ x can also be a string, in which case the curve with matching name is
+ retrieved from the elldata database, if available.
 Description:
  (gen, ?0):bell:prec    ellinit($1, prec)
  (gen, 1):ell           smallellinit($1)
  (gen, small):ell:prec  ellinit0($1, $2, prec)
 Doc:
- initialize an \tet{ell} structure,
- associated to the elliptic curve $E$. $E$ is either a $5$-component
- vector $[a_1,a_2,a_3,a_4,a_6]$ defining the elliptic curve with Weierstrass
- equation
- $$ Y^2 + a_1 XY + a_3 Y = X^3 + a_2 X^2 + a_4 X + a_6 $$
- or a string, in this case the coefficients of the curve with matching name
- are looked in the \tet{elldata} database if available.
+ initialize an \tet{ell} structure, associated to the elliptic curve $E$.
+ $E$ is either
+ \item a $5$-component vector $[a_1,a_2,a_3,a_4,a_6]$ defining the elliptic
+ curve with Weierstrass equation
+ $$ Y^2 + a_1 XY + a_3 Y = X^3 + a_2 X^2 + a_4 X + a_6, $$
+ \item a $2$-component vector $[a_4,a_6]$ defining the elliptic
+ curve with short Weierstrass equation
+ $$ Y^2 = X^3 + a_4 X + a_6, $$
+ \item a character string in Cremona's notation, in which case the curve is
+ retrieved from the \tet{elldata} database if available.
  \bprog
  ? E = ellinit([0,0,0,0,1]); \\ y^2 = x^3 + 1
  ? E = ellinit("36a1");      \\ the same curve, using Cremona's notations
+ ? E = ellinit([0,1]);       \\ still the same curve, short form
  @eprog\noindent
  For the time being, only curves over a prime field $\F_p$ and over the
  $p$-adic or real numbers (including rational numbers) are fully supported.
