@@ -1194,7 +1194,7 @@ szeta_odd(long k, long prec)
     for (n=0; n <= kk>>1; n+=2)
     {
       p1 = mulrr(bernreal(kk-n,prec),bernreal(n,prec));
-      if (n) { binom = next_bin(binom,kk,n); setlg(binom,prec+1); }
+      if (n) { binom = next_bin(binom,kk,n); setprec(binom,prec+1); }
       p1 = mulrr(binom,p1);
       if (n == kk>>1) setexpo(p1, expo(p1)-1);
       if ((n>>1)&1) togglesign(p1);
@@ -1211,7 +1211,7 @@ szeta_odd(long k, long prec)
 
       z = addrr(z,p1); if ((ep1 = expo(p1)) < li) break;
       l = (ep1 < 0) ? prec+1 : prec+1 + nbits2nlong(ep1);
-      if (l < realprec(qn)) setlg(qn, l);
+      if (l < realprec(qn)) setprec(qn, l);
       qn = mulrr(qn,q);
       if (low_stack(limit,stack_lim(av2,1)))
       {
@@ -1246,7 +1246,7 @@ szeta_odd(long k, long prec)
 
       z = addrr(z,p1); if ((ep1 = expo(p1)) < li) break;
       l = (ep1 < 0)? prec+1 : prec+1 + nbits2nlong(ep1);
-      if (l < realprec(qn)) setlg(qn, l);
+      if (l < realprec(qn)) setprec(qn, l);
       qn = mulrr(qn,q);
       if (low_stack(limit,stack_lim(av2,1)))
       {

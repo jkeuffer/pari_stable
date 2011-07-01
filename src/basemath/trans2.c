@@ -105,24 +105,24 @@ mpatan(GEN x)
   p2 = rtor(p1, l2); av = avma;
   for (i=1; i<=m; i++)
   {
-    p5 = addsr(1, sqrr(p2)); setlg(p5,l2);
-    p5 = addsr(1, sqrtr_abs(p5)); setlg(p5,l2);
+    p5 = addsr(1, sqrr(p2)); setprec(p5,l2);
+    p5 = addsr(1, sqrtr_abs(p5)); setprec(p5,l2);
     affrr(divrr(p2,p5), p2); avma = av;
   }
-  p3 = sqrr(p2); l1 = minss(4, l2); /* l1 increases to l2 */
-  unr = real_1(l2); setlg(unr, l1);
-  p4 = cgetr(l2);   setlg(p4, l1);
+  p3 = sqrr(p2); l1 = minss(4, l2); /* l1 increases to l2 */;
+  unr = real_1(l2); setprec(unr,l1);
+  p4 = cgetr(l2); setprec(p4,l1);
   affrr(divru(unr,2*n+1), p4);
   s = 0; e = expo(p3); av = avma;
   for (i = n; i > 1; i--) /* n >= 1. i = 1 done outside for efficiency */
   {
-    setlg(p3,l1); p5 = mulrr(p4,p3);
+    setprec(p3,l1); p5 = mulrr(p4,p3);
     l1 += dvmdsBIL(s - e, &s); if (l1 > l2) l1 = l2;
-    setlg(unr,l1); p5 = subrr(divru(unr,2*i-1), p5);
-    setlg(p4,l1); affrr(p5,p4); avma = av;
+    setprec(unr,l1); p5 = subrr(divru(unr,2*i-1), p5);
+    setprec(p4,l1); affrr(p5,p4); avma = av;
   }
-  setlg(p3, l2); p5 = mulrr(p4,p3); /* i = 1 */
-  setlg(unr,l2); p4 = subrr(unr, p5);
+  setprec(p3, l2); p5 = mulrr(p4,p3); /* i = 1 */
+  setprec(unr,l2); p4 = subrr(unr, p5);
 
   p4 = mulrr(p2,p4); setexpo(p4, expo(p4)+m);
   if (inv) p4 = subrr(Pi2n(-1, lp), p4);
@@ -947,7 +947,7 @@ red_mod_2z(GEN x, GEN z)
   GEN Z = gmul2n(z, 1), d = subrr(z, x);
   /* require little accuracy */
   if (!signe(d)) return x;
-  setlg(d, nbits2prec(expo(d) - expo(Z)));
+  setprec(d, nbits2prec(expo(d) - expo(Z)));
   return addrr(mulir(floorr(divrr(d, Z)), Z), x);
 }
 #endif

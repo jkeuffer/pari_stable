@@ -2199,16 +2199,16 @@ rootsold(GEN x, long prec)
           }
         }
         z = gel(y,k+m*i);
-        setlg(gel(z,1), 3);
-        setlg(gel(z,2), 3); gaffect(p3, z); avma = av2;
+        setprec(gel(z,1), 3);
+        setprec(gel(z,2), 3); gaffect(p3, z); avma = av2;
         ln = 1; mask = mask0;
         while (mask > 1)
         {
           GEN p6;
           ln <<= 1; if (mask & 1) ln--;
           mask >>= 1;
-          setlg(gel(z,1), ln+2);
-          setlg(gel(z,2), ln+2); p6 = signe(gel(z,2))? z: gel(z,1);
+          setprec(gel(z,1), ln+2);
+          setprec(gel(z,2), ln+2); p6 = signe(gel(z,2))? z: gel(z,1);
           p6 = gsub(z, gdiv(poleval(xc,p6), poleval(xd,p6)));
           gaffect(p6, z); avma = av2;
         }

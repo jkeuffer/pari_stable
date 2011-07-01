@@ -1485,17 +1485,17 @@ exp1r_abs(GEN x)
     for (i=n; i>=2; i--, avma = av2)
     { /* compute X^(n-1)/n! + ... + X/2 + 1 */
       GEN p1, p3;
-      setlg(X,l1); p3 = divru(X,i);
+      setprec(X,l1); p3 = divru(X,i);
       l1 += dvmdsBIL(s - expo(p3), &s); if (l1>L) l1=L;
-      setlg(unr,l1); p1 = addrr_sign(unr,1, i == n? p3: mulrr(p3,p2),1);
-      setlg(p2,l1); affrr(p1,p2); /* p2 <- 1 + (X/i)*p2 */
+      setprec(unr,l1); p1 = addrr_sign(unr,1, i == n? p3: mulrr(p3,p2),1);
+      setprec(p2,l1); affrr(p1,p2); /* p2 <- 1 + (X/i)*p2 */
     }
-    setlg(X,L); p2 = mulrr(X,p2);
+    setprec(X,L); p2 = mulrr(X,p2);
   }
 
   for (i=1; i<=m; i++)
   {
-    if (lg(p2) > L) setlg(p2,L);
+    if (realprec(p2) > L) setprec(p2,L);
     p2 = mulrr(p2, addsr(2,p2));
   }
   affrr_fixlg(p2,y); avma = av; return y;
@@ -2008,16 +2008,16 @@ logr_abs(GEN X)
     pari_sp av = avma;
     long s = 0, incs = (long)d, l1 = nbits2prec((long)d);
     S = x;
-    setlg(S,  l1);
-    setlg(unr,l1); affrr(divru(unr,k), S); /* destroy x, not needed anymore */
+    setprec(S,  l1);
+    setprec(unr,l1); affrr(divru(unr,k), S); /* destroy x, not needed anymore */
     for (k -= 2;; k -= 2) /* k = 2n+1, ..., 1 */
     { /* S = y^(2n+1-k)/(2n+1) + ... + 1 / k */
-      setlg(y2, l1); T = mulrr(S,y2);
+      setprec(y2, l1); T = mulrr(S,y2);
       if (k == 1) break;
 
       l1 += dvmdsBIL(s + incs, &s); if (l1>L) l1=L;
-      setlg(S, l1);
-      setlg(unr,l1);
+      setprec(S, l1);
+      setprec(unr,l1);
       affrr(addrr(divru(unr, k), T), S); avma = av;
     }
     /* k = 1 special-cased for eficiency */
@@ -2242,14 +2242,14 @@ mpsc1(GEN x, long *ptmod8)
     for (i=n; i>=2; i--)
     {
       GEN p1;
-      setlg(x2,l1); p1 = divrunu(x2, 2*i-1);
+      setprec(x2,l1); p1 = divrunu(x2, 2*i-1);
       l1 += dvmdsBIL(s - expo(p1), &s); if (l1>L) l1=L;
       if (i != n) p1 = mulrr(p1,p2);
-      setlg(unr,l1); p1 = addrr_sign(unr,1, p1,-signe(p1));
-      setlg(p2,l1); affrr(p1,p2); avma = av;
+      setprec(unr,l1); p1 = addrr_sign(unr,1, p1,-signe(p1));
+      setprec(p2,l1); affrr(p1,p2); avma = av;
     }
     p2[1] = evalsigne(-signe(p2)) | evalexpo(expo(p2)-1); /* p2 := -p2/2 */
-    setlg(x2,L); p2 = mulrr(x2,p2);
+    setprec(x2,L); p2 = mulrr(x2,p2);
   }
   /* Now p2 = sum {1<= i <=n} (-1)^i x^(2i) / (2i)! ~ cos(x) - 1 */
   for (i=1; i<=m; i++)

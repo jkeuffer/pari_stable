@@ -706,7 +706,7 @@ pow_check(ulong p, GEN *x, GEN *logx, long *k)
 {
   GEN u, y;
   long e;
-  setlg(*logx, DEFAULTPREC + (lg(*x)-2) / p);
+  setprec(*logx, DEFAULTPREC + (lg(*x)-2) / p);
   u = divru(*logx, p); y = grndtoi(mpexp(u), &e);
   if (e >= -10 || !equalii(powiu(y, p), *x)) return 0;
   *k *= p; *x = y; *logx = u; return 1;

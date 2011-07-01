@@ -245,7 +245,7 @@ preci(GEN o, long p)
   for (i=1; i<l; i++)
   {
     GEN x = gel(o,i);
-    if (typ(x)==t_COMPLEX) { setlg(x[1],p); setlg(x[2],p); } else setlg(x,p);
+    if (typ(x)==t_COMPLEX) { setprec(x[1],p); setprec(x[2],p); } else setprec(x,p);
   }
 }
 static void

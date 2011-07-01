@@ -106,7 +106,7 @@ typedef unsigned long pari_ulong;
 
 #define lg(x)         ((long)(((ulong*)(x))[0] & LGBITS))
 #define setlg(x,s)    (((ulong*)(x))[0]=\
-                        (((ulong*)(x))[0]&(~LGBITS)) | evallg(s))
+                      (((ulong*)(x))[0]&(~LGBITS)) | evallg(s))
 
 #define signe(x)      ((((long*)(x))[1]) >> SIGNSHIFT)
 #define setsigne(x,s) (((ulong*)(x))[1]=\
@@ -116,7 +116,9 @@ typedef unsigned long pari_ulong;
 #define setlgefint(x,s) (((ulong*)(x))[1]=\
                           (((ulong*)(x))[1]&(~LGBITS)) | (ulong)evallgefint(s))
 
-#define realprec(x)         ((long)(((ulong*)(x))[0] & LGBITS))
+#define realprec(x)   ((long)(((ulong*)(x))[0] & LGBITS))
+#define setprec(x,s)  (((ulong*)(x))[0]=\
+                      (((ulong*)(x))[0]&(~LGBITS)) | evallg(s))
 
 #define expo(x)       ((long) ((((ulong*)(x))[1] & EXPOBITS) - HIGHEXPOBIT))
 #define setexpo(x,s)  (((ulong*)(x))[1]=\
