@@ -97,13 +97,6 @@ if test -n "$readline"; then
 fi
 
 if test -n "$readline"; then
-  if test -z "$rl_library_version"; then
-    echo "!!! Possible mismatch between readline headers and library:"
-    echo "!!!  header is apparently for v1.0, library reports $readline_version!"
-    readline_version="1.0=Header/$readline_version=Lib"
-    rl_fake_library_version=yes
-  fi
-
   if test "$fastread" != yes; then
     cat << EOM
 ==========================================================================
