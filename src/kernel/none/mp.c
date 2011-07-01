@@ -164,7 +164,7 @@ static GEN
 addiispec(GEN x, GEN y, long nx, long ny)
 {
   GEN xd, yd, zd;
-  long lz, i;
+  long lz, i = -2;
   LOCAL_OVERFLOW;
 
   if (nx < ny) swapspec(x,y, nx,ny);
@@ -174,7 +174,11 @@ addiispec(GEN x, GEN y, long nx, long ny)
   xd = x + nx;
   yd = y + ny;
   zd[-1] = addll(xd[-1], yd[-1]);
-  for (i = -2; i >= -ny; i--) zd[i] = addllx(xd[i], yd[i]);
+#ifndef addllx8
+  for (  ; i-8 > -ny; i-=8)
+    addllx8(xd+i, yd+i, zd+i, overflow);
+#endif
+  for (  ; i >= -ny; i--) zd[i] = addllx(xd[i], yd[i]);
   if (overflow)
     for(;;)
     {
