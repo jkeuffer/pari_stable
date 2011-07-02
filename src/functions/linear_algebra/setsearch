@@ -2,34 +2,25 @@ Function: setsearch
 Section: linear_algebra
 C-Name: setsearch
 Prototype: lGGD0,L,
-Help: setsearch(S,x,{flag=0}): looks if x belongs to the set S. If flag is 0
- or omitted, returns 0 if it is not, otherwise returns the index j such that
- x==S[j]. If flag is non-zero, return 0 if x belongs to S, otherwise the
- index j where it should be inserted.
-Doc: searches if $x$ belongs to the set $S$ (see \kbd{setisset}).
- A set is a vector of \typ{STR}, but this function
- works also if $S$ is a arbitrary \emph{sorted} vector or list (see
- \kbd{listsort}): if $x$ is not a \typ{STR}, we first
- replace it by \kbd{Str}$(x)$ \emph{unless} the first element of $S$ is also
- not a \typ{STR}.
+Help: setsearch(S,x,{flag=0}): determines whether x belongs to the set S.
+ If flag is 0 or omitted, returns 0 if it does not, otherwise returns the index
+ j such that x==S[j]. If flag is non-zero, return 0 if x belongs to S,
+ otherwise the index j where it should be inserted.
+Doc: determines whether $x$ belongs to the set $S$ (see \kbd{setisset}).
 
  If $x$ belongs to the set and $\fl$ is zero or omitted, returns the
  index $j$ such that $S[j]=x$, otherwise returns 0. If $\fl$ is non-zero
  returns the index $j$ where $x$ should be inserted, and $0$ if it already
  belongs to $S$ (this is meant to be used in conjunction with
- \kbd{listinsert}, see below).
+ \kbd{listinsert}, see below). If $x$ is not a set, the result is undefined.
  \bprog
- ? T = [2,3,5,7]; S = Set(T);
- ? setsearch(S, 2)      \\ search in a true set, t_INT 2 converted to string
+ ? T = [7,2,3,5]; S = Set(T);
+ ? setsearch(S, 2)
  %2 = 1
- ? setsearch(S, Str(2)) \\ search in a true set, no need for conversion
- %3 = 1
- ? setsearch(T, 2)      \\ search in a sorted vector, no need for conversion
- %4 = 1
- ? setsearch(T, Str(2)) \\ search in a sorted vector, t_STR "2" not found
- %5 = 0
  ? setsearch(S, 4)      \\ not found
- %6 = 0
+ %3 = 0
  ? setsearch(S, 4, 1)   \\ should have been inserted at index 3
- %7 = 3
+ %4 = 3
+ ? setsearch(T, 7)      \\ search in a randomly sorted vector
+ %5 = 0 \\ WRONG !
  @eprog

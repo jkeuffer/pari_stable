@@ -1686,36 +1686,19 @@ merge_factor_i(GEN f, GEN g)
 /*                          SET OPERATIONS                             */
 /*                                                                     */
 /***********************************************************************/
-static GEN
-vectoset(GEN x)
-{
-  long i, lx = lg(x);
-  GEN y = cgetg(lx,t_VEC);
-  if (lx == 1) return y;
-  for (i=1; i<lx; i++) gel(y,i) = GENtoGENstr_nospace(simplify_shallow(gel(x,i)));
-  return vecpermute(y, gen_sortspec_uniq(y, lx-1, (void*)&gcmp, cmp_nodata));
-}
-
 GEN
 gtoset(GEN x)
 {
-  pari_sp av;
   long tx, lx;
-  GEN y;
-
   if (!x) return cgetg(1, t_VEC);
   tx = typ(x); lx = lg(x);
   if (!is_vec_t(tx))
   {
-    if (tx != t_LIST) {
-      y = cgetg(2,t_VEC); av = avma;
-      gel(y,1) = gerepileupto(av, GENtoGENstr_nospace(simplify_shallow(x)));
-      return y;
-    }
+    if (tx != t_LIST) return mkveccopy(x);
     x = list_data(x); lx = x? lg(x): 1;
   }
   if (lx==1) return cgetg(1,t_VEC);
-  av = avma; return gerepilecopy(av, vectoset(x));
+  return gen_sort_uniq(x, (void*)&cmp_universal, cmp_nodata);
 }
 
 long
@@ -1725,19 +1708,15 @@ setisset(GEN x)
 
   if (typ(x) != t_VEC) return 0;
   if (lx == 1) return 1;
-  for (i=1; i<lx; i++)
-    if (typ(x[i]) != t_STR) return 0;
   for (i=1; i<lx-1; i++)
-    if (strcmp(GSTR(gel(x,i+1)), GSTR(gel(x,i))) <= 0) return 0;
+    if (cmp_universal(gel(x,i+1), gel(x,i)) <= 0) return 0;
   return 1;
 }
 
 long
 setsearch(GEN T, GEN y, long flag)
 {
-  pari_sp av = avma;
-  long lx, res;
-
+  long lx;
   switch(typ(T))
   {
     case t_VEC: lx = lg(T); break;
@@ -1746,10 +1725,7 @@ setsearch(GEN T, GEN y, long flag)
       return 0; /*not reached*/
   }
   if (lx==1) return flag? 1: 0;
-  if (typ(y) != t_STR && typ(gel(T,1)) == t_STR)
-    y = GENtoGENstr_nospace(simplify_shallow(y));
-  res = gen_search(T,y,flag,(void*)gcmp,cmp_nodata);
-  avma = av; return res;
+  return gen_search(T,y,flag,(void*)cmp_universal,cmp_nodata);
 }
 
 GEN
@@ -1762,7 +1738,7 @@ setunion(GEN x, GEN y)
   i = j = k = 1;
   while (i<lx && j<ly)
   {
-    int s = gcmp(gel(x,i), gel(y,j));
+    int s = cmp_universal(gel(x,i), gel(y,j));
     if (s < 0)
       z[k++] = x[i++];
     else if (s > 0)
@@ -1811,7 +1787,7 @@ setintersect(GEN x, GEN y)
   if (typ(x) != t_VEC || typ(y) != t_VEC) pari_err(typeer, "setintersect");
   while (ix < lx && iy < ly)
   {
-    int c = gcmp(gel(x,ix), gel(y,iy));
+    int c = cmp_universal(gel(x,ix), gel(y,iy));
     if      (c < 0) ix++;
     else if (c > 0) iy++;
     else { gel(z, iz++) = gel(x,ix); ix++; iy++; }
@@ -1841,5 +1817,5 @@ GEN
 setminus(GEN x, GEN y)
 {
   if (typ(x) != t_VEC || typ(y) != t_VEC) pari_err(typeer,"setminus");
-  return gen_setminus(x,y,gcmp);
+  return gen_setminus(x,y,cmp_universal);
 }

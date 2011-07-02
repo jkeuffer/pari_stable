@@ -14,6 +14,8 @@ Done for version 2.6.0 (released ??/??/20??):
     1- mathnf: swapped flag 3 and 5.
     2- allow ellinit([a4,a6]) [#1213]
     3- ellinit(... singular curve ...]): return [] instead of raising an error
+    4- GP set elements are no longer converted to t_STR (requiring "eval" to
+       recover the underlying object). Arbitrary GENs can be stored in a set.
 
   Added
     1- mathnf for matrices over K[X] [#41]
