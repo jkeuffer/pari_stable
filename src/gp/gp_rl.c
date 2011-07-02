@@ -29,6 +29,9 @@ typedef int (*RLCI)(int, int); /* rl_complete and rl_insert functions */
 typedef char* (*GF)(const char*, int); /* generator function */
 
 BEGINEXTERN
+/* otherwise C++ compilers will choke on rl_message() prototype */
+#define USE_VARARGS
+#define PREFER_STDARG
 #include <readline/readline.h>
 #include <readline/history.h>
 ENDEXTERN
