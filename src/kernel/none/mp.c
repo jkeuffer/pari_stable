@@ -1640,14 +1640,14 @@ muliispec(GEN a, GEN b, long na, long nb)
   return gerepileuptoint(av, addshiftw(c,c0, n0));
 }
 
-/* x % (2^n), assuming x, n >= 0 */
+/* x % (2^n), assuming n >= 0 */
 GEN
 remi2n(GEN x, long n)
 {
-  long hi,l,k,lx,ly;
+  long hi,l,k,lx,ly, sx = signe(x);
   GEN z, xd, zd;
 
-  if (!signe(x) || !n) return gen_0;
+  if (!sx || !n) return gen_0;
 
   k = dvmdsBIL(n, &l);
   lx = lgefint(x);
@@ -1667,7 +1667,7 @@ remi2n(GEN x, long n)
     ly = k+3;
 
   zd = z = cgeti(ly);
-  *++zd = evalsigne(1) | evallgefint(ly);
+  *++zd = evalsigne(sx) | evallgefint(ly);
   if (hi) *++zd = hi;
   for ( ;k; k--) *++zd = *++xd;
   return z;

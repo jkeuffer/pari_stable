@@ -1162,7 +1162,7 @@ sqrispec(GEN x, long nx)
   return zd;
 }
 
-/* x % (2^n), assuming x, n >= 0 */
+/* x % (2^n), assuming n >= 0 */
 GEN
 remi2n(GEN x, long n)
 {
