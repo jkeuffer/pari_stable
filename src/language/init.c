@@ -528,7 +528,7 @@ pari_init_defaults(void)
   pari_datadir = os_getenv("GP_DATA_DIR");
   if (!pari_datadir)
   {
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__CYGWIN32__)
     if (paricfg_datadir[0]=='@' && paricfg_datadir[1]==0)
       pari_datadir = win32_datadir();
     else
