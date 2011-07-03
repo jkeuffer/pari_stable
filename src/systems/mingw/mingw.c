@@ -34,10 +34,10 @@ static WORD
 win32_console_color(unsigned long c)
 {
   int shift, intense = 0;
-  if( c >= 30 && c <= 37 ) { shift = 0; c %= 30; } else
-  if( c >= 40 && c <= 47 ) { shift = 4; c %= 40; } else
-  if( c >= 90 && c <= 97 ) { shift = 0; intense = 8; c %= 90; } else
-  if(c >= 100 && c <= 107) { shift = 4; intense = 8; c %= 100; } else
+  if( c >= 30 && c <= 37 ) { shift = 0; c -= 30; } else
+  if( c >= 40 && c <= 47 ) { shift = 4; c -= 40; } else
+  if( c >= 90 && c <= 97 ) { shift = 0; intense = 8; c -= 90; } else
+  if(c >= 100 && c <= 107) { shift = 4; intense = 8; c -= 100; } else
   return 0;
 
   WORD w = 0;
