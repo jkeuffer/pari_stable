@@ -753,12 +753,15 @@ listeheegner(GEN ell, GEN N, GEN D)
 static GEN
 heightQ(GEN P, long prec)
 {
+  long s;
   if (typ(P) == t_FRAC)
   {
     GEN a = gel(P,1), b = gel(P,2);
     P = absi_cmp(a,b) > 0 ? a: b;
   }
-  if (signe(P) < 0) P = absi(P);
+  s = signe(P);
+  if (!s) return real_0(prec);
+  if (s < 0) P = absi(P);
   return glog(P, prec);
 }
 
