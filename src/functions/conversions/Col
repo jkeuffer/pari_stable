@@ -32,3 +32,4 @@ Doc:
  the beginning if $n < 0$. The dimension of the resulting vector is $|n|$.
 
  Note that the function \kbd{Colrev} does not exist, use \kbd{Vecrev}.
+Variant: \fun{GEN}{gtocol}{GEN x} is also available.
