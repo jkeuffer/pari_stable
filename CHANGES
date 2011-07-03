@@ -16,8 +16,10 @@ Done for version 2.6.0 (released ??/??/20??):
     3- ellinit(... singular curve ...]): return [] instead of raising an error
     4- GP set elements are no longer converted to t_STR (requiring "eval" to
        recover the underlying object). Arbitrary GENs can be stored in a set.
+    5- moved Odos/* to relevant src/systems subdirectory
 
   Added
     1- mathnf for matrices over K[X] [#41]
 
   Removed
+    1- dropped DOS support
