@@ -20,6 +20,9 @@ Done for version 2.6.0 (released ??/??/20??):
 
   Added
     1- mathnf for matrices over K[X] [#41]
+BA  2- GP function ellheegner
+BA  3- asm inline macro addllx8 for faster addition.
+BA  4- Library function FpXQ_autpowers
 
   Removed
     1- dropped DOS support
