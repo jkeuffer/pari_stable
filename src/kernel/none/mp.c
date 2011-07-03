@@ -228,7 +228,7 @@ static GEN
 subiispec(GEN x, GEN y, long nx, long ny)
 {
   GEN xd,yd,zd;
-  long lz;
+  long lz, i = -2;
   LOCAL_OVERFLOW;
 
   if (ny==1) return subiuspec(x,*y,nx);
@@ -236,18 +236,19 @@ subiispec(GEN x, GEN y, long nx, long ny)
   lz = nx+2; (void)new_chunk(lz);
   xd = x + nx;
   yd = y + ny;
-  *--zd = subll(*--xd, *--yd);
-  while (yd > y) *--zd = subllx(*--xd, *--yd);
+  zd[-1] = subll(xd[-1], yd[-1]);
+  for (  ; i >= -ny; i--) zd[i] = subllx(xd[i], yd[i]);
   if (overflow)
     for(;;)
     {
-      *--zd = ((ulong)*--xd) - 1;
-      if (*xd) break;
+      zd[i] = ((ulong)xd[i]) - 1;
+      if (xd[i--]) break;
     }
-  if (xd == x)
-    while (*zd == 0) { zd++; lz--; } /* shorten z */
+  if (i>=-nx)
+    for (; i >= -nx; i--) zd[i] = xd[i];
   else
-    do  *--zd = *--xd; while (xd > x);
+    while (zd[i+1] == 0) { i++; lz--; } /* shorten z */
+  zd += i+1;
   *--zd = evalsigne(1) | evallgefint(lz);
   *--zd = evaltyp(t_INT) | evallg(lz);
   avma=(pari_sp)zd; return zd;
