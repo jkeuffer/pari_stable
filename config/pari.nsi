@@ -1,6 +1,8 @@
+;--- PARI/GP: NullSoft Installer configuration file
 !include "MUI.nsh"
-Name "PARI 2.5 (STABLE)"
-!define dll "libpari-gmp.dll"
+Name "PARI 2.6 (TESTING)"
+!define dll "libpari-gmp-2.6.dll"
+!define PARIver "PARI-2-6"
 
 ;--No need to modify things below --
 !define top ".."
@@ -8,8 +10,8 @@ Name "PARI 2.5 (STABLE)"
 AutoCloseWindow false
 
 OutFile "Pari.exe"
-InstallDir "$PROGRAMFILES\PARI"
-InstallDirRegKey HKLM "Software\PARI" ""
+InstallDir "$PROGRAMFILES\${PARIver}"
+InstallDirRegKey HKLM "Software\${PARIver}" ""
 
 !define MUI_ABORTWARNING
 
@@ -29,16 +31,16 @@ InstallDirRegKey HKLM "Software\PARI" ""
 ;--------------------------------
 ;Installer Sections
 
-!define uninst "Software\Microsoft\Windows\CurrentVersion\Uninstall\PARI"
+!define uninst "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PARIver}"
 
 Section "pari (required)" SecCopy
   SetOutPath "$INSTDIR"
   File /oname=gp.exe "${objdir}\gp-dyn.exe"
-  File "makegprc"
+  File /oname=.gprc "cygwin-gprc"
   File "${top}\misc\tex2mail"
   File "${objdir}\${dll}"
   File "\cygwin\bin\cyggmp-3.dll"
-  File "\cygwin\bin\cygncurses-9.dll"
+  File "\cygwin\bin\cygncursesw-10.dll"
   File "\cygwin\bin\cygreadline7.dll"
   File "\cygwin\bin\cygperl5_10.dll"
   File "\cygwin\bin\cyggcc_s-1.dll"
@@ -47,19 +49,15 @@ Section "pari (required)" SecCopy
   File "\cygwin\bin\perl.exe"
   File "\cygwin\bin\sh.exe"
 
-  WriteRegStr HKCU "Software\PARI" "" $INSTDIR
-  WriteRegStr HKLM ${uninst} "DisplayName" "PARI (remove only)"
+  WriteRegStr HKCU "Software\${PARIver}" "" $INSTDIR
+  WriteRegStr HKLM ${uninst} "DisplayName" "${PARIver} (remove only)"
   WriteRegStr HKLM ${uninst} "UninstallString" '"$INSTDIR\uninstall.exe"'
-  
-  WriteUninstaller "$INSTDIR\Uninstall.exe"
 
-  SetOutPath "$INSTDIR"
-  ExecWait "perl makegprc $INSTDIR"
-  Delete "$INSTDIR\makegprc"
+  WriteUninstaller "$INSTDIR\Uninstall.exe"
 SectionEnd
 
 Section "Galois files" SecGAL
-  SetOutPath "$INSTDIR\galdata"
+  SetOutPath "$INSTDIR\data\galdata"
   File "${top}\data\galdata\*"
 SectionEnd
 
@@ -67,7 +65,6 @@ Section "documentation" SecDOC
   SetOutPath "$INSTDIR"
   File "${top}\doc\gphelp"
   SetOutPath $INSTDIR\doc
-  File "acro.exe"
   File "${top}\doc\translations"
   File "${top}\doc\*.tex"
   File "${top}\doc\*.pdf"
@@ -89,8 +86,8 @@ Function .onInstSuccess
   ExecShell "open" "$INSTDIR"
 FunctionEnd
 
-!define short "$SMPROGRAMS\PARI"
-  
+!define short "$SMPROGRAMS\${PARIver}"
+
 Section "shortcuts" SecSM
   CreateDirectory "${short}"
   CreateShortCut "${short}\gp.lnk" "$INSTDIR\gp.exe" "" "$INSTDIR\gp.exe" 0
@@ -119,7 +116,7 @@ LangString DESC_SM ${LANG_ENGLISH} "Add PARI shortcuts to Start Menu and desktop
   !insertmacro MUI_DESCRIPTION_TEXT ${SecDOC} $(DESC_DOC)
   !insertmacro MUI_DESCRIPTION_TEXT ${SecEX} $(DESC_EX)
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
- 
+
 ;--------------------------------
 Section "Uninstall"
   Delete "$INSTDIR\gp.exe"
@@ -128,7 +125,7 @@ Section "Uninstall"
   Delete "$INSTDIR\tex2mail"
   Delete "$INSTDIR\${dll}"
   Delete "$INSTDIR\cyggmp-3.dll"
-  Delete "$INSTDIR\cygncurses-9.dll"
+  Delete "$INSTDIR\cygncursesw-10.dll"
   Delete "$INSTDIR\cygreadline7.dll"
   Delete "$INSTDIR\cygperl5_10.dll"
   Delete "$INSTDIR\cyggcc_s-1.dll"
@@ -143,9 +140,9 @@ Section "Uninstall"
   RMDir /r "$INSTDIR\galdata"
 
   DeleteRegKey HKLM ${uninst}
-  DeleteRegKey /ifempty HKLM "Software\PARI"
+  DeleteRegKey /ifempty HKLM "Software\${PARIver}"
 
-  RMDir /r "$SMPROGRAMS\PARI"
+  RMDir /r "$SMPROGRAMS\${PARIver}"
   Delete "$DESKTOP\PARI.lnk"
   RMDir "$INSTDIR"
 SectionEnd

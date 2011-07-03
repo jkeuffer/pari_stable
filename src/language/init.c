@@ -22,7 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "paripriv.h"
 #include "anal.h"
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__CYGWIN32__)
 #  include "../systems/mingw/mingw.h"
 #  ifndef WINCE
 #    include <process.h>

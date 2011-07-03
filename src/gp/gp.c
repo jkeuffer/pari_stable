@@ -1123,15 +1123,13 @@ gprc_get(char *path)
     s = str + l;
     if (c != '/' && c != '\\') *s++ = '/';
 #ifdef UNIX
-    *s = '.'; /* .gprc */
+    strcpy(s, ".gprc");
 #else
-    *s = '_'; /* _gprc */
+    strcpy(s, "gprc");
 #endif
-    strcpy(s+1, "gprc");
     f = gprc_chk(str); /* in $HOME */
     if (!f) f = gprc_chk(s); /* in . */
     if (!f) f = gprc_chk("/etc/gprc");
-    if (!f) f = gprc_chk("C:/_gprc");
     if (!f)
     { /* in 'gp' directory */
       char *t = path + strlen(path);
