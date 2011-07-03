@@ -2880,13 +2880,21 @@ Itos(GEN x)
 static GEN
 gtovecsmallpost(GEN x, long n)
 {
-  long i, imax, lx, tx = typ(x);
+  long i, imax, lx;
   GEN y = zero_Flv(n);
 
-  switch(tx)
+  switch(typ(x))
   {
     case t_INT:
       y[1] = itos(x); return y;
+    case t_POL:
+      lx=lg(x); imax = minss(lx-2, n);
+      for (i=1; i<=imax; i++) y[i] = Itos(gel(x,lx-i));
+      return y;
+    case t_SER:
+      lx=lg(x); imax = minss(lx-2, n); x++;
+      for (i=1; i<=imax; i++) y[i] = Itos(gel(x,i));
+      return y;
     case t_VEC: case t_COL:
       lx=lg(x); imax = minss(lx-1, n);
       for (i=1; i<=imax; i++) y[i] = Itos(gel(x,i));
@@ -2908,13 +2916,23 @@ gtovecsmallpost(GEN x, long n)
 static GEN
 gtovecsmallpre(GEN x, long n)
 {
-  long i, imax, lx, tx = typ(x);
+  long i, imax, lx;
   GEN y = zero_Flv(n), y0;
 
-  switch(tx)
+  switch(typ(x))
   {
     case t_INT:
       y[n] = itos(x); return y;
+    case t_POL:
+      lx=lg(x);
+      y0 = init_vectopre(lx-2, n, y, &imax);
+      for (i=1; i<=imax; i++) y0[i] = Itos(gel(x,lx-i));
+      return y;
+    case t_SER:
+      lx=lg(x); x++;
+      y0 = init_vectopre(lx-2, n, y, &imax);
+      for (i=1; i<=imax; i++) y0[i] = Itos(gel(x,i));
+      return y;
     case t_VEC: case t_COL:
       lx=lg(x);
       y0 = init_vectopre(lx-1, n, y, &imax);
@@ -2969,6 +2987,14 @@ gtovecsmall(GEN x)
     case t_VEC: case t_COL:
       l = lg(x); V = cgetg(l,t_VECSMALL);
       for(i=1; i<l; i++) V[i] = Itos(gel(x,i));
+      return V;
+    case t_POL:
+      l = lg(x); V = cgetg(l-1,t_VECSMALL);
+      for (i=1; i<=l-2; i++) V[i] = Itos(gel(x,l-i));
+      return V;
+    case t_SER:
+      l = lg(x); V = cgetg(l-1,t_VEC); x++;
+      for (i=1; i<=l-2; i++) V[i] = Itos(gel(x,i));
       return V;
     default:
       pari_err(typeer,"vectosmall");

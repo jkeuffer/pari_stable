@@ -21,6 +21,7 @@ Done for version 2.6.0 (released ??/??/20??):
     7- no longer allow Vec()/Vecrev(), Col(), Vecsmall(),  without argument.
        Use [], []~, Vecsmall([]), respectively.
     8- allow specifying an optional dimension in Vec/Vecrev, Col, Vecsmall.
+    9- allow Vecsmall(t_POL or t_SER)
 
   Added
     1- mathnf for matrices over K[X] [#41]

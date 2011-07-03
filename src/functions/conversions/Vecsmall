@@ -11,11 +11,6 @@ Doc:
  parameter $n$.
 
  This acts as \kbd{Vec}$(x,n), but only on a limited set of objects:
- the result must be representable as a vector of small integers. In
- particular, polynomials and power series are forbidden. If $x$ is a character
- string, a vector of individual characters in ASCII encoding is returned
- (\tet{Strchr} yields back the character string).
-
- If you really want to try and transform a polynomial or power series to a
- \typ{VECSMALL}, use \kbd{Vecsmall(Vec(x, n))}. This will fail if one
- coefficient of $x$ is not a small integer.
+ the result must be representable as a vector of small integers.
+ If $x$ is a character string, a vector of individual characters in ASCII
+ encoding is returned (\tet{Strchr} yields back the character string).
