@@ -2705,14 +2705,100 @@ gtoser(GEN x, long v, long prec)
   return y;
 }
 
+static GEN
+gtovecpost(GEN x, long n)
+{
+  long i, imax, lx, tx = typ(x);
+  GEN y = zerovec(n);
+
+  if (is_scalar_t(tx) || tx == t_RFRAC) { gel(y,1) = gcopy(x); return y; }
+  switch(tx)
+  {
+    case t_POL:
+      lx=lg(x); imax = minss(lx-2, n);
+      for (i=1; i<=imax; i++) gel(y,i) = gcopy(gel(x,lx-i));
+      return y;
+    case t_SER:
+      lx=lg(x); imax = minss(lx-2, n); x++;
+      for (i=1; i<=imax; i++) gel(y,i) = gcopy(gel(x,i));
+      return y;
+    case t_QFR: case t_QFI: case t_VEC: case t_COL:
+      lx=lg(x); imax = minss(lx-1, n);
+      for (i=1; i<=imax; i++) gel(y,i) = gcopy(gel(x,i));
+      return y;
+    case t_LIST:
+      x = list_data(x); lx = x? lg(x): 1;
+      imax = minss(lx-1, n);
+      for (i=1; i<=imax; i++) gel(y,i) = gcopy(gel(x,i));
+      return y;
+    case t_VECSMALL:
+      lx=lg(x);
+      imax = minss(lx-1, n);
+      for (i=1; i<=imax; i++) gel(y,i) = stoi(x[i]);
+      return y;
+    default: pari_err(typeer,"gtovec");
+      return NULL; /*notreached*/
+  }
+}
+
+static GEN
+init_vectopre(long a, long n, GEN y, long *imax)
+{
+  *imax = minss(a, n);
+  return (n == *imax)?  y: y + n - a;
+}
+static GEN
+gtovecpre(GEN x, long n)
+{
+  long i, imax, lx, tx = typ(x);
+  GEN y = zerovec(n), y0;
+
+  if (is_scalar_t(tx) || tx == t_RFRAC) { gel(y,n) = gcopy(x); return y; }
+  switch(tx)
+  {
+    case t_POL:
+      lx=lg(x);
+      y0 = init_vectopre(lx-2, n, y, &imax);
+      for (i=1; i<=imax; i++) gel(y0,i) = gcopy(gel(x,lx-i));
+      return y;
+    case t_SER:
+      lx=lg(x); x++;
+      y0 = init_vectopre(lx-2, n, y, &imax);
+      for (i=1; i<=imax; i++) gel(y0,i) = gcopy(gel(x,i));
+      return y;
+    case t_QFR: case t_QFI: case t_VEC: case t_COL:
+      lx=lg(x);
+      y0 = init_vectopre(lx-1, n, y, &imax);
+      for (i=1; i<=imax; i++) gel(y0,i) = gcopy(gel(x,i));
+      return y;
+    case t_LIST:
+      x = list_data(x); lx = x? lg(x): 1;
+      y0 = init_vectopre(lx-1, n, y, &imax);
+      for (i=1; i<=imax; i++) gel(y0,i) = gcopy(gel(x,i));
+      return y;
+    case t_VECSMALL:
+      lx=lg(x);
+      y0 = init_vectopre(lx-1, n, y, &imax);
+      for (i=1; i<=imax; i++) gel(y0,i) = stoi(x[i]);
+      return y;
+    default: pari_err(typeer,"gtovec");
+      return NULL; /*notreached*/
+  }
+}
+GEN
+gtovec0(GEN x, long n)
+{
+  if (!n) return gtovec(x);
+  if (n > 0) return gtovecpost(x, n);
+  return gtovecpre(x, -n);
+}
+
 GEN
 gtovec(GEN x)
 {
-  long tx, lx, i;
+  long i, lx, tx = typ(x);
   GEN y;
 
-  if (!x) return cgetg(1,t_VEC);
-  tx = typ(x);
   if (is_scalar_t(tx)) return mkveccopy(x);
   switch(tx)
   {
@@ -2750,20 +2836,29 @@ gtovec(GEN x)
 }
 
 GEN
-gtovecrev(GEN x)
+gtovecrev0(GEN x, long n)
 {
-  GEN y = gtovec(x);
+  GEN y = gtovec0(x, n);
   long ly = lg(y), lim = ly>>1, i;
   for (i = 1; i <= lim; i++) swap(gel(y,i), gel(y,ly-i));
   return y;
 }
+GEN
+gtovecrev(GEN x) { return gtovecrev0(x, 0); }
 
+GEN
+gtocol0(GEN x, long n)
+{
+  GEN y;
+  if (!n) return gtocol(x);
+  y = gtovec0(x, n);
+  settyp(y, t_COL); return y;
+}
 GEN
 gtocol(GEN x)
 {
   long lx, tx, i, j, h;
   GEN y;
-  if (!x) return cgetg(1,t_COL);
   tx = typ(x);
   if (tx != t_MAT) { y = gtovec(x); settyp(y, t_COL); return y; }
   lx = lg(x); if (lx == 1) return cgetg(1, t_COL);
@@ -2775,34 +2870,110 @@ gtocol(GEN x)
   return y;
 }
 
+static long
+Itos(GEN x)
+{
+   if (typ(x) != t_INT) pari_err(typeer,"vectosmall");
+   return itos(x);
+}
+
+static GEN
+gtovecsmallpost(GEN x, long n)
+{
+  long i, imax, lx, tx = typ(x);
+  GEN y = zero_Flv(n);
+
+  switch(tx)
+  {
+    case t_INT:
+      y[1] = itos(x); return y;
+    case t_VEC: case t_COL:
+      lx=lg(x); imax = minss(lx-1, n);
+      for (i=1; i<=imax; i++) y[i] = Itos(gel(x,i));
+      return y;
+    case t_LIST:
+      x = list_data(x); lx = x? lg(x): 1;
+      imax = minss(lx-1, n);
+      for (i=1; i<=imax; i++) y[i] = Itos(gel(x,i));
+      return y;
+    case t_VECSMALL:
+      lx=lg(x);
+      imax = minss(lx-1, n);
+      for (i=1; i<=imax; i++) y[i] = x[i];
+      return y;
+    default: pari_err(typeer,"gtovecsmall");
+      return NULL; /*notreached*/
+  }
+}
+static GEN
+gtovecsmallpre(GEN x, long n)
+{
+  long i, imax, lx, tx = typ(x);
+  GEN y = zero_Flv(n), y0;
+
+  switch(tx)
+  {
+    case t_INT:
+      y[n] = itos(x); return y;
+    case t_VEC: case t_COL:
+      lx=lg(x);
+      y0 = init_vectopre(lx-1, n, y, &imax);
+      for (i=1; i<=imax; i++) y0[i] = Itos(gel(x,i));
+      return y;
+    case t_LIST:
+      x = list_data(x); lx = x? lg(x): 1;
+      y0 = init_vectopre(lx-1, n, y, &imax);
+      for (i=1; i<=imax; i++) y0[i] = Itos(gel(x,i));
+      return y;
+    case t_VECSMALL:
+      lx=lg(x);
+      y0 = init_vectopre(lx-1, n, y, &imax);
+      for (i=1; i<=imax; i++) y0[i] = x[i];
+      return y;
+    default: pari_err(typeer,"gtovecsmall");
+      return NULL; /*notreached*/
+  }
+}
+
+GEN
+gtovecsmall0(GEN x, long n)
+{
+  if (!n) return gtovecsmall(x);
+  if (n > 0) return gtovecsmallpost(x, n);
+  return gtovecsmallpre(x, -n);
+}
+
 GEN
 gtovecsmall(GEN x)
 {
   GEN V;
-  long tx, l,i;
+  long l, i;
 
-  if (!x) return cgetg(1,t_VECSMALL);
-  tx = typ(x);
-  if (tx == t_VECSMALL) return gcopy(x);
-  if (tx == t_INT) return mkvecsmall(itos(x));
-  if (tx == t_STR)
+  switch(typ(x))
   {
-    char *s = GSTR(x);
-    l = strlen(s);
-    V = cgetg(l+1, t_VECSMALL);
-    s--;
-    for (i=1; i<=l; i++) V[i] = (long)s[i];
-    return V;
+    case t_INT: return mkvecsmall(itos(x));
+    case t_STR:
+    {
+      char *s = GSTR(x);
+      l = strlen(s);
+      V = cgetg(l+1, t_VECSMALL);
+      s--;
+      for (i=1; i<=l; i++) V[i] = (long)s[i];
+      return V;
+    }
+    case t_VECSMALL: return gcopy(x);
+    case t_LIST:
+      x = list_data(x);
+      if (!x) return cgetg(1, t_VECSMALL);
+      /* fall through */
+    case t_VEC: case t_COL:
+      l = lg(x); V = cgetg(l,t_VECSMALL);
+      for(i=1; i<l; i++) V[i] = Itos(gel(x,i));
+      return V;
+    default:
+      pari_err(typeer,"vectosmall");
+      return NULL; /* not reached */
   }
-  if (!is_vec_t(tx)) pari_err(typeer,"vectosmall");
-  l = lg(x);
-  V = cgetg(l,t_VECSMALL);
-  for(i=1; i<l; i++) {
-    GEN y = gel(x,i);
-    if (typ(y) != t_INT) pari_err(typeer,"vectosmall");
-    V[i] = itos(y);
-  }
-  return V;
 }
 
 GEN

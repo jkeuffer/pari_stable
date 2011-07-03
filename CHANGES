@@ -18,6 +18,9 @@ Done for version 2.6.0 (released ??/??/20??):
        recover the underlying object). Arbitrary GENs can be stored in a set.
     5- moved Odos/* to relevant src/systems subdirectory
     6- removed Odos directory
+    7- no longer allow Vec()/Vecrev(), Col(), Vecsmall(),  without argument.
+       Use [], []~, Vecsmall([]), respectively.
+    8- allow specifying an optional dimension in Vec/Vecrev, Col, Vecsmall.
 
   Added
     1- mathnf for matrices over K[X] [#41]
