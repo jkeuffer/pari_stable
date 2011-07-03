@@ -174,7 +174,7 @@ addiispec(GEN x, GEN y, long nx, long ny)
   xd = x + nx;
   yd = y + ny;
   zd[-1] = addll(xd[-1], yd[-1]);
-#ifndef addllx8
+#ifdef addllx8
   for (  ; i-8 > -ny; i-=8)
     addllx8(xd+i, yd+i, zd+i, overflow);
 #endif
