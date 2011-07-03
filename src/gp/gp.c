@@ -1937,7 +1937,7 @@ read_opt(pari_stack *p_A, long argc, char **argv)
   GP_DATA->flags = f;
   if (f & gpd_TEST) {
     GP_DATA->breakloop = 0;
-    init80col();
+    init_linewrap(76);
   } else if (initrc)
     gp_initrc(p_A, argv[0]);
   for ( ; i < argc; i++) stack_pushp(p_A, pari_strdup(argv[i]));
@@ -2169,7 +2169,7 @@ void
 gp_output(GEN z, gp_data *G)
 {
   if (G->flags & gpd_TEST) {
-    init80col();
+    init_linewrap(76);
     gen_output(z, G->fmt); pari_putc('\n');
   }
   else if (G->flags & gpd_TEXMACS)
@@ -2385,7 +2385,17 @@ GEN
 sd_psfile(const char *v, long flag)
 { return sd_string(v, flag, "psfile", &current_psfile); }
 
-
 GEN
 sd_lines(const char *v, long flag)
 { return sd_ulong(v,flag,"lines",&(GP_DATA->lim_lines), 0,LONG_MAX,NULL); }
+GEN
+sd_linewrap(const char *v, long flag)
+{
+  ulong old = GP_DATA->linewrap, new;;
+  GEN z = sd_ulong(v,flag,"linewrap",&new, 0,LONG_MAX,NULL);
+  if (old)
+  { if (!new) resetout(1); }
+  else
+  { if (new) init_linewrap(new); }
+  GP_DATA->linewrap = new; return z;
+}

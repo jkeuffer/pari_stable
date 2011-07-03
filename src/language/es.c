@@ -415,13 +415,18 @@ static PariOUT defaultErr = {normalErrC, normalErrS, normalErrF};
 
 /**                         GENERIC PRINTING                       **/
 void
+resetout(int initerr)
+{
+  pariOut = &defaultOut;
+  if (initerr) pariErr = &defaultErr;
+}
+void
 initout(int initerr)
 {
   pari_infile = stdin;
   pari_outfile = stdout;
   pari_errfile = stderr;
-  pariOut = &defaultOut;
-  if (initerr) pariErr = &defaultErr;
+  resetout(initerr);
 }
 
 static int last_was_newline = 1;
@@ -1437,21 +1442,20 @@ static int col_index;
 
 /* output string wrapped after MAX_WIDTH characters (for gp -test) */
 static void
-putc80(char c)
+putc_lw(char c)
 {
-  const int MAX_WIDTH = 76;
   if (c == '\n') col_index = 0;
-  else if (col_index == MAX_WIDTH) { normalOutC('\n'); col_index = 1; }
+  else if (col_index >= GP_DATA->linewrap) { normalOutC('\n'); col_index = 1; }
   else col_index++;
   normalOutC(c);
 }
 static void
-puts80(const char *s) { while (*s) putc80(*s++); }
+puts_lw(const char *s) { while (*s) putc_lw(*s++); }
 
-static PariOUT pariOut80= {putc80, puts80, normalOutF};
+static PariOUT pariOut_lw= {putc_lw, puts_lw, normalOutF};
 
 void
-init80col(void) { col_index = 0; pariOut = &pariOut80; }
+init_linewrap(long w) { col_index=0; GP_DATA->linewrap=w; pariOut=&pariOut_lw; }
 
 /* output stopped after max_line have been printed, for default(lines,).
  * n = length of prefix already printed (print up to max_lin lines) */

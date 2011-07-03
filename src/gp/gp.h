@@ -58,6 +58,7 @@ GEN sd_graphcolors(const char *v, long flag);
 GEN sd_help(const char *v, long flag);
 GEN sd_histfile(const char *v, long flag);
 GEN sd_lines(const char *v, long flag);
+GEN sd_linewrap(const char *v, long flag);
 GEN sd_prompt(const char *v, long flag);
 GEN sd_prompt_cont(const char *v, long flag);
 GEN sd_psfile(const char *v, long flag);

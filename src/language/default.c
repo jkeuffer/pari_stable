@@ -788,6 +788,7 @@ default_gp_data(void)
   D->breakloop   = 1;
   D->echo        = 0;
   D->lim_lines   = 0;
+  D->linewrap    = 0;
   D->recover     = 1;
   D->chrono      = 0;
 

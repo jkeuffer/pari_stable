@@ -28,6 +28,7 @@ Done for version 2.6.0 (released ??/??/20??):
 BA  2- GP function ellheegner
 BA  3- asm inline macro addllx8 for faster addition.
 BA  4- Library function FpXQ_autpowers
+    5- GP default 'linewrap'
 
   Removed
     1- dropped DOS support

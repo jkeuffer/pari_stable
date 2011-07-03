@@ -257,7 +257,8 @@ void* get_stack(double fraction, long min);
 void  init_graph(void);
 void  free_graph(void);
 void  initout(int initerr);
-void  init80col(void);
+void  resetout(int initerr);
+void  init_linewrap(long w);
 int   pari_kernel_init(void);
 void  print_functions_hash(const char *s);
 void  print_all_user_fun(int member);
@@ -324,7 +325,7 @@ typedef struct {
   gp_pp *pp;
   gp_path *path;
   pariout_t *fmt;
-  ulong lim_lines, flags;
+  ulong lim_lines, flags, linewrap;
   int echo, breakloop, recover, use_readline; /* GP-specific */
   int secure, simplify, strictmatch, chrono; /* libpari ? */
   pari_timer *T;
