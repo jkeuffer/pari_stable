@@ -77,6 +77,24 @@ __extension__ ({ ulong __value, __arg1 = (a), __arg2 = (b), __temp; \
   __value; \
 })
 
+#define subllx8(a,b,c,overflow) \
+do { long *__arg1 = a, *__arg2 = b, *__out = c; \
+     ulong __temp; \
+   __asm__ ("subq %6, %1 \n\t" \
+            "movq    (%3), %1 ; sbbq    (%4),%1; movq %1,    (%5) \n\t" \
+            "movq  -8(%3), %1 ; sbbq  -8(%4),%1; movq %1,  -8(%5) \n\t" \
+            "movq -16(%3), %1 ; sbbq -16(%4),%1; movq %1, -16(%5) \n\t" \
+            "movq -24(%3), %1 ; sbbq -24(%4),%1; movq %1, -24(%5) \n\t" \
+            "movq -32(%3), %1 ; sbbq -32(%4),%1; movq %1, -32(%5) \n\t" \
+            "movq -40(%3), %1 ; sbbq -40(%4),%1; movq %1, -40(%5) \n\t" \
+            "movq -48(%3), %1 ; sbbq -48(%4),%1; movq %1, -48(%5) \n\t" \
+            "movq -56(%3), %1 ; sbbq -56(%4),%1; movq %1, -56(%5) \n\t" \
+            "adcq  %2, %2" \
+        : "=m" (*__out), "=&r" (__temp), "=&g" (overflow) \
+        : "r" (__arg1), "r" (__arg2), "r" (__out), "g" (overflow), "1" ((ulong)0), "2" ((ulong)0) \
+        : "cc"); \
+} while(0)
+
 #define mulll(a,b) \
 __extension__ ({ ulong __valuelo, __arg1 = (a), __arg2 = (b); \
    __asm__ ("mulq %3" \

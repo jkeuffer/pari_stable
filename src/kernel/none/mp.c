@@ -237,6 +237,10 @@ subiispec(GEN x, GEN y, long nx, long ny)
   xd = x + nx;
   yd = y + ny;
   zd[-1] = subll(xd[-1], yd[-1]);
+#ifdef subllx8
+  for (  ; i-8 > -ny; i-=8)
+    subllx8(xd+i, yd+i, zd+i, overflow);
+#endif
   for (  ; i >= -ny; i--) zd[i] = subllx(xd[i], yd[i]);
   if (overflow)
     for(;;)
