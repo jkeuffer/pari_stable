@@ -145,7 +145,7 @@ BA 21- GP function getenv
 BA 23- low-level function int_bit
    24- library function stack_strcat
    25- function polredbest [ adapting a preliminary patch by BA ]
-BA 26- library functions Fl_invsafe, F2x_halfgcd
+BA 26- library functions Fl_invsafe, F2x_halfgcd, Flx_Flxq_eval and Flx_FlxqV_eval.
 BA 27- support for sparse matrix and Wiedemann algorithm
    28- GP function vecsearch() [ use with vecsort() ]
 
