@@ -1438,7 +1438,7 @@ term_height(void)
   return (n>1)? n: DFT_TERM_HEIGHT;
 }
 
-static int col_index;
+static ulong col_index;
 
 /* output string wrapped after MAX_WIDTH characters (for gp -test) */
 static void
