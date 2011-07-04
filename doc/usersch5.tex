@@ -2821,6 +2821,9 @@ exists, the result is currently undefined.
 is a multiple of the order of \kbd{a}, either as a \typ{INT} or a
 factorization matrix.
 
+\fun{int}{Fp_issquare}{GEN x, GEN p} returns $1$ if \kbd{x} is a square
+modulo \kbd{p}, and $0$ otherwise.
+
 \fun{GEN}{Fp_sqrt}{GEN x, GEN p} returns a square root of \kbd{x} modulo
 \kbd{p} (the smallest non-negative residue), where \kbd{x}, \kbd{p} are
 \typ{INT}s, and \kbd{p} is assumed to be prime. Return \kbd{NULL}
@@ -3668,6 +3671,10 @@ that \kbd{T} is irreducible mod \kbd{p}.
 
 \fun{int}{FpXQ_issquare}{GEN x, GEN T, GEN p} returns $1$ if $x$ is a square
 and $0$ otherwise. Assumes that \kbd{T} is irreducible mod \kbd{p}.
+
+\fun{int}{Fq_issquare}{GEN x, GEN T, GEN p} returns $1$ if $x$ is a square
+and $0$ otherwise. Assumes that \kbd{T} is irreducible mod \kbd{p}. $T =
+\kbd{NULL}$ is forbidden unless $x$ is an \kbd{Fp}.
 
 \fun{GEN}{FpXQ_order}{GEN a, GEN ord, GEN T, GEN p} returns the order of the
 \typ{FpXQ} \kbd{a}. If \kbd{o} is non-\kbd{NULL}, it is assumed that \kbd{o}

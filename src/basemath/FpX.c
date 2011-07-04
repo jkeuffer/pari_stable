@@ -1195,6 +1195,19 @@ FpXQ_issquare(GEN x, GEN T, GEN p)
   res = kronecker(z, p) == 1;
   avma = av; return res;
 }
+int
+Fp_issquare(GEN x, GEN p)
+{
+  if (equalui(2, p)) return 1;
+  return kronecker(x, p) == 1;
+}
+/* assume T irreducible mod p */
+int
+Fq_issquare(GEN x, GEN T, GEN p)
+{
+  if (typ(x) != t_INT) return FpXQ_issquare(x, T, p);
+  return (! odd(degpol(T)) || Fp_issquare(x, p));
+}
 
 GEN
 FpXQ_matrix_pow(GEN y, long n, long m, GEN P, GEN l)

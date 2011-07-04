@@ -202,6 +202,7 @@ GEN     random_FpE(GEN a4, GEN a6, GEN p);
 
 /* FpX.c */
 
+int     Fp_issquare(GEN x, GEN p);
 GEN     Fp_FpX_sub(GEN x, GEN y, GEN p);
 GEN     Fp_FpXQ_log(GEN a, GEN g, GEN ord, GEN T, GEN p);
 GEN     FpV_inv(GEN x, GEN p);
@@ -256,6 +257,7 @@ GEN     FpXQ_trace(GEN x, GEN T, GEN p);
 GEN     FpXQC_to_mod(GEN z, GEN T, GEN p);
 GEN     FpXV_prod(GEN V, GEN p);
 GEN     FpXV_red(GEN z, GEN p);
+int     Fq_issquare(GEN x, GEN T, GEN p);
 GEN     FqV_inv(GEN x, GEN T, GEN p);
 GEN     gener_FpXQ(GEN T, GEN p, GEN *o);
 GEN     random_FpX(long d, long v, GEN p);
