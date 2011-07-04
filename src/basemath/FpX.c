@@ -1189,6 +1189,7 @@ FpXQ_issquare(GEN x, GEN T, GEN p)
   GEN m, z;
   long res;
   if (lg(x) == 2 || equalui(2, p)) return 1;
+  if (lg(x) == 3) return Fq_issquare(gel(x,2), T, p);
   av = avma;
   m = diviiexact(subis(powiu(p, degpol(T)), 1), subis(p,1));
   z = constant_term( FpXQ_pow(x, m, T, p) );
