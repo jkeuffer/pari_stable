@@ -2391,11 +2391,11 @@ sd_lines(const char *v, long flag)
 GEN
 sd_linewrap(const char *v, long flag)
 {
-  ulong old = GP_DATA->linewrap, new;;
-  GEN z = sd_ulong(v,flag,"linewrap",&new, 0,LONG_MAX,NULL);
+  ulong old = GP_DATA->linewrap, n;
+  GEN z = sd_ulong(v,flag,"linewrap",&n, 0,LONG_MAX,NULL);
   if (old)
-  { if (!new) resetout(1); }
+  { if (!n) resetout(1); }
   else
-  { if (new) init_linewrap(new); }
-  GP_DATA->linewrap = new; return z;
+  { if (n) init_linewrap(n); }
+  GP_DATA->linewrap = n; return z;
 }
