@@ -1,8 +1,8 @@
 default(realprecision,38);
 \e
 \\ Initialisations diverses
-gettime; p2=Pol([1,3021,-786303,-6826636057,-546603588746,3853890514072057])
-fa=[11699,6;2392997,2;4987333019653,2]
+gettime; p2=Pol([1,3021,-786303,-6826636057,-546603588746,3853890514072057]);
+fa=[11699,6;2392997,2;4987333019653,2];
 setrand(1);a=matrix(3,5,j,k,vectorv(5,l,random\10^8));
 setrand(1);as=matrix(3,3,j,k,vectorv(5,l,random\10^8));
 nfpol=x^5-5*x^3+5*x+25; nf=nfinit(nfpol)
@@ -59,7 +59,7 @@ idy=idealred(nf,idx,[1,5,6])
 idx2=idealmul(nf,idx,idx)
 idt=idealmul(nf,idx,idx,1)
 idz=idealintersect(nf,idx,idy)
-aid=[idx,idy,idz,1,idx]
+aid=[idx,idy,idz,1,idx];
 idealadd(nf,idx,idy)
 idealaddtoone(nf,idx,idy)
 idealaddtoone(nf,[idy,idx])

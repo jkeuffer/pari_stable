@@ -2754,23 +2754,53 @@ bruti_sign(GEN g, pariout_t *T, outString *S, int addsign)
 static void
 matbruti(GEN g, pariout_t *T, outString *S)
 {
-  long i, j, r, l;
+  long i, j, r, w, l, lgall, *pad;
+  pari_sp av;
   OUT_FUN print;
+  outString scratchstr;
 
   if (typ(g) != t_MAT) { bruti(g,T,S); return; }
 
   r=lg(g); if (r==1 || lg(g[1])==1) { str_puts(S, "[;]"); return; }
+  av = avma;
   l = lg(g[1]); str_putc(S, '\n');
   print = (typ(g[1]) == t_VECSMALL)? prints: bruti;
+  pad = (long*)stackmalloc(l*r*sizeof(long));
+  str_init(&scratchstr);
+  lgall = 2; /* opening [ and closing ] */
+  w = term_width();
+  for (j=1; j<r; j++)
+  {
+    GEN col = gel(g,j);
+    long maxc = 0;
+    for (i=1; i<l; i++)
+    {
+      long lgs;
+      scratchstr.cur = scratchstr.string;
+      print(gel(col,i),T,&scratchstr);
+      lgs = scratchstr.cur-scratchstr.string;
+      pad[j*l+i] = -lgs;
+      if (maxc < lgs) maxc = lgs;
+    }
+    for (i=1; i<l; i++) pad[j*l+i] += maxc;
+    lgall += maxc + 1; /* column width, including separating space */
+    if (lgall > w) { pad = NULL; break; } /* doesn't fit, abort padding */
+  }
+  pari_free(scratchstr.string);
   for (i=1; i<l; i++)
   {
     str_putc(S, '[');
     for (j=1; j<r; j++)
     {
+      if (pad) {
+        long white = pad[j*l+i];
+        while (white-- > 0) str_putc(S, ' ');
+      }
       print(gcoeff(g,i,j),T,S); if (j<r-1) str_putc(S, ' ');
     }
     if (i<l-1) str_puts(S, "]\n\n"); else str_puts(S, "]\n");
   }
+  avma = av;
 }
 
 /********************************************************************/
