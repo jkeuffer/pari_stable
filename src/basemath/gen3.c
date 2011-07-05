@@ -2993,7 +2993,7 @@ gtovecsmall(GEN x)
       for (i=1; i<=l-2; i++) V[i] = Itos(gel(x,l-i));
       return V;
     case t_SER:
-      l = lg(x); V = cgetg(l-1,t_VEC); x++;
+      l = lg(x); V = cgetg(l-1,t_VECSMALL); x++;
       for (i=1; i<=l-2; i++) V[i] = Itos(gel(x,i));
       return V;
     default:
