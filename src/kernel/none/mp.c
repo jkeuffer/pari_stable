@@ -485,10 +485,6 @@ addumului(ulong a, ulong b, GEN Y)
   avma=(pari_sp)z; return z;
 }
 
-GEN muliispec(GEN a, GEN b, long na, long nb);
-/*#define KARAMULR_VARIANT*/
-#define muliispec_mirror muliispec
-
 /***********************************************************************/
 /**                                                                   **/
 /**                          DIVISION                                 **/
@@ -1644,6 +1640,8 @@ muliispec(GEN a, GEN b, long na, long nb)
   }
   return gerepileuptoint(av, addshiftw(c,c0, n0));
 }
+
+#define muliispec_mirror muliispec
 
 /* x % (2^n), assuming n >= 0 */
 GEN
