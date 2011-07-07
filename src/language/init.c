@@ -1007,6 +1007,10 @@ pari_err2GEN(int numerr, va_list ap)
   case notfuncer:
     return mkvec2(stoi(numerr),va_arg(ap, GEN));
   case openfiler:
+  {
+    const char *f = va_arg(ap, const char*);
+    return mkvec3(stoi(numerr), strtoGENstr(f), strtoGENstr(va_arg(ap, char*)));
+  }
   case overflower:
   case impl:
   case typeer: case mattype1: case negexper:
