@@ -1820,7 +1820,7 @@ localredbug(GEN p, const char *s)
   return NULL; /* not reached */
 }
 
-/* Here p > 3. e assumed integral */
+/* Here p > 3. e assumed integral, minim = 1 if we only want a minimal model */
 static GEN
 localred_p(GEN e, GEN p, int minim)
 {
@@ -2097,6 +2097,7 @@ localred_23(GEN e, long p)
   }
 }
 
+/* minim = 1 if we only want a minimal model */
 static GEN
 localred(GEN e, GEN p, int minim)
 {
