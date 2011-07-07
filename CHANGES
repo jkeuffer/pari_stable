@@ -9,6 +9,8 @@ Done for version 2.6.0 (released ??/??/20??):
     2- numerical instability in ellheightoo [#1204]
     3- Flm_gauss(m, smallish p): fix and enable the OK_ulong switch [ faster ]
     4- remi2n didn't allow negative arguments [native kernel] [#1215]
+    5- ellrootno(e, p) started by computing a global minimal model for e
+       instead of a local one at p.
 
   Changed
     1- mathnf: swapped flag 3 and 5.

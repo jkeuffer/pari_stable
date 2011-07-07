@@ -2509,7 +2509,7 @@ ellrootno_p(GEN e, GEN p, ulong ex)
   if (!ex) return 1;
   if (ex == 1) return -kronecker(negi(ell_get_c6(e)),p);
   j=ell_get_j(e);
-  if (!gequal0(j) && Q_pval(j,p) < 0) return krosi(-1,p);
+  if (signe(j) && Q_pval(j,p) < 0) return krosi(-1,p);
   ep = 12 / ugcd(12, Z_pval(ell_get_disc(e),p));
   if (ep==4) z = 2; else z = (ep&1) ? 3 : 1;
   return krosi(-z, p);
@@ -2539,18 +2539,27 @@ ellrootno(GEN e, GEN p)
   long s;
   GEN N;
   checksmallell(e);
-  e = ell_to_small_red(e, &N);
-  if (!p || gequal1(p))
+  if (!p || isint1(p))
+  {
+    e = ell_to_small_red(e, &N);
     s = ellrootno_global(e, N);
+  }
   else
   {
+    GEN v;
+    ulong pp;
     if (typ(p) != t_INT || signe(p) < 0) pari_err(typeer,"ellrootno");
-    if (cmpiu(p,3) > 0) s = ellrootno_p(e,p, Z_pval(N, p));
-    else switch(itou(p))
+    if (!signe(p)) return -1; /* local factor at infinity */
+    pp = itou_or_0(p);
+    e = ell_to_small(e);
+    v = ellintegralmodel(e);
+    if (v) e = _coordch(e, v);
+    v = localred(e, p, 0);
+    switch(pp)
     {
       case 2: s = ellrootno_2(e); break;
       case 3: s = ellrootno_3(e); break;
-      default: s = -1; break; /* local factor at infinity */
+      default: s = ellrootno_p(e,p, itou(gel(v,1))); break;
     }
   }
   avma = av; return s;
