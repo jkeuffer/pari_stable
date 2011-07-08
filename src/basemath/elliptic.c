@@ -2261,21 +2261,40 @@ ell_to_small_red(GEN e, GEN *N)
 /**           ROOT NUMBER (after Halberstadt at p = 2,3)           **/
 /**                                                                **/
 /********************************************************************/
+/* x a t_INT */
+static long
+val_aux(GEN x, long p)
+{ return signe(x)? Z_lval(x,p): 12; }
+static long
+val_auxrem(GEN x, long p, long pk, long *u) {
+  long v;
+  GEN z;
+  if (!signe(x)) { *u = 0; return 12; }
+  v = Z_lvalrem(x,p,&z);
+  *u = umodiu(z,pk); return v;
+}
+static void
+val_init(GEN e, long p, long pk,
+         long *v4, long *u, long *v6, long *v, long *vd, long *d1)
+{
+  GEN c4 = ell_get_c4(e), c6 = ell_get_c6(e), D = ell_get_disc(e);
+  pari_sp av = avma;
+  *v4 = val_auxrem(c4, p,pk, u);
+  *v6 = val_auxrem(c6, p,pk, v);
+  *vd = val_auxrem(D , p,pk, d1); avma = av;
+}
 
 /* p = 2 or 3 */
 static long
 neron(GEN e, long p, long* ptkod)
 {
   long kod, v4, v6, vd;
-  pari_sp av=avma;
-  GEN c4, c6, d, nv;
-
-  nv = localred_23(e,p);
+  pari_sp av = avma;
+  GEN nv = localred_23(e,p);
   *ptkod = kod = itos(gel(nv,2));
-  c4=ell_get_c4(e); c6=ell_get_c6(e); d=ell_get_disc(e);
-  v4 = gequal0(c4) ? 12 : Z_lval(c4,p);
-  v6 = gequal0(c6) ? 12 : Z_lval(c6,p);
-  vd = Z_lval(d,p); avma = av;
+  v4 = val_aux(ell_get_c4(e), p);
+  v6 = val_aux(ell_get_c6(e), p);
+  vd = Z_lval(ell_get_disc(e), p); avma = av;
   if (p == 2) {
     if (kod > 4) return 1;
     switch(kod)
@@ -2353,25 +2372,6 @@ neron(GEN e, long p, long* ptkod)
         }
     }
   }
-}
-
-static long
-val_aux(GEN x, long p, long pk, long *u) {
-  long v;
-  GEN z;
-  if (!signe(x)) { *u = 0; return 12; }
-  v = Z_lvalrem(x,p,&z);
-  *u = umodiu(z,pk); return v;
-}
-static void
-val_init(GEN e, long p, long pk,
-         long *v4, long *u, long *v6, long *v, long *vd, long *d1)
-{
-  GEN c4 = ell_get_c4(e), c6 = ell_get_c6(e), D = ell_get_disc(e);
-  pari_sp av = avma;
-  *v4 = val_aux(c4, p,pk, u);
-  *v6 = val_aux(c6, p,pk, v);
-  *vd = val_aux(D , p,pk, d1); avma = av;
 }
 
 static long
