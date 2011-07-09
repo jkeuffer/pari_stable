@@ -876,7 +876,7 @@ qfr5_init(GEN x, struct qfr_data *S)
   {
     pari_sp av=avma;
     long e;
-    S->isqrtD = grndtoi(S->sqrtD,&e);
+    S->isqrtD = gcvtoi(S->sqrtD,&e);
     if (e>-2) { avma = av; S->isqrtD = sqrti(S->D); }
   }
   else if (typ(S->isqrtD) != t_INT) pari_err(arither1);

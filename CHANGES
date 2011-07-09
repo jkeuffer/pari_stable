@@ -11,6 +11,7 @@ Done for version 2.6.0 (released ??/??/20??):
     4- remi2n didn't allow negative arguments [native kernel] [#1215]
     5- ellrootno(e, p) started by computing a global minimal model for e
        instead of a local one at p.
+    6- qfbred(t_QFR) wrong when frac( sqrt(D) ) > 0.5
 
   Changed
     1- mathnf: swapped flag 3 and 5.
