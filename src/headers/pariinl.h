@@ -1336,6 +1336,106 @@ Fp_div(GEN a, GEN b, GEN m)
 
 /*******************************************************************/
 /*                                                                 */
+/*                        ADDMULII / SUBMULII                      */
+/*                                                                 */
+/*******************************************************************/
+/* x - y*z */
+INLINE GEN
+submulii(GEN x, GEN y, GEN z)
+{
+  long lx = lgefint(x), ly, lz;
+  pari_sp av;
+  GEN t;
+  if (lx == 2) { t = mulii(z,y); togglesign(t); return t; }
+  ly = lgefint(y);
+  if (ly == 2) return icopy(x);
+  lz = lgefint(z);
+  av = avma; (void)new_chunk(lx+ly+lz); /* HACK */
+  t = mulii(z, y);
+  avma = av; return subii(x,t);
+}
+/* y*z - x */
+INLINE GEN
+mulsubii(GEN y, GEN z, GEN x)
+{
+  long lx = lgefint(x), ly, lz;
+  pari_sp av;
+  GEN t;
+  if (lx == 2) return mulii(z,y);
+  ly = lgefint(y);
+  if (ly == 2) return negi(x);
+  lz = lgefint(z);
+  av = avma; (void)new_chunk(lx+ly+lz); /* HACK */
+  t = mulii(z, y);
+  avma = av; return subii(t,x);
+}
+
+/* x - u*y */
+INLINE GEN
+submuliu(GEN x, GEN y, ulong u)
+{
+  pari_sp av;
+  long ly = lgefint(y);
+  if (ly == 2) return icopy(x);
+  av = avma;
+  (void)new_chunk(3+ly+lgefint(x)); /* HACK */
+  y = mului(u,y);
+  avma = av; return subii(x, y);
+}
+/* x + u*y */
+INLINE GEN
+addmuliu(GEN x, GEN y, ulong u)
+{
+  pari_sp av;
+  long ly = lgefint(y);
+  if (ly == 2) return icopy(x);
+  av = avma;
+  (void)new_chunk(3+ly+lgefint(x)); /* HACK */
+  y = mului(u,y);
+  avma = av; return addii(x, y);
+}
+/* x - u*y */
+INLINE GEN
+submuliu_inplace(GEN x, GEN y, ulong u)
+{
+  pari_sp av;
+  long ly = lgefint(y);
+  if (ly == 2) return x;
+  av = avma;
+  (void)new_chunk(3+ly+lgefint(x)); /* HACK */
+  y = mului(u,y);
+  avma = av; return subii(x, y);
+}
+/* x + u*y */
+INLINE GEN
+addmuliu_inplace(GEN x, GEN y, ulong u)
+{
+  pari_sp av;
+  long ly = lgefint(y);
+  if (ly == 2) return x;
+  av = avma;
+  (void)new_chunk(3+ly+lgefint(x)); /* HACK */
+  y = mului(u,y);
+  avma = av; return addii(x, y);
+}
+/* ux + vy */
+INLINE GEN
+lincombii(GEN u, GEN v, GEN x, GEN y)
+{
+  long lx = lgefint(x), ly;
+  GEN p1, p2;
+  pari_sp av;
+  if (lx == 2) return mulii(v,y);
+  ly = lgefint(y);
+  if (ly == 2) return mulii(u,x);
+  av = avma; (void)new_chunk(lx+ly+lgefint(u)+lgefint(v)); /* HACK */
+  p1 = mulii(u,x);
+  p2 = mulii(v,y);
+  avma = av; return addii(p1,p2);
+}
+
+/*******************************************************************/
+/*                                                                 */
 /*                          GEN SUBTYPES                           */
 /*                                                                 */
 /*******************************************************************/

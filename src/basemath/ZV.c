@@ -390,120 +390,33 @@ ZC_lincomb1_inplace(GEN X, GEN Y, GEN v)
 {
   long i, m = lgefint(v);
   if (m == 2) return; /* v = 0 */
-  if (m == 3)
-  {
-    long s = signe(v);
-    ulong w = v[2];
-    if (w == 1) /* v = +- 1 */
-    {
-      if (s > 0)
-      { /* 1 */
-        for (i = lg(X)-1; i; i--)
-          if (signe(Y[i])) gel(X,i) = addii(gel(X,i), gel(Y,i));
-      }
-      else
-      { /* -1 */
-        for (i = lg(X)-1; i; i--)
-          if (signe(Y[i])) gel(X,i) = subii(gel(X,i), gel(Y,i));
-      }
-      return;
-    }
-    for (i = lg(X)-1; i; i--)
-    {
-      GEN p1 = gel(X,i), p2 = gel(Y,i);
-      if (!signe(p1)) {
-        gel(X,i) = mului(w,p2); if (s < 0) togglesign(gel(X,i));
-      }
-      else if (signe(p2))
-      {
-        pari_sp av = avma; (void)new_chunk(1+lgefint(p1)+lgefint(p2));/*HACK*/
-        p2 = mului(w,p2); if (s < 0) togglesign(p2);
-        avma = av; gel(X,i) = addii(p1,p2);
-      }
-    }
-    return;
-  }
-  /* m > 3 */
-  for (i = lg(X)-1; i; i--)
-  {
-    GEN p1 = gel(X,i), p2 = gel(Y,i);
-    if (!signe(p1)) gel(X,i) = mulii(v,p2);
-    else if (signe(p2))
-    {
-      pari_sp av = avma; (void)new_chunk(m+lgefint(p1)+lgefint(p2)); /*HACK*/
-      p2 = mulii(v,p2);
-      avma = av; gel(X,i) = addii(p1,p2);
-    }
-  }
+  for (i = lg(X)-1; i; i--) gel(X,i) = addmulii_inplace(gel(X,i), gel(Y,i), v);
 }
 
-/* X + v Y */
+/* X + v Y, wasteful if (v = 0) */
 static GEN
 ZC_lincomb1(GEN v, GEN X, GEN Y)
 {
-  long i, lx = lg(X), m = lgefint(v);
-  GEN p1, p2, A = cgetg(lx,t_COL);
-  if (is_bigint(v))
-  {
-    for (i=1; i<lx; i++)
-    {
-      p1=gel(X,i); p2=gel(Y,i);
-      if      (!signe(p1)) gel(A,i) = mulii(v,p2);
-      else if (!signe(p2)) gel(A,i) = icopy(p1);
-      else
-      {
-        pari_sp av = avma; (void)new_chunk(m+lgefint(p1)+lgefint(p2)); /*HACK*/
-        p2 = mulii(v,p2);
-        avma = av; gel(A,i) = addii(p1,p2);
-      }
-    }
-  }
-  else
-  {
-    long w = itos(v);
-    for (i=1; i<lx; i++)
-    {
-      p1=gel(X,i); p2=gel(Y,i);
-      if      (!signe(p1)) gel(A,i) = mulsi(w,p2);
-      else if (!signe(p2)) gel(A,i) = icopy(p1);
-      else
-      {
-        pari_sp av = avma; (void)new_chunk(1+lgefint(p1)+lgefint(p2)); /*HACK*/
-        p2 = mulsi(w,p2);
-        avma = av; gel(A,i) = addii(p1,p2);
-      }
-    }
-  }
+  long i, lx = lg(X);
+  GEN A = cgetg(lx,t_COL);
+  for (i=1; i<lx; i++) gel(A,i) = addmulii(gel(X,i), gel(Y,i), v);
   return A;
 }
 /* -X + vY */
 static GEN
 ZC_lincomb_1(GEN v, GEN X, GEN Y)
 {
-  long i, m, lx = lg(X);
-  GEN p1, p2, A = cgetg(lx,t_COL);
-  m = lgefint(v);
-  for (i=1; i<lx; i++)
-  {
-    p1=gel(X,i); p2=gel(Y,i);
-    if      (!signe(p1)) gel(A,i) = mulii(v,p2);
-    else if (!signe(p2)) gel(A,i) = negi(p1);
-    else
-    {
-      pari_sp av = avma; (void)new_chunk(m+lgefint(p1)+lgefint(p2)); /* HACK */
-      p2 = mulii(v,p2);
-      avma = av; gel(A,i) = subii(p2,p1);
-    }
-  }
+  long i, lx = lg(X);
+  GEN A = cgetg(lx,t_COL);
+  for (i=1; i<lx; i++) gel(A,i) = mulsubii(gel(Y,i), v, gel(X,i));
   return A;
 }
 /* X,Y compatible ZV; u,v in Z. Returns A = u*X + v*Y */
 GEN
 ZC_lincomb(GEN u, GEN v, GEN X, GEN Y)
 {
-  pari_sp av;
-  long i, lx, m, su, sv;
-  GEN p1, p2, A;
+  long su, sv;
+  GEN A;
 
   su = signe(u); if (!su) return ZC_Z_mul(Y, v);
   sv = signe(v); if (!sv) return ZC_Z_mul(X, u);
@@ -528,20 +441,9 @@ ZC_lincomb(GEN u, GEN v, GEN X, GEN Y)
   }
   else
   { /* not cgetg_copy: x may be a t_VEC */
-    lx = lg(X); A = cgetg(lx,t_COL); m = lgefint(u)+lgefint(v);
-    for (i=1; i<lx; i++)
-    {
-      p1=gel(X,i); p2=gel(Y,i);
-      if      (!signe(p1)) gel(A,i) = mulii(v,p2);
-      else if (!signe(p2)) gel(A,i) = mulii(u,p1);
-      else
-      {
-        av = avma; (void)new_chunk(m+lgefint(p1)+lgefint(p2)); /* HACK */
-        p1 = mulii(u,p1);
-        p2 = mulii(v,p2);
-        avma = av; gel(A,i) = addii(p1,p2);
-      }
-    }
+    long i, lx = lg(X);
+    A = cgetg(lx,t_COL);
+    for (i=1; i<lx; i++) gel(A,i) = lincombii(u,v,gel(X,i),gel(Y,i));
   }
   return A;
 }
@@ -795,6 +697,25 @@ ZM_isidentity(GEN x)
 /**                       MISCELLANEOUS                            **/
 /**                                                                **/
 /********************************************************************/
+/* assume lg(x) = lg(y), x,y in Z^n */
+int
+ZV_cmp(GEN x, GEN y)
+{
+  long fl,i, lx = lg(x);
+  for (i=1; i<lx; i++)
+    if (( fl = cmpii(gel(x,i), gel(y,i)) )) return fl;
+  return 0;
+}
+/* assume lg(x) = lg(y), x,y in Z^n */
+int
+ZV_abscmp(GEN x, GEN y)
+{
+  long fl,i, lx = lg(x);
+  for (i=1; i<lx; i++)
+    if (( fl = absi_cmp(gel(x,i), gel(y,i)) )) return fl;
+  return 0;
+}
+
 long
 zv_content(GEN x)
 {

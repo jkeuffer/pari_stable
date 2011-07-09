@@ -2051,6 +2051,8 @@ GEN     member_zkst(GEN bid);
 
 /* mp.c */
 
+GEN     addmulii(GEN x, GEN y, GEN z);
+GEN     addmulii_inplace(GEN x, GEN y, GEN z);
 ulong   Fl_inv(ulong x, ulong p);
 int     Fp_ratlift(GEN x, GEN m, GEN amax, GEN bmax, GEN *a, GEN *b);
 int     absi_cmp(GEN x, GEN y);
@@ -2923,6 +2925,14 @@ INLINE GEN    pr_get_tau(GEN pr);
 INLINE int    pr_is_inert(GEN P);
 INLINE GEN    pr_norm(GEN pr);
 INLINE long   rnf_get_degree(GEN rnf);
+
+INLINE GEN    addmuliu(GEN x, GEN y, ulong u);
+INLINE GEN    addmuliu_inplace(GEN x, GEN y, ulong u);
+INLINE GEN    lincombii(GEN u, GEN v, GEN x, GEN y);
+INLINE GEN    mulsubii(GEN y, GEN z, GEN x);
+INLINE GEN    submulii(GEN x, GEN y, GEN z);
+INLINE GEN    submuliu(GEN x, GEN y, ulong u);
+INLINE GEN    submuliu_inplace(GEN x, GEN y, ulong u);
 
 INLINE GEN    FpXQ_add(GEN x,GEN y,GEN T,GEN p);
 INLINE GEN    FpXQ_sub(GEN x,GEN y,GEN T,GEN p);

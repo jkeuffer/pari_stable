@@ -34,6 +34,9 @@ BA  4- Library function FpXQ_autpowers
     5- GP default 'linewrap'
     6- functions Fp_issquare, Fq_issquare.
     7- GP function cmp [ universal comparison ]
+    8- library functions addmulii, addmulii_inplace, addmuliu,
+       addmuliu_inplace, lincombii, mulsubii, submulii, submuliu,
+       submuliu_inplace
 
   Removed
     1- dropped DOS support

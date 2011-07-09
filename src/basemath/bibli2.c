@@ -1541,25 +1541,6 @@ cmp_nodata(void *data, GEN x, GEN y)
   return cmp(x,y);
 }
 
-/* assume lg(x) = lg(y), x,y in Z^n */
-int
-ZV_cmp(GEN x, GEN y)
-{
-  long fl,i, lx = lg(x);
-  for (i=1; i<lx; i++)
-    if (( fl = cmpii(gel(x,i), gel(y,i)) )) return fl;
-  return 0;
-}
-/* assume lg(x) = lg(y), x,y in Z^n */
-int
-ZV_abscmp(GEN x, GEN y)
-{
-  long fl,i, lx = lg(x);
-  for (i=1; i<lx; i++)
-    if (( fl = absi_cmp(gel(x,i), gel(y,i)) )) return fl;
-  return 0;
-}
-
 /* assume x and y come from the same idealprimedec call (uniformizer unique) */
 int
 cmp_prime_over_p(GEN x, GEN y)

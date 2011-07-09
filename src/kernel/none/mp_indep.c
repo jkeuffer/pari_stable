@@ -385,6 +385,72 @@ mulir(GEN x, GEN y)
   avma = (pari_sp)z; return z;
 }
 
+/* x + y*z, generic. If lgefint(z) <= 3, caller should use faster variants  */
+static GEN
+addmulii_gen(GEN x, GEN y, GEN z, long lz)
+{
+  long lx = lgefint(x), ly;
+  pari_sp av;
+  GEN t;
+  if (lx == 2) return mulii(z,y);
+  ly = lgefint(y);
+  if (ly == 2) return icopy(x); /* y = 0, wasteful copy */
+  av = avma; (void)new_chunk(lx+ly+lz); /*HACK*/
+  t = mulii(z, y);
+  avma = av; return addii(t,x);
+}
+/* x + y*z, lgefint(z) == 3 */
+static GEN
+addmulii_lg3(GEN x, GEN y, GEN z)
+{
+  long s = signe(z), lx, ly;
+  ulong w = z[2];
+  pari_sp av;
+  GEN t;
+  if (w == 1) return (s > 0)? addii(x,y): subii(x,y); /* z = +- 1 */
+  lx = lgefint(x);
+  ly = lgefint(y);
+  if (lx == 2)
+  { /* x = 0 */
+    if (ly == 2) return gen_0;
+    t = muluispec(w, y+2, ly-2);
+    if (signe(y) < 0) s = -s;
+    setsigne(t, s); return t;
+  }
+  if (ly == 2) return icopy(x); /* y = 0, wasteful copy */
+  av = avma; (void)new_chunk(1+lx+ly);/*HACK*/
+  t = muluispec(w, y+2, ly-2);
+  if (signe(y) < 0) s = -s;
+  setsigne(t, s);
+  avma = av; return addii(x,t);
+}
+/* x + y*z */
+GEN
+addmulii(GEN x, GEN y, GEN z)
+{
+  long lz = lgefint(z);
+  switch(lz)
+  {
+    case 2: return icopy(x); /* z = 0, wasteful copy */
+    case 3: return addmulii_lg3(x, y, z);
+    default:return addmulii_gen(x, y, z, lz);
+  }
+}
+/* x + y*z, returns x itself and not a copy when y*z = 0 */
+GEN
+addmulii_inplace(GEN x, GEN y, GEN z)
+{
+  long lz;
+  if (lgefint(y) == 2) return x;
+  lz = lgefint(z);
+  switch(lz)
+  {
+    case 2: return x;
+    case 3: return addmulii_lg3(x, y, z);
+    default:return addmulii_gen(x, y, z, lz);
+  }
+}
+
 /* written by Bruno Haible following an idea of Robert Harley */
 long
 vals(ulong z)

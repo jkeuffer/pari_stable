@@ -2279,6 +2279,30 @@ the real number equal to $x$. This is a special case of \kbd{gexpo}.
 
 \fun{void}{addumului}{ulong a, ulong b, GEN x} return $a + b|X|$.
 
+\fun{GEN}{addmuliu}{GEN x, GEN y, ulong u} returns $x +yu$.
+
+\fun{GEN}{addmulii}{GEN x, GEN y, GEN z} returns $x + yz$.
+
+\fun{GEN}{addmulii_inplace}{GEN x, GEN y, GEN z} returns $x + yz$, but
+returns $x$ itself and not a copy if $yz = 0$. Not suitable for
+\tet{gerepile} or \tet{gerepileupto}.
+
+\fun{GEN}{addmuliu_inplace}{GEN x, GEN y, ulong u} returns $x +yu$, but
+returns $x$ itself and not a copy if $yu = 0$. Not suitable for
+\tet{gerepile} or \tet{gerepileupto}.
+
+\fun{GEN}{submuliu_inplace}{GEN x, GEN y, ulong u} returns $x- yu$, but
+returns $x$ itself and not a copy if $yu = 0$. Not suitable for
+\tet{gerepile} or \tet{gerepileupto}.
+
+\fun{GEN}{lincombii}{GEN u, GEN v, GEN x, GEN y} returns $ux + vy$.
+
+\fun{GEN}{mulsubii}{GEN y, GEN z, GEN x} returns $yz - x$.
+
+\fun{GEN}{submulii}{GEN x, GEN y, GEN z} returns $x - yz$.
+
+\fun{GEN}{submuliu}{GEN x, GEN y, ulong u} returns $x -yu$.
+
 \fun{GEN}{mulu_interval}{ulong a, ulong b} returns $a(a+1)\cdots b$, assuming
 that $a \leq b$. Very inefficient when $a = 0$.
 

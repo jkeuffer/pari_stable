@@ -91,38 +91,6 @@ lll_finish(GEN h, long k, long flag)
   http://www.shoup.net/ntl/
 */
 
-/* x - s*y */
-static GEN
-submulu(GEN x, GEN y, ulong s)
-{
-  pari_sp av;
-  if (!signe(y)) return x;
-  av = avma;
-  (void)new_chunk(3+lgefint(x)+lgefint(y)); /* HACK */
-  y = mului(s,y);
-  avma = av; return subii(x, y);
-}
-static GEN
-addmulu(GEN x, GEN y, ulong s)
-{
-  pari_sp av;
-  if (!signe(y)) return x;
-  av = avma;
-  (void)new_chunk(3+lgefint(x)+lgefint(y)); /* HACK */
-  y = mului(s,y);
-  avma = av; return addii(x, y);
-}
-static GEN
-submul(GEN x, GEN y, GEN s)
-{
-  pari_sp av;
-  if (!signe(y)) return x;
-  av = avma;
-  (void)new_chunk(lgefint(s)+lgefint(x)+lgefint(y)); /* HACK */
-  y = mulii(s,y);
-  avma = av; return subii(x, y);
-}
-
 /***********************************************/
 /* Babai's Nearest Plane algorithm (iterative) */
 /***********************************************/
@@ -258,20 +226,20 @@ Babai(pari_sp av, long kappa, GEN *pG, GEN *pB, GEN *pU, GEN mu, GEN r, GEN s,
           }
           avma = btop;
           for (i=1; i<=n; i++)
-            gmael(B,kappa,i) = submulu(gmael(B,kappa,i), gmael(B,j,i), xx);
+            gmael(B,kappa,i) = submuliu_inplace(gmael(B,kappa,i), gmael(B,j,i), xx);
           for (i=1; i<=d; i++)
-            gmael(U,kappa,i) = submulu(gmael(U,kappa,i), gmael(U,j,i), xx);
+            gmael(U,kappa,i) = submuliu_inplace(gmael(U,kappa,i), gmael(U,j,i), xx);
           btop = avma;
           ztmp = shifti(muliu(gmael(G,kappa,j), xx), 1);
           ztmp = subii(mulii(gmael(G,j,j), sqru(xx)), ztmp);
           ztmp = addii(gmael(G,kappa,kappa), ztmp);
           gmael(G,kappa,kappa) = gerepileuptoint(btop, ztmp);
           for (i=1; i<=j; i++)
-            gmael(G,kappa,i) = submulu(gmael(G,kappa,i), gmael(G,j,i), xx);
+            gmael(G,kappa,i) = submuliu_inplace(gmael(G,kappa,i), gmael(G,j,i), xx);
           for (i=j+1; i<kappa; i++)
-            gmael(G,kappa,i) = submulu(gmael(G,kappa,i), gmael(G,i,j), xx);
+            gmael(G,kappa,i) = submuliu_inplace(gmael(G,kappa,i), gmael(G,i,j), xx);
           for (i=kappa+1; i<=maxG; i++)
-            gmael(G,i,kappa) = submulu(gmael(G,i,kappa), gmael(G,i,j), xx);
+            gmael(G,i,kappa) = submuliu_inplace(gmael(G,i,kappa), gmael(G,i,j), xx);
         }
         else /* = -xx */
         {
@@ -282,20 +250,20 @@ Babai(pari_sp av, long kappa, GEN *pG, GEN *pB, GEN *pU, GEN mu, GEN r, GEN s,
           }
           avma = btop;
           for (i=1; i<=n; i++)
-            gmael(B,kappa,i) = addmulu(gmael(B,kappa,i), gmael(B,j,i), xx);
+            gmael(B,kappa,i) = addmuliu_inplace(gmael(B,kappa,i), gmael(B,j,i), xx);
           for (i=1; i<=d; i++)
-            gmael(U,kappa,i) = addmulu(gmael(U,kappa,i), gmael(U,j,i), xx);
+            gmael(U,kappa,i) = addmuliu_inplace(gmael(U,kappa,i), gmael(U,j,i), xx);
           btop = avma;
           ztmp = shifti(muliu(gmael(G,kappa,j), xx), 1);
           ztmp = addii(mulii(gmael(G,j,j), sqru(xx)), ztmp);
           ztmp = addii(gmael(G,kappa,kappa), ztmp);
           gmael(G,kappa,kappa) = gerepileuptoint(btop, ztmp);
           for (i=1; i<=j; i++)
-            gmael(G,kappa,i) = addmulu(gmael(G,kappa,i), gmael(G,j,i), xx);
+            gmael(G,kappa,i) = addmuliu_inplace(gmael(G,kappa,i), gmael(G,j,i), xx);
           for (i=j+1; i<kappa; i++)
-            gmael(G,kappa,i) = addmulu(gmael(G,kappa,i), gmael(G,i,j), xx);
+            gmael(G,kappa,i) = addmuliu_inplace(gmael(G,kappa,i), gmael(G,i,j), xx);
           for (i=kappa+1; i<=maxG; i++)
-            gmael(G,i,kappa) = addmulu(gmael(G,i,kappa), gmael(G,i,j), xx);
+            gmael(G,i,kappa) = addmuliu_inplace(gmael(G,i,kappa), gmael(G,i,j), xx);
         }
       }
       else
@@ -312,20 +280,20 @@ Babai(pari_sp av, long kappa, GEN *pG, GEN *pB, GEN *pU, GEN mu, GEN r, GEN s,
         }
         avma = btop;
         for (i=1; i<=n; i++)
-          gmael(B,kappa,i) = submul(gmael(B,kappa,i), gmael(B,j,i), X);
+          gmael(B,kappa,i) = submulii(gmael(B,kappa,i), gmael(B,j,i), X);
         for (i=1; i<=d; i++)
-          gmael(U,kappa,i) = submul(gmael(U,kappa,i), gmael(U,j,i), X);
+          gmael(U,kappa,i) = submulii(gmael(U,kappa,i), gmael(U,j,i), X);
         btop = avma;
         ztmp = shifti(mulii(gmael(G,kappa,j), X), 1);
         ztmp = subii(mulii(gmael(G,j,j), sqri(X)), ztmp);
         ztmp = addii(gmael(G,kappa,kappa), ztmp);
         gmael(G,kappa,kappa) = gerepileuptoint(btop, ztmp);
         for (i=1; i<=j; i++)
-          gmael(G,kappa,i) = submul(gmael(G,kappa,i), gmael(G,j,i), X);
+          gmael(G,kappa,i) = submulii(gmael(G,kappa,i), gmael(G,j,i), X);
         for (   ; i<kappa; i++)
-          gmael(G,kappa,i) = submul(gmael(G,kappa,i), gmael(G,i,j), X);
+          gmael(G,kappa,i) = submulii(gmael(G,kappa,i), gmael(G,i,j), X);
         for (i=kappa+1; i<=maxG; i++)
-          gmael(G,i,kappa) = submul(gmael(G,i,kappa), gmael(G,i,j), X);
+          gmael(G,i,kappa) = submulii(gmael(G,i,kappa), gmael(G,i,j), X);
       }
     }
     if (!go_on) break; /* Anything happened? */
