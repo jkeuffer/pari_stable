@@ -2,9 +2,9 @@ Function: vecsort
 Section: linear_algebra
 C-Name: vecsort0
 Prototype: GDGD0,L,
-Help: vecsort(x,{cmp},{flag=0}): sorts the vector of vectors (or matrix) x in
- ascending order, according to the comparison function cmp, if not omitted.
- (If cmp is an integer, sort according to the value of the k-th component
+Help: vecsort(x,{cmpf},{flag=0}): sorts the vector of vectors (or matrix) x in
+ ascending order, according to the comparison function cmpf, if not omitted.
+ (If cmpf is an integer, sort according to the value of the k-th component
  of each entry.) Binary digits of flag (if present) mean: 1: indirect sorting,
  return the permutation instead of the permuted vector, 2: sort using
  lexicographic order, 4: use descending instead of ascending order, 8: remove
@@ -31,9 +31,9 @@ Doc: sorts the vector $x$ in ascending order, using a mergesort method.
  Note that mergesort is stable, hence the initial ordering of ``equal''
  entries (with respect to the sorting criterion) is not changed.
 
- If \kbd{cmp} is omitted, we use the standard comparison function
+ If \kbd{cmpf} is omitted, we use the standard comparison function
  \kbd{<}, thereby restricting the possible types for the elements of $x$
- (integers, fractions or reals). If \kbd{cmp} is present, it is understood as
+ (integers, fractions or reals). If \kbd{cmpf} is present, it is understood as
  a comparison function and we sort according to it. The following
  possibilities exist:
 
@@ -41,7 +41,7 @@ Doc: sorts the vector $x$ in ascending order, using a mergesort method.
  subcomponents of the components of~$x$.
 
  \item a vector: sort lexicographically according to the components listed in
- the vector. For example, if $\kbd{cmp}=\kbd{[2,1,3]}$, sort with respect to
+ the vector. For example, if $\kbd{cmpf}=\kbd{[2,1,3]}$, sort with respect to
  the second component, and when these are equal, with respect to the first,
  and when these are equal, with respect to the third.
 
@@ -56,10 +56,10 @@ Doc: sorts the vector $x$ in ascending order, using a mergesort method.
  [2 1]
  ? vecsort(v, (x,y)->sign(y-x))            \\@com reverse sort
  ? vecsort(v, (x,y)->sign(abs(x)-abs(y)))  \\@com sort by increasing absolute value
- ? cmp(x,y) = my(dx = poldisc(x), dy = poldisc(y)); sign(abs(dx) - abs(dy))
- ? vecsort([x^2+1, x^3-2, x^4+5*x+1], cmp)
+ ? cmpf(x,y) = my(dx = poldisc(x), dy = poldisc(y)); sign(abs(dx) - abs(dy))
+ ? vecsort([x^2+1, x^3-2, x^4+5*x+1], cmpf)
  @eprog\noindent
- The last example used the named \kbd{cmp} instead of an anonymous function,
+ The last example used the named \kbd{cmpf} instead of an anonymous function,
  and sorts polynomials with respect to the absolute value of their
  discriminant. A more efficient approach would use precomputations to ensure
  a given discriminant is computed only once:
