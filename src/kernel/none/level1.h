@@ -704,8 +704,8 @@ rdivii(GEN x, GEN y, long prec)
   GEN z = cgetr(prec);
   pari_sp av = avma;
   affir(x, z);
-  if (!is_bigint(y)) {
-    affrr(divrs(z, y[2]), z);
+  if (lg(y) == 3) {
+    affrr(divru(z, y[2]), z);
     if (signe(y) < 0) togglesign(z);
   }
   else
