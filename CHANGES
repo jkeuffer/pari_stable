@@ -40,6 +40,7 @@ BA  4- Library function FpXQ_autpowers
     8- library functions addmulii, addmulii_inplace, addmuliu,
        addmuliu_inplace, lincombii, mulsubii, submulii, submuliu,
        submuliu_inplace
+LGr 9- Catalan's constant [ Catalan() ]
 
   Removed
     1- dropped DOS support

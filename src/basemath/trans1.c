@@ -29,16 +29,17 @@ static const long SQRTVERYBIGINT = 46341L;
 static const long CBRTVERYBIGINT =  1291L;
 #endif
 
-static THREAD GEN geuler, glog2, gpi;
+static THREAD GEN gcatalan, geuler, glog2, gpi;
 void
 pari_init_floats(void)
 {
-  geuler = gpi = bernzone = glog2 = NULL;
+  gcatalan = geuler = gpi = bernzone = glog2 = NULL;
 }
 
 void
 pari_close_floats(void)
 {
+  if (gcatalan) gunclone(gcatalan);
   if (geuler) gunclone(geuler);
   if (gpi) gunclone(gpi);
   if (bernzone) gunclone(bernzone);
@@ -137,8 +138,11 @@ constpi(long prec)
   }
   setexpo(C, expo(C)+2);
   affrr(divrr(sqrr(addrr(A,B)), C), tmppi);
+  BLOCK_SIGINT_START;
   if (gpi) gunclone(gpi);
-  avma = av;  return gpi = tmppi;
+  gpi = tmppi;
+  BLOCK_SIGINT_END;
+  avma = av;  return gpi;
 }
 
 GEN
@@ -230,12 +234,50 @@ consteuler(long prec)
     }
   }
   divrrz(u,v,tmpeuler);
+  BLOCK_SIGINT_START;
   if (geuler) gunclone(geuler);
-  avma = av1; return geuler = tmpeuler;
+  geuler = tmpeuler;
+  BLOCK_SIGINT_END;
+  avma = av1; return geuler;
 }
 
 GEN
 mpeuler(long prec) { return rtor(consteuler(prec), prec); }
+
+/********************************************************************/
+/**                                                                **/
+/**                       CATALAN CONSTANT                         **/
+/**                                                                **/
+/********************************************************************/
+
+static GEN
+catalaneval(void *sqp, GEN a)
+{
+  GEN sq = (GEN)sqp; /* (2a-1)^2 */
+  affii(addii(sq, shifti(a, 3)), sq); /* (2a+1)^2 */
+  return mkfrac(mpodd(a)? gen_m1: gen_1, sq);
+}
+
+/* sumalt(n=0, (-1)^n/(2*n+1)^2)
+ * N.B. faster than Broadhurst's formula from arXiv:math/9803067v1 */
+GEN
+constcatalan(long prec)
+{
+  pari_sp av = avma;
+  GEN sq, tmp;
+  if (gcatalan && realprec(gcatalan) >= prec) return gcatalan;
+  prec++;
+  sq = cgeti(prec); affsi(1, sq);
+  tmp = gclone(sumalt((void *)sq, catalaneval, gen_0, prec));
+  BLOCK_SIGINT_START;
+  if (gcatalan) gunclone(gcatalan);
+  gcatalan = tmp;
+  BLOCK_SIGINT_END;
+  avma = av; return gcatalan;
+}
+
+GEN
+mpcatalan(long prec) { return rtor(constcatalan(prec), prec); }
 
 /********************************************************************/
 /**                                                                **/
@@ -1907,8 +1949,11 @@ constlog2(long prec)
   n = prec2nbits(l) >> 1;
   y = divrr(Pi2n(-1, prec), agm1r_abs( real2n(2 - n, l) ));
   affrr(divru(y,n), tmplog2);
+  BLOCK_SIGINT_START;
   if (glog2) gunclone(glog2);
-  avma = av; return glog2 = tmplog2;
+  glog2 = tmplog2;
+  BLOCK_SIGINT_END;
+  avma = av; return glog2;
 }
 
 GEN

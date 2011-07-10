@@ -5,4 +5,5 @@ Prototype: p
 Help: Pi=Pi(): the constant pi, with current precision.
 Description:
  ():real:prec        mppi(prec)
-Doc: the constant $\pi$ ($3.14159\cdots$).
+Doc: the constant $\pi$ ($3.14159\cdots$). Note that \kbd{Pi} is one of the few
+ reserved names which cannot be used for user variables.

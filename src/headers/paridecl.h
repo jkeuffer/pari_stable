@@ -2538,6 +2538,7 @@ GEN     gtan(GEN x, long prec);
 GEN     logr_abs(GEN x);
 GEN     mpcos(GEN x);
 GEN     mpeuler(long prec);
+GEN     mpcatalan(long prec);
 GEN     mpexp(GEN x);
 GEN     mpexp1(GEN x);
 GEN     mplog(GEN x);
