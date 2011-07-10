@@ -684,7 +684,6 @@ GEN
 sd_readline(const char *v, long flag)
 {
   const char *msg[] = {
-    "(bits 0x2/0x4 control matched-insert/arg-complete)",
     "(bits 0x2/0x4 control matched-insert/arg-complete)", NULL};
   ulong o_readline_state = readline_state;
   GEN res = sd_ulong(v,flag,"readline", &readline_state, 0, 7, msg);

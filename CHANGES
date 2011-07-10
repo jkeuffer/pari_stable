@@ -13,6 +13,7 @@ Done for version 2.6.0 (released ??/??/20??):
        instead of a local one at p.
     6- qfbred(t_QFR) wrong when frac( sqrt(D) ) > 0.5
     7- add GC in sumalt()
+    8- problems with diagnostic messages when changing a 'default', e.g. \o3
 
   Changed
     1- mathnf: swapped flag 3 and 5.

@@ -177,6 +177,7 @@ sd_ulong_init(const char *v, const char *s, ulong *ptn, ulong Min, ulong Max)
   }
 }
 
+/* msg is NULL or NULL-terminated array with msg[0] != NULL. */
 GEN
 sd_ulong(const char *v, long flag, const char *s, ulong *ptn, ulong Min, ulong Max,
          const char **msg)
@@ -189,19 +190,12 @@ sd_ulong(const char *v, long flag, const char *s, ulong *ptn, ulong Min, ulong M
       return utoi(*ptn);
     case d_ACKNOWLEDGE:
       if (!v || *ptn != n) {
-        if (msg)
-        {
-          ulong i;
-          for (i = 0; i < *ptn; i++) {
-            if (!msg[i]) { i--; break; }
-          }
-          if (i != (ulong)-1) {
-            if (i == *ptn) i = 0;
-            pari_printf("   %s = %lu %s\n", s, *ptn, msg[i]);
-            return gnil;
-          }
-        }
-        pari_printf("   %s = %lu\n", s, *ptn);
+        if (!msg)         /* no specific message */
+          pari_printf("   %s = %lu\n", s, *ptn);
+        else if (!msg[1]) /* single message, always printed */
+          pari_printf("   %s = %lu %s\n", s, *ptn, msg[0]);
+        else              /* print (new)-n-th message */
+          pari_printf("   %s = %lu %s\n", s, *ptn, msg[*ptn]);
       }
       break;
   }
