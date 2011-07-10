@@ -642,7 +642,7 @@ divrs(GEN x, long y)
 GEN
 divru(GEN x, ulong y)
 {
-  long i, lx, garde, sh, s = signe(x);
+  long i, lx, garde, sh, e, s = signe(x);
   GEN z;
   LOCAL_HIREMAINDER;
 
@@ -651,13 +651,28 @@ divru(GEN x, ulong y)
   if (y==1) return rcopy(x);
   if (y==2) return shiftr(x, -1);
 
-  z=cgetr(lx=lg(x)); hiremainder=0;
-  for (i=2; i<lx; i++) z[i] = divll(x[i],y);
-
-  /* we may have hiremainder != 0 ==> garde */
-  garde=divll(0,y); sh=bfffo(z[2]);
+  e = expo(x);
+  lx = lg(x);
+  z = cgetr(lx);
+  if (y <= (ulong)x[2])
+  {
+    hiremainder = 0;
+    for (i=2; i<lx; i++) z[i] = divll(x[i],y);
+    /* we may have hiremainder != 0 ==> garde */
+    garde = divll(0,y);
+  }
+  else
+  {
+    long l = lx-1;
+    hiremainder = x[2];
+    for (i=2; i<l; i++) z[i] = divll(x[i+1],y);
+    z[i] = divll(0,y);
+    garde = hiremainder;
+    e -= BITS_IN_LONG;
+  }
+  sh=bfffo(z[2]); /* z[2] != 0 */
   if (sh) shift_left(z,z, 2,lx-1, garde,sh);
-  z[1] = evalsigne(s) | evalexpo(expo(x)-sh);
+  z[1] = evalsigne(s) | evalexpo(e-sh);
   if ((garde << sh) & HIGHBIT) roundr_up_ip(z, lx);
   return z;
 }

@@ -14,6 +14,7 @@ Done for version 2.6.0 (released ??/??/20??):
     6- qfbred(t_QFR) wrong when frac( sqrt(D) ) > 0.5
     7- add GC in sumalt()
     8- problems with diagnostic messages when changing a 'default', e.g. \o3
+    9- divru() could call bfffo(0) => overflow in expo()
 
   Changed
     1- mathnf: swapped flag 3 and 5.
