@@ -107,6 +107,19 @@ addqf(GEN x, GEN y, long prec) { pari_sp av = avma;
   return gerepileupto(av, gadd(y, quadtofp(x, prec)));
 }
 static GEN
+mulrfrac(GEN x, GEN y)
+{
+  pari_sp av = avma;
+  GEN z, a = gel(y,1), b = gel(y,2);
+  if (is_pm1(a)) /* frequent special case */
+  {
+    z = divri(x, b);
+    if (signe(a) < 0) togglesign(z);
+    return z;
+  }
+  return gerepileuptoleaf(av, divri(mulri(x,gel(y,1)), gel(y,2)));
+}
+static GEN
 mulqf(GEN x, GEN y, long prec) { pari_sp av = avma;
   return gerepileupto(av, gmul(y, quadtofp(x, prec)));
 }
@@ -1847,10 +1860,7 @@ gmul(GEN x, GEN y)
     case t_REAL:
       switch(ty)
       {
-        case t_FRAC:
-          if (!signe(y[1])) return gen_0;
-          av = avma;
-          return gerepileuptoleaf(av, divri(mulri(x,gel(y,1)), gel(y,2)));
+        case t_FRAC: return mulrfrac(x, y);
         case t_COMPLEX: return mulRc(x, y);
         case t_QUAD: return mulqf(y, x, lg(x));
         default: pari_err(operf,"*",x,y);
