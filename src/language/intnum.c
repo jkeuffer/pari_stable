@@ -433,7 +433,7 @@ initexpsinh(long m, long prec)
     gel(D.tabwp,k) = mulrr(xp, t);
     gel(D.tabxm,k) = invr(xp);
     gel(D.tabwm,k) = mulrr(gel(D.tabxm,k), t);
-    if (expo(D.tabxm[k]) < -D.eps) { nt = k-1; break; }
+    if (expo(gel(D.tabxm,k)) < -D.eps) { nt = k-1; break; }
   }
   return gerepilecopy(ltop, intinit_end(&D, nt, nt));
 }

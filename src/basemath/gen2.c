@@ -347,12 +347,12 @@ gequal0(GEN x)
       {
         if (gequal0(gel(x,2))) return 1;
         if (typ(x[1])!=t_REAL || typ(x[2])!=t_REAL) return 0;
-        return (expo(x[1])>expo(x[2]));
+        return (expo(gel(x,1))>expo(gel(x,2)));
       }
       if (gequal0(gel(x,2)))
       {
         if (typ(x[1])!=t_REAL || typ(x[2])!=t_REAL) return 0;
-        return (expo(x[2])>expo(x[1]));
+        return (expo(gel(x,2))>expo(gel(x,1)));
       }
       return 0;
 

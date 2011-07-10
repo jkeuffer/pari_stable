@@ -700,7 +700,7 @@ rhoimag(GEN x)
 static void
 fix_expo(GEN x)
 {
-  long d = expo(x[5]) - (1L << EMAX);
+  long d = expo(gel(x,5)) - (1L << EMAX);
   if (d >= 0) {
     gel(x,4) = addsi(1, gel(x,4));
     setexpo(x[5], d);

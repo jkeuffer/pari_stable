@@ -602,7 +602,7 @@ nf_Mignotte_bound(GEN nf, GEN polbase)
     for (j=1; j <= r1; j++) /* N2[j] = || sigma_j(S) ||_2 */
     {
       gel(N2,j) = sqrtr( RgC_fpnorml2(gel(matGS,j), DEFAULTPREC) );
-      if (realprec(N2[j]) < DEFAULTPREC) goto PRECPB;
+      if (realprec(gel(N2,j)) < DEFAULTPREC) goto PRECPB;
     }
     for (   ; j <= n; j+=2)
     {
@@ -610,7 +610,7 @@ nf_Mignotte_bound(GEN nf, GEN polbase)
       GEN q2 = RgC_fpnorml2(gel(matGS,j+1), DEFAULTPREC);
       p1 = gmul2n(addrr(q1, q2), -1);
       gel(N2,j) = gel(N2,j+1) = sqrtr(p1);
-      if (realprec(N2[j]) < DEFAULTPREC) goto PRECPB;
+      if (realprec(gel(N2,j)) < DEFAULTPREC) goto PRECPB;
     }
     if (j > n) break; /* done */
 PRECPB:

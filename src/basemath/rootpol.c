@@ -433,8 +433,8 @@ myshiftrc(GEN z, long e)
 {
   if (typ(z)==t_COMPLEX)
   {
-    if (signe(z[1])) setexpo(z[1], expo(z[1])+e);
-    if (signe(z[2])) setexpo(z[2], expo(z[2])+e);
+    if (signe(z[1])) setexpo(gel(z,1), expo(gel(z,1))+e);
+    if (signe(z[2])) setexpo(gel(z,2), expo(gel(z,2))+e);
   }
   else
     if (signe(z)) setexpo(z,expo(z)+e);
@@ -2226,7 +2226,7 @@ rootsold(GEN x, long prec)
         avma = av; return roots2(x,prec);
       }
       avma = av2;
-      if (expo(z[2]) < expmin && real)
+      if (expo(gel(z,2)) < expmin && real)
       {
         affsr(0, gel(z,2));
         for (j=1; j<m; j++) gaffect(z, gel(y, k+(i-1)*m+j));
