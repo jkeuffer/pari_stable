@@ -2509,8 +2509,8 @@ jell(GEN x, long prec)
      * then
      *   h = t * (q(2x) / q(x) = t * q(x);
      * but inteta(q) costly and useless if expo(q) << 1  => inteta(q) = 1.
-     * log_2 ( exp(-2Pi Im tau) ) < -bit_accuracy(prec)
-     * <=> Im tau > bit_accuracy(prec) * log(2) / 2Pi */
+     * log_2 ( exp(-2Pi Im tau) ) < -prec2nbits(prec)
+     * <=> Im tau > prec2nbits(prec) * log(2) / 2Pi */
     long C = (long)bit_accuracy_mul(prec, LOG2/(2*PI));
     q = exp_IPiC(gmul2n(x,1), prec); /* e(x) */
     if (gcmpgs(gel(x,2), C) > 0) /* eta(q(x)) = 1 : no need to compute q(2x) */

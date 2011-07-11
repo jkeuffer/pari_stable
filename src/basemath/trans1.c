@@ -2085,7 +2085,7 @@ logagmcx(GEN q, long prec)
   e = precision(q); if (e > prec) prec = e;
   z = cgetc(prec); av = avma; prec++;
   if (gsigne(gel(q,1)) < 0) { q = gneg(q); neg = 1; }
-  lim = bit_accuracy(prec) >> 1;
+  lim = prec2nbits(prec) >> 1;
   Q = gtofp(q, prec);
   a = gel(Q,1);
   b = gel(Q,2);

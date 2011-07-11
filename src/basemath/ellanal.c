@@ -468,7 +468,7 @@ ellL1_bitprec(GEN E, long r, long bitprec)
 }
 
 GEN
-ellL1(GEN E, long r, long prec) { return ellL1_bitprec(E, r, bit_accuracy(prec)); }
+ellL1(GEN E, long r, long prec) { return ellL1_bitprec(E, r, prec2nbits(prec)); }
 
 GEN
 ellanalyticrank(GEN e, GEN eps, long prec)
@@ -487,7 +487,7 @@ ellanalyticrank(GEN e, GEN eps, long prec)
       eps = gtofp(eps, DEFAULTPREC);
       if (typ(eps) != t_REAL) pari_err(typeer, "ellanalyticrank");
     }
-  init_el(&el, e, &rk, bit_accuracy(prec)); /* set rk to rank parity (0 or 1) */
+  init_el(&el, e, &rk, prec2nbits(prec)); /* set rk to rank parity (0 or 1) */
   if (DEBUGLEVEL) {
     err_printf("ellanalyticrank: CURVE = %Ps\n", e);
     err_printf("Rank is %s\n", rk == 0? "even": "odd");

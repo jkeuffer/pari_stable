@@ -699,7 +699,7 @@ lindep(GEN x)
   re = real_i(x);
   im = imag_i(x);
   /* independent over R ? */
-  if (n == 2 && real_indep(re,im,bit_accuracy(prec)))
+  if (n == 2 && real_indep(re,im,prec2nbits(prec)))
     { avma = av; return cgetg(1, t_COL); }
   if (EXP > -10) pari_err(precer,"lindep");
 
