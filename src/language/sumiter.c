@@ -946,7 +946,7 @@ sumalt(void *E, GEN (*eval)(void *, GEN), GEN a, long prec)
   av2 = avma; lim = stack_lim(av,4);
   for (k=0; ; k++) /* k < N */
   {
-    c = gadd(az,c); s = gadd(s, gmul(c, eval(E, a)));
+    c = addir(az,c); s = gadd(s, gmul(c, eval(E, a)));
     if (k==N-1) break;
     az = diviiexact(mulii(muluu((N-k)<<1,N+k),az), muluu(k+1,k+k+1));
     a = incloop(a); /* in place! */
@@ -963,20 +963,27 @@ GEN
 sumalt2(void *E, GEN (*eval)(void *, GEN), GEN a, long prec)
 {
   long k, N;
-  pari_sp av = avma;
+  pari_sp av = avma, av2, lim;
   GEN s, dn, pol;
 
   if (typ(a) != t_INT) pari_err(talker,"non integral index in sumalt");
   N = (long)(0.31*(prec2nbits(prec) + 5));
   pol = polzagreel(N,N>>1,prec+1);
   pol = RgX_div_by_X_x(pol, gen_1, &dn);
+  a = setloop(a);
   N = degpol(pol);
   s = gen_0;
+  av2 = avma; lim = stack_lim(av,4);
   for (k=0; k<=N; k++)
   {
     s = gadd(s, gmul(gel(pol,k+2), eval(E, a)));
     if (k == N) break;
-    a = addsi(1,a);
+    a = incloop(a); /* in place! */
+    if (low_stack(lim, stack_lim(av,4)))
+    {
+      if (DEBUGMEM>1) pari_warn(warnmem,"sumalt2, k = %ld/%ld", k,N-1);
+      s = gerepileupto(av2, s);
+    }
   }
   return gerepileupto(av, gdiv(s,dn));
 }
