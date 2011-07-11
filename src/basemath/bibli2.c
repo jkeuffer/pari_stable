@@ -1545,16 +1545,15 @@ cmp_nodata(void *data, GEN x, GEN y)
 int
 cmp_prime_over_p(GEN x, GEN y)
 {
-  GEN fx = gel(x,4), fy = gel(y,4);
-  long k = fx[2] - fy[2]; /* diff. between residue degree */
+  long k = pr_get_f(x) - pr_get_f(y); /* diff. between residue degree */
   return k? ((k > 0)? 1: -1)
-          : ZV_cmp(gel(x,2), gel(y,2));
+          : ZV_cmp(pr_get_gen(x), pr_get_gen(y));
 }
 
 int
 cmp_prime_ideal(GEN x, GEN y)
 {
-  int k = cmpii(gel(x,1), gel(y,1));
+  int k = cmpii(pr_get_p(x), pr_get_p(y));
   return k? k: cmp_prime_over_p(x,y);
 }
 
