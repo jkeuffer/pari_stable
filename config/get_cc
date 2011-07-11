@@ -1,5 +1,5 @@
 # Exported variables
-_cc_list="__gnuc__ CC CFLAGS optimization DBGFLAGS OPTFLAGS exe_suff suffix ASMINLINE"
+_cc_list="__gnuc__ CC CFLAGS optimization DBGFLAGS OPTFLAGS exe_suff suffix ASMINLINE KERNELCFLAGS"
 
 # Which optimization ?
 if test "$fastread" != yes; then
