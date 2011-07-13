@@ -2519,6 +2519,7 @@ GEN     Qp_sqrtn(GEN x, GEN n, GEN *zetan);
 long    Zn_issquare(GEN x, GEN n);
 GEN     Zn_sqrt(GEN x, GEN n);
 GEN     agm(GEN x, GEN y, long prec);
+GEN     constcatalan(long prec);
 GEN     consteuler(long prec);
 GEN     constlog2(long prec);
 GEN     constpi(long prec);
