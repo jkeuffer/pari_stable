@@ -15,7 +15,7 @@ Done for version 2.6.0 (released ??/??/20??):
     7- add GC in sumalt()
     8- problems with diagnostic messages when changing a 'default', e.g. \o3
     9- divru() could call bfffo(0) => overflow in expo()
-AM 10- (t_FRAC<0) * t_INTMOD => wrong result
+AMe10- (t_FRAC<0) * t_INTMOD => wrong result
 
   Changed
     1- mathnf: swapped flag 3 and 5.
