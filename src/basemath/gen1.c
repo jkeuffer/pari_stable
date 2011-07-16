@@ -2596,7 +2596,7 @@ gdiv(GEN x, GEN y)
 
         case t_INTMOD: { GEN Y = gel(y,1);
           z = cgetg(3,t_INTMOD); p1 = remii(mulii(gel(y,2),gel(x,2)), Y);
-          return div_intmod_same(z, Y, gel(x,1), p1);
+          return div_intmod_same(z, Y, modii(gel(x,1), Y), p1);
         }
 
         case t_FFELT: av=avma;
