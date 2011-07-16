@@ -81,7 +81,10 @@ echo Checking for optional libraries and headers...
 # $_graphic_list
 . ./get_graphic_lib
 # $_readline_list (includes 'readline')
-. ./get_readline
+case "$without_readline" in
+  yes);;
+  *) . ./get_readline
+esac
 #############################################################################
 case $kernlvl1 in
 gmp) libpari_base=pari-gmp;;

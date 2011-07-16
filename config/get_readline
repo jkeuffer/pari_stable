@@ -1,7 +1,3 @@
-if test "$optimization" = profiling; then
-  without_readline=yes
-fi
-
 #exported variables
 _readline_list="readline readline_version RLINCLUDE RLLIBS"
 
@@ -10,88 +6,58 @@ if test -n "$with_readline"; then
   with_readline_lib="$with_readline_lib $with_readline/lib"
   with_readline_include="$with_readline_include $with_readline/include"
 fi
-if test -z "$without_readline"; then
-  pth="$with_readline_lib $libpth"
-  lib=readline; . ./locatelib
-  rl_fullname=$try
-fi
+pth="$with_readline_lib $libpth"
+lib=readline; . ./locatelib
 
-if test -n "$readline"; then
 # Readline -- Headers
-  pth="$with_readline_include $basic_include_path"
-  x=`./locate 'readline/readline.h' '' $pth`
-  case $x in
-   ?:/*|/*) rl_include=`dirname $x`
-     echo ..."Found readline header in $rl_include";;
-    *) echo ..."But no header file has been found"
-       readline=;;
-  esac
-fi
+pth="$with_readline_include $basic_include_path"
+x=`./locate 'readline/readline.h' '' $pth`
+case $x in
+ ?:/*|/*) rl_include=`dirname $x`
+    echo ..."Found readline header in $rl_include"
+    if (echo $rl_include | grep "readline$" > /dev/null); then
+      rl_include=`dirname $rl_include`
+      RLINCLUDE="-I$rl_include"
+    fi
+     ;;
+  *) echo ..."But no header file has been found"
+     readline=;;
+esac
 
+exe=$osname-$arch-rlv$$
 if test -n "$readline"; then
-  pth="$libpth"
-# Readline -- TermCap
-  lib=$rl_fullname; sym=tgetent; . ./locatesymbol
-  need_tgetent="$try"
-  if test -n "$need_tgetent"; then
-    opth=$pth; pth="$with_ncurses_lib $libpth"
-    lib=ncurses; . ./locatelib
-    if test -n "$try"; then # ncurses found. Does it contain tgetent ?
-      lib=$try; . ./locatesymbol
-    fi
-    pth=$opth
-    if test -n "$try"; then
-      rl_ncurses=$ncurses
-      need_tgetent=
-    else # give termcap a try
-      lib=termcap; . ./locatelib
-      if test -n "$try"; then
-        rl_termcap=$termcap
-        need_tgetent=
-      fi
-    fi
-  fi
-# Readline -- CFLAGS
-  if (echo $rl_include | grep "readline$" > /dev/null); then
-    rl_include=`dirname $rl_include`
-    RLINCLUDE="-I$rl_include"
-  fi
   RLLIBS="-L$readline -lreadline"
-  if test -n "$rl_ncurses"; then
-    echo ..."Library ncurses needed by readline"
-    RLLIBS="$RLLIBS -L$rl_ncurses -lncurses"
+else
+  RLLIBS="-lreadline"
+fi
+$CC $CFLAGS $extraflag $RLINCLUDE -o $exe rl_version.c $RLLIBS 2> /dev/null
+if test ! -r $exe; then # need ncurses ?
+  echo ..."Linking failed. Trying with libncurses"
+  pth="$with_ncurses_lib $libpth"
+  lib=ncurses; . ./locatelib
+  if test -n "$ncurses"; then
+    RLLIBS="$RLLIBS -L$ncurses -lncurses"
+  else
+    RLLIBS="$RLLIBS -lncurses"
   fi
-  if test -n "$rl_termcap"; then
-    echo ..."Library termcap needed by readline"
-    RLLIBS="$RLLIBS -L$rl_termcap -ltermcap"
-  fi
-# Readline -- last chance for tgetent
-  if test -n "$need_tgetent"; then # try to compile anyway (in libc?)
-    list=readline; extra_flags="$RLLIBS $RLINCLUDE"; ./look
-    if test "$has_readline" = no; then
-      echo "cannot use readline: please install libncurses or libtermcap."
-      readline=
-    fi
-  fi
+  $CC $CFLAGS $extraflag $RLINCLUDE -o $exe rl_version.c $RLLIBS 2> /dev/null
 fi
 
+readline_version=
+if test -r $exe; then
+  readline_version=`env LD_LIBRARY_PATH="$LD_LIBRARY_PATH$dir_sep$readline" $RUNTEST $exe`;
+fi
+rm -f $exe $exe$exe_suff;
+
 if test -n "$readline"; then
-  exe=$osname-$arch-rlv$$
-  $CC $CFLAGS $extraflag $RLINCLUDE -o $exe rl_version.c $RLLIBS 2> /dev/null
-  if test -r $exe; then
-    readline_version=`env LD_LIBRARY_PATH="$LD_LIBRARY_PATH$dir_sep$readline" $RUNTEST $exe`;
-  else
-    readline_version="?.?";
-  fi
-  rm -f $exe $exe$exe_suff;
   case "$readline_version" in
   *Editline*|*EditLine*) readline=
     echo "###"
     echo "### Editline wrapper detected, building without readline support"
     echo "###";;
-  \?.\?) readline=
+  "") readline=
     echo "###"
-    echo "### Readline library detected, but does not seem to work"
+    echo "### Readline library does not seem to work. Maybe install libncurses?"
     echo "###";;
   esac
 fi
