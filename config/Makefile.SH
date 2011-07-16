@@ -51,7 +51,7 @@ case "$osname" in
   mingw)
     export_file='$(LIBPARI).def';;
   darwin)
-    ld_install_name="-Wl,-dylib_install_name -Wl,\"$libdir\"/\$(LIBPARI_DYN)";;
+    ld_install_name="-Wl,-install_name -Wl,\"$libdir\"/\$(LIBPARI_DYN)";;
 esac
 
 PLOTCFLAGS=
