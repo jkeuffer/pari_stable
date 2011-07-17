@@ -47,3 +47,6 @@ LGr 9- Catalan's constant [ Catalan() ]
 
   Removed
     1- dropped DOS support
+    2- qfrep(): bit 2 of flag is now meaningless, we now always return a
+       t_VECSMALL
+
