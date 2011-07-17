@@ -1665,18 +1665,20 @@ static GEN
 minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
 {
   GEN A, x, u, r, L, gnorme, invp, V;
-  long n = lg(a), i, j, k, s, maxrank;
+  long n = lg(a), i, j, k, s, maxrank, sBORNE;
   pari_sp av = avma, av1, lim;
   double p,maxnorm,BOUND,*v,*y,*z,**q;
-  const double eps = 1e-8;
+  const double eps = 1e-10;
   int stockall = 0;
 
   if (typ(a) != t_MAT || !RgM_is_ZM(a)) pari_err(typeer,"qfminim0");
-  if (!BORNE) BORNE = gen_0;
+  if (!BORNE)
+    sBORNE = 0;
   else
   {
     BORNE = gfloor(BORNE);
     if (typ(BORNE) != t_INT) pari_err(typeer, "minim0");
+    sBORNE = itos(BORNE);
   }
   if (!STOCKMAX) stockall = 1;
   else if (typ(STOCKMAX) != t_INT) pari_err(typeer, "minim0");
@@ -1685,20 +1687,17 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
   switch(flag)
   {
     case min_FIRST:
-      if (isintzero(BORNE)) pari_err(talker,"bound = 0 in minim2");
+      if (!sBORNE) pari_err(talker,"bound = 0 in minim2");
       break;
-    case min_ALL: break;
-    case min_PERF: break;
     case min_VECSMALL:
     case min_VECSMALL2:
-      maxrank = itos(BORNE);
+      maxrank = sBORNE;
       if (maxrank <= 0) return cgetg(1, t_VECSMALL);
 
       L = const_vecsmall(maxrank, 0);
-      if (flag == min_VECSMALL2) BORNE = shifti(BORNE,1);
-      if (isintzero(BORNE)) return L;
+      if (flag == min_VECSMALL2) sBORNE <<= 1;
+      if (!sBORNE) return L;
       break;
-    default: pari_err(flagerr, "minim0");
   }
   if (n == 1)
   {
@@ -1732,20 +1731,22 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
     for (i=1; i<j; i++) q[i][j] = rtodbl(gcoeff(r,i,j));
   }
 
-  if (isintzero(BORNE))
+  if (!sBORNE)
   {
-    BORNE = gcoeff(a,1,1);
+    BORNE = gcoeff(A,1,1);
     for (i=2; i<=n; i++)
     {
-      GEN c = gcoeff(a,i,i);
+      GEN c = gcoeff(A,i,i);
       if (cmpii(c, BORNE) < 0) BORNE = c;
     }
     maxnorm = -1.; /* don't update maxnorm */
+    sBORNE = itos(BORNE);
   }
   else
     maxnorm = 0.;
-  p = gtodouble(BORNE);
+  p = (double)sBORNE;
   BOUND = p * (1 + eps);
+  if ((long)BOUND != (long)p) pari_err(precer, "qfminim");
 
   switch(flag)
   {
@@ -1755,7 +1756,7 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
       L = new_chunk(1+maxrank);
       break;
     case min_PERF:
-      BORNE = gerepileuptoint(av1,BORNE);
+      avma = av1;
       maxrank = (n*(n+1)) >> 1;
       L = const_vecsmall(maxrank, 0);
       V = cgetg(1+maxrank, t_VECSMALL);
@@ -1800,11 +1801,11 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
     {
       pari_sp av2 = avma;
       gnorme = roundr(dbltor(p));
-      if (cmpii(gnorme,BORNE) >= 0) avma = av2;
+      if (cmpis(gnorme, sBORNE) >= 0) avma = av2;
       else
       {
         BOUND=gtodouble(gnorme)*(1+eps); s=0;
-        affii(gnorme,BORNE); avma = av1;
+        sBORNE = itos(gnorme); avma = av1;
         if (flag == min_PERF) invp = matid(maxrank);
       }
     }
@@ -1876,7 +1877,7 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
       if (DEBUGLEVEL>1) { err_printf("\n"); err_flush(); }
       avma = av; return stoi(s);
   }
-  r = (maxnorm >= 0) ? roundr(dbltor(maxnorm)): BORNE;
+  r = (maxnorm >= 0) ? roundr(dbltor(maxnorm)): stoi(sBORNE);
   k = minss(s,maxrank);
   L[0] = evaltyp(t_MAT) | evallg(k + 1);
   for (j=1; j<=k; j++) gel(L,j) = ZM_zc_mul(u, gel(L,j));
