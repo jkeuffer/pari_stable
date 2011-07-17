@@ -31,6 +31,7 @@ AMe10- (t_FRAC<0) * t_INTMOD => wrong result
     9- allow Vecsmall(t_POL or t_SER)
 LGr10- nicer printout of small matrices: justify columns
    11- improve gmul(t_REAL, t_FRAC) when numerator of t_FRAC is 1
+BA 12- [darwin] do not use dylib_ prefix to ld options [#1210]
 
   Added
     1- mathnf for matrices over K[X] [#41]
