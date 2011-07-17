@@ -1666,9 +1666,9 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
 {
   GEN A, x, res, u, r, L, gnorme, invp, V;
   long n = lg(a), i, j, k, s, maxrank;
-  pari_sp av0 = avma, av1, av, lim;
+  pari_sp av = avma, av1, lim;
   double p,maxnorm,BOUND,*v,*y,*z,**q;
-  const double eps = 0.0001;
+  const double eps = 1e-8;
   int stockall = 0;
 
   if (typ(a) != t_MAT || !RgM_is_ZM(a)) pari_err(typeer,"qfminim0");
@@ -1686,8 +1686,8 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
   {
     case min_FIRST:
       if (isintzero(BORNE)) pari_err(talker,"bound = 0 in minim2");
-      res = cgetg(3,t_VEC); break;
-    case min_ALL: res = cgetg(4,t_VEC); break;
+      break;
+    case min_ALL: break;
     case min_PERF: break;
     case min_VECSMALL:
     case min_VECSMALL2:
@@ -1704,16 +1704,13 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
   {
     switch(flag)
     {
-      case min_FIRST: avma=av0; return cgetg(1,t_VEC);
+      case min_FIRST: avma=av; return cgetg(1,t_VEC);
       case min_VECSMALL:
       case min_VECSMALL2: return res;
-      case min_PERF:  avma=av0; return gen_0;
+      case min_PERF:  avma=av; return gen_0;
     }
-    gel(res,1) = gel(res,2) = gen_0;
-    gel(res,3) = cgetg(1,t_MAT); return res;
+    return mkvec3(gen_0, gen_0, cgetg(1,t_MAT));
   }
-
-  av = avma;
   minim_alloc(n, &q, &x, &y, &z, &v);
   av1 = avma;
 
@@ -1735,21 +1732,20 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
     for (i=1; i<j; i++) q[i][j] = rtodbl(gcoeff(r,i,j));
   }
 
-  if (flag==min_PERF || isintzero(BORNE))
+  if (isintzero(BORNE))
   {
-    double c;
-    p = rtodbl(gcoeff(a,1,1));
-    for (i=2; i<=n; i++) { c = rtodbl(gcoeff(a,i,i)); if (c < p) p = c; }
-    BORNE = roundr(dbltor(p));
+    BORNE = gcoeff(a,1,1);
+    for (i=2; i<=n; i++)
+    {
+      GEN c = gcoeff(a,i,i);
+      if (cmpii(c, BORNE) < 0) BORNE = c;
+    }
     maxnorm = -1.; /* don't update maxnorm */
   }
   else
-  {
-    p = gtodouble(BORNE);
     maxnorm = 0.;
-  }
+  p = gtodouble(BORNE);
   BOUND = p * (1 + eps);
-  if (BOUND == p) pari_err(precer, "minim0");
 
   switch(flag)
   {
@@ -1797,11 +1793,7 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
     if (maxnorm >= 0)
     {
       if (flag == min_FIRST)
-      {
-        gel(res,2) = gerepileupto(av, ZM_zc_mul(u,x));
-        av = avma;
-        gel(res,1) = gerepileuptoint(av, roundr(dbltor(p))); return res;
-      }
+        return gerepilecopy(av, mkvec2(roundr(dbltor(p)), ZM_zc_mul(u,x)));
       if (p > maxnorm) maxnorm = p;
     }
     else
@@ -1862,7 +1854,7 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
         if (s == maxrank)
         {
           if (DEBUGLEVEL>1) { err_printf("\n"); err_flush(); }
-          avma=av0; return stoi(s);
+          avma=av; return stoi(s);
         }
 
         if (low_stack(lim, stack_lim(av1,1)))
@@ -1876,24 +1868,20 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
   switch(flag)
   {
     case min_FIRST:
-      avma=av0; return cgetg(1,t_VEC);
+      avma = av; return cgetg(1,t_VEC);
     case min_VECSMALL:
     case min_VECSMALL2:
-      avma=av; return res;
+      avma = (pari_sp)res; return res;
     case min_PERF:
       if (DEBUGLEVEL>1) { err_printf("\n"); err_flush(); }
-      avma=av0; return stoi(s);
+      avma = av; return stoi(s);
   }
   k = minss(s,maxrank);
   r = (maxnorm >= 0) ? roundr(dbltor(maxnorm)): BORNE;
 
   L[0] = evaltyp(t_MAT) | evallg(k + 1);
   for (j=1; j<=k; j++) gel(L,j) = ZM_zc_mul(u, gel(L,j));
-
-  gerepileall(av, 2, &r, &L);
-  gel(res,1) = stoi(s<<1);
-  gel(res,2) = r;
-  gel(res,3) = L; return res;
+  return gerepilecopy(av, mkvec3(stoi(s<<1), r, L));
 }
 
 GEN
