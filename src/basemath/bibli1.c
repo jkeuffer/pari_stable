@@ -1664,7 +1664,7 @@ addcolumntomatrix(GEN V, GEN invp, GEN L)
 static GEN
 minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
 {
-  GEN A, x, u, r, L, gnorme, invp, V;
+  GEN x, u, r, L, gnorme, invp, V;
   long n = lg(a), i, j, k, s, maxrank, sBORNE;
   pari_sp av = avma, av1, lim;
   double p,maxnorm,BOUND,*v,*y,*z,**q;
@@ -1714,11 +1714,10 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
   if (lg(u) != n) pari_err(talker,"not a definite form in minim0");
   a = qf_apply_ZM(a,u);
 
-  n--; A = a; /* save exact input */
-  a = RgM_gtofp(a, DEFAULTPREC);
-  r = qfgaussred_positive(a);
+  n--;
+  r = qfgaussred_positive(RgM_gtofp(a, DEFAULTPREC));
   if (!r) {
-    r = qfgaussred_positive(A); /* exact computation */
+    r = qfgaussred_positive(a); /* exact computation */
     if (!r) pari_err(talker,"not a positive definite form in minim0");
     r = RgM_gtofp(r, DEFAULTPREC);
   }
@@ -1730,10 +1729,10 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
 
   if (!sBORNE)
   {
-    BORNE = gcoeff(A,1,1); j = 1;
+    BORNE = gcoeff(a,1,1); j = 1;
     for (i=2; i<=n; i++)
     {
-      GEN c = gcoeff(A,i,i);
+      GEN c = gcoeff(a,i,i);
       if (cmpii(c, BORNE) < 0) { BORNE = c; j = i; }
     }
     if (flag == min_FIRST)
