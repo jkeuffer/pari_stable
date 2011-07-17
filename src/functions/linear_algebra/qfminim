@@ -31,7 +31,8 @@ Doc: $x$ being a square and symmetric matrix representing a positive definite
  are returned in no particular order.
 
  If $\fl=1$, ignores $m$ and returns the first vector whose norm is less
- than $b$. In this variant, an explicit $b$ must be provided.
+ than $b$. If no explicit $b$ is provided, return a vector of smallish norm
+ (smallest vector in an LLL-reduced basis).
 
  In these two cases, $x$ must have \emph{integral} entries. The
  implementation uses low precision floating point computations for maximal

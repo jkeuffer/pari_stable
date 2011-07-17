@@ -1686,9 +1686,6 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
   maxrank = 0; L = V = invp = NULL; /* gcc -Wall */
   switch(flag)
   {
-    case min_FIRST:
-      if (!sBORNE) pari_err(talker,"bound = 0 in minim2");
-      break;
     case min_VECSMALL:
     case min_VECSMALL2:
       maxrank = sBORNE;
@@ -1733,12 +1730,14 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
 
   if (!sBORNE)
   {
-    BORNE = gcoeff(A,1,1);
+    BORNE = gcoeff(A,1,1); j = 1;
     for (i=2; i<=n; i++)
     {
       GEN c = gcoeff(A,i,i);
-      if (cmpii(c, BORNE) < 0) BORNE = c;
+      if (cmpii(c, BORNE) < 0) { BORNE = c; j = i; }
     }
+    if (flag == min_FIRST)
+      return gerepilecopy(av, mkvec2(BORNE, gel(u,j)));
     maxnorm = -1.; /* don't update maxnorm */
     sBORNE = itos(BORNE);
   }
