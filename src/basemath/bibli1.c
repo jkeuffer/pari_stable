@@ -1703,7 +1703,13 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
       if (n == 1) return gen_0;
       break;
     default:
-      if (n == 1) return mkvec3(gen_0, gen_0, cgetg(1,t_MAT));
+      if (n == 1) {
+        L = cgetg(4, t_VEC);
+        gel(L,1) = gen_0;
+        gel(L,2) = gen_0;
+        gel(L,3) = cgetg(1, t_MAT);
+        return L;
+      }
       break;
   }
   minim_alloc(n, &q, &x, &y, &z, &v);
