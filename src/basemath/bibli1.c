@@ -1678,7 +1678,8 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
   {
     BORNE = gfloor(BORNE);
     if (typ(BORNE) != t_INT) pari_err(typeer, "minim0");
-    sBORNE = itos(BORNE);
+    sBORNE = itos(BORNE); avma = av;
+    BORNE = NULL; /* no longer used */
   }
   if (!STOCKMAX) stockall = 1;
   else if (typ(STOCKMAX) != t_INT) pari_err(typeer, "minim0");
@@ -1693,19 +1694,17 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
 
       L = const_vecsmall(maxrank, 0);
       if (flag == min_VECSMALL2) sBORNE <<= 1;
-      if (!sBORNE) return L;
+      if (!sBORNE || n == 1) return L;
       break;
-  }
-  if (n == 1)
-  {
-    switch(flag)
-    {
-      case min_FIRST: avma=av; return cgetg(1,t_VEC);
-      case min_VECSMALL:
-      case min_VECSMALL2: return L;
-      case min_PERF:  avma=av; return gen_0;
-    }
-    return mkvec3(gen_0, gen_0, cgetg(1,t_MAT));
+    case min_FIRST:
+      if (n == 1) return cgetg(1,t_VEC);
+      break;
+    case min_PERF:
+      if (n == 1) return gen_0;
+      break;
+    default:
+      if (n == 1) return mkvec3(gen_0, gen_0, cgetg(1,t_MAT));
+      break;
   }
   minim_alloc(n, &q, &x, &y, &z, &v);
   av1 = avma;
@@ -1742,9 +1741,8 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
   }
   else
     maxnorm = 0.;
-  p = (double)sBORNE;
-  BOUND = p * (1 + eps);
-  if ((long)BOUND != (long)p) pari_err(precer, "qfminim");
+  BOUND = sBORNE * (1 + eps);
+  if ((long)BOUND != sBORNE) pari_err(precer, "qfminim");
 
   switch(flag)
   {
@@ -1763,7 +1761,6 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
   s = 0; av1 = avma; lim = stack_lim(av1,1);
   k = n; y[n] = z[n] = 0;
   x[n] = (long)sqrt(BOUND/v[n]);
-  if (flag == min_PERF) invp = matid(maxrank);
   for(;;x[1]--)
   {
     do
@@ -1791,26 +1788,27 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
     p = (double)x[1] + z[1]; p = y[1] + p*p*v[1]; /* norm(x) */
     if (maxnorm >= 0)
     {
-      if (flag == min_FIRST)
-        return gerepilecopy(av, mkvec2(roundr(dbltor(p)), ZM_zc_mul(u,x)));
       if (p > maxnorm) maxnorm = p;
     }
     else
-    {
+    { /* maxnorm < 0 : only look for minimal vectors */
       pari_sp av2 = avma;
       gnorme = roundr(dbltor(p));
       if (cmpis(gnorme, sBORNE) >= 0) avma = av2;
       else
       {
-        BOUND=gtodouble(gnorme)*(1+eps); s=0;
         sBORNE = itos(gnorme); avma = av1;
-        if (flag == min_PERF) invp = matid(maxrank);
+        BOUND = sBORNE * (1+eps);
+        s = 0;
       }
     }
     s++;
 
     switch(flag)
     {
+      case min_FIRST:
+        return gerepilecopy(av, mkvec2(roundr(dbltor(p)), ZM_zc_mul(u,x)));
+
       case min_ALL:
         if (s > maxrank && stockall) /* overflow */
         {
@@ -1838,10 +1836,12 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
 
       case min_PERF:
       {
-        long I=1;
-        pari_sp av2=avma;
+        pari_sp av2;
+        long I;
 
-        for (i=1; i<=n; i++)
+        if (s == 1) invp = matid(maxrank);
+        av2 = avma;
+        for (i = I = 1; i<=n; i++)
           for (j=i; j<=n; j++,I++) V[I] = x[i]*x[j];
         if (! addcolumntomatrix(V,invp,L))
         {
