@@ -269,37 +269,21 @@ FpXV_FpC_mul(GEN V, GEN W, GEN p)
   return gerepileupto(av, FpX_red(z,p));
 }
 
-#if 0
-static long brent_kung_nbmul(long d, long n, long p)
-{
-  return p+n*((d+p-1)/p);
-}
-  TODO: This the the optimal parameter for the purpose of reducing
-  multiplications, but profiling need to be done to ensure it is not slower
-  than the other option in practice
-/*Return optimal parameter l for the evaluation of n polynomials of degree d*/
-long brent_kung_optpow(long d, long n)
-{
-  double r;
-  long f,c,pr;
-  if (n>=d ) return d;
-  pr=n*d;
-  if (pr<=1) return 1;
-  r=d/sqrt(pr);
-  c=(long)ceil(d/ceil(r));
-  f=(long)floor(d/floor(r));
-  return (brent_kung_nbmul(d, n, c) <= brent_kung_nbmul(d, n, f))?c:f;
-}
-#endif
-/*Return optimal parameter l for the evaluation of n polynomials of degree d*/
+/* Return optimal parameter l for the evaluation of n/m polynomials of degree d
+   Fractional values can be used if the evaluations are done with different
+   accuracies, and thus have different weights.
+ */
 long
-brent_kung_optpow(long d, long n)
+brent_kung_optpow(long d, long n, long m)
 {
-  long l, pr;
-  if (n >= d) return d;
-  pr = n*d; if (pr <= 1) return 1;
-  l = (long) ((double)d / sqrt(pr));
-  return (d+l-1) / l;
+  long p, r;
+  long pold=1, rold=n*(d-1);
+  for(p=2; p<=d; p++)
+  {
+    r = m*(p-1) + n*((d-1)/p);
+    if (r<rold) { pold=p; rold=r; }
+  }
+  return pold;
 }
 
 /*Close to FpXV_FpC_mul*/
@@ -369,7 +353,7 @@ FpXQ_autpowers(GEN aut, long f, GEN T, GEN p)
 {
   pari_sp av = avma;
   long n = degpol(T);
-  long i, nautpow = brent_kung_optpow(n-1,f-1);
+  long i, nautpow = brent_kung_optpow(n-1,f-2,1);
   long v = varn(T);
   GEN autpow = FpXQ_powers(aut, nautpow,T,p);
   GEN V = cgetg(f + 2, t_VEC);

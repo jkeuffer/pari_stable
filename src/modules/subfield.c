@@ -386,7 +386,7 @@ embedding(GEN g, GEN DATA, primedata *S, GEN den, GEN listdelta)
   long rt;
   pari_sp av;
 
-  T   = gel(DATA,1); rt = brent_kung_optpow(degpol(T), 2);
+  T   = gel(DATA,1); rt = brent_kung_optpow(degpol(T), 4, 3);
   maxp= gel(DATA,7);
   gp = RgX_deriv(g); av = avma;
   w0 = chinese_retrieve_pol(DATA, S, listdelta);

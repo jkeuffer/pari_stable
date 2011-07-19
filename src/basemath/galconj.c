@@ -455,7 +455,7 @@ monomorphismratlift(GEN P, GEN S, struct galois_lift *gl, GEN frob)
   pari_timer ti;
 
   if (DEBUGLEVEL == 1) timer_start(&ti);
-  rt = brent_kung_optpow(degpol(Q),1);
+  rt = brent_kung_optpow(degpol(P), 4, 3);
   mask = quadratic_prec_mask(e);
   Pr = FpX_red(P,q);
   Qr = (P==Q)? Pr: FpX_red(Q, q);/*A little speed up for automorphismlift*/
@@ -957,7 +957,7 @@ static GEN
 sympol_aut_evalmod(GEN sym, long g, GEN sigma, GEN Tp, GEN p)
 {
   pari_sp ltop=avma;
-  long i, j, npows = brent_kung_optpow(degpol(Tp)-1, g-1);
+  long i, j, npows = brent_kung_optpow(degpol(Tp)-1, g-1, 1);
   GEN s, f, pows, v = zv_to_ZV(gel(sym,1)), w = zv_to_ZV(gel(sym,2));
   sigma = RgX_to_FpX(sigma, p);
   pows  = FpXQ_powers(sigma,npows,Tp,p);

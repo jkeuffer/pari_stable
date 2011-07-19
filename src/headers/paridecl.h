@@ -2418,7 +2418,7 @@ int     ZM_incremental_CRT(GEN *H, GEN Hp, GEN q, GEN qp, ulong p);
 GEN     ZM_init_CRT(GEN Hp, ulong p);
 int     ZX_incremental_CRT(GEN *ptH, GEN Hp, GEN q, GEN qp, ulong p);
 GEN     ZX_init_CRT(GEN Hp, ulong p, long v);
-long    brent_kung_optpow(long d, long n);
+long    brent_kung_optpow(long d, long n, long m);
 GEN     ffinit(GEN p, long n, long v);
 GEN     Kronecker_to_mod(GEN z, GEN pol);
 GEN     init_Fq(GEN p, long n, long v);
