@@ -1678,7 +1678,9 @@ gtoset(GEN x)
     x = list_data(x); lx = x? lg(x): 1;
   }
   if (lx==1) return cgetg(1,t_VEC);
-  return gen_sort_uniq(x, (void*)&cmp_universal, cmp_nodata);
+  x = gen_sort_uniq(x, (void*)&cmp_universal, cmp_nodata);
+  settyp(x, t_VEC); /* it may be t_COL */
+  return x;
 }
 
 long
