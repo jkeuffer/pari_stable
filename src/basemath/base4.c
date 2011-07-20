@@ -121,25 +121,51 @@ vec_mulid(GEN nf, GEN x, long nx, long N)
 GEN
 idealhnf_shallow(GEN nf, GEN x)
 {
-  GEN cx;
-  long tx = typ(x), lx = lg(x);
+  long tx = typ(x), lx = lg(x), N;
 
   /* cannot use idealtyp because here we allow non-square matrices */
   if (tx == t_VEC && lx == 3) { x = gel(x,1); tx = typ(x); lx = lg(x); }
   if (tx == t_VEC && lx == 6) return idealhnf_two(nf,x); /* PRIME */
-  if (tx == t_MAT) {
-    long nx = lx-1, N = nf_get_degree(nf);
-    if (nx == 0) return cgetg(1, t_MAT);
-    if (lg(x[1])-1 != N) pari_err(talker,"incorrect dimension in idealhnf");
-    if (nx == 1) return idealhnf_principal(nf, gel(x,1));
+  switch(tx)
+  {
+    case t_MAT:
+    {
+      GEN cx;
+      long nx = lx-1;
+      N = nf_get_degree(nf);
+      if (nx == 0) return cgetg(1, t_MAT);
+      if (lg(x[1])-1 != N) pari_err(talker,"incorrect dimension in idealhnf");
+      if (nx == 1) return idealhnf_principal(nf, gel(x,1));
 
-    if (nx == N && RgM_is_ZM(x) && ZM_ishnf(x)) return x;
-    x = Q_primitive_part(x, &cx);
-    if (nx < N) x = vec_mulid(nf, x, nx, N);
-    x = ZM_hnfmod(x, ZM_detmult(x));
-    return cx? ZM_Q_mul(x,cx): x;
+      if (nx == N && RgM_is_ZM(x) && ZM_ishnf(x)) return x;
+      x = Q_primitive_part(x, &cx);
+      if (nx < N) x = vec_mulid(nf, x, nx, N);
+      x = ZM_hnfmod(x, ZM_detmult(x));
+      return cx? ZM_Q_mul(x,cx): x;
+    }
+    case t_QFI:
+    case t_QFR:
+    {
+      pari_sp av = avma;
+      GEN u, D = nf_get_disc(nf), T = nf_get_pol(nf), f = nf_get_index(nf);
+      GEN A = gel(x,1), B = gel(x,2);
+      N = nf_get_degree(nf);
+      if (N != 2)
+        pari_err(talker,"Qfb only allowed for quadratic fields", x, D);
+      if (!equalii(qfb_disc(x), D))
+        pari_err(talker,"%Ps has discriminant != %Ps in idealhnf", x, D);
+      /* x -> A Z + (-B + sqrt(D)) / 2 Z
+         K = Q[t]/T(t), t^2 + ut + v = 0,  u^2 - 4v = Df^2
+         => t = (-u + sqrt(D) f)/2
+         => sqrt(D)/2 = (t + u/2)/f */
+      u = gel(T,3);
+      B = deg1pol_shallow(ginv(f),
+                          gsub(gdiv(u, shifti(f,1)), gdiv(B,gen_2)),
+                          varn(T));
+      return gerepileupto(av, idealhnf_two(nf, mkvec2(A,B)));
+    }
+    default: return idealhnf_principal(nf, x); /* PRINCIPAL */
   }
-  return idealhnf_principal(nf, x); /* PRINCIPAL */
 }
 GEN
 idealhnf(GEN nf, GEN x)
