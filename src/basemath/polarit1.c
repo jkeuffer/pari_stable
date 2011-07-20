@@ -1066,8 +1066,7 @@ Flx_factcantor_i(GEN f, ulong p, long flag)
 {
   long j, e, vf, nbfact, d = degpol(f);
   ulong k;
-  GEN E, f2, g, g1, u, v, pd, q, y;
-  GEN *t;
+  GEN E, f2, g, g1, u, v, pd, q, y, t;
 
   if (d <= 2) switch(flag) {
     case 2: return Flx_is_irred_2(f, p, d);
@@ -1075,7 +1074,7 @@ Flx_factcantor_i(GEN f, ulong p, long flag)
     default: return Flx_factor_2(f, p, d);
   }
   /* to hold factors and exponents */
-  t = (GEN*)cgetg(d+1,t_VEC);
+  t = flag ? cgetg(d+1,t_VECSMALL): cgetg(d+1,t_VEC);
   E = cgetg(d+1, t_VECSMALL);
   vf=f[1]; e = nbfact = 1;
   for(;;)
@@ -1113,19 +1112,19 @@ Flx_factcantor_i(GEN f, ulong p, long flag)
         if (flag)
         {
           if (flag > 1) return NULL;
-          for ( ; nbfact<j; nbfact++) { t[nbfact]=(GEN)d; E[nbfact]=e*k; }
+          for ( ; nbfact<j; nbfact++) { t[nbfact]=d; E[nbfact]=e*k; }
         }
         else
         {
           long r;
           g = Flx_normalize(g, p);
-          t[nbfact]=g; q = subis(pd,1); /* also ok for p=2: unused */
+          gel(t,nbfact) = g; q = subis(pd,1); /* also ok for p=2: unused */
           r = vali(q); q = shifti(pd,-r);
          /* First parameter is an integer m, converted to polynomial w_m, whose
           * coeffs are its digits in base p (initially m = p --> w_m = X). Take
           * gcd(g, w_m^(p^d-1)/2), m++, until a factor is found. p = 2 is
           * treated separately */
-          Flx_split(p,t+nbfact,d,p,q,r);
+          Flx_split(p,&gel(t,nbfact),d,p,q,r);
           for (; nbfact<j; nbfact++) E[nbfact]=e*k;
         }
         du -= dg;
@@ -1134,7 +1133,8 @@ Flx_factcantor_i(GEN f, ulong p, long flag)
       }
       if (du)
       {
-        t[nbfact] = flag? (GEN)du: Flx_normalize(u, p);
+        if (flag) t[nbfact] = du;
+        else  gel(t,nbfact) = Flx_normalize(u, p);
         E[nbfact++]=e*k;
       }
     }
@@ -1143,7 +1143,7 @@ Flx_factcantor_i(GEN f, ulong p, long flag)
   }
   if (flag > 1) return gen_1; /* irreducible */
   setlg(t, nbfact);
-  setlg(E, nbfact); y = mkvec2((GEN)t, E);
+  setlg(E, nbfact); y = mkvec2(t, E);
   return flag ? sort_factor(y, (void*)cmpGsGs, cmp_nodata)
               : sort_factor_pol(y, cmp_small);
 }
@@ -1166,7 +1166,7 @@ FpX_factcantor_i(GEN f, GEN pp, long flag)
   long j, e, vf, nbfact, d = degpol(f);
   ulong p, k;
   GEN E,y,f2,g,g1,u,v,pd,q;
-  GEN *t;
+  GEN t;
   if (lgefint(pp)==3)
   {
     ulong p = pp[2];
@@ -1180,6 +1180,7 @@ FpX_factcantor_i(GEN f, GEN pp, long flag)
     }
     return F;
   }
+
   if (d <= 2) switch(flag) {
     case 2: return FpX_is_irred_2(f, pp, d);
     case 1: return FpX_degfact_2(f, pp, d);
@@ -1188,7 +1189,7 @@ FpX_factcantor_i(GEN f, GEN pp, long flag)
   p = init_p(pp);
 
   /* to hold factors and exponents */
-  t = (GEN*)cgetg(d+1,t_VEC);
+  t = flag ? cgetg(d+1,t_VECSMALL): cgetg(d+1,t_VEC);
   E = cgetg(d+1, t_VECSMALL);
   vf=varn(f); e = nbfact = 1;
   for(;;)
@@ -1227,22 +1228,22 @@ FpX_factcantor_i(GEN f, GEN pp, long flag)
         if (flag)
         {
           if (flag > 1) return NULL;
-          for ( ; nbfact<j; nbfact++) { t[nbfact]=(GEN)d; E[nbfact]=e*k; }
+          for ( ; nbfact<j; nbfact++) { t[nbfact]=d; E[nbfact]=e*k; }
         }
         else
         {
           long r;
           g = FpX_normalize(g, pp);
-          t[nbfact]=g; q = subis(pd,1); /* also ok for p=2: unused */
+          gel(t,nbfact) = g; q = subis(pd,1); /* also ok for p=2: unused */
           r = vali(q); q = shifti(q,-r);
          /* First parameter is an integer m, converted to polynomial w_m, whose
           * coeffs are its digits in base p (initially m = p --> w_m = X). Take
           * gcd(g, w_m^(p^d-1)/2), m++, until a factor is found. p = 2 is
           * treated separately */
           if (p)
-            split(p,t+nbfact,d,pp,q,r,S);
+            split(p,&gel(t,nbfact),d,pp,q,r,S);
           else
-            splitgen(pp,t+nbfact,d,pp,q,r);
+            splitgen(pp,&gel(t,nbfact),d,pp,q,r);
           for (; nbfact<j; nbfact++) E[nbfact]=e*k;
         }
         du -= dg;
@@ -1251,7 +1252,8 @@ FpX_factcantor_i(GEN f, GEN pp, long flag)
       }
       if (du)
       {
-        t[nbfact] = flag? (GEN)du: FpX_normalize(u, pp);
+        if (flag) t[nbfact] = du;
+        else gel(t,nbfact) = FpX_normalize(u, pp);
         E[nbfact++]=e*k;
       }
     }
@@ -1260,7 +1262,7 @@ FpX_factcantor_i(GEN f, GEN pp, long flag)
   }
   if (flag > 1) return gen_1; /* irreducible */
   setlg(t, nbfact);
-  setlg(E, nbfact); y = mkvec2((GEN)t, E);
+  setlg(E, nbfact); y = mkvec2(t, E);
   return flag ? sort_factor(y, (void*)&cmpGsGs, cmp_nodata)
               : sort_factor_pol(y, cmpii);
 }
@@ -1501,16 +1503,16 @@ FpX_factor_i(GEN f, GEN pp)
 {
   long e, N, nbfact, val, d = degpol(f);
   ulong p, k, j;
-  GEN E, f2, g1, u, *t;
+  GEN E, f2, g1, u, t;
 
   if (d <= 2) return FpX_factor_2(f, pp, d);
   p = init_p(pp);
 
   /* to hold factors and exponents */
-  t = (GEN*)cgetg(d+1,t_COL); E = cgetg(d+1,t_VECSMALL);
+  t = cgetg(d+1,t_COL); E = cgetg(d+1,t_VECSMALL);
   val = ZX_valrem(f, &f);
   e = nbfact = 1;
-  if (val) { t[1] = pol_x(varn(f)); E[1] = val; nbfact++; }
+  if (val) { gel(t,1) = pol_x(varn(f)); E[1] = val; nbfact++; }
 
   for(;;)
   {
@@ -1535,8 +1537,8 @@ FpX_factor_i(GEN f, GEN pp)
       N = degpol(u);
       if (N > 0)
       {
-        t[nbfact] = FpX_normalize(u,pp);
-        d = (N==1)? 1: FpX_split_Berlekamp(t+nbfact, pp);
+        gel(t,nbfact) = FpX_normalize(u,pp);
+        d = (N==1)? 1: FpX_split_Berlekamp(&gel(t,nbfact), pp);
         for (j=0; j<(ulong)d; j++) E[nbfact+j] = e*k;
         nbfact += d;
       }
@@ -1547,7 +1549,7 @@ FpX_factor_i(GEN f, GEN pp)
     e *= p; f = RgX_deflate(f2, p);
   }
   setlg(t, nbfact);
-  setlg(E, nbfact); return sort_factor_pol(mkvec2((GEN)t,E), cmpii);
+  setlg(E, nbfact); return sort_factor_pol(mkvec2(t,E), cmpii);
 }
 GEN
 FpX_factor(GEN f, GEN p)
@@ -2654,7 +2656,7 @@ static GEN
 FqX_factor_i(GEN f, GEN T, GEN p)
 {
   long pg, j, k, e, N, lfact, pk, d = degpol(f);
-  GEN E, f2, f3, df1, df2, g1, u, q, *t;
+  GEN E, f2, f3, df1, df2, g1, u, q, t;
 
   switch(d)
   {
@@ -2667,7 +2669,7 @@ FqX_factor_i(GEN f, GEN T, GEN p)
 
   pg = itos_or_0(p);
   df2  = NULL; /* gcc -Wall */
-  t = (GEN*)cgetg(d+1,t_VEC);
+  t = cgetg(d+1,t_VEC);
   E = cgetg(d+1, t_VECSMALL);
 
   q = powiu(p, degpol(T));
@@ -2702,19 +2704,19 @@ FqX_factor_i(GEN f, GEN T, GEN p)
     N = degpol(u);
     if (N) {
       nb0 = lfact;
-      t[lfact] = FqX_normalize(u, T,p);
+      gel(t,lfact) = FqX_normalize(u, T,p);
       if (N == 1) lfact++;
       else
       {
 #if 0
         lfact += FqX_split_Berlekamp(t+lfact, q, T, p);
 #else
-        GEN P = FqX_split_Trager(t[lfact], T, p);
+        GEN P = FqX_split_Trager(gel(t,lfact), T, p);
         if (P) {
-          for (j = 1; j < lg(P); j++) t[lfact++] = gel(P,j);
+          for (j = 1; j < lg(P); j++) gel(t,lfact++) = gel(P,j);
         } else {
           if (DEBUGLEVEL) pari_warn(warner, "FqX_split_Trager failed!");
-          lfact += FqX_sqf_split(t+lfact, q, T, p);
+          lfact += FqX_sqf_split(&gel(t,lfact), q, T, p);
         }
 #endif
       }
@@ -2727,7 +2729,7 @@ FqX_factor_i(GEN f, GEN T, GEN p)
   setlg(t, lfact);
   setlg(E, lfact);
   for (j=1; j<lfact; j++) gel(t,j) = FqX_normalize(gel(t,j), T,p);
-  (void)sort_factor_pol(mkvec2((GEN)t, E), cmp_RgX);
+  (void)sort_factor_pol(mkvec2(t, E), cmp_RgX);
   k = 1;
   for (j = 2; j < lfact; j++)
   {
@@ -2741,7 +2743,7 @@ FqX_factor_i(GEN f, GEN T, GEN p)
     }
   }
   setlg(t, k+1);
-  setlg(E, k+1); return mkvec2((GEN)t, E);
+  setlg(E, k+1); return mkvec2(t, E);
 }
 
 static void
