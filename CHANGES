@@ -17,6 +17,7 @@ Done for version 2.6.0 (released ??/??/20??):
     9- divru() could call bfffo(0) => overflow in expo()
 AMe10- (t_FRAC<0) * t_INTMOD => wrong result
    11- trace(t_POL or t_SER) could yield an unormalized object [0 leading term]
+LGr12- off-by-1 error in primepi() when argument is = primelimit
 
   Changed
     1- mathnf: swapped flag 3 and 5.

@@ -759,10 +759,10 @@ ulong
 uprimepi(ulong n)
 {
   byteptr p = diffptr+1;
-  ulong prime = 2, res = 1;
+  ulong prime = 2, res = 0;
   maxprime_check(n);
-  while (prime <= n) { res++; NEXT_PRIME_VIADIFF(prime,p); }
-  return res-1;
+  while (prime < n) { res++; NEXT_PRIME_VIADIFF(prime,p); }
+  return prime == n? res+1: res;
 }
 
 GEN
