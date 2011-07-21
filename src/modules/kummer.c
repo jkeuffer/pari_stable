@@ -1307,6 +1307,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
         GEN H, be, P, X = Flm_Flc_mul(K, y, ell);
         if (ok_congruence(X, ell, lW, vecMsup))
         {
+          pari_sp av = avma;
           if (all < 0)
           {
             gel(mat, rk+1) = X;
@@ -1320,7 +1321,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
           if (!all) {
             H = rnfnormgroup(bnr, P);
             if (ZM_equal(subgroup, H)) return P; /* DONE */
-            continue;
+            avma = av; continue;
           } else {
             GEN P0 = Q_primpart(lift(P));
             GEN g = nfgcd(P0, RgX_deriv(P0), polnf, nf_get_index(nf));
@@ -1328,6 +1329,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
             H = rnfnormgroup(bnr, P);
             if (!ZM_equal(subgroup,H) && !bnrisconductor(bnr,H)) continue;
           }
+          P = gerepilecopy(av, P);
           res = shallowconcat(res, P);
           if (all < 0 && rk == ncyc) return res;
           if (firstpass) break;
