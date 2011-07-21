@@ -4341,6 +4341,12 @@ in variable \kbd{v}, of degree less than~\kbd{d}.
 
 \fun{GEN}{F2x_gcd}{GEN a, GEN b}
 
+\fun{int}{F2x_issquare}{GEN x} returns $1$ if $x$ is a square of a \kbd{F2x}
+and $0$ otherwise.
+
+\fun{GEN}{F2x_sqrt}{GEN x} returns the squareroot of $x$, assuming $x$ is a
+square of a \kbd{F2x}.
+
 \subsec{\kbd{F2xq}} See \kbd{FpXQ} operations.
 
 \fun{GEN}{F2xq_mul}{GEN x, GEN y, GEN pol}

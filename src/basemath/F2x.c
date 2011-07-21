@@ -341,6 +341,49 @@ F2x_sqr(GEN x)
   return F2x_renormalize(z, lz);
 }
 
+int
+F2x_issquare(GEN x)
+{
+  const ulong mask = (ULONG_MAX/3UL)*2;
+  ulong i, lx = lg(x);
+  for (i=2; i<lx; i++)
+    if ((x[i]&mask)) return 0;
+  return 1;
+}
+
+/* Assume x is a perfect square */
+GEN
+F2x_sqrt(GEN x)
+{
+  const ulong sq[]={0,1,4,5,2,3,6,7,8,9,12,13,10,11,14,15};
+  long i,ii,j,jj;
+  long lx=lg(x), lz=2+((lx-1)>>1);
+  GEN z;
+  z = cgetg(lz, t_VECSMALL); z[1]=x[1];
+  for (j=2,jj=2;jj<lz;j++,jj++)
+  {
+    ulong x2=x[j++];
+    z[jj]=0;
+    if (x2)
+      for(i=0,ii=0;ii<BITS_IN_HALFULONG;i+=8,ii+=4)
+      {
+        ulong rl = (x2>>i)&15UL, rh = (x2>>(i+4))&15UL;
+        z[jj]|=sq[rl|(rh<<1)]<<ii;
+      }
+    if (j<lx)
+    {
+      x2 = x[j];
+      if (x2)
+        for(i=0,ii=0;ii<BITS_IN_HALFULONG;i+=8,ii+=4)
+        {
+          ulong rl = (x2>>i)&15UL, rh = (x2>>(i+4))&15UL;
+          z[jj]|=(sq[rl|(rh<<1)]<<ii)<<BITS_IN_HALFULONG;
+        }
+    }
+  }
+  return F2x_renormalize(z, lz);
+}
+
 INLINE void
 F2x_addshiftip(GEN x, GEN y, ulong d)
 {
