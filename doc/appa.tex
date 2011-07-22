@@ -132,6 +132,12 @@ the expected results. Have a look and decide for yourself if something is
 amiss. If it looks like a bug in the Pari system, we would appreciate a
 report (see the last section).
 
+\subsec{Cross-compiling:}
+
+When cross-compiling, you can set the environment variable \kbd{RUNTEST} to a program
+that is able to run the target binaries (e.g. an emulator). It will be used for both
+the \kbd{Configure} tests and \kbd{make bench}.
+
 \section{Troubleshooting and fine tuning}
 In case the default \kbd{Configure} run fails miserably, try
 

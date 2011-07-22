@@ -48,6 +48,8 @@ BA  4- Library function FpXQ_autpowers
        addmuliu_inplace, lincombii, mulsubii, submulii, submuliu,
        submuliu_inplace
 LGr 9- Catalan's constant [ Catalan() ]
+BA 10- library functions F2x_issquare/F2x_sqrt
+BA 11- [INSTALL] Documentation of RUNTEST
 
   Removed
     1- dropped DOS support
