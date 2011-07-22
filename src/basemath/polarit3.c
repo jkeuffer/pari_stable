@@ -265,7 +265,11 @@ FpXV_FpC_mul(GEN V, GEN W, GEN p)
   pari_sp av = avma;
   long i, l = lg(V);
   GEN z = ZX_Z_mul(gel(V,1),gel(W,1));
-  for(i=2; i<l; i++) z = ZX_add(z, ZX_Z_mul(gel(V,i),gel(W,i)));
+  for(i=2; i<l; i++)
+  {
+    z = ZX_add(z, ZX_Z_mul(gel(V,i),gel(W,i)));
+    if ((i & 7) == 0) z = gerepileupto(av, z);
+  }
   return gerepileupto(av, FpX_red(z,p));
 }
 
@@ -290,9 +294,14 @@ brent_kung_optpow(long d, long n, long m)
 static GEN
 FpXQ_eval_powers(GEN P, GEN V, long a, long n, GEN p)
 {
+  pari_sp av = avma;
   GEN z = scalar_ZX_shallow(gel(P,2+a), varn(P)); /* V[1] = 1 */
   long i;
-  for (i=1; i<=n; i++) z = ZX_add(z, ZX_Z_mul(gel(V,i+1),gel(P,2+a+i)));
+  for (i=1; i<=n; i++)
+  {
+    z = ZX_add(z, ZX_Z_mul(gel(V,i+1),gel(P,2+a+i)));
+    if ((i & 7) == 0) z = gerepileupto(av, z);
+  }
   return FpX_red(z, p);
 }
 

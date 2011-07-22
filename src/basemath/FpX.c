@@ -350,17 +350,13 @@ FpX_divrem(GEN x, GEN y, GEN p, GEN *pr)
 GEN
 FpX_div_by_X_x(GEN a, GEN x, GEN p, GEN *r)
 {
-  long l = lg(a), i;
-  GEN z = cgetg(l-1, t_POL), a0, z0;
+  long l = lg(a)-1, i;
+  GEN z = cgetg(l, t_POL);
   z[1] = evalsigne(1) | evalvarn(0);
-  a0 = a + l-1;
-  z0 = z + l-2; *z0 = *a0--;
-  for (i=l-3; i>1; i--) /* z[i] = (a[i+1] + x*z[i+1]) % p */
-  {
-    GEN t = addii(gel(a0--,0), Fp_mul(x, gel(z0--,0), p));
-    *z0 = (long)t;
-  }
-  if (r) *r = addii(gel(a0,0), Fp_mul(x, gel(z0,0), p));
+  gel(z, l-1) = gel(a,l);
+  for (i=l-2; i>1; i--) /* z[i] = a[i+1] + x*z[i+1] */
+    gel(z, i) = Fp_addmul(gel(a,i+1), x, gel(z,i+1), p);
+  if (r) *r = Fp_addmul(gel(a,2), x, gel(z,2), p);
   return z;
 }
 
@@ -711,13 +707,12 @@ FpX_eval(GEN x,GEN y,GEN p)
         goto fppoleval;/*sorry break(2) no implemented*/
       }
     r = (i==j)? y: Fp_powu(y,i-j+1,p);
-    p1 = modii(addii(mulii(p1,r), gel(x,j)),p);
+    p1 = Fp_addmul(gel(x,j), p1, r, p);
     if ((i & 7) == 0) { affii(p1, res); p1 = res; avma = av; }
   }
  fppoleval:
   modiiz(p1,p,res);
-  avma=av;
-  return res;
+  avma = av; return res;
 }
 
 /* Tz=Tx*Ty where Tx and Ty coprime
@@ -956,18 +951,15 @@ FpX_invMontgomery(GEN T, GEN p)
 }
 
 /* Compute x mod T where degpol(x)<=2*(degpol(T)-1) i.e. lgpol(x)<2*lgpol(T)-2
- * and mg is the Montgomery inverse of T.
- */
-GEN
-FpX_rem_Montgomery(GEN x, GEN mg, GEN T, GEN p)
+ * and mg is the Montgomery inverse of T. */
+static GEN
+FpX_rem_Montgomery_noGC(GEN x, GEN mg, GEN T, GEN p)
 {
-  pari_sp ltop=avma;
   GEN z;
   long l  = lgpol(x);
   long lt = degpol(T); /*We discard the leading term*/
   long ld, lm, lT, lmg;
-  if (l<=lt)
-    return ZX_copy(x);
+  if (l<=lt) return ZX_copy(x);
   ld = l-lt;
   lm = minss(ld, lgpol(mg));
   lT  = ZX_lgrenormalizespec(T+2,lt);
@@ -977,8 +969,13 @@ FpX_rem_Montgomery(GEN x, GEN mg, GEN T, GEN p)
   z = FpX_recipspec(z+2,minss(ld,lgpol(z)),ld);/* z = rec (rec(x) * mg) lz<=ld*/
   z = FpX_mulspec(z+2,T+2,p,lgpol(z),lT);      /* z *= pol        lz<=ld+lt*/
   z = FpX_subspec(x+2,z+2,p,lt,minss(lt,lgpol(z)));/* z = x - z   lz<=lt */
-  z[1] = x[1];
-  return gerepileupto(ltop, z);
+  z[1] = x[1]; return z;
+}
+GEN
+FpX_rem_Montgomery(GEN x, GEN mg, GEN T, GEN p)
+{
+  pari_sp av = avma;
+  return gerepileupto(av, FpX_rem_Montgomery_noGC(x,mg,T,p));
 }
 
 GEN
@@ -992,7 +989,7 @@ FpX_rem(GEN x, GEN y, GEN p)
   {
     pari_sp av=avma;
     GEN mg = FpX_invMontgomery(y, p);
-    return gerepileupto(av, FpX_rem_Montgomery(x, mg, y, p));
+    return gerepileupto(av, FpX_rem_Montgomery_noGC(x, mg, y, p));
   }
 }
 
@@ -1056,18 +1053,20 @@ FpXQ_div(GEN x,GEN y,GEN T,GEN p)
 static GEN
 FpXQ_mul_mg(GEN x,GEN y,GEN mg,GEN T,GEN p)
 {
+  pari_sp av = avma;
   GEN z = FpX_mul(x,y,p);
   if (lg(T) > lg(z)) return z;
-  return FpX_rem_Montgomery(z, mg, T, p);
+  return gerepileupto(av, FpX_rem_Montgomery_noGC(z, mg, T, p));
 }
 
 /* Square of y in Z/pZ[X]/(T), as t_VECSMALL. */
 static GEN
 FpXQ_sqr_mg(GEN y,GEN mg,GEN T,GEN p)
 {
+  pari_sp av = avma;
   GEN z = FpX_sqr(y,p);
   if (lg(T) > lg(z)) return z;
-  return FpX_rem_Montgomery(z, mg, T, p);
+  return gerepileupto(av, FpX_rem_Montgomery_noGC(z, mg, T, p));
 }
 
 typedef struct {
@@ -1166,7 +1165,7 @@ FpXQ_powers(GEN x, long l, GEN T, GEN p)
     } else { /* use squarings if degree(x) is large */
       for(i = 4; i < l+2; i++)
         gel(V,i) = odd(i)? FpXQ_sqr_mg(gel(V, (i+1)>>1),mg,T,p)
-                       : FpXQ_mul_mg(gel(V, i-1),x,mg,T,p);
+                         : FpXQ_mul_mg(gel(V, i-1),x,mg,T,p);
     }
   } else {
     gel(V,3) = FpXQ_sqr(x,T,p);
@@ -1176,7 +1175,7 @@ FpXQ_powers(GEN x, long l, GEN T, GEN p)
     } else { /* use squarings if degree(x) is large */
       for(i = 4; i < l+2; i++)
         gel(V,i) = odd(i)? FpXQ_sqr(gel(V, (i+1)>>1),T,p)
-                       : FpXQ_mul(gel(V, i-1),x,T,p);
+                         : FpXQ_mul(gel(V, i-1),x,T,p);
     }
   }
   return V;

@@ -1275,6 +1275,17 @@ INLINE GEN
 Fp_center(GEN u, GEN p, GEN ps2)
 { return absi_cmp(u,ps2)<=0? icopy(u): subii(u,p); }
 
+/* x + y*z mod p */
+INLINE GEN
+Fp_addmul(GEN x, GEN y, GEN z, GEN p)
+{
+  pari_sp av;
+  if (!signe(y) || !signe(z)) return Fp_red(x, p);
+  if (!signe(x)) return Fp_mul(z,y, p);
+  av = avma;
+  return gerepileuptoint(av, modii(addii(x, mulii(y,z)), p));
+}
+
 INLINE GEN
 Fp_mul(GEN a, GEN b, GEN m)
 {

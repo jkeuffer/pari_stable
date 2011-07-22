@@ -2998,6 +2998,7 @@ INLINE GEN    FpXX_renormalize(GEN x, long lx);
 INLINE GEN    FpX_div(GEN x, GEN y, GEN p);
 INLINE GEN    FpX_renormalize(GEN x, long lx);
 INLINE GEN    Fp_add(GEN a, GEN b, GEN m);
+INLINE GEN    Fp_addmul(GEN x, GEN y, GEN z, GEN p);
 INLINE GEN    Fp_center(GEN u, GEN p, GEN ps2);
 INLINE GEN    Fp_div(GEN a, GEN b, GEN m);
 INLINE GEN    Fp_inv(GEN a, GEN m);
