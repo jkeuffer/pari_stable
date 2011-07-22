@@ -9,19 +9,21 @@ Help: nfbasis(x,{flag=0},{fa}): integral basis of the field Q[a], where a is
  instead. If present, fa provides the matrix of a partial factorization of the
  discriminant of x, useful if one wants only an order maximal at certain
  primes only.
-Doc: \idx{integral basis} of the number
- field defined by the irreducible, preferably monic, polynomial $x$, using a
- modified version of the \idx{round 4} algorithm by default, due to David
- \idx{Ford}, Sebastian \idx{Pauli} and Xavier \idx{Roblot}. The binary digits
- of $\fl$ have the following meaning:
+Doc:
+ Let $x$ be an irreducible polynomial with integral coefficients. This
+ function returns an \idx{integral basis} of the number field defined by
+ $x$, that is a $\Z$-basis of its maximal order.
+
+ It uses a modified version of the \idx{round 4} algorithm by default, due to
+ David \idx{Ford}, Sebastian \idx{Pauli} and Xavier \idx{Roblot}. The binary
+ digits of $\fl$ have the following meaning:
 
  1: assume that no square of a prime greater than the default \kbd{primelimit}
  divides the discriminant of $x$, i.e.~that the index of $x$ has only small
  prime divisors.
 
- 2: use \idx{round 2} algorithm. For small degrees and coefficient size, this
- is sometimes a little faster. (This program is the translation into C of a
- program written by David \idx{Ford} in Algeb.)
+ 2: use \idx{round 2} algorithm. This is usually much slower. (This program is
+ the translation into C of a program written by David \idx{Ford} in Algeb.)
 
  Thus for instance, if $\fl=3$, this uses the round 2 algorithm and outputs
  an order which will be maximal at all the small primes.
