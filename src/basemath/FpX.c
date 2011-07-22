@@ -712,6 +712,7 @@ FpX_eval(GEN x,GEN y,GEN p)
       }
     r = (i==j)? y: Fp_powu(y,i-j+1,p);
     p1 = modii(addii(mulii(p1,r), gel(x,j)),p);
+    if ((i & 7) == 0) { affii(p1, res); p1 = res; avma = av; }
   }
  fppoleval:
   modiiz(p1,p,res);
