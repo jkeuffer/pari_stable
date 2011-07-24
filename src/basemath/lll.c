@@ -423,7 +423,7 @@ fplll(GEN *ptrB, GEN *ptrU, GEN *ptrr, double DELTA, double ETA, long flag, long
     }
     else
     { /* Step5: Find the right insertion index kappa, kappa2 = initial kappa */
-      if (DEBUGLEVEL>=4 && kappa==kappamax && signe(gel(s,kappa-1)))
+      if (DEBUGLEVEL>=10 && kappa==kappamax && signe(gel(s,kappa-1)))
       {
         long e = expo(divrr(mulrr(gmael(r,kappa-1,kappa-1), delta),
                             gel(s,kappa-1)));
