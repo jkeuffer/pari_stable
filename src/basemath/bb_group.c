@@ -278,8 +278,7 @@ gen_Shanks_log(GEN x, GEN g0,GEN q, void *E, const struct bb_group *grp)
       p1 = gerepileupto(av1, p1);
     }
   }
-  pari_err(talker,"gen_Shanks_log: supplied order (= %Ps) is incorrect", q);
-  return NULL; /* not reached */
+  return NULL; /* no solution */
 }
 
 /*Generic discrete logarithme in a group of prime order p*/
@@ -352,7 +351,8 @@ gen_PH_log(GEN a, GEN g, GEN ord, void *E, const struct bb_group *grp,
   GEN fa, ex;
   long e,i,j,l;
 
-  if (grp->cmp(g, a)==0) return gen_1; /* frequent special case */
+  if (grp->cmp(g, a)==0) /* frequent special case */
+    return grp->equal1(g)? gen_0: gen_1;
   if (easy)
   {
     GEN e = easy(E, a, g, ord);
@@ -384,6 +384,7 @@ gen_PH_log(GEN a, GEN g, GEN ord, void *E, const struct bb_group *grp,
     { /* n_q = sum_{i<j} b_i q^i */
       b = grp->pow(E,a0, gel(qj,e-1-j));
       b = gen_plog(b, g_q, q, E, grp, easy);
+      if (!b) { avma = av; return NULL; }
       n_q = addii(n_q, mulii(b, gel(qj,j)));
       if (j == e-1) break;
 
@@ -400,7 +401,6 @@ gen_PH_log(GEN a, GEN g, GEN ord, void *E, const struct bb_group *grp,
 /**                    ORDER OF AN ELEMENT                            **/
 /**                                                                   **/
 /***********************************************************************/
-
 /*Find the exact order of a assuming a^o==1*/
 GEN
 gen_eltorder(GEN a, GEN o, void *E, const struct bb_group *grp)
@@ -433,6 +433,47 @@ gen_eltorder(GEN a, GEN o, void *E, const struct bb_group *grp)
     }
   }
   return gerepilecopy(av, o);
+}
+
+/*Find the exact order of a assuming a^o==1, return [order,factor(order)] */
+GEN
+gen_eltorder_fa(GEN a, GEN o, void *E, const struct bb_group *grp)
+{
+  pari_sp av = avma;
+  long i, l, ind;
+  GEN m, F, P;
+
+  m = dlog_get_ordfa(o);
+  if (!m) pari_err(talker,"missing order in gen_eltorder");
+  o = gel(m,1);
+  m = gel(m,2); l = lg(m[1]);
+  P = cgetg(l, t_COL); ind = 1;
+  F = cgetg(l, t_COL);
+  for (i = l-1; i; i--)
+  {
+    GEN t, y, p = gcoeff(m,i,1);
+    long j, e = itos(gcoeff(m,i,2));
+    t = diviiexact(o, powiu(p,e));
+    y = grp->pow(E, a, t);
+    if (grp->equal1(y)) o = t;
+    else {
+      for (j = 1; j < e; j++)
+      {
+        y = grp->pow(E, y, p);
+        if (grp->equal1(y)) break;
+      }
+      if (j < e) {
+        if (j > 1) p = powiu(p, j);
+        o = mulii(t, p);
+      }
+      gel(P,ind) = p;
+      gel(F,ind) = utoipos(j);
+      ind++;
+    }
+  }
+  setlg(P, ind);
+  setlg(F, ind);
+  return gerepilecopy(av, mkvec2(o, mkmat2(P,F)));
 }
 
 /*******************************************************************/
@@ -491,7 +532,9 @@ gen_Shanks_sqrtl(GEN a, GEN l, GEN q,long e, GEN r, GEN y, GEN m,void *E, const 
       k++;
     } while(!grp->equal1(p1));
     if (k==e) { avma = av; return NULL; }
-    dl = negi(gen_plog(z,m,l,E,grp,NULL));
+    dl = gen_plog(z,m,l,E,grp,NULL);
+    if (!dl) { avma = av; return NULL; }
+    dl = negi(dl);
     p1 = grp->pow(E,y, Fp_mul(dl,powiu(l,e-k-1),q));
     m = grp->pow(E,m,dl);
     e = k;

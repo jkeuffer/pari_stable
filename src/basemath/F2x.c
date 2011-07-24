@@ -711,7 +711,8 @@ F2xq_order(GEN a, GEN ord, GEN T)
 GEN
 F2xq_log(GEN a, GEN g, GEN ord, GEN T)
 {
-  return gen_PH_log(a,g,ord,(void*)T,&F2xq_star,NULL);
+  GEN z = gen_PH_log(a,g,ord,(void*)T,&F2xq_star,NULL);
+  return z? z: cgetg(1,t_VEC);
 }
 
 GEN

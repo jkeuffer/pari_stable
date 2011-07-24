@@ -4,19 +4,20 @@ C-Name: znlog
 Prototype: GGDG
 Help: znlog(x,g,{o}): return the discrete logarithm of x in
  (Z/nZ)* in base g. If present, o represents the multiplicative
- order of g. If no o is given, assume that g generate (Z/nZ)*.
+ order of g. Return [] if no solution exist.
 Doc: discrete logarithm of $x$ in $(\Z/N\Z)^*$ in base $g$.
+ The result is $[]$ when $x$ is not a power of $g$.
  If present, $o$ represents the multiplicative order of $g$, see
  \secref{se:DLfun}; the preferred format for this parameter is
  \kbd{[ord, factor(ord)]}, where \kbd{ord} is the order of $g$.
- If no $o$ is given, assume that $g$ generate $(\Z/N\Z)^*$.
+ The result is undefined if $g$ is not invertible mod $N$ or if the supplied
+ order is incorrect.
 
- This function uses a simple-minded combination of generic
- discrete log algorithms (index calculus methods are not yet implemented).
+ This function uses a simple-minded combination of generic discrete log
+ algorithms (index calculus methods are not yet implemented):
 
  \item Pohlig-Hellman algorithm, to reduce to groups of prime order $q$,
  where $q | p-1$ and $p$ is an odd prime divisor of $N$,
-
  \item Shanks baby-step/giant-step ($q$ small),
 
  \item Pollard rho method ($q$ large).
@@ -37,13 +38,10 @@ Doc: discrete logarithm of $x$ in $(\Z/N\Z)^*$ in base $g$.
  %5 = 76210072736547066624
  ? G^% == 5
  %6 = 1
- @eprog\noindent The result is undefined when $x$ is not a power of $g$ or
- when $x$ is not invertible mod $N$:
- \bprog
- ? znlog(6, Mod(2,3))
-   ***   at top-level: znlog(6,Mod(2,3))
-   ***                 ^-----------------
-   *** znlog: impossible inverse modulo: Mod(0, 3).
+ ? N = 2^4*3^2*5^3*7^4*11; g = Mod(13, N); znlog(g^110, g)
+ %7 = 110
+ ? znlog(6, Mod(2,3))  \\ no solution
+ %8 = []
  @eprog\noindent For convenience, $g$ is also allowed to be a $p$-adic number:
  \bprog
  ? g = 3+O(5^10); znlog(2, g)

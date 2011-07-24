@@ -763,7 +763,7 @@ FF_log(GEN x, GEN g, GEN ord)
     if (!ord) ord = factor_pn_1(p,degpol(T));
     r = Flxq_log(gel(x,2), gel(g,2), ord, T, pp);
   }
-  return gerepileuptoint(av, r);
+  return gerepileupto(av, r);
 }
 
 GEN

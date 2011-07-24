@@ -19,6 +19,7 @@ AMe10- (t_FRAC<0) * t_INTMOD => wrong result
    11- trace(t_POL or t_SER) could yield an unormalized object [0 leading term]
 LGr12- off-by-1 error in primepi() when argument is = primelimit
    13- bestappr(0.*x+1) -> incorrect object
+   14- znlog(3, Mod(3,8), 2) -> error
 
   Changed
     1- mathnf: swapped flag 3 and 5.
@@ -39,6 +40,9 @@ BA 12- [darwin] do not use dylib_ prefix to ld options [#1210]
    14- no longer allow 3 arguments in bestappr() [useless], no longer
        mix Pade approximants and continued fractions [too confusing: must a
        t_SER be converted to a t_RFRAC or be treated coefficientwise?]
+   15- if znlog() has no solution, return [] instead of error
+   16- znlog(x, g): no longer assume that g is a primitive root, nor that the
+       underlying (Z/N)^* is cyclic
 
   Added
     1- mathnf for matrices over K[X] [#41]

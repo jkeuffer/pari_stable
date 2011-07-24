@@ -1870,8 +1870,10 @@ GEN
 Flxq_log(GEN a, GEN g, GEN ord, GEN T, ulong p)
 {
   Flxq_muldata E;
+  GEN z;
   E.T=T; E.p=p;
-  return gen_PH_log(a,g,ord,(void*)&E,&Flxq_star,NULL);
+  z = gen_PH_log(a,g,ord,(void*)&E,&Flxq_star,NULL);
+  return z ? z: cgetg(1,t_VEC);
 }
 
 GEN

@@ -3947,7 +3947,7 @@ GEN
 elllog(GEN e, GEN a, GEN g, GEN o)
 {
   pari_sp av = avma;
-  GEN j;
+  GEN j, z;
   checksmallell(e); checkellpt(a); checkellpt(g);
   j = ell_get_j(e);
   switch(typ(j))
@@ -3960,7 +3960,8 @@ elllog(GEN e, GEN a, GEN g, GEN o)
       break;
     default: pari_err(impl,"elllog over infinite fields");
   }
-  return gerepileupto(av, gen_PH_log(a,g,o, (void*)e,&ell_group,NULL));
+  z = gen_PH_log(a,g,o, (void*)e,&ell_group,NULL);
+  return gerepileupto(av, z? z: cgetg(1,t_VEC));
 }
 
 /* assume e is defined over Q (use Mazur's theorem) */

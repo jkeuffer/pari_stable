@@ -2025,13 +2025,16 @@ Fp_order(GEN a, GEN o, GEN p) {
   }
   return gen_eltorder(a, o, (void*)p, &Fp_star);
 }
+GEN
+Fp_order_fa(GEN a, GEN o, GEN p)
+{ return gen_eltorder_fa(a, o, (void*)p, &Fp_star); }
 
 /* return order of a mod p^e, e > 0, pe = p^e */
 static GEN
 Zp_order(GEN a, GEN p, long e, GEN pe)
 {
   GEN ap, op;
-  if (equalii(p, gen_2))
+  if (equaliu(p, 2))
   {
     if (e == 1) return gen_1;
     if (e == 2) return mod4(a) == 1? gen_1: gen_2;
@@ -2104,7 +2107,9 @@ _Fp_easylog(void *E, GEN x, GEN g, GEN ord)
   {
     ord = dlog_get_ord(ord);
     if (!ord) ord = p1;
-    return gerepileupto(av, shifti(ord,-1));
+    if (!mpodd(ord)) return gerepileupto(av, shifti(ord,-1));
+    /* if odd is odd, there are no solution ! No way to tell the caller
+     * in current API :-( */
   }
   avma = av; return NULL;
 }
@@ -2112,90 +2117,113 @@ _Fp_easylog(void *E, GEN x, GEN g, GEN ord)
 GEN
 Fp_log(GEN a, GEN g, GEN ord, GEN p)
 {
-  return gen_PH_log(a,g,ord,(void*)p,&Fp_star,_Fp_easylog);
+  GEN z = gen_PH_log(a,g,ord,(void*)p,&Fp_star,_Fp_easylog);
+  return z? z: cgetg(1, t_VEC);
 }
 
-/* find a s.t. g^a = x (mod p^k), p prime, k > 0, (x,p) = 1, g primitive root
- * mod p^2 [ hence mod p^k ] */
-#if 0
-/* direct Pohlig-Helmann: O(k log p) mul*/
+/* find x such that h = g^x mod N > 1, N = prod P[i]^E[i], P[i] prime.
+ * Destroys P/E */
 static GEN
-Zplog2(GEN x, GEN g, GEN p, ulong k, GEN pk)
+znlog_rec(GEN h, GEN g, GEN N, GEN P, GEN E)
 {
-  ulong l;
-  GEN b, c, ct, t, pl, pl_1, q, Q;
-  if (k == 1) return Fp_log(x, g, subis(p,1), p);
-  l = (k+1) >> 1;
-  pl_1 = powiu(p, l-1);
-  pl = mulii(pl_1, p);
-  q = odd(k)? pl_1: pl;
-  Q = subii(pl, pl_1);
-  /* write a = b + Q c, Q = (p-1)p^(l-1), c defined mod q */
-  b = Zplog2(remii(x, pl), remii(g, pl), p, l, pl); /* g^b = x (mod p^l) */
-  /* G := g^Q = 1 + t p^l (mod p^k), (t,p) = 1 */
-  t = diviiexact(subis(Fp_pow(g, Q, pk), 1), pl);
-  /* G^c = 1 + c p^l t (mod p^k) = x g^-b */
-  ct = diviiexact(subis(Fp_mul(x, Fp_pow(g, negi(b), pk), pk), 1), pl);
-  c = Fp_mul(ct, Fp_inv(t, q), q);
-  return addii(b, mulii(c, Q));
+  long l = lg(P) - 1, e = itos(gel(E,l));
+  GEN p = gel(P, l), pe = e == 1? p: powiu(p, e);
+  GEN a,b, hp,gp, hpe,gpe, ogpe; /* = order(g mod p^e) | p^(e-1)(p-1) */
+
+  hpe = modii(h, pe);
+  gpe = modii(g, pe);
+  if (e == 1) {
+    hp = hpe;
+    gp = gpe;
+  } else {
+    hp = remii(hpe, p);
+    gp = remii(gpe, p);
+  }
+  if (hp == gen_0 || gp == gen_0) return NULL;
+  if (equaliu(p, 2))
+  {
+    ogpe = Zp_order(gp, gen_2, e, int2n(e));
+    a = Fp_log(hpe, gpe, ogpe, p);
+    if (typ(a) != t_INT) return NULL;
+  }
+  else
+  { /* Don't use black box groups: (Z/p^2)^* / (Z/p)^* ~ Z/pZ,
+       in which DL is trivial */
+    GEN v = Fp_order_fa(gp, subis(p,1), p); /* [order(gp), factor(order(gp))] */
+    GEN ogp = gel(v,1);
+    if (!equali1(Fp_pow(hp, ogp, p))) return NULL;
+    a = Fp_log(hp, gp, v, p);
+    if (typ(a) != t_INT) return NULL;
+    if (e == 1) ogpe = ogp;
+    else
+    { /* find a s.t. g^a = h (mod p^e), p odd prime, e > 0, (h,p) = 1 */
+      /* use p-adic log: O(log p + e) mul*/
+      long vpogpe, vpohpe;
+
+      hpe = Fp_mul(hpe, Fp_pow(gpe, negi(a), pe), pe);
+      gpe = Fp_pow(gpe, ogp, pe);
+      /* g,h = 1 mod p; compute b s.t. h = g^b */
+
+      /* v_p(order g mod pe) */
+      vpogpe = equali1(gpe)? 0: e - Z_pval(subis(gpe,1), p);
+      /* v_p(order h mod pe) */
+      vpohpe = equali1(gpe)? 0: e - Z_pval(subis(hpe,1), p);
+      if (vpohpe > vpogpe) return NULL;
+
+      ogpe = mulii(ogp, powiu(p, vpogpe)); /* order g mod p^e */
+      b = gdiv(Qp_log(cvtop(hpe, p, e)), Qp_log(cvtop(gpe, p, e)));
+      a = addii(a, mulii(ogp, gtrunc(b)));
+    }
+  }
+  /* gp^a = hp => x = a mod ogpe => generalized Pohlig-Helman strategy */
+  if (l == 1) return a;
+
+  N = diviiexact(N, powiu(p, e)); /* make N coprime to p */
+  h = Fp_mul(h, Fp_pow(g, negi(a), N), N);
+  g = Fp_pow(g, ogpe, N);
+  setlg(P, l); /* remove last element */
+  setlg(E, l);
+  b = znlog_rec(h, g, N, P, E);
+  if (!b) return NULL;
+  return addmulii(a, b, ogpe);
 }
-#else
-/* use p-adic log: O(log p + k) mul*/
-static GEN
-Zplog(GEN x, GEN g, GEN p, ulong k, GEN pk, GEN o)
-{
-  GEN b, n = subis(p,1), a = Fp_log(x, g, o?o:n, p);
-  if (k == 1) return a;
-  x = Fp_mul(x, Fp_pow(g, negi(a), pk), pk);
-  b = gdiv(Qp_log(cvtop(x, p, k)), Qp_log(cvtop(Fp_pow(g,n,pk), p, k)));
-  return addii(a, mulii(n, gtrunc(b)));
-}
-#endif
 
 GEN
-znlog(GEN x, GEN g, GEN o)
+znlog(GEN h, GEN g, GEN o)
 {
   pari_sp av = avma;
-  long k;
-  GEN p, pk;
+  GEN N, fa, x;
   switch (typ(g))
   {
-    case t_PADIC: {
-      pk = gel(g,3); k = precp(g);
-      p = gel(g,2); x = Rg_to_Fp(x, pk);
-      if (equaliu(p, 2))
-      {
-        if (k > 2) pari_err(talker, "not a primitive root in znlog");
-        avma = av; return is_pm1(x)? gen_0: gen_1;
+    case t_PADIC:
+    {
+      GEN p = gel(g,2);
+      long v = valp(g);
+      if (v < 0) pari_err(consister,"znlog");
+      if (v > 0) {
+        long k = ggval(h, p);
+        if (k % v) return cgetg(1,t_VEC);
+        k /= v;
+        if (!gequal(h, gpowgs(g,k))) { avma = av; return cgetg(1,t_VEC); }
+        avma = av; return stoi(k);
       }
-      g = gel(g,4);
+      N = gel(g,3);
+      g = Rg_to_Fp(g, N);
       break;
     }
-    case t_INTMOD: {
-      long e;
-      pk = gel(g,1);
-      e = mod4(pk);
-      if (e == 0)
-      {
-        if (!equaliu(pk, 4)) pari_err(talker, "not a primitive root in znlog");
-        x = Rg_to_Fp(x, pk);
-        avma = av; return is_pm1(x)? gen_0: gen_1;
-      }
-      g = gel(g,2);
-      if (e == 2) {
-        if (equaliu(pk, 2)) return gen_0;
-        pk = shifti(pk, -1);
-        if (cmpii(g, pk) >= 0) g = subii(g, pk);
-      }
-      x = Rg_to_Fp(x, pk);
-      k = Z_isanypower(pk, &p);
-      if (!k) { p = pk; k = 1; }
-      break;
-    }
-    default: pari_err(talker,"not an element of (Z/pZ)* in znlog");
+    case t_INTMOD:
+      N = gel(g,1);
+      g = gel(g,2); break;
+    default: pari_err(talker,"not an element of (Z/NZ)* in znlog");
       return NULL; /* not reached */
   }
-  return gerepileuptoint(av, Zplog(x, g, p, k, pk, o));
+  if (is_pm1(N)) { avma = av; return gen_0; }
+  h = Rg_to_Fp(h, N);
+  if (o) return gerepileupto(av, Fp_log(h, g, o, N));
+  fa = Z_factor(N);
+  x = znlog_rec(h, g, N, gel(fa,1), gel(fa,2));
+  if (!x) { avma = av; return cgetg(1,t_VEC); }
+  return gerepileuptoint(av, x);
 }
 
 GEN

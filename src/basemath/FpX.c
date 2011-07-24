@@ -1343,8 +1343,10 @@ FpXQ_log(GEN a, GEN g, GEN ord, GEN T, GEN p)
   else
   {
     FpX_muldata s;
+    GEN z;
     s.T=T; s.p=p;
-    return gen_PH_log(a,g,ord, (void*)&s,&FpXQ_star,_FpXQ_easylog);
+    z = gen_PH_log(a,g,ord, (void*)&s,&FpXQ_star,_FpXQ_easylog);
+    return z? z: cgetg(1,t_VEC);
   }
 }
 
