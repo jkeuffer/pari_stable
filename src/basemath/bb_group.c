@@ -406,19 +406,24 @@ GEN
 gen_eltorder(GEN a, GEN o, void *E, const struct bb_group *grp)
 {
   pari_sp av = avma;
-  long i;
+  long i, l;
   GEN m;
 
   m = dlog_get_ordfa(o);
   if (!m) pari_err(talker,"missing order in gen_eltorder");
   o = gel(m,1);
-  m = gel(m,2);
-  for (i = lg(m[1])-1; i; i--)
+  m = gel(m,2); l = lg(m[1]);
+  for (i = l-1; i; i--)
   {
     GEN t, y, p = gcoeff(m,i,1);
     long j, e = itos(gcoeff(m,i,2));
-    t = diviiexact(o, powiu(p,e));
-    y = grp->pow(E, a, t);
+    if (l == 1) {
+      t = gen_1;
+      y = a;
+    } else {
+      t = diviiexact(o, powiu(p,e));
+      y = grp->pow(E, a, t);
+    }
     if (grp->equal1(y)) o = t;
     else {
       for (j = 1; j < e; j++)
@@ -453,8 +458,13 @@ gen_eltorder_fa(GEN a, GEN o, void *E, const struct bb_group *grp)
   {
     GEN t, y, p = gcoeff(m,i,1);
     long j, e = itos(gcoeff(m,i,2));
-    t = diviiexact(o, powiu(p,e));
-    y = grp->pow(E, a, t);
+    if (l == 1) {
+      t = gen_1;
+      y = a;
+    } else {
+      t = diviiexact(o, powiu(p,e));
+      y = grp->pow(E, a, t);
+    }
     if (grp->equal1(y)) o = t;
     else {
       for (j = 1; j < e; j++)

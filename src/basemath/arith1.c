@@ -2130,8 +2130,13 @@ znlog_rec(GEN h, GEN g, GEN N, GEN P, GEN E)
   GEN p = gel(P, l), pe = e == 1? p: powiu(p, e);
   GEN a,b, hp,gp, hpe,gpe, ogpe; /* = order(g mod p^e) | p^(e-1)(p-1) */
 
-  hpe = modii(h, pe);
-  gpe = modii(g, pe);
+  if (l == 1) {
+    hpe = h;
+    gpe = g;
+  } else {
+    hpe = modii(h, pe);
+    gpe = modii(g, pe);
+  }
   if (e == 1) {
     hp = hpe;
     gp = gpe;
