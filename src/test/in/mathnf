@@ -1,0 +1,6 @@
+\e
+mathnf(Mat([0,2]))
+mathnf(Mat([0,2]), 1)
+mathnf(Mat([0,x]), 2)
+mathnf(Mat([0,x]), 3)
+mathnf([x,x^2+1; x^3+x+1, x+2]*Mod(1,5), 2)
