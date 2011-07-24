@@ -440,7 +440,6 @@ INLINE void vecselect_p(GEN A, GEN B, GEN p, long init, long lB);
 
 /* arith1.c */
 
-GEN     bestappr_mod(GEN x, GEN A, GEN B);
 int     is_gener_Fp(GEN x, GEN p, GEN p_1, GEN L);
 int     is_gener_Fl(ulong x, ulong p, ulong p_1, GEN L);
 

@@ -2523,17 +2523,9 @@ sfcont2(GEN b, GEN x, long k)
 
 
 GEN
-gcf(GEN x)
-{
-  return gboundcf(x,0);
-}
-
+gcf(GEN x) { return gboundcf(x,0); }
 GEN
-gcf2(GEN b, GEN x)
-{
-  return contfrac0(x,b,0);
-}
-
+gcf2(GEN b, GEN x) { return contfrac0(x,b,0); }
 GEN
 contfrac0(GEN x, GEN b, long nmax)
 {
@@ -2596,70 +2588,92 @@ pnqn(GEN x)
   return gerepilecopy(av, mkmat2(mkcol2(p1,q1), mkcol2(p0,q0)));
 }
 
-/* x t_INTMOD. Look for coprime integers a<=A and b<=B, such that a/b = x */
-GEN
-bestappr_mod(GEN x, GEN A, GEN B)
+/* write Mod(x,N) as a/b, gcd(a,b) = 1, b <= B (no condition if B = NULL) */
+static GEN
+mod_to_frac(GEN x, GEN N, GEN B)
 {
-  long i, lx;
-  GEN y;
-  switch(typ(x))
+  GEN a, b, A;
+  if (B)
   {
-    case t_INTMOD:
-    {
-      pari_sp av = avma;
-      GEN a,b,d, t = cgetg(3, t_FRAC);
-      if (! ratlift(gel(x,2), gel(x,1), A,B, &a,&b)) return NULL;
-      if (is_pm1(b)) return icopy_avma(a, av);
-      d = gcdii(a,b);
-      if (!is_pm1(d)) { avma = av; return NULL; }
-      cgiv(d);
-      gel(t,1) = a;
-      gel(t,2) = b; return t;
-    }
-    case t_POLMOD:
-    {
-      pari_sp av = avma;
-      GEN a,b,d;
-      if (! RgXQ_ratlift(gel(x,2), gel(x,1), itos(A), itos(B), &a,&b))
-        return NULL;
-      d = RgX_gcd(a,b);
-      if (degpol(d)>0) { avma = av; return NULL; }
-      return gerepileupto(av, gdiv(a,b));
-    }
-    case t_COMPLEX: {
-        GEN t;
-        y = cgetg(3, t_COMPLEX);
-        t = bestappr_mod(gel(x,1),A,B); if (!t) return NULL;
-        gel(y,1) = t;
-        t = bestappr_mod(gel(x,2),A,B); if (!t) return NULL;
-        gel(y,2) = t; return y;
-      }
-    case t_POL: case t_SER:
-      y = cgetg_copy(x, &lx); y[1] = x[1];
-      for (i=2; i<lx; i++)
-      {
-        GEN t = bestappr_mod(gel(x,i),A,B);
-        if (!t) return NULL;
-        gel(y,i) = t;
-      }
-      return y;
-    case t_RFRAC: case t_VEC: case t_COL: case t_MAT:
-      y = cgetg_copy(x, &lx);
-      for (i=1; i<lx; i++)
-      {
-        GEN t = bestappr_mod(gel(x,i),A,B);
-        if (!t) return NULL;
-        gel(y,i) = t;
-      }
-      return y;
+    A = divii(shifti(N, -1), B);
+    /* denominator bound useless, don't use it */
+    if (cmpii(A, B) < 0) B = NULL;
   }
-  pari_err(typeer,"bestappr0");
-  return NULL; /* not reached */
+  if (!B)
+  {
+    A = sqrti(shifti(N, -1));
+    B = A;
+  }
+  if (!Fp_ratlift(x, N, A,B,&a,&b) || !equali1( gcdii(a,b) )) return NULL;
+  return is_pm1(b)? a: mkfrac(a,b);
 }
 
+static GEN
+mod_to_rfrac(GEN x, GEN N, long B)
+{
+  GEN a, b;
+  long A, d = degpol(N);
+  if (B >= 0)
+  {
+    A = d-1 - B;
+    /* denominator bound useless, don't use it */
+    if (A < B) B = -1;
+  }
+  if (B < 0)
+  {
+    B = d >> 1;
+    A = odd(d)? B : B-1;
+  }
+  if (varn(N) != varn(x)) x = scalarpol(x, varn(N));
+  if (! RgXQ_ratlift(x, N, A, B, &a,&b)) return NULL;
+  if (degpol(RgX_gcd(a,b)) > 0) return NULL;
+  return gdiv(a,b);
+}
+
+/* k > 0 t_INT, x a t_FRAC, returns the convergent a/b
+ * of the continued fraction of x with b <= k maximal */
+static GEN
+bestappr_frac(GEN x, GEN k)
+{
+  pari_sp av;
+  GEN p0, p1, p, q0, q1, q, a, y;
+
+  if (cmpii(gel(x,2),k) <= 0) return gcopy(x);
+  av = avma; y = x;
+  p1 = gen_1; p0 = truedvmdii(gel(x,1), gel(x,2), &a); /* = floor(x) */
+  q1 = gen_0; q0 = gen_1;
+  x = mkfrac(a, gel(x,2)); /* = frac(x); now 0<= x < 1 */
+  for(;;)
+  {
+    x = ginv(x); /* > 1 */
+    a = typ(x)==t_INT? x: divii(gel(x,1), gel(x,2));
+    if (cmpii(a,k) > 0)
+    { /* next partial quotient will overflow limits */
+      GEN n, d;
+      a = divii(subii(k, q1), q0);
+      p = addii(mulii(a,p0), p1); p1=p0; p0=p;
+      q = addii(mulii(a,q0), q1); q1=q0; q0=q;
+      /* compare |y-p0/q0|, |y-p1/q1| */
+      n = gel(y,1);
+      d = gel(y,2);
+      if (absi_cmp(mulii(q1, subii(mulii(q0,n), mulii(d,p0))),
+                   mulii(q0, subii(mulii(q1,n), mulii(d,p1)))) < 0)
+                   { p1 = p0; q1 = q0; }
+      break;
+    }
+    p = addii(mulii(a,p0), p1); p1=p0; p0=p;
+    q = addii(mulii(a,q0), q1); q1=q0; q0=q;
+
+    if (cmpii(q0,k) > 0) break;
+    x = gsub(x,a); /* 0 <= x < 1 */
+    if (typ(x) == t_INT) { p1 = p0; q1 = q0; break; } /* x = 0 */
+
+  }
+  return gerepileupto(av, gdiv(p1,q1));
+}
 /* bestappr(t_REAL != 0), to maximal accuracy */
 static GEN
-bestappr_max(GEN x)
+bestappr_real_max(GEN x)
 {
   pari_sp av = avma;
   GEN p0, p1, p, q0, q1, q, a;
@@ -2682,126 +2696,178 @@ bestappr_max(GEN x)
   }
   return gerepileupto(av, gdiv(p1,q1));
 }
+/* k > 0 t_INT, x != 0 a t_REAL, returns the convergent a/b
+ * of the continued fraction of x with b <= k maximal */
+static GEN
+bestappr_real(GEN x, GEN k)
+{
+  pari_sp av = avma;
+  GEN kr, p0, p1, p, q0, q1, q, a, y;
+
+  y = x;
+  p1 = gen_1; a = p0 = floorr(x);
+  q1 = gen_0; q0 = gen_1;
+  x = subri(x,a); /* 0 <= x < 1 */
+  if (!signe(x)) { cgiv(x); return a; }
+  kr = itor(k, realprec(x));
+  for(;;)
+  {
+    long d;
+    x = invr(x); /* > 1 */
+    if (cmprr(x,kr) > 0)
+    { /* next partial quotient will overflow limits */
+      a = divii(subii(k, q1), q0);
+      p = addii(mulii(a,p0), p1); p1=p0; p0=p;
+      q = addii(mulii(a,q0), q1); q1=q0; q0=q;
+      /* compare |y-p0/q0|, |y-p1/q1| */
+      if (absr_cmp(mulir(q1, subri(mulir(q0,y), p0)),
+                   mulir(q0, subri(mulir(q1,y), p1))) < 0)
+                   { p1 = p0; q1 = q0; }
+      break;
+    }
+    d = nbits2prec(expo(x) + 1);
+    if (d > lg(x)) { p1 = p0; q1 = q0; break; } /* original x was ~ 0 */
+
+    a = truncr(x); /* truncr(x) will NOT raise precer */
+    p = addii(mulii(a,p0), p1); p1=p0; p0=p;
+    q = addii(mulii(a,q0), q1); q1=q0; q0=q;
+
+    if (cmpii(q0,k) > 0) break;
+    x = subri(x,a); /* 0 <= x < 1 */
+    if (!signe(x)) { p1 = p0; q1 = q0; break; }
+  }
+  return gerepileupto(av, gdiv(p1,q1));
+}
+
+/* k t_INT or NULL */
+static GEN
+bestappr_Q(GEN x, GEN k)
+{
+  long lx, tx = typ(x), i;
+  GEN a, y;
+
+  switch(tx)
+  {
+    case t_INT: return icopy(x);
+    case t_FRAC: return k? bestappr_frac(x, k): gcopy(x);
+    case t_REAL:
+      if (!signe(x)) return gen_0;
+      return k? bestappr_real(x, k): bestappr_real_max(x);
+
+    case t_INTMOD: {
+      pari_sp av = avma;
+      a = mod_to_frac(gel(x,2), gel(x,1), k); if (!a) return NULL;
+      return gerepilecopy(av, a);
+    }
+    case t_PADIC: {
+      pari_sp av = avma;
+      long v = valp(x);
+      a = mod_to_frac(gel(x,4), gel(x,3), k); if (!a) return NULL;
+      if (v) a = gmul(a, powis(gel(x,2), v));
+      return gerepilecopy(av, a);
+    }
+
+    case t_COMPLEX: case t_POLMOD: case t_POL: case t_SER: case t_RFRAC:
+    case t_VEC: case t_COL: case t_MAT:
+      y = cgetg_copy(x, &lx);
+      if (lontyp[tx] == 1) i = 1; else { y[1] = x[1]; i = 2; }
+      for (; i<lx; i++)
+      {
+        a = bestappr_Q(gel(x,i),k); if (!a) return NULL;
+        gel(y,i) = a;
+      }
+      return gnormalize(y);
+  }
+  pari_err(typeer,"bestappr_Q");
+  return NULL; /* not reached */
+}
+
+static GEN
+bestappr_ser(GEN x, long B)
+{
+  long v = valp(x), lx = lg(x);
+  GEN N, t;
+  x = normalizepol(ser2pol_i(x, lx));
+  N = monomial(gen_1, lx-2, varn(x));
+  t = mod_to_rfrac(x, N, B); if (!t) return NULL;
+  if (v) t = RgX_mulXn(t, v);
+  return t;
+}
+static GEN bestappr_RgX(GEN x, long B);
+/* x t_POLMOD, B >= 0 or < 0 [omit condition on B].
+ * Look for coprime t_POL a,b, deg(b)<=B, such that a/b = x */
+static GEN
+bestappr_RgX(GEN x, long B)
+{
+  long i, lx, tx = typ(x);
+  GEN y, t;
+  switch(tx)
+  {
+    case t_INT: case t_REAL: case t_INTMOD: case t_FRAC:
+    case t_COMPLEX: case t_PADIC: case t_QUAD: case t_POL:
+      return gcopy(x);
+
+    case t_RFRAC: {
+      pari_sp av = avma;
+      if (B < 0 || degpol(gel(x,2)) <= B) return gcopy(x);
+      x = rfractoser(x, varn(gel(x,2)), 2*B+1);
+      t = bestappr_ser(x, B); if (!t) return NULL;
+      return gerepileupto(av, t);
+    }
+    case t_POLMOD: {
+      pari_sp av = avma;
+      t = mod_to_rfrac(gel(x,2), gel(x,1), B); if (!t) return NULL;
+      return gerepileupto(av, t);
+    }
+    case t_SER: {
+      pari_sp av = avma;
+      t = bestappr_ser(x, B); if (!t) return NULL;
+      return gerepileupto(av, t);
+    }
+
+    case t_VEC: case t_COL: case t_MAT:
+      y = cgetg_copy(x, &lx);
+      if (lontyp[tx] == 1) i = 1; else { y[1] = x[1]; i = 2; }
+      for (; i<lx; i++)
+      {
+        t = bestappr_RgX(gel(x,i),B); if (!t) return NULL;
+        gel(y,i) = t;
+      }
+      return gnormalize(y);
+  }
+  pari_err(typeer,"bestappr_RgX");
+  return NULL; /* not reached */
+}
 
 /* allow k = NULL: maximal accuracy */
 GEN
 bestappr(GEN x, GEN k)
 {
   pari_sp av = avma;
-  long lx, i;
-  GEN p0, p1, p, q0, q1, q, a, y;
-
-  if (k) {
+  if (k) { /* replace by floor(k) */
     switch(typ(k))
     {
-      case t_INT: break;
-      case t_REAL: case t_FRAC: k = gcvtoi(k,&i); break;
+      case t_INT:
+        break;
+      case t_REAL: case t_FRAC:
+        k = floor_safe(k); /* left on stack for efficiency */
+        if (!signe(k)) k = gen_1;
+        break;
       default:
         pari_err(talker,"incorrect bound type in bestappr");
+        break;
     }
-    if (signe(k) <= 0) k = gen_1;
   }
-  switch(typ(x))
-  {
-    case t_INT:
-      avma = av; return icopy(x);
-
-    case t_FRAC:
-      if (!k || cmpii(gel(x,2),k) <= 0) { avma = av; return gcopy(x); }
-      y = x;
-      p1 = gen_1; p0 = truedvmdii(gel(x,1), gel(x,2), &a); /* = floor(x) */
-      q1 = gen_0; q0 = gen_1;
-      x = mkfrac(a, gel(x,2)); /* = frac(x); now 0<= x < 1 */
-      for(;;)
-      {
-        x = ginv(x); /* > 1 */
-        a = typ(x)==t_INT? x: divii(gel(x,1), gel(x,2));
-        if (cmpii(a,k) > 0)
-        { /* next partial quotient will overflow limits */
-          GEN n, d;
-          a = divii(subii(k, q1), q0);
-          p = addii(mulii(a,p0), p1); p1=p0; p0=p;
-          q = addii(mulii(a,q0), q1); q1=q0; q0=q;
-          /* compare |y-p0/q0|, |y-p1/q1| */
-          n = gel(y,1);
-          d = gel(y,2);
-          if (absi_cmp(mulii(q1, subii(mulii(q0,n), mulii(d,p0))),
-                       mulii(q0, subii(mulii(q1,n), mulii(d,p1)))) < 0)
-                       { p1 = p0; q1 = q0; }
-          break;
-        }
-        p = addii(mulii(a,p0), p1); p1=p0; p0=p;
-        q = addii(mulii(a,q0), q1); q1=q0; q0=q;
-
-        if (cmpii(q0,k) > 0) break;
-        x = gsub(x,a); /* 0 <= x < 1 */
-        if (typ(x) == t_INT) { p1 = p0; q1 = q0; break; } /* x = 0 */
-
-      }
-      return gerepileupto(av, gdiv(p1,q1));
-
-    case t_REAL: {
-      GEN kr;
-
-      if (!signe(x)) return gen_0;
-      if (!k) return bestappr_max(x);
-      y = x;
-      p1 = gen_1; a = p0 = floorr(x);
-      q1 = gen_0; q0 = gen_1;
-      x = subri(x,a); /* 0 <= x < 1 */
-      if (!signe(x)) { cgiv(x); return a; }
-      kr = itor(k, realprec(x));
-      for(;;)
-      {
-        x = invr(x); /* > 1 */
-        if (cmprr(x,kr) > 0)
-        { /* next partial quotient will overflow limits */
-          a = divii(subii(k, q1), q0);
-          p = addii(mulii(a,p0), p1); p1=p0; p0=p;
-          q = addii(mulii(a,q0), q1); q1=q0; q0=q;
-          /* compare |y-p0/q0|, |y-p1/q1| */
-          if (absr_cmp(mulir(q1, subri(mulir(q0,y), p0)),
-                       mulir(q0, subri(mulir(q1,y), p1))) < 0)
-                       { p1 = p0; q1 = q0; }
-          break;
-        }
-        a = truncr(x); /* truncr(x) may raise precer */
-        p = addii(mulii(a,p0), p1); p1=p0; p0=p;
-        q = addii(mulii(a,q0), q1); q1=q0; q0=q;
-
-        if (cmpii(q0,k) > 0) break;
-        x = subri(x,a); /* 0 <= x < 1 */
-        if (!signe(x)) { p1 = p0; q1 = q0; break; }
-      }
-      return gerepileupto(av, gdiv(p1,q1));
-   }
-   case t_COMPLEX:
-      y = cgetg(3, t_COMPLEX);
-      gel(y,1) = bestappr(gel(x,1),k);
-      gel(y,2) = bestappr(gel(x,2),k);
-      return y;
-   case t_POL: case t_SER:
-      y = cgetg_copy(x, &lx); y[1] = x[1];
-      for (i=2; i<lx; i++) gel(y,i) = bestappr(gel(x,i),k);
-      return y;
-   case t_RFRAC: case t_VEC: case t_COL: case t_MAT:
-      y = cgetg_copy(x, &lx);
-      for (i=1; i<lx; i++) gel(y,i) = bestappr(gel(x,i),k);
-      return y;
-  }
-  pari_err(typeer,"bestappr");
-  return NULL; /* not reached */
+  x = bestappr_Q(x, k);
+  if (!x) { avma = av; return cgetg(1,t_VEC); }
+  return x;
 }
-
 GEN
-bestappr0(GEN x, GEN a, GEN b)
+bestapprPade(GEN x, long B)
 {
-  pari_sp av;
-  GEN t;
-  if (!b) return bestappr(x,a);
-  av = avma;
-  t = bestappr_mod(x,a,b);
-  if (!t) { avma = av; return gen_m1; }
+  pari_sp av = avma;
+  GEN t = bestappr_RgX(x, B);
+  if (!t) { avma = av; return cgetg(1,t_VEC); }
   return t;
 }
 
