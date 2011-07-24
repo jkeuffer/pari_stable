@@ -52,4 +52,5 @@ else
     X11_INC=
   fi
 fi
+rm -f $exe $exe$exe_suff;
 echo ..."X11 libraries: $X11_LIBS"
