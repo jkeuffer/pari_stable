@@ -1663,7 +1663,7 @@ static GEN
 nfsqff_trager(GEN u, GEN T, GEN dent)
 {
   long k = 0, i, lx;
-  GEN P, x0, fa, n = ZX_ZXY_rnfequation(T, u, &k);
+  GEN U, P, x0, mx0, fa, n = ZX_ZXY_rnfequation(T, u, &k);
   int tmonic;
   if (DEBUGLEVEL>4) err_printf("nfsqff_trager: choosing k = %ld\n",k);
 
@@ -1674,11 +1674,14 @@ nfsqff_trager(GEN u, GEN T, GEN dent)
   tmonic = is_pm1(leading_term(T));
   P = cgetg(lx,t_COL);
   x0 = deg1pol_shallow(stoi(-k), gen_0, varn(T));
+  mx0 = deg1pol_shallow(stoi(k), gen_0, varn(T));
+  U = RgXQX_translate(u, mx0, T);
+  if (!tmonic) U = Q_primpart(U);
   for (i=lx-1; i>0; i--)
   {
-    GEN f = gel(fa,i), F = RgXQX_translate(f, x0, T);
-    if (!tmonic) F = Q_primpart(F);
-    F = nfgcd(u, F, T, dent);
+    GEN f = gel(fa,i), F = nfgcd(U, f, T, dent);
+    F = RgXQX_translate(F, x0, T);
+    /* F = gcd(f, u(t - x0)) [t + x0] = gcd(f(t + x0), u), more efficient */
     if (typ(F) != t_POL || degpol(F) == 0)
       pari_err(talker,"reducible modulus in factornf");
     gel(P,i) = QXQX_normalize(F, T);
