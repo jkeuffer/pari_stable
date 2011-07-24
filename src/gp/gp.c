@@ -376,7 +376,9 @@ download them from the PARI WWW site 'http://pari.math.u-bordeaux.fr/'."
     suggestions, technical questions, bug reports and patch submissions.\n\
   - pari-users for everything else!\n");
   print_text("\
-To subscribe, send an empty message to <listname>-subscribe@list.cr.yp.to. \
+To subscribe, send an empty message to\n\
+  <listname>-request@pari.math.u-bordeaux.fr,\
+with a Subject: field containing the word \"subscribe\"\
 An archive is kept at the WWW site mentioned above. You can also reach the \
 authors directly by email: pari@math.u-bordeaux.fr (answer not guaranteed)."); }
 

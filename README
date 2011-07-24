@@ -45,18 +45,20 @@ suggestions, technical questions, bug reports or patch submissions.
 
 To subscribe, send empty messages respectively to
 
-   pari-announce-subscribe@list.cr.yp.to
-   pari-users-subscribe@list.cr.yp.to
-   pari-dev-subscribe@list.cr.yp.to
+   pari-announce-request@pari.math.u-bordeaux.fr
+   pari-users-request@pari.math.u-bordeaux.fr
+   pari-dev-request@pari.math.u-bordeaux.fr
 
-If you are not a member of any of those lists and don't want to become
+with a Subject: containing the word "subscribe".
+
+If you are not a member of any of those lists and do not want to become
 one, you can write to us at
 
   pari@math.u-bordeaux.fr
 
-At the very least, we will forward your mail to the lists above and correct
-faulty behaviour, if necessary. But we cannot promise you will get an
-individual answer.
+We may forward your mail to the lists above and will definitely try to
+correct faulty behaviour, if necessary. But we cannot promise that you
+will get an individual answer.
 
 Last but not least, PARI home page can be found at
 
