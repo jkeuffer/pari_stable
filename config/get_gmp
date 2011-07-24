@@ -4,48 +4,45 @@ if test -n "$with_gmp"; then
   with_gmp_lib="$with_gmp_lib $with_gmp/lib"
   with_gmp_include="$with_gmp_include $with_gmp/include"
 fi
-if test "$kernlvl1" = "gmp"; then
-  gmp_add="$TOP/gmp-$osname-$arch $TOP/gmp"
-  pth="$with_gmp_lib $gmp_add $libpth"
-  lib=gmp; . ./locatelib
-fi
+pth="$with_gmp_lib $libpth"
+lib=gmp; . ./locatelib
 
-if test -n "$gmp"; then
-  pth="$with_gmp_include $basic_include_path"
-  x=`./locate 'gmp.h' '' $pth`
-  case $x in
-   ?:/*|/*) gmp_include=`dirname $x`
-     echo ..."Found gmp header in $gmp_include"
-     ;;
-    *) echo ..."But no header file has been found"
-       gmp=;;
-  esac
-fi
+pth="$with_gmp_include $basic_include_path"
+x=`./locate 'gmp.h' '' $pth`
+case $x in
+ ?:/*|/*) gmp_include=`dirname $x`
+   echo ..."Found gmp header in $gmp_include"
+   GMPINCLUDE="-I$gmp_include"
+   ;;
+  *) echo ..."But no header file has been found"
+     gmp=;;
+esac
 
+exe=$osname-$arch-gmpv$$
 if test -n "$gmp"; then
-  GMPINCLUDE="-I$gmp_include"
   GMPLIBS="-L$gmp -lgmp"
-
-  exe=$osname-$arch-rlv$$
-  $CC $CFLAGS $extraflag $GMPINCLUDE -o $exe gmp_version.c $GMPLIBS 2> /dev/null
-  if test -r $exe; then
-    gmp_version=`env LD_LIBRARY_PATH="$LD_LIBRARY_PATH$dir_sep$gmp" $RUNTEST $exe`;
-  fi
-  if test "$gmp_version" = "unsupported"; then
-    echo "### Your GMP library ABI is unsupported."
-    gmp=
-  fi
-  if test -z "$gmp_version"; then
-    $CC $CFLAGS $extraflag $GMPINCLUDE -o $exe ansi.c $GMPLIBS 2> /dev/null
-    if test -r $exe; then
-      echo "### Your version of GMP is too old for PARI. Please upgrade"
-    else
-      echo "### Your GMP library is incompatible with the compiler settings."
-    fi
-    gmp=
-  fi
-  rm -f $exe $exe$exe_suff
+else
+  GMPLIBS="-lgmp"
 fi
+
+$CC $CFLAGS $extraflag $GMPINCLUDE -o $exe gmp_version.c $GMPLIBS 2> /dev/null
+if test -r $exe; then
+  gmp_version=`env LD_LIBRARY_PATH="$LD_LIBRARY_PATH$dir_sep$gmp" $RUNTEST $exe`;
+fi
+if test "$gmp_version" = "unsupported"; then
+  echo "### Your GMP library ABI is unsupported."
+  gmp=
+fi
+if test -z "$gmp_version"; then
+  $CC $CFLAGS $extraflag $GMPINCLUDE -o $exe ansi.c $GMPLIBS 2> /dev/null
+  if test -r $exe; then
+    echo "### Your version of GMP is too old for PARI. Please upgrade"
+  else
+    echo "### Your GMP library is incompatible with the compiler settings."
+  fi
+  gmp=
+fi
+rm -f $exe $exe$exe_suff
 
 if test -z "$gmp"; then
   echo "### Building without GNU MP support"

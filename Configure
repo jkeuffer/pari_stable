@@ -77,7 +77,9 @@ echo Checking for optional libraries and headers...
 . ./get_include_path
 . ./get_libpth
 # $_gmp_list
-. ./get_gmp
+if test "$kernlvl1" = "gmp"; then
+  . ./get_gmp
+fi
 # $_graphic_list
 . ./get_graphic_lib
 # $_readline_list (includes 'readline')
