@@ -2583,7 +2583,7 @@ INIT:
     /* could make it probabilistic for H ? [e.g if stable twice, etc]
      * Probabilistic anyway for H0, H1 */
     if (DEBUGLEVEL>5)
-      err_printf("resultant mod %ld (bound 2^%ld, stable=%ld)", p,expi(q),stable);
+      err_printf("resultant mod %ld (bound 2^%ld, stable=%ld)\n", p,expi(q),stable);
     if (stable && (ulong)expi(q) >= bound) break; /* DONE */
     if (low_stack(lim, stack_lim(av,2)))
     {
@@ -2779,7 +2779,7 @@ ZX_resultant_all(GEN A, GEN B, GEN dB, ulong bound)
       q = qp;
     }
     if (DEBUGLEVEL>5)
-      err_printf("resultant mod %ld (bound 2^%ld, stable = %d)",p,expi(q),stable);
+      err_printf("resultant mod %ld (bound 2^%ld, stable = %d)\n",p,expi(q),stable);
     if (stable && (ulong)expi(q) >= bound) break; /* DONE */
     if (low_stack(lim, stack_lim(av,2)))
     {

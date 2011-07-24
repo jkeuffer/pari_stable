@@ -1309,7 +1309,7 @@ ZM_inv(GEN M, GEN dM)
       stable = ZM_incremental_CRT(&H, Hp, q,qp, p);
       q = qp;
     }
-    if (DEBUGLEVEL>5) err_printf("inverse mod %ld (stable=%ld)", p,stable);
+    if (DEBUGLEVEL>5) err_printf("inverse mod %ld (stable=%ld)\n", p,stable);
     if (stable) {/* DONE ? */
       if (dM)
       { if (RgM_isscalar(ZM_mul(M, H), dM)) break; }
