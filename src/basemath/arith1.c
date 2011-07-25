@@ -2121,13 +2121,13 @@ Fp_log(GEN a, GEN g, GEN ord, GEN p)
   return z? z: cgetg(1, t_VEC);
 }
 
-/* find x such that h = g^x mod N > 1, N = prod P[i]^E[i], P[i] prime.
- * Destroys P/E */
+/* find x such that h = g^x mod N > 1, N = prod_{i <= l} P[i]^E[i], P[i] prime.
+ * PHI[l] = eulerphi(N / P[l]^E[l]).   Destroys P/E */
 static GEN
-znlog_rec(GEN h, GEN g, GEN N, GEN P, GEN E)
+znlog_rec(GEN h, GEN g, GEN N, GEN P, GEN E, GEN PHI)
 {
-  long l = lg(P) - 1, e = itos(gel(E,l));
-  GEN p = gel(P, l), pe = e == 1? p: powiu(p, e);
+  long l = lg(P) - 1, e = E[l];
+  GEN p = gel(P, l), phi = gel(PHI,l), pe = e == 1? p: powiu(p, e);
   GEN a,b, hp,gp, hpe,gpe, ogpe; /* = order(g mod p^e) | p^(e-1)(p-1) */
 
   if (l == 1) {
@@ -2183,21 +2183,38 @@ znlog_rec(GEN h, GEN g, GEN N, GEN P, GEN E)
   /* gp^a = hp => x = a mod ogpe => generalized Pohlig-Helman strategy */
   if (l == 1) return a;
 
-  N = diviiexact(N, powiu(p, e)); /* make N coprime to p */
-  h = Fp_mul(h, Fp_pow(g, negi(a), N), N);
-  g = Fp_pow(g, ogpe, N);
+  N = diviiexact(N, pe); /* make N coprime to p */
+  h = Fp_mul(h, Fp_pow(g, modii(negi(a), phi), N), N);
+  g = Fp_pow(g, modii(ogpe, phi), N);
   setlg(P, l); /* remove last element */
   setlg(E, l);
-  b = znlog_rec(h, g, N, P, E);
+  b = znlog_rec(h, g, N, P, E, PHI);
   if (!b) return NULL;
   return addmulii(a, b, ogpe);
+}
+
+static GEN
+get_PHI(GEN P, GEN E)
+{
+  long i, l = lg(P);
+  GEN PHI = cgetg(l, t_VEC);
+  gel(PHI,1) = gen_1;
+  for (i=1; i<l-1; i++)
+  {
+    GEN t, p = gel(P,i);
+    long e = E[i];
+    t = mulii(powiu(p, e-1), subis(p,1));
+    if (i > 1) t = mulii(t, gel(PHI,i));
+    gel(PHI,i+1) = t;
+  }
+  return PHI;
 }
 
 GEN
 znlog(GEN h, GEN g, GEN o)
 {
   pari_sp av = avma;
-  GEN N, fa, x;
+  GEN N, fa, P, E, x;
   switch (typ(g))
   {
     case t_PADIC:
@@ -2226,7 +2243,9 @@ znlog(GEN h, GEN g, GEN o)
   h = Rg_to_Fp(h, N);
   if (o) return gerepileupto(av, Fp_log(h, g, o, N));
   fa = Z_factor(N);
-  x = znlog_rec(h, g, N, gel(fa,1), gel(fa,2));
+  P = gel(fa,1);
+  E = vec_to_vecsmall(gel(fa,2));
+  x = znlog_rec(h, g, N, P, E, get_PHI(P,E));
   if (!x) { avma = av; return cgetg(1,t_VEC); }
   return gerepileuptoint(av, x);
 }
