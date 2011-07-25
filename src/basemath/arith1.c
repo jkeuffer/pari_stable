@@ -92,7 +92,7 @@ is_gener_Fp(GEN x, GEN p, GEN p_1, GEN L)
   if (t >= 0) return 0;
   for (i = lg(L)-1; i; i--) {
     GEN t = Fp_pow(x, gel(L,i), p);
-    if (equalii(t, p_1) || is_pm1(t)) return 0;
+    if (equalii(t, p_1) || equali1(t)) return 0;
   }
   return 1;
 }
@@ -147,7 +147,7 @@ pgener_Zl(ulong p)
   pari_sp av = avma;
   GEN q = sqru(p);
   GEN y = Fp_powu(utoipos(x), p-1, q);
-  if (is_pm1(y)) {
+  if (equali1(y)) {
     x += p;
     if (x < p) pari_err(talker, "p too large in pgener_Zl");
   }
@@ -166,7 +166,7 @@ pgener_Zp(GEN p)
   if (lgefint(p) == 3 && !(p[2] & HIGHBIT)) return utoipos( pgener_Zl(p[2]) );
   x = pgener_Fp(p);
   y = Fp_pow(x, subis(p,1), sqri(p));
-  if (is_pm1(y)) x = addii(x,p); else avma = (pari_sp)x;
+  if (equali1(y)) x = addii(x,p); else avma = (pari_sp)x;
   return x;
 }
 
@@ -200,7 +200,7 @@ znprimroot(GEN m)
       break;
     case 2: /* m = 2 mod 4 */
       m = shifti(m,-1); /* becomes odd */
-      if (is_pm1(m)) { x = gen_1; break; }
+      if (equali1(m)) { x = gen_1; break; }
       x = gener_Zp(m); if (!mod2(x)) x = addii(x,m);
       break;
     default: /* m odd */
@@ -776,7 +776,7 @@ ispower(GEN x, GEN K, GEN *pt)
   if (!K) return gisanypower(x, pt);
   if (typ(K) != t_INT) pari_err(typeer, "ispower");
   if (signe(K) <= 0) pari_err(talker, "non-positive exponent %Ps in ispower",K);
-  if (is_pm1(K)) { if (pt) *pt = gcopy(x); return 1; }
+  if (equali1(K)) { if (pt) *pt = gcopy(x); return 1; }
   switch(typ(x)) {
     case t_INT:
       return Z_ispowerall(x, itou(K), pt);
@@ -931,7 +931,7 @@ Z_isanypower(GEN x, GEN *pty)
       e = cgcd(e, v); if (e == 1) goto END;
     }
     if (stop) {
-      if (is_pm1(x)) k = e;
+      if (equali1(x)) k = e;
       goto END;
     }
   }
@@ -1013,7 +1013,7 @@ END:
     { /* add missing small factors */
       y = powuu(P[1], E[1] / k);
       for (i = 2; i < l; i++) y = mulii(y, powuu(P[i], E[i] / k));
-      x = is_pm1(x)? y: mulii(x,y);
+      x = equali1(x)? y: mulii(x,y);
     }
     if (s < 0) togglesign(x);
     *pty = gerepilecopy(av, x);
@@ -1464,7 +1464,7 @@ Fp_sqrt(GEN a, GEN p)
   GEN p1, q, v, y, w, m;
 
   if (typ(a) != t_INT || typ(p) != t_INT) pari_err(arither1);
-  if (signe(p) <= 0 || is_pm1(p)) pari_err(talker,"not a prime in Fp_sqrt");
+  if (signe(p) <= 0 || equali1(p)) pari_err(talker,"not a prime in Fp_sqrt");
   if (lgefint(p) == 3)
   {
     ulong u = (ulong)p[2]; u = Fl_sqrt(umodiu(a, u), u);
@@ -1517,11 +1517,11 @@ Fp_sqrt(GEN a, GEN p)
   v = Fp_mul(a, p1, p);
   w = Fp_mul(v, p1, p);
   lim = stack_lim(av,1);
-  while (!is_pm1(w))
+  while (!equali1(w))
   { /* a*w = v^2, y primitive 2^e-th root of 1
        a square --> w even power of y, hence w^(2^(e-1)) = 1 */
     p1 = sqrmod(w,p);
-    for (k=1; !is_pm1(p1) && k < e; k++) p1 = sqrmod(p1,p);
+    for (k=1; !equali1(p1) && k < e; k++) p1 = sqrmod(p1,p);
     if (k == e) { avma=av; return NULL; } /* p composite or (a/p) != 1 */
     /* w ^ (2^k) = 1 --> w = y ^ (u * 2^(e-k)), u odd */
     p1 = y;
@@ -1553,7 +1553,7 @@ lcmii(GEN x, GEN y)
   GEN a, b;
   if (!signe(x) || !signe(y)) return gen_0;
   av = avma;
-  a = gcdii(x,y); if (!is_pm1(a)) y = diviiexact(y,a);
+  a = gcdii(x,y); if (!equali1(a)) y = diviiexact(y,a);
   b = mulii(x,y); setabssign(b); return gerepileuptoint(av, b);
 }
 
@@ -2050,7 +2050,7 @@ Zp_order(GEN a, GEN p, long e, GEN pe)
     if (e == 1) return op;
     a = Fp_pow(a, op, pe); /* 1 mod p */
   }
-  if (is_pm1(a)) return op;
+  if (equali1(a)) return op;
   return mulii(op, powiu(p, e - Z_pval(subis(a,1), p)));
 }
 
@@ -2063,7 +2063,7 @@ znorder(GEN x, GEN o)
   if (typ(x) != t_INTMOD)
     pari_err(talker,"not an element of (Z/nZ)* in order");
   b = gel(x,1); a = gel(x,2);
-  if (!gequal1(gcdii(a,b)))
+  if (!equali1(gcdii(a,b)))
     pari_err(talker,"not an element of (Z/nZ)* in order");
   if (!o)
   {
@@ -2100,7 +2100,7 @@ _Fp_easylog(void *E, GEN x, GEN g, GEN ord)
   pari_sp av = avma;
   GEN p1, p = (GEN)E;
   (void)g;
-  if (is_pm1(x)) return gen_0;
+  if (equali1(x)) return gen_0;
   /* p > 2 */
   p1 = addsi(-1, p);
   if (equalii(p1,x))  /* -1 */
@@ -2222,7 +2222,7 @@ znlog(GEN h, GEN g, GEN o)
     default: pari_err(talker,"not an element of (Z/NZ)* in znlog");
       return NULL; /* not reached */
   }
-  if (is_pm1(N)) { avma = av; return gen_0; }
+  if (equali1(N)) { avma = av; return gen_0; }
   h = Rg_to_Fp(h, N);
   if (o) return gerepileupto(av, Fp_log(h, g, o, N));
   fa = Z_factor(N);
@@ -2421,7 +2421,7 @@ Qsfcont(GEN a, GEN b, GEN y, ulong k)
         c = subii(c, b);
         if (cmpii(c, b) < 0) {
           /* by 1. If next quotient is 1 in y, add 1 */
-          if (i < l && is_pm1(gel(y,i+1))) gel(z,i) = addis(q,1);
+          if (i < l && equali1(gel(y,i+1))) gel(z,i) = addis(q,1);
           i++;
         }
         break;
@@ -2638,7 +2638,7 @@ mod_to_frac(GEN x, GEN N, GEN B)
     B = A;
   }
   if (!Fp_ratlift(x, N, A,B,&a,&b) || !equali1( gcdii(a,b) )) return NULL;
-  return is_pm1(b)? a: mkfrac(a,b);
+  return equali1(b)? a: mkfrac(a,b);
 }
 
 static GEN
@@ -3056,7 +3056,7 @@ find_order(GEN f, GEN h)
     {
       GEN q = diviiexact(h,gel(p,i));
       fh = powgi(f, q);
-      if (!is_pm1(gel(fh,1))) break;
+      if (!equali1(gel(fh,1))) break;
       h = q;
     }
   }
@@ -3077,7 +3077,7 @@ end_classno(GEN h, GEN hin, GEN forms, long lform)
     fg = powgi(gel(forms,i), h);
     fh = powgi(fg, q);
     a = gel(fh,1);
-    if (is_pm1(a)) continue;
+    if (equali1(a)) continue;
     b = gel(fh,2); p1 = fg;
     for (com=1; ; com++, p1 = gmul(p1,fg))
       if (equalii(gel(p1,1), a) && absi_equal(gel(p1,2), b)) break;
@@ -3279,7 +3279,7 @@ classno(GEN x)
       }
     }
     ftest = gmul(ftest,fg);
-    if (is_pm1(gel(ftest,1))) pari_err(impl,"classno with too small order");
+    if (equali1(gel(ftest,1))) pari_err(impl,"classno with too small order");
     if (low_stack(lim, stack_lim(av2,2))) ftest = gerepileupto(av2,ftest);
   }
 }

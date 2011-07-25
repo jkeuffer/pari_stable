@@ -431,7 +431,7 @@ gequal1(GEN x)
   switch(typ(x))
   {
     case t_INT:
-      return is_pm1(x) && signe(x)==1;
+      return equali1(x);
 
     case t_REAL:
       return signe(x) > 0 ? absrnz_equal1(x): 0;
@@ -475,7 +475,7 @@ gequalm1(GEN x)
   switch(typ(x))
   {
     case t_INT:
-      return is_pm1(x) && signe(x)== -1;
+      return equalim1(x);
 
     case t_REAL:
       return signe(x) < 0 ? absrnz_equal1(x): 0;
