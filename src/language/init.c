@@ -405,9 +405,8 @@ pari_sighandler(int sig)
       {
         GP_DATA->pp->file = NULL; /* to avoid oo recursion on error */
         pari_outfile = stdout; pari_fclose(f);
-        pari_err(talker, "Broken Pipe, resetting file stack...");
       }
-      /*Do not attempt to write to stdout in case it triggered the SIGPIPE*/
+      pari_err(talker, "Broken Pipe, resetting file stack...");
       return; /* not reached */
     }
 #endif

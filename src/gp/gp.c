@@ -2053,7 +2053,9 @@ prettyp_init(void)
   if (pp->file || (pp->file = try_pipe(pp->cmd, mf_OUT))) return 1;
 
   pari_warn(warner,"broken prettyprinter: '%s'",pp->cmd);
-  pari_free(pp->cmd); pp->cmd = NULL; return 0;
+  pari_free(pp->cmd); pp->cmd = NULL;
+  sd_output("1", d_SILENT);
+  return 0;
 }
 
 /* n = history number. if n = 0 no history */
