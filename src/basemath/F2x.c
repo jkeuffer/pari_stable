@@ -705,7 +705,7 @@ static const struct bb_group F2xq_star={_F2xq_mul,_F2xq_pow,_F2xq_rand,_F2xq_has
 GEN
 F2xq_order(GEN a, GEN ord, GEN T)
 {
-  return gen_eltorder(a,ord,(void*)T,&F2xq_star);
+  return gen_order(a,ord,(void*)T,&F2xq_star);
 }
 
 GEN

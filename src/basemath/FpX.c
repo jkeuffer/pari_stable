@@ -1318,7 +1318,7 @@ FpXQ_order(GEN a, GEN ord, GEN T, GEN p)
   {
     FpX_muldata s;
     s.T=T; s.p=p;
-    return gen_eltorder(a,ord, (void*)&s,&FpXQ_star);
+    return gen_order(a,ord, (void*)&s,&FpXQ_star);
   }
 }
 

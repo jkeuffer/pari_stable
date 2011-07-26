@@ -1863,7 +1863,7 @@ Flxq_order(GEN a, GEN ord, GEN T, ulong p)
 {
   Flxq_muldata E;
   E.T=T; E.p=p;
-  return gen_eltorder(a,ord,(void*)&E,&Flxq_star);
+  return gen_order(a,ord,(void*)&E,&Flxq_star);
 }
 
 GEN

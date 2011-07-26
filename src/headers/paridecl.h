@@ -724,6 +724,7 @@ GEN     rhorealnod(GEN x, GEN isqrtD);
 ulong   Fl_order(ulong a, ulong o, ulong p);
 ulong   Fl_powu(ulong x, ulong n, ulong p);
 ulong   Fl_sqrt(ulong a, ulong p);
+GEN     Fp_factored_order(GEN a, GEN o, GEN p);
 GEN     Fp_log(GEN a, GEN g, GEN ord, GEN p);
 GEN     Fp_order(GEN a, GEN o, GEN p);
 GEN     Fp_pow(GEN a, GEN n, GEN m);
@@ -1105,8 +1106,8 @@ GEN dlog_get_ordfa(GEN o);
 GEN dlog_get_ord(GEN o);
 GEN gen_PH_log(GEN a, GEN g, GEN ord, void *E, const struct bb_group *grp, GEN easy(void *E, GEN, GEN, GEN));
 GEN gen_Shanks_sqrtn(GEN a, GEN n, GEN q, GEN *zetan, void *E, const struct bb_group *grp);
-GEN gen_eltorder(GEN x, GEN o, void *E, const struct bb_group *grp);
-GEN gen_eltorder_fa(GEN a, GEN o, void *E, const struct bb_group *grp);
+GEN gen_order(GEN x, GEN o, void *E, const struct bb_group *grp);
+GEN gen_factored_order(GEN a, GEN o, void *E, const struct bb_group *grp);
 GEN gen_plog(GEN x,GEN g0,GEN q, void *E, const struct bb_group *grp, GEN easy(void*E, GEN, GEN, GEN));
 GEN gen_pow(GEN x, GEN n, void *E, GEN (*sqr)(void*,GEN),
                                    GEN (*mul)(void*,GEN,GEN));

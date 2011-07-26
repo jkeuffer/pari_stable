@@ -403,14 +403,14 @@ gen_PH_log(GEN a, GEN g, GEN ord, void *E, const struct bb_group *grp,
 /***********************************************************************/
 /*Find the exact order of a assuming a^o==1*/
 GEN
-gen_eltorder(GEN a, GEN o, void *E, const struct bb_group *grp)
+gen_order(GEN a, GEN o, void *E, const struct bb_group *grp)
 {
   pari_sp av = avma;
   long i, l;
   GEN m;
 
   m = dlog_get_ordfa(o);
-  if (!m) pari_err(talker,"missing order in gen_eltorder");
+  if (!m) pari_err(talker,"missing order in gen_order");
   o = gel(m,1);
   m = gel(m,2); l = lg(m[1]);
   for (i = l-1; i; i--)
@@ -442,14 +442,14 @@ gen_eltorder(GEN a, GEN o, void *E, const struct bb_group *grp)
 
 /*Find the exact order of a assuming a^o==1, return [order,factor(order)] */
 GEN
-gen_eltorder_fa(GEN a, GEN o, void *E, const struct bb_group *grp)
+gen_factored_order(GEN a, GEN o, void *E, const struct bb_group *grp)
 {
   pari_sp av = avma;
   long i, l, ind;
   GEN m, F, P;
 
   m = dlog_get_ordfa(o);
-  if (!m) pari_err(talker,"missing order in gen_eltorder");
+  if (!m) pari_err(talker,"missing order in gen_order");
   o = gel(m,1);
   m = gel(m,2); l = lg(m[1]);
   P = cgetg(l, t_COL); ind = 1;

@@ -166,7 +166,7 @@ FpE_order(GEN z, GEN o, GEN a4, GEN p)
   struct _FpE e;
   e.a4=a4;
   e.p=p;
-  return gerepileuptoint(av, gen_eltorder(z, o, (void*)&e, &FpE_group));
+  return gerepileuptoint(av, gen_order(z, o, (void*)&e, &FpE_group));
 }
 
 /***********************************************************************/

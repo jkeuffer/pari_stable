@@ -3998,7 +3998,7 @@ ellorder(GEN e, GEN z, GEN o)
       return utoi( _orderell(e, z) );
     default: pari_err(impl,"orderell for nonrational elliptic curves");
   }
-  return gerepileuptoint(av, gen_eltorder(z, o, (void*)e, &ell_group));
+  return gerepileuptoint(av, gen_order(z, o, (void*)e, &ell_group));
 }
 
 GEN

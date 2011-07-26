@@ -44,6 +44,7 @@ BA 12- [darwin] do not use dylib_ prefix to ld options [#1210]
    15- if znlog() has no solution, return [] instead of error
    16- znlog(x, g): no longer assume that g is a primitive root, nor that the
        underlying (Z/N)^* is cyclic
+   17- renamed gen_eltorder -> gen_order
 
   Added
     1- mathnf for matrices over K[X] [#41]
@@ -60,6 +61,7 @@ LGr 9- Catalan's constant [ Catalan() ]
 BA 10- library functions F2x_issquare/F2x_sqrt
 BA 11- [INSTALL] Documentation of RUNTEST
    12- new function bestapprPade
+   13- new function gen_factored_order, Fp_factored_order
 
   Removed
     1- dropped DOS support

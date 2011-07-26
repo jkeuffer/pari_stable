@@ -2842,9 +2842,15 @@ $\kbd{g} = \gcd(\kbd{a},\kbd{m})$.
 \pmod{p}$. Return an integer $e$ such that $a^e=g \pmod{p}$. If $e$ does not
 exists, the result is currently undefined.
 
-\fun{GEN}{Fp_order}{GEN a, GEN ord, GEN p} returns the order of the
-\typ{Fp} \kbd{a}. If \kbd{ord} is non-\kbd{NULL}, it is assumed that \kbd{ord}
-is a multiple of the order of \kbd{a}, either as a \typ{INT} or a
+\fun{GEN}{Fp_order}{GEN a, GEN N, GEN p} returns the order of the
+\typ{Fp} \kbd{a}. If \kbd{N} is non-\kbd{NULL}, it is assumed that \kbd{N}
+is a multiple of the order of \kbd{a}, as a \typ{INT} or a
+factorization matrix.
+
+\fun{GEN}{Fp_factored_order}{GEN a, GEN N, GEN p} returns $[o,F]$, where $o$
+is the multiplicative order of the \kbd{Fp} $a$ in $\F_p^*$, and $F$ is the
+factorization of $o$. If \kbd{N} is non-\kbd{NULL}, it is assumed that
+\kbd{N} is a multiple of the order of \kbd{a}, as a \typ{INT} or a
 factorization matrix.
 
 \fun{int}{Fp_issquare}{GEN x, GEN p} returns $1$ if \kbd{x} is a square

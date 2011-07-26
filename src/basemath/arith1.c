@@ -2023,11 +2023,11 @@ Fp_order(GEN a, GEN o, GEN p) {
     ulong q = p[2];
     return utoi( Fl_order(umodiu(a, q), umodiu(o, q-1), q) );
   }
-  return gen_eltorder(a, o, (void*)p, &Fp_star);
+  return gen_order(a, o, (void*)p, &Fp_star);
 }
 GEN
-Fp_order_fa(GEN a, GEN o, GEN p)
-{ return gen_eltorder_fa(a, o, (void*)p, &Fp_star); }
+Fp_factored_order(GEN a, GEN o, GEN p)
+{ return gen_factored_order(a, o, (void*)p, &Fp_star); }
 
 /* return order of a mod p^e, e > 0, pe = p^e */
 static GEN
@@ -2154,7 +2154,7 @@ znlog_rec(GEN h, GEN g, GEN N, GEN P, GEN E, GEN PHI)
   else
   { /* Don't use black box groups: (Z/p^2)^* / (Z/p)^* ~ Z/pZ,
        in which DL is trivial */
-    GEN v = Fp_order_fa(gp, subis(p,1), p); /* [order(gp), factor(order(gp))] */
+    GEN v = Fp_factored_order(gp, subis(p,1), p); /* [order(gp), factor(order(gp))] */
     GEN ogp = gel(v,1);
     if (!equali1(Fp_pow(hp, ogp, p))) return NULL;
     a = Fp_log(hp, gp, v, p);
