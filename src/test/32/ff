@@ -84,17 +84,13 @@ Mod(4294967310, 4294967311), Mod(1, 4294967311)*x^3 + Mod(1, 4294967311)*x^2
 ,o]);fflog(g^17,g,o);
 ? test2(2)
 [1, [1, matrix(0,2)]]
-1
+0
 ? test2(3)
 [2, [2, Mat([2, 1])]]
 1
 ? test2(46744073709551653)
 [2, [46744073709551652, [2, 2; 3, 1; 7, 1; 37, 1; 1036513, 1; 14510113, 1]]]
-  ***   at top-level: test2(46744073709551
-  ***                 ^--------------------
-  ***   in function test2: ...d(1,p)),&o);print([g,o]);fflog(g^17,g,o)
-  ***                                                  ^---------------
-  *** fflog: gen_Shanks_log: supplied order (= 2) is incorrect.
+0
 ? test2(precprime(1<<32))
 [2, [4294967290, [2, 1; 5, 1; 19, 1; 22605091, 1]]]
 17
@@ -106,9 +102,7 @@ Mod(4294967310, 4294967311), Mod(1, 4294967311)*x^3 + Mod(1, 4294967311)*x^2
 ? polrootsff(x^4+1,2,y^2+y+1)
 [Mod(Mod(1, 2), Mod(1, 2)*y^2 + Mod(1, 2)*y + Mod(1, 2))]~
 ? t=ffgen(ffinit(7,4));fflog(t^6,t^2)
-  ***   at top-level: t=ffgen(ffinit(7,4));fflog(t^6,t^2)
-  ***                                      ^--------------
-  *** fflog: gen_Shanks_log: supplied order (= 5) is incorrect.
+[]
 ? t=ffgen(ffinit(2,64))^((2^64-1)\5);1/t
 x^58 + x^57 + x^56 + x^52 + x^51 + x^49 + x^46 + x^45 + x^42 + x^39 + x^36 +
  x^35 + x^32 + x^30 + x^29 + x^25 + x^23 + x^22 + x^21 + x^20 + x^19 + x^12 
@@ -121,4 +115,4 @@ x^58 + x^57 + x^56 + x^52 + x^51 + x^49 + x^46 + x^45 + x^42 + x^39 + x^36 +
 [x + t 6]
 
 ? print("Total time spent: ",gettime);
-Total time spent: 436
+Total time spent: 412
