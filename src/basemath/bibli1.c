@@ -1845,7 +1845,12 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
         pari_sp av2;
         long I;
 
-        if (s == 1) invp = matid(maxrank);
+        if (s == 1) {
+          invp = matid(maxrank);
+          for (i = 1; i <= maxrank; i++) L[i] = 0;
+        }
+        /* must go till the end in case we find a smallest vector last */
+        if (s == maxrank) continue;
         av2 = avma;
         for (i = I = 1; i<=n; i++)
           for (j=i; j<=n; j++,I++) V[I] = x[i]*x[j];
@@ -1854,14 +1859,7 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
           if (DEBUGLEVEL>1) { err_printf("."); err_flush(); }
           s--; avma=av2; continue;
         }
-
         if (DEBUGLEVEL>1) { err_printf("*"); err_flush(); }
-        if (s == maxrank)
-        {
-          if (DEBUGLEVEL>1) { err_printf("\n"); err_flush(); }
-          avma=av; return stoi(s);
-        }
-
         if (low_stack(lim, stack_lim(av1,1)))
         {
           if(DEBUGMEM>1) pari_warn(warnmem,"minim0, rank>=%ld",s);

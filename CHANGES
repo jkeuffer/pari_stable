@@ -21,6 +21,7 @@ LGr12- off-by-1 error in primepi() when argument is = primelimit
    13- bestappr(0.*x+1) -> incorrect object
    14- znlog(3, Mod(3,8), 2) -> error
    15- crash when default(prettyprinter,...) points to a non-existent command
+   16- qfperfection(): wrong result in unlucky cases [#1223]
 
   Changed
     1- mathnf: swapped flag 3 and 5.
