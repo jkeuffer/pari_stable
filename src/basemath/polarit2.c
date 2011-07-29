@@ -2722,6 +2722,11 @@ RgX_disc_aux(GEN x)
   long dx = degpol(x), Tx;
   GEN D, L, y;
   if (!signe(x) || !dx) return RgX_get_0(x);
+  if (dx == 1) return RgX_get_1(x);
+  if (dx == 2) {
+    GEN a = gel(x,4), b = gel(x,3), c = gel(x,2);
+    return gsub(gsqr(b), gmul2n(gmul(a,c),2));
+  }
   Tx = RgX_simpletype(x);
   if (Tx == t_INT) return ZX_disc(x);
   if (Tx == t_FRAC) return QX_disc(x);
