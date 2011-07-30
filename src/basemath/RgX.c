@@ -35,9 +35,8 @@ RgX_equal_var(GEN x, GEN y) { return varn(x) == varn(y) && RgX_equal(x,y); }
 GEN
 RgX_get_1(GEN x)
 {
-  pari_sp av = avma;
   GEN p, T;
-  long i, lx, vx = varn(x), tx = RgX_type(x, &p, &T, &lx);
+  long i, lx, tx = RgX_type(x, &p, &T, &lx);
   if (RgX_type_is_composite(tx))
     RgX_type_decode(tx, &i /*junk*/, &tx);
   switch(tx)
@@ -47,16 +46,15 @@ RgX_get_1(GEN x)
     case t_FFELT: x = FF_1(T); break;
     default: x = gen_1; break;
   }
-  return gerepileupto(av, scalarpol(x, vx));
+  return x;
 }
 /* Returns 0 in the base ring over which x is defined */
 /* HACK: this also works for t_SER */
 GEN
 RgX_get_0(GEN x)
 {
-  pari_sp av = avma;
   GEN p, T;
-  long i, lx, vx = varn(x), tx = RgX_type(x, &p, &T, &lx);
+  long i, lx, tx = RgX_type(x, &p, &T, &lx);
   if (RgX_type_is_composite(tx))
     RgX_type_decode(tx, &i /*junk*/, &tx);
   switch(tx)
@@ -66,7 +64,7 @@ RgX_get_0(GEN x)
     case t_FFELT: x = FF_zero(T); break;
     default: x = gen_0; break;
   }
-  return gerepileupto(av, scalarpol(x, vx));
+  return x;
 }
 
 /********************************************************************/

@@ -342,6 +342,15 @@ mpexp0(GEN x)
 static GEN
 powr0(GEN x)
 { return signe(x)? real_1(realprec(x)): mpexp0(x); }
+
+/* x t_POL or t_SER, return scalarpol(RgX_get_1(x)) */
+static GEN
+scalarpol_get_1(GEN x)
+{
+  GEN y = cgetg(3,t_POL);
+  y[1] = evalvarn(varn(x)) | evalsigne(1);
+  gel(y,2) = RgX_get_1(x); return y;
+}
 /* to be called by the generic function gpowgs(x,s) when s = 0 */
 static GEN
 gpowg0(GEN x)
@@ -373,12 +382,12 @@ gpowg0(GEN x)
     case t_POLMOD:
       y = cgetg(3,t_POLMOD);
       gel(y,1) = gcopy(gel(x,1));
-      gel(y,2) = RgX_get_1(gel(x,1)); return y;
+      gel(y,2) = scalarpol_get_1(gel(x,1)); return y;
 
     case t_RFRAC:
-      return RgX_get_1(gel(x,2));
+      return scalarpol_get_1(gel(x,2));
     case t_POL: case t_SER:
-      return RgX_get_1(x);
+      return scalarpol_get_1(x);
 
     case t_MAT:
       lx=lg(x); if (lx==1) return cgetg(1,t_MAT);
