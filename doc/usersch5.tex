@@ -6283,10 +6283,16 @@ returns the $3$-dimensional \typ{VEC} \kbd{[x,y,z]}.
 returns the $4$-dimensional \typ{VEC} \kbd{[x,y,z,t]}.
 
 \fun{GEN}{retmkcol}{GEN x}
-returns the $1$-dimensional \typ{COL} \kbd{[x]}.
+returns the $1$-dimensional \typ{COL} \kbd{[x]~}.
 
 \fun{GEN}{retmkcol2}{GEN x, GEN y}
-returns the $2$-dimensional \typ{COL} \kbd{[x,y]}.
+returns the $2$-dimensional \typ{COL} \kbd{[x,y]~}.
+
+\fun{GEN}{retmkmat}{GEN x}
+returns the $1$-column \typ{MAT} with colum \kbd{x}.
+
+\fun{GEN}{retmkmat2}{GEN x, GEN y}
+returns the $2$-column \typ{MAT} with colums \kbd{x}, \kbd{y}.
 
 \fun{GEN}{retmkintmod}{GEN x, GEN y}
 returns the \typ{INTMOD} \kbd{Mod(x, y)}.

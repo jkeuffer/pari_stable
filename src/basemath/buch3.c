@@ -1981,7 +1981,7 @@ static GEN
 fasmall_append(GEN fa, long p, long e)
 {
   GEN P = gel(fa,1), E = gel(fa,2);
-  return mkmat2(vecsmall_append(P,p), vecsmall_append(E,e));
+  retmkmat2(vecsmall_append(P,p), vecsmall_append(E,e));
 }
 
 static GEN

@@ -51,6 +51,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
   do { GEN _v = cgetg(3, t_COL);\
        gel(_v,1) = (x);\
        gel(_v,2) = (y); return _v; } while(0)
+#define retmkmat(x)\
+  do { GEN _v = cgetg(2, t_MAT);\
+       gel(_v,1) = (x); return _v; } while(0)
+#define retmkmat2(x,y)\
+  do { GEN _v = cgetg(3, t_MAT);\
+       gel(_v,1) = (x);\
+       gel(_v,2) = (y); return _v; } while(0)
+
 INLINE GEN
 mkintmod(GEN x, GEN y) { retmkintmod(x,y); }
 INLINE GEN
@@ -133,9 +141,9 @@ INLINE GEN
 mkcolcopy(GEN x) { GEN v = cgetg(2, t_COL); gel(v,1) = gcopy(x); return v; }
 /* mat */
 INLINE GEN
-mkmat(GEN x) { GEN v = cgetg(2, t_MAT); gel(v,1) = x; return v; }
+mkmat(GEN x) { retmkmat(x); }
 INLINE GEN
-mkmat2(GEN x, GEN y) { GEN v=cgetg(3,t_MAT); gel(v,1)=x; gel(v,2)=y; return v; }
+mkmat2(GEN x, GEN y) { retmkmat2(x,y); }
 INLINE GEN
 mkmatcopy(GEN x) { GEN v = cgetg(2, t_MAT); gel(v,1) = gcopy(x); return v; }
 /* pol */

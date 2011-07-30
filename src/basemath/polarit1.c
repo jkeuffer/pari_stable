@@ -1720,7 +1720,7 @@ padicff(GEN x,GEN p,long pr)
 static GEN
 padic_trivfact(GEN x, GEN p, long r)
 {
-  return mkmat2(mkcol(ZX_to_ZpX_normalized(x, p, powiu(p,r), r)),
+  retmkmat2(mkcol(ZX_to_ZpX_normalized(x, p, powiu(p,r), r)),
                 mkcol(gen_1));
 }
 
