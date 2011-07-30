@@ -1703,13 +1703,7 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
       if (n == 1) return gen_0;
       break;
     default:
-      if (n == 1) {
-        L = cgetg(4, t_VEC);
-        gel(L,1) = gen_0;
-        gel(L,2) = gen_0;
-        gel(L,3) = cgetg(1, t_MAT);
-        return L;
-      }
+      if (n == 1) retmkvec3(gen_0, gen_0, cgetg(1, t_MAT));
       break;
   }
   minim_alloc(n, &q, &x, &y, &z, &v);
@@ -2241,9 +2235,7 @@ fincke_pohst(GEN a, GEN B0, long stockmax, long PREC, FP_chk_fun *CHECK)
     if (l == 1)
     {
       if (CHECK) pari_err(talker, "dimension 0 in fincke_pohst");
-      z = cgetg(4,t_VEC);
-      gel(z,1) = gel(z,2) = gen_0;
-      gel(z,3) = cgetg(1,t_MAT); return z;
+      retmkvec3(gen_0, gen_0, cgetg(1,t_MAT));
     }
     i = gprecision(a); if (i) prec = i;
     if (DEBUGLEVEL>2) err_printf("first LLL: prec = %ld\n", prec);

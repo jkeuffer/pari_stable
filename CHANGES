@@ -63,6 +63,8 @@ BA 10- library functions F2x_issquare/F2x_sqrt
 BA 11- [INSTALL] Documentation of RUNTEST
    12- new function bestapprPade
    13- new function gen_factored_order, Fp_factored_order
+   14- macros retmkvec, retmkvec2, retmkvec3, retmkvec4, retmkcol, retmkcol2,
+       retmkintmod, retmkpolmod.
 
   Removed
     1- dropped DOS support

@@ -1394,12 +1394,11 @@ static GEN
 sqrt_Cipolla_sqr(void *data, GEN y)
 {
   GEN u = gel(y,1), v = gel(y,2), p = gel(data,2), n = gel(data,3);
-  GEN z, u2 = sqri(u), v2 = sqri(v);
+  GEN u2 = sqri(u), v2 = sqri(v);
   v = subii(sqri(addii(v,u)), addii(u2,v2));
   u = addii(u2, mulii(v2,n));
-  z = cgetg(3, t_VEC); /* NOT mkvec2: must be gerepileupto-able */
-  gel(z,1) = modii(u,p);
-  gel(z,2) = modii(v,p); return z;
+  /* NOT mkvec2: must be gerepileupto-able */
+  retmkvec2(modii(v,p), modii(u,p));
 }
 /* compute (t+X) y^2 */
 static GEN
@@ -1408,12 +1407,11 @@ sqrt_Cipolla_msqr(void *data, GEN y)
   GEN u = gel(y,1), v = gel(y,2), a = gel(data,1), p = gel(data,2), gt = gel(data,4);
   ulong t = gt[2];
   GEN d = addii(u, mului(t,v)), d2= sqri(d);
-  GEN z, b = remii(mulii(a,v), p);
+  GEN b = remii(mulii(a,v), p);
   u = subii(mului(t,d2), mulii(b,addii(u,d)));
   v = subii(d2, mulii(b,v));
-  z = cgetg(3, t_VEC); /* NOT mkvec2: must be gerepileupto-able */
-  gel(z,1) = modii(u,p);
-  gel(z,2) = modii(v,p); return z;
+  /* NOT mkvec2: must be gerepileupto-able */
+  retmkvec2(modii(v,p), modii(u,p));
 }
 /* assume a reduced mod p [ otherwise correct but inefficient ] */
 static GEN

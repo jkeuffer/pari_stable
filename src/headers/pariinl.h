@@ -18,9 +18,41 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*                          CONSTRUCTORS                           */
 /*                                                                 */
 /*******************************************************************/
+#define retmkintmod(x,y)\
+  do { GEN _v = cgetg(3, t_INTMOD);\
+       gel(_v,1) = (y);\
+       gel(_v,2) = (x); return _v; } while(0)
+#define retmkpolmod(x,y)\
+  do { GEN _v = cgetg(3, t_POLMOD);\
+       gel(_v,1) = (y);\
+       gel(_v,2) = (x); return _v; } while(0)
+#define retmkvec(x)\
+  do { GEN _v = cgetg(2, t_VEC);\
+       gel(_v,1) = (x); return _v; } while(0)
+#define retmkvec2(x,y)\
+  do { GEN _v = cgetg(3, t_VEC);\
+       gel(_v,1) = (x);\
+       gel(_v,2) = (y); return _v; } while(0)
+#define retmkvec3(x,y,z)\
+  do { GEN _v = cgetg(4, t_VEC);\
+       gel(_v,1) = (x);\
+       gel(_v,2) = (y);\
+       gel(_v,3) = (z); return _v; } while(0)
+#define retmkvec4(x,y,z,t)\
+  do { GEN _v = cgetg(5, t_VEC);\
+       gel(_v,1) = (x);\
+       gel(_v,2) = (y);\
+       gel(_v,3) = (z);\
+       gel(_v,4) = (t); return _v; } while(0)
+#define retmkcol(x)\
+  do { GEN _v = cgetg(2, t_COL);\
+       gel(_v,1) = (x); return _v; } while(0)
+#define retmkcol2(x,y)\
+  do { GEN _v = cgetg(3, t_COL);\
+       gel(_v,1) = (x);\
+       gel(_v,2) = (y); return _v; } while(0)
 INLINE GEN
-mkintmod(GEN x, GEN y) { GEN v = cgetg(3, t_INTMOD);
-  gel(v,1) = y; gel(v,2) = x; return v; }
+mkintmod(GEN x, GEN y) { retmkintmod(x,y); }
 INLINE GEN
 mkintmodu(ulong x, ulong y) {
   GEN v = cgetg(3,t_INTMOD);
@@ -28,8 +60,7 @@ mkintmodu(ulong x, ulong y) {
   gel(v,2) = utoi(x); return v;
 }
 INLINE GEN
-mkpolmod(GEN x, GEN y) { GEN v = cgetg(3, t_POLMOD);
-  gel(v,1) = y; gel(v,2) = x; return v; }
+mkpolmod(GEN x, GEN y) { retmkpolmod(x,y); }
 INLINE GEN
 mkfrac(GEN x, GEN y) { GEN v = cgetg(3, t_FRAC);
   gel(v,1) = x; gel(v,2) = y; return v; }
@@ -67,17 +98,13 @@ mkvecsmall4(long x,long y,long z,long t) { GEN v = cgetg(5, t_VECSMALL);
   v[1]=x; v[2]=y; v[3]=z; v[4]=t; return v; }
 /* vec */
 INLINE GEN
-mkvec(GEN x) { GEN v = cgetg(2, t_VEC); gel(v,1) = x; return v; }
+mkvec(GEN x) { retmkvec(x); }
 INLINE GEN
-mkvec2(GEN x, GEN y) {
-  GEN v = cgetg(3,t_VEC); gel(v,1) = x; gel(v,2) = y; return v; }
+mkvec2(GEN x, GEN y) { retmkvec2(x,y); }
 INLINE GEN
-mkvec3(GEN x, GEN y, GEN z) {
-  GEN v=cgetg(4,t_VEC); gel(v,1) = x; gel(v,2) = y; gel(v,3) = z; return v; }
+mkvec3(GEN x, GEN y, GEN z) { retmkvec3(x,y,z); }
 INLINE GEN
-mkvec4(GEN x, GEN y, GEN z, GEN t) {
-  GEN v=cgetg(5,t_VEC); gel(v,1) = x; gel(v,2) = y; gel(v,3) = z; gel(v,4) = t;
-  return v; }
+mkvec4(GEN x, GEN y, GEN z, GEN t) { retmkvec4(x,y,z,t); }
 INLINE GEN
 mkvec5(GEN x, GEN y, GEN z, GEN t, GEN u) {
   GEN v=cgetg(6,t_VEC); gel(v,1) = x; gel(v,2) = y; gel(v,3) = z;
@@ -99,10 +126,9 @@ mkvec2copy(GEN x, GEN y) {
   GEN v = cgetg(3,t_VEC); gel(v,1) = gcopy(x); gel(v,2) = gcopy(y); return v; }
 /* col */
 INLINE GEN
-mkcol(GEN x) { GEN v = cgetg(2, t_COL); gel(v,1) = x; return v; }
+mkcol(GEN x) { retmkcol(x); }
 INLINE GEN
-mkcol2(GEN x, GEN y) {
-  GEN v = cgetg(3,t_COL); gel(v,1) = x; gel(v,2) = y; return v; }
+mkcol2(GEN x, GEN y) { retmkcol2(x,y); }
 INLINE GEN
 mkcolcopy(GEN x) { GEN v = cgetg(2, t_COL); gel(v,1) = gcopy(x); return v; }
 /* mat */

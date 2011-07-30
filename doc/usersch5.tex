@@ -6256,6 +6256,46 @@ equal to \kbd{[x,y,z,t]}.
 
 \smallskip
 
+It is sometimes useful to return such a container whose entries are not
+universal objects, but nonetheless suitable for \tet{gerepileupto}.
+If the entries can be computed at the time the result is returned, the
+following macros achieve this effect:
+
+\fun{GEN}{retmkvec}{GEN x} returns a vector containing the single entry $x$,
+where the vector root is created just before the function argument $x$ is
+evaluated. Expands to
+\bprog
+  {
+    GEN res = cgetg(2, t_VEC);
+    gel(res, 1) = x; /* @Ccom or rather, the \emph{expansion} of $x$ */
+    return res;
+  }
+@eprog\noindent For instance, the \kbd{retmkvec(gcopy(x))} returns a clean
+object, just like \kbd{return mkveccopy(x)} would.
+
+\fun{GEN}{retmkvec2}{GEN x, GEN y}
+returns the $2$-dimensional \typ{VEC} \kbd{[x,y]}.
+
+\fun{GEN}{retmkvec3}{GEN x, GEN y, GEN z}
+returns the $3$-dimensional \typ{VEC} \kbd{[x,y,z]}.
+
+\fun{GEN}{retmkvec4}{GEN x, GEN y, GEN z, GEN t}
+returns the $4$-dimensional \typ{VEC} \kbd{[x,y,z,t]}.
+
+\fun{GEN}{retmkcol}{GEN x}
+returns the $1$-dimensional \typ{COL} \kbd{[x]}.
+
+\fun{GEN}{retmkcol2}{GEN x, GEN y}
+returns the $2$-dimensional \typ{COL} \kbd{[x,y]}.
+
+\fun{GEN}{retmkintmod}{GEN x, GEN y}
+returns the \typ{INTMOD} \kbd{Mod(x, y)}.
+
+\fun{GEN}{retmkpolmod}{GEN x, GEN y}
+returns the \typ{POLMOD} \kbd{Mod(x, y)}.
+
+\smallskip
+
 \fun{GEN}{mkintn}{long n, ...} returns the non-negative \typ{INT} whose
 development in base $2^{32}$ is given by the following $n$ words
 (\kbd{unsigned long}). It is assumed that all such arguments are less than
