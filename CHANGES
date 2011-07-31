@@ -65,6 +65,8 @@ BA 11- [INSTALL] Documentation of RUNTEST
    13- new function gen_factored_order, Fp_factored_order
    14- macros retmkvec, retmkvec2, retmkvec3, retmkvec4, retmkcol, retmkcol2,
        retmkmat, retmkmat2, retmkintmod, retmkpolmod.
+       retmkintmod, retmkpolmod.
+   15- allow Ser(t_VECSMALL)
 
   Removed
     1- dropped DOS support

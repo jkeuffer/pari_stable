@@ -2698,6 +2698,16 @@ gtoser(GEN x, long v, long prec)
       y[1] = evalsigne(1) | evalvalp(i-1) | evalvarn(v);
       for (j=2; j<lx; j++) gel(y,j) = gcopy(gel(x,j));
       break;
+    case t_VECSMALL:
+      lx = lg(x);
+      for (i=1; i < lx; i++)
+        if (x[i]) break;
+      if (i == lx) return zeroser(v, lx-1);
+      lx -= i-2; x += i-2;
+      y = cgetg(lx,t_SER);
+      y[1] = evalsigne(1) | evalvalp(i-1) | evalvarn(v);
+      for (j=2; j<lx; j++) gel(y,j) = stoi(x[j]);
+      break;
 
     default: pari_err(typeer,"gtoser");
       return NULL; /* not reached */
