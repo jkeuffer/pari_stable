@@ -1316,6 +1316,7 @@ evalstate_reset(void)
   s_trace.n = 0;
   reset_break();
   compilestate_reset();
+  parsestate_reset();
   avma = top;
 }
 

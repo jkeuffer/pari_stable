@@ -889,7 +889,6 @@ void
 err_recover(long numerr)
 {
   evalstate_reset();
-  parsestate_reset();
   initout(0);
   killallfiles();
   s_ERR_CATCH.n = 0;
