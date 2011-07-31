@@ -6,9 +6,9 @@ Help: cmp(x,y): compare two arbitrary objects x and y (1 if x>y, 0 if x=y, -1
  if x<y). The function is used to implement sets, and has no useful
  mathematical meaning.
 Doc: gives the result of a comparison between arbitrary objects $x$ and $y$
- (as $-1$, $0$ or $1$). The underlying order relation is transitive
+ (as $-1$, $0$ or $1$). The underlying order relation is transitive,
  the function returns $0$ if and only if $x~\kbd{===}~y$, and its
- restrictions to integers coincides with the customary one. Besides that
+ restriction to integers coincides with the customary one. Besides that,
  it has no useful mathematical meaning.
 
  In case all components are equal up to the smallest length of the operands,
