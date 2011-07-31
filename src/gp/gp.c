@@ -1382,27 +1382,54 @@ do_prompt(char *buf, const char *prompt, filtre_t *F)
 /*                           GP MAIN LOOP                           */
 /*                                                                  */
 /********************************************************************/
+static const char esc = (0x1f & '['); /* C-[ = escape */
+static char *
+strip_prompt(const char *s)
+{
+  long l = strlen(s);
+  char *t, *t0 = stackmalloc(l+1);
+  t = t0;
+  for (; *s; s++)
+  {
+#ifdef RL_PROMPT_START_IGNORE
+    if (*s == RL_PROMPT_START_IGNORE || *s == RL_PROMPT_END_IGNORE) continue;
+#endif
+    if (*s == esc) /* skip ANSI color escape sequence */
+    {
+      while (*++s != 'm')
+        if (!*s) goto end;
+      continue;
+    }
+    *t = *s; t++;
+  }
+end:
+  *t = 0; return t0;
+}
 static void
 update_logfile(const char *prompt, const char *s)
 {
+  pari_sp av;
+  const char *p;
   if (!pari_logfile) return;
+  av = avma;
+  p = strip_prompt(prompt); /* raw prompt */
+
   switch (logstyle) {
     case logstyle_TeX:
       fprintf(pari_logfile,
               "\\PARIpromptSTART|%s\\PARIpromptEND|%s\\PARIinputEND|%%\n",
-              prompt,s);
+              p, s);
     break;
     case logstyle_plain:
-      fprintf(pari_logfile,"%s%s\n",prompt,s);
+      fprintf(pari_logfile,"%s%s\n",p, s);
     break;
-    case logstyle_color: {
-      pari_sp av = avma;
-      fprintf(pari_logfile,"%s%s%s%s%s\n",term_get_color(NULL,c_PROMPT), prompt,
+    case logstyle_color:
+      fprintf(pari_logfile,"%s%s%s%s%s\n",term_get_color(NULL,c_PROMPT), p,
                                           term_get_color(NULL,c_INPUT), s,
                                           term_get_color(NULL,c_NONE));
-      avma = av; break;
-    }
+      break;
   }
+  avma = av;
 }
 
 void

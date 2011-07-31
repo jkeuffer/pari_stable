@@ -389,9 +389,16 @@ static void
 _putc_log(char c) { if (pari_logfile) (void)putc(c, pari_logfile); }
 static void
 _puts_log(const char *s) {
-  if (pari_logfile) {
-    if (*s != esc || logstyle == logstyle_color)
-      (void)fputs(s, pari_logfile);
+  FILE *f = pari_logfile;
+  const char *t;
+  if (!f) return;
+  if (logstyle == logstyle_color) { (void)fputs(s, f); return; }
+  for (t = s; *t; t++)
+  {
+    if (*t != esc) { (void)fputc(*t, f); continue; }
+    /* skip ANSI color escape sequence */
+    while (*++t != 'm')
+      if (!*t) return;
   }
 }
 static void
