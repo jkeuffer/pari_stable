@@ -778,6 +778,14 @@ direuler0(GEN a, GEN b, GEN code, GEN c)
 /**                                                                **/
 /********************************************************************/
 
+INLINE GEN
+copyupto(GEN z, GEN t)
+{
+  if (is_universal_constant(z) || (z>(GEN)bot && z<=t))
+    return z;
+  else
+    return gcopy(z);
+}
 GEN
 vecteur(GEN nmax, GEN code)
 {
@@ -792,7 +800,7 @@ vecteur(GEN nmax, GEN code)
   for (i=1; i<=m; i++)
   {
     c[2] = i; p1 = closure_evalnobrk(code);
-    gel(y,i) = isonstack(p1)? p1 : gcopy(p1);
+    gel(y,i) = copyupto(p1, y);
     set_lex(-1,c);
   }
   pop_lex(1); return y;
@@ -847,7 +855,7 @@ matrice(GEN nlig, GEN ncol, GEN code)
     for (j=1; j<=n; j++)
     {
       c1[2] = j; p1 = closure_evalnobrk(code);
-      gel(z,j) = isonstack(p1)? p1 : gcopy(p1);
+      gel(z,j) = copyupto(p1, y);
       set_lex(-2,c1);
       set_lex(-1,c2);
     }
