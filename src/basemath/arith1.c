@@ -2089,35 +2089,35 @@ order(GEN x) { return znorder(x, NULL); }
 
 /*********************************************************************/
 /**                                                                 **/
-/**               DISCRETE LOGARITHM  in  (Z/nZ)*  i                **/
+/**               DISCRETE LOGARITHM  in  (Z/nZ)*                   **/
 /**                                                                 **/
 /*********************************************************************/
+/* Trivial cases a = 1, -1. Return x s.t. g^x = a or [] if no such x exist */
 static GEN
-_Fp_easylog(void *E, GEN x, GEN g, GEN ord)
+Fp_easylog(void *E, GEN a, GEN g, GEN ord)
 {
   pari_sp av = avma;
-  GEN p1, p = (GEN)E;
-  (void)g;
-  if (equali1(x)) return gen_0;
+  GEN p = (GEN)E;
+  /* assume a reduced mod p, p not necessarily prime */
+  if (equali1(a)) return gen_0;
   /* p > 2 */
-  p1 = addsi(-1, p);
-  if (equalii(p1,x))  /* -1 */
+  if (equalii(subis(p,1), a))  /* -1 */
   {
+    pari_sp av2;
+    GEN t;
     ord = dlog_get_ord(ord);
-    if (!ord) ord = p1;
-    if (!mpodd(ord)) return gerepileupto(av, shifti(ord,-1));
-    /* if odd is odd, there are no solution ! No way to tell the caller
-     * in current API :-( */
+    if (mpodd(ord)) { avma = av; return cgetg(1, t_VEC); } /* no solution */
+    t = shifti(ord,-1); /* only possible solution */
+    av2 = avma;
+    if (!equalii(Fp_pow(g, t, p), a)) { avma = av; return cgetg(1, t_VEC); }
+    avma = av2; return gerepileuptoint(av, t);
   }
-  avma = av; return NULL;
+  avma = av; return NULL; /* not easy */
 }
 
 GEN
 Fp_log(GEN a, GEN g, GEN ord, GEN p)
-{
-  GEN z = gen_PH_log(a,g,ord,(void*)p,&Fp_star,_Fp_easylog);
-  return z? z: cgetg(1, t_VEC);
-}
+{ return gen_PH_log(a,g,ord,(void*)p,&Fp_star, &Fp_easylog); }
 
 /* find x such that h = g^x mod N > 1, N = prod_{i <= l} P[i]^E[i], P[i] prime.
  * PHI[l] = eulerphi(N / P[l]^E[l]).   Destroys P/E */
@@ -2145,14 +2145,16 @@ znlog_rec(GEN h, GEN g, GEN N, GEN P, GEN E, GEN PHI)
   if (hp == gen_0 || gp == gen_0) return NULL;
   if (equaliu(p, 2))
   {
-    ogpe = Zp_order(gp, gen_2, e, int2n(e));
-    a = Fp_log(hpe, gpe, ogpe, p);
+    GEN N = int2n(e);
+    ogpe = Zp_order(gpe, gen_2, e, N);
+    a = Fp_log(hpe, gpe, ogpe, N);
     if (typ(a) != t_INT) return NULL;
   }
   else
-  { /* Don't use black box groups: (Z/p^2)^* / (Z/p)^* ~ Z/pZ,
-       in which DL is trivial */
-    GEN v = Fp_factored_order(gp, subis(p,1), p); /* [order(gp), factor(order(gp))] */
+  { /* Avoid black box groups: (Z/p^2)^* / (Z/p)^* ~ (Z/pZ, +), where DL
+       is trivial */
+    /* [order(gp), factor(order(gp))] */
+    GEN v = Fp_factored_order(gp, subis(p,1), p);
     GEN ogp = gel(v,1);
     if (!equali1(Fp_pow(hp, ogp, p))) return NULL;
     a = Fp_log(hp, gp, v, p);
@@ -2178,7 +2180,7 @@ znlog_rec(GEN h, GEN g, GEN N, GEN P, GEN E, GEN PHI)
       a = addii(a, mulii(ogp, gtrunc(b)));
     }
   }
-  /* gp^a = hp => x = a mod ogpe => generalized Pohlig-Helman strategy */
+  /* gp^a = hp => x = a mod ogpe => generalized Pohlig-Hellman strategy */
   if (l == 1) return a;
 
   N = diviiexact(N, pe); /* make N coprime to p */

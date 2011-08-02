@@ -278,7 +278,7 @@ gen_Shanks_log(GEN x, GEN g0,GEN q, void *E, const struct bb_group *grp)
       p1 = gerepileupto(av1, p1);
     }
   }
-  return NULL; /* no solution */
+  avma = av; return cgetg(1, t_VEC); /* no solution */
 }
 
 /*Generic discrete logarithme in a group of prime order p*/
@@ -383,8 +383,12 @@ gen_PH_log(GEN a, GEN g, GEN ord, void *E, const struct bb_group *grp,
     for (j=0;; j++)
     { /* n_q = sum_{i<j} b_i q^i */
       b = grp->pow(E,a0, gel(qj,e-1-j));
+      /* early abort: cheap and very effective */
+      if (j == 0 && !grp->equal1(grp->pow(E,b,q))) {
+        avma = av; return cgetg(1, t_VEC);
+      }
       b = gen_plog(b, g_q, q, E, grp, easy);
-      if (!b) { avma = av; return NULL; }
+      if (typ(b) != t_INT) { avma = av; return cgetg(1, t_VEC); }
       n_q = addii(n_q, mulii(b, gel(qj,j)));
       if (j == e-1) break;
 
@@ -543,7 +547,7 @@ gen_Shanks_sqrtl(GEN a, GEN l, GEN q,long e, GEN r, GEN y, GEN m,void *E, const 
     } while(!grp->equal1(p1));
     if (k==e) { avma = av; return NULL; }
     dl = gen_plog(z,m,l,E,grp,NULL);
-    if (!dl) { avma = av; return NULL; }
+    if (typ(dl) != t_INT) { avma = av; return NULL; }
     dl = negi(dl);
     p1 = grp->pow(E,y, Fp_mul(dl,powiu(l,e-k-1),q));
     m = grp->pow(E,m,dl);

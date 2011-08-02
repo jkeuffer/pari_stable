@@ -222,20 +222,23 @@ groups:
 \fun{GEN}{gen_Shanks_log}{GEN x, GEN g, GEN N, void *E, const struct bb_group
 *grp} \hbadness 10000\break
 Generic baby-step/giant-step algorithm (Shanks's method). Assuming
-that $g$ has order $N$, compute an integer $k$ such that $g^k = x$. This
-requires $O(\sqrt{N})$ group operations and uses an auxiliary table
-containing $O(\sqrt{N})$ group elements.
+that $g$ has order $N$, compute an integer $k$ such that $g^k = x$.
+Return \kbd{cgetg(1, t\_VEC)} if there are no solutions. This requires
+$O(\sqrt{N})$ group operations and uses an auxiliary table containing
+$O(\sqrt{N})$ group elements.
 
 \fun{GEN}{gen_Pollard_log}{GEN x, GEN g, GEN N, void *E, const struct bb_group
 *grp} \hbadness 10000\break
 Generic Pollard rho algorithm. Assuming that $g$ has order $N$, compute an
 integer $k$ such that $g^k = x$. This requires $O(\sqrt{N})$ group operations
-in average and $O(1)$ storage.
+in average and $O(1)$ storage. Will enter an infinite loop if there are no
+solutions.
 
 \fun{GEN}{gen_plog}{GEN x, GEN g, GEN N, void *E, const struct bb_group,
     GEN easy(void*, GEN, GEN, GEN)} \hbadness 10000
 Assuming that $g$ has prime order $N$, compute an integer $k$ such that
 $g^k = x$, using either \kbd{gen\_Shanks\_log} or \kbd{gen\_Pollard\_log}.
+Return \kbd{cgetg(1, t\_VEC)} if there are no solutions.
 
 If \kbd{easy} is not \kbd{NULL}, call \kbd{easy(E,a,g,N)} first and if the
 return value is not \kbd{NULL}, return it. For instance this is used over
@@ -255,9 +258,9 @@ This function uses \kbd{gen\_plog} for all prime divisors of $\gcd(n,N)$.
 \fun{GEN}{gen_PH_log}{GEN a, GEN g, GEN N, void *E, const struct bb_group
 *grp, GEN easy(void *E, GEN, GEN, GEN)} \hbadness 10000
 Generic Pohlig-Hellman algorithm. Assuming that $g$ has order $N$, compute
-an integer $k$ such that $g^k = x$. This requires $O(p^{1/2+\epsilon})$ group
-operations, where $p$ is the largest prime divisor of $N$, and uses an
-auxiliary table containing $O(\sqrt{p})$ group elements.
+an integer $k$ such that $g^k = x$. Return \kbd{cgetg(1, t\_VEC)} if there
+are no solutions. This calls \tet{gen_plog} repeatedly for all prime divisors
+$p$ of $N$.
 
 \kbd{easy} is as in \kbd{gen\_plog}.
 
