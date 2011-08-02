@@ -25,6 +25,8 @@ LGr12- off-by-1 error in primepi() when argument is = primelimit
    17- allocatemem() did not reset parse error [#1226]
 BA 18- (x->vector(1,j,x))(1) --> significant pointers lost [#1211]
 VL 19- [makefile] Incorrect -I and -L flags order [#1212]
+   20- nfbasis / nfdisc(f,, partial factorization) would sometimes spend a
+       lot of time trying to factorize a discriminant [#1227]
 
   Changed
     1- mathnf: swapped flag 3 and 5.

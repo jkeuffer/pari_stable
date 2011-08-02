@@ -589,7 +589,7 @@ nfmaxord(nfmaxord_t *S, GEN T, long flag, GEN fa)
 static GEN
 update_fact(GEN d, GEN f)
 {
-  GEN E, Q, P = gel(f,1);
+  GEN fa, E, Q, P = gel(f,1);
   long iq, i, k, l;
   if (typ(f)!=t_MAT || lg(f)!=3)
     pari_err(talker,"not a factorisation in nfbasis");
@@ -603,9 +603,11 @@ update_fact(GEN d, GEN f)
     if (k) { Q[iq] = P[i]; gel(E,iq) = utoipos(k); iq++; }
   }
   setlg(Q,iq);
-  setlg(E,iq);
+  setlg(E,iq); fa = mkmat2(Q,E);
   if (signe(d) < 0) d = negi(d);
-  return merge_factor_i(Z_factor(d), mkmat2(Q,E));
+  if (is_pm1(d)) return fa;
+  d = BPSW_psp(gel(P,l-1))? Z_factor(d): to_famat_shallow(d, gen_1);
+  return merge_factor_i(d, fa);
 }
 
 /* FIXME: have to deal with compatibility flags */
