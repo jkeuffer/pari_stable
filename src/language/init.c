@@ -990,15 +990,12 @@ pari_err2GEN(int numerr, va_list ap)
       const char *msg = va_arg(ap, char*);
       const char *s = va_arg(ap,char *);
       const char *entry = va_arg(ap,char *);
-      return mkvec3(stoi(numerr),strtoGENstr(msg), mkvecsmall2((long)s,(long)entry));
+      retmkvec3(stoi(numerr),strtoGENstr(msg), mkvecsmall2((long)s,(long)entry));
     }
   case talker: case alarmer:
     {
       const char *ch1 = va_arg(ap, char*);
-      char *s = pari_vsprintf(ch1,ap);
-      GEN res = mkvec3(stoi(numerr),strtoGENstr(ch1),strtoGENstr(s));
-      free(s);
-      return res;
+      retmkvec3(stoi(numerr), strtoGENstr(ch1), gvsprintf(ch1,ap));
     }
   case user:
   case invmoder:
@@ -1007,7 +1004,7 @@ pari_err2GEN(int numerr, va_list ap)
   case openfiler:
   {
     const char *f = va_arg(ap, const char*);
-    return mkvec3(stoi(numerr), strtoGENstr(f), strtoGENstr(va_arg(ap, char*)));
+    retmkvec3(stoi(numerr), strtoGENstr(f), strtoGENstr(va_arg(ap, char*)));
   }
   case overflower:
   case impl:
@@ -1015,7 +1012,7 @@ pari_err2GEN(int numerr, va_list ap)
   case constpoler: case notpoler: case redpoler:
   case zeropoler: case consister: case flagerr: case precer:
   case bugparier:
-    return mkvec2(stoi(numerr),strtoGENstr(va_arg(ap, char*)));
+    retmkvec2(stoi(numerr), strtoGENstr(va_arg(ap, char*)));
   case operi: case operf:
     {
       const char *op = va_arg(ap, const char*);
@@ -1024,7 +1021,7 @@ pari_err2GEN(int numerr, va_list ap)
       return mkvec4(stoi(numerr),strtoGENstr(op),x,y);
     }
   case primer1:
-    return mkvec2(stoi(numerr),utoi(va_arg(ap, ulong)));
+    retmkvec2(stoi(numerr), utoi(va_arg(ap, ulong)));
   case errpile:
     return NULL;
   default:
