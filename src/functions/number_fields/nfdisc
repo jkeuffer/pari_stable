@@ -2,13 +2,13 @@ Function: nfdisc
 Section: number_fields
 C-Name: nfdisc0
 Prototype: GD0,L,DG
-Help: nfdisc(x,{flag=0},{fa}): discriminant of the number field defined by
- the polynomial x using round 4. Optional args flag and fa are as in nfbasis.
+Help: nfdisc(T,{flag=0},{fa}): discriminant of the number field defined by
+ the polynomial T using round 4. Optional args flag and fa are as in nfbasis.
 Doc: \idx{field discriminant} of the number field defined by the integral,
- preferably monic, irreducible polynomial $x$. $\fl$ and $fa$ are exactly as
- in \kbd{nfbasis}. That is, $fa$ provides the matrix of a partial
- factorization of the discriminant of $x$, and binary digits of $\fl$ are as
- follows:
+ preferably monic, irreducible polynomial $T$. $\fl$ and \kbd{fa} are exactly as
+ in \kbd{nfbasis}. That is, \kbd{fa} is the matrix of a partial
+ factorization of the discriminant of $T$ or a prime $p$, and binary digits
+ of $\fl$ are as follows:
 
  1: assume that no square of a prime greater than \kbd{primelimit}
  divides the discriminant.
@@ -16,4 +16,16 @@ Doc: \idx{field discriminant} of the number field defined by the integral,
  2: use the round 2 algorithm, instead of the default \idx{round 4}. This
  should be slower except maybe for polynomials of small degree and
  coefficients.
-Variant: Also available is \fun{GEN}{nfdisc}{GEN x} ($\fl=0$).
+
+ If \kbd{fa} is a prime $p$, return the $p$-adic discriminant of the maximal
+ order of $\Z_p[X]/(T)$, as a power of $p$:
+ \bprog
+ ? nfdisc(x^2 + 6)
+ %1 = -24
+ ? nfdisc(x^2 + 6,, 2)
+ %2 = 8
+ ? nfdisc(x^2 + 6,, 3)
+ %3 = 3
+ @eprog
+
+Variant: Also available is \fun{GEN}{nfdisc}{GEN T} ($\fl=0$).

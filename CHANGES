@@ -52,6 +52,7 @@ BA 12- [darwin] do not use dylib_ prefix to ld options [#1210]
        underlying (Z/N)^* is cyclic
    17- renamed gen_eltorder -> gen_order
    18- logfile: strip properly color escape sequences [#1225]
+   19- allow nfdisc / nfbasis(f,, p) for a p-adic discriminant / max. order
 
   Added
     1- mathnf for matrices over K[X] [#41]

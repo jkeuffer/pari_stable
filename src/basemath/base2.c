@@ -28,14 +28,22 @@ static void
 nfmaxord_check_args(nfmaxord_t *S, GEN T, long flag, GEN fa)
 {
   GEN dT, P;
-  long l;
+  long l, v;
 
   if (typ(T)!=t_POL) pari_err(notpoler,"nfmaxord");
   if (degpol(T) <= 0) pari_err(constpoler,"nfmaxord");
 
   if (fa) {
-    if (typ(fa) != t_MAT) pari_err(typeer,"nfmaxord");
-    dT = factorback(fa);
+    switch(typ(fa))
+    {
+      case t_MAT: dT = factorback(fa); break;
+      case t_INT: v = ZpX_disc_val(T, fa);
+                  dT = powis(fa, v);
+                  fa = to_famat_shallow(fa, stoi(v));
+                  break;
+      default: pari_err(typeer,"nfmaxord");
+               return; /*not reached*/
+    }
     if (!signe(dT)) pari_err(talker,"reducible polynomial in nfmaxord");
   } else {
     dT = ZX_disc(T);
@@ -539,7 +547,7 @@ static GEN dbasis(GEN p, GEN f, long mf, GEN alpha, GEN U);
 static GEN maxord(GEN p,GEN f,long mf);
 
 /* return integer basis. If fa not NULL, taken to be the factorization
- * of disc(T) [no consistency check] */
+ * of disc(T) or a prime divisor thereof [no consistency check] */
 void
 nfmaxord(nfmaxord_t *S, GEN T, long flag, GEN fa)
 {
@@ -560,7 +568,7 @@ nfmaxord(nfmaxord_t *S, GEN T, long flag, GEN fa)
   {
     VOLATILE pari_sp av;
     /* includes the silly case where P[i] = -1 */
-    if (E[i] == 1) { ordmax = shallowconcat(ordmax, gen_1); continue; }
+    if (E[i] <= 1) { ordmax = shallowconcat(ordmax, gen_1); continue; }
     av = avma;
     CATCH(invmoder) { /* caught false prime, update factorization */
       GEN x = (GEN)global_err_data;
@@ -585,14 +593,19 @@ nfmaxord(nfmaxord_t *S, GEN T, long flag, GEN fa)
   allbase_from_ordmax(S, ordmax, P, T);
 }
 
-/* d a t_INT, f a t_MAT factorisation sharing some prime divisors with d */
+/* d a t_INT, f a t_MAT factorisation sharing some prime divisors with d or
+ * a prime */
 static GEN
 update_fact(GEN d, GEN f)
 {
   GEN fa, E, Q, P = gel(f,1);
   long iq, i, k, l;
-  if (typ(f)!=t_MAT || lg(f)!=3)
-    pari_err(talker,"not a factorisation in nfbasis");
+  switch (typ(f))
+  {
+    case t_INT: return f;
+    case t_MAT: if (lg(f) == 3) break; /*fall through*/
+    default: pari_err(talker,"not a factorisation in nfbasis");
+  }
   l = lg(P);
   if (l > 1 && is_pm1(gel(P,1))) P = vecslice(P, 2, --l);
   Q = cgetg(l,t_COL);

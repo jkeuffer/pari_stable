@@ -2,24 +2,25 @@ Function: nfbasis
 Section: number_fields
 C-Name: nfbasis0
 Prototype: GD0,L,DG
-Help: nfbasis(x,{flag=0},{fa}): integral basis of the field Q[a], where a is
- a root of the polynomial x, using the round 4 algorithm. Second and third
+Help: nfbasis(T,{flag=0},{fa}): integral basis of the field Q[a], where a is
+ a root of the polynomial T, using the round 4 algorithm. Second and third
  args are optional. Binary digits of flag mean 1: assume that no square of a
- prime>primelimit divides the discriminant of x, 2: use round 2 algorithm
- instead. If present, fa provides the matrix of a partial factorization of the
- discriminant of x, useful if one wants only an order maximal at certain
- primes only.
+ prime>primelimit divides the discriminant of T, 2: use round 2 algorithm
+ instead. If present, fa is the matrix of a partial factorization of the
+ discriminant of T or a prime p (useful if one wants only an order maximal
+ at certain primes only).
+
 Doc:
- Let $x$ be an irreducible polynomial with integral coefficients. This
+ Let $T$ be an irreducible polynomial with integral coefficients. This
  function returns an \idx{integral basis} of the number field defined by
- $x$, that is a $\Z$-basis of its maximal order.
+ $T$, that is a $\Z$-basis of its maximal order.
 
  It uses a modified version of the \idx{round 4} algorithm by default, due to
  David \idx{Ford}, Sebastian \idx{Pauli} and Xavier \idx{Roblot}. The binary
  digits of $\fl$ have the following meaning:
 
  1: assume that no square of a prime greater than the default \kbd{primelimit}
- divides the discriminant of $x$, i.e.~that the index of $x$ has only small
+ divides the discriminant of $T$, i.e.~that the index of $T$ has only small
  prime divisors.
 
  2: use \idx{round 2} algorithm. This is usually much slower. (This program is
@@ -28,14 +29,26 @@ Doc:
  Thus for instance, if $\fl=3$, this uses the round 2 algorithm and outputs
  an order which will be maximal at all the small primes.
 
- If \var{fa} is present, we assume (without checking!) that it is the two-column
- matrix of the factorization of the discriminant of the polynomial $x$. Note
- that it does \emph{not} have to be a complete factorization. This is
- especially useful if only a local integral basis for some small set of places
- is desired: only factors with exponents greater or equal to 2 will be
- considered.
+ If \var{fa} is present it must be either a factorization matrix
+ of a prime number. If it is a matrix, we assume (without checking!) that
+ it is a two-column matrix of a (partial) factorization of the discriminant
+ $D$ of $T$; namely the first column contains prime divisors of $D$, and the
+ second one the valuation of $D$ at each of these primes. Returns a
+ $\Z$-basis of an order whose index is not divisible by any of these prime
+ numbers. Note that it does \emph{not} have to be a complete factorization.
+ This is useful if only a local integral basis for some small set
+ of places is desired.
+
+ If \var{fa} is a prime number $p$, return a local integral basis for
+ $\Z_p[X]/(T)$:
+ \bprog
+ ? nfbasis(x^2+x-1001)
+ %1 = [1, 1/3*x - 1/3]
+ ? nfbasis(x^2+x-1001,, 2)
+ %2 = [1, x]
+ @eprog
 
 Variant: An extended version is
- \fun{GEN}{nfbasis}{GEN x, GEN *d, long flag, GEN fa = NULL}, where \kbd{*d}
+ \fun{GEN}{nfbasis}{GEN T, GEN *d, long flag, GEN fa = NULL}, where \kbd{*d}
  receives the discriminant of the number field
- (\emph{not} of the polynomial $x$).
+ (\emph{not} of the polynomial $T$).
