@@ -1437,6 +1437,8 @@ GEN     gp_read_file(char *s);
 GEN     gp_read_stream(FILE *f);
 GEN     gp_readvec_file(char *s);
 GEN     gp_readvec_stream(FILE *f);
+GEN     gsprintf(const char *fmt, ...);
+GEN     gvsprintf(const char *fmt, va_list ap);
 char*   itostr(GEN x);
 void    matbrute(GEN g, char format, long dec);
 char*   os_getenv(const char *s);

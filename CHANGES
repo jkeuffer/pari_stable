@@ -68,12 +68,13 @@ BA  4- Library function FpXQ_autpowers
 LGr 9- Catalan's constant [ Catalan() ]
 BA 10- library functions F2x_issquare/F2x_sqrt
 BA 11- [INSTALL] Documentation of RUNTEST
-   12- new function bestapprPade
-   13- new function gen_factored_order, Fp_factored_order
+   12- library function bestapprPade
+   13- library function gen_factored_order, Fp_factored_order
    14- macros retmkvec, retmkvec2, retmkvec3, retmkvec4, retmkcol, retmkcol2,
-       retmkmat, retmkmat2, retmkintmod, retmkpolmod.
-       retmkintmod, retmkpolmod.
+       retmkmat, retmkmat2, retmkintmod, retmkpolmod
+       retmkintmod, retmkpolmod
    15- allow Ser(t_VECSMALL)
+BA 16- library function gsprintf/gvsprintf
 
   Removed
     1- dropped DOS support

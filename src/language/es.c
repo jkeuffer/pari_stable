@@ -4182,12 +4182,29 @@ pari_printf(const char *fmt, ...) /* variadic version of printf0 */
 char *
 pari_vsprintf(const char *fmt, va_list ap)
 { return sm_dopr(fmt, NULL, ap); }
+
+GEN
+gvsprintf(const char *fmt, va_list ap)
+{
+  char *s = sm_dopr(fmt, NULL, ap);
+  GEN z = strtoGENstr(s);
+  free(s); return z;
+}
+
 char *
 pari_sprintf(const char *fmt, ...) /* variadic version of Strprintf */
 {
-  char *s;
   va_list ap; va_start(ap, fmt);
-  s = pari_vsprintf(fmt, ap); va_end(ap); return s;
+  char *s = pari_vsprintf(fmt, ap);
+  va_end(ap); return s;
+}
+
+GEN
+gsprintf(const char *fmt, ...) /* variadic version of gvsprintf */
+{
+  va_list ap; va_start(ap, fmt);
+  GEN s = gvsprintf(fmt, ap);
+  va_end(ap); return s;
 }
 
 /* variadic version of fprintf0. FIXME: fprintf0 not yet available */
