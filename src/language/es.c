@@ -4204,8 +4204,10 @@ pari_sprintf(const char *fmt, ...) /* variadic version of Strprintf */
 GEN
 gsprintf(const char *fmt, ...) /* variadic version of gvsprintf */
 {
-  va_list ap; va_start(ap, fmt);
-  GEN s = gvsprintf(fmt, ap);
+  GEN s;
+  va_list ap;
+  va_start(ap, fmt);
+  s = gvsprintf(fmt, ap);
   va_end(ap); return s;
 }
 
