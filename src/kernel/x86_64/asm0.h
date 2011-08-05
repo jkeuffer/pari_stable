@@ -54,7 +54,7 @@ do { long *__arg1 = a, *__arg2 = b, *__out = c; \
             "movq -48(%3), %1 ; adcq -48(%4),%1; movq %1, -48(%5) \n\t" \
             "movq -56(%3), %1 ; adcq -56(%4),%1; movq %1, -56(%5) \n\t" \
             "adcq  %2, %2" \
-        : "=m" (*__out), "=&r" (__temp), "=&g" (overflow) \
+        : "=m" (*__out), "=&r" (__temp), "=&r" (overflow) \
         : "r" (__arg1), "r" (__arg2), "r" (__out), "g" (overflow), "1" ((ulong)0), "2" ((ulong)0) \
         : "cc"); \
 } while(0)
@@ -90,7 +90,7 @@ do { long *__arg1 = a, *__arg2 = b, *__out = c; \
             "movq -48(%3), %1 ; sbbq -48(%4),%1; movq %1, -48(%5) \n\t" \
             "movq -56(%3), %1 ; sbbq -56(%4),%1; movq %1, -56(%5) \n\t" \
             "adcq  %2, %2" \
-        : "=m" (*__out), "=&r" (__temp), "=&g" (overflow) \
+        : "=m" (*__out), "=&r" (__temp), "=&r" (overflow) \
         : "r" (__arg1), "r" (__arg2), "r" (__out), "g" (overflow), "1" ((ulong)0), "2" ((ulong)0) \
         : "cc"); \
 } while(0)

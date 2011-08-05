@@ -61,7 +61,7 @@ do { long *__arg1 = a, *__arg2 = b, *__out = c; \
             "movl -24(%3), %1 ; adcl -24(%4),%1; movl %1, -24(%5) \n\t" \
             "movl -28(%3), %1 ; adcl -28(%4),%1; movl %1, -28(%5) \n\t" \
             "adcl  %2, %2" \
-        : "=m" (*__out), "=&r" (__temp), "=&g" (overflow) \
+        : "=m" (*__out), "=&r" (__temp), "=&r" (overflow) \
         : "r" (__arg1), "r" (__arg2), "r" (__out), "g" (overflow), "1" ((ulong)0), "2" ((ulong)0)        : "cc"); \
 } while(0)
 
@@ -96,7 +96,7 @@ do { long *__arg1 = a, *__arg2 = b, *__out = c; \
             "movl -24(%3), %1 ; sbbl -24(%4),%1; movl %1, -24(%5) \n\t" \
             "movl -28(%3), %1 ; sbbl -28(%4),%1; movl %1, -28(%5) \n\t" \
             "adcl  %2, %2" \
-        : "=m" (*__out), "=&r" (__temp), "=&g" (overflow) \
+        : "=m" (*__out), "=&r" (__temp), "=&r" (overflow) \
         : "r" (__arg1), "r" (__arg2), "r" (__out), "g" (overflow), "1" ((ulong)0), "2" ((ulong)0)        : "cc"); \
 } while(0)
 
