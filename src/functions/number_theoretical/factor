@@ -93,7 +93,7 @@ Doc: general factorization function, where $x$ is a
  [59649589127497217 1]
 
  [5704689200685129054721 1]
- @eprog
+ @eprog\noindent Over $\Q$, the prime factors are sorted by increasing size.
 
  \misctitle{Rational functions}
  The polynomials or rational functions to be factored must have scalar
@@ -123,6 +123,7 @@ Doc: general factorization function, where $x$ is a
  ? content(t^2 + 5/2*t + 1)
  %2 = 1/2
  @eprog\noindent
+ The irreducible factors are sorted by increasing degree.
  See also \tet{nffactor}.
 Variant: This function should only be used by the \kbd{gp} interface. Use
  directly \fun{GEN}{factor}{GEN x} or \fun{GEN}{boundfact}{GEN x, long lim}.
