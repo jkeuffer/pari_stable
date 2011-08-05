@@ -2,30 +2,31 @@ Function: polgalois
 Section: number_fields
 C-Name: polgalois
 Prototype: Gp
-Help: polgalois(x): Galois group of the polynomial x (see manual for group
- coding). Return [n, s, k, name] where n is the order, s the signature, k the
- index and name is the GAP4 name of the transitive group.
+Help: polgalois(T): Galois group of the polynomial T (see manual for group
+ coding). Return [n, s, k, name] where n is the group order, s the signature,
+ k the index and name is the GAP4 name of the transitive group.
 Doc: \idx{Galois} group of the non-constant
- polynomial $x\in\Q[X]$. In the present version \vers, $x$ must be irreducible
- and the degree of $x$ must be less than or equal to 7. On certain versions for
- which the data file of Galois resolvents has been installed (available in the
- Unix distribution as a separate package), degrees 8, 9, 10 and 11 are also
- implemented.
+ polynomial $T\in\Q[X]$. In the present version \vers, $T$ must be irreducible
+ and the degree $d$ of $T$ must be less than or equal to 7. If the
+ \tet{galdata} package has been installed, degrees 8, 9, 10 and 11 are also
+ implemented. By definition, if $K = \Q[x]/(T)$, this computes the action of
+ the Galois group of the Galois closure of $K$ on the $d$ distinct roots of
+ $T$, up to conjugacy (corresponding to different root orderings).
 
  The output is a 4-component vector $[n,s,k,name]$ with the
  following meaning: $n$ is the cardinality of the group, $s$ is its signature
- ($s=1$ if the group is a subgroup of the alternating group $A_n$, $s=-1$
+ ($s=1$ if the group is a subgroup of the alternating group $A_d$, $s=-1$
  otherwise) and name is a character string containing name of the transitive
  group according to the GAP 4 transitive groups library by Alexander Hulpke.
 
  $k$ is more arbitrary and the choice made up to version~2.2.3 of PARI is rather
- unfortunate: for $n > 7$, $k$ is the numbering of the group among all
- transitive subgroups of $S_n$, as given in ``The transitive groups of degree up
+ unfortunate: for $d > 7$, $k$ is the numbering of the group among all
+ transitive subgroups of $S_d$, as given in ``The transitive groups of degree up
  to eleven'', G.~Butler and J.~McKay, \emph{Communications in Algebra}, vol.~11,
  1983,
- pp.~863--911 (group $k$ is denoted $T_k$ there). And for $n \leq 7$, it was ad
- hoc, so as to ensure that a given triple would design a unique group.
- Specifically, for polynomials of degree $\leq 7$, the groups are coded as
+ pp.~863--911 (group $k$ is denoted $T_k$ there). And for $d \leq 7$, it was ad
+ hoc, so as to ensure that a given triple would denote a unique group.
+ Specifically, for polynomials of degree $d\leq 7$, the groups are coded as
  follows, using standard notations
  \smallskip
  In degree 1: $S_1=[1,1,1]$.
