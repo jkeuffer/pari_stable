@@ -1844,7 +1844,7 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
           for (i = 1; i <= maxrank; i++) L[i] = 0;
         }
         /* must go till the end in case we find a smallest vector last */
-        if (s == maxrank) continue;
+        if (s >= maxrank) { s = maxrank; continue; }
         av2 = avma;
         for (i = I = 1; i<=n; i++)
           for (j=i; j<=n; j++,I++) V[I] = x[i]*x[j];
