@@ -957,15 +957,16 @@ diviiround(GEN x, GEN y)
 GEN
 gdivround(GEN x, GEN y)
 {
-  pari_sp av1, av;
+  pari_sp av;
   long tx=typ(x),ty=typ(y);
   GEN q,r;
-  int fl;
 
   if (tx==t_INT && ty==t_INT) return diviiround(x,y);
   av = avma;
   if (is_rational_t(tx) && is_rational_t(ty))
   { /* same as diviiround but less efficient */
+    pari_sp av1;
+    int fl;
     q = quotrem(x,y,&r);
     av1 = avma;
     fl = gcmp(gmul2n(Q_abs(r),1), Q_abs(y));
@@ -990,11 +991,11 @@ gdivround(GEN x, GEN y)
 GEN
 gdivmod(GEN x, GEN y, GEN *pr)
 {
-  long ty,tx=typ(x);
+  long tx = typ(x);
 
   if (tx==t_INT)
   {
-    ty=typ(y);
+    long ty = typ(y);
     if (ty==t_INT) return dvmdii(x,y,pr);
     if (ty==t_POL) { *pr=gcopy(x); return gen_0; }
     pari_err(typeer,"gdivmod");
@@ -1496,7 +1497,7 @@ recip(GEN x)
 {
   long v=varn(x), lx = lg(x);
   pari_sp tetpil, av=avma;
-  GEN p1,p2,a,y,u;
+  GEN p1, a, y, u;
 
   if (typ(x)!=t_SER) pari_err(talker,"not a series in serreverse");
   if (valp(x)!=1 || lx < 3)
@@ -1533,7 +1534,7 @@ recip(GEN x)
       p1 = gmulsg(i,gel(x,i+1));
       for (k = 2; k < minss(i,mi); k++)
       {
-        p2 = gmul(gel(x,k+1),gel(u,i-k+2));
+        GEN p2 = gmul(gel(x,k+1),gel(u,i-k+2));
         p1 = gadd(p1, gmulsg(k,p2));
       }
       i++;
@@ -2201,12 +2202,12 @@ gtrunc2n(GEN x, long s)
 GEN
 gcvtoi(GEN x, long *e)
 {
-  long tx = typ(x), lx, i, ex, e1;
+  long tx = typ(x), lx, e1;
   GEN y;
 
   if (tx == t_REAL)
   {
-    ex = expo(x); if (ex < 0) { *e = ex; return gen_0; }
+    long ex = expo(x); if (ex < 0) { *e = ex; return gen_0; }
     lx = realprec(x); e1 = ex - prec2nbits(lx) + 1;
     y = trunc2nr_lg(x, lx, e1);
     if (e1 <= 0) { pari_sp av = avma; e1 = expo(subri(x,y)); avma = av; }
@@ -2215,6 +2216,7 @@ gcvtoi(GEN x, long *e)
   *e = -(long)HIGHEXPOBIT;
   if (is_matvec_t(tx))
   {
+    long i;
     y = cgetg_copy(x, &lx);
     for (i=1; i<lx; i++)
     {

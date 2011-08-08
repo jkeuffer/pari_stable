@@ -30,11 +30,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 GEN
 map_proto_G(GEN f(GEN), GEN x)
 {
-  long lx, i;
-  GEN y;
   if (is_matvec_t(typ(x)))
   {
-    y = cgetg_copy(x, &lx);
+    long lx, i;
+    GEN y = cgetg_copy(x, &lx);
     for (i=1; i<lx; i++) gel(y,i) = map_proto_G(f, gel(x,i));
     return y;
   }
@@ -44,11 +43,10 @@ map_proto_G(GEN f(GEN), GEN x)
 GEN
 map_proto_lG(long f(GEN), GEN x)
 {
-  long lx, i;
-  GEN y;
   if (is_matvec_t(typ(x)))
   {
-    y = cgetg_copy(x, &lx);
+    long lx, i;
+    GEN y = cgetg_copy(x, &lx);
     for (i=1; i<lx; i++) gel(y,i) = map_proto_lG(f, gel(x,i));
     return y;
   }
@@ -58,17 +56,17 @@ map_proto_lG(long f(GEN), GEN x)
 GEN
 map_proto_GG(GEN f(GEN,GEN), GEN x, GEN n)
 {
-  long l, i;
-  GEN y;
   if (is_matvec_t(typ(x)))
   {
-    y = cgetg_copy(x, &l);
+    long l, i;
+    GEN y = cgetg_copy(x, &l);
     for (i=1; i<l; i++) gel(y,i) = map_proto_GG(f,gel(x,i),n);
     return y;
   }
   if (is_matvec_t(typ(n)))
   {
-    y = cgetg_copy(n, &l);
+    long l, i;
+    GEN y = cgetg_copy(n, &l);
     for (i=1; i<l; i++) gel(y,i) = map_proto_GG(f,x,gel(n,i));
     return y;
   }
@@ -98,12 +96,10 @@ map_proto_lGG(long f(GEN,GEN), GEN x, GEN n)
 GEN
 map_proto_lGL(long f(GEN,long), GEN x, long y)
 {
-  long l, i;
-  GEN t;
-
   if (is_matvec_t(typ(x)))
   {
-    t = cgetg_copy(x, &l);
+    long l, i;
+    GEN t = cgetg_copy(x, &l);
     for (i=1; i<l; i++) gel(t,i) = map_proto_lGL(f,gel(x,i),y);
     return t;
   }
@@ -113,12 +109,10 @@ map_proto_lGL(long f(GEN,long), GEN x, long y)
 GEN
 map_proto_GL(GEN f(GEN,long), GEN x, long y)
 {
-  long l, i;
-  GEN t;
-
   if (is_matvec_t(typ(x)))
   {
-    t = cgetg_copy(x, &l);
+    long l, i;
+    GEN t = cgetg_copy(x, &l);
     for (i=1; i<l; i++) gel(t,i) = map_proto_GL(f,gel(x,i),y);
     return t;
   }
