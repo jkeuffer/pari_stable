@@ -570,7 +570,7 @@ static GEN
 addsub_pp(GEN x, GEN y, GEN (*op)(GEN,GEN))
 {
   pari_sp av = avma;
-  long c,d,e,r,rx,ry;
+  long d,e,r,rx,ry;
   GEN u, z, mod, p = gel(x,2);
   int swap;
 
@@ -589,6 +589,7 @@ addsub_pp(GEN x, GEN y, GEN (*op)(GEN,GEN))
   }
   else
   {
+    long c;
     if (ry < rx) { r=ry; mod = gel(y,3); } else { r=rx; mod = gel(x,3); }
     u = swap? op(gel(y,4), gel(x,4)): op(gel(x,4), gel(y,4));
     if (!signe(u) || (c = Z_pvalrem(u,p,&u)) >= r)
@@ -842,7 +843,7 @@ add_rfrac(GEN x, GEN y)
 {
   pari_sp av = avma;
   GEN x1 = gel(x,1), x2 = gel(x,2);
-  GEN y1 = gel(y,1), y2 = gel(y,2), z, q, r, n, d, delta;
+  GEN y1 = gel(y,1), y2 = gel(y,2), q, r, n, d, delta;
 
   delta = RgX_gcd(x2,y2);
   if (!degpol(delta))
@@ -865,6 +866,7 @@ add_rfrac(GEN x, GEN y)
   q = RgX_divrem(n, delta, &r); /* we want gcd(n,delta) */
   if (isexactzero(r))
   {
+    GEN z;
     d = RgX_mul(x2, y2);
     /* "constant" denominator ? */
     z = lg(d) == 3? RgX_Rg_div(q, gel(d,2)): gred_rfrac_simple(q, d);
@@ -1204,14 +1206,14 @@ gsubsg(long x, GEN y)
 GEN
 gsub(GEN x, GEN y)
 {
-  long tx = typ(x), ty = typ(y), lx, vx, vy;
+  long tx = typ(x), ty = typ(y);
   pari_sp av;
-  GEN z, p1;
+  GEN z;
   if (tx == ty) switch(tx) /* shortcut to generic case */
   {
     case t_INT: return subii(x,y);
     case t_REAL: return subrr(x,y);
-    case t_INTMOD:  { GEN X = gel(x,1), Y = gel(y,1);
+    case t_INTMOD:  { GEN p1, X = gel(x,1), Y = gel(y,1);
       z = cgetg(3,t_INTMOD);
       if (X==Y || equalii(X,Y))
         return sub_intmod_same(z, X, gel(x,2), gel(y,2));
@@ -1242,26 +1244,28 @@ gsub(GEN x, GEN y)
         return addsub_polmod_same(gel(x,1), gel(x,2), gel(y,2), &gsub);
       return addsub_polmod(gel(x,1), gel(y,1), gel(x,2), gel(y,2), &gsub);
     case t_FFELT: return FF_sub(x,y);
-    case t_POL:
-      vx = varn(x);
-      vy = varn(y);
+    case t_POL: {
+      long vx = varn(x);
+      long vy = varn(y);
       if (vx != vy) {
         if (varncmp(vx, vy) < 0) return RgX_Rg_sub(x, y);
         else                     return Rg_RgX_sub(x, y);
       }
       return RgX_sub(x, y);
+    }
     case t_VEC:
       if (lg(y) != lg(x)) pari_err(operi,"+",x,y);
       return RgV_sub(x,y);
     case t_COL:
       if (lg(y) != lg(x)) pari_err(operi,"+",x,y);
       return RgC_sub(x,y);
-    case t_MAT:
-      lx = lg(x);
+    case t_MAT: {
+      long lx = lg(x);
       if (lg(y) != lx) pari_err(operi,"+",x,y);
       if (lx == 1) return cgetg(1, t_MAT);
       if (lg(y[1]) != lg(x[1])) pari_err(operi,"+",x,y);
       return RgM_sub(x,y);
+    }
     case t_RFRAC: case t_SER: break;
 
     default: pari_err(operf,"+",x,y);
@@ -1496,9 +1500,9 @@ mul_polmod(GEN X, GEN Y, GEN x, GEN y)
   long T[3] = { evaltyp(t_POLMOD) | _evallg(3),0,0 };
   long vx = varn(X), vy = varn(Y);
   GEN z = cgetg(3,t_POLMOD);
-  pari_sp av;
 
   if (vx==vy) {
+    pari_sp av;
     gel(z,1) = RgX_gcd(X,Y); av = avma;
     gel(z,2) = gerepileupto(av, gmod(gmul(x, y), gel(z,1)));
     return z;
