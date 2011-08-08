@@ -728,7 +728,7 @@ Flx_sqrspec_sqri_inflate(GEN x, long N, ulong p, long nx)
 GEN
 Flx_sqrspec(GEN a, ulong p, long na)
 {
-  GEN a0,c,c0,c1;
+  GEN a0, c, c0;
   long n0, n0a, i, v = 0;
   pari_sp av;
 
@@ -766,7 +766,7 @@ Flx_sqrspec(GEN a, ulong p, long na)
   if (p == 2) n0 *= 2;
   else
   {
-    GEN  t = Flx_addspec(a0,a,p,na,n0a);
+    GEN c1, t = Flx_addspec(a0,a,p,na,n0a);
     t = Flx_sqr(t,p);
     c1= Flx_add(c0,c, p);
     c1= Flx_sub(t, c1, p);
@@ -898,10 +898,10 @@ Flx_invMontgomery(GEN T, ulong p)
   if (l<5) return pol0_Flx(T[1]);
   if (l<=Flx_INVMONTGOMERY_LIMIT)
   {
-    ulong c=T[l-1], ci=1;
+    ulong c = T[l-1];
     if (c!=1)
     {
-      ci=Fl_inv(c,p);
+      long ci = Fl_inv(c,p);
       T=Flx_Fl_mul(T, ci, p);
       r=Flx_invMontgomery_basecase(T,p);
       r=Flx_Fl_mul(r,ci,p);
@@ -2610,13 +2610,13 @@ FlxqX_invMontgomery(GEN T, GEN Q, ulong p)
   pari_sp ltop=avma;
   long l=lg(T);
   GEN r;
-  GEN c=gel(T,l-1), ci=NULL;
+  GEN c = gel(T,l-1);
   if (l<5) return pol0_Flx(T[1]);
   if (l<=FlxqX_INVMONTGOMERY_LIMIT)
   {
     if (!Flx_equal1(c))
     {
-      ci= Flxq_inv(c,Q,p);
+      GEN ci = Flxq_inv(c,Q,p);
       T = FlxqX_Flxq_mul(T, ci, Q, p);
       r = FlxqX_invMontgomery_basecase(T,Q,p);
       r = FlxqX_Flxq_mul(r,ci,Q,p);
