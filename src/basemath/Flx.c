@@ -901,7 +901,7 @@ Flx_invMontgomery(GEN T, ulong p)
     ulong c = T[l-1];
     if (c!=1)
     {
-      long ci = Fl_inv(c,p);
+      ulong ci = Fl_inv(c,p);
       T=Flx_Fl_mul(T, ci, p);
       r=Flx_invMontgomery_basecase(T,p);
       r=Flx_Fl_mul(r,ci,p);
