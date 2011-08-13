@@ -2489,7 +2489,7 @@ GEN
 gboundcf(GEN x, long k)
 {
   pari_sp av;
-  long lx, tx = typ(x), e;
+  long tx = typ(x), e;
   GEN y, a, b, c;
 
   if (k < 0) pari_err(talker, "negative nmax in gboundcf");
@@ -2500,10 +2500,9 @@ gboundcf(GEN x, long k)
     {
       case t_INT: return mkveccopy(x);
       case t_REAL:
-        av = avma; lx = realprec(x);
-        e = prec2nbits(lx)-1-expo(x);
+        av = avma;
+        c = mantissa_real(x,&e);
         if (e < 0) pari_err(talker,"integral part not significant in gboundcf");
-        c = trunc2nr_lg(x,lx,0);
         y = int2n(e);
         a = Qsfcont(c,y, NULL, k);
         b = addsi(signe(x), c);
