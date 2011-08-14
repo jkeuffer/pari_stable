@@ -2014,7 +2014,7 @@ roundr(GEN x)
 GEN
 roundr_safe(GEN x)
 {
-  long e1, ex, lx, s = signe(x);
+  long e1, ex, s = signe(x);
   pari_sp av;
   GEN t, y;
 
@@ -2024,9 +2024,8 @@ roundr_safe(GEN x)
   av = avma;
   t = addrr(real2n(-1,nbits2prec(ex+1)), x); /* x + 0.5 */
 
-  lx = realprec(x);
-  e1 = expo(t) - prec2nbits(lx) + 1;
-  y = trunc2nr_lg(t, lx, e1);
+  e1 = expo(t) - bit_prec(t) + 1;
+  y = trunc2nr_lg(t, lg(t), e1);
   if (signe(x) < 0) y = addsi(-1,y);
   return gerepileuptoint(av,y);
 }
