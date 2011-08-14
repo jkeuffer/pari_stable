@@ -41,12 +41,11 @@ RgX_get_1(GEN x)
     RgX_type_decode(tx, &i /*junk*/, &tx);
   switch(tx)
   {
-    case t_INTMOD: x = mkintmod(gen_1,p); break;
-    case t_PADIC: x = cvtop(gen_1, p, lx); break;
-    case t_FFELT: x = FF_1(T); break;
-    default: x = gen_1; break;
+    case t_INTMOD: retmkintmod(gen_1,p);
+    case t_PADIC: return cvtop(gen_1, p, lx);
+    case t_FFELT: return FF_1(T);
+    default: return gen_1;
   }
-  return x;
 }
 /* Returns 0 in the base ring over which x is defined */
 /* HACK: this also works for t_SER */
@@ -59,12 +58,11 @@ RgX_get_0(GEN x)
     RgX_type_decode(tx, &i /*junk*/, &tx);
   switch(tx)
   {
-    case t_INTMOD: x = mkintmod(gen_0,p); break;
-    case t_PADIC: x = cvtop(gen_0, p, lx); break;
-    case t_FFELT: x = FF_zero(T); break;
-    default: x = gen_0; break;
+    case t_INTMOD: retmkintmod(gen_0, icopy(p));
+    case t_PADIC: return cvtop(gen_0, p, lx);
+    case t_FFELT: return FF_zero(T);
+    default: return gen_0;
   }
-  return x;
 }
 
 /********************************************************************/
