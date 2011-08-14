@@ -364,9 +364,9 @@ shifti(GEN x, long n)
 }
 
 GEN
-trunc2nr_lg(GEN x, long lx, long n)
+mantissa2nr(GEN x, long n)
 { /*This is a kludge since x is not an integer*/
-  return shifti_spec(x, lx, n);
+  return shifti_spec(x, lg(x), n);
 }
 
 GEN

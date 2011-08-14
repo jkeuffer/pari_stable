@@ -2130,7 +2130,7 @@ GEN     truedvmdii(GEN x, GEN y, GEN *z);
 GEN     truedvmdis(GEN x, long y, GEN *z);
 GEN     truedvmdsi(long x, GEN y, GEN *z);
 GEN     trunc2nr(GEN x, long n);
-GEN     trunc2nr_lg(GEN x, long lx, long n);
+GEN     mantissa2nr(GEN x, long n);
 GEN     truncr(GEN x);
 ulong   umodiu(GEN y, ulong x);
 long    vals(ulong x);

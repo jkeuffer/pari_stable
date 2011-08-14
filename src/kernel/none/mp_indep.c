@@ -51,20 +51,18 @@ affrr(GEN x, GEN y)
 GEN
 trunc2nr(GEN x, long n)
 {
-  long ex, lx;
+  long ex;
   if (!signe(x)) return gen_0;
   ex = expo(x) + n; if (ex < 0) return gen_0;
-  lx = lg(x);
-  return trunc2nr_lg(x, lx, ex - bit_accuracy(lx) + 1);
+  return mantissa2nr(x, ex - bit_prec(x) + 1);
 }
 
 /* x a t_REAL, x = i/2^e, i a t_INT */
 GEN
 mantissa_real(GEN x, long *e)
 {
-  long lx = lg(x);
-  *e = bit_accuracy(lx)-1-expo(x);
-  return trunc2nr_lg(x, lx, 0);
+  *e = bit_prec(x)-1-expo(x);
+  return mantissa2nr(x, 0);
 }
 
 GEN
