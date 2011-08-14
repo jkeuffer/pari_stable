@@ -528,7 +528,7 @@ rpowuu(ulong a, ulong n, long prec)
 
   if (a == 1) return real_1(prec);
   if (a == 2) return real2n(n, prec);
-  if (n == 1) return stor(a, prec);
+  if (n == 1) return utor(a, prec);
   av = avma;
   D.sqr   = &sqri;
   D.mulug = &mului;
