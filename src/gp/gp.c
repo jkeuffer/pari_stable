@@ -2422,7 +2422,7 @@ sd_lines(const char *v, long flag)
 GEN
 sd_linewrap(const char *v, long flag)
 {
-  ulong old = GP_DATA->linewrap, n;
+  ulong old = GP_DATA->linewrap, n = GP_DATA->linewrap;
   GEN z = sd_ulong(v,flag,"linewrap",&n, 0,LONG_MAX,NULL);
   if (old)
   { if (!n) resetout(1); }
