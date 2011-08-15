@@ -874,7 +874,7 @@ suitable(GEN x, long k, GEN *pp, long *pi)
     case t_FRAC: return 1;
     case t_REAL: {
       GEN p = *pp;
-      if (signe(x) && (!p || cmprr(p, x) < 0)) { *pp = x; *pi = k; }
+      if (signe(x) && (!p || absr_cmp(p, x) < 0)) { *pp = x; *pi = k; }
       return 0;
     }
     default: return !gequal0(x);
