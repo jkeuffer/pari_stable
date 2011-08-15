@@ -19,7 +19,7 @@ kern1=$src/kernel/$kernlvl1
 #
 # File lists
 #
-kernel="mp mpinl"
+kernel="mpker mpinl"
 gp=`ls $src_dir/gp/*.c | sed 's,.*/\(.*\)\.c,\1,'`
 language=`ls $src_dir/language/*.c | sed 's,.*/\(.*\)\.c,\1,'`
 basemath=`ls $src_dir/basemath/*.c | sed 's,.*/\(.*\)\.c,\1,'`
@@ -328,7 +328,7 @@ gp-sta: $add_funclist \$(OBJS) \$(OBJSGP)
 cleantest:
 	\$(RM) *.dif gp.out pari.ps
 cleanobj:
-	-\$(RM) *\$(_O) mp.c *.s mpinl.h parilvl0.h parilvl1.h libpari* $exec kerntest
+	-\$(RM) *\$(_O) mpker.c *.s mpinl.h parilvl0.h parilvl1.h libpari* $exec kerntest
 cleandesc:
 	-\$(RM) $desc/\$(DESC) *\$(TMPSUF)
 cleantune:
