@@ -27,6 +27,7 @@ BA 18- (x->vector(1,j,x))(1) --> significant pointers lost [#1211]
 VL 19- [makefile] Incorrect -I and -L flags order [#1212]
    20- nfbasis / nfdisc(f,, partial factorization) would sometimes spend a
        lot of time trying to factorize a discriminant [#1227]
+   21- numerical instability in qfgaussred / qfsign [#1232]
 
   Changed
     1- mathnf: swapped flag 3 and 5.

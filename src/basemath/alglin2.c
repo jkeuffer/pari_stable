@@ -861,13 +861,33 @@ qfgaussred_positive(GEN a)
   return gerepilecopy(av,b);
 }
 
+/* Maximal pivot strategy: x is a suitable pivot if it is non zero and either
+ * - an exact type, or
+ * - it is maximal among remaining non-zero (t_REAL) pivots */
+static int
+suitable(GEN x, long k, GEN *pp, long *pi)
+{
+  long t = typ(x);
+  switch(t)
+  {
+    case t_INT: return signe(x) != 0;
+    case t_FRAC: return 1;
+    case t_REAL: {
+      GEN p = *pp;
+      if (signe(x) && (!p || cmprr(p, x) < 0)) { *pp = x; *pi = k; }
+      return 0;
+    }
+    default: return !gequal0(x);
+  }
+}
+
 /* Gauss reduction (arbitrary symetric matrix, only the part above the
  * diagonal is considered). If signature is non-zero, return only the
  * signature, in which case gsigne() should be defined for elements of a. */
 static GEN
 gaussred(GEN a, long signature)
 {
-  GEN r, p, invp, ak, al;
+  GEN r, ak, al;
   pari_sp av, av1, lim;
   long n = lg(a), i, j, k, l, sp, sn, t;
 
@@ -883,7 +903,10 @@ gaussred(GEN a, long signature)
   t = n; sp = sn = 0;
   while (t)
   {
-    k=1; while (k<=n && (!r[k] || gequal0(gcoeff(a,k,k)))) k++;
+    long pind = 0;
+    GEN invp, p = NULL;
+    k=1; while (k<=n && (!r[k] || !suitable(gcoeff(a,k,k), k, &p, &pind))) k++;
+    if (k > n && p) k = pind;
     if (k <= n)
     {
       p = gcoeff(a,k,k); invp = ginv(p); /* != 0 */
@@ -908,7 +931,8 @@ gaussred(GEN a, long signature)
     { /* all remaining diagonal coeffs are currently 0 */
       for (k=1; k<=n; k++) if (r[k])
       {
-        l=k+1; while (l<=n && (!r[l] || gequal0(gcoeff(a,k,l)))) l++;
+        l=k+1; while (l<=n && (!r[l] || !suitable(gcoeff(a,k,l), l, &p, &pind))) l++;
+        if (l > n && p) l = pind;
         if (l > n) continue;
 
         p = gcoeff(a,k,l); invp = ginv(p);
