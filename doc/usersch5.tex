@@ -5260,6 +5260,10 @@ algorithm. Use \tet{image} instead.
 
 \subsec{\kbd{ZX}, \kbd{QX}}
 
+\fun{void}{RgX_check_QX}{GEN x, const char *s} Assuming \kbd{x} is a \typ{POL}
+raise an error if it is not a \kbd{QX} ($s$ should point to the name of the
+caller).
+
 \fun{void}{RgX_check_ZX}{GEN x, const char *s} Assuming \kbd{x} is a \typ{POL}
 raise an error if it is not a \kbd{ZX} ($s$ should point to the name of the
 caller).
@@ -6282,11 +6286,19 @@ returns the $3$-dimensional \typ{VEC} \kbd{[x,y,z]}.
 \fun{GEN}{retmkvec4}{GEN x, GEN y, GEN z, GEN t}
 returns the $4$-dimensional \typ{VEC} \kbd{[x,y,z,t]}.
 
+\fun{GEN}{retconst_vec}{long n, GEN x}
+returns the $n$-dimensional \typ{VEC} whose entries are constant and all
+equal to $x$.
+
 \fun{GEN}{retmkcol}{GEN x}
 returns the $1$-dimensional \typ{COL} \kbd{[x]~}.
 
 \fun{GEN}{retmkcol2}{GEN x, GEN y}
 returns the $2$-dimensional \typ{COL} \kbd{[x,y]~}.
+
+\fun{GEN}{retconst_col}{long n, GEN x}
+returns the $n$-dimensional \typ{COL} whose entries are constant and all
+equal to $x$.
 
 \fun{GEN}{retmkmat}{GEN x}
 returns the $1$-column \typ{MAT} with colum \kbd{x}.

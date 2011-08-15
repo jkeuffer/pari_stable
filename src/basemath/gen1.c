@@ -523,26 +523,28 @@ conjvec(GEN x,long prec)
         switch(typ(c)) {
           case t_INTMOD: {
             GEN p = gel(c,1);
-            pari_sp av = avma;
-            T = RgX_to_FpX(T,p); /* left on stack */
-            if (typ(x) == t_POL) {
-              x = RgX_to_FpX(x, p);
-              if (varn(x) != varn(T))
-                pari_err(talker,"not a rational polynomial in conjvec");
-              z = FpXQC_to_mod(FpXQ_conjvec(x, T , p), T, p);
-              return gerepileupto(av, z);
-            } else {
-              z = cgetg(lx-2,t_COL);
-              x = Rg_to_Fp(x, p);
-              for (i=1; i<=lx-3; i++) gel(z,i) = x;
-              return z;
-            }
+            pari_sp av;
+            if (typ(x) != t_POL) retconst_col(lx-3, Rg_to_Fp(x, p));
+            av = avma;
+            T = RgX_to_FpX(T,p);
+            x = RgX_to_FpX(x, p);
+            if (varn(x) != varn(T))
+              pari_err(talker,"not a rational polynomial in conjvec");
+            z = FpXQC_to_mod(FpXQ_conjvec(x, T , p), T, p);
+            return gerepileupto(av, z);
           }
           case t_INT:
           case t_FRAC: break;
           default: pari_err(talker,"not a rational polynomial in conjvec");
         }
       }
+      if (typ(x) != t_POL)
+      {
+        if (!is_rational_t(typ(x)))
+          pari_err(talker,"not a rational polynomial in conjvec");
+        retconst_col(lx-3, gcopy(x));
+      }
+      RgX_check_QX(x, "conjvec");
       av = avma;
       if (varn(x) != varn(T))
         pari_err(talker,"inconsistent variables in conjvec");

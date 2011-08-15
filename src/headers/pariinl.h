@@ -166,22 +166,20 @@ pol_0(long v)
   GEN x = cgetg(2,t_POL);
   x[1] = evalvarn(v); return x;
 }
+#define retconst_vec(n,x)\
+  do { long _i, _n = (n);\
+       GEN _v = cgetg(n+1, t_VEC), _x = (x);\
+       for (_i = 1; _i <= _n; _i++) gel(_v,_i) = _x;\
+       return _v; } while(0)
 INLINE GEN
-const_vec(long n, GEN x)
-{
-  GEN v = cgetg(n+1, t_VEC);
-  long i;
-  for (i = 1; i <= n; i++) gel(v,i) = x;
-  return v;
-}
+const_vec(long n, GEN x) { retconst_vec(n, x); }
+#define retconst_col(n,x)\
+  do { long _i, _n = (n);\
+       GEN _v = cgetg(n+1, t_COL), _x = (x);\
+       for (_i = 1; _i <= _n; _i++) gel(_v,_i) = _x;\
+       return _v; } while(0)
 INLINE GEN
-const_col(long n, GEN x)
-{
-  GEN v = cgetg(n+1, t_COL);
-  long i;
-  for (i = 1; i <= n; i++) gel(v,i) = x;
-  return v;
-}
+const_col(long n, GEN x) { retconst_col(n, x); }
 INLINE GEN
 const_vecsmall(long n, long c)
 {

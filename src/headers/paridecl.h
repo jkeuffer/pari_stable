@@ -490,6 +490,7 @@ void    RgV_check_ZV(GEN A, const char *s);
 
 /* ZX.c */
 
+void    RgX_check_QX(GEN x, const char *s);
 void    RgX_check_ZX(GEN x, const char *s);
 void    RgX_check_ZXY(GEN x, const char *s);
 GEN     ZXV_Z_mul(GEN y, GEN x);

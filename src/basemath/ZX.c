@@ -22,12 +22,25 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*                                                                 */
 /*******************************************************************/
 static int
+_check_QX(GEN x)
+{
+  long k = lg(x)-1;
+  for ( ; k>1; k--)
+    if (!is_rational_t(typ(gel(x,k)))) return 0;
+  return 1;
+}
+static int
 _check_ZX(GEN x)
 {
   long k = lg(x)-1;
   for ( ; k>1; k--)
-    if (typ(x[k])!=t_INT) return 0;
+    if (typ(gel(x,k))!=t_INT) return 0;
   return 1;
+}
+void
+RgX_check_QX(GEN x, const char *s)
+{
+  if (! _check_QX(x)) pari_err(talker,"polynomial not in Q[X] in %s",s);
 }
 
 void
