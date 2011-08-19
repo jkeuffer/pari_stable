@@ -1949,6 +1949,40 @@ step(GEN x, GEN y, GEN inc, long k)
   }
 }
 
+/* 1 if we are "sure" that x < y, up to few rounding errors, i.e.
+ * x < y - epsilon. More precisely :
+ * - sign(x - y) < 0
+ * - lgprec(x-y) > 3 || expo(x - y) - expo(x) > -24 */
+static int
+mplessthan(GEN x, GEN y)
+{
+  pari_sp av = avma;
+  GEN z = mpsub(x, y);
+  long l;
+  avma = av;
+  if (typ(z) == t_INT) return (signe(z) < 0);
+  if (signe(z) >= 0) return 0;
+  l = realprec(z);
+  if (l > 3) return 1;
+  return ( expo(z) - mpexpo(x) > -24 );
+}
+
+/* 1 if we are "sure" that x > y, up to few rounding errors, i.e.
+ * x > y + epsilon */
+static int
+mpgreaterthan(GEN x, GEN y)
+{
+  pari_sp av = avma;
+  GEN z = mpsub(x, y);
+  long l;
+  avma = av;
+  if (typ(z) == t_INT) return (signe(z) > 0);
+  if (signe(z) <= 0) return 0;
+  l = realprec(z);
+  if (l > 3) return 1;
+  return ( expo(z) - mpexpo(x) > -24 );
+}
+
 /* x a t_INT, y  t_INT or t_REAL */
 INLINE GEN
 mulimp(GEN x, GEN y)
@@ -1964,30 +1998,18 @@ addmulimp(GEN x, GEN y, GEN z)
   if (typ(z) == t_INT) return mpadd(x, mulii(y, z));
   return mpadd(x, mulir(y, z));
 }
-/* yk + vk * (xk + zk)^2 < borne1, approximately */
+/* yk + vk * (xk + zk)^2 < B + epsilon */
 static int
-check_bound(GEN borne1, GEN xk, GEN yk, GEN zk, GEN vk)
+check_bound(GEN B, GEN xk, GEN yk, GEN zk, GEN vk)
 {
   pari_sp av = avma;
-  long i;
+  int f;
   GEN t = mpadd(xk, zk);
   if (!isintzero(t)) yk = mpadd(yk, mpmul(vk, mpsqr(t)));
-  i = mpcmp(yk, borne1);
-  avma = av; return (i <= 0);
+  f = mpgreaterthan(yk, B);
+  avma = av; return !f;
 }
 
-static GEN
-add_fudge(GEN x) {
-  if (typ(x) == t_INT) return addir(x, real2n(-32,3));
-  if (!signe(x)) return x;
-  return addrr(x, real2n(expo(x) - (bit_prec(x) >> 1), 3));
-}
-static GEN
-sub_fudge(GEN x) {
-  if (typ(x) == t_INT) return subir(x, real2n(-32,3));
-  if (!signe(x)) return x;
-  return subrr(x, real2n(expo(x) - (bit_prec(x) >> 1), 3));
-}
 /* q is the Gauss reduction of the quadratic form */
 /* general program for positive definit quadratic forms (real coeffs).
  * Enumerate vectors whose norm is less than BORNE, minimal vectors
@@ -2024,13 +2046,10 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
     gel(x,i) = gel(y,i) = gel(z,i) = gen_0;
   }
   if (BORNE) {
-    norme1 = BORNE;
-    borne2 = mulrr(norme1,alpha);
-  } else {
-    norme1 = gel(v,1);
-    borne2 = sub_fudge(norme1);
-  }
-  borne1 = add_fudge(norme1);
+    borne1 = BORNE;
+    borne2 = mulrr(borne1,alpha);
+  } else
+    borne1 = gel(v,1);
   if (DEBUGLEVEL>2)
     err_printf("smallvectors looking for norm < %P.4G\n",borne1);
   s = 0; k = n;
@@ -2058,7 +2077,7 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
         gel(y,l) = gerepileuptoleaf(av1, p1);
         /* skip the [x_1,...,x_skipfirst,0,...,0] */
         if ((l <= skipfirst && !signe(y[skipfirst]))
-         || mpcmp(borne1, gel(y,l)) < 0) fl = 1;
+         || mplessthan(borne1, gel(y,l)) < 0) fl = 1;
         else
           gel(x,l) = mpround( mpneg(gel(z,l)) );
         k = l;
@@ -2091,16 +2110,16 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
 
     av1 = avma; p1 = mpsqr(mpadd(gel(x,1),gel(z,1)));
     norme1 = mpadd(gel(y,1), mpmul(p1, gel(v,1)));
-    if (mpcmp(norme1,borne1) > 0) { avma=av1; continue; /* main */ }
+    if (mpgreaterthan(norme1,borne1) > 0) { avma=av1; continue; /* main */ }
 
-    norme1 = gerepileupto(av1,norme1);
+    norme1 = gerepileuptoleaf(av1,norme1);
     if (check)
     {
       if (checkcnt < 5 && mpcmp(norme1, borne2) < 0)
       {
         if (!check(data,x)) { checkcnt++ ; continue; /* main */}
         if (DEBUGLEVEL>4) err_printf("New bound: %Ps", norme1);
-        borne1 = add_fudge(norme1);
+        borne1 = norme1;
         borne2 = mulrr(borne1, alpha);
         s = 0; checkcnt = 0;
       }
@@ -2109,10 +2128,9 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
     {
       if (!BORNE) /* find minimal vectors */
       {
-        if (mpcmp(norme1, borne2) < 0)
-        {
-          borne1 = add_fudge(norme1);
-          borne2 = sub_fudge(norme1);
+        if (mplessthan(norme1, borne1) < 0)
+        { /* strictly smaller vector than previously known */
+          borne1 = norme1; /* + epsilon */
           s = 0;
         }
       }
@@ -2137,21 +2155,16 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
         for (i = 1; i <= s; i++)
         {
           long k = per[i];
-          if (check(data,gel(S,k))) {
-            norme1 = gel(norms,k);
-            borne1 = add_fudge(norme1);
-            break;
-          }
+          if (check(data,gel(S,k))) { borne1 = gel(norms,k); break; }
         }
         imin = i;
         for (; i <= s; i++)
-          if (mpcmp(gel(norms,per[i]), borne1) > 0) break;
+          if (mpgreaterthan(gel(norms,per[i]), borne1) > 0) break;
         imax = i;
         for (i=imin, s=0; i < imax; i++) gel(S,++s) = gel(S,per[i]);
         avma = av2;
         if (s)
         {
-          borne1 = add_fudge(norme1);
           borne2 = mulrr(borne1, alpha);
           checkcnt = 0;
         }
@@ -2189,12 +2202,14 @@ END:
     for (j=0,i=1; i<=stockmax; i++)
     {
       long t = per[i];
-      norme1 = gel(norms,t);
-      if (j && mpcmp(norme1, borne1) > 0) break;
+      GEN N = gel(norms,t);
+      if (j && mpgreaterthan(N, borne1) > 0) break;
       if ((p = check(data,gel(S,t))))
       {
-        if (!j) borne1 = add_fudge(norme1);
-        j++; gel(pols,j) = p; alph[j]=S[t];
+        if (!j) borne1 = N;
+        j++;
+        gel(pols,j) = p;
+        gel(alph,j) = gel(S,t);
       }
     }
     setlg(pols,j+1);
