@@ -2001,7 +2001,7 @@ GEN
 subresext(GEN x, GEN y, GEN *U, GEN *V)
 {
   pari_sp av, av2, tetpil, lim;
-  long dx, dy, dv, signh, tx = typ(x), ty = typ(y);
+  long dx, dy, du, signh, tx = typ(x), ty = typ(y);
   GEN r, z, g, h, p1, cu, cv, u, v, um1, uze, vze;
   GEN *gptr[3];
 
@@ -2042,10 +2042,10 @@ subresext(GEN x, GEN y, GEN *U, GEN *V)
   }
   /* uze an RgX */
   if (!u) { *U = *V = gen_0; avma = av; return gen_0; }
-  z = gel(v,2); dv = degpol(v);
-  if (dv > 1)
-  { /* z = gdivexact(gpowgs(z,dv), gpowgs(h,dv-1)); */
-    p1 = gpowgs(gdiv(z,h),dv-1);
+  z = gel(v,2); du = degpol(u);
+  if (du > 1)
+  { /* z = gdivexact(gpowgs(z,du), gpowgs(h,du-1)); */
+    p1 = gpowgs(gdiv(z,h),du-1);
     z = gmul(z,p1);
     uze = RgX_Rg_mul(uze, p1);
   }

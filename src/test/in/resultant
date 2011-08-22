@@ -55,3 +55,6 @@ for(n=2,3,for(l=1,3,print(polresultant(P*x^l+1,n*x^4+4503599627370517))))
 polresultant(z^1746-1, polcyclo(1973, z))
 
 for(i=1,15,if(rnfequation(polcyclo(17,'y),x+y^i,1)[2]^17!=1,print("error",i)))
+
+\\ #1233
+bezoutres(x^2+1, x^2-1)
