@@ -1465,24 +1465,29 @@ GEN
 gsubstvec(GEN e, GEN v, GEN r)
 {
   pari_sp ltop=avma;
-  long i,l=lg(v);
+  long i, j, l = lg(v);
   GEN w,z;
-  if ( !is_vec_t(typ(v)) || !is_vec_t(typ(r)) )
-    pari_err(typeer,"substvec");
+  if ( !is_vec_t(typ(v)) || !is_vec_t(typ(r)) ) pari_err(typeer,"substvec");
   if (lg(r)!=l)
     pari_err(talker,"different number of variables and values in substvec");
-  w=cgetg(l,t_VECSMALL);
-  z=cgetg(l,t_VECSMALL);
-  for(i=1;i<l;i++)
+  w = cgetg(l,t_VECSMALL);
+  z = cgetg(l,t_VECSMALL);
+  for(i=j=1;i<l;i++)
   {
     GEN T = gel(v,i);
     if (!gcmpX(T)) pari_err(talker,"not a variable in substvec (%Ps)", T);
-    w[i]=varn(T);
-    z[i]=fetch_var();
+    if (gvar(gel(r,i)) == NO_VARIABLE) /* no need to take precautions */
+      e = gsubst(e, varn(T), gel(r,i));
+    else
+    {
+      w[j]=varn(T);
+      z[j]=fetch_var();
+      j++;
+    }
   }
-  for(i=1;i<l;i++) e = gsubst(e,w[i],pol_x(z[i]));
-  for(i=1;i<l;i++) e = gsubst(e,z[i],gel(r,i));
-  for(i=1;i<l;i++) (void)delete_var();
+  for(i=1;i<j;i++) e = gsubst(e,w[i],pol_x(z[i]));
+  for(i=1;i<j;i++) e = gsubst(e,z[i],gel(r,i));
+  for(i=1;i<j;i++) (void)delete_var();
   return gerepileupto(ltop,e);
 }
 

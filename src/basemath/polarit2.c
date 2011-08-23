@@ -2344,7 +2344,7 @@ RgX_resultant_all(GEN P, GEN Q, GEN *sol)
   {
     delta = degpol(P) - degpol(Q); /* > 0 */
     Z = Lazard2(Q, leading_term(Q), s, delta);
-    if (!odd(delta)) sig = -sig;
+    if (both_odd(degpol(P), degpol(Q))) sig = -sig;
     Q = nextSousResultant(P, Q, Z, s);
     P = Z;
     if (low_stack(lim,stack_lim(av,1)))

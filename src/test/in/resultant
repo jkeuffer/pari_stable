@@ -58,3 +58,6 @@ for(i=1,15,if(rnfequation(polcyclo(17,'y),x+y^i,1)[2]^17!=1,print("error",i)))
 
 \\ #1233
 bezoutres(x^2+1, x^2-1)
+\\ #1234
+polresultant(x^4+x^2+1, x^4-y, x, 0)
+
