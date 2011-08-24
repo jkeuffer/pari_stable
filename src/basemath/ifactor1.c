@@ -3768,12 +3768,7 @@ ifactor(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
   byteptr d = diffptr+1; /* start at p = 3 */
 
   i = signe(n);
-  if (!i) {
-    GEN z = cgetg(3,t_MAT);
-    gel(z,1) = mkcol(gen_0);
-    gel(z,2) = mkcol(gen_1);
-    return z;
-  }
+  if (!i) retmkmat2(mkcol(gen_0), mkcol(gen_1));
   (void)cgetg(3,t_MAT);
   if (i < 0) STORE(&nb, utoineg(1), 1);
   if (is_pm1(n)) return aux_end(NULL,nb);
