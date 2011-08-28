@@ -216,7 +216,7 @@ sd_realprecision(const char *v, long flag)
     if (prec == precreal) return gnil;
     precreal = prec;
   }
-  if (flag == d_RETURN) return stoi(fmt->sigd);
+  if (flag == d_RETURN) return stoi(prec2ndec(precreal));
   if (flag == d_ACKNOWLEDGE)
   {
     long n = prec2ndec(precreal);

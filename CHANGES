@@ -32,6 +32,8 @@ VL 19- [makefile] Incorrect -I and -L flags order [#1212]
    23- numerical instability in polredabs [#1228, #1229]
    24- wrong result in bezoutres [#1233]
    25- wrong sign in polresultant() [#1234]
+   26- change default(realprecision) so that it returns the internal precision
+       [ as precision(1.) ], not the number of printed digits. [#1235]
 
   Changed
     1- mathnf: swapped flag 3 and 5.
