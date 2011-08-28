@@ -520,16 +520,38 @@ BPSW_psp(GEN N)
   avma = av; return k;
 }
 
-/* no prime divisor <= 661 */
+/* can we write n = x^k ? Assume N has no prime divisor <= 2^14.
+ * Not memory clean */
+long
+isanypower_nosmalldiv(GEN N, GEN *px)
+{
+  GEN x = N, y;
+  ulong mask = 7, ex0 = 11;
+  long ex, k = 1;
+  while (Z_issquareall(x, &y)) { k <<= 1; x = y; }
+  while ( (ex = is_357_power(x, &y, &mask)) ) { k *= ex; x = y; }
+  /* stop when x^(1/k) < 2^14 */
+  while ( (ex = is_pth_power(x, &y, &ex0, 15)) ) { k *= ex; x = y; }
+  *px = x; return k;
+}
+
+/* no prime divisor <= 2^14 (> 661) */
 long
 BPSW_psp_nosmalldiv(GEN N)
 {
   pari_sp av;
   MR_Jaeschke_t S;
+  long l = lgefint(N);
   int k;
 
-  if (lgefint(N) == 3) return uisprime_nosmalldiv((ulong)N[2]);
+  if (l == 3) return uisprime_nosmalldiv((ulong)N[2]);
   av = avma;
+  /* N large: test for pure power, rarely succeeds, but requires < 1% of
+   * compositeness test times */
+  if (bit_accuracy(l) > 512 && isanypower_nosmalldiv(N, &N) != 1)
+  {
+    avma = av; return 0;
+  }
   init_MR_Jaeschke(&S, N);
   k = (!bad_for_base(&S, gen_2) && IsLucasPsP(N));
   avma = av; return k;

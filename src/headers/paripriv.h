@@ -573,6 +573,7 @@ GEN     squfof(GEN n);
 long    BPSW_psp_nosmalldiv(GEN N);
 int     Fl_MR_Jaeschke(ulong n, long k);
 int     MR_Jaeschke(GEN n, long k);
+long    isanypower_nosmalldiv(GEN N, GEN *px);
 int     uisprime_nosmalldiv(ulong n);
 
 /* init.c */

@@ -3823,14 +3823,10 @@ ifactor(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
 
   if (all)
   { /* smallfact: look for easy pure powers then stop. Cf Z_isanypower */
-    GEN x = n, y;
-    ulong mask = 7, ex0 = 11;
-    long ex, k = 1;
+    GEN x;
+    long k;
     av = avma;
-    while (Z_issquareall(x, &y)) { k <<= 1; x = y; }
-    while ( (ex = is_357_power(x, &y, &mask)) ) { k *= ex; x = y; }
-    /* stop when x^(1/k) < 2^14 */
-    while ( (ex = is_pth_power(x, &y, &ex0, 15)) ) { k *= ex; x = y; }
+    k = isanypower_nosmalldiv(n, &x);
     if (k > 1) affii(x, n);
     avma = av; STOREi(&nb, n, k);
     if (DEBUGLEVEL >= 2) {
