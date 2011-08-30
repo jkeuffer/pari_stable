@@ -1982,27 +1982,41 @@ tocomplex(GEN x, long l)
   gel(y,2) = real_0(l); return y;
 }
 
-/* x,y are t_COMPLEX, are they approximately conjugate ? */
-static int
-isconj(GEN x, GEN y, long e)
-{
-  pari_sp av = avma;
-  long i= (gexpo( gsub(gel(x,1),gel(y,1)) ) < e
-        && gexpo( gadd(gel(x,2),gel(y,2)) ) < e);
-  avma = av; return i;
-}
-
-/* x,y are t_COMPLEX, compare lexicographically, up to 2^-e absolute error */
+/* x,y are t_COMPLEX of t_REALs or t_REAL, compare lexicographically,
+ * up to 2^-e absolute error */
 static int
 cmp_complex_appr(void *E, GEN x, GEN y)
 {
   long e = (long)E;
-  GEN z;
-  z = gsub(gel(x,1), gel(y,1));
-  if (gexpo(z) >= e) return (int)signe(z);
-  z = gsub(gel(x,2), gel(y,2));
-  if (gexpo(z) >= e) return (int)signe(z);
-  return 0;
+  GEN z, xi, yi, xr, yr;
+  long sxi, syi;
+  if (typ(x) == t_COMPLEX) { xr = gel(x,1); xi = gel(x,2); sxi = signe(xi); }
+  else { xr = x; xi = NULL; sxi = 0; }
+  if (typ(y) == t_COMPLEX) { yr = gel(y,1); yi = gel(y,2); syi = signe(yi); }
+  else { yr = y; yi = NULL; syi = 0; }
+  /* Compare absolute values of imaginary parts */
+  if (!sxi)
+  {
+    if (syi && expo(yi) >= e) return -1;
+    /* |Im x| ~ |Im y| ~ 0 */
+  }
+  else if (!syi)
+  {
+    if (sxi && expo(xi) >= e) return 1;
+    /* |Im x| ~ |Im y| ~ 0 */
+  }
+  else
+  {
+    long sz;
+    z = addrr_sign(xi, 1, yi, -1);
+    sz = signe(z);
+    if (sz && expo(z) >= e) return (int)sz;
+  }
+  /* |Im x| ~ |Im y|, sort according to real parts */
+  z = subrr(xr, yr);
+  if (expo(z) >= e) return (int)signe(z);
+  /* Re x ~ Re y. Place negative absolute value before positive */
+  return (int) (sxi - syi);
 }
 
 /* the vector of roots of p, with absolute error 2^(- bit_accuracy(l)) */
@@ -2010,8 +2024,8 @@ static GEN
 roots_aux(GEN p, long l, long clean)
 {
   pari_sp av = avma;
-  long n, i, k, s, t, ex;
-  GEN L, res, rea, com;
+  long n, i, ex;
+  GEN L, res;
 
   if (typ(p) != t_POL)
   {
@@ -2024,49 +2038,22 @@ roots_aux(GEN p, long l, long clean)
   if (lg(p) == 3) return cgetg(1,t_COL); /* constant polynomial */
 
   if (l < 3) l = 3;
-  L = roots_com(p, prec2nbits(l)); n = lg(L);
-  if (!isreal(p))
-  {
-    res = cgetg(n,t_COL);
-    for (i=1; i<n; i++) gel(res,i) = tocomplex(gel(L,i),l);
-    gen_sort_inplace(res, (void*)0, &cmp_complex_appr, NULL);
-    return gerepileupto(av,res);
-  }
   ex = 5 - prec2nbits(l);
-  rea = cgetg(n,t_COL); s = 0;
-  com = cgetg(n,t_COL); t = 0;
+  L = roots_com(p, prec2nbits(l)); n = lg(L);
+  res = cgetg(n,t_COL);
   for (i=1; i<n; i++)
   {
     GEN c = gel(L,i);
-    if (isrealappr(c,ex)) {
+    if (clean && isrealappr(c,ex))
+    {
       if (typ(c) == t_COMPLEX) c = gel(c,1);
-      gel(rea,++s) = c;
+      c = gtofp(c, l);
     }
     else
-      gel(com,++t) = c;
+      c = tocomplex(c, l);
+    gel(res,i) = c;
   }
-  setlg(rea,s+1); gen_sort_inplace(rea, &gcmp, &cmp_nodata, NULL);
-  setlg(com,t+1); gen_sort_inplace(com, (void*)ex, &cmp_complex_appr, NULL);
-  res = cgetg(n,t_COL);
-  if (clean)
-    for (i=1; i<=s; i++) gel(res,i) = gtofp(gel(rea,i), l);
-  else
-    for (i=1; i<=s; i++) gel(res,i) = tocomplex(gel(rea,i), l);
-  for (i=1; i<=t; i++)
-  {
-    GEN c = gel(com,i); if (!c) continue;
-    gel(res,++s) = tocomplex(c,l);
-    for (k=i+1; k<=t; k++)
-    {
-      GEN d = gel(com,k); if (!d) continue;
-      if (isconj(c,d,ex))
-      {
-        gel(res,++s) = tocomplex(d,l);
-        gel(com,k) = NULL; break;
-      }
-    }
-    if (k==n) pari_err(bugparier,"roots (conjugates)");
-  }
+  gen_sort_inplace(res, (void*)ex, &cmp_complex_appr, NULL);
   return gerepileupto(av,res);
 }
 GEN
