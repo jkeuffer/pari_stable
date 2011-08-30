@@ -63,6 +63,7 @@ BA 12- [darwin] do not use dylib_ prefix to ld options [#1210]
    20- first call isanypower() in BPSP_psp_nosmalldiv() when input is > 2^512
        [ < 1% of required time, 1 order of magnitude faster when it succeeds ]
        [ #1074 ]
+   21- sort polroots() output so that it no longer depends on current precision
 
   Added
     1- mathnf for matrices over K[X] [#41]

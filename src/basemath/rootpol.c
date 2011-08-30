@@ -1982,7 +1982,7 @@ tocomplex(GEN x, long l)
   gel(y,2) = real_0(l); return y;
 }
 
-/* x,y are t_COMPLEX */
+/* x,y are t_COMPLEX, are they approximately conjugate ? */
 static int
 isconj(GEN x, GEN y, long e)
 {
@@ -1992,13 +1992,26 @@ isconj(GEN x, GEN y, long e)
   avma = av; return i;
 }
 
+/* x,y are t_COMPLEX, compare lexicographically, up to 2^-e absolute error */
+static int
+cmp_complex_appr(void *E, GEN x, GEN y)
+{
+  long e = (long)E;
+  GEN z;
+  z = gsub(gel(x,1), gel(y,1));
+  if (gexpo(z) >= e) return (int)signe(z);
+  z = gsub(gel(x,2), gel(y,2));
+  if (gexpo(z) >= e) return (int)signe(z);
+  return 0;
+}
+
 /* the vector of roots of p, with absolute error 2^(- bit_accuracy(l)) */
 static GEN
 roots_aux(GEN p, long l, long clean)
 {
   pari_sp av = avma;
-  long n, i, k, s, t, e;
-  GEN c, L, p1, res, rea, com;
+  long n, i, k, s, t, ex;
+  GEN L, res, rea, com;
 
   if (typ(p) != t_POL)
   {
@@ -2016,21 +2029,24 @@ roots_aux(GEN p, long l, long clean)
   {
     res = cgetg(n,t_COL);
     for (i=1; i<n; i++) gel(res,i) = tocomplex(gel(L,i),l);
+    gen_sort_inplace(res, (void*)0, &cmp_complex_appr, NULL);
     return gerepileupto(av,res);
   }
-  e = 5 - prec2nbits(l);
+  ex = 5 - prec2nbits(l);
   rea = cgetg(n,t_COL); s = 0;
   com = cgetg(n,t_COL); t = 0;
   for (i=1; i<n; i++)
   {
-    p1 = gel(L,i);
-    if (isrealappr(p1,e)) {
-      if (typ(p1) == t_COMPLEX) p1 = gel(p1,1);
-      gel(rea,++s) = p1;
+    GEN c = gel(L,i);
+    if (isrealappr(c,ex)) {
+      if (typ(c) == t_COMPLEX) c = gel(c,1);
+      gel(rea,++s) = c;
     }
-    else gel(com,++t) = p1;
+    else
+      gel(com,++t) = c;
   }
-  setlg(rea,s+1); rea = sort(rea);
+  setlg(rea,s+1); gen_sort_inplace(rea, &gcmp, &cmp_nodata, NULL);
+  setlg(com,t+1); gen_sort_inplace(com, (void*)ex, &cmp_complex_appr, NULL);
   res = cgetg(n,t_COL);
   if (clean)
     for (i=1; i<=s; i++) gel(res,i) = gtofp(gel(rea,i), l);
@@ -2038,15 +2054,15 @@ roots_aux(GEN p, long l, long clean)
     for (i=1; i<=s; i++) gel(res,i) = tocomplex(gel(rea,i), l);
   for (i=1; i<=t; i++)
   {
-    c = gel(com,i); if (!c) continue;
+    GEN c = gel(com,i); if (!c) continue;
     gel(res,++s) = tocomplex(c,l);
     for (k=i+1; k<=t; k++)
     {
-      p1 = gel(com,k); if (!p1) continue;
-      if (isconj(c,p1,e))
+      GEN d = gel(com,k); if (!d) continue;
+      if (isconj(c,d,ex))
       {
-        gel(res,++s) = tocomplex(p1,l);
-        com[k] = 0; break;
+        gel(res,++s) = tocomplex(d,l);
+        gel(com,k) = NULL; break;
       }
     }
     if (k==n) pari_err(bugparier,"roots (conjugates)");

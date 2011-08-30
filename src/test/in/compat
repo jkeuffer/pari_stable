@@ -225,7 +225,7 @@ initalgred(nfpol)
 initalgred2(nfpol)
 vp=primedec(nf,3)[1]
 idx=idealmul(nf,idmat(5),vp)
-idy=ideallllred(nf,idx,[1,5,6])
+idy=ideallllred(nf,idx,[1,6,5])
 idealadd(nf,idx,idy)
 idealaddone(nf,idx,idy)
 idealaddmultone(nf,[idy,idx])
