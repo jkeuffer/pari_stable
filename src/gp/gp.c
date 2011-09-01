@@ -775,7 +775,7 @@ what_readline(void)
             (GP_DATA->use_readline)? "enabled": "disabled",
             extra);
 #else
-  s = "not compiled in";
+  s = (char*)"not compiled in";
 #endif
   return s;
 }
