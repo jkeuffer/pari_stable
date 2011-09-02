@@ -253,13 +253,12 @@ padicprec(GEN x, GEN p)
   return 0; /* not reached */
 }
 
-#define DEGREE0 -LONG_MAX
 /* Degree of x (scalar, t_POL, t_RFRAC) wrt variable v if v >= 0,
- * wrt to main variable if v < 0.
- */
+ * wrt to main variable if v < 0. */
 long
 poldegree(GEN x, long v)
 {
+  const long DEGREE0 = -LONG_MAX;
   long tx = typ(x), lx,w,i,d;
 
   if (is_scalar_t(tx)) return gequal0(x)? DEGREE0: 0;
@@ -269,7 +268,7 @@ poldegree(GEN x, long v)
       if (!signe(x)) return DEGREE0;
       w = varn(x);
       if (v < 0 || v == w) return degpol(x);
-      if (v < w) return 0;
+      if (varncmp(v, w) < 0) return 0;
       lx = lg(x); d = DEGREE0;
       for (i=2; i<lx; i++)
       {
@@ -283,6 +282,38 @@ poldegree(GEN x, long v)
       return poldegree(gel(x,1),v) - poldegree(gel(x,2),v);
   }
   pari_err(typeer,"degree");
+  return 0; /* not reached  */
+}
+
+/* assume v >= 0 and x is a POLYNOMIAL in v, return deg_v(x) */
+long
+RgX_degree(GEN x, long v)
+{
+  long tx = typ(x), lx, w, i, d;
+
+  if (is_scalar_t(tx)) return gequal0(x)? -1: 0;
+  switch(tx)
+  {
+    case t_POL:
+      if (!signe(x)) return -1;
+      w = varn(x);
+      if (v == w) return degpol(x);
+      if (varncmp(v, w) < 0) return 0;
+      lx = lg(x); d = -1;
+      for (i=2; i<lx; i++)
+      {
+        long e = RgX_degree(gel(x,i), v);
+        if (e > d) d = e;
+      }
+      return d;
+
+    case t_RFRAC:
+      w = varn(gel(x,2));
+      if (varncmp(v, w) < 0) return 0;
+      if (RgX_degree(gel(x,2),v)) pari_err(talker, "not a t_POL in RgX_degree");
+      return RgX_degree(gel(x,1),v);
+  }
+  pari_err(typeer,"RgX_degree");
   return 0; /* not reached  */
 }
 
@@ -1261,6 +1292,7 @@ RgX_RgM_eval(GEN Q, GEN x)
   GEN z;
   long d = degpol(Q), rtd, n = lg(x)-1;
   if (d < 0) return zeromat(n, n);
+  if (d == 0) return scalarmat(gel(Q,2), n);
   rtd = (long) sqrt((double)d);
   z = RgX_RgMV_eval(Q, RgM_powers(x, rtd));
   return gerepileupto(av, z);
@@ -1324,28 +1356,17 @@ gsubst(GEN x, long v, GEN y)
   {
     case t_POL:
       if (lx==2)
-        return (ty==t_MAT)? scalarmat(gen_0,ly-1): gen_0;
+        return ty == t_MAT? scalarmat(gen_0,ly-1): gen_0;
 
       vx = varn(x);
+      if (varncmp(vx, v) > 0) return ty == t_MAT? scalarmat(x,ly-1): gcopy(x);
       if (varncmp(vx, v) < 0)
       {
-        if (varncmp(gvar(y), vx) > 0)
-        { /* easy special case */
-          z = cgetg(lx, t_POL); z[1] = x[1];
-          for (i=2; i<lx; i++) gel(z,i) = gsubst(gel(x,i),v,y);
-          return normalizepol_lg(z,lx);
-        }
-        /* general case */
-        av = avma; x = swap_vars(x, v);
-        return gerepileupto(av, poleval(x,y));
+        av = avma; z = cgetg(lx, t_POL); z[1] = x[1];
+        for (i=2; i<lx; i++) gel(z,i) = gsubst(gel(x,i),v,y);
+        return gerepileupto(av, poleval(z, pol_x(vx)));
       }
-      /* v <= vx */
-      if (ty!=t_MAT)
-        return varncmp(vx,v) > 0 ? gcopy(x): poleval(x,y);
-
-      if (varncmp(vx, v) > 0) return scalarmat(x,ly-1);
-      if (lx==3) return scalarmat(gel(x,2),ly-1);
-      return RgX_RgM_eval(x, y);
+      return ty == t_MAT? RgX_RgM_eval(x, y): poleval(x,y);
 
     case t_SER:
       vx = varn(x);

@@ -2314,7 +2314,7 @@ Flx_FlxY_resultant(GEN a, GEN b, ulong pp)
   return gerepileupto(ltop,z);
 }
 
-/* return a t_POL (in variable v) whose coeffs are the coeffs of b,
+/* return a t_POL (in variable v >= 0) whose coeffs are the coeffs of b,
  * in variable v. This is an incorrect PARI object if initially varn(b) << v.
  * We could return a vector of coeffs, but it is convenient to have degpol()
  * and friends available. Even in that case, it will behave nicely with all
@@ -2323,7 +2323,7 @@ Flx_FlxY_resultant(GEN a, GEN b, ulong pp)
 GEN
 swap_vars(GEN b0, long v)
 {
-  long i, n = poldegree(b0, v);
+  long i, n = RgX_degree(b0, v);
   GEN b, x;
   if (n < 0) return pol_0(v);
   b = cgetg(n+3, t_POL); x = b + 2;

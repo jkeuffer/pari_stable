@@ -5624,6 +5624,9 @@ $q$ and pseudo-remainder $r$ such that $\kbd{lc}(y)^{\deg(x) - \deg(y) + 1}x
 \fun{GEN}{RgX_pseudorem}{GEN x, GEN y} return the remainder
 in the pseudo-division of $x$ by $y$.
 
+\fun{long}{RgX_degree}{GEN x, long v} $x$ being a \typ{POL} and $v \geq 0$,
+returns the degree in $v$ of $x$. Error if $x$ is not a polynomial in $v$.
+
 \fun{GEN}{RgXQX_pseudorem}{GEN x, GEN y, GEN T} return the remainder
 in the pseudo-division of $x$ by $y$ over $R[X]/(T)$.
 

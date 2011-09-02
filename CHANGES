@@ -34,6 +34,7 @@ VL 19- [makefile] Incorrect -I and -L flags order [#1212]
    25- wrong sign in polresultant() [#1234]
    26- change default(realprecision) so that it returns the internal precision
        [ as precision(1.) ], not the number of printed digits. [#1235]
+   27- subst(Y/X,X,x) -> 0
 
   Changed
     1- mathnf: swapped flag 3 and 5.
