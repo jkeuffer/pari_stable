@@ -109,12 +109,13 @@ done
 # runpath
 tmp=$runpath
 for d in "$plotrunpath" "$gmp" "$readline" "/usr/lib"; do
-  if test -n "$d"; then
-    case "$tmp" in
-      $d|*$dir_sep$d|*$dir_sep$d$dir_sep*);;
-      *) tmp="$tmp$dir_sep$d";;
-    esac
-  fi
+  case "$d" in
+    ""|yes) ;;
+    *) case "$tmp" in
+        $d|*$dir_sep$d|*$dir_sep$d$dir_sep*);;
+        *) tmp="$tmp$dir_sep$d";;
+       esac ;;
+  esac
 done
 RUNPTH_FINAL=
 RUNPTH=

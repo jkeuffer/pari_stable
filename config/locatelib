@@ -28,8 +28,8 @@ if test -z "$try"; then
       *) rpmlib=$lib; devlib=lib$lib ;;
     esac
     echo "###"
-    echo "### lib$lib.so not found. Please install $lib development files."
-    echo "### They usually come in $rpmlib-devel (RPM) or $devlib-dev (Debian) packages"
+    echo "### lib$lib.so not found. Maybe install $lib development files?"
+    echo "### E.g.$rpmlib-devel (RPM) or $devlib-dev (Debian) packages"
     echo "###"
   fi
 fi

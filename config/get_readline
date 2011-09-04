@@ -49,18 +49,17 @@ if test -r $exe; then
 fi
 rm -f $exe $exe$exe_suff;
 
-if test -n "$readline"; then
-  case "$readline_version" in
-  *Editline*|*EditLine*) readline=
-    echo "###"
-    echo "### Editline wrapper detected, building without readline support"
-    echo "###";;
-  "") readline=
-    echo "###"
-    echo "### Readline library does not seem to work. Maybe install libncurses?"
-    echo "###";;
-  esac
-fi
+case "$readline_version" in
+*Editline*|*EditLine*) readline=
+  echo "###"
+  echo "### Editline wrapper detected, building without readline support"
+  echo "###";;
+"") readline=
+  echo "###"
+  echo "### Readline library does not seem to work. Maybe install libncurses?"
+  echo "###";;
+*) if test -z "$readline"; then readline=yes; fi;;
+esac
 
 if test -n "$readline"; then
   if test "$fastread" != yes; then
