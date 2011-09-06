@@ -1,7 +1,7 @@
 This file lists the things that ought to be implemented / fixed.  Most
 items require major work, and some may not be that desireable after all.
 If you intend to work on any of these things, have a look at
-README-subversion and drop an email to pari-dev.
+README-git and drop an email to pari-dev.
 
 Priority classification (first column): [subjective and debatable]
 5    as soon as possible
