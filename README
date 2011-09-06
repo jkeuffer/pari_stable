@@ -23,7 +23,7 @@ The file README.WIN is specific to Windows 3.2 (95/98/2000/NT) users.
 For the adventurous:
 * If you want to check up-to-date, but possibly unstable, development
 versions of PARI/GP or do development work yourself, see the file
-README-subversion.
+README-git.
 
 * Directory Odos/ contains information to compile binaries on DOS-based
 systems (DOS, OS/2, Win3.1, Win95/98/NT/CE).
