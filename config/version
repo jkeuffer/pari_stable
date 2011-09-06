@@ -12,29 +12,16 @@ version_code=`expr $VersionMajor \\* 65536 + $VersionMinor \\* 256 + $patch`
 
 # Status: alpha, beta, released, development
 stat=development
-vcsversion=
 
 # soname of stable libpari.so is libpari.so.$soname_num
 
-patchlevel_verbose=
-if test -d "$TOP/.svn"; then
-  vcsversion="svn-"`svnversion $TOP`
-else if test -d "$TOP/.git"; then
+if test -d "$TOP/.git"; then
   vcsversion="git-"`git log -1 --pretty=format:%h -- $TOP`
-else if test -d "$TOP/CVS"; then
-  vcsversion="CHANGES-"`$head 1 "$TOP/CHANGES" | awk '{print $4}'`
-else if test -r "svnversion"; then
-  vcsversion="svn-"`cat svnversion`
-      fi
-    fi
-  fi
-fi
-
-if test -n "$vcsversion"; then
   status="$stat $vcsversion"
   patchlevel_verbose="[ $status ]"
 else
   status="$stat"
+  patchlevel_verbose=
 fi
 version=$VersionMajor.$VersionMinor
 pari_release="$version.$patch"

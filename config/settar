@@ -6,11 +6,10 @@ extrafile=
 
 case "$STATUS" in
   alpha|beta) dir="$dir.$STATUS";;
-  development) dir="$dir.alpha";;
-  svnsnapshot) STATUS=development;
-               extrafile=config/svnversion;
-               svnversion > config/svnversion;
-               dir="$dir.svn`cat config/svnversion`";;
+  snapshot) STATUS=development;
+            extrafile=config/gitversion;
+            git describe > config/gitversion;
+            dir=`cat config/gitversion`;;
 esac
 tarfile=$dir.tar
 v='config/version'
@@ -30,7 +29,7 @@ fi
 mkdir $dir && mv $tarfile $dir
 cd $dir && tar xf $tarfile && rm -f $tarfile && cd ..
 tar cf $tarfile $dir
-rm -f config/svnversion
+rm -f config/gitversion
 rm -rf $dir
 rm -f $tarfile.gz
 gzip  $tarfile

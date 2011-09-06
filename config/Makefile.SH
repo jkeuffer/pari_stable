@@ -628,13 +628,8 @@ parilvl0.h: \$(L0MODS)
 EOT
 fi
 
-if test -f $TOP/.svn/entries; then
-  vcfile="../.svn/entries"
-else if test -f $TOP/.git/index; then
+if test -f $TOP/.git/index; then
   vcfile="../.git/index"
-  fi
-fi
-if test -n "$vcfile"; then
   cat >> $file <<EOT
 paricfg.h: $vcfile $cfg/version
 	-sh $cfg/setversion

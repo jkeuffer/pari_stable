@@ -9,7 +9,7 @@ dosversion=`echo $version|sed -e 's/\.//g'`
 dosversion="_$dosversion$patch"
 __status__=$status
 case "$status" in
-  development*) __status__='development';;
+  development*) __status__='snapshot';;
 esac
 
 cat > $file << EOT
@@ -18,7 +18,6 @@ cat > $file << EOT
 #
 SHELL = $make_sh
 VERS = pari-$version.$patch $__status__
-SVN=svn+ssh://kb@pari.math.u-bordeaux.fr/home/svn/pari
 TAG=release-$VersionMajor-$VersionMinor-$patch
 
 dft target::
@@ -34,7 +33,7 @@ dft target::
 	@echo "	dbg	                Compile gp binary suitable for debugging"
 	@echo "	prf	                Compile gp binary suitable for profiling"
 	@echo "	distrib,alpha,beta,release  Create a new distribution"
-	@echo "	svnsnapshot             Create a svnsnapshot"
+	@echo "	snapshot                Create a snapshot"
 	@echo "	ctags			Generate VI/VIM tags file in ./src"
 	@echo "	etags			Generate Emacs  tags file in ./src"
 	@echo "	tune	                Generate tuning utility"
@@ -67,17 +66,14 @@ clean:: cleandoc cleanall
 distrib:
 	$config_dir/settar \$(VERS) $__status__
 
-svntag:
-	@echo svn copy \$(SVN)/trunk \$(SVN)/tags/\$(TAG)
-
-alpha: svntag
+alpha:
 	$config_dir/settar \$(VERS) alpha
-beta: svntag
+beta:
 	$config_dir/settar \$(VERS) beta
-release: svntag
+release:
 	$config_dir/settar \$(VERS) released
-svnsnapshot:
-	$config_dir/settar \$(VERS) svnsnapshot
+snapshot:
+	$config_dir/settar \$(VERS) snapshot
 
 dosdistrib: gpman
 	-zip -kr GPB${dosversion}.ZIP GP.EXE README README.DOS ../EMX/README.DOC ../RSX/README.TXT
