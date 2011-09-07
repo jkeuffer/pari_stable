@@ -1435,8 +1435,14 @@ update_logfile(const char *prompt, const char *s)
 void
 echo_and_log(const char *prompt, const char *s)
 {
-  if (GP_DATA->echo) { pari_puts(prompt); pari_puts(s); pari_putc('\n'); }
-  else update_logfile(prompt, s);
+  if (GP_DATA->echo) {
+    /* not pari_puts(): would duplicate in logfile */
+    fputs(prompt, pari_outfile);
+    fputs(s,      pari_outfile);
+    fputc('\n',   pari_outfile);
+    pari_set_last_newline(1);
+  }
+  update_logfile(prompt, s);
   pari_flush();
 }
 
