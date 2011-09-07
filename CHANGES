@@ -67,6 +67,7 @@ BA 12- [darwin] do not use dylib_ prefix to ld options [#1210]
    21- sort polroots() output so that it no longer depends on current precision
    22- delete README-subversion, replace with README-git
    23- move README.os2 to src/system/os2/README
+   24- change compiler version printout in gp header
 
   Added
     1- mathnf for matrices over K[X] [#41]

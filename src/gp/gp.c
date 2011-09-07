@@ -798,11 +798,11 @@ what_cc(void)
   char *s;
 #ifdef GCC_VERSION
 #  ifdef __cplusplus
-#    define Format "g++-%s"
+#    define Format "(C++) %s"
 #  else
-#    define Format "gcc-%s"
+#    define Format "%s"
 #  endif
-  s = stackmalloc(4 + strlen(GCC_VERSION) + 1);
+  s = stackmalloc(6 + strlen(GCC_VERSION) + 1);
   (void)sprintf(s, Format, GCC_VERSION);
 #else
 #  ifdef _MSC_VER
