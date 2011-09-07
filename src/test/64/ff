@@ -80,8 +80,7 @@ Mod(4294967310, 4294967311), Mod(1, 4294967311)*x^3 + Mod(1, 4294967311)*x^2
 11, a, [x + (268392743*a^2 + 2459390605*a + 1304316255), 1; x + (4026574568*
 a^2 + 1835576706*a + 2990651057), 1], [268392743*a^2 + 2459390605*a + 130431
 6254, 4026574568*a^2 + 1835576706*a + 2990651056]~]
-? test2(p)=ffgen(x*Mod(1,p));g=ffprimroot(ffgen((x+1)*Mod(1,p)),&o);print([g
-,o]);fflog(g^17,g,o);
+? test2(p)=ffgen(x*Mod(1,p));g=ffprimroot(ffgen((x+1)*Mod(1,p)),&o);print([g,o]);fflog(g^17,g,o);
 ? test2(2)
 [1, [1, matrix(0,2)]]
 0
@@ -115,4 +114,4 @@ x^58 + x^57 + x^56 + x^52 + x^51 + x^49 + x^46 + x^45 + x^42 + x^39 + x^36 +
 [x + t 6]
 
 ? print("Total time spent: ",gettime);
-Total time spent: 1024
+Total time spent: 1076

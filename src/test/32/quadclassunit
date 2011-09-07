@@ -1,6 +1,5 @@
 ? gettime;
-? test(D)=for(d=D,D+10^3,if(!isfundamental(d),next);print(d," ",quadclassuni
-t(d).cyc));
+? test(D)=for(d=D,D+10^3,if(!isfundamental(d),next);print(d," ",quadclassunit(d).cyc));
 ? setrand(1);test(10^15);test(-10^15)
 1000000000000001 [4, 4, 2, 2, 2]
 1000000000000005 [2, 2, 2, 2]
@@ -621,4 +620,4 @@ t(d).cyc));
 ? setrand(38);quadclassunit(-29920).cyc
 [4, 2, 2, 2]
 ? print("Total time spent: ",gettime);
-Total time spent: 6324
+Total time spent: 7144

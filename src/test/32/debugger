@@ -1,7 +1,6 @@
    echo = 1 (on)
 ? default(breakloop,1)
-? my(bound=100,step=20,halt=41);check(B)=my(bi=[B^2]);for(i=1,bound,my(p=i+s
-tep,N=p^2);if(i==halt,error("check:",N)))
+? my(bound=100,step=20,halt=41);check(B)=my(bi=[B^2]);for(i=1,bound,my(p=i+step,N=p^2);if(i==halt,error("check:",N)))
 (B)->my(bound=100,step=20,halt=41);my(bi=[B^2]);for(i=1,bound,my(p=i+step,N=
 p^2);if(i==halt,error("check:",N)))
 ? check(1000);
@@ -18,4 +17,4 @@ break> break
 ? [bound,step,halt,i,p,N,bi,B]
 [bound, step, halt, i, p, N, bi, B]
 ? print("Total time spent: ",gettime);
-Total time spent: 4
+Total time spent: 0
