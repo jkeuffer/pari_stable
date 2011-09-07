@@ -1,6 +1,5 @@
    echo = 1 (on)
-? gettime;p2=Pol([1,3021,-786303,-6826636057,-546603588746,3853890514072057]
-);
+? gettime;p2=Pol([1,3021,-786303,-6826636057,-546603588746,3853890514072057]);
 ? fa=[11699,6;2392997,2;4987333019653,2];
 ? setrand(1);a=matrix(3,5,j,k,vectorv(5,l,random\10^8));
 ? setrand(1);as=matrix(3,3,j,k,vectorv(5,l,random\10^8));
@@ -1016,4 +1015,4 @@ x^15 - 15*x^11 + 75*x^7 - x^5 - 125*x^3 + 5*x + 1
 ? getheap
 [175, 113027]
 ? print("Total time spent: ",gettime);
-Total time spent: 116
+Total time spent: 112
