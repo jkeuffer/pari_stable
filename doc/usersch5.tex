@@ -5630,6 +5630,12 @@ returns the degree in $v$ of $x$. Error if $x$ is not a polynomial in $v$.
 \fun{GEN}{RgXQX_pseudorem}{GEN x, GEN y, GEN T} return the remainder
 in the pseudo-division of $x$ by $y$ over $R[X]/(T)$.
 
+\fun{int}{ZXQX_divides}{GEN x, GEN y, GEN T} let $T$ be a monic irreducible
+\kbd{ZX}, let $x, y$ be \typ{POL} whose coefficients are either \typ{INT}s or
+\kbd{ZX} in the same variable as $T$. Assume further that the leading
+coefficient of $y$ is an integer. Return $1$ if $y | x$ in $(\Z[Y]/(T))[X]$,
+and $0$ otherwise.
+
 \fun{GEN}{RgXQX_pseudodivrem}{GEN x, GEN y, GEN T, GEN *ptr} compute
 a pseudo-quotient $q$ and pseudo-remainder $r$ such that
 $\kbd{lc}(y)^{\deg(x) - \deg(y) + 1}x = qy + r$ in $R[X]/(T)$. Return $q$ and

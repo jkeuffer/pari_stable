@@ -190,13 +190,16 @@ nfgcd_all(GEN P, GEN Q, GEN T, GEN den, GEN *Pnew)
     sol = RgM_to_RgXX(sol,vP,vT);
     dsol = Q_primpart(sol);
 
-    R = RgXQX_pseudorem(Q, dsol, T);
-    if (signe(R)) continue;
+    if (!ZXQX_divides(Q, dsol, T)) continue;
     if (Pnew)
+    {
       *Pnew = RgXQX_pseudodivrem(P, dsol, T, &R);
+      if (signe(R)) continue;
+    }
     else
-      R = RgXQX_pseudorem(P, dsol, T);
-    if (signe(R)) continue;
+    {
+      if (!ZXQX_divides(P, dsol, T)) continue;
+    }
     gerepileall(ltop, Pnew? 2: 1, &dsol, Pnew);
     return dsol; /* both remainders are 0 */
   }

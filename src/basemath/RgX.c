@@ -1353,6 +1353,64 @@ rem(GEN c, GEN T)
   return c;
 }
 
+/* x, y, are ZYX, lc(y) is an integer, T is a ZY */
+int
+ZXQX_divides(GEN x, GEN y, GEN T)
+{
+  long dx, dy, dz, i, p;
+  pari_sp av = avma, av2, lim;
+  GEN y_lead;
+
+  if (!signe(y)) pari_err(gdiver);
+  dy = degpol(y); y_lead = gel(y,dy+2);
+  if (typ(y_lead) == t_POL) y_lead = gel(y_lead, 2); /* t_INT */
+  /* if monic, no point in using pseudo-division */
+  if (gequal1(y_lead)) return signe(RgXQX_rem(x, y, T)) == 0;
+  dx = degpol(x);
+  if (dx < dy) return !signe(x);
+  (void)new_chunk(2);
+  x = RgX_recip_shallow(x)+2;
+  y = RgX_recip_shallow(y)+2;
+  /* pay attention to sparse divisors */
+  for (i = 1; i <= dy; i++)
+    if (!signe(gel(y,i))) gel(y,i) = NULL;
+  dz = dx-dy; p = dz+1;
+  av2 = avma; lim = stack_lim(av2,1);
+  for (;;)
+  {
+    GEN m, x0 = gel(x,0), y0 = y_lead, cx = content(x0);
+    x0 = gneg(x0); p--;
+    m = gcdii(cx, y0);
+    if (!equali1(m))
+    {
+      x0 = gdiv(x0, m);
+      y0 = diviiexact(y0, m);
+      if (equali1(y0)) y0 = NULL;
+    }
+    for (i=1; i<=dy; i++)
+    {
+      GEN c = gel(x,i); if (y0) c = gmul(y0, c);
+      if (gel(y,i)) c = gadd(c, gmul(x0,gel(y,i)));
+      if (typ(c) == t_POL) c = ZX_rem(c, T);
+      gel(x,i) = c;
+    }
+    for (   ; i<=dx; i++)
+    {
+      GEN c = gel(x,i); if (y0) c = gmul(y0, c);
+      if (typ(c) == t_POL) c = ZX_rem(c, T);
+      gel(x,i) = c;
+    }
+    do { x++; dx--; } while (dx >= 0 && !signe(gel(x,0)));
+    if (dx < dy) break;
+    if (low_stack(lim,stack_lim(av2,1)))
+    {
+      if(DEBUGMEM>1) pari_warn(warnmem,"ZXQX_divides dx = %ld >= %ld",dx,dy);
+      gerepilecoeffs(av2,x,dx+1);
+    }
+  }
+  avma = av; return (dx < 0);
+}
+
 /* T either NULL or a t_POL. */
 GEN
 RgXQX_pseudorem(GEN x, GEN y, GEN T)
