@@ -41,7 +41,7 @@ RgX_get_1(GEN x)
     RgX_type_decode(tx, &i /*junk*/, &tx);
   switch(tx)
   {
-    case t_INTMOD: retmkintmod(gen_1,p);
+    case t_INTMOD: retmkintmod(gen_1, icopy(p));
     case t_PADIC: return cvtop(gen_1, p, lx);
     case t_FFELT: return FF_1(T);
     default: return gen_1;
