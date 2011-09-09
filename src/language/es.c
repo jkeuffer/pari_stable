@@ -2688,7 +2688,13 @@ bruti_intern(GEN g, pariout_t *T, outString *S, int addsign)
 
     case t_STR:
       quote_string(S, GSTR(g)); break;
-
+    case t_ERROR:
+      {
+        char *s = pari_err2str(g);
+        str_puts(S, "error(");
+        quote_string(S, s); free(s);
+        str_puts(S, ")"); break;
+      }
     case t_CLOSURE:
       if (lg(g)>=7)
       {

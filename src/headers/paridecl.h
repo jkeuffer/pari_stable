@@ -1944,6 +1944,7 @@ void    pari_close(void);
 void    pari_close_opts(ulong init_opts);
 int     pari_daemon(void);
 void    pari_err(int numerr, ...);
+char *  pari_err2str(GEN err);
 void    pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts);
 void    pari_init(size_t parisize, ulong maxprime);
 void    pari_stackcheck_init(void *stack_base);
