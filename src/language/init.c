@@ -1209,6 +1209,50 @@ pari_err(int numerr, ...)
   err_recover(numerr);
 }
 
+static const char *
+numerr_name(long numerr)
+{
+  switch ((enum err_list) numerr)
+  {
+  case syntaxer: return "syntaxer";
+  case bugparier: return "bugparier";
+  case alarmer: return "alarmer";
+  case openfiler: return "openfiler";
+  case talker: return "talker";
+  case flagerr: return "flagerr";
+  case impl: return "impl";
+  case archer: return "archer";
+  case notfuncer: return "notfuncer";
+  case precer: return "precer";
+  case typeer: return "typeer";
+  case consister: return "consister";
+  case user: return "user";
+  case errpile: return "errpile";
+  case overflower: return "overflower";
+  case mattype1: return "mattype1";
+  case primer1: return "primer1";
+  case invmoder: return "invmoder";
+  case constpoler: return "constpoler";
+  case redpoler: return "redpoler";
+  case zeropoler: return "zeropoler";
+  case operi: return "operi";
+  case operf: return "operf";
+  case gdiver: return "gdiver";
+  case memer: return "memer";
+  case negexper: return "negexper";
+  case sqrter5: return "sqrter5";
+  case noer: return "noer";
+  }
+  return "invalid error number";
+}
+
+GEN
+err_name(GEN err)
+{
+  if (typ(err)!=t_ERROR) pari_err(typeer,"errname");
+  return strtoGENstr(numerr_name(err_get_num(err)));
+}
+
 /* Try f (trapping error e), recover using r (break_loop, if NULL) */
 GEN
 trap0(const char *e, GEN r, GEN f)

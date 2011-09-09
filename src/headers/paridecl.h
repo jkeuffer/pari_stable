@@ -1916,6 +1916,7 @@ void    dbg_release(void);
 long    err_catch(long errnum, jmp_buf *penv);
 long    err_get_num(GEN e);
 void    err_leave(long n);
+GEN     errname(GEN err);
 GEN     gclone(GEN x);
 void    gclone_refc(GEN x);
 GEN     gcopy(GEN x);
