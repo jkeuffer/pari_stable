@@ -539,6 +539,7 @@ heegner_L1(void*E, GEN *psum, GEN n, GEN a, long jmax)
   long j, l = lg(*psum);
   GEN G = heegner_G(h,n);
   GEN sum = cgetg(l, t_VEC);
+  (void)jmax;
   for (j = 1; j < l; j++)
     gel(sum, j) = addrr(gel(*psum,j), divri(mulir(a, real_i(gel(G,j))), n));
   *psum = sum;
@@ -662,7 +663,7 @@ testdisc(GEN ap, GEN M, long d, long s)
 }
 
 static GEN
-listedisc(GEN ell, long s, GEN M, GEN ap, long d)
+listedisc(long s, GEN M, GEN ap, long d)
 {
   const long NBR_disc = 10;
   GEN v = cgetg(NBR_disc+1, t_VECSMALL);
@@ -730,7 +731,7 @@ listepoints(GEN L)
 }
 
 static GEN
-listeheegner(GEN ell, GEN N, GEN D)
+listeheegner(GEN N, GEN D)
 {
   pari_sp av = avma;
   const long kmin = 30;
@@ -1035,7 +1036,7 @@ static GEN
 process_points(GEN ell, GEN N, long D)
 {
   GEN ymin;
-  GEN LISTE = listeheegner(ell, N, stoi(D));
+  GEN LISTE = listeheegner(N, stoi(D));
   long k, l = lg(LISTE);
   for (k = 2; k<l; k++)
   {
@@ -1053,7 +1054,7 @@ process_points(GEN ell, GEN N, long D)
 }
 
 static void
-heegner_find_disc(GEN *ppointsf, GEN *pmulf, GEN ell, GEN N, long prec)
+heegner_find_disc(GEN *ppointsf, GEN *pmulf, GEN ell, GEN N)
 {
   long d = 0;
   GEN M = Z_factor(mulsi(4, N)), F = gel(M,1);
@@ -1062,7 +1063,7 @@ heegner_find_disc(GEN *ppointsf, GEN *pmulf, GEN ell, GEN N, long prec)
   for (k = 1; k < lF; k++) ap[k] = equalis(ellap(ell, gel(F, k)), -1);
   for(;;)
   {
-    GEN liste, listed = listedisc(ell, s, M, ap, d);
+    GEN liste, listed = listedisc(s, M, ap, d);
     long k, l = lg(listed);
     if (DEBUGLEVEL)
       err_printf("List of discriminants...%Ps\n", listed);
@@ -1131,7 +1132,7 @@ ellheegner(GEN E)
     E = ellinit(E, prec);
     w1 = gel(E,15);
   }
-  heegner_find_disc(&pointsf, &mulf, E, N, prec);
+  heegner_find_disc(&pointsf, &mulf, E, N);
   ymin = gsqrt(gel(pointsf, 1), prec);
   if (DEBUGLEVEL) err_printf("N = %Ps, ymin*N = %Ps\n",N,gmul(ymin,N));
   pts = gel(pointsf, 2);
