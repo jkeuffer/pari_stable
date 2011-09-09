@@ -4133,6 +4133,37 @@ out_print0(PariOUT *out, GEN g, long flag)
     }
   }
 }
+
+static void
+str_print0(outString *S, GEN g, long flag)
+{
+  OUT_FUN f = get_fun(flag);
+  long i, l = lg(g);
+  for (i = 1; i < l; i++)
+  {
+    GEN x = gel(g,i);
+    if (typ(x)==t_STR)
+      str_puts(S, GSTR(x)); /* text surrounded by "" otherwise */
+    else
+    {
+      char *s = GENtostr_fun(x, GP_DATA->fmt, f);
+      str_puts(S, s); free(s);
+    }
+  }
+}
+
+/*Display s, followed by the element of g */
+
+char *
+pari_sprint0(const char *s, GEN g, long flag)
+{
+  outString S;
+  str_init(&S);
+  str_puts(&S, s);
+  str_print0(&S, g, flag);
+  *S.cur = 0; return S.string;
+}
+
 void
 print0(GEN g, long flag) { out_print0(pariOut, g, flag); }
 
