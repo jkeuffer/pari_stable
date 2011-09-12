@@ -2723,6 +2723,7 @@ INLINE long   expu(ulong x);
 INLINE void   fixlg(GEN z, long ly);
 INLINE GEN    fractor(GEN x, long prec);
 INLINE GEN    icopy(GEN x);
+INLINE GEN    icopyspec(GEN x, long nx);
 INLINE GEN    icopy_avma(GEN x, pari_sp av);
 INLINE GEN    itor(GEN x, long prec);
 INLINE long   itos(GEN x);

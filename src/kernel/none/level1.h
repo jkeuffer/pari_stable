@@ -165,6 +165,14 @@ icopy(GEN x)
   while (--lx > 0) y[lx] = x[lx];
   return y;
 }
+INLINE GEN
+icopyspec(GEN x, long nx)
+{
+  GEN y = cgeti(nx + 2);
+  y[1] = evalsigne(1) | evallgefint(nx + 2);
+  while (--nx >= 0) y[nx + 2]=x[nx];
+  return y;
+}
 INLINE GEN rcopy(GEN x) { return leafcopy(x); }
 INLINE GEN mpcopy(GEN x) { return leafcopy(x); }
 

@@ -307,66 +307,60 @@ affir(GEN x, GEN y)
   }
 }
 
-static GEN
-shifti_spec(GEN x, long lx, long n)
+INLINE GEN
+shiftispec(GEN x, long nx, long n)
 {
-  long ly, i, m, s = signe(x);
-  GEN y;
-  if (!s) return gen_0;
-  if (!n)
-  {
-    y = cgeti(lx);
-    y[1] = evalsigne(s) | evallgefint(lx);
-    while (--lx > 1) y[lx]=x[lx];
-    return y;
-  }
+  long ny, i, m;
+  GEN y, yd;
+  if (!n)  return icopyspec(x, nx);
+
   if (n > 0)
   {
     GEN z = (GEN)avma;
     long d = dvmdsBIL(n, &m);
 
-    ly = lx+d; y = new_chunk(ly);
+    ny = nx+d; y = new_chunk(ny + 2); yd = y + 2;
     for ( ; d; d--) *--z = 0;
-    if (!m) for (i=2; i<lx; i++) y[i]=x[i];
+    if (!m) for (i=0; i<nx; i++) yd[i]=x[i];
     else
     {
       register const ulong sh = BITS_IN_LONG - m;
-      shift_left(y,x, 2,lx-1, 0,m);
-      i = ((ulong)x[2]) >> sh;
+      shift_left(yd,x, 0,nx-1, 0,m);
+      i = ((ulong)x[0]) >> sh;
       /* Extend y on the left? */
-      if (i) { ly++; y = new_chunk(1); y[2] = i; }
+      if (i) { ny++; y = new_chunk(1); y[2] = i; }
     }
   }
   else
   {
-    ly = lx - dvmdsBIL(-n, &m);
-    if (ly<3) return gen_0;
-    y = new_chunk(ly);
+    ny = nx - dvmdsBIL(-n, &m);
+    if (ny<1) return gen_0;
+    y = new_chunk(ny + 2); yd = y + 2;
     if (m) {
-      shift_right(y,x, 2,ly, 0,m);
-      if (y[2] == 0)
+      shift_right(yd,x, 0,ny, 0,m);
+      if (yd[0] == 0)
       {
-        if (ly==3) { avma = (pari_sp)(y+3); return gen_0; }
-        ly--; avma = (pari_sp)(++y);
+        if (ny==1) { avma = (pari_sp)(y+3); return gen_0; }
+        ny--; avma = (pari_sp)(++y);
       }
     } else {
-      for (i=2; i<ly; i++) y[i]=x[i];
+      for (i=0; i<ny; i++) yd[i]=x[i];
     }
   }
-  y[1] = evalsigne(s)|evallgefint(ly);
-  y[0] = evaltyp(t_INT)|evallg(ly); return y;
-}
-
-GEN
-shifti(GEN x, long n)
-{
-  return shifti_spec(x, lgefint(x), n);
+  y[1] = evalsigne(1)|evallgefint(ny + 2);
+  y[0] = evaltyp(t_INT)|evallg(ny + 2); return y;
 }
 
 GEN
 mantissa2nr(GEN x, long n)
 { /*This is a kludge since x is not an integer*/
-  return shifti_spec(x, lg(x), n);
+  long s = signe(x);
+  GEN y;
+
+  if(s == 0) return gen_0;
+  y = shiftispec(x + 2, lg(x) - 2, n);
+  if (signe(y)) setsigne(y, s);
+  return y;
 }
 
 GEN

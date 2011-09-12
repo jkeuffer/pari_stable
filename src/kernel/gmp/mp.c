@@ -315,54 +315,52 @@ affir(GEN x, GEN y)
   }
 }
 
-GEN
-shifti(GEN x, long n)
+INLINE GEN
+shiftispec(GEN x, long nx, long n)
 {
-  const long s=signe(x);
-  long lz,lx,m;
-  GEN z;
+  long ny,m;
+  GEN yd, y;
 
-  if (!s) return gen_0;
-  if (!n) return icopy(x);
-  lx = lgefint(x);
+  if (!n) return icopyspec(x, nx);
+
   if (n > 0)
   {
     long d = dvmdsBIL(n, &m);
     long i;
 
-    lz = lx + d + (m!=0);
-    z = cgeti(lz);
-    for (i=0; i<d; i++) LIMBS(z)[i] = 0;
+    ny = nx + d + (m!=0);
+    y = cgeti(ny + 2); yd = y + 2;
+    for (i=0; i<d; i++) yd[i] = 0;
 
-    if (!m) xmpn_copy(LIMBS(z)+d, LIMBS(x), NLIMBS(x));
+    if (!m) xmpn_copy((mp_limb_t *) (yd + d), (mp_limb_t *) x, nx);
     else
     {
-      ulong carry = mpn_lshift(LIMBS(z)+d, LIMBS(x), NLIMBS(x), m);
-      if (carry) z[lz - 1] = carry;
-      else lz--;
+      ulong carryd = mpn_lshift((mp_limb_t *) (yd + d), (mp_limb_t *) x, nx, m);
+      if (carryd) yd[ny - 1] = carryd;
+      else ny--;
     }
   }
   else
   {
     long d = dvmdsBIL(-n, &m);
 
-    lz = lx - d;
-    if (lz<3) return gen_0;
-    z = cgeti(lz);
+    ny = nx - d;
+    if (ny < 1) return gen_0;
+    y = cgeti(ny + 2); yd = y + 2;
 
-    if (!m) xmpn_copy(LIMBS(z), LIMBS(x) + d, NLIMBS(x) - d);
+    if (!m) xmpn_copy((mp_limb_t *) yd, (mp_limb_t *) (x + d), nx - d);
     else
     {
-      mpn_rshift(LIMBS(z), LIMBS(x) + d, NLIMBS(x) - d, m);
-      if (z[lz - 1] == 0)
+      mpn_rshift((mp_limb_t *) yd, (mp_limb_t *) (x + d), nx - d, m);
+      if (yd[ny - 1] == 0)
       {
-        if (lz == 3) { avma = (pari_sp)(z+3); return gen_0; }
-        lz--;
+        if (ny == 1) { avma = (pari_sp)(yd + 1); return gen_0; }
+        ny--;
       }
     }
   }
-  z[1] = evalsigne(s)|evallgefint(lz);
-  return z;
+  y[1] = evalsigne(1)|evallgefint(ny + 2);
+  return y;
 }
 
 GEN

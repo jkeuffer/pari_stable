@@ -774,6 +774,18 @@ int2u(ulong n) {
   *int_MSW(z) = 1L << m; return z;
 }
 
+GEN
+shifti(GEN x, long n)
+{
+  long s = signe(x);
+  GEN y;
+
+  if(s == 0) return gen_0;
+  y = shiftispec(x + 2, lgefint(x) - 2, n);
+  if (signe(y)) setsigne(y, s);
+  return y;
+}
+
 /* actual operations will take place on a+2 and b+2: we strip the codewords */
 GEN
 mulii(GEN a,GEN b)
