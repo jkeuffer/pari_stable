@@ -3311,7 +3311,7 @@ ok_pipe(FILE *f)
 {
   if (DEBUGFILES) err_printf("I/O: checking output pipe...\n");
   CATCH(CATCH_ALL) {
-    CATCH_RELEASE(); return 0;
+    return 0;
   }
   TRY {
     int i;

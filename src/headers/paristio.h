@@ -99,6 +99,7 @@ struct gp_context
   struct pari_evalstate eval;
   struct pari_parsestate parse;
   pariFILE *file;
+  jmp_buf *iferr_env;
   GEN err_data;
 };
 

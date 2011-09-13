@@ -100,8 +100,9 @@ typedef struct {
 
 static THREAD pari_stack s_ERR_CATCH;
 static THREAD cell *ERR_CATCH;
-THREAD GEN global_err_data;
 
+THREAD GEN global_err_data;
+THREAD jmp_buf *iferr_env;
 const long CATCH_ALL = -1;
 
 /*********************************************************************/
@@ -625,6 +626,7 @@ pari_add_oldmodule(entree *ep)
 static void
 pari_init_errcatch(void)
 {
+  iferr_env = NULL;
   stack_init(&s_ERR_CATCH, sizeof(cell), (void**)&ERR_CATCH);
   global_err_data = NULL;
 }
@@ -811,6 +813,7 @@ gp_context_save(struct gp_context* rec)
   if (DEBUGFILES>1)
     err_printf("gp_context_save: %s\n", rec->file ? rec->file->name: "NULL");
   rec->listloc = next_block;
+  rec->iferr_env = iferr_env;
   rec->err_catch = s_ERR_CATCH.n;
   rec->err_data  = global_err_data;
   evalstate_save(&rec->eval);
@@ -832,6 +835,7 @@ gp_context_restore(struct gp_context* rec)
   filestate_restore(rec->file);
   s_ERR_CATCH.n = rec->err_catch;
   global_err_data = rec->err_data;
+  iferr_env = rec->iferr_env;
 
   for (i = 0; i < functions_tblsz; i++)
   {
@@ -893,6 +897,7 @@ err_recover(long numerr)
   killallfiles();
   s_ERR_CATCH.n = 0;
   dbg_release();
+  iferr_env = NULL;
   global_err_data = NULL;
   out_puts(pariErr, "\n");
   pariErr->flush();
@@ -1178,7 +1183,6 @@ pari_err(int numerr, ...)
 
   va_start(ap,numerr);
 
-  global_err_data = NULL;
   if (s_ERR_CATCH.n)
   {
     cell *trapped;
@@ -1192,13 +1196,18 @@ pari_err(int numerr, ...)
         case alarmer:
           global_err_data = (GEN)va_arg(ap, char*);
           break;
+        default:
+          global_err_data = NULL;
       }
       longjmp(*(trapped->penv), numerr);
     }
   }
+  global_err_data = numerr ? pari_err2GEN(numerr,ap):va_arg(ap,GEN);
+  if (*iferr_env)
+    longjmp(*iferr_env, numerr);
   err_init();
   if (numerr != syntaxer) closure_err();
-  pari_err_display(pari_err2GEN(numerr,ap));
+  pari_err_display(global_err_data);
   out_term_color(pariErr, c_NONE);
   va_end(ap);
   pariErr->flush();
