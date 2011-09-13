@@ -100,6 +100,7 @@ BA 16- library function gsprintf/gvsprintf
 BA 17- new PARI type t_ERROR (error messages)
 BA 18- new error trapping system and GP functions iferr,iferrname
 BA 19- implement lngamma(t_PADIC)
+LGr20- new PARI functions F2m_gauss, F2m_inv, F2m_rank, F2m_image, matid_F2m
 
   Removed
     1- dropped DOS support

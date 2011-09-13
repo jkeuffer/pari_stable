@@ -3358,6 +3358,21 @@ to $1$.
 
 \fun{void}{F2m_copy}{GEN x} returns a copy of $x$.
 
+\fun{GEN}{F2m_image}{GEN x} gives a subset of the columns of $x$ that generate
+the image of $x$.
+
+\fun{GEN}{F2m_gauss}{GEN a, GEN b}
+
+\fun{GEN}{F2m_indexrank}{GEN x} $x$ being a matrix of rank $r$, returns a
+vector with two \typ{VECSMALL} components $y$ and $z$ of length $r$ giving a
+list of rows and columns respectively (starting from 1) such that the extracted
+matrix obtained from these two vectors using is invertible.
+
+\fun{long}{F2m_rank}{GEN x} rank of $x$.
+
+\fun{GEN}{matid_F2m}{long n} returns an \kbd{F2m} which is an $n \times n$
+identity matrix.
+
 \fun{GEN}{zero_F2v}{long n} creates a \kbd{F2v} with \kbd{n} components set to
 $0$.
 
@@ -3389,6 +3404,8 @@ allowed for $y$ to be shorter than $x$.
 \fun{ulong}{F2m_det_sp}{GEN x}, as \kbd{F2m\_det}, in place (destroys~\kbd{x}).
 
 \fun{GEN}{F2m_deplin}{GEN x}
+
+\fun{GEN}{F2m_inv}{GEN x}
 
 \fun{GEN}{F2m_ker}{GEN x}
 
