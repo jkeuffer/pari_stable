@@ -93,14 +93,6 @@ int  (*cb_pari_whatnow)(PariOUT *out, const char *, int);
 void (*cb_pari_sigint)(void);
 void (*cb_pari_err_recover)(long);
 
-typedef struct {
-  jmp_buf *penv;
-  long flag;
-} cell;
-
-static THREAD pari_stack s_ERR_CATCH;
-static THREAD cell *ERR_CATCH;
-
 THREAD GEN global_err_data;
 THREAD jmp_buf *iferr_env;
 const long CATCH_ALL = -1;
@@ -627,7 +619,6 @@ static void
 pari_init_errcatch(void)
 {
   iferr_env = NULL;
-  stack_init(&s_ERR_CATCH, sizeof(cell), (void**)&ERR_CATCH);
   global_err_data = NULL;
 }
 
@@ -814,7 +805,6 @@ gp_context_save(struct gp_context* rec)
     err_printf("gp_context_save: %s\n", rec->file ? rec->file->name: "NULL");
   rec->listloc = next_block;
   rec->iferr_env = iferr_env;
-  rec->err_catch = s_ERR_CATCH.n;
   rec->err_data  = global_err_data;
   evalstate_save(&rec->eval);
   parsestate_save(&rec->parse);
@@ -833,7 +823,6 @@ gp_context_restore(struct gp_context* rec)
   evalstate_restore(&rec->eval);
   parsestate_restore(&rec->parse);
   filestate_restore(rec->file);
-  s_ERR_CATCH.n = rec->err_catch;
   global_err_data = rec->err_data;
   iferr_env = rec->iferr_env;
 
@@ -858,44 +847,12 @@ gp_context_restore(struct gp_context* rec)
   try_to_recover = 1;
 }
 
-long
-err_catch(long errnum, jmp_buf *penv)
-{
-  long n;
-  /* for fear of infinite recursion */
-  if (errnum == memer) pari_err(talker, "can't trap memory errors");
-  if (errnum == CATCH_ALL) errnum = noer;
-  else if (errnum > noer) pari_err(talker, "no such error number: %ld", errnum);
-  n = stack_new(&s_ERR_CATCH);
-  ERR_CATCH[n].flag = errnum;
-  ERR_CATCH[n].penv = penv; return n;
-}
-
-/* delete traps younger than n (included) */
-void
-err_leave(long n) { if (n >= 0) s_ERR_CATCH.n = n; }
-
-/* Get last (most recent) handler for error n (or generic noer) killing all
- * more recent non-applicable handlers (now obsolete) */
-static cell *
-err_seek(long n)
-{
-  if (n == bugparier) return NULL;
-  for( ; s_ERR_CATCH.n; s_ERR_CATCH.n--)
-  {
-    cell *t = &ERR_CATCH[ s_ERR_CATCH.n-1 ];
-    if (t->flag == n || t->flag == noer) return t;
-  }
-  return NULL;
-}
-
 void
 err_recover(long numerr)
 {
   evalstate_reset();
   initout(0);
   killallfiles();
-  s_ERR_CATCH.n = 0;
   dbg_release();
   iferr_env = NULL;
   global_err_data = NULL;
@@ -1183,25 +1140,6 @@ pari_err(int numerr, ...)
 
   va_start(ap,numerr);
 
-  if (s_ERR_CATCH.n)
-  {
-    cell *trapped;
-    if ( (trapped = err_seek(numerr)) )
-    {
-      switch(numerr)
-      {
-        case invmoder:
-          global_err_data = va_arg(ap, GEN);
-          break;
-        case alarmer:
-          global_err_data = (GEN)va_arg(ap, char*);
-          break;
-        default:
-          global_err_data = NULL;
-      }
-      longjmp(*(trapped->penv), numerr);
-    }
-  }
   global_err_data = numerr ? pari_err2GEN(numerr,ap):va_arg(ap,GEN);
   if (*iferr_env)
     longjmp(*iferr_env, numerr);

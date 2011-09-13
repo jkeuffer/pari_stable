@@ -95,7 +95,6 @@ struct pari_evalstate
 struct gp_context
 {
   long listloc;
-  long err_catch;
   struct pari_evalstate eval;
   struct pari_parsestate parse;
   pariFILE *file;
