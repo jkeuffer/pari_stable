@@ -100,7 +100,7 @@ typedef struct {
 
 static THREAD pari_stack s_ERR_CATCH;
 static THREAD cell *ERR_CATCH;
-THREAD void *global_err_data;
+THREAD GEN global_err_data;
 
 const long CATCH_ALL = -1;
 
@@ -1159,10 +1159,10 @@ pari_err(int numerr, ...)
       switch(numerr)
       {
         case invmoder:
-          global_err_data = (void*)va_arg(ap, GEN);
+          global_err_data = va_arg(ap, GEN);
           break;
         case alarmer:
-          global_err_data = (char*)va_arg(ap, char*);
+          global_err_data = (GEN)va_arg(ap, char*);
           break;
       }
       longjmp(*(trapped->penv), numerr);

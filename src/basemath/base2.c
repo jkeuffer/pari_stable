@@ -571,7 +571,7 @@ nfmaxord(nfmaxord_t *S, GEN T, long flag, GEN fa)
     if (E[i] <= 1) { ordmax = shallowconcat(ordmax, gen_1); continue; }
     av = avma;
     CATCH(invmoder) { /* caught false prime, update factorization */
-      GEN x = (GEN)global_err_data;
+      GEN x = global_err_data;
       GEN N, p = gcdii(gel(x,1), gel(x,2)), u = diviiexact(gel(x,1),p);
       long l;
       if (DEBUGLEVEL) pari_warn(warner,"impossible inverse: %Ps", x);
