@@ -69,6 +69,8 @@ BA 12- [darwin] do not use dylib_ prefix to ld options [#1210]
    23- move README.os2 to src/system/os2/README
    24- change compiler version printout in gp header
    25- much faster final divisibility test in nfgcd() [#1214]
+   26- error type sqrter5 "not a quadratic residue in sqrt" now generalized
+       to denote "not an n-th power residue in sqrtn"
 
   Added
     1- mathnf for matrices over K[X] [#41]
@@ -96,4 +98,8 @@ BA 16- library function gsprintf/gvsprintf
     1- dropped DOS support
     2- qfrep(): bit 2 of flag is now meaningless, we now always return a
        t_VECSMALL
+    3- file language/errmsg.c and global errmessage[] array: all error
+       messages are now part of pari_err_display())
+    4- error types arither1,notpoler (merged with typeer), matinv1
+       (merged with gdiver)
 

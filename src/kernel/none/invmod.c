@@ -40,7 +40,7 @@ invmod(GEN a, GEN b, GEN *res)
   ulong xu,xu1,xv,xv1;                /* Lehmer stage recurrence matrix */
   int lhmres;                        /* Lehmer stage return value */
 
-  if (typ(a) != t_INT || typ(b) != t_INT) pari_err(arither1);
+  if (typ(a) != t_INT || typ(b) != t_INT) pari_err(typeer,"arithmetic function");
   if (!signe(b)) { *res=absi(a); return 0; }
   av = avma;
   if (lgefint(b) == 3) /* single-word affair */

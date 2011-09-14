@@ -933,13 +933,13 @@ gpow(GEN x, GEN n, long prec)
       y = cgetg(3,t_INTMOD); gel(y,1) = icopy(gel(x,1));
       av = avma;
       z = Fp_sqrtn(gel(x,2), d, gel(x,1), NULL);
-      if (!z) pari_err(talker,"gpow: nth-root does not exist");
+      if (!z) pari_err(sqrter5);
       gel(y,2) = gerepileuptoint(av, Fp_pow(z, a, gel(x,1)));
       return y;
 
     case t_PADIC:
       z = equaliu(d, 2)? Qp_sqrt(x): Qp_sqrtn(x, d, NULL);
-      if (!z) pari_err(talker, "gpow: nth-root does not exist");
+      if (!z) pari_err(sqrter5);
       return gerepileupto(av, powgi(z, a));
 
     case t_FFELT:
@@ -1429,7 +1429,7 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
     gel(y,2) = Fp_sqrtn(gel(x,2),n,gel(x,1),zetan);
     if (!y[2]) {
       if (zetan) {avma=av; return gen_0;}
-      pari_err(talker,"nth-root does not exist in gsqrtn");
+      pari_err(sqrter5);
     }
     if (zetan) { gel(z,2) = *zetan; *zetan = z; }
     return y;
@@ -1438,7 +1438,7 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
     y = Qp_sqrtn(x,n,zetan);
     if (!y) {
       if (zetan) return gen_0;
-      pari_err(talker,"nth-root does not exist in gsqrtn");
+      pari_err(sqrter5);
     }
     return y;
 

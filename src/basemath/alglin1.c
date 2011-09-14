@@ -1044,7 +1044,7 @@ gauss(GEN a, GEN b)
   GEN z;
   if (typ(a)!=t_MAT) pari_err(mattype1,"gauss");
   z = RgM_solve(a,b);
-  if (!z) pari_err(matinv1);
+  if (!z) pari_err(gdiver);
   return z;
 }
 

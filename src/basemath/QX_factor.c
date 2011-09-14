@@ -1046,7 +1046,7 @@ nfrootsQ(GEN x)
   GEN z;
   long val;
 
-  if (typ(x)!=t_POL) pari_err(notpoler,"nfrootsQ");
+  if (typ(x)!=t_POL) pari_err(typeer,"nfrootsQ");
   if (!signe(x)) pari_err(zeropoler,"nfrootsQ");
   x = Q_primpart(x);
   if (!RgX_is_ZX(x)) pari_err(typeer,"nfrootsQ");

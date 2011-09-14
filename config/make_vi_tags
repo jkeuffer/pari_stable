@@ -24,7 +24,6 @@ system('exuberant-ctags', '-f', $tmptags, @files)
 
 getnames("$src/gp/gp_init.h");
 getnames("$src/language/init.h");
-geterrs("$src/language/errmsg.c");
 open(T,"$tmptags");
 for (sort(@gp))
 {
@@ -52,22 +51,6 @@ sub getnames
     if (/^entree functions_/../^$/)
     {
       push(@gp,"$2#$1") if (/[^"]*"([^"]*)".*\(void\*\) *([^,]*)/);
-    }
-  }
-  close(A);
-}
-
-sub geterrs
-{
-  my $f = $_[0];
-  open(A,$f);
-  while (<A>)
-  {
-    if (m,/(\*\s*\w+\s*\*)/,)
-    {
-      $e = $pat = $1;
-      $e =~ s/\W*(\w+)\W*/$1/;
-      push(@tags, "$e\t$f\t/$pat\n");
     }
   }
   close(A);

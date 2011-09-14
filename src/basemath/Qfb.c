@@ -23,7 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 void
 check_quaddisc(GEN x, long *s, long *r, const char *f)
 {
-  if (typ(x) != t_INT) pari_err(arither1);
+  if (typ(x) != t_INT) pari_err(typeer,"check_quaddisc");
   *s = signe(x);
   if (Z_issquare(x)) pari_err(talker,"square discriminant in %s", f);
   *r = mod4(x); if (*s < 0 && *r) *r = 4 - *r;
@@ -847,7 +847,7 @@ static void
 get_disc(GEN x, struct qfr_data *S)
 {
   if (!S->D) S->D = qfb_disc(x);
-  else if (typ(S->D) != t_INT) pari_err(arither1);
+  else if (typ(S->D) != t_INT) pari_err(typeer,"qfr_init");
   if (!signe(S->D)) pari_err(talker,"reducible form in qfr_init");
 }
 
@@ -870,7 +870,7 @@ qfr5_init(GEN x, struct qfr_data *S)
 
   get_disc(x, S);
   if (!S->sqrtD) S->sqrtD = sqrtr(itor(S->D,prec));
-  else if (typ(S->sqrtD) != t_REAL) pari_err(arither1);
+  else if (typ(S->sqrtD) != t_REAL) pari_err(typeer,"qfr_init");
 
   if (!S->isqrtD)
   {
@@ -879,7 +879,7 @@ qfr5_init(GEN x, struct qfr_data *S)
     S->isqrtD = gcvtoi(S->sqrtD,&e);
     if (e>-2) { avma = av; S->isqrtD = sqrti(S->D); }
   }
-  else if (typ(S->isqrtD) != t_INT) pari_err(arither1);
+  else if (typ(S->isqrtD) != t_INT) pari_err(typeer,"qfr_init");
   return x;
 }
 static GEN
@@ -887,7 +887,7 @@ qfr3_init(GEN x, struct qfr_data *S)
 {
   get_disc(x, S);
   if (!S->isqrtD) S->isqrtD = sqrti(S->D);
-  else if (typ(S->isqrtD) != t_INT) pari_err(arither1);
+  else if (typ(S->isqrtD) != t_INT) pari_err(typeer,"qfr_init");
   return x;
 }
 
@@ -1075,8 +1075,8 @@ primeform(GEN x, GEN p, long prec)
   long s, sx = signe(x), sp = signe(p);
   GEN y, b, absp;
 
-  if (typ(x) != t_INT || !sx) pari_err(arither1);
-  if (typ(p) != t_INT || !sp) pari_err(arither1);
+  if (typ(x) != t_INT || !sx) pari_err(typeer,"primeform");
+  if (typ(p) != t_INT || !sp) pari_err(typeer,"primeform");
   if (lgefint(p) == 3)
   {
     if (p[2] == 1) {

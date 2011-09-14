@@ -534,8 +534,7 @@ FF_sqrtn(GEN x, GEN n, GEN *zetan)
   default:
     r=Flxq_sqrtn(gel(x,2),n,T,pp,zetan);
   }
-  if (!r)
-    pari_err(talker,"nth-root does not exist in FF_sqrtn");
+  if (!r) pari_err(sqrter5);
   (void)_mkFF(x, y, r);
   if (zetan)
   {
@@ -561,8 +560,7 @@ FF_sqrt(GEN x)
   default:
     r=Flxq_sqrtn(gel(x,2),gen_2,T,pp,NULL);
   }
-  if (!r)
-    pari_err(talker,"squareroot does not exist in FF_sqrt");
+  if (!r) pari_err(sqrter5);
   return _mkFF(x, y, r);
 }
 

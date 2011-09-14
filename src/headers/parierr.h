@@ -26,13 +26,13 @@ enum {
   errpile, overflower,
 
 /* alglin.c */
-  matinv1, mattype1,
+  mattype1,
 
 /* arith.c  */
-  arither1, primer1, invmoder,
+  primer1, invmoder,
 
 /* base.c   */
-  constpoler, notpoler, redpoler, zeropoler,
+  constpoler, redpoler, zeropoler,
 
 /* gen.c */
   operi, operf, gdiver,

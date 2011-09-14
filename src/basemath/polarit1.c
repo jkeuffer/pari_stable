@@ -1478,7 +1478,7 @@ Zp_appr(GEN f, GEN a)
   pari_sp av = avma;
   long prec;
   GEN z, p;
-  if (typ(f) != t_POL) pari_err(notpoler,"Zp_appr");
+  if (typ(f) != t_POL) pari_err(typeer,"Zp_appr");
   if (typ(a) != t_PADIC) pari_err(typeer,"Zp_appr");
   p = gel(a,2); prec = gequal0(a)? valp(a): precp(a);
   f = QpX_to_ZX(f);
@@ -1537,7 +1537,7 @@ rootpadic(GEN f, GEN p, long prec)
   int reverse;
 
   if (typ(p)!=t_INT) pari_err(typeer,"rootpadic");
-  if (typ(f)!=t_POL) pari_err(notpoler,"rootpadic");
+  if (typ(f)!=t_POL) pari_err(typeer,"rootpadic");
   if (gequal0(f)) pari_err(zeropoler,"rootpadic");
   if (prec <= 0) pari_err(talker,"non-positive precision in rootpadic");
   f = QpX_to_ZX(f);
@@ -1625,7 +1625,7 @@ padicappr(GEN f, GEN a)
     case t_POLMOD: break;
     default: pari_err(typeer,"padicappr");
   }
-  if (typ(f)!=t_POL) pari_err(notpoler,"padicappr");
+  if (typ(f)!=t_POL) pari_err(typeer,"padicappr");
   if (gequal0(f)) pari_err(zeropoler,"padicappr");
   z = RgX_gcd(f, RgX_deriv(f));
   if (degpol(z) > 0) f = RgX_div(f,z);
@@ -1731,8 +1731,7 @@ factorpadic2(GEN f, GEN p, long prec)
   GEN fa,ex,y;
   long n,i,l;
 
-  if (typ(f)!=t_POL) pari_err(notpoler,"factorpadic");
-  if (typ(p)!=t_INT) pari_err(arither1);
+  if (typ(f)!=t_POL || typ(p)!=t_INT) pari_err(typeer,"factorpadic");
   if (gequal0(f)) pari_err(zeropoler,"factorpadic");
   if (prec <= 0) pari_err(talker,"non-positive precision in factorpadic");
 
@@ -1827,8 +1826,7 @@ factorpadic(GEN f,GEN p,long prec)
   long i, l, pr, n = degpol(f);
   int reverse = 0;
 
-  if (typ(f)!=t_POL) pari_err(notpoler,"factorpadic");
-  if (typ(p)!=t_INT) pari_err(arither1);
+  if (typ(f)!=t_POL || typ(p)!=t_INT) pari_err(typeer,"factorpadic");
   if (gequal0(f)) pari_err(zeropoler,"factorpadic");
   if (prec <= 0) pari_err(talker,"non-positive precision in factorpadic");
   if (n == 0) return trivfact();

@@ -153,7 +153,6 @@ extern THREAD pari_sp avma, bot, top;
 #define DISABLE_MEMUSED (size_t)-1
 extern THREAD size_t memused;
 extern byteptr diffptr;
-extern const char *errmessage[];
 extern char *current_psfile, *pari_datadir;
 
 #define gcopyifstack(x,y)  STMT_START {pari_sp _t=(pari_sp)(x); \

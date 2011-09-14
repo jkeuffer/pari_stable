@@ -103,7 +103,7 @@ nextprime(GEN n)
   pari_sp av = avma;
 
   if (typ(n) != t_INT) n = gceil(n);
-  if (typ(n) != t_INT) pari_err(arither1);
+  if (typ(n) != t_INT) pari_err(typeer,"nextprime");
   if (signe(n) <= 0) { avma = av; return gen_2; }
   if (lgefint(n) == 3)
   {
@@ -146,7 +146,7 @@ precprime(GEN n)
   pari_sp av = avma;
 
   if (typ(n) != t_INT) n = gfloor(n);
-  if (typ(n) != t_INT) pari_err(arither1);
+  if (typ(n) != t_INT) pari_err(typeer,"nextprime");
   if (signe(n) <= 0) { avma = av; return gen_0; }
   if (lgefint(n) <= 3)
   { /* check if n <= 10 */
@@ -3314,7 +3314,7 @@ gmoebius(GEN n) { return map_proto_lG(moebius,n); }
 
 INLINE void
 chk_arith(GEN n) {
-  if (typ(n) != t_INT) pari_err(arither1);
+  if (typ(n) != t_INT) pari_err(typeer,"arithmetic function");
   if (!signe(n)) pari_err(talker, "zero argument in an arithmetic function");
 }
 
@@ -3881,7 +3881,7 @@ ifac_break_limit(GEN n, GEN pairs/*unused*/, GEN here, GEN state)
 GEN
 factorint(GEN n, long flag)
 {
-  if (typ(n) != t_INT) pari_err(arither1);
+  if (typ(n) != t_INT) pari_err(typeer,"factorint");
   return ifactor(n,NULL,NULL, 0,flag);
 }
 

@@ -538,7 +538,7 @@ boundfact(GEN n, ulong lim)
       return gerepilecopy(av, merge_factor_i(a,b));
     }
   }
-  pari_err(arither1);
+  pari_err(typeer,"boundfact");
   return NULL; /* not reached */
 }
 

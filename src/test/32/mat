@@ -3,5 +3,5 @@
   *** _+_: impossible addition t_MAT + t_MAT.
   ***   at top-level: 1/matrix(2,2,i,j,Mod(
   ***                  ^--------------------
-  *** _/_: non invertible matrix in gauss
-Total time spent: 4
+  *** _/_: division by a non-invertible object
+Total time spent: 0

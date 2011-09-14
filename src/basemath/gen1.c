@@ -2471,7 +2471,7 @@ gdiv(GEN x, GEN y)
 
     case t_MAT:
       av = avma; y = RgM_inv(y);
-      if (!y) pari_err(matinv1);
+      if (!y) pari_err(gdiver);
       return gerepileupto(av, RgM_mul(x, y));
 
     default: pari_err(operf,"/",x,y);
@@ -2683,7 +2683,7 @@ gdiv(GEN x, GEN y)
       return gmul(x, ginv(y)); /* missing gerepile, for speed */
     case t_MAT:
       av = avma; y = RgM_inv(y);
-      if (!y) pari_err(matinv1);
+      if (!y) pari_err(gdiver);
       return gerepileupto(av, gmul(x, y));
     case t_VEC: case t_COL:
     case t_LIST: case t_STR: case t_VECSMALL: case t_CLOSURE:
@@ -3221,7 +3221,7 @@ ginv(GEN x)
       return y;
     case t_MAT:
       y = RgM_inv(x);
-      if (!y) pari_err(matinv1);
+      if (!y) pari_err(gdiver);
       return y;
     case t_VECSMALL:
     {

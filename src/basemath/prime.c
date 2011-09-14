@@ -138,7 +138,7 @@ millerrabin(GEN n, long k)
   long i;
   MR_Jaeschke_t S;
 
-  if (typ(n) != t_INT) pari_err(arither1);
+  if (typ(n) != t_INT) pari_err(typeer,"millerrabin");
   if (signe(n)<=0) return 0;
   /* If |n| <= 3, check if n = +- 1 */
   if (lgefint(n)==3 && (ulong)(n[2])<=3) return (n[2] != 1);
@@ -494,7 +494,7 @@ BPSW_psp(GEN N)
   MR_Jaeschke_t S;
   int k;
 
-  if (typ(N) != t_INT) pari_err(arither1);
+  if (typ(N) != t_INT) pari_err(typeer,"BPSW_psp");
   if (signe(N) <= 0) return 0;
   if (lgefint(N) == 3) return uisprime((ulong)N[2]);
   if (!mod2(N)) return 0;
@@ -630,7 +630,7 @@ isprimePL(GEN N, long flag)
     F = gel(N,2);
     N = gel(N,1); t = typ(N);
   }
-  if (t != t_INT) pari_err(arither1);
+  if (t != t_INT) pari_err(typeer,"isprimePL");
   eps = cmpis(N,2);
   if (eps<=0) return eps? gen_0: gen_1;
 

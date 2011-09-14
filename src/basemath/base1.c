@@ -269,7 +269,7 @@ tschirnhaus(GEN x)
   long a, v = varn(x);
   GEN u, y = cgetg(5,t_POL);
 
-  if (typ(x)!=t_POL) pari_err(notpoler,"tschirnhaus");
+  if (typ(x)!=t_POL) pari_err(typeer,"tschirnhaus");
   if (lg(x) < 4) pari_err(constpoler,"tschirnhaus");
   if (v) { u = leafcopy(x); setvarn(u,0); x=u; }
   y[1] = evalsigne(1)|evalvarn(0);
@@ -483,7 +483,7 @@ polgalois(GEN x, long prec)
   const int ind6[60]={3,5,4,6, 2,6,4,5, 2,3,5,6, 2,4,3,6, 2,5,3,4,
                       1,4,5,6, 1,5,3,6, 1,6,3,4, 1,3,4,5, 1,6,2,5,
                       1,2,4,6, 1,5,2,4, 1,3,2,6, 1,2,3,5, 1,4,2,3};
-  if (typ(x)!=t_POL) pari_err(notpoler,"galois");
+  if (typ(x)!=t_POL) pari_err(typeer,"galois");
   n=degpol(x); if (n<=0) pari_err(constpoler,"galois");
   if (n>11) pari_err(impl,"galois of degree higher than 11");
   x = Q_primpart(x);

@@ -308,7 +308,7 @@ nf_hyperell_locally_soluble(GEN nf,GEN T,GEN pr)
   GEN repr, zinit, p1;
   pari_sp av = avma;
 
-  if (typ(T)!=t_POL) pari_err(notpoler,"nf_hyperell_locally_soluble");
+  if (typ(T)!=t_POL) pari_err(typeer,"nf_hyperell_locally_soluble");
   if (gequal0(T)) return 1;
   checkprid(pr); nf = checknf(nf);
   pr = shallowcopy(pr);

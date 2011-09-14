@@ -1009,7 +1009,7 @@ pari_err2GEN(int numerr, va_list ap)
   case overflower:
   case impl:
   case typeer: case mattype1: case negexper:
-  case constpoler: case notpoler: case redpoler:
+  case constpoler: case redpoler:
   case zeropoler: case consister: case flagerr: case precer:
   case bugparier:
     retmkvec2(stoi(numerr), strtoGENstr(va_arg(ap, char*)));
@@ -1041,7 +1041,7 @@ pari_err_display(GEN err)
     print_errcontext(pariErr, msg, s, entry);
     return;
   }
-  err_init_msg(numerr); out_puts(pariErr, errmessage[numerr]);
+  err_init_msg(numerr);
   switch (numerr)
   {
   case talker: case alarmer:
@@ -1061,6 +1061,7 @@ pari_err_display(GEN err)
     out_printf(pariErr,"overflow in %Ps.", gel(err,2));
     break;
   case notfuncer:
+    out_puts(pariErr, "not a function in function call");
     {
       GEN fun = gel(err,2);
       if (gcmpX(fun))
@@ -1072,12 +1073,25 @@ pari_err_display(GEN err)
       break;
     }
   case impl:
-    out_printf(pariErr,"sorry, %Ps is not yet implemented.", gel(err,2));
-    break;
-  case typeer: case mattype1: case negexper:
-  case constpoler: case notpoler: case redpoler:
-  case zeropoler: case consister: case flagerr: case precer:
-    out_printf(pariErr," in %Ps.", gel(err,2)); break;
+    out_printf(pariErr,"sorry, %Ps is not yet implemented.", gel(err,2)); break;
+  case typeer:
+    out_printf(pariErr,"incorrect type in %Ps.", gel(err,2)); break;
+  case mattype1:
+    out_printf(pariErr,"not a square matrix in %Ps.", gel(err,2)); break;
+  case negexper:
+    out_printf(pariErr,"negative valuation in %Ps.", gel(err,2)); break;
+  case constpoler:
+    out_printf(pariErr,"constant polynomial in %Ps.", gel(err,2)); break;
+  case redpoler:
+    out_printf(pariErr,"reducible polynomial in %Ps.", gel(err,2)); break;
+  case zeropoler:
+    out_printf(pariErr,"zero polynomial in %Ps.", gel(err,2)); break;
+  case consister:
+    out_printf(pariErr,"inconsistent data in %Ps.", gel(err,2)); break;
+  case flagerr:
+    out_printf(pariErr,"invalid flag in %Ps.", gel(err,2)); break;
+  case precer:
+    out_printf(pariErr,"precision too low in %Ps.", gel(err,2)); break;
   case bugparier:
     out_printf(pariErr,"bug in %Ps, please report",gel(err,2)); break;
   case operi: case operf:
@@ -1103,12 +1117,14 @@ pari_err_display(GEN err)
         break;
     }
   case primer1:
+    out_puts(pariErr, "not enough precomputed primes");
     {
       ulong c = itou(gel(err,2));
       if (c) out_printf(pariErr, ", need primelimit ~ %lu.", c);
       break;
     }
   case errpile:
+    out_puts(pariErr, "the PARI stack overflows !");
     {
       size_t d = top - bot;
       char buf[256];
@@ -1120,6 +1136,10 @@ pari_err_display(GEN err)
       pariErr->puts("  [hint] you can increase GP stack with allocatemem()\n");
       break;
     }
+  case gdiver: out_puts(pariErr, "division by a non-invertible object"); break;
+  case archer: out_puts(pariErr, "sorry, not available on this system"); break;
+  case memer: out_puts(pariErr, "not enough memory"); break;
+  case sqrter5: out_puts(pariErr, "not an n-th power residue in sqrtn"); break;
   }
 }
 

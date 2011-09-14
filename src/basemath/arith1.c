@@ -184,7 +184,7 @@ znprimroot(GEN m)
   pari_sp av;
   GEN x, z;
 
-  if (typ(m) != t_INT) pari_err(arither1);
+  if (typ(m) != t_INT) pari_err(typeer,"znprimroot");
   if (!signe(m)) pari_err(talker,"zero modulus in znprimroot");
   if (is_pm1(m)) return mkintmodu(0,1);
   z = cgetg(3, t_INTMOD);
@@ -217,7 +217,7 @@ znstar(GEN N)
   long i, j, nbp, sizeh;
   pari_sp av;
 
-  if (typ(N) != t_INT) pari_err(arither1);
+  if (typ(N) != t_INT) pari_err(typeer,"znstar");
   if (!signe(N))
   {
     gel(res,1) = gen_2;
@@ -325,7 +325,7 @@ znstar(GEN N)
 GEN
 sqrtint(GEN a)
 {
-  if (typ(a) != t_INT) pari_err(arither1);
+  if (typ(a) != t_INT) pari_err(typeer,"sqrtint");
   switch (signe(a))
   {
     case 1: return sqrti(a);
@@ -1059,8 +1059,7 @@ kronecker(GEN x, GEN y)
   long s = 1, r;
   ulong xu, yu;
 
-  if (typ(x) != t_INT || typ(y) != t_INT) pari_err(arither1);
-
+  if (typ(x) != t_INT || typ(y) != t_INT) pari_err(typeer,"kronecker");
   switch (signe(y))
   {
     case -1: y = negi(y); if (signe(x) < 0) s = -1; break;
@@ -1461,7 +1460,7 @@ Fp_sqrt(GEN a, GEN p)
   long i, k, e;
   GEN p1, q, v, y, w, m;
 
-  if (typ(a) != t_INT || typ(p) != t_INT) pari_err(arither1);
+  if (typ(a) != t_INT || typ(p) != t_INT) pari_err(typeer,"Fp_sqrt");
   if (signe(p) <= 0 || equali1(p)) pari_err(talker,"not a prime in Fp_sqrt");
   if (lgefint(p) == 3)
   {
@@ -2269,7 +2268,7 @@ Fp_sqrtn(GEN a, GEN n, GEN p, GEN *zeta)
 /*********************************************************************/
 static long
 isfund(GEN x) {
-  if (typ(x) != t_INT) pari_err(arither1);
+  if (typ(x) != t_INT) pari_err(typeer,"isfundamental");
   return Z_isfundamental(x);
 }
 GEN
@@ -2304,7 +2303,7 @@ quaddisc(GEN x)
   long i,r,tx=typ(x);
   GEN P,E,f,s;
 
-  if (!is_rational_t(tx)) pari_err(arither1);
+  if (!is_rational_t(tx)) pari_err(typeer,"quaddisc");
   f = factor(x);
   P = gel(f,1);
   E = gel(f,2); s = gen_1;

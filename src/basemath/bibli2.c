@@ -933,7 +933,7 @@ numtoperm(long n, GEN x)
   GEN v;
 
   if (n < 0) pari_err(talker,"n too small (%ld) in numtoperm",n);
-  if (typ(x) != t_INT) pari_err(arither1);
+  if (typ(x) != t_INT) pari_err(typeer,"numtoperm");
   v = cgetg(n+1, t_VEC);
   v[1] = 1; av = avma;
   if (signe(x) <= 0) x = modii(x, mpfact(n));

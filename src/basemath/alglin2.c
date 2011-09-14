@@ -733,7 +733,7 @@ matcompanion(GEN x)
   long n = degpol(x), j;
   GEN y, c;
 
-  if (typ(x)!=t_POL) pari_err(notpoler,"matcompanion");
+  if (typ(x)!=t_POL) pari_err(typeer,"matcompanion");
   if (n == 0) return cgetg(1, t_MAT);
   if (gequal0(x)) pari_err(zeropoler,"matcompanion");
 

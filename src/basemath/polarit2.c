@@ -948,7 +948,7 @@ gisirreducible(GEN x)
       for (i=1; i<l; i++) gel(y,i) = gisirreducible(gel(x,i));
       return y;
     case t_POL: break;
-    default: pari_err(notpoler,"gisirreducible");
+    default: pari_err(typeer,"gisirreducible");
   }
   l = lg(x); if (l<=3) return gen_0;
   y = factor(x); avma = av;

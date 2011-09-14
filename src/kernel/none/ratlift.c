@@ -53,7 +53,6 @@ int
 ratlift(GEN x, GEN m, GEN amax, GEN bmax, GEN *a, GEN *b)
 {
   pari_sp av = avma;
-  if ((typ(x) | typ(m) | typ(amax) | typ(bmax)) != t_INT) pari_err(arither1);
   if (signe(bmax) <= 0)
     pari_err(talker, "ratlift: bmax must be > 0, found\n\tbmax=%Ps\n", bmax);
   if (signe(amax) < 0)

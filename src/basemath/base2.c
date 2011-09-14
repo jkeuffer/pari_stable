@@ -30,7 +30,7 @@ nfmaxord_check_args(nfmaxord_t *S, GEN T, long flag, GEN fa)
   GEN dT, P;
   long l, v;
 
-  if (typ(T)!=t_POL) pari_err(notpoler,"nfmaxord");
+  if (typ(T)!=t_POL) pari_err(typeer,"nfmaxord");
   if (degpol(T) <= 0) pari_err(constpoler,"nfmaxord");
 
   if (fa) {
