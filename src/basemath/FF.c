@@ -552,13 +552,13 @@ FF_sqrt(GEN x)
   switch (x[1])
   {
   case t_FF_FpXQ:
-    r=FpXQ_sqrtn(gel(x,2),gen_2,T,p,NULL);
+    r = FpXQ_sqrtn(gel(x,2),gen_2,T,p,NULL);
     break;
   case t_FF_F2xq:
-    r=F2xq_sqrt(gel(x,2),T);
+    r = F2xq_sqrt(gel(x,2),T);
     break;
   default:
-    r=Flxq_sqrtn(gel(x,2),gen_2,T,pp,NULL);
+    r = Flxq_sqrtn(gel(x,2),gen_2,T,pp,NULL);
   }
   if (!r) pari_err(sqrter5);
   return _mkFF(x, y, r);
@@ -574,10 +574,8 @@ FF_issquare(GEN x)
   {
   case t_FF_FpXQ:
     return FpXQ_issquare(gel(x,2), T, p);
-
   case t_FF_F2xq:
     return 1;
-
   default: /* case t_FF_Flxq: */
     return Flxq_issquare(gel(x,2), T, pp);
   }
@@ -603,21 +601,17 @@ FF_ispower(GEN x, GEN K, GEN *pt)
   if (pt) *pt = cgetg(5,t_FFELT);
   switch(x[1])
   {
-   case t_FF_FpXQ:
-     r = FpXQ_sqrtn(gel(x,2),K,T,p,NULL);
-     if (!r) { avma = av; return 0; }
-     break;
-
-   case t_FF_F2xq:
-     r = F2xq_sqrtn(gel(x,2),K,T,NULL);
-     if (!r) { avma = av; return 0; }
-     break;
-
-   default: /* case t_FF_Flxq: */
-     r = Flxq_sqrtn(gel(x,2),K,T,pp,NULL);
-     if (!r) { avma = av; return 0; }
-     break;
+  case t_FF_FpXQ:
+    r = FpXQ_sqrtn(gel(x,2),K,T,p,NULL);
+    break;
+  case t_FF_F2xq:
+    r = F2xq_sqrtn(gel(x,2),K,T,NULL);
+    break;
+  default: /* case t_FF_Flxq: */
+    r = Flxq_sqrtn(gel(x,2),K,T,pp,NULL);
+    break;
   }
+  if (!r) { avma = av; return 0; }
   if (pt) { (void)_mkFF(x,*pt,r); }
   return 1;
 }
