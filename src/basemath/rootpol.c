@@ -433,11 +433,11 @@ myshiftrc(GEN z, long e)
 {
   if (typ(z)==t_COMPLEX)
   {
-    if (signe(z[1])) setexpo(gel(z,1), expo(gel(z,1))+e);
-    if (signe(z[2])) setexpo(gel(z,2), expo(gel(z,2))+e);
+    if (signe(z[1])) shiftr_inplace(gel(z,1), e);
+    if (signe(z[2])) shiftr_inplace(gel(z,2), e);
   }
   else
-    if (signe(z)) setexpo(z,expo(z)+e);
+    if (signe(z)) shiftr_inplace(z, e);
 }
 
 /* return z*2^e, where z is integer or complex of integer (destroy z) */
@@ -647,7 +647,7 @@ logmax_modulus(GEN p, double tau)
     e = findpower(q);
   }
   if (!signe(r)) { avma = ltop; return 0.; }
-  r = itor(r, DEFAULTPREC); setexpo(r, expo(r) - M);
+  r = itor(r, DEFAULTPREC); shiftr_inplace(r, -M);
   avma = ltop; return -rtodbl(r) * LOG2; /* -log(2) sum e_i 2^-i */
 }
 GEN

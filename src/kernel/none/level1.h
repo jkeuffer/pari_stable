@@ -985,6 +985,12 @@ INLINE ulong
 shiftlr(ulong x, ulong y)
 { hiremainder = x<<(BITS_IN_LONG-y); return (x>>y); }
 
+INLINE void
+shiftr_inplace(GEN z, long d)
+{
+  setexpo(z, expo(z)+d);
+}
+
 /*******************************************************************/
 /*                                                                 */
 /*                           ASSIGNMENT                            */

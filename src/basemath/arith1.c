@@ -3008,13 +3008,13 @@ quadregulator(GEN x, long prec)
     GEN v1 = divii(subii(x,sqri(u1)),v);
     if (equalii(v,v1))
     {
-      R = sqrr(R); setexpo(R,expo(R)-1);
+      R = sqrr(R); shiftr_inplace(R, -1);
       R = mulrr(R, divri(addir(u1,rsqd),v));
       break;
     }
     if (equalii(u,u1))
     {
-      R = sqrr(R); setexpo(R,expo(R)-1);
+      R = sqrr(R); shiftr_inplace(R, -1);
       break;
     }
     R = mulrr(R, divri(addir(u1,rsqd),v));
@@ -3031,7 +3031,7 @@ quadregulator(GEN x, long prec)
   if (Rexpo)
   {
     GEN t = mulsr(Rexpo, mplog2(prec));
-    setexpo(t, expo(t)+1);
+    shiftr_inplace(t, 1);
     R = addrr(R,t);
   }
   return gerepileuptoleaf(av, R);

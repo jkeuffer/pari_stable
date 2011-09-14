@@ -270,7 +270,7 @@ roundr_up_ip(GEN x, long l)
   for(;;)
   {
     if (++x[--i]) break;
-    if (i == 2) { x[2] = HIGHBIT; setexpo(x, expo(x)+1); break; }
+    if (i == 2) { x[2] = HIGHBIT; shiftr_inplace(x, 1); break; }
   }
 }
 

@@ -276,7 +276,7 @@ kbessel1(GEN nu, GEN gx, long prec)
       s = addsr(1, mulrr(ak,s));
       t = addsr(k2,mulrr(ak,t));
     }
-    mulrrz(zf, s, u); setexpo(t, expo(t)-1);
+    mulrrz(zf, s, u); shiftr_inplace(t, -1);
     divrsz(addrr(mulrr(t,zf),mulrr(u,nu)),-n2,v);
     for(;; avma = av1)
     {
@@ -930,14 +930,14 @@ cxerfc_r1(GEN x, long prec)
     /* k = 0 moved out for efficiency */
     denom = gaddsg(1,denom);
     Uk = Vk;
-    Vk = mulur(u,Vk); setexpo(Vk, expo(Vk)-v);
+    Vk = mulur(u,Vk); shiftr_inplace(Vk, -v);
     res = gdiv(Uk, denom);
     for (k = 1; k < npoints; k++)
     {
       if ((k & 255) == 0) gerepileall(av2,4,&denom,&Uk,&Vk,&res);
       denom = gaddsg(2*k+1,denom);
       Uk = mpmul(Uk,Vk);
-      Vk = mulur(u,Vk); setexpo(Vk, expo(Vk)-v);
+      Vk = mulur(u,Vk); shiftr_inplace(Vk, -v);
       res = gadd(res, gdiv(Uk, denom));
     }
   }
@@ -1142,7 +1142,7 @@ bernreal_using_zeta(long n, GEN iz, long prec)
 
   if (!iz) iz = inv_szeta_euler(n, 0., l);
   z = divrr(mpfactr(n, l), mulrr(powru(Pi2n(1, l), n), iz));
-  setexpo(z, expo(z) + 1); /* 2 * n! * zeta(n) / (2Pi)^n */
+  shiftr_inplace(z, 1); /* 2 * n! * zeta(n) / (2Pi)^n */
   if ((n & 3) == 0) setsigne(z, -1);
   return z;
 }
@@ -1196,7 +1196,7 @@ szeta_odd(long k, long prec)
       p1 = mulrr(bernreal(kk-n,prec),bernreal(n,prec));
       if (n) { binom = next_bin(binom,kk,n); setprec(binom,prec+1); }
       p1 = mulrr(binom,p1);
-      if (n == kk>>1) setexpo(p1, expo(p1)-1);
+      if (n == kk>>1) shiftr_inplace(p1, -1);
       if ((n>>1)&1) togglesign(p1);
       y = n? addrr(y,p1): p1;
     }
@@ -1219,7 +1219,7 @@ szeta_odd(long k, long prec)
         gerepileall(av2,2, &z, &qn);
       }
     }
-    setexpo(z, expo(z)+1);
+    shiftr_inplace(z, 1);
     y = addrr(y,z); togglesign(y);
   }
   else
@@ -1254,7 +1254,7 @@ szeta_odd(long k, long prec)
         gerepileall(av2,2, &z, &qn);
       }
     }
-    setexpo(z, expo(z)+1);
+    shiftr_inplace(z, 1);
     y = subrr(y,z);
   }
   return gerepileuptoleaf(av, y);
@@ -1955,7 +1955,7 @@ logabs(GEN x)
   if (typ(x) == t_COMPLEX)
   {
     y = logr_abs( cxnorm(x) );
-    setexpo(y, expo(y)-1);
+    shiftr_inplace(y, -1);
   } else
     y = logr_abs(x);
   return y;
@@ -2014,7 +2014,7 @@ polylogP(long m, GEN x, long prec)
   if (k > 0) { x = ginv(x); fl = !m2; } else fl = 0;
   /* |x| <= 1 */
   if (k > 0) setsigne(p1, -1);
-  setexpo(p1, expo(p1)+1); /* 2log|x| <= 0 */
+  shiftr_inplace(p1, 1); /* 2log|x| <= 0 */
 
   y = polylog(m,x,l);
   y = m2? real_i(y): imag_i(y);

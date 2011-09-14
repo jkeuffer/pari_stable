@@ -124,7 +124,7 @@ mpatan(GEN x)
   setprec(p3, l2); p5 = mulrr(p4,p3); /* i = 1 */
   setprec(unr,l2); p4 = subrr(unr, p5);
 
-  p4 = mulrr(p2,p4); setexpo(p4, expo(p4)+m);
+  p4 = mulrr(p2,p4); shiftr_inplace(p4, m);
   if (inv) p4 = subrr(Pi2n(-1, lp), p4);
   if (sx < 0) togglesign(p4);
   affrr_fixlg(p4,y); avma = av0; return y;
@@ -399,7 +399,7 @@ mpch(GEN x)
     return e >= 0? real_0_bit(e): real_1(nbits2prec(-e));
   }
   av = avma;
-  z = mpexp(x); z = addrr(z, invr(z)); setexpo(z, expo(z)-1);
+  z = mpexp(x); z = addrr(z, invr(z)); shiftr_inplace(z, -1);
   return gerepileuptoleaf(av, z);
 }
 
@@ -443,7 +443,7 @@ mpsh(GEN x)
   if (!signe(x)) return real_0_bit(ex);
   lx = realprec(x); res = cgetr(lx); av = avma;
   if (ex < 1 - BITS_IN_LONG) x = rtor(x, lx + nbits2nlong(-ex)-1);
-  z = mpexp(x); z = subrr(z, invr(z)); setexpo(z, expo(z)-1);
+  z = mpexp(x); z = subrr(z, invr(z)); shiftr_inplace(z, -1);
   affrr(z, res); avma = av; return res;
 }
 
@@ -685,9 +685,9 @@ mpath(GEN x)
   long ex = expo(x);
   GEN z;
   if (ex < 1 - BITS_IN_LONG) x = rtor(x, lg(x) + nbits2nlong(-ex)-1);
-  z = invr( subsr(1,x) ); setexpo(z, expo(z)+1); /* 2/(1-x)*/
+  z = invr( subsr(1,x) ); shiftr_inplace(z, 1); /* 2/(1-x)*/
   z = logr_abs( addrs(z,-1) );
-  setexpo(z, expo(z)-1); return gerepileuptoleaf(av, z);
+  shiftr_inplace(z, -1); return gerepileuptoleaf(av, z);
 }
 
 GEN
@@ -708,11 +708,11 @@ gath(GEN x, long prec)
       av = avma;
       z = subrs(x,1);
       if (!signe(z)) pari_err(talker,"singular argument in atanh");
-      z = invr(z); setexpo(z, expo(z)+1); /* 2/(x-1)*/
+      z = invr(z); shiftr_inplace(z, 1); /* 2/(x-1)*/
       z = addrs(z,1);
       if (!signe(z)) pari_err(talker,"singular argument in atanh");
       z = logr_abs(z);
-      setexpo(z, expo(z)-1); /* (1/2)log((1+x)/(x-1)) */
+      shiftr_inplace(z, -1); /* (1/2)log((1+x)/(x-1)) */
       gel(y,1) = gerepileuptoleaf(av, z);
       gel(y,2) = Pi2n(-1, realprec(x));
       if (sx > 0) togglesign(gel(y,2));
@@ -800,7 +800,7 @@ mpbern(long nb, long prec)
       if ((d1 & 127) == 0) { set_bern(c0, i, S); S = BERN(i); avma = av; }
     }
     S = divru(subsr(2*i, S), 2*i+1);
-    setexpo(S, expo(S) - 2*i);
+    shiftr_inplace(S, - 2*i);
     set_bern(c0, i, S); /* S = B_2i */
   }
   if (DEBUGLEVEL) timer_printf(&T, "Bernoulli");
@@ -814,7 +814,7 @@ bernreal(long n, long prec)
 {
   GEN B;
 
-  if (n==1) { B = stor(-1, prec); setexpo(B,-1); return B; }
+  if (n==1) { B = real2n(-1, prec); setsigne(B, -1); return B; }
   if (n<0 || n&1) return gen_0;
   n >>= 1; mpbern(n+1,prec); B=cgetr(prec);
   affrr(bern(n),B); return B;
@@ -1188,7 +1188,7 @@ gammahs(long m, long prec)
 
   if (ma > 200 + 50*(prec-2)) /* heuristic */
   {
-    z = stor(m + 1, prec); setexpo(z, expo(z)-1);
+    z = stor(m + 1, prec); shiftr_inplace(z, -1);
     affrr(cxgamma(z,0,prec), y);
     avma = av; return y;
   }
@@ -1204,7 +1204,7 @@ gammahs(long m, long prec)
       z = divri(z,p1); v = -v;
       if ((m&3) == 2) setsigne(z,-1);
     }
-    setexpo(z, expo(z) + v);
+    shiftr_inplace(z, v);
   }
   affrr(z, y); avma = av; return y;
 }

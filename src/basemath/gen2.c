@@ -2012,11 +2012,11 @@ quadtofp(GEN x, long prec)
   if (signe(gel(Q,2)) < 0) /* Q[2] = -D/4 or (1-D)/4 */
   {
     z = subri(sqrtr(z), gel(Q,3));
-    setexpo(z, expo(z)-1);
+    shiftr_inplace(z, -1);
   }
   else
   {
-    z = sqrtr_abs(z); setexpo(z, expo(z)-1);
+    z = sqrtr_abs(z); shiftr_inplace(z, -1);
     z = mkcomplex(gmul2n(negi(gel(Q,3)),-1), z);
   }/* z = (-b + sqrt(D)) / 2 */
   return gerepileupto(av, gadd(u, gmul(v,z)));

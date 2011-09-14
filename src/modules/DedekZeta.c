@@ -106,7 +106,7 @@ zeta_get_limx(long r1, long r2, long bit)
   c1 = mulrs(powrfrac(real2n(1, DEFAULTPREC), -2*r2, N), N);
 
   p1 = powru(Pi2n(1, DEFAULTPREC), r - 1);
-  p2 = mulir(powuu(N,r), p1); setexpo(p2, expo(p2)-r2);
+  p2 = mulir(powuu(N,r), p1); shiftr_inplace(p2, -r2);
   c0 = sqrtr( divrr(p2, powru(c1, r+1)) );
 
   A0 = logr_abs( gmul2n(c0, bit) ); p2 = divrr(A0, c1);
@@ -248,7 +248,7 @@ initzeta(GEN T, long prec)
   for (k=1; k<R; k++)
   {
     GEN t = mulri(gel(zet,k), addis(shifti(gr2, k), r1));
-    setexpo(t, expo(t)-k);
+    shiftr_inplace(t, -k);
     if (k&1) togglesign(t);
     gel(ck_even,k) = t;
   }
@@ -256,7 +256,7 @@ initzeta(GEN T, long prec)
   for (k = 1; k <= r2+1; k++)
   {
     GEN t = mulri(gel(zet,k), subis(shifti(gru,k), r1));
-    setexpo(t, expo(t)-k);
+    shiftr_inplace(t, -k);
     if (k&1) togglesign(t);
     gel(ck_odd,k) = addsr(r, t);
   }

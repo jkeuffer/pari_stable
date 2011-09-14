@@ -700,10 +700,9 @@ rhoimag(GEN x)
 static void
 fix_expo(GEN x)
 {
-  long d = expo(gel(x,5)) - (1L << EMAX);
-  if (d >= 0) {
+  if (expo(gel(x,5)) >= (1L << EMAX)) {
     gel(x,4) = addsi(1, gel(x,4));
-    setexpo(x[5], d);
+    shiftr_inplace(gel(x, 5), - (1L << EMAX));
   }
 }
 
@@ -714,9 +713,9 @@ qfr5_dist(GEN e, GEN d, long prec)
   GEN t = logr_abs(d);
   if (signe(e)) {
     GEN u = mulir(e, mplog2(prec));
-    setexpo(u, expo(u)+EMAX); t = addrr(t, u);
+    shiftr_inplace(u, EMAX); t = addrr(t, u);
   }
-  setexpo(t, expo(t)-1); return t;
+  shiftr_inplace(t, -1); return t;
 }
 
 static void
@@ -784,13 +783,13 @@ qfr5_to_qfr(GEN x, GEN d0)
       n = addis(shifti(n, EMAX), expo(d));
       setexpo(d, 0); d = logr_abs(d);
       if (signe(n)) d = addrr(d, mulir(n, mplog2(lg(d0))));
-      setexpo(d, expo(d)-1);
+      shiftr_inplace(d, -1);
       d0 = addrr(d0, d);
     }
     else if (!gequal1(d)) /* avoid loss of precision */
     {
       d = logr_abs(d);
-      setexpo(d, expo(d)-1);
+      shiftr_inplace(d, -1);
       d0 = addrr(d0, d);
     }
   }

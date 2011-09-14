@@ -173,7 +173,7 @@ randomr(long prec)
   b = prec2nbits(prec);
   y = randomi(int2n(b));
   if (!signe(y)) return real_0_bit(b);
-  affir(y, x); setexpo(x, expo(x) - b);
+  affir(y, x); shiftr_inplace(x, - b);
   avma = av; return x;
 }
 

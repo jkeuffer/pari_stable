@@ -312,7 +312,7 @@ intinit_end(intdata *D, long pnt, long mnt)
 
 /* divide by 2 in place */
 static GEN
-divr2_ip(GEN x) { setexpo(x, expo(x)-1); return x; }
+divr2_ip(GEN x) { shiftr_inplace(x, -1); return x; }
 
 /* phi(t)=tanh((3/2)sinh(t)) : from -1 to 1, hence also from a to b compact
  * interval. */
@@ -336,7 +336,7 @@ inittanhsinh(long m, long prec)
     ct = divr2_ip(addrr(et, invr(et)));
     st = subrr(et, ct);
     ext = invr( addrs(mpexp(mulur(3, st)), 1) );
-    setexpo(ext, expo(ext)+1);
+    shiftr_inplace(ext, 1);
     xp = subsr(1, ext);
     wp = divr2_ip(mulur(3, mulrr(ct, mulrr(ext, addsr(1, xp)))));
     if (expo(wp) < -D.eps) { nt = k-1; break; }
@@ -500,8 +500,8 @@ initnumsine(long m, long prec)
     extm = invr(extp); extm1 = subsr(1, extm); extm2 = invr(extm1);
     kpi = mulur(k, pi);
     kct = mulur(k, ct);
-    setexpo(extm1, expo(extm1) + D.m);
-    setexpo(extp1, expo(extp1) + D.m);
+    shiftr_inplace(extm1, D.m);
+    shiftr_inplace(extp1, D.m);
     xp = mulrr(kpi, extm2);
     wp = mulrr(subrr(extm1, mulrr(kct, extm)), mulrr(pi, sqrr(extm2)));
     xm = mulrr(negr(kpi), extp2);

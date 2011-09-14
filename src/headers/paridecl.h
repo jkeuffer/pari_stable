@@ -2816,6 +2816,7 @@ INLINE void   shift_right(GEN z2, GEN z1, long min, long M, ulong f, ulong sh);
 INLINE ulong  shiftl(ulong x, ulong y);
 INLINE ulong  shiftlr(ulong x, ulong y);
 INLINE GEN    shiftr(GEN x, long n);
+INLINE void   shiftr_inplace(GEN z, long d);
 INLINE long   smodis(GEN x, long y);
 INLINE long   smodss(long x, long y);
 INLINE void   stackdummy(pari_sp av, pari_sp ltop);

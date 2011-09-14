@@ -262,7 +262,7 @@ do_agm(GEN *ptx, GEN a1, GEN b1)
     if (!signe(d)) break;
     p1 = sqrtr( divrr(addrr(x,d),x) );
     x = mulrr(x, sqrr(addsr(1,p1)));
-    setexpo(x, expo(x)-2);
+    shiftr_inplace(x, -2);
     if (expo(d) <= G + expo(b1)) break;
   }
   *ptx = x; return ginv(gmul2n(a1,2));

@@ -1250,7 +1250,7 @@ single_recursion(dblPointList *pl,GEN code,GEN xleft,double yleft,
 
   if (depth==RECUR_MAXDEPTH) return;
 
-  xx = addrr(xleft,xright); setexpo(xx, expo(xx)-1);
+  xx = addrr(xleft,xright); shiftr_inplace(xx, -1);
   yy = gtodouble(READ_EXPR(code,xx));
 
   if (dy && fabs(yleft+yright-2*yy)< dy*RECUR_PREC) return;
@@ -1274,7 +1274,7 @@ param_recursion(dblPointList *pl,GEN code,GEN tleft,double xleft,
 
   if (depth==PARAMR_MAXDEPTH) return;
 
-  tt = addrr(tleft,tright); setexpo(tt, expo(tt)-1);
+  tt = addrr(tleft,tright); shiftr_inplace(tt, -1);
   p1 = READ_EXPR(code,tt);
   if (typ(p1)==t_VEC)
   {

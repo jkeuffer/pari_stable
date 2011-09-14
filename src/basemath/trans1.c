@@ -129,14 +129,14 @@ constpi(long prec)
     GEN y, a, b, B_A = subrr(B, A);
     pari_sp av3 = avma;
     if (expo(B_A) < G) break;
-    a = addrr(A,B); setexpo(a, expo(a)-1);
+    a = addrr(A,B); shiftr_inplace(a, -1);
     b = mulrr(A,B);
     affrr(a, A);
     affrr(sqrtr_abs(b), B); avma = av3;
-    y = sqrr(B_A); setexpo(y, expo(y) + i - 2);
+    y = sqrr(B_A); shiftr_inplace(y, i - 2);
     affrr(subrr(C, y), C); avma = av2;
   }
-  setexpo(C, expo(C)+2);
+  shiftr_inplace(C, 2);
   affrr(divrr(sqrr(addrr(A,B)), C), tmppi);
   BLOCK_SIGINT_START;
   if (gpi) gunclone(gpi);
@@ -152,7 +152,7 @@ mppi(long prec) { return rtor(constpi(prec), prec); }
 GEN
 Pi2n(long n, long prec)
 {
-  GEN x = mppi(prec); setexpo(x, 1+n);
+  GEN x = mppi(prec); shiftr_inplace(x, n);
   return x;
 }
 
@@ -1602,7 +1602,7 @@ mpexp_basecase(GEN x)
   z = addsr(1, exp1r_abs(y));
   if (signe(y) < 0) z = invr(z);
   if (sh) {
-    setexpo(z, expo(z)+sh);
+    shiftr_inplace(z, sh);
     if (realprec(z) > l) z = rtor(z, l); /* spurious precision increase */
   }
 #ifdef DEBUG
@@ -1648,7 +1648,7 @@ mpexp(GEN x)
     affrr(t, a); avma = (pari_sp)a;
   }
   affrr(t,z);
-  if (sh) setexpo(z, expo(z) + sh);
+  if (sh) shiftr_inplace(z, sh);
   avma = (pari_sp)z; return z;
 }
 
@@ -1827,12 +1827,12 @@ agm1r_abs(GEN x)
   GEN a1, b1, y = cgetr(l);
   pari_sp av = avma;
 
-  a1 = addrr(real_1(l), x); setexpo(a1, expo(a1)-1);
+  a1 = addrr(real_1(l), x); shiftr_inplace(a1, -1);
   b1 = sqrtr_abs(x);
   while (agmr_gap(a1,b1,L))
   {
     GEN a = a1;
-    a1 = addrr(a,b1); setexpo(a1, expo(a1)-1);
+    a1 = addrr(a,b1); shiftr_inplace(a1, -1);
     b1 = sqrtr_abs(mulrr(a,b1));
   }
   affrr_fixlg(a1,y); avma = av; return y;
@@ -1981,7 +1981,7 @@ logagmr_abs(GEN q)
   Q = rtor(q,prec);
   Q[1] = evalsigne(1) | evalexpo(lim);
 
-  _4ovQ = invr(Q); setexpo(_4ovQ, expo(_4ovQ)+2); /* 4/Q */
+  _4ovQ = invr(Q); shiftr_inplace(_4ovQ, 2); /* 4/Q */
   /* Pi / 2agm(1, 4/Q) ~ log(Q), q = Q * 2^(e-lim) */
   y = divrr(Pi2n(-1, prec), agm1r_abs(_4ovQ));
   y = addrr(y, mulsr(e - lim, mplog2(prec)));
@@ -2077,7 +2077,7 @@ logr_abs(GEN X)
     /* k = 1 special-cased for eficiency */
     y = mulrr(y, addsr(1,T)); /* = log(X)/2 */
   }
-  setexpo(y, expo(y)+m+1);
+  shiftr_inplace(y, m + 1);
   if (EX) y = addrr(y, mulsr(EX, mplog2(l+1)));
   affrr_fixlg(y, z); avma = ltop; return z;
 }
@@ -2106,16 +2106,9 @@ logagmcx(GEN q, long prec)
   }
   ea = expo(a);
   eb = expo(b);
-  if (ea <= eb)
-  {
-    setexpo(Q[1], lim - eb + ea);
-    setexpo(Q[2], lim);
-    e = lim - eb;
-  } else {
-    setexpo(Q[1], lim);
-    setexpo(Q[2], lim - ea + eb);
-    e = lim - ea;
-  }
+  e = ea <= eb ? lim - eb : lim - ea;
+  shiftr_inplace(a, e);
+  shiftr_inplace(b, e);
 
   /* Pi / 2agm(1, 4/Q) ~ log(Q), q = Q * 2^e */
   y = gdiv(Pi2n(-1, prec), agm1cx( gdivsg(4, Q), prec ));
@@ -2220,11 +2213,10 @@ mpsc1(GEN x, long *ptmod8)
     GEN q;
     if (a > 30)
     {
-      GEN z, pitemp = mppi(nbits2prec(a + 32));
-      setexpo(pitemp,-1);
+      GEN z, pitemp = Pi2n(-2, nbits2prec(a + 32));
       z = addrr(x,pitemp); /* = x + Pi/4 */
       if (expo(z) >= bit_prec(z) + 3) pari_err(precer,"mpsc1");
-      setexpo(pitemp, 0);
+      shiftr_inplace(pitemp, 1);
       q = floorr( divrr(z,pitemp) ); /* round ( x / (Pi/2) ) */
     } else {
       q = stoi((long)floor(rtodbl(x) / (PI/2) + 0.5));
@@ -2309,7 +2301,7 @@ mpsc1(GEN x, long *ptmod8)
   for (i=1; i<=m; i++)
   { /* p2 = cos(x)-1 --> cos(2x)-1 */
     p2 = mulrr(p2, addsr(2,p2));
-    setexpo(p2, expo(p2)+1);
+    shiftr_inplace(p2, 1);
     if ((i & 31) == 0) p2 = gerepileuptoleaf((pari_sp)y, p2);
   }
   affrr_fixlg(p2,y); return y;

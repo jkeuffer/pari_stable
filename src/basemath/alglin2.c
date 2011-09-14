@@ -1071,7 +1071,7 @@ jacobi(GEN a, long prec)
     for (i=p+1; i<q; i++) rot(gcoeff(a,p,i), gcoeff(a,i,q), s,u);
     for (i=q+1; i<l; i++) rot(gcoeff(a,p,i), gcoeff(a,q,i), s,u);
     y = gcoeff(a,p,q);
-    t = mulrr(t, y); setexpo(y, expo(y)-de-1);
+    t = mulrr(t, y); shiftr_inplace(y, -de - 1);
     x = gel(L,p); subrrz(x,t, x);
     y = gel(L,q); addrrz(y,t, y);
     for (i=1; i<l; i++) rot(gcoeff(r,i,p), gcoeff(r,i,q), s,u);

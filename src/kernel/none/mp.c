@@ -265,7 +265,7 @@ roundr_up_ip(GEN x, long l)
   for(;;)
   {
     if (++x[--i]) break;
-    if (i == 2) { x[2] = (long)HIGHBIT; setexpo(x, expo(x)+1); break; }
+    if (i == 2) { x[2] = (long)HIGHBIT; shiftr_inplace(x, 1); break; }
   }
 }
 
@@ -2053,10 +2053,10 @@ sqrtr_abs(GEN x)
     l1 <<= 1; if (l1 > l) l1 = l;
     setlg(a, l1 + 2);
     setlg(t, l1 + 2);
-    affrr(addrr(t, divrr(a,t)), t); setexpo(t, expo(t)-1);
+    affrr(addrr(t, divrr(a,t)), t); shiftr_inplace(t, -1);
     avma = av;
   }
-  affrr(t,y); setexpo(y, expo(y) + (ex>>1));
+  affrr(t,y); shiftr_inplace(y, (ex>>1));
   avma = av0; return y;
 }
 
