@@ -119,10 +119,9 @@ constpi(long prec)
   G = - prec2nbits(prec);
   prec++;
 
-  A = real_1(prec);
-  i = A[1]; A[1] = evalsigne(1) | _evalexpo(-1);
+  A = real2n(-1, prec);
   B = sqrtr_abs(A); /* = 1/sqrt(2) */
-  A[1] = i;
+  setexpo(A, 0);
   C = real2n(-2, prec); av2 = avma;
   for (i = 0;; i++)
   {
@@ -1524,7 +1523,7 @@ exp1r_abs(GEN x)
     n = (long)(b / (d + log2((double)n+1))); /* log~constant in small ranges */
   while (n*(d+log2((double)n+1)) < b) n++; /* expect few corrections */
 
-  X = rtor(x,L); X[1] = evalsigne(1) | evalexpo(-e);
+  X = rtor(x,L); shiftr_inplace(X, -m); setsigne(X, 1);
   if (n == 1) p2 = X;
   else
   {
@@ -2236,7 +2235,7 @@ mpsc1(GEN x, long *ptmod8)
 
   b = bit_accuracy(l);
   if (b + (a<<1) <= 0) {
-    y = sqrr(x); y[1] = evalsigne(-1)|evalexpo(expo(y)-1);
+    y = sqrr(x); shiftr_inplace(y, -1); setsigne(y, -1);
     return y;
   }
 
@@ -2275,7 +2274,7 @@ mpsc1(GEN x, long *ptmod8)
   *   log n! ~ (n + 1/2) log(n+1) - (n+1) + log(2Pi)/2,
   * error bounded by 1/6(n+1) <= 1/12. Finally, we want
   * 2n (-1/log(2) - log_2 |Y| + log_2(2n+2)) >= b  */
-  x = rtor(x, L); x[1] = evalsigne(1) | evalexpo(-e);
+  x = rtor(x, L); shiftr_inplace(x, -m); setsigne(x, 1);
   x2 = sqrr(x);
   if (n == 1) p2 = x2;
   else
@@ -2294,7 +2293,7 @@ mpsc1(GEN x, long *ptmod8)
       setprec(unr,l1); p1 = addrr_sign(unr,1, p1,-signe(p1));
       setprec(p2,l1); affrr(p1,p2); avma = av;
     }
-    p2[1] = evalsigne(-signe(p2)) | evalexpo(expo(p2)-1); /* p2 := -p2/2 */
+    shiftr_inplace(p2, -1); togglesign(p2); /* p2 := -p2/2 */
     setprec(x2,L); p2 = mulrr(x2,p2);
   }
   /* Now p2 = sum {1<= i <=n} (-1)^i x^(2i) / (2i)! ~ cos(x) - 1 */

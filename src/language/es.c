@@ -595,7 +595,8 @@ absrtostr_width_frac(GEN x, int width_frac)
   { /* z = |x| 10^beta, 10^b = 5^b * 2^b, 2^b goes into exponent */
     if (beta > 4e9) lx++;
     z = mulrr(x, rpowuu(5UL, (ulong)beta, lx+1));
-    z[1] = evalsigne(1) | evalexpo(expo(z) + beta);
+    setsigne(z, 1);
+    shiftr_inplace(z, beta);
   }
   else
     z = mpabs(x);
@@ -656,7 +657,8 @@ absrtostr(GEN x, int sp, char FORMAT, long wanted_dec)
       if (beta < -4e9) lx++;
       z = divrr(x, rpowuu(5UL, (ulong)-beta, lx+1));
     }
-    z[1] = evalsigne(1) | evalexpo(expo(z) + beta);
+    setsigne(z, 1);
+    shiftr_inplace(z, beta);
   }
   else
     z = x;

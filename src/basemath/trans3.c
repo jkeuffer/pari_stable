@@ -1302,7 +1302,8 @@ szeta(long k, long prec)
     {
       y = mulrr(powru(Pi2n(1, prec), k), single_bern(k, prec));
       y = divrr(y, mpfactr(k,prec));
-      y[1] = evalsigne(1) | evalexpo(expo(y)-1);
+      setsigne(y, 1);
+      shiftr_inplace(y, -1);
     }
     return gerepileuptoleaf(av, y);
   }
