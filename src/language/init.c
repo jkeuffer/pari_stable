@@ -997,9 +997,9 @@ pari_sigint(const char *time_s)
 
 /* if numerr=errpile, return NULL */
 static GEN
-pari_err2GEN(int numerr, va_list ap)
+pari_err2GEN(long numerr, va_list ap)
 {
-  switch (numerr)
+  switch ((enum err_list) numerr)
   {
   case syntaxer:
     {
@@ -1055,8 +1055,10 @@ char *
 pari_err2str(GEN err)
 {
   long numerr = err_get_num(err);
-  switch (numerr)
+  switch ((enum err_list) numerr)
   {
+  case syntaxer:
+    return pari_strdup(GSTR(gel(err,2)));
   case talker: case alarmer:
     return pari_sprintf("%Ps.",gel(err,3));
   case user:
@@ -1120,7 +1122,7 @@ pari_err2str(GEN err)
   case errpile:
     {
       size_t d = top - bot;
-      char *buf = pari_malloc(512*sizeof(char));
+      char *buf = (char *) pari_malloc(512*sizeof(char));
       sprintf(buf, "the PARI stack overflows !\n"
           "  current stack size: %lu (%.3f Mbytes)\n"
           "  [hint] you can increase GP stack with allocatemem()\n",
@@ -1135,8 +1137,9 @@ pari_err2str(GEN err)
     return pari_strdup("not enough memory");
   case sqrter5:
     return pari_strdup("not an n-th power residue in sqrtn");
+  case noer: return NULL;
   }
-  return NULL; /* not reached*/
+  return NULL; /*NOT REACHED*/
 }
 
 static void
