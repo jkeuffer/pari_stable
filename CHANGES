@@ -35,6 +35,7 @@ VL 19- [makefile] Incorrect -I and -L flags order [#1212]
    26- change default(realprecision) so that it returns the internal precision
        [ as precision(1.) ], not the number of printed digits. [#1235]
    27- subst(Y/X,X,x) -> 0
+PB 28- polrootsff(x^2-x-ffgen((v^2+1) * Mod(1,3))) -> SEGV [#1241]
 
   Changed
     1- mathnf: swapped flag 3 and 5.

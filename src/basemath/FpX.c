@@ -1365,6 +1365,7 @@ FpXQ_sqrtn(GEN a, GEN n, GEN T, GEN p, GEN *zeta)
     pari_sp av=avma;
     ulong pp=p[2];
     GEN z = Flxq_sqrtn(ZX_to_Flx(a,pp),n,ZX_to_Flx(T,pp),pp,zeta);
+    if (!z) return NULL;
     z = Flx_to_ZX(z);
     if (zeta)
     {

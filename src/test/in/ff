@@ -63,3 +63,7 @@ t = ffgen(ffinit(2,64))^((2^64-1)\5);1/t
 
 t = ffgen(('t^2+'t+1)*Mod(1,2));
 factorff(x^12 + t*x^10 + x^6 + (t+1)*x^2 + 1)
+
+\\ #1241
+polrootsff(x^2 - x - ffgen((v^2+1) * Mod(1,3)))
+
