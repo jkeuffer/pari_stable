@@ -687,7 +687,7 @@ basistoalg(GEN nf, GEN x)
       gel(z,1) = gcopy(T);
       gel(z,2) = gcopy(x); return z;
     default:
-      pari_err(typeer,"basistoalg");
+      pari_err(typeer,"basistoalg",x);
       return NULL; /* not reached */
   }
 }
@@ -719,7 +719,7 @@ nf_to_scalar_or_basis(GEN nf, GEN x)
       if (lg(x) != lg(nf_get_zk(nf))) break;
       return QV_isscalar(x)? gel(x,1): x;
   }
-  pari_err(typeer,"nf_to_scalar_or_basis");
+  pari_err(typeer,"nf_to_scalar_or_basis",x);
   return NULL; /* not reached */
 }
 /* Let x be a polynomial with coefficients in Q or nf. Return the same
@@ -761,7 +761,7 @@ nf_to_scalar_or_alg(GEN nf, GEN x)
       if (lg(x) != lg(nf_get_zk(nf))) break;
       return QV_isscalar(x)? gel(x,1): coltoliftalg(nf, x);
   }
-  pari_err(typeer,"nf_to_scalar_or_alg");
+  pari_err(typeer,"nf_to_scalar_or_alg",x);
   return NULL; /* not reached */
 }
 
@@ -823,7 +823,7 @@ algtobasis(GEN nf, GEN x)
     case t_INT:
     case t_FRAC: return scalarcol(x, nf_get_degree(nf));
   }
-  pari_err(typeer,"algtobasis");
+  pari_err(typeer,"algtobasis",x);
   return NULL; /* not reached */
 }
 
@@ -872,7 +872,7 @@ matbasistoalg(GEN nf,GEN x)
       for (i=1; i<lx; i++) gel(z,i) = basistoalg(nf, gel(x,i));
       return z;
     case t_MAT: break;
-    default: pari_err(typeer, "matbasistoalg");
+    default: pari_err(typeer, "matbasistoalg",x);
   }
   li = lg(x[1]);
   for (j=1; j<lx; j++)
@@ -897,7 +897,7 @@ matalgtobasis(GEN nf,GEN x)
       for (i=1; i<lx; i++) gel(z,i) = algtobasis(nf, gel(x,i));
       return z;
     case t_MAT: break;
-    default: pari_err(typeer, "matalgtobasis");
+    default: pari_err(typeer, "matalgtobasis",x);
   }
   li = lg(x[1]);
   for (j=1; j<lx; j++)
@@ -1022,7 +1022,7 @@ vec01_to_indices(GEN v)
   {
    case t_VECSMALL: return v;
    case t_VEC: break;
-   default: pari_err(typeer,"vec01_to_indices");
+   default: pari_err(typeer,"vec01_to_indices",v);
   }
   l = lg(v);
   p = new_chunk(l) + l;
@@ -2175,13 +2175,13 @@ ideallistarch(GEN bnf, GEN L, GEN arch)
   ideal_data ID;
   GEN (*join_z)(ideal_data*, GEN);
 
-  if (typ(L) != t_VEC) pari_err(typeer, "ideallistarch");
+  if (typ(L) != t_VEC) pari_err(typeer, "ideallistarch",L);
   if (l == 1) return cgetg(1,t_VEC);
   z = gel(L,1);
-  if (typ(z) != t_VEC) pari_err(typeer, "ideallistarch");
+  if (typ(z) != t_VEC) pari_err(typeer, "ideallistarch",z);
   z = gel(z,1); /* either a bid or [bid,U] */
   if (lg(z) == 3) { /* the latter: do units */
-    if (typ(z) != t_VEC) pari_err(typeer,"ideallistarch");
+    if (typ(z) != t_VEC) pari_err(typeer,"ideallistarch",z);
     ID.sgnU = nfsign_units(bnf, NULL, 1);
     join_z = &join_archunit;
   } else

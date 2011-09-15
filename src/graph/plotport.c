@@ -252,7 +252,7 @@ static long
 initrect_get_arg(GEN x, long flag, long *dft)
 { /* FIXME: gequal0(x) undocumented backward compatibility hack */
   if (!x || gequal0(x) || flag) { PARI_get_plot(0); return *dft - 1; }
-  if (typ(x) != t_INT) pari_err(typeer, "initrect");
+  if (typ(x) != t_INT) pari_err(typeer, "initrect",x);
   return itos(x);
 }
 void
@@ -654,7 +654,9 @@ rectpoints(long ne, GEN listx, GEN listy)
     rectpoint(ne, listx, listy); return;
   }
   lx = lg(listx);
-  if (tx == t_MAT || ty == t_MAT || lg(listy) != lx) pari_err(typeer,"rectpoints");
+  if (tx == t_MAT) pari_err(typeer,"rectpoints",listx);
+  if (ty == t_MAT) pari_err(typeer,"rectpoints",listy);
+  if (lg(listy) != lx) pari_err(consister,"rectpoints");
   lx--; if (!lx) return;
 
   px = (double*) pari_malloc(lx*sizeof(double)); listx++;
@@ -707,7 +709,9 @@ rectlines(long ne, GEN listx, GEN listy, long flag)
   {
     rectline(ne, listx, listy); return;
   }
-  if (tx == t_MAT || ty == t_MAT || lg(listy) != lx) pari_err(typeer,"rectlines");
+  if (tx == t_MAT) pari_err(typeer,"rectlines",listx);
+  if (ty == t_MAT) pari_err(typeer,"rectlines",listy);
+  if (lg(listy) != lx) pari_err(consister,"rectlines");
   lx--; if (!lx) return;
 
   x = (double*) pari_malloc(lx*sizeof(double));
@@ -1148,7 +1152,7 @@ gtodblList(GEN data, long flags)
   long cplx=(flags & PLOT_COMPLEX);
   GEN x,y;
 
-  if (! is_vec_t(tx)) pari_err(typeer,"gtodblList");
+  if (! is_vec_t(tx)) pari_err(typeer,"gtodblList",data);
   if (!nl) return NULL;
   lx1 = lg(data[1]);
 
@@ -1159,16 +1163,17 @@ gtodblList(GEN data, long flags)
   {
     u = i+1;
     x = gel(data,u);   tx = typ(x); lx = lg(x);
+    if (!is_vec_t(tx)) pari_err(typeer,"gtodblList",x);
     if (cplx)
     {
-      if (!is_vec_t(tx)) pari_err(typeer,"gtodblList");
-      y=NULL;
+      y = NULL;
     }
     else
     {
       y = gel(data,u+1); ty = typ(y);
-      if (!is_vec_t(tx) || !is_vec_t(ty) || lg(y) != lx
-          || (!param && lx != lx1)) pari_err(typeer,"gtodblList");
+      if (!is_vec_t(ty)) pari_err(typeer,"gtodblList",y);
+      if (lg(y) != lx || (!param && lx != lx1))
+        pari_err(consister,"gtodblList");
     }
 
     lx--;
@@ -1951,14 +1956,13 @@ gendraw(GEN list, long ps, long flag)
   {
     GEN win = gel(list,3*i+1), x0 = gel(list,3*i+2), y0 = gel(list,3*i+3);
     long xi, yi;
-    if (typ(win)!=t_INT) pari_err(typeer,"rectdraw");
+    if (typ(win)!=t_INT) pari_err(typeer,"rectdraw",win);
     if (flag) {
       xi = DTOL(gtodouble(x0)*(pari_plot.width - 1));
       yi = DTOL(gtodouble(y0)*(pari_plot.height - 1));
     } else {
-      if (typ(x0)!=t_INT || typ(y0)!= t_INT) pari_err(typeer,"rectdraw");
-      xi = itos(x0);
-      yi = itos(y0);
+      xi = gtos(x0);
+      yi = gtos(y0);
     }
     x[i] = xi;
     y[i] = yi;

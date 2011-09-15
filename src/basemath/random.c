@@ -96,7 +96,7 @@ setrand(GEN seed) {
     }
     case t_INT: if (signe(seed) > 0) { init_xor4096i( itou(seed) ); return; }
   }
-  pari_err(typeer, "setrand");
+  pari_err(typeer, "setrand",seed);
 }
 GEN
 getrand(void) {
@@ -212,7 +212,7 @@ genrand(GEN N)
     case t_VEC:
       return ellrandom(N);
     default:
-      pari_err(typeer,"genrand");
+      pari_err(typeer,"genrand",N);
       return NULL;/*not reached*/
   }
 }

@@ -359,7 +359,7 @@ perm_to_GAP(GEN p)
   char *s;
   long sz;
   long lp=lg(p)-1;
-  if (typ(p) != t_VECSMALL)  pari_err(typeer, "perm_to_GAP");
+  if (typ(p) != t_VECSMALL)  pari_err(typeer, "perm_to_GAP",p);
   x = perm_cycles(p);
   sz = (long) ((bfffo(lp)+1) * LOG10_2 + 1);
   /*Dry run*/

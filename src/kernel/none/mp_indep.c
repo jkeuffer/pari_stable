@@ -886,8 +886,6 @@ rtodbl(GEN x)
   const int exp_mid = 0x3ff;/* exponent bias */
   const int expo_len = 11; /* number of bits of exponent */
 
-  if (typ(x)==t_INT && !s) return 0.0;
-  if (typ(x)!=t_REAL) pari_err(typeer,"rtodbl");
   if (!s || (ex=expo(x)) < - exp_mid) return 0.0;
 
   /* start by rounding to closest */
@@ -1000,8 +998,6 @@ rtodbl(GEN x)
   const int expo_len = 11; /* number of bits of exponent */
   const int shift = mant_len-32;
 
-  if (typ(x)==t_INT && !s) return 0.0;
-  if (typ(x)!=t_REAL) pari_err(typeer,"rtodbl");
   if (!s || (ex=expo(x)) < - exp_mid) return 0.0;
 
   /* start by rounding to closest */

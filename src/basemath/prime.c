@@ -138,7 +138,7 @@ millerrabin(GEN n, long k)
   long i;
   MR_Jaeschke_t S;
 
-  if (typ(n) != t_INT) pari_err(typeer,"millerrabin");
+  if (typ(n) != t_INT) pari_err(typeer,"millerrabin",n);
   if (signe(n)<=0) return 0;
   /* If |n| <= 3, check if n = +- 1 */
   if (lgefint(n)==3 && (ulong)(n[2])<=3) return (n[2] != 1);
@@ -494,7 +494,7 @@ BPSW_psp(GEN N)
   MR_Jaeschke_t S;
   int k;
 
-  if (typ(N) != t_INT) pari_err(typeer,"BPSW_psp");
+  if (typ(N) != t_INT) pari_err(typeer,"BPSW_psp",N);
   if (signe(N) <= 0) return 0;
   if (lgefint(N) == 3) return uisprime((ulong)N[2]);
   if (!mod2(N)) return 0;
@@ -630,7 +630,7 @@ isprimePL(GEN N, long flag)
     F = gel(N,2);
     N = gel(N,1); t = typ(N);
   }
-  if (t != t_INT) pari_err(typeer,"isprimePL");
+  if (t != t_INT) pari_err(typeer,"isprimePL",N);
   eps = cmpis(N,2);
   if (eps<=0) return eps? gen_0: gen_1;
 
@@ -792,7 +792,7 @@ primepi(GEN x)
 {
   pari_sp av = avma;
   GEN N = typ(x) == t_INT? x: gfloor(x);
-  if (typ(N) != t_INT) pari_err(typeer, "primepi");
+  if (typ(N) != t_INT) pari_err(typeer, "primepi",N);
   if (signe(N) <= 0) return gen_0;
   avma = av; return utoi(uprimepi(itou(N)));
 }
@@ -853,7 +853,7 @@ static void
 rmprime(GEN T, GEN p)
 {
   long i;
-  if (typ(p) != t_INT) pari_err(typeer,"rmprime");
+  if (typ(p) != t_INT) pari_err(typeer,"rmprime",p);
   i = ZV_search(T, p);
   if (!i) pari_err(talker,"prime %Ps is not in primetable", p);
   gunclone(gel(T,i)); gel(T,i) = NULL;

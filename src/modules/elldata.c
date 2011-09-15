@@ -95,12 +95,13 @@ ellconvertname(GEN n)
     {
       pari_sp av = avma;
       GEN f=gel(n,1), c=gel(n,2), s=gel(n,3);
-      if (typ(f)!=t_INT || typ(c)!=t_INT || typ(s)!=t_INT)
-        pari_err(typeer,"ellconvertname");
+      if (typ(f)!=t_INT) pari_err(typeer,"ellconvertname",f);
+      if (typ(c)!=t_INT) pari_err(typeer,"ellconvertname",c);
+      if (typ(s)!=t_INT) pari_err(typeer,"ellconvertname",s);
       return gerepilecopy(av, shallowconcat1(mkvec3(f, ellrecode(itos(c)), s)));
     }
   }
-  pari_err(typeer,"ellconvertname");
+  pari_err(typeer,"ellconvertname",n);
   return NULL; /*Not reached*/
 }
 
@@ -174,7 +175,7 @@ ellsearch(GEN A)
     if (!ellparsename(GSTR(A),&f,&c,&i))
       pari_err(talker,"Incorrect curve name in ellsearch");
   } else {
-    pari_err(typeer,"ellsearch");
+    pari_err(typeer,"ellsearch",A);
     return NULL;
   }
   if (f <= 0) pari_err(talker,"Non-positive conductor in ellsearch");

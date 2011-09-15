@@ -831,7 +831,7 @@ static GEN
 to_FF_pol(GEN x, GEN ff)
 {
   long i, lx = lg(x);
-  if (typ(x) != t_POL) pari_err(typeer,"to_FF_pol");
+  if (typ(x) != t_POL) pari_err(typeer,"to_FF_pol",x);
   for (i=2; i<lx; i++) gel(x,i) = to_FF(gel(x,i), ff);
   return x;
 }
@@ -947,9 +947,9 @@ ffgen(GEN T, long v)
 {
   GEN A, p = NULL, ff;
   long d;
-  if (typ(T) != t_POL) pari_err(typeer,"ffgen");
+  if (typ(T) != t_POL) pari_err(typeer,"ffgen",T);
   d = degpol(T); p = NULL;
-  if (d < 1 || !RgX_is_FpX(T, &p) || !p) pari_err(typeer,"ffgen");
+  if (d < 1 || !RgX_is_FpX(T, &p) || !p) pari_err(typeer,"ffgen",T);
   ff = cgetg(5,t_FFELT);
   T = RgX_to_FpX(T, p);
   if (v < 0) v = varn(T);
@@ -987,21 +987,22 @@ ffgen(GEN T, long v)
 GEN
 fforder(GEN x, GEN o)
 {
-  if (typ(x)!=t_FFELT) pari_err(typeer,"fforder");
+  if (typ(x)!=t_FFELT) pari_err(typeer,"fforder",x);
   return FF_order(x,o);
 }
 
 GEN
 ffprimroot(GEN x, GEN *o)
 {
-  if (typ(x)!=t_FFELT) pari_err(typeer,"ffprimroot");
+  if (typ(x)!=t_FFELT) pari_err(typeer,"ffprimroot",x);
   return FF_primroot(x,o);
 }
 
 GEN
 fflog(GEN x, GEN g, GEN o)
 {
-  if (typ(x)!=t_FFELT || typ(g)!=t_FFELT) pari_err(typeer,"fflog");
+  if (typ(x)!=t_FFELT) pari_err(typeer,"fflog",x);
+  if (typ(g)!=t_FFELT) pari_err(typeer,"fflog",g);
   return FF_log(x,g,o);
 }
 

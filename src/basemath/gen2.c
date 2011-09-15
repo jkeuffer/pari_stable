@@ -126,7 +126,7 @@ gassoc_proto(GEN f(GEN,GEN), GEN x, GEN y)
   {
     pari_sp av = avma;
     long tx = typ(x);
-    if (!is_vec_t(tx)) pari_err(typeer,"association");
+    if (!is_vec_t(tx)) pari_err(typeer,"association",x);
     return gerepileupto(av, divide_conquer_prod(x,f));
   }
   return f(x,y);
@@ -180,7 +180,7 @@ matsize(GEN x)
     case t_COL: return mkvec2s(L, 1);
     case t_MAT: return mkvec2s(L? lg(x[1])-1: 0, L);
   }
-  pari_err(typeer,"matsize");
+  pari_err(typeer,"matsize",x);
   return NULL; /* not reached */
 }
 
@@ -256,7 +256,7 @@ gtolong(GEN x)
     case t_QUAD:
       if (gequal0(gel(x,3))) return gtolong(gel(x,2)); break;
   }
-  pari_err(typeer,"gtolong");
+  pari_err(typeer,"gtolong",x);
   return 0; /* not reached */
 }
 
@@ -597,11 +597,11 @@ gcmp(GEN x, GEN y)
     if (tx != t_FRAC)
     {
       if (ty == t_STR) return -1;
-      pari_err(typeer,"comparison");
+      pari_err(operf,"comparison",x,y);
     }
   }
   if (ty == t_STR) return -1;
-  if (!is_intreal_t(ty) && ty != t_FRAC) pari_err(typeer,"comparison");
+  if (!is_intreal_t(ty) && ty != t_FRAC) pari_err(operf,"comparison",x,y);
   av=avma; f = gsigne( gsub(x,y) ); avma=av; return f;
 }
 
@@ -619,7 +619,7 @@ gcmpsg(long s, GEN y)
     }
     case t_STR: return -1;
   }
-  pari_err(typeer,"comparison");
+  pari_err(operf,"comparison",stoi(s),y);
   return 0; /* not reached */
 }
 
@@ -1700,7 +1700,7 @@ gabs(GEN x, long prec)
       for (i=1; i<lx; i++) gel(y,i) = gabs(gel(x,i),prec);
       return y;
   }
-  pari_err(typeer,"gabs");
+  pari_err(typeer,"gabs",x);
   return NULL; /* not reached */
 }
 
@@ -2106,7 +2106,7 @@ cvtop2(GEN x, GEN y)
     case t_COMPLEX: return ctop(x, p, d);
     case t_QUAD:    return qtop(x, p, d);
   }
-  pari_err(typeer,"cvtop2");
+  pari_err(typeer,"cvtop2",x);
   return NULL; /* not reached */
 }
 
@@ -2150,7 +2150,7 @@ cvtop(GEN x, GEN p, long d)
     case t_PADIC: return gprec(x,d);
     case t_QUAD: return qtop(x, p, d);
   }
-  pari_err(typeer,"cvtop");
+  pari_err(typeer,"cvtop",x);
   return NULL; /* not reached */
 }
 
@@ -2209,7 +2209,7 @@ gexpo(GEN x)
       for (i=1; i<lx; i++) { e=gexpo(gel(x,i)); if (e>f) f=e; }
       return f;
   }
-  pari_err(typeer,"gexpo");
+  pari_err(typeer,"gexpo",x);
   return 0; /* not reached */
 }
 
@@ -2226,7 +2226,7 @@ normalize(GEN x)
   long i, lx = lg(x);
   GEN y, z;
 
-  if (typ(x) != t_SER) pari_err(typeer,"normalize");
+  if (typ(x) != t_SER) pari_err(typeer,"normalize",x);
   if (lx==2) { setsigne(x,0); return x; }
   for (i=2; i<lx; i++)
     if (! isrationalzero(gel(x,i))) break;
@@ -2310,7 +2310,7 @@ gsigne(GEN x)
     case t_INT: case t_REAL: return signe(x);
     case t_FRAC: return signe(x[1]);
   }
-  pari_err(typeer,"gsigne");
+  pari_err(typeer,"gsigne",x);
   return 0; /* not reached */
 }
 
@@ -2349,7 +2349,7 @@ void
 listkill(GEN L)
 {
 
-  if (typ(L) != t_LIST) pari_err(typeer,"listkill");
+  if (typ(L) != t_LIST) pari_err(typeer,"listkill",L);
   if (list_nmax(L)) {
     GEN v = list_data(L);
     long i, l = lg(v);
@@ -2374,7 +2374,7 @@ listput(GEN L, GEN x, long index)
   long l;
   GEN z;
 
-  if (typ(L) != t_LIST) pari_err(typeer,"listput");
+  if (typ(L) != t_LIST) pari_err(typeer,"listput",L);
   if (index < 0) pari_err(talker,"negative index (%ld) in listput", index);
   z = list_data(L);
   l = z? lg(z): 1;
@@ -2397,7 +2397,7 @@ listinsert(GEN L, GEN x, long index)
   long l, i;
   GEN z;
 
-  if (typ(L) != t_LIST) pari_err(typeer,"listinsert");
+  if (typ(L) != t_LIST) pari_err(typeer,"listinsert",L);
 
   z = list_data(L); l = z? lg(z): 1;
   if (index <= 0 || index > l) pari_err(talker,"bad index in listinsert");
@@ -2414,7 +2414,7 @@ listpop(GEN L, long index)
   long l, i;
   GEN z;
 
-  if (typ(L) != t_LIST) pari_err(typeer,"listinsert");
+  if (typ(L) != t_LIST) pari_err(typeer,"listinsert",L);
 
   if (index < 0) pari_err(talker,"negative index (%ld) in listpop", index);
   z = list_data(L);
@@ -2469,7 +2469,7 @@ listsort(GEN L, long flag)
   pari_sp av = avma;
   GEN perm, v, vnew;
 
-  if (typ(L) != t_LIST) pari_err(typeer,"listsort");
+  if (typ(L) != t_LIST) pari_err(typeer,"listsort",L);
   v = list_data(L); l = v? lg(v): 1;
   if (l < 3) return;
   if (flag)

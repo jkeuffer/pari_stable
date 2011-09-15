@@ -126,7 +126,6 @@ RgX_RgXQ_eval(GEN Q, GEN x, GEN T)
   pari_sp av = avma;
   GEN z;
   long d = degpol(Q), rtd;
-  if (typ(Q)!=t_POL || typ(x)!=t_POL) pari_err(typeer,"RgX_RgXQ_eval");
   if (d < 0) return pol_0(varn(Q));
   rtd = (long) sqrt((double)d);
   z = RgX_RgXQV_eval(Q, RgXQ_powers(x, rtd, T), T);

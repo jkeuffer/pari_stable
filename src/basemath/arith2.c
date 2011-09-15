@@ -538,7 +538,7 @@ boundfact(GEN n, ulong lim)
       return gerepilecopy(av, merge_factor_i(a,b));
     }
   }
-  pari_err(typeer,"boundfact");
+  pari_err(typeer,"boundfact",n);
   return NULL; /* not reached */
 }
 
@@ -726,7 +726,7 @@ divisors(GEN n)
     if (tn == t_INT)
       n = Z_factor(n);
     else {
-      if (is_matvec_t(tn)) pari_err(typeer,"divisors");
+      if (is_matvec_t(tn)) pari_err(typeer,"divisors",n);
       isint = 0;
       n = factor(n);
     }
@@ -808,28 +808,28 @@ GEN
 corepartial(GEN n, long all)
 {
   pari_sp av = avma;
-  if (typ(n) != t_INT) pari_err(typeer,"corepartial");
+  if (typ(n) != t_INT) pari_err(typeer,"corepartial",n);
   return gerepileuptoint(av, corefa(Z_factor_limit(n,all)));
 }
 GEN
 core2partial(GEN n, long all)
 {
   pari_sp av = avma;
-  if (typ(n) != t_INT) pari_err(typeer,"core2partial");
+  if (typ(n) != t_INT) pari_err(typeer,"core2partial",n);
   return gerepilecopy(av, core2fa(Z_factor_limit(n,all)));
 }
 GEN
 core(GEN n)
 {
   pari_sp av = avma;
-  if (typ(n) != t_INT) pari_err(typeer,"core");
+  if (typ(n) != t_INT) pari_err(typeer,"core",n);
   return gerepileuptoint(av, corefa(Z_factor(n)));
 }
 GEN
 core2(GEN n)
 {
   pari_sp av = avma;
-  if (typ(n) != t_INT) pari_err(typeer,"core");
+  if (typ(n) != t_INT) pari_err(typeer,"core",n);
   return gerepilecopy(av, core2fa(Z_factor(n)));
 }
 

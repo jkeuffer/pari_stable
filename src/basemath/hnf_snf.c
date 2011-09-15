@@ -23,7 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 GEN
 mathnf0(GEN x, long flag)
 {
-  if (typ(x)!=t_MAT) pari_err(typeer,"mathnf0");
+  if (typ(x)!=t_MAT) pari_err(typeer,"mathnf0",x);
 
   switch(flag)
   {
@@ -1131,8 +1131,8 @@ ZM_hnfmodid(GEN x, GEN d) { return ZM_hnfmodall(x,d,hnf_MODID); }
 static GEN
 allhnfmod(GEN x, GEN dm, int flag)
 {
-  if (typ(dm)!=t_INT) pari_err(typeer,"allhnfmod");
-  if (typ(x)!=t_MAT) pari_err(typeer,"allhnfmod");
+  if (typ(dm)!=t_INT) pari_err(typeer,"allhnfmod",dm);
+  if (typ(x)!=t_MAT) pari_err(typeer,"allhnfmod",x);
   RgM_check_ZM(x, "allhnfmod");
   return signe(dm)? ZM_hnfmodall(x, dm, flag): ZM_hnf(x);
 }
@@ -1762,7 +1762,7 @@ hnf_invimage(GEN A, GEN b)
     pari_sp av2 = avma;
     long j;
     GEN t = gel(b,k), Aki = gcoeff(A,k,i);
-    if (typ(t) != t_INT) pari_err(typeer,"hnf_invimage");
+    if (typ(t) != t_INT) pari_err(typeer,"hnf_invimage",t);
     for (j=i+1; j<=n; j++) t = subii(t, mulii(gcoeff(A,k,j),gel(u,j)));
     if (!signe(Aki))
     {
@@ -1780,7 +1780,7 @@ hnf_invimage(GEN A, GEN b)
     pari_sp av2 = avma;
     long j;
     GEN t = gel(b,k);
-    if (typ(t) != t_INT) pari_err(typeer,"hnf_invimage");
+    if (typ(t) != t_INT) pari_err(typeer,"hnf_invimage",t);
     for (j=1; j<=n; j++) t = subii(t, mulii(gcoeff(A,k,j),gel(u,j)));
     if (signe(t)) { avma = av;return NULL; }
     avma = av2;
@@ -2071,7 +2071,7 @@ ZM_snf(GEN x) { return ZM_snfall_i(x, NULL,NULL, 1); }
 
 GEN
 smith(GEN x) {
-  if (typ(x)!=t_MAT) pari_err(typeer,"smith");
+  if (typ(x)!=t_MAT) pari_err(typeer,"smith",x);
   RgM_check_ZM(x, "smith");
   return ZM_snfall_i(x, NULL,NULL, 1);
 }
@@ -2079,7 +2079,7 @@ GEN
 smithall(GEN x)
 {
   GEN z = cgetg(4, t_VEC);
-  if (typ(x)!=t_MAT) pari_err(typeer,"smithall");
+  if (typ(x)!=t_MAT) pari_err(typeer,"smithall",x);
   RgM_check_ZM(x, "smithall");
   gel(z,3) = ZM_snfall_i(x, (GEN*)(z+1),(GEN*)(z+2), 0);
   return z;
@@ -2109,7 +2109,7 @@ smithclean(GEN z)
   long i, j, h, l, c, d;
   GEN U, V, y, D, t;
 
-  if (typ(z) != t_VEC) pari_err(typeer,"smithclean");
+  if (typ(z) != t_VEC) pari_err(typeer,"smithclean",z);
   l = lg(z); if (l == 1) return cgetg(1,t_VEC);
   U = gel(z,1);
   if (l != 4 || typ(U) != t_MAT)
@@ -2263,7 +2263,7 @@ gsmithall_i(GEN x,long all)
   long i, j, k, n;
   GEN z, u, v, U, V;
   long vx = gvar(x);
-  if (typ(x)!=t_MAT) pari_err(typeer,"gsmithall");
+  if (typ(x)!=t_MAT) pari_err(typeer,"gsmithall",x);
   if (vx==NO_VARIABLE) return all? smithall(x): smith(x);
   n = lg(x)-1;
   if (!n) return trivsmith(all);
@@ -2474,7 +2474,7 @@ matfrobenius(GEN M, long flag, long v)
   pari_sp ltop=avma;
   long n;
   GEN D, A, N, B, R, M_x;
-  if (typ(M)!=t_MAT) pari_err(typeer,"matfrobenius");
+  if (typ(M)!=t_MAT) pari_err(typeer,"matfrobenius",M);
   if (v<0) v=0;
   if (varncmp(gvar(M), v) <= 0)
     pari_err(talker,"variable must have higher priority in matfrobenius");

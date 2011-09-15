@@ -945,19 +945,21 @@ padicfields0(GEN p, GEN N, long flag)
   long m = 0, d = -1;
   GEN L;
 
-  if (typ(p) != t_INT) pari_err(typeer,"padicfields");
+  if (typ(p) != t_INT) pari_err(typeer,"padicfields",p);
   /* be nice to silly users */
   if (!BPSW_psp(p)) pari_err(talker,"p must be a prime in padicfields");
   switch(typ(N))
   {
     case t_VEC:
-      if (lg(N) != 3 || typ(gel(N,2)) != t_INT) pari_err(typeer, "padicfields");
-      d = itos(gel(N,2));
+      if (lg(N) != 3) pari_err(typeer,"padicfields",N);
+      d = gtos(gel(N,2));
       N = gel(N,1); /* fall through */
     case t_INT:
       m = itos(N);
       if (m <= 0) pari_err(talker,"non-positive degree in padicfields()");
       break;
+    default:
+      pari_err(typeer,"padicfields",N);
   }
   if (d >= 0) return padicfields(p, m, d, flag);
   L = possible_efj(p, m);

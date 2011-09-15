@@ -980,17 +980,24 @@ pari_err2GEN(long numerr, va_list ap)
   case notfuncer:
     retmkerr2(numerr,va_arg(ap, GEN));
   case openfiler:
-  {
-    const char *f = va_arg(ap, const char*);
-    retmkerr3(numerr, strtoGENstr(f), strtoGENstr(va_arg(ap, char*)));
-  }
+    {
+      const char *f = va_arg(ap, const char*);
+      retmkerr3(numerr, strtoGENstr(f), strtoGENstr(va_arg(ap, char*)));
+    }
   case overflower:
   case impl:
-  case typeer: case consister: case negexper:
+  case consister: case negexper:
   case constpoler: case redpoler:
   case zeropoler: case flagerr: case precer:
   case bugparier:
     retmkerr2(numerr, strtoGENstr(va_arg(ap, char*)));
+
+  case typeer: 
+    {
+      const char *f = va_arg(ap, const char*);
+      GEN x = va_arg(ap, GEN);
+      retmkerr3(numerr, strtoGENstr(f), x);
+    }
   case operi: case operf:
     {
       const char *op = va_arg(ap, const char*);
@@ -1036,7 +1043,8 @@ pari_err2str(GEN err)
   case impl:
     return pari_sprintf("sorry, %Ps is not yet implemented.", gel(err,2));
   case typeer:
-    return pari_sprintf("incorrect type in %Ps.", gel(err,2));
+    return pari_sprintf("incorrect type in %Ps (%s).",
+                        gel(err,2), type_name(typ(gel(err,3))));
   case negexper:
     return pari_sprintf("negative valuation in %Ps.", gel(err,2));
   case constpoler:
@@ -1193,7 +1201,7 @@ numerr_name(long numerr)
 GEN
 err_name(GEN err)
 {
-  if (typ(err)!=t_ERROR) pari_err(typeer,"errname");
+  if (typ(err)!=t_ERROR) pari_err(typeer,"errname",err);
   return strtoGENstr(numerr_name(err_get_num(err)));
 }
 

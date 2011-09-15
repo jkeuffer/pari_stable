@@ -91,7 +91,7 @@ binaire(GEN x)
       y = cgetg_copy(x, &lx);
       for (i=1; i<lx; i++) gel(y,i) = binaire(gel(x,i));
       break;
-    default: pari_err(typeer,"binary");
+    default: pari_err(typeer,"binary",x);
       return NULL; /* not reached */
   }
   return y;
@@ -103,7 +103,7 @@ bittest(GEN x, long n)
 {
   long q, r;
 
-  if (typ(x) != t_INT) pari_err(typeer,"bittest");
+  if (typ(x) != t_INT) pari_err(typeer,"bittest",x);
   if (!signe(x) || n < 0) return 0;
   if (signe(x) < 0)
   {
@@ -159,10 +159,8 @@ gbitneg(GEN x, long bits)
   const ulong uzero = 0;
   long lowbits, xl, len_out, i;
 
-  if (typ(x) != t_INT)
-    pari_err(typeer, "bitwise negation");
-  if (bits < -1)
-    pari_err(talker, "negative exponent in bitwise negation");
+  if (typ(x) != t_INT) pari_err(typeer, "bitwise negation",x);
+  if (bits < -1) pari_err(talker, "negative exponent in bitwise negation");
   if (bits == -1) return inegate(x);
   if (bits == 0) return gen_0;
   if (signe(x) < 0) { /* Consider as if mod big power of 2 */
@@ -336,7 +334,7 @@ gbitor(GEN x, GEN y)
   pari_sp ltop = avma;
   GEN z;
 
-  if (typ(x) != t_INT || typ(y) != t_INT) pari_err(typeer, "bitwise or");
+  if (typ(x) != t_INT || typ(y) != t_INT) pari_err(operf, "bitwise or",x,y);
   switch (signs(x, y))
   {
     case 3: /*1,1*/
@@ -361,7 +359,7 @@ gbitand(GEN x, GEN y)
   pari_sp ltop = avma;
   GEN z;
 
-  if (typ(x) != t_INT || typ(y) != t_INT) pari_err(typeer, "bitwise and");
+  if (typ(x) != t_INT || typ(y) != t_INT) pari_err(operf, "bitwise and",x,y);
   switch (signs(x, y))
   {
     case 3: /*1,1*/
@@ -386,7 +384,7 @@ gbitxor(GEN x, GEN y)
   pari_sp ltop = avma;
   GEN z;
 
-  if (typ(x) != t_INT || typ(y) != t_INT) pari_err(typeer, "bitwise xor");
+  if (typ(x) != t_INT || typ(y) != t_INT) pari_err(operf, "bitwise xor",x,y);
   switch (signs(x, y))
   {
     case 3: /*1,1*/
@@ -413,7 +411,7 @@ gbitnegimply(GEN x, GEN y)
   GEN z;
 
   if (typ(x) != t_INT || typ(y) != t_INT)
-    pari_err(typeer, "bitwise negated imply");
+    pari_err(operf, "bitwise negated imply",x,y);
   switch (signs(x, y))
   {
     case 3: /*1,1*/

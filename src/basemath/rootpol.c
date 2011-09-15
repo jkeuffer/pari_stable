@@ -892,7 +892,7 @@ initRUgen(long N, long bit)
 GEN
 FFTinit(long k, long prec)
 {
-  if (k <= 0) pari_err(typeer,"FFTinit");
+  if (k <= 0) pari_err(talker, "non-positive k in FFTinit");
   return initRU(1L << k, prec2nbits(prec)) - 1;
 }
 
@@ -901,7 +901,10 @@ FFT(GEN x, GEN Omega)
 {
   long i, l = lg(Omega), n = lg(x);
   GEN y, z;
-  if (n > l || !is_vec_t(typ(x)) || typ(Omega) != t_VEC) pari_err(typeer,"FFT");
+  if (!is_vec_t(typ(x))) pari_err(typeer,"FFT",x);
+  if (typ(Omega) != t_VEC) pari_err(typeer,"FFT",Omega);
+  if (n > l) pari_err(consister,"FFT");
+    
   if (n < l) {
     z = cgetg(l, t_VECSMALL); /* cf stackdummy */
     for (i = 1; i < n; i++) z[i] = x[i];
@@ -1751,7 +1754,7 @@ quickabs(GEN x)
       a = cxcompotor(a, prec);
       b = cxcompotor(b, prec); return sqrtr(addrr(sqrr(a), sqrr(b)));
     }
-    default: pari_err(typeer,"quickabs");
+    default: pari_err(typeer,"quickabs",x);
       return NULL;/*not reached*/
   }
 
@@ -2030,7 +2033,7 @@ roots_aux(GEN p, long l, long clean)
   if (typ(p) != t_POL)
   {
     if (gequal0(p)) pari_err(zeropoler,"roots");
-    if (!isvalidcoeff(p)) pari_err(typeer,"roots");
+    if (!isvalidcoeff(p)) pari_err(typeer,"roots",p);
     return cgetg(1,t_COL); /* constant polynomial */
   }
   if (!signe(p)) pari_err(zeropoler,"roots");
@@ -2093,7 +2096,7 @@ rootsold(GEN x, long prec)
   GEN y,xc,xd0,xd,xdabs,p2,p7,p11,p12,pa,pax,pb,pp,pq,ps, pi;
   ulong mask0;
 
-  if (typ(x) != t_POL) pari_err(typeer,"rootsold");
+  if (typ(x) != t_POL) pari_err(typeer,"rootsold",x);
   deg0 = degpol(x);
   if (!signe(x)) pari_err(zeropoler,"rootsold");
   y = cgetg(deg0+1,t_COL); if (!deg0) return y;
@@ -2286,7 +2289,7 @@ roots2(GEN T, long PREC)
   pari_sp av1;
   GEN p1,p2,rr,qol,qolbis,x,b,c,ad,v, ex, factors, pol = T;
 
-  if (typ(pol)!=t_POL) pari_err(typeer,"roots2");
+  if (typ(pol)!=t_POL) pari_err(typeer,"roots2",pol);
   if (!signe(pol)) pari_err(zeropoler,"roots2");
   N=degpol(pol);
   if (!N) return cgetg(1,t_COL);
@@ -2310,7 +2313,7 @@ roots2(GEN T, long PREC)
       case t_QUAD: flagexactpol = 0;
         if (gsigne(gmael(c,1,2)) > 0) flagrealpol = 0;
         break;
-      default: pari_err(typeer, "roots2");
+      default: pari_err(typeer, "roots2",c);
     }
   }
   rr=cgetg(N+1,t_COL);

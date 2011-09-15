@@ -37,12 +37,12 @@ polsym_gen(GEN P, GEN y0, long n, GEN T, GEN N)
   GEN s,y,P_lead;
 
   if (n<0) pari_err(impl,"polsym of a negative n");
-  if (typ(P) != t_POL) pari_err(typeer,"polsym");
+  if (typ(P) != t_POL) pari_err(typeer,"polsym",P);
   if (!signe(P)) pari_err(zeropoler,"polsym");
   y = cgetg(n+2,t_COL);
   if (y0)
   {
-    if (typ(y0) != t_COL) pari_err(typeer,"polsym_gen");
+    if (typ(y0) != t_COL) pari_err(typeer,"polsym_gen",y0);
     m = lg(y0)-1;
     for (i=1; i<=m; i++) y[i] = y0[i]; /* not memory clean */
   }
@@ -948,7 +948,7 @@ gisirreducible(GEN x)
       for (i=1; i<l; i++) gel(y,i) = gisirreducible(gel(x,i));
       return y;
     case t_POL: break;
-    default: pari_err(typeer,"gisirreducible");
+    default: pari_err(typeer,"gisirreducible",x);
   }
   l = lg(x); if (l<=3) return gen_0;
   y = factor(x); avma = av;
@@ -1538,7 +1538,7 @@ content(GEN x)
     case t_QFR: case t_QFI:
       lx = 4; break;
 
-    default: pari_err(typeer,"content");
+    default: pari_err(typeer,"content",x);
       return NULL; /* not reached */
   }
   for (i=lontyp[tx]; i<lx; i++)
@@ -1570,7 +1570,7 @@ content(GEN x)
       if (signe(c) < 0) c = negi(c);
       break;
     case t_VEC: case t_COL: case t_MAT:
-      pari_err(typeer, "content");
+      pari_err(typeer, "content",x);
   }
 
   return av==avma? gcopy(c): gerepileupto(av,c);
@@ -1622,7 +1622,7 @@ Q_content(GEN x)
     case t_POLMOD: return Q_content(gel(x,2));
     case t_COMPLEX: return Q_gcd(Q_content(gel(x,1)), Q_content(gel(x,2)));
   }
-  pari_err(typeer,"Q_content");
+  pari_err(typeer,"Q_content",x);
   return NULL; /* not reached */
 }
 
@@ -1678,7 +1678,7 @@ Q_denom(GEN x)
       }
       return gerepileuptoint(av, d);
   }
-  pari_err(typeer,"Q_denom");
+  pari_err(typeer,"Q_denom",x);
   return NULL; /* not reached */
 }
 
@@ -1699,7 +1699,7 @@ Q_muli_to_int(GEN x, GEN d)
   GEN y, xn, xd;
   pari_sp av;
 
-  if (typ(d) != t_INT) pari_err(typeer,"Q_muli_to_int");
+  if (typ(d) != t_INT) pari_err(typeer,"Q_muli_to_int",d);
   switch (typ(x))
   {
     case t_INT:
@@ -1727,7 +1727,7 @@ Q_muli_to_int(GEN x, GEN d)
       gel(y,2) = Q_muli_to_int(gel(x,2), d);
       return y;
   }
-  pari_err(typeer,"Q_muli_to_int");
+  pari_err(typeer,"Q_muli_to_int",x);
   return NULL; /* not reached */
 }
 
@@ -1767,7 +1767,7 @@ Q_divmuli_to_int(GEN x, GEN d, GEN n)
       gel(y,2) = Q_divmuli_to_int(gel(x,2), d,n);
       return y;
   }
-  pari_err(typeer,"Q_divmuli_to_int");
+  pari_err(typeer,"Q_divmuli_to_int",x);
   return NULL; /* not reached */
 }
 
@@ -1799,7 +1799,7 @@ Q_divi_to_int(GEN x, GEN d)
       gel(y,2) = Q_divi_to_int(gel(x,2), d);
       return y;
   }
-  pari_err(typeer,"Q_divi_to_int");
+  pari_err(typeer,"Q_divi_to_int",x);
   return NULL; /* not reached */
 }
 /* c t_FRAC */
@@ -1824,7 +1824,7 @@ Q_div_to_int(GEN x, GEN c)
     case t_INT:  return Q_divi_to_int(x, c);
     case t_FRAC: return Q_divq_to_int(x, c);
   }
-  pari_err(typeer,"Q_div_to_int");
+  pari_err(typeer,"Q_div_to_int",c);
   return NULL; /* not reached */
 }
 /* return y = x * c, assuming x,c rational, and y integral */
@@ -1840,7 +1840,7 @@ Q_mul_to_int(GEN x, GEN c)
       d = gel(c,2);
       return Q_divmuli_to_int(x, d,n);
   }
-  pari_err(typeer,"Q_mul_to_int");
+  pari_err(typeer,"Q_mul_to_int",c);
   return NULL; /* not reached */
 }
 
@@ -1916,7 +1916,8 @@ init_resultant(GEN x, GEN y)
     if (ty==t_POL) return gpowgs(x, degpol(y));
     return gen_1;
   }
-  if (tx!=t_POL || ty!=t_POL) pari_err(typeer,"resultant_all");
+  if (tx!=t_POL) pari_err(typeer,"resultant_all",x);
+  if (ty!=t_POL) pari_err(typeer,"resultant_all",y);
   if (!signe(x) || !signe(y)) return gen_0;
   vx = varn(x);
   vy = varn(y); if (vx == vy) return NULL;
@@ -2005,7 +2006,8 @@ subresext(GEN x, GEN y, GEN *U, GEN *V)
   GEN r, z, g, h, p1, cu, cv, u, v, um1, uze, vze;
   GEN *gptr[3];
 
-  if (!is_extscalar_t(tx) || !is_extscalar_t(ty)) pari_err(typeer,"subresext");
+  if (!is_extscalar_t(tx)) pari_err(typeer,"subresext",x);
+  if (!is_extscalar_t(ty)) pari_err(typeer,"subresext",y);
   if (gequal0(x) || gequal0(y)) { *U = *V = gen_0; return gen_0; }
   if (tx != t_POL) {
     if (ty != t_POL) { *U = ginv(x); *V = gen_0; return gen_1; }
@@ -2100,8 +2102,9 @@ RgX_extgcd(GEN x, GEN y, GEN *U, GEN *V)
   long dx, dy, vx, tx = typ(x), ty = typ(y);
   GEN z, g, h, p1, cu, cv, u, v, um1, uze, vze, *gptr[3];
 
-  if (tx!=t_POL || ty!=t_POL || varncmp(varn(x),varn(y)))
-    pari_err(typeer,"RgX_extgcd");
+  if (tx!=t_POL) pari_err(typeer,"RgX_extgcd",x);
+  if (ty!=t_POL) pari_err(typeer,"RgX_extgcd",y);
+  if ( varncmp(varn(x),varn(y))) pari_err(consister,"RgX_extgcd");
   vx=varn(x);
   if (!signe(x))
   {
@@ -2161,8 +2164,9 @@ RgXQ_ratlift(GEN x, GEN T, long amax, long bmax, GEN *P, GEN *Q)
   long vx;
   GEN g, h, p1, cu, cv, u, v, um1, uze, *gptr[2];
 
-  if (typ(x)!=t_POL || typ(T)!=t_POL || varncmp(varn(x),varn(T)))
-    pari_err(typeer,"RgXQ_ratlift");
+  if (typ(x)!=t_POL) pari_err(typeer,"RgXQ_ratlift",x);
+  if (typ(T)!=t_POL) pari_err(typeer,"RgXQ_ratlift",T);
+  if ( varncmp(varn(x),varn(T))) pari_err(consister,"RgXQ_ratlift");
   if (amax+bmax>=degpol(T))
     pari_err(talker, "ratlift: must have amax+bmax < deg(T)");
   if (!signe(T)) pari_err(zeropoler,"RgXQ_ratlift");
@@ -2428,9 +2432,9 @@ GEN
 sylvestermatrix(GEN x, GEN y)
 {
   long i,j,lx;
-  if (typ(x)!=t_POL || typ(y)!=t_POL) pari_err(typeer,"sylvestermatrix");
-  if (varn(x) != varn(y))
-    pari_err(talker,"not the same variables in sylvestermatrix");
+  if (typ(x)!=t_POL) pari_err(typeer,"sylvestermatrix",x);
+  if (typ(y)!=t_POL) pari_err(typeer,"sylvestermatrix",y);
+  if (varn(x) != varn(y)) pari_err(consister,"sylvestermatrix");
   x = sylvestermatrix_i(x,y); lx = lg(x);
   for (i=1; i<lx; i++)
     for (j=1; j<lx; j++) gcoeff(x,i,j) = gcopy(gcoeff(x,i,j));
@@ -2566,12 +2570,12 @@ rnfcharpoly(GEN nf, GEN Q, GEN x, long v)
     x = gel(x, 2); tx = typ(x);
   }
   if (tx != t_POL) {
-    if (!is_rational_t(tx)) pari_err(typeer,"rnfcharpoly");
+    if (!is_rational_t(tx)) pari_err(typeer,"rnfcharpoly",x);
     return caract_const(av, x, v, dQ);
   }
   vx = varn(x);
   if (vx == vT) return caract_const(av, mkpolmod(x,T), v, dQ);
-  if (vx != vQ) pari_err(typeer,"rnfcharpoly");
+  if (vx != vQ) pari_err(consister,"rnfcharpoly");
   x = rnf_fix_pol(T,x,0);
   if (degpol(x) >= dQ) x = RgX_rem(x, Q);
   if (dQ <= 1) return caract_const(av, constant_term(x), v, 1);
@@ -2776,7 +2780,7 @@ poldisc0(GEN x, long v)
       for (i--; i; i--) gel(z,i) = poldisc0(gel(x,i), v);
       return z;
   }
-  pari_err(typeer,"poldisc");
+  pari_err(typeer,"poldisc",x);
   return NULL; /* not reached */
 }
 
@@ -2787,7 +2791,7 @@ reduceddiscsmith(GEN x)
   pari_sp av = avma;
   GEN xp, M;
 
-  if (typ(x) != t_POL) pari_err(typeer,"reduceddiscsmith");
+  if (typ(x) != t_POL) pari_err(typeer,"reduceddiscsmith",x);
   if (n<=0) pari_err(constpoler,"reduceddiscsmith");
   RgX_check_ZX(x,"poldiscreduced");
   if (!gequal1(gel(x,n+2)))
@@ -2822,7 +2826,7 @@ sturmpart(GEN x, GEN a, GEN b)
   if (t != t_POL)
   {
     if (t == t_INT || t == t_REAL || t == t_FRAC) return 0;
-    pari_err(typeer,"sturm");
+    pari_err(typeer,"sturm",x);
   }
   s=lg(x); if (s==3) return 0;
 
@@ -3024,7 +3028,7 @@ ginvmod(GEN x, GEN y)
       if (tx==t_INT) return Fp_inv(x,y);
       if (tx==t_POL) return gen_0;
   }
-  pari_err(typeer,"ginvmod");
+  pari_err(operf,"ginvmod",x,y);
   return NULL; /* not reached */
 }
 
@@ -3042,7 +3046,7 @@ newtonpoly(GEN x, GEN p)
   long n,ind,a,b,c,u1,u2,r1,r2;
   long *vval, num[] = {evaltyp(t_INT) | _evallg(3), 0, 0};
 
-  if (typ(x)!=t_POL) pari_err(typeer,"newtonpoly");
+  if (typ(x)!=t_POL) pari_err(typeer,"newtonpoly",x);
   n=degpol(x); if (n<=0) return cgetg(1,t_VEC);
   y = cgetg(n+1,t_VEC); x += 2; /* now x[i] = term of degree i */
   vval = (long *) pari_malloc(sizeof(long)*(n+1));

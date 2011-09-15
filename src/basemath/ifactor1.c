@@ -102,8 +102,11 @@ nextprime(GEN n)
   long rc, rc0, rcd, rcn;
   pari_sp av = avma;
 
-  if (typ(n) != t_INT) n = gceil(n);
-  if (typ(n) != t_INT) pari_err(typeer,"nextprime");
+  if (typ(n) != t_INT) 
+  {
+    n = gceil(n);
+    if (typ(n) != t_INT) pari_err(typeer,"nextprime",n);
+  }
   if (signe(n) <= 0) { avma = av; return gen_2; }
   if (lgefint(n) == 3)
   {
@@ -145,8 +148,11 @@ precprime(GEN n)
   long rc, rc0, rcd, rcn;
   pari_sp av = avma;
 
-  if (typ(n) != t_INT) n = gfloor(n);
-  if (typ(n) != t_INT) pari_err(typeer,"nextprime");
+  if (typ(n) != t_INT) 
+  {
+    n = gfloor(n);
+    if (typ(n) != t_INT) pari_err(typeer,"nextprime",n);
+  }
   if (signe(n) <= 0) { avma = av; return gen_0; }
   if (lgefint(n) <= 3)
   { /* check if n <= 10 */
@@ -2744,7 +2750,7 @@ ifac_crack(GEN *partial, GEN *where)
   if (*where < *partial + 6)
     pari_err(talker, "'*where' out of bounds in ifac_crack");
   if (!(VALUE(*where)) || typ(VALUE(*where)) != t_INT)
-    pari_err(typeer, "ifac_crack");
+    pari_err(talker, "incorrect VALUE(*where) in ifac_crack");
   if (CLASS(*where) != gen_0)
     pari_err(talker, "operand not known composite in ifac_crack");
 #endif
@@ -3314,7 +3320,7 @@ gmoebius(GEN n) { return map_proto_lG(moebius,n); }
 
 INLINE void
 chk_arith(GEN n) {
-  if (typ(n) != t_INT) pari_err(typeer,"arithmetic function");
+  if (typ(n) != t_INT) pari_err(typeer,"arithmetic function",n);
   if (!signe(n)) pari_err(talker, "zero argument in an arithmetic function");
 }
 
@@ -3377,7 +3383,7 @@ issquarefree(GEN x)
       if (!signe(x)) return 0;
       av = avma; d = RgX_gcd(x, RgX_deriv(x));
       avma = av; return (lg(d) == 3);
-    default: pari_err(typeer,"issquarefree");
+    default: pari_err(typeer,"issquarefree",x);
       return 0; /* not reached */
   }
 }
@@ -3881,7 +3887,7 @@ ifac_break_limit(GEN n, GEN pairs/*unused*/, GEN here, GEN state)
 GEN
 factorint(GEN n, long flag)
 {
-  if (typ(n) != t_INT) pari_err(typeer,"factorint");
+  if (typ(n) != t_INT) pari_err(typeer,"factorint",n);
   return ifactor(n,NULL,NULL, 0,flag);
 }
 

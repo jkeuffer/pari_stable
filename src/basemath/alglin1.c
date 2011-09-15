@@ -52,7 +52,7 @@ shallowtrans(GEN x)
   long i, dx, lx, tx = typ(x);
   GEN y;
 
-  if (! is_matvec_t(tx)) pari_err(typeer,"shallowtrans");
+  if (! is_matvec_t(tx)) pari_err(typeer,"shallowtrans",x);
   switch(tx)
   {
     case t_VEC:
@@ -78,7 +78,7 @@ gtrans(GEN x)
   long i, dx, lx, tx = typ(x);
   GEN y;
 
-  if (! is_matvec_t(tx)) pari_err(typeer,"gtrans");
+  if (! is_matvec_t(tx)) pari_err(typeer,"gtrans",x);
   switch(tx)
   {
     case t_VEC:
@@ -187,7 +187,7 @@ shallowextract(GEN x, GEN L)
   long i,j, tl = typ(L), tx = typ(x), lx = lg(x);
   GEN y;
 
-  if (! is_matvec_t(tx)) pari_err(typeer,"extract");
+  if (! is_matvec_t(tx)) pari_err(typeer,"extract",x);
   if (tl==t_INT)
   { /* extract components of x as per the bits of mask L */
     long k, l, ix, iy, maxj;
@@ -305,7 +305,7 @@ extract0(GEN x, GEN l1, GEN l2)
   }
   else
   {
-    if (typ(x) != t_MAT) pari_err(typeer,"extract");
+    if (typ(x) != t_MAT) pari_err(typeer,"extract",x);
     y = shallowextract(x,l2);
     if (select_0(l1)) { avma = av; return zeromat(0, lg(y)-1); }
     if (lg(y) == 1 && lg(x) > 1)
@@ -345,7 +345,7 @@ genselect(void *E, long (*f)(void* E, GEN x), GEN A)
     list_data(L) = B; return L;
   }
   else
-    if (!is_matvec_t(t)) pari_err(typeer,"select");
+    if (!is_matvec_t(t)) pari_err(typeer,"select",A);
 
   l = lg(A); v = cgetg(l, t_VECSMALL); av = avma;
   for (i = 1; i < l; i++) {
@@ -360,7 +360,7 @@ genselect(void *E, long (*f)(void* E, GEN x), GEN A)
 GEN
 select0(GEN f, GEN x)
 {
-  if (typ(f) != t_CLOSURE || f[1] < 1) pari_err(typeer, "select");
+  if (typ(f) != t_CLOSURE || f[1] < 1) pari_err(typeer, "select", f);
   return genselect((void *) f, gp_callbool, x);
 }
 
@@ -399,14 +399,14 @@ genapply(void *E, GEN (*f)(void* E, GEN x), GEN x)
       for (i = 1; i < lx; i++) gel(y,i) = f(E, gel(x,i));
       return y;
   }
-  pari_err(typeer,"apply");
+  pari_err(typeer,"apply",x);
   return NULL; /* not reached */
 }
 
 GEN
 apply0(GEN f, GEN x)
 {
-  if (typ(f) != t_CLOSURE || f[1] < 1) pari_err(typeer, "apply");
+  if (typ(f) != t_CLOSURE || f[1] < 1) pari_err(typeer, "apply",f);
   return genapply((void *) f, gp_call, x);
 }
 
@@ -522,9 +522,9 @@ matmuldiagonal(GEN m, GEN d)
   long j, lx;
   GEN y = cgetg_copy(m, &lx);
 
-  if (typ(m)!=t_MAT) pari_err(typeer,"matmuldiagonal");
-  if (! is_vec_t(typ(d)) || lg(d) != lx)
-    pari_err(talker,"incorrect vector in matmuldiagonal");
+  if (typ(m)!=t_MAT) pari_err(typeer,"matmuldiagonal",m);
+  if (! is_vec_t(typ(d))) pari_err(typeer,"matmuldiagonal",d);
+  if (lg(d) != lx) pari_err(consister,"matmuldiagonal");
   for (j=1; j<lx; j++) gel(y,j) = RgC_Rg_mul(gel(m,j), gel(d,j));
   return y;
 }
@@ -536,7 +536,8 @@ matmultodiagonal(GEN A, GEN B)
   long i, j, hA, hB, lA = lg(A), lB = lg(B);
   GEN y = matid(lB-1);
 
-  if (typ(A) != t_MAT || typ(B) != t_MAT) pari_err(typeer,"matmultodiagonal");
+  if (typ(A) != t_MAT) pari_err(typeer,"matmultodiagonal",A);
+  if (typ(B) != t_MAT) pari_err(typeer,"matmultodiagonal",B);
   hA = (lA == 1)? lB: lg(A[1]);
   hB = (lB == 1)? lA: lg(B[1]);
   if (lA != hB || lB != hA) pari_err(consister,"matmultodiagonal");
@@ -870,7 +871,7 @@ init_gauss(GEN a, GEN *b, long *aco, long *li, int *iscol)
       case t_COL:
         *b = mkmat( leafcopy(*b) );
         break;
-      default: pari_err(typeer,"gauss");
+      default: pari_err(typeer,"gauss",*b);
     }
     if (lg((*b)[1])-1 != *li) pari_err(consister,"gauss");
   }
@@ -1042,7 +1043,7 @@ GEN
 gauss(GEN a, GEN b)
 {
   GEN z;
-  if (typ(a)!=t_MAT) pari_err(typeer,"gauss");
+  if (typ(a)!=t_MAT) pari_err(typeer,"gauss",a);
   z = RgM_solve(a,b);
   if (!z) pari_err(gdiver);
   return z;
@@ -1342,7 +1343,7 @@ QM_inv(GEN M, GEN dM)
 GEN
 detint(GEN A)
 {
-  if (typ(A) != t_MAT) pari_err(typeer,"detint");
+  if (typ(A) != t_MAT) pari_err(typeer,"detint",A);
   RgM_check_ZM(A, "detint");
   return ZM_detmult(A);
 }
@@ -1621,7 +1622,7 @@ deplin(GEN x0)
   if (t == t_MAT) x = RgM_shallowcopy(x0);
   else
   {
-    if (t != t_VEC) pari_err(typeer,"deplin");
+    if (t != t_VEC) pari_err(typeer,"deplin",x0);
     x = gtomat(x0);
   }
   nc = lg(x)-1; if (!nc) { avma=av; return cgetg(1,t_COL); }
@@ -1796,7 +1797,7 @@ ker(GEN x)
 GEN
 matker0(GEN x,long flag)
 {
-  if (typ(x)!=t_MAT) pari_err(typeer,"matker");
+  if (typ(x)!=t_MAT) pari_err(typeer,"matker",x);
   if (!flag) return ker(x);
   RgM_check_ZM(x, "keri");
   return keri(x);
@@ -1809,7 +1810,7 @@ image(GEN x)
   GEN d, y, p = NULL;
   long j, k, r;
 
-  if (typ(x)!=t_MAT) pari_err(typeer,"matimage");
+  if (typ(x)!=t_MAT) pari_err(typeer,"matimage",x);
   if (RgM_is_FpM(x, &p) && p)
     return gerepileupto(av, FpM_to_mod(FpM_image(RgM_to_FpM(x, p), p), p));
   d = gauss_pivot(x,&r);
@@ -1829,7 +1830,7 @@ imagecompl(GEN x)
   GEN d,y;
   long j,i,r;
 
-  if (typ(x)!=t_MAT) pari_err(typeer,"imagecompl");
+  if (typ(x)!=t_MAT) pari_err(typeer,"imagecompl",x);
   (void)new_chunk(lg(x) * 3); /* HACK */
   d = gauss_pivot(x,&r);
   avma = av; y = cgetg(r+1,t_VEC);
@@ -1885,14 +1886,14 @@ inverseimage(GEN m,GEN v)
   long j,lv,tv=typ(v);
   GEN y,p1;
 
-  if (typ(m)!=t_MAT) pari_err(typeer,"inverseimage");
+  if (typ(m)!=t_MAT) pari_err(typeer,"inverseimage",m);
   if (tv==t_COL)
   {
     p1 = sinverseimage(m,v);
     if (p1) return p1;
     avma = av; return cgetg(1,t_COL);
   }
-  if (tv!=t_MAT) pari_err(typeer,"inverseimage");
+  if (tv!=t_MAT) pari_err(typeer,"inverseimage",v);
 
   lv=lg(v)-1; y=cgetg(lv+1,t_MAT);
   for (j=1; j<=lv; j++)
@@ -1951,7 +1952,7 @@ suppl(GEN x)
   GEN d, X = x, p = NULL;
   long r;
 
-  if (typ(x)!=t_MAT) pari_err(typeer,"suppl");
+  if (typ(x)!=t_MAT) pari_err(typeer,"suppl",x);
   if (RgM_is_FpM(x, &p) && p)
     return gerepileupto(av, FpM_to_mod(FpM_suppl(RgM_to_FpM(x, p), p), p));
   avma = av; init_suppl(x);
@@ -1989,7 +1990,7 @@ image2(GEN x)
   long k, n, i;
   GEN A, B;
 
-  if (typ(x)!=t_MAT) pari_err(typeer,"image2");
+  if (typ(x)!=t_MAT) pari_err(typeer,"image2",x);
   if (lg(x) == 1) return cgetg(1,t_MAT);
   A = ker(x); k = lg(A)-1;
   if (!k) { avma = av; return gcopy(x); }
@@ -2018,7 +2019,7 @@ rank(GEN x)
   long r;
   GEN p = NULL;
 
-  if (typ(x)!=t_MAT) pari_err(typeer,"rank");
+  if (typ(x)!=t_MAT) pari_err(typeer,"rank",x);
   if (RgM_is_FpM(x, &p) && p)
   {
     r = FpM_rank(RgM_to_FpM(x, p), p);
@@ -2082,7 +2083,7 @@ indexrank(GEN x) {
   pari_sp av = avma;
   long r;
   GEN d, p = NULL;
-  if (typ(x)!=t_MAT) pari_err(typeer,"indexrank");
+  if (typ(x)!=t_MAT) pari_err(typeer,"indexrank",x);
   if (RgM_is_FpM(x, &p) && p)
     return gerepileupto(av, FpM_indexrank(RgM_to_FpM(x, p), p));
   init_indexrank(x);
@@ -2945,7 +2946,7 @@ eigen(GEN x, long prec)
   long e,i,k,l,ly,ex, n = lg(x);
   pari_sp av = avma;
 
-  if (typ(x)!=t_MAT) pari_err(typeer,"eigen");
+  if (typ(x)!=t_MAT) pari_err(typeer,"eigen",x);
   if (n != 1 && n != lg(x[1])) pari_err(consister,"eigen");
   if (n<=2) return gcopy(x);
 
@@ -3043,7 +3044,7 @@ det2(GEN a)
   GEN data;
   pivot_fun pivot;
   long nbco = lg(a)-1;
-  if (typ(a)!=t_MAT) pari_err(typeer,"det2");
+  if (typ(a)!=t_MAT) pari_err(typeer,"det2",a);
   if (!nbco) return gen_1;
   if (nbco != lg(a[1])-1) pari_err(consister,"det2");
   pivot = get_pivot_fun(a, &data);
@@ -3251,7 +3252,7 @@ det(GEN a)
   GEN data, p=NULL;
   pivot_fun pivot;
 
-  if (typ(a)!=t_MAT) pari_err(typeer,"det");
+  if (typ(a)!=t_MAT) pari_err(typeer,"det",a);
   if (!n) return gen_1;
   if (n != lg(a[1])-1) pari_err(consister,"det");
   if (n == 1) return gcopy(gcoeff(a,1,1));
@@ -3276,7 +3277,7 @@ gaussmoduloall(GEN M, GEN D, GEN Y, GEN *ptu1)
   long n, m, j, l, lM;
   GEN delta, H, U, u1, u2, x;
 
-  if (typ(M)!=t_MAT) pari_err(typeer,"gaussmodulo");
+  if (typ(M)!=t_MAT) pari_err(typeer,"gaussmodulo",M);
   lM = lg(M);
   if (lM == 1)
   {
@@ -3284,13 +3285,13 @@ gaussmoduloall(GEN M, GEN D, GEN Y, GEN *ptu1)
     {
       case t_INT: break;
       case t_COL: if (lg(Y) != 1) pari_err(consister,"gaussmodulo");
-      default: pari_err(typeer,"gaussmodulo");
+      default: pari_err(typeer,"gaussmodulo",Y);
     }
     switch(typ(D))
     {
       case t_INT: break;
       case t_COL: if (lg(D) != 1) pari_err(consister,"gaussmodulo");
-      default: pari_err(typeer,"gaussmodulo");
+      default: pari_err(typeer,"gaussmodulo",D);
     }
     if (ptu1) *ptu1 = cgetg(1, t_MAT);
     return gen_0;
@@ -3302,7 +3303,7 @@ gaussmoduloall(GEN M, GEN D, GEN Y, GEN *ptu1)
       if (lg(D)-1!=n) pari_err(consister,"gaussmodulo");
       delta = diagonal_shallow(D); break;
     case t_INT: delta = scalarmat_shallow(D,n); break;
-    default: pari_err(typeer,"gaussmodulo");
+    default: pari_err(typeer,"gaussmodulo",D);
       return NULL; /* not reached */
   }
   switch(typ(Y))
@@ -3311,7 +3312,7 @@ gaussmoduloall(GEN M, GEN D, GEN Y, GEN *ptu1)
     case t_COL:
       if (lg(Y)-1!=n) pari_err(consister,"gaussmodulo");
       break;
-    default: pari_err(typeer,"gaussmodulo");
+    default: pari_err(typeer,"gaussmodulo",Y);
       return NULL; /* not reached */
   }
   H = ZM_hnfall(shallowconcat(M,delta), &U, 1);

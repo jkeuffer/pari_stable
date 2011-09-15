@@ -683,7 +683,8 @@ dirmul(GEN x, GEN y)
   long lx, ly, lz, dx, dy, i, j, k;
   GEN z;
 
-  if (typ(x)!=t_VEC || typ(y)!=t_VEC) pari_err(typeer,"dirmul");
+  if (typ(x)!=t_VEC) pari_err(typeer,"dirmul",x);
+  if (typ(y)!=t_VEC) pari_err(typeer,"dirmul",y);
   dx = dirval(x); lx = lg(x);
   dy = dirval(y); ly = lg(y);
   if (ly-dy < lx-dx) { swap(x,y); lswap(lx,ly); lswap(dx,dy); }
@@ -718,7 +719,8 @@ dirdiv(GEN x, GEN y)
   long lx,ly,lz,dx,dy,i,j;
   GEN z,p1;
 
-  if (typ(x)!=t_VEC || typ(y)!=t_VEC) pari_err(typeer,"dirmul");
+  if (typ(x)!=t_VEC) pari_err(typeer,"dirdiv",x);
+  if (typ(y)!=t_VEC) pari_err(typeer,"dirdiv",y);
   dx = dirval(x); lx = lg(x);
   dy = dirval(y); ly = lg(y);
   if (dy != 1 || ly == 1) pari_err(talker,"not an invertible dirseries in dirdiv");
@@ -771,7 +773,7 @@ binomial(GEN n, long k)
 
   if (k <= 1)
   {
-    if (is_noncalc_t(typ(n))) pari_err(typeer,"binomial");
+    if (is_noncalc_t(typ(n))) pari_err(typeer,"binomial",n);
     if (k < 0) return gen_0;
     if (k == 0) return gen_1;
     return gcopy(n);
@@ -933,7 +935,7 @@ numtoperm(long n, GEN x)
   GEN v;
 
   if (n < 0) pari_err(talker,"n too small (%ld) in numtoperm",n);
-  if (typ(x) != t_INT) pari_err(typeer,"numtoperm");
+  if (typ(x) != t_INT) pari_err(typeer,"numtoperm",x);
   v = cgetg(n+1, t_VEC);
   v[1] = 1; av = avma;
   if (signe(x) <= 0) x = modii(x, mpfact(n));
@@ -962,7 +964,7 @@ permtonum(GEN x)
   for (ind=1; ind<=lx; ind++)
   {
     res = gel(++x, 0);
-    if (typ(res) != t_INT) pari_err(typeer,"permtonum");
+    if (typ(res) != t_INT) pari_err(typeer,"permtonum",res);
     ary[ind] = itos(res);
   }
   ary++; res = gen_0;
@@ -986,7 +988,7 @@ permtonum(GEN x)
 GEN
 polrecip(GEN x)
 {
-  if (typ(x) != t_POL) pari_err(typeer,"polrecip");
+  if (typ(x) != t_POL) pari_err(typeer,"polrecip",x);
   return RgX_recip(x);
 }
 
@@ -1276,7 +1278,7 @@ init_sort(GEN *x, long *tx, long *lx)
     *x = list_data(*x);
     *lx = *x? lg(*x): 1;
   } else {
-    if (!is_matvec_t(*tx) && *tx != t_VECSMALL) pari_err(typeer,"gen_sort");
+    if (!is_matvec_t(*tx) && *tx != t_VECSMALL) pari_err(typeer,"gen_sort",*x);
     *lx = lg(*x);
   }
 }
@@ -1409,7 +1411,7 @@ vecsort0(GEN x, GEN k, long flag)
       if (!y || (lx = lg(y)) == 1)
         return flag & cmp_IND? cgetg(1, t_VECSMALL): listcreate();
     } else {
-      if (!is_matvec_t(tx)) pari_err(typeer,"vecsort");
+      if (!is_matvec_t(tx)) pari_err(typeer,"vecsort",x);
       y = x; lx = lg(y);
       if (lx == 1)
         return flag & cmp_IND? cgetg(1, t_VECSMALL): cgetg(1, tx);
@@ -1425,7 +1427,7 @@ vecsort0(GEN x, GEN k, long flag)
        E = (void*)k;
        CMP = &closurecmp;
        goto END;
-      default: pari_err(typeer,"vecsort");
+      default: pari_err(typeer,"vecsort",k);
     }
     lk = lg(k);
     for (l=0,i=1; i<lk; i++)
@@ -1436,7 +1438,7 @@ vecsort0(GEN x, GEN k, long flag)
     for (j=1; j<lx; j++)
     {
       GEN c = gel(y,j);
-      long t = typ(c); if (! is_vec_t(t)) pari_err(typeer,"vecsort");
+      long t = typ(c); if (! is_vec_t(t)) pari_err(typeer,"vecsort",c);
       if (lg(c) <= l) pari_err(talker,"index too large in vecsort");
     }
     v.cmp = cmp;
@@ -1469,7 +1471,7 @@ GEN
 indexvecsort(GEN x, GEN k)
 {
   struct veccmp_s v; v.cmp = &gcmp; v.k = k;
-  if (typ(k) != t_VECSMALL) pari_err(typeer,"vecsort");
+  if (typ(k) != t_VECSMALL) pari_err(typeer,"vecsort",k);
   return gen_indexsort(x, (void*)&v, &veccmp);
 }
 
@@ -1481,7 +1483,7 @@ GEN
 vecsort(GEN x, GEN k)
 {
   struct veccmp_s v; v.cmp = &gcmp; v.k = k;
-  if (typ(k) != t_VECSMALL) pari_err(typeer,"vecsort");
+  if (typ(k) != t_VECSMALL) pari_err(typeer,"vecsort",k);
   return gen_sort(x, (void*)&v, &veccmp);
 }
 
@@ -1716,7 +1718,8 @@ setunion(GEN x, GEN y)
   pari_sp av = avma;
   long i, j, k, lx = lg(x), ly = lg(y);
   GEN z = cgetg(lx + ly - 1, t_VEC);
-  if (typ(x) != t_VEC || typ(y) != t_VEC) pari_err(typeer,"setunion");
+  if (typ(x) != t_VEC) pari_err(typeer,"setunion",x);
+  if (typ(y) != t_VEC) pari_err(typeer,"setunion",y);
   i = j = k = 1;
   while (i<lx && j<ly)
   {
@@ -1766,7 +1769,8 @@ setintersect(GEN x, GEN y)
   long ix = 1, iy = 1, iz = 1, lx = lg(x), ly = lg(y);
   pari_sp av = avma;
   GEN z = cgetg(lx,t_VEC);
-  if (typ(x) != t_VEC || typ(y) != t_VEC) pari_err(typeer, "setintersect");
+  if (typ(x) != t_VEC) pari_err(typeer, "setintersect",x);
+  if (typ(y) != t_VEC) pari_err(typeer, "setintersect",y);
   while (ix < lx && iy < ly)
   {
     int c = cmp_universal(gel(x,ix), gel(y,iy));
@@ -1798,6 +1802,7 @@ gen_setminus(GEN A, GEN B, int (*cmp)(GEN,GEN))
 GEN
 setminus(GEN x, GEN y)
 {
-  if (typ(x) != t_VEC || typ(y) != t_VEC) pari_err(typeer,"setminus");
+  if (typ(x) != t_VEC) pari_err(typeer,"setminus",x);
+  if (typ(y) != t_VEC) pari_err(typeer,"setminus",y);
   return gen_setminus(x,y,cmp_universal);
 }

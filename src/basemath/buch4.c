@@ -102,7 +102,8 @@ hyperell_locally_soluble(GEN T,GEN p)
 {
   pari_sp av = avma;
   long res;
-  if (typ(T)!=t_POL || typ(p)!=t_INT) pari_err(typeer,"zpsoluble");
+  if (typ(T)!=t_POL) pari_err(typeer,"zpsoluble",T);
+  if (typ(p)!=t_INT) pari_err(typeer,"zpsoluble",p);
   RgX_check_ZX(T, "zpsoluble");
   res = zpsol(T,p,0,gen_1,gen_0) || zpsol(RgX_recip_shallow(T), p, 1, p, gen_0);
   avma = av; return res;
@@ -308,7 +309,7 @@ nf_hyperell_locally_soluble(GEN nf,GEN T,GEN pr)
   GEN repr, zinit, p1;
   pari_sp av = avma;
 
-  if (typ(T)!=t_POL) pari_err(typeer,"nf_hyperell_locally_soluble");
+  if (typ(T)!=t_POL) pari_err(typeer,"nf_hyperell_locally_soluble",T);
   if (gequal0(T)) return 1;
   checkprid(pr); nf = checknf(nf);
   pr = shallowcopy(pr);
@@ -349,7 +350,7 @@ den_remove(GEN nf, GEN a)
       if (da) a = ZC_Z_mul(a, da);
       a = coltoliftalg(nf, a);
       return a;
-    default: pari_err(typeer,"nfhilbert");
+    default: pari_err(typeer,"nfhilbert",a);
       return NULL;/*not reached*/
   }
 }
@@ -478,7 +479,7 @@ bnfsunit(GEN bnf,GEN S,long prec)
   GEN p1,nf,gen,M,U,H;
   GEN sunit,card,sreg,res,pow;
 
-  if (typ(S) != t_VEC) pari_err(typeer,"bnfsunit");
+  if (typ(S) != t_VEC) pari_err(typeer,"bnfsunit",S);
   bnf = checkbnf(bnf);
   nf = bnf_get_nf(bnf);
   gen = bnf_get_gen(bnf);
@@ -633,7 +634,7 @@ bnfissunit(GEN bnf,GEN bnfS,GEN x)
 
   bnf = checkbnf(bnf);
   nf = bnf_get_nf(bnf);
-  if (typ(bnfS)!=t_VEC || lg(bnfS)!=7) pari_err(typeer,"bnfissunit");
+  if (typ(bnfS)!=t_VEC || lg(bnfS)!=7) pari_err(typeer,"bnfissunit",bnfS);
   x = nf_to_scalar_or_alg(nf,x);
   v = NULL;
   if ( (w = make_unit(nf, bnfS, &x)) ) v = bnfisunit(bnf, x);

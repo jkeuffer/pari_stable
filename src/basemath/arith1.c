@@ -184,7 +184,7 @@ znprimroot(GEN m)
   pari_sp av;
   GEN x, z;
 
-  if (typ(m) != t_INT) pari_err(typeer,"znprimroot");
+  if (typ(m) != t_INT) pari_err(typeer,"znprimroot",m);
   if (!signe(m)) pari_err(talker,"zero modulus in znprimroot");
   if (is_pm1(m)) return mkintmodu(0,1);
   z = cgetg(3, t_INTMOD);
@@ -217,7 +217,7 @@ znstar(GEN N)
   long i, j, nbp, sizeh;
   pari_sp av;
 
-  if (typ(N) != t_INT) pari_err(typeer,"znstar");
+  if (typ(N) != t_INT) pari_err(typeer,"znstar",N);
   if (!signe(N))
   {
     gel(res,1) = gen_2;
@@ -325,7 +325,7 @@ znstar(GEN N)
 GEN
 sqrtint(GEN a)
 {
-  if (typ(a) != t_INT) pari_err(typeer,"sqrtint");
+  if (typ(a) != t_INT) pari_err(typeer,"sqrtint",a);
   switch (signe(a))
   {
     case 1: return sqrti(a);
@@ -585,7 +585,7 @@ gissquareall(GEN x, GEN *pt)
 
     case t_FFELT: return FF_issquareall(x, pt)? gen_1: gen_0;
 
-    default: pari_err(typeer, "gissquareall");
+    default: pari_err(typeer, "gissquareall",x);
       return NULL; /* not reached */
   }
   return l? gen_1: gen_0;
@@ -692,7 +692,7 @@ gissquare(GEN x)
       for (i=1; i<l; i++) gel(p1,i) = gissquare(gel(x,i));
       return p1;
   }
-  pari_err(typeer,"gissquare");
+  pari_err(typeer,"gissquare",x);
   return NULL; /* not reached */
 }
 
@@ -774,7 +774,7 @@ ispower(GEN x, GEN K, GEN *pt)
   GEN z;
 
   if (!K) return gisanypower(x, pt);
-  if (typ(K) != t_INT) pari_err(typeer, "ispower");
+  if (typ(K) != t_INT) pari_err(typeer, "ispower",K);
   if (signe(K) <= 0) pari_err(talker, "non-positive exponent %Ps in ispower",K);
   if (equali1(K)) { if (pt) *pt = gcopy(x); return 1; }
   switch(typ(x)) {
@@ -859,7 +859,7 @@ ispower(GEN x, GEN K, GEN *pt)
       if (pt) *pt = gsqrtn(x, K, NULL, DEFAULTPREC);
       return 1;
 
-    default: pari_err(typeer, "ispower");
+    default: pari_err(typeer, "ispower",x);
     return 0; /* not reached */
   }
 }
@@ -1059,7 +1059,8 @@ kronecker(GEN x, GEN y)
   long s = 1, r;
   ulong xu, yu;
 
-  if (typ(x) != t_INT || typ(y) != t_INT) pari_err(typeer,"kronecker");
+  if (typ(x) != t_INT) pari_err(typeer,"kronecker",x);
+  if (typ(y) != t_INT) pari_err(typeer,"kronecker",y);
   switch (signe(y))
   {
     case -1: y = negi(y); if (signe(x) < 0) s = -1; break;
@@ -1247,7 +1248,7 @@ hilbert(GEN x, GEN y, GEN p)
   if (tx > ty) swapspec(x,y, tx,ty);
   if (p)
   {
-    if (typ(p) != t_INT) pari_err(typeer,"hilbert");
+    if (typ(p) != t_INT) pari_err(typeer,"hilbert",p);
     if (signe(p) <= 0) p = NULL;
   }
 
@@ -1460,7 +1461,8 @@ Fp_sqrt(GEN a, GEN p)
   long i, k, e;
   GEN p1, q, v, y, w, m;
 
-  if (typ(a) != t_INT || typ(p) != t_INT) pari_err(typeer,"Fp_sqrt");
+  if (typ(a) != t_INT) pari_err(typeer,"Fp_sqrt",a);
+  if (typ(p) != t_INT) pari_err(typeer,"Fp_sqrt",p);
   if (signe(p) <= 0 || equali1(p)) pari_err(talker,"not a prime in Fp_sqrt");
   if (lgefint(p) == 3)
   {
@@ -2267,7 +2269,7 @@ Fp_sqrtn(GEN a, GEN n, GEN p, GEN *zeta)
 /*********************************************************************/
 static long
 isfund(GEN x) {
-  if (typ(x) != t_INT) pari_err(typeer,"isfundamental");
+  if (typ(x) != t_INT) pari_err(typeer,"isfundamental",x);
   return Z_isfundamental(x);
 }
 GEN
@@ -2302,7 +2304,7 @@ quaddisc(GEN x)
   long i,r,tx=typ(x);
   GEN P,E,f,s;
 
-  if (!is_rational_t(tx)) pari_err(typeer,"quaddisc");
+  if (!is_rational_t(tx)) pari_err(typeer,"quaddisc",x);
   f = factor(x);
   P = gel(f,1);
   E = gel(f,2); s = gen_1;
@@ -2510,7 +2512,7 @@ gboundcf(GEN x, long k)
         av = avma;
         return gerepileupto(av, Qsfcont(gel(x,1),gel(x,2), NULL, k));
     }
-    pari_err(typeer,"gboundcf");
+    pari_err(typeer,"gboundcf",x);
   }
 
   switch(tx)
@@ -2523,7 +2525,7 @@ gboundcf(GEN x, long k)
       av = avma;
       return gerepilecopy(av, sersfcont(gel(x,1), gel(x,2), k));
   }
-  pari_err(typeer,"gboundcf");
+  pari_err(typeer,"gboundcf",x);
   return NULL; /* not reached */
 }
 
@@ -2543,7 +2545,7 @@ sfcont2(GEN b, GEN x, long k)
   if (lb==1) return y;
   if (is_scalar_t(tx))
   {
-    if (!is_intreal_t(tx) && tx != t_FRAC) pari_err(typeer,"sfcont2");
+    if (!is_intreal_t(tx) && tx != t_FRAC) pari_err(typeer,"sfcont2",x);
   }
   else if (tx == t_SER) x = ser2rfrac_i(x);
 
@@ -2583,7 +2585,7 @@ contfrac0(GEN x, GEN b, long nmax)
   if (!b) return gboundcf(x,nmax);
   tb = typ(b);
   if (tb == t_INT) return gboundcf(x,itos(b));
-  if (! is_vec_t(tb)) pari_err(typeer,"contfrac0");
+  if (! is_vec_t(tb)) pari_err(typeer,"contfrac0",b);
   if (nmax < 0) pari_err(talker, "negative nmax in contfrac0");
   return sfcont2(b,x,nmax);
 }
@@ -2595,7 +2597,7 @@ pnqn(GEN x)
   long i, lx, tx = typ(x);
   GEN p0, p1, q0, q1, a, p2, q2;
 
-  if (! is_matvec_t(tx)) pari_err(typeer,"pnqn");
+  if (! is_matvec_t(tx)) pari_err(typeer,"pnqn",x);
   lx = lg(x); if (lx == 1) return matid(2);
   p0 = gen_1; q0 = gen_0;
   if (tx != t_MAT)
@@ -2827,7 +2829,7 @@ bestappr_Q(GEN x, GEN k)
       }
       return gnormalize(y);
   }
-  pari_err(typeer,"bestappr_Q");
+  pari_err(typeer,"bestappr_Q",x);
   return NULL; /* not reached */
 }
 
@@ -2884,7 +2886,7 @@ bestappr_RgX(GEN x, long B)
       }
       return gnormalize(y);
   }
-  pari_err(typeer,"bestappr_RgX");
+  pari_err(typeer,"bestappr_RgX",x);
   return NULL; /* not reached */
 }
 
@@ -3399,7 +3401,7 @@ hclassno(GEN x)
   long s;
   int f;
 
-  if (typ(x) != t_INT) pari_err(typeer,"hclassno");
+  if (typ(x) != t_INT) pari_err(typeer,"hclassno",x);
   s = signe(x);
   if (s < 0) return gen_0;
   if (!s) return gdivgs(gen_1, -12);

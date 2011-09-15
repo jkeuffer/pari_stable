@@ -588,7 +588,7 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
       {
         GEN gen = gel(N,3);
         Z = N;
-        if (typ(gen)!=t_VEC) pari_err(typeer,"galoissubcyclo");
+        if (typ(gen)!=t_VEC) pari_err(typeer,"galoissubcyclo",gen);
         if (lg(gen) == 1) n = 1;
         else
         {
@@ -604,7 +604,7 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
         break;
       }
     default: /*fall through*/
-      pari_err(typeer,"galoissubcyclo");
+      pari_err(typeer,"galoissubcyclo",N);
       return NULL;/*Not reached*/
   }
   if (n==1) { avma = ltop; return deg1pol_shallow(gen_1,gen_m1,v); }
@@ -635,7 +635,7 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
       }
       break;
     default:
-      pari_err(typeer,"galoissubcyclo");
+      pari_err(typeer,"galoissubcyclo",sg);
       return NULL;/*Not reached*/
   }
   if (!complex) V = vecsmall_append(V,n-1); /*add complex conjugation*/
@@ -702,7 +702,7 @@ polsubcyclo_g(long n, long d, GEN Z, long v)
   pari_timer ti;
   if (v<0) v = 0;
   if (d==1) return deg1pol_shallow(gen_1,gen_m1,v);
-  if (d<=0 || n<=0) pari_err(typeer,"polsubcyclo");
+  if (d<=0 || n<=0) pari_err(talker, "non positive degrees in polsubcyclo");
   if ((n & 3) == 2) n >>= 1;
   if (n == 1 || d >= n)
     pari_err(talker,"degree does not divide phi(n) in polsubcyclo");

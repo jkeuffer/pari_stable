@@ -23,7 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 void
 check_quaddisc(GEN x, long *s, long *r, const char *f)
 {
-  if (typ(x) != t_INT) pari_err(typeer,"check_quaddisc");
+  if (typ(x) != t_INT) pari_err(typeer,"check_quaddisc",x);
   *s = signe(x);
   if (Z_issquare(x)) pari_err(talker,"square discriminant in %s", f);
   *r = mod4(x); if (*s < 0 && *r) *r = 4 - *r;
@@ -119,7 +119,9 @@ Qfb0(GEN x, GEN y, GEN z, GEN d, long prec)
   pari_sp av = avma;
   GEN D;
   long s;
-  if (typ(x)!=t_INT || typ(y)!=t_INT || typ(z)!=t_INT) pari_err(typeer,"Qfb");
+  if (typ(x)!=t_INT) pari_err(typeer,"Qfb",x);
+  if (typ(y)!=t_INT) pari_err(typeer,"Qfb",y);
+  if (typ(z)!=t_INT) pari_err(typeer,"Qfb",z);
   D = qfb_disc3(x,y,z);
   if (Z_issquare(D)) pari_err(talker,"square discriminant in Qfb");
   s = signe(D); avma = av;
@@ -222,12 +224,12 @@ GEN
 qfbcompraw(GEN x, GEN y)
 {
   long tx = typ(x);
-  if (typ(y) != tx) pari_err(typeer,"composition");
+  if (typ(y) != tx) pari_err(operf,"*",x,y);
   switch(tx) {
     case t_QFI: return qficompraw(x,y);
     case t_QFR: return qfrcompraw(x,y);
   }
-  pari_err(typeer,"composition");
+  pari_err(typeer,"composition",x);
   return NULL; /* not reached */
 }
 
@@ -237,7 +239,7 @@ qfisqr0(GEN x, long raw)
   pari_sp av = avma;
   GEN z = cgetg(4,t_QFI);
 
-  if (typ(x)!=t_QFI) pari_err(typeer,"composition");
+  if (typ(x)!=t_QFI) pari_err(typeer,"composition",x);
   qfb_sqr(z,x);
   if (raw) return gerepilecopy(av,z);
   return gerepileupto(av, redimag(z));
@@ -248,7 +250,7 @@ qfrsqr0(GEN x, long raw)
   pari_sp av = avma;
   GEN z = cgetg(5,t_QFR);
 
-  if (typ(x)!=t_QFR) pari_err(typeer,"composition");
+  if (typ(x)!=t_QFR) pari_err(typeer,"composition",x);
   qfb_sqr(z,x); gel(z,4) = shiftr(gel(x,4),1);
   if (raw) return gerepilecopy(av,z);
   return gerepileupto(av, redreal(z));
@@ -281,7 +283,7 @@ GEN
 qfr_1(GEN x)
 {
   long prec;
-  if (typ(x) != t_QFR) pari_err(typeer,"qfr_1");
+  if (typ(x) != t_QFR) pari_err(typeer,"qfr_1",x);
   prec = precision(gel(x,4));
   if (!prec) pari_err(talker,"not a t_REAL in 4th component of a t_QFR");
   return qfr_1_by_disc(qfb_disc(x), prec);
@@ -334,7 +336,7 @@ qfi_1_by_disc(GEN D)
 GEN
 qfi_1(GEN x)
 {
-  if (typ(x) != t_QFI) pari_err(typeer,"qfi_1");
+  if (typ(x) != t_QFI) pari_err(typeer,"qfi_1",x);
   return qfi_1_by_disc(qfb_disc(x));
 }
 
@@ -846,7 +848,7 @@ static void
 get_disc(GEN x, struct qfr_data *S)
 {
   if (!S->D) S->D = qfb_disc(x);
-  else if (typ(S->D) != t_INT) pari_err(typeer,"qfr_init");
+  else if (typ(S->D) != t_INT) pari_err(typeer,"qfr_init",S->D);
   if (!signe(S->D)) pari_err(talker,"reducible form in qfr_init");
 }
 
@@ -869,7 +871,7 @@ qfr5_init(GEN x, struct qfr_data *S)
 
   get_disc(x, S);
   if (!S->sqrtD) S->sqrtD = sqrtr(itor(S->D,prec));
-  else if (typ(S->sqrtD) != t_REAL) pari_err(typeer,"qfr_init");
+  else if (typ(S->sqrtD) != t_REAL) pari_err(typeer,"qfr_init",S->sqrtD);
 
   if (!S->isqrtD)
   {
@@ -878,7 +880,7 @@ qfr5_init(GEN x, struct qfr_data *S)
     S->isqrtD = gcvtoi(S->sqrtD,&e);
     if (e>-2) { avma = av; S->isqrtD = sqrti(S->D); }
   }
-  else if (typ(S->isqrtD) != t_INT) pari_err(typeer,"qfr_init");
+  else if (typ(S->isqrtD) != t_INT) pari_err(typeer,"qfr_init",S->isqrtD);
   return x;
 }
 static GEN
@@ -886,7 +888,7 @@ qfr3_init(GEN x, struct qfr_data *S)
 {
   get_disc(x, S);
   if (!S->isqrtD) S->isqrtD = sqrti(S->D);
-  else if (typ(S->isqrtD) != t_INT) pari_err(typeer,"qfr_init");
+  else if (typ(S->isqrtD) != t_INT) pari_err(typeer,"qfr_init",S->isqrtD);
   return x;
 }
 
@@ -1074,8 +1076,9 @@ primeform(GEN x, GEN p, long prec)
   long s, sx = signe(x), sp = signe(p);
   GEN y, b, absp;
 
-  if (typ(x) != t_INT || !sx) pari_err(typeer,"primeform");
-  if (typ(p) != t_INT || !sp) pari_err(typeer,"primeform");
+  if (typ(x) != t_INT) pari_err(typeer,"primeform",x);
+  if (typ(p) != t_INT) pari_err(typeer,"primeform",p);
+  if (!sp || !sx) pari_err(talker,"argument is zero in primeform");
   if (lgefint(p) == 3)
   {
     if (p[2] == 1) {
@@ -1298,13 +1301,13 @@ qfrsolvep(GEN Q, GEN p)
 GEN
 qfbsolve(GEN Q,GEN n)
 {
-  if (typ(n)!=t_INT) pari_err(typeer,"qfbsolve");
+  if (typ(n)!=t_INT) pari_err(typeer,"qfbsolve",n);
   switch(typ(Q))
   {
   case t_QFI: return qfisolvep(Q,n);
   case t_QFR: return qfrsolvep(Q,n);
   default:
-    pari_err(typeer,"qfbsolve");
+    pari_err(typeer,"qfbsolve",Q);
     return NULL; /* NOT REACHED */
   }
 }
@@ -1316,7 +1319,8 @@ cornacchia(GEN d, GEN p, GEN *px, GEN *py)
   pari_sp av = avma, av2, lim;
   GEN a, b, c, L, r;
 
-  if (typ(d) != t_INT || typ(p) != t_INT) pari_err(typeer, "cornacchia");
+  if (typ(d) != t_INT) pari_err(typeer, "cornacchia", d);
+  if (typ(p) != t_INT) pari_err(typeer, "cornacchia", p);
   if (signe(d) <= 0) pari_err(talker, "d must be positive");
   *px = *py = gen_0;
   b = subii(p, d);
@@ -1350,7 +1354,8 @@ cornacchia2(GEN d, GEN p, GEN *px, GEN *py)
   GEN a, b, c, L, r, px4;
   long k;
 
-  if (typ(d) != t_INT || typ(p) != t_INT) pari_err(typeer, "cornacchia");
+  if (typ(d) != t_INT) pari_err(typeer, "cornacchia", d);
+  if (typ(p) != t_INT) pari_err(typeer, "cornacchia", p);
   if (signe(d) <= 0) pari_err(talker, "d must be positive");
   *px = *py = gen_0;
   k = mod4(d);

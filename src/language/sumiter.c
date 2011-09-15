@@ -167,8 +167,8 @@ prime_loop_init(GEN ga, GEN gb, ulong *a, ulong *b, ulong *p)
   byteptr d = diffptr;
 
   ga = gceil(ga); gb = gfloor(gb);
-  if (typ(ga) != t_INT || typ(gb) != t_INT)
-    pari_err(typeer,"prime_loop_init");
+  if (typ(ga) != t_INT) pari_err(typeer,"prime_loop_init",ga);
+  if (typ(gb) != t_INT) pari_err(typeer,"prime_loop_init",gb);
   if (signe(gb) < 0) return NULL;
   if (signe(ga) < 0) ga = gen_1;
   if (lgefint(ga)>3 || lgefint(gb)>3)
@@ -426,12 +426,12 @@ forvec_start(GEN x, long flag, GEN *gd, GEN (**next)(GEN,GEN))
     {
       case 1: /* a >= m[i-1] - m */
         a = gceil(gsub(d->m[i-1], m));
-        if (typ(a) != t_INT) pari_err(typeer,"forvec");
+        if (typ(a) != t_INT) pari_err(typeer,"forvec",a);
         if (signe(a) > 0) m = gadd(m, a); else m = gcopy(m);
         break;
       case 2: /* a > m[i-1] - m */
         a = gfloor(gsub(d->m[i-1], m));
-        if (typ(a) != t_INT) pari_err(typeer,"forvec");
+        if (typ(a) != t_INT) pari_err(typeer,"forvec",a);
         a = addis(a, 1);
         if (signe(a) > 0) m = gadd(m, a); else m = gcopy(m);
         break;
@@ -448,13 +448,13 @@ forvec_start(GEN x, long flag, GEN *gd, GEN (**next)(GEN,GEN))
     switch(flag) {
       case 1:/* a >= M - M[i] */
         a = gfloor(gsub(d->M[i+1], M));
-        if (typ(a) != t_INT) pari_err(typeer,"forvec");
+        if (typ(a) != t_INT) pari_err(typeer,"forvec",a);
         if (signe(a) < 0) M = gadd(M, a); else M = gcopy(M);
         /* M <= M[i+1] */
         break;
       case 2:
         a = gceil(gsub(d->M[i+1], M));
-        if (typ(a) != t_INT) pari_err(typeer,"forvec");
+        if (typ(a) != t_INT) pari_err(typeer,"forvec",a);
         a = subis(a, 1);
         if (signe(a) < 0) M = gadd(M, a); else M = gcopy(M);
         /* M < M[i+1] */
@@ -741,7 +741,7 @@ direuler(void *E, GEN (*eval)(void *, GEN), GEN ga, GEN gb, GEN c)
     else
     {
       ulong k1, q, qlim;
-      if (tx != t_POL) pari_err(typeer,"direuler");
+      if (tx != t_POL) pari_err(typeer,"direuler",polnum);
       lx = degpol(polnum);
       if (lx < 0) pari_err(talker,"constant term != 1 in direuler");
       c = gel(polnum,2);
@@ -770,7 +770,7 @@ direuler(void *E, GEN (*eval)(void *, GEN), GEN ga, GEN gb, GEN c)
     }
     else
     {
-      if (tx != t_POL) pari_err(typeer,"direuler");
+      if (tx != t_POL) pari_err(typeer,"direuler",polden);
       c = gel(polden,2);
       if (!gequal1(c)) pari_err(talker,"constant term != 1 in direuler");
       lx = degpol(polden);
@@ -1275,7 +1275,7 @@ derivfun(void *E, GEN (*eval)(void *, GEN), GEN x, long prec)
   case t_SER: /* FALL THROUGH */
     vx = varn(x);
     return gerepileupto(av, gdiv(deriv(eval(E, x),vx), deriv(x,vx)));
-  default: pari_err(typeer, "formal derivation");
+  default: pari_err(typeer, "formal derivation",x);
     return NULL; /*NOT REACHED*/
   }
 }

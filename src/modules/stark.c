@@ -3272,7 +3272,7 @@ form_to_ideal(GEN x)
   long tx = typ(x);
   GEN b;
   if ((is_vec_t(tx) || lg(x) != 4)
-       && tx != t_QFR && tx != t_QFI) pari_err(typeer,"form_to_ideal");
+       && tx != t_QFR && tx != t_QFI) pari_err(typeer,"form_to_ideal",x);
   b = negi(gel(x,2)); if (mpodd(b)) b = addis(b,1);
   return mkmat2( mkcol2(gel(x,1), gen_0),
                  mkcol2(shifti(b,-1), gen_1) );

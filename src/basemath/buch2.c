@@ -1248,7 +1248,7 @@ famat_to_arch(GEN nf, GEN fa, long prec)
   GEN g,e, y = NULL;
   long i,l;
 
-  if (typ(fa) != t_MAT) pari_err(typeer,"famat_to_arch");
+  if (typ(fa) != t_MAT) pari_err(typeer,"famat_to_arch",fa);
   if (lg(fa) == 1) return triv_arch(nf);
   g = gel(fa,1);
   e = gel(fa,2); l = lg(e);
@@ -3168,7 +3168,7 @@ sbnf2bnf(GEN sbnf, long prec)
   GEN pfc, C, clgp, clgp2, res, y, W, zu, matal, Vbase;
   nfbasic_t T;
 
-  if (typ(sbnf) != t_VEC || lg(sbnf) != 13) pari_err(typeer,"bnfmake");
+  if (typ(sbnf) != t_VEC || lg(sbnf) != 13) pari_err(typeer,"bnfmake",sbnf);
   if (prec < DEFAULTPREC) prec = DEFAULTPREC;
 
   nfbasic_from_sbnf(sbnf, &T);
@@ -3217,7 +3217,7 @@ bnfinit0(GEN P, long flag, GEN data, long prec)
   if (data)
   {
     long lx = lg(data);
-    if (typ(data) != t_VEC || lx > 5) pari_err(typeer,"bnfinit");
+    if (typ(data) != t_VEC || lx > 5) pari_err(typeer,"bnfinit",data);
     switch(lx)
     {
       case 4: relpid = itos(gel(data,3));

@@ -30,7 +30,7 @@ nfmaxord_check_args(nfmaxord_t *S, GEN T, long flag, GEN fa)
   GEN dT, P;
   long l, v;
 
-  if (typ(T)!=t_POL) pari_err(typeer,"nfmaxord");
+  if (typ(T)!=t_POL) pari_err(typeer,"nfmaxord",T);
   if (degpol(T) <= 0) pari_err(constpoler,"nfmaxord");
 
   if (fa) {
@@ -41,7 +41,7 @@ nfmaxord_check_args(nfmaxord_t *S, GEN T, long flag, GEN fa)
                   dT = powis(fa, v);
                   fa = to_famat_shallow(fa, stoi(v));
                   break;
-      default: pari_err(typeer,"nfmaxord");
+      default: pari_err(typeer,"nfmaxord",fa);
                return; /*not reached*/
     }
     if (!signe(dT)) pari_err(talker,"reducible polynomial in nfmaxord");
@@ -631,7 +631,7 @@ _nfbasis(GEN x0, long flag, GEN fa, GEN *pbas, GEN *pdK)
   nfmaxord_t S;
   long fl = 0;
 
-  if (typ(x0)!=t_POL) pari_err(typeer,"nfbasis");
+  if (typ(x0)!=t_POL) pari_err(typeer,"nfbasis",x0);
   if (degpol(x0) <= 0) pari_err(zeropoler,"nfbasis");
   RgX_check_ZX(x0, "nfbasis");
 
@@ -2101,7 +2101,7 @@ GEN
 idealprimedec(GEN nf, GEN p)
 {
   pari_sp av = avma;
-  if (typ(p) != t_INT) pari_err(typeer, "idealprimedec");
+  if (typ(p) != t_INT) pari_err(typeer, "idealprimedec",p);
   return gerepileupto(av, gen_sort(primedec_aux(checknf(nf),p),
                                    (void*)&cmp_prime_over_p, &cmp_nodata));
 }
@@ -2429,7 +2429,7 @@ Rg_to_ff(GEN nf, GEN x, GEN modpr)
     case t_COL:
       x = Q_remove_denom(x, &den);
       if (lg(x) == lg(nf_get_zk(nf))) break;
-    default: pari_err(typeer,"Rg_to_ff");
+    default: pari_err(typeer,"Rg_to_ff",x);
   }
   if (den)
   {
@@ -2999,7 +2999,7 @@ rnf_fix_pol(GEN T, GEN P, int lift)
         if (!RgX_equal_var(gel(c,1), T)) pari_err(consister,"rnf function");
         if (lift) c = gel(c,2);
         break;
-      default: pari_err(typeer, "rnf function");
+      default: pari_err(typeer, "rnf function",c);
     }
     gel(Q,i) = c;
   }
@@ -3337,7 +3337,8 @@ polcompositum0(GEN A, GEN B, long flall)
   long v, k;
   GEN C, D, LPRS;
 
-  if (typ(A)!=t_POL || typ(B)!=t_POL) pari_err(typeer,"polcompositum0");
+  if (typ(A)!=t_POL) pari_err(typeer,"polcompositum0",A);
+  if (typ(B)!=t_POL) pari_err(typeer,"polcompositum0",B);
   if (degpol(A)<=0 || degpol(B)<=0) pari_err(constpoler,"compositum");
   v = varn(A);
   if (varn(B) != v) pari_err(talker,"not the same variable in compositum");

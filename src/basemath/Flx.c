@@ -89,7 +89,7 @@ Flx_to_Flv(GEN x, long N)
 {
   long i, l;
   GEN z = cgetg(N+1,t_VECSMALL);
-  if (typ(x) != t_VECSMALL) pari_err(typeer,"Flx_to_Flv");
+  if (typ(x) != t_VECSMALL) pari_err(typeer,"Flx_to_Flv",x);
   l = lg(x)-1; x++;
   for (i=1; i<l ; i++) z[i]=x[i];
   for (   ; i<=N; i++) z[i]=0;

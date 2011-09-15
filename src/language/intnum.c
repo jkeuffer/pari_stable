@@ -522,7 +522,7 @@ suminit_start(GEN sig)
 
   if (typ(sig) == t_VEC)
   {
-    if (lg(sig) != 3) pari_err(typeer,"sumnum");
+    if (lg(sig) != 3) pari_err(typeer,"sumnum",sig);
     sig2 = gel(sig,2);
     sig  = gel(sig,1);
   }
@@ -605,8 +605,9 @@ intn(void *E, GEN (*eval)(void*, GEN), GEN a, GEN b, GEN tab)
   long m, k, L, i;
   pari_sp ltop = avma, av;
 
-  if (!checktabsimp(tab)) pari_err(typeer,"intnum");
-  if (!isinC(a) || !isinC(b)) pari_err(typeer,"intnum");
+  if (!checktabsimp(tab)) pari_err(typeer,"intnum",tab);
+  if (!isinC(a)) pari_err(typeer,"intnum",a);
+  if (!isinC(b)) pari_err(typeer,"intnum",b);
   m = itos(TABm(tab));
   tabx0 = TABx0(tab); tabw0 = TABw0(tab);
   tabxp = TABxp(tab); tabwp = TABwp(tab); L = lg(tabxp);
@@ -642,7 +643,7 @@ intnsing(void *E, GEN (*eval)(void*, GEN), GEN a, GEN b, GEN tab, long prec)
   long m, k, L, i;
   pari_sp ltop = avma, av;
 
-  if (!checktabsimp(tab)) pari_err(typeer,"intnum");
+  if (!checktabsimp(tab)) pari_err(typeer,"intnum",tab);
   m = itos(TABm(tab));
   tabx0 = TABx0(tab); tabw0 = TABw0(tab);
   tabxp = TABxp(tab); tabwp = TABwp(tab); L = lg(tabxp);
@@ -683,7 +684,7 @@ intninfpm(void *E, GEN (*eval)(void*, GEN), GEN a, long si, GEN tab)
   long m, L, k, h = 0, pas, i;
   pari_sp ltop = avma, av;
 
-  if (!checktabdoub(tab)) pari_err(typeer,"intnum");
+  if (!checktabdoub(tab)) pari_err(typeer,"intnum",tab);
   m = itos(TABm(tab));
   tabx0 = TABx0(tab); tabw0 = TABw0(tab);
   tabxp = TABxp(tab); tabwp = TABwp(tab); L = lg(tabxp);
@@ -720,7 +721,7 @@ intninfinfintern(void *E, GEN (*eval)(void*, GEN), GEN tab, long flag)
   long m, L, k, i, spf;
   pari_sp ltop = avma;
 
-  if (!checktabsimp(tab)) pari_err(typeer,"intnum");
+  if (!checktabsimp(tab)) pari_err(typeer,"intnum",tab);
   m = itos(TABm(tab));
   tabx0 = TABx0(tab); tabw0 = TABw0(tab);
   tabxp = TABxp(tab); tabwp = TABwp(tab); L = lg(tabxp);
@@ -1002,7 +1003,7 @@ intnuminit0(GEN a, GEN b, GEN tab, long prec)
   if (!tab) m = 0;
   else if (typ(tab) != t_INT)
   {
-    if (!checktab(tab)) pari_err(typeer,"intnuminit0");
+    if (!checktab(tab)) pari_err(typeer,"intnuminit0",tab);
     return tab;
   }
   else
@@ -1016,7 +1017,7 @@ sumnuminit0(GEN a, GEN tab, long sgn, long prec)
   if (!tab) m = 0;
   else if (typ(tab) != t_INT)
   {
-    if (!checktab(tab)) pari_err(typeer,"sumnuminit0");
+    if (!checktab(tab)) pari_err(typeer,"sumnuminit0",tab);
     return tab;
   }
   else
@@ -1406,7 +1407,7 @@ intinvintern(void *E, GEN (*eval)(void*, GEN), GEN sig, GEN x, GEN tab, long fla
 
   if (typ(sig) != t_VEC) sig = mkvec2(sig, stoi(flag));
   if (lg(sig) != 3 || !isinR(gel(sig,1)) || !isinR(gel(sig,2)))
-    pari_err(typeer,"integral transform");
+    pari_err(typeer,"integral transform",sig);
   if (gsigne(gel(sig,2)) < 0)
     pari_err(talker,"exponential increase in integral transform");
   D.a = gel(sig,1);
@@ -1470,7 +1471,7 @@ intmellininvshort(GEN sig, GEN x, GEN tab, long prec)
 
   if (typ(sig) != t_VEC) sig = mkvec2(sig, gen_1);
   if (lg(sig) != 3 || !isinR(gel(sig,1)) || !isinR(gel(sig,2)))
-    pari_err(typeer,"intmellininvshort");
+    pari_err(typeer,"intmellininvshort",sig);
   if (gsigne(gel(sig,2)) <= 0)
     pari_err(talker,"need exponential decrease in intinvmellinshort");
   D.L = mulcxI(LX);

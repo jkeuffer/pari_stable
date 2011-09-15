@@ -474,7 +474,7 @@ gconj(GEN x)
       }
     }
     default:
-      pari_err(typeer,"gconj");
+      pari_err(typeer,"gconj",x);
       return NULL; /* not reached */
   }
   return y;
@@ -555,7 +555,7 @@ conjvec(GEN x,long prec)
     }
 
     default:
-      pari_err(typeer,"conjvec");
+      pari_err(typeer,"conjvec",x);
       return NULL; /* not reached */
   }
   return z;
@@ -2852,7 +2852,7 @@ gmulsg(long s, GEN y)
       for (i=1; i<ly; i++) gel(z,i) = gmulsg(s,gel(y,i));
       return z;
   }
-  pari_err(typeer,"gmulsg");
+  pari_err(typeer,"gmulsg",y);
   return NULL; /* not reached */
 }
 
@@ -3046,7 +3046,7 @@ gmul2n(GEN x, long n)
     case t_PADIC: /* int2n wrong if n < 0 */
       return gmul(gmul2n(gen_1,n),x);
   }
-  pari_err(typeer,"gmul2n");
+  pari_err(typeer,"gmul2n",x);
   return NULL; /* not reached */
 }
 
@@ -3237,6 +3237,6 @@ ginv(GEN x)
       return y;
     }
   }
-  pari_err(typeer,"inverse");
+  pari_err(typeer,"inverse",x);
   return NULL; /* not reached */
 }

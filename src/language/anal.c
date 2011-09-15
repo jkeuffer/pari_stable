@@ -904,7 +904,7 @@ gpolvar(GEN x)
   }
   if (typ(x)==t_PADIC) return gcopy( gel(x,2) );
   v = gvar(x);
-  if (v==NO_VARIABLE) pari_err(typeer,"gpolvar");
+  if (v==NO_VARIABLE) pari_err(typeer,"gpolvar",x);
   return pol_x(v);
 }
 

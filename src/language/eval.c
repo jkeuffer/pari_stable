@@ -1492,8 +1492,7 @@ closure_disassemble(GEN C)
   char * code;
   GEN oper;
   long i;
-  if (typ(C)!=t_CLOSURE)
-    pari_err(typeer,"disassemble");
+  if (typ(C)!=t_CLOSURE) pari_err(typeer,"disassemble",C);
   code=GSTR(gel(C,2))-1;
   oper=gel(C,3);
   for(i=1;i<lg(oper);i++)

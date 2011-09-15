@@ -343,7 +343,7 @@ rnfidealhermite(GEN rnf, GEN x)
     case t_POLMOD: case t_POL: case t_COL:
       return rnfprincipaltohermite(rnf,x);
   }
-  pari_err(typeer,"rnfidealhermite");
+  pari_err(typeer,"rnfidealhermite",x);
   return NULL; /* not reached */
 }
 
@@ -417,8 +417,8 @@ rnfidealabstorel(GEN rnf, GEN x)
   checkrnf(rnf); nf = gel(rnf,10); invbas = gel(rnf,8);
   m = nf_get_degree(nf);
   N = m * rnf_get_degree(rnf);
-  if (lg(x)-1 != N) pari_err(typeer, "rnfidealabstorel");
-  if (typ(x) != t_VEC) pari_err(typeer,"rnfidealabstorel");
+  if (typ(x) != t_VEC) pari_err(typeer,"rnfidealabstorel",x);
+  if (lg(x)-1 != N) pari_err(consister, "rnfidealabstorel");
   A = cgetg(N+1,t_MAT);
   I = cgetg(N+1,t_VEC); z = mkvec2(A,I);
   for (j=1; j<=N; j++)
@@ -863,7 +863,7 @@ rnfpolred(GEN nf, GEN pol, long prec)
   long i, j, n, v = varn(pol);
   GEN id, w, I, O, bnf, nfpol;
 
-  if (typ(pol)!=t_POL) pari_err(typeer,"rnfpolred");
+  if (typ(pol)!=t_POL) pari_err(typeer,"rnfpolred",pol);
   bnf = nf; nf = checknf(bnf);
   bnf = (nf == bnf)? NULL: checkbnf(bnf);
   if (degpol(pol) <= 1) { w = cgetg(2, t_VEC); gel(w,1) = pol_x(v); return w; }
@@ -974,7 +974,7 @@ rnfpolredabs(GEN nf, GEN relpol, long flag)
   long fl = (flag & nf_ADDZK)? nf_ADDZK: nf_RAW;
   pari_sp av = avma;
 
-  if (typ(relpol)!=t_POL) pari_err(typeer,"rnfpolredabs");
+  if (typ(relpol)!=t_POL) pari_err(typeer,"rnfpolredabs",relpol);
   nf = checknf(nf);
   if (DEBUGLEVEL>1) timer_start(&ti);
   T = nf_get_pol(nf);

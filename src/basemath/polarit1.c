@@ -42,7 +42,7 @@ poldivrem(GEN x, GEN y, GEN *pr)
     if (pr && pr != ONLY_DIVIDES) *pr=gen_0;
     return gdiv(x,y);
   }
-  if (ty != t_POL) pari_err(typeer,"euclidean division (poldivrem)");
+  if (ty != t_POL) pari_err(operf,"euclidean division",x,y);
   tx = typ(x);
   if (is_scalar_t(tx) || varncmp(vx, vy) > 0)
   {
@@ -60,7 +60,7 @@ poldivrem(GEN x, GEN y, GEN *pr)
     if (pr) *pr = gcopy(x);
     return gen_0;
   }
-  if (tx != t_POL) pari_err(typeer,"euclidean division (poldivrem)");
+  if (tx != t_POL) pari_err(operf,"euclidean division",x,y);
 
   if (varncmp(vx, vy) < 0)
   {
@@ -79,7 +79,7 @@ gdeuc(GEN x, GEN y)
   long ty = typ(y), tx, vx = gvar(x), vy = gvar(y);
 
   if (is_scalar_t(ty) || varncmp(vx, vy) < 0) return gdiv(x,y);
-  if (ty != t_POL) pari_err(typeer,"euclidean division (poldivrem)");
+  if (ty != t_POL) pari_err(operf,"euclidean division",x,y);
   tx = typ(x);
   if (is_scalar_t(tx) || varncmp(vx, vy) > 0)
   {
@@ -87,7 +87,7 @@ gdeuc(GEN x, GEN y)
     if (!degpol(y)) return gdiv(x, gel(y,2)); /* constant */
     return gen_0;
   }
-  if (tx != t_POL) pari_err(typeer,"euclidean division (poldivrem)");
+  if (tx != t_POL) pari_err(operf,"euclidean division",x,y);
   if (varncmp(vx, vy) < 0) return gdiv(x,y);
   return RgX_div(x, y);
 }
@@ -101,7 +101,7 @@ grem(GEN x, GEN y)
     if (gequal0(y)) pari_err(gdiver);
     return gen_0;
   }
-  if (ty != t_POL) pari_err(typeer,"euclidean division (poldivrem)");
+  if (ty != t_POL) pari_err(operf,"euclidean division",x,y);
   tx = typ(x);
   if (is_scalar_t(tx) || varncmp(vx, vy) > 0)
   {
@@ -109,7 +109,7 @@ grem(GEN x, GEN y)
     if (!degpol(y)) return pol_0(vy); /* constant */
     return gcopy(x);
   }
-  if (tx != t_POL) pari_err(typeer,"euclidean division (poldivrem)");
+  if (tx != t_POL) pari_err(operf,"euclidean division",x,y);
 
   if (varncmp(vx, vy) < 0) return pol_0(vx);
   return RgX_rem(x, y);
@@ -137,7 +137,8 @@ static long
 factmod_init(GEN *F, GEN p)
 {
   long d;
-  if (typ(*F)!=t_POL || typ(p)!=t_INT) pari_err(typeer,"factmod");
+  if (typ(*F)!=t_POL) pari_err(typeer,"factmod",*F);
+  if (typ(p)!=t_INT) pari_err(typeer,"factmod",p);
   *F = FpX_normalize(RgX_to_FpX(*F, p), p);
   d = degpol(*F); if (d < 0) pari_err(zeropoler,"factmod");
   return d;
@@ -1327,7 +1328,7 @@ Zp_to_Z(GEN x) {
   {
     case t_INT: break;
     case t_PADIC: x = gtrunc(x); break;
-    default: pari_err(typeer,"QpX_to_ZX");
+    default: pari_err(typeer,"QpX_to_ZX",x);
   }
   return x;
 }
@@ -1345,7 +1346,7 @@ QpX_to_ZX(GEN f)
   GEN c = content(f);
   if (gequal0(c)) /*  O(p^n) can occur */
   {
-    if (typ(c) != t_PADIC) pari_err(typeer,"QpX_to_ZX");
+    if (typ(c) != t_PADIC) pari_err(typeer,"QpX_to_ZX",f);
     c = powis(gel(c,2), valp(c));
   }
   f = RgX_Rg_div(f,c);
@@ -1418,7 +1419,7 @@ QpXQ_to_ZXY(GEN f)
   long i, l = lg(f);
   if (gequal0(c)) /*  O(p^n) can occur */
   {
-    if (typ(c) != t_PADIC) pari_err(typeer,"QpXQ_to_ZXY");
+    if (typ(c) != t_PADIC) pari_err(typeer,"QpXQ_to_ZXY",f);
     c = powis(gel(c,2), valp(c));
   }
   f = RgX_Rg_div(f,c);
@@ -1478,8 +1479,8 @@ Zp_appr(GEN f, GEN a)
   pari_sp av = avma;
   long prec;
   GEN z, p;
-  if (typ(f) != t_POL) pari_err(typeer,"Zp_appr");
-  if (typ(a) != t_PADIC) pari_err(typeer,"Zp_appr");
+  if (typ(f) != t_POL) pari_err(typeer,"Zp_appr",f);
+  if (typ(a) != t_PADIC) pari_err(typeer,"Zp_appr",a);
   p = gel(a,2); prec = gequal0(a)? valp(a): precp(a);
   f = QpX_to_ZX(f);
   if (degpol(f) <= 0) pari_err(constpoler,"Zp_appr");
@@ -1536,8 +1537,8 @@ rootpadic(GEN f, GEN p, long prec)
   long PREC,i,k;
   int reverse;
 
-  if (typ(p)!=t_INT) pari_err(typeer,"rootpadic");
-  if (typ(f)!=t_POL) pari_err(typeer,"rootpadic");
+  if (typ(p)!=t_INT) pari_err(typeer,"rootpadic",p);
+  if (typ(f)!=t_POL) pari_err(typeer,"rootpadic",f);
   if (gequal0(f)) pari_err(zeropoler,"rootpadic");
   if (prec <= 0) pari_err(talker,"non-positive precision in rootpadic");
   f = QpX_to_ZX(f);
@@ -1623,16 +1624,16 @@ padicappr(GEN f, GEN a)
   switch(typ(a)) {
     case t_PADIC: return Zp_appr(f,a);
     case t_POLMOD: break;
-    default: pari_err(typeer,"padicappr");
+    default: pari_err(typeer,"padicappr",a);
   }
-  if (typ(f)!=t_POL) pari_err(typeer,"padicappr");
+  if (typ(f)!=t_POL) pari_err(typeer,"padicappr",f);
   if (gequal0(f)) pari_err(zeropoler,"padicappr");
   z = RgX_gcd(f, RgX_deriv(f));
   if (degpol(z) > 0) f = RgX_div(f,z);
   T = gel(a,1); a = gel(a,2);
   p = NULL; prec = LONG_MAX;
   getprec(a, &prec, &p);
-  getprec(T, &prec, &p); if (!p) pari_err(typeer,"padicappr");
+  getprec(T, &prec, &p); if (!p) pari_err(typeer,"padicappr",T);
   f = QpXQ_to_ZXY(lift_intern(f));
   a = QpX_to_ZX(a);
   T = QpX_to_ZX(T);
@@ -1729,14 +1730,10 @@ factorpadic2(GEN f, GEN p, long prec)
 {
   pari_sp av = avma;
   GEN fa,ex,y;
-  long n,i,l;
+  long i,l, n = degpol(f);
 
-  if (typ(f)!=t_POL || typ(p)!=t_INT) pari_err(typeer,"factorpadic");
-  if (gequal0(f)) pari_err(zeropoler,"factorpadic");
-  if (prec <= 0) pari_err(talker,"non-positive precision in factorpadic");
-
-  n = degpol(f);
   if (n==0) return trivfact();
+
   f = QpX_to_ZX(f);
   if (n==1) return gerepilecopy(av, padic_trivfact(f,p,prec));
   if (!gequal1(leading_term(f)))
@@ -1826,9 +1823,6 @@ factorpadic(GEN f,GEN p,long prec)
   long i, l, pr, n = degpol(f);
   int reverse = 0;
 
-  if (typ(f)!=t_POL || typ(p)!=t_INT) pari_err(typeer,"factorpadic");
-  if (gequal0(f)) pari_err(zeropoler,"factorpadic");
-  if (prec <= 0) pari_err(talker,"non-positive precision in factorpadic");
   if (n == 0) return trivfact();
 
   f = QpX_to_ZX(f); (void)Z_pvalrem(leading_term(f), p, &lt);
@@ -1851,6 +1845,10 @@ factorpadic(GEN f,GEN p,long prec)
 GEN
 factorpadic0(GEN f,GEN p,long r,long flag)
 {
+  if (typ(f)!=t_POL) pari_err(typeer,"factorpadic",f);
+  if (typ(p)!=t_INT) pari_err(typeer,"factorpadic",p);
+  if (!signe(f)) pari_err(zeropoler,"factorpadic");
+  if (r <= 0) pari_err(talker,"non-positive precision in factorpadic");
   switch(flag)
   {
      case 0: return factorpadic(f,p,r);
@@ -1877,7 +1875,7 @@ to_Fq(GEN x, GEN T, GEN p)
     y = mkintmod(x,p);
   else
   {
-    if (tx != t_POL) pari_err(typeer,"to_Fq");
+    if (tx != t_POL) pari_err(typeer,"to_Fq",x);
     lx = lg(x);
     y = cgetg(lx,t_POL); y[1] = x[1];
     for (i=2; i<lx; i++) gel(y,i) = mkintmod(gel(x,i), p);
@@ -2458,8 +2456,9 @@ static void
 ffcheck(pari_sp *av, GEN *f, GEN *T, GEN p)
 {
   long v;
-  if (typ(*T)!=t_POL || typ(*f)!=t_POL || typ(p)!=t_INT)
-    pari_err(typeer,"factorff");
+  if (typ(*T)!=t_POL) pari_err(typeer,"factorff",*T);
+  if (typ(*f)!=t_POL) pari_err(typeer,"factorff",*f);
+  if (typ(p)!=t_INT) pari_err(typeer,"factorff",p);
   v = varn(*T);
   if (varncmp(v, varn(*f)) <= 0)
     pari_err(talker,"polynomial variable must have higher priority in factorff");
@@ -2474,10 +2473,10 @@ factorff(GEN f, GEN p, GEN T)
   if (!p || !T)
   {
     long pa, t;
-    if (typ(f) != t_POL) pari_err(typeer, "factorff");
+    if (typ(f) != t_POL) pari_err(typeer, "factorff",f);
     T = p = NULL;
     t = RgX_type(f, &p, &T, &pa);
-    if (t != t_FFELT) pari_err(typeer, "factorff");
+    if (t != t_FFELT) pari_err(typeer, "factorff",f);
     return FFX_factor(f,T);
   }
   ffcheck(&av, &f, &T, p); z = FqX_factor_i(f, T, p);
@@ -2491,10 +2490,10 @@ polrootsff(GEN f, GEN p, GEN T)
   if (!p || !T)
   {
     long pa, t;
-    if (typ(f) != t_POL) pari_err(typeer, "polrootsff");
+    if (typ(f) != t_POL) pari_err(typeer, "polrootsff",f);
     T = p = NULL;
     t = RgX_type(f, &p, &T, &pa);
-    if (t != t_FFELT) pari_err(typeer, "polrootsff");
+    if (t != t_FFELT) pari_err(typeer, "polrootsff",f);
     return FFX_roots(f,T);
   }
   ffcheck(&av, &f, &T, p); z = FqX_roots_i(f, T, p);

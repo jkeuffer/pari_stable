@@ -38,7 +38,7 @@ charpoly0(GEN x, long v, long flag)
     case 2: return carhess(x,v);
     case 3: return carberkowitz(x,v);
     case 4:
-      if (typ(x) != t_MAT) pari_err(typeer,"charpoly");
+      if (typ(x) != t_MAT) pari_err(typeer,"charpoly",x);
       RgM_check_ZM(x, "charpoly");
       x = ZM_charpoly(x); setvarn(x, v); return x;
   }
@@ -64,7 +64,7 @@ easychar(GEN x, long v, GEN *py)
       return p1;
 
     case t_COMPLEX: case t_QUAD:
-      if (py) pari_err(typeer,"easychar");
+      if (py) pari_err(typeer,"easychar",x);
       p1 = cgetg(5,t_POL);
       p1[1] = evalsigne(1) | evalvarn(v);
       gel(p1,2) = gnorm(x); av = avma;
@@ -73,13 +73,13 @@ easychar(GEN x, long v, GEN *py)
 
     case t_FFELT: {
       pari_sp ltop=avma;
-      if (py) pari_err(typeer,"easychar");
+      if (py) pari_err(typeer,"easychar",x);
       p1 = FpX_to_mod(FF_charpoly(x), FF_p_i(x));
       setvarn(p1,v); return gerepileupto(ltop,p1);
     }
 
     case t_POLMOD:
-      if (py) pari_err(typeer,"easychar");
+      if (py) pari_err(typeer,"easychar",x);
       return RgXQ_charpoly(gel(x,2), gel(x,1), v);
 
     case t_MAT:
@@ -92,7 +92,7 @@ easychar(GEN x, long v, GEN *py)
       if (lg(x[1]) != lx) break;
       return NULL;
   }
-  pari_err(typeer,"easychar");
+  pari_err(typeer,"easychar",x);
   return NULL; /* not reached */
 }
 
@@ -214,7 +214,7 @@ adjsafe(GEN x)
   long n = lg(x)-1;
   pari_sp av = avma;
   GEN C;
-  if (typ(x) != t_MAT) pari_err(typeer, "matadjoint");
+  if (typ(x) != t_MAT) pari_err(typeer, "matadjoint",x);
   if (n <= 1) return gcopy(x);
   C = carberkowitz(x, 0);
   C = RgX_shift_shallow(C, -1);
@@ -275,7 +275,7 @@ minpoly(GEN x, long v)
     setvarn(P,v);
     return gerepileupto(ltop,P);
   }
-  if (typ(x)!=t_MAT) pari_err(typeer,"minpoly");
+  if (typ(x)!=t_MAT) pari_err(typeer,"minpoly",x);
   if (lg(x) == 1) return pol_1(v);
   return gerepilecopy(ltop,gel(matfrobenius(x,1,v),1));
 }
@@ -291,7 +291,7 @@ hess(GEN x)
   pari_sp av = avma, lim;
   long lx = lg(x), m, i, j;
 
-  if (typ(x) != t_MAT) pari_err(typeer,"hess");
+  if (typ(x) != t_MAT) pari_err(typeer,"hess",x);
   if (lx == 1) return cgetg(1,t_MAT);
   if (lg(x[1]) != lx) pari_err(consister,"hess");
 
@@ -330,7 +330,7 @@ Flm_hess(GEN x, ulong p)
   pari_sp av = avma;
   long lx = lg(x), m, i, j;
 
-  if (typ(x) != t_MAT) pari_err(typeer,"hess");
+  if (typ(x) != t_MAT) pari_err(typeer,"hess",x);
   if (lx == 1) return cgetg(1,t_MAT);
   if (lg(x[1]) != lx) pari_err(consister,"hess");
 
@@ -572,7 +572,7 @@ gnorm(GEN x)
       for (i=1; i<lx; i++) gel(y,i) = gnorm(gel(x,i));
       return y;
   }
-  pari_err(typeer,"gnorm");
+  pari_err(typeer,"gnorm",x);
   return NULL; /* not reached */
 }
 
@@ -597,7 +597,7 @@ gnorml2(GEN x)
     case t_COL:
     case t_MAT: lx = lg(x); break;
 
-    default: pari_err(typeer,"gnorml2");
+    default: pari_err(typeer,"gnorml2",x);
       return NULL; /* not reached */
   }
   if (lx == 1) return gen_0;
@@ -639,7 +639,7 @@ gnorml1(GEN x,long prec)
       for (i=1; i<lx; i++) s = gadd(s, gnorml1(gel(x,i),prec));
       break;
 
-    default: pari_err(typeer,"gnorml1");
+    default: pari_err(typeer,"gnorml1",x);
       return NULL; /* not reached */
   }
   return gerepileupto(av, s);
@@ -675,7 +675,7 @@ gnorml1_fake(GEN x)
       for (i=1; i<lx; i++) s = gadd(s, gnorml1_fake(gel(x,i)));
       break;
 
-    default: pari_err(typeer,"gnorml1_fake");
+    default: pari_err(typeer,"gnorml1_fake",x);
       return NULL; /* not reached */
   }
   return gerepileupto(av, s);
@@ -703,7 +703,7 @@ gsupnorm_aux(GEN x, GEN *m, GEN *msq)
     case t_COL:
     case t_MAT: lx = lg(x); break;
 
-    default: pari_err(typeer,"gsupnorm");
+    default: pari_err(typeer,"gsupnorm",x);
       return; /* not reached */
   }
   for (i=1; i<lx; i++) gsupnorm_aux(gel(x,i), m, msq);
@@ -733,7 +733,7 @@ matcompanion(GEN x)
   long n = degpol(x), j;
   GEN y, c;
 
-  if (typ(x)!=t_POL) pari_err(typeer,"matcompanion");
+  if (typ(x)!=t_POL) pari_err(typeer,"matcompanion",x);
   if (n == 0) return cgetg(1, t_MAT);
   if (gequal0(x)) pari_err(zeropoler,"matcompanion");
 
@@ -814,7 +814,7 @@ gtrace(GEN x)
       if (lx != lg(x[1])) pari_err(consister,"gtrace");
       av = avma; return gerepileupto(av, mattrace(x));
   }
-  pari_err(typeer,"gtrace");
+  pari_err(typeer,"gtrace",x);
   return NULL; /* not reached */
 }
 
@@ -827,7 +827,7 @@ qfgaussred_positive(GEN a)
   GEN b;
   long i,j,k, n = lg(a);
 
-  if (typ(a)!=t_MAT) pari_err(typeer,"qfgaussred_positive");
+  if (typ(a)!=t_MAT) pari_err(typeer,"qfgaussred_positive",a);
   if (n == 1) return cgetg(1, t_MAT);
   if (lg(a[1])!=n) pari_err(consister,"qfgaussred_positive");
   b = cgetg(n,t_MAT);
@@ -891,7 +891,7 @@ gaussred(GEN a, long signature)
   pari_sp av, av1, lim;
   long n = lg(a), i, j, k, l, sp, sn, t;
 
-  if (typ(a) != t_MAT) pari_err(typeer,"gaussred");
+  if (typ(a) != t_MAT) pari_err(typeer,"gaussred",a);
   if (n == 1) return signature? mkvec2(gen_0, gen_0): cgetg(1, t_MAT);
   if (lg(a[1]) != n) pari_err(consister,"gaussred");
   n--;
@@ -1007,7 +1007,7 @@ jacobi(GEN a, long prec)
   long de, e, e1, e2, i, j, p, q, l = lg(a);
   GEN c, ja, L, r, L2, r2, unr;
 
-  if (typ(a) != t_MAT) pari_err(typeer,"jacobi");
+  if (typ(a) != t_MAT) pari_err(typeer,"jacobi",a);
   ja = cgetg(3,t_VEC);
   L = cgetg(l,t_COL); gel(ja,1) = L;
   r = cgetg(l,t_MAT); gel(ja,2) = r;
@@ -1110,9 +1110,9 @@ jacobi(GEN a, long prec)
 GEN
 matrixqz0(GEN x,GEN p)
 {
-  if (typ(x) != t_MAT) pari_err(typeer,"QM_minors_coprime");
+  if (typ(x) != t_MAT) pari_err(typeer,"QM_minors_coprime",x);
   if (!p) return QM_minors_coprime(x,NULL);
-  if (typ(p) != t_INT) pari_err(typeer,"QM_minors_coprime");
+  if (typ(p) != t_INT) pari_err(typeer,"QM_minors_coprime",p);
   if (signe(p)>=0) return QM_minors_coprime(x,p);
   if (equaliu(p,1)) return QM_ImZ_hnf(x); /* p = -1 */
   if (equaliu(p,2)) return QM_ImQ_hnf(x); /* p = -2 */
@@ -1328,7 +1328,8 @@ intersect(GEN x, GEN y)
   pari_sp av;
   GEN z;
 
-  if (typ(x)!=t_MAT || typ(y)!=t_MAT) pari_err(typeer,"intersect");
+  if (typ(x)!=t_MAT) pari_err(typeer,"intersect",x);
+  if (typ(y)!=t_MAT) pari_err(typeer,"intersect",y);
   if (lx==1 || lg(y)==1) return cgetg(1,t_MAT);
 
   av = avma; z = ker(shallowconcat(x,y));

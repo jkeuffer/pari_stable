@@ -43,7 +43,7 @@ gvar(GEN x)
     case t_VECSMALL:
     case t_STR:
     case t_LIST:
-      pari_err(typeer, "gvar");
+      pari_err(typeer, "gvar",x);
   }
   return NO_VARIABLE;
 }
@@ -249,7 +249,7 @@ padicprec(GEN x, GEN p)
       }
       return s;
   }
-  pari_err(typeer,"padicprec");
+  pari_err(typeer,"padicprec",x);
   return 0; /* not reached */
 }
 
@@ -281,7 +281,7 @@ poldegree(GEN x, long v)
       if (gequal0(gel(x,1))) return DEGREE0;
       return poldegree(gel(x,1),v) - poldegree(gel(x,2),v);
   }
-  pari_err(typeer,"degree");
+  pari_err(typeer,"degree",x);
   return 0; /* not reached  */
 }
 
@@ -310,10 +310,10 @@ RgX_degree(GEN x, long v)
     case t_RFRAC:
       w = varn(gel(x,2));
       if (varncmp(v, w) < 0) return 0;
-      if (RgX_degree(gel(x,2),v)) pari_err(talker, "not a t_POL in RgX_degree");
+      if (RgX_degree(gel(x,2),v)) pari_err(typeer, "RgX_degree", x);
       return RgX_degree(gel(x,1),v);
   }
-  pari_err(typeer,"RgX_degree");
+  pari_err(typeer,"RgX_degree",x);
   return 0; /* not reached  */
 }
 
@@ -348,7 +348,7 @@ pollead(GEN x, long v)
       break;
 
     default:
-      pari_err(typeer,"pollead");
+      pari_err(typeer,"pollead",x);
       return NULL; /* not reached */
   }
   if (v < w) return gcopy(x);
@@ -363,7 +363,7 @@ pollead(GEN x, long v)
   else if (tx == t_SER) {
     if (!signe(x)) { avma = av; return gen_0;}
     x = gel(x,2);
-  } else pari_err(typeer,"pollead");
+  } else pari_err(typeer,"pollead",x);
   return gerepileupto(av, gsubst(x,MAXVARN,pol_x(w)));
 }
 
@@ -420,7 +420,7 @@ isrealappr(GEN x, long e)
       for (i=lg(x)-1; i>0; i--)
         if (! isrealappr(gel(x,i),e)) return 0;
       return 1;
-    default: pari_err(typeer,"isrealappr"); return 0;
+    default: pari_err(typeer,"isrealappr",x); return 0;
   }
 }
 
@@ -481,7 +481,7 @@ iscomplex(GEN x)
     case t_QUAD:
       return signe(gmael(x,1,2)) > 0;
   }
-  pari_err(typeer,"iscomplex");
+  pari_err(typeer,"iscomplex",x);
   return 0; /* not reached */
 }
 
@@ -1029,9 +1029,9 @@ gdivmod(GEN x, GEN y, GEN *pr)
     long ty = typ(y);
     if (ty==t_INT) return dvmdii(x,y,pr);
     if (ty==t_POL) { *pr=gcopy(x); return gen_0; }
-    pari_err(typeer,"gdivmod");
+    pari_err(operf,"gdivmod",x,y);
   }
-  if (tx!=t_POL) pari_err(typeer,"gdivmod");
+  if (tx!=t_POL) pari_err(operf,"gdivmod",x,y);
   return poldivrem(x,y,pr);
 }
 
@@ -1114,7 +1114,7 @@ mod_r(GEN x, long v, GEN T)
       list_data(y) = list_data(x)? mod_r(list_data(x),v,T): NULL;
       return y;
   }
-  pari_err(typeer,"substpol");
+  pari_err(typeer,"substpol",x);
   return NULL;/*not reached*/
 }
 GEN
@@ -1233,7 +1233,7 @@ gdeflate(GEN x, long v, long d)
       list_data(z) = NULL;
     return z;
   }
-  pari_err(typeer,"gdeflate");
+  pari_err(typeer,"gdeflate",x);
   return NULL; /* not reached */
 }
 
@@ -1488,9 +1488,9 @@ gsubstvec(GEN e, GEN v, GEN r)
   pari_sp ltop=avma;
   long i, j, l = lg(v);
   GEN w,z;
-  if ( !is_vec_t(typ(v)) || !is_vec_t(typ(r)) ) pari_err(typeer,"substvec");
-  if (lg(r)!=l)
-    pari_err(talker,"different number of variables and values in substvec");
+  if ( !is_vec_t(typ(v)) ) pari_err(typeer,"substvec",v);
+  if ( !is_vec_t(typ(r)) ) pari_err(typeer,"substvec",r);
+  if (lg(r)!=l) pari_err(consister,"substvec");
   w = cgetg(l,t_VECSMALL);
   z = cgetg(l,t_VECSMALL);
   for(i=j=1;i<l;i++)
@@ -1668,7 +1668,7 @@ deriv(GEN x, long v)
     case t_CLOSURE:
       if (v==-1) return closure_deriv(x);
   }
-  pari_err(typeer,"deriv");
+  pari_err(typeer,"deriv",x);
   return NULL; /* not reached */
 }
 
@@ -1687,10 +1687,9 @@ diffop(GEN x, GEN v, GEN dv)
   pari_sp av;
   long i, idx, lx, tx = typ(x), vx;
   GEN y;
-  if (!is_vec_t(typ(v)) || !is_vec_t(typ(dv)))
-    pari_err(typeer,"diffop");
-  if (lg(v)!=lg(dv))
-    pari_err(talker,"different number of variables and values");
+  if (!is_vec_t(typ(v))) pari_err(typeer,"diffop",v);
+  if (!is_vec_t(typ(dv))) pari_err(typeer,"diffop",dv);
+  if (lg(v)!=lg(dv)) pari_err(consister,"diffop");
   if (is_const_t(tx)) return gen_0;
   switch(tx)
   {
@@ -1742,7 +1741,7 @@ diffop(GEN x, GEN v, GEN dv)
       return y;
 
   }
-  pari_err(typeer,"diffop");
+  pari_err(typeer,"diffop",x);
   return NULL; /* not reached */
 }
 
@@ -1934,7 +1933,7 @@ integ(GEN x, long v)
       for (i=1; i<lg(x); i++) gel(y,i) = integ(gel(x,i),v);
       return y;
   }
-  pari_err(typeer,"integ");
+  pari_err(typeer,"integ",x);
   return NULL; /* not reached */
 }
 
@@ -1962,7 +1961,7 @@ gfloor(GEN x)
       for (i=1; i<lx; i++) gel(y,i) = gfloor(gel(x,i));
       return y;
   }
-  pari_err(typeer,"gfloor");
+  pari_err(typeer,"gfloor",x);
   return NULL; /* not reached */
 }
 
@@ -2012,7 +2011,7 @@ gceil(GEN x)
       for (i=1; i<lx; i++) gel(y,i) = gceil(gel(x,i));
       return y;
   }
-  pari_err(typeer,"gceil");
+  pari_err(typeer,"gceil",x);
   return NULL; /* not reached */
 }
 
@@ -2096,7 +2095,7 @@ ground(GEN x)
       for (i=1; i<lx; i++) gel(y,i) = ground(gel(x,i));
       return y;
   }
-  pari_err(typeer,"ground");
+  pari_err(typeer,"ground",x);
   return NULL; /* not reached */
 }
 
@@ -2180,7 +2179,7 @@ grndtoi(GEN x, long *e)
       }
       return y;
   }
-  pari_err(typeer,"grndtoi");
+  pari_err(typeer,"grndtoi",x);
   return NULL; /* not reached */
 }
 
@@ -2217,7 +2216,7 @@ gtrunc2n(GEN x, long s)
       }
       gel(z,1) = gtrunc2n(gel(x,1), s);
       return z;
-    default: pari_err(typeer,"gtrunc2n");
+    default: pari_err(typeer,"gtrunc2n",x);
       return NULL; /* not reached */
   }
 }
@@ -2269,7 +2268,7 @@ isint(GEN n, GEN *ptk)
     case t_FRAC:    return 0;
     case t_COMPLEX: return gequal0(gel(n,2)) && isint(gel(n,1),ptk);
     case t_QUAD:    return gequal0(gel(n,3)) && isint(gel(n,2),ptk);
-    default: pari_err(typeer,"isint"); return 0; /* not reached */
+    default: pari_err(typeer,"isint",n); return 0; /* not reached */
   }
 }
 
@@ -2383,7 +2382,7 @@ gtrunc(GEN x)
       return y;
     }
   }
-  pari_err(typeer,"gtrunc");
+  pari_err(typeer,"gtrunc",x);
   return NULL; /* not reached */
 }
 
@@ -2590,7 +2589,7 @@ _gtopoly(GEN x, long v, int reverse)
         return y;
       }
       break;
-    default: pari_err(typeer,"gtopoly");
+    default: pari_err(typeer,"gtopoly",x);
       return NULL; /* not reached */
   }
   setvarn(y,v); return y;
@@ -2735,7 +2734,7 @@ gtoser(GEN x, long v, long prec)
       for (j=2; j<lx; j++) gel(y,j) = stoi(x[j]);
       break;
 
-    default: pari_err(typeer,"gtoser");
+    default: pari_err(typeer,"gtoser",x);
       return NULL; /* not reached */
   }
   return y;
@@ -2772,7 +2771,7 @@ gtovecpost(GEN x, long n)
       imax = minss(lx-1, n);
       for (i=1; i<=imax; i++) gel(y,i) = stoi(x[i]);
       return y;
-    default: pari_err(typeer,"gtovec");
+    default: pari_err(typeer,"gtovec",x);
       return NULL; /*notreached*/
   }
 }
@@ -2817,7 +2816,7 @@ gtovecpre(GEN x, long n)
       y0 = init_vectopre(lx-1, n, y, &imax);
       for (i=1; i<=imax; i++) gel(y0,i) = stoi(x[i]);
       return y;
-    default: pari_err(typeer,"gtovec");
+    default: pari_err(typeer,"gtovec",x);
       return NULL; /*notreached*/
   }
 }
@@ -2866,7 +2865,7 @@ gtovec(GEN x)
     }
     case t_VECSMALL:
       return vecsmall_to_vec(x);
-    default: pari_err(typeer,"gtovec");
+    default: pari_err(typeer,"gtovec",x);
       return NULL; /*notreached*/
   }
 }
@@ -2909,7 +2908,7 @@ gtocol(GEN x)
 static long
 Itos(GEN x)
 {
-   if (typ(x) != t_INT) pari_err(typeer,"vectosmall");
+   if (typ(x) != t_INT) pari_err(typeer,"vectosmall",x);
    return itos(x);
 }
 
@@ -2945,7 +2944,7 @@ gtovecsmallpost(GEN x, long n)
       imax = minss(lx-1, n);
       for (i=1; i<=imax; i++) y[i] = x[i];
       return y;
-    default: pari_err(typeer,"gtovecsmall");
+    default: pari_err(typeer,"gtovecsmall",x);
       return NULL; /*notreached*/
   }
 }
@@ -2984,7 +2983,7 @@ gtovecsmallpre(GEN x, long n)
       y0 = init_vectopre(lx-1, n, y, &imax);
       for (i=1; i<=imax; i++) y0[i] = x[i];
       return y;
-    default: pari_err(typeer,"gtovecsmall");
+    default: pari_err(typeer,"gtovecsmall",x);
       return NULL; /*notreached*/
   }
 }
@@ -3033,7 +3032,7 @@ gtovecsmall(GEN x)
       for (i=1; i<=l-2; i++) V[i] = Itos(gel(x,i));
       return V;
     default:
-      pari_err(typeer,"vectosmall");
+      pari_err(typeer,"vectosmall",x);
       return NULL; /* not reached */
   }
 }
@@ -3121,7 +3120,7 @@ _rfraccoeff(GEN x, long n, long v)
   if (v < 0) v = minss(vp, vq);
   P = (vp == v)? p: swap_vars(p, v);
   Q = (vq == v)? q: swap_vars(q, v);
-  if (!RgX_is_monomial(Q)) pari_err(typeer, "polcoeff");
+  if (!RgX_is_monomial(Q)) pari_err(typeer, "polcoeff", x);
   n += degpol(Q);
   return gdiv(_polcoeff(P, n, v), leading_term(Q));
 }
@@ -3209,7 +3208,7 @@ denom(GEN x)
       }
       return gerepile(av,tetpil,s);
   }
-  pari_err(typeer,"denom");
+  pari_err(typeer,"denom",x);
   return NULL; /* not reached */
 }
 
@@ -3239,7 +3238,7 @@ numer(GEN x)
       av=avma; s=denom(x); tetpil=avma;
       return gerepile(av,tetpil,gmul(s,x));
   }
-  pari_err(typeer,"numer");
+  pari_err(typeer,"numer",x);
   return NULL; /* not reached */
 }
 
@@ -3289,7 +3288,7 @@ lift0(GEN x, long v)
       gel(y,2) = lift0(gel(x,2),v);
       gel(y,3) = lift0(gel(x,3),v); return y;
   }
-  pari_err(typeer,"lift");
+  pari_err(typeer,"lift",x);
   return NULL; /* not reached */
 }
 
@@ -3330,7 +3329,7 @@ lift_intern0(GEN x, long v)
         gel(x,i) = lift_intern0(gel(x,i),v);
       return x;
   }
-  pari_err(typeer,"lift_intern");
+  pari_err(typeer,"lift_intern",x);
   return NULL; /* not reached */
 }
 
@@ -3394,7 +3393,7 @@ centerlift0(GEN x, long v)
       gel(y,2) = powiu(gel(x,2),-v);
       return y;
   }
-  pari_err(typeer,"centerlift");
+  pari_err(typeer,"centerlift",x);
   return NULL; /* not reached */
 }
 
@@ -3442,7 +3441,7 @@ op_ReIm(GEN f(GEN), GEN x)
       for (i=1; i<lx; i++) gel(z,i) = f(gel(x,i));
       return z;
   }
-  pari_err(typeer,"greal/gimag");
+  pari_err(typeer,"greal/gimag",x);
   return NULL; /* not reached */
 }
 
@@ -3638,7 +3637,7 @@ geval_gp(GEN x, GEN t)
       if (x[1]) pari_err(impl,"eval on functions with parameters");
       return closure_evalres(x);
   }
-  pari_err(typeer,"geval");
+  pari_err(typeer,"geval",x);
   return NULL; /* not reached */
 }
 GEN
@@ -3911,7 +3910,7 @@ poleval(GEN x, GEN y)
 
     case t_VEC: case t_COL:
       i = lg(x)-1; imin = 1; break;
-    default: pari_err(typeer,"poleval");
+    default: pari_err(typeer,"poleval",x);
       return NULL; /* not reached */
   }
   if (i<=imin)

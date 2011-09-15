@@ -2365,7 +2365,7 @@ galoispermtopol_i(GEN gal, GEN perm, GEN mod, GEN mod2)
     if (DEBUGLEVEL>=4) err_printf("\n");
     return v;
   }
-  pari_err(typeer, "galoispermtopol");
+  pari_err(typeer, "galoispermtopol", perm);
   return NULL; /* not reached */
 }
 
@@ -2429,7 +2429,7 @@ static void
 chk_perm(GEN perm, long n)
 {
   if (typ(perm) != t_VECSMALL || lg(perm)!=n+1)
-    pari_err(typeer, "galoisfixedfield");
+    pari_err(typeer, "galoisfixedfield", perm);
 }
 
 static int

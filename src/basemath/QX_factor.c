@@ -1046,10 +1046,10 @@ nfrootsQ(GEN x)
   GEN z;
   long val;
 
-  if (typ(x)!=t_POL) pari_err(typeer,"nfrootsQ");
+  if (typ(x)!=t_POL) pari_err(typeer,"nfrootsQ",x);
   if (!signe(x)) pari_err(zeropoler,"nfrootsQ");
   x = Q_primpart(x);
-  if (!RgX_is_ZX(x)) pari_err(typeer,"nfrootsQ");
+  if (!RgX_is_ZX(x)) pari_err(typeer,"nfrootsQ",x);
   val = ZX_valrem(x, &x);
   (void)ZX_gcd_all(x, ZX_deriv(x), &x);
   z = DDF(x, 1);

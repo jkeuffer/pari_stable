@@ -614,7 +614,7 @@ incrementalGSgen(GEN x, GEN L, GEN B, long k, GEN fl)
     if (j==k || fl[j])
     {
       u = gcoeff(x,k,j); tu = typ(u);
-      if (! is_extscalar_t(tu)) pari_err(typeer,"incrementalGSgen");
+      if (! is_extscalar_t(tu)) pari_err(typeer,"incrementalGSgen",u);
       for (i=1; i<j; i++)
         if (fl[i])
         {
@@ -733,7 +733,7 @@ rescale_to_int(GEN x)
           if (exact) D = lcmii(D, gel(c,2));
           break;
         default:
-          pari_err(typeer,"rescale_to_int");
+          pari_err(typeer,"rescale_to_int",c);
           return NULL; /* not reached */
       }
       if (e < emin) emin = e;
@@ -763,7 +763,7 @@ lll(GEN x) { return lllfp(x,LLLDFT,LLL_IM); }
 GEN
 qflll0(GEN x, long flag)
 {
-  if (typ(x) != t_MAT) pari_err(typeer,"qflll");
+  if (typ(x) != t_MAT) pari_err(typeer,"qflll",x);
   switch(flag)
   {
     case 0: return lll(x);
@@ -780,7 +780,7 @@ qflll0(GEN x, long flag)
 GEN
 qflllgram0(GEN x, long flag)
 {
-  if (typ(x) != t_MAT) pari_err(typeer,"qflllgram");
+  if (typ(x) != t_MAT) pari_err(typeer,"qflllgram",x);
   switch(flag)
   {
     case 0: return lllgram(x);
@@ -818,7 +818,7 @@ kerint(GEN x)
 GEN
 matkerint0(GEN x, long flag)
 {
-  if (typ(x) != t_MAT) pari_err(typeer,"matkerint");
+  if (typ(x) != t_MAT) pari_err(typeer,"matkerint",x);
   RgM_check_ZM(x, "kerint");
   switch(flag)
   {

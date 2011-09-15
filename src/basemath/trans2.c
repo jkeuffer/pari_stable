@@ -145,7 +145,7 @@ gatan(GEN x, long prec)
       if (ismpzero(gel(x,2))) return gatan(gel(x,1), prec);
       av = avma; return gerepilecopy(av, mulcxmI(gath(mulcxI(x),prec)));
 
-    case t_INTMOD: case t_PADIC: pari_err(typeer,"gatan");
+    case t_INTMOD: case t_PADIC: pari_err(typeer,"gatan",x);
 
     default:
       av = avma; if (!(y = toser_i(x))) break;
@@ -206,7 +206,7 @@ gasin(GEN x, long prec)
       av = avma;
       return gerepilecopy(av, mulcxmI(gash(mulcxI(x), prec)));
 
-    case t_INTMOD: case t_PADIC: pari_err(typeer,"gasin");
+    case t_INTMOD: case t_PADIC: pari_err(typeer,"gasin",x);
     default:
       av = avma; if (!(y = toser_i(x))) break;
       if (gequal0(y)) return gerepilecopy(av, y);
@@ -282,7 +282,7 @@ gacos(GEN x, long prec)
       y = glog(p1,prec); /* log(x + I*sqrt(1-x^2)) */
       return gerepilecopy(av, mulcxmI(y));
 
-    case t_INTMOD: case t_PADIC: pari_err(typeer,"gacos");
+    case t_INTMOD: case t_PADIC: pari_err(typeer,"gacos",x);
     case t_SER:
       av = avma; if (!(y = toser_i(x))) break;
       if (valp(y) < 0) pari_err(negexper,"gacos");
@@ -342,7 +342,7 @@ rfix(GEN x,long prec)
     case t_INT: return itor(x, prec);
     case t_FRAC: return rdivii(gel(x,1),gel(x,2), prec);
     case t_REAL: break;
-    default: pari_err(typeer,"rfix (conversion to t_REAL)");
+    default: pari_err(typeer,"rfix (conversion to t_REAL)",x);
   }
   return x;
 }
@@ -378,7 +378,7 @@ garg(GEN x, long prec)
     case t_VEC: case t_COL: case t_MAT:
       return transc(garg,x,prec);
   }
-  pari_err(typeer,"garg");
+  pari_err(typeer,"garg",x);
   return NULL; /* not reached */
 }
 
@@ -418,7 +418,7 @@ gch(GEN x, long prec)
     case t_PADIC:
       av = avma; p1 = gexp(x,prec); p1 = gadd(p1, ginv(p1));
       return gerepileupto(av, gmul2n(p1,-1));
-    case t_INTMOD: pari_err(typeer,"gch");
+    case t_INTMOD: pari_err(typeer,"gch",x);
     default:
       av = avma; if (!(y = toser_i(x))) break;
       if (gequal0(y) && valp(y) == 0) return gerepilecopy(av, y);
@@ -524,7 +524,7 @@ gth(GEN x, long prec)
       t = gexp(gmul2n(x,1),prec);
       t = gdivsg(-2, gaddgs(t,1));
       return gerepileupto(av, gaddsg(1,t));
-    case t_INTMOD: pari_err(typeer,"gth");
+    case t_INTMOD: pari_err(typeer,"gth",x);
     default:
       av = avma; if (!(y = toser_i(x))) break;
       if (gequal0(y)) return gerepilecopy(av, y);
@@ -575,7 +575,7 @@ gash(GEN x, long prec)
       p1 = gadd(x, gsqrt(gaddsg(1,gsqr(x)), prec));
       y = glog(p1,prec); /* log (x + sqrt(1+x^2)) */
       return gerepileupto(av, y);
-    case t_INTMOD: case t_PADIC: pari_err(typeer,"gash");
+    case t_INTMOD: case t_PADIC: pari_err(typeer,"gash",x);
     default:
       av = avma; if (!(y = toser_i(x))) break;
       if (gequal0(y)) return gerepilecopy(av, y);
@@ -642,7 +642,7 @@ gach(GEN x, long prec)
       if (signe(real_i(y)) < 0) y = gneg(y);
       return gerepileupto(av, y);
 
-    case t_INTMOD: case t_PADIC: pari_err(typeer,"gach");
+    case t_INTMOD: case t_PADIC: pari_err(typeer,"gach",x);
 
     default: {
       GEN a;
@@ -723,7 +723,7 @@ gath(GEN x, long prec)
       av = avma; z = glog( gaddgs(gdivsg(2,gsubsg(1,x)),-1), prec );
       return gerepileupto(av, gmul2n(z,-1));
 
-    case t_INTMOD: case t_PADIC: pari_err(typeer,"gath");
+    case t_INTMOD: case t_PADIC: pari_err(typeer,"gath",x);
     default:
       av = avma; if (!(y = toser_i(x))) break;
       if (valp(y) < 0) pari_err(negexper,"gath");
@@ -1225,7 +1225,7 @@ ggamd(GEN x, long prec)
       av=avma; x = gadd(x,ghalf); tetpil=avma;
       return gerepile(av,tetpil,ggamma(x,prec));
 
-    case t_INTMOD: pari_err(typeer,"ggamd");
+    case t_INTMOD: pari_err(typeer,"ggamd",x);
     case t_SER: pari_err(impl,"gamd of a power series");
   }
   return transc(ggamd,x,prec);
@@ -1373,7 +1373,7 @@ ggamma(GEN x, long prec)
       return gammahs(m-1, prec);
 
     case t_PADIC: return Qp_gamma(x);
-    case t_INTMOD: pari_err(typeer,"ggamma");
+    case t_INTMOD: pari_err(typeer,"ggamma",x);
     default:
       av = avma; if (!(y = toser_i(x))) break;
       return gerepileupto(av, gexp(glngamma(y,prec),prec));
@@ -1425,7 +1425,7 @@ glngamma(GEN x, long prec)
       return gerepileupto(av, gmul(a, p1));
 
     case t_PADIC: av = avma; return gerepileupto(av, Qp_log(Qp_gamma(x)));
-    case t_INTMOD: pari_err(typeer,"glngamma");
+    case t_INTMOD: pari_err(typeer,"glngamma",x);
   }
   return transc(glngamma,x,prec);
 }
@@ -1526,7 +1526,7 @@ gpsi(GEN x, long prec)
   switch(typ(x))
   {
     case t_REAL: case t_COMPLEX: return cxpsi(x,prec);
-    case t_INTMOD: case t_PADIC: pari_err(typeer,"gpsi");
+    case t_INTMOD: case t_PADIC: pari_err(typeer,"gpsi",x);
     case t_SER: pari_err(impl,"psi of power series");
   }
   return transc(gpsi,x,prec);

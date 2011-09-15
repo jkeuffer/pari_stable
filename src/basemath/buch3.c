@@ -1230,7 +1230,7 @@ ABC_to_bnr(GEN A, GEN B, GEN C, GEN *H, int gen)
         if (!B) pari_err(talker,"missing conductor in ABC_to_bnr");
         *H = C; return Buchray(A,B, gen? nf_INIT | nf_GEN: nf_INIT);
     }
-  pari_err(typeer,"ABC_to_bnr");
+  pari_err(typeer,"ABC_to_bnr",A);
   *H = NULL; return NULL; /* not reached */
 }
 
@@ -1256,7 +1256,7 @@ check_subgroup(GEN bnr, GEN H, GEN *clhray, int triv_is_NULL, const char *s)
   if (H)
   {
     D = diagonal_shallow(bnr_get_cyc(bnr));
-    if (typ(H) != t_MAT) pari_err(typeer,"check_subgroup");
+    if (typ(H) != t_MAT) pari_err(typeer,"check_subgroup",H);
     RgM_check_ZM(H, "check_subgroup");
     H = ZM_hnf(H);
     if (!hnfdivide(H, D)) pari_err(talker,"incorrect subgroup in %s", s);
@@ -1564,7 +1564,7 @@ rnfconductor(GEN bnf, GEN polrel, long flag)
   GEN nf, module, bnr, group, den, D;
 
   bnf = checkbnf(bnf); nf = bnf_get_nf(bnf);
-  if (typ(polrel) != t_POL) pari_err(typeer,"rnfconductor");
+  if (typ(polrel) != t_POL) pari_err(typeer,"rnfconductor",polrel);
   den = Q_denom( RgX_to_nfX(nf, polrel) );
   if (!is_pm1(den)) polrel = RgX_rescale(polrel, den);
   if (flag)
@@ -1679,14 +1679,15 @@ KerChar(GEN chi, GEN cyc)
   long i, l = lg(cyc);
   GEN m, U, d1;
 
-  if (typ(chi) != t_VEC) pari_err(typeer,"KerChar");
+  if (typ(chi) != t_VEC) pari_err(typeer,"KerChar",chi);
   if (lg(chi) != l) pari_err(talker,"incorrect character length in KerChar");
   if (l == 1) return NULL; /* trivial subgroup */
   d1 = gel(cyc,1); m = cgetg(l+1,t_MAT);
   for (i=1; i<l; i++)
   {
-    if (typ(chi[i]) != t_INT) pari_err(typeer,"conductorofchar");
-    gel(m,i) = mkcol(mulii(gel(chi,i), diviiexact(d1, gel(cyc,i))));
+    GEN c = gel(chi,i);
+    if (typ(c) != t_INT) pari_err(typeer,"conductorofchar", c);
+    gel(m,i) = mkcol(mulii(c, diviiexact(d1, gel(cyc,i))));
   }
   gel(m,i) = mkcol(d1);
   (void)ZM_hnfall(m, &U, 1);
@@ -1715,13 +1716,13 @@ get_classno(GEN t, GEN h)
 
 static void
 chk_listBU(GEN L, const char *s) {
-  if (typ(L) != t_VEC) pari_err(typeer,s);
+  if (typ(L) != t_VEC) pari_err(typeer,s,L);
   if (lg(L) > 1) {
     GEN z = gel(L,1);
-    if (typ(z) != t_VEC) pari_err(typeer, s);
+    if (typ(z) != t_VEC) pari_err(typeer, s,z);
     if (lg(z) == 1) return;
     z = gel(z,1); /* [bid,U] */
-    if (typ(z) != t_VEC || lg(z) != 3) pari_err(typeer, s);
+    if (typ(z) != t_VEC || lg(z) != 3) pari_err(typeer, s,z);
     checkbid(gel(z,1));
   }
 }
@@ -2381,7 +2382,7 @@ subgroupcond(GEN bnr, GEN indexbound)
 GEN
 subgrouplist0(GEN bnr, GEN indexbound, long all)
 {
-  if (typ(bnr)!=t_VEC) pari_err(typeer,"subgrouplist");
+  if (typ(bnr)!=t_VEC) pari_err(typeer,"subgrouplist",bnr);
   if (lg(bnr)!=1 && typ(bnr[1])!=t_INT)
   {
     checkbnr(bnr);

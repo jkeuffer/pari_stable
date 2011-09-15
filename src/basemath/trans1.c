@@ -321,7 +321,7 @@ transc(GEN (*f)(GEN,long), GEN x, long prec)
       for (i=1; i<lx; i++) gel(y,i) = f(gel(p1,i),prec);
       return gerepile(av,tetpil,y);
 
-    default: pari_err(typeer,"a transcendental function");
+    default: pari_err(typeer,"a transcendental function",x);
   }
   return f(x,prec);
 }
@@ -398,7 +398,7 @@ gpowg0(GEN x)
     case t_QFI: return qfi_1(x);
     case t_VECSMALL: return identity_perm(lg(x) - 1);
   }
-  pari_err(typeer,"gpow");
+  pari_err(typeer,"gpow",x);
   return NULL; /* not reached */
 }
 
@@ -846,7 +846,7 @@ ser_pow(GEN x, GEN n, long prec)
     return y;
   }
   p1 = gdiv(x,lead);
-  if (typ(p1) != t_SER) pari_err(typeer, "ser_pow");
+  if (typ(p1) != t_SER) pari_err(typeer, "ser_pow",x);
   gel(p1,2) = gen_1; /* in case it's inexact */
   if (typ(n) == t_FRAC && !isinexact(lead) && ispower(lead, gel(n,2), &p2))
     p2 = powgi(p2, gel(n,1));
@@ -1069,12 +1069,11 @@ Zn_sqrt(GEN d, GEN fn)
   pari_sp ltop = avma, btop, st_lim;
   GEN b = gen_0, m = gen_1;
   long j, np;
-  if (typ(d) != t_INT)
-    pari_err(typeer, "Zn_sqrt");
+  if (typ(d) != t_INT) pari_err(typeer, "Zn_sqrt",d);
   if (typ(fn) == t_INT)
     fn = Z_factor(absi(fn));
   else if (!is_Z_factor(fn))
-    pari_err(typeer, "Zn_sqrt");
+    pari_err(typeer, "Zn_sqrt",fn);
   np = lg(gel(fn, 1))-1;
   btop = avma; st_lim = stack_lim(btop, 1);
   for (j = 1; j <= np; ++j)
@@ -1105,12 +1104,11 @@ long
 Zn_issquare(GEN d, GEN fn)
 {
   long j, np;
-  if (typ(d) != t_INT)
-    pari_err(typeer, "Zn_issquare");
+  if (typ(d) != t_INT) pari_err(typeer, "Zn_issquare",d);
   if (typ(fn) == t_INT)
     fn = Z_factor(absi(fn));
   else if (!is_Z_factor(fn))
-    pari_err(typeer, "Zn_issquare");
+    pari_err(typeer, "Zn_issquare",fn);
   np = lg(gel(fn, 1))-1;
   for (j = 1; j <= np; ++j)
   {
@@ -1471,7 +1469,7 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
     av = avma; if (!(y = toser_i(x))) break;
     return gerepileupto(av, ser_powfrac(y, ginv(n), prec));
   }
-  pari_err(typeer,"gsqrtn");
+  pari_err(typeer,"gsqrtn",x);
   return NULL;/* not reached */
 }
 
@@ -1795,7 +1793,7 @@ gexp(GEN x, long prec)
     case t_REAL: return mpexp(x);
     case t_COMPLEX: return cxexp(x,prec);
     case t_PADIC: return Qp_exp(x);
-    case t_INTMOD: pari_err(typeer,"gexp");
+    case t_INTMOD: pari_err(typeer,"gexp",x);
     default:
     {
       pari_sp av = avma;
@@ -2182,7 +2180,7 @@ glog(GEN x, long prec)
     case t_PADIC:
       return Qp_log(x);
 
-    case t_INTMOD: pari_err(typeer,"glog");
+    case t_INTMOD: pari_err(typeer,"glog",x);
     default:
       av = avma; if (!(y = toser_i(x))) break;
       if (valp(y) || gequal0(y)) pari_err(talker,"log is not meromorphic at 0");
@@ -2380,7 +2378,7 @@ gcos(GEN x, long prec)
       y = cgetr(prec); av = avma;
       affrr_fixlg(mpcos(tofp_safe(x,prec)), y); avma = av; return y;
 
-    case t_INTMOD: pari_err(typeer,"gcos");
+    case t_INTMOD: pari_err(typeer,"gcos",x);
 
     case t_PADIC: x = cos_p(x);
       if (!x) pari_err(talker,"p-adic argument out of range in gcos");
@@ -2450,7 +2448,7 @@ gsin(GEN x, long prec)
       y = cgetr(prec); av = avma;
       affrr_fixlg(mpsin(tofp_safe(x,prec)), y); avma = av; return y;
 
-    case t_INTMOD: pari_err(typeer,"gsin");
+    case t_INTMOD: pari_err(typeer,"gsin",x);
 
     case t_PADIC: x = sin_p(x);
       if (!x) pari_err(talker,"p-adic argument out of range in gsin");
@@ -2603,7 +2601,7 @@ gsincos(GEN x, GEN *s, GEN *c, long prec)
       }
       return;
   }
-  pari_err(typeer,"gsincos");
+  pari_err(typeer,"gsincos",x);
 }
 
 /********************************************************************/
@@ -2650,7 +2648,7 @@ gtan(GEN x, long prec)
       av = avma;
       return gerepileupto(av, gdiv(gsin(x,prec), gcos(x,prec)));
 
-    case t_INTMOD: pari_err(typeer,"gtan");
+    case t_INTMOD: pari_err(typeer,"gtan",x);
 
     default:
       av = avma; if (!(y = toser_i(x))) break;
@@ -2703,7 +2701,7 @@ gcotan(GEN x, long prec)
       av = avma;
       return gerepileupto(av, gdiv(gcos(x,prec), gsin(x,prec)));
 
-    case t_INTMOD: pari_err(typeer,"gcotan");
+    case t_INTMOD: pari_err(typeer,"gcotan",x);
 
     default:
       av = avma; if (!(y = toser_i(x))) break;
