@@ -2329,8 +2329,7 @@ GEN
 checkgal(GEN gal)
 {
   if (typ(gal) == t_POL) pari_err(talker, "please apply galoisinit first");
-  if (typ(gal) != t_VEC || lg(gal) != 9)
-    pari_err(talker, "Not a Galois group in a Galois related function");
+  if (typ(gal) != t_VEC || lg(gal) != 9) pari_err(typeer, "checkgal",gal);
   return gal;
 }
 

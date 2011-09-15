@@ -1525,7 +1525,7 @@ recip(GEN x)
   pari_sp tetpil, av=avma;
   GEN p1, a, y, u;
 
-  if (typ(x)!=t_SER) pari_err(talker,"not a series in serreverse");
+  if (typ(x)!=t_SER) pari_err(typeer,"serreverse",x);
   if (valp(x)!=1 || lx < 3)
     pari_err(talker,"valuation not equal to 1 in serreverse");
 

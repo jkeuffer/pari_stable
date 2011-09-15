@@ -102,7 +102,7 @@ nextprime(GEN n)
   long rc, rc0, rcd, rcn;
   pari_sp av = avma;
 
-  if (typ(n) != t_INT) 
+  if (typ(n) != t_INT)
   {
     n = gceil(n);
     if (typ(n) != t_INT) pari_err(typeer,"nextprime",n);
@@ -148,7 +148,7 @@ precprime(GEN n)
   long rc, rc0, rcd, rcn;
   pari_sp av = avma;
 
-  if (typ(n) != t_INT) 
+  if (typ(n) != t_INT)
   {
     n = gfloor(n);
     if (typ(n) != t_INT) pari_err(typeer,"nextprime",n);

@@ -167,7 +167,7 @@ jbesselh(GEN n, GEN z, long prec)
   pari_sp av;
   GEN res, y, p1;
 
-  if (typ(n)!=t_INT) pari_err(talker,"not an integer index in jbesselh");
+  if (typ(n)!=t_INT) pari_err(typeer,"jbesselh",n);
   k = itos(n);
   if (k < 0) return jbessel(gadd(ghalf,n), z, prec);
 

@@ -106,7 +106,7 @@ GEN
 qfr(GEN x, GEN y, GEN z, GEN d)
 {
   GEN t = cgetg(5,t_QFR);
-  if (typ(d) != t_REAL) pari_err(talker,"Shanks distance must be a t_REAL in qfr");
+  if (typ(d) != t_REAL) pari_err(typeer,"qfr",d);
   gel(t,1) = icopy(x);
   gel(t,2) = icopy(y);
   gel(t,3) = icopy(z);
@@ -354,7 +354,7 @@ qfrpowraw(GEN x, long n)
   long m;
   GEN y;
 
-  if (typ(x) != t_QFR) pari_err(talker,"not a t_QFR in qfrpowraw");
+  if (typ(x) != t_QFR) pari_err(typeer,"qfrpowraw",x);
   if (!n) return qfr_1(x);
   if (n== 1) return gcopy(x);
   if (n==-1) return invraw(x);
@@ -376,7 +376,7 @@ qfipowraw(GEN x, long n)
   long m;
   GEN y;
 
-  if (typ(x) != t_QFI) pari_err(talker,"not a t_QFI in qfipow");
+  if (typ(x) != t_QFI) pari_err(typeer,"qfipow",x);
   if (!n) return qfi_1(x);
   if (n== 1) return gcopy(x);
   if (n==-1) return invraw(x);
@@ -419,7 +419,8 @@ nucomp(GEN x, GEN y, GEN L)
   GEN a, a1, a2, b2, b, d, d1, g, n, p1, q1, q2, s, u, u1, v, v1, v2, v3, Q;
 
   if (x==y) return nudupl(x,L);
-  if (typ(x) != t_QFI || typ(y) != t_QFI) pari_err(talker,"not a t_QFI in nucomp");
+  if (typ(x) != t_QFI) pari_err(typeer,"nucomp",x);
+  if (typ(y) != t_QFI) pari_err(typeer,"nucomp",y);
 
   if (absi_cmp(gel(x,1),gel(y,1)) < 0) swap(x, y);
   s = shifti(addii(gel(x,2),gel(y,2)), -1);
@@ -486,7 +487,7 @@ nudupl(GEN x, GEN L)
   long z;
   GEN u, v, d, d1, p1, a, b, c, a2, b2, c2, Q, v2, v3, g;
 
-  if (typ(x) != t_QFI) pari_err(talker,"not a t_QFI in nudupl");
+  if (typ(x) != t_QFI) pari_err(typeer,"nudupl",x);
   a = gel(x,1);
   b = gel(x,2);
   d1 = bezout(b,a, &u,&v);
@@ -530,7 +531,7 @@ nupow(GEN x, GEN n)
   pari_sp av;
   GEN y, l;
 
-  if (typ(n) != t_INT) pari_err(talker,"not an integer exponent in nupow");
+  if (typ(n) != t_QFI) pari_err(typeer,"nudupl",n);
   if (gequal1(n)) return gcopy(x);
   av = avma; y = qfi_1(x);
   if (!signe(n)) return y;
@@ -901,7 +902,7 @@ redreal0(GEN x, long flag, GEN D, GEN isqrtD, GEN sqrtD)
   pari_sp av = avma;
   struct qfr_data S;
   GEN d;
-  if (typ(x) != t_QFR) pari_err(talker,"not a real quadratic form in redreal");
+  if (typ(x) != t_QFR) pari_err(typeer,"redreal",x);
   d = gel(x,4);
   S.D = D;
   S.sqrtD = sqrtD;

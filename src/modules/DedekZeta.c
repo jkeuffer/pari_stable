@@ -86,7 +86,7 @@ dirzetak(GEN nf, GEN b)
   GEN z, c;
   long n;
 
-  if (typ(b) != t_INT) pari_err(talker,"not an integer type in dirzetak");
+  if (typ(b) != t_INT) pari_err(typeer,"dirzetak",b);
   if (signe(b) <= 0) return cgetg(1,t_VEC);
   nf = checknf(nf);
   n = itos_or_0(b); if (!n) pari_err(talker,"too many terms in dirzetak");

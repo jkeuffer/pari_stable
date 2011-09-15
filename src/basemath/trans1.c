@@ -1401,7 +1401,7 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
   long i, lx, tx;
   pari_sp av;
   GEN y, z;
-  if (typ(n)!=t_INT) pari_err(talker,"second arg must be integer in gsqrtn");
+  if (typ(n)!=t_INT) pari_err(typeer,"gsqrtn",n);
   if (!signe(n)) pari_err(talker,"1/0 exponent in gsqrtn");
   if (is_pm1(n))
   {
@@ -2133,7 +2133,7 @@ teich(GEN x)
   long n, k;
   pari_sp av;
 
-  if (typ(x)!=t_PADIC) pari_err(talker,"not a p-adic argument in teichmuller");
+  if (typ(x)!=t_PADIC) pari_err(typeer,"teichmuller",x);
   if (!signe(x[4])) return gcopy(x);
   p = gel(x,2);
   q = gel(x,3);

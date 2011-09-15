@@ -1943,7 +1943,7 @@ gendraw(GEN list, long ps, long flag)
 {
   long i,n,ne,*w,*x,*y;
 
-  if (typ(list) != t_VEC) pari_err(talker,"not a vector in rectdraw");
+  if (typ(list) != t_VEC) pari_err(typeer,"rectdraw",list);
   n = lg(list)-1; if (!n) return;
   if (n%3) pari_err(talker,"incorrect number of components in rectdraw");
   n = n/3;

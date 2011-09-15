@@ -509,7 +509,7 @@ somme(GEN a, GEN b, GEN code, GEN x)
   pari_sp av, av0 = avma, lim;
   GEN p1;
 
-  if (typ(a) != t_INT) pari_err(talker,"non integral index in sum");
+  if (typ(a) != t_INT) pari_err(typeer,"sum",a);
   if (!x) x = gen_0;
   if (gcmp(b,a) < 0) return gcopy(x);
 
@@ -539,7 +539,7 @@ suminf(void *E, GEN (*eval)(void *, GEN), GEN a, long prec)
   pari_sp av0 = avma, av, lim;
   GEN p1,x = real_1(prec);
 
-  if (typ(a) != t_INT) pari_err(talker,"non integral index in suminf");
+  if (typ(a) != t_INT) pari_err(typeer,"suminf",a);
   a = setloop(a);
   av = avma; lim = stack_lim(av,1);
   fl=0; G = prec2nbits(prec) + 5;
@@ -590,7 +590,7 @@ produit(GEN a, GEN b, GEN code, GEN x)
   pari_sp av, av0 = avma, lim;
   GEN p1;
 
-  if (typ(a) != t_INT) pari_err(talker,"non integral index in sum");
+  if (typ(a) != t_INT) pari_err(typeer,"prod",a);
   if (!x) x = gen_1;
   if (gcmp(b,a) < 0) return gcopy(x);
 
@@ -620,7 +620,7 @@ prodinf(void *E, GEN (*eval)(void *, GEN), GEN a, long prec)
   long fl,G;
   GEN p1,x = real_1(prec);
 
-  if (typ(a) != t_INT) pari_err(talker,"non integral index in prodinf");
+  if (typ(a) != t_INT) pari_err(typeer,"prodinf",a);
   a = setloop(a);
   av = avma; lim = stack_lim(av,1);
   fl=0; G = -prec2nbits(prec)-5;
@@ -645,7 +645,7 @@ prodinf1(void *E, GEN (*eval)(void *, GEN), GEN a, long prec)
   long fl,G;
   GEN p1,p2,x = real_1(prec);
 
-  if (typ(a) != t_INT) pari_err(talker,"non integral index in prodinf1");
+  if (typ(a) != t_INT) pari_err(typeer,"prodinf1",a);
   a = setloop(a);
   av = avma; lim = stack_lim(av,1);
   fl=0; G = -prec2nbits(prec)-5;
@@ -970,7 +970,7 @@ sumalt(void *E, GEN (*eval)(void *, GEN), GEN a, long prec)
   pari_sp av = avma, av2, lim;
   GEN s, az, c, e1, d;
 
-  if (typ(a) != t_INT) pari_err(talker,"non integral index in sumalt");
+  if (typ(a) != t_INT) pari_err(typeer,"sumalt",a);
   e1 = addsr(3, sqrtr(stor(8,prec)));
   N = (ulong)(0.4*(prec2nbits(prec)+ 7));
   d = powru(e1,N);
@@ -1001,7 +1001,7 @@ sumalt2(void *E, GEN (*eval)(void *, GEN), GEN a, long prec)
   pari_sp av = avma, av2, lim;
   GEN s, dn, pol;
 
-  if (typ(a) != t_INT) pari_err(talker,"non integral index in sumalt");
+  if (typ(a) != t_INT) pari_err(typeer,"sumalt",a);
   N = (long)(0.31*(prec2nbits(prec) + 5));
   pol = polzagreel(N,N>>1,prec+1);
   pol = RgX_div_by_X_x(pol, gen_1, &dn);
@@ -1042,8 +1042,7 @@ sumpos(void *E, GEN (*eval)(void *, GEN), GEN a, long prec)
   pari_sp av = avma;
   GEN r, reel, s, az, c, x, e1, d, *stock;
 
-  if (typ(a) != t_INT) pari_err(talker,"non integral index in sumpos");
-
+  if (typ(a) != t_INT) pari_err(typeer,"sumpos",a);
   a = subis(a,1); reel = cgetr(prec);
   e1 = addsr(3, sqrtr(stor(8,prec)));
   N = (long)(0.4*(prec2nbits(prec) + 7));
@@ -1089,8 +1088,7 @@ sumpos2(void *E, GEN (*eval)(void *, GEN), GEN a, long prec)
   pari_sp av = avma;
   GEN r, reel, s, pol, dn, x, *stock;
 
-  if (typ(a) != t_INT) pari_err(talker,"non integral index in sumpos2");
-
+  if (typ(a) != t_INT) pari_err(typeer,"sumpos2",a);
   a = subis(a,1); reel = cgetr(prec);
   N = (long)(0.31*(prec2nbits(prec) + 5));
 

@@ -82,8 +82,7 @@ checknf(GEN x)
 void
 checkbnr(GEN bnr)
 {
-  if (typ(bnr)!=t_VEC || lg(bnr)!=7)
-    pari_err(talker,"incorrect bigray field");
+  if (typ(bnr)!=t_VEC || lg(bnr)!=7) pari_err(typeer,"checkbnr",bnr);
   (void)checkbnf(bnr_get_bnf(bnr));
 }
 
@@ -98,9 +97,8 @@ checkbnrgen(GEN bnr)
 void
 checksqmat(GEN x, long N)
 {
-  if (typ(x)!=t_MAT) pari_err(talker,"incorrect ideal");
-  if (lg(x) == 1 || lg(x[1]) != N+1)
-    pari_err(talker,"incorrect matrix for ideal");
+  if (typ(x)!=t_MAT) pari_err(typeer,"checksqmat",x);
+  if (lg(x) == 1 || lg(x[1]) != N+1) pari_err(consister,"checksqmat");
 }
 
 GEN
@@ -145,10 +143,10 @@ checknfelt_mod(GEN nf, GEN x, const char *s)
 void
 check_ZKmodule(GEN x, const char *s)
 {
-  if (typ(x) != t_VEC || lg(x) < 3) pari_err(talker,"not a module in %s", s);
-  if (typ(x[1]) != t_MAT) pari_err(talker,"not a matrix in %s", s);
-  if (typ(x[2]) != t_VEC || lg(x[2]) != lg(x[1]))
-    pari_err(talker,"not a correct ideal list in %s", s);
+  if (typ(x) != t_VEC || lg(x) < 3) pari_err(typeer,s,x);
+  if (typ(x[1]) != t_MAT) pari_err(typeer,s,gel(x,1));
+  if (typ(x[2]) != t_VEC) pari_err(typeer,s,gel(x,2));
+  if (lg(x[2]) != lg(x[1])) pari_err(consister, s);
 }
 
 GEN

@@ -1735,7 +1735,7 @@ sumnumall(void *E, GEN (*eval)(void*, GEN), GEN a, GEN sig, GEN tab, long flag, 
 
   b = suminit_start(sig);
   flii = gequal0(gel(b,2));
-  if (!is_scalar_t(typ(a))) pari_err(talker, "incorrect beginning value in sumnum");
+  if (!is_scalar_t(typ(a))) pari_err(typeer,"sumnum",a);
   tab = sumnuminit0(sig, tab, sgn, prec);
 
   signew = (typ(sig) == t_VEC) ? gel(sig,1) : sig;

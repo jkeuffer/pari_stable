@@ -992,7 +992,7 @@ pari_err2GEN(long numerr, va_list ap)
   case bugparier:
     retmkerr2(numerr, strtoGENstr(va_arg(ap, char*)));
 
-  case typeer: 
+  case typeer:
     {
       const char *f = va_arg(ap, const char*);
       GEN x = va_arg(ap, GEN);

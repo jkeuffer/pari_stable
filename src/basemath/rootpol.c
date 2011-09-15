@@ -904,7 +904,7 @@ FFT(GEN x, GEN Omega)
   if (!is_vec_t(typ(x))) pari_err(typeer,"FFT",x);
   if (typ(Omega) != t_VEC) pari_err(typeer,"FFT",Omega);
   if (n > l) pari_err(consister,"FFT");
-    
+
   if (n < l) {
     z = cgetg(l, t_VECSMALL); /* cf stackdummy */
     for (i = 1; i < n; i++) z[i] = x[i];

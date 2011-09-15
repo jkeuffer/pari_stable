@@ -23,35 +23,29 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 void
 checkellpt(GEN z)
-{ if (typ(z)!=t_VEC || lg(z) > 3) pari_err(talker, "not a point in ellxxx"); }
+{ if (typ(z)!=t_VEC || lg(z) > 3) pari_err(typeer, "checkellpt", z); }
 void
 checkell5(GEN e)
-{ if (typ(e)!=t_VEC || lg(e) < 6)
-    pari_err(talker, "not an elliptic curve (ell5) in ellxxx"); }
+{ if (typ(e)!=t_VEC || lg(e) < 6) pari_err(typeer, "checkell5",e); }
 void
 checksmallell(GEN e)
-{ if (typ(e)!=t_VEC || lg(e) < 14)
-    pari_err(talker, "not an elliptic curve (smallell) in ellxxx"); }
+{ if (typ(e)!=t_VEC || lg(e) < 14) pari_err(typeer, "checksmallell",e); }
 void
 checkell(GEN e)
-{ if (typ(e)!=t_VEC || lg(e) < 20)
-    pari_err(talker, "not an elliptic curve (ell) in ellxxx"); }
+{ if (typ(e)!=t_VEC || lg(e) < 20) pari_err(typeer, "checkell",e); }
 static void
 checksmallell_real(GEN e)
 { if (typ(e)!=t_VEC || (lg(e) >= 20 && !ell_is_real(e)))
-    pari_err(talker, "not an elliptic curve (smallell) over R in ellxxx"); }
+    pari_err(typeer, "checksmallell_real", e); }
 void
 checkell_real(GEN e)
-{ if (typ(e)!=t_VEC || !ell_is_real(e))
-    pari_err(talker, "not an elliptic curve over R in ellxxx"); }
+{ if (typ(e)!=t_VEC || !ell_is_real(e)) pari_err(typeer, "checkell_real", e); }
 void
 checkell_padic(GEN e)
-{ if (typ(e)!=t_VEC || !ell_is_real(e))
-    pari_err(talker, "not an elliptic curve over R in ellxxx"); }
+{ if (typ(e)!=t_VEC || !ell_is_padic(e)) pari_err(typeer, "checkell_padic",e); }
 static void
-checkch(GEN z)
-{ if (typ(z)!=t_VEC || lg(z) != 5)
-    pari_err(talker,"not a coordinate change in ellxxx"); }
+checkcoordch(GEN z)
+{ if (typ(z)!=t_VEC || lg(z) != 5) pari_err(typeer,"checkcoordch",z); }
 
 /* 4 X^3 + b2 X^2 + 2b4 X + b6 */
 static GEN
@@ -596,7 +590,7 @@ GEN
 ellchangecurve(GEN e, GEN w)
 {
   pari_sp av = avma;
-  checkch(w); checkell5(e);
+  checkcoordch(w); checkell5(e);
   return gerepilecopy(av, _coordch(e, w));
 }
 
@@ -676,7 +670,7 @@ ellchangepoint(GEN x, GEN ch)
   pari_sp av = avma;
 
   if (typ(x) != t_VEC) pari_err(typeer,"ellchangepoint",x);
-  checkch(ch);
+  checkcoordch(ch);
   if (lx == 1) return cgetg(1, t_VEC);
   u = gel(ch,1);
   r = gel(ch,2);
@@ -720,7 +714,7 @@ ellchangepointinv(GEN x, GEN ch)
   pari_sp av = avma;
 
   if (typ(x) != t_VEC) pari_err(typeer,"ellchangepointinv",x);
-  checkch(ch);
+  checkcoordch(ch);
   if (lx == 1) return cgetg(1, t_VEC);
   u = gel(ch,1);
   r = gel(ch,2);

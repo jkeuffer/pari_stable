@@ -377,20 +377,18 @@ polhensellift(GEN pol, GEN L, GEN p, long N)
   long i, l, t;
   pari_sp av = avma;
 
-  if (typ(pol) != t_POL) pari_err(talker, "not a polynomial in polhensellift");
+  if (typ(pol) != t_POL) pari_err(typeer, "polhensellift",pol);
   RgX_check_ZXY(pol, "polhensellift");
-  t = typ(L);
-  if (!is_vec_t(t) || lg(L) < 3)
-    pari_err(talker, "not a factorization in polhensellift");
+  if (!is_vec_t(typ(L)) || lg(L) < 3) pari_err(typeer, "polhensellift",L);
   t = typ(p);
   if (t == t_VEC) /* [p, T] */
   {
     T = gel(p,2);
-    if (typ(T) != t_POL) pari_err(talker, "incorrect T in polhensellift");
+    if (typ(T) != t_POL) pari_err(typeer, "polhensellift",pol);
     RgX_check_ZX(T, "polhensellift");
     p = gel(p,1); t = typ(p);
   }
-  if (t != t_INT) pari_err(talker, "incorrect p in polhensellift");
+  if (t != t_INT) pari_err(typeer, "polhensellift",p);
   if (N < 1) pari_err(talker, "not a positive exponent in polhensellift");
 
   l = lg(L); L = leafcopy(L);

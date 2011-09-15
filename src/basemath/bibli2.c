@@ -628,7 +628,7 @@ laplace(GEN x)
   long i, l = lg(x), e = valp(x);
   GEN y, t;
 
-  if (typ(x) != t_SER) pari_err(talker,"not a series in laplace");
+  if (typ(x) != t_SER) pari_err(typeer,"laplace",x);
   if (e < 0) pari_err(talker,"negative valuation in laplace");
   y = cgetg(l,t_SER);
   t = mpfact(e); y[1] = x[1];
@@ -649,8 +649,9 @@ convol(GEN x, GEN y)
   long j, lx, ly, ex, ey, vx = varn(x);
   GEN z;
 
-  if (typ(x) != t_SER || typ(y) != t_SER) pari_err(talker,"not a series in convol");
-  if (varn(y) != vx) pari_err(talker,"different variables in convol");
+  if (typ(x) != t_SER) pari_err(typeer,"convol",x);
+  if (typ(y) != t_SER) pari_err(typeer,"convol",y);
+  if (varn(y) != vx) pari_err(consister,"convol");
   ex = valp(x); lx = lg(x) + ex; x -= ex;
   ey = valp(y); ly = lg(y) + ey; y -= ey;
   /* inputs shifted: x[i] and y[i] now correspond to monomials of same degree */
@@ -1123,7 +1124,7 @@ modreverse(GEN x)
   long v, n;
   GEN T, a, y;
 
-  if (typ(x)!=t_POLMOD) pari_err(talker,"not a polmod in modreverse");
+  if (typ(x)!=t_POLMOD) pari_err(typeer,"modreverse",x);
   T = gel(x,1); n = degpol(T); if (n <= 0) return gcopy(x);
   a = gel(x,2);
   v = varn(T);

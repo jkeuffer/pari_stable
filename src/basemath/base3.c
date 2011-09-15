@@ -526,7 +526,7 @@ nfpow(GEN nf, GEN z, GEN n)
   long s, N;
   GEN x, cx, T;
 
-  if (typ(n)!=t_INT) pari_err(talker,"not an integer exponent in nfpow");
+  if (typ(n)!=t_INT) pari_err(typeer,"nfpow",n);
   nf = checknf(nf); T = nf_get_pol(nf); N = degpol(T);
   s = signe(n); if (!s) return scalarcol_shallow(gen_1,N);
   x = nf_to_scalar_or_basis(nf, z);
@@ -587,7 +587,7 @@ pow_ei_mod_p(GEN nf, long I, GEN n, GEN p)
   long s,N;
   GEN y;
 
-  if (typ(n) != t_INT) pari_err(talker,"not an integer exponent in nfpow");
+  if (typ(n) != t_INT) pari_err(typeer,"nfpow",n);
   nf = checknf(nf); N = nf_get_degree(nf);
   s = signe(n);
   if (s < 0) pari_err(talker,"negative power in pow_ei_mod_p");
@@ -1829,7 +1829,7 @@ check_nfelt(GEN x, GEN *den)
 {
   long l = lg(x), i;
   GEN t, d = NULL;
-  if (typ(x) != t_COL) pari_err(talker,"%Ps not a nfelt", x);
+  if (typ(x) != t_COL) pari_err(typeer, "check_nfelt", x);
   for (i=1; i<l; i++)
   {
     t = gel(x,i);
@@ -1839,7 +1839,7 @@ check_nfelt(GEN x, GEN *den)
       case t_FRAC:
         if (!d) d = gel(t,2); else d = lcmii(d, gel(t,2));
         break;
-      default: pari_err(talker,"%Ps not a nfelt", x);
+      default: pari_err(typeer, "check_nfelt", x);
     }
   }
   *den = d;

@@ -53,7 +53,7 @@ eval_mnemonic(GEN str, const char *tmplate)
   const char *arg;
 
   if (typ(str)==t_INT) return itos(str);
-  if (typ(str)!=t_STR) pari_err(talker,"invalid flag");
+  if (typ(str)!=t_STR) pari_err(typeer,"eval_mnemonic",str);
 
   arg=GSTR(str);
   etmplate = strchr(tmplate, '\n');

@@ -1599,7 +1599,7 @@ idealpow(GEN nf, GEN x, GEN n)
   long tx;
   GEN res, ax;
 
-  if (typ(n) != t_INT) pari_err(talker,"non-integral exponent in idealpow");
+  if (typ(n) != t_INT) pari_err(typeer,"idealpow",n);
   tx = idealtyp(&x,&ax);
   res = ax? cgetg(3,t_VEC): NULL;
   av = avma;
@@ -1638,7 +1638,7 @@ idealpowred(GEN nf, GEN x, GEN n)
   long s;
   GEN y;
 
-  if (typ(n) != t_INT) pari_err(talker,"non-integral exponent in idealpowred");
+  if (typ(n) != t_INT) pari_err(typeer,"idealpowred",n);
   s = signe(n); if (s == 0) return idealpow(nf,x,n);
   y = gen_pow(x, n, (void*)nf, &_sqr, &_mul);
 
@@ -2598,14 +2598,15 @@ nfsnf(GEN nf, GEN x)
   GEN z,u,v,w,d,dinv,A,I,J;
 
   nf = checknf(nf); N = nf_get_degree(nf);
-  if (typ(x)!=t_VEC || lg(x)!=4) pari_err(talker,"not a module in nfsnf");
+  if (typ(x)!=t_VEC || lg(x)!=4) pari_err(typeer,"nfsnf",x);
   A = gel(x,1);
   I = gel(x,2);
   J = gel(x,3);
-  if (typ(A)!=t_MAT) pari_err(talker,"not a matrix in nfsnf");
+  if (typ(A)!=t_MAT) pari_err(typeer,"nfsnf",A);
   n = lg(A)-1;
-  if (typ(I)!=t_VEC || lg(I)!=n+1 || typ(J)!=t_VEC || lg(J)!=n+1)
-    pari_err(talker,"not a correct ideal list in nfsnf");
+  if (typ(I)!=t_VEC) pari_err(typeer,"nfsnf",I);
+  if (typ(J)!=t_VEC) pari_err(typeer,"nfsnf",J);
+  if (lg(I)!=n+1 || lg(J)!=n+1) pari_err(consister,"nfsnf");
   if (!n) pari_err(talker,"not a matrix of maximal rank in nfsnf");
   m = lg(A[1])-1;
   if (n < m) pari_err(talker,"not a matrix of maximal rank in nfsnf");

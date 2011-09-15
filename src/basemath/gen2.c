@@ -2117,7 +2117,7 @@ cvtop(GEN x, GEN p, long d)
   GEN z;
   long v;
 
-  if (typ(p) != t_INT) pari_err(talker,"not an integer modulus in cvtop");
+  if (typ(p) != t_INT) pari_err(typeer,"cvtop",p);
   switch(typ(x))
   {
     case t_INT:
