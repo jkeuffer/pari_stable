@@ -714,7 +714,7 @@ qfr5_dist(GEN e, GEN d, long prec)
   GEN t = logr_abs(d);
   if (signe(e)) {
     GEN u = mulir(e, mplog2(prec));
-    setexpo(u, expo(u+EMAX)); t = addrr(t, u);
+    setexpo(u, expo(u)+EMAX); t = addrr(t, u);
   }
   setexpo(t, expo(t)-1); return t;
 }
