@@ -96,7 +96,7 @@ BA 11- [INSTALL] Documentation of RUNTEST
    15- allow Ser(t_VECSMALL)
 BA 16- library function gsprintf/gvsprintf
 BA 17- new PARI type t_ERROR (error messages)
-BA 18- new error trapping system and GP function iferr
+BA 18- new error trapping system and GP functions iferr,iferrname
 BA 19- implement lngamma(t_PADIC)
 
   Removed

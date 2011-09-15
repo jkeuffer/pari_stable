@@ -17,13 +17,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "paripriv.h"
 #include "anal.h"
 
-GEN
-iferrpari(GEN a, GEN b, GEN c)
+static GEN
+iferrnum(long errnum, GEN a, GEN b)
 {
   GEN res;
   struct pari_evalstate state;
   evalstate_save(&state);
-  CATCH(CATCH_ALL)
+  CATCH(errnum)
   {
     evalstate_restore(&state);
     if (!b) return gnil;
@@ -40,7 +40,19 @@ iferrpari(GEN a, GEN b, GEN c)
   } TRY {
     res = closure_evalgen(a);
   } ENDCATCH;
-  return c?closure_evalgen(c):res;
+  return res;
+}
+
+GEN
+iferrpari(GEN a, GEN b)
+{
+  return iferrnum(CATCH_ALL, a, b);
+}
+
+GEN
+iferrnamepari(const char *err, GEN a, GEN b)
+{
+  return iferrnum(name_numerr(err), a, b);
 }
 
 /********************************************************************/

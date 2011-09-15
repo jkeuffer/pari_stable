@@ -1162,7 +1162,7 @@ pari_err(int numerr, ...)
   err_recover(numerr);
 }
 
-static const char *
+const char *
 numerr_name(long numerr)
 {
   switch ((enum err_list) numerr)
@@ -1198,6 +1198,40 @@ numerr_name(long numerr)
   return "invalid error number";
 }
 
+long
+name_numerr(const char *s)
+{
+  if (!strcmp(s,"syntaxer")) return syntaxer;
+  if (!strcmp(s,"bugparier")) return bugparier;
+  if (!strcmp(s,"alarmer")) return alarmer;
+  if (!strcmp(s,"openfiler")) return openfiler;
+  if (!strcmp(s,"talker")) return talker;
+  if (!strcmp(s,"flagerr")) return flagerr;
+  if (!strcmp(s,"impl")) return impl;
+  if (!strcmp(s,"archer")) return archer;
+  if (!strcmp(s,"notfuncer")) return notfuncer;
+  if (!strcmp(s,"precer")) return precer;
+  if (!strcmp(s,"typeer")) return typeer;
+  if (!strcmp(s,"user")) return user;
+  if (!strcmp(s,"errpile")) return errpile;
+  if (!strcmp(s,"overflower")) return overflower;
+  if (!strcmp(s,"consister")) return consister;
+  if (!strcmp(s,"primer1")) return primer1;
+  if (!strcmp(s,"invmoder")) return invmoder;
+  if (!strcmp(s,"constpoler")) return constpoler;
+  if (!strcmp(s,"redpoler")) return redpoler;
+  if (!strcmp(s,"zeropoler")) return zeropoler;
+  if (!strcmp(s,"operi")) return operi;
+  if (!strcmp(s,"operf")) return operf;
+  if (!strcmp(s,"gdiver")) return gdiver;
+  if (!strcmp(s,"memer")) return memer;
+  if (!strcmp(s,"negexper")) return negexper;
+  if (!strcmp(s,"sqrter5")) return sqrter5;
+  if (!strcmp(s,"noer")) return noer;
+  pari_err(talker,"unknown error name");
+  return -1; /* NOT REACHED */
+}
+
 GEN
 err_name(GEN err)
 {
@@ -1212,20 +1246,7 @@ trap0(const char *e, GEN r, GEN f)
   long numerr = CATCH_ALL;
   GEN x;
   if (!e || !*e) numerr = CATCH_ALL;
-  else if (!strcmp(e,"alarmer")) numerr = alarmer;
-  else if (!strcmp(e,"archer")) numerr = archer;
-  else if (!strcmp(e,"errpile")) numerr = errpile;
-  else if (!strcmp(e,"gdiver")) numerr = gdiver;
-  else if (!strcmp(e,"impl")) numerr = impl;
-  else if (!strcmp(e,"invmoder")) numerr = invmoder;
-  else if (!strcmp(e,"overflower")) numerr = overflower;
-  else if (!strcmp(e,"syntaxer")) numerr = syntaxer;
-  else if (!strcmp(e,"talker")) numerr = talker;
-  else if (!strcmp(e,"typeer")) numerr = typeer;
-  else if (!strcmp(e,"user")) numerr = user;
-  else pari_err(impl,"this trap keyword");
-  /* TODO: complete the list */
-
+  else numerr = name_numerr(e);
   if (!f) {
     pari_warn(warner,"default handlers are no longer supported --> ignored");
     return gnil;
