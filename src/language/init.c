@@ -1094,9 +1094,9 @@ pari_err2str(GEN err)
   case operi: case operf:
     {
       const char *f, *op = GSTR(gel(err,2));
+      const char *what = numerr == operi? "inconsistent": "forbidden";
       GEN x = gel(err,3);
       GEN y = gel(err,4);
-      return pari_strdup(numerr == operi? "impossible": "forbidden");
       switch(*op)
       {
       case '+': f = "addition"; break;
@@ -1108,7 +1108,7 @@ pari_err2str(GEN err)
       case 'g': op = ","; f = "gcd"; break;
       default: op = "-->"; f = "assignment"; break;
       }
-      return pari_sprintf(" %s %s %s %s.", f,type_name(typ(x)),op,type_name(typ(y)));
+      return pari_sprintf("%s %s %s %s %s.", what,f,type_name(typ(x)),op,type_name(typ(y)));
     }
   case primer1:
     {
