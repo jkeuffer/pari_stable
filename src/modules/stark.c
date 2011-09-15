@@ -2788,7 +2788,6 @@ quadhilbertreal(GEN D, long prec)
           gel(vec,i) = bnrstark(bnr, M, prec);
           gcoeff(M,i,i) = t;
         }
-        CATCH_RELEASE();
         return gerepileupto(av, vec);
       }
 

@@ -18,3 +18,12 @@ print();
 (x->1/x)(0)
 print();
 
+ecm(N,t,B)=
+{
+  for(a=1,t,
+     iferr(
+       my(E=ellinit([0,0,0,a,1]*Mod(1,N)));
+       ellpow(E,[0,1]*Mod(1,N),B),
+       err,if(errname(err)=="invmoder",return(gcd(lift(component(err,1)),N)),error(err))));
+}
+ecm(2^64+1,10,200!)

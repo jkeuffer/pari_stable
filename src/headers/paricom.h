@@ -39,18 +39,24 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
  * will execute 'code', then 'recovery' if exception 'numer' is thrown
  * [ any exception if numer == CATCH_ALL ].
  * RETRY = as TRY, but execute 'recovery', then 'code' again [still catching] */
-#define CATCH(err) {         \
-  VOLATILE long __err = err, __catcherr = -1; \
-  int pari_errno;            \
-  jmp_buf __env;             \
-  if ((pari_errno = setjmp(__env)))
 
-#define RETRY else __catcherr = err_catch(__err, &__env); {
-#define TRY else { __catcherr = err_catch(__err, &__env);
-
-#define CATCH_RELEASE() err_leave(__catcherr)
-#define ENDCATCH } CATCH_RELEASE(); }
+extern THREAD jmp_buf *iferr_env;
 extern const long CATCH_ALL;
+
+#define CATCH(err) {         \
+  jmp_buf *__iferr_old=iferr_env; \
+  jmp_buf __env;             \
+  iferr_env = &__env;        \
+  if (setjmp(*iferr_env))    \
+  {                          \
+    iferr_env = __iferr_old; \
+    if (err!=CATCH_ALL && err_get_num(global_err_data) != err) \
+      pari_err(0, global_err_data);
+
+#define RETRY } iferr_env = &__env; {
+#define TRY } else {
+
+#define ENDCATCH iferr_env = __iferr_old; } }
 
 extern const double LOG2, LOG10_2, LOG2_10;
 #ifndef  PI

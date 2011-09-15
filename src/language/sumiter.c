@@ -16,6 +16,33 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "paripriv.h"
 #include "anal.h"
+
+GEN
+iferrpari(GEN a, GEN b, GEN c)
+{
+  GEN res;
+  struct pari_evalstate state;
+  evalstate_save(&state);
+  CATCH(CATCH_ALL)
+  {
+    evalstate_restore(&state);
+    if (!b) return gnil;
+    if (global_err_data)
+    {
+      GEN foo = gclone(global_err_data);
+      global_err_data = gcopy(foo); /* A direct gcopy could overwrite global_err_data */
+      gunclone(foo);
+    } else global_err_data = mkerr(errpile);
+    push_lex(global_err_data,b);
+    res = closure_evalgen(b);
+    pop_lex(1);
+    return res;
+  } TRY {
+    res = closure_evalgen(a);
+  } ENDCATCH;
+  return c?closure_evalgen(c):res;
+}
+
 /********************************************************************/
 /**                                                                **/
 /**                        ITERATIONS                              **/

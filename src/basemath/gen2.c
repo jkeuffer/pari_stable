@@ -813,12 +813,10 @@ gequal_try(GEN x, GEN y)
 {
   int i;
   CATCH(CATCH_ALL) {
-    CATCH_RELEASE();
-    switch(pari_errno)
+    switch(err_get_num(global_err_data))
     {
-      case errpile:
-      case memer: pari_err(pari_errno);
-      case alarmer: pari_err(pari_errno, global_err_data);
+      case errpile: case memer: case alarmer:
+        pari_err(0, global_err_data);
     }
     return 0;
   } TRY {

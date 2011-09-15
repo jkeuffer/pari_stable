@@ -49,6 +49,7 @@ GEN resetloop(GEN a, GEN b);
 GEN setloop(GEN a);
 
 /* parser */
+GEN iferrpari(GEN a, GEN b, GEN c);
 void forpari(GEN a, GEN b, GEN node);
 void untilpari(GEN a, GEN b);
 void whilepari(GEN a, GEN b);
