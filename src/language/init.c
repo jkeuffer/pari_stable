@@ -1105,8 +1105,8 @@ pari_err2str(GEN err)
                 f = NULL; break;
       case '*': f = "multiplication"; break;
       case '/': case '%': case '\\': f = "division"; break;
-      case 'g': op = ","; f = "gcd"; break;
-      default: op = "-->"; f = "assignment"; break;
+      case '=': op = "-->"; f = "assignment"; break;
+      default:  f = op; op = ","; break;
       }
       return pari_sprintf("%s %s %s %s %s.", what,f,type_name(typ(x)),op,type_name(typ(y)));
     }

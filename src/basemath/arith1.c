@@ -1597,8 +1597,7 @@ chinese(GEN x, GEN y)
   {
     case t_POLMOD:
       z = cgetg(3, t_POLMOD);
-      if (varn(gel(x,1))!=varn(gel(y,1)))
-         pari_err(talker,"incompatible variables in chinese");
+      if (varn(gel(x,1))!=varn(gel(y,1))) pari_err(operi,"chinese",x,y);
       if (RgX_equal(gel(x,1),gel(y,1)))  /* same modulus */
       {
         gel(z,1) = gcopy(gel(x,1));
@@ -1621,7 +1620,7 @@ chinese(GEN x, GEN y)
       z = cgetg(3,t_INTMOD);
       Z_chinese_pre(A, B, &C, &U, &d);
       c = Z_chinese_post(a, b, C, U, d);
-      if (!c) pari_err(consister,"Z_chinese");
+      if (!c) pari_err(operi,"chinese", x,y);
       gel(z,1) = icopy_avma(C, (pari_sp)z);
       gel(z,2) = icopy_avma(c, (pari_sp)gel(z,1));
       avma = (pari_sp)gel(z,2); return z;
@@ -1637,7 +1636,7 @@ chinese(GEN x, GEN y)
       for (i=1; i<lx; i++) gel(z,i) = chinese(gel(x,i),gel(y,i));
       return z;
   }
-  pari_err(typeer,"chinese");
+  pari_err(operi,"chinese",x,y);
   return NULL; /* not reached */
 }
 

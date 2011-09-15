@@ -1112,7 +1112,7 @@ ggcd(GEN x, GEN y)
   pari_sp av, tetpil;
   GEN p1,z;
 
-  if (is_noncalc_t(tx) || is_noncalc_t(ty)) pari_err(operf,"g",x,y);
+  if (is_noncalc_t(tx) || is_noncalc_t(ty)) pari_err(operf,"gcd",x,y);
   if (is_matvec_t(ty))
   {
     z = cgetg_copy(y, &l);
@@ -1216,7 +1216,7 @@ ggcd(GEN x, GEN y)
         {
           case t_FRAC:
             av = avma; p1=gcdii(gel(x,1),gel(y,2)); avma = av;
-            if (!is_pm1(p1)) pari_err(operi,"g",x,y);
+            if (!is_pm1(p1)) pari_err(operi,"gcd",x,y);
             return ggcd(gel(y,1), x);
 
           case t_COMPLEX: case t_QUAD:
@@ -1286,7 +1286,7 @@ ggcd(GEN x, GEN y)
         if (varncmp(vy,vx) < 0) return cont_gcd_rfrac(y, x);
         av = avma;
         p1 = ggcd(gel(x,1),gel(y,2));
-        if (degpol(p1)) pari_err(operi,"g",x,y);
+        if (degpol(p1)) pari_err(operi,"gcd",x,y);
         avma = av; return gdiv(ggcd(gel(y,1),x), content(gel(y,2)));
     }
   }
@@ -1327,13 +1327,13 @@ ggcd(GEN x, GEN y)
       break;
 
     case t_RFRAC: z=cgetg(3,t_RFRAC);
-      if (ty != t_RFRAC) pari_err(operf,"g",x,y);
+      if (ty != t_RFRAC) pari_err(operf,"gcd",x,y);
       p1 = RgX_div(gel(y,2), RgX_gcd(gel(x,2), gel(y,2)));
       tetpil = avma;
       gel(z,2) = gerepile((pari_sp)z,tetpil,gmul(p1, gel(x,2)));
       gel(z,1) = ggcd(gel(x,1), gel(y,1)); return z;
   }
-  pari_err(operf,"g",x,y);
+  pari_err(operf,"gcd",x,y);
   return NULL; /* not reached */
 }
 GEN

@@ -1816,7 +1816,7 @@ gaffsg(long s, GEN x)
       break;
     }
     case t_QUAD: gaffsg(s,gel(x,2)); gaffsg(0,gel(x,3)); break;
-    default: pari_err(operf,"",stoi(s),x);
+    default: pari_err(operf,"=",stoi(s),x);
   }
 }
 
@@ -1907,7 +1907,7 @@ gaffect(GEN x, GEN y)
 
   /* Various conversions. Avoid them, use specialized routines ! */
 
-  if (!is_const_t(ty)) pari_err(operf,"",x,y);
+  if (!is_const_t(ty)) pari_err(operf,"=",x,y);
   switch(tx)
   {
     case t_INT:
@@ -1930,7 +1930,7 @@ gaffect(GEN x, GEN y)
           avma = av; break;
 
         case t_QUAD: gaffect(x,gel(y,2)); gaffsg(0,gel(y,3)); break;
-        default: pari_err(operf,"",x,y);
+        default: pari_err(operf,"=",x,y);
       }
       break;
 
@@ -1938,7 +1938,7 @@ gaffect(GEN x, GEN y)
       switch(ty)
       {
         case t_COMPLEX: gaffect(x,gel(y,1)); gaffsg(0,gel(y,2)); break;
-        default: pari_err(operf,"",x,y);
+        default: pari_err(operf,"=",x,y);
       }
       break;
 
@@ -1961,12 +1961,12 @@ gaffect(GEN x, GEN y)
           p1 = mulii(num,Fp_inv(den,gel(y,3)));
           affii(modii(p1,gel(y,3)), gel(y,4)); avma = av; break;
         case t_QUAD: gaffect(x,gel(y,2)); gaffsg(0,gel(y,3)); break;
-        default: pari_err(operf,"",x,y);
+        default: pari_err(operf,"=",x,y);
       }
       break;
 
     case t_COMPLEX:
-      if (!gequal0(gel(x,2))) pari_err(operf,"",x,y);
+      if (!gequal0(gel(x,2))) pari_err(operf,"=",x,y);
       gaffect(gel(x,1), y);
       break;
 
@@ -1976,7 +1976,7 @@ gaffect(GEN x, GEN y)
         case t_INTMOD:
           av = avma; affii(padic_to_Fp(x, gel(y,1)), gel(y,2));
           avma = av; break;
-        default: pari_err(operf,"",x,y);
+        default: pari_err(operf,"=",x,y);
       }
       break;
 
@@ -1984,16 +1984,16 @@ gaffect(GEN x, GEN y)
       switch(ty)
       {
         case t_INT: case t_INTMOD: case t_FRAC: case t_PADIC:
-          pari_err(operf,"",x,y);
+          pari_err(operf,"=",x,y);
 
         case t_REAL:
           av = avma; affgr(quadtofp(x,lg(y)), y); avma = av; break;
         case t_COMPLEX:
-          ly = precision(y); if (!ly) pari_err(operf,"",x,y);
+          ly = precision(y); if (!ly) pari_err(operf,"=",x,y);
           av = avma; gaffect(quadtofp(x,ly), y); avma = av; break;
-        default: pari_err(operf,"",x,y);
+        default: pari_err(operf,"=",x,y);
       }
-    default: pari_err(operf,"",x,y);
+    default: pari_err(operf,"=",x,y);
   }
 }
 
