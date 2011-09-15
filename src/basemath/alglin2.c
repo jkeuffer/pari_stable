@@ -92,7 +92,7 @@ easychar(GEN x, long v, GEN *py)
       if (lg(x[1]) != lx) break;
       return NULL;
   }
-  pari_err(consister,"easychar");
+  pari_err(typeer,"easychar");
   return NULL; /* not reached */
 }
 
@@ -291,7 +291,7 @@ hess(GEN x)
   pari_sp av = avma, lim;
   long lx = lg(x), m, i, j;
 
-  if (typ(x) != t_MAT) pari_err(consister,"hess");
+  if (typ(x) != t_MAT) pari_err(typeer,"hess");
   if (lx == 1) return cgetg(1,t_MAT);
   if (lg(x[1]) != lx) pari_err(consister,"hess");
 
@@ -330,7 +330,7 @@ Flm_hess(GEN x, ulong p)
   pari_sp av = avma;
   long lx = lg(x), m, i, j;
 
-  if (typ(x) != t_MAT) pari_err(consister,"hess");
+  if (typ(x) != t_MAT) pari_err(typeer,"hess");
   if (lx == 1) return cgetg(1,t_MAT);
   if (lg(x[1]) != lx) pari_err(consister,"hess");
 
@@ -1007,7 +1007,7 @@ jacobi(GEN a, long prec)
   long de, e, e1, e2, i, j, p, q, l = lg(a);
   GEN c, ja, L, r, L2, r2, unr;
 
-  if (typ(a) != t_MAT) pari_err(consister,"jacobi");
+  if (typ(a) != t_MAT) pari_err(typeer,"jacobi");
   ja = cgetg(3,t_VEC);
   L = cgetg(l,t_COL); gel(ja,1) = L;
   r = cgetg(l,t_MAT); gel(ja,2) = r;

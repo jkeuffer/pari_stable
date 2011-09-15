@@ -1042,7 +1042,7 @@ GEN
 gauss(GEN a, GEN b)
 {
   GEN z;
-  if (typ(a)!=t_MAT) pari_err(consister,"gauss");
+  if (typ(a)!=t_MAT) pari_err(typeer,"gauss");
   z = RgM_solve(a,b);
   if (!z) pari_err(gdiver);
   return z;
@@ -3043,7 +3043,7 @@ det2(GEN a)
   GEN data;
   pivot_fun pivot;
   long nbco = lg(a)-1;
-  if (typ(a)!=t_MAT) pari_err(consister,"det2");
+  if (typ(a)!=t_MAT) pari_err(typeer,"det2");
   if (!nbco) return gen_1;
   if (nbco != lg(a[1])-1) pari_err(consister,"det2");
   pivot = get_pivot_fun(a, &data);
@@ -3251,7 +3251,7 @@ det(GEN a)
   GEN data, p=NULL;
   pivot_fun pivot;
 
-  if (typ(a)!=t_MAT) pari_err(consister,"det");
+  if (typ(a)!=t_MAT) pari_err(typeer,"det");
   if (!n) return gen_1;
   if (n != lg(a[1])-1) pari_err(consister,"det");
   if (n == 1) return gcopy(gcoeff(a,1,1));
@@ -3280,8 +3280,18 @@ gaussmoduloall(GEN M, GEN D, GEN Y, GEN *ptu1)
   lM = lg(M);
   if (lM == 1)
   {
-    if ((typ(Y)!=t_INT && lg(Y)!=1)
-     || (typ(D)!=t_INT && lg(D)!=1)) pari_err(consister,"gaussmodulo");
+    switch(typ(Y))
+    {
+      case t_INT: break;
+      case t_COL: if (lg(Y) != 1) pari_err(consister,"gaussmodulo");
+      default: pari_err(typeer,"gaussmodulo");
+    }
+    switch(typ(D))
+    {
+      case t_INT: break;
+      case t_COL: if (lg(D) != 1) pari_err(consister,"gaussmodulo");
+      default: pari_err(typeer,"gaussmodulo");
+    }
     if (ptu1) *ptu1 = cgetg(1, t_MAT);
     return gen_0;
   }
