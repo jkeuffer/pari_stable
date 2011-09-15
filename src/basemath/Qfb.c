@@ -531,7 +531,7 @@ nupow(GEN x, GEN n)
   pari_sp av;
   GEN y, l;
 
-  if (typ(n) != t_QFI) pari_err(typeer,"nudupl",n);
+  if (typ(n) != t_INT) pari_err(typeer,"nupow",n);
   if (gequal1(n)) return gcopy(x);
   av = avma; y = qfi_1(x);
   if (!signe(n)) return y;
