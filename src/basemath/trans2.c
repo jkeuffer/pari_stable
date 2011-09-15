@@ -1424,7 +1424,7 @@ glngamma(GEN x, long prec)
       a = gadd(a, mpeuler(prec));
       return gerepileupto(av, gmul(a, p1));
 
-    case t_PADIC:  pari_err(impl,"p-adic lngamma function");
+    case t_PADIC: av = avma; return gerepileupto(av, Qp_log(Qp_gamma(x)));
     case t_INTMOD: pari_err(typeer,"glngamma");
   }
   return transc(glngamma,x,prec);
