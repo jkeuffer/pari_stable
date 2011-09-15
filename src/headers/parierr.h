@@ -25,9 +25,6 @@ enum err_list {
 
   errpile, overflower,
 
-/* alglin.c */
-  mattype1,
-
 /* arith.c  */
   primer1, invmoder,
 

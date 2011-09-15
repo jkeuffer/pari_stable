@@ -857,10 +857,10 @@ init_gauss(GEN a, GEN *b, long *aco, long *li, int *iscol)
     *li = 0; return 0;
   }
   *li = lg(a[1])-1;
-  if (*li < *aco) pari_err(mattype1,"gauss");
+  if (*li < *aco) pari_err(consister,"gauss");
   if (*b)
   {
-    if (*li != *aco) pari_err(mattype1,"gauss");
+    if (*li != *aco) pari_err(consister,"gauss");
     switch(typ(*b))
     {
       case t_MAT:
@@ -1042,7 +1042,7 @@ GEN
 gauss(GEN a, GEN b)
 {
   GEN z;
-  if (typ(a)!=t_MAT) pari_err(mattype1,"gauss");
+  if (typ(a)!=t_MAT) pari_err(consister,"gauss");
   z = RgM_solve(a,b);
   if (!z) pari_err(gdiver);
   return z;
@@ -2946,7 +2946,7 @@ eigen(GEN x, long prec)
   pari_sp av = avma;
 
   if (typ(x)!=t_MAT) pari_err(typeer,"eigen");
-  if (n != 1 && n != lg(x[1])) pari_err(mattype1,"eigen");
+  if (n != 1 && n != lg(x[1])) pari_err(consister,"eigen");
   if (n<=2) return gcopy(x);
 
   ex = 16 - prec2nbits(prec);
@@ -3043,9 +3043,9 @@ det2(GEN a)
   GEN data;
   pivot_fun pivot;
   long nbco = lg(a)-1;
-  if (typ(a)!=t_MAT) pari_err(mattype1,"det2");
+  if (typ(a)!=t_MAT) pari_err(consister,"det2");
   if (!nbco) return gen_1;
-  if (nbco != lg(a[1])-1) pari_err(mattype1,"det2");
+  if (nbco != lg(a[1])-1) pari_err(consister,"det2");
   pivot = get_pivot_fun(a, &data);
   return det_simple_gauss(a, data, pivot);
 }
@@ -3251,9 +3251,9 @@ det(GEN a)
   GEN data, p=NULL;
   pivot_fun pivot;
 
-  if (typ(a)!=t_MAT) pari_err(mattype1,"det");
+  if (typ(a)!=t_MAT) pari_err(consister,"det");
   if (!n) return gen_1;
-  if (n != lg(a[1])-1) pari_err(mattype1,"det");
+  if (n != lg(a[1])-1) pari_err(consister,"det");
   if (n == 1) return gcopy(gcoeff(a,1,1));
   if (RgM_is_FpM(a, &p) && p)
   {

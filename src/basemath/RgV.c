@@ -156,7 +156,7 @@ RgM_Rg_add(GEN x, GEN y)
   GEN z = cgetg(l,t_MAT);
 
   if (l==1) return z;
-  if (typ(x) != t_MAT || l != lg(x[1])) pari_err(mattype1,"RgM_Rg_add");
+  if (typ(x) != t_MAT || l != lg(x[1])) pari_err(consister,"RgM_Rg_add");
   z = cgetg(l,t_MAT);
   for (i=1; i<l; i++)
   {
@@ -174,7 +174,7 @@ RgM_Rg_add_shallow(GEN x, GEN y)
   GEN z = cgetg(l,t_MAT);
 
   if (l==1) return z;
-  if (typ(x) != t_MAT || l != lg(x[1])) pari_err(mattype1,"RgM_Rg_add");
+  if (typ(x) != t_MAT || l != lg(x[1])) pari_err(consister,"RgM_Rg_add");
   for (i=1; i<l; i++)
   {
     GEN zi = cgetg(l,t_COL), xi = gel(x,i);

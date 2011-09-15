@@ -2267,7 +2267,7 @@ gsmithall_i(GEN x,long all)
   if (vx==NO_VARIABLE) return all? smithall(x): smith(x);
   n = lg(x)-1;
   if (!n) return trivsmith(all);
-  if (lg(x[1]) != n+1) pari_err(mattype1,"gsmithall");
+  if (lg(x[1]) != n+1) pari_err(consister,"gsmithall");
   av = avma; lim = stack_lim(av,1);
   x = RgM_shallowcopy(x);
   if (all) { U = matid(n); V = matid(n); }
@@ -2479,7 +2479,7 @@ matfrobenius(GEN M, long flag, long v)
   if (varncmp(gvar(M), v) <= 0)
     pari_err(talker,"variable must have higher priority in matfrobenius");
   n = lg(M)-1;
-  if (n && lg(M[1])!=n+1) pari_err(mattype1,"matfrobenius");
+  if (n && lg(M[1])!=n+1) pari_err(consister,"matfrobenius");
   M_x = RgM_Rg_add_shallow(M, monomial(gen_m1, 1, v));
   if (flag<2)
   {

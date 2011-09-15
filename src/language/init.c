@@ -1024,9 +1024,9 @@ pari_err2GEN(long numerr, va_list ap)
   }
   case overflower:
   case impl:
-  case typeer: case mattype1: case negexper:
+  case typeer: case consister: case negexper:
   case constpoler: case redpoler:
-  case zeropoler: case consister: case flagerr: case precer:
+  case zeropoler: case flagerr: case precer:
   case bugparier:
     retmkerr2(numerr, strtoGENstr(va_arg(ap, char*)));
   case operi: case operf:
@@ -1075,8 +1075,6 @@ pari_err2str(GEN err)
     return pari_sprintf("sorry, %Ps is not yet implemented.", gel(err,2));
   case typeer:
     return pari_sprintf("incorrect type in %Ps.", gel(err,2));
-  case mattype1:
-    return pari_sprintf("not a square matrix in %Ps.", gel(err,2));
   case negexper:
     return pari_sprintf("negative valuation in %Ps.", gel(err,2));
   case constpoler:
@@ -1225,11 +1223,10 @@ numerr_name(long numerr)
   case notfuncer: return "notfuncer";
   case precer: return "precer";
   case typeer: return "typeer";
-  case consister: return "consister";
   case user: return "user";
   case errpile: return "errpile";
   case overflower: return "overflower";
-  case mattype1: return "mattype1";
+  case consister: return "consister";
   case primer1: return "primer1";
   case invmoder: return "invmoder";
   case constpoler: return "constpoler";
