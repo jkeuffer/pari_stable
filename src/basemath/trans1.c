@@ -2200,13 +2200,14 @@ glog(GEN x, long prec)
 static GEN
 mpsc1(GEN x, long *ptmod8)
 {
-  long a = expo(x), b, l,  L, i, n, m, e, B;
+  long a = expo(x), l = realprec(x), b, L, i, n, m, e, B;
   GEN y, p2, x2;
   double d;
 
   n = 0;
   if (a >= 0)
   {
+    long p;
     GEN q;
     if (a > 30)
     {
@@ -2215,20 +2216,20 @@ mpsc1(GEN x, long *ptmod8)
       if (expo(z) >= bit_prec(z) + 3) pari_err(precer,"mpsc1");
       shiftr_inplace(pitemp, 1);
       q = floorr( divrr(z,pitemp) ); /* round ( x / (Pi/2) ) */
+      p = l+1; x = rtor(x,p);
     } else {
       q = stoi((long)floor(rtodbl(x) / (PI/2) + 0.5));
+      p = l;
     }
     if (signe(q))
     {
-      long p = realprec(x)+1;
-      x = subrr(rtor(x,p), mulir(q, Pi2n(-1,p))); /* x mod Pi/2  */
+      x = subrr(x, mulir(q, Pi2n(-1,p))); /* x mod Pi/2  */
       a = expo(x);
       if (!signe(x) && a >= 0) pari_err(precer,"mpsc1");
       n = mod4(q); if (n && signe(q) < 0) n = 4 - n;
     }
   }
   /* a < 0 */
-  l = realprec(x);
   b = signe(x); *ptmod8 = (b < 0)? 4 + n: n;
   if (!b) return real_0_bit((expo(x)<<1) - 1);
 
