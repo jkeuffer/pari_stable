@@ -118,7 +118,10 @@ pari_compile_str(char *lex, int strict)
   struct pari_parsestate state;
   parsestate_save(&state);
   pari_lex_start = lex;
-  pari_discarded = 0;
+  pari_unused_chars=NULL;
+  pari_once=1;
+  pari_discarded=0;
+  pari_lasterror=NULL;
   if (pari_parse(&lex) || pari_discarded)
   {
     if (pari_unused_chars && !pari_discarded)
