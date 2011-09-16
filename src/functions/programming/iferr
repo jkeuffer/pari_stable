@@ -7,7 +7,7 @@ Description:
  (closure,closure):gen iferrpari($1, $2)
 Help: iferr(seq1,E,seq2): evaluates the expression sequence seq1. if
  an error occurs, seq2 is evaluated with the formal parameter E set to the
- error data. 
+ error data.
 Doc: evaluates the expression sequence \var{seq1}. if an error occurs,
  \var{seq2} is evaluated with the formal parameter \var{E} set to the error
  data.
