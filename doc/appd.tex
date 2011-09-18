@@ -77,8 +77,6 @@ recursions, is disabled (use \kbd{pari\_stackcheck\_init()} to reenable it);
 \kbd{mplog2}) are not shared between threads and will be recomputed as
 needed;
 
-\item error handlers (set with \kbd{trap()}) are reset.
-
 \noindent The following sample program can be compiled using
 \bprog
     cc thread.c -o thread.o -lpari -lpthread

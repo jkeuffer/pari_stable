@@ -5,20 +5,20 @@ Prototype: sEVE
 Help: iferrname(str,seq1,E,seq2): evaluates the expression sequence seq1. if
  an error of type str occurs, seq2 is evaluated with the formal parameter E set to the
  error data.
-Doc: evaluates the expression sequence \var{seq1}. if an error of type \var{str} occurs,
- \var{seq2} is evaluated with the formal parameter \var{E} set to the error
- data.
- The following uses \kbd{iferrname} to implement Lenstra ECM factoring method:
+Doc: evaluates the expression sequence \var{seq1}. If an error of type
+ \var{str} occurs, \var{seq2} is evaluated with the formal parameter \var{E}
+ set to the error data.
+ The following uses \kbd{iferrname} to implement Lenstra's ECM factoring method:
  \bprog
  ? ecm(N,B,t)=
    {
-     for(a=1,t,
+     for(a=1, t,
        iferrname("invmoder",
-         ellpow(ellinit([a,1]*Mod(1,N)),[0,1]*Mod(1,N),B),
+         ellpow(ellinit([a,1]*Mod(1,N)), [0,1]*Mod(1,N), B),
          err, return(gcd(lift(component(err,1)),N))
        ));
    }
- ? ecm(2^101-1,1000!,100)
+ ? ecm(2^101-1, 1000!, 100)
  %2 = 7432339208719
  @eprog
  The return value of \kbd{iferrname} itself is, if an error of type  \var{str} occurs, the

@@ -735,9 +735,32 @@ following equivalent basic forms are available to create new ones
   f(x,y) = x^2 + y^2
 @eprog
 
-\subsec{Error messages} (\tet{t_ERROR}): Objects of this type are created when an error
-occurs and are immediately printed to the terminal and GP enters the "break loop".
-You can create such objects using the \tet{error()} function.
+\subsec{Error contexts} (\tet{t_ERROR}): an object of this type is created
+whenever an error occurs: it contains some information about the error and
+the error context. Usually, an appropriate error is printed immediately, the
+computation is aborted, and GP enters the ``break loop'':
+\bprog
+  ? 1/0; 1 + 1
+    ***   at top-level: 1/0;1+1
+    ***                  ^------
+    *** _/_: division by a non-invertible object
+    ***   Break loop: type 'break' to go back to GP
+
+@eprog\noindent Here the computation is aborted as soon as we try to evaluate
+$1/0$, and $1 + 1$ is never executed. Exceptions can be trapped
+using \tet{iferr} or \tet{iferrname}, however : we can evaluate some
+expression and either recover an ordinary result (no error occurred), or an
+exception (an error did occur).
+\bprog
+  ? i = Mod(6,12); iferr(1/i, E, print(E)); 1 + 1
+  error("impossible inverse modulo: Mod(6, 12).")
+  %1 = 2
+@eprog\noindent One can ignore the exception, print it as above, or extract
+non trivial information from the error context :
+\bprog
+  ? i = Mod(6,12); iferr(1/i, E, print(component(E,1)));
+  Mod(6, 12)
+@eprog\noindent We can also rethrow the exception: \kbd{error(E)}.
 
 \section{GP operators}\label{se:operators}
 
@@ -1596,7 +1619,7 @@ time = 0 ms.
 only numerical computations. Remember, PARI is not a computer algebra system!
 
 
-\subsec{Beware scopes!}\label{se:bewarescope}
+\subsec{Beware scopes}\label{se:bewarescope}
 Be extra careful with the scopes of variables. What is wrong with the
 following definition?
 \bprog
@@ -1693,7 +1716,7 @@ applies the function \kbd{f} to every element in the vector \kbd{v}.
 (The built-in function \kbd{apply} is more powerful since it also applies to
 lists and matrices.)
 
-\subsec{Defining functions within a function ?}
+\subsec{Defining functions within a function}
 Defining a single function is easy:
 \bprog
 init(x) = (add = y -> x+y);
@@ -1743,7 +1766,7 @@ the same way:
 ? init5() = my(x = 5); ( add(y) = x+y ); ( mul(y) = x*y );
 @eprog
 
-\subsec{Closures as Objects?} Contrary to what you might think after the
+\subsec{Closures as Objects} Contrary to what you might think after the
 preceding examples, GP's closures may not be used to simulate true
 ``objects'', with private and public parts and methods to access and
 manipulate them. In fact, closures indeed incorporate an existing context
@@ -2034,7 +2057,7 @@ first; here is a slightly pathological case:
 ? if (siN(x) < eps, do_something())
   ***   at top-level: if(siN(x)<eps,do_someth
   ***                    ^--------------------
-  ***   not a function: `siN'.
+  ***   not a function in function call
 @eprog\noindent (no arrow!) The code is syntactically correct and compiled
 correctly, even though the \kbd{siN} function, a typo for \kbd{sin}, was not
 defined at this point. When trying to evaluate the bytecode, however, it
@@ -2047,7 +2070,7 @@ mathematical content, which is easier to grasp than a parser's logic:
 ? 1/0
   ***   at top-level: 1/0
   ***                  ^--
-  *** _/_: division by zero
+  *** _/_: division by a non-invertible object
 @eprog\noindent telling us that a runtime error occurred while evaluating the
 binary \kbd{/} operator (the \kbd{\_} surrounding the operator are
 placeholders). More context is provided if the error occurs deep in the
@@ -2062,7 +2085,7 @@ call chain:
   ***                             ^-----
   ***   in function f: 1/x
   ***                   ^--
-  *** _/_: division by zero
+  *** _/_: division by a non-invertible object
 @eprog
 
 \subsec{Error recovery}\sidx{error recovery}\label{se:errorrec}
@@ -2077,9 +2100,10 @@ the problem.
 A slightly different situation, still related to error recovery, is when you
 actually foresee that some error may occur, are unable to prevent it, but
 quite capable of recovering from it, given the chance. Examples include lazy
-factorization (cf.~\tet{addprimes}), where you knowingly use a pseudo prime
-$N$ as if it were prime; you may then encounter an ``impossible'' situation,
-but this would usually exhibit a factor of $N$, enabling you to refine the
+factorization (cf.~\tet{addpseudoprimes}), where you knowingly use a pseudo
+prime $N$ as if it were prime; you may then encounter an ``impossible''
+situation, but this would usually exhibit a factor of $N$, enabling you to
+refine the
 factorization and go on. Or you might run an expensive computation at low
 precision to guess the size of the output, hence the right precision to use.
 You can then encounter errors like ``precision loss in truncation'', e.g when
@@ -2089,9 +2113,9 @@ has been lost, and no significant digit remains. It would be enough to
 restart part of the computation at a slightly higher precision.
 
 We now describe \tev{error trapping}, a useful mechanism which alleviates
-much of the pain in the first situation, and provides a satisfactory way out
-of the second one. Everything is handled via the \tet{trap} function whose
-different modes we now describe.
+much of the pain in the first situation (the break loop debugger), and
+provides satisfactory ways out of the second one (the \tet{iferr} and
+\tet{iferrname} exception handlers).
 
 \subsec{Break loop}\label{se:break_loop}
 
@@ -2134,7 +2158,7 @@ explained above. A break loop looks like this:
 ? v = 0; 1/v
   ***   at top-level: v=0;1/v
   ***                      ^--
-  *** _/_: division by zero
+  *** _/_: division by a non-invertible object
   ***   Break loop (type 'break' or Control-d to go back to GP)
 break>
 @eprog
@@ -2157,7 +2181,7 @@ break loop:
 -1
   ***   at top-level: for(v=-2,2,print(1/v))
   ***                                   ^----
-  *** _/_: division by zero
+  *** _/_: division by a non-invertible object
   ***   Break loop (type 'break' or Control-d to go back to GP)
 break> v
 0
@@ -2177,33 +2201,88 @@ overflow, the PARI stack is reset so that you can run commands (otherwise the
 stack would immediately overflow again). Still, as explained above, you do
 not lose the value of any \kbd{gp} variable in the process.
 
-\subsec{Protecting code} Finally \kbd{trap} can define a temporary handler
-used within the scope of a code fragment, protecting it from errors, by
-providing replacement code should the trap be activated. The expression
+\subsec{Protecting code}
+ The \tet{iferr} and \tet{iferrname} functions allow to define a temporary
+handler used within the scope of a code fragment, protecting it from errors,
+by providing replacement code should the trap be activated. The expression
 
-  \kbd{trap}( , \var{recovery}, \var{statements})
+  \kbd{iferr(\var{statements}, ERR, \var{recovery})}
 
 \noindent evaluates and returns the value of \var{statements}, unless an
 error occurs during the evaluation in which case the value of \var{recovery}
 is returned. As in an if/else clause, with the difference that
 \var{statements} has been partially evaluated, with possible side effects.
+We shall give a lot more details about the \kbd{ERR} argument shortly; it is
+the name of a variable, lexically scoped to the \var{recovery} expression
+sequence, whose value is set by the exception handler to help the recovery
+code decide what to do about the error.
+
 For instance one could define a fault tolerant inversion function as follows:
 \bprog
-? inv(x) = trap (, "oo", 1/x)
+? inv(x) = iferr(1/x, ERR, "oo")
 ? for (i=-1,1, print(inv(i)))
 -1
 oo
 1
 @eprog\noindent Protected codes can be nested without adverse effect, the
-last trap seen being the first to spring.
+last trap seen being the first to spring. Let's now see how \kbd{ERR} can be
+used; as written, \kbd{inv} is too tolerant:
+\bprog
+? inv("blah")
+%2 = "oo"
+@eprog Let's improve it by checking that we did trap a ``division by 0''
+error, and not an unrelated one like the type error \kbd{1 / "blah"}.
+\bprog
+? inv2(x) = {
+  iferr(1/x,
+        ERR, if (errname(ERR) != "gdiver", error(ERR));
+             "oo")
 
-\subsec{Trapping specific exceptions} We have not yet seen the use of the
-first argument of trap, which has been omitted in all previous examples. It
-simply indicates that only errors of a specific type should be intercepted,
-see the documentation of \tet{trap} for the complete list. For instance, we
-have
+}
+? inv2(0)
+%3 = "oo"  \\ as before
+? inv2("blah")
+  ***   at top-level: inv2("blah")
+  ***                 ^------------
+  ***   in function inv2: ...f(errname(ERR)!="gdiver",error(ERR));"oo")
+  ***                                                 ^-----------------
+  *** error: forbidden division t_INT / t_STR.
+@eprog\noindent In the last example, the error type was not expected, so we
+rethrow the error: \kbd{error(ERR)} triggers the original error that we
+mistakenly trapped. Since the recovery code should always check whether the
+error is the one expected, this construction is very common and can be
+simplified as:
+\bprog
+? inv3(x) = iferrname("gdiver", 1/x, ERR, "oo")
+@eprog\noindent Rather than trapping everything, then rethrowing whatever we
+do not like, it is cleaner to only trap errors of a specific kind. Here is a
+final example, to check in a safe way whether \tet{install} works correctly
+in your \kbd{gp}:
+\bprog
+broken_install() =
+{ \\ can we install ?
+  iferrname("archer", install(addii,GG), ERR, return ("OS"));
+  \\ can we use an installed function ?
+  iferr(if (addii(1,1) != 2, return("BROKEN")),
+        ERR, return("USE"));
+  return (0);
+}
+@eprog
+\noindent The function returns
+\kbd{OS} if the operating system does not support \kbd{install},
+\kbd{USE} if using an installed function triggers an error,
+\kbd{BROKEN} if the installed function did not behave as expected,
+and 0 if everything works.
 
-\kbd{gdiver}: division by 0
+\subsec{List of exception types}
+
+The \kbd{ERR} formal parameter contains more useful data than just the error
+name, which we recovered using \kbd{errname(ERR)}. In fact, a \typ{ERROR}
+object usually has extra components, which can be accessed as
+\kbd{component(ERR,1)}, \kbd{component(ERR,2)}, and so on. We now give the
+list of all exception types, and the corresponding contents of \kbd{ERR}.
+
+\kbd{gdiver}: division by non invertible object
 
 \kbd{invmoder}: impossible inverse modulo
 
@@ -2212,25 +2291,6 @@ have
 \kbd{typeer}: wrong type
 
 \kbd{errpile}: the PARI stack overflows
-
-\noindent Omitting the error name means we are trapping all errors. For
-instance, the following can be used to check in a safe way whether
-\tet{install} works correctly in your \kbd{gp}:
-\bprog
-broken_install() =
-{
-  trap(archer, return ("OS"),
-    install(addii,GG)
-  );
-  trap(, "USE",
-    if (addii(1,1) != 2, "BROKEN")
-  )
-}
-@eprog
-\noindent The function returns 0 if everything works (the omitted \var{else}
-clause of the \kbd{if}), \kbd{OS} if the operating system does not support
-\kbd{install}, \kbd{USE} if using an installed function triggers an error,
-and \kbd{BROKEN} if the installed function did not behave as expected.
 
 \section{Interfacing GP with other languages}
 \noindent

@@ -10,25 +10,24 @@ Help: iferr(seq1,E,seq2): evaluates the expression sequence seq1. if
  error data.
 Doc: evaluates the expression sequence \var{seq1}. if an error occurs,
  \var{seq2} is evaluated with the formal parameter \var{E} set to the error
- data.
- The error type is given by \kbd{errname(E)}, and other data can be accessed using
- the \tet{component} function.
- The code \var{seq2} should check whether the error is the one expected. In the negative
- the error can be rethrown using \tet{error(E)} (and eventually caught by an higher
- \kbd{iferr} instance).
- The following uses \kbd{iferr} to implement Lenstra ECM factoring method
- (however see \tet{ifername} for a simpler way).
+ data. The error type is given by \kbd{errname(E)}, and other data can be
+ accessed using the \tet{component} function. The code \var{seq2} should
+ check whether the error is the one expected. In the negative the error can
+ be rethrown using \tet{error(E)} (and possibly caught by an higher
+ \kbd{iferr} instance). The following uses \kbd{iferr} to implement Lenstra
+ ECM factoring method (however see \tet{ifername} for a simpler
+ implementation).
  \bprog
  ? ecm(N,B,t)=
    {
      for(a=1,t,
-       iferr(ellpow(ellinit([a,1]*Mod(1,N)),[0,1]*Mod(1,N),B),
-            err,if(errname(err)=="invmoder",
-                  return(gcd(lift(component(err,1)),N)),
-                  error(err))));
+       iferr(ellpow(ellinit([a,1]*Mod(1,N)), [0,1]*Mod(1,N), B),
+             err, if(errname(err)=="invmoder",
+                     return(gcd(lift(component(err,1)),N)),
+                     error(err))));
    }
- ? ecm(2^101-1,1000!,100)
+ ? ecm(2^101-1, 1000!, 100)
  %2 = 7432339208719
  @eprog
- The return value of \kbd{iferr} itself is, if an error occurs, the value of \var{seq2},
- it returns the value of \var{seq1}.
+ The return value of \kbd{iferr} itself is the value
+ of \var{seq2} if an error occurs, and the value of \var{seq1} otherwise.

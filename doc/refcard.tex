@@ -426,7 +426,9 @@ $s$}{forstep$(X\,$=$\;a,b,s,\seq)$}
 \li{exit $n$ innermost enclosing loops}{break$(\{n\})$}
 \li{start new iteration of $n$th enclosing loop}{next$(\{n\})$}
 \li{return $x$ from current subroutine}{return$(\{x\})$}
-\li{error recovery (try $\seq_1$)}{trap$(\{err\},\{\seq_2\},\{\seq_1\})$}
+\li{try $\seq_1$, evaluate $\seq_2$ on error}{iferr$(\seq_1, E, \seq_2)$}
+\li{try $\seq_1$, eval $\seq_2$ on error $e$}{iferrname$(e, \seq_1, E, \seq_2)$}
+\li{type of error message $E$}{errname$(E)$}
 %
 \subsec{Input/Output}
 \li{print args with/without newline}{print$(),$ print1$()$}

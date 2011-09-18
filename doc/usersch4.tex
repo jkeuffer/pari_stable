@@ -1079,7 +1079,7 @@ on their use.
 Some types have a second codeword, used differently by each type, and
 we will describe it as we now consider each of them in turn.
 
-\subsec{Type \typ{INT} (integer)}:
+\subsec{Type \typ{INT} (integer)}
 \sidx{integer}\kbdsidx{t_INT}this type has a second codeword \kbd{z[1]} which
 contains the following information:
 
@@ -1198,7 +1198,7 @@ These functions directly access the binary data and are thus much faster than
 the generic modulo functions. Besides, they return long integers instead of
 \kbd{GEN}s, so they do not clutter up the stack.
 
-\subsec{Type \typ{REAL} (real number)}:
+\subsec{Type \typ{REAL} (real number)}
 \kbdsidx{t_REAL}\sidx{real number}this type has a second codeword z[1] which
 also encodes its sign, obtained or set using the same functions as for a
 \typ{INT}, and a binary exponent. This exponent is handled using the
@@ -1237,18 +1237,18 @@ represented as \kbd{z[0]} (encoding $\kbd{type} = \typ{REAL}$, \kbd{lg(z)}),
 \kbd{z[1]} (encoding $\kbd{sign} = 1$, $\kbd{expo} = 1$), $\kbd{z[2]} =
 \kbd{0xe0000000}$, $\kbd{z[3]} =\dots = \kbd{z[lg(z)-1]} = \kbd{0x0}$.
 
-\subsec{Type \typ{INTMOD}}:\kbdsidx{t_INTMOD}
+\subsec{Type \typ{INTMOD}}\kbdsidx{t_INTMOD}
 \kbd{z[1]} points to the modulus, and \kbd{z[2]} at the number representing
 the class \kbd{z}. Both are separate \kbd{GEN} objects, and both must be
 \typ{INT}s, satisfying the inequality $0 \le \kbd{z[2]} < \kbd{z[1]}$.
 
-\subsec{Type \typ{FRAC} (rational number)}:%
+\subsec{Type \typ{FRAC} (rational number)}%
 \kbdsidx{t_FRAC}\sidx{rational number}
 \kbd{z[1]} points to the numerator $n$, and \kbd{z[2]} to the denominator
 $d$. Both must be of type \typ{INT} such that $n\neq 0$, $d > 0$ and
 $(n,d) = 1$.
 
-\subsec{Type \typ{FFELT} (finite field element)}:%
+\subsec{Type \typ{FFELT} (finite field element)}%
 \kbdsidx{t_FFELT}\sidx{finite field element} (Experimental)
 
 Components of this type should normally not be accessed directly. Instead,
@@ -1271,7 +1271,7 @@ $\F_l[X]/T$.
 \kbd{l=z[4]} is the \typ{INT} $2$, $T$ is irreducible modulo $2$, and
 $\deg A < \deg T$. This represents the element $A\pmod{T}$ in $\F_2[X]/T$.
 
-\subsec{Type \typ{COMPLEX} (complex number)}:%
+\subsec{Type \typ{COMPLEX} (complex number)}%
 \kbdsidx{t_COMPLEX}\sidx{complex number}
 \kbd{z[1]} points to the real part, and \kbd{z[2]} to the imaginary part.
 The components \kbd{z[1]} and \kbd{z[2]} must be of type
@@ -1280,7 +1280,7 @@ and \typ{PADIC} are also allowed (the latter for $p = 2$ or
 congruent to 3 mod 4 only), but one should rather use the more general
 \typ{POLMOD} construction.
 
-\subsec{Type \typ{PADIC} ($p$-adic numbers)}:%
+\subsec{Type \typ{PADIC} ($p$-adic numbers)}%
 \sidx{p-adic number}\kbdsidx{t_PADIC} this type has a second codeword
 \kbd{z[1]} which contains the following information: the $p$-adic precision
 (the exponent of $p$ modulo which the $p$-adic unit corresponding to
@@ -1308,7 +1308,7 @@ a\typ{INT} representing the $p$-adic unit associated to \kbd{z} modulo
 $$ \kbd{z} = p^{\text{valp(z)}} * (\kbd{z[4]} + O(\kbd{z[3]})),\quad
 \text{where}\quad \kbd{z[3]} = O(p^{\text{precp(z)}}). $$
 
-\subsec{Type \typ{QUAD} (quadratic number)}:
+\subsec{Type \typ{QUAD} (quadratic number)}
 \sidx{quadratic number}\kbdsidx{t_QUAD}\kbd{z[1]} points to the canonical
 polynomial $P$ defining the quadratic field (as output by \tet{quadpoly}),
 \kbd{z[2]} to the ``real part'' and \kbd{z[3]} to the ``imaginary part''. The
@@ -1323,7 +1323,7 @@ converting the \typ{QUAD} to a \typ{REAL} (or \typ{COMPLEX} with \typ{REAL}
 components) to the accuracy of the \typ{COMPLEX}. As a consequence,
 operations between \typ{QUAD} and \emph{exact} \typ{COMPLEX}s are not allowed.
 
-\subsec{Type \typ{POLMOD} (polmod)}:\kbdsidx{t_POLMOD}\sidx{polmod}
+\subsec{Type \typ{POLMOD} (polmod)}\kbdsidx{t_POLMOD}\sidx{polmod}
 as for \typ{INTMOD}s, \kbd{z[1]} points to the modulus, and \kbd{z[2]}
 to a polynomial representing the class of~\kbd{z}. Both must be of type
 \typ{POL} in the same variable, satisfying the inequality $\deg \kbd{z[2]}
@@ -1336,7 +1336,7 @@ a polynomial of degree 0 in the correct variable. On the other hand a
 variable of \emph{greater} priority is not acceptable; see
 \secref{se:priority} for the problems which may arise.
 
-\subsec{Type \typ{POL} (polynomial)}:\kbdsidx{t_POL}\sidx{polynomial} this
+\subsec{Type \typ{POL} (polynomial)}\kbdsidx{t_POL}\sidx{polynomial} this
 type has a second codeword. It contains a ``\emph{sign}'': 0 if the
 polynomial is equal to~0, and 1 if not (see however the important remark
 below) and a \emph{variable number} (e.g.~0 for $x$, 1 for $y$, etc\dots).
@@ -1393,7 +1393,7 @@ leading term \kbd{z[lg(z)-1]} is not an exact integer zero. More precisely,
 and \kbd{isrationalzero(x)} is false for the leading coefficient. The same
 remark applies to \typ{SER}s.
 
-\subsec{Type \typ{SER} (power series)}:
+\subsec{Type \typ{SER} (power series)}
 \kbdsidx{t_SER}\sidx{power series}This type also has a second codeword, which
 encodes a ``\emph{sign}'', i.e.~0 if the power series is 0, and 1 if not, a
 \emph{variable number} as for polynomials, and an \emph{exponent}. This
@@ -1412,58 +1412,58 @@ Note that the exponent of a power series can be negative, i.e.~we are
 then dealing with a Laurent series (with a finite number of negative
 terms).
 
-\subsec{Type \typ{RFRAC} (rational function)}:%
+\subsec{Type \typ{RFRAC} (rational function)}%
 \kbdsidx{t_RFRAC}\sidx{rational function} \kbd{z[1]} points to the
 numerator $n$,
 and \kbd{z[2]} on the denominator $d$. The denominator must be of type \typ{POL},
 with variable of higher priority than the numerator. The numerator
 $n$ is not an exact $0$ and $(n,d) = 1$ (see \tet{gred_rfac2}).
 
-\subsec{Type \typ{QFR} (indefinite binary quadratic form)}:%
+\subsec{Type \typ{QFR} (indefinite binary quadratic form)}%
 \kbdsidx{t_QFR}\sidx{indefinite binary quadratic form} \kbd{z[1]},
 \kbd{z[2]}, \kbd{z[3]} point to the three coefficients of the form and are of
 type \typ{INT}. \kbd{z[4]} is Shanks's distance function, and must be of type
 \typ{REAL}.
 
-\subsec{Type \typ{QFI} (definite binary quadratic form)}:%
+\subsec{Type \typ{QFI} (definite binary quadratic form)}%
 \kbdsidx{t_QFI}\sidx{definite binary quadratic form} \kbd{z[1]}, \kbd{z[2]},
 \kbd{z[3]} point to the three coefficients of the form. All three are of type
 \typ{INT}.
 
-\subsec{Type \typ{VEC} and \typ{COL} (vector)}:%
+\subsec{Type \typ{VEC} and \typ{COL} (vector)}%
 \kbdsidx{t_VEC}\kbdsidx{t_COL}\sidx{row vector}\sidx{column vector}
 \kbd{z[1]}, \kbd{z[2]},\dots \kbd{z[lg(z)-1]} point to the components of the
 vector.
 
-\subsec{Type \typ{MAT} (matrix)}:\kbdsidx{t_MAT}\sidx{matrix} \kbd{z[1]},
+\subsec{Type \typ{MAT} (matrix)}\kbdsidx{t_MAT}\sidx{matrix} \kbd{z[1]},
 \kbd{z[2]},\dots \kbd{z[lg(z)-1]} point to the column vectors of \kbd{z},
 i.e.~they must be of type \typ{COL} and of the same length.
 
-\subsec{Type \typ{VECSMALL} (vector of small integers)}:\kbdsidx{t_VECSMALL}
+\subsec{Type \typ{VECSMALL} (vector of small integers)}\kbdsidx{t_VECSMALL}
 \kbd{z[1]}, \kbd{z[2]},\dots \kbd{z[lg(z)-1]} are ordinary signed long
 integers. This type is used instead of a \typ{VEC} of \typ{INT}s for
 efficiency reasons, for instance to implement efficiently permutations,
 polynomial arithmetic and linear algebra over small finite fields, etc.
 
-\subsec{Type \typ{STR} (character string)}:%
+\subsec{Type \typ{STR} (character string)}%
 \kbdsidx{t_STR}\sidx{character string}
 
 \fun{char *}{GSTR}{z} (= \kbd{(z+1)}) points to the first character of the
 (\kbd{NULL}-terminated) string.
 
-\subsec{Type \typ{ERROR} (error message)}:\kbdsidx{t_ERROR}\sidx{error message}
-This type holds error messages. The error catching system returns such
-objects which contain information about the error. The second codeword
-\kbd{z[1]} contains the error type (as passed to \tet{pari_err}). The subsequent
-word \kbd{z[2]},\dots \kbd{z[lg(z)-1]} are pointers to \kbd{GEN}s containing
+\subsec{Type \typ{ERROR} (error context)}\kbdsidx{t_ERROR}\sidx{error context}
+This type holds error messages, as well as details about the error, as
+returned by the exception handling system. The second codeword \kbd{z[1]}
+contains the error type (an \kbd{int}, as passed to \tet{pari_err}). The
+subsequent words \kbd{z[2]},\dots \kbd{z[lg(z)-1]} are \kbd{GEN}s containing
 additional data, depending on the error type.
 
-\subsec{Type \typ{CLOSURE} (closure)}:\kbdsidx{t_CLOSURE}\sidx{closure}
+\subsec{Type \typ{CLOSURE} (closure)}\kbdsidx{t_CLOSURE}\sidx{closure}
 This type holds GP functions and closures, in compiled form. It is useless in
 library mode and subject to change each time the GP language evolves. Hence we
 do not describe it here and refer to the Developer's Guide.
 
-\subsec{Type \typ{LIST} (list)}:\kbdsidx{t_LIST}\sidx{list}
+\subsec{Type \typ{LIST} (list)}\kbdsidx{t_LIST}\sidx{list}
 this type was introduced for specific \kbd{gp} use and is rather inefficient
 compared to a straightforward linked list implementation (it requires more
 memory, as well as many unnecessary copies). Hence we do not describe it
@@ -1537,7 +1537,7 @@ abides). We call the latter type a ``temporary variable''. The regular
 variables meant to be used in regular objects, are called ``user
 variables\sidx{variable (user)}''.
 
-\subsubsec{User variables}\sidx{variable (user)}: When the program starts,
+\subsubsec{User variables}\sidx{variable (user)} When the program starts,
 \kbd{x} is the only user variable (number~$0$). To define new ones, use
 
 \fun{long}{fetch_user_var}{char *s}: inspects the user variable whose name is
@@ -1572,7 +1572,7 @@ number is unknown to the interpreter,  e.g. it is a user variable. Note
 that this may not be the same as \kbd{pol\_x(v)} if assignments have been
 performed in the interpreter.
 
-\subsubsec{Temporary variables}\sidx{variable (temporary)}:
+\subsubsec{Temporary variables}\sidx{variable (temporary)}
 \kbd{MAXVARN} is available, but is better left to PARI internal functions
 (some of which do not check that \kbd{MAXVARN} is free for them to use,
 which can be considered a bug). You can create more temporary variables
@@ -1790,19 +1790,17 @@ operands, as in the \tet{pari_printf} function. For instance:
 \bprog
   pari_err(talker, "x[%d] = %Ps is not invertible!", i, gel(x,i));
 @eprog\noindent
-The simple syntax seen above is
-just a special case with a constant format and no remaining arguments.
-The general syntax is
+The simple syntax seen above is just a special case with a constant format
+and no remaining arguments. The general syntax is
 
 \fun{void}{pari_err}{numerr,...}
 
-\noindent where \kbd{numerr} is a codeword which indicates what to do with
-the remaining arguments and what message to print. The list of valid keywords
-is in \kbd{language/errmessages.c} together with the basic corresponding
-message. For instance, \kbd{pari\_err(typeer,"extgcd")} prints the message:
+\noindent where \kbd{numerr} is a codeword which specifies the error class
+and what to do with the remaining arguments and what message to print.
+For instance, \kbd{pari\_err(typeer,"extgcd")} prints the message:
 \bprog
     ***   incorrect type in extgcd.
-@eprog
+@eprog\noindent See \secref{se:errors} for details.
 
 \subsec{Warnings}
 

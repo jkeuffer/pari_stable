@@ -10,6 +10,7 @@
 %
 % GENERAL FORMATTING
 %
+\newif\ifSUBSECTOC\SUBSECTOCtrue
 \newif\ifGPHELP
 \newif\ifPDF
 \newread\std
@@ -259,11 +260,12 @@
   \penalty10000 % impossible break
   \smallskip}% whatever follows will add a \parskip
 
+% overwritten in users.tex
 \def\subsectitle#1{%
   \ifGPHELP\else%
     \vskip 0pt plus 45pt\penalty-300
     \vskip 6pt plus -42pt minus 3pt\fi%
-  \tocwrite{{\sevenrm \hskip1cm#1\string\dotfill\the\pageno}}%
+  \ifSUBSECTOC\tocwrite{{\sevenrm \hskip1cm#1\string\dotfill\the\pageno}}\fi%
   \sectionhook\noindent{\bf#1}.}
 
 \def\subsubsectitle#1{% a \parskip is being added anyway by \noindent
