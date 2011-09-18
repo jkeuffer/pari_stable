@@ -1233,7 +1233,7 @@ name_numerr(const char *s)
 }
 
 GEN
-err_name(GEN err)
+errname(GEN err)
 {
   if (typ(err)!=t_ERROR) pari_err(typeer,"errname",err);
   return strtoGENstr(numerr_name(err_get_num(err)));
