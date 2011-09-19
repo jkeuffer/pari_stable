@@ -1050,7 +1050,7 @@ pari_err2str(GEN err)
   case constpoler:
     return pari_sprintf("constant polynomial in %Ps.", gel(err,2));
   case redpoler:
-    return pari_sprintf("reducible polynomial in %Ps.", gel(err,2));
+    return pari_sprintf("not an irreducible polynomial in %Ps.", gel(err,2));
   case zeropoler:
     return pari_sprintf("zero polynomial in %Ps.", gel(err,2));
   case consister:
@@ -1070,9 +1070,7 @@ pari_err2str(GEN err)
       switch(*op)
       {
       case '+': f = "addition"; break;
-      case '-':
-                return pari_sprintf(" negation - %s.",type_name(typ(x)));
-                f = NULL; break;
+      case '-': return pari_sprintf(" negation - %s.",type_name(typ(x)));
       case '*': f = "multiplication"; break;
       case '/': case '%': case '\\': f = "division"; break;
       case '=': op = "-->"; f = "assignment"; break;
