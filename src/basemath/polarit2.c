@@ -558,7 +558,7 @@ factor(GEN x)
       case t_INT: case t_FRAC: case t_COMPLEX:
       case t_POL: case t_RFRAC: break;
       default:
-        pari_err(talker,"can't factor %Ps",x);
+        pari_err(typeer,"factor",x);
     }
     y = cgetg(3,t_MAT);
     gel(y,1) = mkcolcopy(x);
@@ -674,7 +674,10 @@ factor(GEN x)
     case t_COMPLEX:
       y = gauss_factor(x);
       if (y) return y;
-      /* fall through */
+      break;
+
+    default:
+      pari_err(typeer,"factor",x);
   }
   pari_err(talker,"can't factor %Ps",x);
   return NULL; /* not reached */
