@@ -1994,8 +1994,7 @@ QuadGetST(GEN bnr, GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
     N0[j] = (long)bit_accuracy_mul(prec, 0.35 * gtodouble(c));
     if (n0 < N0[j]) n0 = N0[j];
   }
-  if ((ulong)n0 > maxprime())
-    pari_err(talker, "Not enough precomputed primes (need all p <= %ld)", n0);
+  maxprime_check(n0);
   if (DEBUGLEVEL>1) err_printf("N0 = %ld\n", n0);
   InitPrimesQuad(bnr, n0, &LIST);
 
@@ -2172,8 +2171,7 @@ GetST(GEN bnr, GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
     N0[j] = zeta_get_N0(c, limx);
     if (n0 < N0[j]) n0  = N0[j];
   }
-  if ((ulong)n0 > maxprime())
-    pari_err(talker, "Not enough precomputed primes (need all p <= %ld)", n0);
+  maxprime_check(n0);
   i0 = zeta_get_i0(r1, r2, prec2nbits(prec), limx);
   InitPrimes(bnr, n0, &LIST);
 
