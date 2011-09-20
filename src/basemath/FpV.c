@@ -313,7 +313,6 @@ FpM_mul(GEN x, GEN y, GEN p)
   long j, l, lx=lg(x), ly=lg(y);
   GEN z;
   if (ly==1) return cgetg(1,t_MAT);
-  /* if (lx != lg(y[1])) pari_err(operi,"*",x,y); */
   if (lx==1) return zeromat(0, ly-1);
   l = lg(x[1]); z = cgetg(ly,t_MAT);
   for (j=1; j<ly; j++) gel(z,j) = FpM_FpC_mul_i(x, gel(y,j), lx, l, p);
@@ -325,7 +324,6 @@ Flm_mul(GEN x, GEN y, ulong p)
   long i,j,l,lx=lg(x), ly=lg(y);
   GEN z;
   if (ly==1) return cgetg(1,t_MAT);
-  /* if (lx != lg(y[1])) pari_err(operi,"*",x,y); */
   z = cgetg(ly,t_MAT);
   if (lx==1)
   {
@@ -366,7 +364,6 @@ FpV_dotproduct(GEN x, GEN y, GEN p)
   long i, lx = lg(x);
   pari_sp av;
   GEN c;
-  /* if (lx != lg(y)) pari_err(operi,"*",x,y); */
   if (lx == 1) return gen_0;
   av = avma; c = mulii(gel(x,1),gel(y,1));
   for (i=2; i<lx; i++) c = addii(c, mulii(gel(x,i),gel(y,i)));
@@ -398,14 +395,12 @@ GEN
 FpM_FpC_mul(GEN x, GEN y, GEN p)
 {
   long lx = lg(x);
-  /* if (lx != lg(y)) pari_err(operi,"*",x,y); */
   return lx==1? cgetg(1,t_COL): FpM_FpC_mul_i(x, y, lx, lg(x[1]), p);
 }
 GEN
 Flm_Flc_mul(GEN x, GEN y, ulong p)
 {
   long l, lx = lg(x);
-  /* if (lx != lg(y)) pari_err(operi,"*",x,y); */
   if (lx==1) return cgetg(1,t_VECSMALL);
   l = lg(x[1]);
   if (p==2)
@@ -421,7 +416,6 @@ FpM_FpC_mul_FpX(GEN x, GEN y, GEN p, long v)
 {
   long i, l, lx = lg(x);
   GEN z;
-  /* if (lx != lg(y)) pari_err(operi,"*",x,y); */
   if (lx==1) return pol_0(v);
   l = lg(x[1]);
   z = new_chunk(l+1);

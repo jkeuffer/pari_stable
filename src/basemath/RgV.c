@@ -288,7 +288,7 @@ GEN
 RgV_RgC_mul(GEN x, GEN y)
 {
   long lx = lg(x);
-  if (lx != lg(y)) pari_err(operi,"*",x,y);
+  if (lx != lg(y)) pari_err(consister,"RgV_RgC_mul");
   return RgV_dotproduct_i(x, y, lx);
 }
 GEN
@@ -304,14 +304,14 @@ RgC_RgM_mul(GEN x, GEN y)
 {
   long i, ly = lg(y);
   GEN z = cgetg(ly,t_MAT);
-  if (ly != 1 && lg(y[1]) != 2) pari_err(operi,"*",x,y);
+  if (ly != 1 && lg(y[1]) != 2) pari_err(consister,"RgC_RgM_mul");
   for (i=1; i<ly; i++) gel(z,i) = RgC_Rg_mul(x, gcoeff(y,1,i));
   return z;
 }
 GEN
 RgM_RgV_mul(GEN x, GEN y)
 {
-  if (lg(x) != 2) pari_err(operi,"*",x,y);
+  if (lg(x) != 2) pari_err(consister,"RgM_RgV_mul");
   return RgC_RgV_mul(gel(x,1), y);
 }
 
@@ -334,7 +334,7 @@ GEN
 RgM_RgC_mul(GEN x, GEN y)
 {
   long lx = lg(x);
-  if (lx != lg(y)) pari_err(operi,"*",x,y);
+  if (lx != lg(y)) pari_err(consister,"RgM_RgC_mul");
   return RgM_RgC_mul_i(x, y, lx, (lx == 1)? 1: lg(x[1]));
 }
 GEN
@@ -344,7 +344,7 @@ RgV_RgM_mul(GEN x, GEN y)
   GEN z;
   if (ly == 1) return cgetg(1,t_VEC);
   lx = lg(x);
-  if (lx != lg(y[1])) pari_err(operi,"*",x,y);
+  if (lx != lg(y[1])) pari_err(consister,"RgV_RgM_mul");
   z = cgetg(ly, t_VEC);
   for (i=1; i<ly; i++) gel(z,i) = RgV_dotproduct_i(x, gel(y,i), lx);
   return z;
@@ -356,7 +356,7 @@ RgM_mul(GEN x, GEN y)
   GEN z;
   if (ly == 1) return cgetg(1,t_MAT);
   lx = lg(x);
-  if (lx != lg(y[1])) pari_err(operi,"*",x,y);
+  if (lx != lg(y[1])) pari_err(consister,"RgM_mul");
   z = cgetg(ly, t_MAT);
   l = (lx == 1)? 1: lg(x[1]);
   for (j=1; j<ly; j++) gel(z,j) = RgM_RgC_mul_i(x, gel(y,j), lx, l);
@@ -368,7 +368,7 @@ RgM_sqr(GEN x)
   long j, lx = lg(x);
   GEN z;
   if (lx == 1) return cgetg(1, t_MAT);
-  if (lx != lg(x[1])) pari_err(operi,"*",x,x);
+  if (lx != lg(x[1])) pari_err(consister,"RgM_sqr");
   z = cgetg(lx, t_MAT);
   for (j=1; j<lx; j++) gel(z,j) = RgM_RgC_mul_i(x, gel(x,j), lx, lx);
   return z;

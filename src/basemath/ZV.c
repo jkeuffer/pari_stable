@@ -161,7 +161,6 @@ ZM_mul(GEN x, GEN y)
   long j, l, lx=lg(x), ly=lg(y);
   GEN z;
   if (ly==1) return cgetg(1,t_MAT);
-  /* if (lx != lg(y[1])) pari_err(operi,"*",x,y); */
   if (lx==1) return zeromat(0, ly-1);
   l = lg(x[1]); z = cgetg(ly,t_MAT);
   for (j=1; j<ly; j++) gel(z,j) = ZM_ZC_mul_i(x, gel(y,j), lx, l);
@@ -171,7 +170,6 @@ GEN
 ZM_ZC_mul(GEN x, GEN y)
 {
   long lx = lg(x);
-  /* if (lx != lg(y)) pari_err(operi,"*",x,y); */
   return lx==1? cgetg(1,t_COL): ZM_ZC_mul_i(x, y, lx, lg(x[1]));
 }
 
