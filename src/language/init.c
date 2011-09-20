@@ -973,7 +973,7 @@ pari_err2GEN(long numerr, va_list ap)
   case talker: case alarmer:
     {
       const char *ch1 = va_arg(ap, char*);
-      retmkerr3(numerr, strtoGENstr(ch1), gvsprintf(ch1,ap));
+      retmkerr2(numerr, gvsprintf(ch1,ap));
     }
   case user:
   case invmoder:
@@ -1029,7 +1029,7 @@ pari_err2str(GEN err)
   case syntaxer:
     return pari_strdup(GSTR(gel(err,2)));
   case talker: case alarmer:
-    return pari_sprintf("%Ps.",gel(err,3));
+    return pari_sprintf("%Ps.",gel(err,2));
   case user:
     return pari_sprint0("user error: ", gel(err,2), f_RAW);
   case invmoder:
