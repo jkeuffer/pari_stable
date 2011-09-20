@@ -278,8 +278,9 @@ are fast, but recursive objects with such components could be handled more
 efficiently: programming with libpari will save large constant factors here,
 compared to GP.
 
-\subsec{Integers} \sidx{integer}
-(\tet{t_INT}): after an (optional) leading \kbd{+} or \kbd{-}, type in the
+\subsec{Integers (\typ{INT})}%
+\sidx{integer}\sidx{t_INT}
+After an (optional) leading \kbd{+} or \kbd{-}, type in the
 decimal digits of your integer. No decimal point!
 \bprog
 ? 1234567
@@ -290,8 +291,9 @@ decimal digits of your integer. No decimal point!
 %3 = 1.000000000000000000000000000
 @eprog
 
-\subsec{Real numbers} \sidx{real number}
-(\tet{t_REAL}): after an (optional) leading \kbd{+} or \kbd{-},
+\subsec{Real numbers (\typ{REAL})}%
+\sidx{real number}\sidx{t_REAL}
+After an (optional) leading \kbd{+} or \kbd{-},
 type a number with a decimal point. Leading zeroes may be omitted, up to the
 decimal point, but trailing zeroes are important: your \typ{REAL}
 is assigned an internal precision, which is the supremum of the input
@@ -321,9 +323,10 @@ When the integer part of a real number $x$ is not known exactly because the
 exponent of $x$ is greater than the internal precision, the real number is
 printed in \kbd{e} format.
 
-\subsec{Intmods}\sidx{intmod}
-(\tet{t_INTMOD}): to create the image of the integer $a$ in $\Z/b\Z$ (for
-some non-zero integer $b$), type \kbd{Mod(a,b)}; \emph{not} \kbd{a\%b}.
+\subsec{Intmods (\typ{INTMOD})}%
+\sidx{intmod}\sidx{t_INTMOD}
+To create the image of the integer $a$ in $\Z/b\Z$ (for some non-zero
+integer $b$), type \kbd{Mod(a,b)}; \emph{not} \kbd{a\%b}.
 Internally, all operations are done on integer representatives belonging to
 $[0,b-1]$.
 
@@ -335,8 +338,9 @@ defined:
 
 \kbd{x.mod}: return the modulus \kbd{b}.
 
-\subsec{Rational numbers}\sidx{rational number}
-(\tet{t_FRAC}): all fractions are automatically reduced to lowest
+\subsec{Rational numbers (\typ{FRAC})}%
+\sidx{rational number}\sidx{t_FRAC}
+All fractions are automatically reduced to lowest
 terms, so it is impossible to work with reducible fractions. To enter $n/m$
 just type it as written. As explained in \secref{se:gdiv}, floating point
 division is \emph{not} performed, only reduction to lowest
@@ -367,8 +371,9 @@ time = 60 ms.
 %2 = Mod(2759492, 10000019)
 @eprog\noindent
 
-\subsec{Finite field elements}\sidx{finite field element} (\tet{t_FFELT}):
-let $T\in\F_p[X]$ be a monic irreducible polynomial defining your
+\subsec{Finite field elements (\typ{FFELT})}%
+\sidx{finite field element}\sidx{t_FFELT}
+Let $T\in\F_p[X]$ be a monic irreducible polynomial defining your
 finite field over $\F_p$, for instance obtained using \tet{ffinit}. Then the
 \tet{ffgen} function creates a generator of the finite field as an
 $\F_p$-algebra, namely the class of $X$ in $\F_p[X]/(T)$, from which you can
@@ -395,14 +400,15 @@ expressing \kbd{f} in term of the field generator.
 \kbd{f.mod}: the minimal polynomial (with reduced integer
 coefficients) of the field generator.
 
-\subsec{Complex numbers}\sidx{complex number} (\tet{t_COMPLEX}): to
-enter $x+iy$, type \kbd{x + I*y}. (That's \kbd{I}, \emph{not} \kbd{i}!) The
-letter \tet{I} stands for $\sqrt{-1}$. The ``real'' and ``imaginary''
+\subsec{Complex numbers (\typ{COMPLEX})}%
+\sidx{complex number}\sidx{t_COMPLEX}
+To enter $x+iy$, type \kbd{x + I*y}. (That's \kbd{I}, \emph{not} \kbd{i}!)
+The letter \tet{I} stands for $\sqrt{-1}$. The ``real'' and ``imaginary''
 parts $x$ and $y$ can be of type \typ{INT}, \typ{REAL}, \typ{INTMOD},
 \typ{FRAC}, or \typ{PADIC}.
 
-\subsec{$p$-adic numbers}\sidx{p-adic number}\label{se:padic}
-(\tet{t_PADIC}):
+\subsec{$p$-adic numbers (\typ{PADIC}):}%
+\sidx{p-adic number}\label{se:padic}\sidx{t_PADIC}
 Typing \kbd{O($p$\pow $k$)}, where $p$ and $k$ are integers, yields a
 $p$-adic $0$ of accuracy~$k$, representing any $p$-adic number whose
 valuation is $\geq k$. To input a general non-0 $p$-adic number, write
@@ -444,7 +450,9 @@ steeply as $p$ increases (and updates become very rare). But \typ{INTMOD}s
 remain at least 25\% more efficient. (But they do not have denominators!)
 % n = 1+O(1009^2);   for (i=1,10^6, n++)
 % n = Mod(1,1009^2); for (i=1,10^6, n++)
-\subsec{Quadratic numbers}\sidx{quadratic number} (\tet{t_QUAD}):
+
+\subsec{Quadratic numbers (\typ{QUAD})}%
+\sidx{quadratic number}\sidx{t_QUAD}
 This type is used to work in the quadratic order of \emph{discriminant}
 \kbd{d}, where \kbd{d} is a non-square integer congruent to $0$ or $1$
 (modulo $4$). The command
@@ -464,10 +472,11 @@ Since the order is $\Z + \kbd{w}\Z$, any other element can be input
 as \kbd{$x$+$y$*w} for some integers $x$ and $y$. In fact, you may work in
 its fraction field $\Q(\sqrt{d})$ and use \typ{FRAC} values for $x$ and $y$.
 
-\subsec{Polmods}\sidx{polmod} (\tet{t_POLMOD}): exactly as
-for intmods, to enter $x \mod y$ (where $x$ and $y$ are polynomials),
-type \kbd{Mod(x,y)}, not \kbd{x\%y}. Note that when $y$ is an irreducible
-polynomial in one variable, polmods whose modulus is $y$ are simply
+\subsec{Polmods (\typ{POLMOD})}%
+\sidx{polmod}\sidx{t_POLMOD}
+Exactly as for intmods, to enter $x \mod y$ (where $x$ and $y$ are
+polynomials), type \kbd{Mod(x,y)}, not \kbd{x\%y}. Note that when $y$ is an
+irreducible polynomial in one variable, polmods whose modulus is $y$ are simply
 algebraic numbers in the finite extension defined by the polynomial $y$.
 This allows us to work easily in \idx{number field}s, finite extensions of
 the $p$-adic field $\Q_p$, or \idx{finite field}s.
@@ -514,9 +523,10 @@ If the main variables are the same, it is allowed to mix \typ{POL} and
     %1 = Mod(2*x, x^2 + 1)
 @eprog
 
-\subsec{Polynomials}\sidx{polynomial}\label{se:pol}
-(\tet{t_POL}): type the polynomial in a natural way, not
-forgetting to put a ``$*$'' between a coefficient and a formal variable;
+\subsec{Polynomials (\typ{POL})}%
+\sidx{polynomial}\label{se:pol}\sidx{t_POL}
+Type the polynomial in a natural way, not forgetting to put a ``$*$'' between
+a coefficient and a formal variable;
 \bprog
 ? 1 + 2*x + 3*x^2
 %1 = 3*x^2 + 2*x + 1
@@ -565,8 +575,8 @@ monomials sorted by decreasing degree:
 \kbd{y}.) See \secref{se:varsymb} for valid variable names, and a discussion
 of multivariate polynomial rings.
 
-\subsec{Power series}\sidx{power series}\label{se:series}
-(\tet{t_SER}):
+\subsec{Power series (\typ{SER})}%
+\sidx{power series}\sidx{t_SER}\label{se:series}
 Typing \kbd{O(X\pow $k$)}, where $k$ is an integer, yields an $X$-adic $0$ of
 accuracy~$k$, representing any power series in \kbd{X} whose valuation is
 $\geq k$. Of course, \kbd{X} can be replaced by any other variable name! To
@@ -608,15 +618,16 @@ the computation:
 %4 = 1.000000000000000000000000000*y^-1 + O(1)
 @eprog
 
-\subsec{Rational functions}\sidx{rational function}
-(\tet{t_RFRAC}): as for fractions, all rational
-functions are automatically reduced to lowest terms. All that was
-said about fractions in \secref{se:FRAC} remains valid here.
+\subsec{Rational functions (\typ{RFRAC})}%
+\sidx{rational function}\sidx{t_RFRAC}
+As for fractions, all rational functions are automatically reduced to lowest
+terms. All that was said about fractions in \secref{se:FRAC} remains valid
+here.
 
-\subsec{Binary quadratic forms of positive or negative discriminant}%
-\sidx{binary quadratic form}
-(\tet{t_QFR} and \tet{t_QFI}):
-these are input using the function \kbd{Qfb}. For example \kbd{Qfb(1,2,3)}
+\subsec{Binary quadratic forms of positive or negative discriminant
+(\typ{QFR} and \typ{QFI})}%
+\sidx{binary quadratic form}\sidx{t_QFR}\sidx{t_QFI}
+These are input using the function \kbd{Qfb}. For example \kbd{Qfb(1,2,3)}
 creates the binary form $x^2+2xy+3y^2$. It is imaginary (of internal type
 \typ{QFI}) since its discriminant $2^2 - 4\times 3 = -8$ is negative.
 Although imaginary forms could be positive or negative definite, only
@@ -628,25 +639,27 @@ and Lenstra's ``distance''), which must be a real number. See also the
 function \kbd{qfbprimeform} which directly creates a prime form of given
 discriminant.
 
-\subsec{Row and column vectors}\sidx{row vector}\sidx{column vector}
-(\tet{t_VEC} and \tet{t_COL}): to enter a row vector, type the components
-separated by commas ``\kbd{,}'', and enclosed between brackets
-``\kbd{[}$\,$'' and ``$\,$\kbd{]}'', e.g.~\kbd{[1,2,3]}. To enter a column
-vector, type the vector horizontally, and add a tilde ``\til'' to transpose.
-\kbd{[ ]} yields the empty (row) vector. The function \tet{Vec} can be used
-to transform any object into a vector (see Chapter~3).
+\subsec{Row and column vectors (\typ{VEC} and \typ{COL})}%
+\sidx{row vector}\sidx{column vector}\sidx{t_VEC}\sidx{t_COL})
+To enter a row vector, type the components separated by commas ``\kbd{,}'',
+and enclosed between brackets ``\kbd{[}$\,$'' and ``$\,$\kbd{]}'',
+e.g.~\kbd{[1,2,3]}. To enter a column vector, type the vector horizontally,
+and add a tilde ``\til'' to transpose. \kbd{[ ]} yields the empty (row)
+vector. The function \tet{Vec} can be used to transform any object into a
+vector (see Chapter~3).
 
 If the variable $x$ contains a (row or column) vector, $x[m]$ refers to its
 $m$-th entry. You can assign a result to $x[m]$ (i.e.~write something like
 $x[k]=\var{expr}$).
 
-\subsec{Matrices} (\tet{t_MAT}):\sidx{matrix} to enter a matrix, type
-the components line by line, the components being separated by commas
-``\kbd{,}'', the lines by semicolons ``\kbd{;}'', and everything enclosed in
-brackets ``\kbd{[}$\,$'' and ``$\,$\kbd{]}'', e.g. \kbd{[x,y; z,t; u,v]}.
-\kbd{[;]} yields an empty ($0 \times 0$) matrix. The function \tet{Mat}
-transforms any object into a matrix, and \tet{matrix} creates matrices
-whose $(i,j)$-th entry is described by a function $f(i,j)$:
+\subsec{Matrices (\typ{MAT})}%
+\sidx{matrix}\sidx{t_MAT}
+To enter a matrix, type the components line by line, the components being
+separated by commas ``\kbd{,}'', the lines by semicolons ``\kbd{;}'', and
+everything enclosed in brackets ``\kbd{[}$\,$'' and ``$\,$\kbd{]}'', e.g.
+\kbd{[x,y; z,t; u,v]}. \kbd{[;]} yields an empty ($0 \times 0$) matrix. The
+function \tet{Mat} transforms any object into a matrix, and \tet{matrix}
+creates matrices whose $(i,j)$-th entry is described by a function $f(i,j)$:
 \bprog
 ? Mat(1)
 %1 =
@@ -705,9 +718,10 @@ the other using \tet{Vec} / \tet{Mat}, though:
 [4 5 6]
 @eprog
 
-\subsec{Lists} (\tet{t_LIST}):\sidx{list} lists can be input
-directly, as in \kbd{List([1,2,3,4])}; but in most cases, one creates
-an empty list, then appends elements using \kbd{listput}:
+\subsec{Lists (\typ{LIST})}%
+\sidx{list}\sidx{t_LIST}
+Lists can be input directly, as in \kbd{List([1,2,3,4])}; but in most cases,
+one creates an empty list, then appends elements using \kbd{listput}:
 \bprog
   ? a = List(); listput(a,1); listput(a,2);
   ? a
@@ -715,30 +729,36 @@ an empty list, then appends elements using \kbd{listput}:
 @eprog\noindent
 Elements can be accessed directly as with the vector types described above.
 
-\subsec{Strings} (\tet{t_STR}):\sidx{string}\sidx{character string} to
-enter a string, just enclose it between double quotes \kbd{"}, like this:
+\subsec{Strings (\typ{STR})}%
+\sidx{string}\sidx{character string}\sidx{t_STR}
+To enter a string, enclose it between double quotes \kbd{"}, like this:
 \kbd{"this is a string"}. The function \kbd{Str} can be used to transform any
 object into a string.
 
-\subsec{Small vectors} (\tet{t_VECSMALL}): this is an internal type,
-used to code in an efficient way vectors containing only small integers, such
-as permutations. Most \kbd{gp} functions will refuse to operate on these
-objects.
+\subsec{Small vectors (\typ{VECSMALL})}%
+\sidx{t_VECSMALL}
+This is an internal type, used to code in an efficient way vectors containing
+only small integers, such as permutations. Most \kbd{gp} functions will
+refuse to operate on these objects.
 
-\subsec{Functions} (\tet{t_CLOSURE}): we will explain this at length in
-\secref{se:user_defined}. For the time being, suffice it to say that
-functions can be assigned to variables, as any other object, and the
-following equivalent basic forms are available to create new ones
+\subsec{Functions (\typ{CLOSURE})}%
+\sidx{t_CLOSURE}
+We will explain this at length in \secref{se:user_defined}. For the time
+being, suffice it to say that functions can be assigned to variables, as any
+other object, and the following equivalent basic forms are available to
+create new ones
 \bprog
   f = (x,y) -> x^2 + y^2
 
   f(x,y) = x^2 + y^2
 @eprog
 
-\subsec{Error contexts} (\tet{t_ERROR}): an object of this type is created
-whenever an error occurs: it contains some information about the error and
-the error context. Usually, an appropriate error is printed immediately, the
-computation is aborted, and GP enters the ``break loop'':
+\subsec{Error contexts (\typ{ERROR})}%
+\sidx{t_ERROR}
+An object of this type is created whenever an error occurs: it contains some
+information about the error and the error context. Usually, an appropriate
+error is printed immediately, the computation is aborted, and GP enters the
+``break loop'':
 \bprog
   ? 1/0; 1 + 1
     ***   at top-level: 1/0;1+1
@@ -1692,7 +1712,7 @@ your machine) from within \kbd{gp}. To increase it before launching \kbd{gp},
 you can use \tet{ulimit} or \tet{limit}, depending on your shell, and raise
 the process available stack space (increase \tet{stacksize}).
 
-\subsec{Function which take functions as parameters ?} Very easy:
+\subsec{Function which take functions as parameters} This is done as follows:
 \bprog
 ? calc(f, x) = f(x)
 ? calc(sin, Pi)
@@ -2414,7 +2434,7 @@ first character is a digit, and with \b{r} or \b{w}, if the file name itself
 contains a space. In such cases, just use the underlying \tet{read} or
 \tet{write} function; see~\secref{se:write}).
 
-\subseckbd{?} $\{\var{command}\}$: \kbd{gp} on-line help interface.
+\subseckbd{?$\{\var{command}\}$} The \kbd{gp} on-line help interface.
 If you type \kbd{?$n$} where $n$ is a number from 1 to 11, you will get the
 list of functions in Section $3.n$ of the manual (the list of sections being
 obtained by simply typing \kbd{?}). \label{se:exthelp}
@@ -2495,38 +2515,38 @@ help script, or write new ones (and we would like to know about it
 so that we may include them in future distributions). By the way, outside
 of \kbd{gp} you can give more than one keyword as argument to \kbd{gphelp}.
 
-\subseckbd{/*...*/}: comment. Everything between the stars is ignored by
+\subseckbd{/*...*/} A comment. Everything between the stars is ignored by
 \kbd{gp}. These comments can span any number of lines.
 
-\subseckbd{\bs\bs}: one-line comment. The rest of the line
+\subseckbd{\bs\bs} A one-line comment. The rest of the line
 is ignored by \kbd{gp}.
 
-\subsec{\b{a}} $\{n\}$: prints the object number $n$ ($\%n$)
+\subsec{\b{a} $\{n\}$} Prints the object number $n$ ($\%n$)
 in raw format. If the number $n$ is omitted, print the latest computed object
 ($\%$). \label{se:history}
 
-\subsec{\b{c}}: \sidx{available commands}prints the list of all available
+\subsec{\b{c}}\sidx{available commands} Prints the list of all available
 hardcoded functions under \kbd{gp}, not including operators written as special
 symbols (see \secref{se:operators}). More information can be obtained using
 the \kbd{?} metacommand (see above). For user-defined functions / member
 functions, see \b{u} and \b{um}.
 
-\subsec{\b{d}}: prints the \idx{defaults} as described in the
+\subsec{\b{d}} Prints the \idx{defaults} as described in the
 previous section (shortcut for \kbd{default()}, see \secref{se:default}).
 
-\subsec{\b{e}} $\{n\}$: switches the \tet{echo} mode on (1) or off (0). If
+\subsec{\b{e} $\{n\}$} Switches the \tet{echo} mode on (1) or off (0). If
 $n$ is explicitly given, set echo to $n$.
 
-\subsec{\b{g}} $\{n\}$: sets the debugging level \tet{debug} to the
+\subsec{\b{g} $\{n\}$} Sets the debugging level \tet{debug} to the
 non-negative integer $n$.
 
-\subsec{\b{gf}} $\{n\}$: sets the file usage debugging level \tet{debugfiles}
+\subsec{\b{gf} $\{n\}$} Sets the file usage debugging level \tet{debugfiles}
 to the non-negative integer $n$.
 
-\subsec{\b{gm}} $\{n\}$: sets the memory debugging level \tet{debugmem}
+\subsec{\b{gm} $\{n\}$} Sets the memory debugging level \tet{debugmem}
 to the non-negative integer $n$.
 
-\subsec{\b{h}} $\{m$\kbd{-}$n\}$: outputs some debugging info about the
+\subsec{\b{h} $\{m$\kbd{-}$n\}$} Outputs some debugging info about the
 hashtable. If the argument is a number $n$, outputs the contents of cell
 $n$. Ranges can be given in the form $m$\kbd{-}$n$ (from cell $m$ to cell
 $n$, \$ = last cell). If a function name is given instead of a number or
@@ -2534,25 +2554,25 @@ range, outputs info on the internal structure of the hash cell this
 function occupies (a \kbd{struct entree} in C). If the range is reduced to
 a dash ('\kbd{-}'), outputs statistics about hash cell usage.
 
-\subsec{\b{l}} $\{$\var{logfile}$\}$: switches \tet{log} mode on and off.
+\subsec{\b{l} $\{$\var{logfile}$\}$} Switches \tet{log} mode on and off.
 If a \var{logfile} argument is given, change the default logfile name to
 \var{logfile} and switch log mode on.
 
-\subsec{\b{m}}: as \b{a}, but using prettymatrix format.
+\subsec{\b{m}} As \b{a}, but using prettymatrix format.
 
-\subsec{\b{o}} $\{n\}$: sets \tet{output} mode to $n$ ($0$: raw, $1$:
+\subsec{\b{o} $\{n\}$} Sets \tet{output} mode to $n$ ($0$: raw, $1$:
 prettymatrix, $3$: external prettyprint).
 
-\subsec{\b{p}} $\{n\}$: sets \tet{realprecision} to $n$ decimal
+\subsec{\b{p} $\{n\}$} Sets \tet{realprecision} to $n$ decimal
 digits. Prints its current value if $n$ is omitted.
 
-\subsec{\b{ps}} $\{n\}$: sets \tet{seriesprecision} to $n$ significant terms.
+\subsec{\b{ps} $\{n\}$} Sets \tet{seriesprecision} to $n$ significant terms.
 Prints its current value if $n$ is omitted.
 
-\subsec{\b{q}}: quits the \kbd{gp} session and returns to the system.
+\subsec{\b{q}} Quits the \kbd{gp} session and returns to the system.
 Shortcut for \tet{quit}\kbd{()} (see \secref{se:quit}).
 
-\subsec{\b{r}} $\{$\var{filename}$\}$: \idx{read}s into \kbd{gp} all the
+\subsec{\b{r} $\{$\var{filename}$\}$} Reads into \kbd{gp} all the
 commands contained in the named file as if they had been typed from the
 keyboard, one line after the other. Can be used in combination with the \b{w}
 command (see below). Related but not equivalent to the function \kbd{read}
@@ -2569,27 +2589,27 @@ command accepts compressed files in \tet{compress}ed (\kbd{.Z}) or
 \tet{gzip}ped (\kbd{.gz} or \kbd{.z}) format. They will be uncompressed on
 the fly as \kbd{gp} reads them, without changing the files themselves.
 
-\subsec{\b{s}}: prints the state of the PARI \tev{stack} and \tev{heap}.
+\subsec{\b{s}} Prints the state of the PARI \tev{stack} and \tev{heap}.
 This is used primarily as a debugging device for PARI.
 
-\subsec{\b{t}}: prints the \idx{internal longword format} of all the PARI
+\subsec{\b{t}} Prints the \idx{internal longword format} of all the PARI
 types. The detailed bit or byte format of the initial codeword(s) is
 explained in Chapter~4, but its knowledge is not necessary for a \kbd{gp} user.
 
-\subsec{\b{u}}: prints the definitions of all user-defined functions.
+\subsec{\b{u}} Prints the definitions of all user-defined functions.
 
-\subsec{\b{um}}: prints the definitions of all user-defined member functions.
+\subsec{\b{um}} Prints the definitions of all user-defined member functions.
 
-\subsec{\b{v}}: prints the \idx{version number} and implementation architecture
+\subsec{\b{v}} Prints the \idx{version number} and implementation architecture
 (680x0, Sparc, Alpha, other) of the \kbd{gp} executable you are using.
 
-\subsec{\b{w}} $\{n\}$ $\{$\var{filename}$\}$: writes the object number
+\subsec{\b{w} $\{n\}$ $\{$\var{filename}$\}$} Writes the object number
 $n$ ( $\%n$ ) into the named file, in raw format. If the number $n$ is
 omitted, writes the latest computed object ( $\%$ ). If \var{filename} is
 omitted, appends to \kbd{logfile} (the GP function \tet{write} is a trifle more
 powerful, as you can have arbitrary file names).
 
-\subsec{\b{x}}: prints the complete tree with addresses and contents (in
+\subsec{\b{x}} Prints the complete tree with addresses and contents (in
 hexadecimal) of the \idx{internal representation} of the latest computed
 object in \kbd{gp}. As for \b{s}, this is used primarily as a debugging device for
 PARI, and the format should be self-explanatory (a $*$ before an object --
@@ -2597,14 +2617,13 @@ typically a modulus -- means the corresponding component is out of stack).
 However, used on a PARI integer, it can be used as a
 decimal$\rightarrow$hexadecimal converter.
 
-\subsec{\b{y}} $\{n\}$: switches \kbd{simplify} on (1) or off (0). If $n$
+\subsec{\b{y} $\{n\}$} Switches \kbd{simplify} on (1) or off (0). If $n$
 is explicitly given, set simplify to $n$.
 
-\subseckbd{\#}: switches the \kbd{timer} on or off.
+\subseckbd{\#} Switches the \kbd{timer} on or off.
 
-\subseckbd{\#\#}: prints the time taken by the latest computation.
+\subseckbd{\#\#} Prints the time taken by the latest computation.
 Useful when you forgot to turn on the \kbd{timer}.
-
 
 \section{The preferences file}\sidx{startup}\sidx{preferences file}
 \label{se:gprc}
@@ -2708,7 +2727,7 @@ one (note the terminating \kbd{;} to separate the expressions):
 }
 @eprog
 
-\subsec{Where is it?}
+\subsec{The gprc location}
 When \kbd{gp} is started, it looks for a customization file, or \kbd{gprc} in the
 following places (in this order, only the first one found will be loaded):
 
@@ -2759,7 +2778,7 @@ This very useful library provides line editing and contextual completion
 to \kbd{gp}. You are encouraged to read the \kbd{readline} user manual,
 but we describe basic usage here.
 
-\subsec{A (too) short introduction to readline}: \label{se:readline}
+\subsec{A (too) short introduction to readline}\label{se:readline}
 In the following, \kbd{C-} stands for ``the \kbd{Control} key combined with
 another'' and the same for \kbd{M-} with the \kbd{Meta} key; generally
 \kbd{C-} combinations act on characters, while the \kbd{M-} ones operate on

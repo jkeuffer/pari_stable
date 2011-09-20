@@ -11,6 +11,7 @@
 % GENERAL FORMATTING
 %
 \newif\ifSUBSECTOC\SUBSECTOCtrue
+\newif\ifSUBSECDOT\SUBSECDOTtrue
 \newif\ifGPHELP
 \newif\ifPDF
 \newread\std
@@ -260,7 +261,6 @@
   \penalty10000 % impossible break
   \smallskip}% whatever follows will add a \parskip
 
-% overwritten in users.tex
 \def\subsectitle#1{%
   \ifGPHELP\else%
     \vskip 0pt plus 45pt\penalty-300
@@ -317,8 +317,6 @@
 \def\emacs{\annotepar{EMACS}}
 
 \def\subseckbd#1{\subsec{\kbd{#1}}}
-\def\@subsecidx#1{\subsec{#1}\toindex{#1}}
-\def\subsecidx{\gdef\f@nt{tt}\let\do=\@subsecidx\doverb}
 
 %
 % General purpose

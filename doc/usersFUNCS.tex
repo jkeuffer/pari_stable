@@ -133,22 +133,28 @@ for general background and details.
 
 \section{Standard monadic or dyadic operators}
 
-\subseckbd{+$/$-}: The expressions \kbd{+}$x$ and \kbd{-}$x$ refer
+\subseckbd{+$/$-} The expressions \kbd{+}$x$ and \kbd{-}$x$ refer
 to monadic operators (the first does nothing, the second negates $x$).
 
 The library syntax is \fun{GEN}{gneg}{GEN x} for \kbd{-}$x$.
 
-\subseckbd{+}, \kbd{-}: The expression $x$ \kbd{+} $y$ is the \idx{sum} and
-$x$ \kbd{-} $y$ is the \idx{difference} of $x$ and $y$. Addition/subtraction
-between a scalar type $x$ and a \typ{COL} or \typ{MAT} $y$ returns
-respectively $[y[1] \pm x, y[2],\dots]$ and $y \pm x \text{Id}$. Other
-addition/subtraction between a scalar type and a vector or a matrix, or
+\subseckbd{+} The expression $x$ \kbd{+} $y$ is the \idx{sum} of $x$ and $y$.
+Addition between a scalar type $x$ and a \typ{COL} or \typ{MAT} $y$ returns
+respectively $[y[1] + x, y[2],\dots]$ and $y + x \text{Id}$. Other additions
+between a scalar type and a vector or a matrix, or between vector/matrices of
+incompatible sizes are forbidden.
+
+The library syntax is \fun{GEN}{gadd}{GEN x, GEN y}.
+
+\subseckbd{-} The expression $x$ \kbd{-} $y$ is the \idx{difference} of $x$
+and $y$. Subtraction between a scalar type $x$ and a \typ{COL} or \typ{MAT}
+$y$ returns respectively $[y[1] - x, y[2],\dots]$ and $y - x \text{Id}$.
+Other subtractions between a scalar type and a vector or a matrix, or
 between vector/matrices of incompatible sizes are forbidden.
 
-The library syntax is \fun{GEN}{gadd}{GEN x, GEN y} for $x$ \kbd{+} $y$,
-\fun{GEN}{gsub}{GEN x, GEN y} for $x$ \kbd{-} $y$.
+The library syntax is \fun{GEN}{gsub}{GEN x, GEN y} for $x$ \kbd{-} $y$.
 
-\subseckbd{*}: The expression $x$ \kbd{*} $y$ is the \idx{product} of $x$
+\subseckbd{*} The expression $x$ \kbd{*} $y$ is the \idx{product} of $x$
 and $y$. Among the prominent impossibilities are multiplication between
 vector/matrices of incompatible sizes, between a \typ{INTMOD} or \typ{PADIC}
 Restricted to scalars, \kbd{*} is commutative; because of vector and matrix
@@ -176,7 +182,7 @@ length, understand them as permutations and compose them.
 The library syntax is \fun{GEN}{gmul}{GEN x, GEN y} for $x$ \kbd{*} $y$.
 Also available is \fun{GEN}{gsqr}{GEN x} for $x$ \kbd{*} $x$.
 
-\subseckbd{/}: The expression $x$ \kbd{/} $y$ is the \idx{quotient} of $x$
+\subseckbd{/} The expression $x$ \kbd{/} $y$ is the \idx{quotient} of $x$
 and $y$. In addition to the impossibilities for multiplication, note that if
 the divisor is a matrix, it must be an invertible square matrix, and in that
 case the result is $x*y^{-1}$. Furthermore note that the result is as exact
@@ -193,7 +199,7 @@ integers, add \kbd{O(p\pow k)} to the result; finally, to obtain the
 
 The library syntax is \fun{GEN}{gdiv}{GEN x, GEN y} for $x$ \kbd{/} $y$.
 
-\subseckbd{\bs}: The expression \kbd{$x$ \bs\ $y$} is the \idx{Euclidean
+\subseckbd{\bs} The expression \kbd{$x$ \bs\ $y$} is the \idx{Euclidean
 quotient} of $x$ and $y$. If $y$ is a real scalar, this is defined as
 \kbd{floor($x$/$y$)} if $y > 0$, and \kbd{ceil($x$/$y$)} if $y < 0$ and
 the division is not exact. Hence the remainder \kbd{$x$ - ($x$\bs$y$)*$y$}
@@ -206,7 +212,7 @@ is applied componentwise.
 The library syntax is \fun{GEN}{gdivent}{GEN x, GEN y}
 for $x$ \kbd{\bs} $y$.
 
-\subseckbd{\bs/}: The expression $x$ \b{/} $y$ evaluates to the rounded
+\subseckbd{\bs/} The expression $x$ \b{/} $y$ evaluates to the rounded
 \idx{Euclidean quotient} of $x$ and $y$. This is the same as \kbd{$x$ \bs\ $y$}
 except for scalar division: the quotient is such that the corresponding
 remainder is smallest in absolute value and in case of a tie the quotient
@@ -218,7 +224,7 @@ When $x$ is a vector or matrix, the operator is applied componentwise.
 The library syntax is \fun{GEN}{gdivround}{GEN x, GEN y}
 for $x$ \b{/} $y$.
 
-\subseckbd{\%}: The expression \kbd{$x$ \% $y$} evaluates to the modular
+\subseckbd{\%} The expression \kbd{$x$ \% $y$} evaluates to the modular
 \idx{Euclidean remainder} of $x$ and $y$, which we now define. When $x$ or $y$
 is a non-integral real number, \kbd{$x$\%$y$} is defined as \kbd{$x$ -
 ($x$\bs$y$)*$y$}. Otherwise, if $y$ is an integer, this is the smallest
@@ -241,7 +247,7 @@ is applied componentwise.
 The library syntax is \fun{GEN}{gmod}{GEN x, GEN y}
 for $x$ \kbd{\%} $y$.
 
-\subseckbd{\pow}: The expression $x\hbox{\kbd{\pow}}n$ is \idx{powering}.
+\subseckbd{\pow} The expression $x\hbox{\kbd{\pow}}n$ is \idx{powering}.
 If the exponent is an integer, then exact operations are performed using
 binary (left-shift) powering techniques. In particular, in this case $x$
 cannot be a vector or matrix unless it is a square matrix (invertible
@@ -467,7 +473,7 @@ componentwise evaluation of the function. In particular, transcendental
 functions on square matrices, which are not implemented in the present
 version \vers, will have a different name if they are implemented some day.
 
-\subseckbd{\pow}: If $y$ is not of type integer, \kbd{x\pow y} has the same
+\subseckbd{\pow} If $y$ is not of type integer, \kbd{x\pow y} has the same
 effect as \kbd{exp(y*log(x))}. It can be applied to $p$-adic numbers as well
 as to the more usual types.\sidx{powering}
 
@@ -1173,7 +1179,7 @@ session, without having to kill the window first. This window can be closed,
 enlarged or reduced using the standard window manager functions. No zooming
 procedure is implemented though (yet).
 
-\subsec{Functions for PostScript output:} in the same way that \kbd{printtex} allows you to have a \TeX\ output
+\subsec{Functions for PostScript output} in the same way that \kbd{printtex} allows you to have a \TeX\ output
 corresponding to printed results, the functions starting with \kbd{ps} allow
 you to have \tet{PostScript} output of the plots. This will not be identical
 with the screen output, but sufficiently close. Note that you can use
@@ -1185,7 +1191,7 @@ to that file. Hence you probably want to remove this file, or change the
 value of \kbd{psfile}, in between plots. On the other hand, in this manner,
 as many plots as desired can be kept in a single file. \smallskip
 
-\subsec{And library mode ?} \emph{None of the graphic functions are available
+\subsec{Library mode} \emph{None of the graphic functions are available
 within the PARI library, you must be under \kbd{gp} to use them}. The reason
 for that is that you really should not use PARI for heavy-duty graphical work,
 there are better specialized alternatives around. This whole set of routines

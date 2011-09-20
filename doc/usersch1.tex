@@ -59,7 +59,7 @@ can have a quick idea of what is available by looking at the \kbd{gp}
 reference card (\kbd{refcard.dvi} or \kbd{refcard.ps}). In case of need, you
 can refer to the complete function description in Chapter 3.
 
-\subsectitle{How to get the latest version?} Everything can be found on
+\subsectitle{How to get the latest version} Everything can be found on
 PARI's home page:
 \bprog
   http://pari.math.u-bordeaux.fr/
@@ -67,7 +67,7 @@ PARI's home page:
 version information, the complete mailing list archives, frequently asked
 questions and various tips. All threaded and fully searchable.
 
-\subsectitle{How to report bugs?} Bugs are submitted online to our Bug
+\subsectitle{How to report bugs} Bugs are submitted online to our Bug
 Tracking System, available from PARI's home page, or directly from the URL
 \bprog
   http://pari.math.u-bordeaux.fr/Bugs/
@@ -212,7 +212,7 @@ small finite field, etc.
 Every PARI object (called \tet{GEN} in the sequel) belongs to one of these
 basic types. Let us have a closer look.
 
-\subsec{Integers and reals}: they are of
+\subsec{Integers and reals} They are of
 arbitrary and varying length (each number carrying in its internal
 \sidx{integer}\sidx{real number}
 representation its own length or precision) with the following mild
@@ -225,7 +225,8 @@ $2^{29}$.
 
 Integers and real numbers are non-recursive types.
 
-\subsec{Intmods, rational numbers, $p$-adic numbers, polmods, and rational functions}: these are recursive, but in a restricted way.
+\subsec{Intmods, rational numbers, $p$-adic numbers, polmods, and rational
+functions} These are recursive, but in a restricted way.
 \sidx{intmod}\sidx{rational number}\sidx{p-adic number}\sidx{polmod}
 
 For intmods or polmods, there are two components: the modulus, which must
@@ -246,15 +247,14 @@ codewords contain an exponent, giving the $p$-adic valuation of the number,
 and also the information on the precision of the number, which is
 redundant with $p^k$, but is included for the sake of efficiency.
 
-\subsec{Finite field elements}: \sidx{finite field element}
-
+\subsec{Finite field elements}\sidx{finite field element}
 The exact internal format depends of the finite field size, but it includes
 the field characteristic $p$, an irreducible polynomial $T\in\F_p[X]$
 defining the finite field $\F_p[X]/(T)$ and the element expressed as
 a polynomial in (the class of) $X$.
 
-\subsec{Complex numbers and quadratic numbers}: \sidx{complex
-number}\sidx{quadratic number} quadratic numbers are numbers of the form
+\subsec{Complex numbers and quadratic numbers}\sidx{complex
+number}\sidx{quadratic number} Quadratic numbers are numbers of the form
 $a+bw$, where $w$ is such that $[\Z[w]:\Z]=2$, and more precisely $w=\sqrt
 d/2$ when $d\equiv 0 \mod 4$, and $w=(1+\sqrt d)/2$ when $d\equiv 1 \mod 4$,
 where $d$ is the discriminant of a quadratic order. Complex numbers
@@ -269,9 +269,9 @@ one explicitly uses a complex $p$-adic type. Quadratic numbers are more
 restricted: their components may be as above, except that \typ{REAL} is not
 allowed.
 
-\subsec{Polynomials, power series, vectors, matrices and lists}:
+\subsec{Polynomials, power series, vectors, matrices and lists}
 \sidx{polynomial}\sidx{power series}\sidx{vector}\sidx{matrix}
-they are completely recursive: their components can be of any type, and types
+They are completely recursive: their components can be of any type, and types
 can be mixed (however beware when doing operations). Note in particular that
 a polynomial in two variables is simply a polynomial with polynomial
 coefficients.
@@ -283,10 +283,10 @@ several variables of a special type) are OK. This is a difficult design
 problem: the mathematical problem itself contains some amount of imprecision,
 and it is not easy to design an intuitive generic interface for such beasts.
 
-\subsec{Strings}: These contain objects just as they would be printed by the
+\subsec{Strings} These contain objects just as they would be printed by the
 \kbd{gp} calculator.
 
-\subsec{What is zero?} This is a crucial question in all computer
+\subsec{Zero} What is zero? This is a crucial question in all computer
 systems. The answer we give in PARI is the following. For exact types, all
 zeros are equivalent and are exact, and thus are usually represented as an
 integer \idx{zero}. The problem becomes non-trivial for imprecise types:
