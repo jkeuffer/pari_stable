@@ -37,14 +37,10 @@ while (<FILE>)
         $doc .= library_syntax($fun, $args);
       }
       s/_def_//;
-      my ($secname) = $_;
-      my ($l) = $_;
-      $l = "def,$l" if ($fun->{Section} =~ 'default');
-      if ($secname =~ s/_/\\_/g) {
-        print "\n\\subsec{$secname$v}\\kbdsidx{$l}\\label{se:$l}\n$doc\n";
-      } else {
-        print "\n\\subsec{$secname$v}\\sidx{$secname}\\label{se:$l}\n$doc\n";
-      }
+      my($secname) = $_;
+      my($l) = ($fun->{Section} =~ 'default')? "def,$_": $_;
+      my($idx) = ($secname =~ s/_/\\_/g)? $l: $secname;
+      print "\n\\subsec{$secname$v}\\kbdsidx{$idx}\\label{se:$l}\n$doc\n";
     }
   }
   print;
