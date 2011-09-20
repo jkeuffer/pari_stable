@@ -279,7 +279,7 @@ efficiently: programming with libpari will save large constant factors here,
 compared to GP.
 
 \subsec{Integers (\typ{INT})}%
-\sidx{integer}\sidx{t_INT}
+\sidx{integer}\kbdsidx{t_INT}
 After an (optional) leading \kbd{+} or \kbd{-}, type in the
 decimal digits of your integer. No decimal point!
 \bprog
@@ -292,7 +292,7 @@ decimal digits of your integer. No decimal point!
 @eprog
 
 \subsec{Real numbers (\typ{REAL})}%
-\sidx{real number}\sidx{t_REAL}
+\sidx{real number}\kbdsidx{t_REAL}
 After an (optional) leading \kbd{+} or \kbd{-},
 type a number with a decimal point. Leading zeroes may be omitted, up to the
 decimal point, but trailing zeroes are important: your \typ{REAL}
@@ -324,7 +324,7 @@ exponent of $x$ is greater than the internal precision, the real number is
 printed in \kbd{e} format.
 
 \subsec{Intmods (\typ{INTMOD})}%
-\sidx{intmod}\sidx{t_INTMOD}
+\sidx{intmod}\kbdsidx{t_INTMOD}
 To create the image of the integer $a$ in $\Z/b\Z$ (for some non-zero
 integer $b$), type \kbd{Mod(a,b)}; \emph{not} \kbd{a\%b}.
 Internally, all operations are done on integer representatives belonging to
@@ -339,7 +339,7 @@ defined:
 \kbd{x.mod}: return the modulus \kbd{b}.
 
 \subsec{Rational numbers (\typ{FRAC})}%
-\sidx{rational number}\sidx{t_FRAC}
+\sidx{rational number}\kbdsidx{t_FRAC}
 All fractions are automatically reduced to lowest
 terms, so it is impossible to work with reducible fractions. To enter $n/m$
 just type it as written. As explained in \secref{se:gdiv}, floating point
@@ -372,7 +372,7 @@ time = 60 ms.
 @eprog\noindent
 
 \subsec{Finite field elements (\typ{FFELT})}%
-\sidx{finite field element}\sidx{t_FFELT}
+\sidx{finite field element}\kbdsidx{t_FFELT}
 Let $T\in\F_p[X]$ be a monic irreducible polynomial defining your
 finite field over $\F_p$, for instance obtained using \tet{ffinit}. Then the
 \tet{ffgen} function creates a generator of the finite field as an
@@ -401,14 +401,14 @@ expressing \kbd{f} in term of the field generator.
 coefficients) of the field generator.
 
 \subsec{Complex numbers (\typ{COMPLEX})}%
-\sidx{complex number}\sidx{t_COMPLEX}
+\sidx{complex number}\kbdsidx{t_COMPLEX}
 To enter $x+iy$, type \kbd{x + I*y}. (That's \kbd{I}, \emph{not} \kbd{i}!)
 The letter \tet{I} stands for $\sqrt{-1}$. The ``real'' and ``imaginary''
 parts $x$ and $y$ can be of type \typ{INT}, \typ{REAL}, \typ{INTMOD},
 \typ{FRAC}, or \typ{PADIC}.
 
 \subsec{$p$-adic numbers (\typ{PADIC}):}%
-\sidx{p-adic number}\label{se:padic}\sidx{t_PADIC}
+\sidx{p-adic number}\label{se:padic}\kbdsidx{t_PADIC}
 Typing \kbd{O($p$\pow $k$)}, where $p$ and $k$ are integers, yields a
 $p$-adic $0$ of accuracy~$k$, representing any $p$-adic number whose
 valuation is $\geq k$. To input a general non-0 $p$-adic number, write
@@ -452,7 +452,7 @@ remain at least 25\% more efficient. (But they do not have denominators!)
 % n = Mod(1,1009^2); for (i=1,10^6, n++)
 
 \subsec{Quadratic numbers (\typ{QUAD})}%
-\sidx{quadratic number}\sidx{t_QUAD}
+\sidx{quadratic number}\kbdsidx{t_QUAD}
 This type is used to work in the quadratic order of \emph{discriminant}
 \kbd{d}, where \kbd{d} is a non-square integer congruent to $0$ or $1$
 (modulo $4$). The command
@@ -473,7 +473,7 @@ as \kbd{$x$+$y$*w} for some integers $x$ and $y$. In fact, you may work in
 its fraction field $\Q(\sqrt{d})$ and use \typ{FRAC} values for $x$ and $y$.
 
 \subsec{Polmods (\typ{POLMOD})}%
-\sidx{polmod}\sidx{t_POLMOD}
+\sidx{polmod}\kbdsidx{t_POLMOD}
 Exactly as for intmods, to enter $x \mod y$ (where $x$ and $y$ are
 polynomials), type \kbd{Mod(x,y)}, not \kbd{x\%y}. Note that when $y$ is an
 irreducible polynomial in one variable, polmods whose modulus is $y$ are simply
@@ -524,7 +524,7 @@ If the main variables are the same, it is allowed to mix \typ{POL} and
 @eprog
 
 \subsec{Polynomials (\typ{POL})}%
-\sidx{polynomial}\label{se:pol}\sidx{t_POL}
+\sidx{polynomial}\label{se:pol}\kbdsidx{t_POL}
 Type the polynomial in a natural way, not forgetting to put a ``$*$'' between
 a coefficient and a formal variable;
 \bprog
@@ -576,7 +576,7 @@ monomials sorted by decreasing degree:
 of multivariate polynomial rings.
 
 \subsec{Power series (\typ{SER})}%
-\sidx{power series}\sidx{t_SER}\label{se:series}
+\sidx{power series}\kbdsidx{t_SER}\label{se:series}
 Typing \kbd{O(X\pow $k$)}, where $k$ is an integer, yields an $X$-adic $0$ of
 accuracy~$k$, representing any power series in \kbd{X} whose valuation is
 $\geq k$. Of course, \kbd{X} can be replaced by any other variable name! To
@@ -619,14 +619,14 @@ the computation:
 @eprog
 
 \subsec{Rational functions (\typ{RFRAC})}%
-\sidx{rational function}\sidx{t_RFRAC}
+\sidx{rational function}\kbdsidx{t_RFRAC}
 As for fractions, all rational functions are automatically reduced to lowest
 terms. All that was said about fractions in \secref{se:FRAC} remains valid
 here.
 
 \subsec{Binary quadratic forms of positive or negative discriminant
 (\typ{QFR} and \typ{QFI})}%
-\sidx{binary quadratic form}\sidx{t_QFR}\sidx{t_QFI}
+\sidx{binary quadratic form}\kbdsidx{t_QFR}\kbdsidx{t_QFI}
 These are input using the function \kbd{Qfb}. For example \kbd{Qfb(1,2,3)}
 creates the binary form $x^2+2xy+3y^2$. It is imaginary (of internal type
 \typ{QFI}) since its discriminant $2^2 - 4\times 3 = -8$ is negative.
@@ -640,7 +640,7 @@ function \kbd{qfbprimeform} which directly creates a prime form of given
 discriminant.
 
 \subsec{Row and column vectors (\typ{VEC} and \typ{COL})}%
-\sidx{row vector}\sidx{column vector}\sidx{t_VEC}\sidx{t_COL})
+\sidx{row vector}\sidx{column vector}\kbdsidx{t_VEC}\kbdsidx{t_COL})
 To enter a row vector, type the components separated by commas ``\kbd{,}'',
 and enclosed between brackets ``\kbd{[}$\,$'' and ``$\,$\kbd{]}'',
 e.g.~\kbd{[1,2,3]}. To enter a column vector, type the vector horizontally,
@@ -653,7 +653,7 @@ $m$-th entry. You can assign a result to $x[m]$ (i.e.~write something like
 $x[k]=\var{expr}$).
 
 \subsec{Matrices (\typ{MAT})}%
-\sidx{matrix}\sidx{t_MAT}
+\sidx{matrix}\kbdsidx{t_MAT}
 To enter a matrix, type the components line by line, the components being
 separated by commas ``\kbd{,}'', the lines by semicolons ``\kbd{;}'', and
 everything enclosed in brackets ``\kbd{[}$\,$'' and ``$\,$\kbd{]}'', e.g.
@@ -719,7 +719,7 @@ the other using \tet{Vec} / \tet{Mat}, though:
 @eprog
 
 \subsec{Lists (\typ{LIST})}%
-\sidx{list}\sidx{t_LIST}
+\sidx{list}\kbdsidx{t_LIST}
 Lists can be input directly, as in \kbd{List([1,2,3,4])}; but in most cases,
 one creates an empty list, then appends elements using \kbd{listput}:
 \bprog
@@ -730,19 +730,19 @@ one creates an empty list, then appends elements using \kbd{listput}:
 Elements can be accessed directly as with the vector types described above.
 
 \subsec{Strings (\typ{STR})}%
-\sidx{string}\sidx{character string}\sidx{t_STR}
+\sidx{string}\sidx{character string}\kbdsidx{t_STR}
 To enter a string, enclose it between double quotes \kbd{"}, like this:
 \kbd{"this is a string"}. The function \kbd{Str} can be used to transform any
 object into a string.
 
 \subsec{Small vectors (\typ{VECSMALL})}%
-\sidx{t_VECSMALL}
+\kbdsidx{t_VECSMALL}
 This is an internal type, used to code in an efficient way vectors containing
 only small integers, such as permutations. Most \kbd{gp} functions will
 refuse to operate on these objects.
 
 \subsec{Functions (\typ{CLOSURE})}%
-\sidx{t_CLOSURE}
+\kbdsidx{t_CLOSURE}
 We will explain this at length in \secref{se:user_defined}. For the time
 being, suffice it to say that functions can be assigned to variables, as any
 other object, and the following equivalent basic forms are available to
@@ -754,7 +754,7 @@ create new ones
 @eprog
 
 \subsec{Error contexts (\typ{ERROR})}%
-\sidx{t_ERROR}
+\kbdsidx{t_ERROR}
 An object of this type is created whenever an error occurs: it contains some
 information about the error and the error context. Usually, an appropriate
 error is printed immediately, the computation is aborted, and GP enters the
