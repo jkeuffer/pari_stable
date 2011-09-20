@@ -8038,11 +8038,11 @@ typecast to a sensible common domain, because their types do not match up.
 @eprog\noindent prints the error message: \kbd{forbidden} $s$
 \typ{$x$} \var{op} \typ{$y$}, where \typ{$z$} denotes the type of $z$.
 Here, $s$ denotes the spelled out name of the operator
-$\var{op}\in\{\kbd{+}, \kbd{-}, \kbd{*}, \kbd{/}, \kbd{=}\}$, e.g.
-\emph{addition} for \kbd{"+"}. If \var{op} is not in the above operator,
-list, it is taken to be the already spelled out name of a function, e.g.
-\kbd{"gcd"}, and the error message becomes \kbd{forbidden} \var{op} \typ{$x$},
-\typ{$y$}.
+$\var{op}\in\{\kbd{+}, \kbd{*}, \kbd{/}, \kbd{\%}, \kbd{=}\}$, e.g.
+\emph{addition} for \kbd{"+"} or \emph{assignment} for \kbd{"="}. If \var{op}
+is not in the above operator, list, it is taken to be the already spelled out
+name of a function, e.g. \kbd{"gcd"}, and the error message becomes
+\kbd{forbidden} \var{op} \typ{$x$}, \typ{$y$}.
 
 \subsec{operi} Impossible operation between two objects than cannot be
 typecast to a sensible common domain for deeper reasons than a type mismatch,

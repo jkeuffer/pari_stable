@@ -1076,7 +1076,6 @@ pari_err2str(GEN err)
       switch(*op)
       {
       case '+': f = "addition"; break;
-      case '-': return pari_sprintf(" negation - %s.",type_name(typ(x)));
       case '*': f = "multiplication"; break;
       case '/': case '%': case '\\': f = "division"; break;
       case '=': op = "-->"; f = "assignment"; break;

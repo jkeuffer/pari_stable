@@ -1558,7 +1558,7 @@ gneg(GEN x)
     case t_COL: return RgC_neg(x);
     case t_MAT: return RgM_neg(x);
     default:
-      pari_err(operf,"-",x,NULL);
+      pari_err(typeer,"gneg",x);
       return NULL; /* not reached */
   }
   return y;
@@ -1625,7 +1625,7 @@ gneg_i(GEN x)
       gel(y,2) = gel(x,2); break;
 
     default:
-      pari_err(operf,"-",x,NULL);
+      pari_err(typeer,"gneg_i",x);
       return NULL; /* not reached */
   }
   return y;
