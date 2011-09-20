@@ -279,7 +279,7 @@ sub treat {
   my ($first);
   while (<DOC>)
   {
-    if (/^\\(subsubsec[a-z]*|subsec[a-z]*|section|chapter){$help}/)
+    if (/^\\(subsubsec[a-z]*|subsec[a-z]*|section|chapter){$help\b/)
       { $first = $_; last; }
   }
   if (eof(DOC))
@@ -594,28 +594,13 @@ sub get_match {
 }
 
 sub detex {
-  my($fun,$args);
+  my($fun);
 # 1: get the function "prototype"
   $fun = &get_match($_,'{','}');
-  # name
   $fun = &basic_subst($fun);
   $_ = $remainder;
-  # args as $(x)$ in \subsecidx{sin}$(x)$:
-  if (/^ *\$/)
-  {
-    $args = &basic_subst(&get_match($_,'\$','\$'));
-    $_ = $remainder;
-  }
   $_ = <DOC> if (!&basic_subst($_));
-  # dft value as (...) in \subsecidx{echo} (default \kbd{0})
-  if (/^ *\(/)
-  {
-    $args .= ' (' . &basic_subst(&get_match($_,'\(','\)')) . ')';
-    $_ = $remainder;
-  }
-  $args .= ":" if ($args !~ /: *$/ && ($args || $fun !~ /: */));
-
-  push(@text, "\@[startbold]$fun\@[endbold]$args");
+  push(@text, "\@[startbold]$fun:\@[endbold]");
   push(@text, "");
 # 2: parse the function description
   if ($_) { s/^ *://; &presubst(); }
@@ -985,13 +970,13 @@ sub TeXprint_topod {
   s/\\section\s*{((?:[^{}]|\{[^{}]*\})*)}\s*/"\n\n$tr{podleader}head1 " . indexify($1) . "\n\n"/e;
 
   # Try to delimit by :
-  s/\\subsec(?:ref|idx|op)?(?:unix)?\s*{(([^{}]+(?=[{}])|{[^{}]+})+)}([^\n]*):[\n ]/"\n\n$tr{podleader}head2 " . indexify("$1$3") . "\n\n"/e;
-  s/\\subsubsec(?:ref|idx|op)?(?:unix)?\s*{(([^{}]+(?=[{}])|{[^{}]+})+)}([^:]*):\s*/"\n\n$tr{podleader}head3 " . indexify("$1$3") . "\n\n"/e;
+  s/\\subsec(?:ref)?(?:unix)?\s*{(([^{}]+(?=[{}])|{[^{}]+})+)}([^\n]*):[\n ]/"\n\n$tr{podleader}head2 " . indexify("$1$3") . "\n\n"/e;
+  s/\\subsubsec(?:ref)?(?:unix)?\s*{(([^{}]+(?=[{}])|{[^{}]+})+)}([^:]*):\s*/"\n\n$tr{podleader}head3 " . indexify("$1$3") . "\n\n"/e;
   s/\\subsubsec\s*{(([^{}]+(?=[{}])|{[^{}]+})+)}(.*)$/"\n\n$tr{podleader}head3 " . indexify("$1") . "$3\n\n"/me;
   s/\\subseckbd\s*{(([^{}]+(?=[{}])|{[^{}]+})+)}([^:]*):\s*/"\n\n$tr{podleader}head2 " . indexify("$1$3") . "\n\n"/e;
   # Try to delimit by ' '
-  s/\\subsec(?:ref|idx|op)?(?:unix)?\s*{(([^{}]+(?=[{}])|{[^{}]+})+)}(\S*)\s+/"\n\n$tr{podleader}head2 " . indexify("$1$3") . "\n\n"/e;
-  s/\\subsec(?:ref|title|idx|op)?(?:unix)?\s*{(([^{}]+(?=[{}])|{[^{}]*})+)}:?\s*/"\n\n$tr{podleader}head2 " . indexify("$1") . "\n\n"/e;
+  s/\\subsec(?:ref)?(?:unix)?\s*{(([^{}]+(?=[{}])|{[^{}]+})+)}(\S*)\s+/"\n\n$tr{podleader}head2 " . indexify("$1$3") . "\n\n"/e;
+  s/\\subsec(?:title)?(?:unix)?\s*{(([^{}]+(?=[{}])|{[^{}]*})+)}:?\s*/"\n\n$tr{podleader}head2 " . indexify("$1") . "\n\n"/e;
 
   # This is to skip preface in refcard:
   /\Q$tr{podleader}\Ehead1|\\title(?![a-zA-Z])\s*\{/o and $seen_start = 1
