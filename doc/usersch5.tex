@@ -8020,9 +8020,9 @@ which does not make sense. (As in \kbd{galoisinit(Pol(1))}.)
 \subsec{redpoler} Function $s$ expected an irreducible polynomial,
 and did not receive one. (As in \kbd{nfinit(x\pow2-1)}.)
 \bprog
-  pari_err(redpoler, const char *s)
+  pari_err(redpoler, const char *s, GEN x)
 @eprog\noindent prints the error message: \kbd{not an irreducible polynomial
-in $s$}.
+in $s$ : $x$}.
 
 \subsec{zeropoler} An argument of function $s$ is a zero polynomial, which
 does not make sense. (As in \kbd{polroots(0)}.)

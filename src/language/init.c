@@ -987,10 +987,15 @@ pari_err2GEN(long numerr, va_list ap)
   case overflower:
   case impl:
   case consister: case negexper:
-  case constpoler: case redpoler:
+  case constpoler:
   case zeropoler: case flagerr: case precer:
   case bugparier:
     retmkerr2(numerr, strtoGENstr(va_arg(ap, char*)));
+  case redpoler:
+    {
+      const char *f = va_arg(ap, const char*);
+      retmkerr3(numerr, strtoGENstr(f), va_arg(ap, GEN));
+    }
 
   case typeer:
     {
@@ -1050,7 +1055,8 @@ pari_err2str(GEN err)
   case constpoler:
     return pari_sprintf("constant polynomial in %Ps.", gel(err,2));
   case redpoler:
-    return pari_sprintf("not an irreducible polynomial in %Ps.", gel(err,2));
+    return pari_sprintf("not an irreducible polynomial in %Ps: %Ps.",
+                        gel(err,2), gel(err,3));
   case zeropoler:
     return pari_sprintf("zero polynomial in %Ps.", gel(err,2));
   case consister:

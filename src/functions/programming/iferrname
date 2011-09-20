@@ -94,8 +94,9 @@ Doc: evaluates the expression sequence \var{seq1}. If an error of type
   \var{E} has one component, 1 (\typ{STR}): the function name $s$.
 
   \item \kbd{"redpoler"}. Function $s$ expected an irreducible polynomial,
-  and did not receive one. (As in \kbd{nfinit(x\pow2-1)}.)
-  \var{E} has one component, 1 (\typ{STR}): the function name $s$.
+  and did receive $T$, which was not. (As in \kbd{nfinit(x\pow2-1)}.)
+  \var{E} has two component, 1 (\typ{STR}): the function name $s$,
+  2 (\typ{POL}): the polynomial $x$.
 
   \item \kbd{"zeropoler"}. An argument of function $s$ is a zero polynomial,
   which does not make sense. (As in \kbd{polroots(0)}.)

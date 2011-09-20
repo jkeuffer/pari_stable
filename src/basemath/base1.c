@@ -486,7 +486,7 @@ polgalois(GEN x, long prec)
   if (n>11) pari_err(impl,"galois of degree higher than 11");
   x = Q_primpart(x);
   RgX_check_ZX(x, "galois");
-  if (!ZX_is_irred(x)) pari_err(impl,"galois of reducible polynomial");
+  if (!ZX_is_irred(x)) pari_err(redpoler,"galois",x);
 
   if (n<4)
   {
@@ -1773,7 +1773,7 @@ nfbasic_init(GEN x, long flag, GEN fa, nfbasic_t *T)
     nfmaxord_t S;
     x = Q_primpart(x);
     RgX_check_ZX(x, "nfinit");
-    if (!ZX_is_irred(x)) pari_err(redpoler, "nfinit");
+    if (!ZX_is_irred(x)) pari_err(redpoler,"nfinit",x);
     if (flag & nf_RED || !gequal1(gel(x,lg(x)-1)))
       x = ZX_Q_normalize(x, &(T->lead));
     nfmaxord(&S, x, flag, fa);
