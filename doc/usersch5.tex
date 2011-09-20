@@ -8006,7 +8006,7 @@ or \kbd{exp(1e100)}, which overflow in \kbd{lg} and \kbd{expo}.)
 \subsec{primer1} A function using the precomputed list of prime numbers
 ran out of primes.
 \bprog
-  pari_err(constpoler, ulong c)
+  pari_err(primer1, ulong c)
 @eprog\noindent prints the error message: \kbd{not enough precomputed primes,
 need primelimit \til $c$} if $c$ is non-zero. And simply \kbd{not enough
 precomputed primes} otherwise.

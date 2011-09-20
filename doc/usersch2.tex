@@ -2275,14 +2275,18 @@ simplified as:
 \bprog
 ? inv3(x) = iferrname("gdiver", 1/x, ERR, "oo")
 @eprog\noindent Rather than trapping everything, then rethrowing whatever we
-do not like, it is cleaner to only trap errors of a specific kind. Here is a
+do not like, we adviѕe to only trap errors of a specific kind, as above. Of
+course, sometimes, one just want to trap \emph{everything}:
+
+ Here is a
 final example, to check in a safe way whether \tet{install} works correctly
 in your \kbd{gp}:
 \bprog
 broken_install() =
 { \\ can we install ?
-  iferrname("archer", install(addii,GG), ERR, return ("OS"));
-  \\ can we use an installed function ?
+  iferr(install(addii,GG),
+        ERR, return ("OS"));
+  \\ can we use the installed function ?
   iferr(if (addii(1,1) != 2, return("BROKEN")),
         ERR, return("USE"));
   return (0);
@@ -2294,23 +2298,12 @@ broken_install() =
 \kbd{BROKEN} if the installed function did not behave as expected,
 and 0 if everything works.
 
-\subsec{List of exception types}
-
 The \kbd{ERR} formal parameter contains more useful data than just the error
 name, which we recovered using \kbd{errname(ERR)}. In fact, a \typ{ERROR}
 object usually has extra components, which can be accessed as
-\kbd{component(ERR,1)}, \kbd{component(ERR,2)}, and so on. We now give the
-list of all exception types, and the corresponding contents of \kbd{ERR}.
-
-\kbd{gdiver}: division by non invertible object
-
-\kbd{invmoder}: impossible inverse modulo
-
-\kbd{archer}: not available on this architecture or operating system
-
-\kbd{typeer}: wrong type
-
-\kbd{errpile}: the PARI stack overflows
+\kbd{component(ERR,1)}, \kbd{component(ERR,2)}, and so on. See
+\secref{se:iferrname} for the list of all exception types, and the
+corresponding contents of \kbd{ERR}.
 
 \section{Interfacing GP with other languages}
 \noindent

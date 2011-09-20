@@ -5,29 +5,29 @@ Prototype: EVE
 Wrapper: (_,_)
 Description:
  (closure,closure):gen iferrpari($1, $2)
-Help: iferr(seq1,E,seq2): evaluates the expression sequence seq1. if
+Help: iferr(seq1,E,seq2): evaluates the expression sequence seq1. If
  an error occurs, seq2 is evaluated with the formal parameter E set to the
  error data.
-Doc: evaluates the expression sequence \var{seq1}. if an error occurs,
+Doc: evaluates the expression sequence \var{seq1}. If an error occurs,
  \var{seq2} is evaluated with the formal parameter \var{E} set to the error
  data. The error type is given by \kbd{errname(E)}, and other data can be
- accessed using the \tet{component} function. The code \var{seq2} should
- check whether the error is the one expected. In the negative the error can
- be rethrown using \tet{error(E)} (and possibly caught by an higher
- \kbd{iferr} instance). The following uses \kbd{iferr} to implement Lenstra
- ECM factoring method (however see \tet{ifername} for a simpler
- implementation).
+ accessed using the \tet{component} function (see the documentation if
+ \kbd{iferrname} below). The code \var{seq2} should check whether the error is
+ the one expected. In the negative the error can be rethrown using
+ \tet{error(E)} (and possibly caught by an higher \kbd{iferr} instance). The
+ following uses \kbd{iferr} to implement Lenstra's ECM factoring method
+ (however see \tet{iferrname} for a simpler implementation).
  \bprog
- ? ecm(N,B,t)=
+ ? ecm(N, B = 1000!, nb = 100)=
    {
-     for(a=1,t,
+     for(a = 1, nb,
        iferr(ellpow(ellinit([a,1]*Mod(1,N)), [0,1]*Mod(1,N), B),
-             err, if(errname(err)=="invmoder",
-                     return(gcd(lift(component(err,1)),N)),
-                     error(err))));
+         E, if(errname(E)=="invmoder",
+              return(gcd(lift(component(E,1)),N)),
+              error(E))));
    }
- ? ecm(2^101-1, 1000!, 100)
+ ? ecm(2^101-1)
  %2 = 7432339208719
  @eprog
- The return value of \kbd{iferr} itself is the value
- of \var{seq2} if an error occurs, and the value of \var{seq1} otherwise.
+ The return value of \kbd{iferr} itself is the value of \var{seq2} if an
+ error occurs, and the value of \var{seq1} otherwise.
