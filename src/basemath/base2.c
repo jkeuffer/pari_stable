@@ -632,7 +632,7 @@ _nfbasis(GEN x0, long flag, GEN fa, GEN *pbas, GEN *pdK)
   long fl = 0;
 
   if (typ(x0)!=t_POL) pari_err(typeer,"nfbasis",x0);
-  if (degpol(x0) <= 0) pari_err(zeropoler,"nfbasis");
+  if (degpol(x0) <= 0) pari_err(constpoler,"nfbasis");
   RgX_check_ZX(x0, "nfbasis");
 
   x = ZX_Q_normalize(x0, &lead);
