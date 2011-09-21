@@ -1105,7 +1105,8 @@ tests_OK(GEN a, GEN nfa, GEN b, GEN nfb, long fliso)
   GEN da, db, fa, P, E, U;
   long i, nP, m = degpol(a), n = degpol(b), q = m / n; /* relative degree */
 
-  if (m <= 0 || n <= 0) pari_err(constpoler, "nfisincl");
+  if (m <= 0) pari_err(redpoler,"nfisincl",a);
+  if (n <= 0) pari_err(redpoler,"nfisincl",b);
   if (fliso) { if (n != m) return 0; } else { if (n % m) return 0; }
   if (m == 1) return 1;
 
