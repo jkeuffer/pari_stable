@@ -482,7 +482,7 @@ polgalois(GEN x, long prec)
                       1,4,5,6, 1,5,3,6, 1,6,3,4, 1,3,4,5, 1,6,2,5,
                       1,2,4,6, 1,5,2,4, 1,3,2,6, 1,2,3,5, 1,4,2,3};
   if (typ(x)!=t_POL) pari_err(typeer,"galois",x);
-  n=degpol(x); if (n<=0) pari_err(constpoler,"galois");
+  n=degpol(x);
   if (n>11) pari_err(impl,"galois of degree higher than 11");
   x = Q_primpart(x);
   RgX_check_ZX(x, "galois");
