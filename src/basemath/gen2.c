@@ -1898,7 +1898,7 @@ gaffect(GEN x, GEN y)
       affii(gel(x,2),gel(y,2));
       affii(gel(x,3),gel(y,3)); return;
     case t_VEC: case t_COL: case t_MAT:
-      lx = lg(x); if (lx != lg(y)) pari_err(operi,"",x,y);
+      lx = lg(x); if (lx != lg(y)) pari_err(consister,"gaffect");
       for (i=1; i<lx; i++) gaffect(gel(x,i),gel(y,i));
       return;
   }
