@@ -28,11 +28,9 @@ iferrnum(long errnum, GEN a, GEN b)
     evalstate_restore(&state);
     if (!b) return gnil;
     if (global_err_data)
-    {
-      GEN foo = gclone(global_err_data);
-      global_err_data = gcopy(foo); /* A direct gcopy could overwrite global_err_data */
-      gunclone(foo);
-    } else global_err_data = mkerr(errpile);
+      global_err_data = gerepilecopy(avma, global_err_data);
+    else
+      global_err_data = mkerr(errpile);
     push_lex(global_err_data,b);
     res = closure_evalgen(b);
     pop_lex(1);
