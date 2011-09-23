@@ -137,10 +137,10 @@ case "x$bugp" in
 esac
 if test -n "$file_diff"; then
   len=`wc -l $file_diff | sed -e 's/ *\([0-9]*\).*/\1/'`
-  pat=`${head}4 $file_diff|${tail}1|grep "12[8-9],137"`
+  pat=`${head}4 $file_diff|${tail}1|grep "12[7-8],136"`
   case "$pat" in
-    *128,137*) elen=30;;
-    *129,137*) elen=25;;
+    *127,136*) elen=30;;
+    *128,136*) elen=25;;
     *) elen=0;;
   esac
   sys0190=`grep "^+ SYS0190\>" $file_diff`
