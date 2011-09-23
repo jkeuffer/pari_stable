@@ -2178,7 +2178,7 @@ galoisconj4_main(GEN T, GEN den, long flag)
   { if (!den) den = Q_denom(nf_get_zk(nf)); }
   else
   {
-    if (n <= 0) pari_err(redpoler, "galoisinit");
+    if (n <= 0) pari_err(redpoler,"galoisinit",T);
     RgX_check_ZX(T, "galoisinit");
     if (!ZX_is_squarefree(T))
       pari_err(talker, "Polynomial not squarefree in galoisinit");

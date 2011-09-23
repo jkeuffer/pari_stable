@@ -1004,7 +1004,10 @@ Decomp(decomp_t *S, long flag)
     err_printf("\n");
   }
   if (!FpX_valrem(S->chi, S->nu, p, &b1))
-    pari_err(talker, "bug in Decomp (not a factor), is p = %Ps a prime?", p);
+  {
+    if (!BPSW_psp(p)) pari_err(talker,"not a prime in Decomp");
+    pari_err(bugparier, "Decomp (not a factor)");
+  }
   b2 = FpX_div(S->chi, b1, p);
   a = FpX_mul(FpXQ_inv(b2, b1, p), b2, p);
   /* E = e / de, e in Z[X], de in Z,  E = a(phi) mod (f, p) */
@@ -1560,7 +1563,10 @@ loop(decomp_t *S, long nv, long Ea, long Fa)
     /* nug irreducible mod p */
     w = FpX_factorff_irred(nug, ch_var(S->nu, nv), S->p);
     if (degpol(gel(w,1)) != 1)
-      pari_err(talker, "no root in nilord. Is p = %Ps a prime?", S->p);
+    {
+      if (!BPSW_psp(S->p)) pari_err(talker,"not a prime in nilord");
+      pari_err(bugparier, "nilord (no root)");
+    }
 
     for (i = 1; i < lg(w); i++)
     { /* Look for a root delt of nug in Fp[phi] such that vp(gamma - delta) > 0
@@ -1600,8 +1606,10 @@ loop(decomp_t *S, long nv, long Ea, long Fa)
       }
     }
     if (i == lg(w))
-      pari_err(talker, "no root in nilord. Is p = %Ps a prime?", S->p);
-
+    {
+      if (!BPSW_psp(S->p)) pari_err(talker,"not a prime in nilord");
+      pari_err(bugparier, "nilord (no root II)");
+    }
     if (eq) delt = gmul(delt, powiu(S->p,  eq));
     if (er) delt = gmul(delt, gpowgs(S->nu, er));
     beta = gsub(beta, delt);
