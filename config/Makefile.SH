@@ -214,7 +214,7 @@ EXPORT_CREATE = $export_create
 EXPORT_LIB    = $export_lib
 EXPORT_LIB_CREATE = $export_lib_create
 DLLD_IGNORE   = $dlld_ignore
-DLLTOOL = `$CC -print-prog-name=dlltool 2>/dev/null`
+DLLTOOL = $DLLTOOL
 
 RUNPTH       = $RUNPTH
 RUNPTH_FINAL = $RUNPTH_FINAL

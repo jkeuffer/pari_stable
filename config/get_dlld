@@ -1,5 +1,5 @@
 # Exported variables
-_dlld_list='DL_DFLT_NAME DLLD DLLDFLAGS EXTRADLLDFLAGS DLSUFFIX soname sodest'
+_dlld_list='DL_DFLT_NAME DLLD DLLDFLAGS EXTRADLLDFLAGS DLSUFFIX soname sodest DLLTOOL'
 
 # Which suffix for Dynamic Lib?
 # Some linkers (SunOS 4) need minor and major lib version numbers.
@@ -18,7 +18,13 @@ case "$osname" in
          soname=$sodest;;
   hpux) soname= ; sodest= ; DLSUFFIX=sl;;
   irix) soname= ; sodest= ;;
-  os2|cygwin|mingw)soname= ; sodest= ; DLSUFFIX=dll ;;
+  os2|cygwin|mingw)soname= ; sodest= ; DLSUFFIX=dll
+    if test "x$DLLTOOL" = x; then
+      DLLTOOL=`locate dlltool`;
+      if test "x$DLLTOOL" = x; then
+        DLLTOOL=`$CC -dumpmachine`-dlltool
+      fi
+    fi;;
   darwin)soname= ; sodest= ; DLSUFFIX=dylib;
          compat_ver=$VersionMajor.$VersionMinor.0; num_ver=$VersionMajor.$VersionMinor.$patch;;
   *) do_dll=no ;;

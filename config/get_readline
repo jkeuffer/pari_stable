@@ -42,6 +42,17 @@ if test ! -r $exe; then # need ncurses ?
   fi
   $CC $CFLAGS $extraflag $RLINCLUDE -o $exe rl_version.c $RLLIBS 2> /dev/null
 fi
+if test ! -r $exe; then # need termcap ?
+  echo ..."Linking failed. Trying with libtermcap"
+  pth="$with_ncurses_lib $libpth"
+  lib=termcap; . ./locatelib
+  if test -n "$termcap"; then
+    RLLIBS="$RLLIBS -L$termcap -ltermcap"
+  else
+    RLLIBS="$RLLIBS -ltermcap"
+  fi
+  $CC $CFLAGS $extraflag $RLINCLUDE -o $exe rl_version.c $RLLIBS 2> /dev/null
+fi
 
 readline_version=
 if test -r $exe; then
