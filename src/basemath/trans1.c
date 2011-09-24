@@ -1621,25 +1621,25 @@ mpexp(GEN x)
 
   if (l <= maxss(EXPNEWTON_LIMIT, (1L<<s) + 2))
   {
-    if (l == 2 || !signe(x)) return mpexp0(x);
+    if (!signe(x)) return mpexp0(x);
     return mpexp_basecase(x);
   }
   z = cgetr(l); /* room for result */
   x = modlog2(x, &sh);
-  if (!x) { avma = (pari_sp)(z+l); return real2n(sh, l); }
-  mask = quadratic_prec_mask(l-1);
-  for(i=0, p=1; i<s; i++) { p <<= 1; if (mask & 1) p--; mask >>= 1; }
-  a = mpexp_basecase(rtor(x, p+2));
+  if (!x) { avma = (pari_sp)(z+lg(z)); return real2n(sh, l); }
+  mask = quadratic_prec_mask(prec2nbits(l)+BITS_IN_LONG);
+  for(i=0, p=1; i<s+TWOPOTBITS_IN_LONG; i++) { p <<= 1; if (mask & 1) p-=1; mask >>= 1; }
+  a = mpexp_basecase(rtor(x, nbits2prec(p)));
   x = addrs(x,1);
-  if (lg(x) < l+1) x = rtor(x, l+1);
+  if (realprec(x) < l+1) x = rtor(x, l+1);
   a = rtor(a, l+1); /*append 0s */
   t = NULL;
   for(;;)
   {
     p <<= 1; if (mask & 1) p--;
     mask >>= 1;
-    setlg(x, p+2);
-    setlg(a, p+2);
+    setprec(x, nbits2prec(p));
+    setprec(a, nbits2prec(p));
     t = mulrr(a, subrr(x, logr_abs(a))); /* a (x - log(a)) */
     if (mask == 1) break;
     affrr(t, a); avma = (pari_sp)a;
