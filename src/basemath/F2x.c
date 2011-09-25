@@ -752,7 +752,7 @@ gener_F2xq(GEN T, GEN *po)
   GEN g, L2, o, q;
 
   if (f == 1) {
-    if (po) *po = mkvec2(gen_1, trivfact());
+    if (po) *po = mkvec2(gen_1, trivial_fact());
     return pol1_F2x(vT);
   }
   q = subis(powuu(2,f), 1);

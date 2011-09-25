@@ -555,14 +555,12 @@ factor(GEN x)
   {
     switch(tx)
     {
-      case t_INT: case t_FRAC: case t_COMPLEX:
-      case t_POL: case t_RFRAC: break;
-      default:
-        pari_err(typeer,"factor",x);
+      case t_INT:
+      case t_COMPLEX:
+      case t_POL:
+      case t_RFRAC: return zero_fact(x);
+      default: pari_err(typeer,"factor",x);
     }
-    y = cgetg(3,t_MAT);
-    gel(y,1) = mkcolcopy(x);
-    gel(y,2) = mkcol(gen_1); return y;
   }
   av = avma;
   switch(tx)
@@ -2162,20 +2160,26 @@ RgX_extgcd(GEN x, GEN y, GEN *U, GEN *V)
 int
 RgXQ_ratlift(GEN x, GEN T, long amax, long bmax, GEN *P, GEN *Q)
 {
-  pari_sp av, av2, tetpil, lim;
+  pari_sp av = avma, av2, tetpil, lim;
   long signh; /* junk */
   long vx;
   GEN g, h, p1, cu, cv, u, v, um1, uze, *gptr[2];
 
   if (typ(x)!=t_POL) pari_err(typeer,"RgXQ_ratlift",x);
   if (typ(T)!=t_POL) pari_err(typeer,"RgXQ_ratlift",T);
-  if ( varncmp(varn(x),varn(T))) pari_err(consister,"RgXQ_ratlift");
-  if (amax+bmax>=degpol(T))
+  if ( varncmp(varn(x),varn(T)) ) pari_err(consister,"RgXQ_ratlift");
+  if (bmax < 0) pari_err(talker, "ratlift: bmax must be >= 0");
+  if (!signe(T)) {
+    if (degpol(x) <= amax) {
+      *P = gcopy(x);
+      *Q = pol_1(varn(x));
+      return 1;
+    }
+    return 0;
+  }
+  if (amax+bmax >= degpol(T))
     pari_err(talker, "ratlift: must have amax+bmax < deg(T)");
-  if (!signe(T)) pari_err(zeropoler,"RgXQ_ratlift");
   vx = varn(T);
-
-  av = avma;
   u = x = primitive_part(x, &cu);
   v = T = primitive_part(T, &cv);
   g = h = gen_1; av2 = avma; lim = stack_lim(av2,1);

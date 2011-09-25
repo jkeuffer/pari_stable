@@ -133,15 +133,12 @@ init_p(GEN pp)
   return p;
 }
 
-static long
-factmod_init(GEN *F, GEN p)
+static GEN
+factmod_init(GEN F, GEN p)
 {
-  long d;
-  if (typ(*F)!=t_POL) pari_err(typeer,"factmod",*F);
   if (typ(p)!=t_INT) pari_err(typeer,"factmod",p);
-  *F = FpX_normalize(RgX_to_FpX(*F, p), p);
-  d = degpol(*F); if (d < 0) pari_err(zeropoler,"factmod");
-  return d;
+  if (typ(F)!=t_POL) pari_err(typeer,"factmod",F);
+  return FpX_normalize(RgX_to_FpX(F, p), p);
 }
 
 static GEN
@@ -239,7 +236,12 @@ rootmod2(GEN f, GEN pp)
   ulong p;
   GEN y;
 
-  if (!factmod_init(&f, pp)) { avma = av; return cgetg(1,t_COL); }
+  f = factmod_init(f, pp);
+  switch (degpol(f))
+  {
+    case  0: avma = av; return cgetg(1,t_COL);
+    case -1: pari_err(zeropoler,"rootmod2");
+  }
   p = init_p(pp); if (!p) pari_err(talker,"prime too big in rootmod2");
   if (p & 1)
     y = Flc_to_ZC(Flx_roots_naive(ZX_to_Flx(f,p), p));
@@ -420,7 +422,7 @@ FpX_roots(GEN f, GEN p) {
   GEN F = FpX_factmod_init(f,p);
   switch(degpol(F))
   {
-    case -1: pari_err(zeropoler,"factmod");
+    case -1: pari_err(zeropoler,"FpX_roots");
     case 0: avma = av; return cgetg(1, t_COL);
   }
   return gerepileupto(av, odd(q)? FpX_roots_i(F, p): root_mod_even(F,q));
@@ -432,7 +434,7 @@ FpX_oneroot(GEN f, GEN p) {
   GEN F = FpX_factmod_init(f,p);
   switch(degpol(F))
   {
-    case -1: pari_err(zeropoler,"factmod");
+    case -1: pari_err(zeropoler,"FpX_oneroot");
     case 0: avma = av; return NULL;
   }
   if (!odd(q))
@@ -452,7 +454,12 @@ rootmod(GEN f, GEN p)
   pari_sp av = avma;
   GEN y;
 
-  if (!factmod_init(&f, p)) { avma=av; return cgetg(1,t_COL); }
+  f = factmod_init(f, p);
+  switch (degpol(f))
+  {
+    case  0: avma = av; return cgetg(1,t_COL);
+    case -1: pari_err(zeropoler,"rootmod");
+  }
   q = init_p(p); if (!q) q = mod2BIL(p);
   if (q & 1)
     y = FpX_roots_i(f, p);
@@ -749,13 +756,6 @@ FqX_nbfact(GEN u, GEN T, GEN p)
 }
 
 /************************************************************/
-GEN
-trivfact(void)
-{
-  GEN y = cgetg(3,t_MAT);
-  gel(y,1) = gel(y,2) = cgetg(1,t_COL); return y;
-}
-
 /* polynomial in variable v, whose coeffs are the digits of m in base p */
 static GEN
 stoFpX(ulong m, ulong p, long v)
@@ -867,30 +867,55 @@ cmpGsGs(GEN a, GEN b) { return (long)a - (long)b; }
 static GEN
 FpX_is_irred_2(GEN f, GEN p, long d)
 {
-  if (!d) return NULL;
-  if (d == 1) return gen_1;
+  switch(d)
+  {
+    case -1:
+    case 0: return NULL;
+    case 1: return gen_1;
+  }
   return FpX_quad_factortype(f, p) == -1? gen_1: NULL;
 }
 static GEN
 FpX_degfact_2(GEN f, GEN p, long d)
 {
-  if (!d) return trivfact();
-  if (d == 1) return mkvec2(mkvecsmall(1), mkvecsmall(1));
+  switch(d)
+  {
+    case -1:retmkvec2(mkvecsmall(-1),mkvecsmall(1));
+    case 0: return trivial_fact();
+    case 1: retmkvec2(mkvecsmall(1), mkvecsmall(1));
+  }
   switch(FpX_quad_factortype(f, p)) {
-    case 1: return mkvec2(mkvecsmall2(1,1), mkvecsmall2(1,1));
-    case -1:return mkvec2(mkvecsmall(2), mkvecsmall(1));
-    default: return mkvec2(mkvecsmall(1), mkvecsmall(2));
+    case  1: retmkvec2(mkvecsmall2(1,1), mkvecsmall2(1,1));
+    case -1: retmkvec2(mkvecsmall(2), mkvecsmall(1));
+    default: retmkvec2(mkvecsmall(1), mkvecsmall(2));
   }
 }
+
+GEN
+zero_fact(GEN x) { retmkmat2(mkcolcopy(x), mkcol(gen_1)); }
+GEN
+trivial_fact(void) { retmkmat2(cgetg(1,t_COL), cgetg(1,t_COL)); }
+
+/* Mod(0,p) * x, where x is f's main variable */
+static GEN
+Mod0pX(GEN f, GEN p)
+{ return scalarpol(mkintmod(gen_0, p), varn(f)); }
+static GEN
+zero_fact_intmod(GEN f, GEN p) { return zero_fact(Mod0pX(f,p)); }
+
+/* not gerepile safe */
 static GEN
 FpX_factor_2(GEN f, GEN p, long d)
 {
   GEN r, s, R, S;
   long v;
   int sgn;
-  if (d < 0) pari_err(zeropoler,"FpX_factor_2");
-  if (!d) return mkvec2(cgetg(1,t_COL), cgetg(1,t_VECSMALL));
-  if (d == 1) return mkvec2(mkcol(f), mkvecsmall(1));
+  switch(d)
+  {
+    case -1: retmkvec2(mkcol(pol_0(varn(f))), mkvecsmall(1));
+    case  0: retmkvec2(cgetg(1,t_COL), cgetg(1,t_VECSMALL));
+    case  1: retmkvec2(mkcol(f), mkvecsmall(1));
+  }
   r = FpX_quad_root(f, p, 1);
   if (!r) return mkvec2(mkcol(f), mkvecsmall(1));
   v = varn(f);
@@ -906,7 +931,8 @@ FpX_factor_2(GEN f, GEN p, long d)
 
 /* factor f mod pp.
  * flag = 1: return the degrees, not the factors
- * flag = 2: return NULL if f is not irreducible */
+ * flag = 2: return NULL if f is not irreducible.
+ * Not gerepile-safe */
 static GEN
 FpX_factcantor_i(GEN f, GEN pp, long flag)
 {
@@ -1007,14 +1033,20 @@ FpX_factcantor(GEN f, GEN pp, long flag)
   if (flag == 2) { avma = av; return z; }
   return gerepilecopy(av, z);
 }
+
 GEN
-factcantor0(GEN f, GEN pp, long flag)
+factcantor0(GEN f, GEN p, long flag)
 {
   pari_sp av = avma;
   long j, nbfact;
   GEN z, y, t, E, u, v;
-  if (! factmod_init(&f, pp)) { avma=av; return trivfact(); }
-  z = FpX_factcantor_i(f,pp,flag); t = gel(z,1); E = gel(z,2);
+  f = factmod_init(f, p);
+  switch (degpol(f))
+  {
+    case  0: avma = av; return trivial_fact();
+    case -1: return gerepileupto(av, zero_fact_intmod(f, p));
+  }
+  z = FpX_factcantor_i(f,p,flag); t = gel(z,1); E = gel(z,2);
   y = cgetg(3, t_MAT); nbfact = lg(t);
   u = cgetg(nbfact,t_COL); gel(y,1) = u;
   v = cgetg(nbfact,t_COL); gel(y,2) = v;
@@ -1027,7 +1059,7 @@ factcantor0(GEN f, GEN pp, long flag)
   else
     for (j=1; j<nbfact; j++)
     {
-      gel(u,j) = FpX_to_mod(gel(t,j), pp);
+      gel(u,j) = FpX_to_mod(gel(t,j), p);
       gel(v,j) = utoi((ulong)E[j]);
     }
   return gerepileupto(av, y);
@@ -1293,7 +1325,12 @@ factmod(GEN f, GEN p)
   long j;
   GEN y, u, v, z, t, E;
 
-  if (!factmod_init(&f, p)) { avma = av; return trivfact(); }
+  f = factmod_init(f, p);
+  switch (degpol(f))
+  {
+    case  0: avma = av; return trivial_fact();
+    case -1: return gerepileupto(av, zero_fact_intmod(f, p));
+  }
   z = FpX_factor_i(f, p); t = gel(z,1); E = gel(z,2);
   y = cgetg(3,t_MAT); nbfact = lg(t);
   u = cgetg(nbfact,t_COL); gel(y,1) = u;
@@ -1732,7 +1769,7 @@ factorpadic2(GEN f, GEN p, long prec)
   GEN fa,ex,y;
   long i,l, n = degpol(f);
 
-  if (n==0) return trivfact();
+  if (n==0) return trivial_fact();
 
   f = QpX_to_ZX(f);
   if (n==1) return gerepilecopy(av, padic_trivfact(f,p,prec));
@@ -1823,7 +1860,7 @@ factorpadic(GEN f,GEN p,long prec)
   long i, l, pr, n = degpol(f);
   int reverse = 0;
 
-  if (n == 0) return trivfact();
+  if (n == 0) return trivial_fact();
 
   f = QpX_to_ZX(f); (void)Z_pvalrem(leading_term(f), p, &lt);
   f = pnormalize(f, p, prec, n-1, &lead, &pr, &reverse);
@@ -1847,7 +1884,7 @@ factorpadic0(GEN f,GEN p,long r,long flag)
 {
   if (typ(f)!=t_POL) pari_err(typeer,"factorpadic",f);
   if (typ(p)!=t_INT) pari_err(typeer,"factorpadic",p);
-  if (!signe(f)) pari_err(zeropoler,"factorpadic");
+  if (!signe(f)) return zero_fact(f);
   if (r <= 0) pari_err(talker,"non-positive precision in factorpadic");
   switch(flag)
   {
@@ -2364,11 +2401,14 @@ FpX_factorff(GEN P, GEN p, GEN T)
 static GEN
 FqX_factor_i(GEN f, GEN T, GEN p)
 {
-  long pg, j, k, d, e, N, lfact, pk;
+  long pg, j, k, e, N, lfact, pk, d = degpol(f);
   GEN E, f2, f3, df1, df2, g1, u, q, *t;
 
-  if (!signe(f)) pari_err(zeropoler,"FqX_factor");
-  d = degpol(f); if (!d) return trivfact();
+  switch(d)
+  {
+    case -1: return zero_fact(f);
+    case 0: return trivial_fact();
+  }
   T = FpX_normalize(T, p);
   f = FqX_normalize(f, T, p);
   if (isabsolutepol(f)) return FpX_factorff_i(simplify_shallow(f), p, T);

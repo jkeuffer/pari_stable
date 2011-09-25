@@ -681,7 +681,7 @@ factor_eulerphi(GEN n)
     }
   }
   avma = av;
-  if (!B) return v? to_mat(gen_2, v): trivfact();
+  if (!B) return v? to_mat(gen_2, v): trivial_fact();
   A = cgetg(3, t_MAT);
   P = gel(B,1); E = gel(B,2); l = lg(P);
   AP = cgetg(l+1, t_COL); gel(A,1) = AP; AP++;

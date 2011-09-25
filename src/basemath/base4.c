@@ -516,7 +516,7 @@ idealfactor(GEN nf, GEN x)
       long lfa;
       f = factor(Q_abs(x));
       c1 = gel(f,1); lfa = lg(c1);
-      if (lfa == 1) { avma = av; return trivfact(); }
+      if (lfa == 1) { avma = av; return trivial_fact(); }
       c2 = gel(f,2);
       settyp(c1, t_VEC); /* for shallowconcat */
       settyp(c2, t_VEC); /* for shallowconcat */

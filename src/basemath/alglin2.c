@@ -734,8 +734,8 @@ matcompanion(GEN x)
   GEN y, c;
 
   if (typ(x)!=t_POL) pari_err(typeer,"matcompanion",x);
+  if (!signe(x)) pari_err(zeropoler,"matcompanion");
   if (n == 0) return cgetg(1, t_MAT);
-  if (gequal0(x)) pari_err(zeropoler,"matcompanion");
 
   y = cgetg(n+1,t_MAT);
   for (j=1; j < n; j++) gel(y,j) = col_ei(n, j+1);

@@ -1799,7 +1799,7 @@ factorsplice(GEN fa, long k)
 static GEN
 factorpow(GEN fa, long n)
 {
-  if (!n) return trivfact();
+  if (!n) return trivial_fact();
   return mkmat2(gel(fa,1), gmulsg(n, gel(fa,2)));
 }
 static GEN
@@ -1925,7 +1925,7 @@ discrayabslist(GEN bnf, GEN L)
   h = bnf_get_no(bnf);
   ID.degk = nf_get_degree(nf);
   ID.fadk = Z_factor(absi(nf_get_disc(nf)));
-  ID.idealrelinit = trivfact();
+  ID.idealrelinit = trivial_fact();
   V = cgetg(l, t_VEC);
   D = cgetg(l, t_VEC);
   for (i = 1; i < l; i++)
@@ -2231,7 +2231,7 @@ discrayabslistarch(GEN bnf, GEN arch, long bound)
     discall = cgetg(2,t_VEC);
   }
   EMPTY = mkvec3(gen_0,gen_0,gen_0);
-  idealrelinit = trivfact();
+  idealrelinit = trivial_fact();
   av1 = avma; lim = stack_lim(av1,1);
   Disc = bigcgetvec(bound);
   for (i=1; i<=bound; i++) bigel(Disc,i) = cgetg(1,t_VEC);

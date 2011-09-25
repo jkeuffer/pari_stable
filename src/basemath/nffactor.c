@@ -540,7 +540,7 @@ nffactor(GEN nf,GEN pol)
   dA = degpol(A);
   if (dA <= 0) {
     avma = (pari_sp)(rep + 3);
-    return (dA == 0)? trivfact(): zerofact(varn(pol));
+    return (dA == 0)? trivial_fact(): zerofact(varn(pol));
   }
   A = Q_primpart( QXQX_normalize(A, T) );
   if (dA == 1) {
@@ -1710,7 +1710,7 @@ polfnf(GEN a, GEN T)
   if (dA <= 0)
   {
     avma = (pari_sp)(rep + 3);
-    return (dA == 0)? trivfact(): zerofact(varn(A));
+    return (dA == 0)? trivial_fact(): zerofact(varn(A));
   }
   bad = dent = ZX_disc(T);
   if (tmonic) dent = indexpartial(T, dent);

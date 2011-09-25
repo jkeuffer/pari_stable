@@ -2337,8 +2337,10 @@ GEN     roots_to_pol_r1(GEN a, long v, long r1);
 long    sturmpart(GEN x, GEN a, GEN b);
 GEN     subresext(GEN x, GEN y, GEN *U, GEN *V);
 GEN     sylvestermatrix(GEN x,GEN y);
+GEN     trivial_fact(void);
 GEN     vecbezout(GEN x, GEN y);
 GEN     vecbezoutres(GEN x, GEN y);
+GEN     zero_fact(GEN x);
 
 /* polarit3.c */
 

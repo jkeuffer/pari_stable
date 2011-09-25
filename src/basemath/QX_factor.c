@@ -1001,7 +1001,7 @@ ZX_factor_i(GEN x)
   GEN fa,ex,y;
   long n,i,l;
 
-  if (!signe(x)) pari_err(zeropoler,"ZX_factor");
+  if (!signe(x)) return zero_fact(x);
   fa = ZX_squff(x, &ex);
   l = lg(fa); n = 0;
   for (i=1; i<l; i++)

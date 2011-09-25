@@ -609,7 +609,6 @@ long    FqX_split_Berlekamp(GEN *t, GEN q, GEN T, GEN p);
 GEN     Zp_appr(GEN f, GEN a);
 int     cmp_padic(GEN x, GEN y);
 GEN     factcantor0(GEN f, GEN pp, long flag);
-GEN     trivfact(void);
 
 /* polarit2.c */
 
