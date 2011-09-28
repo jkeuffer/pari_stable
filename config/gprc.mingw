@@ -1,0 +1,5 @@
+lines  = 25
+colors = "brightfg"
+prompt = "(%H:%M) gp > "
+histfile = "gp_history.txt"
+breakloop = 0

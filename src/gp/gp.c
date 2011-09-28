@@ -1147,7 +1147,9 @@ gprc_get(void)
 #endif
     f = gprc_chk(str); /* in $HOME */
     if (!f) f = gprc_chk(s); /* in . */
+#ifndef _WIN32
     if (!f) f = gprc_chk("/etc/gprc");
+#endif
     if (!f)  /* in datadir */
     {
       char *t = (char *) pari_malloc(strlen(pari_datadir) + 9);
@@ -1363,6 +1365,9 @@ brace_color(char *s, int c, int force)
 static void
 color_prompt(char *buf, const char *prompt)
 {
+#ifdef _WIN32
+  strcpy(buf,prompt);
+#else
   char *s = buf;
   *s = 0;
   /* escape sequences bug readline, so use special bracing (if available) */
@@ -1370,6 +1375,7 @@ color_prompt(char *buf, const char *prompt)
   s += strlen(s); strcpy(s, prompt);
   s += strlen(s);
   brace_color(s, c_INPUT, 1);
+#endif
 }
 
 static const char *
