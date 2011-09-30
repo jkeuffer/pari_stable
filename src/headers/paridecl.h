@@ -45,6 +45,7 @@ GEN     isprincipalgenforce(GEN bnf,GEN x);
 
 GEN     F2c_to_ZC(GEN x);
 GEN     F2m_to_ZM(GEN z);
+ulong   F2v_dotproduct(GEN x, GEN y);
 void    F2v_add_inplace(GEN x, GEN y);
 GEN     F2x_1_add(GEN y);
 GEN     F2x_add(GEN x, GEN y);

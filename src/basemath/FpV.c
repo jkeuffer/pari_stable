@@ -439,6 +439,23 @@ Flv_dotproduct(GEN x, GEN y, ulong p)
   for (i=2; i<lx; i++) c = Fl_add(c, Fl_mul(x[i], y[i], p), p);
   return c;
 }
+ulong
+F2v_dotproduct(GEN x0, GEN y0)
+{
+  uGEN x = (uGEN)x0, y = (uGEN)y0;
+  long i, lx = lg(x);
+  ulong c;
+  if (lx == 2) return 0;
+  c = x[2] & y[2];
+  for (i=3; i<lx; i++) c ^= x[i] & y[i];
+  if (BITS_IN_LONG == 64) c ^= c >> 32;
+  c ^= c >> 16;
+  c ^= c >>  8;
+  c ^= c >>  4;
+  c ^= c >>  2;
+  c ^= c >>  1;
+  return c & 1;
+}
 
 GEN
 FpM_FpC_mul(GEN x, GEN y, GEN p)
