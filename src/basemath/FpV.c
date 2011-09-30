@@ -306,6 +306,21 @@ Flm_Flc_mul_i(GEN x, GEN y, long lx, long l, ulong p)
   for (i=1; i<l; i++) z[i] = Flmrow_Flc_mul(x, y, p, lx, i);
   return z;
 }
+INLINE GEN
+F2m_F2c_mul_i(GEN x, GEN y, long lx, long l)
+{
+  long j;
+  GEN z = NULL;
+
+  for (j=1; j<lx; j++)
+  {
+    if (!F2v_coeff(y,j)) continue;
+    if (!z) z = vecsmall_copy(gel(x,j));
+    else F2v_add_inplace(z,gel(x,j));
+  }
+  if (!z) z = zero_F2v(l);
+  return z;
+}
 
 GEN
 FpM_mul(GEN x, GEN y, GEN p)
@@ -314,6 +329,24 @@ FpM_mul(GEN x, GEN y, GEN p)
   GEN z;
   if (ly==1) return cgetg(1,t_MAT);
   if (lx==1) return zeromat(0, ly-1);
+  if (lgefint(p) == 3)
+  {
+    pari_sp av = avma;
+    ulong pp = (ulong)p[2];
+    if (pp == 2)
+    {
+      x = ZM_to_F2m(x);
+      y = ZM_to_F2m(y);
+      z = F2m_to_ZM(F2m_mul(x,y));
+    }
+    else
+    {
+      x = ZM_to_Flm(x, pp);
+      y = ZM_to_Flm(y, pp);
+      z = Flm_to_ZM(Flm_mul(x,y, pp));
+    }
+    return gerepileupto(av, z);
+  }
   l = lg(x[1]); z = cgetg(ly,t_MAT);
   for (j=1; j<ly; j++) gel(z,j) = FpM_FpC_mul_i(x, gel(y,j), lx, l, p);
   return z;
@@ -338,6 +371,23 @@ Flm_mul(GEN x, GEN y, ulong p)
     for (j=1; j<ly; j++)
       gel(z,j) = Flm_Flc_mul_i(x, gel(y,j), lx, l, p);
   }
+  return z;
+}
+GEN
+F2m_mul(GEN x, GEN y)
+{
+  long i,j,l,lx=lg(x), ly=lg(y);
+  GEN z;
+  if (ly==1) return cgetg(1,t_MAT);
+  /* if (lx != coeff(y,1,1)) pari_err(operi,"*",x,y); */
+ z = cgetg(ly,t_MAT);
+  if (lx==1)
+  {
+    for (i=1; i<ly; i++) gel(z,i) = const_vecsmall(1,0);
+    return z;
+  }
+  l = coeff(x,1,1);
+  for (j=1; j<ly; j++) gel(z,j) = F2m_F2c_mul_i(x, gel(y,j), lx, l);
   return z;
 }
 
@@ -409,6 +459,14 @@ Flm_Flc_mul(GEN x, GEN y, ulong p)
     return Flm_Flc_mul_i_SMALL(x, y, lx, l, p);
   else
     return Flm_Flc_mul_i(x, y, lx, l, p);
+}
+GEN
+F2m_F2c_mul(GEN x, GEN y)
+{
+  long l, lx = lg(x);
+  if (lx==1) return cgetg(1,t_VECSMALL);
+  l = coeff(x,1,1);
+  return F2m_F2c_mul_i(x, y, lx, l);
 }
 /* RgV_to_RgX(FpM_FpC_mul(x,y,p), v), p != NULL, memory clean */
 GEN

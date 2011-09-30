@@ -3358,6 +3358,9 @@ to $1$.
 
 \fun{void}{F2m_copy}{GEN x} returns a copy of $x$.
 
+\fun{GEN}{F2m_F2c_mul}{GEN x, GEN y} multiplies  \kbd{x} and \kbd{y} (assumed
+to have compatible dimensions).
+
 \fun{GEN}{F2m_image}{GEN x} gives a subset of the columns of $x$ that generate
 the image of $x$.
 
@@ -3367,6 +3370,9 @@ the image of $x$.
 vector with two \typ{VECSMALL} components $y$ and $z$ of length $r$ giving a
 list of rows and columns respectively (starting from 1) such that the extracted
 matrix obtained from these two vectors using is invertible.
+
+\fun{GEN}{F2m_mul}{GEN x, GEN y} multiplies  \kbd{x} and \kbd{y} (assumed to
+have compatible dimensions).
 
 \fun{long}{F2m_rank}{GEN x} rank of $x$.
 

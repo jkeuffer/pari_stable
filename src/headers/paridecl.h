@@ -266,6 +266,8 @@ GEN     random_FpX(long d, long v, GEN p);
 
 /* FpV.c */
 
+GEN     F2m_F2c_mul(GEN x, GEN y);
+GEN     F2m_mul(GEN x, GEN y);
 GEN     Flc_Fl_div(GEN x, ulong y, ulong p);
 void    Flc_Fl_div_inplace(GEN x, ulong y, ulong p);
 GEN     Flc_Fl_mul(GEN x, ulong y, ulong p);
