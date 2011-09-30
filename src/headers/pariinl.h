@@ -1226,12 +1226,14 @@ INLINE long
 bit_accuracy(long x) { return (x-2) * BITS_IN_LONG; }
 INLINE double
 bit_accuracy_mul(long x, double y) { return (x-2) * (BITS_IN_LONG*y); }
+INLINE double
+prec2nbits_mul(long x, double y) { return (x-2) * (BITS_IN_LONG*y); }
 INLINE long
 bit_prec(GEN x) { return bit_accuracy(realprec(x)); }
 INLINE long
 prec2nbits(long x) { return bit_accuracy(x); }
 INLINE long
-prec2ndec(long x) { return (long)bit_accuracy_mul(x, LOG10_2); }
+prec2ndec(long x) { return (long)prec2nbits_mul(x, LOG10_2); }
 INLINE long
 divsBIL(long n) { return n >> TWOPOTBITS_IN_LONG; }
 INLINE long

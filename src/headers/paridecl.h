@@ -3073,6 +3073,7 @@ INLINE GEN    affc_fixlg(GEN x, GEN res);
 INLINE GEN    bin_copy(GENbin *p);
 INLINE long   bit_accuracy(long x);
 INLINE double bit_accuracy_mul(long x, double y);
+INLINE double prec2nbits_mul(long x, double y);
 INLINE long   bit_prec(GEN x);
 INLINE int    both_odd(long x, long y);
 INLINE GEN    cgetc(long x);

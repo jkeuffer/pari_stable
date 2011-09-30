@@ -980,7 +980,7 @@ cxgamma(GEN s0, int dolog, long prec)
     S = gprec_w(s,3);
     /* l2 ~ |lngamma(s))|^2 */
     l2 = gnorm(gmul(S, glog(S, 3)));
-    l = (bit_accuracy_mul(prec, LOG2) - rtodbl(glog(l2,3))/2) / 2.;
+    l = (prec2nbits_mul(prec, LOG2) - rtodbl(glog(l2,3))/2) / 2.;
     if (l < 0) l = 0.;
 
     iS = imag_i(S);
@@ -1025,7 +1025,7 @@ cxgamma(GEN s0, int dolog, long prec)
     v = v - st;
     l2 = u*u + v*v;
     if (l2 < 0.000001) l2 = 0.000001;
-    l = (bit_accuracy_mul(prec, LOG2) - log(l2)/2) / 2.;
+    l = (prec2nbits_mul(prec, LOG2) - log(l2)/2) / 2.;
     if (l < 0) l = 0.;
 
     la = 3.; /* FIXME: heuristic... */
@@ -1458,7 +1458,7 @@ cxpsi(GEN s0, long prec)
 
     l = rtodbl( gnorm(glog(S, 3)) );
     l = log(l) / 2.;
-    lim = 2 + (long)ceil((bit_accuracy_mul(prec, LOG2) - l) / (2*(1+log((double)la))));
+    lim = 2 + (long)ceil((prec2nbits_mul(prec, LOG2) - l) / (2*(1+log((double)la))));
     if (lim < 2) lim = 2;
 
     l = (2*lim-1)*la / (2.*PI);
@@ -1481,7 +1481,7 @@ cxpsi(GEN s0, long prec)
     }
     if (l < 0.000001) l = 0.000001;
     l = log(l) / 2.;
-    lim = 2 + (long)ceil((bit_accuracy_mul(prec, LOG2) - l) / (2*(1+log((double)la))));
+    lim = 2 + (long)ceil((prec2nbits_mul(prec, LOG2) - l) / (2*(1+log((double)la))));
     if (lim < 2) lim = 2;
 
     l = (2*lim-1)*la / (2.*PI);

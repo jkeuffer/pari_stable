@@ -188,7 +188,7 @@ consteuler(long prec)
 
   prec++;
 
-  l = prec+1; x = (long) (1 + bit_accuracy_mul(l, LOG2/4));
+  l = prec+1; x = (long) (1 + prec2nbits_mul(l, LOG2/4));
   a = utor(x,l); u=logr_abs(a); setsigne(u,-1); affrr(u,a);
   b = real_1(l);
   v = real_1(l);

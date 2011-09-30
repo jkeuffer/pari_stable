@@ -106,7 +106,7 @@ jbesselintern(GEN n, GEN z, long flag, long prec)
         if (i && i < precnew) n = gtofp(n,precnew);
       }
       z = gtofp(z,precnew);
-      B = bit_accuracy_mul(prec, LOG2/2) / L;
+      B = prec2nbits_mul(prec, LOG2/2) / L;
       lim = bessel_get_lim(B, L);
       p1 = gprec_wtrunc(_jbessel(n,z,flag,lim), prec);
       return gerepileupto(av, gmul(p2,p1));
@@ -257,7 +257,7 @@ kbessel1(GEN nu, GEN gx, long prec)
   y = cgetr(l); l1=lnew+1;
   av = avma; x = gtofp(gx, lnew); nu = gtofp(nu, lnew);
   nu2 = gmul2n(sqrr(nu), 2); togglesign(nu2);
-  n = (long) (bit_accuracy_mul(l,LOG2) + PI*sqrt(gtodouble(gnorm(nu)))) / 2;
+  n = (long) (prec2nbits_mul(l,LOG2) + PI*sqrt(gtodouble(gnorm(nu)))) / 2;
   n2 = n<<1; pitemp=mppi(l1);
   r = gmul2n(x,1);
   if (cmprs(x, n) < 0)
@@ -412,7 +412,7 @@ kbesselintern(GEN n, GEN z, long flag, long prec)
       {
         GEN z2 = gmul2n(z, -1);
         k = labs(ki);
-        B = bit_accuracy_mul(prec,LOG2/2) / L;
+        B = prec2nbits_mul(prec,LOG2/2) / L;
         if (fl) B += 0.367879;
         lim = bessel_get_lim(B, L);
         p1 = gmul(gpowgs(z2,k), _kbessel1(k,z,flag,lim,precnew));
@@ -541,7 +541,7 @@ hyperu(GEN a, GEN b, GEN gx, long prec)
   x = gtofp(gx, l);
   a1 = gaddsg(1, gadd(a,mb)); P = gmul(a1, a);
   p1 = gabs(gtofp(P,3), 3);
-  n = (long)(bit_accuracy_mul(l, LOG2) + PI*sqrt(gtodouble(p1)));
+  n = (long)(prec2nbits_mul(l, LOG2) + PI*sqrt(gtodouble(p1)));
   S = gadd(a1, a);
   if (cmprs(x,n) < 0)
   {
@@ -616,7 +616,7 @@ incgam2_0(GEN x, GEN expx)
 
   if (expo(x) >= 4)
   {
-    double mx = rtodbl(x), m = (bit_accuracy_mul(l,LOG2) + mx)/4;
+    double mx = rtodbl(x), m = (prec2nbits_mul(l,LOG2) + mx)/4;
     n = (long)(1+m*m/mx);
     z = divsr(-n, addsr(n<<1,x));
     for (i=n-1; i >= 1; i--)
@@ -663,7 +663,7 @@ incgam2(GEN s, GEN x, long prec)
     l = realprec(x);
     mx = fabs(rtodbl(x));
   }
-  m = (bit_accuracy_mul(l,LOG2) + mx)/4;
+  m = (prec2nbits_mul(l,LOG2) + mx)/4;
   n = (long)(1+m*m/mx);
   i = typ(s);
   if (i == t_REAL) b = addsr(-1,s);
@@ -906,7 +906,7 @@ cxerfc_r1(GEN x, long prec)
 {
   GEN h, h2, eh2, denom, res, lambda;
   long u, v;
-  const double D = bit_accuracy_mul(prec, LOG2);
+  const double D = prec2nbits_mul(prec, LOG2);
   const long npoints = (long)ceil(D/PI)+1;
   pari_sp av = avma;
   {
@@ -1024,7 +1024,7 @@ optim_zeta(GEN S, long prec, long *pp, long *pn)
     t = fabs( rtodbl(gel(S,2)) );
   }
 
-  B = bit_accuracy_mul(prec, LOG2);
+  B = prec2nbits_mul(prec, LOG2);
   if (s <= 0) /* may occur if S ~ 0, and we don't use the func. eq. */
   { /* TODO: the crude bounds below are generally valid. Optimize ? */
     double l,l2, la = 1.; /* heuristic */
@@ -1107,7 +1107,7 @@ inv_szeta_euler(long n, double lba, long prec)
   ulong p, lim;
 
   if (n > prec2nbits(prec)) return real_1(prec);
-  if (!lba) lba = bit_accuracy_mul(prec, LOG2);
+  if (!lba) lba = prec2nbits_mul(prec, LOG2);
   D = exp((lba - log(n-1)) / (n-1));
   lim = 1 + (ulong)ceil(D);
   maxprime_check(lim);
@@ -1266,7 +1266,7 @@ single_bern(long k, long prec)
 {
   GEN B;
   if (OK_bern(k >> 1, prec)) B = bernreal(k, prec);
-  else if (k * (log(k) - 2.83) > bit_accuracy_mul(prec, LOG2))
+  else if (k * (log(k) - 2.83) > prec2nbits_mul(prec, LOG2))
     B = bernreal_using_zeta(k, NULL, prec);
   else
     B = fractor(bernfrac(k), prec);
@@ -1296,7 +1296,7 @@ szeta(long k, long prec)
   if ((k&1) == 0)
   {
     if (!OK_bern(k >> 1, prec)
-        && (k * (log(k) - 2.83) > bit_accuracy_mul(prec, LOG2)))
+        && (k * (log(k) - 2.83) > prec2nbits_mul(prec, LOG2)))
       y = invr( inv_szeta_euler(k, 0, prec) ); /* would use zeta above */
     else
     {
@@ -1308,7 +1308,7 @@ szeta(long k, long prec)
     return gerepileuptoleaf(av, y);
   }
   /* k > 1 odd */
-  if (k * log(k) > bit_accuracy_mul(prec, LOG2)) /* heuristic */
+  if (k * log(k) > prec2nbits_mul(prec, LOG2)) /* heuristic */
     return gerepileuptoleaf(av, invr( inv_szeta_euler(k, 0, prec) ));
   return szeta_odd(k, prec);
 }
@@ -2513,7 +2513,7 @@ jell(GEN x, long prec)
      * but inteta(q) costly and useless if expo(q) << 1  => inteta(q) = 1.
      * log_2 ( exp(-2Pi Im tau) ) < -prec2nbits(prec)
      * <=> Im tau > prec2nbits(prec) * log(2) / 2Pi */
-    long C = (long)bit_accuracy_mul(prec, LOG2/(2*PI));
+    long C = (long)prec2nbits_mul(prec, LOG2/(2*PI));
     q = exp_IPiC(gmul2n(x,1), prec); /* e(x) */
     if (gcmpgs(gel(x,2), C) > 0) /* eta(q(x)) = 1 : no need to compute q(2x) */
       h = q;

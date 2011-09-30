@@ -656,7 +656,7 @@ lindep2(GEN x, long bit)
       bit = 32 + gexpo(x);
     }
     else
-      bit = (long)bit_accuracy_mul(bit, 0.8);
+      bit = (long)prec2nbits_mul(bit, 0.8);
   }
   else
     bit = (long) (bit/LOG10_2);

@@ -273,7 +273,7 @@ findmforinit(long m, long prec)
 
   if (m <= 0)
   {
-    p = (long)bit_accuracy_mul(prec, 0.3);
+    p = (long)prec2nbits_mul(prec, 0.3);
     m = 2; r = 4;
     while (r < p) { m++; r <<= 1; }
   }

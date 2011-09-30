@@ -3416,7 +3416,7 @@ elllseries(GEN e, GEN s, GEN A, long prec)
   cg = divrr(Pi2n(1, prec), gsqrt(N,prec));
   cga = gmul(cg, A);
   cgb = gdiv(cg, A);
-  l = (ulong)((bit_accuracy_mul(prec, LOG2) +
+  l = (ulong)((prec2nbits_mul(prec, LOG2) +
               fabs(gtodouble(real_i(s))-1.) * log(rtodbl(cga)))
             / rtodbl(cgb) + 1);
   if ((long)l < 1) l = 1;

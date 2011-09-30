@@ -1784,8 +1784,8 @@ RecCoeff2(GEN nf,  RC_data *d,  long prec)
   d->G = minss(-20, -prec2nbits(prec) >> 4);
 
   vec  = shallowconcat(mkvec(gneg(beta)), row(M, d->v));
-  imin = (long)bit_accuracy_mul(prec, .225);
-  imax = (long)bit_accuracy_mul(prec, .315);
+  imin = (long)prec2nbits_mul(prec, .225);
+  imax = (long)prec2nbits_mul(prec, .315);
 
   av = avma;
   for (i = imax; i >= imin; i-=16, avma = av)
@@ -1991,7 +1991,7 @@ QuadGetST(GEN bnr, GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
   {
     GEN dtcr = gel(dataCR, mael(vChar,j,1)), c = ch_C(dtcr);
     gel(C,j) = c;
-    N0[j] = (long)bit_accuracy_mul(prec, 0.35 * gtodouble(c));
+    N0[j] = (long)prec2nbits_mul(prec, 0.35 * gtodouble(c));
     if (n0 < N0[j]) n0 = N0[j];
   }
   maxprime_check(n0);
