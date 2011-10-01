@@ -2512,12 +2512,13 @@ Flm_det_sp(GEN a, ulong p)
     q = ucoeff(a,i,i);
 
     x = Fl_mul(x,q,p);
+    q = Fl_inv(q,p);
     for (k=i+1; k<=nbco; k++)
     {
       ulong m = ucoeff(a,i,k);
       if (!m) continue;
 
-      m = Fl_div(m, q, p);
+      m = Fl_mul(m, q, p);
       for (j=i+1; j<=nbco; j++)
         ucoeff(a,j,k) = Fl_sub(ucoeff(a,j,k), Fl_mul(m,ucoeff(a,j,i), p), p);
     }
@@ -2568,21 +2569,20 @@ FpM_det(GEN a, GEN p)
     q = gcoeff(a,i,i);
 
     x = Fp_mul(x,q,p);
+    q = Fp_inv(q,p);
     for (k=i+1; k<=nbco; k++)
     {
       GEN m = modii(gcoeff(a,i,k), p);
       if (!signe(m)) continue;
 
-      m = Fp_div(m, q, p);
+      m = Fp_mul(m, q, p);
       for (j=i+1; j<=nbco; j++)
       {
         gcoeff(a,j,k) = Fp_sub(gcoeff(a,j,k), Fp_mul(m,gcoeff(a,j,i),p),p);
         if (low_stack(lim, stack_lim(av,1)))
         {
           if(DEBUGMEM>1) pari_warn(warnmem,"det. col = %ld",i);
-          gerepileall(av,2, &a,&x);
-          q = gcoeff(a,i,i);
-          m = gcoeff(a,i,k); m = Fp_div(m, q, p);
+          gerepileall(av,4, &a,&x,&q,&m);
         }
       }
     }
