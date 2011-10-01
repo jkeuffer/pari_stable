@@ -1867,6 +1867,28 @@ system0(const char *s)
 #endif
 }
 
+GEN
+closure_alarmer(GEN C, long s)
+{
+  struct pari_evalstate state;
+  VOLATILE GEN x;
+  if (!s) { alarm0(0); return closure_evalgen(C); }
+  evalstate_save(&state);
+#ifndef HAS_ALARM
+  pari_err(archer,"alarm");
+#endif
+  CATCH(CATCH_ALL) /* We need to stop the timer after any error */
+  {
+    if (err_get_num(global_err_data)!=alarmer)
+    {
+      alarm0(0); pari_err(0, global_err_data);
+    }
+    evalstate_restore(&state); x = gerepilecopy(avma, global_err_data);
+  }
+  TRY { alarm0(s); x = closure_evalgen(C); alarm0(0); } ENDCATCH;
+  return x;
+}
+
 void
 alarm0(long s)
 {
@@ -1876,6 +1898,13 @@ alarm0(long s)
 #else
   if (s) pari_err(archer,"alarm");
 #endif
+}
+
+GEN
+gp_alarm(long s, GEN code)
+{
+  if (!code) { alarm0(s); return gnil; }
+  return closure_alarmer(code,s);
 }
 
 /*******************************************************************/
