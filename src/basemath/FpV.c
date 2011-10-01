@@ -379,8 +379,7 @@ F2m_mul(GEN x, GEN y)
   long i,j,l,lx=lg(x), ly=lg(y);
   GEN z;
   if (ly==1) return cgetg(1,t_MAT);
-  /* if (lx != coeff(y,1,1)) pari_err(operi,"*",x,y); */
- z = cgetg(ly,t_MAT);
+  z = cgetg(ly,t_MAT);
   if (lx==1)
   {
     for (i=1; i<ly; i++) gel(z,i) = const_vecsmall(1,0);
