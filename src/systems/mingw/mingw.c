@@ -57,6 +57,9 @@ win32_console_color(unsigned long c)
 void
 win32_ansi_fputs(const char* s, void* f)
 {
+  WORD color;
+  unsigned long c[3];
+  long nbarg;
   if( !(f == stdout || f == stderr) ) {
     fputs(s,f);
     return;
@@ -74,17 +77,26 @@ win32_ansi_fputs(const char* s, void* f)
       (fputs)(s,f);
       return;
     }
-
-    WORD color = 7;
-    unsigned long a1=0,a2=0,a3=0;
-    a1 = strtoul(p,&p,10);
-    if( *p == ';' ) a2 = strtoul(p+1,&p,10);
-    if( *p == ';' ) a3 = strtoul(p+1,&p,10);
+    nbarg = 0;
+    c[nbarg++] = strtoul(p,&p,10);
+    if( *p == ';' ) c[nbarg++] = strtoul(p+1,&p,10);
+    if( *p == ';' ) c[nbarg++] = strtoul(p+1,&p,10);
     if( *p++ == 'm' ) {
-      if( a2|a3 )
-        color = win32_console_color(a2) | win32_console_color(a3);
+      switch(nbarg)
+      {
+      case 1:
+        color = 7;
+        break;
+      case 2:
+        color = win32_console_color(c[1]);
+        if (c[0]&4) color |= 0x8000;
+        break;
+      case 3:
+        color = win32_console_color(c[1]) | win32_console_color(c[2]);
+        if (c[0]&4) color |= 0x8000;
+      }
+      SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),color);
     }
-    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),color);
     s = p;
   }
 }
