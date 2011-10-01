@@ -284,6 +284,8 @@ sd_colors(const char *v, long flag)
       v = "1, 5, 3, 7, 6, 2, 3"; /* Assume recent ReadLine. */
     if (l <= 7 && strncmp(v, "lightbg", l) == 0)
       v = "1, 6, 3, 4, 5, 2, 3"; /* Assume recent ReadLine. */
+    if (l <= 8 && strncmp(v, "brightfg", l) == 0)      /* Good for windows consoles */
+      v = "9, 13, 11, 15, 14, 10, 11";
     if (l <= 6 && strncmp(v, "boldfg", l) == 0)        /* Good for darkbg consoles */
       v = "[1,,1], [5,,1], [3,,1], [7,,1], [6,,1], , [2,,1]";
     v0 = s = filtre(v, 0);
