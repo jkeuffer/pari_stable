@@ -2040,7 +2040,7 @@ roots_aux(GEN p, long l, long clean)
   if (!isvalidpol(p)) pari_err(talker,"invalid coefficients in roots");
   if (lg(p) == 3) return cgetg(1,t_COL); /* constant polynomial */
 
-  if (l < 3) l = 3;
+  if (l < LOWDEFAULTPREC) l = LOWDEFAULTPREC;
   ex = 5 - prec2nbits(l);
   L = roots_com(p, prec2nbits(l)); n = lg(L);
   res = cgetg(n,t_COL);
