@@ -1062,44 +1062,44 @@ F2m_gauss_sp(GEN a, GEN b)
   bco = lg(b)-1;
   for (i=1; i<=aco; i++)
   {
-    GEN col = vecsmall_copy(gel(a,i));
-    if (!d[i] && F2v_coeff(col, i))
+    GEN ai = vecsmall_copy(gel(a,i));
+    if (!d[i] && F2v_coeff(ai, i))
       k = i;
     else
-      for (k = 1; k <= li; k++) if (!d[k] && F2v_coeff(col,k)) break;
+      for (k = 1; k <= li; k++) if (!d[k] && F2v_coeff(ai,k)) break;
     /* found a pivot on row k */
     if (k > li) return NULL;
     d[k] = i;
 
     /* Clear k-th row but column-wise */
-    F2v_clear(col,k);
+    F2v_clear(ai,k);
     for (l=1; l<=aco; l++)
     {
-      GEN coll = gel(a,l);
-      if (!F2v_coeff(coll,k)) continue;
+      GEN al = gel(a,l);
+      if (!F2v_coeff(al,k)) continue;
 
-      F2v_add_inplace(coll,col);
+      F2v_add_inplace(al,ai);
     }
     for (l=1; l<=bco; l++)
     {
-      GEN coll = gel(b,l);
-      if (!F2v_coeff(coll,k)) continue;
+      GEN al = gel(b,l);
+      if (!F2v_coeff(al,k)) continue;
 
-      F2v_add_inplace(coll,col);
+      F2v_add_inplace(al,ai);
     }
   }
   u = gcopy(b);
   for (j = 1; j <= bco; j++)
   {
-    GEN colb = gel(b, j), colu = gel(u, j);
+    GEN bj = gel(b, j), uj = gel(u, j);
 
     for (i = 1; i <= li; i++)
       if (d[i] && d[i] != i) /* can d[i] still be 0 ? */
       {
-        if (F2v_coeff(colb, i))
-          F2v_set(colu, d[i]);
+        if (F2v_coeff(bj, i))
+          F2v_set(uj, d[i]);
         else
-          F2v_clear(colu, d[i]);
+          F2v_clear(uj, d[i]);
       }
   }
   return u;
@@ -2128,7 +2128,7 @@ F2m_indexrank(GEN x)
   long n = lg(x)-1;
   (void)new_chunk(3+n+1+n+1);
   /* yield r = dim ker(x) */
-  d = F2m_gauss_pivot(x,&r);
+  d = F2m_gauss_pivot(F2m_copy(x),&r);
   avma = av;
   /* now r = dim Im(x) */
   r = n - r;
@@ -2223,29 +2223,45 @@ FpM_indexrank(GEN x, GEN p) {
 /*                                                                 */
 /*******************************************************************/
 
+static long
+F2v_find_nonzero(GEN x0, GEN mask0, long l, long m)
+{
+  ulong *x = (ulong *)x0+2, *mask = (ulong *)mask0+2, e;
+  long i, j;
+  for (i = 0; i < l; i++)
+  {
+    e = *x++ & *mask++;
+    if (e)
+      for (j = 1; ; j++, e >>= 1) if (e & 1uL) return i*BITS_IN_LONG+j;
+  }
+  return m+1;
+}
+
 /* in place, destroy x */
 GEN
 F2m_ker_sp(GEN x, long deplin)
 {
   GEN y, c, d;
-  long i, j, k, r, m, n;
+  long i, j, k, l, r, m, n;
 
   n = lg(x)-1;
   m = mael(x,1,1); r=0;
 
-  c = const_vecsmall(m, 0);
-  d = new_chunk(n+1);
+  d = cgetg(n+1, t_VECSMALL);
+  c = zero_F2v(m);
+  l = lg(c)-1;
+  for (i = 2; i <= l; i++) c[i] = -1;
+  if (remsBIL(m)) c[l] = (1uL<<remsBIL(m))-1uL;
   for (k=1; k<=n; k++)
   {
-    for (j=1; j<=m; j++)
-      if (!c[j] && F2m_coeff(x,j,k))
-        break;
-    if (j > m)
+    GEN xk = gel(x,k);
+    j = F2v_find_nonzero(xk, c, l, m);
+    if (j>m)
     {
       if (deplin) {
         GEN c = zero_F2v(n);
         for (i=1; i<k; i++)
-          if (F2m_coeff(x, d[i], k))
+          if (F2v_coeff(xk, d[i]))
             F2v_set(c, i);
         F2v_set(c, k);
         return c;
@@ -2254,13 +2270,14 @@ F2m_ker_sp(GEN x, long deplin)
     }
     else
     {
-      c[j] = k; d[k] = j;
+      F2v_clear(c,j); d[k] = j;
+      F2v_clear(xk, j);
       for (i=k+1; i<=n; i++)
-        if (F2m_coeff(x,j,i))
-        {
-          F2v_add_inplace(gel(x,i), gel(x,k));
-          F2m_set(x,j,i);
-        }
+      {
+        GEN xi = gel(x,i);
+        if (F2v_coeff(xi,j)) F2v_add_inplace(xi, xk);
+      }
+      F2v_set(xk, j);
     }
   }
   if (deplin) return NULL;
@@ -2488,7 +2505,7 @@ ulong
 F2m_det(GEN x)
 {
   pari_sp av = avma;
-  ulong d = F2m_det_sp(Flm_copy(x));
+  ulong d = F2m_det_sp(F2m_copy(x));
   avma = av; return d;
 }
 
@@ -2591,52 +2608,37 @@ FpM_det(GEN a, GEN p)
   return gerepileuptoint(av, Fp_mul(x, gcoeff(a,nbco,nbco),p));
 }
 
-static long
-F2v_find_nonzero(GEN x0, GEN mask0, long l, long m)
-{
-  ulong *x = (ulong *)x0+2, *mask = (ulong *)mask0+2, e;
-  long i, j;
-  l -= 2;
-  for (i = 0; i < l; i++)
-  {
-    e = *x++ & *mask++;
-    if (e)
-      for (j = 1; ; j++, e >>= 1) if (e & 1uL) return i*BITS_IN_LONG+j;
-  }
-  return m+1;
-}
-
+/* Destroy x */
 static GEN
 F2m_gauss_pivot(GEN x, long *rr)
 {
-  GEN c,d,mask;
-  long j,k,r,t,n,l,m;
+  GEN c, d;
+  long i, j, k, l, r, m, n;
 
-  n=lg(x)-1; if (!n) { *rr=0; return NULL; }
+  n = lg(x)-1; if (!n) { *rr=0; return NULL; }
+  m = mael(x,1,1); r=0;
 
-  m=gel(x,1)[1]; r=0;
-  d=cgetg(n+1,t_VECSMALL);
-  x = Flm_copy(x);
-  c = const_vecsmall(m, 0);
-  mask = zero_F2v(m);
-  l = lg(mask);
-  for (j = 2; j < l; j++) mask[j] = -1;
-  if (remsBIL(m)) mask[l-1] &= (1UL<<remsBIL(m))-1UL;
+  d = cgetg(n+1, t_VECSMALL);
+  c = zero_F2v(m);
+  l = lg(c)-1;
+  for (i = 2; i <= l; i++) c[i] = -1;
+  if (remsBIL(m)) c[l] = (1uL<<remsBIL(m))-1uL;
   for (k=1; k<=n; k++)
   {
     GEN xk = gel(x,k);
-    j = F2v_find_nonzero(xk,mask,l,m);
-    if (j>m) { r++; d[k]=0; }
+    j = F2v_find_nonzero(xk, c, l, m);
+    if (j>m) { r++; d[k] = 0; }
     else
     {
-      c[j]=k; d[k]=j; F2v_clear(mask,j);
-      for (t=k+1; t<=n; t++)
+      F2v_clear(c,j); d[k] = j;
+      for (i=k+1; i<=n; i++)
       {
-        GEN xt = gel(x,t);
-        if (F2v_coeff(xt,j)) F2v_add_inplace(xt,xk);
+        GEN xi = gel(x,i);
+        if (F2v_coeff(xi,j)) F2v_add_inplace(xi, xk);
       }
     }
   }
+
   *rr = r; avma = (pari_sp)d; return d;
 }
 
@@ -2820,13 +2822,13 @@ F2m_image(GEN x)
   GEN d,y;
   long j,k,r;
 
-  d = F2m_gauss_pivot(x,&r);
-  if (!d) { avma = av; return Flm_copy(x); }
+  d = F2m_gauss_pivot(F2m_copy(x),&r);
+  if (!d) { avma = av; return F2m_copy(x); }
   /* d left on stack */
   r = lg(x)-1 - r; /* = dim Im(x) */
   y = cgetg(r+1,t_MAT);
   for (j=k=1; j<=r; k++)
-    if (d[k]) gel(y,j++) = Flv_copy(gel(x,k));
+    if (d[k]) gel(y,j++) = F2v_copy(gel(x,k));
   return y;
 }
 
@@ -2852,7 +2854,7 @@ F2m_rank(GEN x)
 {
   pari_sp av = avma;
   long r;
-  (void)F2m_gauss_pivot(x,&r);
+  (void)F2m_gauss_pivot(F2m_copy(x),&r);
   avma = av; return lg(x)-1 - r;
 }
 
