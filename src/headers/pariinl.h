@@ -1167,7 +1167,7 @@ affgr(GEN x, GEN y)
     case t_INT:  affir(x,y); break;
     case t_REAL: affrr(x,y); break;
     case t_FRAC: rdiviiz(gel(x,1),gel(x,2), y); break;
-    case t_QUAD: av = avma; affgr(quadtofp(x,lg(y)), y); avma = av; break;
+    case t_QUAD: av = avma; affgr(quadtofp(x,realprec(y)), y); avma = av; break;
     default: pari_err(operf,"",x,y);
   }
 }
@@ -1183,7 +1183,7 @@ affc_fixlg(GEN x, GEN res)
   else
   {
     avma = (pari_sp)(res+3);
-    res = cgetr(lg(gel(res,1)));
+    res = cgetr(realprec(gel(res,1)));
     affrr_fixlg(x, res);
   }
   return res;
