@@ -157,7 +157,7 @@ T_A_Matrices(GEN MatFU, long r, GEN *eps5, long prec)
   A = RgM_inv(m1); if (!A) pari_err(precer,"thue");
   IntM = RgM_Rg_add(RgM_mul(A,m1), gen_m1);
 
-  eps2 = gadd(vecmax(gabs(IntM, 3)), real2n(-e, 3)); /* t_REAL */
+  eps2 = gadd(vecmax(gabs(IntM, 3)), real2n(-e, LOWDEFAULTPREC)); /* t_REAL */
   nia = vecmax(gabs(A, 3));
   if (typ(nia) != t_REAL) nia = gtofp(nia, 3);
 
@@ -168,7 +168,7 @@ T_A_Matrices(GEN MatFU, long r, GEN *eps5, long prec)
   p1 = addrr(mulsr(r, gmul2n(nia,-e)), eps2);
   eps3 = mulrr(mulsr(2*r*r,nia), p1);
   if (!signe(eps3))
-    eps3 = real2n(expo(eps3), 3);
+    eps3 = real2n(expo(eps3), LOWDEFAULTPREC);
   else
     eps3 = myround(eps3, 1);
 

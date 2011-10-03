@@ -418,7 +418,7 @@ static double
 charpoly_bound(GEN M)
 {
   pari_sp av = avma;
-  GEN s = real_0(3), bin, B2 = itor(sqri(ZM_supnorm(M)), 3);
+  GEN s = real_0(LOWDEFAULTPREC), bin, B2 = itor(sqri(ZM_supnorm(M)), LOWDEFAULTPREC);
   long n = lg(M)-1, k;
   double d;
   bin = gen_1;

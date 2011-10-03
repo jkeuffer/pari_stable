@@ -190,7 +190,7 @@ jbesselh(GEN n, GEN z, long prec)
       else l = linit - 1 + divsBIL(-2*k*gz);
       if (l>prec) prec = l;
       prec += divsBIL(-gz);
-      if (prec < 3) prec = 3;
+      if (prec < LOWDEFAULTPREC) prec = LOWDEFAULTPREC;
       z = gadd(z, real_0(prec));
       if (typ(z) == t_COMPLEX) gel(z,2) = gadd(gel(z,2), real_0(prec));
       p1 = gmul(_jbesselh(k,z,prec), gsqrt(gdiv(z,Pi2n(-1,prec)),prec));

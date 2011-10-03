@@ -1682,7 +1682,7 @@ a_posteriori_errors(GEN p, GEN roots_pol, long pari_err)
 
   pari_err += (long)log2((double)n) + 1;
   if (pari_err > -2) return 0;
-  sigma = real2n(-pari_err, 3);
+  sigma = real2n(-pari_err, LOWDEFAULTPREC);
   /*  2 / ((s - 1)^(1/n) - 1) */
   shatzle = divur(2, subrs(sqrtnr(subrs(sigma,1),n), 1));
   for (i=1; i<=n; i++)
@@ -2205,8 +2205,8 @@ rootsold(GEN x, long prec)
           }
         }
         z = gel(y,k+m*i);
-        setprec(gel(z,1), 3);
-        setprec(gel(z,2), 3); gaffect(p3, z); avma = av2;
+        setprec(gel(z,1), LOWDEFAULTPREC);
+        setprec(gel(z,2), LOWDEFAULTPREC); gaffect(p3, z); avma = av2;
         ln = 1; mask = mask0;
         while (mask > 1)
         {

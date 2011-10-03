@@ -2712,7 +2712,7 @@ compute_R(GEN lambda, GEN z, GEN *ptL, GEN *ptkR)
   if (mpcmp(den,D) > 0)
   {
     if (DEBUGLEVEL) err_printf("D = %Ps\nden = %Ps\n",D,
-                    lgefint(den) <= DEFAULTPREC? den: itor(den,3));
+                    lgefint(den) <= DEFAULTPREC? den: itor(den,LOWDEFAULTPREC));
     return fupb_PRECI;
   }
   L = Q_muli_to_int(lambda, den);
@@ -2723,8 +2723,8 @@ compute_R(GEN lambda, GEN z, GEN *ptL, GEN *ptkR)
   c = gmul(R,z); /* should be n (= 1 if we are done) */
   if (DEBUGLEVEL)
   {
-    err_printf("\n#### Tentative regulator : %Ps\n", gprec_w(R,3));
-    err_printf("\n ***** check = %Ps\n",gprec_w(c,3));
+    err_printf("\n#### Tentative regulator: %.28Pg\n", R);
+    err_printf("\n ***** check = %.28Pg\n",c);
   }
   ec = gexpo(c);
   /* safe check for c < 0.75 : avoid underflow in gtodouble() */

@@ -83,7 +83,7 @@ two_factor_bound(GEN x)
   GEN *invbin, c, r = cgetr(3), z;
 
   x += 2; invbin = (GEN*)new_chunk(n+1);
-  z = real_1(3); /* invbin[i] = 1 / binomial(n, i) */
+  z = real_1(LOWDEFAULTPREC); /* invbin[i] = 1 / binomial(n, i) */
   for (i=0,j=n; j >= i; i++,j--)
   {
     invbin[i] = invbin[j] = z;

@@ -931,7 +931,7 @@ phi(long d, GEN fd)
 static void
 Aurifeuille_init(GEN a, long d, GEN fd, struct aurifeuille_t *S)
 {
-  GEN sqrta = sqrtr_abs(itor(a, 3));
+  GEN sqrta = sqrtr_abs(itor(a, LOWDEFAULTPREC));
   GEN bound = ceil_safe(powru(addrs(sqrta,1), phi(d, fd)));
   GEN zl = polsubcyclo_start(d, 0, 0, bound, &(S->e), (long*)&(S->l));
   S->le = gel(zl,1);

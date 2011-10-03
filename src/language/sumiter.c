@@ -1168,7 +1168,7 @@ zbrent(void *E, GEN (*eval)(void *, GEN), GEN a, GEN b, long prec)
   fb = eval(E, b);
   if (gsigne(fa)*gsigne(fb) > 0) pari_err(talker,"roots must be bracketed in solve");
   itmax = (prec * (2*BITS_IN_LONG)) + 1;
-  tol = real2n(5-prec2nbits(prec), 3);
+  tol = real2n(5-prec2nbits(prec), LOWDEFAULTPREC);
   fc = fb;
   e = d = NULL; /* gcc -Wall */
   for (iter=1; iter<=itmax; iter++)

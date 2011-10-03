@@ -2005,7 +2005,7 @@ quadtofp(GEN x, long prec)
 {
   GEN z, Q, u = gel(x,2), v = gel(x,3);
   pari_sp av;
-  if (prec < 3) prec = 3;
+  if (prec < LOWDEFAULTPREC) prec = LOWDEFAULTPREC;
   if (isintzero(v)) return cxcompotor(u, prec);
   av = avma; Q = gel(x,1);
   z = itor(quad_disc(x), prec);

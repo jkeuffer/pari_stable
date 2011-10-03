@@ -2112,7 +2112,7 @@ logagmcx(GEN q, long prec)
   a = gel(y,1);
   b = gel(y,2);
   a = addrr(a, mulsr(-e, mplog2(prec)));
-  if (lg(a) == 3) a = real_0_bit(expo(a));
+  if (realprec(a) <= LOWDEFAULTPREC) a = real_0_bit(expo(a));
   if (neg) b = gsigne(b) <= 0? gadd(b, mppi(prec))
                              : gsub(b, mppi(prec));
   affrr_fixlg(a, gel(z,1));
@@ -2329,7 +2329,7 @@ mpcos(GEN x)
 
   if (!signe(x)) {
     long l = nbits2prec(-expo(x));
-    if (l < 3) l = 3;
+    if (l < LOWDEFAULTPREC) l = LOWDEFAULTPREC;
     return real_1(l);
   }
 

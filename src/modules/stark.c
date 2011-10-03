@@ -3082,7 +3082,7 @@ quadhilbertimag(GEN D)
     T.qfpq = qficomp(qfp, qfq);
   }
   /* u modulo 2pq */
-  prec = 3;
+  prec = LOWDEFAULTPREC;
   Pr = cgetg(h+1,t_VEC);
   Pi = cgetg(h+1,t_VEC);
   for(;;)

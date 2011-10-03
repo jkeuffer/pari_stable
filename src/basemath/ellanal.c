@@ -789,7 +789,7 @@ logplusQ(GEN t, long prec)
 static GEN
 hnaive_max(GEN ell, GEN ht)
 {
-  const long prec = 3; /* minimal accuracy */
+  const long prec = LOWDEFAULTPREC; /* minimal accuracy */
   GEN b2     = ell_get_b2(ell), j = ell_get_j(ell);
   GEN logd   = glog(absi(ell_get_disc(ell)), prec);
   GEN logj   = logplusQ(j, prec);

@@ -645,11 +645,11 @@ isprimePL(GEN N, long flag)
     f = factorback(F); F = gel(F,1);
     if (!equalii(f, N_1) && !BLS_test(N,f)) {
       if (DEBUGLEVEL>3)
-        err_printf("Pocklington-Lehmer: N-1 not smooth enough --> Failure. Factored up to %Ps (%.3Ps%%)\n", f, divri(itor(f,3), N));
+        err_printf("Pocklington-Lehmer: N-1 not smooth enough --> Failure. Factored up to %Ps (%.3Ps%%)\n", f, divri(itor(f,LOWDEFAULTPREC), N));
       avma = ltop; return gen_0;
     }
     if (DEBUGLEVEL>3)
-      err_printf("Pocklington-Lehmer: N-1 factored up to %Ps! (%.3Ps%%)\n", f, divri(itor(f,3), N));
+      err_printf("Pocklington-Lehmer: N-1 factored up to %Ps! (%.3Ps%%)\n", f, divri(itor(f,LOWDEFAULTPREC), N));
   }
   if (DEBUGLEVEL>3)
     err_printf("Pocklington-Lehmer: N-1 smooth enough! Computing certificate\n");

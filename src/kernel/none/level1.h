@@ -353,7 +353,7 @@ cmpsr(long x, GEN y)
   GEN z;
 
   if (!x) return -signe(y);
-  av=avma; z = stor(x, 3); avma=av;
+  av=avma; z = stor(x, LOWDEFAULTPREC); avma=av;
   return cmprr(z,y);
 }
 INLINE int

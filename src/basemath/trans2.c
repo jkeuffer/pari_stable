@@ -489,7 +489,7 @@ mpth(GEN x)
 
   if (!s) return real_0_bit(expo(x));
   lx = realprec(x);
-  if (absr_cmp(x, stor(prec2nbits(lx), 3)) >= 0) {
+  if (absr_cmp(x, stor(prec2nbits(lx), LOWDEFAULTPREC)) >= 0) {
     y = real_1(lx);
   } else {
     pari_sp av = avma;
@@ -977,16 +977,16 @@ cxgamma(GEN s0, int dolog, long prec)
     GEN S, iS, l2, la, u;
     double logla, l;
 
-    S = gprec_w(s,3);
+    S = gprec_w(s,LOWDEFAULTPREC);
     /* l2 ~ |lngamma(s))|^2 */
-    l2 = gnorm(gmul(S, glog(S, 3)));
-    l = (prec2nbits_mul(prec, LOG2) - rtodbl(glog(l2,3))/2) / 2.;
+    l2 = gnorm(gmul(S, glog(S, LOWDEFAULTPREC)));
+    l = (prec2nbits_mul(prec, LOG2) - rtodbl(glog(l2,LOWDEFAULTPREC))/2) / 2.;
     if (l < 0) l = 0.;
 
     iS = imag_i(S);
     if (et > 0 && l > 0)
     {
-      GEN t = gmul(iS, dbltor(PI / l)), logt = glog(t,3);
+      GEN t = gmul(iS, dbltor(PI / l)), logt = glog(t,LOWDEFAULTPREC);
       la = gmul(t, logt);
       if      (gcmpgs(la, 3) < 0)   { logla = log(3.); la = stoi(3); }
       else if (gcmpgs(la, 150) > 0) { logla = rtodbl(logt); la = t; }
@@ -1453,7 +1453,7 @@ cxpsi(GEN s0, long prec)
 
   if (expo(sig) > 300 || (typ(s) == t_COMPLEX && gexpo(gel(s,2)) > 300))
   { /* |s| is HUGE. Play safe */
-    GEN L, S = gprec_w(s,3), rS = real_i(S), iS = imag_i(S);
+    GEN L, S = gprec_w(s,LOWDEFAULTPREC), rS = real_i(S), iS = imag_i(S);
     double l;
 
     l = rtodbl( gnorm(glog(S, 3)) );

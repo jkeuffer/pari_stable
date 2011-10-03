@@ -1226,7 +1226,7 @@ zell(GEN e, GEN z, long prec)
     GEN z1, z2;
     int bad;
 
-    z1 = pointell(e,gprec_w(t,3),3); /* we don't need much precision */
+    z1 = pointell(e,gprec_w(t,LOWDEFAULTPREC),LOWDEFAULTPREC); /* we don't need much precision */
     if (ell_is_inf(z1)) pari_err(precer, "ellpointtoz");
     /* Either z = z1 (ok: keep t), or z = z2 (bad: t <-- -t) */
     z2 = invell(e, z1);
