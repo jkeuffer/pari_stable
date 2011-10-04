@@ -2046,11 +2046,8 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
     gel(v,i) = gcoeff(q,i,i);
     gel(x,i) = gel(y,i) = gel(z,i) = gen_0;
   }
-  if (BORNE) {
-    borne1 = BORNE;
-    borne2 = mulrr(borne1,alpha);
-  } else
-    borne1 = gel(v,1);
+  borne1 = BORNE? BORNE: gel(v,1);
+  borne2 = mulrr(borne1,alpha);
   if (DEBUGLEVEL>2)
     err_printf("smallvectors looking for norm < %P.4G\n",borne1);
   s = 0; k = n;
