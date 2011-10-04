@@ -1612,7 +1612,7 @@ split_0(GEN p, long bit, GEN *F, GEN *G)
 /********************************************************************/
 
 static GEN
-root_error(long n, long k, GEN roots_pol, long pari_err, GEN shatzle)
+root_error(long n, long k, GEN roots_pol, long err, GEN shatzle)
 {
   GEN rho, d, eps, epsbis, eps2, prod, aux, rap = NULL;
   long i, j, m;
@@ -1629,7 +1629,7 @@ root_error(long n, long k, GEN roots_pol, long pari_err, GEN shatzle)
   rho = gabs(mygprec(gel(roots_pol,k),31), DEFAULTPREC);
   if (expo(rho) < 0) rho = real_1(DEFAULTPREC);
   eps = mulrr(rho, shatzle);
-  aux = shiftr(powru(rho,n), pari_err);
+  aux = shiftr(powru(rho,n), err);
   prod = NULL; /* 1. */
 
   for (j=1; j<=2 || (j<=5 && cmprr(rap, dbltor(1.2)) > 0); j++)
@@ -1675,19 +1675,19 @@ mygprec_absolute(GEN x, long bit)
 }
 
 static long
-a_posteriori_errors(GEN p, GEN roots_pol, long pari_err)
+a_posteriori_errors(GEN p, GEN roots_pol, long err)
 {
   long i, e, n = degpol(p), e_max = -(long)EXPOBITS;
   GEN sigma, shatzle, x;
 
-  pari_err += (long)log2((double)n) + 1;
-  if (pari_err > -2) return 0;
-  sigma = real2n(-pari_err, LOWDEFAULTPREC);
+  err += (long)log2((double)n) + 1;
+  if (err > -2) return 0;
+  sigma = real2n(-err, LOWDEFAULTPREC);
   /*  2 / ((s - 1)^(1/n) - 1) */
   shatzle = divur(2, subrs(sqrtnr(subrs(sigma,1),n), 1));
   for (i=1; i<=n; i++)
   {
-    x = root_error(n,i,roots_pol,pari_err,shatzle);
+    x = root_error(n,i,roots_pol,err,shatzle);
     e = gexpo(x); if (e > e_max) e_max = e;
     gel(roots_pol,i) = mygprec_absolute(gel(roots_pol,i), -e);
   }
