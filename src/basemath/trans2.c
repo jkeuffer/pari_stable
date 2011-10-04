@@ -192,11 +192,11 @@ gasin(GEN x, long prec)
       if (!sx) return real_0_bit(expo(x));
       if (absrnz_equal1(x)) { /* |x| = 1 */
         if (sx > 0) return Pi2n(-1, realprec(x)); /* 1 */
-        y = Pi2n(-1, lg(x)); setsigne(y, -1); return y; /* -1 */
+        y = Pi2n(-1, realprec(x)); setsigne(y, -1); return y; /* -1 */
       }
       if (expo(x) < 0) return mpasin(x);
       y = cgetg(3,t_COMPLEX);
-      gel(y,1) = Pi2n(-1, lg(x));
+      gel(y,1) = Pi2n(-1, realprec(x));
       gel(y,2) = mpach(x);
       if (sx < 0) togglesign(gel(y,1)); else togglesign(gel(y,2));
       return y;
@@ -250,7 +250,7 @@ mpacos(GEN x)
   }
   else {
     z = mpatan(divrr(a, x));
-    if (signe(x) < 0) z = addrr(mppi(lg(z)), z);
+    if (signe(x) < 0) z = addrr(mppi(realprec(z)), z);
   }
   return gerepileuptoleaf(av, z);
 }
@@ -271,7 +271,7 @@ gacos(GEN x, long prec)
       if (expo(x) < 0) return mpacos(x);
 
       y = cgetg(3,t_COMPLEX); p1 = mpach(x);
-      if (sx < 0) { gel(y,1) = mppi(lg(x)); togglesign(p1); }
+      if (sx < 0) { gel(y,1) = mppi(realprec(x)); togglesign(p1); }
       else gel(y,1) = gen_0;
       gel(y,2) = p1; return y;
 
@@ -316,7 +316,7 @@ mparg(GEN x, GEN y)
   if (!sy)
   {
     if (sx > 0) return real_0_bit(expo(y) - expo(x));
-    return mppi(lg(x));
+    return mppi(realprec(x));
   }
   prec = realprec(y); if (prec < realprec(x)) prec = realprec(x);
   if (!sx)
@@ -684,7 +684,7 @@ mpath(GEN x)
   pari_sp av = avma;
   long ex = expo(x);
   GEN z;
-  if (ex < 1 - BITS_IN_LONG) x = rtor(x, lg(x) + nbits2nlong(-ex)-1);
+  if (ex < 1 - BITS_IN_LONG) x = rtor(x, realprec(x) + nbits2nlong(-ex)-1);
   z = invr( subsr(1,x) ); shiftr_inplace(z, 1); /* 2/(1-x)*/
   z = logr_abs( addrs(z,-1) );
   shiftr_inplace(z, -1); return gerepileuptoleaf(av, z);
