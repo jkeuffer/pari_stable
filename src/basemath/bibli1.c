@@ -2253,15 +2253,17 @@ fincke_pohst(GEN a, GEN B0, long stockmax, long PREC, FP_chk_fun *CHECK)
       if (CHECK) pari_err(talker, "dimension 0 in fincke_pohst");
       retmkvec3(gen_0, gen_0, cgetg(1,t_MAT));
     }
-    i = gprecision(a); if (i) prec = i;
-    if (DEBUGLEVEL>2) err_printf("first LLL: prec = %ld\n", prec);
-    u = i? lllfp(a, 0.75, LLL_GRAM): ZM_lll(a, 0.75, LLL_GRAM);
+    u = lllfp(a, 0.75, LLL_GRAM);
     if (lg(u) != lg(a)) return NULL;
     r = qf_apply_ZM(a,u);
-    if (!i) {
+    i = gprecision(r);
+    if (i)
+      prec = i;
+    else {
       prec = DEFAULTPREC + nbits2nlong(gexpo(r));
       if (prec < PREC) prec = PREC;
     }
+    if (DEBUGLEVEL>2) err_printf("first LLL: prec = %ld\n", prec);
     r = qfgaussred_positive(r);
     if (!r) return NULL;
     for (i=1; i<l; i++)
