@@ -809,8 +809,8 @@ rnfisnorm(GEN T, GEN x, long flag)
 
   /* computation on T-units */
   futu = shallowconcat(bnf_get_fu(rel), bnf_get_tuU(rel));
-  bnfS = bnfsunit(bnf,S1,3);
-  sunitrel = shallowconcat(futu, gel(bnfsunit(rel,S2,3), 1));
+  bnfS = bnfsunit(bnf,S1,LOWDEFAULTPREC);
+  sunitrel = shallowconcat(futu, gel(bnfsunit(rel,S2,LOWDEFAULTPREC), 1));
 
   A = lift_intern(bnfissunit(bnf,bnfS,x));
   L = lg(sunitrel);

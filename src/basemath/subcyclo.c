@@ -678,9 +678,9 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
   if (DEBUGLEVEL >= 4)
     err_printf("Subcyclo: %ld orbits with %ld elements each\n",phi_n/card,card);
   av = avma;
-  powz = polsubcyclo_complex_roots(n,!complex,3);
+  powz = polsubcyclo_complex_roots(n,!complex,LOWDEFAULTPREC);
   L = polsubcyclo_orbits(n,H,O,powz,NULL);
-  B = polsubcyclo_complex_bound(av,L,3);
+  B = polsubcyclo_complex_bound(av,L,LOWDEFAULTPREC);
   zl = polsubcyclo_start(n,phi_n/card,card,B,&val,&l);
   powz = polsubcyclo_roots(n,zl);
   le = gel(zl,1);
@@ -716,9 +716,9 @@ polsubcyclo_g(long n, long d, GEN Z, long v)
   o /= d;
   gd = Fl_powu(g%n, d, n);
   /*FIXME: If degree is small, the computation of B is a waste of time*/
-  powz = polsubcyclo_complex_roots(n,(o&1)==0,3);
+  powz = polsubcyclo_complex_roots(n,(o&1)==0,LOWDEFAULTPREC);
   L = polsubcyclo_cyclic(n,d,o,g,gd,powz,NULL);
-  B = polsubcyclo_complex_bound(ltop,L,3);
+  B = polsubcyclo_complex_bound(ltop,L,LOWDEFAULTPREC);
   zl = polsubcyclo_start(n,d,o,B,&val,&l);
   le = gel(zl,1);
   if (DEBUGLEVEL >= 6) timer_start(&ti);
