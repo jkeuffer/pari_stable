@@ -1413,7 +1413,7 @@ ZM_inv(GEN M, GEN dM)
       gerepileall(av2, 2, &H, &q);
     }
   }
-  if (DEBUGLEVEL>5) err_printf("ZM_inv done");
+  if (DEBUGLEVEL>5) err_printf("ZM_inv done\n");
   return gerepilecopy(av, H);
 }
 
