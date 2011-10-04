@@ -27,7 +27,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 static void
 nfmaxord_check_args(nfmaxord_t *S, GEN T, long flag, GEN fa)
 {
-  GEN dT, P;
+  GEN dT, E, P;
   long l, v;
 
   if (typ(T)!=t_POL) pari_err(typeer,"nfmaxord",T);
@@ -54,9 +54,15 @@ nfmaxord_check_args(nfmaxord_t *S, GEN T, long flag, GEN fa)
   }
   S->dT = dT;
   P = gel(fa,1); l = lg(P);
-  if (l > 1 && is_pm1(gel(P,1))) P = vecslice(P, 2, --l);
+  E = gel(fa,2);
+  if (l > 1 && is_pm1(gel(P,1)))
+  {
+    l--;
+    P = vecslice(P, 2, l);
+    E = vecslice(E, 2, l);
+  }
   S->dTP = P;
-  S->dTE = vec_to_vecsmall(gel(fa,2));
+  S->dTE = vec_to_vecsmall(E);
 }
 
 static int
