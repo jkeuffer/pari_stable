@@ -41,6 +41,9 @@ Doc: if \var{code} is omitted, trigger an \var{alarmer} exception after $s$
  }
  @eprog\noindent We either return the factorization directly, or replace the
  \typ{ERROR} result by a simple bounded factorization \kbd{factor(N,0)}. Note
- the \tet{factor_add_primes} trick: any prime larger than $2^24$ discovered while
- attempting the initial factorization is stored and remembered. When the
+ the \tet{factor_add_primes} trick: any prime larger than $2^24$ discovered
+ while attempting the initial factorization is stored and remembered. When the
  alarm rings, the subsequent bounded factorization finds it right away.
+
+ It is not possible to set a new alarm \emph{within} another \kbd{alarm}
+ code: the new timer erases the parent one.
