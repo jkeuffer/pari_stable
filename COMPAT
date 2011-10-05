@@ -7,6 +7,8 @@ This file lists the incompatible changes between Version 2.x and older versions
     t_SER be converted to a t_RFRAC or be treated coefficientwise?]. Use
     bestapprPade() to obtain rational functions, and bestappr() to obtain
     rational numbers.
+  - [non-Unix systems] the name of the preferences file is now "gprc.txt"
+    (it remains ".gprc" on Unix systems)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.4 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

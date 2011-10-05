@@ -1106,9 +1106,9 @@ gprc_chk(const char *s)
   return f;
 }
 
-/* Look for [._]gprc: $GPRC, then in $HOME, ., /etc, path [ to gp binary ] */
+/* Look for [._]gprc: $GPRC, then in $HOME, ., /etc, pari_datadir */
 static FILE *
-gprc_get(char *path)
+gprc_get(void)
 {
   FILE *f = NULL;
   const char *gprc = os_getenv("GPRC");
@@ -1120,30 +1120,24 @@ gprc_get(char *path)
     char *str, *s, c;
     long l;
     l = strlen(home); c = home[l-1];
-    str = strcpy((char*)pari_malloc(l+7), home);
+    /* + "/gprc.txt" + \0*/
+    str = strcpy((char*)pari_malloc(l+10), home);
     if (free_it) pari_free((void*)home);
     s = str + l;
     if (c != '/' && c != '\\') *s++ = '/';
 #ifdef UNIX
     strcpy(s, ".gprc");
 #else
-    strcpy(s, "gprc");
+    strcpy(s, "gprc.txt");
 #endif
     f = gprc_chk(str); /* in $HOME */
     if (!f) f = gprc_chk(s); /* in . */
     if (!f) f = gprc_chk("/etc/gprc");
-    if (!f)
-    { /* in 'gp' directory */
-      char *t = path + strlen(path);
-      while (t > path && *t != '/') t--;
-      if (*t == '/')
-      {
-        long l = t - path + 1;
-        t = (char*)pari_malloc(l + 6);
-        strncpy(t, path, l);
-        strcpy(t+l, s); f = gprc_chk(t);
-        pari_free(t);
-      }
+    if (!f)  /* in datadir */
+    {
+      char *t = pari_malloc(strlen(pari_datadir) + 9);
+      sprintf(t, "%s/%s", pari_datadir, s);
+      f = gprc_chk(t);
     }
     pari_free(str);
   }
@@ -1246,10 +1240,10 @@ static jmp_buf *env;
 static pari_stack s_env;
 
 static void
-gp_initrc(pari_stack *p_A, char *path)
+gp_initrc(pari_stack *p_A)
 {
   char *nexts,*s,*t;
-  FILE *file = gprc_get(path);
+  FILE *file = gprc_get();
   Buffer *b;
   filtre_t F;
   VOLATILE long c = 0;
@@ -2003,7 +1997,7 @@ read_opt(pari_stack *p_A, long argc, char **argv)
     GP_DATA->breakloop = 0;
     init_linewrap(76);
   } else if (initrc)
-    gp_initrc(p_A, argv[0]);
+    gp_initrc(p_A);
   for ( ; i < argc; i++) stack_pushp(p_A, pari_strdup(argv[i]));
 
   /* override the values from gprc */

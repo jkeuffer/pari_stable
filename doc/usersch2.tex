@@ -2724,12 +2724,8 @@ one (note the terminating \kbd{;} to separate the expressions):
 When \kbd{gp} is started, it looks for a customization file, or \kbd{gprc} in the
 following places (in this order, only the first one found will be loaded):
 
-\noindent$\bullet$ On the Macintosh (only), \kbd{gp} looks in the directory
-which contains the \kbd{gp} executable itself for a file called \kbd{gprc}.
-
 \noindent$\bullet$ \kbd{gp} checks whether the environment variable
-\tet{GPRC} is set. Under DOS, you can set it in \kbd{AUTOEXEC.BAT}. On Unix,
-this can be done with something like: \smallskip
+\tet{GPRC} is set. On Unix, this can be done with something like: \smallskip
 
 \settabs\+\indent&\kbd{GPRC=/my/dir/anyname; export GPRC}\quad&\cr
 
@@ -2746,23 +2742,27 @@ this can be done with something like: \smallskip
 
 \kbd{\$HOME/.gprc} on a Unix system
 
-\kbd{\$HOME\bs\_$\,$gprc} on a DOS, OS/2, or Windows system.
+\kbd{\$HOME\bs gprc.txt} on a DOS, OS/2, or Windows system.
 
 \noindent$\bullet$ If \kbd{HOME} also leaves us clueless, we try
 
 \strut\kbd{\til/.gprc} on a Unix system (where as usual \kbd{\til} stands for
 your home directory), or
 
-\kbd{\b{\_}$\,$gprc} on a DOS, OS/2, or Windows system.
+\noindent$\bullet$ If no gprc was found among the user files mentioned above
+we look for \kbd{/etc/gprc} for a system-wide gprc file (you will need root
+privileges to set up such a file yourself).
 
-\noindent$\bullet$ Finally, if no gprc was found among the user files
-mentioned above we look for \kbd{/etc/gprc} (\kbd{\bs etc\bs gprc})
-for a system-wide gprc file (you will need root privileges to set up such a
-file yourself).
+\noindent$\bullet$ Finally, we look in pari's \kbd{datadir} for a file named
 
-Note that on Unix systems, the \kbd{gprc}'s default name starts with a '.' and
-thus is hidden to regular \kbd{ls} commands; you need to type \kbd{ls -a} to
-list it.
+\kbd{.gprc} on a Unix system
+
+\kbd{gprc.txt} on a DOS, OS/2, or Windows system. If you are using our
+Windows installer, this is where the default preferences file is written.
+
+\noindent Note that on Unix systems, the \kbd{gprc}'s default name starts
+with a '.' and thus is hidden to regular \kbd{ls} commands; you need to type
+\kbd{ls -a} to list it.
 
 
 \section{Using readline} \sidx{line editor}\sidx{completion}

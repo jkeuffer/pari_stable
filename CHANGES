@@ -80,6 +80,9 @@ BA 12- [darwin] do not use dylib_ prefix to ld options [#1210]
 BA 27- global_err_data is now a GEN.
 BA 28- more usable form of alarm(s, code): evaluate code, aborting after s
        seconds. Return the result or a t_ERROR object.
+   29- [non-Unix systems] the name of the preferences file is now "gprc.txt"
+       (it remains ".gprc" on Unix systems)
+   30- also look for the preferences file in PARI's "datadir"
 
   Added
     1- mathnf for matrices over K[X] [#41]
