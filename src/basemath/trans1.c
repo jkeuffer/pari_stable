@@ -1976,7 +1976,7 @@ logagmr_abs(GEN q)
   z = cgetr(prec); av = avma; prec++;
   lim = prec2nbits(prec) >> 1;
   Q = rtor(q,prec);
-  Q[1] = evalsigne(1) | evalexpo(lim);
+  shiftr_inplace(Q,lim-e); setsigne(Q,1);
 
   _4ovQ = invr(Q); shiftr_inplace(_4ovQ, 2); /* 4/Q */
   /* Pi / 2agm(1, 4/Q) ~ log(Q), q = Q * 2^(e-lim) */
@@ -1992,7 +1992,6 @@ logr_abs(GEN X)
   long EX, L, m, k, a, b, l = realprec(X);
   GEN z, x, y;
   ulong u;
-  int neg;
   double d;
 
   if (l > LOGAGM_LIMIT) return logagmr_abs(X);
@@ -2007,11 +2006,9 @@ logr_abs(GEN X)
   if (u > (~0UL / 3) * 2) { /* choose 1-x/2 */
     EX++; u = ~u;
     while (!u && ++k < l) { u = (ulong)X[k]; u = ~u; }
-    neg = 1;
   } else { /* choose x - 1 */
     u &= ~HIGHBIT; /* u - HIGHBIT, assuming HIGHBIT set */
     while (!u && ++k < l) u = (ulong)X[k];
-    neg = 0;
   }
   if (k == l) return EX? mulsr(EX, mplog2(l)): real_0(l);
   z = cgetr(EX? l: l - (k-2)); ltop = avma;
@@ -2038,8 +2035,7 @@ logr_abs(GEN X)
   if (m > b-a) m = b-a;
   if (m < 0.2*a) m = 0; else L += divsBIL(m);
   x = rtor(X,L);
-  if (neg) x[1] = evalsigne(1) | _evalexpo(-1);
-  else     x[1] = evalsigne(1) | _evalexpo(0);
+  setsigne(x,1); shiftr_inplace(x,-EX);
   /* 2/3 < x < 4/3 */
   for (k=1; k<=m; k++) x = sqrtr_abs(x);
 
