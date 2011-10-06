@@ -1605,7 +1605,7 @@ mpexp_basecase(GEN x)
 #ifdef DEBUG
 {
   GEN t = mplog(z), u = divrr(subrr(x, t),x);
-  if (signe(u) && expo(u) > 5-bit_accuracy(minss(l,lg(t)))) pari_err(talker,"");
+  if (signe(u) && expo(u) > 5-prec2nbits(minss(l,realprec(t)))) pari_err(talker,"");
 }
 #endif
   return gerepileuptoleaf(av, z); /* NOT affrr, precision often increases */
@@ -2044,8 +2044,8 @@ logr_abs(GEN X)
   /* log(x) = log(1+y) - log(1-y) = 2 sum_{k odd} y^k / k
    * Truncate the sum at k = 2n+1, the remainder is
    *   2 sum_{k >= 2n+3} y^k / k < 2y^(2n+3) / (2n+3)(1-y) < y^(2n+3)
-   * We want y^(2n+3) < y 2^(-bit_accuracy(L)), hence
-   *   n+1 > bit_accuracy(L) /-log_2(y^2) */
+   * We want y^(2n+3) < y 2^(-prec2nbits(L)), hence
+   *   n+1 > -prec2nbits(L) /-log_2(y^2) */
   d = -2*dbllog2r(y); /* ~ -log_2(y^2) */
   k = (long)(2*(prec2nbits(L) / d));
   k |= 1;
@@ -2229,7 +2229,7 @@ mpsc1(GEN x, long *ptmod8)
   b = signe(x); *ptmod8 = (b < 0)? 4 + n: n;
   if (!b) return real_0_bit((expo(x)<<1) - 1);
 
-  b = bit_accuracy(l);
+  b = prec2nbits(l);
   if (b + (a<<1) <= 0) {
     y = sqrr(x); shiftr_inplace(y, -1); setsigne(y, -1);
     return y;

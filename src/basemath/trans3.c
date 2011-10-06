@@ -1096,7 +1096,7 @@ optim_zeta(GEN S, long prec, long *pp, long *pn)
 }
 
 /* 1/zeta(n) using Euler product. Assume n > 0.
- * if (lba != 0) it is log(bit_accuracy) we _really_ require */
+ * if (lba != 0) it is log(prec2nbits) we _really_ require */
 GEN
 inv_szeta_euler(long n, double lba, long prec)
 {

@@ -2022,7 +2022,7 @@ cmp_complex_appr(void *E, GEN x, GEN y)
   return (int) (sxi - syi);
 }
 
-/* the vector of roots of p, with absolute error 2^(- bit_accuracy(l)) */
+/* the vector of roots of p, with absolute error 2^(- prec2nbits(l)) */
 static GEN
 roots_aux(GEN p, long l, long clean)
 {
