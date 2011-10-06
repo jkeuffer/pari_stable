@@ -1135,7 +1135,7 @@ gprc_get(void)
     if (!f) f = gprc_chk("/etc/gprc");
     if (!f)  /* in datadir */
     {
-      char *t = pari_malloc(strlen(pari_datadir) + 9);
+      char *t = (char *) pari_malloc(strlen(pari_datadir) + 9);
       sprintf(t, "%s/%s", pari_datadir, s);
       f = gprc_chk(t);
     }
