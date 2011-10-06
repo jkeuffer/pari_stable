@@ -2,9 +2,8 @@ Function: polroots
 Section: polynomials
 C-Name: roots0
 Prototype: GD0,L,p
-Help: polroots(x,{flag=0}): complex roots of the polynomial x. flag is
- optional, and can be 0: default, uses Schonhage's method modified by
- Gourdon, or 1: uses a modified Newton method.
+Help: polroots(x): complex roots of the polynomial x using
+ Schonhage's method, as modified by Gourdon.
 Doc: complex roots of the polynomial
  \var{pol}, given as a column vector where each root is repeated according to
  its multiplicity. The precision is given as for transcendental functions: in
@@ -12,14 +11,12 @@ Doc: complex roots of the polynomial
  user, but it must be explicitly given as a second argument in library mode.
 
  The algorithm used is a modification of A.~Sch\"onhage\sidx{Sch\"onage}'s
- root-finding algorithm, due to and implemented by X.~Gourdon. Barring bugs, it
- is guaranteed to converge and to give the roots to the required accuracy.
+ root-finding algorithm, due to and originally implemented by X.~Gourdon.
+ Barring bugs, it is guaranteed to converge and to give the roots to the
+ required accuracy.
 
- If $\fl=1$, use a variant of the Newton-Raphson method, which is \emph{not}
- guaranteed to converge, nor to give accurate results, but is rather
- fast when it does. If you get the messages ``too many iterations in roots''
- or ``INTERNAL ERROR: incorrect result in roots'', use the default algorithm.
-Variant: Also available is \fun{GEN}{roots}{GEN x, long prec}, as well as
+ %\syn{NO}
+ The library syntax is \fun{GEN}{roots}{GEN x, long prec}. Also available is
  \fun{GEN}{cleanroots}{GEN x, long prec} which ensures that real roots of
  real polynomials are returned as \typ{REAL} (instead of \typ{COMPLEX}s with
  0 imaginary part).
