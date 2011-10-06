@@ -831,7 +831,7 @@ RgX_mulspec_basecase(GEN x, GEN y, long nx, long ny, long v)
   z -= v+2; z[1] = 0; return normalizepol_lg(z, lz);
 }
 
-/* return (x * X^d) + y. Assume d > 0, y != 0 */
+/* return (x * X^d) + y. Assume d > 0 */
 GEN
 addmulXn(GEN x, GEN y, long d)
 {
@@ -845,7 +845,7 @@ addmulXn(GEN x, GEN y, long d)
   x += 2; y += 2; a = ny-d;
   if (a <= 0)
   {
-    lz = (a>nx)? ny+2: nx+d+2;
+    lz = nx+d+2;
     (void)new_chunk(lz); xd = x+nx; yd = y+ny;
     while (xd > x) gel(--zd,0) = gel(--xd,0);
     x = zd + a;
@@ -1013,6 +1013,20 @@ RgX_sqrspec(GEN a, long na)
   c0 = addmulXn(c0,c1, n0);
   c0 = addmulXncopy(c0,c,n0);
   return RgX_shift_inplace(gerepileupto(av,c0), v);
+}
+
+/* (X^a + A)(X^b + B) - X^(a+b), where deg A < a, deg B < b */
+GEN
+RgX_mul_normalized(GEN A, long a, GEN B, long b)
+{
+  GEN z = RgX_mul(A, B);
+  if (a < b)
+    z = addmulXn(addmulXn(A, B, b-a), z, a);
+  else if (a > b)
+    z = addmulXn(addmulXn(B, A, a-b), z, b);
+  else
+    z = addmulXn(RgX_add(A, B), z, a);
+  setvarn(z,varn(A)); return z;
 }
 
 GEN

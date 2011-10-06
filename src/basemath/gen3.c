@@ -2497,8 +2497,18 @@ scalarpol(GEN x, long v)
   if (isrationalzero(x)) return zeropol(v);
   y = cgetg(3,t_POL);
   y[1] = gequal0(x)? evalvarn(v)
-                 : evalvarn(v) | evalsigne(1);
+                   : evalvarn(v) | evalsigne(1);
   gel(y,2) = gcopy(x); return y;
+}
+GEN
+scalarpol_shallow(GEN x, long v)
+{
+  GEN y;
+  if (isrationalzero(x)) return zeropol(v);
+  y = cgetg(3,t_POL);
+  y[1] = gequal0(x)? evalvarn(v)
+                   : evalvarn(v) | evalsigne(1);
+  gel(y,2) = x; return y;
 }
 
 /* x0 + x1*T, do not assume x1 != 0 */

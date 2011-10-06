@@ -752,62 +752,75 @@ leftright_pow_fold(GEN x, GEN n, void *data, GEN (*sqr)(void*,GEN),
 /*                     ROOTS --> MONIC POLYNOMIAL                  */
 /*                                                                 */
 /*******************************************************************/
-/* return c = x - u, code = c[1] */
 static GEN
-x_u(GEN u, long code)
+normalized_mul(GEN x, GEN y)
 {
-  GEN c = cgetg(4,t_POL); c[1] = code;
-  gel(c,2) = gneg(u);
-  gel(c,3) = gen_1; return c;
+  long a = gel(x,1)[1], b = gel(y,1)[1];
+  return mkvec2(mkvecsmall(a + b),
+                RgX_mul_normalized(gel(x,2),a, gel(y,2),b));
 }
+/* L = [Vecsmall([a]), A], with a > 0, A an RgX, deg(A) < a; return X^a + A */
+static GEN
+normalized_to_RgX(GEN L)
+{
+  long i, a = gel(L,1)[1];
+  GEN A = gel(L,2);
+  GEN z = cgetg(a + 3, t_POL);
+  z[1] = evalsigne(1) | evalvarn(varn(A));
+  for (i = 2; i < lg(A); i++) gel(z,i) = gcopy(gel(A,i));
+  for (     ; i < a+2;   i++) gel(z,i) = gen_0;
+  gel(z,i) = gen_1; return z;
+}
+
 /* compute prod (x - a[i]) */
 GEN
 roots_to_pol(GEN a, long v)
 {
-  long i, k, code, lx = lg(a);
+  pari_sp av = avma;
+  long i, k, lx = lg(a);
   GEN L;
   if (lx == 1) return pol_1(v);
   L = cgetg(lx, t_VEC);
-  code = evalsigne(1)|evalvarn(v);
   for (k=1,i=1; i<lx-1; i+=2)
   {
-    GEN u = gel(a,i), v = gel(a,i+1);
-    GEN c = cgetg(5,t_POL); gel(L,k++) = c; c[1] = code;
-    gel(c,2) = gmul(u,v);
-    gel(c,3) = gneg(gadd(u,v));
-    gel(c,4) = gen_1;
+    GEN s = gel(a,i), t = gel(a,i+1);
+    GEN x0 = gmul(s,t);
+    GEN x1 = gneg(gadd(s,t));
+    gel(L,k++) = mkvec2(mkvecsmall(2), deg1pol_shallow(x1,x0,v));
   }
-  if (i < lx) gel(L,k++) = x_u(gel(a,i), code);
-  setlg(L, k); return divide_conquer_prod(L, gmul);
+  if (i < lx) gel(L,k++) = mkvec2(mkvecsmall(1),
+                                  scalarpol_shallow(gneg(gel(a,i)), v));
+  setlg(L, k); L = divide_conquer_prod(L, normalized_mul);
+  return gerepileupto(av, normalized_to_RgX(L));
 }
 
 /* prod_{i=1..r1} (x - a[i]) prod_{i=1..r2} (x - a[i])(x - conj(a[i]))*/
 GEN
 roots_to_pol_r1(GEN a, long v, long r1)
 {
-  long i, k, code, lx = lg(a);
+  pari_sp av = avma;
+  long i, k, lx = lg(a);
   GEN L;
   if (lx == 1) return pol_1(v);
   L = cgetg(lx, t_VEC);
-  code = evalsigne(1)|evalvarn(v);
   for (k=1,i=1; i<r1; i+=2)
   {
-    GEN u = gel(a,i), v = gel(a,i+1);
-    GEN c = cgetg(5,t_POL); gel(L,k++) = c; c[1] = code;
-    gel(c,2) = gmul(u,v);
-    gel(c,3) = gneg(gadd(u,v));
-    gel(c,4) = gen_1;
+    GEN s = gel(a,i), t = gel(a,i+1);
+    GEN x0 = gmul(s,t);
+    GEN x1 = gneg(gadd(s,t));
+    gel(L,k++) = mkvec2(mkvecsmall(2), deg1pol_shallow(x1,x0,v));
   }
-  if (i < r1+1) gel(L,k++) = x_u(gel(a,i), code);
+  if (i < r1+1) gel(L,k++) = mkvec2(mkvecsmall(1),
+                                    scalarpol_shallow(gneg(gel(a,i)), v));
   for (i=r1+1; i<lx; i++)
   {
-    GEN u = gel(a,i);
-    GEN c = cgetg(5,t_POL); gel(L,k++) = c; c[1] = code;
-    gel(c,2) = gnorm(u);
-    gel(c,3) = gneg(gtrace(u));
-    gel(c,4) = gen_1;
+    GEN s = gel(a,i);
+    GEN x0 = gnorm(s);
+    GEN x1 = gneg(gtrace(s));
+    gel(L,k++) = mkvec2(mkvecsmall(2), deg1pol_shallow(x1,x0,v));
   }
-  setlg(L, k); return divide_conquer_prod(L, gmul);
+  setlg(L, k); L = divide_conquer_prod(L, normalized_mul);
+  return gerepileupto(av, normalized_to_RgX(L));
 }
 
 GEN
