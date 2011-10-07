@@ -3430,6 +3430,13 @@ os_getenv(const char *s)
 #endif
 }
 
+GEN
+gp_getenv(const char *s)
+{
+  char *t = os_getenv(s);
+  return t?strtoGENstr(t):gen_0;
+}
+
 /* FIXME: HAS_GETPWUID */
 #if defined(UNIX) || defined(__EMX__)
 #include <pwd.h>
