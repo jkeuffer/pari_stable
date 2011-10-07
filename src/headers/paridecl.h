@@ -1370,6 +1370,7 @@ void    forell(void *E, long call(void*, GEN), long a, long b);
 GEN     addell(GEN e, GEN z1, GEN z2);
 GEN     akell(GEN e, GEN n);
 GEN     anell(GEN e, long n);
+GEN     anellsmall(GEN e, long n);
 GEN     bilhell(GEN e, GEN z1, GEN z2, long prec);
 void    checkell(GEN e);
 void    checkell_real(GEN e);

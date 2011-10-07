@@ -9,5 +9,5 @@ Doc:
  corresponding to the elliptic curve $E$. All comments in \kbd{ellak}
  description remain valid.
 Variant: Also available is
-  \fun{GEN}{anellsmall}{GEN e, long n0}, which returns a \typ{VECSMALL}
+  \fun{GEN}{anellsmall}{GEN e, long n}, which returns a \typ{VECSMALL}
  instead of a \typ{VEC}, saving on memory.
