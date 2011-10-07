@@ -84,6 +84,7 @@ BA 28- more usable form of alarm(s, code): evaluate code, aborting after s
        (it remains ".gprc" on Unix systems)
    30- also look for the preferences file in PARI's "datadir"
    31- removed rootsold() code : polroots(x, 1) is now treated as polroots(x)
+   32- rewrite ellan using C-longs + new function anellsmall()
 
   Added
     1- mathnf for matrices over K[X] [#41]

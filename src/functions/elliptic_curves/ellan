@@ -8,3 +8,6 @@ Doc:
  computes the vector of the first $n$ $a_k$
  corresponding to the elliptic curve $E$. All comments in \kbd{ellak}
  description remain valid.
+Variant: Also available is
+  \fun{GEN}{anellsmall}{GEN e, long n0}, which returns a \typ{VECSMALL}
+ instead of a \typ{VEC}, saving on memory.

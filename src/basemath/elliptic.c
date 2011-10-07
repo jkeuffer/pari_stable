@@ -3276,7 +3276,7 @@ checkell_int(GEN e)
 }
 
 GEN
-anell(GEN e, long n0)
+anellsmall(GEN e, long n0)
 {
   const long tab[4]={0,1,1,-1}; /* p prime; (-1/p) = tab[p&3]. tab[0] unused */
   ulong p, m, SQRTn, n = (ulong)n0;
@@ -3289,54 +3289,58 @@ anell(GEN e, long n0)
   c6= ell_get_c6(e);
   D = ell_get_disc(e);
 
-  an = cgetg(n+1,t_VEC); gel(an,1) = gen_1;
-  for (p=2; p <= n; p++) gel(an,p) = NULL;
+  an = cgetg(n+1,t_VECSMALL); an[1] = 1;
+  for (p=2; p <= n; p++) an[p] = LONG_MAX; /* not computed yet */
   for (p=2; p<=n; p++)
   {
-    if (an[p]) continue; /* p not prime */
+    if (an[p] != LONG_MAX) continue; /* p not prime */
 
     if (!umodiu(D,p)) /* bad reduction, p | D */
       switch (tab[p&3] * krois(c6,p)) /* (-c6/p) */
       {
         case -1: /* non deployee */
           for (m=p; m<=n; m+=p)
-            if (an[m/p]) gel(an,m) = negi(gel(an,m/p));
+            if (an[m/p] != LONG_MAX) an[m] = -an[m/p];
           continue;
         case 0: /* additive */
-          for (m=p; m<=n; m+=p) gel(an,m) = gen_0;
+          for (m=p; m<=n; m+=p) an[m] = 0;
           continue;
         case 1: /* deployee */
           for (m=p; m<=n; m+=p)
-            if (an[m/p]) gel(an,m) = gel(an,m/p);
+            if (an[m/p] != LONG_MAX) an[m] = an[m/p];
           continue;
       }
     else /* good reduction */
     {
       long ap = ellap_small_goodred(e, p);
-
       if (p <= SQRTn) {
         ulong pk, oldpk = 1;
         for (pk=p; pk <= n; oldpk=pk, pk *= p)
         {
-          if (pk == p) gel(an,pk) = stoi(ap);
+          if (pk == p)
+            an[pk] = ap;
           else
-          {
-            pari_sp av = avma;
-            GEN u = mulsi(ap, gel(an,oldpk));
-            GEN v = mului(p, gel(an,oldpk/p));
-            gel(an,pk) = gerepileuptoint(av, subii(u,v));
-          }
+            an[pk] = ap * an[oldpk] - p * an[oldpk/p];
           for (m = n/pk; m > 1; m--)
-            if (an[m] && m%p) gel(an,m*pk) = mulii(gel(an,m), gel(an,pk));
+            if (an[m] != LONG_MAX && m%p) an[m*pk] = an[m] * an[pk];
         }
       } else {
-        gel(an,p) = stoi(ap);
+        an[p] = ap;
         for (m = n/p; m > 1; m--)
-          if (an[m]) gel(an,m*p) = mulsi(ap, gel(an,m));
+          if (an[m] != LONG_MAX) an[m*p] = ap * an[m];
       }
     }
   }
   return an;
+}
+
+GEN
+anell(GEN e, long n0)
+{
+  GEN v = anellsmall(e, n0);
+  long i;
+  for (i = 1; i <= n0; i++) gel(v,i) = stoi(v[i]);
+  settyp(v, t_VEC); return v;
 }
 
 GEN
@@ -3396,7 +3400,7 @@ elllseries(GEN e, GEN s, GEN A, long prec)
   pari_sp av = avma, av1, lim;
   ulong l, n;
   long eps, flun;
-  GEN z, cg, v, cga, cgb, s2, ns, gs, N;
+  GEN z, cg, v, cga, cgb, s2, K, gs, N;
 
   if (!A) A = gen_1;
   else
@@ -3420,23 +3424,24 @@ elllseries(GEN e, GEN s, GEN A, long prec)
               fabs(gtodouble(real_i(s))-1.) * log(rtodbl(cga)))
             / rtodbl(cgb) + 1);
   if ((long)l < 1) l = 1;
-  v = anell(e, minss(l,LGBITS-1));
-  s2 = ns = NULL; /* gcc -Wall */
-  if (!flun) { s2 = gsubsg(2,s); ns = gpow(cg, gsubgs(gmul2n(s,1),2),prec); }
+  v = anellsmall(e, minss(l,LGBITS-1));
+  s2 = K = NULL; /* gcc -Wall */
+  if (!flun) { s2 = gsubsg(2,s); K = gpow(cg, gsubgs(gmul2n(s,1),2),prec); }
   z = gen_0;
   av1 = avma; lim = stack_lim(av1,1);
   for (n = 1; n <= l; n++)
   {
-    GEN p1, an, gn = utoipos(n);
-    an = ((ulong)n<LGBITS)? gel(v,n): akell(e,gn);
+    GEN p1, an, gn = utoipos(n), ns;
+    an = ((ulong)n<LGBITS)? stoi(v[n]): akell(e,gn);
     if (!signe(an)) continue;
 
-    p1 = gdiv(incgam0(s,mulur(n,cga),gs,prec), gpow(gn,s,prec));
+    ns = gpow(gn,s,prec);
+    p1 = gdiv(incgam0(s,mulur(n,cga),gs,prec), ns);
     if (flun)
       p1 = gmul2n(p1, 1);
     else
     {
-      GEN p2 = gdiv(gmul(ns, incgam(s2,mulur(n,cgb),prec)), gpow(gn, s2,prec));
+      GEN p2 = gdiv(gmul(gmul(K,ns), incgam(s2,mulur(n,cgb),prec)), sqru(n));
       if (eps < 0) p2 = gneg_i(p2);
       p1 = gadd(p1, p2);
     }
