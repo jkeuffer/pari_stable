@@ -651,7 +651,7 @@ convol(GEN x, GEN y)
 
   if (typ(x) != t_SER) pari_err(e_TYPE,"convol",x);
   if (typ(y) != t_SER) pari_err(e_TYPE,"convol",y);
-  if (varn(y) != vx) pari_err(e_DIM,"convol");
+  if (varn(y) != vx) pari_err(e_VAR,"convol", x,y);
   ex = valp(x); lx = lg(x) + ex; x -= ex;
   ey = valp(y); ly = lg(y) + ey; y -= ey;
   /* inputs shifted: x[i] and y[i] now correspond to monomials of same degree */

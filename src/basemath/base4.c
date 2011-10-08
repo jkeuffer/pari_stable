@@ -1453,15 +1453,16 @@ idealinv(GEN nf, GEN x)
       if (is_const_t(tx)) x = ginv(x);
       else
       {
+        GEN T;
         switch(tx)
         {
           case t_COL: x = coltoliftalg(nf,x); break;
           case t_POLMOD: x = gel(x,2); break;
         }
         if (typ(x) != t_POL) { x = ginv(x); break; }
-        if (varn(x) != nf_get_varn(nf))
-          pari_err(e_MISC,"incompatible variables in idealinv");
-        x = QXQ_inv(x,nf_get_pol(nf));
+        T = nf_get_pol(nf);
+        if (varn(x) != varn(T)) pari_err(e_VAR,"idealinv", x, T);
+        x = QXQ_inv(x, T);
       }
       x = idealhnf_principal(nf,x); break;
     case id_PRIME:

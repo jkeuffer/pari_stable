@@ -986,11 +986,21 @@ pari_err2GEN(long numerr, va_list ap)
     }
   case e_OVERFLOW:
   case e_IMPL:
-  case e_DIM: case e_NEGVAL:
+  case e_DIM:
+  case e_NEGVAL:
   case e_CONSTPOL:
-  case e_ZEROPOL: case e_FLAG: case e_PREC:
+  case e_ZEROPOL:
+  case e_FLAG:
+  case e_PREC:
   case e_BUG:
     retmkerr2(numerr, strtoGENstr(va_arg(ap, char*)));
+  case e_VAR:
+    {
+      const char *f = va_arg(ap, const char*);
+      GEN x = va_arg(ap, GEN);
+      GEN y = va_arg(ap, GEN);
+      retmkerr4(numerr, strtoGENstr(f), x,y);
+    }
   case e_IRREDPOL:
     {
       const char *f = va_arg(ap, const char*);
@@ -1023,6 +1033,30 @@ long
 err_get_num(GEN e)
 {
   return e? e[1]: e_STACK;
+}
+
+static char *
+type_dim(GEN x)
+{
+  char *v = stackmalloc(64);
+  switch(typ(x))
+  {
+    case t_MAT:
+    {
+      long l = lg(x), r = (l == 1)? 1: lg(gel(x,1));
+      sprintf(v, "t_MAT (%ldx%ld)", r-1,l-1);
+      break;
+    }
+    case t_COL:
+      sprintf(v, "t_COL (%ld elts)", lg(x)-1);
+      break;
+    case t_VEC:
+      sprintf(v, "t_VEC (%ld elts)", lg(x)-1);
+      break;
+    default:
+      v = (char*)type_name(typ(x));
+  }
+  return v;
 }
 
 char *
@@ -1060,7 +1094,13 @@ pari_err2str(GEN err)
   case e_ZEROPOL:
     return pari_sprintf("zero polynomial in %Ps.", gel(err,2));
   case e_DIM:
-    return pari_sprintf("inconsistent data in %Ps.", gel(err,2));
+    return pari_sprintf("inconsistent dimensions in %Ps.", gel(err,2));
+  case e_VAR:
+  {
+    GEN x = gel(err,3), y = gel(err,4);
+    return pari_sprintf("inconsistent variables in %Ps, %Ps != %Ps.",
+                        gel(err,2), pol_x(varn(x)), pol_x(varn(y)));
+  }
   case e_FLAG:
     return pari_sprintf("invalid flag in %Ps.", gel(err,2));
   case e_PREC:
@@ -1069,6 +1109,8 @@ pari_err2str(GEN err)
     return pari_sprintf("bug in %Ps, please report",gel(err,2));
   case e_OP: case e_TYPE2:
     {
+      pari_sp av = avma;
+      char *v;
       const char *f, *op = GSTR(gel(err,2));
       const char *what = numerr == e_OP? "inconsistent": "forbidden";
       GEN x = gel(err,3);
@@ -1081,7 +1123,8 @@ pari_err2str(GEN err)
       case '=': op = "-->"; f = "assignment"; break;
       default:  f = op; op = ","; break;
       }
-      return pari_sprintf("%s %s %s %s %s.", what,f,type_name(typ(x)),op,type_name(typ(y)));
+      v = pari_sprintf("%s %s %s %s %s.", what,f,type_dim(x),op,type_dim(y));
+      avma = av; return v;
     }
   case e_MAXPRIME:
     {
@@ -1185,6 +1228,7 @@ numerr_name(long numerr)
   case e_STACK: return "e_STACK";
   case e_OVERFLOW: return "e_OVERFLOW";
   case e_DIM: return "e_DIM";
+  case e_VAR: return "e_VAR";
   case e_MAXPRIME: return "e_MAXPRIME";
   case e_INTMOD: return "e_INTMOD";
   case e_CONSTPOL: return "e_CONSTPOL";
@@ -1219,6 +1263,7 @@ name_numerr(const char *s)
   if (!strcmp(s,"e_STACK")) return e_STACK;
   if (!strcmp(s,"e_OVERFLOW")) return e_OVERFLOW;
   if (!strcmp(s,"e_DIM")) return e_DIM;
+  if (!strcmp(s,"e_VAR")) return e_VAR;
   if (!strcmp(s,"e_MAXPRIME")) return e_MAXPRIME;
   if (!strcmp(s,"e_INTMOD")) return e_INTMOD;
   if (!strcmp(s,"e_CONSTPOL")) return e_CONSTPOL;

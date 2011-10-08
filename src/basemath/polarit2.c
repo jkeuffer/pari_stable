@@ -2118,7 +2118,7 @@ RgX_extgcd(GEN x, GEN y, GEN *U, GEN *V)
 
   if (tx!=t_POL) pari_err(e_TYPE,"RgX_extgcd",x);
   if (ty!=t_POL) pari_err(e_TYPE,"RgX_extgcd",y);
-  if ( varncmp(varn(x),varn(y))) pari_err(e_DIM,"RgX_extgcd");
+  if ( varncmp(varn(x),varn(y))) pari_err(e_VAR,"RgX_extgcd",x,y);
   vx=varn(x);
   if (!signe(x))
   {
@@ -2180,7 +2180,7 @@ RgXQ_ratlift(GEN x, GEN T, long amax, long bmax, GEN *P, GEN *Q)
 
   if (typ(x)!=t_POL) pari_err(e_TYPE,"RgXQ_ratlift",x);
   if (typ(T)!=t_POL) pari_err(e_TYPE,"RgXQ_ratlift",T);
-  if ( varncmp(varn(x),varn(T)) ) pari_err(e_DIM,"RgXQ_ratlift");
+  if ( varncmp(varn(x),varn(T)) ) pari_err(e_VAR,"RgXQ_ratlift",x,T);
   if (bmax < 0) pari_err(e_MISC, "ratlift: bmax must be >= 0");
   if (!signe(T)) {
     if (degpol(x) <= amax) {
@@ -2454,7 +2454,7 @@ sylvestermatrix(GEN x, GEN y)
   long i,j,lx;
   if (typ(x)!=t_POL) pari_err(e_TYPE,"sylvestermatrix",x);
   if (typ(y)!=t_POL) pari_err(e_TYPE,"sylvestermatrix",y);
-  if (varn(x) != varn(y)) pari_err(e_DIM,"sylvestermatrix");
+  if (varn(x) != varn(y)) pari_err(e_VAR,"sylvestermatrix",x,y);
   x = sylvestermatrix_i(x,y); lx = lg(x);
   for (i=1; i<lx; i++)
     for (j=1; j<lx; j++) gcoeff(x,i,j) = gcopy(gcoeff(x,i,j));

@@ -676,7 +676,7 @@ basistoalg(GEN nf, GEN x)
       return gcopy(x);
     case t_POL:
       T = nf_get_pol(nf);
-      if (varn(T) != varn(x)) pari_err(e_DIM,"basistoalg");
+      if (varn(T) != varn(x)) pari_err(e_VAR,"basistoalg",x,T);
       z = cgetg(3,t_POLMOD);
       gel(z,1) = gcopy(T);
       gel(z,2) = RgX_rem(x, T); return z;
@@ -708,8 +708,7 @@ nf_to_scalar_or_basis(GEN nf, GEN x)
     {
       GEN T = nf_get_pol(nf);
       long l = lg(x);
-      if (varn(x) != varn(T))
-        pari_err(e_MISC,"incompatible variables in nf_to_scalar_or_basis");
+      if (varn(x) != varn(T)) pari_err(e_VAR,"nf_to_scalar_or_basis", x,T);
       if (l >= lg(T)) { x = RgX_rem(x, T); l = lg(x); }
       if (l == 2) return gen_0;
       if (l == 3) return gel(x,2);
@@ -750,8 +749,7 @@ nf_to_scalar_or_alg(GEN nf, GEN x)
     {
       GEN T = nf_get_pol(nf);
       long l = lg(x);
-      if (varn(x) != varn(T))
-        pari_err(e_MISC,"incompatible variables in nf_to_scalar_or_alg");
+      if (varn(x) != varn(T)) pari_err(e_VAR,"nf_to_scalar_or_alg", x,T);
       if (l >= lg(T)) { x = RgX_rem(x, T); l = lg(x); }
       if (l == 2) return gen_0;
       if (l == 3) return gel(x,2);
@@ -785,8 +783,7 @@ GEN
 poltobasis(GEN nf, GEN x)
 {
   GEN P = nf_get_pol(nf);
-  if (varn(x) != varn(P))
-    pari_err(e_MISC, "incompatible variables in poltobasis");
+  if (varn(x) != varn(P)) pari_err(e_VAR, "poltobasis", x,P);
   if (degpol(x) >= degpol(P)) x = RgX_rem(x,P);
   return mulmat_pol(nf_get_invzk(nf), x);
 }

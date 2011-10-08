@@ -21,7 +21,7 @@ enum err_list {
 
   e_MISC, e_FLAG, e_IMPL, e_ARCH, e_NOTFUNC,
 
-  e_PREC, e_TYPE, e_DIM, e_USER,
+  e_PREC, e_TYPE, e_DIM, e_VAR, e_USER,
 
   e_STACK, e_OVERFLOW,
 

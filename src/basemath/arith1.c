@@ -1598,23 +1598,29 @@ chinese(GEN x, GEN y)
   if (tx == typ(y)) switch(tx)
   {
     case t_POLMOD:
+    {
+      GEN A = gel(x,1), B = gel(y,1);
+      GEN a = gel(x,2), b = gel(y,2);
       z = cgetg(3, t_POLMOD);
-      if (varn(gel(x,1))!=varn(gel(y,1))) pari_err(e_OP,"chinese",x,y);
-      if (RgX_equal(gel(x,1),gel(y,1)))  /* same modulus */
+      if (varn(A)!=varn(B)) pari_err(e_VAR,"chinese",A,B);
+      if (RgX_equal(A,B))  /* same modulus */
       {
-        gel(z,1) = gcopy(gel(x,1));
-        gel(z,2) = chinese(gel(x,2),gel(y,2));
+        gel(z,1) = gcopy(A);
+        gel(z,2) = chinese(a,b);
         return z;
       }
       av = avma;
-      d = RgX_extgcd(gel(x,1),gel(y,1),&u,&v);
-      p2 = gsub(gel(y,2), gel(x,2));
+      d = RgX_extgcd(A,B,&u,&v);
+      p2 = gsub(b, a);
       if (!gequal0(gmod(p2, d))) break;
-      p1 = gdiv(gel(x,1),d);
-      p2 = gadd(gel(x,2), gmul(gmul(u,p1), p2));
+      p1 = gdiv(A,d);
+      p2 = gadd(a, gmul(gmul(u,p1), p2));
 
-      tetpil=avma; gel(z,1) = gmul(p1,gel(y,1)); gel(z,2) = gmod(p2,gel(z,1));
+      tetpil = avma;
+      gel(z,1) = gmul(p1,B);
+      gel(z,2) = gmod(p2,gel(z,1));
       gerepilecoeffssp(av,tetpil,z+1,2); return z;
+    }
     case t_INTMOD:
     {
       GEN A = gel(x,1), B = gel(y,1);

@@ -3004,13 +3004,14 @@ rnf_fix_pol(GEN T, GEN P, int lift)
       case t_INT: case t_FRAC: break;
       case t_POL:
         if (varn(c) != vT)
-          pari_err(e_MISC,"incorrect variable in rnf function");
+          pari_err(e_VAR,"rnf function", c,T);
         if (lg(c) >= lg(T)) c = RgX_rem(c,T);
         check_pol(&c);
         if (!lift && typ(c) == t_POL) c = mkpolmod(c, T);
         break;
       case t_POLMOD:
-        if (!RgX_equal_var(gel(c,1), T)) pari_err(e_DIM,"rnf function");
+        if (!RgX_equal_var(gel(c,1), T))
+          pari_err(e_VAR,"rnf function", gel(c,1),T);
         if (lift) c = gel(c,2);
         break;
       default: pari_err(e_TYPE, "rnf function",c);
@@ -3355,7 +3356,7 @@ polcompositum0(GEN A, GEN B, long flall)
   if (typ(B)!=t_POL) pari_err(e_TYPE,"polcompositum0",B);
   if (degpol(A)<=0 || degpol(B)<=0) pari_err(e_CONSTPOL,"compositum");
   v = varn(A);
-  if (varn(B) != v) pari_err(e_MISC,"not the same variable in compositum");
+  if (varn(B) != v) pari_err(e_VAR,"compositum", A,B);
   same = (A == B || RgX_equal(A,B));
   A = Q_primpart(A); RgX_check_ZX(A,"compositum");
   if (!ZX_is_squarefree(A)) pari_err(e_MISC,"compositum: %Ps inseparable", A);

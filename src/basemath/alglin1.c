@@ -524,7 +524,7 @@ matmuldiagonal(GEN m, GEN d)
 
   if (typ(m)!=t_MAT) pari_err(e_TYPE,"matmuldiagonal",m);
   if (! is_vec_t(typ(d))) pari_err(e_TYPE,"matmuldiagonal",d);
-  if (lg(d) != lx) pari_err(e_DIM,"matmuldiagonal");
+  if (lg(d) != lx) pari_err(e_OP,"operation 'matmuldiagonal'", m,d);
   for (j=1; j<lx; j++) gel(y,j) = RgC_Rg_mul(gel(m,j), gel(d,j));
   return y;
 }
@@ -540,7 +540,7 @@ matmultodiagonal(GEN A, GEN B)
   if (typ(B) != t_MAT) pari_err(e_TYPE,"matmultodiagonal",B);
   hA = (lA == 1)? lB: lg(A[1]);
   hB = (lB == 1)? lA: lg(B[1]);
-  if (lA != hB || lB != hA) pari_err(e_DIM,"matmultodiagonal");
+  if (lA != hB || lB != hA) pari_err(e_OP,"operation 'matmultodiagonal'", A,B);
   for (i=1; i<lB; i++)
   {
     GEN z = gen_0;
