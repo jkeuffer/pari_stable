@@ -2255,7 +2255,7 @@ error, and not an unrelated one like the type error \kbd{1 / "blah"}.
 \bprog
 ? inv2(x) = {
   iferr(1/x,
-        ERR, if (errname(ERR) != "gdiver", error(ERR));
+        ERR, if (errname(ERR) != "e_INV", error(ERR));
              "oo")
 
 }
@@ -2264,7 +2264,7 @@ error, and not an unrelated one like the type error \kbd{1 / "blah"}.
 ? inv2("blah")
   ***   at top-level: inv2("blah")
   ***                 ^------------
-  ***   in function inv2: ...f(errname(ERR)!="gdiver",error(ERR));"oo")
+  ***   in function inv2: ...f(errname(ERR)!="e_INV",error(ERR));"oo")
   ***                                                 ^-----------------
   *** error: forbidden division t_INT / t_STR.
 @eprog\noindent In the last example, the error type was not expected, so we
@@ -2273,7 +2273,7 @@ mistakenly trapped. Since the recovery code should always check whether the
 error is the one expected, this construction is very common and can be
 simplified as:
 \bprog
-? inv3(x) = iferrname("gdiver", 1/x, ERR, "oo")
+? inv3(x) = iferrname("e_INV", 1/x, ERR, "oo")
 @eprog\noindent Rather than trapping everything, then rethrowing whatever we
 do not like, we adviѕe to only trap errors of a specific kind, as above. Of
 course, sometimes, one just want to trap \emph{everything}:
@@ -2587,7 +2587,8 @@ This is used primarily as a debugging device for PARI.
 
 \subsec{\b{t}} Prints the \idx{internal longword format} of all the PARI
 types. The detailed bit or byte format of the initial codeword(s) is
-explained in Chapter~4, but its knowledge is not necessary for a \kbd{gp} user.
+explained in Chapter~4, but its knowledge is not necessary for a \kbd{gp}
+user.
 
 \subsec{\b{u}} Prints the definitions of all user-defined functions.
 

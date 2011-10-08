@@ -525,7 +525,7 @@ compilecast_loc(int type, int mode, const char *loc)
     else compile_varerr(loc);
      break;
   default:
-    pari_err(bugparier,"compilecast, type unknown %ld",mode);
+    pari_err(e_BUG,"compilecast, type unknown %ld",mode);
   }
 }
 
@@ -734,7 +734,7 @@ compilefacteurmat(long n, int mode)
     compilecast(n,Gvec,mode);
     return;
   default:
-    pari_err(bugparier,"compilefacteurmat");
+    pari_err(e_BUG,"compilefacteurmat");
   }
 }
 
@@ -1215,7 +1215,7 @@ compilefunc(entree *ep, long n, int mode, long flag)
             break;
           }
         default:
-          pari_err(talker,"Unknown prototype code `%c' for `%.*s'",c,
+          pari_err(e_MISC,"Unknown prototype code `%c' for `%.*s'",c,
               tree[x].len, tree[x].str);
         }
         break;
@@ -1261,7 +1261,7 @@ compilefunc(entree *ep, long n, int mode, long flag)
           op_push(OCprecdl,0,n);
           break;
         default:
-          pari_err(talker,"Unknown prototype code `%c' for `%.*s'",c,
+          pari_err(e_MISC,"Unknown prototype code `%c' for `%.*s'",c,
               tree[x].len, tree[x].str);
         }
         break;
@@ -1282,7 +1282,7 @@ compilefunc(entree *ep, long n, int mode, long flag)
           op_push(OCtostr, -1, n);
           break;
         default:
-          pari_err(talker,"Unknown prototype code `%c' for `%.*s'",c,
+          pari_err(e_MISC,"Unknown prototype code `%c' for `%.*s'",c,
               tree[x].len, tree[x].str);
         }
         break;
@@ -1311,12 +1311,12 @@ compilefunc(entree *ep, long n, int mode, long flag)
             break;
           }
         default:
-          pari_err(talker,"Unknown prototype code `%c*' for `%.*s'",c,
+          pari_err(e_MISC,"Unknown prototype code `%c*' for `%.*s'",c,
               tree[x].len, tree[x].str);
         }
         break;
       default:
-        pari_err(bugparier,"PPproto %d in compilefunc",mod);
+        pari_err(e_BUG,"PPproto %d in compilefunc",mod);
       }
       q=p;
     }
@@ -1384,7 +1384,7 @@ genclosure(entree *ep, const char *loc, long  nbdata, int check)
   getcodepos(&pos);
   dbgstart = loc;
   if (nbdata > arity)
-    pari_err(talker,"too many parameters for closure `%s'", ep->name);
+    pari_err(e_MISC,"too many parameters for closure `%s'", ep->name);
   for(i=1; i<= nbdata; i++)
     op_push_loc(OCpushgen,data_push(NULL),loc);
   arity -= nbdata;
@@ -1468,7 +1468,7 @@ genclosure(entree *ep, const char *loc, long  nbdata, int check)
         op_push_loc(OCdefaultlong,-index,loc);
         break;
       default:
-        pari_err(talker,"Unknown prototype code `D%c' for `%s'",c,ep->name);
+        pari_err(e_MISC,"Unknown prototype code `D%c' for `%s'",c,ep->name);
       }
       break;
     case PPdefaultmulti:
@@ -1490,7 +1490,7 @@ genclosure(entree *ep, const char *loc, long  nbdata, int check)
         op_push_loc(OCtostr,-index,loc);
         break;
       default:
-        pari_err(talker,
+        pari_err(e_MISC,
             "Unknown prototype code `D...,%c,' for `%s'",c,ep->name);
       }
       break;
@@ -1500,7 +1500,7 @@ genclosure(entree *ep, const char *loc, long  nbdata, int check)
       case 's':
         return NULL;
       default:
-        pari_err(talker,"Unknown prototype code `%c*' for `%s'",c,ep->name);
+        pari_err(e_MISC,"Unknown prototype code `%c*' for `%s'",c,ep->name);
       }
       break;
     default:
@@ -1532,12 +1532,12 @@ strtoclosure(const char *s, long n,  ...)
   pari_sp av = avma;
   entree *ep = is_entry(s);
   GEN C;
-  if (!ep) pari_err(talker,"no function named \"%s\"",s);
+  if (!ep) pari_err(e_MISC,"no function named \"%s\"",s);
   ep = do_alias(ep);
   if ((!EpSTATIC(ep) && EpVALENCE(ep)!=EpINSTALL) || !ep->value)
-    pari_err(talker,"not a built-in/install'ed function: \"%s\"",s);
+    pari_err(e_MISC,"not a built-in/install'ed function: \"%s\"",s);
   C = genclosure(ep,ep->name,n,0);
-  if (!C) pari_err(talker,"function prototype unsupported: \"%s\"",s);
+  if (!C) pari_err(e_MISC,"function prototype unsupported: \"%s\"",s);
   else
   {
     va_list ap;
@@ -1579,7 +1579,7 @@ compilenode(long n, int mode, long flag)
 {
   long x,y;
   if (n<0)
-    pari_err(bugparier,"compilenode");
+    pari_err(e_BUG,"compilenode");
   x=tree[n].x;
   y=tree[n].y;
 
@@ -1655,7 +1655,7 @@ compilenode(long n, int mode, long flag)
           break;
         }
       default:
-        pari_err(bugparier,"compilenode, unsupported constant");
+        pari_err(e_BUG,"compilenode, unsupported constant");
       }
       avma=ltop;
       return;
@@ -1765,7 +1765,7 @@ compilenode(long n, int mode, long flag)
     compilecast(n,Gvoid,mode);
     return;
   default:
-    pari_err(bugparier,"compilenode");
+    pari_err(e_BUG,"compilenode");
   }
 }
 
@@ -1960,7 +1960,7 @@ optimizefunc(entree *ep, long n)
           fl &= vec_optimize(cattovec(arg[j++], OPcat));
           break;
         default:
-          pari_err(talker,"Unknown prototype code `%c' for `%.*s'",c,
+          pari_err(e_MISC,"Unknown prototype code `%c' for `%.*s'",c,
               tree[x].len, tree[x].str);
         }
         break;
@@ -1983,12 +1983,12 @@ optimizefunc(entree *ep, long n)
             break;
           }
         default:
-          pari_err(talker,"Unknown prototype code `%c*' for `%.*s'",c,
+          pari_err(e_MISC,"Unknown prototype code `%c*' for `%.*s'",c,
               tree[x].len, tree[x].str);
         }
         break;
       default:
-        pari_err(bugparier,"PPproto %d in compilefunc",mod);
+        pari_err(e_BUG,"PPproto %d in compilefunc",mod);
       }
     }
   }
@@ -2013,7 +2013,7 @@ optimizenode(long n)
 {
   long x,y;
   if (n<0)
-    pari_err(bugparier,"optimizenode");
+    pari_err(e_BUG,"optimizenode");
   x=tree[n].x;
   y=tree[n].y;
 
@@ -2069,6 +2069,6 @@ optimizenode(long n)
     tree[n].flags=tree[x].flags;
     return;
   default:
-    pari_err(bugparier,"optimizenode");
+    pari_err(e_BUG,"optimizenode");
   }
 }

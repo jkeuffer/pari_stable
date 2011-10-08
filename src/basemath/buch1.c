@@ -179,7 +179,7 @@ double
 check_bach(double cbach, double B)
 {
   if (cbach >= B)
-   pari_err(talker,"sorry, couldn't deal with this field. PLEASE REPORT");
+   pari_err(e_MISC,"sorry, couldn't deal with this field. PLEASE REPORT");
   if (cbach <= 0.3)
     cbach *= 2;
   else
@@ -913,7 +913,7 @@ Buchquad(GEN D, double cbach, double cbach2, long prec)
     if (cbach2 < cbach) cbach2 = cbach;
     cbach = 6.;
   }
-  if (cbach <= 0.) pari_err(talker,"Bach constant <= 0 in Buchquad");
+  if (cbach <= 0.) pari_err(e_MISC,"Bach constant <= 0 in Buchquad");
   av = avma;
   BQ.powsubFB = BQ.subFB = NULL;
   init_GRHcheck(GRHcheck, 2, BQ.PRECREG? 2: 0, LOGD);
@@ -1040,7 +1040,7 @@ buchimag(GEN D, GEN c, GEN c2, GEN REL)
 
 GEN
 buchreal(GEN D, GEN flag, GEN c, GEN c2, GEN REL, long prec) {
-  if (signe(flag)) pari_err(impl,"narrow class group");
+  if (signe(flag)) pari_err(e_IMPL,"narrow class group");
   (void)REL; return Buchquad(D,gtodouble(c),gtodouble(c2),prec);
 }
 
@@ -1055,7 +1055,7 @@ quadclassunit0(GEN x, long flag, GEN data, long prec)
   {
     lx = lg(data);
     if (typ(data)!=t_VEC || lx > 7)
-      pari_err(talker,"incorrect parameters in quadclassunit");
+      pari_err(e_MISC,"incorrect parameters in quadclassunit");
     if (lx > 3) lx = 3;
   }
   switch(lx)
@@ -1063,6 +1063,6 @@ quadclassunit0(GEN x, long flag, GEN data, long prec)
     case 3: c2 = gtodouble(gel(data,2));
     case 2: c1 = gtodouble(gel(data,1));
   }
-  if (flag) pari_err(impl,"narrow class group");
+  if (flag) pari_err(e_IMPL,"narrow class group");
   return Buchquad(x,c1,c2,prec);
 }

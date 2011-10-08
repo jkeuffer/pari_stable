@@ -112,7 +112,7 @@ calc_block(blockdata *B, GEN Z, GEN Y, GEN SB)
     for (j=2; j<r; j++)
       if (n[j]%k == 0)
       {
-        if (++lpn >= BIL) pari_err(talker,"overflow in calc_block");
+        if (++lpn >= BIL) pari_err(e_MISC,"overflow in calc_block");
         pn[lpn] = n[j]; pnon[lpn] = j;
         ngcd = ugcd(ngcd, n[j]);
       }
@@ -448,7 +448,7 @@ get_bezout(GEN pol, GEN fk, GEN p)
     A = gel(fk,i);
     B = FpX_div(pol, A, p);
     d = FpX_extgcd(A,B,p, &u, &v);
-    if (degpol(d) > 0) pari_err(talker, "relatively prime polynomials expected");
+    if (degpol(d) > 0) pari_err(e_MISC, "relatively prime polynomials expected");
     d = constant_term(d);
     if (!gequal1(d)) v = FpX_Fp_mul(v, Fp_inv(d, p), p);
     gel(U,i) = FpX_mul(B,v, p);
@@ -551,7 +551,7 @@ choose_prime(primedata *S, GEN pol, GEN dpol)
   for(k = 1; k < 11 || !oldlcm; k++,avma = av)
   {
     do NEXT_PRIME_VIADIFF(p[2], di); while (!smodis(dpol, p[2]));
-    if (k > 5 * N) pari_err(talker,"sorry, too many block systems in nfsubfields");
+    if (k > 5 * N) pari_err(e_MISC,"sorry, too many block systems in nfsubfields");
     ff = gel(FpX_factor(pol, p), 1);
     r = lg(ff)-1;
     if (r == N || r >= BIL) continue;

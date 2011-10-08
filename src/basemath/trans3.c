@@ -41,8 +41,8 @@ _jbessel(GEN n, GEN z, long flag, long m)
   {
     long v = valp(z);
     k = lg(Z)-2 - v;
-    if (v < 0) pari_err(negexper,"jbessel");
-    if (v == 0) pari_err(impl,"jbessel around a!=0");
+    if (v < 0) pari_err(e_NEGVAL,"jbessel");
+    if (v == 0) pari_err(e_IMPL,"jbessel around a!=0");
     if (k <= 0) return scalarser(gen_1, varn(z), 2*v);
     setlg(Z, k+2);
   }
@@ -126,13 +126,13 @@ jbesselintern(GEN n, GEN z, long flag, long prec)
       }
       return gerepilecopy(av,y);
 
-    case t_PADIC: pari_err(impl,"p-adic jbessel function");
+    case t_PADIC: pari_err(e_IMPL,"p-adic jbessel function");
     default:
       if (!(y = toser_i(z))) break;
       if (issmall(n,&ki)) n = utoi(labs(ki));
       return gerepileupto(av, _jbessel(n,y,flag,lg(y)-2));
   }
-  pari_err(typeer,"jbessel",z);
+  pari_err(e_TYPE,"jbessel",z);
   return NULL; /* not reached */
 }
 GEN
@@ -167,7 +167,7 @@ jbesselh(GEN n, GEN z, long prec)
   pari_sp av;
   GEN res, y, p1;
 
-  if (typ(n)!=t_INT) pari_err(typeer,"jbesselh",n);
+  if (typ(n)!=t_INT) pari_err(e_TYPE,"jbesselh",n);
   k = itos(n);
   if (k < 0) return jbessel(gadd(ghalf,n), z, prec);
 
@@ -210,17 +210,17 @@ jbesselh(GEN n, GEN z, long prec)
       }
       return gerepilecopy(av, y);
 
-    case t_PADIC: pari_err(impl,"p-adic jbesselh function");
+    case t_PADIC: pari_err(e_IMPL,"p-adic jbesselh function");
     default:
       av = avma; if (!(y = toser_i(z))) break;
       if (gequal0(y)) return gerepileupto(av, gpowgs(y,k));
-      if (valp(y) < 0) pari_err(negexper,"jbesselh");
+      if (valp(y) < 0) pari_err(e_NEGVAL,"jbesselh");
       y = gprec(y, lg(y)-2 + (2*k+1)*valp(y));
       p1 = gdiv(_jbesselh(k,y,prec),gpowgs(y,k));
       for (i=1; i<=k; i++) p1 = gmulgs(p1,2*i+1);
       return gerepilecopy(av,p1);
   }
-  pari_err(typeer,"jbesselh",z);
+  pari_err(e_TYPE,"jbesselh",z);
   return NULL; /* not reached */
 }
 
@@ -337,8 +337,8 @@ _kbessel1(long n, GEN z, long flag, long m, long prec)
   {
     long v = valp(z);
     k = lg(Z)-2 - v;
-    if (v < 0) pari_err(negexper,"_kbessel1");
-    if (v == 0) pari_err(impl,"Bessel K around a!=0");
+    if (v < 0) pari_err(e_NEGVAL,"_kbessel1");
+    if (v == 0) pari_err(e_IMPL,"Bessel K around a!=0");
     if (k <= 0) return gadd(gen_1, zeroser(varn(z), 2*v));
     setlg(Z, k+2);
   }
@@ -393,7 +393,7 @@ kbesselintern(GEN n, GEN z, long flag, long prec)
   {
     case t_INT: case t_FRAC: case t_QUAD:
     case t_REAL: case t_COMPLEX:
-      if (gequal0(z)) pari_err(talker,"zero argument in a k/n bessel function");
+      if (gequal0(z)) pari_err(e_MISC,"zero argument in a k/n bessel function");
       i = precision(z); if (i) prec = i;
       i = precision(n); if (i && prec > i) prec = i;
       ex = gexpo(z);
@@ -468,7 +468,7 @@ kbesselintern(GEN n, GEN z, long flag, long prec)
       }
       return gerepilecopy(av, y);
 
-    case t_PADIC: pari_err(impl,"p-adic Bessel K function");
+    case t_PADIC: pari_err(e_IMPL,"p-adic Bessel K function");
     default:
       if (!(y = toser_i(z))) break;
       if (issmall(n,&ki))
@@ -477,7 +477,7 @@ kbesselintern(GEN n, GEN z, long flag, long prec)
         return gerepilecopy(av, _kbessel1(k,y,flag+2,lg(y)-2,prec));
       }
       if (!issmall(gmul2n(n,1),&ki))
-        pari_err(talker,"cannot give a power series result in k/n bessel function");
+        pari_err(e_MISC,"cannot give a power series result in k/n bessel function");
       k = labs(ki); n = gmul2n(stoi(k),-1);
       fl2 = (k&3)==1;
       pm = jbesselintern(gneg(n),y,flag,prec);
@@ -493,7 +493,7 @@ kbesselintern(GEN n, GEN z, long flag, long prec)
       else p1 = pm;
       return gerepileupto(av, fl2? gneg(p1): gcopy(p1));
   }
-  pari_err(typeer,"kbesselintern",z);
+  pari_err(e_TYPE,"kbesselintern",z);
   return NULL; /* not reached */
 }
 
@@ -537,7 +537,7 @@ hyperu(GEN a, GEN b, GEN gx, long prec)
   pari_sp av = avma;
 
   if(gsigne(gx) <= 0)
-    pari_err(talker,"hyperu's third argument must be positive");
+    pari_err(e_MISC,"hyperu's third argument must be positive");
   x = gtofp(gx, l);
   a1 = gaddsg(1, gadd(a,mb)); P = gmul(a1, a);
   p1 = gabs(gtofp(P,3), 3);
@@ -771,7 +771,7 @@ eint1(GEN x, long prec)
 
   if (typ(x) != t_REAL) {
     x = gtofp(x, prec);
-    if (typ(x) != t_REAL) pari_err(impl,"non-real argument in eint1");
+    if (typ(x) != t_REAL) pari_err(e_IMPL,"non-real argument in eint1");
   }
   if (signe(x) >= 0) return gerepileuptoleaf(av, incgam2_0(x, mpexp(x)));
   /* rewritten from code contributed by Manfred Radimersky */
@@ -800,12 +800,12 @@ GEN
 veceint1(GEN C, GEN nmax, long prec)
 {
   if (!nmax) return eint1(C,prec);
-  if (typ(nmax) != t_INT) pari_err(typeer,"veceint1",nmax);
+  if (typ(nmax) != t_INT) pari_err(e_TYPE,"veceint1",nmax);
   if (typ(C) != t_REAL) {
     C = gtofp(C, prec);
-    if (typ(C) != t_REAL) pari_err(typeer,"veceint1",C);
+    if (typ(C) != t_REAL) pari_err(e_TYPE,"veceint1",C);
   }
-  if (signe(C) <= 0) pari_err(talker,"negative or zero constant in veceint1");
+  if (signe(C) <= 0) pari_err(e_MISC,"negative or zero constant in veceint1");
   return mpveceint1(C, NULL, itos(nmax));
 }
 
@@ -1287,7 +1287,7 @@ szeta(long k, long prec)
     if ((k&1) == 0) return gen_0;
     /* the one value such that k < 0 and 1 - k < 0, due to overflow */
     if ((ulong)k == (HIGHBIT | 1))
-      pari_err(talker, "too large negative arg %ld in zeta", k);
+      pari_err(e_MISC, "too large negative arg %ld in zeta", k);
     k = 1-k;
     y = single_bern(k, prec); togglesign(y);
     return gerepileuptoleaf(av, divru(y, k));
@@ -1675,7 +1675,7 @@ zetap(GEN s)
   GEN gp, q, vz, is, cff, val, va, cft;
 
   if (valp(s) < 0)
-    pari_err(talker, "argument must be a p-adic integer");
+    pari_err(e_MISC, "argument must be a p-adic integer");
   if (!prec) prec = 1;
 
   gp = gel(s,2); p = itou(gp);
@@ -1779,7 +1779,7 @@ zetap(GEN s)
 GEN
 gzeta(GEN x, long prec)
 {
-  if (gequal1(x)) pari_err(talker, "argument equal to one in zeta");
+  if (gequal1(x)) pari_err(e_MISC, "argument equal to one in zeta");
   switch(typ(x))
   {
     case t_INT:
@@ -1793,12 +1793,12 @@ gzeta(GEN x, long prec)
     case t_REAL: case t_COMPLEX:
       return czeta(x,prec);
 
-    case t_INTMOD: pari_err(typeer,"gzeta",x);
+    case t_INTMOD: pari_err(e_TYPE,"gzeta",x);
 
     case t_PADIC:
       return zetap(x);
 
-    case t_SER: pari_err(impl,"zeta of power series");
+    case t_SER: pari_err(e_IMPL,"zeta of power series");
   }
   return transc(gzeta,x,prec);
 }
@@ -1872,7 +1872,7 @@ polylog(long m, GEN x, long prec)
   pari_sp av, av1, limpile;
   GEN X, Xn, z, p1, p2, y, res;
 
-  if (m < 0) pari_err(talker,"negative index in polylog");
+  if (m < 0) pari_err(e_MISC,"negative index in polylog");
   if (!m) return mkfrac(gen_m1,gen_2);
   if (gequal0(x)) return gcopy(x);
   if (m==1)
@@ -2071,14 +2071,14 @@ gpolylog(long m, GEN x, long prec)
       for (i=1; i<lx; i++) gel(y,i) = polylog(m,gel(p1,i),prec);
       return gerepileupto(av, y);
 
-    case t_INTMOD: case t_PADIC: pari_err(impl, "padic polylogarithm");
+    case t_INTMOD: case t_PADIC: pari_err(e_IMPL, "padic polylogarithm");
     default:
       av = avma; if (!(y = toser_i(x))) break;
       if (!m) { avma = av; return mkfrac(gen_m1,gen_2); }
       if (m==1) return gerepileupto(av, gneg( glog(gsub(gen_1,y),prec) ));
       if (gequal0(y)) return gerepilecopy(av, y);
       v = valp(y);
-      if (v <= 0) pari_err(impl,"polylog around a!=0");
+      if (v <= 0) pari_err(e_IMPL,"polylog around a!=0");
       n = (lg(y)-3 + v) / v;
       a = zeroser(varn(y), lg(y)-2);
       for (i=n; i>=1; i--)
@@ -2090,7 +2090,7 @@ gpolylog(long m, GEN x, long prec)
       for (i=1; i<lx; i++) gel(y,i) = gpolylog(m,gel(x,i),prec);
       return y;
   }
-  pari_err(typeer,"gpolylog",x);
+  pari_err(e_TYPE,"gpolylog",x);
   return NULL; /* not reached */
 }
 
@@ -2103,7 +2103,7 @@ polylog0(long m, GEN x, long flag, long prec)
     case 1: return polylogD(m,x,0,prec);
     case 2: return polylogD(m,x,1,prec);
     case 3: return polylogP(m,x,prec);
-    default: pari_err(flagerr,"polylog");
+    default: pari_err(e_FLAG,"polylog");
   }
   return NULL; /* not reached */
 }
@@ -2114,7 +2114,7 @@ upper_half(GEN x, long *prec)
   long tx = typ(x), l;
   if (tx == t_QUAD) { x = quadtofp(x, *prec); tx = typ(x); }
   if (tx != t_COMPLEX || gsigne(gel(x,2)) <= 0)
-    pari_err(talker,"argument '%Ps' does not belong to upper half-plane", x);
+    pari_err(e_MISC,"argument '%Ps' does not belong to upper half-plane", x);
   l = precision(x); if (l) *prec = l;
   return x;
 }
@@ -2206,7 +2206,7 @@ qq(GEN x, long prec)
     x = upper_half(x, &prec);
     return exp_IPiC(gmul2n(x,1), prec); /* e(x) */
   }
-  if (! ( x = toser_i(x)) ) pari_err(talker,"bad argument for modular function");
+  if (! ( x = toser_i(x)) ) pari_err(e_MISC,"bad argument for modular function");
   return x;
 }
 
@@ -2279,7 +2279,7 @@ inteta(GEN q)
   y = gen_1; qn = gen_1; ps = gen_1;
   if (tx==t_PADIC)
   {
-    if (valp(q) <= 0) pari_err(talker,"non-positive valuation in eta");
+    if (valp(q) <= 0) pari_err(e_MISC,"non-positive valuation in eta");
     for(;;)
     {
       GEN t = gneg_i(gmul(ps,gmul(q,gsqr(qn))));
@@ -2296,7 +2296,7 @@ inteta(GEN q)
     pari_sp av, lim;
 
     v = valp(q); /* handle valuation separately to avoid overflow */
-    if (v <= 0) pari_err(talker,"non-positive valuation in eta");
+    if (v <= 0) pari_err(e_MISC,"non-positive valuation in eta");
     y = ser2pol_i(q, l); /* t_SER inefficient when input has low degree */
     n = degpol(y);
     if (n == 1 || n < (l>>2)) return inteta_pol(y, v, l);
@@ -2336,7 +2336,7 @@ inteta(GEN q)
     else
     {
       l = lg(q)-2; tx = 0;
-      if (valp(q) <= 0) pari_err(talker,"non-positive valuation in eta");
+      if (valp(q) <= 0) pari_err(e_MISC,"non-positive valuation in eta");
     }
     for(;;)
     {
@@ -2392,8 +2392,8 @@ sumdedekind(GEN h, GEN k)
 {
   pari_sp av = avma;
   GEN d;
-  if (typ(h) != t_INT) pari_err(typeer, "sumdedekind",h);
-  if (typ(k) != t_INT) pari_err(typeer, "sumdedekind",k);
+  if (typ(h) != t_INT) pari_err(e_TYPE, "sumdedekind",h);
+  if (typ(k) != t_INT) pari_err(e_TYPE, "sumdedekind",k);
   d = gcdii(h,k);
   if (!is_pm1(d))
     avma = av;
@@ -2458,7 +2458,7 @@ trueeta(GEN x, long prec)
   pari_sp av = avma;
   GEN U, st, s, t;
 
-  if (!is_scalar_t(typ(x))) pari_err(typeer,"trueeta",x);
+  if (!is_scalar_t(typ(x))) pari_err(e_TYPE,"trueeta",x);
   x = upper_half(x, &prec);
   x = redtausl2(x, &U);
   st = eta_correction(x, U, 1);
@@ -2656,7 +2656,7 @@ weber0(GEN x, long flag,long prec)
     case 0: return weberf(x,prec);
     case 1: return weberf1(x,prec);
     case 2: return weberf2(x,prec);
-    default: pari_err(flagerr,"weber");
+    default: pari_err(e_FLAG,"weber");
   }
   return NULL; /* not reached */
 }
@@ -2672,7 +2672,7 @@ theta(GEN q, GEN z, long prec)
   n = precision(z); if (n && n < l) l = n;
   if (l) prec = l;
   z = gtofp(z, prec);
-  q = gtofp(q, prec); if (gexpo(q) >= 0) pari_err(talker,"q >= 1 in theta");
+  q = gtofp(q, prec); if (gexpo(q) >= 0) pari_err(e_MISC,"q >= 1 in theta");
   zold = NULL; /* gcc -Wall */
   zy = imag_i(z);
   if (gequal0(zy)) k = gen_0;
@@ -2725,10 +2725,10 @@ thetanullk(GEN q, long k, long prec)
   pari_sp av = avma;
   GEN p1, ps, qn, y, ps2;
 
-  if (k < 0) pari_err(talker,"k < 0 in thetanullk");
+  if (k < 0) pari_err(e_MISC,"k < 0 in thetanullk");
   l = precision(q);
   if (l) prec = l;
-  q = gtofp(q, prec); if (gexpo(q) >= 0) pari_err(talker,"q >= 1 in theta");
+  q = gtofp(q, prec); if (gexpo(q) >= 0) pari_err(e_MISC,"q >= 1 in theta");
 
   if (!(k&1)) { avma = av; return gen_0; }
   qn = gen_1;
@@ -2757,7 +2757,7 @@ vecthetanullk(GEN q, long k, long prec)
   GEN p1, ps, qn, y, ps2;
 
   l = precision(q); if (l) prec = l;
-  q = gtofp(q, prec); if (gexpo(q) >= 0) pari_err(talker,"q >= 1 in theta");
+  q = gtofp(q, prec); if (gexpo(q) >= 0) pari_err(e_MISC,"q >= 1 in theta");
 
   qn = gen_1;
   ps2 = gsqr(q);

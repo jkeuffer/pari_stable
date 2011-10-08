@@ -58,7 +58,7 @@ _factpol(GEN x, long t/*unused*/, long hint/*unused*/) {
 }
 
 static void
-suppressed(void) {pari_err(talker,"this function no longer exists");}
+suppressed(void) {pari_err(e_MISC,"this function no longer exists");}
 
 #define BUCH_PROTO "GDGDGD5,G,D1,G,D4,L,D3,L,p"
 #define B_ARGS GEN g1,GEN g2,GEN g3,GEN g4,GEN g5,long l1,long l2,long prec

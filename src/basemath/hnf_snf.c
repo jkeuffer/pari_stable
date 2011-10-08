@@ -23,7 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 GEN
 mathnf0(GEN x, long flag)
 {
-  if (typ(x)!=t_MAT) pari_err(typeer,"mathnf0",x);
+  if (typ(x)!=t_MAT) pari_err(e_TYPE,"mathnf0",x);
 
   switch(flag)
   {
@@ -38,7 +38,7 @@ mathnf0(GEN x, long flag)
     }
     case 4: RgM_check_ZM(x, "mathnf0"); return hnflll(x);
     case 5: RgM_check_ZM(x, "mathnf0"); return hnfperm(x);
-    default: pari_err(flagerr,"mathnf");
+    default: pari_err(e_FLAG,"mathnf");
   }
   return NULL; /* not reached */
 }
@@ -554,7 +554,7 @@ mathnfspec(GEN x, GEN *ptperm, GEN *ptdep, GEN *ptB, GEN *ptC)
 
 TOOLARGE:
   if (lg(*ptC) > 1 && lg((*ptC)[1]) > 1)
-    pari_err(impl,"mathnfspec with large entries");
+    pari_err(e_IMPL,"mathnfspec with large entries");
   x = ZM_hnf(x); lx = lg(x); j = ly; k = 0;
   for (i=1; i<ly; i++)
   {
@@ -1001,7 +1001,7 @@ ZM_hnfmodall(GEN x, GEN dm, long flag)
   if (li > co)
   {
     ldef = li - co;
-    if (!modid) pari_err(talker,"nb lines > nb columns in ZM_hnfmod");
+    if (!modid) pari_err(e_MISC,"nb lines > nb columns in ZM_hnfmod");
   }
   /* To prevent coeffs explosion, only reduce mod dm when lg() > ldm */
   ldm = lgefint(dm);
@@ -1131,8 +1131,8 @@ ZM_hnfmodid(GEN x, GEN d) { return ZM_hnfmodall(x,d,hnf_MODID); }
 static GEN
 allhnfmod(GEN x, GEN dm, int flag)
 {
-  if (typ(dm)!=t_INT) pari_err(typeer,"allhnfmod",dm);
-  if (typ(x)!=t_MAT) pari_err(typeer,"allhnfmod",x);
+  if (typ(dm)!=t_INT) pari_err(e_TYPE,"allhnfmod",dm);
+  if (typ(x)!=t_MAT) pari_err(e_TYPE,"allhnfmod",x);
   RgM_check_ZM(x, "allhnfmod");
   return signe(dm)? ZM_hnfmodall(x, dm, flag): ZM_hnf(x);
 }
@@ -1725,7 +1725,7 @@ hnfdivide(GEN A, GEN B)
   GEN u, b, m, r;
 
   if (!n) return 1;
-  if (lg(B)-1 != n) pari_err(consister,"hnfdivide");
+  if (lg(B)-1 != n) pari_err(e_DIM,"hnfdivide");
   u = cgetg(n+1, t_COL);
   for (k=1; k<=n; k++)
   {
@@ -1762,7 +1762,7 @@ hnf_invimage(GEN A, GEN b)
     pari_sp av2 = avma;
     long j;
     GEN t = gel(b,k), Aki = gcoeff(A,k,i);
-    if (typ(t) != t_INT) pari_err(typeer,"hnf_invimage",t);
+    if (typ(t) != t_INT) pari_err(e_TYPE,"hnf_invimage",t);
     for (j=i+1; j<=n; j++) t = subii(t, mulii(gcoeff(A,k,j),gel(u,j)));
     if (!signe(Aki))
     {
@@ -1780,7 +1780,7 @@ hnf_invimage(GEN A, GEN b)
     pari_sp av2 = avma;
     long j;
     GEN t = gel(b,k);
-    if (typ(t) != t_INT) pari_err(typeer,"hnf_invimage",t);
+    if (typ(t) != t_INT) pari_err(e_TYPE,"hnf_invimage",t);
     for (j=1; j<=n; j++) t = subii(t, mulii(gcoeff(A,k,j),gel(u,j)));
     if (signe(t)) { avma = av;return NULL; }
     avma = av2;
@@ -2071,7 +2071,7 @@ ZM_snf(GEN x) { return ZM_snfall_i(x, NULL,NULL, 1); }
 
 GEN
 smith(GEN x) {
-  if (typ(x)!=t_MAT) pari_err(typeer,"smith",x);
+  if (typ(x)!=t_MAT) pari_err(e_TYPE,"smith",x);
   RgM_check_ZM(x, "smith");
   return ZM_snfall_i(x, NULL,NULL, 1);
 }
@@ -2079,7 +2079,7 @@ GEN
 smithall(GEN x)
 {
   GEN z = cgetg(4, t_VEC);
-  if (typ(x)!=t_MAT) pari_err(typeer,"smithall",x);
+  if (typ(x)!=t_MAT) pari_err(e_TYPE,"smithall",x);
   RgM_check_ZM(x, "smithall");
   gel(z,3) = ZM_snfall_i(x, (GEN*)(z+1),(GEN*)(z+2), 0);
   return z;
@@ -2109,7 +2109,7 @@ smithclean(GEN z)
   long i, j, h, l, c, d;
   GEN U, V, y, D, t;
 
-  if (typ(z) != t_VEC) pari_err(typeer,"smithclean",z);
+  if (typ(z) != t_VEC) pari_err(e_TYPE,"smithclean",z);
   l = lg(z); if (l == 1) return cgetg(1,t_VEC);
   U = gel(z,1);
   if (l != 4 || typ(U) != t_MAT)
@@ -2263,11 +2263,11 @@ gsmithall_i(GEN x,long all)
   long i, j, k, n;
   GEN z, u, v, U, V;
   long vx = gvar(x);
-  if (typ(x)!=t_MAT) pari_err(typeer,"gsmithall",x);
+  if (typ(x)!=t_MAT) pari_err(e_TYPE,"gsmithall",x);
   if (vx==NO_VARIABLE) return all? smithall(x): smith(x);
   n = lg(x)-1;
   if (!n) return trivsmith(all);
-  if (lg(x[1]) != n+1) pari_err(consister,"gsmithall");
+  if (lg(x[1]) != n+1) pari_err(e_DIM,"gsmithall");
   av = avma; lim = stack_lim(av,1);
   x = RgM_shallowcopy(x);
   if (all) { U = matid(n); V = matid(n); }
@@ -2340,7 +2340,7 @@ GEN
 matsnf0(GEN x,long flag)
 {
   pari_sp av = avma;
-  if (flag > 7) pari_err(flagerr,"matsnf");
+  if (flag > 7) pari_err(e_FLAG,"matsnf");
   if (typ(x) == t_VEC && flag & 4) return smithclean(x);
   if (flag & 2) x = flag&1 ? gsmithall(x): gsmith(x);
   else          x = flag&1 ?  smithall(x):  smith(x);
@@ -2417,7 +2417,7 @@ Frobeniusform(GEN V, long n)
   {
     GEN  P = gel(V,i);
     long d = degpol(P);
-    if (k+d-1 > n) pari_err(talker, "accuracy lost in matfrobenius");
+    if (k+d-1 > n) pari_err(e_MISC, "accuracy lost in matfrobenius");
     for (j=0; j<d-1; j++, k++) gcoeff(M,k+1,k) = gen_1;
     for (j=0; j<d; j++) gcoeff(M,k-j,k) = gneg(gel(P, 1+d-j));
   }
@@ -2434,7 +2434,7 @@ build_frobeniusbc(GEN V, long n)
     GEN  P = gel(V,i);
     long d = degpol(P);
     if (d <= 0) continue;
-    if (l+d-2 > n) pari_err(talker, "accuracy lost in matfrobenius");
+    if (l+d-2 > n) pari_err(e_MISC, "accuracy lost in matfrobenius");
     gcoeff(M,k,i) = gen_1;
     for (j=1; j<d; j++,k++,l++)
     {
@@ -2474,24 +2474,24 @@ matfrobenius(GEN M, long flag, long v)
   pari_sp ltop=avma;
   long n;
   GEN D, A, N, B, R, M_x;
-  if (typ(M)!=t_MAT) pari_err(typeer,"matfrobenius",M);
+  if (typ(M)!=t_MAT) pari_err(e_TYPE,"matfrobenius",M);
   if (v<0) v=0;
   if (varncmp(gvar(M), v) <= 0)
-    pari_err(talker,"variable must have higher priority in matfrobenius");
+    pari_err(e_MISC,"variable must have higher priority in matfrobenius");
   n = lg(M)-1;
-  if (n && lg(M[1])!=n+1) pari_err(consister,"matfrobenius");
+  if (n && lg(M[1])!=n+1) pari_err(e_DIM,"matfrobenius");
   M_x = RgM_Rg_add_shallow(M, monomial(gen_m1, 1, v));
   if (flag<2)
   {
     D = matsnf0(M_x,6);
-    if (prod_degree(D) != n) pari_err(talker, "accuracy lost in matfrobenius");
+    if (prod_degree(D) != n) pari_err(e_MISC, "accuracy lost in matfrobenius");
     if (flag != 1) D = Frobeniusform(D, n);
     return gerepileupto(ltop, D);
   }
-  if (flag>2) pari_err(flagerr,"matfrobenius");
+  if (flag>2) pari_err(e_FLAG,"matfrobenius");
   A = matsnf0(M_x,3);
   D = smithclean(RgM_diagonal_shallow(gel(A,3)));
-  if (prod_degree(D) != n) pari_err(talker, "accuracy lost in matfrobenius");
+  if (prod_degree(D) != n) pari_err(e_MISC, "accuracy lost in matfrobenius");
   N = Frobeniusform(D, n);
   B = build_frobeniusbc(D, n);
   R = build_basischange(N, RgM_mul(B,gel(A,1)));

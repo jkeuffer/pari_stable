@@ -51,7 +51,7 @@ void
 pari_ask_confirm(const char *s)
 {
   if (!cb_pari_ask_confirm)
-    pari_err(talker,"Can't ask for confirmation. Please define cb_pari_ask_confirm()");
+    pari_err(e_MISC,"Can't ask for confirmation. Please define cb_pari_ask_confirm()");
   cb_pari_ask_confirm(s);
 }
 
@@ -150,13 +150,13 @@ filtre0(filtre_t *F)
 
       case LBRACE:
         t--;
-        if (F->wait_for_brace) pari_err(impl,"embedded braces (in parser)");
+        if (F->wait_for_brace) pari_err(e_IMPL,"embedded braces (in parser)");
         F->more_input = 2;
         F->wait_for_brace = 1;
         break;
 
       case RBRACE:
-        if (!F->wait_for_brace) pari_err(talker,"unexpected closing brace");
+        if (!F->wait_for_brace) pari_err(e_MISC,"unexpected closing brace");
         F->more_input = 0; t--;
         F->wait_for_brace = 0;
         break;
@@ -851,7 +851,7 @@ fmtnum(outString *S, long lvalue, GEN gvalue, int base, int signvalue,
       }
       gvalue = gfloor( simplify_shallow(gvalue) );
       if (typ(gvalue) != t_INT)
-        pari_err(talker,"not a t_INT in integer format conversion: %Ps", gvalue);
+        pari_err(e_MISC,"not a t_INT in integer format conversion: %Ps", gvalue);
     }
     s = signe(gvalue);
     if (!s) { lbuf = 1; buf = zerotostr(); signvalue = 0; goto END; }
@@ -955,7 +955,7 @@ static GEN
 v_get_arg(GEN arg_vector, int *index, const char *save_fmt)
 {
   if (*index >= lg(arg_vector))
-    pari_err(talker, "missing arg %d for printf format '%s'", *index, save_fmt);
+    pari_err(e_MISC, "missing arg %d for printf format '%s'", *index, save_fmt);
   return gel(arg_vector, (*index)++);
 }
 
@@ -1062,7 +1062,7 @@ fmtreal(outString *S, GEN gvalue, int space, int signvalue, int FORMAT,
     sigd = get_sigd(gvalue, FORMAT, maxwidth);
     gvalue = gtofp(gvalue, ndec2prec(sigd));
     if (typ(gvalue) != t_REAL)
-      pari_err(talker,"impossible conversion to t_REAL: %Ps",gvalue);
+      pari_err(e_MISC,"impossible conversion to t_REAL: %Ps",gvalue);
   }
   if ((FORMAT == 'f' || FORMAT == 'F') && maxwidth >= 0)
     buf = absrtostr_width_frac(gvalue, maxwidth);
@@ -1100,7 +1100,7 @@ nextch:
         ch = *fmt++;
         switch(ch) {
           case 0:
-            pari_err(talker, "printf: end of format");
+            pari_err(e_MISC, "printf: end of format");
 /*------------------------------------------------------------------------
                              -- flags
 ------------------------------------------------------------------------*/
@@ -1151,7 +1151,7 @@ nextch:
           }
           case '.':
             if (pointflag)
-              pari_err(talker, "two '.' in conversion specification");
+              pari_err(e_MISC, "two '.' in conversion specification");
             pointflag = 1;
             goto nextch;
 /*------------------------------------------------------------------------
@@ -1159,16 +1159,16 @@ nextch:
 ------------------------------------------------------------------------*/
           case 'l':
             if (GENflag)
-              pari_err(talker, "P/l length modifiers in the same conversion");
+              pari_err(e_MISC, "P/l length modifiers in the same conversion");
             if (longflag)
-              pari_err(impl, "ll length modifier in printf");
+              pari_err(e_IMPL, "ll length modifier in printf");
             longflag = 1;
             goto nextch;
           case 'P':
             if (longflag)
-              pari_err(talker, "P/l length modifiers in the same conversion");
+              pari_err(e_MISC, "P/l length modifiers in the same conversion");
             if (GENflag)
-              pari_err(talker, "'P' length modifier appears twice");
+              pari_err(e_MISC, "'P' length modifier appears twice");
             GENflag = 1;
             goto nextch;
           case 'h': /* dummy: va_arg promotes short into int */
@@ -1289,7 +1289,7 @@ nextch:
             avma = av; break;
           }
           default:
-            pari_err(talker, "invalid conversion or specification %c in format `%s'", ch, save_fmt);
+            pari_err(e_MISC, "invalid conversion or specification %c in format `%s'", ch, save_fmt);
         } /* second switch on ch */
         break;
       default:
@@ -1743,7 +1743,7 @@ GENtoGENstr_nospace(GEN x)
 static char
 ltoc(long n) {
   if (n <= 0 || n > 255)
-    pari_err(talker, "out of range in integer -> character conversion (%ld)", n);
+    pari_err(e_MISC, "out of range in integer -> character conversion (%ld)", n);
   return (char)n;
 }
 static char
@@ -1888,7 +1888,7 @@ type_name(long t)
     case t_VECSMALL:s="t_VECSMALL";break;
     case t_CLOSURE: s="t_CLOSURE"; break;
     case t_ERROR:   s="t_ERROR";   break;
-    default: pari_err(talker,"unknown type %ld",t);
+    default: pari_err(e_MISC,"unknown type %ld",t);
       s = NULL; /* not reached */
   }
   return s;
@@ -2086,14 +2086,14 @@ print_functions_hash(const char *s)
   {
     m = functions_tblsz-1; n = atol(s);
     if (*s=='$') n = m;
-    if (m<n) pari_err(talker,"invalid range in print_functions_hash");
+    if (m<n) pari_err(e_MISC,"invalid range in print_functions_hash");
     while (isdigit((int)*s)) s++;
 
     if (*s++ != '-') m = n;
     else
     {
       if (*s !='$') m = minss(atol(s),m);
-      if (m<n) pari_err(talker,"invalid range in print_functions_hash");
+      if (m<n) pari_err(e_MISC,"invalid range in print_functions_hash");
     }
 
     for(; n<=m; n++)
@@ -2107,7 +2107,7 @@ print_functions_hash(const char *s)
   if (is_keyword_char((int)*s))
   {
     ep = is_entry_intern(s,functions_hash,&n);
-    if (!ep) pari_err(talker,"no such function");
+    if (!ep) pari_err(e_MISC,"no such function");
     print_entree(ep,n); return;
   }
   if (*s=='-')
@@ -2155,7 +2155,7 @@ static void
 do_append(char **sp, char c, char *last, int count)
 {
   if (*sp + count > last)
-    pari_err(talker, "TeX variable name too long");
+    pari_err(e_MISC, "TeX variable name too long");
   while (count--)
     *(*sp)++ = c;
 }
@@ -2167,9 +2167,9 @@ get_texvar(long v, char *buf, unsigned int len)
   char *t = buf, *e = buf + len - 1;
   const char *s;
 
-  if (!ep) pari_err(talker, "this object uses debugging variables");
+  if (!ep) pari_err(e_MISC, "this object uses debugging variables");
   s = ep->name;
-  if (strlen(s) >= len) pari_err(talker, "TeX variable name too long");
+  if (strlen(s) >= len) pari_err(e_MISC, "TeX variable name too long");
   while (isalpha((int)*s)) *t++ = *s++;
   *t = 0;
   if (isdigit((int)*s) || *s == '_') {
@@ -3160,7 +3160,7 @@ pari_fclose(pariFILE *f)
 static pariFILE *
 pari_open_file(FILE *f, const char *s, const char *mode)
 {
-  if (!f) pari_err(talker, "could not open requested file %s", s);
+  if (!f) pari_err(e_MISC, "could not open requested file %s", s);
   if (DEBUGFILES)
     err_printf("I/O: opening file %s (mode %s)\n", s, mode);
   return newfile(f,s,0);
@@ -3186,7 +3186,7 @@ pari_safefopen(const char *s, const char *mode)
 {
   long fd = open(s, O_CREAT|O_EXCL|O_RDWR, S_IRUSR|S_IWUSR);
 
-  if (fd == -1) pari_err(talker,"tempfile %s already exists",s);
+  if (fd == -1) pari_err(e_MISC,"tempfile %s already exists",s);
   return pari_open_file(fdopen(fd, mode), s, mode);
 }
 #else
@@ -3328,7 +3328,7 @@ pariFILE *
 try_pipe(const char *cmd, int fl)
 {
 #ifndef HAVE_PIPES
-  pari_err(archer); return NULL;
+  pari_err(e_ARCH); return NULL;
 #else
   FILE *file;
   const char *f;
@@ -3339,7 +3339,7 @@ try_pipe(const char *cmd, int fl)
   {
     pari_sp av = avma;
     char *s;
-    if (flag & mf_OUT) pari_err(archer);
+    if (flag & mf_OUT) pari_err(e_ARCH);
     f = pari_unique_filename("pipe");
     s = stackmalloc(strlen(cmd)+strlen(f)+4);
     sprintf(s,"%s > %s",cmd,f);
@@ -3356,7 +3356,7 @@ try_pipe(const char *cmd, int fl)
     }
     f = cmd;
   }
-  if (!file) pari_err(talker,"[pipe:] '%s' failed",cmd);
+  if (!file) pari_err(e_MISC,"[pipe:] '%s' failed",cmd);
   return newfile(file, f, mf_PIPE|flag);
 #endif
 }
@@ -3409,7 +3409,7 @@ os_open(const char *s, int mode)
 #ifdef WINCE
   HANDLE h;
   short ws[256];
-  if (mode != O_RDONLY) pari_err(impl,"generic open for Windows");
+  if (mode != O_RDONLY) pari_err(e_IMPL,"generic open for Windows");
   MultiByteToWideChar(CP_ACP, 0, s, strlen(s)+1, ws, 256);
   h = CreateFile(ws,GENERIC_READ,FILE_SHARE_READ,NULL,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,NULL);
   fd = (h == INVALID_HANDLE_VALUE)? (long)-1: (long)h;
@@ -3781,9 +3781,9 @@ switchin_last(void)
 {
   char *s = last_filename;
   FILE *file;
-  if (!s) pari_err(talker,"You never gave me anything to read!");
+  if (!s) pari_err(e_MISC,"You never gave me anything to read!");
   file = try_open(s);
-  if (!file) pari_err(openfiler,"input",s);
+  if (!file) pari_err(e_FILE,"input",s);
   return pari_infile = pari_get_infile(s,file)->file;
 }
 
@@ -3827,7 +3827,7 @@ switchin(const char *name)
       if ((f = try_name(t))) return f;
     }
   }
-  pari_err(openfiler,"input",name);
+  pari_err(e_FILE,"input",name);
   return NULL; /*not reached*/
 }
 
@@ -3848,12 +3848,12 @@ switchout(const char *name)
       if (f)
       {
         if (is_magic_ok(f))
-          pari_err(talker,"%s is a GP binary file. Please use writebin", name);
+          pari_err(e_MISC,"%s is a GP binary file. Please use writebin", name);
         fclose(f);
       }
     }
     f = fopen(name, "a");
-    if (!f) pari_err(openfiler,"output",name);
+    if (!f) pari_err(e_FILE,"output",name);
     pari_outfile = f;
   }
   else if (pari_outfile != stdout)
@@ -3869,9 +3869,9 @@ switchout(const char *name)
 /**                                                               **/
 /*******************************************************************/
 #define _fwrite(a,b,c,d) \
-  if (fwrite((a),(b),(c),(d)) < (c)) pari_err(talker,"write failed")
+  if (fwrite((a),(b),(c),(d)) < (c)) pari_err(e_MISC,"write failed")
 #define _fread(a,b,c,d) \
-  if (fread((a),(b),(c),(d)) < (c)) pari_err(talker,"read failed")
+  if (fread((a),(b),(c),(d)) < (c)) pari_err(e_MISC,"read failed")
 #define _lfread(a,b,c) _fread((a),sizeof(long),(b),(c))
 #define _cfread(a,b,c) _fread((a),sizeof(char),(b),(c))
 #define _lfwrite(a,b,c) _fwrite((a),sizeof(long),(b),(c))
@@ -3974,7 +3974,7 @@ readobj(FILE *f, int *ptc)
     case VAR_GEN:
     {
       char *s = rdstr(f);
-      if (!s) pari_err(talker,"malformed binary file (no name)");
+      if (!s) pari_err(e_MISC,"malformed binary file (no name)");
       if (c == NAM_GEN)
       {
         x = rdGEN(f);
@@ -3989,7 +3989,7 @@ readobj(FILE *f, int *ptc)
       break;
     }
     case EOF: break;
-    default: pari_err(talker,"unknown code in readobj");
+    default: pari_err(e_MISC,"unknown code in readobj");
   }
   *ptc = c; return x;
 }
@@ -4068,10 +4068,10 @@ writebin(const char *name, GEN x)
   if (f) {
     int ok = check_magic(name,f);
     fclose(f);
-    if (!ok) pari_err(openfiler,"binary output",name);
+    if (!ok) pari_err(e_FILE,"binary output",name);
   }
   f = fopen(name,"a");
-  if (!f) pari_err(openfiler,"binary output",name);
+  if (!f) pari_err(e_FILE,"binary output",name);
   if (!already) write_magic(f);
 
   if (x) writeGEN(x,f);
@@ -4273,10 +4273,10 @@ void
 error0(GEN g)
 {
   if (lg(g)==2 && typ(gel(g,1))==t_ERROR) pari_err(0, gel(g,1));
-  else pari_err(user, g);
+  else pari_err(e_USER, g);
 }
 
-void warning0(GEN g) { pari_warn(user, g); }
+void warning0(GEN g) { pari_warn(e_USER, g); }
 
 static char *
 wr_check(const char *s) {
@@ -4334,7 +4334,7 @@ gp_history(gp_hist *H, long p, char *old, char *entry)
   GEN z;
 
   if (!t)
-    pari_err(old?syntaxer:talker,"The result history is empty", old, entry);
+    pari_err(old?e_SYNTAX:e_MISC,"The result history is empty", old, entry);
 
   if (p <= 0) p += t; /* count |p| entries starting from last */
   if (p <= 0 || p <= (long)(t - s) || (ulong)p > t)
@@ -4343,14 +4343,14 @@ gp_history(gp_hist *H, long p, char *old, char *entry)
     long pmin = (long)(t - s) + 1;
     if (pmin <= 0) pmin = 1;
     sprintf(str, "History result %%%ld not available [%%%ld-%%%lu]", p,pmin,t);
-    pari_err(syntaxer, str, old, entry);
+    pari_err(e_SYNTAX, str, old, entry);
   }
   z = H->res[ (p-1) % s ];
   if (!z)
   {
     char *str = stackmalloc(128);
     sprintf(str, "History result %%%ld has been deleted (histsize changed)", p);
-    pari_err(syntaxer, str, old, entry);
+    pari_err(e_SYNTAX, str, old, entry);
   }
   return z;
 }
@@ -4555,7 +4555,7 @@ pari_unique_filename(const char *s)
 {
   char *buf = init_unique(s);
   if (pari_file_exists(buf) && !get_file(buf, pari_file_exists))
-    pari_err(talker,"couldn't find a suitable name for a tempfile (%s)",s);
+    pari_err(e_MISC,"couldn't find a suitable name for a tempfile (%s)",s);
   return buf;
 }
 
@@ -4568,6 +4568,6 @@ pari_unique_dir(const char *s)
 {
   char *buf = init_unique(s);
   if (pari_dir_exists(buf) && !get_file(buf, pari_dir_exists))
-    pari_err(talker,"couldn't find a suitable name for a tempdir (%s)",s);
+    pari_err(e_MISC,"couldn't find a suitable name for a tempdir (%s)",s);
   return buf;
 }

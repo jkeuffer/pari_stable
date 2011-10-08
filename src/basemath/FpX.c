@@ -251,7 +251,7 @@ FpX_divrem(GEN x, GEN y, GEN p, GEN *pr)
   pari_sp av0, av;
   GEN z,p1,rem,lead;
 
-  if (!signe(y)) pari_err(gdiver);
+  if (!signe(y)) pari_err(e_INV);
   vx = varn(x);
   dy = degpol(y);
   dx = degpol(x);
@@ -1039,7 +1039,7 @@ FpXQ_inv(GEN x,GEN T,GEN p)
 {
   pari_sp av = avma;
   GEN U = FpXQ_invsafe(x, T, p);
-  if (!U) pari_err(gdiver);
+  if (!U) pari_err(e_INV);
   return gerepileupto(av, U);
 }
 

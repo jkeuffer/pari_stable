@@ -86,10 +86,10 @@ dirzetak(GEN nf, GEN b)
   GEN z, c;
   long n;
 
-  if (typ(b) != t_INT) pari_err(typeer,"dirzetak",b);
+  if (typ(b) != t_INT) pari_err(e_TYPE,"dirzetak",b);
   if (signe(b) <= 0) return cgetg(1,t_VEC);
   nf = checknf(nf);
-  n = itos_or_0(b); if (!n) pari_err(talker,"too many terms in dirzetak");
+  n = itos_or_0(b); if (!n) pari_err(e_MISC,"too many terms in dirzetak");
   c = dirzetak0(nf, n);
   z = vecsmall_to_vec(c); pari_free(c); return z;
 }
@@ -121,7 +121,7 @@ zeta_get_N0(GEN C,  GEN limx)
   pari_sp av = avma;
   GEN z = gcvtoi(gdiv(C, limx), &e); /* avoid truncation error */
   if (e >= 0 || is_bigint(z))
-    pari_err(talker, "need %Ps coefficients in initzeta: computation impossible", z);
+    pari_err(e_MISC, "need %Ps coefficients in initzeta: computation impossible", z);
   if (DEBUGLEVEL>1) err_printf("\ninitzeta: N0 = %Ps\n", z);
   avma = av; return itos(z);
 }
@@ -569,16 +569,16 @@ gzetakall(GEN znf, GEN s, long flag, long prec)
   GEN z;
 
   if (typ(znf)!=t_VEC || lg(znf)!=10 || typ(znf[1]) != t_VECSMALL)
-    pari_err(talker,"not a zeta number field in zetakall");
+    pari_err(e_MISC,"not a zeta number field in zetakall");
   if (isint(s, &s))
   {
     long ss = itos(s), r1, r2;
-    if (ss==1) pari_err(talker,"s = 1 is a pole (gzetakall)");
+    if (ss==1) pari_err(e_MISC,"s = 1 is a pole (gzetakall)");
     znf_get_sign(znf, &r1, &r2);
     if (ss==0)
     {
       avma = av;
-      if (flag) pari_err(talker,"s = 0 is a pole (gzetakall)");
+      if (flag) pari_err(e_MISC,"s = 0 is a pole (gzetakall)");
       if (r1 + r2 > 1) return gen_0;
       return r1? mkfrac(gen_m1, gen_2): gneg(gel(znf, 2));
     }

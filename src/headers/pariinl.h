@@ -677,7 +677,7 @@ vecsplice(GEN a, long j)
 {
   long i, k, l = lg(a);
   GEN b;
-  if (l == 1) pari_err(talker, "incorrect component in vecsplice");
+  if (l == 1) pari_err(e_MISC, "incorrect component in vecsplice");
   b = cgetg(l-1, typ(a));
   for (i = k = 1; i < l; i++)
     if (i != j) gel(b, k++) = gel(a,i);
@@ -858,7 +858,7 @@ pari_malloc(size_t size)
     BLOCK_SIGINT_START;
     tmp = (char*)malloc(size);
     BLOCK_SIGINT_END;
-    if (!tmp) pari_err(memer);
+    if (!tmp) pari_err(e_MEM);
     return tmp;
   }
   if (DEBUGMEM) pari_warn(warner,"mallocing NULL object");
@@ -873,7 +873,7 @@ pari_realloc(void *pointer, size_t size)
   if (!pointer) tmp = (char *) malloc(size);
   else tmp = (char *) realloc(pointer,size);
   BLOCK_SIGINT_END;
-  if (!tmp) pari_err(memer);
+  if (!tmp) pari_err(e_MEM);
   return tmp;
 }
 INLINE void*
@@ -1054,7 +1054,7 @@ cxcompotor(GEN z, long prec)
     case t_INT:  return itor(z, prec);
     case t_FRAC: return fractor(z, prec);
     case t_REAL: return rtor(z, prec);
-    default: pari_err(typeer,"cxcompotor",z); return NULL; /* not reached */
+    default: pari_err(e_TYPE,"cxcompotor",z); return NULL; /* not reached */
   }
 }
 INLINE GEN
@@ -1075,7 +1075,7 @@ gtodouble(GEN x)
 }
 INLINE long
 gtos(GEN x) {
-  if (typ(x) != t_INT) pari_err(talker,"gtos expected an integer, got '%Ps'",x);
+  if (typ(x) != t_INT) pari_err(e_MISC,"gtos expected an integer, got '%Ps'",x);
   return itos(x);
 }
 
@@ -1110,7 +1110,7 @@ gtofp(GEN z, long prec)
       return cxtofp(z, prec);
     }
     case t_QUAD: return quadtofp(z, prec);
-    default: pari_err(typeer,"gtofp",z); return NULL; /* not reached */
+    default: pari_err(e_TYPE,"gtofp",z); return NULL; /* not reached */
   }
 }
 
@@ -1168,7 +1168,7 @@ affgr(GEN x, GEN y)
     case t_REAL: affrr(x,y); break;
     case t_FRAC: rdiviiz(gel(x,1),gel(x,2), y); break;
     case t_QUAD: av = avma; affgr(quadtofp(x,realprec(y)), y); avma = av; break;
-    default: pari_err(operf,"",x,y);
+    default: pari_err(e_TYPE2,"",x,y);
   }
 }
 
@@ -1361,7 +1361,7 @@ INLINE GEN
 Fp_inv(GEN a, GEN m)
 {
   GEN res;
-  if (! invmod(a,m,&res)) pari_err(invmoder, gmodulo(res,m));
+  if (! invmod(a,m,&res)) pari_err(e_INTMOD, gmodulo(res,m));
   return res;
 }
 INLINE GEN
@@ -2154,7 +2154,7 @@ bnf_get_tuN(GEN bnf) { return gmael3(bnf,8,4,1)[2]; }
 INLINE GEN
 bnf_get_fu(GEN bnf) {
   GEN fu = bnf_get_fu_nocheck(bnf);
-  if (typ(fu) == t_MAT) pari_err(talker,"missing units in bnf");
+  if (typ(fu) == t_MAT) pari_err(e_MISC,"missing units in bnf");
   return fu;
 }
 INLINE GEN
@@ -2180,7 +2180,7 @@ INLINE GEN
 bnr_get_gen(GEN bnr) {
   GEN G = bnr_get_clgp(bnr);
   if (lg(G) !=  4)
-    pari_err(talker,"missing bnr generators: please use bnrinit(,,1)");
+    pari_err(e_MISC,"missing bnr generators: please use bnrinit(,,1)");
   return gel(G,3);
 }
 
@@ -2197,7 +2197,7 @@ bid_get_gen_nocheck(GEN bid) { return gmael(bid,2,3); }
 INLINE GEN
 bid_get_gen(GEN bid) {
   GEN G = gel(bid, 2);
-  if (lg(G) != 4) pari_err(talker,"missing bid generators. Use idealstar(,,2)");
+  if (lg(G) != 4) pari_err(e_MISC,"missing bid generators. Use idealstar(,,2)");
   return gel(G,3);
 }
 INLINE GEN

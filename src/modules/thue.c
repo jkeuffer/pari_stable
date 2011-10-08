@@ -154,7 +154,7 @@ T_A_Matrices(GEN MatFU, long r, GEN *eps5, long prec)
   m1 = rowslice(vecslice(MatFU, 1,r), 1,r); /* minor order r */
   m1 = logabs(m1, 3);
 
-  A = RgM_inv(m1); if (!A) pari_err(precer,"thue");
+  A = RgM_inv(m1); if (!A) pari_err(e_PREC,"thue");
   IntM = RgM_Rg_add(RgM_mul(A,m1), gen_m1);
 
   eps2 = gadd(vecmax(gabs(IntM, 3)), real2n(-e, LOWDEFAULTPREC)); /* t_REAL */
@@ -163,7 +163,7 @@ T_A_Matrices(GEN MatFU, long r, GEN *eps5, long prec)
 
   /* Check for the precision in matrix inversion. See paper, Lemma 2.4.2. */
   p1 = addrr(mulsr(r, gmul2n(nia, e)), eps2); /* t_REAL */
-  if (expo(p1) < -2*r) pari_err(precer,"thue");
+  if (expo(p1) < -2*r) pari_err(e_PREC,"thue");
 
   p1 = addrr(mulsr(r, gmul2n(nia,-e)), eps2);
   eps3 = mulrr(mulsr(2*r*r,nia), p1);
@@ -194,7 +194,7 @@ inithue(GEN P, GEN bnf, long flag, long prec)
 
   if (!bnf)
   {
-    if (!gequal1(leading_term(P))) pari_err(talker,"non-monic polynomial in thue");
+    if (!gequal1(leading_term(P))) pari_err(e_MISC,"non-monic polynomial in thue");
     bnf = Buchall(P, nf_FORCE, DEFAULTPREC);
     if (flag) (void)bnfcertify(bnf);
     else
@@ -524,7 +524,7 @@ MiddleSols(GEN *pS, GEN bound, GEN roo, GEN poly, GEN rhs, long s, GEN c1)
           if (odd(d))  add_sol(pS, negi(p), negi(q));
       }
     }
-    if (j == lg(t)) pari_err(bugparier, "Short continued fraction in thue");
+    if (j == lg(t)) pari_err(e_BUG, "Short continued fraction in thue");
   }
   return bndcf;
 }
@@ -628,8 +628,8 @@ thueinit(GEN pol, long flag, long prec)
   long k, s, lfa, dpol = degpol(pol);
 
   if (checktnf(pol)) { bnf = checkbnf(gel(pol,2)); pol = gel(pol,1); }
-  if (typ(pol)!=t_POL) pari_err(typeer,"thueinit",pol);
-  if (dpol <= 0) pari_err(constpoler,"thueinit");
+  if (typ(pol)!=t_POL) pari_err(e_TYPE,"thueinit",pol);
+  if (dpol <= 0) pari_err(e_CONSTPOL,"thueinit");
   RgX_check_ZX(pol, "thueinit");
   if (varn(pol)) { pol = leafcopy(pol); setvarn(pol, 0); }
   /* POL monic: POL(x) = C pol(x/L), L integer */
@@ -664,7 +664,7 @@ thueinit(GEN pol, long flag, long prec)
     return gerepilecopy(av, tnf);
   }
 
-  if (dpol <= 2) pari_err(talker,"invalid polynomial in thue (need deg>2)");
+  if (dpol <= 2) pari_err(e_MISC,"invalid polynomial in thue (need deg>2)");
   s = sturm(pol);
   if (s)
   {
@@ -779,7 +779,7 @@ get_B0(long i1, GEN Delta, GEN Lambda, GEN eps5, long prec, baker_s *BS)
     i2++; if (i2 == i1) i2++;
     if (i2 > BS->r) break;
   }
-  pari_err(bugparier,"thue (totally rational case)");
+  pari_err(e_BUG,"thue (totally rational case)");
   return NULL; /* not reached */
 }
 
@@ -829,7 +829,7 @@ get_Bx_LLL(long i1, GEN Delta, GEN Lambda, GEN eps5, long prec, baker_s *BS)
     i2++; if (i2 == i1) i2++;
     if (i2 > BS->r) break;
   }
-  pari_err(bugparier,"thue (totally rational case)");
+  pari_err(e_BUG,"thue (totally rational case)");
   return NULL; /* not reached */
 }
 
@@ -851,7 +851,7 @@ LargeSols(GEN P, GEN tnf, GEN rhs, GEN ne, GEN *pS)
       if (!is_pm1(gel(csts, 7)) && !is_pm1(bnf_get_no(bnf)) && !is_pm1(rhs))
         pari_warn(warner, "The result returned by 'thue' is conditional on the GRH");
   }
-  else if (typ(ne) != t_VEC) pari_err(typeer, "thue",ne);
+  else if (typ(ne) != t_VEC) pari_err(e_TYPE, "thue",ne);
   if (lg(ne)==1) return NULL;
 
   nf_get_sign(bnf_get_nf(bnf), &s, &t);
@@ -1037,8 +1037,8 @@ thue(GEN tnf, GEN rhs, GEN ne)
   pari_sp av = avma;
   GEN POL, C, L, x3, S;
 
-  if (!checktnf(tnf)) pari_err(talker,"not a tnf in thue");
-  if (typ(rhs) != t_INT) pari_err(typeer,"thue",rhs);
+  if (!checktnf(tnf)) pari_err(e_MISC,"not a tnf in thue");
+  if (typ(rhs) != t_INT) pari_err(e_TYPE,"thue",rhs);
 
   /* solve P(x,y) = rhs <=> POL(L x, y) = C rhs, with POL monic in Z[X] */
   POL = gel(tnf,1);
@@ -1070,7 +1070,7 @@ thue(GEN tnf, GEN rhs, GEN ne)
     GEN P, D, v = gmael(tnf, 2, 1), R = gmael(tnf, 2, 2);
     long i, l, degf = v[1], e = v[2], va = v[3], vb = v[4];
     if (!signe(rhs)) {
-      if (degf == 1) pari_err(talker,"infinitely many solutions in thue");
+      if (degf == 1) pari_err(e_MISC,"infinitely many solutions in thue");
       avma = av; return cgetg(1, t_VEC);
     }
     P = cgetg(lg(POL), t_POL); P[1] = POL[1];
@@ -1329,7 +1329,7 @@ bnfisintnormabs(GEN bnf, GEN a)
   GEN nf, res, PR;
   long i;
 
-  if (typ(a) != t_INT) pari_err(typeer,"bnfisintnormabs",a);
+  if (typ(a) != t_INT) pari_err(e_TYPE,"bnfisintnormabs",a);
   bnf = checkbnf(bnf); nf = bnf_get_nf(bnf);
   if (!signe(a)) return mkvec(gen_0);
   if (is_pm1(a)) return mkvec(gen_1);

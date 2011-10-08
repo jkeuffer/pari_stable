@@ -184,7 +184,7 @@ gram_matrix(GEN x)
 {
   long i,j, lx = lg(x), tx = typ(x);
   GEN g;
-  if (!is_matvec_t(tx)) pari_err(typeer,"gram",x);
+  if (!is_matvec_t(tx)) pari_err(e_TYPE,"gram",x);
   g = cgetg(lx,t_MAT);
   for (i=1; i<lx; i++)
   {
@@ -439,7 +439,7 @@ choose_params(GEN P, GEN N, GEN X, GEN B, long *pdelta, long *pt)
   long delta, t;
   tau = gtodouble(glog(X, DEFAULTPREC)) / logN;
   beta = gtodouble(glog(B, DEFAULTPREC)) / logN;
-  if (tau >= beta * beta / d) pari_err(talker, "bound too large");
+  if (tau >= beta * beta / d) pari_err(e_MISC, "bound too large");
   /* TODO : remove P0 completely ! */
   rho = gtodouble(glog(P0, DEFAULTPREC)) / logN;
 
@@ -487,13 +487,13 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
 
   pari_sp av = avma;
 
-  if (typ(P0) != t_POL) pari_err(typeer, "zncoppersmith",P0);
-  if (typ(N) != t_INT) pari_err(typeer, "zncoppersmith",N);
+  if (typ(P0) != t_POL) pari_err(e_TYPE, "zncoppersmith",P0);
+  if (typ(N) != t_INT) pari_err(e_TYPE, "zncoppersmith",N);
   if (typ(X) != t_INT) {
     X = gfloor(X);
-    if (typ(X) != t_INT) pari_err(typeer, "zncoppersmith",X);
+    if (typ(X) != t_INT) pari_err(e_TYPE, "zncoppersmith",X);
   }
-  if (signe(X) < 0) pari_err(talker, "negative bound in zncoppersmith");
+  if (signe(X) < 0) pari_err(e_MISC, "negative bound in zncoppersmith");
   if (!B) B = N;
   if (typ(B) != t_INT) B = gceil(B);
 
@@ -505,7 +505,7 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
 
   P = leafcopy(P0); d = degpol(P);
   if (d == 0) { avma = av; return cgetg(1, t_VEC); }
-  if (d < 0) pari_err(talker, "zero polynomial forbidden");
+  if (d < 0) pari_err(e_MISC, "zero polynomial forbidden");
 
   if (!gequal1(gel(P,d+2)))
   {
@@ -644,9 +644,9 @@ lindep2(GEN x, long bit)
   pari_sp av = avma;
   GEN re, im, M;
 
-  if (! is_vec_t(tx)) pari_err(typeer,"lindep2",x);
+  if (! is_vec_t(tx)) pari_err(e_TYPE,"lindep2",x);
   if (lx<=2) return cgetg(1,t_COL);
-  if (bit < 0) pari_err(talker, "negative accuracy in lindep2");
+  if (bit < 0) pari_err(e_MISC, "negative accuracy in lindep2");
   if (!bit)
   {
     bit = gprecision(x);
@@ -694,7 +694,7 @@ lindep(GEN x)
   if (!prec) prec = DEFAULTPREC;
   EXP = 2*n - prec2nbits(prec);
 
-  if (! is_vec_t(typ(x))) pari_err(typeer,"lindep",x);
+  if (! is_vec_t(typ(x))) pari_err(e_TYPE,"lindep",x);
   if (n <= 1) return cgetg(1,t_COL);
   x = RgC_gtofp(x, prec);
   re = real_i(x);
@@ -702,7 +702,7 @@ lindep(GEN x)
   /* independent over R ? */
   if (n == 2 && real_indep(re,im,prec2nbits(prec)))
     { avma = av; return cgetg(1, t_COL); }
-  if (EXP > -10) pari_err(precer,"lindep");
+  if (EXP > -10) pari_err(e_PREC,"lindep");
 
   qzer = cgetg(lx, t_VECSMALL);
   b = matid(n);
@@ -775,7 +775,7 @@ lindep(GEN x)
     }
     i = j; k = i+1;
     avma = av1; r = grndtoi(gmael(m,k,i), &e);
-    if (e >= 0) pari_err(precer,"lindep");
+    if (e >= 0) pari_err(e_PREC,"lindep");
     togglesign_safe(&r);
     ZC_lincomb1_inplace(gel(b,k), gel(b,i), r);
     swap(gel(b,k), gel(b,i));
@@ -1007,7 +1007,7 @@ init_pslq(pslq_M *M, GEN x, long *PREC)
   long tx = typ(x), lx = lg(x), n = lx-1, i, j, k, prec;
   GEN s1, s, sinv;
 
-  if (! is_vec_t(tx)) pari_err(typeer,"pslq",x);
+  if (! is_vec_t(tx)) pari_err(e_TYPE,"pslq",x);
   /* check trivial cases */
   for (k = 1; k <= n; k++)
     if (gequal0(gel(x,k))) return col_ei(n, k);
@@ -1487,7 +1487,7 @@ RESTART:
         {
           if (ctpro == 1) goto DOGEN;
           storeprecdoubles(&Mbar, &Mbarst); /* restore */
-          if (! applybar(&M, &Mbar, Abargen,Bbargen)) pari_err(bugparier,"pslqL2");
+          if (! applybar(&M, &Mbar, Abargen,Bbargen)) pari_err(e_BUG,"pslqL2");
           if ( (p1 = checkend(&M, prec)) ) return gerepilecopy(av0, p1);
           goto RESTART;
         }
@@ -1519,9 +1519,9 @@ plindep(GEN x)
     j = precp(p1); if (j < prec) prec = j;
     if (!p) p = gel(p1,2);
     else if (!equalii(p, gel(p1,2)))
-      pari_err(talker,"inconsistent primes in plindep");
+      pari_err(e_MISC,"inconsistent primes in plindep");
   }
-  if (!p) pari_err(talker,"not a p-adic vector in plindep");
+  if (!p) pari_err(e_MISC,"not a p-adic vector in plindep");
   v = ggval(x,p); pn = powiu(p,prec);
   if (v != 0) x = gmul(x, powis(p, -v));
   x = RgV_to_FpV(x, pn);
@@ -1543,7 +1543,7 @@ GEN
 lindep0(GEN x,long bit)
 {
   long i, tx = typ(x);
-  if (! is_vec_t(tx) && tx != t_MAT) pari_err(typeer,"lindep",x);
+  if (! is_vec_t(tx) && tx != t_MAT) pari_err(e_TYPE,"lindep",x);
   for (i = 1; i < lg(x); i++)
     if (typ(gel(x,i)) == t_PADIC) return plindep(x);
   switch (bit)
@@ -1563,13 +1563,13 @@ algdep0(GEN x, long n, long bit)
   pari_sp av;
   GEN y;
 
-  if (! is_scalar_t(tx)) pari_err(typeer,"algdep0",x);
+  if (! is_scalar_t(tx)) pari_err(e_TYPE,"algdep0",x);
   if (tx==t_POLMOD) { y = gcopy(gel(x,1)); setvarn(y,0); return y; }
   if (gequal0(x)) return pol_x(0);
   if (n <= 0)
   {
     if (!n) return gen_1;
-    pari_err(talker,"negative polynomial degree in algdep");
+    pari_err(e_MISC,"negative polynomial degree in algdep");
   }
 
   av = avma; y = cgetg(n+2,t_COL);
@@ -1583,7 +1583,7 @@ algdep0(GEN x, long n, long bit)
     y = lindep0(y, bit);
     if (typ(y) == t_REAL) return gerepileupto(av, y);
   }
-  if (lg(y) < 2) pari_err(talker,"higher degree than expected in algdep");
+  if (lg(y) < 2) pari_err(e_MISC,"higher degree than expected in algdep");
   y = RgV_to_RgX(y, 0);
   if (gsigne(leading_term(y)) > 0) return gerepilecopy(av, y);
   return gerepileupto(av, RgX_neg(y));
@@ -1672,18 +1672,18 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
   const double eps = 1e-10;
   int stockall = 0;
 
-  if (typ(a) != t_MAT || !RgM_is_ZM(a)) pari_err(typeer,"qfminim0",a);
+  if (typ(a) != t_MAT || !RgM_is_ZM(a)) pari_err(e_TYPE,"qfminim0",a);
   if (!BORNE)
     sBORNE = 0;
   else
   {
     BORNE = gfloor(BORNE);
-    if (typ(BORNE) != t_INT) pari_err(typeer, "minim0",BORNE);
+    if (typ(BORNE) != t_INT) pari_err(e_TYPE, "minim0",BORNE);
     sBORNE = itos(BORNE); avma = av;
     BORNE = NULL; /* no longer used */
   }
   if (!STOCKMAX) stockall = 1;
-  else if (typ(STOCKMAX) != t_INT) pari_err(typeer, "minim0",STOCKMAX);
+  else if (typ(STOCKMAX) != t_INT) pari_err(e_TYPE, "minim0",STOCKMAX);
 
   maxrank = 0; L = V = invp = NULL; /* gcc -Wall */
   switch(flag)
@@ -1711,14 +1711,14 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
   av1 = avma;
 
   u = lllgramint(a);
-  if (lg(u) != n) pari_err(talker,"not a definite form in minim0");
+  if (lg(u) != n) pari_err(e_MISC,"not a definite form in minim0");
   a = qf_apply_ZM(a,u);
 
   n--;
   r = qfgaussred_positive(RgM_gtofp(a, DEFAULTPREC));
   if (!r) {
     r = qfgaussred_positive(a); /* exact computation */
-    if (!r) pari_err(talker,"not a positive definite form in minim0");
+    if (!r) pari_err(e_MISC,"not a positive definite form in minim0");
     r = RgM_gtofp(r, DEFAULTPREC);
   }
   for (j=1; j<=n; j++)
@@ -1743,13 +1743,13 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
   else
     maxnorm = 0.;
   BOUND = sBORNE * (1 + eps);
-  if ((long)BOUND != sBORNE) pari_err(precer, "qfminim");
+  if ((long)BOUND != sBORNE) pari_err(e_PREC, "qfminim");
 
   switch(flag)
   {
     case min_ALL:
       maxrank = stockall? 200: itos(STOCKMAX);
-      if (maxrank < 0) pari_err(talker,"negative number of vectors in minim0");
+      if (maxrank < 0) pari_err(e_MISC,"negative number of vectors in minim0");
       L = new_chunk(1+maxrank);
       break;
     case min_PERF:
@@ -1895,16 +1895,16 @@ qfminim0(GEN a, GEN borne, GEN stockmax, long flag, long prec)
     case 2:
     {
       long maxnum = -1;
-      if (typ(a) != t_MAT) pari_err(typeer,"qfminim",a);
+      if (typ(a) != t_MAT) pari_err(e_TYPE,"qfminim",a);
       if (stockmax) {
-        if (typ(stockmax) != t_INT) pari_err(typeer,"qfminim",stockmax);
+        if (typ(stockmax) != t_INT) pari_err(e_TYPE,"qfminim",stockmax);
         maxnum = itos(stockmax);
       }
       a = fincke_pohst(a,borne,maxnum,prec,NULL);
-      if (!a) pari_err(precer,"qfminim");
+      if (!a) pari_err(e_PREC,"qfminim");
       return a;
     }
-    default: pari_err(flagerr,"qfminim");
+    default: pari_err(e_FLAG,"qfminim");
   }
   return NULL; /* not reached */
 }
@@ -2247,7 +2247,7 @@ fincke_pohst(GEN a, GEN B0, long stockmax, long PREC, FP_chk_fun *CHECK)
     l = lg(a);
     if (l == 1)
     {
-      if (CHECK) pari_err(talker, "dimension 0 in fincke_pohst");
+      if (CHECK) pari_err(e_MISC, "dimension 0 in fincke_pohst");
       retmkvec3(gen_0, gen_0, cgetg(1,t_MAT));
     }
     u = lllfp(a, 0.75, LLL_GRAM);
@@ -2292,11 +2292,11 @@ fincke_pohst(GEN a, GEN B0, long stockmax, long PREC, FP_chk_fun *CHECK)
   for (i=1; i<l; i++) { uperm[l-i] = u[perm[i]]; rperm[l-i] = r[perm[i]]; }
   u = uperm;
   r = rperm; res = NULL;
-  CATCH(precer) { }
+  CATCH(e_PREC) { }
   TRY {
     if (CHECK && CHECK->f_init) bound = CHECK->f_init(CHECK, r, u);
     r = Q_from_QR(r, gprecision(vnorm));
-    if (!r) pari_err(precer,"fincke_pohst");
+    if (!r) pari_err(e_PREC,"fincke_pohst");
     res = smallvectors(r, bound, stockmax, CHECK);
   } ENDCATCH;
   if (CHECK)
@@ -2304,7 +2304,7 @@ fincke_pohst(GEN a, GEN B0, long stockmax, long PREC, FP_chk_fun *CHECK)
     if (CHECK->f_post) res = CHECK->f_post(CHECK, res, u);
     return res;
   }
-  if (!res) pari_err(precer,"fincke_pohst");
+  if (!res) pari_err(e_PREC,"fincke_pohst");
 
   z = cgetg(4,t_VEC);
   gel(z,1) = gcopy(gel(res,1));

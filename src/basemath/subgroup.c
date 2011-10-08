@@ -368,7 +368,7 @@ dopsub(subgp_iter *T, GEN p, GEN indexsubq)
         if (!equaliu(p1,T->countsub))
         {
           err_printf("  alpha = %Ps\n",p1);
-          pari_err(bugparier,"forsubgroup (alpha != countsub)");
+          pari_err(e_BUG,"forsubgroup (alpha != countsub)");
         }
       }
     }
@@ -387,19 +387,19 @@ parse_bound(subgp_iter *T)
     break;
   case t_VEC: /* exact value */
     b = gel(B,1);
-    if (lg(B) != 2 || typ(b) != t_INT) pari_err(typeer,"subgroup", B);
+    if (lg(B) != 2 || typ(b) != t_INT) pari_err(e_TYPE,"subgroup", B);
     T->boundtype = b_EXACT;
     T->bound = b;
     break;
   case t_COL: /* exact type */
-    pari_err(impl,"exact type in subgrouplist");
-    if (lg(B) > len(T->L)+1) pari_err(typeer,"subgroup",B);
+    pari_err(e_IMPL,"exact type in subgrouplist");
+    if (lg(B) > len(T->L)+1) pari_err(e_TYPE,"subgroup",B);
     T->boundtype = b_TYPE;
     break;
-  default: pari_err(typeer,"subgroup",B);
+  default: pari_err(e_TYPE,"subgroup",B);
   }
   if (signe(T->bound) <= 0)
-    pari_err(talker,"subgroup: index bound must be positive");
+    pari_err(e_MISC,"subgroup: index bound must be positive");
 }
 
 static GEN
@@ -438,12 +438,12 @@ subgroup_engine(subgp_iter *T)
 
   if (typ(cyc) != t_VEC)
   {
-    if (typ(cyc) != t_MAT) pari_err(typeer,"forsubgroup",cyc);
+    if (typ(cyc) != t_MAT) pari_err(e_TYPE,"forsubgroup",cyc);
     cyc = RgM_diagonal_shallow(cyc);
   }
   for (i=1; i<n-1; i++)
     if (!dvdii(gel(cyc,i), gel(cyc,i+1)))
-      pari_err(talker,"not a group in forsubgroup");
+      pari_err(e_MISC,"not a group in forsubgroup");
   if (n == 1) {
     parse_bound(T);
     switch(T->boundtype)
@@ -453,7 +453,7 @@ subgroup_engine(subgp_iter *T)
     }
     avma = av; return;
   }
-  if (!signe(cyc[1])) pari_err(talker,"infinite group in forsubgroup");
+  if (!signe(cyc[1])) pari_err(e_MISC,"infinite group in forsubgroup");
   fa = Z_factor(gel(cyc,1)); primlist = gel(fa,1);
   nbprim = lg(primlist);
   listL = new_chunk(n); imax = k = 0;
@@ -560,7 +560,7 @@ forsubgroup(void *E, long call(void*, GEN), GEN cyc, GEN bound)
   long N;
 
   T.fun = call;
-  T.cyc = get_snf(cyc,&N); if (!T.cyc) pari_err(typeer,"forsubgroup",cyc);
+  T.cyc = get_snf(cyc,&N); if (!T.cyc) pari_err(e_TYPE,"forsubgroup",cyc);
   T.bound = bound;
   T.fundata = E;
   T.stop = 0;
@@ -601,7 +601,7 @@ subgrouplist_i(GEN CYC, GEN bound, GEN expoI, GEN gen)
   GEN z, H, cyc;
 
   cyc = get_snf(CYC, &N);
-  if (!cyc) pari_err(typeer,"subgrouplist",CYC);
+  if (!cyc) pari_err(e_TYPE,"subgrouplist",CYC);
   n = lg(cyc)-1; /* not necessarily = N */
 
   S.list = sublist = (slist*) pari_malloc(sizeof(slist));

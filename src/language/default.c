@@ -49,7 +49,7 @@ get_sep(const char *t)
         if (! (*s++ = *t++) ) return buf;
     }
     if (s == lim)
-      pari_err(talker,"get_sep: argument too long (< %ld chars)", GET_SEP_SIZE);
+      pari_err(e_MISC,"get_sep: argument too long (< %ld chars)", GET_SEP_SIZE);
   }
 }
 
@@ -71,10 +71,10 @@ my_int(char *s)
 
   while (isdigit((int)*p)) {
     ulong m;
-    if (n > (~0UL / 10)) pari_err(syntaxer,"integer too large",s,s);
+    if (n > (~0UL / 10)) pari_err(e_SYNTAX,"integer too large",s,s);
     n *= 10; m = n;
     n += *p++ - '0';
-    if (n < m) pari_err(syntaxer,"integer too large",s,s);
+    if (n < m) pari_err(e_SYNTAX,"integer too large",s,s);
   }
   if (n)
   {
@@ -84,9 +84,9 @@ my_int(char *s)
       case 'm': case 'M': n = safe_mul(n,1000000UL);    p++; break;
       case 'g': case 'G': n = safe_mul(n,1000000000UL); p++; break;
     }
-    if (!n) pari_err(syntaxer,"integer too large",s,s);
+    if (!n) pari_err(e_SYNTAX,"integer too large",s,s);
   }
-  if (*p) pari_err(syntaxer,"I was expecting an integer here", s, s);
+  if (*p) pari_err(e_SYNTAX,"I was expecting an integer here", s, s);
   return n;
 }
 
@@ -101,7 +101,7 @@ get_int(const char *s, long dflt)
   if (!isdigit((int)*p)) return dflt;
 
   n = (long)my_int(p);
-  if (n < 0) pari_err(syntaxer,"integer too large",s,s);
+  if (n < 0) pari_err(e_SYNTAX,"integer too large",s,s);
   return minus? -n: n;
 }
 
@@ -109,7 +109,7 @@ ulong
 get_uint(const char *s)
 {
   char *p = get_sep(s);
-  if (*p == '-') pari_err(syntaxer,"arguments must be positive integers",s,s);
+  if (*p == '-') pari_err(e_SYNTAX,"arguments must be positive integers",s,s);
   return my_int(p);
 }
 
@@ -145,7 +145,7 @@ sd_toggle(const char *v, long flag, const char *s, int *ptn)
     {
       char *t = stackmalloc(64 + strlen(s));
       (void)sprintf(t, "default: incorrect value for %s [0:off / 1:on]", s);
-      pari_err(syntaxer, t, v,v);
+      pari_err(e_SYNTAX, t, v,v);
     }
     state = *ptn = n;
   }
@@ -171,7 +171,7 @@ sd_ulong_init(const char *v, const char *s, ulong *ptn, ulong Min, ulong Max)
       char *buf = stackmalloc(strlen(s) + 2 * 20 + 40);
       (void)sprintf(buf, "default: incorrect value for %s [%lu-%lu]",
                     s, Min, Max);
-      pari_err(syntaxer, buf, v,v);
+      pari_err(e_SYNTAX, buf, v,v);
     }
     *ptn = n;
   }
@@ -253,7 +253,7 @@ gp_get_color(char **st)
       long i = 0;
       for (a[0] = s = ++v; *s && *s != ']'; s++)
         if (*s == ',') { *s = 0; a[++i] = s+1; }
-      if (*s != ']') pari_err(syntaxer,"expected character: ']'",s, *st);
+      if (*s != ']') pari_err(e_SYNTAX,"expected character: ']'",s, *st);
       *s = 0; for (i++; i<3; i++) a[i] = "";
       /*    properties    |   color    | background */
       c = (atoi(a[2])<<8) | atoi(a[0]) | (atoi(a[1])<<4);
@@ -332,7 +332,7 @@ sd_format(const char *v, long flag)
   {
     char c = *v;
     if (c!='e' && c!='f' && c!='g')
-      pari_err(syntaxer,"default: inexistent format",v,v);
+      pari_err(e_SYNTAX,"default: inexistent format",v,v);
     fmt->format = c; v++;
 
     if (isdigit((int)*v))
@@ -460,7 +460,7 @@ TeX_define2(const char *s, const char *def) {
 static FILE *
 open_logfile(const char *s) {
   FILE *log = fopen(s, "a");
-  if (!log) pari_err(openfiler,"logfile",s);
+  if (!log) pari_err(e_FILE,"logfile",s);
 #ifndef WINCE
   setbuf(log,(char *)NULL);
 #endif
@@ -654,7 +654,7 @@ sd_prettyprinter(const char *v, long flag)
     int cancel = (!strcmp(v,"no"));
 
     if (GP_DATA->secure)
-      pari_err(talker,"[secure mode]: can't modify 'prettyprinter' default (to %s)",v);
+      pari_err(e_MISC,"[secure mode]: can't modify 'prettyprinter' default (to %s)",v);
     if (!strcmp(v,"yes")) v = DFT_PRETTYPRINTER;
     if (old && strcmp(old,v) && pp->file)
     {
@@ -722,7 +722,7 @@ setdefault(const char *s, const char *v, long flag)
   ep = is_entry_intern(s, defaults_hash, NULL);
   if (!ep)
   {
-    pari_err(talker,"unknown default: %s",s);
+    pari_err(e_MISC,"unknown default: %s",s);
     return NULL; /* not reached */
   }
   return call_f2(ep, v, flag);

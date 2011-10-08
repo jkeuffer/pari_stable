@@ -219,7 +219,7 @@ group_ident_i(GEN G, GEN S)
         {
           for(i=1; t[i] != -1; i++)
             if (t[i]==s) return i;
-          pari_err(talker,"Not a group in group_ident");
+          pari_err(e_MISC,"Not a group in group_ident");
         }
         while (*t>=0) t++;
       }
@@ -324,7 +324,7 @@ group_ident_i(GEN G, GEN S)
             return indexgroupcentre(G,Z,good,bad)? 11: 12;
           }
         }
-        pari_err(talker,"Not a group in group_ident");
+        pari_err(e_MISC,"Not a group in group_ident");
       }
       while (*t!=-1) t++;
     }
@@ -427,7 +427,7 @@ group_ident_i(GEN G, GEN S)
             }
             break;
           }
-          pari_err(talker,"Not a group in group_ident");
+          pari_err(e_MISC,"Not a group in group_ident");
         }
         while (*t!=-1) t++;
       }
@@ -494,7 +494,7 @@ group_ident_i(GEN G, GEN S)
             }
             break;
           }
-          pari_err(talker,"Not a group in group_ident");
+          pari_err(e_MISC,"Not a group in group_ident");
         }
         while (*t!=-1) t++;
       }
@@ -509,7 +509,7 @@ group_ident(GEN G, GEN S)
   pari_sp av = avma;
   long idx = group_ident_i(G, S);
   avma = av;
-  if (!idx) pari_err(impl,"galoisidentify for groups of order >127");
+  if (!idx) pari_err(e_IMPL,"galoisidentify for groups of order >127");
   return idx;
 }
 
@@ -541,7 +541,7 @@ group_ident_trans(GEN G, GEN S)
   const long *t;
   if (n == 1) return 1;
   if (n > 30)
-    pari_err(talker,
+    pari_err(e_MISC,
         "Classification of transitive groups of order > 30 is not known");
   if (uisprime(n)) return 1;
   s = group_ident(G,S);

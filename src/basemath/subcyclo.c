@@ -311,15 +311,15 @@ lift_check_modulus(GEN H, long n)
   {
     case t_INTMOD:
       if (!equalsi(n, gel(H,1)))
-        pari_err(talker,"wrong modulus in galoissubcyclo");
+        pari_err(e_MISC,"wrong modulus in galoissubcyclo");
       H = gel(H,2);
     case t_INT:
       h = smodis(H,n);
       if (ugcd(h,n) != 1)
-        pari_err(talker,"generators must be prime to conductor in galoissubcyclo");
+        pari_err(e_MISC,"generators must be prime to conductor in galoissubcyclo");
       return h;
   }
-  pari_err(talker,"wrong type in galoissubcyclo");
+  pari_err(e_MISC,"wrong type in galoissubcyclo");
   return 0;/*not reached*/
 }
 
@@ -545,7 +545,7 @@ bnr_to_znstar(GEN bnr, long *complex)
   bid = bnr_get_bid(bnr);
   gen = bnr_get_gen(bnr);
   if (nf_get_degree(bnr_get_nf(bnr)) != 1)
-    pari_err(talker,"bnr must be over Q in bnr_to_znstar");
+    pari_err(e_MISC,"bnr must be over Q in bnr_to_znstar");
   /* cond is the finite part of the conductor,
    * complex is the infinite part*/
   cond = gcoeff(bid_get_ideal(bid), 1, 1);
@@ -573,14 +573,14 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
   long i, card, phi_n, val,l, n, cnd, complex=1;
   pari_timer ti;
 
-  if (flag<0 || flag>2) pari_err(flagerr,"galoissubcyclo");
+  if (flag<0 || flag>2) pari_err(e_FLAG,"galoissubcyclo");
   if (v < 0) v = 0;
   if (!sg) sg = gen_1;
   switch(typ(N))
   {
     case t_INT:
       n = itos(N);
-      if (n < 1) pari_err(talker,"degree <= 0 in galoissubcyclo");
+      if (n < 1) pari_err(e_MISC,"degree <= 0 in galoissubcyclo");
       break;
     case t_VEC:
       if (lg(N)==7) N = bnr_to_znstar(N,&complex);
@@ -588,23 +588,23 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
       {
         GEN gen = gel(N,3);
         Z = N;
-        if (typ(gen)!=t_VEC) pari_err(typeer,"galoissubcyclo",gen);
+        if (typ(gen)!=t_VEC) pari_err(e_TYPE,"galoissubcyclo",gen);
         if (lg(gen) == 1) n = 1;
         else
         {
           GEN z = gel(gen,1);
           if (typ(z) != t_INTMOD)
 #ifdef NETHACK_MESSAGES
-            pari_err(talker,"You have transgressed!");
+            pari_err(e_MISC,"You have transgressed!");
 #else
-            pari_err(talker,"Please do not try to break PARI with ridiculous counterfeit data. Thanks!");
+            pari_err(e_MISC,"Please do not try to break PARI with ridiculous counterfeit data. Thanks!");
 #endif
           n = itos(gel(z,1));
         }
         break;
       }
     default: /*fall through*/
-      pari_err(typeer,"galoissubcyclo",N);
+      pari_err(e_TYPE,"galoissubcyclo",N);
       return NULL;/*Not reached*/
   }
   if (n==1) { avma = ltop; return deg1pol_shallow(gen_1,gen_m1,v); }
@@ -626,16 +626,16 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
     case t_MAT:/*Fall through*/
       {
         if (lg(sg) == 1 || lg(sg) != lg(sg[1]))
-          pari_err(talker,"not a HNF matrix in galoissubcyclo");
+          pari_err(e_MISC,"not a HNF matrix in galoissubcyclo");
         if (!Z)
-          pari_err(talker,"N must be a bnrinit or a znstar if H is a matrix in galoissubcyclo");
+          pari_err(e_MISC,"N must be a bnrinit or a znstar if H is a matrix in galoissubcyclo");
         if ( lg(Z[2]) != lg(sg) || lg(Z[3]) != lg(sg))
-          pari_err(talker,"Matrix of wrong dimensions in galoissubcyclo");
+          pari_err(e_MISC,"Matrix of wrong dimensions in galoissubcyclo");
         V = znstar_hnf_generators(znstar_small(Z),sg);
       }
       break;
     default:
-      pari_err(typeer,"galoissubcyclo",sg);
+      pari_err(e_TYPE,"galoissubcyclo",sg);
       return NULL;/*Not reached*/
   }
   if (!complex) V = vecsmall_append(V,n-1); /*add complex conjugation*/
@@ -702,10 +702,10 @@ polsubcyclo_g(long n, long d, GEN Z, long v)
   pari_timer ti;
   if (v<0) v = 0;
   if (d==1) return deg1pol_shallow(gen_1,gen_m1,v);
-  if (d<=0 || n<=0) pari_err(talker, "non positive degrees in polsubcyclo");
+  if (d<=0 || n<=0) pari_err(e_MISC, "non positive degrees in polsubcyclo");
   if ((n & 3) == 2) n >>= 1;
   if (n == 1 || d >= n)
-    pari_err(talker,"degree does not divide phi(n) in polsubcyclo");
+    pari_err(e_MISC,"degree does not divide phi(n) in polsubcyclo");
   o = itos(gel(Z,1));
   g = itos(gmael3(Z,3,1,2));
   p = n / ugcd(n,o); /* p^a / gcd(p^a,phi(p^a)) = p*/
@@ -961,7 +961,7 @@ factor_Aurifeuille(GEN a, long d)
   long i, lP, va = vali(a), sa, astar, D;
   struct aurifeuille_t S;
 
-  if (d <= 0) pari_err(talker,"non-positive degree in factor_Aurifeuille");
+  if (d <= 0) pari_err(e_MISC,"non-positive degree in factor_Aurifeuille");
   if ((d & 3) == 2) { d >>= 1; a = negi(a); }
   if ((va & 1) == (d & 1)) { avma = av; return gen_1; }
   sa = signe(a);

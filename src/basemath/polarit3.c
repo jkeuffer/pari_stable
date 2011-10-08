@@ -144,10 +144,10 @@ Rg_to_Fp(GEN x, GEN p)
       GEN q = gel(x,1), a = gel(x,2);
       if (equalii(q, p)) return icopy(a);
       if (!dvdii(q,p))
-        pari_err(talker,"inconsistent moduli in Rg_to_Fp: %Ps, %Ps", q, p);
+        pari_err(e_MISC,"inconsistent moduli in Rg_to_Fp: %Ps, %Ps", q, p);
       return remii(a, p);
     }
-    default: pari_err(typeer, "Rg_to_Fp",x);
+    default: pari_err(e_TYPE, "Rg_to_Fp",x);
       return NULL; /* not reached */
   }
 }
@@ -167,10 +167,10 @@ Rg_to_Fl(GEN x, ulong p)
       GEN q = gel(x,1), a = gel(x,2);
       if (equaliu(q, p)) return itou(a);
       if (!dvdiu(q,p))
-        pari_err(talker,"inconsistent moduli in Rg_to_Fp: %Ps, %lu", q, p);
+        pari_err(e_MISC,"inconsistent moduli in Rg_to_Fp: %Ps, %lu", q, p);
       return umodiu(a, p);
     }
-    default: pari_err(typeer, "Rg_to_Fl",x);
+    default: pari_err(e_TYPE, "Rg_to_Fl",x);
       return 0; /* not reached */
   }
 }
@@ -202,7 +202,7 @@ Rg_to_FpXQ(GEN x, GEN T, GEN p)
       b = Rg_to_FpXQ(gel(x,2), T,p);
       return FpXQ_div(a,b, T,p);
   }
-  pari_err(typeer,"Rg_to_FpXQ",x);
+  pari_err(e_TYPE,"Rg_to_FpXQ",x);
   return NULL; /* not reached */
 }
 GEN
@@ -323,7 +323,7 @@ FpX_FpXQV_eval(GEN P, GEN V, GEN T, GEN p)
     z = FpXQ_eval_powers(P,V,0,d,p);
     return gerepileupto(av, z);
   }
-  if (l<=1) pari_err(talker,"powers is only [] or [1] in FpX_FpXQV_eval");
+  if (l<=1) pari_err(e_MISC,"powers is only [] or [1] in FpX_FpXQV_eval");
   d -= l;
   z = FpXQ_eval_powers(P,V,d+1,l-1,p);
   while (d >= l-1)
@@ -621,7 +621,7 @@ FpXQX_divrem(GEN x, GEN y, GEN T, GEN p, GEN *pr)
   GEN z,p1,rem,lead;
 
   if (!T) return FpX_divrem(x,y,p,pr);
-  if (!signe(y)) pari_err(gdiver);
+  if (!signe(y)) pari_err(e_INV);
   vx=varn(x); dy=degpol(y); dx=degpol(x);
   if (dx < dy)
   {
@@ -800,7 +800,7 @@ FpXQXQ_inv(GEN x, GEN S, GEN T,GEN p)
 {
   pari_sp av = avma;
   GEN U = FpXQXQ_invsafe(x, S, T, p);
-  if (!U) pari_err(gdiver);
+  if (!U) pari_err(e_INV);
   return gerepileupto(av, U);
 }
 
@@ -1379,7 +1379,7 @@ intersect_ker(GEN P, GEN MA, GEN U, GEN l)
   }
   if (DEBUGLEVEL>=4) timer_printf(&T,"matrix polcyclo");
   if (lg(A)!=r+1)
-    pari_err(talker,"ZZ_%Ps[%Ps]/(%Ps) is not a field in FpX_ffintersect"
+    pari_err(e_MISC,"ZZ_%Ps[%Ps]/(%Ps) is not a field in FpX_ffintersect"
         ,l,pol_x(vp),P);
   A = gerepileupto(ltop,A);
   /*The formula is
@@ -1420,7 +1420,7 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
   vp = varn(P); np = degpol(P);
   vq = varn(Q); nq = degpol(Q);
   if (np<=0 || nq<=0 || n<=0 || np%n!=0 || nq%n!=0)
-    pari_err(talker,"bad degrees in FpX_ffintersect: %d,%d,%d",n,np,nq);
+    pari_err(e_MISC,"bad degrees in FpX_ffintersect: %d,%d,%d",n,np,nq);
   e = u_pvalrem(n, l, &pg);
   if(!MA) MA = FpXQ_matrix_pow(FpXQ_pow(pol_x(vp),l,P,l),np,np,P,l);
   if(!MB) MB = FpXQ_matrix_pow(FpXQ_pow(pol_x(vq),l,Q,l),nq,nq,Q,l);
@@ -1442,13 +1442,13 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
       if (DEBUGLEVEL>=4) timer_start(&T);
       A = FpM_ker(RgM_Rg_add_shallow(MA, z),l);
       if (lg(A)!=2)
-        pari_err(talker,"ZZ_%Ps[%Ps]/(%Ps) is not a field in FpX_ffintersect"
+        pari_err(e_MISC,"ZZ_%Ps[%Ps]/(%Ps) is not a field in FpX_ffintersect"
             ,l,pol_x(vp),P);
       A = RgV_to_RgX(gel(A,1),vp);
 
       B = FpM_ker(RgM_Rg_add_shallow(MB, z),l);
       if (lg(B)!=2)
-        pari_err(talker,"ZZ_%Ps[%Ps]/(%Ps) is not a field in FpX_ffintersect"
+        pari_err(e_MISC,"ZZ_%Ps[%Ps]/(%Ps) is not a field in FpX_ffintersect"
             ,l,pol_x(vq),Q);
       B = RgV_to_RgX(gel(B,1),vq);
 
@@ -1456,11 +1456,11 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
       An = gel(FpXQ_pow(A,ipg,P,l),2);
       Bn = gel(FpXQ_pow(B,ipg,Q,l),2);
       if (!invmod(Bn,l,&z))
-        pari_err(talker,"Polynomials not irreducible in FpX_ffintersect");
+        pari_err(e_MISC,"Polynomials not irreducible in FpX_ffintersect");
       z = Fp_mul(An,z,l);
       L = Fp_sqrtn(z,ipg,l,NULL);
       if ( !L )
-        pari_err(talker,"Polynomials not irreducible in FpX_ffintersect");
+        pari_err(e_MISC,"Polynomials not irreducible in FpX_ffintersect");
       if (DEBUGLEVEL>=4) timer_printf(&T, "Fp_sqrtn");
       B = FpX_Fp_mul(B,L,l);
     }
@@ -1479,7 +1479,7 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
       if (typ(z)==t_INT) z = scalarpol(z,MAXVARN);
       L = FpXQ_sqrtn(z,ipg,U,l,NULL);
       if (DEBUGLEVEL>=4) timer_printf(&T,"FpXQ_sqrtn");
-      if (!L) pari_err(talker,"Polynomials not irreducible in FpX_ffintersect");
+      if (!L) pari_err(e_MISC,"Polynomials not irreducible in FpX_ffintersect");
       B = FqX_Fq_mul(B,L,U,l);
       B = gsubst(B,MAXVARN,gen_0);
       A = gsubst(A,MAXVARN,gen_0);
@@ -2203,7 +2203,7 @@ FlxX_pseudorem(GEN x, GEN y, ulong p)
   long vx = varn(x), dx, dy, dz, i, lx, dp;
   pari_sp av = avma, av2, lim;
 
-  if (!signe(y)) pari_err(gdiver);
+  if (!signe(y)) pari_err(e_INV);
   (void)new_chunk(2);
   dx=degpol(x); x = RgX_recip_shallow(x)+2;
   dy=degpol(y); y = RgX_recip_shallow(y)+2; dz=dx-dy; dp = dz+1;
@@ -2433,7 +2433,7 @@ ZX_ZXY_resultant_all(GEN A, GEN B0, long *plambda, GEN *LERS)
   if (LERS)
   {
     if (!checksqfree)
-      pari_err(talker,"ZX_ZXY_resultant_all: LERS != NULL needs lambda");
+      pari_err(e_MISC,"ZX_ZXY_resultant_all: LERS != NULL needs lambda");
     C0 = cgetg(dres+2, t_VECSMALL);
     C1 = cgetg(dres+2, t_VECSMALL);
     dglist = cgetg(dres+1, t_VECSMALL);
@@ -3063,9 +3063,9 @@ static GEN
 init_Fq_i(GEN p, long n, long v)
 {
   GEN P;
-  if (n <= 0) pari_err(talker,"non positive degree in ffinit");
-  if (typ(p) != t_INT) pari_err(typeer, "ffinit",p);
-  if (signe(p) <= 0) pari_err(talker,"%Ps is not a prime", p);
+  if (n <= 0) pari_err(e_MISC,"non positive degree in ffinit");
+  if (typ(p) != t_INT) pari_err(e_TYPE, "ffinit",p);
+  if (signe(p) <= 0) pari_err(e_MISC,"%Ps is not a prime", p);
   if (v < 0) v = 0;
   if (n == 1) return pol_x(v);
   if (fpinit_check(p, n+1, n)) return polcyclo(n+1, v);

@@ -132,7 +132,7 @@ PARI_ColorSetUp(Display *display, GEN colors)
     PARI_Colors[i].blue  = b*65535/255;
     PARI_Colors[i].flags = DoRed | DoGreen | DoBlue;
     if (!XAllocColor(display, PARI_Colormap, &PARI_Colors[i]))
-      pari_err(talker, "cannot allocate color %ld", i);
+      pari_err(e_MISC, "cannot allocate color %ld", i);
   }
 }
 
@@ -296,7 +296,7 @@ PARI_get_plot(long fatal)
   if (!(display = XOpenDisplay(NULL)))
   {
     if (fatal) exiterr("no X server");
-    pari_err(talker, "no X server");
+    pari_err(e_MISC, "no X server");
   }
   screen = DefaultScreen(display);
   pari_plot.width  = DisplayWidth(display, screen) - 40;

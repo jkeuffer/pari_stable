@@ -30,7 +30,7 @@ iferrnum(long errnum, GEN a, GEN b)
     if (global_err_data)
       global_err_data = gerepilecopy(avma, global_err_data);
     else
-      global_err_data = mkerr(errpile);
+      global_err_data = mkerr(e_STACK);
     push_lex(global_err_data,b);
     res = closure_evalgen(b);
     pop_lex(1);
@@ -127,7 +127,7 @@ forstep(GEN a, GEN b, GEN s, GEN code)
     for (i=lg(v)-1; i; i--) s = gadd(s,gel(v,i));
   }
   ss = gsigne(s);
-  if (!ss) pari_err(talker, "step equal to zero in forstep");
+  if (!ss) pari_err(e_MISC, "step equal to zero in forstep");
   cmp = (ss > 0)? &gcmp: &negcmp;
   i = 0;
   while (cmp(a,b) <= 0)
@@ -177,14 +177,14 @@ prime_loop_init(GEN ga, GEN gb, ulong *a, ulong *b, ulong *p)
   byteptr d = diffptr;
 
   ga = gceil(ga); gb = gfloor(gb);
-  if (typ(ga) != t_INT) pari_err(typeer,"prime_loop_init",ga);
-  if (typ(gb) != t_INT) pari_err(typeer,"prime_loop_init",gb);
+  if (typ(ga) != t_INT) pari_err(e_TYPE,"prime_loop_init",ga);
+  if (typ(gb) != t_INT) pari_err(e_TYPE,"prime_loop_init",gb);
   if (signe(gb) < 0) return NULL;
   if (signe(ga) < 0) ga = gen_1;
   if (lgefint(ga)>3 || lgefint(gb)>3)
   {
     if (cmpii(ga, gb) > 0) return NULL;
-    pari_err(primer1, 0);
+    pari_err(e_MAXPRIME, 0);
   }
   *a = itou(ga);
   *b = itou(gb); if (*a > *b) return NULL;
@@ -417,7 +417,7 @@ forvec_start(GEN x, long flag, GEN *gd, GEN (**next)(GEN,GEN))
 {
   long i, tx = typ(x), l = lg(x), t = t_INT;
   forvec_data *d;
-  if (!is_vec_t(tx)) pari_err(talker,"not a vector in forvec");
+  if (!is_vec_t(tx)) pari_err(e_MISC,"not a vector in forvec");
   if (l == 1) { *next = &forvec_dummy; return cgetg(1, tx); }
   *gd = cgetg(sizeof(forvec_data)/sizeof(long) + 1, t_VECSMALL) + 1;
   d = (forvec_data*) *gd;
@@ -430,18 +430,18 @@ forvec_start(GEN x, long flag, GEN *gd, GEN (**next)(GEN,GEN))
     GEN a, e = gel(x,i), m = gel(e,1), M = gel(e,2);
     tx = typ(e);
     if (! is_vec_t(tx) || lg(e)!=3)
-      pari_err(talker,"not a vector of two-component vectors in forvec");
+      pari_err(e_MISC,"not a vector of two-component vectors in forvec");
     if (typ(m) != t_INT) t = t_REAL;
     if (i > 1) switch(flag)
     {
       case 1: /* a >= m[i-1] - m */
         a = gceil(gsub(d->m[i-1], m));
-        if (typ(a) != t_INT) pari_err(typeer,"forvec",a);
+        if (typ(a) != t_INT) pari_err(e_TYPE,"forvec",a);
         if (signe(a) > 0) m = gadd(m, a); else m = gcopy(m);
         break;
       case 2: /* a > m[i-1] - m */
         a = gfloor(gsub(d->m[i-1], m));
-        if (typ(a) != t_INT) pari_err(typeer,"forvec",a);
+        if (typ(a) != t_INT) pari_err(e_TYPE,"forvec",a);
         a = addis(a, 1);
         if (signe(a) > 0) m = gadd(m, a); else m = gcopy(m);
         break;
@@ -458,13 +458,13 @@ forvec_start(GEN x, long flag, GEN *gd, GEN (**next)(GEN,GEN))
     switch(flag) {
       case 1:/* a >= M - M[i] */
         a = gfloor(gsub(d->M[i+1], M));
-        if (typ(a) != t_INT) pari_err(typeer,"forvec",a);
+        if (typ(a) != t_INT) pari_err(e_TYPE,"forvec",a);
         if (signe(a) < 0) M = gadd(M, a); else M = gcopy(M);
         /* M <= M[i+1] */
         break;
       case 2:
         a = gceil(gsub(d->M[i+1], M));
-        if (typ(a) != t_INT) pari_err(typeer,"forvec",a);
+        if (typ(a) != t_INT) pari_err(e_TYPE,"forvec",a);
         a = subis(a, 1);
         if (signe(a) < 0) M = gadd(M, a); else M = gcopy(M);
         /* M < M[i+1] */
@@ -488,7 +488,7 @@ forvec_start(GEN x, long flag, GEN *gd, GEN (**next)(GEN,GEN))
     case 0: *next = t==t_INT? &forvec_next_i:    &forvec_next; break;
     case 1: *next = t==t_INT? &forvec_next_le_i: &forvec_next_le; break;
     case 2: *next = t==t_INT? &forvec_next_lt_i: &forvec_next_lt; break;
-    default: pari_err(flagerr,"forvec");
+    default: pari_err(e_FLAG,"forvec");
   }
   return (GEN)d->a;
 }
@@ -519,7 +519,7 @@ somme(GEN a, GEN b, GEN code, GEN x)
   pari_sp av, av0 = avma, lim;
   GEN p1;
 
-  if (typ(a) != t_INT) pari_err(typeer,"sum",a);
+  if (typ(a) != t_INT) pari_err(e_TYPE,"sum",a);
   if (!x) x = gen_0;
   if (gcmp(b,a) < 0) return gcopy(x);
 
@@ -549,7 +549,7 @@ suminf(void *E, GEN (*eval)(void *, GEN), GEN a, long prec)
   pari_sp av0 = avma, av, lim;
   GEN p1,x = real_1(prec);
 
-  if (typ(a) != t_INT) pari_err(typeer,"suminf",a);
+  if (typ(a) != t_INT) pari_err(e_TYPE,"suminf",a);
   a = setloop(a);
   av = avma; lim = stack_lim(av,1);
   fl=0; G = prec2nbits(prec) + 5;
@@ -600,7 +600,7 @@ produit(GEN a, GEN b, GEN code, GEN x)
   pari_sp av, av0 = avma, lim;
   GEN p1;
 
-  if (typ(a) != t_INT) pari_err(typeer,"prod",a);
+  if (typ(a) != t_INT) pari_err(e_TYPE,"prod",a);
   if (!x) x = gen_1;
   if (gcmp(b,a) < 0) return gcopy(x);
 
@@ -630,7 +630,7 @@ prodinf(void *E, GEN (*eval)(void *, GEN), GEN a, long prec)
   long fl,G;
   GEN p1,x = real_1(prec);
 
-  if (typ(a) != t_INT) pari_err(typeer,"prodinf",a);
+  if (typ(a) != t_INT) pari_err(e_TYPE,"prodinf",a);
   a = setloop(a);
   av = avma; lim = stack_lim(av,1);
   fl=0; G = -prec2nbits(prec)-5;
@@ -655,7 +655,7 @@ prodinf1(void *E, GEN (*eval)(void *, GEN), GEN a, long prec)
   long fl,G;
   GEN p1,p2,x = real_1(prec);
 
-  if (typ(a) != t_INT) pari_err(typeer,"prodinf1",a);
+  if (typ(a) != t_INT) pari_err(e_TYPE,"prodinf1",a);
   a = setloop(a);
   av = avma; lim = stack_lim(av,1);
   fl=0; G = -prec2nbits(prec)-5;
@@ -681,7 +681,7 @@ prodinf0(GEN a, GEN code, long flag, long prec)
     case 0: EXPR_WRAP(code, prodinf (EXPR_ARG, a, prec));
     case 1: EXPR_WRAP(code, prodinf1(EXPR_ARG, a, prec));
   }
-  pari_err(flagerr);
+  pari_err(e_FLAG);
   return NULL; /* not reached */
 }
 
@@ -744,20 +744,20 @@ direuler(void *E, GEN (*eval)(void *, GEN), GEN ga, GEN gb, GEN c)
     {
       if (!gequal1(polnum))
       {
-        if (!gequalm1(polnum)) pari_err(talker,"constant term != 1 in direuler");
+        if (!gequalm1(polnum)) pari_err(e_MISC,"constant term != 1 in direuler");
         polden = gneg(polden);
       }
     }
     else
     {
       ulong k1, q, qlim;
-      if (tx != t_POL) pari_err(typeer,"direuler",polnum);
+      if (tx != t_POL) pari_err(e_TYPE,"direuler",polnum);
       lx = degpol(polnum);
-      if (lx < 0) pari_err(talker,"constant term != 1 in direuler");
+      if (lx < 0) pari_err(e_MISC,"constant term != 1 in direuler");
       c = gel(polnum,2);
       if (!gequal1(c))
       {
-        if (!gequalm1(c)) pari_err(talker,"constant term != 1 in direuler");
+        if (!gequalm1(c)) pari_err(e_MISC,"constant term != 1 in direuler");
         polnum = gneg(polnum);
         polden = gneg(polden);
       }
@@ -776,13 +776,13 @@ direuler(void *E, GEN (*eval)(void *, GEN), GEN ga, GEN gb, GEN c)
     tx = typ(polden);
     if (is_scalar_t(tx))
     {
-      if (!gequal1(polden)) pari_err(talker,"constant term != 1 in direuler");
+      if (!gequal1(polden)) pari_err(e_MISC,"constant term != 1 in direuler");
     }
     else
     {
-      if (tx != t_POL) pari_err(typeer,"direuler",polden);
+      if (tx != t_POL) pari_err(e_TYPE,"direuler",polden);
       c = gel(polden,2);
-      if (!gequal1(c)) pari_err(talker,"constant term != 1 in direuler");
+      if (!gequal1(c)) pari_err(e_MISC,"constant term != 1 in direuler");
       lx = degpol(polden);
       for (i=p; i<=n; i+=p)
       {
@@ -831,7 +831,7 @@ vecteur(GEN nmax, GEN code)
   long c[]={evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0};
 
   m = gtos(nmax);
-  if (m < 0)  pari_err(talker,"negative number of components in vector");
+  if (m < 0)  pari_err(e_MISC,"negative number of components in vector");
   if (!code) return zerovec(m);
   y = cgetg(m+1,t_VEC); push_lex(c, code);
   for (i=1; i<=m; i++)
@@ -851,7 +851,7 @@ vecteursmall(GEN nmax, GEN code)
   long c[]={evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0};
 
   m = gtos(nmax);
-  if (m < 0)  pari_err(talker,"negative number of components in vector");
+  if (m < 0)  pari_err(e_MISC,"negative number of components in vector");
   if (!code) return const_vecsmall(m, 0);
   y = cgetg(m+1,t_VECSMALL); push_lex(c,code);
   for (i=1; i<=m; i++)
@@ -880,8 +880,8 @@ matrice(GEN nlig, GEN ncol, GEN code)
 
   m = gtos(ncol);
   n = gtos(nlig);
-  if (m < 0) pari_err(talker,"negative number of columns in matrix");
-  if (n < 0) pari_err(talker,"negative number of rows in matrix");
+  if (m < 0) pari_err(e_MISC,"negative number of columns in matrix");
+  if (n < 0) pari_err(e_MISC,"negative number of rows in matrix");
   if (!m) return cgetg(1,t_MAT);
   if (!code || !n) return zeromatcopy(n, m);
   push_lex(c1,code);
@@ -980,7 +980,7 @@ sumalt(void *E, GEN (*eval)(void *, GEN), GEN a, long prec)
   pari_sp av = avma, av2, lim;
   GEN s, az, c, e1, d;
 
-  if (typ(a) != t_INT) pari_err(typeer,"sumalt",a);
+  if (typ(a) != t_INT) pari_err(e_TYPE,"sumalt",a);
   e1 = addsr(3, sqrtr(stor(8,prec)));
   N = (ulong)(0.4*(prec2nbits(prec)+ 7));
   d = powru(e1,N);
@@ -1011,7 +1011,7 @@ sumalt2(void *E, GEN (*eval)(void *, GEN), GEN a, long prec)
   pari_sp av = avma, av2, lim;
   GEN s, dn, pol;
 
-  if (typ(a) != t_INT) pari_err(typeer,"sumalt",a);
+  if (typ(a) != t_INT) pari_err(e_TYPE,"sumalt",a);
   N = (long)(0.31*(prec2nbits(prec) + 5));
   pol = polzagreel(N,N>>1,prec+1);
   pol = RgX_div_by_X_x(pol, gen_1, &dn);
@@ -1040,7 +1040,7 @@ sumalt0(GEN a, GEN code, long flag, long prec)
   {
     case 0: EXPR_WRAP(code, sumalt (EXPR_ARG,a,prec));
     case 1: EXPR_WRAP(code, sumalt2(EXPR_ARG,a,prec));
-    default: pari_err(flagerr);
+    default: pari_err(e_FLAG);
   }
   return NULL; /* not reached */
 }
@@ -1052,7 +1052,7 @@ sumpos(void *E, GEN (*eval)(void *, GEN), GEN a, long prec)
   pari_sp av = avma;
   GEN r, reel, s, az, c, x, e1, d, *stock;
 
-  if (typ(a) != t_INT) pari_err(typeer,"sumpos",a);
+  if (typ(a) != t_INT) pari_err(e_TYPE,"sumpos",a);
   a = subis(a,1); reel = cgetr(prec);
   e1 = addsr(3, sqrtr(stor(8,prec)));
   N = (long)(0.4*(prec2nbits(prec) + 7));
@@ -1098,7 +1098,7 @@ sumpos2(void *E, GEN (*eval)(void *, GEN), GEN a, long prec)
   pari_sp av = avma;
   GEN r, reel, s, pol, dn, x, *stock;
 
-  if (typ(a) != t_INT) pari_err(typeer,"sumpos2",a);
+  if (typ(a) != t_INT) pari_err(e_TYPE,"sumpos2",a);
   a = subis(a,1); reel = cgetr(prec);
   N = (long)(0.31*(prec2nbits(prec) + 5));
 
@@ -1141,7 +1141,7 @@ sumpos0(GEN a, GEN code, long flag, long prec)
   {
     case 0: EXPR_WRAP(code, sumpos (EXPR_ARG,a,prec));
     case 1: EXPR_WRAP(code, sumpos2(EXPR_ARG,a,prec));
-    default: pari_err(flagerr);
+    default: pari_err(e_FLAG);
   }
   return NULL; /* not reached */
 }
@@ -1166,7 +1166,7 @@ zbrent(void *E, GEN (*eval)(void *, GEN), GEN a, GEN b, long prec)
 
   fa = eval(E, a);
   fb = eval(E, b);
-  if (gsigne(fa)*gsigne(fb) > 0) pari_err(talker,"roots must be bracketed in solve");
+  if (gsigne(fa)*gsigne(fb) > 0) pari_err(e_MISC,"roots must be bracketed in solve");
   itmax = (prec * (2*BITS_IN_LONG)) + 1;
   tol = real2n(5-prec2nbits(prec), LOWDEFAULTPREC);
   fc = fb;
@@ -1214,7 +1214,7 @@ zbrent(void *E, GEN (*eval)(void *, GEN), GEN a, GEN b, long prec)
     else                          b = subrr(b,tol1);
     fb = eval(E, b);
   }
-  if (iter > itmax) pari_err(talker,"too many iterations in solve");
+  if (iter > itmax) pari_err(e_MISC,"too many iterations in solve");
   return gerepileuptoleaf(av, rcopy(b));
 }
 
@@ -1283,7 +1283,7 @@ derivfun(void *E, GEN (*eval)(void *, GEN), GEN x, long prec)
   case t_SER: /* FALL THROUGH */
     vx = varn(x);
     return gerepileupto(av, gdiv(deriv(eval(E, x),vx), deriv(x,vx)));
-  default: pari_err(typeer, "formal derivation",x);
+  default: pari_err(e_TYPE, "formal derivation",x);
     return NULL; /*NOT REACHED*/
   }
 }

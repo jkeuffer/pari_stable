@@ -81,7 +81,7 @@ get_modular_eqn(struct meqn *M, ulong ell, long vx, long vy)
   GEN eqn;
   long idx = uprimepi(ell)-1;
   if (!modular_eqn && !get_seadata(0))
-    pari_err(talker,"ellmodulareqn requires the package seadata");
+    pari_err(e_MISC,"ellmodulareqn requires the package seadata");
   if (idx && idx<lg(modular_eqn))
     eqn = gel(modular_eqn, idx);
   else eqn = get_seadata(ell);
@@ -98,13 +98,13 @@ ellmodulareqn(long ell, long vx, long vy)
   GEN res;
   if (vx<0) vx=0;
   if (vy<0) vy=fetch_user_var("y");
-  if (varncmp(vx,vy)>=0) pari_err(talker,"wrong variable priority");
-  if (ell<0) pari_err(talker,"level must be positive");
-  if (!uisprime(ell)) pari_err(talker,"level must be prime");
+  if (varncmp(vx,vy)>=0) pari_err(e_MISC,"wrong variable priority");
+  if (ell<0) pari_err(e_MISC,"level must be positive");
+  if (!uisprime(ell)) pari_err(e_MISC,"level must be prime");
 
   res = cgetg(3, t_VEC);
   if (!get_modular_eqn(&meqn, ell, vx, vy))
-    pari_err(talker,"modular equation of level %ld is not available", ell);
+    pari_err(e_MISC,"modular equation of level %ld is not available", ell);
   gel(res,1) = meqn.eq; gel(res,2) = stoi(meqn.type=='A');
   return res;
 }
@@ -372,7 +372,7 @@ find_eigen_value(GEN a4, GEN a6, ulong ell, GEN h, GEN p, GEN tr)
       if (ZX_equal(gel(Dr,2), nGr))     { avma = ltop; return ell-t; }
       Dr = gerepileupto(btop, eigen_elladd((void*)&Edat, Dr, BP));
     }
-    pari_err(bugparier,"find_eigen_value_power");
+    pari_err(e_BUG,"find_eigen_value_power");
     return 0; /* NOT REACHED */
   }
   else
@@ -412,7 +412,7 @@ find_eigen_value_power(GEN a4, GEN a6, ulong ell, long k, GEN h, ulong lambda, G
     Dr = eigen_elladd((void*)&Edat, Dr, BP);
     if (low_stack(st_lim, stack_lim(btop, 1))) Dr = gerepileupto(btop, Dr);
   }
-  pari_err(bugparier,"find_eigen_value_power");
+  pari_err(e_BUG,"find_eigen_value_power");
   return 0; /* NOT REACHED */
 }
 
@@ -457,7 +457,7 @@ find_kernel(GEN a4, GEN a6, ulong ell, GEN a4t, GEN a6t, GEN pp1, GEN p)
   V = FpC_sub(Coefft, Coeff, p);
   v = shallowconcat(FpM_gauss(N, V, p), mkcol2(gen_0, gen_0));
   K = FpM_ker(M, p);
-  if (lg(K) != 3) pari_err(talker, "trace not determined in a unique way");
+  if (lg(K) != 3) pari_err(e_MISC, "trace not determined in a unique way");
   K1 = FpC_Fp_mul(gel(K,1), Fp_inv(gcoeff(K,1,1), p), p);
   K2 = FpC_sub(gel(K,2), FpC_Fp_mul(K1, gcoeff(K,1,2), p), p);
   K2 = FpC_Fp_mul(K2, Fp_inv(gel(K2,2), p), p);
@@ -558,7 +558,7 @@ find_isogenous_from_Atkin(GEN a4, GEN a6, long ell, GEN meqn, GEN g, GEN p)
     GEN h = find_kernel(a4, a6, ell, a4t, a6t, pp1, p);
     if (h) return gerepilecopy(ltop, mkvec3(a4t, a6t, h));
   }
-  pari_err(bugparier, "find_isogenous_from_Atkin, kernel not found");
+  pari_err(e_BUG, "find_isogenous_from_Atkin, kernel not found");
   return NULL;
 }
 
@@ -668,7 +668,7 @@ find_kernel_power(GEN Eba4, GEN Eba6, GEN Eca4, GEN Eca6, ulong ell, struct meqn
     }
     avma = btop;
   }
-  pari_err(talker, "failed to find kernel polynomial");
+  pari_err(e_MISC, "failed to find kernel polynomial");
   return NULL; /*NOT REACHED*/
 }
 
@@ -872,7 +872,7 @@ find_trace(GEN a4, GEN a6, ulong ell, GEN p, long *ptr_kt, ulong smallfact)
     break;
   case MTAtkin:
     tr = find_trace_Atkin(ell, r, p);
-    if (lg(tr)==1) pari_err(talker,"not a prime number");
+    if (lg(tr)==1) pari_err(e_MISC,"not a prime number");
     kt = 1;
     break;
   default: /* case MTpathological: */
@@ -1285,7 +1285,7 @@ match_and_sort(GEN compile_atkin, GEN Mu, GEN u, GEN a4, GEN a6, GEN p)
     if ((i & 0xff) == 0) point = gerepilecopy(av1, point);
   }
   /* no match ? */
-  pari_err(bugparier,"match_and_sort");
+  pari_err(e_BUG,"match_and_sort");
   return NULL; /* not reached */
 }
 
@@ -1353,7 +1353,7 @@ ellsea(GEN E, GEN p, long smallfact)
     GEN ellkt, trace_mod;
     NEXT_PRIME_VIADIFF(ell, primepointer);
     trace_mod = find_trace(a4, a6, ell, p, &kt, smallfact);
-    if (trace_mod==gen_0) pari_err(talker,"not enough modular polynomials");
+    if (trace_mod==gen_0) pari_err(e_MISC,"not enough modular polynomials");
     if (!trace_mod) continue;
     ellkt = powuu(ell, kt);
     if (lg(trace_mod) == 2)

@@ -316,7 +316,7 @@ GetSharp(FAD_t *fdata, GEN pp, GEN ppp, GEN pol, GEN beta, long *pl)
     if (i <= v) break;
     p1 = shallowcopy(p2);
   }
-  if (!v) pari_err(talker, "No division in GetSharp");
+  if (!v) pari_err(e_MISC, "No division in GetSharp");
 
   for (l = v; l >= 0; l--)
   {
@@ -409,7 +409,7 @@ RootCongruents(KRASNER_t *data, FAD_t *fdata, GEN pol, GEN alpha, GEN pp, GEN pp
     if (l <= 1) return l;
 #ifdef CHECK_EXTENSIONS
     if (l != DegreeMod(fdata, pp, ppp, pol))
-      pari_err(talker, "Degrees do not match in RCA");
+      pari_err(e_MISC, "Degrees do not match in RCA");
 #endif
     /* decrease precision if sl gets bigger than a multiple of e */
     sl += l;
@@ -562,7 +562,7 @@ TamelyRamifiedCase(KRASNER_t *data)
       {
         nb = IsIsomorphic(data, &fdata, gel(vpl, j));
         if (nb)
-          pari_err(talker,
+          pari_err(e_MISC,
                    "Oops, fields are isomorphic in TamelyRamifiedCase!\n");
       }
       NbConjugateFields(data, &fdata);
@@ -584,7 +584,7 @@ TamelyRamifiedCase(KRASNER_t *data)
 
 #ifdef CHECK_EXTENSIONS
   if (!equaliu(data->nbext, cnt))
-    pari_err(talker,"Number of fields incorrect in TamelyRamifiedCase\n");
+    pari_err(e_MISC,"Number of fields incorrect in TamelyRamifiedCase\n");
 #endif
 
   return gerepilecopy(av, rep);
@@ -710,7 +710,7 @@ WildlyRamifiedCase(KRASNER_t *data)
   Omega = StructureOmega(data, &nbpol);
   nbext = itos_or_0(data->nbext);
   if (!nbext || (nbext & ~LGBITS))
-    pari_err(talker,"too many extensions in padicfields");
+    pari_err(e_MISC,"too many extensions in padicfields");
 
   if (DEBUGLEVEL>0) {
     err_printf("There are %ld extensions to find and %Ps polynomials to consider\n", nbext, nbpol);
@@ -736,7 +736,7 @@ WildlyRamifiedCase(KRASNER_t *data)
       long e = data->e, f = data->f, j = data->j;
       disc = RgXQ_norm(disc, data->upl);
       if (Z_pval(disc, data->p) != f*(e+j-1))
-        pari_err(talker, "incorrect discriminant in WildlyRamifiedCase\n");
+        pari_err(e_MISC, "incorrect discriminant in WildlyRamifiedCase\n");
     }
 #endif
 
@@ -891,7 +891,7 @@ possible_efj(GEN p, long m)
     for (pve = 1,ve = 1; ve <= v; ve++) { pve *= pp; nb += pve * ve; }
     nb = itos_or_0(muluu(nb, zv_sum(D)));
     if (!nb || is_bigint( mului(pve, sqru(v)) ) )
-      pari_err(talker,"too many ramification possibilities in padicfields");
+      pari_err(e_MISC,"too many ramification possibilities in padicfields");
   }
   nb += taum1; /* upper bound for the number of possible triples [e,f,j] */
 
@@ -945,21 +945,21 @@ padicfields0(GEN p, GEN N, long flag)
   long m = 0, d = -1;
   GEN L;
 
-  if (typ(p) != t_INT) pari_err(typeer,"padicfields",p);
+  if (typ(p) != t_INT) pari_err(e_TYPE,"padicfields",p);
   /* be nice to silly users */
-  if (!BPSW_psp(p)) pari_err(talker,"p must be a prime in padicfields");
+  if (!BPSW_psp(p)) pari_err(e_MISC,"p must be a prime in padicfields");
   switch(typ(N))
   {
     case t_VEC:
-      if (lg(N) != 3) pari_err(typeer,"padicfields",N);
+      if (lg(N) != 3) pari_err(e_TYPE,"padicfields",N);
       d = gtos(gel(N,2));
       N = gel(N,1); /* fall through */
     case t_INT:
       m = itos(N);
-      if (m <= 0) pari_err(talker,"non-positive degree in padicfields()");
+      if (m <= 0) pari_err(e_MISC,"non-positive degree in padicfields()");
       break;
     default:
-      pari_err(typeer,"padicfields",N);
+      pari_err(e_TYPE,"padicfields",N);
   }
   if (d >= 0) return padicfields(p, m, d, flag);
   L = possible_efj(p, m);

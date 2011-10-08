@@ -28,7 +28,7 @@ void
 RgV_check_ZV(GEN A, const char *s)
 {
   if (!check_ZV(A, lg(A)))
-    pari_err(talker,"not an integer vector in %s",s);
+    pari_err(e_MISC,"not an integer vector in %s",s);
 }
 void
 RgM_check_ZM(GEN A, const char *s)
@@ -39,7 +39,7 @@ RgM_check_ZM(GEN A, const char *s)
     long j, m = lg(A[1]);
     for (j=1; j<n; j++)
       if (!check_ZV(gel(A,j), m))
-        pari_err(talker,"not an integer matrix in %s",s);
+        pari_err(e_MISC,"not an integer matrix in %s",s);
   }
 }
 
@@ -270,7 +270,7 @@ ZC_Z_add(GEN x, GEN y)
 {
   long k, lx = lg(x);
   GEN z = cgetg(lx, t_COL);
-  if (lx == 1) pari_err(operf,"+",x,y);
+  if (lx == 1) pari_err(e_TYPE2,"+",x,y);
   gel(z,1) = addii(y,gel(x,1));
   for (k = 2; k < lx; k++) gel(z,k) = icopy(gel(x,k));
   return z;
@@ -291,7 +291,7 @@ ZC_Z_sub(GEN x, GEN y)
 {
   long k, lx = lg(x);
   GEN z = cgetg(lx, t_COL);
-  if (lx == 1) pari_err(operf,"+",x,y);
+  if (lx == 1) pari_err(e_TYPE2,"+",x,y);
   gel(z,1) = subii(gel(x,1), y);
   for (k = 2; k < lx; k++) gel(z,k) = icopy(gel(x,k));
   return z;

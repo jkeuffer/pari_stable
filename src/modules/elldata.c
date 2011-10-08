@@ -83,25 +83,25 @@ ellconvertname(GEN n)
     {
       long f,i,c;
       if (!ellparsename(GSTR(n),&f,&c,&i))
-        pari_err(talker,"Incorrect curve name in ellconvertname");
+        pari_err(e_MISC,"Incorrect curve name in ellconvertname");
       if (f<0 || c<0 || i<0)
-        pari_err(talker,"Incomplete curve name in ellconvertname");
+        pari_err(e_MISC,"Incomplete curve name in ellconvertname");
       return mkvec3s(f,c,i);
     }
   case t_VEC:
     if (lg(n)!=4)
-      pari_err(talker,"Incorrect vector in ellconvertname");
+      pari_err(e_MISC,"Incorrect vector in ellconvertname");
     else
     {
       pari_sp av = avma;
       GEN f=gel(n,1), c=gel(n,2), s=gel(n,3);
-      if (typ(f)!=t_INT) pari_err(typeer,"ellconvertname",f);
-      if (typ(c)!=t_INT) pari_err(typeer,"ellconvertname",c);
-      if (typ(s)!=t_INT) pari_err(typeer,"ellconvertname",s);
+      if (typ(f)!=t_INT) pari_err(e_TYPE,"ellconvertname",f);
+      if (typ(c)!=t_INT) pari_err(e_TYPE,"ellconvertname",c);
+      if (typ(s)!=t_INT) pari_err(e_TYPE,"ellconvertname",s);
       return gerepilecopy(av, shallowconcat1(mkvec3(f, ellrecode(itos(c)), s)));
     }
   }
-  pari_err(typeer,"ellconvertname",n);
+  pari_err(e_TYPE,"ellconvertname",n);
   return NULL; /*Not reached*/
 }
 
@@ -115,9 +115,9 @@ ellcondfile(long f)
   GEN V;
   sprintf(s, "%s/elldata/ell%ld", pari_datadir, n);
   F = pari_fopengz(s); avma = av;
-  if (!F) pari_err(talker,"Missing elldata for conductor %ld\n[need %s]",f,s);
+  if (!F) pari_err(e_MISC,"Missing elldata for conductor %ld\n[need %s]",f,s);
   V = gp_read_stream(F->file);
-  if (!V || typ(V)!=t_VEC ) pari_err(talker,"Incompatible elldata file %s\n",s);
+  if (!V || typ(V)!=t_VEC ) pari_err(e_MISC,"Incompatible elldata file %s\n",s);
   pari_fclose(F); return V;
 }
 
@@ -147,7 +147,7 @@ ellsearchbyname(GEN V, char *name)
     GEN v = gel(V,j);
     if (!strcmp(GSTR(gel(v,1)), name)) return v;
   }
-  pari_err(talker,"No such elliptic curve");
+  pari_err(e_MISC,"No such elliptic curve");
   return NULL;
 }
 
@@ -173,12 +173,12 @@ ellsearch(GEN A)
   if      (typ(A)==t_INT) { f = itos(A); c = i = -1; }
   else if (typ(A)==t_STR) {
     if (!ellparsename(GSTR(A),&f,&c,&i))
-      pari_err(talker,"Incorrect curve name in ellsearch");
+      pari_err(e_MISC,"Incorrect curve name in ellsearch");
   } else {
-    pari_err(typeer,"ellsearch",A);
+    pari_err(e_TYPE,"ellsearch",A);
     return NULL;
   }
-  if (f <= 0) pari_err(talker,"Non-positive conductor in ellsearch");
+  if (f <= 0) pari_err(e_MISC,"Non-positive conductor in ellsearch");
   V = ellcondlist(f);
   if (c >= 0)
     V = (i < 0)? ellsearchbyclass(V,c): ellsearchbyname(V, GSTR(A));
@@ -191,8 +191,8 @@ ellsearchcurve(GEN name)
   pari_sp ltop=avma;
   long f, c, i;
   if (!ellparsename(GSTR(name),&f,&c,&i))
-    pari_err(talker,"Incorrect curve name in ellsearch");
-  if (f<0 || c<0 || i<0) pari_err(talker,"Incomplete curve name in ellsearch");
+    pari_err(e_MISC,"Incorrect curve name in ellsearch");
+  if (f<0 || c<0 || i<0) pari_err(e_MISC,"Incomplete curve name in ellsearch");
   return gerepilecopy(ltop, ellsearchbyname(ellcondlist(f), GSTR(name)));
 }
 
@@ -207,7 +207,7 @@ ellidentify(GEN E)
   for (j=1; j<lg(V); j++)
     if (ZV_equal(gmael(V,j,2), M))
       return gerepilecopy(ltop, mkvec2(gel(V,j),gel(G,2)));
-  pari_err(talker,"No such elliptic curve in database");
+  pari_err(e_MISC,"No such elliptic curve in database");
   return NULL;
 }
 

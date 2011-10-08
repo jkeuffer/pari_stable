@@ -548,7 +548,7 @@ LLL_check_progress(GEN Bnorm, long n0, GEN m, int final, long *ti_LLL)
   for (i=1; i<=R; i++) setlg(u[i], n0+1);
   if (R <= 1)
   {
-    if (!R) pari_err(bugparier,"LLL_cmbf [no factor]");
+    if (!R) pari_err(e_BUG,"LLL_cmbf [no factor]");
     return NULL; /* irreducible */
   }
   setlg(u, R+1); return u;
@@ -901,7 +901,7 @@ DDF(GEN a, int fl)
   famod = cgetg(nmax+1,t_COL);
   gel(famod,1) = ap;
   if (nmax != FpX_split_Berlekamp((GEN*)(famod+1), prime))
-    pari_err(bugparier,"DDF: wrong numbers of factors");
+    pari_err(e_BUG,"DDF: wrong numbers of factors");
   if (DEBUGLEVEL>2)
   {
     if (DEBUGLEVEL>4) timer_printf(&T2, "splitting mod p = %ld", chosenp);
@@ -1046,10 +1046,10 @@ nfrootsQ(GEN x)
   GEN z;
   long val;
 
-  if (typ(x)!=t_POL) pari_err(typeer,"nfrootsQ",x);
-  if (!signe(x)) pari_err(zeropoler,"nfrootsQ");
+  if (typ(x)!=t_POL) pari_err(e_TYPE,"nfrootsQ",x);
+  if (!signe(x)) pari_err(e_ZEROPOL,"nfrootsQ");
   x = Q_primpart(x);
-  if (!RgX_is_ZX(x)) pari_err(typeer,"nfrootsQ",x);
+  if (!RgX_is_ZX(x)) pari_err(e_TYPE,"nfrootsQ",x);
   val = ZX_valrem(x, &x);
   (void)ZX_gcd_all(x, ZX_deriv(x), &x);
   z = DDF(x, 1);

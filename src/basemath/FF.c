@@ -41,7 +41,7 @@ INLINE void
 _checkFF(GEN x, GEN y, const char *s)
 {
   if (x[1]!=y[1] || !equalii(gel(x,4),gel(y,4)) || !gequal(gel(x,3),gel(y,3)))
-    pari_err(operi,s,x,y);
+    pari_err(e_OP,s,x,y);
 }
 
 INLINE GEN
@@ -395,7 +395,7 @@ FF_Z_Z_muldiv(GEN x, GEN a, GEN b)
     r = FpX_Fp_mul(A, Fp_div(a,b,p), p);
     break;
   case t_FF_F2xq:
-    if (!mpodd(b)) pari_err(gdiver);
+    if (!mpodd(b)) pari_err(e_INV);
     r = mpodd(a)? vecsmall_copy(A): zero_Flx(A[1]);
     break;
   default:
@@ -442,7 +442,7 @@ FF_mul2n(GEN x, long n)
     }
     break;
   case t_FF_F2xq:
-    if (n<0) pari_err(gdiver);
+    if (n<0) pari_err(e_INV);
     r = n==0? vecsmall_copy(A): zero_Flx(A[1]);
     break;
   default:
@@ -534,7 +534,7 @@ FF_sqrtn(GEN x, GEN n, GEN *zetan)
   default:
     r=Flxq_sqrtn(gel(x,2),n,T,pp,zetan);
   }
-  if (!r) pari_err(sqrter5);
+  if (!r) pari_err(e_SQRTN);
   (void)_mkFF(x, y, r);
   if (zetan)
   {
@@ -560,7 +560,7 @@ FF_sqrt(GEN x)
   default:
     r = Flxq_sqrtn(gel(x,2),gen_2,T,pp,NULL);
   }
-  if (!r) pari_err(sqrter5);
+  if (!r) pari_err(e_SQRTN);
   return _mkFF(x, y, r);
 }
 
@@ -594,7 +594,7 @@ FF_ispower(GEN x, GEN K, GEN *pt)
   ulong pp;
   GEN r, T, p;
   pari_sp av = avma;
-  if (!K) pari_err(talker,"missing exponent in FF_ispower");
+  if (!K) pari_err(e_MISC,"missing exponent in FF_ispower");
 
   if (FF_equal0(x)) { if (pt) *pt = gcopy(x); return 1; }
   _getFF(x, &T, &p, &pp);
@@ -831,7 +831,7 @@ static GEN
 to_FF_pol(GEN x, GEN ff)
 {
   long i, lx = lg(x);
-  if (typ(x) != t_POL) pari_err(typeer,"to_FF_pol",x);
+  if (typ(x) != t_POL) pari_err(e_TYPE,"to_FF_pol",x);
   for (i=2; i<lx; i++) gel(x,i) = to_FF(gel(x,i), ff);
   return x;
 }
@@ -947,9 +947,9 @@ ffgen(GEN T, long v)
 {
   GEN A, p = NULL, ff;
   long d;
-  if (typ(T) != t_POL) pari_err(typeer,"ffgen",T);
+  if (typ(T) != t_POL) pari_err(e_TYPE,"ffgen",T);
   d = degpol(T); p = NULL;
-  if (d < 1 || !RgX_is_FpX(T, &p) || !p) pari_err(typeer,"ffgen",T);
+  if (d < 1 || !RgX_is_FpX(T, &p) || !p) pari_err(e_TYPE,"ffgen",T);
   ff = cgetg(5,t_FFELT);
   T = RgX_to_FpX(T, p);
   if (v < 0) v = varn(T);
@@ -987,22 +987,22 @@ ffgen(GEN T, long v)
 GEN
 fforder(GEN x, GEN o)
 {
-  if (typ(x)!=t_FFELT) pari_err(typeer,"fforder",x);
+  if (typ(x)!=t_FFELT) pari_err(e_TYPE,"fforder",x);
   return FF_order(x,o);
 }
 
 GEN
 ffprimroot(GEN x, GEN *o)
 {
-  if (typ(x)!=t_FFELT) pari_err(typeer,"ffprimroot",x);
+  if (typ(x)!=t_FFELT) pari_err(e_TYPE,"ffprimroot",x);
   return FF_primroot(x,o);
 }
 
 GEN
 fflog(GEN x, GEN g, GEN o)
 {
-  if (typ(x)!=t_FFELT) pari_err(typeer,"fflog",x);
-  if (typ(g)!=t_FFELT) pari_err(typeer,"fflog",g);
+  if (typ(x)!=t_FFELT) pari_err(e_TYPE,"fflog",x);
+  if (typ(g)!=t_FFELT) pari_err(e_TYPE,"fflog",g);
   return FF_log(x,g,o);
 }
 

@@ -220,9 +220,9 @@ nffactormod(GEN nf, GEN x, GEN pr)
 
   nf = checknf(nf);
   vn = nf_get_varn(nf);
-  if (typ(x)!=t_POL) pari_err(typeer,"nffactormod",x);
+  if (typ(x)!=t_POL) pari_err(e_TYPE,"nffactormod",x);
   if (varncmp(vx,vn) >= 0)
-    pari_err(talker,"polynomial variable must have highest priority in nffactormod");
+    pari_err(e_MISC,"polynomial variable must have highest priority in nffactormod");
 
   modpr = nf_to_Fq_init(nf, &pr, &T, &p);
   xrd = nfX_to_FqX(x, nf, modpr);
@@ -351,7 +351,7 @@ nfroots(GEN nf,GEN pol)
   RgX_check_ZX(T,"nfroots");
   A = rnf_fix_pol(T,pol,1);
   d = degpol(A);
-  if (d < 0) pari_err(zeropoler, "nfroots");
+  if (d < 0) pari_err(e_ZEROPOL, "nfroots");
   if (d == 0) return cgetg(1,t_VEC);
   if (d == 1)
   {
@@ -379,7 +379,7 @@ nfissplit(GEN nf, GEN x)
   long l;
   nf = checknf(nf);
   x = rnf_fix_pol(nf_get_pol(nf), x, 1);
-  if (typ(x) != t_POL) pari_err(typeer, "nfissplit",x);
+  if (typ(x) != t_POL) pari_err(e_TYPE, "nfissplit",x);
   l = lg(nfsqff(nf, x, ROOTS_SPLIT, gen_1));
   avma = av; return l != 1;
 }
@@ -1248,7 +1248,7 @@ max_radius(GEN PRK, GEN B)
   pari_sp av = avma;
   long i, j, d = lg(PRK)-1;
 
-  S = RgM_inv( get_R(PRK) ); if (!S) pari_err(precer,"max_radius");
+  S = RgM_inv( get_R(PRK) ); if (!S) pari_err(e_PREC,"max_radius");
   for (i=1; i<=d; i++)
   {
     GEN s = gen_0;
@@ -1686,7 +1686,7 @@ nfsqff_trager(GEN u, GEN T, GEN dent)
     F = RgXQX_translate(F, x0, T);
     /* F = gcd(f, u(t - x0)) [t + x0] = gcd(f(t + x0), u), more efficient */
     if (typ(F) != t_POL || degpol(F) == 0)
-      pari_err(talker,"reducible modulus in factornf");
+      pari_err(e_MISC,"reducible modulus in factornf");
     gel(P,i) = QXQX_normalize(F, T);
   }
   return P;
@@ -1701,8 +1701,8 @@ polfnf(GEN a, GEN T)
   long dA;
   int tmonic;
 
-  if (typ(a)!=t_POL) pari_err(typeer,"polfnf",a);
-  if (typ(T)!=t_POL) pari_err(typeer,"polfnf",T);
+  if (typ(a)!=t_POL) pari_err(e_TYPE,"polfnf",a);
+  if (typ(T)!=t_POL) pari_err(e_TYPE,"polfnf",T);
   T = Q_primpart(T); tmonic = is_pm1(leading_term(T));
   RgX_check_ZX(T,"polfnf");
   A = Q_primpart( QXQX_normalize(rnf_fix_pol(T,a,1), T) );
@@ -2129,7 +2129,7 @@ rootsof1_kannan(GEN nf)
     if (DEBUGLEVEL) pari_warn(warnprec,"rootsof1",prec);
     nf = nfnewprec_shallow(nf,prec);
   }
-  if (itos(ground(gel(y,2))) != N) pari_err(bugparier,"rootsof1 (bug1)");
+  if (itos(ground(gel(y,2))) != N) pari_err(e_BUG,"rootsof1 (bug1)");
   w = gel(y,1); ws = itos(w);
   if (ws == 2) { avma = av; return trivroots(); }
 
@@ -2139,6 +2139,6 @@ rootsof1_kannan(GEN nf)
     z = is_primitive_root(nf, d, gel(list,i), ws);
     if (z) return gerepilecopy(av, mkvec2(w, z));
   }
-  pari_err(bugparier,"rootsof1");
+  pari_err(e_BUG,"rootsof1");
   return NULL; /* not reached */
 }

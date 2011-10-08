@@ -305,7 +305,7 @@ initgaloisborne(GEN T, GEN dn, long prec, GEN *ptL, GEN *ptprep, GEN *ptdis)
   else
   {
     if (typ(dn) != t_INT || signe(dn) <= 0)
-      pari_err(talker, "incorrect denominator in initgaloisborne: %Ps", dn);
+      pari_err(e_MISC, "incorrect denominator in initgaloisborne: %Ps", dn);
     den = dn;
   }
   if (ptprep) *ptprep = prep;
@@ -1048,7 +1048,7 @@ fixedfieldsympol(GEN O, GEN mod, GEN l, GEN p, long v)
     if (sympol_is1to1_lg(NS,i+1))
       sym = fixedfieldsurmer(mod,l,p,v,NS,vecsmall_shorten(W,i));
   }
-  if (!sym) pari_err(talker,"p too small in fixedfieldsympol");
+  if (!sym) pari_err(e_MISC,"p too small in fixedfieldsympol");
   if (DEBUGLEVEL>=2) err_printf("FixedField: Found: %Ps\n",gel(sym,1));
   return gerepilecopy(ltop,sym);
 }
@@ -1116,7 +1116,7 @@ vectopol(GEN v, GEN M, GEN den , GEN mod, GEN mod2, long x)
 static GEN
 permtopol(GEN p, GEN L, GEN M, GEN den, GEN mod, GEN mod2, long x)
 {
-  if (lg(p) != lg(L)) pari_err(talker,"incorrect permutation in permtopol");
+  if (lg(p) != lg(L)) pari_err(e_MISC,"incorrect permutation in permtopol");
   return vectopol(vecpermute(L,p), M, den, mod, mod2, x);
 }
 
@@ -2178,12 +2178,12 @@ galoisconj4_main(GEN T, GEN den, long flag)
   { if (!den) den = Q_denom(nf_get_zk(nf)); }
   else
   {
-    if (n <= 0) pari_err(redpoler,"galoisinit",T);
+    if (n <= 0) pari_err(e_IRREDPOL,"galoisinit",T);
     RgX_check_ZX(T, "galoisinit");
     if (!ZX_is_squarefree(T))
-      pari_err(talker, "Polynomial not squarefree in galoisinit");
+      pari_err(e_MISC, "Polynomial not squarefree in galoisinit");
     if (!gequal1(gel(T,n+2)))
-      pari_err(talker, "non-monic polynomial in galoisinit");
+      pari_err(e_MISC, "non-monic polynomial in galoisinit");
   }
   if (n == 1)
   {
@@ -2197,7 +2197,7 @@ galoisconj4_main(GEN T, GEN den, long flag)
   if (den)
   {
     if (typ(den) != t_INT)
-      pari_err(talker, "Second arg. must be integer in galoisconj4");
+      pari_err(e_MISC, "Second arg. must be integer in galoisconj4");
     den = absi(den);
   }
   gb.l = utoipos(ga.l);
@@ -2306,7 +2306,7 @@ galoisconj0(GEN nf, long flag, GEN d, long prec)
     case 2: return galoisconj2(nf, prec);
     case 4: return galoisconj4(nf, d);
   }
-  pari_err(flagerr, "nfgaloisconj");
+  pari_err(e_FLAG, "nfgaloisconj");
   return NULL; /*not reached*/
 }
 
@@ -2328,8 +2328,8 @@ isomborne(GEN P, GEN den, GEN p)
 GEN
 checkgal(GEN gal)
 {
-  if (typ(gal) == t_POL) pari_err(talker, "please apply galoisinit first");
-  if (typ(gal) != t_VEC || lg(gal) != 9) pari_err(typeer, "checkgal",gal);
+  if (typ(gal) == t_POL) pari_err(e_MISC, "please apply galoisinit first");
+  if (typ(gal) != t_VEC || lg(gal) != 9) pari_err(e_TYPE, "checkgal",gal);
   return gal;
 }
 
@@ -2364,7 +2364,7 @@ galoispermtopol_i(GEN gal, GEN perm, GEN mod, GEN mod2)
     if (DEBUGLEVEL>=4) err_printf("\n");
     return v;
   }
-  pari_err(typeer, "galoispermtopol", perm);
+  pari_err(e_TYPE, "galoispermtopol", perm);
   return NULL; /* not reached */
 }
 
@@ -2428,7 +2428,7 @@ static void
 chk_perm(GEN perm, long n)
 {
   if (typ(perm) != t_VECSMALL || lg(perm)!=n+1)
-    pari_err(typeer, "galoisfixedfield", perm);
+    pari_err(e_TYPE, "galoisfixedfield", perm);
 }
 
 static int
@@ -2444,7 +2444,7 @@ galoisfixedfield(GEN gal, GEN perm, long flag, long y)
   pari_sp lbot, ltop = avma;
   GEN T, L, P, S, PL, O, res, mod, mod2;
   long x, n, i;
-  if (flag<0 || flag>2) pari_err(flagerr, "galoisfixedfield");
+  if (flag<0 || flag>2) pari_err(e_FLAG, "galoisfixedfield");
   gal = checkgal(gal); T = gal_get_pol(gal);
   x = varn(T);
   L = gal_get_roots(gal); n = lg(L)-1;
@@ -2491,7 +2491,7 @@ galoisfixedfield(GEN gal, GEN perm, long flag, long y)
     PM = vandermondeinversemod(PL, P, Pden, mod);
     if (y < 0) y = fetch_user_var("y");
     if (y <= x)
-      pari_err(talker,"variable priority too high in galoisfixedfield");
+      pari_err(e_MISC,"variable priority too high in galoisfixedfield");
     lbot = avma; res = cgetg(4, t_VEC);
     gel(res,3) = fixedfieldfactor(L,O,gal_get_group(gal), PM,Pden,mod,mod2,x,y);
   }
@@ -2523,7 +2523,7 @@ galoisisabelian(GEN gal, long flag)
     case 0: return gerepileupto(av, group_abelianHNF(G,S));
     case 1: avma=av; return gen_1;
     case 2: return gerepileupto(av, group_abelianSNF(G,S));
-    default: pari_err(flagerr,"galoisisabelian");
+    default: pari_err(e_FLAG,"galoisisabelian");
   }
   return NULL; /* not reached */
 }

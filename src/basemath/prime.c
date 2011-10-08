@@ -138,7 +138,7 @@ millerrabin(GEN n, long k)
   long i;
   MR_Jaeschke_t S;
 
-  if (typ(n) != t_INT) pari_err(typeer,"millerrabin",n);
+  if (typ(n) != t_INT) pari_err(e_TYPE,"millerrabin",n);
   if (signe(n)<=0) return 0;
   /* If |n| <= 3, check if n = +- 1 */
   if (lgefint(n)==3 && (ulong)(n[2])<=3) return (n[2] != 1);
@@ -494,7 +494,7 @@ BPSW_psp(GEN N)
   MR_Jaeschke_t S;
   int k;
 
-  if (typ(N) != t_INT) pari_err(typeer,"BPSW_psp",N);
+  if (typ(N) != t_INT) pari_err(e_TYPE,"BPSW_psp",N);
   if (signe(N) <= 0) return 0;
   if (lgefint(N) == 3) return uisprime((ulong)N[2]);
   if (!mod2(N)) return 0;
@@ -630,7 +630,7 @@ isprimePL(GEN N, long flag)
     F = gel(N,2);
     N = gel(N,1); t = typ(N);
   }
-  if (t != t_INT) pari_err(typeer,"isprimePL",N);
+  if (t != t_INT) pari_err(e_TYPE,"isprimePL",N);
   eps = cmpis(N,2);
   if (eps<=0) return eps? gen_0: gen_1;
 
@@ -675,7 +675,7 @@ isprimePL(GEN N, long flag)
       else                      r = isprimePL(p,flag);
     }
     gmael(C,3,i) = r;
-    if (r == gen_0) pari_err(talker,"False prime number %Ps in isprimePL", p);
+    if (r == gen_0) pari_err(e_MISC,"False prime number %Ps in isprimePL", p);
   }
   if (!flag) { avma = ltop; return gen_1; }
   return gerepileupto(ltop,C);
@@ -716,7 +716,7 @@ gisprime(GEN x, long flag)
     case 1: return map_proto_GL(isprimePL,x,1);
     case 2: return map_proto_lG(isprimeAPRCL,x);
   }
-  pari_err(flagerr,"gisprime");
+  pari_err(e_FLAG,"gisprime");
   return NULL;
 }
 
@@ -736,7 +736,7 @@ uprime(long n)
   byteptr p;
   ulong prime;
 
-  if (n <= 0) pari_err(talker, "n-th prime meaningless if n = %ld",n);
+  if (n <= 0) pari_err(e_MISC, "n-th prime meaningless if n = %ld",n);
   if (n < 1000) {
     p = diffptr;
     prime = 0;
@@ -792,7 +792,7 @@ primepi(GEN x)
 {
   pari_sp av = avma;
   GEN N = typ(x) == t_INT? x: gfloor(x);
-  if (typ(N) != t_INT) pari_err(typeer, "primepi",N);
+  if (typ(N) != t_INT) pari_err(e_TYPE, "primepi",N);
   if (signe(N) <= 0) return gen_0;
   avma = av; return utoi(uprimepi(itou(N)));
 }
@@ -853,9 +853,9 @@ static void
 rmprime(GEN T, GEN p)
 {
   long i;
-  if (typ(p) != t_INT) pari_err(typeer,"rmprime",p);
+  if (typ(p) != t_INT) pari_err(e_TYPE,"rmprime",p);
   i = ZV_search(T, p);
-  if (!i) pari_err(talker,"prime %Ps is not in primetable", p);
+  if (!i) pari_err(e_MISC,"prime %Ps is not in primetable", p);
   gunclone(gel(T,i)); gel(T,i) = NULL;
   cleanprimetab(T);
 }
@@ -900,7 +900,7 @@ addp(GEN *T, GEN p)
   v = gen_indexsort_uniq(p, (void*)&cmpii, &cmp_nodata);
   p = vecpermute(p, v);
   if (cmpii(gel(p,1), gen_1) <= 0)
-    pari_err(talker,"entries must be > 1 in addprimes");
+    pari_err(e_MISC,"entries must be > 1 in addprimes");
   p = addp_union(*T, p);
   l = lg(p);
   if (l != lg(*T))

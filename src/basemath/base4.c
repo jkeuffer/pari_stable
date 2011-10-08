@@ -56,18 +56,18 @@ idealtyp(GEN *ideal, GEN *arch)
   {
     case t_MAT: lx = lg(x);
       if (lx == 1) { t = id_PRINCIPAL; x = gen_0; break; }
-      if (lx != lg(x[1])) pari_err(talker,"non-square t_MAT in idealtyp");
+      if (lx != lg(x[1])) pari_err(e_MISC,"non-square t_MAT in idealtyp");
       t = id_MAT;
       break;
 
-    case t_VEC: if (lg(x)!=6) pari_err(talker, "incorrect ideal in idealtyp");
+    case t_VEC: if (lg(x)!=6) pari_err(e_MISC, "incorrect ideal in idealtyp");
       t = id_PRIME; break;
 
     case t_POL: case t_POLMOD: case t_COL:
     case t_INT: case t_FRAC:
       t = id_PRINCIPAL; break;
     default:
-      pari_err(talker, "incorrect ideal in idealtyp");
+      pari_err(e_MISC, "incorrect ideal in idealtyp");
       return 0; /*not reached*/
   }
   *ideal = x; return t;
@@ -99,7 +99,7 @@ idealhnf_principal(GEN nf, GEN x)
       return scalarmat(absi(x), nf_get_degree(nf));
     case t_FRAC:
       return scalarmat(Q_abs(x), nf_get_degree(nf));
-    default: pari_err(typeer,"idealhnf",x);
+    default: pari_err(e_TYPE,"idealhnf",x);
   }
   x = Q_primitive_part(x, &cx);
   RgV_check_ZV(x, "idealhnf");
@@ -134,7 +134,7 @@ idealhnf_shallow(GEN nf, GEN x)
       long nx = lx-1;
       N = nf_get_degree(nf);
       if (nx == 0) return cgetg(1, t_MAT);
-      if (lg(x[1])-1 != N) pari_err(talker,"incorrect dimension in idealhnf");
+      if (lg(x[1])-1 != N) pari_err(e_MISC,"incorrect dimension in idealhnf");
       if (nx == 1) return idealhnf_principal(nf, gel(x,1));
 
       if (nx == N && RgM_is_ZM(x) && ZM_ishnf(x)) return x;
@@ -151,9 +151,9 @@ idealhnf_shallow(GEN nf, GEN x)
       GEN A = gel(x,1), B = gel(x,2);
       N = nf_get_degree(nf);
       if (N != 2)
-        pari_err(talker,"Qfb only allowed for quadratic fields", x, D);
+        pari_err(e_MISC,"Qfb only allowed for quadratic fields", x, D);
       if (!equalii(qfb_disc(x), D))
-        pari_err(talker,"%Ps has discriminant != %Ps in idealhnf", x, D);
+        pari_err(e_MISC,"%Ps has discriminant != %Ps in idealhnf", x, D);
       /* x -> A Z + (-B + sqrt(D)) / 2 Z
          K = Q[t]/T(t), t^2 + ut + v = 0,  u^2 - 4v = Df^2
          => t = (-u + sqrt(D) f)/2
@@ -205,7 +205,7 @@ idealdiv0(GEN nf, GEN x, GEN y, long flag)
   {
     case 0: return idealdiv(nf,x,y);
     case 1: return idealdivexact(nf,x,y);
-    default: pari_err(flagerr,"idealdiv");
+    default: pari_err(e_FLAG,"idealdiv");
   }
   return NULL; /* not reached */
 }
@@ -487,7 +487,7 @@ factor_norm(GEN x)
 {
   GEN r = gcoeff(x,1,1), f, p, e;
   long i, k, l;
-  if (typ(r)!=t_INT) pari_err(typeer,"idealfactor",r);
+  if (typ(r)!=t_INT) pari_err(e_TYPE,"idealfactor",r);
   f = Z_factor(r); p = gel(f,1); e = gel(f,2); l = lg(p);
   for (i=1; i<l; i++) e[i] = val_norm(x,gel(p,i), &k);
   settyp(e, t_VECSMALL); return f;
@@ -543,7 +543,7 @@ idealfactor(GEN nf, GEN x)
     x = Q_primitive_part(x, &cx);
     X = x;
   }
-  N = lg(X)-1; if (!N) pari_err(talker,"zero ideal in idealfactor");
+  N = lg(X)-1; if (!N) pari_err(e_MISC,"zero ideal in idealfactor");
   if (!cx)
   {
     c1 = c2 = NULL; /* gcc -Wall */
@@ -625,7 +625,7 @@ idealval(GEN nf, GEN ix, GEN P)
   }
   /* id_MAT */
   nf = checknf(nf);
-  N = lg(ix)-1; if (!N) pari_err(talker,"zero ideal in idealval");
+  N = lg(ix)-1; if (!N) pari_err(e_MISC,"zero ideal in idealval");
   ix = Q_primitive_part(ix, &cx);
   f = pr_get_f(P);
   if (f == N) { v = cx? Q_pval(cx,p): 0; avma = av; return v; }
@@ -767,7 +767,7 @@ idealaddtoone_i(GEN nf, GEN x, GEN y)
     a = hnfmerge_get_1(x, y);
     if (a) a = ZC_reducemodlll(a, idealmul_HNF(nf,x,y));
   }
-  if (!a) pari_err(talker, "non coprime ideals in idealaddtoone");
+  if (!a) pari_err(e_MISC, "non coprime ideals in idealaddtoone");
   return a;
 }
 
@@ -802,10 +802,10 @@ idealaddmultoone(GEN nf, GEN list)
   GEN H, U, perm, L;
 
   nf = checknf(nf); N = nf_get_degree(nf);
-  if (!is_vec_t(tx)) pari_err(talker,"not a vector of ideals in idealaddmultoone");
+  if (!is_vec_t(tx)) pari_err(e_MISC,"not a vector of ideals in idealaddmultoone");
   l = lg(list);
   L = cgetg(l, t_VEC);
-  if (l == 1) pari_err(talker,"ideals don't sum to Z_K in idealaddmultoone");
+  if (l == 1) pari_err(e_MISC,"ideals don't sum to Z_K in idealaddmultoone");
   nz = 0; /* number of non-zero ideals in L */
   for (i=1; i<l; i++)
   {
@@ -816,13 +816,13 @@ idealaddmultoone(GEN nf, GEN list)
       nz++;
       RgM_check_ZM(I,"idealaddmultoone");
       if (lg(gel(I,1)) != N+1)
-        pari_err(talker,"%Zs: not an ideal in idealaddmultoone", I);
+        pari_err(e_MISC,"%Zs: not an ideal in idealaddmultoone", I);
     }
     gel(L,i) = I;
   }
   H = ZM_hnfperm(shallowconcat1(L), &U, &perm);
   if (lg(H) == 1 || !gequal1(gcoeff(H,1,1)))
-    pari_err(talker,"ideals don't sum to Z_K in idealaddmultoone");
+    pari_err(e_MISC,"ideals don't sum to Z_K in idealaddmultoone");
   for (i=1; i<=N; i++)
     if (perm[i] == 1) break;
   U = gel(U,(nz-1)*N + i); /* (L[1]|...|L[nz]) U = 1 */
@@ -1392,7 +1392,7 @@ idealnorm(GEN nf, GEN x)
   x = (typ(x) == t_POL)? RgXQ_norm(x, T): gpowgs(x, degpol(T));
   tx = typ(x);
   if (tx == t_INT) return gerepileuptoint(av, absi(x));
-  if (tx != t_FRAC) pari_err(typeer, "idealnorm",x);
+  if (tx != t_FRAC) pari_err(e_TYPE, "idealnorm",x);
   return gerepileupto(av, Q_abs(x));
 }
 
@@ -1447,7 +1447,7 @@ idealinv(GEN nf, GEN x)
   switch (tx)
   {
     case id_MAT:
-      if (lg(x)-1 != nf_get_degree(nf)) pari_err(consister,"idealinv");
+      if (lg(x)-1 != nf_get_degree(nf)) pari_err(e_DIM,"idealinv");
       x = idealinv_HNF(nf,x); break;
     case id_PRINCIPAL: tx = typ(x);
       if (is_const_t(tx)) x = ginv(x);
@@ -1460,7 +1460,7 @@ idealinv(GEN nf, GEN x)
         }
         if (typ(x) != t_POL) { x = ginv(x); break; }
         if (varn(x) != nf_get_varn(nf))
-          pari_err(talker,"incompatible variables in idealinv");
+          pari_err(e_MISC,"incompatible variables in idealinv");
         x = QXQ_inv(x,nf_get_pol(nf));
       }
       x = idealhnf_principal(nf,x); break;
@@ -1599,7 +1599,7 @@ idealpow(GEN nf, GEN x, GEN n)
   long tx;
   GEN res, ax;
 
-  if (typ(n) != t_INT) pari_err(typeer,"idealpow",n);
+  if (typ(n) != t_INT) pari_err(e_TYPE,"idealpow",n);
   tx = idealtyp(&x,&ax);
   res = ax? cgetg(3,t_VEC): NULL;
   av = avma;
@@ -1638,7 +1638,7 @@ idealpowred(GEN nf, GEN x, GEN n)
   long s;
   GEN y;
 
-  if (typ(n) != t_INT) pari_err(typeer,"idealpowred",n);
+  if (typ(n) != t_INT) pari_err(e_TYPE,"idealpowred",n);
   s = signe(n); if (s == 0) return idealpow(nf,x,n);
   y = gen_pow(x, n, (void*)nf, &_sqr, &_mul);
 
@@ -1723,14 +1723,14 @@ idealdivexact(GEN nf, GEN x0, GEN y0)
   nf = checknf(nf);
   x = idealhnf_shallow(nf, x0);
   y = idealhnf_shallow(nf, y0);
-  if (lg(y) == 1) pari_err(talker, "cannot invert zero ideal");
+  if (lg(y) == 1) pari_err(e_MISC, "cannot invert zero ideal");
   if (lg(x) == 1) { avma = av; return cgetg(1, t_MAT); } /* numerator is zero */
   y = Q_primitive_part(y, &cy);
   if (cy) x = RgM_Rg_div(x,cy);
   Nx = idealnorm(nf,x);
   Ny = idealnorm(nf,y);
   if (typ(Nx) != t_INT || typ(Ny) != t_INT || !dvdii(Nx,Ny))
-    pari_err(talker, "quotient not integral in idealdivexact");
+    pari_err(e_MISC, "quotient not integral in idealdivexact");
   /* Find a norm Nz | Ny such that gcd(Nx/Nz, Nz) = 1 */
   for (Nz = Ny;;)
   {
@@ -1787,10 +1787,10 @@ chk_vdir(GEN nf, GEN vdir)
   long i, t, l = lg(vdir);
   GEN v;
   if (l != lg(nf_get_roots(nf)))
-    pari_err(talker, "incorrect vector length in idealred");
+    pari_err(e_MISC, "incorrect vector length in idealred");
   t = typ(vdir);
   if (t == t_VECSMALL) return vdir;
-  if (t != t_VEC) pari_err(typeer, "idealred",vdir);
+  if (t != t_VEC) pari_err(e_TYPE, "idealred",vdir);
   v = cgetg(l, t_VECSMALL);
   for (i=1; i<l; i++) v[i] = itos(gceil(gel(vdir,i)));
   return v;
@@ -2074,7 +2074,7 @@ unif_mod_fZ(GEN pr, GEN F)
   {
     GEN u, v, q, a = diviiexact(F,p);
     q = (pr_get_e(pr) == 1)? sqri(p): p;
-    if (!gequal1(bezout(q, a, &u,&v))) pari_err(bugparier,"unif_mod_fZ");
+    if (!gequal1(bezout(q, a, &u,&v))) pari_err(e_BUG,"unif_mod_fZ");
     u = mulii(u,q);
     v = mulii(v,a);
     t = ZC_Z_mul(t, v);
@@ -2137,7 +2137,7 @@ idealapprfact_i(GEN nf, GEN x, int nored)
   if (!z) return scalarcol_shallow(gen_1, nf_get_degree(nf));
   if (nored)
   {
-    if (flagden) pari_err(impl,"nored + denominator in idealapprfact");
+    if (flagden) pari_err(e_IMPL,"nored + denominator in idealapprfact");
     return z;
   }
   e2 = cgetg(r, t_VEC);
@@ -2159,7 +2159,7 @@ GEN
 idealapprfact(GEN nf, GEN x) {
   pari_sp av = avma;
   if (typ(x) != t_MAT || lg(x) != 3)
-    pari_err(talker,"not a factorization in idealapprfact");
+    pari_err(e_MISC,"not a factorization in idealapprfact");
   check_listpr(gel(x,1));
   return gerepileupto(av, idealapprfact_i(nf, x, 0));
 }
@@ -2218,11 +2218,11 @@ idealchinese(GEN nf, GEN x, GEN w)
 
   nf = checknf(nf); N = nf_get_degree(nf);
   if (typ(x) != t_MAT || lg(x) != 3)
-    pari_err(talker,"not a prime ideal factorization in idealchinese");
+    pari_err(e_MISC,"not a prime ideal factorization in idealchinese");
   L = gel(x,1); r = lg(L);
   e = gel(x,2);
   if (!is_vec_t(ty) || lg(w) != r)
-    pari_err(talker,"not a suitable vector of elements in idealchinese");
+    pari_err(e_MISC,"not a suitable vector of elements in idealchinese");
   if (r == 1) return scalarcol_shallow(gen_1,N);
 
   w = Q_remove_denom(w, &den);
@@ -2251,7 +2251,7 @@ idealchinese(GEN nf, GEN x, GEN w)
     if (gequal0(gel(w,i))) continue;
     u = hnfmerge_get_1(idealdivpowprime(nf,F, gel(L,i), gel(e,i)),
                        idealpow(nf, gel(L,i), gel(e,i)));
-    if (!u) pari_err(talker, "non coprime ideals in idealchinese");
+    if (!u) pari_err(e_MISC, "non coprime ideals in idealchinese");
     t = nfmuli(nf, u, gel(w,i));
     s = s? ZC_add(s,t): t;
   }
@@ -2273,7 +2273,7 @@ mat_ideal_two_elt2(GEN nf, GEN x, GEN a)
 
 static void
 not_in_ideal(void) {
-  pari_err(talker,"element not in ideal in idealtwoelt2");
+  pari_err(e_MISC,"element not in ideal in idealtwoelt2");
 }
 
 /* Given an integral ideal x and a in x, gives a b such that
@@ -2347,7 +2347,7 @@ nfreduce(GEN nf, GEN x, GEN I)
   pari_sp av = avma;
   GEN aI;
   x = nf_to_scalar_or_basis(checknf(nf), x);
-  if (idealtyp(&I,&aI) != id_MAT || lg(I)==1) pari_err(typeer,"nfreduce",I);
+  if (idealtyp(&I,&aI) != id_MAT || lg(I)==1) pari_err(e_TYPE,"nfreduce",I);
   if (typ(x) != t_COL) x = scalarcol( gmod(x, gcoeff(I,1,1)), lg(I)-1 );
   else x = reducemodinvertible(x, I);
   return gerepileupto(av, x);
@@ -2522,9 +2522,9 @@ nfhnf(GEN nf, GEN x)
   check_ZKmodule(x, "nfhnf");
   A = gel(x,1);
   I = gel(x,2); k = lg(A)-1;
-  if (!k) pari_err(talker,"not a matrix of maximal rank in nfhnf");
+  if (!k) pari_err(e_MISC,"not a matrix of maximal rank in nfhnf");
   m = lg(A[1])-1;
-  if (k < m) pari_err(talker,"not a matrix of maximal rank in nfhnf");
+  if (k < m) pari_err(e_MISC,"not a matrix of maximal rank in nfhnf");
 
   av = avma; lim = stack_lim(av, 2);
   A = RgM_to_nfM(nf,A);
@@ -2535,7 +2535,7 @@ nfhnf(GEN nf, GEN x)
     GEN d, di = NULL;
 
     def--; j=def; while (j>=1 && gequal0(gcoeff(A,i,j))) j--;
-    if (!j) pari_err(talker,"not a matrix of maximal rank in nfhnf");
+    if (!j) pari_err(e_MISC,"not a matrix of maximal rank in nfhnf");
     if (j==def) j--; else {
       swap(gel(A,j), gel(A,def)); swap(gel(I,j), gel(I,def));
     }
@@ -2598,19 +2598,19 @@ nfsnf(GEN nf, GEN x)
   GEN z,u,v,w,d,dinv,A,I,J;
 
   nf = checknf(nf); N = nf_get_degree(nf);
-  if (typ(x)!=t_VEC || lg(x)!=4) pari_err(typeer,"nfsnf",x);
+  if (typ(x)!=t_VEC || lg(x)!=4) pari_err(e_TYPE,"nfsnf",x);
   A = gel(x,1);
   I = gel(x,2);
   J = gel(x,3);
-  if (typ(A)!=t_MAT) pari_err(typeer,"nfsnf",A);
+  if (typ(A)!=t_MAT) pari_err(e_TYPE,"nfsnf",A);
   n = lg(A)-1;
-  if (typ(I)!=t_VEC) pari_err(typeer,"nfsnf",I);
-  if (typ(J)!=t_VEC) pari_err(typeer,"nfsnf",J);
-  if (lg(I)!=n+1 || lg(J)!=n+1) pari_err(consister,"nfsnf");
-  if (!n) pari_err(talker,"not a matrix of maximal rank in nfsnf");
+  if (typ(I)!=t_VEC) pari_err(e_TYPE,"nfsnf",I);
+  if (typ(J)!=t_VEC) pari_err(e_TYPE,"nfsnf",J);
+  if (lg(I)!=n+1 || lg(J)!=n+1) pari_err(e_DIM,"nfsnf");
+  if (!n) pari_err(e_MISC,"not a matrix of maximal rank in nfsnf");
   m = lg(A[1])-1;
-  if (n < m) pari_err(talker,"not a matrix of maximal rank in nfsnf");
-  if (n > m) pari_err(impl,"nfsnf for non square matrices");
+  if (n < m) pari_err(e_MISC,"not a matrix of maximal rank in nfsnf");
+  if (n > m) pari_err(e_IMPL,"nfsnf for non square matrices");
 
   av = avma; lim = stack_lim(av,1);
   A = RgM_to_nfM(nf, A);
@@ -2671,7 +2671,7 @@ nfsnf(GEN nf, GEN x)
           D = idealdiv(nf,gel(I,k),gel(I,i));
           p2 = idealdiv(nf,gel(J,i), p1);
           l = RgV_find_denom( RgM_solve(p2, D) );
-          if (l>N) pari_err(talker,"bug2 in nfsnf");
+          if (l>N) pari_err(e_MISC,"bug2 in nfsnf");
           p1 = element_mulvecrow(nf,gel(D,l),A,k,i);
           for (l=1; l<=i; l++) gcoeff(A,i,l) = gadd(gcoeff(A,i,l),gel(p1,l));
 
@@ -2729,7 +2729,7 @@ nfkermodpr(GEN nf, GEN x, GEN modpr)
   GEN T, p, pr = modpr;
 
   nf = checknf(nf); modpr = nf_to_Fq_init(nf, &pr,&T,&p);
-  if (typ(x)!=t_MAT) pari_err(typeer,"nfkermodpr",x);
+  if (typ(x)!=t_MAT) pari_err(e_TYPE,"nfkermodpr",x);
   x = nfM_to_FqM(x, nf, modpr);
   return gerepilecopy(av, FqM_to_nfM(FqM_ker(x,T,p), modpr));
 }
@@ -2743,7 +2743,7 @@ nfsolvemodpr(GEN nf, GEN a, GEN b, GEN pr)
 
   nf = checknf(nf);
   modpr = nf_to_Fq_init(nf, &pr,&T,&p);
-  if (typ(a)!=t_MAT) pari_err(typeer,"nfsolvemodpr",a);
+  if (typ(a)!=t_MAT) pari_err(e_TYPE,"nfsolvemodpr",a);
   a = nfM_to_FqM(a, nf, modpr);
   switch(tb)
   {
@@ -2755,7 +2755,7 @@ nfsolvemodpr(GEN nf, GEN a, GEN b, GEN pr)
       b = nfV_to_FqV(b, nf, modpr);
       a = FqV_to_nfV(FqM_gauss(a,b,T,p), modpr);
       break;
-    default: pari_err(typeer,"nfsolvemodpr",b);
+    default: pari_err(e_TYPE,"nfsolvemodpr",b);
   }
   return gerepilecopy(av, a);
 }
@@ -2896,7 +2896,7 @@ nfhnfmod(GEN nf, GEN x, GEN detmat)
 
   li = lg(A[1]);
   detmat = Q_remove_denom(detmat, NULL);
-  if (typ(detmat)!=t_MAT) pari_err(typeer,"nfhnfmod",detmat);
+  if (typ(detmat)!=t_MAT) pari_err(e_TYPE,"nfhnfmod",detmat);
   RgM_check_ZM(detmat, "nfhnfmod");
 
   av = avma; lim = stack_lim(av,2);

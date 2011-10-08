@@ -62,7 +62,7 @@ GEN
 next0(long n)
 {
   if (n < 1)
-    pari_err(talker,"positive integer expected in next");
+    pari_err(e_MISC,"positive integer expected in next");
   if (n == 1) br_status = br_NEXT;
   else
   {
@@ -76,7 +76,7 @@ GEN
 break0(long n)
 {
   if (n < 1)
-    pari_err(talker,"positive integer expected in break");
+    pari_err(e_MISC,"positive integer expected in break");
   br_count = n;
   br_status = br_BREAK; return NULL;
 }
@@ -218,7 +218,7 @@ copyvalue(entree *ep)
 }
 
 INLINE void
-err_var(void) { pari_err(talker, "variable name expected"); }
+err_var(void) { pari_err(e_MISC, "variable name expected"); }
 
 INLINE void
 checkvalue(entree *ep)
@@ -257,9 +257,9 @@ check_array_index(long c, long max)
   if (c < 1 || c >= max)
   {
     if (max <= 2)
-      pari_err(talker,"array index (%ld) out of allowed range [%s]",c,max==1?"none":"1");
+      pari_err(e_MISC,"array index (%ld) out of allowed range [%s]",c,max==1?"none":"1");
     else
-      pari_err(talker,"array index (%ld) out of allowed range [1-%ld]",c,max-1);
+      pari_err(e_MISC,"array index (%ld) out of allowed range [1-%ld]",c,max-1);
   }
 }
 
@@ -290,14 +290,14 @@ change_compo(matcomp *c, GEN res)
   if (typ(p) == t_VECSMALL)
   {
     if (typ(res) != t_INT || is_bigint(res))
-      pari_err(talker,"not a suitable VECSMALL component");
+      pari_err(e_MISC,"not a suitable VECSMALL component");
     *pt = (GEN)itos(res); return;
   }
   t = typ(res);
   if (c->full_row)
   {
     if (t != t_VEC || lg(res) != lg(p))
-      pari_err(talker,"incorrect type or length in matrix assignment");
+      pari_err(e_MISC,"incorrect type or length in matrix assignment");
     for (i=1; i<lg(p); i++)
     {
       GEN p1 = gcoeff(p,c->full_row,i); if (isclone(p1)) gunclone_deep(p1);
@@ -307,7 +307,7 @@ change_compo(matcomp *c, GEN res)
   }
   if (c->full_col)
     if (t != t_COL || lg(res) != lg(*pt))
-      pari_err(talker,"incorrect type or length in matrix assignment");
+      pari_err(e_MISC,"incorrect type or length in matrix assignment");
 
   res = gclone(res);
   gunclone_deep(*pt);
@@ -557,7 +557,7 @@ closure_castgen(GEN z, long mode)
   case Gvoid:
     break;
   default:
-    pari_err(bugparier,"closure_castgen, type unknown");
+    pari_err(e_BUG,"closure_castgen, type unknown");
   }
 }
 
@@ -575,7 +575,7 @@ closure_castlong(long z, long mode)
   case Gvar:
     err_var();
   default:
-    pari_err(bugparier,"closure_castlong, type unknown");
+    pari_err(e_BUG,"closure_castlong, type unknown");
   }
 }
 
@@ -717,7 +717,7 @@ closure_eval(GEN C)
   {
     op_code opcode=(op_code) code[pc];
     long operand=oper[pc];
-    if (sp<0) pari_err(bugparier,"closure_eval, stack underflow");
+    if (sp<0) pari_err(e_BUG,"closure_eval, stack underflow");
     st_alloc(16);
     CHECK_CTRLC
     switch(opcode)
@@ -928,7 +928,7 @@ closure_eval(GEN C)
           closure_castlong(p[c],operand);
           break;
         default:
-          pari_err(talker,"_[_]: not a vector");
+          pari_err(e_MISC,"_[_]: not a vector");
           break;
         }
         break;
@@ -960,7 +960,7 @@ closure_eval(GEN C)
           g->x = *(C->ptcell);
           break;
         default:
-          pari_err(talker,"_[_]: not a vector");
+          pari_err(e_MISC,"_[_]: not a vector");
         }
         C->parent   = p;
         break;
@@ -971,7 +971,7 @@ closure_eval(GEN C)
         long c=st[sp-2];
         long d=st[sp-1];
         if (typ(p)!=t_MAT)
-          pari_err(talker,"_[_,_]: not a matrix");
+          pari_err(e_MISC,"_[_,_]: not a matrix");
         check_array_index(d, lg(p));
         check_array_index(c, lg(p[d]));
         sp-=3;
@@ -987,7 +987,7 @@ closure_eval(GEN C)
         GEN p = g->x;
         sp-=2;
         if (typ(p)!=t_MAT)
-          pari_err(talker,"_[_,_]: not a matrix");
+          pari_err(e_MISC,"_[_,_]: not a matrix");
         check_array_index(d, lg(p));
         check_array_index(c, lg(p[d]));
         C->ptcell = (GEN *) gel(p,d)+c;
@@ -1000,7 +1000,7 @@ closure_eval(GEN C)
         GEN  p=gel(st,sp-2);
         long c=st[sp-1];
         if (typ(p)!=t_MAT)
-          pari_err(talker,"_[,_]: not a matrix");
+          pari_err(e_MISC,"_[,_]: not a matrix");
         check_array_index(c, lg(p));
         sp--;
         gel(st,sp-1) = gel(p,c);
@@ -1014,7 +1014,7 @@ closure_eval(GEN C)
         GEN p = g->x;
         sp--;
         if (typ(p)!=t_MAT)
-          pari_err(talker,"_[,_]: not a matrix");
+          pari_err(e_MISC,"_[,_]: not a matrix");
         check_array_index(c, lg(p));
         C->ptcell = (GEN *) p+c;
         C->full_col = c;
@@ -1028,8 +1028,8 @@ closure_eval(GEN C)
         long r=st[sp-1];
         sp--;
         if (typ(p)!=t_MAT)
-          pari_err(talker,"_[_,]: not a matrix");
-        if (lg(p)==1) pari_err(talker,"a 0x0 matrix has no elements");
+          pari_err(e_MISC,"_[_,]: not a matrix");
+        if (lg(p)==1) pari_err(e_MISC,"a 0x0 matrix has no elements");
         check_array_index(r,lg(p[1]));
         gel(st,sp-1) = row(p,r);
         break;
@@ -1042,8 +1042,8 @@ closure_eval(GEN C)
         GEN p = g->x, p2;
         sp--;
         if (typ(p)!=t_MAT)
-          pari_err(talker,"_[_,]: not a matrix");
-        if (lg(p)==1) pari_err(talker,"a 0x0 matrix has no elements");
+          pari_err(e_MISC,"_[_,]: not a matrix");
+        if (lg(p)==1) pari_err(e_MISC,"a 0x0 matrix has no elements");
         check_array_index(r,lg(p[1]));
         p2 = rowcopy(p,r);
         C->full_row = r; /* record row number */
@@ -1104,7 +1104,7 @@ closure_eval(GEN C)
     case 19: sp-=19; f(st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4],st[sp+5],st[sp+6],st[sp+7],st[sp+8],st[sp+9],st[sp+10],st[sp+11],st[sp+12],st[sp+13],st[sp+14],st[sp+15],st[sp+16],st[sp+17],st[sp+18]); break; \
     case 20: sp-=20; f(st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4],st[sp+5],st[sp+6],st[sp+7],st[sp+8],st[sp+9],st[sp+10],st[sp+11],st[sp+12],st[sp+13],st[sp+14],st[sp+15],st[sp+16],st[sp+17],st[sp+18],st[sp+19]); break; \
     default: \
-      pari_err(impl,"functions with more than 20 parameters");\
+      pari_err(e_IMPL,"functions with more than 20 parameters");\
       goto endeval; /*not reached*/ \
   }
 
@@ -1162,15 +1162,15 @@ closure_eval(GEN C)
         GEN fun = gel(st,sp-1-n);
         long arity;
         GEN z;
-        if (typ(fun)!=t_CLOSURE) pari_err(notfuncer, fun);
+        if (typ(fun)!=t_CLOSURE) pari_err(e_NOTFUNC, fun);
         arity=fun[1];
         if (n>arity)
-          pari_err(talker,"too many parameters in user-defined function call");
+          pari_err(e_MISC,"too many parameters in user-defined function call");
         for (j=n+1;j<=arity;j++)
           gel(st,sp++)=0;
 #ifdef STACK_CHECK
         if (PARI_stack_limit && (void*) &z <= PARI_stack_limit)
-          pari_err(talker, "deep recursion");
+          pari_err(e_MISC, "deep recursion");
 #endif
         z = closure_return(fun);
         if (br_status) goto endeval;
@@ -1220,12 +1220,12 @@ closure_eval(GEN C)
     case OCcheckargs:
       for (j=sp-1;operand;operand>>=1UL,j--)
         if ((operand&1L) && gel(st,j)==NULL)
-          pari_err(talker,"missing mandatory argument");
+          pari_err(e_MISC,"missing mandatory argument");
       break;
     case OCcheckargs0:
       for (j=sp-1;operand;operand>>=1UL,j--)
         if ((operand&1L) && gel(st,j))
-          pari_err(talker,"argument type not implemented");
+          pari_err(e_MISC,"argument type not implemented");
       break;
     case OCdefaultlong:
       sp--;
@@ -1350,7 +1350,7 @@ closure_evalnobrk(GEN C)
 {
   pari_sp ltop=avma;
   closure_eval(C);
-  if (br_status) pari_err(talker, "break not allowed here");
+  if (br_status) pari_err(e_MISC, "break not allowed here");
   return gerepileupto(ltop,gel(st,--sp));
 }
 
@@ -1492,7 +1492,7 @@ closure_disassemble(GEN C)
   char * code;
   GEN oper;
   long i;
-  if (typ(C)!=t_CLOSURE) pari_err(typeer,"disassemble",C);
+  if (typ(C)!=t_CLOSURE) pari_err(e_TYPE,"disassemble",C);
   code=GSTR(gel(C,2))-1;
   oper=gel(C,3);
   for(i=1;i<lg(oper);i++)

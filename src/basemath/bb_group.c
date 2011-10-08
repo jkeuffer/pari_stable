@@ -247,7 +247,7 @@ gen_Shanks_log(GEN x, GEN g0,GEN q, void *E, const struct bb_group *grp)
   GEN p1,smalltable,giant,perm,v,g0inv;
   p1 = sqrti(q);
   if (cmpiu(p1,LGBITS) >= 0)
-    pari_err(talker,"order too large in gen_Shanks_log");
+    pari_err(e_MISC,"order too large in gen_Shanks_log");
   lbaby = itos(p1)+1; smalltable = cgetg(lbaby+1,t_VEC);
   g0inv = grp->pow(E,g0,gen_m1);
 
@@ -313,7 +313,7 @@ dlog_get_ordfa(GEN o)
       if (lg(o) == 3 && signe(gel(o,1)) > 0 && is_Z_factor(gel(o,2))) return o;
       break;
   }
-  pari_err(typeer, "generic discrete logarithm (order factorization)",o);
+  pari_err(e_TYPE, "generic discrete logarithm (order factorization)",o);
   return NULL; /* not reached */
 }
 GEN
@@ -335,7 +335,7 @@ dlog_get_ord(GEN o)
       if (typ(o) == t_INT && signe(o) > 0) return o;
       break;
   }
-  pari_err(typeer, "generic discrete logarithm (order factorization)",o);
+  pari_err(e_TYPE, "generic discrete logarithm (order factorization)",o);
   return NULL; /* not reached */
 }
 
@@ -414,7 +414,7 @@ gen_order(GEN a, GEN o, void *E, const struct bb_group *grp)
   GEN m;
 
   m = dlog_get_ordfa(o);
-  if (!m) pari_err(talker,"missing order in gen_order");
+  if (!m) pari_err(e_MISC,"missing order in gen_order");
   o = gel(m,1);
   m = gel(m,2); l = lg(m[1]);
   for (i = l-1; i; i--)
@@ -453,7 +453,7 @@ gen_factored_order(GEN a, GEN o, void *E, const struct bb_group *grp)
   GEN m, F, P;
 
   m = dlog_get_ordfa(o);
-  if (!m) pari_err(talker,"missing order in gen_order");
+  if (!m) pari_err(e_MISC,"missing order in gen_order");
   o = gel(m,1);
   m = gel(m,2); l = lg(m[1]);
   P = cgetg(l, t_COL); ind = 1;

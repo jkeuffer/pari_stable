@@ -70,13 +70,13 @@ unused_chars(const char *lex, int strict)
 void
 compile_err(const char *msg, const char *str)
 {
-  pari_err(syntaxer, msg, str, pari_lex_start);
+  pari_err(e_SYNTAX, msg, str, pari_lex_start);
 }
 
 void
 compile_varerr(const char *str)
 {
-  pari_err(syntaxer, "variable name expected", str, pari_lex_start);
+  pari_err(e_SYNTAX, "variable name expected", str, pari_lex_start);
 }
 
 void

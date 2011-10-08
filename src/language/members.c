@@ -35,7 +35,7 @@ INLINE int is_ell(GEN x) {
 }
 
 static void
-member_err(const char *s) { pari_err(typeer,s); }
+member_err(const char *s) { pari_err(e_TYPE,s); }
 
 GEN
 member_e(GEN x)
@@ -291,7 +291,7 @@ member_reg(GEN x) /* regulator */
     if (t == typ_QUA) return gel(x,4);
     member_err("reg");
   }
-  if (t == typ_BNR) pari_err(impl,"ray regulator");
+  if (t == typ_BNR) pari_err(e_IMPL,"ray regulator");
   y = check_RES(y, "reg");
   return gel(y,2);
 }
@@ -310,7 +310,7 @@ member_fu(GEN x) /* fundamental units */
     }
     member_err("fu");
   }
-  if (t == typ_BNR) pari_err(impl,"ray units");
+  if (t == typ_BNR) pari_err(e_IMPL,"ray units");
   return matbasistoalg(y, bnf_get_fu(y));
 }
 
@@ -332,7 +332,7 @@ member_tu(GEN x)
   }
   else
   {
-    if (t == typ_BNR) pari_err(impl,"ray torsion units");
+    if (t == typ_BNR) pari_err(e_IMPL,"ray torsion units");
     gel(res,1) = utoipos( bnf_get_tuN(bnf) );
     gel(res,2) = basistoalg(bnf, bnf_get_tuU(bnf));
   }
@@ -510,7 +510,7 @@ GEN
 member_omega(GEN x)
 {
   if (!is_ell(x)) member_err("omega");
-  if (!ell_is_real(x)) pari_err(talker,"curve not defined over R");
+  if (!ell_is_real(x)) pari_err(e_MISC,"curve not defined over R");
   return mkvec2(gel(x,15), gel(x,16));
 }
 
@@ -518,7 +518,7 @@ GEN
 member_eta(GEN x)
 {
   if (!is_ell(x)) member_err("eta");
-  if (!ell_is_real(x)) pari_err(talker,"curve not defined over R");
+  if (!ell_is_real(x)) pari_err(e_MISC,"curve not defined over R");
   return mkvec2(gel(x,17), gel(x,18));
 }
 
@@ -526,7 +526,7 @@ GEN
 member_area(GEN x)
 {
   if (!is_ell(x)) member_err("area");
-  if (!ell_is_real(x)) pari_err(talker,"curve not defined over R");
+  if (!ell_is_real(x)) pari_err(e_MISC,"curve not defined over R");
   return gel(x,19);
 }
 
@@ -535,7 +535,7 @@ member_tate(GEN x)
 {
   if (!is_ell(x)) member_err("tate");
   if (!ell_is_padic(x))
-    pari_err(talker,"curve not defined over a p-adic field");
+    pari_err(e_MISC,"curve not defined over a p-adic field");
   return mkvec3(gel(x,15), gel(x,16), gel(x,17));
 }
 
@@ -544,6 +544,6 @@ member_w(GEN x)
 {
   if (!is_ell(x)) member_err("w");
   if (!ell_is_padic(x))
-    pari_err(talker,"curve not defined over a p-adic field");
+    pari_err(e_MISC,"curve not defined over a p-adic field");
   return gel(x,18);
 }

@@ -53,7 +53,7 @@ eval_mnemonic(GEN str, const char *tmplate)
   const char *arg;
 
   if (typ(str)==t_INT) return itos(str);
-  if (typ(str)!=t_STR) pari_err(typeer,"eval_mnemonic",str);
+  if (typ(str)!=t_STR) pari_err(e_TYPE,"eval_mnemonic",str);
 
   arg=GSTR(str);
   etmplate = strchr(tmplate, '\n');
@@ -78,9 +78,9 @@ eval_mnemonic(GEN str, const char *tmplate)
     /* Now the ID is whatever is between arg and e. */
     l = e - arg;
     if (l >= sizeof(b))
-      pari_err(talker,"id too long in a stringified flag");
+      pari_err(e_MISC,"id too long in a stringified flag");
     if (!l)                             /* Garbage after whitespace? */
-      pari_err(talker,"a stringified flag does not start with an id");
+      pari_err(e_MISC,"a stringified flag does not start with an id");
     strncpy(b, arg, l);
     b[l] = 0;
     arg = e;
@@ -88,7 +88,7 @@ eval_mnemonic(GEN str, const char *tmplate)
     while (('0' <= *e) && (*e <= '9'))
       e++;
     if (*e == 0)
-      pari_err(talker,"numeric id in a stringified flag");
+      pari_err(e_MISC,"numeric id in a stringified flag");
     negate = 0;
     negated = NULL;
 find:
@@ -137,14 +137,14 @@ find:
       negate = 1;
     }
     if (!id)
-      pari_err(talker,"Unrecognized id '%s' in a stringified flag", inibuf);
+      pari_err(e_MISC,"Unrecognized id '%s' in a stringified flag", inibuf);
     if (singleton && !first)
-      pari_err(talker,"Singleton id non-single in a stringified flag");
+      pari_err(e_MISC,"Singleton id non-single in a stringified flag");
     if (id[0] == '=') {
       if (negate)
-        pari_err(talker,"Cannot negate id=value in a stringified flag");
+        pari_err(e_MISC,"Cannot negate id=value in a stringified flag");
       if (!first)
-        pari_err(talker,"Assign action should be first in a stringified flag");
+        pari_err(e_MISC,"Assign action should be first in a stringified flag");
       action = A_ACTION_ASSIGN;
       id++;
       if (id[0] == '=') {
@@ -153,7 +153,7 @@ find:
       }
     } else if (id[0] == '^') {
       if (id[1] != '~')
-        pari_err(talker, "Unrecognized action in a template");
+        pari_err(e_MISC, "Unrecognized action in a template");
       id += 2;
       if (negate)
         action = A_ACTION_SET;
@@ -173,7 +173,7 @@ find:
     while (isspace((int)*e))
       e++;
     if (*e && (*e != ';') && (*e != ','))
-      pari_err(talker, "Non-numeric argument of an action in a template");
+      pari_err(e_MISC, "Non-numeric argument of an action in a template");
     numarg = atol(id);          /* Now it is safe to get it... */
     switch (action) {
     case A_ACTION_SET:
@@ -186,13 +186,13 @@ find:
       retval = numarg;
       break;
     default:
-      pari_err(talker,"error in parse_option_string");
+      pari_err(e_MISC,"error in parse_option_string");
     }
     first = 0;
     while (isspace((int)*arg))
       arg++;
     if (*arg && !(ispunct((int)*arg) && *arg != '-'))
-      pari_err(talker,"Junk after an id in a stringified flag");
+      pari_err(e_MISC,"Junk after an id in a stringified flag");
     /* Skip punctuation */
     if (*arg)
       arg++;
@@ -265,7 +265,7 @@ check_proto(const char *code)
         s++; break;
       }
       old = s; while (*s && *s != ',') s++;
-      if (*s != ',') pari_err(syntaxer, "missing comma", old, code);
+      if (*s != ',') pari_err(e_SYNTAX, "missing comma", old, code);
       break;
     case 'V':
     case '=':
@@ -275,10 +275,10 @@ check_proto(const char *code)
     case 'm':
     case 'l':
     case 'i':
-    case 'v': pari_err(syntaxer, "this code has to come first", s-1, code);
-    default: pari_err(syntaxer, "unknown parser code", s-1, code);
+    case 'v': pari_err(e_SYNTAX, "this code has to come first", s-1, code);
+    default: pari_err(e_SYNTAX, "unknown parser code", s-1, code);
   }
-  if (arity > 20) pari_err(impl,"functions with more than 20 parameters");
+  if (arity > 20) pari_err(e_IMPL,"functions with more than 20 parameters");
   return arity;
 }
 
@@ -311,7 +311,7 @@ install(void *f, char *name, char *code)
   if (ep && ep->valence != EpNEW)
   {
     if (ep->valence != EpINSTALL)
-      pari_err(talker,"[install] identifier '%s' already in use", name);
+      pari_err(e_MISC,"[install] identifier '%s' already in use", name);
     pari_warn(warner, "[install] updating '%s' prototype; module not reloaded", name);
     if (ep->code) pari_free((void*)ep->code);
   }
@@ -320,7 +320,7 @@ install(void *f, char *name, char *code)
     char *s = name;
     if (isalpha((int)*s))
       while (is_keyword_char(*++s)) /* empty */;
-    if (*s) pari_err(syntaxer,"not a valid identifier", s, name);
+    if (*s) pari_err(e_SYNTAX,"not a valid identifier", s, name);
     if (!ep) ep = installep(name, strlen(name), functions_hash + hash);
     ep->value=f; ep->valence=EpINSTALL;
   }
@@ -334,7 +334,7 @@ void
 kill0(const char *e)
 {
   entree *ep = is_entry(e);
-  if (!ep || EpSTATIC(ep)) pari_err(talker,"can't kill that");
+  if (!ep || EpSTATIC(ep)) pari_err(e_MISC,"can't kill that");
   freeep(ep);
   ep->valence = EpNEW;
   ep->value   = NULL;
@@ -778,7 +778,7 @@ long pari_var_next_temp(void) { return max_avail; }
 static long
 pari_var_pop(long v)
 {
-  if (v != nvar-1) pari_err(talker,"can't pop user variable %ld", v);
+  if (v != nvar-1) pari_err(e_MISC,"can't pop user variable %ld", v);
   return --nvar;
 }
 void
@@ -787,7 +787,7 @@ pari_var_create(entree *ep)
   GEN p = (GEN)initial_value(ep);
   long v;
   if (*p) return;
-  if (nvar == max_avail) pari_err(talker,"no more variables available");
+  if (nvar == max_avail) pari_err(e_MISC,"no more variables available");
   v = nvar++;
   /* set p = pol_x(v) */
   p[0] = evaltyp(t_POL) | _evallg(4);
@@ -806,7 +806,7 @@ delete_var(void)
 long
 fetch_var(void)
 {
-  if (nvar == max_avail) pari_err(talker,"no more variables available");
+  if (nvar == max_avail) pari_err(e_MISC,"no more variables available");
   return max_avail--;
 }
 
@@ -824,7 +824,7 @@ manage_var(long n, entree *ep)
         pari_var_create(ep);
         return varn(initial_value(ep));
   }
-  pari_err(talker, "panic");
+  pari_err(e_MISC, "panic");
   return -1; /* not reached */
 }
 
@@ -838,7 +838,7 @@ fetch_named_var(const char *s)
   {
     case EpVAR: return ep;
     case EpNEW: break;
-    default: pari_err(talker, "%s already exists with incompatible valence", s);
+    default: pari_err(e_MISC, "%s already exists with incompatible valence", s);
   }
   pari_var_create(ep);
   ep->valence=EpVAR;
@@ -871,9 +871,9 @@ name_var(long n, const char *s)
   char *u;
 
   if (n < pari_var_next())
-    pari_err(talker, "renaming a GP variable is forbidden");
+    pari_err(e_MISC, "renaming a GP variable is forbidden");
   if (n > (long)MAXVARN)
-    pari_err(talker, "variable number too big");
+    pari_err(e_MISC, "variable number too big");
 
   ep = (entree*)pari_malloc(sizeof(entree) + strlen(s) + 1);
   u = (char *)initial_value(ep);
@@ -904,7 +904,7 @@ gpolvar(GEN x)
   }
   if (typ(x)==t_PADIC) return gcopy( gel(x,2) );
   v = gvar(x);
-  if (v==NO_VARIABLE) pari_err(typeer,"gpolvar",x);
+  if (v==NO_VARIABLE) pari_err(e_TYPE,"gpolvar",x);
   return pol_x(v);
 }
 
@@ -954,7 +954,7 @@ alias0(const char *s, const char *old)
   ep = fetch_entry(old,strlen(old));
   e  = fetch_entry(s,strlen(s));
   if (EpVALENCE(e) != EpALIAS && EpVALENCE(e) != EpNEW)
-    pari_err(talker,"can't replace an existing symbol by an alias");
+    pari_err(e_MISC,"can't replace an existing symbol by an alias");
   freeep(e);
   x = newblock(2); x[0] = evaltyp(t_STR)|_evallg(2); /* for getheap */
   gel(x,1) = (GEN)ep;

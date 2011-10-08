@@ -15,33 +15,33 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 enum err_list {
 /* Force errors into non-0 */
-  syntaxer = 1, bugparier, /* untrappable errors */
+  e_SYNTAX = 1, e_BUG, /* untrappable errors */
 
-  alarmer, openfiler,
+  e_ALARM, e_FILE,
 
-  talker, flagerr, impl, archer, notfuncer,
+  e_MISC, e_FLAG, e_IMPL, e_ARCH, e_NOTFUNC,
 
-  precer, typeer, consister, user,
+  e_PREC, e_TYPE, e_DIM, e_USER,
 
-  errpile, overflower,
+  e_STACK, e_OVERFLOW,
 
 /* arith.c  */
-  primer1, invmoder,
+  e_MAXPRIME, e_INTMOD,
 
 /* base.c   */
-  constpoler, redpoler, zeropoler,
+  e_CONSTPOL, e_IRREDPOL, e_ZEROPOL,
 
 /* gen.c */
-  operi, operf, gdiver,
+  e_OP, e_TYPE2, e_INV,
 
 /* init.c */
-  memer,
+  e_MEM,
 
 /* trans.c */
-  negexper, sqrter5,
+  e_NEGVAL, e_SQRTN,
 
 /* NO ERROR */
-  noer
+  e_NONE
 };
 
 enum { warner, warnprec, warnfile, warnmem };

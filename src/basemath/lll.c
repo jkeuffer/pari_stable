@@ -614,7 +614,7 @@ incrementalGSgen(GEN x, GEN L, GEN B, long k, GEN fl)
     if (j==k || fl[j])
     {
       u = gcoeff(x,k,j); tu = typ(u);
-      if (! is_extscalar_t(tu)) pari_err(typeer,"incrementalGSgen",u);
+      if (! is_extscalar_t(tu)) pari_err(e_TYPE,"incrementalGSgen",u);
       for (i=1; i<j; i++)
         if (fl[i])
         {
@@ -639,7 +639,7 @@ lllgramallgen(GEN x, long flag)
   int flc;
 
   n = lx-1; if (n<=1) return lll_trivial(x,flag);
-  if (lg(x[1]) != lx) pari_err(consister,"lllgramallgen");
+  if (lg(x[1]) != lx) pari_err(e_DIM,"lllgramallgen");
 
   fl = cgetg(lx, t_VECSMALL);
 
@@ -733,7 +733,7 @@ rescale_to_int(GEN x)
           if (exact) D = lcmii(D, gel(c,2));
           break;
         default:
-          pari_err(typeer,"rescale_to_int",c);
+          pari_err(e_TYPE,"rescale_to_int",c);
           return NULL; /* not reached */
       }
       if (e < emin) emin = e;
@@ -763,7 +763,7 @@ lll(GEN x) { return lllfp(x,LLLDFT,LLL_IM); }
 GEN
 qflll0(GEN x, long flag)
 {
-  if (typ(x) != t_MAT) pari_err(typeer,"qflll",x);
+  if (typ(x) != t_MAT) pari_err(e_TYPE,"qflll",x);
   switch(flag)
   {
     case 0: return lll(x);
@@ -772,7 +772,7 @@ qflll0(GEN x, long flag)
     case 4: RgM_check_ZM(x,"qflll"); return lllkerim(x);
     case 5: return lllkerimgen(x);
     case 8: return lllgen(x);
-    default: pari_err(flagerr,"qflll");
+    default: pari_err(e_FLAG,"qflll");
   }
   return NULL; /* not reached */
 }
@@ -780,7 +780,7 @@ qflll0(GEN x, long flag)
 GEN
 qflllgram0(GEN x, long flag)
 {
-  if (typ(x) != t_MAT) pari_err(typeer,"qflllgram",x);
+  if (typ(x) != t_MAT) pari_err(e_TYPE,"qflllgram",x);
   switch(flag)
   {
     case 0: return lllgram(x);
@@ -788,7 +788,7 @@ qflllgram0(GEN x, long flag)
     case 4: RgM_check_ZM(x,"qflllgram"); return lllgramkerim(x);
     case 5: return lllgramkerimgen(x);
     case 8: return lllgramgen(x);
-    default: pari_err(flagerr,"qflllgram");
+    default: pari_err(e_FLAG,"qflllgram");
   }
   return NULL; /* not reached */
 }
@@ -818,13 +818,13 @@ kerint(GEN x)
 GEN
 matkerint0(GEN x, long flag)
 {
-  if (typ(x) != t_MAT) pari_err(typeer,"matkerint",x);
+  if (typ(x) != t_MAT) pari_err(e_TYPE,"matkerint",x);
   RgM_check_ZM(x, "kerint");
   switch(flag)
   {
     case 0: return kerint(x);
     case 1: return kerint1(x);
-    default: pari_err(flagerr,"matkerint");
+    default: pari_err(e_FLAG,"matkerint");
   }
   return NULL; /* not reached */
 }

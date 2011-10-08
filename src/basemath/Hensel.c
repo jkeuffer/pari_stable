@@ -67,7 +67,7 @@ BuildTree(GEN link, GEN V, GEN W, GEN a, GEN T, GEN p)
   {
     GEN d, u, v;
     d = FqX_extgcd(gel(V,j), gel(V,j+1), T, p, &u, &v);
-    if (degpol(d) > 0) pari_err(talker, "relatively prime polynomials expected");
+    if (degpol(d) > 0) pari_err(e_MISC, "relatively prime polynomials expected");
     d = gel(d,2);
     if (!gequal1(d))
     {
@@ -243,7 +243,7 @@ MultiLift(GEN f, GEN a, GEN T, GEN p, long e0, long flag)
   ulong mask;
   pari_timer Ti;
 
-  if (k < 2 || e0 < 1) pari_err(talker, "MultiLift: bad args");
+  if (k < 2 || e0 < 1) pari_err(e_MISC, "MultiLift: bad args");
   if (e0 == 1) return a;
 
   if (DEBUGLEVEL > 3) timer_start(&Ti);
@@ -377,19 +377,19 @@ polhensellift(GEN pol, GEN L, GEN p, long N)
   long i, l, t;
   pari_sp av = avma;
 
-  if (typ(pol) != t_POL) pari_err(typeer, "polhensellift",pol);
+  if (typ(pol) != t_POL) pari_err(e_TYPE, "polhensellift",pol);
   RgX_check_ZXY(pol, "polhensellift");
-  if (!is_vec_t(typ(L)) || lg(L) < 3) pari_err(typeer, "polhensellift",L);
+  if (!is_vec_t(typ(L)) || lg(L) < 3) pari_err(e_TYPE, "polhensellift",L);
   t = typ(p);
   if (t == t_VEC) /* [p, T] */
   {
     T = gel(p,2);
-    if (typ(T) != t_POL) pari_err(typeer, "polhensellift",pol);
+    if (typ(T) != t_POL) pari_err(e_TYPE, "polhensellift",pol);
     RgX_check_ZX(T, "polhensellift");
     p = gel(p,1); t = typ(p);
   }
-  if (t != t_INT) pari_err(typeer, "polhensellift",p);
-  if (N < 1) pari_err(talker, "not a positive exponent in polhensellift");
+  if (t != t_INT) pari_err(e_TYPE, "polhensellift",p);
+  if (N < 1) pari_err(e_MISC, "not a positive exponent in polhensellift");
 
   l = lg(L); L = leafcopy(L);
   for (i = 1; i < l; i++)

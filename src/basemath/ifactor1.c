@@ -105,7 +105,7 @@ nextprime(GEN n)
   if (typ(n) != t_INT)
   {
     n = gceil(n);
-    if (typ(n) != t_INT) pari_err(typeer,"nextprime",n);
+    if (typ(n) != t_INT) pari_err(e_TYPE,"nextprime",n);
   }
   if (signe(n) <= 0) { avma = av; return gen_2; }
   if (lgefint(n) == 3)
@@ -151,7 +151,7 @@ precprime(GEN n)
   if (typ(n) != t_INT)
   {
     n = gfloor(n);
-    if (typ(n) != t_INT) pari_err(typeer,"nextprime",n);
+    if (typ(n) != t_INT) pari_err(e_TYPE,"nextprime",n);
   }
   if (signe(n) <= 0) { avma = av; return gen_0; }
   if (lgefint(n) <= 3)
@@ -221,7 +221,7 @@ snextpr(ulong p, byteptr *d, long *rcn, long *q, long k)
       if (d1 < 0)
       {
         err_printf("snextpr: %lu != prc210_rp[%ld] mod 210\n", p, rcn0);
-        pari_err(bugparier, "[caller of] snextpr");
+        pari_err(e_BUG, "[caller of] snextpr");
       }
     }
     NEXT_PRIME_VIADIFF(p,*d);
@@ -234,7 +234,7 @@ snextpr(ulong p, byteptr *d, long *rcn, long *q, long k)
     if (*rcn == NPRC)
     {
       err_printf("snextpr: %lu should have been prime but isn\'t\n", p);
-      pari_err(bugparier, "[caller of] snextpr");
+      pari_err(e_BUG, "[caller of] snextpr");
     }
   }
   /* look for the next one */
@@ -247,7 +247,7 @@ snextpr(ulong p, byteptr *d, long *rcn, long *q, long k)
     if (n <= 11)                /* wraparound mod 2^BITS_IN_LONG */
     {
       err_printf("snextpr: integer wraparound after prime %lu\n", p);
-      pari_err(bugparier, "[caller of] snextpr");
+      pari_err(e_BUG, "[caller of] snextpr");
     }
   }
   return n;
@@ -339,7 +339,7 @@ elladd0(GEN N, GEN *gl, long nbc, long nbc1,
 
   /* actually, this is only ever called with nbc1==nbc or nbc1==4, so: */
   if (nbc1 == 4) mask = 3;
-  else if (nbc1 < nbc) pari_err(bugparier, "[caller of] elladd0");
+  else if (nbc1 < nbc) pari_err(e_BUG, "[caller of] elladd0");
 
   W[1] = subii(X1[0], X2[0]);
   for (i=1; i<nbc; i++)
@@ -947,7 +947,7 @@ ellfacteur(GEN N, int insist)
       if (rcn == NPRC)
       {
         err_printf("ECM: %lu should have been prime but isn\'t\n", p);
-        pari_err(bugparier, "ellfacteur");
+        pari_err(e_BUG, "ellfacteur");
       }
     }
 
@@ -1574,9 +1574,9 @@ squfof(GEN n)
   d1 = itou(sqrti(D1));
   b1 = (long)((d1-1) | 1); /* largest odd number not exceeding d1 */
   c1 = itos(shifti(subii(D1, sqru((ulong)b1)), -2));
-  if (!c1) pari_err(bugparier,"squfof [caller of] (n or 3n is a square)");
+  if (!c1) pari_err(e_BUG,"squfof [caller of] (n or 3n is a square)");
   c2 = itos(shifti(subii(D2, sqru((ulong)b2)), -2));
-  if (!c2) pari_err(bugparier,"squfof [caller of] (5n is a square)");
+  if (!c2) pari_err(e_BUG,"squfof [caller of] (5n is a square)");
   L1 = (long)usqrtsafe(d1);
   L2 = (long)usqrtsafe(d2);
   /* dd1 used to compute floor((d1+b1)/2) as dd1+floor(b1/2), without
@@ -2356,7 +2356,7 @@ static void
 ifac_check(GEN partial, GEN where)
 {
   if (!where || where < FIRST(partial) || where > LAST(partial))
-    pari_err(talker, "'where' out of bounds");
+    pari_err(e_MISC, "'where' out of bounds");
 }
 static void
 ifac_print(GEN part, GEN where)
@@ -2377,7 +2377,7 @@ ifac_print(GEN part, GEN where)
     else if (c == gen_0) s = "composite";
     else if (c == gen_1) s = "unfinished prime";
     else if (c == gen_2) s = "prime";
-    else pari_err(bugparier, "unknown factor class");
+    else pari_err(e_BUG, "unknown factor class");
     err_printf("[%Ps, %Ps, %s]\n", v, e, s);
   }
   err_printf("Done.\n");
@@ -2500,7 +2500,7 @@ ifac_sort_one(GEN *partial, GEN *where, GEN washere)
 #ifdef IFAC_DEBUG
   ifac_check(*partial, *where);
   if (!washere || washere < *where || washere > LAST(*partial))
-    pari_err(talker, "'washere' out of bounds in ifac_sort_one");
+    pari_err(e_MISC, "'washere' out of bounds in ifac_sort_one");
 #endif
   value    = VALUE(washere);
   exponent = EXPON(washere);
@@ -2535,7 +2535,7 @@ ifac_sort_one(GEN *partial, GEN *where, GEN washere)
   if (cmp_res)
   {
     if (cmp_res < 0 && scan != *where)
-      pari_err(talker, "misaligned partial detected in ifac_sort_one");
+      pari_err(e_MISC, "misaligned partial detected in ifac_sort_one");
     INIT(scan, value, exponent, class0); return 0;
   }
   /* case cmp_res == 0: repeated factor detected */
@@ -2551,9 +2551,9 @@ ifac_sort_one(GEN *partial, GEN *where, GEN washere)
     if (class1)
     {
       if (class0 == gen_0 && class1 != gen_0)
-        pari_err(talker, "composite equals prime in ifac_sort_one");
+        pari_err(e_MISC, "composite equals prime in ifac_sort_one");
       else if (class0 != gen_0 && class1 == gen_0)
-        pari_err(talker, "prime equals composite in ifac_sort_one");
+        pari_err(e_MISC, "prime equals composite in ifac_sort_one");
       else if (class0 == gen_2)        /* should happen even less */
         CLASS(scan) = class0;        /* use it */
     }
@@ -2665,8 +2665,8 @@ ifac_divide(GEN *partial, GEN *where)
 #ifdef IFAC_DEBUG
   ifac_check(*partial, *where);
   if (CLASS(*where) != gen_1)
-    pari_err(talker, "division by composite or finished prime in ifac_divide");
-  if (!VALUE(*where)) pari_err(talker, "division by nothing in ifac_divide");
+    pari_err(e_MISC, "division by composite or finished prime in ifac_divide");
+  if (!VALUE(*where)) pari_err(e_MISC, "division by nothing in ifac_divide");
 #endif
   newexp = exponent = itos(EXPON(*where));
   if (exponent > 1 && moebius_mode) return 1;
@@ -2748,11 +2748,11 @@ ifac_crack(GEN *partial, GEN *where)
 #ifdef IFAC_DEBUG
   ifac_check(*partial, *where);
   if (*where < *partial + 6)
-    pari_err(talker, "'*where' out of bounds in ifac_crack");
+    pari_err(e_MISC, "'*where' out of bounds in ifac_crack");
   if (!(VALUE(*where)) || typ(VALUE(*where)) != t_INT)
-    pari_err(talker, "incorrect VALUE(*where) in ifac_crack");
+    pari_err(e_MISC, "incorrect VALUE(*where) in ifac_crack");
   if (CLASS(*where) != gen_0)
-    pari_err(talker, "operand not known composite in ifac_crack");
+    pari_err(e_MISC, "operand not known composite in ifac_crack");
 #endif
 
   if (DEBUGLEVEL>2) {
@@ -2852,7 +2852,7 @@ ifac_crack(GEN *partial, GEN *where)
   {
     err_printf("IFAC: factoring %Ps\n", VALUE(*where));
     err_printf("\tyielded 'factor' %Ps\n\twhich isn't!\n", factor);
-    pari_err(bugparier, "factoring");
+    pari_err(e_BUG, "factoring");
   }
   /* factoring engines report the factor found; tell about the cofactor */
   if (DEBUGLEVEL >= 4) err_printf("IFAC: cofactor = %Ps\n", VALUE(*where));
@@ -2872,7 +2872,7 @@ ifac_crack(GEN *partial, GEN *where)
     VALUE(*where) = VALUE(old); /* move cofactor pointer to lowest slot */
     VALUE(old) = factor; /* save factor */
   }
-  else pari_err(bugparier,"ifac_crack [Z_issquareall miss]");
+  else pari_err(e_BUG,"ifac_crack [Z_issquareall miss]");
   return 2;
 }
 
@@ -3026,7 +3026,7 @@ ifac_main(GEN *partial)
       }
       continue;
     }
-    pari_err(talker, "non-existent factor class in ifac_main");
+    pari_err(e_MISC, "non-existent factor class in ifac_main");
   } /* while */
   if (moebius_mode && EXPON(here) != gen_1)
   {
@@ -3320,8 +3320,8 @@ gmoebius(GEN n) { return map_proto_lG(moebius,n); }
 
 INLINE void
 chk_arith(GEN n) {
-  if (typ(n) != t_INT) pari_err(typeer,"arithmetic function",n);
-  if (!signe(n)) pari_err(talker, "zero argument in an arithmetic function");
+  if (typ(n) != t_INT) pari_err(e_TYPE,"arithmetic function",n);
+  if (!signe(n)) pari_err(e_MISC, "zero argument in an arithmetic function");
 }
 
 long
@@ -3383,7 +3383,7 @@ issquarefree(GEN x)
       if (!signe(x)) return 0;
       av = avma; d = RgX_gcd(x, RgX_deriv(x));
       avma = av; return (lg(d) == 3);
-    default: pari_err(typeer,"issquarefree",x);
+    default: pari_err(e_TYPE,"issquarefree",x);
       return 0; /* not reached */
   }
 }
@@ -3782,7 +3782,7 @@ ifactor(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
   n = gclone(n); setabssign(n);
   /* trial division bound */
   if (all) {
-    if (all > maxprime() + 1) pari_err(primer1, all);
+    if (all > maxprime() + 1) pari_err(e_MAXPRIME, all);
     lim = all; /* use supplied limit */
   }
   else
@@ -3887,7 +3887,7 @@ ifac_break_limit(GEN n, GEN pairs/*unused*/, GEN here, GEN state)
 GEN
 factorint(GEN n, long flag)
 {
-  if (typ(n) != t_INT) pari_err(typeer,"factorint",n);
+  if (typ(n) != t_INT) pari_err(e_TYPE,"factorint",n);
   return ifactor(n,NULL,NULL, 0,flag);
 }
 

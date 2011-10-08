@@ -744,7 +744,7 @@ cleanarch(GEN x, long N, long prec)
     }
     return y;
   }
-  if (!is_vec_t(tx)) pari_err(talker,"not a vector/matrix in cleanarch");
+  if (!is_vec_t(tx)) pari_err(e_MISC,"not a vector/matrix in cleanarch");
   RU = lg(x)-1; R1 = (RU<<1)-N;
   s = gdivgs(RgV_sum(real_i(x)), -N); /* -log |norm(x)| / N */
   y = cgetg(RU+1,tx);
@@ -869,7 +869,7 @@ init_units(GEN BNF)
     GEN nf = bnf_get_nf(bnf), A = bnf_get_logfu(bnf);
     funits = gerepilecopy(av, getfu(nf, &A, &l, 0));
     if (typ(funits) == t_MAT)
-      pari_err(talker, "bnf accuracy too low to compute units on the fly");
+      pari_err(e_MISC, "bnf accuracy too low to compute units on the fly");
   }
   l = lg(funits) + 1;
   v = cgetg(l, t_VEC); gel(v,1) = bnf_get_tuU(bnf);
@@ -1003,7 +1003,7 @@ pr_index(GEN L, GEN pr)
   GEN al = pr_get_gen(pr);
   for (j=1; j<l; j++)
     if (ZV_equal(al, pr_get_gen(gel(L,j)))) return j;
-  pari_err(bugparier,"codeprime");
+  pari_err(e_BUG,"codeprime");
   return 0; /* not reached */
 }
 
@@ -1248,7 +1248,7 @@ famat_to_arch(GEN nf, GEN fa, long prec)
   GEN g,e, y = NULL;
   long i,l;
 
-  if (typ(fa) != t_MAT) pari_err(typeer,"famat_to_arch",fa);
+  if (typ(fa) != t_MAT) pari_err(e_TYPE,"famat_to_arch",fa);
   if (lg(fa) == 1) return triv_arch(nf);
   g = gel(fa,1);
   e = gel(fa,2); l = lg(e);
@@ -1292,7 +1292,7 @@ scalar_get_arch_real(GEN nf, GEN u, GEN *emb)
   GEN v, logu;
   long i, s = signe(u), RU = lg(nf_get_roots(nf))-1, R1 = nf_get_r1(nf);
 
-  if (!s) pari_err(talker,"0 in get_arch_real");
+  if (!s) pari_err(e_MISC,"0 in get_arch_real");
   v = cgetg(RU+1, t_COL);
   logu = logr_abs(u);
   for (i=1; i<=R1; i++) gel(v,i) = logu;
@@ -1378,7 +1378,7 @@ red_mod_units(GEN col, GEN z)
   if (typ(x) != t_MAT) return NULL;
   x = gel(x,RU);
   if (signe(x[RU]) < 0) x = gneg_i(x);
-  if (!gequal1(gel(x,RU))) pari_err(bugparier,"red_mod_units");
+  if (!gequal1(gel(x,RU))) pari_err(e_BUG,"red_mod_units");
   setlg(x,RU); return x;
 }
 
@@ -1449,7 +1449,7 @@ isprincipalarch(GEN bnf, GEN col, GEN kNx, GEN e, GEN dx, long *pe)
   R1 = nf_get_r1(nf);
   RU = (N + R1)>>1;
   col = cleanarch(col,N,prec); settyp(col, t_COL);
-  if (!col) pari_err(precer, "isprincipalarch");
+  if (!col) pari_err(e_PREC, "isprincipalarch");
   if (RU > 1)
   { /* reduce mod units */
     GEN u, z = init_red_mod_units(bnf,prec);
@@ -1614,7 +1614,7 @@ bnfisprincipal0(GEN bnf,GEN x,long flag)
   switch( idealtyp(&x, &arch) )
   {
     case id_PRINCIPAL:
-      if (gequal0(x)) pari_err(talker,"zero ideal in isprincipal");
+      if (gequal0(x)) pari_err(e_MISC,"zero ideal in isprincipal");
       return triv_gen(bnf, x, flag);
     case id_PRIME:
       if (pr_is_inert(x))
@@ -1622,7 +1622,7 @@ bnfisprincipal0(GEN bnf,GEN x,long flag)
       x = idealhnf_two(bnf_get_nf(bnf), x);
       break;
     case id_MAT:
-      if (lg(x)==1) pari_err(talker,"zero ideal in isprincipal");
+      if (lg(x)==1) pari_err(e_MISC,"zero ideal in isprincipal");
   }
   pr = prec_arch(bnf); /* precision of unit matrix */
   c = getrand();
@@ -1827,7 +1827,7 @@ bnfisunit(GEN bnf,GEN x)
   if (tx == t_MAT)
   { /* famat, assumed integral */
     if (lg(x) != 3 || lg(x[1]) != lg(x[2]))
-      pari_err(talker, "not a factorization matrix in bnfisunit");
+      pari_err(e_MISC, "not a factorization matrix in bnfisunit");
   } else {
     x = nf_to_scalar_or_basis(nf,x);
     if (typ(x) != t_COL)
@@ -1874,7 +1874,7 @@ bnfisunit(GEN bnf,GEN x)
       prec = MEDDEFAULTPREC + divsBIL( gexpo(x) );
     else
     {
-      if (i > 4) pari_err(precer,"bnfisunit");
+      if (i > 4) pari_err(e_PREC,"bnfisunit");
       prec = (prec-1)<<1;
     }
     if (DEBUGLEVEL) pari_warn(warnprec,"bnfisunit",prec);
@@ -2293,7 +2293,7 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
     u = ZM_lll(ZM_mul(F->G0, ideal), 0.99, LLL_IM);
     ideal = ZM_mul(ideal,u); /* approximate T2-LLL reduction */
     r = Q_from_QR(RgM_mul(G, ideal), prec); /* Cholesky for T2 | ideal */
-    if (!r) pari_err(bugparier, "small_norm (precision too low)");
+    if (!r) pari_err(e_BUG, "small_norm (precision too low)");
 
     skipfirst = ZV_isscalar(gel(ideal,1))? 1: 0; /* 1 probable */
     for (k=1; k<=N; k++)
@@ -2675,7 +2675,7 @@ static GEN
 bestappr_noer(GEN x, GEN k)
 {
   GEN y;
-  CATCH(precer) { y = NULL; }
+  CATCH(e_PREC) { y = NULL; }
   TRY { y = bestappr(x,k); } ENDCATCH;
   return y;
 }
@@ -2824,7 +2824,7 @@ class_group_gen(GEN nf,GEN W,GEN C,GEN Vbase,long prec, GEN nf0,
     }
     G[j] = J[1]; /* generator, order cyc[j] */
     arch = famat_to_arch(nf, gel(J,2), prec);
-    if (!arch) pari_err(precer,"class_group_gen");
+    if (!arch) pari_err(e_PREC,"class_group_gen");
     gel(Ga,j) = gneg(arch);
   }
   /* at this point Y = PY, Ur = PUr, V = VP, X = XP */
@@ -3168,7 +3168,7 @@ sbnf2bnf(GEN sbnf, long prec)
   GEN pfc, C, clgp, clgp2, res, y, W, zu, matal, Vbase;
   nfbasic_t T;
 
-  if (typ(sbnf) != t_VEC || lg(sbnf) != 13) pari_err(typeer,"bnfmake",sbnf);
+  if (typ(sbnf) != t_VEC || lg(sbnf) != 13) pari_err(e_TYPE,"bnfmake",sbnf);
   if (prec < DEFAULTPREC) prec = DEFAULTPREC;
 
   nfbasic_from_sbnf(sbnf, &T);
@@ -3178,12 +3178,12 @@ sbnf2bnf(GEN sbnf, long prec)
   nf = nfbasic_to_nf(&T, ro, prec);
 
   A = get_archclean(nf, fu, prec, 1);
-  if (!A) pari_err(precer, "bnfmake");
+  if (!A) pari_err(e_PREC, "bnfmake");
 
   prec = gprecision(ro);
   matal = check_and_build_matal(sbnf);
   C = get_archclean(nf,matal,prec,0);
-  if (!C) pari_err(precer, "bnfmake");
+  if (!C) pari_err(e_PREC, "bnfmake");
 
   pfc = gel(sbnf,9);
   l = lg(pfc);
@@ -3217,7 +3217,7 @@ bnfinit0(GEN P, long flag, GEN data, long prec)
   if (data)
   {
     long lx = lg(data);
-    if (typ(data) != t_VEC || lx > 5) pari_err(typeer,"bnfinit",data);
+    if (typ(data) != t_VEC || lx > 5) pari_err(e_TYPE,"bnfinit",data);
     switch(lx)
     {
       case 4: relpid = itos(gel(data,3));
@@ -3230,7 +3230,7 @@ bnfinit0(GEN P, long flag, GEN data, long prec)
     case 2:
     case 0: fl = 0; break;
     case 1: fl = nf_FORCE; break;
-    default: pari_err(flagerr,"bnfinit");
+    default: pari_err(e_FLAG,"bnfinit");
       return NULL; /* not reached */
   }
   return Buchall_param(P, c1, c2, relpid, fl, prec);
@@ -3569,7 +3569,7 @@ Buchall_param(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long
     if (cbach2 < cbach) cbach2 = cbach;
     cbach = 12.;
   }
-  if (cbach <= 0.) pari_err(talker,"Bach constant <= 0 in buch");
+  if (cbach <= 0.) pari_err(e_MISC,"Bach constant <= 0 in buch");
 
   /* resc ~ sqrt(D) w / 2^r1 (2pi)^r2 = hR / Res(zeta_K, s=1) */
   resc = gdiv(mulri(gsqrt(D,DEFAULTPREC), gel(zu,1)),
@@ -3757,7 +3757,7 @@ START:
         gerepileall(av2, 4, &W,&C,&B,&dep);
         cache.chk = cache.last;
         need = lg(dep)>1? lg(dep[1])-1: lg(B[1])-1;
-        /* FIXME: replace by err(bugparier,"") */
+        /* FIXME: replace by err(e_BUG,"") */
         if (!need && cache.missing)
         { /* The test above will never be true except if 27449|class number,
            * but the code implicitely assumes that if we have maximal rank
@@ -3865,7 +3865,7 @@ START:
       if ((flun & nf_FORCE) && typ(fu) == t_MAT)
       { /* units not found but we want them */
         if (e > 0)
-          pari_err(talker, "bnfinit: fundamental units too large");
+          pari_err(e_MISC, "bnfinit: fundamental units too large");
         if (e < 0) precadd = (DEFAULTPREC-2) + divsBIL( (-e) );
         avma = av3; precpb = "getfu"; continue;
       }

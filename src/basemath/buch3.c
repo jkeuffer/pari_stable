@@ -137,7 +137,7 @@ too_big(GEN nf, GEN bet)
     case t_INT: return absi_cmp(x, gen_1);
     case t_FRAC: return absi_cmp(gel(x,1), gel(x,2));
   }
-  pari_err(bugparier, "wrong type in too_big");
+  pari_err(e_BUG, "wrong type in too_big");
   return 0; /* not reached */
 }
 
@@ -485,7 +485,7 @@ bnrinit0(GEN bnf, GEN ideal, long flag)
   {
     case 0: flag = nf_INIT; break;
     case 1: flag = nf_INIT | nf_GEN; break;
-    default: pari_err(flagerr,"bnrinit");
+    default: pari_err(e_FLAG,"bnrinit");
   }
   return Buchray(bnf,ideal,flag);
 }
@@ -542,7 +542,7 @@ bnrisprincipal(GEN bnr, GEN x, long flag)
   /* compute generator */
   L = isprincipalfact(bnf, x, bnr_get_gen(bnr), ZC_neg(ex),
                       nf_GENMAT|nf_GEN_IF_PRINCIPAL|nf_FORCE);
-  if (L == gen_0) pari_err(bugparier,"isprincipalray");
+  if (L == gen_0) pari_err(e_BUG,"isprincipalray");
   alpha = nffactorback(nf, L, NULL);
   if (lg(cycbid) > 1)
   {
@@ -1166,7 +1166,7 @@ bnfcertify0(GEN bnf, long flag)
     err_printf("  Testing primes <= %Ps\n\n", B); err_flush();
   }
   bound = itou_or_0(B);
-  if (!bound) pari_err(talker,"sorry, too many primes to check");
+  if (!bound) pari_err(e_MISC,"sorry, too many primes to check");
   maxprime_check(bound);
   for (p = 2; p <= bound; ) {
     check_prime(p,bnf, &S);
@@ -1227,10 +1227,10 @@ ABC_to_bnr(GEN A, GEN B, GEN C, GEN *H, int gen)
       case 7: /* bnr */
         *H = B; return A;
       case 11: /* bnf */
-        if (!B) pari_err(talker,"missing conductor in ABC_to_bnr");
+        if (!B) pari_err(e_MISC,"missing conductor in ABC_to_bnr");
         *H = C; return Buchray(A,B, gen? nf_INIT | nf_GEN: nf_INIT);
     }
-  pari_err(typeer,"ABC_to_bnr",A);
+  pari_err(e_TYPE,"ABC_to_bnr",A);
   *H = NULL; return NULL; /* not reached */
 }
 
@@ -1256,10 +1256,10 @@ check_subgroup(GEN bnr, GEN H, GEN *clhray, int triv_is_NULL, const char *s)
   if (H)
   {
     D = diagonal_shallow(bnr_get_cyc(bnr));
-    if (typ(H) != t_MAT) pari_err(typeer,"check_subgroup",H);
+    if (typ(H) != t_MAT) pari_err(e_TYPE,"check_subgroup",H);
     RgM_check_ZM(H, "check_subgroup");
     H = ZM_hnf(H);
-    if (!hnfdivide(H, D)) pari_err(talker,"incorrect subgroup in %s", s);
+    if (!hnfdivide(H, D)) pari_err(e_MISC,"incorrect subgroup in %s", s);
     h = ZM_det_triangular(H);
     if (equalii(h, *clhray)) H = NULL; else *clhray = h;
   }
@@ -1413,7 +1413,7 @@ rnfnormgroup(GEN bnr, GEN polrel)
   nf = bnf_get_nf(bnf); cnd = gel(bnr_get_mod(bnr), 1);
   polrel = rnf_fix_pol(nf_get_pol(nf),polrel,1);
   if (!gequal1(leading_term(polrel)))
-    pari_err(impl,"rnfnormgroup for non-monic polynomials");
+    pari_err(e_IMPL,"rnfnormgroup for non-monic polynomials");
 
   reldeg = degpol(polrel);
   /* reldeg-th powers are in norm group */
@@ -1425,7 +1425,7 @@ rnfnormgroup(GEN bnr, GEN polrel)
   group = diagonal_shallow(group);
   k = cmpiu(detgroup,reldeg);
   if (k < 0)
-    pari_err(talker,"not an Abelian extension in rnfnormgroup?");
+    pari_err(e_MISC,"not an Abelian extension in rnfnormgroup?");
   if (!k) return gerepilecopy(av, group);
 
   discnf = nf_get_disc(nf);
@@ -1460,7 +1460,7 @@ rnfnormgroup(GEN bnr, GEN polrel)
       /* check decomposition of pr has Galois type */
       for (j=2; j<=nfac; j++)
         if (degpol(gel(fac,j)) != f)
-          pari_err(talker,"non Galois extension in rnfnormgroup");
+          pari_err(e_MISC,"non Galois extension in rnfnormgroup");
       if (oldf < 0) oldf = f; else if (oldf != f) oldf = 0;
       if (f == reldeg) continue; /* reldeg-th powers already included */
 
@@ -1471,7 +1471,7 @@ rnfnormgroup(GEN bnr, GEN polrel)
       group = ZM_hnf(shallowconcat(group, col));
       detgroup = ZM_det_triangular(group);
       k = cmpiu(detgroup,reldeg);
-      if (k < 0) pari_err(talker,"not an Abelian extension in rnfnormgroup");
+      if (k < 0) pari_err(e_MISC,"not an Abelian extension in rnfnormgroup");
       if (!k) { cgiv(detgroup); return gerepileupto(av,group); }
     }
   }
@@ -1564,7 +1564,7 @@ rnfconductor(GEN bnf, GEN polrel, long flag)
   GEN nf, module, bnr, group, den, D;
 
   bnf = checkbnf(bnf); nf = bnf_get_nf(bnf);
-  if (typ(polrel) != t_POL) pari_err(typeer,"rnfconductor",polrel);
+  if (typ(polrel) != t_POL) pari_err(e_TYPE,"rnfconductor",polrel);
   den = Q_denom( RgX_to_nfX(nf, polrel) );
   if (!is_pm1(den)) polrel = RgX_rescale(polrel, den);
   if (flag)
@@ -1679,14 +1679,14 @@ KerChar(GEN chi, GEN cyc)
   long i, l = lg(cyc);
   GEN m, U, d1;
 
-  if (typ(chi) != t_VEC) pari_err(typeer,"KerChar",chi);
-  if (lg(chi) != l) pari_err(talker,"incorrect character length in KerChar");
+  if (typ(chi) != t_VEC) pari_err(e_TYPE,"KerChar",chi);
+  if (lg(chi) != l) pari_err(e_MISC,"incorrect character length in KerChar");
   if (l == 1) return NULL; /* trivial subgroup */
   d1 = gel(cyc,1); m = cgetg(l+1,t_MAT);
   for (i=1; i<l; i++)
   {
     GEN c = gel(chi,i);
-    if (typ(c) != t_INT) pari_err(typeer,"conductorofchar", c);
+    if (typ(c) != t_INT) pari_err(e_TYPE,"conductorofchar", c);
     gel(m,i) = mkcol(mulii(c, diviiexact(d1, gel(cyc,i))));
   }
   gel(m,i) = mkcol(d1);
@@ -1716,13 +1716,13 @@ get_classno(GEN t, GEN h)
 
 static void
 chk_listBU(GEN L, const char *s) {
-  if (typ(L) != t_VEC) pari_err(typeer,s,L);
+  if (typ(L) != t_VEC) pari_err(e_TYPE,s,L);
   if (lg(L) > 1) {
     GEN z = gel(L,1);
-    if (typ(z) != t_VEC) pari_err(typeer, s,z);
+    if (typ(z) != t_VEC) pari_err(e_TYPE, s,z);
     if (lg(z) == 1) return;
     z = gel(z,1); /* [bid,U] */
-    if (typ(z) != t_VEC || lg(z) != 3) pari_err(typeer, s,z);
+    if (typ(z) != t_VEC || lg(z) != 3) pari_err(e_TYPE, s,z);
     checkbid(gel(z,1));
   }
 }
@@ -1755,7 +1755,7 @@ Lbnrclassno(GEN L, GEN fac)
   long i, l = lg(L);
   for (i=1; i<l; i++)
     if (gequal(gmael(L,i,1),fac)) return gmael(L,i,2);
-  pari_err(bugparier,"Lbnrclassno");
+  pari_err(e_BUG,"Lbnrclassno");
   return NULL; /* not reached */
 }
 
@@ -1776,7 +1776,7 @@ factordivexact(GEN fa1,GEN fa2)
     else
     {
       p1 = subii(gel(E1,i), gel(E2,j)); k = signe(p1);
-      if (k < 0) pari_err(talker,"factordivexact is not exact!");
+      if (k < 0) pari_err(e_MISC,"factordivexact is not exact!");
       if (k > 0) { P[c] = P1[i]; gel(E,c) = p1; c++; }
     }
   }
@@ -2073,7 +2073,7 @@ decodemodule(GEN nf, GEN fa)
 
   nf = checknf(nf);
   if (typ(fa)!=t_MAT || lg(fa)!=3)
-    pari_err(talker,"not a factorisation in decodemodule");
+    pari_err(e_MISC,"not a factorisation in decodemodule");
   n = nf_get_degree(nf); nn = n*n; id = NULL;
   G = gel(fa,1);
   E = gel(fa,2);
@@ -2081,7 +2081,7 @@ decodemodule(GEN nf, GEN fa)
   {
     long code = itos(gel(G,k)), p = code / nn, j = (code%n)+1;
     GEN P = idealprimedec(nf, utoipos(p)), e = gel(E,k);
-    if (lg(P) <= j) pari_err(talker, "incorrect hash code in decodemodule");
+    if (lg(P) <= j) pari_err(e_MISC, "incorrect hash code in decodemodule");
     pr = gel(P,j);
     id = id? idealmulpowprime(nf,id, pr,e)
            : idealpow(nf, pr,e);
@@ -2112,7 +2112,7 @@ discrayabslistarch(GEN bnf, GEN arch, long bound)
   GEN nf, p, Z, fa, ideal, bidp, matarchunit, Disc, U, sgnU, EMPTY;
   GEN res, embunit, h, Ray, discall, idealrel, idealrelinit, fadkabs;
 
-  if (bound <= 0) pari_err(talker,"non-positive bound in Discrayabslist");
+  if (bound <= 0) pari_err(e_MISC,"non-positive bound in Discrayabslist");
   res = discall = NULL; /* -Wall */
 
   bnf = checkbnf(bnf);
@@ -2128,7 +2128,7 @@ discrayabslistarch(GEN bnf, GEN arch, long bound)
   if (allarch) {
     matarchunit = zlog_units(nf, U, sgnU, bidp);
     bidp = Idealstar(nf,matid(degk), nf_INIT);
-    if (r1>15) pari_err(talker,"r1>15 in discrayabslistarch");
+    if (r1>15) pari_err(e_MISC,"r1>15 in discrayabslistarch");
     nba = r1;
   } else {
     matarchunit = NULL;
@@ -2382,7 +2382,7 @@ subgroupcond(GEN bnr, GEN indexbound)
 GEN
 subgrouplist0(GEN bnr, GEN indexbound, long all)
 {
-  if (typ(bnr)!=t_VEC) pari_err(typeer,"subgrouplist",bnr);
+  if (typ(bnr)!=t_VEC) pari_err(e_TYPE,"subgrouplist",bnr);
   if (lg(bnr)!=1 && typ(bnr[1])!=t_INT)
   {
     checkbnr(bnr);

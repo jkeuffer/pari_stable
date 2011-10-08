@@ -15,7 +15,7 @@ with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /* This file originally adapted from gmp-3.1.1 (from T. Granlund), files
- * longlong.h and gmp-impl.h
+ * longlong.h and gmp-e_IMPL.h
 
   Copyright (C) 2000 Free Software Foundation, Inc. */
 

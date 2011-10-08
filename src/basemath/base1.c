@@ -26,7 +26,7 @@ int new_galois_format = 0;
 void
 checkrnf(GEN rnf)
 {
-  if (typ(rnf)!=t_VEC || lg(rnf)!=13) pari_err(typeer,"checkrnf",rnf);
+  if (typ(rnf)!=t_VEC || lg(rnf)!=13) pari_err(e_TYPE,"checkrnf",rnf);
 }
 
 GEN
@@ -61,8 +61,8 @@ checkbnf(GEN x)
   GEN bnf = checkbnf_i(x);
   if (!bnf)
   {
-    if (checknf_i(x)) pari_err(talker,"please apply bnfinit first");
-    pari_err(typeer,"checkbnf",x);
+    if (checknf_i(x)) pari_err(e_MISC,"please apply bnfinit first");
+    pari_err(e_TYPE,"checkbnf",x);
   }
   return bnf;
 }
@@ -73,8 +73,8 @@ checknf(GEN x)
   GEN nf = checknf_i(x);
   if (!nf)
   {
-    if (typ(x)==t_POL) pari_err(talker,"please apply nfinit first");
-    pari_err(typeer,"checknf",x);
+    if (typ(x)==t_POL) pari_err(e_MISC,"please apply nfinit first");
+    pari_err(e_TYPE,"checknf",x);
   }
   return nf;
 }
@@ -82,7 +82,7 @@ checknf(GEN x)
 void
 checkbnr(GEN bnr)
 {
-  if (typ(bnr)!=t_VEC || lg(bnr)!=7) pari_err(typeer,"checkbnr",bnr);
+  if (typ(bnr)!=t_VEC || lg(bnr)!=7) pari_err(e_TYPE,"checkbnr",bnr);
   (void)checkbnf(bnr_get_bnf(bnr));
 }
 
@@ -91,14 +91,14 @@ checkbnrgen(GEN bnr)
 {
   checkbnr(bnr);
   if (lg(bnr[5])<=3)
-    pari_err(talker,"please apply bnrinit(,,1) and not bnrinit(,)");
+    pari_err(e_MISC,"please apply bnrinit(,,1) and not bnrinit(,)");
 }
 
 void
 checksqmat(GEN x, long N)
 {
-  if (typ(x)!=t_MAT) pari_err(typeer,"checksqmat",x);
-  if (lg(x) == 1 || lg(x[1]) != N+1) pari_err(consister,"checksqmat");
+  if (typ(x)!=t_MAT) pari_err(e_TYPE,"checksqmat",x);
+  if (lg(x) == 1 || lg(x[1]) != N+1) pari_err(e_DIM,"checksqmat");
 }
 
 GEN
@@ -110,14 +110,14 @@ checkbid_i(GEN bid)
 void
 checkbid(GEN bid)
 {
-  if (!checkbid_i(bid)) pari_err(typeer,"checkbid",bid);
+  if (!checkbid_i(bid)) pari_err(e_TYPE,"checkbid",bid);
 }
 
 void
 checkprid(GEN id)
 {
   if (typ(id) != t_VEC || lg(id) != 6 || typ(id[2]) != t_COL)
-    pari_err(typeer,"checkprid",id);
+    pari_err(e_TYPE,"checkprid",id);
 }
 GEN
 get_prid(GEN x)
@@ -135,7 +135,7 @@ checknfelt_mod(GEN nf, GEN x, const char *s)
 {
   GEN T = gel(x,1), a = gel(x,2);
   if (!RgX_equal_var(T, nf_get_pol(nf)))
-    pari_err(talker, "incompatible modulus in %s:\n  mod = %Ps,\n  nf  = %Ps",
+    pari_err(e_MISC, "incompatible modulus in %s:\n  mod = %Ps,\n  nf  = %Ps",
              s, a, T);
   return a;
 }
@@ -143,10 +143,10 @@ checknfelt_mod(GEN nf, GEN x, const char *s)
 void
 check_ZKmodule(GEN x, const char *s)
 {
-  if (typ(x) != t_VEC || lg(x) < 3) pari_err(typeer,s,x);
-  if (typ(x[1]) != t_MAT) pari_err(typeer,s,gel(x,1));
-  if (typ(x[2]) != t_VEC) pari_err(typeer,s,gel(x,2));
-  if (lg(x[2]) != lg(x[1])) pari_err(consister, s);
+  if (typ(x) != t_VEC || lg(x) < 3) pari_err(e_TYPE,s,x);
+  if (typ(x[1]) != t_MAT) pari_err(e_TYPE,s,gel(x,1));
+  if (typ(x[2]) != t_VEC) pari_err(e_TYPE,s,gel(x,2));
+  if (lg(x[2]) != lg(x[1])) pari_err(e_DIM, s);
 }
 
 GEN
@@ -267,8 +267,8 @@ tschirnhaus(GEN x)
   long a, v = varn(x);
   GEN u, y = cgetg(5,t_POL);
 
-  if (typ(x)!=t_POL) pari_err(typeer,"tschirnhaus",x);
-  if (lg(x) < 4) pari_err(constpoler,"tschirnhaus");
+  if (typ(x)!=t_POL) pari_err(e_TYPE,"tschirnhaus",x);
+  if (lg(x) < 4) pari_err(e_CONSTPOL,"tschirnhaus");
   if (v) { u = leafcopy(x); setvarn(u,0); x=u; }
   y[1] = evalsigne(1)|evalvarn(0);
   do
@@ -481,12 +481,12 @@ polgalois(GEN x, long prec)
   const int ind6[60]={3,5,4,6, 2,6,4,5, 2,3,5,6, 2,4,3,6, 2,5,3,4,
                       1,4,5,6, 1,5,3,6, 1,6,3,4, 1,3,4,5, 1,6,2,5,
                       1,2,4,6, 1,5,2,4, 1,3,2,6, 1,2,3,5, 1,4,2,3};
-  if (typ(x)!=t_POL) pari_err(typeer,"galois",x);
+  if (typ(x)!=t_POL) pari_err(e_TYPE,"galois",x);
   n=degpol(x);
-  if (n>11) pari_err(impl,"galois of degree higher than 11");
+  if (n>11) pari_err(e_IMPL,"galois of degree higher than 11");
   x = Q_primpart(x);
   RgX_check_ZX(x, "galois");
-  if (!ZX_is_irred(x)) pari_err(redpoler,"galois",x);
+  if (!ZX_is_irred(x)) pari_err(e_IRREDPOL,"galois",x);
 
   if (n<4)
   {
@@ -532,7 +532,7 @@ polgalois(GEN x, long prec)
             return (degpol(gel(p2,1))==2)? galois_res(n,4,1,2)
                                          : galois_res(n,4,-1,1);
 
-          default: pari_err(bugparier,"galois (bug1)");
+          default: pari_err(e_BUG,"galois (bug1)");
         }
 
       case 5: z = cgetg(7,t_VEC);
@@ -574,7 +574,7 @@ polgalois(GEN x, long prec)
           pr = - (prec2nbits(prec) >> 1);
           for (l=1; l<=6; l++)
             if (ee[l] <= pr && gequal0(poleval(p5,gel(w,l)))) break;
-          if (l>6) pari_err(bugparier,"galois (bug4)");
+          if (l>6) pari_err(e_BUG,"galois (bug4)");
           p2=(l==6)? transroot(p1,2,5):transroot(p1,1,l);
           p3=gen_0;
           for (i=1; i<=5; i++)
@@ -679,7 +679,7 @@ polgalois(GEN x, long prec)
                 return f? galois_res(n,12,1,4): galois_res(n,24,-1,8);
               }
             case 4: avma = av; return galois_res(n,6,-1,2);
-            default: pari_err(bugparier,"galois (bug3)");
+            default: pari_err(e_BUG,"galois (bug3)");
           }
         }
 
@@ -708,7 +708,7 @@ polgalois(GEN x, long prec)
           case 3: avma = av; return galois_res(n,21,1,3);
           case 4: avma = av; return galois_res(n,14,-1,2);
           case 5: avma = av; return galois_res(n,7,1,1);
-          default: pari_err(bugparier,"galois (bug2)");
+          default: pari_err(e_BUG,"galois (bug2)");
         }
     }
     tchi: avma = av1; x = tschirnhaus(x1);
@@ -812,14 +812,14 @@ elt_galoisapply(GEN nf, GEN aut, GEN x)
       switch(lg(x)) {
         case 1: return cgetg(1, t_MAT);
         case 3: break;
-        default: pari_err(typeer, "galoisapply",x);
+        default: pari_err(e_TYPE, "galoisapply",x);
       }
       g = gel(x,1); G = cgetg_copy(g, &lx);
       for (i = 1; i < lx; i++) gel(G,i) = galoisapply(nf, aut, gel(g,i));
       return mkmat2(g, ZC_copy(gel(x,2)));
     }
   }
-  pari_err(typeer,"galoisapply",x);
+  pari_err(e_TYPE,"galoisapply",x);
   return NULL; /* not reached */
 }
 
@@ -866,7 +866,7 @@ galoisapply(GEN nf, GEN aut, GEN x)
       for (j=1; j<lx; j++) gel(y,j) = ZC_galoisapply(nf, aut, gel(x,j));
       return gerepileupto(av, idealhnf_shallow(nf,y));
   }
-  pari_err(typeer,"galoisapply",x);
+  pari_err(e_TYPE,"galoisapply",x);
   return NULL; /* not reached */
 }
 
@@ -902,7 +902,7 @@ idealquasifrob(GEN nf, GEN gal, GEN pr, GEN subg, GEN *S)
       avma = av;
     }
   }
-  pari_err(talker,"Frobenius element not found");
+  pari_err(e_MISC,"Frobenius element not found");
   return NULL; /*NOT REACHED*/
 }
 
@@ -917,9 +917,9 @@ idealfrobenius(GEN nf, GEN gal, GEN pr)
   checkgal(gal);
   checkprid(pr);
   if (!gequal(nf_get_pol(nf), gal_get_pol(gal)))
-    pari_err(talker,"incompatible data in idealfrobenius");
+    pari_err(e_MISC,"incompatible data in idealfrobenius");
   if (pr_get_e(pr)>1)
-    pari_err(talker,"ramified prime in idealfrobenius");
+    pari_err(e_MISC,"ramified prime in idealfrobenius");
   f = pr_get_f(pr); n = nf_get_degree(nf);
   if (f==1) { avma = av; return identity_perm(n); }
   modpr = nf_to_Fq_init(nf,&pr,&T,&p);
@@ -962,7 +962,7 @@ idealinertiagroup(GEN nf, GEN gal, GEN pr)
       avma = ltop;
     }
   }
-  pari_err(talker,"no isotrope element not found");
+  pari_err(e_MISC,"no isotrope element not found");
   return NULL;
 }
 
@@ -1058,7 +1058,7 @@ idealramgroups(GEN nf, GEN gal, GEN pr)
   checkgal(gal);
   checkprid(pr);
   if (!gequal(nf_get_pol(nf), gal_get_pol(gal)))
-    pari_err(talker,"incompatible data in idealramgroups");
+    pari_err(e_MISC,"incompatible data in idealramgroups");
   e = pr_get_e(pr); n = nf_get_degree(nf);
   p = itos(pr_get_p(pr));
   if (e%p) return idealramgroupstame(nf, gal, pr);
@@ -1086,7 +1086,7 @@ get_bnfpol(GEN x, GEN *bnf, GEN *nf)
   *bnf = checkbnf_i(x);
   *nf  = checknf_i(x);
   if (*nf) x = nf_get_pol(*nf);
-  if (typ(x) != t_POL) pari_err(typeer,"get_bnfpol",x);
+  if (typ(x) != t_POL) pari_err(e_TYPE,"get_bnfpol",x);
   return x;
 }
 
@@ -1105,8 +1105,8 @@ tests_OK(GEN a, GEN nfa, GEN b, GEN nfb, long fliso)
   GEN da, db, fa, P, E, U;
   long i, nP, m = degpol(a), n = degpol(b), q = m / n; /* relative degree */
 
-  if (m <= 0) pari_err(redpoler,"nfisincl",a);
-  if (n <= 0) pari_err(redpoler,"nfisincl",b);
+  if (m <= 0) pari_err(e_IRREDPOL,"nfisincl",a);
+  if (n <= 0) pari_err(e_IRREDPOL,"nfisincl",b);
   if (fliso) { if (n != m) return 0; } else { if (n % m) return 0; }
   if (m == 1) return 1;
 
@@ -1127,7 +1127,7 @@ tests_OK(GEN a, GEN nfa, GEN b, GEN nfb, long fliso)
   fa = Z_factor_limit(absi(da), 0);
   P = gel(fa,1);
   E = gel(fa,2); nP = lg(P) - 1;
-  if (!nP) pari_err(talker,"inconsistent data in nfisincl");
+  if (!nP) pari_err(e_MISC,"inconsistent data in nfisincl");
   for (i=1; i<nP; i++)
     if (mod2(gel(E,i)) && !dvdii(db, powiu(gel(P,i),q))) return 0;
   U = gel(P,nP);
@@ -1730,7 +1730,7 @@ get_nfindex(GEN bas)
     {
       case t_INT: continue;
       case t_FRAC: lc = gel(lc,2); break;
-      default: pari_err(typeer,"get_nfindex",lc);
+      default: pari_err(e_TYPE,"get_nfindex",lc);
     }
     D = mulii(D, lc);
   }
@@ -1774,7 +1774,7 @@ nfbasic_init(GEN x, long flag, GEN fa, nfbasic_t *T)
     nfmaxord_t S;
     x = Q_primpart(x);
     RgX_check_ZX(x, "nfinit");
-    if (!ZX_is_irred(x)) pari_err(redpoler,"nfinit",x);
+    if (!ZX_is_irred(x)) pari_err(e_IRREDPOL,"nfinit",x);
     if (flag & nf_RED || !gequal1(gel(x,lg(x)-1)))
       x = ZX_Q_normalize(x, &(T->lead));
     nfmaxord(&S, x, flag, fa);
@@ -1864,7 +1864,7 @@ nfinit0(GEN x, long flag,long prec)
     case 1: return nfinitall(x,0,prec);
     case 2: case 4: return nfinitall(x,nf_RED,prec);
     case 3: case 5: return nfinitall(x,nf_RED|nf_ORIG,prec);
-    default: pari_err(flagerr,"nfinit");
+    default: pari_err(e_FLAG,"nfinit");
   }
   return NULL; /* not reached */
 }
@@ -1897,7 +1897,7 @@ nfnewprec(GEN nf, long prec)
   GEN z;
   switch(nftyp(nf))
   {
-    default: pari_err(talker,"incorrect nf in nfnewprec");
+    default: pari_err(e_MISC,"incorrect nf in nfnewprec");
     case typ_BNF: z = bnfnewprec(nf,prec); break;
     case typ_BNR: z = bnrnewprec(nf,prec); break;
     case typ_NF: {
@@ -1962,7 +1962,7 @@ chk_gen(void *data, GEN x)
 {
   pari_sp av = avma, av1;
   GEN h, g = get_polchar((CG_data*)data,x);
-  if (!g) pari_err(precer,"chk_gen");
+  if (!g) pari_err(e_PREC,"chk_gen");
   av1 = avma;
   h = ZX_gcd(g, ZX_deriv(g));
   if (degpol(h)) { avma = av; return NULL; }
@@ -2104,8 +2104,8 @@ ordred(GEN x)
   pari_sp av = avma;
   GEN y;
 
-  if (typ(x) != t_POL) pari_err(typeer,"ordred",x);
-  if (!gequal1(leading_term(x))) pari_err(impl,"ordred");
+  if (typ(x) != t_POL) pari_err(e_TYPE,"ordred",x);
+  if (!gequal1(leading_term(x))) pari_err(e_IMPL,"ordred");
   if (!signe(x)) return gcopy(x);
   y = mkvec2(x, matid(degpol(x)));
   return gerepileupto(av, Polred(y, 0, NULL));
@@ -2164,7 +2164,7 @@ chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
   S = cgetg(N+1, t_VECSMALL);
   for (i = 1; i <= N; i++)
   {
-    P = get_polmin_w(d, i); if (!P) pari_err(precer,"chk_gen_init");
+    P = get_polmin_w(d, i); if (!P) pari_err(e_PREC,"chk_gen_init");
     S[i] = degpol(P);
     if (S[i] == N)
     { /* primitive element */
@@ -2204,7 +2204,7 @@ chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
     {
       for (j = 1; j <= N; j++) x[j] = (long)random_Fl(7) - 3;
       e = RgM_zc_mul(d->ZKembed, x);
-      P = get_pol(d, e); if (!P) pari_err(precer, "chk_gen_init");
+      P = get_pol(d, e); if (!P) pari_err(e_PREC, "chk_gen_init");
       if (!ZX_is_squarefree(P)) continue;
       if (DEBUGLEVEL>2) err_printf("chk_gen_init: generator %Ps\n",P);
       B = T2_from_embed(e, r1);
@@ -2219,7 +2219,7 @@ chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
     for (i = 2; i <= r1+r2; i++) V = gadd(V, gel(inv,i));
     /* V corresponds to 1_Z */
     V = grndtoi(V, &j);
-    if (j > -5) pari_err(bugparier,"precision too low in chk_gen_init");
+    if (j > -5) pari_err(e_BUG,"precision too low in chk_gen_init");
     M = mkmat(V); /* 1 */
 
     V = cgetg(N+1, t_VEC);
@@ -2263,7 +2263,7 @@ chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
   prec = chk_gen_prec(N, (gexpo(bound)*N)/2);
   if (DEBUGLEVEL)
     err_printf("chk_gen_init: new prec = %ld (initially %ld)\n", prec, d->prec);
-  if (prec > d->prec) pari_err(bugparier, "polredabs (precision problem)");
+  if (prec > d->prec) pari_err(e_BUG, "polredabs (precision problem)");
   if (prec < d->prec) d->ZKembed = gprec_w(d->ZKembed, prec);
   return bound;
 }
@@ -2370,7 +2370,7 @@ polredabs0(GEN x, long flag)
     remove_duplicates(y,a);
     l = lg(a);
     if (l == 1)
-      pari_err(bugparier, "polredabs (missing vector)");
+      pari_err(e_BUG, "polredabs (missing vector)");
   }
   if (DEBUGLEVEL) err_printf("Found %ld minimal polynomials.\n",l-1);
   if (flag & nf_ALL) {

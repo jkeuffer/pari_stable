@@ -233,7 +233,7 @@ good_arena_size(ulong slow2_size, ulong total, ulong fixed_to_cache,
    */
 
   if (model_type != 0)
-      pari_err(talker, "unsupported type of cache model"); /* Future expansion */
+      pari_err(e_MISC, "unsupported type of cache model"); /* Future expansion */
 
   /* The simplest case: we fit into cache */
   if (total + fixed_to_cache <= cache_arena)
@@ -324,7 +324,7 @@ set_optimize(long what, GEN g)
     ret = (long)(cache_model.cutoff * 1000);
     break;
   default:
-    pari_err(talker, "panic: set_optimize");
+    pari_err(e_MISC, "panic: set_optimize");
     break;
   }
   if (g != NULL) {
@@ -489,7 +489,7 @@ maxprime(void) { return _maxprime; }
 void
 maxprime_check(ulong c)
 {
-  if (_maxprime < c) pari_err(primer1, c);
+  if (_maxprime < c) pari_err(e_MAXPRIME, c);
 }
 
 /* assume ptr is the address of a diffptr containing the succesive
@@ -515,7 +515,7 @@ initprimes(ulong maxnum)
   ulong maxnum1 = ((maxnum<65302?65302:maxnum)+512ul);
 
   if ((maxnum>>1) > LONG_MAX - 1024)
-      pari_err(talker, "Too large primelimit");
+      pari_err(e_MISC, "Too large primelimit");
   p = initprimes0(maxnum1, &len, &last);
 #if 0 /* not yet... GN */
   static int build_the_tables = 1;
@@ -538,7 +538,7 @@ boundfact(GEN n, ulong lim)
       return gerepilecopy(av, merge_factor_i(a,b));
     }
   }
-  pari_err(typeer,"boundfact",n);
+  pari_err(e_TYPE,"boundfact",n);
   return NULL; /* not reached */
 }
 
@@ -726,7 +726,7 @@ divisors(GEN n)
     if (tn == t_INT)
       n = Z_factor(n);
     else {
-      if (is_matvec_t(tn)) pari_err(typeer,"divisors",n);
+      if (is_matvec_t(tn)) pari_err(e_TYPE,"divisors",n);
       isint = 0;
       n = factor(n);
     }
@@ -739,11 +739,11 @@ divisors(GEN n)
   for (i=1; i<l; i++)
   {
     e[i] = itos(gel(E,i));
-    if (e[i] < 0) pari_err(talker, "denominators not allowed in divisors");
+    if (e[i] < 0) pari_err(e_MISC, "denominators not allowed in divisors");
     nbdiv = itou_or_0( muluu(nbdiv, 1+e[i]) );
   }
   if (!nbdiv || nbdiv & ~LGBITS)
-    pari_err(talker, "too many divisors (more than %ld)", LGBITS - 1);
+    pari_err(e_MISC, "too many divisors (more than %ld)", LGBITS - 1);
   d = t = (GEN*) cgetg(nbdiv+1,t_VEC);
   *++d = gen_1;
   if (isint)
@@ -808,28 +808,28 @@ GEN
 corepartial(GEN n, long all)
 {
   pari_sp av = avma;
-  if (typ(n) != t_INT) pari_err(typeer,"corepartial",n);
+  if (typ(n) != t_INT) pari_err(e_TYPE,"corepartial",n);
   return gerepileuptoint(av, corefa(Z_factor_limit(n,all)));
 }
 GEN
 core2partial(GEN n, long all)
 {
   pari_sp av = avma;
-  if (typ(n) != t_INT) pari_err(typeer,"core2partial",n);
+  if (typ(n) != t_INT) pari_err(e_TYPE,"core2partial",n);
   return gerepilecopy(av, core2fa(Z_factor_limit(n,all)));
 }
 GEN
 core(GEN n)
 {
   pari_sp av = avma;
-  if (typ(n) != t_INT) pari_err(typeer,"core",n);
+  if (typ(n) != t_INT) pari_err(e_TYPE,"core",n);
   return gerepileuptoint(av, corefa(Z_factor(n)));
 }
 GEN
 core2(GEN n)
 {
   pari_sp av = avma;
-  if (typ(n) != t_INT) pari_err(typeer,"core",n);
+  if (typ(n) != t_INT) pari_err(e_TYPE,"core",n);
   return gerepilecopy(av, core2fa(Z_factor(n)));
 }
 

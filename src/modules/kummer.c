@@ -181,7 +181,7 @@ idealsqrtn(GEN nf, GEN x, GEN gn, int strict)
   {
     long ex = itos(gel(Ex,i));
     GEN e = stoi(ex / n);
-    if (strict && ex % n) pari_err(talker,"not an n-th power in idealsqrtn");
+    if (strict && ex % n) pari_err(e_MISC,"not an n-th power in idealsqrtn");
     if (q) q = idealmulpowprime(nf, q, gel(Pr,i), e);
     else   q = idealpow(nf, gel(Pr,i), e);
   }
@@ -350,7 +350,7 @@ downtoK(toK_s *T, GEN x)
 static GEN
 no_sol(long all, long i)
 {
-  if (!all) pari_err(talker,"bug%d in kummer",i);
+  if (!all) pari_err(e_MISC,"bug%d in kummer",i);
   return cgetg(1,t_VEC);
 }
 
@@ -361,7 +361,7 @@ get_gell(GEN bnr, GEN subgp, long all)
   if (all && all != -1) gell = stoi(all);
   else if (subgp)       gell = det(subgp);
   else                  gell = det(diagonal_shallow(bnr_get_cyc(bnr)));
-  if (typ(gell) != t_INT) pari_err(typeer,"rnfkummer",gell);
+  if (typ(gell) != t_INT) pari_err(e_TYPE,"rnfkummer",gell);
   return gell;
 }
 
@@ -773,7 +773,7 @@ FOUND:  X = Flm_Flc_mul(K, y, ell);
                 gel(C,2) = colgrp;
                 gel(C,3) = grptocol(rnfnormgroup(bnr, gsub(xell, gmul(be1,be))));
                 K2 = Flm_ker(C, ell);
-                if (lg(K2) != 2) pari_err(bugparier, "linear algebra");
+                if (lg(K2) != 2) pari_err(e_BUG, "linear algebra");
                 K2 = gel(K2,1);
                 if (K2[1] != K2[2])
                   Flc_Fl_mul_inplace(colgrp, Fl_div(K2[2],K2[1],ell), ell);
@@ -834,7 +834,7 @@ isvirtualunit(GEN bnf, GEN v, GEN cycgen, GEN cyc, GEN gell, long rc)
   }
   setlg(y, rc+1);
   b = bnfisunit(bnf,eps);
-  if (lg(b) == 1) pari_err(bugparier,"isvirtualunit");
+  if (lg(b) == 1) pari_err(e_BUG,"isvirtualunit");
   return shallowconcat(lift_intern(b), y);
 }
 
@@ -1117,7 +1117,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   bnf = bnr_get_bnf(bnr);
   nf  = bnf_get_nf(bnf);
   polnf = nf_get_pol(nf); vnf = varn(polnf);
-  if (!vnf) pari_err(talker,"main variable in kummer must not be x");
+  if (!vnf) pari_err(e_MISC,"main variable in kummer must not be x");
   /* step 7 */
   p1 = bnrconductor(bnr, subgroup, 2);
   if (DEBUGLEVEL) timer_printf(&t, "[rnfkummer] conductor");
@@ -1126,7 +1126,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   gell = get_gell(bnr,subgroup,all<-1?-all:all);
   ell = itos(gell);
   if (ell == 1) return pol_x(0);
-  if (!uisprime(ell)) pari_err(impl,"kummer for composite relative degree");
+  if (!uisprime(ell)) pari_err(e_IMPL,"kummer for composite relative degree");
   if (bnf_get_tuN(bnf) % ell == 0)
     return rnfkummersimple(bnr, subgroup, gell, all);
 

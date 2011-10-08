@@ -98,7 +98,7 @@ RgX_RgXQV_eval(GEN P, GEN V, GEN T)
     z = RgXQ_eval_powers(P,V,0,d);
     return gerepileupto(av, z);
   }
-  if (l<=1) pari_err(talker,"powers is only [] or [1] in RgX_RgXQV_eval");
+  if (l<=1) pari_err(e_MISC,"powers is only [] or [1] in RgX_RgXQV_eval");
   d -= l;
   btop = avma;
   z = RgXQ_eval_powers(P,V,d+1,l-1);
@@ -470,7 +470,7 @@ RgX_modXn_shallow(GEN a, long n)
   long i, L, l = lg(a);
   GEN  b;
   if (l == 2 || !n) return pol_0(varn(a));
-  if (n < 0) pari_err(talker,"n < 0 in RgX_modXn");
+  if (n < 0) pari_err(e_MISC,"n < 0 in RgX_modXn");
   L = n+2; if (L > l) L = l;
   b = cgetg(L, t_POL); b[1] = a[1];
   for (i=2; i<L; i++) gel(b,i) = gel(a,i);
@@ -1102,7 +1102,7 @@ RgX_divrem(GEN x, GEN y, GEN *pr)
   GEN z,p1,p2,rem,y_lead,mod;
   GEN (*f)(GEN,GEN);
 
-  if (!signe(y)) pari_err(gdiver);
+  if (!signe(y)) pari_err(e_INV);
 
   dy = degpol(y);
   y_lead = gel(y,dy+2);
@@ -1276,7 +1276,7 @@ RgXQX_divrem(GEN x, GEN y, GEN T, GEN *pr)
   pari_sp av0, av, tetpil;
   GEN z,p1,rem,lead;
 
-  if (!signe(y)) pari_err(gdiver);
+  if (!signe(y)) pari_err(e_INV);
   vx = varn(x);
   dx = degpol(x);
   dy = degpol(y);
@@ -1374,7 +1374,7 @@ ZXQX_divides(GEN x, GEN y, GEN T)
   pari_sp av = avma, av2, lim;
   GEN y_lead;
 
-  if (!signe(y)) pari_err(gdiver);
+  if (!signe(y)) pari_err(e_INV);
   dy = degpol(y); y_lead = gel(y,dy+2);
   if (typ(y_lead) == t_POL) y_lead = gel(y_lead, 2); /* t_INT */
   /* if monic, no point in using pseudo-division */
@@ -1432,7 +1432,7 @@ RgXQX_pseudorem(GEN x, GEN y, GEN T)
   pari_sp av = avma, av2, lim;
   GEN y_lead;
 
-  if (!signe(y)) pari_err(gdiver);
+  if (!signe(y)) pari_err(e_INV);
   dy = degpol(y); y_lead = gel(y,dy+2);
   /* if monic, no point in using pseudo-division */
   if (gequal1(y_lead)) return T? RgXQX_rem(x, y, T): RgX_rem(x, y);
@@ -1501,7 +1501,7 @@ RgXQX_pseudodivrem(GEN x, GEN y, GEN T, GEN *ptr)
   pari_sp av = avma, av2, lim;
   GEN z, r, ypow, y_lead;
 
-  if (!signe(y)) pari_err(gdiver);
+  if (!signe(y)) pari_err(e_INV);
   dy = degpol(y); y_lead = gel(y,dy+2);
   if (gequal1(y_lead)) return T? RgXQX_divrem(x,y, T, ptr): RgX_divrem(x,y, ptr);
   dx = degpol(x);

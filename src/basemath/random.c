@@ -96,7 +96,7 @@ setrand(GEN seed) {
     }
     case t_INT: if (signe(seed) > 0) { init_xor4096i( itou(seed) ); return; }
   }
-  pari_err(typeer, "setrand",seed);
+  pari_err(e_TYPE, "setrand",seed);
 }
 GEN
 getrand(void) {
@@ -196,7 +196,7 @@ genrand(GEN N)
   switch(typ(N))
   {
     case t_INT:
-      if (signe(N)<=0) pari_err(talker,"invalid bound in random");
+      if (signe(N)<=0) pari_err(e_MISC,"invalid bound in random");
       return randomi(N);
     case t_REAL:
       return randomr(realprec(N));
@@ -212,7 +212,7 @@ genrand(GEN N)
     case t_VEC:
       return ellrandom(N);
     default:
-      pari_err(typeer,"genrand",N);
+      pari_err(e_TYPE,"genrand",N);
       return NULL;/*not reached*/
   }
 }

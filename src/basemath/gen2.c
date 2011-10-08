@@ -126,7 +126,7 @@ gassoc_proto(GEN f(GEN,GEN), GEN x, GEN y)
   {
     pari_sp av = avma;
     long tx = typ(x);
-    if (!is_vec_t(tx)) pari_err(typeer,"association",x);
+    if (!is_vec_t(tx)) pari_err(e_TYPE,"association",x);
     return gerepileupto(av, divide_conquer_prod(x,f));
   }
   return f(x,y);
@@ -180,7 +180,7 @@ matsize(GEN x)
     case t_COL: return mkvec2s(L, 1);
     case t_MAT: return mkvec2s(L? lg(x[1])-1: 0, L);
   }
-  pari_err(typeer,"matsize",x);
+  pari_err(e_TYPE,"matsize",x);
   return NULL; /* not reached */
 }
 
@@ -194,7 +194,7 @@ greffe_aux(GEN x, long l, long lx, long v)
 {
   GEN y = cgetg(l,t_SER);
   long i;
-  if (l <= 2) pari_err(talker, "l <= 2 in RgX_to_ser");
+  if (l <= 2) pari_err(e_MISC, "l <= 2 in RgX_to_ser");
   y[1] = x[1]; setvalp(y, v);
   x += v; lx -= v;
   if (lx > l) {
@@ -256,7 +256,7 @@ gtolong(GEN x)
     case t_QUAD:
       if (gequal0(gel(x,3))) return gtolong(gel(x,2)); break;
   }
-  pari_err(typeer,"gtolong",x);
+  pari_err(e_TYPE,"gtolong",x);
   return 0; /* not reached */
 }
 
@@ -597,11 +597,11 @@ gcmp(GEN x, GEN y)
     if (tx != t_FRAC)
     {
       if (ty == t_STR) return -1;
-      pari_err(operf,"comparison",x,y);
+      pari_err(e_TYPE2,"comparison",x,y);
     }
   }
   if (ty == t_STR) return -1;
-  if (!is_intreal_t(ty) && ty != t_FRAC) pari_err(operf,"comparison",x,y);
+  if (!is_intreal_t(ty) && ty != t_FRAC) pari_err(e_TYPE2,"comparison",x,y);
   av=avma; f = gsigne( gsub(x,y) ); avma=av; return f;
 }
 
@@ -619,7 +619,7 @@ gcmpsg(long s, GEN y)
     }
     case t_STR: return -1;
   }
-  pari_err(operf,"comparison",stoi(s),y);
+  pari_err(e_TYPE2,"comparison",stoi(s),y);
   return 0; /* not reached */
 }
 
@@ -815,7 +815,7 @@ gequal_try(GEN x, GEN y)
   CATCH(CATCH_ALL) {
     switch(err_get_num(global_err_data))
     {
-      case errpile: case memer: case alarmer:
+      case e_STACK: case e_MEM: case e_ALARM:
         pari_err(0, global_err_data);
     }
     return 0;
@@ -945,7 +945,7 @@ ggval(GEN x, GEN p)
   if (isrationalzero(x)) return LONG_MAX;
   if (is_const_t(tx) && tp==t_POL) return 0;
   if (tp == t_INT && (!signe(p) || is_pm1(p)))
-    pari_err(talker, "forbidden divisor %Ps in ggval", p);
+    pari_err(e_MISC, "forbidden divisor %Ps in ggval", p);
   switch(tx)
   {
     case t_INT:
@@ -990,7 +990,7 @@ ggval(GEN x, GEN p)
       {
         long vp = varn(p);
         if (degpol(p) <= 0)
-          pari_err(talker, "forbidden divisor %Ps in ggval", p);
+          pari_err(e_MISC, "forbidden divisor %Ps in ggval", p);
         vx = varn(x);
         if (vp == vx)
         {
@@ -1020,7 +1020,7 @@ ggval(GEN x, GEN p)
       vx = varn(x);
       if (vp == vx) {
         vp = RgX_val(p);
-        if (!vp) pari_err(talker, "forbidden divisor %Ps in ggval", p);
+        if (!vp) pari_err(e_MISC, "forbidden divisor %Ps in ggval", p);
         return (long)(valp(x) / vp);
       }
       if (varncmp(vx, vp) > 0) return 0;
@@ -1032,7 +1032,7 @@ ggval(GEN x, GEN p)
     case t_COMPLEX: case t_QUAD: case t_VEC: case t_COL: case t_MAT:
       return minval(x,p,1);
   }
-  pari_err(talker,"forbidden or conflicting type in gval");
+  pari_err(e_MISC,"forbidden or conflicting type in gval");
   return 0; /* not reached */
 }
 
@@ -1130,7 +1130,7 @@ Z_lval(GEN x, ulong p)
     if (r) break;
     vx++; x = q;
     if (vx == VAL_DC_THRESHOLD) {
-      if (p == 1) pari_err(talker, "p = 1 in Z_lvalrem");
+      if (p == 1) pari_err(e_MISC, "p = 1 in Z_lvalrem");
       vx += Z_pvalrem_DC(x, sqru(p), &x) << 1;
       q = diviu_rem(x, p, &r); if (!r) vx++;
       break;
@@ -1159,7 +1159,7 @@ Z_lvalrem(GEN x, ulong p, GEN *py)
     if (r) break;
     vx++; x = q;
     if (vx == VAL_DC_THRESHOLD) {
-      if (p == 1) pari_err(talker, "p = 1 in Z_lvalrem");
+      if (p == 1) pari_err(e_MISC, "p = 1 in Z_lvalrem");
       vx += Z_pvalrem_DC(x, sqru(p), &x) << 1;
       q = diviu_rem(x, p, &r); if (!r) { vx++; x = q; }
       break;
@@ -1388,7 +1388,7 @@ gen_pval(GEN x, GEN p, long imin)
   {
     if (v == VAL_DC_THRESHOLD)
     {
-      if (is_pm1(p)) pari_err(talker, "p = 1 in gen_pvalrem");
+      if (is_pm1(p)) pari_err(e_MISC, "p = 1 in gen_pvalrem");
       v += gen_pvalrem_DC(y, p, &y, imin);
       avma = av; return v;
     }
@@ -1438,7 +1438,7 @@ gen_lvalrem(GEN x, ulong p, GEN *px, long imin)
   {
     if (v == VAL_DC_THRESHOLD)
     {
-      if (p == 1) pari_err(talker, "p = 1 in gen_lvalrem");
+      if (p == 1) pari_err(e_MISC, "p = 1 in gen_lvalrem");
       v += gen_pvalrem_DC(x, sqru(p), px, imin) << 1;
       x = gen_z_divides(*px, p, imin);
       if (x) { *px = x; v++; }
@@ -1472,7 +1472,7 @@ gen_pvalrem(GEN x, GEN p, GEN *px, long imin)
   {
     if (v == VAL_DC_THRESHOLD)
     {
-      if (is_pm1(p)) pari_err(talker, "p = 1 in gen_pvalrem");
+      if (is_pm1(p)) pari_err(e_MISC, "p = 1 in gen_pvalrem");
       return v + gen_pvalrem_DC(x, p, px, imin);
     }
 
@@ -1558,7 +1558,7 @@ gneg(GEN x)
     case t_COL: return RgC_neg(x);
     case t_MAT: return RgM_neg(x);
     default:
-      pari_err(typeer,"gneg",x);
+      pari_err(e_TYPE,"gneg",x);
       return NULL; /* not reached */
   }
   return y;
@@ -1625,7 +1625,7 @@ gneg_i(GEN x)
       gel(y,2) = gel(x,2); break;
 
     default:
-      pari_err(typeer,"gneg_i",x);
+      pari_err(e_TYPE,"gneg_i",x);
       return NULL; /* not reached */
   }
   return y;
@@ -1692,7 +1692,7 @@ gabs(GEN x, long prec)
 
     case t_SER:
      if (valp(x) || !signe(x))
-       pari_err(talker, "abs is not meromorphic at 0");
+       pari_err(e_MISC, "abs is not meromorphic at 0");
      return is_negative(gel(x,2))? gneg(x): gcopy(x);
 
     case t_VEC: case t_COL: case t_MAT:
@@ -1700,7 +1700,7 @@ gabs(GEN x, long prec)
       for (i=1; i<lx; i++) gel(y,i) = gabs(gel(x,i),prec);
       return y;
   }
-  pari_err(typeer,"gabs",x);
+  pari_err(e_TYPE,"gabs",x);
   return NULL; /* not reached */
 }
 
@@ -1720,7 +1720,7 @@ vecmax(GEN x)
   long lx = lg(x), i, j;
   GEN s;
 
-  if (lx==1) pari_err(talker, "empty vector in vecmax");
+  if (lx==1) pari_err(e_MISC, "empty vector in vecmax");
   switch(typ(x))
   {
     case t_VEC: case t_COL:
@@ -1730,7 +1730,7 @@ vecmax(GEN x)
       return gcopy(s);
     case t_MAT: {
       long lx2 = lg(x[1]);
-      if (lx2==1) pari_err(talker, "empty vector in vecmax");
+      if (lx2==1) pari_err(e_MISC, "empty vector in vecmax");
       s = gcoeff(x,1,1); i = 2;
       for (j=1; j<lx; j++,i=1)
       {
@@ -1752,7 +1752,7 @@ vecmin(GEN x)
   long lx = lg(x), i, j;
   GEN s;
 
-  if (lx==1) pari_err(talker, "empty vector in vecmin");
+  if (lx==1) pari_err(e_MISC, "empty vector in vecmin");
   switch(typ(x))
   {
     case t_VEC: case t_COL:
@@ -1762,7 +1762,7 @@ vecmin(GEN x)
       return gcopy(s);
     case t_MAT: {
       long lx2 = lg(x[1]);
-      if (lx2==1) pari_err(talker, "empty vector in vecmin");
+      if (lx2==1) pari_err(e_MISC, "empty vector in vecmin");
       s = gcoeff(x,1,1); i = 2;
       for (j=1; j<lx; j++,i=1)
       {
@@ -1814,7 +1814,7 @@ gaffsg(long s, GEN x)
       break;
     }
     case t_QUAD: gaffsg(s,gel(x,2)); gaffsg(0,gel(x,3)); break;
-    default: pari_err(operf,"=",stoi(s),x);
+    default: pari_err(e_TYPE2,"=",stoi(s),x);
   }
 }
 
@@ -1830,12 +1830,12 @@ padic_to_Fp(GEN x, GEN Y) {
   pari_sp av = avma;
   GEN p = gel(x,2), z;
   long vy, vx = valp(x);
-  if (!signe(Y)) pari_err(gdiver);
+  if (!signe(Y)) pari_err(e_INV);
   vy = Z_pvalrem(Y,p, &z);
-  if (vx < 0 || !gequal1(z)) pari_err(operi,"",x, mkintmod(gen_1,Y));
+  if (vx < 0 || !gequal1(z)) pari_err(e_OP,"",x, mkintmod(gen_1,Y));
   if (vx >= vy) { avma = av; return gen_0; }
   z = gel(x,4);
-  if (!signe(z) || vy > vx + precp(x)) pari_err(operi,"",x, mkintmod(gen_1,Y));
+  if (!signe(z) || vy > vx + precp(x)) pari_err(e_OP,"",x, mkintmod(gen_1,Y));
   if (vx) z = mulii(z, powiu(p,vx));
   return gerepileuptoint(av, remii(z, Y));
 }
@@ -1845,11 +1845,11 @@ padic_to_Fl(GEN x, ulong Y) {
   ulong u, z;
   long vy, vx = valp(x);
   vy = u_pvalrem(Y,p, &u);
-  if (vx < 0 || u != 1) pari_err(operi,"",x, mkintmodu(1,Y));
+  if (vx < 0 || u != 1) pari_err(e_OP,"",x, mkintmodu(1,Y));
   /* Y = p^vy */
   if (vx >= vy) return 0;
   z = umodiu(gel(x,4), Y);
-  if (!z || vy > vx + precp(x)) pari_err(operi,"",x, mkintmodu(1,Y));
+  if (!z || vy > vx + precp(x)) pari_err(e_OP,"",x, mkintmodu(1,Y));
   if (vx) {
     ulong pp = p[2];
     z = Fl_mul(z, upowuu(pp,vx), Y); /* p^vx < p^vy = Y */
@@ -1859,7 +1859,7 @@ padic_to_Fl(GEN x, ulong Y) {
 
 static void
 croak(const char *s) {
-  pari_err(talker,"trying to overwrite a universal object in gaffect (%s)", s);
+  pari_err(e_MISC,"trying to overwrite a universal object in gaffect (%s)", s);
 }
 
 void
@@ -1881,7 +1881,7 @@ gaffect(GEN x, GEN y)
       croak("gnil)");
     case t_REAL: affrr(x,y); return;
     case t_INTMOD:
-      if (!dvdii(gel(x,1),gel(y,1))) pari_err(operi,"",x,y);
+      if (!dvdii(gel(x,1),gel(y,1))) pari_err(e_OP,"",x,y);
       modiiz(gel(x,2),gel(y,1),gel(y,2)); return;
     case t_FRAC:
       affii(gel(x,1),gel(y,1));
@@ -1890,22 +1890,22 @@ gaffect(GEN x, GEN y)
       gaffect(gel(x,1),gel(y,1));
       gaffect(gel(x,2),gel(y,2)); return;
     case t_PADIC:
-      if (!equalii(gel(x,2),gel(y,2))) pari_err(operi,"",x,y);
+      if (!equalii(gel(x,2),gel(y,2))) pari_err(e_OP,"",x,y);
       modiiz(gel(x,4),gel(y,3),gel(y,4));
       setvalp(y,valp(x)); return;
     case t_QUAD:
-      if (! ZX_equal(gel(x,1),gel(y,1))) pari_err(operi,"",x,y);
+      if (! ZX_equal(gel(x,1),gel(y,1))) pari_err(e_OP,"",x,y);
       affii(gel(x,2),gel(y,2));
       affii(gel(x,3),gel(y,3)); return;
     case t_VEC: case t_COL: case t_MAT:
-      lx = lg(x); if (lx != lg(y)) pari_err(consister,"gaffect");
+      lx = lg(x); if (lx != lg(y)) pari_err(e_DIM,"gaffect");
       for (i=1; i<lx; i++) gaffect(gel(x,i),gel(y,i));
       return;
   }
 
   /* Various conversions. Avoid them, use specialized routines ! */
 
-  if (!is_const_t(ty)) pari_err(operf,"=",x,y);
+  if (!is_const_t(ty)) pari_err(e_TYPE2,"=",x,y);
   switch(tx)
   {
     case t_INT:
@@ -1928,7 +1928,7 @@ gaffect(GEN x, GEN y)
           avma = av; break;
 
         case t_QUAD: gaffect(x,gel(y,2)); gaffsg(0,gel(y,3)); break;
-        default: pari_err(operf,"=",x,y);
+        default: pari_err(e_TYPE2,"=",x,y);
       }
       break;
 
@@ -1936,7 +1936,7 @@ gaffect(GEN x, GEN y)
       switch(ty)
       {
         case t_COMPLEX: gaffect(x,gel(y,1)); gaffsg(0,gel(y,2)); break;
-        default: pari_err(operf,"=",x,y);
+        default: pari_err(e_TYPE2,"=",x,y);
       }
       break;
 
@@ -1959,12 +1959,12 @@ gaffect(GEN x, GEN y)
           p1 = mulii(num,Fp_inv(den,gel(y,3)));
           affii(modii(p1,gel(y,3)), gel(y,4)); avma = av; break;
         case t_QUAD: gaffect(x,gel(y,2)); gaffsg(0,gel(y,3)); break;
-        default: pari_err(operf,"=",x,y);
+        default: pari_err(e_TYPE2,"=",x,y);
       }
       break;
 
     case t_COMPLEX:
-      if (!gequal0(gel(x,2))) pari_err(operf,"=",x,y);
+      if (!gequal0(gel(x,2))) pari_err(e_TYPE2,"=",x,y);
       gaffect(gel(x,1), y);
       break;
 
@@ -1974,7 +1974,7 @@ gaffect(GEN x, GEN y)
         case t_INTMOD:
           av = avma; affii(padic_to_Fp(x, gel(y,1)), gel(y,2));
           avma = av; break;
-        default: pari_err(operf,"=",x,y);
+        default: pari_err(e_TYPE2,"=",x,y);
       }
       break;
 
@@ -1982,16 +1982,16 @@ gaffect(GEN x, GEN y)
       switch(ty)
       {
         case t_INT: case t_INTMOD: case t_FRAC: case t_PADIC:
-          pari_err(operf,"=",x,y);
+          pari_err(e_TYPE2,"=",x,y);
 
         case t_REAL:
           av = avma; affgr(quadtofp(x,lg(y)), y); avma = av; break;
         case t_COMPLEX:
-          ly = precision(y); if (!ly) pari_err(operf,"=",x,y);
+          ly = precision(y); if (!ly) pari_err(e_TYPE2,"=",x,y);
           av = avma; gaffect(quadtofp(x,ly), y); avma = av; break;
-        default: pari_err(operf,"=",x,y);
+        default: pari_err(e_TYPE2,"=",x,y);
       }
-    default: pari_err(operf,"=",x,y);
+    default: pari_err(e_TYPE2,"=",x,y);
   }
 }
 
@@ -2106,7 +2106,7 @@ cvtop2(GEN x, GEN y)
     case t_COMPLEX: return ctop(x, p, d);
     case t_QUAD:    return qtop(x, p, d);
   }
-  pari_err(typeer,"cvtop2",x);
+  pari_err(e_TYPE,"cvtop2",x);
   return NULL; /* not reached */
 }
 
@@ -2117,7 +2117,7 @@ cvtop(GEN x, GEN p, long d)
   GEN z;
   long v;
 
-  if (typ(p) != t_INT) pari_err(typeer,"cvtop",p);
+  if (typ(p) != t_INT) pari_err(e_TYPE,"cvtop",p);
   switch(typ(x))
   {
     case t_INT:
@@ -2150,7 +2150,7 @@ cvtop(GEN x, GEN p, long d)
     case t_PADIC: return gprec(x,d);
     case t_QUAD: return qtop(x, p, d);
   }
-  pari_err(typeer,"cvtop",x);
+  pari_err(e_TYPE,"cvtop",x);
   return NULL; /* not reached */
 }
 
@@ -2209,7 +2209,7 @@ gexpo(GEN x)
       for (i=1; i<lx; i++) { e=gexpo(gel(x,i)); if (e>f) f=e; }
       return f;
   }
-  pari_err(typeer,"gexpo",x);
+  pari_err(e_TYPE,"gexpo",x);
   return 0; /* not reached */
 }
 
@@ -2226,7 +2226,7 @@ normalize(GEN x)
   long i, lx = lg(x);
   GEN y, z;
 
-  if (typ(x) != t_SER) pari_err(typeer,"normalize",x);
+  if (typ(x) != t_SER) pari_err(e_TYPE,"normalize",x);
   if (lx==2) { setsigne(x,0); return x; }
   for (i=2; i<lx; i++)
     if (! isrationalzero(gel(x,i))) break;
@@ -2310,7 +2310,7 @@ gsigne(GEN x)
     case t_INT: case t_REAL: return signe(x);
     case t_FRAC: return signe(x[1]);
   }
-  pari_err(typeer,"gsigne",x);
+  pari_err(e_TYPE,"gsigne",x);
   return 0; /* not reached */
 }
 
@@ -2337,7 +2337,7 @@ ensure_nb(GEN L, long l)
   {
     nmax = 32;
     if (list_data(L))
-      pari_err(talker, "store list in variable before appending elements");
+      pari_err(e_MISC, "store list in variable before appending elements");
     v = (GEN)pari_malloc((nmax+1) * sizeof(long));
     v[0] = evaltyp(t_VEC) | _evallg(1);
   }
@@ -2349,7 +2349,7 @@ void
 listkill(GEN L)
 {
 
-  if (typ(L) != t_LIST) pari_err(typeer,"listkill",L);
+  if (typ(L) != t_LIST) pari_err(e_TYPE,"listkill",L);
   if (list_nmax(L)) {
     GEN v = list_data(L);
     long i, l = lg(v);
@@ -2374,8 +2374,8 @@ listput(GEN L, GEN x, long index)
   long l;
   GEN z;
 
-  if (typ(L) != t_LIST) pari_err(typeer,"listput",L);
-  if (index < 0) pari_err(talker,"negative index (%ld) in listput", index);
+  if (typ(L) != t_LIST) pari_err(e_TYPE,"listput",L);
+  if (index < 0) pari_err(e_MISC,"negative index (%ld) in listput", index);
   z = list_data(L);
   l = z? lg(z): 1;
 
@@ -2397,10 +2397,10 @@ listinsert(GEN L, GEN x, long index)
   long l, i;
   GEN z;
 
-  if (typ(L) != t_LIST) pari_err(typeer,"listinsert",L);
+  if (typ(L) != t_LIST) pari_err(e_TYPE,"listinsert",L);
 
   z = list_data(L); l = z? lg(z): 1;
-  if (index <= 0 || index > l) pari_err(talker,"bad index in listinsert");
+  if (index <= 0 || index > l) pari_err(e_MISC,"bad index in listinsert");
   ensure_nb(L, l);
   z = list_data(L);
   for (i=l; i > index; i--) z[i] = z[i-1];
@@ -2414,13 +2414,13 @@ listpop(GEN L, long index)
   long l, i;
   GEN z;
 
-  if (typ(L) != t_LIST) pari_err(typeer,"listinsert",L);
+  if (typ(L) != t_LIST) pari_err(e_TYPE,"listinsert",L);
 
-  if (index < 0) pari_err(talker,"negative index (%ld) in listpop", index);
+  if (index < 0) pari_err(e_MISC,"negative index (%ld) in listpop", index);
   z = list_data(L);
-  if (!z) pari_err(talker,"empty list in listpop");
+  if (!z) pari_err(e_MISC,"empty list in listpop");
   l = lg(z)-1;
-  if (!l) pari_err(talker,"empty list in listpop");
+  if (!l) pari_err(e_MISC,"empty list in listpop");
 
   if (!index || index > l) index = l;
   gunclone_deep( gel(z, index) );
@@ -2469,7 +2469,7 @@ listsort(GEN L, long flag)
   pari_sp av = avma;
   GEN perm, v, vnew;
 
-  if (typ(L) != t_LIST) pari_err(typeer,"listsort",L);
+  if (typ(L) != t_LIST) pari_err(e_TYPE,"listsort",L);
   v = list_data(L); l = v? lg(v): 1;
   if (l < 3) return;
   if (flag)

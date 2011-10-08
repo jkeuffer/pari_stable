@@ -479,7 +479,7 @@ divsi(long x, GEN y)
   long p1, s = signe(y);
   LOCAL_HIREMAINDER;
 
-  if (!s) pari_err(gdiver);
+  if (!s) pari_err(e_INV);
   if (!x || lgefint(y)>3 || ((long)y[2])<0) return gen_0;
   hiremainder=0; p1=divll(labs(x),y[2]);
   if (x<0) { hiremainder = -((long)hiremainder); p1 = -p1; }
@@ -494,7 +494,7 @@ divir(GEN x, GEN y)
   long ly = lg(y), lx = lgefint(x);
   pari_sp av;
 
-  if (ly == 2) pari_err(gdiver);
+  if (ly == 2) pari_err(e_INV);
   if (lx == 2) return div0r(y);
   if (lx == 3) {
     z = divur(x[2], y);
@@ -513,7 +513,7 @@ divur(ulong x, GEN y)
   long ly = lg(y);
   GEN z;
 
-  if (ly == 2) pari_err(gdiver);
+  if (ly == 2) pari_err(e_INV);
   if (!x) return div0r(y);
   if (ly > INVNEWTON_LIMIT) {
     av = avma; z = invr(y);
@@ -532,7 +532,7 @@ divsr(long x, GEN y)
   long ly = lg(y);
   GEN z;
 
-  if (ly == 2) pari_err(gdiver);
+  if (ly == 2) pari_err(e_INV);
   if (!x) return div0r(y);
   if (ly > INVNEWTON_LIMIT) {
     av = avma; z = invr(y);
@@ -565,7 +565,7 @@ invr(GEN b)
   ulong mask;
 
   if (l <= maxss(INVNEWTON_LIMIT, (1L<<s) + 2)) {
-    if (l == 2) pari_err(gdiver);
+    if (l == 2) pari_err(e_INV);
     return invr_basecase(b);
   }
   mask = quadratic_prec_mask(l-2);
@@ -620,7 +620,7 @@ divrs(GEN x, long y)
   GEN z;
   LOCAL_HIREMAINDER;
 
-  if (!y) pari_err(gdiver);
+  if (!y) pari_err(e_INV);
   if (y<0) { s = -s; y = -y; }
   if (!s) return real_0_bit(expo(x) - expu(y));
   if (y==1) { z = rcopy(x); setsigne(z,s); return z; }
@@ -644,7 +644,7 @@ divru(GEN x, ulong y)
   GEN z;
   LOCAL_HIREMAINDER;
 
-  if (!y) pari_err(gdiver);
+  if (!y) pari_err(e_INV);
   if (!s) return real_0_bit(expo(x) - expu(y));
   if (y==1) return rcopy(x);
   if (y==2) return shiftr(x, -1);
@@ -861,7 +861,7 @@ dbltor(double x)
     const ulong a = fi.i;
     ulong A;
     e = ((a & (HIGHBIT-1)) >> mant_len) - exp_mid;
-    if (e == exp_mid+1) pari_err(talker, "NaN or Infinity in dbltor");
+    if (e == exp_mid+1) pari_err(e_MISC, "NaN or Infinity in dbltor");
     A = a << expo_len;
     if (e == -exp_mid)
     { /* unnormalized values */
@@ -891,7 +891,7 @@ rtodbl(GEN x)
   /* start by rounding to closest */
   a = (x[2] & (HIGHBIT-1)) + 0x400;
   if (a & HIGHBIT) { ex++; a=0; }
-  if (ex >= exp_mid) pari_err(overflower,"t_REAL->double conversion");
+  if (ex >= exp_mid) pari_err(e_OVERFLOW,"t_REAL->double conversion");
   fi.i = ((ex + exp_mid) << mant_len) | (a >> expo_len);
   if (s<0) fi.i |= HIGHBIT;
   return fi.f;
@@ -956,7 +956,7 @@ dbltor(double x)
     const ulong b = fi.i[INDEX1];
     ulong A, B;
     e = ((a & (HIGHBIT-1)) >> shift) - exp_mid;
-    if (e == exp_mid+1) pari_err(talker, "NaN or Infinity in dbltor");
+    if (e == exp_mid+1) pari_err(e_MISC, "NaN or Infinity in dbltor");
     A = b >> (BITS_IN_LONG-expo_len) | (a << expo_len);
     B = b << expo_len;
     if (e == -exp_mid)
@@ -1008,7 +1008,7 @@ rtodbl(GEN x)
     if (a & HIGHBIT) { ex++; a=0; }
   }
   else b = 0;
-  if (ex >= exp_mid) pari_err(overflower,"t_REAL->double conversion");
+  if (ex >= exp_mid) pari_err(e_OVERFLOW,"t_REAL->double conversion");
   ex += exp_mid;
   k = (a >> expo_len) | (ex << shift);
   if (s<0) k |= HIGHBIT;

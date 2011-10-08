@@ -156,11 +156,11 @@ numbpart(GEN n)
   long prec, bitprec;
   ulong q;
 
-  if (typ(n) != t_INT) pari_err(typeer, "partition function",n);
+  if (typ(n) != t_INT) pari_err(e_TYPE, "partition function",n);
   if (signe(n) < 0) return gen_0;
   if (cmpiu(n, 2) < 0) return gen_1;
   if (cmpii(n, uu32toi(0x38d7e, 0xa4c68000)) >= 0)
-    pari_err(talker, "arg to partition function must be < 10^15");
+    pari_err(e_MISC, "arg to partition function must be < 10^15");
   est = estim(n);
   bitprec = (long)(rtodbl(est)/LOG2) + 32;
   prec = nbits2prec(bitprec);

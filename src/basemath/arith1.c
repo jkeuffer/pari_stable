@@ -138,7 +138,7 @@ ulong
 pgener_Zl(ulong p)
 {
   ulong x;
-  if (p == 2) pari_err(talker,"primitive root mod 2^3 does not exist");
+  if (p == 2) pari_err(e_MISC,"primitive root mod 2^3 does not exist");
   /* only p < 2^32 such that znprimroot(p) != znprimroot(p^2) */
   if (p == 40487) return 40492;
   x = pgener_Fl(p);
@@ -149,7 +149,7 @@ pgener_Zl(ulong p)
   GEN y = Fp_powu(utoipos(x), p-1, q);
   if (equali1(y)) {
     x += p;
-    if (x < p) pari_err(talker, "p too large in pgener_Zl");
+    if (x < p) pari_err(e_MISC, "p too large in pgener_Zl");
   }
   avma = av;
 }
@@ -184,8 +184,8 @@ znprimroot(GEN m)
   pari_sp av;
   GEN x, z;
 
-  if (typ(m) != t_INT) pari_err(typeer,"znprimroot",m);
-  if (!signe(m)) pari_err(talker,"zero modulus in znprimroot");
+  if (typ(m) != t_INT) pari_err(e_TYPE,"znprimroot",m);
+  if (!signe(m)) pari_err(e_MISC,"zero modulus in znprimroot");
   if (is_pm1(m)) return mkintmodu(0,1);
   z = cgetg(3, t_INTMOD);
   m = absi(m);
@@ -195,7 +195,7 @@ znprimroot(GEN m)
   {
     case 0: /* m = 0 mod 4 */
       if (!equaliu(m,4)) /* m != 4, non cyclic */
-        pari_err(talker,"primitive root mod %Ps does not exist", m);
+        pari_err(e_MISC,"primitive root mod %Ps does not exist", m);
       x = utoipos(3);
       break;
     case 2: /* m = 2 mod 4 */
@@ -217,7 +217,7 @@ znstar(GEN N)
   long i, j, nbp, sizeh;
   pari_sp av;
 
-  if (typ(N) != t_INT) pari_err(typeer,"znstar",N);
+  if (typ(N) != t_INT) pari_err(e_TYPE,"znstar",N);
   if (!signe(N))
   {
     gel(res,1) = gen_2;
@@ -325,12 +325,12 @@ znstar(GEN N)
 GEN
 sqrtint(GEN a)
 {
-  if (typ(a) != t_INT) pari_err(typeer,"sqrtint",a);
+  if (typ(a) != t_INT) pari_err(e_TYPE,"sqrtint",a);
   switch (signe(a))
   {
     case 1: return sqrti(a);
     case 0: return gen_0;
-    default: pari_err(talker, "negative integer in sqrtint");
+    default: pari_err(e_MISC, "negative integer in sqrtint");
   }
   return NULL; /* not reached */
 }
@@ -422,7 +422,7 @@ is_char_2(GEN a)
     b = gel(a,1);
     if (!mod2(b))
     {
-      if (!equaliu(b, 2)) pari_err(impl, "issquare for this input");
+      if (!equaliu(b, 2)) pari_err(e_IMPL, "issquare for this input");
       return 1;
     }
     return 0;
@@ -585,7 +585,7 @@ gissquareall(GEN x, GEN *pt)
 
     case t_FFELT: return FF_issquareall(x, pt)? gen_1: gen_0;
 
-    default: pari_err(typeer, "gissquareall",x);
+    default: pari_err(e_TYPE, "gissquareall",x);
       return NULL; /* not reached */
   }
   return l? gen_1: gen_0;
@@ -692,7 +692,7 @@ gissquare(GEN x)
       for (i=1; i<l; i++) gel(p1,i) = gissquare(gel(x,i));
       return p1;
   }
-  pari_err(typeer,"gissquare",x);
+  pari_err(e_TYPE,"gissquare",x);
   return NULL; /* not reached */
 }
 
@@ -774,8 +774,8 @@ ispower(GEN x, GEN K, GEN *pt)
   GEN z;
 
   if (!K) return gisanypower(x, pt);
-  if (typ(K) != t_INT) pari_err(typeer, "ispower",K);
-  if (signe(K) <= 0) pari_err(talker, "non-positive exponent %Ps in ispower",K);
+  if (typ(K) != t_INT) pari_err(e_TYPE, "ispower",K);
+  if (signe(K) <= 0) pari_err(e_MISC, "non-positive exponent %Ps in ispower",K);
   if (equali1(K)) { if (pt) *pt = gcopy(x); return 1; }
   switch(typ(x)) {
     case t_INT:
@@ -859,7 +859,7 @@ ispower(GEN x, GEN K, GEN *pt)
       if (pt) *pt = gsqrtn(x, K, NULL, DEFAULTPREC);
       return 1;
 
-    default: pari_err(typeer, "ispower",x);
+    default: pari_err(e_TYPE, "ispower",x);
     return 0; /* not reached */
   }
 }
@@ -897,7 +897,7 @@ gisanypower(GEN x, GEN *pty)
     *pty = gerepilecopy(av, mkfrac(a, b));
     return k;
   }
-  pari_err(talker, "missing exponent");
+  pari_err(e_MISC, "missing exponent");
   return 0; /* not reached */
 }
 
@@ -1059,8 +1059,8 @@ kronecker(GEN x, GEN y)
   long s = 1, r;
   ulong xu, yu;
 
-  if (typ(x) != t_INT) pari_err(typeer,"kronecker",x);
-  if (typ(y) != t_INT) pari_err(typeer,"kronecker",y);
+  if (typ(x) != t_INT) pari_err(e_TYPE,"kronecker",x);
+  if (typ(y) != t_INT) pari_err(e_TYPE,"kronecker",y);
   switch (signe(y))
   {
     case -1: y = negi(y); if (signe(x) < 0) s = -1; break;
@@ -1214,7 +1214,7 @@ hilbertii(GEN x, GEN y, GEN p)
   GEN u, v;
 
   if (!p) return (signe(x)<0 && signe(y)<0)? -1: 1;
-  if (is_pm1(p)) pari_err(talker,"p = 1 in hilbert()");
+  if (is_pm1(p)) pari_err(e_MISC,"p = 1 in hilbert()");
   av = avma;
   a = odd(Z_pvalrem(x,p,&u));
   b = odd(Z_pvalrem(y,p,&v));
@@ -1234,7 +1234,7 @@ hilbertii(GEN x, GEN y, GEN p)
 }
 
 static void
-err_at2(void) {pari_err(talker, "insufficient precision for p = 2 in hilbert");}
+err_at2(void) {pari_err(e_MISC, "insufficient precision for p = 2 in hilbert");}
 
 long
 hilbert(GEN x, GEN y, GEN p)
@@ -1248,7 +1248,7 @@ hilbert(GEN x, GEN y, GEN p)
   if (tx > ty) swapspec(x,y, tx,ty);
   if (p)
   {
-    if (typ(p) != t_INT) pari_err(typeer,"hilbert",p);
+    if (typ(p) != t_INT) pari_err(e_TYPE,"hilbert",p);
     if (signe(p) <= 0) p = NULL;
   }
 
@@ -1314,7 +1314,7 @@ hilbert(GEN x, GEN y, GEN p)
       p2 = odd(valp(y))? mulii(p,gel(y,4)): gel(y,4);
       z = hilbertii(p1,p2,p); avma = av; return z;
   }
-  pari_err(talker,"forbidden or incompatible types in hilbert");
+  pari_err(e_MISC,"forbidden or incompatible types in hilbert");
   return 0; /* not reached */
 }
 #undef eps
@@ -1338,7 +1338,7 @@ Fl_sqrt(ulong a, ulong p)
   p1 = p - 1; e = vals(p1);
   if (e == 0) /* p = 2 */
   {
-    if (p != 2) pari_err(talker,"composite modulus in Fl_sqrt: %lu",p);
+    if (p != 2) pari_err(e_MISC,"composite modulus in Fl_sqrt: %lu",p);
     return ((a & 1) == 0)? 0: 1;
   }
   q = p1 >> e; /* q = (p-1)/2^oo is odd */
@@ -1350,7 +1350,7 @@ Fl_sqrt(ulong a, ulong p)
       if (i >= 0)
       {
         if (i) continue;
-        pari_err(talker,"composite modulus in Fl_sqrt: %lu",p);
+        pari_err(e_MISC,"composite modulus in Fl_sqrt: %lu",p);
       }
       y = m = Fl_powu(k, q, p);
       for (i=1; i<e; i++)
@@ -1461,9 +1461,9 @@ Fp_sqrt(GEN a, GEN p)
   long i, k, e;
   GEN p1, q, v, y, w, m;
 
-  if (typ(a) != t_INT) pari_err(typeer,"Fp_sqrt",a);
-  if (typ(p) != t_INT) pari_err(typeer,"Fp_sqrt",p);
-  if (signe(p) <= 0 || equali1(p)) pari_err(talker,"not a prime in Fp_sqrt");
+  if (typ(a) != t_INT) pari_err(e_TYPE,"Fp_sqrt",a);
+  if (typ(p) != t_INT) pari_err(e_TYPE,"Fp_sqrt",p);
+  if (signe(p) <= 0 || equali1(p)) pari_err(e_MISC,"not a prime in Fp_sqrt");
   if (lgefint(p) == 3)
   {
     ulong u = (ulong)p[2]; u = Fl_sqrt(umodiu(a, u), u);
@@ -1487,7 +1487,7 @@ Fp_sqrt(GEN a, GEN p)
   if (e == 0) /* p = 2 */
   {
     avma = av;
-    if (!equaliu(p,2)) pari_err(talker,"composite modulus in Fp_sqrt: %Ps",p);
+    if (!equaliu(p,2)) pari_err(e_MISC,"composite modulus in Fp_sqrt: %Ps",p);
     if (!signe(a) || !mod2(a)) return gen_0;
     return gen_1;
   }
@@ -1501,7 +1501,7 @@ Fp_sqrt(GEN a, GEN p)
       if (i >= 0)
       {
         if (i) continue;
-        pari_err(talker,"composite modulus in Fp_sqrt: %Ps",p);
+        pari_err(e_MISC,"composite modulus in Fp_sqrt: %Ps",p);
       }
       av1 = avma;
       y = m = Fp_pow(utoipos((ulong)k),q,p);
@@ -1599,7 +1599,7 @@ chinese(GEN x, GEN y)
   {
     case t_POLMOD:
       z = cgetg(3, t_POLMOD);
-      if (varn(gel(x,1))!=varn(gel(y,1))) pari_err(operi,"chinese",x,y);
+      if (varn(gel(x,1))!=varn(gel(y,1))) pari_err(e_OP,"chinese",x,y);
       if (RgX_equal(gel(x,1),gel(y,1)))  /* same modulus */
       {
         gel(z,1) = gcopy(gel(x,1));
@@ -1622,7 +1622,7 @@ chinese(GEN x, GEN y)
       z = cgetg(3,t_INTMOD);
       Z_chinese_pre(A, B, &C, &U, &d);
       c = Z_chinese_post(a, b, C, U, d);
-      if (!c) pari_err(operi,"chinese", x,y);
+      if (!c) pari_err(e_OP,"chinese", x,y);
       gel(z,1) = icopy_avma(C, (pari_sp)z);
       gel(z,2) = icopy_avma(c, (pari_sp)gel(z,1));
       avma = (pari_sp)gel(z,2); return z;
@@ -1638,7 +1638,7 @@ chinese(GEN x, GEN y)
       for (i=1; i<lx; i++) gel(z,i) = chinese(gel(x,i),gel(y,i));
       return z;
   }
-  pari_err(operi,"chinese",x,y);
+  pari_err(e_OP,"chinese",x,y);
   return NULL; /* not reached */
 }
 
@@ -2059,10 +2059,10 @@ znorder(GEN x, GEN o)
   GEN b, a;
 
   if (typ(x) != t_INTMOD)
-    pari_err(talker,"not an element of (Z/nZ)* in order");
+    pari_err(e_MISC,"not an element of (Z/nZ)* in order");
   b = gel(x,1); a = gel(x,2);
   if (!equali1(gcdii(a,b)))
-    pari_err(talker,"not an element of (Z/nZ)* in order");
+    pari_err(e_MISC,"not an element of (Z/nZ)* in order");
   if (!o)
   {
     GEN fa = Z_factor(b), P = gel(fa,1), E = gel(fa,2);
@@ -2221,7 +2221,7 @@ znlog(GEN h, GEN g, GEN o)
     {
       GEN p = gel(g,2);
       long v = valp(g);
-      if (v < 0) pari_err(consister,"znlog");
+      if (v < 0) pari_err(e_DIM,"znlog");
       if (v > 0) {
         long k = ggval(h, p);
         if (k % v) return cgetg(1,t_VEC);
@@ -2236,7 +2236,7 @@ znlog(GEN h, GEN g, GEN o)
     case t_INTMOD:
       N = gel(g,1);
       g = gel(g,2); break;
-    default: pari_err(talker,"not an element of (Z/NZ)* in znlog");
+    default: pari_err(e_MISC,"not an element of (Z/NZ)* in znlog");
       return NULL; /* not reached */
   }
   if (equali1(N)) { avma = av; return gen_0; }
@@ -2269,7 +2269,7 @@ Fp_sqrtn(GEN a, GEN n, GEN p, GEN *zeta)
 /*********************************************************************/
 static long
 isfund(GEN x) {
-  if (typ(x) != t_INT) pari_err(typeer,"isfundamental",x);
+  if (typ(x) != t_INT) pari_err(e_TYPE,"isfundamental",x);
   return Z_isfundamental(x);
 }
 GEN
@@ -2304,7 +2304,7 @@ quaddisc(GEN x)
   long i,r,tx=typ(x);
   GEN P,E,f,s;
 
-  if (!is_rational_t(tx)) pari_err(typeer,"quaddisc",x);
+  if (!is_rational_t(tx)) pari_err(e_TYPE,"quaddisc",x);
   f = factor(x);
   P = gel(f,1);
   E = gel(f,2); s = gen_1;
@@ -2353,7 +2353,7 @@ mpfact(long n)
 {
   if (n < 2)
   {
-    if (n < 0) pari_err(talker,"negative argument in factorial function");
+    if (n < 0) pari_err(e_MISC,"negative argument in factorial function");
     return gen_1;
   }
   return mulu_interval(2UL, (ulong)n);
@@ -2492,7 +2492,7 @@ gboundcf(GEN x, long k)
   long tx = typ(x), e;
   GEN y, a, b, c;
 
-  if (k < 0) pari_err(talker, "negative nmax in gboundcf");
+  if (k < 0) pari_err(e_MISC, "negative nmax in gboundcf");
   if (is_scalar_t(tx))
   {
     if (gequal0(x)) return mkvec(gen_0);
@@ -2502,7 +2502,7 @@ gboundcf(GEN x, long k)
       case t_REAL:
         av = avma;
         c = mantissa_real(x,&e);
-        if (e < 0) pari_err(talker,"integral part not significant in gboundcf");
+        if (e < 0) pari_err(e_MISC,"integral part not significant in gboundcf");
         y = int2n(e);
         a = Qsfcont(c,y, NULL, k);
         b = addsi(signe(x), c);
@@ -2512,7 +2512,7 @@ gboundcf(GEN x, long k)
         av = avma;
         return gerepileupto(av, Qsfcont(gel(x,1),gel(x,2), NULL, k));
     }
-    pari_err(typeer,"gboundcf",x);
+    pari_err(e_TYPE,"gboundcf",x);
   }
 
   switch(tx)
@@ -2525,7 +2525,7 @@ gboundcf(GEN x, long k)
       av = avma;
       return gerepilecopy(av, sersfcont(gel(x,1), gel(x,2), k));
   }
-  pari_err(typeer,"gboundcf",x);
+  pari_err(e_TYPE,"gboundcf",x);
   return NULL; /* not reached */
 }
 
@@ -2538,14 +2538,14 @@ sfcont2(GEN b, GEN x, long k)
 
   if (k)
   {
-    if (k >= lb) pari_err(talker,"list of numerators too short in sfcontf2");
+    if (k >= lb) pari_err(e_MISC,"list of numerators too short in sfcontf2");
     lb = k+1;
   }
   y = cgetg(lb,t_VEC);
   if (lb==1) return y;
   if (is_scalar_t(tx))
   {
-    if (!is_intreal_t(tx) && tx != t_FRAC) pari_err(typeer,"sfcont2",x);
+    if (!is_intreal_t(tx) && tx != t_FRAC) pari_err(e_TYPE,"sfcont2",x);
   }
   else if (tx == t_SER) x = ser2rfrac_i(x);
 
@@ -2585,8 +2585,8 @@ contfrac0(GEN x, GEN b, long nmax)
   if (!b) return gboundcf(x,nmax);
   tb = typ(b);
   if (tb == t_INT) return gboundcf(x,itos(b));
-  if (! is_vec_t(tb)) pari_err(typeer,"contfrac0",b);
-  if (nmax < 0) pari_err(talker, "negative nmax in contfrac0");
+  if (! is_vec_t(tb)) pari_err(e_TYPE,"contfrac0",b);
+  if (nmax < 0) pari_err(e_MISC, "negative nmax in contfrac0");
   return sfcont2(b,x,nmax);
 }
 
@@ -2597,7 +2597,7 @@ pnqn(GEN x)
   long i, lx, tx = typ(x);
   GEN p0, p1, q0, q1, a, p2, q2;
 
-  if (! is_matvec_t(tx)) pari_err(typeer,"pnqn",x);
+  if (! is_matvec_t(tx)) pari_err(e_TYPE,"pnqn",x);
   lx = lg(x); if (lx == 1) return matid(2);
   p0 = gen_1; q0 = gen_0;
   if (tx != t_MAT)
@@ -2625,7 +2625,7 @@ pnqn(GEN x)
     }
     else
     {
-      if (ly != 3) pari_err(talker,"incorrect size in pnqn");
+      if (ly != 3) pari_err(e_MISC,"incorrect size in pnqn");
       p1 = gcoeff(x,2,1); q1 = gcoeff(x,1,1);
       for (i=2; i<lx; i++)
       {
@@ -2740,7 +2740,7 @@ bestappr_real_max(GEN x)
     d = nbits2prec(expo(x) + 1);
     if (d > lg(x)) { p1 = p0; q1 = q0; break; } /* original x was ~ 0 */
 
-    a = truncr(x); /* truncr(x) will NOT raise precer */
+    a = truncr(x); /* truncr(x) will NOT raise e_PREC */
     p = addii(mulii(a,p0), p1); p1=p0; p0=p;
     q = addii(mulii(a,q0), q1); q1=q0; q0=q;
     x = subri(x,a); /* 0 <= x < 1 */
@@ -2779,7 +2779,7 @@ bestappr_real(GEN x, GEN k)
     d = nbits2prec(expo(x) + 1);
     if (d > lg(x)) { p1 = p0; q1 = q0; break; } /* original x was ~ 0 */
 
-    a = truncr(x); /* truncr(x) will NOT raise precer */
+    a = truncr(x); /* truncr(x) will NOT raise e_PREC */
     p = addii(mulii(a,p0), p1); p1=p0; p0=p;
     q = addii(mulii(a,q0), q1); q1=q0; q0=q;
 
@@ -2829,7 +2829,7 @@ bestappr_Q(GEN x, GEN k)
       }
       return gnormalize(y);
   }
-  pari_err(typeer,"bestappr_Q",x);
+  pari_err(e_TYPE,"bestappr_Q",x);
   return NULL; /* not reached */
 }
 
@@ -2886,7 +2886,7 @@ bestappr_RgX(GEN x, long B)
       }
       return gnormalize(y);
   }
-  pari_err(typeer,"bestappr_RgX",x);
+  pari_err(e_TYPE,"bestappr_RgX",x);
   return NULL; /* not reached */
 }
 
@@ -2905,7 +2905,7 @@ bestappr(GEN x, GEN k)
         if (!signe(k)) k = gen_1;
         break;
       default:
-        pari_err(talker,"incorrect bound type in bestappr");
+        pari_err(e_MISC,"incorrect bound type in bestappr");
         break;
     }
   }
@@ -3022,7 +3022,7 @@ quadregulator(GEN x, long prec)
     R = mulrr(R, divri(addir(u1,rsqd),v));
     Rexpo += expo(R); setexpo(R,0);
     u = u1; v = v1;
-    if (Rexpo & ~EXPOBITS) pari_err(talker,"exponent overflow in quadregulator");
+    if (Rexpo & ~EXPOBITS) pari_err(e_MISC,"exponent overflow in quadregulator");
     if (low_stack(lim, stack_lim(av2,2)))
     {
       if(DEBUGMEM>1) pari_warn(warnmem,"quadregulator");
@@ -3052,7 +3052,7 @@ qfbclassno0(GEN x,long flag)
   {
     case 0: return map_proto_G(classno,x);
     case 1: return map_proto_G(classno2,x);
-    default: pari_err(flagerr,"qfbclassno");
+    default: pari_err(e_FLAG,"qfbclassno");
   }
   return NULL; /* not reached */
 }
@@ -3221,7 +3221,7 @@ classno(GEN x)
   p2 = gsqrt(absi(D),DEFAULTPREC);
   p1 = mulrr(divrr(p2,mppi(DEFAULTPREC)), dbltor(1.005)); /*overshoot by 0.5%*/
   s = itos_or_0( truncr(shiftr(sqrtr(p2), 1)) );
-  if (!s) pari_err(talker,"discriminant too big in classno");
+  if (!s) pari_err(e_MISC,"discriminant too big in classno");
   if (s < 10) s = 200;
   else if (s < 20) s = 1000;
   else if (s < 5000) s = 5000;
@@ -3297,7 +3297,7 @@ classno(GEN x)
       }
     }
     ftest = gmul(ftest,fg);
-    if (equali1(gel(ftest,1))) pari_err(impl,"classno with too small order");
+    if (equali1(gel(ftest,1))) pari_err(e_IMPL,"classno with too small order");
     if (low_stack(lim, stack_lim(av2,2))) ftest = gerepileupto(av2,ftest);
   }
 }
@@ -3328,7 +3328,7 @@ classno2(GEN x)
     if (cmprr(sqrr(p2), shiftr(invlogd,1)) >= 0) p1 = mulrr(p2,p1);
   }
   n = itos_or_0( mptrunc(p1) );
-  if (!n) pari_err(talker,"discriminant too large in classno");
+  if (!n) pari_err(e_MISC,"discriminant too large in classno");
 
   p4 = divri(Pi,d);
   p7 = invr(sqrtr_abs(Pi));
@@ -3401,7 +3401,7 @@ hclassno(GEN x)
   long s;
   int f;
 
-  if (typ(x) != t_INT) pari_err(typeer,"hclassno",x);
+  if (typ(x) != t_INT) pari_err(e_TYPE,"hclassno",x);
   s = signe(x);
   if (s < 0) return gen_0;
   if (!s) return gdivgs(gen_1, -12);

@@ -102,8 +102,8 @@ hyperell_locally_soluble(GEN T,GEN p)
 {
   pari_sp av = avma;
   long res;
-  if (typ(T)!=t_POL) pari_err(typeer,"zpsoluble",T);
-  if (typ(p)!=t_INT) pari_err(typeer,"zpsoluble",p);
+  if (typ(T)!=t_POL) pari_err(e_TYPE,"zpsoluble",T);
+  if (typ(p)!=t_INT) pari_err(e_TYPE,"zpsoluble",p);
   RgX_check_ZX(T, "zpsoluble");
   res = zpsol(T,p,0,gen_1,gen_0) || zpsol(RgX_recip_shallow(T), p, 1, p, gen_0);
   avma = av; return res;
@@ -122,7 +122,7 @@ quad_char(GEN nf, GEN t, GEN pr)
     t = Fq_pow(t, diviiexact(ord, ordp), T,p); /* in F_p^* */
     if (typ(t) == t_POL)
     {
-      if (degpol(t)) pari_err(bugparier,"nfhilbertp");
+      if (degpol(t)) pari_err(e_BUG,"nfhilbertp");
       t = gel(t,2);
     }
   }
@@ -309,7 +309,7 @@ nf_hyperell_locally_soluble(GEN nf,GEN T,GEN pr)
   GEN repr, zinit, p1;
   pari_sp av = avma;
 
-  if (typ(T)!=t_POL) pari_err(typeer,"nf_hyperell_locally_soluble",T);
+  if (typ(T)!=t_POL) pari_err(e_TYPE,"nf_hyperell_locally_soluble",T);
   if (gequal0(T)) return 1;
   checkprid(pr); nf = checknf(nf);
   pr = shallowcopy(pr);
@@ -350,7 +350,7 @@ den_remove(GEN nf, GEN a)
       if (da) a = ZC_Z_mul(a, da);
       a = coltoliftalg(nf, a);
       return a;
-    default: pari_err(typeer,"nfhilbert",a);
+    default: pari_err(e_TYPE,"nfhilbert",a);
       return NULL;/*not reached*/
   }
 }
@@ -458,7 +458,7 @@ nfhilbert0(GEN nf,GEN a,GEN b,GEN p)
   nf = checknf(nf);
   if (p) {
     checkprid(p);
-    if (gequal0(a) || gequal0(b)) pari_err (talker,"0 argument in nfhilbertp");
+    if (gequal0(a) || gequal0(b)) pari_err (e_MISC,"0 argument in nfhilbertp");
     return nfhilbertp(nf,a,b,p);
   }
   return nfhilbert(nf,a,b);
@@ -479,7 +479,7 @@ bnfsunit(GEN bnf,GEN S,long prec)
   GEN p1,nf,gen,M,U,H;
   GEN sunit,card,sreg,res,pow;
 
-  if (typ(S) != t_VEC) pari_err(typeer,"bnfsunit",S);
+  if (typ(S) != t_VEC) pari_err(e_TYPE,"bnfsunit",S);
   bnf = checkbnf(bnf);
   nf = bnf_get_nf(bnf);
   gen = bnf_get_gen(bnf);
@@ -529,7 +529,7 @@ bnfsunit(GEN bnf,GEN S,long prec)
     H = mathnfspec(U1,&perm,&dep,&B,&p1);
     lH = lg(H);
     lB = lg(B);
-    if (lg(dep) > 1 && lg(dep[1]) > 1) pari_err(bugparier,"bnfsunit");
+    if (lg(dep) > 1 && lg(dep[1]) > 1) pari_err(e_BUG,"bnfsunit");
    /*                   [ H B  ]            [ H^-1   - H^-1 B ]
     * perm o HNF(U1) =  [ 0 Id ], inverse = [  0         Id   ]
     * (permute the rows)
@@ -634,7 +634,7 @@ bnfissunit(GEN bnf,GEN bnfS,GEN x)
 
   bnf = checkbnf(bnf);
   nf = bnf_get_nf(bnf);
-  if (typ(bnfS)!=t_VEC || lg(bnfS)!=7) pari_err(typeer,"bnfissunit",bnfS);
+  if (typ(bnfS)!=t_VEC || lg(bnfS)!=7) pari_err(e_TYPE,"bnfissunit",bnfS);
   x = nf_to_scalar_or_alg(nf,x);
   v = NULL;
   if ( (w = make_unit(nf, bnfS, &x)) ) v = bnfisunit(bnf, x);
@@ -697,16 +697,16 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
   GEN prod, S1, S2, gen, cyc, bnf, nf, nfabs, rnfeq, bnfabs, k, polabs;
   GEN y = cgetg(9, t_VEC);
 
-  if (galois < 0 || galois > 2) pari_err(flagerr, "rnfisnorminit");
+  if (galois < 0 || galois > 2) pari_err(e_FLAG, "rnfisnorminit");
   T = get_bnfpol(T, &bnf, &nf); vbas = varn(T);
   if (!bnf) bnf = Buchall(nf? nf: T, nf_FORCE, DEFAULTPREC);
   if (!nf) nf = bnf_get_nf(bnf);
 
   relpol = get_bnfpol(relpol, &bnfabs, &nfabs);
-  if (!gequal1(leading_term(relpol))) pari_err(impl,"non monic relative equation");
+  if (!gequal1(leading_term(relpol))) pari_err(e_IMPL,"non monic relative equation");
   drel = degpol(relpol);
   if (varncmp(varn(relpol), vbas) >= 0)
-    pari_err(talker,"main variable must be of higher priority in rnfisnorminit");
+    pari_err(e_MISC,"main variable must be of higher priority in rnfisnorminit");
   if (drel <= 2) galois = 1;
 
   rnfeq = NULL; /* no reltoabs needed */
@@ -772,7 +772,7 @@ rnfisnorm(GEN T, GEN x, long flag)
   long L, i, drel, itu;
 
   if (typ(T) != t_VEC || lg(T) != 9)
-    pari_err(talker,"please apply rnfisnorminit first");
+    pari_err(e_MISC,"please apply rnfisnorminit first");
   bnf = gel(T,1); rel = gel(T,2); relpol = gel(T,3); theta = gel(T,4);
   drel = degpol(relpol);
   bnf = checkbnf(bnf);
@@ -822,7 +822,7 @@ rnfisnorm(GEN T, GEN x, long flag)
     if (typ(u) != t_POLMOD) u = mkpolmod(u, gel(theta,1));
     gel(sunitrel,i) = u;
     u = bnfissunit(bnf,bnfS, gnorm(u));
-    if (lg(u) == 1) pari_err(bugparier,"rnfisnorm");
+    if (lg(u) == 1) pari_err(e_BUG,"rnfisnorm");
     gel(u,itu) = lift_intern(gel(u,itu)); /* lift root of 1 part */
     gel(M,i) = u;
   }

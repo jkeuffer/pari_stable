@@ -1770,25 +1770,25 @@ seen so far:
 
 \fun{char*}{pari_vsprintf}{const char *fmt, va_list ap}
 
-\subsec{Errors}\sidx{error}\kbdsidx{talker}
+\subsec{Errors}\sidx{error}\kbdsidx{e_MISC}
 
 \noindent
 If you want your functions to issue error messages, you can use the general
 error handling routine \tet{pari_err}. The basic syntax is
 %
 \bprog
-  pari_err(talker, "error message");
+  pari_err(e_MISC, "error message");
 @eprog\noindent
 This prints the corresponding error message and exit the program (in
 library mode; go back to the \kbd{gp} prompt otherwise).\label{se:err} You can
 also use it in the more versatile guise
 \bprog
-  pari_err(talker, format, ...);
+  pari_err(e_MISC, format, ...);
 @eprog\noindent
 where \kbd{format} describes the format to use to write the remaining
 operands, as in the \tet{pari_printf} function. For instance:
 \bprog
-  pari_err(talker, "x[%d] = %Ps is not invertible!", i, gel(x,i));
+  pari_err(e_MISC, "x[%d] = %Ps is not invertible!", i, gel(x,i));
 @eprog\noindent
 The simple syntax seen above is just a special case with a constant format
 and no remaining arguments. The general syntax is
@@ -1797,7 +1797,7 @@ and no remaining arguments. The general syntax is
 
 \noindent where \kbd{numerr} is a codeword which specifies the error class
 and what to do with the remaining arguments and what message to print.
-For instance, \kbd{pari\_err(typeer,"extgcd")} prints the message:
+For instance, \kbd{pari\_err(e\_TYPE,"extgcd")} prints the message:
 \bprog
     ***   incorrect type in extgcd.
 @eprog\noindent See \secref{se:errors} for details.
@@ -1813,7 +1813,7 @@ the requested message and go on. The basic example is
 \bprog
     pari_warn(warner, "Strategy 1 failed. Trying strategy 2")
 @eprog\noindent
-which is the exact equivalent of \kbd{pari\_err(talker,...)} except that
+which is the exact equivalent of \kbd{pari\_err(e\_MISC,...)} except that
 you certainly do not want to stop the program at this point, just inform the
 user that something important has occurred; in particular, this output would be
 suitably highlighted under \kbd{gp}, whereas a simple \kbd{printf} would not.
@@ -1997,7 +1997,7 @@ ulong p = 0;
 @eprog
 \noindent calling the macro \tet{NEXT_PRIME_VIADIFF_CHECK}$(p, \var{ptr})$
 repeatedly will assign the successive prime numbers to $p$. Overrunning the
-prime table boundary will raise the error \tet{primer1}, which will just
+prime table boundary will raise the error \tet{e_MAXPRIME}, which will just
 print the error message:
 
 \kbd{*** not enough precomputed primes}
@@ -2010,7 +2010,7 @@ and is slightly faster. It should be used in the following way:
 byteptr ptr = diffptr;
 ulong p = 0;
 
-if (maxprime() < goal) pari_err(primer1, goal); /*@Ccom not enough primes */
+if (maxprime() < goal) pari_err(e_MAXPRIME, goal); /*@Ccom not enough primes */
 while (p <= goal) /*@Ccom run through all primes up to \kbd{goal} */
 {
   NEXT_PRIME_VIADIFF(p, ptr);
@@ -2018,7 +2018,7 @@ while (p <= goal) /*@Ccom run through all primes up to \kbd{goal} */
 }
 @eprog\noindent
 Here, we use the general error handling function \kbd{pari\_err} (see
-\secref{se:err}), with the codeword \kbd{primer1}, raising the ``not enough
+\secref{se:err}), with the codeword \kbd{e\_MAXPRIME}, raising the ``not enough
 primes'' error. This could be rewritten as
 \bprog
 maxprime_check(goal);

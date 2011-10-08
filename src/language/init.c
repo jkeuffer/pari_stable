@@ -313,7 +313,7 @@ pari_daemon(void)
 int
 pari_daemon(void)
 {
-  pari_err(impl,"pari_daemon without waitpid & setsid");
+  pari_err(e_IMPL,"pari_daemon without waitpid & setsid");
   return 0;
 }
 #endif
@@ -331,7 +331,7 @@ static void pari_sighandler(int sig);
 /*                         SIGNAL HANDLERS                           */
 /*********************************************************************/
 static void
-dflt_sigint_fun(void) { pari_err(talker, "user interrupt"); }
+dflt_sigint_fun(void) { pari_err(e_MISC, "user interrupt"); }
 
 #if defined(_WIN32) || defined(__CYGWIN32__)
 int win32ctrlc = 0;
@@ -399,14 +399,14 @@ pari_sighandler(int sig)
         GP_DATA->pp->file = NULL; /* to avoid oo recursion on error */
         pari_outfile = stdout; pari_fclose(f);
       }
-      pari_err(talker, "Broken Pipe, resetting file stack...");
+      pari_err(e_MISC, "Broken Pipe, resetting file stack...");
       return; /* not reached */
     }
 #endif
 
     default: msg="signal handling"; break;
   }
-  pari_err(bugparier,msg);
+  pari_err(e_BUG,msg);
 }
 
 void
@@ -465,9 +465,9 @@ pari_init_stack(size_t size, size_t old)
     for (;; s>>=1)
     {
       char buf[128];
-      bot = (pari_sp)malloc(s); /* NOT pari_malloc, memer would be deadly */
+      bot = (pari_sp)malloc(s); /* NOT pari_malloc, e_MEM would be deadly */
       if (bot) break;
-      if (!s) pari_err(memer); /* no way out. Die */
+      if (!s) pari_err(e_MEM); /* no way out. Die */
       /* must use sprintf: pari stack is currently dead */
       sprintf(buf, "not enough memory, new stack %lu", (ulong)s);
       pari_warn(warner, buf, s);
@@ -731,7 +731,7 @@ pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts)
   pari_init_stack(parisize, 0);
   diffptr = initprimes(maxprime);
   init_universal_constants();
-  if (pari_kernel_init()) pari_err(talker,"Cannot initialize kernel");
+  if (pari_kernel_init()) pari_err(e_MISC,"Cannot initialize kernel");
 
   primetab = cgetalloc(t_VEC, 1);
   varentries = (entree**) pari_calloc((MAXVARN+1)*sizeof(entree*));
@@ -877,7 +877,7 @@ err_init_msg(int numerr)
 {
   const char *gp_function_name;
   out_puts(pariErr, "  *** ");
-  if (numerr != user && (gp_function_name = closure_func_err()))
+  if (numerr != e_USER && (gp_function_name = closure_func_err()))
     out_printf(pariErr, "%s: ", gp_function_name);
   else
     out_puts(pariErr, "  ");
@@ -895,7 +895,7 @@ pari_warn(int numerr, ...)
   err_init_msg(numerr);
   switch (numerr)
   {
-    case user:
+    case e_USER:
       out_puts(pariErr, "user warning: ");
       out_print0(pariErr, va_arg(ap, GEN), f_RAW);
       break;
@@ -931,14 +931,14 @@ pari_sigint(const char *time_s)
 {
   err_init();
   closure_err();
-  err_init_msg(talker);
+  err_init_msg(e_MISC);
   out_puts(pariErr, "user interrupt after ");
   out_puts(pariErr, time_s);
   out_term_color(pariErr, c_NONE);
   pariErr->flush();
   if (cb_pari_handle_exception &&
       cb_pari_handle_exception(-1)) return;
-  err_recover(talker);
+  err_recover(e_MISC);
 }
 
 #define retmkerr2(x,y)\
@@ -957,62 +957,62 @@ pari_sigint(const char *time_s)
        gel(_v,3) = (z);\
        gel(_v,4) = (t); return _v; } while(0)
 
-/* if numerr=errpile, return NULL */
+/* if numerr=e_STACK, return NULL */
 static GEN
 pari_err2GEN(long numerr, va_list ap)
 {
   switch ((enum err_list) numerr)
   {
-  case syntaxer:
+  case e_SYNTAX:
     {
       const char *msg = va_arg(ap, char*);
       const char *s = va_arg(ap,char *);
       const char *entry = va_arg(ap,char *);
       retmkerr3(numerr,strtoGENstr(msg), mkvecsmall2((long)s,(long)entry));
     }
-  case talker: case alarmer:
+  case e_MISC: case e_ALARM:
     {
       const char *ch1 = va_arg(ap, char*);
       retmkerr2(numerr, gvsprintf(ch1,ap));
     }
-  case user:
-  case invmoder:
-  case notfuncer:
+  case e_USER:
+  case e_INTMOD:
+  case e_NOTFUNC:
     retmkerr2(numerr,va_arg(ap, GEN));
-  case openfiler:
+  case e_FILE:
     {
       const char *f = va_arg(ap, const char*);
       retmkerr3(numerr, strtoGENstr(f), strtoGENstr(va_arg(ap, char*)));
     }
-  case overflower:
-  case impl:
-  case consister: case negexper:
-  case constpoler:
-  case zeropoler: case flagerr: case precer:
-  case bugparier:
+  case e_OVERFLOW:
+  case e_IMPL:
+  case e_DIM: case e_NEGVAL:
+  case e_CONSTPOL:
+  case e_ZEROPOL: case e_FLAG: case e_PREC:
+  case e_BUG:
     retmkerr2(numerr, strtoGENstr(va_arg(ap, char*)));
-  case redpoler:
+  case e_IRREDPOL:
     {
       const char *f = va_arg(ap, const char*);
       retmkerr3(numerr, strtoGENstr(f), va_arg(ap, GEN));
     }
 
-  case typeer:
+  case e_TYPE:
     {
       const char *f = va_arg(ap, const char*);
       GEN x = va_arg(ap, GEN);
       retmkerr3(numerr, strtoGENstr(f), x);
     }
-  case operi: case operf:
+  case e_OP: case e_TYPE2:
     {
       const char *op = va_arg(ap, const char*);
       GEN x = va_arg(ap, GEN);
       GEN y = va_arg(ap, GEN);
       retmkerr4(numerr,strtoGENstr(op),x,y);
     }
-  case primer1:
+  case e_MAXPRIME:
     retmkerr2(numerr, utoi(va_arg(ap, ulong)));
-  case errpile:
+  case e_STACK:
     return NULL;
   default:
     return mkerr(numerr);
@@ -1022,7 +1022,7 @@ pari_err2GEN(long numerr, va_list ap)
 long
 err_get_num(GEN e)
 {
-  return e? e[1]: errpile;
+  return e? e[1]: e_STACK;
 }
 
 char *
@@ -1031,46 +1031,46 @@ pari_err2str(GEN err)
   long numerr = err_get_num(err);
   switch ((enum err_list) numerr)
   {
-  case syntaxer:
+  case e_SYNTAX:
     return pari_strdup(GSTR(gel(err,2)));
-  case talker: case alarmer:
+  case e_MISC: case e_ALARM:
     return pari_sprintf("%Ps.",gel(err,2));
-  case user:
+  case e_USER:
     return pari_sprint0("user error: ", gel(err,2), f_RAW);
-  case invmoder:
+  case e_INTMOD:
     return pari_sprintf("impossible inverse modulo: %Ps.", gel(err,2));
-  case openfiler:
+  case e_FILE:
     return pari_sprintf("error opening %Ps file: `%Ps'.", gel(err,2), gel(err,3));
-  case overflower:
+  case e_OVERFLOW:
     return pari_sprintf("overflow in %Ps.", gel(err,2));
-  case notfuncer:
+  case e_NOTFUNC:
     return pari_strdup("not a function in function call");
-  case impl:
+  case e_IMPL:
     return pari_sprintf("sorry, %Ps is not yet implemented.", gel(err,2));
-  case typeer:
+  case e_TYPE:
     return pari_sprintf("incorrect type in %Ps (%s).",
                         gel(err,2), type_name(typ(gel(err,3))));
-  case negexper:
+  case e_NEGVAL:
     return pari_sprintf("negative valuation in %Ps.", gel(err,2));
-  case constpoler:
+  case e_CONSTPOL:
     return pari_sprintf("constant polynomial in %Ps.", gel(err,2));
-  case redpoler:
+  case e_IRREDPOL:
     return pari_sprintf("not an irreducible polynomial in %Ps: %Ps.",
                         gel(err,2), gel(err,3));
-  case zeropoler:
+  case e_ZEROPOL:
     return pari_sprintf("zero polynomial in %Ps.", gel(err,2));
-  case consister:
+  case e_DIM:
     return pari_sprintf("inconsistent data in %Ps.", gel(err,2));
-  case flagerr:
+  case e_FLAG:
     return pari_sprintf("invalid flag in %Ps.", gel(err,2));
-  case precer:
+  case e_PREC:
     return pari_sprintf("precision too low in %Ps.", gel(err,2));
-  case bugparier:
+  case e_BUG:
     return pari_sprintf("bug in %Ps, please report",gel(err,2));
-  case operi: case operf:
+  case e_OP: case e_TYPE2:
     {
       const char *f, *op = GSTR(gel(err,2));
-      const char *what = numerr == operi? "inconsistent": "forbidden";
+      const char *what = numerr == e_OP? "inconsistent": "forbidden";
       GEN x = gel(err,3);
       GEN y = gel(err,4);
       switch(*op)
@@ -1083,14 +1083,14 @@ pari_err2str(GEN err)
       }
       return pari_sprintf("%s %s %s %s %s.", what,f,type_name(typ(x)),op,type_name(typ(y)));
     }
-  case primer1:
+  case e_MAXPRIME:
     {
       const char * msg = "not enough precomputed primes";
       ulong c = itou(gel(err,2));
       if (c) return pari_sprintf("%s, need primelimit ~ %lu",msg, c);
       else   return pari_strdup(msg);
     }
-  case errpile:
+  case e_STACK:
     {
       size_t d = top - bot;
       char *buf = (char *) pari_malloc(512*sizeof(char));
@@ -1100,15 +1100,15 @@ pari_err2str(GEN err)
           (ulong)d, (double)d/1048576.);
       return buf;
     }
-  case gdiver:
+  case e_INV:
     return pari_strdup("division by a non-invertible object");
-  case archer:
+  case e_ARCH:
     return pari_strdup("sorry, not available on this system");
-  case memer:
+  case e_MEM:
     return pari_strdup("not enough memory");
-  case sqrter5:
+  case e_SQRTN:
     return pari_strdup("not an n-th power residue in sqrtn");
-  case noer: return NULL;
+  case e_NONE: return NULL;
   }
   return NULL; /*NOT REACHED*/
 }
@@ -1117,7 +1117,7 @@ static void
 pari_err_display(GEN err)
 {
   long numerr=err_get_num(err);
-  if (numerr==syntaxer)
+  if (numerr==e_SYNTAX)
   {
     const char *msg = GSTR(gel(err,2));
     const char *s     = (const char *) gmael(err,3,1);
@@ -1130,7 +1130,7 @@ pari_err_display(GEN err)
     char *s = pari_err2str(err);
     err_init_msg(numerr);
     pariErr->puts(s);
-    if (numerr==notfuncer)
+    if (numerr==e_NOTFUNC)
     {
       GEN fun = gel(err,2);
       if (gcmpX(fun))
@@ -1155,7 +1155,7 @@ pari_err(int numerr, ...)
   if (*iferr_env)
     longjmp(*iferr_env, numerr);
   err_init();
-  if (numerr != syntaxer) closure_err();
+  if (numerr != e_SYNTAX) closure_err();
   pari_err_display(global_err_data);
   out_term_color(pariErr, c_NONE);
   va_end(ap);
@@ -1170,33 +1170,33 @@ numerr_name(long numerr)
 {
   switch ((enum err_list) numerr)
   {
-  case syntaxer: return "syntaxer";
-  case bugparier: return "bugparier";
-  case alarmer: return "alarmer";
-  case openfiler: return "openfiler";
-  case talker: return "talker";
-  case flagerr: return "flagerr";
-  case impl: return "impl";
-  case archer: return "archer";
-  case notfuncer: return "notfuncer";
-  case precer: return "precer";
-  case typeer: return "typeer";
-  case user: return "user";
-  case errpile: return "errpile";
-  case overflower: return "overflower";
-  case consister: return "consister";
-  case primer1: return "primer1";
-  case invmoder: return "invmoder";
-  case constpoler: return "constpoler";
-  case redpoler: return "redpoler";
-  case zeropoler: return "zeropoler";
-  case operi: return "operi";
-  case operf: return "operf";
-  case gdiver: return "gdiver";
-  case memer: return "memer";
-  case negexper: return "negexper";
-  case sqrter5: return "sqrter5";
-  case noer: return "noer";
+  case e_SYNTAX: return "e_SYNTAX";
+  case e_BUG: return "e_BUG";
+  case e_ALARM: return "e_ALARM";
+  case e_FILE: return "e_FILE";
+  case e_MISC: return "e_MISC";
+  case e_FLAG: return "e_FLAG";
+  case e_IMPL: return "e_IMPL";
+  case e_ARCH: return "e_ARCH";
+  case e_NOTFUNC: return "e_NOTFUNC";
+  case e_PREC: return "e_PREC";
+  case e_TYPE: return "e_TYPE";
+  case e_USER: return "e_USER";
+  case e_STACK: return "e_STACK";
+  case e_OVERFLOW: return "e_OVERFLOW";
+  case e_DIM: return "e_DIM";
+  case e_MAXPRIME: return "e_MAXPRIME";
+  case e_INTMOD: return "e_INTMOD";
+  case e_CONSTPOL: return "e_CONSTPOL";
+  case e_IRREDPOL: return "e_IRREDPOL";
+  case e_ZEROPOL: return "e_ZEROPOL";
+  case e_OP: return "e_OP";
+  case e_TYPE2: return "e_TYPE2";
+  case e_INV: return "e_INV";
+  case e_MEM: return "e_MEM";
+  case e_NEGVAL: return "e_NEGVAL";
+  case e_SQRTN: return "e_SQRTN";
+  case e_NONE: return "e_NONE";
   }
   return "invalid error number";
 }
@@ -1204,41 +1204,41 @@ numerr_name(long numerr)
 long
 name_numerr(const char *s)
 {
-  if (!strcmp(s,"syntaxer")) return syntaxer;
-  if (!strcmp(s,"bugparier")) return bugparier;
-  if (!strcmp(s,"alarmer")) return alarmer;
-  if (!strcmp(s,"openfiler")) return openfiler;
-  if (!strcmp(s,"talker")) return talker;
-  if (!strcmp(s,"flagerr")) return flagerr;
-  if (!strcmp(s,"impl")) return impl;
-  if (!strcmp(s,"archer")) return archer;
-  if (!strcmp(s,"notfuncer")) return notfuncer;
-  if (!strcmp(s,"precer")) return precer;
-  if (!strcmp(s,"typeer")) return typeer;
-  if (!strcmp(s,"user")) return user;
-  if (!strcmp(s,"errpile")) return errpile;
-  if (!strcmp(s,"overflower")) return overflower;
-  if (!strcmp(s,"consister")) return consister;
-  if (!strcmp(s,"primer1")) return primer1;
-  if (!strcmp(s,"invmoder")) return invmoder;
-  if (!strcmp(s,"constpoler")) return constpoler;
-  if (!strcmp(s,"redpoler")) return redpoler;
-  if (!strcmp(s,"zeropoler")) return zeropoler;
-  if (!strcmp(s,"operi")) return operi;
-  if (!strcmp(s,"operf")) return operf;
-  if (!strcmp(s,"gdiver")) return gdiver;
-  if (!strcmp(s,"memer")) return memer;
-  if (!strcmp(s,"negexper")) return negexper;
-  if (!strcmp(s,"sqrter5")) return sqrter5;
-  if (!strcmp(s,"noer")) return noer;
-  pari_err(talker,"unknown error name");
+  if (!strcmp(s,"e_SYNTAX")) return e_SYNTAX;
+  if (!strcmp(s,"e_BUG")) return e_BUG;
+  if (!strcmp(s,"e_ALARM")) return e_ALARM;
+  if (!strcmp(s,"e_FILE")) return e_FILE;
+  if (!strcmp(s,"e_MISC")) return e_MISC;
+  if (!strcmp(s,"e_FLAG")) return e_FLAG;
+  if (!strcmp(s,"e_IMPL")) return e_IMPL;
+  if (!strcmp(s,"e_ARCH")) return e_ARCH;
+  if (!strcmp(s,"e_NOTFUNC")) return e_NOTFUNC;
+  if (!strcmp(s,"e_PREC")) return e_PREC;
+  if (!strcmp(s,"e_TYPE")) return e_TYPE;
+  if (!strcmp(s,"e_USER")) return e_USER;
+  if (!strcmp(s,"e_STACK")) return e_STACK;
+  if (!strcmp(s,"e_OVERFLOW")) return e_OVERFLOW;
+  if (!strcmp(s,"e_DIM")) return e_DIM;
+  if (!strcmp(s,"e_MAXPRIME")) return e_MAXPRIME;
+  if (!strcmp(s,"e_INTMOD")) return e_INTMOD;
+  if (!strcmp(s,"e_CONSTPOL")) return e_CONSTPOL;
+  if (!strcmp(s,"e_IRREDPOL")) return e_IRREDPOL;
+  if (!strcmp(s,"e_ZEROPOL")) return e_ZEROPOL;
+  if (!strcmp(s,"e_OP")) return e_OP;
+  if (!strcmp(s,"e_TYPE2")) return e_TYPE2;
+  if (!strcmp(s,"e_INV")) return e_INV;
+  if (!strcmp(s,"e_MEM")) return e_MEM;
+  if (!strcmp(s,"e_NEGVAL")) return e_NEGVAL;
+  if (!strcmp(s,"e_SQRTN")) return e_SQRTN;
+  if (!strcmp(s,"e_NONE")) return e_NONE;
+  pari_err(e_MISC,"unknown error name");
   return -1; /* NOT REACHED */
 }
 
 GEN
 errname(GEN err)
 {
-  if (typ(err)!=t_ERROR) pari_err(typeer,"errname",err);
+  if (typ(err)!=t_ERROR) pari_err(e_TYPE,"errname",err);
   return strtoGENstr(numerr_name(err_get_num(err)));
 }
 
@@ -1674,7 +1674,7 @@ dec_gerepile(pari_sp *x, pari_sp av0, pari_sp av, pari_sp tetpil, size_t dec)
   if (*x < av && *x >= av0)
   { /* update address if in stack */
     if (*x < tetpil) *x += dec;
-    else pari_err(bugparier, "gerepile, significant pointers lost");
+    else pari_err(e_BUG, "gerepile, significant pointers lost");
   }
 }
 
@@ -1791,7 +1791,7 @@ gerepile(pari_sp av, pari_sp tetpil, GEN q)
   GEN x, a;
 
   if (dec == 0) return q;
-  if ((long)dec < 0) pari_err(talker,"lbot>ltop in gerepile");
+  if ((long)dec < 0) pari_err(e_MISC,"lbot>ltop in gerepile");
 
   /* dec_gerepile(&q, av0, av, tetpil, dec), saving 1 comparison */
   if (q >= (GEN)av0 && q < (GEN)tetpil)

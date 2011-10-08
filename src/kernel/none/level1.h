@@ -21,21 +21,21 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 INLINE long
 evallg(long x)
 {
-  if (x & ~LGBITS) pari_err(overflower,"lg()");
+  if (x & ~LGBITS) pari_err(e_OVERFLOW,"lg()");
   return _evallg(x);
 }
 INLINE long
 evalvalp(long x)
 {
   long v = _evalvalp(x);
-  if (v & ~VALPBITS) pari_err(overflower,"valp()");
+  if (v & ~VALPBITS) pari_err(e_OVERFLOW,"valp()");
   return v;
 }
 INLINE long
 evalexpo(long x)
 {
   long v = _evalexpo(x);
-  if (v & ~EXPOBITS) pari_err(overflower,"expo()");
+  if (v & ~EXPOBITS) pari_err(e_OVERFLOW,"expo()");
   return v;
 }
 
@@ -83,7 +83,7 @@ INLINE GEN
 new_chunk(size_t x) /* x is a number of longs */
 {
   GEN z = ((GEN) avma) - x;
-  if (x > (avma-bot) / sizeof(long)) pari_err(errpile);
+  if (x > (avma-bot) / sizeof(long)) pari_err(e_STACK);
   CHECK_CTRLC
   avma = (pari_sp)z;
 
@@ -266,7 +266,7 @@ itos(GEN x)
   if (!s) return 0;
   u = x[2];
   if (lgefint(x) > 3 || u < 0)
-    pari_err(overflower,"t_INT-->long assignment");
+    pari_err(e_OVERFLOW,"t_INT-->long assignment");
   return (s>0) ? u : -u;
 }
 /* as itos, but return 0 if too large. Cf is_bigint */
@@ -283,7 +283,7 @@ itou(GEN x)
     case 2: return 0;
     case 3: return x[2];
     default:
-      pari_err(overflower,"t_INT-->ulong assignment");
+      pari_err(e_OVERFLOW,"t_INT-->ulong assignment");
       return 0; /* not reached */
   }
 }
@@ -555,7 +555,7 @@ sdivss_rem(long x, long y, long *r)
 {
   long q;
   LOCAL_HIREMAINDER;
-  if (!y) pari_err(gdiver);
+  if (!y) pari_err(e_INV);
   hiremainder = 0; q = divll((ulong)labs(x),(ulong)labs(y));
   if (x < 0) { hiremainder = -((long)hiremainder); q = -q; }
   if (y < 0) q = -q;
@@ -570,7 +570,7 @@ udivui_rem(ulong x, GEN y, ulong *r)
   long q, s = signe(y);
   LOCAL_HIREMAINDER;
 
-  if (!s) pari_err(gdiver);
+  if (!s) pari_err(e_INV);
   if (!x || lgefint(y)>3) { *r = x; return 0; }
   hiremainder=0; q = (long)divll(x, (ulong)y[2]);
   if (s < 0) q = -q;
@@ -583,7 +583,7 @@ sdivsi_rem(long x, GEN y, long *r)
   long q, s = signe(y);
   LOCAL_HIREMAINDER;
 
-  if (!s) pari_err(gdiver);
+  if (!s) pari_err(e_INV);
   if (!x || lgefint(y)>3 || ((long)y[2]) < 0) { *r = x; return 0; }
   hiremainder=0; q = (long)divll(labs(x), (ulong)y[2]);
   if (x < 0) { hiremainder = -((long)hiremainder); q = -q; }
@@ -598,7 +598,7 @@ sdivsi(long x, GEN y)
 {
   long q, s = signe(y);
 
-  if (!s) pari_err(gdiver);
+  if (!s) pari_err(e_INV);
   if (!x || lgefint(y)>3 || ((long)y[2]) < 0) return 0;
   q = labs(x) / y[2];
   if (x < 0) q = -q;
@@ -651,7 +651,7 @@ modsi(long x, GEN y) {
 INLINE ulong
 umodui(ulong x, GEN y)
 {
-  if (!signe(y)) pari_err(gdiver);
+  if (!signe(y)) pari_err(e_INV);
   if (!x || lgefint(y) > 3) return x;
   return x % (ulong)y[2];
 }
@@ -939,7 +939,7 @@ shiftr(GEN x, long n)
   const long e = evalexpo(expo(x)+n);
   const GEN y = rcopy(x);
 
-  if (e & ~EXPOBITS) pari_err(overflower,"expo()");
+  if (e & ~EXPOBITS) pari_err(e_OVERFLOW,"expo()");
   y[1] = (y[1]&~EXPOBITS) | e; return y;
 }
 INLINE GEN
@@ -1000,7 +1000,7 @@ INLINE void
 affii(GEN x, GEN y)
 {
   long lx = lgefint(x);
-  if (lg(y)<lx) pari_err(overflower,"t_INT-->t_INT assignment");
+  if (lg(y)<lx) pari_err(e_OVERFLOW,"t_INT-->t_INT assignment");
   while (--lx) y[lx] = x[lx];
 }
 INLINE void

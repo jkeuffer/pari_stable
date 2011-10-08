@@ -368,7 +368,7 @@ time_fun(speed_function_t fun, speed_param *s, long enabled)
                      * speed_unittime * speed_precision
                      / maxdd(t[i], speed_unittime));
       if (reps_d > 2e9 || reps_d < 1.0)
-        pari_err(talker, "Fatal error: new reps bad: %.2f\n", reps_d);
+        pari_err(e_MISC, "Fatal error: new reps bad: %.2f\n", reps_d);
 
       s->reps = (ulong)reps_d;
     }
@@ -386,7 +386,7 @@ time_fun(speed_function_t fun, speed_param *s, long enabled)
         if (t[j] <= t[j-e+1] * TOLERANCE) { avma = av; return t[j-e+1]; }
     }
   }
-  pari_err(talker,"couldn't measure time");
+  pari_err(e_MISC,"couldn't measure time");
   return -1.0; /* not reached */
 }
 

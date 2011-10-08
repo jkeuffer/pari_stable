@@ -57,7 +57,7 @@ translate(char **src, char *s)
         case 'e':  *s='\033'; break; /* escape */
         case 'n':  *s='\n'; break;
         case 't':  *s='\t'; break;
-        default:   *s=*t; if (!*t) pari_err(talker,"unfinished string");
+        default:   *s=*t; if (!*t) pari_err(e_MISC,"unfinished string");
       }
       t++; s++;
     }
@@ -72,7 +72,7 @@ translate(char **src, char *s)
 }
 
 #define match2(s,c) if (*s != c) \
-                      pari_err(talker,"expected character: '%c' instead of",c);
+                      pari_err(e_MISC,"expected character: '%c' instead of",c);
 
 /*  Read a "string" from src. Format then copy it, starting at s. Return
  *  pointer to char following the end of the input string */
@@ -129,12 +129,12 @@ parse_texmacs_command(tm_cmd *c, const char *ch)
   pari_stack s_A;
 
   if (*s != DATA_BEGIN || *send-- != DATA_END)
-    pari_err(talker, "missing DATA_[BEGIN | END] in TeXmacs command");
+    pari_err(e_MISC, "missing DATA_[BEGIN | END] in TeXmacs command");
   s++;
-  if (strncmp(s, "special:", 8)) pari_err(talker, "unrecognized TeXmacs command");
+  if (strncmp(s, "special:", 8)) pari_err(e_MISC, "unrecognized TeXmacs command");
   s += 8;
   if (*s != '(' || *send-- != ')')
-    pari_err(talker, "missing enclosing parentheses for TeXmacs command");
+    pari_err(e_MISC, "missing enclosing parentheses for TeXmacs command");
   s++; t = s;
   skip_alpha(s);
   c->cmd = pari_strndup(t, s - t);
@@ -168,16 +168,16 @@ handle_texmacs_command(const char *s)
   tm_cmd c;
   parse_texmacs_command(&c, s);
   if (strcmp(c.cmd, "complete"))
-    pari_err(talker,"Texmacs_stdin command %s not implemented", c.cmd);
+    pari_err(e_MISC,"Texmacs_stdin command %s not implemented", c.cmd);
   if (c.n != 2)
-    pari_err(talker,"was expecting 2 arguments for Texmacs_stdin command");
+    pari_err(e_MISC,"was expecting 2 arguments for Texmacs_stdin command");
   texmacs_completion(c.v[0], atol(c.v[1]));
   free_cmd(&c);
   tm_did_complete = 1;
 }
 #else
 static void
-handle_texmacs_command(const char *s) { pari_err(talker, "readline not available"); }
+handle_texmacs_command(const char *s) { pari_err(e_MISC, "readline not available"); }
 #endif
 
 /*******************************************************************/
@@ -567,7 +567,7 @@ external_help(const char *s, int num)
   pariFILE *z;
   FILE *f;
 
-  if (!has_ext_help()) pari_err(talker,"no external help program");
+  if (!has_ext_help()) pari_err(e_MISC,"no external help program");
   t = filter_quotes(s);
   str = (char*)pari_malloc(strlen(Help) + strlen(t) + 64);
   *ar = 0;
@@ -647,7 +647,7 @@ aide0(const char *s0, int flag)
   if (isdigit((int)*s))
   {
     n = atoi(s);
-    if (n < 0 || n > 15) pari_err(syntaxer,"no such section in help: ?",s,s);
+    if (n < 0 || n > 15) pari_err(e_SYNTAX,"no such section in help: ?",s,s);
     if (n == 12)
       community();
     else if (long_help)
@@ -727,7 +727,7 @@ aide0(const char *s0, int flag)
   if (long_help) { external_help(ep->name,3); return; }
   if (ep->help) { print_text(ep->help); return; }
 
-  pari_err(bugparier,"aide (no help found)");
+  pari_err(e_BUG,"aide (no help found)");
 }
 
 void
@@ -878,7 +878,7 @@ gpreadbin(const char *s, int *vector)
 {
   GEN x = readbin(s,pari_infile, vector);
   popinfile();
-  if (!x) pari_err(openfiler,"input",s);
+  if (!x) pari_err(e_FILE,"input",s);
   return x;
 }
 
@@ -1004,7 +1004,7 @@ escape(char *tch, int ismain)
       s = get_sep(s);
       if (!*s) s = (GP_DATA->simplify)? "0": "1";
       (void)sd_simplify(s,d_ACKNOWLEDGE); break;
-    default: pari_err(syntaxer,"unexpected character", tch,tch-1);
+    default: pari_err(e_SYNTAX,"unexpected character", tch,tch-1);
   }
 }
 
@@ -1079,7 +1079,7 @@ check_meta(char *buf, int ismain)
 /* LOCATE GPRC */
 
 static int get_line_from_file(const char *prompt, filtre_t *F, FILE *file);
-#define err_gprc(s,t,u) { err_printf("\n"); pari_err(syntaxer,s,t,u); }
+#define err_gprc(s,t,u) { err_printf("\n"); pari_err(e_SYNTAX,s,t,u); }
 
 /* return $HOME or the closest we can find */
 static const char *
@@ -1631,7 +1631,7 @@ gp_sigint_fun(void) {
 static void
 gp_alarm_fun(void) {
   if (GP_DATA->flags & gpd_TEXMACS) tm_start_output();
-  pari_err(alarmer, gp_format_time(timer_get(GP_DATA->T)));
+  pari_err(e_ALARM, gp_format_time(timer_get(GP_DATA->T)));
 }
 #endif /* SIGALRM */
 
@@ -1660,8 +1660,8 @@ break_loop(int numerr)
   long nenv, oldframe_level = frame_level;
   pari_sp av;
 
-  if (numerr == syntaxer) return 0;
-  if (numerr == errpile) { evalstate_clone(); avma = top; }
+  if (numerr == e_SYNTAX) return 0;
+  if (numerr == e_STACK) { evalstate_clone(); avma = top; }
 
   b = filtered_buffer(&F);
   nenv=stack_new(&s_env);
@@ -1741,7 +1741,7 @@ gp_handle_exception(long numerr)
   else if ((GP_DATA->breakloop) && break_loop(numerr)) return 1;
   if (s_env.n>=1) {
     err_printf("\n"); err_flush();
-    gp_err_recover(numerr>=0? numerr: talker);
+    gp_err_recover(numerr>=0? numerr: e_MISC);
   }
   return 0;
 }
@@ -1769,7 +1769,7 @@ static void
 check_secure(const char *s)
 {
   if (GP_DATA->secure)
-    pari_err(talker, "[secure mode]: system commands not allowed\nTried to run '%s'",s);
+    pari_err(e_MISC, "[secure mode]: system commands not allowed\nTried to run '%s'",s);
 }
 
 GEN
@@ -1855,9 +1855,9 @@ system0(const char *s)
 #if defined(UNIX) || defined(__EMX__) || defined(_WIN32)
   check_secure(s);
   if (system(s) < 0)
-    pari_err(talker, "system(\"%s\") failed", s);
+    pari_err(e_MISC, "system(\"%s\") failed", s);
 #else
-  pari_err(archer);
+  pari_err(e_ARCH);
 #endif
 }
 
@@ -1869,11 +1869,11 @@ closure_alarmer(GEN C, long s)
   if (!s) { alarm0(0); return closure_evalgen(C); }
   evalstate_save(&state);
 #ifndef HAS_ALARM
-  pari_err(archer,"alarm");
+  pari_err(e_ARCH,"alarm");
 #endif
   CATCH(CATCH_ALL) /* We need to stop the timer after any error */
   {
-    if (err_get_num(global_err_data)!=alarmer)
+    if (err_get_num(global_err_data)!=e_ALARM)
     {
       alarm0(0); pari_err(0, global_err_data);
     }
@@ -1886,11 +1886,11 @@ closure_alarmer(GEN C, long s)
 void
 alarm0(long s)
 {
-  if (s < 0) pari_err(talker,"delay must be non-negative");
+  if (s < 0) pari_err(e_MISC,"delay must be non-negative");
 #ifdef HAS_ALARM
   alarm(s);
 #else
-  if (s) pari_err(archer,"alarm");
+  if (s) pari_err(e_ARCH,"alarm");
 #endif
 }
 
@@ -2264,26 +2264,26 @@ sd_graphcolormap(const char *v, long flag)
   {
     char *t = filtre(v, 0);
     if (*t != '[' || t[strlen(t)-1] != ']')
-      pari_err(syntaxer, "incorrect value for graphcolormap", t, t);
+      pari_err(e_SYNTAX, "incorrect value for graphcolormap", t, t);
     for (s = 0, p = t+1, l = 2, a=0; *p; p++)
       if (*p == '[')
       {
         a++;
         while (*++p != ']')
           if (!*p || *p == '[')
-            pari_err(syntaxer, "incorrect value for graphcolormap", p, t);
+            pari_err(e_SYNTAX, "incorrect value for graphcolormap", p, t);
       }
       else if (*p == '"')
       {
         s += sizeof(long)+1;
         while (*p && *++p != '"') s++;
-        if (!*p) pari_err(syntaxer, "incorrect value for graphcolormap", p, t);
+        if (!*p) pari_err(e_SYNTAX, "incorrect value for graphcolormap", p, t);
         s = (s+sizeof(long)-1) & ~(sizeof(long)-1);
       }
       else if (*p == ',')
         l++;
     if (l < 4)
-      pari_err(talker, "too few colors (< 4) in graphcolormap");
+      pari_err(e_MISC, "too few colors (< 4) in graphcolormap");
     if (pari_colormap) pari_free(pari_colormap);
     pari_colormap = (GEN)pari_malloc((l+4*a)*sizeof(long) + s);
     pari_colormap[0] = evaltyp(t_VEC)|evallg(l);
@@ -2310,7 +2310,7 @@ sd_graphcolormap(const char *v, long flag)
         {
           char buf[100];
           sprintf(buf, "incorrect value for graphcolormap[%ld]: ", i);
-          pari_err(syntaxer, buf, p, t);
+          pari_err(e_SYNTAX, buf, p, t);
         }
         *p = '\0';
         lp[1] = atocolor(ap[0]);
@@ -2324,7 +2324,7 @@ sd_graphcolormap(const char *v, long flag)
         i++;
         break;
       default:
-        pari_err(syntaxer, "incorrect value for graphcolormap", p, t);
+        pari_err(e_SYNTAX, "incorrect value for graphcolormap", p, t);
       }
     free(t);
   }
@@ -2358,8 +2358,8 @@ sd_graphcolors(const char *v, long flag)
     for (p = t+1, l=2; *p != ']'; p++)
       if (*p == ',') l++;
       else if (*p < '0' || *p > '9')
-        pari_err(syntaxer, "incorrect value for graphcolors", p, t);
-    if (*++p) pari_err(syntaxer, "incorrect value for graphcolors", p, t);
+        pari_err(e_SYNTAX, "incorrect value for graphcolors", p, t);
+    if (*++p) pari_err(e_SYNTAX, "incorrect value for graphcolors", p, t);
     if (pari_graphcolors) pari_free(pari_graphcolors);
     pari_graphcolors = cgetalloc(t_VECSMALL, l);
     for (p = t+1, i=0; *p; p++)
@@ -2392,7 +2392,7 @@ sd_help(const char *v, long flag)
   if (v)
   {
     if (GP_DATA->secure)
-      pari_err(talker,"[secure mode]: can't modify 'help' default (to %s)",v);
+      pari_err(e_MISC,"[secure mode]: can't modify 'help' default (to %s)",v);
     if (Help) pari_free((void*)Help);
     Help = path_expand(v);
   }

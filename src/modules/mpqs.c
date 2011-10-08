@@ -950,7 +950,7 @@ static void
 pari_fputs(char *s, pariFILE *f)
 {
   if (fputs(s, f->file) < 0)
-    pari_err(talker, "error whilst writing to file %s", f->name);
+    pari_err(e_MISC, "error whilst writing to file %s", f->name);
 }
 #define min_bufspace 120UL /* use new buffer when < min_bufspace left */
 #define buflist_size 1024  /* size of list-of-buffers blocks */
@@ -1065,7 +1065,7 @@ mpqs_sort_lp_file(char *filename)
       bufspace = MPQS_STRING_LENGTH - length + 1;
       /* read remainder of line */
       if (fgets(cur_line, bufspace, TMP) == NULL)
-        pari_err(talker,"MPQS: relations file truncated?!\n");
+        pari_err(e_MISC,"MPQS: relations file truncated?!\n");
       lg1 = strlen(cur_line);
       length += lg1; /* we already counted the \0 once */
       bufspace -= (lg1 + 1); /* but here we must take it into account */
@@ -1335,7 +1335,7 @@ mpqs_mergesort_lp_file(char *REL_str, char *NEW_str, char *TMP_str, pariFILE *pC
   pari_fclose(pNEW);
   pari_unlink(REL_str);
   if (rename(TMP_str,REL_str))
-    pari_err(talker, "cannot rename file %s to %s", TMP_str, REL_str);
+    pari_err(e_MISC, "cannot rename file %s to %s", TMP_str, REL_str);
   if (MPQS_DEBUGLEVEL >= 6)
     err_printf("MPQS: renamed file %s to %s\n", TMP_str, REL_str);
   return tp;
@@ -1363,7 +1363,7 @@ check_root(mpqs_handle_t *h, long p, long start)
     err_printf("MPQS: B = %Ps\n", h->B);
     err_printf("MPQS: C = %Ps\n", h->C);
     err_printf("MPQS: z = %ld\n", z);
-    pari_err(bugparier, "MPQS: self_init: found wrong polynomial");
+    pari_err(e_BUG, "MPQS: self_init: found wrong polynomial");
   }
 }
 #endif
@@ -2177,7 +2177,7 @@ mpqs_eval_cand(mpqs_handle_t *h, long number_of_cand,
           err_printf("MPQS: %Ps @ %Ps :%s\n", Y, Qx, relations);
           err_printf("\tQx_2 = %Ps\n", Qx_2);
           err_printf("\t rhs = %Ps\n", rhs);
-          pari_err(talker, "MPQS: wrong full relation found!!");
+          pari_err(e_MISC, "MPQS: wrong full relation found!!");
         }
         else
           PRINT_IF_VERBOSE("\b(:)");
@@ -2214,7 +2214,7 @@ mpqs_eval_cand(mpqs_handle_t *h, long number_of_cand,
           err_printf("MPQS: %Ps @ %Ps :%s\n", Y, Qx, relations);
           err_printf("\tQx_2 = %Ps\n", Qx_2);
           err_printf("\t rhs = %Ps\n", rhs);
-          pari_err(talker, "MPQS: wrong large prime relation found!!");
+          pari_err(e_MISC, "MPQS: wrong large prime relation found!!");
         }
         else
           PRINT_IF_VERBOSE("\b(;)");
@@ -2388,7 +2388,7 @@ mpqs_combine_large_primes(mpqs_handle_t *h,
       Qx_2 = modii(sqri(new_Y), h->N);
       prod = mpqs_factorback(h, s);
       if (!equalii(Qx_2, prod))
-        pari_err(talker, "MPQS: combined large prime relation is false");
+        pari_err(e_MISC, "MPQS: combined large prime relation is false");
       avma = av1;
     }
 #endif
@@ -2429,7 +2429,7 @@ stream_read_F2m(FILE *FREL, long rows, long cols, long *fpos)
   else
     m = zero_F2m_copy(rows, cols);
   if ((fpos[0] = ftell(FREL)) < 0)
-    pari_err(talker, "ftell error on full relations file");
+    pari_err(e_MISC, "ftell error on full relations file");
   while (fgets(buf, MPQS_STRING_LENGTH, FREL))
   {
     s = strchr(buf, ':') + 2;
@@ -2444,13 +2444,13 @@ stream_read_F2m(FILE *FREL, long rows, long cols, long *fpos)
     }
     i++;
     if (i < cols && (fpos[i] = ftell(FREL)) < 0)
-      pari_err(talker, "ftell error on full relations file");
+      pari_err(e_MISC, "ftell error on full relations file");
   }
   if (i != cols)
   {
     err_printf("MPQS: full relations file %s than expected",
                i > cols ? "longer" : "shorter");
-    pari_err(talker, "MPQS panicking");
+    pari_err(e_MISC, "MPQS panicking");
   }
   return m;
 }
@@ -2484,9 +2484,9 @@ mpqs_add_relation(GEN Y_prod, GEN N, long *ei, char *rel)
 static char*
 mpqs_get_relation(char *buf, long pos, FILE *FREL)
 {
-  if (fseek(FREL, pos, SEEK_SET)) pari_err(talker, "cannot seek FREL file");
+  if (fseek(FREL, pos, SEEK_SET)) pari_err(e_MISC, "cannot seek FREL file");
   if (!fgets(buf, MPQS_STRING_LENGTH, FREL))
-    pari_err(talker, "FREL file truncated?!");
+    pari_err(e_MISC, "FREL file truncated?!");
   return buf;
 }
 
@@ -2610,7 +2610,7 @@ mpqs_solve_linear_system(mpqs_handle_t *h, pariFILE *pFREL, long rel)
     for (j = 2; j <= h->size_of_FB + 1; j++)
       if (ei[j])
       {
-        if (ei[j] & 1) pari_err(bugparier, "MPQS (relation is a nonsquare)");
+        if (ei[j] & 1) pari_err(e_BUG, "MPQS (relation is a nonsquare)");
         X = remii(mulii(X,
                         Fp_powu(utoipos(FB[j].fbe_p), (ulong)ei[j]>>1, N)),
                   N);

@@ -36,17 +36,17 @@ poldivrem(GEN x, GEN y, GEN *pr)
   if (is_scalar_t(ty) || varncmp(vx, vy) < 0)
   {
     if (pr == ONLY_REM) {
-      if (gequal0(y)) pari_err(gdiver);
+      if (gequal0(y)) pari_err(e_INV);
       return gen_0;
     }
     if (pr && pr != ONLY_DIVIDES) *pr=gen_0;
     return gdiv(x,y);
   }
-  if (ty != t_POL) pari_err(operf,"euclidean division",x,y);
+  if (ty != t_POL) pari_err(e_TYPE2,"euclidean division",x,y);
   tx = typ(x);
   if (is_scalar_t(tx) || varncmp(vx, vy) > 0)
   {
-    if (!signe(y)) pari_err(gdiver);
+    if (!signe(y)) pari_err(e_INV);
     if (!degpol(y)) /* constant */
     {
       if (pr == ONLY_REM) return pol_0(vy);
@@ -60,7 +60,7 @@ poldivrem(GEN x, GEN y, GEN *pr)
     if (pr) *pr = gcopy(x);
     return gen_0;
   }
-  if (tx != t_POL) pari_err(operf,"euclidean division",x,y);
+  if (tx != t_POL) pari_err(e_TYPE2,"euclidean division",x,y);
 
   if (varncmp(vx, vy) < 0)
   {
@@ -79,15 +79,15 @@ gdeuc(GEN x, GEN y)
   long ty = typ(y), tx, vx = gvar(x), vy = gvar(y);
 
   if (is_scalar_t(ty) || varncmp(vx, vy) < 0) return gdiv(x,y);
-  if (ty != t_POL) pari_err(operf,"euclidean division",x,y);
+  if (ty != t_POL) pari_err(e_TYPE2,"euclidean division",x,y);
   tx = typ(x);
   if (is_scalar_t(tx) || varncmp(vx, vy) > 0)
   {
-    if (!signe(y)) pari_err(gdiver);
+    if (!signe(y)) pari_err(e_INV);
     if (!degpol(y)) return gdiv(x, gel(y,2)); /* constant */
     return gen_0;
   }
-  if (tx != t_POL) pari_err(operf,"euclidean division",x,y);
+  if (tx != t_POL) pari_err(e_TYPE2,"euclidean division",x,y);
   if (varncmp(vx, vy) < 0) return gdiv(x,y);
   return RgX_div(x, y);
 }
@@ -98,18 +98,18 @@ grem(GEN x, GEN y)
 
   if (is_scalar_t(ty) || varncmp(vx, vy) < 0)
   {
-    if (gequal0(y)) pari_err(gdiver);
+    if (gequal0(y)) pari_err(e_INV);
     return gen_0;
   }
-  if (ty != t_POL) pari_err(operf,"euclidean division",x,y);
+  if (ty != t_POL) pari_err(e_TYPE2,"euclidean division",x,y);
   tx = typ(x);
   if (is_scalar_t(tx) || varncmp(vx, vy) > 0)
   {
-    if (!signe(y)) pari_err(gdiver);
+    if (!signe(y)) pari_err(e_INV);
     if (!degpol(y)) return pol_0(vy); /* constant */
     return gcopy(x);
   }
-  if (tx != t_POL) pari_err(operf,"euclidean division",x,y);
+  if (tx != t_POL) pari_err(e_TYPE2,"euclidean division",x,y);
 
   if (varncmp(vx, vy) < 0) return pol_0(vx);
   return RgX_rem(x, y);
@@ -128,7 +128,7 @@ init_p(GEN pp)
   else
   {
     p = itou(pp);
-    if (p < 2 || signe(pp) < 0) pari_err(talker,"not a prime in factmod");
+    if (p < 2 || signe(pp) < 0) pari_err(e_MISC,"not a prime in factmod");
   }
   return p;
 }
@@ -136,8 +136,8 @@ init_p(GEN pp)
 static GEN
 factmod_init(GEN F, GEN p)
 {
-  if (typ(p)!=t_INT) pari_err(typeer,"factmod",p);
-  if (typ(F)!=t_POL) pari_err(typeer,"factmod",F);
+  if (typ(p)!=t_INT) pari_err(e_TYPE,"factmod",p);
+  if (typ(F)!=t_POL) pari_err(e_TYPE,"factmod",F);
   return FpX_normalize(RgX_to_FpX(F, p), p);
 }
 
@@ -200,7 +200,7 @@ root_mod_even(GEN f, ulong p)
     case 2: return root_mod_2(f);
     case 4: return root_mod_4(f);
   }
-  pari_err(talker,"not a prime in rootmod");
+  pari_err(e_MISC,"not a prime in rootmod");
   return NULL; /* not reached */
 }
 
@@ -240,9 +240,9 @@ rootmod2(GEN f, GEN pp)
   switch (degpol(f))
   {
     case  0: avma = av; return cgetg(1,t_COL);
-    case -1: pari_err(zeropoler,"rootmod2");
+    case -1: pari_err(e_ZEROPOL,"rootmod2");
   }
-  p = init_p(pp); if (!p) pari_err(talker,"prime too big in rootmod2");
+  p = init_p(pp); if (!p) pari_err(e_MISC,"prime too big in rootmod2");
   if (p & 1)
     y = Flc_to_ZC(Flx_roots_naive(ZX_to_Flx(f,p), p));
   else
@@ -322,7 +322,7 @@ FpX_roots_i(GEN f, GEN p)
 
   /* take gcd(x^(p-1) - 1, f) by splitting (x^q-1) * (x^q+1) */
   b = FpXQ_pow(pol_x(varn(f)),q, f,p);
-  if (lg(b) < 3) pari_err(talker,"not a prime in rootmod");
+  if (lg(b) < 3) pari_err(e_MISC,"not a prime in rootmod");
   b = ZX_Z_add(b, gen_m1); /* b = x^((p-1)/2) - 1 mod f */
   a = FpX_gcd(f,b, p);
   b = ZX_Z_add(b, gen_2); /* b = x^((p-1)/2) + 1 mod f */
@@ -355,7 +355,7 @@ FpX_roots_i(GEN f, GEN p)
         gel(y,j)    = b; break;
       }
       if (pol0[2] == 100 && !BPSW_psp(p))
-        pari_err(talker, "not a prime in polrootsmod");
+        pari_err(e_MISC, "not a prime in polrootsmod");
     }
   }
   return sort(y);
@@ -373,7 +373,7 @@ FpX_oneroot_i(GEN f, GEN p)
 
   /* take gcd(x^(p-1) - 1, f) by splitting (x^q-1) * (x^q+1) */
   b = FpXQ_pow(pol_x(varn(f)),q, f,p);
-  if (lg(b) < 3) pari_err(talker,"not a prime in rootmod");
+  if (lg(b) < 3) pari_err(e_MISC,"not a prime in rootmod");
   b = ZX_Z_add(b, gen_m1); /* b = x^((p-1)/2) - 1 mod f */
   a = FpX_gcd(f,b, p);
   b = ZX_Z_add(b, gen_2); /* b = x^((p-1)/2) + 1 mod f */
@@ -408,7 +408,7 @@ FpX_oneroot_i(GEN f, GEN p)
         break;
       }
       if (pol0[2] == 100 && !BPSW_psp(p))
-        pari_err(talker, "not a prime in polrootsmod");
+        pari_err(e_MISC, "not a prime in polrootsmod");
     }
   }
 }
@@ -422,7 +422,7 @@ FpX_roots(GEN f, GEN p) {
   GEN F = FpX_factmod_init(f,p);
   switch(degpol(F))
   {
-    case -1: pari_err(zeropoler,"FpX_roots");
+    case -1: pari_err(e_ZEROPOL,"FpX_roots");
     case 0: avma = av; return cgetg(1, t_COL);
   }
   return gerepileupto(av, odd(q)? FpX_roots_i(F, p): root_mod_even(F,q));
@@ -434,7 +434,7 @@ FpX_oneroot(GEN f, GEN p) {
   GEN F = FpX_factmod_init(f,p);
   switch(degpol(F))
   {
-    case -1: pari_err(zeropoler,"FpX_oneroot");
+    case -1: pari_err(e_ZEROPOL,"FpX_oneroot");
     case 0: avma = av; return NULL;
   }
   if (!odd(q))
@@ -458,7 +458,7 @@ rootmod(GEN f, GEN p)
   switch (degpol(f))
   {
     case  0: avma = av; return cgetg(1,t_COL);
-    case -1: pari_err(zeropoler,"rootmod");
+    case -1: pari_err(e_ZEROPOL,"rootmod");
   }
   q = init_p(p); if (!q) q = mod2BIL(p);
   if (q & 1)
@@ -475,7 +475,7 @@ rootmod0(GEN f, GEN p, long flag)
   {
     case 0: return rootmod(f,p);
     case 1: return rootmod2(f,p);
-    default: pari_err(flagerr,"polrootsmod");
+    default: pari_err(e_FLAG,"polrootsmod");
   }
   return NULL; /* not reached */
 }
@@ -1094,7 +1094,7 @@ Flx_addmul_inplace(GEN gx, GEN gy, ulong c, ulong p)
   if (!c) return;
   lx = lg(gx);
   ly = lg(gy);
-  if (lx<ly) pari_err(bugparier,"lx<ly in Flx_addmul_inplace");
+  if (lx<ly) pari_err(e_BUG,"lx<ly in Flx_addmul_inplace");
   if (SMALL_ULONG(p))
     for (i=2; i<ly;  i++) x[i] = (x[i] + c*y[i]) % p;
   else
@@ -1304,7 +1304,7 @@ FpX_factor_i(GEN f, GEN pp)
     }
     if (!p) break;
     j = degpol(f2); if (!j) break;
-    if (j % p) pari_err(talker, "factmod: %lu is not prime", p);
+    if (j % p) pari_err(e_MISC, "factmod: %lu is not prime", p);
     e *= p; f = RgX_deflate(f2, p);
   }
   setlg(t, nbfact);
@@ -1349,7 +1349,7 @@ factormod0(GEN f, GEN p, long flag)
   {
     case 0: return factmod(f,p);
     case 1: return simplefactmod(f,p);
-    default: pari_err(flagerr,"factormod");
+    default: pari_err(e_FLAG,"factormod");
   }
   return NULL; /* not reached */
 }
@@ -1365,7 +1365,7 @@ Zp_to_Z(GEN x) {
   {
     case t_INT: break;
     case t_PADIC: x = gtrunc(x); break;
-    default: pari_err(typeer,"QpX_to_ZX",x);
+    default: pari_err(e_TYPE,"QpX_to_ZX",x);
   }
   return x;
 }
@@ -1383,7 +1383,7 @@ QpX_to_ZX(GEN f)
   GEN c = content(f);
   if (gequal0(c)) /*  O(p^n) can occur */
   {
-    if (typ(c) != t_PADIC) pari_err(typeer,"QpX_to_ZX",f);
+    if (typ(c) != t_PADIC) pari_err(e_TYPE,"QpX_to_ZX",f);
     c = powis(gel(c,2), valp(c));
   }
   f = RgX_Rg_div(f,c);
@@ -1456,7 +1456,7 @@ QpXQ_to_ZXY(GEN f)
   long i, l = lg(f);
   if (gequal0(c)) /*  O(p^n) can occur */
   {
-    if (typ(c) != t_PADIC) pari_err(typeer,"QpXQ_to_ZXY",f);
+    if (typ(c) != t_PADIC) pari_err(e_TYPE,"QpXQ_to_ZXY",f);
     c = powis(gel(c,2), valp(c));
   }
   f = RgX_Rg_div(f,c);
@@ -1516,11 +1516,11 @@ Zp_appr(GEN f, GEN a)
   pari_sp av = avma;
   long prec;
   GEN z, p;
-  if (typ(f) != t_POL) pari_err(typeer,"Zp_appr",f);
-  if (typ(a) != t_PADIC) pari_err(typeer,"Zp_appr",a);
+  if (typ(f) != t_POL) pari_err(e_TYPE,"Zp_appr",f);
+  if (typ(a) != t_PADIC) pari_err(e_TYPE,"Zp_appr",a);
   p = gel(a,2); prec = gequal0(a)? valp(a): precp(a);
   f = QpX_to_ZX(f);
-  if (degpol(f) <= 0) pari_err(constpoler,"Zp_appr");
+  if (degpol(f) <= 0) pari_err(e_CONSTPOL,"Zp_appr");
   (void)ZX_gcd_all(f, ZX_deriv(f), &f);
   z = ZX_Zp_root(f, gtrunc(a), p, prec);
   return gerepilecopy(av, ZV_to_ZpV(z, p, prec));
@@ -1574,10 +1574,10 @@ rootpadic(GEN f, GEN p, long prec)
   long PREC,i,k;
   int reverse;
 
-  if (typ(p)!=t_INT) pari_err(typeer,"rootpadic",p);
-  if (typ(f)!=t_POL) pari_err(typeer,"rootpadic",f);
-  if (gequal0(f)) pari_err(zeropoler,"rootpadic");
-  if (prec <= 0) pari_err(talker,"non-positive precision in rootpadic");
+  if (typ(p)!=t_INT) pari_err(e_TYPE,"rootpadic",p);
+  if (typ(f)!=t_POL) pari_err(e_TYPE,"rootpadic",f);
+  if (gequal0(f)) pari_err(e_ZEROPOL,"rootpadic");
+  if (prec <= 0) pari_err(e_MISC,"non-positive precision in rootpadic");
   f = QpX_to_ZX(f);
   f = pnormalize(f, p, prec, 1, &lead, &PREC, &reverse);
   y = ZX_Zp_roots(f,p,PREC);
@@ -1612,7 +1612,7 @@ scalar_getprec(GEN x, long *pprec, GEN *pp)
   {
     long e = valp(x); if (signe(x[4])) e += precp(x);
     if (e < *pprec) *pprec = e;
-    if (*pp && !equalii(*pp, gel(x,2))) pari_err(consister,"apprpadic");
+    if (*pp && !equalii(*pp, gel(x,2))) pari_err(e_DIM,"apprpadic");
     *pp = gel(x,2);
   }
 }
@@ -1661,16 +1661,16 @@ padicappr(GEN f, GEN a)
   switch(typ(a)) {
     case t_PADIC: return Zp_appr(f,a);
     case t_POLMOD: break;
-    default: pari_err(typeer,"padicappr",a);
+    default: pari_err(e_TYPE,"padicappr",a);
   }
-  if (typ(f)!=t_POL) pari_err(typeer,"padicappr",f);
-  if (gequal0(f)) pari_err(zeropoler,"padicappr");
+  if (typ(f)!=t_POL) pari_err(e_TYPE,"padicappr",f);
+  if (gequal0(f)) pari_err(e_ZEROPOL,"padicappr");
   z = RgX_gcd(f, RgX_deriv(f));
   if (degpol(z) > 0) f = RgX_div(f,z);
   T = gel(a,1); a = gel(a,2);
   p = NULL; prec = LONG_MAX;
   getprec(a, &prec, &p);
-  getprec(T, &prec, &p); if (!p) pari_err(typeer,"padicappr",T);
+  getprec(T, &prec, &p); if (!p) pari_err(e_TYPE,"padicappr",T);
   f = QpXQ_to_ZXY(lift_intern(f));
   a = QpX_to_ZX(a);
   T = QpX_to_ZX(T);
@@ -1774,7 +1774,7 @@ factorpadic2(GEN f, GEN p, long prec)
   f = QpX_to_ZX(f);
   if (n==1) return gerepilecopy(av, padic_trivfact(f,p,prec));
   if (!gequal1(leading_term(f)))
-    pari_err(impl,"factorpadic2 for non-monic polynomial");
+    pari_err(e_IMPL,"factorpadic2 for non-monic polynomial");
 
   fa = ZX_squff(f, &ex);
   l = lg(fa); n = 0;
@@ -1882,15 +1882,15 @@ factorpadic(GEN f,GEN p,long prec)
 GEN
 factorpadic0(GEN f,GEN p,long r,long flag)
 {
-  if (typ(f)!=t_POL) pari_err(typeer,"factorpadic",f);
-  if (typ(p)!=t_INT) pari_err(typeer,"factorpadic",p);
+  if (typ(f)!=t_POL) pari_err(e_TYPE,"factorpadic",f);
+  if (typ(p)!=t_INT) pari_err(e_TYPE,"factorpadic",p);
   if (!signe(f)) return zero_fact(f);
-  if (r <= 0) pari_err(talker,"non-positive precision in factorpadic");
+  if (r <= 0) pari_err(e_MISC,"non-positive precision in factorpadic");
   switch(flag)
   {
      case 0: return factorpadic(f,p,r);
      case 1: return factorpadic2(f,p,r);
-     default: pari_err(flagerr,"factorpadic");
+     default: pari_err(e_FLAG,"factorpadic");
   }
   return NULL; /* not reached */
 }
@@ -1912,7 +1912,7 @@ to_Fq(GEN x, GEN T, GEN p)
     y = mkintmod(x,p);
   else
   {
-    if (tx != t_POL) pari_err(typeer,"to_Fq",x);
+    if (tx != t_POL) pari_err(e_TYPE,"to_Fq",x);
     lx = lg(x);
     y = cgetg(lx,t_POL); y[1] = x[1];
     for (i=2; i<lx; i++) gel(y,i) = mkintmod(gel(x,i), p);
@@ -2055,7 +2055,7 @@ FqX_split_Trager(GEN A, GEN T, GEN p)
     GEN f = gel(fa,i), F = lift_intern(poleval(f, x0));
     F = FqX_normalize(FqX_gcd(u, F, T, p), T, p);
     if (typ(F) != t_POL || degpol(F) == 0)
-      pari_err(talker,"reducible modulus in FqX_split_Trager");
+      pari_err(e_MISC,"reducible modulus in FqX_split_Trager");
     u = FqX_div(u, F, T, p);
     gel(P,i) = F;
   }
@@ -2314,7 +2314,7 @@ FqX_roots_i(GEN f, GEN T, GEN p)
 {
   GEN R;
   f = FqX_normalize(f, T, p);
-  if (!signe(f)) pari_err(zeropoler,"FqX_roots");
+  if (!signe(f)) pari_err(e_ZEROPOL,"FqX_roots");
   if (isabsolutepol(f)) return FpX_rootsff_i(simplify_shallow(f), p, T);
   if (degpol(f)==2)
     return gen_sort(FqX_quad_roots(f,T,p), (void*) &cmp_RgX, &cmp_nodata);
@@ -2496,12 +2496,12 @@ static void
 ffcheck(pari_sp *av, GEN *f, GEN *T, GEN p)
 {
   long v;
-  if (typ(*T)!=t_POL) pari_err(typeer,"factorff",*T);
-  if (typ(*f)!=t_POL) pari_err(typeer,"factorff",*f);
-  if (typ(p)!=t_INT) pari_err(typeer,"factorff",p);
+  if (typ(*T)!=t_POL) pari_err(e_TYPE,"factorff",*T);
+  if (typ(*f)!=t_POL) pari_err(e_TYPE,"factorff",*f);
+  if (typ(p)!=t_INT) pari_err(e_TYPE,"factorff",p);
   v = varn(*T);
   if (varncmp(v, varn(*f)) <= 0)
-    pari_err(talker,"polynomial variable must have higher priority in factorff");
+    pari_err(e_MISC,"polynomial variable must have higher priority in factorff");
   *T = RgX_to_FpX(*T, p); *av = avma;
   *f = RgX_to_FqX(*f, *T,p);
 }
@@ -2513,10 +2513,10 @@ factorff(GEN f, GEN p, GEN T)
   if (!p || !T)
   {
     long pa, t;
-    if (typ(f) != t_POL) pari_err(typeer, "factorff",f);
+    if (typ(f) != t_POL) pari_err(e_TYPE, "factorff",f);
     T = p = NULL;
     t = RgX_type(f, &p, &T, &pa);
-    if (t != t_FFELT) pari_err(typeer, "factorff",f);
+    if (t != t_FFELT) pari_err(e_TYPE, "factorff",f);
     return FFX_factor(f,T);
   }
   ffcheck(&av, &f, &T, p); z = FqX_factor_i(f, T, p);
@@ -2530,10 +2530,10 @@ polrootsff(GEN f, GEN p, GEN T)
   if (!p || !T)
   {
     long pa, t;
-    if (typ(f) != t_POL) pari_err(typeer, "polrootsff",f);
+    if (typ(f) != t_POL) pari_err(e_TYPE, "polrootsff",f);
     T = p = NULL;
     t = RgX_type(f, &p, &T, &pa);
-    if (t != t_FFELT) pari_err(typeer, "polrootsff",f);
+    if (t != t_FFELT) pari_err(e_TYPE, "polrootsff",f);
     return FFX_roots(f,T);
   }
   ffcheck(&av, &f, &T, p); z = FqX_roots_i(f, T, p);

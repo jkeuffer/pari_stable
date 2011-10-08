@@ -359,7 +359,7 @@ perm_to_GAP(GEN p)
   char *s;
   long sz;
   long lp=lg(p)-1;
-  if (typ(p) != t_VECSMALL)  pari_err(typeer, "perm_to_GAP",p);
+  if (typ(p) != t_VECSMALL)  pari_err(e_TYPE, "perm_to_GAP",p);
   x = perm_cycles(p);
   sz = (long) ((bfffo(lp)+1) * LOG10_2 + 1);
   /*Dry run*/
@@ -462,7 +462,7 @@ long
 group_domain(GEN G)
 {
   GEN gen = grp_get_gen(G);
-  if (lg(gen) < 2) pari_err(talker,"empty group in group_domain");
+  if (lg(gen) < 2) pari_err(e_MISC,"empty group in group_domain");
   return lg(gel(gen,1)) - 1;
 }
 
@@ -605,7 +605,7 @@ group_quotient(GEN G, GEN H)
     for(j=1;j<lg(V);j++)
     {
       long b = el[mael(V,j,1)];
-      if (b==0) pari_err(talker, "not a WSS group");
+      if (b==0) pari_err(e_MISC, "not a WSS group");
       F2v_set(used,b);
     }
     for (j = 1; j <= o; j++)
@@ -625,7 +625,7 @@ quotient_perm(GEN C, GEN p)
   for (j = 1; j < l; ++j)
   {
     p3[j] = coset[p[mael(gen,j,1)]];
-    if (p3[j]==0) pari_err(talker,"not a WSS group");
+    if (p3[j]==0) pari_err(e_MISC,"not a WSS group");
   }
   return p3;
 }
@@ -880,7 +880,7 @@ group_abelianHNF(GEN G, GEN S)
     for(j=1; j<lg(S); j++)
       if (zv_equal(P, gel(S,j))) break;
     avma = av;
-    if (j==lg(S)) pari_err(talker,"wrong argument in galoisisabelian");
+    if (j==lg(S)) pari_err(e_MISC,"wrong argument in galoisisabelian");
     j--;
     for(k=1; k<i; k++)
     {
@@ -937,7 +937,7 @@ group_subgroup_isnormal(GEN G, GEN H)
   GEN g = grp_get_gen(G);
   long i, n = lg(g);
   if (lg(grp_get_gen(H)) > 1 && group_domain(G) != group_domain(H))
-    pari_err(talker,"not a subgroup in group_subgroup_isnormal");
+    pari_err(e_MISC,"not a subgroup in group_subgroup_isnormal");
   for(i=1; i<n; i++)
     if (!group_perm_normalize(H, gel(g,i))) return 0;
   return 1;
@@ -1037,6 +1037,6 @@ group_export(GEN G, long format)
   case 0: return group_export_GAP(G);
   case 1: return group_export_MAGMA(G);
   }
-  pari_err(flagerr,"galoisexport");
+  pari_err(e_FLAG,"galoisexport");
   return NULL; /*-Wall*/
 }

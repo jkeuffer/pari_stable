@@ -664,7 +664,7 @@ ArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
   for (i = 1; i <= nz; i++)
   {
     if (is_bigint(gel(cyc,i)))
-      pari_err(talker,"conductor too large in ArtinNumber");
+      pari_err(e_MISC,"conductor too large in ArtinNumber");
     gel(gen,i) = set_sign_mod_divisor(nf, NULL, gel(gen,i), cond,sarch);
     classe = isprincipalray(bnr, gel(gen,i));
     for (ic = 1; ic <= nChar; ic++) {
@@ -725,7 +725,7 @@ ArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
     s0 = gmul(gel(s,ic), EvalChar(lC[ic], classe));
     s0 = gdiv(s0, sqrtnc);
     if (check && - expo(subrs(gnorm(s0), 1)) < prec2nbits(prec) >> 1)
-      pari_err(bugparier, "ArtinNumber");
+      pari_err(e_BUG, "ArtinNumber");
     gel(W, indW[ic]) = gmul(s0, z);
   }
   return gerepilecopy(av, W);
@@ -765,7 +765,7 @@ bnrrootnumber(GEN bnr, GEN chi, long flag, long prec)
   pari_sp av = avma;
   GEN cond, condc, bnrc, CHI, cyc;
 
-  if (flag < 0 || flag > 1) pari_err(flagerr,"bnrrootnumber");
+  if (flag < 0 || flag > 1) pari_err(e_FLAG,"bnrrootnumber");
 
   checkbnr(bnr);
   cyc = bnr_get_cyc(bnr);
@@ -773,7 +773,7 @@ bnrrootnumber(GEN bnr, GEN chi, long flag, long prec)
   l    = lg(cyc);
 
   if (typ(chi) != t_VEC || lg(chi) != l)
-    pari_err(talker, "incorrect character in bnrrootnumber");
+    pari_err(e_MISC, "incorrect character in bnrrootnumber");
 
   if (flag) condc = NULL;
   else
@@ -2430,7 +2430,7 @@ LABDOUB:
   if (!polrel) /* FAILED */
   {
     long incr_pr;
-    if (++cpt >= 3) pari_err(precer, "stark (computation impossible)");
+    if (++cpt >= 3) pari_err(e_PREC, "stark (computation impossible)");
 
     /* compute the precision, we need
           a) get at least EXTRA_PREC fractional digits if there is none;
@@ -2469,7 +2469,7 @@ get_subgroup(GEN subgp, GEN cyc, const char *s)
     subgp = ZM_hnf(subgp);
     if (hnfdivide(subgp, cyc)) return subgp;
   }
-  pari_err(talker,"incorrect subgroup in %s", s);
+  pari_err(e_MISC,"incorrect subgroup in %s", s);
   return NULL;
 }
 
@@ -2489,8 +2489,8 @@ bnrstark(GEN bnr, GEN subgrp, long prec)
 
   /* check the bnf */
   if (!nf_get_varn(nf))
-    pari_err(talker, "main variable in bnrstark must not be x");
-  if (nf_get_r2(nf)) pari_err(talker, "base field not totally real in bnrstark");
+    pari_err(e_MISC, "main variable in bnrstark must not be x");
+  if (nf_get_r2(nf)) pari_err(e_MISC, "base field not totally real in bnrstark");
   Mcyc = diagonal_shallow(bnr_get_cyc(bnr));
   subgrp = get_subgroup(subgrp,Mcyc,"bnrstark");
 
@@ -2502,7 +2502,7 @@ bnrstark(GEN bnr, GEN subgrp, long prec)
 
   /* check the class field */
   if (!gequal0(gel(bnr_get_mod(bnr), 2)))
-    pari_err(talker, "class field not totally real in bnrstark");
+    pari_err(e_MISC, "class field not totally real in bnrstark");
 
   /* find a suitable extension N */
   dtQ = InitQuotient(subgrp);
@@ -2556,8 +2556,8 @@ bnrL1(GEN bnr, GEN subgp, long flag, long prec)
   nf  = bnf_get_nf(bnf);
   N   = nf_get_degree(nf);
 
-  if (N == 1) pari_err(talker, "the ground field must be distinct from Q");
-  if (flag < 0 || flag > 8) pari_err(flagerr,"bnrL1");
+  if (N == 1) pari_err(e_MISC, "the ground field must be distinct from Q");
+  if (flag < 0 || flag > 8) pari_err(e_FLAG,"bnrL1");
 
   /* compute bnr(conductor) */
   if (!(flag & 2)) bnr = gel(bnrconductor(bnr, NULL, 2),2);
@@ -2599,7 +2599,7 @@ bnrL1(GEN bnr, GEN subgp, long flag, long prec)
   settyp(allCR[cl], t_VEC); /* set correct type for trivial character */
 
   setlg(listCR, nc + 1);
-  if (nc == 0) pari_err(talker, "no non-trivial character in bnrL1");
+  if (nc == 0) pari_err(e_MISC, "no non-trivial character in bnrL1");
 
   /* compute the data for these characters */
   dataCR = InitChar(bnr, listCR, prec);
@@ -2697,7 +2697,7 @@ makescind(GEN nf, GEN P)
       return galoisfixedfield(G, perm, 1, varn(P));
     }
   }
-  pari_err(bugparier,"makescind");
+  pari_err(e_BUG,"makescind");
   return NULL; /*not reached*/
 }
 
@@ -2721,14 +2721,14 @@ quadray_init(GEN *pD, GEN f, GEN *pbnf, long prec)
     }
     else
       isfund = Z_isfundamental(D);
-    if (!isfund) pari_err(talker,"quadray needs a fundamental discriminant");
+    if (!isfund) pari_err(e_MISC,"quadray needs a fundamental discriminant");
   }
   else
   {
     bnf = checkbnf(D);
     nf = bnf_get_nf(bnf);
     if (nf_get_degree(nf) != 2)
-      pari_err(talker,"not a polynomial of degree 2 in quadray");
+      pari_err(e_MISC,"not a polynomial of degree 2 in quadray");
     D = nf_get_disc(nf);
   }
   if (pbnf) *pbnf = bnf;
@@ -2763,7 +2763,7 @@ quadhilbertreal(GEN D, long prec)
 
   for(;;) {
     VOLATILE GEN pol = NULL;
-    CATCH(precer) {
+    CATCH(e_PREC) {
       prec += EXTRA_PREC;
       if (DEBUGLEVEL) pari_warn(warnprec, "quadhilbertreal", prec);
       bnr = bnrnewprec_shallow(bnr, prec);
@@ -2960,7 +2960,7 @@ init_pq(GEN D, struct gpq_data *T)
     }
     /* if !store or (q,r) won't improve on current best pair, forget that q */
     if (store && t*t > best)
-      if (++l >= Np) pari_err(bugparier, "quadhilbert (not enough primes)");
+      if (++l >= Np) pari_err(e_BUG, "quadhilbert (not enough primes)");
     if (!best) /* (p,q) with p < q always better than (q,q) */
     { /* try (q,q) */
       if (gcdq >= 12 && umodiu(D, q)) /* e = 1 and unramified */
@@ -3172,7 +3172,7 @@ get_lambda(GEN bnr)
       }
       return labas;
     }
-  pari_err(bugparier,"get_lambda");
+  pari_err(e_BUG,"get_lambda");
   return NULL;
 }
 
@@ -3270,7 +3270,7 @@ form_to_ideal(GEN x)
   long tx = typ(x);
   GEN b;
   if ((is_vec_t(tx) || lg(x) != 4)
-       && tx != t_QFR && tx != t_QFI) pari_err(typeer,"form_to_ideal",x);
+       && tx != t_QFR && tx != t_QFI) pari_err(e_TYPE,"form_to_ideal",x);
   b = negi(gel(x,2)); if (mpodd(b)) b = addis(b,1);
   return mkmat2( mkcol2(gel(x,1), gen_0),
                  mkcol2(shifti(b,-1), gen_1) );
@@ -3399,7 +3399,7 @@ findquad(GEN a, GEN x, GEN p)
   u = simplify_shallow(u); tu = typ(u);
   v = simplify_shallow(v); tv = typ(v);
   if (!is_scalar_t(tu) || !is_scalar_t(tv))
-    pari_err(talker, "incorrect data in findquad");
+    pari_err(e_MISC, "incorrect data in findquad");
   x = deg1pol(v, u, varn(a));
   if (typ(x) == t_POL) x = gmodulo(x,p);
   return gerepileupto(av, x);

@@ -461,7 +461,7 @@ ellL1_bitprec(GEN E, long r, long bitprec)
   struct bg_data bg;
   long parity;
   long prec = nbits2prec(bitprec)+1;
-  if (r<0) pari_err(talker,"derivative order must be nonnegative");
+  if (r<0) pari_err(e_MISC,"derivative order must be nonnegative");
   init_el(&el, E, &parity, bitprec);
   if (parity != (r & 1)) return gen_0;
   return gerepileuptoleaf(av, ellL1_i(&el, &bg, r, NULL, prec));
@@ -485,7 +485,7 @@ ellanalyticrank(GEN e, GEN eps, long prec)
   else
     if (typ(eps) != t_REAL) {
       eps = gtofp(eps, DEFAULTPREC);
-      if (typ(eps) != t_REAL) pari_err(typeer, "ellanalyticrank", eps);
+      if (typ(eps) != t_REAL) pari_err(e_TYPE, "ellanalyticrank", eps);
     }
   init_el(&el, e, &rk, prec2nbits(prec)); /* set rk to rank parity (0 or 1) */
   if (DEBUGLEVEL) {
@@ -966,9 +966,9 @@ heegner_index(GEN E, long t, GEN N, GEN tam, GEN D, GEN mulf, long prec)
   ind = sqrtr( mulri(mulrr(a, b), c) );
   ind = grndtoi(ind, &e); /* known to ~ 15 bits */
   if (e > expi(ind) - 14)
-    pari_err(talker,"This curve seems to contradict Gross-Hayachi's conjecture, please report");
+    pari_err(e_MISC,"This curve seems to contradict Gross-Hayachi's conjecture, please report");
   if (e >= 0)
-    pari_err(precer, "ellheegner (precision loss in truncation)");
+    pari_err(e_PREC, "ellheegner (precision loss in truncation)");
   return itos(ind);
 }
 
@@ -1028,7 +1028,7 @@ heegner_find_point(GEN e, GEN ht, GEN N, GEN z1, long k, long prec)
     }
     avma = av;
   }
-  pari_err(bugparier, "ellheegner, point not found");
+  pari_err(e_BUG, "ellheegner, point not found");
   return NULL; /* NOT REACHED */
 }
 
@@ -1111,7 +1111,7 @@ ellheegner(GEN E)
 
   if (trivial_change(cb)) cb = NULL; else E = ellchangecurve(E, cb);
   if (ellrootno(E, NULL) == 1)
-    pari_err(talker, "The curve has even analytic rank");
+    pari_err(e_MISC, "The curve has even analytic rank");
   w1 = gel(E,15); /* real period */
   while (1)
   {
@@ -1119,7 +1119,7 @@ ellheegner(GEN E)
     GEN l1 = ellL1_bitprec(E, 1, bitprec);
     long bitneeded;
     if (expo(l1) < 1 - bitprec/2)
-      pari_err(talker, "The curve has (probably) analytic rank > 1");
+      pari_err(e_MISC, "The curve has (probably) analytic rank > 1");
     ht = divrr(mulrs(l1, wtor * wtor), mulri(w1, tam));
     if (DEBUGLEVEL) err_printf("Expected height=%Ps\n", ht);
     hnaive = hnaive_max(E, ht);

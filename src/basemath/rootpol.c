@@ -892,7 +892,7 @@ initRUgen(long N, long bit)
 GEN
 FFTinit(long k, long prec)
 {
-  if (k <= 0) pari_err(talker, "non-positive k in FFTinit");
+  if (k <= 0) pari_err(e_MISC, "non-positive k in FFTinit");
   return initRU(1L << k, prec2nbits(prec)) - 1;
 }
 
@@ -901,9 +901,9 @@ FFT(GEN x, GEN Omega)
 {
   long i, l = lg(Omega), n = lg(x);
   GEN y, z;
-  if (!is_vec_t(typ(x))) pari_err(typeer,"FFT",x);
-  if (typ(Omega) != t_VEC) pari_err(typeer,"FFT",Omega);
-  if (n > l) pari_err(consister,"FFT");
+  if (!is_vec_t(typ(x))) pari_err(e_TYPE,"FFT",x);
+  if (typ(Omega) != t_VEC) pari_err(e_TYPE,"FFT",Omega);
+  if (n > l) pari_err(e_DIM,"FFT");
 
   if (n < l) {
     z = cgetg(l, t_VECSMALL); /* cf stackdummy */
@@ -1754,7 +1754,7 @@ quickabs(GEN x)
       a = cxcompotor(a, prec);
       b = cxcompotor(b, prec); return sqrtr(addrr(sqrr(a), sqrr(b)));
     }
-    default: pari_err(typeer,"quickabs",x);
+    default: pari_err(e_TYPE,"quickabs",x);
       return NULL;/*not reached*/
   }
 
@@ -1769,7 +1769,7 @@ cauchy_bound(GEN p)
   GEN invlc;
   double Lmax = -pariINFINITY;
 
-  if (n <= 0) pari_err(constpoler,"cauchy_bound");
+  if (n <= 0) pari_err(e_CONSTPOL,"cauchy_bound");
   invlc = invr( quickabs(gel(p,n+2)) ); /* 1 / |lc(p)| */
   for (i = 0; i < n; i++)
   {
@@ -2032,12 +2032,12 @@ roots_aux(GEN p, long l, long clean)
 
   if (typ(p) != t_POL)
   {
-    if (gequal0(p)) pari_err(zeropoler,"roots");
-    if (!isvalidcoeff(p)) pari_err(typeer,"roots",p);
+    if (gequal0(p)) pari_err(e_ZEROPOL,"roots");
+    if (!isvalidcoeff(p)) pari_err(e_TYPE,"roots",p);
     return cgetg(1,t_COL); /* constant polynomial */
   }
-  if (!signe(p)) pari_err(zeropoler,"roots");
-  if (!isvalidpol(p)) pari_err(talker,"invalid coefficients in roots");
+  if (!signe(p)) pari_err(e_ZEROPOL,"roots");
+  if (!isvalidpol(p)) pari_err(e_MISC,"invalid coefficients in roots");
   if (lg(p) == 3) return cgetg(1,t_COL); /* constant polynomial */
 
   if (l < LOWDEFAULTPREC) l = LOWDEFAULTPREC;
@@ -2073,7 +2073,7 @@ roots0(GEN p, long flag,long l)
     case 0: return roots(p,l);
     case 1: pari_warn(warner, "deprecated flag = 1 in polroots");
             return roots(p,l);
-    default: pari_err(flagerr,"polroots");
+    default: pari_err(e_FLAG,"polroots");
   }
   return NULL; /* not reached */
 }
