@@ -321,7 +321,7 @@ transc(GEN (*f)(GEN,long), GEN x, long prec)
       for (i=1; i<lx; i++) gel(y,i) = f(gel(p1,i),prec);
       return gerepile(av,tetpil,y);
 
-    default: pari_err(e_TYPE,"a transcendental function",x);
+    default: pari_err_TYPE("a transcendental function",x);
   }
   return f(x,prec);
 }
@@ -398,7 +398,7 @@ gpowg0(GEN x)
     case t_QFI: return qfi_1(x);
     case t_VECSMALL: return identity_perm(lg(x) - 1);
   }
-  pari_err(e_TYPE,"gpow",x);
+  pari_err_TYPE("gpow",x);
   return NULL; /* not reached */
 }
 
@@ -846,7 +846,7 @@ ser_pow(GEN x, GEN n, long prec)
     return y;
   }
   p1 = gdiv(x,lead);
-  if (typ(p1) != t_SER) pari_err(e_TYPE, "ser_pow",x);
+  if (typ(p1) != t_SER) pari_err_TYPE( "ser_pow",x);
   gel(p1,2) = gen_1; /* in case it's inexact */
   if (typ(n) == t_FRAC && !isinexact(lead) && ispower(lead, gel(n,2), &p2))
     p2 = powgi(p2, gel(n,1));
@@ -1069,11 +1069,11 @@ Zn_sqrt(GEN d, GEN fn)
   pari_sp ltop = avma, btop, st_lim;
   GEN b = gen_0, m = gen_1;
   long j, np;
-  if (typ(d) != t_INT) pari_err(e_TYPE, "Zn_sqrt",d);
+  if (typ(d) != t_INT) pari_err_TYPE( "Zn_sqrt",d);
   if (typ(fn) == t_INT)
     fn = Z_factor(absi(fn));
   else if (!is_Z_factor(fn))
-    pari_err(e_TYPE, "Zn_sqrt",fn);
+    pari_err_TYPE( "Zn_sqrt",fn);
   np = lg(gel(fn, 1))-1;
   btop = avma; st_lim = stack_lim(btop, 1);
   for (j = 1; j <= np; ++j)
@@ -1104,11 +1104,11 @@ long
 Zn_issquare(GEN d, GEN fn)
 {
   long j, np;
-  if (typ(d) != t_INT) pari_err(e_TYPE, "Zn_issquare",d);
+  if (typ(d) != t_INT) pari_err_TYPE( "Zn_issquare",d);
   if (typ(fn) == t_INT)
     fn = Z_factor(absi(fn));
   else if (!is_Z_factor(fn))
-    pari_err(e_TYPE, "Zn_issquare",fn);
+    pari_err_TYPE( "Zn_issquare",fn);
   np = lg(gel(fn, 1))-1;
   for (j = 1; j <= np; ++j)
   {
@@ -1401,7 +1401,7 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
   long i, lx, tx;
   pari_sp av;
   GEN y, z;
-  if (typ(n)!=t_INT) pari_err(e_TYPE,"gsqrtn",n);
+  if (typ(n)!=t_INT) pari_err_TYPE("gsqrtn",n);
   if (!signe(n)) pari_err(e_MISC,"1/0 exponent in gsqrtn");
   if (is_pm1(n))
   {
@@ -1469,7 +1469,7 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
     av = avma; if (!(y = toser_i(x))) break;
     return gerepileupto(av, ser_powfrac(y, ginv(n), prec));
   }
-  pari_err(e_TYPE,"gsqrtn",x);
+  pari_err_TYPE("gsqrtn",x);
   return NULL;/* not reached */
 }
 
@@ -1793,7 +1793,7 @@ gexp(GEN x, long prec)
     case t_REAL: return mpexp(x);
     case t_COMPLEX: return cxexp(x,prec);
     case t_PADIC: return Qp_exp(x);
-    case t_INTMOD: pari_err(e_TYPE,"gexp",x);
+    case t_INTMOD: pari_err_TYPE("gexp",x);
     default:
     {
       pari_sp av = avma;
@@ -2129,7 +2129,7 @@ teich(GEN x)
   long n, k;
   pari_sp av;
 
-  if (typ(x)!=t_PADIC) pari_err(e_TYPE,"teichmuller",x);
+  if (typ(x)!=t_PADIC) pari_err_TYPE("teichmuller",x);
   if (!signe(x[4])) return gcopy(x);
   p = gel(x,2);
   q = gel(x,3);
@@ -2176,7 +2176,7 @@ glog(GEN x, long prec)
     case t_PADIC:
       return Qp_log(x);
 
-    case t_INTMOD: pari_err(e_TYPE,"glog",x);
+    case t_INTMOD: pari_err_TYPE("glog",x);
     default:
       av = avma; if (!(y = toser_i(x))) break;
       if (valp(y) || gequal0(y)) pari_err(e_MISC,"log is not meromorphic at 0");
@@ -2376,7 +2376,7 @@ gcos(GEN x, long prec)
       y = cgetr(prec); av = avma;
       affrr_fixlg(mpcos(tofp_safe(x,prec)), y); avma = av; return y;
 
-    case t_INTMOD: pari_err(e_TYPE,"gcos",x);
+    case t_INTMOD: pari_err_TYPE("gcos",x);
 
     case t_PADIC: x = cos_p(x);
       if (!x) pari_err(e_MISC,"p-adic argument out of range in gcos");
@@ -2446,7 +2446,7 @@ gsin(GEN x, long prec)
       y = cgetr(prec); av = avma;
       affrr_fixlg(mpsin(tofp_safe(x,prec)), y); avma = av; return y;
 
-    case t_INTMOD: pari_err(e_TYPE,"gsin",x);
+    case t_INTMOD: pari_err_TYPE("gsin",x);
 
     case t_PADIC: x = sin_p(x);
       if (!x) pari_err(e_MISC,"p-adic argument out of range in gsin");
@@ -2599,7 +2599,7 @@ gsincos(GEN x, GEN *s, GEN *c, long prec)
       }
       return;
   }
-  pari_err(e_TYPE,"gsincos",x);
+  pari_err_TYPE("gsincos",x);
 }
 
 /********************************************************************/
@@ -2646,7 +2646,7 @@ gtan(GEN x, long prec)
       av = avma;
       return gerepileupto(av, gdiv(gsin(x,prec), gcos(x,prec)));
 
-    case t_INTMOD: pari_err(e_TYPE,"gtan",x);
+    case t_INTMOD: pari_err_TYPE("gtan",x);
 
     default:
       av = avma; if (!(y = toser_i(x))) break;
@@ -2699,7 +2699,7 @@ gcotan(GEN x, long prec)
       av = avma;
       return gerepileupto(av, gdiv(gcos(x,prec), gsin(x,prec)));
 
-    case t_INTMOD: pari_err(e_TYPE,"gcotan",x);
+    case t_INTMOD: pari_err_TYPE("gcotan",x);
 
     default:
       av = avma; if (!(y = toser_i(x))) break;

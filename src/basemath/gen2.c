@@ -126,7 +126,7 @@ gassoc_proto(GEN f(GEN,GEN), GEN x, GEN y)
   {
     pari_sp av = avma;
     long tx = typ(x);
-    if (!is_vec_t(tx)) pari_err(e_TYPE,"association",x);
+    if (!is_vec_t(tx)) pari_err_TYPE("association",x);
     return gerepileupto(av, divide_conquer_prod(x,f));
   }
   return f(x,y);
@@ -180,7 +180,7 @@ matsize(GEN x)
     case t_COL: return mkvec2s(L, 1);
     case t_MAT: return mkvec2s(L? lg(x[1])-1: 0, L);
   }
-  pari_err(e_TYPE,"matsize",x);
+  pari_err_TYPE("matsize",x);
   return NULL; /* not reached */
 }
 
@@ -256,7 +256,7 @@ gtolong(GEN x)
     case t_QUAD:
       if (gequal0(gel(x,3))) return gtolong(gel(x,2)); break;
   }
-  pari_err(e_TYPE,"gtolong",x);
+  pari_err_TYPE("gtolong",x);
   return 0; /* not reached */
 }
 
@@ -597,11 +597,11 @@ gcmp(GEN x, GEN y)
     if (tx != t_FRAC)
     {
       if (ty == t_STR) return -1;
-      pari_err(e_TYPE2,"comparison",x,y);
+      pari_err_TYPE2("comparison",x,y);
     }
   }
   if (ty == t_STR) return -1;
-  if (!is_intreal_t(ty) && ty != t_FRAC) pari_err(e_TYPE2,"comparison",x,y);
+  if (!is_intreal_t(ty) && ty != t_FRAC) pari_err_TYPE2("comparison",x,y);
   av=avma; f = gsigne( gsub(x,y) ); avma=av; return f;
 }
 
@@ -619,7 +619,7 @@ gcmpsg(long s, GEN y)
     }
     case t_STR: return -1;
   }
-  pari_err(e_TYPE2,"comparison",stoi(s),y);
+  pari_err_TYPE2("comparison",stoi(s),y);
   return 0; /* not reached */
 }
 
@@ -1558,7 +1558,7 @@ gneg(GEN x)
     case t_COL: return RgC_neg(x);
     case t_MAT: return RgM_neg(x);
     default:
-      pari_err(e_TYPE,"gneg",x);
+      pari_err_TYPE("gneg",x);
       return NULL; /* not reached */
   }
   return y;
@@ -1625,7 +1625,7 @@ gneg_i(GEN x)
       gel(y,2) = gel(x,2); break;
 
     default:
-      pari_err(e_TYPE,"gneg_i",x);
+      pari_err_TYPE("gneg_i",x);
       return NULL; /* not reached */
   }
   return y;
@@ -1700,7 +1700,7 @@ gabs(GEN x, long prec)
       for (i=1; i<lx; i++) gel(y,i) = gabs(gel(x,i),prec);
       return y;
   }
-  pari_err(e_TYPE,"gabs",x);
+  pari_err_TYPE("gabs",x);
   return NULL; /* not reached */
 }
 
@@ -1814,7 +1814,7 @@ gaffsg(long s, GEN x)
       break;
     }
     case t_QUAD: gaffsg(s,gel(x,2)); gaffsg(0,gel(x,3)); break;
-    default: pari_err(e_TYPE2,"=",stoi(s),x);
+    default: pari_err_TYPE2("=",stoi(s),x);
   }
 }
 
@@ -1832,10 +1832,10 @@ padic_to_Fp(GEN x, GEN Y) {
   long vy, vx = valp(x);
   if (!signe(Y)) pari_err(e_INV);
   vy = Z_pvalrem(Y,p, &z);
-  if (vx < 0 || !gequal1(z)) pari_err(e_OP,"",x, mkintmod(gen_1,Y));
+  if (vx < 0 || !gequal1(z)) pari_err_OP("",x, mkintmod(gen_1,Y));
   if (vx >= vy) { avma = av; return gen_0; }
   z = gel(x,4);
-  if (!signe(z) || vy > vx + precp(x)) pari_err(e_OP,"",x, mkintmod(gen_1,Y));
+  if (!signe(z) || vy > vx + precp(x)) pari_err_OP("",x, mkintmod(gen_1,Y));
   if (vx) z = mulii(z, powiu(p,vx));
   return gerepileuptoint(av, remii(z, Y));
 }
@@ -1845,11 +1845,11 @@ padic_to_Fl(GEN x, ulong Y) {
   ulong u, z;
   long vy, vx = valp(x);
   vy = u_pvalrem(Y,p, &u);
-  if (vx < 0 || u != 1) pari_err(e_OP,"",x, mkintmodu(1,Y));
+  if (vx < 0 || u != 1) pari_err_OP("",x, mkintmodu(1,Y));
   /* Y = p^vy */
   if (vx >= vy) return 0;
   z = umodiu(gel(x,4), Y);
-  if (!z || vy > vx + precp(x)) pari_err(e_OP,"",x, mkintmodu(1,Y));
+  if (!z || vy > vx + precp(x)) pari_err_OP("",x, mkintmodu(1,Y));
   if (vx) {
     ulong pp = p[2];
     z = Fl_mul(z, upowuu(pp,vx), Y); /* p^vx < p^vy = Y */
@@ -1881,7 +1881,7 @@ gaffect(GEN x, GEN y)
       croak("gnil)");
     case t_REAL: affrr(x,y); return;
     case t_INTMOD:
-      if (!dvdii(gel(x,1),gel(y,1))) pari_err(e_OP,"",x,y);
+      if (!dvdii(gel(x,1),gel(y,1))) pari_err_OP("",x,y);
       modiiz(gel(x,2),gel(y,1),gel(y,2)); return;
     case t_FRAC:
       affii(gel(x,1),gel(y,1));
@@ -1890,11 +1890,11 @@ gaffect(GEN x, GEN y)
       gaffect(gel(x,1),gel(y,1));
       gaffect(gel(x,2),gel(y,2)); return;
     case t_PADIC:
-      if (!equalii(gel(x,2),gel(y,2))) pari_err(e_OP,"",x,y);
+      if (!equalii(gel(x,2),gel(y,2))) pari_err_OP("",x,y);
       modiiz(gel(x,4),gel(y,3),gel(y,4));
       setvalp(y,valp(x)); return;
     case t_QUAD:
-      if (! ZX_equal(gel(x,1),gel(y,1))) pari_err(e_OP,"",x,y);
+      if (! ZX_equal(gel(x,1),gel(y,1))) pari_err_OP("",x,y);
       affii(gel(x,2),gel(y,2));
       affii(gel(x,3),gel(y,3)); return;
     case t_VEC: case t_COL: case t_MAT:
@@ -1905,7 +1905,7 @@ gaffect(GEN x, GEN y)
 
   /* Various conversions. Avoid them, use specialized routines ! */
 
-  if (!is_const_t(ty)) pari_err(e_TYPE2,"=",x,y);
+  if (!is_const_t(ty)) pari_err_TYPE2("=",x,y);
   switch(tx)
   {
     case t_INT:
@@ -1928,7 +1928,7 @@ gaffect(GEN x, GEN y)
           avma = av; break;
 
         case t_QUAD: gaffect(x,gel(y,2)); gaffsg(0,gel(y,3)); break;
-        default: pari_err(e_TYPE2,"=",x,y);
+        default: pari_err_TYPE2("=",x,y);
       }
       break;
 
@@ -1936,7 +1936,7 @@ gaffect(GEN x, GEN y)
       switch(ty)
       {
         case t_COMPLEX: gaffect(x,gel(y,1)); gaffsg(0,gel(y,2)); break;
-        default: pari_err(e_TYPE2,"=",x,y);
+        default: pari_err_TYPE2("=",x,y);
       }
       break;
 
@@ -1959,12 +1959,12 @@ gaffect(GEN x, GEN y)
           p1 = mulii(num,Fp_inv(den,gel(y,3)));
           affii(modii(p1,gel(y,3)), gel(y,4)); avma = av; break;
         case t_QUAD: gaffect(x,gel(y,2)); gaffsg(0,gel(y,3)); break;
-        default: pari_err(e_TYPE2,"=",x,y);
+        default: pari_err_TYPE2("=",x,y);
       }
       break;
 
     case t_COMPLEX:
-      if (!gequal0(gel(x,2))) pari_err(e_TYPE2,"=",x,y);
+      if (!gequal0(gel(x,2))) pari_err_TYPE2("=",x,y);
       gaffect(gel(x,1), y);
       break;
 
@@ -1974,7 +1974,7 @@ gaffect(GEN x, GEN y)
         case t_INTMOD:
           av = avma; affii(padic_to_Fp(x, gel(y,1)), gel(y,2));
           avma = av; break;
-        default: pari_err(e_TYPE2,"=",x,y);
+        default: pari_err_TYPE2("=",x,y);
       }
       break;
 
@@ -1982,16 +1982,16 @@ gaffect(GEN x, GEN y)
       switch(ty)
       {
         case t_INT: case t_INTMOD: case t_FRAC: case t_PADIC:
-          pari_err(e_TYPE2,"=",x,y);
+          pari_err_TYPE2("=",x,y);
 
         case t_REAL:
           av = avma; affgr(quadtofp(x,lg(y)), y); avma = av; break;
         case t_COMPLEX:
-          ly = precision(y); if (!ly) pari_err(e_TYPE2,"=",x,y);
+          ly = precision(y); if (!ly) pari_err_TYPE2("=",x,y);
           av = avma; gaffect(quadtofp(x,ly), y); avma = av; break;
-        default: pari_err(e_TYPE2,"=",x,y);
+        default: pari_err_TYPE2("=",x,y);
       }
-    default: pari_err(e_TYPE2,"=",x,y);
+    default: pari_err_TYPE2("=",x,y);
   }
 }
 
@@ -2106,7 +2106,7 @@ cvtop2(GEN x, GEN y)
     case t_COMPLEX: return ctop(x, p, d);
     case t_QUAD:    return qtop(x, p, d);
   }
-  pari_err(e_TYPE,"cvtop2",x);
+  pari_err_TYPE("cvtop2",x);
   return NULL; /* not reached */
 }
 
@@ -2117,7 +2117,7 @@ cvtop(GEN x, GEN p, long d)
   GEN z;
   long v;
 
-  if (typ(p) != t_INT) pari_err(e_TYPE,"cvtop",p);
+  if (typ(p) != t_INT) pari_err_TYPE("cvtop",p);
   switch(typ(x))
   {
     case t_INT:
@@ -2150,7 +2150,7 @@ cvtop(GEN x, GEN p, long d)
     case t_PADIC: return gprec(x,d);
     case t_QUAD: return qtop(x, p, d);
   }
-  pari_err(e_TYPE,"cvtop",x);
+  pari_err_TYPE("cvtop",x);
   return NULL; /* not reached */
 }
 
@@ -2209,7 +2209,7 @@ gexpo(GEN x)
       for (i=1; i<lx; i++) { e=gexpo(gel(x,i)); if (e>f) f=e; }
       return f;
   }
-  pari_err(e_TYPE,"gexpo",x);
+  pari_err_TYPE("gexpo",x);
   return 0; /* not reached */
 }
 
@@ -2226,7 +2226,7 @@ normalize(GEN x)
   long i, lx = lg(x);
   GEN y, z;
 
-  if (typ(x) != t_SER) pari_err(e_TYPE,"normalize",x);
+  if (typ(x) != t_SER) pari_err_TYPE("normalize",x);
   if (lx==2) { setsigne(x,0); return x; }
   for (i=2; i<lx; i++)
     if (! isrationalzero(gel(x,i))) break;
@@ -2310,7 +2310,7 @@ gsigne(GEN x)
     case t_INT: case t_REAL: return signe(x);
     case t_FRAC: return signe(x[1]);
   }
-  pari_err(e_TYPE,"gsigne",x);
+  pari_err_TYPE("gsigne",x);
   return 0; /* not reached */
 }
 
@@ -2349,7 +2349,7 @@ void
 listkill(GEN L)
 {
 
-  if (typ(L) != t_LIST) pari_err(e_TYPE,"listkill",L);
+  if (typ(L) != t_LIST) pari_err_TYPE("listkill",L);
   if (list_nmax(L)) {
     GEN v = list_data(L);
     long i, l = lg(v);
@@ -2374,7 +2374,7 @@ listput(GEN L, GEN x, long index)
   long l;
   GEN z;
 
-  if (typ(L) != t_LIST) pari_err(e_TYPE,"listput",L);
+  if (typ(L) != t_LIST) pari_err_TYPE("listput",L);
   if (index < 0) pari_err(e_MISC,"negative index (%ld) in listput", index);
   z = list_data(L);
   l = z? lg(z): 1;
@@ -2397,7 +2397,7 @@ listinsert(GEN L, GEN x, long index)
   long l, i;
   GEN z;
 
-  if (typ(L) != t_LIST) pari_err(e_TYPE,"listinsert",L);
+  if (typ(L) != t_LIST) pari_err_TYPE("listinsert",L);
 
   z = list_data(L); l = z? lg(z): 1;
   if (index <= 0 || index > l) pari_err(e_MISC,"bad index in listinsert");
@@ -2414,7 +2414,7 @@ listpop(GEN L, long index)
   long l, i;
   GEN z;
 
-  if (typ(L) != t_LIST) pari_err(e_TYPE,"listinsert",L);
+  if (typ(L) != t_LIST) pari_err_TYPE("listinsert",L);
 
   if (index < 0) pari_err(e_MISC,"negative index (%ld) in listpop", index);
   z = list_data(L);
@@ -2469,7 +2469,7 @@ listsort(GEN L, long flag)
   pari_sp av = avma;
   GEN perm, v, vnew;
 
-  if (typ(L) != t_LIST) pari_err(e_TYPE,"listsort",L);
+  if (typ(L) != t_LIST) pari_err_TYPE("listsort",L);
   v = list_data(L); l = v? lg(v): 1;
   if (l < 3) return;
   if (flag)

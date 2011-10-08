@@ -945,13 +945,13 @@ padicfields0(GEN p, GEN N, long flag)
   long m = 0, d = -1;
   GEN L;
 
-  if (typ(p) != t_INT) pari_err(e_TYPE,"padicfields",p);
+  if (typ(p) != t_INT) pari_err_TYPE("padicfields",p);
   /* be nice to silly users */
   if (!BPSW_psp(p)) pari_err(e_MISC,"p must be a prime in padicfields");
   switch(typ(N))
   {
     case t_VEC:
-      if (lg(N) != 3) pari_err(e_TYPE,"padicfields",N);
+      if (lg(N) != 3) pari_err_TYPE("padicfields",N);
       d = gtos(gel(N,2));
       N = gel(N,1); /* fall through */
     case t_INT:
@@ -959,7 +959,7 @@ padicfields0(GEN p, GEN N, long flag)
       if (m <= 0) pari_err(e_MISC,"non-positive degree in padicfields()");
       break;
     default:
-      pari_err(e_TYPE,"padicfields",N);
+      pari_err_TYPE("padicfields",N);
   }
   if (d >= 0) return padicfields(p, m, d, flag);
   L = possible_efj(p, m);

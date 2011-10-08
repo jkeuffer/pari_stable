@@ -313,7 +313,7 @@ dlog_get_ordfa(GEN o)
       if (lg(o) == 3 && signe(gel(o,1)) > 0 && is_Z_factor(gel(o,2))) return o;
       break;
   }
-  pari_err(e_TYPE, "generic discrete logarithm (order factorization)",o);
+  pari_err_TYPE( "generic discrete logarithm (order factorization)",o);
   return NULL; /* not reached */
 }
 GEN
@@ -335,7 +335,7 @@ dlog_get_ord(GEN o)
       if (typ(o) == t_INT && signe(o) > 0) return o;
       break;
   }
-  pari_err(e_TYPE, "generic discrete logarithm (order factorization)",o);
+  pari_err_TYPE( "generic discrete logarithm (order factorization)",o);
   return NULL; /* not reached */
 }
 

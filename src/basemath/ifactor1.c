@@ -105,7 +105,7 @@ nextprime(GEN n)
   if (typ(n) != t_INT)
   {
     n = gceil(n);
-    if (typ(n) != t_INT) pari_err(e_TYPE,"nextprime",n);
+    if (typ(n) != t_INT) pari_err_TYPE("nextprime",n);
   }
   if (signe(n) <= 0) { avma = av; return gen_2; }
   if (lgefint(n) == 3)
@@ -151,7 +151,7 @@ precprime(GEN n)
   if (typ(n) != t_INT)
   {
     n = gfloor(n);
-    if (typ(n) != t_INT) pari_err(e_TYPE,"nextprime",n);
+    if (typ(n) != t_INT) pari_err_TYPE("nextprime",n);
   }
   if (signe(n) <= 0) { avma = av; return gen_0; }
   if (lgefint(n) <= 3)
@@ -3320,7 +3320,7 @@ gmoebius(GEN n) { return map_proto_lG(moebius,n); }
 
 INLINE void
 chk_arith(GEN n) {
-  if (typ(n) != t_INT) pari_err(e_TYPE,"arithmetic function",n);
+  if (typ(n) != t_INT) pari_err_TYPE("arithmetic function",n);
   if (!signe(n)) pari_err(e_MISC, "zero argument in an arithmetic function");
 }
 
@@ -3383,7 +3383,7 @@ issquarefree(GEN x)
       if (!signe(x)) return 0;
       av = avma; d = RgX_gcd(x, RgX_deriv(x));
       avma = av; return (lg(d) == 3);
-    default: pari_err(e_TYPE,"issquarefree",x);
+    default: pari_err_TYPE("issquarefree",x);
       return 0; /* not reached */
   }
 }
@@ -3887,7 +3887,7 @@ ifac_break_limit(GEN n, GEN pairs/*unused*/, GEN here, GEN state)
 GEN
 factorint(GEN n, long flag)
 {
-  if (typ(n) != t_INT) pari_err(e_TYPE,"factorint",n);
+  if (typ(n) != t_INT) pari_err_TYPE("factorint",n);
   return ifactor(n,NULL,NULL, 0,flag);
 }
 

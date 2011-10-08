@@ -628,7 +628,7 @@ thueinit(GEN pol, long flag, long prec)
   long k, s, lfa, dpol = degpol(pol);
 
   if (checktnf(pol)) { bnf = checkbnf(gel(pol,2)); pol = gel(pol,1); }
-  if (typ(pol)!=t_POL) pari_err(e_TYPE,"thueinit",pol);
+  if (typ(pol)!=t_POL) pari_err_TYPE("thueinit",pol);
   if (dpol <= 0) pari_err(e_CONSTPOL,"thueinit");
   RgX_check_ZX(pol, "thueinit");
   if (varn(pol)) { pol = leafcopy(pol); setvarn(pol, 0); }
@@ -851,7 +851,7 @@ LargeSols(GEN P, GEN tnf, GEN rhs, GEN ne, GEN *pS)
       if (!is_pm1(gel(csts, 7)) && !is_pm1(bnf_get_no(bnf)) && !is_pm1(rhs))
         pari_warn(warner, "The result returned by 'thue' is conditional on the GRH");
   }
-  else if (typ(ne) != t_VEC) pari_err(e_TYPE, "thue",ne);
+  else if (typ(ne) != t_VEC) pari_err_TYPE( "thue",ne);
   if (lg(ne)==1) return NULL;
 
   nf_get_sign(bnf_get_nf(bnf), &s, &t);
@@ -1038,7 +1038,7 @@ thue(GEN tnf, GEN rhs, GEN ne)
   GEN POL, C, L, x3, S;
 
   if (!checktnf(tnf)) pari_err(e_MISC,"not a tnf in thue");
-  if (typ(rhs) != t_INT) pari_err(e_TYPE,"thue",rhs);
+  if (typ(rhs) != t_INT) pari_err_TYPE("thue",rhs);
 
   /* solve P(x,y) = rhs <=> POL(L x, y) = C rhs, with POL monic in Z[X] */
   POL = gel(tnf,1);
@@ -1329,7 +1329,7 @@ bnfisintnormabs(GEN bnf, GEN a)
   GEN nf, res, PR;
   long i;
 
-  if (typ(a) != t_INT) pari_err(e_TYPE,"bnfisintnormabs",a);
+  if (typ(a) != t_INT) pari_err_TYPE("bnfisintnormabs",a);
   bnf = checkbnf(bnf); nf = bnf_get_nf(bnf);
   if (!signe(a)) return mkvec(gen_0);
   if (is_pm1(a)) return mkvec(gen_1);

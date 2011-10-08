@@ -132,7 +132,7 @@ jbesselintern(GEN n, GEN z, long flag, long prec)
       if (issmall(n,&ki)) n = utoi(labs(ki));
       return gerepileupto(av, _jbessel(n,y,flag,lg(y)-2));
   }
-  pari_err(e_TYPE,"jbessel",z);
+  pari_err_TYPE("jbessel",z);
   return NULL; /* not reached */
 }
 GEN
@@ -167,7 +167,7 @@ jbesselh(GEN n, GEN z, long prec)
   pari_sp av;
   GEN res, y, p1;
 
-  if (typ(n)!=t_INT) pari_err(e_TYPE,"jbesselh",n);
+  if (typ(n)!=t_INT) pari_err_TYPE("jbesselh",n);
   k = itos(n);
   if (k < 0) return jbessel(gadd(ghalf,n), z, prec);
 
@@ -220,7 +220,7 @@ jbesselh(GEN n, GEN z, long prec)
       for (i=1; i<=k; i++) p1 = gmulgs(p1,2*i+1);
       return gerepilecopy(av,p1);
   }
-  pari_err(e_TYPE,"jbesselh",z);
+  pari_err_TYPE("jbesselh",z);
   return NULL; /* not reached */
 }
 
@@ -493,7 +493,7 @@ kbesselintern(GEN n, GEN z, long flag, long prec)
       else p1 = pm;
       return gerepileupto(av, fl2? gneg(p1): gcopy(p1));
   }
-  pari_err(e_TYPE,"kbesselintern",z);
+  pari_err_TYPE("kbesselintern",z);
   return NULL; /* not reached */
 }
 
@@ -800,10 +800,10 @@ GEN
 veceint1(GEN C, GEN nmax, long prec)
 {
   if (!nmax) return eint1(C,prec);
-  if (typ(nmax) != t_INT) pari_err(e_TYPE,"veceint1",nmax);
+  if (typ(nmax) != t_INT) pari_err_TYPE("veceint1",nmax);
   if (typ(C) != t_REAL) {
     C = gtofp(C, prec);
-    if (typ(C) != t_REAL) pari_err(e_TYPE,"veceint1",C);
+    if (typ(C) != t_REAL) pari_err_TYPE("veceint1",C);
   }
   if (signe(C) <= 0) pari_err(e_MISC,"negative or zero constant in veceint1");
   return mpveceint1(C, NULL, itos(nmax));
@@ -1793,7 +1793,7 @@ gzeta(GEN x, long prec)
     case t_REAL: case t_COMPLEX:
       return czeta(x,prec);
 
-    case t_INTMOD: pari_err(e_TYPE,"gzeta",x);
+    case t_INTMOD: pari_err_TYPE("gzeta",x);
 
     case t_PADIC:
       return zetap(x);
@@ -2090,7 +2090,7 @@ gpolylog(long m, GEN x, long prec)
       for (i=1; i<lx; i++) gel(y,i) = gpolylog(m,gel(x,i),prec);
       return y;
   }
-  pari_err(e_TYPE,"gpolylog",x);
+  pari_err_TYPE("gpolylog",x);
   return NULL; /* not reached */
 }
 
@@ -2392,8 +2392,8 @@ sumdedekind(GEN h, GEN k)
 {
   pari_sp av = avma;
   GEN d;
-  if (typ(h) != t_INT) pari_err(e_TYPE, "sumdedekind",h);
-  if (typ(k) != t_INT) pari_err(e_TYPE, "sumdedekind",k);
+  if (typ(h) != t_INT) pari_err_TYPE( "sumdedekind",h);
+  if (typ(k) != t_INT) pari_err_TYPE( "sumdedekind",k);
   d = gcdii(h,k);
   if (!is_pm1(d))
     avma = av;
@@ -2458,7 +2458,7 @@ trueeta(GEN x, long prec)
   pari_sp av = avma;
   GEN U, st, s, t;
 
-  if (!is_scalar_t(typ(x))) pari_err(e_TYPE,"trueeta",x);
+  if (!is_scalar_t(typ(x))) pari_err_TYPE("trueeta",x);
   x = upper_half(x, &prec);
   x = redtausl2(x, &U);
   st = eta_correction(x, U, 1);

@@ -485,7 +485,7 @@ ellanalyticrank(GEN e, GEN eps, long prec)
   else
     if (typ(eps) != t_REAL) {
       eps = gtofp(eps, DEFAULTPREC);
-      if (typ(eps) != t_REAL) pari_err(e_TYPE, "ellanalyticrank", eps);
+      if (typ(eps) != t_REAL) pari_err_TYPE( "ellanalyticrank", eps);
     }
   init_el(&el, e, &rk, prec2nbits(prec)); /* set rk to rank parity (0 or 1) */
   if (DEBUGLEVEL) {

@@ -220,7 +220,7 @@ nffactormod(GEN nf, GEN x, GEN pr)
 
   nf = checknf(nf);
   vn = nf_get_varn(nf);
-  if (typ(x)!=t_POL) pari_err(e_TYPE,"nffactormod",x);
+  if (typ(x)!=t_POL) pari_err_TYPE("nffactormod",x);
   if (varncmp(vx,vn) >= 0)
     pari_err(e_MISC,"polynomial variable must have highest priority in nffactormod");
 
@@ -379,7 +379,7 @@ nfissplit(GEN nf, GEN x)
   long l;
   nf = checknf(nf);
   x = rnf_fix_pol(nf_get_pol(nf), x, 1);
-  if (typ(x) != t_POL) pari_err(e_TYPE, "nfissplit",x);
+  if (typ(x) != t_POL) pari_err_TYPE( "nfissplit",x);
   l = lg(nfsqff(nf, x, ROOTS_SPLIT, gen_1));
   avma = av; return l != 1;
 }
@@ -1701,8 +1701,8 @@ polfnf(GEN a, GEN T)
   long dA;
   int tmonic;
 
-  if (typ(a)!=t_POL) pari_err(e_TYPE,"polfnf",a);
-  if (typ(T)!=t_POL) pari_err(e_TYPE,"polfnf",T);
+  if (typ(a)!=t_POL) pari_err_TYPE("polfnf",a);
+  if (typ(T)!=t_POL) pari_err_TYPE("polfnf",T);
   T = Q_primpart(T); tmonic = is_pm1(leading_term(T));
   RgX_check_ZX(T,"polfnf");
   A = Q_primpart( QXQX_normalize(rnf_fix_pol(T,a,1), T) );

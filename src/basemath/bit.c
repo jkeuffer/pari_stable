@@ -91,7 +91,7 @@ binaire(GEN x)
       y = cgetg_copy(x, &lx);
       for (i=1; i<lx; i++) gel(y,i) = binaire(gel(x,i));
       break;
-    default: pari_err(e_TYPE,"binary",x);
+    default: pari_err_TYPE("binary",x);
       return NULL; /* not reached */
   }
   return y;
@@ -103,7 +103,7 @@ bittest(GEN x, long n)
 {
   long q, r;
 
-  if (typ(x) != t_INT) pari_err(e_TYPE,"bittest",x);
+  if (typ(x) != t_INT) pari_err_TYPE("bittest",x);
   if (!signe(x) || n < 0) return 0;
   if (signe(x) < 0)
   {
@@ -159,7 +159,7 @@ gbitneg(GEN x, long bits)
   const ulong uzero = 0;
   long lowbits, xl, len_out, i;
 
-  if (typ(x) != t_INT) pari_err(e_TYPE, "bitwise negation",x);
+  if (typ(x) != t_INT) pari_err_TYPE( "bitwise negation",x);
   if (bits < -1) pari_err(e_MISC, "negative exponent in bitwise negation");
   if (bits == -1) return inegate(x);
   if (bits == 0) return gen_0;
@@ -334,7 +334,7 @@ gbitor(GEN x, GEN y)
   pari_sp ltop = avma;
   GEN z;
 
-  if (typ(x) != t_INT || typ(y) != t_INT) pari_err(e_TYPE2, "bitwise or",x,y);
+  if (typ(x) != t_INT || typ(y) != t_INT) pari_err_TYPE2( "bitwise or",x,y);
   switch (signs(x, y))
   {
     case 3: /*1,1*/
@@ -359,7 +359,7 @@ gbitand(GEN x, GEN y)
   pari_sp ltop = avma;
   GEN z;
 
-  if (typ(x) != t_INT || typ(y) != t_INT) pari_err(e_TYPE2, "bitwise and",x,y);
+  if (typ(x) != t_INT || typ(y) != t_INT) pari_err_TYPE2( "bitwise and",x,y);
   switch (signs(x, y))
   {
     case 3: /*1,1*/
@@ -384,7 +384,7 @@ gbitxor(GEN x, GEN y)
   pari_sp ltop = avma;
   GEN z;
 
-  if (typ(x) != t_INT || typ(y) != t_INT) pari_err(e_TYPE2, "bitwise xor",x,y);
+  if (typ(x) != t_INT || typ(y) != t_INT) pari_err_TYPE2( "bitwise xor",x,y);
   switch (signs(x, y))
   {
     case 3: /*1,1*/
@@ -411,7 +411,7 @@ gbitnegimply(GEN x, GEN y)
   GEN z;
 
   if (typ(x) != t_INT || typ(y) != t_INT)
-    pari_err(e_TYPE2, "bitwise negated imply",x,y);
+    pari_err_TYPE2( "bitwise negated imply",x,y);
   switch (signs(x, y))
   {
     case 3: /*1,1*/

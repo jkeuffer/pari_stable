@@ -526,7 +526,7 @@ nfpow(GEN nf, GEN z, GEN n)
   long s, N;
   GEN x, cx, T;
 
-  if (typ(n)!=t_INT) pari_err(e_TYPE,"nfpow",n);
+  if (typ(n)!=t_INT) pari_err_TYPE("nfpow",n);
   nf = checknf(nf); T = nf_get_pol(nf); N = degpol(T);
   s = signe(n); if (!s) return scalarcol_shallow(gen_1,N);
   x = nf_to_scalar_or_basis(nf, z);
@@ -587,7 +587,7 @@ pow_ei_mod_p(GEN nf, long I, GEN n, GEN p)
   long s,N;
   GEN y;
 
-  if (typ(n) != t_INT) pari_err(e_TYPE,"nfpow",n);
+  if (typ(n) != t_INT) pari_err_TYPE("nfpow",n);
   nf = checknf(nf); N = nf_get_degree(nf);
   s = signe(n);
   if (s < 0) pari_err(e_MISC,"negative power in pow_ei_mod_p");
@@ -676,7 +676,7 @@ basistoalg(GEN nf, GEN x)
       return gcopy(x);
     case t_POL:
       T = nf_get_pol(nf);
-      if (varn(T) != varn(x)) pari_err(e_VAR,"basistoalg",x,T);
+      if (varn(T) != varn(x)) pari_err_VAR("basistoalg",x,T);
       z = cgetg(3,t_POLMOD);
       gel(z,1) = gcopy(T);
       gel(z,2) = RgX_rem(x, T); return z;
@@ -687,7 +687,7 @@ basistoalg(GEN nf, GEN x)
       gel(z,1) = gcopy(T);
       gel(z,2) = gcopy(x); return z;
     default:
-      pari_err(e_TYPE,"basistoalg",x);
+      pari_err_TYPE("basistoalg",x);
       return NULL; /* not reached */
   }
 }
@@ -708,7 +708,7 @@ nf_to_scalar_or_basis(GEN nf, GEN x)
     {
       GEN T = nf_get_pol(nf);
       long l = lg(x);
-      if (varn(x) != varn(T)) pari_err(e_VAR,"nf_to_scalar_or_basis", x,T);
+      if (varn(x) != varn(T)) pari_err_VAR("nf_to_scalar_or_basis", x,T);
       if (l >= lg(T)) { x = RgX_rem(x, T); l = lg(x); }
       if (l == 2) return gen_0;
       if (l == 3) return gel(x,2);
@@ -718,7 +718,7 @@ nf_to_scalar_or_basis(GEN nf, GEN x)
       if (lg(x) != lg(nf_get_zk(nf))) break;
       return QV_isscalar(x)? gel(x,1): x;
   }
-  pari_err(e_TYPE,"nf_to_scalar_or_basis",x);
+  pari_err_TYPE("nf_to_scalar_or_basis",x);
   return NULL; /* not reached */
 }
 /* Let x be a polynomial with coefficients in Q or nf. Return the same
@@ -749,7 +749,7 @@ nf_to_scalar_or_alg(GEN nf, GEN x)
     {
       GEN T = nf_get_pol(nf);
       long l = lg(x);
-      if (varn(x) != varn(T)) pari_err(e_VAR,"nf_to_scalar_or_alg", x,T);
+      if (varn(x) != varn(T)) pari_err_VAR("nf_to_scalar_or_alg", x,T);
       if (l >= lg(T)) { x = RgX_rem(x, T); l = lg(x); }
       if (l == 2) return gen_0;
       if (l == 3) return gel(x,2);
@@ -759,7 +759,7 @@ nf_to_scalar_or_alg(GEN nf, GEN x)
       if (lg(x) != lg(nf_get_zk(nf))) break;
       return QV_isscalar(x)? gel(x,1): coltoliftalg(nf, x);
   }
-  pari_err(e_TYPE,"nf_to_scalar_or_alg",x);
+  pari_err_TYPE("nf_to_scalar_or_alg",x);
   return NULL; /* not reached */
 }
 
@@ -783,7 +783,7 @@ GEN
 poltobasis(GEN nf, GEN x)
 {
   GEN P = nf_get_pol(nf);
-  if (varn(x) != varn(P)) pari_err(e_VAR, "poltobasis", x,P);
+  if (varn(x) != varn(P)) pari_err_VAR( "poltobasis", x,P);
   if (degpol(x) >= degpol(P)) x = RgX_rem(x,P);
   return mulmat_pol(nf_get_invzk(nf), x);
 }
@@ -820,7 +820,7 @@ algtobasis(GEN nf, GEN x)
     case t_INT:
     case t_FRAC: return scalarcol(x, nf_get_degree(nf));
   }
-  pari_err(e_TYPE,"algtobasis",x);
+  pari_err_TYPE("algtobasis",x);
   return NULL; /* not reached */
 }
 
@@ -869,7 +869,7 @@ matbasistoalg(GEN nf,GEN x)
       for (i=1; i<lx; i++) gel(z,i) = basistoalg(nf, gel(x,i));
       return z;
     case t_MAT: break;
-    default: pari_err(e_TYPE, "matbasistoalg",x);
+    default: pari_err_TYPE( "matbasistoalg",x);
   }
   li = lg(x[1]);
   for (j=1; j<lx; j++)
@@ -894,7 +894,7 @@ matalgtobasis(GEN nf,GEN x)
       for (i=1; i<lx; i++) gel(z,i) = algtobasis(nf, gel(x,i));
       return z;
     case t_MAT: break;
-    default: pari_err(e_TYPE, "matalgtobasis",x);
+    default: pari_err_TYPE( "matalgtobasis",x);
   }
   li = lg(x[1]);
   for (j=1; j<lx; j++)
@@ -1019,7 +1019,7 @@ vec01_to_indices(GEN v)
   {
    case t_VECSMALL: return v;
    case t_VEC: break;
-   default: pari_err(e_TYPE,"vec01_to_indices",v);
+   default: pari_err_TYPE("vec01_to_indices",v);
   }
   l = lg(v);
   p = new_chunk(l) + l;
@@ -1826,7 +1826,7 @@ check_nfelt(GEN x, GEN *den)
 {
   long l = lg(x), i;
   GEN t, d = NULL;
-  if (typ(x) != t_COL) pari_err(e_TYPE, "check_nfelt", x);
+  if (typ(x) != t_COL) pari_err_TYPE( "check_nfelt", x);
   for (i=1; i<l; i++)
   {
     t = gel(x,i);
@@ -1836,7 +1836,7 @@ check_nfelt(GEN x, GEN *den)
       case t_FRAC:
         if (!d) d = gel(t,2); else d = lcmii(d, gel(t,2));
         break;
-      default: pari_err(e_TYPE, "check_nfelt", x);
+      default: pari_err_TYPE( "check_nfelt", x);
     }
   }
   *den = d;
@@ -2172,13 +2172,13 @@ ideallistarch(GEN bnf, GEN L, GEN arch)
   ideal_data ID;
   GEN (*join_z)(ideal_data*, GEN);
 
-  if (typ(L) != t_VEC) pari_err(e_TYPE, "ideallistarch",L);
+  if (typ(L) != t_VEC) pari_err_TYPE( "ideallistarch",L);
   if (l == 1) return cgetg(1,t_VEC);
   z = gel(L,1);
-  if (typ(z) != t_VEC) pari_err(e_TYPE, "ideallistarch",z);
+  if (typ(z) != t_VEC) pari_err_TYPE( "ideallistarch",z);
   z = gel(z,1); /* either a bid or [bid,U] */
   if (lg(z) == 3) { /* the latter: do units */
-    if (typ(z) != t_VEC) pari_err(e_TYPE,"ideallistarch",z);
+    if (typ(z) != t_VEC) pari_err_TYPE("ideallistarch",z);
     ID.sgnU = nfsign_units(bnf, NULL, 1);
     join_z = &join_archunit;
   } else

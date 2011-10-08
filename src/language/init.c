@@ -1208,6 +1208,17 @@ pari_err(int numerr, ...)
   err_recover(numerr);
 }
 
+void
+pari_err_IRREDPOL(const char *f, GEN x) { pari_err(e_IRREDPOL, f,x); }
+void
+pari_err_OP(const char *f, GEN x, GEN y) { pari_err(e_OP, f,x,y); }
+void
+pari_err_TYPE(const char *f, GEN x) { pari_err(e_TYPE, f,x); }
+void
+pari_err_TYPE2(const char *f, GEN x, GEN y) { pari_err(e_TYPE2, f,x,y); }
+void
+pari_err_VAR(const char *f, GEN x, GEN y) { pari_err(e_VAR, f,x,y); }
+
 const char *
 numerr_name(long numerr)
 {
@@ -1283,7 +1294,7 @@ name_numerr(const char *s)
 GEN
 errname(GEN err)
 {
-  if (typ(err)!=t_ERROR) pari_err(e_TYPE,"errname",err);
+  if (typ(err)!=t_ERROR) pari_err_TYPE("errname",err);
   return strtoGENstr(numerr_name(err_get_num(err)));
 }
 

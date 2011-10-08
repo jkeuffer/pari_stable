@@ -147,7 +147,7 @@ Rg_to_Fp(GEN x, GEN p)
         pari_err(e_MISC,"inconsistent moduli in Rg_to_Fp: %Ps, %Ps", q, p);
       return remii(a, p);
     }
-    default: pari_err(e_TYPE, "Rg_to_Fp",x);
+    default: pari_err_TYPE( "Rg_to_Fp",x);
       return NULL; /* not reached */
   }
 }
@@ -170,7 +170,7 @@ Rg_to_Fl(GEN x, ulong p)
         pari_err(e_MISC,"inconsistent moduli in Rg_to_Fp: %Ps, %lu", q, p);
       return umodiu(a, p);
     }
-    default: pari_err(e_TYPE, "Rg_to_Fl",x);
+    default: pari_err_TYPE( "Rg_to_Fl",x);
       return 0; /* not reached */
   }
 }
@@ -202,7 +202,7 @@ Rg_to_FpXQ(GEN x, GEN T, GEN p)
       b = Rg_to_FpXQ(gel(x,2), T,p);
       return FpXQ_div(a,b, T,p);
   }
-  pari_err(e_TYPE,"Rg_to_FpXQ",x);
+  pari_err_TYPE("Rg_to_FpXQ",x);
   return NULL; /* not reached */
 }
 GEN
@@ -3064,7 +3064,7 @@ init_Fq_i(GEN p, long n, long v)
 {
   GEN P;
   if (n <= 0) pari_err(e_MISC,"non positive degree in ffinit");
-  if (typ(p) != t_INT) pari_err(e_TYPE, "ffinit",p);
+  if (typ(p) != t_INT) pari_err_TYPE( "ffinit",p);
   if (signe(p) <= 0) pari_err(e_MISC,"%Ps is not a prime", p);
   if (v < 0) v = 0;
   if (n == 1) return pol_x(v);

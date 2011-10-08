@@ -35,7 +35,7 @@ INLINE int is_ell(GEN x) {
 }
 
 static void
-member_err(const char *s, GEN y) { pari_err(e_TYPE,s,y); }
+member_err(const char *s, GEN y) { pari_err_TYPE(s,y); }
 
 GEN
 member_e(GEN x)

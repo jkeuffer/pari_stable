@@ -156,7 +156,7 @@ numbpart(GEN n)
   long prec, bitprec;
   ulong q;
 
-  if (typ(n) != t_INT) pari_err(e_TYPE, "partition function",n);
+  if (typ(n) != t_INT) pari_err_TYPE( "partition function",n);
   if (signe(n) < 0) return gen_0;
   if (cmpiu(n, 2) < 0) return gen_1;
   if (cmpii(n, uu32toi(0x38d7e, 0xa4c68000)) >= 0)

@@ -588,7 +588,7 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
       {
         GEN gen = gel(N,3);
         Z = N;
-        if (typ(gen)!=t_VEC) pari_err(e_TYPE,"galoissubcyclo",gen);
+        if (typ(gen)!=t_VEC) pari_err_TYPE("galoissubcyclo",gen);
         if (lg(gen) == 1) n = 1;
         else
         {
@@ -604,7 +604,7 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
         break;
       }
     default: /*fall through*/
-      pari_err(e_TYPE,"galoissubcyclo",N);
+      pari_err_TYPE("galoissubcyclo",N);
       return NULL;/*Not reached*/
   }
   if (n==1) { avma = ltop; return deg1pol_shallow(gen_1,gen_m1,v); }
@@ -635,7 +635,7 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
       }
       break;
     default:
-      pari_err(e_TYPE,"galoissubcyclo",sg);
+      pari_err_TYPE("galoissubcyclo",sg);
       return NULL;/*Not reached*/
   }
   if (!complex) V = vecsmall_append(V,n-1); /*add complex conjugation*/

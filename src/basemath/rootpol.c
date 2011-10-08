@@ -901,8 +901,8 @@ FFT(GEN x, GEN Omega)
 {
   long i, l = lg(Omega), n = lg(x);
   GEN y, z;
-  if (!is_vec_t(typ(x))) pari_err(e_TYPE,"FFT",x);
-  if (typ(Omega) != t_VEC) pari_err(e_TYPE,"FFT",Omega);
+  if (!is_vec_t(typ(x))) pari_err_TYPE("FFT",x);
+  if (typ(Omega) != t_VEC) pari_err_TYPE("FFT",Omega);
   if (n > l) pari_err(e_DIM,"FFT");
 
   if (n < l) {
@@ -1754,7 +1754,7 @@ quickabs(GEN x)
       a = cxcompotor(a, prec);
       b = cxcompotor(b, prec); return sqrtr(addrr(sqrr(a), sqrr(b)));
     }
-    default: pari_err(e_TYPE,"quickabs",x);
+    default: pari_err_TYPE("quickabs",x);
       return NULL;/*not reached*/
   }
 
@@ -2033,7 +2033,7 @@ roots_aux(GEN p, long l, long clean)
   if (typ(p) != t_POL)
   {
     if (gequal0(p)) pari_err(e_ZEROPOL,"roots");
-    if (!isvalidcoeff(p)) pari_err(e_TYPE,"roots",p);
+    if (!isvalidcoeff(p)) pari_err_TYPE("roots",p);
     return cgetg(1,t_COL); /* constant polynomial */
   }
   if (!signe(p)) pari_err(e_ZEROPOL,"roots");

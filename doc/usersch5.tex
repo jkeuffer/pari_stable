@@ -7936,7 +7936,11 @@ arguments to \tet{pari_err}. The general syntax is
   const char *s
   const char *fmt, ...
 @eprog\noindent where \kbd{fmt} is a PARI
-format, producing a string $s$ from the remaining arguments.
+format, producing a string $s$ from the remaining arguments. Since
+providing the correct arguments to \tet{pari_err} is quite error-prone, we
+also provide specialized routines \kbd{pari\_err\_\var{ERRORCLASS}(\dots)}
+instead of \kbd{pari\_err(e\_\var{ERRORCLASS}, \dots)} so that the C compiler
+can check their arguments.
 
 \noindent We now inspect the list of valid keywords (error classes) for
 \kbd{numerr}, and the corresponding required arguments.
@@ -7990,6 +7994,7 @@ system}.
 (As in \kbd{factor("blah")}.)
 \bprog
   pari_err(e_TYPE, const char *s, GEN x)
+  pari_err_TYPE( const char *s, GEN x)
 @eprog\noindent prints the error message: \kbd{incorrect type in $s$
 (\typ{$x$})}, where \typ{$x$} is the type of $x$.
 
@@ -8006,6 +8011,7 @@ inconsistent variables. E.g., considering the algebraic number
 
 \bprog
   pari_err(e_VAR, const char *s, GEN x, GEN y)
+  pari_err_VAR( const char *s, GEN x, GEN y)
 @eprog\noindent prints the error message: \kbd{inconsistent dimensions in $s$}.
 
 \subsec{e\_USER} A user error, as triggered by \tet{error}($g_1,\dots,g_n)$.
@@ -8050,6 +8056,7 @@ which does not make sense. (As in \kbd{galoisinit(Pol(1))}.)
 and did not receive one. (As in \kbd{nfinit(x\pow2-1)}.)
 \bprog
   pari_err(e_IRREDPOL, const char *s, GEN x)
+  pari_err_IRREDPOL(const char *s, GEN x)
 @eprog\noindent prints the error message: \kbd{not an irreducible polynomial
 in $s$ : $x$}.
 
@@ -8064,6 +8071,7 @@ typecast to a sensible common domain, because their types do not match up.
 (As in \kbd{Mod(1,2) + Pi}.)
 \bprog
   pari_err(e_TYPE2, const char *op, GEN x, GEN y)
+  pari_err_TYPE2( const char *op, GEN x, GEN y)
 @eprog\noindent prints the error message: \kbd{forbidden} $s$
 \typ{$x$} \var{op} \typ{$y$}, where \typ{$z$} denotes the type of $z$.
 Here, $s$ denotes the spelled out name of the operator
@@ -8080,7 +8088,8 @@ two \typ{PADIC}s, provided the underlying prime is the same; so the addition
 is not forbidden a priori for type reasons, it only becomes so when
 inspecting the objects and trying to perform the operation.
 \bprog
-  pari_err(e_TYPE2, const char *op, GEN x, GEN y)
+  pari_err(e_OP, const char *op, GEN x, GEN y)
+  pari_err_OP(const char *op, GEN x, GEN y)
 @eprog\noindent As \kbd{e\_TYPE2}, replacing \kbd{forbidden} by
 \kbd{inconsistent}.
 

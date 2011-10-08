@@ -361,7 +361,7 @@ get_gell(GEN bnr, GEN subgp, long all)
   if (all && all != -1) gell = stoi(all);
   else if (subgp)       gell = det(subgp);
   else                  gell = det(diagonal_shallow(bnr_get_cyc(bnr)));
-  if (typ(gell) != t_INT) pari_err(e_TYPE,"rnfkummer",gell);
+  if (typ(gell) != t_INT) pari_err_TYPE("rnfkummer",gell);
   return gell;
 }
 

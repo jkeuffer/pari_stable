@@ -26,7 +26,7 @@ int new_galois_format = 0;
 void
 checkrnf(GEN rnf)
 {
-  if (typ(rnf)!=t_VEC || lg(rnf)!=13) pari_err(e_TYPE,"checkrnf",rnf);
+  if (typ(rnf)!=t_VEC || lg(rnf)!=13) pari_err_TYPE("checkrnf",rnf);
 }
 
 GEN
@@ -62,7 +62,7 @@ checkbnf(GEN x)
   if (!bnf)
   {
     if (checknf_i(x)) pari_err(e_MISC,"please apply bnfinit first");
-    pari_err(e_TYPE,"checkbnf",x);
+    pari_err_TYPE("checkbnf",x);
   }
   return bnf;
 }
@@ -74,7 +74,7 @@ checknf(GEN x)
   if (!nf)
   {
     if (typ(x)==t_POL) pari_err(e_MISC,"please apply nfinit first");
-    pari_err(e_TYPE,"checknf",x);
+    pari_err_TYPE("checknf",x);
   }
   return nf;
 }
@@ -82,7 +82,7 @@ checknf(GEN x)
 void
 checkbnr(GEN bnr)
 {
-  if (typ(bnr)!=t_VEC || lg(bnr)!=7) pari_err(e_TYPE,"checkbnr",bnr);
+  if (typ(bnr)!=t_VEC || lg(bnr)!=7) pari_err_TYPE("checkbnr",bnr);
   (void)checkbnf(bnr_get_bnf(bnr));
 }
 
@@ -97,7 +97,7 @@ checkbnrgen(GEN bnr)
 void
 checksqmat(GEN x, long N)
 {
-  if (typ(x)!=t_MAT) pari_err(e_TYPE,"checksqmat",x);
+  if (typ(x)!=t_MAT) pari_err_TYPE("checksqmat",x);
   if (lg(x) == 1 || lg(x[1]) != N+1) pari_err(e_DIM,"checksqmat");
 }
 
@@ -110,14 +110,14 @@ checkbid_i(GEN bid)
 void
 checkbid(GEN bid)
 {
-  if (!checkbid_i(bid)) pari_err(e_TYPE,"checkbid",bid);
+  if (!checkbid_i(bid)) pari_err_TYPE("checkbid",bid);
 }
 
 void
 checkprid(GEN id)
 {
   if (typ(id) != t_VEC || lg(id) != 6 || typ(id[2]) != t_COL)
-    pari_err(e_TYPE,"checkprid",id);
+    pari_err_TYPE("checkprid",id);
 }
 GEN
 get_prid(GEN x)
@@ -143,9 +143,9 @@ checknfelt_mod(GEN nf, GEN x, const char *s)
 void
 check_ZKmodule(GEN x, const char *s)
 {
-  if (typ(x) != t_VEC || lg(x) < 3) pari_err(e_TYPE,s,x);
-  if (typ(x[1]) != t_MAT) pari_err(e_TYPE,s,gel(x,1));
-  if (typ(x[2]) != t_VEC) pari_err(e_TYPE,s,gel(x,2));
+  if (typ(x) != t_VEC || lg(x) < 3) pari_err_TYPE(s,x);
+  if (typ(x[1]) != t_MAT) pari_err_TYPE(s,gel(x,1));
+  if (typ(x[2]) != t_VEC) pari_err_TYPE(s,gel(x,2));
   if (lg(x[2]) != lg(x[1])) pari_err(e_DIM, s);
 }
 
@@ -267,7 +267,7 @@ tschirnhaus(GEN x)
   long a, v = varn(x);
   GEN u, y = cgetg(5,t_POL);
 
-  if (typ(x)!=t_POL) pari_err(e_TYPE,"tschirnhaus",x);
+  if (typ(x)!=t_POL) pari_err_TYPE("tschirnhaus",x);
   if (lg(x) < 4) pari_err(e_CONSTPOL,"tschirnhaus");
   if (v) { u = leafcopy(x); setvarn(u,0); x=u; }
   y[1] = evalsigne(1)|evalvarn(0);
@@ -481,12 +481,12 @@ polgalois(GEN x, long prec)
   const int ind6[60]={3,5,4,6, 2,6,4,5, 2,3,5,6, 2,4,3,6, 2,5,3,4,
                       1,4,5,6, 1,5,3,6, 1,6,3,4, 1,3,4,5, 1,6,2,5,
                       1,2,4,6, 1,5,2,4, 1,3,2,6, 1,2,3,5, 1,4,2,3};
-  if (typ(x)!=t_POL) pari_err(e_TYPE,"galois",x);
+  if (typ(x)!=t_POL) pari_err_TYPE("galois",x);
   n=degpol(x);
   if (n>11) pari_err(e_IMPL,"galois of degree higher than 11");
   x = Q_primpart(x);
   RgX_check_ZX(x, "galois");
-  if (!ZX_is_irred(x)) pari_err(e_IRREDPOL,"galois",x);
+  if (!ZX_is_irred(x)) pari_err_IRREDPOL("galois",x);
 
   if (n<4)
   {
@@ -812,14 +812,14 @@ elt_galoisapply(GEN nf, GEN aut, GEN x)
       switch(lg(x)) {
         case 1: return cgetg(1, t_MAT);
         case 3: break;
-        default: pari_err(e_TYPE, "galoisapply",x);
+        default: pari_err_TYPE( "galoisapply",x);
       }
       g = gel(x,1); G = cgetg_copy(g, &lx);
       for (i = 1; i < lx; i++) gel(G,i) = galoisapply(nf, aut, gel(g,i));
       return mkmat2(g, ZC_copy(gel(x,2)));
     }
   }
-  pari_err(e_TYPE,"galoisapply",x);
+  pari_err_TYPE("galoisapply",x);
   return NULL; /* not reached */
 }
 
@@ -866,7 +866,7 @@ galoisapply(GEN nf, GEN aut, GEN x)
       for (j=1; j<lx; j++) gel(y,j) = ZC_galoisapply(nf, aut, gel(x,j));
       return gerepileupto(av, idealhnf_shallow(nf,y));
   }
-  pari_err(e_TYPE,"galoisapply",x);
+  pari_err_TYPE("galoisapply",x);
   return NULL; /* not reached */
 }
 
@@ -1086,7 +1086,7 @@ get_bnfpol(GEN x, GEN *bnf, GEN *nf)
   *bnf = checkbnf_i(x);
   *nf  = checknf_i(x);
   if (*nf) x = nf_get_pol(*nf);
-  if (typ(x) != t_POL) pari_err(e_TYPE,"get_bnfpol",x);
+  if (typ(x) != t_POL) pari_err_TYPE("get_bnfpol",x);
   return x;
 }
 
@@ -1105,8 +1105,8 @@ tests_OK(GEN a, GEN nfa, GEN b, GEN nfb, long fliso)
   GEN da, db, fa, P, E, U;
   long i, nP, m = degpol(a), n = degpol(b), q = m / n; /* relative degree */
 
-  if (m <= 0) pari_err(e_IRREDPOL,"nfisincl",a);
-  if (n <= 0) pari_err(e_IRREDPOL,"nfisincl",b);
+  if (m <= 0) pari_err_IRREDPOL("nfisincl",a);
+  if (n <= 0) pari_err_IRREDPOL("nfisincl",b);
   if (fliso) { if (n != m) return 0; } else { if (n % m) return 0; }
   if (m == 1) return 1;
 
@@ -1730,7 +1730,7 @@ get_nfindex(GEN bas)
     {
       case t_INT: continue;
       case t_FRAC: lc = gel(lc,2); break;
-      default: pari_err(e_TYPE,"get_nfindex",lc);
+      default: pari_err_TYPE("get_nfindex",lc);
     }
     D = mulii(D, lc);
   }
@@ -1774,7 +1774,7 @@ nfbasic_init(GEN x, long flag, GEN fa, nfbasic_t *T)
     nfmaxord_t S;
     x = Q_primpart(x);
     RgX_check_ZX(x, "nfinit");
-    if (!ZX_is_irred(x)) pari_err(e_IRREDPOL,"nfinit",x);
+    if (!ZX_is_irred(x)) pari_err_IRREDPOL("nfinit",x);
     if (flag & nf_RED || !gequal1(gel(x,lg(x)-1)))
       x = ZX_Q_normalize(x, &(T->lead));
     nfmaxord(&S, x, flag, fa);
@@ -2104,7 +2104,7 @@ ordred(GEN x)
   pari_sp av = avma;
   GEN y;
 
-  if (typ(x) != t_POL) pari_err(e_TYPE,"ordred",x);
+  if (typ(x) != t_POL) pari_err_TYPE("ordred",x);
   if (!gequal1(leading_term(x))) pari_err(e_IMPL,"ordred");
   if (!signe(x)) return gcopy(x);
   y = mkvec2(x, matid(degpol(x)));

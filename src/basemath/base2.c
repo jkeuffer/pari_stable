@@ -30,7 +30,7 @@ nfmaxord_check_args(nfmaxord_t *S, GEN T, long flag, GEN fa)
   GEN dT, E, P;
   long l, v;
 
-  if (typ(T)!=t_POL) pari_err(e_TYPE,"nfmaxord",T);
+  if (typ(T)!=t_POL) pari_err_TYPE("nfmaxord",T);
   if (degpol(T) <= 0) pari_err(e_CONSTPOL,"nfmaxord");
 
   if (fa) {
@@ -41,7 +41,7 @@ nfmaxord_check_args(nfmaxord_t *S, GEN T, long flag, GEN fa)
                   dT = powis(fa, v);
                   fa = to_famat_shallow(fa, stoi(v));
                   break;
-      default: pari_err(e_TYPE,"nfmaxord",fa);
+      default: pari_err_TYPE("nfmaxord",fa);
                return; /*not reached*/
     }
     if (!signe(dT)) pari_err(e_MISC,"reducible polynomial in nfmaxord");
@@ -637,7 +637,7 @@ _nfbasis(GEN x0, long flag, GEN fa, GEN *pbas, GEN *pdK)
   nfmaxord_t S;
   long fl = 0;
 
-  if (typ(x0)!=t_POL) pari_err(e_TYPE,"nfbasis",x0);
+  if (typ(x0)!=t_POL) pari_err_TYPE("nfbasis",x0);
   if (degpol(x0) <= 0) pari_err(e_CONSTPOL,"nfbasis");
   RgX_check_ZX(x0, "nfbasis");
 
@@ -2115,7 +2115,7 @@ GEN
 idealprimedec(GEN nf, GEN p)
 {
   pari_sp av = avma;
-  if (typ(p) != t_INT) pari_err(e_TYPE, "idealprimedec",p);
+  if (typ(p) != t_INT) pari_err_TYPE( "idealprimedec",p);
   return gerepileupto(av, gen_sort(primedec_aux(checknf(nf),p),
                                    (void*)&cmp_prime_over_p, &cmp_nodata));
 }
@@ -2443,7 +2443,7 @@ Rg_to_ff(GEN nf, GEN x, GEN modpr)
     case t_COL:
       x = Q_remove_denom(x, &den);
       if (lg(x) == lg(nf_get_zk(nf))) break;
-    default: pari_err(e_TYPE,"Rg_to_ff",x);
+    default: pari_err_TYPE("Rg_to_ff",x);
   }
   if (den)
   {
@@ -3004,17 +3004,17 @@ rnf_fix_pol(GEN T, GEN P, int lift)
       case t_INT: case t_FRAC: break;
       case t_POL:
         if (varn(c) != vT)
-          pari_err(e_VAR,"rnf function", c,T);
+          pari_err_VAR("rnf function", c,T);
         if (lg(c) >= lg(T)) c = RgX_rem(c,T);
         check_pol(&c);
         if (!lift && typ(c) == t_POL) c = mkpolmod(c, T);
         break;
       case t_POLMOD:
         if (!RgX_equal_var(gel(c,1), T))
-          pari_err(e_VAR,"rnf function", gel(c,1),T);
+          pari_err_VAR("rnf function", gel(c,1),T);
         if (lift) c = gel(c,2);
         break;
-      default: pari_err(e_TYPE, "rnf function",c);
+      default: pari_err_TYPE( "rnf function",c);
     }
     gel(Q,i) = c;
   }
@@ -3352,11 +3352,11 @@ polcompositum0(GEN A, GEN B, long flall)
   long v, k;
   GEN C, D, LPRS;
 
-  if (typ(A)!=t_POL) pari_err(e_TYPE,"polcompositum0",A);
-  if (typ(B)!=t_POL) pari_err(e_TYPE,"polcompositum0",B);
+  if (typ(A)!=t_POL) pari_err_TYPE("polcompositum0",A);
+  if (typ(B)!=t_POL) pari_err_TYPE("polcompositum0",B);
   if (degpol(A)<=0 || degpol(B)<=0) pari_err(e_CONSTPOL,"compositum");
   v = varn(A);
-  if (varn(B) != v) pari_err(e_VAR,"compositum", A,B);
+  if (varn(B) != v) pari_err_VAR("compositum", A,B);
   same = (A == B || RgX_equal(A,B));
   A = Q_primpart(A); RgX_check_ZX(A,"compositum");
   if (!ZX_is_squarefree(A)) pari_err(e_MISC,"compositum: %Ps inseparable", A);

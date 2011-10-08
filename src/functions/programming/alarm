@@ -7,7 +7,7 @@ Help: alarm({s = 0},{code}): if code is omitted, trigger an "e_ALARM"
  exception after s seconds, cancelling any previously set alarm; stop a pending
  alarm if s = 0 or is omitted. Otherwise, evaluate code, aborting after s
  seconds.
-Doc: if \var{code} is omitted, trigger an \var{e_ALARM} exception after $s$
+Doc: if \var{code} is omitted, trigger an \var{e\_ALARM} exception after $s$
  seconds, cancelling any previously set alarm; stop a pending alarm if $s =
  0$ or is omitted.
 

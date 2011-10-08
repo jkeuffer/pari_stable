@@ -184,7 +184,7 @@ gram_matrix(GEN x)
 {
   long i,j, lx = lg(x), tx = typ(x);
   GEN g;
-  if (!is_matvec_t(tx)) pari_err(e_TYPE,"gram",x);
+  if (!is_matvec_t(tx)) pari_err_TYPE("gram",x);
   g = cgetg(lx,t_MAT);
   for (i=1; i<lx; i++)
   {
@@ -487,11 +487,11 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
 
   pari_sp av = avma;
 
-  if (typ(P0) != t_POL) pari_err(e_TYPE, "zncoppersmith",P0);
-  if (typ(N) != t_INT) pari_err(e_TYPE, "zncoppersmith",N);
+  if (typ(P0) != t_POL) pari_err_TYPE( "zncoppersmith",P0);
+  if (typ(N) != t_INT) pari_err_TYPE( "zncoppersmith",N);
   if (typ(X) != t_INT) {
     X = gfloor(X);
-    if (typ(X) != t_INT) pari_err(e_TYPE, "zncoppersmith",X);
+    if (typ(X) != t_INT) pari_err_TYPE( "zncoppersmith",X);
   }
   if (signe(X) < 0) pari_err(e_MISC, "negative bound in zncoppersmith");
   if (!B) B = N;
@@ -644,7 +644,7 @@ lindep2(GEN x, long bit)
   pari_sp av = avma;
   GEN re, im, M;
 
-  if (! is_vec_t(tx)) pari_err(e_TYPE,"lindep2",x);
+  if (! is_vec_t(tx)) pari_err_TYPE("lindep2",x);
   if (lx<=2) return cgetg(1,t_COL);
   if (bit < 0) pari_err(e_MISC, "negative accuracy in lindep2");
   if (!bit)
@@ -694,7 +694,7 @@ lindep(GEN x)
   if (!prec) prec = DEFAULTPREC;
   EXP = 2*n - prec2nbits(prec);
 
-  if (! is_vec_t(typ(x))) pari_err(e_TYPE,"lindep",x);
+  if (! is_vec_t(typ(x))) pari_err_TYPE("lindep",x);
   if (n <= 1) return cgetg(1,t_COL);
   x = RgC_gtofp(x, prec);
   re = real_i(x);
@@ -1007,7 +1007,7 @@ init_pslq(pslq_M *M, GEN x, long *PREC)
   long tx = typ(x), lx = lg(x), n = lx-1, i, j, k, prec;
   GEN s1, s, sinv;
 
-  if (! is_vec_t(tx)) pari_err(e_TYPE,"pslq",x);
+  if (! is_vec_t(tx)) pari_err_TYPE("pslq",x);
   /* check trivial cases */
   for (k = 1; k <= n; k++)
     if (gequal0(gel(x,k))) return col_ei(n, k);
@@ -1543,7 +1543,7 @@ GEN
 lindep0(GEN x,long bit)
 {
   long i, tx = typ(x);
-  if (! is_vec_t(tx) && tx != t_MAT) pari_err(e_TYPE,"lindep",x);
+  if (! is_vec_t(tx) && tx != t_MAT) pari_err_TYPE("lindep",x);
   for (i = 1; i < lg(x); i++)
     if (typ(gel(x,i)) == t_PADIC) return plindep(x);
   switch (bit)
@@ -1563,7 +1563,7 @@ algdep0(GEN x, long n, long bit)
   pari_sp av;
   GEN y;
 
-  if (! is_scalar_t(tx)) pari_err(e_TYPE,"algdep0",x);
+  if (! is_scalar_t(tx)) pari_err_TYPE("algdep0",x);
   if (tx==t_POLMOD) { y = gcopy(gel(x,1)); setvarn(y,0); return y; }
   if (gequal0(x)) return pol_x(0);
   if (n <= 0)
@@ -1672,18 +1672,18 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
   const double eps = 1e-10;
   int stockall = 0;
 
-  if (typ(a) != t_MAT || !RgM_is_ZM(a)) pari_err(e_TYPE,"qfminim0",a);
+  if (typ(a) != t_MAT || !RgM_is_ZM(a)) pari_err_TYPE("qfminim0",a);
   if (!BORNE)
     sBORNE = 0;
   else
   {
     BORNE = gfloor(BORNE);
-    if (typ(BORNE) != t_INT) pari_err(e_TYPE, "minim0",BORNE);
+    if (typ(BORNE) != t_INT) pari_err_TYPE( "minim0",BORNE);
     sBORNE = itos(BORNE); avma = av;
     BORNE = NULL; /* no longer used */
   }
   if (!STOCKMAX) stockall = 1;
-  else if (typ(STOCKMAX) != t_INT) pari_err(e_TYPE, "minim0",STOCKMAX);
+  else if (typ(STOCKMAX) != t_INT) pari_err_TYPE( "minim0",STOCKMAX);
 
   maxrank = 0; L = V = invp = NULL; /* gcc -Wall */
   switch(flag)
@@ -1895,9 +1895,9 @@ qfminim0(GEN a, GEN borne, GEN stockmax, long flag, long prec)
     case 2:
     {
       long maxnum = -1;
-      if (typ(a) != t_MAT) pari_err(e_TYPE,"qfminim",a);
+      if (typ(a) != t_MAT) pari_err_TYPE("qfminim",a);
       if (stockmax) {
-        if (typ(stockmax) != t_INT) pari_err(e_TYPE,"qfminim",stockmax);
+        if (typ(stockmax) != t_INT) pari_err_TYPE("qfminim",stockmax);
         maxnum = itos(stockmax);
       }
       a = fincke_pohst(a,borne,maxnum,prec,NULL);

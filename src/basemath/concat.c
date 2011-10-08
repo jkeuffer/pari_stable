@@ -306,7 +306,7 @@ shallowconcat1(GEN x)
   else if (tx == t_LIST)
   { x = list_data(x); lx = x ? lg(x): 1; }
   else
-  { pari_err(e_TYPE,"concat",x); return NULL; /* not reached */ }
+  { pari_err_TYPE("concat",x); return NULL; /* not reached */ }
   if (lx==1) pari_err(e_MISC,"trying to concat elements of an empty vector");
   if (lx==2) return gel(x,1);
 

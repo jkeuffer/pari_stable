@@ -99,7 +99,7 @@ idealhnf_principal(GEN nf, GEN x)
       return scalarmat(absi(x), nf_get_degree(nf));
     case t_FRAC:
       return scalarmat(Q_abs(x), nf_get_degree(nf));
-    default: pari_err(e_TYPE,"idealhnf",x);
+    default: pari_err_TYPE("idealhnf",x);
   }
   x = Q_primitive_part(x, &cx);
   RgV_check_ZV(x, "idealhnf");
@@ -487,7 +487,7 @@ factor_norm(GEN x)
 {
   GEN r = gcoeff(x,1,1), f, p, e;
   long i, k, l;
-  if (typ(r)!=t_INT) pari_err(e_TYPE,"idealfactor",r);
+  if (typ(r)!=t_INT) pari_err_TYPE("idealfactor",r);
   f = Z_factor(r); p = gel(f,1); e = gel(f,2); l = lg(p);
   for (i=1; i<l; i++) e[i] = val_norm(x,gel(p,i), &k);
   settyp(e, t_VECSMALL); return f;
@@ -1392,7 +1392,7 @@ idealnorm(GEN nf, GEN x)
   x = (typ(x) == t_POL)? RgXQ_norm(x, T): gpowgs(x, degpol(T));
   tx = typ(x);
   if (tx == t_INT) return gerepileuptoint(av, absi(x));
-  if (tx != t_FRAC) pari_err(e_TYPE, "idealnorm",x);
+  if (tx != t_FRAC) pari_err_TYPE( "idealnorm",x);
   return gerepileupto(av, Q_abs(x));
 }
 
@@ -1461,7 +1461,7 @@ idealinv(GEN nf, GEN x)
         }
         if (typ(x) != t_POL) { x = ginv(x); break; }
         T = nf_get_pol(nf);
-        if (varn(x) != varn(T)) pari_err(e_VAR,"idealinv", x, T);
+        if (varn(x) != varn(T)) pari_err_VAR("idealinv", x, T);
         x = QXQ_inv(x, T);
       }
       x = idealhnf_principal(nf,x); break;
@@ -1600,7 +1600,7 @@ idealpow(GEN nf, GEN x, GEN n)
   long tx;
   GEN res, ax;
 
-  if (typ(n) != t_INT) pari_err(e_TYPE,"idealpow",n);
+  if (typ(n) != t_INT) pari_err_TYPE("idealpow",n);
   tx = idealtyp(&x,&ax);
   res = ax? cgetg(3,t_VEC): NULL;
   av = avma;
@@ -1639,7 +1639,7 @@ idealpowred(GEN nf, GEN x, GEN n)
   long s;
   GEN y;
 
-  if (typ(n) != t_INT) pari_err(e_TYPE,"idealpowred",n);
+  if (typ(n) != t_INT) pari_err_TYPE("idealpowred",n);
   s = signe(n); if (s == 0) return idealpow(nf,x,n);
   y = gen_pow(x, n, (void*)nf, &_sqr, &_mul);
 
@@ -1791,7 +1791,7 @@ chk_vdir(GEN nf, GEN vdir)
     pari_err(e_MISC, "incorrect vector length in idealred");
   t = typ(vdir);
   if (t == t_VECSMALL) return vdir;
-  if (t != t_VEC) pari_err(e_TYPE, "idealred",vdir);
+  if (t != t_VEC) pari_err_TYPE( "idealred",vdir);
   v = cgetg(l, t_VECSMALL);
   for (i=1; i<l; i++) v[i] = itos(gceil(gel(vdir,i)));
   return v;
@@ -2348,7 +2348,7 @@ nfreduce(GEN nf, GEN x, GEN I)
   pari_sp av = avma;
   GEN aI;
   x = nf_to_scalar_or_basis(checknf(nf), x);
-  if (idealtyp(&I,&aI) != id_MAT || lg(I)==1) pari_err(e_TYPE,"nfreduce",I);
+  if (idealtyp(&I,&aI) != id_MAT || lg(I)==1) pari_err_TYPE("nfreduce",I);
   if (typ(x) != t_COL) x = scalarcol( gmod(x, gcoeff(I,1,1)), lg(I)-1 );
   else x = reducemodinvertible(x, I);
   return gerepileupto(av, x);
@@ -2599,14 +2599,14 @@ nfsnf(GEN nf, GEN x)
   GEN z,u,v,w,d,dinv,A,I,J;
 
   nf = checknf(nf); N = nf_get_degree(nf);
-  if (typ(x)!=t_VEC || lg(x)!=4) pari_err(e_TYPE,"nfsnf",x);
+  if (typ(x)!=t_VEC || lg(x)!=4) pari_err_TYPE("nfsnf",x);
   A = gel(x,1);
   I = gel(x,2);
   J = gel(x,3);
-  if (typ(A)!=t_MAT) pari_err(e_TYPE,"nfsnf",A);
+  if (typ(A)!=t_MAT) pari_err_TYPE("nfsnf",A);
   n = lg(A)-1;
-  if (typ(I)!=t_VEC) pari_err(e_TYPE,"nfsnf",I);
-  if (typ(J)!=t_VEC) pari_err(e_TYPE,"nfsnf",J);
+  if (typ(I)!=t_VEC) pari_err_TYPE("nfsnf",I);
+  if (typ(J)!=t_VEC) pari_err_TYPE("nfsnf",J);
   if (lg(I)!=n+1 || lg(J)!=n+1) pari_err(e_DIM,"nfsnf");
   if (!n) pari_err(e_MISC,"not a matrix of maximal rank in nfsnf");
   m = lg(A[1])-1;
@@ -2730,7 +2730,7 @@ nfkermodpr(GEN nf, GEN x, GEN modpr)
   GEN T, p, pr = modpr;
 
   nf = checknf(nf); modpr = nf_to_Fq_init(nf, &pr,&T,&p);
-  if (typ(x)!=t_MAT) pari_err(e_TYPE,"nfkermodpr",x);
+  if (typ(x)!=t_MAT) pari_err_TYPE("nfkermodpr",x);
   x = nfM_to_FqM(x, nf, modpr);
   return gerepilecopy(av, FqM_to_nfM(FqM_ker(x,T,p), modpr));
 }
@@ -2744,7 +2744,7 @@ nfsolvemodpr(GEN nf, GEN a, GEN b, GEN pr)
 
   nf = checknf(nf);
   modpr = nf_to_Fq_init(nf, &pr,&T,&p);
-  if (typ(a)!=t_MAT) pari_err(e_TYPE,"nfsolvemodpr",a);
+  if (typ(a)!=t_MAT) pari_err_TYPE("nfsolvemodpr",a);
   a = nfM_to_FqM(a, nf, modpr);
   switch(tb)
   {
@@ -2756,7 +2756,7 @@ nfsolvemodpr(GEN nf, GEN a, GEN b, GEN pr)
       b = nfV_to_FqV(b, nf, modpr);
       a = FqV_to_nfV(FqM_gauss(a,b,T,p), modpr);
       break;
-    default: pari_err(e_TYPE,"nfsolvemodpr",b);
+    default: pari_err_TYPE("nfsolvemodpr",b);
   }
   return gerepilecopy(av, a);
 }
@@ -2897,7 +2897,7 @@ nfhnfmod(GEN nf, GEN x, GEN detmat)
 
   li = lg(A[1]);
   detmat = Q_remove_denom(detmat, NULL);
-  if (typ(detmat)!=t_MAT) pari_err(e_TYPE,"nfhnfmod",detmat);
+  if (typ(detmat)!=t_MAT) pari_err_TYPE("nfhnfmod",detmat);
   RgM_check_ZM(detmat, "nfhnfmod");
 
   av = avma; lim = stack_lim(av,2);

@@ -270,7 +270,7 @@ ZC_Z_add(GEN x, GEN y)
 {
   long k, lx = lg(x);
   GEN z = cgetg(lx, t_COL);
-  if (lx == 1) pari_err(e_TYPE2,"+",x,y);
+  if (lx == 1) pari_err_TYPE2("+",x,y);
   gel(z,1) = addii(y,gel(x,1));
   for (k = 2; k < lx; k++) gel(z,k) = icopy(gel(x,k));
   return z;
@@ -291,7 +291,7 @@ ZC_Z_sub(GEN x, GEN y)
 {
   long k, lx = lg(x);
   GEN z = cgetg(lx, t_COL);
-  if (lx == 1) pari_err(e_TYPE2,"+",x,y);
+  if (lx == 1) pari_err_TYPE2("+",x,y);
   gel(z,1) = subii(gel(x,1), y);
   for (k = 2; k < lx; k++) gel(z,k) = icopy(gel(x,k));
   return z;

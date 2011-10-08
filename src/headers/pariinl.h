@@ -1054,7 +1054,7 @@ cxcompotor(GEN z, long prec)
     case t_INT:  return itor(z, prec);
     case t_FRAC: return fractor(z, prec);
     case t_REAL: return rtor(z, prec);
-    default: pari_err(e_TYPE,"cxcompotor",z); return NULL; /* not reached */
+    default: pari_err_TYPE("cxcompotor",z); return NULL; /* not reached */
   }
 }
 INLINE GEN
@@ -1110,7 +1110,7 @@ gtofp(GEN z, long prec)
       return cxtofp(z, prec);
     }
     case t_QUAD: return quadtofp(z, prec);
-    default: pari_err(e_TYPE,"gtofp",z); return NULL; /* not reached */
+    default: pari_err_TYPE("gtofp",z); return NULL; /* not reached */
   }
 }
 
@@ -1168,7 +1168,7 @@ affgr(GEN x, GEN y)
     case t_REAL: affrr(x,y); break;
     case t_FRAC: rdiviiz(gel(x,1),gel(x,2), y); break;
     case t_QUAD: av = avma; affgr(quadtofp(x,realprec(y)), y); avma = av; break;
-    default: pari_err(e_TYPE2,"",x,y);
+    default: pari_err_TYPE2("",x,y);
   }
 }
 
