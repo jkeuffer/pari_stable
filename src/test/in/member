@@ -49,8 +49,9 @@ test(s)=
 {
   for (i=1, #members,
     my (m = members[i]);
-    trap("impl",,trap("talker",,trap("typeer",, print(".", m, ": ",  eval(Str(s,".", m))))))
-  );
+    iferr( print(".", m, ": ",  eval(Str(s,".", m))),
+           E, n = errname(E);
+              if (n != "e_IMPL" && n != "e_TYPE" && n != "e_MISC", error(E))))
 }
 
 print("NF"); test( NF = nfinit(y^2-1105) )

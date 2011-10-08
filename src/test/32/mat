@@ -1,7 +1,7 @@
   ***   at top-level: Mat([1])+matrix(0,1)
   ***                         ^------------
-  *** _+_: inconsistent addition t_MAT + t_MAT.
+  *** _+_: inconsistent addition t_MAT (1x1) + t_MAT (0x1).
   ***   at top-level: 1/matrix(2,2,i,j,Mod(
   ***                  ^--------------------
   *** _/_: division by a non-invertible object
-Total time spent: 0
+Total time spent: 36

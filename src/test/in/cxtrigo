@@ -13,17 +13,15 @@ test(f, F, N = 8) = {
   my (h = 1./ N);
   forstep (re = -N, N, h,
     forstep (im = -N, N, h,
-      trap(,
-        printf ("%s: %.1f + I*%.1f is a pole ?\n", f, re, im)
-      ,
+      iferr(
         my(mr, cr, dt);
         mr = f(re+im*I);
         cr = F(re+im*I); dt = mr - cr;
         if (abs(dt) > 1e-10,
           printf("%s(%.1f + I*%.1f):\t%.2g + I*%.2g\n",
                  f, re, im, real(dt), imag(dt));
-        )
-      )
+        ),
+        ERR, printf ("%s: %.1f + I*%.1f is a pole ?\n", f, re, im))
     )
   );
 }

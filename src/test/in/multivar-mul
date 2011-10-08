@@ -10,7 +10,7 @@ t(n)=x^max((n-1)\2,0)/if(n<1,1,if(n%2,y,z));
 {f(N,M,v,w)=
   t1=sum(n=1,#v,t(v[n]),x^N);
   t2=sum(n=1,#w,t(w[n]),x^M);
-  trap(, return(1), t1*t2); 0;
+  iferr(t1*t2; 0, E, 1);
 }
 
 {doit(N,M)=
