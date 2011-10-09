@@ -7998,11 +7998,11 @@ system}.
 @eprog\noindent prints the error message: \kbd{incorrect type in $s$
 (\typ{$x$})}, where \typ{$x$} is the type of $x$.
 
-\subsec{e\_DIM} arguments $x$ and $y$ submitted to function $s$ have
-inconsistent dimensions. E.g., multiplying matrices of inconsistent dimension,
-adding vectors of different lengths,\dots
+\subsec{e\_DIM} arguments submitted to function $s$ have inconsistent
+dimensions. E.g., when solving a linear system, or trying to compute the
+determinant of a non-square matrix.
 \bprog
-  pari_err(e_DIM, const char *s, GEN x, GEN y)
+  pari_err(e_DIM, const char *s)
 @eprog\noindent prints the error message: \kbd{inconsistent dimensions in $s$}.
 
 \subsec{e\_VAR} polynomials $x$ and $y$ submitted to function $s$ have
