@@ -2586,7 +2586,8 @@ rnfcharpoly(GEN nf, GEN Q, GEN x, long v)
     if      (vM == vQ) { if (!RgX_equal(M, Q)) ok = 0; }
     else if (vM == vT) { if (!RgX_equal(M, T)) ok = 0; }
     else ok = 0;
-    if (!ok) pari_err(e_DIM,"rnfcharpoly");
+    if (!ok)
+      pari_err(e_MISC,"not the same number field in rnfcharpoly");
     x = gel(x, 2); tx = typ(x);
   }
   if (tx != t_POL) {
@@ -2595,7 +2596,7 @@ rnfcharpoly(GEN nf, GEN Q, GEN x, long v)
   }
   vx = varn(x);
   if (vx == vT) return caract_const(av, mkpolmod(x,T), v, dQ);
-  if (vx != vQ) pari_err(e_DIM,"rnfcharpoly");
+  if (vx != vQ) pari_err_VAR("rnfcharpoly", x,Q);
   x = rnf_fix_pol(T,x,0);
   if (degpol(x) >= dQ) x = RgX_rem(x, Q);
   if (dQ <= 1) return caract_const(av, constant_term(x), v, 1);

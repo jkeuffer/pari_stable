@@ -1612,7 +1612,9 @@ scalar_getprec(GEN x, long *pprec, GEN *pp)
   {
     long e = valp(x); if (signe(x[4])) e += precp(x);
     if (e < *pprec) *pprec = e;
-    if (*pp && !equalii(*pp, gel(x,2))) pari_err(e_DIM,"apprpadic");
+    if (*pp && !equalii(*pp, gel(x,2)))
+      pari_err(e_MISC, "inconsistent primes in 'apprpadic': %Ps != %Ps",
+               *pp, gel(x,2));
     *pp = gel(x,2);
   }
 }
