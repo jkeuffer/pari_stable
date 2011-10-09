@@ -328,7 +328,7 @@ struct var_lex
 
 struct trace
 {
-  long *pc;
+  long pc;
   GEN closure;
 };
 
@@ -400,8 +400,8 @@ restore_trace(long nbtrace)
   s_trace.n-=nbtrace;
 }
 
-INLINE void
-trace_push(long *pc, GEN C)
+INLINE long
+trace_push(long pc, GEN C)
 {
   long tr;
   BLOCK_SIGINT_START
@@ -409,6 +409,7 @@ trace_push(long *pc, GEN C)
   trace[tr].pc = pc;
   trace[tr].closure = C;
   BLOCK_SIGINT_END
+  return tr;
 }
 
 void
@@ -418,7 +419,7 @@ push_lex(GEN a, GEN C)
   struct var_lex *v=var+vn;
   v->flag  = PUSH_VAL;
   v->value = a;
-  if (C) trace_push(NULL, C);
+  if (C) (void) trace_push(-1, C);
 }
 
 GEN
@@ -585,8 +586,8 @@ closure_func_err(void)
   long fun=s_trace.n-1, pc;
   const char *code;
   GEN C, oper;
-  if (fun < 0 || !trace[fun].pc) return NULL;
-  pc = *trace[fun].pc; C  = trace[fun].closure;
+  if (fun < 0 || trace[fun].pc < 0) return NULL;
+  pc = trace[fun].pc; C  = trace[fun].closure;
   code = GSTR(gel(C,2))-1; oper = gel(C,3);
   if (code[pc]==OCcallgen || code[pc]==OCcallgen2 ||
       code[pc]==OCcallint || code[pc]==OCcalllong || code[pc]==OCcallvoid)
@@ -634,7 +635,7 @@ closure_err(void)
     if ((i==lastfun || lg(trace[i+1].closure)>=7))
     {
       /* After a SIGINT, pc can be slightly off: ensure 0 <= pc < lg() */
-      long pc = trace[i].pc ? minss(*trace[i].pc, lg(mael(C,5,1))-1): 1;
+      long pc = trace[i].pc>=0 ? minss(trace[i].pc, lg(mael(C,5,1))-1): 1;
       long offset = pc? mael3(C,5,1,pc): 0;
       int member;
       const char *s, *sbase;
@@ -668,10 +669,7 @@ closure_context(long start)
   if (fun<0) return lastfun;
   while (fun>start+1 && lg(trace[fun].closure)==6) fun--;
   for (i=fun; i<=lastfun; i++)
-  {
-    long *pc=trace[i].pc;
-    push_frame(trace[i].closure, pc?*pc:-1);
-  }
+    push_frame(trace[i].closure, trace[i].pc);
   return lastfun;
 }
 
@@ -696,9 +694,9 @@ closure_eval(GEN C)
   long saved_sp=sp-C[1];
   long saved_rp=rp;
   long j, nbmvar=0, nblvar=0;
-  long pc = 0; /* pc need to be defined after a ^C */
+  long pc, t;
   if (isclone(C)) ++bl_refc(C);
-  trace_push(&pc, C);
+  t = trace_push(0, C);
   if (lg(C)==8)
   {
     GEN z=gel(C,7);
@@ -719,6 +717,7 @@ closure_eval(GEN C)
     long operand=oper[pc];
     if (sp<0) pari_err(e_BUG,"closure_eval, stack underflow");
     st_alloc(16);
+    trace[t].pc = pc;
     CHECK_CTRLC
     switch(opcode)
     {
