@@ -3317,11 +3317,13 @@ lift_intern0(GEN x, long v)
 
   switch(typ(x))
   {
-    case t_INT: case t_REAL: case t_FRAC:
+    case t_INT: case t_REAL: case t_FRAC: case t_FFELT:
       return x;
 
     case t_INTMOD:
       return gel(x,2);
+    case t_PADIC:
+      return gtrunc(x);
 
     case t_POLMOD:
       if (v < 0 || v == varn(gel(x,1))) return gel(x,2);
