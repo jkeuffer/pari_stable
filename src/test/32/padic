@@ -1,0 +1,8 @@
+[0]~
+  ***   at top-level: padicappr(x^2+1+O(3)
+  ***                 ^--------------------
+  *** padicappr: different primes in Zp_to_Z: 5 != 3.
+  ***   at top-level: padicappr(x^2+1+O(3)
+  ***                 ^--------------------
+  *** padicappr: different primes in Zp_to_Z: 5 != 3.
+Total time spent: 4

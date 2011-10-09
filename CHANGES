@@ -41,6 +41,7 @@ BA 30- functions ending by the x[y]=z construct could corrupt the stack.
    31- nfbasis(pol, 0, factorization containing (-1)^1) -> wrong [#1244]
    32- qfminim(): better type checks for matrix entries
    33- qfminim(): incorrect GC in smallvectors()
+   34- padicappr(x^2+1+O(3), -1+O(5^10)) --> no error
 
   Changed
     1- mathnf: swapped flag 3 and 5.

@@ -1359,35 +1359,53 @@ factormod0(GEN f, GEN p, long flag)
 /*                  CONVERSIONS RELATED TO p-ADICS                 */
 /*                                                                 */
 /*******************************************************************/
+/* x t_PADIC, p a prime. Consistency check */
+static void
+check_padic_p(GEN x, GEN p)
+{
+  GEN q = gel(x,2);
+  if (!equalii(p, q))
+    pari_err(e_MISC, "different primes in Zp_to_Z: %Ps != %Ps", p, q);
+}
 static GEN
-Zp_to_Z(GEN x) {
+Zp_to_Z(GEN x, GEN p) {
   switch(typ(x))
   {
     case t_INT: break;
-    case t_PADIC: x = gtrunc(x); break;
-    default: pari_err_TYPE("QpX_to_ZX",x);
+    case t_PADIC:
+      check_padic_p(x, p);
+      x = gtrunc(x); break;
+    default: pari_err_TYPE("Zp_to_Z",x);
   }
   return x;
 }
 static GEN
-ZpX_to_ZX(GEN f) {
+ZpX_to_ZX(GEN f, GEN p) {
   long i, l = lg(f);
   GEN F = cgetg(l, t_POL); F[1] = f[1];
-  for (i=2; i<l; i++) gel(f,i) = Zp_to_Z(gel(f,i));
+  for (i=2; i<l; i++) gel(f,i) = Zp_to_Z(gel(f,i), p);
   return f;
 }
-/* make f suitable for [root|factor]padic */
+
 static GEN
-QpX_to_ZX(GEN f)
+get_padic_content(GEN f, GEN p)
 {
   GEN c = content(f);
   if (gequal0(c)) /*  O(p^n) can occur */
   {
     if (typ(c) != t_PADIC) pari_err_TYPE("QpX_to_ZX",f);
-    c = powis(gel(c,2), valp(c));
+    check_padic_p(c, p);
+    c = powis(p, valp(c));
   }
-  f = RgX_Rg_div(f,c);
-  return ZpX_to_ZX(f);
+  return c;
+}
+/* make f suitable for [root|factor]padic */
+static GEN
+QpX_to_ZX(GEN f, GEN p)
+{
+  GEN c = get_padic_content(f, p);
+  f = RgX_Rg_div(f, c);
+  return ZpX_to_ZX(f, p);
 }
 
 /* x in Z return x + O(pr), pr = p^r. Return gen_0 instead of zeropadic */
@@ -1450,23 +1468,18 @@ ZXV_to_ZpXQV(GEN z, GEN T, GEN p, long prec)
 }
 
 static GEN
-QpXQ_to_ZXY(GEN f)
+QpXQ_to_ZXY(GEN f, GEN p)
 {
-  GEN c = content(f);
+  GEN c = get_padic_content(f, p);
   long i, l = lg(f);
-  if (gequal0(c)) /*  O(p^n) can occur */
-  {
-    if (typ(c) != t_PADIC) pari_err_TYPE("QpXQ_to_ZXY",f);
-    c = powis(gel(c,2), valp(c));
-  }
   f = RgX_Rg_div(f,c);
   for (i=2; i<l; i++)
   {
     GEN t = gel(f,i);
     switch(typ(t))
     {
-      case t_POL: t = ZpX_to_ZX(t); break;
-      default: t = Zp_to_Z(t); break;
+      case t_POL: t = ZpX_to_ZX(t, p); break;
+      default: t = Zp_to_Z(t, p); break;
     }
     gel(f,i) = t;
   }
@@ -1519,7 +1532,7 @@ Zp_appr(GEN f, GEN a)
   if (typ(f) != t_POL) pari_err_TYPE("Zp_appr",f);
   if (typ(a) != t_PADIC) pari_err_TYPE("Zp_appr",a);
   p = gel(a,2); prec = gequal0(a)? valp(a): precp(a);
-  f = QpX_to_ZX(f);
+  f = QpX_to_ZX(f, p);
   if (degpol(f) <= 0) pari_err(e_CONSTPOL,"Zp_appr");
   (void)ZX_gcd_all(f, ZX_deriv(f), &f);
   z = ZX_Zp_root(f, gtrunc(a), p, prec);
@@ -1578,7 +1591,7 @@ rootpadic(GEN f, GEN p, long prec)
   if (typ(f)!=t_POL) pari_err_TYPE("rootpadic",f);
   if (gequal0(f)) pari_err(e_ZEROPOL,"rootpadic");
   if (prec <= 0) pari_err(e_MISC,"non-positive precision in rootpadic");
-  f = QpX_to_ZX(f);
+  f = QpX_to_ZX(f, p);
   f = pnormalize(f, p, prec, 1, &lead, &PREC, &reverse);
   y = ZX_Zp_roots(f,p,PREC);
   k = lg(y);
@@ -1673,9 +1686,9 @@ padicappr(GEN f, GEN a)
   p = NULL; prec = LONG_MAX;
   getprec(a, &prec, &p);
   getprec(T, &prec, &p); if (!p) pari_err_TYPE("padicappr",T);
-  f = QpXQ_to_ZXY(lift_intern(f));
-  a = QpX_to_ZX(a);
-  T = QpX_to_ZX(T);
+  f = QpXQ_to_ZXY(f, p);
+  a = QpX_to_ZX(a,p);
+  T = QpX_to_ZX(T,p);
   z = ZXY_ZpQ_root(f, a, T, p, prec);
   return gerepilecopy(av, ZXV_to_ZpXQV(z, T, p, prec));
 }
@@ -1773,7 +1786,7 @@ factorpadic2(GEN f, GEN p, long prec)
 
   if (n==0) return trivial_fact();
 
-  f = QpX_to_ZX(f);
+  f = QpX_to_ZX(f, p);
   if (n==1) return gerepilecopy(av, padic_trivfact(f,p,prec));
   if (!gequal1(leading_term(f)))
     pari_err(e_IMPL,"factorpadic2 for non-monic polynomial");
@@ -1864,7 +1877,7 @@ factorpadic(GEN f,GEN p,long prec)
 
   if (n == 0) return trivial_fact();
 
-  f = QpX_to_ZX(f); (void)Z_pvalrem(leading_term(f), p, &lt);
+  f = QpX_to_ZX(f, p); (void)Z_pvalrem(leading_term(f), p, &lt);
   f = pnormalize(f, p, prec, n-1, &lead, &pr, &reverse);
   y = ZX_monic_factorpadic(f, p, pr);
   P = gel(y,1); l = lg(P);
