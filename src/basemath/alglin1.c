@@ -2154,7 +2154,7 @@ Flm_indexrank(GEN x, ulong p)
   long n = lg(x)-1;
   (void)new_chunk(3+n+1+n+1);
   /* yield r = dim ker(x) */
-  d = Flm_gauss_pivot(x,p,&r);
+  d = Flm_gauss_pivot(Flm_copy(x),p,&r);
   avma = av;
   /* now r = dim Im(x) */
   r = n - r;
@@ -2642,6 +2642,7 @@ F2m_gauss_pivot(GEN x, long *rr)
   *rr = r; avma = (pari_sp)d; return d;
 }
 
+/* Destroy x */
 static GEN
 Flm_gauss_pivot(GEN x, ulong p, long *rr)
 {
@@ -2652,7 +2653,6 @@ Flm_gauss_pivot(GEN x, ulong p, long *rr)
 
   m=lg(x[1])-1; r=0;
   d=cgetg(n+1,t_VECSMALL);
-  x = Flm_copy(x);
   c = const_vecsmall(m, 0);
   for (k=1; k<=n; k++)
   {
@@ -2839,7 +2839,7 @@ Flm_image(GEN x, ulong p)
   GEN d,y;
   long j,k,r;
 
-  d = Flm_gauss_pivot(x,p,&r);
+  d = Flm_gauss_pivot(Flm_copy(x),p,&r);
   if (!d) { avma = av; return Flm_copy(x); }
   /* d left on stack */
   r = lg(x)-1 - r; /* = dim Im(x) */
@@ -2863,7 +2863,7 @@ Flm_rank(GEN x, ulong p)
 {
   pari_sp av = avma;
   long r;
-  (void)Flm_gauss_pivot(x,p,&r);
+  (void)Flm_gauss_pivot(Flm_copy(x),p,&r);
   avma = av; return lg(x)-1 - r;
 }
 
