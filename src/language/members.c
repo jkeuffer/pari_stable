@@ -90,7 +90,7 @@ member_bnf(GEN x)
 {
   long t; GEN y = get_bnf(x,&t);
   if (!y) member_err("bnf",x);
-  return x;
+  return y;
 }
 
 GEN
