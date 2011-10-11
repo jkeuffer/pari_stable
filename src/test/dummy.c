@@ -9,8 +9,9 @@ void shiftaddress(){}
 void shiftaddress_canon(){}
 void powuu(){}
 void gerepilemanysp(){}
-void invr(){}
 void ceilr(){}
 void roundr(){}
 void pari_err(){}
 void pari_warn(){}
+void quadratic_prec_mask(){}
+void prec2nbits(){}
