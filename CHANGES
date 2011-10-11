@@ -42,6 +42,7 @@ BA 30- functions ending by the x[y]=z construct could corrupt the stack.
    32- qfminim(): better type checks for matrix entries
    33- qfminim(): incorrect GC in smallvectors()
    34- padicappr(x^2+1+O(3), -1+O(5^10)) --> no error
+   35- tests test-kernel and test-ploth were broken
 
   Changed
     1- mathnf: swapped flag 3 and 5.
