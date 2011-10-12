@@ -820,7 +820,7 @@ get_ro_perm(PERM S1, PERM S2, long d, resolv *R, buildroot *BR)
       if (e < -64 || sufprec(ro)) break;
       e = 0;
     }
-    BR->pr += nbits2nlong(e + 10);
+    BR->pr += nbits2extraprec(e + 10);
     moreprec(BR);
   }
   if (e > -10 || typ(roi) == t_COMPLEX) return NULL;

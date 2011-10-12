@@ -101,7 +101,7 @@ mpatan(GEN x)
       m = 0;
     }
   }
-  l2 = l + nbits2nlong(m);
+  l2 = l + nbits2extraprec(m);
   p2 = rtor(p1, l2); av = avma;
   for (i=1; i<=m; i++)
   {
@@ -442,7 +442,7 @@ mpsh(GEN x)
 
   if (!signe(x)) return real_0_bit(ex);
   lx = realprec(x); res = cgetr(lx); av = avma;
-  if (ex < 1 - BITS_IN_LONG) x = rtor(x, lx + nbits2nlong(-ex)-1);
+  if (ex < 1 - BITS_IN_LONG) x = rtor(x, lx + nbits2extraprec(-ex)-1);
   z = mpexp(x); z = subrr(z, invr(z)); shiftr_inplace(z, -1);
   affrr(z, res); avma = av; return res;
 }
@@ -495,7 +495,7 @@ mpth(GEN x)
     pari_sp av = avma;
     long ex = expo(x);
     GEN t;
-    if (ex < 1 - BITS_IN_LONG) x = rtor(x, lx + nbits2nlong(-ex)-1);
+    if (ex < 1 - BITS_IN_LONG) x = rtor(x, lx + nbits2extraprec(-ex)-1);
     t = exp1r_abs(gmul2n(x,1)); /* exp(|2x|) - 1 */
     y = gerepileuptoleaf(av, divrr(t, addsr(2,t)));
   }
@@ -549,7 +549,7 @@ mpash(GEN x)
   long lx = realprec(x), ex = expo(x);
 
   res = cgetr(lx); av = avma;
-  if (ex < 1 - BITS_IN_LONG) x = rtor(x, lx + nbits2nlong(-ex)-1);
+  if (ex < 1 - BITS_IN_LONG) x = rtor(x, lx + nbits2extraprec(-ex)-1);
   z = logr_abs( addrr_sign(x,1, sqrtr_abs( addrs(sqrr(x), 1) ), 1) );
   if (signe(x) < 0) togglesign(z);
   affrr(z, res); avma = av; return res;
@@ -684,7 +684,7 @@ mpath(GEN x)
   pari_sp av = avma;
   long ex = expo(x);
   GEN z;
-  if (ex < 1 - BITS_IN_LONG) x = rtor(x, realprec(x) + nbits2nlong(-ex)-1);
+  if (ex < 1 - BITS_IN_LONG) x = rtor(x, realprec(x) + nbits2extraprec(-ex)-1);
   z = invr( subsr(1,x) ); shiftr_inplace(z, 1); /* 2/(1-x)*/
   z = logr_abs( addrs(z,-1) );
   shiftr_inplace(z, -1); return gerepileuptoleaf(av, z);

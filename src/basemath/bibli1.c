@@ -2257,7 +2257,7 @@ fincke_pohst(GEN a, GEN B0, long stockmax, long PREC, FP_chk_fun *CHECK)
     if (i)
       prec = i;
     else {
-      prec = DEFAULTPREC + nbits2nlong(gexpo(r));
+      prec = DEFAULTPREC + nbits2extraprec(gexpo(r));
       if (prec < PREC) prec = PREC;
     }
     if (DEBUGLEVEL>2) err_printf("first LLL: prec = %ld\n", prec);

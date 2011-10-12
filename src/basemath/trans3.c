@@ -250,7 +250,7 @@ kbessel1(GEN nu, GEN gx, long prec)
   ex = gexpo(gx);
   if (ex < 0)
   {
-    long rab = nbits2nlong(-ex);
+    long rab = nbits2extraprec(-ex);
     lnew = l + rab; prec += rab;
   }
   else lnew = l;
@@ -436,7 +436,7 @@ kbesselintern(GEN n, GEN z, long flag, long prec)
       ex = gexpo(s);
       if (ex < 0)
       {
-        long rab = nbits2nlong(-ex);
+        long rab = nbits2extraprec(-ex);
         if (fl) rab *= 2;
         precnew += rab;
       }
@@ -741,7 +741,7 @@ incgam0(GEN s, GEN x, GEN g, long prec)
     if (es < 0) {
       long l = precision(s);
       if (!l) l = prec;
-      prec = l + nbits2nlong(-es) + 1;
+      prec = l + nbits2extraprec(-es) + 1;
       s = gtofp(s, prec);
       x = gtofp(x, prec);
     }
@@ -1210,7 +1210,7 @@ szeta_odd(long k, long prec)
       p1 = invr( mulir(powuu(n,k),addrs(qn,-1)) );
 
       z = addrr(z,p1); if ((ep1 = expo(p1)) < li) break;
-      l = (ep1 < 0) ? prec+1 : prec+1 + nbits2nlong(ep1);
+      l = (ep1 < 0) ? prec+1 : prec+1 + nbits2extraprec(ep1);
       if (l < realprec(qn)) setprec(qn, l);
       qn = mulrr(qn,q);
       if (low_stack(limit,stack_lim(av2,1)))
@@ -1245,7 +1245,7 @@ szeta_odd(long k, long prec)
       p1 = divrr(addrs(mulrr(qn,addsr(1,mulur(n<<1,p2))),-1),p1);
 
       z = addrr(z,p1); if ((ep1 = expo(p1)) < li) break;
-      l = (ep1 < 0)? prec+1 : prec+1 + nbits2nlong(ep1);
+      l = (ep1 < 0)? prec+1 : prec+1 + nbits2extraprec(ep1);
       if (l < realprec(qn)) setprec(qn, l);
       qn = mulrr(qn,q);
       if (low_stack(limit,stack_lim(av2,1)))

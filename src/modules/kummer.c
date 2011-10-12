@@ -698,7 +698,7 @@ rnfkummersimple(GEN bnr, GEN subgroup, GEN gell, long all)
   vecWB = shallowconcat(vecW, vecBp);
 
   prec = DEFAULTPREC +
-    nbits2nlong(((degK-1) * (gexpo(vecWB) + gexpo(nf_get_M(nf)))));
+      nbits2extraprec(((degK-1) * (gexpo(vecWB) + gexpo(nf_get_M(nf)))));
   if (nf_get_prec(nf) < prec) nf = nfnewprec_shallow(nf, prec);
   msign = nfsign(nf, vecWB);
   arch = ZV_to_zv(arch);

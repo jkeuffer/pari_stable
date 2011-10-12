@@ -422,7 +422,7 @@ CplxModulus(GEN data, long *newprec)
   {
     gel(data,5) = InitChar(bnr, listCR, dprec);
     pol = AllStark(data, nf, -1, dprec);
-    pr = nbits2nlong( gexpo(pol) );
+    pr = nbits2extraprec( gexpo(pol) );
     if (pr < 0) pr = 0;
     dprec = maxss(dprec, pr) + EXTRA_PREC;
     if (!gequal0(leading_term(pol)))
@@ -3106,7 +3106,7 @@ quadhilbertimag(GEN D)
     P = grndtoi(P,&exmax);
     if (DEBUGLEVEL>1) timer_printf(&ti,"product, error bits = %ld",exmax);
     if (exmax <= -10) break;
-    avma = av0; prec += (DEFAULTPREC-2) + nbits2nlong(exmax);
+    avma = av0; prec += (DEFAULTPREC-2) + nbits2extraprec(exmax);
     if (DEBUGLEVEL) pari_warn(warnprec,"quadhilbertimag",prec);
   }
   return gerepileupto(av,P);

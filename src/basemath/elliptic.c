@@ -406,7 +406,7 @@ ellinit_real(GEN x, long prec)
     default: e = -1; break;
   }
   PREC = prec;
-  if (e > 0) PREC += nbits2nlong(e >> 1);
+  if (e > 0) PREC += nbits2extraprec(e >> 1);
   R = cleanroots(RHSpol(y), PREC);
   /* sort roots in decreasing order */
   if (gsigne(D) > 0) gen_sort_inplace(R, NULL, &invcmp, NULL);
