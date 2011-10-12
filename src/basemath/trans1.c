@@ -70,7 +70,7 @@ piold(long prec)
   double alpha;
 
   tmppi = cgetr(prec);
-  prec++;
+  incrprec(prec);
   n = (long)(1 + (prec-2)/alpha2);
   n1 = 6*n - 1;
   p2 = addsi(k2, mulss(n,k1));
@@ -117,7 +117,7 @@ constpi(long prec)
   av = avma; tmppi = newblock(prec);
   *tmppi = evaltyp(t_REAL) | evallg(prec);
   G = - prec2nbits(prec);
-  prec++;
+  incrprec(prec);
 
   A = real2n(-1, prec);
   B = sqrtr_abs(A); /* = 1/sqrt(2) */
@@ -186,7 +186,7 @@ consteuler(long prec)
   av1 = avma; tmpeuler = newblock(prec);
   *tmpeuler = evaltyp(t_REAL) | evallg(prec);
 
-  prec++;
+  incrprec(prec);
 
   l = prec+1; x = (long) (1 + prec2nbits_mul(l, LOG2/4));
   a = utor(x,l); u=logr_abs(a); setsigne(u,-1); affrr(u,a);
@@ -265,7 +265,7 @@ constcatalan(long prec)
   pari_sp av = avma;
   GEN sq, tmp;
   if (gcatalan && realprec(gcatalan) >= prec) return gcatalan;
-  prec++;
+  incrprec(prec);
   sq = cgeti(prec); affsi(1, sq);
   tmp = gclone(sumalt((void *)sq, catalaneval, gen_0, prec));
   BLOCK_SIGINT_START;
@@ -1973,7 +1973,7 @@ logagmr_abs(GEN q)
   pari_sp av;
 
   if (absrnz_equal2n(q)) return e? mulsr(e, mplog2(prec)): real_0(prec);
-  z = cgetr(prec); av = avma; prec++;
+  z = cgetr(prec); av = avma; incrprec(prec);
   lim = prec2nbits(prec) >> 1;
   Q = rtor(q,prec);
   shiftr_inplace(Q,lim-e); setsigne(Q,1);
@@ -2085,7 +2085,7 @@ logagmcx(GEN q, long prec)
   int neg = 0;
 
   e = precision(q); if (e > prec) prec = e;
-  z = cgetc(prec); av = avma; prec++;
+  z = cgetc(prec); av = avma; incrprec(prec);
   if (gsigne(gel(q,1)) < 0) { q = gneg(q); neg = 1; }
   lim = prec2nbits(prec) >> 1;
   Q = gtofp(q, prec);

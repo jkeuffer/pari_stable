@@ -758,7 +758,7 @@ mpbern(long nb, long prec)
   GEN B;
   pari_timer T;
 
-  prec++; /* compute one more word of accuracy than required */
+  incrprec(prec); /* compute one more word of accuracy than required */
   if (OK_bern(nb, prec)) return;
   if (nb < 0) nb = 0;
   l = 3 + prec*(nb+1);
@@ -1050,7 +1050,7 @@ cxgamma(GEN s0, int dolog, long prec)
       nn = 1;
     if (DEBUGLEVEL>5) err_printf("lim, nn: [%ld, %ld], la = %lf\n",lim,nn,la);
   }
-  prec++;
+  incrprec(prec);
 
   av2 = avma; avlim = stack_lim(av2,3);
   y = s;
@@ -1491,7 +1491,7 @@ cxpsi(GEN s0, long prec)
     if (nn < 1) nn = 1;
     if (DEBUGLEVEL>2) err_printf("lim, nn: [%ld, %ld]\n",lim,nn);
   }
-  prec++; unr = real_1(prec); /* one extra word of precision */
+  incrprec(prec); unr = real_1(prec); /* one extra word of precision */
 
   a = gdiv(unr, gaddgs(s, nn)); /* 1 / (s+n) */
   av2 = avma; sum = gmul2n(a,-1);

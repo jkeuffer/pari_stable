@@ -915,7 +915,7 @@ cxerfc_r1(GEN x, long prec)
     u = (long)floor(t*(1L<<v));
     /* define exp(-2*h^2) to be u*2^(-v) */
   }
-  prec++;
+  incrprec(prec);
   x = gtofp(x,prec);
   eh2 = sqrtr_abs(rtor(shiftr(dbltor(u),-v),prec));
   h2 = negr(logr_abs(eh2));
@@ -1112,7 +1112,7 @@ inv_szeta_euler(long n, double lba, long prec)
   lim = 1 + (ulong)ceil(D);
   maxprime_check(lim);
 
-  prec++;
+  incrprec(prec);
   z = subir(gen_1, real2n(-n, prec));
   for (p = 3; p <= lim;)
   {
@@ -1375,7 +1375,7 @@ czeta(GEN s0, long prec)
   }
   optim_zeta(s, prec, &lim, &nn);
   maxprime_check((ulong)nn);
-  prec++; unr = real_1(prec); /* one extra word of precision */
+  incrprec(prec); unr = real_1(prec); /* one extra word of precision */
 
   tab = (GEN*)cgetg(nn, t_VEC); /* table of q^(-s), q = p^e */
   { /* general case */
