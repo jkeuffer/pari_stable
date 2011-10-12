@@ -1012,7 +1012,7 @@ cxgamma(GEN s0, int dolog, long prec)
   else
   { /* |s| is moderate. Use floats  */
     double ssig = rtodbl(sig);
-    double st = rtodbl(imag_i(s));
+    double st = typ(s) == t_REAL? 0.0: rtodbl(imag_i(s));
     double la, l,l2,u,v, rlogs, ilogs;
 
     dcxlog(ssig,st, &rlogs,&ilogs);
@@ -1472,7 +1472,7 @@ cxpsi(GEN s0, long prec)
   else
   {
     double ssig = rtodbl(sig);
-    double st = rtodbl(imag_i(s));
+    double st = typ(s) == t_REAL? 0.0: rtodbl(imag_i(s));
     double l;
     {
       double rlog, ilog; /* log (s - Euler) */
