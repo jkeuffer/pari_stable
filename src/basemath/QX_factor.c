@@ -1047,7 +1047,7 @@ nfrootsQ(GEN x)
   long val;
 
   if (typ(x)!=t_POL) pari_err_TYPE("nfrootsQ",x);
-  if (!signe(x)) pari_err_ZEROPOL("nfrootsQ");
+  if (!signe(x)) pari_err_ROOTS0("nfrootsQ");
   x = Q_primpart(x);
   if (!RgX_is_ZX(x)) pari_err_TYPE("nfrootsQ",x);
   val = ZX_valrem(x, &x);

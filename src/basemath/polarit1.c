@@ -240,7 +240,7 @@ rootmod2(GEN f, GEN pp)
   switch (degpol(f))
   {
     case  0: avma = av; return cgetg(1,t_COL);
-    case -1: pari_err_ZEROPOL("rootmod2");
+    case -1: pari_err_ROOTS0("rootmod2");
   }
   p = init_p(pp); if (!p) pari_err(e_MISC,"prime too big in rootmod2");
   if (p & 1)
@@ -421,7 +421,7 @@ FpX_roots(GEN f, GEN p) {
   GEN F = FpX_factmod_init(f,p);
   switch(degpol(F))
   {
-    case -1: pari_err_ZEROPOL("FpX_roots");
+    case -1: pari_err_ROOTS0("FpX_roots");
     case 0: avma = av; return cgetg(1, t_COL);
   }
   return gerepileupto(av, odd(q)? FpX_roots_i(F, p): root_mod_even(F,q));
@@ -433,7 +433,7 @@ FpX_oneroot(GEN f, GEN p) {
   GEN F = FpX_factmod_init(f,p);
   switch(degpol(F))
   {
-    case -1: pari_err_ZEROPOL("FpX_oneroot");
+    case -1: pari_err_ROOTS0("FpX_oneroot");
     case 0: avma = av; return NULL;
   }
   if (!odd(q))
@@ -457,7 +457,7 @@ rootmod(GEN f, GEN p)
   switch (degpol(f))
   {
     case  0: avma = av; return cgetg(1,t_COL);
-    case -1: pari_err_ZEROPOL("rootmod");
+    case -1: pari_err_ROOTS0("rootmod");
   }
   q = init_p(p); if (!q) q = mod2BIL(p);
   if (q & 1)
@@ -1588,7 +1588,7 @@ rootpadic(GEN f, GEN p, long prec)
 
   if (typ(p)!=t_INT) pari_err_TYPE("rootpadic",p);
   if (typ(f)!=t_POL) pari_err_TYPE("rootpadic",f);
-  if (gequal0(f)) pari_err_ZEROPOL("rootpadic");
+  if (gequal0(f)) pari_err_ROOTS0("rootpadic");
   if (prec <= 0) pari_err(e_MISC,"non-positive precision in rootpadic");
   f = QpX_to_ZX(f, p);
   f = pnormalize(f, p, prec, 1, &lead, &PREC, &reverse);
@@ -1676,7 +1676,7 @@ padicappr(GEN f, GEN a)
     default: pari_err_TYPE("padicappr",a);
   }
   if (typ(f)!=t_POL) pari_err_TYPE("padicappr",f);
-  if (gequal0(f)) pari_err_ZEROPOL("padicappr");
+  if (gequal0(f)) pari_err_ROOTS0("padicappr");
   z = RgX_gcd(f, RgX_deriv(f));
   if (degpol(z) > 0) f = RgX_div(f,z);
   T = gel(a,1); a = gel(a,2);
@@ -2326,7 +2326,7 @@ FqX_roots_i(GEN f, GEN T, GEN p)
 {
   GEN R;
   f = FqX_normalize(f, T, p);
-  if (!signe(f)) pari_err_ZEROPOL("FqX_roots");
+  if (!signe(f)) pari_err_ROOTS0("FqX_roots");
   if (isabsolutepol(f)) return FpX_rootsff_i(simplify_shallow(f), p, T);
   if (degpol(f)==2)
     return gen_sort(FqX_quad_roots(f,T,p), (void*) &cmp_RgX, &cmp_nodata);

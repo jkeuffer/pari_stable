@@ -27,7 +27,7 @@ enum err_list {
 
   e_MAXPRIME, e_INTMOD,
 
-  e_CONSTPOL, e_IRREDPOL, e_PRIME, e_ZEROPOL,
+  e_CONSTPOL, e_IRREDPOL, e_PRIME, e_ROOTS0,
 
   e_OP, e_TYPE2, e_INV,
 

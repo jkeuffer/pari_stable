@@ -8162,6 +8162,13 @@ which was not. (As in \kbd{idealprimedec(nf, 4)}.)
   pari_err_PRIME(const char *s, GEN x)
 @eprog\noindent prints the error message: \kbd{not a prime in $s$ : $x$}.
 
+\subsubsec{e\_ROOTS0} An argument of function $s$ is a zero polynomial, and
+we need to consider its roots. (As in \kbd{polroots(0)}.)
+\bprog
+  pari_err(e_ROOTS0, const char *s)
+  pari_err_ROOTS0(const char *s)
+@eprog\noindent prints the error message: \kbd{zero polynomial in $s$}.
+
 \subsubsec{e\_SQRTN} Tried to compute an $n$-th root of $x$, which does not exist.
 (As in \kbd{sqrt(Mod(-1,3))}.)
 \bprog
@@ -8169,13 +8176,6 @@ which was not. (As in \kbd{idealprimedec(nf, 4)}.)
   pari_err_SQRTN(GEN x)
 @eprog\noindent prints the error message: \kbd{not an n-th power residue in
 sqrtn : $x$}.
-
-\subsubsec{e\_ZEROPOL} An argument of function $s$ is a zero polynomial, which
-does not make sense. (As in \kbd{polroots(0)}.)
-\bprog
-  pari_err(e_ZEROPOL, const char *s)
-  pari_err_ZEROPOL(const char *s)
-@eprog\noindent prints the error message: \kbd{zero polynomial in $s$}.
 
 \section{Hashtables}
 A \tet{hashtable}, or associative array, is a set of pairs $(k,v)$ of keys

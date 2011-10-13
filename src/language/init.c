@@ -989,7 +989,7 @@ pari_err2GEN(long numerr, va_list ap)
   case e_DIM:
   case e_NEGVAL:
   case e_CONSTPOL:
-  case e_ZEROPOL:
+  case e_ROOTS0:
   case e_FLAG:
   case e_PREC:
   case e_BUG:
@@ -1094,7 +1094,7 @@ pari_err2str(GEN err)
   case e_SQRTN:
     return pari_sprintf("not an n-th power residue in %Ps: %Ps",
                         gel(err,2), gel(err,3));
-  case e_ZEROPOL:
+  case e_ROOTS0:
     return pari_sprintf("zero polynomial in %Ps.", gel(err,2));
   case e_DIM:
     return pari_sprintf("inconsistent dimensions in %Ps.", gel(err,2));
@@ -1244,7 +1244,7 @@ pari_err_TYPE2(const char *f, GEN x, GEN y) { pari_err(e_TYPE2, f,x,y); }
 void
 pari_err_VAR(const char *f, GEN x, GEN y) { pari_err(e_VAR, f,x,y); }
 void
-pari_err_ZEROPOL(const char *f) { pari_err(e_ZEROPOL, f); }
+pari_err_ROOTS0(const char *f) { pari_err(e_ROOTS0, f); }
 
 const char *
 numerr_name(long numerr)
@@ -1272,7 +1272,7 @@ numerr_name(long numerr)
   case e_CONSTPOL: return "e_CONSTPOL";
   case e_IRREDPOL: return "e_IRREDPOL";
   case e_PRIME: return "e_PRIME";
-  case e_ZEROPOL: return "e_ZEROPOL";
+  case e_ROOTS0: return "e_ROOTS0";
   case e_OP: return "e_OP";
   case e_TYPE2: return "e_TYPE2";
   case e_INV: return "e_INV";
@@ -1308,7 +1308,7 @@ name_numerr(const char *s)
   if (!strcmp(s,"e_CONSTPOL")) return e_CONSTPOL;
   if (!strcmp(s,"e_IRREDPOL")) return e_IRREDPOL;
   if (!strcmp(s,"e_PRIME")) return e_PRIME;
-  if (!strcmp(s,"e_ZEROPOL")) return e_ZEROPOL;
+  if (!strcmp(s,"e_ROOTS0")) return e_ROOTS0;
   if (!strcmp(s,"e_OP")) return e_OP;
   if (!strcmp(s,"e_TYPE2")) return e_TYPE2;
   if (!strcmp(s,"e_INV")) return e_INV;

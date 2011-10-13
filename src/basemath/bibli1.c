@@ -505,7 +505,7 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
 
   P = leafcopy(P0); d = degpol(P);
   if (d == 0) { avma = av; return cgetg(1, t_VEC); }
-  if (d < 0) pari_err_ZEROPOL("zncoppersmith");
+  if (d < 0) pari_err_ROOTS0("zncoppersmith");
 
   if (!gequal1(gel(P,d+2)))
   {
