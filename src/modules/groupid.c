@@ -219,7 +219,7 @@ group_ident_i(GEN G, GEN S)
         {
           for(i=1; t[i] != -1; i++)
             if (t[i]==s) return i;
-          pari_err(e_MISC,"Not a group in group_ident");
+          return -1;
         }
         while (*t>=0) t++;
       }
@@ -324,7 +324,7 @@ group_ident_i(GEN G, GEN S)
             return indexgroupcentre(G,Z,good,bad)? 11: 12;
           }
         }
-        pari_err(e_MISC,"Not a group in group_ident");
+        return -1;
       }
       while (*t!=-1) t++;
     }
@@ -427,7 +427,7 @@ group_ident_i(GEN G, GEN S)
             }
             break;
           }
-          pari_err(e_MISC,"Not a group in group_ident");
+          return -1;
         }
         while (*t!=-1) t++;
       }
@@ -494,7 +494,7 @@ group_ident_i(GEN G, GEN S)
             }
             break;
           }
-          pari_err(e_MISC,"Not a group in group_ident");
+          return -1;
         }
         while (*t!=-1) t++;
       }
@@ -508,9 +508,9 @@ group_ident(GEN G, GEN S)
 {
   pari_sp av = avma;
   long idx = group_ident_i(G, S);
-  avma = av;
-  if (!idx) pari_err_IMPL("galoisidentify for groups of order >127");
-  return idx;
+  if (idx < 0) pari_err(e_MISC,"Not a group in group_ident");
+  if (!idx) pari_err_IMPL("galoisidentify for groups of order > 127");
+  avma = av; return idx;
 }
 
 long
