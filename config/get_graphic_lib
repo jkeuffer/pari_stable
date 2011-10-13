@@ -18,7 +18,11 @@ else
               esac;;
       *) . ./get_X11  # X11,X11_INC,X11_LIBS.
          if test -z "$X11_LIBS"; then
-           case $which_graphic_lib in X11) which_graphic_lib=none;; esac
+           case $which_graphic_lib in
+	     X11) which_graphic_lib=none;;
+	     auto) case $osname in cygwin) which_graphic_lib=win32;;
+		   esac;;
+	     esac
          else
            case $which_graphic_lib in auto) which_graphic_lib=X11;; esac
          fi;;
