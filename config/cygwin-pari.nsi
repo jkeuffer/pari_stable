@@ -6,10 +6,10 @@ Name "PARI 2.6 (TESTING)"
 
 ;--No need to modify things below --
 !define top ".."
-!define objdir "${top}\Ocygwin-i686"
+!define cfgdir "${top}\config"
 AutoCloseWindow false
 
-OutFile "${objdir}\Pari.exe"
+OutFile "Pari.exe"
 InstallDir "$PROGRAMFILES\${PARIver}"
 InstallDirRegKey HKLM "Software\${PARIver}" ""
 
@@ -35,10 +35,10 @@ InstallDirRegKey HKLM "Software\${PARIver}" ""
 
 Section "pari (required)" SecCopy
   SetOutPath "$INSTDIR"
-  File /oname=gp.exe "${objdir}\gp-dyn.exe"
-  File /oname=.gprc "cygwin-gprc"
+  File /oname=gp.exe "gp-dyn.exe"
+  File /oname=.gprc "${cfgdir}\cygwin-gprc"
   File "${top}\misc\tex2mail"
-  File "${objdir}\${dll}"
+  File "${dll}"
   FILE "\cygwin\bin\cygcrypt-0.dll"
   FILE "\cygwin\bin\cygiconv-2.dll"
   FILE "\cygwin\bin\cygintl-8.dll"

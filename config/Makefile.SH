@@ -477,6 +477,10 @@ install-lib-dyn-link: install-lib-dyn-base
 	  \$(LN) \$(LIBPARI_DYN) \$(LIBDIR)/\$(LIBPARI_SO); fi
 install-lib-dyn: \$(LIBPARI_DYN) install-lib-dyn-link
 
+nsis: gp
+	-cd $doc; \$(MAKE) docpdf
+	makensis pari.nsi
+
 mpinl.h: parilvl0.h parilvl1.h
 	cat parilvl0.h parilvl1.h > mpinl.h
 
