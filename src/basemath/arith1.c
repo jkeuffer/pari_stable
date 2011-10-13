@@ -3028,7 +3028,7 @@ quadregulator(GEN x, long prec)
     R = mulrr(R, divri(addir(u1,rsqd),v));
     Rexpo += expo(R); setexpo(R,0);
     u = u1; v = v1;
-    if (Rexpo & ~EXPOBITS) pari_err(e_MISC,"exponent overflow in quadregulator");
+    if (Rexpo & ~EXPOBITS) pari_err_OVERFLOW("quadregulator [exponent]");
     if (low_stack(lim, stack_lim(av2,2)))
     {
       if(DEBUGMEM>1) pari_warn(warnmem,"quadregulator");

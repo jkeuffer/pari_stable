@@ -601,7 +601,7 @@ pow_monome(GEN x, long n)
   }
   else
     d = dx*n + 2;
-  if ((d + 1) & ~LGBITS) pari_err(e_MISC,"degree overflow in pow_monome");
+  if ((d + 1) & ~LGBITS) pari_err(e_OVERFLOW,"pow_monome [degree]");
   A = cgetg(d+1, t_POL); A[1] = x[1];
   for (i=2; i < d; i++) gel(A,i) = gen_0;
   b = gpowgs(gel(x,dx+2), n); /* not memory clean if (n < 0) */
@@ -858,7 +858,7 @@ ser_pow(GEN x, GEN n, long prec)
 static long
 val_from_i(GEN E)
 {
-  if (is_bigint(E)) pari_err(e_MISC,"valuation overflow in sqrtn");
+  if (is_bigint(E)) pari_err_OVERFLOW("sqrtn [valuation]");
   return itos(E);
 }
 
@@ -919,7 +919,7 @@ gpow(GEN x, GEN n, long prec)
 
     x = ground(gmulsg(gexpo(x),n));
     if (is_bigint(x) || (ulong)x[2] >= HIGHEXPOBIT)
-      pari_err(e_MISC,"gpow: underflow or overflow");
+      pari_err_OVERFLOW("gpow");
     avma = av; return real_0_bit(itos(x));
   }
   if (tn == t_FRAC)
