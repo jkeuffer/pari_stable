@@ -2138,7 +2138,7 @@ idealapprfact_i(GEN nf, GEN x, int nored)
   if (!z) return scalarcol_shallow(gen_1, nf_get_degree(nf));
   if (nored)
   {
-    if (flagden) pari_err(e_IMPL,"nored + denominator in idealapprfact");
+    if (flagden) pari_err_IMPL("nored + denominator in idealapprfact");
     return z;
   }
   e2 = cgetg(r, t_VEC);
@@ -2611,7 +2611,7 @@ nfsnf(GEN nf, GEN x)
   if (!n) pari_err(e_MISC,"not a matrix of maximal rank in nfsnf");
   m = lg(A[1])-1;
   if (n < m) pari_err(e_MISC,"not a matrix of maximal rank in nfsnf");
-  if (n > m) pari_err(e_IMPL,"nfsnf for non square matrices");
+  if (n > m) pari_err_IMPL("nfsnf for non square matrices");
 
   av = avma; lim = stack_lim(av,1);
   A = RgM_to_nfM(nf, A);

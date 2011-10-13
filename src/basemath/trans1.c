@@ -1187,7 +1187,7 @@ gsqrt(GEN x, long prec)
       y = cgetg(3,t_COMPLEX); av = avma;
 
       p1 = gsqrt(cxnorm(x), prec);
-      if (typ(p1) == t_INTMOD) pari_err(e_IMPL,"sqrt(complex of t_INTMODs)");
+      if (typ(p1) == t_INTMOD) pari_err_IMPL("sqrt(complex of t_INTMODs)");
       if (!signe(p1)) { gel(y,1) = gel(y,2) = sqrtr(p1); return y; }
       if (gsigne(gel(x,1)) < 0)
       {

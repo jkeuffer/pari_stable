@@ -483,7 +483,7 @@ polgalois(GEN x, long prec)
                       1,2,4,6, 1,5,2,4, 1,3,2,6, 1,2,3,5, 1,4,2,3};
   if (typ(x)!=t_POL) pari_err_TYPE("galois",x);
   n=degpol(x);
-  if (n>11) pari_err(e_IMPL,"galois of degree higher than 11");
+  if (n>11) pari_err_IMPL("galois of degree higher than 11");
   x = Q_primpart(x);
   RgX_check_ZX(x, "galois");
   if (!ZX_is_irred(x)) pari_err_IRREDPOL("galois",x);
@@ -2105,7 +2105,7 @@ ordred(GEN x)
   GEN y;
 
   if (typ(x) != t_POL) pari_err_TYPE("ordred",x);
-  if (!gequal1(leading_term(x))) pari_err(e_IMPL,"ordred");
+  if (!gequal1(leading_term(x))) pari_err_IMPL("ordred");
   if (!signe(x)) return gcopy(x);
   y = mkvec2(x, matid(degpol(x)));
   return gerepileupto(av, Polred(y, 0, NULL));

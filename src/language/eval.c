@@ -1103,7 +1103,7 @@ closure_eval(GEN C)
     case 19: sp-=19; f(st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4],st[sp+5],st[sp+6],st[sp+7],st[sp+8],st[sp+9],st[sp+10],st[sp+11],st[sp+12],st[sp+13],st[sp+14],st[sp+15],st[sp+16],st[sp+17],st[sp+18]); break; \
     case 20: sp-=20; f(st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4],st[sp+5],st[sp+6],st[sp+7],st[sp+8],st[sp+9],st[sp+10],st[sp+11],st[sp+12],st[sp+13],st[sp+14],st[sp+15],st[sp+16],st[sp+17],st[sp+18],st[sp+19]); break; \
     default: \
-      pari_err(e_IMPL,"functions with more than 20 parameters");\
+      pari_err_IMPL("functions with more than 20 parameters");\
       goto endeval; /*not reached*/ \
   }
 

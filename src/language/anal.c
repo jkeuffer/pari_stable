@@ -278,7 +278,7 @@ check_proto(const char *code)
     case 'v': pari_err(e_SYNTAX, "this code has to come first", s-1, code);
     default: pari_err(e_SYNTAX, "unknown parser code", s-1, code);
   }
-  if (arity > 20) pari_err(e_IMPL,"functions with more than 20 parameters");
+  if (arity > 20) pari_err_IMPL("functions with more than 20 parameters");
   return arity;
 }
 

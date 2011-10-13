@@ -2395,7 +2395,7 @@ galoisbig(GEN pol, long prec)
     case 9: t = galoismodulo9(EVEN,pol,dpol);  tab=tab9; break;
     case 10:t = galoismodulo10(EVEN,pol,dpol); tab=tab10; break;
     case 11:t = galoismodulo11(EVEN,pol,dpol); tab=tab11; break;
-    default: pari_err(e_IMPL,"galois in degree > 11");
+    default: pari_err_IMPL("galois in degree > 11");
       return NULL; /* not reached */
   }
   if (!t)

@@ -313,7 +313,7 @@ pari_daemon(void)
 int
 pari_daemon(void)
 {
-  pari_err(e_IMPL,"pari_daemon without waitpid & setsid");
+  pari_err_IMPL("pari_daemon without waitpid & setsid");
   return 0;
 }
 #endif
@@ -1211,6 +1211,8 @@ void
 pari_err_FILE(const char *f, const char *g) { pari_err(e_FILE, f,g); }
 void
 pari_err_FLAG(const char *f) { pari_err(e_FLAG,f); }
+void
+pari_err_IMPL(const char *f) { pari_err(e_IMPL,f); }
 void
 pari_err_IRREDPOL(const char *f, GEN x) { pari_err(e_IRREDPOL, f,x); }
 void

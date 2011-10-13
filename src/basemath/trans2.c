@@ -854,7 +854,7 @@ bernvec_old(long nb)
   GEN y;
 
   if (nb < 0) return cgetg(1, t_VEC);
-  if (nb > 46340 && BITS_IN_LONG == 32) pari_err(e_IMPL, "bernvec for n > 46340");
+  if (nb > 46340 && BITS_IN_LONG == 32) pari_err_IMPL( "bernvec for n > 46340");
 
   y = cgetg(nb+2, t_VEC); gel(y,1) = gen_1;
   for (n = 1; n <= nb; n++)
@@ -1226,7 +1226,7 @@ ggamd(GEN x, long prec)
       return gerepile(av,tetpil,ggamma(x,prec));
 
     case t_INTMOD: pari_err_TYPE("ggamd",x);
-    case t_SER: pari_err(e_IMPL,"gamd of a power series");
+    case t_SER: pari_err_IMPL("gamd of a power series");
   }
   return transc(ggamd,x,prec);
 }
@@ -1417,7 +1417,7 @@ glngamma(GEN x, long prec)
       av = avma; if (!(y = toser_i(x))) break;
       if (valp(y)) pari_err(e_NEGVAL,"glngamma");
       p1 = gsubsg(1,y);
-      if (!valp(p1)) pari_err(e_IMPL,"lngamma around a!=1");
+      if (!valp(p1)) pari_err_IMPL("lngamma around a!=1");
       n = (lg(y)-3) / valp(p1);
       a = zeroser(varn(y), lg(y)-2);
       for (i=n; i>=2; i--) a = gmul(p1, gadd(a, gdivgs(szeta(i, prec),i)));
@@ -1527,7 +1527,7 @@ gpsi(GEN x, long prec)
   {
     case t_REAL: case t_COMPLEX: return cxpsi(x,prec);
     case t_INTMOD: case t_PADIC: pari_err_TYPE("gpsi",x);
-    case t_SER: pari_err(e_IMPL,"psi of power series");
+    case t_SER: pari_err_IMPL("psi of power series");
   }
   return transc(gpsi,x,prec);
 }

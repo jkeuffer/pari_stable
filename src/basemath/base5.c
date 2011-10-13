@@ -980,7 +980,7 @@ rnfpolredabs(GEN nf, GEN relpol, long flag)
   T = nf_get_pol(nf);
   relpol = rnf_fix_pol(T, relpol, 0);
   if ((flag & nf_ADDZK) && !(flag & nf_ABSOLUTE))
-    pari_err(e_IMPL,"this combination of flags in rnfpolredabs");
+    pari_err_IMPL("this combination of flags in rnfpolredabs");
   if (flag & nf_PARTIALFACT)
   {
     long sa;

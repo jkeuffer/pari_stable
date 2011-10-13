@@ -554,7 +554,7 @@ mathnfspec(GEN x, GEN *ptperm, GEN *ptdep, GEN *ptB, GEN *ptC)
 
 TOOLARGE:
   if (lg(*ptC) > 1 && lg((*ptC)[1]) > 1)
-    pari_err(e_IMPL,"mathnfspec with large entries");
+    pari_err_IMPL("mathnfspec with large entries");
   x = ZM_hnf(x); lx = lg(x); j = ly; k = 0;
   for (i=1; i<ly; i++)
   {

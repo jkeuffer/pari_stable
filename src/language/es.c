@@ -150,7 +150,7 @@ filtre0(filtre_t *F)
 
       case LBRACE:
         t--;
-        if (F->wait_for_brace) pari_err(e_IMPL,"embedded braces (in parser)");
+        if (F->wait_for_brace) pari_err_IMPL("embedded braces (in parser)");
         F->more_input = 2;
         F->wait_for_brace = 1;
         break;
@@ -1161,7 +1161,7 @@ nextch:
             if (GENflag)
               pari_err(e_MISC, "P/l length modifiers in the same conversion");
             if (longflag)
-              pari_err(e_IMPL, "ll length modifier in printf");
+              pari_err_IMPL( "ll length modifier in printf");
             longflag = 1;
             goto nextch;
           case 'P':
@@ -3409,7 +3409,7 @@ os_open(const char *s, int mode)
 #ifdef WINCE
   HANDLE h;
   short ws[256];
-  if (mode != O_RDONLY) pari_err(e_IMPL,"generic open for Windows");
+  if (mode != O_RDONLY) pari_err_IMPL("generic open for Windows");
   MultiByteToWideChar(CP_ACP, 0, s, strlen(s)+1, ws, 256);
   h = CreateFile(ws,GENERIC_READ,FILE_SHARE_READ,NULL,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,NULL);
   fd = (h == INVALID_HANDLE_VALUE)? (long)-1: (long)h;

@@ -422,7 +422,7 @@ is_char_2(GEN a)
     b = gel(a,1);
     if (!mod2(b))
     {
-      if (!equaliu(b, 2)) pari_err(e_IMPL, "issquare for this input");
+      if (!equaliu(b, 2)) pari_err_IMPL( "issquare for this input");
       return 1;
     }
     return 0;
@@ -3303,7 +3303,7 @@ classno(GEN x)
       }
     }
     ftest = gmul(ftest,fg);
-    if (equali1(gel(ftest,1))) pari_err(e_IMPL,"classno with too small order");
+    if (equali1(gel(ftest,1))) pari_err_IMPL("classno with too small order");
     if (low_stack(lim, stack_lim(av2,2))) ftest = gerepileupto(av2,ftest);
   }
 }

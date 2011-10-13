@@ -305,7 +305,7 @@ ellinit_padic(GEN x, GEN p, long prec)
   if (equaliu(p,2))
   {
     pv = utoipos(4);
-    pari_err(e_IMPL,"ellinit for 2-adic numbers");
+    pari_err_IMPL("ellinit for 2-adic numbers");
   }
   else
     pv = p;
@@ -948,7 +948,7 @@ ellrandom(GEN e)
       }
       return gerepilecopy(av, mkvec2(x, gel(y,1)));
     default:
-      pari_err(e_IMPL,"random point on elliptic curve over an infinite field");
+      pari_err_IMPL("random point on elliptic curve over an infinite field");
   }
   return NULL; /* not reached */
 }
@@ -3284,7 +3284,11 @@ anellsmall(GEN e, long n0)
 
   checkell_int(e);
   if (n0 <= 0) return cgetg(1,t_VEC);
-  if (n >= LGBITS) pari_err(e_IMPL,"anell for n >= %lu", LGBITS);
+  if (n >= LGBITS) {
+    char *s = stackmalloc(128);
+    sprintf(s,"anell for n >= %lu", LGBITS);
+    pari_err_IMPL(s);
+  }
   SQRTn = (ulong)sqrt(n);
   c6= ell_get_c6(e);
   D = ell_get_disc(e);
@@ -3960,7 +3964,7 @@ elllog(GEN e, GEN a, GEN g, GEN o)
     case t_FFELT:
       if (!o) pari_err(e_MISC,"curve order required over a finite field");
       break;
-    default: pari_err(e_IMPL,"elllog over infinite fields");
+    default: pari_err_IMPL("elllog over infinite fields");
   }
   z = gen_PH_log(a,g,o, (void*)e,&ell_group,NULL);
   return gerepileupto(av, z? z: cgetg(1,t_VEC));
@@ -3998,7 +4002,7 @@ ellorder(GEN e, GEN z, GEN o)
       break;
     case t_INT: case t_FRAC:
       return utoi( _orderell(e, z) );
-    default: pari_err(e_IMPL,"orderell for nonrational elliptic curves");
+    default: pari_err_IMPL("orderell for nonrational elliptic curves");
   }
   return gerepileuptoint(av, gen_order(z, o, (void*)e, &ell_group));
 }

@@ -293,7 +293,7 @@ member_reg(GEN x) /* regulator */
     if (t == typ_QUA) return gel(x,4);
     member_err("reg",x);
   }
-  if (t == typ_BNR) pari_err(e_IMPL,"ray regulator");
+  if (t == typ_BNR) pari_err_IMPL("ray regulator");
   y = check_RES(y, "reg");
   return gel(y,2);
 }
@@ -312,7 +312,7 @@ member_fu(GEN x) /* fundamental units */
     }
     member_err("fu",x);
   }
-  if (t == typ_BNR) pari_err(e_IMPL,"ray units");
+  if (t == typ_BNR) pari_err_IMPL("ray units");
   return matbasistoalg(y, bnf_get_fu(y));
 }
 
@@ -334,7 +334,7 @@ member_tu(GEN x)
   }
   else
   {
-    if (t == typ_BNR) pari_err(e_IMPL,"ray torsion units");
+    if (t == typ_BNR) pari_err_IMPL("ray torsion units");
     gel(res,1) = utoipos( bnf_get_tuN(bnf) );
     gel(res,2) = basistoalg(bnf, bnf_get_tuU(bnf));
   }

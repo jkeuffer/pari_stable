@@ -42,7 +42,7 @@ _jbessel(GEN n, GEN z, long flag, long m)
     long v = valp(z);
     k = lg(Z)-2 - v;
     if (v < 0) pari_err(e_NEGVAL,"jbessel");
-    if (v == 0) pari_err(e_IMPL,"jbessel around a!=0");
+    if (v == 0) pari_err_IMPL("jbessel around a!=0");
     if (k <= 0) return scalarser(gen_1, varn(z), 2*v);
     setlg(Z, k+2);
   }
@@ -126,7 +126,7 @@ jbesselintern(GEN n, GEN z, long flag, long prec)
       }
       return gerepilecopy(av,y);
 
-    case t_PADIC: pari_err(e_IMPL,"p-adic jbessel function");
+    case t_PADIC: pari_err_IMPL("p-adic jbessel function");
     default:
       if (!(y = toser_i(z))) break;
       if (issmall(n,&ki)) n = utoi(labs(ki));
@@ -210,7 +210,7 @@ jbesselh(GEN n, GEN z, long prec)
       }
       return gerepilecopy(av, y);
 
-    case t_PADIC: pari_err(e_IMPL,"p-adic jbesselh function");
+    case t_PADIC: pari_err_IMPL("p-adic jbesselh function");
     default:
       av = avma; if (!(y = toser_i(z))) break;
       if (gequal0(y)) return gerepileupto(av, gpowgs(y,k));
@@ -338,7 +338,7 @@ _kbessel1(long n, GEN z, long flag, long m, long prec)
     long v = valp(z);
     k = lg(Z)-2 - v;
     if (v < 0) pari_err(e_NEGVAL,"_kbessel1");
-    if (v == 0) pari_err(e_IMPL,"Bessel K around a!=0");
+    if (v == 0) pari_err_IMPL("Bessel K around a!=0");
     if (k <= 0) return gadd(gen_1, zeroser(varn(z), 2*v));
     setlg(Z, k+2);
   }
@@ -468,7 +468,7 @@ kbesselintern(GEN n, GEN z, long flag, long prec)
       }
       return gerepilecopy(av, y);
 
-    case t_PADIC: pari_err(e_IMPL,"p-adic Bessel K function");
+    case t_PADIC: pari_err_IMPL("p-adic Bessel K function");
     default:
       if (!(y = toser_i(z))) break;
       if (issmall(n,&ki))
@@ -771,7 +771,7 @@ eint1(GEN x, long prec)
 
   if (typ(x) != t_REAL) {
     x = gtofp(x, prec);
-    if (typ(x) != t_REAL) pari_err(e_IMPL,"non-real argument in eint1");
+    if (typ(x) != t_REAL) pari_err_IMPL("non-real argument in eint1");
   }
   if (signe(x) >= 0) return gerepileuptoleaf(av, incgam2_0(x, mpexp(x)));
   /* rewritten from code contributed by Manfred Radimersky */
@@ -1798,7 +1798,7 @@ gzeta(GEN x, long prec)
     case t_PADIC:
       return zetap(x);
 
-    case t_SER: pari_err(e_IMPL,"zeta of power series");
+    case t_SER: pari_err_IMPL("zeta of power series");
   }
   return transc(gzeta,x,prec);
 }
@@ -2071,14 +2071,14 @@ gpolylog(long m, GEN x, long prec)
       for (i=1; i<lx; i++) gel(y,i) = polylog(m,gel(p1,i),prec);
       return gerepileupto(av, y);
 
-    case t_INTMOD: case t_PADIC: pari_err(e_IMPL, "padic polylogarithm");
+    case t_INTMOD: case t_PADIC: pari_err_IMPL( "padic polylogarithm");
     default:
       av = avma; if (!(y = toser_i(x))) break;
       if (!m) { avma = av; return mkfrac(gen_m1,gen_2); }
       if (m==1) return gerepileupto(av, gneg( glog(gsub(gen_1,y),prec) ));
       if (gequal0(y)) return gerepilecopy(av, y);
       v = valp(y);
-      if (v <= 0) pari_err(e_IMPL,"polylog around a!=0");
+      if (v <= 0) pari_err_IMPL("polylog around a!=0");
       n = (lg(y)-3 + v) / v;
       a = zeroser(varn(y), lg(y)-2);
       for (i=n; i>=1; i--)

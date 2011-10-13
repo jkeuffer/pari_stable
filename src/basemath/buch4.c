@@ -703,7 +703,7 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
   if (!nf) nf = bnf_get_nf(bnf);
 
   relpol = get_bnfpol(relpol, &bnfabs, &nfabs);
-  if (!gequal1(leading_term(relpol))) pari_err(e_IMPL,"non monic relative equation");
+  if (!gequal1(leading_term(relpol))) pari_err_IMPL("non monic relative equation");
   drel = degpol(relpol);
   if (varncmp(varn(relpol), vbas) >= 0)
     pari_err(e_MISC,"main variable must be of higher priority in rnfisnorminit");

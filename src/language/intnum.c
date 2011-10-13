@@ -1500,7 +1500,7 @@ mytra(GEN a, GEN x, long flag)
       gel(b,2) = (flag? mulcxI(xa): mulcxmI(xa));
       return b;
     case f_YOSCS: case f_YOSCC:
-      pari_err(e_IMPL,"Fourier transform of oscillating functions");
+      pari_err_IMPL("Fourier transform of oscillating functions");
   }
   return NULL;
 }

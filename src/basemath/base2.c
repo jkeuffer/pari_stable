@@ -2681,7 +2681,7 @@ rnfdedekind_i(GEN nf, GEN P, GEN pr, long vdisc, long only_maximal)
     pari_err(e_MISC,"relative polynomial with non-integral coefficients");
   if (vdisc == 1) return NULL; /* pr-maximal */
   if (!only_maximal && !gequal1(leading_term(P)))
-    pari_err(e_IMPL, "the full Dedekind criterion in the non-monic case");
+    pari_err_IMPL( "the full Dedekind criterion in the non-monic case");
   /* either monic OR only_maximal = 1 */
   m = degpol(P);
   nfT = nf_get_pol(nf);
@@ -2699,7 +2699,7 @@ rnfdedekind_i(GEN nf, GEN P, GEN pr, long vdisc, long only_maximal)
     else
     {
       GEN z = FqX_non_root(Ppr, T, p);
-      if (!z) pari_err(e_IMPL, "Dedekind in the difficult case");
+      if (!z) pari_err_IMPL( "Dedekind in the difficult case");
       z = Fq_to_nf(z, modpr);
       if (typ(z) == t_INT)
         P = RgX_translate(P, z);
@@ -3055,7 +3055,7 @@ rnfallbase(GEN nf, GEN *ppol, GEN *pD, GEN *pd, GEN *pf)
   nf = checknf(nf); nfT = nf_get_pol(nf);
   pol = rnf_fix_pol(nfT,pol,0);
   if (!gequal1(leading_term(pol)))
-    pari_err(e_IMPL,"non-monic relative polynomials");
+    pari_err_IMPL("non-monic relative polynomials");
 
   n = degpol(pol);
   disc = RgX_disc(pol); pol = lift_intern(pol);

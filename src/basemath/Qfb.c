@@ -97,7 +97,7 @@ GEN
 qfi(GEN x, GEN y, GEN z)
 {
   GEN t = cgetg(4,t_QFI);
-  if (signe(x) < 0) pari_err(e_IMPL,"negative definite t_QFI");
+  if (signe(x) < 0) pari_err_IMPL("negative definite t_QFI");
   gel(t,1) = icopy(x);
   gel(t,2) = icopy(y);
   gel(t,3) = icopy(z); return t;
@@ -1084,7 +1084,7 @@ primeform(GEN x, GEN p, long prec)
   {
     if (p[2] == 1) {
       if (sx < 0) {
-        if (sp < 0) pari_err(e_IMPL,"negative definite t_QFI");
+        if (sp < 0) pari_err_IMPL("negative definite t_QFI");
         return qfi_1_by_disc(x);
       }
       y = qfr_1_by_disc(x,prec);
@@ -1093,7 +1093,7 @@ primeform(GEN x, GEN p, long prec)
     }
     y = primeform_u(x, p[2]);
     if (sx < 0) {
-      if (sp < 0) pari_err(e_IMPL,"negative definite t_QFI");
+      if (sp < 0) pari_err_IMPL("negative definite t_QFI");
       return y;
     }
     if (sp < 0) { togglesign(gel(y,1)); togglesign(gel(y,3)); }
@@ -1102,7 +1102,7 @@ primeform(GEN x, GEN p, long prec)
   s = mod8(x);
   if (sx < 0)
   {
-    if (sp < 0) pari_err(e_IMPL,"negative definite t_QFI");
+    if (sp < 0) pari_err_IMPL("negative definite t_QFI");
     if (s) s = 8-s;
     y = cgetg(4, t_QFI);
   }

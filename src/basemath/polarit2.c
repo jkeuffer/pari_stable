@@ -36,7 +36,7 @@ polsym_gen(GEN P, GEN y0, long n, GEN T, GEN N)
   pari_sp av1, av2;
   GEN s,y,P_lead;
 
-  if (n<0) pari_err(e_IMPL,"polsym of a negative n");
+  if (n<0) pari_err_IMPL("polsym of a negative n");
   if (typ(P) != t_POL) pari_err_TYPE("polsym",P);
   if (!signe(P)) pari_err(e_ZEROPOL,"polsym");
   y = cgetg(n+2,t_COL);
@@ -576,7 +576,7 @@ factor(GEN x)
       tx=RgX_type(x,&p,&pol,&pa);
       switch(tx)
       {
-        case 0: pari_err(e_IMPL,"factor for general polynomials");
+        case 0: pari_err_IMPL("factor for general polynomials");
         case t_INT: return QX_factor(x);
         case t_INTMOD: return factmod(x,p);
 
@@ -633,7 +633,7 @@ factor(GEN x)
           {
             case t_INT: p1 = polfnf(x,pol); break;
             case t_INTMOD: p1 = factorff(x,p,pol); break;
-            default: pari_err(e_IMPL,"factor of general polynomial");
+            default: pari_err_IMPL("factor of general polynomial");
               return NULL; /* not reached */
           }
           switch (t1)
@@ -644,7 +644,7 @@ factor(GEN x)
             case t_COMPLEX: w = gen_I(); break;
             case t_QUAD: w = mkquad(pol,gen_0,gen_1);
               break;
-            default: pari_err(e_IMPL,"factor of general polynomial");
+            default: pari_err_IMPL("factor of general polynomial");
               return NULL; /* not reached */
           }
           p2=gel(p1,1);

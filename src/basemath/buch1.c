@@ -1040,7 +1040,7 @@ buchimag(GEN D, GEN c, GEN c2, GEN REL)
 
 GEN
 buchreal(GEN D, GEN flag, GEN c, GEN c2, GEN REL, long prec) {
-  if (signe(flag)) pari_err(e_IMPL,"narrow class group");
+  if (signe(flag)) pari_err_IMPL("narrow class group");
   (void)REL; return Buchquad(D,gtodouble(c),gtodouble(c2),prec);
 }
 
@@ -1063,6 +1063,6 @@ quadclassunit0(GEN x, long flag, GEN data, long prec)
     case 3: c2 = gtodouble(gel(data,2));
     case 2: c1 = gtodouble(gel(data,1));
   }
-  if (flag) pari_err(e_IMPL,"narrow class group");
+  if (flag) pari_err_IMPL("narrow class group");
   return Buchquad(x,c1,c2,prec);
 }

@@ -1788,7 +1788,7 @@ factorpadic2(GEN f, GEN p, long prec)
   f = QpX_to_ZX(f, p);
   if (n==1) return gerepilecopy(av, padic_trivfact(f,p,prec));
   if (!gequal1(leading_term(f)))
-    pari_err(e_IMPL,"factorpadic2 for non-monic polynomial");
+    pari_err_IMPL("factorpadic2 for non-monic polynomial");
 
   fa = ZX_squff(f, &ex);
   l = lg(fa); n = 0;

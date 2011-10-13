@@ -392,7 +392,7 @@ parse_bound(subgp_iter *T)
     T->bound = b;
     break;
   case t_COL: /* exact type */
-    pari_err(e_IMPL,"exact type in subgrouplist");
+    pari_err_IMPL("exact type in subgrouplist");
     if (lg(B) > len(T->L)+1) pari_err_TYPE("subgroup",B);
     T->boundtype = b_TYPE;
     break;
