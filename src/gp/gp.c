@@ -41,11 +41,21 @@ ENDEXTERN
 /**                                                                **/
 /********************************************************************/
 
-#define skip_space(s) while (isspace((int)*s)) s++
-#define skip_alpha(s) while (isalpha((int)*s)) s++
+static void
+skip_space(char **s) {
+  char *t = *s;
+  while (isspace((int)*t)) t++;
+  *s = t;
+}
+static void
+skip_alpha(char **s) {
+  char *t = *s;
+  while (isalpha((int)*t)) t++;
+  *s = t;
+}
 
 static char *
-translate(char **src, char *s)
+translate(char **src, char *s, char *entry)
 {
   char *t = *src;
   while (*t)
@@ -57,7 +67,8 @@ translate(char **src, char *s)
         case 'e':  *s='\033'; break; /* escape */
         case 'n':  *s='\n'; break;
         case 't':  *s='\t'; break;
-        default:   *s=*t; if (!*t) pari_err(e_MISC,"unfinished string");
+        default:   *s=*t;
+                   if (!*t) pari_err(e_SYNTAX,"unfinished string",s,entry);
       }
       t++; s++;
     }
@@ -71,16 +82,20 @@ translate(char **src, char *s)
   *s=0; *src=t; return s;
 }
 
-#define match2(s,c) if (*s != c) \
-                      pari_err(e_MISC,"expected character: '%c' instead of",c);
+static void
+matchQ(char *s, char *entry)
+{
+  if (*s != '"')
+    pari_err(e_SYNTAX,"expected character: '\"' instead of",s,entry);
+}
 
 /*  Read a "string" from src. Format then copy it, starting at s. Return
  *  pointer to char following the end of the input string */
 static char *
-readstring(char *src, char *s)
+readstring(char *src, char *s, char *entry)
 {
-  match2(src, '"'); src++; s = translate(&src, s);
-  match2(src, '"'); return src+1;
+  matchQ(src, entry); src++; s = translate(&src, s, entry);
+  matchQ(src, entry); return src+1;
 }
 /*******************************************************************/
 /**                                                               **/
@@ -136,14 +151,14 @@ parse_texmacs_command(tm_cmd *c, const char *ch)
   if (*s != '(' || *send-- != ')')
     pari_err(e_MISC, "missing enclosing parentheses for TeXmacs command");
   s++; t = s;
-  skip_alpha(s);
+  skip_alpha(&s);
   c->cmd = pari_strndup(t, s - t);
   stack_init(&s_A,sizeof(*A),(void**)&A);
   for (c->n = 0; s <= send; c->n++)
   {
     char *u = (char*)pari_malloc(strlen(s) + 1);
-    skip_space(s);
-    if (*s == '"') s = readstring(s, u);
+    skip_space(&s);
+    if (*s == '"') s = readstring(s, u, t);
     else
     { /* read integer */
       t = s;
@@ -657,7 +672,7 @@ aide0(const char *s0, int flag)
     return;
   }
   /* Get meaningful answer on '\ps 5' (e.g. from <F1>) */
-  if (*s == '\\') { char *t = s+1; skip_alpha(t); *t = '\0'; }
+  if (*s == '\\') { char *t = s+1; skip_alpha(&t); *t = '\0'; }
   if (isalpha((int)*s)) cut_trailing_garbage(s);
 
   if (flag & h_APROPOS) { external_help(s,-1); return; }
@@ -675,10 +690,10 @@ aide0(const char *s0, int flag)
     if (!strcmp(ep->name, "default"))
     {
       char *t = s+7, *e;
-      skip_space(t);
+      skip_space(&t);
       if (*t == '(') {
-        t++; skip_space(t);
-        e = t; skip_alpha(e); *e = '\0'; /* safe: get_sep() made it a copy */
+        t++; skip_space(&t);
+        e = t; skip_alpha(&e); *e = '\0'; /* safe: get_sep() made it a copy */
         if (pari_is_default(t)) { external_help(t, 2); return; }
       }
     }
@@ -1242,7 +1257,6 @@ static pari_stack s_env;
 static void
 gp_initrc(pari_stack *p_A)
 {
-  char *nexts,*s,*t;
   FILE *file = gprc_get();
   Buffer *b;
   filtre_t F;
@@ -1253,10 +1267,16 @@ gp_initrc(pari_stack *p_A)
   (void)stack_new(&s_env);
   for(;;)
   {
+    char *nexts, *s, *t;
+    long slen;
+
     if (setjmp(env[s_env.n-1])) err_printf("...skipping line %ld.\n", c);
     c++;
     if (!get_line_from_file(NULL,&F,file)) break;
     s = b->buf;
+    /* remove trailing \n */
+    slen = strlen(s);
+    if (s[slen-1] == '\n') s[slen-1] = 0;
     if (*s == '#')
     { /* preprocessor directive */
       int z, NOT = 0;
@@ -1284,15 +1304,18 @@ gp_initrc(pari_stack *p_A)
       { /* read file */
         s += 4;
         t = (char*)pari_malloc(strlen(s) + 1);
-        if (*s == '"') (void)readstring(s, t); else strcpy(t,s);
+        if (*s == '"') (void)readstring(s, t, s-4); else strcpy(t,s);
         stack_pushp(p_A,t);
       }
       else
       { /* set default */
+        char *s_end;
         t = s; while (*t && *t != '=') t++;
         if (*t != '=') err_gprc("missing '='",t,b->buf);
-        *t++ = 0;
-        if (*t == '"') (void)readstring(t, t);
+        s_end = t;
+        t++;
+        if (*t == '"') (void)readstring(t, t, s);
+        *s_end = 0;
         (void)setdefault(s,t,d_INITRC);
       }
     }
