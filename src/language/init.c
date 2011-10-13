@@ -993,6 +993,7 @@ pari_err2GEN(long numerr, va_list ap)
   case e_FLAG:
   case e_PREC:
   case e_BUG:
+  case e_ARCH:
     retmkerr2(numerr, strtoGENstr(va_arg(ap, char*)));
   case e_VAR:
     {
@@ -1149,7 +1150,7 @@ pari_err2str(GEN err)
   case e_INV:
     return pari_strdup("division by a non-invertible object");
   case e_ARCH:
-    return pari_strdup("sorry, not available on this system");
+    return pari_sprintf("sorry, '%Ps' not available on this system",gel(err,2));
   case e_MEM:
     return pari_strdup("not enough memory");
   case e_NONE: return NULL;

@@ -28,9 +28,9 @@ Doc: evaluates the expression sequence \var{seq1}. If an error of type
 
   \misctitle{Internal errors, ``system'' errors}
 
-  \item \kbd{"e\_ARCH"}. A requested feature is not available on this
+  \item \kbd{"e\_ARCH"}. A requested feature $s$ is not available on this
   architecture or operating system.
-  \var{E} has no component.
+  \var{E} has one component (\typ{STR}): the missing feature name $s$.
 
   \item \kbd{"e\_BUG"}. A bug in the PARI library, in function $s$.
   \var{E} has one component (\typ{STR}): the function name $s$.

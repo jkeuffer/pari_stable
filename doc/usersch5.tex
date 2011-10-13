@@ -7952,12 +7952,12 @@ can check their arguments.
 
 \subsec{Internal errors, ``system'' errors}
 
-\subsubsec{e\_ARCH} A requested feature is not available on this architecture
-or operating system.
+\subsubsec{e\_ARCH} A requested feature $s$ is not available on this
+architecture or operating system.
 \bprog
   pari_err(e_ARCH)
-@eprog\noindent prints the error message: \kbd{sorry, not available on this
-system}.
+@eprog\noindent prints the error message: \kbd{sorry, '$s$' not available on
+this system}.
 
 \subsubsec{e\_BUG} A bug in the PARI library, in function $s$.
 \bprog

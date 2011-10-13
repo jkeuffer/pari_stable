@@ -95,7 +95,8 @@ install0(char *name, char *code, char *gpname, char *lib)
 }
 #  else
 void
-install0(char *name, char *code, char *gpname, char *lib) { pari_err(e_ARCH); }
+install0(char *name, char *code, char *gpname, char *lib)
+{ pari_err(e_ARCH,"install"); }
 #endif
 #endif
 

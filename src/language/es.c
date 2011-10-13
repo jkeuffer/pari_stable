@@ -3328,7 +3328,7 @@ pariFILE *
 try_pipe(const char *cmd, int fl)
 {
 #ifndef HAVE_PIPES
-  pari_err(e_ARCH); return NULL;
+  pari_err(e_ARCH,"pipes"); return NULL;
 #else
   FILE *file;
   const char *f;
@@ -3339,7 +3339,7 @@ try_pipe(const char *cmd, int fl)
   {
     pari_sp av = avma;
     char *s;
-    if (flag & mf_OUT) pari_err(e_ARCH);
+    if (flag & mf_OUT) pari_err(e_ARCH,"pipes");
     f = pari_unique_filename("pipe");
     s = stackmalloc(strlen(cmd)+strlen(f)+4);
     sprintf(s,"%s > %s",cmd,f);

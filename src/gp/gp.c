@@ -1880,7 +1880,7 @@ system0(const char *s)
   if (system(s) < 0)
     pari_err(e_MISC, "system(\"%s\") failed", s);
 #else
-  pari_err(e_ARCH);
+  pari_err(e_ARCH,"system");
 #endif
 }
 
