@@ -2010,7 +2010,7 @@ and is slightly faster. It should be used in the following way:
 byteptr ptr = diffptr;
 ulong p = 0;
 
-if (maxprime() < goal) pari_err(e_MAXPRIME, goal); /*@Ccom not enough primes */
+if (maxprime() < goal) pari_err_MAXPRIME(goal); /*@Ccom not enough primes */
 while (p <= goal) /*@Ccom run through all primes up to \kbd{goal} */
 {
   NEXT_PRIME_VIADIFF(p, ptr);

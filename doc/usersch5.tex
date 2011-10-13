@@ -8018,7 +8018,6 @@ determinant of a non-square matrix.
 \subsec{e\_VAR} polynomials $x$ and $y$ submitted to function $s$ have
 inconsistent variables. E.g., considering the algebraic number
 \kbd{Mod(t,t\pow2+1)} in \kbd{nfinit(x\pow2+1)}.
-
 \bprog
   pari_err(e_VAR, const char *s, GEN x, GEN y)
   pari_err_VAR( const char *s, GEN x, GEN y)
@@ -8046,12 +8045,14 @@ represented within PARI's hardcoded limits. (As in \kbd{2\pow2\pow2\pow10}
 or \kbd{exp(1e100)}, which overflow in \kbd{lg} and \kbd{expo}.)
 \bprog
   pari_err(e_OVERFLOW, const char *s)
+  pari_err_OVERFLOW(const char *s)
 @eprog\noindent prints the error message: \kbd{overflow in $s$}.
 
 \subsec{e\_MAXPRIME} A function using the precomputed list of prime numbers
 ran out of primes.
 \bprog
   pari_err(e_MAXPRIME, ulong c)
+  pari_err_MAXPRIME(ulong c)
 @eprog\noindent prints the error message: \kbd{not enough precomputed primes,
 need primelimit \til $c$} if $c$ is non-zero. And simply \kbd{not enough
 precomputed primes} otherwise.

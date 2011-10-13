@@ -21,21 +21,21 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 INLINE long
 evallg(long x)
 {
-  if (x & ~LGBITS) pari_err(e_OVERFLOW,"lg()");
+  if (x & ~LGBITS) pari_err_OVERFLOW("lg()");
   return _evallg(x);
 }
 INLINE long
 evalvalp(long x)
 {
   long v = _evalvalp(x);
-  if (v & ~VALPBITS) pari_err(e_OVERFLOW,"valp()");
+  if (v & ~VALPBITS) pari_err_OVERFLOW("valp()");
   return v;
 }
 INLINE long
 evalexpo(long x)
 {
   long v = _evalexpo(x);
-  if (v & ~EXPOBITS) pari_err(e_OVERFLOW,"expo()");
+  if (v & ~EXPOBITS) pari_err_OVERFLOW("expo()");
   return v;
 }
 
@@ -266,7 +266,7 @@ itos(GEN x)
   if (!s) return 0;
   u = x[2];
   if (lgefint(x) > 3 || u < 0)
-    pari_err(e_OVERFLOW,"t_INT-->long assignment");
+    pari_err_OVERFLOW("t_INT-->long assignment");
   return (s>0) ? u : -u;
 }
 /* as itos, but return 0 if too large. Cf is_bigint */
@@ -283,7 +283,7 @@ itou(GEN x)
     case 2: return 0;
     case 3: return x[2];
     default:
-      pari_err(e_OVERFLOW,"t_INT-->ulong assignment");
+      pari_err_OVERFLOW("t_INT-->ulong assignment");
       return 0; /* not reached */
   }
 }
@@ -939,7 +939,7 @@ shiftr(GEN x, long n)
   const long e = evalexpo(expo(x)+n);
   const GEN y = rcopy(x);
 
-  if (e & ~EXPOBITS) pari_err(e_OVERFLOW,"expo()");
+  if (e & ~EXPOBITS) pari_err_OVERFLOW("expo()");
   y[1] = (y[1]&~EXPOBITS) | e; return y;
 }
 INLINE GEN
@@ -1000,7 +1000,7 @@ INLINE void
 affii(GEN x, GEN y)
 {
   long lx = lgefint(x);
-  if (lg(y)<lx) pari_err(e_OVERFLOW,"t_INT-->t_INT assignment");
+  if (lg(y)<lx) pari_err_OVERFLOW("t_INT-->t_INT assignment");
   while (--lx) y[lx] = x[lx];
 }
 INLINE void

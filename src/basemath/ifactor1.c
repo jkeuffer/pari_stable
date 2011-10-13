@@ -3782,7 +3782,7 @@ ifactor(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
   n = gclone(n); setabssign(n);
   /* trial division bound */
   if (all) {
-    if (all > maxprime() + 1) pari_err(e_MAXPRIME, all);
+    if (all > maxprime() + 1) pari_err_MAXPRIME(all);
     lim = all; /* use supplied limit */
   }
   else

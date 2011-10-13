@@ -654,7 +654,7 @@ powp(GEN x, GEN n)
   long v;
   GEN y, mod, p = gel(x,2);
 
-  if (valp(x)) pari_err(e_OVERFLOW,"valp()");
+  if (valp(x)) pari_err_OVERFLOW("valp()");
 
   if (!signe(x[4])) {
     if (signe(n) < 0) pari_err(e_INV);
@@ -794,11 +794,11 @@ powgi(GEN x, GEN n)
 
     case t_INT:
       if (is_pm1(x)) return (signe(x) < 0 && mpodd(n))? gen_m1: gen_1;
-      if (signe(x)) pari_err(e_OVERFLOW,"lg()");
+      if (signe(x)) pari_err_OVERFLOW("lg()");
       if (signe(n) < 0) pari_err(e_INV);
       return gen_0;
     case t_FRAC:
-      pari_err(e_OVERFLOW,"lg()");
+      pari_err_OVERFLOW("lg()");
 
     case t_QFR: return qfrpow(x, n);
     case t_POLMOD: return pow_polmod(x, n);
@@ -1578,7 +1578,7 @@ modlog2(GEN x, long *sh)
   double d = rtodbl(x);
   long q = (long) ((fabs(d) + (LOG2/2))/LOG2);
   if (d > LOG2 * LONG_MAX)
-    pari_err(e_OVERFLOW, "expo()"); /* avoid overflow in  q */
+    pari_err_OVERFLOW("expo()"); /* avoid overflow in  q */
   if (d < 0) q = -q;
   *sh = q;
   if (q) {
