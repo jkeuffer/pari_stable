@@ -98,7 +98,7 @@ void
 checksqmat(GEN x, long N)
 {
   if (typ(x)!=t_MAT) pari_err_TYPE("checksqmat",x);
-  if (lg(x) == 1 || lg(x[1]) != N+1) pari_err(e_DIM,"checksqmat");
+  if (lg(x) == 1 || lg(x[1]) != N+1) pari_err_DIM("checksqmat");
 }
 
 GEN
@@ -146,7 +146,7 @@ check_ZKmodule(GEN x, const char *s)
   if (typ(x) != t_VEC || lg(x) < 3) pari_err_TYPE(s,x);
   if (typ(x[1]) != t_MAT) pari_err_TYPE(s,gel(x,1));
   if (typ(x[2]) != t_VEC) pari_err_TYPE(s,gel(x,2));
-  if (lg(x[2]) != lg(x[1])) pari_err(e_DIM, s);
+  if (lg(x[2]) != lg(x[1])) pari_err_DIM(s);
 }
 
 GEN

@@ -903,7 +903,7 @@ FFT(GEN x, GEN Omega)
   GEN y, z;
   if (!is_vec_t(typ(x))) pari_err_TYPE("FFT",x);
   if (typ(Omega) != t_VEC) pari_err_TYPE("FFT",Omega);
-  if (n > l) pari_err(e_DIM,"FFT");
+  if (n > l) pari_err_DIM("FFT");
 
   if (n < l) {
     z = cgetg(l, t_VECSMALL); /* cf stackdummy */

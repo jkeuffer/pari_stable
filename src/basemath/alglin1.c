@@ -854,14 +854,14 @@ init_gauss(GEN a, GEN *b, long *aco, long *li, int *iscol)
   *aco = lg(a) - 1;
   if (!*aco) /* a empty */
   {
-    if (*b && lg(*b) != 1) pari_err(e_DIM,"gauss");
+    if (*b && lg(*b) != 1) pari_err_DIM("gauss");
     *li = 0; return 0;
   }
   *li = lg(a[1])-1;
-  if (*li < *aco) pari_err(e_DIM,"gauss");
+  if (*li < *aco) pari_err_DIM("gauss");
   if (*b)
   {
-    if (*li != *aco) pari_err(e_DIM,"gauss");
+    if (*li != *aco) pari_err_DIM("gauss");
     switch(typ(*b))
     {
       case t_MAT:
@@ -873,7 +873,7 @@ init_gauss(GEN a, GEN *b, long *aco, long *li, int *iscol)
         break;
       default: pari_err_TYPE("gauss",*b);
     }
-    if (lg((*b)[1])-1 != *li) pari_err(e_DIM,"gauss");
+    if (lg((*b)[1])-1 != *li) pari_err_DIM("gauss");
   }
   else
     *b = matid(*li);
@@ -1953,7 +1953,7 @@ sinverseimage(GEN mat, GEN y)
   GEN col,p1 = cgetg(nbcol+1,t_MAT);
 
   if (nbcol==1) return NULL;
-  if (lg(y) != lg(mat[1])) pari_err(e_DIM,"inverseimage");
+  if (lg(y) != lg(mat[1])) pari_err_DIM("inverseimage");
 
   gel(p1,nbcol) = y;
   for (i=1; i<nbcol; i++) p1[i]=mat[i];
@@ -2875,7 +2875,7 @@ sFpM_invimage(GEN mat, GEN y, GEN p)
   GEN M = cgetg(l+1,t_MAT), col, t;
 
   if (l==1) return NULL;
-  if (lg(y) != lg(mat[1])) pari_err(e_DIM,"FpM_invimage");
+  if (lg(y) != lg(mat[1])) pari_err_DIM("FpM_invimage");
 
   for (i=1; i<l; i++) gel(M,i) = gel(mat,i);
   gel(M,l) = y; M = FpM_ker(M,p);
@@ -3143,7 +3143,7 @@ eigen(GEN x, long prec)
   pari_sp av = avma;
 
   if (typ(x)!=t_MAT) pari_err_TYPE("eigen",x);
-  if (n != 1 && n != lg(x[1])) pari_err(e_DIM,"eigen");
+  if (n != 1 && n != lg(x[1])) pari_err_DIM("eigen");
   if (n<=2) return gcopy(x);
 
   ex = 16 - prec2nbits(prec);
@@ -3242,7 +3242,7 @@ det2(GEN a)
   long nbco = lg(a)-1;
   if (typ(a)!=t_MAT) pari_err_TYPE("det2",a);
   if (!nbco) return gen_1;
-  if (nbco != lg(a[1])-1) pari_err(e_DIM,"det2");
+  if (nbco != lg(a[1])-1) pari_err_DIM("det2");
   pivot = get_pivot_fun(a, &data);
   return det_simple_gauss(a, data, pivot);
 }
@@ -3450,7 +3450,7 @@ det(GEN a)
 
   if (typ(a)!=t_MAT) pari_err_TYPE("det",a);
   if (!n) return gen_1;
-  if (n != lg(a[1])-1) pari_err(e_DIM,"det");
+  if (n != lg(a[1])-1) pari_err_DIM("det");
   if (n == 1) return gcopy(gcoeff(a,1,1));
   if (RgM_is_FpM(a, &p) && p)
   {
@@ -3480,13 +3480,13 @@ gaussmoduloall(GEN M, GEN D, GEN Y, GEN *ptu1)
     switch(typ(Y))
     {
       case t_INT: break;
-      case t_COL: if (lg(Y) != 1) pari_err(e_DIM,"gaussmodulo");
+      case t_COL: if (lg(Y) != 1) pari_err_DIM("gaussmodulo");
       default: pari_err_TYPE("gaussmodulo",Y);
     }
     switch(typ(D))
     {
       case t_INT: break;
-      case t_COL: if (lg(D) != 1) pari_err(e_DIM,"gaussmodulo");
+      case t_COL: if (lg(D) != 1) pari_err_DIM("gaussmodulo");
       default: pari_err_TYPE("gaussmodulo",D);
     }
     if (ptu1) *ptu1 = cgetg(1, t_MAT);
@@ -3496,7 +3496,7 @@ gaussmoduloall(GEN M, GEN D, GEN Y, GEN *ptu1)
   switch(typ(D))
   {
     case t_COL:
-      if (lg(D)-1!=n) pari_err(e_DIM,"gaussmodulo");
+      if (lg(D)-1!=n) pari_err_DIM("gaussmodulo");
       delta = diagonal_shallow(D); break;
     case t_INT: delta = scalarmat_shallow(D,n); break;
     default: pari_err_TYPE("gaussmodulo",D);
@@ -3506,7 +3506,7 @@ gaussmoduloall(GEN M, GEN D, GEN Y, GEN *ptu1)
   {
     case t_INT: Y = const_col(n, Y); break;
     case t_COL:
-      if (lg(Y)-1!=n) pari_err(e_DIM,"gaussmodulo");
+      if (lg(Y)-1!=n) pari_err_DIM("gaussmodulo");
       break;
     default: pari_err_TYPE("gaussmodulo",Y);
       return NULL; /* not reached */

@@ -1490,7 +1490,7 @@ gsubstvec(GEN e, GEN v, GEN r)
   GEN w,z;
   if ( !is_vec_t(typ(v)) ) pari_err_TYPE("substvec",v);
   if ( !is_vec_t(typ(r)) ) pari_err_TYPE("substvec",r);
-  if (lg(r)!=l) pari_err(e_DIM,"substvec");
+  if (lg(r)!=l) pari_err_DIM("substvec");
   w = cgetg(l,t_VECSMALL);
   z = cgetg(l,t_VECSMALL);
   for(i=j=1;i<l;i++)
@@ -1689,7 +1689,7 @@ diffop(GEN x, GEN v, GEN dv)
   GEN y;
   if (!is_vec_t(typ(v))) pari_err_TYPE("diffop",v);
   if (!is_vec_t(typ(dv))) pari_err_TYPE("diffop",dv);
-  if (lg(v)!=lg(dv)) pari_err(e_DIM,"diffop");
+  if (lg(v)!=lg(dv)) pari_err_DIM("diffop");
   if (is_const_t(tx)) return gen_0;
   switch(tx)
   {
@@ -3756,7 +3756,7 @@ GEN
 qfeval(GEN q, GEN x)
 {
   long l = lg(q);
-  if (lg(x) != l) pari_err(e_DIM,"qfeval");
+  if (lg(x) != l) pari_err_DIM("qfeval");
   if (l == 1) return gen_0;
   return qfeval0(q,x,l);
 }
@@ -3785,7 +3785,7 @@ hqfeval(GEN q, GEN x)
 {
   long l = lg(q);
 
-  if (lg(x) != l) pari_err(e_DIM,"hqfeval");
+  if (lg(x) != l) pari_err_DIM("hqfeval");
   if (l==1) return gen_0;
   if (lg(q[1]) != l) pari_err(e_MISC,"invalid quadratic form in hqfeval");
   return hqfeval0(q,x,l);
@@ -3852,7 +3852,7 @@ GEN
 qfevalb(GEN q, GEN x, GEN y)
 {
   long l = lg(q);
-  if (lg(x) != l || lg(y) != l) pari_err(e_DIM,"qfevalb");
+  if (lg(x) != l || lg(y) != l) pari_err_DIM("qfevalb");
   if (l==1) return gen_0;
   return qfevalb0(q,x,y,l);
 }
@@ -3863,7 +3863,7 @@ init_qf_apply(GEN q, GEN M, long *k, long *l)
   *l = lg(q); *k = lg(M);
   if (*l == 1) { if (*k == 1) return; }
   else         { if (*k != 1 && lg(M[1]) == *l) return; }
-  pari_err(e_DIM,"qf_apply_RgM");
+  pari_err_DIM("qf_apply_RgM");
 }
 /* Return X = M'.q.M, assuming q is a symetric matrix and M is a
  * matrix of compatible dimensions. X_ij are X_ji identical, not copies */

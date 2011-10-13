@@ -293,7 +293,7 @@ hess(GEN x)
 
   if (typ(x) != t_MAT) pari_err_TYPE("hess",x);
   if (lx == 1) return cgetg(1,t_MAT);
-  if (lg(x[1]) != lx) pari_err(e_DIM,"hess");
+  if (lg(x[1]) != lx) pari_err_DIM("hess");
 
   x = RgM_shallowcopy(x); lim = stack_lim(av,2);
   for (m=2; m<lx-1; m++)
@@ -332,7 +332,7 @@ Flm_hess(GEN x, ulong p)
 
   if (typ(x) != t_MAT) pari_err_TYPE("hess",x);
   if (lx == 1) return cgetg(1,t_MAT);
-  if (lg(x[1]) != lx) pari_err(e_DIM,"hess");
+  if (lg(x[1]) != lx) pari_err_DIM("hess");
 
   x = Flm_copy(x);
   for (m=2; m<lx-1; m++)
@@ -811,7 +811,7 @@ gtrace(GEN x)
     case t_MAT:
       lx = lg(x); if (lx == 1) return gen_0;
       /*now lx >= 2*/
-      if (lx != lg(x[1])) pari_err(e_DIM,"gtrace");
+      if (lx != lg(x[1])) pari_err_DIM("gtrace");
       av = avma; return gerepileupto(av, mattrace(x));
   }
   pari_err_TYPE("gtrace",x);
@@ -829,7 +829,7 @@ qfgaussred_positive(GEN a)
 
   if (typ(a)!=t_MAT) pari_err_TYPE("qfgaussred_positive",a);
   if (n == 1) return cgetg(1, t_MAT);
-  if (lg(a[1])!=n) pari_err(e_DIM,"qfgaussred_positive");
+  if (lg(a[1])!=n) pari_err_DIM("qfgaussred_positive");
   b = cgetg(n,t_MAT);
   for (j=1; j<n; j++)
   {
@@ -893,7 +893,7 @@ gaussred(GEN a, long signature)
 
   if (typ(a) != t_MAT) pari_err_TYPE("gaussred",a);
   if (n == 1) return signature? mkvec2(gen_0, gen_0): cgetg(1, t_MAT);
-  if (lg(a[1]) != n) pari_err(e_DIM,"gaussred");
+  if (lg(a[1]) != n) pari_err_DIM("gaussred");
   n--;
 
   av = avma;
@@ -1012,7 +1012,7 @@ jacobi(GEN a, long prec)
   L = cgetg(l,t_COL); gel(ja,1) = L;
   r = cgetg(l,t_MAT); gel(ja,2) = r;
   if (l == 1) return ja;
-  if (lg(a[1]) != l) pari_err(e_DIM,"jacobi");
+  if (lg(a[1]) != l) pari_err_DIM("jacobi");
 
   e1 = HIGHEXPOBIT-1;
   for (j=1; j<l; j++)

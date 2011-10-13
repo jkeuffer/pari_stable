@@ -418,7 +418,7 @@ rnfidealabstorel(GEN rnf, GEN x)
   m = nf_get_degree(nf);
   N = m * rnf_get_degree(rnf);
   if (typ(x) != t_VEC) pari_err_TYPE("rnfidealabstorel",x);
-  if (lg(x)-1 != N) pari_err(e_DIM, "rnfidealabstorel");
+  if (lg(x)-1 != N) pari_err_DIM("rnfidealabstorel");
   A = cgetg(N+1,t_MAT);
   I = cgetg(N+1,t_VEC); z = mkvec2(A,I);
   for (j=1; j<=N; j++)
@@ -778,7 +778,7 @@ rnflllgram(GEN nf, GEN pol, GEN order,long prec)
   M = gel(order,1);
   I = gel(order,2); lx = lg(I);
   if (lx < 3) return gcopy(order);
-  if (lx-1 != degpol(pol)) pari_err(e_DIM,"rnflllgram");
+  if (lx-1 != degpol(pol)) pari_err_DIM("rnflllgram");
   I = leafcopy(I);
   H = NULL;
   MPOL = matbasistoalg(nf, M);

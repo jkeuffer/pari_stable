@@ -656,7 +656,7 @@ rectpoints(long ne, GEN listx, GEN listy)
   lx = lg(listx);
   if (tx == t_MAT) pari_err_TYPE("rectpoints",listx);
   if (ty == t_MAT) pari_err_TYPE("rectpoints",listy);
-  if (lg(listy) != lx) pari_err(e_DIM,"rectpoints");
+  if (lg(listy) != lx) pari_err_DIM("rectpoints");
   lx--; if (!lx) return;
 
   px = (double*) pari_malloc(lx*sizeof(double)); listx++;
@@ -711,7 +711,7 @@ rectlines(long ne, GEN listx, GEN listy, long flag)
   }
   if (tx == t_MAT) pari_err_TYPE("rectlines",listx);
   if (ty == t_MAT) pari_err_TYPE("rectlines",listy);
-  if (lg(listy) != lx) pari_err(e_DIM,"rectlines");
+  if (lg(listy) != lx) pari_err_DIM("rectlines");
   lx--; if (!lx) return;
 
   x = (double*) pari_malloc(lx*sizeof(double));
@@ -1173,7 +1173,7 @@ gtodblList(GEN data, long flags)
       y = gel(data,u+1); ty = typ(y);
       if (!is_vec_t(ty)) pari_err_TYPE("gtodblList",y);
       if (lg(y) != lx || (!param && lx != lx1))
-        pari_err(e_DIM,"gtodblList");
+        pari_err_DIM("gtodblList");
     }
 
     lx--;

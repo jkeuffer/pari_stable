@@ -639,7 +639,7 @@ lllgramallgen(GEN x, long flag)
   int flc;
 
   n = lx-1; if (n<=1) return lll_trivial(x,flag);
-  if (lg(x[1]) != lx) pari_err(e_DIM,"lllgramallgen");
+  if (lg(x[1]) != lx) pari_err_DIM("lllgramallgen");
 
   fl = cgetg(lx, t_VECSMALL);
 

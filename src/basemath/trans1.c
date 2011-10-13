@@ -390,7 +390,7 @@ gpowg0(GEN x)
 
     case t_MAT:
       lx=lg(x); if (lx==1) return cgetg(1,t_MAT);
-      if (lx != lg(x[1])) pari_err(e_DIM,"gpow");
+      if (lx != lg(x[1])) pari_err_DIM("gpow");
       y = matid(lx-1);
       for (i=1; i<lx; i++) gcoeff(y,i,i) = gpowg0(gcoeff(x,i,i));
       return y;

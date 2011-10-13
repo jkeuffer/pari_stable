@@ -1208,6 +1208,8 @@ pari_err(int numerr, ...)
 }
 
 void
+pari_err_DIM(const char *f) { pari_err(e_DIM, f); }
+void
 pari_err_FILE(const char *f, const char *g) { pari_err(e_FILE, f,g); }
 void
 pari_err_FLAG(const char *f) { pari_err(e_FLAG,f); }

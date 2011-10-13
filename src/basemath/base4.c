@@ -1447,7 +1447,7 @@ idealinv(GEN nf, GEN x)
   switch (tx)
   {
     case id_MAT:
-      if (lg(x)-1 != nf_get_degree(nf)) pari_err(e_DIM,"idealinv");
+      if (lg(x)-1 != nf_get_degree(nf)) pari_err_DIM("idealinv");
       x = idealinv_HNF(nf,x); break;
     case id_PRINCIPAL: tx = typ(x);
       if (is_const_t(tx)) x = ginv(x);
@@ -2607,7 +2607,7 @@ nfsnf(GEN nf, GEN x)
   n = lg(A)-1;
   if (typ(I)!=t_VEC) pari_err_TYPE("nfsnf",I);
   if (typ(J)!=t_VEC) pari_err_TYPE("nfsnf",J);
-  if (lg(I)!=n+1 || lg(J)!=n+1) pari_err(e_DIM,"nfsnf");
+  if (lg(I)!=n+1 || lg(J)!=n+1) pari_err_DIM("nfsnf");
   if (!n) pari_err(e_MISC,"not a matrix of maximal rank in nfsnf");
   m = lg(A[1])-1;
   if (n < m) pari_err(e_MISC,"not a matrix of maximal rank in nfsnf");
