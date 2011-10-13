@@ -1338,7 +1338,7 @@ Fl_sqrt(ulong a, ulong p)
   p1 = p - 1; e = vals(p1);
   if (e == 0) /* p = 2 */
   {
-    if (p != 2) pari_err(e_MISC,"composite modulus in Fl_sqrt: %lu",p);
+    if (p != 2) pari_err(e_PRIME,"Fl_sqrt [modulus]",utoi(p));
     return ((a & 1) == 0)? 0: 1;
   }
   q = p1 >> e; /* q = (p-1)/2^oo is odd */
@@ -1350,7 +1350,7 @@ Fl_sqrt(ulong a, ulong p)
       if (i >= 0)
       {
         if (i) continue;
-        pari_err(e_MISC,"composite modulus in Fl_sqrt: %lu",p);
+        pari_err(e_PRIME,"Fl_sqrt [modulus]",utoi(p));
       }
       y = m = Fl_powu(k, q, p);
       for (i=1; i<e; i++)
@@ -1487,7 +1487,7 @@ Fp_sqrt(GEN a, GEN p)
   if (e == 0) /* p = 2 */
   {
     avma = av;
-    if (!equaliu(p,2)) pari_err(e_MISC,"composite modulus in Fp_sqrt: %Ps",p);
+    if (!equaliu(p,2)) pari_err(e_PRIME,"Fp_sqrt [modulus]",p);
     if (!signe(a) || !mod2(a)) return gen_0;
     return gen_1;
   }
@@ -1501,7 +1501,7 @@ Fp_sqrt(GEN a, GEN p)
       if (i >= 0)
       {
         if (i) continue;
-        pari_err(e_MISC,"composite modulus in Fp_sqrt: %Ps",p);
+        pari_err(e_PRIME,"Fp_sqrt [modulus]",p);
       }
       av1 = avma;
       y = m = Fp_pow(utoipos((ulong)k),q,p);
