@@ -1322,8 +1322,8 @@ cornacchia(GEN d, GEN p, GEN *px, GEN *py)
   pari_sp av = avma, av2, lim;
   GEN a, b, c, L, r;
 
-  if (typ(d) != t_INT) pari_err_TYPE( "cornacchia", d);
-  if (typ(p) != t_INT) pari_err_TYPE( "cornacchia", p);
+  if (typ(d) != t_INT) pari_err_TYPE("cornacchia", d);
+  if (typ(p) != t_INT) pari_err_TYPE("cornacchia", p);
   if (signe(d) <= 0) pari_err(e_MISC, "d must be positive");
   *px = *py = gen_0;
   b = subii(p, d);
@@ -1357,8 +1357,8 @@ cornacchia2(GEN d, GEN p, GEN *px, GEN *py)
   GEN a, b, c, L, r, px4;
   long k;
 
-  if (typ(d) != t_INT) pari_err_TYPE( "cornacchia", d);
-  if (typ(p) != t_INT) pari_err_TYPE( "cornacchia", p);
+  if (typ(d) != t_INT) pari_err_TYPE("cornacchia", d);
+  if (typ(p) != t_INT) pari_err_TYPE("cornacchia", p);
   if (signe(d) <= 0) pari_err(e_MISC, "d must be positive");
   *px = *py = gen_0;
   k = mod4(d);

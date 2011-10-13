@@ -1584,7 +1584,7 @@ content(GEN x)
       if (signe(c) < 0) c = negi(c);
       break;
     case t_VEC: case t_COL: case t_MAT:
-      pari_err_TYPE( "content",x);
+      pari_err_TYPE("content",x);
   }
 
   return av==avma? gcopy(c): gerepileupto(av,c);

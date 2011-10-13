@@ -2392,8 +2392,8 @@ sumdedekind(GEN h, GEN k)
 {
   pari_sp av = avma;
   GEN d;
-  if (typ(h) != t_INT) pari_err_TYPE( "sumdedekind",h);
-  if (typ(k) != t_INT) pari_err_TYPE( "sumdedekind",k);
+  if (typ(h) != t_INT) pari_err_TYPE("sumdedekind",h);
+  if (typ(k) != t_INT) pari_err_TYPE("sumdedekind",k);
   d = gcdii(h,k);
   if (!is_pm1(d))
     avma = av;

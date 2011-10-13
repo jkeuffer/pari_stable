@@ -214,7 +214,7 @@ adjsafe(GEN x)
   long n = lg(x)-1;
   pari_sp av = avma;
   GEN C;
-  if (typ(x) != t_MAT) pari_err_TYPE( "matadjoint",x);
+  if (typ(x) != t_MAT) pari_err_TYPE("matadjoint",x);
   if (n <= 1) return gcopy(x);
   C = carberkowitz(x, 0);
   C = RgX_shift_shallow(C, -1);

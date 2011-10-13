@@ -23,26 +23,26 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 void
 checkellpt(GEN z)
-{ if (typ(z)!=t_VEC || lg(z) > 3) pari_err_TYPE( "checkellpt", z); }
+{ if (typ(z)!=t_VEC || lg(z) > 3) pari_err_TYPE("checkellpt", z); }
 void
 checkell5(GEN e)
-{ if (typ(e)!=t_VEC || lg(e) < 6) pari_err_TYPE( "checkell5",e); }
+{ if (typ(e)!=t_VEC || lg(e) < 6) pari_err_TYPE("checkell5",e); }
 void
 checksmallell(GEN e)
-{ if (typ(e)!=t_VEC || lg(e) < 14) pari_err_TYPE( "checksmallell",e); }
+{ if (typ(e)!=t_VEC || lg(e) < 14) pari_err_TYPE("checksmallell",e); }
 void
 checkell(GEN e)
-{ if (typ(e)!=t_VEC || lg(e) < 20) pari_err_TYPE( "checkell",e); }
+{ if (typ(e)!=t_VEC || lg(e) < 20) pari_err_TYPE("checkell",e); }
 static void
 checksmallell_real(GEN e)
 { if (typ(e)!=t_VEC || (lg(e) >= 20 && !ell_is_real(e)))
-    pari_err_TYPE( "checksmallell_real", e); }
+    pari_err_TYPE("checksmallell_real", e); }
 void
 checkell_real(GEN e)
-{ if (typ(e)!=t_VEC || !ell_is_real(e)) pari_err_TYPE( "checkell_real", e); }
+{ if (typ(e)!=t_VEC || !ell_is_real(e)) pari_err_TYPE("checkell_real", e); }
 void
 checkell_padic(GEN e)
-{ if (typ(e)!=t_VEC || !ell_is_padic(e)) pari_err_TYPE( "checkell_padic",e); }
+{ if (typ(e)!=t_VEC || !ell_is_padic(e)) pari_err_TYPE("checkell_padic",e); }
 static void
 checkcoordch(GEN z)
 { if (typ(z)!=t_VEC || lg(z) != 5) pari_err_TYPE("checkcoordch",z); }
@@ -3620,7 +3620,7 @@ ellheight0(GEN e, GEN a, long flag, long prec)
   GEN Lp, x, y, z, phi2, psi2, psi3;
 
   if (flag > 2 || flag < 0) pari_err_FLAG("ellheight");
-  checksmallell_real(e); if (!is_matvec_t(tx)) pari_err_TYPE( "ellgheight",a);
+  checksmallell_real(e); if (!is_matvec_t(tx)) pari_err_TYPE("ellgheight",a);
   lx = lg(a); if (lx==1) return cgetg(1,tx);
   tx = typ(a[1]);
   if (is_matvec_t(tx))
@@ -3694,7 +3694,7 @@ mathell(GEN e, GEN x, long prec)
   long lx = lg(x),i,j,tx=typ(x);
   pari_sp av = avma;
 
-  if (!is_vec_t(tx)) pari_err_TYPE( "ellheightmatrix",x);
+  if (!is_vec_t(tx)) pari_err_TYPE("ellheightmatrix",x);
   y = cgetg(lx,t_MAT); pdiag = new_chunk(lx);
   for (i=1; i<lx; i++)
   {
@@ -3742,8 +3742,8 @@ bilhell(GEN e, GEN z1, GEN z2, long prec)
   long tz1 = typ(z1), tz2 = typ(z2);
   pari_sp av = avma;
 
-  if (!is_matvec_t(tz1)) pari_err_TYPE( "ellbil",z1);
-  if (!is_matvec_t(tz2)) pari_err_TYPE( "ellbil",z2);
+  if (!is_matvec_t(tz1)) pari_err_TYPE("ellbil",z1);
+  if (!is_matvec_t(tz2)) pari_err_TYPE("ellbil",z2);
   if (lg(z1)==1) return cgetg(1,tz1);
   if (lg(z2)==1) return cgetg(1,tz2);
 

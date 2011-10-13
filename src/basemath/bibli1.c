@@ -487,11 +487,11 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
 
   pari_sp av = avma;
 
-  if (typ(P0) != t_POL) pari_err_TYPE( "zncoppersmith",P0);
-  if (typ(N) != t_INT) pari_err_TYPE( "zncoppersmith",N);
+  if (typ(P0) != t_POL) pari_err_TYPE("zncoppersmith",P0);
+  if (typ(N) != t_INT) pari_err_TYPE("zncoppersmith",N);
   if (typ(X) != t_INT) {
     X = gfloor(X);
-    if (typ(X) != t_INT) pari_err_TYPE( "zncoppersmith",X);
+    if (typ(X) != t_INT) pari_err_TYPE("zncoppersmith",X);
   }
   if (signe(X) < 0) pari_err(e_MISC, "negative bound in zncoppersmith");
   if (!B) B = N;
@@ -1678,12 +1678,12 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
   else
   {
     BORNE = gfloor(BORNE);
-    if (typ(BORNE) != t_INT) pari_err_TYPE( "minim0",BORNE);
+    if (typ(BORNE) != t_INT) pari_err_TYPE("minim0",BORNE);
     sBORNE = itos(BORNE); avma = av;
     BORNE = NULL; /* no longer used */
   }
   if (!STOCKMAX) stockall = 1;
-  else if (typ(STOCKMAX) != t_INT) pari_err_TYPE( "minim0",STOCKMAX);
+  else if (typ(STOCKMAX) != t_INT) pari_err_TYPE("minim0",STOCKMAX);
 
   maxrank = 0; L = V = invp = NULL; /* gcc -Wall */
   switch(flag)

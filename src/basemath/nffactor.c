@@ -379,7 +379,7 @@ nfissplit(GEN nf, GEN x)
   long l;
   nf = checknf(nf);
   x = rnf_fix_pol(nf_get_pol(nf), x, 1);
-  if (typ(x) != t_POL) pari_err_TYPE( "nfissplit",x);
+  if (typ(x) != t_POL) pari_err_TYPE("nfissplit",x);
   l = lg(nfsqff(nf, x, ROOTS_SPLIT, gen_1));
   avma = av; return l != 1;
 }

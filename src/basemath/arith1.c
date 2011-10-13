@@ -585,7 +585,7 @@ gissquareall(GEN x, GEN *pt)
 
     case t_FFELT: return FF_issquareall(x, pt)? gen_1: gen_0;
 
-    default: pari_err_TYPE( "gissquareall",x);
+    default: pari_err_TYPE("gissquareall",x);
       return NULL; /* not reached */
   }
   return l? gen_1: gen_0;
@@ -774,7 +774,7 @@ ispower(GEN x, GEN K, GEN *pt)
   GEN z;
 
   if (!K) return gisanypower(x, pt);
-  if (typ(K) != t_INT) pari_err_TYPE( "ispower",K);
+  if (typ(K) != t_INT) pari_err_TYPE("ispower",K);
   if (signe(K) <= 0) pari_err(e_MISC, "non-positive exponent %Ps in ispower",K);
   if (equali1(K)) { if (pt) *pt = gcopy(x); return 1; }
   switch(typ(x)) {
@@ -859,7 +859,7 @@ ispower(GEN x, GEN K, GEN *pt)
       if (pt) *pt = gsqrtn(x, K, NULL, DEFAULTPREC);
       return 1;
 
-    default: pari_err_TYPE( "ispower",x);
+    default: pari_err_TYPE("ispower",x);
     return 0; /* not reached */
   }
 }

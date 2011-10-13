@@ -1719,10 +1719,10 @@ chk_listBU(GEN L, const char *s) {
   if (typ(L) != t_VEC) pari_err_TYPE(s,L);
   if (lg(L) > 1) {
     GEN z = gel(L,1);
-    if (typ(z) != t_VEC) pari_err_TYPE( s,z);
+    if (typ(z) != t_VEC) pari_err_TYPE(s,z);
     if (lg(z) == 1) return;
     z = gel(z,1); /* [bid,U] */
-    if (typ(z) != t_VEC || lg(z) != 3) pari_err_TYPE( s,z);
+    if (typ(z) != t_VEC || lg(z) != 3) pari_err_TYPE(s,z);
     checkbid(gel(z,1));
   }
 }

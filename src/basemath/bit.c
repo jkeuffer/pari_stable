@@ -159,7 +159,7 @@ gbitneg(GEN x, long bits)
   const ulong uzero = 0;
   long lowbits, xl, len_out, i;
 
-  if (typ(x) != t_INT) pari_err_TYPE( "bitwise negation",x);
+  if (typ(x) != t_INT) pari_err_TYPE("bitwise negation",x);
   if (bits < -1) pari_err(e_MISC, "negative exponent in bitwise negation");
   if (bits == -1) return inegate(x);
   if (bits == 0) return gen_0;

@@ -377,18 +377,18 @@ polhensellift(GEN pol, GEN L, GEN p, long N)
   long i, l, t;
   pari_sp av = avma;
 
-  if (typ(pol) != t_POL) pari_err_TYPE( "polhensellift",pol);
+  if (typ(pol) != t_POL) pari_err_TYPE("polhensellift",pol);
   RgX_check_ZXY(pol, "polhensellift");
-  if (!is_vec_t(typ(L)) || lg(L) < 3) pari_err_TYPE( "polhensellift",L);
+  if (!is_vec_t(typ(L)) || lg(L) < 3) pari_err_TYPE("polhensellift",L);
   t = typ(p);
   if (t == t_VEC) /* [p, T] */
   {
     T = gel(p,2);
-    if (typ(T) != t_POL) pari_err_TYPE( "polhensellift",pol);
+    if (typ(T) != t_POL) pari_err_TYPE("polhensellift",pol);
     RgX_check_ZX(T, "polhensellift");
     p = gel(p,1); t = typ(p);
   }
-  if (t != t_INT) pari_err_TYPE( "polhensellift",p);
+  if (t != t_INT) pari_err_TYPE("polhensellift",p);
   if (N < 1) pari_err(e_MISC, "not a positive exponent in polhensellift");
 
   l = lg(L); L = leafcopy(L);

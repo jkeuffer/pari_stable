@@ -812,7 +812,7 @@ elt_galoisapply(GEN nf, GEN aut, GEN x)
       switch(lg(x)) {
         case 1: return cgetg(1, t_MAT);
         case 3: break;
-        default: pari_err_TYPE( "galoisapply",x);
+        default: pari_err_TYPE("galoisapply",x);
       }
       g = gel(x,1); G = cgetg_copy(g, &lx);
       for (i = 1; i < lx; i++) gel(G,i) = galoisapply(nf, aut, gel(g,i));

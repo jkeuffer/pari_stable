@@ -869,7 +869,7 @@ matbasistoalg(GEN nf,GEN x)
       for (i=1; i<lx; i++) gel(z,i) = basistoalg(nf, gel(x,i));
       return z;
     case t_MAT: break;
-    default: pari_err_TYPE( "matbasistoalg",x);
+    default: pari_err_TYPE("matbasistoalg",x);
   }
   li = lg(x[1]);
   for (j=1; j<lx; j++)
@@ -894,7 +894,7 @@ matalgtobasis(GEN nf,GEN x)
       for (i=1; i<lx; i++) gel(z,i) = algtobasis(nf, gel(x,i));
       return z;
     case t_MAT: break;
-    default: pari_err_TYPE( "matalgtobasis",x);
+    default: pari_err_TYPE("matalgtobasis",x);
   }
   li = lg(x[1]);
   for (j=1; j<lx; j++)
@@ -1826,7 +1826,7 @@ check_nfelt(GEN x, GEN *den)
 {
   long l = lg(x), i;
   GEN t, d = NULL;
-  if (typ(x) != t_COL) pari_err_TYPE( "check_nfelt", x);
+  if (typ(x) != t_COL) pari_err_TYPE("check_nfelt", x);
   for (i=1; i<l; i++)
   {
     t = gel(x,i);
@@ -1836,7 +1836,7 @@ check_nfelt(GEN x, GEN *den)
       case t_FRAC:
         if (!d) d = gel(t,2); else d = lcmii(d, gel(t,2));
         break;
-      default: pari_err_TYPE( "check_nfelt", x);
+      default: pari_err_TYPE("check_nfelt", x);
     }
   }
   *den = d;
@@ -2172,10 +2172,10 @@ ideallistarch(GEN bnf, GEN L, GEN arch)
   ideal_data ID;
   GEN (*join_z)(ideal_data*, GEN);
 
-  if (typ(L) != t_VEC) pari_err_TYPE( "ideallistarch",L);
+  if (typ(L) != t_VEC) pari_err_TYPE("ideallistarch",L);
   if (l == 1) return cgetg(1,t_VEC);
   z = gel(L,1);
-  if (typ(z) != t_VEC) pari_err_TYPE( "ideallistarch",z);
+  if (typ(z) != t_VEC) pari_err_TYPE("ideallistarch",z);
   z = gel(z,1); /* either a bid or [bid,U] */
   if (lg(z) == 3) { /* the latter: do units */
     if (typ(z) != t_VEC) pari_err_TYPE("ideallistarch",z);

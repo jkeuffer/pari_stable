@@ -252,7 +252,7 @@ static long
 initrect_get_arg(GEN x, long flag, long *dft)
 { /* FIXME: gequal0(x) undocumented backward compatibility hack */
   if (!x || gequal0(x) || flag) { PARI_get_plot(0); return *dft - 1; }
-  if (typ(x) != t_INT) pari_err_TYPE( "initrect",x);
+  if (typ(x) != t_INT) pari_err_TYPE("initrect",x);
   return itos(x);
 }
 void

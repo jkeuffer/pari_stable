@@ -1392,7 +1392,7 @@ idealnorm(GEN nf, GEN x)
   x = (typ(x) == t_POL)? RgXQ_norm(x, T): gpowgs(x, degpol(T));
   tx = typ(x);
   if (tx == t_INT) return gerepileuptoint(av, absi(x));
-  if (tx != t_FRAC) pari_err_TYPE( "idealnorm",x);
+  if (tx != t_FRAC) pari_err_TYPE("idealnorm",x);
   return gerepileupto(av, Q_abs(x));
 }
 
@@ -1791,7 +1791,7 @@ chk_vdir(GEN nf, GEN vdir)
     pari_err(e_MISC, "incorrect vector length in idealred");
   t = typ(vdir);
   if (t == t_VECSMALL) return vdir;
-  if (t != t_VEC) pari_err_TYPE( "idealred",vdir);
+  if (t != t_VEC) pari_err_TYPE("idealred",vdir);
   v = cgetg(l, t_VECSMALL);
   for (i=1; i<l; i++) v[i] = itos(gceil(gel(vdir,i)));
   return v;

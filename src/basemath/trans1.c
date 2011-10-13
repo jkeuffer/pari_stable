@@ -846,7 +846,7 @@ ser_pow(GEN x, GEN n, long prec)
     return y;
   }
   p1 = gdiv(x,lead);
-  if (typ(p1) != t_SER) pari_err_TYPE( "ser_pow",x);
+  if (typ(p1) != t_SER) pari_err_TYPE("ser_pow",x);
   gel(p1,2) = gen_1; /* in case it's inexact */
   if (typ(n) == t_FRAC && !isinexact(lead) && ispower(lead, gel(n,2), &p2))
     p2 = powgi(p2, gel(n,1));
@@ -1072,11 +1072,11 @@ Zn_sqrt(GEN d, GEN fn)
   pari_sp ltop = avma, btop, st_lim;
   GEN b = gen_0, m = gen_1;
   long j, np;
-  if (typ(d) != t_INT) pari_err_TYPE( "Zn_sqrt",d);
+  if (typ(d) != t_INT) pari_err_TYPE("Zn_sqrt",d);
   if (typ(fn) == t_INT)
     fn = Z_factor(absi(fn));
   else if (!is_Z_factor(fn))
-    pari_err_TYPE( "Zn_sqrt",fn);
+    pari_err_TYPE("Zn_sqrt",fn);
   np = lg(gel(fn, 1))-1;
   btop = avma; st_lim = stack_lim(btop, 1);
   for (j = 1; j <= np; ++j)
@@ -1107,11 +1107,11 @@ long
 Zn_issquare(GEN d, GEN fn)
 {
   long j, np;
-  if (typ(d) != t_INT) pari_err_TYPE( "Zn_issquare",d);
+  if (typ(d) != t_INT) pari_err_TYPE("Zn_issquare",d);
   if (typ(fn) == t_INT)
     fn = Z_factor(absi(fn));
   else if (!is_Z_factor(fn))
-    pari_err_TYPE( "Zn_issquare",fn);
+    pari_err_TYPE("Zn_issquare",fn);
   np = lg(gel(fn, 1))-1;
   for (j = 1; j <= np; ++j)
   {

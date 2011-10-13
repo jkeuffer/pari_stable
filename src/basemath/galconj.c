@@ -2329,7 +2329,7 @@ GEN
 checkgal(GEN gal)
 {
   if (typ(gal) == t_POL) pari_err(e_MISC, "please apply galoisinit first");
-  if (typ(gal) != t_VEC || lg(gal) != 9) pari_err_TYPE( "checkgal",gal);
+  if (typ(gal) != t_VEC || lg(gal) != 9) pari_err_TYPE("checkgal",gal);
   return gal;
 }
 
@@ -2364,7 +2364,7 @@ galoispermtopol_i(GEN gal, GEN perm, GEN mod, GEN mod2)
     if (DEBUGLEVEL>=4) err_printf("\n");
     return v;
   }
-  pari_err_TYPE( "galoispermtopol", perm);
+  pari_err_TYPE("galoispermtopol", perm);
   return NULL; /* not reached */
 }
 
@@ -2428,7 +2428,7 @@ static void
 chk_perm(GEN perm, long n)
 {
   if (typ(perm) != t_VECSMALL || lg(perm)!=n+1)
-    pari_err_TYPE( "galoisfixedfield", perm);
+    pari_err_TYPE("galoisfixedfield", perm);
 }
 
 static int

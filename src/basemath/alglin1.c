@@ -360,7 +360,7 @@ genselect(void *E, long (*f)(void* E, GEN x), GEN A)
 GEN
 select0(GEN f, GEN x)
 {
-  if (typ(f) != t_CLOSURE || f[1] < 1) pari_err_TYPE( "select", f);
+  if (typ(f) != t_CLOSURE || f[1] < 1) pari_err_TYPE("select", f);
   return genselect((void *) f, gp_callbool, x);
 }
 
@@ -406,7 +406,7 @@ genapply(void *E, GEN (*f)(void* E, GEN x), GEN x)
 GEN
 apply0(GEN f, GEN x)
 {
-  if (typ(f) != t_CLOSURE || f[1] < 1) pari_err_TYPE( "apply",f);
+  if (typ(f) != t_CLOSURE || f[1] < 1) pari_err_TYPE("apply",f);
   return genapply((void *) f, gp_call, x);
 }
 

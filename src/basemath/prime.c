@@ -792,7 +792,7 @@ primepi(GEN x)
 {
   pari_sp av = avma;
   GEN N = typ(x) == t_INT? x: gfloor(x);
-  if (typ(N) != t_INT) pari_err_TYPE( "primepi",N);
+  if (typ(N) != t_INT) pari_err_TYPE("primepi",N);
   if (signe(N) <= 0) return gen_0;
   avma = av; return utoi(uprimepi(itou(N)));
 }

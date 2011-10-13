@@ -1283,7 +1283,7 @@ derivfun(void *E, GEN (*eval)(void *, GEN), GEN x, long prec)
   case t_SER: /* FALL THROUGH */
     vx = varn(x);
     return gerepileupto(av, gdiv(deriv(eval(E, x),vx), deriv(x,vx)));
-  default: pari_err_TYPE( "formal derivation",x);
+  default: pari_err_TYPE("formal derivation",x);
     return NULL; /*NOT REACHED*/
   }
 }

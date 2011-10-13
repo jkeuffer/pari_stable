@@ -43,7 +43,7 @@ gvar(GEN x)
     case t_VECSMALL:
     case t_STR:
     case t_LIST:
-      pari_err_TYPE( "gvar",x);
+      pari_err_TYPE("gvar",x);
   }
   return NO_VARIABLE;
 }
@@ -310,7 +310,7 @@ RgX_degree(GEN x, long v)
     case t_RFRAC:
       w = varn(gel(x,2));
       if (varncmp(v, w) < 0) return 0;
-      if (RgX_degree(gel(x,2),v)) pari_err_TYPE( "RgX_degree", x);
+      if (RgX_degree(gel(x,2),v)) pari_err_TYPE("RgX_degree", x);
       return RgX_degree(gel(x,1),v);
   }
   pari_err_TYPE("RgX_degree",x);
@@ -3130,7 +3130,7 @@ _rfraccoeff(GEN x, long n, long v)
   if (v < 0) v = minss(vp, vq);
   P = (vp == v)? p: swap_vars(p, v);
   Q = (vq == v)? q: swap_vars(q, v);
-  if (!RgX_is_monomial(Q)) pari_err_TYPE( "polcoeff", x);
+  if (!RgX_is_monomial(Q)) pari_err_TYPE("polcoeff", x);
   n += degpol(Q);
   return gdiv(_polcoeff(P, n, v), leading_term(Q));
 }

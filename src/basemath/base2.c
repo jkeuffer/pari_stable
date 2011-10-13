@@ -2115,7 +2115,7 @@ GEN
 idealprimedec(GEN nf, GEN p)
 {
   pari_sp av = avma;
-  if (typ(p) != t_INT) pari_err_TYPE( "idealprimedec",p);
+  if (typ(p) != t_INT) pari_err_TYPE("idealprimedec",p);
   return gerepileupto(av, gen_sort(primedec_aux(checknf(nf),p),
                                    (void*)&cmp_prime_over_p, &cmp_nodata));
 }
@@ -3014,7 +3014,7 @@ rnf_fix_pol(GEN T, GEN P, int lift)
           pari_err_VAR("rnf function", gel(c,1),T);
         if (lift) c = gel(c,2);
         break;
-      default: pari_err_TYPE( "rnf function",c);
+      default: pari_err_TYPE("rnf function",c);
     }
     gel(Q,i) = c;
   }

@@ -96,7 +96,7 @@ setrand(GEN seed) {
     }
     case t_INT: if (signe(seed) > 0) { init_xor4096i( itou(seed) ); return; }
   }
-  pari_err_TYPE( "setrand",seed);
+  pari_err_TYPE("setrand",seed);
 }
 GEN
 getrand(void) {

@@ -1770,8 +1770,8 @@ setintersect(GEN x, GEN y)
   long ix = 1, iy = 1, iz = 1, lx = lg(x), ly = lg(y);
   pari_sp av = avma;
   GEN z = cgetg(lx,t_VEC);
-  if (typ(x) != t_VEC) pari_err_TYPE( "setintersect",x);
-  if (typ(y) != t_VEC) pari_err_TYPE( "setintersect",y);
+  if (typ(x) != t_VEC) pari_err_TYPE("setintersect",x);
+  if (typ(y) != t_VEC) pari_err_TYPE("setintersect",y);
   while (ix < lx && iy < ly)
   {
     int c = cmp_universal(gel(x,ix), gel(y,iy));
