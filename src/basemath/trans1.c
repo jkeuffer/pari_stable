@@ -1757,7 +1757,7 @@ serexp(GEN x, long prec)
   GEN p1,y,xd,yd;
 
   ex = valp(x);
-  if (ex < 0) pari_err(e_NEGVAL,"gexp");
+  if (ex < 0) pari_err_NEGVAL("gexp");
   if (gequal0(x)) return gaddsg(1,x);
   lx = lg(x);
   if (ex)
@@ -2387,7 +2387,7 @@ gcos(GEN x, long prec)
     default:
       av = avma; if (!(y = toser_i(x))) break;
       if (gequal0(y)) return gerepileupto(av, gaddsg(1,y));
-      if (valp(y) < 0) pari_err(e_NEGVAL,"gcos");
+      if (valp(y) < 0) pari_err_NEGVAL("gcos");
       gsincos(y,&u,&v,prec);
       return gerepilecopy(av,v);
   }
@@ -2457,7 +2457,7 @@ gsin(GEN x, long prec)
     default:
       av = avma; if (!(y = toser_i(x))) break;
       if (gequal0(y)) return gerepilecopy(av, y);
-      if (valp(y) < 0) pari_err(e_NEGVAL,"gsin");
+      if (valp(y) < 0) pari_err_NEGVAL("gsin");
       gsincos(y,&u,&v,prec);
       return gerepilecopy(av,u);
   }
@@ -2653,7 +2653,7 @@ gtan(GEN x, long prec)
     default:
       av = avma; if (!(y = toser_i(x))) break;
       if (gequal0(y)) return gerepilecopy(av, y);
-      if (valp(y) < 0) pari_err(e_NEGVAL,"gtan");
+      if (valp(y) < 0) pari_err_NEGVAL("gtan");
       gsincos(y,&s,&c,prec);
       return gerepileupto(av, gdiv(s,c));
   }
@@ -2706,7 +2706,7 @@ gcotan(GEN x, long prec)
     default:
       av = avma; if (!(y = toser_i(x))) break;
       if (gequal0(y)) pari_err(e_MISC,"0 argument in cotan");
-      if (valp(y) < 0) pari_err(e_NEGVAL,"cotan"); /* fall through */
+      if (valp(y) < 0) pari_err_NEGVAL("cotan"); /* fall through */
       gsincos(y,&s,&c,prec);
       return gerepileupto(av, gdiv(c,s));
   }

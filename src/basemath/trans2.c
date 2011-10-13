@@ -149,7 +149,7 @@ gatan(GEN x, long prec)
 
     default:
       av = avma; if (!(y = toser_i(x))) break;
-      if (valp(y) < 0) pari_err(e_NEGVAL,"gatan");
+      if (valp(y) < 0) pari_err_NEGVAL("gatan");
       if (lg(y)==2) return gerepilecopy(av, y);
       /* lg(y) > 2 */
       a = integ(gdiv(derivser(y), gaddsg(1,gsqr(y))), varn(y));
@@ -211,7 +211,7 @@ gasin(GEN x, long prec)
       av = avma; if (!(y = toser_i(x))) break;
       if (gequal0(y)) return gerepilecopy(av, y);
       /* lg(y) > 2*/
-      if (valp(y) < 0) pari_err(e_NEGVAL,"gasin");
+      if (valp(y) < 0) pari_err_NEGVAL("gasin");
       p1 = gsubsg(1,gsqr(y));
       if (gequal0(p1))
       {
@@ -285,7 +285,7 @@ gacos(GEN x, long prec)
     case t_INTMOD: case t_PADIC: pari_err_TYPE("gacos",x);
     case t_SER:
       av = avma; if (!(y = toser_i(x))) break;
-      if (valp(y) < 0) pari_err(e_NEGVAL,"gacos");
+      if (valp(y) < 0) pari_err_NEGVAL("gacos");
       if (lg(y) > 2)
       {
         p1 = gsubsg(1,gsqr(y));
@@ -579,7 +579,7 @@ gash(GEN x, long prec)
     default:
       av = avma; if (!(y = toser_i(x))) break;
       if (gequal0(y)) return gerepilecopy(av, y);
-      if (valp(y) < 0) pari_err(e_NEGVAL,"gash");
+      if (valp(y) < 0) pari_err_NEGVAL("gash");
       p1 = gaddsg(1,gsqr(y));
       if (gequal0(p1))
       {
@@ -649,7 +649,7 @@ gach(GEN x, long prec)
       long v;
       av = avma; if (!(y = toser_i(x))) break;
       v = valp(y);
-      if (v < 0) pari_err(e_NEGVAL,"gach");
+      if (v < 0) pari_err_NEGVAL("gach");
       if (gequal0(y))
       {
         if (!v) return gerepilecopy(av, y);
@@ -726,7 +726,7 @@ gath(GEN x, long prec)
     case t_INTMOD: case t_PADIC: pari_err_TYPE("gath",x);
     default:
       av = avma; if (!(y = toser_i(x))) break;
-      if (valp(y) < 0) pari_err(e_NEGVAL,"gath");
+      if (valp(y) < 0) pari_err_NEGVAL("gath");
       z = gdiv(derivser(y), gsubsg(1,gsqr(y)));
       a = integ(z, varn(y));
       if (!valp(y)) a = gadd(a, gath(gel(y,2),prec));
@@ -1415,7 +1415,7 @@ glngamma(GEN x, long prec)
 
     default:
       av = avma; if (!(y = toser_i(x))) break;
-      if (valp(y)) pari_err(e_NEGVAL,"glngamma");
+      if (valp(y)) pari_err_NEGVAL("glngamma");
       p1 = gsubsg(1,y);
       if (!valp(p1)) pari_err_IMPL("lngamma around a!=1");
       n = (lg(y)-3) / valp(p1);

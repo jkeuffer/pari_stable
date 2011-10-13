@@ -1964,6 +1964,7 @@ void    pari_err_FLAG(const char *f);
 void    pari_err_IMPL(const char *f);
 void    pari_err_IRREDPOL(const char *f, GEN x);
 void    pari_err_MAXPRIME(ulong c);
+void    pari_err_NEGVAL(const char *f);
 void    pari_err_OP(const char *f, GEN x, GEN y);
 void    pari_err_OVERFLOW(const char *f);
 void    pari_err_PREC(const char *f);

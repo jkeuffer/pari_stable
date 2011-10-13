@@ -41,7 +41,7 @@ _jbessel(GEN n, GEN z, long flag, long m)
   {
     long v = valp(z);
     k = lg(Z)-2 - v;
-    if (v < 0) pari_err(e_NEGVAL,"jbessel");
+    if (v < 0) pari_err_NEGVAL("jbessel");
     if (v == 0) pari_err_IMPL("jbessel around a!=0");
     if (k <= 0) return scalarser(gen_1, varn(z), 2*v);
     setlg(Z, k+2);
@@ -214,7 +214,7 @@ jbesselh(GEN n, GEN z, long prec)
     default:
       av = avma; if (!(y = toser_i(z))) break;
       if (gequal0(y)) return gerepileupto(av, gpowgs(y,k));
-      if (valp(y) < 0) pari_err(e_NEGVAL,"jbesselh");
+      if (valp(y) < 0) pari_err_NEGVAL("jbesselh");
       y = gprec(y, lg(y)-2 + (2*k+1)*valp(y));
       p1 = gdiv(_jbesselh(k,y,prec),gpowgs(y,k));
       for (i=1; i<=k; i++) p1 = gmulgs(p1,2*i+1);
@@ -337,7 +337,7 @@ _kbessel1(long n, GEN z, long flag, long m, long prec)
   {
     long v = valp(z);
     k = lg(Z)-2 - v;
-    if (v < 0) pari_err(e_NEGVAL,"_kbessel1");
+    if (v < 0) pari_err_NEGVAL("_kbessel1");
     if (v == 0) pari_err_IMPL("Bessel K around a!=0");
     if (k <= 0) return gadd(gen_1, zeroser(varn(z), 2*v));
     setlg(Z, k+2);
