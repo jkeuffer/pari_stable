@@ -1816,7 +1816,7 @@ idealstar0(GEN nf, GEN ideal,long flag)
     case 0: return Idealstar(nf,ideal, nf_GEN);
     case 1: return Idealstar(nf,ideal, nf_INIT);
     case 2: return Idealstar(nf,ideal, nf_INIT|nf_GEN);
-    default: pari_err(e_FLAG,"idealstar");
+    default: pari_err_FLAG("idealstar");
   }
   return NULL; /* not reached */
 }
@@ -2114,7 +2114,7 @@ Ideallist(GEN bnf, ulong bound, long flag)
 }
 GEN
 ideallist0(GEN bnf,long bound, long flag) {
-  if (flag<0 || flag>4) pari_err(e_FLAG,"ideallist");
+  if (flag<0 || flag>4) pari_err_FLAG("ideallist");
   return Ideallist(bnf,bound,flag);
 }
 GEN

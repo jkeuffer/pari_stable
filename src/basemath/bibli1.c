@@ -1904,7 +1904,7 @@ qfminim0(GEN a, GEN borne, GEN stockmax, long flag, long prec)
       if (!a) pari_err(e_PREC,"qfminim");
       return a;
     }
-    default: pari_err(e_FLAG,"qfminim");
+    default: pari_err_FLAG("qfminim");
   }
   return NULL; /* not reached */
 }

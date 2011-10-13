@@ -493,7 +493,7 @@ ellinit0(GEN x, long flag,long prec)
   {
     case 0: return ellinit(x,prec);
     case 1: return smallellinit(x);
-    default: pari_err(e_FLAG,"ellinit");
+    default: pari_err_FLAG("ellinit");
   }
   return NULL; /* not reached */
 }
@@ -1768,7 +1768,7 @@ ellwp0(GEN w, GEN z, long flag, long PREC, long prec)
       }
       return v;
     case 2: return pointell(w,z,prec);
-    default: pari_err(e_FLAG,"ellwp"); return NULL;
+    default: pari_err_FLAG("ellwp"); return NULL;
   }
 }
 
@@ -3615,7 +3615,7 @@ ellheight0(GEN e, GEN a, long flag, long prec)
   pari_sp av = avma;
   GEN Lp, x, y, z, phi2, psi2, psi3;
 
-  if (flag > 2 || flag < 0) pari_err(e_FLAG,"ellheight");
+  if (flag > 2 || flag < 0) pari_err_FLAG("ellheight");
   checksmallell_real(e); if (!is_matvec_t(tx)) pari_err_TYPE( "ellgheight",a);
   lx = lg(a); if (lx==1) return cgetg(1,tx);
   tx = typ(a[1]);
@@ -4277,7 +4277,7 @@ elltors0(GEN e, long flag)
   {
     case 0: return elltors(e);
     case 1: return nagelllutz(e);
-    default: pari_err(e_FLAG,"elltors");
+    default: pari_err_FLAG("elltors");
   }
   return NULL; /* not reached */
 }

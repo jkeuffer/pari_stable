@@ -2073,7 +2073,7 @@ roots0(GEN p, long flag,long l)
     case 0: return roots(p,l);
     case 1: pari_warn(warner, "deprecated flag = 1 in polroots");
             return roots(p,l);
-    default: pari_err(e_FLAG,"polroots");
+    default: pari_err_FLAG("polroots");
   }
   return NULL; /* not reached */
 }

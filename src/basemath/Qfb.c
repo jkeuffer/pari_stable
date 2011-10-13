@@ -913,7 +913,7 @@ redreal0(GEN x, long flag, GEN D, GEN isqrtD, GEN sqrtD)
     case qf_NOD:         x = qfr3_red(x,&S); break;
     case qf_STEP:        x = qfr5_rho(x,&S); break;
     case qf_STEP|qf_NOD: x = qfr3_rho(x,&S); break;
-    default: pari_err(e_FLAG,"qfbred");
+    default: pari_err_FLAG("qfbred");
   }
   return gerepilecopy(av, qfr5_to_qfr(x,d));
 }

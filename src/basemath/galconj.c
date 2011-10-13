@@ -2306,7 +2306,7 @@ galoisconj0(GEN nf, long flag, GEN d, long prec)
     case 2: return galoisconj2(nf, prec);
     case 4: return galoisconj4(nf, d);
   }
-  pari_err(e_FLAG, "nfgaloisconj");
+  pari_err_FLAG("nfgaloisconj");
   return NULL; /*not reached*/
 }
 
@@ -2444,7 +2444,7 @@ galoisfixedfield(GEN gal, GEN perm, long flag, long y)
   pari_sp lbot, ltop = avma;
   GEN T, L, P, S, PL, O, res, mod, mod2;
   long x, n, i;
-  if (flag<0 || flag>2) pari_err(e_FLAG, "galoisfixedfield");
+  if (flag<0 || flag>2) pari_err_FLAG("galoisfixedfield");
   gal = checkgal(gal); T = gal_get_pol(gal);
   x = varn(T);
   L = gal_get_roots(gal); n = lg(L)-1;
@@ -2523,7 +2523,7 @@ galoisisabelian(GEN gal, long flag)
     case 0: return gerepileupto(av, group_abelianHNF(G,S));
     case 1: avma=av; return gen_1;
     case 2: return gerepileupto(av, group_abelianSNF(G,S));
-    default: pari_err(e_FLAG,"galoisisabelian");
+    default: pari_err_FLAG("galoisisabelian");
   }
   return NULL; /* not reached */
 }

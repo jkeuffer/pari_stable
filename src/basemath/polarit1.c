@@ -474,7 +474,7 @@ rootmod0(GEN f, GEN p, long flag)
   {
     case 0: return rootmod(f,p);
     case 1: return rootmod2(f,p);
-    default: pari_err(e_FLAG,"polrootsmod");
+    default: pari_err_FLAG("polrootsmod");
   }
   return NULL; /* not reached */
 }
@@ -1348,7 +1348,7 @@ factormod0(GEN f, GEN p, long flag)
   {
     case 0: return factmod(f,p);
     case 1: return simplefactmod(f,p);
-    default: pari_err(e_FLAG,"factormod");
+    default: pari_err_FLAG("factormod");
   }
   return NULL; /* not reached */
 }
@@ -1904,7 +1904,7 @@ factorpadic0(GEN f,GEN p,long r,long flag)
   {
      case 0: return factorpadic(f,p,r);
      case 1: return factorpadic2(f,p,r);
-     default: pari_err(e_FLAG,"factorpadic");
+     default: pari_err_FLAG("factorpadic");
   }
   return NULL; /* not reached */
 }

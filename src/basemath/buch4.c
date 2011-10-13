@@ -697,7 +697,7 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
   GEN prod, S1, S2, gen, cyc, bnf, nf, nfabs, rnfeq, bnfabs, k, polabs;
   GEN y = cgetg(9, t_VEC);
 
-  if (galois < 0 || galois > 2) pari_err(e_FLAG, "rnfisnorminit");
+  if (galois < 0 || galois > 2) pari_err_FLAG("rnfisnorminit");
   T = get_bnfpol(T, &bnf, &nf); vbas = varn(T);
   if (!bnf) bnf = Buchall(nf? nf: T, nf_FORCE, DEFAULTPREC);
   if (!nf) nf = bnf_get_nf(bnf);

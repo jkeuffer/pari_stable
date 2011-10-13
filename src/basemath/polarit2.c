@@ -348,7 +348,7 @@ gp_factor0(GEN x, GEN flag)
 {
   ulong B;
   if (!flag) return factor(x);
-  if (typ(flag) != t_INT || signe(flag) < 0) pari_err(e_FLAG,"factor");
+  if (typ(flag) != t_INT || signe(flag) < 0) pari_err_FLAG("factor");
   switch(lgefint(flag))
   {
     case 2: B = 0; break;
@@ -2513,7 +2513,7 @@ polresultant0(GEN x, GEN y, long v, long flag)
     case 2:
     case 0: x=resultant_all(x,y,NULL); break;
     case 1: x=resultant2(x,y); break;
-    default: pari_err(e_FLAG,"polresultant");
+    default: pari_err_FLAG("polresultant");
   }
   if (m) x = gsubst(x,MAXVARN,pol_x(0));
   return gerepileupto(av,x);

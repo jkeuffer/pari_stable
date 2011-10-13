@@ -1037,6 +1037,6 @@ group_export(GEN G, long format)
   case 0: return group_export_GAP(G);
   case 1: return group_export_MAGMA(G);
   }
-  pari_err(e_FLAG,"galoisexport");
+  pari_err_FLAG("galoisexport");
   return NULL; /*-Wall*/
 }

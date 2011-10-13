@@ -765,7 +765,7 @@ bnrrootnumber(GEN bnr, GEN chi, long flag, long prec)
   pari_sp av = avma;
   GEN cond, condc, bnrc, CHI, cyc;
 
-  if (flag < 0 || flag > 1) pari_err(e_FLAG,"bnrrootnumber");
+  if (flag < 0 || flag > 1) pari_err_FLAG("bnrrootnumber");
 
   checkbnr(bnr);
   cyc = bnr_get_cyc(bnr);
@@ -2557,7 +2557,7 @@ bnrL1(GEN bnr, GEN subgp, long flag, long prec)
   N   = nf_get_degree(nf);
 
   if (N == 1) pari_err(e_MISC, "the ground field must be distinct from Q");
-  if (flag < 0 || flag > 8) pari_err(e_FLAG,"bnrL1");
+  if (flag < 0 || flag > 8) pari_err_FLAG("bnrL1");
 
   /* compute bnr(conductor) */
   if (!(flag & 2)) bnr = gel(bnrconductor(bnr, NULL, 2),2);

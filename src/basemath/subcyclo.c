@@ -573,7 +573,7 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
   long i, card, phi_n, val,l, n, cnd, complex=1;
   pari_timer ti;
 
-  if (flag<0 || flag>2) pari_err(e_FLAG,"galoissubcyclo");
+  if (flag<0 || flag>2) pari_err_FLAG("galoissubcyclo");
   if (v < 0) v = 0;
   if (!sg) sg = gen_1;
   switch(typ(N))

@@ -7960,20 +7960,22 @@ can check their arguments.
   pari_err(e_ALARM, const char *fmt, ...)
 @eprog\noindent prints the error message: $s$.
 
-\subsec{e\_FILE} Error while trying to open a file.
-\bprog
-  pari_err(e_FILE, const char *what, const char *name)
-@eprog\noindent prints the error message: \kbd{error opening \emph{what} file:
-`\emph{name}'}.
-
 \subsec{e\_MISC} Generic uncategorized error.
 \bprog
   pari_err(e_MISC, const char *fmt, ...)
 @eprog\noindent prints the error message: $s$.
 
+\subsec{e\_FILE} Error while trying to open a file.
+\bprog
+  pari_err_FILE(const char *what, const char *name)
+  pari_err(e_FILE, const char *what, const char *name)
+@eprog\noindent prints the error message: \kbd{error opening \emph{what} file:
+`\emph{name}'}.
+
 \subsec{e\_FLAG} A flag argument is out of bounds in function $s$.
 \bprog
   pari_err(e_FLAG, const char *s)
+  pari_err_FLAG(const char *s)
 @eprog\noindent prints the error message: \kbd{invalid flag in $s$}.
 
 \subsec{e\_IMPL} A requested feature $s$ is not implemented.

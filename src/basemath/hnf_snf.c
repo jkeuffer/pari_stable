@@ -38,7 +38,7 @@ mathnf0(GEN x, long flag)
     }
     case 4: RgM_check_ZM(x, "mathnf0"); return hnflll(x);
     case 5: RgM_check_ZM(x, "mathnf0"); return hnfperm(x);
-    default: pari_err(e_FLAG,"mathnf");
+    default: pari_err_FLAG("mathnf");
   }
   return NULL; /* not reached */
 }
@@ -2340,7 +2340,7 @@ GEN
 matsnf0(GEN x,long flag)
 {
   pari_sp av = avma;
-  if (flag > 7) pari_err(e_FLAG,"matsnf");
+  if (flag > 7) pari_err_FLAG("matsnf");
   if (typ(x) == t_VEC && flag & 4) return smithclean(x);
   if (flag & 2) x = flag&1 ? gsmithall(x): gsmith(x);
   else          x = flag&1 ?  smithall(x):  smith(x);
@@ -2488,7 +2488,7 @@ matfrobenius(GEN M, long flag, long v)
     if (flag != 1) D = Frobeniusform(D, n);
     return gerepileupto(ltop, D);
   }
-  if (flag>2) pari_err(e_FLAG,"matfrobenius");
+  if (flag>2) pari_err_FLAG("matfrobenius");
   A = matsnf0(M_x,3);
   D = smithclean(RgM_diagonal_shallow(gel(A,3)));
   if (prod_degree(D) != n) pari_err(e_MISC, "accuracy lost in matfrobenius");

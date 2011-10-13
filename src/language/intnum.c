@@ -1102,7 +1102,7 @@ intnuminitgen(void *E, GEN (*eval)(void*, GEN), GEN a, GEN b, long m,
   long flag = f_SEMI, codea = transcode(a, 1), codeb = transcode(b, 1);
   intdata D; intinit_start(&D, m, flext, precl);
 
-  if (flag < 0 || flag >= 3) pari_err(e_FLAG,"intnuminitgen");
+  if (flag < 0 || flag >= 3) pari_err_FLAG("intnuminitgen");
   lim = lg(D.tabxp) - 1;
   if (is_osc_f(labs(codea)) || is_osc_f(labs(codeb)))
     { pisurh = Pi2n(D.m, precl); flag = f_OSC1; }
@@ -1574,7 +1574,7 @@ intnumromb(void *E, GEN (*eval)(void *, GEN), GEN a, GEN b, long flag, long prec
     case 1: z = rombint(E, eval, a, b, prec); break;
     case 2: z = qromi  (E, eval, a, b, prec); break;
     case 3: z = qrom2  (E, eval, a, b, prec); break;
-    default: pari_err(e_FLAG); return NULL; /* not reached */
+    default: pari_err_FLAG("intnumromb"); return NULL; /* not reached */
   }
   if (!z) pari_err(e_MISC, "too many iterations in intnumromb");
   return gerepileupto(av, z);

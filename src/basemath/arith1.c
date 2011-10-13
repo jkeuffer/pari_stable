@@ -3058,7 +3058,7 @@ qfbclassno0(GEN x,long flag)
   {
     case 0: return map_proto_G(classno,x);
     case 1: return map_proto_G(classno2,x);
-    default: pari_err(e_FLAG,"qfbclassno");
+    default: pari_err_FLAG("qfbclassno");
   }
   return NULL; /* not reached */
 }

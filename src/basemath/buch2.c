@@ -3230,7 +3230,7 @@ bnfinit0(GEN P, long flag, GEN data, long prec)
     case 2:
     case 0: fl = 0; break;
     case 1: fl = nf_FORCE; break;
-    default: pari_err(e_FLAG,"bnfinit");
+    default: pari_err_FLAG("bnfinit");
       return NULL; /* not reached */
   }
   return Buchall_param(P, c1, c2, relpid, fl, prec);

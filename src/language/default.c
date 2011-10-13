@@ -460,7 +460,7 @@ TeX_define2(const char *s, const char *def) {
 static FILE *
 open_logfile(const char *s) {
   FILE *log = fopen(s, "a");
-  if (!log) pari_err(e_FILE,"logfile",s);
+  if (!log) pari_err_FILE("logfile",s);
 #ifndef WINCE
   setbuf(log,(char *)NULL);
 #endif

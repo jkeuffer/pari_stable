@@ -772,7 +772,7 @@ qflll0(GEN x, long flag)
     case 4: RgM_check_ZM(x,"qflll"); return lllkerim(x);
     case 5: return lllkerimgen(x);
     case 8: return lllgen(x);
-    default: pari_err(e_FLAG,"qflll");
+    default: pari_err_FLAG("qflll");
   }
   return NULL; /* not reached */
 }
@@ -788,7 +788,7 @@ qflllgram0(GEN x, long flag)
     case 4: RgM_check_ZM(x,"qflllgram"); return lllgramkerim(x);
     case 5: return lllgramkerimgen(x);
     case 8: return lllgramgen(x);
-    default: pari_err(e_FLAG,"qflllgram");
+    default: pari_err_FLAG("qflllgram");
   }
   return NULL; /* not reached */
 }
@@ -824,7 +824,7 @@ matkerint0(GEN x, long flag)
   {
     case 0: return kerint(x);
     case 1: return kerint1(x);
-    default: pari_err(e_FLAG,"matkerint");
+    default: pari_err_FLAG("matkerint");
   }
   return NULL; /* not reached */
 }

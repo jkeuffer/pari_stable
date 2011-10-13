@@ -2097,7 +2097,7 @@ matimage0(GEN x,long flag)
   {
     case 0: return image(x);
     case 1: return image2(x);
-    default: pari_err(e_FLAG,"matimage");
+    default: pari_err_FLAG("matimage");
   }
   return NULL; /* not reached */
 }
@@ -3186,7 +3186,7 @@ det0(GEN a,long flag)
   {
     case 0: return det(a);
     case 1: return det2(a);
-    default: pari_err(e_FLAG,"matdet");
+    default: pari_err_FLAG("matdet");
   }
   return NULL; /* not reached */
 }

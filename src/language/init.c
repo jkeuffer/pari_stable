@@ -1208,6 +1208,10 @@ pari_err(int numerr, ...)
 }
 
 void
+pari_err_FILE(const char *f, const char *g) { pari_err(e_FILE, f,g); }
+void
+pari_err_FLAG(const char *f) { pari_err(e_FLAG,f); }
+void
 pari_err_IRREDPOL(const char *f, GEN x) { pari_err(e_IRREDPOL, f,x); }
 void
 pari_err_PRIME(const char *f, GEN x) { pari_err(e_PRIME, f,x); }

@@ -488,7 +488,7 @@ forvec_start(GEN x, long flag, GEN *gd, GEN (**next)(GEN,GEN))
     case 0: *next = t==t_INT? &forvec_next_i:    &forvec_next; break;
     case 1: *next = t==t_INT? &forvec_next_le_i: &forvec_next_le; break;
     case 2: *next = t==t_INT? &forvec_next_lt_i: &forvec_next_lt; break;
-    default: pari_err(e_FLAG,"forvec");
+    default: pari_err_FLAG("forvec");
   }
   return (GEN)d->a;
 }
@@ -681,7 +681,7 @@ prodinf0(GEN a, GEN code, long flag, long prec)
     case 0: EXPR_WRAP(code, prodinf (EXPR_ARG, a, prec));
     case 1: EXPR_WRAP(code, prodinf1(EXPR_ARG, a, prec));
   }
-  pari_err(e_FLAG);
+  pari_err_FLAG("prodinf");
   return NULL; /* not reached */
 }
 
@@ -1040,7 +1040,7 @@ sumalt0(GEN a, GEN code, long flag, long prec)
   {
     case 0: EXPR_WRAP(code, sumalt (EXPR_ARG,a,prec));
     case 1: EXPR_WRAP(code, sumalt2(EXPR_ARG,a,prec));
-    default: pari_err(e_FLAG);
+    default: pari_err_FLAG("sumalt");
   }
   return NULL; /* not reached */
 }
@@ -1141,7 +1141,7 @@ sumpos0(GEN a, GEN code, long flag, long prec)
   {
     case 0: EXPR_WRAP(code, sumpos (EXPR_ARG,a,prec));
     case 1: EXPR_WRAP(code, sumpos2(EXPR_ARG,a,prec));
-    default: pari_err(e_FLAG);
+    default: pari_err_FLAG("sumpos");
   }
   return NULL; /* not reached */
 }

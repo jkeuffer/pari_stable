@@ -182,7 +182,7 @@ polchebyshev(long n, long kind, long v)
   {
     case 1: return polchebyshev1(n, v);
     case 2: return polchebyshev2(n, v);
-    default: pari_err(e_FLAG, "polchebyshev");
+    default: pari_err_FLAG("polchebyshev");
   }
   return NULL; /* not reached */
 }
@@ -195,7 +195,7 @@ polchebyshev_eval(long n, long kind, GEN x)
   {
     case 1: return polchebyshev1_eval(n, x);
     case 2: return polchebyshev2_eval(n, x);
-    default: pari_err(e_FLAG, "polchebyshev");
+    default: pari_err_FLAG("polchebyshev");
   }
   return NULL; /* not reached */
 }
@@ -920,7 +920,7 @@ stirling(long n, long m, long flag)
   {
     case 1: return stirling1((ulong)n,(ulong)m);
     case 2: return stirling2((ulong)n,(ulong)m);
-    default: pari_err(e_FLAG,"stirling");
+    default: pari_err_FLAG("stirling");
   }
   return NULL; /*NOT REACHED*/
 }
@@ -1399,7 +1399,7 @@ vecsort0(GEN x, GEN k, long flag)
   void *E;
 
   if (flag < 0 || flag > (cmp_REV|cmp_LEX|cmp_IND|cmp_UNIQ))
-    pari_err(e_FLAG,"vecsort");
+    pari_err_FLAG("vecsort");
   if (k) {
     long i, j, l, lk, tx, lx;
     struct veccmp_s v;

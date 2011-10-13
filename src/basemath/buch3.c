@@ -485,7 +485,7 @@ bnrinit0(GEN bnf, GEN ideal, long flag)
   {
     case 0: flag = nf_INIT; break;
     case 1: flag = nf_INIT | nf_GEN; break;
-    default: pari_err(e_FLAG,"bnrinit");
+    default: pari_err_FLAG("bnrinit");
   }
   return Buchray(bnf,ideal,flag);
 }

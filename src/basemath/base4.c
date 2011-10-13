@@ -205,7 +205,7 @@ idealdiv0(GEN nf, GEN x, GEN y, long flag)
   {
     case 0: return idealdiv(nf,x,y);
     case 1: return idealdivexact(nf,x,y);
-    default: pari_err(e_FLAG,"idealdiv");
+    default: pari_err_FLAG("idealdiv");
   }
   return NULL; /* not reached */
 }

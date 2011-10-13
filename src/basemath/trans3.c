@@ -2103,7 +2103,7 @@ polylog0(long m, GEN x, long flag, long prec)
     case 1: return polylogD(m,x,0,prec);
     case 2: return polylogD(m,x,1,prec);
     case 3: return polylogP(m,x,prec);
-    default: pari_err(e_FLAG,"polylog");
+    default: pari_err_FLAG("polylog");
   }
   return NULL; /* not reached */
 }
@@ -2656,7 +2656,7 @@ weber0(GEN x, long flag,long prec)
     case 0: return weberf(x,prec);
     case 1: return weberf1(x,prec);
     case 2: return weberf2(x,prec);
-    default: pari_err(e_FLAG,"weber");
+    default: pari_err_FLAG("weber");
   }
   return NULL; /* not reached */
 }

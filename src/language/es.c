@@ -3790,7 +3790,7 @@ switchin_last(void)
   FILE *file;
   if (!s) pari_err(e_MISC,"You never gave me anything to read!");
   file = try_open(s);
-  if (!file) pari_err(e_FILE,"input",s);
+  if (!file) pari_err_FILE("input",s);
   return pari_infile = pari_get_infile(s,file)->file;
 }
 
@@ -3834,7 +3834,7 @@ switchin(const char *name)
       if ((f = try_name(t))) return f;
     }
   }
-  pari_err(e_FILE,"input",name);
+  pari_err_FILE("input",name);
   return NULL; /*not reached*/
 }
 
@@ -3860,7 +3860,7 @@ switchout(const char *name)
       }
     }
     f = fopen(name, "a");
-    if (!f) pari_err(e_FILE,"output",name);
+    if (!f) pari_err_FILE("output",name);
     pari_outfile = f;
   }
   else if (pari_outfile != stdout)
@@ -4075,10 +4075,10 @@ writebin(const char *name, GEN x)
   if (f) {
     int ok = check_magic(name,f);
     fclose(f);
-    if (!ok) pari_err(e_FILE,"binary output",name);
+    if (!ok) pari_err_FILE("binary output",name);
   }
   f = fopen(name,"a");
-  if (!f) pari_err(e_FILE,"binary output",name);
+  if (!f) pari_err_FILE("binary output",name);
   if (!already) write_magic(f);
 
   if (x) writeGEN(x,f);

@@ -716,7 +716,7 @@ gisprime(GEN x, long flag)
     case 1: return map_proto_GL(isprimePL,x,1);
     case 2: return map_proto_lG(isprimeAPRCL,x);
   }
-  pari_err(e_FLAG,"gisprime");
+  pari_err_FLAG("gisprime");
   return NULL;
 }
 
