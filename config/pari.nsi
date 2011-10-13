@@ -9,7 +9,7 @@ Name "PARI 2.6 (TESTING)"
 !define objdir "${top}\Ocygwin-i686"
 AutoCloseWindow false
 
-OutFile "Pari.exe"
+OutFile "${objdir}\Pari.exe"
 InstallDir "$PROGRAMFILES\${PARIver}"
 InstallDirRegKey HKLM "Software\${PARIver}" ""
 
