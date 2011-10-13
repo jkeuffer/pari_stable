@@ -121,18 +121,19 @@ ellcondfile(long f)
   pari_fclose(F); return V;
 }
 
-/* FIXME: could use a binary search */
+/* return the vector of all curves of conductor f */
 static GEN
 ellcondlist(long f)
 {
-  GEN  v, V = ellcondfile(f);
+  GEN V = ellcondfile(f);
   long i;
   for (i=1; i<lg(V); i++)
-  {
-    int cmp  = cmpis(gmael(V,i,1), f);
+  { /* not worth using a binary search */
+    GEN v = gel(V,i);
+    int cmp = cmpis(gel(v,1), f);
     if (cmp >= 0) {
       if (cmp) break;
-      v = gel(V,i); return vecslice(v,2, lg(v)-1);
+      return vecslice(v,2, lg(v)-1);
     }
   }
   return cgetg(1,t_VEC);
