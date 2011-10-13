@@ -94,7 +94,7 @@ whatnow(PariOUT *out, const char *s, int flag)
   if (!strcmp(def,"x*y")) ep = NULL;
   else {
     ep = is_entry(wp.name);
-    if (!ep) pari_err(e_BUG,"whatnow");
+    if (!ep) pari_err_BUG("whatnow");
   }
   out_puts(out, "New syntax: ");
   out_term_color(out, c_ERR);

@@ -703,7 +703,7 @@ tschirn(buildroot *BR)
   long i, k, v = varn(BR->p), l = lg(BR->r);
   GEN a, h, r;
 
-  if (l >= BR->N) pari_err(e_BUG,"tschirn");
+  if (l >= BR->N) pari_err_BUG("tschirn");
   if (DEBUGLEVEL)
     err_printf("\n$$$$$ Tschirnhaus transformation of degree %ld: $$$$$\n",l-1);
 

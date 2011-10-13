@@ -306,6 +306,6 @@ Fp_ratlift(GEN x, GEN m, GEN amax, GEN bmax, GEN *a, GEN *b)
   } /* while */
 
   /* We have run into d1 == 0 before returning. This cannot happen */
-  pari_err(e_BUG, "ratlift failed to catch d1 == 0\n");
+  pari_err_BUG("ratlift failed to catch d1 == 0\n");
   return 0; /* NOTREACHED */
 }

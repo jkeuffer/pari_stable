@@ -1093,7 +1093,7 @@ Flx_addmul_inplace(GEN gx, GEN gy, ulong c, ulong p)
   if (!c) return;
   lx = lg(gx);
   ly = lg(gy);
-  if (lx<ly) pari_err(e_BUG,"lx<ly in Flx_addmul_inplace");
+  if (lx<ly) pari_err_BUG("lx<ly in Flx_addmul_inplace");
   if (SMALL_ULONG(p))
     for (i=2; i<ly;  i++) x[i] = (x[i] + c*y[i]) % p;
   else

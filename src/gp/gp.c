@@ -727,7 +727,7 @@ aide0(const char *s0, int flag)
   if (long_help) { external_help(ep->name,3); return; }
   if (ep->help) { print_text(ep->help); return; }
 
-  pari_err(e_BUG,"aide (no help found)");
+  pari_err_BUG("aide (no help found)");
 }
 
 void

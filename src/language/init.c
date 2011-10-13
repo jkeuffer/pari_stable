@@ -406,7 +406,7 @@ pari_sighandler(int sig)
 
     default: msg="signal handling"; break;
   }
-  pari_err(e_BUG,msg);
+  pari_err_BUG(msg);
 }
 
 void
@@ -1210,6 +1210,8 @@ pari_err(int numerr, ...)
 }
 
 void
+pari_err_BUG(const char *f) { pari_err(e_BUG,f); }
+void
 pari_err_CONSTPOL(const char *f) { pari_err(e_CONSTPOL, f); }
 void
 pari_err_DIM(const char *f) { pari_err(e_DIM, f); }
@@ -1757,7 +1759,7 @@ dec_gerepile(pari_sp *x, pari_sp av0, pari_sp av, pari_sp tetpil, size_t dec)
   if (*x < av && *x >= av0)
   { /* update address if in stack */
     if (*x < tetpil) *x += dec;
-    else pari_err(e_BUG, "gerepile, significant pointers lost");
+    else pari_err_BUG("gerepile, significant pointers lost");
   }
 }
 

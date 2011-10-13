@@ -1363,7 +1363,7 @@ check_root(mpqs_handle_t *h, long p, long start)
     err_printf("MPQS: B = %Ps\n", h->B);
     err_printf("MPQS: C = %Ps\n", h->C);
     err_printf("MPQS: z = %ld\n", z);
-    pari_err(e_BUG, "MPQS: self_init: found wrong polynomial");
+    pari_err_BUG("MPQS: self_init: found wrong polynomial");
   }
 }
 #endif
@@ -2177,7 +2177,7 @@ mpqs_eval_cand(mpqs_handle_t *h, long number_of_cand,
           err_printf("MPQS: %Ps @ %Ps :%s\n", Y, Qx, relations);
           err_printf("\tQx_2 = %Ps\n", Qx_2);
           err_printf("\t rhs = %Ps\n", rhs);
-          pari_err(e_BUG, "MPQS: wrong full relation found");
+          pari_err_BUG("MPQS: wrong full relation found");
         }
         else
           PRINT_IF_VERBOSE("\b(:)");
@@ -2214,7 +2214,7 @@ mpqs_eval_cand(mpqs_handle_t *h, long number_of_cand,
           err_printf("MPQS: %Ps @ %Ps :%s\n", Y, Qx, relations);
           err_printf("\tQx_2 = %Ps\n", Qx_2);
           err_printf("\t rhs = %Ps\n", rhs);
-          pari_err(e_BUG, "MPQS: wrong large prime relation found");
+          pari_err_BUG("MPQS: wrong large prime relation found");
         }
         else
           PRINT_IF_VERBOSE("\b(;)");
@@ -2388,7 +2388,7 @@ mpqs_combine_large_primes(mpqs_handle_t *h,
       Qx_2 = modii(sqri(new_Y), h->N);
       prod = mpqs_factorback(h, s);
       if (!equalii(Qx_2, prod))
-        pari_err(e_BUG, "MPQS: combined large prime relation is false");
+        pari_err_BUG("MPQS: combined large prime relation is false");
       avma = av1;
     }
 #endif
@@ -2610,7 +2610,7 @@ mpqs_solve_linear_system(mpqs_handle_t *h, pariFILE *pFREL, long rel)
     for (j = 2; j <= h->size_of_FB + 1; j++)
       if (ei[j])
       {
-        if (ei[j] & 1) pari_err(e_BUG, "MPQS (relation is a nonsquare)");
+        if (ei[j] & 1) pari_err_BUG("MPQS (relation is a nonsquare)");
         X = remii(mulii(X,
                         Fp_powu(utoipos(FB[j].fbe_p), (ulong)ei[j]>>1, N)),
                   N);

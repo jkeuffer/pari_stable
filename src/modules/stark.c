@@ -725,7 +725,7 @@ ArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
     s0 = gmul(gel(s,ic), EvalChar(lC[ic], classe));
     s0 = gdiv(s0, sqrtnc);
     if (check && - expo(subrs(gnorm(s0), 1)) < prec2nbits(prec) >> 1)
-      pari_err(e_BUG, "ArtinNumber");
+      pari_err_BUG("ArtinNumber");
     gel(W, indW[ic]) = gmul(s0, z);
   }
   return gerepilecopy(av, W);
@@ -2697,7 +2697,7 @@ makescind(GEN nf, GEN P)
       return galoisfixedfield(G, perm, 1, varn(P));
     }
   }
-  pari_err(e_BUG,"makescind");
+  pari_err_BUG("makescind");
   return NULL; /*not reached*/
 }
 
@@ -2960,7 +2960,7 @@ init_pq(GEN D, struct gpq_data *T)
     }
     /* if !store or (q,r) won't improve on current best pair, forget that q */
     if (store && t*t > best)
-      if (++l >= Np) pari_err(e_BUG, "quadhilbert (not enough primes)");
+      if (++l >= Np) pari_err_BUG("quadhilbert (not enough primes)");
     if (!best) /* (p,q) with p < q always better than (q,q) */
     { /* try (q,q) */
       if (gcdq >= 12 && umodiu(D, q)) /* e = 1 and unramified */
@@ -3172,7 +3172,7 @@ get_lambda(GEN bnr)
       }
       return labas;
     }
-  pari_err(e_BUG,"get_lambda");
+  pari_err_BUG("get_lambda");
   return NULL;
 }
 

@@ -532,7 +532,7 @@ polgalois(GEN x, long prec)
             return (degpol(gel(p2,1))==2)? galois_res(n,4,1,2)
                                          : galois_res(n,4,-1,1);
 
-          default: pari_err(e_BUG,"galois (bug1)");
+          default: pari_err_BUG("galois (bug1)");
         }
 
       case 5: z = cgetg(7,t_VEC);
@@ -574,7 +574,7 @@ polgalois(GEN x, long prec)
           pr = - (prec2nbits(prec) >> 1);
           for (l=1; l<=6; l++)
             if (ee[l] <= pr && gequal0(poleval(p5,gel(w,l)))) break;
-          if (l>6) pari_err(e_BUG,"galois (bug4)");
+          if (l>6) pari_err_BUG("galois (bug4)");
           p2=(l==6)? transroot(p1,2,5):transroot(p1,1,l);
           p3=gen_0;
           for (i=1; i<=5; i++)
@@ -679,7 +679,7 @@ polgalois(GEN x, long prec)
                 return f? galois_res(n,12,1,4): galois_res(n,24,-1,8);
               }
             case 4: avma = av; return galois_res(n,6,-1,2);
-            default: pari_err(e_BUG,"galois (bug3)");
+            default: pari_err_BUG("galois (bug3)");
           }
         }
 
@@ -708,7 +708,7 @@ polgalois(GEN x, long prec)
           case 3: avma = av; return galois_res(n,21,1,3);
           case 4: avma = av; return galois_res(n,14,-1,2);
           case 5: avma = av; return galois_res(n,7,1,1);
-          default: pari_err(e_BUG,"galois (bug2)");
+          default: pari_err_BUG("galois (bug2)");
         }
     }
     tchi: avma = av1; x = tschirnhaus(x1);
@@ -2219,7 +2219,7 @@ chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
     for (i = 2; i <= r1+r2; i++) V = gadd(V, gel(inv,i));
     /* V corresponds to 1_Z */
     V = grndtoi(V, &j);
-    if (j > -5) pari_err(e_BUG,"precision too low in chk_gen_init");
+    if (j > -5) pari_err_BUG("precision too low in chk_gen_init");
     M = mkmat(V); /* 1 */
 
     V = cgetg(N+1, t_VEC);
@@ -2263,7 +2263,7 @@ chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
   prec = chk_gen_prec(N, (gexpo(bound)*N)/2);
   if (DEBUGLEVEL)
     err_printf("chk_gen_init: new prec = %ld (initially %ld)\n", prec, d->prec);
-  if (prec > d->prec) pari_err(e_BUG, "polredabs (precision problem)");
+  if (prec > d->prec) pari_err_BUG("polredabs (precision problem)");
   if (prec < d->prec) d->ZKembed = gprec_w(d->ZKembed, prec);
   return bound;
 }
@@ -2370,7 +2370,7 @@ polredabs0(GEN x, long flag)
     remove_duplicates(y,a);
     l = lg(a);
     if (l == 1)
-      pari_err(e_BUG, "polredabs (missing vector)");
+      pari_err_BUG("polredabs (missing vector)");
   }
   if (DEBUGLEVEL) err_printf("Found %ld minimal polynomials.\n",l-1);
   if (flag & nf_ALL) {

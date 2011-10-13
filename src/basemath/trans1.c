@@ -1260,7 +1260,7 @@ palogaux(GEN x)
   e = valp(y); /* > 0 */
   if (e <= 0) {
     if (!BPSW_psp(p)) pari_err_PRIME("p-adic log",p);
-    pari_err(e_BUG, "log_p");
+    pari_err_BUG("log_p");
   }
   pp = e+precp(y);
   if (equaliu(p,2)) pp--;

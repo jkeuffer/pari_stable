@@ -1028,7 +1028,7 @@ heegner_find_point(GEN e, GEN ht, GEN N, GEN z1, long k, long prec)
     }
     avma = av;
   }
-  pari_err(e_BUG, "ellheegner, point not found");
+  pari_err_BUG("ellheegner, point not found");
   return NULL; /* NOT REACHED */
 }
 

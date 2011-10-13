@@ -1487,7 +1487,7 @@ RESTART:
         {
           if (ctpro == 1) goto DOGEN;
           storeprecdoubles(&Mbar, &Mbarst); /* restore */
-          if (! applybar(&M, &Mbar, Abargen,Bbargen)) pari_err(e_BUG,"pslqL2");
+          if (! applybar(&M, &Mbar, Abargen,Bbargen)) pari_err_BUG("pslqL2");
           if ( (p1 = checkend(&M, prec)) ) return gerepilecopy(av0, p1);
           goto RESTART;
         }

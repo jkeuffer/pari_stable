@@ -927,7 +927,7 @@ red_montgomery(GEN T, GEN N, ulong inv)
   d = NLIMBS(T); /* <= 2*k */
   if (d == 0) return gen_0;
 #ifdef DEBUG
-  if (d > 2*k) pari_err(e_BUG,"red_montgomery");
+  if (d > 2*k) pari_err_BUG("red_montgomery");
 #endif
   if (k == 1)
   { /* as below, special cased for efficiency */
@@ -1002,7 +1002,7 @@ red_montgomery(GEN T, GEN N, ulong inv)
   GEN res = remii(mulii(T, Fp_inv(R, N)), N);
   if (k > lgefint(N)
     || !equalii(remii(Td,N),res)
-    || cmpii(Td, addii(shifti(T, -s), N)) >= 0) pari_err(e_BUG,"red_montgomery");
+    || cmpii(Td, addii(shifti(T, -s), N)) >= 0) pari_err_BUG("red_montgomery");
 }
 #endif
   avma = (pari_sp)Td; return Td;

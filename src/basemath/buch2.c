@@ -1003,7 +1003,7 @@ pr_index(GEN L, GEN pr)
   GEN al = pr_get_gen(pr);
   for (j=1; j<l; j++)
     if (ZV_equal(al, pr_get_gen(gel(L,j)))) return j;
-  pari_err(e_BUG,"codeprime");
+  pari_err_BUG("codeprime");
   return 0; /* not reached */
 }
 
@@ -1378,7 +1378,7 @@ red_mod_units(GEN col, GEN z)
   if (typ(x) != t_MAT) return NULL;
   x = gel(x,RU);
   if (signe(x[RU]) < 0) x = gneg_i(x);
-  if (!gequal1(gel(x,RU))) pari_err(e_BUG,"red_mod_units");
+  if (!gequal1(gel(x,RU))) pari_err_BUG("red_mod_units");
   setlg(x,RU); return x;
 }
 
@@ -2293,7 +2293,7 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
     u = ZM_lll(ZM_mul(F->G0, ideal), 0.99, LLL_IM);
     ideal = ZM_mul(ideal,u); /* approximate T2-LLL reduction */
     r = Q_from_QR(RgM_mul(G, ideal), prec); /* Cholesky for T2 | ideal */
-    if (!r) pari_err(e_BUG, "small_norm (precision too low)");
+    if (!r) pari_err_BUG("small_norm (precision too low)");
 
     skipfirst = ZV_isscalar(gel(ideal,1))? 1: 0; /* 1 probable */
     for (k=1; k<=N; k++)

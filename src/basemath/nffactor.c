@@ -2129,7 +2129,7 @@ rootsof1_kannan(GEN nf)
     if (DEBUGLEVEL) pari_warn(warnprec,"rootsof1",prec);
     nf = nfnewprec_shallow(nf,prec);
   }
-  if (itos(ground(gel(y,2))) != N) pari_err(e_BUG,"rootsof1 (bug1)");
+  if (itos(ground(gel(y,2))) != N) pari_err_BUG("rootsof1 (bug1)");
   w = gel(y,1); ws = itos(w);
   if (ws == 2) { avma = av; return trivroots(); }
 
@@ -2139,6 +2139,6 @@ rootsof1_kannan(GEN nf)
     z = is_primitive_root(nf, d, gel(list,i), ws);
     if (z) return gerepilecopy(av, mkvec2(w, z));
   }
-  pari_err(e_BUG,"rootsof1");
+  pari_err_BUG("rootsof1");
   return NULL; /* not reached */
 }

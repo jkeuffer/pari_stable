@@ -1311,7 +1311,7 @@ intnum_i(void *E, GEN (*eval)(void*, GEN), GEN a, GEN b, GEN tab, long prec)
       SP = intninfpm(E, eval, coupeb, 1, gel(tab,2));
     else
     {
-      if (codeb != f_YOSCC) pari_err(e_BUG, "code error in intnum");
+      if (codeb != f_YOSCC) pari_err_BUG("code error in intnum");
       if (gequal(kma, kmb))
         SP = intninfpm(E, eval, coupeb, 1, gel(tab,2));
       else

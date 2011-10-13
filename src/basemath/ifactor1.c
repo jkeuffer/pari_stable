@@ -221,7 +221,7 @@ snextpr(ulong p, byteptr *d, long *rcn, long *q, long k)
       if (d1 < 0)
       {
         err_printf("snextpr: %lu != prc210_rp[%ld] mod 210\n", p, rcn0);
-        pari_err(e_BUG, "[caller of] snextpr");
+        pari_err_BUG("[caller of] snextpr");
       }
     }
     NEXT_PRIME_VIADIFF(p,*d);
@@ -234,7 +234,7 @@ snextpr(ulong p, byteptr *d, long *rcn, long *q, long k)
     if (*rcn == NPRC)
     {
       err_printf("snextpr: %lu should have been prime but isn\'t\n", p);
-      pari_err(e_BUG, "[caller of] snextpr");
+      pari_err_BUG("[caller of] snextpr");
     }
   }
   /* look for the next one */
@@ -247,7 +247,7 @@ snextpr(ulong p, byteptr *d, long *rcn, long *q, long k)
     if (n <= 11)                /* wraparound mod 2^BITS_IN_LONG */
     {
       err_printf("snextpr: integer wraparound after prime %lu\n", p);
-      pari_err(e_BUG, "[caller of] snextpr");
+      pari_err_BUG("[caller of] snextpr");
     }
   }
   return n;
@@ -339,7 +339,7 @@ elladd0(GEN N, GEN *gl, long nbc, long nbc1,
 
   /* actually, this is only ever called with nbc1==nbc or nbc1==4, so: */
   if (nbc1 == 4) mask = 3;
-  else if (nbc1 < nbc) pari_err(e_BUG, "[caller of] elladd0");
+  else if (nbc1 < nbc) pari_err_BUG("[caller of] elladd0");
 
   W[1] = subii(X1[0], X2[0]);
   for (i=1; i<nbc; i++)
@@ -947,7 +947,7 @@ ellfacteur(GEN N, int insist)
       if (rcn == NPRC)
       {
         err_printf("ECM: %lu should have been prime but isn\'t\n", p);
-        pari_err(e_BUG, "ellfacteur");
+        pari_err_BUG("ellfacteur");
       }
     }
 
@@ -1574,9 +1574,9 @@ squfof(GEN n)
   d1 = itou(sqrti(D1));
   b1 = (long)((d1-1) | 1); /* largest odd number not exceeding d1 */
   c1 = itos(shifti(subii(D1, sqru((ulong)b1)), -2));
-  if (!c1) pari_err(e_BUG,"squfof [caller of] (n or 3n is a square)");
+  if (!c1) pari_err_BUG("squfof [caller of] (n or 3n is a square)");
   c2 = itos(shifti(subii(D2, sqru((ulong)b2)), -2));
-  if (!c2) pari_err(e_BUG,"squfof [caller of] (5n is a square)");
+  if (!c2) pari_err_BUG("squfof [caller of] (5n is a square)");
   L1 = (long)usqrtsafe(d1);
   L2 = (long)usqrtsafe(d2);
   /* dd1 used to compute floor((d1+b1)/2) as dd1+floor(b1/2), without
@@ -2377,7 +2377,7 @@ ifac_print(GEN part, GEN where)
     else if (c == gen_0) s = "composite";
     else if (c == gen_1) s = "unfinished prime";
     else if (c == gen_2) s = "prime";
-    else pari_err(e_BUG, "unknown factor class");
+    else pari_err_BUG("unknown factor class");
     err_printf("[%Ps, %Ps, %s]\n", v, e, s);
   }
   err_printf("Done.\n");
@@ -2852,7 +2852,7 @@ ifac_crack(GEN *partial, GEN *where)
   {
     err_printf("IFAC: factoring %Ps\n", VALUE(*where));
     err_printf("\tyielded 'factor' %Ps\n\twhich isn't!\n", factor);
-    pari_err(e_BUG, "factoring");
+    pari_err_BUG("factoring");
   }
   /* factoring engines report the factor found; tell about the cofactor */
   if (DEBUGLEVEL >= 4) err_printf("IFAC: cofactor = %Ps\n", VALUE(*where));
@@ -2872,7 +2872,7 @@ ifac_crack(GEN *partial, GEN *where)
     VALUE(*where) = VALUE(old); /* move cofactor pointer to lowest slot */
     VALUE(old) = factor; /* save factor */
   }
-  else pari_err(e_BUG,"ifac_crack [Z_issquareall miss]");
+  else pari_err_BUG("ifac_crack [Z_issquareall miss]");
   return 2;
 }
 

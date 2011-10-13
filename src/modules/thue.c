@@ -524,7 +524,7 @@ MiddleSols(GEN *pS, GEN bound, GEN roo, GEN poly, GEN rhs, long s, GEN c1)
           if (odd(d))  add_sol(pS, negi(p), negi(q));
       }
     }
-    if (j == lg(t)) pari_err(e_BUG, "Short continued fraction in thue");
+    if (j == lg(t)) pari_err_BUG("Short continued fraction in thue");
   }
   return bndcf;
 }
@@ -779,7 +779,7 @@ get_B0(long i1, GEN Delta, GEN Lambda, GEN eps5, long prec, baker_s *BS)
     i2++; if (i2 == i1) i2++;
     if (i2 > BS->r) break;
   }
-  pari_err(e_BUG,"thue (totally rational case)");
+  pari_err_BUG("thue (totally rational case)");
   return NULL; /* not reached */
 }
 
@@ -829,7 +829,7 @@ get_Bx_LLL(long i1, GEN Delta, GEN Lambda, GEN eps5, long prec, baker_s *BS)
     i2++; if (i2 == i1) i2++;
     if (i2 > BS->r) break;
   }
-  pari_err(e_BUG,"thue (totally rational case)");
+  pari_err_BUG("thue (totally rational case)");
   return NULL; /* not reached */
 }
 

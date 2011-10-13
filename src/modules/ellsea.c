@@ -372,7 +372,7 @@ find_eigen_value(GEN a4, GEN a6, ulong ell, GEN h, GEN p, GEN tr)
       if (ZX_equal(gel(Dr,2), nGr))     { avma = ltop; return ell-t; }
       Dr = gerepileupto(btop, eigen_elladd((void*)&Edat, Dr, BP));
     }
-    pari_err(e_BUG,"find_eigen_value_power");
+    pari_err_BUG("find_eigen_value_power");
     return 0; /* NOT REACHED */
   }
   else
@@ -412,7 +412,7 @@ find_eigen_value_power(GEN a4, GEN a6, ulong ell, long k, GEN h, ulong lambda, G
     Dr = eigen_elladd((void*)&Edat, Dr, BP);
     if (low_stack(st_lim, stack_lim(btop, 1))) Dr = gerepileupto(btop, Dr);
   }
-  pari_err(e_BUG,"find_eigen_value_power");
+  pari_err_BUG("find_eigen_value_power");
   return 0; /* NOT REACHED */
 }
 
@@ -558,7 +558,7 @@ find_isogenous_from_Atkin(GEN a4, GEN a6, long ell, GEN meqn, GEN g, GEN p)
     GEN h = find_kernel(a4, a6, ell, a4t, a6t, pp1, p);
     if (h) return gerepilecopy(ltop, mkvec3(a4t, a6t, h));
   }
-  pari_err(e_BUG, "find_isogenous_from_Atkin, kernel not found");
+  pari_err_BUG("find_isogenous_from_Atkin, kernel not found");
   return NULL;
 }
 
@@ -1285,7 +1285,7 @@ match_and_sort(GEN compile_atkin, GEN Mu, GEN u, GEN a4, GEN a6, GEN p)
     if ((i & 0xff) == 0) point = gerepilecopy(av1, point);
   }
   /* no match ? */
-  pari_err(e_BUG,"match_and_sort");
+  pari_err_BUG("match_and_sort");
   return NULL; /* not reached */
 }
 

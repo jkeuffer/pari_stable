@@ -525,7 +525,7 @@ compilecast_loc(int type, int mode, const char *loc)
     else compile_varerr(loc);
      break;
   default:
-    pari_err(e_BUG,"compilecast, type unknown %ld",mode);
+    pari_err_BUG("compilecast [unknown type]");
   }
 }
 
@@ -734,7 +734,7 @@ compilefacteurmat(long n, int mode)
     compilecast(n,Gvec,mode);
     return;
   default:
-    pari_err(e_BUG,"compilefacteurmat");
+    pari_err_BUG("compilefacteurmat");
   }
 }
 
@@ -1316,7 +1316,7 @@ compilefunc(entree *ep, long n, int mode, long flag)
         }
         break;
       default:
-        pari_err(e_BUG,"PPproto %d in compilefunc",mod);
+        pari_err_BUG("compilefunc [unknown PPproto]");
       }
       q=p;
     }
@@ -1578,8 +1578,7 @@ static void
 compilenode(long n, int mode, long flag)
 {
   long x,y;
-  if (n<0)
-    pari_err(e_BUG,"compilenode");
+  if (n<0) pari_err_BUG("compilenode");
   x=tree[n].x;
   y=tree[n].y;
 
@@ -1655,7 +1654,7 @@ compilenode(long n, int mode, long flag)
           break;
         }
       default:
-        pari_err(e_BUG,"compilenode, unsupported constant");
+        pari_err_BUG("compilenode, unsupported constant");
       }
       avma=ltop;
       return;
@@ -1765,7 +1764,7 @@ compilenode(long n, int mode, long flag)
     compilecast(n,Gvoid,mode);
     return;
   default:
-    pari_err(e_BUG,"compilenode");
+    pari_err_BUG("compilenode");
   }
 }
 
@@ -1988,7 +1987,7 @@ optimizefunc(entree *ep, long n)
         }
         break;
       default:
-        pari_err(e_BUG,"PPproto %d in compilefunc",mod);
+        pari_err_BUG("optimizefun [unknown PPproto]");
       }
     }
   }
@@ -2013,7 +2012,7 @@ optimizenode(long n)
 {
   long x,y;
   if (n<0)
-    pari_err(e_BUG,"optimizenode");
+    pari_err_BUG("optimizenode");
   x=tree[n].x;
   y=tree[n].y;
 
@@ -2069,6 +2068,6 @@ optimizenode(long n)
     tree[n].flags=tree[x].flags;
     return;
   default:
-    pari_err(e_BUG,"optimizenode");
+    pari_err_BUG("optimizenode");
   }
 }

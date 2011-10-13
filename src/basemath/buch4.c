@@ -122,7 +122,7 @@ quad_char(GEN nf, GEN t, GEN pr)
     t = Fq_pow(t, diviiexact(ord, ordp), T,p); /* in F_p^* */
     if (typ(t) == t_POL)
     {
-      if (degpol(t)) pari_err(e_BUG,"nfhilbertp");
+      if (degpol(t)) pari_err_BUG("nfhilbertp");
       t = gel(t,2);
     }
   }
@@ -529,7 +529,7 @@ bnfsunit(GEN bnf,GEN S,long prec)
     H = mathnfspec(U1,&perm,&dep,&B,&p1);
     lH = lg(H);
     lB = lg(B);
-    if (lg(dep) > 1 && lg(dep[1]) > 1) pari_err(e_BUG,"bnfsunit");
+    if (lg(dep) > 1 && lg(dep[1]) > 1) pari_err_BUG("bnfsunit");
    /*                   [ H B  ]            [ H^-1   - H^-1 B ]
     * perm o HNF(U1) =  [ 0 Id ], inverse = [  0         Id   ]
     * (permute the rows)
@@ -822,7 +822,7 @@ rnfisnorm(GEN T, GEN x, long flag)
     if (typ(u) != t_POLMOD) u = mkpolmod(u, gel(theta,1));
     gel(sunitrel,i) = u;
     u = bnfissunit(bnf,bnfS, gnorm(u));
-    if (lg(u) == 1) pari_err(e_BUG,"rnfisnorm");
+    if (lg(u) == 1) pari_err_BUG("rnfisnorm");
     gel(u,itu) = lift_intern(gel(u,itu)); /* lift root of 1 part */
     gel(M,i) = u;
   }

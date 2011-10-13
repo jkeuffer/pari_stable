@@ -773,7 +773,7 @@ FOUND:  X = Flm_Flc_mul(K, y, ell);
                 gel(C,2) = colgrp;
                 gel(C,3) = grptocol(rnfnormgroup(bnr, gsub(xell, gmul(be1,be))));
                 K2 = Flm_ker(C, ell);
-                if (lg(K2) != 2) pari_err(e_BUG, "linear algebra");
+                if (lg(K2) != 2) pari_err_BUG("linear algebra");
                 K2 = gel(K2,1);
                 if (K2[1] != K2[2])
                   Flc_Fl_mul_inplace(colgrp, Fl_div(K2[2],K2[1],ell), ell);
@@ -834,7 +834,7 @@ isvirtualunit(GEN bnf, GEN v, GEN cycgen, GEN cyc, GEN gell, long rc)
   }
   setlg(y, rc+1);
   b = bnfisunit(bnf,eps);
-  if (lg(b) == 1) pari_err(e_BUG,"isvirtualunit");
+  if (lg(b) == 1) pari_err_BUG("isvirtualunit");
   return shallowconcat(lift_intern(b), y);
 }
 

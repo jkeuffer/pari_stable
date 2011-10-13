@@ -909,7 +909,7 @@ step5(Cache **pC, Red *R, long p, GEN et, ulong ltab)
    repeat:
     NEXT_PRIME_VIADIFF(q,d);
   }
-  pari_err(e_BUG,"aprcl test fails! this is highly improbable");
+  pari_err_BUG("aprcl test fails! this is highly improbable");
   return 0;
 }
 
@@ -955,7 +955,7 @@ aprcl(GEN N)
   t = compt(N);
   if (DEBUGLEVEL) err_printf("Starting APRCL: Choosing t = %ld\n",t);
   et = e(t, &globfa);
-  if (cmpii(sqri(et),N) < 0) pari_err(e_BUG,"aprcl: e(t) too small");
+  if (cmpii(sqri(et),N) < 0) pari_err_BUG("aprcl: e(t) too small");
   if (!gequal1(gcdii(N,mului(t,et)))) return _res(1,0);
 
   R.N = N;

@@ -1012,7 +1012,7 @@ Decomp(decomp_t *S, long flag)
   if (!FpX_valrem(S->chi, S->nu, p, &b1))
   {
     if (!BPSW_psp(p)) pari_err_PRIME("Decomp",p);
-    pari_err(e_BUG, "Decomp (not a factor)");
+    pari_err_BUG("Decomp (not a factor)");
   }
   b2 = FpX_div(S->chi, b1, p);
   a = FpX_mul(FpXQ_inv(b2, b1, p), b2, p);
@@ -1571,7 +1571,7 @@ loop(decomp_t *S, long nv, long Ea, long Fa)
     if (degpol(gel(w,1)) != 1)
     {
       if (!BPSW_psp(S->p)) pari_err_PRIME("nilord",S->p);
-      pari_err(e_BUG, "nilord (no root)");
+      pari_err_BUG("nilord (no root)");
     }
 
     for (i = 1; i < lg(w); i++)
@@ -1614,7 +1614,7 @@ loop(decomp_t *S, long nv, long Ea, long Fa)
     if (i == lg(w))
     {
       if (!BPSW_psp(S->p)) pari_err_PRIME("nilord",S->p);
-      pari_err(e_BUG, "nilord (no root II)");
+      pari_err_BUG("nilord (no root II)");
     }
     if (eq) delt = gmul(delt, powiu(S->p,  eq));
     if (er) delt = gmul(delt, gpowgs(S->nu, er));

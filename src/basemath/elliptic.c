@@ -1809,7 +1809,7 @@ localred_result(long f, long kod, long c, GEN v)
 static GEN
 localredbug(GEN p, const char *s)
 {
-  if (BPSW_psp(p)) pari_err(e_BUG, s);
+  if (BPSW_psp(p)) pari_err_BUG(s);
   pari_err_PRIME("localred",p);
   return NULL; /* not reached */
 }
@@ -3025,7 +3025,7 @@ ellap2(GEN e, ulong p)
     {
       if (ftest.isnull) {
         if (!uisprime(p)) pari_err_PRIME("ellap",utoi(p));
-        pari_err(e_BUG,"ellap (f^(i*s) = 1)");
+        pari_err_BUG("ellap (f^(i*s) = 1)");
       }
       l=0; r=s;
       while (l<r)
@@ -4099,18 +4099,18 @@ nagelllutz(GEN e)
     w2 = mkvec( utoipos(t) );
     for (k=2; k<=t; k++)
       if (_orderell(e,gel(r,k)) == t) break;
-    if (k>t) pari_err(e_BUG,"elltors (bug1)");
+    if (k>t) pari_err_BUG("elltors (bug1)");
 
     w3 = mkvec( gel(r,k) );
   }
   else
   {
-    if (t&3) pari_err(e_BUG,"elltors (bug2)");
+    if (t&3) pari_err_BUG("elltors (bug2)");
     t2 = t>>1;
     w2 = mkvec2(utoipos(t2), gen_2);
     for (k=2; k<=t; k++)
       if (_orderell(e,gel(r,k)) == t2) break;
-    if (k>t) pari_err(e_BUG,"elltors (bug3)");
+    if (k>t) pari_err_BUG("elltors (bug3)");
 
     p1 = ellpow_Z(e,gel(r,k),utoipos(t>>2));
     k2 = (!ell_is_inf(p1) && gequal(gel(r,2),p1))? 3: 2;

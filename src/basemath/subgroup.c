@@ -368,7 +368,7 @@ dopsub(subgp_iter *T, GEN p, GEN indexsubq)
         if (!equaliu(p1,T->countsub))
         {
           err_printf("  alpha = %Ps\n",p1);
-          pari_err(e_BUG,"forsubgroup (alpha != countsub)");
+          pari_err_BUG("forsubgroup (alpha != countsub)");
         }
       }
     }

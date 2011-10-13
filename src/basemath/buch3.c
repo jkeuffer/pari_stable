@@ -137,7 +137,7 @@ too_big(GEN nf, GEN bet)
     case t_INT: return absi_cmp(x, gen_1);
     case t_FRAC: return absi_cmp(gel(x,1), gel(x,2));
   }
-  pari_err(e_BUG, "wrong type in too_big");
+  pari_err_BUG("wrong type in too_big");
   return 0; /* not reached */
 }
 
@@ -542,7 +542,7 @@ bnrisprincipal(GEN bnr, GEN x, long flag)
   /* compute generator */
   L = isprincipalfact(bnf, x, bnr_get_gen(bnr), ZC_neg(ex),
                       nf_GENMAT|nf_GEN_IF_PRINCIPAL|nf_FORCE);
-  if (L == gen_0) pari_err(e_BUG,"isprincipalray");
+  if (L == gen_0) pari_err_BUG("isprincipalray");
   alpha = nffactorback(nf, L, NULL);
   if (lg(cycbid) > 1)
   {
@@ -1755,7 +1755,7 @@ Lbnrclassno(GEN L, GEN fac)
   long i, l = lg(L);
   for (i=1; i<l; i++)
     if (gequal(gmael(L,i,1),fac)) return gmael(L,i,2);
-  pari_err(e_BUG,"Lbnrclassno");
+  pari_err_BUG("Lbnrclassno");
   return NULL; /* not reached */
 }
 

@@ -7962,12 +7962,13 @@ system}.
 \subsubsec{e\_BUG} A bug in the PARI library, in function $s$.
 \bprog
   pari_err(e_BUG, const char *s)
+  pari_err_BUG(const char *s)
 @eprog\noindent prints the error message: \kbd{Bug in $s$, please report}.
 
 \subsubsec{e\_FILE} Error while trying to open a file.
 \bprog
-  pari_err_FILE(const char *what, const char *name)
   pari_err(e_FILE, const char *what, const char *name)
+  pari_err_FILE(const char *what, const char *name)
 @eprog\noindent prints the error message: \kbd{error opening \emph{what} file:
 `\emph{name}'}.
 
@@ -8283,7 +8284,7 @@ For example this function swaps two elements:
 void swapfoo(long a, long b)
 {
   foo x;
-  if (a > s_foo.n || b > s_foo.n) pari_err(e_BUG,"swapfoo");
+  if (a > s_foo.n || b > s_foo.n) pari_err_BUG("swapfoo");
   x        = t_foo[a];
   t_foo[a] = t_foo[b];
   t_foo[b] = x;

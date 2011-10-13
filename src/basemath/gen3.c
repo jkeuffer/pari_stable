@@ -3660,7 +3660,7 @@ simplify_shallow(GEN x)
 {
   long i, lx;
   GEN y, z;
-  if (!x) pari_err(e_BUG, "simplify, NULL input");
+  if (!x) pari_err_BUG("simplify, NULL input");
 
   switch(typ(x))
   {
@@ -3701,7 +3701,7 @@ simplify_shallow(GEN x)
       for (i=1; i<lx; i++) gel(y,i) = simplify_shallow(gel(x,i));
       return y;
   }
-  pari_err(e_BUG,"simplify_shallow, type unknown");
+  pari_err_BUG("simplify_shallow, type unknown");
   return NULL; /* not reached */
 }
 

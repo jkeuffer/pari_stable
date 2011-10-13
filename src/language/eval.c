@@ -558,7 +558,7 @@ closure_castgen(GEN z, long mode)
   case Gvoid:
     break;
   default:
-    pari_err(e_BUG,"closure_castgen, type unknown");
+    pari_err_BUG("closure_castgen, type unknown");
   }
 }
 
@@ -576,7 +576,7 @@ closure_castlong(long z, long mode)
   case Gvar:
     err_var();
   default:
-    pari_err(e_BUG,"closure_castlong, type unknown");
+    pari_err_BUG("closure_castlong, type unknown");
   }
 }
 
@@ -715,7 +715,7 @@ closure_eval(GEN C)
   {
     op_code opcode=(op_code) code[pc];
     long operand=oper[pc];
-    if (sp<0) pari_err(e_BUG,"closure_eval, stack underflow");
+    if (sp<0) pari_err_BUG("closure_eval, stack underflow");
     st_alloc(16);
     trace[t].pc = pc;
     CHECK_CTRLC

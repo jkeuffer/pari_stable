@@ -1957,6 +1957,7 @@ void    pari_close(void);
 void    pari_close_opts(ulong init_opts);
 int     pari_daemon(void);
 void    pari_err(int numerr, ...);
+void    pari_err_BUG(const char *f);
 void    pari_err_CONSTPOL(const char *f);
 void    pari_err_DIM(const char *f);
 void    pari_err_FILE(const char *f, const char *g);
