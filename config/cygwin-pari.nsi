@@ -37,6 +37,7 @@ Section "pari (required)" SecCopy
   SetOutPath "$INSTDIR"
   File /oname=gp.exe "gp-dyn.exe"
   File /oname=.gprc "${cfgdir}\cygwin-gprc"
+  File /oname=postinst "${cfgdir}\cygwin-postinst"
   File "${top}\misc\tex2mail"
   File "${dll}"
   FILE "\cygwin\bin\cygcrypt-0.dll"
@@ -51,11 +52,16 @@ Section "pari (required)" SecCopy
   File "\cygwin\bin\cygwin1.dll"
   File "\cygwin\bin\perl.exe"
   File "\cygwin\bin\sh.exe"
+  File "\cygwin\bin\ln.exe"
   SetOutPath "$INSTDIR\terminfo\c"
   File /nonfatal "\cygwin\usr\share\terminfo\c\cygwin"
   SetOutPath "$INSTDIR\terminfo\63"
   File /nonfatal "\cygwin\usr\share\terminfo\63\cygwin"
   SetOutPath "$INSTDIR"
+  CreateDirectory "$INSTDIR\..\bin"
+  ExecWait 'sh ./postinst'
+  Delete "ln.exe"
+  Delete "postinst"
 
   WriteRegStr HKCU "Software\${PARIver}" "" $INSTDIR
   WriteRegStr HKLM ${uninst} "DisplayName" "${PARIver} (remove only)"
@@ -181,5 +187,7 @@ Section "Uninstall"
 
   RMDir /r "$SMPROGRAMS\${PARIver}"
   Delete "$DESKTOP\PARI.lnk"
+  Delete "$INSTDIR\..\bin\sh"
+  RMDir "$INSTDIR\..\bin"
   RMDir "$INSTDIR"
 SectionEnd
