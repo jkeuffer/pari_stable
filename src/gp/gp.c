@@ -2031,6 +2031,43 @@ read_opt(pari_stack *p_A, long argc, char **argv)
   pari_outfile = stdout;
 }
 
+#ifdef __CYGWIN32__
+void
+cyg_environment(int argc, char ** argv)
+{
+  char *ti_dirs = getenv("TERMINFO_DIRS");
+  char *argv0, *p;
+  char *newdir;
+  long n;
+
+  if (!argc || !argv) return;
+  argv0 = *argv;
+  if (!argv0 || !*argv0) return;
+  p = strrchr(argv0, '/');
+  if (!p)
+    p = argv0 = "";
+  else
+    p++;
+  n = p - argv0;
+  if (ti_dirs)
+  {
+    n += 14 + strlen(ti_dirs) + 1 + 8 + 1;
+    newdir = malloc(n);
+    if (!newdir) return;
+    snprintf(newdir, n-8, "TERMINFO_DIRS=%s:%s", ti_dirs, argv0);
+  }
+  else
+  {
+    n += 14 + 8 + 1;
+    newdir = malloc(n);
+    if (!newdir) return;
+    snprintf(newdir, n-8, "TERMINFO_DIRS=%s", argv0);
+  }
+  strcpy(newdir+n-9,"terminfo");
+  putenv(newdir);
+}
+#endif
+
 #ifdef WINCE
 int
 WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
@@ -2055,6 +2092,9 @@ main(int argc, char **argv)
     puts("### Errors on startup, exiting...\n\n");
     exit(1);
   }
+#ifdef __CYGWIN32__
+  cyg_environment(argc, argv);
+#endif
   gp_is_interactive = pari_stdin_isatty();
   pari_init_defaults();
   stack_init(&s_A,sizeof(*A),(void**)&A);

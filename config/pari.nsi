@@ -51,6 +51,11 @@ Section "pari (required)" SecCopy
   File "\cygwin\bin\cygwin1.dll"
   File "\cygwin\bin\perl.exe"
   File "\cygwin\bin\sh.exe"
+  SetOutPath "$INSTDIR\terminfo\c"
+  File /nonfatal "\cygwin\usr\share\terminfo\c\cygwin"
+  SetOutPath "$INSTDIR\terminfo\63"
+  File /nonfatal "\cygwin\usr\share\terminfo\63\cygwin"
+  SetOutPath "$INSTDIR"
 
   WriteRegStr HKCU "Software\${PARIver}" "" $INSTDIR
   WriteRegStr HKLM ${uninst} "DisplayName" "${PARIver} (remove only)"
@@ -144,6 +149,7 @@ Section "Uninstall"
   RMDir /r "$INSTDIR\doc"
   RMDir /r "$INSTDIR\examples"
   RMDir /r "$INSTDIR\data"
+  RMDir /r "$INSTDIR\terminfo"
 
   DeleteRegKey HKLM ${uninst}
   DeleteRegKey /ifempty HKLM "Software\${PARIver}"
