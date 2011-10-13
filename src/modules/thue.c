@@ -159,7 +159,7 @@ T_A_Matrices(GEN MatFU, long r, GEN *eps5, long prec)
 
   eps2 = gadd(vecmax(gabs(IntM, 3)), real2n(-e, LOWDEFAULTPREC)); /* t_REAL */
   nia = vecmax(gabs(A, 3));
-  if (typ(nia) != t_REAL) nia = gtofp(nia, 3);
+  if (typ(nia) != t_REAL) nia = gtofp(nia, LOWDEFAULTPREC);
 
   /* Check for the precision in matrix inversion. See paper, Lemma 2.4.2. */
   p1 = addrr(mulsr(r, gmul2n(nia, e)), eps2); /* t_REAL */

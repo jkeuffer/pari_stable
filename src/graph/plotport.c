@@ -110,7 +110,7 @@ fill_gap(screen scr, long i, int jnew, int jpre)
 }
 
 static double
-todbl(GEN x) { return rtodbl(gtofp(x, 3)); }
+todbl(GEN x) { return rtodbl(gtofp(x, LOWDEFAULTPREC)); }
 
 static GEN
 READ_EXPR(GEN code, GEN x) {

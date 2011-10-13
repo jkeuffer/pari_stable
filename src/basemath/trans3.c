@@ -94,7 +94,7 @@ jbesselintern(GEN n, GEN z, long flag, long prec)
       if (flz0 && gequal0(n)) return real_1(prec);
       p2 = gdiv(gpow(gmul2n(z,-1),n,prec), ggamma(gaddgs(n,1),prec));
       if (flz0) return gerepileupto(av, p2);
-      L = 1.3591409 * gtodouble(gabs(gtofp(z,3),prec));
+      L = 1.3591409 * gtodouble(gabs(gtofp(z,LOWDEFAULTPREC),prec));
       precnew = prec;
       if (L >= 1.0) precnew += 1 + (long)(L/(1.3591409*LOG2*BITS_IN_LONG));
       if (issmall(n,&ki))
@@ -540,7 +540,7 @@ hyperu(GEN a, GEN b, GEN gx, long prec)
     pari_err(e_MISC,"hyperu's third argument must be positive");
   x = gtofp(gx, l);
   a1 = gaddsg(1, gadd(a,mb)); P = gmul(a1, a);
-  p1 = gabs(gtofp(P,3), 3);
+  p1 = gabs(gtofp(P,LOWDEFAULTPREC), LOWDEFAULTPREC);
   n = (long)(prec2nbits_mul(l, LOG2) + PI*sqrt(gtodouble(p1)));
   S = gadd(a1, a);
   if (cmprs(x,n) < 0)
