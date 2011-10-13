@@ -802,7 +802,7 @@ idealaddmultoone(GEN nf, GEN list)
   GEN H, U, perm, L;
 
   nf = checknf(nf); N = nf_get_degree(nf);
-  if (!is_vec_t(tx)) pari_err(e_MISC,"not a vector of ideals in idealaddmultoone");
+  if (!is_vec_t(tx)) pari_err_TYPE("idealaddmultoone",list);
   l = lg(list);
   L = cgetg(l, t_VEC);
   if (l == 1) pari_err(e_MISC,"ideals don't sum to Z_K in idealaddmultoone");
