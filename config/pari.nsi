@@ -64,10 +64,27 @@ Section "pari (required)" SecCopy
   WriteUninstaller "$INSTDIR\Uninstall.exe"
 SectionEnd
 
+SectionGroup /e "Data files" SecDATA
+Section "Elliptic curves files" SecELL
+  SetOutPath "$INSTDIR\data\elldata"
+  File "${top}\data\elldata\*"
+SectionEnd
+
 Section "Galois files" SecGAL
   SetOutPath "$INSTDIR\data\galdata"
   File "${top}\data\galdata\*"
 SectionEnd
+
+Section "Frobenius of elliptic curves files" SecSEA
+  SetOutPath "$INSTDIR\data\seadata"
+  File "${top}\data\seadata\*"
+SectionEnd
+
+Section "Galois polynomial files" SecGPL
+  SetOutPath "$INSTDIR\data\galpol"
+  File "${top}\data\galpol\*"
+SectionEnd
+SectionGroupEnd
 
 Section "documentation" SecDOC
   SetOutPath "$INSTDIR"
@@ -114,12 +131,20 @@ SectionEnd
 LangString DESC_SecCopy ${LANG_ENGLISH} "Copy pari files to application folder."
 LangString DESC_DOC ${LANG_ENGLISH} "Install documentation and online help."
 LangString DESC_EX ${LANG_ENGLISH} "Install sample GP scripts."
-LangString DESC_GAL ${LANG_ENGLISH} "Install Galois data files (degree > 7)."
+LangString DESC_DATA ${LANG_ENGLISH} "Data files pertaining to pari"
+LangString DESC_ELL ${LANG_ENGLISH} "Install elliptic curves data files (for ellsearch and ellidentify)."
+LangString DESC_GAL ${LANG_ENGLISH} "Install Galois data files (for polgalois in degree > 7)."
+LangString DESC_SEA ${LANG_ENGLISH} "Install Modular polynomials (for ellap'SEA implementation)."
+LangString DESC_GPL ${LANG_ENGLISH} "Install Galois polynomials data files (for galoisgetpol)."
 LangString DESC_SM ${LANG_ENGLISH} "Add PARI shortcuts to Start Menu and desktop."
 
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
   !insertmacro MUI_DESCRIPTION_TEXT ${SecCopy} $(DESC_SecCopy)
+  !insertmacro MUI_DESCRIPTION_TEXT ${SecDATA} $(DESC_DATA)
+  !insertmacro MUI_DESCRIPTION_TEXT ${SecELL} $(DESC_ELL)
   !insertmacro MUI_DESCRIPTION_TEXT ${SecGAL} $(DESC_GAL)
+  !insertmacro MUI_DESCRIPTION_TEXT ${SecSEA} $(DESC_SEA)
+  !insertmacro MUI_DESCRIPTION_TEXT ${SecGPL} $(DESC_GPL)
   !insertmacro MUI_DESCRIPTION_TEXT ${SecSM} $(DESC_SM)
   !insertmacro MUI_DESCRIPTION_TEXT ${SecDOC} $(DESC_DOC)
   !insertmacro MUI_DESCRIPTION_TEXT ${SecEX} $(DESC_EX)
