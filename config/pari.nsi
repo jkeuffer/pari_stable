@@ -143,7 +143,7 @@ Section "Uninstall"
   Delete "$INSTDIR\Uninstall.exe"
   RMDir /r "$INSTDIR\doc"
   RMDir /r "$INSTDIR\examples"
-  RMDir /r "$INSTDIR\galdata"
+  RMDir /r "$INSTDIR\data"
 
   DeleteRegKey HKLM ${uninst}
   DeleteRegKey /ifempty HKLM "Software\${PARIver}"
