@@ -947,7 +947,7 @@ padicfields0(GEN p, GEN N, long flag)
 
   if (typ(p) != t_INT) pari_err_TYPE("padicfields",p);
   /* be nice to silly users */
-  if (!BPSW_psp(p)) pari_err(e_MISC,"p must be a prime in padicfields");
+  if (!BPSW_psp(p)) pari_err_PRIME("padicfields",p);
   switch(typ(N))
   {
     case t_VEC:

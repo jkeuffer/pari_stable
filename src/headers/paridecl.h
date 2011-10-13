@@ -1959,6 +1959,7 @@ int     pari_daemon(void);
 void    pari_err(int numerr, ...);
 void    pari_err_IRREDPOL(const char *f, GEN x);
 void    pari_err_OP(const char *f, GEN x, GEN y);
+void    pari_err_PRIME(const char *f, GEN x);
 void    pari_err_TYPE(const char *f, GEN x);
 void    pari_err_TYPE2(const char *f, GEN x, GEN y);
 void    pari_err_VAR(const char *f, GEN x, GEN y);

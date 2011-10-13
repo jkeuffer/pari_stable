@@ -1011,7 +1011,7 @@ Decomp(decomp_t *S, long flag)
   }
   if (!FpX_valrem(S->chi, S->nu, p, &b1))
   {
-    if (!BPSW_psp(p)) pari_err(e_MISC,"not a prime in Decomp");
+    if (!BPSW_psp(p)) pari_err_PRIME("Decomp",p);
     pari_err(e_BUG, "Decomp (not a factor)");
   }
   b2 = FpX_div(S->chi, b1, p);
@@ -1570,7 +1570,7 @@ loop(decomp_t *S, long nv, long Ea, long Fa)
     w = FpX_factorff_irred(nug, ch_var(S->nu, nv), S->p);
     if (degpol(gel(w,1)) != 1)
     {
-      if (!BPSW_psp(S->p)) pari_err(e_MISC,"not a prime in nilord");
+      if (!BPSW_psp(S->p)) pari_err_PRIME("nilord",S->p);
       pari_err(e_BUG, "nilord (no root)");
     }
 
@@ -1613,7 +1613,7 @@ loop(decomp_t *S, long nv, long Ea, long Fa)
     }
     if (i == lg(w))
     {
-      if (!BPSW_psp(S->p)) pari_err(e_MISC,"not a prime in nilord");
+      if (!BPSW_psp(S->p)) pari_err_PRIME("nilord",S->p);
       pari_err(e_BUG, "nilord (no root II)");
     }
     if (eq) delt = gmul(delt, powiu(S->p,  eq));
@@ -1868,7 +1868,7 @@ get_LV(GEN nf, GEN L, GEN p, long N)
 }
 
 static void
-errprime(GEN p) { pari_err(e_MISC, "idealprimedec: %Ps is not prime", p); }
+errprime(GEN p) { pari_err_PRIME("idealprimedec",p); }
 
 /* P = Fp-basis (over O_K/p) for pr.
  * V = Z-basis for I_p/pr. ramif != 0 iff some pr|p is ramified.

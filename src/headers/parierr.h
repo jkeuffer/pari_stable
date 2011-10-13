@@ -15,7 +15,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 enum err_list {
 /* Force errors into non-0 */
-  e_SYNTAX = 1, e_BUG, /* untrappable errors */
+  e_SYNTAX = 1, e_BUG,
 
   e_ALARM, e_FILE,
 
@@ -25,19 +25,14 @@ enum err_list {
 
   e_STACK, e_OVERFLOW,
 
-/* arith.c  */
   e_MAXPRIME, e_INTMOD,
 
-/* base.c   */
-  e_CONSTPOL, e_IRREDPOL, e_ZEROPOL,
+  e_CONSTPOL, e_IRREDPOL, e_PRIME, e_ZEROPOL,
 
-/* gen.c */
   e_OP, e_TYPE2, e_INV,
 
-/* init.c */
   e_MEM,
 
-/* trans.c */
   e_NEGVAL, e_SQRTN,
 
 /* NO ERROR */

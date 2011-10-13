@@ -97,6 +97,11 @@ Doc: evaluates the expression sequence \var{seq1}. If an error of type
   \var{E} has one component, 1 (\typ{INTMOD}): the element
   \kbd{Mod($a$,$b$)}.
 
+  \item \kbd{"e\_PRIME"}. Function $s$ expected a prime number,
+  and did receive $p$, which was not. (As in \kbd{idealprimedec(nf, 4)}.)
+  \var{E} has two component, 1 (\typ{STR}): the function name $s$,
+  2 : the argument $p$.
+
   \item \kbd{"e\_CONSTPOL"}. An argument of function $s$ is a constant
   polynomial, which does not make sense. (As in \kbd{galoisinit(Pol(1))}.)
   \var{E} has one component, 1 (\typ{STR}): the function name $s$.

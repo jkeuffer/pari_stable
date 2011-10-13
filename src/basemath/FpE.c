@@ -145,7 +145,7 @@ random_FpE(GEN a4, GEN a6, GEN p)
     rhs = Fp_add(Fp_mul(x, Fp_add(Fp_sqr(x, p), a4, p), p), a6, p);
   } while (kronecker(rhs, p) < 0);
   y = Fp_sqrt(rhs, p);
-  if (!y) pari_err(e_MISC,"not a prime number");
+  if (!y) pari_err_PRIME("random_FpE", p);
   return gerepilecopy(ltop, mkvec2(x, y));
 }
 

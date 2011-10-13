@@ -128,7 +128,7 @@ init_p(GEN pp)
   else
   {
     p = itou(pp);
-    if (p < 2 || signe(pp) < 0) pari_err(e_MISC,"not a prime in factmod");
+    if (p < 2 || signe(pp) < 0) pari_err_PRIME("factmod",pp);
   }
   return p;
 }
@@ -200,7 +200,7 @@ root_mod_even(GEN f, ulong p)
     case 2: return root_mod_2(f);
     case 4: return root_mod_4(f);
   }
-  pari_err(e_MISC,"not a prime in rootmod");
+  pari_err_PRIME("rootmod",utoi(p));
   return NULL; /* not reached */
 }
 
@@ -322,7 +322,7 @@ FpX_roots_i(GEN f, GEN p)
 
   /* take gcd(x^(p-1) - 1, f) by splitting (x^q-1) * (x^q+1) */
   b = FpXQ_pow(pol_x(varn(f)),q, f,p);
-  if (lg(b) < 3) pari_err(e_MISC,"not a prime in rootmod");
+  if (lg(b) < 3) pari_err_PRIME("rootmod",p);
   b = ZX_Z_add(b, gen_m1); /* b = x^((p-1)/2) - 1 mod f */
   a = FpX_gcd(f,b, p);
   b = ZX_Z_add(b, gen_2); /* b = x^((p-1)/2) + 1 mod f */
@@ -354,8 +354,7 @@ FpX_roots_i(GEN f, GEN p)
         gel(y,j+db) = FpX_div(a,b, p);
         gel(y,j)    = b; break;
       }
-      if (pol0[2] == 100 && !BPSW_psp(p))
-        pari_err(e_MISC, "not a prime in polrootsmod");
+      if (pol0[2] == 100 && !BPSW_psp(p)) pari_err_PRIME("polrootsmod",p);
     }
   }
   return sort(y);
@@ -373,7 +372,7 @@ FpX_oneroot_i(GEN f, GEN p)
 
   /* take gcd(x^(p-1) - 1, f) by splitting (x^q-1) * (x^q+1) */
   b = FpXQ_pow(pol_x(varn(f)),q, f,p);
-  if (lg(b) < 3) pari_err(e_MISC,"not a prime in rootmod");
+  if (lg(b) < 3) pari_err_PRIME("rootmod",p);
   b = ZX_Z_add(b, gen_m1); /* b = x^((p-1)/2) - 1 mod f */
   a = FpX_gcd(f,b, p);
   b = ZX_Z_add(b, gen_2); /* b = x^((p-1)/2) + 1 mod f */
@@ -408,7 +407,7 @@ FpX_oneroot_i(GEN f, GEN p)
         break;
       }
       if (pol0[2] == 100 && !BPSW_psp(p))
-        pari_err(e_MISC, "not a prime in polrootsmod");
+        pari_err_PRIME("polrootsmod",p);
     }
   }
 }
@@ -1304,7 +1303,7 @@ FpX_factor_i(GEN f, GEN pp)
     }
     if (!p) break;
     j = degpol(f2); if (!j) break;
-    if (j % p) pari_err(e_MISC, "factmod: %lu is not prime", p);
+    if (j % p) pari_err_PRIME("factmod",utoi(p));
     e *= p; f = RgX_deflate(f2, p);
   }
   setlg(t, nbfact);

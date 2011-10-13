@@ -928,13 +928,16 @@ gpow(GEN x, GEN n, long prec)
     switch (tx)
     {
     case t_INTMOD:
-      if (!BPSW_psp(gel(x,1))) pari_err(e_MISC,"gpow: modulus %Ps is not prime",x[1]);
-      y = cgetg(3,t_INTMOD); gel(y,1) = icopy(gel(x,1));
-      av = avma;
-      z = Fp_sqrtn(gel(x,2), d, gel(x,1), NULL);
-      if (!z) pari_err(e_SQRTN);
-      gel(y,2) = gerepileuptoint(av, Fp_pow(z, a, gel(x,1)));
-      return y;
+      {
+        GEN p = gel(x,1);
+        if (!BPSW_psp(p)) pari_err_PRIME("gpow",p);
+        y = cgetg(3,t_INTMOD); gel(y,1) = icopy(p);
+        av = avma;
+        z = Fp_sqrtn(gel(x,2), d, p, NULL);
+        if (!z) pari_err(e_SQRTN);
+        gel(y,2) = gerepileuptoint(av, Fp_pow(z, a, p));
+        return y;
+      }
 
     case t_PADIC:
       z = equaliu(d, 2)? Qp_sqrt(x): Qp_sqrtn(x, d, NULL);
@@ -1256,8 +1259,7 @@ palogaux(GEN x)
   y = gdiv(gaddgs(x,-1), gaddgs(x,1));
   e = valp(y); /* > 0 */
   if (e <= 0) {
-    if (!BPSW_psp(p))
-      pari_err(e_MISC, "error in p-adic log, %Ps is not a prime", p);
+    if (!BPSW_psp(p)) pari_err_PRIME("p-adic log",p);
     pari_err(e_BUG, "log_p");
   }
   pp = e+precp(y);

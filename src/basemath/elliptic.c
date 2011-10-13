@@ -1810,7 +1810,7 @@ static GEN
 localredbug(GEN p, const char *s)
 {
   if (BPSW_psp(p)) pari_err(e_BUG, s);
-  pari_err(e_MISC,"not a prime in localred");
+  pari_err_PRIME("localred",p);
   return NULL; /* not reached */
 }
 
@@ -2101,7 +2101,7 @@ localred(GEN e, GEN p, int minim)
   {
     long l = itos(p);
     GEN z;
-    if (l < 2) pari_err(e_MISC,"not a prime in localred");
+    if (l < 2) pari_err_PRIME("localred",p);
     z = localred_23(e, l);
     return minim? gel(z,3): z;
   }
@@ -2115,7 +2115,7 @@ elllocalred(GEN e, GEN p)
   if (typ(ell_get_disc(e)) != t_INT)
     pari_err(e_MISC,"not an integral curve in elllocalred");
   if (typ(p) != t_INT) pari_err_TYPE("elllocalred",p);
-  if (signe(p) <= 0) pari_err(e_MISC, "not a prime in elllocalred");
+  if (signe(p) <= 0) pari_err_PRIME("elllocalred",p);
   return gerepileupto(av, localred(e, p, 0));
 }
 
@@ -2545,7 +2545,7 @@ ellrootno(GEN e, GEN p)
     GEN v;
     ulong pp;
     if (typ(p) != t_INT) pari_err_TYPE("ellrootno", p);
-    if (signe(p) < 0) pari_err(e_MISC,"not a prime in ellrootno");
+    if (signe(p) < 0) pari_err_PRIME("ellrootno",p);
     if (!signe(p)) return -1; /* local factor at infinity */
     pp = itou_or_0(p);
     e = ell_to_small(e);
@@ -2992,7 +2992,7 @@ ellap2(GEN e, ulong p)
     while (!KRO || KRO == KROold)
     {
       ulong t;
-      if (++x >= p) pari_err(e_MISC, "%lu is not prime, use ellak", p);
+      if (++x >= p) pari_err_PRIME("ellap",utoi(p));
       t = Fl_add(c4, Fl_mul(x,x,p), p);
       u = Fl_add(c6, Fl_mul(x, t, p), p);
       KRO = kross(u,p);
@@ -3024,7 +3024,7 @@ ellap2(GEN e, ulong p)
     for (i=1; ; i++)
     {
       if (ftest.isnull) {
-        if (!uisprime(p)) pari_err(e_MISC,"%lu is not prime, use ellak", p);
+        if (!uisprime(p)) pari_err_PRIME("ellap",utoi(p));
         pari_err(e_BUG,"ellap (f^(i*s) = 1)");
       }
       l=0; r=s;
@@ -3243,7 +3243,7 @@ ellap(GEN e, GEN p)
   if (!p)
     p = get_p(e);
   else
-    if (typ(p)!=t_INT || signe(p) <= 0) pari_err(e_MISC,"not a prime in ellap");
+    if (typ(p)!=t_INT || signe(p) <= 0) pari_err_PRIME("ellap",p);
   if ( (a = easy_ap(e, p)) ) return a;
   lp = expi(p);
   if (lp < 30) return stoi(ellap2(e, itou(p)));

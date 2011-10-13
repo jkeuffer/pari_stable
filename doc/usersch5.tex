@@ -8048,6 +8048,13 @@ ran out of primes.
 need primelimit \til $c$} if $c$ is non-zero. And simply \kbd{not enough
 precomputed primes} otherwise.
 
+\subsec{e\_PRIME} Function $s$ expected a prime number, and did receive $p$,
+which was not. (As in \kbd{idealprimedec(nf, 4)}.)
+\bprog
+  pari_err_PRIME(const char *s, GEN x)
+  pari_err_PRIME(const char *s, GEN x)
+@eprog\noindent prints the error message: \kbd{not a prime in $s$ : $x$}.
+
 \subsec{e\_CONSTPOL} An argument of function $s$ is a constant polynomial,
 which does not make sense. (As in \kbd{galoisinit(Pol(1))}.)
 \bprog

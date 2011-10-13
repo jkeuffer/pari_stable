@@ -1002,11 +1002,7 @@ pari_err2GEN(long numerr, va_list ap)
       retmkerr4(numerr, strtoGENstr(f), x,y);
     }
   case e_IRREDPOL:
-    {
-      const char *f = va_arg(ap, const char*);
-      retmkerr3(numerr, strtoGENstr(f), va_arg(ap, GEN));
-    }
-
+  case e_PRIME:
   case e_TYPE:
     {
       const char *f = va_arg(ap, const char*);
@@ -1090,6 +1086,9 @@ pari_err2str(GEN err)
     return pari_sprintf("constant polynomial in %Ps.", gel(err,2));
   case e_IRREDPOL:
     return pari_sprintf("not an irreducible polynomial in %Ps: %Ps.",
+                        gel(err,2), gel(err,3));
+  case e_PRIME:
+    return pari_sprintf("not a prime number in %Ps: %Ps.",
                         gel(err,2), gel(err,3));
   case e_ZEROPOL:
     return pari_sprintf("zero polynomial in %Ps.", gel(err,2));
@@ -1211,6 +1210,8 @@ pari_err(int numerr, ...)
 void
 pari_err_IRREDPOL(const char *f, GEN x) { pari_err(e_IRREDPOL, f,x); }
 void
+pari_err_PRIME(const char *f, GEN x) { pari_err(e_PRIME, f,x); }
+void
 pari_err_OP(const char *f, GEN x, GEN y) { pari_err(e_OP, f,x,y); }
 void
 pari_err_TYPE(const char *f, GEN x) { pari_err(e_TYPE, f,x); }
@@ -1244,6 +1245,7 @@ numerr_name(long numerr)
   case e_INTMOD: return "e_INTMOD";
   case e_CONSTPOL: return "e_CONSTPOL";
   case e_IRREDPOL: return "e_IRREDPOL";
+  case e_PRIME: return "e_PRIME";
   case e_ZEROPOL: return "e_ZEROPOL";
   case e_OP: return "e_OP";
   case e_TYPE2: return "e_TYPE2";
@@ -1279,6 +1281,7 @@ name_numerr(const char *s)
   if (!strcmp(s,"e_INTMOD")) return e_INTMOD;
   if (!strcmp(s,"e_CONSTPOL")) return e_CONSTPOL;
   if (!strcmp(s,"e_IRREDPOL")) return e_IRREDPOL;
+  if (!strcmp(s,"e_PRIME")) return e_PRIME;
   if (!strcmp(s,"e_ZEROPOL")) return e_ZEROPOL;
   if (!strcmp(s,"e_OP")) return e_OP;
   if (!strcmp(s,"e_TYPE2")) return e_TYPE2;

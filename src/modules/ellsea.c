@@ -100,7 +100,7 @@ ellmodulareqn(long ell, long vx, long vy)
   if (vy<0) vy=fetch_user_var("y");
   if (varncmp(vx,vy)>=0) pari_err(e_MISC,"wrong variable priority");
   if (ell<0) pari_err(e_MISC,"level must be positive");
-  if (!uisprime(ell)) pari_err(e_MISC,"level must be prime");
+  if (!uisprime(ell)) pari_err_PRIME("ellmodulareqn (level)",utoi(ell));
 
   res = cgetg(3, t_VEC);
   if (!get_modular_eqn(&meqn, ell, vx, vy))
@@ -872,7 +872,7 @@ find_trace(GEN a4, GEN a6, ulong ell, GEN p, long *ptr_kt, ulong smallfact)
     break;
   case MTAtkin:
     tr = find_trace_Atkin(ell, r, p);
-    if (lg(tr)==1) pari_err(e_MISC,"not a prime number");
+    if (lg(tr)==1) pari_err_PRIME("ellsea",p);
     kt = 1;
     break;
   default: /* case MTpathological: */

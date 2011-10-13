@@ -1463,7 +1463,7 @@ Fp_sqrt(GEN a, GEN p)
 
   if (typ(a) != t_INT) pari_err_TYPE("Fp_sqrt",a);
   if (typ(p) != t_INT) pari_err_TYPE("Fp_sqrt",p);
-  if (signe(p) <= 0 || equali1(p)) pari_err(e_MISC,"not a prime in Fp_sqrt");
+  if (signe(p) <= 0 || equali1(p)) pari_err_PRIME("Fp_sqrt",p);
   if (lgefint(p) == 3)
   {
     ulong u = (ulong)p[2]; u = Fl_sqrt(umodiu(a, u), u);
