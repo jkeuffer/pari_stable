@@ -7920,11 +7920,14 @@ writable directory among \kbd{/tmp}, \kbd{/var/tmp} and \kbd{.}.
 
 \fun{char*}{pari_unique_dir}{const char *s} creates a ``unique directory''
 and return its name built from the string $s$, the user id and process pid
-(on Unix systems). This directory is itself located in
+(on Unix systems). This directory is itself located in the temp
+directory mentioned above. The name returned is \tet{malloc}'ed.
 
-The name returned is \tet{malloc}'ed.
-
-\fun{char*}{pari_unique_filename}{const char *s}
+\fun{char*}{pari_unique_filename}{const char *s} creates a \emph{new} empty
+file in the temp directory, whose name contains the id-string $s$ (truncated
+to its first $8$ chars), followed by a system-dependent suffix (incorporating
+the ids of both the user and the running process, for instance). The function
+returns the tempfile name. The name returned is \tet{malloc}'ed.
 
 \section{Errors}\label{se:errors}
 
