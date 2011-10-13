@@ -734,7 +734,7 @@ matcompanion(GEN x)
   GEN y, c;
 
   if (typ(x)!=t_POL) pari_err_TYPE("matcompanion",x);
-  if (!signe(x)) pari_err_ZEROPOL("matcompanion");
+  if (!signe(x)) pari_err(e_MISC,"matcompanion of the zero polynomial");
   if (n == 0) return cgetg(1, t_MAT);
 
   y = cgetg(n+1,t_MAT);
