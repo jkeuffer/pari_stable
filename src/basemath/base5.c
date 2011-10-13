@@ -637,7 +637,7 @@ findmin(GEN nf, GEN x, GEN muf)
     {
       x = ZM_lll(x, 0.75, LLL_INPLACE);
       m = lllfp(RgM_mul(G,x), 0.75, 0);
-      if (typ(m) != t_MAT) pari_err(e_PREC,"rnflllgram");
+      if (typ(m) != t_MAT) pari_err_PREC("rnflllgram");
     }
     x = ZM_mul(x, m);
     y = RgM_mul(M, x);

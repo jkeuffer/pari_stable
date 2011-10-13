@@ -968,7 +968,7 @@ heegner_index(GEN E, long t, GEN N, GEN tam, GEN D, GEN mulf, long prec)
   if (e > expi(ind) - 14)
     pari_err(e_MISC,"This curve seems to contradict Gross-Hayachi's conjecture, please report");
   if (e >= 0)
-    pari_err(e_PREC, "ellheegner (precision loss in truncation)");
+    pari_err_PREC( "ellheegner (precision loss in truncation)");
   return itos(ind);
 }
 

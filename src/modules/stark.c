@@ -2430,7 +2430,7 @@ LABDOUB:
   if (!polrel) /* FAILED */
   {
     long incr_pr;
-    if (++cpt >= 3) pari_err(e_PREC, "stark (computation impossible)");
+    if (++cpt >= 3) pari_err_PREC( "stark (computation impossible)");
 
     /* compute the precision, we need
           a) get at least EXTRA_PREC fractional digits if there is none;

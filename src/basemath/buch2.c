@@ -1449,7 +1449,7 @@ isprincipalarch(GEN bnf, GEN col, GEN kNx, GEN e, GEN dx, long *pe)
   R1 = nf_get_r1(nf);
   RU = (N + R1)>>1;
   col = cleanarch(col,N,prec); settyp(col, t_COL);
-  if (!col) pari_err(e_PREC, "isprincipalarch");
+  if (!col) pari_err_PREC( "isprincipalarch");
   if (RU > 1)
   { /* reduce mod units */
     GEN u, z = init_red_mod_units(bnf,prec);
@@ -1874,7 +1874,7 @@ bnfisunit(GEN bnf,GEN x)
       prec = MEDDEFAULTPREC + divsBIL( gexpo(x) );
     else
     {
-      if (i > 4) pari_err(e_PREC,"bnfisunit");
+      if (i > 4) pari_err_PREC("bnfisunit");
       prec = (prec-1)<<1;
     }
     if (DEBUGLEVEL) pari_warn(warnprec,"bnfisunit",prec);
@@ -2824,7 +2824,7 @@ class_group_gen(GEN nf,GEN W,GEN C,GEN Vbase,long prec, GEN nf0,
     }
     G[j] = J[1]; /* generator, order cyc[j] */
     arch = famat_to_arch(nf, gel(J,2), prec);
-    if (!arch) pari_err(e_PREC,"class_group_gen");
+    if (!arch) pari_err_PREC("class_group_gen");
     gel(Ga,j) = gneg(arch);
   }
   /* at this point Y = PY, Ur = PUr, V = VP, X = XP */
@@ -3178,12 +3178,12 @@ sbnf2bnf(GEN sbnf, long prec)
   nf = nfbasic_to_nf(&T, ro, prec);
 
   A = get_archclean(nf, fu, prec, 1);
-  if (!A) pari_err(e_PREC, "bnfmake");
+  if (!A) pari_err_PREC( "bnfmake");
 
   prec = gprecision(ro);
   matal = check_and_build_matal(sbnf);
   C = get_archclean(nf,matal,prec,0);
-  if (!C) pari_err(e_PREC, "bnfmake");
+  if (!C) pari_err_PREC( "bnfmake");
 
   pfc = gel(sbnf,9);
   l = lg(pfc);

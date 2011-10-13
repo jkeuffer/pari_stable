@@ -1765,7 +1765,7 @@ get_norm(norm_S *S, GEN a)
   {
     long e;
     GEN N = grndtoi( norm_by_embed(S->r1, RgM_RgC_mul(S->M, a)), &e );
-    if (e > -5) pari_err(e_PREC, "get_norm");
+    if (e > -5) pari_err_PREC( "get_norm");
     return N;
   }
   if (S->w) a = RgV_RgC_mul(S->w, a);

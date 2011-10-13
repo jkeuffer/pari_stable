@@ -245,7 +245,7 @@ do_agm(GEN *ptx, GEN a1, GEN b1)
   GEN p1, a, b, x;
 
   x = gmul2n(subrr(a1,b1),-2);
-  if (!signe(x)) pari_err(e_PREC,"ellinit");
+  if (!signe(x)) pari_err_PREC("ellinit");
   for(;;)
   {
     GEN d;
@@ -269,7 +269,7 @@ do_padic_agm(GEN *ptx, GEN a1, GEN b1, GEN p)
   long mi;
 
   if (!x) x = gmul2n(gsub(a1,b1),-2);
-  if (gequal0(x)) pari_err(e_PREC,"ellinit");
+  if (gequal0(x)) pari_err_PREC("ellinit");
   mi = minss(precp(a1),precp(b1));
   for(;;)
   {
@@ -1227,7 +1227,7 @@ zell(GEN e, GEN z, long prec)
     int bad;
 
     z1 = pointell(e,gprec_w(t,LOWDEFAULTPREC),LOWDEFAULTPREC); /* we don't need much precision */
-    if (ell_is_inf(z1)) pari_err(e_PREC, "ellpointtoz");
+    if (ell_is_inf(z1)) pari_err_PREC( "ellpointtoz");
     /* Either z = z1 (ok: keep t), or z = z2 (bad: t <-- -t) */
     z2 = invell(e, z1);
     bad = (gexpo(gsub(z,z1)) > gexpo(gsub(z,z2)));

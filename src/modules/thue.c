@@ -154,7 +154,7 @@ T_A_Matrices(GEN MatFU, long r, GEN *eps5, long prec)
   m1 = rowslice(vecslice(MatFU, 1,r), 1,r); /* minor order r */
   m1 = logabs(m1, 3);
 
-  A = RgM_inv(m1); if (!A) pari_err(e_PREC,"thue");
+  A = RgM_inv(m1); if (!A) pari_err_PREC("thue");
   IntM = RgM_Rg_add(RgM_mul(A,m1), gen_m1);
 
   eps2 = gadd(vecmax(gabs(IntM, 3)), real2n(-e, LOWDEFAULTPREC)); /* t_REAL */
@@ -163,7 +163,7 @@ T_A_Matrices(GEN MatFU, long r, GEN *eps5, long prec)
 
   /* Check for the precision in matrix inversion. See paper, Lemma 2.4.2. */
   p1 = addrr(mulsr(r, gmul2n(nia, e)), eps2); /* t_REAL */
-  if (expo(p1) < -2*r) pari_err(e_PREC,"thue");
+  if (expo(p1) < -2*r) pari_err_PREC("thue");
 
   p1 = addrr(mulsr(r, gmul2n(nia,-e)), eps2);
   eps3 = mulrr(mulsr(2*r*r,nia), p1);

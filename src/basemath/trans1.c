@@ -2211,7 +2211,7 @@ mpsc1(GEN x, long *ptmod8)
     {
       GEN z, pitemp = Pi2n(-2, nbits2prec(a + 32));
       z = addrr(x,pitemp); /* = x + Pi/4 */
-      if (expo(z) >= bit_prec(z) + 3) pari_err(e_PREC,"mpsc1");
+      if (expo(z) >= bit_prec(z) + 3) pari_err_PREC("mpsc1");
       shiftr_inplace(pitemp, 1);
       q = floorr( divrr(z,pitemp) ); /* round ( x / (Pi/2) ) */
       p = l+1; x = rtor(x,p);
@@ -2223,7 +2223,7 @@ mpsc1(GEN x, long *ptmod8)
     {
       x = subrr(x, mulir(q, Pi2n(-1,p))); /* x mod Pi/2  */
       a = expo(x);
-      if (!signe(x) && a >= 0) pari_err(e_PREC,"mpsc1");
+      if (!signe(x) && a >= 0) pari_err_PREC("mpsc1");
       n = mod4(q); if (n && signe(q) < 0) n = 4 - n;
     }
   }

@@ -1962,7 +1962,7 @@ chk_gen(void *data, GEN x)
 {
   pari_sp av = avma, av1;
   GEN h, g = get_polchar((CG_data*)data,x);
-  if (!g) pari_err(e_PREC,"chk_gen");
+  if (!g) pari_err_PREC("chk_gen");
   av1 = avma;
   h = ZX_gcd(g, ZX_deriv(g));
   if (degpol(h)) { avma = av; return NULL; }
@@ -2164,7 +2164,7 @@ chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
   S = cgetg(N+1, t_VECSMALL);
   for (i = 1; i <= N; i++)
   {
-    P = get_polmin_w(d, i); if (!P) pari_err(e_PREC,"chk_gen_init");
+    P = get_polmin_w(d, i); if (!P) pari_err_PREC("chk_gen_init");
     S[i] = degpol(P);
     if (S[i] == N)
     { /* primitive element */
@@ -2204,7 +2204,7 @@ chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
     {
       for (j = 1; j <= N; j++) x[j] = (long)random_Fl(7) - 3;
       e = RgM_zc_mul(d->ZKembed, x);
-      P = get_pol(d, e); if (!P) pari_err(e_PREC, "chk_gen_init");
+      P = get_pol(d, e); if (!P) pari_err_PREC( "chk_gen_init");
       if (!ZX_is_squarefree(P)) continue;
       if (DEBUGLEVEL>2) err_printf("chk_gen_init: generator %Ps\n",P);
       B = T2_from_embed(e, r1);

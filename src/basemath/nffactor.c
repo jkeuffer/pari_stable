@@ -1248,7 +1248,7 @@ max_radius(GEN PRK, GEN B)
   pari_sp av = avma;
   long i, j, d = lg(PRK)-1;
 
-  S = RgM_inv( get_R(PRK) ); if (!S) pari_err(e_PREC,"max_radius");
+  S = RgM_inv( get_R(PRK) ); if (!S) pari_err_PREC("max_radius");
   for (i=1; i<=d; i++)
   {
     GEN s = gen_0;

@@ -702,7 +702,7 @@ lindep(GEN x)
   /* independent over R ? */
   if (n == 2 && real_indep(re,im,prec2nbits(prec)))
     { avma = av; return cgetg(1, t_COL); }
-  if (EXP > -10) pari_err(e_PREC,"lindep");
+  if (EXP > -10) pari_err_PREC("lindep");
 
   qzer = cgetg(lx, t_VECSMALL);
   b = matid(n);
@@ -775,7 +775,7 @@ lindep(GEN x)
     }
     i = j; k = i+1;
     avma = av1; r = grndtoi(gmael(m,k,i), &e);
-    if (e >= 0) pari_err(e_PREC,"lindep");
+    if (e >= 0) pari_err_PREC("lindep");
     togglesign_safe(&r);
     ZC_lincomb1_inplace(gel(b,k), gel(b,i), r);
     swap(gel(b,k), gel(b,i));
@@ -1743,7 +1743,7 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
   else
     maxnorm = 0.;
   BOUND = sBORNE * (1 + eps);
-  if ((long)BOUND != sBORNE) pari_err(e_PREC, "qfminim");
+  if ((long)BOUND != sBORNE) pari_err_PREC( "qfminim");
 
   switch(flag)
   {
@@ -1901,7 +1901,7 @@ qfminim0(GEN a, GEN borne, GEN stockmax, long flag, long prec)
         maxnum = itos(stockmax);
       }
       a = fincke_pohst(a,borne,maxnum,prec,NULL);
-      if (!a) pari_err(e_PREC,"qfminim");
+      if (!a) pari_err_PREC("qfminim");
       return a;
     }
     default: pari_err_FLAG("qfminim");
@@ -2296,7 +2296,7 @@ fincke_pohst(GEN a, GEN B0, long stockmax, long PREC, FP_chk_fun *CHECK)
   TRY {
     if (CHECK && CHECK->f_init) bound = CHECK->f_init(CHECK, r, u);
     r = Q_from_QR(r, gprecision(vnorm));
-    if (!r) pari_err(e_PREC,"fincke_pohst");
+    if (!r) pari_err_PREC("fincke_pohst");
     res = smallvectors(r, bound, stockmax, CHECK);
   } ENDCATCH;
   if (CHECK)
@@ -2304,7 +2304,7 @@ fincke_pohst(GEN a, GEN B0, long stockmax, long PREC, FP_chk_fun *CHECK)
     if (CHECK->f_post) res = CHECK->f_post(CHECK, res, u);
     return res;
   }
-  if (!res) pari_err(e_PREC,"fincke_pohst");
+  if (!res) pari_err_PREC("fincke_pohst");
 
   z = cgetg(4,t_VEC);
   gel(z,1) = gcopy(gel(res,1));

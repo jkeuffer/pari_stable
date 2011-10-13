@@ -1005,7 +1005,7 @@ eval_sign(GEN M, GEN x, long k)
   GEN z = gel(x,1); /* times M[k,1], which is 1 */
   for (i = 2; i < l; i++)
     z = mpadd(z, mpmul(gcoeff(M,k,i), gel(x,i)));
-  if (realprec(z) < DEFAULTPREC) pari_err(e_PREC,"nfsign_arch");
+  if (realprec(z) < DEFAULTPREC) pari_err_PREC("nfsign_arch");
   return signe(z);
 }
 

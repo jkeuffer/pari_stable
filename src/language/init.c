@@ -1216,9 +1216,11 @@ pari_err_IMPL(const char *f) { pari_err(e_IMPL,f); }
 void
 pari_err_IRREDPOL(const char *f, GEN x) { pari_err(e_IRREDPOL, f,x); }
 void
-pari_err_PRIME(const char *f, GEN x) { pari_err(e_PRIME, f,x); }
-void
 pari_err_OP(const char *f, GEN x, GEN y) { pari_err(e_OP, f,x,y); }
+void
+pari_err_PREC(const char *f) { pari_err(e_PREC,f); }
+void
+pari_err_PRIME(const char *f, GEN x) { pari_err(e_PRIME, f,x); }
 void
 pari_err_TYPE(const char *f, GEN x) { pari_err(e_TYPE, f,x); }
 void
