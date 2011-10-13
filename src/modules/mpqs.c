@@ -2177,7 +2177,7 @@ mpqs_eval_cand(mpqs_handle_t *h, long number_of_cand,
           err_printf("MPQS: %Ps @ %Ps :%s\n", Y, Qx, relations);
           err_printf("\tQx_2 = %Ps\n", Qx_2);
           err_printf("\t rhs = %Ps\n", rhs);
-          pari_err(e_MISC, "MPQS: wrong full relation found!!");
+          pari_err(e_BUG, "MPQS: wrong full relation found");
         }
         else
           PRINT_IF_VERBOSE("\b(:)");
@@ -2214,7 +2214,7 @@ mpqs_eval_cand(mpqs_handle_t *h, long number_of_cand,
           err_printf("MPQS: %Ps @ %Ps :%s\n", Y, Qx, relations);
           err_printf("\tQx_2 = %Ps\n", Qx_2);
           err_printf("\t rhs = %Ps\n", rhs);
-          pari_err(e_MISC, "MPQS: wrong large prime relation found!!");
+          pari_err(e_BUG, "MPQS: wrong large prime relation found");
         }
         else
           PRINT_IF_VERBOSE("\b(;)");
@@ -2388,7 +2388,7 @@ mpqs_combine_large_primes(mpqs_handle_t *h,
       Qx_2 = modii(sqri(new_Y), h->N);
       prod = mpqs_factorback(h, s);
       if (!equalii(Qx_2, prod))
-        pari_err(e_MISC, "MPQS: combined large prime relation is false");
+        pari_err(e_BUG, "MPQS: combined large prime relation is false");
       avma = av1;
     }
 #endif
