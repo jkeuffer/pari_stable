@@ -1358,12 +1358,12 @@ factormod0(GEN f, GEN p, long flag)
 /*                  CONVERSIONS RELATED TO p-ADICS                 */
 /*                                                                 */
 /*******************************************************************/
-/* x t_PADIC, p a prime. Consistency check */
+/* x t_PADIC, p a prime or NULL (unset). Consistency check */
 static void
 check_padic_p(GEN x, GEN p)
 {
   GEN q = gel(x,2);
-  if (!equalii(p, q))
+  if (p && !equalii(p, q))
     pari_err(e_MISC, "different primes in Zp_to_Z: %Ps != %Ps", p, q);
 }
 static GEN
@@ -1624,9 +1624,7 @@ scalar_getprec(GEN x, long *pprec, GEN *pp)
   {
     long e = valp(x); if (signe(x[4])) e += precp(x);
     if (e < *pprec) *pprec = e;
-    if (*pp && !equalii(*pp, gel(x,2)))
-      pari_err(e_MISC, "inconsistent primes in 'apprpadic': %Ps != %Ps",
-               *pp, gel(x,2));
+    check_padic_p(x, *pp);
     *pp = gel(x,2);
   }
 }
