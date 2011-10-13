@@ -8069,6 +8069,7 @@ which was not. (As in \kbd{idealprimedec(nf, 4)}.)
 which does not make sense. (As in \kbd{galoisinit(Pol(1))}.)
 \bprog
   pari_err(e_CONSTPOL, const char *s)
+  pari_err_CONSTPOL(const char *s)
 @eprog\noindent prints the error message: \kbd{constant polynomial in $s$}.
 
 \subsec{e\_IRREDPOL} Function $s$ expected an irreducible polynomial,
@@ -8083,6 +8084,7 @@ in $s$ : $x$}.
 does not make sense. (As in \kbd{polroots(0)}.)
 \bprog
   pari_err(e_ZEROPOL, const char *s)
+  pari_err_ZEROPOL(const char *s)
 @eprog\noindent prints the error message: \kbd{zero polynomial in $s$}.
 
 \subsec{e\_TYPE2} Forbidden operation between two objects than cannot be

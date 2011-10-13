@@ -1208,6 +1208,8 @@ pari_err(int numerr, ...)
 }
 
 void
+pari_err_CONSTPOL(const char *f) { pari_err(e_CONSTPOL, f); }
+void
 pari_err_DIM(const char *f) { pari_err(e_DIM, f); }
 void
 pari_err_FILE(const char *f, const char *g) { pari_err(e_FILE, f,g); }
@@ -1233,6 +1235,8 @@ void
 pari_err_TYPE2(const char *f, GEN x, GEN y) { pari_err(e_TYPE2, f,x,y); }
 void
 pari_err_VAR(const char *f, GEN x, GEN y) { pari_err(e_VAR, f,x,y); }
+void
+pari_err_ZEROPOL(const char *f) { pari_err(e_ZEROPOL, f); }
 
 const char *
 numerr_name(long numerr)

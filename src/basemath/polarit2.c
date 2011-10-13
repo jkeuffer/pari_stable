@@ -38,7 +38,7 @@ polsym_gen(GEN P, GEN y0, long n, GEN T, GEN N)
 
   if (n<0) pari_err_IMPL("polsym of a negative n");
   if (typ(P) != t_POL) pari_err_TYPE("polsym",P);
-  if (!signe(P)) pari_err(e_ZEROPOL,"polsym");
+  if (!signe(P)) pari_err_ZEROPOL("polsym");
   y = cgetg(n+2,t_COL);
   if (y0)
   {
@@ -2813,7 +2813,7 @@ reduceddiscsmith(GEN x)
   GEN xp, M;
 
   if (typ(x) != t_POL) pari_err_TYPE("reduceddiscsmith",x);
-  if (n<=0) pari_err(e_CONSTPOL,"reduceddiscsmith");
+  if (n<=0) pari_err_CONSTPOL("reduceddiscsmith");
   RgX_check_ZX(x,"poldiscreduced");
   if (!gequal1(gel(x,n+2)))
     pari_err(e_MISC,"non-monic polynomial in poldiscreduced");
@@ -2842,7 +2842,7 @@ sturmpart(GEN x, GEN a, GEN b)
   pari_sp av = avma, lim = stack_lim(av, 1);
   GEN g,h,u,v;
 
-  if (gequal0(x)) pari_err(e_ZEROPOL,"sturm");
+  if (gequal0(x)) pari_err_ZEROPOL("sturm");
   t = typ(x);
   if (t != t_POL)
   {

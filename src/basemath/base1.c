@@ -268,7 +268,7 @@ tschirnhaus(GEN x)
   GEN u, y = cgetg(5,t_POL);
 
   if (typ(x)!=t_POL) pari_err_TYPE("tschirnhaus",x);
-  if (lg(x) < 4) pari_err(e_CONSTPOL,"tschirnhaus");
+  if (lg(x) < 4) pari_err_CONSTPOL("tschirnhaus");
   if (v) { u = leafcopy(x); setvarn(u,0); x=u; }
   y[1] = evalsigne(1)|evalvarn(0);
   do

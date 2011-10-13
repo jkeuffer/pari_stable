@@ -31,7 +31,7 @@ nfmaxord_check_args(nfmaxord_t *S, GEN T, long flag, GEN fa)
   long l, v;
 
   if (typ(T)!=t_POL) pari_err_TYPE("nfmaxord",T);
-  if (degpol(T) <= 0) pari_err(e_CONSTPOL,"nfmaxord");
+  if (degpol(T) <= 0) pari_err_CONSTPOL("nfmaxord");
 
   if (fa) {
     switch(typ(fa))
@@ -638,7 +638,7 @@ _nfbasis(GEN x0, long flag, GEN fa, GEN *pbas, GEN *pdK)
   long fl = 0;
 
   if (typ(x0)!=t_POL) pari_err_TYPE("nfbasis",x0);
-  if (degpol(x0) <= 0) pari_err(e_CONSTPOL,"nfbasis");
+  if (degpol(x0) <= 0) pari_err_CONSTPOL("nfbasis");
   RgX_check_ZX(x0, "nfbasis");
 
   x = ZX_Q_normalize(x0, &lead);
@@ -3354,7 +3354,7 @@ polcompositum0(GEN A, GEN B, long flall)
 
   if (typ(A)!=t_POL) pari_err_TYPE("polcompositum0",A);
   if (typ(B)!=t_POL) pari_err_TYPE("polcompositum0",B);
-  if (degpol(A)<=0 || degpol(B)<=0) pari_err(e_CONSTPOL,"compositum");
+  if (degpol(A)<=0 || degpol(B)<=0) pari_err_CONSTPOL("compositum");
   v = varn(A);
   if (varn(B) != v) pari_err_VAR("compositum", A,B);
   same = (A == B || RgX_equal(A,B));

@@ -351,7 +351,7 @@ nfroots(GEN nf,GEN pol)
   RgX_check_ZX(T,"nfroots");
   A = rnf_fix_pol(T,pol,1);
   d = degpol(A);
-  if (d < 0) pari_err(e_ZEROPOL, "nfroots");
+  if (d < 0) pari_err_ZEROPOL("nfroots");
   if (d == 0) return cgetg(1,t_VEC);
   if (d == 1)
   {

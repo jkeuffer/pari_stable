@@ -508,11 +508,11 @@ rnfequationall(GEN A, GEN B, long *pk, GEN *pLPRS)
 
   A = get_nfpol(A, &nf); lA = lg(A);
   if (!nf) {
-    if (lA<=3) pari_err(e_CONSTPOL,"rnfequation");
+    if (lA<=3) pari_err_CONSTPOL("rnfequation");
     RgX_check_ZX(A,"rnfequation");
   }
   B = rnf_fix_pol(A,B,1); lB = lg(B);
-  if (lB<=3) pari_err(e_CONSTPOL,"rnfequation");
+  if (lB<=3) pari_err_CONSTPOL("rnfequation");
   B = Q_primpart(B);
   RgX_check_ZXY(B,"rnfequation");
 

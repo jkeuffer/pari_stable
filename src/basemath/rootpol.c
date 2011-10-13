@@ -1769,7 +1769,7 @@ cauchy_bound(GEN p)
   GEN invlc;
   double Lmax = -pariINFINITY;
 
-  if (n <= 0) pari_err(e_CONSTPOL,"cauchy_bound");
+  if (n <= 0) pari_err_CONSTPOL("cauchy_bound");
   invlc = invr( quickabs(gel(p,n+2)) ); /* 1 / |lc(p)| */
   for (i = 0; i < n; i++)
   {
@@ -2032,11 +2032,11 @@ roots_aux(GEN p, long l, long clean)
 
   if (typ(p) != t_POL)
   {
-    if (gequal0(p)) pari_err(e_ZEROPOL,"roots");
+    if (gequal0(p)) pari_err_ZEROPOL("roots");
     if (!isvalidcoeff(p)) pari_err_TYPE("roots",p);
     return cgetg(1,t_COL); /* constant polynomial */
   }
-  if (!signe(p)) pari_err(e_ZEROPOL,"roots");
+  if (!signe(p)) pari_err_ZEROPOL("roots");
   if (!isvalidpol(p)) pari_err(e_MISC,"invalid coefficients in roots");
   if (lg(p) == 3) return cgetg(1,t_COL); /* constant polynomial */
 
