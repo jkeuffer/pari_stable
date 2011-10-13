@@ -600,9 +600,8 @@ pow_ei_mod_p(GEN nf, long I, GEN n, GEN p)
 }
 
 /* valuation of integer x, with resp. to prime ideal P above p.
- * p.P^(-1) = b Z_K
- * [b may be given as the 'multiplication by b' matrix, possibly a t_INT]
- */
+ * p.P^(-1) Z_{K,P} = b Z_{K,P}, where b is integral; it may be given as an
+ * element of Z_K (t_INT or ZV), or via the 'multiplication by b' ZM matrix */
 long
 int_elt_val(GEN nf, GEN x, GEN p, GEN b, GEN *newx)
 {
