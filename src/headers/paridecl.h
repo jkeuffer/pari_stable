@@ -1968,6 +1968,7 @@ void    pari_err_OP(const char *f, GEN x, GEN y);
 void    pari_err_OVERFLOW(const char *f);
 void    pari_err_PREC(const char *f);
 void    pari_err_PRIME(const char *f, GEN x);
+void    pari_err_SQRTN(const char *f, GEN x);
 void    pari_err_TYPE(const char *f, GEN x);
 void    pari_err_TYPE2(const char *f, GEN x, GEN y);
 void    pari_err_VAR(const char *f, GEN x, GEN y);

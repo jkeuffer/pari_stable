@@ -141,6 +141,7 @@ Doc: evaluates the expression sequence \var{seq1}. If an error of type
   negative valuation, which does not make sense. (As in \kbd{cos(1/x)}.)
   \var{E} has one component, 1 (\typ{STR}): the function name $s$.
 
-  \item \kbd{"e\_SQRTN"}. Trying to compute an $n$-th root which does not
-  exist. (As in \kbd{sqrt(Mod(-1,3))}.)
-  \var{E} has no component.
+  \item \kbd{"e\_SQRTN"}. Trying to compute an $n$-th root of $x$, which does
+  not exist. (As in \kbd{sqrt(Mod(-1,3))}.)
+  \var{E} has two components, 1 (\typ{STR}): the function name $s$,
+  2: the argument $x$.

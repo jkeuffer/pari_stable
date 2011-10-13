@@ -934,14 +934,14 @@ gpow(GEN x, GEN n, long prec)
         y = cgetg(3,t_INTMOD); gel(y,1) = icopy(p);
         av = avma;
         z = Fp_sqrtn(gel(x,2), d, p, NULL);
-        if (!z) pari_err(e_SQRTN);
+        if (!z) pari_err_SQRTN("gpow",x);
         gel(y,2) = gerepileuptoint(av, Fp_pow(z, a, p));
         return y;
       }
 
     case t_PADIC:
       z = equaliu(d, 2)? Qp_sqrt(x): Qp_sqrtn(x, d, NULL);
-      if (!z) pari_err(e_SQRTN);
+      if (!z) pari_err_SQRTN("gpow",x);
       return gerepileupto(av, powgi(z, a));
 
     case t_FFELT:
@@ -1050,10 +1050,10 @@ Qp_sqrt(GEN x)
   y = cgetg(5,t_PADIC);
   pp = precp(x);
   mod = gel(x,3);
-  x   = gel(x,4); /* lift to t_INT */
+  z   = gel(x,4); /* lift to t_INT */
   e >>= 1;
-  z = Up_sqrt(x, p, pp);
-  if (!z) pari_err(e_SQRTN);
+  z = Up_sqrt(z, p, pp);
+  if (!z) pari_err_SQRTN("Qp_sqrt",x);
   if (equaliu(p,2))
   {
     pp  = (pp <= 3) ? 1 : pp-1;
@@ -1179,7 +1179,7 @@ gsqrt(GEN x, long prec)
     case t_INTMOD:
       y = cgetg(3,t_INTMOD); gel(y,1) = icopy(gel(x,1));
       p1 = Fp_sqrt(gel(x,2),gel(y,1));
-      if (!p1) pari_err(e_SQRTN);
+      if (!p1) pari_err_SQRTN("gsqrt",x);
       gel(y,2) = p1; return y;
 
     case t_COMPLEX:
@@ -1428,7 +1428,7 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
     gel(y,2) = Fp_sqrtn(gel(x,2),n,gel(x,1),zetan);
     if (!y[2]) {
       if (zetan) {avma=av; return gen_0;}
-      pari_err(e_SQRTN);
+      pari_err_SQRTN("gsqrtn",x);
     }
     if (zetan) { gel(z,2) = *zetan; *zetan = z; }
     return y;
@@ -1437,7 +1437,7 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
     y = Qp_sqrtn(x,n,zetan);
     if (!y) {
       if (zetan) return gen_0;
-      pari_err(e_SQRTN);
+      pari_err_SQRTN("gsqrtn",x);
     }
     return y;
 

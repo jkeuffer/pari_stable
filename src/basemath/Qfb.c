@@ -1055,11 +1055,13 @@ primeform_u(GEN x, ulong p)
       case 0: b = 0; break;
       case 1: b = 1; break;
       case 4: b = 2; break;
-      default: pari_err(e_SQRTN); b = 0; /* -Wall */
+      default: pari_err_SQRTN("primeform", mkintmod(x,utoi(p)) );
+               b = 0; /* -Wall */
     }
     c = shifti(subsi(s,x), -3);
   } else {
-    b = Fl_sqrt(umodiu(x,p), p); if (b == ~0UL) pari_err(e_SQRTN);
+    b = Fl_sqrt(umodiu(x,p), p);
+    if (b == ~0UL) pari_err_SQRTN("primeform", mkintmod(x,utoi(p)) );
     /* mod(b) != mod2(x) ? */
     if ((b ^ s) & 1) b = p - b;
     c = diviuexact(shifti(subii(sqru(b), x), -2), p);
@@ -1114,7 +1116,7 @@ primeform(GEN x, GEN p, long prec)
   /* 2 or 3 mod 4 */
   if (s & 2) pari_err(e_MISC,"discriminant not congruent to 0,1 mod 4 in primeform");
   absp = absi(p); av = avma;
-  b = Fp_sqrt(x, absp); if (!b) pari_err(e_SQRTN);
+  b = Fp_sqrt(x, absp); if (!b) pari_err_SQRTN("primeform", mkintmod(x,absp));
   s &= 1; /* s = x mod 2 */
   /* mod(b) != mod2(x) ? [Warning: we may have b == 0] */
   if ((!signe(b) && s) || mod2(b) != s) b = gerepileuptoint(av, subii(absp,b));

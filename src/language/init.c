@@ -975,9 +975,9 @@ pari_err2GEN(long numerr, va_list ap)
       const char *ch1 = va_arg(ap, char*);
       retmkerr2(numerr, gvsprintf(ch1,ap));
     }
-  case e_USER:
   case e_INTMOD:
   case e_NOTFUNC:
+  case e_USER:
     retmkerr2(numerr,va_arg(ap, GEN));
   case e_FILE:
     {
@@ -1003,6 +1003,7 @@ pari_err2GEN(long numerr, va_list ap)
     }
   case e_IRREDPOL:
   case e_PRIME:
+  case e_SQRTN:
   case e_TYPE:
     {
       const char *f = va_arg(ap, const char*);
@@ -1090,6 +1091,9 @@ pari_err2str(GEN err)
   case e_PRIME:
     return pari_sprintf("not a prime number in %Ps: %Ps.",
                         gel(err,2), gel(err,3));
+  case e_SQRTN:
+    return pari_sprintf("not an n-th power residue in %Ps: %Ps",
+                        gel(err,2), gel(err,3));
   case e_ZEROPOL:
     return pari_sprintf("zero polynomial in %Ps.", gel(err,2));
   case e_DIM:
@@ -1148,8 +1152,6 @@ pari_err2str(GEN err)
     return pari_strdup("sorry, not available on this system");
   case e_MEM:
     return pari_strdup("not enough memory");
-  case e_SQRTN:
-    return pari_strdup("not an n-th power residue in sqrtn");
   case e_NONE: return NULL;
   }
   return NULL; /*NOT REACHED*/
@@ -1229,6 +1231,8 @@ void
 pari_err_PREC(const char *f) { pari_err(e_PREC,f); }
 void
 pari_err_PRIME(const char *f, GEN x) { pari_err(e_PRIME, f,x); }
+void
+pari_err_SQRTN(const char *f, GEN x) { pari_err(e_SQRTN, f,x); }
 void
 pari_err_TYPE(const char *f, GEN x) { pari_err(e_TYPE, f,x); }
 void
