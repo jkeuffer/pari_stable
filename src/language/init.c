@@ -1072,7 +1072,7 @@ pari_err2str(GEN err)
   case e_INTMOD:
     return pari_sprintf("impossible inverse modulo: %Ps.", gel(err,2));
   case e_FILE:
-    return pari_sprintf("error opening %Ps file: `%Ps'.", gel(err,2), gel(err,3));
+    return pari_sprintf("error opening %Ps: `%Ps'.", gel(err,2), gel(err,3));
   case e_OVERFLOW:
     return pari_sprintf("overflow in %Ps.", gel(err,2));
   case e_NOTFUNC:

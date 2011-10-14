@@ -893,7 +893,7 @@ gpreadbin(const char *s, int *vector)
 {
   GEN x = readbin(s,pari_infile, vector);
   popinfile();
-  if (!x) pari_err_FILE("input",s);
+  if (!x) pari_err_FILE("input file",s);
   return x;
 }
 

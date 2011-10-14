@@ -2062,7 +2062,7 @@ postdraw0(long *w, long *x, long *y, long lw, long scale)
   }
   psfile = fopen(current_psfile, "a");
   if (!psfile)
-    pari_err_FILE("postscript",current_psfile);
+    pari_err_FILE("postscript file",current_psfile);
 
   /* Definitions taken from post terminal of Gnuplot. */
   fprintf(psfile,"%%!\n\

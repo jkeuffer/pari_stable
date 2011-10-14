@@ -3160,7 +3160,7 @@ pari_fclose(pariFILE *f)
 static pariFILE *
 pari_open_file(FILE *f, const char *s, const char *mode)
 {
-  if (!f) pari_err_FILE("requested", s);
+  if (!f) pari_err_FILE("requested file", s);
   if (DEBUGFILES)
     err_printf("I/O: opening file %s (mode %s)\n", s, mode);
   return newfile(f,s,0);
@@ -3790,7 +3790,7 @@ switchin_last(void)
   FILE *file;
   if (!s) pari_err(e_MISC,"You never gave me anything to read!");
   file = try_open(s);
-  if (!file) pari_err_FILE("input",s);
+  if (!file) pari_err_FILE("input file",s);
   return pari_infile = pari_get_infile(s,file)->file;
 }
 
@@ -3834,7 +3834,7 @@ switchin(const char *name)
       if ((f = try_name(t))) return f;
     }
   }
-  pari_err_FILE("input",name);
+  pari_err_FILE("input file",name);
   return NULL; /*not reached*/
 }
 
@@ -3855,12 +3855,12 @@ switchout(const char *name)
       if (f)
       {
         if (is_magic_ok(f))
-          pari_err(e_MISC,"%s is a GP binary file. Please use writebin", name);
+          pari_err_FILE("binary output file [ use writebin ! ]", name);
         fclose(f);
       }
     }
     f = fopen(name, "a");
-    if (!f) pari_err_FILE("output",name);
+    if (!f) pari_err_FILE("output file",name);
     pari_outfile = f;
   }
   else if (pari_outfile != stdout)
@@ -4075,10 +4075,10 @@ writebin(const char *name, GEN x)
   if (f) {
     int ok = check_magic(name,f);
     fclose(f);
-    if (!ok) pari_err_FILE("binary output",name);
+    if (!ok) pari_err_FILE("binary output file",name);
   }
   f = fopen(name,"a");
-  if (!f) pari_err_FILE("binary output",name);
+  if (!f) pari_err_FILE("binary output file",name);
   if (!already) write_magic(f);
 
   if (x) writeGEN(x,f);
