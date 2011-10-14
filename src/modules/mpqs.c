@@ -663,19 +663,16 @@ mpqs_set_sieve_threshold(mpqs_handle_t *h)
 
 /* Given the partially populated handle, find the optimum place in the FB
  * to pick prime factors for A from.  The lowest admissible subscript is
- * index0_FB, but unless kN is very small, we'll stay away a bit from that.
- * The highest admissible, in a pinch, is size_of_FB + 1, where the largest
- * FB prime resides.  The ideal corner is about (sqrt(kN)/M) ^ (1/omega_A),
+ * index0_FB, but unless kN is very small, we stay away a bit from that.
+ * The highest admissible is size_of_FB + 1, where the largest FB prime
+ * resides.  The ideal corner is about (sqrt(kN)/M) ^ (1/omega_A),
  * so that A will end up of size comparable to sqrt(kN)/M;  experimentally
- * it seems desirable to stay very slightly below this.  Moreover, the
- * selection of the individual primes happens to pari_err on the large side, for
- * which it is wise to compensate a bit.  This is what the (small positive)
- * quantity MPQS_A_FUDGE is for.
+ * it seems desirable to stay slightly below this.  Moreover, the selection
+ * of the individual primes happens to err on the large side, for which we
+ * compensate a bit, using the (small positive) quantity MPQS_A_FUDGE.
  * We rely on a few auxiliary fields in the handle to be already set by
  * mqps_set_sieve_threshold() before we are called.
- * This function may fail under highly unfortunate circumstances, so we
- * report back about our success to the caller (mpqs()), allowing it to
- * bail out after emitting a warning. */
+ * Return 1 on success, and 0 otherwise. */
 static int
 mpqs_locate_A_range(mpqs_handle_t *h)
 {
@@ -706,8 +703,6 @@ mpqs_locate_A_range(mpqs_handle_t *h)
         "MPQS: sizing out of tune, FB too small or\n\tway too few primes in A");
     return 0;
   }
-
-  /* GN 20050723 - comparison against index1_FB removed. */
   h->index2_FB = i - 1;
 #ifdef MPQS_DEBUG_LOCATE_A_RANGE
   err_printf("MPQS DEBUG: index2_FB = %ld\n", i - 1);
