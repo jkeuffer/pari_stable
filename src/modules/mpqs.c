@@ -2414,7 +2414,7 @@ mpqs_combine_large_primes(mpqs_handle_t *h,
 static GEN
 stream_read_F2m(FILE *FREL, long rows, long cols, long *fpos)
 {
-  long i = 0, e, p;
+  long i, e, p;
   char buf[MPQS_STRING_LENGTH], *s;
   GEN m;
   long space = 2*((nbits2nlong(rows)+3)*cols+1);
@@ -2428,10 +2428,11 @@ stream_read_F2m(FILE *FREL, long rows, long cols, long *fpos)
   }
   else
     m = zero_F2m_copy(rows, cols);
-  if ((fpos[0] = ftell(FREL)) < 0)
-    pari_err(e_MISC, "ftell error on full relations file");
-  while (fgets(buf, MPQS_STRING_LENGTH, FREL))
+  for (i = 0;; i++)
   {
+    if (i < cols && (fpos[i] = ftell(FREL)) < 0)
+      pari_err(e_FILE, "full relations file [ftell]");
+    if (!fgets(buf, MPQS_STRING_LENGTH, FREL)) break;
     s = strchr(buf, ':') + 2;
     s = strtok(s, " \n");
     while (s != NULL)
@@ -2442,15 +2443,12 @@ stream_read_F2m(FILE *FREL, long rows, long cols, long *fpos)
       if (e & 1) F2m_set(m, p, i+1);
       s = strtok(NULL, " \n");
     }
-    i++;
-    if (i < cols && (fpos[i] = ftell(FREL)) < 0)
-      pari_err(e_MISC, "ftell error on full relations file");
   }
   if (i != cols)
   {
     err_printf("MPQS: full relations file %s than expected",
                i > cols ? "longer" : "shorter");
-    pari_err(e_MISC, "MPQS panicking");
+    pari_err(e_BUG, "MPQS [panicking]");
   }
   return m;
 }
