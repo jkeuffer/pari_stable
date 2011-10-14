@@ -944,8 +944,7 @@ mpqs_relations_cmp(const void *a, const void *b)
 static void
 pari_fputs(char *s, pariFILE *f)
 {
-  if (fputs(s, f->file) < 0)
-    pari_err(e_MISC, "error whilst writing to file %s", f->name);
+  if (fputs(s, f->file) < 0) pari_err_FILE("output file [fputs]", f->name);
 }
 #define min_bufspace 120UL /* use new buffer when < min_bufspace left */
 #define buflist_size 1024  /* size of list-of-buffers blocks */
@@ -1060,7 +1059,7 @@ mpqs_sort_lp_file(char *filename)
       bufspace = MPQS_STRING_LENGTH - length + 1;
       /* read remainder of line */
       if (fgets(cur_line, bufspace, TMP) == NULL)
-        pari_err(e_MISC,"MPQS: relations file truncated?!\n");
+        pari_err_FILE("TMP file [fgets]", pTMP->name);
       lg1 = strlen(cur_line);
       length += lg1; /* we already counted the \0 once */
       bufspace -= (lg1 + 1); /* but here we must take it into account */
@@ -1329,8 +1328,7 @@ mpqs_mergesort_lp_file(char *REL_str, char *NEW_str, char *TMP_str, pariFILE *pC
   pari_fclose(pREL);
   pari_fclose(pNEW);
   pari_unlink(REL_str);
-  if (rename(TMP_str,REL_str))
-    pari_err(e_MISC, "cannot rename file %s to %s", TMP_str, REL_str);
+  if (rename(TMP_str,REL_str)) pari_err_FILE("output file [rename]", REL_str);
   if (MPQS_DEBUGLEVEL >= 6)
     err_printf("MPQS: renamed file %s to %s\n", TMP_str, REL_str);
   return tp;
@@ -2403,12 +2401,13 @@ mpqs_combine_large_primes(mpqs_handle_t *h,
 /**                                                                 **/
 /*********************************************************************/
 
-/* create and read an F2m from a relation file FREL (opened by caller).
+/* create and read an F2m from a relation file FREL.
  * Also record the position of each relation in the file for later use
  * rows = size_of_FB+1, cols = rel */
 static GEN
-stream_read_F2m(FILE *FREL, long rows, long cols, long *fpos)
+stream_read_F2m(pariFILE *pFREL, long rows, long cols, long *fpos)
 {
+  FILE *FREL = pFREL->file;
   long i, e, p;
   char buf[MPQS_STRING_LENGTH], *s;
   GEN m;
@@ -2426,7 +2425,7 @@ stream_read_F2m(FILE *FREL, long rows, long cols, long *fpos)
   for (i = 0;; i++)
   {
     if (i < cols && (fpos[i] = ftell(FREL)) < 0)
-      pari_err(e_FILE, "full relations file [ftell]");
+      pari_err_FILE("full relations file [ftell]", pFREL->name);
     if (!fgets(buf, MPQS_STRING_LENGTH, FREL)) break;
     s = strchr(buf, ':') + 2;
     s = strtok(s, " \n");
@@ -2475,11 +2474,12 @@ mpqs_add_relation(GEN Y_prod, GEN N, long *ei, char *rel)
 }
 
 static char*
-mpqs_get_relation(char *buf, long pos, FILE *FREL)
+mpqs_get_relation(char *buf, long pos, pariFILE *pFREL)
 {
-  if (fseek(FREL, pos, SEEK_SET)) pari_err(e_MISC, "cannot seek FREL file");
-  if (!fgets(buf, MPQS_STRING_LENGTH, FREL))
-    pari_err(e_MISC, "FREL file truncated?!");
+  if (fseek(pFREL->file, pos, SEEK_SET))
+    pari_err_FILE("FREL file [fseek]", pFREL->name);
+  if (!fgets(buf, MPQS_STRING_LENGTH, pFREL->file))
+    pari_err_FILE("FREL file [fgets]", pFREL->name);
   return buf;
 }
 
@@ -2518,7 +2518,6 @@ split(GEN N, GEN *e, GEN *res)
 static GEN
 mpqs_solve_linear_system(mpqs_handle_t *h, pariFILE *pFREL, long rel)
 {
-  FILE *FREL = pFREL->file;
   GEN N = h->N, X, Y_prod, X_plus_Y, D1, res, new_res;
   mpqs_FB_entry_t *FB = h->FB;
   pari_sp av=avma, av2, av3, lim, lim3;
@@ -2531,7 +2530,7 @@ mpqs_solve_linear_system(mpqs_handle_t *h, pariFILE *pFREL, long rel)
 
   fpos = (long *) pari_malloc(rel * sizeof(long));
 
-  m = stream_read_F2m(FREL, h->size_of_FB+1, rel, fpos);
+  m = stream_read_F2m(pFREL, h->size_of_FB+1, rel, fpos);
   if (DEBUGLEVEL >= 7)
     err_printf("\\\\ MATRIX READ BY MPQS\nFREL=%Ps\n",m);
 
@@ -2590,7 +2589,7 @@ mpqs_solve_linear_system(mpqs_handle_t *h, pariFILE *pFREL, long rel)
     {
       if (F2m_coeff(ker_m, j, i))
         Y_prod = mpqs_add_relation(Y_prod, N, ei,
-                                   mpqs_get_relation(buf, fpos[j-1], FREL));
+                                   mpqs_get_relation(buf, fpos[j-1], pFREL));
       if (low_stack(lim3, stack_lim(av3,1)))
       {
         if(DEBUGMEM>1) pari_warn(warnmem,"[1]: mpqs_solve_linear_system");
