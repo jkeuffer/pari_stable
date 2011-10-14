@@ -319,7 +319,7 @@ lift_check_modulus(GEN H, long n)
         pari_err(e_MISC,"generators must be prime to conductor in galoissubcyclo");
       return h;
   }
-  pari_err(e_MISC,"wrong type in galoissubcyclo");
+  pari_err_TYPE("galoissubcyclo [subgroup]", H);
   return 0;/*not reached*/
 }
 

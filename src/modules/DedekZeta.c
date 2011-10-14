@@ -569,7 +569,7 @@ gzetakall(GEN znf, GEN s, long flag, long prec)
   GEN z;
 
   if (typ(znf)!=t_VEC || lg(znf)!=10 || typ(znf[1]) != t_VECSMALL)
-    pari_err(e_MISC,"not a zeta number field in zetakall");
+    pari_err_TYPE("zetakall", znf);
   if (isint(s, &s))
   {
     long ss = itos(s), r1, r2;

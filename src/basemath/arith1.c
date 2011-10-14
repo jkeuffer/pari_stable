@@ -2948,7 +2948,7 @@ bestappr(GEN x, GEN k)
         if (!signe(k)) k = gen_1;
         break;
       default:
-        pari_err(e_MISC,"incorrect bound type in bestappr");
+        pari_err_TYPE("bestappr [bound type]", k);
         break;
     }
   }
