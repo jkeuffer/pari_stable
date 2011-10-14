@@ -3875,30 +3875,30 @@ switchout(const char *name)
 /**                    I/O IN BINARY FORM                         **/
 /**                                                               **/
 /*******************************************************************/
-#define _fwrite(a,b,c,d) \
-  if (fwrite((a),(b),(c),(d)) < (c)) pari_err(e_MISC,"write failed")
-#define _fread(a,b,c,d) \
-  if (fread((a),(b),(c),(d)) < (c)) pari_err(e_MISC,"read failed")
-#define _lfread(a,b,c) _fread((a),sizeof(long),(b),(c))
-#define _cfread(a,b,c) _fread((a),sizeof(char),(b),(c))
-#define _lfwrite(a,b,c) _fwrite((a),sizeof(long),(b),(c))
-#define _cfwrite(a,b,c) _fwrite((a),sizeof(char),(b),(c))
+static void
+_fread(void *a, size_t b, size_t c, FILE *d)
+{ if (fread(a,b,c,d) < c) pari_err_FILE("input file [fread]", "FILE*"); }
+static void
+_lfread(void *a, size_t b, FILE *c) { _fread(a,sizeof(long),b,c); }
+static void
+_cfread(void *a, size_t b, FILE *c) { _fread(a,sizeof(char),b,c); }
+
+static void
+_fwrite(const void *a, size_t b, size_t c, FILE *d)
+{ if (fwrite(a,b,c,d) < c) pari_err_FILE("output file [fwrite]", "FILE*"); }
+static void
+_lfwrite(const void *a, size_t b, FILE *c) { _fwrite(a,sizeof(long),b,c); }
+static void 
+_cfwrite(const void *a, size_t b, FILE *c) { _fwrite(a,sizeof(char),b,c); }
 
 #define BIN_GEN 0
 #define NAM_GEN 1
 #define VAR_GEN 2
 
 static long
-rd_long(FILE *f)
-{
-  long L;
-  _lfread(&L, 1UL, f); return L;
-}
+rd_long(FILE *f) { long L; _lfread(&L, 1UL, f); return L; }
 static void
-wr_long(long L, FILE *f)
-{
-  _lfwrite(&L, 1UL, f);
-}
+wr_long(long L, FILE *f) { _lfwrite(&L, 1UL, f); }
 
 /* append x to file f */
 static void
