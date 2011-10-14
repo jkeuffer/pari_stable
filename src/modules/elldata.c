@@ -117,7 +117,7 @@ ellcondfile(long f)
   F = pari_fopengz(s); avma = av;
   if (!F) pari_err(e_MISC,"Missing elldata for conductor %ld\n[need %s]",f,s);
   V = gp_read_stream(F->file);
-  if (!V || typ(V)!=t_VEC ) pari_err(e_MISC,"Incompatible elldata file %s\n",s);
+  if (!V || typ(V)!=t_VEC ) pari_err(e_MISC,"incompatible elldata file %s",s);
   pari_fclose(F); return V;
 }
 

@@ -584,7 +584,7 @@ TamelyRamifiedCase(KRASNER_t *data)
 
 #ifdef CHECK_EXTENSIONS
   if (!equaliu(data->nbext, cnt))
-    pari_err(e_MISC,"Number of fields incorrect in TamelyRamifiedCase\n");
+    pari_err(e_MISC,"Number of fields incorrect in TamelyRamifiedCase");
 #endif
 
   return gerepilecopy(av, rep);
@@ -736,7 +736,7 @@ WildlyRamifiedCase(KRASNER_t *data)
       long e = data->e, f = data->f, j = data->j;
       disc = RgXQ_norm(disc, data->upl);
       if (Z_pval(disc, data->p) != f*(e+j-1))
-        pari_err(e_MISC, "incorrect discriminant in WildlyRamifiedCase\n");
+        pari_err(e_MISC, "incorrect discriminant in WildlyRamifiedCase");
     }
 #endif
 

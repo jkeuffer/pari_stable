@@ -54,16 +54,16 @@ ratlift(GEN x, GEN m, GEN amax, GEN bmax, GEN *a, GEN *b)
 {
   pari_sp av = avma;
   if (signe(bmax) <= 0)
-    pari_err(e_MISC, "ratlift: bmax must be > 0, found\n\tbmax=%Ps\n", bmax);
+    pari_err(e_MISC, "ratlift: bmax must be > 0, found\n\tbmax=%Ps", bmax);
   if (signe(amax) < 0)
-    pari_err(e_MISC, "ratilft: amax must be >= 0, found\n\tamax=%Ps\n", amax);
+    pari_err(e_MISC, "ratilft: amax must be >= 0, found\n\tamax=%Ps", amax);
   /* check 2*amax*bmax < m */
   if (cmpii(shifti(mulii(amax, bmax), 1), m) >= 0)
-    pari_err(e_MISC, "ratlift: must have 2*amax*bmax < m, found\n\tamax=%Ps\n\tbmax=%Ps\n\tm=%Ps\n", amax,bmax,m);
+    pari_err(e_MISC, "ratlift: must have 2*amax*bmax < m, found\n\tamax=%Ps\n\tbmax=%Ps\n\tm=%Ps", amax,bmax,m);
   /* we _could_ silently replace x with modii(x,m) instead of the following,
    * but let's leave this up to the caller */
   if (signe(x) < 0 || cmpii(x,m) >= 0)
-    pari_err(e_MISC, "ratlift: must have 0 <= x < m, found\n\tx=%Ps\n\tm=%Ps\n", x,m);
+    pari_err(e_MISC, "ratlift: must have 0 <= x < m, found\n\tx=%Ps\n\tm=%Ps", x,m);
   avma = av; return Fp_ratlift(x, m, amax, bmax, a, b);
 }
 
@@ -306,6 +306,6 @@ Fp_ratlift(GEN x, GEN m, GEN amax, GEN bmax, GEN *a, GEN *b)
   } /* while */
 
   /* We have run into d1 == 0 before returning. This cannot happen */
-  pari_err_BUG("ratlift failed to catch d1 == 0\n");
+  pari_err_BUG("ratlift failed to catch d1 == 0");
   return 0; /* NOTREACHED */
 }
