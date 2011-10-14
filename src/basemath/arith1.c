@@ -1026,9 +1026,33 @@ END:
 /**                        KRONECKER SYMBOL                         **/
 /**                                                                 **/
 /*********************************************************************/
-/* u = 3,5 mod 8 ?  (= 2 not a square mod u) */
-#define  ome(t) (labs(((t)&7)-4) == 1)
-#define gome(t) (ome(mod2BIL(t)))
+/* t = 3,5 mod 8 ?  (= 2 not a square mod t) */
+static int
+ome(long t)
+{
+  switch(t & 7)
+  {
+    case 3:
+    case 5: return 1;
+    default: return 0;
+  }
+}
+/* t a t_INT, is t = 3,5 mod 8 ? */
+static int
+gome(GEN t)
+{ return signe(t)? ome( mod2BIL(t) ): 0; }
+
+/* t a t_INT, return 1 if t = 3 (mod 4), 0 otherwise */
+static int
+eps(GEN t)
+{
+  switch(signe(t))
+  {
+    case -1: return mod4(t) == 1;
+    case 1:  return mod4(t) == 3;
+    default: return 0;
+  }
+}
 
 /* assume y odd, return kronecker(x,y) * s */
 static long
@@ -1205,121 +1229,134 @@ krouu(ulong x, ulong y)
 /**                          HILBERT SYMBOL                         **/
 /**                                                                 **/
 /*********************************************************************/
-#define eps(t) (((signe(t)*(mod2BIL(t)))&3)==3)
+/* x,y are t_INT or t_REAL */
+static long
+mphilbertoo(GEN x, GEN y)
+{ 
+  long sx = signe(x), sy = signe(y);
+  if (!sx || !sy) return 0;
+  return (sx < 0 && sy < 0)? -1: 1;
+}
+
 long
 hilbertii(GEN x, GEN y, GEN p)
 {
   pari_sp av;
-  long a, b, z;
-  GEN u, v;
+  long oddvx, oddvy, z;
 
-  if (!p) return (signe(x)<0 && signe(y)<0)? -1: 1;
-  if (is_pm1(p)) pari_err(e_MISC,"p = 1 in hilbert()");
+  if (!p) return mphilbertoo(x,y);
+  if (is_pm1(p) || signe(p) < 0) pari_err(e_PRIME,"hilbertii",p);
+  if (!signe(x) || !signe(y)) return 0;
   av = avma;
-  a = odd(Z_pvalrem(x,p,&u));
-  b = odd(Z_pvalrem(y,p,&v));
+  oddvx = odd(Z_pvalrem(x,p,&x));
+  oddvy = odd(Z_pvalrem(y,p,&y));
+  /* x, y are p-units, compute hilbert(x * p^oddvx, y * p^oddvy, p) */
   if (equaliu(p, 2))
   {
-    z = (eps(u) && eps(v))? -1: 1;
-    if (a && gome(v)) z = -z;
-    if (b && gome(u)) z = -z;
+    z = (eps(x) && eps(y))? -1: 1;
+    if (oddvx && gome(y)) z = -z;
+    if (oddvy && gome(x)) z = -z;
   }
   else
   {
-    z = (a && b && eps(p))? -1: 1;
-    if (a && kronecker(v,p)<0) z = -z;
-    if (b && kronecker(u,p)<0) z = -z;
+    z = (oddvx && oddvy && eps(p))? -1: 1;
+    if (oddvx && kronecker(y,p) < 0) z = -z;
+    if (oddvy && kronecker(x,p) < 0) z = -z;
   }
   avma = av; return z;
 }
 
 static void
-err_at2(void) {pari_err(e_MISC, "insufficient precision for p = 2 in hilbert");}
+err_prec(void)
+{ pari_err(e_MISC, "insufficient precision in hilbert"); }
+static void
+err_p(GEN p, GEN q)
+{ pari_err(e_MISC, "different primes in hilbert: %Ps != %Ps", p,q); }
+static void
+err_oo(GEN p)
+{ pari_err(e_MISC, "different primes in hilbert: %Ps != oo", p); }
+
+/* x t_INTMOD, *pp = prime or NULL [ unset, set it to x.mod ].
+ * Return lift(x) provided it's p-adic accuracy is large enough to decide
+ * hilbert()'s value [ problem at p = 2 ] */
+static GEN
+lift_intmod(GEN x, GEN *pp)
+{
+  GEN p = *pp, N = gel(x,1);
+  x = gel(x,2);
+  if (!p)
+  {
+    *pp = p = N;
+    switch(itos_or_0(p))
+    {
+      case 2:
+      case 4: err_prec();
+    }
+    return x;
+  }
+  if (!signe(p)) err_oo(N);
+  if (equaliu(p,2))
+  { if (vali(N) <= 2) err_prec(); }
+  else
+  { if (!dvdii(N,p)) err_p(N,p); }
+  if (!signe(x)) err_prec();
+  return x;
+}
+/* x t_PADIC, *pp = prime or NULL [ unset, set it to x.p ].
+ * Return lift(x)*p^(v(x) mod 2) provided it's p-adic accuracy is large enough
+ * to decide hilbert()'s value [ problem at p = 2 ]*/
+static GEN
+lift_padic(GEN x, GEN *pp)
+{
+  GEN p = *pp, q = gel(x,2), y = gel(x,4);
+  if (!p) *pp = p = q;
+  else if (!equalii(p,q)) err_p(p, q);
+  if (equaliu(p,2) && precp(x) <= 2) err_prec();
+  if (!signe(y)) err_prec();
+  return odd(valp(x))? mulii(p,y): y;
+}
 
 long
 hilbert(GEN x, GEN y, GEN p)
 {
-  pari_sp av;
-  long tx, ty, z;
-  GEN p1, p2;
+  pari_sp av = avma;
+  long tx = typ(x), ty = typ(y), z;
 
-  if (gequal0(x) || gequal0(y)) return 0;
-  av = avma; tx = typ(x); ty = typ(y);
-  if (tx > ty) swapspec(x,y, tx,ty);
-  if (p)
+  if (p && typ(p) != t_INT) pari_err_TYPE("hilbert",p);
+  if (tx == t_REAL)
   {
-    if (typ(p) != t_INT) pari_err_TYPE("hilbert",p);
-    if (signe(p) <= 0) p = NULL;
+    if (p && signe(p)) err_oo(p);
+    switch (ty)
+    {
+      case t_INT:
+      case t_REAL: return mphilbertoo(x,y);
+      case t_FRAC: return mphilbertoo(x,gel(y,1));
+      default: pari_err_TYPE2("hilbert",x,y);
+    }
   }
-
-  switch(tx) /* <= ty */
+  if (ty == t_REAL)
   {
-    case t_INT:
-      switch(ty)
-      {
-        case t_INT: return hilbertii(x,y,p);
-        case t_REAL:
-          return (signe(x)<0 && signe(y)<0)? -1: 1;
-        case t_INTMOD:
-          p = gel(y,1); if (equaliu(p,2)) err_at2();
-          return hilbertii(x, gel(y,2), p);
-        case t_FRAC:
-          z = hilbertii(x, mulii(gel(y,1),gel(y,2)), p);
-          avma = av; return z;
-        case t_PADIC:
-          p = gel(y,2);
-          if (equaliu(p,2) && precp(y) <= 1) err_at2();
-          p1 = odd(valp(y))? mulii(p,gel(y,4)): gel(y,4);
-          z = hilbertii(x, p1, p); avma = av; return z;
-      }
-      break;
-
-    case t_REAL:
-      if (ty != t_FRAC) break;
-      if (signe(x) > 0) return 1;
-      return signe(y[1])*signe(y[2]);
-
-    case t_INTMOD:
-      p = gel(x,1); if (equaliu(p,2)) err_at2();
-      switch(ty)
-      {
-        case t_INTMOD:
-          if (!equalii(p, gel(y,1))) break;
-          return hilbertii(gel(x,2),gel(y,2),p);
-        case t_FRAC:
-          return hilbert(gel(x,2),y,p);
-        case t_PADIC:
-          if (!equalii(p, gel(y,2))) break;
-          return hilbert(gel(x,2),y,p);
-      }
-      break;
-
-    case t_FRAC:
-      p1 = mulii(gel(x,1),gel(x,2));
-      switch(ty)
-      {
-        case t_FRAC:
-          p2 = mulii(gel(y,1),gel(y,2));
-          z = hilbertii(p1,p2,p); avma = av; return z;
-        case t_PADIC:
-          z = hilbert(p1,y,NULL); avma = av; return z;
-      }
-      break;
-
-    case t_PADIC:
-      p = gel(x,2);
-      if (ty != t_PADIC || !equalii(p,gel(y,2))) break;
-      if (equaliu(p,2) && (precp(x) <= 1 || precp(y) <= 1)) err_at2();
-      p1 = odd(valp(x))? mulii(p,gel(x,4)): gel(x,4);
-      p2 = odd(valp(y))? mulii(p,gel(y,4)): gel(y,4);
-      z = hilbertii(p1,p2,p); avma = av; return z;
+    if (p && signe(p)) err_oo(p);
+    switch (tx)
+    {
+      case t_INT:
+      case t_REAL: return mphilbertoo(x,y);
+      case t_FRAC: return mphilbertoo(gel(x,1),y);
+      default: pari_err_TYPE2("hilbert",x,y);
+    }
   }
-  pari_err(e_MISC,"forbidden or incompatible types in hilbert");
-  return 0; /* not reached */
+  if (tx == t_INTMOD) { x = lift_intmod(x, &p); tx = t_INT; }
+  if (ty == t_INTMOD) { y = lift_intmod(y, &p); ty = t_INT; }
+
+  if (tx == t_PADIC) { x = lift_padic(x, &p); tx = t_INT; }
+  if (ty == t_PADIC) { y = lift_padic(y, &p); ty = t_INT; }
+
+  if (tx == t_FRAC) { tx = t_INT; x = p? mulii(gel(x,1),gel(x,2)): gel(x,1); }
+  if (ty == t_FRAC) { ty = t_INT; y = p? mulii(gel(y,1),gel(y,2)): gel(y,1); }
+
+  if (tx != t_INT || ty != t_INT) pari_err_TYPE2("hilbert",x,y);
+  z = hilbertii(x,y,p); avma = av; return z;
 }
-#undef eps
-#undef ome
-#undef gome
 
 /*******************************************************************/
 /*                                                                 */

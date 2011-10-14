@@ -14,4 +14,95 @@
 [-1, -1, 1]
 [-1, -1, 1]
 [-1, 1, -1]
-Total time spent: 1260
+[1, 2]: 1
+[1, 3]: 1
+[1, 4]: error("insufficient precision in hilbert.")
+[1, 5]: error("insufficient precision in hilbert.")
+[1, 6]: 1
+[1, 7]: 1
+[1, 8]: 0
+[1, 9]: error("insufficient precision in hilbert.")
+[1, 10]: 1
+[1, 11]: 1
+[2, 3]: 1
+[2, 4]: error("insufficient precision in hilbert.")
+[2, 5]: error("insufficient precision in hilbert.")
+[2, 6]: 1
+[2, 7]: 1
+[2, 8]: 0
+[2, 9]: error("insufficient precision in hilbert.")
+[2, 10]: 1
+[2, 11]: 1
+[3, 4]: error("forbidden hilbert t_REAL , t_INTMOD.")
+[3, 5]: error("forbidden hilbert t_REAL , t_INTMOD.")
+[3, 6]: error("forbidden hilbert t_REAL , t_INTMOD.")
+[3, 7]: error("forbidden hilbert t_REAL , t_INTMOD.")
+[3, 8]: error("forbidden hilbert t_REAL , t_INTMOD.")
+[3, 9]: error("forbidden hilbert t_REAL , t_PADIC.")
+[3, 10]: error("forbidden hilbert t_REAL , t_PADIC.")
+[3, 11]: error("forbidden hilbert t_REAL , t_PADIC.")
+[4, 5]: error("insufficient precision in hilbert.")
+[4, 6]: error("insufficient precision in hilbert.")
+[4, 7]: error("insufficient precision in hilbert.")
+[4, 8]: error("insufficient precision in hilbert.")
+[4, 9]: error("insufficient precision in hilbert.")
+[4, 10]: error("insufficient precision in hilbert.")
+[4, 11]: error("insufficient precision in hilbert.")
+[5, 6]: error("insufficient precision in hilbert.")
+[5, 7]: error("insufficient precision in hilbert.")
+[5, 8]: error("insufficient precision in hilbert.")
+[5, 9]: error("insufficient precision in hilbert.")
+[5, 10]: error("insufficient precision in hilbert.")
+[5, 11]: error("insufficient precision in hilbert.")
+[6, 7]: error("different primes in hilbert: 3 != 8.")
+[6, 8]: error("different primes in hilbert: 5 != 8.")
+[6, 9]: error("different primes in hilbert: 8 != 2.")
+[6, 10]: error("different primes in hilbert: 8 != 2.")
+[6, 11]: error("different primes in hilbert: 8 != 5.")
+[7, 8]: error("different primes in hilbert: 5 != 3.")
+[7, 9]: error("different primes in hilbert: 3 != 2.")
+[7, 10]: error("different primes in hilbert: 3 != 2.")
+[7, 11]: error("different primes in hilbert: 3 != 5.")
+[8, 9]: error("different primes in hilbert: 5 != 2.")
+[8, 10]: error("different primes in hilbert: 5 != 2.")
+[8, 11]: 0
+[9, 10]: error("insufficient precision in hilbert.")
+[9, 11]: error("insufficient precision in hilbert.")
+[10, 11]: error("different primes in hilbert: 2 != 5.")
+p = 0:
+1: 1
+2: 1
+3: 1
+4: error("different primes in hilbert: 2 != oo.")
+5: error("different primes in hilbert: 4 != oo.")
+6: error("different primes in hilbert: 8 != oo.")
+7: error("different primes in hilbert: 3 != oo.")
+8: error("different primes in hilbert: 5 != oo.")
+9: error("different primes in hilbert: 0 != 2.")
+10: error("different primes in hilbert: 0 != 2.")
+11: error("different primes in hilbert: 0 != 5.")
+p = 2:
+1: 1
+2: -1
+3: error("different primes in hilbert: 2 != oo.")
+4: error("insufficient precision in hilbert.")
+5: error("insufficient precision in hilbert.")
+6: 1
+7: error("insufficient precision in hilbert.")
+8: error("insufficient precision in hilbert.")
+9: error("insufficient precision in hilbert.")
+10: 1
+11: error("different primes in hilbert: 2 != 5.")
+p = 5:
+1: 1
+2: 1
+3: error("different primes in hilbert: 5 != oo.")
+4: error("different primes in hilbert: 2 != 5.")
+5: error("different primes in hilbert: 4 != 5.")
+6: error("different primes in hilbert: 8 != 5.")
+7: error("different primes in hilbert: 3 != 5.")
+8: error("insufficient precision in hilbert.")
+9: error("different primes in hilbert: 5 != 2.")
+10: error("different primes in hilbert: 5 != 2.")
+11: 1
+Total time spent: 988

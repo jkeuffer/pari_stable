@@ -43,6 +43,8 @@ BA 30- functions ending by the x[y]=z construct could corrupt the stack.
    33- qfminim(): incorrect GC in smallvectors()
    34- padicappr(x^2+1+O(3), -1+O(5^10)) --> no error
    35- tests test-kernel and test-ploth were broken
+   36- lots of missing sanity checks in hilbert(x,y,p) 
+       [ e.g. hilbert(O(3), Pi, 5) -> 0 ]
 
   Changed
     1- mathnf: swapped flag 3 and 5.

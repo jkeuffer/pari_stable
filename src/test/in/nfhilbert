@@ -34,3 +34,12 @@ for (j = 1,10,
   print([nfhilbert(K, a,b,p), nfhilbert(K, a,c,p), nfhilbert(K, a,d,p)])
 )
 }
+
+L = [2, 3, 1.0, Mod(1,2), Mod(1,4), Mod(1,8), Mod(1,3), Mod(0,5), 1 + O(2^2), 1 + O(2^3), 1 + O(5)];
+for (i=1,#L, for(j=i+1,#L, print([i,j], ": ", iferr(hilbert(L[i],L[j]), E, E))))
+print("p = 0:");
+for (i=1,#L, print(i, ": ", iferr(hilbert(L[i],L[i], 0), E, E)))
+print("p = 2:");
+for (i=1,#L, print(i, ": ", iferr(hilbert(L[i],L[i], 2), E, E)))
+print("p = 5:");
+for (i=1,#L, print(i, ": ", iferr(hilbert(L[i],L[i], 5), E, E)))
