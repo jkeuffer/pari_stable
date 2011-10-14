@@ -26,7 +26,7 @@ galoisnbpol(long a)
   F = pari_fopengz(s);
   if (!F) pari_err_FILE("galpol file",s);
   n = gp_read_stream(F->file);
-  if (!n || typ(n)!=t_INT) pari_err(e_MISC,"Incompatible galpol file %s\n",s);
+  if (!n || typ(n)!=t_INT) pari_err(e_MISC,"incompatible galpol file %s",s);
   pari_fclose(F); return n;
 }
 
@@ -56,7 +56,7 @@ galoisgetpol(long a, long b, long sig)
     else pari_err_FILE("galpol file", s);
   }
   V = gp_read_stream(F->file);
-  if (!V || typ(V)!=t_VEC ) pari_err(e_MISC,"Incompatible galpol file\n");
+  if (!V || typ(V)!=t_VEC) pari_err(e_MISC,"incompatible galpol file");
   pari_fclose(F); return V;
 }
 

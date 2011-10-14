@@ -2359,7 +2359,7 @@ polgaloisnamesbig(long n, long k)
   }
   V = gp_read_stream(f->file);
   if (!V || typ(V)!=t_VEC || k>=lg(V))
-    pari_err(e_MISC,"galois files %s not compatible\n",s);
+    pari_err(e_MISC,"incompatible galois file %s",s);
   pari_fclose(f);
   return gerepilecopy(av, gel(V,k));
 }
