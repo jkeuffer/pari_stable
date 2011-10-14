@@ -2272,9 +2272,9 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
   *     T2(v0) <= (4/3)^((n-1)/2) NI^(2/n) disc(K)^(1/n)
   * We consider v with T2(v) <= BMULT * T2(v0)
   * Hence Nv <= ((4/3)^((n-1)/2) * BMULT / n)^(n/2) NI sqrt(disc(K)) */
-  precbound = 3 + (long)ceil(
+  precbound = nbits2prec( BITS_IN_LONG + (long)ceil(
     (N/2. * ((N-1)/2.* log(4./3) + log(BMULT/(double)N)) + log(LIMC2) + LOGD/2)
-      / (BITS_IN_LONG * LOG2)); /* enough to compute norms */
+      / LOG2)); /* enough to compute norms */
   if (precbound < prec) M = gprec_w(M, precbound);
 
   minim_alloc(N+1, &q, &x, &y, &z, &v);

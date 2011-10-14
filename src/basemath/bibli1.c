@@ -27,7 +27,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 static int
 no_prec_pb(GEN x)
 {
-  return (typ(x) != t_REAL || realprec(x) >  3
+  return (typ(x) != t_REAL || realprec(x) > LOWDEFAULTPREC
                            || expo(x) < BITS_IN_LONG/2);
 }
 /* zero x[1..k-1], fill L = (mu_{i,j}). Return 0 if precision problem
@@ -1959,12 +1959,10 @@ mplessthan(GEN x, GEN y)
 {
   pari_sp av = avma;
   GEN z = mpsub(x, y);
-  long l;
   avma = av;
   if (typ(z) == t_INT) return (signe(z) < 0);
   if (signe(z) >= 0) return 0;
-  l = realprec(z);
-  if (l > 3) return 1;
+  if (realprec(z) > LOWDEFAULTPREC) return 1;
   return ( expo(z) - mpexpo(x) > -24 );
 }
 
@@ -1975,12 +1973,10 @@ mpgreaterthan(GEN x, GEN y)
 {
   pari_sp av = avma;
   GEN z = mpsub(x, y);
-  long l;
   avma = av;
   if (typ(z) == t_INT) return (signe(z) > 0);
   if (signe(z) <= 0) return 0;
-  l = realprec(z);
-  if (l > 3) return 1;
+  if (realprec(z) > LOWDEFAULTPREC) return 1;
   return ( expo(z) - mpexpo(x) > -24 );
 }
 
