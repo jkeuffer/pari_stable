@@ -299,7 +299,7 @@ galopen(const char *pre, long n, long n1, long n2)
 
   (void)sprintf(s, "%s/galdata/%s%ld_%ld_%ld", pari_datadir, pre, n, n1, n2);
   f = pari_fopengz(s);
-  if (!f) pari_err(e_MISC,"galois files not available\n[missing %s]",s);
+  if (!f) pari_err_FILE("galois",s);
   avma = av; return f;
 }
 

@@ -24,7 +24,7 @@ galoisnbpol(long a)
   char *s = stackmalloc(strlen(pari_datadir) + 11 + 20 + 1);
   sprintf(s,"%s/galpol/%ld/nb", pari_datadir, a);
   F = pari_fopengz(s);
-  if (!F) pari_err(e_MISC,"Missing galpol file %s\n",s);
+  if (!F) pari_err_FILE("galpol",s);
   n = gp_read_stream(F->file);
   if (!n || typ(n)!=t_INT) pari_err(e_MISC,"Incompatible galpol file %s\n",s);
   pari_fclose(F); return n;
@@ -51,9 +51,9 @@ galoisgetpol(long a, long b, long sig)
   if (!F)
   {
     long n = itos(galoisnbpol(a));
-    if (b>n)
-      pari_err(e_MISC,"Only %ld group%s of order %ld",n,n>2?"s":"",a);
-    else pari_err(e_MISC,"Missing galpol file");
+    if (b > n) pari_err(e_MISC,"Only %ld group%s of order %ld",
+                        n, n>1? "s": "", a);
+    else pari_err_FILE("galpol", s);
   }
   V = gp_read_stream(F->file);
   if (!V || typ(V)!=t_VEC ) pari_err(e_MISC,"Incompatible galpol file\n");

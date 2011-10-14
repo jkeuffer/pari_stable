@@ -3160,7 +3160,7 @@ pari_fclose(pariFILE *f)
 static pariFILE *
 pari_open_file(FILE *f, const char *s, const char *mode)
 {
-  if (!f) pari_err(e_MISC, "could not open requested file %s", s);
+  if (!f) pari_err_FILE("requested", s);
   if (DEBUGFILES)
     err_printf("I/O: opening file %s (mode %s)\n", s, mode);
   return newfile(f,s,0);
