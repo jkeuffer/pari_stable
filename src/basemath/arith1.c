@@ -1232,7 +1232,7 @@ krouu(ulong x, ulong y)
 /* x,y are t_INT or t_REAL */
 static long
 mphilbertoo(GEN x, GEN y)
-{ 
+{
   long sx = signe(x), sy = signe(y);
   if (!sx || !sy) return 0;
   return (sx < 0 && sy < 0)? -1: 1;

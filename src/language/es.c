@@ -3888,7 +3888,7 @@ _fwrite(const void *a, size_t b, size_t c, FILE *d)
 { if (fwrite(a,b,c,d) < c) pari_err_FILE("output file [fwrite]", "FILE*"); }
 static void
 _lfwrite(const void *a, size_t b, FILE *c) { _fwrite(a,sizeof(long),b,c); }
-static void 
+static void
 _cfwrite(const void *a, size_t b, FILE *c) { _fwrite(a,sizeof(char),b,c); }
 
 #define BIN_GEN 0
