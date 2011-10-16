@@ -563,17 +563,18 @@ nffactor(GEN nf,GEN pol)
   return sort_factor_pol(rep, cmp_RgX);
 }
 
-/* assume x scalar or t_COL */
+/* assume x scalar or t_COL, G t_MAT */
 static GEN
 arch_for_T2(GEN G, GEN x)
 {
-  return (typ(x) == t_COL)? gmul(G,x): gmul(gel(G,1),x);
+  return (typ(x) == t_COL)? RgM_RgC_mul(G,x)
+                          : RgC_Rg_mul(gel(G,1),x);
 }
 static GEN
 arch_for_T2_prec(GEN G, GEN x, long prec)
 {
-  return (typ(x) == t_COL)? gmul(G, RgC_gtofp(x,prec))
-                          : gmul(gel(G,1), gtofp(x, prec));
+  return (typ(x) == t_COL)? RgM_RgC_mul(G, RgC_gtofp(x,prec))
+                          : RgC_Rg_mul(gel(G,1), gtofp(x, prec));
 }
 
 /* return a bound for T_2(P), P | polbase in C[X]
@@ -591,7 +592,7 @@ nf_Mignotte_bound(GEN nf, GEN polbase)
   long prec, i, j, d = degpol(polbase), n = nf_get_degree(nf), r1 = nf_get_r1(nf);
 
   binlS = bin = vecbinome(d-1);
-  if (!gequal1(lS)) binlS = gmul(lS, bin);
+  if (!isint1(lS)) binlS = ZC_Z_mul(bin,lS);
 
   N2 = cgetg(n+1, t_VEC);
   prec = gprecision(G);
@@ -604,16 +605,15 @@ nf_Mignotte_bound(GEN nf, GEN polbase)
     matGS = shallowtrans(matGS);
     for (j=1; j <= r1; j++) /* N2[j] = || sigma_j(S) ||_2 */
     {
-      gel(N2,j) = sqrtr( RgC_fpnorml2(gel(matGS,j), DEFAULTPREC) );
-      if (realprec(gel(N2,j)) < DEFAULTPREC) goto PRECPB;
+      GEN c = sqrtr( RgC_fpnorml2(gel(matGS,j), DEFAULTPREC) );
+      gel(N2,j) = c; if (!signe(c)) goto PRECPB;
     }
     for (   ; j <= n; j+=2)
     {
       GEN q1 = RgC_fpnorml2(gel(matGS,j  ), DEFAULTPREC);
       GEN q2 = RgC_fpnorml2(gel(matGS,j+1), DEFAULTPREC);
-      p1 = gmul2n(addrr(q1, q2), -1);
-      gel(N2,j) = gel(N2,j+1) = sqrtr(p1);
-      if (realprec(gel(N2,j)) < DEFAULTPREC) goto PRECPB;
+      GEN c = sqrtr( gmul2n(addrr(q1, q2), -1) );
+      gel(N2,j) = gel(N2,j+1) = c; if (!signe(c)) goto PRECPB;
     }
     if (j > n) break; /* done */
 PRECPB:
@@ -623,7 +623,7 @@ PRECPB:
   }
 
   /* Take sup over 0 <= i <= d of
-   * sum_sigma | binom(d-1, i-1) ||sigma(S)||_2 + binom(d-1,i) lc(S) |^2 */
+   * sum_j | binom(d-1, i-1) ||sigma_j(S)||_2 + binom(d-1,i) lc(S) |^2 */
 
   /* i = 0: n lc(S)^2 */
   C = mului(n, sqri(lS));
@@ -632,7 +632,7 @@ PRECPB:
   for (i = 1; i < d; i++)
   {
     GEN B = gel(bin,i), L = gel(binlS,i+1);
-    GEN s = addri(mulir(B, gel(N2,1)),  L); /* j=1 */
+    GEN s = sqrr(addri(mulir(B, gel(N2,1)),  L)); /* j=1 */
     for (j = 2; j <= n; j++) s = addrr(s, sqrr(addri(mulir(B, gel(N2,j)), L)));
     if (mpcmp(C, s) < 0) C = s;
   }
@@ -642,38 +642,36 @@ PRECPB:
 /* return a bound for T_2(P), P | polbase
  * max |b_i|^2 <= 3^{3/2 + d} / (4 \pi d) [P]_2,
  * where [P]_2 is Bombieri's 2-norm
- * Sum over conjugates
-*/
+ * Sum over conjugates */
 static GEN
 nf_Beauzamy_bound(GEN nf, GEN polbase)
 {
   GEN lt, C, s, G = nf_get_G(nf), POL, bin;
-  long i,prec,precnf, d = degpol(polbase), n = nf_get_degree(nf);
-
-  precnf = gprecision(G);
-  prec   = MEDDEFAULTPREC;
+  long d = degpol(polbase), n = nf_get_degree(nf), prec   = MEDDEFAULTPREC;
   bin = vecbinome(d);
   POL = polbase + 2;
   /* compute [POL]_2 */
   for (;;)
   {
+    nffp_t F;
+    long i;
+
     s = real_0(prec);
     for (i=0; i<=d; i++)
     {
-      GEN p1 = gnorml2(arch_for_T2_prec(G, gel(POL,i), prec));
-      if (!signe(p1)) continue;
-      if (realprec(p1) == 3) break;
+      GEN c = gel(POL,i);
+      if (gcmp0(c)) continue;
+      c = gnorml2(arch_for_T2_prec(G, c, prec));
+      if (!signe(c)) goto PRECPB;
       /* s += T2(POL[i]) / binomial(d,i) */
-      s = addrr(s, gdiv(p1, gel(bin,i+1)));
+      s = addrr(s, divri(c, gel(bin,i+1)));
     }
-    if (i > d) break;
+    break;
 
+PRECPB:
     prec = (prec<<1)-2;
-    if (prec > precnf)
-    {
-      nffp_t F; remake_GM(nf, &F, prec); G = F.G;
-      if (DEBUGLEVEL>1) pari_warn(warnprec, "nf_factor_bound", prec);
-    }
+    remake_GM(nf, &F, prec); G = F.G;
+    if (DEBUGLEVEL>1) pari_warn(warnprec, "nf_factor_bound", prec);
   }
   lt = leading_term(polbase);
   s = mulri(s, muliu(sqri(lt), n));
