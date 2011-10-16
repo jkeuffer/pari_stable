@@ -123,7 +123,7 @@ sub get_docdir {
     $d = $0; $d =~ s,/gphelp,,;
     for ("$datadir", '.', '..', $d) {
       my $t = "$_/doc";
-      if (-r "$t/translations") { $d = $t; last; }
+      if (-f "$t/translations") { $d = $t; last; }
     }
     $d ||= "$datadir/doc";	# Last resort
   }
@@ -167,15 +167,15 @@ sub not_found {
 
 sub choose_chap {
   while (s/\@([0-9])$//) { $docfile = "usersch$1.tex"; }
-  if (-r $docfile) { $pipe = ""; }
+  if (-f $docfile) { $pipe = ""; }
   else
   {
     die "Cannot find $docfile"
-      if (! -r "$docfile.z" &&
-          ! -r "$docfile.gz" &&
-          ! -r "$docfile.Z" &&
-          ! -r "$docfile.bz2");
-    if (-r "$docfile.bz2") {
+      if (! -f "$docfile.z" &&
+          ! -f "$docfile.gz" &&
+          ! -f "$docfile.Z" &&
+          ! -f "$docfile.bz2");
+    if (-f "$docfile.bz2") {
         $pipe = $bzcat;
         $docfile = "$docfile.bz2";
     } else {
