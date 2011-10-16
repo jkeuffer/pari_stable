@@ -368,6 +368,7 @@ sub apropos_check {
   s/\\bs/\\/;
   s/\\\#/\#/g;
   s,\+\$/\$-,+/-,;
+  s/\$\(.*//; # remove argument lists
   if (/ /) { push(@sentence_list,$_); } else { push(@list,$_); }
 }
 
