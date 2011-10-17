@@ -232,10 +232,7 @@ gasin(GEN x, long prec)
 /**                                                                **/
 /********************************************************************/
 static GEN
-acos0(long e) {
-  long l = divsBIL(e); if (l >= 0) l = -1;
-  return Pi2n(-1, 2-l);
-}
+acos0(long e) { return Pi2n(-1, nbits2prec(e<0? -e: 1)); }
 
 /* |x| < 1, x != 0 */
 static GEN
