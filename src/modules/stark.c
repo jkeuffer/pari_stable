@@ -1721,7 +1721,7 @@ RecCoeff3(GEN nf, RC_data *d, long prec)
   Bd  = grndtoi(gmin(B, tB), &e);
   if (e > 0) return NULL; /* failure */
   Bd = addis(Bd, 1);
-  prec2 = BIGDEFAULTPREC + divsBIL( expi(Bd) );
+  prec2 = nbits2prec( expi(Bd) + 192 );
   prec2 = maxss(precdbl(prec), prec2);
   B2 = sqri(Bd);
   C2 = shifti(B2, BIG<<1);
@@ -2436,7 +2436,7 @@ LABDOUB:
           a) get at least EXTRA_PREC fractional digits if there is none;
        or b) double the fractional digits.
     */
-    incr_pr = gprecision(polrelnum)-2 - divsBIL( gexpo(polrelnum) );
+    incr_pr = nbits2extraprec( prec2nbits(gprecision(polrelnum))- gexpo(polrelnum) );
     if (incr_pr < 0) incr_pr = -incr_pr + EXTRA_PREC;
     newprec = newprec + maxss(ADD_PREC, cpt*incr_pr);
     if (DEBUGLEVEL) pari_warn(warnprec, "AllStark", newprec);
@@ -3285,7 +3285,7 @@ get_prec(GEN P, long prec)
   if (k == 3) return precdbl(prec); /* approximation not trustworthy */
   k = prec - k; /* lost precision when computing P */
   if (k < 0) k = 0;
-  k += MEDDEFAULTPREC + (gexpo(P) / BITS_IN_LONG);
+  k += nbits2prec(gexpo(P) + 128);
   if (k <= prec) k = precdbl(prec); /* dubious: old prec should have worked */
   return k;
 }

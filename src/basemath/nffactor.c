@@ -1202,7 +1202,7 @@ static GEN
 get_R(GEN M)
 {
   GEN R;
-  long i, l, prec = DEFAULTPREC + divsBIL( gexpo(M) );
+  long i, l, prec = nbits2prec( gexpo(M) + 64 );
 
   for(;;)
   {

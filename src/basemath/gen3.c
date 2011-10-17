@@ -115,7 +115,7 @@ precrealexact(GEN t, GEN s) {
   e -= expo(t);
   if (!signe(t)) return prec0(-e);
   l = realprec(t);
-  return (e > 0)? l + divsBIL(e): l;
+  return (e > 0)? l + nbits2extraprec(e): l;
 }
 static long
 precCOMPLEX(GEN z)

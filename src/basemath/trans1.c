@@ -63,7 +63,7 @@ GEN
 piold(long prec)
 {
   const long k1 = 545140134, k2 = 13591409, k3 = 640320;
-  const double alpha2 = 47.11041314/BITS_IN_LONG; /* 3log(k3/12) / log(2^BIL) */
+  const double alpha2 = 47.11041314; /* 3log(k3/12) / log(2) */
   GEN p1,p2,p3,tmppi;
   long l, n, n1;
   pari_sp av = avma, av2;
@@ -71,7 +71,7 @@ piold(long prec)
 
   tmppi = cgetr(prec);
   incrprec(prec);
-  n = (long)(1 + (prec-2)/alpha2);
+  n = (long)(1 + prec2nbits(prec)/alpha2);
   n1 = 6*n - 1;
   p2 = addsi(k2, mulss(n,k1));
   p1 = itor(p2, prec);
@@ -1496,7 +1496,7 @@ exp1r_abs(GEN x)
   B = b/3 + BITS_IN_LONG + (BITS_IN_LONG*BITS_IN_LONG)/ b;
   d = a/2.; m = (long)(d + sqrt(d*d + B)); /* >= 0 */
   if (m < (-a) * 0.1) m = 0; /* not worth it */
-  L = l + nbits2nlong(m);
+  L = l + nbits2extraprec(m);
  /* Multiplication is quadratic in this range (l is small, otherwise we
   * use logAGM + Newton). Set Y = 2^(-e-a) x, compute truncated series
   * sum x^k/k!: this costs roughly
@@ -2035,7 +2035,7 @@ logr_abs(GEN X)
   d = -a/2.; m = (long)(d + sqrt(d*d + b/6)); /* >= 0 */
 
   if (m > b-a) m = b-a;
-  if (m < 0.2*a) m = 0; else L += divsBIL(m);
+  if (m < 0.2*a) m = 0; else L += nbits2extraprec(m);
   x = rtor(X,L);
   setsigne(x,1); shiftr_inplace(x,-EX);
   /* 2/3 < x < 4/3 */
