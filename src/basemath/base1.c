@@ -517,7 +517,7 @@ polgalois(GEN x, long prec)
           gel(z,5) = F4(transroot(p1,2,3));
           gel(z,6) = F4(transroot(p1,3,4));
           p5 = roots_to_ZX(z, &e); if (e <= -10) break;
-          prec = (prec<<1)-2;
+          prec = precdbl(prec);
         }
         if (!ZX_is_squarefree(p5)) goto tchi;
         p2 = gel(ZX_factor(p5),1);
@@ -559,7 +559,7 @@ polgalois(GEN x, long prec)
               ee[l]=e; gel(z,l) = p3;
             }
             p5 = roots_to_ZX(z, &e); if (e <= -10) break;
-            prec = (prec<<1)-2;
+            prec = precdbl(prec);
           }
           if (!ZX_is_squarefree(p5)) goto tchi;
           p3=gel(ZX_factor(p5),1);
@@ -591,7 +591,7 @@ polgalois(GEN x, long prec)
             f = Z_issquare(p4); avma = av;
             return f? galois_res(n,5,1,1): galois_res(n,10,1,2);
           }
-          prec=(prec<<1)-2;
+          prec = precdbl(prec);
         }
 
       case 6: z = cgetg(7, t_VEC);
@@ -615,7 +615,7 @@ polgalois(GEN x, long prec)
               gel(z,l) = p3;
             }
             p5 = roots_to_ZX(z, &e); if (e <= -10) break;
-            prec=(prec<<1)-2;
+            prec = precdbl(prec);
           }
           if (!ZX_is_squarefree(p5)) goto tchi;
           p2=gel(ZX_factor(p5),1);
@@ -646,7 +646,7 @@ polgalois(GEN x, long prec)
                 else
                   return f? galois_res(n,36,1,10): galois_res(n,72,-1,13);
               }
-              prec=(prec<<1)-2; break;
+              prec = precdbl(prec); break;
 
             case 2: l2=degpol(gel(p2,1)); if (l2>3) l2=6-l2;
               switch(l2)
@@ -695,7 +695,7 @@ polgalois(GEN x, long prec)
               for (k=j+1; k<=7; k++) gel(z,++ind) = gadd(t, gel(p1,k));
             }
           p5 = roots_to_ZX(z, &e); if (e <= -10) break;
-          prec = (prec<<1)-2;
+          prec = precdbl(prec);
         }
         if (!ZX_is_squarefree(p5)) goto tchi;
         p2=gel(ZX_factor(p5),1);
@@ -1638,7 +1638,7 @@ get_red_G(nfbasic_t *T, GEN *pro)
       if (u0) u0 = gerepileupto(av, RgM_mul(u0,u));
       else    u0 = gerepilecopy(av, u);
     }
-    prec = (prec<<1)-2 + divsBIL(gexpo(u0));
+    prec = precdbl(prec) + divsBIL(gexpo(u0));
     F.ro = NULL;
     if (DEBUGLEVEL) pari_warn(warnprec,"get_red_G", prec);
   }
@@ -2335,7 +2335,7 @@ polredabs_aux(nfbasic_t *T, GEN *u)
       v = fincke_pohst(mkvec(R),NULL,-1, 0, &chk);
       if (v) break;
     }
-    prec = (prec<<1)-2;
+    prec = precdbl(prec);
     get_nf_fp_compo(T, &F, NULL, prec);
     if (DEBUGLEVEL) pari_warn(warnprec,"polredabs0",prec);
   }

@@ -1875,7 +1875,7 @@ bnfisunit(GEN bnf,GEN x)
     else
     {
       if (i > 4) pari_err_PREC("bnfisunit");
-      prec = (prec-1)<<1;
+      prec = precdbl(prec);
     }
     if (DEBUGLEVEL) pari_warn(warnprec,"bnfisunit",prec);
     nf = nfnewprec_shallow(nf, prec);
@@ -3055,7 +3055,7 @@ bnfnewprec_shallow(GEN bnf, long prec)
       gac = get_archclean(nf,matal,prec,0);
       if (gac) break;
     }
-    avma = av; prec = (prec-1)<<1;
+    avma = av; prec = precdbl(prec);
     if (DEBUGLEVEL) pari_warn(warnprec,"bnfnewprec(extra)",prec);
   }
   y = leafcopy(bnf);
@@ -3711,7 +3711,7 @@ START:
         pari_sp av3 = avma;
         GEN nf0 = nf;
         if (precadd) { PRECREG += precadd; precadd = 0; }
-        else           PRECREG = (PRECREG<<1)-2;
+        else           PRECREG = precdbl(PRECREG);
         if (DEBUGLEVEL)
         {
           char str[64]; sprintf(str,"Buchall_param (%s)",precpb);

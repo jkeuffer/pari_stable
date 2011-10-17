@@ -208,7 +208,7 @@ inithue(GEN P, GEN bnf, long flag, long prec)
     ro = tnf_get_roots(P, prec_roots, s, t);
     MatFU = Conj_LH(bnf_get_fu(bnf), &ALH, ro, prec);
     if (MatFU) break;
-    prec_roots = (prec_roots << 1) - 2;
+    prec_roots = precdbl(prec_roots);
     if (DEBUGLEVEL>1) pari_warn(warnprec, "inithue", prec_roots);
   }
 
@@ -687,7 +687,7 @@ thueinit(GEN pol, long flag, long prec)
     for (;;)
     {
       if (( tnf = inithue(pol, bnf, flag, PREC) )) break;
-      PREC = (PREC<<1)-2;
+      PREC = precdbl(PREC);
       if (DEBUGLEVEL>1) pari_warn(warnprec,"thueinit",PREC);
       bnf = NULL; avma = av;
     }
@@ -916,7 +916,7 @@ LargeSols(GEN P, GEN tnf, GEN rhs, GEN ne, GEN *pS)
     for (;;)
     {
       if (( MatNE = Conj_LH(ne, &Hmu, ro, prec) )) break;
-      prec = (prec<<1)-2;
+      prec = precdbl(prec);
       if (DEBUGLEVEL>1) pari_warn(warnprec,"thue",prec);
       ro = tnf_get_roots(P, prec, s, t);
     }

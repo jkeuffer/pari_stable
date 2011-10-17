@@ -1006,7 +1006,7 @@ START:
     switch(get_R(&BQ, C, (lg(C)-1) - (lg(B)-1) - (lg(W)-1), divir(h,z), &R))
     {
       case fupb_PRECI:
-        BQ.PRECREG = (BQ.PRECREG<<1)-2;
+        BQ.PRECREG = precdbl(BQ.PRECREG);
         FIRST = 1; goto START;
 
       case fupb_RELAT:

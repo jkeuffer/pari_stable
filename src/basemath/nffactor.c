@@ -617,7 +617,7 @@ nf_Mignotte_bound(GEN nf, GEN polbase)
     }
     if (j > n) break; /* done */
 PRECPB:
-    prec = (prec<<1)-2;
+    prec = precdbl(prec);
     remake_GM(nf, &F, prec); G = F.G;
     if (DEBUGLEVEL>1) pari_warn(warnprec, "nf_factor_bound", prec);
   }
@@ -669,7 +669,7 @@ nf_Beauzamy_bound(GEN nf, GEN polbase)
     break;
 
 PRECPB:
-    prec = (prec<<1)-2;
+    prec = precdbl(prec);
     remake_GM(nf, &F, prec); G = F.G;
     if (DEBUGLEVEL>1) pari_warn(warnprec, "nf_factor_bound", prec);
   }
@@ -1208,7 +1208,7 @@ get_R(GEN M)
   {
     R = Q_from_QR(M, prec);
     if (R) break;
-    prec = (prec-1)<<1;
+    prec = precdbl(prec);
   }
   l = lg(R);
   for (i=1; i<l; i++) gcoeff(R,i,i) = gen_1;
@@ -2123,7 +2123,7 @@ rootsof1_kannan(GEN nf)
       y = fincke_pohst(mkvec(R), utoipos(N), N * N, 0, NULL);
       if (y) break;
     }
-    prec = (prec<<1)-2;
+    prec = precdbl(prec);
     if (DEBUGLEVEL) pari_warn(warnprec,"rootsof1",prec);
     nf = nfnewprec_shallow(nf,prec);
   }

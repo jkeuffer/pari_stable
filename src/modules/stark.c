@@ -893,7 +893,7 @@ InitChar(GEN bnr, GEN listCR, long prec)
   dk    = nf_get_disc(nf);
   N     = nf_get_degree(nf);
   nf_get_sign(nf, &r1,&r2);
-  prec2 = ((prec-2) << 1) + EXTRA_PREC;
+  prec2 = precdbl(prec) + EXTRA_PREC;
   C     = gmul2n(sqrtr_abs(divir(dk, powru(mppi(prec2),N))), -r2);
   initc = init_get_chic( bnr_get_cyc(bnr) );
 
@@ -1003,7 +1003,7 @@ CharNewPrec(GEN dataCR, GEN nf, long prec)
 
   dk    =  nf_get_disc(nf);
   N     =  nf_get_degree(nf);
-  prec2 = ((prec - 2)<<1) + EXTRA_PREC;
+  prec2 = precdbl(prec) + EXTRA_PREC;
 
   C = sqrtr(divir(absi(dk), powru(mppi(prec2), N)));
 
@@ -1722,7 +1722,7 @@ RecCoeff3(GEN nf, RC_data *d, long prec)
   if (e > 0) return NULL; /* failure */
   Bd = addis(Bd, 1);
   prec2 = BIGDEFAULTPREC + divsBIL( expi(Bd) );
-  prec2 = maxss((prec << 1) - 2, prec2);
+  prec2 = maxss(precdbl(prec), prec2);
   B2 = sqri(Bd);
   C2 = shifti(B2, BIG<<1);
 
@@ -1760,7 +1760,7 @@ LABrcf: ct++;
   if (!cand)
   {
     if (ct > 3) return NULL;
-    prec2 = (prec2 << 1) - 2;
+    prec2 = precdbl(prec2);
     if (DEBUGLEVEL>1) pari_warn(warnprec,"RecCoeff", prec2);
     goto LABrcf;
   }
@@ -2175,7 +2175,7 @@ GetST(GEN bnr, GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
   i0 = zeta_get_i0(r1, r2, prec2nbits(prec), limx);
   InitPrimes(bnr, n0, &LIST);
 
-  prec2 = ((prec-2) << 1) + EXTRA_PREC;
+  prec2 = precdbl(prec) + EXTRA_PREC;
   racpi = sqrtr(mppi(prec2));
   powracpi = cgetg(r1+2,t_VEC);
   gel(powracpi,1) = racpi;
@@ -3282,11 +3282,11 @@ static long
 get_prec(GEN P, long prec)
 {
   long k = gprecision(P);
-  if (k == 3) return (prec<<1)-2; /* approximation not trustworthy */
+  if (k == 3) return precdbl(prec); /* approximation not trustworthy */
   k = prec - k; /* lost precision when computing P */
   if (k < 0) k = 0;
   k += MEDDEFAULTPREC + (gexpo(P) / BITS_IN_LONG);
-  if (k <= prec) k = (prec<<1)-2; /* dubious: old prec should have worked */
+  if (k <= prec) k = precdbl(prec); /* dubious: old prec should have worked */
   return k;
 }
 
@@ -3350,7 +3350,7 @@ PRECPB:
   {
     GEN om = get_om(nf, idealdiv(nf,f,gel(listray,i)));
     GEN s = computeth2(om,lanum,prec);
-    if (!s) { prec = (prec<<1)-2; goto PRECPB; }
+    if (!s) { prec = precdbl(prec); goto PRECPB; }
     gel(P,i) = s;
   }
   P0 = roots_to_pol(P, 0);

@@ -212,7 +212,7 @@ reducebeta(GEN bnfz, GEN be, GEN ell)
   {
     z = get_arch_real(nf, be, &emb, prec);
     if (z) break;
-    prec = (prec-1)<<1;
+    prec = precdbl(prec);
     if (DEBUGLEVEL) pari_warn(warnprec,"reducebeta",prec);
     nf = nfnewprec_shallow(nf,prec);
   }

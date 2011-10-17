@@ -1241,6 +1241,8 @@ prec2nbits(long x) { return bit_accuracy(x); }
 INLINE long
 prec2ndec(long x) { return (long)prec2nbits_mul(x, LOG10_2); }
 INLINE long
+precdbl(long x) {return (x - 1) << 1;}
+INLINE long
 divsBIL(long n) { return n >> TWOPOTBITS_IN_LONG; }
 INLINE long
 remsBIL(long n) { return n & (BITS_IN_LONG-1); }

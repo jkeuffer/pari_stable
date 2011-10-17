@@ -786,7 +786,7 @@ rnflllgram(GEN nf, GEN pol, GEN order,long prec)
 PRECNF:
   if (count == MAX_COUNT)
   {
-    prec = (prec<<1)-2; count = 0;
+    prec = precdbl(prec); count = 0;
     if (DEBUGLEVEL) pari_warn(warnprec,"rnflllgram",prec);
     nf = nfnewprec_shallow(nf,prec);
   }

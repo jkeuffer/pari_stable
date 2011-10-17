@@ -2723,7 +2723,7 @@ ZX_resultant_all(GEN A, GEN B, GEN dB, ulong bound)
       const long CNTMAX = 5; /* to avoid oo loops if R = 0 */
       long bnd = 0, cnt;
       long prec = nbits2prec( maxss(gexpo(A), gexpo(B)) + 1 );
-      for(cnt = 1; cnt < CNTMAX; cnt++, prec = (prec-1)<<1)
+      for(cnt = 1; cnt < CNTMAX; cnt++, prec = precdbl(prec))
       {
         GEN R = fp_resultant(RgX_gtofp(A, prec), RgX_gtofp(B, prec));
         bnd = gexpo(R) + 1;

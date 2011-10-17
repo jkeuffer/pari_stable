@@ -198,7 +198,7 @@ initzeta(GEN T, long prec)
     nf = bnf_get_nf(bnf);
   }
 
-  prec = (prec<<1) - 2;
+  prec = precdbl(prec);
   racpi = sqrtr(mppi(prec));
   /* all the above left on stack for efficiency */
 
