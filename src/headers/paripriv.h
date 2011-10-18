@@ -484,8 +484,6 @@ GEN     checkrnfeq(GEN x);
 /* bibli1.c */
 
 GEN     plindep(GEN x);
-GEN     pslq(GEN x);
-GEN     pslqL2(GEN x);
 
 /* buch1.c */
 

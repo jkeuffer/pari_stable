@@ -12,15 +12,12 @@ Doc: \sidx{algebraic dependence}
  either by a polynomial evaluation (use \tet{subst}), or by computing the
  roots of the polynomial given by \kbd{algdep} (use \tet{polroots}).
 
- Internally, \tet{lindep}$([1,x,\ldots,x^k], \fl)$ is used. If
- \tet{lindep} is not able to find a relation and returns a lower bound for the
- sup norm of the smallest relation, \tet{algdep} returns that bound instead.
+ Internally, \tet{lindep}$([1,x,\ldots,x^k], \fl)$ is used.
  A non-zero value of $\fl$ may improve on the default behavior
  if the input number is known to a \emph{huge} accuracy, and you suspect the
  last bits are incorrect  (this truncates the number, throwing away the least
  significant bits), but default values are usually sufficient:
  \bprog
- \\\\\\\\\ LLL
  ? \p200
  ? algdep(2^(1/6)+3^(1/5), 30);      \\ wrong in 0.8s
  ? algdep(2^(1/6)+3^(1/5), 30, 100); \\ wrong in 0.4s
@@ -33,15 +30,6 @@ Doc: \sidx{algebraic dependence}
  ? algdep(2^(1/6)+3^(1/5), 30);      \\ right in 2.9s
  ? \p1000
  ? algdep(2^(1/6)+3^(1/5), 30);      \\ right in 10.6s
- \\\\\\\\\ PSLQ
- ? \p200
- ? algdep(2^(1/6)+3^(1/5), 30, -3);  \\ failure in 15s
- ? \p250
- ? algdep(2^(1/6)+3^(1/5), 30, -3);  \\ right in 20s
- ? \p500
- ? algdep(2^(1/6)+3^(1/5), 30, -3);  \\ right in 52s
- ? \p1000
- ? algdep(2^(1/6)+3^(1/5), 30, -3);  \\ right in 164s
  @eprog\noindent
  The changes in \kbd{defaultprecision} only affect the quality of the
  initial approximation to $2^{1/6} + 3^{1/5}$, \kbd{algdep} itself uses
@@ -50,16 +38,12 @@ Doc: \sidx{algebraic dependence}
 
  Proceeding by increments of 5 digits of accuracy, \kbd{algdep} with default
  flag produces its first correct result at 205 digits, and from then on a
- steady stream of correct results. Interestingly enough, our PSLQ also
- reliably succeeds from 205 digits on (and is 15 times slower at that
- accuracy).
+ steady stream of correct results.
 
  The above example is the test case studied in a 2000 paper by Borwein and
  Lisonek: Applications of integer relation algorithms, \emph{Discrete Math.},
- {\bf 217}, p.~65--82. The paper concludes in the superiority of the PSLQ
- algorithm, which either shows that PARI's implementation of PSLQ is lacking,
- or that its LLL is extremely good. The version of PARI tested there was
- 1.39, which succeeded reliably from precision 265 on, in about 200 as much
- time as the current version.
+ {\bf 217}, p.~65--82. The version of PARI tested there was 1.39, which
+ succeeded reliably from precision 265 on, in about 200 as much time as the
+ current version.
 
 Variant: Also available is \fun{GEN}{algdep}{GEN x, long k} ($\fl=0$).

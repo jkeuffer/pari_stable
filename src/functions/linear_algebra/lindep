@@ -2,49 +2,24 @@ Function: lindep
 Section: linear_algebra
 C-Name: lindep0
 Prototype: GD0,L,
-Help: lindep(x,{flag=0}): Z-linear dependencies between components of x.
- flag is optional, and can be 0: default, uses a standard LLL; -1: uses
- Hastad et al; -2: returns a non-trivial kernel vector (not integral in
- general); -3: uses PSLQ; or positive, using LLL with 'flag' many digits of
- accuracy, which should be less than the input accuracy.
-Doc: \sidx{linear dependence}$x$ being a
- vector with $p$-adic or real/complex coefficients, finds a small integral
- linear combination among these coefficients.
+Help: lindep(x,{flag=0}): Z-linear dependencies between components of x,
+ using LLL. flag is optional, and can be 0: default, guess a suitable
+ accuracy, or positive: accuracy to use for the computation, in decimal
+ digits.
+Doc: \sidx{linear dependence}$x$ being a vector with $p$-adic or real/complex
+ coefficients, finds a small integral linear combination among these
+ coefficients.
 
  If $x$ is $p$-adic, $\fl$ is meaningless and the algorithm LLL-reduces a
  suitable (dual) lattice.
 
- Otherwise, the value of $\fl$ determines the algorithm used; in the current
- version of PARI, we suggest to use \emph{non-negative} values, since it is by
- far the fastest and most robust implementation. See the detailed example in
- \secref{se:algdep} (\kbd{algdep}).
-
- If $\fl\geq 0$, uses a floating point (variable precision) LLL algorithm.
- This is in general much faster than the other variants.
+ Otherwise, we use a floating point (variable precision) LLL algorithm.
  If $\fl = 0$ the accuracy is chosen internally using a crude heuristic.
  If $\fl > 0$ the computation is done with an accuracy of $\fl$ decimal digits.
  To get meaningful results in the latter case, the parameter $\fl$ should be
  smaller than the number of correct decimal digits in the input.
 
- If $\fl=-1$, uses a variant of the \idx{LLL} algorithm due to Hastad,
- Lagarias and Schnorr (STACS 1986). If the precision is too low, the routine
- may enter an infinite loop. Faster than the alternatives if it converges,
- especially when the accuracy is much larger than what is really necessary;
- usually diverges, though.
-
- If $\fl=-2$, $x$ is allowed to be (and in any case interpreted as) a matrix.
- Returns a non trivial element of the kernel of $x$, or $0$ if $x$ has trivial
- kernel. The element is defined over the field of coefficients of $x$, and is
- in general not integral.
-
- If $\fl=-3$, uses the PSLQ algorithm. This may return a real number $B$,
- indicating that the input accuracy was exhausted and that no relation exist
- whose sup norm is less than $B$.
-
- If $\fl=-4$, uses an experimental 2-level PSLQ, which does not work at all.
- Don't use it!
-
 Variant: Also available are \fun{GEN}{lindep}{GEN x} ($\fl=0$)
  \fun{GEN}{lindep2}{GEN x, long bit} ($\fl\geq 0$, bypasses the check for
- $p$-adic inputs) and \fun{GEN}{deplin}{GEN x} ($\fl=-2$).
+ $p$-adic inputs).
 

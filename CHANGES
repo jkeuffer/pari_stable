@@ -128,4 +128,5 @@ BA 21- GP function getenv.
        messages are now part of pari_err_display())
     4- error types arither1,mattype1,notpoler (merged with typeer), matinv1
        (merged with gdiver)
-
+    5- legacy lindep and PSLQ implementations [algdep/lindep with
+       negative flags]: now use LLL in all cases.
