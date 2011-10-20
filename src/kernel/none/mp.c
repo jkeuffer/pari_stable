@@ -417,18 +417,22 @@ END:
 }
 
 INLINE int
-absi_cmp_lg(GEN x, GEN y, long l)
+cmpiispec(GEN x, GEN y, long lx, long ly)
 {
-  long i=2;
-  while (i<l && x[i]==y[i]) i++;
-  if (i==l) return 0;
+  long i;
+  if (lx < ly) return -1;
+  if (lx > ly) return  1;
+  i = 0; while (i<lx && x[i]==y[i]) i++;
+  if (i==lx) return 0;
   return ((ulong)x[i] > (ulong)y[i])? 1: -1;
 }
 
 INLINE int
-absi_equal_lg(GEN x, GEN y, long l)
+equaliispec(GEN x, GEN y, long lx, long ly)
 {
-  long i = l-1; while (i>1 && x[i]==y[i]) i--;
+  long i;
+  if (lx != ly) return 0;
+  i = ly-1; while (i>=0 && x[i]==y[i]) i--;
   return i==1;
 }
 

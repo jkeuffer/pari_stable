@@ -65,20 +65,21 @@ addii_sign(GEN x, long sx, GEN y, long sy)
 
   if (!sx) return sy? icopy_sign(y, sy): gen_0;
   if (!sy) return icopy_sign(x, sx);
-  lx=lgefint(x); ly=lgefint(y);
-
+  lx = lgefint(x);
+  ly = lgefint(y);
   if (sx==sy)
     z = addiispec(x+2,y+2,lx-2,ly-2);
   else
   { /* sx != sy */
-    long i = lx - ly;
-    if (i==0) /* lx == ly */
-    {
-      i = absi_cmp_lg(x,y,lx);
-      if (!i) return gen_0;
+    long i = cmpiispec(x+2,y+2,lx-2,ly-2);
+    if (!i) return gen_0;
+    /* we must ensure |x| > |y| for subiispec */
+    if (i < 0) {
+      sx = sy;
+      z = subiispec(y+2,x+2,ly-2,lx-2);
     }
-    if (i<0) { sx=sy; swapspec(x,y, lx,ly); } /* ensure |x| >= |y| */
-    z = subiispec(x+2,y+2,lx-2,ly-2);
+    else
+      z = subiispec(x+2,y+2,lx-2,ly-2);
   }
   setsigne(z,sx); return z;
 }

@@ -21,32 +21,26 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**                                                                **/
 /********************************************************************/
 
-/*They depend on absi_cmp_lg and absi_equal_lg in mp.c*/
+/*They depend on cmpiispec and equaliispec in mp.c*/
 
 int
 equalii(GEN x, GEN y)
 {
   if ((x[1] & (LGBITS|SIGNBITS)) != (y[1] & (LGBITS|SIGNBITS))) return 0;
-  return absi_equal_lg(x, y, lgefint(x));
+  return equaliispec(x+2, y+2, lgefint(x)-2, lgefint(y)-2);
 }
 
 int
 cmpii(GEN x, GEN y)
 {
   const long sx = signe(x), sy = signe(y);
-  long lx,ly;
-
   if (sx<sy) return -1;
   if (sx>sy) return 1;
   if (!sx) return 0;
-
-  lx=lgefint(x); ly=lgefint(y);
-  if (lx>ly) return sx;
-  if (lx<ly) return -sx;
   if (sx>0)
-    return absi_cmp_lg(x, y, lx);
+    return cmpiispec(x+2, y+2, lgefint(x)-2, lgefint(y)-2);
   else
-    return -absi_cmp_lg(x, y, lx);
+    return -cmpiispec(x+2, y+2, lgefint(x)-2, lgefint(y)-2);
 }
 
 int
@@ -104,28 +98,18 @@ cmprr(GEN x, GEN y)
 int
 absi_equal(GEN x, GEN y)
 {
-  long lx;
-
   if (!signe(x)) return !signe(y);
   if (!signe(y)) return 0;
-
-  lx=lgefint(x); if (lx != lgefint(y)) return 0;
-  return absi_equal_lg(x, y, lx);
+  return equaliispec(x+2, y+2, lgefint(x)-2, lgefint(y)-2);
 }
 
 /* x and y are integers. Return sign(|x| - |y|) */
 int
 absi_cmp(GEN x, GEN y)
 {
-  long lx,ly;
-
   if (!signe(x)) return signe(y)? -1: 0;
   if (!signe(y)) return 1;
-
-  lx=lgefint(x); ly=lgefint(y);
-  if (lx>ly) return 1;
-  if (lx<ly) return -1;
-  return absi_cmp_lg(x, y, lx);
+  return cmpiispec(x+2, y+2, lgefint(x)-2, lgefint(y)-2);
 }
 
 /* x and y are reals. Return sign(|x| - |y|) */

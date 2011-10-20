@@ -472,15 +472,18 @@ END:
 }
 
 INLINE int
-absi_cmp_lg(GEN x, GEN y, long l)
+cmpiispec(GEN x, GEN y, long lx, long ly)
 {
-  return mpn_cmp(LIMBS(x),LIMBS(y),l-2);
+  if (lx < ly) return -1;
+  if (lx > ly) return  1;
+  return mpn_cmp((mp_limb_t*)x,(mp_limb_t*)y, lx);
 }
 
 INLINE int
-absi_equal_lg(GEN x, GEN y, long l)
+equaliispec(GEN x, GEN y, long lx, long ly)
 {
-  return !mpn_cmp(LIMBS(x),LIMBS(y),l-2);
+  if (lx != ly) return 0;
+  return !mpn_cmp((mp_limb_t*)x,(mp_limb_t*)y, lx);
 }
 
 /***********************************************************************/
