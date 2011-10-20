@@ -433,7 +433,7 @@ equaliispec(GEN x, GEN y, long lx, long ly)
   long i;
   if (lx != ly) return 0;
   i = ly-1; while (i>=0 && x[i]==y[i]) i--;
-  return i==1;
+  return i < 0;
 }
 
 /***********************************************************************/
