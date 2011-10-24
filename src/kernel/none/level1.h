@@ -328,6 +328,12 @@ itor(GEN x, long prec) { GEN z = cgetr(prec); affir(x,z); return z; }
 INLINE GEN
 rtor(GEN x, long prec) { GEN z = cgetr(prec); affrr(x,z); return z; }
 
+INLINE ulong int_bit(GEN x, long n)
+{
+  long r, q = dvmdsBIL(n, &r);
+  return q < lgefint(x)-2?((ulong)*int_W(x,q) >> r) & 1UL:0;
+}
+
 /*******************************************************************/
 /*                                                                 */
 /*                           COMPARISON                            */

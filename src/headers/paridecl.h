@@ -2761,6 +2761,7 @@ INLINE GEN    fractor(GEN x, long prec);
 INLINE GEN    icopy(GEN x);
 INLINE GEN    icopyspec(GEN x, long nx);
 INLINE GEN    icopy_avma(GEN x, pari_sp av);
+INLINE ulong  int_bit(GEN x, long n);
 INLINE GEN    itor(GEN x, long prec);
 INLINE long   itos(GEN x);
 INLINE long   itos_or_0(GEN x);

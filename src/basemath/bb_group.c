@@ -41,14 +41,6 @@ int_block(GEN n, long i, long l)
   return (w<<lr)|w2;
 }
 
-/* return n & (1<<l) */
-INLINE ulong
-int_bit(GEN x, long n)
-{
-  long r, q = dvmdsBIL(n, &r);
-  return (*int_W(x,q) >> r) & 1;
-}
-
 /* assume n != 0, t_INT. Compute x^|n| using sliding window powering */
 static GEN
 sliding_window_powu(GEN x, ulong n, long e, void *E, GEN (*sqr)(void*,GEN),

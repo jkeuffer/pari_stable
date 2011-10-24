@@ -20,6 +20,6 @@ Doc:
  @eprog\noindent
  See \secref{se:bitand} for the behavior at negative arguments.
 Variant: For a \typ{INT} $x$, the variant \fun{long}{bittest}{GEN x, long n} is
- generally easier to use.
-
+ generally easier to use, and if furthermore $n\ge 0$ the low-level function
+ \fun{ulong}{int_bit}{GEN x, long n} returns \kbd{bittest(abs(x),n)}.
 

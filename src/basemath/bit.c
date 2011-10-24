@@ -101,20 +101,16 @@ binaire(GEN x)
 long
 bittest(GEN x, long n)
 {
-  long q, r;
-
   if (typ(x) != t_INT) pari_err_TYPE("bittest",x);
   if (!signe(x) || n < 0) return 0;
   if (signe(x) < 0)
   {
     pari_sp ltop=avma;
-    long b = !bittest(inegate(x),n);
+    long b = !int_bit(inegate(x),n);
     avma=ltop;
     return b;
   }
-  q = dvmdsBIL(n, &r);
-  if (q+3 > lgefint(x)) return 0;
-  return (*int_W(x,q) >> r) & 1;
+  return int_bit(x, n);
 }
 
 GEN
