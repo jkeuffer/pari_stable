@@ -1614,8 +1614,8 @@ split_0(GEN p, long bit, GEN *F, GEN *G)
 static GEN
 root_error(long n, long k, GEN roots_pol, long err, GEN shatzle)
 {
-  GEN rho, d, eps, epsbis, eps2, prod, aux, rap = NULL;
-  long i, j, m;
+  GEN rho, d, eps, epsbis, eps2, aux, rap = NULL;
+  long i, j;
 
   d = cgetg(n+1,t_VEC);
   for (i=1; i<=n; i++)
@@ -1630,11 +1630,11 @@ root_error(long n, long k, GEN roots_pol, long err, GEN shatzle)
   if (expo(rho) < 0) rho = real_1(DEFAULTPREC);
   eps = mulrr(rho, shatzle);
   aux = shiftr(powru(rho,n), err);
-  prod = NULL; /* 1. */
 
   for (j=1; j<=2 || (j<=5 && cmprr(rap, dbltor(1.2)) > 0); j++)
   {
-    m = n;
+    GEN prod = NULL; /* 1. */
+    long m = n;
     epsbis = mulrr(eps, dbltor(1.25));
     for (i=1; i<=n; i++)
     {
