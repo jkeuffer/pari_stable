@@ -68,6 +68,8 @@ exec 5>> $config_log
 ####################### CONFIGURE - COMPILATION #############################
 # $_cc_list (includes 'optimization'), extraflag
 . ./get_cc
+#
+. ./get_mt
 # doubleformat, sizeof_long
 . ./get_double_format
 # asmarch, pretty
@@ -152,11 +154,11 @@ esac
 for variable in\
   pari_release pari_release_verbose version libpari_base static TOP objdir\
   arch asmarch osname pretty\
-  kernlvl0 kernlvl1 RT_LIBS DL_LIBS LIBS\
+  kernlvl0 kernlvl1 RT_LIBS DL_LIBS MT_LIBS LIBS\
   dir_sep runpath runpathprefix LDDYN RUNTEST\
   ln_s make_sh\
   sizeof_long doubleformat\
-  enable_tls\
+  thread_engine enable_tls\
   $_tools_list\
   $_test_list\
   $_install_list\

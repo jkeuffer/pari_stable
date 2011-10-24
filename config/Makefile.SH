@@ -24,6 +24,8 @@ gp=`ls $src_dir/gp/*.c | sed 's,.*/\(.*\)\.c,\1,'`
 language=`ls $src_dir/language/*.c | sed 's,.*/\(.*\)\.c,\1,'`
 basemath=`ls $src_dir/basemath/*.c | sed 's,.*/\(.*\)\.c,\1,'`
 modules=`ls $src_dir/modules/*.c   | sed 's,.*/\(.*\)\.c,\1,'`
+mt="mt $thread_engine"
+
 systems=
 if test -d "$src_dir/systems/$osname"; then
   systems=`ls $src_dir/systems/$osname/*.c | sed 's,.*/\(.*\)\.c,\1,'`
@@ -102,7 +104,7 @@ for f in $kernel; do
   KERNOBJS="$KERNOBJS $f\$(_O)"
 done
 OBJS=$KERNOBJS
-for f in $basemath $language $modules $systems; do
+for f in $basemath $language $modules $systems $mt; do
   OBJS="$OBJS $f\$(_O)"
 done
 OBJSGP=
@@ -230,9 +232,10 @@ RUNPTH_FINAL = $RUNPTH_FINAL
 LDDYN        = $LDDYN
 LIBS         = $LIBS
 GMPLIBS      = $GMPLIBS
+MT_LIBS      = $MT_LIBS
 RT_LIBS      = $RT_LIBS
 DL_LIBS      = $DL_LIBS
-STA_LIBS     = \$(GMPLIBS) \$(RT_LIBS) \$(LIBS)
+STA_LIBS     = \$(GMPLIBS) \$(RT_LIBS) \$(MT_LIBS) \$(LIBS)
 
 RM = rm -f
 MV = mv -f
@@ -487,7 +490,7 @@ install-lib-sta: \$(LIBPARI_STA)
 install-lib-dyn-base:
 	-mkdir -p \$(LIBDIR)
 	-\$(RM) \$(LIBDIR)/\$(LIBPARI_DYN) \$(LIBDIR)/\$(LIBPARI_SONAME) \$(LIBDIR)/\$(LIBPARI_SO)
-	\$(DLLD_IGNORE)\$(DLLD) -o \$(LIBDIR)/\$(LIBPARI_DYN) \$(DLLDFLAGS) \$(OBJS) \$(EXTRADLLDFLAGS) \$(GMPLIBS) \$(RT_LIBS) \$(EXPORT_FILE) \$(LD_INSTALL_NAME)
+	\$(DLLD_IGNORE)\$(DLLD) -o \$(LIBDIR)/\$(LIBPARI_DYN) \$(DLLDFLAGS) \$(OBJS) \$(EXTRADLLDFLAGS) \$(GMPLIBS) \$(RT_LIBS) \$(MT_LIBS) \$(EXPORT_FILE) \$(LD_INSTALL_NAME)
 	$install_implib
 
 install-lib-dyn-link: install-lib-dyn-base
@@ -594,7 +597,7 @@ gp-dyn: $add_funclist \$(OBJSGP) \$(LIBPARI_DYN) \$(EXPORT_LIB)
 
 \$(LIBPARI_DYN): $add_funclist \$(OBJS) \$(EXPORT_FILE)
 	-\$(RM) \$(LIBPARI_DYN)
-	\$(DLLD_IGNORE)\$(DLLD) -o \$(TOPLDDYN)/\$(LIBPARI_DYN) \$(DLLDFLAGS) \$(OBJS) \$(EXTRADLLDFLAGS) \$(GMPLIBS) \$(RT_LIBS) \$(EXPORT_FILE)
+	\$(DLLD_IGNORE)\$(DLLD) -o \$(TOPLDDYN)/\$(LIBPARI_DYN) \$(DLLDFLAGS) \$(OBJS) \$(EXTRADLLDFLAGS) \$(GMPLIBS) \$(RT_LIBS) \$(MT_LIBS) \$(EXPORT_FILE)
 	-if test "\$(LIBPARI_DYN)" != "\$(LIBPARI_SO)"; then \
 	  \$(RM) \$(LIBPARI_SO);\
 	  \$(LN) \$(LIBPARI_DYN) \$(LIBPARI_SO); fi
@@ -691,7 +694,7 @@ if test -s $f; then . $f; fi
 ANAL_H=$src/language/anal.h
 RECT_H=$src/graph/rect.h
 HUGELINE=
-for dir in basemath modules language gp graph systems; do
+for dir in basemath modules language gp graph systems mt; do
   eval list='$'$dir
   case "$dir" in
     systems)  SRC=$src/$dir/$osname;;

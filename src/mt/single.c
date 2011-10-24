@@ -1,4 +1,4 @@
-/* Copyright (C) 2010  The PARI group.
+/* Copyright (C) 2013  The PARI group.
 
 This file is part of the PARI/GP package.
 
@@ -11,11 +11,34 @@ Check the License for details. You should have received a copy of it, along
 with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 #include "pari.h"
+#include "paripriv.h"
+#include "mt.h"
 
-const char *paricfg_datadir = GPDATADIR;
-const char *paricfg_version = PARIVERSION;
-const char *paricfg_buildinfo = PARIINFO;
-const long  paricfg_version_code = PARI_VERSION_CODE;
-const char *paricfg_vcsversion = PARI_VCSVERSION;
-const char *paricfg_compiledate = __DATE__;
-const char *paricfg_mt_engine = PARI_MT_ENGINE;
+void mt_init_stack(size_t s) { (void)s; }
+void mt_err_recover(long er) { (void)er; }
+void pari_mt_close(void) { }
+void mt_queue_reset(void) { }
+
+int
+mt_is_parallel(void)
+{
+  return 0;
+}
+
+int
+mt_is_thread(void)
+{
+  return 0;
+}
+
+void
+pari_mt_init(void)
+{
+  pari_mt_nbthreads = 1;
+}
+
+void
+mt_queue_start(struct pari_mt *pt, GEN worker)
+{
+  return mtsingle_queue_start(pt, worker);
+}

@@ -133,6 +133,7 @@ struct pari_evalstate
   long var;
   long lvars;
   long trace;
+  long pending_threads;
   struct pari_compilestate comp;
 };
 
@@ -145,6 +146,19 @@ struct gp_context
   pariFILE *file;
   jmp_buf *iferr_env;
   GEN err_data;
+};
+
+struct pari_mt
+{
+  struct mt_state
+  {
+    GEN worker;
+    GEN pending;
+    long workid;
+  } mt;
+  GEN (*get)(struct mt_state *mt, long *workid, long *pending);
+  void (*submit)(struct mt_state *mt, long workid, GEN work);
+  void (*end)(void);
 };
 
 typedef struct PariOUT {

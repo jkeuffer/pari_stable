@@ -1,0 +1,17 @@
+Function: parforprime
+Section: programming/control
+C-Name: parforprime
+Prototype: vV=GDGJDVDI
+Help: parforprime(p=a,{b},expr1,{j,expr2}): the sequence expr2 (dependent on p
+ and j) is evaluated for p prime between a and b, in random order, with j being
+ substitued for the value of expr1 (dependent on i), computed in parallel. If b
+ is omitted, the loop will not stop.
+Doc: the sequence \kbd{expr2} (dependent on $p$ and $j$) is evaluated for $p$
+ prime between $a$ and $b$, in random order, with $j$ being substitued for the
+ value of \kbd{expr1} (dependent on $p$), computed in parallel. If $b$ is
+ omitted, the loop will not stop.
+
+ It is allowed fo \kbd{expr2} to exit the loop using
+ \kbd{break}/\kbd{next}/\kbd{return}, however in that case, \kbd{expr2} will
+ still be evaluated for all remaining value of $p$ less than the current one,
+ unless a subsequent \kbd{break}/\kbd{next}/\kbd{return} happens.

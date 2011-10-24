@@ -219,6 +219,8 @@ err_var(GEN x) { pari_err_TYPE("evaluator [variable name expected]", x); }
 INLINE void
 checkvalue(entree *ep)
 {
+  if (mt_is_thread())
+    pari_err(e_MISC,"mt: global variable not supported: %s",ep->name);
   if (ep->valence==EpNEW)
   {
     pari_var_create(ep);
@@ -1392,12 +1394,14 @@ evalstate_save(struct pari_evalstate *state)
   state->lvars= s_lvars.n;
   state->trace= s_trace.n;
   compilestate_save(&state->comp);
+  mtstate_save(&state->pending_threads);
 }
 
 void
 evalstate_restore(struct pari_evalstate *state)
 {
   avma = state->avma;
+  mtstate_restore(&state->pending_threads);
   sp = state->sp;
   rp = state->rp;
   restore_vars(s_var.n-state->var,s_lvars.n-state->lvars);
@@ -1409,6 +1413,7 @@ evalstate_restore(struct pari_evalstate *state)
 void
 evalstate_reset(void)
 {
+  mtstate_reset();
   sp = 0;
   rp = 0;
   dbg_level = 0;
@@ -1491,6 +1496,209 @@ closure_callgen1(GEN C, GEN x)
   gel(st,sp++) = x;
   for(i=2; i<= ar; i++) gel(st,sp++) = NULL;
   return closure_returnupto(C);
+}
+
+GEN
+pareval_worker(GEN C)
+{
+  return closure_callgenall(C, 0);
+}
+
+GEN
+pareval(GEN C)
+{
+  pari_sp av = avma;
+  long l = lg(C), i, pending = 0, workid;
+  struct pari_mt pt;
+  GEN worker, V, done;
+  if (!is_vec_t(typ(C))) pari_err_TYPE("pareval",C);
+  worker = snm_closure(is_entry("_pareval_worker"), NULL);
+  V = cgetg(l, t_VEC);
+  mt_queue_start(&pt, worker);
+  for (i=1; i<l || pending; i++)
+  {
+    mt_queue_submit(&pt, i, i<l? mkvec(gel(C,i)): NULL);
+    done = mt_queue_get(&pt, &workid, &pending);
+    if (done) gel(V,workid) = done;
+  }
+  mt_queue_end(&pt);
+  return gerepilecopy(av, V);
+}
+
+GEN
+parvector_worker(GEN i, GEN C)
+{
+  return closure_callgen1(C, i);
+}
+
+GEN
+parfor_worker(GEN i, GEN C)
+{
+  retmkvec2(gcopy(i), closure_callgen1(C, i));
+}
+
+GEN
+parvector(long n, GEN code)
+{
+  pari_sp av = avma;
+  long i, pending = 0, workid;
+  GEN worker = snm_closure(is_entry("_parvector_worker"), mkvec(code));
+  GEN V = cgetg(n+1, t_VEC), done;
+  struct pari_mt pt;
+  mt_queue_start(&pt, worker);
+  for (i=1; i<=n || pending; i++)
+  {
+    mt_queue_submit(&pt, i, i<=n? mkvec(stoi(i)): NULL);
+    done = mt_queue_get(&pt, &workid, &pending);
+    if (done) gel(V,workid) = done;
+  }
+  mt_queue_end(&pt);
+  return gerepilecopy(av, V);
+}
+
+GEN
+parsum(GEN a, GEN b, GEN code, GEN x)
+{
+  pari_sp av = avma, av2, lim;
+  long pending = 0;
+  GEN worker = snm_closure(is_entry("_parvector_worker"), mkvec(code));
+  GEN done;
+  struct pari_mt pt;
+  if (typ(a) != t_INT) pari_err_TYPE("parsum",a);
+  if (!x) x = gen_0;
+  if (gcmp(b,a) < 0) return gcopy(x);
+
+  mt_queue_start(&pt, worker);
+  b = gfloor(b);
+  a = setloop(a);
+  av2=avma; lim = stack_lim(av2,1);
+  for (; cmpii(a,b) <= 0 || pending; incloop(a))
+  {
+    mt_queue_submit(&pt, 0, cmpii(a,b) <= 0? mkvec(a): NULL);
+    done = mt_queue_get(&pt, NULL, &pending);
+    if (done)
+    {
+      x = gadd(x, done);
+      if (low_stack(lim, stack_lim(av2,1)))
+      {
+        if (DEBUGMEM>1) pari_warn(warnmem,"sum");
+        x = gerepileupto(av2,x);
+      }
+    }
+  }
+  mt_queue_end(&pt);
+  return gerepilecopy(av, x);
+}
+
+void
+parfor(GEN a, GEN b, GEN code, GEN code2)
+{
+  pari_sp av = avma;
+  long running, pending = 0;
+  long status = br_NONE;
+  GEN worker = snm_closure(is_entry("_parfor_worker"), mkvec(code));
+  GEN done, stop = NULL;
+  struct pari_mt pt;
+  if (typ(a) != t_INT) pari_err_TYPE("parfor",a);
+  if (b && gcmp(b,a) < 0) return;
+
+  mt_queue_start(&pt, worker);
+  b = b ? gfloor(b): NULL;
+  a = setloop(a);
+  if (code2)
+  {
+    push_lex(gen_0, code2);
+    push_lex(gen_0, NULL);
+  }
+  while ((running = (!stop && (!b || cmpii(a,b) <= 0))) || pending)
+  {
+    mt_queue_submit(&pt, 0, running ? mkvec(a): NULL);
+    done = mt_queue_get(&pt, NULL, &pending);
+    if (code2 && done && (!stop || cmpii(gel(done,1),stop) < 0))
+    {
+      set_lex(-2,gel(done,1)); set_lex(-1,gel(done,2));
+      closure_evalvoid(code2);
+      if (loop_break())
+      {
+        status = br_status;
+        br_status = br_NONE;
+        stop = icopy(gel(done,1));
+      }
+    }
+    incloop(a);
+  }
+  mt_queue_end(&pt);
+  if (code2) pop_lex(2);
+  br_status = status;
+  avma = av;
+}
+
+void
+parforprime(GEN a, GEN b, GEN code, GEN code2)
+{
+  pari_sp av = avma;
+  long running, pending = 0;
+  long status = br_NONE;
+  GEN worker = snm_closure(is_entry("_parfor_worker"), mkvec(code));
+  GEN done, stop = NULL;
+  struct pari_mt pt;
+  forprime_t T;
+
+  if (!forprime_init(&T, a,b)) { avma = av; return; }
+  mt_queue_start(&pt, worker);
+  if (code2)
+  {
+    push_lex(gen_0, code2);
+    push_lex(gen_0, NULL);
+  }
+  while ((running = (!stop && forprime_next(&T))) || pending)
+  {
+    mt_queue_submit(&pt, 0, running ? mkvec(T.pp): NULL);
+    done = mt_queue_get(&pt, NULL, &pending);
+    if (code2 && done && (!stop || cmpii(gel(done,1),stop) < 0))
+    {
+      set_lex(-2,gel(done,1)); set_lex(-1,gel(done,2));
+      closure_evalvoid(code2);
+      if (loop_break())
+      {
+        status = br_status;
+        br_status = br_NONE;
+        stop = icopy(gel(done,1));
+      }
+    }
+  }
+  mt_queue_end(&pt);
+  if (code2) pop_lex(2);
+  br_status = status;
+  avma = av;
+}
+
+GEN
+parapply_worker(GEN d, GEN C)
+{
+  return closure_callgen1(C, d);
+}
+
+GEN
+parapply(GEN C, GEN D)
+{
+  pari_sp av = avma;
+  long l = lg(D), i, pending = 0, workid;
+  GEN V, worker, done;
+  struct pari_mt pt;
+  if (typ(C) != t_CLOSURE || closure_arity(C) < 1) pari_err_TYPE("parapply",C);
+  if (!is_vec_t(typ(D))) pari_err_TYPE("parapply",D);
+  worker = strtoclosure("_parapply_worker", 1, C);
+  V = cgetg(l, typ(D));
+  mt_queue_start(&pt, worker);
+  for (i=1; i<l || pending; i++)
+  {
+    mt_queue_submit(&pt, i, i<l? mkvec(gel(D,i)): NULL);
+    done = mt_queue_get(&pt, &workid, &pending);
+    if (done) gel(V,workid) = done;
+  }
+  mt_queue_end(&pt);
+  return gerepilecopy(av, V);
 }
 
 GEN

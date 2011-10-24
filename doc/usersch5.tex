@@ -1371,6 +1371,8 @@ be quoted using \kbd{'\bs'}\cr
 \+&&\quad to be processed by \fun{void}{closure_evalvoid}{GEN C}\cr
 \+& \kbd{E} & closure whose value is used, as in \kbd{sum} loops,\cr
 \+&&\quad to be processed by \fun{void}{closure_evalgen}{GEN C}\cr
+\+& \kbd{J} & implicit function of arity $1$, as in \kbd{parsum} loops,\cr
+\+&&\quad to be processed by \fun{void}{closure_callgen1}{GEN C}\cr
 
 \noindent A \tev{closure} is a GP function in compiled (bytecode) form. It
 can be efficiently evaluated using the \kbd{closure\_eval}$xxx$ functions.

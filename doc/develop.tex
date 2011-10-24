@@ -722,5 +722,43 @@ it is actually valid. This is used by GP2C -C.
 \fun{GEN*}{safegcoeff}{GEN x, long a, long b} safe version of
 \kbd{gcoeff(x,a, b)} for \typ{MAT}.
 
+\chapter{Parallelism}
+
+PARI provide an abstraction for doing parallel computations.
+
+\fun{void}{mt_queue_start}{struct pari\_mt *pt, GEN worker} Let worker be a
+\typ{CLOSURE} object of arity $1$.  Initialize the structure \kbd{pt} for
+parallel evaluation of \kbd{worker}.
+
+\fun{void}{mt_queue_submit}{struct pari\_mt *pt, long workid, GEN work} Submit
+\kbd{work} to be evaluated by \kbd{worker}, or \kbd{NULL} if no further works
+are to be submitted. The value \kbd{workid} is user-specified.
+
+\fun{GEN}{mt_queue_get}{struct pari\_mt *pt, long *workid, long *pending}
+Return the result of the evaluation by \kbd{worker} of some of the previously
+submitted works. Set \kbd{pending} to the number of remaining pending works.
+Set \kbd{workid} to the value associate to this work by
+\kbd{mt\_queue\_submit}.  Returns \kbd{NULL} if more works need to be
+submitted.
+
+\fun{void}{mt_queue_end}{struct pari\_mt *pt} End the parallel execution.
+
+Call to \kbd{mt\_queue\_submit} and \kbd{mt\_queue\_get} must be alternated:
+each call to \kbd{mt\_queue\_submit}  must be followed by a call to
+\kbd{mt\_queue\_get} before any other call to \kbd{mt\_queue\_submit} and
+conversely for \kbd{mt\_queue\_get} with respect to \kbd{mt\_queue\_submit}.
+
+The first calls to \kbd{mt\_queue\_get} will return \kbd{NULL} until a
+sufficient number of works have been submitted. If no more works are to be
+submitted, \kbd{mt\_queue\_submit(handle,NULL)} should be used to allow for
+further calls to \kbd{mt\_queue\_get}.  If \kbd{mt\_queue\_get} set
+\kbd{pending} to $0$, then no more works are pending and it is safe to call
+\kbd{mt\_queue\_end}.
+
+The parameter \kbd{workid} can be chosen arbitrarily. It is associated to a
+work but is not available to \kbd{worker}.  It provides an efficient way to
+identify a result with its work. It is meaningless when the parameter
+\kbd{work} is \kbd{NULL}.
+
 \vfill\eject
 \input index\end

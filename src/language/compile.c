@@ -166,7 +166,7 @@ compilestate_restore(struct pari_compilestate *comp)
 }
 
 static GEN
-getfunction(struct codepos *pos, long arity, long nbmvar, GEN text, long gap)
+getfunction(const struct codepos *pos, long arity, long nbmvar, GEN text, long gap)
 {
   long lop =s_opcode.n+1-pos->opcode;
   long ldat=s_data.n+1-pos->data;
@@ -427,6 +427,7 @@ parseproto(char const **q, char *c, const char *str)
     case 'V':
     case 'I':
     case 'E':
+    case 'J':
     case 'n':
     case 'P':
     case 'r':
@@ -903,6 +904,19 @@ cattovec(long n, long fnum)
   return stack;
 }
 
+static GEN
+compilelambda(long n, long y, GEN vep, struct codepos *pos)
+{
+  long nbmvar, lev = vep ? lg(vep)-1 : 0;
+  GEN text=cgetg(3,t_VEC);
+  gel(text,1)=strtoGENstr(lev? ((entree*) vep[1])->name: "");
+  gel(text,2)=strntoGENstr(tree[y].str,tree[y].len);
+  nbmvar=ctxmvar()-lev;
+  if (lev) op_push(OCgetargs,lev,n);
+  compilenode(y,Ggen,FLsurvive|FLreturn);
+  return getfunction(pos,lev,nbmvar,text,2);
+}
+
 static void
 compilecall(long n, int mode)
 {
@@ -941,18 +955,19 @@ compileuserfunc(entree *ep, long n, int mode)
 }
 
 static GEN
-compilefuncinline(long c, long a, long flag, long isif, long lev, long *ev)
+compilefuncinline(long n, long c, long a, long flag, long isif, long lev, long *ev)
 {
   struct codepos pos;
   int type=c=='I'?Gvoid:Ggen;
   long rflag=c=='I'?0:FLsurvive;
+  GEN vep = NULL;
   if (isif && (flag&FLreturn)) rflag|=FLreturn;
   getcodepos(&pos);
   if (lev)
   {
     long i;
-    GEN vep=cgetg(lev+1,t_VECSMALL);
     GEN varg=cgetg(lev+1,t_VECSMALL);
+    vep=cgetg(lev+1,t_VECSMALL);
     for(i=0;i<lev;i++)
     {
       entree *ve;
@@ -966,7 +981,9 @@ compilefuncinline(long c, long a, long flag, long isif, long lev, long *ev)
     checkdups(varg,vep);
     frame_push(vep);
   }
-  if (tree[a].f==Fnoarg)
+  if (c=='J')
+    return compilelambda(n,a,vep,&pos);
+  else if (tree[a].f==Fnoarg)
     compilecast(a,Gvoid,type);
   else
     compilenode(a,type,rflag);
@@ -1248,7 +1265,7 @@ compilefunc(entree *ep, long n, int mode, long flag)
       {
       case PPstd:
         if (j>nb) compile_err("too few arguments", tree[n].str+tree[n].len-1);
-        if (c!='I' && c!='E')
+        if (c!='I' && c!='E' && c!='J')
         {
           long x = tree[arg[j]].x, f = tree[arg[j]].f;
           if (f==Fnoarg)
@@ -1330,10 +1347,12 @@ compilefunc(entree *ep, long n, int mode, long flag)
           }
         case 'I':
         case 'E':
+        case 'J':
           {
             long a = arg[j++];
-            GEN  d = compilefuncinline(c, a, flag, is_func_named(ep,"if"), lev, ev);
+            GEN  d = compilefuncinline(n, c, a, flag, is_func_named(ep,"if"), lev, ev);
             op_push(OCpushgen, data_push(d), a);
+            if (lg(d)==8) op_push(OCsaveframe,FLsurvive,n);
             break;
           }
         case 'V':
@@ -1469,7 +1488,7 @@ compilefunc(entree *ep, long n, int mode, long flag)
             long k, n=nb+1-j;
             GEN g=cgetg(n+1,t_VEC);
             for(k=1; k<=n; k++)
-              gel(g, k) = compilefuncinline(c, arg[j+k-1], flag, 1, lev, ev);
+              gel(g, k) = compilefuncinline(n, c, arg[j+k-1], flag, 1, lev, ev);
             op_push(OCpushgen, data_push(g), arg[j]);
             j=nb+1;
             break;
@@ -2136,6 +2155,7 @@ optimizefunc(entree *ep, long n)
           break;
         case 'I':
         case 'E':
+        case 'J':
           optimizenode(arg[j]);
           fl&=tree[arg[j]].flags;
           tree[arg[j++]].flags=COsafelex|COsafedyn;

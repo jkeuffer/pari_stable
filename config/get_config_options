@@ -5,6 +5,7 @@ config_file=
 optimization=full
 target_host=
 which_graphic_lib=auto
+thread_engine=single
 share_prefix=
 prefix=/usr/local
 test -n "$GP_INSTALL_PREFIX" && prefix="$GP_INSTALL_PREFIX"
@@ -48,6 +49,7 @@ while test $# -gt 0; do
   --time=*) timing_fun=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
   --host=*) target_host=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
   --kernel=*) kernel=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
+  --mt=*) thread_engine=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
   --tune) tune=yes;;
   --builddir) dfltobjdir=auto;;
   --builddir=*) dfltobjdir=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
@@ -136,6 +138,8 @@ Additional developer options:
   -pg             creates profiling version (in Oxxx.prf)
   -gcov           creates gcov version (in Oxxx.gcov)
   --enable-tls	  (*experimental*) enable thread-local stack
+  --mt=pthread	  (*experimental*) enable pthread thread engine
+  --mt=mpi	  (*experimental*) enable MPI thread engine
 
 Installation directories:
   --prefix=<dir>        install files in <dir> (default $prefix)

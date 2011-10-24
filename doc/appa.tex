@@ -127,8 +127,30 @@ one, \kbd{ftime}, gives timings in terms of absolute (wall-clock) time.
 Moreover, the \kbd{clock\_gettime} function is more precise, but much slower
 (at the time of this writing), than \kbd{getrusage} or \kbd{times}.
 
+\kbd{--mt=}\var{engine}: specify the engine used for parallel computations.
+Supported value are
+
+\item single: (default) no parallellism.
+
+\item pthread: use POSIX threads. This is well-suited for multi-core systems.
+Setting this option also set \kbd{--enable-tls}, see below. This option
+requires the pthread library.
+For benchmarking, it is often useful to set \kbd{--time=ftime} so that GP
+report wall-clock instead of the sum of the time spent by each threads.
+
+\item mpi: use the MPI interface to parallelism.  This allows to take
+advantage of clusters using MPI. This option requires a MPI library.
+It is usually necessary to set the environment variable \kbd{CC} to
+\kbd{mpicc}.
+
 \subsec{Compilation} To compile the \kbd{gp} binary and build the
 documentation, type
+
+\kbd{--enable-tls}: build the thread-safe version of the library. Implied by
+\kbd{--mt=pthread}. This tends to slow down the shared library libpari
+by $15\%$, so you might want to use the static library instead.
+See Appendix~D if you want to write multi-threaded libpari program.
+Beware that this option change the library ABI.
 
 \kbd{make all}
 

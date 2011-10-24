@@ -69,6 +69,7 @@ long    gp_colors[c_LAST];
 int     disable_color;
 ulong   DEBUGFILES, DEBUGLEVEL, DEBUGMEM;
 long    DEBUGVAR;
+ulong   pari_mt_nbthreads;
 ulong   compatible, precreal, precdl, logstyle;
 gp_data *GP_DATA;
 
@@ -490,6 +491,7 @@ pari_init_stack(size_t size, size_t old)
     BLOCK_SIGINT_END;
   }
   avma = top = bot+s;
+  if (GP_DATA->threadsize==0) mt_init_stack(s);
   memused = 0;
 }
 
@@ -760,6 +762,7 @@ pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts)
   pari_var_init();
   (void)getabstime();
   try_to_recover = 1;
+  pari_mt_init();
 }
 
 void
@@ -773,6 +776,7 @@ pari_close_opts(ulong init_opts)
 
   BLOCK_SIGINT_START;
   if ((init_opts&INIT_SIGm)) pari_sig_init(SIG_DFL);
+  pari_mt_close();
 
   while (delete_var()) /* empty */;
   for (i = 0; i < functions_tblsz; i++)
@@ -1306,6 +1310,7 @@ pari_err(int numerr, ...)
   }
   global_err_data = E;
   if (*iferr_env) longjmp(*iferr_env, numerr);
+  mt_err_recover(numerr);
   err_init();
   if (numerr != e_SYNTAX) closure_err(0);
   pari_err_display(E);
@@ -2287,6 +2292,7 @@ pari_version(void)
  * Arguments:
  *  I  closure whose value is ignored, like in for() loop
  *  E  closure whose value is used, like in sum() loop
+ *  J  implicit function of arity 1, like in parsum() loop
  *  G  GEN
  *  L  long
  *  V  lexical variable

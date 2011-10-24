@@ -506,6 +506,10 @@ sd_TeXstyle(const char *v, long flag)
 }
 
 GEN
+sd_nbthreads(const char *v, long flag)
+{ return sd_ulong(v,flag,"nbthreads",&pari_mt_nbthreads, 1,LONG_MAX,NULL); }
+
+GEN
 sd_output(const char *v, long flag)
 {
   const char *msg[] = {"(raw)", "(prettymatrix)", "(prettyprint)",
@@ -527,6 +531,19 @@ sd_parisize(const char *v, long flag)
       pari_init_stack(n, size);
     else
       allocatemem(n);
+  }
+  return r;
+}
+
+GEN
+sd_threadsize(const char *v, long flag)
+{
+  ulong size = GP_DATA->threadsize, n = size;
+  GEN r = sd_ulong(v,flag,"threadsize",&n, 0,LONG_MAX,NULL);
+  if (n != size)
+  {
+    GP_DATA->threadsize = n;
+    mt_init_stack(n? n: top-bot);
   }
   return r;
 }

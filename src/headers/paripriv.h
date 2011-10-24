@@ -343,6 +343,10 @@ void evalstate_reset(void);
 void evalstate_restore(struct pari_evalstate *state);
 void evalstate_save(struct pari_evalstate *state);
 
+void mtstate_save(long *pending);
+void mtstate_reset(void);
+void mtstate_restore(long *pending);
+
 void debug_context(void);
 
 /* GP_DATA */
@@ -356,6 +360,7 @@ typedef struct {
   int secure, simplify, strictmatch, strictargs, chrono; /* libpari ? */
   pari_timer *T;
   ulong primelimit; /* deprecated */
+  ulong threadsize;
 } gp_data;
 extern gp_data *GP_DATA;
   /* GP_DATA->flags */

@@ -852,6 +852,8 @@ print_version(void)
   if (ver) (void)sprintf(buf, "compiled: %s, %s", date, ver);
   else     (void)sprintf(buf, "compiled: %s", date);
   center(buf);
+  sprintf(buf, "threading engine: %s",paricfg_mt_engine);
+  center(buf);
   ver = what_readline();
   buf = stack_malloc(strlen(ver) + 64);
   (void)sprintf(buf, "(readline %s, extended help%s enabled)", ver,

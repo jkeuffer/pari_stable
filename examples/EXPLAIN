@@ -12,6 +12,10 @@ make TARGET=extgcd
 interpretor (Need readline). To build it, run
 make TARGET=minigp EXTRALIBS=-lreadline
 
+* the C program pari-mt.c using the Pari library interface for parallel
+computation. To build it, run
+make TARGET=pari-mt
+
 * the C program thread.c using the Pari library in a multi-threaded context,
 POSIX threads version, as described in Appendix D of the users' manual.
 This requires that PARI is Configured with --enable-tls. To build it, run

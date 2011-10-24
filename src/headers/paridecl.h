@@ -1790,6 +1790,7 @@ GEN sd_format(const char *v, long flag);
 GEN sd_histsize(const char *v, long flag);
 GEN sd_log(const char *v, long flag);
 GEN sd_logfile(const char *v, long flag);
+GEN sd_nbthreads(const char *v, long flag);
 GEN sd_new_galois_format(const char *v, long flag);
 GEN sd_output(const char *v, long flag);
 GEN sd_parisize(const char *v, long flag);
@@ -1803,8 +1804,9 @@ GEN sd_simplify(const char *v, long flag);
 GEN sd_sopath(char *v, int flag);
 GEN sd_strictargs(const char *v, long flag);
 GEN sd_strictmatch(const char *v, long flag);
-GEN sd_toggle(const char *v, long flag, const char *s, int *ptn);
 GEN sd_string(const char *v, long flag, const char *s, char **f);
+GEN sd_threadsize(const char *v, long flag);
+GEN sd_toggle(const char *v, long flag, const char *s, int *ptn);
 GEN sd_ulong(const char *v, long flag, const char *s, ulong *ptn, ulong Min, ulong Max, const char **msg);
 GEN setdefault(const char *s, const char *v, long flag);
 long setrealprecision(long n, long *prec);
@@ -2037,6 +2039,16 @@ GEN     gp_evalupto(void *E, GEN x);
 long    gp_evalvoid(void *E, GEN x);
 long    loop_break(void);
 GEN     next0(long n);
+GEN     parapply(GEN V, GEN C);
+GEN     parapply_worker(GEN d, GEN code);
+GEN     pareval(GEN C);
+GEN     pareval_worker(GEN code);
+void    parfor(GEN a, GEN b, GEN code, GEN code2);
+GEN     parfor_worker(GEN i, GEN C);
+void    parforprime(GEN a, GEN b, GEN code, GEN code2);
+GEN     parsum(GEN a, GEN b, GEN code, GEN x);
+GEN     parvector(long n, GEN code);
+GEN     parvector_worker(GEN i, GEN C);
 void    pop_lex(long n);
 void    push_lex(GEN a, GEN C);
 GEN     return0(GEN x);
@@ -2745,6 +2757,7 @@ extern const char *paricfg_buildinfo;
 extern const long  paricfg_version_code;
 extern const char *paricfg_vcsversion;
 extern const char *paricfg_compiledate;
+extern const char *paricfg_mt_engine;
 
 /* part.c */
 
@@ -2804,6 +2817,18 @@ GEN     vecvecsmall_indexsort(GEN x);
 long    vecvecsmall_search(GEN x, GEN y, long flag);
 GEN     vecvecsmall_sort(GEN x);
 GEN     vecvecsmall_sort_uniq(GEN x);
+
+/* mt.c */
+
+void    mt_err_recover(long er);
+void    mt_init_stack(size_t s);
+int     mt_is_thread(void);
+void    mt_queue_end(struct pari_mt *pt);
+GEN     mt_queue_get(struct pari_mt *pt, long *jobid, long *pending);
+void    mt_queue_start(struct pari_mt *pt, GEN worker);
+void    mt_queue_submit(struct pari_mt *pt, long jobid, GEN work);
+void    pari_mt_init(void);
+void    pari_mt_close(void);
 
 /* polarit1.c */
 
