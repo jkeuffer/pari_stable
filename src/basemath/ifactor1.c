@@ -3748,17 +3748,24 @@ static void
 STOREu(long *nb, ulong x, long e) { STORE(nb, utoipos(x), e); }
 static void
 STOREi(long *nb, GEN x, long e) { STORE(nb, icopy(x), e); }
+/* no prime less than p divides n */
 static int
-special_primes(GEN n, GEN pp, long *nb, GEN T)
+special_primes(GEN n, ulong p, long *nb, GEN T)
 {
   long i, l = lg(T);
-  for (i = 1; i < l; i++)
-    if (dvdiiz(n,gel(T,i), n))
-    {
-      long k = 1; while (dvdiiz(n,gel(T,i), n)) k++;
-      STOREi(nb, gel(T,i), k);
-      if (absi_cmp(pp, n) > 0) return 1;
-    }
+  if (l > 1)
+  { /* pp = square of biggest p tried so far */
+    long pp[] = { evaltyp(t_INT)|_evallg(4), 0,0,0 };
+    pari_sp av = avma; affii(sqru(p), pp); avma = av;
+
+    for (i = 1; i < l; i++)
+      if (dvdiiz(n,gel(T,i), n))
+      {
+        long k = 1; while (dvdiiz(n,gel(T,i), n)) k++;
+        STOREi(nb, gel(T,i), k);
+        if (absi_cmp(pp, n) > 0) return 1;
+      }
+  }
   return 0;
 }
 
@@ -3768,7 +3775,6 @@ ifactor(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
         GEN state, ulong all, long hint)
 {
   pari_sp av;
-  long pp[] = { evaltyp(t_INT)|_evallg(4), 0,0,0 };
   long nb = 0, i;
   ulong p, k, lim;
   byteptr d = diffptr+1; /* start at p = 3 */
@@ -3816,12 +3822,8 @@ ifactor(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
       return aux_end(n,nb);
     }
   }
-
-  /* pp = square of biggest p tried so far */
-  av = avma; affii(sqru(p), pp); avma = av;
-
   /* trial divide by the special primes */
-  if (special_primes(n, pp, &nb, primetab))
+  if (special_primes(n, p, &nb, primetab))
   {
     if (!is_pm1(n)) STOREi(&nb, n, 1);
     return aux_end(n,nb);
