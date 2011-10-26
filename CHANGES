@@ -45,6 +45,7 @@ BA 30- functions ending by the x[y]=z construct could corrupt the stack.
    35- tests test-kernel and test-ploth were broken
    36- lots of missing sanity checks in hilbert(x,y,p)
        [ e.g. hilbert(O(3), Pi, 5) -> 0 ]
+BA 37- for(i=1,10^7,) + SIGINT -> SEGV [#1249]
 
   Changed
     1- mathnf: swapped flag 3 and 5.

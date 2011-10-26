@@ -635,7 +635,7 @@ closure_err(void)
     if ((i==lastfun || lg(trace[i+1].closure)>=7))
     {
       /* After a SIGINT, pc can be slightly off: ensure 0 <= pc < lg() */
-      long pc = trace[i].pc>=0 ? minss(trace[i].pc, lg(mael(C,5,1))-1): 1;
+      long pc = minss(lg(mael(C,5,1))-1, trace[i].pc>=0 ? trace[i].pc: 1);
       long offset = pc? mael3(C,5,1,pc): 0;
       int member;
       const char *s, *sbase;
