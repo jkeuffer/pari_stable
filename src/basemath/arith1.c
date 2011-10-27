@@ -1355,6 +1355,7 @@ hilbert(GEN x, GEN y, GEN p)
   if (ty == t_FRAC) { ty = t_INT; y = p? mulii(gel(y,1),gel(y,2)): gel(y,1); }
 
   if (tx != t_INT || ty != t_INT) pari_err_TYPE2("hilbert",x,y);
+  if (p && !signe(p)) p = NULL;
   z = hilbertii(x,y,p); avma = av; return z;
 }
 

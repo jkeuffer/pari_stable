@@ -43,3 +43,5 @@ print("p = 2:");
 for (i=1,#L, print(i, ": ", iferr(hilbert(L[i],L[i], 2), E, E)))
 print("p = 5:");
 for (i=1,#L, print(i, ": ", iferr(hilbert(L[i],L[i], 5), E, E)))
+\\#1251
+hilbert(-1,-1,0)
