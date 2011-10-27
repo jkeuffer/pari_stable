@@ -21,7 +21,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 ASM addll mulll bfffo divll
 */
 #ifdef ASMINLINE
-/* Written by Bruno Haible, 1996-1998. */
+/* Written by Bruno Haible, 1996-1998.
+   addllx8/subllx8 by Bill Allombert, 2011.
+*/
 
 /* This file can assume the GNU C extensions.
    (It is included only if __GNUC__ is defined.) */
@@ -51,18 +53,18 @@ __extension__ ({ ulong __value, __arg1 = (a), __arg2 = (b), __temp; \
 #define addllx8(a,b,c,overflow) \
 do { long *__arg1 = a, *__arg2 = b, *__out = c; \
      ulong __temp; \
-   __asm__ ("subl %6, %1 \n\t" \
-            "movl    (%3), %1 ; adcl    (%4),%1; movl %1,    (%5) \n\t" \
-            "movl  -4(%3), %1 ; adcl  -4(%4),%1; movl %1,  -4(%5) \n\t" \
-            "movl  -8(%3), %1 ; adcl  -8(%4),%1; movl %1,  -8(%5) \n\t" \
-            "movl -12(%3), %1 ; adcl -12(%4),%1; movl %1, -12(%5) \n\t" \
-            "movl -16(%3), %1 ; adcl -16(%4),%1; movl %1, -16(%5) \n\t" \
-            "movl -20(%3), %1 ; adcl -20(%4),%1; movl %1, -20(%5) \n\t" \
-            "movl -24(%3), %1 ; adcl -24(%4),%1; movl %1, -24(%5) \n\t" \
-            "movl -28(%3), %1 ; adcl -28(%4),%1; movl %1, -28(%5) \n\t" \
-            "adcl  %2, %2" \
-        : "=m" (*__out), "=&r" (__temp), "=&r" (overflow) \
-        : "r" (__arg1), "r" (__arg2), "r" (__out), "g" (overflow), "1" ((ulong)0), "2" ((ulong)0)        : "cc"); \
+   __asm__ ("subl %5, %0 \n\t" \
+            "movl    (%2), %0 ; adcl    (%3),%0; movl %0,    (%4) \n\t" \
+            "movl  -4(%2), %0 ; adcl  -4(%3),%0; movl %0,  -4(%4) \n\t" \
+            "movl  -8(%2), %0 ; adcl  -8(%3),%0; movl %0,  -8(%4) \n\t" \
+            "movl -12(%2), %0 ; adcl -12(%3),%0; movl %0, -12(%4) \n\t" \
+            "movl -16(%2), %0 ; adcl -16(%3),%0; movl %0, -16(%4) \n\t" \
+            "movl -20(%2), %0 ; adcl -20(%3),%0; movl %0, -20(%4) \n\t" \
+            "movl -24(%2), %0 ; adcl -24(%3),%0; movl %0, -24(%4) \n\t" \
+            "movl -28(%2), %0 ; adcl -28(%3),%0; movl %0, -28(%4) \n\t" \
+            "adcl  %1, %1" \
+        : "=&r" (__temp), "=&r" (overflow) \
+        : "r" (__arg1), "r" (__arg2), "r" (__out), "g" (overflow), "0" ((ulong)0), "1" ((ulong)0)        : "cc"); \
 } while(0)
 
 #define subll(a,b) \
@@ -86,18 +88,18 @@ __extension__ ({ ulong __value, __arg1 = (a), __arg2 = (b), __temp; \
 #define subllx8(a,b,c,overflow) \
 do { long *__arg1 = a, *__arg2 = b, *__out = c; \
      ulong __temp; \
-   __asm__ ("subl %6, %1 \n\t" \
-            "movl    (%3), %1 ; sbbl    (%4),%1; movl %1,    (%5) \n\t" \
-            "movl  -4(%3), %1 ; sbbl  -4(%4),%1; movl %1,  -4(%5) \n\t" \
-            "movl  -8(%3), %1 ; sbbl  -8(%4),%1; movl %1,  -8(%5) \n\t" \
-            "movl -12(%3), %1 ; sbbl -12(%4),%1; movl %1, -12(%5) \n\t" \
-            "movl -16(%3), %1 ; sbbl -16(%4),%1; movl %1, -16(%5) \n\t" \
-            "movl -20(%3), %1 ; sbbl -20(%4),%1; movl %1, -20(%5) \n\t" \
-            "movl -24(%3), %1 ; sbbl -24(%4),%1; movl %1, -24(%5) \n\t" \
-            "movl -28(%3), %1 ; sbbl -28(%4),%1; movl %1, -28(%5) \n\t" \
-            "adcl  %2, %2" \
-        : "=m" (*__out), "=&r" (__temp), "=&r" (overflow) \
-        : "r" (__arg1), "r" (__arg2), "r" (__out), "g" (overflow), "1" ((ulong)0), "2" ((ulong)0)        : "cc"); \
+   __asm__ ("subl %5, %0 \n\t" \
+            "movl    (%2), %0 ; sbbl    (%3),%0; movl %0,    (%4) \n\t" \
+            "movl  -4(%2), %0 ; sbbl  -4(%3),%0; movl %0,  -4(%4) \n\t" \
+            "movl  -8(%2), %0 ; sbbl  -8(%3),%0; movl %0,  -8(%4) \n\t" \
+            "movl -12(%2), %0 ; sbbl -12(%3),%0; movl %0, -12(%4) \n\t" \
+            "movl -16(%2), %0 ; sbbl -16(%3),%0; movl %0, -16(%4) \n\t" \
+            "movl -20(%2), %0 ; sbbl -20(%3),%0; movl %0, -20(%4) \n\t" \
+            "movl -24(%2), %0 ; sbbl -24(%3),%0; movl %0, -24(%4) \n\t" \
+            "movl -28(%2), %0 ; sbbl -28(%3),%0; movl %0, -28(%4) \n\t" \
+            "adcl  %1, %1" \
+        : "=&r" (__temp), "=&r" (overflow) \
+        : "r" (__arg1), "r" (__arg2), "r" (__out), "g" (overflow), "0" ((ulong)0), "1" ((ulong)0)        : "cc"); \
 } while(0)
 
 

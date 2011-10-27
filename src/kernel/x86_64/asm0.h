@@ -44,18 +44,18 @@ __extension__ ({ ulong __value, __arg1 = (a), __arg2 = (b), __temp; \
 #define addllx8(a,b,c,overflow) \
 do { long *__arg1 = a, *__arg2 = b, *__out = c; \
      ulong __temp; \
-   __asm__ ("subq %6, %1 \n\t" \
-            "movq    (%3), %1 ; adcq    (%4),%1; movq %1,    (%5) \n\t" \
-            "movq  -8(%3), %1 ; adcq  -8(%4),%1; movq %1,  -8(%5) \n\t" \
-            "movq -16(%3), %1 ; adcq -16(%4),%1; movq %1, -16(%5) \n\t" \
-            "movq -24(%3), %1 ; adcq -24(%4),%1; movq %1, -24(%5) \n\t" \
-            "movq -32(%3), %1 ; adcq -32(%4),%1; movq %1, -32(%5) \n\t" \
-            "movq -40(%3), %1 ; adcq -40(%4),%1; movq %1, -40(%5) \n\t" \
-            "movq -48(%3), %1 ; adcq -48(%4),%1; movq %1, -48(%5) \n\t" \
-            "movq -56(%3), %1 ; adcq -56(%4),%1; movq %1, -56(%5) \n\t" \
-            "adcq  %2, %2" \
-        : "=m" (*__out), "=&r" (__temp), "=&r" (overflow) \
-        : "r" (__arg1), "r" (__arg2), "r" (__out), "g" (overflow), "1" ((ulong)0), "2" ((ulong)0) \
+   __asm__ ("subq %5, %0 \n\t" \
+            "movq    (%2), %0 ; adcq    (%3),%0; movq %0,    (%4) \n\t" \
+            "movq  -8(%2), %0 ; adcq  -8(%3),%0; movq %0,  -8(%4) \n\t" \
+            "movq -16(%2), %0 ; adcq -16(%3),%0; movq %0, -16(%4) \n\t" \
+            "movq -24(%2), %0 ; adcq -24(%3),%0; movq %0, -24(%4) \n\t" \
+            "movq -32(%2), %0 ; adcq -32(%3),%0; movq %0, -32(%4) \n\t" \
+            "movq -40(%2), %0 ; adcq -40(%3),%0; movq %0, -40(%4) \n\t" \
+            "movq -48(%2), %0 ; adcq -48(%3),%0; movq %0, -48(%4) \n\t" \
+            "movq -56(%2), %0 ; adcq -56(%3),%0; movq %0, -56(%4) \n\t" \
+            "adcq  %1, %1" \
+        : "=&r" (__temp), "=&r" (overflow) \
+        : "r" (__arg1), "r" (__arg2), "r" (__out), "g" (overflow), "0" ((ulong)0), "1" ((ulong)0) \
         : "cc"); \
 } while(0)
 
@@ -80,18 +80,18 @@ __extension__ ({ ulong __value, __arg1 = (a), __arg2 = (b), __temp; \
 #define subllx8(a,b,c,overflow) \
 do { long *__arg1 = a, *__arg2 = b, *__out = c; \
      ulong __temp; \
-   __asm__ ("subq %6, %1 \n\t" \
-            "movq    (%3), %1 ; sbbq    (%4),%1; movq %1,    (%5) \n\t" \
-            "movq  -8(%3), %1 ; sbbq  -8(%4),%1; movq %1,  -8(%5) \n\t" \
-            "movq -16(%3), %1 ; sbbq -16(%4),%1; movq %1, -16(%5) \n\t" \
-            "movq -24(%3), %1 ; sbbq -24(%4),%1; movq %1, -24(%5) \n\t" \
-            "movq -32(%3), %1 ; sbbq -32(%4),%1; movq %1, -32(%5) \n\t" \
-            "movq -40(%3), %1 ; sbbq -40(%4),%1; movq %1, -40(%5) \n\t" \
-            "movq -48(%3), %1 ; sbbq -48(%4),%1; movq %1, -48(%5) \n\t" \
-            "movq -56(%3), %1 ; sbbq -56(%4),%1; movq %1, -56(%5) \n\t" \
-            "adcq  %2, %2" \
-        : "=m" (*__out), "=&r" (__temp), "=&r" (overflow) \
-        : "r" (__arg1), "r" (__arg2), "r" (__out), "g" (overflow), "1" ((ulong)0), "2" ((ulong)0) \
+   __asm__ ("subq %5, %0 \n\t" \
+            "movq    (%2), %0 ; sbbq    (%3),%0; movq %0,    (%4) \n\t" \
+            "movq  -8(%2), %0 ; sbbq  -8(%3),%0; movq %0,  -8(%4) \n\t" \
+            "movq -16(%2), %0 ; sbbq -16(%3),%0; movq %0, -16(%4) \n\t" \
+            "movq -24(%2), %0 ; sbbq -24(%3),%0; movq %0, -24(%4) \n\t" \
+            "movq -32(%2), %0 ; sbbq -32(%3),%0; movq %0, -32(%4) \n\t" \
+            "movq -40(%2), %0 ; sbbq -40(%3),%0; movq %0, -40(%4) \n\t" \
+            "movq -48(%2), %0 ; sbbq -48(%3),%0; movq %0, -48(%4) \n\t" \
+            "movq -56(%2), %0 ; sbbq -56(%3),%0; movq %0, -56(%4) \n\t" \
+            "adcq  %1, %1" \
+        : "=&r" (__temp), "=&r" (overflow) \
+        : "r" (__arg1), "r" (__arg2), "r" (__out), "g" (overflow), "0" ((ulong)0), "1" ((ulong)0) \
         : "cc"); \
 } while(0)
 
