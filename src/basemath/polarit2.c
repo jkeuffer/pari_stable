@@ -1340,12 +1340,14 @@ ggcd(GEN x, GEN y)
       }
       break;
 
-    case t_RFRAC: z=cgetg(3,t_RFRAC);
+    case t_RFRAC:
+    {
+      GEN xd = gel(x,2), yd = gel(y,2);
       if (ty != t_RFRAC) pari_err_TYPE2("gcd",x,y);
-      p1 = RgX_div(gel(y,2), RgX_gcd(gel(x,2), gel(y,2)));
-      tetpil = avma;
-      gel(z,2) = gerepile((pari_sp)z,tetpil,gmul(p1, gel(x,2)));
+      z = cgetg(3,t_RFRAC); av = avma;
+      gel(z,2) = gerepileupto(av, RgX_mul(xd, RgX_div(yd, RgX_gcd(xd, yd))));
       gel(z,1) = ggcd(gel(x,1), gel(y,1)); return z;
+    }
   }
   pari_err_TYPE2("gcd",x,y);
   return NULL; /* not reached */
@@ -2659,9 +2661,9 @@ inexact(GEN x, int *simple, int *rational)
 static GEN
 gcdmonome(GEN x, GEN y)
 {
+  pari_sp av = avma;
   long dx = degpol(x), e = RgX_valrem(y, &y);
   long i, l = lg(y);
-  pari_sp av = avma;
   GEN t, v = cgetg(l, t_VEC);
   gel(v,1) = gel(x,dx+2);
   for (i = 2; i < l; i++) gel(v,i) = gel(y,i);
