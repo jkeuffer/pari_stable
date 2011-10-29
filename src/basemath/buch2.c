@@ -3741,19 +3741,12 @@ START:
             gel(emb,j) = perm_log_embed(gel(emb, j-rel->relorig),
                                         gel(F.embperm, rel->relaut));
         }
-        if (DEBUGLEVEL) timer_printf(&T, "floating point embeddings");
         if (first) {
           C = emb;
           W = hnfspec_i(mat, F.perm, &dep, &B, &C, lg(F.subFB)-1);
-          if (DEBUGLEVEL)
-            timer_printf(&T, "hnfspec [%ld x %ld]", lg(F.perm)-1, lg(mat)-1);
         }
         else
-        {
           W = hnfadd_i(W, F.perm, &dep, &B, &C, mat, emb);
-          if (DEBUGLEVEL)
-            timer_printf(&T, "hnfadd (%ld + %ld)", lg(mat)-1, lg(dep)-1);
-        }
         gerepileall(av2, 4, &W,&C,&B,&dep);
         cache.chk = cache.last;
         need = lg(dep)>1? lg(dep[1])-1: lg(B[1])-1;
