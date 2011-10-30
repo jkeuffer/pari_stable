@@ -44,7 +44,7 @@ nfmaxord_check_args(nfmaxord_t *S, GEN T, long flag, GEN fa)
       default: pari_err_TYPE("nfmaxord",fa);
                return; /*not reached*/
     }
-    if (!signe(dT)) pari_err(e_MISC,"reducible polynomial in nfmaxord");
+    if (!signe(dT)) pari_err_IRREDPOL("nfmaxord",mkvec2(T,fa));
   } else {
     dT = ZX_disc(T);
     if (flag & nf_PARTIALFACT)
