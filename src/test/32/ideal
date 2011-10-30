@@ -5,10 +5,14 @@
   *** idealaddtoone: incorrect type in idealaddmultoone [integer matrix] (t_MAT).
   ***   at top-level: ideallog(Q,2,idealst
   ***                 ^--------------------
-  *** ideallog: 2 not coprime to [2, [2]~, 1, 1, 1] in zlog_pk.
+  *** ideallog: elements not coprime in zlog_pk:
+    2
+    [2, [2]~, 1, 1, 1]
   ***   at top-level: idealstar(Qi,matdiag
   ***                 ^--------------------
-  *** idealstar: non coprime ideals in idealaddtoone.
+  *** idealstar: elements not coprime in idealaddtoone:
+    [2, 0; 0, 2]
+    [6, 0; 0, 3]
 
 [1/2   0]
 
