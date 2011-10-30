@@ -105,4 +105,5 @@ p = 5:
 9: error("different primes in hilbert: 5 != 2.")
 10: error("different primes in hilbert: 5 != 2.")
 11: 1
-Total time spent: 1260
+-1
+Total time spent: 1244
