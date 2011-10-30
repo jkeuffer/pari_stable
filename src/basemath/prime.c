@@ -675,7 +675,11 @@ isprimePL(GEN N, long flag)
       else                      r = isprimePL(p,flag);
     }
     gmael(C,3,i) = r;
-    if (r == gen_0) pari_err(e_MISC,"False prime number %Ps in isprimePL", p);
+    if (r == gen_0)
+    { /* composite in prime factorisation ! */
+      err_printf("Not a prime: %Ps", p);
+      pari_err_BUG("isprimePL [false prime number]");
+    }
   }
   if (!flag) { avma = ltop; return gen_1; }
   return gerepileupto(ltop,C);
