@@ -282,11 +282,8 @@ qfr_1_by_disc(GEN D, long prec)
 GEN
 qfr_1(GEN x)
 {
-  long prec;
   if (typ(x) != t_QFR) pari_err_TYPE("qfr_1",x);
-  prec = precision(gel(x,4));
-  if (!prec) pari_err(e_MISC,"not a t_REAL in 4th component of a t_QFR");
-  return qfr_1_by_disc(qfb_disc(x), prec);
+  return qfr_1_by_disc(qfb_disc(x), precision(gel(x,4)));
 }
 
 static void
