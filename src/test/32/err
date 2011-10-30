@@ -37,4 +37,28 @@
   *** polhensellift: elements not coprime in BuildTree:
     x + t
     x + t
+  ***   at top-level: M[,1]=1
+  ***                 ^-------
+  ***   incorrect type in matrix col assignment (t_INT).
+  ***   at top-level: M[,3]=1
+  ***                  ^------
+  ***   array index (3) out of allowed range [1-2].
+  ***   at top-level: M[,1]=[1,2]
+  ***                 ^-----------
+  ***   incorrect type in matrix col assignment (t_VEC).
+  ***   at top-level: M[,1]=[1,2,3]~
+  ***                 ^--------------
+  ***   inconsistent dimensions in matrix col assignment.
+  ***   at top-level: M[1,]=1
+  ***                 ^-------
+  ***   incorrect type in matrix row assignment (t_INT).
+  ***   at top-level: M[3,]=1
+  ***                  ^------
+  ***   array index (3) out of allowed range [1-2].
+  ***   at top-level: M[1,]=[1,2]~
+  ***                 ^------------
+  ***   incorrect type in matrix row assignment (t_COL).
+  ***   at top-level: M[1,]=[1,2,3]
+  ***                 ^-------------
+  ***   inconsistent dimensions in matrix row assignment.
 Total time spent: 8

@@ -296,8 +296,8 @@ change_compo(matcomp *c, GEN res)
   t = typ(res);
   if (c->full_row)
   {
-    if (t != t_VEC || lg(res) != lg(p))
-      pari_err(e_MISC,"incorrect type or length in matrix assignment");
+    if (t != t_VEC) pari_err_TYPE("matrix row assignment", res);
+    if (lg(res) != lg(p)) pari_err_DIM("matrix row assignment");
     for (i=1; i<lg(p); i++)
     {
       GEN p1 = gcoeff(p,c->full_row,i); if (isclone(p1)) gunclone_deep(p1);
@@ -306,8 +306,10 @@ change_compo(matcomp *c, GEN res)
     return;
   }
   if (c->full_col)
-    if (t != t_COL || lg(res) != lg(*pt))
-      pari_err(e_MISC,"incorrect type or length in matrix assignment");
+  {
+    if (t != t_COL) pari_err_TYPE("matrix col assignment", res);
+    if (lg(res) != lg(*pt)) pari_err_DIM("matrix col assignment");
+  }
 
   res = gclone(res);
   gunclone_deep(*pt);
