@@ -3116,6 +3116,15 @@ gen_if_principal(GEN bnf, GEN x)
   return z;
 }
 
+static int
+is_pseudo_matrix(GEN O)
+{
+  return (typ(O) ==t_VEC && lg(O) >= 3
+          && typ(O[1]) == t_MAT
+          && typ(O[2]) != t_VEC
+          && lg(O[1]) == lg(O[2]));
+}
+
 /* given bnf and a pseudo-basis of an order in HNF [A,I], tries to simplify
  * the HNF as much as possible. The resulting matrix will be upper triangular
  * but the diagonal coefficients will not be equal to 1. The ideals are
@@ -3128,8 +3137,7 @@ rnfsimplifybasis(GEN bnf, GEN x)
   GEN y, Az, Iz, nf, A, I;
 
   bnf = checkbnf(bnf); nf = bnf_get_nf(bnf);
-  if (typ(x) != t_VEC || lg(x) < 3)
-    pari_err(e_MISC,"not a pseudo-basis in nfsimplifybasis");
+  if (!is_pseudo_matrix(O)) pari_err_TYPE("rnfsimplifybasis",O);
   A = gel(x,1);
   I = gel(x,2); l = lg(I);
   y = cgetg(3, t_VEC);
@@ -3163,9 +3171,7 @@ get_order(GEN nf, GEN O, const char *s)
 {
   if (typ(O) == t_POL)
     return rnfpseudobasis(nf, O);
-  if (typ(O)!=t_VEC || lg(O) < 3 || typ(O[1]) != t_MAT || typ(O[2]) != t_VEC
-      || lg(O[1]) != lg(O[2]))
-    pari_err(e_MISC,"not a pseudo-matrix in %s", s);
+  if (!is_pseudo_matrix(O)) pari_err_TYPE(s, O);
   return O;
 }
 
