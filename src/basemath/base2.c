@@ -610,7 +610,7 @@ update_fact(GEN d, GEN f)
   {
     case t_INT: return f;
     case t_MAT: if (lg(f) == 3) break; /*fall through*/
-    default: pari_err(e_MISC,"not a factorisation in nfbasis");
+    default: pari_err_TYPE("nfbasis [factorization expected]",f);
   }
   l = lg(P);
   if (l > 1 && is_pm1(gel(P,1))) P = vecslice(P, 2, --l);
@@ -2345,7 +2345,7 @@ void
 checkmodpr(GEN modpr)
 {
   if (typ(modpr) != t_COL || lg(modpr) < SMALLMODPR)
-    pari_err(e_MISC,"incorrect modpr format");
+    pari_err_TYPE("checkmodpr [use nfmodprinit]", modpr);
   checkprid(gel(modpr,mpr_PR));
 }
 
