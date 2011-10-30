@@ -123,6 +123,11 @@ Doc: evaluates the expression sequence \var{seq1}. If an error of type
   polynomial, which does not make sense. (As in \kbd{galoisinit(Pol(1))}.)
   \var{E} has one component, 1 (\typ{STR}): the function name $s$.
 
+  \item \kbd{"e\_COPRIME"}. Function $s$ expected a prime number,
+  and did receive $x,y$, which were not.
+  \var{E} has three component, 1 (\typ{STR}): the function name $s$,
+  2 : the argument $x$, 3 : the argument $y$.
+
   \item \kbd{"e\_INTMOD"}. Tried to invert a non-invertible \typ{INTMOD}
   \kbd{Mod($a$,$b$)}. Provided $a$ is not $0$ mod $b$, this allows to factor
   the modulus, as \kbd{gcd($a$,$b$)} is a non-trivial divisor of $b$.

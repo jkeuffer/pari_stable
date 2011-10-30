@@ -8119,6 +8119,14 @@ which does not make sense. (As in \kbd{galoisinit(Pol(1))}.)
   pari_err_CONSTPOL(const char *s)
 @eprog\noindent prints the error message: \kbd{constant polynomial in $s$}.
 
+\subsubsec{e\_COPRIME} Function $s$ expected two coprime arguments, and did
+receive $x$, $y$ which were not.
+\bprog
+  pari_err(e_COPRIME, const char *s, GEN x, GEN y)
+  pari_err_COPRIME(const char *s, GEN x, GEN y)
+@eprog\noindent prints the error message: \kbd{elements not coprime in $s$:
+$x, y$}.
+
 \subsubsec{e\_INTMOD} Tried to invert a non-invertible \typ{INTMOD}
 \kbd{Mod($a$,$b$)}. Provided $a$ is not $0$ mod $b$, this allows to factor
 the modulus, as \kbd{gcd($a$,$b$)} is a non-trivial divisor of $b$.
@@ -8158,7 +8166,7 @@ analytic at infinity. (As in \kbd{cos(1/x)}.)
 \subsubsec{e\_PRIME} Function $s$ expected a prime number, and did receive $p$,
 which was not. (As in \kbd{idealprimedec(nf, 4)}.)
 \bprog
-  pari_err_PRIME(const char *s, GEN x)
+  pari_err(e_PRIME, const char *s, GEN x)
   pari_err_PRIME(const char *s, GEN x)
 @eprog\noindent prints the error message: \kbd{not a prime in $s$ : $x$}.
 

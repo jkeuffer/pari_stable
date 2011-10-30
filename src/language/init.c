@@ -1011,12 +1011,12 @@ pari_err2GEN(long numerr, va_list ap)
       GEN x = va_arg(ap, GEN);
       retmkerr3(numerr, strtoGENstr(f), x);
     }
-  case e_OP: case e_TYPE2:
+  case e_COPRIME: case e_OP: case e_TYPE2:
     {
-      const char *op = va_arg(ap, const char*);
+      const char *f = va_arg(ap, const char*);
       GEN x = va_arg(ap, GEN);
       GEN y = va_arg(ap, GEN);
-      retmkerr4(numerr,strtoGENstr(op),x,y);
+      retmkerr4(numerr,strtoGENstr(f),x,y);
     }
   case e_MAXPRIME:
     retmkerr2(numerr, utoi(va_arg(ap, ulong)));
@@ -1063,54 +1063,47 @@ pari_err2str(GEN err)
   long numerr = err_get_num(err);
   switch ((enum err_list) numerr)
   {
-  case e_SYNTAX:
-    return pari_strdup(GSTR(gel(err,2)));
   case e_MISC: case e_ALARM:
     return pari_sprintf("%Ps.",gel(err,2));
-  case e_USER:
-    return pari_sprint0("user error: ", gel(err,2), f_RAW);
-  case e_INTMOD:
-    return pari_sprintf("impossible inverse modulo: %Ps.", gel(err,2));
-  case e_FILE:
-    return pari_sprintf("error opening %Ps: `%Ps'.", gel(err,2), gel(err,3));
-  case e_OVERFLOW:
-    return pari_sprintf("overflow in %Ps.", gel(err,2));
-  case e_NOTFUNC:
-    return pari_strdup("not a function in function call");
-  case e_IMPL:
-    return pari_sprintf("sorry, %Ps is not yet implemented.", gel(err,2));
-  case e_TYPE:
-    return pari_sprintf("incorrect type in %Ps (%s).",
-                        gel(err,2), type_name(typ(gel(err,3))));
-  case e_NEGVAL:
-    return pari_sprintf("negative valuation in %Ps.", gel(err,2));
+
+  case e_ARCH:
+    return pari_sprintf("sorry, '%Ps' not available on this system.",gel(err,2));
+  case e_BUG:
+    return pari_sprintf("bug in %Ps, please report.",gel(err,2));
   case e_CONSTPOL:
     return pari_sprintf("constant polynomial in %Ps.", gel(err,2));
+  case e_COPRIME:
+    return pari_sprintf("elements not coprime in %Ps: %Ps\n %Ps",
+                        gel(err,2), gel(err,3), gel(err,4));
+  case e_DIM:
+    return pari_sprintf("inconsistent dimensions in %Ps.", gel(err,2));
+  case e_FILE:
+    return pari_sprintf("error opening %Ps: `%Ps'.", gel(err,2), gel(err,3));
+  case e_FLAG:
+    return pari_sprintf("invalid flag in %Ps.", gel(err,2));
+  case e_IMPL:
+    return pari_sprintf("sorry, %Ps is not yet implemented.", gel(err,2));
+  case e_INTMOD:
+    return pari_sprintf("impossible inverse modulo: %Ps.", gel(err,2));
+  case e_INV:
+    return pari_strdup("division by a non-invertible object");
   case e_IRREDPOL:
     return pari_sprintf("not an irreducible polynomial in %Ps: %Ps.",
                         gel(err,2), gel(err,3));
-  case e_PRIME:
-    return pari_sprintf("not a prime number in %Ps: %Ps.",
-                        gel(err,2), gel(err,3));
-  case e_SQRTN:
-    return pari_sprintf("not an n-th power residue in %Ps: %Ps",
-                        gel(err,2), gel(err,3));
-  case e_ROOTS0:
-    return pari_sprintf("zero polynomial in %Ps.", gel(err,2));
-  case e_DIM:
-    return pari_sprintf("inconsistent dimensions in %Ps.", gel(err,2));
-  case e_VAR:
-  {
-    GEN x = gel(err,3), y = gel(err,4);
-    return pari_sprintf("inconsistent variables in %Ps, %Ps != %Ps.",
-                        gel(err,2), pol_x(varn(x)), pol_x(varn(y)));
-  }
-  case e_FLAG:
-    return pari_sprintf("invalid flag in %Ps.", gel(err,2));
-  case e_PREC:
-    return pari_sprintf("precision too low in %Ps.", gel(err,2));
-  case e_BUG:
-    return pari_sprintf("bug in %Ps, please report",gel(err,2));
+  case e_MAXPRIME:
+    {
+      const char * msg = "not enough precomputed primes";
+      ulong c = itou(gel(err,2));
+      if (c) return pari_sprintf("%s, need primelimit ~ %lu.",msg, c);
+      else   return pari_strdup(msg);
+    }
+  case e_MEM:
+    return pari_strdup("not enough memory");
+  case e_NEGVAL:
+    return pari_sprintf("negative valuation in %Ps.", gel(err,2));
+  case e_NONE: return NULL;
+  case e_NOTFUNC:
+    return pari_strdup("not a function in function call");
   case e_OP: case e_TYPE2:
     {
       pari_sp av = avma;
@@ -1130,13 +1123,18 @@ pari_err2str(GEN err)
       v = pari_sprintf("%s %s %s %s %s.", what,f,type_dim(x),op,type_dim(y));
       avma = av; return v;
     }
-  case e_MAXPRIME:
-    {
-      const char * msg = "not enough precomputed primes";
-      ulong c = itou(gel(err,2));
-      if (c) return pari_sprintf("%s, need primelimit ~ %lu",msg, c);
-      else   return pari_strdup(msg);
-    }
+  case e_OVERFLOW:
+    return pari_sprintf("overflow in %Ps.", gel(err,2));
+  case e_PREC:
+    return pari_sprintf("precision too low in %Ps.", gel(err,2));
+  case e_PRIME:
+    return pari_sprintf("not a prime number in %Ps: %Ps.",
+                        gel(err,2), gel(err,3));
+  case e_ROOTS0:
+    return pari_sprintf("zero polynomial in %Ps.", gel(err,2));
+  case e_SQRTN:
+    return pari_sprintf("not an n-th power residue in %Ps: %Ps.",
+                        gel(err,2), gel(err,3));
   case e_STACK:
     {
       size_t d = top - bot;
@@ -1147,13 +1145,19 @@ pari_err2str(GEN err)
           (ulong)d, (double)d/1048576.);
       return buf;
     }
-  case e_INV:
-    return pari_strdup("division by a non-invertible object");
-  case e_ARCH:
-    return pari_sprintf("sorry, '%Ps' not available on this system",gel(err,2));
-  case e_MEM:
-    return pari_strdup("not enough memory");
-  case e_NONE: return NULL;
+  case e_SYNTAX:
+    return pari_strdup(GSTR(gel(err,2)));
+  case e_TYPE:
+    return pari_sprintf("incorrect type in %Ps (%s).",
+                        gel(err,2), type_name(typ(gel(err,3))));
+  case e_USER:
+    return pari_sprint0("user error: ", gel(err,2), f_RAW);
+  case e_VAR:
+    {
+      GEN x = gel(err,3), y = gel(err,4);
+      return pari_sprintf("inconsistent variables in %Ps, %Ps != %Ps.",
+                          gel(err,2), pol_x(varn(x)), pol_x(varn(y)));
+    }
   }
   return NULL; /*NOT REACHED*/
 }
@@ -1215,6 +1219,8 @@ pari_err_BUG(const char *f) { pari_err(e_BUG,f); }
 void
 pari_err_CONSTPOL(const char *f) { pari_err(e_CONSTPOL, f); }
 void
+pari_err_COPRIME(const char *f, GEN x) { pari_err(e_COPRIME, f,x); }
+void
 pari_err_DIM(const char *f) { pari_err(e_DIM, f); }
 void
 pari_err_FILE(const char *f, const char *g) { pari_err(e_FILE, f,g); }
@@ -1237,6 +1243,8 @@ pari_err_PREC(const char *f) { pari_err(e_PREC,f); }
 void
 pari_err_PRIME(const char *f, GEN x) { pari_err(e_PRIME, f,x); }
 void
+pari_err_ROOTS0(const char *f) { pari_err(e_ROOTS0, f); }
+void
 pari_err_SQRTN(const char *f, GEN x) { pari_err(e_SQRTN, f,x); }
 void
 pari_err_TYPE(const char *f, GEN x) { pari_err(e_TYPE, f,x); }
@@ -1244,43 +1252,42 @@ void
 pari_err_TYPE2(const char *f, GEN x, GEN y) { pari_err(e_TYPE2, f,x,y); }
 void
 pari_err_VAR(const char *f, GEN x, GEN y) { pari_err(e_VAR, f,x,y); }
-void
-pari_err_ROOTS0(const char *f) { pari_err(e_ROOTS0, f); }
 
 const char *
 numerr_name(long numerr)
 {
   switch ((enum err_list) numerr)
   {
-  case e_SYNTAX: return "e_SYNTAX";
-  case e_BUG: return "e_BUG";
-  case e_ALARM: return "e_ALARM";
-  case e_FILE: return "e_FILE";
-  case e_MISC: return "e_MISC";
-  case e_FLAG: return "e_FLAG";
-  case e_IMPL: return "e_IMPL";
-  case e_ARCH: return "e_ARCH";
-  case e_NOTFUNC: return "e_NOTFUNC";
-  case e_PREC: return "e_PREC";
-  case e_TYPE: return "e_TYPE";
-  case e_USER: return "e_USER";
-  case e_STACK: return "e_STACK";
-  case e_OVERFLOW: return "e_OVERFLOW";
-  case e_DIM: return "e_DIM";
-  case e_VAR: return "e_VAR";
-  case e_MAXPRIME: return "e_MAXPRIME";
-  case e_INTMOD: return "e_INTMOD";
+  case e_ALARM:    return "e_ALARM";
+  case e_ARCH:     return "e_ARCH";
+  case e_BUG:      return "e_BUG";
   case e_CONSTPOL: return "e_CONSTPOL";
+  case e_COPRIME:  return "e_COPRIME";
+  case e_DIM:      return "e_DIM";
+  case e_FILE:     return "e_FILE";
+  case e_FLAG:     return "e_FLAG";
+  case e_IMPL:     return "e_IMPL";
+  case e_INTMOD:   return "e_INTMOD";
+  case e_INV:      return "e_INV";
   case e_IRREDPOL: return "e_IRREDPOL";
-  case e_PRIME: return "e_PRIME";
-  case e_ROOTS0: return "e_ROOTS0";
-  case e_OP: return "e_OP";
-  case e_TYPE2: return "e_TYPE2";
-  case e_INV: return "e_INV";
-  case e_MEM: return "e_MEM";
-  case e_NEGVAL: return "e_NEGVAL";
-  case e_SQRTN: return "e_SQRTN";
-  case e_NONE: return "e_NONE";
+  case e_MAXPRIME: return "e_MAXPRIME";
+  case e_MEM:      return "e_MEM";
+  case e_MISC:     return "e_MISC";
+  case e_NEGVAL:   return "e_NEGVAL";
+  case e_NONE:     return "e_NONE";
+  case e_NOTFUNC:  return "e_NOTFUNC";
+  case e_OP:       return "e_OP";
+  case e_OVERFLOW: return "e_OVERFLOW";
+  case e_PREC:     return "e_PREC";
+  case e_PRIME:    return "e_PRIME";
+  case e_ROOTS0:   return "e_ROOTS0";
+  case e_SQRTN:    return "e_SQRTN";
+  case e_STACK:    return "e_STACK";
+  case e_SYNTAX:   return "e_SYNTAX";
+  case e_TYPE2:    return "e_TYPE2";
+  case e_TYPE:     return "e_TYPE";
+  case e_USER:     return "e_USER";
+  case e_VAR:      return "e_VAR";
   }
   return "invalid error number";
 }
@@ -1288,35 +1295,36 @@ numerr_name(long numerr)
 long
 name_numerr(const char *s)
 {
-  if (!strcmp(s,"e_SYNTAX")) return e_SYNTAX;
-  if (!strcmp(s,"e_BUG")) return e_BUG;
-  if (!strcmp(s,"e_ALARM")) return e_ALARM;
-  if (!strcmp(s,"e_FILE")) return e_FILE;
-  if (!strcmp(s,"e_MISC")) return e_MISC;
-  if (!strcmp(s,"e_FLAG")) return e_FLAG;
-  if (!strcmp(s,"e_IMPL")) return e_IMPL;
-  if (!strcmp(s,"e_ARCH")) return e_ARCH;
-  if (!strcmp(s,"e_NOTFUNC")) return e_NOTFUNC;
-  if (!strcmp(s,"e_PREC")) return e_PREC;
-  if (!strcmp(s,"e_TYPE")) return e_TYPE;
-  if (!strcmp(s,"e_USER")) return e_USER;
-  if (!strcmp(s,"e_STACK")) return e_STACK;
-  if (!strcmp(s,"e_OVERFLOW")) return e_OVERFLOW;
-  if (!strcmp(s,"e_DIM")) return e_DIM;
-  if (!strcmp(s,"e_VAR")) return e_VAR;
-  if (!strcmp(s,"e_MAXPRIME")) return e_MAXPRIME;
-  if (!strcmp(s,"e_INTMOD")) return e_INTMOD;
+  if (!strcmp(s,"e_ALARM"))    return e_ALARM;
+  if (!strcmp(s,"e_ARCH"))     return e_ARCH;
+  if (!strcmp(s,"e_BUG"))      return e_BUG;
   if (!strcmp(s,"e_CONSTPOL")) return e_CONSTPOL;
+  if (!strcmp(s,"e_COPRIME"))  return e_COPRIME;
+  if (!strcmp(s,"e_DIM"))      return e_DIM;
+  if (!strcmp(s,"e_FILE"))     return e_FILE;
+  if (!strcmp(s,"e_FLAG"))     return e_FLAG;
+  if (!strcmp(s,"e_IMPL"))     return e_IMPL;
+  if (!strcmp(s,"e_INTMOD"))   return e_INTMOD;
+  if (!strcmp(s,"e_INV"))      return e_INV;
   if (!strcmp(s,"e_IRREDPOL")) return e_IRREDPOL;
-  if (!strcmp(s,"e_PRIME")) return e_PRIME;
-  if (!strcmp(s,"e_ROOTS0")) return e_ROOTS0;
-  if (!strcmp(s,"e_OP")) return e_OP;
-  if (!strcmp(s,"e_TYPE2")) return e_TYPE2;
-  if (!strcmp(s,"e_INV")) return e_INV;
-  if (!strcmp(s,"e_MEM")) return e_MEM;
-  if (!strcmp(s,"e_NEGVAL")) return e_NEGVAL;
-  if (!strcmp(s,"e_SQRTN")) return e_SQRTN;
-  if (!strcmp(s,"e_NONE")) return e_NONE;
+  if (!strcmp(s,"e_MAXPRIME")) return e_MAXPRIME;
+  if (!strcmp(s,"e_MEM"))      return e_MEM;
+  if (!strcmp(s,"e_MISC"))     return e_MISC;
+  if (!strcmp(s,"e_NEGVAL"))   return e_NEGVAL;
+  if (!strcmp(s,"e_NONE"))     return e_NONE;
+  if (!strcmp(s,"e_NOTFUNC"))  return e_NOTFUNC;
+  if (!strcmp(s,"e_OP"))       return e_OP;
+  if (!strcmp(s,"e_OVERFLOW")) return e_OVERFLOW;
+  if (!strcmp(s,"e_PREC"))     return e_PREC;
+  if (!strcmp(s,"e_PRIME"))    return e_PRIME;
+  if (!strcmp(s,"e_ROOTS0"))   return e_ROOTS0;
+  if (!strcmp(s,"e_SQRTN"))    return e_SQRTN;
+  if (!strcmp(s,"e_STACK"))    return e_STACK;
+  if (!strcmp(s,"e_SYNTAX"))   return e_SYNTAX;
+  if (!strcmp(s,"e_TYPE"))     return e_TYPE;
+  if (!strcmp(s,"e_TYPE2"))    return e_TYPE2;
+  if (!strcmp(s,"e_USER"))     return e_USER;
+  if (!strcmp(s,"e_VAR"))      return e_VAR;
   pari_err(e_MISC,"unknown error name");
   return -1; /* NOT REACHED */
 }
