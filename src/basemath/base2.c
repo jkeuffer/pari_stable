@@ -3121,7 +3121,7 @@ is_pseudo_matrix(GEN O)
 {
   return (typ(O) ==t_VEC && lg(O) >= 3
           && typ(O[1]) == t_MAT
-          && typ(O[2]) != t_VEC
+          && typ(O[2]) == t_VEC
           && lg(O[1]) == lg(O[2]));
 }
 
@@ -3137,7 +3137,7 @@ rnfsimplifybasis(GEN bnf, GEN x)
   GEN y, Az, Iz, nf, A, I;
 
   bnf = checkbnf(bnf); nf = bnf_get_nf(bnf);
-  if (!is_pseudo_matrix(O)) pari_err_TYPE("rnfsimplifybasis",O);
+  if (!is_pseudo_matrix(x)) pari_err_TYPE("rnfsimplifybasis",x);
   A = gel(x,1);
   I = gel(x,2); l = lg(I);
   y = cgetg(3, t_VEC);
