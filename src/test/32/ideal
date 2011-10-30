@@ -2,7 +2,7 @@
 [[1]~, [0]~]
   ***   at top-level: idealaddtoone(Q,[1,[
   ***                 ^--------------------
-  *** idealaddtoone: not an integer matrix in idealaddmultoone.
+  *** idealaddtoone: incorrect type in idealaddmultoone [integer matrix] (t_MAT).
   ***   at top-level: ideallog(Q,2,idealst
   ***                 ^--------------------
   *** ideallog: 2 not coprime to [2, [2]~, 1, 1, 1] in zlog_pk.
