@@ -83,8 +83,9 @@ static const long RND_REL_RELPID = 1;
 static const long PREVENT_LLL_IN_RND_REL = 1;
 /* random relations */
 static const long MINSFB = 3;
-static const long MAXRELSUP = 50;
 static const long SFB_MAX = 3;
+static const long MAXDEPSIZESFB = 50;
+static const long MAXDEPSFB = 5;
 /* add_rel_i */
 static const ulong mod_p = 27449UL;
 /* be_honest */
@@ -3840,14 +3841,16 @@ START:
         /* Random relations */
         if (lg(F.subFB) == 1) goto START;
         if (DEBUGLEVEL) err_printf("\n#### Looking for random relations\n");
-        if (++nreldep > MAXRELSUP) {
+        nreldep++;
+        if (nreldep > MAXDEPSIZESFB) {
           if (++sfb_trials > SFB_MAX && LIMC < LIMCMAX/6) goto START;
           F.sfb_chg = sfb_INCREASE;
-        }
-        if (F.sfb_chg) {
-          if (!subFB_change(&F)) goto START;
           nreldep = 0;
         }
+        else if (!(nreldep % MAXDEPSFB))
+          F.sfb_chg = sfb_CHANGE;
+        if (F.newpow) F.sfb_chg = 0;
+        if (F.sfb_chg && !subFB_change(&F)) goto START;
         if (F.newpow) {
           powFBgen(&cache, &F, nf, auts);
           if (DEBUGLEVEL) timer_printf(&T, "powFBgen");
@@ -3934,8 +3937,7 @@ START:
       { /* dependent rows */
         F.L_jid = vecslice(F.perm, 1, need);
         vecsmall_sort(F.L_jid);
-        if (cache.missing && need == old_need && !F.newpow)
-          F.sfb_chg = sfb_CHANGE;
+        if (need != old_need) nreldep = 0;
         old_need = need;
       }
       else
