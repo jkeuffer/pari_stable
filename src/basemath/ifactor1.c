@@ -2356,7 +2356,7 @@ static void
 ifac_check(GEN partial, GEN where)
 {
   if (!where || where < FIRST(partial) || where > LAST(partial))
-    pari_err(e_MISC, "'where' out of bounds");
+    pari_err_BUG("ifac_check ['where' out of bounds]");
 }
 static void
 ifac_print(GEN part, GEN where)
@@ -2500,7 +2500,7 @@ ifac_sort_one(GEN *partial, GEN *where, GEN washere)
 #ifdef IFAC_DEBUG
   ifac_check(*partial, *where);
   if (!washere || washere < *where || washere > LAST(*partial))
-    pari_err(e_MISC, "'washere' out of bounds in ifac_sort_one");
+    pari_err_BUG("ifac_sort_one ['washere' out of bounds]");
 #endif
   value    = VALUE(washere);
   exponent = EXPON(washere);
@@ -2535,7 +2535,7 @@ ifac_sort_one(GEN *partial, GEN *where, GEN washere)
   if (cmp_res)
   {
     if (cmp_res < 0 && scan != *where)
-      pari_err(e_MISC, "misaligned partial detected in ifac_sort_one");
+      pari_err_BUG("ifact_sort_one [misaligned partial]");
     INIT(scan, value, exponent, class0); return 0;
   }
   /* case cmp_res == 0: repeated factor detected */
@@ -2551,9 +2551,9 @@ ifac_sort_one(GEN *partial, GEN *where, GEN washere)
     if (class1)
     {
       if (class0 == gen_0 && class1 != gen_0)
-        pari_err(e_MISC, "composite equals prime in ifac_sort_one");
+        pari_err_BUG("ifac_sort_one (composite = prime)");
       else if (class0 != gen_0 && class1 == gen_0)
-        pari_err(e_MISC, "prime equals composite in ifac_sort_one");
+        pari_err_BUG("ifac_sort_one (prime = composite)");
       else if (class0 == gen_2)        /* should happen even less */
         CLASS(scan) = class0;        /* use it */
     }
@@ -2665,8 +2665,8 @@ ifac_divide(GEN *partial, GEN *where)
 #ifdef IFAC_DEBUG
   ifac_check(*partial, *where);
   if (CLASS(*where) != gen_1)
-    pari_err(e_MISC, "division by composite or finished prime in ifac_divide");
-  if (!VALUE(*where)) pari_err(e_MISC, "division by nothing in ifac_divide");
+    pari_err_BUG("ifac_divide [division by composite or finished prime]");
+  if (!VALUE(*where)) pari_err_BUG("ifac_divide [division by nothing]");
 #endif
   newexp = exponent = itos(EXPON(*where));
   if (exponent > 1 && moebius_mode) return 1;
@@ -2748,11 +2748,11 @@ ifac_crack(GEN *partial, GEN *where)
 #ifdef IFAC_DEBUG
   ifac_check(*partial, *where);
   if (*where < *partial + 6)
-    pari_err(e_MISC, "'*where' out of bounds in ifac_crack");
+    pari_err_BUG("ifac_crack ['*where' out of bounds]");
   if (!(VALUE(*where)) || typ(VALUE(*where)) != t_INT)
-    pari_err(e_MISC, "incorrect VALUE(*where) in ifac_crack");
+    pari_err_BUG("ifac_crack [incorrect VALUE(*where)]");
   if (CLASS(*where) != gen_0)
-    pari_err(e_MISC, "operand not known composite in ifac_crack");
+    pari_err_BUG("ifac_crack [operand not known composite]");
 #endif
 
   if (DEBUGLEVEL>2) {
@@ -3026,7 +3026,7 @@ ifac_main(GEN *partial)
       }
       continue;
     }
-    pari_err(e_MISC, "non-existent factor class in ifac_main");
+    pari_err_BUG("ifac_main [non-existent factor class]");
   } /* while */
   if (moebius_mode && EXPON(here) != gen_1)
   {
