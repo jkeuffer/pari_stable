@@ -61,4 +61,31 @@
   ***   at top-level: M[1,]=[1,2,3]
   ***                 ^-------------
   ***   inconsistent dimensions in matrix row assignment.
-Total time spent: 8
+  ***   at top-level: [;][1,]
+  ***                    ^----
+  ***   array index (1) out of allowed range [none].
+  ***   at top-level: [;][,1]
+  ***                    ^----
+  ***   array index (1) out of allowed range [none].
+  ***   at top-level: 1[1]
+  ***                  ^---
+  ***   incorrect type in _[_] OCcompo1 [not a vector] (t_INT).
+  ***   at top-level: issquare(1,&v[1])
+  ***                              ^----
+  ***   incorrect type in &_[_] OCcompo1ptr [not a vector] (t_POL).
+  ***   at top-level: 1[1,1]
+  ***                  ^-----
+  ***   incorrect type in _[_,_] OCcompo2 [not a matrix] (t_INT).
+  ***   at top-level: 1[,1]
+  ***                  ^----
+  ***   incorrect type in _[,_] OCcompoC [not a matrix] (t_INT).
+  ***   at top-level: issquare(1,&v[,1])
+  ***                              ^-----
+  ***   incorrect type in &_[,_] OCcompoCptr [not a matrix] (t_POL).
+  ***   at top-level: 1[1,]
+  ***                  ^----
+  ***   incorrect type in _[_,] OCcompoL [not a matrix] (t_INT).
+  ***   at top-level: issquare(1,&v[1,])
+  ***                              ^-----
+  ***   incorrect type in &_[_,] OCcompoLptr [not a matrix] (t_POL).
+Total time spent: 4

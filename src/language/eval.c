@@ -929,7 +929,7 @@ closure_eval(GEN C)
           closure_castlong(p[c],operand);
           break;
         default:
-          pari_err(e_MISC,"_[_]: not a vector");
+          pari_err_TYPE("_[_] OCcompo1 [not a vector]", p);
           break;
         }
         break;
@@ -961,7 +961,7 @@ closure_eval(GEN C)
           g->x = *(C->ptcell);
           break;
         default:
-          pari_err(e_MISC,"_[_]: not a vector");
+          pari_err_TYPE("&_[_] OCcompo1ptr [not a vector]", p);
         }
         C->parent   = p;
         break;
@@ -971,8 +971,7 @@ closure_eval(GEN C)
         GEN  p=gel(st,sp-3);
         long c=st[sp-2];
         long d=st[sp-1];
-        if (typ(p)!=t_MAT)
-          pari_err(e_MISC,"_[_,_]: not a matrix");
+        if (typ(p)!=t_MAT) pari_err_TYPE("_[_,_] OCcompo2 [not a matrix]", p);
         check_array_index(d, lg(p));
         check_array_index(c, lg(p[d]));
         sp-=3;
@@ -988,7 +987,7 @@ closure_eval(GEN C)
         GEN p = g->x;
         sp-=2;
         if (typ(p)!=t_MAT)
-          pari_err(e_MISC,"_[_,_]: not a matrix");
+          pari_err_TYPE("&_[_,_] OCcompo2ptr [not a matrix]", p);
         check_array_index(d, lg(p));
         check_array_index(c, lg(p[d]));
         C->ptcell = (GEN *) gel(p,d)+c;
@@ -1001,7 +1000,7 @@ closure_eval(GEN C)
         GEN  p=gel(st,sp-2);
         long c=st[sp-1];
         if (typ(p)!=t_MAT)
-          pari_err(e_MISC,"_[,_]: not a matrix");
+          pari_err_TYPE("_[,_] OCcompoC [not a matrix]", p);
         check_array_index(c, lg(p));
         sp--;
         gel(st,sp-1) = gel(p,c);
@@ -1015,7 +1014,7 @@ closure_eval(GEN C)
         GEN p = g->x;
         sp--;
         if (typ(p)!=t_MAT)
-          pari_err(e_MISC,"_[,_]: not a matrix");
+          pari_err_TYPE("&_[,_] OCcompoCptr [not a matrix]", p);
         check_array_index(c, lg(p));
         C->ptcell = (GEN *) p+c;
         C->full_col = c;
@@ -1029,9 +1028,8 @@ closure_eval(GEN C)
         long r=st[sp-1];
         sp--;
         if (typ(p)!=t_MAT)
-          pari_err(e_MISC,"_[_,]: not a matrix");
-        if (lg(p)==1) pari_err(e_MISC,"a 0x0 matrix has no elements");
-        check_array_index(r,lg(p[1]));
+          pari_err_TYPE("_[_,] OCcompoL [not a matrix]", p);
+        check_array_index(r,lg(p) == 1? 1: lg(p[1]));
         gel(st,sp-1) = row(p,r);
         break;
       }
@@ -1043,9 +1041,8 @@ closure_eval(GEN C)
         GEN p = g->x, p2;
         sp--;
         if (typ(p)!=t_MAT)
-          pari_err(e_MISC,"_[_,]: not a matrix");
-        if (lg(p)==1) pari_err(e_MISC,"a 0x0 matrix has no elements");
-        check_array_index(r,lg(p[1]));
+          pari_err_TYPE("&_[_,] OCcompoLptr [not a matrix]", p);
+        check_array_index(r,lg(p) == 1? 1: lg(p[1]));
         p2 = rowcopy(p,r);
         C->full_row = r; /* record row number */
         C->ptcell = &p2;
