@@ -97,4 +97,7 @@
   ***   at top-level: v[1]=2^64
   ***                 ^---------
   ***   incorrect type in t_VECSMALL assignment (t_INT).
-Total time spent: 8
+  ***   at top-level: v[Pi]=1
+  ***                   ^-----
+  ***   incorrect type in gtos [integer expected] (t_REAL).
+Total time spent: 12

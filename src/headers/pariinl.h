@@ -1075,7 +1075,7 @@ gtodouble(GEN x)
 }
 INLINE long
 gtos(GEN x) {
-  if (typ(x) != t_INT) pari_err(e_MISC,"gtos expected an integer, got '%Ps'",x);
+  if (typ(x) != t_INT) pari_err_TYPE("gtos [integer expected]",x);
   return itos(x);
 }
 
