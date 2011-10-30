@@ -767,7 +767,7 @@ idealaddtoone_i(GEN nf, GEN x, GEN y)
     a = hnfmerge_get_1(x, y);
     if (a) a = ZC_reducemodlll(a, idealmul_HNF(nf,x,y));
   }
-  if (!a) pari_err(e_MISC, "non coprime ideals in idealaddtoone");
+  if (!a) pari_err_COPRIME("idealaddtoone",x,y);
   return a;
 }
 
@@ -2250,9 +2250,9 @@ idealchinese(GEN nf, GEN x, GEN w)
   {
     GEN u, t;
     if (gequal0(gel(w,i))) continue;
-    u = hnfmerge_get_1(idealdivpowprime(nf,F, gel(L,i), gel(e,i)),
-                       idealpow(nf, gel(L,i), gel(e,i)));
-    if (!u) pari_err(e_MISC, "non coprime ideals in idealchinese");
+    t = idealdivpowprime(nf,F, gel(L,i), gel(e,i));
+    u = hnfmerge_get_1(t, idealpow(nf, gel(L,i), gel(e,i)));
+    if (!u) pari_err_COPRIME("idealchinese", t,gel(L,i));
     t = nfmuli(nf, u, gel(w,i));
     s = s? ZC_add(s,t): t;
   }

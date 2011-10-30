@@ -67,7 +67,7 @@ BuildTree(GEN link, GEN V, GEN W, GEN a, GEN T, GEN p)
   {
     GEN d, u, v;
     d = FqX_extgcd(gel(V,j), gel(V,j+1), T, p, &u, &v);
-    if (degpol(d) > 0) pari_err(e_MISC, "relatively prime polynomials expected");
+    if (degpol(d) > 0) pari_err_COPRIME("BuildTree", gel(V,j), gel(V,j+1));
     d = gel(d,2);
     if (!gequal1(d))
     {

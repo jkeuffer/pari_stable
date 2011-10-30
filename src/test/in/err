@@ -36,3 +36,5 @@ ecm2(N,t,B)=
        err,my(d=gcd(lift(component(err,1)),N));if(d>1,return(d))));
 }
 ecm2(2^64+1,10,200!)
+\\ e_COPRIME
+T=t^2-2;p=2;A=x^2+1;B=[x+t,x+t];r=polhensellift(A,B,[p,T],6)

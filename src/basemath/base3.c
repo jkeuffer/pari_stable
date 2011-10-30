@@ -1493,8 +1493,7 @@ zlog_pk(GEN nf, GEN a, GEN y, GEN pr, GEN prk, GEN list, GEN *psigne)
     for (i = 1; i < lg(cyc); i++)
     {
       GEN t;
-      if (typ(gel(e,i)) != t_INT)
-        pari_err(e_MISC,"%Ps not coprime to %Ps in zlog_pk", a, pr);
+      if (typ(gel(e,i)) != t_INT) pari_err_COPRIME("zlog_pk", a, pr);
       t = modii(negi(gel(e,i)), gel(cyc,i));
       gel(++y,0) = negi(t); if (!signe(t)) continue;
 

@@ -1073,7 +1073,7 @@ pari_err2str(GEN err)
   case e_CONSTPOL:
     return pari_sprintf("constant polynomial in %Ps.", gel(err,2));
   case e_COPRIME:
-    return pari_sprintf("elements not coprime in %Ps: %Ps\n %Ps",
+    return pari_sprintf("elements not coprime in %Ps:\n    %Ps\n    %Ps",
                         gel(err,2), gel(err,3), gel(err,4));
   case e_DIM:
     return pari_sprintf("inconsistent dimensions in %Ps.", gel(err,2));
@@ -1219,7 +1219,7 @@ pari_err_BUG(const char *f) { pari_err(e_BUG,f); }
 void
 pari_err_CONSTPOL(const char *f) { pari_err(e_CONSTPOL, f); }
 void
-pari_err_COPRIME(const char *f, GEN x) { pari_err(e_COPRIME, f,x); }
+pari_err_COPRIME(const char *f, GEN x, GEN y) { pari_err(e_COPRIME, f,x,y); }
 void
 pari_err_DIM(const char *f) { pari_err(e_DIM, f); }
 void

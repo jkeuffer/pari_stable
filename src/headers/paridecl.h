@@ -1959,7 +1959,7 @@ int     pari_daemon(void);
 void    pari_err(int numerr, ...);
 void    pari_err_BUG(const char *f);
 void    pari_err_CONSTPOL(const char *f);
-void    pari_err_COPRIME(const char *f, GEN x);
+void    pari_err_COPRIME(const char *f, GEN x, GEN y);
 void    pari_err_DIM(const char *f);
 void    pari_err_FILE(const char *f, const char *g);
 void    pari_err_FLAG(const char *f);

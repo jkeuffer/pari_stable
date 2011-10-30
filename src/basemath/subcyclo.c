@@ -315,8 +315,7 @@ lift_check_modulus(GEN H, long n)
       H = gel(H,2);
     case t_INT:
       h = smodis(H,n);
-      if (ugcd(h,n) != 1)
-        pari_err(e_MISC,"generators must be prime to conductor in galoissubcyclo");
+      if (ugcd(h,n) != 1) pari_err_COPRIME("galoissubcyclo", H,stoi(n));
       return h;
   }
   pari_err_TYPE("galoissubcyclo [subgroup]", H);

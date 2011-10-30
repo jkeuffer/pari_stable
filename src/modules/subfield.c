@@ -448,7 +448,7 @@ get_bezout(GEN pol, GEN fk, GEN p)
     A = gel(fk,i);
     B = FpX_div(pol, A, p);
     d = FpX_extgcd(A,B,p, &u, &v);
-    if (degpol(d) > 0) pari_err(e_MISC, "relatively prime polynomials expected");
+    if (degpol(d) > 0) pari_err_COPRIME("get_bezout",A,B);
     d = constant_term(d);
     if (!gequal1(d)) v = FpX_Fp_mul(v, Fp_inv(d, p), p);
     gel(U,i) = FpX_mul(B,v, p);

@@ -32,4 +32,9 @@
 
 274177
 274177
+  ***   at top-level: ...=2;A=x^2+1;B=[x+t,x+t];r=polhensellift(A,B,[p
+  ***                                             ^--------------------
+  *** polhensellift: elements not coprime in BuildTree:
+    x + t
+    x + t
 Total time spent: 8
