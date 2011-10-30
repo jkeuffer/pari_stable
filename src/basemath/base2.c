@@ -2980,7 +2980,7 @@ check_pol(GEN *px)
   for (i=2; i<lx; i++)
   {
     long tx = typ(x[i]);
-    if (!is_rational_t(tx)) pari_err(e_MISC,"incorrect coeff in rnf function");
+    if (!is_rational_t(tx)) pari_err_TYPE("rnf function [coeff]", gel(x,i));
   }
   if (lx == 2) *px = gen_0;
   if (lx == 3) *px = gel(x,2);
@@ -2993,7 +2993,8 @@ rnf_fix_pol(GEN T, GEN P, int lift)
 {
   long i, vT = varn(T), lP = lg(P);
   GEN Q = cgetg(lP, t_POL);
-  if (typ(P) != t_POL || varncmp(varn(P), vT) >= 0)
+  if (typ(P) != t_POL) pari_err_TYPE("rnf function [t_POL expected]", P);
+  if (varncmp(varn(P), vT) >= 0)
     pari_err(e_MISC,"incorrect polynomial in rnf function");
   Q[1] = P[1];
   for (i=2; i<lP; i++)
