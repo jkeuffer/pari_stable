@@ -88,4 +88,13 @@
   ***   at top-level: issquare(1,&v[1,])
   ***                              ^-----
   ***   incorrect type in &_[_,] OCcompoLptr [not a matrix] (t_POL).
-Total time spent: 4
+  ***   at top-level: v[2]=1
+  ***                  ^-----
+  ***   array index (2) out of allowed range [1].
+  ***   at top-level: v[1]=Pi
+  ***                 ^-------
+  ***   incorrect type in t_VECSMALL assignment (t_REAL).
+  ***   at top-level: v[1]=2^64
+  ***                 ^---------
+  ***   incorrect type in t_VECSMALL assignment (t_INT).
+Total time spent: 8

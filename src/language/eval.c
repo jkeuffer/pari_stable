@@ -290,7 +290,7 @@ change_compo(matcomp *c, GEN res)
   if (typ(p) == t_VECSMALL)
   {
     if (typ(res) != t_INT || is_bigint(res))
-      pari_err(e_MISC,"not a suitable VECSMALL component");
+      pari_err_TYPE("t_VECSMALL assignment", res);
     *pt = (GEN)itos(res); return;
   }
   t = typ(res);
