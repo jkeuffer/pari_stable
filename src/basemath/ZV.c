@@ -28,7 +28,11 @@ void
 RgV_check_ZV(GEN A, const char *s)
 {
   if (!check_ZV(A, lg(A)))
-    pari_err(e_MISC,"not an integer vector in %s",s);
+  {
+    char *t = stackmalloc(strlen(s) + 32);
+    sprintf(t, "%s [integer vector]", s);
+    pari_err_TYPE(t, A);
+  }
 }
 void
 RgM_check_ZM(GEN A, const char *s)
@@ -39,7 +43,11 @@ RgM_check_ZM(GEN A, const char *s)
     long j, m = lg(A[1]);
     for (j=1; j<n; j++)
       if (!check_ZV(gel(A,j), m))
-        pari_err(e_MISC,"not an integer matrix in %s",s);
+      {
+        char *t = stackmalloc(strlen(s) + 32);
+        sprintf(t, "%s [integer matrix]", s);
+        pari_err_TYPE(t, A);
+      }
   }
 }
 
