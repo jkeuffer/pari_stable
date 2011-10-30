@@ -594,7 +594,6 @@ FF_ispower(GEN x, GEN K, GEN *pt)
   ulong pp;
   GEN r, T, p;
   pari_sp av = avma;
-  if (!K) pari_err(e_MISC,"missing exponent in FF_ispower");
 
   if (FF_equal0(x)) { if (pt) *pt = gcopy(x); return 1; }
   _getFF(x, &T, &p, &pp);
