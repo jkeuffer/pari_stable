@@ -7679,6 +7679,10 @@ $n$, only $n$ characters are copied and a terminal null byte is added.
 \fun{char*}{stack_strdup}{const char *s} returns a copy of $s$, allocated
 on the PARI stack (uses \kbd{stackmalloc}).
 
+\fun{char*}{stack_strcat}{const char *s, const char *t} returns the
+concatenation of $s$ and $t$, allocated on the PARI stack (uses
+\kbd{stackmalloc}).
+
 \fun{char*}{itostr}{GEN x} writes the \typ{INT} $x$ to a \tet{stackmalloc}'ed
 string.
 

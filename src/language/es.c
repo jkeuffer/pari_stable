@@ -1633,6 +1633,15 @@ stack_strdup(const char *s)
   char *t = stackmalloc(n);
   memcpy(t,s,n); return t;
 }
+char *
+stack_strcat(const char *s, const char *t)
+{
+  long ls = strlen(s), lt = strlen(t);
+  long n = ls + lt + 1;
+  char *u = stackmalloc(n);
+  memcpy(u,     s, ls);
+  memcpy(u + ls,t, lt); return u;
+}
 
 char *
 pari_strdup(const char *s)

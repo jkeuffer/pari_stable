@@ -773,7 +773,7 @@ bnrrootnumber(GEN bnr, GEN chi, long flag, long prec)
   l    = lg(cyc);
 
   if (typ(chi) != t_VEC || lg(chi) != l)
-    pari_err(e_MISC, "incorrect character in bnrrootnumber");
+    pari_err_TYPE("bnrrootnumber [incorrect character]", chi);
 
   if (flag) condc = NULL;
   else
@@ -2469,7 +2469,7 @@ get_subgroup(GEN subgp, GEN cyc, const char *s)
     subgp = ZM_hnf(subgp);
     if (hnfdivide(subgp, cyc)) return subgp;
   }
-  pari_err(e_MISC,"incorrect subgroup in %s", s);
+  pari_err_TYPE(stack_strcat(s," [incorrect subgroup]"), subgp);
   return NULL;
 }
 
@@ -3398,8 +3398,8 @@ findquad(GEN a, GEN x, GEN p)
   u = poldivrem(x, a, &v);
   u = simplify_shallow(u); tu = typ(u);
   v = simplify_shallow(v); tv = typ(v);
-  if (!is_scalar_t(tu) || !is_scalar_t(tv))
-    pari_err(e_MISC, "incorrect data in findquad");
+  if (!is_scalar_t(tu)) pari_err_TYPE("findquad", u);
+  if (!is_scalar_t(tv)) pari_err_TYPE("findquad", v);
   x = deg1pol(v, u, varn(a));
   if (typ(x) == t_POL) x = gmodulo(x,p);
   return gerepileupto(av, x);

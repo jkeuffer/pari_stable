@@ -1502,6 +1502,7 @@ void    print0(GEN g, long flag);
 void    print1(GEN g);
 void    printf0(const char *fmt, GEN args);
 void    printtex(GEN g);
+char *  stack_strcat(const char *s, const char *t);
 char*   stack_strdup(const char *s);
 void    strftime_expand(const char *s, char *buf, long max);
 GEN     Strprintf(const char *fmt, GEN args);
