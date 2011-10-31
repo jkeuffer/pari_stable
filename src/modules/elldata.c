@@ -82,24 +82,21 @@ ellconvertname(GEN n)
   case t_STR:
     {
       long f,i,c;
-      if (!ellparsename(GSTR(n),&f,&c,&i))
-        pari_err(e_MISC,"Incorrect curve name in ellconvertname");
+      if (!ellparsename(GSTR(n),&f,&c,&i)) pari_err_TYPE("ellconvertname", n);
       if (f<0 || c<0 || i<0)
-        pari_err(e_MISC,"Incomplete curve name in ellconvertname");
+        pari_err_TYPE("ellconvertname [incomplete name]", n);
       return mkvec3s(f,c,i);
     }
   case t_VEC:
-    if (lg(n)!=4)
-      pari_err(e_MISC,"Incorrect vector in ellconvertname");
-    else
+    if (lg(n)==4)
     {
       pari_sp av = avma;
       GEN f=gel(n,1), c=gel(n,2), s=gel(n,3);
-      if (typ(f)!=t_INT) pari_err_TYPE("ellconvertname",f);
-      if (typ(c)!=t_INT) pari_err_TYPE("ellconvertname",c);
-      if (typ(s)!=t_INT) pari_err_TYPE("ellconvertname",s);
+      if (typ(f)!=t_INT || typ(c)!=t_INT || typ(s)!=t_INT)
+        pari_err_TYPE("ellconvertname",n);
       return gerepilecopy(av, shallowconcat1(mkvec3(f, ellrecode(itos(c)), s)));
     }
+    /*fall through*/
   }
   pari_err_TYPE("ellconvertname",n);
   return NULL; /*Not reached*/
@@ -114,10 +111,11 @@ ellcondfile(long f)
   pariFILE *F;
   GEN V;
   sprintf(s, "%s/elldata/ell%ld", pari_datadir, n);
-  F = pari_fopengz(s); avma = av;
-  if (!F) pari_err(e_MISC,"Missing elldata for conductor %ld\n[need %s]",f,s);
+  F = pari_fopengz(s);
+  if (!F) pari_err_FILE("elldata file",s);
+  avma = av;
   V = gp_read_stream(F->file);
-  if (!V || typ(V)!=t_VEC ) pari_err(e_MISC,"incompatible elldata file %s",s);
+  if (!V || typ(V)!=t_VEC ) pari_err_FILE("elldata file [read]",s);
   pari_fclose(F); return V;
 }
 
@@ -174,7 +172,7 @@ ellsearch(GEN A)
   if      (typ(A)==t_INT) { f = itos(A); c = i = -1; }
   else if (typ(A)==t_STR) {
     if (!ellparsename(GSTR(A),&f,&c,&i))
-      pari_err(e_MISC,"Incorrect curve name in ellsearch");
+      pari_err_TYPE("ellsearch",A);
   } else {
     pari_err_TYPE("ellsearch",A);
     return NULL;
@@ -191,9 +189,8 @@ ellsearchcurve(GEN name)
 {
   pari_sp ltop=avma;
   long f, c, i;
-  if (!ellparsename(GSTR(name),&f,&c,&i))
-    pari_err(e_MISC,"Incorrect curve name in ellsearch");
-  if (f<0 || c<0 || i<0) pari_err(e_MISC,"Incomplete curve name in ellsearch");
+  if (!ellparsename(GSTR(name),&f,&c,&i)) pari_err_TYPE("ellsearch",name);
+  if (f<0 || c<0 || i<0) pari_err_TYPE("ellsearch [incomplete name]", name);
   return gerepilecopy(ltop, ellsearchbyname(ellcondlist(f), GSTR(name)));
 }
 
