@@ -305,7 +305,7 @@ initgaloisborne(GEN T, GEN dn, long prec, GEN *ptL, GEN *ptprep, GEN *ptdis)
   else
   {
     if (typ(dn) != t_INT || signe(dn) <= 0)
-      pari_err(e_MISC, "incorrect denominator in initgaloisborne: %Ps", dn);
+      pari_err_TYPE("initgaloisborne [incorrect denominator]", dn);
     den = dn;
   }
   if (ptprep) *ptprep = prep;
@@ -1116,7 +1116,7 @@ vectopol(GEN v, GEN M, GEN den , GEN mod, GEN mod2, long x)
 static GEN
 permtopol(GEN p, GEN L, GEN M, GEN den, GEN mod, GEN mod2, long x)
 {
-  if (lg(p) != lg(L)) pari_err(e_MISC,"incorrect permutation in permtopol");
+  if (lg(p) != lg(L)) pari_err_TYPE("permtopol [permutation]", p);
   return vectopol(vecpermute(L,p), M, den, mod, mod2, x);
 }
 
@@ -2196,8 +2196,7 @@ galoisconj4_main(GEN T, GEN den, long flag)
 
   if (den)
   {
-    if (typ(den) != t_INT)
-      pari_err(e_MISC, "Second arg. must be integer in galoisconj4");
+    if (typ(den) != t_INT) pari_err_TYPE("galoisconj4 [2nd arg integer]", den);
     den = absi(den);
   }
   gb.l = utoipos(ga.l);
@@ -2328,7 +2327,7 @@ isomborne(GEN P, GEN den, GEN p)
 GEN
 checkgal(GEN gal)
 {
-  if (typ(gal) == t_POL) pari_err(e_MISC, "please apply galoisinit first");
+  if (typ(gal) == t_POL) pari_err_TYPE("checkgal [apply galoisinit first]",gal);
   if (typ(gal) != t_VEC || lg(gal) != 9) pari_err_TYPE("checkgal",gal);
   return gal;
 }

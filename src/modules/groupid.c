@@ -508,7 +508,7 @@ group_ident(GEN G, GEN S)
 {
   pari_sp av = avma;
   long idx = group_ident_i(G, S);
-  if (idx < 0) pari_err(e_MISC,"Not a group in group_ident");
+  if (idx < 0) pari_err_TYPE("group_ident [not a group]", G);
   if (!idx) pari_err_IMPL("galoisidentify for groups of order > 127");
   avma = av; return idx;
 }
