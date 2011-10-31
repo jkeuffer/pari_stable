@@ -59,11 +59,7 @@ GEN
 checkbnf(GEN x)
 {
   GEN bnf = checkbnf_i(x);
-  if (!bnf)
-  {
-    if (checknf_i(x)) pari_err(e_MISC,"please apply bnfinit first");
-    pari_err_TYPE("checkbnf",x);
-  }
+  if (!bnf) pari_err_TYPE("checkbnf [please apply bnfinit()]",x);
   return bnf;
 }
 
@@ -71,18 +67,15 @@ GEN
 checknf(GEN x)
 {
   GEN nf = checknf_i(x);
-  if (!nf)
-  {
-    if (typ(x)==t_POL) pari_err(e_MISC,"please apply nfinit first");
-    pari_err_TYPE("checknf",x);
-  }
+  if (!nf) pari_err_TYPE("checknf [please apply nfinit()]",x);
   return nf;
 }
 
 void
 checkbnr(GEN bnr)
 {
-  if (typ(bnr)!=t_VEC || lg(bnr)!=7) pari_err_TYPE("checkbnr",bnr);
+  if (typ(bnr)!=t_VEC || lg(bnr)!=7)
+    pari_err_TYPE("checkbnr [please apply bnrinit()]",bnr);
   (void)checkbnf(bnr_get_bnf(bnr));
 }
 
@@ -91,7 +84,7 @@ checkbnrgen(GEN bnr)
 {
   checkbnr(bnr);
   if (lg(bnr[5])<=3)
-    pari_err(e_MISC,"please apply bnrinit(,,1) and not bnrinit(,)");
+    pari_err_TYPE("checkbnrgen [apply bnrinit(,,1), not bnrinit()]",bnr);
 }
 
 void
@@ -1897,7 +1890,7 @@ nfnewprec(GEN nf, long prec)
   GEN z;
   switch(nftyp(nf))
   {
-    default: pari_err(e_MISC,"incorrect nf in nfnewprec");
+    default: pari_err_TYPE("nfnewprec", nf);
     case typ_BNF: z = bnfnewprec(nf,prec); break;
     case typ_BNR: z = bnrnewprec(nf,prec); break;
     case typ_NF: {

@@ -1037,7 +1037,7 @@ thue(GEN tnf, GEN rhs, GEN ne)
   pari_sp av = avma;
   GEN POL, C, L, x3, S;
 
-  if (!checktnf(tnf)) pari_err(e_MISC,"not a tnf in thue");
+  if (!checktnf(tnf)) pari_err_TYPE("thue [please apply thueinit()]", tnf);
   if (typ(rhs) != t_INT) pari_err_TYPE("thue",rhs);
 
   /* solve P(x,y) = rhs <=> POL(L x, y) = C rhs, with POL monic in Z[X] */
