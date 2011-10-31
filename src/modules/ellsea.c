@@ -81,7 +81,8 @@ get_modular_eqn(struct meqn *M, ulong ell, long vx, long vy)
   GEN eqn;
   long idx = uprimepi(ell)-1;
   if (!modular_eqn && !get_seadata(0))
-    pari_err(e_MISC,"ellmodulareqn requires the package seadata");
+    pari_err_FILE("seadata package",
+                  stack_strcat(pari_datadir,"/seadata/sea0"));
   if (idx && idx<lg(modular_eqn))
     eqn = gel(modular_eqn, idx);
   else eqn = get_seadata(ell);
@@ -99,8 +100,8 @@ ellmodulareqn(long ell, long vx, long vy)
   if (vx<0) vx=0;
   if (vy<0) vy=fetch_user_var("y");
   if (varncmp(vx,vy)>=0) pari_err(e_MISC,"wrong variable priority");
-  if (ell<0) pari_err(e_MISC,"level must be positive");
-  if (!uisprime(ell)) pari_err_PRIME("ellmodulareqn (level)",utoi(ell));
+  if (ell < 0 || !uisprime(ell))
+    pari_err_PRIME("ellmodulareqn (level)", stoi(ell));
 
   res = cgetg(3, t_VEC);
   if (!get_modular_eqn(&meqn, ell, vx, vy))
@@ -457,7 +458,7 @@ find_kernel(GEN a4, GEN a6, ulong ell, GEN a4t, GEN a6t, GEN pp1, GEN p)
   V = FpC_sub(Coefft, Coeff, p);
   v = shallowconcat(FpM_gauss(N, V, p), mkcol2(gen_0, gen_0));
   K = FpM_ker(M, p);
-  if (lg(K) != 3) pari_err(e_MISC, "trace not determined in a unique way");
+  if (lg(K) != 3) pari_err_BUG("trace not determined in a unique way");
   K1 = FpC_Fp_mul(gel(K,1), Fp_inv(gcoeff(K,1,1), p), p);
   K2 = FpC_sub(gel(K,2), FpC_Fp_mul(K1, gcoeff(K,1,2), p), p);
   K2 = FpC_Fp_mul(K2, Fp_inv(gel(K2,2), p), p);
@@ -668,7 +669,7 @@ find_kernel_power(GEN Eba4, GEN Eba6, GEN Eca4, GEN Eca6, ulong ell, struct meqn
     }
     avma = btop;
   }
-  pari_err(e_MISC, "failed to find kernel polynomial");
+  pari_err_BUG("failed to find kernel polynomial");
   return NULL; /*NOT REACHED*/
 }
 
