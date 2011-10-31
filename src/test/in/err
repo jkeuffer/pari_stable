@@ -64,3 +64,8 @@ v[2] = 1
 v[1] = Pi
 v[1] = 2^64
 v[Pi] = 1
+
+\\ RgM_check_ZM
+M = [1.,0;0,1]; qflll(M,1)
+\\ RgV_check_ZV
+addprimes(1.)

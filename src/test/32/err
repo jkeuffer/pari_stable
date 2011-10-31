@@ -100,4 +100,10 @@
   ***   at top-level: v[Pi]=1
   ***                   ^-----
   ***   incorrect type in gtos [integer expected] (t_REAL).
-Total time spent: 12
+  ***   at top-level: M=[1.,0;0,1];qflll(M,1)
+  ***                              ^----------
+  *** qflll: incorrect type in qflll [integer matrix] (t_MAT).
+  ***   at top-level: addprimes(1.)
+  ***                 ^-------------
+  *** addprimes: incorrect type in addprimes [integer vector] (t_VEC).
+Total time spent: 16

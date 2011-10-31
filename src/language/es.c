@@ -1640,7 +1640,7 @@ stack_strcat(const char *s, const char *t)
   long n = ls + lt + 1;
   char *u = stackmalloc(n);
   memcpy(u,     s, ls);
-  memcpy(u + ls,t, lt); return u;
+  memcpy(u + ls,t, lt+1); return u;
 }
 
 char *
