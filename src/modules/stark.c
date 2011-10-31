@@ -773,7 +773,7 @@ bnrrootnumber(GEN bnr, GEN chi, long flag, long prec)
   l    = lg(cyc);
 
   if (typ(chi) != t_VEC || lg(chi) != l)
-    pari_err_TYPE("bnrrootnumber [incorrect character]", chi);
+    pari_err_TYPE("bnrrootnumber [character]", chi);
 
   if (flag) condc = NULL;
   else
@@ -2469,7 +2469,7 @@ get_subgroup(GEN subgp, GEN cyc, const char *s)
     subgp = ZM_hnf(subgp);
     if (hnfdivide(subgp, cyc)) return subgp;
   }
-  pari_err_TYPE(stack_strcat(s," [incorrect subgroup]"), subgp);
+  pari_err_TYPE(stack_strcat(s," [subgroup]"), subgp);
   return NULL;
 }
 
