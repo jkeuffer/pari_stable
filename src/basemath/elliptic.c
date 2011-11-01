@@ -135,7 +135,7 @@ initsmall(GEN x, GEN y)
     case 2:
     case 4:
     case 5:
-      pari_err(e_MISC, "not an elliptic curve (ell5) in ellxxx");
+      pari_err_TYPE("ellxxx [not an elliptic curve (ell5)]",x);
       return 0; break; /* not reached */
     case 3:
       a1 = a2 = a3 = gen_0;
@@ -151,7 +151,7 @@ initsmall(GEN x, GEN y)
       break;
   }
   if (typ(x)!=t_VEC)
-    pari_err(e_MISC, "not an elliptic curve (ell5) in ellxxx");
+    pari_err_TYPE("ellxxx [not an elliptic curve (ell5)]",x);
   gel(y,1) = a1;
   gel(y,2) = a2;
   gel(y,3) = a3;
@@ -464,7 +464,7 @@ get_ell(GEN x)
     case t_VEC: switch(lg(x)) { case 3: case 6: case 14: case 20: return x; }
     /*fall through*/
   }
-  pari_err(e_MISC, "not an elliptic curve (ell5) in ellxxx");
+  pari_err_TYPE("ellxxx [not an elliptic curve (ell5)]",x);
   return NULL;/*not reached*/
 }
 GEN
@@ -538,7 +538,7 @@ coordch4(GEN e, GEN u, GEN r, GEN s, GEN t)
   /* A6 = (r^3 + a2 r^2 + a4 r + a6 - t(t + a1 r + a3)) / u^6 */
   gel(y,5) = gmul(v6,gsub(ellRHS(e,r), gmul(t,gadd(t, p2))));
   if (lx == 6) return y;
-  if (lx < 14) pari_err(e_MISC,"not an elliptic curve in coordch");
+  if (lx < 14) pari_err_TYPE("coordch [not an elliptic curve]",e);
 
   /* B2 = (b2 + 12r) / u^2 */
   gel(y,6) = gmul(v2,gadd(ell_get_b2(e),gmul2n(rx3,2)));
@@ -558,7 +558,7 @@ coordch4(GEN e, GEN u, GEN r, GEN s, GEN t)
   gel(y,12) = gmul(gsqr(v6),ell_get_disc(e));
   gel(y,13) = ell_get_j(e);
   if (lx == 14) return y;
-  if (lx < 20) pari_err(e_MISC,"not an elliptic curve in coordch");
+  if (lx < 20) pari_err_TYPE("coordch [not an elliptic curve]",e);
   R = ell_get_roots(e);
   if (typ(R) != t_COL) set_dummy(y);
   else if (typ(e[1])==t_PADIC)
@@ -780,8 +780,7 @@ ellisoncurve(GEN e, GEN x)
   long i, tx = typ(x), lx;
 
   checkell5(e);
-  if (!is_vec_t(tx))
-    pari_err(e_MISC, "neither a point nor a vector of points in ellisoncurve");
+  if (!is_vec_t(tx)) pari_err_TYPE("ellisoncurve [point]", x);
   lx = lg(x); if (lx==1) return cgetg(1,tx);
   tx = typ(x[1]);
   if (is_vec_t(tx))
@@ -986,7 +985,7 @@ ellpow_CM(GEN e, GEN z, GEN n)
   }
   while (degpol(p1) < vn);
   if (degpol(p1) > vn || signe(z2))
-    pari_err(e_MISC,"not a complex multiplication in powell");
+    pari_err_TYPE("powell [not a complex multiplication]", n);
   q1p = RgX_deriv(q1);
   b2ov12 = gdivgs(ell_get_b2(e), 12); /* x - b2/12 */
   grdx = gadd(gel(z,1), b2ov12);
@@ -1110,7 +1109,7 @@ ellpow_CM_aux(GEN e, GEN z, GEN a, GEN w)
   GEN A, B, q;
   if (typ(a) != t_INT) pari_err_TYPE("ellpow_Z",a);
   q = CM_factor(e, w);
-  if (!q) pari_err(e_MISC,"not a complex multiplication in powell");
+  if (!q) pari_err_TYPE("powell [not a complex multiplication]",w);
   if (q != gen_1) w = gdiv(w, q);
   /* compute [a + q w] z, z has CM by w */
   if (typ(w) == t_QUAD && is_pm1(gel(gel(w,1), 3)))
@@ -1394,7 +1393,7 @@ elleisnum(GEN om, long k, long flag, long prec)
   GEN p1, y;
   SL2_red T;
 
-  if (k&1 || k<=0) pari_err(e_MISC,"k not a positive even integer in elleisnum");
+  if (k&1 || k<=0) pari_err_TYPE("elleisnum [k not positive even]",stoi(k));
   if (!get_periods(om, &T)) pari_err_TYPE("elleisnum",om);
   y = _elleisnum(&T, k, prec);
   if (k==2 && signe(T.c))
@@ -1747,7 +1746,7 @@ ellwp0(GEN w, GEN z, long flag, long PREC, long prec)
   if (!z) return weipell0(w,prec,PREC);
   if (typ(z)==t_POL)
   {
-    if (!gcmpX(z)) pari_err(e_MISC,"expecting a simple variable in ellwp");
+    if (!gcmpX(z)) pari_err_TYPE("ellwp [expecting simple variable]",z);
     v = weipell0(w,prec,PREC); setvarn(v, varn(z));
     return v;
   }
@@ -2113,8 +2112,8 @@ elllocalred(GEN e, GEN p)
   pari_sp av = avma;
   checksmallell(e);
   if (typ(ell_get_disc(e)) != t_INT)
-    pari_err(e_MISC,"not an integral curve in elllocalred");
-  if (typ(p) != t_INT) pari_err_TYPE("elllocalred",p);
+    pari_err_TYPE("elllocalred [not an integral curve]",e);
+  if (typ(p) != t_INT) pari_err_TYPE("elllocalred [prime]",p);
   if (signe(p) <= 0) pari_err_PRIME("elllocalred",p);
   return gerepileupto(av, localred(e, p, 0));
 }
@@ -2137,7 +2136,7 @@ ellintegralmodel(GEN e)
       case t_FRAC: /* partial factorization */
         L = shallowconcat(L, gel(Z_factor_limit(gel(c,2), 0),1));
         break;
-      default: pari_err(e_MISC, "not a rational curve in ellintegralmodel");
+      default: pari_err_TYPE("ellintegralmodel [not a rational curve]",e);
     }
   }
   /* a = [a1, a2, a3, a4, a6] */
@@ -3272,7 +3271,7 @@ checkell_int(GEN e)
       typ(ell_get_a2(e)) != t_INT ||
       typ(ell_get_a3(e)) != t_INT ||
       typ(ell_get_a4(e)) != t_INT ||
-      typ(ell_get_a6(e)) != t_INT) pari_err(e_MISC,"not an integral model");
+      typ(ell_get_a6(e)) != t_INT) pari_err_TYPE("anellsmall [not an integral model]",e);
 }
 
 GEN
@@ -3360,7 +3359,7 @@ akell(GEN e, GEN n)
   if (gequal1(n)) return gen_1;
   c6= ell_get_c6(e);
   D = ell_get_disc(e);
-  if (typ(D) != t_INT) pari_err(e_MISC,"not an integral model in akell");
+  if (typ(D) != t_INT) pari_err_TYPE("akell [not an integral model]",e);
   u = coprime_part(n, D);
   s = 1;
   if (!equalii(u, n))
@@ -3751,7 +3750,7 @@ bilhell(GEN e, GEN z1, GEN z2, long prec)
   tz2 = typ(z2[1]);
   if (is_matvec_t(tz2))
   {
-    if (is_matvec_t(tz1)) pari_err(e_MISC,"two vector/matrix types in bilhell");
+    if (is_matvec_t(tz1)) pari_err_TYPE("bilhell",z1);
     p1 = z1; z1 = z2; z2 = p1;
   }
   h2 = ghell(e,z2,prec);
