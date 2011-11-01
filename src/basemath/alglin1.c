@@ -205,7 +205,7 @@ shallowextract(GEN x, GEN L)
     l = lgefint(L)-1; ix = iy = 1;
     maxj = BITS_IN_LONG - bfffo(*int_MSW(L));
     if ((l-2) * BITS_IN_LONG + maxj >= lx)
-      pari_err(e_MISC,"mask too large in vecextract");
+      pari_err_TYPE("vecextract [mask too large]", L);
     for (k = 2, Ld = int_LSW(L); k < l; k++, Ld = int_nextW(Ld))
     {
       ulong B = *Ld;
@@ -225,7 +225,7 @@ shallowextract(GEN x, GEN L)
     char *s = GSTR(L);
     long first, last, cmpl, d;
     if (! get_range(s, &first, &last, &cmpl, lx))
-      pari_err(e_MISC, "incorrect range in extract");
+      pari_err_TYPE("vecextract [incorrect range]", L);
     if (lx == 1) return cgetg(1,tx);
     d = last - first;
     if (cmpl)
@@ -319,7 +319,7 @@ extract0(GEN x, GEN l1, GEN l2)
     if (lg(y) == 1 && lg(x) > 1)
     {
       if (!extract_selector_ok(lg(gel(x,1)), l1))
-        pari_err(e_MISC,"incorrect mask in vecextract");
+        pari_err_TYPE("vecextract [incorrect mask]", l1);
       avma = av; return cgetg(1, t_MAT);
     }
     y = shallowextract(shallowtrans(y), l1);
@@ -498,7 +498,7 @@ diagonal(GEN x)
   if (tx==t_MAT)
   {
     if (RgM_isdiagonal(x)) return gcopy(x);
-    pari_err(e_MISC,"incorrect object in diagonal");
+    pari_err_TYPE("diagonal",x);
   }
   lx=lg(x); y=cgetg(lx,t_MAT);
   for (j=1; j<lx; j++)
