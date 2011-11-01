@@ -97,4 +97,5 @@ Vecsmall([1, 2, 3, 0])
 Vecsmall([0, 1, 2, 3])
 Vecsmall([1, 2, 3, 4])
 Vecsmall([1, 2, 3, 4])
+Vecsmall([4, 5, 3])
 Total time spent: 0

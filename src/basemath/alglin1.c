@@ -187,7 +187,15 @@ shallowextract(GEN x, GEN L)
   long i,j, tl = typ(L), tx = typ(x), lx = lg(x);
   GEN y;
 
-  if (! is_matvec_t(tx)) pari_err_TYPE("extract",x);
+  switch(tx)
+  {
+    case t_VEC:
+    case t_COL:
+    case t_MAT:
+    case t_VECSMALL: break;
+    default: pari_err_TYPE("extract",x);
+
+  }
   if (tl==t_INT)
   { /* extract components of x as per the bits of mask L */
     long k, l, ix, iy, maxj;
@@ -273,7 +281,7 @@ shallowextract(GEN x, GEN L)
     }
     return y;
   }
-  pari_err(e_MISC,"incorrect mask in vecextract");
+  pari_err_TYPE("vecextract [mask]", L);
   return NULL; /* not reached */
 }
 
@@ -299,7 +307,7 @@ extract0(GEN x, GEN l1, GEN l2)
   if (! l2)
   {
     y = shallowextract(x, l1);
-    if (lg(y) == 1) return y;
+    if (lg(y) == 1 || typ(y) == t_VECSMALL) return y;
     av2 = avma;
     y = gcopy(y);
   }

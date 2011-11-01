@@ -10,19 +10,19 @@ Help: vecextract(x,y,{z}): extraction of the components of the matrix or
  strings (indicating ranges as in "1..10") or masks (integers whose binary
  representation indicates the indices to extract, from left to right 1, 2, 4,
  8, etc.).
-Doc: extraction of components of the
- vector or matrix $x$ according to $y$. In case $x$ is a matrix, its
- components are as usual the \emph{columns} of $x$. The parameter $y$ is a
- component specifier, which is either an integer, a string describing a
- range, or a vector.
+Doc: extraction of components of the vector or matrix $x$ according to $y$.
+ In case $x$ is a matrix, its components are the \emph{columns} of $x$. The
+ parameter $y$ is a component specifier, which is either an integer, a string
+ describing a range, or a vector.
 
  If $y$ is an integer, it is considered as a mask: the binary bits of $y$ are
  read from right to left, but correspond to taking the components from left to
  right. For example, if $y=13=(1101)_2$ then the components 1,3 and 4 are
  extracted.
 
- If $y$ is a vector, which must have integer entries, these entries correspond
- to the component numbers to be extracted, in the order specified.
+ If $y$ is a vector (\typ{VEC}, \typ{COL} or \typ{VECSMALL}), which must have
+ integer entries, these entries correspond to the component numbers to be
+ extracted, in the order specified.
 
  If $y$ is a string, it can be
 
