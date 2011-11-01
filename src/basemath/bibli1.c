@@ -425,7 +425,8 @@ choose_params(GEN P, GEN N, GEN X, GEN B, long *pdelta, long *pt)
   long delta, t;
   tau = gtodouble(glog(X, DEFAULTPREC)) / logN;
   beta = gtodouble(glog(B, DEFAULTPREC)) / logN;
-  if (tau >= beta * beta / d) pari_err(e_MISC, "bound too large");
+  if (tau >= beta * beta / d)
+    pari_err_OVERFLOW("zncoppersmith [bound too large]");
   /* TODO : remove P0 completely ! */
   rho = gtodouble(glog(P0, DEFAULTPREC)) / logN;
 

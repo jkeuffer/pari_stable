@@ -242,7 +242,7 @@ rootmod2(GEN f, GEN pp)
     case  0: avma = av; return cgetg(1,t_COL);
     case -1: pari_err_ROOTS0("rootmod2");
   }
-  p = init_p(pp); if (!p) pari_err(e_MISC,"prime too big in rootmod2");
+  p = init_p(pp); if (!p) pari_err_OVERFLOW("rootmod2 [prime too big]");
   if (p & 1)
     y = Flc_to_ZC(Flx_roots_naive(ZX_to_Flx(f,p), p));
   else

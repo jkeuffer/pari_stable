@@ -1287,7 +1287,7 @@ szeta(long k, long prec)
     if ((k&1) == 0) return gen_0;
     /* the one value such that k < 0 and 1 - k < 0, due to overflow */
     if ((ulong)k == (HIGHBIT | 1))
-      pari_err(e_MISC, "too large negative arg %ld in zeta", k);
+      pari_err_OVERFLOW("zeta [large negative argument]");
     k = 1-k;
     y = single_bern(k, prec); togglesign(y);
     return gerepileuptoleaf(av, divru(y, k));
@@ -1787,6 +1787,7 @@ gzeta(GEN x, long prec)
       {
         if (signe(x) > 0) return real_1(prec);
         if (signe(x) < 0 && mod2(x) == 0) return real_0(prec);
+        pari_err_OVERFLOW("zeta [large negative argument]");
       }
       return szeta(itos(x),prec);
 

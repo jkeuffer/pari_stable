@@ -40,7 +40,7 @@ get_prime_index(ulong len)
   int i;
   for (i=0; i < hashprimes_len; i++)
     if (hashprimes[i] > len) return i;
-  pari_err(e_MISC, "hash table too large");
+  pari_err_OVERFLOW("hash table [too large]");
   return -1; /* not reached */
 }
 

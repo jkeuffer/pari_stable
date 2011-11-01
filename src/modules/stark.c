@@ -664,7 +664,7 @@ ArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
   for (i = 1; i <= nz; i++)
   {
     if (is_bigint(gel(cyc,i)))
-      pari_err(e_MISC,"conductor too large in ArtinNumber");
+      pari_err_OVERFLOW("ArtinNumber [conductor too large]");
     gel(gen,i) = set_sign_mod_divisor(nf, NULL, gel(gen,i), cond,sarch);
     classe = isprincipalray(bnr, gel(gen,i));
     for (ic = 1; ic <= nChar; ic++) {

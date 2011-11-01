@@ -873,7 +873,7 @@ name_var(long n, const char *s)
   if (n < pari_var_next())
     pari_err(e_MISC, "renaming a GP variable is forbidden");
   if (n > (long)MAXVARN)
-    pari_err(e_MISC, "variable number too big");
+    pari_err_OVERFLOW("variable number");
 
   ep = (entree*)pari_malloc(sizeof(entree) + strlen(s) + 1);
   u = (char *)initial_value(ep);

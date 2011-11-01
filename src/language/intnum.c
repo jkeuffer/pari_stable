@@ -904,7 +904,7 @@ intnuminit(GEN a, GEN b, long m, long prec)
   long codea, codeb, l;
   GEN T, U, km, kma, kmb, tmp;
 
-  if (m > 30) pari_err(e_MISC,"m too large in intnuminit");
+  if (m > 30) pari_err_OVERFLOW("intnuminit [m]");
   l = prec + 1;
   codea = transcode(a, 1);
   codeb = transcode(b, 1);

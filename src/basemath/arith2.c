@@ -515,7 +515,7 @@ initprimes(ulong maxnum)
   ulong maxnum1 = ((maxnum<65302?65302:maxnum)+512ul);
 
   if ((maxnum>>1) > LONG_MAX - 1024)
-      pari_err(e_MISC, "Too large primelimit");
+    pari_err_OVERFLOW("initprimes [primelimit]");
   p = initprimes0(maxnum1, &len, &last);
 #if 0 /* not yet... GN */
   static int build_the_tables = 1;

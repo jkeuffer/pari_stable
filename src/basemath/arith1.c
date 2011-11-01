@@ -149,7 +149,7 @@ pgener_Zl(ulong p)
   GEN y = Fp_powu(utoipos(x), p-1, q);
   if (equali1(y)) {
     x += p;
-    if (x < p) pari_err(e_MISC, "p too large in pgener_Zl");
+    if (x < p) pari_err_OVERFLOW("pgener_Zl [large prime]");
   }
   avma = av;
 }
@@ -3265,7 +3265,7 @@ classno(GEN x)
   p2 = gsqrt(absi(D),DEFAULTPREC);
   p1 = mulrr(divrr(p2,mppi(DEFAULTPREC)), dbltor(1.005)); /*overshoot by 0.5%*/
   s = itos_or_0( truncr(shiftr(sqrtr(p2), 1)) );
-  if (!s) pari_err(e_MISC,"discriminant too big in classno");
+  if (!s) pari_err_OVERFLOW("classno [discriminant too large]");
   if (s < 10) s = 200;
   else if (s < 20) s = 1000;
   else if (s < 5000) s = 5000;
@@ -3372,7 +3372,7 @@ classno2(GEN x)
     if (cmprr(sqrr(p2), shiftr(invlogd,1)) >= 0) p1 = mulrr(p2,p1);
   }
   n = itos_or_0( mptrunc(p1) );
-  if (!n) pari_err(e_MISC,"discriminant too large in classno");
+  if (!n) pari_err_OVERFLOW("classno [discriminant too large]");
 
   p4 = divri(Pi,d);
   p7 = invr(sqrtr_abs(Pi));

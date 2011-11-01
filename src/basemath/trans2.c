@@ -1215,7 +1215,7 @@ ggamd(GEN x, long prec)
     case t_INT:
     {
       long k = itos(x);
-      if (labs(k) > 962353) pari_err(e_MISC, "argument too large in ggamd");
+      if (labs(k) > 962353) pari_err_OVERFLOW("ggamd");
       return gammahs(k<<1, prec);
     }
     case t_REAL: case t_FRAC: case t_COMPLEX: case t_QUAD: case t_PADIC:
@@ -1353,7 +1353,7 @@ ggamma(GEN x, long prec)
   {
     case t_INT:
       if (signe(x) <= 0) pari_err(e_MISC,"non-positive integer argument in ggamma");
-      if (cmpiu(x,481177) > 0) pari_err(e_MISC,"argument too large in ggamma");
+      if (cmpiu(x,481177) > 0) pari_err_OVERFLOW("ggamma");
       return mpfactr(itos(x) - 1, prec);
 
     case t_REAL: case t_COMPLEX:
@@ -1364,7 +1364,7 @@ ggamma(GEN x, long prec)
       z = gel(x,1); /* true argument is z/2 */
       if (is_bigint(z) || labs(m = itos(z)) > 962354)
       {
-        pari_err(e_MISC, "argument too large in ggamma");
+        pari_err_OVERFLOW("ggamma");
         return NULL; /* not reached */
       }
       return gammahs(m-1, prec);

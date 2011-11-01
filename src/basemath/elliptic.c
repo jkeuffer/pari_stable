@@ -963,7 +963,7 @@ ellpow_CM(GEN e, GEN z, GEN n)
   if (typ(N) != t_INT)
     pari_err_TYPE("powell (non integral CM exponent)",N);
   ln = itos_or_0(shifti(addsi(1, N), 3));
-  if (!ln) pari_err(e_MISC, "norm too large in CM");
+  if (!ln) pari_err_OVERFLOW("ellpow_CM [norm too large]");
   vn = ((ln>>1)-4)>>2;
   z1 = weipell(e, ln);
   z2 = gsubst(z1, 0, monomial(n, 1, 0));
@@ -2647,7 +2647,7 @@ get_table_size(GEN pordmin, GEN B)
   pari_sp av = avma;
   GEN t = ceilr( sqrtr( divri(itor(pordmin, DEFAULTPREC), B) ) );
   if (is_bigint(t))
-    pari_err(e_MISC,"prime too large: please install the 'seadata' package");
+    pari_err_OVERFLOW("ellap [large prime: install the 'seadata' package]");
   avma = av;
   return itos(t) >> 1;
 }

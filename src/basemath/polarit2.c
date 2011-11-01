@@ -353,7 +353,7 @@ gp_factor0(GEN x, GEN flag)
   {
     case 2: B = 0; break;
     case 3: B = flag[2]; maxprime_check(B); break;
-    default: pari_err(e_MISC,"factor: prime bound too large = %Ps", flag);
+    default: pari_err_OVERFLOW("factor [large prime bound]");
              return NULL; /*not reached*/
   }
   return boundfact(x, B);
