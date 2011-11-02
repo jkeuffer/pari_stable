@@ -26,7 +26,7 @@ galoisnbpol(long a)
   F = pari_fopengz(s);
   if (!F) pari_err_FILE("galpol file",s);
   n = gp_read_stream(F->file);
-  if (!n || typ(n)!=t_INT) pari_err(e_MISC,"incompatible galpol file %s",s);
+  if (!n || typ(n)!=t_INT) pari_err_FILE("galpol file [incompatible]",s);
   pari_fclose(F); return n;
 }
 
@@ -37,14 +37,16 @@ galoisgetpol(long a, long b, long sig)
   GEN V;
   const char *si;
   char *s;
-  if (a<=0 || b<0) pari_err(e_MISC,"argument must be positive");
+  if (a<=0) pari_err_TYPE("galoisgetpol [a<=0]",stoi(a));
+  if (b<0) pari_err_TYPE("galoisgetpol [b<0]",stoi(b));
   if (!b) return galoisnbpol(a);
   switch(sig)
   {
     case 1: si="real"; break;
     case 2: if (a%2==0) { si="complex"; break; }
     default: /*FALL THROUGH*/
-      pari_err(e_MISC,"invalid signature in galoisgetpol"); return NULL;
+      pari_err_TYPE("galoisgetpol [invalid signature]", stoi(sig));
+      return NULL;
   }
   s = pari_sprintf("%s/galpol/%ld/%ld/%s", pari_datadir, a,b,si);
   F = pari_fopengz(s); free(s);
@@ -53,10 +55,10 @@ galoisgetpol(long a, long b, long sig)
     long n = itos(galoisnbpol(a));
     if (b > n) pari_err(e_MISC,"Only %ld group%s of order %ld",
                         n, n>1? "s": "", a);
-    else pari_err_FILE("galpol file", s);
+    else pari_err_FILE("galpol file", F->name);
   }
   V = gp_read_stream(F->file);
-  if (!V || typ(V)!=t_VEC) pari_err(e_MISC,"incompatible galpol file");
+  if (!V || typ(V)!=t_VEC) pari_err_FILE("galpol file", F->name);
   pari_fclose(F); return V;
 }
 
