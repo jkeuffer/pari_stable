@@ -112,7 +112,7 @@ calc_block(blockdata *B, GEN Z, GEN Y, GEN SB)
     for (j=2; j<r; j++)
       if (n[j]%k == 0)
       {
-        if (++lpn >= BIL) pari_err(e_MISC,"overflow in calc_block");
+        if (++lpn >= BIL) pari_err_OVERFLOW("calc_block");
         pn[lpn] = n[j]; pnon[lpn] = j;
         ngcd = ugcd(ngcd, n[j]);
       }
@@ -551,7 +551,7 @@ choose_prime(primedata *S, GEN pol, GEN dpol)
   for(k = 1; k < 11 || !oldlcm; k++,avma = av)
   {
     do NEXT_PRIME_VIADIFF(p[2], di); while (!smodis(dpol, p[2]));
-    if (k > 5 * N) pari_err(e_MISC,"sorry, too many block systems in nfsubfields");
+    if (k > 5 * N) pari_err_OVERFLOW("choose_prime [too many block systems]");
     ff = gel(FpX_factor(pol, p), 1);
     r = lg(ff)-1;
     if (r == N || r >= BIL) continue;
