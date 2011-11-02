@@ -399,7 +399,7 @@ parse_bound(subgp_iter *T)
   default: pari_err_TYPE("subgroup",B);
   }
   if (signe(T->bound) <= 0)
-    pari_err(e_MISC,"subgroup: index bound must be positive");
+    pari_err_TYPE("subgroup [index bound <=0]", T->bound);
 }
 
 static GEN
@@ -443,7 +443,7 @@ subgroup_engine(subgp_iter *T)
   }
   for (i=1; i<n-1; i++)
     if (!dvdii(gel(cyc,i), gel(cyc,i+1)))
-      pari_err(e_MISC,"not a group in forsubgroup");
+      pari_err_TYPE("forsubgroup [not a group]", cyc);
   if (n == 1) {
     parse_bound(T);
     switch(T->boundtype)
@@ -453,7 +453,7 @@ subgroup_engine(subgp_iter *T)
     }
     avma = av; return;
   }
-  if (!signe(cyc[1])) pari_err(e_MISC,"infinite group in forsubgroup");
+  if (!signe(cyc[1])) pari_err_TYPE("forsubgroup [infinite group]", cyc);
   fa = Z_factor(gel(cyc,1)); primlist = gel(fa,1);
   nbprim = lg(primlist);
   listL = new_chunk(n); imax = k = 0;
