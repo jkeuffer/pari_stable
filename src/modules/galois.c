@@ -69,7 +69,7 @@ partitions_galois(long n)
     case 9: p = 30; break;
     case 10:p = 42; break;
     default:
-      if (n < 0) pari_err(e_MISC, "partitions( %ld ) is meaningless", n);
+      if (n < 0) pari_err_TYPE("partitions_galois", stoi(n));
       av = avma; p = itos( numbpart(stoi(n)) ); avma = av; break;
   }
   T = new_chunk(p + 1); T[0] = 0;
@@ -309,7 +309,7 @@ bin(char c)
   if (c>='0' && c<='9') c=c-'0';
   else if (c>='A' && c<='Z') c=c-'A'+10;
   else if (c>='a' && c<='z') c=c-'a'+36;
-  else pari_err(e_MISC,"incorrect value in bin()");
+  else pari_err_TYPE("bin [not alphanumeric]", stoi(c));
   return c;
 }
 
@@ -676,7 +676,7 @@ gpoly(GEN rr, long n1, long n2)
       return gsub(p1,p2);
     }
   }
-  pari_err(e_MISC,"indefinite invariant polynomial in gpoly()");
+  pari_err_TYPE("gpoly [undefined invariant polynomial]", mkvecsmall2(n1,n2));
   return NULL; /* not reached */
 }
 
@@ -2358,8 +2358,7 @@ polgaloisnamesbig(long n, long k)
     avma = av; return strtoGENstr("");
   }
   V = gp_read_stream(f->file);
-  if (!V || typ(V)!=t_VEC || k>=lg(V))
-    pari_err(e_MISC,"incompatible galois file %s",s);
+  if (!V || typ(V)!=t_VEC || k>=lg(V)) pari_err_FILE("galois file %s",s);
   pari_fclose(f);
   return gerepilecopy(av, gel(V,k));
 }
