@@ -499,7 +499,7 @@ polgalois(GEN x, long prec)
     switch(n)
     {
       case 4: z = cgetg(7,t_VEC);
-        prec = DEFAULTPREC + (long)(cb*(18./ LOG2 / BITS_IN_LONG));
+        prec = nbits2prec((long)(cb*(18./ LOG2)) + 64);
         for(;;)
         {
           p1=cleanroots(x,prec);
@@ -531,7 +531,7 @@ polgalois(GEN x, long prec)
       case 5: z = cgetg(7,t_VEC);
         ee= cgetg(7,t_VECSMALL);
         w = cgetg(7,t_VECSMALL);
-        prec = DEFAULTPREC + (long)(cb*(21. / LOG2/ BITS_IN_LONG));
+        prec = nbits2prec((long)(cb*(21. / LOG2)) + 64);
         for(;;)
         {
           for(;;)
@@ -588,7 +588,7 @@ polgalois(GEN x, long prec)
         }
 
       case 6: z = cgetg(7, t_VEC);
-        prec = DEFAULTPREC + (long)(cb * (42. / LOG2 / BITS_IN_LONG));
+        prec = nbits2prec((long) (cb * (42. / LOG2)) + 64);
         for(;;)
         {
           for(;;)
@@ -677,7 +677,7 @@ polgalois(GEN x, long prec)
         }
 
       case 7: z = cgetg(36,t_VEC);
-        prec = DEFAULTPREC + (long)(cb*(7. / LOG2 / BITS_IN_LONG));
+        prec = nbits2prec((long)(cb*(7. / LOG2)) + 64);
         for(;;)
         {
           ind = 0; p1=cleanroots(x,prec);
@@ -1387,7 +1387,7 @@ get_roots_for_M(nffp_t *F)
     eBD = 1 + gexpo(gel(F->basden,1));
     er  = F->ro? (1+gexpo(F->ro)): cauchy_bound(F->x)/LOG2;
     if (er < 0) er = 0;
-    F->extraprec = (long)((n*er + eBD + log2(n)) / BITS_IN_LONG);
+    F->extraprec = nbits2extraprec((long)(n*er + eBD + log2(n))-(BITS_IN_LONG-1));/*FIXME*/
   }
 
   PREC = F->prec + F->extraprec;
@@ -1631,7 +1631,7 @@ get_red_G(nfbasic_t *T, GEN *pro)
       if (u0) u0 = gerepileupto(av, RgM_mul(u0,u));
       else    u0 = gerepilecopy(av, u);
     }
-    prec = precdbl(prec) + divsBIL(gexpo(u0));
+    prec = precdbl(prec) + nbits2extraprec(gexpo(u0));
     F.ro = NULL;
     if (DEBUGLEVEL) pari_warn(warnprec,"get_red_G", prec);
   }
