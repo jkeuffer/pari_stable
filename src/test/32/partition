@@ -11,7 +11,7 @@
 426796827005538082281337283642237399241533
   ***   at top-level: numbpart(10^15+2)
   ***                 ^-----------------
-  *** numbpart: arg to partition function must be < 10^15.
+  *** numbpart: overflow in numbpart [n < 10^15].
 [Vecsmall([1])]
 [Vecsmall([9]), Vecsmall([1, 8]), Vecsmall([2, 7]), Vecsmall([3, 6]), Vecsma
 ll([4, 5]), Vecsmall([1, 1, 7]), Vecsmall([1, 2, 6]), Vecsmall([1, 3, 5]), V
@@ -29,4 +29,4 @@ ecsmall([1, 1, 1, 1, 2, 3]), Vecsmall([1, 1, 1, 2, 2, 2]), Vecsmall([1, 1, 1
 , 1, 1, 1, 3]), Vecsmall([1, 1, 1, 1, 1, 2, 2]), Vecsmall([1, 1, 1, 1, 1, 1,
  1, 2]), Vecsmall([1, 1, 1, 1, 1, 1, 1, 1, 1])]
 []
-Total time spent: 49943
+Total time spent: 16269
