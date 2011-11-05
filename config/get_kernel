@@ -33,7 +33,17 @@ case "$arch" in
         4) asmarch=ppc;;
         8) asmarch=ppc64;;
         esac;                           prettya='PowerPC' ;;
-  arm*)          asmarch=none;          prettya=$arch ;;
+  arm*)
+    exe=$osname-$arch-endian$$
+    echo $n "Checking supported ARM kernel: $c"
+    if ($CC $CFLAGS -I../src/kernel/arm kernel.c -o $exe 2>/dev/null); then
+      asmarch=arm;
+    else
+      asmarch=none;
+    fi;
+    echo "$asmarch"
+    rm -f $exe
+    prettya=$arch;;
   m68k)          asmarch=m68k;          prettya='Motorola 68k';;
   sh3)           asmarch=none;          prettya=SH-3 ;;
   sh5)           asmarch=none;          prettya=SH-5 ;;
