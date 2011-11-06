@@ -818,7 +818,8 @@ gtrace(GEN x)
   return NULL; /* not reached */
 }
 
-/* Gauss decomposition for positive definite matrix a [matrix Q, Algo 2.7.6]
+/* Cholesky decomposition for positive definite matrix a
+ * [GTM138, Algo 2.7.6, matrix Q]
  * If a is not positive definite return NULL. */
 GEN
 qfgaussred_positive(GEN a)
