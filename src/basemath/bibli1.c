@@ -1179,22 +1179,44 @@ addmulimp(GEN x, GEN y, GEN z)
   if (typ(z) == t_INT) return mpadd(x, mulii(y, z));
   return mpadd(x, mulir(y, z));
 }
+
+/* yk + vk * (xk + zk)^2 */
+static GEN
+norm_aux(GEN xk, GEN yk, GEN zk, GEN vk)
+{
+  GEN t = mpadd(xk, zk);
+  if (typ(t) == t_INT) { /* probably gen_0, avoid loss of accuracy */
+    yk = addmulimp(yk, sqri(t), vk);
+  } else {
+    yk = mpadd(yk, mpmul(sqrr(t), vk));
+  }
+  return yk;
+}
 /* yk + vk * (xk + zk)^2 < B + epsilon */
 static int
 check_bound(GEN B, GEN xk, GEN yk, GEN zk, GEN vk)
 {
   pari_sp av = avma;
-  int f;
-  GEN t = mpadd(xk, zk);
-  if (!isintzero(t)) yk = mpadd(yk, mpmul(vk, mpsqr(t)));
-  f = mpgreaterthan(yk, B);
+  int f = mpgreaterthan(norm_aux(xk,yk,zk,vk), B);
   avma = av; return !f;
 }
 
-/* q is the Gauss reduction of the quadratic form */
-/* general program for positive definit quadratic forms (real coeffs).
- * Enumerate vectors whose norm is less than BORNE, minimal vectors
- * if BORNE = NULL (implies check = NULL).
+/* q(k-th canonical basis vector), where q is given in Cholesky form
+ * q(x) = sum_{i = 1}^n q[i,i] (x[i] + sum_{j > i} q[i,j] x[j])^2.
+ * Namely q(e_k) = q[k,k] + sum_{i < k} q[i,i] q[i,k]^2
+ * Assume 1 <= k <= n. */
+static GEN
+cholesky_norm_ek(GEN q, long k)
+{
+  GEN t = gcoeff(q,k,k);
+  long i;
+  for (i = 1; i < k; i++) t = norm_aux(gen_0, t, gcoeff(q,i,k), gcoeff(q,i,i));
+  return t;
+}
+
+/* q is the Cholesky decomposition of a quadratic form
+ * Enumerate vectors whose norm is less than BORNE (Algo 2.5.7),
+ * minimal vectors if BORNE = NULL (implies check = NULL).
  * If (check != NULL) consider only vectors passing the check, and assumes
  *   we only want the smallest possible vectors */
 static GEN
@@ -1226,13 +1248,27 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
     gel(v,i) = gcoeff(q,i,i);
     gel(x,i) = gel(y,i) = gel(z,i) = gen_0;
   }
-  borne1 = BORNE? BORNE: gel(v,1);
+  if (BORNE)
+    borne1 = BORNE;
+  else
+  {
+    borne1 = gcoeff(q,1,1);
+    for (i=2; i<N; i++)
+    {
+      GEN b = cholesky_norm_ek(q, i);
+      if (gcmp(b, borne1) < 0) borne1 = b;
+    }
+    /* borne1 = norm of smallest basis vector */
+  }
   borne2 = mulrr(borne1,alpha);
   if (DEBUGLEVEL>2)
     err_printf("smallvectors looking for norm < %P.4G\n",borne1);
   s = 0; k = n;
   for(;; step(x,y,inc,k)) /* main */
-  {
+  { /* x (supposedly) small vector, ZV.
+     * For all t >= k, we have
+     *   z[t] = sum_{j > t} q[t,j] * x[j]
+     *   y[t] = sum_{i > t} q[i,i] * (x[i] + z[i])^2 */
     do
     {
       int fl = 0;
@@ -1244,18 +1280,12 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
         for (j=k+1; j<N; j++) p1 = addmulimp(p1, gel(x,j), gcoeff(q,l,j));
         gel(z,l) = gerepileuptoleaf(av1,p1);
 
-        av1 = avma; p1 = mpadd(gel(x,k),gel(z,k));
-        if (typ(p1) == t_INT) { /* probably gen_0, avoid loss of accuracy */
-          p1 = sqri(p1);
-          p1 = addmulimp(gel(y,k), p1, gel(v,k));
-        } else {
-          p1 = sqrr(p1);
-          p1 = mpadd(gel(y,k), mpmul(p1, gel(v,k)));
-        }
+        av1 = avma;
+        p1 = norm_aux(gel(x,k), gel(y,k), gel(z,k), gel(v,k));
         gel(y,l) = gerepileuptoleaf(av1, p1);
         /* skip the [x_1,...,x_skipfirst,0,...,0] */
         if ((l <= skipfirst && !signe(y[skipfirst]))
-         || mplessthan(borne1, gel(y,l)) < 0) fl = 1;
+         || mplessthan(borne1, gel(y,l))) fl = 1;
         else
           gel(x,l) = mpround( mpneg(gel(z,l)) );
         k = l;
@@ -1286,9 +1316,9 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
     while (k > 1);
     if (!signe(x[1]) && !signe(y[1])) continue; /* exclude 0 */
 
-    av1 = avma; p1 = mpsqr(mpadd(gel(x,1),gel(z,1)));
-    norme1 = mpadd(gel(y,1), mpmul(p1, gel(v,1)));
-    if (mpgreaterthan(norme1,borne1) > 0) { avma=av1; continue; /* main */ }
+    av1 = avma;
+    norme1 = norm_aux(gel(x,1),gel(y,1),gel(z,1),gel(v,1));
+    if (mpgreaterthan(norme1,borne1)) { avma = av1; continue; /* main */ }
 
     norme1 = gerepileuptoleaf(av1,norme1);
     if (check)
@@ -1306,7 +1336,7 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
     {
       if (!BORNE) /* find minimal vectors */
       {
-        if (mplessthan(norme1, borne1) < 0)
+        if (mplessthan(norme1, borne1))
         { /* strictly smaller vector than previously known */
           borne1 = norme1; /* + epsilon */
           s = 0;
@@ -1337,7 +1367,7 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
         }
         imin = i;
         for (; i <= s; i++)
-          if (mpgreaterthan(gel(norms,per[i]), borne1) > 0) break;
+          if (mpgreaterthan(gel(norms,per[i]), borne1)) break;
         imax = i;
         for (i=imin, s=0; i < imax; i++) gel(S,++s) = gel(S,per[i]);
         avma = av2;
@@ -1381,7 +1411,7 @@ END:
     {
       long t = per[i];
       GEN N = gel(norms,t);
-      if (j && mpgreaterthan(N, borne1) > 0) break;
+      if (j && mpgreaterthan(N, borne1)) break;
       if ((p = check(data,gel(S,t))))
       {
         if (!j) borne1 = N;
@@ -1474,10 +1504,11 @@ fincke_pohst(GEN a, GEN B0, long stockmax, long PREC, FP_chk_fun *CHECK)
   r = rperm; res = NULL;
   CATCH(e_PREC) { }
   TRY {
+    GEN q;
     if (CHECK && CHECK->f_init) bound = CHECK->f_init(CHECK, r, u);
-    r = Q_from_QR(r, gprecision(vnorm));
-    if (!r) pari_err_PREC("fincke_pohst");
-    res = smallvectors(r, bound, stockmax, CHECK);
+    q = Q_from_QR(r, gprecision(vnorm));
+    if (!q) pari_err_PREC("fincke_pohst");
+    res = smallvectors(q, bound, stockmax, CHECK);
   } ENDCATCH;
   if (CHECK)
   {
