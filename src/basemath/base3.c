@@ -670,8 +670,9 @@ basistoalg(GEN nf, GEN x)
       return gerepilecopy(av, coltoalg(nf, x));
     }
     case t_POLMOD:
-      if (!RgX_equal_var(nf_get_pol(nf),gel(x,1)))
-        pari_err(e_MISC,"not the same number field in basistoalg");
+      T = nf_get_pol(nf);
+      if (!RgX_equal_var(T,gel(x,1)))
+        pari_err_MODULUS("basistoalg", T,gel(x,1));
       return gcopy(x);
     case t_POL:
       T = nf_get_pol(nf);
@@ -797,7 +798,7 @@ algtobasis(GEN nf, GEN x)
   {
     case t_POLMOD:
       if (!RgX_equal_var(nf_get_pol(nf),gel(x,1)))
-        pari_err(e_MISC,"not the same number field in algtobasis");
+        pari_err_MODULUS("algtobasis", nf_get_pol(nf),gel(x,1));
       x = gel(x,2);
       switch(typ(x))
       {
@@ -846,7 +847,7 @@ rnfbasistoalg(GEN rnf,GEN x)
 
     case t_POLMOD:
       if (!RgX_equal_var(gel(rnf,1),gel(x,1)))
-        pari_err(e_MISC,"not the same number field in rnfbasistoalg");
+        pari_err_MODULUS("rnfbasistoalg", gel(rnf,1),gel(x,1));
       return gcopy(x);
 
     default: z = cgetg(3,t_POLMOD);
@@ -945,7 +946,7 @@ rnfalgtobasis(GEN rnf,GEN x)
 
     case t_POLMOD:
       if (!RgX_equal_var(gel(rnf,1),gel(x,1)))
-        pari_err(e_MISC,"not the same number field in rnfalgtobasis");
+        pari_err_MODULUS("rnfalgtobasis", gel(rnf,1),gel(x,1));
       x = gel(x,2);
       if (typ(x) != t_POL) { GEN A = gel(rnf,8); return gmul(x, gel(A,1)); }
       /* fall through */
@@ -1712,7 +1713,7 @@ Idealstar(GEN nf, GEN ideal, long flag)
     arch = gel(ideal,2); ideal = gel(ideal,1);
     i = typ(arch);
     if (!is_vec_t(i) || lg(arch) != R1+1)
-      pari_err(e_MISC,"incorrect archimedean component in Idealstar");
+      pari_err_TYPE("Idealstar [incorrect archimedean component]",arch);
     archp = vec01_to_indices(arch);
   }
   else

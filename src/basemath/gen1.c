@@ -528,26 +528,24 @@ conjvec(GEN x,long prec)
             av = avma;
             T = RgX_to_FpX(T,p);
             x = RgX_to_FpX(x, p);
-            if (varn(x) != varn(T))
-              pari_err(e_MISC,"not a rational polynomial in conjvec");
+            if (varn(x) != varn(T)) pari_err_VAR("conjvec",x,T);
             z = FpXQC_to_mod(FpXQ_conjvec(x, T , p), T, p);
             return gerepileupto(av, z);
           }
           case t_INT:
           case t_FRAC: break;
-          default: pari_err(e_MISC,"not a rational polynomial in conjvec");
+          default: pari_err_TYPE("conjvec [not a rational t_POL]",T);
         }
       }
       if (typ(x) != t_POL)
       {
         if (!is_rational_t(typ(x)))
-          pari_err(e_MISC,"not a rational polynomial in conjvec");
+          pari_err_TYPE("conjvec [not a rational t_POL]",x);
         retconst_col(lx-3, gcopy(x));
       }
       RgX_check_QX(x, "conjvec");
       av = avma;
-      if (varn(x) != varn(T))
-        pari_err(e_MISC,"inconsistent variables in conjvec");
+      if (varn(x) != varn(T)) pari_err_VAR("conjvec",x,T);
       r = cleanroots(T,prec);
       z = cgetg(lx-2,t_COL);
       for (i=1; i<=lx-3; i++) gel(z,i) = poleval(x, gel(r,i));

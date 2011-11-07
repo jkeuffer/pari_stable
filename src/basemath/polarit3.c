@@ -143,8 +143,7 @@ Rg_to_Fp(GEN x, GEN p)
     case t_INTMOD: {
       GEN q = gel(x,1), a = gel(x,2);
       if (equalii(q, p)) return icopy(a);
-      if (!dvdii(q,p))
-        pari_err(e_MISC,"inconsistent moduli in Rg_to_Fp: %Ps, %Ps", q, p);
+      if (!dvdii(q,p)) pari_err_MODULUS("Rg_to_Fp", q, p);
       return remii(a, p);
     }
     default: pari_err_TYPE("Rg_to_Fp",x);
@@ -166,8 +165,7 @@ Rg_to_Fl(GEN x, ulong p)
     case t_INTMOD: {
       GEN q = gel(x,1), a = gel(x,2);
       if (equaliu(q, p)) return itou(a);
-      if (!dvdiu(q,p))
-        pari_err(e_MISC,"inconsistent moduli in Rg_to_Fp: %Ps, %lu", q, p);
+      if (!dvdiu(q,p)) pari_err_MODULUS("Rg_to_Fl", q, utoi(p));
       return umodiu(a, p);
     }
     default: pari_err_TYPE("Rg_to_Fl",x);

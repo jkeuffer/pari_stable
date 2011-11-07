@@ -3012,7 +3012,7 @@ rnf_fix_pol(GEN T, GEN P, int lift)
         break;
       case t_POLMOD:
         if (!RgX_equal_var(gel(c,1), T))
-          pari_err_VAR("rnf function", gel(c,1),T);
+          pari_err_MODULUS("rnf function", gel(c,1),T);
         if (lift) c = gel(c,2);
         break;
       default: pari_err_TYPE("rnf function",c);

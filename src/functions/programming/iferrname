@@ -146,6 +146,14 @@ Doc: evaluates the expression sequence \var{seq1}. If an error of type
   \item \kbd{"e\_MISC"}. Generic uncategorized error.
   \var{E} has one component (\typ{STR}): the error message to print.
 
+  \item \kbd{"e\_MODULUS"}. moduli $x$ and $y$ submitted to function $s$ are
+  inconsistent. As in
+  \bprog
+    nfalgtobasis(nfinit(t^3-2), Mod(t,t^2+1)
+  @eprog\noindent
+  \var{E} has three component, 1 (\typ{STR}): the function $s$,
+  2: the argument $x$, 3: the argument $x$.
+
   \item \kbd{"e\_NEGVAL"}. An argument of function $s$ is a power series with
   negative valuation, which does not make sense. (As in \kbd{cos(1/x)}.)
   \var{E} has one component, 1 (\typ{STR}): the function name $s$.

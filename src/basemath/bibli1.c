@@ -692,20 +692,19 @@ plindep(GEN x)
 {
   long i, j, prec = LONG_MAX, nx = lg(x)-1, v;
   pari_sp av = avma;
-  GEN p = NULL, pn,p1,m,a;
+  GEN p = NULL, pn, m, a;
 
   if (nx < 2) return cgetg(1,t_COL);
   for (i=1; i<=nx; i++)
   {
-    p1 = gel(x,i);
-    if (typ(p1) != t_PADIC) continue;
+    GEN c = gel(x,i), q;
+    if (typ(c) != t_PADIC) continue;
 
-    j = precp(p1); if (j < prec) prec = j;
-    if (!p) p = gel(p1,2);
-    else if (!equalii(p, gel(p1,2)))
-      pari_err(e_MISC,"inconsistent primes in plindep");
+    j = precp(c); if (j < prec) prec = j;
+    q = gel(c,2);
+    if (!p) p = q; else if (!equalii(p, q)) pari_err_MODULUS("plindep", p, q);
   }
-  if (!p) pari_err(e_MISC,"not a p-adic vector in plindep");
+  if (!p) pari_err_TYPE("plindep [not a p-adic vector]",x);
   v = ggval(x,p); pn = powiu(p,prec);
   if (v != 0) x = gmul(x, powis(p, -v));
   x = RgV_to_FpV(x, pn);

@@ -56,18 +56,18 @@ idealtyp(GEN *ideal, GEN *arch)
   {
     case t_MAT: lx = lg(x);
       if (lx == 1) { t = id_PRINCIPAL; x = gen_0; break; }
-      if (lx != lg(x[1])) pari_err(e_MISC,"non-square t_MAT in idealtyp");
+      if (lx != lg(x[1])) pari_err_TYPE("idealtyp [non-square t_MAT]",x);
       t = id_MAT;
       break;
 
-    case t_VEC: if (lg(x)!=6) pari_err(e_MISC, "incorrect ideal in idealtyp");
+    case t_VEC: if (lg(x)!=6) pari_err_TYPE("idealtyp",x);
       t = id_PRIME; break;
 
     case t_POL: case t_POLMOD: case t_COL:
     case t_INT: case t_FRAC:
       t = id_PRINCIPAL; break;
     default:
-      pari_err(e_MISC, "incorrect ideal in idealtyp");
+      pari_err_TYPE("idealtyp",x);
       return 0; /*not reached*/
   }
   *ideal = x; return t;
@@ -134,7 +134,7 @@ idealhnf_shallow(GEN nf, GEN x)
       long nx = lx-1;
       N = nf_get_degree(nf);
       if (nx == 0) return cgetg(1, t_MAT);
-      if (lg(x[1])-1 != N) pari_err(e_MISC,"incorrect dimension in idealhnf");
+      if (lg(x[1])-1 != N) pari_err_TYPE("idealhnf [wrong dimension]",x);
       if (nx == 1) return idealhnf_principal(nf, gel(x,1));
 
       if (nx == N && RgM_is_ZM(x) && ZM_ishnf(x)) return x;
@@ -151,7 +151,7 @@ idealhnf_shallow(GEN nf, GEN x)
       GEN A = gel(x,1), B = gel(x,2);
       N = nf_get_degree(nf);
       if (N != 2)
-        pari_err(e_MISC,"Qfb only allowed for quadratic fields", x, D);
+        pari_err_TYPE("idealhnf [Qfb for non-quadratic fields]", x);
       if (!equalii(qfb_disc(x), D))
         pari_err(e_MISC,"%Ps has discriminant != %Ps in idealhnf", x, D);
       /* x -> A Z + (-B + sqrt(D)) / 2 Z
@@ -816,7 +816,7 @@ idealaddmultoone(GEN nf, GEN list)
       nz++;
       RgM_check_ZM(I,"idealaddmultoone");
       if (lg(gel(I,1)) != N+1)
-        pari_err(e_MISC,"%Zs: not an ideal in idealaddmultoone", I);
+        pari_err_TYPE("idealaddmultoone [not an ideal]", I);
     }
     gel(L,i) = I;
   }
@@ -2160,7 +2160,7 @@ GEN
 idealapprfact(GEN nf, GEN x) {
   pari_sp av = avma;
   if (typ(x) != t_MAT || lg(x) != 3)
-    pari_err(e_MISC,"not a factorization in idealapprfact");
+    pari_err_TYPE("idealapprfact [not a factorization]",x);
   check_listpr(gel(x,1));
   return gerepileupto(av, idealapprfact_i(nf, x, 0));
 }
@@ -2219,11 +2219,10 @@ idealchinese(GEN nf, GEN x, GEN w)
 
   nf = checknf(nf); N = nf_get_degree(nf);
   if (typ(x) != t_MAT || lg(x) != 3)
-    pari_err(e_MISC,"not a prime ideal factorization in idealchinese");
+    pari_err_TYPE("idealchinese [not a factorization]",x);
   L = gel(x,1); r = lg(L);
   e = gel(x,2);
-  if (!is_vec_t(ty) || lg(w) != r)
-    pari_err(e_MISC,"not a suitable vector of elements in idealchinese");
+  if (!is_vec_t(ty) || lg(w) != r) pari_err_TYPE("idealchinese",w);
   if (r == 1) return scalarcol_shallow(gen_1,N);
 
   w = Q_remove_denom(w, &den);
@@ -2672,7 +2671,7 @@ nfsnf(GEN nf, GEN x)
           D = idealdiv(nf,gel(I,k),gel(I,i));
           p2 = idealdiv(nf,gel(J,i), p1);
           l = RgV_find_denom( RgM_solve(p2, D) );
-          if (l>N) pari_err(e_MISC,"bug2 in nfsnf");
+          if (l>N) pari_err_BUG("nfsnf");
           p1 = element_mulvecrow(nf,gel(D,l),A,k,i);
           for (l=1; l<=i; l++) gcoeff(A,i,l) = gadd(gcoeff(A,i,l),gel(p1,l));
 

@@ -69,3 +69,6 @@ v[Pi] = 1
 M = [1.,0;0,1]; qflll(M,1)
 \\ RgV_check_ZV
 addprimes(1.)
+
+\\e_MODULUS
+nfalgtobasis(nfinit(t^3-2),Mod(t,t^2+1))

@@ -106,4 +106,9 @@
   ***   at top-level: addprimes(1.)
   ***                 ^-------------
   *** addprimes: incorrect type in addprimes [integer vector] (t_VEC).
-Total time spent: 16
+  ***   at top-level: nfalgtobasis(nfinit(
+  ***                 ^--------------------
+  *** nfalgtobasis: inconsistent moduli in algtobasis:
+    t^3 - 2
+    t^2 + 1
+Total time spent: 12
