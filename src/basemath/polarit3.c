@@ -1376,9 +1376,7 @@ intersect_ker(GEN P, GEN MA, GEN U, GEN l)
     A = FpM_ker(FpXQV_FpX_Frobenius(V, U, P, l), l);
   }
   if (DEBUGLEVEL>=4) timer_printf(&T,"matrix polcyclo");
-  if (lg(A)!=r+1)
-    pari_err(e_MISC,"ZZ_%Ps[%Ps]/(%Ps) is not a field in FpX_ffintersect"
-        ,l,pol_x(vp),P);
+  if (lg(A)!=r+1) pari_err_IRREDPOL("FpX_ffintersect", P);
   A = gerepileupto(ltop,A);
   /*The formula is
    * a_{r-1} = -\phi(a_0)/b_0
@@ -1417,8 +1415,10 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
   GEN *gptr[2];
   vp = varn(P); np = degpol(P);
   vq = varn(Q); nq = degpol(Q);
-  if (np<=0 || nq<=0 || n<=0 || np%n!=0 || nq%n!=0)
-    pari_err(e_MISC,"bad degrees in FpX_ffintersect: %d,%d,%d",n,np,nq);
+  if (np<=0) pari_err_IRREDPOL("FpX_ffintersect", P);
+  if (nq<=0) pari_err_IRREDPOL("FpX_ffintersect", Q);
+  if (n<=0 || np%n || nq%n)
+    pari_err_TYPE("FpX_ffintersect [bad degrees]",stoi(n));
   e = u_pvalrem(n, l, &pg);
   if(!MA) MA = FpXQ_matrix_pow(FpXQ_pow(pol_x(vp),l,P,l),np,np,P,l);
   if(!MB) MB = FpXQ_matrix_pow(FpXQ_pow(pol_x(vq),l,Q,l),nq,nq,Q,l);
@@ -1439,26 +1439,20 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
       z = negi(z);
       if (DEBUGLEVEL>=4) timer_start(&T);
       A = FpM_ker(RgM_Rg_add_shallow(MA, z),l);
-      if (lg(A)!=2)
-        pari_err(e_MISC,"ZZ_%Ps[%Ps]/(%Ps) is not a field in FpX_ffintersect"
-            ,l,pol_x(vp),P);
+      if (lg(A)!=2) pari_err_IRREDPOL("FpX_ffintersect",P);
       A = RgV_to_RgX(gel(A,1),vp);
 
       B = FpM_ker(RgM_Rg_add_shallow(MB, z),l);
-      if (lg(B)!=2)
-        pari_err(e_MISC,"ZZ_%Ps[%Ps]/(%Ps) is not a field in FpX_ffintersect"
-            ,l,pol_x(vq),Q);
+      if (lg(B)!=2) pari_err_IRREDPOL("FpX_ffintersect",Q);
       B = RgV_to_RgX(gel(B,1),vq);
 
       if (DEBUGLEVEL>=4) timer_printf(&T, "FpM_ker");
       An = gel(FpXQ_pow(A,ipg,P,l),2);
       Bn = gel(FpXQ_pow(B,ipg,Q,l),2);
-      if (!invmod(Bn,l,&z))
-        pari_err(e_MISC,"Polynomials not irreducible in FpX_ffintersect");
+      if (!invmod(Bn,l,&z)) pari_err_IRREDPOL("FpX_ffintersect", mkvec2(P,Q));
       z = Fp_mul(An,z,l);
       L = Fp_sqrtn(z,ipg,l,NULL);
-      if ( !L )
-        pari_err(e_MISC,"Polynomials not irreducible in FpX_ffintersect");
+      if (!L) pari_err_IRREDPOL("FpX_ffintersect", mkvec2(P,Q));
       if (DEBUGLEVEL>=4) timer_printf(&T, "Fp_sqrtn");
       B = FpX_Fp_mul(B,L,l);
     }
@@ -1477,7 +1471,7 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
       if (typ(z)==t_INT) z = scalarpol(z,MAXVARN);
       L = FpXQ_sqrtn(z,ipg,U,l,NULL);
       if (DEBUGLEVEL>=4) timer_printf(&T,"FpXQ_sqrtn");
-      if (!L) pari_err(e_MISC,"Polynomials not irreducible in FpX_ffintersect");
+      if (!L) pari_err_IRREDPOL("FpX_ffintersect", mkvec2(P,Q));
       B = FqX_Fq_mul(B,L,U,l);
       B = gsubst(B,MAXVARN,gen_0);
       A = gsubst(A,MAXVARN,gen_0);
@@ -3061,7 +3055,7 @@ static GEN
 init_Fq_i(GEN p, long n, long v)
 {
   GEN P;
-  if (n <= 0) pari_err(e_MISC,"non positive degree in ffinit");
+  if (n <= 0) pari_err_TYPE("ffinit [degree <= 0]", stoi(n));
   if (typ(p) != t_INT) pari_err_TYPE("ffinit",p);
   if (signe(p) <= 0) pari_err_PRIME("ffinit",p);
   if (v < 0) v = 0;
