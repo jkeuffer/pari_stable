@@ -417,7 +417,7 @@ forvec_start(GEN x, long flag, GEN *gd, GEN (**next)(GEN,GEN))
 {
   long i, tx = typ(x), l = lg(x), t = t_INT;
   forvec_data *d;
-  if (!is_vec_t(tx)) pari_err(e_MISC,"not a vector in forvec");
+  if (!is_vec_t(tx)) pari_err_TYPE("forvec [not a vector]", x);
   if (l == 1) { *next = &forvec_dummy; return cgetg(1, tx); }
   *gd = cgetg(sizeof(forvec_data)/sizeof(long) + 1, t_VECSMALL) + 1;
   d = (forvec_data*) *gd;
@@ -430,7 +430,7 @@ forvec_start(GEN x, long flag, GEN *gd, GEN (**next)(GEN,GEN))
     GEN a, e = gel(x,i), m = gel(e,1), M = gel(e,2);
     tx = typ(e);
     if (! is_vec_t(tx) || lg(e)!=3)
-      pari_err(e_MISC,"not a vector of two-component vectors in forvec");
+      pari_err_TYPE("forvec [expected vector not of type [min,MAX]]",e);
     if (typ(m) != t_INT) t = t_REAL;
     if (i > 1) switch(flag)
     {
@@ -831,7 +831,7 @@ vecteur(GEN nmax, GEN code)
   long c[]={evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0};
 
   m = gtos(nmax);
-  if (m < 0)  pari_err(e_MISC,"negative number of components in vector");
+  if (m < 0)  pari_err_TYPE("vector [negative dimension]", stoi(m));
   if (!code) return zerovec(m);
   y = cgetg(m+1,t_VEC); push_lex(c, code);
   for (i=1; i<=m; i++)
@@ -851,7 +851,7 @@ vecteursmall(GEN nmax, GEN code)
   long c[]={evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0};
 
   m = gtos(nmax);
-  if (m < 0)  pari_err(e_MISC,"negative number of components in vector");
+  if (m < 0)  pari_err_TYPE("vectorsmall [negative dimension]", stoi(m));
   if (!code) return const_vecsmall(m, 0);
   y = cgetg(m+1,t_VECSMALL); push_lex(c,code);
   for (i=1; i<=m; i++)
@@ -880,8 +880,8 @@ matrice(GEN nlig, GEN ncol, GEN code)
 
   m = gtos(ncol);
   n = gtos(nlig);
-  if (m < 0) pari_err(e_MISC,"negative number of columns in matrix");
-  if (n < 0) pari_err(e_MISC,"negative number of rows in matrix");
+  if (m < 0)  pari_err_TYPE("matrix [negative nbcols]", stoi(m));
+  if (n < 0)  pari_err_TYPE("matrix [negative nbrows]", stoi(n));
   if (!m) return cgetg(1,t_MAT);
   if (!code || !n) return zeromatcopy(n, m);
   push_lex(c1,code);

@@ -72,3 +72,9 @@ addprimes(1.)
 
 \\e_MODULUS
 nfalgtobasis(nfinit(t^3-2),Mod(t,t^2+1))
+\\e_DIM
+vector(-1,i,0)
+vectorv(-1,i,0)
+vectorsmall(-1,i,0)
+matrix(-1,1,i,j,0)
+matrix(1,-1,i,j,0)
