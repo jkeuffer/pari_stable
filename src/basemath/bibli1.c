@@ -480,7 +480,7 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
     X = gfloor(X);
     if (typ(X) != t_INT) pari_err_TYPE("zncoppersmith",X);
   }
-  if (signe(X) < 0) pari_err(e_MISC, "negative bound in zncoppersmith");
+  if (signe(X) < 0) pari_err_TYPE("zncoppersmith [negative bound]",X);
   if (!B) B = N;
   if (typ(B) != t_INT) B = gceil(B);
 
@@ -633,7 +633,7 @@ lindep2(GEN x, long bit)
 
   if (! is_vec_t(tx)) pari_err_TYPE("lindep2",x);
   if (lx<=2) return cgetg(1,t_COL);
-  if (bit < 0) pari_err(e_MISC, "negative accuracy in lindep2");
+  if (bit < 0) pari_err_TYPE("lindep2 [negative accuracy]", stoi(bit));
   if (!bit)
   {
     bit = gprecision(x);
@@ -755,7 +755,7 @@ algdep0(GEN x, long n, long bit)
   if (n <= 0)
   {
     if (!n) return gen_1;
-    pari_err(e_MISC,"negative polynomial degree in algdep");
+    pari_err_TYPE("algdet [negative degree]", stoi(n));
   }
 
   av = avma; y = cgetg(n+2,t_COL);
@@ -932,7 +932,8 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
   {
     case min_ALL:
       maxrank = stockall? 200: itos(STOCKMAX);
-      if (maxrank < 0) pari_err(e_MISC,"negative number of vectors in minim0");
+      if (maxrank < 0)
+        pari_err_TYPE("minim0 [negative number of vectors]",STOCKMAX);
       L = new_chunk(1+maxrank);
       break;
     case min_PERF:
@@ -1456,7 +1457,7 @@ fincke_pohst(GEN a, GEN B0, long stockmax, long PREC, FP_chk_fun *CHECK)
     l = lg(a);
     if (l == 1)
     {
-      if (CHECK) pari_err(e_MISC, "dimension 0 in fincke_pohst");
+      if (CHECK) pari_err_TYPE("fincke_pohst [dimension 0]", a);
       retmkvec3(gen_0, gen_0, cgetg(1,t_MAT));
     }
     u = lllfp(a, 0.75, LLL_GRAM);
