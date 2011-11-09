@@ -960,7 +960,7 @@ permtonum(GEN x)
   pari_sp av=avma;
   GEN ary,res;
 
-  if (!is_vec_t(tx)) pari_err(e_MISC,"not a vector in permtonum");
+  if (!is_vec_t(tx)) pari_err_TYPE("permtonum",x);
   ary = cgetg(lx+1,t_VECSMALL);
   for (ind=1; ind<=lx; ind++)
   {
@@ -1056,10 +1056,9 @@ polint(GEN X, GEN Y, GEN x, GEN *ptdy)
 
   if (Y) ty = typ(Y); else { Y = X; ty = tx; X = NULL; }
 
-  if (! is_vec_t(tx) || ! is_vec_t(ty))
-    pari_err(e_MISC,"not vectors in polinterpolate");
-  if (lx != lg(Y))
-    pari_err(e_MISC,"different lengths in polinterpolate");
+  if (! is_vec_t(tx)) pari_err_TYPE("polinterpolate",X);
+  if (! is_vec_t(ty)) pari_err_TYPE("polinterpolate",Y);
+  if (lx != lg(Y)) pari_err_DIM("polinterpolate");
   if (lx <= 2)
   {
     if (ptdy) *ptdy = gen_0;
@@ -1706,7 +1705,7 @@ setsearch(GEN T, GEN y, long flag)
   {
     case t_VEC: lx = lg(T); break;
     case t_LIST: T = list_data(T); lx = T? lg(T): 1; break;
-    default: pari_err(e_MISC,"not a set in setsearch");
+    default: pari_err_TYPE("setsearch",T);
       return 0; /*not reached*/
   }
   if (lx==1) return flag? 1: 0;
