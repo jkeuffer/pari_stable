@@ -863,22 +863,30 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
     BORNE = gfloor(BORNE);
     if (typ(BORNE) != t_INT) pari_err_TYPE("minim0",BORNE);
     sBORNE = itos(BORNE); avma = av;
-    BORNE = NULL; /* no longer used */
   }
-  if (!STOCKMAX) stockall = 1;
-  else if (typ(STOCKMAX) != t_INT) pari_err_TYPE("minim0",STOCKMAX);
+  if (!STOCKMAX)
+  {
+    stockall = 1;
+    maxrank = 200;
+  }
+  else
+  {
+    STOCKMAX = gfloor(STOCKMAX);
+    if (typ(STOCKMAX) != t_INT) pari_err_TYPE("minim0",STOCKMAX);
+    maxrank = itos(STOCKMAX);
+    if (maxrank < 0)
+      pari_err_TYPE("minim0 [negative number of vectors]",STOCKMAX);
+  }
 
-  maxrank = 0; L = V = invp = NULL; /* gcc -Wall */
+  L = V = invp = NULL; /* gcc -Wall */
   switch(flag)
   {
     case min_VECSMALL:
     case min_VECSMALL2:
-      maxrank = sBORNE;
-      if (maxrank <= 0) return cgetg(1, t_VECSMALL);
-
-      L = const_vecsmall(maxrank, 0);
+      if (sBORNE <= 0) return cgetg(1, t_VECSMALL);
+      L = const_vecsmall(sBORNE, 0);
       if (flag == min_VECSMALL2) sBORNE <<= 1;
-      if (!sBORNE || n == 1) return L;
+      if (n == 1) return L;
       break;
     case min_FIRST:
       if (n == 1) return cgetg(1,t_VEC);
@@ -912,16 +920,16 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
 
   if (!sBORNE)
   {
-    BORNE = gcoeff(a,1,1); j = 1;
+    GEN B = gcoeff(a,1,1);
+    long t = 1;
     for (i=2; i<=n; i++)
     {
       GEN c = gcoeff(a,i,i);
-      if (cmpii(c, BORNE) < 0) { BORNE = c; j = i; }
+      if (cmpii(c, B) < 0) { B = c; t = i; }
     }
-    if (flag == min_FIRST)
-      return gerepilecopy(av, mkvec2(BORNE, gel(u,j)));
+    if (flag == min_FIRST) return gerepilecopy(av, mkvec2(B, gel(u,t)));
     maxnorm = -1.; /* don't update maxnorm */
-    sBORNE = itos(BORNE);
+    sBORNE = itos(B);
   }
   else
     maxnorm = 0.;
@@ -931,9 +939,6 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
   switch(flag)
   {
     case min_ALL:
-      maxrank = stockall? 200: itos(STOCKMAX);
-      if (maxrank < 0)
-        pari_err_TYPE("minim0 [negative number of vectors]",STOCKMAX);
       L = new_chunk(1+maxrank);
       break;
     case min_PERF:
