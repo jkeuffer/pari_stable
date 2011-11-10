@@ -1052,13 +1052,20 @@ polint_i(GEN X, GEN Y, GEN x, long n, GEN *ptdy)
 GEN
 polint(GEN X, GEN Y, GEN x, GEN *ptdy)
 {
-  long tx=typ(X), ty, lx=lg(X);
+  long lx = lg(X);
 
-  if (Y) ty = typ(Y); else { Y = X; ty = tx; X = NULL; }
+  if (! is_vec_t(typ(X))) pari_err_TYPE("polinterpolate",X);
+  if (Y)
+  {
+    if (! is_vec_t(typ(Y))) pari_err_TYPE("polinterpolate",Y);
+    if (lx != lg(Y)) pari_err_DIM("polinterpolate");
+  }
+  else
+  { 
+    Y = X;
+    X = NULL;
+  }
 
-  if (! is_vec_t(tx)) pari_err_TYPE("polinterpolate",X);
-  if (! is_vec_t(ty)) pari_err_TYPE("polinterpolate",Y);
-  if (lx != lg(Y)) pari_err_DIM("polinterpolate");
   if (lx <= 2)
   {
     if (ptdy) *ptdy = gen_0;
