@@ -6,7 +6,7 @@ Description:
 Function: _err_type
 Class: gp2c_internal
 Description:
- (str):void  pari_err_TYPE($1)
+ (str,gen):void  pari_err_TYPE($1,$2)
 
 Function: error
 Section: programming/specific
