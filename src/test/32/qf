@@ -9,4 +9,8 @@
 
 [12, 1]
 266
-Total time spent: 4
+  ***   at top-level: qfminim(L~*L,10^16)[
+  ***                 ^--------------------
+  *** qfminim: precision too low in qfminim.
+10000000000000000
+Total time spent: 20
