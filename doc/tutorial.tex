@@ -586,21 +586,16 @@ may be lifted back to $\Z$ with either \kbd{lift} or \kbd{centerlift}. Type
 obtained \kbd{Mod(1,n)} on the other hand, it would have given us a hint that
 \kbd{n} is maybe prime, but never a proof.
 
-To find the factors is another story. One must use less naive techniques than
-trial division, or be patient. To finish this example, type \kbd{fa =
-factor(n)} to see the factors. The smallest factor is 14902357, we may take
-a small coffee break and let trial division run to completion. Type
-\kbd{\#} to turn the time on, then
+To find the factors is another story. In this case, the integer $n$ is small
+ enough to let trial division run to completion. Type \kbd{\#} to turn on the
+\kbd{gp} timer, then
 \bprog
   for (i = 2, ceil(sqrt(n)), if (n%i==0, print(i); break))
 @eprog\noindent
-This takes less than one minute on a 1GHz processor. Actually, interpreting
-the expression in the loop takes more than two thirds of the running time
-as you can check by typing just
-\bprog
-  for (i = 2, 14902357, n%i)
-@eprog\noindent
-You may stop the timer by typing \kbd{\#} again.
+This should take less than 5 seconds. In general, one must use less naive
+techniques than trial division, or be very patient. Type \kbd{fa = factor(n)}
+to let the factoring engine find all prime factors. You may stop the timer by
+typing \kbd{\#} again.
 
 Note that, as is the case with most ``prime''-producing functions, the
 ``prime'' factors given by \kbd{factor} are only strong pseudoprimes, and not
@@ -612,7 +607,7 @@ true primes. All arithmetic functions can be applied in this way to the entries
 of a vector or matrix. In fact, it has been checked that the strong
 pseudoprimes output by \kbd{factor} (Baillie-Pomerance-Selfridge-Wagstaff
 pseudoprimes, without small divisors) are true primes at least up to
-$10^{13}$, and no explicit counter-example is known.\smallskip
+$2^{64}$, and no explicit counter-example is known.\smallskip
 
 The second specifically number-theoretic type is the $p$-adic numbers. I have
 no room for definitions, so please skip ahead if you have no use for such
@@ -850,21 +845,19 @@ $\Z^{20}/\Lambda$? Type \kbd{matsnf(H)}. Wow, 20 cyclic factors.
 
 There is a triangular basis for $\Lambda$ (triangular when expressed in
 the canonical basis), perhaps it looks better than our initial one? Type
-\kbd{mathnf(H)}. Hum. This is taking ages. Ah, the documentation says that
-\kbd{mathnf} is fast for tiny matrices but should never be used for matrices
-of dimension larger than $10$. Type \kbd{Control-C} to interrupt the longish
-computation, then \kbd{z = mathnf(H, 1);}. That's better. \kbd{z[1]} is the
-triangular HNF basis, and \kbd{z[2]} is the base change matrix from the
-canonical basis to the new one; of course it has determinant $\pm 1$. Try
-\kbd{matdet(z[2])}, then \kbd{H * z[2] == z[1]}. Fine, it works. And
-\kbd{z[1]} indeed looks better than \kbd{H}.
+\kbd{mathnf(H)}. Hum, what if I also want the unimodular transformation
+matrix? Simple : \kbd{z = mathnf(H, 1);} \kbd{z[1]} is the triangular HNF
+basis, and \kbd{z[2]} is the base change matrix from the canonical basis to
+the new one, with determinant $\pm 1$. Try \kbd{matdet(z[2])},
+then \kbd{H * z[2] == z[1]}. Fine, it works. And \kbd{z[1]} indeed looks
+better than \kbd{H}.
 
 Can we do better? Perhaps, but then we'd better drop the requirement that
 the basis be triangular, since the latter is essentially canonical. Type
 \bprog
   M = H * qflll(H)
 @eprog
-Its column give an LLL-reduced basis for $\Lambda$ (\kbd{qflll(H)} itself
+Its columns give an LLL-reduced basis for $\Lambda$ (\kbd{qflll(H)} itself
 gives the base change matrix). The LLL algorithm outputs a nice basis for a
 lattice given by an arbitrary basis, where nice means the basis vectors are
 almost orthogonal and short, with precise guarantees on their relations to
@@ -879,18 +872,21 @@ $\log 3$, $\log 5$ and $\log 15$. How to detect it?
   u * v
 @eprog\noindent
 Pretty close. In fact, \kbd{lindep} automates this kind of search for integer
-relations, using more sophisticated algorithms like PSLQ.
+relations; try \kbd{lindep(u)}.
 
 Let us come back to $\Lambda$ above, and our LLL basis in \kbd{M}. Type
 \bprog
   G = M~*M  \\@com Gram matrix
-  m = qfminim(G, norml2(M[,1]), 100);
+  m = qfminim(G, norml2(M[,1]), 100, 2);
 @eprog\noindent
 This enumerates the vectors in $\Lambda$ which are shorter than the first LLL
-basis vector, at most 100 of them. There are $\kbd{m[1]} = 6$ such vectors,
-and \kbd{m[3]} gives half of them (\kbd{-m[3]} would complete the lot): they
-are the first 3 basis vectors! So these are optimally short, at least with
-respect to the Euclidean length. Let us try
+basis vector, at most 100 of them. The final argument $2$ instructs the
+function to use a safe (slower) algorithm, since the matrix entries are
+rather large; trying to remove it should produce an error, in this case.
+There are $\kbd{m[1]} = 6$ such vectors, and \kbd{m[3]} gives half of them
+(\kbd{-m[3]} would complete the lot): they are the first 3 basis vectors! So
+these are optimally short, at least with respect to the Euclidean length. Let
+us try
 \bprog
   m = qfminim(G, norml2(M[,4]), 100, 2);
 @eprog\noindent
@@ -903,7 +899,7 @@ vectors; \kbd{matrank(m[3])} says the 100 we have are all included in a
 \bprog
   m = qfminim(G, norml2(M[,4]) - 1, 100000, 2);
 @eprog\noindent
-This time we find 50840 vectors of the requested length, spanning a
+This time we find 50886 vectors of the requested length, spanning a
 $4$-dimensional space, which is actually generated by \kbd{M[,1]},
 \kbd{M[,2]} \kbd{M[,3]} and \kbd{M[,5]}.
 
@@ -923,69 +919,61 @@ default precision. If the argument is not exact, the precision of the
 argument is used for the computation. A note of warning however: even in this
 case the \emph{printed} value is the current real format, usually the
 same as the default precision. In the present chapter we assume that your
-machine works with 32-bit long integers. If it is not the case, we leave it
+machine works with 64-bit long integers. If it is not the case, we leave it
 to you as a good exercise to make the necessary modifications.
 
-Let's assume that we have 28 decimals of default precision (this is what we
-get automatically at the start of a \kbd{gp} session on 32-bit machines). Type
-\kbd{e = exp(1)}. We get the number $e=2.718\dots$ to 28 decimals. Let us check
+Let's assume that we have 38 decimals of default precision (this is what we
+get automatically at the start of a \kbd{gp} session on 64-bit machines). Type
+\kbd{e = exp(1)}. We get the number $e=2.718\dots$ to 38 decimals. Let us check
 how many correct decimals we really have. Change the precision to a
-substantially higher value, for example by typing \kbd{\b{p} 50}. Then type
+substantially higher value, for example by typing \kbd{\b{p} 100}. Then type
 \kbd{e}, then \kbd{exp(1)} once again. This last value is the correct value
-of the mathematical constant $e$ to 50 decimals, while the variable \kbd{e}
-shows the value that was computed to 28 decimals. Clearly they coincide to
+of the mathematical constant $e$ to 100 decimals, while the variable \kbd{e}
+shows the value that was computed to 38 decimals. Clearly they coincide to
 exactly 29 significant digits.
 
-So 28 digits are printed, but how many significant digits are actually
+So 38 digits are printed, but how many significant digits are actually
 contained in the variable \kbd{e}? Type \kbd{\#e} which indicates we have
-exactly $3$ mantissa words. Since $3\ln(2^{32}) / \ln(10)\approx28.9$ we see
-that we have 28 or 29 significant digits (on 32-bit machines).
+exactly $2$ mantissa words. Since $2\ln(2^{64}) / \ln(10)\approx38.5$ we see
+that we have 38 or 39 significant digits (on 64-bit machines).
 
 \smallskip
-Come back to 28 decimals (\kbd{\b{p} 28}). If we type \kbd{exp(1.)}
-you can check that we also obtain 28 decimals. However, type
-\kbd{f = exp(1 + 1E-30)}. Although the default precision is still 28,
-you can check using the method above that we have in fact 59 significant
-digits! The reason is that \kbd{1 + 1E-30} is computed according to the PARI
-philosophy, i.e.~to the best possible precision. Since \kbd{1E-30} has 29
+Come back to 38 decimals (\kbd{\b{p} 38}). If we type \kbd{exp(1.)}
+you can check that we also obtain 38 decimals. However, type
+\kbd{f = exp(1 + 1E-40)}. Although the default precision is still 28,
+you can check using the method above that we have in fact 96 significant
+digits! The reason is that \kbd{1 + 1E-40} is computed according to the PARI
+philosophy, i.e.~to the best possible precision. Since \kbd{1E-40} has 39
 significant digits and 1 has ``infinite'' precision, the number \kbd{1 +
-1E-30} will have $59=29+30$ significant digits, hence \kbd{f} also.
+1E-30} will have $79=39+40$ significant digits, hence \kbd{f} also.
 
-Now type \kbd{cos(1E-15)}. The result is printed as $1.0000\dots$, but
+Now type \kbd{cos(1E-19)}. The result is printed as $1.0000\dots$, but
 is of course not exactly equal to 1. Using \kbd{\#\%}, we see that the
-result has 7 mantissa words, giving us the possibility of having 67
-correct significant digits. In fact (look in precision 100), only 60 are
-correct. PARI gives you as much as it can, and since 6 mantissa words
-would have given you only 57 digits, it uses 7. But why does it give so
-precise a result? Well, it is the same reason as before. When $x$ is close
-to 1, $\cos(x)$ is close to $1-x^2/2$, hence the precision is going to be
-approximately the same as when computing this quantity, here $1-0.5*10^{-30}$
-where $0.5*10^{-30}$ is considered with 28 significant digit accuracy. Hence the
-result will have approximately $28+30=58$ significant digits.
+result has 4 mantissa words, giving us the possibility of having 77
+correct significant digits. PARI gives you as much as it can, and since 3
+mantissa words would have given you only 57 digits, it uses 4. But why does
+it give so precise a result? Well, it is the same reason as before. When $x$
+is close to 1, $\cos(x)$ is close to $1-x^2/2$, hence the precision is going
+to be approximately the same as when computing this quantity, here
+$1-0.5*10^{-38}$ where $0.5*10^{-38}$ is considered with 38 significant digit
+accuracy. Hence the result will have approximately $38+38=76$ significant
+digits.
 
-Unfortunately, this philosophy cannot go too far. For example, when you
-type \kbd{cos(0)}, \kbd{gp} should give you exactly 1. Since it is reasonable for
-a program to assume that a transcendental function never gives you an exact
-result, \kbd{gp} gives you $1.000\dots$ with as many mantissa word as the current
+This philosophy cannot go too far. For example, when you type \kbd{cos(0)},
+\kbd{gp} should give you exactly 1. Since it is reasonable for a program to
+assume that a transcendental function never gives you an exact result,
+\kbd{gp} gives you $1.000\dots$ with as many mantissa word as the current
 precision.
 \medskip
 Let's see some more transcendental functions at work. Type
 \kbd{gamma(10)}. No problem (type \kbd{9!} to check). Type \kbd{gamma(100)}.
-The number is now written in exponential format because the default
-accuracy is too small to give the correct result (type \kbd{99!} to get the
-complete answer).
-To get the complete value, there are two solutions. The first and most natural
-one is to increase the precision. Since \kbd{gamma(100)} has 156 decimal
+The number is now written in exponential format because the default accuracy
+is too small to give the correct result. To get all digits, the most natural
+solution is to increase the precision; since \kbd{gamma(100)} has 156 decimal
 digits, type \kbd{\b{p} 170} to be on the safe side, then \kbd{gamma(100)}
-once again. After some work, the printed result is this time perfectly
-correct.
+once again. Another one is to compute \kbd{99!} directly.
 
-However, this is probably not the best way to proceed. Come back first to the
-default precision (type \kbd{\b{p} 28}). As the gamma function increases
-very rapidly, one usually uses its logarithm. Type \kbd{lngamma(100)}. This
-time the result has a reasonable size, and is exactly equal to \kbd{log(99!)}.
-
-Try \kbd{gamma(1/2 + 10*I)}. No problem, we have the complex gamma function.
+Try \kbd{gamma(1/2 + 10*I)}. No problem, we have the complex $\Gamma$ function.
 Now type
 \bprog
   t = 1000;
@@ -998,13 +986,13 @@ Stirling formula.
 Let's play now with the Riemann zeta function. First turn on the timer (type
 \kbd{\#}). Type \kbd{zeta(2)}, then \kbd{Pi\pow 2/6}. This seems correct. Type
 \kbd{zeta(3)}. All this takes essentially no time at all. However, type
-\kbd{zeta(3.)}. Although the result is the same, you will notice that the
-time is substantially larger; if your machine is too fast to see the
-difference, increase the precision to \kbd{\b{p}1000}. This is because PARI
-uses special formulas to compute \kbd{zeta(n)} when \kbd{n} is an integer.
+\kbd{zeta(3.1)}. You will notice that the time is substantially larger; if
+your machine is too fast to see the difference, increase the precision to
+\kbd{\b{p}1000}. This is because PARI uses special formulas to compute
+\kbd{zeta(n)} when \kbd{n} is an integer.
 
 Type \kbd{zeta(1 + I)}. This also works. Now for fun, let us compute in a
-very naive way the first complex zero of \kbd{zeta}. We know that it is
+naive way the first complex zero of \kbd{zeta}. We know that it is
 of the form $1/2 + i*t$ with $t$ between 14 and 15. Thus, we can use the
 following series of instructions. But instead of typing them directly, write
 them into a file, say \kbd{zeta.gp}, then type \kbd{\b{r} zeta.gp} under
@@ -1081,9 +1069,9 @@ expected.\smallskip
 %
 Now type \kbd{?3}. This gives you the list of all transcendental functions.
 Instead of continuing with more examples, we suggest that you experiment
-yourself with the list of functions. In each case, try integer, real, complex
-and $p$-adic arguments. You will notice that some have not been implemented
-(or do not have a reasonable definition).
+yourself with this list. Try integer, real, complex and $p$-adic arguments.
+You will notice that some have not been implemented (or do not have a
+reasonable definition).
 
 \section{Using Numerical Tools}
 
