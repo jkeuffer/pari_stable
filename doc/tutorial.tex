@@ -95,8 +95,8 @@ the following:
   1./ 7.
   1 / 7 + 0.
 @eprog\noindent
-Immediately a number of decimals of this fraction appear, 28 on most systems,
-38 on the others, and the repeating pattern is $142857$. The reason is that
+Immediately a number of decimals of this fraction appear, 38 on most systems,
+28 on the others, and the repeating pattern is $142857$. The reason is that
 you have included in the operations numbers like \kbd{0.}, \kbd{1.} or \kbd{7.}
 which are \emph{imprecise} real numbers, hence \kbd{gp} cannot give you an
 exact result.
@@ -107,12 +107,11 @@ already 12 decimals more accuracy than conventional double precision floating
 point operations. The precise value depends on a technical reason: if your
 machine supports 64-bit integers (the standard C library can handle integers
 up to $2^{64}$), the default precision is 38 decimals, and 28 otherwise.
-For definiteness, we will assume the latter henceforth. Of course, you
-can extend the precision (almost) as much as you like as we will see in a
-moment.
+For definiteness, we will assume the former henceforth. Of course, you can
+extend the precision (almost) as much as you like as we will see in a moment.
 
 I'm getting bored, why don't we get on with some more exciting stuff?  Well,
-try \kbd{exp(1)}. Presto, comes out the value of $e$ to 28 digits. Try
+try \kbd{exp(1)}. Presto, comes out the value of $e$ to 38 digits. Try
 \kbd{log(exp(1))}. Well, we get a floating point number and not an exact $1$,
 but pretty close! That's what you lose by working numerically.
 
@@ -195,32 +194,30 @@ the number of digits of integers also. Try \kbd{1000!}. It is never necessary
 to tell \kbd{gp} in advance the size of the integers that it will encounter.
 The same is true for real numbers, although most computations with floating
 point assume a default precision and truncate their results to this accuracy;
-initially 28 decimal digits, but we may change that with \b{p} of course.
+initially 38 decimal digits, but we may change that with \b{p} of course.
 \smallskip
 %
-4) Come back to 28 digits of precision (\kbd{\b{p} 28}), and type
-\kbd{exp(75)}. As you can see the result is printed in exponential format.
+4) Come back to 38 digits of precision (\kbd{\b{p} 38}), and type
+\kbd{exp(100)}. As you can see the result is printed in exponential format.
 This is because \kbd{gp} never wants you to believe that a result is correct
-when it is not. We are working with 28 digits of precision, but the integer
-part of $\exp(24*\pi)$ has 33 decimal digits. Hence if \kbd{gp} had dutifully
-printed out 33 digits, the last few digits would have been wrong. Hence
-\kbd{gp} wants to print only 28 significant digits, but to do so it has to
+when it is not. We are working with 38 digits of precision, but the integer
+part of $\exp(100)$ has 44 decimal digits. Hence if \kbd{gp} had dutifully
+printed out 44 digits, the last few digits would have been wrong. Hence
+\kbd{gp} wants to print only 38 significant digits, but to do so it has to
 print in exponential format. \smallskip
 %
 5) There are two ways to avoid this. One is of course to increase the
-precision to more than 33 decimals. Let's try it. To give it a wide margin,
-we set the precision to 40 decimals. Then we recall our last result (\kbd{\%}
+precision. Let's try it. To give it a wide margin, we set the precision to 50
+decimals. Then we recall our last result (\kbd{\%}
 or \kbd{\%n} where \kbd{n} is the number of the result). What? We still have
 an exponential format! Do you understand why?
 
 Again let's try to see what's happening. The number you recalled had been
-computed only to 28 decimals, and even if you set the precision to 1000
-decimals, \kbd{gp} knows that your number has only 28 digits of accuracy but
-an integral part with 33 digits. So you haven't improved things by increasing
-the precision. Or have you? What if we retype \kbd{exp(75)} now that we
-have 40 digits? Try it. Now we do not have an exponential format, and we see
-that at 28 decimals the last 6 digits would have been wrong if they had been
-printed in fixed-point format.
+computed only to 38 decimals, and even if you set the precision to 1000
+decimals, \kbd{gp} knows that your number has only 38 digits of accuracy but
+an integral part with 44 digits. So you haven't improved things by increasing
+the precision. Or have you? What if we retype \kbd{exp(100)} now that we
+have 50 digits? Try it. Now we no longer have an exponential format.
 \medskip
 %
 6) What if I forget what the current precision is and I don't feel like
@@ -241,7 +238,7 @@ argument will be supplied by \kbd{gp}. You can then check out from the text
 what effect a given value will have, and in particular the default one.
 \smallskip
 %
-8) Try the following: starting in precision 28, type first
+8) Try the following: starting in precision 38, type first
 \kbd{default(format, "e0.100")}, then \kbd{exp(1)}. Where are my 100
 significant digits? Well, \kbd{default(format,)} only changes the output
 format, but \emph{not} the default precision. On the other hand, the \b{p}
@@ -251,9 +248,9 @@ command changes both the precision and the output format.
 
 Another thing you better get used to pretty fast is error messages. Try
 typing \kbd{1/0}. Couldn't be clearer. Taking again our universal example in
-precision 28, type
+precision 38, type
 \bprog
-  floor(exp(75))
+  floor(exp(100))
 @eprog\noindent
 \kbd{floor} is the mathematician's integer part, not to be confused with
 \kbd{truncate}, which is the computer scientist's: \kbd{floor(-3.4)} is equal
@@ -261,8 +258,8 @@ to $-4$ whereas \kbd{truncate(-3.4)} is equal to $-3$.  You get a more
 cryptic error message, which you would immediately understand if you had read
 the additional comments of the preceding section. Since you were told not to
 read them, here's the explanation: \kbd{gp} is unable to compute the
-integer part of \kbd{exp(75)} given only 28 decimals of accuracy, since
-it has 33 digits.
+integer part of \kbd{exp(100)} given only 38 decimals of accuracy, since
+it has 44 digits.
 
 Some error messages are more cryptic and sometimes not so easy to understand.
 For instance, try \kbd{log(x)}. It simply tells you that \kbd{gp} does not
@@ -476,23 +473,21 @@ Now type \kbd{hr = 1.* h;} (do not forget the semicolon, we don't want to see
 the result!), then \kbd{dr = matdet(hr)}. You notice two things. First the
 computation, is much faster than in the rational case. (If your computer is
 too fast for you to notice, try again with \kbd{h = mathilbert(40)}, or
-some larger value.) The reason for this is that PARI is handling real
-numbers with 28 digits of accuracy, while in the rational case it is
+even some larger value.) The reason for this is that PARI is handling real
+numbers with 38 digits of accuracy, while in the rational case it is
 handling integers having up to 226 decimal digits.
 
 The second, more important, fact is that the result is terribly wrong. If you
 compare with \kbd{1.$*$d} computed earlier, which is the correct answer, you
-will see that only 2 decimals agree! (None agree if you replaced 20 by 40 as
+will see that few decimals agree! (None agree if you replaced 20 by 40 as
 suggested above.) This catastrophic instability is as already mentioned one
 of the characteristics of Hilbert matrices. In fact, the situation is
 worse than that. Type \kbd{norml2(1/h - 1/hr)} (the function \kbd{norml2}
 gives the square of the $L^2$ norm, i.e.~the sum of the squares of the
-coefficients). The result is larger than $10^{50}$, showing that some
-coefficients of \kbd{1/hr} are wrong by as much as $10^{24}$ (the largest
-error is in fact equal to $4.244 \cdot 10^{24}$ for the coefficient of row 15
-and column 15, which is a 28 digit integer). To obtain the correct result
-after rounding for the inverse, we have to use a default precision of 56
-digits (try it).
+coefficients). The result is larger than $10^{32}$, showing that some
+coefficients of \kbd{1/hr} are wrong by as much as $10^{16}$. To obtain the
+correct result after rounding for the inverse, we have to use a default
+precision of 57 digits (try it).
 
 Although vectors and matrices can be entered manually, by typing explicitly
 their elements, very often the elements satisfy a simple law and one uses a
@@ -940,7 +935,7 @@ that we have 38 or 39 significant digits (on 64-bit machines).
 \smallskip
 Come back to 38 decimals (\kbd{\b{p} 38}). If we type \kbd{exp(1.)}
 you can check that we also obtain 38 decimals. However, type
-\kbd{f = exp(1 + 1E-40)}. Although the default precision is still 28,
+\kbd{f = exp(1 + 1E-40)}. Although the default precision is still 38,
 you can check using the method above that we have in fact 96 significant
 digits! The reason is that \kbd{1 + 1E-40} is computed according to the PARI
 philosophy, i.e.~to the best possible precision. Since \kbd{1E-40} has 39
@@ -1116,11 +1111,9 @@ work, although the sum is not alternating any more! Similarly, try
   sumalt(n=1, (-1)^n / (n+I))
 @eprog
 \medskip
-More traditional functions are the numerical integration functions.
-Come back to \kbd{\b{p} 28} since these routines are very slow when working
-with too many significant digits. Try \kbd{intnum(t=1,2, 1/t)}
-and presto! you get 26 decimals of $\log(2)$. Look at Chapter 3 to see the
-available integration functions.
+More traditional functions are the numerical integration functions. Try
+\kbd{intnum(t=1,2, 1/t)} and presto! you get 100 decimals of $\log(2)$. Look
+at Chapter 3 to see the available integration functions.
 
 With PARI, however, you can go further since complex types are allowed.
 For example, assume that we want to know the location of the zeros of the
@@ -1151,7 +1144,7 @@ $z = r*\exp(i*t)$, and took the real part to avoid integrating the
 imaginary part. Actually, there is a built-in function \kbd{intcirc}
 to integrate over a circle, yielding the much simpler:
 \bprog
-  zero(r) = intcirc(z=0, r, fun(z))
+  zero2(r) = intcirc(z=0, r, fun(z))
 @eprog
 (This is a little faster than the previous implementation, and no less
 accurate.)
@@ -1170,7 +1163,7 @@ Therefore, type
   fun(x) = my(u = exp(x)); u * cos(sqrt(u^2 - x^2)) - x
 @eprog\noindent
 Then \kbd{fun(0)} is positive while \kbd{fun(1)} is negative. Come
-back to precision 28 and type
+back to precision 38 and type
 \bprog
   x0 = solve(x=0,1, fun(x))
   z = x0 + I*sqrt(exp(2*x0) - x0^2)
@@ -1178,8 +1171,8 @@ back to precision 28 and type
 which is the required zero. As a check, type \kbd{exp(z) - z}.
 
 Of course you can integrate over contours which are more complicated than
-circles, but you must perform yourself the changes of variable as we have
-done above to reduce the integral to a number of integrals on line segments.
+circles, but you must perform yourself the variable changes, as we have done
+above to reduce the integral to a number of integrals on line segments.
 \smallskip
 %
 The example above also shows the use of the \kbd{solve} function. To use
@@ -1229,8 +1222,8 @@ coefficients then convert it to a polynomial using \kbd{Pol} or \kbd{Polrev}
 \bprog
   T = Polrev( vector(100, i, i) );
 
-  for (i=1, 10^4, Polrev( vector(100, i, i) ) )   \\@com time: 124ms
-  for (i=1, 10^4, sum(i = 1, 100, (i+1) * x^i) ) \\@com time: 3,985ms
+  for (i=1, 10^4, Polrev( vector(100, i, i) ) )   \\@com time: 60ms
+  for (i=1, 10^4, sum(i = 1, 100, (i+1) * x^i) ) \\@com time: 1,74ms
 @eprog\noindent The reason for the discrepancy is that the explicit summation
 (of densely encoded polynomials) is quadratic in the degree, whereas creating
 a vector of coefficients then converting it to a polynomial type is linear.
@@ -1243,7 +1236,7 @@ $15$-th cyclotomic polynomial,
 which is of degree $\varphi(15)=8$. Now, type
 \bprog
   r = polroots(pol)
-@eprog\noindent We obtain the 8 complex roots of \kbd{pol}, given to 28
+@eprog\noindent We obtain the 8 complex roots of \kbd{pol}, given to 38
 significant digits. To see them better, type \b{b}: they are given as pairs
 of complex conjugate roots, in a random order. The only ordering done by the
 function \kbd{polroots} concerns the real roots, which are given first, and
@@ -1268,8 +1261,8 @@ if we had many more. Let's do it automatically. Type
   rr = round(rc)
   sqrt( norml2(rc - rr) )
 @eprog\noindent We see that \kbd{rr} is indeed all 1's, and that the
-$L^2$-norm of \kbd{rc - rr} is around $3.10^{-28}$, reasonable enough when we
-work with 28 significant digits! Note that the function \kbd{norml2},
+$L^2$-norm of \kbd{rc - rr} is around $2.10^{-37}$, reasonable enough when we
+work with 38 significant digits! Note that the function \kbd{norml2},
 contrary to what its name implies, does not give the $L^2$ norm but its
 square, hence we must take the square root. Well, this is not absolutely
 necessary in the present case! In fact, \kbd{round} itself already provides
@@ -2747,9 +2740,9 @@ We also decrease drastically the default precision.
   \p 9
 @eprog\noindent
 This is very important, since plotting involves calculation of functions at
-a huge number of points, and a relative precision of 28 significant digits
+a huge number of points, and a relative precision of 38 significant digits
 is an obvious overkill: the output device resolution certainly won't reach
-$10^{28} \times 10^{28}$ pixels!
+$10^{38} \times 10^{38}$ pixels!
 
 Start with a simple plot:
 \bprog
