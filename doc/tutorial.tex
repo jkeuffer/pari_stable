@@ -2179,15 +2179,9 @@ of \kbd{u}, we type \kbd{norm(u)} (what else?); \kbd{trace(u)} works as well.
 Notice that none of this would work on polynomials or column vectors since
 you don't have the opportunity to supply \kbd{nf}! But we could use
 \kbd{nfeltpow(nf,u,3)}, \kbd{nfeltdiv(nf,1,u)} (or \kbd{nfeltpow(nf,u,-1)})
-which would work whatever representation was chosen. There is no
-\kbd{nfeltnorm} function (\kbd{nfelttrace} does not exist either), but we can
-easily write one:
-\bprog
-  nfeltnorm(nf,u) = norm(nfbasistoalg(nf, u))
-@eprog\noindent
-Notice that this is certainly not foolproof (try it with complex or quadratic
-arguments!), but we could refine it if the need arose. You can also
-consider $(u)$ as a principal ideal, and just type
+which would work whatever representation was chosen. Of course,
+there is also an \kbd{nfeltnorm} function (and \kbd{nfelttrace} as well).
+You can also consider $(u)$ as a principal ideal, and just type
 \bprog
   idealnorm(nf,u)
 @eprog\noindent
@@ -2621,7 +2615,7 @@ resp.~arbitrary. (Subgroups are given by a matrix of generators, in terms of
 we already know. \kbd{L} has $7$ elements, the $2$ from \kbd{L0}, and
 $5$ new ones:
 \bprog
-  L1 = eval( setminus(Set(L), Set(L0)) )
+  L1 = setminus(Set(L), Set(L0))
 @eprog\noindent
 The conductors are
 \bprog
