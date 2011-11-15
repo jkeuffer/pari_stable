@@ -92,6 +92,8 @@ BA 28- more usable form of alarm(s, code): evaluate code, aborting after s
    32- rewrite ellan using C-longs + new function anellsmall()
    33- renamed all libpari error codes [ pari_err() arguments ]
    34- allow t_VECSMALL in vecextract
+   35- look for a few more short vectors in polred(), only return subfields
+       and the best primitive polynomial [wrt discriminant]
 
   Added
     1- mathnf for matrices over K[X] [#41]
@@ -123,6 +125,7 @@ BA 21- GP function getenv.
    22- new error class e_PRIME [ pari_err() ]
 BA 23- low-level function int_bit.
    24- library function stack_strcat
+   25- function polredbest [ adaptіng a preliminary patch by BA ]
 
   Removed
     1- dropped DOS support

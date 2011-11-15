@@ -17,8 +17,8 @@ Doc: returns a canonical defining polynomial $P$ for the same number field
  \misctitle{Warning} This routine uses an exponential-time algorithm to
  enumerate all potential generators, and may be exceedingly slow when the
  number field has many subfields, hence a lot of elements of small $T_2$-norm.
- E.g. do not try it on the compositum of many quadratic fields; in that case,
- use \tet{polred} instead.
+ The function \tet{polredbest} is in general much faster (it runs in
+ polynomial time), and tends to return polynomials with smaller discriminants.
 
  The binary digits of $\fl$ mean
 
@@ -37,6 +37,15 @@ Doc: returns a canonical defining polynomial $P$ for the same number field
  long as the discriminant of the \emph{field} $\Q[X]/(T)$ is easy to factor
  (has at most one large prime factor not in the \kbd{addprimes} table), the
  result is the same.
+
+ \bprog
+ ? T = x^16 - 136*x^14 + 6476*x^12 - 141912*x^10 + 1513334*x^8 - 7453176*x^6 + 13950764*x^4 - 5596840*x^2 + 46225
+ ? T1 = polredabs(T); T2 = polredbest(T);
+ ? [ norml2(polroots(T1)), norml2(polroots(T2)) ]
+ %3 = [88.0000000, 120.000000]
+ ? [ sizedigit(poldisc(T1)), sizedigit(poldisc(T2)) ]
+ %4 = [75, 67]
+ @eprog
 
 Variant: Instead of the above hardcoded numerical flags, one should use an
  or-ed combination of

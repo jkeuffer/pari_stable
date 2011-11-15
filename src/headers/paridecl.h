@@ -905,6 +905,7 @@ GEN     polredabs(GEN x);
 GEN     polredabs0(GEN x, long flag);
 GEN     polredabs2(GEN x);
 GEN     polredabsall(GEN x, long flun);
+GEN     polredbest(GEN x, long flag);
 GEN     smallpolred(GEN x);
 GEN     smallpolred2(GEN x);
 GEN     tschirnhaus(GEN x);
