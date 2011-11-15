@@ -2086,6 +2086,9 @@ findmindisc(GEN y, GEN *pa)
   }
   *pa = b; return x;
 }
+/* filter [y,b] from polred_aux: keep a single polynomial of degree n in y
+ * [ the best wrt discriminant ordering ], but keep all non-primitive
+ * polynomials */
 static void
 filter(GEN y, GEN b, long n)
 {
@@ -2181,10 +2184,9 @@ Polred(GEN x, long flag, GEN fa)
 static void
 polredbest_aux(nfbasic_t *T, GEN *pro, GEN *px, GEN *pdx, GEN *pb)
 {
-  GEN a, v, y, x = T->x, b = pol_x(varn(x));
-  long i, l, d;
+  GEN a, v, y, x = T->x, b = pol_x(varn(x)); /* default values */
+  long i, l, n = degpol(x);
   v = polred_aux(T, pro, nf_ORIG);
-  d = degpol(x);
   *pdx = T->dx;
   y = gel(v,2);
   a = gel(v,1); l = lg(a);
@@ -2192,7 +2194,7 @@ polredbest_aux(nfbasic_t *T, GEN *pro, GEN *px, GEN *pdx, GEN *pb)
   {
     GEN yi = gel(y,i);
     pari_sp av = avma;
-    if (degpol(yi)==d && ZX_is_better(yi,x,pdx)) { x = yi; b = gel(a,i); }
+    if (degpol(yi) == n && ZX_is_better(yi,x,pdx)) { x = yi; b = gel(a,i); }
     else avma = av;
   }
   *px = x;
