@@ -1061,7 +1061,7 @@ polint(GEN X, GEN Y, GEN x, GEN *ptdy)
     if (lx != lg(Y)) pari_err_DIM("polinterpolate");
   }
   else
-  { 
+  {
     Y = X;
     X = NULL;
   }

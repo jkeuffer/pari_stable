@@ -2178,7 +2178,7 @@ Polred(GEN x, long flag, GEN fa)
 }
 
 /* finds "best" polynomial in polred_aux list, defaulting to T->x if none of
- * them is primitive. *px is the ZX, characteristic polynomial of *pb, *pdx 
+ * them is primitive. *px is the ZX, characteristic polynomial of *pb, *pdx
  * its discriminant.
  * Set *pro = polroots(T->x) [ NOT *px ], in case caller needs it. */
 static void
