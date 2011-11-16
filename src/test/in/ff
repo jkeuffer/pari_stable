@@ -1,4 +1,3 @@
-allocatemem(50*10^6);
 {
 test(p,f) = setrand(1); a = ffgen(ffinit(p,f, 'a)); [
 a^2+3*a+1,
