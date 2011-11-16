@@ -613,3 +613,202 @@ FpXQC_to_mod(GEN z, GEN T, GEN p)
     gel(x,i) = mkpolmod(FpX_to_mod(gel(z,i), p), T);
   return x;
 }
+
+/********************************************************************************
+ **                                                                            **
+ **                     Blackbox linear algebra                                **
+ **                                                                            **
+ ********************************************************************************/
+
+/* A sparse column (zCs) v is a t_COL with two components C and E which are
+ * t_VECSMALL of the same rank. we have v = sum_i E[i]*e_{C[i]} where (e_j) is
+ * the canonical basis.  */
+
+/* A sparse matrix (zMs) is a t_VEC of zCs */
+
+/* FpCs and FpMs are identical but E[i] is interpreted as a _signed_ C long
+ * integer representing an element of Fp. This is important since p can be
+ * large and p+E[i] would not fit in a C long.  */
+
+/* RgCs and RgMs are similar, except that the type and content of the component
+ * is unspecified. Functions handling RgCs/RgMs must be independent of E. */
+
+/* Most functions take an argument nblin which is the number of lines of the
+ * column/matrix, which cannot be derived from the data. */
+
+GEN
+zCs_to_ZC(GEN R, long nblin)
+{
+  GEN C = gel(R,1), E = gel(R,2);
+  long j, l = lg(C);
+  GEN c = zerocol(nblin);
+  for (j = 1; j < l; ++j)
+    gel(c, C[j]) = stoi(E[j]);
+  return c;
+}
+
+GEN
+zMs_to_ZM(GEN M, long nblin)
+{
+  long  i, n = lg(M)-1;
+  GEN m = cgetg(n+1, t_MAT);
+  for (i = 1; i <= n; ++i)
+    gel(m, i) = zCs_to_ZC(gel(M, i), nblin);
+  return m;
+}
+
+/* Solve the equation f(X) = B mod p where B is a FpV, and f is a linear endomorphism.
+ * Return either a solution as a t_COL, or a kernel vector as a t_VEC.
+ */
+
+GEN
+gen_FpM_Wiedemann(void *E, GEN (*f)(void*, GEN), GEN B, GEN p)
+{
+  long col = 0, n = lg(B)-1, m = 2*n+1;
+  if (ZV_equal0(B)) return zerocol(n);
+  while (++col <= n)
+  {
+    pari_sp ltop = avma, av, lim;
+    long i, lQ;
+    GEN V, Q, M, W = B;
+    GEN b = cgetg(m+2, t_POL);
+    b[1] = evalsigne(1)|evalvarn(0);
+    gel(b, 2) = gel(W, col);
+    for (i = 3; i<m+2; i++)
+      gel(b, i) = cgeti(lgefint(p));
+    av = avma; lim = stack_lim(av,1);
+    for (i = 3; i<m+2; i++)
+    {
+      W = f(E, W);
+      affii(gel(W, col),gel(b, i));
+      if (low_stack(lim, stack_lim(av,2)))
+      {
+        if (DEBUGMEM>1) pari_warn(warnmem,"Wiedemann: first loop, %ld",i);
+        W = gerepileupto(av, W);
+      }
+    }
+    b = FpX_renormalize(b, m+2);
+    if (lgpol(b)==0) {avma = ltop; continue; }
+    M = FpX_halfgcd(b, monomial(gen_1, m, 0), p);
+    Q = FpX_neg(FpX_normalize(gcoeff(M, 2, 1),p),p);
+    W = B; lQ =lg(Q);
+    if (DEBUGLEVEL) err_printf("Wiedemann: deg. minpoly: %ld\n",lQ-3);
+    V = FpC_Fp_mul(W, gel(Q, lQ-2), p);
+    av = avma; lim = stack_lim(av,1);
+    for (i = lQ-3; i > 1; i--)
+    {
+      W = f(E, W);
+      V = ZC_lincomb(gen_1, gel(Q,i), V, W);
+      if (low_stack(lim, stack_lim(av,2)))
+      {
+        if (DEBUGMEM>1) pari_warn(warnmem,"Wiedemann: second loop, %ld",i);
+        gerepileall(av, 2, &V, &W);
+      }
+    }
+    V = FpC_red(V, p);
+    W = FpC_sub(f(E,V), B, p);
+    if (ZV_equal0(W)) return V;
+    av = avma;
+    for (i = 1; i <= n; ++i)
+    {
+      V = W;
+      W = f(E, V);
+      if (ZV_equal0(W))
+        return shallowtrans(V);
+      gerepileall(av, 2, &V, &W);
+    }
+    avma = ltop;
+  }
+  return NULL;
+}
+
+GEN
+FpMs_FpC_mul(GEN M, GEN B, GEN p)
+{
+  long i, j;
+  long n = lg(B)-1;
+  GEN V = zerocol(n);
+  for (i = 1; i <= n; ++i)
+    if (signe(gel(B, i)))
+    {
+      GEN R = gel(M, i), C = gel(R, 1), E = gel(R, 2);
+      long l = lg(C);
+      for (j = 1; j < l; ++j)
+      {
+        long k = C[j];
+        switch(E[j])
+        {
+        case 1:
+          gel(V, k) = gel(V,k)==gen_0 ? gel(B,i) : addii(gel(V, k), gel(B,i));
+          break;
+        case -1:
+          gel(V, k) = gel(V,k)==gen_0 ? negi(gel(B,i)) : subii(gel(V, k), gel(B,i));
+          break;
+        default:
+          gel(V, k) = gel(V,k)==gen_0 ? mulis(gel(B, i), E[j]) : addii(gel(V, k), mulis(gel(B, i), E[j]));
+          break;
+        }
+      }
+    }
+  return FpC_red(V,p);
+}
+
+struct relcomb_s
+{
+  GEN M, p;
+};
+
+static GEN
+wrap_relcomb(void*E, GEN x)
+{
+  struct relcomb_s *s = (struct relcomb_s *) E;
+  return FpMs_FpC_mul(s->M, x, s->p);
+}
+
+static GEN
+vecplin(GEN A, GEN plin)
+{
+  return mkvec2(vecpermute(plin,gel(A,1)), gel(A,2));
+}
+
+/* Solve the equation MX = A
+   Return either a solution as a t_COL, or the index of a column which is linearly
+   dependent from the other as a t_VECSMALL with a single component.
+ */
+
+GEN
+FpMs_FpCs_solve(GEN M, GEN A, long nblin, GEN p)
+{
+  pari_sp av = avma;
+  struct relcomb_s s;
+  GEN pcol, plin;
+  long nbi=lg(M)-1, lR;
+  long i, n;
+  GEN Mp, Ap, Rp;
+  pari_timer ti;
+  RgMs_structelim(M, nblin, gel(A, 1), &pcol, &plin);
+  if (DEBUGLEVEL)
+    err_printf("Structured elimination: %ld -> %ld\n",nbi,lg(pcol)-1);
+  n = lg(pcol)-1;
+  Mp = cgetg(n+1, t_MAT);
+  for(i=1; i<=n; i++)
+    gel(Mp, i) = vecplin(gel(M,pcol[i]), plin);
+  Ap = zCs_to_ZC(vecplin(A, plin), n);
+  s.M = Mp; s.p = p;
+  timer_start(&ti);
+  Rp = gen_FpM_Wiedemann((void*)&s,wrap_relcomb, Ap, p);
+  if (DEBUGLEVEL) timer_printf(&ti,"linear algebra");
+  if (!Rp) { avma = av; return NULL; }
+  lR = lg(Rp)-1;
+  if (typ(Rp) == t_COL)
+  {
+    GEN R = zerocol(nbi+1);
+    for (i=1; i<=lR; i++)
+       gel(R,pcol[i]) = gel(Rp,i);
+    return R;
+  }
+  for (i = 1; i <= lR; ++i)
+    if (signe(gel(Rp, i)))
+      return mkvecsmall(pcol[i]);
+  return NULL; /* NOT REACHED */
+}

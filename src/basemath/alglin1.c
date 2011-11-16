@@ -3138,6 +3138,67 @@ FlxqM_ker(GEN x, GEN T, ulong p)
 
 /*******************************************************************/
 /*                                                                 */
+/*                   Structured Elimination                        */
+/*                                                                 */
+/*******************************************************************/
+
+/* M is a RgMs with nblin lines, A a list of line indices.
+   Eliminate lines of M with a single entry that do not belong to A,
+   and the corresponding columns.
+   Retur pcol and plin:
+   pcol is a map from the new columns indices to the old one.
+   plin is a map from the old lines indices to the new one (0 if removed).
+*/
+
+void
+RgMs_structelim(GEN M, long nblin, GEN A, GEN *p_col, GEN *p_lin)
+{
+  long i,j,k;
+  long n = lg(M)-1, nrm, lA = lg(A);
+  GEN plin = cgetg(nblin+1, t_VECSMALL);
+  GEN pcol = const_vecsmall(n, 0);
+  pari_sp av = avma;
+  GEN rm  = const_vecsmall(n, 1);
+  GEN W   = const_vecsmall(nblin, 0);
+  for (i = 1; i <= n; ++i)
+  {
+    GEN F = gmael(M, i, 1);
+    long l = lg(F);
+    for (j = 1; j < l; ++j)
+      W[F[j]]++;
+  }
+  for (j = 1; j < lA; ++j)
+    W[A[j]] = -1;
+  do
+  {
+    nrm = 0;
+    for (i = 1; i <= n; ++i)
+      if (rm[i])
+      {
+        GEN c = gmael(M, i, 1);
+        long lc = lg(c);
+        for (j = 1; j < lc; ++j)
+          if (W[c[j]] == 1)
+          {
+            rm[i] = 0; nrm=1;
+            for (k = 1; k < lc; ++k)
+              W[c[k]]--;
+            break;
+          }
+      }
+  } while(nrm);
+  for (j = 1, i = 1; i <= n; ++i)
+    if (rm[i])
+      pcol[j++] = i;
+  setlg(pcol,j);
+  for (k = 1, i = 1; i <= nblin; ++i)
+    plin[i] = W[i] ? k++: 0;
+  avma = av;
+  *p_col = pcol; *p_lin = plin;
+}
+
+/*******************************************************************/
+/*                                                                 */
 /*                        EIGENVECTORS                             */
 /*   (independent eigenvectors, sorted by increasing eigenvalue)   */
 /*                                                                 */

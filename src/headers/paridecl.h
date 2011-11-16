@@ -290,12 +290,15 @@ GEN     FpC_Fp_mul(GEN x, GEN y, GEN p);
 GEN     FpC_center(GEN z, GEN p, GEN pov2);
 GEN     FpC_red(GEN z, GEN p);
 GEN     FpC_to_mod(GEN z, GEN p);
+GEN     FpCs_to_FpC(GEN C);
 GEN     FpM_FpC_mul(GEN x, GEN y, GEN p);
 GEN     FpM_FpC_mul_FpX(GEN x, GEN y, GEN p, long v);
 GEN     FpM_center(GEN z, GEN p, GEN pov2);
 GEN     FpM_mul(GEN x, GEN y, GEN p);
 GEN     FpM_red(GEN z, GEN p);
 GEN     FpM_to_mod(GEN z, GEN p);
+GEN     FpMs_FpC_mul(GEN M, GEN B, GEN p);
+GEN     FpMs_FpCs_solve(GEN M, GEN B, long nblin, GEN p);
 GEN     FpC_add(GEN x, GEN y, GEN p);
 GEN     FpC_sub(GEN x, GEN y, GEN p);
 GEN     FpV_add(GEN x, GEN y, GEN p);
@@ -305,6 +308,9 @@ GEN     FpV_dotsquare(GEN x, GEN p);
 GEN     FpV_red(GEN z, GEN p);
 GEN     FpV_to_mod(GEN z, GEN p);
 GEN     FpX_to_mod(GEN z, GEN p);
+GEN     gen_FpM_Wiedemann(void *E, GEN (*f)(void*, GEN), GEN B, GEN p);
+GEN     zCs_to_ZC(GEN C, long nblin);
+GEN     zMs_to_ZM(GEN M, long nblin);
 
 /* RgV.c */
 
@@ -569,6 +575,7 @@ GEN     RgM_diagonal_shallow(GEN m);
 GEN     RgM_inv_upper(GEN a);
 GEN     RgM_solve(GEN a, GEN b);
 GEN     RgM_solve_realimag(GEN x, GEN y);
+void    RgMs_structelim(GEN M, long N, GEN A, GEN *p_col, GEN *p_lin);
 GEN     ZM_detmult(GEN A);
 GEN     ZM_inv(GEN M, GEN dM);
 GEN     apply0(GEN f, GEN A);
