@@ -1,0 +1,21 @@
+Function: polredbest
+Section: number_fields
+C-Name: polredbest
+Prototype: GD0,L,
+Help: polredbest(T,{flag=0}): reduction of the polynomial T (gives minimal
+ polynomials only). If flag=1, gives also elements.
+Doc: finds a polynomial with reasonably
+ small coefficients defining the same number field as $T$.
+ All $T$ accepted by \tet{nfinit} are also allowed here (e.g. non-monic
+ polynomials, \kbd{nf}, \kbd{bnf}, \kbd{[T,Z\_K\_basis]}). Contrary to
+ \tet{polredabs}, this routine runs in polynomial time, but it offers no
+ guarantee as to the minimality of its result.
+
+ If $\fl = 1$: outputs a two-component row vector $[P,a]$,  where $P$ is the
+ default output and \kbd{Mod(a, P)} is a root of the original $T$.
+ \bprog
+ ? polredbest(x^4 + 8, 1)
+ %1 = [x^4 + 2, Mod(x^3, x^4 + 2)]
+ ? charpoly(%[2])
+ %2 = x^4 + 8
+ @eprog
