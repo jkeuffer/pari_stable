@@ -11,6 +11,6 @@
 266
   ***   at top-level: qfminim(L~*L,10^16)[
   ***                 ^--------------------
-  *** qfminim: precision too low in qfminim.
+  *** qfminim: overflow in t_INT-->long assignment.
 10000000000000000
 Total time spent: 20
