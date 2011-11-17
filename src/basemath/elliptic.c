@@ -1736,7 +1736,7 @@ ellwpseries0(GEN e, long v, long PRECDL, long prec)
   return ellwpseries_aux(c4,c6,v,PRECDL);
 }
 
-GEN 
+GEN
 ellwp(GEN w, GEN z, long prec)
 { return ellwp0(w,z,0,prec); }
 
@@ -1750,7 +1750,7 @@ ellwp0(GEN w, GEN z, long flag, long prec)
   if (flag && flag != 1) pari_err_FLAG("ellwp");
   if (!z) return gerepileupto(av, ellwpseries0(w,0,precdl,prec));
   y = toser_i(z);
-  if (y) 
+  if (y)
   {
     long vy = varn(y), v = valp(y);
     GEN P, Q, R;
