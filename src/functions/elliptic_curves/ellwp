@@ -1,25 +1,18 @@
 Function: ellwp
 Section: elliptic_curves
 C-Name: ellwp0
-Prototype: GDGD0,L,DPp
-Help: ellwp(E,{z=x},{flag=0},{d=seriesprecision}):
+Prototype: GDGD0,L,p
+Help: ellwp(E,{z='x},{flag=0}):
  computes the value at z of the Weierstrass P function attached to the
  elliptic curve E as given by ellinit (alternatively, E can be
  given as a lattice [om1,om2]). Optional flag means 0 (default), compute only
- P(z), 1 compute [P(z),P'(z)], 2 consider om as an elliptic curve and compute
- P(z) for that curve (identical to ellztopoint in that case). If z is omitted
- or is a simple variable, return formal expansion in z with d significant
- terms.
+ P(z), 1 compute [P(z),P'(z)].
 Doc: Computes the value at $z$ of the Weierstrass $\wp$ function attached to
- the elliptic curve $E$ as given by \kbd{ellinit} (alternatively, $E$ can be
- given as a lattice $[\omega_1,\omega_2]$).
+ the elliptic curve $E$ as given by \kbd{ellinit}; alternatively, $E$ can be
+ given as a lattice $[\omega_1,\omega_2]$.
 
- If $z$ is omitted or is a simple variable, computes the \emph{power series}
- expansion in $z$ (starting $z^{-2}+O(z^2)$). The series is given to $d$
- significant terms (\tet{seriesprecision} by default).
+ Optional \fl\ means 0 (default): compute only $\wp(z)$, 1: compute
+ $[\wp(z),\wp'(z)]$.
 
- Optional \fl\ is (for now) only taken into account when $z$ is numeric, and
- means 0: compute only $\wp(z)$, 1: compute $[\wp(z),\wp'(z)]$.
-
-Variant: Also available is \fun{GEN}{weipell}{GEN E, long precdl} for the power
- series.
+Variant: Also available is \fun{GEN}{ellwpseries}{GEN E, long v, long precdl}
+ for the power series in variable $v$.

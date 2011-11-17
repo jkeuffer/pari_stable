@@ -46,6 +46,8 @@ BA 30- functions ending by the x[y]=z construct could corrupt the stack.
    36- lots of missing sanity checks in hilbert(x,y,p)
        [ e.g. hilbert(O(3), Pi, 5) -> 0 ]
 BA 37- for(i=1,10^7,) + SIGINT -> SEGV [#1249]
+   38- ellwp: take flag into account also for t_SER output [ was: numerical
+       case only ]
 
   Changed
     1- mathnf: swapped flag 3 and 5.
@@ -94,6 +96,8 @@ BA 28- more usable form of alarm(s, code): evaluate code, aborting after s
    34- allow t_VECSMALL in vecextract
    35- look for a few more short vectors in polred(), only return subfields
        and the best primitive polynomial [wrt discriminant]
+   36- [library] remove precdl argument in ellwp0: use a t_SER argument like
+       in all other transcendental functions.
 
   Added
     1- mathnf for matrices over K[X] [#41]

@@ -507,10 +507,6 @@ GEN     minkowski_bound(GEN D, long N, long r2, long prec);
 int     subgroup_conductor_ok(GEN H, GEN L);
 GEN     subgrouplist_cond_sub(GEN bnr, GEN C, GEN bound);
 
-/* elliptic.c */
-
-GEN     weipell0(GEN e, long prec, long PREC);
-
 /* ellsea.c */
 
 void    pari_close_seadata(void);

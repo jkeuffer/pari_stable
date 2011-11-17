@@ -11,6 +11,7 @@ This file lists the incompatible changes between Version 2.x and older versions
     (it remains ".gprc" on Unix systems)
   - removed rootsold() code : polroots(x, 1) is now treated as polroots(x)
   - renamed all libpari error codes [ pari_err() arguments ]
+  - ellwp0(): remove precdl argument
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.4 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

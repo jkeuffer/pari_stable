@@ -31,7 +31,7 @@ ellheegner(ellinit([-157^2,0]))
 elldivpol(ellinit([1,2,3,5,7]),4)
 
 \\#1185
-ellwp(ellinit([0,-1,1,-10,-20]),,,11)
+ellwp(ellinit([0,-1,1,-10,-20]),x+O(x^12))
 
 \\#1186
 ellpow(ellinit([3,0]), [1,2], -quadgen(-4))

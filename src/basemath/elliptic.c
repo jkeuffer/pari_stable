@@ -964,7 +964,7 @@ ellpow_CM(GEN e, GEN z, GEN n)
   ln = itos_or_0(shifti(addsi(1, N), 3));
   if (!ln) pari_err_OVERFLOW("ellpow_CM [norm too large]");
   vn = ((ln>>1)-4)>>2;
-  z1 = weipell(e, ln);
+  z1 = ellwpseries(e, 0, ln);
   z2 = gsubst(z1, 0, monomial(n, 1, 0));
   p0 = gen_0; p1 = gen_1;
   q0 = gen_1; q1 = gen_0;
@@ -1469,7 +1469,7 @@ reduce_z(GEN z, SL2_red *T)
 /* computes the numerical value of wp(z | L), L = om1 Z + om2 Z
  * return NULL if z in L.  If flall=1, compute also wp' */
 static GEN
-weipellnumall(SL2_red *T, GEN z, long flall, long prec0)
+ellwpnum_all(SL2_red *T, GEN z, long flall, long prec0)
 {
   long toadd, prec;
   pari_sp av=avma, lim, av1;
@@ -1513,7 +1513,7 @@ weipellnumall(SL2_red *T, GEN z, long flall, long prec0)
     if (gexpo(qn) <= - prec2nbits(prec) - 5 - toadd) break;
     if (low_stack(lim, stack_lim(av1,1)))
     {
-      if(DEBUGMEM>1) pari_warn(warnmem,"weipellnum");
+      if(DEBUGMEM>1) pari_warn(warnmem,"ellwpnum_all");
       gerepileall(av1, flall? 3: 2, &y, &qn, &yp);
     }
   }
@@ -1668,7 +1668,7 @@ pointell(GEN e, GEN z, long prec)
   SL2_red T;
 
   checkell_real(e); (void)get_periods(e, &T);
-  v = weipellnumall(&T,z,1,prec);
+  v = ellwpnum_all(&T,z,1,prec);
   if (!v) { avma = av; return ellinf(); }
   gel(v,1) = gsub(gel(v,1), gdivgs(ell_get_b2(e),12));
   gel(v,2) = gsub(gel(v,2), gmul2n(ellLHS0(e,gel(v,1)),-1));
@@ -1676,17 +1676,17 @@ pointell(GEN e, GEN z, long prec)
 }
 
 static GEN
-_weipell(GEN c4, GEN c6, long PREC)
+ellwpseries_aux(GEN c4, GEN c6, long v, long PRECDL)
 {
   long i, k, l;
   pari_sp av;
-  GEN t, res = cgetg(PREC+2,t_SER), *P = (GEN*)(res + 2);
+  GEN t, res = cgetg(PRECDL+2,t_SER), *P = (GEN*)(res + 2);
 
-  res[1] = evalsigne(1) | _evalvalp(-2) | evalvarn(0);
-  if (!PREC) { setsigne(res,0); return res; }
+  res[1] = evalsigne(1) | _evalvalp(-2) | evalvarn(v);
+  if (!PRECDL) { setsigne(res,0); return res; }
 
-  for (i=1; i<PREC; i+=2) P[i]= gen_0;
-  switch(PREC)
+  for (i=1; i<PRECDL; i+=2) P[i]= gen_0;
+  switch(PRECDL)
   {
     default:P[6] = gdivgs(c6,6048);
     case 6:
@@ -1697,10 +1697,10 @@ _weipell(GEN c4, GEN c6, long PREC)
     case 1: P[0] = gen_1;
     case 0: break;
   }
-  if (PREC <= 8) return res;
+  if (PRECDL <= 8) return res;
   av = avma;
   P[8] = gerepileupto(av, gdivgs(gsqr(P[4]), 3));
-  for (k=5; (k<<1) < PREC; k++)
+  for (k=5; (k<<1) < PRECDL; k++)
   {
     av = avma;
     t = gmul(P[4], P[(k-2)<<1]);
@@ -1717,58 +1717,64 @@ _weipell(GEN c4, GEN c6, long PREC)
 }
 
 GEN
-weipell(GEN e, long PREC)
+ellwpseries(GEN e, long v, long PRECDL)
 {
   GEN c4, c6;
   checksmallell(e);
   c4 = ell_get_c4(e);
-  c6 = ell_get_c6(e); return _weipell(c4,c6,PREC);
+  c6 = ell_get_c6(e); return ellwpseries_aux(c4,c6,v,PRECDL);
 }
 
-GEN
-weipell0(GEN e, long prec, long PREC)
+static GEN
+ellwpseries0(GEN e, long v, long PRECDL, long prec)
 {
   GEN c4,c6;
 
-  if (lg(e) > 3) return weipell(e, PREC);
+  if (lg(e) > 3) return ellwpseries(e, v, PRECDL);
   c4 = elleisnum(e, 4, 0, prec);
   c6 = elleisnum(e, 6, 0, prec); c6 = gneg(c6);
-  return _weipell(c4,c6,PREC);
+  return ellwpseries_aux(c4,c6,v,PRECDL);
 }
 
+GEN 
+ellwp(GEN w, GEN z, long prec)
+{ return ellwp0(w,z,0,prec); }
+
 GEN
-ellwp0(GEN w, GEN z, long flag, long PREC, long prec)
+ellwp0(GEN w, GEN z, long flag, long prec)
 {
-  GEN v;
+  GEN y;
   pari_sp av = avma;
   SL2_red T;
 
-  if (!z) return weipell0(w,prec,PREC);
-  if (typ(z)==t_POL)
+  if (flag && flag != 1) pari_err_FLAG("ellwp");
+  if (!z) return gerepileupto(av, ellwpseries0(w,0,precdl,prec));
+  y = toser_i(z);
+  if (y) 
   {
-    if (!gcmpX(z)) pari_err_TYPE("ellwp [expecting simple variable]",z);
-    v = weipell0(w,prec,PREC); setvarn(v, varn(z));
-    return v;
+    long vy = varn(y), v = valp(y);
+    GEN P, Q, R;
+    if (v <= 0) pari_err(e_IMPL,"ellwp(t_SER) away from 0");
+    if (gequal0(y)) {
+      (void)ellwpseries0(w, vy, 0, 0); /* type checking */
+      avma = av;
+      if (!flag) return zeroser(vy, -2*v);
+      retmkvec2(zeroser(vy, -2*v), zeroser(vy, -3*v));
+    }
+    P = ellwpseries0(w, vy, lg(y)-2, prec);
+    Q = gsubst(P, varn(P), y);
+    if (!flag)
+      return gerepileupto(av, Q);
+    else
+    {
+      R = mkvec2(Q, gdiv(derivser(Q), derivser(y)));
+      return gerepilecopy(av, R);
+    }
   }
   if (!get_periods(w, &T)) pari_err_TYPE("ellwp",w);
-  switch(flag)
-  {
-    case 0: v = weipellnumall(&T,z,0,prec);
-      if (!v) { avma = av; v = gpowgs(z,-2); }
-      return v;
-    case 1: v = weipellnumall(&T,z,1,prec);
-      if (!v)
-      {
-        GEN p1 = gmul2n(gpowgs(z,3),1);
-        pari_sp tetpil = avma;
-        v = cgetg(3,t_VEC);
-        gel(v,1) = gpowgs(z,-2);
-        gel(v,2) = gneg(p1); return gerepile(av,tetpil,v);
-      }
-      return v;
-    case 2: return pointell(w,z,prec);
-    default: pari_err_FLAG("ellwp"); return NULL;
-  }
+  y = ellwpnum_all(&T,z,flag,prec);
+  if (!y) pari_err(e_MISC, "argument in lattice in ellwp");
+  return gerepileupto(av, y);
 }
 
 /********************************************************************/
