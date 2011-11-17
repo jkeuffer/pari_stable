@@ -40,9 +40,9 @@ Doc:
  %2 = Mod(1, 7)
  ? a = ffgen(ffinit(3,7), 'a); random(a)
  %3 = a^6 + 2*a^5 + a^4 + a^3 + a^2 + 2*a
- ? E = ellinit([0,0,0,3,7]*Mod(1,109)); random(E)
+ ? E = ellinit([3,7]*Mod(1,109)); random(E)
  %4 = [Mod(103, 109), Mod(10, 109)]
- ? E = ellinit([0,0,0,1,7]*a^0); random(E)
+ ? E = ellinit([1,7]*a^0); random(E)
  %5 = [a^6 + a^5 + 2*a^4 + 2*a^2, 2*a^6 + 2*a^4 + 2*a^3 + a^2 + 2*a]
  ? random(Mod(1,7)*x^4)
  %6 = Mod(5, 7)*x^4 + Mod(6, 7)*x^3 + Mod(2, 7)*x^2 + Mod(2, 7)*x + Mod(5, 7)

@@ -14,7 +14,7 @@ Doc:
  groups. $E$ must be an \var{ell} as output by \kbd{ellinit}.
 
  \bprog
- ?  E = ellinit([0,0,0,-1,0]);
+ ?  E = ellinit([-1,0]);
  ?  elltors(E)
  %1 = [4, [2, 2], [[0, 0], [1, 0]]]
  @eprog

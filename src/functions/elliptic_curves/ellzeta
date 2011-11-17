@@ -13,7 +13,7 @@ Doc:
  Alternatively, one can input a lattice basis $[\omega_1,\omega_2]$ directly
  instead of $E$.
  \bprog
- ? e = ellinit([0,0,0,1,0]);
+ ? e = ellinit([1,0]);
  ? ellzeta(e, e.omega[1]/2)
  %2 = 0.8472130847939790866064991234 + 4.417621070 E-29*I
  ? 2*ellzeta([1,I], 1/2)

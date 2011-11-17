@@ -11,13 +11,13 @@ Doc: computes the structure of the group $E(\F_p) \sim \Z/d_1\Z \times
  be explicitly given. Over $\Q$ or $\Q_p$, the equation is assumed to be
  minimal at $p$.
  \bprog
- ? E = ellinit([0,0,0,0,1]);  \\ defined over Q
+ ? E = ellinit([0,1]);  \\ y^2 = x^3 + 0.x + 1, defined over Q
  ? ellgroup(E, 3)  \\ 3 necessary here
  %2 = [4]    \\ cyclic
  ? ellgroup(E, 7)
  %3 = [6, 2] \\ non-cyclic
 
- ? E = ellinit([0,0,0,0,1] * Mod(1,11));  \\ defined over F_11
+ ? E = ellinit([0,1] * Mod(1,11));  \\ defined over F_11
  ? ellgroup(E)   \\ no need to repeat 11
  %5 = [12]
  ? ellgroup(E, 11)   \\ ... but it also works
@@ -25,5 +25,7 @@ Doc: computes the structure of the group $E(\F_p) \sim \Z/d_1\Z \times
  ? ellgroup(E, 13) \\ ouch, inconsistent input !
     ***   at top-level: ellgroup(E,13)
     ***                 ^--------------
-    *** ellgroup: inconsistent moduli in Rg_to_Fp: 11, 13.
+    *** ellgroup: inconsistent moduli in Rg_to_Fp:
+      11
+      13
  @eprog

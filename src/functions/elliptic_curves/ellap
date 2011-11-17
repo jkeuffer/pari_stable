@@ -17,13 +17,13 @@ Doc: computes the trace of Frobenius $a_p$ for the elliptic curve $E$ and the
  be defined over $\Q$, and $p$ must be explicitly given. Over $\Q$ or
  $\Q_p$, the equation is assumed to be minimal at $p$.
  \bprog
- ? E = ellinit([0,0,0,0,1]);  \\ defined over Q
+ ? E = ellinit([0,1]);  \\ y^2 = x^3 + 0.x + 1, defined over Q
  ? ellap(E, 3)  \\ 3 necessary here
  %2 = 0    \\ #E(F_3) = 3+1 - 0 = 4
  ? ellap(E, 7)
  %3 = -4   \\ #E(F_7) = 12
 
- ? E = ellinit([0,0,0,0,1] * Mod(1,11));  \\ defined over F_11
+ ? E = ellinit([0,1] * Mod(1,11));  \\ defined over F_11
  ? ellap(E)       \\ no need to repeat 11
  %5 = 0
  ? ellap(E, 11)   \\ ... but it also works
@@ -31,7 +31,9 @@ Doc: computes the trace of Frobenius $a_p$ for the elliptic curve $E$ and the
  ? ellgroup(E, 13) \\ ouch, inconsistent input !
     ***   at top-level: ellap(E,13)
     ***                 ^-----------
-    *** ellap: inconsistent moduli in Rg_to_Fp: 11, 13.
+    *** ellap: inconsistent moduli in Rg_to_Fp:
+      11
+      13
  @eprog
  \misctitle{Algorithms used} If $E/\F_p$ has CM by a principal imaginary
  quadratic order we use an explicit formula (involving essentially Kronecker
