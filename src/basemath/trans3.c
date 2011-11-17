@@ -2506,7 +2506,7 @@ jell(GEN x, long prec)
   /* Let h = Delta(2x) / Delta(x), then j(x) = (1 + 256h)^3 / h */
   x = upper_half(x, &prec);
   x = redtausl2(x, &U); /* forget about Ua : j has weight 0 */
-  { /* cf eta_reduced, raiѕed to power 24
+  { /* cf eta_reduced, raised to power 24
      * Compute
      *   t = (inteta(q(2x)) / inteta(q(x))) ^ 24;
      * then
