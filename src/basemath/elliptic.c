@@ -1748,7 +1748,7 @@ ellwp0(GEN w, GEN z, long flag, long prec)
   SL2_red T;
 
   if (flag && flag != 1) pari_err_FLAG("ellwp");
-  if (!z) return gerepileupto(av, ellwpseries0(w,0,precdl,prec));
+  if (!z) z = pol_x(0);
   y = toser_i(z);
   if (y)
   {
