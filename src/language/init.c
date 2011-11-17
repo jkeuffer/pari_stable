@@ -853,7 +853,6 @@ err_recover(long numerr)
   evalstate_reset();
   initout(0);
   killallfiles();
-  dbg_release();
   iferr_env = NULL;
   global_err_data = NULL;
   out_puts(pariErr, "\n");

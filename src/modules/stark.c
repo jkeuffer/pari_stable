@@ -415,9 +415,7 @@ CplxModulus(GEN data, long *newprec)
   pari_sp av;
   GEN pol, listCR, cpl, bnr = gel(data,1), nf = checknf(bnr);
 
-  dbg_block();
   listCR = get_listCR(bnr, gel(data,3));
-  dbg_release();
   for (av = avma;; avma = av)
   {
     gel(data,5) = InitChar(bnr, listCR, dprec);
@@ -495,9 +493,7 @@ FindModulus(GEN bnr, GEN dtQ, long *newprec)
 
   for(;;)
   {
-    dbg_block();
     listid = ideallist(nf, maxnorm); /* all ideals of norm <= maxnorm */
-    dbg_release();
 
     av1 = avma;
     for (n = minnorm; n <= maxnorm; n++)
@@ -516,10 +512,8 @@ FindModulus(GEN bnr, GEN dtQ, long *newprec)
           gel(arch,N+1-s) = gen_0;
 
           /* compute Clk(m), check if m is a conductor */
-          dbg_block();
           bnrm = Buchray(bnf, m, nf_INIT|nf_GEN);
           c = bnrisconductor(bnrm, NULL);
-          dbg_release();
           gel(arch,N+1-s) = gen_1;
           if (!c) continue;
 
@@ -527,9 +521,7 @@ FindModulus(GEN bnr, GEN dtQ, long *newprec)
           ImC = ComputeKernel(bnrm, bnr, dtQ);
 
           /* ... and its subgroups of index 2 with conductor m */
-          dbg_block();
           candD = subgrouplist_cond_sub(bnrm, ImC, mkvec(gen_2));
-          dbg_release();
           nbcand = lg(candD) - 1;
           for (c = 1; c <= nbcand; c++)
           {
@@ -897,8 +889,6 @@ InitChar(GEN bnr, GEN listCR, long prec)
   C     = gmul2n(sqrtr_abs(divir(dk, powru(mppi(prec2),N))), -r2);
   initc = init_get_chic( bnr_get_cyc(bnr) );
 
-  dbg_block();
-
   dataCR = cgetg_copy(listCR, &l);
   for (i = 1; i < l; i++)
   {
@@ -945,7 +935,6 @@ InitChar(GEN bnr, GEN listCR, long prec)
     ch_CHI0(dtcr) = chi;
   }
 
-  dbg_release();
   return gerepilecopy(av, dataCR);
 }
 
@@ -2712,10 +2701,8 @@ quadray_init(GEN *pD, GEN f, GEN *pbnf, long prec)
     int isfund;
     if (pbnf) {
       long v = f? gvar(f): NO_VARIABLE;
-      dbg_block();
       if (v == NO_VARIABLE) v = fetch_user_var("y");
       bnf = Buchall(quadpoly0(D, v), nf_FORCE, prec);
-      dbg_release();
       nf = bnf_get_nf(bnf);
       isfund = equalii(D, nf_get_disc(nf));
     }

@@ -141,3 +141,4 @@ BA 23- low-level function int_bit.
        (merged with gdiver)
     5- legacy lindep and PSLQ implementations [algdep/lindep with
        negative flags]: now use LLL in all cases.
+BA  6- [libpari] removed unusable functions dbg_close/dbg_release.

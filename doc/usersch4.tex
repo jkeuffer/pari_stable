@@ -1862,16 +1862,6 @@ own functions, especially if you \tet{install} the latter under \kbd{gp}
 stack, heap, and number of variables used. Corresponds to \kbd{\bs s}
 under gp.
 
-\fun{void}{dbg_block}{} Behave as if \kbd{DEBUGLEVEL = 0}, effectively
-blocking diagnostics linked to \kbd{DEBUGLEVEL}.
-
-\fun{void}{dbg_release}{} Stop blocking diagnostics.
-
-This pair is useful when your code uses high level functions like
-\kbd{bnfinit} which produce a lot of diagnostics even at low
-\kbd{DEBUGLEVEL}s. You may want to brace the corresponding function calls
-with a \kbd{dbg\_block()} and \kbd{dbg\_release()} pair to suppress those.
-
 \subsec{Timers and timing output}
 
 \noindent To handle timings in a reentrant way, PARI defines a dedicated data
