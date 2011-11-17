@@ -35,3 +35,13 @@ ellwp(ellinit([0,-1,1,-10,-20]),x+O(x^12))
 
 \\#1186
 ellpow(ellinit([3,0]), [1,2], -quadgen(-4))
+
+v = [ellwp,ellzeta,ellsigma]
+e = ellinit([1,1]);
+{
+for (i = 1, #v,
+  my(f = v[i]);
+  print(f(e));
+  print(f(e, x+O(x^10)));
+)
+}

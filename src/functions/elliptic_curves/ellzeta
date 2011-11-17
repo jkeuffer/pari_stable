@@ -1,8 +1,8 @@
 Function: ellzeta
 Section: elliptic_curves
 C-Name: ellzeta
-Prototype: GGp
-Help: ellzeta(E,z): E being given by ellinit, returns the value at z of the
+Prototype: GDGp
+Help: ellzeta(E,{z='x}): E being given by ellinit, returns the value at z of the
  Weierstrass zeta function of the period lattice of E.
 Doc:
  $E$ being given by \kbd{ellinit}, returns the
@@ -18,8 +18,12 @@ Doc:
  %2 = 0.8472130847939790866064991234 + 4.417621070 E-29*I
  ? 2*ellzeta([1,I], 1/2)
  %3 = 3.141592653589793238462643384 + 0.E-37*I
+ ? ellzeta(ellinit([0,1])) \\ 'x implicitly at default seriesprecision
+ %4 = x^-1 + 1/35*x^5 - 1/7007*x^11 + O(x^15)
+ ? ellzeta(ellinit([0,1]), x + O(x^20)) \\ explicit precision
+ %5 = x^-1 + 1/35*x^5 - 1/7007*x^11 + 1/1440257*x^17 + O(x^18)
  @eprog\noindent
  The quasi-periods of $\zeta$, such that
  $$\zeta(z + a\omega_1 + b\omega_2) = \zeta(z) + a\eta_1 + b\eta_2 $$
- for integers $a$ and $b$ are obtained directly as $\eta_i =
- 2\zeta(\omega_i/2)$ or using \tet{elleta}.
+ for integers $a$ and $b$ are obtained as $\eta_i =
+ 2\zeta(\omega_i/2)$. Or using directly \tet{elleta}.

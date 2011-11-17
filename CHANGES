@@ -98,6 +98,7 @@ BA 28- more usable form of alarm(s, code): evaluate code, aborting after s
        and the best primitive polynomial [wrt discriminant]
    36- [library] remove precdl argument in ellwp0: use a t_SER argument like
        in all other transcendental functions.
+   37- ellsigma / ellzeta: allow t_SER arguments, like ellwp.
 
   Added
     1- mathnf for matrices over K[X] [#41]
