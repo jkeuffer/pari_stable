@@ -39,7 +39,8 @@ Doc: returns a canonical defining polynomial $P$ for the same number field
  result is the same.
 
  \bprog
- ? T = x^16 - 136*x^14 + 6476*x^12 - 141912*x^10 + 1513334*x^8 - 7453176*x^6 + 13950764*x^4 - 5596840*x^2 + 46225
+ ? T = x^16 - 136*x^14 + 6476*x^12 - 141912*x^10 + 1513334*x^8 \
+       - 7453176*x^6 + 13950764*x^4 - 5596840*x^2 + 46225
  ? T1 = polredabs(T); T2 = polredbest(T);
  ? [ norml2(polroots(T1)), norml2(polroots(T2)) ]
  %3 = [88.0000000, 120.000000]

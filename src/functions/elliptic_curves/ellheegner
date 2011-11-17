@@ -11,8 +11,9 @@ Doc: Let $E$ be an elliptic curve over the rationals, assumed to be of (analytic
  the square root of the conductor and the heigth of the point.
  \bprog
  ? E = ellinit([-157^2,0]);
- ? ellheegner(E)
- %1 = [69648970982596494254458225/166136231668185267540804, 538962435089604615078004307258785218335/67716816556077455999228495435742408]
+ ? u = ellheegner(E); print(u[1], "\n", u[2])
+ 69648970982596494254458225/166136231668185267540804
+ 538962435089604615078004307258785218335/67716816556077455999228495435742408
  ? ellheegner(ellinit([0,1]))         \\ E has rank 0 !
   ***   at top-level: ellheegner(E=ellinit
   ***                 ^--------------------
