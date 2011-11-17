@@ -4326,9 +4326,8 @@ wr_finish(void)
   pari_set_last_newline(wr_last_was_newline);
 }
 
-#define WR_NL() pari_putc('\n'); wr_finish()
-#define WR_NO() wr_finish()
-
+static void WR_NL(void) { pari_putc('\n'); wr_finish(); }
+static void WR_NO(void) { wr_finish(); }
 void write0  (const char *s, GEN g) { wr_init(s); print0(g, f_RAW); WR_NL(); }
 void writetex(const char *s, GEN g) { wr_init(s); print0(g, f_TEX); WR_NL(); }
 void write1  (const char *s, GEN g) { wr_init(s); print0(g, f_RAW); WR_NO(); }
