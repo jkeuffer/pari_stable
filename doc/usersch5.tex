@@ -1568,6 +1568,10 @@ representative of $x^2$ modulo $m$.
 positive representative of $x^{-1}$ modulo $m$. If $x$ is not invertible
 mod~$m$, raise an exception.
 
+\fun{ulong}{Fl_invsafe}{ulong x, ulong m} returns the smallest
+positive representative of $x^{-1}$ modulo $m$. If $x$ is not invertible
+mod~$m$, return $0$ (which is ambiguous if $m=1$).
+
 \fun{ulong}{Fl_div}{ulong x, ulong y, ulong m} returns the smallest
 positive representative of $x y^{-1}$ modulo $m$. If $y$ is not invertible
 mod $m$, raise an exception.

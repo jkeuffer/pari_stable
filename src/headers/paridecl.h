@@ -2100,6 +2100,7 @@ GEN     member_zkst(GEN bid);
 GEN     addmulii(GEN x, GEN y, GEN z);
 GEN     addmulii_inplace(GEN x, GEN y, GEN z);
 ulong   Fl_inv(ulong x, ulong p);
+ulong   Fl_invsafe(ulong x, ulong p);
 int     Fp_ratlift(GEN x, GEN m, GEN amax, GEN bmax, GEN *a, GEN *b);
 int     absi_cmp(GEN x, GEN y);
 int     absi_equal(GEN x, GEN y);

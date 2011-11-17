@@ -125,11 +125,12 @@ BA 18- new error trapping system and GP functions iferr,iferrname
 BA 19- implement lngamma(t_PADIC)
 LGr20- new PARI functions F2m_gauss, F2m_inv, F2m_rank, F2m_image, matid_F2m, F2m_mul,
        F2m_F2c_mul
-BA 21- GP function getenv.
+BA 21- GP function getenv
    22- new error class e_PRIME [ pari_err() ]
-BA 23- low-level function int_bit.
+BA 23- low-level function int_bit
    24- library function stack_strcat
    25- function polredbest [ adaptіng a preliminary patch by BA ]
+BA 26- library function Fl_invsafe
 
   Removed
     1- dropped DOS support

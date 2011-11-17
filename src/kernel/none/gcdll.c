@@ -1067,29 +1067,20 @@ lgcdii(ulong* d, ulong* d1,
 
 /* 1 / Mod(x,p). Assume x < p */
 ulong
-Fl_inv(ulong x, ulong p)
+Fl_invsafe(ulong x, ulong p)
 {
   long s;
   ulong xv, xv1, g = xgcduu(p, x, 1, &xv, &xv1, &s);
-  if (g != 1UL) pari_err(e_INTMOD, mkintmod(utoi(x), utoi(p)));
+  if (g != 1UL) return 0UL;
   xv = xv1 % p; if (s < 0) xv = p - xv;
   return xv;
 }
 
-#if 0
-/* assume m > 0 */
-long
-Fl_inv_signed(long a, long m)
+/* 1 / Mod(x,p). Assume x < p */
+ulong
+Fl_inv(ulong x, ulong p)
 {
-  if (a >= 0)
-  {
-    if (a > m) a %= m;
-  }
-  else
-  {
-    if (-a > m) a %= m;
-    a += m;
-  }
-  return (long)Fl_inv((ulong)a, (ulong)m);
+  ulong xv  = Fl_invsafe(x, p);
+  if (!xv && p!=1UL) pari_err(e_INTMOD, mkintmod(utoi(x), utoi(p)));
+  return xv;
 }
-#endif
