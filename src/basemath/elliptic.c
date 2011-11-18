@@ -3803,66 +3803,92 @@ bilhell(GEN e, GEN z1, GEN z2, long prec)
 /**                    Modular Parametrization                     **/
 /**                                                                **/
 /********************************************************************/
+/* t*x^v (1 + O(x)), t != 0 */
+static GEN
+triv_ser(GEN t, long v)
+{
+  GEN s = cgetg(3,t_SER);
+  s[1] = evalsigne(1) | _evalvalp(v) | evalvarn(0);
+  gel(s,2) = t; return s;
+}
 
 GEN
 elltaniyama(GEN e, long prec)
 {
-  GEN x, w, c, d, s1, s2, s3, X, C;
+  GEN x, w, c, d, X, C, b2, b4;
   long n, m;
-  pari_sp av=avma, tetpil;
+  pari_sp av = avma;
 
-  checksmallell(e); x = cgetg(prec+3,t_SER);
+  checksmallell(e);
+  if (prec < 0) pari_err(e_MISC, "negative precision in elltaniyama");
+  if (!prec) retmkvec2(triv_ser(gen_1,-2), triv_ser(gen_m1,-3));
+
+  x = cgetg(prec+3,t_SER);
   x[1] = evalsigne(1) | _evalvalp(-2) | evalvarn(0);
-  gel(x,2) = gen_1;
   d = ginv(gtoser(anell(e,prec+1), 0, prec)); setvalp(d,-1);
-  /* 2y(t) + a1x + a3 = d tx'(t). Solve for x(t),y(t):
+  /* 2y(q) + a1x + a3 = d qx'(q). Solve for x(q),y(q):
    * 4y^2 = 4x^3 + b2 x^2 + 2b4 x + b6 */
-
-  if (!prec) goto END;
   c = gsqr(d);
-  /* 4x^3 + b2 x^2 + 2b4 x + b6 = c (t x'(t))^2; c = 1/t^2 + O(1/t) */
-  C = c+4; /* C[i] = coef(c, t^i) */
+  /* solve 4x^3 + b2 x^2 + 2b4 x + b6 = c (q x'(q))^2; c = 1/q^2 + O(1/q)
+   * Take derivative then divide by 2x':
+   *  b2 x + b4 = (1/2) (q c')(q x') + c q (q x')' - 6x^2.
+   * Write X[i] = coeff(x, q^i), C[i] = coeff(c, q^i), we obtain for all n
+   *  ((n+1)(n+2)-12) X[n+2] =  b2 X[n] + b4 delta_{n = 0}
+   *   + 6    \sum_{m = -1}^{n+1} X[m] X[n-m]
+   *   - (1/2)\sum_{m = -2}^{n+1} (n+m) m C[n-m]X[m].
+   * */
+  C = c+4;
   X = x+4;
-  /* n = -3 */
-  gel(X,-1) = gmul2n(gmul(gel(X,-2),gel(C,-1)), -1);
+  gel(X,-2) = gen_1;
+  gel(X,-1) = gmul2n(gel(C,-1), -1); /* n = -3, X[-1] = C[-1] / 2 */
+  b2 = ell_get_b2(e);
+  b4 = ell_get_b4(e);
   for (n=-2; n <= prec-4; n++)
   {
+    pari_sp av2 = avma;
+    GEN s1, s2, s3;
     if (n != 2)
     {
-      s3 = gmul(ell_get_b2(e),gel(X,n));
-      if (!n) s3 = gadd(s3, ell_get_b4(e));
+      s3 = gmul(b2, gel(X,n));
+      if (!n) s3 = gadd(s3, b4);
       s2 = gen_0;
       for (m=-2; m<=n+1; m++)
-        s2 = gadd(s2,gmulsg(m*(n+m),gmul(gel(X,m),gel(C,n-m))));
+        if (m) s2 = gadd(s2, gmulsg(m*(n+m), gmul(gel(X,m),gel(C,n-m))));
       s2 = gmul2n(s2,-1);
       s1 = gen_0;
-      for (m=-1; m+m<=n; m++)
-      {
-        if (m+m==n)
-          s1 = gadd(s1, gsqr(gel(X,m)));
-        else
-          s1 = gadd(s1, gmul2n(gmul(gel(X,m),gel(X,n-m)),1));
-      }
-      gel(X,n+2) = gdivgs(gsub(gadd(gmulsg(6,s1),s3),s2), (n+2)*(n+1)-12);
+      for (m =- 1; m+m < n; m++) s1 = gadd(s1, gmul(gel(X,m),gel(X,n-m)));
+      s1 = gmul2n(s1, 1);
+      if (m+m==n) s1 = gadd(s1, gsqr(gel(X,m)));
+      /* ( (n+1)(n+2) - 12 ) X[n+2] = (6 s1 + s3 - s2) */
+      s1 = gdivgs(gsub(gadd(gmulsg(6,s1),s3),s2), (n+2)*(n+1)-12);
     }
     else
     {
-      setlg(x, 9); gel(x,8) = pol_x(MAXVARN);
-      w = derivser(x); setvalp(w,-2); /* 4v^3 + b2 x^2 + 2b4 x + b6 */
-      s1 = gadd(ell_get_b6(e), gmul(x, gadd(gmul2n(ell_get_b4(e),1),
-                                        gmul(x,gadd(ell_get_b2(e),gmul2n(x,2))))));
-      setlg(x, prec+3);
-      s2 = gsub(s1, gmul(c,gsqr(w)));
-      s2 = gel(s2,2);
-      gel(X,n+2) = gneg(gdiv(gel(s2,2),gel(s2,3)));
+      GEN b6 = ell_get_b6(e);
+      GEN U = cgetg(9, t_SER);
+      U[1] = evalsigne(1) | _evalvalp(-2) | evalvarn(0);
+      gel(U,2) = gel(x,2);
+      gel(U,3) = gel(x,3);
+      gel(U,4) = gel(x,4);
+      gel(U,5) = gel(x,5);
+      gel(U,6) = gel(x,6);
+      gel(U,7) = gel(x,7);
+      gel(U,8) = gen_0; /* defined mod q^5 */
+      /* write x = U + x_4 q^4 + O(q^5) and expand original equation */
+      w = derivser(U); setvalp(w,-2); /* q X' */
+      /* 4X^3 + b2 U^2 + 2b4 U + b6 */
+      s1 = gadd(b6, gmul(U, gadd(gmul2n(b4,1), gmul(U,gadd(b2,gmul2n(U,2))))));
+      /* s2 = (qX')^2 - (4X^3 + b2 U^2 + 2b4 U + b6) = 28 x_4 + O(q) */
+      s2 = gsub(gmul(c,gsqr(w)), s1);
+      s1 = signe(s2)? gdivgs(gel(s2,2), 28): gen_0; /* = x_4 */
     }
+    gel(X,n+2) = gerepileupto(av2, s1);
   }
-END:
   w = gmul(d,derivser(x)); setvalp(w, valp(w)+1);
   w = gsub(w, ellLHS0(e,x));
-  tetpil = avma; s1 = cgetg(3,t_VEC);
-  gel(s1,1) = gcopy(x);
-  gel(s1,2) = gmul2n(w,-1); return gerepile(av,tetpil,s1);
+  c = cgetg(3,t_VEC);
+  gel(c,1) = gcopy(x);
+  gel(c,2) = gmul2n(w,-1); return gerepileupto(av, c);
 }
 
 /********************************************************************/
