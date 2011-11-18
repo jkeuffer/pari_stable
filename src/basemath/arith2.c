@@ -562,31 +562,6 @@ Z_smoothen(GEN N, GEN L, GEN *pP, GEN *pe)
 /**                    SIMPLE FACTORISATIONS                          **/
 /**                                                                   **/
 /***********************************************************************/
-
-/* Factor n and output [p,e] where
- * p, e are vecsmall with n = prod{p[i]^e[i]} */
-GEN
-factoru(ulong n)
-{
-  GEN f = cgetg(3,t_VEC);
-  pari_sp av = avma;
-  GEN F, P, E, p, e;
-  long i, l;
-  /* enough room to store <= 15 primes and exponents (OK if n < 2^64) */
-  (void)new_chunk((15 + 1)*2);
-  F = Z_factor(utoi(n));
-  P = gel(F,1);
-  E = gel(F,2); l = lg(P);
-  avma = av;
-  p = cgetg(l,t_VECSMALL); gel(f,1) = p;
-  e = cgetg(l,t_VECSMALL); gel(f,2) = e;
-  for (i = 1; i < l; i++)
-  {
-    p[i] = itou(gel(P,i));
-    e[i] = itou(gel(E,i));
-  }
-  return f;
-}
 /* Factor n and output [p,e,c] where
  * p, e and c are vecsmall with n = prod{p[i]^e[i]} and c[i] = p[i]^e[i] */
 GEN
@@ -598,7 +573,7 @@ factoru_pow(ulong n)
   long i, l;
   /* enough room to store <= 15 * [p,e,p^e] (OK if n < 2^64) */
   (void)new_chunk((15 + 1)*3);
-  F = Z_factor(utoi(n));
+  F = factoru(n);
   P = gel(F,1);
   E = gel(F,2); l = lg(P);
   avma = av;
@@ -607,8 +582,8 @@ factoru_pow(ulong n)
   gel(f,3) = c = cgetg(l,t_VECSMALL);
   for(i = 1; i < l; i++)
   {
-    p[i] = itou(gel(P,i));
-    e[i] = itou(gel(E,i));
+    p[i] = P[i];
+    e[i] = E[i];
     c[i] = upowuu(p[i], e[i]);
   }
   return f;

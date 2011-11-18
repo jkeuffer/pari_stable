@@ -3315,6 +3315,100 @@ utridiv_bound(ulong n)
   return 1UL<<14;
 }
 
+static void
+ifac_factoru(GEN n, GEN P, GEN E, long *pi)
+{
+  GEN part = ifac_start(n, 0);
+  for(;;)
+  {
+    GEN here = ifac_main(&part);
+    if (here == gen_1) return;
+    P[*pi] = itou( VALUE(here) );
+    E[*pi] = itou( EXPON(here) );
+    (*pi)++;
+    INIT0(here);
+  }
+}
+
+/* Factor n and output [p,e] where
+ * p, e are vecsmall with n = prod{p[i]^e[i]} */
+GEN
+factoru(ulong n)
+{
+  GEN f, E, E2, P, P2;
+  byteptr d = diffptr+1;
+  pari_sp av;
+  ulong p, lim;
+  long v, i, oldi;
+
+  if (n == 0) retmkvec2(mkvecsmall(0), mkvecsmall(1));
+  if (n == 1) return trivial_fact();
+
+  v = vals(n);
+  if (v)
+  {
+    n >>= v;
+    if (n == 1) retmkvec2(mkvecsmall(2), mkvecsmall(v));
+  }
+  f = cgetg(3,t_VEC); av = avma;
+  /* enough room to store <= 15 primes and exponents (OK if n < 2^64) */
+  (void)new_chunk((15 + 1)*2);
+  P = cgetg(16, t_VECSMALL);
+  E = cgetg(16, t_VECSMALL);
+  if (v) { P[1] = 2; E[1] = v; i = 2; } else i = 1;
+  lim = utridiv_bound(n);
+  p = 2;
+  while (p <= 661)
+  {
+    int stop;
+    if (!*d) break;
+    NEXT_PRIME_VIADIFF(p,d);
+    v = u_lvalrem_stop(&n, p, &stop);
+    if (v) {
+      P[i] = p;
+      E[i] = v; i++;
+    }
+    if (stop) {
+      if (n != 1) { P[i] = n; E[i] = 1; i++; }
+      goto END;
+    }
+  }
+  /* tiny integers without small factors are often primes */
+  oldi = i;
+  if (uisprime_nosmalldiv(n)) { P[i] = n; E[i] = 1; i++; goto END; }
+  while (p < lim)
+  {
+    int stop;
+    if (!*d) break;
+    NEXT_PRIME_VIADIFF(p,d);
+    v = u_lvalrem_stop(&n, p, &stop);
+    if (v) {
+      P[i] = p;
+      E[i] = v; i++;
+    }
+    if (stop) {
+      if (n != 1) { P[i] = n; E[i] = 1; i++; }
+      goto END;
+    }
+  }
+  if (i != oldi && uisprime_nosmalldiv(n)) { P[i] = n; E[i] = 1; i++; }
+  else
+  {
+    GEN perm;
+    ifac_factoru(utoipos(n), P, E, &i);
+    setlg(P, i);
+    perm = vecsmall_indexsort(P);
+    P = vecpermute(P, perm);
+    E = vecpermute(E, perm);
+  }
+END:
+  avma = av;
+  P2 = cgetg(i, t_VECSMALL); gel(f,1) = P2;
+  E2 = cgetg(i, t_VECSMALL); gel(f,2) = E2;
+  while (--i >= 1) { P2[i] = P[i]; E2[i] = E[i]; }
+  return f;
+}
+
 GEN
 gmoebius(GEN n) { return map_proto_lG(moebius,n); }
 
@@ -3781,6 +3875,38 @@ ifactor(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
 
   i = signe(n);
   if (!i) retmkmat2(mkcol(gen_0), mkcol(gen_1));
+  if (lgefint(n) == 3)
+  { /* small integer */
+    GEN f, Pf, Ef, P, E, F = cgetg(3, t_MAT);
+    long l;
+    av = avma;
+    /* enough room to store <= 15 primes and exponents (OK if n < 2^64) */
+    (void)new_chunk((15*3 + 15 + 1) * 2);
+    f = factoru(n[2]);
+    avma = av;
+    Pf = gel(f,1);
+    Ef = gel(f,2);
+    l = lg(Pf);
+    if (i < 0)
+    { /* add sign */
+      long L = l+1;
+      gel(F,1) = P = cgetg(L, t_COL);
+      gel(F,2) = E = cgetg(L, t_COL);
+      gel(P,1) = gen_m1; P++;
+      gel(E,1) = gen_1;  E++;
+    }
+    else
+    {
+      gel(F,1) = P = cgetg(l, t_COL);
+      gel(F,2) = E = cgetg(l, t_COL);
+    }
+    for (i = 1; i < l; i++)
+    {
+      gel(P,i) = utoipos(Pf[i]);
+      gel(E,i) = utoipos(Ef[i]);
+    }
+    return F;
+  }
   (void)cgetg(3,t_MAT);
   if (i < 0) STORE(&nb, utoineg(1), 1);
   if (is_pm1(n)) return aux_end(NULL,nb);
