@@ -505,23 +505,39 @@ init_primepointer(ulong a, ulong p, byteptr *ptr)
   *ptr = diff; return p;
 }
 
-byteptr
-initprimes(ulong maxnum)
+static byteptr
+initprimes_i(ulong maxnum, long *lenp, ulong *lastp)
 {
-  long len;
-  ulong last;
   byteptr p;
   /* The algorithm must see the next prime beyond maxnum, whence the +512. */
   ulong maxnum1 = ((maxnum<65302?65302:maxnum)+512ul);
 
   if ((maxnum>>1) > LONG_MAX - 1024)
     pari_err_OVERFLOW("initprimes [primelimit]");
-  p = initprimes0(maxnum1, &len, &last);
+  p = initprimes0(maxnum1, lenp, lastp);
 #if 0 /* not yet... GN */
   static int build_the_tables = 1;
   if (build_the_tables) { init_tinyprimes_tridiv(p); build_the_tables=0; }
 #endif
-  _maxprime = last; return p;
+  return p;
+}
+
+byteptr
+initprimes(ulong maxnum)
+{
+  long len;
+  ulong last;
+  return initprimes_i(maxnum, &len, &last);
+}
+
+void
+initprimetable(ulong maxnum)
+{
+  long len;
+  ulong last;
+  byteptr p = initprimes_i(maxnum, &len, &last);
+  if (diffptr) free(diffptr);
+  diffptr = p; _maxprime = last;
 }
 
 GEN

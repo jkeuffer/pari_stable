@@ -2021,14 +2021,15 @@ while (p <= goal) /*@Ccom run through all primes up to \kbd{goal} */
 not mention the largest needed prime.
 
 \fun{bytepr}{initprimes}{ulong maxprime} computes a prime table (of all prime
-differences for $p < maxp$) on the fly. You may assign it to \kbd{diffptr} or
-to a similar variable of your own. Beware that before changing \kbd{diffptr},
-you must free the (\kbd{malloc}ed) precomputed table first; and then all
-pointers into the old table will become invalid.
+differences for $p < maxp$) on the fly.
 
 PARI currently guarantees that the first 6547 primes, up to and including
 65557, are present in the table, even if you set \kbd{maxprime} to zero.
 in the \kbd{pari\_init} call.
+
+\fun{void}{initprimetable}{ulong maxprime} computes a prime table (of all prime
+differences for $p < maxp$) and assign it to \kbd{diffptr}. You should refrain
+from changing \kbd{diffptr} and call this function instead.
 
 \fun{ulong}{init_primepointer}{ulong a, ulong p, byteptr *ptr}
 assume \kbd{*ptr} is inside of a \kbd{diffptr} containing the successive

@@ -538,11 +538,7 @@ sd_primelimit(const char *v, long flag)
 {
   ulong max = maxprime(), n = max;
   GEN r = sd_ulong(v,flag,"primelimit",&n, 0,2*(ulong)(LONG_MAX-1024) + 1,NULL);
-  if (n != max)
-  {
-    byteptr ptr = initprimes(n);
-    pari_free(diffptr); diffptr = ptr;
-  }
+  if (n != max) initprimetable(n);
   return r;
 }
 

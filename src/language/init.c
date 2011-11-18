@@ -60,7 +60,7 @@ static const long readonly_ghalf[] = {
 };
 THREAD GEN    bernzone;
 GEN     primetab; /* private primetable */
-byteptr diffptr;
+byteptr diffptr = NULL;
 FILE    *pari_outfile, *pari_errfile, *pari_logfile, *pari_infile;
 char    *current_logfile, *current_psfile, *pari_datadir;
 long    gp_colors[c_LAST];
@@ -729,7 +729,7 @@ pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts)
 
   if ((init_opts&INIT_SIGm)) pari_sig_init(pari_sighandler);
   pari_init_stack(parisize, 0);
-  diffptr = initprimes(maxprime);
+  initprimetable(maxprime);
   init_universal_constants();
   if (pari_kernel_init()) pari_err(e_MISC,"Cannot initialize kernel");
 
