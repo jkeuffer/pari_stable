@@ -428,9 +428,10 @@ initprimes0_i(ulong maxnum, long *lenp, ulong *lastp, byteptr p1)
   /* Checked to be enough up to 40e6, attained at 155893 */
   rootnum = (ulong) sqrt((double)maxnum); /* cast it back to a long */
   rootnum |= 1;
-  (void) initprimes0_i(rootnum, &psize, &last, p1); /* recursive call */
+  /* recursive call (remember that maxnum > maxpr) */
+  (void) initprimes0_i(maxss(rootnum, maxpr), &psize, &last, p1);
   fin1 = p1 + psize - 1;
-  remains = (maxnum - rootnum) >> 1; /* number of odd numbers to check */
+  remains = (maxnum - last) >> 1; /* number of odd numbers to check */
 
   /* Actually, we access primes array of psize too; but we access it
      consequently, thus we do not include it in fixed_to_cache */
@@ -443,13 +444,13 @@ initprimes0_i(ulong maxnum, long *lenp, ulong *lastp, byteptr p1)
   else
     p = (byteptr) bot;
   fin = p + asize;              /* the 0 sentinel goes at fin. */
-  curlow = rootnum + 2; /* First candidate: know primes up to rootnum (odd). */
+  curlow = last + 2; /* First candidate: know primes up to last (odd). */
   curdiff = fin1;
 
   /* During each iteration p..fin-1 represents a range of odd
      numbers.  plast is a pointer which represents the last prime seen,
      it may point before p..fin-1. */
-  plast = p - ((rootnum - last) >> 1) - 1;
+  plast = p - 1;
   p_prime_above = p1 + 2;
   while (remains)       /* Cycle over arenas.  Performance is not crucial */
   {
