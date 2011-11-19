@@ -30,7 +30,7 @@ static ulong diffptrlen;
  * initprimes() below.  initprimes1() is the old algorithm, called when
  * maxnum (size) is moderate. */
 static byteptr
-initprimes1(ulong size, long *lenp, long *lastp)
+initprimes1(ulong size, long *lenp, long *lastp, byteptr p1)
 {
   long k;
   byteptr q, r, s, p = (byteptr)pari_calloc(size+2), fin = p + size;
@@ -40,17 +40,18 @@ initprimes1(ulong size, long *lenp, long *lastp)
     do { r+=k; k+=2; r+=k; } while (*++q);
     for (s=r; s<=fin; s+=k) *s = 1;
   }
-  r = p; *r++ = 2; *r++ = 1; /* 2 and 3 */
-  for (s=q=r-1; ; s=q)
+  r = p1; *r++ = 2; *r++ = 1; /* 2 and 3 */
+  for (s=q=p+1; ; s=q)
   {
     do q++; while (*q);
     if (q > fin) break;
     *r++ = (unsigned char) ((q-s) << 1);
   }
   *r++ = 0;
-  *lenp = r - p;
+  *lenp = r - p1;
   *lastp = ((s - p) << 1) + 1;
-  return (byteptr) pari_realloc(p,r-p);
+  pari_free(p);
+  return p1;
 }
 
 /*  Timing in ms (Athlon/850; reports 512K of secondary cache; looks
@@ -384,11 +385,11 @@ sieve_chunk(byteptr known_primes, ulong s, byteptr data, ulong count)
 /* Here's the workhorse.  This is recursive, although normally the first
    recursive call will bottom out and invoke initprimes1() at once.
    (Not static;  might conceivably be useful to someone in library mode) */
-byteptr
-initprimes0(ulong maxnum, long *lenp, ulong *lastp)
+static byteptr
+initprimes0_i(ulong maxnum, long *lenp, ulong *lastp, byteptr p1)
 {
-  long size, alloced, psize;
-  byteptr q, fin, p, p1, fin1, plast, curdiff;
+  long alloced, psize;
+  byteptr q, fin, p, fin1, plast, curdiff;
   ulong last, remains, curlow, rootnum, asize, maxpr = maxprime();
   ulong prime_above = 3;
   byteptr p_prime_above;
@@ -397,11 +398,11 @@ initprimes0(ulong maxnum, long *lenp, ulong *lastp)
   if (maxnum > maxpr && maxnum <= maxpr+512) maxnum = uprecprime(maxnum);
   if (maxnum <= maxpr)
   {
-    ulong prime, lastprime;
+    long size;
+    ulong prime, lastprime = 0;
     byteptr d;
     if (maxnum == maxpr)
     {
-      p1 = pari_malloc(diffptrlen);
       memcpy(p1, diffptr, diffptrlen);
       *lastp = maxnum;
       *lenp = diffptrlen;
@@ -415,7 +416,6 @@ initprimes0(ulong maxnum, long *lenp, ulong *lastp)
     }
     if (prime == maxnum) { p = d; lastprime = prime; }
     size = p-diffptr+1;
-    p1 = (byteptr) pari_malloc(size);
     memcpy(p1, diffptr, size-1);
     p1[size] = 0;
     *lastp = lastprime;
@@ -423,21 +423,12 @@ initprimes0(ulong maxnum, long *lenp, ulong *lastp)
     return p1;
   }
   if (maxnum <= 1ul<<17)        /* Arbitrary. */
-    return initprimes1(maxnum>>1, lenp, (long*)lastp); /* Break recursion */
+    return initprimes1(maxnum>>1, lenp, (long*)lastp, p1); /* Break recursion */
 
   /* Checked to be enough up to 40e6, attained at 155893 */
-  /* Due to multibyte representation of large gaps, this estimate will
-     be broken by large enough maxnum.  However, assuming exponential
-     distribution of gaps with the average log(n), we are safe up to
-     circa exp(-256/log(1/0.09)) = 1.5e46.  OK with LONG_BITS <= 128. ;-) */
-  size = (long) (1.09 * maxnum/log((double)maxnum)) + 146;
-  p1 = (byteptr) pari_malloc(size);
   rootnum = (ulong) sqrt((double)maxnum); /* cast it back to a long */
   rootnum |= 1;
-  {
-    byteptr p2 = initprimes0(rootnum, &psize, &last); /* recursive call */
-    memcpy(p1, p2, psize); pari_free(p2);
-  }
+  (void) initprimes0_i(rootnum, &psize, &last, p1); /* recursive call */
   fin1 = p1 + psize - 1;
   remains = (maxnum - rootnum) >> 1; /* number of odd numbers to check */
 
@@ -499,6 +490,17 @@ initprimes0(ulong maxnum, long *lenp, ulong *lastp)
   *lenp = curdiff - p1;
   *lastp = last;
   if (alloced) pari_free(p);
+  return p1;
+}
+byteptr
+initprimes0(ulong maxnum, long *lenp, ulong *lastp)
+{
+  /* Due to multibyte representation of large gaps, this estimate will
+     be broken by large enough maxnum.  However, assuming exponential
+     distribution of gaps with the average log(n), we are safe up to
+     circa exp(-256/log(1/0.09)) = 1.5e46.  OK with LONG_BITS <= 128. ;-) */
+  long size = (long) (1.09 * maxnum/log((double)maxnum)) + 146;
+  byteptr p1 = initprimes0_i(maxnum, lenp, lastp, (byteptr)pari_malloc(size));
   return (byteptr) pari_realloc(p1, *lenp);
 }
 #if 0 /* not yet... GN */
