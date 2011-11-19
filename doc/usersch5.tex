@@ -2716,6 +2716,9 @@ $0$ otherwise.
 $0$ if it cannot be represented as an \kbd{ulong} (bigger than $2^{64} - 59$
 or $2^{32} - 5$ depending on the word size).
 
+\fun{ulong}{uprecprime}{ulong n}, returns the largest prime $\leq n$. Return
+$0$ if $n\leq 1$.
+
 \fun{ulong}{uprime}{long n} returns the $n$-th prime, assuming it belongs to
 the precomputed prime table. Error otherwise.
 

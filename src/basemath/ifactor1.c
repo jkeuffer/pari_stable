@@ -142,6 +142,39 @@ nextprime(GEN n)
   return gerepileuptoint(av, n);
 }
 
+ulong
+uprecprime(ulong n)
+{
+  long rc, rc0, rcd, rcn;
+  { /* check if n <= 10 */
+    if (n <= 1)  return 0;
+    if (n == 2)  return 2;
+    if (n <= 4)  return 3;
+    if (n <= 6)  return 5;
+    if (n <= 10) return 7;
+  }
+  /* here n >= 11 */
+  if (!(n % 2)) n--;
+  rc = rc0 = n % 210;
+  /* find previous prime residue class mod 210 */
+  for(;;)
+  {
+    rcn = (long)(prc210_no[rc>>1]);
+    if (rcn != NPRC) break;
+    rc -= 2; /* cannot wrap since 1 is coprime and rc odd */
+  }
+  if (rc < rc0) n += rc - rc0;
+  /* now find an actual (pseudo)prime */
+  for(;;)
+  {
+    if (uisprime(n)) break;
+    if (--rcn < 0) rcn = 47;
+    rcd = prc210_d1[rcn];
+    n -= rcd;
+  }
+  return n;
+}
+
 GEN
 precprime(GEN n)
 {
@@ -155,15 +188,11 @@ precprime(GEN n)
   }
   if (signe(n) <= 0) { avma = av; return gen_0; }
   if (lgefint(n) <= 3)
-  { /* check if n <= 10 */
-    ulong k = n[2];
-    if (k <= 1)  { avma = av; return gen_0; }
-    if (k == 2)  { avma = av; return gen_2; }
-    if (k <= 4)  { avma = av; return utoipos(3); }
-    if (k <= 6)  { avma = av; return utoipos(5); }
-    if (k <= 10) { avma = av; return utoipos(7); }
+  {
+    ulong k = ((uGEN)n)[2];
+    avma = av;
+    return utoipos(uprecprime(k));
   }
-  /* here n >= 11 */
   if (!mod2(n)) n = addsi(-1,n);
   rc = rc0 = smodis(n, 210);
   /* find previous prime residue class mod 210 */

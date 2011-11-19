@@ -22,6 +22,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "paripriv.h"
 
+static ulong _maxprime = 0;
+static ulong diffptrlen;
+
 /* Building/Rebuilding the diffptr table. The actual work is done by the
  * following two subroutines;  the user entry point is the function
  * initprimes() below.  initprimes1() is the old algorithm, called when
@@ -386,14 +389,41 @@ initprimes0(ulong maxnum, long *lenp, ulong *lastp)
 {
   long size, alloced, psize;
   byteptr q, fin, p, p1, fin1, plast, curdiff;
-  ulong last, remains, curlow, rootnum, asize;
+  ulong last, remains, curlow, rootnum, asize, maxpr = maxprime();
   ulong prime_above = 3;
   byteptr p_prime_above;
 
+  maxnum |= 1;                  /* make it odd. */
+  if (maxnum > maxpr && maxnum <= maxpr+512) maxnum = uprecprime(maxnum);
+  if (maxnum <= maxpr)
+  {
+    ulong prime, lastprime;
+    byteptr d;
+    if (maxnum == maxpr)
+    {
+      p1 = pari_malloc(diffptrlen);
+      memcpy(p1, diffptr, diffptrlen);
+      *lastp = maxnum;
+      *lenp = diffptrlen;
+      return p1;
+    }
+    p = diffptr; lastprime = 0; /* -Wall */
+    for (prime = 2, d = diffptr+1; prime < maxnum; )
+    {
+      p = d; lastprime = prime;
+      NEXT_PRIME_VIADIFF(prime,d);
+    }
+    if (prime == maxnum) { p = d; lastprime = prime; }
+    size = p-diffptr+1;
+    p1 = (byteptr) pari_malloc(size);
+    memcpy(p1, diffptr, size-1);
+    p1[size] = 0;
+    *lastp = lastprime;
+    *lenp = size;
+    return p1;
+  }
   if (maxnum <= 1ul<<17)        /* Arbitrary. */
     return initprimes1(maxnum>>1, lenp, (long*)lastp); /* Break recursion */
-
-  maxnum |= 1;                  /* make it odd. */
 
   /* Checked to be enough up to 40e6, attained at 155893 */
   /* Due to multibyte representation of large gaps, this estimate will
@@ -481,8 +511,6 @@ void
 init_tinyprimes_tridiv(byteptr p);      /* in ifactor2.c */
 #endif
 
-static ulong _maxprime = 0;
-
 ulong
 maxprime(void) { return _maxprime; }
 
@@ -537,7 +565,7 @@ initprimetable(ulong maxnum)
   ulong last;
   byteptr p = initprimes_i(maxnum, &len, &last);
   if (diffptr) free(diffptr);
-  diffptr = p; _maxprime = last;
+  diffptr = p; diffptrlen = len; _maxprime = last;
 }
 
 GEN

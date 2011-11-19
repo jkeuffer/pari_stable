@@ -1937,6 +1937,7 @@ int     is_pth_power(GEN x, GEN *pt, ulong *curexp, ulong cutoffbits);
 GEN     nextprime(GEN n);
 GEN     precprime(GEN n);
 ulong   unextprime(ulong n);
+ulong   uprecprime(ulong n);
 
 /* init.c */
 
