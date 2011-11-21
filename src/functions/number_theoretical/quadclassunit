@@ -33,12 +33,13 @@ Doc: \idx{Buchmann-McCurley}'s sub-exponential algorithm for computing the
  work at all; use the general function \tet{bnfnarrow}.
 
  Optional parameter \var{tech} is a row vector of the form $[c_1, c_2]$,
- where $c_1 \leq c_2$ are positive real numbers which control the execution
+ where $c_1 \leq c_2$ are non-negative real numbers which control the execution
  time and the stack size, see \ref{se:GRHbnf}. The parameter is used as a
  threshold to balance the relation finding phase against the final linear
- algebra. Increasing the default $c_1 = 0.2$ means that relations are easier
+ algebra. Increasing the default $c_1$ means that relations are easier
  to find, but more relations are needed and the linear algebra will be
- harder. The parameter $c_2$ is mostly obsolete and should not be changed,
+ harder. The default value for $c_1$ is $0$ and means that it is taken equal
+ to $c_2$. The parameter $c_2$ is mostly obsolete and should not be changed,
  but we still document it for completeness: we compute a tentative class
  group by generators and relations using a factorbase of prime ideals $\leq
  c_1 (\log |D|)^2$, then prove that ideals of norm $\leq c_2 (\log |D|)^2$ do

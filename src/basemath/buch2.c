@@ -69,7 +69,7 @@ check_and_build_obj(GEN S, long tag, GEN (*build)(GEN))
 /* get_random_ideal */
 static const long RANDOM_BITS = 4;
 /* Buchall */
-static const double BNF_C1 = 0.3, BNF_C2 = 0.3;
+static const double BNF_C1 = 0.0, BNF_C2 = 0.0;
 static const long RELSUP = 5;
 static const long FAIL_DIVISOR = 32;
 static const long MINFAIL = 10;
@@ -400,14 +400,13 @@ subFBgen(FB_t *F, GEN nf, GEN auts, GEN cyclic, double PROD, long minsFB)
     prod *= (double)itos(gel(y,t));
     if (iyes > minsFB && prod > PROD) break;
   }
-  if (i == lv) return 0;
   setlg(yes, iyes);
   for (j=1; j<iyes; j++)     F->perm[j] = yes[j];
   for (i=1; i<ino; i++, j++) F->perm[j] =  no[i];
   for (   ; j<lv; j++)       F->perm[j] =  perm[j];
   F->allsubFB = NULL;
   FB_aut_perm(F, nf, auts, cyclic);
-  assign_subFB(F, yes, iyes);
+  if (iyes) assign_subFB(F, yes, iyes);
   avma = av; return 1;
 }
 static int
@@ -487,20 +486,6 @@ pre_allocate(RELCACHE_t *cache, size_t n)
   if (len >= cache->len) reallocate(cache, len << 1);
 }
 
-static GEN
-countf(GEN LP)
-{
-  long i, nP = lg(LP)-1, maxf = pr_get_f(gel(LP, nP));
-  GEN nbf = const_vecsmall(maxf, 0);
-  nbf[maxf] = 1;
-  for (i = 1; i < nP; i++)
-  {
-    long f = pr_get_f( gel(LP,i) );
-    nbf[f]++;
-  }
-  return nbf;
-}
-
 void
 init_GRHcheck(GRHcheck_t *S, long N, long R1, double LOGD)
 {
@@ -509,16 +494,88 @@ init_GRHcheck(GRHcheck_t *S, long N, long R1, double LOGD)
   const double c3 = 3.801387092431; /* Euler + log(8*Pi)*/
   S->cN = R1*c2 + N*c1;
   S->cD = LOGD - N*c3 - R1*PI/2;
-  S->checkok = 0;
+  S->maxprimes = 16000; /* sufficient for LIMC=176081*/
+  S->primes = pari_malloc(S->maxprimes*sizeof(*S->primes));
+  S->nprimes = 0;
 }
 
 int
 GRHok(GRHcheck_t *S, double L, double SA, double SB)
 {
-  if (S->checkok || S->cD + (S->cN + 2*SB) / L - 2*SA < -1e-8) return 1;
-  if (DEBUGLEVEL) err_printf("*** GRH check negative! ***\n");
-  return 0;
+  return (S->cD + (S->cN + 2*SB) / L - 2*SA < -1e-8);
 }
+
+static void
+check_prime_dec(GRHcheck_t *S, long np, GEN nf, GEN P, GEN D, GEN invhr)
+{
+  byteptr delta = diffptr;
+  long i, p;
+  if (S->nprimes >= np) return;
+  if (S->nprimes)
+    p = uprime(S->nprimes);
+  else
+    p = 0;
+  if (S->maxprimes < np)
+  {
+    S->maxprimes *= 2;
+    S->primes = pari_realloc(S->primes, S->maxprimes*sizeof(*S->primes));
+  }
+  for (i = S->nprimes, delta = diffptr + i; i < np; i++)
+  {
+    pari_sp av = avma;
+    long j, k, l, n;
+    GRHprime_t *pr = S->primes + i;
+    GEN dec, a = NULL, b = NULL;
+    NEXT_PRIME_VIADIFF(p, delta);
+    pr->logp = log(p);
+    if (umodiu(D, p))
+      dec = FpX_degfact(P, utoipos(p));
+    else
+    {
+      GEN dec0 = idealprimedec(nf, utoipos(p));
+      n = lg(dec0);
+      dec = cgetg(3, t_MAT);
+      gel(dec, 1) = cgetg(n, t_VECSMALL);
+      for (j = 1; j < n; j++) coeff(dec, j, 1) = itou(gmael(dec0, j, 4));
+      gel(dec, 2) = const_vecsmall(n-1, 1);
+    }
+    n = lg(gel(dec, 1));
+    l = coeff(dec, 1, 1);
+    for (j = 2, k = 1; j < n; j++)
+      if (coeff(dec, j, 1) == l)
+        coeff(dec, k, 2) += coeff(dec, j, 2);
+      else
+      {
+        l = coeff(dec, j, 1);
+        k++;
+        coeff(dec, k, 1) = l;
+        coeff(dec, k, 2) = coeff(dec, j, 2);
+      }
+    k++;
+    setlg(gel(dec,1), k);
+    setlg(gel(dec,2), k);
+    for (j = 1; j < k; j++)
+    {
+      long f = coeff(dec, j, 1), nb = coeff(dec, j, 2);
+      GEN nor = powuu(p, f);
+      if (a)
+      {
+        a = mulii(a, powiu(nor, nb));
+        b = mulii(b, powiu(gsub(nor, gen_1), nb));
+      }
+      else
+      {
+        a = powuu(p, f*nb-1);
+        b = diviuexact(powiu(gsub(nor, gen_1), nb), p-1);
+      }
+    }
+    a = divri(mulir(b, invhr), a);
+    affrr(a, invhr);
+    pr->dec = gerepilecopy(av, dec);
+  }
+  S->nprimes = np;
+}
+
 
 /* Compute FB, LV, iLP + KC*. Reset perm
  * n2: bound for norm of tested prime ideals (includes be_honest())
@@ -526,83 +583,50 @@ GRHok(GRHcheck_t *S, double L, double SA, double SB)
 
  * Return prod_{p<=n2} (1-1/p) / prod_{Norm(P)<=n2} (1-1/Norm(P)),
  * close to residue of zeta_K at 1 = 2^r1 (2pi)^r2 h R / (w D) */
-static GEN
-FBgen(FB_t *F, GEN nf, long N, long C2, long C1, GRHcheck_t *S)
+static void
+FBgen(FB_t *F, GEN nf, GEN D, long N, long C2, long C1, GEN invhr, GRHcheck_t *S)
 {
   byteptr delta = diffptr;
   long i, p, ip;
-  GEN prim, Res;
-  double L = log((double)C2), SA = 0, SB = 0;
+  GRHprime_t *pr = S->primes;
+  GEN prim;
+  double L = log((double)C2);
 
   maxprime_check((ulong)C2);
+  check_prime_dec(S, uprimepi((ulong)C2)+1, nf, nf_get_pol(nf), D, invhr);
   F->sfb_chg = 0;
   F->FB  = cgetg(C2+1, t_VECSMALL);
   F->iLP = cgetg(C2+1, t_VECSMALL);
   F->LV = (GEN*)new_chunk(C2+1);
 
-  Res = real_1(DEFAULTPREC);
   prim = icopy(gen_1);
   i = ip = 0;
   F->KC = F->KCZ = 0;
-  for (p = 0;;) /* p <= C2 */
+  for (p = 0;; pr++) /* p <= C2 */
   {
-    pari_sp av = avma, av1;
-    long f, k, l, m;
-    GEN LP, a, b, nbf;
+    pari_sp av = avma;
+    long k, l, m;
+    GEN LP, nb, f;
 
     NEXT_PRIME_VIADIFF(p, delta);
     if (!F->KC && p > C1) { F->KCZ = i; F->KC = ip; }
     if (p > C2) break;
 
     if (DEBUGLEVEL>1) { err_printf(" %ld",p); err_flush(); }
+
+    f = gel(pr->dec, 1); nb = gel(pr->dec, 2);
+    if (f[1] == N) continue; /* p inert */
+    l = (long)(L/pr->logp);
+    for (k=0, m=1; m < lg(f) && f[m]<=l; m++) k += nb[m];
+
     prim[2] = p; LP = idealprimedec(nf,prim);
-
-    av1 = avma; a = b = NULL;
-    nbf = countf(LP); l = lg(nbf); k = 0;
-    /* a/b := (p-1)/p * prod_{LP|p, NP <= C2} NP / (NP-1) */
-    a = utoi(p-1); b = prim;
-    for (f=1; f<l; f++)
-    {
-      long nor, nb = nbf[f];
-
-      if (!nb) continue;
-      if (f == 1) nor = p;
-      else
-      {
-        nor = itos_or_0(powiu(prim, f));
-        if (!nor || nor > C2) break;
-      }
-      k += nb;
-      a = mulii(a, powuu(nor,   nb));
-      b = mulii(b, powuu(nor-1, nb));
-      if (!S->checkok)
-      {
-        double logp = log((double)p);
-        double logNP = f*logp, q = 1/sqrt((double)nor);
-        double A = logNP * q, B = logNP * A;
-        long M = (long)(L/logNP);
-        if (M > 1)
-        {
-          double inv1_q = 1 / (1-q);
-          A *= (1 - pow(q, M)) * inv1_q;
-          B *= (1 - pow(q, M)*(M+1 - M*q)) * inv1_q * inv1_q;
-        }
-        SA += nb * A;
-        SB += nb * B;
-      }
-    }
-    a = a? divri(mulir(a,Res),b): divru(mulur(p-1,Res),p);
-    affrr(a, Res);
-    avma = av1;
-    if (l == N+1) continue; /* p inert */
-
     /* keep non-inert ideals with Norm <= C2 */
     for (m = 1; m <= k; m++)
     {
       GEN t = gel(LP,m);
       gel(t,5) = zk_scalar_or_multable(nf, gel(t,5));
     }
-    if (f == l)
+    if (m == lg(LP))
       setisclone(LP); /* flag it: all prime divisors in FB */
     else
       { setlg(LP,k+1); LP = gerepilecopy(av,LP); }
@@ -610,7 +634,7 @@ FBgen(FB_t *F, GEN nf, long N, long C2, long C1, GRHcheck_t *S)
     F->LV[p]  = LP;
     F->iLP[p] = ip; ip += k;
   }
-  if (! F->KC) return NULL;
+  /* Note F->KC > 0 otherwise GRHchk is false */
   setlg(F->FB, F->KCZ+1); F->KCZ2 = i;
   if (DEBUGLEVEL>1)
   {
@@ -623,9 +647,46 @@ FBgen(FB_t *F, GEN nf, long N, long C2, long C1, GRHcheck_t *S)
       for (i=1; i<=F->KCZ; i++) err_printf("++ LV[%ld] = %Ps",i,F->LV[F->FB[i]]);
     }
   }
-  if (!GRHok(S, L, SA, SB)) return NULL;
-  F->perm = NULL;
-  F->L_jid = NULL; S->checkok = 1; return Res;
+  F->perm = NULL; F->L_jid = NULL;
+}
+
+static int
+GRHchk(GEN nf, GEN D, GEN P, long N, GRHcheck_t *S, GEN invhr, long LIMC)
+{
+  long i, np = uprimepi(LIMC) + 1, count;
+  double logC = log(LIMC), SA = 0, SB = 0;
+  byteptr delta;
+  ulong p;
+  check_prime_dec(S, np, nf, P, D, invhr);
+  p = 0; count = 0; delta = diffptr;
+  for (i = 0; i < np; i++)
+  {
+    GRHprime_t *pr = S->primes+i;
+    GEN dec = pr->dec, fs = gel(dec, 1);
+    double logCslogp = logC/pr->logp;
+    long j = lg(fs), lim = logCslogp;
+    NEXT_PRIME_VIADIFF(p, delta);
+    while (--j)
+    {
+      long f = fs[j], M, nb;
+      double logNP, q, A, B;
+      if (f > lim) continue;
+      logNP = f * pr->logp;
+      q = 1/sqrt(upowuu(p, f));
+      A = logNP * q; B = logNP * A; M = logCslogp/f;
+      if (M > 1)
+      {
+        double inv1_q = 1 / (1-q);
+        A *= (1 - pow(q, M)) * inv1_q;
+        B *= (1 - pow(q, M)*(M+1 - M*q)) * inv1_q * inv1_q;
+      }
+      nb = coeff(dec, j, 2);
+      SA += nb * A;
+      SB += nb * B;
+      count += nb;
+    }
+  }
+  return count >= N && GRHok(S, logC, SA, SB);
 }
 
 /*  SMOOTH IDEALS */
@@ -3562,12 +3623,12 @@ Buchall_param(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long
 {
   pari_timer T;
   pari_sp av0 = avma, av, av2;
-  long PRECREG, N, R1, R2, RU, LIMC, LIMC2, zc, i;
+  long PRECREG, N, R1, R2, RU, low, high, LIMC0, LIMC, LIMC2, LIMCMAX, zc, i;
   long nreldep, sfb_trials, need, old_need = -1, precdouble = 0, precadd = 0;
   long done_small, small_fail, fail_limit, squash_index;
   double lim, drc, LOGD, LOGD2;
-  GEN zu, nf, D, A, W, R, Res, z, h, PERM, fu = NULL /*-Wall*/;
-  GEN res, L, resc, B, C, C0, lambda, dep, clg1, clg2, Vbase;
+  GEN zu, nf, D, Dp, A, W, R, h, PERM, fu = NULL /*-Wall*/;
+  GEN res, L, invhr, B, C, C0, lambda, dep, clg1, clg2, Vbase;
   GEN auts, cyclic;
   const char *precpb = NULL;
   int FIRST = 1;
@@ -3612,34 +3673,64 @@ Buchall_param(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long
     if (cbach2 < cbach) cbach2 = cbach;
     cbach = 12.;
   }
-  if (cbach <= 0.) pari_err(e_MISC,"Bach constant <= 0 in buch");
+  if (cbach < 0.) pari_err(e_MISC,"Bach constant < 0 in buch");
 
-  /* resc ~ sqrt(D) w / 2^r1 (2pi)^r2 = hR / Res(zeta_K, s=1) */
-  resc = gdiv(mulri(gsqrt(D,DEFAULTPREC), gel(zu,1)),
-              gmul2n(powru(mppi(DEFAULTPREC), R2), RU));
-  av = avma; cache.base = NULL; F.subFB = NULL;
+  /* invhr ~ 2^r1 (2pi)^r2 / sqrt(D) w = Res(zeta_K, s=1) / hR */
+  invhr = gdiv(gmul2n(powru(mppi(DEFAULTPREC), R2), RU),
+              mulri(gsqrt(D,DEFAULTPREC), gel(zu,1)));
+  cache.base = NULL; F.subFB = NULL; F.LP = NULL;
   init_GRHcheck(&GRHcheck, N, R1, LOGD);
+  LIMC0 = maxss((long)(cbach2*LOGD2), 20);
+  if (LIMC0 < 3 * N) LIMC0 = 3 * N;
+  LIMCMAX = (long)(12.*LOGD2);
+  low = LIMC0;
+  /* XXX 100 and 1000 below to ensure a good enough approximation of residue */
+  high = expi(D) < 16 ? 100 : 1000;
+  Dp = gmul(D, nf_get_index(nf));
+  if (high < low) high = low;
+  while (!GRHchk(nf, Dp, P, N, &GRHcheck, invhr, high))
+  {
+    low = high;
+    high *= 2;
+  }
+  while (high - low > 1)
+  {
+    long test = (low+high)/2;
+    if (GRHchk(nf, Dp, P, N, &GRHcheck, invhr, test))
+      high = test;
+    else
+      low = test;
+  }
+  if (high == LIMC0+1 && GRHchk(nf, Dp, P, N, &GRHcheck, invhr, LIMC0))
+    LIMC2 = LIMC0;
+  else
+    LIMC2 = high;
+  LIMC0 = maxss((long)(cbach*LOGD2), 20);
+  av = avma; LIMC = cbach ? LIMC0 : LIMC2;
+  if (DEBUGLEVEL) timer_printf(&T, "computing Bach constant");
 
 START:
   if (DEBUGLEVEL) timer_start(&T);
-  do
-  {
-    if (!FIRST) cbach = check_bach(cbach,12.);
-    FIRST = 0; avma = av;
-    if (cache.base) delete_cache(&cache);
-    if (F.subFB) delete_FB(&F);
-    LIMC = (long)(cbach*LOGD2);
-    if (LIMC < 20) { LIMC = 20; cbach = (double)LIMC / LOGD2; }
-    LIMC2 = maxss(3 * N, (long)(cbach2*LOGD2));
-    if (LIMC2 < LIMC) LIMC2 = LIMC;
-    if (DEBUGLEVEL) { err_printf("LIMC = %ld, LIMC2 = %ld\n",LIMC,LIMC2); }
+  if (!FIRST) LIMC = check_LIMC(LIMC,LIMCMAX);
+  if (DEBUGLEVEL && LIMC > LIMC0)
+    err_printf("%s*** Bach constant: %f\n", FIRST?"":"\n", LIMC/LOGD2);
+  FIRST = 0; avma = av;
+  if (cache.base) delete_cache(&cache);
+  if (F.LP) delete_FB(&F);
+  if (LIMC2 < LIMC) LIMC2 = LIMC;
+  if (DEBUGLEVEL) { err_printf("LIMC = %ld, LIMC2 = %ld\n",LIMC,LIMC2); }
 
-    Res = FBgen(&F, nf, N, LIMC2, LIMC, &GRHcheck);
-  }
-  while (!Res || !subFBgen(&F,nf,auts,cyclic,mindd(lim,LIMC2) + 0.5,MINSFB));
+  FBgen(&F, nf, Dp, N, LIMC2, LIMC, invhr, &GRHcheck);
+  av = avma;
+  subFBgen(&F,nf,auts,cyclic,mindd(lim,LIMC2) + 0.5,MINSFB);
   if (DEBUGLEVEL)
-    timer_printf(&T, "factorbase (#subFB = %ld) and ideal permutations",
-                     lg(F.subFB)-1);
+  {
+    if (lg(F.subFB) > 1)
+      timer_printf(&T, "factorbase (#subFB = %ld) and ideal permutations",
+                       lg(F.subFB)-1);
+    else
+      timer_printf(&T, "factorbase (no subFB) and ideal permutations");
+  }
   fact = (FACT*)stack_malloc((F.KC+1)*sizeof(FACT));
   PERM = leafcopy(F.perm); /* to be restored in case of precision increase */
   cache.basis = zero_Flm_copy(F.KC,F.KC);
@@ -3724,9 +3815,10 @@ START:
       if (need > 0)
       {
         /* Random relations */
+        if (lg(F.subFB) == 1) goto START;
         if (DEBUGLEVEL) err_printf("\n#### Looking for random relations\n");
         if (++nreldep > MAXRELSUP) {
-          if (++sfb_trials > SFB_MAX && cbach < 2) goto START;
+          if (++sfb_trials > SFB_MAX && LIMC < LIMCMAX/6) goto START;
           F.sfb_chg = sfb_INCREASE;
         }
         if (F.sfb_chg) {
@@ -3779,7 +3871,7 @@ START:
         if (DEBUGLEVEL) timer_printf(&T, "floating point embeddings");
         if (first) {
           C = emb;
-          W = hnfspec_i(mat, F.perm, &dep, &B, &C, lg(F.subFB)-1);
+          W = hnfspec_i(mat, F.perm, &dep, &B, &C, F.subFB ? lg(F.subFB)-1:0);
         }
         else
           W = hnfadd_i(W, F.perm, &dep, &B, &C, mat, emb);
@@ -3864,14 +3956,13 @@ START:
     h = ZM_det_triangular(W);
     if (DEBUGLEVEL) err_printf("\n#### Tentative class number: %Ps\n", h);
 
-    z = mulrr(Res, resc); /* ~ hR if enough relations, a multiple otherwise */
-    switch (compute_R(lambda, divir(h,z), &L, &R, &T))
+    switch (compute_R(lambda, mulir(h,invhr), &L, &R, &T))
     {
       case fupb_RELAT:
         need = 1; /* not enough relations */
         continue;
       case fupb_PRECI: /* prec problem unless we cheat on Bach constant */
-        if ((precdouble&7) == 7 && cbach<=2) goto START;
+        if ((precdouble&7) == 7 && LIMC<=LIMCMAX/6) goto START;
         precpb = "compute_R";
         continue;
     }

@@ -996,9 +996,10 @@ marginal. They \emph{can} be useful to fine-tune and experiment with the
 parameters in the C code (there are many more than just those three).
 We nevertheless describe it for completeness.
 
-The numbers $c_1 \leq c_2$ are positive real numbers. For $i = 1,2$, let $B_i
-= c_i(\log |d_K|)^2$, and denote by $S(B)$ the set of maximal ideals of $K$
-whose norm is less than $B$. We want $S(B_1)$ to generate $\Cl(K)$ and hope
+The numbers $c_1 \leq c_2$ are non-negative real numbers. By default they are
+chosen so that the result is correct under GRH. For $i = 1,2$, let
+$B_i = c_i(\log |d_K|)^2$, and denote by $S(B)$ the set of maximal ideals of
+$K$ whose norm is less than $B$. We want $S(B_1)$ to generate $\Cl(K)$ and hope
 that $S(B_2)$ can be \emph{proven} to generate $\Cl(K)$.
 
 More precisely, $S(B_1)$ is a factorbase used to compute a tentative
@@ -1010,7 +1011,8 @@ the bounds $B_i$, and the algorithm increases them until one can \emph{prove}
 under GRH that $S(B_2)$ generates $\Cl(K)$. A uniform result of Bach says
 that $c_2 = 12$ is always suitable, but this bound is very pessimistic and a
 direct algorithm due to Belabas-Diaz-Friedman is used to check the condition,
-assuming GRH. The default values are $c_1 = c_2 = 0.3$.
+assuming GRH. The default values are $c_1 = c_2 = 0$. When $c_1$ is equal to
+$0$ the algorithm takes it equal to $c_2$.
 
 $\var{nrpid}$ is the maximal number of small norm relations associated to each
 ideal in the factor base. Set it to $0$ to disable the search for small norm

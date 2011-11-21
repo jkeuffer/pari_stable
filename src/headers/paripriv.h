@@ -494,7 +494,8 @@ GEN     qfbforms(GEN D);
 
 /* buch2.c */
 
-typedef struct GRHcheck_t { double cD, cN; long checkok; } GRHcheck_t;
+typedef struct GRHprime_t { double logp; GEN dec; } GRHprime_t;
+typedef struct GRHcheck_t { double cD, cN; GRHprime_t *primes; long nprimes, maxprimes; } GRHcheck_t;
 void    init_GRHcheck(GRHcheck_t *S, long N, long R1, double LOGD);
 int     GRHok(GRHcheck_t *S, double L, double SA, double SB);
 GEN     check_and_build_matal(GEN bnf);

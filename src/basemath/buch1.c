@@ -189,6 +189,21 @@ check_bach(double cbach, double B)
   return cbach;
 }
 
+long
+check_LIMC(long LIMC, long LIMCMAX)
+{
+  if (LIMC >= LIMCMAX)
+   pari_err(e_MISC,"sorry, couldn't deal with this field. PLEASE REPORT");
+  if (LIMC <= LIMCMAX/40) /* cbach <= 0.3 */
+    LIMC *= 2;
+  else if (LIMCMAX < 60) /* \Delta_K <= 9 */
+    LIMC++;
+  else
+    LIMC += LIMCMAX / 60; /* cbach += 0.2 */
+  if (LIMC > LIMCMAX) LIMC = LIMCMAX;
+  return LIMC;
+}
+
 /* Is |q| <= p ? */
 static int
 isless_iu(GEN q, ulong p) {
@@ -285,6 +300,39 @@ clearhash(long **hash)
   }
 }
 
+static void
+check_prime_quad(GRHcheck_t *S, long np, GEN D, GEN invhr)
+{
+  long p, i;
+  GEN invhrtmp = invhr;
+  byteptr delta;
+  pari_sp av = avma;
+
+  if (S->nprimes >= np) return;
+  if (S->nprimes)
+    p = uprime(S->nprimes);
+  else
+    p = 0;
+  if (S->maxprimes < np)
+  {
+    S->maxprimes *= 2;
+    S->primes = pari_realloc(S->primes, S->maxprimes*sizeof(*S->primes));
+  }
+  for (i = S->nprimes, delta = diffptr + i; i < np; i++)
+  {
+    long s;
+    GRHprime_t *pr = S->primes + i;
+    NEXT_PRIME_VIADIFF(p, delta);
+    pr->logp = log(p);
+    s = krois(D,p);
+    pr->dec = (GEN)s;
+    if (s) invhrtmp = mulur(p - s, divru(invhrtmp, p));
+  }
+  S->nprimes = np;
+  affrr(invhrtmp, invhr);
+  avma = av;
+}
+
 /* p | conductor of order of disc D ? */
 static int
 is_bad(GEN D, ulong p)
@@ -301,30 +349,67 @@ is_bad(GEN D, ulong p)
   avma = av; return r;
 }
 
-/* create B->FB, B->numFB; set B->badprim. Return L(kro_D, 1) */
-static GEN
-FBquad(struct buch_quad *B, long C2, long C1, GRHcheck_t *S)
+static int
+quadGRHchk(GEN D, GRHcheck_t *S, GEN invhr, long LIMC)
 {
-  GEN Res = real_1(DEFAULTPREC), D = B->QFR->D;
-  double L = log((double)C2), SA = 0, SB = 0;
-  long i, p, s, LIM;
+  long i, np = uprimepi(LIMC) + 1, count;
+  double logC = log(LIMC), SA = 0, SB = 0;
+  byteptr delta;
+  ulong p;
+  check_prime_quad(S, np, D, invhr);
+  p = 0; count = 0; delta = diffptr;
+  for (i = 0; i < np; i++)
+  {
+    GRHprime_t *pr = S->primes+i;
+    long M;
+    double logNP, q, A, B;
+    NEXT_PRIME_VIADIFF(p, delta);
+    if ((long)pr->dec < 0)
+    {
+      logNP = 2 * pr->logp;
+      q = 1/(double)p;
+    }
+    else
+    {
+      logNP = pr->logp;
+      q = 1/sqrt((double)p);
+    }
+    A = logNP * q; B = logNP * A; M = logC/logNP;
+    if (M > 1)
+    {
+      double inv1_q = 1 / (1-q);
+      A *= (1 - pow(q, M)) * inv1_q;
+      B *= (1 - pow(q, M)*(M+1 - M*q)) * inv1_q * inv1_q;
+    }
+    if ((long)pr->dec>0) { SA += 2*A;SB += 2*B; } else { SA += A; SB += B; }
+    if (pr->dec) count++;
+  }
+  return count > 1 && GRHok(S, logC, SA, SB);
+}
+
+/* create B->FB, B->numFB; set B->badprim. Return L(kro_D, 1) */
+static void
+FBquad(struct buch_quad *B, long C2, long C1, GEN invhr, GRHcheck_t *S)
+{
+  GEN D = B->QFR->D;
+  long i, p;
   pari_sp av;
   byteptr d = diffptr;
+  GRHprime_t *pr = S->primes;
 
+  check_prime_quad(S, uprimepi((ulong)C2)+1, D, invhr);
   B->numFB = cgetg(C2+1, t_VECSMALL);
   B->FB    = cgetg(C2+1, t_VECSMALL);
   av = avma;
   B->KC = 0; i = 0;
   maxprime_check((ulong)C2);
   B->badprim = gen_1;
-  for (p = 0;;) /* p <= C2 */
+  for (p = 0;; pr++) /* p <= C2 */
   {
     NEXT_PRIME_VIADIFF(p, d);
     if (!B->KC && p > C1) B->KC = i;
     if (p > C2) break;
-    s = krois(D,p);
-    if (s) Res = mulur(p, divru(Res, p - s));
-    switch (s)
+    switch ((long)pr->dec)
     {
       case -1: break; /* inert */
       case  0: /* ramified */
@@ -333,41 +418,15 @@ FBquad(struct buch_quad *B, long C2, long C1, GRHcheck_t *S)
       default:  /* split */
         i++; B->numFB[p] = i; B->FB[i] = p; break;
     }
-    if (!S->checkok)
-    {
-      double logp = log((double)p);
-      double logNP = s < 0? 2*logp: logp;
-      double q = s < 0? 1/(double)p: 1/sqrt((double)p);
-      double A = logNP * q, B = logNP * A;
-      long M = (long)(L/logNP);
-      if (M > 1)
-      {
-        double inv1_q = 1 / (1-q);
-        A *= (1 - pow(q, M)) * inv1_q;
-        B *= (1 - pow(q, M)*(M+1 - M*q)) * inv1_q * inv1_q;
-      }
-      if (s > 0) { SA += 2 * A; SB += 2 * B; } else { SA += A; SB += B; }
-    }
   }
-  if (!B->KC) return NULL;
-  if (!GRHok(S, L, SA, SB)) return NULL;
   B->KC2 = i;
   setlg(B->FB, B->KC2+1);
-  LIM = (expi(D) < 16)? 100: 1000;
-  while (p < LIM)
-  {
-    s = krois(D,p);
-    Res = mulur(p, divru(Res, p - s));
-    NEXT_PRIME_VIADIFF(p, d);
-  }
   if (B->badprim != gen_1)
-    gerepileall(av, 2, &Res, &B->badprim);
+    B->badprim = gerepileuptoint(av, B->badprim);
   else
   {
-    B->badprim = NULL;
-    Res = gerepileuptoleaf(av, Res);
+    B->badprim = NULL; avma = av;
   }
-  S->checkok = 1; return Res;
 }
 
 /* create B->vperm, return B->subFB */
@@ -394,7 +453,7 @@ subFBquad(struct buch_quad *B, GEN D, double PROD)
       if (lgsub > minSFB && prod > PROD) break;
     }
   }
-  if (j == lv) return NULL;
+  /* lgsub >= 1 otherwise quadGRHchk is false */
   i = lgsub;
   for (j = 1; j < ino;i++,j++) B->vperm[i] = no[j];
   for (     ; i < lv; i++)     B->vperm[i] = i;
@@ -868,10 +927,10 @@ Buchquad(GEN D, double cbach, double cbach2, long prec)
   pari_sp av0 = avma, av, av2;
   const long RELSUP = 5;
   long i, s, current, triv, sfb_trials, nrelsup, nreldep, need, nsubFB;
-  ulong LIMC, LIMC2, cp;
-  GEN W, cyc, res, gen, dep, mat, C, extraC, B, R, resc, Res, z, h = NULL; /*-Wall*/
+  ulong low, high, LIMC0, LIMC, LIMC2, LIMCMAX, cp;
+  GEN W, cyc, res, gen, dep, mat, C, extraC, B, R, invhr, h = NULL; /*-Wall*/
   double drc, lim, LOGD, LOGD2;
-  GRHcheck_t G, *GRHcheck = &G;
+  GRHcheck_t GRHcheck;
   struct qfr_data QFR;
   struct buch_quad BQ;
   int FIRST = 1;
@@ -903,9 +962,9 @@ Buchquad(GEN D, double cbach, double cbach2, long prec)
   LOGD2 = LOGD * LOGD;
 
   lim = sqrt(drc);
-  /* resc = sqrt(D) w / 2^r1 (2pi)^r2 ~ hR / L(chi,1) */
-  if (BQ.PRECREG) resc = dbltor(lim / 2.);
-  else         resc = dbltor(lim / PI);
+  /* invhr = 2^r1 (2pi)^r2 / sqrt(D) w ~ L(chi,1) / hR */
+  if (BQ.PRECREG) invhr = dbltor(2. / lim);
+  else         invhr = dbltor(PI / lim);
   if (!BQ.PRECREG) lim /= sqrt(3.);
   cp = (ulong)exp(sqrt(LOGD*log(LOGD)/8.0));
   if (cp < 20) cp = 20;
@@ -913,30 +972,50 @@ Buchquad(GEN D, double cbach, double cbach2, long prec)
     if (cbach2 < cbach) cbach2 = cbach;
     cbach = 6.;
   }
-  if (cbach <= 0.) pari_err(e_MISC,"Bach constant <= 0 in Buchquad");
+  if (cbach < 0.) pari_err(e_MISC,"Bach constant < 0 in Buchquad");
   av = avma;
   BQ.powsubFB = BQ.subFB = NULL;
-  init_GRHcheck(GRHcheck, 2, BQ.PRECREG? 2: 0, LOGD);
+  init_GRHcheck(&GRHcheck, 2, BQ.PRECREG? 2: 0, LOGD);
+  LIMC0 = maxss((long)(cbach2*LOGD2), 20);
+  LIMCMAX = (long)(6.*LOGD2);
+  low = LIMC0;
+  high = expi(D) < 16 ? 100 : 1000;
+  while (!quadGRHchk(D, &GRHcheck, invhr, high))
+  {
+    low = high;
+    high *= 2;
+  }
+  while (high - low > 1)
+  {
+    long test = (low+high)/2;
+    if (quadGRHchk(D, &GRHcheck, invhr, test))
+      high = test;
+    else
+      low = test;
+  }
+  if (high == LIMC0+1 && quadGRHchk(D, &GRHcheck, invhr, LIMC0))
+    LIMC2 = LIMC0;
+  else
+    LIMC2 = high;
+  LIMC0 = maxss((long)(cbach*LOGD2), 20);
+  LIMC = cbach ? LIMC0 : LIMC2;
 
 /* LIMC = Max(cbach*(log D)^2, exp(sqrt(log D loglog D) / 8)) */
 START:
-  do
-  {
-    if (!FIRST) cbach = check_bach(cbach,6.);
-    FIRST = 0; avma = av;
-    if (BQ.subFB) gunclone(BQ.subFB);
-    if (BQ.powsubFB) gunclone(BQ.powsubFB);
-    clearhash(BQ.hashtab);
-    LIMC = (ulong)(cbach*LOGD2);
-    if (LIMC < cp) { LIMC = cp; cbach = (double)LIMC / LOGD2; }
-    LIMC2 = (ulong)(maxdd(cbach,cbach2)*LOGD2);
-    if (LIMC2 < LIMC) LIMC2 = LIMC;
-    if (BQ.PRECREG) qfr_data_init(QFR.D, BQ.PRECREG, &QFR);
+  if (!FIRST) LIMC = check_LIMC(LIMC,LIMCMAX);
+  if (DEBUGLEVEL && LIMC > LIMC0)
+    err_printf("%s*** Bach constant: %f\n", FIRST?"":"\n", LIMC/LOGD2);
+  FIRST = 0; avma = av;
+  if (BQ.subFB) gunclone(BQ.subFB);
+  if (BQ.powsubFB) gunclone(BQ.powsubFB);
+  clearhash(BQ.hashtab);
+  if (LIMC < cp) LIMC = cp;
+  if (LIMC2 < LIMC) LIMC2 = LIMC;
+  if (BQ.PRECREG) qfr_data_init(QFR.D, BQ.PRECREG, &QFR);
 
-    Res = FBquad(&BQ, LIMC2, LIMC, GRHcheck);
-    if (DEBUGLEVEL) timer_printf(&T, "factor base");
-  }
-  while (!Res || !(BQ.subFB = subFBquad(&BQ, QFR.D, lim + 0.5)));
+  FBquad(&BQ, LIMC2, LIMC, invhr, &GRHcheck);
+  if (DEBUGLEVEL) timer_printf(&T, "factor base");
+  BQ.subFB = subFBquad(&BQ, QFR.D, lim + 0.5);
   if (DEBUGLEVEL) timer_printf(&T, "subFBquad = %Ps",
                                vecpermute(BQ.FB, BQ.subFB));
   nsubFB = lg(BQ.subFB) - 1;
@@ -1002,8 +1081,7 @@ START:
     h = ZM_det_triangular(W);
     if (DEBUGLEVEL) err_printf("\n#### Tentative class number: %Ps\n", h);
 
-    z = mulrr(Res, resc); /* ~ hR if enough relations, a multiple otherwise */
-    switch(get_R(&BQ, C, (lg(C)-1) - (lg(B)-1) - (lg(W)-1), divir(h,z), &R))
+    switch(get_R(&BQ, C, (lg(C)-1) - (lg(B)-1) - (lg(W)-1), mulir(h,invhr), &R))
     {
       case fupb_PRECI:
         BQ.PRECREG = precdbl(BQ.PRECREG);
@@ -1048,7 +1126,7 @@ GEN
 quadclassunit0(GEN x, long flag, GEN data, long prec)
 {
   long lx;
-  double c1 = 0.2, c2 = 0.2;
+  double c1 = 0.0, c2 = 0.0;
 
   if (!data) lx=1;
   else
