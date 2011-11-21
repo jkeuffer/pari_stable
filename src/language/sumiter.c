@@ -1248,25 +1248,25 @@ derivnum(void *E, GEN (*eval)(void *, GEN), GEN x, long prec)
   GEN eps,a,b, y;
   long fpr, pr, l, e, ex;
   pari_sp av = avma;
-  fpr = precision(x)-2; /* required final prec (in sig. words) */
-  if (fpr == -2) fpr = prec-2;
+  fpr = prec2nbits(precision(x)); /* required final prec (in sig. words) */
+  if (fpr == 0) fpr = prec2nbits(prec);
   ex = gexpo(x);
   if (ex < 0) ex = 0; /* near 0 */
-  pr = (long)ceil(fpr * 1.5 + (ex / BITS_IN_LONG));
-  l = 2+pr;
+  pr = (long)ceil(fpr * 1.5 + ex);
+  l = nbits2prec(pr);
   switch(typ(x))
   {
     case t_REAL:
     case t_COMPLEX:
-      x = gprec_w(x, l + 1 + (ex / BITS_IN_LONG));
+      x = gprec_w(x, l + nbits2extraprec(ex + BITS_IN_LONG));
   }
 
-  e = fpr * (BITS_IN_LONG/2); /* 1/2 required prec (in sig. bits) */
+  e = fpr/2; /* 1/2 required prec (in sig. bits) */
   eps = real2n(-e, l);
   a = eval(E, gsub(x, eps));
   b = eval(E, gadd(x, eps));
   y = gmul2n(gsub(b,a), e-1);
-  return gerepileupto(av, gprec_w(y, fpr+2));
+  return gerepileupto(av, gprec_w(y, nbits2prec(fpr)));
 }
 
 GEN

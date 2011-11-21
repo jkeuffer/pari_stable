@@ -1578,7 +1578,7 @@ isprincipalall(GEN bnf, GEN x, long *ptprec, long flag)
   else
   {
     if (e < 0) e = 0;
-    *ptprec = prec + divsBIL(e) + (MEDDEFAULTPREC-2);
+    *ptprec = prec + nbits2extraprec(e + 128);
     if (flag & nf_FORCE)
     {
       if (DEBUGLEVEL) pari_warn(warner,"precision too low for generators, e = %ld",e);
@@ -1871,7 +1871,7 @@ bnfisunit(GEN bnf,GEN x)
       }
     }
     if (i == 1)
-      prec = MEDDEFAULTPREC + divsBIL( gexpo(x) );
+      prec = nbits2prec(gexpo(x) + 128);
     else
     {
       if (i > 4) pari_err_PREC("bnfisunit");
@@ -3849,7 +3849,7 @@ START:
       A = cleanarch(AU, N, PRECREG);
       if (DEBUGLEVEL) timer_printf(&T, "cleanarch");
       if (!A) {
-        precadd = (DEFAULTPREC-2) + divsBIL( gexpo(AU) ) - gprecision(AU);
+        precadd = nbits2extraprec( gexpo(AU) + 64 ) - gprecision(AU);
         if (precadd <= 0) precadd = 1;
         precpb = "cleanarch"; continue;
       }
@@ -3859,7 +3859,7 @@ START:
       { /* units not found but we want them */
         if (e > 0)
           pari_err(e_MISC, "bnfinit: fundamental units too large");
-        if (e < 0) precadd = (DEFAULTPREC-2) + divsBIL( (-e) );
+        if (e < 0) precadd = nbits2extraprec( (-e - (BITS_IN_LONG - 1)) + 64);
         avma = av3; precpb = "getfu"; continue;
       }
     }
@@ -3867,7 +3867,7 @@ START:
     i = lg(C)-zc; C += zc; C[0] = evaltyp(t_MAT)|evallg(i);
     C0 = C; C = cleanarch(C, N, PRECREG);
     if (!C) {
-      precadd = (DEFAULTPREC-2) + divsBIL( gexpo(C0) ) - gprecision(C0);
+      precadd = nbits2extraprec( gexpo(C0) + 64 ) - gprecision(C0);
       if (precadd <= 0) precadd = 1;
       precpb = "cleanarch";
     }

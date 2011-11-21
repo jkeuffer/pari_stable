@@ -890,7 +890,7 @@ Buchquad(GEN D, double cbach, double cbach2, long prec)
     }
     BQ.PRECREG = 0;
   } else {
-    BQ.PRECREG = maxss(prec+1, MEDDEFAULTPREC + 2*(expi(QFR.D)/BITS_IN_LONG));
+    BQ.PRECREG = maxss(prec+1, nbits2prec(2*expi(QFR.D) + 128));
   }
   if (DEBUGLEVEL) timer_start(&T);
   BQ.primfact   = new_chunk(100);

@@ -22,6 +22,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "paripriv.h"
 
+#define HALF_E 1.3591409 /* Exponential / 2 */
+
 /***********************************************************************/
 /**                                                                   **/
 /**                       BESSEL FUNCTIONS                            **/
@@ -94,9 +96,9 @@ jbesselintern(GEN n, GEN z, long flag, long prec)
       if (flz0 && gequal0(n)) return real_1(prec);
       p2 = gdiv(gpow(gmul2n(z,-1),n,prec), ggamma(gaddgs(n,1),prec));
       if (flz0) return gerepileupto(av, p2);
-      L = 1.3591409 * gtodouble(gabs(gtofp(z,LOWDEFAULTPREC),prec));
+      L = HALF_E * gtodouble(gabs(gtofp(z,LOWDEFAULTPREC),prec));
       precnew = prec;
-      if (L >= 1.0) precnew += 1 + (long)(L/(1.3591409*LOG2*BITS_IN_LONG));
+      if (L >= 1.0) precnew += nbits2extraprec((long)(L/(HALF_E*LOG2) + BITS_IN_LONG));
       if (issmall(n,&ki))
       {
         k = labs(ki);
@@ -187,9 +189,9 @@ jbesselh(GEN n, GEN z, long prec)
       res = cgetc(linit);
       av = avma;
       if (gz>=0) l = linit;
-      else l = linit - 1 + divsBIL(-2*k*gz);
+      else l = linit + nbits2extraprec(-2*k*gz - BITS_IN_LONG);
       if (l>prec) prec = l;
-      prec += divsBIL(-gz);
+      prec += nbits2extraprec(-gz);
       if (prec < LOWDEFAULTPREC) prec = LOWDEFAULTPREC;
       z = gadd(z, real_0(prec));
       if (typ(z) == t_COMPLEX) gel(z,2) = gadd(gel(z,2), real_0(prec));
