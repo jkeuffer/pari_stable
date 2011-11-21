@@ -427,7 +427,7 @@ END2: /* clean up mat: remove everything to the right of the 1s on diagonal */
     nr = lnz;
   }
   else
-    permpro = imagecomplspec(extramat, &nr);
+    permpro = ZM_imagecomplspec(extramat, &nr);
   /* lnz = lg(permpro) */
   if (nlze)
   { /* put the nlze 0 rows (trivial generators) at the top */
@@ -608,7 +608,7 @@ hnfadd_i(GEN H, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, /* cf hnfspec */
   extramat = shallowconcat(extratop, vconcat(dep, H));
   Cnew     = shallowconcat(extraC, vecslice(C, col-lH+1, co));
   if (DEBUGLEVEL>5) err_printf("    1st phase done\n");
-  permpro = imagecomplspec(extramat, &nlze);
+  permpro = ZM_imagecomplspec(extramat, &nlze);
   extramat = rowpermute(extramat, permpro);
   *ptB     = rowpermute(B,        permpro);
   permpro = vecpermute(perm, permpro);
