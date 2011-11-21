@@ -53,6 +53,7 @@ GEN     F2x_deriv(GEN x);
 GEN     F2x_divrem(GEN x, GEN y, GEN *pr);
 GEN     F2x_extgcd(GEN a, GEN b, GEN *ptu, GEN *ptv);
 GEN     F2x_gcd(GEN a, GEN b);
+GEN     F2x_halfgcd(GEN a, GEN b);
 int     F2x_issquare(GEN a);
 GEN     F2x_mul(GEN x, GEN y);
 GEN     F2x_rem(GEN x, GEN y);

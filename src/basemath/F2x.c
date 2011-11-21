@@ -546,6 +546,44 @@ F2x_extgcd(GEN a, GEN b, GEN *ptu, GEN *ptv)
   return d;
 }
 
+static GEN
+F2x_halfgcd_i(GEN a, GEN b)
+{
+  pari_sp av=avma, lim = stack_lim(av,2);
+  GEN u,u1,v,v1;
+  long vx = a[1];
+  long n = (F2x_degree(a)+1)>>1;
+  u1 = v = pol0_F2x(vx);
+  u = v1 = pol1_F2x(vx);
+  while (F2x_degree(b)>=n)
+  {
+    GEN r, q = F2x_divrem(a,b, &r);
+    a = b; b = r; swap(u,u1); swap(v,v1);
+    u1 = F2x_add(u1, F2x_mul(u, q));
+    v1 = F2x_add(v1, F2x_mul(v, q));
+    if (low_stack(lim,stack_lim(av,2)))
+    {
+      if (DEBUGMEM>1) pari_warn(warnmem,"F2x_halfgcd (d = %ld)",F2x_degree(b));
+      gerepileall(av,6, &a,&b,&u1,&v1,&u,&v);
+    }
+  }
+  return gerepilecopy(av, mkmat2(mkcol2(u,u1), mkcol2(v,v1)));
+}
+
+GEN
+F2x_halfgcd(GEN x, GEN y)
+{
+  pari_sp av;
+  GEN M,q,r;
+  if (F2x_degree(y)<F2x_degree(x)) return F2x_halfgcd_i(x,y);
+  av = avma;
+  q = F2x_divrem(y,x,&r);
+  M = F2x_halfgcd_i(x,r);
+  gcoeff(M,1,1) = F2x_add(gcoeff(M,1,1), F2x_mul(q, gcoeff(M,1,2)));
+  gcoeff(M,2,1) = F2x_add(gcoeff(M,2,1), F2x_mul(q, gcoeff(M,2,2)));
+  return gerepilecopy(av, M);
+}
+
 GEN
 F2xq_mul(GEN x,GEN y,GEN pol)
 {
