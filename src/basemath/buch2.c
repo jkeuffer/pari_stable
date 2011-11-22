@@ -2686,7 +2686,7 @@ bestappr_noer(GEN x, GEN k)
  *
  * Output: *ptkR = R, *ptU = basis of fundamental units (in terms lambda) */
 static int
-compute_R(GEN lambda, GEN z, GEN *ptL, GEN *ptkR)
+compute_R(GEN lambda, GEN z, GEN *ptL, GEN *ptkR, pari_timer *T)
 {
   pari_sp av = avma;
   long r, ec;
@@ -2718,6 +2718,7 @@ compute_R(GEN lambda, GEN z, GEN *ptL, GEN *ptkR)
   {
     err_printf("\n#### Tentative regulator: %.28Pg\n", R);
     err_printf("\n ***** check = %.28Pg\n",c);
+    timer_printf(T, "computing check");
   }
   ec = gexpo(c);
   /* safe check for c < 0.75 : avoid underflow in gtodouble() */
@@ -3685,6 +3686,7 @@ START:
         if (!F.sfb_chg) rnd_rel(&cache, &F, nf, fact);
         F.L_jid = F.perm;
       }
+      timer_start(&T);
       if (precpb)
       {
         GEN nf0 = nf;
@@ -3701,10 +3703,9 @@ START:
 
         F.newarc = 1;
         for (i = 1; i < lg(PERM); i++) F.perm[i] = PERM[i];
-        cache.chk = cache.base; W = NULL; /* recompute arch components + reduce */
+        cache.chk = cache.base; W = NULL; /* recompute arch components+reduce */
       }
       avma = av4;
-      timer_start(&T);
       if (cache.chk != cache.last)
       { /* Reduce relation matrices */
         long l = cache.last - cache.chk + 1, j;
@@ -3810,7 +3811,7 @@ START:
     if (DEBUGLEVEL) err_printf("\n#### Tentative class number: %Ps\n", h);
 
     z = mulrr(Res, resc); /* ~ hR if enough relations, a multiple otherwise */
-    switch (compute_R(lambda, divir(h,z), &L, &R))
+    switch (compute_R(lambda, divir(h,z), &L, &R, &T))
     {
       case fupb_RELAT:
         need = 1; /* not enough relations */
