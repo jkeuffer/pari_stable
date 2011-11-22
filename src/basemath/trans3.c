@@ -402,10 +402,10 @@ kbesselintern(GEN n, GEN z, long flag, long prec)
       /* experimental */
       if (!flag && !gequal0(n) && ex > prec2nbits(prec)/16 + gexpo(n))
         return kbessel1(n,z,prec);
-      L = 1.3591409 * gtodouble(gabs(z,prec));
+      L = HALF_E * gtodouble(gabs(z,prec));
       precnew = prec;
-      if (L >= 1.3591409) {
-        long rab = (long)(L/(1.3591409*LOG2*BITS_IN_LONG));
+      if (L >= HALF_E) {
+        long rab = nbits2extraprec((long) L/(HALF_E*LOG2));
         if (fl) rab *= 2;
          precnew += 1 + rab;
       }
@@ -979,7 +979,7 @@ gerfc(GEN x, long prec)
   else
   { /* erfc(-x)=2-erfc(x) */
     /* FIXME could decrease prec
-    long size = ceil((pow(rtodbl(gimag(x)),2)-pow(rtodbl(greal(x)),2))/(LOG2*BITS_IN_LONG));
+    long size = nbits2extraprec(ceil((pow(rtodbl(gimag(x)),2)-pow(rtodbl(greal(x)),2))/LOG2)));
     prec = size > 0 ? prec : prec + size;
     */
     /* NOT gsubsg(2, ...) : would create a result of
@@ -1105,7 +1105,7 @@ inv_szeta_euler(long n, double lba, long prec)
   GEN z, res = cgetr(prec);
   pari_sp av = avma, avlim = stack_lim(av, 1);
   byteptr d =  diffptr + 2;
-  double A = n / (LOG2*BITS_IN_LONG), D;
+  double A = n / LOG2, D;
   ulong p, lim;
 
   if (n > prec2nbits(prec)) return real_1(prec);
@@ -1118,7 +1118,7 @@ inv_szeta_euler(long n, double lba, long prec)
   z = subir(gen_1, real2n(-n, prec));
   for (p = 3; p <= lim;)
   {
-    long l = prec + 1 - (long)floor(A * log(p));
+    long l = prec - nbits2extraprec((long)floor(A * log(p)) - BITS_IN_LONG);
     GEN h;
 
     if (l < 3)         l = 3;
@@ -1166,8 +1166,7 @@ bernfrac_using_zeta(long n)
   }
   /* 1.712086 = ??? */
   t = log( gtodouble(d) ) + (n + 0.5) * log(n) - n*(1+log2PI) + 1.712086;
-  u = t / (LOG2*BITS_IN_LONG); prec = (long)ceil(u);
-  prec += 3;
+  u = t / LOG2; prec = nbits2prec((long)ceil(u) + BITS_IN_LONG);
   iz = inv_szeta_euler(n, t, prec);
   a = roundr( mulir(d, bernreal_using_zeta(n, iz, prec)) );
   return gerepilecopy(av, mkfrac(a, d));
