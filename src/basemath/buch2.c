@@ -3698,7 +3698,6 @@ START:
           nreldep = 0;
         }
         if (F.newpow) {
-          if (DEBUGLEVEL) timer_start(&T);
           powFBgen(&cache, &F, nf, auts);
           if (DEBUGLEVEL) timer_printf(&T, "powFBgen");
         }
@@ -3724,6 +3723,7 @@ START:
         cache.chk = cache.base; W = NULL; /* recompute arch components + reduce */
       }
       avma = av4;
+      timer_start(&T);
       if (cache.chk != cache.last)
       { /* Reduce relation matrices */
         long l = cache.last - cache.chk + 1, j;
@@ -3731,7 +3731,6 @@ START:
         int first = (W == NULL); /* never reduced before */
         REL_t *rel;
 
-        timer_start(&T);
         for (j=1,rel = cache.chk + 1; j < l; rel++,j++)
         {
           gel(mat,j) = rel->R;
@@ -3831,7 +3830,6 @@ START:
     }
     /* DONE */
 
-    if (DEBUGLEVEL) timer_start(&T);
     if (F.KCZ2 > F.KCZ)
     {
       if (F.sfb_chg && !subFB_change(&F)) goto START;
