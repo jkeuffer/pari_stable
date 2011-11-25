@@ -3750,11 +3750,11 @@ START:
           W = hnfadd_i(W, F.perm, &dep, &B, &C, mat, emb);
         gerepileall(av2, 4, &W,&C,&B,&dep);
         cache.chk = cache.last;
-        if (DEBUGLEVEL > 1)
+        if (DEBUGLEVEL)
         {
           if (first)
             timer_printf(&T, "hnfspec [%ld x %ld]", lg(F.perm)-1, l-1);
-          else
+          else if (DEBUGLEVEL > 1)
             timer_printf(&T, "hnfadd (%ld + %ld)", l-1, lg(dep)-1);
         }
       }
