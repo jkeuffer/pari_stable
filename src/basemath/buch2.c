@@ -3741,7 +3741,7 @@ START:
             gel(emb,j) = perm_log_embed(gel(emb, j-rel->relorig),
                                         gel(F.embperm, rel->relaut));
         }
-        if (DEBUGLEVEL > 1) timer_printf(&T, "floating point embeddings");
+        if (DEBUGLEVEL) timer_printf(&T, "floating point embeddings");
         if (first) {
           C = emb;
           W = hnfspec_i(mat, F.perm, &dep, &B, &C, lg(F.subFB)-1);
@@ -3754,7 +3754,7 @@ START:
         {
           if (first)
             timer_printf(&T, "hnfspec [%ld x %ld]", lg(F.perm)-1, l-1);
-          else if (DEBUGLEVEL > 1)
+          else
             timer_printf(&T, "hnfadd (%ld + %ld)", l-1, lg(dep)-1);
         }
       }
