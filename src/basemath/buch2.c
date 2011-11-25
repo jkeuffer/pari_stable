@@ -3612,6 +3612,7 @@ START:
   {
     do
     {
+      pari_sp av4 = avma;
       if (need > 0)
       {
         long oneed = cache.end - cache.last;
@@ -3706,7 +3707,6 @@ START:
       }
       if (precpb)
       {
-        pari_sp av3 = avma;
         GEN nf0 = nf;
         if (precadd) { PRECREG += precadd; precadd = 0; }
         else           PRECREG = precdbl(PRECREG);
@@ -3717,12 +3717,14 @@ START:
         }
         nf = gclone( nfnewprec_shallow(nf, PRECREG) );
         if (precdouble) gunclone(nf0);
-        avma = av3; precdouble++; precpb = NULL;
+        precdouble++; precpb = NULL;
 
         F.newarc = 1;
         for (i = 1; i < lg(PERM); i++) F.perm[i] = PERM[i];
         cache.chk = cache.base; W = NULL; /* recompute arch components + reduce */
       }
+      avma = av4;
+      if (cache.chk != cache.last)
       { /* Reduce relation matrices */
         long l = cache.last - cache.chk + 1, j;
         GEN M = nf_get_M(nf), mat = cgetg(l, t_MAT), emb = cgetg(l, t_MAT);
@@ -3739,6 +3741,7 @@ START:
             gel(emb,j) = perm_log_embed(gel(emb, j-rel->relorig),
                                         gel(F.embperm, rel->relaut));
         }
+        if (DEBUGLEVEL > 1) timer_printf(&T, "floating point embeddings");
         if (first) {
           C = emb;
           W = hnfspec_i(mat, F.perm, &dep, &B, &C, lg(F.subFB)-1);
@@ -3747,6 +3750,14 @@ START:
           W = hnfadd_i(W, F.perm, &dep, &B, &C, mat, emb);
         gerepileall(av2, 4, &W,&C,&B,&dep);
         cache.chk = cache.last;
+        if (DEBUGLEVEL > 1)
+        {
+          if (first)
+            timer_printf(&T, "hnfspec [%ld x %ld]", lg(F.perm)-1, l-1);
+          else
+            timer_printf(&T, "hnfadd (%ld + %ld)", l-1, lg(dep)-1);
+        }
+      }
         need = lg(dep)>1? lg(dep[1])-1: lg(B[1])-1;
         /* FIXME: replace by err(e_BUG,"") */
         if (!need && cache.missing)
@@ -3756,6 +3767,7 @@ START:
           for (i = 1; cache.missing; i++)
             if (!mael(cache.basis, i, i))
             {
+              long j;
               mael(cache.basis, i, i) = 1;
               cache.missing--;
               for (j = i+1; j <= F.KC; j++) mael(cache.basis, j, i) = 0;
@@ -3791,7 +3803,6 @@ START:
           else
             F.L_jid = F.perm;
         }
-      }
     }
     while (need);
     A = vecslice(C, 1, zc); /* cols corresponding to units */
