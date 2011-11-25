@@ -1754,7 +1754,7 @@ ZM_init_CRT(GEN Hp, ulong p)
     cp = gel(Hp,j);
     c = cgetg(m, t_COL);
     gel(H,j) = c;
-    for (i=1; i<l; i++) gel(c,i) = stoi(Fl_center(cp[i],p, lim));
+    for (i=1; i<m; i++) gel(c,i) = stoi(Fl_center(cp[i],p, lim));
   }
   return H;
 }
