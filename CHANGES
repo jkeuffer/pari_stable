@@ -49,6 +49,7 @@ BA 37- for(i=1,10^7,) + SIGINT -> SEGV [#1249]
    38- ellwp: take flag into account also for t_SER output [ was: numerical
        case only ]
    39- factor(p) was much slower than isprime(p) for p a "small" prime
+BA 40- mateigen precision error was not trappable.
 
   Changed
     1- mathnf: swapped flag 3 and 5.
