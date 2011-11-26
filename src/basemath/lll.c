@@ -512,7 +512,7 @@ ZM_lll_norms(GEN x, double DELTA, long flag, GEN *B)
   if (n <= 1) return lll_trivial(x, flag);
   x = RgM_shallowcopy(x);
   U = (flag & LLL_INPLACE)? NULL: matid(n);
-  for (p = 3; ; p++)
+  for (p = LOWDEFAULTPREC; ; incrprec(p))
   {
     GEN m = fplll(&x, &U, B, DELTA, ETA, flag, p);
     if (m) return m;
