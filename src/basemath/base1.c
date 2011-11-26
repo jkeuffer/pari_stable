@@ -1610,11 +1610,10 @@ get_red_G(nfbasic_t *T, GEN *pro)
 {
   GEN G, u, u0 = NULL;
   pari_sp av;
-  long i, prec, extraprec, n = degpol(T->x);
+  long i, prec, n = degpol(T->x);
   nffp_t F;
 
-  extraprec = (long) (0.25 * n / (sizeof(long) / 4));
-  prec = DEFAULTPREC + extraprec;
+  prec = nbits2prec(n+32);
   nffp_init(&F, T, NULL, prec);
   av = avma;
   for (i=1; ; i++)
