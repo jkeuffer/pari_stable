@@ -1838,7 +1838,7 @@ bnfisunit(GEN bnf,GEN x)
       gel(v,RU) = mkintmodu((s > 0)? 0: n>>1, n);
       return v;
     }
-    if (!gequal1(Q_denom(x))) { avma = av; return cgetg(1,t_COL); }
+    if (!isint1(Q_denom(x))) { avma = av; return cgetg(1,t_COL); }
   }
 
   R1 = nf_get_r1(nf); v = cgetg(RU+1,t_COL);
@@ -1855,10 +1855,8 @@ bnfisunit(GEN bnf,GEN x)
     {
       GEN logN = RgV_sum(rx); /* log(Nx), should be ~ 0 */
       if (gexpo(logN) > -20)
-      {
-        long p = 2 + maxss(1, (nf_get_prec(nf)-2) / 2);
-        if (typ(logN) != t_REAL || gprecision(rx) > p)
-          { avma = av; return cgetg(1,t_COL); } /* not a precision problem */
+      { /* precision problem ? */
+        if (typ(logN) != t_REAL) { avma = av; return cgetg(1,t_COL); } /*no*/
       }
       else
       {
@@ -1866,7 +1864,7 @@ bnfisunit(GEN bnf,GEN x)
         if (ex)
         {
           ex = grndtoi(ex, &e);
-          if (gequal0(gel(ex,RU)) && e < -4) break;
+          if (!signe(gel(ex,RU)) && e < -4) break;
         }
       }
     }
