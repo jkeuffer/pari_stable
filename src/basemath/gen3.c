@@ -3081,7 +3081,13 @@ multi_coeff(GEN x, long n, long v, long dx)
   long i, lx = dx+3;
   GEN z = cgetg(lx, t_POL); z[1] = x[1];
   for (i = 2; i < lx; i++) gel(z,i) = polcoeff_i(gel(x,i), n, v);
-  return normalizepol_lg(z, lx);
+  z = normalizepol_lg(z, lx);
+  switch(lg(z))
+  {
+    case 2: z = gen_0; break;
+    case 3: z = gel(z,2); break;
+  }
+  return z;
 }
 
 /* assume x a t_POL */
@@ -3093,7 +3099,7 @@ _polcoeff(GEN x, long n, long v)
   if (dx < 0) return gen_0;
   if (v < 0 || v == (w=varn(x)))
     return (n < 0 || n > dx)? gen_0: gel(x,n+2);
-  if (w > v) return n? gen_0: x;
+  if (varncmp(w,v) > 0) return n? gen_0: x;
   /* w < v */
   return multi_coeff(x, n, v, dx);
 }
@@ -3114,7 +3120,7 @@ _sercoeff(GEN x, long n, long v)
     if (N > dx) pari_err(e_MISC,"non existent component in truecoeff");
     return (N < 0)? gen_0: gel(x,N+2);
   }
-  if (w > v) return N? gen_0: x;
+  if (varncmp(w,v) > 0) return N? gen_0: x;
   /* w < v */
   z = multi_coeff(x, n, v, dx);
   if (ex) z = gmul(z, monomial(gen_1,ex, w));

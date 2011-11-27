@@ -102,6 +102,7 @@ BA 28- more usable form of alarm(s, code): evaluate code, aborting after s
    36- [library] remove precdl argument in ellwp0: use a t_SER argument like
        in all other transcendental functions.
    37- ellsigma / ellzeta: allow t_SER arguments, like ellwp.
+   38- polcoeff(x+2*y,1,y) -> 2  [ was 2*x^0 ]
 
   Added
     1- mathnf for matrices over K[X] [#41]
