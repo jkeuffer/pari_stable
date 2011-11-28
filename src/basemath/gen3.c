@@ -148,7 +148,7 @@ precCOMPLEX(GEN z)
   lx = realprec(x);
   ly = realprec(y);
   if (e) {
-    long d = divsBIL(e), l = ly-d;
+    long d = nbits2extraprec(e), l = ly-d;
     return (l > lx)? lx + d: ly;
   }
   return minss(lx, ly);

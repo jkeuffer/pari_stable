@@ -73,7 +73,7 @@ mpatan(GEN x)
   }
 
   e = expo(x); inv = (e >= 0); /* = (|x| > 1 ) */
-  if (e > 0) lp += divsBIL(e);
+  if (e > 0) lp += nbits2extraprec(e);
 
   y = cgetr(lp); av0 = avma;
   p1 = rtor(x, l+1); setabssign(p1); /* p1 = |x| */
