@@ -2256,11 +2256,10 @@ mpsc1(GEN x, long *ptmod8)
   * use logAGM + Newton). Set Y = 2^(-e-a) x, compute truncated series
   * sum Y^2k/(2k)!: this costs roughly
   *   m b^2 + sum_{k <= n} (2k e + BITS_IN_LONG)^2
-  *   floor(b/2e) b^2 / 3  + m b^2
+  *   ~ floor(b/2e) b^2 / 3  + m b^2
   * bit operations with |x| <  2^(1+a), |Y| < 2^(1-e) , m = e+a and b bits of
   * accuracy needed, so
   *    B := ( b / 6 + BITS_IN_LONG + BITS_IN_LONG^2 / 2b) ~ m(m-a)
-  *
   * we want b ~ 6 m (m-a) or m~b+a hence
   *     m = min( a/2 + sqrt(a^2/4 + b/6),  b/2 + a )
   * NB1: e ~ (b/6)^(1/2) or b/2.
