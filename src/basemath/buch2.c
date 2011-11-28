@@ -3039,7 +3039,7 @@ bnfnewprec_shallow(GEN bnf, long prec)
   prec1 = prec;
   if (r1 + r2 > 1) {
     long e = gexpo(bnf_get_logfu(bnf)) + 1 - TWOPOTBITS_IN_LONG;
-    if (e >= 0) prec += (e>>TWOPOTBITS_IN_LONG);
+    if (e >= 0) prec += nbits2extraprec(e);
   }
   if (DEBUGLEVEL && prec1!=prec) pari_warn(warnprec,"bnfnewprec",prec);
   matal = check_and_build_matal(bnf);
