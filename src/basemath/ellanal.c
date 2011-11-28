@@ -256,7 +256,7 @@ number_of_terms_Sx(GEN x, long epsbit)
 {
   long M, M1, M2;
   M1 = (long)(epsbit * 7.02901423262); /* epsbit * log(2) / (log(3) - 1) */
-  M2 = itos(ceilr(gmul2n(x,1))); /* >= 2x */
+  M2 = itos(ceil_safe(gmul2n(x,1))); /* >= 2x */
   if (M2 < 2) M2 = 2;
   M = M2;
   for(;;)
@@ -271,7 +271,7 @@ number_of_terms_Sx(GEN x, long epsbit)
 static GEN
 cutoff_point(long r, GEN X, GEN emX, long epsbit, long prec)
 {
-  GEN M1 = ceilr(divsr(7*prec2nbits(prec)+1, X));
+  GEN M1 = ceil_safe(divsr(7*prec2nbits(prec)+1, X));
   GEN M2 = gen_2, M = M1;
   for(;;)
   {
