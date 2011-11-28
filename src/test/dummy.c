@@ -12,6 +12,8 @@ void gerepilemanysp(){}
 void ceilr(){}
 void roundr(){}
 void pari_err(){}
-void pari_warn(){}
+void pari_err_PREC(){}
+void pari_err_BUG(){}
+void pari_err_OVERFLOW(){}void pari_warn(){}
 void quadratic_prec_mask(){}
 void prec2nbits(){}
