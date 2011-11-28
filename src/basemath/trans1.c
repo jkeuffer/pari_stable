@@ -2274,7 +2274,7 @@ mpsc1(GEN x, long *ptmod8)
   * 2n (-1/log(2) - log_2 |Y| + log_2(2n+2)) >= b  */
   x = rtor(x, L); shiftr_inplace(x, -m); setsigne(x, 1);
   x2 = sqrr(x);
-  if (n == 1) p2 = x2;
+  if (n == 1) { p2 = x2; shiftr_inplace(p2, -1); setsigne(p2, -1); } /*-Y^2/2*/
   else
   {
     GEN unr = real_1(L);
