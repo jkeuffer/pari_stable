@@ -1985,7 +1985,7 @@ gaffect(GEN x, GEN y)
           pari_err_TYPE2("=",x,y);
 
         case t_REAL:
-          av = avma; affgr(quadtofp(x,lg(y)), y); avma = av; break;
+          av = avma; affgr(quadtofp(x,realprec(y)), y); avma = av; break;
         case t_COMPLEX:
           ly = precision(y); if (!ly) pari_err_TYPE2("=",x,y);
           av = avma; gaffect(quadtofp(x,ly), y); avma = av; break;
