@@ -2259,7 +2259,7 @@ GenusFieldQuadReal(GEN disc)
     t = mkpoln(3, gen_1, gen_0, negi(d)); /* x^2 - d */
     T = T? ZX_compositum_disjoint(T, t): t;
   }
-  return gerepileupto(av, polredabs0(T, nf_PARTIALFACT));
+  return gerepileupto(av, polredbest(T, 0));
 }
 static GEN
 GenusFieldQuadImag(GEN disc)
@@ -2286,7 +2286,7 @@ GenusFieldQuadImag(GEN disc)
     t = mkpoln(3, gen_1, gen_0, negi(d)); /* x^2 - d */
     T = T? ZX_compositum_disjoint(T, t): t;
   }
-  return gerepileupto(av, polredabs0(T, nf_PARTIALFACT));
+  return gerepileupto(av, polredbest(T, 0));
 }
 
 /* if flag != 0, computes a fast and crude approximation of the result */
@@ -2785,7 +2785,7 @@ quadhilbertreal(GEN D, long prec)
     } ENDCATCH;
     if (pol) {
       pol = makescind(nf, pol);
-      return gerepileupto(av, polredabs0(pol, nf_PARTIALFACT));
+      return gerepileupto(av, polredbest(pol, 0));
     }
   }
 }
