@@ -2148,13 +2148,13 @@ polred_aux(nfbasic_t *T, GEN *pro, long orig)
     for (j = i+1; j <= n; j++)
     {
       GEN ch, ai;
-      ai = gadd(gel(T->bas,j), gel(T->bas,i));
+      ai = gadd(gel(T->bas,i), gel(T->bas,j));
       ch = get_polmin_add2(&d, i, j);
       update(&ai, &ch, T, orig);
       gel(y,k) = ch;
       gel(b,k) = ai; k++;
 
-      ai = gsub(gel(T->bas,j), gel(T->bas,i));
+      ai = gsub(gel(T->bas,i), gel(T->bas,j));
       ch = get_polmin_sub2(&d, i, j);
       update(&ai, &ch, T, orig);
       gel(y,k) = ch;
