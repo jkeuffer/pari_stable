@@ -733,7 +733,7 @@ L2_bound(GEN nf, GEN den)
   GEN M, L, prep, T = nf_get_pol(nf), tozk = nf_get_invzk(nf);
   long prec;
 
-  prec = ZX_max_lg(T) + ZM_max_lg(tozk) - 2;
+  prec = nbits2prec(bit_accuracy(ZX_max_lg(T)) + bit_accuracy(ZM_max_lg(tozk)));
   (void)initgaloisborne(nf, den, prec, &L, &prep, NULL);
   M = vandermondeinverse(L, RgX_gtofp(T,prec), den, prep);
   return RgM_fpnorml2(RgM_mul(tozk,M), DEFAULTPREC);

@@ -833,7 +833,7 @@ subfields_poldata(GEN T, poldata *PD)
   }
   else
   {
-    PD->den = initgaloisborne(T,NULL,ZX_max_lg(T), &L,NULL,&dis);
+    PD->den = initgaloisborne(T,NULL,nbits2prec(bit_accuracy(ZX_max_lg(T))), &L,NULL,&dis);
     PD->roo = L;
     PD->dis = absi(dis);
   }
