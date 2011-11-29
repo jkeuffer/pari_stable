@@ -49,11 +49,13 @@ Doc:
 
  @eprog
  These variants all depend on a single internal generator, and are
- independent from the system's random number generator.
+ independent from your operating system's random number generators.
  A random seed may be obtained via \tet{getrand}, and reset
  using \tet{setrand}: from a given seed, and given sequence of \kbd{random}s,
  the exact same values will be generated. The same seed is used at each
- startup, reseed the generator yourself if this is a problem.
+ startup, reseed the generator yourself if this is a problem. Note that
+ internal functions also call the random number generator; adding such a
+ function call in the middle of your code will change the numbers produced.
 
  \misctitle{Technical note}
  Up to
