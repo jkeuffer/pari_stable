@@ -210,7 +210,7 @@ GEN
 get_theta_abstorel(GEN T, GEN pol, GEN k)
 {
   GEN u, ky = signe(k)? deg1pol_shallow(k, gen_0, varn(T)): gen_0;
-  u = deg1pol_shallow(gen_1, mkpolmod(ky, T), varn(pol));
+  u = deg1pol_shallow(mkpolmod(gen_1, T), mkpolmod(ky, T), varn(pol));
   if (degpol(pol) == 1) u = RgX_rem(u,pol);
   return mkpolmod(u, pol);
 }

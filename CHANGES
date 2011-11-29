@@ -51,6 +51,7 @@ BA 37- for(i=1,10^7,) + SIGINT -> SEGV [#1249]
    39- factor(p) was much slower than isprime(p) for p a "small" prime
 BA 40- mateigen precision error was not trappable.
    41- accuracy problems in bnfisunit [#1253]
+   42- broken rnfeltup [#1256]
 
   Changed
     1- mathnf: swapped flag 3 and 5.

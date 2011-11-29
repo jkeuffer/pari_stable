@@ -46,4 +46,6 @@
 [[8, 2; 0, 1], [2, 0; 0, 1], [1, 0; 0, 1]]
 1
 1
-Total time spent: 244
+Mod(x^5 + x^2 + 2, x^6 + x^5 + x^4 + x^3 + x^2 + x + 1)
+Mod(z^2, z^3 + z^2 - 2*z - 1)
+Total time spent: 212
