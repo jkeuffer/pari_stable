@@ -441,9 +441,10 @@ static void
 init_el(struct ellld *el, GEN E, long *parity, long bitprec)
 {
   GEN eX;
-  long prec = nbits2prec(bitprec);
+  long prec;
   checksmallell(E);
   el->E = ell_to_small_red(E, &el->N);
+  prec = nbits2prec(bitprec+expi(el->N)+1);
   el->X = divrr(Pi2n(1, prec), sqrtr(itor(el->N, prec))); /* << 1 */
   eX = mpexp(el->X);
   if (realprec(eX) > prec) eX = rtor(eX, prec); /* avoid spurious accuracy increase */
