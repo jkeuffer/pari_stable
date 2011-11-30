@@ -965,7 +965,7 @@ heegner_index(GEN E, long t, GEN N, GEN tam, GEN D, GEN mulf, long prec)
   c = shifti(stoi(wd22), omega(gcdii(N, D))); /* (w(D)/2)^2*2^omega(gcd(D,N)) */
   ind = sqrtr( mulri(mulrr(a, b), c) );
   ind = grndtoi(ind, &e); /* known to ~ 15 bits */
-  if (e > expi(ind) - 14)
+  if (e > expi(ind) - 12)
     pari_err(e_BUG,"ellheegner [contradicts Gross-Hayachi's conjecture!?]");
   if (e >= 0)
     pari_err_PREC("ellheegner (precision loss in truncation)");
