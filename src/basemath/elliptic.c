@@ -2545,7 +2545,7 @@ ellrootno_p(GEN e, GEN p, ulong ex)
   if (!ex) return 1;
   if (ex == 1) return -kronecker(negi(ell_get_c6(e)),p);
   j=ell_get_j(e);
-  if (signe(j) && Q_pval(j,p) < 0) return krosi(-1,p);
+  if (!gequal0(j) && Q_pval(j,p) < 0) return krosi(-1,p);
   ep = 12 / ugcd(12, Z_pval(ell_get_disc(e),p));
   if (ep==4) z = 2; else z = (ep&1) ? 3 : 1;
   return krosi(-z, p);

@@ -45,3 +45,7 @@ for (i = 1, #v,
   print(f(e, x+O(x^10)));
 )
 }
+
+\\ #1257
+ellrootno(ellinit([0,-1,1,217,-282]))
+
