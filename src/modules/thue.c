@@ -676,9 +676,9 @@ thueinit(GEN pol, long flag, long prec)
     /* Guess precision by approximating Baker's bound. The guess is most of
      * the time not sharp, ie 10 to 30 decimal digits above what is _really_
      * necessary. Note that the limiting step is the reduction. See paper. */
-    PREC = 3 + (long)((5.83 + (dr+4)*5 + log(fact(dr+3)) + (dr+3)*log(dr+2) +
+    PREC = nbits2prec((long)((5.83 + (dr+4)*5 + log(fact(dr+3)) + (dr+3)*log(dr+2) +
                      (dr+3)*log(d) + log(log(2*d*(dr+2))) + (dr+1))
-                     / ((sizeof(long)/4)* 10.));
+                     /10.)*32+32);
 
     if (flag == 0) PREC = (long)(2.2 * PREC); /* Lazy, to be improved */
     if (PREC < prec) PREC = prec;
