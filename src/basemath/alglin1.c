@@ -1052,7 +1052,11 @@ gauss(GEN a, GEN b)
 {
   GEN z;
   if (typ(a)!=t_MAT) pari_err_TYPE("gauss",a);
-  z = RgM_solve(a,b);
+  if (RgM_is_ZM(a) && b &&
+      ((typ(b) == t_COL && RgV_is_ZV(b)) || (typ(b) == t_MAT && RgM_is_ZM(b))))
+    z = ZM_gauss(a,b);
+  else
+    z = RgM_solve(a,b);
   if (!z) pari_err(e_INV);
   return z;
 }
@@ -1377,6 +1381,64 @@ FqM_gauss(GEN a, GEN b, GEN T, GEN p)
   u = cgetg(bco+1,t_MAT);
   for (j=1; j<=bco; j++) gel(u,j) = Fq_get_col(a, gel(b,j), aco, T, p);
   return gerepilecopy(av, iscol? gel(u,1): u);
+}
+
+/*
+ * Dixon p-adic lifting algorithm.
+ * Numer. Math. 40, 137-141 (1982)
+ * DOI: 10.1007/BF01459082
+ */
+GEN
+ZM_gauss(GEN a, GEN b)
+{
+  pari_sp av = avma, av2;
+  int iscol;
+  long n, ncol, i, m;
+  ulong p;
+  byteptr d;
+  GEN N, C, delta, xb, nb, nmin, res;
+
+  if (!init_gauss(a, &b, &n, &ncol, &iscol)) return cgetg(1, iscol?t_COL:t_MAT);
+  nb = gen_0; ncol = lg(b);
+  for (i = 1; i < ncol; i++)
+  {
+    GEN ni = gnorml2(gel(b, i));
+    if (cmpii(nb, ni) < 0) nb = ni;
+  }
+  if (!signe(nb)) { avma = av; return gcopy(b); }
+  delta = gen_1; nmin = nb;
+  for (i = 1; i <= n; i++)
+  {
+    GEN ni = gnorml2(gel(a, i));
+    if (cmpii(ni, nmin) < 0)
+    {
+      delta = mulii(delta, nmin); nmin = ni;
+    }
+    else
+      delta = mulii(delta, ni);
+  }
+  if (!signe(nmin)) { avma = av; return NULL; }
+  d = init_modular(&p); av2 = avma;
+  for(;;)
+  {
+    C = Flm_inv(ZM_to_Flm(a, p), p);
+    if (C) break;
+    NEXT_PRIME_VIADIFF_CHECK(p,d);
+    avma = av2;
+  }
+  /* N.B. Our delta/lambda are SQUARES of those in the paper
+   * log(delta lambda) / log p, where lambda is 3+sqrt(5) / 2,
+   * whose log is < 1, hence + 1 (to cater for rounding errors) */
+  m = (long)ceil((rtodbl(logr_abs(itor(delta,LOWDEFAULTPREC))) + 1)
+                 / log((double)p));
+  xb = Zlm_gauss(a, b, p, m, C);
+  N = powuu(p, m);
+  delta = sqrti(delta);
+  if (iscol)
+    res = FpC_ratlift(gel(xb,1), N, delta,delta, NULL);
+  else
+    res = FpM_ratlift(xb, N, delta,delta, NULL);
+  return gerepileupto(av, res);
 }
 
 GEN

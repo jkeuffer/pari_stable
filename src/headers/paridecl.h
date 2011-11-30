@@ -581,6 +581,7 @@ GEN     RgM_solve(GEN a, GEN b);
 GEN     RgM_solve_realimag(GEN x, GEN y);
 void    RgMs_structelim(GEN M, long N, GEN A, GEN *p_col, GEN *p_lin);
 GEN     ZM_detmult(GEN A);
+GEN     ZM_gauss(GEN a, GEN b);
 GEN     ZM_inv(GEN M, GEN dM);
 GEN     Zlm_gauss(GEN a, GEN b, ulong p, long e, GEN C);
 GEN     apply0(GEN f, GEN A);
@@ -2194,6 +2195,7 @@ long    vals(ulong x);
 
 /* nffactor.c */
 
+GEN     FpC_ratlift(GEN P, GEN mod, GEN amax, GEN bmax, GEN denom);
 GEN     FpM_ratlift(GEN M, GEN mod, GEN amax, GEN bmax, GEN denom);
 GEN     FpX_ratlift(GEN P, GEN mod, GEN amax, GEN bmax, GEN denom);
 GEN     nffactor(GEN nf,GEN x);
@@ -3092,6 +3094,7 @@ INLINE int    RgM_is_ZM(GEN x);
 INLINE GEN    RgM_minor(GEN a, long i, long j);
 INLINE GEN    RgM_shallowcopy(GEN x);
 INLINE int    RgV_isscalar(GEN x);
+INLINE int    RgV_is_ZV(GEN x);
 INLINE int    RgX_is_monomial(GEN x);
 INLINE int    RgX_is_rational(GEN x);
 INLINE int    RgX_is_ZX(GEN x);

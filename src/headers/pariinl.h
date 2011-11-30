@@ -571,11 +571,21 @@ RgX_is_monomial(GEN x)
   return 1;
 }
 INLINE int
+RgV_is_ZV(GEN x)
+{
+  long i, h = lg(x);
+  if (h == 1) return 1;
+  for (i = h-1; i > 0; i--)
+    if (typ(gel(x,i)) != t_INT) return 0;
+  return 1;
+}
+INLINE int
 RgM_is_ZM(GEN x)
 {
   long i, j, h, l = lg(x);
   if (l == 1) return 1;
   h = lg(gel(x,1));
+  if (h == 1) return 1;
   for (j = l-1; j > 0; j--)
     for (i = h-1; i > 0; i--)
       if (typ(gcoeff(x,i,j)) != t_INT) return 0;

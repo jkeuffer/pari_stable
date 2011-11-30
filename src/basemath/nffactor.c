@@ -101,6 +101,20 @@ FpM_ratlift(GEN M, GEN mod, GEN amax, GEN bmax, GEN denom)
   return N;
 }
 GEN
+FpC_ratlift(GEN P, GEN mod, GEN amax, GEN bmax, GEN denom)
+{
+  pari_sp ltop = avma;
+  long j, l;
+  GEN a, Q = cgetg_copy(P, &l);
+  for (j = 1; j < l; ++j)
+  {
+    a = lift_to_frac(gel(P,j), mod, amax,bmax,denom);
+    if (!a) { avma = ltop; return NULL; }
+    gel(Q,j) = a;
+  }
+  return Q;
+}
+GEN
 FpX_ratlift(GEN P, GEN mod, GEN amax, GEN bmax, GEN denom)
 {
   pari_sp ltop = avma;
