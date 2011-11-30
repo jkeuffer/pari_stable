@@ -12,7 +12,7 @@ Doc: determines whether $x$ belongs to the set $S$ (see \kbd{setisset}).
  index $j$ such that $S[j]=x$, otherwise returns 0. If $\fl$ is non-zero
  returns the index $j$ where $x$ should be inserted, and $0$ if it already
  belongs to $S$ (this is meant to be used in conjunction with
- \kbd{listinsert}, see below). If $x$ is not a set, the result is undefined.
+ \kbd{listinsert}). If $x$ is not a set, the result is undefined.
  \bprog
  ? T = [7,2,3,5]; S = Set(T);
  ? setsearch(S, 2)
