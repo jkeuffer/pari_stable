@@ -1517,7 +1517,7 @@ exp1r_abs(GEN x)
   b += m;
   e = m - a; /* >= 1 */
   /* ~ -1/log(2) - log_2 Y */
-  d = e+BITS_IN_LONG-1-1/LOG2 - log2((double)(ulong)x[2]);
+  d = m-dbllog2(x)-1/LOG2;
   n = (long)(b / d);
   if (n > 1)
     n = (long)(b / (d + log2((double)n+1))); /* log~constant in small ranges */
@@ -2246,7 +2246,7 @@ mpsc1(GEN x, long *ptmod8)
   b += m;
   e = m - a; /* >= 1 */
   /* ~ 2( -1/log(2) - log_2 Y ) */
-  d = 2.0 * (e+BITS_IN_LONG-1-1/LOG2 - log2((double)(ulong)x[2]));
+  d = 2.0 * (m-dbllog2r(x)-1/LOG2);
   n = (long)(b / d);
   if (n > 1)
     n = (long)(b / (d + log2((double)n+1))); /* log~constant in small ranges */

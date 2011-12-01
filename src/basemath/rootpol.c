@@ -351,11 +351,9 @@ log2ir(GEN x)
 }
 /* return log(|x|) */
 static double
-dblogr(GEN x) {
-  double l;
+dbllogr(GEN x) {
   if (!signe(x)) return -pariINFINITY;
-  l = (double)(ulong)x[2];
-  return log(l) + LOG2 * (expo(x) - (BITS_IN_LONG-1));
+  return LOG2*dbllog2r(x);
 }
 static GEN /* beware overflow */
 dblexp(double x) { return fabs(x) < 100.? dbltor(exp(x)): mpexp(dbltor(x)); }
@@ -930,7 +928,7 @@ isreal(GEN p)
 static GEN
 abs_update_r(GEN x, double *mu) {
   GEN y = gtofp(x, DEFAULTPREC);
-  double ly = dblogr(y); if (ly < *mu) *mu = ly;
+  double ly = dbllogr(y); if (ly < *mu) *mu = ly;
   setabssign(y); return y;
 }
 /* return |x|, low accuracy. Set *mu = min(log(y), *mu) */
@@ -947,7 +945,7 @@ abs_update(GEN x, double *mu) {
   xr = gtofp(xr, DEFAULTPREC);
   yr = gtofp(yr, DEFAULTPREC);
   y = sqrtr(addrr(sqrr(xr), sqrr(yr)));
-  ly = dblogr(y); if (ly < *mu) *mu = ly;
+  ly = dbllogr(y); if (ly < *mu) *mu = ly;
   return y;
 }
 
@@ -1005,7 +1003,7 @@ parameters(GEN p, long *LMAX, double *mu, double *gamma,
       gerepileall(av2,2, &g,&RU);
     }
   }
-  *gamma = dblogr(divru(g,NN)) / LOG2;
+  *gamma = dbllog2r(divru(g,NN));
   *LMAX = Lmax; avma = av;
 }
 
@@ -1361,7 +1359,7 @@ conformal_mapping(double *radii, GEN ctr, GEN p, long k, long bit,
       GEN t, r = dblexp(radii[i]), r2 = sqrr(r);
       /* 2(r^2 - 1) / (r^2 - 3(r-1)) */
       t = divrr(shiftr((subrs(r2,1)),1), subrr(r2, mulur(3,subrs(r,1))));
-      radii[i] = dblogr(addsr(1,t)) / 2;
+      radii[i] = dbllogr(addsr(1,t)) / 2;
       avma = av2;
     }
   lrho = logradius(radii, q,k,aux/10., &delta);
@@ -1776,7 +1774,7 @@ cauchy_bound(GEN p)
     GEN y = gel(p,i+2);
     double L;
     if (gequal0(y)) continue;
-    L = dblogr(mulrr(quickabs(y), invlc)) / (n-i);
+    L = dbllogr(mulrr(quickabs(y), invlc)) / (n-i);
     if (L > Lmax) Lmax = L;
   }
   avma = av; return Lmax + LOG2;
