@@ -262,7 +262,7 @@ static long
 getpreci(buildroot *BR)
 {
   GEN x = gmael(BR->r,1,1);
-  return (typ(x)==t_COMPLEX)? lg(x[1]): lg(x);
+  return (typ(x)==t_COMPLEX)? realprec(gel(x,1)): realprec(x);
 }
 
 #define setcard_obj(x,n) ((x)[0] = (PERM)(n))
