@@ -3439,6 +3439,14 @@ and \kbd{y}
 
 \fun{GEN}{FlxqM_ker}{GEN x, GEN T, ulong p}
 
+\subsec{\kbd{Zlm}}
+\fun{GEN}{Zlm_gauss}{GEN a, GEN b, ulong p, long e, GEN C} as \kbd{gauss}
+with the following peculiarities: $a$ and $b$ are \kbd{ZM}, such that $a$ is
+invertible modulo $p$. Optional $C$ is an \kbd{Flm} that is an inverse of
+$a\mod p$ or \kbd{NULL}. Return the matrix $x$ such that $ax=b\mod p^e$ and
+all elements of $x$ are in $[0,p^e-1]$. For efficiency, it is better
+to reduce $a$ and $b$ mod $p^e$ first.
+
 \subsec{\kbd{FpX}} Let \kbd{p} an understood \typ{INT}, to be given in
 the function arguments; in practice \kbd{p} is not assumed to be prime, but
 be wary. Recall than an \kbd{Fp} object is a \typ{INT}, preferrably belonging

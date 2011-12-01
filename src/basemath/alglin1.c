@@ -1380,6 +1380,34 @@ FqM_gauss(GEN a, GEN b, GEN T, GEN p)
 }
 
 GEN
+Zlm_gauss(GEN a, GEN b, ulong p, long e, GEN C)
+{
+  pari_sp av = avma, lim = stack_lim(av, 2), av2;
+  GEN xi, xb, pi = gen_1, P;
+  long i;
+  if (!C) {
+    C = Flm_inv(ZM_to_Flm(a, p), p);
+    if (!C) pari_err(e_INV);
+  }
+  P = utoipos(p);
+  av2 = avma;
+  xb = xi = Flm_to_ZM(Flm_mul(C, ZM_to_Flm(b, p), p));
+  for (i = 2; i <= e; i++)
+  {
+    pi = mulii(pi, P); /* = p^i */
+    b = ZM_Z_divexact(ZM_sub(b, ZM_mul(a, xi)), P);
+    if (low_stack(lim, stack_lim(av,2)))
+    {
+      if(DEBUGMEM>1) pari_warn(warnmem,"Zlm_gauss. i=%ld",i);
+      gerepileall(av2,3, &pi,&b,&xb);
+    }
+    xi = Flm_to_ZM(Flm_mul(C, ZM_to_Flm(b, p), p));
+    xb = ZM_add(xb, ZM_Z_mul(xi, pi));
+  }
+  return gerepileupto(av, xb);
+}
+
+GEN
 FpM_inv(GEN x, GEN p) { return FpM_gauss(x, NULL, p); }
 
 /* M integral, dM such that M' = dM M^-1 is integral [e.g det(M)]. Return M' */
