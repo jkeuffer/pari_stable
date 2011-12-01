@@ -415,7 +415,7 @@ real_0_digits(long n) {
 }
 
 static GEN
-real_read(pari_sp av, const char **s, GEN y, long PREC)
+real_read(pari_sp av, const char **s, GEN y, long prec)
 {
   long l, n = 0;
   switch(**s)
@@ -437,7 +437,7 @@ real_read(pari_sp av, const char **s, GEN y, long PREC)
       n = old - *s;
       if (**s != 'E' && **s != 'e')
       {
-        if (!signe(y)) { avma = av; return real_0(PREC); }
+        if (!signe(y)) { avma = av; return real_0(prec); }
         break;
       }
     }
@@ -446,14 +446,16 @@ real_read(pari_sp av, const char **s, GEN y, long PREC)
       n += exponent(s);
       if (!signe(y)) { avma = av; return real_0_digits(n); }
   }
-  l = lgefint(y); if (l < (long)PREC) l = (long)PREC;
-  if (!n) return itor(y, l);
-  y = itor(y, l+1);
+  l = nbits2prec(bit_accuracy(lgefint(y)));
+  if (l < prec) l = prec; else prec = l;
+  if (!n) return itor(y, prec);
+  incrprec(l);
+  y = itor(y, l);
   if (n > 0)
-    y = mulrr(y, rpowuu(10UL, (ulong)n, l+1));
+    y = mulrr(y, rpowuu(10UL, (ulong)n, l));
   else
-    y = divrr(y, rpowuu(10UL, (ulong)-n, l+1));
-  return gerepileuptoleaf(av, rtor(y, l));
+    y = divrr(y, rpowuu(10UL, (ulong)-n, l));
+  return gerepileuptoleaf(av, rtor(y, prec));
 }
 
 static GEN
