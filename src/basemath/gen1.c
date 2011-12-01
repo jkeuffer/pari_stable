@@ -3071,13 +3071,19 @@ inv_ser(GEN b)
   while (mask > 1)
   {
     long lnew = lold << 1;
+    GEN z;
 
     if (mask & 1) lnew--;
     mask >>= 1;
     setlg(a, lnew + 2);
     setlg(x, lnew + 2);
     /* TODO: gmul(a,x) should be a half product (the higher half is known) */
-    y = gadd(x, gmul(x, gsubsg(1, gmul(a,x))));
+    z = gmul(a,x); /* = 1 + O(t^lold) */
+    y = cgetg(lnew-lold + 2, t_SER);
+    y[1] = _evalvalp(lold) | evalvarn(v) | evalsigne(1);
+    for (j = 2; j < 2+lnew-lold; j++) gel(y,j) = gel(z,j+lold);
+    /* y = a*x - 1; */
+    y = gsub(x, gmul(x, y));
     for (j = lold+2; j < lnew+2; j++) x[j] = y[j];
     if (low_stack(lim, stack_lim(av2,2)))
     {
