@@ -692,7 +692,9 @@ polidentical(GEN x, GEN y)
   for (lx--; lx >= 2; lx--) if (!gidentical(gel(x,lx), gel(y,lx))) return 0;
   return 1;
 }
-
+/* x,y t_SER */
+static int
+seridentical(GEN x, GEN y) { return polidentical(x,y); }
 /* typ(x) = typ(y) = t_VEC/COL/MAT */
 static int
 vecidentical(GEN x, GEN y)
@@ -747,7 +749,8 @@ gidentical(GEN x, GEN y)
       return gidentical(gel(x,2),gel(y,2)) && polidentical(gel(x,1),gel(y,1));
     case t_POL:
       return polidentical(x,y);
-
+    case t_SER:
+      return seridentical(x,y);
     case t_FFELT:
       return FF_equal(x,y);
 
