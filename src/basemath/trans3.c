@@ -1172,12 +1172,16 @@ bernfrac_using_zeta(long n)
   return gerepilecopy(av, mkfrac(a, d));
 }
 
-/* y = binomial(n,k-2). Return binomial(n,k) */
+/* n >= k >= 2, y = binomial(n,k-2), as a t_REAL. Return binomial(n,k) */
 static GEN
 next_bin(GEN y, long n, long k)
 {
-  y = divru(mulru(y, n-k+2), k-1);
-  return divru(mulru(y, n-k+1), k);
+  if (n & HIGHMASK)
+  {
+    y = divru(mulru(y, n-k+2), k-1);
+    return divru(mulru(y, n-k+1), k);
+  }
+  return divru(mulru(y, (n-k+2)*(n-k+1)), (k-1)*k);
 }
 
 /* assume k > 1 odd */
