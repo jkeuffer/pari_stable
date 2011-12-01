@@ -1377,24 +1377,27 @@ ZM_inv(GEN M, GEN dM)
   long lM = lg(M), stable = 0;
 
   if (lM == 1) return cgetg(1,t_MAT);
-  if (!dM) dM = det(M);
 
-  if (is_pm1(dM)) dM = NULL;
+  if (dM && is_pm1(dM)) dM = gen_1;
   av2 = avma;
   H = NULL;
   d = init_modular(&p);
   for(;;)
   {
+    ulong dMp;
+    GEN Mp;
     NEXT_PRIME_VIADIFF_CHECK(p,d);
-    if (dM)
+    Mp = ZM_to_Flm(M,p);
+    if (dM == gen_1)
+      Hp = Flm_inv_sp(Mp, p);
+    else
     {
-      ulong dMp = umodiu(dM,p);
+      dMp = dM? umodiu(dM,p): Flm_det(Mp,p);
       if (!dMp) continue;
-      Hp = Flm_inv_sp(ZM_to_Flm(M,p), p);
+      Hp = Flm_inv_sp(Mp, p);
+      if (!Hp) pari_err(e_INV);
       if (dMp != 1) Flm_Fl_mul_inplace(Hp, dMp, p);
     }
-    else
-      Hp = Flm_inv_sp(ZM_to_Flm(M,p), p);
 
     if (!H)
     {
@@ -1409,7 +1412,7 @@ ZM_inv(GEN M, GEN dM)
     }
     if (DEBUGLEVEL>5) err_printf("inverse mod %ld (stable=%ld)\n", p,stable);
     if (stable) {/* DONE ? */
-      if (dM)
+      if (dM != gen_1)
       { if (RgM_isscalar(ZM_mul(M, H), dM)) break; }
       else
       { if (ZM_isidentity(ZM_mul(M, H))) break; }
