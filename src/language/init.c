@@ -2001,19 +2001,18 @@ timer_start(pari_timer *T)
 # endif
 #endif
 
-long
-timer_delay(pari_timer *T)
+static long
+timer_aux(pari_timer *T, pari_timer *U)
 {
-  long s = T->s, us = T->us; timer_start(T);
-  return 1000 * (T->s - s) + (T->us - us) / 1000;
+  long s = T->s, us = T->us; timer_start(U);
+  return 1000 * (U->s - s) + (U->us - us + 500) / 1000;
 }
-
+/* return delay, reset timer */
 long
-timer_get(pari_timer *T)
-{
-  pari_timer t; timer_start(&t);
-  return 1000 * (t.s - T->s) + (t.us - T->us) / 1000;
-}
+timer_delay(pari_timer *T) { return timer_aux(T, T); }
+/* return delay, don't reset timer */
+long
+timer_get(pari_timer *T) { pari_timer t; return timer_aux(T, &t); }
 
 static void
 timer_vprintf(pari_timer *T, const char *format, va_list args)
