@@ -1485,7 +1485,7 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
 GEN
 exp1r_abs(GEN x)
 {
-  long l = realprec(x), a = expo(x), b = prec2nbits(l), L, i, n, m, e, B;
+  long l = realprec(x), a = expo(x), b = prec2nbits(l), L, i, n, m, B;
   GEN y, p2, X;
   pari_sp av;
   double d;
@@ -1515,9 +1515,7 @@ exp1r_abs(GEN x)
   * error bounded by 1/6(n+1) <= 1/12. Finally, we want
   * n (-1/log(2) -log_2 |Y| + log_2(n+1)) >= b  */
   b += m;
-  e = m - a; /* >= 1 */
-  /* ~ -1/log(2) - log_2 Y */
-  d = m-dbllog2(x)-1/LOG2;
+  d = m-dbllog2(x)-1/LOG2; /* ~ -log_2 Y - 1/log(2) */
   n = (long)(b / d);
   if (n > 1)
     n = (long)(b / (d + log2((double)n+1))); /* log~constant in small ranges */
@@ -2198,7 +2196,7 @@ glog(GEN x, long prec)
 static GEN
 mpsc1(GEN x, long *ptmod8)
 {
-  long a = expo(x), l = realprec(x), b, L, i, n, m, e, B;
+  long a = expo(x), l = realprec(x), b, L, i, n, m, B;
   GEN y, p2, x2;
   double d;
 
@@ -2244,9 +2242,7 @@ mpsc1(GEN x, long *ptmod8)
   L = l + nbits2nlong(m);
 
   b += m;
-  e = m - a; /* >= 1 */
-  /* ~ 2( -1/log(2) - log_2 Y ) */
-  d = 2.0 * (m-dbllog2r(x)-1/LOG2);
+  d = 2.0 * (m-dbllog2r(x)-1/LOG2); /* ~ 2( - log_2 Y - 1/log(2) ) */
   n = (long)(b / d);
   if (n > 1)
     n = (long)(b / (d + log2((double)n+1))); /* log~constant in small ranges */
