@@ -1373,7 +1373,11 @@ ggamma(GEN x, long prec)
     case t_INTMOD: pari_err_TYPE("ggamma",x);
     default:
       av = avma; if (!(y = toser_i(x))) break;
-      return gerepileupto(av, gexp(glngamma(y,prec),prec));
+      if (valp(y)>0)
+        z = gdiv(gexp(glngamma(gaddgs(y,1),prec),prec),y);
+      else
+        z = gexp(glngamma(y,prec),prec);
+      return gerepileupto(av, z);
   }
   return transc(ggamma,x,prec);
 }

@@ -53,6 +53,7 @@ BA 40- mateigen precision error was not trappable.
    41- accuracy problems in bnfisunit [#1253]
    42- broken rnfeltup [#1255]
    43- x===y was always wrong for x,y t_SER
+BA 44- gamma(t_SER) with positive valuation did not work.
 
   Changed
     1- mathnf: swapped flag 3 and 5.
