@@ -583,10 +583,10 @@ gzetakall(GEN znf, GEN s, long flag, long prec)
       return r1? mkfrac(gen_m1, gen_2): gneg(gel(znf, 2));
     }
     if (!flag && ss < 0 && (r2 || !odd(ss))) return gen_0;
-    z = slambdak(znf, itos(s), flag, prec+1);
+    z = slambdak(znf, itos(s), flag, prec+EXTRAPRECWORD);
   }
   else
-    z = cxlambdak(znf, s, flag, prec+1);
+    z = cxlambdak(znf, s, flag, prec+EXTRAPRECWORD);
   if (gprecision(z) > prec) z = gprec_w(z, prec);
   return gerepileupto(av, z);
 }

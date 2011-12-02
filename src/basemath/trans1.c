@@ -188,7 +188,7 @@ consteuler(long prec)
 
   incrprec(prec);
 
-  l = prec+1; x = (long) (1 + prec2nbits_mul(l, LOG2/4));
+  l = prec+EXTRAPRECWORD; x = (long) (1 + prec2nbits_mul(l, LOG2/4));
   a = utor(x,l); u=logr_abs(a); setsigne(u,-1); affrr(u,a);
   b = real_1(l);
   v = real_1(l);
@@ -1631,8 +1631,8 @@ mpexp(GEN x)
   for(i=0, p=1; i<s+TWOPOTBITS_IN_LONG; i++) { p <<= 1; if (mask & 1) p-=1; mask >>= 1; }
   a = mpexp_basecase(rtor(x, nbits2prec(p)));
   x = addrs(x,1);
-  if (realprec(x) < l+1) x = rtor(x, l+1);
-  a = rtor(a, l+1); /*append 0s */
+  if (realprec(x) < l+EXTRAPRECWORD) x = rtor(x, l+EXTRAPRECWORD);
+  a = rtor(a, l+EXTRAPRECWORD); /*append 0s */
   t = NULL;
   for(;;)
   {
@@ -1951,7 +1951,7 @@ constlog2(long prec)
   tmplog2 = newblock(prec);
   *tmplog2 = evaltyp(t_REAL) | evallg(prec);
   av = avma;
-  l = prec+1;
+  l = prec+EXTRAPRECWORD;
   n = prec2nbits(l) >> 1;
   y = divrr(Pi2n(-1, prec), agm1r_abs( real2n(2 - n, l) ));
   affrr(divru(y,n), tmplog2);
@@ -2212,7 +2212,7 @@ mpsc1(GEN x, long *ptmod8)
       if (expo(z) >= bit_prec(z) + 3) pari_err_PREC("mpsc1");
       shiftr_inplace(pitemp, 1);
       q = floorr( divrr(z,pitemp) ); /* round ( x / (Pi/2) ) */
-      p = l+1; x = rtor(x,p);
+      p = l+EXTRAPRECWORD; x = rtor(x,p);
     } else {
       q = stoi((long)floor(rtodbl(x) / (PI/2) + 0.5));
       p = l;

@@ -34,12 +34,12 @@ trans_fix_arg(long *prec, GEN *s0, GEN *sig, pari_sp *av, GEN *res)
   *res = cgetc(l); *av = avma;
   if (typ(s) == t_COMPLEX)
   { /* s = sig + i t */
-    s = cxtofp(s, l+1);
+    s = cxtofp(s, l+EXTRAPRECWORD);
     *sig = gel(s,1);
   }
   else /* real number */
   {
-    *sig = s = gtofp(s, l+1);
+    *sig = s = gtofp(s, l+EXTRAPRECWORD);
     p1 = trunc2nr(s, 0);
     if (!signe(subri(s,p1))) *s0 = p1;
   }
@@ -63,7 +63,7 @@ mpatan(GEN x)
   if (!sx) return real_0_bit(expo(x));
   l = lp = realprec(x);
   if (absrnz_equal1(x)) { /* |x| = 1 */
-    y = Pi2n(-2, l+1); if (sx < 0) setsigne(y,-1);
+    y = Pi2n(-2, l+EXTRAPRECWORD); if (sx < 0) setsigne(y,-1);
     return y;
   }
   if (l > AGM_ATAN_LIMIT)
@@ -76,7 +76,7 @@ mpatan(GEN x)
   if (e > 0) lp += nbits2extraprec(e);
 
   y = cgetr(lp); av0 = avma;
-  p1 = rtor(x, l+1); setabssign(p1); /* p1 = |x| */
+  p1 = rtor(x, l+EXTRAPRECWORD); setabssign(p1); /* p1 = |x| */
   if (inv) p1 = invr(p1);
   e = expo(p1);
   if (e < -100)

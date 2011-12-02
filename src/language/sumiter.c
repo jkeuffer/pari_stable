@@ -1013,7 +1013,7 @@ sumalt2(void *E, GEN (*eval)(void *, GEN), GEN a, long prec)
 
   if (typ(a) != t_INT) pari_err_TYPE("sumalt",a);
   N = (long)(0.31*(prec2nbits(prec) + 5));
-  pol = polzagreel(N,N>>1,prec+1);
+  pol = polzagreel(N,N>>1,prec+EXTRAPRECWORD);
   pol = RgX_div_by_X_x(pol, gen_1, &dn);
   a = setloop(a);
   N = degpol(pol);
@@ -1123,7 +1123,7 @@ sumpos2(void *E, GEN (*eval)(void *, GEN), GEN a, long prec)
       stock[k] = addrr(reel, gmul2n(x,1));
     }
   s = gen_0;
-  pol = polzagreel(N,N>>1,prec+1);
+  pol = polzagreel(N,N>>1,prec+EXTRAPRECWORD);
   pol = RgX_div_by_X_x(pol, gen_1, &dn);
   for (k=1; k<=lg(pol)-2; k++)
   {

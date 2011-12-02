@@ -534,7 +534,7 @@ hyperu(GEN a, GEN b, GEN gx, long prec)
 {
   GEN S, P, T, x, p1, zf, u, a1, mb = gneg(b);
   const int ex = iscomplex(a) || iscomplex(b);
-  long k, n, l = (typ(gx)==t_REAL)? realprec(gx): prec, l1 = l+1;
+  long k, n, l = (typ(gx)==t_REAL)? realprec(gx): prec, l1 = l+EXTRAPRECWORD;
   GEN y = ex? cgetc(l): cgetr(l);
   pari_sp av = avma;
 
@@ -627,9 +627,9 @@ incgam2_0(GEN x, GEN expx)
   }
   else
   {
-    GEN S, t, H, run = real_1(l+1);
+    GEN S, t, H, run = real_1(l+EXTRAPRECWORD);
     n = -prec2nbits(l)-1;
-    x = rtor(x, l+1);
+    x = rtor(x, l+EXTRAPRECWORD);
     S = z = t = H = run;
     for (i = 2; expo(t) - expo(S) >= n; i++)
     {
@@ -984,7 +984,7 @@ gerfc(GEN x, long prec)
     */
     /* NOT gsubsg(2, ...) : would create a result of
      * huge accuracy if re(x)>>1, rounded to 2 by subsequent affc_fixlg... */
-    z = gsub(real2n(1,prec+1), gerfc(gneg(x), prec));
+    z = gsub(real2n(1,prec+EXTRAPRECWORD), gerfc(gneg(x), prec));
   }
   avma = av; return affc_fixlg(z, res);
 }
@@ -1139,7 +1139,7 @@ inv_szeta_euler(long n, double lba, long prec)
 GEN
 bernreal_using_zeta(long n, GEN iz, long prec)
 {
-  long l = prec + 1;
+  long l = prec+EXTRAPRECWORD;
   GEN z;
 
   if (!iz) iz = inv_szeta_euler(n, 0., l);
@@ -1190,7 +1190,7 @@ szeta_odd(long k, long prec)
 {
   long kk, n, li = -(1+prec2nbits(prec));
   pari_sp av = avma, av2, limit;
-  GEN y, p1, qn, z, q, pi2 = Pi2n(1, prec), binom= real_1(prec+1);
+  GEN y, p1, qn, z, q, pi2 = Pi2n(1, prec), binom= real_1(prec+EXTRAPRECWORD);
 
   q = mpexp(pi2); kk = k+1; /* >= 4 */
   y = NULL; /* gcc -Wall */
@@ -1199,7 +1199,7 @@ szeta_odd(long k, long prec)
     for (n=0; n <= kk>>1; n+=2)
     {
       p1 = mulrr(bernreal(kk-n,prec),bernreal(n,prec));
-      if (n) { binom = next_bin(binom,kk,n); setprec(binom,prec+1); }
+      if (n) { binom = next_bin(binom,kk,n); setprec(binom,prec+EXTRAPRECWORD); }
       p1 = mulrr(binom,p1);
       if (n == kk>>1) shiftr_inplace(p1, -1);
       if ((n>>1)&1) togglesign(p1);
@@ -1215,7 +1215,7 @@ szeta_odd(long k, long prec)
       p1 = invr( mulir(powuu(n,k),addrs(qn,-1)) );
 
       z = addrr(z,p1); if ((ep1 = expo(p1)) < li) break;
-      l = (ep1 < 0) ? prec+1 : prec+1 + nbits2extraprec(ep1);
+      l = (ep1 < 0) ? prec+EXTRAPRECWORD : prec+EXTRAPRECWORD + nbits2extraprec(ep1);
       if (l < realprec(qn)) setprec(qn, l);
       qn = mulrr(qn,q);
       if (low_stack(limit,stack_lim(av2,1)))
@@ -1250,7 +1250,7 @@ szeta_odd(long k, long prec)
       p1 = divrr(addrs(mulrr(qn,addsr(1,mulur(n<<1,p2))),-1),p1);
 
       z = addrr(z,p1); if ((ep1 = expo(p1)) < li) break;
-      l = (ep1 < 0)? prec+1 : prec+1 + nbits2extraprec(ep1);
+      l = (ep1 < 0)? prec+EXTRAPRECWORD : prec+EXTRAPRECWORD + nbits2extraprec(ep1);
       if (l < realprec(qn)) setprec(qn, l);
       qn = mulrr(qn,q);
       if (low_stack(limit,stack_lim(av2,1)))
@@ -1889,7 +1889,7 @@ polylog(long m, GEN x, long prec)
 
   l = precision(x); if (!l) l = prec;
   res = cgetc(l); av = avma;
-  x = gtofp(x, l+1);
+  x = gtofp(x, l+EXTRAPRECWORD);
   e = gexpo(gnorm(x));
   if (!e || e == -1) {
     y = cxpolylog(m,x,prec);
