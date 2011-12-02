@@ -1416,6 +1416,7 @@ GEN     elltaniyama(GEN e, long prec);
 GEN     elltatepairing(GEN E, GEN t, GEN s, GEN m);
 GEN     elltors0(GEN e, long flag);
 GEN     ellweilpairing(GEN E, GEN t, GEN s, GEN m);
+GEN     ellwp(GEN w, GEN z, long prec);
 GEN     ellwp0(GEN w, GEN z, long flag, long prec);
 GEN     ellwpseries(GEN e, long v, long PRECDL);
 GEN     ellzeta(GEN om, GEN z, long prec);
