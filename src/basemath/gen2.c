@@ -2478,7 +2478,7 @@ listsort(GEN L, long flag)
   if (flag)
   {
     long lnew;
-    perm = gen_indexsort_uniq(L, (void*)&lexcmp, cmp_nodata);
+    perm = gen_indexsort_uniq(L, (void*)&cmp_universal, cmp_nodata);
     lnew = lg(perm); /* may have changed since 'uniq' */
     vnew = cgetg(lnew,t_VEC);
     for (i=1; i<lnew; i++) {
@@ -2494,7 +2494,7 @@ listsort(GEN L, long flag)
   }
   else
   {
-    perm = gen_indexsort(L, (void*)&lexcmp, cmp_nodata);
+    perm = gen_indexsort(L, (void*)&cmp_universal, cmp_nodata);
     vnew = cgetg(l,t_VEC);
     for (i=1; i<l; i++) gel(vnew,i) = gel(v,perm[i]);
   }

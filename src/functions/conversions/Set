@@ -9,4 +9,5 @@ Description:
  (gen):vec        gtoset($1)
 Doc:
  converts $x$ into a set, i.e.~into a row vector, with strictly increasing
- entries with respect to a (somewhat arbitrary) universal comparison function.
+ entries with respect to the (somewhat arbitrary) universal comparison function
+ \tet{cmp}.

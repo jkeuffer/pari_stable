@@ -107,6 +107,8 @@ BA 28- more usable form of alarm(s, code): evaluate code, aborting after s
    37- ellsigma / ellzeta: allow t_SER arguments, like ellwp.
    38- polcoeff(x+2*y,1,y) -> 2  [ was 2*x^0 ]
    39- quadhilbert / quadray: replace final polredabs call by polredbest [#1025]
+   40- listsort() now uses the cmp() comparison function, and becomes fully
+       compatible with setsearch() [#1167]
 
   Added
     1- mathnf for matrices over K[X] [#41]
