@@ -1246,10 +1246,10 @@ GEN
 derivnum(void *E, GEN (*eval)(void *, GEN), GEN x, long prec)
 {
   GEN eps,a,b, y;
-  long fpr, pr, l, e, ex;
+  long pr, l, e, ex;
   pari_sp av = avma;
-  fpr = prec2nbits(precision(x)); /* required final prec (in sig. words) */
-  if (fpr == 0) fpr = prec2nbits(prec);
+  long p = precision(x);
+  long fpr = p ? prec2nbits(p): prec2nbits(prec);
   ex = gexpo(x);
   if (ex < 0) ex = 0; /* near 0 */
   pr = (long)ceil(fpr * 1.5 + ex);
