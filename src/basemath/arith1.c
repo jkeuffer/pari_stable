@@ -901,11 +901,11 @@ gisanypower(GEN x, GEN *pty)
   return 0; /* not reached */
 }
 
-long
-Z_isanypower(GEN x, GEN *pty)
+/* disregard the sign of x, caller will take care of x < 0 */
+static long
+Z_isanypower_aux(GEN x, GEN *pty)
 {
-  pari_sp av = avma;
-  long ex, v, i, j, l, k, s = signe(x);
+  long ex, v, i, j, l, k;
   GEN logx, y, fa, P, E, Pe, Ee;
   byteptr d = diffptr;
   ulong mask, p = 0, ex0 = 11, e = 0, e2;
@@ -941,7 +941,7 @@ Z_isanypower(GEN x, GEN *pty)
     long v3, v5, v7, le;
     ulong e2 = e;
     v = u_lvalrem(e2, 2, &e2);
-    if (v && s > 0)
+    if (v)
     {
       for (i = 0; i < v; i++)
       {
@@ -1006,8 +1006,7 @@ Z_isanypower(GEN x, GEN *pty)
     }
   }
 END:
-  if (!pty || k == 1) avma = av;
-  else
+  if (pty && k != 1)
   {
     if (e)
     { /* add missing small factors */
@@ -1015,10 +1014,34 @@ END:
       for (i = 2; i < l; i++) y = mulii(y, powuu(P[i], E[i] / k));
       x = equali1(x)? y: mulii(x,y);
     }
-    if (s < 0) togglesign(x);
-    *pty = gerepilecopy(av, x);
+    *pty = x;
   }
   return k == 1? 0: k;
+}
+long
+Z_isanypower(GEN x, GEN *pty)
+{
+  pari_sp av = avma;
+  long k = Z_isanypower_aux(x, pty);
+  if (!k) { avma = av; return 0; }
+  if (signe(x) < 0)
+  {
+    long v = vals(k);
+    if (v)
+    {
+      GEN y;
+      k >>= v;
+      if (k == 1) { avma = av; return 0; }
+      if (!pty) { avma = av; return k; }
+      y = *pty;
+      y = powiu(y, 1<<v);
+      togglesign(y);
+      *pty = gerepileuptoint(av, y);
+      return k;
+    }
+  }
+  if (pty) *pty = gerepilecopy(av, *pty); else avma = av;
+  return k;
 }
 
 /*********************************************************************/
