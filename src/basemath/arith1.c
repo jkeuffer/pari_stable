@@ -875,11 +875,19 @@ gisanypower(GEN x, GEN *pty)
     pari_sp av = avma;
     GEN fa, P, E, a = gel(x,1), b = gel(x,2);
     long i, j, p, e;
-    int sw = (cmpii(a, b) > 0);
+    int sw = (absi_cmp(a, b) > 0);
 
     if (sw) swap(a, b);
     k = Z_isanypower(a, pty? &a: NULL);
-    if (!k) { avma = av; return 0; }
+    if (!k)
+    { /* a = -1,1 or not a pure power */
+      if (!is_pm1(a)) { avma = av; return 0; }
+      if (signe(a) < 0) b = negi(b);
+      k = Z_isanypower(b, pty? &b: NULL);
+      if (!k || !pty) { avma = av; return k; }
+      *pty = gerepileupto(av, ginv(b));
+      return k;
+    }
     fa = factoru(k);
     P = gel(fa,1);
     E = gel(fa,2); h = k;
