@@ -626,7 +626,7 @@ gcmpsg(long s, GEN y)
 static int
 lexcmp_scal_vec(GEN x, GEN y)
 {
-  long fl;
+  int fl;
   if (lg(y)==1) return 1;
   fl = lexcmp(x,gel(y,1));
   if (fl) return fl;
@@ -645,7 +645,7 @@ int
 lexcmp(GEN x, GEN y)
 {
   const long tx=typ(x), ty=typ(y);
-  long lx,ly,l,fl,i;
+  long lx,ly,l,i;
 
   if (!is_matvec_t(tx))
   {
@@ -669,7 +669,7 @@ lexcmp(GEN x, GEN y)
   ly = lg(y); l = minss(lx,ly);
   for (i=1; i<l; i++)
   {
-    fl = lexcmp(gel(x,i),gel(y,i));
+    int fl = lexcmp(gel(x,i),gel(y,i));
     if (fl) return fl;
   }
   if (lx == ly) return 0;
