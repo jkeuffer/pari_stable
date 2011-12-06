@@ -8058,7 +8058,7 @@ typecast to a sensible common domain, because their types do not match up.
 (As in \kbd{Mod(1,2) + Pi}.)
 \bprog
   pari_err(e_TYPE2, const char *op, GEN x, GEN y)
-  pari_err_TYPE2( const char *op, GEN x, GEN y)
+  pari_err_TYPE2(const char *op, GEN x, GEN y)
 @eprog\noindent prints the error message: \kbd{forbidden} $s$
 \typ{$x$} \var{op} \typ{$y$}, where \typ{$z$} denotes the type of $z$.
 Here, $s$ denotes the spelled out name of the operator
@@ -8073,7 +8073,7 @@ inconsistent variables. E.g., considering the algebraic number
 \kbd{Mod(t,t\pow2+1)} in \kbd{nfinit(x\pow2+1)}.
 \bprog
   pari_err(e_VAR, const char *s, GEN x, GEN y)
-  pari_err_VAR( const char *s, GEN x, GEN y)
+  pari_err_VAR(const char *s, GEN x, GEN y)
 @eprog\noindent prints the error message: \kbd{inconsistent variables in $s$}.
 
 \subsec{Overflows}
@@ -8177,7 +8177,7 @@ inconsistent. E.g., considering the algebraic number
 \kbd{Mod(t,t\pow2+1)} in \kbd{nfinit(t\pow3-2)}.
 \bprog
   pari_err(e_MODULUS, const char *s, GEN x, GEN y)
-  pari_err_MODULUS( const char *s, GEN x, GEN y)
+  pari_err_MODULUS(const char *s, GEN x, GEN y)
 @eprog\noindent prints the error message: \kbd{inconsistent moduli in $s$},
 then the moduli.
 
