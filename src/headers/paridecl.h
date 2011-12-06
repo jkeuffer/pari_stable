@@ -1215,6 +1215,7 @@ GEN     stirling1(ulong n, ulong m);
 GEN     stirling2(ulong n, ulong m);
 long    tablesearch(GEN T, GEN x, int (*cmp)(GEN,GEN));
 GEN     vecbinome(long n);
+long    vecsearch(GEN v, GEN x, GEN k);
 GEN     vecsort(GEN x, GEN k);
 GEN     vecsort0(GEN x, GEN k, long flag);
 GEN     ZV_indexsort(GEN L);

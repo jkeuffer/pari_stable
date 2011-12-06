@@ -1150,21 +1150,20 @@ cmp_small(GEN x, GEN y) {
   return a>b? 1: (a<b? -1: 0);
 }
 
-struct veccmp_s
-{
-  GEN k;
-  int (*cmp)(GEN,GEN);
-};
-
 static int
 veccmp(void *data, GEN x, GEN y)
 {
-  struct veccmp_s *v=(struct veccmp_s *) data;
-  long i, s, lk = lg(v->k);
+  GEN k = (GEN)data;
+  long i, s, lk = lg(k), lx = minss(lg(x), lg(y));
 
+  if (!is_vec_t(typ(x))) pari_err_TYPE("lexicographic vecsort",x);
+  if (!is_vec_t(typ(y))) pari_err_TYPE("lexicographic vecsort",y);
   for (i=1; i<lk; i++)
   {
-    s = v->cmp(gel(x,v->k[i]), gel(y,v->k[i]));
+    long c = k[i];
+    if (c >= lx)
+      pari_err_TYPE("lexicographic vecsort, index too large", stoi(c));
+    s = lexcmp(gel(x,c), gel(y,c));
     if (s) return s;
   }
   return 0;
@@ -1389,74 +1388,58 @@ closurecmp(void *data, GEN x, GEN y)
   pari_sp av = avma;
   GEN z = closure_callgen2((GEN)data, x,y);
   if (typ(z) != t_INT)
-    pari_err(e_MISC,"comparison function must return an integer");
+    pari_err_TYPE("closurecmp, cmp. fun. must return an integer", z);
   avma = av; return signe(z);
 }
 
+static void
+check_positive_entries(GEN k)
+{
+  long i, l = lg(k);
+  for (i=1; i<l; i++)
+    if (k[i] <= 0) pari_err_TYPE("sort_function, negative index", stoi(k[i]));
+}
+
+typedef int (*CMP_FUN)(void*,GEN,GEN);
+static CMP_FUN
+sort_function(void **E, GEN x, GEN k)
+{
+  int (*cmp)(GEN,GEN) = &lexcmp;
+  if (!k)
+  {
+    *E = (void*)((typ(x) == t_VECSMALL)? cmp_small: cmp);
+    return &cmp_nodata;
+  }
+  if (typ(x) == t_VECSMALL) pari_err_TYPE("sort_function", x);
+  switch(typ(k))
+  {
+    case t_INT: k = mkvecsmall(itos(k));  break;
+    case t_VEC: case t_COL: k = ZV_to_zv(k); break;
+    case t_VECSMALL: break;
+    case t_CLOSURE:
+     if (k[1] != 2)
+       pari_err_TYPE("sort_function, cmp. fun. needs exactly 2 arguments",k);
+     *E = (void*)k;
+     return &closurecmp;
+    default: pari_err_TYPE("sort_function",k);
+  }
+  check_positive_entries(k);
+  *E = (void*)k;
+  return &veccmp;
+}
+
 #define cmp_IND 1
-#define cmp_LEX 2
+#define cmp_LEX 2 /* FIXME: backward compatibility, ignored */
 #define cmp_REV 4
 #define cmp_UNIQ 8
 GEN
 vecsort0(GEN x, GEN k, long flag)
 {
-  int (*CMP)(void*,GEN,GEN);
-  int (*cmp)(GEN,GEN) = (flag & cmp_LEX)? &lexcmp: &gcmp;
   void *E;
+  int (*CMP)(void*,GEN,GEN) = sort_function(&E, x, k);
 
   if (flag < 0 || flag > (cmp_REV|cmp_LEX|cmp_IND|cmp_UNIQ))
     pari_err_FLAG("vecsort");
-  if (k) {
-    long i, j, l, lk, tx, lx;
-    struct veccmp_s v;
-    GEN y;
-
-    /* cf init_sort */
-    tx = typ(x);
-    if (tx == t_LIST) {
-      y = list_data(x);
-      if (!y || (lx = lg(y)) == 1)
-        return flag & cmp_IND? cgetg(1, t_VECSMALL): listcreate();
-    } else {
-      if (!is_matvec_t(tx)) pari_err_TYPE("vecsort",x);
-      y = x; lx = lg(y);
-      if (lx == 1)
-        return flag & cmp_IND? cgetg(1, t_VECSMALL): cgetg(1, tx);
-    }
-    switch(typ(k))
-    {
-      case t_INT: k = mkvecsmall(itos(k)); break;
-      case t_VEC: case t_COL: k = ZV_to_zv(k); break;
-      case t_VECSMALL: break;
-      case t_CLOSURE:
-       if (k[1] != 2)
-         pari_err(e_MISC,"comparison function needs exactly 2 arguments");
-       E = (void*)k;
-       CMP = &closurecmp;
-       goto END;
-      default: pari_err_TYPE("vecsort",k);
-    }
-    lk = lg(k);
-    for (l=0,i=1; i<lk; i++)
-    {
-      j = k[i]; if (j<=0) pari_err(e_MISC,"negative index in vecsort");
-      if (j>l) l = j;
-    }
-    for (j=1; j<lx; j++)
-    {
-      GEN c = gel(y,j);
-      long t = typ(c); if (! is_vec_t(t)) pari_err_TYPE("vecsort",c);
-      if (lg(c) <= l) pari_err(e_MISC,"index too large in vecsort");
-    }
-    v.cmp = cmp;
-    v.k = k;
-    E = (void*)&v;
-    CMP = &veccmp;
-  } else {
-    E = (void*)((typ(x) == t_VECSMALL)? cmp_small: cmp);
-    CMP = &cmp_nodata;
-  }
-END:
   if (flag & cmp_UNIQ)
     x = flag & cmp_IND? gen_indexsort_uniq(x, E, CMP): gen_sort_uniq(x, E, CMP);
   else
@@ -1477,9 +1460,8 @@ indexlexsort(GEN x) { return gen_indexsort(x, (void*)&lexcmp, cmp_nodata); }
 GEN
 indexvecsort(GEN x, GEN k)
 {
-  struct veccmp_s v; v.cmp = &gcmp; v.k = k;
   if (typ(k) != t_VECSMALL) pari_err_TYPE("vecsort",k);
-  return gen_indexsort(x, (void*)&v, &veccmp);
+  return gen_indexsort(x, (void*)k, &veccmp);
 }
 
 GEN
@@ -1489,9 +1471,17 @@ lexsort(GEN x) { return gen_sort(x, (void*)lexcmp, cmp_nodata); }
 GEN
 vecsort(GEN x, GEN k)
 {
-  struct veccmp_s v; v.cmp = &gcmp; v.k = k;
   if (typ(k) != t_VECSMALL) pari_err_TYPE("vecsort",k);
-  return gen_sort(x, (void*)&v, &veccmp);
+  return gen_sort(x, (void*)k, &veccmp);
+}
+long
+vecsearch(GEN v, GEN x, GEN k)
+{
+  pari_sp av = avma;
+  void *E;
+  int (*CMP)(void*,GEN,GEN) = sort_function(&E, x, k);
+  long r = gen_search(v, x, 0, E, CMP);
+  avma = av; return r;
 }
 
 GEN

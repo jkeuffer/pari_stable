@@ -32,10 +32,10 @@ Doc: sorts the vector $x$ in ascending order, using a mergesort method.
  entries (with respect to the sorting criterion) is not changed.
 
  If \kbd{cmpf} is omitted, we use the standard comparison function
- \kbd{<}, thereby restricting the possible types for the elements of $x$
- (integers, fractions or reals). If \kbd{cmpf} is present, it is understood as
- a comparison function and we sort according to it. The following
- possibilities exist:
+ \kbd{lex}, thereby restricting the possible types for the elements of $x$
+ (integers, fractions or reals and vectors of those). If \kbd{cmpf} is
+ present, it is understood as a comparison function and we sort according to
+ it. The following possibilities exist:
 
  \item an integer $k$: sort according to the value of the $k$-th
  subcomponents of the components of~$x$.
@@ -49,11 +49,11 @@ Doc: sorts the vector $x$ in ascending order, using a mergesort method.
  and returning an integer which is $<0$, $>0$ or $=0$ if $x<y$, $x>y$ or
  $x=y$ respectively. The \tet{sign} function is very useful in this context:
  \bprog
- ? vecsort([3,0,2; 1,0,2],lex) \\ sort columns according to lex order
+ ? vecsort([3,0,2; 1,0,2]) \\ sort columns according to lex order
  %1 =
- [2 3]
+ [0 2 3]
 
- [2 1]
+ [0 2 1]
  ? vecsort(v, (x,y)->sign(y-x))            \\@com reverse sort
  ? vecsort(v, (x,y)->sign(abs(x)-abs(y)))  \\@com sort by increasing absolute value
  ? cmpf(x,y) = my(dx = poldisc(x), dy = poldisc(y)); sign(abs(dx) - abs(dy))
@@ -77,9 +77,6 @@ Doc: sorts the vector $x$ in ascending order, using a mergesort method.
  applied to the components of $x$ sorts $x$ in increasing order.
  For example, \kbd{vecextract(x, vecsort(x,,1))} is equivalent to
  \kbd{vecsort(x)}.
-
- \item 2: sorts $x$ by ascending lexicographic order (as per the
- \kbd{lex} comparison function).
 
  \item 4: use descending instead of ascending order.
 

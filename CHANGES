@@ -111,6 +111,8 @@ BA 28- more usable form of alarm(s, code): evaluate code, aborting after s
    39- quadhilbert / quadray: replace final polredabs call by polredbest [#1025]
    40- listsort() now uses the cmp() comparison function, and becomes fully
        compatible with setsearch() [#1167]
+   41- vecsort(,,2) [lexicographic order] is now always on. The flag is
+       now deprecated and ignored.
 
   Added
     1- mathnf for matrices over K[X] [#41]
@@ -145,6 +147,7 @@ BA 23- low-level function int_bit
    25- function polredbest [ adapting a preliminary patch by BA ]
 BA 26- library functions Fl_invsafe, F2x_halfgcd
 BA 27- support for sparse matrix and Wiedemann algorithm
+   28- GP function vecsearch() [ use with vecsort() ]
 
   Removed
     1- dropped DOS support
