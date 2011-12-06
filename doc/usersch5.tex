@@ -5277,6 +5277,50 @@ not assume that \kbd{v} is sorted.
 divisors for $M - x\text{Id}$, where $M$ is an $n\times n$ square matrix.
 Returns the Frobenius form of $M$. Used by \kbd{matfrobenius}.
 
+\subsec{Blackbox linear algebra}
+
+A sparse column \kbd{zCs} $v$ is a \typ{COL} with two components $C$ and $E$
+which are \typ{VECSMALL} of the same length, representing $\sum_i
+E[i]*e_{C[i]}$, where $(e_j)$ is the canonical basis. A sparse matrix
+(\kbd{zMs}) is a \typ{VEC} of \kbd{zCs}.
+
+\kbd{FpCs} and \kbd{FpMs} are identical to the above, but $E[i]$ is now
+interpreted as a \emph{signed} C long integer representing an element of
+$\F_p$. This is important since $p$ can be so large that $p+E[i]$ would not
+fit in a C long.
+
+\kbd{RgCs} and \kbd{RgMs} are similar, except that the type of the components
+of $E$ is now unspecified. Functions handling those later objects
+must not depend on the type of those components.
+
+It is not possible to derive the space dimension (number of rows) from the
+above data. Thus most functions take an argument \kbd{nbrow} which is the
+number of rows of the corresponding column/matrix in dense representation.
+
+%\fun{GEN}{FpCs_to_FpC}{GEN C}
+
+\fun{GEN}{FpMs_FpC_mul}{GEN M, GEN B, GEN p} multiply the sparse matrix $M$
+(over $\F_p$) by the sparse vector $B$. The result is an \kbd{FpC}, i.e.~a
+dense vector.
+
+\fun{GEN}{zCs_to_ZC}{GEN C, long nbrow} convert the sparse vector $C$
+to a dense \kbd{ZC} of dimension \kbd{nbrow}.
+
+\fun{GEN}{zMs_to_ZM}{GEN M, long nbrow} convert the sparse matrix $M$
+to a dense \kbd{ZM} whose columns have dimension \kbd{nbrow}.
+
+\fun{GEN}{FpMs_FpCs_solve}{GEN M, GEN B, long nbrow, GEN p}
+solve the equation $MX = B$, where $M$ is a sparse matrix and $B$ is a sparse
+vector, both over $\F_p$. Return either a solution as a \typ{COL} (dense
+vector), or the index of a column which is linearly dependent from the
+others as a \typ{VECSMALL} with a single component.
+
+\fun{GEN}{gen_FpM_Wiedemann}{void *E, GEN (*f)(void*, GEN), GEN B, GEN p}
+solve equation $f(X) = B$ over $\F_p$, where $B$ is a \kbd{FpV}, and $f$ is a
+blackbox endomorphism, where $f(E, X)$ computes the value of $f$ at the
+(dense) column vector $X$. Returns either a solution \typ{COL}, or a kernel
+vector as a \typ{VEC}.
+
 \subsec{Obsolete functions}
 
 The functions in this section are kept for backward compatibility only

@@ -298,7 +298,7 @@ GEN     FpM_mul(GEN x, GEN y, GEN p);
 GEN     FpM_red(GEN z, GEN p);
 GEN     FpM_to_mod(GEN z, GEN p);
 GEN     FpMs_FpC_mul(GEN M, GEN B, GEN p);
-GEN     FpMs_FpCs_solve(GEN M, GEN B, long nblin, GEN p);
+GEN     FpMs_FpCs_solve(GEN M, GEN B, long nbrow, GEN p);
 GEN     FpC_add(GEN x, GEN y, GEN p);
 GEN     FpC_sub(GEN x, GEN y, GEN p);
 GEN     FpV_add(GEN x, GEN y, GEN p);
@@ -309,8 +309,8 @@ GEN     FpV_red(GEN z, GEN p);
 GEN     FpV_to_mod(GEN z, GEN p);
 GEN     FpX_to_mod(GEN z, GEN p);
 GEN     gen_FpM_Wiedemann(void *E, GEN (*f)(void*, GEN), GEN B, GEN p);
-GEN     zCs_to_ZC(GEN C, long nblin);
-GEN     zMs_to_ZM(GEN M, long nblin);
+GEN     zCs_to_ZC(GEN C, long nbrow);
+GEN     zMs_to_ZM(GEN M, long nbrow);
 
 /* RgV.c */
 

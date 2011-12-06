@@ -633,24 +633,24 @@ FpXQC_to_mod(GEN z, GEN T, GEN p)
  * unspecified. Functions handling RgCs/RgMs must be independent of the type
  * of E. */
 
-/* Most functions take an argument nblin which is the number of lines of the
+/* Most functions take an argument nbrow which is the number of lines of the
  * column/matrix, which cannot be derived from the data. */
 
 GEN
-zCs_to_ZC(GEN R, long nblin)
+zCs_to_ZC(GEN R, long nbrow)
 {
-  GEN C = gel(R,1), E = gel(R,2), c = zerocol(nblin);
+  GEN C = gel(R,1), E = gel(R,2), c = zerocol(nbrow);
   long j, l = lg(C);
   for (j = 1; j < l; ++j) gel(c, C[j]) = stoi(E[j]);
   return c;
 }
 
 GEN
-zMs_to_ZM(GEN M, long nblin)
+zMs_to_ZM(GEN M, long nbrow)
 {
   long i, l = lg(M);
   GEN m = cgetg(l, t_MAT);
-  for (i = 1; i < l; ++i) gel(m,i) = zCs_to_ZC(gel(M,i), nblin);
+  for (i = 1; i < l; ++i) gel(m,i) = zCs_to_ZC(gel(M,i), nbrow);
   return m;
 }
 
@@ -761,34 +761,32 @@ wrap_relcomb(void*E, GEN x)
 }
 
 static GEN
-vecplin(GEN A, GEN plin)
+vecprow(GEN A, GEN prow)
 {
-  return mkvec2(vecpermute(plin,gel(A,1)), gel(A,2));
+  return mkvec2(vecpermute(prow,gel(A,1)), gel(A,2));
 }
 
-/* Solve the equation MX = A
-   Return either a solution as a t_COL, or the index of a column which is linearly
-   dependent from the other as a t_VECSMALL with a single component.
- */
-
+/* Solve the equation MX = A. Return either a solution as a t_COL,
+ * or the index of a column which is linearly dependent from the others as a
+ * t_VECSMALL with a single component. */
 GEN
-FpMs_FpCs_solve(GEN M, GEN A, long nblin, GEN p)
+FpMs_FpCs_solve(GEN M, GEN A, long nbrow, GEN p)
 {
   pari_sp av = avma;
   struct relcomb_s s;
-  GEN pcol, plin;
+  GEN pcol, prow;
   long nbi=lg(M)-1, lR;
   long i, n;
   GEN Mp, Ap, Rp;
   pari_timer ti;
-  RgMs_structelim(M, nblin, gel(A, 1), &pcol, &plin);
+  RgMs_structelim(M, nbrow, gel(A, 1), &pcol, &prow);
   if (DEBUGLEVEL)
     err_printf("Structured elimination: %ld -> %ld\n",nbi,lg(pcol)-1);
   n = lg(pcol)-1;
   Mp = cgetg(n+1, t_MAT);
   for(i=1; i<=n; i++)
-    gel(Mp, i) = vecplin(gel(M,pcol[i]), plin);
-  Ap = zCs_to_ZC(vecplin(A, plin), n);
+    gel(Mp, i) = vecprow(gel(M,pcol[i]), prow);
+  Ap = zCs_to_ZC(vecprow(A, prow), n);
   s.M = Mp; s.p = p;
   timer_start(&ti);
   Rp = gen_FpM_Wiedemann((void*)&s,wrap_relcomb, Ap, p);
