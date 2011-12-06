@@ -614,24 +614,24 @@ FpXQC_to_mod(GEN z, GEN T, GEN p)
   return x;
 }
 
-/********************************************************************************
- **                                                                            **
- **                     Blackbox linear algebra                                **
- **                                                                            **
- ********************************************************************************/
+/********************************************************************/
+/*                                                                  */
+/*                     Blackbox linear algebra                      */
+/*                                                                  */
+/********************************************************************/
 
 /* A sparse column (zCs) v is a t_COL with two components C and E which are
- * t_VECSMALL of the same rank. we have v = sum_i E[i]*e_{C[i]} where (e_j) is
- * the canonical basis.  */
-
-/* A sparse matrix (zMs) is a t_VEC of zCs */
+ * t_VECSMALL of the same length, representing sum_i E[i]*e_{C[i]}, where
+ * (e_j) is the canonical basis.
+ * A sparse matrix (zMs) is a t_VEC of zCs */
 
 /* FpCs and FpMs are identical but E[i] is interpreted as a _signed_ C long
  * integer representing an element of Fp. This is important since p can be
  * large and p+E[i] would not fit in a C long.  */
 
-/* RgCs and RgMs are similar, except that the type and content of the component
- * is unspecified. Functions handling RgCs/RgMs must be independent of E. */
+/* RgCs and RgMs are similar, except that the type of the component is
+ * unspecified. Functions handling RgCs/RgMs must be independent of the type
+ * of E. */
 
 /* Most functions take an argument nblin which is the number of lines of the
  * column/matrix, which cannot be derived from the data. */
@@ -639,28 +639,23 @@ FpXQC_to_mod(GEN z, GEN T, GEN p)
 GEN
 zCs_to_ZC(GEN R, long nblin)
 {
-  GEN C = gel(R,1), E = gel(R,2);
+  GEN C = gel(R,1), E = gel(R,2), c = zerocol(nblin);
   long j, l = lg(C);
-  GEN c = zerocol(nblin);
-  for (j = 1; j < l; ++j)
-    gel(c, C[j]) = stoi(E[j]);
+  for (j = 1; j < l; ++j) gel(c, C[j]) = stoi(E[j]);
   return c;
 }
 
 GEN
 zMs_to_ZM(GEN M, long nblin)
 {
-  long  i, n = lg(M)-1;
-  GEN m = cgetg(n+1, t_MAT);
-  for (i = 1; i <= n; ++i)
-    gel(m, i) = zCs_to_ZC(gel(M, i), nblin);
+  long i, l = lg(M);
+  GEN m = cgetg(l, t_MAT);
+  for (i = 1; i < l; ++i) gel(m,i) = zCs_to_ZC(gel(M,i), nblin);
   return m;
 }
 
-/* Solve the equation f(X) = B mod p where B is a FpV, and f is a linear endomorphism.
- * Return either a solution as a t_COL, or a kernel vector as a t_VEC.
- */
-
+/* Solve equation f(X) = B (mod p) where B is a FpV, and f is an endomorphism.
+ * Return either a solution as a t_COL, or a kernel vector as a t_VEC. */
 GEN
 gen_FpM_Wiedemann(void *E, GEN (*f)(void*, GEN), GEN B, GEN p)
 {
