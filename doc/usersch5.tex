@@ -6469,11 +6469,18 @@ number \kbd{v} dividing the \typ{POL}~\kbd{x}.
 
 \subsec{Generic}
 
-\fun{long}{gcmp}{GEN x, GEN y} comparison of \kbd{x} with \kbd{y} (returns
-the sign ($-1$, 0 or 1) of $\kbd{x}-\kbd{y}$).
+\fun{long}{gcmp}{GEN x, GEN y} comparison of \kbd{x} with \kbd{y}: returns
+$1$ ($x > y$), $0$ ($x = y$) or $-1$ ($x < y$). Two \typ{STR}
+are compared using the standard lexicographic ordering; a \typ{STR}
+is considered strictly larger than any non-string type. If neither
+$x$ nor $y$ is a \typ{STR}, their allowed types are \typ{INT}, \typ{REAL}
+or \typ{FRAC}. Used \tet{cmp_universal} to compare arbitrary \kbd{GEN}s.
 
 \fun{long}{lexcmp}{GEN x, GEN y} comparison of \kbd{x} with \kbd{y} for the
-lexicographic ordering.
+lexicographic ordering; when comparing objects of different lengths whose
+components are all equal up to the smallest of their length, consider that
+the longest is largest. Consider scalars as $1$-component vectors. Return
+\kbd{gcmp}$(x,y)$ if both arguments are scalars.
 
 \fun{int}{gcmpX}{GEN x} return 1 (true) if \kbd{x} is a variable
 (monomial of degree $1$ with \typ{INT} coefficients equal to $1$ and $0$),

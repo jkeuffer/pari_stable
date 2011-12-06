@@ -578,31 +578,76 @@ cmp_universal(GEN x, GEN y)
   }
 }
 
+static int
+cmpfrac(GEN x, GEN y)
+{
+  pari_sp av = avma;
+  GEN a = gel(x,1), b = gel(x,2);
+  GEN c = gel(y,1), d = gel(y,2);
+  int r = cmpii(mulii(a, d), mulii(b, c));
+  avma = av; return r;
+}
+static int
+cmpifrac(GEN a, GEN y)
+{
+  pari_sp av = avma;
+  GEN c = gel(y,1), d = gel(y,2);
+  int r = cmpii(mulii(a, d), c);
+  avma = av; return r;
+}
+static int
+cmprfrac(GEN a, GEN y)
+{
+  pari_sp av = avma;
+  GEN c = gel(y,1), d = gel(y,2);
+  int r = cmpri(mulri(a, d), c);
+  avma = av; return r;
+}
+
 /* returns the sign of x - y when it makes sense. 0 otherwise */
 int
 gcmp(GEN x, GEN y)
 {
-  long tx = typ(x), ty = typ(y), f;
-  pari_sp av;
+  long tx = typ(x), ty = typ(y);
 
-  if (is_intreal_t(tx))
-    { if (is_intreal_t(ty)) return mpcmp(x,y); }
-  else
+  if (tx == ty) /* generic case */
+    switch(tx)
+    {
+      case t_INT:  return cmpii(x, y);
+      case t_REAL: return cmprr(x, y);
+      case t_FRAC: return cmpfrac(x, y);
+      case t_STR:  return cmp_str(GSTR(x), GSTR(y));
+    }
+  switch(tx)
   {
-    if (tx==t_STR)
-    {
-      if (ty != t_STR) return 1;
-      return cmp_str(GSTR(x), GSTR(y));
-    }
-    if (tx != t_FRAC)
-    {
-      if (ty == t_STR) return -1;
-      pari_err_TYPE2("comparison",x,y);
-    }
+    case t_INT:
+      switch(ty)
+      {
+        case t_REAL: return cmpir(x, y);
+        case t_FRAC: return cmpifrac(x, y);
+        case t_STR:  return -1;
+      }
+      break;
+    case t_REAL:
+      switch(ty)
+      {
+        case t_INT:  return cmpri(x, y);
+        case t_FRAC: return cmprfrac(x, y);
+        case t_STR:  return -1;
+      }
+      break;
+    case t_FRAC:
+      switch(ty)
+      {
+        case t_INT:  return -cmpifrac(y, x);
+        case t_REAL: return -cmprfrac(y, x);
+        case t_STR:  return -1;
+      }
+      break;
+    case t_STR: return 1;
   }
-  if (ty == t_STR) return -1;
-  if (!is_intreal_t(ty) && ty != t_FRAC) pari_err_TYPE2("comparison",x,y);
-  av=avma; f = gsigne( gsub(x,y) ); avma=av; return f;
+  pari_err_TYPE2("comparison",x,y);
+  return 0;/*not reached*/
 }
 
 int
