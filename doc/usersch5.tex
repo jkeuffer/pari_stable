@@ -5658,6 +5658,10 @@ $x$ of degree $> 0$ are $0$ (as per \kbd{gequal0}).
 \fun{GEN}{RgX_mul}{GEN x, GEN y} multiplies the two \typ{POL} (in the same
 variable) \kbd{x} and \kbd{y}. Uses Karatsuba algorithm.
 
+\fun{GEN}{RgX_mul_normalized}{GEN A, long a, GEN B, long b}
+returns $(X^a + A)(X^b + B) - X^(a+b)$, where we assume that $\deg A < a$
+and $\deg B < b$ are polynomials in the same variable $X$.
+
 \fun{GEN}{RgX_mulspec}{GEN a, GEN b, long na, long nb}. Internal routine:
 \kbd{a} and \kbd{b} are arrays of coefficients representing polynomials
 $\sum_{i = 0}^{\kbd{na-1}} \kbd{a}[i] X^i$ and
