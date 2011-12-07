@@ -1383,20 +1383,17 @@ FqM_gauss(GEN a, GEN b, GEN T, GEN p)
   return gerepilecopy(av, iscol? gel(u,1): u);
 }
 
-/*
- * Dixon p-adic lifting algorithm.
- * Numer. Math. 40, 137-141 (1982)
- * DOI: 10.1007/BF01459082
- */
+/* Dixon p-adic lifting algorithm.
+ * Numer. Math. 40, 137-141 (1982), DOI: 10.1007/BF01459082 */
 GEN
-ZM_gauss(GEN a, GEN b)
+ZM_gauss(GEN a, GEN b0)
 {
   pari_sp av = avma, av2;
   int iscol;
   long n, ncol, i, m;
   ulong p;
   byteptr d;
-  GEN N, C, delta, xb, nb, nmin, res;
+  GEN N, C, delta, xb, nb, nmin, res, b = b0;
 
   if (!init_gauss(a, &b, &n, &ncol, &iscol)) return cgetg(1, iscol?t_COL:t_MAT);
   nb = gen_0; ncol = lg(b);
@@ -1405,7 +1402,7 @@ ZM_gauss(GEN a, GEN b)
     GEN ni = gnorml2(gel(b, i));
     if (cmpii(nb, ni) < 0) nb = ni;
   }
-  if (!signe(nb)) { avma = av; return gcopy(b); }
+  if (!signe(nb)) { avma = av; return gcopy(b0); }
   delta = gen_1; nmin = nb;
   for (i = 1; i <= n; i++)
   {
@@ -3737,6 +3734,91 @@ det_develop(GEN M, long max, double bound)
   return det_bareiss(M);
 }
 
+/* area of parallelogram bounded by (v1,v2) */
+static GEN
+parallelogramarea(GEN v1, GEN v2)
+{ return gsub(gmul(gnorml2(v1), gnorml2(v2)), gsqr(RgV_dotproduct(v1, v2))); }
+
+/* Square of Hadamard bound for det(a), a square matrix.
+ * Slightly improvement: instead of using the column norms, use the area of
+ * the parallelogram formed by pairs of consecutive vectors */
+GEN
+RgM_Hadamard(GEN a)
+{
+  pari_sp av = avma;
+  long n = lg(a)-1, i;
+  GEN B;
+  if (n == 0) return gen_1;
+  if (n == 1) return gsqr(gcoeff(a,1,1));
+  a = RgM_gtofp(a, LOWDEFAULTPREC);
+  B = gen_1;
+  for (i = 1; i <= n/2; i++)
+    B = gmul(B, parallelogramarea(gel(a,2*i-1), gel(a,2*i)));
+  if (odd(n)) B = gmul(B, gnorml2(gel(a, n)));
+  return gerepileuptoint(av, ceil_safe(B));
+}
+
+/* assume dim(a) = n > 1 */
+static GEN
+ZM_det_i(GEN a, long n)
+{
+  pari_sp av = avma, av2;
+  long i;
+  ulong p, compp, Dp = 1;
+  byteptr d;
+  GEN D, h, q, v, comp;
+  if (n == 2) {
+    D = subii(mulii(gcoeff(a,1,1), gcoeff(a,2,2)),
+              mulii(gcoeff(a,2,1), gcoeff(a,1,2)));
+    return gerepileuptoint(av, D);
+  }
+  h = RgM_Hadamard(a);
+  if (!signe(h)) { avma = av; return gen_0; }
+  h = sqrti(h);
+  for (q = gen_1, d = init_modular(&p); cmpii(q, h) <= 0; )
+  {
+    av2 = avma;
+    Dp = Flm_det(ZM_to_Flm(a, p), p);
+    avma = av2;
+    if (Dp) break;
+    q = muliu(q, p);
+    NEXT_PRIME_VIADIFF_CHECK(p,d);
+  }
+  if (!Dp) { avma = av; return gen_0; }
+  av2 = avma;
+  v = cgetg(n+1, t_COL);
+  gel(v, 1) = gen_1; /* ensure content(v) = 1 */
+  for (i = 2; i <= n; i++) gel(v, i) = stoi(random_Fl(15) - 7);
+  D = Q_denom(ZM_gauss(a, v));
+  if (expi(D) < expi(h) >> 1)
+  { /* First try unlucky, try once more */
+    for (i = 2; i <= n; i++) gel(v, i) = stoi(random_Fl(15) - 7);
+    D = lcmii(D, Q_denom(ZM_gauss(a, v)));
+  }
+  D = gerepileuptoint(av2, D);
+  if (q != gen_1) D = lcmii(D, q);
+  /* determinant is a multiple of D */
+  h = shifti(divii(h, D), 1);
+
+  compp = Fl_div(Dp, umodiu(D,p), p);
+  comp = Z_init_CRT(compp, p);
+  q = utoipos(p);
+  while (cmpii(q, h) <= 0)
+  {
+    GEN qp;
+    NEXT_PRIME_VIADIFF_CHECK(p,d);
+    Dp = umodiu(D, p);
+    if (!Dp) continue;
+    av2 = avma;
+    compp = Fl_div(Flm_det(ZM_to_Flm(a, p), p), Dp, p);
+    avma = av2;
+    qp = muliu(q, p);
+    (void) Z_incremental_CRT(&comp, compp, q, qp, p);
+    q = qp;
+  }
+  return gerepileuptoint(av, mulii(comp, D));
+}
+
 GEN
 det(GEN a)
 {
@@ -3749,9 +3831,11 @@ det(GEN a)
   if (!n) return gen_1;
   if (n != lg(a[1])-1) pari_err_DIM("det");
   if (n == 1) return gcopy(gcoeff(a,1,1));
-  if (RgM_is_FpM(a, &p) && p)
+  if (RgM_is_FpM(a, &p))
   {
-    pari_sp av = avma;
+    pari_sp av;
+    if (!p) return ZM_det_i(a, n);
+    av = avma;
     return gerepilecopy(av, Fp_to_mod(FpM_det(RgM_to_FpM(a, p), p), p));
   }
   pivot = get_pivot_fun(a, &data);
@@ -3760,6 +3844,17 @@ det(GEN a)
   return det_develop(a, 7, B);
 }
 
+GEN
+ZM_det(GEN a)
+{
+  long n = lg(a)-1;
+  if (typ(a)!=t_MAT) pari_err_TYPE("ZM_det",a);
+  if (!n) return gen_1;
+  if (n != lg(a[1])-1) pari_err_DIM("ZM_det");
+  RgM_check_ZM(a, "ZM_det");
+  if (n == 1) return icopy(gcoeff(a,1,1));
+  return ZM_det_i(a, n);
+}
 
 /* return a solution of congruence system sum M_{ i,j } X_j = Y_i mod D_i
  * If ptu1 != NULL, put in *ptu1 a Z-basis of the homogeneous system */

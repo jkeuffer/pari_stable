@@ -3,8 +3,8 @@ Section: linear_algebra
 C-Name: det0
 Prototype: GD0,L,
 Help: matdet(x,{flag=0}): determinant of the matrix x using Gauss-Bareiss.
- If (optional) flag is set to 1, use classical Gaussian elimination (slightly
- better for integer entries).
+ If (optional) flag is set to 1, use classical Gaussian elimination (not very
+ good for integer entries).
 Description:
  (gen, ?0):gen           det($1)
  (gen, 1):gen            det2($1)
@@ -12,11 +12,13 @@ Description:
  (gen, small):gen        det0($1, $2)
 Doc: determinant of $x$. $x$ must be a square matrix.
 
- If $\fl=0$, uses Gauss-Bareiss.
+ If $\fl=0$, uses Gauss-Bareiss or a method due to Dixon, Pernet and Stein if
+ $x$ has integer entries.
 
  If $\fl=1$, uses classical Gaussian elimination, which is better when the
  entries of the matrix are reals or integers for example, but usually much
  worse for more complicated entries like multivariate polynomials.
 
-Variant: Also available are \fun{GEN}{det}{GEN x} ($\fl=0$) and
- \fun{GEN}{det2}{GEN x} ($\fl=1$).
+Variant: Also available are \fun{GEN}{det}{GEN x} ($\fl=0$),
+ \fun{GEN}{det2}{GEN x} ($\fl=1$) and \fun{GEN}{ZM_det}{GEN x} for integer
+ entries.
