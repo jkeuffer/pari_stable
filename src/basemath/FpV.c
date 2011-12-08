@@ -448,7 +448,9 @@ F2v_dotproduct(GEN x0, GEN y0)
   if (lx == 2) return 0;
   c = x[2] & y[2];
   for (i=3; i<lx; i++) c ^= x[i] & y[i];
-  if (BITS_IN_LONG == 64) c ^= c >> 32;
+#ifdef LONG_IS_64BIT
+  c ^= c >> 32;
+#endif
   c ^= c >> 16;
   c ^= c >>  8;
   c ^= c >>  4;
