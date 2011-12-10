@@ -1480,6 +1480,7 @@ vecsearch(GEN v, GEN x, GEN k)
   pari_sp av = avma;
   void *E;
   int (*CMP)(void*,GEN,GEN) = sort_function(&E, x, k);
+  if (!is_matvec_t(typ(v))) pari_err_TYPE("vecsearch", v);
   long r = gen_search(v, x, 0, E, CMP);
   avma = av; return r;
 }
