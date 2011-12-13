@@ -212,19 +212,20 @@ F2x_addshift(GEN x, GEN y, long d)
 }
 
 /* shift polynomial + gerepile */
-/* Do not set evalvarn*/
+/* Do not set evalvarn. Cf Flx_shiftip */
 static GEN
 F2x_shiftip(pari_sp av, GEN x, long v)
 {
   long i, lx = lg(x), ly;
   GEN y;
   if (!v || lx==2) return gerepileuptoleaf(av, x);
-  avma = av; ly = lx + v;
-  x += lx; y = new_chunk(ly) + ly; /*cgetg could overwrite x!*/
+  ly = lx + v;
+  (void)new_chunk(ly); /* check that result fits */
+  x += lx; y = (GEN)av;
   for (i = 2; i<lx; i++) *--y = *--x;
   for (i = 0; i< v; i++) *--y = 0;
   y -= 2; y[0] = evaltyp(t_VECSMALL) | evallg(ly);
-  return y;
+  avma = (pari_sp)y; return y;
 }
 
 static GEN
