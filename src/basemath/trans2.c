@@ -109,7 +109,7 @@ mpatan(GEN x)
     p5 = addsr(1, sqrtr_abs(p5)); setprec(p5,l2);
     affrr(divrr(p2,p5), p2); avma = av;
   }
-  p3 = sqrr(p2); l1 = minss(4, l2); /* l1 increases to l2 */;
+  p3 = sqrr(p2); l1 = minss(LOWDEFAULTPREC+EXTRAPRECWORD, l2); /* l1 increases to l2 */;
   unr = real_1(l2); setprec(unr,l1);
   p4 = cgetr(l2); setprec(p4,l1);
   affrr(divru(unr,2*n+1), p4);
