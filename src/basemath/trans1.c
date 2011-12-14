@@ -1224,7 +1224,7 @@ rootsof1complex(GEN n, long prec)
 {
   pari_sp av = avma;
   if (is_pm1(n)) return real_1(prec);
-  if (lgefint(n)==3 && n[2]==2) return stor(-1, prec);
+  if (equaliu(n, 2)) return stor(-1, prec);
   return gerepileupto(av, exp_Ir( divri(Pi2n(1, prec), n) ));
 }
 
@@ -1317,13 +1317,12 @@ Qp_sqrtn_ram(GEN x, long e)
     if (z) return NULL;
     x = gcopy(x); setvalp(x,0);
   }
-  /*If p=2 -1 is an root of unity in U1,we need an extra check*/
-  if (lgefint(p)==3 && p[2]==2 && mod8(gel(x,4))!=signe(gel(x,4)))
-    return NULL;
+  /*If p = 2, -1 is a root of 1 in U1: need extra check*/
+  if (equaliu(p, 2) && mod8(gel(x,4)) != 1) return NULL;
   a = Qp_exp_safe(gdiv(Qp_log(x), n));
   if (!a) return NULL;
-  /*Here n=p^e and a^n=z*x where z is a (p-1)th-root of unity. Note that
-      z^p=z; hence for b = a/z, then b^n=x. We say b=x/a^(n-1)*/
+  /*Here n=p^e and a^n=z*x where z is a (p-1)th-root of 1. Since z^p=z,
+   * we have b^n=x, for b = a/z. We say b=x/a^(n-1)*/
   a = gdiv(x, powgi(a,addis(n,-1))); if (v) setvalp(a,v);
   return gerepileupto(ltop,a);
 }
@@ -1375,8 +1374,8 @@ Qp_sqrtn(GEN x, GEN n, GEN *zetan)
     if (signe(q) < 0) x = ginv(x);
     x = gerepileupto(av, x);
     if (zetan)
-      *zetan = (e && lgefint(p)==3 && p[2]==2)? gen_m1 /*-1 in Q_2*/
-                                              : gen_1;
+      *zetan = (e && equaliu(p, 2))? gen_m1 /*-1 in Q_2*/
+                                   : gen_1;
     return x;
   }
   tetpil = avma;
@@ -1386,7 +1385,7 @@ Qp_sqrtn(GEN x, GEN n, GEN *zetan)
   if (zetan)
   {
     GEN *gptr[2];
-    if (e && lgefint(p)==3 && p[2]==2)/*-1 in Q_2*/
+    if (e && equaliu(p, 2))/*-1 in Q_2*/
     {
       tetpil = avma; x = gcopy(x); *zetan = gneg(*zetan);
     }
