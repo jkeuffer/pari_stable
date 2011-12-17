@@ -11,3 +11,5 @@ check(1000);
 [bound, step, halt, i, p, N, bi, B]
 break
 [bound, step, halt, i, p, N, bi, B]
+my(p=120);for(i=1,100,1/0)
+[p,i]

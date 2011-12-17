@@ -16,5 +16,13 @@ break> break
 
 ? [bound,step,halt,i,p,N,bi,B]
 [bound, step, halt, i, p, N, bi, B]
-? print("Total time spent: ",gettime);
+? my(p=120);for(i=1,100,1/0)
+  ***   at top-level: my(p=120);for(i=1,100,1/0)
+  ***                                        ^---
+  *** _/_: division by a non-invertible object
+  ***   Break loop: type 'break' to go back to GP
+break> [p,i]
+[120, 1]
+break> print("Total time spent: ",gettime);
 Total time spent: 0
+
