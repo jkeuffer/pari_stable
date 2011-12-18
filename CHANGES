@@ -57,6 +57,7 @@ BA 44- gamma(t_SER) with positive valuation did not work.
    45- ispower(x < 0) could return an even value ! [#1259]
    46- ispower(1 / n) return a wrong result [#1259]
 BA 47- [breakloop] initial context could be lost.
+BA 48- Ser([1+O(x)],x) returned an invalid object.
 
   Changed
     1- mathnf: swapped flag 3 and 5.

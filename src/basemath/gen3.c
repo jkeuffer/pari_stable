@@ -2712,7 +2712,7 @@ gtoser(GEN x, long v, long prec)
       return gerepileupto(av, rfractoser(x, v, prec));
 
     case t_QFR: case t_QFI: case t_VEC: case t_COL:
-      if (varncmp(gvar(x), v) < 0)
+      if (varncmp(gvar(x), v) <= 0)
         pari_err(e_MISC,"main variable must have higher priority in gtoser");
       lx = lg(x); if (tx == t_QFR) lx--;
       for (i=1; i < lx; i++)
