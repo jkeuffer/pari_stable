@@ -757,15 +757,6 @@ FqX_nbfact(GEN u, GEN T, GEN p)
 /************************************************************/
 /* polynomial in variable v, whose coeffs are the digits of m in base p */
 static GEN
-stoFpX(ulong m, ulong p, long v)
-{
-  GEN y = new_chunk(BITS_IN_LONG + 2);
-  long l = 2;
-  do { ulong q = m/p; gel(y,l++) = utoi(m - q*p); m=q; } while (m);
-  y[1] = evalsigne(1) | evalvarn(v);
-  y[0] = evaltyp(t_POL) | evallg(l); return y;
-}
-static GEN
 stoFlx(ulong m, ulong p, long v)
 {
   GEN y = new_chunk(BITS_IN_LONG + 2);
@@ -820,40 +811,6 @@ Flx_try_pow(GEN w0, GEN pol, ulong p, GEN q, long r)
  *  t[0] is expected to be normalized (leading coeff = 1)
  * OUTPUT:
  *  t[0],t[1]...t[k-1] the k factors, normalized */
-static void
-split(ulong m, GEN *t, long d, GEN p, GEN q, long r, GEN S)
-{
-  long l, v, dv;
-  ulong ps;
-  pari_sp av0, av;
-  GEN w,w0;
-
-  dv=degpol(*t); if (dv==d) return;
-  v=varn(*t); av0=avma; ps = (ulong)p[2];
-  for(av=avma;;avma=av)
-  {
-    if (ps==2)
-    {
-      w0 = w = FpXQ_pow(pol_x(v), utoi(m-1), *t, gen_2); m += 2;
-      for (l=1; l<d; l++)
-        w = ZX_add(w0, FpX_FpXQV_eval(w, S, *t, gen_2));
-    }
-    else
-    {
-      w = FpX_rem(stoFpX(m,ps,v),*t, p);
-      m++; w = try_pow(w,*t,p,q,r);
-      if (!w) continue;
-      w = ZX_Z_add(w, gen_m1);
-    }
-    w = FpX_gcd(*t,w, p);
-    l = degpol(w); if (l && l!=dv) break;
-  }
-  w = FpX_normalize(w, p);
-  w = gerepileupto(av0, w);
-  l /= d; t[l]=FpX_div(*t,w,p); *t=w;
-  split(m,t+l,d,p,q,r,S);
-  split(m,t,  d,p,q,r,S);
-}
 
 static void
 Flx_split(ulong m, GEN *t, long d, ulong p, GEN q, long r)
@@ -1163,8 +1120,8 @@ Flx_factcantor(GEN f, ulong p, long flag)
 static GEN
 FpX_factcantor_i(GEN f, GEN pp, long flag)
 {
-  long j, e, vf, nbfact, d = degpol(f);
-  ulong p, k;
+  long j, vf, nbfact, d = degpol(f);
+  ulong k;
   GEN E,y,f2,g,g1,u,v,pd,q;
   GEN t;
   if (lgefint(pp)==3)
@@ -1179,86 +1136,77 @@ FpX_factcantor_i(GEN f, GEN pp, long flag)
         gmael(F,1,i)= Flx_to_ZX(gmael(F,1,i));
     }
     return F;
-  }
+  } /*Now, we can assume that p is large */
 
   if (d <= 2) switch(flag) {
     case 2: return FpX_is_irred_2(f, pp, d);
     case 1: return FpX_degfact_2(f, pp, d);
     default: return FpX_factor_2(f, pp, d);
   }
-  p = init_p(pp);
 
   /* to hold factors and exponents */
   t = flag ? cgetg(d+1,t_VECSMALL): cgetg(d+1,t_VEC);
   E = cgetg(d+1, t_VECSMALL);
-  vf=varn(f); e = nbfact = 1;
-  for(;;)
+  vf=varn(f); nbfact = 1;
+  f2 = FpX_gcd(f,ZX_deriv(f), pp);
+  if (flag > 1 && lg(f2) > 3) return NULL;
+  g1 = FpX_div(f,f2,pp);
+  k = 0;
+  while (lg(g1)>3)
   {
-    f2 = FpX_gcd(f,ZX_deriv(f), pp);
-    if (flag > 1 && lg(f2) > 3) return NULL;
-    g1 = FpX_div(f,f2,pp);
-    k = 0;
-    while (lg(g1)>3)
+    long du,dg;
+    GEN S;
+    k++;
+    u = g1; g1 = FpX_gcd(f2,g1, pp);
+    if (lg(g1)>3)
     {
-      long du,dg;
-      GEN S;
-      k++; if (p && !(k%p)) { k++; f2 = FpX_div(f2,g1,pp); }
-      u = g1; g1 = FpX_gcd(f2,g1, pp);
-      if (lg(g1)>3)
-      {
-        u = FpX_div( u,g1,pp);
-        f2= FpX_div(f2,g1,pp);
-      }
-      du = degpol(u);
-      if (du <= 0) continue;
-
-      /* here u is square-free (product of irred. of multiplicity e * k) */
-      pd=gen_1; v=pol_x(vf);
-      S = du==1 ?  cgetg(1, t_VEC): FpXQ_powers(FpXQ_pow(v, pp, u, pp), du-1, u, pp);
-      for (d=1; d <= du>>1; d++)
-      {
-        if (!flag) pd = mulii(pd,pp);
-        v = FpX_FpXQV_eval(v, S, u, pp);
-        g = FpX_gcd(ZX_sub(v, pol_x(vf)), u, pp);
-        dg = degpol(g);
-        if (dg <= 0) continue;
-
-        /* g is a product of irred. pols, all of which have degree d */
-        j = nbfact+dg/d;
-        if (flag)
-        {
-          if (flag > 1) return NULL;
-          for ( ; nbfact<j; nbfact++) { t[nbfact]=d; E[nbfact]=e*k; }
-        }
-        else
-        {
-          long r;
-          g = FpX_normalize(g, pp);
-          gel(t,nbfact) = g; q = subis(pd,1); /* also ok for p=2: unused */
-          r = vali(q); q = shifti(q,-r);
-         /* First parameter is an integer m, converted to polynomial w_m, whose
-          * coeffs are its digits in base p (initially m = p --> w_m = X). Take
-          * gcd(g, w_m^(p^d-1)/2), m++, until a factor is found. p = 2 is
-          * treated separately */
-          if (p)
-            split(p,&gel(t,nbfact),d,pp,q,r,S);
-          else
-            splitgen(pp,&gel(t,nbfact),d,pp,q,r);
-          for (; nbfact<j; nbfact++) E[nbfact]=e*k;
-        }
-        du -= dg;
-        u = FpX_div(u,g,pp);
-        v = FpX_rem(v,u,pp);
-      }
-      if (du)
-      {
-        if (flag) t[nbfact] = du;
-        else gel(t,nbfact) = FpX_normalize(u, pp);
-        E[nbfact++]=e*k;
-      }
+      u = FpX_div( u,g1,pp);
+      f2= FpX_div(f2,g1,pp);
     }
-    j = lg(f2); if (j==3) break;
-    e *= p; f = RgX_deflate(f2, p);
+    du = degpol(u);
+    if (du <= 0) continue;
+
+    /* here u is square-free (product of irred. of multiplicity e * k) */
+    pd=gen_1; v=pol_x(vf);
+    S = du==1 ?  cgetg(1, t_VEC): FpXQ_powers(FpXQ_pow(v, pp, u, pp), du-1, u, pp);
+    for (d=1; d <= du>>1; d++)
+    {
+      if (!flag) pd = mulii(pd,pp);
+      v = FpX_FpXQV_eval(v, S, u, pp);
+      g = FpX_gcd(ZX_sub(v, pol_x(vf)), u, pp);
+      dg = degpol(g);
+      if (dg <= 0) continue;
+
+      /* g is a product of irred. pols, all of which have degree d */
+      j = nbfact+dg/d;
+      if (flag)
+      {
+        if (flag > 1) return NULL;
+        for ( ; nbfact<j; nbfact++) { t[nbfact]=d; E[nbfact]=k; }
+      }
+      else
+      {
+        long r;
+        g = FpX_normalize(g, pp);
+        gel(t,nbfact) = g; q = subis(pd,1); /* also ok for p=2: unused */
+        r = vali(q); q = shifti(q,-r);
+       /* First parameter is an integer m, converted to polynomial w_m, whose
+        * coeffs are its digits in base p (initially m = p --> w_m = X). Take
+        * gcd(g, w_m^(p^d-1)/2), m++, until a factor is found. p = 2 is
+        * treated separately */
+        splitgen(pp,&gel(t,nbfact),d,pp,q,r);
+        for (; nbfact<j; nbfact++) E[nbfact]=k;
+      }
+      du -= dg;
+      u = FpX_div(u,g,pp);
+      v = FpX_rem(v,u,pp);
+    }
+    if (du)
+    {
+      if (flag) t[nbfact] = du;
+      else gel(t,nbfact) = FpX_normalize(u, pp);
+      E[nbfact++]=k;
+    }
   }
   if (flag > 1) return gen_1; /* irreducible */
   setlg(t, nbfact);
