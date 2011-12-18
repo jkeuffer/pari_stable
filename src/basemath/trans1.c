@@ -2121,29 +2121,69 @@ mplog(GEN x)
   return logr_abs(x);
 }
 
+/* pe = p^e, p prime, 0 < x < pe a t_INT coprime to p. Return the (p-1)-th
+ * root of 1 in (Z/pe)^* congruent to x mod p, resp x mod 4 if p = 2.
+ * Simplified form of Zp_sqrtnlift: 1/(p-1) is trivial to compute */
+GEN
+Zp_teichmuller(GEN x, GEN p, long e, GEN pe)
+{
+  GEN q, z, p1;
+  pari_sp av;
+  ulong mask;
+  if (equaliu(p,2)) return (mod4(x) & 2)? addsi(-1,pe): gen_1;
+  if (e == 1) return icopy(x);
+  av = avma;
+  p1 = addsi(-1, p);
+  mask = quadratic_prec_mask(e);
+  q = p; z = remii(x, p);
+  while (mask > 1)
+  { /* Newton iteration solving z^{1 - p} = 1, z = x (mod p) */
+    GEN w, t, qold = q;
+    if (mask <= 3) /* last iteration */
+      q = pe;
+    else
+    {
+      q = sqri(q);
+      if (mask & 1) q = diviiexact(q, p);
+    }
+    mask >>= 1;
+    /* q <= qold^2 */
+    if (lgefint(q) == 3)
+    {
+      ulong Z = (ulong)z[2], Q = (ulong)q[2], P1 = (ulong)p1[2];
+      ulong W = (Q-1) / P1; /* -1/(p-1) + O(qold) */
+      ulong T = Fl_mul(W, Fl_powu(Z,P1,Q) - 1, Q);
+      Z = Fl_mul(Z, 1 + T, Q);
+      z = utoi(Z);
+    }
+    else
+    {
+      w = diviiexact(addsi(-1,qold),p1); /* -1/(p-1) + O(qold) */
+      t = Fp_mul(w, subis(Fp_pow(z,p1,q), 1), q);
+      z = Fp_mul(z, addsi(1,t), q);
+    }
+  }
+  return gerepileuptoint(av, z);
+}
+
 GEN
 teich(GEN x)
 {
-  GEN p,q,y,z,aux,p1;
-  long n, k;
-  pari_sp av;
+  GEN p, q, y, z;
+  long n;
 
   if (typ(x)!=t_PADIC) pari_err_TYPE("teichmuller",x);
-  if (!signe(x[4])) return gcopy(x);
+  z = gel(x,4);
+  if (!signe(z)) return gcopy(x);
   p = gel(x,2);
   q = gel(x,3);
-  z = gel(x,4); y = cgetp(x); av = avma;
-  if (equaliu(p,2))
-    z = (mod4(z) & 2)? addsi(-1,q): gen_1;
-  else
-  {
-    p1 = addsi(-1, p);
-    z = remii(z, p);
-    aux = diviiexact(addsi(-1,q),p1); n = precp(x);
-    for (k=1; k<n; k<<=1)
-      z = Fp_mul(z,addsi(1,mulii(aux,addsi(-1,Fp_pow(z,p1,q)))), q);
-  }
-  affii(z, gel(y,4)); avma = av; return y;
+  n = precp(x);
+  y = cgetg(5,t_PADIC);
+  y[1] = evalprecp(n) | _evalvalp(0);
+  gel(y,2) = icopy(p);
+  gel(y,3) = icopy(q);
+  gel(y,4) = Zp_teichmuller(z, p, n, q);
+  return y;
 }
 
 GEN
