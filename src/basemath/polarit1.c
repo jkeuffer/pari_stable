@@ -934,7 +934,7 @@ FpX_factor_2(GEN f, GEN p, long d)
   return mkvec2(mkcol2(R,S), mkvecsmall2(1,1));
 }
 
-ulong
+static ulong
 Flx_quad_root(GEN x, ulong p, int unknown)
 {
   ulong s, u, D, b = x[3], c = x[2];
