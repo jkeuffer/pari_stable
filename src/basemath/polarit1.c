@@ -801,7 +801,7 @@ Flx_try_pow(GEN w0, GEN pol, ulong p, GEN q, long r)
     w2 = Flxq_sqr(w,pol,p);
     if (Flx_equal1(w2)) break;
   }
-  return degpol(w)==0 && w[2] == p-1 ? NULL: w;
+  return degpol(w)==0 && (ulong)w[2] == p-1 ? NULL: w;
 }
 
 /* INPUT:
@@ -946,7 +946,7 @@ Flx_quad_root(GEN x, ulong p, int unknown)
   D = Fl_sub(Fl_sqr(b,p), Fl_mul(c,4,p), p);
   if (unknown && kross(D,p) == -1) return p;
   s = Fl_sqrt(D,p);
-  if (s==~0L) return p;
+  if (s==~0UL) return p;
   u = (p>>1)+1;
   return Fl_mul(u, Fl_sub(s,b, p), p);
 }
