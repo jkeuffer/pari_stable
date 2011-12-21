@@ -976,7 +976,7 @@ heegner_index(GEN E, long t, GEN N, GEN tam, GEN D, GEN mulf, long prec)
 static long
 is_tors(GEN E, GEN torsion, GEN P)
 {
-  long a, n, i;
+  long a, i;
   GEN Q, R;
   if (lg(gel(torsion,2))==1) return 0;
   a = itou(gmael(torsion,2,1));
@@ -991,7 +991,7 @@ is_tors(GEN E, GEN torsion, GEN P)
   }
   if (gequal(P,Q)) return 1;
   R = Q;
-  for(i=2; i<=n; i++)
+  for(i=2; i<=a; i++)
   {
     R = addell(E,R,Q);
     if (gequal(R,P)) return 1;
