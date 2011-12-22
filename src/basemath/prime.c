@@ -350,6 +350,7 @@ u_IsLucasPsP(ulong n)
 static int
 IsLucasPsP(GEN N)
 {
+  pari_sp av = avma, lim = stack_lim(av, 1);
   GEN N_2, m, z;
   long i, v;
   ulong b;
@@ -370,6 +371,11 @@ IsLucasPsP(GEN N)
     if (!signe(z)) return 1;
     z = modii(subis(sqri(z), 2), N);
     if (equaliu(z, 2)) return 0;
+    if (low_stack(lim,stack_lim(av,1)))
+    {
+      if(DEBUGMEM>1) pari_warn(warnmem,"IsLucasPsP");
+      z = gerepileupto(av, z);
+    }
   }
   return 0;
 }
