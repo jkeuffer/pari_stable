@@ -2167,6 +2167,199 @@ order(GEN x) { return znorder(x, NULL); }
 /**               DISCRETE LOGARITHM  in  (Z/nZ)*                   **/
 /**                                                                 **/
 /*********************************************************************/
+static GEN
+Fp_log_halfgcd(ulong bnd, GEN C, GEN g, GEN p)
+{
+  pari_sp av = avma;
+  GEN h1, h2;
+  if (!Fp_ratlift(g,p,C,shifti(C,-1),&h1,&h2)) return NULL;
+  h1 = absi(h1); h2 = absi(h2);
+  if (Z_issmooth(h1, bnd) && Z_issmooth(h2, bnd))
+  {
+    GEN F = ZM_to_zm(Z_factor_limit(h1, bnd));
+    GEN G = ZM_to_zm(Z_factor_limit(h2, bnd));
+    retmkmat2(vecsmall_concat(gel(F, 1),gel(G, 1)),
+              vecsmall_concat(gel(F, 2),zv_neg(gel(G, 2))));
+  }
+  avma = av; return NULL;
+}
+
+static GEN
+Fp_log_find_rel(GEN b, ulong bnd, GEN C, GEN p, GEN *g, long *e)
+{
+  GEN rel;
+  do
+  {
+    (*e)++; *g = Fp_mul(*g, b, p);
+    rel = Fp_log_halfgcd(bnd, C, *g, p);
+  } while (!rel);
+  return rel;
+}
+
+struct Fp_log_rel
+{
+  GEN rel;
+  long *sieve;
+  ulong prmax;
+  long nbrel, nbmax;
+};
+
+static long
+addifsmooth(struct Fp_log_rel *r, GEN h, long u, long v)
+{
+  long off = r->prmax+1;
+  h = absi(h);
+  if (Z_issmooth(h, r->prmax))
+  {
+    GEN z = ZM_to_zm(Z_factor_limit(h, r->prmax));
+    if (v<0)
+      z = mkmat2(vecsmall_append(gel(z,1),off+u),vecsmall_append(gel(z,2),-1));
+    else if (u==v)
+      z = mkmat2(vecsmall_append(gel(z,1),off+u),vecsmall_append(gel(z,2),-2));
+    else
+      z = mkmat2(vecsmall_concat(gel(z,1),mkvecsmall2(off+u,off+v)),
+                 vecsmall_concat(gel(z,2),mkvecsmall2(-1,-1)));
+    gel(r->rel,++r->nbrel) = z;
+  }
+  return r->nbrel==r->nbmax;
+}
+
+/*
+Let p=C^2+c
+Solve h = (C+x)*(C+a)-p = 0 [mod l]
+h= -c+x*(C+a)+C*a = 0  [mod l]
+x = (c-C*a)/(C+a) [mod l]
+h = -c+C*(x+a)+a*x
+*/
+
+static void
+Fp_log_sieve_h(struct Fp_log_rel *r, GEN C, GEN c, GEN Ci, GEN ci, ulong a, GEN pr, GEN sz, GEN p)
+{
+  ulong th = expi(C), n = lg(pr)-1;
+  long i,j;
+  if (addifsmooth(r, addis(C,a),a,-1)) return;
+  for(j=0; j<=a; j++)
+    r->sieve[j]=0;
+  for(i=1; i<=n; i++)
+  {
+    ulong li = pr[i], s = sz[i], al = a % li;
+    ulong u, iv = Fl_invsafe(Fl_add(Ci[i],al,li),li);
+    if (!iv) continue;
+    u = Fl_mul(Fl_sub(ci[i],Fl_mul(Ci[i],al,li),li), iv ,li);
+    for(j = u; j<=a; j+=li)
+      r->sieve[j] += s;
+  }
+  th = th - expu(th)-1;
+  for(j=0; j<=a; j++)
+    if (r->sieve[j]>=th)
+    {
+      GEN h = addis(subii(muliu(C,a+j),c), a*j);
+      if (addifsmooth(r, h, a, j)) return;
+    }
+}
+
+static GEN
+_psi(void*E, GEN y)
+{
+  GEN lx = (GEN) E;
+  long prec = lg(lx);
+  GEN ly = glog(y, prec);
+  GEN u = gdiv(lx, ly);
+  return gsub(gdiv(y ,ly), gpow(u, u, prec));
+}
+
+static GEN
+opt_param(GEN x, long prec)
+{
+  return zbrent((void*)glog(x,prec), _psi, gen_2, x, prec);
+}
+
+static GEN
+Fp_log_index(GEN a, GEN b, GEN m, GEN p)
+{
+  pari_sp av = avma, av2;
+  long i, nb, nbi, nbrow, e, AV;
+  GEN g, aa, pr, sz;
+  GEN M, V, A;
+  pari_timer ti;
+  struct Fp_log_rel r;
+  GEN c, C = sqrtremi(p, &c), Ci, ci;
+  ulong prmax;
+  ulong bnds = itou(roundr_safe(opt_param(sqrti(p),DEFAULTPREC)));
+  ulong bnd = 4*bnds;
+  if (cmpii(sqru(bnds),m)>=0) return NULL;
+  nbi = uprimepi(bnd);
+  if (nbi<=1) return NULL;
+  if (DEBUGLEVEL)
+  {
+    err_printf("bnd=%lu Size FB=%ld\n", bnd, nbi);
+    timer_start(&ti);
+  }
+  pr = primes_zv(nbi);
+  prmax = pr[nbi];
+  av2 = avma;
+  Ci = cgetg(nbi+1,t_VECSMALL);
+  ci = cgetg(nbi+1,t_VECSMALL);
+  sz = cgetg(nbi+1,t_VECSMALL);
+  for (i = 1; i <= nbi; ++i)
+  {
+    ulong lp = pr[i];
+    Ci[i] = umodiu(C, lp);
+    ci[i] = umodiu(c, lp);
+    sz[i] = expu(lp);
+  }
+  r.nbrel = 0;
+  r.nbmax = 6*nbi;
+  r.rel = cgetg(r.nbmax+1,t_VEC);
+  r.sieve = cgetg(r.nbmax+2,t_VECSMALL)+1;
+  r.prmax = prmax;
+  g = gen_1; e = 0;
+  gel(r.rel,++r.nbrel) = Fp_log_find_rel(b, prmax, C, p, &g, &e);
+  if (DEBUGLEVEL) timer_printf(&ti,"log generator");
+  for(i=0; r.nbrel < r.nbmax; i++)
+  {
+    Fp_log_sieve_h(&r, C, c, Ci, ci, i, pr, sz, p);
+    nb = r.nbrel;
+    if (DEBUGLEVEL && (i&127)==0)
+      err_printf("%ld%% ",100*nb/(r.nbmax));
+  }
+  nbrow = prmax+i;
+  if (DEBUGLEVEL)
+  {
+    err_printf("\n"); timer_printf(&ti," %ld relations, %ld generators", r.nbrel, nbi+i);
+  }
+  setlg(r.rel,r.nbrel+1); M = r.rel;
+  gerepileall(av2, 2, &M, &g);
+  V = const_vecsmall(nb,0);
+  V[1] = e;
+  AV = 0; aa=a;
+  while (1)
+  {
+    pari_sp av2;
+    GEN R;
+    timer_start(&ti);
+    A = Fp_log_find_rel(b, prmax, C, p, &aa, &AV);
+    if (DEBUGLEVEL) timer_printf(&ti,"log element");
+    av2 = avma;
+    R = FpMs_FpCs_solve(M, A, nbrow, m);
+    if (typ(R) == t_COL)
+    {
+      GEN l = Fp_sub(FpV_dotproduct(zv_to_ZV(V), R, m), stoi(AV), m);
+      if (!equalii(a,Fp_pow(b,l,p))) pari_err_BUG("Fp_log_index");
+      return gerepileuptoint(av, l);
+    }
+    else
+    {
+      long k = R[1];
+      avma = av2;
+      if (DEBUGLEVEL)
+        err_printf("changing col %ld\n", k);
+      gel(M, k) = Fp_log_find_rel(b, prmax, C, p, &g, &e);
+      V[k] = e;
+    }
+  }
+}
+
 /* Trivial cases a = 1, -1. Return x s.t. g^x = a or [] if no such x exist */
 static GEN
 Fp_easylog(void *E, GEN a, GEN g, GEN ord)
@@ -2187,6 +2380,9 @@ Fp_easylog(void *E, GEN a, GEN g, GEN ord)
     if (!equalii(Fp_pow(g, t, p), a)) { avma = av; return cgetg(1, t_VEC); }
     avma = av2; return gerepileuptoint(av, t);
   }
+  if (typ(ord)==t_INT && expi(ord)>=27 && !dvdii(subis(p,1),sqri(ord))
+                                       && BPSW_psp(ord) && BPSW_psp(p))
+    return Fp_log_index(a, g, ord, p);
   avma = av; return NULL; /* not easy */
 }
 
