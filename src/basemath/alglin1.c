@@ -3145,59 +3145,117 @@ FlxqM_ker(GEN x, GEN T, ulong p)
 /*                                                                 */
 /*******************************************************************/
 
-/* M is a RgMs with nblin lines, A a list of line indices.
-   Eliminate lines of M with a single entry that do not belong to A,
-   and the corresponding columns.
-   Retur pcol and plin:
-   pcol is a map from the new columns indices to the old one.
-   plin is a map from the old lines indices to the new one (0 if removed).
-*/
-
-void
-RgMs_structelim(GEN M, long nblin, GEN A, GEN *p_col, GEN *p_lin)
+static void
+rem_col(GEN c, long i, GEN iscol, GEN Wrow, long *rcol, long *rrow)
 {
-  long i,j,k;
-  long n = lg(M)-1, nrm, lA = lg(A);
-  GEN plin = cgetg(nblin+1, t_VECSMALL);
-  GEN pcol = const_vecsmall(n, 0);
-  pari_sp av = avma;
-  GEN rm  = const_vecsmall(n, 1);
-  GEN W   = const_vecsmall(nblin, 0);
-  for (i = 1; i <= n; ++i)
+  long lc = lg(c), k;
+  iscol[i] = 0; (*rcol)--;
+  for (k = 1; k < lc; ++k)
   {
-    GEN F = gmael(M, i, 1);
-    long l = lg(F);
-    for (j = 1; j < l; ++j)
-      W[F[j]]++;
+    Wrow[c[k]]--;
+    if (Wrow[c[k]]==0) (*rrow)--;
   }
-  for (j = 1; j < lA; ++j)
-    W[A[j]] = -1;
+}
+
+static void
+rem_singleton(GEN M, GEN iscol, GEN Wrow, long *rcol, long *rrow)
+{
+  long i, j;
+  long nbcol = lg(iscol)-1, last;
   do
   {
-    nrm = 0;
-    for (i = 1; i <= n; ++i)
-      if (rm[i])
+    last = 0;
+    for (i = 1; i <= nbcol; ++i)
+      if (iscol[i])
       {
         GEN c = gmael(M, i, 1);
         long lc = lg(c);
         for (j = 1; j < lc; ++j)
-          if (W[c[j]] == 1)
+          if (Wrow[c[j]] == 1)
           {
-            rm[i] = 0; nrm=1;
-            for (k = 1; k < lc; ++k)
-              W[c[k]]--;
-            break;
+            rem_col(c, i, iscol, Wrow, rcol, rrow);
+            last=1; break;
           }
       }
-  } while(nrm);
-  for (j = 1, i = 1; i <= n; ++i)
-    if (rm[i])
+  } while (last);
+}
+
+GEN
+fill_wcol(GEN M, GEN iscol, GEN Wrow, long *w, GEN wcol)
+{
+  long nbcol = lg(iscol)-1;
+  long i, j, m, last;
+  GEN per;
+  for (m = 2, last=0; !last ; m++)
+  {
+    for (i = 1; i <= nbcol; ++i)
+    {
+      wcol[i] = 0;
+      if (iscol[i])
+      {
+        GEN c = gmael(M, i, 1);
+        long lc = lg(c);
+        for (j = 1; j < lc; ++j)
+          if (Wrow[c[j]] == m) {  wcol[i]++; last = 1; }
+      }
+    }
+  }
+  per = vecsmall_indexsort(wcol);
+  *w = wcol[per[nbcol]];
+  return per;
+}
+
+/* M is a RgMs with nbrow rows, A a list of row indices.
+   Eliminate rows of M with a single entry that do not belong to A,
+   and the corresponding columns. Also eliminate columns until #colums=#rows.
+   Return pcol and prow:
+   pcol is a map from the new columns indices to the old one.
+   prow is a map from the old rows indices to the new one (0 if removed).
+*/
+
+void
+RgMs_structelim(GEN M, long nbrow, GEN A, GEN *p_col, GEN *p_row)
+{
+  long i,j,k;
+  long nbcol = lg(M)-1, lA = lg(A);
+  GEN prow = cgetg(nbrow+1, t_VECSMALL);
+  GEN pcol = const_vecsmall(nbcol, 0);
+  pari_sp av = avma;
+  long rcol = nbcol, rrow = 0, imin = nbcol - usqrtsafe(nbcol);
+  GEN iscol = const_vecsmall(nbcol, 1);
+  GEN Wrow  = const_vecsmall(nbrow, 0);
+  GEN wcol = cgetg(nbcol+1, t_VECSMALL);
+  pari_sp av2=avma;
+  for (i = 1; i <= nbcol; ++i)
+  {
+    GEN F = gmael(M, i, 1);
+    long l = lg(F)-1;
+    for (j = 1; j <= l; ++j)
+      Wrow[F[j]]++;
+  }
+  for (j = 1; j < lA; ++j)
+    Wrow[A[j]] = -1;
+  for (i = 1; i <= nbrow; ++i)
+    if (Wrow[i])
+      rrow++;
+  rem_singleton(M, iscol, Wrow, &rcol, &rrow);
+  for (; rcol>rrow;)
+  {
+    long w;
+    GEN per = fill_wcol(M, iscol, Wrow, &w, wcol);
+    for (i = nbcol; i>=imin && wcol[per[i]]>=w && rcol>rrow; i--)
+      rem_col(gmael(M, per[i], 1), per[i], iscol, Wrow, &rcol, &rrow);
+    rem_singleton(M, iscol, Wrow, &rcol, &rrow);
+    avma = av2;
+  }
+  for (j = 1, i = 1; i <= nbcol; ++i)
+    if (iscol[i])
       pcol[j++] = i;
   setlg(pcol,j);
-  for (k = 1, i = 1; i <= nblin; ++i)
-    plin[i] = W[i] ? k++: 0;
+  for (k = 1, i = 1; i <= nbrow; ++i)
+    prow[i] = Wrow[i] ? k++: 0;
   avma = av;
-  *p_col = pcol; *p_lin = plin;
+  *p_col = pcol; *p_row = prow;
 }
 
 /*******************************************************************/
