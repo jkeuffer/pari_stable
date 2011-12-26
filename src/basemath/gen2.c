@@ -1319,6 +1319,28 @@ factorial_lval(ulong n, ulong p)
   return (long)v;
 }
 
+long
+Z_issmooth(GEN m, ulong lim)
+{
+  pari_sp av=avma;
+  ulong p = 2;
+  byteptr d = diffptr+1;
+  m = icopy(m);
+  for(;;)
+  {
+    if (!*d) break;
+    if (!umodiu(m,p))
+    {
+      int stop;
+      Z_lvalrem_stop(m, p, &stop);
+      if (stop) { avma = av; return cmpiu(m,lim)<=0; }
+    }
+    NEXT_PRIME_VIADIFF(p,d);
+    if (p > lim) break;
+  }
+  avma = av; return 0;
+}
+
 /********** Same for "containers" ZX / ZV / ZC **********/
 
 /* If the t_INT q divides the ZX/ZV x, return the quotient. Otherwise NULL.

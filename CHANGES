@@ -151,6 +151,7 @@ BA 23- low-level function int_bit
 BA 26- library functions Fl_invsafe, F2x_halfgcd, Flx_Flxq_eval and Flx_FlxqV_eval.
 BA 27- support for sparse matrix and Wiedemann algorithm
    28- GP function vecsearch() [ use with vecsort() ]
+BA 29- library function Z_issmooth
 
   Removed
     1- dropped DOS support

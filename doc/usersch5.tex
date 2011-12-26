@@ -2638,6 +2638,9 @@ of a positive integer, and $0$ otherwise. Useful for sanity checks but not
 100\% foolproof. Specifically, this routine checks that $f$ is a two-column
 matrix all of whose entries are positive integers.
 
+\fun{long}{Z_issmooth}{GEN n, ulong lim} returns $1$ if all the
+prime factors of the \typ{INT} \kbd{n} are less or equal to $lim$.
+
 \fun{long}{Z_issquarefree}{GEN x} returns $1$ if the \typ{INT} \kbd{n}
 is square-free, and $0$ otherwise.
 

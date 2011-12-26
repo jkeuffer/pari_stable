@@ -1676,6 +1676,7 @@ long    ZX_lvalrem(GEN x, ulong p, GEN *px);
 long    ZX_lval(GEN x, ulong p);
 long    ZX_pval(GEN x, GEN p);
 long    ZX_pvalrem(GEN x, GEN p, GEN *px);
+long    Z_issmooth(GEN m, ulong lim);
 long    Z_lval(GEN n, ulong p);
 long    Z_lvalrem(GEN n, ulong p, GEN *py);
 long    Z_pval(GEN n, GEN p);
