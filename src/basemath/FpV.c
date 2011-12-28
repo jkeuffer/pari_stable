@@ -798,16 +798,17 @@ FpMs_FpCs_solve(GEN M, GEN A, long nbrow, GEN p)
   long i, n;
   GEN Mp, Ap, Rp;
   pari_timer ti;
+  if (DEBUGLEVEL) timer_start(&ti);
   RgMs_structelim(M, nbrow, gel(A, 1), &pcol, &prow);
   if (DEBUGLEVEL)
-    err_printf("Structured elimination: %ld -> %ld\n",nbi,lg(pcol)-1);
+    timer_printf(&ti,"structured elimination (%ld -> %ld)",nbi,lg(pcol)-1);
   n = lg(pcol)-1;
   Mp = cgetg(n+1, t_MAT);
   for(i=1; i<=n; i++)
     gel(Mp, i) = vecprow(gel(M,pcol[i]), prow);
   Ap = zCs_to_ZC(vecprow(A, prow), n);
   s.M = Mp; s.p = p;
-  timer_start(&ti);
+  if (DEBUGLEVEL) timer_start(&ti);
   Rp = gen_FpM_Wiedemann((void*)&s,wrap_relcomb, Ap, p);
   if (DEBUGLEVEL) timer_printf(&ti,"linear algebra");
   if (!Rp) { avma = av; return NULL; }
