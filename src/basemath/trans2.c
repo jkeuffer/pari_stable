@@ -743,14 +743,14 @@ OK_bern(long k, long prec)
   return (bernzone && bernzone[1] >= k && bernzone[2] >= prec);
 }
 
-#define BERN(i)       (B + 3 + (i)*B[2])
-#define set_bern(c0, i, B) STMT_START { \
-  *(BERN(i)) = c0; affrr(B, BERN(i)); } STMT_END
+static GEN
+BERN(GEN B, long i) { return (B + 3 + i*B[2]); }
+
 /* compute B_0,B_2,...,B_2*nb */
 void
 mpbern(long nb, long prec)
 {
-  long i, l, c0;
+  long n, l, c0;
   pari_sp av;
   GEN B;
   pari_timer T;
@@ -763,48 +763,48 @@ mpbern(long nb, long prec)
   B[0] = evaltyp(t_STR) | evallg(l); /* dummy non-recursive type */
   B[1] = nb;
   B[2] = prec;
-  av = avma;
 
   c0 = evaltyp(t_REAL) | evallg(prec);
-  *(BERN(0)) = c0; affsr(1, BERN(0));
-  if (bernzone && bernzone[2] >= prec)
-  { /* don't recompute known Bernoulli */
-    for (i = 1; i <= bernzone[1]; i++) set_bern(c0, i, bern(i));
-  }
-  else i = 1;
+  for (n = 0; n <= nb; n++) BERN(B, n)[0] = c0;
+  av = avma;
+  affur(1, BERN(B,0));
+  n = 1;
+  if (bernzone && bernzone[2] >= prec) /* don't recompute known Bernoulli */
+    for (; n <= bernzone[1]; n++) affrr(bern(n), BERN(B,n));
   if (DEBUGLEVEL) {
     err_printf("caching Bernoulli numbers 2*%ld to 2*%ld, prec = %ld\n",
-               i,nb,prec);
+               n,nb,prec);
     timer_start(&T);
   }
 
-  if (i == 1 && nb > 0)
+  if (n == 1 && nb > 0)
   {
-    set_bern(c0, 1, divru(real_1(prec), 6)); /* B2 = 1/6 */
-    i = 2;
+    affrr(divru(real_1(prec), 6), BERN(B,1)); /* B2 = 1/6 */
+    n = 2;
   }
-  for (   ; i <= nb; i++, avma = av)
-  { /* i > 1 */
-    long n = 8, m = 5, d1 = i-1, d2 = 2*i-3;
-    GEN S = BERN(d1);
+  /* B_{2n} = (2n-1) / (4n+2) -
+   * sum_{a = 1}^{n-1} (2n)...(2n+2-2a) / (2...(2a-1)2a) B_{2a} */
+  for (   ; n <= nb; n++, avma = av)
+  { /* n > 1 */
+    long u = 8, v = 5, a = n-1, b = 2*n-3;
+    GEN S = BERN(B,a);
 
     for (;;)
-    {
-      S = divru(mulru(S, n*m), d1*d2);
-      if (d1 == 1) break;
-      n += 4; m += 2; d1--; d2 -= 2;
-      S = addrr(BERN(d1), S);
-      if ((d1 & 127) == 0) { set_bern(c0, i, S); S = BERN(i); avma = av; }
+    { /* b = 2a-1, u = 2v-2, 2a + v = 2n+3 */
+      if (a == 1) { S = mulru(S, u*v); break; } /* a=b=1, v=2n+1, u=4n */
+      S = divru(mulru(S, u*v), a*b);
+      u += 4; v += 2; a--; b -= 2;
+      S = addrr(BERN(B,a), S);
+      if ((a & 127) == 0) { GEN S0=S; S = BERN(B,n); affrr(S0, S); avma = av; }
     }
-    S = divru(subsr(2*i, S), 2*i+1);
-    shiftr_inplace(S, - 2*i);
-    set_bern(c0, i, S); /* S = B_2i */
+    S = divru(subsr(2*n, S), 2*n+1);
+    shiftr_inplace(S, - 2*n);
+    affrr(S, BERN(B,n)); /* S = B_2n */
   }
   if (DEBUGLEVEL) timer_printf(&T, "Bernoulli");
   if (bernzone) killblock(bernzone);
   avma = av; bernzone = B;
 }
-#undef BERN
 
 GEN
 bernreal(long n, long prec)
@@ -813,8 +813,8 @@ bernreal(long n, long prec)
 
   if (n==1) { B = real2n(-1, prec); setsigne(B, -1); return B; }
   if (n<0 || n&1) return gen_0;
-  n >>= 1; mpbern(n+1,prec); B=cgetr(prec);
-  affrr(bern(n),B); return B;
+  n >>= 1; mpbern(n+1,prec);
+  return rtor(bern(n), prec);
 }
 
 static GEN
