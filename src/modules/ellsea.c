@@ -296,8 +296,9 @@ eigen_elldbl(void *E, GEN P)
 {
   pari_sp ltop = avma;
   struct eigen_ellinit *Edat=(struct eigen_ellinit *)E;
-  GEN p = Edat->p, h = Edat->h, x = gel(P,1), y = gel(P,2);
+  GEN p = Edat->p, h = Edat->h, x, y;
   if (ell_is_inf(P)) return gcopy(P);
+  x = gel(P,1), y = gel(P,2);
   if (ZX_equal(x, pol_x(0)) && ZX_equal(y, pol_1(0)))
     return Edat->X12;
   else
@@ -322,11 +323,12 @@ eigen_elladd(void *E, GEN P, GEN Q)
 {
   pari_sp ltop = avma;
   struct eigen_ellinit *Edat=(struct eigen_ellinit *)E;
-  GEN Px = gel(P,1), Py = gel(P,2);
-  GEN Qx = gel(Q,1), Qy = gel(Q,2);
+  GEN Px, Py, Qx, Qy;
   GEN p = Edat->p, h = Edat->h, lambda, C, D;
   if (ell_is_inf(P)) return gcopy(Q);
   if (ell_is_inf(Q)) return gcopy(P);
+  Px = gel(P,1); Py = gel(P,2);
+  Qx = gel(Q,1); Qy = gel(Q,2);
   if (ZX_equal(Px, Qx))
   {
     if (ZX_equal(Py, Qy))
