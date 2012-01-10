@@ -945,18 +945,23 @@ ltwist1(GEN ell, GEN D, long bitprec)
   return gerepileuptoleaf(av, ellL1_bitprec(ed, 0, bitprec));
 }
 
-/* D discriminant (t_INT), tam Tamagawa number (t_INT), t = #E_tor (t_INT),
- * N conductor (t_INT)
- * mulf = ltwist1(E) (t_REAL, 16 correct bits) */
-static long
-heegner_index(GEN E, long t, GEN N, GEN tam, GEN D, GEN mulf, long prec)
-{
-  GEN a, b, c, ind;
-  long wd22, e;
-  GEN om = gabs(gimag(gel(E, 16)), prec); /* O_vol/O_re, t_REAL */
+/* Return O_re*c(E)/(4*O_vol*|E_t|^2) */
 
-  a = divrs(divir(tam, om), 4); /* O_re*c(E)/(4*O_vol) */
-  b = mulrr(divrs(sqrtr_abs(itor(D, prec)), t*t), mulf); /* sqrt(|D|)/|E_t|^2 * L(E_D,1) */
+static GEN
+heegner_indexmult(GEN E, long t, GEN tam, long prec)
+{
+  pari_sp av = avma;
+  GEN om = gabs(gimag(gel(E, 16)), prec); /* O_vol/O_re, t_REAL */
+  return gerepileupto(av, divrs(divir(tam, om), 4*t*t));
+}
+
+static GEN
+heegner_indexmultD(GEN N, GEN a, GEN D, long prec)
+{
+  pari_sp av = avma;
+  GEN b, c;
+  long wd22;
+  b = sqrtr_abs(itor(D, prec)); /* sqrt(|D|) */
   if (equalis(D, -3))
     wd22 = 9;
   else if (equalis(D, -4))
@@ -964,13 +969,7 @@ heegner_index(GEN E, long t, GEN N, GEN tam, GEN D, GEN mulf, long prec)
   else
     wd22 = 1; /* (w(D)/2)^2 */
   c = shifti(stoi(wd22), omega(gcdii(N, D))); /* (w(D)/2)^2*2^omega(gcd(D,N)) */
-  ind = sqrtr( mulri(mulrr(a, b), c) );
-  ind = grndtoi(ind, &e); /* known to ~ 15 bits */
-  if (e > expi(ind) - 12)
-    pari_err(e_BUG,"ellheegner [contradicts Gross-Hayachi's conjecture!?]");
-  if (e >= 0)
-    pari_err_PREC("ellheegner (precision loss in truncation)");
-  return itos(ind);
+  return gerepileupto(av, mulri(mulrr(a, b), c));
 }
 
 static long
@@ -1082,7 +1081,7 @@ process_points(GEN ell, GEN N, long D)
 }
 
 static void
-heegner_find_disc(GEN *ppointsf, GEN *pmulf, GEN ell, GEN N)
+heegner_find_disc(GEN *ppointsf, long *pind, GEN ell, GEN N, GEN indmult, long prec)
 {
   long d = 0;
   GEN M = Z_factor(mulsi(4, N)), F = gel(M,1);
@@ -1101,13 +1100,19 @@ heegner_find_disc(GEN *ppointsf, GEN *pmulf, GEN ell, GEN N)
     liste = vecsort0(liste, gen_1, 4);
     for (k = 1; k < l; ++k)
     {
-      GEN P = gel(liste,k);
-      GEN mulf = ltwist1(ell, gel(P,3), 16);
-      if (DEBUGLEVEL)
-        err_printf(" L(E_%Ps,1) approx.  %Ps\n", gel(P,3), mulf);
-      if (expo(mulf) > -8) {
+      GEN P = gel(liste,k), D = gel(P,3);
+      GEN indmultD = heegner_indexmultD(N, indmult, D, prec);
+      GEN mulf = ltwist1(ell, D, 8+expo(indmultD));
+      GEN indr = mulrr(indmultD, mulf);
+      if (DEBUGLEVEL>=1) err_printf("Index^2 = %Ps\n", indr);
+      if (signe(indr)>0 && expo(indr) >= -1) /* indr >=.5 */
+      {
+        long e;
+        GEN indi = grndtoi(sqrtr_abs(indr), &e);
+        if (e > expi(indi)-7) pari_err_BUG("ellheegner");
         *ppointsf = P;
-        *pmulf = mulf; return;
+        *pind = itos(indi);
+        return;
       }
     }
     d = listed[l-1];
@@ -1127,7 +1132,7 @@ ellheegner(GEN E)
 {
   pari_sp av = avma;
   GEN z, vDi;
-  GEN P, ht, pointsf, pts, points, ymin, D, mulf, s, w1;
+  GEN P, ht, pointsf, pts, points, ymin, D, s, w1;
   long ind, lint;
   long i,k,l;
   long bitprec=16, prec=nbits2prec(bitprec)+1;
@@ -1160,7 +1165,7 @@ ellheegner(GEN E)
     E = ellinit(E, prec);
     w1 = gel(E,15);
   }
-  heegner_find_disc(&pointsf, &mulf, E, N);
+  heegner_find_disc(&pointsf, &ind, E, N, heegner_indexmult(E, wtor, tam, prec), prec);
   ymin = gsqrt(gel(pointsf, 1), prec);
   if (DEBUGLEVEL) err_printf("N = %Ps, ymin*N = %Ps\n",N,gmul(ymin,N));
   pts = gel(pointsf, 2);
@@ -1171,9 +1176,6 @@ ellheegner(GEN E)
   for (i = 1; i < l; ++i)
     gel(points, i) = qfb_root(gmael(pts, i, 1), vDi);
   if (DEBUGLEVEL) timer_start(&T);
-  ind = heegner_index(E, wtor, N, tam, D, mulf, prec);
-  if (DEBUGLEVEL)
-    timer_printf(&T,"heegner_index");
   s = heegner_psi(E, N, ymin, points, bitprec);
   if (DEBUGLEVEL)
     timer_printf(&T,"heegner_psi");
