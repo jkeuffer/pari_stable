@@ -59,6 +59,7 @@ BA 44- gamma(t_SER) with positive valuation did not work.
 BA 47- [breakloop] initial context could be lost.
 BA 48- Ser([1+O(x)],x) returned an invalid object.
 BA 49- ispseudoprime used too much stack for huge operands.
+   50- [rnfidealup doc] idealgentoHNF() was incorrect.
 
   Changed
     1- mathnf: swapped flag 3 and 5.
