@@ -4463,161 +4463,67 @@ ellffchord(GEN E, GEN t, GEN s, GEN pt)
   return gsub(gsub(gel(pt, 2), gel(t, 2)), gmul(gdiv(gsub(gel(t, 2), gel(s, 2)), gsub(gel(t, 1), gel(s, 1))), gsub(gel(pt, 1), gel(t, 1))));
 }
 
-struct ellff
+struct _ell_miller
 {
-  GEN E, pt1, pt2;
+  GEN E, P;
 };
 
 static GEN
-ellffadd(GEN E, GEN S, GEN T, GEN pt1, GEN pt2)
+ellmiller_dbl(void* data, GEN d)
 {
-  GEN s=gel(S,1), t=gel(T,1);
-  GEN a, b, h;
-  GEN ST = cgetg(3, t_VEC);
-  GEN st = addell(E, s, t);
-  pari_sp av=avma;
-  gel(ST, 1) = st;
-  if (ell_is_inf(st))
-  {
-    a  = ellffvert(s, pt1);
-    if (gequal0(a)) return gen_0;
-    b  = ellffvert(s, pt2);
-  } else
-  {
-    a  = gmul(ellffchord(E, s, t, pt1), ellffvert(st, pt2));
-    if (gequal0(a)) return gen_0;
-    b  = gmul(ellffchord(E, s, t, pt2), ellffvert(st, pt1));
-  }
-  if (gequal0(b)) return gen_0;
-  h = gmul(gmul(gel(S,2), gel(T,2)),  gdiv(a, b));
-  gel(ST, 2) = gerepileupto(av, h);
-  return ST;
-}
-static GEN
-_ellffadd(void *data, GEN s, GEN t)
-{
-  struct ellff* ff=(struct ellff*) data;
-  if (s==gen_0 || t==gen_0) return gen_0;
-  return ellffadd(ff->E,s,t,ff->pt1,ff->pt2);
+  struct _ell_miller *m = (struct _ell_miller *) data;
+  GEN P = m->P, E = m->E;
+  GEN v, line;
+  GEN num = gsqr(gel(d,1));
+  GEN denom = gsqr(gel(d,2));
+  GEN point = gel(d,3);
+  line = ellfftang(E, point, P);
+  num  = gmul(num, line);
+  point = addell(E, point, point);
+  v = ellffvert(point, P);
+  denom = gmul(denom, v);
+  return mkvec3(num, denom, point);
 }
 
 static GEN
-ellffdbl(GEN E, GEN S, GEN pt1, GEN pt2)
+ellmiller_add(void* data, GEN va, GEN vb)
 {
-  GEN s=gel(S,1);
-  GEN a, b, h;
-  GEN S2 = cgetg(3, t_VEC);
-  GEN s2 = addell(E, s, s);
-  pari_sp av=avma;
-  gel(S2, 1) = s2;
-  if (ell_is_inf(s2))
-  {
-    a  = ellfftang(E, s, pt1);
-    if (gequal0(a)) return gen_0;
-    b  = ellfftang(E, s, pt2);
-  } else
-  {
-    a  = gmul(ellfftang(E, s, pt1), ellffvert(s2, pt2));
-    if (gequal0(a)) return gen_0;
-    b  = gmul(ellfftang(E, s, pt2), ellffvert(s2, pt1));
-  }
-  if (gequal0(b)) return gen_0;
-  h = gmul(gsqr(gel(S,2)), gdiv(a, b));
-  gel(S2, 2) = gerepileupto(av, h);
-  return S2;
+  struct _ell_miller *m = (struct _ell_miller *)data;
+  GEN P = m->P, E = m->E;
+  GEN v, line, point;
+  GEN na = gel(va,1), da = gel(va,2), pa = gel(va,3);
+  GEN nb = gel(vb,1), db = gel(vb,2), pb = gel(vb,3);
+  GEN num   = gmul(na, nb);
+  GEN denom = gmul(da, db);
+  line = ellffchord(E, pa, pb, P);
+  point = addell(E, pa, pb);
+  num  = gmul(num, line);
+  v = ellffvert(point, P);
+  denom = gmul(denom, v);
+  return mkvec3(num, denom, point);
 }
 
 static GEN
-_ellffdbl(void *data, GEN s)
+ellmiller(GEN E, GEN Q, GEN P, GEN m)
 {
-  struct ellff* ff=(struct ellff*) data;
-  if (s==gen_0) return gen_0;
-  return ellffdbl(ff->E, s,ff->pt1,ff->pt2);
+  pari_sp ltop = avma;
+  struct _ell_miller d;
+  GEN v, result, num, denom;
+
+  d.E = E; d.P = P;
+  v = gen_pow(mkvec3(gen_1,gen_1,Q), m, (void*)&d, ellmiller_dbl, ellmiller_add);
+  num = gel(v,1); denom = gel(v,2);
+  result = !gequal0(denom) ? gdiv(num, denom): gen_1;
+  return gerepileupto(ltop, gequal0(result)? gen_1: result);
 }
 
-static GEN
-ellffmul(GEN E, GEN t, GEN m, GEN pt1, GEN pt2)
-{
-  struct ellff ff;
-  ff.E=E;  ff.pt1=pt1; ff.pt2=pt2;
-  return gen_pow(t, m, (void*)&ff, _ellffdbl, _ellffadd);
-}
-
-static GEN
-ellweilpairing3(GEN E, GEN t, GEN s, GEN unit)
-{
-  GEN t2,s2,a,b;
-  if (gequal(s,t)) return unit;
-  t2 = addell(E,t,t);
-  if (gequal(s,t2)) return unit;
-  s2 = addell(E,s,s);
-  a  = gmul(ellfftang(E, s, t),  ellfftang(E, t, s2));
-  b  = gmul(ellfftang(E, s, t2), ellfftang(E, t, s));
-  return gsqr(gdiv(a,b));
-}
-
-GEN
-ellweilpairing(GEN E, GEN t, GEN s, GEN m)
-{
-  pari_sp ltop=avma;
-  GEN w, unit;
-  checksmallell(E); checkellpt(t); checkellpt(s);
-  if (typ(m)!=t_INT) pari_err_TYPE("ellweilpairing",m);
-  unit = gpowgs(ell_get_j(E), 0);
-  if (ell_is_inf(s) || ell_is_inf(t)) return unit;
-  if (equaliu(m, 2))
-    return gequal(s, t)?unit:gerepileupto(ltop, gneg(unit));
-  if (equaliu(m, 3))
-    return gerepileupto(ltop,ellweilpairing3(E, s, t, unit));
-  while(1)
-  {
-    GEN r, rs, tr, a, b;
-    avma = ltop;
-    r  = ellrandom(E);
-    rs = addell(E, r, s);
-    tr = subell(E, t, r);
-    if (ell_is_inf(rs) || ell_is_inf(tr) || ell_is_inf(r) || gequal(rs, t))
-      continue;
-    a = ellffmul(E, mkvec2(t, gen_1), m, rs, r);
-    if (a==gen_0) continue;
-    b = ellffmul(E, mkvec2(s, gen_1), m, tr, invell(E,r));
-    if (b==gen_0) continue;
-    if (!ell_is_inf(gel(a,1)) || !ell_is_inf(gel(b,1)))
-      pari_err(e_MISC,"Points of wrong order in ellweilpairing");
-    w = gdiv(gel(a, 2), gel(b, 2));
-    return gerepileupto(ltop,w);
-  }
-}
-
-GEN
-elltatepairing(GEN E, GEN t, GEN s, GEN m)
-{
-  pari_sp ltop=avma;
-  checksmallell(E); checkellpt(t); checkellpt(s);
-  if (typ(m)!=t_INT) pari_err_TYPE("elltatepairing",m);
-  if (ell_is_inf(s) || ell_is_inf(t)) return gen_1;
-  while(1)
-  {
-    GEN r, rs, a;
-    avma = ltop;
-    r  = ellrandom(E);
-    rs = addell(E, r, s);
-    if (ell_is_inf(rs) || gequal(t,r) || ell_is_inf(r) || gequal(rs, t))
-      continue;
-    a = ellffmul(E, mkvec2(t, gen_1), m, rs, r);
-    if (a==gen_0) continue;
-    if (!ell_is_inf(gel(a,1)))
-      pari_err(e_MISC,"Points of wrong order in elltatepairing");
-    return gerepilecopy(ltop, gel(a, 2));
-  }
-}
-
-static GEN
-ell_to_a4a6(GEN E, GEN p)
 /* Transforms a curve E into short Weierstrass form E' modulo p.
    Returns a vector, the first two entries of which are a4' and a6'.
    The third entry is a vector describing the isomorphism E' \to E.
 */
+
+static GEN
+ell_to_a4a6(GEN E, GEN p)
 {
   GEN a1, a3, b2, c4, c6;
   checkell5(E);
@@ -4628,6 +4534,52 @@ ell_to_a4a6(GEN E, GEN p)
   c6 = Rg_to_Fp(ell_get_c6(E),p);
   retmkvec3(Fp_neg(Fp_mulu(c4, 27, p), p), Fp_neg(Fp_mulu(c6, 54, p), p),
             mkvec4(modsi(6,p),Fp_mulu(b2,3,p),Fp_mulu(a1,3,p),Fp_mulu(a3,108,p)));
+}
+
+GEN
+ellweilpairing(GEN E, GEN P, GEN Q, GEN m)
+{
+  pari_sp ltop = avma;
+  GEN num, denom, result;
+  GEN ellj = ell_get_j(E);
+  checksmallell(E); checkellpt(P); checkellpt(Q);
+  if (typ(m)!=t_INT) pari_err_TYPE("ellweilpairing",m);
+  if (ell_is_inf(P) || ell_is_inf(Q) || gequal(P,Q))
+    return gpowgs(ellj, 0);
+  if (typ(ellj)==t_INTMOD)
+  {
+    GEN p = gel(ellj, 1);
+    GEN S = ell_to_a4a6(E, p);
+    GEN z = FpE_weilpairing(RgV_to_FpV(ellchangepointinv(P,gel(S,3)),p),
+                            RgV_to_FpV(ellchangepointinv(Q,gel(S,3)),p),m,gel(S,1),p);
+    return gerepileupto(ltop, Fp_to_mod(z, p));
+  }
+  num    = ellmiller(E, P, Q, m);
+  denom  = ellmiller(E, Q, P, m);
+  result = gdiv(num, denom);
+  if (mpodd(m))
+    result  = gneg(result);
+  return gerepileupto(ltop, result);
+}
+
+GEN
+elltatepairing(GEN E, GEN P, GEN Q, GEN m)
+{
+  GEN ellj = ell_get_j(E);
+  checksmallell(E); checkellpt(P); checkellpt(Q);
+  if (typ(m)!=t_INT) pari_err_TYPE("elltatepairing",m);
+  if (ell_is_inf(P) || ell_is_inf(Q))
+    return gpowgs(ellj, 0);
+  if (typ(ellj)==t_INTMOD)
+  {
+    pari_sp ltop = avma;
+    GEN p = gel(ellj, 1);
+    GEN S = ell_to_a4a6(E, p);
+    GEN z = FpE_tatepairing(RgV_to_FpV(ellchangepointinv(P,gel(S,3)),p),
+                            RgV_to_FpV(ellchangepointinv(Q,gel(S,3)),p),m,gel(S,1),p);
+    return gerepileupto(ltop, Fp_to_mod(z, p));
+  }
+  return ellmiller(E, P, Q, m);
 }
 
 GEN
