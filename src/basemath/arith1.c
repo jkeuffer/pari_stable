@@ -2233,7 +2233,7 @@ h = -c+C*(x+a)+a*x
 */
 
 static void
-Fp_log_sieve_h(struct Fp_log_rel *r, GEN C, GEN c, GEN Ci, GEN ci, ulong a, GEN pr, GEN sz, GEN p)
+Fp_log_sieve_h(struct Fp_log_rel *r, GEN C, GEN c, GEN Ci, GEN ci, long a, GEN pr, GEN sz, GEN p)
 {
   ulong th = expi(C), n = lg(pr)-1;
   long i,j;
@@ -2278,7 +2278,7 @@ static GEN
 Fp_log_index(GEN a, GEN b, GEN m, GEN p)
 {
   pari_sp av = avma, av2;
-  long i, nb, nbi, nbrow, e, AV;
+  long i, nbi, nbrow, e, AV;
   GEN g, aa, pr, sz;
   GEN M, V, A;
   pari_timer ti;
@@ -2319,9 +2319,8 @@ Fp_log_index(GEN a, GEN b, GEN m, GEN p)
   for(i=0; r.nbrel < r.nbmax; i++)
   {
     Fp_log_sieve_h(&r, C, c, Ci, ci, i, pr, sz, p);
-    nb = r.nbrel;
     if (DEBUGLEVEL && (i&127)==0)
-      err_printf("%ld%% ",100*nb/(r.nbmax));
+      err_printf("%ld%% ",100*r.nbrel/(r.nbmax));
   }
   nbrow = prmax+i;
   if (DEBUGLEVEL)
@@ -2330,7 +2329,7 @@ Fp_log_index(GEN a, GEN b, GEN m, GEN p)
   }
   setlg(r.rel,r.nbrel+1); M = r.rel;
   gerepileall(av2, 2, &M, &g);
-  V = const_vecsmall(nb,0);
+  V = const_vecsmall(r.nbrel,0);
   V[1] = e;
   AV = 0; aa=a;
   while (1)

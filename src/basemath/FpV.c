@@ -818,10 +818,10 @@ FpMs_FpCs_solve(GEN M, GEN A, long nbrow, GEN p)
     GEN R = zerocol(nbi+1);
     for (i=1; i<=lR; i++)
        gel(R,pcol[i]) = gel(Rp,i);
-    return R;
+    return gerepilecopy(av, R);
   }
   for (i = 1; i <= lR; ++i)
     if (signe(gel(Rp, i)))
-      return mkvecsmall(pcol[i]);
+      return gerepileuptoleaf(av, mkvecsmall(pcol[i]));
   return NULL; /* NOT REACHED */
 }

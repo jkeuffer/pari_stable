@@ -3180,7 +3180,7 @@ rem_singleton(GEN M, GEN iscol, GEN Wrow, long *rcol, long *rrow)
   } while (last);
 }
 
-GEN
+static GEN
 fill_wcol(GEN M, GEN iscol, GEN Wrow, long *w, GEN wcol)
 {
   long nbcol = lg(iscol)-1;
