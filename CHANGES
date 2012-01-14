@@ -60,6 +60,7 @@ BA 47- [breakloop] initial context could be lost.
 BA 48- Ser([1+O(x)],x) returned an invalid object.
 BA 49- ispseudoprime used too much stack for huge operands.
    50- [rnfidealup doc] idealgentoHNF() was incorrect.
+DS 51- elldivpol returned wrong result for degree n >=8.
 
   Changed
     1- mathnf: swapped flag 3 and 5.

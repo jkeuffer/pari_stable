@@ -4660,7 +4660,7 @@ elldivpol0(GEN e, GEN t, GEN p24, long n, long v)
   else
   {
     GEN t1 = gmul(elldivpol0(e,t,p24,m+2,v),
-                  gpowgs(elldivpol0(e,t,p24,m-1,v),v));
+                  gpowgs(elldivpol0(e,t,p24,m-1,v),2));
     GEN t2 = gmul(elldivpol0(e,t,p24,m-2,v),
                   gpowgs(elldivpol0(e,t,p24,m+1,v),2));
     ret = gmul(elldivpol0(e,t,p24,m,v), gsub(t1,t2));

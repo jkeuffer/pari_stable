@@ -30,6 +30,7 @@ ellheegner(ellinit([0, -1, 1, -33, 93]))
 ellheegner(ellinit([-157^2,0]))
 
 elldivpol(ellinit([1,2,3,5,7]),4)
+elldivpol(ellinit([0,0,0,0,1]),8)
 
 \\#1185
 ellwp(ellinit([0,-1,1,-10,-20]),x+O(x^12))
