@@ -2235,7 +2235,7 @@ h = -c+C*(x+a)+a*x
 static void
 Fp_log_sieve_h(struct Fp_log_rel *r, GEN C, GEN c, GEN Ci, GEN ci, long a, GEN pr, GEN sz, GEN p)
 {
-  ulong th = expi(C), n = lg(pr)-1;
+  long th = expi(C), n = lg(pr)-1;
   long i,j;
   if (addifsmooth(r, addis(C,a),a,-1)) return;
   for(j=0; j<=a; j++)
