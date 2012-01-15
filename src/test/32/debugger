@@ -23,6 +23,7 @@ break> break
   ***   Break loop: type 'break' to go back to GP
 break> [p,i]
 [120, 1]
-break> print("Total time spent: ",gettime);
-Total time spent: 0
+break> break
 
+? print("Total time spent: ",gettime);
+Total time spent: 0
