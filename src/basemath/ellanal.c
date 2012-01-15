@@ -933,8 +933,7 @@ twistcurve(GEN e, GEN D)
   GEN D2 = sqri(D);
   GEN a4 = mulii(mulsi(-27, D2), ell_get_c4(e));
   GEN a6 = mulii(mulsi(-54, mulii(D, D2)), ell_get_c6(e));
-  GEN ed = smallellinit(mkvec5(gen_0,gen_0,gen_0,a4,a6));
-  return ellminimalmodel(ed, NULL);
+  return smallellinit(mkvec2(a4,a6));
 }
 
 static GEN
