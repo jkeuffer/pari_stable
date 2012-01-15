@@ -786,13 +786,20 @@ mpbern(long nb, long prec)
    * sum_{a = 1}^{n-1} (2n)...(2n+2-2a) / (2...(2a-1)2a) B_{2a} */
   for (   ; n <= nb; n++, avma = av)
   { /* n > 1 */
-    long u = 8, v = 5, a = n-1, b = 2*n-3;
+#ifdef LONG_IS_64BIT
+    const ulong mul_overflow = 3037000500;
+#else
+    const ulong mul_overflow = 46341;
+#endif
+    ulong u = 8, v = 5, a = n-1, b = 2*n-3;
     GEN S = BERN(B,a);
 
     for (;;)
     { /* b = 2a-1, u = 2v-2, 2a + v = 2n+3 */
-      if (a == 1) { S = mulru(S, u*v); break; } /* a=b=1, v=2n+1, u=4n */
-      S = divru(mulru(S, u*v), a*b);
+      if (a == 1) { S = mulri(S, muluu(u,v)); break; } /* a=b=1, v=2n+1, u=4n */
+      /* beware overflow */
+      S = (v <= mul_overflow)? mulru(S, u*v): mulri(S, muluu(u,v));
+      S = (a <= mul_overflow)? divru(S, a*b): divri(S, muluu(a,b));
       u += 4; v += 2; a--; b -= 2;
       S = addrr(BERN(B,a), S);
       if ((a & 127) == 0) { GEN S0=S; S = BERN(B,n); affrr(S0, S); avma = av; }
