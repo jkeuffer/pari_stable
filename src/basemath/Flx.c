@@ -48,6 +48,15 @@ Flx_to_ZX(GEN z)
 }
 
 GEN
+Flx_to_FlxX(GEN z, long sv)
+{
+  long i, l = lg(z);
+  GEN x = cgetg(l,t_POL);
+  for (i=2; i<l; i++) gel(x,i) = Fl_to_Flx(z[i], sv);
+  x[1] = evalsigne(l-2!=0)| z[1]; return x;
+}
+
+GEN
 Flv_to_ZV(GEN z)
 {
   long i, l = lg(z);

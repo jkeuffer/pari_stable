@@ -1646,67 +1646,82 @@ Flx_factorgalois(GEN P, ulong l, long d, long w, GEN MP)
   return gerepileupto(ltop,R);
 }
 
-/* P,Q irreducible over F_l. Factor P over FF_l[X] / Q  [factors are ordered as
- * a Frobenius cycle] */
 GEN
-FpX_factorff_irred(GEN P, GEN Q, GEN l)
+Flx_factorff_irred(GEN P, GEN Q, ulong p)
 {
   pari_sp ltop = avma, av;
   GEN SP, SQ, MP, MQ, M, FP, FQ, E, V, IR, res;
   long np = degpol(P), nq = degpol(Q), d = cgcd(np,nq);
-  long i, vp = varn(P), vq = varn(Q);
+  long i, vp = P[1], vq = Q[1];
+  if (d==1) retmkcol(Flx_to_FlxX(P, vq));
+  FQ = Flxq_matrix_pow(Flxq_pow(polx_Flx(vq),utoi(p),Q,p),nq,nq,Q,p);
+  av = avma;
+  FP = Flxq_matrix_pow(Flxq_pow(polx_Flx(vp),utoi(p),P,p),np,np,P,p);
+  FpX_ffintersect(Flx_to_ZX(P),Flx_to_ZX(Q),d,utoi(p),&SP,&SQ, Flm_to_ZM(FP), Flm_to_ZM(FQ));
+  E = Flx_factorgalois(P,p,d,vq, FP);
+  E = FlxX_to_Flm(E,np);
+  MP= Flxq_matrix_pow(ZX_to_Flx(SP,p),np,d,P,p);
+  IR= gel(Flm_indexrank(MP,p),1);
+  E = rowpermute(E, IR);
+  M = rowpermute(MP,IR);
+  M = Flm_inv(M,p);
+  MQ= Flxq_matrix_pow(ZX_to_Flx(SQ,p),nq,d,Q,p);
+  M = Flm_mul(MQ,M,p);
+  M = Flm_mul(M,E,p);
+  M = gerepileupto(av,M);
+  V = cgetg(d+1,t_VEC);
+  gel(V,1) = M;
+  for(i=2;i<=d;i++)
+    gel(V,i) = Flm_mul(FQ,gel(V,i-1),p);
+  res = cgetg(d+1,t_COL);
+  for(i=1;i<=d;i++)
+    gel(res,i) = Flm_to_FlxX(gel(V,i),vp,vq);
+  return gerepileupto(ltop,res);
+}
 
+/* P,Q irreducible over F_p. Factor P over FF_p[X] / Q  [factors are ordered as
+ * a Frobenius cycle] */
+GEN
+FpX_factorff_irred(GEN P, GEN Q, GEN p)
+{
+  pari_sp ltop = avma, av;
+  GEN res;
+  long np = degpol(P), nq = degpol(Q), d = cgcd(np,nq);
   if (d==1) return mkcolcopy(P);
-  if (lgefint(l)==3)
-  {
-    ulong p = l[2];
-    GEN Px = ZX_to_Flx(P,p), Qx = ZX_to_Flx(Q,p);
-    FQ = Flxq_matrix_pow(Flxq_pow(polx_Flx(vq),l,Qx,p),nq,nq,Qx,p);
-    av = avma;
-    FP = Flxq_matrix_pow(Flxq_pow(polx_Flx(vp),l,Px,p),np,np,Px,p);
-    FpX_ffintersect(P,Q,d,l,&SP,&SQ, Flm_to_ZM(FP), Flm_to_ZM(FQ));
 
-    E = Flx_factorgalois(Px,p,d,vq, FP);
-    E = FlxX_to_Flm(E,np);
-    MP= Flxq_matrix_pow(ZX_to_Flx(SP,p),np,d,Px,p);
-    IR= gel(Flm_indexrank(MP,p),1);
-    E = rowpermute(E, IR);
-    M = rowpermute(MP,IR);
-    M = Flm_inv(M,p);
-    MQ= Flxq_matrix_pow(ZX_to_Flx(SQ,p),nq,d,Qx,p);
-    M = Flm_mul(MQ,M,p);
-    M = Flm_mul(M,E,p);
-    M = gerepileupto(av,M);
-    V = cgetg(d+1,t_VEC);
-    gel(V,1) = M;
-    for(i=2;i<=d;i++)
-      gel(V,i) = Flm_mul(FQ,gel(V,i-1),p);
-    res=cgetg(d+1,t_COL);
-    for(i=1;i<=d;i++)
-      gel(res,i) = FlxX_to_ZXX(Flm_to_FlxX(gel(V,i),evalvarn(vp),evalvarn(vq)));
+  if (lgefint(p)==3)
+  {
+    ulong pp = p[2];
+    GEN F = Flx_factorff_irred(ZX_to_Flx(P,pp), ZX_to_Flx(Q,pp), pp);
+    long i, lF = lg(F);
+    res = cgetg(lF, t_COL);
+    for(i=1; i<lF; i++)
+      gel(res,i) = FlxX_to_ZXX(gel(F,i));
   }
   else
   {
-    FQ = FpXQ_matrix_pow(FpXQ_pow(pol_x(vq),l,Q,l),nq,nq,Q,l);
+    GEN SP, SQ, MP, MQ, M, FP, FQ, E, V, IR;
+    long i, vp = varn(P), vq = varn(Q);
+    FQ = FpXQ_matrix_pow(FpXQ_pow(pol_x(vq),p,Q,p),nq,nq,Q,p);
     av = avma;
-    FP = FpXQ_matrix_pow(FpXQ_pow(pol_x(vp),l,P,l),np,np,P,l);
-    FpX_ffintersect(P,Q,d,l,&SP,&SQ,FP,FQ);
+    FP = FpXQ_matrix_pow(FpXQ_pow(pol_x(vp),p,P,p),np,np,P,p);
+    FpX_ffintersect(P,Q,d,p,&SP,&SQ,FP,FQ);
 
-    E = FpX_factorgalois(P,l,d,vq,FP);
+    E = FpX_factorgalois(P,p,d,vq,FP);
     E = RgXX_to_RgM(E,np);
-    MP= FpXQ_matrix_pow(SP,np,d,P,l);
-    IR= gel(FpM_indexrank(MP,l),1);
+    MP= FpXQ_matrix_pow(SP,np,d,P,p);
+    IR= gel(FpM_indexrank(MP,p),1);
     E = rowpermute(E, IR);
     M = rowpermute(MP,IR);
-    M = FpM_inv(M,l);
-    MQ= FpXQ_matrix_pow(SQ,nq,d,Q,l);
-    M = FpM_mul(MQ,M,l);
-    M = FpM_mul(M,E,l);
+    M = FpM_inv(M,p);
+    MQ= FpXQ_matrix_pow(SQ,nq,d,Q,p);
+    M = FpM_mul(MQ,M,p);
+    M = FpM_mul(M,E,p);
     M = gerepileupto(av,M);
     V = cgetg(d+1,t_VEC);
     gel(V,1) = M;
     for(i=2;i<=d;i++)
-      gel(V,i) = FpM_mul(FQ,gel(V,i-1),l);
+      gel(V,i) = FpM_mul(FQ,gel(V,i-1),p);
     res = cgetg(d+1,t_COL);
     for(i=1;i<=d;i++)
       gel(res,i) = RgM_to_RgXX(gel(V,i),vp,vq);
