@@ -1137,13 +1137,14 @@ F2m_inv(GEN a) {
 
 /* destroy a, b */
 static GEN
-Flm_gauss_sp(GEN a, GEN b, ulong p)
+Flm_gauss_sp(GEN a, GEN b, ulong *detp, ulong p)
 {
   long i, j, k, li, bco, aco = lg(a)-1;
   const int OK_ulong = SMALL_ULONG(p);
+  ulong det = 1;
   GEN u;
 
-  if (!aco) return cgetg(1,t_MAT);
+  if (!aco) { if (detp) *detp = 1; return cgetg(1,t_MAT); }
   li = lg(a[1])-1;
   bco = lg(b)-1;
   for (i=1; i<=aco; i++)
@@ -1156,7 +1157,16 @@ Flm_gauss_sp(GEN a, GEN b, ulong p)
       for (k = i; k <= li; k++)
       {
         ulong piv = ( ucoeff(a,k,i) %= p );
-        if (piv) { ucoeff(a,k,i) = Fl_inv(piv, p); break; }
+        if (piv)
+        {
+          ucoeff(a,k,i) = Fl_inv(piv, p);
+          if (detp)
+          {
+            if (det & HIGHMASK) det %= p;
+            det *= piv;
+          }
+          break;
+        }
       }
     }
     else
@@ -1164,7 +1174,12 @@ Flm_gauss_sp(GEN a, GEN b, ulong p)
       for (k = i; k <= li; k++)
       {
         ulong piv = ucoeff(a,k,i);
-        if (piv) { ucoeff(a,k,i) = Fl_inv(piv, p); break; }
+        if (piv)
+        {
+          ucoeff(a,k,i) = Fl_inv(piv, p);
+          if (detp) det = Fl_mul(det, piv, p);
+          break;
+        }
       }
     }
     /* found a pivot on line k */
@@ -1204,6 +1219,7 @@ Flm_gauss_sp(GEN a, GEN b, ulong p)
       }
     }
   }
+  if (detp) *detp = det;
   u = cgetg(bco+1,t_MAT);
   if (OK_ulong)
     for (j=1; j<=bco; j++) ugel(u,j) = Fl_get_col_OK(a,(uGEN)b[j], aco,p);
@@ -1224,15 +1240,15 @@ matid_Flm(long n)
 
 GEN
 Flm_gauss(GEN a, GEN b, ulong p) {
-  return Flm_gauss_sp(RgM_shallowcopy(a), RgM_shallowcopy(b), p);
+  return Flm_gauss_sp(RgM_shallowcopy(a), RgM_shallowcopy(b), NULL, p);
 }
 static GEN
-Flm_inv_sp(GEN a, ulong p) {
-  return Flm_gauss_sp(a, matid_Flm(lg(a)-1), p);
+Flm_inv_sp(GEN a, ulong *detp, ulong p) {
+  return Flm_gauss_sp(a, matid_Flm(lg(a)-1), detp, p);
 }
 GEN
 Flm_inv(GEN a, ulong p) {
-  return Flm_inv_sp(RgM_shallowcopy(a), p);
+  return Flm_inv_sp(RgM_shallowcopy(a), NULL, p);
 }
 
 GEN
@@ -1259,7 +1275,7 @@ FpM_gauss(GEN a, GEN b, GEN p)
     {
       a = ZM_to_Flm(a, pp);
       b = ZM_to_Flm(b, pp);
-      u = Flm_gauss_sp(a,b, pp);
+      u = Flm_gauss_sp(a,b, NULL, pp);
       if (!u) {avma = av; return u;}
       u = iscol? Flc_to_ZC(gel(u,1)): Flm_to_ZM(u);
     }
@@ -1375,10 +1391,18 @@ ZM_inv(GEN M, GEN dM)
   ulong p;
   byteptr d;
   long lM = lg(M), stable = 0;
+  int negate = 0;
 
   if (lM == 1) return cgetg(1,t_MAT);
 
-  if (dM && is_pm1(dM)) dM = gen_1;
+  /* HACK: include dM = -1 ! */
+  if (dM && is_pm1(dM))
+  {
+    /* modular algorithm computes M^{-1}, NOT multiplied by det(M) = -1.
+     * We will correct (negate) at the end. */
+    if (signe(dM) < 0) negate = 1;
+    dM = gen_1;
+  }
   av2 = avma;
   H = NULL;
   d = init_modular(&p);
@@ -1389,13 +1413,17 @@ ZM_inv(GEN M, GEN dM)
     NEXT_PRIME_VIADIFF_CHECK(p,d);
     Mp = ZM_to_Flm(M,p);
     if (dM == gen_1)
-      Hp = Flm_inv_sp(Mp, p);
+      Hp = Flm_inv_sp(Mp, NULL, p);
     else
     {
-      dMp = dM? umodiu(dM,p): Flm_det(Mp,p);
-      if (!dMp) continue;
-      Hp = Flm_inv_sp(Mp, p);
-      if (!Hp) pari_err(e_INV);
+      if (dM) {
+        dMp = umodiu(dM,p); if (!dMp) continue;
+        Hp = Flm_inv_sp(Mp, NULL, p);
+        if (!Hp) pari_err(e_INV);
+      } else {
+        Hp = Flm_inv_sp(Mp, &dMp, p);
+        if (!Hp) continue;
+      }
       if (dMp != 1) Flm_Fl_mul_inplace(Hp, dMp, p);
     }
 
@@ -1425,7 +1453,10 @@ ZM_inv(GEN M, GEN dM)
     }
   }
   if (DEBUGLEVEL>5) err_printf("ZM_inv done\n");
-  return gerepilecopy(av, H);
+  if (negate)
+    return gerepileupto(av, ZM_neg(H));
+  else
+    return gerepilecopy(av, H);
 }
 
 /* same as above, M rational */
@@ -2520,13 +2551,59 @@ F2m_det(GEN x)
   avma = av; return d;
 }
 
-/* in place, destroy x */
+/* in place, destroy a, SMALL_ULONG(p) is TRUE */
+static ulong
+Flm_det_sp_OK(GEN a, long nbco, ulong p)
+{
+  long i,j,k, s = 1;
+  ulong q, x = 1;
+
+  for (i=1; i<nbco; i++)
+  {
+    for(k=i; k<=nbco; k++)
+    {
+      ulong c = ucoeff(a,k,i) % p;
+      ucoeff(a,k,i) = c;
+      if (c) break;
+    }
+    for(j=k+1; j<=nbco; j++) ucoeff(a,j,i) %= p;
+    if (k > nbco) return ucoeff(a,i,i);
+    if (k != i)
+    { /* exchange the lines s.t. k = i */
+      for (j=i; j<=nbco; j++) lswap(ucoeff(a,i,j), ucoeff(a,k,j));
+      s = -s;
+    }
+    q = ucoeff(a,i,i);
+
+    if (x & HIGHMASK) x %= p;
+    x *= q;
+    q = Fl_inv(q,p);
+    for (k=i+1; k<=nbco; k++)
+    {
+      ulong m = ucoeff(a,i,k) % p;
+      if (!m) continue;
+
+      m = p - ((m*q)%p);
+      for (j=i+1; j<=nbco; j++)
+      {
+        ulong c = ucoeff(a,j,k);
+        if (c & HIGHMASK) c %= p;
+        ucoeff(a,j,k) = c  + m*ucoeff(a,j,i);
+      }
+    }
+  }
+  x %= p;
+  if (s < 0 && x) x = p - x;
+  return (x * ucoeff(a,nbco,nbco)) % p;
+}
+/* in place, destroy a */
 ulong
 Flm_det_sp(GEN a, ulong p)
 {
   long i,j,k, s = 1, nbco = lg(a)-1;
   ulong q, x = 1;
 
+  if (SMALL_ULONG(p)) return Flm_det_sp_OK(a, nbco, p);
   for (i=1; i<nbco; i++)
   {
     for(k=i; k<=nbco; k++)
