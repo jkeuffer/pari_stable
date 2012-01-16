@@ -155,7 +155,8 @@ BA 26- library functions Fl_invsafe, F2x_halfgcd, Flx_Flxq_eval and Flx_FlxqV_ev
 BA 27- support for sparse matrix and Wiedemann algorithm
    28- GP function vecsearch() [ use with vecsort() ]
 BA 29- library function Z_issmooth
-BA 30- linear sieve algorithm for Fp_log/znlog.
+BA 30- linear sieve algorithm for Fp_log/znlog
+BA 31- library functions Flx_to_FlxX, F2m_to_Flm and F2c_to_Flc
 
   Removed
     1- dropped DOS support

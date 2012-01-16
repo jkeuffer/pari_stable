@@ -1405,32 +1405,57 @@ FpM_Frobenius_pow(GEN M, long d, GEN T, GEN p)
  * We compute FpM_ker(U(MA),l) and then we recover
  * the eigen value by Galois action, see formula.
  */
+
 static GEN
-intersect_ker(GEN P, GEN MA, GEN U, GEN l)
+Flx_intersect_ker(GEN P, GEN MA, GEN U, ulong p)
+{
+  pari_sp ltop = avma;
+  long i, vp = P[1], vu = U[1], r = degpol(U);
+  GEN A, R;
+  ulong ib0;
+  pari_timer T;
+  GEN M, V;
+  if (DEBUGLEVEL>=4) timer_start(&T);
+  V = Flm_Frobenius(MA, r, p, U[1]);
+  if (DEBUGLEVEL>=4) timer_printf(&T,"pol[Frobenius]");
+  M = FlxqV_Flx_Frobenius(V, U, P, p);
+  if (DEBUGLEVEL>=4) timer_printf(&T,"U[Frobenius]");
+  if (p==2)
+    A = F2m_to_Flm(F2m_ker(Flm_to_F2m(M)));
+  else
+    A = Flm_ker(M,p);
+  A = gerepileupto(ltop,A);
+  /*The formula is
+   * a_{r-1} = -\phi(a_0)/b_0
+   * a_{i-1} = \phi(a_i)+b_ia_{r-1}  i=r-1 to 1
+   * Where a_0=A[1] and b_i=U[i+2] */
+  ib0 = Fl_inv(Fl_neg(U[2], p), p);
+  R = cgetg(r+1,t_MAT);
+  gel(R,1) = gel(A,1);
+  gel(R,r) = Flm_Flc_mul(MA, Flc_Fl_mul(gel(A,1),ib0, p), p);
+  for(i=r-1; i>1; i--)
+    gel(R,i) = Flv_add(Flm_Flc_mul(MA,gel(R,i+1),p),
+                       Flc_Fl_mul(gel(R,r), U[i+2], p), p);
+  return gerepileupto(ltop, Flm_to_FlxX(Flm_transpose(R),vp,vu));
+}
+
+static GEN
+FpX_intersect_ker(GEN P, GEN MA, GEN U, GEN l)
 {
   pari_sp ltop = avma;
   long i, vp = varn(P), vu = varn(U), r = degpol(U);
-  GEN A, R, ib0;
+  GEN V, A, R, ib0;
   pari_timer T;
-  if (DEBUGLEVEL>=4) timer_start(&T);
   if (lgefint(l)==3)
   {
     ulong p = l[2];
-    GEN M, V = Flm_Frobenius(ZM_to_Flm(MA, p), r, p, evalvarn(vu));
-    if (DEBUGLEVEL>=4) timer_printf(&T,"pol[Frobenius]");
-    M = FlxqV_Flx_Frobenius(V, ZX_to_Flx(U, p), ZX_to_Flx(P, p), p);
-    if (DEBUGLEVEL>=4) timer_printf(&T,"U[Frobenius]");
-    if (p==2)
-      A = F2m_to_ZM(F2m_ker(Flm_to_F2m(M)));
-    else
-      A = Flm_to_ZM(Flm_ker(M,p));
+    GEN res = Flx_intersect_ker(ZX_to_Flx(P,p), ZM_to_Flm(MA,p), ZX_to_Flx(U,p), p);
+    return gerepileupto(ltop, FlxX_to_ZXX(res));
   }
-  else
-  {
-    GEN V = FpM_Frobenius(MA,r,l,vu);
-    if (DEBUGLEVEL>=4) timer_printf(&T,"pol[Frobenius]");
-    A = FpM_ker(FpXQV_FpX_Frobenius(V, U, P, l), l);
-  }
+  if (DEBUGLEVEL>=4) timer_start(&T);
+  V = FpM_Frobenius(MA,r,l,vu);
+  if (DEBUGLEVEL>=4) timer_printf(&T,"pol[Frobenius]");
+  A = FpM_ker(FpXQV_FpX_Frobenius(V, U, P, l), l);
   if (DEBUGLEVEL>=4) timer_printf(&T,"matrix polcyclo");
   if (lg(A)!=r+1) pari_err_IRREDPOL("FpX_ffintersect", P);
   A = gerepileupto(ltop,A);
@@ -1444,11 +1469,8 @@ intersect_ker(GEN P, GEN MA, GEN U, GEN l)
   gel(R,r) = FpM_FpC_mul(MA, FpC_Fp_mul(gel(A,1),ib0,l), l);
   for(i=r-1;i>1;i--)
     gel(R,i) = FpC_add(FpM_FpC_mul(MA,gel(R,i+1),l),
-                       FpC_Fp_mul(gel(R,r), gel(U,i+2), l),l);
-  R = shallowtrans(R);
-  for(i=1;i<lg(R);i++) gel(R,i) = RgV_to_RgX(gel(R,i),vu);
-  A = gtopolyrev(R,vp);
-  return gerepileupto(ltop,A);
+        FpC_Fp_mul(gel(R,r), gel(U,i+2), l),l);
+  return gerepilecopy(ltop,RgM_to_RgXX(shallowtrans(R),vp,vu));
 }
 
 /* n must divide both the degree of P and Q.  Compute SP and SQ such
@@ -1516,8 +1538,8 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
     {
       GEN L, An, Bn, z, U;
       U = gmael(FpX_factor(polcyclo(pg,MAXVARN),l),1,1);
-      A = intersect_ker(P, MA, U, l);
-      B = intersect_ker(Q, MB, U, l);
+      A = FpX_intersect_ker(P, MA, U, l);
+      B = FpX_intersect_ker(Q, MB, U, l);
       if (DEBUGLEVEL>=4) timer_start(&T);
       An = gel(FpXYQQ_pow(A,ipg,U,P,l),2);
       Bn = gel(FpXYQQ_pow(B,ipg,U,Q,l),2);
