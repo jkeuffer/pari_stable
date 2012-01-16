@@ -1069,6 +1069,7 @@ gtodouble(GEN x)
   if (typ(x)!=t_REAL) {
     pari_sp av = avma;
     x = gtofp(x, DEFAULTPREC);
+    if (typ(x)!=t_REAL) pari_err_TYPE("gtodouble [t_REAL expected]", x);
     avma = av;
   }
   return rtodbl(x);
