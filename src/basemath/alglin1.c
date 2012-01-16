@@ -3170,6 +3170,56 @@ Flm_rank(GEN x, ulong p)
 }
 
 static GEN
+sFlm_invimage(GEN mat, GEN y, ulong p)
+{
+  pari_sp av = avma;
+  long i, l = lg(mat);
+  GEN M = cgetg(l+1,t_MAT), col;
+  ulong t;
+
+  if (l==1) return NULL;
+  if (lg(y) != lg(mat[1])) pari_err_DIM("Flm_invimage");
+
+  for (i=1; i<l; i++) gel(M,i) = gel(mat,i);
+  gel(M,l) = y; M = Flm_ker(M,p);
+  i = lg(M)-1; if (!i) return NULL;
+
+  col = gel(M,i); t = col[l];
+  if (!t) return NULL;
+
+  t = Fl_inv(Fl_neg(t,p),p);
+  setlg(col,l);
+  if (t==1) return gerepilecopy(av, col);
+  return gerepileupto(av, Flc_Fl_mul(col, t, p));
+}
+
+/* inverse image of v by m */
+
+GEN
+Flm_invimage(GEN m, GEN v, ulong p)
+{
+  pari_sp av = avma;
+  long j, l;
+  GEN y, c;
+
+  if (typ(v) == t_VECSMALL)
+  {
+    c = sFlm_invimage(m,v,p);
+    if (c) return c;
+    avma = av; return cgetg(1,t_MAT);
+  }
+  /* t_MAT */
+  y = cgetg_copy(v, &l);
+  for (j=1; j < l; j++)
+  {
+    c = sFlm_invimage(m,gel(v,j),p);
+    if (!c) { avma = av; return cgetg(1,t_MAT); }
+    gel(y,j) = c;
+  }
+  return y;
+}
+
+static GEN
 sFpM_invimage(GEN mat, GEN y, GEN p)
 {
   pari_sp av = avma;

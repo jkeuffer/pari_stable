@@ -1251,6 +1251,17 @@ FqM_to_FlxM(GEN x, GEN T, GEN pp)
 
 /* compute the reciprocical isomorphism of S mod T,p, i.e. V such that
    V(S)=X  mod T,p*/
+
+GEN
+Flxq_ffisom_inv(GEN S,GEN T, ulong p)
+{
+  pari_sp ltop = avma;
+  long n = degpol(T);
+  GEN M = Flxq_matrix_pow(S,n,n,T,p);
+  GEN V = Flm_invimage(M, vecsmall_ei(n, 2), p);
+  return gerepileupto(ltop, Flv_to_Flx(V, T[1]));
+}
+
 GEN
 FpXQ_ffisom_inv(GEN S,GEN T, GEN p)
 {
@@ -1483,6 +1494,125 @@ FpX_intersect_ker(GEN P, GEN MA, GEN U, GEN l)
  * We assume the prime p is very large
  * so we handle Frobenius as matrices.
  */
+
+void
+Flx_ffintersect(GEN P, GEN Q, long n, ulong l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
+{
+  pari_sp ltop = avma;
+  long vp = P[1], vq = Q[1], np = degpol(P), nq = degpol(Q), e;
+  ulong pg;
+  GEN A, B, Ap, Bp;
+  if (np<=0) pari_err_IRREDPOL("FpX_ffintersect", P);
+  if (nq<=0) pari_err_IRREDPOL("FpX_ffintersect", Q);
+  if (n<=0 || np%n || nq%n)
+    pari_err_TYPE("FpX_ffintersect [bad degrees]",stoi(n));
+  e = u_lvalrem(n, l, &pg);
+  if(!MA) MA = Flxq_matrix_pow(Flxq_powu(polx_Flx(vp),l,P,l),np,np,P,l);
+  if(!MB) MB = Flxq_matrix_pow(Flxq_powu(polx_Flx(vq),l,Q,l),nq,nq,Q,l);
+  A = Ap = pol0_Flx(vp);
+  B = Bp = pol0_Flx(vq);
+  if (pg > 1)
+  {
+    pari_timer T;
+    GEN ipg = utoipos(pg);
+    if (l%pg == 1)
+    /* No need to use relative extension, so don't. (Well, now we don't
+     * in the other case either, but this special case is more efficient) */
+    {
+      GEN L;
+      ulong z, An, Bn;
+      z = Fl_neg(rootsof1_Fl(pg, l), l);
+      if (DEBUGLEVEL>=4) timer_start(&T);
+      A = Flm_ker(Flm_Fl_add(MA, z, l),l);
+      if (lg(A)!=2) pari_err_IRREDPOL("FpX_ffintersect",P);
+      A = Flv_to_Flx(gel(A,1),vp);
+
+      B = Flm_ker(Flm_Fl_add(MB, z, l),l);
+      if (lg(B)!=2) pari_err_IRREDPOL("FpX_ffintersect",Q);
+      B = Flv_to_Flx(gel(B,1),vq);
+
+      if (DEBUGLEVEL>=4) timer_printf(&T, "FpM_ker");
+      An = Flxq_powu(A,pg,P,l)[2];
+      Bn = Flxq_powu(B,pg,Q,l)[2];
+      z = Fl_invsafe(Bn,l);
+      if (!z) pari_err_IRREDPOL("FpX_ffintersect", mkvec2(P,Q));
+      z = Fl_mul(An,z,l);
+      L = Fp_sqrtn(utoi(z),ipg,utoipos(l),NULL);
+      if (!L) pari_err_IRREDPOL("FpX_ffintersect", mkvec2(P,Q));
+      if (DEBUGLEVEL>=4) timer_printf(&T, "Fp_sqrtn");
+      B = Flx_Fl_mul(B,itou(L),l);
+    }
+    else
+    {
+      GEN L, An, Bn, z, U;
+      U = ZX_to_Flx(gmael(FpX_factor(polcyclo(pg,MAXVARN),utoi(l)),1,1),l);
+      A = Flx_intersect_ker(P, MA, U, l);
+      B = Flx_intersect_ker(Q, MB, U, l);
+      if (DEBUGLEVEL>=4) timer_start(&T);
+      An = gel(FlxYqQ_pow(A,ipg,U,P,l),2);
+      Bn = gel(FlxYqQ_pow(B,ipg,U,Q,l),2);
+      if (DEBUGLEVEL>=4) timer_printf(&T,"pows [P,Q]");
+      z = Flxq_mul(An,Flxq_inv(Bn,U,l),U,l);
+      L = Flxq_sqrtn(z,ipg,U,l,NULL);
+      if (DEBUGLEVEL>=4) timer_printf(&T,"FpXQ_sqrtn");
+      if (!L) pari_err_IRREDPOL("FpX_ffintersect", mkvec2(P,Q));
+      B = FlxqX_Flxq_mul(B,L,U,l);
+      A = FlxY_evalx(A,0,l);
+      B = FlxY_evalx(B,0,l);
+    }
+  }
+  if (e)
+  {
+    GEN VP, VQ, Ay, By;
+    ulong lmun = l-1;
+    long i, j;
+    MA = Flm_Fl_add(MA,lmun,l);
+    MB = Flm_Fl_add(MB,lmun,l);
+    Ay = pol1_Flx(vp);
+    By = pol1_Flx(vq);
+    VP = vecsmall_ei(np, 1);
+    VQ = np == nq? VP: vecsmall_ei(nq, 1); /* save memory */
+    for(j=0;j<e;j++)
+    {
+      if (j)
+      {
+        Ay = Flxq_mul(Ay,Flxq_powu(Ap,lmun,P,l),P,l);
+        for(i=1;i<lg(Ay)-1;i++) VP[i] = Ay[i+1];
+        for(;i<=np;i++) gel(VP,i) = gen_0;
+      }
+      Ap = Flm_invimage(MA,VP,l);
+      Ap = Flv_to_Flx(Ap,vp);
+
+      if (j)
+      {
+        By = Flxq_mul(By,Flxq_powu(Bp,lmun,Q,l),Q,l);
+        for(i=1;i<lg(By)-1;i++) VQ[i] = By[i+1];
+        for(;i<=nq;i++) gel(VQ,i) = gen_0;
+      }
+      Bp = Flm_invimage(MB,VQ,l);
+      Bp = Flv_to_Flx(Bp,vq);
+    }
+  }
+  *SP = Flx_add(A,Ap,l);
+  *SQ = Flx_add(B,Bp,l);
+  gerepileall(ltop,2,SP,SQ);
+}
+
+/* Let l be a prime number, P, Q in ZZ[X].  P and Q are both
+ * irreducible modulo l and degree(P) divides degree(Q).  Output a
+ * monomorphism between FF_l[X]/(P) and FF_l[X]/(Q) as a polynomial R such
+ * that Q | P(R) mod l.  If P and Q have the same degree, it is of course an
+ * isomorphism.  */
+GEN
+Flx_ffisom(GEN P,GEN Q,ulong l)
+{
+  pari_sp av = avma;
+  GEN SP, SQ, R;
+  Flx_ffintersect(P,Q,degpol(P),l,&SP,&SQ,NULL,NULL);
+  R = Flxq_ffisom_inv(SP,P,l);
+  return gerepileupto(av, Flx_Flxq_eval(R,SQ,Q,l));
+}
+
 void
 FpX_ffintersect(GEN P, GEN Q, long n, GEN l, GEN *SP, GEN *SQ, GEN MA, GEN MB)
 {
@@ -2144,7 +2274,7 @@ FlxY_evalx_drop(GEN Q, ulong x, ulong p)
 }
 
 /* as above, but don't care about degree drop */
-static GEN
+GEN
 FlxY_evalx(GEN Q, ulong x, ulong p)
 {
   GEN z;

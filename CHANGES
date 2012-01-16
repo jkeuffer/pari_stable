@@ -182,10 +182,12 @@ BA 31- library functions Flx_to_FlxX, F2m_to_Flm, F2c_to_Flc, and Flxq_powu
 LGr33- library function uprecprime()
    34- library function ZM_pivots()
    35- library functions nm_Z_mul, ZM_togglesign, ZM_nm_mul [ to improve Zlm_gauss ]
-BA 36- [breakloop] GP functions dbg_up/dbg_down (like gdb up/down).
+BA 36- [breakloop] GP functions dbg_up/dbg_down (like gdb up/down)
    37- library functions rootsof1_Fp, rootsof1u_Fp, rootsof1_Fl
-BA 38- GP functions dbg_x (like \x) and dbg_err (current error data).
+BA 38- GP functions dbg_x (like \x) and dbg_err (current error data)
    39- matconcat()
+BA 40- library functions Flm_Fl_add, Flm_invimage, FlxY_evalx
+BA 41- library functions Flx_ffisom, Flx_ffintersect, Flxq_ffisom_inv
 
   Removed
     1- dropped DOS support

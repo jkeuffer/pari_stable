@@ -3267,6 +3267,9 @@ operations.
 
 \fun{GEN}{Flm_copy}{GEN x} returns a copy of \kbd{x}.
 
+\fun{GEN}{Flm_Fl_add}{GEN x, ulong y, ulong p} returns $x + y*\text{Id}$
+($x$ must be square).
+
 \fun{GEN}{Flm_Flc_mul}{GEN x, GEN y, ulong p} multiplies  \kbd{x} and \kbd{y}
 (assumed to have compatible dimensions).
 
@@ -3334,6 +3337,8 @@ the square \kbd{Flm} $x$, as a \kbd{Flx}.
 \fun{GEN}{Flm_indexrank}{GEN x, ulong p}
 
 \fun{GEN}{Flm_inv}{GEN x, ulong p}
+
+\fun{GEN}{Flm_invimage}{GEN x, GEN y, ulong p}
 
 \fun{GEN}{Flm_ker}{GEN x, ulong p}
 
@@ -4194,6 +4199,9 @@ that the \kbd{Flx} $z$ is squarefree mod the prime $p$. Returns a
 irreducible factors of degree $i$. Set \kbd{nb} to the total number of
 irreducible factors (the sum of the $D[i]$).
 
+\fun{void}{Flx_ffintersect}{GEN P, GEN Q, long n, ulong p, GEN *SP,GEN *SQ, GEN
+MA,GEN MB}, as \kbd{FpX\_ffintersect}
+
 \fun{long}{Flx_nbroots}{GEN f, ulong p}, as \kbd{FpX\_nbroots}.
 
 \fun{GEN}{Flv_polint}{GEN x, GEN y, ulong p, long sv} as \kbd{FpV\_polint},
@@ -4226,6 +4234,8 @@ returning an \kbd{Flx} in variable $v$.
 
 \fun{GEN}{Flxq_matrix_pow}{GEN x, long m, long n, GEN T, ulong p},
 see \kbd{FpXQ\_matrix\_pow}.
+
+\fun{GEN}{Flxq_ffisom_inv}{GEN S, GEN T, ulong p}, as \kbd{FpXQ\_ffisom\_inv}.
 
 \fun{GEN}{Flx_Flxq_eval}{GEN f, GEN x, GEN T, ulong p} returns
 $\kbd{f}(\kbd{x})$.
@@ -4282,6 +4292,8 @@ its factorization.
 \fun{GEN}{FlxX_add}{GEN P, GEN Q, ulong p}
 
 \fun{GEN}{FlxY_Flx_div}{GEN x, GEN y, ulong p}
+
+\fun{GEN}{FlxY_evalx}{GEN x, GEN y, ulong p}
 
 \fun{GEN}{FlxX_renormalize}{GEN x, long l}, as \kbd{normalizepol}, where
 $\kbd{l} = \kbd{lg(x)}$, in place.

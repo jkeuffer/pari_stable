@@ -156,6 +156,24 @@ Flv_sub_inplace(GEN x, GEN y, ulong p)
   for (i = 1; i < l; i++) x[i] = Fl_sub(x[i], y[i], p);
 }
 
+GEN
+Flm_Fl_add(GEN x, ulong y, ulong p)
+{
+  long l = lg(x), i, j;
+  GEN z = cgetg(l,t_MAT);
+
+  if (l==1) return z;
+  if (l != lg(x[1])) pari_err_OP( "+", x, utoi(y));
+  for (i=1; i<l; i++)
+  {
+    GEN zi = cgetg(l,t_VECSMALL), xi = gel(x,i);
+    gel(z,i) = zi;
+    for (j=1; j<l; j++) zi[j] = xi[j];
+    zi[i] = Fl_add(zi[i], y, p);
+  }
+  return z;
+}
+
 /********************************************************************/
 /**                                                                **/
 /**                           MULTIPLICATION                       **/
