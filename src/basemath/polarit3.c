@@ -1484,13 +1484,12 @@ FpX_intersect_ker(GEN P, GEN MA, GEN U, GEN l)
  * so we handle Frobenius as matrices.
  */
 void
-FpX_ffintersect(GEN P, GEN Q, long n, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
+FpX_ffintersect(GEN P, GEN Q, long n, GEN l, GEN *SP, GEN *SQ, GEN MA, GEN MB)
 {
-  pari_sp lbot, ltop = avma;
+  pari_sp ltop = avma;
   long vp, vq, np, nq, e;
   ulong pg;
   GEN A, B, Ap, Bp;
-  GEN *gptr[2];
   vp = varn(P); np = degpol(P);
   vq = varn(Q); nq = degpol(Q);
   if (np<=0) pari_err_IRREDPOL("FpX_ffintersect", P);
@@ -1544,15 +1543,14 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
       An = gel(FpXYQQ_pow(A,ipg,U,P,l),2);
       Bn = gel(FpXYQQ_pow(B,ipg,U,Q,l),2);
       if (DEBUGLEVEL>=4) timer_printf(&T,"pows [P,Q]");
-      z = Fq_inv(Bn,U,l);
-      z = Fq_mul(An,z,U,l);
+      z = Fq_mul(An,Fq_inv(Bn,U,l),U,l);
       if (typ(z)==t_INT) z = scalarpol(z,MAXVARN);
       L = FpXQ_sqrtn(z,ipg,U,l,NULL);
       if (DEBUGLEVEL>=4) timer_printf(&T,"FpXQ_sqrtn");
       if (!L) pari_err_IRREDPOL("FpX_ffintersect", mkvec2(P,Q));
       B = FqX_Fq_mul(B,L,U,l);
-      B = gsubst(B,MAXVARN,gen_0);
-      A = gsubst(A,MAXVARN,gen_0);
+      A = FpXY_evalx(A,gen_0,l);
+      B = FpXY_evalx(B,gen_0,l);
     }
   }
   if (e)
@@ -1586,13 +1584,9 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
       Bp = RgV_to_RgX(Bp,vq);
     }
   }
-  A = ZX_add(A,Ap);
-  B = ZX_add(B,Bp);
-  lbot = avma;
-  *SP = FpX_red(A,l);
-  *SQ = FpX_red(B,l);
-  gptr[0] = SP;
-  gptr[1] = SQ; gerepilemanysp(ltop,lbot,gptr,2);
+  *SP = FpX_add(A,Ap,l);
+  *SQ = FpX_add(B,Bp,l);
+  gerepileall(ltop,2,SP,SQ);
 }
 /* Let l be a prime number, P, Q in ZZ[X].  P and Q are both
  * irreducible modulo l and degree(P) divides degree(Q).  Output a
