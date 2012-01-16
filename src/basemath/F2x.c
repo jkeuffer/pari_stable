@@ -886,7 +886,7 @@ F2c_to_Flc(GEN x)
   long i,j,k;
   for (i=2,k=1; i<lg(x); i++)
     for (j=0; j<BITS_IN_LONG && k<l; j++,k++)
-      gel(z,k)=(x[i]>>j)&1UL;
+      z[k] = (x[i]>>j)&1UL;
   return z;
 }
 
