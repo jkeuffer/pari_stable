@@ -164,6 +164,7 @@ GEN     Flxq_mul(GEN x, GEN y, GEN T, ulong p);
 ulong   Flxq_norm(GEN x, GEN T, ulong p);
 GEN     Flxq_order(GEN a, GEN ord, GEN T, ulong p);
 GEN     Flxq_pow(GEN x, GEN n, GEN T, ulong p);
+GEN     Flxq_powu(GEN x, ulong n, GEN T, ulong p);
 GEN     Flxq_powers(GEN x, long l, GEN T, ulong p);
 GEN     Flxq_sqr(GEN y,GEN T,ulong p);
 GEN     Flxq_sqrtn(GEN a, GEN n, GEN T, ulong p, GEN *zetan);

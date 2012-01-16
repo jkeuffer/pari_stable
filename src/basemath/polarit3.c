@@ -1670,9 +1670,9 @@ Flx_factorff_irred(GEN P, GEN Q, ulong p)
   long np = degpol(P), nq = degpol(Q), d = cgcd(np,nq);
   long i, vp = P[1], vq = Q[1];
   if (d==1) retmkcol(Flx_to_FlxX(P, vq));
-  FQ = Flxq_matrix_pow(Flxq_pow(polx_Flx(vq),utoi(p),Q,p),nq,nq,Q,p);
+  FQ = Flxq_matrix_pow(Flxq_powu(polx_Flx(vq),p,Q,p),nq,nq,Q,p);
   av = avma;
-  FP = Flxq_matrix_pow(Flxq_pow(polx_Flx(vp),utoi(p),P,p),np,np,P,p);
+  FP = Flxq_matrix_pow(Flxq_powu(polx_Flx(vp),p,P,p),np,np,P,p);
   FpX_ffintersect(Flx_to_ZX(P),Flx_to_ZX(Q),d,utoi(p),&SP,&SQ, Flm_to_ZM(FP), Flm_to_ZM(FQ));
   E = Flx_factorgalois(P,p,d,vq, FP);
   E = FlxX_to_Flm(E,np);

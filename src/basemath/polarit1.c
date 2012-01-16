@@ -526,7 +526,7 @@ Flx_Berlekamp_ker(GEN u, ulong l)
   GEN Q, XP;
   pari_timer T;
   timer_start(&T);
-  XP = Flxq_pow(polx_Flx(u[1]),utoipos(l),u,l);
+  XP = Flxq_powu(polx_Flx(u[1]),l,u,l);
   Q  = Flxq_matrix_pow(XP,N,N,u,l);
   for (j=1; j<=N; j++)
     coeff(Q,j,j) = Fl_sub(coeff(Q,j,j),1,l);
@@ -687,7 +687,7 @@ Flx_nbfact_by_degree(GEN z, long *nb, ulong p)
   GEN D = const_vecsmall(e, 0);
   pari_sp av = avma;
   GEN g, w,  PolX = polx_Flx(z[1]);
-  GEN XP = Flxq_pow(PolX,utoipos(p),z,p);
+  GEN XP = Flxq_powu(PolX,p,z,p);
   GEN MP = Flxq_matrix_pow(XP,e,e,z,p);
 
   w = PolX; *nb = 0;
@@ -730,7 +730,7 @@ Flx_nbroots(GEN f, ulong p)
   GEN z, X;
   if (n <= 1) return n;
   X = polx_Flx(f[1]);
-  z = Flxq_pow(X, utoipos(p), f, p);
+  z = Flxq_powu(X, p, f, p);
   z = Flx_sub(z, X, p);
   z = Flx_gcd(z, f, p);
   avma = av; return degpol(z);
@@ -1056,7 +1056,7 @@ Flx_factcantor_i(GEN f, ulong p, long flag)
 
       /* here u is square-free (product of irred. of multiplicity e * k) */
       pd=gen_1; v=polx_Flx(vf);
-      S = du==1 ?  cgetg(1, t_VEC): Flxq_powers(Flxq_pow(v, utoi(p), u, p), du-1, u, p);
+      S = du==1 ?  cgetg(1, t_VEC): Flxq_powers(Flxq_powu(v, p, u, p), du-1, u, p);
       for (d=1; d <= du>>1; d++)
       {
         if (!flag) pd = muliu(pd,p);

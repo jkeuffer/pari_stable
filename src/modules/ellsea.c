@@ -793,13 +793,13 @@ find_trace_Atkin(ulong ell, long r, GEN p)
     if (krouu(disc, ell) >= 0) continue;
     T[3] = Fl_neg(teta, ell);
     U[3] = Fl_mul(invp, teta, ell);
-    a = Flxq_pow(U, utoi(r/P[1]), T, ell);
-    if (!Flx_equal1(a) && Flx_equal1(Flxq_pow(a, utoi(P[1]), T, ell)))
+    a = Flxq_powu(U, r/P[1], T, ell);
+    if (!Flx_equal1(a) && Flx_equal1(Flxq_powu(a, P[1], T, ell)))
     {
       pari_sp av = avma;
       long i, l=lg(P);
       for (i = 2; i < l; i++, avma = av)
-        if (Flx_equal1(Flxq_pow(U, utoi(r/P[i]), T, ell))) break;
+        if (Flx_equal1(Flxq_powu(U, r/P[i], T, ell))) break;
       if (i==l) val_pos[++nval] = teta;
     }
   }

@@ -1744,6 +1744,30 @@ _Flxq_mul(void *data, GEN x, GEN y)
 
 /* n-Power of x in Z/pZ[X]/(T), as t_VECSMALL. */
 GEN
+Flxq_powu(GEN x, ulong n, GEN T, ulong p)
+{
+  pari_sp av = avma;
+  Flxq_muldata D;
+  GEN y;
+  switch(n)
+  {
+    case 0: return pol1_Flx(T[1]);
+    case 1: return vecsmall_copy(x);
+    case 2: return Flxq_sqr(x, T, p);
+  }
+  D.T = T; D.p = p;
+  if (lg(T) >= Flx_POW_MONTGOMERY_LIMIT)
+  {
+    D.mg  = Flx_invMontgomery(T,p);
+    y = gen_powu(x, n, (void*)&D, &_sqr_Montgomery, &_mul_Montgomery);
+  }
+  else
+    y = gen_powu(x, n, (void*)&D, &_Flxq_sqr, &_Flxq_mul);
+  return gerepileuptoleaf(av, y);
+}
+
+/* n-Power of x in Z/pZ[X]/(T), as t_VECSMALL. */
+GEN
 Flxq_pow(GEN x, GEN n, GEN T, ulong p)
 {
   pari_sp av = avma;
@@ -1954,7 +1978,7 @@ Flxq_conjvec(GEN x, GEN T, ulong p)
   long i, l = lgpol(T);
   GEN z = cgetg(l,t_COL);
   gel(z,1) = vecsmall_copy(x);
-  for (i=2; i<l; i++) gel(z,i) = Flxq_pow(gel(z,i-1), utoi(p), T, p);
+  for (i=2; i<l; i++) gel(z,i) = Flxq_powu(gel(z,i-1), p, T, p);
   return z;
 }
 
@@ -2009,7 +2033,7 @@ gener_Flxq(GEN T, ulong p, GEN *po)
       /* norm(g), assuming T is monic */
       t = Flx_resultant(T, g, p);
       if (t == 1 || !is_gener_Fl(t, p, p_1, L)) continue;
-      tt = Flxq_pow(g, utoi(p_1>>1), T, p);
+      tt = Flxq_powu(g, p_1>>1, T, p);
     }
     RES = p_1;
     for (i = 1; i < j; i++)
