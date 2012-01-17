@@ -2679,9 +2679,12 @@ Flm_det_sp_OK(GEN a, long nbco, ulong p)
       }
     }
   }
-  x %= p;
+  if (x & HIGHMASK) x %= p;
+  q = ucoeff(a,nbco,nbco);
+  if (q & HIGHMASK) q %= p;
+  x = (x*q) % p;
   if (s < 0 && x) x = p - x;
-  return (x * ucoeff(a,nbco,nbco)) % p;
+  return x;
 }
 /* in place, destroy a */
 ulong
