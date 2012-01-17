@@ -6,7 +6,7 @@
   ***                   ^--
   *** _/_: division by a non-invertible object
 
-  ***   at top-level: f(Mat(0),Col(0))
+  ***   at top-level: f(Mat(0),Col(1))
   ***                 ^----------------
   ***   in function f: matsolve
   ***                  ^--------
@@ -126,4 +126,4 @@
   ***   at top-level: matrix(1,-1,i,j,0)
   ***                 ^------------------
   *** matrix: incorrect type in matrix [negative nbcols] (t_INT).
-Total time spent: 8
+Total time spent: 12
