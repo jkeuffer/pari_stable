@@ -4,11 +4,15 @@ C-Name: trap0
 Prototype: DrDEDE
 Help: trap({e}, {rec}, seq): try to execute seq, trapping runtime error e (all
  of them if e ommitted); sequence rec is executed if the error occurs and
- is the result of the command.
+ is the result of the command. THIS FUNCTION IS OBSOLETE: use "IFERR"
 Wrapper: (,_,_)
 Description:
  (?str,?closure,?closure):gen trap0($1, $2, $3)
-Doc: tries to
+Doc: THIS FUNCTION IS OBSOLETE: use \tet{iferr}, which has a nicer and much
+ more powerful interface. For compatibility's sake we now describe the
+ \emph{obsolete} function \tet{trap}.
+
+ This function tries to
  evaluate \var{seq}, trapping runtime error $e$, that is effectively preventing
  it from aborting computations in the usual way; the recovery sequence
  \var{rec} is executed if the error occurs and the evaluation of \var{rec}
