@@ -1713,6 +1713,20 @@ mulcxmI(GEN x)
   }
 }
 
+/* fill in coefficients of t_SER z from coeffs of t_POL y */
+static GEN
+fill_ser(GEN z, GEN y)
+{
+  long i, lx = lg(z), ly = lg(y);
+  if (ly >= lx) {
+    for (i = 2; i < lx; i++) gel(z,i) = gel(y,i);
+  } else {
+    for (i = 2; i < ly; i++) gel(z,i) = gel(y,i);
+    for (     ; i < lx; i++) gel(z,i) = gen_0;
+  }
+  return normalize(z);
+}
+
 GEN
 gmul(GEN x, GEN y)
 {
@@ -1779,16 +1793,14 @@ gmul(GEN x, GEN y)
       z[1] = evalvalp(valp(x)+valp(y)) | evalvarn(vx) | evalsigne(1);
       if (lx > 200) /* threshold for 32bit coeffs: 400, 512 bits: 100 */
       {
-        long ly;
-        y = RgX_mul(ser2pol_i(x, lx), ser2pol_i(y, lx));
-        ly = lg(y);
-        if (ly >= lx) {
-          for (i = 2; i < lx; i++) z[i] = y[i];
-        } else {
-          for (i = 2; i < ly; i++) z[i] = y[i];
-          for (     ; i < lx; i++) gel(z,i) = gen_0;
-        }
-        z = normalize(z);
+        x = ser2pol_i(x, lx);
+        y = ser2pol_i(y, lx);
+        /* FIXME: should be a short product */
+        if (RgX_is_ZX(x) && RgX_is_ZX(y))
+          y = ZX_mul(x,y);
+        else
+          y = RgX_mul(x, y);
+        z = fill_ser(z, y);
         return gerepilecopy((pari_sp)(z + lx), z);
       }
       x += 2; y += 2; z += 2; lx -= 3;
@@ -2072,7 +2084,7 @@ sqr_ser_part(GEN x, long l1, long l2)
 GEN
 gsqr(GEN x)
 {
-  long i, l;
+  long i, lx;
   pari_sp av, tetpil;
   GEN z, p1, p2, p3, p4;
 
@@ -2154,7 +2166,21 @@ gsqr(GEN x)
     }
 
     case t_SER:
-      return normalize( sqr_ser_part(x, 0, lg(x)-3) );
+      lx = lg(x);
+      if (lx > 300)
+      {
+        pari_sp av = avma;
+        GEN z = cgetg(lx,t_SER);
+        z[1] = evalvalp(2*valp(x)) | evalvarn(varn(x)) | evalsigne(1);
+        x = ser2pol_i(x,lx);
+        if (RgX_is_ZX(x))
+          x = ZX_sqr(x);
+        else
+          x = RgX_sqr(x);
+        z = fill_ser(z, x);
+        return gerepilecopy(av, z);
+      }
+      return normalize( sqr_ser_part(x, 0, lx-3) );
 
     case t_RFRAC: z = cgetg(3,t_RFRAC);
       gel(z,1) = gsqr(gel(x,1));
@@ -2164,11 +2190,11 @@ gsqr(GEN x)
     case t_QFR: return qfrsqr(x);
     case t_QFI: return qfisqr(x);
     case t_VECSMALL:
-      z = cgetg_copy(x, &l);
-      for (i=1; i<l; i++)
+      z = cgetg_copy(x, &lx);
+      for (i=1; i<lx; i++)
       {
         long xi = x[i];
-        if (xi < 1 || xi >= l) pari_err_TYPE2("*",x,x);
+        if (xi < 1 || xi >= lx) pari_err_TYPE2("*",x,x);
         z[i] = x[xi];
       }
       return z;
