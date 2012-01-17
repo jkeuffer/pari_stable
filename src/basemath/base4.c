@@ -481,7 +481,7 @@ val_norm(GEN x, GEN p, long *vz)
   return v;
 }
 
-/* return factorization of Nx, x in HNF */
+/* return factorization of Nx, x integral in HNF */
 GEN
 factor_norm(GEN x)
 {
@@ -493,57 +493,15 @@ factor_norm(GEN x)
   settyp(e, t_VECSMALL); return f;
 }
 
-GEN
-idealfactor(GEN nf, GEN x)
+/* X integral ideal */
+static GEN
+idealfactor_HNF(GEN nf, GEN x)
 {
-  pari_sp av;
-  long tx, i, j, k, lf, lc, N, v, vc;
-  GEN X, f, f1, f2, c1, c2, y1, y2, y, p1, cx, P;
+  const long N = lg(x)-1;
+  long i, j, k, lf, lc, v, vc;
+  GEN f, f1, f2, c1, c2, y1, y2, p1, cx, P;
 
-  tx = idealtyp(&x,&y);
-  if (tx == id_PRIME)
-  {
-    y = cgetg(3,t_MAT);
-    gel(y,1) = mkcolcopy(x);
-    gel(y,2) = mkcol(gen_1); return y;
-  }
-  av = avma; nf = checknf(nf);
-  if (tx == id_PRINCIPAL)
-  {
-    x = nf_to_scalar_or_basis(nf, x);
-    if (typ(x) != t_COL)
-    {
-      long lfa;
-      f = factor(Q_abs(x));
-      c1 = gel(f,1); lfa = lg(c1);
-      if (lfa == 1) { avma = av; return trivial_fact(); }
-      c2 = gel(f,2);
-      settyp(c1, t_VEC); /* for shallowconcat */
-      settyp(c2, t_VEC); /* for shallowconcat */
-      for (i = 1; i < lfa; i++)
-      {
-        GEN P = idealprimedec(nf, gel(c1,i)), E = gel(c2,i), z;
-        long lP = lg(P);
-        z = cgetg(lP, t_COL);
-        for (j = 1; j < lP; j++) gel(z,j) = mului(pr_get_e(gel(P,j)), E);
-        gel(c1,i) = P;
-        gel(c2,i) = z;
-      }
-      c1 = shallowconcat1(c1); settyp(c1, t_COL);
-      c2 = shallowconcat1(c2);
-      gel(f,1) = c1;
-      gel(f,2) = c2; return gerepilecopy(av, f);
-    }
-    /* faster valuations for principal ideal x than for X = x in HNF form */
-    x = Q_primitive_part(x, &cx);
-    X = idealhnf_principal(nf, x);
-  }
-  else /* id_MAT */
-  {
-    x = Q_primitive_part(x, &cx);
-    X = x;
-  }
-  N = lg(X)-1; if (!N) pari_err(e_MISC,"zero ideal in idealfactor");
+  x = Q_primitive_part(x, &cx);
   if (!cx)
   {
     c1 = c2 = NULL; /* gcc -Wall */
@@ -551,11 +509,11 @@ idealfactor(GEN nf, GEN x)
   }
   else
   {
-    f = factor(cx);
+    f = Z_factor(cx);
     c1 = gel(f,1);
     c2 = gel(f,2); lc = lg(c1);
   }
-  f = factor_norm(X);
+  f = factor_norm(x);
   f1 = gel(f,1);
   f2 = gel(f,2); lf = lg(f1);
   y1 = cgetg((lf+lc-2)*N+1, t_COL);
@@ -565,7 +523,7 @@ idealfactor(GEN nf, GEN x)
   {
     long l = f2[i]; /* = v_p(Nx) */
     p1 = idealprimedec(nf,gel(f1,i));
-    vc = cx? Q_pval(cx,gel(f1,i)): 0;
+    vc = cx? Z_pval(cx,gel(f1,i)): 0;
     for (j=1; j<lg(p1); j++)
     {
       P = gel(p1,j);
@@ -587,7 +545,7 @@ idealfactor(GEN nf, GEN x)
   for (i=1; i<lc; i++)
   {
     /* p | Nx already treated */
-    if (dvdii(gcoeff(X,1,1),gel(c1,i))) continue;
+    if (dvdii(gcoeff(x,1,1),gel(c1,i))) continue;
     p1 = idealprimedec(nf,gel(c1,i));
     vc = itos(gel(c2,i));
     for (j=1; j<lg(p1); j++)
@@ -598,10 +556,64 @@ idealfactor(GEN nf, GEN x)
     }
   }
   setlg(y1, k);
-  setlg(y2, k); y = gerepilecopy(av, mkmat2(y1,y2));
-  y2 = gel(y,2); for (i=1; i<k; i++) gel(y2,i) = stoi(y2[i]);
-  settyp(y2, t_COL);
-  return sort_factor(y, (void*)&cmp_prime_ideal, &cmp_nodata);
+  setlg(y2, k);
+  return mkmat2(y1, zc_to_ZC(y2));
+}
+
+GEN
+idealfactor(GEN nf, GEN x)
+{
+  pari_sp av = avma;
+  long tx;
+  GEN fa, f, y;
+
+  nf = checknf(nf);
+  tx = idealtyp(&x,&y);
+  if (tx == id_PRIME)
+  {
+    y = cgetg(3,t_MAT);
+    gel(y,1) = mkcolcopy(x);
+    gel(y,2) = mkcol(gen_1); return y;
+  }
+  if (tx == id_PRINCIPAL)
+  {
+    x = nf_to_scalar_or_basis(nf, x);
+    if (typ(x) != t_COL)
+    {
+      GEN c1, c2;
+      long lfa, i,j;
+      f = factor(Q_abs(x));
+      c1 = gel(f,1); lfa = lg(c1);
+      if (lfa == 1) { avma = av; return trivial_fact(); }
+      c2 = gel(f,2);
+      settyp(c1, t_VEC); /* for shallowconcat */
+      settyp(c2, t_VEC); /* for shallowconcat */
+      for (i = 1; i < lfa; i++)
+      {
+        GEN P = idealprimedec(nf, gel(c1,i)), E = gel(c2,i), z;
+        long lP = lg(P);
+        z = cgetg(lP, t_COL);
+        for (j = 1; j < lP; j++) gel(z,j) = mului(pr_get_e(gel(P,j)), E);
+        gel(c1,i) = P;
+        gel(c2,i) = z;
+      }
+      c1 = shallowconcat1(c1); settyp(c1, t_COL);
+      c2 = shallowconcat1(c2);
+      gel(f,1) = c1;
+      gel(f,2) = c2; return gerepilecopy(av, f);
+    }
+  }
+  x = idealnumden(nf, x);
+  if (isintzero(gel(x,1))) pari_err(e_MISC,"zero ideal in idealfactor");
+  fa = idealfactor_HNF(nf, gel(x,1));
+  if (!isint1(gel(x,2)))
+  {
+    GEN fa2 = idealfactor_HNF(nf, gel(x,2));
+    fa2 = famat_inv_shallow(fa2);
+    fa = famat_mul_shallow(fa, fa2);
+  }
+  fa = gerepilecopy(av, fa);
+  return sort_factor(fa, (void*)&cmp_prime_ideal, &cmp_nodata);
 }
 
 /* P prime ideal in idealprimedec format. Return valuation(ix) at P */
@@ -968,6 +980,17 @@ famat_sqr(GEN f)
   h = cgetg(3,t_MAT);
   gel(h,1) = gcopy(gel(f,1));
   gel(h,2) = gmul2n(gel(f,2),1);
+  return h;
+}
+GEN
+famat_inv_shallow(GEN f)
+{
+  GEN h;
+  if (lg(f) == 1) return cgetg(1,t_MAT);
+  if (typ(f) != t_MAT) return to_famat_shallow(f,gen_m1);
+  h = cgetg(3,t_MAT);
+  gel(h,1) = gel(f,1);
+  gel(h,2) = ZC_neg(gel(f,2));
   return h;
 }
 GEN

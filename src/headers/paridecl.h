@@ -1041,6 +1041,7 @@ GEN     zk_scalar_or_multable(GEN, GEN x);
 /* base4.c */
 GEN     RM_round_maxrank(GEN G);
 GEN     famat_inv(GEN f);
+GEN     famat_inv_shallow(GEN f);
 GEN     famat_makecoprime(GEN nf, GEN g, GEN e, GEN pr, GEN prk, GEN EX);
 GEN     famat_mul(GEN f, GEN g);
 GEN     famat_pow(GEN f, GEN n);
