@@ -1473,6 +1473,52 @@ idealinv(GEN nf, GEN x)
   gel(res,2) = ext_inv(nf, ax); return res;
 }
 
+/* write x = A/B, A,B coprime integral ideals */
+GEN
+idealnumden(GEN nf, GEN x)
+{
+  pari_sp av = avma;
+  GEN ax, c, d, A, B, J;
+  long tx = idealtyp(&x,&ax);
+  nf = checknf(nf);
+  switch (tx)
+  {
+    case id_PRIME:
+      retmkvec2(idealhnf(nf, x), gen_1);
+    case id_PRINCIPAL:
+      x = nf_to_scalar_or_basis(nf, x);
+      switch(typ(x))
+      {
+        case t_INT:
+          return gerepilecopy(av, mkvec2(absi(x),gen_1));
+        case t_FRAC:
+          return gerepilecopy(av, mkvec2(absi(gel(x,1)), gel(x,2)));
+      }
+      /* t_COL */
+      x = Q_remove_denom(x, &d);
+      if (!d) return gerepilecopy(av, mkvec2(idealhnf(nf, x), gen_1));
+      x = idealhnf(nf, x);
+      break;
+    case id_MAT: {
+      long n = lg(x)-1;
+      if (n == 0) return mkvec2(gen_0, gen_1);
+      if (n != nf_get_degree(nf)) pari_err_DIM("idealnumden");
+      x = Q_remove_denom(x, &d);
+      if (!d) return gerepilecopy(av, mkvec2(x, gen_1));
+      break;
+    }
+  }
+  J = hnfmodid(x, d); /* = d/B */
+  c = gcoeff(J,1,1); /* (d/B) \cap Z, divides d */
+  B = idealinv_HNF_aux(nf, J); /* (d/B \cap Z) B/d */
+  c = diviiexact(d, c);
+  if (!is_pm1(c)) B = ZM_Z_mul(B, c); /* = B ! */
+  A = idealmul(nf, x, B); /* d * (original x) * B = d A */
+  if (!is_pm1(d)) A = ZM_Z_divexact(A, d); /* = A ! */
+  if (is_pm1(gcoeff(B,1,1))) B = gen_1;
+  return gerepilecopy(av, mkvec2(A, B));
+}
+
 /* Return x, integral in 2-elt form, such that pr^n = x/d. Assume n != 0 */
 static GEN
 idealpowprime(GEN nf, GEN pr, GEN n, GEN *d)
