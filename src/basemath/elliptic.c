@@ -4552,11 +4552,15 @@ elltatepairing(GEN E, GEN t, GEN s, GEN m)
 static GEN
 ell_to_a4a6(GEN E, GEN p)
 {
-  GEN c4, c6;
+  GEN a1, a3, b2, c4, c6;
   checkell5(E);
+  a1 = Rg_to_Fp(ell_get_a1(E),p);
+  a3 = Rg_to_Fp(ell_get_a3(E),p);
+  b2 = Rg_to_Fp(ell_get_b2(E),p);
   c4 = Rg_to_Fp(ell_get_c4(E),p);
   c6 = Rg_to_Fp(ell_get_c6(E),p);
-  return mkvec2(Fp_neg(Fp_mulu(c4, 27, p), p), Fp_neg(Fp_mulu(c6, 54, p), p));
+  retmkvec3(Fp_neg(Fp_mulu(c4, 27, p), p), Fp_neg(Fp_mulu(c6, 54, p), p),
+            mkvec4(modsi(6,p),Fp_mulu(b2,3,p),Fp_mulu(a1,3,p),Fp_mulu(a3,108,p)));
 }
 
 GEN
