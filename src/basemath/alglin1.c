@@ -1392,7 +1392,6 @@ ZM_gauss(GEN a, GEN b0)
   int iscol;
   long n, ncol, i, m;
   ulong p;
-  byteptr d;
   GEN N, C, delta, xb, nb, nmin, res, b = b0;
 
   if (!init_gauss(a, &b, &n, &ncol, &iscol)) return cgetg(1, iscol?t_COL:t_MAT);
@@ -1415,12 +1414,17 @@ ZM_gauss(GEN a, GEN b0)
       delta = mulii(delta, ni);
   }
   if (!signe(nmin)) { avma = av; return NULL; }
-  d = init_modular(&p); av2 = avma;
+  av2 = avma;
+#ifdef LONG_IS_64BIT
+  p = 1000000000000000000;
+#else
+  p = 1000000000;
+#endif
   for(;;)
   {
+    p = unextprime(p+1);
     C = Flm_inv(ZM_to_Flm(a, p), p);
     if (C) break;
-    NEXT_PRIME_VIADIFF_CHECK(p,d);
     avma = av2;
   }
   /* N.B. Our delta/lambda are SQUARES of those in the paper
