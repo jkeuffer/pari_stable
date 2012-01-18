@@ -3943,6 +3943,7 @@ ZM_det_i(GEN a, long n)
 GEN
 det(GEN a)
 {
+  const long DIXON_THRESHOLD = 40;
   long n = lg(a)-1;
   double B;
   GEN data, p=NULL;
@@ -3952,7 +3953,7 @@ det(GEN a)
   if (!n) return gen_1;
   if (n != lg(a[1])-1) pari_err_DIM("det");
   if (n == 1) return gcopy(gcoeff(a,1,1));
-  if (RgM_is_FpM(a, &p))
+  if (RgM_is_FpM(a, &p) && (p || n > DIXON_THRESHOLD))
   {
     pari_sp av;
     if (!p) return ZM_det_i(a, n);
