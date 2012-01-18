@@ -687,7 +687,7 @@ defaults_list(pari_stack *s)
   long i;
   for (i = 0; i < functions_tblsz; i++)
     for (ep = defaults_hash[i]; ep; ep = ep->next)
-      if (ep->menu == 16) stack_pushp(s, ep);
+      if (ep->menu == 16) pari_stack_pushp(s, ep);
 }
 /* ep associated to function f of arity 2. Call f(v,flag) */
 static GEN
@@ -702,11 +702,11 @@ setdefault(const char *s, const char *v, long flag)
     pari_stack st;
     entree **L;
     long i;
-    stack_init(&st, sizeof(*L), (void**)&L);
+    pari_stack_init(&st, sizeof(*L), (void**)&L);
     defaults_list(&st);
     qsort (L, st.n, sizeof(*L), compare_name);
     for (i = 0; i < st.n; i++) (void)call_f2(L[i], NULL, d_ACKNOWLEDGE);
-    stack_delete(&st);
+    pari_stack_delete(&st);
     return gnil;
   }
   ep = is_entry_intern(s, defaults_hash, NULL);

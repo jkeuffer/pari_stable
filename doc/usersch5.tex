@@ -8383,7 +8383,7 @@ To create a stack of objects of type \kbd{foo}, we proceed as follows:
 \bprog
 foo *t_foo;
 pari_stack s_foo;
-stack_init(&s_foo, sizeof(*t_foo), (void**)t_foo);
+pari_stack_init(&s_foo, sizeof(*t_foo), (void**)t_foo);
 @eprog\noindent Think of \kbd{s\_foo} as the controlling interface, and
 \kbd{t\_foo} as the (dynamic) array tied to it. The value of \kbd{t\_foo}
 may be changed as you add more elements.
@@ -8394,7 +8394,7 @@ The following function pushes an element on the stack.
 /* access globals t_foo and s_foo */
 void push_foo(foo x)
 {
-  long n = stack_new(&s_foo);
+  long n = pari_stack_new(&s_foo);
   t_foo[n] = x;
 }
 @eprog
@@ -8427,12 +8427,12 @@ struct foo_s
   pari_stack s_foo;
 } tt_foo;
 pari_stack st_foo;
-stack_init(&st_foo, sizeof(*tt_foo), (void**)&tt_foo);
+pari_stack_init(&st_foo, sizeof(*tt_foo), (void**)&tt_foo);
 long new_stack(void)
 {
-  long n = stack_new(&st_foo);
+  long n = pari_stack_new(&st_foo);
   struct foo_s *st = tt_foo+n;
-  stack_init(&st->s_foo, sizeof(*st->t_foo), (void**)&st->t_foo);
+  pari_stack_init(&st->s_foo, sizeof(*st->t_foo), (void**)&st->t_foo);
   return n;
 }
 @eprog
@@ -8449,32 +8449,32 @@ following public fields are defined:
 the topmost element of the stack.  \kbd{s.n} can be changed as long as
 $0\leq\kbd{s.n}\leq\kbd{s.alloc}$ holds.
 
-\fun{void}{stack_init}{pari_stack *s, size_t size, void **data} links
+\fun{void}{pari_stack_init}{pari_stack *s, size_t size, void **data} links
 \kbd{*s} to the data pointer \kbd{*data}, where \kbd{size} is the size of
 data element. The pointer \kbd{*data} is set to \kbd{NULL}, \kbd{s->n} and
 \kbd{s->alloc} are set to $0$: the array is empty.
 
-\fun{void}{stack_alloc}{pari_stack *s, long nb} makes room for \kbd{nb} more
+\fun{void}{pari_stack_alloc}{pari_stack *s, long nb} makes room for \kbd{nb} more
 elements, i.e.~makes sure that $\kbd{s.alloc}\geq\kbd{s.n} + \kbd{nb}$, possibly
 reallocating \kbd{data}.
 
-\fun{long}{stack_new}{pari_stack *s} increases \kbd{s.n} by one unit,
+\fun{long}{pari_stack_new}{pari_stack *s} increases \kbd{s.n} by one unit,
 possibly reallocating \kbd{data}, and returns $\kbd{s.n}-1$.
 
 \misctitle{Caveat} The following construction is incorrect because
 \kbd{stack\_new} can change the value of \kbd{t\_foo}:
 \bprog
-t_foo[ stack_new(&s_foo) ] = x;
+t_foo[ pari_stack_new(&s_foo) ] = x;
 @eprog
 
-\fun{void}{stack_delete}{pari_stack *s} frees \kbd{data} and resets the stack
+\fun{void}{pari_stack_delete}{pari_stack *s} frees \kbd{data} and resets the stack
 to the state immediately following \kbd{stack\_init} (\kbd{s->n} and
 \kbd{s->alloc} are set to $0$).
 
-\fun{void *}{stack_pushp}{pari_stack *s, void *u} This function assumes that
+\fun{void *}{pari_stack_pushp}{pari_stack *s, void *u} This function assumes that
 \kbd{*data} is of pointer type. Pushes the element \kbd{u} on the stack \kbd{s}.
 
-\fun{void **}{stack_base}{pari_stack *s} returns the address of \kbd{data},
+\fun{void **}{pari_stack_base}{pari_stack *s} returns the address of \kbd{data},
 typecast to a \kbd{void **}.
 
 \section{Vectors and Matrices}

@@ -40,8 +40,8 @@ pari_init_parser(void)
   long i;
   const char *opname[]={"_||_", "_&&_", "_===_", "_==_", "_!=_", "_>=_", "_>_", "_<=_", "_<_", "_-_","_+_","_<<_", "_>>_", "_%_", "_\\/_", "_\\_", "_/_", "_*_","_^_","__","_=_","_--","_++","_-=_", "_+=_", "_<<=_", "_>>=_", "_%=_", "_\\/=_", "_\\=_", "_/=_", "_*=_","+_","-_","!_","_!","_'","_~","%","#_","",""};
 
-  stack_init(&s_node,sizeof(*pari_tree),(void **)&pari_tree);
-  stack_alloc(&s_node,OPnboperator);
+  pari_stack_init(&s_node,sizeof(*pari_tree),(void **)&pari_tree);
+  pari_stack_alloc(&s_node,OPnboperator);
   parsestate_reset();
   for (i=0;i<OPnboperator;i++)
   {
@@ -54,7 +54,7 @@ pari_init_parser(void)
   }
 }
 void
-pari_close_parser(void) { stack_delete(&s_node); }
+pari_close_parser(void) { pari_stack_delete(&s_node); }
 
 static void
 unused_chars(const char *lex, int strict)
@@ -141,7 +141,7 @@ pari_compile_str(char *lex, int strict)
 static long
 newnode(Ffunc f, long x, long y, struct node_loc *loc)
 {
-  long n=stack_new(&s_node);
+  long n=pari_stack_new(&s_node);
   pari_tree[n].f=f;
   pari_tree[n].x=x;
   pari_tree[n].y=y;

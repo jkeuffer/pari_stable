@@ -407,7 +407,7 @@ trace_push(long pc, GEN C)
 {
   long tr;
   BLOCK_SIGINT_START
-  tr = stack_new(&s_trace);
+  tr = pari_stack_new(&s_trace);
   trace[tr].pc = pc;
   trace[tr].closure = C;
   BLOCK_SIGINT_END
@@ -417,7 +417,7 @@ trace_push(long pc, GEN C)
 void
 push_lex(GEN a, GEN C)
 {
-  long vn=stack_new(&s_var);
+  long vn=pari_stack_new(&s_var);
   struct var_lex *v=var+vn;
   v->flag  = PUSH_VAL;
   v->value = a;
@@ -453,26 +453,26 @@ void
 pari_init_evaluator(void)
 {
   sp=0;
-  stack_init(&s_st,sizeof(*st),(void**)&st);
-  stack_alloc(&s_st,32);
+  pari_stack_init(&s_st,sizeof(*st),(void**)&st);
+  pari_stack_alloc(&s_st,32);
   s_st.n=s_st.alloc;
   rp=0;
-  stack_init(&s_ptrs,sizeof(*ptrs),(void**)&ptrs);
-  stack_alloc(&s_ptrs,16);
+  pari_stack_init(&s_ptrs,sizeof(*ptrs),(void**)&ptrs);
+  pari_stack_alloc(&s_ptrs,16);
   s_ptrs.n=s_ptrs.alloc;
-  stack_init(&s_var,sizeof(*var),(void**)&var);
-  stack_init(&s_lvars,sizeof(*lvars),(void**)&lvars);
-  stack_init(&s_trace,sizeof(*trace),(void**)&trace);
+  pari_stack_init(&s_var,sizeof(*var),(void**)&var);
+  pari_stack_init(&s_lvars,sizeof(*lvars),(void**)&lvars);
+  pari_stack_init(&s_trace,sizeof(*trace),(void**)&trace);
   br_res = NULL;
 }
 void
 pari_close_evaluator(void)
 {
-  stack_delete(&s_st);
-  stack_delete(&s_ptrs);
-  stack_delete(&s_var);
-  stack_delete(&s_lvars);
-  stack_delete(&s_trace);
+  pari_stack_delete(&s_st);
+  pari_stack_delete(&s_ptrs);
+  pari_stack_delete(&s_var);
+  pari_stack_delete(&s_lvars);
+  pari_stack_delete(&s_trace);
 }
 
 static gp_pointer *
@@ -482,7 +482,7 @@ new_ptr(void)
   {
     long i;
     gp_pointer *old = ptrs;
-    (void)stack_new(&s_ptrs);
+    (void)pari_stack_new(&s_ptrs);
     if (old != ptrs)
       for(i=0; i<rp; i++)
       {
@@ -680,7 +680,7 @@ st_alloc(long n)
 {
   if (sp+n>s_st.n)
   {
-    stack_alloc(&s_st,n+16);
+    pari_stack_alloc(&s_st,n+16);
     s_st.n=s_st.alloc;
     if (DEBUGMEM>=2) pari_warn(warner,"doubling evaluator stack");
   }
@@ -703,7 +703,7 @@ closure_eval(GEN C)
   {
     GEN z=gel(C,7);
     long l=lg(z)-1;
-    stack_alloc(&s_var,l);
+    pari_stack_alloc(&s_var,l);
     s_var.n+=l;
     nbmvar+=l;
     for(j=1;j<=l;j++)
@@ -1061,7 +1061,7 @@ closure_eval(GEN C)
     case OClocalvar:
       {
         entree *ep = (entree *)operand;
-        long n = stack_new(&s_lvars);
+        long n = pari_stack_new(&s_lvars);
         lvars[n] = ep;
         nblvar++;
         pushvalue(ep,gel(st,--sp));
@@ -1070,7 +1070,7 @@ closure_eval(GEN C)
     case OClocalvar0:
       {
         entree *ep = (entree *)operand;
-        long n = stack_new(&s_lvars);
+        long n = pari_stack_new(&s_lvars);
         lvars[n] = ep;
         nblvar++;
         zerovalue(ep);
@@ -1176,7 +1176,7 @@ closure_eval(GEN C)
         break;
       }
     case OCnewframe:
-      stack_alloc(&s_var,operand);
+      pari_stack_alloc(&s_var,operand);
       s_var.n+=operand;
       nbmvar+=operand;
       for(j=1;j<=operand;j++)
@@ -1200,7 +1200,7 @@ closure_eval(GEN C)
       }
       break;
     case OCgetargs:
-      stack_alloc(&s_var,operand);
+      pari_stack_alloc(&s_var,operand);
       s_var.n+=operand;
       nbmvar+=operand;
       sp-=operand;

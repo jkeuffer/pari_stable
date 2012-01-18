@@ -91,21 +91,21 @@ static THREAD struct frame_s *frames;
 void
 pari_init_compiler(void)
 {
-  stack_init(&s_opcode,sizeof(*opcode),(void **)&opcode);
-  stack_init(&s_operand,sizeof(*operand),(void **)&operand);
-  stack_init(&s_data,sizeof(*data),(void **)&data);
-  stack_init(&s_lvar,sizeof(*localvars),(void **)&localvars);
-  stack_init(&s_dbginfo,sizeof(*dbginfo),(void **)&dbginfo);
-  stack_init(&s_frame,sizeof(*frames),(void **)&frames);
+  pari_stack_init(&s_opcode,sizeof(*opcode),(void **)&opcode);
+  pari_stack_init(&s_operand,sizeof(*operand),(void **)&operand);
+  pari_stack_init(&s_data,sizeof(*data),(void **)&data);
+  pari_stack_init(&s_lvar,sizeof(*localvars),(void **)&localvars);
+  pari_stack_init(&s_dbginfo,sizeof(*dbginfo),(void **)&dbginfo);
+  pari_stack_init(&s_frame,sizeof(*frames),(void **)&frames);
   offset=-1;
 }
 void
 pari_close_compiler(void)
 {
-  stack_delete(&s_opcode);
-  stack_delete(&s_operand);
-  stack_delete(&s_data);
-  stack_delete(&s_lvar);
+  pari_stack_delete(&s_opcode);
+  pari_stack_delete(&s_operand);
+  pari_stack_delete(&s_data);
+  pari_stack_delete(&s_lvar);
 }
 
 struct codepos
@@ -227,9 +227,9 @@ getclosure(struct codepos *pos)
 static void
 op_push_loc(op_code o, long x, const char *loc)
 {
-  long n=stack_new(&s_opcode);
-  long m=stack_new(&s_operand);
-  long d=stack_new(&s_dbginfo);
+  long n=pari_stack_new(&s_opcode);
+  long m=pari_stack_new(&s_operand);
+  long d=pari_stack_new(&s_dbginfo);
   opcode[n]=o;
   operand[m]=x;
   dbginfo[d]=loc;
@@ -245,9 +245,9 @@ static void
 op_insert_loc(long k, op_code o, long x, const char *loc)
 {
   long i;
-  long n=stack_new(&s_opcode);
-  (void) stack_new(&s_operand);
-  (void) stack_new(&s_dbginfo);
+  long n=pari_stack_new(&s_opcode);
+  (void) pari_stack_new(&s_operand);
+  (void) pari_stack_new(&s_dbginfo);
   for (i=n-1; i>=k; i--)
   {
     opcode[i+1] = opcode[i];
@@ -262,7 +262,7 @@ op_insert_loc(long k, op_code o, long x, const char *loc)
 static long
 data_push(GEN x)
 {
-  long n=stack_new(&s_data);
+  long n=pari_stack_new(&s_data);
   data[n] = x?gclone(x):x;
   return n-offset;
 }
@@ -270,7 +270,7 @@ data_push(GEN x)
 static void
 var_push(entree *ep, Ltype type)
 {
-  long n=stack_new(&s_lvar);
+  long n=pari_stack_new(&s_lvar);
   localvars[n].ep   = ep;
   localvars[n].type = type;
 }
@@ -278,7 +278,7 @@ var_push(entree *ep, Ltype type)
 static void
 frame_push(GEN x)
 {
-  long n=stack_new(&s_frame);
+  long n=pari_stack_new(&s_frame);
   frames[n].pc = s_opcode.n-1;
   frames[n].frame = gclone(x);
 }

@@ -598,10 +598,10 @@ RgM_is_ZM(GEN x)
 /**                                                                **/
 /********************************************************************/
 INLINE void **
-stack_base(pari_stack *s) { return (void **) ((char *)s+s->offset); }
+pari_stack_base(pari_stack *s) { return (void **) ((char *)s+s->offset); }
 
 INLINE void
-stack_init(pari_stack *s, size_t size, void **data)
+pari_stack_init(pari_stack *s, size_t size, void **data)
 {
   s->offset = (char *)data-(char *)s;
   *data = NULL;
@@ -611,9 +611,9 @@ stack_init(pari_stack *s, size_t size, void **data)
 }
 
 INLINE void
-stack_alloc(pari_stack *s, long nb)
+pari_stack_alloc(pari_stack *s, long nb)
 {
-  void **sdat = stack_base(s);
+  void **sdat = pari_stack_base(s);
   if (s->n+nb <= s->alloc) return;
   if (!s->alloc)
     s->alloc = nb;
@@ -625,20 +625,20 @@ stack_alloc(pari_stack *s, long nb)
 }
 
 INLINE long
-stack_new(pari_stack *s) { stack_alloc(s, 1); return s->n++; }
+pari_stack_new(pari_stack *s) { pari_stack_alloc(s, 1); return s->n++; }
 
 INLINE void
-stack_delete(pari_stack *s)
+pari_stack_delete(pari_stack *s)
 {
-  void **sdat = stack_base(s);
+  void **sdat = pari_stack_base(s);
   if (*sdat) free(*sdat);
 }
 
 INLINE void
-stack_pushp(pari_stack *s, void *u)
+pari_stack_pushp(pari_stack *s, void *u)
 {
-  long n = stack_new(s);
-  void **sdat =(void**) *stack_base(s);
+  long n = pari_stack_new(s);
+  void **sdat =(void**) *pari_stack_base(s);
   sdat[n] = u;
 }
 

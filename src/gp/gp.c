@@ -153,7 +153,7 @@ parse_texmacs_command(tm_cmd *c, const char *ch)
   s++; t = s;
   skip_alpha(&s);
   c->cmd = pari_strndup(t, s - t);
-  stack_init(&s_A,sizeof(*A),(void**)&A);
+  pari_stack_init(&s_A,sizeof(*A),(void**)&A);
   for (c->n = 0; s <= send; c->n++)
   {
     char *u = (char*)pari_malloc(strlen(s) + 1);
@@ -165,7 +165,7 @@ parse_texmacs_command(tm_cmd *c, const char *ch)
       while (isdigit((int)*s)) s++;
       strncpy(u, t, s - t); u[s-t] = 0;
     }
-    stack_pushp(&s_A, u);
+    pari_stack_pushp(&s_A, u);
   }
   c->v = A;
 }
@@ -319,7 +319,7 @@ commands(long n)
   char **t_L;
   pari_stack s_L;
 
-  stack_init(&s_L, sizeof(*t_L), (void**)&t_L);
+  pari_stack_init(&s_L, sizeof(*t_L), (void**)&t_L);
   for (i = 0; i < functions_tblsz; i++)
     for (ep = functions_hash[i]; ep; ep = ep->next)
     {
@@ -332,11 +332,11 @@ commands(long n)
         case EpNEW: continue;
       }
       m = ep->menu;
-      if ((n < 0 && m && m < 13) || m == n) stack_pushp(&s_L, (void*)ep->name);
+      if ((n < 0 && m && m < 13) || m == n) pari_stack_pushp(&s_L, (void*)ep->name);
     }
-  stack_pushp(&s_L, NULL);
+  pari_stack_pushp(&s_L, NULL);
   print_fun_list(t_L, term_height()-4);
-  stack_delete(&s_L);
+  pari_stack_delete(&s_L);
 }
 
 static void
@@ -1247,7 +1247,7 @@ filtered_buffer(filtre_t *F)
 {
   Buffer *b = new_buffer();
   init_filtre(F, b);
-  stack_pushp(&s_bufstack, (void*)b);
+  pari_stack_pushp(&s_bufstack, (void*)b);
   return b;
 }
 
@@ -1264,7 +1264,7 @@ gp_initrc(pari_stack *p_A)
 
   if (!file) return;
   b = filtered_buffer(&F);
-  (void)stack_new(&s_env);
+  (void)pari_stack_new(&s_env);
   for(;;)
   {
     char *nexts, *s, *t;
@@ -1305,7 +1305,7 @@ gp_initrc(pari_stack *p_A)
         s += 4;
         t = (char*)pari_malloc(strlen(s) + 1);
         if (*s == '"') (void)readstring(s, t, s-4); else strcpy(t,s);
-        stack_pushp(p_A,t);
+        pari_stack_pushp(p_A,t);
       }
       else
       { /* set default */
@@ -1687,7 +1687,7 @@ break_loop(int numerr)
   if (numerr == e_STACK) { evalstate_clone(); avma = top; }
 
   b = filtered_buffer(&F);
-  nenv=stack_new(&s_env);
+  nenv=pari_stack_new(&s_env);
   gp_context_save(&rec);
   frame_level = closure_context(oldframe_level);
   pari_infile = newfile(stdin, "stdin", mf_IN)->file;
@@ -2021,7 +2021,7 @@ read_opt(pari_stack *p_A, long argc, char **argv)
     init_linewrap(76);
   } else if (initrc)
     gp_initrc(p_A);
-  for ( ; i < argc; i++) stack_pushp(p_A, pari_strdup(argv[i]));
+  for ( ; i < argc; i++) pari_stack_pushp(p_A, pari_strdup(argv[i]));
 
   /* override the values from gprc */
   if (p) (void)sd_primelimit(p, d_INITRC);
@@ -2084,8 +2084,8 @@ main(int argc, char **argv)
   pari_stack s_A;
 
   GP_DATA = default_gp_data();
-  stack_init(&s_env, sizeof(*env), (void**)&env);
-  (void)stack_new(&s_env);
+  pari_stack_init(&s_env, sizeof(*env), (void**)&env);
+  (void)pari_stack_new(&s_env);
 
   if (setjmp(env[s_env.n-1]))
   {
@@ -2097,8 +2097,8 @@ main(int argc, char **argv)
 #endif
   gp_is_interactive = pari_stdin_isatty();
   pari_init_defaults();
-  stack_init(&s_A,sizeof(*A),(void**)&A);
-  stack_init(&s_bufstack, sizeof(Buffer*), (void**)&bufstack);
+  pari_stack_init(&s_A,sizeof(*A),(void**)&A);
+  pari_stack_init(&s_bufstack, sizeof(Buffer*), (void**)&bufstack);
   cb_pari_err_recover = gp_err_recover;
   pari_init_opts(1000000 * sizeof(long), 500000, INIT_SIGm);
   pari_add_defaults_module(functions_gp_default);
@@ -2138,7 +2138,7 @@ main(int argc, char **argv)
      * Don't restore in that case. */
     if (!pari_logfile) pari_logfile = l;
   }
-  stack_delete(&s_A);
+  pari_stack_delete(&s_A);
   (void)gp_main_loop(gp_RECOVER|gp_ISMAIN);
   gp_quit(0); return 0; /* not reached */
 }

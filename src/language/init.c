@@ -221,10 +221,10 @@ THREAD void *PARI_stack_limit = NULL;
 
 #  ifdef __EMX__                                /* Emulate */
 void
-pari_stackcheck_init(void *stack_base)
+pari_stackcheck_init(void *pari_stack_base)
 {
-  (void) stack_base;
-  if (!stack_base) { PARI_stack_limit = NULL; return; }
+  (void) pari_stack_base;
+  if (!pari_stack_base) { PARI_stack_limit = NULL; return; }
   PARI_stack_limit = get_stack(1./16, 32*1024);
 }
 #  else /* !__EMX__ */
@@ -236,23 +236,23 @@ pari_stackcheck_init(void *stack_base)
  * used on the stack. Leave PARI_stack_limit at its initial value (NULL) to
  * show no check should be made [init failed]. Assume stack grows downward. */
 void
-pari_stackcheck_init(void *stack_base)
+pari_stackcheck_init(void *pari_stack_base)
 {
   struct rlimit rip;
   ulong size;
-  if (!stack_base) { PARI_stack_limit = NULL; return; }
+  if (!pari_stack_base) { PARI_stack_limit = NULL; return; }
   if (getrlimit(RLIMIT_STACK, &rip)) return;
   size = rip.rlim_cur;
-  if (size == (ulong)RLIM_INFINITY || size > (ulong)stack_base)
-    PARI_stack_limit = (void*)(((ulong)stack_base) / 16);
+  if (size == (ulong)RLIM_INFINITY || size > (ulong)pari_stack_base)
+    PARI_stack_limit = (void*)(((ulong)pari_stack_base) / 16);
   else
-    PARI_stack_limit = (void*)((ulong)stack_base - (size/16)*15);
+    PARI_stack_limit = (void*)((ulong)pari_stack_base - (size/16)*15);
 }
 #  endif /* !__EMX__ */
 
 #else
 void
-pari_stackcheck_init(void *stack_base)
+pari_stackcheck_init(void *pari_stack_base)
 {
   PARI_stack_limit = NULL;
 }
@@ -569,7 +569,7 @@ static int
 gp_init_entrees(pari_stack *p_A, entree **hash)
 {
   long i;
-  entree **v = (entree **)*stack_base(p_A);
+  entree **v = (entree **)*pari_stack_base(p_A);
   init_hashtable(hash, functions_tblsz);
   for (i = 0; i < p_A->n; i++) pari_fill_hashtable(hash, v[i]);
   return (hash == functions_hash);
@@ -584,10 +584,10 @@ extern entree functions_basic[], functions_default[];
 static void
 pari_init_functions(void)
 {
-  stack_init(&s_MODULES, sizeof(*MODULES),(void**)&MODULES);
-  stack_pushp(&s_MODULES,functions_basic);
-  stack_init(&s_OLDMODULES, sizeof(*OLDMODULES),(void**)&OLDMODULES);
-  stack_pushp(&s_OLDMODULES,oldfonctions);
+  pari_stack_init(&s_MODULES, sizeof(*MODULES),(void**)&MODULES);
+  pari_stack_pushp(&s_MODULES,functions_basic);
+  pari_stack_init(&s_OLDMODULES, sizeof(*OLDMODULES),(void**)&OLDMODULES);
+  pari_stack_pushp(&s_OLDMODULES,oldfonctions);
   functions_hash = (entree**) pari_calloc(sizeof(entree*)*functions_tblsz);
   pari_fill_hashtable(functions_hash,
                       new_fun_set? functions_basic: oldfonctions);
@@ -600,7 +600,7 @@ pari_add_module(entree *ep)
 {
   if (new_fun_set)
     pari_fill_hashtable(functions_hash, ep);
-  stack_pushp(&s_MODULES, ep);
+  pari_stack_pushp(&s_MODULES, ep);
 }
 
 void
@@ -612,7 +612,7 @@ pari_add_oldmodule(entree *ep)
 {
   if (!new_fun_set)
     pari_fill_hashtable(functions_hash, ep);
-  stack_pushp(&s_OLDMODULES, ep);
+  pari_stack_pushp(&s_OLDMODULES, ep);
 }
 
 static void
@@ -774,8 +774,8 @@ pari_close_opts(ulong init_opts)
   free((void*)diffptr);
   free(current_logfile);
   free(current_psfile);
-  stack_delete(&s_MODULES);
-  stack_delete(&s_OLDMODULES);
+  pari_stack_delete(&s_MODULES);
+  pari_stack_delete(&s_OLDMODULES);
   if (pari_datadir) free(pari_datadir);
   if (init_opts&INIT_DFTm)
   { /* delete GP_DATA */
