@@ -7779,11 +7779,11 @@ at most $n$ chars from $s$ (uses \kbd{pari\_malloc}). If $s$ is longer than
 $n$, only $n$ characters are copied and a terminal null byte is added.
 
 \fun{char*}{stack_strdup}{const char *s} returns a copy of $s$, allocated
-on the PARI stack (uses \kbd{stack_malloc}).
+on the PARI stack (uses \kbd{stack\_malloc}).
 
 \fun{char*}{stack_strcat}{const char *s, const char *t} returns the
 concatenation of $s$ and $t$, allocated on the PARI stack (uses
-\kbd{stack_malloc}).
+\kbd{stack\_malloc}).
 
 \fun{char*}{itostr}{GEN x} writes the \typ{INT} $x$ to a \tet{stack_malloc}'ed
 string.
