@@ -1160,7 +1160,7 @@ testprimes(GEN bnf, GEN BOUND)
   pmax = itou( pr_get_p(gel(fb, lg(fb)-1)) ); /* largest p in factorbase */
   Vbase = get_Vbase(bnf);
   (void)recover_partFB(&F, Vbase, nf_get_degree(nf));
-  fact = (FACT*)stackmalloc((F.KC+1)*sizeof(FACT));
+  fact = (FACT*)stack_malloc((F.KC+1)*sizeof(FACT));
 
   /* loop up to min(maxprime, BOUND) */
   for (av=avma, p=2; p < bound; avma=av)
@@ -1515,7 +1515,7 @@ isprincipalall(GEN bnf, GEN x, long *ptprec, long flag)
   x = Q_primitive_part(x, &xc);
   av = avma;
 
-  fact = (FACT*)stackmalloc((F.KC+1)*sizeof(FACT));
+  fact = (FACT*)stack_malloc((F.KC+1)*sizeof(FACT));
   xar = split_ideal(nf, &F, x, Vbase, L, fact);
   lW = lg(W)-1; Wex = const_vecsmall(lW, 0);
   lB = lg(B)-1; Bex = const_vecsmall(lB, 0);
@@ -3595,7 +3595,7 @@ START:
   if (DEBUGLEVEL)
     timer_printf(&T, "factorbase (#subFB = %ld) and ideal permutations",
                      lg(F.subFB)-1);
-  fact = (FACT*)stackmalloc((F.KC+1)*sizeof(FACT));
+  fact = (FACT*)stack_malloc((F.KC+1)*sizeof(FACT));
   PERM = leafcopy(F.perm); /* to be restored in case of precision increase */
   cache.basis = zero_Flm_copy(F.KC,F.KC);
   F.id2 = zerovec(F.KC);

@@ -794,7 +794,7 @@ factor_Aurifeuille_aux(GEN A, long Astar, long n, GEN P,
   { /* A^* even */
     GEN i = Fp_powu(z, n>>2, le), z2 = Fp_sqr(z, le);
 
-    invertible = stackmalloc(n); /* even indices unused */
+    invertible = stack_malloc(n); /* even indices unused */
     for (j = 1; j < n; j+=2) invertible[j] = 1;
     for (k = 1; k < lg(P); k++)
     {
@@ -878,7 +878,7 @@ factor_Aurifeuille_aux(GEN A, long Astar, long n, GEN P,
     a = Zp_sqrtlift(A, utoipos(g), utoipos(l), e);
     b = negi(a);
 
-    invertible = stackmalloc(n);
+    invertible = stack_malloc(n);
     for (j = 1; j < n; j++) invertible[j] = 1;
     for (k = 1; k < lg(P); k++)
     {

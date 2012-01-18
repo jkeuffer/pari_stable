@@ -1036,7 +1036,7 @@ err_get_num(GEN e)
 static char *
 type_dim(GEN x)
 {
-  char *v = stackmalloc(64);
+  char *v = stack_malloc(64);
   switch(typ(x))
   {
     case t_MAT:

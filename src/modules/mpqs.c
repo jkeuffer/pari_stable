@@ -916,7 +916,7 @@ mpqs_eval_histograms(mpqs_handle_t *h)
 static char *
 mpqs_get_filename(char *dir, const char *s)
 {
-  char *buf = stackmalloc(strlen(dir) + strlen(s) + 2);
+  char *buf = stack_malloc(strlen(dir) + strlen(s) + 2);
 #if defined(__EMX__) || defined(WINCE)
   sprintf(buf, "%s\\%s", dir,s);
 #else
@@ -964,7 +964,7 @@ mpqs_sort_lp_file(char *filename)
   size_t length, bufspace;
   pari_sp av=avma;
 
-  buflist_head = (char**) stackmalloc(buflist_size * sizeof(char*));
+  buflist_head = (char**) stack_malloc(buflist_size * sizeof(char*));
   buflist = buflist_head;
   *buflist++ = NULL; /* flag this as last and only buflist block */
   /* extra blocks may be allocated as needed and linked ahead of

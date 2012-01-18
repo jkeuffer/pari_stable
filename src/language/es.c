@@ -551,7 +551,7 @@ real0tostr_width_frac(long width_frac)
 {
   char *buf, *s;
   if (width_frac == 0) return zerotostr();
-  buf = s = stackmalloc(width_frac + 3);
+  buf = s = stack_malloc(width_frac + 3);
   *s++ = '0';
   *s++ = '.';
   (void)zeros(s, width_frac);
@@ -569,7 +569,7 @@ real0tostr(long ex, char format, char exp_char, long wanted_dec)
     if (width_frac < 0) width_frac = (ex >= 0)? 0: (long)(-ex * LOG10_2);
     return real0tostr_width_frac(width_frac);
   } else {
-    buf0 = buf = stackmalloc(3 + MAX_EXPO_LEN + 1);
+    buf0 = buf = stack_malloc(3 + MAX_EXPO_LEN + 1);
     *buf++ = '0';
     *buf++ = '.';
     *buf++ = exp_char;
@@ -605,7 +605,7 @@ absrtostr_width_frac(GEN x, int width_frac)
 
   s = itostr_sign(z, 1, &ls); /* ls > 0, number of digits in s */
   /* '.', trailing \0 */
-  buf0 = buf = stackmalloc( ls + 1+1 );
+  buf0 = buf = stack_malloc( ls + 1+1 );
   point = ls - beta; /* position of . in s; <= ls, may be < 0 */
   if (point > 0) /* write integer_part.fractional_part */
   {
@@ -683,7 +683,7 @@ absrtostr(GEN x, int sp, char FORMAT, long wanted_dec)
   }
 
   /* '.', " E", exponent, trailing \0 */
-  buf0 = buf = stackmalloc( ls + 1+2+MAX_EXPO_LEN+1 );
+  buf0 = buf = stack_malloc( ls + 1+2+MAX_EXPO_LEN+1 );
   point = ls - beta; /* position of . in s; < 0 or > 0 */
   if (beta <= 0 || format == 'e' || (format == 'g' && point-1 < -4))
   { /* e format */
@@ -878,7 +878,7 @@ fmtnum(outString *S, long lvalue, GEN gvalue, int base, int signvalue,
   }
   if (base > 0) caps = 0; else { caps = 1; base = -base; }
 
-  buf0 = buf = stackmalloc(mxl) + mxl; /* fill from the right */
+  buf0 = buf = stack_malloc(mxl) + mxl; /* fill from the right */
   *--buf = 0; /* trailing \0 */
   if (gvalue) {
     if (base == 10) {
@@ -1325,7 +1325,7 @@ char *
 term_get_color(char *s, long n)
 {
   long c[3], a;
-  if (!s) s = stackmalloc(COLOR_LEN);
+  if (!s) s = stack_malloc(COLOR_LEN);
 
   if (disable_color) { *s = 0; return s; }
   if (n == c_NONE || (a = gp_colors[n]) == c_NONE)
@@ -1630,7 +1630,7 @@ char *
 stack_strdup(const char *s)
 {
   long n = strlen(s)+1;
-  char *t = stackmalloc(n);
+  char *t = stack_malloc(n);
   memcpy(t,s,n); return t;
 }
 char *
@@ -1638,7 +1638,7 @@ stack_strcat(const char *s, const char *t)
 {
   long ls = strlen(s), lt = strlen(t);
   long n = ls + lt + 1;
-  char *u = stackmalloc(n);
+  char *u = stack_malloc(n);
   memcpy(u,     s, ls);
   memcpy(u + ls,t, lt+1); return u;
 }
@@ -2790,7 +2790,7 @@ matbruti(GEN g, pariout_t *T, outString *S)
   av = avma;
   l = lg(g[1]); str_putc(S, '\n');
   print = (typ(g[1]) == t_VECSMALL)? prints: bruti;
-  pad = (long*)stackmalloc(l*r*sizeof(long));
+  pad = (long*)stack_malloc(l*r*sizeof(long));
   str_init(&scratchstr);
   lgall = 2; /* opening [ and closing ] */
   w = term_width();
@@ -3350,7 +3350,7 @@ try_pipe(const char *cmd, int fl)
     char *s;
     if (flag & mf_OUT) pari_err(e_ARCH,"pipes");
     f = pari_unique_filename("pipe");
-    s = stackmalloc(strlen(cmd)+strlen(f)+4);
+    s = stack_malloc(strlen(cmd)+strlen(f)+4);
     sprintf(s,"%s > %s",cmd,f);
     file = system(s)? NULL: fopen(f,"r");
     flag |= mf_FALSE; pari_free(f); avma = av;
@@ -3727,7 +3727,7 @@ pari_get_infile(const char *name, FILE *file)
 #endif
   ))
   { /* compressed file (compress or gzip) */
-    char *cmd = stackmalloc(strlen(ZCAT) + l + 4);
+    char *cmd = stack_malloc(strlen(ZCAT) + l + 4);
     sprintf(cmd,"%s \"%s\"",ZCAT,name);
     fclose(file);
     return try_pipe(cmd, mf_IN);
@@ -3748,7 +3748,7 @@ pari_fopengz(const char *s)
   if (f) return pari_get_infile(s, f);
 
   l = strlen(s);
-  name = stackmalloc(l + 3 + 1);
+  name = stack_malloc(l + 3 + 1);
   strcpy(name, s); (void)sprintf(name + l, ".gz");
   f = fopen(name, "r");
   pf = f ? pari_get_infile(name, f): NULL;
@@ -3776,7 +3776,7 @@ try_name(char *name)
 
   if (!file)
   { /* try appending ".gp" to name */
-    s = stackmalloc(strlen(name)+4);
+    s = stack_malloc(strlen(name)+4);
     sprintf(s, "%s.gp", name);
     file = try_open(s);
   }
@@ -4023,7 +4023,7 @@ is_magic_ok(FILE *f)
 {
   pari_sp av = avma;
   size_t L = strlen(MAGIC);
-  char *s = stackmalloc(L);
+  char *s = stack_malloc(L);
   int r = (fread(s,1,L, f) == L && strncmp(s,MAGIC,L) == 0);
   avma = av; return r;
 }
@@ -4354,7 +4354,7 @@ gp_history(gp_hist *H, long p, char *old, char *entry)
   if (p <= 0) p += t; /* count |p| entries starting from last */
   if (p <= 0 || p <= (long)(t - s) || (ulong)p > t)
   {
-    char *str = stackmalloc(128);
+    char *str = stack_malloc(128);
     long pmin = (long)(t - s) + 1;
     if (pmin <= 0) pmin = 1;
     sprintf(str, "History result %%%ld not available [%%%ld-%%%lu]", p,pmin,t);
@@ -4363,7 +4363,7 @@ gp_history(gp_hist *H, long p, char *old, char *entry)
   z = H->res[ (p-1) % s ];
   if (!z)
   {
-    char *str = stackmalloc(128);
+    char *str = stack_malloc(128);
     sprintf(str, "History result %%%ld has been deleted (histsize changed)", p);
     pari_err(e_SYNTAX, str, old, entry);
   }

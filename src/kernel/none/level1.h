@@ -100,6 +100,20 @@ new_chunk(size_t x) /* x is a number of longs */
   return z;
 }
 
+INLINE char *
+stack_malloc(size_t N)
+{
+  long n = nchar2nlong(N);
+  return (char*)new_chunk(n);
+}
+
+INLINE char *
+stack_calloc(size_t N)
+{
+  char *p = stack_malloc(N);
+  memset(p, 0, N); return p;
+}
+
 /* cgetg(lg(x), typ(x)), set *lx. Implicit unsetisclone() */
 INLINE GEN
 cgetg_copy(GEN x, long *plx) {

@@ -21,7 +21,7 @@ galoisnbpol(long a)
 {
   GEN n;
   pariFILE *F;
-  char *s = stackmalloc(strlen(pari_datadir) + 11 + 20 + 1);
+  char *s = stack_malloc(strlen(pari_datadir) + 11 + 20 + 1);
   sprintf(s,"%s/galpol/%ld/nb", pari_datadir, a);
   F = pari_fopengz(s);
   if (!F) pari_err_FILE("galpol file",s);

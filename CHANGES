@@ -127,6 +127,7 @@ BA 28- more usable form of alarm(s, code): evaluate code, aborting after s
    42- allow t_SER with integral coefficients to use asymptotically fast
        (ZX_mul / ZX_sqr) polynomial multiplication
 LGr43- let initprimes0 use an existing prime table
+   44- rename stackmalloc -> stack_malloc. Add stack_calloc
 
   Added
     1- mathnf for matrices over K[X] [#41]

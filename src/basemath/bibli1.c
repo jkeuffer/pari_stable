@@ -679,13 +679,6 @@ dalloc(size_t n)
   return (double*)new_chunk(n / sizeof(long));
 }
 
-char *
-stackmalloc(size_t N)
-{
-  long n = nchar2nlong(N);
-  return (char*)new_chunk(n);
-}
-
 /* x is a vector of elts of a p-adic field */
 GEN
 plindep(GEN x)

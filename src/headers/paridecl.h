@@ -1161,7 +1161,6 @@ GEN     qfrep0(GEN a, GEN borne, long flag);
 GEN     qfminim0(GEN a, GEN borne, GEN stockmax,long flag, long prec);
 GEN     minim2(GEN a, GEN borne, GEN stockmax);
 GEN     perf(GEN a);
-char*   stackmalloc(size_t N);
 GEN     zncoppersmith(GEN P0, GEN N, GEN X, GEN B) ;
 
 /* bibli2.c */
@@ -2888,6 +2887,8 @@ INLINE void   shiftr_inplace(GEN z, long d);
 INLINE long   smodis(GEN x, long y);
 INLINE long   smodss(long x, long y);
 INLINE void   stackdummy(pari_sp av, pari_sp ltop);
+INLINE char  *stack_malloc(size_t N);
+INLINE char  *stack_calloc(size_t N);
 INLINE GEN    stoi(long x);
 INLINE GEN    stor(long x, long prec);
 INLINE GEN    subii(GEN x, GEN y);

@@ -135,7 +135,7 @@ static PERM
 permmul(PERM s1, PERM s2)
 {
   long i, n1 = s1[0];
-  PERM s3 = (PERM)stackmalloc((n1+1) * sizeof(IND));
+  PERM s3 = (PERM)stack_malloc((n1+1) * sizeof(IND));
   for (i=1; i<=n1; i++) s3[i] = s1[(int)s2[i]];
   s3[0] = (IND)n1; return s3;
 }
@@ -273,7 +273,7 @@ static PERM *
 alloc_pobj(long n, long m)
 {
   long i;
-  PERM *g = (PERM*) stackmalloc( (m+1)*sizeof(PERM) + (n+1)*m * sizeof(IND) );
+  PERM *g = (PERM*) stack_malloc( (m+1)*sizeof(PERM) + (n+1)*m * sizeof(IND) );
   PERM gpt = (PERM) (g + (m+1));
 
   for (i=1; i<=m; i++) { g[i] = gpt; gpt += (n+1); }
@@ -294,7 +294,7 @@ static pariFILE *
 galopen(const char *pre, long n, long n1, long n2)
 {
   pari_sp av = avma;
-  char *s = stackmalloc(strlen(pari_datadir) + 3 + 4 * 20 + 1 + 3);
+  char *s = stack_malloc(strlen(pari_datadir) + 3 + 4 * 20 + 1 + 3);
   pariFILE *f;
 
   (void)sprintf(s, "%s/galdata/%s%ld_%ld_%ld", pari_datadir, pre, n, n1, n2);
@@ -2346,7 +2346,7 @@ GEN
 polgaloisnamesbig(long n, long k)
 {
   pari_sp av = avma;
-  char *s = stackmalloc(strlen(pari_datadir) + 13 + 20 + 3);
+  char *s = stack_malloc(strlen(pari_datadir) + 13 + 20 + 3);
   pariFILE *f;
   GEN V;
 

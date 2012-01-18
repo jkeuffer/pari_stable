@@ -742,7 +742,7 @@ constructor underlying \kbd{cgetg}, which calls \kbd{new\_chunk} then sets
 the first code word. It works by simply returning the address
 \kbd{((GEN)avma) - n}, after checking that it is larger than \kbd{(GEN)bot}.
 
-\fun{char*}{stackmalloc}{size_t n} allocates memory on the stack for $n$
+\fun{char*}{stack_malloc}{size_t n} allocates memory on the stack for $n$
 chars (\emph{not} $n$ \kbd{GEN}s). This is faster than using \kbd{malloc},
 and easier to use in most situations when temporary storage is needed. In
 particular there is no need to \kbd{free} individually all variables thus
@@ -7779,13 +7779,13 @@ at most $n$ chars from $s$ (uses \kbd{pari\_malloc}). If $s$ is longer than
 $n$, only $n$ characters are copied and a terminal null byte is added.
 
 \fun{char*}{stack_strdup}{const char *s} returns a copy of $s$, allocated
-on the PARI stack (uses \kbd{stackmalloc}).
+on the PARI stack (uses \kbd{stack_malloc}).
 
 \fun{char*}{stack_strcat}{const char *s, const char *t} returns the
 concatenation of $s$ and $t$, allocated on the PARI stack (uses
-\kbd{stackmalloc}).
+\kbd{stack_malloc}).
 
-\fun{char*}{itostr}{GEN x} writes the \typ{INT} $x$ to a \tet{stackmalloc}'ed
+\fun{char*}{itostr}{GEN x} writes the \typ{INT} $x$ to a \tet{stack_malloc}'ed
 string.
 
 \fun{char*}{GENtostr}{GEN x}, using the current default output format

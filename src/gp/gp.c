@@ -375,7 +375,7 @@ static void
 community(void)
 {
   pari_sp av = avma;
-  char *s = stackmalloc(strlen(pari_datadir) + 1024);
+  char *s = stack_malloc(strlen(pari_datadir) + 1024);
 
   (void)sprintf(s, "The standard distribution of GP/PARI includes a \
 reference manual, a tutorial, a reference card and quite a few examples. They \
@@ -768,7 +768,7 @@ what_readline(void)
   char *s;
 #ifdef READLINE
   const char *ver;
-  char *extra = stackmalloc(strlen(READLINE) + 32);
+  char *extra = stack_malloc(strlen(READLINE) + 32);
 #  if defined(HAS_RL_LIBRARY_VERSION) || defined(FAKE_RL_LIBRARY_VERSION)
 #    ifdef FAKE_RL_LIBRARY_VERSION
   extern char *rl_library_version;
@@ -785,7 +785,7 @@ what_readline(void)
     ver = READLINE;
     extra[0] = 0;
   }
-  s = stackmalloc(3 + strlen(ver) + 8 + strlen(extra));
+  s = stack_malloc(3 + strlen(ver) + 8 + strlen(extra));
   (void)sprintf(s, "v%s %s%s", ver,
             (GP_DATA->use_readline)? "enabled": "disabled",
             extra);
@@ -817,11 +817,11 @@ what_cc(void)
 #  else
 #    define Format "%s"
 #  endif
-  s = stackmalloc(6 + strlen(GCC_VERSION) + 1);
+  s = stack_malloc(6 + strlen(GCC_VERSION) + 1);
   (void)sprintf(s, Format, GCC_VERSION);
 #else
 #  ifdef _MSC_VER
-  s = stackmalloc(32);
+  s = stack_malloc(32);
   (void)sprintf(s, "MSVC-%i", _MSC_VER);
 #  else
   s = NULL;
@@ -838,12 +838,12 @@ print_version(void)
 
   center(paricfg_version);
   center(paricfg_buildinfo);
-  buf = stackmalloc(strlen(__DATE__) +  32 + (ver? strlen(ver): 0));
+  buf = stack_malloc(strlen(__DATE__) +  32 + (ver? strlen(ver): 0));
   if (ver) (void)sprintf(buf, "compiled: %s, %s", __DATE__, ver);
   else     (void)sprintf(buf, "compiled: %s", __DATE__);
   center(buf);
   ver = what_readline();
-  buf = stackmalloc(strlen(ver) + 64);
+  buf = stack_malloc(strlen(ver) + 64);
   (void)sprintf(buf, "(readline %s, extended help%s enabled)", ver,
                 has_ext_help()? "": " not");
   center(buf); avma = av;
@@ -1404,7 +1404,7 @@ static char *
 strip_prompt(const char *s)
 {
   long l = strlen(s);
-  char *t, *t0 = stackmalloc(l+1);
+  char *t, *t0 = stack_malloc(l+1);
   t = t0;
   for (; *s; s++)
   {

@@ -143,7 +143,7 @@ sd_toggle(const char *v, long flag, const char *s, int *ptn)
     if (n == state) return gnil;
     if (n != !state)
     {
-      char *t = stackmalloc(64 + strlen(s));
+      char *t = stack_malloc(64 + strlen(s));
       (void)sprintf(t, "default: incorrect value for %s [0:off / 1:on]", s);
       pari_err(e_SYNTAX, t, v,v);
     }
@@ -168,7 +168,7 @@ sd_ulong_init(const char *v, const char *s, ulong *ptn, ulong Min, ulong Max)
     ulong n = get_uint(v);
     if (n > Max || n < Min)
     {
-      char *buf = stackmalloc(strlen(s) + 2 * 20 + 40);
+      char *buf = stack_malloc(strlen(s) + 2 * 20 + 40);
       (void)sprintf(buf, "default: incorrect value for %s [%lu-%lu]",
                     s, Min, Max);
       pari_err(e_SYNTAX, buf, v,v);
@@ -346,7 +346,7 @@ sd_format(const char *v, long flag)
   }
   if (flag == d_RETURN)
   {
-    char *s = stackmalloc(64);
+    char *s = stack_malloc(64);
     (void)sprintf(s, "%c.%ld", fmt->format, fmt->sigd);
     return strtoGENstr(s);
   }

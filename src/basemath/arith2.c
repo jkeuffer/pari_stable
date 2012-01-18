@@ -28,12 +28,13 @@ static ulong diffptrlen;
 /* Building/Rebuilding the diffptr table. The actual work is done by the
  * following two subroutines;  the user entry point is the function
  * initprimes() below.  initprimes1() is the old algorithm, called when
- * maxnum (size) is moderate. */
+ * maxnum (size) is moderate. Must be called after pari_init_stack() )*/
 static byteptr
 initprimes1(ulong size, long *lenp, long *lastp, byteptr p1)
 {
+  pari_sp av = avma;
   long k;
-  byteptr q, r, s, p = (byteptr)pari_calloc(size+2), fin = p + size;
+  byteptr q, r, s, p = (byteptr)stack_calloc(size+2), fin = p + size;
 
   for (r=q=p,k=1; r<=fin; )
   {
@@ -50,8 +51,7 @@ initprimes1(ulong size, long *lenp, long *lastp, byteptr p1)
   *r++ = 0;
   *lenp = r - p1;
   *lastp = ((s - p) << 1) + 1;
-  pari_free(p);
-  return p1;
+  avma = av; return p1;
 }
 
 /*  Timing in ms (Athlon/850; reports 512K of secondary cache; looks

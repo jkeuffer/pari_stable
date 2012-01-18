@@ -403,7 +403,7 @@ newton_polygon(GEN p, long k)
   long n = degpol(p), i, j, h, l, *vertex;
 
   init_dalloc();
-  logcoef = (double*)stackmalloc((n+1)*sizeof(double));
+  logcoef = (double*)stack_malloc((n+1)*sizeof(double));
   vertex = (long*)new_chunk(n+1);
 
   /* vertex[i] = 1 if i a vertex of convex hull, 0 otherwise */
@@ -1398,7 +1398,7 @@ split_2(GEN p, long bit, GEN ctr, double thickness, GEN *F, GEN *G)
   double lrmin, lrmax, lrho, *radii;
 
   init_dalloc();
-  radii = (double*) stackmalloc((n+1) * sizeof(double));
+  radii = (double*) stack_malloc((n+1) * sizeof(double));
 
   for (i=2; i<n; i++) radii[i] = UNDEF;
   aux = thickness/(double)(4 * n);
