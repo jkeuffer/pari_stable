@@ -126,6 +126,7 @@ BA 28- more usable form of alarm(s, code): evaluate code, aborting after s
        now deprecated and ignored.
    42- allow t_SER with integral coefficients to use asymptotically fast
        (ZX_mul / ZX_sqr) polynomial multiplication
+LGr43- let initprimes0 use an existing prime table
 
   Added
     1- mathnf for matrices over K[X] [#41]
@@ -165,6 +166,7 @@ BA 29- library function Z_issmooth
 BA 30- linear sieve algorithm for Fp_log/znlog
 BA 31- library functions Flx_to_FlxX, F2m_to_Flm, F2c_to_Flc, and Flxq_powu
    32- GP function idealnumden()
+LGr33- library function uprecprime()
 
   Removed
     1- dropped DOS support
