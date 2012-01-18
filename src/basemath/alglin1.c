@@ -1432,7 +1432,7 @@ ZM_gauss(GEN a, GEN b0)
    * whose log is < 1, hence + 1 (to cater for rounding errors) */
   m = (long)ceil((rtodbl(logr_abs(itor(delta,LOWDEFAULTPREC))) + 1)
                  / log((double)p));
-  xb = Zlm_gauss(a, b, p, m, C);
+  xb = ZlM_gauss(a, b, p, m, C);
   N = powuu(p, m);
   delta = sqrti(delta);
   if (iscol)
@@ -1443,7 +1443,7 @@ ZM_gauss(GEN a, GEN b0)
 }
 
 GEN
-Zlm_gauss(GEN a, GEN b, ulong p, long e, GEN C)
+ZlM_gauss(GEN a, GEN b, ulong p, long e, GEN C)
 {
   pari_sp av = avma, lim = stack_lim(av, 2), av2;
   GEN xi, xb, pi = gen_1, P;
@@ -1462,7 +1462,7 @@ Zlm_gauss(GEN a, GEN b, ulong p, long e, GEN C)
     b = ZM_Z_divexact(ZM_sub(b, ZM_nm_mul(a, xi)), P);
     if (low_stack(lim, stack_lim(av,2)))
     {
-      if(DEBUGMEM>1) pari_warn(warnmem,"Zlm_gauss. i=%ld",i);
+      if(DEBUGMEM>1) pari_warn(warnmem,"ZlM_gauss. i=%ld",i);
       gerepileall(av2,3, &pi,&b,&xb);
     }
     xi = Flm_mul(C, ZM_to_Flm(b, p), p);

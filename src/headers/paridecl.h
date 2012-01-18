@@ -589,7 +589,7 @@ GEN     ZM_det(GEN a);
 GEN     ZM_detmult(GEN A);
 GEN     ZM_gauss(GEN a, GEN b);
 GEN     ZM_inv(GEN M, GEN dM);
-GEN     Zlm_gauss(GEN a, GEN b, ulong p, long e, GEN C);
+GEN     ZlM_gauss(GEN a, GEN b, ulong p, long e, GEN C);
 GEN     apply0(GEN f, GEN A);
 GEN     closemodinvertible(GEN x, GEN y);
 GEN     deplin(GEN x);
