@@ -90,6 +90,23 @@ ZM_supnorm(GEN x)
 /**                           MULTIPLICATION                       **/
 /**                                                                **/
 /********************************************************************/
+/* x non-empty ZM, y a compatible nc (dimension > 0). */
+static GEN
+ZM_nc_mul_i(GEN x, GEN y, long c, long l)
+{
+  long i, j;
+  pari_sp av;
+  GEN z = cgetg(l,t_COL), s;
+
+  for (i=1; i<l; i++)
+  {
+    av = avma; s = muliu(gcoeff(x,i,1),y[1]);
+    for (j=2; j<c; j++)
+      if (y[j]) s = addii(s, muliu(gcoeff(x,i,j),y[j]));
+    gel(z,i) = gerepileuptoint(av,s);
+  }
+  return z;
+}
 /* x non-empty ZM, y a compatible zc (dimension > 0). */
 static GEN
 ZM_zc_mul_i(GEN x, GEN y, long c, long l)
@@ -123,6 +140,17 @@ ZM_zm_mul(GEN x, GEN y)
   if (l == 1) return z;
   c = lg(x[1]);
   for (j = 1; j < ly; j++) gel(z,j) = ZM_zc_mul_i(x, gel(y,j), l,c);
+  return z;
+}
+/* x ZM, y a compatible zn (dimension > 0). */
+GEN
+ZM_nm_mul(GEN x, GEN y)
+{
+  long j, c, l = lg(x), ly = lg(y);
+  GEN z = cgetg(ly, t_MAT);
+  if (l == 1) return z;
+  c = lg(x[1]);
+  for (j = 1; j < ly; j++) gel(z,j) = ZM_nc_mul_i(x, gel(y,j), l,c);
   return z;
 }
 
@@ -363,6 +391,29 @@ ZC_z_mul(GEN X, long c)
   for (i=1; i<l; i++) gel(A,i) = mulsi(c,gel(X,i));
   return A;
 }
+
+/* return a ZM */
+GEN
+nm_Z_mul(GEN X, GEN c)
+{
+  long i, j, h, l = lg(X), s = signe(c);
+  GEN A;
+  if (l == 1) return cgetg(1, t_MAT);
+  h = lg(X[1]);
+  if (!s) return zeromat(h-1, l-1);
+  if (is_pm1(c)) {
+    if (s > 0) return Flm_to_ZM(X);
+    X = Flm_to_ZM(X); ZM_togglesign(X); return X;
+  }
+  A = cgetg(l, t_MAT);
+  for (j = 1; j < l; j++)
+  {
+    GEN a = cgetg(h, t_COL), x = gel(X, j);
+    for (i = 1; i < h; i++) gel(a,i) = muliu(c, x[i]);
+    gel(A,j) = a;
+  }
+  return A;
+}
 GEN
 ZM_Z_mul(GEN X, GEN c)
 {
@@ -542,6 +593,12 @@ ZV_togglesign(GEN M)
 {
   long l = lg(M);
   while (--l > 0) togglesign_safe(&gel(M,l));
+}
+void
+ZM_togglesign(GEN M)
+{
+  long l = lg(M);
+  while (--l > 0) ZV_togglesign(gel(M,l));
 }
 
 /********************************************************************/

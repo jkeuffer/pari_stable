@@ -67,6 +67,8 @@ DS 51- elldivpol returned wrong result for degree n >=8.
        to costly factorizations [#1158]
 LGr54- the global variables associated to the primetable _maxprime / diffptr
        could become inconsistent
+   55- library functions nm_Z_mul, ZM_togglesign, ZM_nm_mul [ to improve
+       Zlm_gauss ]
 
   Changed
     1- mathnf: swapped flag 3 and 5.

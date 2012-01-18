@@ -469,12 +469,14 @@ int     ZM_equal(GEN A, GEN B);
 GEN     ZM_hnfremdiv(GEN x, GEN y, GEN *Q);
 long    ZM_max_lg(GEN x);
 GEN     ZM_mul(GEN x, GEN y);
+GEN     ZM_nm_mul(GEN x, GEN y);
 GEN     ZM_neg(GEN x);
 GEN     ZM_pow(GEN x, GEN n);
 GEN     ZM_sub(GEN x, GEN y);
 GEN     ZM_supnorm(GEN x);
 GEN     ZM_to_Flm(GEN x, ulong p);
 GEN     ZM_to_zm(GEN z);
+void    ZM_togglesign(GEN M);
 GEN     ZM_zc_mul(GEN x, GEN y);
 GEN     ZM_zm_mul(GEN x, GEN y);
 GEN     ZMrow_ZC_mul(GEN x, GEN y, long i);
@@ -504,6 +506,7 @@ int     ZM_ishnf(GEN x);
 int     ZM_isidentity(GEN x);
 void    RgM_check_ZM(GEN A, const char *s);
 void    RgV_check_ZV(GEN A, const char *s);
+GEN     nm_Z_mul(GEN X, GEN c);
 
 /* ZX.c */
 
