@@ -1454,7 +1454,7 @@ Zlm_gauss(GEN a, GEN b, ulong p, long e, GEN C)
   xb = Flm_to_ZM(xi);
   for (i = 2; i <= e; i++)
   {
-    pi = mulii(pi, P); /* = p^i */
+    pi = muliu(pi, p); /* = p^i */
     b = ZM_Z_divexact(ZM_sub(b, ZM_nm_mul(a, xi)), P);
     if (low_stack(lim, stack_lim(av,2)))
     {
