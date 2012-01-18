@@ -128,6 +128,7 @@ BA 28- more usable form of alarm(s, code): evaluate code, aborting after s
        (ZX_mul / ZX_sqr) polynomial multiplication
 LGr43- let initprimes0 use an existing prime table
    44- rename stackmalloc -> stack_malloc. Add stack_calloc
+   45- matimagecompl() now returns a permutation (t_VECMALL) no longer a t_VEC
 
   Added
     1- mathnf for matrices over K[X] [#41]
@@ -168,6 +169,7 @@ BA 30- linear sieve algorithm for Fp_log/znlog
 BA 31- library functions Flx_to_FlxX, F2m_to_Flm, F2c_to_Flc, and Flxq_powu
    32- GP function idealnumden()
 LGr33- library function uprecprime()
+   34- library function ZM_pivots()
 
   Removed
     1- dropped DOS support

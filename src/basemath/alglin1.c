@@ -1937,7 +1937,9 @@ static GEN F2m_gauss_pivot(GEN x, long *rr);
 static GEN Flm_gauss_pivot(GEN x, ulong p, long *rry);
 
 /* r = dim ker(x).
- * Returns d: d[k] contains the index of the first non-zero pivot in column k */
+ * Returns d:
+ *   d[k] != 0 contains the index of a non-zero pivot in column k
+ *   d[k] == 0 if column k is a linear combination of the (k-1) first ones */
 GEN
 RgM_pivots(GEN x0, GEN data, long *rr, pivot_fun pivot)
 {
@@ -1945,6 +1947,7 @@ RgM_pivots(GEN x0, GEN data, long *rr, pivot_fun pivot)
   long i, j, k, r, t, m, n = lg(x0)-1;
   pari_sp av, lim;
 
+  if (RgM_is_ZM(x0)) return ZM_pivots(x0, rr);
   if (!n) { *rr = 0; return NULL; }
 
   d = cgetg(n+1, t_VECSMALL);
@@ -1974,39 +1977,85 @@ RgM_pivots(GEN x0, GEN data, long *rr, pivot_fun pivot)
   }
   *rr = r; avma = (pari_sp)d; return d;
 }
+
+static long
+ZM_count_0_cols(GEN M)
+{
+  long i, l = lg(M), n = 0;
+  for (i = 1; i < l; i++)
+    if (ZV_equal0(gel(M,i))) n++;
+  return n;
+}
+
+static void indexrank_all(long m, long n, long r, GEN d, GEN *prow, GEN *pcol);
 /* As above, integer entries */
 GEN
-ZM_pivots(GEN x0, long *rr)
+ZM_pivots(GEN M0, long *rr)
 {
   ulong mod_p;
   byteptr bp;
-  GEN d;
-  long rmin, m, n = lg(x0)-1, i, imax;
-  pari_sp av;
+  GEN d, dbest = NULL;
+  long m, n, i, imax, rmin, rbest, zc;
+  int beenthere = 0;
+  pari_sp av, av0 = avma;
 
-  if (!n) { *rr = 0; return NULL; }
+  rbest = n = lg(M0)-1;
+  if (n == 0) { *rr = 0; return NULL; }
+  zc = ZM_count_0_cols(M0);
+  if (n == zc) { *rr = zc; return zero_zv(n); }
 
-  m = lg(x0[1])-1;
-  rmin = m<n ? n-m : 0;
+  m = lg(M0[1])-1;
+  rmin = (m < n-zc) ? n-m : zc;
   bp = init_modular(&mod_p);
   imax = (n < (1<<4))? 1: (n>>3); /* heuristic */
-  for (av = avma, i = 0; i < imax; avma = av, i++)
+
+  for(;;)
   {
-    d = Flm_gauss_pivot(ZM_to_Flm(x0, mod_p), mod_p, rr);
-    if (*rr == rmin) { avma = (pari_sp)d; return d; }
-    NEXT_PRIME_VIADIFF(mod_p, bp);
+    GEN row, col, M, KM, IM, RHS, X, cX;
+    long rk;
+    for (av = avma, i = 0;; avma = av, i++)
+    {
+      NEXT_PRIME_VIADIFF_CHECK(mod_p, bp);
+      d = Flm_gauss_pivot(ZM_to_Flm(M0, mod_p), mod_p, rr);
+      if (*rr == rmin) goto END; /* maximal rank, return */
+      if (*rr < rbest) { /* save best r so far */
+        rbest = *rr;
+        if (dbest) gunclone(dbest);
+        dbest = gclone(d);
+        if (beenthere) break;
+      }
+      if (!beenthere && i >= imax) break;
+    }
+    beenthere = 1;
+    /* Dubious case: there is (probably) a non trivial kernel */
+    indexrank_all(m,n, rbest, dbest, &row, &col);
+    M = rowpermute(vecpermute(M0, col), row);
+    rk = n - rbest; /* (probable) dimension of image */
+    IM = vecslice(M,1,rk);
+    KM = vecslice(M,rk+1, n);
+    M = rowslice(IM, 1,rk); /* square maximal rank */
+    X = ZM_gauss(M, rowslice(KM, 1,rk));
+    X = Q_remove_denom(X, &cX);
+    RHS = rowslice(KM,rk+1,m);
+    if (cX) RHS = ZM_Z_mul(RHS, cX);
+    if (ZM_equal(ZM_mul(rowslice(IM,rk+1,m), X), RHS))
+    {
+      d = vecsmall_copy(dbest);
+      goto END;
+    }
+    avma = av;
   }
-  /* Dubious case: there is a non trivial kernel without full rank */
-  /* As far as I can see there is not much we can do: we could use d[]
-   * instead of pivot(), is it worth it ? */
-  avma = av;
-  return RgM_pivots(x0, NULL, rr, gauss_get_pivot_NZ);
+END:
+  if (dbest) gunclone(dbest);
+  return gerepileuptoleaf(av0, d);
 }
+
 static GEN
 gauss_pivot(GEN x, long *rr) {
   GEN data;
   pivot_fun pivot = get_pivot_fun(x, &data);
-  return RgM_pivots(x, data, rr, pivot); }
+  return RgM_pivots(x, data, rr, pivot);
+}
 
 /* compute ker(x) */
 static GEN
@@ -2074,71 +2123,51 @@ image(GEN x)
   return y;
 }
 
-GEN
-ZM_imagecompl(GEN x)
+static GEN
+imagecompl_aux(GEN x, GEN(*PIVOT)(GEN,long*))
 {
   pari_sp av = avma;
   GEN d,y;
   long j,i,r;
 
   if (typ(x)!=t_MAT) pari_err_TYPE("imagecompl",x);
-  (void)new_chunk(lg(x) * 3); /* HACK */
-  d = ZM_pivots(x,&r);
-  avma = av; y = cgetg(r+1,t_VEC);
+  (void)new_chunk(lg(x) * 4 + 1); /* HACK */
+  d = PIVOT(x,&r); /* if (!d) then r = 0 */
+  avma = av; y = cgetg(r+1,t_VECSMALL);
   for (i=j=1; j<=r; i++)
-    if (!d[i]) gel(y,j++) = utoipos(i);
+    if (!d[i]) y[j++] = i;
   return y;
 }
-
 GEN
-imagecompl(GEN x)
-{
-  pari_sp av = avma;
-  GEN d,y;
-  long j,i,r;
-
-  if (typ(x)!=t_MAT) pari_err_TYPE("imagecompl",x);
-  (void)new_chunk(lg(x) * 3); /* HACK */
-  d = gauss_pivot(x,&r);
-  avma = av; y = cgetg(r+1,t_VEC);
-  for (i=j=1; j<=r; i++)
-    if (!d[i]) gel(y,j++) = utoipos(i);
-  return y;
-}
+imagecompl(GEN x) { return imagecompl_aux(x, &gauss_pivot); }
+GEN
+ZM_imagecompl(GEN x) { return imagecompl_aux(x, &ZM_pivots); }
 
 /* permutation giving imagecompl(x') | image(x'), x' = transpose of x */
+static GEN
+imagecomplspec_aux(GEN x, long *nlze, GEN(*PIVOT)(GEN,long*))
+{
+  pari_sp av = avma;
+  GEN d,y;
+  long i,j,k,l,r;
+
+  if (typ(x)!=t_MAT) pari_err_TYPE("imagecomplspec",x);
+  x = shallowtrans(x); l = lg(x);
+  d = PIVOT(x,&r);
+  *nlze = r;
+  avma = av; /* HACK: shallowtrans(x) big enough to avoid overwriting d */
+  if (!d) return identity_perm(l-1);
+  y = cgetg(l,t_VECSMALL);
+  for (i=j=1, k=r+1; i<l; i++)
+    if (d[i]) y[k++]=i; else y[j++]=i;
+  return y;
+}
 GEN
 imagecomplspec(GEN x, long *nlze)
-{
-  pari_sp av = avma;
-  GEN d,y;
-  long i,j,k,l,r;
-
-  x = shallowtrans(x); l = lg(x);
-  d = gauss_pivot(x,&r);
-  avma = av; /* HACK: shallowtrans(x) big enough to avoid overwriting d */
-  y = cgetg(l,t_VECSMALL);
-  for (i=j=1, k=r+1; i<l; i++)
-    if (d[i]) y[k++]=i; else y[j++]=i;
-  *nlze = r; return y;
-}
-
-/* permutation giving imagecompl(x') | image(x'), x' = transpose of x */
+{ return imagecomplspec_aux(x,nlze,&gauss_pivot); }
 GEN
 ZM_imagecomplspec(GEN x, long *nlze)
-{
-  pari_sp av = avma;
-  GEN d,y;
-  long i,j,k,l,r;
-
-  x = shallowtrans(x); l = lg(x);
-  d = ZM_pivots(x,&r);
-  avma = av; /* HACK: shallowtrans(x) big enough to avoid overwriting d */
-  y = cgetg(l,t_VECSMALL);
-  for (i=j=1, k=r+1; i<l; i++)
-    if (d[i]) y[k++]=i; else y[j++]=i;
-  *nlze = r; return y;
-}
+{ return imagecomplspec_aux(x,nlze,&ZM_pivots); }
 
 static GEN
 sinverseimage(GEN mat, GEN y)
@@ -2361,6 +2390,21 @@ Flm_indexrank(GEN x, ulong p)
   return res;
 }
 
+/* d a t_VECSMALL of integers in 1..n. Return the vector of the d[i]
+ * followed by the missing indices */
+static GEN
+perm_complete(GEN d, long n)
+{
+  GEN y = cgetg(n+1, t_VECSMALL);
+  long i, j = 1, k = n, l = lg(d);
+  pari_sp av = avma;
+  char *T = stack_calloc(n+1);
+  for (i = 1; i < l; i++) T[d[i]] = 1;
+  for (i = 1; i <= n; i++)
+    if (T[i]) y[j++] = i; else y[k--] = i;
+  avma = av; return y;
+}
+
 /* n = dim x, r = dim Ker(x), d from gauss_pivot */
 static GEN
 indexrank0(long n, long r, GEN d)
@@ -2378,6 +2422,14 @@ indexrank0(long n, long r, GEN d)
     vecsmall_sort(p1);
   }
   return res;
+}
+/* x an m x n t_MAT, n > 0, r = dim Ker(x), d from gauss_pivot */
+static void
+indexrank_all(long m, long n, long r, GEN d, GEN *prow, GEN *pcol)
+{
+  GEN IR = indexrank0(n, r, d);
+  *prow = perm_complete(gel(IR,1), m);
+  *pcol = perm_complete(gel(IR,2), n);
 }
 static void
 init_indexrank(GEN x) {
