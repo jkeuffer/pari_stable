@@ -65,6 +65,8 @@ DS 51- elldivpol returned wrong result for degree n >=8.
    53- idealfactor(nf, non integral ideal) would remove a rational content
        instead of factoring A/B with A,B coprime integer ideal. Which led
        to costly factorizations [#1158]
+LGr54- the global variables associated to the primetable _maxprime / diffptr
+       could become inconsistent
 
   Changed
     1- mathnf: swapped flag 3 and 5.
