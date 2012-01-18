@@ -1,4 +1,5 @@
 default(realprecision,38);
+dobnf(T,flag=0,tech=[])= setrand(1); my(K = bnfinit(T,flag,tech)); [K.cyc,K.fu];
 \e
 \\ Initialisations diverses
 gettime; p2=Pol([1,3021,-786303,-6826636057,-546603588746,3853890514072057]);
@@ -7,21 +8,21 @@ setrand(1);a=matrix(3,5,j,k,vectorv(5,l,random\10^8));
 setrand(1);as=matrix(3,3,j,k,vectorv(5,l,random\10^8));
 nfpol=x^5-5*x^3+5*x+25; nf=nfinit(nfpol)
 nfinit(nfpol,2)
-nfinit(nfpol,3)
+nfinit(nfpol,3)[2]
 nf3=nfinit(x^6+108);
-nf4=nfinit(x^3-10*x+8)
 setrand(1);bnf2=bnfinit(y^3-y-1);nf2=bnf2[7];
 setrand(1);bnf=bnfinit(x^2-x-57,,[0.2,0.2])
-setrand(1);bnfinit(x^2-x-100000,1)
+dobnf(x^2-x-100000,1)
 \p19
 setrand(1);sbnf=bnfcompress(bnfinit(x^3-x^2-14*x-1))
+bnfinit(sbnf)
 \p38
-bnr=bnrinit(bnf,[[5,3;0,1],[1,0]],1)
+bnr=bnrinit(bnf,[[5,3;0,1],[1,0]],1); bnr.cyc
+bnr2=bnrinit(bnf,[[25,13;0,1],[1,1]],1); bnr2.bid
 rnfinit(nf2,x^5-x-2)
 \\
 bnfcertify(bnf)
-setrand(1);bnfinit(x^2-x-100000,1).fu
-setrand(1);bnfinit(x^4+24*x^2+585*x+1791,,[0.1,0.1])
+dobnf(x^4+24*x^2+585*x+1791,,[0.1,0.1])
 bnrconductor(bnf,[[25,13;0,1],[1,1]])
 bnrconductorofchar(bnr,[2])
 \\ bnfdecodemodule(bnf,
@@ -31,13 +32,9 @@ bnfisprincipal(bnf,[5,1;0,1],0)
 bnfisprincipal(bnf,[5,1;0,1])
 \\ bnfissunit
 bnfisunit(bnf,Mod(3405*x-27466,x^2-x-57))
-\p19
-bnfinit(sbnf)
-\p38
 bnfnarrow(bnf)
 bnfsignunit(bnf)
 \\ bnfsunit(bnf,
-bnr2=bnrinit(bnf,[[25,13;0,1],[1,1]],1)
 bnrclassno(bnf,[[5,3;0,1],[1,0]])
 lu=ideallist(bnf,55,3);
 bnrclassnolist(bnf,lu)
@@ -50,7 +47,7 @@ bnrdisc(bnr2,,,3)
 bnrdisclist(bnf,lu)
 bnrdisclist(bnf,20)
 bnrisprincipal(bnr,idealprimedec(bnf,7)[1])
-dirzetak(nf4,30)
+dirzetak(nfinit(x^3-10*x+8), 30)
 factornf(x^3+x^2-2*x-1,t^3+t^2-2*t-1)
 \\
 vp=idealprimedec(nf,3)[1]
