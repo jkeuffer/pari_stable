@@ -3753,7 +3753,8 @@ START:
       { /* dependent rows */
         F.L_jid = vecslice(F.perm, 1, need);
         vecsmall_sort(F.L_jid);
-        if (need == old_need && !F.newpow) F.sfb_chg = sfb_CHANGE;
+        if (cache.missing && need == old_need && !F.newpow)
+          F.sfb_chg = sfb_CHANGE;
         old_need = need;
       }
       else
