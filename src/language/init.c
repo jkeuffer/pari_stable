@@ -627,7 +627,7 @@ pari_init_errcatch(void)
 /*********************************************************************/
 
 static void
-pari_stack_alloc(struct pari_mainstack *st, size_t s)
+pari_mainstack_alloc(struct pari_mainstack *st, size_t s)
 {
   st->bot = (pari_sp)pari_malloc(s);
   st->avma = st->top = st->bot+s;
@@ -635,14 +635,14 @@ pari_stack_alloc(struct pari_mainstack *st, size_t s)
 }
 
 static void
-pari_stack_free(struct pari_mainstack *st)
+pari_mainstack_free(struct pari_mainstack *st)
 {
   free((void*)st->bot);
   st->avma = st->top = st->bot = 0;
 }
 
 static void
-pari_stack_use(struct pari_mainstack *st)
+pari_mainstack_use(struct pari_mainstack *st)
 {
   bot = st->bot; top = st->top; avma = st->avma;
   memused = st->memused;
@@ -654,14 +654,14 @@ pari_stack_use(struct pari_mainstack *st)
 void
 pari_thread_alloc(struct pari_thread *t, size_t s, GEN arg)
 {
-  pari_stack_alloc(&t->st,s);
+  pari_mainstack_alloc(&t->st,s);
   t->data = arg;
 }
 
 void
 pari_thread_free(struct pari_thread *t)
 {
-  pari_stack_free(&t->st);
+  pari_mainstack_free(&t->st);
 }
 
 void
@@ -691,7 +691,7 @@ pari_thread_close(void)
 GEN
 pari_thread_start(struct pari_thread *t)
 {
-  pari_stack_use(&t->st);
+  pari_mainstack_use(&t->st);
   pari_thread_init();
   return t->data;
 }
