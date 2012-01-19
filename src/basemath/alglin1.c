@@ -1143,7 +1143,7 @@ F2m_inv(GEN a) {
 static GEN
 Flm_gauss_sp(GEN a, GEN b, ulong *detp, ulong p)
 {
-  long i, j, k, li, bco, aco = lg(a)-1;
+  long i, j, k, li, bco, aco = lg(a)-1, s = 1;
   const int OK_ulong = SMALL_ULONG(p);
   ulong det = 1;
   GEN u;
@@ -1190,6 +1190,7 @@ Flm_gauss_sp(GEN a, GEN b, ulong *detp, ulong p)
     if (k > li) return NULL;
     if (k != i)
     { /* swap lines so that k = i */
+      s = -s;
       for (j=i; j<=aco; j++) swap(gcoeff(a,i,j), gcoeff(a,k,j));
       for (j=1; j<=bco; j++) swap(gcoeff(b,i,j), gcoeff(b,k,j));
     }
@@ -1223,7 +1224,12 @@ Flm_gauss_sp(GEN a, GEN b, ulong *detp, ulong p)
       }
     }
   }
-  if (detp) *detp = det % p;
+  if (detp)
+  {
+    det %=  p;
+    if (s < 0 && det) det = p - det;
+    *detp = det;
+  }
   u = cgetg(bco+1,t_MAT);
   if (OK_ulong)
     for (j=1; j<=bco; j++) ugel(u,j) = Fl_get_col_OK(a,(uGEN)b[j], aco,p);
