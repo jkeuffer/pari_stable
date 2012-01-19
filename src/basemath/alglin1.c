@@ -1223,7 +1223,7 @@ Flm_gauss_sp(GEN a, GEN b, ulong *detp, ulong p)
       }
     }
   }
-  if (detp) *detp = det;
+  if (detp) *detp = det % p;
   u = cgetg(bco+1,t_MAT);
   if (OK_ulong)
     for (j=1; j<=bco; j++) ugel(u,j) = Fl_get_col_OK(a,(uGEN)b[j], aco,p);
