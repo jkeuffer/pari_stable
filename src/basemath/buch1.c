@@ -316,7 +316,8 @@ check_prime_quad(GRHcheck_t *S, long np, GEN D, GEN invhr)
   if (S->maxprimes < np)
   {
     S->maxprimes *= 2;
-    S->primes = pari_realloc(S->primes, S->maxprimes*sizeof(*S->primes));
+    S->primes = (GRHprime_t*)pari_realloc((void*)S->primes,
+                                          S->maxprimes*sizeof(*S->primes));
   }
   for (i = S->nprimes, delta = diffptr + i; i < np; i++)
   {

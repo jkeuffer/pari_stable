@@ -496,7 +496,7 @@ init_GRHcheck(GRHcheck_t *S, long N, long R1, double LOGD)
   S->cN = R1*c2 + N*c1;
   S->cD = LOGD - N*c3 - R1*PI/2;
   S->maxprimes = 16000; /* sufficient for LIMC=176081*/
-  S->primes = pari_malloc(S->maxprimes*sizeof(*S->primes));
+  S->primes = (GRHprime_t*)pari_malloc(S->maxprimes*sizeof(*S->primes));
   S->nprimes = 0;
 }
 
@@ -519,7 +519,8 @@ check_prime_dec(GRHcheck_t *S, long np, GEN nf, GEN P, GEN D, GEN invhr)
   if (S->maxprimes < np)
   {
     S->maxprimes *= 2;
-    S->primes = pari_realloc(S->primes, S->maxprimes*sizeof(*S->primes));
+    S->primes = (GRHprime_t*)pari_realloc((void*)S->primes,
+                                          S->maxprimes*sizeof(*S->primes));
   }
   for (i = S->nprimes, delta = diffptr + i; i < np; i++)
   {
