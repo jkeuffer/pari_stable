@@ -1986,7 +1986,18 @@ void
 rectdraw_flag(GEN list, long flag) { gendraw(list, 0, flag); }
 
 static void
-ps_sc(void *data, long col) { (void)data; (void)col; }
+ps_sc(void *data, long col)
+{
+  long l = lg(pari_colormap)-1;
+  int r, g, b;
+  if (col >= l)
+  {
+    pari_warn(warner,"non-existent color: %ld", col);
+    col = l-1;
+  }
+  color_to_rgb(gel(pari_colormap,col+1), &r, &g, &b);
+  fprintf((FILE*)data,"%f %f %f setrgbcolor\n", r/255., g/255., b/255.);
+}
 
 static void
 ps_point(void *data, long x, long y)
