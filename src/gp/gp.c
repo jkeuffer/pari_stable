@@ -478,7 +478,7 @@ slash_commands(void)
 \\ps{n}  : change series precision\n\
 \\q      : quit completely this GP session\n\
 \\r {f}  : read in a file\n\
-\\s {n}  : print stack information\n\
+\\s      : print stack information\n\
 \\t      : print the list of PARI types\n\
 \\u      : print the list of user-defined functions\n\
 \\v      : print current version of GP\n\
