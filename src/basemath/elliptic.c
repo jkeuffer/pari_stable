@@ -35,8 +35,14 @@ checkell(GEN e)
 { if (typ(e)!=t_VEC || lg(e) < 20) pari_err_TYPE("checkell",e); }
 static void
 checksmallell_real(GEN e)
-{ if (typ(e)!=t_VEC || (lg(e) >= 20 && !ell_is_real(e)))
-    pari_err_TYPE("checksmallell_real", e); }
+{ checksmallell(e);
+  switch (typ(ell_get_disc(e)))
+  {
+    case t_INT:
+    case t_FRAC: break;
+    default: pari_err_TYPE("checksmallell_real", e);
+  }
+}
 void
 checkell_real(GEN e)
 { if (typ(e)!=t_VEC || !ell_is_real(e)) pari_err_TYPE("checkell_real", e); }
