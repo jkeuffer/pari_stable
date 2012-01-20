@@ -3976,6 +3976,10 @@ rdGEN(FILE *f)
   return bin_copy(p);
 }
 
+/* read a binary object in file f. Set *ptc to the object "type":
+ * BIN_GEN: an anonymous GEN x; return x.
+ * NAM_GEN: a named GEN x, with name v; set 'v to x (changevalue) and return x
+ * VAR_GEN: a name v; create the (unassigned) variable v and return gnil */
 GEN
 readobj(FILE *f, int *ptc)
 {
@@ -4111,26 +4115,33 @@ GEN
 readbin(const char *name, FILE *f, int *vector)
 {
   pari_sp av = avma;
-  GEN x,y,z;
-  int cx = 0 /* gcc -Wall */, cy;
+  pari_stack s_obj;
+  GEN obj, x, y;
+  int cy;
+  if (vector) *vector = 0;
   if (!check_magic(name,f)) return NULL;
-  x = z = NULL;
+  pari_stack_init(&s_obj, sizeof(GEN), (void**)&obj);
+  /* HACK: push codeword so as to be able to treat s_obj.data as a t_VEC */
+  pari_stack_pushp(&s_obj, (void*) (evaltyp(t_VEC)|evallg(1)));
+  x = gnil;
   while ((y = readobj(f, &cy)))
   {
-    if (x && cx == BIN_GEN) z = z? shallowconcat(z, mkvec(x)): mkvec(x);
-    x = y; cx = cy;
+    x = y;
+    if (cy == BIN_GEN) pari_stack_pushp(&s_obj, (void*)y);
   }
-  if (z)
+  switch(s_obj.n)
   {
-    if (x && cx == BIN_GEN) z = z? shallowconcat(z, mkvec(x)): mkvec(x);
-    if (DEBUGLEVEL)
-      pari_warn(warner,"%ld unnamed objects read. Returning then in a vector",
-          lg(z)-1);
-    x = gerepilecopy(av, z);
-    if (vector) *vector = 1;
+    case 0: break;
+    case 1: x = gel(obj,1); break;
+    default:
+      setlg(obj, s_obj.n);
+      if (DEBUGLEVEL)
+        pari_warn(warner,"%ld unnamed objects read. Returning then in a vector",
+                  s_obj.n);
+      x = gerepilecopy(av, obj);
+      if (vector) *vector = 1;
   }
-  else
-    if (vector) *vector = 0;
+  pari_stack_delete(&s_obj);
   return x;
 }
 
