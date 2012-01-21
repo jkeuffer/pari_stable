@@ -152,6 +152,13 @@ newblock(size_t n)
   return cur_block = x;
 }
 
+GEN
+gcloneref(GEN x)
+{
+  if (isclone(x)) { ++bl_refc(x); return x; }
+  else return gclone(x);
+}
+
 void
 gclone_refc(GEN x) { ++bl_refc(x); }
 

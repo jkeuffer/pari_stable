@@ -1956,6 +1956,7 @@ void    dbg_gerepileupto(GEN q);
 long    err_get_num(GEN e);
 GEN     errname(GEN err);
 GEN     gclone(GEN x);
+GEN     gcloneref(GEN x);
 void    gclone_refc(GEN x);
 GEN     gcopy(GEN x);
 GEN     gcopy_avma(GEN x, pari_sp *AVMA);

@@ -53,7 +53,7 @@ GEN
 return0(GEN x)
 {
   GEN y = br_res;
-  br_res = (x && x != gnil)? gclone(x): NULL;
+  br_res = (x && x != gnil)? gcloneref(x): NULL;
   if (y) gunclone(y);
   br_status = br_RETURN; return NULL;
 }
