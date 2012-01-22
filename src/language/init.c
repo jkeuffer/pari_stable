@@ -59,8 +59,8 @@ static const long readonly_ghalf[] = {
   (long)(readonly_constants+7)
 };
 THREAD GEN    bernzone;
-THREAD GEN     primetab; /* private primetable */
-THREAD byteptr diffptr = NULL;
+GEN     primetab; /* private primetable */
+byteptr diffptr = NULL;
 FILE    *pari_outfile, *pari_errfile, *pari_logfile, *pari_infile;
 char    *current_logfile, *current_psfile, *pari_datadir;
 long    gp_colors[c_LAST];
