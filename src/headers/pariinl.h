@@ -598,12 +598,12 @@ RgM_is_ZM(GEN x)
 /**                                                                **/
 /********************************************************************/
 INLINE void **
-pari_stack_base(pari_stack *s) { return (void **) ((char *)s+s->offset); }
+pari_stack_base(pari_stack *s) { return (void **) ((ulong)s + (ulong)s->offset); }
 
 INLINE void
 pari_stack_init(pari_stack *s, size_t size, void **data)
 {
-  s->offset = (char *)data-(char *)s;
+  s->offset = (ulong)data-(ulong)s;
   *data = NULL;
   s->n = 0;
   s->alloc = 0;

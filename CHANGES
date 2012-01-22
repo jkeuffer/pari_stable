@@ -70,6 +70,7 @@ LGr54- the global variables associated to the primetable _maxprime / diffptr
    55- library functions nm_Z_mul, ZM_togglesign, ZM_nm_mul [ to improve
        Zlm_gauss ]
    56- psdraw() ignored plot colors
+BA 57- stack_base() was not C89 standard compliant.
 
   Changed
     1- mathnf: swapped flag 3 and 5.
