@@ -2233,7 +2233,7 @@ h = -c+C*(x+a)+a*x
 */
 
 static void
-Fp_log_sieve_h(struct Fp_log_rel *r, GEN C, GEN c, GEN Ci, GEN ci, long a, GEN pr, GEN sz, GEN p)
+Fp_log_sieve_h(struct Fp_log_rel *r, GEN C, GEN c, GEN Ci, GEN ci, long a, GEN pr, GEN sz)
 {
   long th = expi(C), n = lg(pr)-1;
   long i,j;
@@ -2318,7 +2318,7 @@ Fp_log_index(GEN a, GEN b, GEN m, GEN p)
   if (DEBUGLEVEL) timer_printf(&ti,"log generator");
   for(i=0; r.nbrel < r.nbmax; i++)
   {
-    Fp_log_sieve_h(&r, C, c, Ci, ci, i, pr, sz, p);
+    Fp_log_sieve_h(&r, C, c, Ci, ci, i, pr, sz);
     if (DEBUGLEVEL && (i&127)==0)
       err_printf("%ld%% ",100*r.nbrel/(r.nbmax));
   }
