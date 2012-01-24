@@ -2898,7 +2898,7 @@ color_to_rgb(GEN c, int *r, int *g, int *b)
     case t_STR:
       colorname_to_rgb(GSTR(c), r,g,b);
       break;
-    case t_VECSMALL:
+    default: /* t_VECSMALL: */
       *r = c[1]; *g = c[2]; *b = c[3];
       break;
   }
