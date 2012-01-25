@@ -2,8 +2,7 @@ Function: precision
 Section: conversions
 C-Name: precision0
 Prototype: GD0,L,
-Help: precision(x,{n}): change the precision of x to be n. If n is omitted,
- output real precision of object x.
+Help: precision(x,{n}): if n is present, return x at precision n. If n is omitted, return real precision of object x.
 Description:
  (real):small          prec2ndec(gprecision($1))
  (gen):int             precision0($1, 0)
@@ -14,7 +13,10 @@ Description:
  (real,small):real     precision0($1, $2)
  (gen,small):gen       precision0($1, $2)
 
-Doc: gives the precision in decimal digits of the PARI object $x$. If $x$ is
+Doc: the function has two different behaviors according to whether $n$ is present or not.
+
+ If $n$ is missing, the function returns the precision in decimal digits of the
+ PARI object $x$. If $x$ is
  an exact object, the largest single precision integer is returned.
  \bprog
  ? precision(exp(1e-100))
@@ -33,7 +35,7 @@ Doc: gives the precision in decimal digits of the PARI object $x$. If $x$ is
  ? isexact(x) = precision(x) == precision(0)
  @eprog
 
- If $n$ is not omitted, creates a new object equal to $x$ with a new
+ If $n$ is present, the function creates a new object equal to $x$ with a new
  ``precision'' $n$. (This never changes the type of the result. In particular
  it is not possible to use it to obtain a polynomial from a power series; tor
  that, see \tet{truncate}.) Now the meaning of precision is different from the
