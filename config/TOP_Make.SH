@@ -81,10 +81,10 @@ dosdistrib: gpman
 	-zip -k GPD${dosversion}.ZIP doc/*.tex doc/gphelp doc/gp.man examples misc/gprc* misc/gpalias
 
 etags:
-	cd src; sh ../config/make_emacs_tags
+	config/make_tags --emacs "$TOP/src"
 
 ctags:
-	config/make_vi_tags "$TOP/src"
+	config/make_tags --vi "$TOP/src"
 
 checkspaces:
 	config/checkspaces

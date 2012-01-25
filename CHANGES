@@ -144,6 +144,9 @@ LGr43- let initprimes0 use an existing prime table
    46- remove config/gitversion from 'make snapshot' tarball
 JM 47- Better implementation of ellweilpairing/elltatepairing
 BA 48- agm now returns the optimal AGM
+   49- unify make_emacs_tags / make_vi_tags => make_tags + fix problems for
+       (exuberant-ctags)-based etags. Both tag files (emacs / vi) contain
+       the same tags now.
 
   Added
     1- mathnf for matrices over K[X] [#41]
