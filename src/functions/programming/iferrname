@@ -123,7 +123,7 @@ Doc: evaluates the expression sequence \var{seq1}. If an error of type
   polynomial, which does not make sense. (As in \kbd{galoisinit(Pol(1))}.)
   \var{E} has one component, 1 (\typ{STR}): the function name $s$.
 
-  \item \kbd{"e\_COPRIME"}. Function $s$ expected a prime number,
+  \item \kbd{"e\_COPRIME"}. Function $s$ expected coprime arguments,
   and did receive $x,y$, which were not.
   \var{E} has three component, 1 (\typ{STR}): the function name $s$,
   2 : the argument $x$, 3 : the argument $y$.
