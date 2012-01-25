@@ -1,0 +1,7 @@
+do(y)=my(x = lambertw(y)); exp(x)*x / y;
+do(-1)
+do(I)
+\p38
+do(2)
+\p200
+do(1e14)

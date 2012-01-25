@@ -3162,6 +3162,7 @@ vecthetanullk(GEN q, long k, long prec)
   for (i = 2; i <= k; i+=2) gel(y,i) = gneg_i(gel(y,i));
   return gerepileupto(av, gmul(p1, y));
 }
+
 /* [d^i theta/dz^i(q, 0), i = 1, 3, .., 2*k - 1], q = exp(2iPi tau) */
 GEN
 vecthetanullk_tau(GEN tau, long k, long prec)
@@ -3193,3 +3194,74 @@ trueE2(GEN tau, long prec)
   y = vecthetanullk_loop(q2, 3, prec);
   return gerepileupto(av, gdiv(gel(y,2), gel(y,1)));
 }
+
+/* Lambert W function : solution x of x*exp(x)=y, using Newton. y >= 0 t_REAL.
+ * Good for low accuracy: the precision remains constant. Not memory-clean */
+static GEN
+mplambertW0(GEN y)
+{
+  long bitprec = bit_prec(y) - 2;
+  GEN x, tmp;
+
+  x = mplog(addrs(y,1));
+  do {
+   tmp = x;
+   /* f(x) = log(x)+x-log(y), f'(x) = (1+1/x)
+    * x *= (1-log(x/y))/(x+1) */
+    x = mulrr(x, divrr(subsr(1, mplog(divrr(x,y))), addrs(x,1)));
+  } while (expo(tmp) - expo(subrr(x,tmp)) < bitprec);
+  return x;
+};
+
+/* Lambert W function using Newton, increasing prec */
+GEN
+mplambertW(GEN y)
+{
+  pari_sp av = avma;
+  GEN x;
+  long p = 1, s = signe(y);
+  ulong mask = quadratic_prec_mask(lg(y)-1);
+
+  if (s<0) pari_err_DOMAIN("Lw", "y", "<", gen_0, y);
+  if(s==0) return rcopy(y);
+  x = mplambertW0(rtor(y, LOWDEFAULTPREC));
+  while (mask!=1)
+  {
+    p <<= 1; if (mask & 1) p--;
+    mask >>= 1;
+    x = rtor(x, p+2);
+    x = mulrr(x, divrr(subsr(1, mplog(divrr(x,y))),addrs(x,1)));
+  }
+  return gerepileuptoleaf(av,x);
+}
+
+GEN
+glambertW(GEN y, long prec)
+{
+  switch(typ(y))
+  {
+    case t_REAL: return mplambertW(y);
+    case t_COMPLEX: pari_err_IMPL("complex lambertW");
+    default: return transc(glambertW,y,prec);
+  }
+}
+
+#if 0
+/* Another Lambert-like function: solution of exp(x)/x=y, y >= e t_REAL,
+ * using Newton with constant prec. Good for low accuracy */
+GEN
+mplambertX(GEN y)
+{
+  long bitprec = bit_prec(y)-2;
+  GEN tmp, x = mplog(y);
+  if (typ(x) != t_REAL || signe(subrs(x,1))<0)
+    pari_err(e_MISC,"Lx : argument less than e");
+  do {
+    tmp = x;
+   /* f(x)=x-log(xy), f'(x)=1-1/x */
+   /* x *= (log(x*y)-1)/(x-1) */
+    x = mulrr(x, divrr(subrs(mplog(mulrr(x,y)),1), subrs(x,1)));
+  } while(expo(tmp)-expo(subrr(x,tmp)) < bitprec);
+  return x;
+}
+#endif

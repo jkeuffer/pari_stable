@@ -1,0 +1,8 @@
+Function: lambertw
+Section: transcendental
+C-Name: glambertW
+Prototype: Gp
+Help: lambertw(y): solution of the implicit equation x*exp(x)=y.
+Doc: Lambert $W$ function, solution of the implicit equation $xe^x=y$,
+ for $y > 0$.
+Variant: Also available is \fun{GEN}{lambertx}{GEN y, long prec}.

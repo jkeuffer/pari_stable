@@ -3122,6 +3122,7 @@ GEN     ibessel(GEN n, GEN z, long prec);
 GEN     jbessel(GEN n, GEN z, long prec);
 GEN     jbesselh(GEN n, GEN z, long prec);
 GEN     mpeint1(GEN x, GEN expx);
+GEN     mplambertX(GEN y);
 GEN     mpveceint1(GEN C, GEN eC, long n);
 GEN     powruvec(GEN e, ulong n);
 GEN     nbessel(GEN n, GEN z, long prec);
@@ -3142,6 +3143,7 @@ GEN     weber0(GEN x, long flag,long prec);
 GEN     weberf(GEN x, long prec);
 GEN     weberf1(GEN x, long prec);
 GEN     weberf2(GEN x, long prec);
+GEN     glambertW(GEN y, long prec);
 
 /* level1.h */
 
