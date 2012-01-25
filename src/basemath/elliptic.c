@@ -4049,7 +4049,7 @@ _orderell(GEN e, GEN p)
   pari_sp av = avma;
   GEN p1 = p;
   long k;
-  for (k = 1; k < 16; k++)
+  for (k = 1; k <= 12; k++)
   {
     if (ell_is_inf(p1)) { avma = av; return k; }
     p1 = addell(e, p1, p);
