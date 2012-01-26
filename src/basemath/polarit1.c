@@ -1908,9 +1908,10 @@ static GEN
 padicff2(GEN nf,GEN p,long k)
 {
   GEN z, mat, D, U, fa, pk, dec_p, Ui, mulx;
-  long i, l;
+  GEN invzk = nf_get_invzk(nf);
+  long i, l, v = nf_get_varn(nf);
 
-  mulx = zk_scalar_or_multable(nf, gmael(nf,8,2)); /* mul by (x mod T) */
+  mulx = zk_scalar_or_multable(nf, gel(invzk,2)); /* mul by (x mod T) */
   dec_p = idealprimedec(nf,p);
   fa = cgetg_copy(dec_p, &l);
   D = NULL; /* -Wall */
@@ -1922,7 +1923,7 @@ padicff2(GEN nf,GEN p,long k)
     Ui= ZM_inv(U, gen_1); setlg(Ui, ef+1); /* cf ZM_snf_group */
     U = rowslice(U, 1, ef);
     mat = ZM_mul(U, ZM_mul(mulx, Ui));
-    gel(fa,i) = ZM_charpoly(mat);
+    gel(fa,i) = ZM_charpoly(mat); setvarn(gel(fa,i), v);
   }
   pk = gel(D,1); /* = p^k */
   z = cgetg(l,t_COL); pk = icopy(pk);
