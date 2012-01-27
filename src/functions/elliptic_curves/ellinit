@@ -87,4 +87,4 @@ Doc:
  arbitrarily set to zero. See also the description of member functions
  related to elliptic curves at the beginning of this section.
 Variant: Also available are \fun{GEN}{ellinit}{GEN E, long prec} ($\fl=0$) and
- \fun{GEN}{smallellinit}{GEN E, long prec} ($\fl=1$).
+ \fun{GEN}{smallellinit}{GEN E} ($\fl=1$).
