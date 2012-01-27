@@ -4044,17 +4044,44 @@ elllog(GEN e, GEN a, GEN g, GEN o)
 
 /* assume e is defined over Q (use Mazur's theorem) */
 static long
-_orderell(GEN e, GEN p)
+_orderell(GEN E, GEN P)
 {
-  pari_sp av = avma;
-  GEN p1 = p;
-  long k;
-  for (k = 1; k <= 12; k++)
+  if (ell_is_inf(P))
+    return 1;
+  else
   {
-    if (ell_is_inf(p1)) { avma = av; return k; }
-    p1 = addell(e, p1, p);
+    pari_sp av = avma;
+    int i;
+    GEN p, avec, Ep, P1;
+    long k;
+
+    /* choose not too small prime p with good reduction */
+    p = utoi (100000);
+    do
+    {
+      p = gnextprime (addis (p, 1));
+    } while (modii (gel (E, 12), p) == gen_0); /* bad reduction */
+
+    /* assign E mod p to Ep */
+    avec = cgetg (6, t_VEC);
+    for (i = 1; i <= 5; i++)
+      gel (avec, i) = gmodulo (gel (E, i), p);
+    Ep = smallellinit (avec);
+
+    /* check whether the order of P on Ep is <= 12 */
+    for (P1 = addell (Ep, P, P), k = 2;
+         !ell_is_inf (P1) && k <= 12;
+         P1 = addell (Ep, P1, P), k++);
+
+    if (k != 13)
+      /* check over Q; one could also run more tests modulo primes */
+      for (P1 = addell (E, P, P), k = 2;
+          !ell_is_inf (P1) && k <= 12;
+          P1 = addell (E, P1, P), k++);
+
+    avma = av;
+    return (k == 13 ? 0 : k);
   }
-  avma = av; return 0;
 }
 
 GEN
