@@ -59,17 +59,44 @@ iferrnamepari(const char *err, GEN a, GEN b)
 /**                                                                **/
 /********************************************************************/
 
+static void
+forparii(GEN a, GEN b, GEN code)
+{
+  pari_sp av, av0 = avma, lim;
+  GEN aa;
+  if (gcmp(b,a) < 0) return;
+  b = gfloor(b);
+  aa = a = setloop(a);
+  av=avma; lim = stack_lim(av,1);
+  push_lex(a,code);
+  for(;;)
+  {
+    closure_evalvoid(code); if (loop_break()) break;
+    if (cmpii(a,b) >= 0) break;
+    a = get_lex(-1);
+    a = a==aa? incloop(a): gaddgs(a,1);
+    if (low_stack(lim, stack_lim(av,1)))
+    {
+      if (DEBUGMEM>1) pari_warn(warnmem,"forparii");
+      a = gerepileupto(av,a);
+    }
+    set_lex(-1,a);
+  }
+  pop_lex(1);  avma = av0;
+}
+
 void
 forpari(GEN a, GEN b, GEN code)
 {
   pari_sp ltop=avma, av, lim;
+  if (typ(a) == t_INT) { forparii(a,b,code); return; }
   b = gcopy(b); /* Kludge to work-around the a+(a=2) bug */
   av=avma; lim = stack_lim(av,1);
   push_lex(a,code);
   while (gcmp(a,b) <= 0)
   {
     closure_evalvoid(code); if (loop_break()) break;
-    a = get_lex(-1); a = typ(a) == t_INT? addis(a, 1): gaddgs(a,1);
+    a = get_lex(-1); a = gaddgs(a,1);
     if (low_stack(lim, stack_lim(av,1)))
     {
       if (DEBUGMEM>1) pari_warn(warnmem,"forpari");
