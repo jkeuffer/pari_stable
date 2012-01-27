@@ -67,10 +67,9 @@ DS 51- elldivpol returned wrong result for degree n >=8.
        to costly factorizations [#1158]
 LGr54- the global variables associated to the primetable _maxprime / diffptr
        could become inconsistent
-   55- library functions nm_Z_mul, ZM_togglesign, ZM_nm_mul [ to improve
-       Zlm_gauss ]
-   56- psdraw() ignored plot colors
-BA 57- stack_base() was not C89 standard compliant.
+   55- psdraw() ignored plot colors
+BA 56- stack_base() was not C89 standard compliant.
+BA 57- my(f(x)=x+1);f --> SEGV                                       [#1273]
 
   Changed
     1- mathnf: swapped flag 3 and 5.
@@ -174,6 +173,7 @@ BA 31- library functions Flx_to_FlxX, F2m_to_Flm, F2c_to_Flc, and Flxq_powu
    32- GP function idealnumden()
 LGr33- library function uprecprime()
    34- library function ZM_pivots()
+   35- library functions nm_Z_mul, ZM_togglesign, ZM_nm_mul [ to improve Zlm_gauss ]
 
   Removed
     1- dropped DOS support

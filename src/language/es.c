@@ -2553,14 +2553,15 @@ print_context(GEN g, pariout_t *T, outString *S, long tex)
     long i, l = lg(v);
     str_puts(S,"my(");
     for(i=1; i<l; i++)
-    {
-      entree *ep = (entree*) gel(d,i);
-      if (i>1)
-        str_putc(S,',');
-      str_puts(S,ep->name);
-      str_putc(S,'=');
-      if (tex) texi(gel(v,l-i),T,S); else bruti(gel(v,l-i),T,S);
-    }
+      if (gel(d,i))
+      {
+        entree *ep = (entree*) gel(d,i);
+        if (i>1)
+          str_putc(S,',');
+        str_puts(S,ep->name);
+        str_putc(S,'=');
+        if (tex) texi(gel(v,l-i),T,S); else bruti(gel(v,l-i),T,S);
+      }
     str_puts(S,");");
   }
 }
