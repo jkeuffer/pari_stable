@@ -588,6 +588,7 @@ void    RgMs_structelim(GEN M, long N, GEN A, GEN *p_col, GEN *p_lin);
 GEN     ZM_det(GEN a);
 GEN     ZM_detmult(GEN A);
 GEN     ZM_gauss(GEN a, GEN b);
+GEN     ZM_imagecompl(GEN x);
 GEN     ZM_inv(GEN M, GEN dM);
 GEN     ZlM_gauss(GEN a, GEN b, ulong p, long e, GEN C);
 GEN     apply0(GEN f, GEN A);
