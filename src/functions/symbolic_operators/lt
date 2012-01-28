@@ -1,5 +1,5 @@
 Function: _<_
-Help: _<_
+Help: x<y: return 1 if x is strictly less than y, 0 otherwise.
 Section: symbolic_operators
 C-Name: glt
 Prototype: GG

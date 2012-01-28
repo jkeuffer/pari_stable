@@ -1,5 +1,5 @@
 Function: _<=_
-Help: _<=_
+Help: x<=y: return 1 if x is less or equal to y, 0 otherwise.
 Section: symbolic_operators
 C-Name: gle
 Prototype: GG
