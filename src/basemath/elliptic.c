@@ -3666,7 +3666,7 @@ ellheight0(GEN e, GEN a, long flag, long prec)
   GEN Lp, x, y, z, phi2, psi2, psi3;
 
   if (flag > 2 || flag < 0) pari_err_FLAG("ellheight");
-  checksmallell_real(e); if (!is_matvec_t(tx)) pari_err_TYPE("ellgheight",a);
+  checksmallell_real(e); if (!is_matvec_t(tx)) pari_err_TYPE("ellheight",a);
   lx = lg(a); if (lx==1) return cgetg(1,tx);
   tx = typ(a[1]);
   if (is_matvec_t(tx))
