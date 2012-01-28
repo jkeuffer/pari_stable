@@ -70,6 +70,7 @@ LGr54- the global variables associated to the primetable _maxprime / diffptr
    55- psdraw() ignored plot colors
 BA 56- stack_base() was not C89 standard compliant.
 BA 57- my(f(x)=x+1);f --> SEGV                                       [#1273]
+   58- ellheight([0, 0, 1, -1, 0], [0., 0.]) -> BUG
 
   Changed
     1- mathnf: swapped flag 3 and 5.
