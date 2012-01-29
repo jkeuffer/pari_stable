@@ -16,7 +16,7 @@ v='config/version'
 
 if test "$status" != "$STATUS"; then
   mv $v $v.old
-  sed -e "s/status=.*/status=$STATUS/" $v.old > $v
+  sed -e "s/stat=.*/stat=$STATUS/" $v.old > $v
   tar cf $tarfile `config/get_MANIFEST` $extrafile
   mv $v.old $v
 else

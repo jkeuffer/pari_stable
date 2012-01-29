@@ -15,8 +15,13 @@ stat=development
 
 # soname of stable libpari.so is libpari.so.$soname_num
 
+vcsversion=
 if test -d "$TOP/.git"; then
   vcsversion="git-"`cd $TOP && git log -1 --pretty=format:%h`
+else if test -r "gitversion"; then
+  vcsversion="git-"`cat gitversion`
+fi; fi
+if test -n "$vcsversion"; then
   status="$stat $vcsversion"
   patchlevel_verbose="[ $status ]"
 else
