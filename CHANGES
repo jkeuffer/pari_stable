@@ -133,6 +133,7 @@ BA 28- more usable form of alarm(s, code): evaluate code, aborting after s
 LGr43- let initprimes0 use an existing prime table
    44- rename stackmalloc -> stack_malloc. Add stack_calloc
    45- matimagecompl() now returns a permutation (t_VECMALL) no longer a t_VEC
+   46- remove config/gitversion from 'make snapshot' tarball
 
   Added
     1- mathnf for matrices over K[X] [#41]

@@ -10,24 +10,21 @@ patch='0'
 # Version code
 version_code=`expr $VersionMajor \\* 65536 + $VersionMinor \\* 256 + $patch`
 
-# Status: alpha, beta, released, development
+# Status: alpha, beta, released, development. Rewritten by config/settar !
 stat=development
 
 # soname of stable libpari.so is libpari.so.$soname_num
+status="$stat"
+patchlevel_verbose=
 
-vcsversion=
-if test -d "$TOP/.git"; then
-  vcsversion="git-"`cd $TOP && git log -1 --pretty=format:%h`
-else if test -r "gitversion"; then
-  vcsversion="git-"`cat gitversion`
-fi; fi
-if test -n "$vcsversion"; then
-  status="$stat $vcsversion"
-  patchlevel_verbose="[ $status ]"
-else
-  status="$stat"
-  patchlevel_verbose=
-fi
+case "$stat" in # $stat rewritten by config/settar ?
+  *git-*) patchlevel_verbose="[ $stat ]";;
+  *) if test -d "$TOP/.git"; then
+       vcsversion="git-"`git log -1 --pretty=format:%h`
+       status="$stat $vcsversion"
+       patchlevel_verbose="[ $status ]"
+     fi
+esac
 version=$VersionMajor.$VersionMinor
 pari_release="$version.$patch"
 if test `expr $VersionMinor % 2` = 1; then
