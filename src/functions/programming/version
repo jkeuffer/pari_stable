@@ -5,11 +5,9 @@ Prototype:
 Help: version(): returns the PARI version as [major,minor,patch] or [major,minor,patch,VCSversion].
 Doc: returns the current version number as a \typ{VEC} with three integer
  components (major version number, minor version number and patchlevel);
- if your
- sources were obtained through one of our version control systems (CVS, svn,
- git\dots), this will be followed by a more precise version string
- (\kbd{svn-}\emph{revision} if compiled from a subversion repository,
- \kbd{git-}\emph{commit} if compiled from a git repository, \dots).
+ if your sources were obtained through our version control system, this will
+ be followed by a more precise version string, e.g.~\kbd{git-}\emph{commit
+ hash}.
 
  This function is present in all versions of PARI following releases 2.3.4
  (stable) and 2.4.3 (testing).
@@ -29,7 +27,7 @@ Doc: returns the current version number as a \typ{VEC} with three integer
  \bprog
   %1 = [2, 3, 4]    \\ released version, stable branch
   %1 = [2, 4, 3]    \\ released version, testing branch
-  %1 = [2, 4, 4, "svn-12746"] \\ development
+  %1 = [2, 6, 0, "git-2cce227"] \\ development
  @eprog
 
  In particular the first line of the gp introductory message can be essentially
