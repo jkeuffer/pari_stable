@@ -176,6 +176,7 @@ BA 31- library functions Flx_to_FlxX, F2m_to_Flm, F2c_to_Flc, and Flxq_powu
 LGr33- library function uprecprime()
    34- library function ZM_pivots()
    35- library functions nm_Z_mul, ZM_togglesign, ZM_nm_mul [ to improve Zlm_gauss ]
+BA 36- [breakloop] GP functions dbg_up/dbg_down (like gdb up/down).
 
   Removed
     1- dropped DOS support
