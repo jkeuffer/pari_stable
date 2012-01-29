@@ -17,6 +17,7 @@
 # $Id$
 
 TOP=`pwd`
+MAKE=${MAKE:-make}
 config_dir=config
 data_dir=data
 doc_dir=doc
@@ -171,8 +172,8 @@ if test -n "$tune"; then
   echo "Building and tuning PARI (this may take a while)"
   echo
   (cd $objdir; rm -f parilvl1.h pariinl.h;\
-  make tune; tune -t > tune.h.new && mv tune.h.new tune.h;\
-  rm -f parilvl1.h pariinl.h; make gp)
+  $MAKE tune; tune -t > tune.h.new && mv tune.h.new tune.h;\
+  rm -f parilvl1.h pariinl.h; $MAKE gp)
 else
   echo $n "Shall we try to build pari $version.$patch ($status) now (y/n)? $c"
   dflt=n; rep='y n'; . $config_dir/myread
@@ -185,11 +186,11 @@ if test "$objdir" != "$mkobjdir"; then
 fi
 
 case $ans in
-y) if (cd $objdir; make gp); then
+y) if (cd $objdir; $MAKE gp); then
      echo $n "Shall we install the files where they belong (y/n)? $c"
      dflt=n; rep='y n'; . $config_dir/myread
      case $ans in
-       y) make install;;
+       y) $MAKE install;;
        n) echo "Ok. Type \"${cdobjdir}make install\" when you are ready";;
      esac
    fi;;
