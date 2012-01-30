@@ -1,5 +1,5 @@
 #!/bin/sh
-# to be run from the Oxxx directory
+# to be run from the Oxxx directory. Called iff $TOP/.git/index exists
 TOP=..
 cfg=$TOP/config
 f=paricfg.h
