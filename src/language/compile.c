@@ -382,11 +382,12 @@ localvars_find(GEN pack, entree *ep)
 
 /*
  Flags for copy optimisation:
+ -- Freturn: The result will be returned.
  -- FLsurvive: The result must survive the closure.
  -- FLnocopy: The result will never be updated nor part of a user variable.
  -- FLnocopylex: The result will never be updated nor part of dynamic variable.
 */
-enum FLflag {FLsurvive=1, FLnocopy=2, FLnocopylex=4};
+enum FLflag {FLreturn=1, FLsurvive=2, FLnocopy=4, FLnocopylex=8};
 
 static void
 copyifclone(long n, long mode, long flag, long mask)
@@ -911,6 +912,13 @@ compilefunc(entree *ep, long n, int mode, long flag)
   }
   else if (is_func_named(x,"if") && mode==Gvoid)
     ep=is_entry("_void_if");
+  else if (is_func_named(x,"return") && (flag&FLreturn) && nb<=1)
+  {
+    if (nb==0) op_push(OCpushgnil,0,n);
+    else compilenode(arg[1],Ggen,FLsurvive|FLreturn);
+    avma=ltop;
+    return;
+  }
   else if (is_func_named(x,"my"))
   {
     long lgarg;
@@ -1587,7 +1595,7 @@ compilenode(long n, int mode, long flag)
   case Fseq:
     if (tree[x].f!=Fnoarg)
       compilenode(x,Gvoid,0);
-    compilenode(y,mode,flag&FLsurvive);
+    compilenode(y,mode,flag&(FLreturn|FLsurvive));
     return;
   case Ffacteurmat:
     compilefacteurmat(n,mode);
@@ -1748,7 +1756,7 @@ compilenode(long n, int mode, long flag)
       }
       dbgstart=tree[y].str;
       if (y>=0 && tree[y].f!=Fnoarg)
-        compilenode(y,Ggen,FLsurvive);
+        compilenode(y,Ggen,FLsurvive|FLreturn);
       else
         compilecast(n,Gvoid,Ggen);
       op_push(OCpushgen, data_push(getfunction(&pos,nb,nbmvar,text)),n);
@@ -1774,7 +1782,7 @@ gp_closure(long n)
   struct codepos pos;
   getcodepos(&pos);
   dbgstart=tree[n].str;
-  compilenode(n,Ggen,FLsurvive);
+  compilenode(n,Ggen,FLsurvive|FLreturn);
   return getfunction(&pos,0,0,strntoGENstr(tree[n].str,tree[n].len));
 }
 
