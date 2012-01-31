@@ -3,6 +3,8 @@ Class: gp
 Section: programming/specific
 C-Name: system0
 Prototype: vs
+Description:
+ (str):void   system($1)
 Help: system(str): str being a string, execute the system command str.
 Doc: \var{str} is a string representing a system command. This command is
  executed, its output written to the standard output (this won't get into your
