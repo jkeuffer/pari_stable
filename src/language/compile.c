@@ -382,11 +382,11 @@ localvars_find(GEN pack, entree *ep)
 
 /*
  Flags for copy optimisation:
- -- FLreturn: The result must survive the closure.
+ -- FLsurvive: The result must survive the closure.
  -- FLnocopy: The result will never be updated nor part of a user variable.
  -- FLnocopylex: The result will never be updated nor part of dynamic variable.
 */
-enum FLflag {FLreturn=1, FLnocopy=2, FLnocopylex=4};
+enum FLflag {FLsurvive=1, FLnocopy=2, FLnocopylex=4};
 
 static void
 copyifclone(long n, long mode, long flag, long mask)
@@ -394,7 +394,7 @@ copyifclone(long n, long mode, long flag, long mask)
   if (mode==Ggen && !(flag&mask))
   {
     op_push(OCcopyifclone,0,n);
-    if (!(flag&FLreturn) && DEBUGLEVEL)
+    if (!(flag&FLsurvive) && DEBUGLEVEL)
       pari_warn(warner,"compiler generates copy for `%.*s'",
                        tree[n].len,tree[n].str);
   }
@@ -761,7 +761,7 @@ compilevec(long n, long mode, op_code op)
   op_push(op,l,n);
   for (i=1;i<l;i++)
   {
-    compilenode(arg[i],Ggen,FLreturn);
+    compilenode(arg[i],Ggen,FLsurvive);
     op_push(OCstackgen,i,n);
   }
   avma=ltop;
@@ -795,7 +795,7 @@ compilemat(long n, long mode)
     for(j=1;j<lgcol;j++)
     {
       k-=lglin;
-      compilenode(col[j], Ggen, FLreturn);
+      compilenode(col[j], Ggen, FLsurvive);
       op_push(OCstackgen,k,n);
     }
   }
@@ -1134,7 +1134,7 @@ compilefunc(entree *ep, long n, int mode, long flag)
             struct codepos pos;
             long a=arg[j++];
             int type=c=='I'?Gvoid:Ggen;
-            long flag=c=='I'?0:FLreturn;
+            long flag=c=='I'?0:FLsurvive;
             getcodepos(&pos);
             if (lev)
             {
@@ -1205,7 +1205,7 @@ compilefunc(entree *ep, long n, int mode, long flag)
               op_push(OCvec, nb+1, a);
               for(l=1; l<=nb; l++)
               {
-                compilenode(g[l], Ggen, FLreturn);
+                compilenode(g[l], Ggen, FLsurvive);
                 op_push(OCstackgen,l, a);
               }
               op_push(OCpop, 1, a);
@@ -1303,7 +1303,7 @@ compilefunc(entree *ep, long n, int mode, long flag)
             for(m=1,k=1;k<=n;k++)
               for(l=1;l<lg(g[k]);l++,m++)
               {
-                compilenode(mael(g,k,l),Ggen,FLreturn);
+                compilenode(mael(g,k,l),Ggen,FLsurvive);
                 op_push(OCstackgen,m,mael(g,k,l));
               }
             op_push_loc(OCpop, 1, str);
@@ -1587,7 +1587,7 @@ compilenode(long n, int mode, long flag)
   case Fseq:
     if (tree[x].f!=Fnoarg)
       compilenode(x,Gvoid,0);
-    compilenode(y,mode,flag&FLreturn);
+    compilenode(y,mode,flag&FLsurvive);
     return;
   case Ffacteurmat:
     compilefacteurmat(n,mode);
@@ -1748,11 +1748,11 @@ compilenode(long n, int mode, long flag)
       }
       dbgstart=tree[y].str;
       if (y>=0 && tree[y].f!=Fnoarg)
-        compilenode(y,Ggen,FLreturn);
+        compilenode(y,Ggen,FLsurvive);
       else
         compilecast(n,Gvoid,Ggen);
       op_push(OCpushgen, data_push(getfunction(&pos,nb,nbmvar,text)),n);
-      if (nbmvar) op_push(OCsaveframe,!!(flag&FLreturn),n);
+      if (nbmvar) op_push(OCsaveframe,!!(flag&FLsurvive),n);
       compilecast(n, Gclosure, mode);
       avma=ltop;
       return;
@@ -1774,7 +1774,7 @@ gp_closure(long n)
   struct codepos pos;
   getcodepos(&pos);
   dbgstart=tree[n].str;
-  compilenode(n,Ggen,FLreturn);
+  compilenode(n,Ggen,FLsurvive);
   return getfunction(&pos,0,0,strntoGENstr(tree[n].str,tree[n].len));
 }
 
