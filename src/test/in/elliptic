@@ -39,6 +39,11 @@ tcurve=ellinit([1,0,1,-19,26]);
 ellorder(tcurve,[1,2])
 elltors(tcurve)
 \\
+E = ellinit ([1, 1]);
+P = [72, 611];
+Q = ellpow (E, P, 20);
+ellorder (E, Q)
+\\
 mcurve=ellinit([-17,0])
 mpoints=[[-1,4],[-4,2]]~
 mhbi=ellbil(mcurve,mpoints,[9,24])
