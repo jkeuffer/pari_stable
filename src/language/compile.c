@@ -1142,7 +1142,8 @@ compilefunc(entree *ep, long n, int mode, long flag)
             struct codepos pos;
             long a=arg[j++];
             int type=c=='I'?Gvoid:Ggen;
-            long flag=c=='I'?0:FLsurvive;
+            long rflag=c=='I'?0:FLsurvive;
+            if (is_func_named(x,"if") && (flag&FLreturn)) rflag|=FLreturn;
             getcodepos(&pos);
             if (lev)
             {
@@ -1165,7 +1166,7 @@ compilefunc(entree *ep, long n, int mode, long flag)
             if (tree[a].f==Fnoarg)
               compilecast(a,Gvoid,type);
             else
-              compilenode(a,type,flag);
+              compilenode(a,type,rflag);
             op_push(OCpushgen, data_push(getclosure(&pos)),a);
             break;
           }
