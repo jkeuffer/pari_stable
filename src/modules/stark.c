@@ -2535,17 +2535,12 @@ bnrstark(GEN bnr, GEN subgrp, long prec)
 GEN
 bnrL1(GEN bnr, GEN subgp, long flag, long prec)
 {
-  GEN bnf, nf, cyc, L1, lchi, clchi, allCR, listCR, dataCR;
+  GEN cyc, L1, lchi, clchi, allCR, listCR, dataCR;
   GEN W, S, T, indCR, invCR, Qt, vChar;
-  long N, cl, i, j, nc, a;
+  long cl, i, j, nc, a;
   pari_sp av = avma;
 
   checkbnr(bnr);
-  bnf = bnr_get_bnf(bnr);
-  nf  = bnf_get_nf(bnf);
-  N   = nf_get_degree(nf);
-
-  if (N == 1) pari_err(e_MISC, "the ground field must be distinct from Q");
   if (flag < 0 || flag > 8) pari_err_FLAG("bnrL1");
 
   /* compute bnr(conductor) */
@@ -2588,7 +2583,7 @@ bnrL1(GEN bnr, GEN subgp, long flag, long prec)
   settyp(allCR[cl], t_VEC); /* set correct type for trivial character */
 
   setlg(listCR, nc + 1);
-  if (nc == 0) pari_err(e_MISC, "no non-trivial character in bnrL1");
+  if (nc == 0) return gerepilecopy(av, listCR);
 
   /* compute the data for these characters */
   dataCR = InitChar(bnr, listCR, prec);
