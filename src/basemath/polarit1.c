@@ -1911,6 +1911,11 @@ padicff2(GEN nf,GEN p,long k)
   GEN invzk = nf_get_invzk(nf);
   long i, l, v = nf_get_varn(nf);
 
+  if (lg(invzk) == 2)
+  { /* trivial case deg = 1 */
+    z = nf_get_pol(nf);
+    retmkcol( ZX_to_ZpX_normalized(z, p, powiu(p, k), k) );
+  }
   mulx = zk_scalar_or_multable(nf, gel(invzk,2)); /* mul by (x mod T) */
   dec_p = idealprimedec(nf,p);
   fa = cgetg_copy(dec_p, &l);

@@ -72,6 +72,7 @@ BA 56- stack_base() was not C89 standard compliant.
 BA 57- my(f(x)=x+1);f --> SEGV                                       [#1273]
    58- ellheight([0, 0, 1, -1, 0], [0., 0.]) -> BUG
    59- allow bnrL1 over Q [#1279]
+   60- factorpadic(,,,1) => SEGV when linear factors/Q [#1278]
 
   Changed
     1- mathnf: swapped flag 3 and 5.
