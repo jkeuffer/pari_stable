@@ -1258,7 +1258,7 @@ FpXQ_ffisom_inv(GEN S,GEN T, GEN p)
   long n = degpol(T);
   GEN V, M = FpXQ_matrix_pow(S,n,n,T,p);
   V = FpM_invimage(M, col_ei(n, 2), p);
-  return gerepileupto(ltop, gtopolyrev(V, varn(T)));
+  return gerepilecopy(ltop, RgV_to_RgX(V, varn(T)));
 }
 
 /* Let M the matrix of the x^p Frobenius automorphism.
@@ -1510,9 +1510,7 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l, GEN *SP, GEN *SQ, GEN MA, GEN MB)
      * in the other case either, but this special case is more efficient) */
     {
       GEN L, An, Bn, z;
-      ulong t; (void)u_lvalrem(pg, 2, &t); /* 2 implicit in pgener_Fp_local */
-      z = pgener_Fp_local(l, gel(Z_factor(utoipos(t)), 1));
-      z = Fp_pow(z, diviuexact(subis(l,1), pg), l); /* prim. pg-th root of 1 */
+      (void) Fp_sqrtn(gen_1,ipg,l,&z);
       z = negi(z);
       if (DEBUGLEVEL>=4) timer_start(&T);
       A = FpM_ker(RgM_Rg_add_shallow(MA, z),l);
