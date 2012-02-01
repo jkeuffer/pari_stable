@@ -516,13 +516,13 @@ check_prime_dec(GRHcheck_t *S, long np, GEN nf, GEN P, GEN D, GEN invhr)
     p = uprime(S->nprimes);
   else
     p = 0;
-  if (S->maxprimes < np)
+  if (S->maxprimes <= np)
   {
     S->maxprimes *= 2;
     S->primes = (GRHprime_t*)pari_realloc((void*)S->primes,
                                           S->maxprimes*sizeof(*S->primes));
   }
-  for (i = S->nprimes, delta = diffptr + i; i < np; i++)
+  for (i = S->nprimes, delta = diffptr + i; i <= np; i++)
   {
     pari_sp av = avma;
     long j, k, l, n;
@@ -595,7 +595,7 @@ FBgen(FB_t *F, GEN nf, GEN D, long N, long C2, long C1, GEN invhr, GRHcheck_t *S
   double L = log((double)C2);
 
   maxprime_check((ulong)C2);
-  check_prime_dec(S, uprimepi((ulong)C2)+1, nf, nf_get_pol(nf), D, invhr);
+  check_prime_dec(S, uprimepi((ulong)C2), nf, nf_get_pol(nf), D, invhr);
   F->sfb_chg = 0;
   F->FB  = cgetg(C2+1, t_VECSMALL);
   F->iLP = cgetg(C2+1, t_VECSMALL);
@@ -655,13 +655,13 @@ FBgen(FB_t *F, GEN nf, GEN D, long N, long C2, long C1, GEN invhr, GRHcheck_t *S
 static int
 GRHchk(GEN nf, GEN D, GEN P, long N, GRHcheck_t *S, GEN invhr, long LIMC)
 {
-  long i, np = uprimepi(LIMC) + 1, count;
+  long i, np = uprimepi(LIMC), count;
   double logC = log(LIMC), SA = 0, SB = 0;
   byteptr delta;
   ulong p;
   check_prime_dec(S, np, nf, P, D, invhr);
   p = 0; count = 0; delta = diffptr;
-  for (i = 0; i < np; i++)
+  for (i = 0; i <= np; i++)
   {
     GRHprime_t *pr = S->primes+i;
     GEN dec = pr->dec, fs = gel(dec, 1);

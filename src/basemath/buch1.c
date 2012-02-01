@@ -313,13 +313,13 @@ check_prime_quad(GRHcheck_t *S, long np, GEN D, GEN invhr)
     p = uprime(S->nprimes);
   else
     p = 0;
-  if (S->maxprimes < np)
+  if (S->maxprimes <= np)
   {
     S->maxprimes *= 2;
     S->primes = (GRHprime_t*)pari_realloc((void*)S->primes,
                                           S->maxprimes*sizeof(*S->primes));
   }
-  for (i = S->nprimes, delta = diffptr + i; i < np; i++)
+  for (i = S->nprimes, delta = diffptr + i; i <= np; i++)
   {
     long s;
     GRHprime_t *pr = S->primes + i;
@@ -353,13 +353,13 @@ is_bad(GEN D, ulong p)
 static int
 quadGRHchk(GEN D, GRHcheck_t *S, GEN invhr, long LIMC)
 {
-  long i, np = uprimepi(LIMC) + 1, count;
+  long i, np = uprimepi(LIMC), count;
   double logC = log(LIMC), SA = 0, SB = 0;
   byteptr delta;
   ulong p;
   check_prime_quad(S, np, D, invhr);
   p = 0; count = 0; delta = diffptr;
-  for (i = 0; i < np; i++)
+  for (i = 0; i <= np; i++)
   {
     GRHprime_t *pr = S->primes+i;
     long M;
@@ -383,9 +383,9 @@ quadGRHchk(GEN D, GRHcheck_t *S, GEN invhr, long LIMC)
       B *= (1 - pow(q, M)*(M+1 - M*q)) * inv1_q * inv1_q;
     }
     if ((long)pr->dec>0) { SA += 2*A;SB += 2*B; } else { SA += A; SB += B; }
-    if (pr->dec) count++;
+    if ((long)pr->dec >= 0 && !is_bad(D, (ulong)p)) count++;
   }
-  return count > 1 && GRHok(S, logC, SA, SB);
+  return count > 5 && GRHok(S, logC, SA, SB);
 }
 
 /* create B->FB, B->numFB; set B->badprim. Return L(kro_D, 1) */
@@ -398,7 +398,7 @@ FBquad(struct buch_quad *B, long C2, long C1, GEN invhr, GRHcheck_t *S)
   byteptr d = diffptr;
   GRHprime_t *pr = S->primes;
 
-  check_prime_quad(S, uprimepi((ulong)C2)+1, D, invhr);
+  check_prime_quad(S, uprimepi((ulong)C2), D, invhr);
   B->numFB = cgetg(C2+1, t_VECSMALL);
   B->FB    = cgetg(C2+1, t_VECSMALL);
   av = avma;
