@@ -2097,12 +2097,15 @@ postdraw0(long *w, long *x, long *y, long lw, long scale)
   fprintf(psfile,"stroke showpage\n"); fclose(psfile);
 }
 
+#define RoColT(R) minss(numcolors,RoCol(R))
+
 void
 gen_rectdraw0(struct plot_eng *eng, void *data, long *w, long *x, long *y, long lw, double xs, double ys)
 {
   long i, j;
   long hgapsize = eng->pl->hunit, fheight = eng->pl->fheight;
   long vgapsize = eng->pl->vunit,  fwidth = eng->pl->fwidth;
+  long numcolors = lg(pari_colormap)-1;
   for(i=0; i<lw; i++)
   {
     PariRect *e = rectgraph[w[i]];
@@ -2113,18 +2116,18 @@ gen_rectdraw0(struct plot_eng *eng, void *data, long *w, long *x, long *y, long 
       switch(RoType(R))
       {
       case ROt_PT:
-        eng->sc(data,RoCol(R));
+        eng->sc(data,RoColT(R));
         eng->pt(data, DTOL((RoPTx(R)+x0)*xs), DTOL((RoPTy(R)+y0)*ys));
         break;
       case ROt_LN:
-        eng->sc(data,RoCol(R));
+        eng->sc(data,RoColT(R));
         eng->ln(data, DTOL((RoLNx1(R)+x0)*xs),
                       DTOL((RoLNy1(R)+y0)*ys),
                       DTOL((RoLNx2(R)+x0)*xs),
                       DTOL((RoLNy2(R)+y0)*ys));
         break;
       case ROt_BX:
-        eng->sc(data,RoCol(R));
+        eng->sc(data,RoColT(R));
         eng->bx(data,
                 DTOL((RoBXx1(R)+x0)*xs),
                 DTOL((RoBXy1(R)+y0)*ys),
@@ -2143,7 +2146,7 @@ gen_rectdraw0(struct plot_eng *eng, void *data, long *w, long *x, long *y, long 
             points[j].x = DTOL((ptx[j]+x0)*xs);
             points[j].y = DTOL((pty[j]+y0)*ys);
           }
-          eng->sc(data,RoCol(R));
+          eng->sc(data,RoColT(R));
           eng->mp(data, nb, points);
           pari_free(points);
           break;
@@ -2160,7 +2163,7 @@ gen_rectdraw0(struct plot_eng *eng, void *data, long *w, long *x, long *y, long 
             points[j].x = DTOL((ptx[j]+x0)*xs);
             points[j].y = DTOL((pty[j]+y0)*ys);
           }
-          eng->sc(data,RoCol(R));
+          eng->sc(data,RoColT(R));
           eng->ml(data, nb, points);
           pari_free(points);
           break;
@@ -2183,7 +2186,7 @@ gen_rectdraw0(struct plot_eng *eng, void *data, long *w, long *x, long *y, long 
             vgap -= ((vjust == RoSTdirTOP) ? 2 : 1)*(fheight - 1);
           x = DTOL((RoSTx(R) + x0 + hgap - (l * fwidth * shift)/2)*xs);
           y = DTOL((RoSTy(R) + y0 - vgap/2)*ys);
-          eng->sc(data,RoCol(R));
+          eng->sc(data,RoColT(R));
           eng->st(data, x, y, text, l);
           break;
         }

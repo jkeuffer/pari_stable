@@ -61,12 +61,6 @@ exiterr(const char *str)
 static void SetForeground(void *data, long col)
 {
   struct data_x *dx = (struct data_x *) data;
-  if (col >= dx->numcolors)
-  {
-    char buf[128];
-    sprintf(buf, "non-existent color: %ld", col);
-    exiterr(buf);
-  }
   XSetForeground(dx->display,dx->gc, PARI_Colors[col].pixel);
 }
 
@@ -152,7 +146,7 @@ PARI_ColorSetUp(Display *display, GEN colors)
   for (i=0; i<n; i++)
   {
     int r, g, b;
-    color_to_rgb(gel(pari_colormap,i+1), &r, &g, &b);
+    color_to_rgb(gel(colors,i+1), &r, &g, &b);
     PARI_Colors[i].red   = r*65535/255;
     PARI_Colors[i].green = g*65535/255;
     PARI_Colors[i].blue  = b*65535/255;

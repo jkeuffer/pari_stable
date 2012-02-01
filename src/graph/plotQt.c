@@ -130,7 +130,6 @@ struct data_qt
 static void SetForeground(void *data, long col)
 {
    struct data_qt *d = (struct data_qt *) data;
-   if (col >= d->numcolors) col = d->numcolors-1;
    d->p->setPen(d->color[col]);
 }
 

@@ -100,7 +100,6 @@ static void DrawPoints(void *data, long nb, struct plot_points *p)
 static void SetForeground(void *data, long col)
 {
   Fl_Color *color = (Fl_Color*)data;
-  if (col >= numcolors) col = numcolors-1;
   fl_color(color[col]);
 }
 
