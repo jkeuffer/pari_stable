@@ -19,9 +19,9 @@ Doc: let \var{bnr} be the number field data output by \kbd{bnrinit(,,1)} and
  if omitted). This function returns, for each \idx{character} $\chi$ of the ray
  class group which is trivial on $H$, the value at $s = 1$ (or $s = 0$) of the
  abelian $L$-function associated to $\chi$. For the value at $s = 0$, the
- function returns in fact for each $\chi$ a vector $[r_\chi, c_\chi]$ where 
+ function returns in fact for each $\chi$ a vector $[r_\chi, c_\chi]$ where
  $$L(s, \chi) = c \cdot s^r + O(s^{r + 1})$$
- \noindent near $0$. 
+ \noindent near $0$.
 
  The argument \fl\ is optional, its binary digits
  mean 1: compute at $s = 0$ if unset or $s = 1$ if set, 2: compute the
