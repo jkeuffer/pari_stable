@@ -49,13 +49,23 @@ struct data_x
   GC gc;
 };
 
+/* after fork(), we don't want the child to recover but to exit */
+static void
+exiterr(const char *str)
+{
+  term_color(c_ERR);
+  err_printf("\n  *** X fatal error: %s\n",str);
+  term_color(c_NONE); exit(1);
+}
+
 static void SetForeground(void *data, long col)
 {
   struct data_x *dx = (struct data_x *) data;
   if (col >= dx->numcolors)
   {
-    pari_warn(warner,"non-existent color: %ld", col);
-    col = dx->numcolors-1;
+    char buf[128];
+    sprintf(buf, "non-existent color: %ld", col);
+    exiterr(buf);
   }
   XSetForeground(dx->display,dx->gc, PARI_Colors[col].pixel);
 }
@@ -112,6 +122,22 @@ static void DrawString(void *data, long x, long y, char *text, long numtext)
   XDrawString(dx->display,dx->win,dx->gc, x,y, text, numtext);
 }
 
+#define MAX_BUF 256
+
+static int
+Xerror(Display *d, XErrorEvent *pari_err) {
+  char buf[MAX_BUF];
+  XGetErrorText(d,pari_err->error_code,buf,MAX_BUF);
+  exiterr(buf); return 0;
+}
+
+static int
+IOerror(Display *d) {
+  char buf[MAX_BUF];
+  sprintf(buf, "lost display on %s", DisplayString(d));
+  exiterr(buf); return 0;
+}
+
 static void
 PARI_ColorSetUp(Display *display, GEN colors)
 {
@@ -132,33 +158,8 @@ PARI_ColorSetUp(Display *display, GEN colors)
     PARI_Colors[i].blue  = b*65535/255;
     PARI_Colors[i].flags = DoRed | DoGreen | DoBlue;
     if (!XAllocColor(display, PARI_Colormap, &PARI_Colors[i]))
-      pari_err(e_MISC, "cannot allocate color %ld", i);
+      exiterr("cannot allocate color");
   }
-}
-
-/* after fork(), we don't want the child to recover but to exit */
-static void
-exiterr(const char *str)
-{
-  term_color(c_ERR);
-  err_printf("\n  *** X fatal error: %s\n",str);
-  term_color(c_NONE); exit(1);
-}
-
-#define MAX_BUF 256
-
-static int
-Xerror(Display *d, XErrorEvent *pari_err) {
-  char buf[MAX_BUF];
-  XGetErrorText(d,pari_err->error_code,buf,MAX_BUF);
-  exiterr(buf); return 0;
-}
-
-static int
-IOerror(Display *d) {
-  char buf[MAX_BUF];
-  sprintf(buf, "lost display on %s", DisplayString(d));
-  exiterr(buf); return 0;
 }
 
 void
