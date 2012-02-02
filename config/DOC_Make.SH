@@ -13,6 +13,8 @@ cat > doc/Makefile << EOT
 #
 SHELL = $make_sh
 PERL  = $perl
+TEX   = tex
+PDFTEX= pdftex
 
 DESC          = pari.desc
 MACROS= paricfg.tex parimacro.tex
@@ -32,41 +34,41 @@ paricfg.tex: paricfg.tex.in
 	    -e 's!@datadir@!$datadir!' paricfg.tex.in > \$@
 
 %.pdf: %.tex \$(MACROS)
-	pdftex \$<
+	\$(PDFTEX) \$<
 
 %.dvi: %.tex \$(MACROS)
-	tex \$<
+	\$(TEX) \$<
 
 libpari.pdf: \$(PARI_TEX) \$(MACROS)
 	-rm -f libpari.std
-	pdftex libpari
-	pdftex libpari
-	make libpari.std; pdftex libpari; rm -f libpari.std
+	\$(PDFTEX) libpari
+	\$(PDFTEX) libpari
+	make libpari.std; \$(PDFTEX) libpari; rm -f libpari.std
 libpari.dvi: \$(PARI_TEX) \$(MACROS)
 	-rm -f libpari.std
-	tex libpari
-	tex libpari
-	make libpari.std; tex libpari; rm -f libpari.std
+	\$(TEX) libpari
+	\$(TEX) libpari
+	make libpari.std; \$(TEX) libpari; rm -f libpari.std
 
 develop.pdf: develop.tex \$(MACROS)
 	-rm -f develop.std
-	pdftex develop
-	pdftex develop
-	make develop.std; pdftex develop; rm -f develop.std
+	\$(PDFTEX) develop
+	\$(PDFTEX) develop
+	make develop.std; \$(PDFTEX) develop; rm -f develop.std
 develop.dvi: develop.tex \$(MACROS)
 	-rm -f develop.std
-	tex develop
-	tex develop
-	make develop.std; tex develop; rm -f develop.std
+	\$(TEX) develop
+	\$(TEX) develop
+	make develop.std; \$(TEX) develop; rm -f develop.std
 
 tutorial.pdf: tutorial.tex \$(MACROS)
 	-rm -f tutorial.std
-	pdftex tutorial
-	pdftex tutorial
+	\$(PDFTEX) tutorial
+	\$(PDFTEX) tutorial
 tutorial.dvi: tutorial.tex \$(MACROS)
 	-rm -f tutorial.std
-	tex tutorial
-	tex tutorial
+	\$(TEX) tutorial
+	\$(TEX) tutorial
 
 %.ps: %.dvi
 	dvips \$< -o \$@
@@ -83,15 +85,15 @@ refcard.ps: refcard.dvi
 
 users.dvi: \$(USERS_TEX)
 	-rm -f users.std
-	tex users
-	tex users
-	make users.std; tex users; rm -f users.std
+	\$(TEX) users
+	\$(TEX) users
+	make users.std; \$(TEX) users; rm -f users.std
 
 users.pdf: \$(USERS_TEX)
 	-rm -f users.std
-	pdftex users
-	pdftex users
-	make users.std; pdftex users; rm -f users.std
+	\$(PDFTEX) users
+	\$(PDFTEX) users
+	make users.std; \$(PDFTEX) users; rm -f users.std
 
 gpman: gp.1
 	nroff -man gp.1 | unix2dos -ascii > gp.man
