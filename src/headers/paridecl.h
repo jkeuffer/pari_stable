@@ -372,7 +372,7 @@ GEN     scalarmat_s(long x, long n);
 /* RgX.c */
 
 GEN     QX_ZXQV_eval(GEN P, GEN V, GEN dV);
-int     ZXQX_divides(GEN x, GEN y, GEN T);
+int     ZXQX_dvd(GEN x, GEN y, GEN T);
 GEN     QXQ_powers(GEN a, long n, GEN T);
 GEN     QXQV_to_mod(GEN V, GEN T);
 GEN     QXQXV_to_mod(GEN V, GEN T);

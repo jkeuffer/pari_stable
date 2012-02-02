@@ -204,7 +204,7 @@ nfgcd_all(GEN P, GEN Q, GEN T, GEN den, GEN *Pnew)
     sol = RgM_to_RgXX(sol,vP,vT);
     dsol = Q_primpart(sol);
 
-    if (!ZXQX_divides(Q, dsol, T)) continue;
+    if (!ZXQX_dvd(Q, dsol, T)) continue;
     if (Pnew)
     {
       *Pnew = RgXQX_pseudodivrem(P, dsol, T, &R);
@@ -212,7 +212,7 @@ nfgcd_all(GEN P, GEN Q, GEN T, GEN den, GEN *Pnew)
     }
     else
     {
-      if (!ZXQX_divides(P, dsol, T)) continue;
+      if (!ZXQX_dvd(P, dsol, T)) continue;
     }
     gerepileall(ltop, Pnew? 2: 1, &dsol, Pnew);
     return dsol; /* both remainders are 0 */

@@ -1368,9 +1368,9 @@ rem(GEN c, GEN T)
 
 /* x, y, are ZYX, lc(y) is an integer, T is a ZY */
 int
-ZXQX_divides(GEN x, GEN y, GEN T)
+ZXQX_dvd(GEN x, GEN y, GEN T)
 {
-  long dx, dy, dz, i, p;
+  long dx, dy, dz, i, p, T_ismonic;
   pari_sp av = avma, av2, lim;
   GEN y_lead;
 
@@ -1379,6 +1379,7 @@ ZXQX_divides(GEN x, GEN y, GEN T)
   if (typ(y_lead) == t_POL) y_lead = gel(y_lead, 2); /* t_INT */
   /* if monic, no point in using pseudo-division */
   if (gequal1(y_lead)) return signe(RgXQX_rem(x, y, T)) == 0;
+  T_ismonic = gequal1(leading_term(T));
   dx = degpol(x);
   if (dx < dy) return !signe(x);
   (void)new_chunk(2);
@@ -1404,20 +1405,20 @@ ZXQX_divides(GEN x, GEN y, GEN T)
     {
       GEN c = gel(x,i); if (y0) c = gmul(y0, c);
       if (gel(y,i)) c = gadd(c, gmul(x0,gel(y,i)));
-      if (typ(c) == t_POL) c = ZX_rem(c, T);
+      if (typ(c) == t_POL) c = T_ismonic ? ZX_rem(c, T): RgX_rem(c, T);
       gel(x,i) = c;
     }
     for (   ; i<=dx; i++)
     {
       GEN c = gel(x,i); if (y0) c = gmul(y0, c);
-      if (typ(c) == t_POL) c = ZX_rem(c, T);
+      if (typ(c) == t_POL) c = T_ismonic ? ZX_rem(c, T): RgX_rem(c, T);
       gel(x,i) = c;
     }
     do { x++; dx--; } while (dx >= 0 && !signe(gel(x,0)));
     if (dx < dy) break;
     if (low_stack(lim,stack_lim(av2,1)))
     {
-      if(DEBUGMEM>1) pari_warn(warnmem,"ZXQX_divides dx = %ld >= %ld",dx,dy);
+      if(DEBUGMEM>1) pari_warn(warnmem,"ZXQX_dvd dx = %ld >= %ld",dx,dy);
       gerepilecoeffs(av2,x,dx+1);
     }
   }
