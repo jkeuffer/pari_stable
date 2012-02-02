@@ -54,6 +54,7 @@ $zcat = "$gzip -dc";
 $bzip = "bzip2";
 $bzcat = "$bzip -dc";
 $docdir = &get_docdir();
+$tex = $ENV{GPTEX} || "tex";
 
 $refcard = (@ARGV and $ARGV[-1] =~ /refcard/i);
 
@@ -447,7 +448,7 @@ sub posttex {
   close(TEX) || die "Error closing '$texfile.tex': $!";
 
   chdir($tmpdir);
-  $out = `tex $wrap.tex 2>&1 < /dev/null`;
+  $out = `$tex $wrap.tex 2>&1 < /dev/null`;
   -f "$wrap.dvi"
     || die "could not create '$wrap.dvi': status=$?, $out";
   safe_setsid();
