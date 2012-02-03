@@ -2535,9 +2535,9 @@ bnrstark(GEN bnr, GEN subgrp, long prec)
 GEN
 bnrL1(GEN bnr, GEN subgp, long flag, long prec)
 {
-  GEN cyc, L1, lchi, clchi, allCR, listCR, dataCR;
-  GEN W, S, T, indCR, invCR, Qt, vChar;
-  long cl, i, j, nc, a;
+  GEN cyc, L1, allCR, listCR;
+  GEN indCR, invCR, Qt;
+  long cl, i, nc;
   pari_sp av = avma;
 
   checkbnr(bnr);
@@ -2561,10 +2561,9 @@ bnrL1(GEN bnr, GEN subgp, long flag, long prec)
   for (i = 1; i < cl; i++)
   {
     /* lift to a character on Cl(bnr) */
-    lchi = LiftChar(cyc, gel(Qt,3), gel(allCR,i), gel(Qt,2));
-    clchi = ConjChar(lchi, cyc);
-
-    a = i;
+    GEN lchi = LiftChar(cyc, gel(Qt,3), gel(allCR,i), gel(Qt,2));
+    GEN clchi = ConjChar(lchi, cyc);
+    long j, a = i;
     for (j = 1; j <= nc; j++)
       if (ZV_equal(gmael(listCR, j, 1), clchi)) { a = -j; break; }
 
@@ -2583,24 +2582,22 @@ bnrL1(GEN bnr, GEN subgp, long flag, long prec)
   settyp(allCR[cl], t_VEC); /* set correct type for trivial character */
 
   setlg(listCR, nc + 1);
-  if (nc == 0) return gerepilecopy(av, listCR);
-
-  /* compute the data for these characters */
-  dataCR = InitChar(bnr, listCR, prec);
-
-  vChar = sortChars(dataCR);
-  GetST(bnr, &S, &T, dataCR, vChar, prec);
-  W = ComputeAllArtinNumbers(dataCR, vChar, 1, prec);
-
   L1 = cgetg((flag&1)? cl: cl+1, t_VEC);
-  for (i = 1; i < cl; i++)
+  if (nc)
   {
-    a = indCR[i];
-    if (a > 0)
-      gel(L1,i) = GetValue(gel(dataCR,a), gel(W,a), gel(S,a), gel(T,a),
-                           flag, prec);
-    else
-      gel(L1,i) = gconj(gel(L1,-a));
+    GEN dataCR = InitChar(bnr, listCR, prec);
+    GEN W, S, T, vChar = sortChars(dataCR);
+    GetST(bnr, &S, &T, dataCR, vChar, prec);
+    W = ComputeAllArtinNumbers(dataCR, vChar, 1, prec);
+    for (i = 1; i < cl; i++)
+    {
+      long a = indCR[i];
+      if (a > 0)
+        gel(L1,i) = GetValue(gel(dataCR,a), gel(W,a), gel(S,a), gel(T,a),
+                             flag, prec);
+      else
+        gel(L1,i) = gconj(gel(L1,-a));
+    }
   }
   if (!(flag & 1))
     gel(L1,cl) = GetValue1(bnr, flag & 2, prec);
