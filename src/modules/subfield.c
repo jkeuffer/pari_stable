@@ -105,7 +105,7 @@ calc_block(blockdata *B, GEN Z, GEN Y, GEN SB)
   }
   gel(Yp,lY) = Zp;
 
-  K = divisors(utoipos(n[1])); lK = lg(K);
+  K = divisorsu(n[1]); lK = lg(K);
   for (i=1; i<lK; i++)
   {
     long ngcd = n[1], k = itos(gel(K,i)), dk = B->size*k, lpn = 0;
@@ -869,7 +869,7 @@ subfieldsall(GEN nf)
   pol = PD.pol;
 
   v0 = varn(pol); N = degpol(pol);
-  dg = divisors(utoipos(N)); ld = lg(dg)-1;
+  dg = divisorsu(N); ld = lg(dg)-1;
   if (DEBUGLEVEL) err_printf("\n***** Entering subfields\n\npol = %Ps\n",pol);
 
 
