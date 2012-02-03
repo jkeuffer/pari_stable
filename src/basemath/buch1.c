@@ -1102,6 +1102,7 @@ START:
   if (!quad_be_honest(&BQ)) goto START;
   if (DEBUGLEVEL) timer_printf(&T, "be honest");
   clearhash(BQ.hashtab);
+  pari_free(GRHcheck.primes);
 
   gen = get_clgp(&BQ,W,&cyc,BQ.PRECREG);
   gunclone(BQ.subFB);

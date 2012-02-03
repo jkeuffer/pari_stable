@@ -4044,6 +4044,7 @@ START:
   } while (need || precpb);
 
   delete_cache(&cache); delete_FB(&F);
+  pari_free(GRHcheck.primes);
   Vbase = vecpermute(F.LP, F.perm);
   class_group_gen(nf,W,C,Vbase,PRECREG,NULL, &clg1, &clg2);
   res = get_clfu(clg1, R, zu, fu);
