@@ -518,7 +518,9 @@ check_prime_dec(GRHcheck_t *S, long np, GEN nf, GEN P, GEN D, GEN invhr)
     p = 0;
   if (S->maxprimes <= np)
   {
-    S->maxprimes *= 2;
+    do
+      S->maxprimes *= 2;
+    while (S->maxprimes <= np);
     S->primes = (GRHprime_t*)pari_realloc((void*)S->primes,
                                           S->maxprimes*sizeof(*S->primes));
   }
@@ -590,12 +592,13 @@ FBgen(FB_t *F, GEN nf, GEN D, long N, long C2, long C1, GEN invhr, GRHcheck_t *S
 {
   byteptr delta = diffptr;
   long i, p, ip;
-  GRHprime_t *pr = S->primes;
+  GRHprime_t *pr;
   GEN prim;
   double L = log((double)C2);
 
   maxprime_check((ulong)C2);
   check_prime_dec(S, uprimepi((ulong)C2), nf, nf_get_pol(nf), D, invhr);
+  pr = S->primes;
   F->sfb_chg = 0;
   F->FB  = cgetg(C2+1, t_VECSMALL);
   F->iLP = cgetg(C2+1, t_VECSMALL);

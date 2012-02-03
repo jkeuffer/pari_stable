@@ -315,7 +315,9 @@ check_prime_quad(GRHcheck_t *S, long np, GEN D, GEN invhr)
     p = 0;
   if (S->maxprimes <= np)
   {
-    S->maxprimes *= 2;
+    do
+      S->maxprimes *= 2;
+    while (S->maxprimes <= np);
     S->primes = (GRHprime_t*)pari_realloc((void*)S->primes,
                                           S->maxprimes*sizeof(*S->primes));
   }
@@ -396,9 +398,10 @@ FBquad(struct buch_quad *B, long C2, long C1, GEN invhr, GRHcheck_t *S)
   long i, p;
   pari_sp av;
   byteptr d = diffptr;
-  GRHprime_t *pr = S->primes;
+  GRHprime_t *pr;
 
   check_prime_quad(S, uprimepi((ulong)C2), D, invhr);
+  pr = S->primes;
   B->numFB = cgetg(C2+1, t_VECSMALL);
   B->FB    = cgetg(C2+1, t_VECSMALL);
   av = avma;
