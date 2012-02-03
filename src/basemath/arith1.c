@@ -210,6 +210,39 @@ znprimroot(GEN m)
   gel(z,2) = gerepileuptoint(av, x); return z;
 }
 
+/* n | (p-1), returns a primitive n-th root of 1 in F_p^* */
+GEN
+rootsof1_Fp(GEN n, GEN p)
+{
+  pari_sp av = avma;
+  GEN z;
+  GEN t; (void)Z_lvalrem(n, 2, &t); /* 2 implicit in pgener_Fp_local */
+  z = pgener_Fp_local(p, gel(Z_factor(t), 1));
+  z = Fp_pow(z, diviiexact(subis(p,1), n), p); /* prim. n-th root of 1 */
+  return gerepileuptoint(av, z);
+}
+
+GEN
+rootsof1u_Fp(ulong n, GEN p)
+{
+  pari_sp av = avma;
+  GEN z;
+  ulong t; (void)u_lvalrem(n, 2, &t); /* 2 implicit in pgener_Fp_local */
+  z = pgener_Fp_local(p, gel(Z_factor(utoipos(t)), 1));
+  z = Fp_pow(z, diviuexact(subis(p,1), n), p); /* prim. n-th root of 1 */
+  return gerepileuptoint(av, z);
+}
+
+ulong
+rootsof1_Fl(ulong n, ulong p)
+{
+  pari_sp av = avma;
+  ulong z, t; (void)u_lvalrem(n, 2, &t); /* 2 implicit in pgener_Fp_local */
+  z = pgener_Fl_local(p, gel(factoru(t), 1));
+  z = Fl_powu(z, (p-1) / n, p); /* prim. n-th root of 1 */
+  avma = av; return z;
+}
+
 GEN
 znstar(GEN N)
 {

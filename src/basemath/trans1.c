@@ -1232,12 +1232,10 @@ rootsof1complex(GEN n, long prec)
 GEN
 rootsof1padic(GEN n, GEN y)
 {
-  pari_sp av0 = avma, av;
-  GEN z, r = cgetp(y);
-
-  av = avma; (void)Fp_sqrtn(gen_1,n,gel(y,2),&z);
-  if (z==gen_0) { avma = av0; return gen_0; }/*should not happen*/
-  z = Zp_sqrtnlift(gen_1, n, z, gel(y,2), precp(y));
+  GEN z, r = cgetp(y), p = gel(y,2);
+  pari_sp av = avma;
+  z = rootsof1_Fp(n, p);
+  z = Zp_sqrtnlift(gen_1, n, z, p, precp(y));
   affii(z, gel(r,4)); avma = av; return r;
 }
 

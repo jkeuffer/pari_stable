@@ -1510,8 +1510,7 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l, GEN *SP, GEN *SQ, GEN MA, GEN MB)
      * in the other case either, but this special case is more efficient) */
     {
       GEN L, An, Bn, z;
-      (void) Fp_sqrtn(gen_1,ipg,l,&z);
-      z = negi(z);
+      z = negi( rootsof1u_Fp(pg, l) );
       if (DEBUGLEVEL>=4) timer_start(&T);
       A = FpM_ker(RgM_Rg_add_shallow(MA, z),l);
       if (lg(A)!=2) pari_err_IRREDPOL("FpX_ffintersect",P);

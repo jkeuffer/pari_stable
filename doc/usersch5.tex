@@ -2920,6 +2920,15 @@ It is not necessary, and in fact slightly inefficient, to include $\ell=2$,
 since 2 is treated separately in any case, i.e. the generator
 obtained is never a square.
 
+\fun{GEN}{rootsof1_Fp}{GEN n, GEN p} returns a primitive $n$-th root modulo
+the prime $p$.
+
+\fun{GEN}{rootsof1u_Fp}{ulong n, GEN p} returns a primitive $n$-th root modulo
+the prime $p$.
+
+\fun{ulong}{rootsof1_Fl}{ulong n, ulong p} returns a primitive $n$-th root
+modulo the prime $p$.
+
 \subsec{Extending functions to vector inputs}
 
 The following functions apply $f$ to the given arguments, recursively
