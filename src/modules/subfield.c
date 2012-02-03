@@ -108,7 +108,7 @@ calc_block(blockdata *B, GEN Z, GEN Y, GEN SB)
   K = divisorsu(n[1]); lK = lg(K);
   for (i=1; i<lK; i++)
   {
-    long ngcd = n[1], k = itos(gel(K,i)), dk = B->size*k, lpn = 0;
+    long ngcd = n[1], k = K[i], dk = B->size*k, lpn = 0;
     for (j=2; j<r; j++)
       if (n[j]%k == 0)
       {
@@ -872,7 +872,6 @@ subfieldsall(GEN nf)
   dg = divisorsu(N); ld = lg(dg)-1;
   if (DEBUGLEVEL) err_printf("\n***** Entering subfields\n\npol = %Ps\n",pol);
 
-
   LSB = _subfield(pol_x(0), gen_0);
   if (ld > 2)
   {
@@ -882,7 +881,7 @@ subfieldsall(GEN nf)
     choose_prime(&S, PD.pol, PD.dis);
     for (i=ld-1; i>1; i--)
     {
-      B.size  = itos(gel(dg,i));
+      B.size  = dg[i];
       B.d = N / B.size;
       NLSB = subfields_of_given_degree(&B);
       if (NLSB) { LSB = concat(LSB, NLSB); gunclone(NLSB); }
