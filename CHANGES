@@ -181,6 +181,7 @@ LGr33- library function uprecprime()
    35- library functions nm_Z_mul, ZM_togglesign, ZM_nm_mul [ to improve Zlm_gauss ]
 BA 36- [breakloop] GP functions dbg_up/dbg_down (like gdb up/down).
    37- library functions rootsof1_Fp, rootsof1u_Fp, rootsof1_Fl
+BA 38- GP function dbg_x (like \x)
 
   Removed
     1- dropped DOS support

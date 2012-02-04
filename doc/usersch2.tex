@@ -2603,13 +2603,13 @@ omitted, writes the latest computed object ( $\%$ ). If \var{filename} is
 omitted, appends to \kbd{logfile} (the GP function \tet{write} is a trifle more
 powerful, as you can have arbitrary file names).
 
-\subsec{\b{x}} Prints the complete tree with addresses and contents (in
-hexadecimal) of the \idx{internal representation} of the latest computed
-object in \kbd{gp}. As for \b{s}, this is used primarily as a debugging device for
-PARI, and the format should be self-explanatory (a $*$ before an object --
-typically a modulus -- means the corresponding component is out of stack).
-However, used on a PARI integer, it can be used as a
-decimal$\rightarrow$hexadecimal converter.
+\subsec{\b{x} $\{n\}$} Prints the complete tree with addresses and contents
+(in hexadecimal) of the \idx{internal representation} of the object number
+$n$ ( $\%n$ ). If the number $n$ is omitted, uses the latest computed object
+in \kbd{gp}. As for \b{s}, this is used primarily as a debugging device for
+PARI, and the format should be self-explanatory. The underlying GP
+function \tet{dbg_x} is more versatile, since it can be applied to other
+objects than history entries.
 
 \subsec{\b{y} $\{n\}$} Switches \kbd{simplify} on (1) or off (0). If $n$
 is explicitly given, set simplify to $n$.
