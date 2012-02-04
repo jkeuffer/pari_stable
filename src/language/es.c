@@ -4130,15 +4130,15 @@ readbin(const char *name, FILE *f, int *vector)
     x = y;
     if (cy == BIN_GEN) pari_stack_pushp(&s_obj, (void*)y);
   }
-  switch(s_obj.n)
+  switch(s_obj.n) /* >= 1 */
   {
-    case 0: break;
-    case 1: x = gel(obj,1); break;
-    default:
+    case 1: break; /* nothing but the codeword */
+    case 2: x = gel(obj,1); break; /* read a single BIN_GEN */
+    default: /* more than one BIN_GEN */
       setlg(obj, s_obj.n);
       if (DEBUGLEVEL)
         pari_warn(warner,"%ld unnamed objects read. Returning then in a vector",
-                  s_obj.n);
+                  s_obj.n - 1);
       x = gerepilecopy(av, obj);
       if (vector) *vector = 1;
   }
