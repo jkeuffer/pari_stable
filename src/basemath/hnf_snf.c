@@ -1382,7 +1382,7 @@ GEN
 hnflll(GEN x)
 {
   GEN z = cgetg(3, t_VEC);
-  gel(z,1) = ZM_hnflll(x, &gel(z,2), 0);
+  gel(z,1) = ZM_hnflll(x, &gel(z,2), 1);
   return z;
 }
 
