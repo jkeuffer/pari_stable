@@ -1928,6 +1928,7 @@ gexp(GEN x, long prec)
     case t_COMPLEX: return cxexp(x,prec);
     case t_PADIC: return Qp_exp(x);
     case t_INTMOD: pari_err_TYPE("gexp",x);
+    case t_INT: if (!signe(x)) return gen_1; /* fall through */
     default:
     {
       pari_sp av = avma;
@@ -2763,6 +2764,30 @@ mpsincos(GEN x, GEN *s, GEN *c)
   gerepilemanysp(av,tetpil,gptr,2);
 }
 
+/* SINE and COSINE - 1 */
+
+void
+mpsincosm1(GEN x, GEN *s, GEN *c)
+{
+  long mod8;
+  pari_sp av, tetpil;
+  GEN p1, *gptr[2];
+
+  if (!signe(x))
+  {
+    long e = expo(x);
+    *s = real_0_bit(e);
+    *c = real_0_bit(2*e-1);
+    return;
+  }
+
+  av=avma; p1=mpsc1(x,&mod8); tetpil=avma;
+  if (mod8%4) pari_err(e_MISC, "mpsincosm1 only for x close to 0");
+  *c=gcopy(p1); *s=mpaut(p1); if (mod8 == 4) togglesign(*s);
+  gptr[0]=s; gptr[1]=c;
+  gerepilemanysp(av,tetpil,gptr,2);
+}
+
 /* return exp(ix), x a t_REAL */
 GEN
 exp_Ir(GEN x)
@@ -2772,6 +2797,35 @@ exp_Ir(GEN x)
   mpsincos(x, (GEN*)(v+2), (GEN*)(v+1));
   if (!signe(gel(v,2))) return gerepilecopy(av, gel(v,1));
   return v;
+}
+
+/* return exp(ix) - 1, x a t_REAL */
+
+GEN
+expm1_Ir(GEN x)
+{
+  pari_sp av = avma;
+  GEN v = cgetg(3,t_COMPLEX);
+  mpsincosm1(x, (GEN*)(v+2), (GEN*)(v+1));
+  if (!signe(gel(v,2))) return gerepilecopy(av, gel(v,1));
+  return v;
+}
+
+/* return exp(z) - 1, z complex */
+
+GEN
+cxexpm1(GEN z, long prec)
+{
+  pari_sp av = avma;
+  GEN x, y, X, Y, res;
+  x = greal(z); y = gimag(z);
+  if (typ(x) != t_REAL) x = gtofp(x, prec);
+  if (typ(y) != t_REAL) y = gtofp(y, prec);
+  if (gcmp0(y)) return mpexp1(x);
+  if (gcmp0(x)) return expm1_Ir(y);
+  X = mpexp1(x); Y = expm1_Ir(y);
+  res = gadd(gadd(X, Y), gmul(X, Y));
+  return gerepilecopy(av, res);
 }
 
 void

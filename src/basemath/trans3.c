@@ -641,7 +641,14 @@ incgam2_0(GEN x, GEN expx)
   }
 }
 
-/* assume x != 0 */
+/* Only changes: these two comments and the line y = ...
+   according to comment 3) */
+
+/* incgam using the continued fraction. Should reasonably be
+   called incgamcf */
+
+/* assume that x is not too small */
+
 static GEN
 incgam2(GEN s, GEN x, long prec)
 {
@@ -675,7 +682,8 @@ incgam2(GEN s, GEN x, long prec)
     b = (i == t_INT)? addsi(-1,s): gaddsg(-1,z);
     s = z;
   }
-  y = gmul(gexp(gneg(x), prec), gpow(x,b,prec));
+  if (i == t_INT) y = gmul(gexp(gneg(x), prec), powgi(x,b));
+  else y = gexp(gsub(gmul(b, glog(x, prec)), x), prec);
   x_s = gsub(x, s);
   av2 = avma; avlim = stack_lim(av2,3);
   S = gdiv(gaddsg(-n,s), gaddgs(x_s,n<<1));
@@ -691,7 +699,18 @@ incgam2(GEN s, GEN x, long prec)
   return gerepileupto(av, gmul(y, gaddsg(1,S)));
 }
 
-/* use exp(-x) * (x^s/s) * sum_{k >= 0} x^k / prod(i=1,k, s+i) */
+GEN
+incgamcf(GEN s, GEN x, long prec)
+{
+  return incgam2(s, x, prec);
+}
+
+/* Only change: the line y = ... according to comment 2). Did not implement
+   comment 1) since I don't understand. Should reasonably be called
+   incgamcser */
+
+/* use exp(-x) * (x^s/s) * sum_{k >= 0} x^k / prod(i=1, k, s+i) */
+
 GEN
 incgamc(GEN s, GEN x, long prec)
 {
@@ -721,25 +740,142 @@ incgamc(GEN s, GEN x, long prec)
       gerepileall(av2, 2, &S, &t);
     }
   }
-  y = gdiv(gmul(gexp(gneg(x),prec), gpow(x,b,prec)), s);
-  return gerepileupto(av, gmul(y,t));
+  if (typ(b)==t_INT) y = gdiv(gmul(gexp(gneg(x), prec), powgi(x,b)), s);
+  else y = gdiv(gexp(gsub(gmul(b, glog(x, prec)), x), prec), s);
+  return gerepileupto(av, gmul(y, t));
 }
+
+/* Changes: added: use asymptotic expansion. */
+
+GEN
+incgamasymp(GEN s, GEN x, long prec)
+{
+  pari_sp av = avma;
+  GEN S, q, cox;
+  long j, l, E, esx;
+  if (typ(x) != t_REAL) x = gtofp(x, prec);
+  l = precision(x); E = (long)(prec2nbits_mul(l,LOG2) + 1);
+  if (gexpo(x) < (E>>1) + 1)
+    pari_err(e_MISC, "x too small for incgamasymp");
+  S = real_1(prec); q = real_1(prec); j = 0;
+  if (typ(s) == t_INT) cox = gmul(gexp(gneg(x), prec), powgi(x, subis(s, 1)));
+  else cox = gexp(gsub(gmul(gsubgs(s, 1), glog(x, prec)), x), prec);
+  esx = -prec2nbits(l)-gexpo(cox);
+  {
+    pari_sp btop = avma, st_lim = stack_lim(btop, 1);
+    while (gexpo(q) >= esx)
+    {
+      j++; q = gmul(q, gdiv(gsubgs(s, j), x)); S = gadd(S, q);
+      if (low_stack(st_lim, stack_lim(btop, 1)))
+        gerepileall(btop, 2, &S, &q);
+    }
+  }
+  return gerepileupto(av, gmul(cox, S));
+}
+
+GEN 
+myexp1(GEN x, long prec)
+{
+  pari_sp av = avma;
+  if (typ(x) != t_REAL) x = gtofp(x, prec);
+  return gerepilecopy(av, mpexp1(x));
+}
+/* Change: added: special handling of negative s */
+
+GEN
+incgamspec(GEN s, GEN x, GEN g, long prec)
+{
+  pari_sp ltop = avma;
+  GEN q, S, cox, P, sk, S1, S2, S3, L = NULL, F2, F3;
+  long n, k;
+  GEN p3;
+  k = itos(ground(gneg(greal(s))));
+  if (k < 0)
+    pari_err(e_MISC, "incgamspec should be called with real(s)<=1/2");
+  sk = gaddgs(s, k);
+  if (typ(s) == t_INT) cox = gmul(powgi(x, s), gexp(gneg(x), prec));
+  else 
+  {
+    L = glog(x, prec); cox = gexp(gadd(gneg(x), gmul(s, L)), prec);
+  }
+  if (k == 0) {S = gen_0; P = gen_1;}
+  else
+  {
+    GEN sj;
+    long j;
+    q = ginv(s); S = q; P = s;
+    for (j = 1; j < k; j++)
+    {
+      sj = gaddgs(s, j); q = gmul(q, gdiv(x, sj));
+      S = gadd(S, q); P = gmul(P, sj);
+    }
+    S = gmul(S, gneg(cox));
+  }
+  if (gcmp0(sk))
+  {
+    GEN p1;
+    p1 = gadd(S, gdiv(eint1(x, prec), P));
+    return gerepilecopy(ltop, p1);
+  }
+  if (gexpo(sk) > -7)
+  {
+    GEN p5, PG;
+    PG = gmul(sk, P);
+    if (g) g=gmul(g, PG);
+    p5 = gadd(S, gdiv(gsub(incgam0(gaddgs(sk, 1), x, g, prec), gmul(gpowgs(x, k), cox)), PG));
+    return gerepilecopy(ltop, p5);
+  }
+  if (!L) L = glog(x, prec);
+  if (2*gexpo(sk) < -prec2nbits(prec) - 3)
+  {
+    GEN EUL = mpeuler(prec);
+    S1 = gadd(negr(EUL), gmul(gdivgs(sk, 2), addrr(divrs(sqrr(mppi(prec)), 6), sqrr(EUL))));
+    F2 = gmul(gneg(L), gaddsg(1, gmul(gdivgs(sk, 2), L)));
+    F3 = gexp(gmul(sk, L), prec);
+  }
+  else
+  {
+    if (typ(sk) != t_REAL) sk = gtofp(sk, prec);
+    S1 = gdiv(myexp1(glngamma(gaddgs(sk, 1), prec), prec), sk);
+    F3 = myexp1(gmul(sk, L), prec); F2 = gneg(gdiv(F3, sk));
+    F3 = gaddsg(1, F3);
+  }
+  S2 = gmul(F2, gadd(gexp(gneg(x), prec), gdiv(incgamc(gaddgs(sk, 1), x, prec), F3)));
+  S3 = real_0(prec); q = real_m1(prec); n = 0;
+  while (gexpo(q) > -prec2nbits(prec))
+  {
+    n++; q = gmul(q, gdivgs(gneg(x), n));
+    S3 = gadd(S3, gdiv(q, gaddsg(n, sk)));
+  }
+  p3 = gadd(S, gdiv(gadd(gadd(S1, S2), S3), P));
+  return gerepilecopy(ltop, p3);
+}
+
+/* Changes: completely modified. */
+
+/* This is the main driver routine. According to documentation,
+   use asymptotic expansion if x > E/2, use continued fraction if
+   E/12 < x <= E/2, use power series otherwise. In addition, need to
+   take care when s is close to a negative integer */
 
 /* If g != NULL, assume that g=gamma(s,prec). */
 GEN
 incgam0(GEN s, GEN x, GEN g, long prec)
 {
   pari_sp av;
-  long es, e;
-  GEN z;
+  long es, l, E;
+  GEN z, rs;
 
   if (gequal0(x)) return g? gcopy(g): ggamma(s,prec);
   av = avma;
-  es = gexpo(s); e = maxss(es, 0);
-  if (gsigne(real_i(s)) <= 0 || gexpo(x) > e)
-    z = incgam2(s,x,prec);
-  else
+  if (typ(x) != t_REAL) x = gtofp(x, prec);
+  l = precision(x); E = prec2nbits(l) + 1;
+  if (gexpo(x) > (E>>1) + 3) return incgamasymp(s, x, prec);
+  if (gexpo(gmulsg(13,x)) >= E) return incgamcf(s, x, prec);
+  rs = greal(s);
+  if (gsigne(rs) > 0 && gexpo(rs) >= -1)
   {
+    es = gexpo(s);
     if (es < 0) {
       long l = precision(s);
       if (!l) l = prec;
@@ -749,12 +885,15 @@ incgam0(GEN s, GEN x, GEN g, long prec)
     }
     if (!g) g = ggamma(s,prec);
     z = gsub(g, incgamc(s,x,prec));
+    return gerepileupto(av, z);
   }
-  return gerepileupto(av, z);
+  else return gerepilecopy(av, incgamspec(s, x, g, prec));
 }
 
 GEN
 incgam(GEN s, GEN x, long prec) { return incgam0(s, x, NULL, prec); }
+
+
 
 /* x >= 0 a t_REAL */
 GEN
