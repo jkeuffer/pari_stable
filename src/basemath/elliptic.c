@@ -4645,31 +4645,32 @@ elldivpol4(GEN e, long n, long v)
   setvarn(res, v); return res;
 }
 
+/* T = (2y + a1x + a3)^2 modulo the curve equation */
 static GEN
-elldivpol0(GEN e, GEN t, GEN p24, long n, long v)
+elldivpol0(GEN e, GEN t, GEN T, long n, long v)
 {
   GEN ret;
   long m = n/2;
   if (gel(t,n)) return gel(t,n);
   if (n<=4) ret = elldivpol4(e, n, v);
-  else if (n%2==1)
+  else if (odd(n))
   {
-    GEN t1 = gmul(elldivpol0(e,t,p24,m+2,v),
-                  gpowgs(elldivpol0(e,t,p24,m,v),3));
-    GEN t2 = gmul(elldivpol0(e,t,p24,m-1,v),
-                  gpowgs(elldivpol0(e,t,p24,m+1,v),3));
-    if (m%2==1)
-      ret = gsub(t1, gmul(p24,t2));
-    else
-      ret = gsub(gmul(p24,t1), t2);
+    GEN t1 = RgX_mul(elldivpol0(e,t,T,m+2,v),
+                     gpowgs(elldivpol0(e,t,T,m,v),3));
+    GEN t2 = RgX_mul(elldivpol0(e,t,T,m-1,v),
+                     gpowgs(elldivpol0(e,t,T,m+1,v),3));
+    if (odd(m))/*f_{4l+3} = f_{2l+3}f_{2l+1}^3 - T f_{2l}f_{2l+2}^3, m=2l+1*/
+      ret = RgX_sub(t1, RgX_mul(T,t2));
+    else       /*f_{4l+1} = T f_{2l+2}f_{2l}^3 - f_{2l-1}f_{2l+1}^3, m=2l*/
+      ret = RgX_sub(RgX_mul(T,t1), t2);
   }
   else
-  {
-    GEN t1 = gmul(elldivpol0(e,t,p24,m+2,v),
-                  gpowgs(elldivpol0(e,t,p24,m-1,v),2));
-    GEN t2 = gmul(elldivpol0(e,t,p24,m-2,v),
-                  gpowgs(elldivpol0(e,t,p24,m+1,v),2));
-    ret = gmul(elldivpol0(e,t,p24,m,v), gsub(t1,t2));
+  { /* f_2m = f_m(f_{m+2}f_{m-1}^2 - f_{m-2}f_{m+1}^2) */
+    GEN t1 = RgX_mul(elldivpol0(e,t,T,m+2,v),
+                     RgX_sqr(elldivpol0(e,t,T,m-1,v)));
+    GEN t2 = RgX_mul(elldivpol0(e,t,T,m-2,v),
+                     RgX_sqr(elldivpol0(e,t,T,m+1,v)));
+    ret = RgX_mul(elldivpol0(e,t,T,m,v), RgX_sub(t1,t2));
   }
   gel(t,n) = ret;
   return ret;
@@ -4686,27 +4687,20 @@ elldivpol(GEN e, long n, long v)
     pari_err(e_MISC,"variable must have higher priority in elldivpol");
   if (n<0) n = -n;
   if (n==1 || n==3)
-    return gerepilecopy(av, elldivpol4(e, n, v));
+    ret = elldivpol4(e, n, v);
   else
   {
     GEN a1 = ell_get_a1(e), a2 = ell_get_a2(e), a3 = ell_get_a3(e);
     GEN a4 = ell_get_a4(e), a6 = ell_get_a6(e);
-    GEN f1 = mkpoln(4, gen_1, a2, a4, a6);
-    GEN f2 = mkpoln(2, a1, a3);
-    GEN d2, psi24;
-    setvarn(f1,v); setvarn(f2,v);
-    d2 = gadd(gmulsg(4, f1), gsqr(f2));
-    psi24 = gsqr(d2);
+    GEN f1 = mkpoln(4, gen_1, a2, a4, a6); /* x^3 + a2 x^2 + a4 x + a6 */
+    GEN f2 = mkpoln(2, a1, a3); /* a1 x + a3 */
+    GEN d2 = RgX_add(gmulsg(4, f1), RgX_sqr(f2)); /* (2y + a1x + 3)^2 mod E */
+    setvarn(d2,v);
     if (n <= 4)
       ret = elldivpol4(e, n, v);
     else
-    {
-      GEN t = cgetg(n+1, t_VEC);
-      long i;
-      for(i=1; i<=n; i++) gel(t,i) = NULL;
-      ret = elldivpol0(e, t, psi24, n, v);
-    }
-    if (n%2==0) ret = gmul(ret, d2);
-    return gerepilecopy(av, ret);
+      ret = elldivpol0(e, const_vec(n,NULL), RgX_sqr(d2), n, v);
+    if (n%2==0) ret = RgX_mul(ret, d2);
   }
+  return gerepilecopy(av, ret);
 }
