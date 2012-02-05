@@ -671,6 +671,7 @@ GRHchk(GEN nf, GEN D, GEN P, long N, GRHcheck_t *S, GEN invhr, long LIMC)
     double logCslogp = logC/pr->logp;
     long j = lg(fs), lim = logCslogp;
     NEXT_PRIME_VIADIFF(p, delta);
+    if (fs[1] == N && N <= lim) count--; /* Inert prime */
     while (--j)
     {
       long f = fs[j], M, nb;
