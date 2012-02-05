@@ -34,3 +34,5 @@ p = 67452192952521724999; pi = idealprimedec(nf,p)[1];
 q = 762234946175168528650011228121; qi = idealprimedec(nf,q)[1];
 idealfactor(nf, idealdiv(nf,pi,qi))
 
+\\#1180
+setrand(1);quadclassunit(572).no
