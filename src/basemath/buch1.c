@@ -983,7 +983,9 @@ Buchquad(GEN D, double cbach, double cbach2, long prec)
   LIMC0 = maxss((long)(cbach2*LOGD2), 20);
   LIMCMAX = (long)(6.*LOGD2);
   low = LIMC0;
+  /* XXX 100 and 1000 below to ensure a good enough approximation of residue */
   high = expi(D) < 16 ? 100 : 1000;
+  if (high < low) high = low;
   while (!quadGRHchk(D, &GRHcheck, invhr, high))
   {
     low = high;

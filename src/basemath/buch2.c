@@ -3715,8 +3715,8 @@ Buchall_param(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long
   low = LIMC0;
   /* XXX 100 and 1000 below to ensure a good enough approximation of residue */
   high = expi(D) < 16 ? 100 : 1000;
-  Dp = gmul(D, nf_get_index(nf));
   if (high < low) high = low;
+  Dp = gmul(D, nf_get_index(nf));
   while (!GRHchk(nf, Dp, P, N, &GRHcheck, invhr, high))
   {
     low = high;
