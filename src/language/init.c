@@ -729,9 +729,9 @@ pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts)
 
   pari_stackcheck_init(&u);
   if ((init_opts&INIT_DFTm)) {
+    pari_init_defaults();
     GP_DATA = default_gp_data();
     gp_expand_path(GP_DATA->path);
-    pari_init_defaults();
   }
 
   if ((init_opts&INIT_SIGm)) pari_sig_init(pari_sighandler);
