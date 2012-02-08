@@ -468,12 +468,12 @@ gen_factored_order(GEN a, GEN o, void *E, const struct bb_group *grp)
         y = grp->pow(E, y, p);
         if (grp->equal1(y)) break;
       }
+      gel(P,ind) = p;
+      gel(F,ind) = utoipos(j);
       if (j < e) {
         if (j > 1) p = powiu(p, j);
         o = mulii(t, p);
       }
-      gel(P,ind) = p;
-      gel(F,ind) = utoipos(j);
       ind++;
     }
   }

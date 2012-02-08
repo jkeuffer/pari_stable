@@ -12,3 +12,5 @@ znlog(7,Mod(3,8))
 znlog(0,Mod(3,4))
 znlog(6,Mod(2,7),znorder(Mod(2,7)))
 znlog(3,Mod(3,8),znorder(Mod(3,8)))
+znlog(5,Mod(2,401))
+
