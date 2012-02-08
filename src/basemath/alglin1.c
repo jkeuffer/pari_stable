@@ -331,6 +331,35 @@ extract0(GEN x, GEN l1, GEN l2)
 }
 
 GEN
+vecrange(GEN a, GEN b)
+{
+  GEN y;
+  long i, l;
+  if (typ(a)!=t_INT) pari_err_TYPE("vecrange",a);
+  if (typ(b)!=t_INT) pari_err_TYPE("vecrange",b);
+  if (cmpii(a,b)>0) return cgetg(1,t_VEC);
+  l = itos(subii(b,a))+1;
+  a = setloop(a);
+  y = cgetg(l+1, t_VEC);
+  for (i=1; i<=l; incloop(a), i++)
+    gel(y,i) = gcopy(a);
+  return y;
+}
+
+GEN
+vecrangess(long a, long b)
+{
+  GEN y;
+  long i, l;
+  if (a>b) return cgetg(1,t_VEC);
+  l = b-a+1;
+  y = cgetg(l+1, t_VEC);
+  for (i=1; i<=l; a++, i++)
+    gel(y,i) = stoi(a);
+  return y;
+}
+
+GEN
 genselect(void *E, long (*f)(void* E, GEN x), GEN A)
 {
   long i, l, nb = 0, t = typ(A);

@@ -648,6 +648,8 @@ GEN     shallowextract(GEN x, GEN L);
 GEN     shallowtrans(GEN x);
 GEN     split_realimag(GEN x, long r1, long r2);
 GEN     suppl(GEN x);
+GEN     vecrange(GEN a, GEN b);
+GEN     vecrangess(long a, long b);
 
 /* alglin2.c */
 

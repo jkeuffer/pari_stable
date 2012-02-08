@@ -29,6 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 %parse-param {char **lex}
 %lex-param {char **lex}
 %initial-action{ @$.start=@$.end=*lex; }
+%token KDOTDOT ".."
 %token KPARROW ")->"
 %token KARROW "->"
 %token KPE   "+="
@@ -179,6 +180,7 @@ matrixlines: matrixelts  ';' matrixelts {$$=newnode(Fmatrixlines,$1,$3,&@$);}
 ;
 
 matrix: '[' ']'             {$$=newnode(Fvec,-1,-1,&@$);}
+      | '[' expr ".." expr ']' {$$=newopcall(OPrange,$2,$4,&@$);}
       | '[' ';' ']'         {$$=newnode(Fmat,-1,-1,&@$);}
       | '[' matrixelts ']'  {$$=newnode(Fvec,$2,-1,&@$);}
       | '[' matrixlines ']' {$$=newnode(Fmat,$2,-1,&@$);}

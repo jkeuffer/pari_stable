@@ -424,7 +424,7 @@ real_read(pari_sp av, const char **s, GEN y, long prec)
     case '.':
     {
       const char *old = ++*s;
-      if (isalpha((int)**s))
+      if (isalpha((int)**s) || **s=='.')
       {
         if (**s == 'E' || **s == 'e') {
           n = exponent(s);
@@ -511,6 +511,7 @@ skipconstante(char **lex)
   if (**lex=='.')
   {
     char *old = ++*lex;
+    if (**lex == '.') { --*lex; return KINTEGER; }
     if (isalpha((int)**lex))
     {
       skipexponent(lex);
@@ -571,7 +572,12 @@ pari_lex(union token_value *yylval, struct node_loc *yylloc, char **lex)
   }
   if (**lex == '.')
   {
-    int token=skipconstante(lex);
+    int token;
+    if ((*lex)[1]== '.')
+    {
+      *lex+=2; yylloc->end = *lex; return KDOTDOT;
+    }
+    token=skipconstante(lex);
     if (token==KREAL)
     {
       yylloc->end = *lex;

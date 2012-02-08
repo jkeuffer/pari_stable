@@ -42,7 +42,7 @@ typedef struct node_s
 
 typedef enum {CSTstr, CSTquote, CSTint, CSTreal, CSTmember, CSTentry} CSTtype;
 
-typedef enum {OPor, OPand, OPid, OPeq, OPne, OPge, OPg, OPle, OPl, OPs, OPp, OPsl, OPsr, OPmod, OPdr, OPeuc, OPd, OPm, OPpow, OPcat, OPstore, OPss, OPpp, OPse ,OPpe ,OPsle ,OPsre ,OPmode ,OPdre ,OPeuce ,OPde ,OPme, OPpl, OPn, OPnb, OPfact, OPderiv, OPtrans, OPhist, OPlength, OPnboperator} OPerator;
+typedef enum {OPor, OPand, OPid, OPeq, OPne, OPge, OPg, OPle, OPl, OPs, OPp, OPsl, OPsr, OPmod, OPdr, OPeuc, OPd, OPm, OPpow, OPcat, OPstore, OPss, OPpp, OPse ,OPpe ,OPsle ,OPsre ,OPmode ,OPdre ,OPeuce ,OPde ,OPme, OPpl, OPn, OPnb, OPfact, OPderiv, OPtrans, OPrange, OPhist, OPlength, OPnboperator} OPerator;
 
 extern THREAD node *pari_tree;
 
