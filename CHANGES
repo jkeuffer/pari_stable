@@ -74,8 +74,8 @@ BA 57- my(f(x)=x+1);f --> SEGV                                       [#1273]
    59- allow bnrL1 over Q [#1279]
    60- factorpadic(,,,1) => SEGV when linear factors/Q [#1278]
    61- mathnf(..., 4) didn't remove 0 columns from HNF [#1271]
-   62- znlog(5,Mod(2,401)) -> SEGV [#1285]
-JD 63- possible SEGV in pari_init_opts [#1264]
+JD 62- possible SEGV in pari_init_opts [#1264]
+BA 63- ellorder(E,P*Mod(1,p)) did not work if E was defined over Z.
 
   Changed
     1- mathnf: swapped flag 3 and 5.

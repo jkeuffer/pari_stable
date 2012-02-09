@@ -17,6 +17,8 @@ o=ellorder(E,P, p+1-ellap(E,p))
 e=elllog(E,P,Q,o)
 ellpow(E,Q,e) == P
 
+ellorder(ellinit([0,2],1),[-1,-1]*Mod(1,11))
+
 elltors(ellinit([-2147484185^2,0]))
 
 ellanalyticrank(ellinit([0, -1, 1, -10, -20]))
