@@ -21,6 +21,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "paripriv.h"
 
+static GEN ell_to_a4a6(GEN E, GEN p);
+
 void
 checkellpt(GEN z)
 { if (typ(z)!=t_VEC || lg(z) > 3) pari_err_TYPE("checkellpt", z); }
@@ -4051,27 +4053,31 @@ _orderell(GEN E, GEN P)
   else
   {
     pari_sp av = avma;
-    int i;
-    GEN p, avec, Ep, P1;
+    GEN tmp, p, a4, Pp, P1;
     long k;
 
-    /* choose not too small prime p with good reduction */
+    /* choose not too small prime p dividing neither a coefficient of the
+       short Weierstrass form nor of P and leading to good reduction      */
     p = utoi (100000);
     do
     {
       p = gnextprime (addis (p, 1));
-    } while (modii (gel (E, 12), p) == gen_0); /* bad reduction */
+    } while (   Rg_to_Fp (denom (ell_get_c4 (E)), p) == gen_0
+             || Rg_to_Fp (denom (ell_get_c6 (E)), p) == gen_0
+             || Rg_to_Fp (denom (gel (P, 1)), p) == gen_0
+             || Rg_to_Fp (denom (gel (P, 2)), p) == gen_0
+             || Rg_to_Fp (ell_get_disc (E), p) == gen_0);
 
-    /* assign E mod p to Ep */
-    avec = cgetg (6, t_VEC);
-    for (i = 1; i <= 5; i++)
-      gel (avec, i) = gmodulo (gel (E, i), p);
-    Ep = smallellinit (avec);
-
-    /* check whether the order of P on Ep is <= 12 */
-    for (P1 = addell (Ep, P, P), k = 2;
+    /* transform E into short Weierstrass form Ep modulo p
+       and P to Pp on Ep */
+    tmp = ell_to_a4a6 (E, p);
+    a4 = gel (tmp, 1);
+    Pp = RgV_to_FpV (ellchangepointinv (P, gel (tmp, 3)), p);
+    
+    /* check whether the order of Pp on Ep is <= 12 */
+    for (P1 = FpE_dbl (Pp, a4, p), k = 2;
          !ell_is_inf (P1) && k <= 12;
-         P1 = addell (Ep, P1, P), k++);
+         P1 = FpE_add (P1, Pp, a4, p), k++);
 
     if (k != 13)
       /* check over Q; one could also run more tests modulo primes */
