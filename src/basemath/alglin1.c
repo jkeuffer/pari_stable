@@ -330,13 +330,68 @@ extract0(GEN x, GEN l1, GEN l2)
   return y;
 }
 
+long
+vecslice_parse_arg(long lA, long *y1, long *y2, long *skip)
+{
+  *skip=0;
+  if (!*y1)
+  {
+    if (*y2)
+    {
+      if (*y2<0) *y2 += lA;
+      if (*y2<=0 || *y2>=lA)
+        pari_err_DIM("_[..]");
+      *skip=*y2;
+    }
+    *y1 = 1; *y2 = lA-1;
+  }
+  else if (!*y2) *y2 = *y1;
+  if (*y1<0) *y1 += lA;
+  if (*y2<0) *y2 += lA;
+  if (*y1<=0 || *y1>*y2 || *y2>=lA) pari_err_DIM("_[..]");
+  return *y2 - *y1 + 2 - !!*skip;
+}
+
+GEN
+vecslice0(GEN A, long y1, long y2)
+{
+  GEN B;
+  long t = typ(A), skip;
+  long i,lB, lA=lg(A);
+  if (!is_vec_t(t)) pari_err_TYPE("_[_.._]",A);
+  lB = vecslice_parse_arg(lA, &y1, &y2, &skip);
+  B = cgetg(lB, t);
+  for (i=1; i<lB; i++, y1++)
+  {
+    if (y1 == skip) {i--; continue; }
+    gel(B,i) = gcopy(gel(A,y1));
+  }
+  return B;
+}
+
+GEN
+matslice0(GEN A, long x1, long x2, long y1, long y2)
+{
+  GEN B;
+  long i,lB, lA=lg(A), skip;
+  if (typ(A)!=t_MAT) pari_err_TYPE("_[_.._,_.._]",A);
+  lB = vecslice_parse_arg(lA, &y1, &y2, &skip);
+  B = cgetg(lB, t_MAT);
+  for (i=1; i<lB; i++, y1++)
+  {
+    if (y1 == skip) {i--; continue; }
+    gel(B,i) = vecslice0(gel(A,y1),x1,x2);
+  }
+  return B;
+}
+
 GEN
 vecrange(GEN a, GEN b)
 {
   GEN y;
   long i, l;
-  if (typ(a)!=t_INT) pari_err_TYPE("vecrange",a);
-  if (typ(b)!=t_INT) pari_err_TYPE("vecrange",b);
+  if (typ(a)!=t_INT) pari_err_TYPE("[_.._]",a);
+  if (typ(b)!=t_INT) pari_err_TYPE("[_.._]",b);
   if (cmpii(a,b)>0) return cgetg(1,t_VEC);
   l = itos(subii(b,a))+1;
   a = setloop(a);

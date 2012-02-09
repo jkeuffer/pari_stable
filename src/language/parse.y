@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
         ((Current).start  = ((N)?(Rhs)[1].start:(Rhs)[0].end),  \
          (Current).end    = (Rhs)[N].end)
 #include "parsec.h"
+#define NOARG(x) newnode(Fnoarg,-1,-1,&(x))
 
 %}
 %name-prefix="pari_"
@@ -29,9 +30,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 %parse-param {char **lex}
 %lex-param {char **lex}
 %initial-action{ @$.start=@$.end=*lex; }
-%token KDOTDOT ".."
 %token KPARROW ")->"
 %token KARROW "->"
+%token KDOTDOT ".."
 %token KPE   "+="
 %token KSE   "-="
 %token KME   "*="
@@ -60,7 +61,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 %left SEQ DEFFUNC
 %left INT LVAL
 %right ")->" "->"
-%left ';' ','
+%left ';' ',' ".."
 %right '=' "+=" "-=" "*=" "/=" "\\/=" "\\=" "%=" ">>=" "<<="
 %left '&' "&&" "||"
 %left "===" "==" "!=" '>' ">=" '<' "<="
@@ -74,29 +75,34 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 %left "++" "--"
 %left '('
 %left ':'
-%type <val> seq sequnused matrix matrix_index expr
+%type <val> seq sequnused
+%type <val> range matrix matrix_index expr
 %type <val> lvalue
 %type <val> matrixelts matrixlines arg listarg definition
 %type <val> funcid memberid
 %type <val> backticks history
 %type <val> compr in
-%destructor { pari_discarded++; } seq matrix matrix_index expr lvalue matrixelts matrixlines arg listarg definition funcid memberid backticks history compr in
+%destructor { pari_discarded++; } seq matrix range matrix_index expr lvalue matrixelts matrixlines arg listarg definition funcid memberid backticks history compr in
 %%
 
 sequnused: seq       {$$=$1;}
          | seq error {$$=$1; pari_unused_chars=@1.end;YYABORT;}
 ;
 
-seq: /**/ %prec SEQ  {$$=newnode(Fnoarg,-1,-1,&@$);}
+seq: /**/ %prec SEQ  {$$=NOARG(@$);}
    | expr %prec SEQ  {$$=$1;}
    | seq ';'         {$$=$1; @$=@1;}
    | seq ';' expr    {$$=newnode(Fseq,$1,$3,&@$);}
 ;
 
-matrix_index: '[' expr ',' expr ']' {$$=newnode(Fmatrix,$2,$4,&@$);}
-            | '[' expr ']'          {$$=newnode(Fmatrix,$2,-1,&@$);}
-            | '[' expr ',' ']'      {$$=newnode(FmatrixL,$2,-1,&@$);}
-            | '[' ',' expr ']'      {$$=newnode(FmatrixR,$3,-1,&@$);}
+range: /* */          { $$=newnode(Frange,NOARG(@$),NOARG(@$),&@$); }
+     | expr           { $$=newnode(Frange,$1,NOARG(@$),&@$); }
+     | expr ".." expr { $$=newnode(Frange,$1,$3,&@$); }
+     | '^' expr       { $$=newnode(Frange,NOARG(@$),$2,&@$); }
+;
+
+matrix_index: '[' range ',' range ']' {$$=newnode(Fmatrix,$2,$4,&@$);}
+            | '[' range ']'           {$$=newnode(Fmatrix,$2,-1,&@$);}
 ;
 
 backticks: '`' {$$=1;}
@@ -161,14 +167,14 @@ expr: KINTEGER %prec INT  {$$=newintnode(&@1);}
     | expr '~' {$$=newopcall(OPtrans,$1,-1,&@$);}
     | expr '\'' {$$=newopcall(OPderiv,$1,-1,&@$);}
     | expr '!'  {$$=newopcall(OPfact,$1,-1,&@$);}
-    | expr matrix_index {$$=newnode(Ffacteurmat,$1,$2,&@$);}
+    | expr matrix_index {$$=newnode(Fmatcoeff,$1,$2,&@$);}
     | memberid {$$=$1;}
     | expr ':' KENTRY   {$$=newnode(Ftag,$1,0,&@$);}
     | '(' expr ')' {$$=$2;}
 ;
 
 lvalue: KENTRY %prec LVAL   {$$=newnode(Fentry,newconst(CSTentry,&@1),-1,&@$);}
-      | lvalue matrix_index {$$=newnode(Ffacteurmat,$1,$2,&@$);}
+      | lvalue matrix_index {$$=newnode(Fmatcoeff,$1,$2,&@$);}
       | lvalue ':' KENTRY   {$$=newnode(Ftag,$1,newconst(CSTentry,&@2),&@$);}
 ;
 
@@ -192,7 +198,7 @@ in: lvalue '<' '-' expr {$$=newnode(Flistarg,$4,$1,&@$);}
 ;
 
 compr: '[' expr '|' in ']' {$$=newopcall(OPcompr,$4,$2,&@$);}
-     | '[' expr '|' in ',' expr ']' {$$=newopcall(OPcompr, newnode(Flistarg,$4,$2,&@$),$6,&@$);}
+     | '[' expr '|' in ',' expr ']' {$$=newopcall3(OPcompr, $4,$2,$6,&@$);}
 ;
 
 arg: seq        {$$=$1;}

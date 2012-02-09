@@ -653,10 +653,34 @@ checkdups(GEN arg, GEN vep)
   if (l!=0) compile_err("variable declared twice",tree[arg[l]].str);
 }
 
+enum {MAT_range,MAT_std,MAT_line,MAT_column,VEC_std};
+
+static int
+matindex_type(long n)
+{
+  long x = tree[n].x, y = tree[n].y;
+  long fxx = tree[tree[x].x].f, fxy = tree[tree[x].y].f;
+  if (y==-1)
+  {
+    if (fxy!=Fnoarg) return MAT_range;
+    if (fxx==Fnoarg) compile_err("missing index",tree[n].str);
+    return VEC_std;
+  }
+  else
+  {
+    long fyx = tree[tree[y].x].f, fyy = tree[tree[y].y].f;
+    if (fxy!=Fnoarg || fyy!=Fnoarg) return MAT_range;
+    if (fxx==Fnoarg && fyx==Fnoarg) compile_err("missing index",tree[n].str);
+    if (fxx==Fnoarg) return MAT_column;
+    if (fyx==Fnoarg) return MAT_line;
+    return MAT_std;
+  }
+}
+
 static entree *
 getlvalue(long n)
 {
-  while (tree[n].f==Ffacteurmat || tree[n].f==Ftag)
+  while ((tree[n].f==Fmatcoeff && matindex_type(tree[n].y)!=MAT_range) || tree[n].f==Ftag)
     n=tree[n].x;
   return getvar(n);
 }
@@ -669,74 +693,90 @@ compilelvalue(long n)
     return;
   else
   {
-    long x=tree[n].x;
-    long y=tree[n].y;
-    long yx=tree[y].x;
-    long yy=tree[y].y;
-    long f=tree[y].f;
-    if (tree[x].f==Ffacteurmat && f==Fmatrix && yy==-1 &&
-        tree[tree[x].y].f==FmatrixL)
+    long x = tree[n].x, y = tree[n].y;
+    long yx = tree[y].x, yy = tree[y].y;
+    long m = matindex_type(y);
+    if (m == MAT_range)
+      compile_err("not an lvalue",tree[n].str);
+    if (m == VEC_std && tree[x].f==Fmatcoeff)
     {
-      compilelvalue(tree[x].x);
-      compilenode(tree[tree[x].y].x,Gsmall,0);
-      compilenode(yx,Gsmall,0);
-      op_push(OCcompo2ptr,0,y);
-      return;
+      int mx = matindex_type(tree[x].y);
+      if (mx==MAT_line)
+      {
+        int xy = tree[x].y, xyx = tree[xy].x;
+        compilelvalue(tree[x].x);
+        compilenode(tree[xyx].x,Gsmall,0);
+        compilenode(tree[yx].x,Gsmall,0);
+        op_push(OCcompo2ptr,0,y);
+        return;
+      }
     }
     compilelvalue(x);
-    compilenode(yx,Gsmall,0);
-    if (f==Fmatrix && yy==-1)
-      op_push(OCcompo1ptr,0,y);
-    else
+    switch(m)
     {
-      switch(f)
-      {
-      case Fmatrix:
-        compilenode(yy,Gsmall,0);
-        op_push(OCcompo2ptr,0,y);
-        break;
-      case FmatrixR:
-        op_push(OCcompoCptr,0,y);
-        break;
-      case FmatrixL:
-        op_push(OCcompoLptr,0,y);
-        break;
-      }
+    case VEC_std:
+      compilenode(tree[yx].x,Gsmall,0);
+      op_push(OCcompo1ptr,0,y);
+      break;
+    case MAT_std:
+      compilenode(tree[yx].x,Gsmall,0);
+      compilenode(tree[yy].x,Gsmall,0);
+      op_push(OCcompo2ptr,0,y);
+      break;
+    case MAT_line:
+      compilenode(tree[yx].x,Gsmall,0);
+      op_push(OCcompoLptr,0,y);
+      break;
+    case MAT_column:
+      compilenode(tree[yy].x,Gsmall,0);
+      op_push(OCcompoCptr,0,y);
+      break;
     }
   }
 }
 
 static void
-compilefacteurmat(long n, int mode)
+compilematcoeff(long n, int mode)
 {
-  long x=tree[n].x;
-  long y=tree[n].y;
-  long yx=tree[y].x;
-  long yy=tree[y].y;
-  long f=tree[y].f;
+  long x=tree[n].x, y=tree[n].y;
+  long yx=tree[y].x, yy=tree[y].y;
+  long m=matindex_type(y);
   compilenode(x,Ggen,FLnocopy);
-  compilenode(yx,Gsmall,0);
-  if (f==Fmatrix && yy==-1)
+  switch(m)
   {
+  case VEC_std:
+    compilenode(tree[yx].x,Gsmall,0);
     op_push(OCcompo1,mode,y);
     return;
-  }
-  switch(f)
-  {
-  case Fmatrix:
-    compilenode(yy,Gsmall,0);
+  case MAT_std:
+    compilenode(tree[yx].x,Gsmall,0);
+    compilenode(tree[yy].x,Gsmall,0);
     op_push(OCcompo2,mode,y);
     return;
-  case FmatrixR:
-    op_push(OCcompoC,0,y);
-    compilecast(n,Gvec,mode);
-    return;
-  case FmatrixL:
+  case MAT_line:
+    compilenode(tree[yx].x,Gsmall,0);
     op_push(OCcompoL,0,y);
     compilecast(n,Gvec,mode);
     return;
+  case MAT_column:
+    compilenode(tree[yy].x,Gsmall,0);
+    op_push(OCcompoC,0,y);
+    compilecast(n,Gvec,mode);
+    return;
+  case MAT_range:
+    compilenode(tree[yx].x,Gsmall,0);
+    compilenode(tree[yx].y,Gsmall,0);
+    if (yy==-1)
+      op_push(OCcallgen,(long)is_entry("_[_.._]"),n);
+    else
+    {
+      compilenode(tree[yy].x,Gsmall,0);
+      compilenode(tree[yy].y,Gsmall,0);
+      op_push(OCcallgen,(long)is_entry("_[_.._,_.._]"),n);
+    }
+    return;
   default:
-    pari_err_BUG("compilefacteurmat");
+    pari_err_BUG("compilematcoeff");
   }
 }
 
@@ -1599,8 +1639,8 @@ compilenode(long n, int mode, long flag)
       compilenode(x,Gvoid,0);
     compilenode(y,mode,flag&(FLreturn|FLsurvive));
     return;
-  case Ffacteurmat:
-    compilefacteurmat(n,mode);
+  case Fmatcoeff:
+    compilematcoeff(n,mode);
     if (mode==Ggen && !(flag&FLnocopy))
       op_push(OCcopy,0,n);
     return;
@@ -1865,18 +1905,17 @@ optimizemat(long n)
 }
 
 static void
-optimizefacteurmat(long n)
+optimizematcoeff(long n)
 {
   long x=tree[n].x;
   long y=tree[n].y;
   long yx=tree[y].x;
   long yy=tree[y].y;
-  long f=tree[y].f;
   long fl;
   optimizenode(x);
   optimizenode(yx);
   fl=tree[x].flags&tree[yx].flags;
-  if (f==Fmatrix && yy>=0)
+  if (yy>=0)
   {
     optimizenode(yy);
     fl&=tree[yy].flags;
@@ -2034,8 +2073,13 @@ optimizenode(long n)
     optimizenode(y);
     tree[n].flags=tree[x].flags&tree[y].flags;
     return;
-  case Ffacteurmat:
-    optimizefacteurmat(n);
+  case Frange:
+    optimizenode(x);
+    optimizenode(y);
+    tree[n].flags=tree[x].flags&tree[y].flags;
+    break;
+  case Fmatcoeff:
+    optimizematcoeff(n);
     break;
   case Faffect:
     optimizenode(x);

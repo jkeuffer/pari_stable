@@ -167,6 +167,12 @@ newopcall(OPerator op, long x, long y, struct node_loc *loc)
 }
 
 static long
+newopcall3(OPerator op, long x, long y, long z, struct node_loc *loc)
+{
+  return newopcall(op,newnode(Flistarg,x,y,loc),z,loc);
+}
+
+static long
 newintnode(struct node_loc *loc)
 {
   if (loc->end-loc->start<=(long)(1+LOG10_2*BITS_IN_LONG))

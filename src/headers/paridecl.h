@@ -640,6 +640,7 @@ GEN     matimage0(GEN x,long flag);
 GEN     matker0(GEN x, long flag);
 GEN     matmuldiagonal(GEN x, GEN d);
 GEN     matmultodiagonal(GEN x, GEN y);
+GEN     matslice0(GEN A, long x1, long x2, long y1, long y2);
 GEN     matsolvemod0(GEN M, GEN D, GEN Y,long flag);
 long    rank(GEN x);
 GEN     reducemodinvertible(GEN x, GEN y);
@@ -651,6 +652,7 @@ GEN     split_realimag(GEN x, long r1, long r2);
 GEN     suppl(GEN x);
 GEN     vecrange(GEN a, GEN b);
 GEN     vecrangess(long a, long b);
+GEN     vecslice0(GEN A, long y1, long y2);
 
 /* alglin2.c */
 
