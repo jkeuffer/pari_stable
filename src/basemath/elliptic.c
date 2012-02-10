@@ -4072,7 +4072,7 @@ _orderell(GEN E, GEN P)
        and P to Pp on Ep */
     tmp = ell_to_a4a6 (E, p);
     a4 = gel (tmp, 1);
-    Pp = RgV_to_FpV (ellchangepointinv (P, gel (tmp, 3)), p);
+    Pp = RgV_to_FpV (ellchangepointinv (RgV_to_FpV (P, p), gel (tmp, 3)), p);
     
     /* check whether the order of Pp on Ep is <= 12 */
     for (P1 = FpE_dbl (Pp, a4, p), k = 2;
