@@ -115,11 +115,6 @@ q^101)
 6
 ? elltors(tcurve)
 [12, [6, 2], [[-2, 8], [3, -2]]]
-? E=ellinit([1,1]);
-? P=[72,611];
-? Q=ellpow(E,P,20);
-? ellorder(E,Q)
-0
 ? mcurve=ellinit([-17,0])
 [0, 0, 0, -17, 0, 0, -34, 0, -289, 816, 0, 314432, 1728, [4.1231056256176605
 498214098559740770251, 0.E-57, -4.1231056256176605498214098559740770251]~, 1
@@ -160,6 +155,6 @@ q^101)
 ? precision(cmcurve)
 38
 ? getheap
-[64, 5137]
+[57, 4395]
 ? print("Total time spent: ",gettime);
-Total time spent: 8
+Total time spent: 12

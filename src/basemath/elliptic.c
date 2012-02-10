@@ -741,6 +741,25 @@ ellchangepointinv(GEN x, GEN ch)
   return gerepilecopy(av,y);
 }
 
+static GEN
+ellchangepointinv_Fp(GEN x, GEN ch, GEN p)
+{
+  GEN u, r, s, t, X, Y, u2, u3, u2X, z;
+  if (ell_is_inf(x)) return x;
+  X = gel(x,1);
+  Y = gel(x,2);
+  u = gel(ch,1);
+  r = gel(ch,2);
+  s = gel(ch,3);
+  t = gel(ch,4);
+  u2 = Fp_sqr(u, p); u3 = Fp_mul(u,u2,p);
+  u2X = Fp_mul(u2,X, p);
+  z = cgetg(3, t_VEC);
+  gel(z,1) = Fp_add(u2X,r,p);
+  gel(z,2) = Fp_add(Fp_mul(u3,Y,p), Fp_add(Fp_mul(s,u2X,p), t, p), p);
+  return z;
+}
+
 
 static long
 ellexpo(GEN E)
@@ -4044,50 +4063,61 @@ elllog(GEN e, GEN a, GEN g, GEN o)
   return gerepileupto(av, z? z: cgetg(1,t_VEC));
 }
 
+static int
+ell_is_integral(GEN E)
+{
+  return typ(ell_get_a1(E)) == t_INT
+      && typ(ell_get_a2(E)) == t_INT
+      && typ(ell_get_a3(E)) == t_INT
+      && typ(ell_get_a4(E)) == t_INT
+      && typ(ell_get_a6(E)) == t_INT;
+}
+
 /* assume e is defined over Q (use Mazur's theorem) */
 static long
 _orderell(GEN E, GEN P)
 {
-  if (ell_is_inf(P))
-    return 1;
-  else
-  {
-    pari_sp av = avma;
-    GEN tmp, p, a4, Pp, P1;
-    long k;
+  pari_sp av = avma;
+  GEN tmp, p, a4, dx, dy, d4, d6, D, Pp, Q;
+  ulong pp;
+  long k;
+  if (ell_is_inf(P)) return 1;
 
-    /* choose not too small prime p dividing neither a coefficient of the
-       short Weierstrass form nor of P and leading to good reduction      */
-    p = utoi (100000);
-    do
-    {
-      p = gnextprime (addis (p, 1));
-    } while (   Rg_to_Fp (denom (ell_get_c4 (E)), p) == gen_0
-             || Rg_to_Fp (denom (ell_get_c6 (E)), p) == gen_0
-             || Rg_to_Fp (denom (gel (P, 1)), p) == gen_0
-             || Rg_to_Fp (denom (gel (P, 2)), p) == gen_0
-             || Rg_to_Fp (ell_get_disc (E), p) == gen_0);
+  dx = Q_denom(gel(P,1));
+  dy = Q_denom(gel(P,2));
+  if (ell_is_integral(E)) /* integral model, try Nagell Lutz */
+    if (cmpiu(dx, 4) > 0 || cmpiu(dy, 8) > 0) return 0;
 
-    /* transform E into short Weierstrass form Ep modulo p
-       and P to Pp on Ep */
-    tmp = ell_to_a4a6 (E, p);
-    a4 = gel (tmp, 1);
-    Pp = RgV_to_FpV (ellchangepointinv (RgV_to_FpV (P, p), gel (tmp, 3)), p);
-    
-    /* check whether the order of Pp on Ep is <= 12 */
-    for (P1 = FpE_dbl (Pp, a4, p), k = 2;
-         !ell_is_inf (P1) && k <= 12;
-         P1 = FpE_add (P1, Pp, a4, p), k++);
+  d4 = Q_denom(ell_get_c4(E));
+  d6 = Q_denom(ell_get_c6(E));
+  D = ell_get_disc (E);
+  /* choose not too small prime p dividing neither a coefficient of the
+     short Weierstrass form nor of P and leading to good reduction      */
 
-    if (k != 13)
-      /* check over Q; one could also run more tests modulo primes */
-      for (P1 = addell (E, P, P), k = 2;
-          !ell_is_inf (P1) && k <= 12;
-          P1 = addell (E, P1, P), k++);
+  for (pp = 100003;;pp = unextprime(pp + 1))
+    if (Rg_to_Fl(d4, pp) && Rg_to_Fl(d6, pp) && Rg_to_Fl(D, pp)
+     && Rg_to_Fl(dx, pp) && Rg_to_Fl(dy, pp)) break;
 
-    avma = av;
-    return (k == 13 ? 0 : k);
-  }
+  /* transform E into short Weierstrass form Ep modulo p
+     and P to Pp on Ep */
+  p = utoipos(pp);
+  tmp = ell_to_a4a6(E, p);
+  a4 = gel(tmp, 1);
+  Pp = ellchangepointinv_Fp(RgV_to_FpV(P, p), gel(tmp,3), p);
+
+  /* check whether the order of Pp on Ep is <= 12 */
+  for (Q = FpE_dbl(Pp, a4, p), k = 2;
+       !ell_is_inf(Q) && k <= 12;
+       Q = FpE_add(Q, Pp, a4, p), k++) /* empty */;
+
+  if (k != 13)
+    /* check over Q; one could also run more tests modulo primes */
+    for (Q = addell(E, P, P), k = 2;
+        !ell_is_inf(Q) && k <= 12;
+        Q = addell(E, Q, P), k++) /* empty */;
+
+  avma = av;
+  return (k == 13 ? 0 : k);
 }
 
 GEN
@@ -4095,12 +4125,11 @@ ellorder(GEN e, GEN z, GEN o)
 {
   pari_sp av = avma;
   GEN j;
-  long tj, tz1, tz2;
   checksmallell(e); checkellpt(z);
-  j = ell_get_j(e); tj = typ(j);
   if (ell_is_inf(z)) return gen_1;
-  tz1 = typ(gel(z,1)); tz2 = typ(gel(z,2));
-  if (is_rational_t(tj) && is_rational_t(tz1) && is_rational_t(tz2))
+  j = ell_get_j(e);
+  if (is_rational_t(typ(j)) &&
+      is_rational_t(typ(gel(z,1))) && is_rational_t(typ(gel(z,2))))
     return utoi( _orderell(e, z) );
   if (!o)
   {

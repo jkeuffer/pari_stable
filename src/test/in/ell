@@ -19,7 +19,13 @@ ellpow(E,Q,e) == P
 
 ellorder(ellinit([0,2],1),[-1,-1]*Mod(1,997))
 
-elltors(ellinit([-2147484185^2,0]))
+E = ellinit([-2147484185^2,0]);
+elltors(E)
+ellorder(E, [0,0])
+ellorder(E, [2147484185, 0])
+ellorder(E, [2147484185/3, 1/11])
+E = ellinit([1,1]); P = [72, 611];
+ellorder (E, ellpow(E, P, 20))
 
 ellanalyticrank(ellinit([0, -1, 1, -10, -20]))
 ellanalyticrank(ellinit([0, 0, 1, -1, 0]))
@@ -52,4 +58,3 @@ for (i = 1, #v,
 
 \\ #1257
 ellrootno(ellinit([0,-1,1,217,-282]))
-
