@@ -353,7 +353,7 @@ is_bad(GEN D, ulong p)
 }
 
 static int
-quadGRHchk(GEN D, GRHcheck_t *S, GEN invhr, long LIMC)
+quadGRHchk(GEN D, GRHcheck_t *S, GEN invhr, long LIMC, long minSFB)
 {
   long i, np = uprimepi(LIMC), count;
   double logC = log(LIMC), SA = 0, SB = 0;
@@ -385,9 +385,9 @@ quadGRHchk(GEN D, GRHcheck_t *S, GEN invhr, long LIMC)
       B *= (1 - pow(q, M)*(M+1 - M*q)) * inv1_q * inv1_q;
     }
     if ((long)pr->dec>0) { SA += 2*A;SB += 2*B; } else { SA += A; SB += B; }
-    if ((long)pr->dec >= 0 && !is_bad(D, (ulong)p)) count++;
+    if ((long)pr->dec>=0 && umodiu(D,(ulong)p) && !is_bad(D,(ulong)p)) count++;
   }
-  return count > 5 && GRHok(S, logC, SA, SB);
+  return count > minSFB && GRHok(S, logC, SA, SB);
 }
 
 /* create B->FB, B->numFB; set B->badprim. Return L(kro_D, 1) */
@@ -435,14 +435,13 @@ FBquad(struct buch_quad *B, long C2, long C1, GEN invhr, GRHcheck_t *S)
 
 /* create B->vperm, return B->subFB */
 static GEN
-subFBquad(struct buch_quad *B, GEN D, double PROD)
+subFBquad(struct buch_quad *B, GEN D, double PROD, long minSFB)
 {
-  long i, j, minSFB, lgsub = 1, ino = 1, lv = B->KC+1;
+  long i, j, lgsub = 1, ino = 1, lv = B->KC+1;
   double prod = 1.;
   pari_sp av;
   GEN no;
 
-  minSFB = (expi(D) > 15)? 3: 2;
   B->vperm = cgetg(lv, t_VECSMALL);
   av = avma;
   no    = cgetg(lv, t_VECSMALL);
@@ -930,7 +929,7 @@ Buchquad(GEN D, double cbach, double cbach2, long prec)
   pari_timer T;
   pari_sp av0 = avma, av, av2;
   const long RELSUP = 5;
-  long i, s, current, triv, sfb_trials, nrelsup, nreldep, need, nsubFB;
+  long i, s, current, triv, sfb_trials, nrelsup, nreldep, need, nsubFB, minSFB;
   ulong low, high, LIMC0, LIMC, LIMC2, LIMCMAX, cp;
   GEN W, cyc, res, gen, dep, mat, C, extraC, B, R, invhr, h = NULL; /*-Wall*/
   double drc, lim, LOGD, LOGD2;
@@ -979,6 +978,7 @@ Buchquad(GEN D, double cbach, double cbach2, long prec)
   if (cbach < 0.) pari_err(e_MISC,"Bach constant < 0 in Buchquad");
   av = avma;
   BQ.powsubFB = BQ.subFB = NULL;
+  minSFB = (expi(D) > 15)? 3: 2;
   init_GRHcheck(&GRHcheck, 2, BQ.PRECREG? 2: 0, LOGD);
   LIMC0 = maxss((long)(cbach2*LOGD2), 20);
   LIMCMAX = (long)(6.*LOGD2);
@@ -986,7 +986,7 @@ Buchquad(GEN D, double cbach, double cbach2, long prec)
   /* XXX 100 and 1000 below to ensure a good enough approximation of residue */
   high = expi(D) < 16 ? 100 : 1000;
   if (high < low) high = low;
-  while (!quadGRHchk(D, &GRHcheck, invhr, high))
+  while (!quadGRHchk(D, &GRHcheck, invhr, high, minSFB))
   {
     low = high;
     high *= 2;
@@ -994,12 +994,12 @@ Buchquad(GEN D, double cbach, double cbach2, long prec)
   while (high - low > 1)
   {
     long test = (low+high)/2;
-    if (quadGRHchk(D, &GRHcheck, invhr, test))
+    if (quadGRHchk(D, &GRHcheck, invhr, test, minSFB))
       high = test;
     else
       low = test;
   }
-  if (high == LIMC0+1 && quadGRHchk(D, &GRHcheck, invhr, LIMC0))
+  if (high == LIMC0+1 && quadGRHchk(D, &GRHcheck, invhr, LIMC0, minSFB))
     LIMC2 = LIMC0;
   else
     LIMC2 = high;
@@ -1008,23 +1008,27 @@ Buchquad(GEN D, double cbach, double cbach2, long prec)
 
 /* LIMC = Max(cbach*(log D)^2, exp(sqrt(log D loglog D) / 8)) */
 START:
-  if (!FIRST) LIMC = check_LIMC(LIMC,LIMCMAX);
-  if (DEBUGLEVEL && LIMC > LIMC0)
-    err_printf("%s*** Bach constant: %f\n", FIRST?"":"\n", LIMC/LOGD2);
-  FIRST = 0; avma = av;
-  if (BQ.subFB) gunclone(BQ.subFB);
-  if (BQ.powsubFB) gunclone(BQ.powsubFB);
-  clearhash(BQ.hashtab);
-  if (LIMC < cp) LIMC = cp;
-  if (LIMC2 < LIMC) LIMC2 = LIMC;
-  if (BQ.PRECREG) qfr_data_init(QFR.D, BQ.PRECREG, &QFR);
+  do
+  {
+    if (!FIRST) LIMC = check_LIMC(LIMC,LIMCMAX);
+    if (DEBUGLEVEL && LIMC > LIMC0)
+      err_printf("%s*** Bach constant: %f\n", FIRST?"":"\n", LIMC/LOGD2);
+    FIRST = 0; avma = av;
+    if (BQ.subFB) gunclone(BQ.subFB);
+    if (BQ.powsubFB) gunclone(BQ.powsubFB);
+    clearhash(BQ.hashtab);
+    if (LIMC < cp) LIMC = cp;
+    if (LIMC2 < LIMC) LIMC2 = LIMC;
+    if (BQ.PRECREG) qfr_data_init(QFR.D, BQ.PRECREG, &QFR);
 
-  FBquad(&BQ, LIMC2, LIMC, invhr, &GRHcheck);
-  if (DEBUGLEVEL) timer_printf(&T, "factor base");
-  BQ.subFB = subFBquad(&BQ, QFR.D, lim + 0.5);
-  if (DEBUGLEVEL) timer_printf(&T, "subFBquad = %Ps",
-                               vecpermute(BQ.FB, BQ.subFB));
-  nsubFB = lg(BQ.subFB) - 1;
+    FBquad(&BQ, LIMC2, LIMC, invhr, &GRHcheck);
+    if (DEBUGLEVEL) timer_printf(&T, "factor base");
+    BQ.subFB = subFBquad(&BQ, QFR.D, lim + 0.5, minSFB);
+    if (DEBUGLEVEL) timer_printf(&T, "subFBquad = %Ps",
+				 vecpermute(BQ.FB, BQ.subFB));
+    nsubFB = lg(BQ.subFB) - 1;
+  }
+  while (!nsubFB);
   BQ.powsubFB = powsubFBquad(&BQ,CBUCH+1);
   if (DEBUGLEVEL) timer_printf(&T, "powsubFBquad");
   BQ.limhash = (LIMC & HIGHMASK)? (HIGHBIT>>1): LIMC*LIMC;
