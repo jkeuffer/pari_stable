@@ -4065,7 +4065,7 @@ ellorder(GEN e, GEN z, GEN o)
   long tj, tz1, tz2;
   checksmallell(e); checkellpt(z);
   j = ell_get_j(e); tj = typ(j);
-  if (ell_is_inf(z)) return gpowgs(j,0);
+  if (ell_is_inf(z)) return gen_1;
   tz1 = typ(gel(z,1)); tz2 = typ(gel(z,2));
   if (is_rational_t(tj) && is_rational_t(tz1) && is_rational_t(tz2))
     return utoi( _orderell(e, z) );
