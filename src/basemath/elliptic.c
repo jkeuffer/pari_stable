@@ -4585,6 +4585,10 @@ elltatepairing(GEN E, GEN t, GEN s, GEN m)
 
 static GEN
 ell_to_a4a6(GEN E, GEN p)
+/* Transforms a curve E into short Weierstrass form E' modulo p.
+   Returns a vector, the first two entries of which are a4' and a6'.
+   The third entry is a vector describing the isomorphism E' \to E.
+*/
 {
   GEN a1, a3, b2, c4, c6;
   checkell5(E);
