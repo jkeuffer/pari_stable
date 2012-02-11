@@ -13,6 +13,7 @@ break
 [bound, step, halt, i, p, N, bi, B]
 my(p=120);for(i=1,100,1/0)
 [p,i]
+dbg_err()
 break
 fun(N)=check(N^2+1);
 fun(20);

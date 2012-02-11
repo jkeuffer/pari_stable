@@ -23,6 +23,8 @@ break> break
   ***   Break loop: type 'break' to go back to GP
 break> [p,i]
 [120, 1]
+break> dbg_err()
+error("division by a non-invertible object")
 break> break
 
 ? fun(N)=check(N^2+1);

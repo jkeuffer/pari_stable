@@ -2068,6 +2068,9 @@ dbg(GEN x, long nb, long bl)
 void
 dbgGEN(GEN x, long nb) { dbg(x,nb,0); }
 
+GEN
+dbg_err(void) { return global_err_data? gcopy(global_err_data):gnil; }
+
 static void
 print_entree(entree *ep, long hash)
 {
