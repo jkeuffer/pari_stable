@@ -563,12 +563,12 @@ ZM_to_Flm(GEN x, ulong p)
 
 /*                          TO INTMOD                        */
 static GEN
-to_intmod(GEN x, GEN p) { return mkintmod(modii(x, p), p); }
+to_intmod(GEN x, GEN p) { retmkintmod(modii(x, p), p); }
 
 GEN
 Fp_to_mod(GEN z, GEN p)
 {
-  return mkintmod(modii(z, p), icopy(p));
+  retmkintmod(modii(z, p), icopy(p));
 }
 
 /* z in Z[X], return z * Mod(1,p), normalized*/
