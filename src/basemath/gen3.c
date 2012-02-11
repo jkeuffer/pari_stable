@@ -2875,6 +2875,12 @@ gtovec(GEN x)
     }
     case t_VECSMALL:
       return vecsmall_to_vec(x);
+    case t_ERROR:
+      lx=lg(x); y = cgetg(lx,t_VEC);
+      gel(y,1) = errname(x);
+      for (i=2; i<lx; i++) gel(y,i) = gcopy(gel(x,i));
+      return y;
+  return vecsmall_to_vec(x);
     default: pari_err_TYPE("gtovec",x);
       return NULL; /*notreached*/
   }
