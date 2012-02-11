@@ -337,6 +337,109 @@ concat1(GEN x)
   return gerepilecopy(av, shallowconcat1(x));
 }
 
+/* fill M[xoff+i, yoff+j] with the contents of c */
+static void
+matfill(GEN M, long xoff, long yoff, GEN c)
+{
+  long i, j, h, l;
+  l = lg(c); if (l == 1) return;
+  switch(typ(c))
+  {
+    case t_VEC:
+      for (i = 1; i < l; i++)
+        gcoeff(M,xoff+1,yoff+i) = gel(c,i);
+      break;
+    case t_COL:
+      for (i = 1; i < l; i++)
+        gcoeff(M,xoff+i,yoff+1) = gel(c,i);
+      break;
+    case t_MAT:
+      h = lg(gel(c,1));
+      for (j = 1; j < l; j++)
+        for (i = 1; i < h; i++) gcoeff(M,xoff+i,yoff+j) = gcoeff(c,i,j);
+      break;
+    default:
+      gcoeff(M, xoff+1, yoff+1) = c;
+      break;
+  }
+}
+
+static GEN
+_matsize(GEN x)
+{
+  long t = typ(x), L = lg(x) - 1;
+  switch(t)
+  { /* matsize */
+    case t_VEC: return mkvecsmall2(1, L);
+    case t_COL: return mkvecsmall2(L, 1);
+    case t_MAT: return mkvecsmall2(L? lg(x[1])-1: 0, L);
+    default:
+      if (is_noncalc_t(t)) pari_err_TYPE("_matsize", x);
+      return mkvecsmall2(1, 1);
+  }
+}
+
+GEN
+matconcat_shallow(GEN v)
+{
+  long i, l = lg(v), L = 0, H = 0;
+  GEN M;
+  if (l == 1) return gcopy(v);
+  switch(typ(v))
+  {
+    case t_VEC:
+      for (i = 1; i < l; i++)
+      {
+        GEN c = gel(v,i);
+        GEN s = _matsize(c);
+        H = maxss(H, s[1]);
+        L += s[2];
+      }
+      M = zeromatcopy(H, L);
+      L = 0;
+      for (i = 1; i < l; i++)
+      {
+        GEN c = gel(v,i);
+        GEN s = _matsize(c);
+        matfill(M, 0, L, c);
+        L += s[2];
+      }
+      return M;
+
+    case t_COL:
+      for (i = 1; i < l; i++)
+      {
+        GEN c = gel(v,i);
+        GEN s = _matsize(c);
+        H += s[1];
+        L = maxss(L, s[2]);
+      }
+      M = zeromatcopy(H, L);
+      H = 0;
+      for (i = 1; i < l; i++)
+      {
+        GEN c = gel(v,i);
+        GEN s = _matsize(c);
+        matfill(M, H, 0, c);
+        H += s[1];
+      }
+      return M;
+    case t_MAT:
+      M = cgetg(l, t_VEC);
+      for (i = 1; i < l; i++) gel(M,i) = matconcat(gel(v,i));
+      return matconcat(M);
+    default:
+      pari_err_TYPE("matconcat_shallow", v);
+      return NULL;
+  }
+}
+GEN
+matconcat(GEN v)
+{
+  pari_sp av = avma;
+  return gerepilecopy(av, matconcat_shallow(v));
+}
+
 GEN
 concat(GEN x, GEN y)
 {
