@@ -1,0 +1,7 @@
+Function: dbg_err
+Class: gp
+Section: programming/control
+C-Name: dbg_err
+Prototype:
+Help: dbg_err({n=1}): (break loop) return the error data the current error, if any.
+Doc: (In the break loop) return the error data the current error, if any.
