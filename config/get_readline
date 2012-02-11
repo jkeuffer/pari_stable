@@ -30,15 +30,16 @@ if test -n "$readline"; then
 else
   RLLIBS="-lreadline"
 fi
+rllibs="$RLLIBS";
 $CC $CFLAGS $extraflag $RLINCLUDE -o $exe rl_version.c $RLLIBS 2> /dev/null
 if test ! -r $exe; then # need ncurses ?
   echo ..."Linking failed. Trying with libncurses"
   pth="$with_ncurses_lib $libpth"
   lib=ncurses; . ./locatelib
   if test -n "$ncurses"; then
-    RLLIBS="$RLLIBS -L$ncurses -lncurses"
+    RLLIBS="$rllibs -L$ncurses -lncurses"
   else
-    RLLIBS="$RLLIBS -lncurses"
+    RLLIBS="$rllibs -lncurses"
   fi
   $CC $CFLAGS $extraflag $RLINCLUDE -o $exe rl_version.c $RLLIBS 2> /dev/null
 fi
@@ -47,9 +48,9 @@ if test ! -r $exe; then # need termcap ?
   pth="$with_ncurses_lib $libpth"
   lib=termcap; . ./locatelib
   if test -n "$termcap"; then
-    RLLIBS="$RLLIBS -L$termcap -ltermcap"
+    RLLIBS="$rllibs -L$termcap -ltermcap"
   else
-    RLLIBS="$RLLIBS -ltermcap"
+    RLLIBS="$rllibs -ltermcap"
   fi
   $CC $CFLAGS $extraflag $RLINCLUDE -o $exe rl_version.c $RLLIBS 2> /dev/null
 fi
