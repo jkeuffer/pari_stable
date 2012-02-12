@@ -27,16 +27,6 @@ ellorder(E, [2147484185/3, 1/11])
 E = ellinit([1,1]); P = [72, 611];
 ellorder (E, ellpow(E, P, 20))
 
-ellanalyticrank(ellinit([0, -1, 1, -10, -20]))
-ellanalyticrank(ellinit([0, 0, 1, -1, 0]))
-ellanalyticrank(ellinit([0, 1, 1, -2, 0]))
-ellanalyticrank(ellinit([0, 0, 1, -7, 6]))
-ellanalyticrank(ellinit([-5187, 176830]))
-
-ellheegner(ellinit([1, 1, 0, -1297, -18530]))
-ellheegner(ellinit([0, -1, 1, -33, 93]))
-ellheegner(ellinit([-157^2,0]))
-
 elldivpol(ellinit([1,2,3,5,7]),4)
 elldivpol(ellinit([0,0,0,0,1]),8)
 
