@@ -193,8 +193,11 @@ static GEN
 FpE_tangent_update(GEN R, GEN Q, GEN a4, GEN p, GEN *pt_R)
 {
   GEN x1, y1;
-  if (ell_is_inf(R)) return gen_1;
-
+  if (ell_is_inf(R))
+  {
+    *pt_R = ellinf();
+    return gen_1;
+  }
   x1 = gel(R, 1);
   y1 = gel(R, 2);
 
@@ -228,7 +231,10 @@ static GEN
 FpE_chord_update(GEN R, GEN P, GEN Q, GEN a4, GEN p, GEN *pt_R)
 {
   if (ell_is_inf(R))
+  {
+    *pt_R = ellinf();
     return gen_1;
+  }
   if (equalii(gel(P, 1), gel(R, 1)))
   {
     if (equalii(gel(P, 2), subii(p, gel(R, 2))))
