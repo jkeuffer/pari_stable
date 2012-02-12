@@ -382,8 +382,8 @@ _matsize(GEN x)
 GEN
 matconcat_shallow(GEN v)
 {
-  long i, l = lg(v), L = 0, H = 0;
-  GEN M;
+  long i, j, h, l = lg(v), L = 0, H = 0;
+  GEN M, maxh, maxl;
   if (l == 1) return gcopy(v);
   switch(typ(v))
   {
@@ -425,9 +425,31 @@ matconcat_shallow(GEN v)
       }
       return M;
     case t_MAT:
-      M = cgetg(l, t_VEC);
-      for (i = 1; i < l; i++) gel(M,i) = matconcat(gel(v,i));
-      return matconcat(M);
+      h = lg(gel(v,1));
+      maxh = const_vecsmall(h-1, 0);
+      maxl = const_vecsmall(l-1, 0);
+      for (j = 1; j < l; j++)
+        for (i = 1; i < h; i++)
+        {
+          GEN c = gcoeff(v,i,j);
+          GEN s = _matsize(c);
+          if (s[1] > maxh[i]) maxh[i] = s[1];
+          if (s[2] > maxl[j]) maxl[j] = s[2];
+        }
+      for (i = 1, H = 0; i < h; i++) H += maxh[i];
+      for (j = 1, L = 0; j < l; j++) L += maxl[j];
+      M = zeromatcopy(H, L);
+      for (j = 1, L = 0; j < l; j++)
+      {
+        for (i = 1, H = 0; i < h; i++)
+        {
+          GEN c = gcoeff(v,i,j);
+          matfill(M, H, L, c);
+          H += maxh[i];
+        }
+        L += maxl[j];
+      }
+      return M;
     default:
       pari_err_TYPE("matconcat_shallow", v);
       return NULL;
