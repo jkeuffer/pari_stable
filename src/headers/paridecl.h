@@ -1893,7 +1893,7 @@ long    group_ident_trans(GEN G, GEN S);
 
 /* hash.c */
 
-hashtable *hash_create(ulong minsize, ulong (*hash)(void*), int (*eq)(void*,void*));
+hashtable *hash_create(ulong minsize, ulong (*hash)(void*), int (*eq)(void*,void*), int use_stack);
 void hash_insert(hashtable *h, void *k, void *v);
 hashentry *hash_search(hashtable *h, void *k);
 hashentry *hash_remove(hashtable *h, void *k);

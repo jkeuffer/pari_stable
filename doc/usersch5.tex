@@ -8322,12 +8322,13 @@ sqrtn : $x$}.
 \section{Hashtables}
 A \tet{hashtable}, or associative array, is a set of pairs $(k,v)$ of keys
 and values. PARI implements general extensible hashtables for fast data
-retrieval, independently of the PARI stack. A hashtable is implemented as a
-table of linked lists, each list containing all entries sharing the same hash
-value. The table length is a prime number, which roughly doubles as the table
-overflows by gaining new entries; both the current number of entries and the
-threshold before the table grows are stored in the table. Finally the table
-remembers the functions used to hash the entries's keys and to test for
+retrieval: when creating a table, we may either choose to use the PARI stack,
+or \kbd{malloc} so as to be stack-independent. A hashtable is implemented as
+a table of linked lists, each list containing all entries sharing the same
+hash value. The table length is a prime number, which roughly doubles as the
+table overflows by gaining new entries; both the current number of entries
+and the threshold before the table grows are stored in the table. Finally the
+table remembers the functions used to hash the entries's keys and to test for
 equality two entries hashed to the same value.
 
 An entry, or \tet{hashentry}, contains
@@ -8356,14 +8357,17 @@ typedef struct {
   ulong pindex; /* prime index */
   ulong (*hash) (void *k); /* hash function */
   int (*eq) (void *k1, void *k2); /* equality test */
+  int use_stack; /* use the PARI stack, resp. malloc */
 } hashtable;
 @eprog\noindent
 
 \fun{hashtable*}{hash_create}{ulong size, ulong (*hash)(void*), int
-(*eq)(void*,void*)}\hfil\break
+(*eq)(void*,void*), int use_stack}\hfil\break
 creates a hashtable with enough room to contain \kbd{size} entries.
 The functions \kbd{hash} and \kbd{eq} will be used to compute the hash value
-of keys and test keys for equality, respectively.
+of keys and test keys for equality, respectively. If \kbd{use\_stack}
+is non zero, the resulting table will use the PARI stack; otherwise, we use
+\kbd{malloc}.
 
 \fun{void}{hash_insert}{hashtable *h, void *k, void *v} inserts $(k,v)$
 in hashtable $h$. No copy is made: $k$ and $v$ themselves are stored. The

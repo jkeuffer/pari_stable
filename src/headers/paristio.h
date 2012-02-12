@@ -122,6 +122,7 @@ typedef struct hashtable {
   ulong pindex; /* prime index */
   ulong (*hash) (void *k); /* hash function */
   int (*eq) (void *k1, void *k2); /* equality test */
+  int use_stack; /* use stack_malloc instead of malloc ? */
 } hashtable;
 
 typedef struct {

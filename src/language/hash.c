@@ -54,13 +54,25 @@ hash_link(hashtable *h, hashentry *e)
 }
 
 hashtable *
-hash_create(ulong minsize, ulong (*hash)(void*), int (*eq)(void*,void*))
+hash_create(ulong minsize, ulong (*hash)(void*), int (*eq)(void*,void*),
+            int use_stack)
 {
-  hashtable *h = (hashtable*)pari_malloc(sizeof(hashtable));
   int i = get_prime_index(minsize);
   ulong len = hashprimes[i];
+  hashtable *h;
 
-  h->table = (hashentry**)pari_calloc(len * sizeof(hashentry*));
+  if (use_stack)
+  {
+    h = (hashtable*)stack_malloc(sizeof(hashtable));
+    h->table = (hashentry**)stack_calloc(len * sizeof(hashentry*));
+    h->use_stack = 1;
+  }
+  else
+  {
+    h = (hashtable*)pari_malloc(sizeof(hashtable));
+    h->table = (hashentry**)pari_calloc(len * sizeof(hashentry*));
+    h->use_stack = 0;
+  }
   h->pindex = i;
   h->nb = 0;
   h->hash = hash;
@@ -71,13 +83,22 @@ hash_create(ulong minsize, ulong (*hash)(void*), int (*eq)(void*,void*))
 void
 hash_insert(hashtable *h, void *k, void *v)
 {
-  hashentry *e = (hashentry*) pari_malloc(sizeof(hashentry));
+  hashentry *e;
   ulong index;
+
+  if (h->use_stack)
+    e = (hashentry*) stack_malloc(sizeof(hashentry));
+  else
+    e = (hashentry*) pari_malloc(sizeof(hashentry));
 
   if (++(h->nb) > h->maxnb && h->pindex < hashprimes_len-1)
   { /* double table size */
     ulong i, newlen = hashprimes[++(h->pindex)];
-    hashentry *E, **newtable = (hashentry**)pari_calloc(newlen*sizeof(hashentry*));
+    hashentry *E, **newtable;
+    if (h->use_stack)
+      newtable = (hashentry**)stack_calloc(newlen*sizeof(hashentry*));
+    else
+      newtable = (hashentry**)pari_calloc(newlen*sizeof(hashentry*));
     for (i = 0; i < h->len; i++)
       while ( (E = h->table[i]) )
       {
@@ -86,7 +107,8 @@ hash_insert(hashtable *h, void *k, void *v)
         E->next = newtable[index];
         newtable[index] = E;
       }
-    free(h->table); h->table = newtable;
+    if (!h->use_stack) free(h->table);
+    h->table = newtable;
     setlen(h, newlen);
   }
   e->key = k;
@@ -127,6 +149,7 @@ void
 hash_destroy(hashtable *h)
 {
   ulong i;
+  if (h->use_stack) return;
   for (i = 0; i < h->len; i++)
   {
     hashentry *e = h->table[i];
@@ -140,7 +163,7 @@ int strequal(void *a, void *b) { return !strcmp((char*)a,(char*)b); }
 hashtable *
 hashstr_import_static(hashentry *e, ulong size)
 {
-  hashtable *h = hash_create(size, (ulong (*)(void *))hash_str, strequal);
+  hashtable *h = hash_create(size, (ulong (*)(void *))hash_str, strequal, 0);
   for ( ; e->key; e++) hash_link(h, e);
   return h;
 }
