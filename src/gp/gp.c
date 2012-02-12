@@ -1776,6 +1776,15 @@ dbg_down(long k)
   gp_err_recover(e_NONE);
 }
 
+void
+pari_breakpoint(void)
+{
+  if (!pari_last_was_newline()) pari_putc('\n');
+  closure_err(0);
+  if (break_loop(-1)) return;
+  gp_err_recover(e_MISC);
+}
+
 /* numerr < 0: from SIGINT */
 static int
 gp_handle_exception(long numerr)

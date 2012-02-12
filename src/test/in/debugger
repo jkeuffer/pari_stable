@@ -21,3 +21,8 @@ N
 dbg_up(4)
 N
 break
+f(N,x)=my(z=x^2+1);breakpoint();gcd(N,z^2+1-z);
+f(221,3)
+z
+
+z

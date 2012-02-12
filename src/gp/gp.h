@@ -51,6 +51,7 @@ GEN  externstr(const char *cmd);
 GEN  gp_alarm(long s, GEN code);
 void gp_quit(long exitcode);
 GEN  input0(void);
+void pari_breakpoint(void);
 GEN  read0(const char *s);
 void system0(const char *cmd);
 int  whatnow(PariOUT *out, const char *s, int silent);
