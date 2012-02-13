@@ -3750,6 +3750,7 @@ START:
   if (DEBUGLEVEL) { err_printf("LIMC = %ld, LIMC2 = %ld\n",LIMC,LIMC2); }
 
   FBgen(&F, nf, Dp, N, LIMC2, LIMC, invhr, &GRHcheck);
+  if (!F.KC) goto START;
   av = avma;
   subFBgen(&F,nf,auts,cyclic,mindd(lim,LIMC2) + 0.5,MINSFB);
   if (DEBUGLEVEL)
