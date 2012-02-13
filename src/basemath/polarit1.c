@@ -1113,6 +1113,9 @@ Flx_factcantor(GEN f, ulong p, long flag)
   return gerepilecopy(av, z);
 }
 
+int
+Flx_is_irred(GEN f, ulong p) { return !!Flx_factcantor_i(f,p,2); }
+
 /* factor f mod pp.
  * flag = 1: return the degrees, not the factors
  * flag = 2: return NULL if f is not irreducible.

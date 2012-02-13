@@ -4191,6 +4191,10 @@ form $Q(X^d)$, return $Q$.
 
 \fun{int}{Flx_is_squarefree}{GEN z, ulong p}
 
+\fun{int}{Flx_is_irred}{GEN f, ulong p}, as \kbd{FpX\_is\_irred}.
+
+\fun{long}{Flx_nbroots}{GEN f, ulong p}, as \kbd{FpX\_nbroots}.
+
 \fun{long}{Flx_nbfact}{GEN z, ulong p}, as \kbd{FpX\_nbfact}.
 
 \fun{GEN}{Flx_nbfact_by_degree}{GEN z, long *nb, ulong p} Assume
@@ -4201,8 +4205,6 @@ irreducible factors (the sum of the $D[i]$).
 
 \fun{void}{Flx_ffintersect}{GEN P, GEN Q, long n, ulong p, GEN *SP,GEN *SQ, GEN
 MA,GEN MB}, as \kbd{FpX\_ffintersect}
-
-\fun{long}{Flx_nbroots}{GEN f, ulong p}, as \kbd{FpX\_nbroots}.
 
 \fun{GEN}{Flv_polint}{GEN x, GEN y, ulong p, long sv} as \kbd{FpV\_polint},
 returning an \kbd{Flx} in variable $v$.
