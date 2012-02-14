@@ -303,7 +303,7 @@ pack_localvars(void)
 void
 push_frame(GEN C, long lpc, long dummy)
 {
-  char *code=closure_codestr(C);
+  const char *code=closure_codestr(C);
   GEN oper=closure_get_oper(C);
   GEN dbg=closure_get_dbg(C);
   GEN frpc=gel(dbg,2);
