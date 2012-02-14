@@ -2713,11 +2713,11 @@ bruti_intern(GEN g, pariout_t *T, outString *S, int addsign)
     case t_CLOSURE:
       if (lg(g)>=7)
       {
-        if (typ(closure_get_text(g))==t_STR)
-          str_puts(S, GSTR(closure_get_text(g)));
+        GEN str = closure_get_text(g);
+        if (typ(str)==t_STR)
+          str_puts(S, GSTR(str));
         else
         {
-          GEN str = closure_get_text(g);
           str_putc(S,'(');   str_puts(S,GSTR(gel(str,1)));
           str_puts(S,")->");
           print_context(g, T, S, 0);
