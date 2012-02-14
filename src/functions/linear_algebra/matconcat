@@ -31,11 +31,11 @@ Doc: returns a \typ{MAT} built from the entries of $v$, which may
  [3 4 6]
 
  [7 8 9]
- @eprog
+ @eprog\noindent
  If the dimensions of the entries to concatenate do not match up, the above
  rules are extended as follows:
 
- \item each entry $v_{i,j}$ of $v$ has a natural length and height $1 \times
+ \item each entry $v_{i,j}$ of $v$ has a natural length and height: $1 \times
  1$ for a scalar, $1 \times n$ for a \typ{VEC} of length $n$, $n \times 1$
  for a \typ{COL}, $m \times n$ for an $m\times n$ \typ{MAT}
 
@@ -74,4 +74,16 @@ Doc: returns a \typ{MAT} built from the entries of $v$, which may
  [1 2 9 0]
 
  [3 4 0 9]
+ ? U=[1,2;3,4]; V=[1,2,3;4,5,6;7,8,9];
+ ? matconcat(matdiagonal([U, V])) \\ block diagonal
+ %7 =
+ [1 2 0 0 0]
+
+ [3 4 0 0 0]
+
+ [0 0 1 2 3]
+
+ [0 0 4 5 6]
+
+ [0 0 7 8 9]
  @eprog
