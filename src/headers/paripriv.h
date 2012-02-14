@@ -246,6 +246,8 @@ INLINE long
 is_keyword_char(char c) { return (isalnum((int)c) || c=='_'); }
 
 /* Interfaces (GP, etc.) */
+hashtable *hash_from_link(GEN e, GEN names, int use_stack);
+void gen_relink(GEN x, hashtable *table);
 entree* is_entry_intern(const char *s, entree **table, long *hash);
 entree* do_alias(entree *ep);
 char* get_sep(const char *t);
@@ -525,10 +527,7 @@ pariFILE* newfile(FILE *f, const char *name, int type);
 void    pari_init_files(void);
 void    pari_close_files(void);
 int     popinfile(void);
-GEN     readobj(FILE *f, int *ptc);
 pariFILE* try_pipe(const char *cmd, int flag);
-void    writeGEN(GEN x, FILE *f);
-void    writenamedGEN(GEN x, const char *s, FILE *f);
 
 /* galconj.c */
 

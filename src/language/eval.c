@@ -1806,7 +1806,7 @@ closure_relink(GEN C, hashtable *table)
       mael(fram,i,j) = (long) hash_search(table,(void*) mael(fram,i,j))->val;
 }
 
-static void
+void
 gen_relink(GEN x, hashtable *table)
 {
   long i, lx, tx = typ(x);
@@ -1822,7 +1822,7 @@ gen_relink(GEN x, hashtable *table)
       break;
     case t_VEC: case t_COL: case t_MAT: case t_ERROR:
       lx = lg(x);
-      for (i= lontyp[tx]; i<lx; i++) gen_relink(gel(x,i), table);
+      for (i=lontyp[tx]; i<lx; i++) gen_relink(gel(x,i), table);
   }
 }
 
@@ -1874,7 +1874,18 @@ copybin_unlink(GEN C)
 {
   long i, l , n, nold = s_relocs.n;
   GEN v, w, V, res;
-  gen_unlink(C);
+  if (C)
+    gen_unlink(C);
+  else
+  { /* contents of all variables */
+    long v, maxv = pari_var_next();
+    for (v=0; v<maxv; v++)
+    {
+      entree *ep = varentries[v];
+      if (!ep || !ep->value) continue;
+      gen_unlink((GEN)ep->value);
+    }
+  }
   n = s_relocs.n-nold;
   v = cgetg(n+1, t_VECSMALL);
   for(i=0; i<n; i++)
@@ -1901,11 +1912,11 @@ eq_id(void *x, void *y) { return x == y; }
 /* e = t_VECSMALL of entree *ep [ addresses ],
  * names = t_VEC of strtoGENstr(ep.names),
  * Return hashtable : ep => is_entry(ep.name) */
-static hashtable *
-hash_from_link(GEN e, GEN names)
+hashtable *
+hash_from_link(GEN e, GEN names, int use_stack)
 {
   long i, l = lg(e);
-  hashtable *h = hash_create(l-1, &hash_id, &eq_id, 1);
+  hashtable *h = hash_create(l-1, &hash_id, &eq_id, use_stack);
   if (lg(names) != l) pari_err_DIM("hash_from_link");
   for (i = 1; i < l; i++)
   {
@@ -1919,7 +1930,7 @@ void
 bincopy_relink(GEN C, GEN V)
 {
   pari_sp av = avma;
-  hashtable *table = hash_from_link(gel(V,1),gel(V,2));
+  hashtable *table = hash_from_link(gel(V,1),gel(V,2),1);
   gen_relink(C, table);
   avma = av;
 }

@@ -3904,9 +3904,7 @@ _lfwrite(const void *a, size_t b, FILE *c) { _fwrite(a,sizeof(long),b,c); }
 static void
 _cfwrite(const void *a, size_t b, FILE *c) { _fwrite(a,sizeof(char),b,c); }
 
-#define BIN_GEN 0
-#define NAM_GEN 1
-#define VAR_GEN 2
+enum { BIN_GEN, NAM_GEN, VAR_GEN, RELINK_TABLE };
 
 static long
 rd_long(FILE *f) { long L; _lfread(&L, 1UL, f); return L; }
@@ -3948,14 +3946,14 @@ rdstr(FILE *f)
   _cfread(s, L, f); return s;
 }
 
-void
+static void
 writeGEN(GEN x, FILE *f)
 {
   fputc(BIN_GEN,f);
   wrGEN(x, f);
 }
 
-void
+static void
 writenamedGEN(GEN x, const char *s, FILE *f)
 {
   fputc(x ? NAM_GEN : VAR_GEN,f);
@@ -3983,9 +3981,13 @@ rdGEN(FILE *f)
 /* read a binary object in file f. Set *ptc to the object "type":
  * BIN_GEN: an anonymous GEN x; return x.
  * NAM_GEN: a named GEN x, with name v; set 'v to x (changevalue) and return x
- * VAR_GEN: a name v; create the (unassigned) variable v and return gnil */
-GEN
-readobj(FILE *f, int *ptc)
+ * VAR_GEN: a name v; create the (unassigned) variable v and return gnil
+ * RELINK_TABLE: a relinking table for gen_relink(), to replace old adresses
+ * in * the original session by new incarnations in the current session.
+ * H is the current relinking table
+ * */
+static GEN
+readobj(FILE *f, int *ptc, hashtable *H)
 {
   int c = fgetc(f);
   GEN x = NULL;
@@ -3993,6 +3995,7 @@ readobj(FILE *f, int *ptc)
   {
     case BIN_GEN:
       x = rdGEN(f);
+      if (H) gen_relink(x, H);
       break;
     case NAM_GEN:
     case VAR_GEN:
@@ -4002,6 +4005,7 @@ readobj(FILE *f, int *ptc)
       if (c == NAM_GEN)
       {
         x = rdGEN(f);
+        if (H) gen_relink(x, H);
         err_printf("setting %s\n",s);
         changevalue(fetch_named_var(s), x);
       }
@@ -4012,6 +4016,8 @@ readobj(FILE *f, int *ptc)
       }
       break;
     }
+    case RELINK_TABLE:
+      x = rdGEN(f); break;
     case EOF: break;
     default: pari_err(e_MISC,"unknown code in readobj");
   }
@@ -4087,6 +4093,8 @@ void
 writebin(const char *name, GEN x)
 {
   FILE *f = fopen(name,"r");
+  pari_sp av = avma;
+  GEN V;
   int already = f? 1: 0;
 
   if (f) {
@@ -4098,6 +4106,12 @@ writebin(const char *name, GEN x)
   if (!f) pari_err_FILE("binary output file",name);
   if (!already) write_magic(f);
 
+  V = copybin_unlink(x);
+  if (lg(gel(V,1)) > 1)
+  {
+    fputc(RELINK_TABLE,f);
+    wrGEN(V, f);
+  }
   if (x) writeGEN(x,f);
   else
   {
@@ -4109,7 +4123,7 @@ writebin(const char *name, GEN x)
       writenamedGEN((GEN)ep->value,ep->name,f);
     }
   }
-  fclose(f);
+  avma = av; fclose(f);
 }
 
 /* read all objects in f. If f contains BIN_GEN that would be silently ignored
@@ -4119,6 +4133,7 @@ GEN
 readbin(const char *name, FILE *f, int *vector)
 {
   pari_sp av = avma;
+  hashtable *H = NULL;
   pari_stack s_obj;
   GEN obj, x, y;
   int cy;
@@ -4128,11 +4143,19 @@ readbin(const char *name, FILE *f, int *vector)
   /* HACK: push codeword so as to be able to treat s_obj.data as a t_VEC */
   pari_stack_pushp(&s_obj, (void*) (evaltyp(t_VEC)|evallg(1)));
   x = gnil;
-  while ((y = readobj(f, &cy)))
+  while ((y = readobj(f, &cy, H)))
   {
     x = y;
-    if (cy == BIN_GEN) pari_stack_pushp(&s_obj, (void*)y);
+    switch(cy)
+    {
+      case BIN_GEN:
+        pari_stack_pushp(&s_obj, (void*)y); break;
+      case RELINK_TABLE:
+        if (H) hash_destroy(H);
+        H = hash_from_link(gel(y,1),gel(y,2), 0);
+    }
   }
+  if (H) hash_destroy(H);
   switch(s_obj.n) /* >= 1 */
   {
     case 1: break; /* nothing but the codeword */
