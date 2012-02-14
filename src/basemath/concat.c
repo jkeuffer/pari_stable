@@ -337,9 +337,9 @@ concat1(GEN x)
   return gerepilecopy(av, shallowconcat1(x));
 }
 
-/* fill M[xoff+i, yoff+j] with the contents of c */
+/* fill M[xoff+i, yoff+j] with the contents of c ( c * Id_n if scalar ) */
 static void
-matfill(GEN M, long xoff, long yoff, GEN c)
+matfill(GEN M, GEN c, long xoff, long yoff, long n)
 {
   long i, j, h, l;
   l = lg(c); if (l == 1) return;
@@ -359,7 +359,8 @@ matfill(GEN M, long xoff, long yoff, GEN c)
         for (i = 1; i < h; i++) gcoeff(M,xoff+i,yoff+j) = gcoeff(c,i,j);
       break;
     default:
-      gcoeff(M, xoff+1, yoff+1) = c;
+      for (i = 1; i <= n; i++)
+        gcoeff(M, xoff+i, yoff+i) = c;
       break;
   }
 }
@@ -401,7 +402,7 @@ matconcat_shallow(GEN v)
       {
         GEN c = gel(v,i);
         GEN s = _matsize(c);
-        matfill(M, 0, L, c);
+        matfill(M, c, 0, L, 1);
         L += s[2];
       }
       return M;
@@ -420,7 +421,7 @@ matconcat_shallow(GEN v)
       {
         GEN c = gel(v,i);
         GEN s = _matsize(c);
-        matfill(M, H, 0, c);
+        matfill(M, c, H, 0, 1);
         H += s[1];
       }
       return M;
@@ -444,7 +445,7 @@ matconcat_shallow(GEN v)
         for (i = 1, H = 0; i < h; i++)
         {
           GEN c = gcoeff(v,i,j);
-          matfill(M, H, L, c);
+          matfill(M, c, H, L, minss(maxh[i], maxl[j]));
           H += maxh[i];
         }
         L += maxl[j];
