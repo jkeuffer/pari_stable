@@ -500,7 +500,7 @@ END2: /* clean up mat: remove everything to the right of the 1s on diagonal */
       GEN MAT, emb;
       gerepileall(av, 4, &H,&C,ptB,ptdep);
       MAT = cgetg(l + 1, t_MAT);
-      emb = cgetg(l + 1, t_MAT);
+      emb = cgetg(l + 1, typ(C));
       for (j = 1 ; j <= l; j++)
       {
         MAT[j] = m0[j];
