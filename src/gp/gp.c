@@ -718,9 +718,9 @@ aide0(const char *s0, int flag)
   switch(EpVALENCE(ep))
   {
     case EpVAR:
-      if (typ(ep->value)==t_CLOSURE && typ(gel(ep->value,6))==t_VEC)
+      if (typ(ep->value)==t_CLOSURE && typ(closure_get_text(ep->value))==t_VEC)
       {
-        GEN str=gel(ep->value,6);
+        GEN str = closure_get_text(ep->value);
         if (!ep->help || long_help)
           pari_printf("%s(%s)=%s",ep->name,GSTR(gel(str,1)),GSTR(gel(str,2)));
         if (!ep->help) return;

@@ -3030,6 +3030,15 @@ INLINE int    pr_is_inert(GEN P);
 INLINE GEN    pr_norm(GEN pr);
 INLINE long   rnf_get_degree(GEN rnf);
 
+INLINE long   closure_arity(GEN C);
+INLINE const char * closure_codestr(GEN C);
+INLINE GEN    closure_get_code(GEN C);
+INLINE GEN    closure_get_oper(GEN C);
+INLINE GEN    closure_get_data(GEN C);
+INLINE GEN    closure_get_dbg(GEN C);
+INLINE GEN    closure_get_text(GEN C);
+INLINE GEN    closure_get_frame(GEN C);
+
 INLINE GEN    addmuliu(GEN x, GEN y, ulong u);
 INLINE GEN    addmuliu_inplace(GEN x, GEN y, ulong u);
 INLINE GEN    lincombii(GEN u, GEN v, GEN x, GEN y);

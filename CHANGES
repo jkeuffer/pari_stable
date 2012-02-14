@@ -190,6 +190,7 @@ BA 38- GP functions dbg_x (like \x) and dbg_err (current error data)
 BA 40- library functions Flm_Fl_add, Flm_invimage, FlxY_evalx
 BA 41- library functions Flx_ffisom, Flx_ffintersect, Flxq_ffisom_inv
 BA 42- library function Flx_is_irred
+BA 43- accessors functions for t_CLOSURE: closure_arity,closure_codestr,closure_get_*
 
   Removed
     1- dropped DOS support

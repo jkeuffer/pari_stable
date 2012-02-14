@@ -1417,7 +1417,7 @@ sort_function(void **E, GEN x, GEN k)
     case t_VEC: case t_COL: k = ZV_to_zv(k); break;
     case t_VECSMALL: break;
     case t_CLOSURE:
-     if (k[1] != 2)
+     if (closure_arity(k) != 2)
        pari_err_TYPE("sort_function, cmp. fun. needs exactly 2 arguments",k);
      *E = (void*)k;
      return &closurecmp;

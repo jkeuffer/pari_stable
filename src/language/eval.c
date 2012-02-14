@@ -594,7 +594,7 @@ closure_func_err(void)
   GEN C, oper;
   if (fun < 0 || trace[fun].pc < 0) return NULL;
   pc = trace[fun].pc; C  = trace[fun].closure;
-  code = GSTR(gel(C,2))-1; oper = gel(C,3);
+  code = closure_codestr(C); oper = closure_get_oper(C);
   if (code[pc]==OCcallgen || code[pc]==OCcallgen2 ||
       code[pc]==OCcallint || code[pc]==OCcalllong || code[pc]==OCcallvoid)
     return ((entree*)oper[pc])->name;
@@ -631,18 +631,19 @@ closure_err(long level)
   long i = maxss(0, lastfun - 19);
   if (lastfun < 0) return; /*e.g. when called by gp_main_loop's simplify */
   if (i > 0) while (lg(trace[i].closure)==6) i--;
-  base = gel(trace[i].closure,6); /* gcc -Wall*/
+  base = closure_get_text(trace[i].closure); /* gcc -Wall*/
   next_label = pari_strdup(i == 0? "at top-level": "[...] at");
   next_fun = next_label;
   for (; i <= lastfun; i++)
   {
     GEN C = trace[i].closure;
-    if (lg(C) >= 7) base=gel(C,6);
+    if (lg(C) >= 7) base=closure_get_text(C);
     if ((i==lastfun || lg(trace[i+1].closure)>=7))
     {
+      GEN dbg = gel(closure_get_dbg(C),1);
       /* After a SIGINT, pc can be slightly off: ensure 0 <= pc < lg() */
-      long pc = minss(lg(mael(C,5,1))-1, trace[i].pc>=0 ? trace[i].pc: 1);
-      long offset = pc? mael3(C,5,1,pc): 0;
+      long pc = minss(lg(dbg)-1, trace[i].pc>=0 ? trace[i].pc: 1);
+      long offset = pc? dbg[pc]: 0;
       int member;
       const char *s, *sbase;
       if (typ(base)!=t_VEC) sbase = GSTR(base);
@@ -695,11 +696,11 @@ st_alloc(long n)
 static void
 closure_eval(GEN C)
 {
-  const char *code=GSTR(gel(C,2))-1;
-  GEN oper=gel(C,3);
-  GEN data=gel(C,4);
+  const char *code=closure_codestr(C);
+  GEN oper=closure_get_oper(C);
+  GEN data=closure_get_data(C);
   long loper=lg(oper);
-  long saved_sp=sp-C[1];
+  long saved_sp=sp-closure_arity(C);
   long saved_rp=rp;
   long j, nbmvar=0, nblvar=0;
   long pc, t;
@@ -707,7 +708,7 @@ closure_eval(GEN C)
   t = trace_push(0, C);
   if (lg(C)==8)
   {
-    GEN z=gel(C,7);
+    GEN z=closure_get_frame(C);
     long l=lg(z)-1;
     pari_stack_alloc(&s_var,l);
     s_var.n+=l;
@@ -1167,7 +1168,7 @@ closure_eval(GEN C)
         long arity;
         GEN z;
         if (typ(fun)!=t_CLOSURE) pari_err(e_NOTFUNC, fun);
-        arity=fun[1];
+        arity = closure_arity(fun);
         if (n>arity)
           pari_err(e_MISC,"too many parameters in user-defined function call");
         for (j=n+1;j<=arity;j++)
@@ -1383,39 +1384,39 @@ closure_returnupto(GEN C)
 void
 closure_callvoid1(GEN C, GEN x)
 {
-  long i;
-  gel(st,sp++)=x;
-  for(i=2; i<=C[1]; i++) gel(st,sp++) = NULL;
+  long i, ar = closure_arity(C);
+  gel(st,sp++) = x;
+  for(i=2; i <= ar; i++) gel(st,sp++) = NULL;
   closure_evalvoid(C);
 }
 
 GEN
 closure_callgen1(GEN C, GEN x)
 {
-  long i;
-  gel(st,sp++)=x;
-  for(i=2; i<=C[1]; i++) gel(st,sp++) = NULL;
+  long i, ar = closure_arity(C);
+  gel(st,sp++) = x;
+  for(i=2; i<= ar; i++) gel(st,sp++) = NULL;
   return closure_returnupto(C);
 }
 
 GEN
 closure_callgen2(GEN C, GEN x, GEN y)
 {
-  long i;
-  st_alloc(C[1]);
-  gel(st,sp++)=x;
-  gel(st,sp++)=y;
-  for(i=3; i<=C[1]; i++) gel(st,sp++) = NULL;
+  long i, ar = closure_arity(C);
+  st_alloc(ar);
+  gel(st,sp++) = x;
+  gel(st,sp++) = y;
+  for(i=3; i<=ar; i++) gel(st,sp++) = NULL;
   return closure_returnupto(C);
 }
 
 GEN
 closure_callgenvec(GEN C, GEN args)
 {
-  long i, l = lg(args);
-  st_alloc(C[1]);
+  long i, l = lg(args), ar = closure_arity(C);
+  st_alloc(ar);
   for (i = 1; i < l;   i++) gel(st,sp++) = gel(args,i);
-  for(      ; i<=C[1]; i++) gel(st,sp++) = NULL;
+  for(      ; i <= ar; i++) gel(st,sp++) = NULL;
   return closure_returnupto(C);
 }
 
@@ -1423,11 +1424,11 @@ GEN
 closure_callgenall(GEN C, long n, ...)
 {
   va_list ap;
-  long i;
+  long i, ar = closure_arity(C);
   va_start(ap,n);
-  st_alloc(C[1]);
-  for (i = 1; i <=n;   i++) gel(st,sp++) = va_arg(ap, GEN);
-  for(      ; i<=C[1]; i++) gel(st,sp++) = NULL;
+  st_alloc(ar);
+  for (i = 1; i <=n;  i++) gel(st,sp++) = va_arg(ap, GEN);
+  for(      ; i <=ar; i++) gel(st,sp++) = NULL;
   va_end(ap);
   return closure_returnupto(C);
 }
@@ -1494,12 +1495,12 @@ disassemble_cast(long mode)
 void
 closure_disassemble(GEN C)
 {
-  char * code;
+  const char * code;
   GEN oper;
   long i;
   if (typ(C)!=t_CLOSURE) pari_err_TYPE("disassemble",C);
-  code=GSTR(gel(C,2))-1;
-  oper=gel(C,3);
+  code=closure_codestr(C);
+  oper=closure_get_oper(C);
   for(i=1;i<lg(oper);i++)
   {
     op_code opcode=(op_code) code[i];
@@ -1792,15 +1793,13 @@ OC_may_have_entree(op_code opcode)
 static void
 closure_relink(GEN C, hashtable *table)
 {
-  char * code;
-  GEN oper, fram;
+  const char *code = closure_codestr(C);
+  GEN oper = closure_get_oper(C);
+  GEN fram = gel(closure_get_dbg(C),3);
   long i, j;
-  code=GSTR(gel(C,2))-1;
-  oper=gel(C,3);
   for(i=1;i<lg(oper);i++)
     if (OC_may_have_entree(code[i]))
       oper[i] = (long) hash_search(table,(void*) oper[i])->val;
-  fram = gmael(C,5,3);
   for (i=1;i<lg(fram);i++)
     for (j=1;j<lg(fram[i]);j++)
       mael(fram,i,j) = (long) hash_search(table,(void*) mael(fram,i,j))->val;
@@ -1814,8 +1813,8 @@ gen_relink(GEN x, hashtable *table)
   {
     case t_CLOSURE:
       closure_relink(x, table);
-      gen_relink(gel(x,4), table);
-      if (lg(x)==8) gen_relink(gel(x,7), table);
+      gen_relink(closure_get_data(x), table);
+      if (lg(x)==8) gen_relink(closure_get_frame(x), table);
       break;
     case t_LIST:
       gen_relink(list_data(x), table);
@@ -1829,18 +1828,16 @@ gen_relink(GEN x, hashtable *table)
 static void
 closure_unlink(GEN C)
 {
-  char * code;
-  GEN oper, fram;
+  const char *code = closure_codestr(C);
+  GEN oper = closure_get_oper(C);
+  GEN fram = gel(closure_get_dbg(C),3);
   long i, j;
-  code=GSTR(gel(C,2))-1;
-  oper=gel(C,3);
   for(i=1;i<lg(oper);i++)
     if (OC_may_have_entree(code[i]))
     {
       long n = pari_stack_new(&s_relocs);
       relocs[n] = (entree *) oper[i];
     }
-  fram = gmael(C,5,3);
   for (i=1;i<lg(fram);i++)
     for (j=1;j<lg(fram[i]);j++)
     {
@@ -1857,8 +1854,8 @@ gen_unlink(GEN x)
   {
     case t_CLOSURE:
       closure_unlink(x);
-      gen_unlink(gel(x,4));
-      if (lg(x)==8) gen_unlink(gel(x,7));
+      gen_unlink(closure_get_data(x));
+      if (lg(x)==8) gen_unlink(closure_get_frame(x));
       break;
     case t_LIST:
       gen_unlink(list_data(x));

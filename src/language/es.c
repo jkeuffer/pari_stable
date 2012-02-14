@@ -1967,7 +1967,7 @@ dbg(GEN x, long nb, long bl)
     x = list_data(x); lx = x? lg(x): 1;
     tx = t_VEC; /* print list_data as vec */
   } else if (tx == t_CLOSURE)
-    pari_printf("(arity=%ld):", x[1]);
+    pari_printf("(arity=%ld):", closure_arity(x));
   for (i=1; i<lx; i++) dbg_word(x[i]);
   bl+=2; pari_putc('\n');
   switch(tx)
@@ -2025,16 +2025,16 @@ dbg(GEN x, long nb, long bl)
       break;
 
     case t_CLOSURE:
-      blancs(bl); pari_puts("code = "); dbg(gel(x,2),nb,bl);
-      blancs(bl); pari_puts("operand = "); dbg(gel(x,3),nb,bl);
-      blancs(bl); pari_puts("data = "); dbg(gel(x,4),nb,bl);
-      blancs(bl); pari_puts("debug = "); dbg(gel(x,5),nb,bl);
+      blancs(bl); pari_puts("code = "); dbg(closure_get_code(x),nb,bl);
+      blancs(bl); pari_puts("operand = "); dbg(closure_get_oper(x),nb,bl);
+      blancs(bl); pari_puts("data = "); dbg(closure_get_data(x),nb,bl);
+      blancs(bl); pari_puts("debug = "); dbg(closure_get_dbg(x),nb,bl);
       if (lg(x)>=7)
       {
-        blancs(bl); pari_puts("text = "); dbg(gel(x,6),nb,bl);
+        blancs(bl); pari_puts("text = "); dbg(closure_get_text(x),nb,bl);
         if (lg(x)>=8)
         {
-          blancs(bl); pari_puts("frame = "); dbg(gel(x,7),nb,bl);
+          blancs(bl); pari_puts("frame = "); dbg(closure_get_frame(x),nb,bl);
         }
       }
       break;
@@ -2713,20 +2713,21 @@ bruti_intern(GEN g, pariout_t *T, outString *S, int addsign)
     case t_CLOSURE:
       if (lg(g)>=7)
       {
-        if (typ(g[6])==t_STR)
-          str_puts(S, GSTR(gel(g,6)));
+        if (typ(closure_get_text(g))==t_STR)
+          str_puts(S, GSTR(closure_get_text(g)));
         else
         {
-          str_putc(S,'(');   str_puts(S,GSTR(gmael(g,6,1)));
+          GEN str = closure_get_text(g);
+          str_putc(S,'(');   str_puts(S,GSTR(gel(str,1)));
           str_puts(S,")->");
           print_context(g, T, S, 0);
-          str_puts(S,GSTR(gmael(g,6,2)));
+          str_puts(S,GSTR(gel(str,2)));
         }
       }
       else
       {
-        str_puts(S,"{\""); str_puts(S,GSTR(gel(g,2)));
-        str_puts(S,"\","); wr_vecsmall(T,S,gel(g,3));
+        str_puts(S,"{\""); str_puts(S,GSTR(closure_get_code(g)));
+        str_puts(S,"\","); wr_vecsmall(T,S,closure_get_oper(g));
         str_putc(S,',');   bruti(gel(g,4),T,S);
         str_putc(S,',');   bruti(gel(g,5),T,S);
         str_putc(S,'}');
@@ -2978,18 +2979,19 @@ texi_sign(GEN g, pariout_t *T, outString *S, int addsign)
     case t_CLOSURE:
       if (lg(g)>=6)
       {
-        if (typ(g[6])==t_STR)
-          str_puts(S, GSTR(gel(g,6)));
+        GEN str = closure_get_text(g);
+        if (typ(str)==t_STR)
+          str_puts(S, GSTR(str));
         else
         {
-          str_putc(S,'(');          str_puts(S,GSTR(gmael(g,6,1)));
+          str_putc(S,'(');          str_puts(S,GSTR(gel(str,1)));
           str_puts(S,")\\mapsto ");
-          print_context(g, T, S ,1); str_puts(S,GSTR(gmael(g,6,2)));
+          print_context(g, T, S ,1); str_puts(S,GSTR(gel(str,2)));
         }
       }
       else
       {
-        str_puts(S,"\\{\""); str_puts(S,GSTR(gel(g,2)));
+        str_puts(S,"\\{\""); str_puts(S,GSTR(closure_get_code(g)));
         str_puts(S,"\","); texi(gel(g,3),T,S);
         str_putc(S,',');   texi(gel(g,4),T,S);
         str_putc(S,',');   texi(gel(g,5),T,S); str_puts(S,"\\}");

@@ -3658,7 +3658,7 @@ geval_gp(GEN x, GEN t)
       return y;
 
     case t_CLOSURE:
-      if (x[1]) pari_err_IMPL("eval on functions with parameters");
+      if (closure_arity(x[1])) pari_err_IMPL("eval on functions with parameters");
       return closure_evalres(x);
   }
   pari_err_TYPE("geval",x);

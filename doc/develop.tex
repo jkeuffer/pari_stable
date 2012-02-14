@@ -63,18 +63,33 @@ plot(x=0,2*Pi,g(x))
 \kbd{g(x)} are inline closures.
 
 This type has a second codeword \kbd{z[1]}, which is the arity of the
-function or closure. This is zero for inline closures.
+function or closure. This is zero for inline closures. To access it, use
 
-\item \kbd{z[2]} points to a \typ{STR} which hold the opcodes.
+\fun{long}{closure_arity}{GEN C}
 
-\item \kbd{z[3]} points to a \typ{VECSMALL} which hold the operands of the opcodes.
+\item \kbd{z[2]} points to a \typ{STR} which holds the opcodes. To access it, use
+
+\fun{GEN}{closure_get_code}{GEN C}.
+
+\fun{const char *}{closure_codestr}{GEN C} returns as an array of \kbd{char}
+starting at $1$.
+
+\item \kbd{z[3]} points to a \typ{VECSMALL} which holds the operands of the opcodes.
+To access it, use
+
+\fun{GEN}{closure_get_oper}{GEN C}
 
 \item \kbd{z[4]} points to a \typ{VEC} which hold the data referenced by the
 \kbd{pushgen} opcodes, which can be \typ{CLOSURE}, and in particular
-inline closures.
+inline closures. To access it, use
+
+\fun{GEN}{closure_get_data}{GEN C}
 
 \item \kbd{z[5]} points to a \typ{VEC} which hold extra data needed for
 error-reporting and debugging. See \secref{se:dbgclosure} for details.
+To access it, use
+
+\fun{GEN}{closure_get_dbg}{GEN C}
 
 Additionally, for functions and true closures,
 
@@ -83,12 +98,16 @@ The first one displays the list of arguments of the closure without the
 enclosing parentheses, the second one the GP code of the function at the
 right of the \kbd{->} token. They are used to display the closure, either in
 implicit or explicit form. However for closures that were not generated from GP
-code, \kbd{z[6]} can point to a \typ{STR} instead.
+code, \kbd{z[6]} can point to a \typ{STR} instead. To access it, use
+
+\fun{GEN}{closure_get_text}{GEN C}
 
 Additionally, for true closure,
 
 \item \kbd{z[7]} points to a \typ{VEC} which holds the values of all lexical
-variables defined in the scope the closure was defined.
+variables defined in the scope the closure was defined. To access it, use
+
+\fun{GEN}{closure_get_frame}{GEN C}
 
 \subsec{Debugging information in closure}\label{se:dbgclosure}
 

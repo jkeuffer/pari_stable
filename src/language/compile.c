@@ -303,10 +303,11 @@ pack_localvars(void)
 void
 push_frame(GEN C, long lpc, long dummy)
 {
-  char *code=GSTR(gel(C,2))-1;
-  GEN oper=gel(C,3);
-  GEN frpc=gmael(C,5,2);
-  GEN fram=gmael(C,5,3);
+  char *code=closure_codestr(C);
+  GEN oper=closure_get_oper(C);
+  GEN dbg=closure_get_dbg(C);
+  GEN frpc=gel(dbg,2);
+  GEN fram=gel(dbg,3);
   long pc, j=1, lfr = lg(frpc);
   if (lpc==-1)
   {
