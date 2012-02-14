@@ -6977,7 +6977,7 @@ and its $\Q$-denominator is $2$, whereas \kbd{content} would return $y/2$ and
 
 \fun{GEN}{Q_content}{GEN x} the $\Q$-content of $x$
 
-\fun{GEN}{Q_denom}{GEN x} the $\Q$-denominator of $x$
+\fun{GEN}{Q_denom}{GEN x} the $\Q$-denominator of $x$. Shallow function.
 
 \fun{GEN}{Q_primitive_part}{GEN x, GEN *c} sets \kbd{c} to the $\Q$-content
 of \kbd{x} and returns \kbd{x / c}, which is integral.
@@ -6987,6 +6987,7 @@ efficiency, the content remains on the stack.)
 
 \fun{GEN}{Q_remove_denom}{GEN x, GEN *ptd} sets \kbd{d} to the
 $\Q$-denominator of \kbd{x} and returns \kbd{x * d}, which is integral.
+Shallow function.
 
 \fun{GEN}{Q_div_to_int}{GEN x, GEN c} returns \kbd{x / c}, assuming $c$
 is a rational number (\typ{INT} or \typ{FRAC}) and the result is integral.

@@ -1605,8 +1605,7 @@ primitive_part(GEN x, GEN *ptc)
 GEN
 primpart(GEN x) { return primitive_part(x, NULL); }
 
-/* NOT MEMORY CLEAN
- * As content(), but over Q. Treats polynomial as elts of Q[x1,...xn], instead
+/* As content(), but over Q. Treats polynomial as elts of Q[x1,...xn], instead
  * of Q(x2,...,xn)[x1] */
 GEN
 Q_content(GEN x)
