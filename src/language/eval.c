@@ -1723,7 +1723,7 @@ closure_disassemble(GEN C)
 }
 
 static int
-OC_may_have_entree(op_code opcode)
+opcode_need_relink(op_code opcode)
 {
   switch(opcode)
   {
@@ -1798,7 +1798,7 @@ closure_relink(GEN C, hashtable *table)
   GEN fram = gel(closure_get_dbg(C),3);
   long i, j;
   for(i=1;i<lg(oper);i++)
-    if (OC_may_have_entree(code[i]))
+    if (opcode_need_relink((op_code)code[i]))
       oper[i] = (long) hash_search(table,(void*) oper[i])->val;
   for (i=1;i<lg(fram);i++)
     for (j=1;j<lg(fram[i]);j++)
@@ -1833,7 +1833,7 @@ closure_unlink(GEN C)
   GEN fram = gel(closure_get_dbg(C),3);
   long i, j;
   for(i=1;i<lg(oper);i++)
-    if (OC_may_have_entree(code[i]))
+    if (opcode_need_relink((op_code) code[i]))
     {
       long n = pari_stack_new(&s_relocs);
       relocs[n] = (entree *) oper[i];
