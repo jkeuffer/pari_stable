@@ -1857,12 +1857,18 @@ agm1cx(GEN x, long prec)
 {
   GEN a1, b1;
   pari_sp av = avma, av2;
-  long L, l = precision(x); if (!l) l = prec;
-
+  long L, l = precision(x), rotate=0;
+  if (!l) l = prec;
   L = 5-prec2nbits(l);
   a1 = gtofp(gmul2n(gadd(real_1(l), x), -1), l); /* avoid loss of accuracy */
-  av2 = avma;
-  b1 = gsqrt(x, prec);
+  if (gsigne(greal(x))<0)
+  { /* We rotate by +/-Pi/2, so that the choice of the principal square
+       root gives the optimal AGM. So a1 = +/-I*a1, b1=sqrt(-x). */
+    if (gsigne(gimag(x))<0) { a1=mulcxI(a1);  rotate=-1; }
+    else                    { a1=mulcxmI(a1); rotate=1; }
+    x = gneg(x);
+  }
+  av2 = avma; b1 = gsqrt(x, prec);
   while (agmcx_gap(a1,b1,L))
   {
     GEN a = a1;
@@ -1870,6 +1876,7 @@ agm1cx(GEN x, long prec)
     av2 = avma;
     b1 = gsqrt(gmul(a,b1), prec);
   }
+  if (rotate) a1 = rotate>0 ? mulcxI(a1):mulcxmI(a1);
   avma = av2; return gerepileupto(av,a1);
 }
 

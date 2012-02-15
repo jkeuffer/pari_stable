@@ -141,7 +141,8 @@ LGr43- let initprimes0 use an existing prime table
    44- rename stackmalloc -> stack_malloc. Add stack_calloc
    45- matimagecompl() now returns a permutation (t_VECMALL) no longer a t_VEC
    46- remove config/gitversion from 'make snapshot' tarball
-JM 47- Better implementation of ellweilpairing/elltatepairing.
+JM 47- Better implementation of ellweilpairing/elltatepairing
+BA 48- agm now returns the optimal AGM
 
   Added
     1- mathnf for matrices over K[X] [#41]
