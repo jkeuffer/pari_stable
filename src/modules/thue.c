@@ -474,6 +474,10 @@ GuessQi(GEN b, GEN c, GEN *eps)
   *eps = mpabs(*eps); return Q;
 }
 
+/* x a t_REAL */
+static GEN
+myfloor(GEN x) { return expo(x) > 30 ? ceil_safe(x): floorr(x); }
+
 /* Check for not-so-small solutions */
 static GEN
 MiddleSols(GEN *pS, GEN bound, GEN roo, GEN poly, GEN rhs, long s, GEN c1)
@@ -487,7 +491,7 @@ MiddleSols(GEN *pS, GEN bound, GEN roo, GEN poly, GEN rhs, long s, GEN c1)
    * 2 + ==> continued fraction is normalized if last entry is 1
    * 3 + ==> start at a0, not a1 */
   nmax = 3 + (long)(gtodouble(logr_abs(bound)) / 0.4812118250596);
-  bound = (expo(bound) > 30)? ceil_safe(bound): floorr(bound);
+  bound = myfloor(bound);
 
   for (k = 1; k <= s; k++)
   {
@@ -560,7 +564,7 @@ SmallSols(GEN S, GEN x3, GEN poly, GEN rhs)
   pari_sp av = avma, lim = stack_lim(av, 1);
   GEN X, P, rhs2;
   long j, l = lg(poly), n = degpol(poly);
-  ulong y, By = itou(floorr(x3));
+  ulong y, By = itou(myfloor(x3));
 
   if (DEBUGLEVEL>1) err_printf("* Checking for small solutions <= %lu\n", By);
   /* y = 0 first: solve X^n = rhs */
