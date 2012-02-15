@@ -3653,7 +3653,7 @@ Buchall_param(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long
   pari_timer T;
   pari_sp av0 = avma, av, av2;
   long PRECREG, N, R1, R2, RU, low, high, LIMC0, LIMC, LIMC2, LIMCMAX, zc, i;
-  long nreldep, sfb_trials, need, old_need = -1, precdouble = 0, precadd = 0;
+  long nreldep, sfb_trials, need, old_need, precdouble = 0, precadd = 0;
   long done_small, small_fail, fail_limit, squash_index;
   double lim, drc, LOGD, LOGD2;
   GEN zu, nf, D, Dp, A, W, R, h, PERM, fu = NULL /*-Wall*/;
@@ -3770,9 +3770,9 @@ START:
   R = NULL; A = NULL;
   av2 = avma;
   init_rel(&cache, &F, RELSUP + RU-1); /* trivial relations */
-  need = cache.end - cache.last;
+  old_need = need = cache.end - cache.last;
 
-  W = NULL;
+  W = NULL; zc = 0;
   sfb_trials = nreldep = 0;
   do
   {
@@ -3916,6 +3916,12 @@ START:
           else
             timer_printf(&T, "hnfadd (%ld + %ld)", l-1, lg(dep)-1);
         }
+      }
+      else if (!W)
+      {
+        need = old_need;
+        F.L_jid = vecslice(F.perm, 1, need);
+        continue;
       }
       need = F.KC - (lg(W)-1) - (lg(B)-1);
       /* FIXME: replace by err(e_BUG,"") */
