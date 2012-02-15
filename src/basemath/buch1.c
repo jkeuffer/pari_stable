@@ -1081,7 +1081,7 @@ START:
     else
       W = hnfadd_i(W,BQ.vperm,&dep,&B,&C, mat,extraC);
     gerepileall(av2, 4, &W,&C,&B,&dep);
-    need = lg(dep)>1? lg(dep[1])-1: lg(B[1])-1;
+    need = BQ.KC - (lg(W)-1) - (lg(B)-1);
     if (need)
     {
       if (++nreldep > 15 && cbach < 1) goto START;

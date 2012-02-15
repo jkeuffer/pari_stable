@@ -587,7 +587,7 @@ hnfadd_i(GEN H, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, /* cf hnfspec */
   li = lg(perm)-1;
   lig = li - lB;
   col = co - lB;
-  nlze = lH? lg(dep[1])-1: lg(B[1])-1;
+  nlze = lig - lH;
 
  /*               col    co
   *       [ 0 |dep |     ]

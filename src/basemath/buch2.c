@@ -3916,7 +3916,7 @@ START:
             timer_printf(&T, "hnfadd (%ld + %ld)", l-1, lg(dep)-1);
         }
       }
-      need = lg(dep)>1? lg(dep[1])-1: lg(B[1])-1;
+      need = F.KC - (lg(W)-1) - (lg(B)-1);
       /* FIXME: replace by err(e_BUG,"") */
       if (!need && cache.missing)
       { /* The test above will never be true except if 27449|class number,
