@@ -564,9 +564,19 @@ SmallSols(GEN S, GEN x3, GEN poly, GEN rhs)
   pari_sp av = avma, lim = stack_lim(av, 1);
   GEN X, P, rhs2;
   long j, l = lg(poly), n = degpol(poly);
-  ulong y, By = itou(myfloor(x3));
+  ulong y, By;
 
-  if (DEBUGLEVEL>1) err_printf("* Checking for small solutions <= %lu\n", By);
+  x3 = myfloor(x3);
+
+  if (DEBUGLEVEL>1) err_printf("* Checking for small solutions <= %Ps\n", x3);
+  if (lgefint(x3) > 3)
+  {
+    char *s = pari_sprintf("thue (SmallSols): y <= %Ps", x3);
+    char *t = pari_strdup(s);
+    pari_free(s);
+    pari_err_OVERFLOW(t);
+  }
+  By = itou(x3);
   /* y = 0 first: solve X^n = rhs */
   if (odd(n))
   {
