@@ -2865,6 +2865,9 @@ factorization matrix.
 \fun{int}{Fp_issquare}{GEN x, GEN p} returns $1$ if \kbd{x} is a square
 modulo \kbd{p}, and $0$ otherwise.
 
+\fun{int}{Fp_ispower}{GEN x, GEN n, GEN p} returns $1$ if \kbd{x} is an
+$n$-th power modulo \kbd{p}, and $0$ otherwise.
+
 \fun{GEN}{Fp_sqrt}{GEN x, GEN p} returns a square root of \kbd{x} modulo
 \kbd{p} (the smallest non-negative residue), where \kbd{x}, \kbd{p} are
 \typ{INT}s, and \kbd{p} is assumed to be prime. Return \kbd{NULL}

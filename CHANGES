@@ -77,6 +77,7 @@ BA 57- my(f(x)=x+1);f --> SEGV                                       [#1273]
 JD 62- possible SEGV in pari_init_opts [#1264]
 BA 63- ellorder(E,P*Mod(1,p)) did not work if E was defined over Z.
    64- allow writebin to save user functions (t_CLOSURE) [#1171]
+   65- sqrtn(1+O(5),5) -> error, ispower(1+O(5),5) -> error [#1261]
 
   Changed
     1- mathnf: swapped flag 3 and 5.

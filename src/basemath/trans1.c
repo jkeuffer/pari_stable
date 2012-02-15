@@ -1307,21 +1307,35 @@ Qp_sqrtn_ram(GEN x, long e)
 {
   pari_sp ltop=avma;
   GEN a, p = gel(x,2), n = powiu(p,e);
-  long v = valp(x);
+  long v = valp(x), va;
   if (v)
   {
     long z;
     v = sdivsi_rem(v, n, &z);
     if (z) return NULL;
-    x = gcopy(x); setvalp(x,0);
+    x = leafcopy(x);
+    setvalp(x,0);
   }
   /*If p = 2, -1 is a root of 1 in U1: need extra check*/
   if (equaliu(p, 2) && mod8(gel(x,4)) != 1) return NULL;
-  a = Qp_exp_safe(gdiv(Qp_log(x), n));
-  if (!a) return NULL;
-  /*Here n=p^e and a^n=z*x where z is a (p-1)th-root of 1. Since z^p=z,
-   * we have b^n=x, for b = a/z. We say b=x/a^(n-1)*/
-  a = gdiv(x, powgi(a,addis(n,-1))); if (v) setvalp(a,v);
+  a = Qp_log(x);
+  va = valp(a) - e;
+  if (va <= 0)
+  {
+    if (signe(gel(a,4))) return NULL;
+    /* all accuracy lost */
+    a = cvtop(remii(gel(x,4),p), p, 1);
+  }
+  else
+  {
+    setvalp(a, va); /* divide by p^e */
+    a = Qp_exp_safe(a);
+    if (!a) return NULL;
+    /* n=p^e and a^n=z*x where z is a (p-1)th-root of 1.
+     * Since z^n=z, we have (a/z)^n = x. */
+    a = gdiv(x, powgi(a,addis(n,-1))); /* = a/z = x/a^(n-1)*/
+    if (v) setvalp(a,v);
+  }
   return gerepileupto(ltop,a);
 }
 
@@ -1360,9 +1374,9 @@ Qp_sqrtn(GEN x, GEN n, GEN *zetan)
   long e;
   if (!signe(x[4]))
   {
-    long m = itos(n);
+    q = divii(addis(n, valp(x)-1), n);
     if (zetan) *zetan = gen_1;
-    return zeropadic(p, (valp(x)+m-1)/m);
+    avma = av; return zeropadic(p, itos(q));
   }
   /* treat the ramified part using logarithms */
   e = Z_pvalrem(n, p, &q);

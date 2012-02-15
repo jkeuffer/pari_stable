@@ -801,6 +801,22 @@ Z_ispowerall(GEN x, ulong k, GEN *pt)
   return 0;
 }
 
+/* is x a K-th power mod p ? Assume p prime. */
+int
+Fp_ispower(GEN x, GEN K, GEN p)
+{
+  pari_sp av = avma;
+  GEN p_1;
+  long r;
+  x = modii(x, p);
+  if (!signe(x) || equali1(x)) { avma = av; return 1; }
+  p_1 = subis(p,1);
+  K = gcdii(K, p_1);
+  if (equaliu(K, 2)) { r = kronecker(x,p); avma = av; return r; }
+  x = Fp_pow(x, diviiexact(p_1,K), p);
+  avma = av; return equali1(x);
+}
+
 long
 ispower(GEN x, GEN K, GEN *pt)
 {
@@ -835,6 +851,7 @@ ispower(GEN x, GEN K, GEN *pt)
         if (pt) *pt = gcopy(x);
         return 1;
       }
+      /* a != 0 */
       av = avma;
       L = Z_factor(q);
       P = gel(L,1); l = lg(P);
@@ -843,15 +860,27 @@ ispower(GEN x, GEN K, GEN *pt)
       for (i = 1; i < l; i++)
       {
         GEN p = gel(P,i), t, b;
-        long e = itos(gel(E,i)), v = Z_pvalrem(a, p, &b);
+        long w, e = itos(gel(E,i)), v = Z_pvalrem(a, p, &b);
+        ulong r;
         if (v >= e) { gel(L, i) = mkintmod(gen_0, powiu(p, e)); continue; }
-        if (!dvdui(v, K)) { avma = av; return 0; }
-        t = cvtop(b, gel(P,i), e - v);
-        if (!ispower(t, K, pt)) { avma = av; return 0; }
+        w = udivui_rem(v, K, &r);
+        if (r) { avma = av; return 0; }
+        /* b unit mod p */
+        if (e - v == 1)
+        { /* mod p: faster */
+          if (!Fp_ispower(b, K, p)) { avma = av; return 0; }
+          if (pt) t = Fp_sqrtn(b, K, p, NULL);
+        }
+        else
+        {
+          /* mod p^{2 +} */
+          t = cvtop(b, gel(P,i), e - v);
+          if (!ispower(t, K, &t)) { avma = av; return 0; }
+          t = gtrunc(t);
+        }
         if (pt)
         {
-          t = gtrunc(*pt);
-          if (v) t = mulii(t, powiu(p, v>>1));
+          if (w) t = mulii(t, powiu(p, w));
           gel(L,i) = mkintmod(t, powiu(p, e));
         }
       }

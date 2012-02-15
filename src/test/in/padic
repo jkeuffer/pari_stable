@@ -2,3 +2,16 @@ padicappr(x,O(2))
 padicappr(x^2+1+O(3), Mod(-1+O(5^10),y^2-2))
 padicappr(x^2+1+O(3), -1+O(5^10))
 factorpadic(y^3+5*y,7,8,1)
+
+test(p, e = 1)=
+{ my (N = 7*p^2);
+  for (i=0,10,if (!ispower(i+O(p^e), N), print([i,p,e])));
+  for (i=1,10,if (!ispower((i+O(p^e))^N, N), error([i,p,e])));
+}
+test(2)
+test(2,2)
+test(2,3)
+test(3)
+test(3,3)
+test(11,3)
+test(nextprime(2^64),3)
