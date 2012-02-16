@@ -1270,15 +1270,10 @@ gp_initrc(pari_stack *p_A)
   for(;;)
   {
     char *nexts, *s, *t;
-    long slen;
-
     if (setjmp(env[s_env.n-1])) err_printf("...skipping line %ld.\n", c);
     c++;
     if (!get_line_from_file(NULL,&F,file)) break;
     s = b->buf;
-    /* remove trailing \n */
-    slen = strlen(s);
-    if (s[slen-1] == '\n') s[slen-1] = 0;
     if (*s == '#')
     { /* preprocessor directive */
       int z, NOT = 0;
