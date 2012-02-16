@@ -1025,7 +1025,7 @@ START:
     if (DEBUGLEVEL) timer_printf(&T, "factor base");
     BQ.subFB = subFBquad(&BQ, QFR.D, lim + 0.5, minSFB);
     if (DEBUGLEVEL) timer_printf(&T, "subFBquad = %Ps",
-				 vecpermute(BQ.FB, BQ.subFB));
+                                 vecpermute(BQ.FB, BQ.subFB));
     nsubFB = lg(BQ.subFB) - 1;
   }
   while (!nsubFB);
