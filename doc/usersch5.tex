@@ -5366,6 +5366,10 @@ number of rows of the corresponding column/matrix in dense representation.
 (over $\F_p$) by the sparse vector $B$. The result is an \kbd{FpC}, i.e.~a
 dense vector.
 
+\fun{GEN}{ZMs_ZC_mul}{GEN M, GEN B, GEN p} multiply the sparse matrix $M$
+(over $\Z$) by the sparse vector $B$. The result is an \kbd{ZC}, i.e.~a
+dense vector.
+
 \fun{GEN}{zCs_to_ZC}{GEN C, long nbrow} convert the sparse vector $C$
 to a dense \kbd{ZC} of dimension \kbd{nbrow}.
 
@@ -5378,8 +5382,20 @@ vector, both over $\F_p$. Return either a solution as a \typ{COL} (dense
 vector), or the index of a column which is linearly dependent from the
 others as a \typ{VECSMALL} with a single component.
 
+\fun{GEN}{ZpMs_ZpCs_solve}{GEN M, GEN B, long nbrow, GEN p, long e}
+solve the equation $MX = B$, where $M$ is a sparse matrix and $B$ is a sparse
+vector, both over $\Z/p^e\Z$. Return either a solution as a \typ{COL} (dense
+vector), or the index of a column which is linearly dependent from the
+others as a \typ{VECSMALL} with a single component.
+
 \fun{GEN}{gen_FpM_Wiedemann}{void *E, GEN (*f)(void*, GEN), GEN B, GEN p}
 solve equation $f(X) = B$ over $\F_p$, where $B$ is a \kbd{FpV}, and $f$ is a
+blackbox endomorphism, where $f(E, X)$ computes the value of $f$ at the
+(dense) column vector $X$. Returns either a solution \typ{COL}, or a kernel
+vector as a \typ{VEC}.
+
+\fun{GEN}{gen_ZpM_Dixon}{void *E, GEN (*f)(void*, GEN), GEN B, GEN p, long e}
+solve equation $f(X) = B$ over $\Z/p^e\Z$, where $B$ is a \kbd{ZV}, and $f$ is a
 blackbox endomorphism, where $f(E, X)$ computes the value of $f$ at the
 (dense) column vector $X$. Returns either a solution \typ{COL}, or a kernel
 vector as a \typ{VEC}.

@@ -314,7 +314,10 @@ GEN     FpV_dotsquare(GEN x, GEN p);
 GEN     FpV_red(GEN z, GEN p);
 GEN     FpV_to_mod(GEN z, GEN p);
 GEN     FpX_to_mod(GEN z, GEN p);
+GEN     ZMs_ZC_mul(GEN M, GEN B);
+GEN     ZpMs_ZpCs_solve(GEN M, GEN B, long nbrow, GEN p, long e);
 GEN     gen_FpM_Wiedemann(void *E, GEN (*f)(void*, GEN), GEN B, GEN p);
+GEN     gen_ZpM_Dixon(void *E, GEN (*f)(void*, GEN), GEN B, GEN p, long e);
 GEN     zCs_to_ZC(GEN C, long nbrow);
 GEN     zMs_to_ZM(GEN M, long nbrow);
 

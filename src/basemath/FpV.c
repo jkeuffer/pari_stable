@@ -755,7 +755,7 @@ gen_FpM_Wiedemann(void *E, GEN (*f)(void*, GEN), GEN B, GEN p)
 }
 
 GEN
-FpMs_FpC_mul(GEN M, GEN B, GEN p)
+ZMs_ZC_mul(GEN M, GEN B)
 {
   long i, j;
   long n = lg(B)-1;
@@ -782,19 +782,85 @@ FpMs_FpC_mul(GEN M, GEN B, GEN p)
         }
       }
     }
-  return FpC_red(V,p);
+  return V;
 }
 
-struct relcomb_s
+GEN
+FpMs_FpC_mul(GEN M, GEN B, GEN p) { return FpC_red(ZMs_ZC_mul(M, B), p); }
+
+GEN
+ZlM_gauss(GEN a, GEN b, ulong p, long e, GEN C)
 {
-  GEN M, p;
+  pari_sp av = avma, lim = stack_lim(av, 2), av2;
+  GEN xi, xb, pi = gen_1, P;
+  long i;
+  if (!C) {
+    C = Flm_inv(ZM_to_Flm(a, p), p);
+    if (!C) pari_err(e_INV);
+  }
+  P = utoipos(p);
+  av2 = avma;
+  xi = Flm_mul(C, ZM_to_Flm(b, p), p);
+  xb = Flm_to_ZM(xi);
+  for (i = 2; i <= e; i++)
+  {
+    pi = muliu(pi, p); /* = p^(i-1) */
+    b = ZM_Z_divexact(ZM_sub(b, ZM_nm_mul(a, xi)), P);
+    if (low_stack(lim, stack_lim(av,2)))
+    {
+      if(DEBUGMEM>1) pari_warn(warnmem,"ZlM_gauss. i=%ld",i);
+      gerepileall(av2,3, &pi,&b,&xb);
+    }
+    xi = Flm_mul(C, ZM_to_Flm(b, p), p);
+    xb = ZM_add(xb, nm_Z_mul(xi, pi));
+  }
+  return gerepileupto(av, xb);
+}
+
+struct wrapper_modp_s {
+  GEN (*f)(void*, GEN);
+  void *E;
+  GEN p;
 };
 
+/* compute f(x) mod p */
 static GEN
-wrap_relcomb(void*E, GEN x)
+wrap_relcomb_modp(void *E, GEN x)
 {
-  struct relcomb_s *s = (struct relcomb_s *) E;
-  return FpMs_FpC_mul(s->M, x, s->p);
+  struct wrapper_modp_s *W = (struct wrapper_modp_s*)E;
+  return FpV_red(W->f(W->E, x), W->p);
+}
+static GEN
+wrap_relcomb(void*E, GEN x) { return ZMs_ZC_mul((GEN)E, x); }
+
+/* Solve f(X) = B (mod p^e); blackbox version of ZlM_gauss */
+GEN
+gen_ZpM_Dixon(void *E, GEN (*f)(void*, GEN), GEN B, GEN p, long e)
+{
+  struct wrapper_modp_s W;
+  pari_sp av = avma, lim = stack_lim(av, 2);
+  GEN xb, xi, pi = gen_1;
+  long i;
+  W.E = E;
+  W.f = f;
+  W.p = p;
+  xi = gen_FpM_Wiedemann((void*)&W, wrap_relcomb_modp, B, p); /* f^(-1) B */
+  if (typ(xi) == t_VEC) return xi;
+  xb = xi;
+  for (i = 2; i <= e; i++)
+  {
+    pi = mulii(pi, p); /* = p^(i-1) */
+    B = ZC_Z_divexact(ZC_sub(B, f(E, xi)), p);
+    if (low_stack(lim, stack_lim(av,2)))
+    {
+      if(DEBUGMEM>1) pari_warn(warnmem,"gen_ZpM_Dixon. i=%ld",i);
+      gerepileall(av,3, &pi,&B,&xb);
+    }
+    xi = gen_FpM_Wiedemann((void*)&W, wrap_relcomb_modp, B, p);
+    if (typ(xi) == t_VEC) return gerepileupto(av, xb);
+    xb = ZC_add(xb, ZC_Z_mul(xi, pi));
+  }
+  return gerepileupto(av, xb);
 }
 
 static GEN
@@ -807,10 +873,9 @@ vecprow(GEN A, GEN prow)
  * or the index of a column which is linearly dependent from the others as a
  * t_VECSMALL with a single component. */
 GEN
-FpMs_FpCs_solve(GEN M, GEN A, long nbrow, GEN p)
+ZpMs_ZpCs_solve(GEN M, GEN A, long nbrow, GEN p, long e)
 {
   pari_sp av = avma;
-  struct relcomb_s s;
   GEN pcol, prow;
   long nbi=lg(M)-1, lR;
   long i, n;
@@ -825,9 +890,8 @@ FpMs_FpCs_solve(GEN M, GEN A, long nbrow, GEN p)
   for(i=1; i<=n; i++)
     gel(Mp, i) = vecprow(gel(M,pcol[i]), prow);
   Ap = zCs_to_ZC(vecprow(A, prow), n);
-  s.M = Mp; s.p = p;
   if (DEBUGLEVEL) timer_start(&ti);
-  Rp = gen_FpM_Wiedemann((void*)&s,wrap_relcomb, Ap, p);
+  Rp = gen_ZpM_Dixon((void*)Mp,wrap_relcomb, Ap, p, e);
   if (DEBUGLEVEL) timer_printf(&ti,"linear algebra");
   if (!Rp) { avma = av; return NULL; }
   lR = lg(Rp)-1;
@@ -843,3 +907,10 @@ FpMs_FpCs_solve(GEN M, GEN A, long nbrow, GEN p)
       return gerepileuptoleaf(av, mkvecsmall(pcol[i]));
   return NULL; /* NOT REACHED */
 }
+
+GEN
+FpMs_FpCs_solve(GEN M, GEN A, long nbrow, GEN p)
+{
+  return ZpMs_ZpCs_solve(M, A, nbrow, p, 1);
+}
+
