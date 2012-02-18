@@ -190,7 +190,7 @@ gunclone_deep(GEN x)
 {
   long i, lx;
   GEN v;
-  if (isclone(x) && --bl_refc(x) > 0) return;
+  if (isclone(x) && bl_refc(x) > 1) { --bl_refc(x); return; }
   BLOCK_SIGINT_START;
   switch(typ(x))
   {
