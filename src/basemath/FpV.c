@@ -696,11 +696,12 @@ zMs_to_ZM(GEN M, long nbrow)
 GEN
 gen_FpM_Wiedemann(void *E, GEN (*f)(void*, GEN), GEN B, GEN p)
 {
+  pari_sp ltop = avma;
   long col = 0, n = lg(B)-1, m = 2*n+1;
   if (ZV_equal0(B)) return zerocol(n);
   while (++col <= n)
   {
-    pari_sp ltop = avma, av, lim;
+    pari_sp btop = avma, av, lim;
     long i, lQ;
     GEN V, Q, M, W = B;
     GEN b = cgetg(m+2, t_POL);
@@ -720,7 +721,7 @@ gen_FpM_Wiedemann(void *E, GEN (*f)(void*, GEN), GEN B, GEN p)
       }
     }
     b = FpX_renormalize(b, m+2);
-    if (lgpol(b)==0) {avma = ltop; continue; }
+    if (lgpol(b)==0) {avma = btop; continue; }
     M = FpX_halfgcd(b, monomial(gen_1, m, 0), p);
     Q = FpX_neg(FpX_normalize(gcoeff(M, 2, 1),p),p);
     W = B; lQ =lg(Q);
@@ -739,17 +740,17 @@ gen_FpM_Wiedemann(void *E, GEN (*f)(void*, GEN), GEN B, GEN p)
     }
     V = FpC_red(V, p);
     W = FpC_sub(f(E,V), B, p);
-    if (ZV_equal0(W)) return V;
+    if (ZV_equal0(W)) return gerepilecopy(ltop, V);
     av = avma;
     for (i = 1; i <= n; ++i)
     {
       V = W;
       W = f(E, V);
       if (ZV_equal0(W))
-        return shallowtrans(V);
+        return gerepilecopy(ltop, shallowtrans(V));
       gerepileall(av, 2, &V, &W);
     }
-    avma = ltop;
+    avma = btop;
   }
   return NULL;
 }
@@ -828,7 +829,7 @@ static GEN
 wrap_relcomb_modp(void *E, GEN x)
 {
   struct wrapper_modp_s *W = (struct wrapper_modp_s*)E;
-  return FpV_red(W->f(W->E, x), W->p);
+  return FpC_red(W->f(W->E, x), W->p);
 }
 static GEN
 wrap_relcomb(void*E, GEN x) { return ZMs_ZC_mul((GEN)E, x); }
@@ -844,8 +845,8 @@ gen_ZpM_Dixon(void *E, GEN (*f)(void*, GEN), GEN B, GEN p, long e)
   W.E = E;
   W.f = f;
   W.p = p;
-  xi = gen_FpM_Wiedemann((void*)&W, wrap_relcomb_modp, B, p); /* f^(-1) B */
-  if (typ(xi) == t_VEC) return xi;
+  xi = gen_FpM_Wiedemann((void*)&W, wrap_relcomb_modp, FpC_red(B, p), p); /* f^(-1) B */
+  if (!xi || e == 1 || typ(xi) == t_VEC) return xi;
   xb = xi;
   for (i = 2; i <= e; i++)
   {
@@ -856,8 +857,9 @@ gen_ZpM_Dixon(void *E, GEN (*f)(void*, GEN), GEN B, GEN p, long e)
       if(DEBUGMEM>1) pari_warn(warnmem,"gen_ZpM_Dixon. i=%ld",i);
       gerepileall(av,3, &pi,&B,&xb);
     }
-    xi = gen_FpM_Wiedemann((void*)&W, wrap_relcomb_modp, B, p);
-    if (typ(xi) == t_VEC) return gerepileupto(av, xb);
+    xi = gen_FpM_Wiedemann((void*)&W, wrap_relcomb_modp, FpC_red(B, p), p);
+    if (!xi) return NULL;
+    if (typ(xi) == t_VEC) return gerepileupto(av, xi);
     xb = ZC_add(xb, ZC_Z_mul(xi, pi));
   }
   return gerepileupto(av, xb);
