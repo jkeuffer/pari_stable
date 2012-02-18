@@ -879,10 +879,8 @@ closure_eval(GEN C)
       break;
     case OCtostr:
       {
-        GEN z=gel(st,sp+operand);
-        if (typ(z)!=t_STR)
-          z = GENtoGENstr(z);
-        st[sp+operand] = (long) GSTR(z);
+        GEN z = gel(st,sp+operand);
+        st[sp+operand] = (long)GENtostr_unquoted(z);
         break;
       }
     case OCvarn:

@@ -1020,10 +1020,8 @@ group_export_MAGMA(GEN G)
   gel(s,k++) = strtoGENstr("|"); comma = strtoGENstr(", ");
   for (i = 1; i < l; ++i)
   {
-    char *t = GENtostr( vecsmall_to_vec(gel(g,i)) );
     if (i > 1) gel(s,k++) = comma;
-    gel(s,k++) = strtoGENstr(t);
-    pari_free(t);
+    gel(s,k++) = GENtoGENstr( vecsmall_to_vec(gel(g,i)) );
   }
   gel(s,k++) = strtoGENstr(">");
   return gerepilecopy(av, shallowconcat1(s));

@@ -1472,6 +1472,7 @@ GEN     GENtoGENstr_nospace(GEN x);
 GEN     GENtoGENstr(GEN x);
 char*   GENtoTeXstr(GEN x);
 char*   GENtostr(GEN x);
+char*   GENtostr_unquoted(GEN x);
 GEN     Str(GEN g);
 GEN     Strchr(GEN g);
 GEN     Strexpand(GEN g);

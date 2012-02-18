@@ -7832,6 +7832,11 @@ string.
 significant digits to print), converts $x$ to a malloc'ed string. Simple
 variant of \tet{pari_sprintf}.
 
+\fun{char*}{GENtostr_unquoted}{GEN x} as \tet{GENtostr} with the following
+differences: 1) a \typ{STR} $x$ is printed without enclosing quotes
+(to be used by \kbd{print}); 2) the result is allocated on the stack
+and \emph{must not} be freed.
+
 \fun{char*}{GENtoTeXstr}{GEN x}, as \kbd{GENtostr}, except that
 \tet{f_TEX} overrides the output format from \kbd{GP\_DATA->fmt}.
 

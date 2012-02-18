@@ -33,6 +33,7 @@ typedef struct outString {
   char *end;    /* end of the output buffer */
   char *cur;   /* current writing place in the output buffer */
   size_t size; /* buffer size */
+  int use_stack; /* use stack_malloc instead of malloc ? */
 } outString;
 
 typedef void (*OUT_FUN)(GEN, pariout_t *, outString *);
@@ -714,23 +715,50 @@ absrtostr(GEN x, int sp, char FORMAT, long wanted_dec)
 
 /* Modifications for format %Ps: R.Butel IMB/CNRS 2007/12/03 */
 
+/* l = old len, L = new len */
+static void
+str_alloc0(outString *S, long l, long L)
+{
+  char *s;
+  if (S->use_stack)
+  {
+    s = stack_malloc(L);
+    memcpy(s, S->string, l);
+  }
+  else
+    s = (char*)pari_realloc((void*)S->string, L);
+  S->string = s;
+  S->cur = s + l;
+  S->end = s + L;
+  S->size = L;
+}
+/* make sure S is large enough to write l further words (<= l * 20 chars).
+ * To avoid automatic extension in between av = avma / avma = av pairs
+ * [ would destroy S->string if (S->use_stack) ] */
+static void
+str_alloc(outString *S, long l)
+{
+  l *= 20;
+  if (S->end - S->cur <= l)
+    str_alloc0(S, S->cur - S->string, S->size + maxss(S->size, l));
+}
 static void
 str_putc(outString *S, char c) {
   *S->cur++ = c;
-  if (S->cur == S->end)
-  {
-    size_t l = S->size << 1;
-    S->string = (char*)pari_realloc((void*)S->string, l);
-    S->cur = S->string + S->size;
-    S->end = S->string + l;
-    S->size = l;
-  }
+  if (S->cur == S->end) str_alloc0(S, S->size, S->size << 1);
 }
+
 static void
-str_init(outString *S)
+str_init(outString *S, int use_stack)
 {
+  char *s;
   S->size = 1024;
-  S->string = S->cur = (char*)pari_malloc(S->size);
+  S->use_stack = use_stack;
+  if (S->use_stack)
+    s = (char*)stack_malloc(S->size);
+  else
+    s = (char*)pari_malloc(S->size);
+  S->string = S->cur = s;
   S->end = S->string + S->size;
 }
 static void
@@ -799,7 +827,7 @@ fmtnum(outString *S, long lvalue, GEN gvalue, int base, int signvalue,
   long lbuf, mxl;
   GEN uvalue = NULL;
   ulong ulvalue = 0;
-  pari_sp av = avma;
+  pari_sp av = avma; /* Assume !S->use_stack */
 
   if (gvalue)
   {
@@ -1005,7 +1033,7 @@ static void
 fmtreal(outString *S, GEN gvalue, int space, int signvalue, int FORMAT,
         int maxwidth, int ljust, int len, int zpad)
 {
-  pari_sp av = avma;
+  pari_sp av = avma; /* Assume !S->use_stack */
   long sigd;
   char *buf;
 
@@ -1087,7 +1115,7 @@ sm_dopr(const char *fmt, GEN arg_vector, va_list args)
   const char *save_fmt = fmt;
   outString __S, *S = &__S;
 
-  str_init(S);
+  str_init(S, 0);
 
   while ((ch = *fmt++) != '\0') {
     switch(ch) {
@@ -1658,15 +1686,23 @@ pari_strndup(const char *s, long n)
   memcpy(t,s,n); t[n] = 0; return t;
 }
 
+/* not stack clean */
+static char *
+GENtostr_aux(GEN x, pariout_t *T, OUT_FUN out, int use_stack) {
+  outString S;
+  str_init(&S, use_stack); out(x, T, &S); *S.cur = 0;
+  return S.string;
+}
+static char *
+GENtostr_fun(GEN x, pariout_t *T, OUT_FUN out)
+{
+  pari_sp av = avma;
+  char *s = GENtostr_aux(x, T, out, 0);
+  avma = av; return s;
+}
+
 /* returns a malloc-ed string, which should be freed after usage */
 /* Returns pari_malloc()ed string */
-static char *
-GENtostr_fun(GEN x, pariout_t *T, OUT_FUN out) {
-  pari_sp av = avma;
-  outString S;
-  str_init(&S); out(x, T, &S); *S.cur = 0;
-  avma = av; return S.string;
-}
 char *
 GENtostr(GEN x) {
   pariout_t *T = GP_DATA->fmt;
@@ -1737,7 +1773,6 @@ GENtoGENstr(GEN x)
   char *s = GENtostr_fun(x, GP_DATA->fmt, &bruti);
   GEN z = strtoGENstr(s); pari_free(s); return z;
 }
-
 GEN
 GENtoGENstr_nospace(GEN x)
 {
@@ -1748,6 +1783,16 @@ GENtoGENstr_nospace(GEN x)
   s = GENtostr_fun(x, &T, &bruti);
   z = strtoGENstr(s); pari_free(s); return z;
 }
+
+static char *
+GENtostr_fun_unquoted(GEN x, pariout_t *T, OUT_FUN f)
+{
+  if (typ(x)==t_STR) return GSTR(x); /* text surrounded by "" otherwise */
+  return GENtostr_aux(x, T, f, 1);
+}
+char *
+GENtostr_unquoted(GEN x)
+{ return GENtostr_fun_unquoted(x, GP_DATA->fmt, &bruti); }
 
 static char
 ltoc(long n) {
@@ -1795,8 +1840,10 @@ itostr(GEN x) {
 static void
 str_absint(outString *S, GEN x)
 {
-  pari_sp av = avma;
+  pari_sp av;
   long l;
+  str_alloc(S, lgefint(x)); /* careful ! */
+  av = avma;
   str_puts(S, itostr_sign(x, 1, &l)); avma = av;
 }
 
@@ -2584,7 +2631,9 @@ bruti_intern(GEN g, pariout_t *T, outString *S, int addsign)
       str_absint(S, g); break;
     case t_REAL:
     {
-      pari_sp av = avma;
+      pari_sp av;
+      str_alloc(S, lg(g)); /* careful! */
+      av = avma;
       if (addsign && signe(g) < 0) str_putc(S, '-');
       str_puts(S, absrtostr(g, T->sp, (char)toupper((int)T->format), T->sigd) );
       avma = av; break;
@@ -2649,10 +2698,14 @@ bruti_intern(GEN g, pariout_t *T, outString *S, int addsign)
     case t_PADIC:
     {
       GEN p = gel(g,2);
-      pari_sp av = avma;
+      pari_sp av, av0;
       char *ev;
+      str_alloc(S, (precp(g)+1) * lgefint(p)); /* careful! */
+      av0 = avma;
+      ev = itostr(p);
+      av = avma;
       i = valp(g); l = precp(g)+i;
-      g = gel(g,4); ev = GENtostr(p);
+      g = gel(g,4);
       for (; i<l; i++)
       {
         g = dvmdii(g,p,&a);
@@ -2668,7 +2721,7 @@ bruti_intern(GEN g, pariout_t *T, outString *S, int addsign)
         if ((i & 0xff) == 0) g = gerepileuptoint(av,g);
       }
       str_puts(S, "O("); VpowE(S, ev,i); str_putc(S, ')');
-      pari_free(ev); break;
+      avma = av0; break;
     }
 
     case t_QFR: case t_QFI: r = (tg == t_QFR);
@@ -2784,39 +2837,44 @@ bruti_sign(GEN g, pariout_t *T, outString *S, int addsign)
 static void
 matbruti(GEN g, pariout_t *T, outString *S)
 {
-  long i, j, r, w, l, lgall, *pad;
+  long i, j, r, w, l, *pad = NULL;
   pari_sp av;
   OUT_FUN print;
-  outString scratchstr;
 
   if (typ(g) != t_MAT) { bruti(g,T,S); return; }
 
   r=lg(g); if (r==1 || lg(g[1])==1) { str_puts(S, "[;]"); return; }
-  av = avma;
   l = lg(g[1]); str_putc(S, '\n');
   print = (typ(g[1]) == t_VECSMALL)? prints: bruti;
-  pad = (long*)stack_malloc(l*r*sizeof(long));
-  str_init(&scratchstr);
-  lgall = 2; /* opening [ and closing ] */
+  av = avma;
   w = term_width();
-  for (j=1; j<r; j++)
+  if (2*r < w)
   {
-    GEN col = gel(g,j);
-    long maxc = 0;
-    for (i=1; i<l; i++)
+    long lgall = 2; /* opening [ and closing ] */
+    pari_sp av2;
+    outString scratchstr;
+    pad = cgetg(l*r+1, t_VECSMALL); /* left on stack if (S->use_stack)*/
+    av2 = avma;
+    str_init(&scratchstr, 1);
+    for (j=1; j<r; j++)
     {
-      long lgs;
-      scratchstr.cur = scratchstr.string;
-      print(gel(col,i),T,&scratchstr);
-      lgs = scratchstr.cur-scratchstr.string;
-      pad[j*l+i] = -lgs;
-      if (maxc < lgs) maxc = lgs;
+      GEN col = gel(g,j);
+      long maxc = 0;
+      for (i=1; i<l; i++)
+      {
+        long lgs;
+        scratchstr.cur = scratchstr.string;
+        print(gel(col,i),T,&scratchstr);
+        lgs = scratchstr.cur-scratchstr.string;
+        pad[j*l+i] = -lgs;
+        if (maxc < lgs) maxc = lgs;
+      }
+      for (i=1; i<l; i++) pad[j*l+i] += maxc;
+      lgall += maxc + 1; /* column width, including separating space */
+      if (lgall > w) { pad = NULL; break; } /* doesn't fit, abort padding */
     }
-    for (i=1; i<l; i++) pad[j*l+i] += maxc;
-    lgall += maxc + 1; /* column width, including separating space */
-    if (lgall > w) { pad = NULL; break; } /* doesn't fit, abort padding */
+    avma = av2;
   }
-  pari_free(scratchstr.string);
   for (i=1; i<l; i++)
   {
     str_putc(S, '[');
@@ -2830,7 +2888,7 @@ matbruti(GEN g, pariout_t *T, outString *S)
     }
     if (i<l-1) str_puts(S, "]\n\n"); else str_puts(S, "]\n");
   }
-  avma = av;
+  if (!S->use_stack) avma = av;
 }
 
 /********************************************************************/
@@ -2918,9 +2976,12 @@ texi_sign(GEN g, pariout_t *T, outString *S, int addsign)
     case t_PADIC:
     {
       GEN p = gel(g,2);
+      pari_sp av;
       char *ev;
+      str_alloc(S, (precp(g)+1) * lgefint(p)); /* careful! */
+      av = avma;
       i = valp(g); l = precp(g)+i;
-      g = gel(g,4); ev = GENtostr(p);
+      g = gel(g,4); ev = itostr(p);
       for (; i<l; i++)
       {
         g = dvmdii(g,p,&a);
@@ -2935,7 +2996,7 @@ texi_sign(GEN g, pariout_t *T, outString *S, int addsign)
         }
       }
       str_puts(S, "O("); texVpowE(S, ev,i); str_putc(S, ')');
-      pari_free(ev); break;
+      avma = av; break;
     }
 
     case t_VEC:
@@ -4187,14 +4248,10 @@ out_print0(PariOUT *out, GEN g, long flag)
   long i, l = lg(g);
   for (i = 1; i < l; i++)
   {
+    pari_sp av = avma;
     GEN x = gel(g,i);
-    if (typ(x)==t_STR)
-      out_puts(out, GSTR(x)); /* text surrounded by "" otherwise */
-    else
-    {
-      char *s = GENtostr_fun(x, GP_DATA->fmt, f);
-      out_puts(out, s); free(s);
-    }
+    char *s = GENtostr_fun_unquoted(x, GP_DATA->fmt, f);
+    out_puts(out, s); avma = av;
   }
 }
 
@@ -4222,7 +4279,7 @@ char *
 pari_sprint0(const char *s, GEN g, long flag)
 {
   outString S;
-  str_init(&S);
+  str_init(&S, 0);
   str_puts(&S, s);
   str_print0(&S, g, flag);
   *S.cur = 0; return S.string;

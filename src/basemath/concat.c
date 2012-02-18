@@ -64,20 +64,14 @@ listconcat(GEN A, GEN B)
 static GEN
 strconcat(GEN x, GEN y)
 {
-  int flx = 0, fly = 0;
   size_t l, lx;
-  char *sx,*sy,*str;
-
-  if (typ(x)==t_STR) sx = GSTR(x); else { flx=1; sx = GENtostr(x); }
-  if (typ(y)==t_STR) sy = GSTR(y); else { fly=1; sy = GENtostr(y); }
+  char *sx = GENtostr_unquoted(x);
+  char *sy = GENtostr_unquoted(y), *str;
   lx = strlen(sx);
   l = nchar2nlong(lx + strlen(sy) + 1);
   x = cgetg(l + 1, t_STR); str = GSTR(x);
   strcpy(str,   sx);
-  strcpy(str+lx,sy);
-  if (flx) pari_free(sx);
-  if (fly) pari_free(sy);
-  return x;
+  strcpy(str+lx,sy); return x;
 }
 
 /* concat A and B vertically. Internal */
@@ -472,7 +466,11 @@ concat(GEN x, GEN y)
   if (!y) return concat1(x);
   tx = typ(x);
   ty = typ(y);
-  if (tx==t_STR  || ty==t_STR)  return strconcat(x,y);
+  if (tx==t_STR  || ty==t_STR)
+  {
+    pari_sp av = avma;
+    return gerepileuptoleaf(av, strconcat(x,y));
+  }
   if (tx==t_LIST || ty==t_LIST) return listconcat(x,y);
   lx=lg(x); ly=lg(y);
 
