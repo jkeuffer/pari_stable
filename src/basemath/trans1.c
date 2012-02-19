@@ -1856,7 +1856,7 @@ static GEN
 agm1cx(GEN x, long prec)
 {
   GEN a1, b1;
-  pari_sp av = avma, av2;
+  pari_sp av = avma;
   long L, l = precision(x), rotate=0;
   if (!l) l = prec;
   L = 5-prec2nbits(l);
@@ -1868,16 +1868,15 @@ agm1cx(GEN x, long prec)
     else                    { a1=mulcxmI(a1); rotate=1; }
     x = gneg(x);
   }
-  av2 = avma; b1 = gsqrt(x, prec);
+  b1 = gsqrt(x, prec);
   while (agmcx_gap(a1,b1,L))
   {
     GEN a = a1;
     a1 = gmul2n(gadd(a,b1),-1);
-    av2 = avma;
     b1 = gsqrt(gmul(a,b1), prec);
   }
   if (rotate) a1 = rotate>0 ? mulcxI(a1):mulcxmI(a1);
-  avma = av2; return gerepileupto(av,a1);
+  return gerepilecopy(av,a1);
 }
 
 /* agm(1,x) */
