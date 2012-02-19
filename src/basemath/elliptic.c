@@ -397,6 +397,7 @@ ellinit_real(GEN x, long prec)
   if (e > 0) PREC += nbits2extraprec(e >> 1);
   gel(y,14) = NULL;
   gel(y,14) = ell_rootsprec(y, PREC);
+  gel(y,15) = NULL;
   w = ellomega_real(y, PREC);
   gel(y,15) = gel(w,1);
   gel(y,16) = gel(w,2);
@@ -1137,14 +1138,26 @@ powell(GEN e, GEN z, GEN n)
 */
 
 static GEN
-ellomegareal_agm(GEN a, GEN b, GEN c, long prec)
+ellomega_agm(GEN a, GEN b, GEN c, long prec)
 {
   retmkvec2(gdiv(mppi(prec),agm(a, c, prec)),
             gdiv(gneg(PiI2n(0,prec)),agm(b, c, prec)));
 }
 
-GEN
-ellomega_real(GEN E, long prec)
+static GEN
+ellomega_cx(GEN E, long prec)
+{
+  pari_sp av = avma;
+  GEN roots = ell_rootsprec(E,prec);
+  GEN e1=gel(roots,1), e2=gel(roots,2), e3=gel(roots,3);
+  GEN a = gsqrt(gsub(e1,e2),prec);
+  GEN b = gsqrt(gsub(e2,e3),prec);
+  GEN c = gsqrt(gsub(e1,e3),prec);
+  return gerepileupto(av, ellomega_agm(a,b,c,prec));
+}
+
+static GEN
+doellomega_real(GEN E, long prec)
 {
   pari_sp av = avma;
   GEN roots = ell_rootsprec(E,prec), D = ell_get_disc(E);
@@ -1154,15 +1167,24 @@ ellomega_real(GEN E, long prec)
     GEN a = gsqrt(gsub(e1,e2),prec);
     GEN b = gsqrt(gsub(e2,e3),prec);
     GEN c = gsqrt(gsub(e1,e3),prec);
-    return gerepileupto(av, ellomegareal_agm(a,b,c,prec));
+    return gerepileupto(av, ellomega_agm(a,b,c,prec));
   }
   else
   {
     GEN z = gsqrt(gsub(e1,e3),prec); /* This assumes imag(e3)<0, so that b > 0*/
     GEN a = gel(z,1), b = gel(z,2), c = gabs(z, prec);
-    z = ellomegareal_agm(a,b,c,prec);
+    z = ellomega_agm(a,b,c,prec);
     return gerepilecopy(av, mkvec2(gel(z,1),gmul2n(gadd(gel(z,1),gel(z,2)),-1)));
   }
+}
+
+GEN
+ellomega_real(GEN E, long prec)
+{
+  if (lg(E)>14 && gel(E,15) && precision(gel(E,15))>=prec)
+    return gprec_w(mkvec2(gel(E,15), gel(E,16)), prec);
+  else
+    return doellomega_real(E, prec);
 }
 
 /********************************************************************/
@@ -1170,28 +1192,150 @@ ellomega_real(GEN E, long prec)
 /**                       ELLIPTIC FUNCTIONS                       **/
 /**                                                                **/
 /********************************************************************/
-static GEN
-quot(GEN x, GEN y)
+static int
+agmcx_gap(GEN a, GEN b, long L)
 {
-  GEN z = mpdiv(x, y), q = floorr(z);
-  if (gsigne(y) < 0 && !gequal(z, q)) q = addis(q, 1);
-  return q;
+  GEN d = gsub(b, a);
+  return (!gequal0(d) && gexpo(d) - gexpo(b) >= L);
 }
+
+GEN
+zellagmcx(GEN a0, GEN b0, GEN r, GEN t, long prec)
+{
+  pari_sp av = avma;
+  GEN x = gdiv(a0, b0);
+  GEN a1, b1;
+  long L, l = precision(x), rotate=0;
+  if (!l) l = prec;
+  L = 5-prec2nbits(l);
+  a1 = gtofp(gmul2n(gadd(real_1(l), x), -1), l); /* avoid loss of accuracy */
+  r = gsqrt(gdiv(gmul(a1,gaddgs(r, 1)),gadd(gmulsg(1, r), x )), prec);
+  if (gsigne(greal(x))<0)
+  { /* We rotate by +/-Pi/2, so that the choice of the principal square
+       root gives the optimal AGM. So a1 = +/-I*a1, b1=sqrt(-x). */
+    if (gsigne(gimag(x))<0) { a1=mulcxI(a1);  rotate=-1; }
+    else                    { a1=mulcxmI(a1); rotate=1; }
+    x = gneg(x);
+  }
+  b1 = gsqrt(x, prec);
+  t = gmul(r, t);
+  while (agmcx_gap(a1,b1,L))
+  {
+    GEN a = a1, b = b1;
+    a1 = gmul2n(gadd(a,b),-1);
+    b1 = gsqrt(gmul(a,b), prec);
+    r = gsqrt(gdiv(gmul(a1,gaddgs(r, 1)),gadd(gmul(b, r), a )), prec);
+    t = gmul(r, t);
+  }
+  if (rotate) a1 = rotate>0 ? mulcxI(a1):mulcxmI(a1);
+  a1 = gmul(a1, b0);
+  t = gatan(gdiv(a1,t), prec);
+  /* send t to the fundamental domain if necessary */
+  if (gsigne(greal(t))<0) t = gadd(t, mppi(prec));
+  return gerepileupto(av,gdiv(t,a1));
+}
+
+static GEN
+zell_closest_0(GEN om, GEN x0, GEN e1, GEN e2, GEN e3)
+{
+  GEN x0e1 = gnorm(gsub(x0,e1));
+  GEN x0e2 = gnorm(gsub(x0,e2));
+  GEN x0e3 = gnorm(gsub(x0,e3));
+  GEN z = gel(om,2);
+  if (gcmp(x0e1, x0e2) <= 0)
+  {
+    if (gcmp(x0e1, x0e3) <= 0)
+      z = gel(om,1);
+  } else
+  {
+    if (gcmp(x0e2, x0e3)<=0)
+      z = gadd(gel(om,1),gel(om,2));
+  }
+  return gmul2n(z, -1);
+}
+
+static GEN
+zellcx(GEN E, GEN P, long prec)
+{
+  GEN roots = ell_rootsprec(E, prec+EXTRAPRECWORD);
+  GEN e1=gel(roots,1), e2=gel(roots,2), e3=gel(roots,3);
+  GEN x0 = gel(P,1), y0 = d_ellLHS(E,P);
+  if (gequal0(y0))
+    return zell_closest_0(ellomega_cx(E,prec),x0,e1,e2,e3);
+  else
+  {
+    GEN a=gsqrt(gsub(e1,e3),prec), b=gsqrt(gsub(e1,e2),prec);
+    GEN r=gsqrt(gdiv(gsub(x0,e3), gsub(x0,e2)),prec);
+    GEN t=gdiv(gneg(y0), gmul2n(gmul(r,gsub(x0,e2)),1));
+    if (gcmp(gnorm(gsub(a,b)),gnorm(gadd(a,b)))>0)
+      b = gneg(b);
+    return zellagmcx(a,b,r,t,prec);
+  }
+}
+
+/* We assume E and P to be real, disc E < 0. In that case, the result is always real */
+
+static GEN
+zellrealneg(GEN E, GEN P, long prec)
+{
+  GEN x0 = gel(P,1), y0 = d_ellLHS(E,P);
+  if (gequal0(y0))
+    return gmul2n(gel(ellomega_real(E,prec),1),-1);
+  else
+  {
+    GEN roots = ell_rootsprec(E, prec+EXTRAPRECWORD);
+    GEN e1=gel(roots,1), e3=gel(roots,3);
+    GEN a=gsqrt(gsub(e1,e3),prec);
+    GEN ar=greal(a),ai=gimag(a);
+    GEN z=gsqrt(gsub(x0,e3), prec);
+    GEN t=gdiv(gneg(y0), gmul2n(gnorm(z),1));
+    GEN r2=ginv(gsqrt(gaddsg(1,gdiv(gmul(ai,gimag(z)),gmul(ar,greal(z)))),prec));
+    return zellagmcx(ar,gabs(a,prec),r2,gmul(t,r2),prec);
+  }
+}
+
+/* We assume E and P to be real, disc E > 0. */
+
+static GEN
+zellrealpos(GEN E, GEN P, long prec)
+{
+  GEN roots = ell_rootsprec(E, prec+EXTRAPRECWORD);
+  GEN e1=gel(roots,1), e2=gel(roots,2), e3=gel(roots,3);
+  GEN x0 = gel(P,1), y0 = d_ellLHS(E,P), e1x0 = gsub(e1,x0);
+  if (gequal0(y0))
+    return zell_closest_0(ellomega_real(E,prec), x0,e1,e2,e3);
+  if (gcmp(x0,e1)>0)
+  {
+    GEN a = gsqrt(gsub(e1,e3),prec), b = gsqrt(gsub(e1,e2),prec);
+    GEN r = gsqrt(gdiv(gsub(x0,e3), gsub(x0,e2)),prec);
+    GEN t = gdiv(gneg(y0), gmul2n(gmul(r,gsub(x0,e2)),1));
+    return zellagmcx(a,b,r,t,prec);
+  } else
+  {
+    GEN om = ellomega_real(E,prec);
+    GEN a = gsqrt(gsub(e1,e3),prec), b = gsqrt(gsub(e1,e2),prec);
+    GEN r = gdiv(a,gsqrt(e1x0,prec));
+    GEN t = gdiv(gmul(r,y0),gmul2n(gsub(x0,e3),1));
+    return gsub(zellagmcx(a,b,r,t,prec),gmul2n(gel(om,2),-1));
+  }
+}
+
 GEN
 zell(GEN e, GEN z, long prec)
 {
-  long ty, sw, fl;
+  long ty;
   pari_sp av = avma;
-  GEN t, u, p1, p2, a, b, x1, u2, D;
+  GEN t, x1, u2, D;
 
   checkell(e); checkellpt(z);
   D = ell_get_disc(e);
   ty = typ(D); if (ty == t_INTMOD) pari_err_TYPE("zell",D);
   if (ell_is_inf(z)) return (ty==t_PADIC)? gen_1: gen_0;
 
-  x1 = new_coords(e,gel(z,1),ell_realroot(e), &a,&b,1, prec);
   if (ty==t_PADIC)
   {
+    GEN a, b;
+    x1 = new_coords(e,gel(z,1),ell_realroot(e), &a,&b,1, prec);
     u2 = do_padic_agm(&x1,a,b,gel(D,2));
     if (!gequal0(gel(e,16)))
     {
@@ -1199,64 +1343,15 @@ zell(GEN e, GEN z, long prec)
       t = gdiv(gaddsg(-1,t), gaddsg(1,t));
     }
     else t = gaddsg(2, ginv(gmul(u2,x1)));
-    return gerepileupto(av,t);
   }
-
-  sw = gsigne(real_i(b)); fl=0;
-  for(;;) /* ~ agm */
+  else if (ty!=t_COMPLEX && typ(gel(z,1))!=t_COMPLEX && typ(gel(z,2))!=t_COMPLEX)
   {
-    GEN a0 = a, b0 = b, x0 = x1, d;
-
-    b = gsqrt(gmul(a0,b0),prec);
-    if (gsigne(real_i(b)) != sw) b = gneg_i(b);
-    a = gmul2n(gadd(gadd(a0,b0),gmul2n(b,1)),-2);
-    d = gsub(a,b);
-    if (gequal0(d) || gexpo(d) < gexpo(a) - prec2nbits(prec) + 5) break;
-    p1 = gsqrt(gdiv(gadd(x0,d),x0),prec);
-    x1 = gmul(x0,gsqr(gmul2n(gaddsg(1,p1),-1)));
-    d = gsub(x1,x0);
-    if (gequal0(d) || gexpo(d) < gexpo(x1) - prec2nbits(prec) + 5)
-    {
-      if (fl) break;
-      fl = 1;
-    }
-    else fl = 0;
-  }
-  u = gdiv(x1,a); t = gaddsg(1,u);
-  if (gequal0(t) || gexpo(t) <  5 - prec2nbits(prec))
-    t = gen_m1;
-  else
-    t = gdiv(u,gsqr(gaddsg(1,gsqrt(t,prec))));
-  u = gsqrt(ginv(gmul2n(a,2)),prec);
-  t = gmul(u, glog(t,prec));
-
-  /* which square root? test the reciprocal function (pointell) */
-  if (!gequal0(t))
-  {
-    GEN z1, z2;
-    int bad;
-
-    z1 = pointell(e,gprec_w(t,LOWDEFAULTPREC),LOWDEFAULTPREC); /* we don't need much precision */
-    if (ell_is_inf(z1)) pari_err_PREC( "ellpointtoz");
-    /* Either z = z1 (ok: keep t), or z = z2 (bad: t <-- -t) */
-    z2 = invell(e, z1);
-    bad = (gexpo(gsub(z,z1)) > gexpo(gsub(z,z2)));
-    if (bad) t = gneg(t);
-    if (DEBUGLEVEL) {
-      if (DEBUGLEVEL>4) {
-        err_printf("  z  = %Ps\n",z);
-        err_printf("  z1 = %Ps\n",z1);
-        err_printf("  z2 = %Ps\n",z2);
-      }
-      err_printf("ellpointtoz: %s square root\n", bad? "bad": "good");
-      err_flush();
-    }
-  }
-  /* send t to the fundamental domain if necessary */
-  p2 = quot(imag_i(t), imag_i(gel(e,16)));
-  if (signe(p2)) t = gsub(t, gmul(p2, gel(e,16)));
-  p2 = quot(real_i(t), gel(e,15));
-  if (signe(p2)) t = gsub(t, gmul(p2, gel(e,15)));
+    if (gsigne(D)<0)
+      t = zellrealneg(e,z,prec);
+    else
+      t = zellrealpos(e,z,prec);
+  } else
+      t = zellcx(e,z,prec);
   return gerepileupto(av,t);
 }
 
