@@ -69,20 +69,24 @@ RHSpol(GEN e)
 static int
 invcmp(void *E, GEN x, GEN y) { (void)E; return -gcmp(x,y); }
 
+static GEN
+ell_rootsprec(GEN e, long prec)
+{
+  GEN R;
+  if (lg(e)>14 && gel(e,14) && precision(gmael(e,14,1))>=prec)
+    return gprec_w(gel(e,14), prec);
+  R = cleanroots(RHSpol(e), prec);
+  /* sort roots in decreasing order */
+  if (gsigne(ell_get_disc(e)) > 0) gen_sort_inplace(R, NULL, &invcmp, NULL);
+  else if (signe(gmael(R,2,2)) < 0) swap(gel(R,2), gel(R,3));
+  return R;
+}
+
 INLINE GEN
 ell_realroot(GEN e) { return gmael(e,14,1); }
 
 static GEN
-ell_realrootprec(GEN e, long prec)
-{
-  GEN R;
-  if (lg(e)>14 && realprec(ell_realroot(e))>=prec)
-    return ell_realroot(e);
-  R = cleanroots(RHSpol(e), prec);
-  /* sort roots in decreasing order */
-  if (gsigne(ell_get_disc(e)) > 0) gen_sort_inplace(R, NULL, &invcmp, NULL);
-  return gel(R,1);
-}
+ell_realrootprec(GEN e, long prec) { return gel(ell_rootsprec(e,prec),1); }
 
 /* x^3 + a2 x^2 + a4 x + a6 */
 static GEN
@@ -375,7 +379,7 @@ base_ring(GEN x, GEN *pp, long *prec)
 GEN
 ellinit_real(GEN x, long prec)
 {
-  GEN y, D, R, T, w;
+  GEN y, D, T, w;
   long PREC, e;
 
   y = cgetg(20,t_VEC);
@@ -391,12 +395,9 @@ ellinit_real(GEN x, long prec)
   }
   PREC = prec;
   if (e > 0) PREC += nbits2extraprec(e >> 1);
-  R = cleanroots(RHSpol(y), PREC);
-  /* sort roots in decreasing order */
-  if (gsigne(D) > 0) gen_sort_inplace(R, NULL, &invcmp, NULL);
-  else if (signe(gmael(R,2,2)) < 0) swap(gel(R,2), gel(R,3));
-  gel(y,14) = R;
-  w = ellomega_real(y, prec);
+  gel(y,14) = NULL;
+  gel(y,14) = ell_rootsprec(y, PREC);
+  w = ellomega_real(y, PREC);
   gel(y,15) = gel(w,1);
   gel(y,16) = gel(w,2);
   T = elleta(w, prec);
@@ -1146,7 +1147,7 @@ GEN
 ellomega_real(GEN E, long prec)
 {
   pari_sp av = avma;
-  GEN roots = ell_get_roots(E), D = ell_get_disc(E);
+  GEN roots = ell_rootsprec(E,prec), D = ell_get_disc(E);
   GEN e1=gel(roots,1), e2=gel(roots,2), e3=gel(roots,3);
   if (signe(D)>0)
   {
@@ -3633,7 +3634,7 @@ exphellagm(GEN e, GEN z, GEN e1, int flag, long prec)
 static GEN
 exp4hellagm(GEN e, GEN z, long prec)
 {
-  GEN e1 = ell_realrootprec(e, prec), x = gel(z,1);
+  GEN e1 = ell_realrootprec(e, prec+EXTRAPRECWORD), x = gel(z,1);
   if (gcmp(x, e1) < 0) /* z not on neutral component */
   {
     GEN eh = exphellagm(e, addell(e, z,z), e1, 0, prec);
@@ -3649,7 +3650,7 @@ ellheightoo(GEN e, GEN z, long prec)
   GEN e1, h, x = gel(z,1);
   pari_sp av = avma;
   checksmallell_real(e);
-  e1 = ell_realrootprec(e, prec);
+  e1 = ell_realrootprec(e, prec+EXTRAPRECWORD);
   if (gcmp(x, e1) < 0) /* z not on neutral component */
   {
     GEN eh = exphellagm(e, addell(e, z,z), e1, 0, prec);
