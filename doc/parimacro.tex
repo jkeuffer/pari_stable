@@ -25,10 +25,13 @@
   \overfullrule=0pt
 \else     %NO
   \magnification=\magstephalf
+  \PDFfalse
   \ifx\pdfoutput\undefined
-     \PDFfalse
   \else
-     \PDFtrue
+     \ifnum\pdfoutput<1
+     \else
+       \PDFtrue
+     \fi
   \fi
 \fi
 
