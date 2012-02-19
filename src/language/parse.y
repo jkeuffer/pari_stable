@@ -69,7 +69,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 %right '^'
 %left '#'
 %left '!' '~' '[' '\''
-%left '.' MAT
+%left '.'
 %left "++" "--"
 %left '('
 %left ':'
@@ -159,7 +159,7 @@ expr: KINTEGER %prec INT  {$$=newintnode(&@1);}
     | expr '~' {$$=newopcall(OPtrans,$1,-1,&@$);}
     | expr '\'' {$$=newopcall(OPderiv,$1,-1,&@$);}
     | expr '!'  {$$=newopcall(OPfact,$1,-1,&@$);}
-    | expr matrix_index %prec MAT {$$=newnode(Ffacteurmat,$1,$2,&@$);}
+    | expr matrix_index {$$=newnode(Ffacteurmat,$1,$2,&@$);}
     | memberid {$$=$1;}
     | expr ':' KENTRY   {$$=newnode(Ftag,$1,0,&@$);}
     | '(' expr ')' {$$=$2;}
