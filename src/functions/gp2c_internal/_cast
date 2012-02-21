@@ -117,6 +117,7 @@ Description:
  (gen):genstr GENtoGENstr($1)
  (str):genstr strtoGENstr($1)
 
+ (gen):str GENtostr_unquoted($1)
  (genstr):str GSTR($1)
  (typ):str type_name($1)
 
