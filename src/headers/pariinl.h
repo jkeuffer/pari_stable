@@ -837,6 +837,11 @@ perm_conj(GEN s, GEN t)
 /*********************************************************************/
 /*                       MALLOC/FREE WRAPPERS                        */
 /*********************************************************************/
+#define BLOCK_SIGALRM_START          \
+{                                    \
+  int block=PARI_SIGINT_block;       \
+  PARI_SIGINT_block = 2;
+
 #define BLOCK_SIGINT_START           \
 {                                    \
   int block=PARI_SIGINT_block;       \

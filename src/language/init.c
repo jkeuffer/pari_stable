@@ -373,14 +373,14 @@ pari_sighandler(int sig)
   {
 #ifdef SIGBREAK
     case SIGBREAK:
-      if (PARI_SIGINT_block) PARI_SIGINT_pending=SIGBREAK;
+      if (PARI_SIGINT_block==1) PARI_SIGINT_pending=SIGBREAK;
       else pari_handle_SIGINT();
       return;
 #endif
 
 #ifdef SIGINT
     case SIGINT:
-      if (PARI_SIGINT_block) PARI_SIGINT_pending=SIGINT;
+      if (PARI_SIGINT_block==1) PARI_SIGINT_pending=SIGINT;
       else pari_handle_SIGINT();
       return;
 #endif
@@ -936,6 +936,8 @@ pari_warn(int numerr, ...)
 void
 pari_sigint(const char *time_s)
 {
+  int recover=0;
+  BLOCK_SIGALRM_START
   err_init();
   closure_err(0);
   err_init_msg(e_MISC);
@@ -943,9 +945,10 @@ pari_sigint(const char *time_s)
   out_puts(pariErr, time_s);
   out_term_color(pariErr, c_NONE);
   pariErr->flush();
-  if (cb_pari_handle_exception &&
-      cb_pari_handle_exception(-1)) return;
-  err_recover(e_MISC);
+  if (cb_pari_handle_exception)
+    recover = cb_pari_handle_exception(-1);
+  BLOCK_SIGINT_END
+  if (!recover) err_recover(e_MISC);
 }
 
 #define retmkerr2(x,y)\

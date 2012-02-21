@@ -199,14 +199,17 @@ A typical low-level construct:
 
 \section{Otherwise undocumented global variables}
 
-\tet{PARI_SIGINT_block}: set this to a non-zero value if you want to block
-the \kbd{SIGINT} signal in a critical part of your code. We use it
-before calling \kbd{malloc}, \kbd{free} and such. (Because \kbd{SIGINT}
-is non-fatal for us, and we don't want to leave the system stack in an
-inconsistent state.)
+\tet{PARI_SIGINT_block}: set this to $1$ (resp. $2$) if you want to block
+the signals \kbd{SIGINT} and \kbd{SIGALRM} (resp. only \kbd{SIGALRM}) in a
+critical part of your code.
+We set it to $1$ before calling \kbd{malloc}, \kbd{free} and such. (Because
+\kbd{SIGINT} is non-fatal for us, and we don't want to leave the system stack
+in an inconsistent state.). We set it to $2$ in the \kbd{SIGINT} handler itself
+to delay an eventual pending alarm.
 
-\tet{PARI_SIGINT_pending}: if this is non-zero, then a \kbd{SIGINT} was
-blocked. Take action as appropriate.
+\tet{PARI_SIGINT_pending}: Either $0$ (no signal was blocked), \kbd{SIGINT}
+(\kbd{SIGINT} was blocked) or \kbd{SIGALRM} (\kbd{SIGALRM} was blocked).
+Take action as appropriate.
 
 \section{Finite fields and black-box groups}
 
