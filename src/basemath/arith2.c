@@ -515,7 +515,7 @@ init_tinyprimes_tridiv(byteptr p);      /* in ifactor2.c */
 #endif
 
 ulong
-maxprime(void) { return _maxprime; }
+maxprime(void) { return diffptr ? _maxprime : 0; }
 
 void
 maxprime_check(ulong c)
