@@ -137,10 +137,8 @@ constpi(long prec)
   }
   shiftr_inplace(C, 2);
   affrr(divrr(sqrr(addrr(A,B)), C), tmppi);
-  BLOCK_SIGINT_START;
-  if (gpi) gunclone(gpi);
-  gpi = tmppi;
-  BLOCK_SIGINT_END;
+  swap(gpi,tmppi); /*Protect against SIGINT*/
+  if (tmppi) gunclone(tmppi);
   avma = av;  return gpi;
 }
 
@@ -233,10 +231,8 @@ consteuler(long prec)
     }
   }
   divrrz(u,v,tmpeuler);
-  BLOCK_SIGINT_START;
-  if (geuler) gunclone(geuler);
-  geuler = tmpeuler;
-  BLOCK_SIGINT_END;
+  swap(geuler,tmpeuler); /*Protect against SIGINT*/
+  if (tmpeuler) gunclone(tmpeuler);
   avma = av1; return geuler;
 }
 
@@ -268,10 +264,8 @@ constcatalan(long prec)
   incrprec(prec);
   sq = cgeti(prec); affsi(1, sq);
   tmp = gclone(sumalt((void *)sq, catalaneval, gen_0, prec));
-  BLOCK_SIGINT_START;
-  if (gcatalan) gunclone(gcatalan);
-  gcatalan = tmp;
-  BLOCK_SIGINT_END;
+  swap(gcatalan,tmp); /*Protect against SIGINT*/
+  if (tmp) gunclone(tmp);
   avma = av; return gcatalan;
 }
 
@@ -1972,10 +1966,8 @@ constlog2(long prec)
   n = prec2nbits(l) >> 1;
   y = divrr(Pi2n(-1, prec), agm1r_abs( real2n(2 - n, l) ));
   affrr(divru(y,n), tmplog2);
-  BLOCK_SIGINT_START;
-  if (glog2) gunclone(glog2);
-  glog2 = tmplog2;
-  BLOCK_SIGINT_END;
+  swap(glog2,tmplog2); /*Protect against SIGINT*/
+  if (tmplog2) gunclone(tmplog2);
   avma = av; return glog2;
 }
 
