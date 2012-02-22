@@ -566,9 +566,11 @@ initprimetable(ulong maxnum)
 {
   long len;
   ulong last;
-  byteptr p = initprimes_i(maxnum, &len, &last);
-  if (diffptr) free(diffptr);
+  byteptr p = initprimes_i(maxnum, &len, &last), old = diffptr;
+  diffptrlen = minss(diffptrlen, len);
+  _maxprime  = minss(_maxprime,last); /*Protect against ^C*/
   diffptr = p; diffptrlen = len; _maxprime = last;
+  if (old) free(old);
 }
 
 GEN
