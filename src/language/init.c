@@ -779,6 +779,7 @@ pari_close_opts(ulong init_opts)
   pari_thread_close();
 
   free((void*)functions_hash);
+  free((void*)defaults_hash);
   free((void*)bot);
   free((void*)diffptr);
   free(current_logfile);
