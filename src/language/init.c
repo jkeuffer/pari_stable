@@ -729,6 +729,7 @@ pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts)
   if ((init_opts&INIT_JMPm)) cb_pari_err_recover = dflt_err_recover;
 
   pari_stackcheck_init(&u);
+  pari_init_homedir();
   if ((init_opts&INIT_DFTm)) {
     pari_init_defaults();
     GP_DATA = default_gp_data();
@@ -784,6 +785,7 @@ pari_close_opts(ulong init_opts)
   free(current_psfile);
   pari_stack_delete(&s_MODULES);
   pari_stack_delete(&s_OLDMODULES);
+  pari_close_homedir();
   if (pari_datadir) free(pari_datadir);
   if (init_opts&INIT_DFTm)
   { /* delete GP_DATA */

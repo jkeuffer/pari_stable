@@ -524,6 +524,8 @@ char *  env_ok(const char *s);
 void    filestate_restore(pariFILE *F);
 void    killallfiles(void);
 pariFILE* newfile(FILE *f, const char *name, int type);
+void    pari_init_homedir(void);
+void    pari_close_homedir(void);
 void    pari_init_files(void);
 void    pari_close_files(void);
 int     popinfile(void);

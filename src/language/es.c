@@ -3147,7 +3147,7 @@ err_printf(const char* fmt, ...)
 /**                            FILES                              **/
 /*******************************************************************/
 /* to cache '~' expansion */
-static THREAD char *homedir;
+static char *homedir;
 /* last file read successfully from try_name() */
 static THREAD char *last_filename;
 /* stack of temporary files (includes all infiles + some output) */
@@ -3365,11 +3365,22 @@ killallfiles(void)
 }
 
 void
+pari_init_homedir(void)
+{
+  homedir = NULL;
+}
+
+void
+pari_close_homedir(void)
+{
+  if (homedir) pari_free(homedir);
+}
+
+void
 pari_init_files(void)
 {
   last_filename = NULL;
   last_tmp_file = NULL;
-  homedir = NULL;
   last_file=NULL;
 }
 
@@ -3379,7 +3390,6 @@ pari_close_files(void)
   popinfile(); /* look for leaks */
   kill_file_stack(&last_file);
   if (last_filename) pari_free(last_filename);
-  if (homedir) pari_free(homedir);
   if (pari_logfile) { fclose(pari_logfile); pari_logfile = NULL; }
   killallfiles();
 }
