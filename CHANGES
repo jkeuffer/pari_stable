@@ -79,6 +79,7 @@ BA 63- ellorder(E,P*Mod(1,p)) did not work if E was defined over Z.
    64- allow writebin to save user functions (t_CLOSURE) [#1171]
    65- sqrtn(1+O(5),5) -> error, ispower(1+O(5),5) -> error [#1261]
    66- parimacro.tex: pdftex --output-format dvi  would produce a PDF
+BA 67- pari_close failed to free all allocated memory [#1297]
 
   Changed
     1- mathnf: swapped flag 3 and 5.
