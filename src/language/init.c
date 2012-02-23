@@ -740,7 +740,7 @@ pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts)
   pari_init_stack(parisize, 0);
   diffptr = NULL; initprimetable(maxprime);
   init_universal_constants();
-  if (pari_kernel_init()) pari_err(e_MISC,"Cannot initialize kernel");
+  pari_kernel_init();
 
   primetab = cgetalloc(t_VEC, 1);
   varentries = (entree**) pari_calloc((MAXVARN+1)*sizeof(entree*));
@@ -777,6 +777,7 @@ pari_close_opts(ulong init_opts)
   free((void*)primetab);
   pari_close_seadata();
   pari_thread_close();
+  pari_kernel_close();
 
   free((void*)functions_hash);
   free((void*)defaults_hash);

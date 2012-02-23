@@ -23,7 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "paripriv.h"
 #include "../src/kernel/none/tune-gen.h"
 
-int pari_kernel_init(void) { return 0; } /*nothing to do*/
+void pari_kernel_init(void) { }
+void pari_kernel_close(void) { }
 
 /* NOTE: arguments of "spec" routines (muliispec, addiispec, etc.) aren't
  * GENs but pairs (long *a, long na) representing a list of digits (in basis

@@ -45,19 +45,36 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*We need PARI invmod renamed to invmod_pari*/
 #define INVMOD_PARI
 
-static void *gmp_realloc(void *ptr, size_t old_size, size_t new_size) {
+static void *pari_gmp_realloc(void *ptr, size_t old_size, size_t new_size) {
   (void)old_size; return (void *) pari_realloc(ptr,new_size);
 }
 
-static void gmp_free(void *ptr, size_t old_size){
+static void pari_gmp_free(void *ptr, size_t old_size){
   (void)old_size; pari_free(ptr);
 }
 
-int pari_kernel_init(void)
+static void *(*old_gmp_malloc)(size_t new_size);
+static void *(*old_gmp_realloc)(void *ptr, size_t old_size, size_t new_size);
+static void (*old_gmp_free)(void *ptr, size_t old_size);
+
+void
+pari_kernel_init(void)
 {
-  /* Use pari_malloc instead of malloc */
-  mp_set_memory_functions((void *(*)(size_t)) pari_malloc, gmp_realloc, gmp_free);
-  return 0;
+  mp_get_memory_functions (&old_gmp_malloc, &old_gmp_realloc, &old_gmp_free);
+  mp_set_memory_functions((void *(*)(size_t)) pari_malloc, pari_gmp_realloc, pari_gmp_free);
+}
+
+void
+pari_kernel_close(void)
+{
+  void *(*new_gmp_malloc)(size_t new_size);
+  void *(*new_gmp_realloc)(void *ptr, size_t old_size, size_t new_size);
+  void (*new_gmp_free)(void *ptr, size_t old_size);
+  mp_get_memory_functions (&new_gmp_malloc, &new_gmp_realloc, &new_gmp_free);
+  if (new_gmp_malloc==pari_malloc) new_gmp_malloc = old_gmp_malloc;
+  if (new_gmp_realloc==pari_gmp_realloc) new_gmp_realloc = old_gmp_realloc;
+  if (new_gmp_free==pari_gmp_free) new_gmp_free = old_gmp_free;
+  mp_set_memory_functions(new_gmp_malloc, new_gmp_realloc, new_gmp_free);
 }
 
 #define LIMBS(x)  ((mp_limb_t *)((x)+2))
