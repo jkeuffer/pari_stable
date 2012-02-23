@@ -155,7 +155,7 @@ GEN
 nfgcd_all(GEN P, GEN Q, GEN T, GEN den, GEN *Pnew)
 {
   pari_sp btop, st_lim, ltop = avma;
-  GEN lP, lQ, M, dsol, R, ax, bo, sol, mod = NULL;
+  GEN lP, lQ, M, dsol, R, bo, sol, mod = NULL, nmod;
   long vP = varn(P), vT = varn(T), dT = degpol(T), dM = 0, dR;
   ulong p;
   byteptr primepointer;
@@ -185,19 +185,18 @@ nfgcd_all(GEN P, GEN Q, GEN T, GEN den, GEN *Pnew)
     if (dR == 0) { avma = ltop; if (Pnew) *Pnew = P; return pol_1(vP); }
     if (mod && dR > dM) continue; /* p divides Res(P/gcd, Q/gcd). Discard. */
 
-    R = RgXX_to_RgM(FlxX_to_ZXX(R), dT);
+    R = FlxX_to_Flm(R, dT);
     /* previous primes divided Res(P/gcd, Q/gcd)? Discard them. */
-    if (!mod || dR < dM) { M = R; mod = utoipos(p); dM = dR; continue; }
+    if (!mod || dR < dM) { M = ZM_init_CRT(R, p); mod = utoipos(p); dM = dR; continue; }
     if (low_stack(st_lim, stack_lim(btop, 1)))
     {
       if (DEBUGMEM>1) pari_warn(warnmem,"nfgcd");
       gerepileall(btop, 2, &M, &mod);
     }
 
-    ax = muliu(Fp_inv(utoipos(p), mod), p);
-    M = ZM_add(R, ZM_Z_mul(ZM_sub(M, R), ax));
-    mod = muliu(mod, p);
-    M = FpM_red(M, mod);
+    nmod = muliu(mod, p);
+    ZM_incremental_CRT(&M,R,mod,nmod,p);
+    mod = nmod;
     /* I suspect it must be better to take amax > bmax*/
     bo = sqrti(shifti(mod, -1));
     if ((sol = FpM_ratlift(M, mod, bo, bo, den)) == NULL) continue;
