@@ -882,7 +882,6 @@ gp_quit(long exitcode)
   free_graph();
   pari_close();
   kill_buffers_upto(NULL);
-  term_color(c_NONE);
   pariputs_opt("Goodbye!\n");
   if (GP_DATA->flags & gpd_TEXMACS) tm_end_output();
   exit(exitcode);
@@ -1537,7 +1536,11 @@ gp_read_line(filtre_t *F, const char *PROMPT)
 #ifdef READLINE
 END:
 #endif
-  if (!disable_color) { term_color(c_NONE); pari_flush(); }
+  if (!disable_color && p != DFT_PROMPT &&
+      (gp_colors[c_PROMPT] != c_NONE || gp_colors[c_INPUT] != c_NONE))
+  {
+    term_color(c_NONE); pari_flush();
+  }
   disable_exception_handler = 0;
   return res;
 }

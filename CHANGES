@@ -81,6 +81,8 @@ BA 63- ellorder(E,P*Mod(1,p)) did not work if E was defined over Z.
    66- parimacro.tex: pdftex --output-format dvi  would produce a PDF
 BA 67- pari_close failed to free all allocated memory [#1297]
 BA 68- pari_close did not restore GMP memory functions.
+   69- avoid outputing ANSI escape sequences to reset terminal state when
+       unnecessary [#1289]
 
   Changed
     1- mathnf: swapped flag 3 and 5.
