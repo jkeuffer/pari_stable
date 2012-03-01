@@ -1165,15 +1165,12 @@ gtodblList(GEN data, long flags)
     x = gel(data,u);   tx = typ(x); lx = lg(x);
     if (!is_vec_t(tx)) pari_err_TYPE("gtodblList",x);
     if (cplx)
-    {
       y = NULL;
-    }
     else
     {
       y = gel(data,u+1); ty = typ(y);
       if (!is_vec_t(ty)) pari_err_TYPE("gtodblList",y);
-      if (lg(y) != lx || (!param && lx != lx1))
-        pari_err_DIM("gtodblList");
+      if (lg(y) != lx || (!param && lx != lx1)) pari_err_DIM("gtodblList");
     }
 
     lx--;
@@ -1185,8 +1182,8 @@ gtodblList(GEN data, long flags)
       if (cplx)
       {
         GEN z = gel(x,v);
-        l[i].d[j] = gtodouble(greal(z));
-        l[u].d[j] = gtodouble(gimag(z));
+        l[i].d[j] = gtodouble(real_i(z));
+        l[u].d[j] = gtodouble(imag_i(z));
       }
       else
       {
@@ -1325,7 +1322,7 @@ rectplothin(GEN a, GEN b, GEN code, long prec, ulong flags,
   GEN t,dx,x;
   dblPointList *pl;
   long tx, i, j, sig, nc, nl, nbpoints;
-  pari_sp av = avma, av2;
+  pari_sp av = avma;
   double xsml,xbig,ysml,ybig,fx,fy;
 
   if (!testpoints)
@@ -1344,7 +1341,7 @@ rectplothin(GEN a, GEN b, GEN code, long prec, ulong flags,
 
   x = gtofp(a, prec);
   if (typ(code) == t_CLOSURE) push_lex(x, code);
-  av2=avma; t=READ_EXPR(code,x); tx=typ(t);
+  t=READ_EXPR(code,x); tx=typ(t);
   /* nc = nb of curves; nl = nb of coord. lists */
   if (!is_matvec_t(tx) && !cplx)
   {
@@ -1431,7 +1428,7 @@ rectplothin(GEN a, GEN b, GEN code, long prec, ulong flags,
     {
       GEN tleft = cgetr(prec), tright = cgetr(prec);
       double xleft, xright = 0;
-      av2 = avma;
+      pari_sp av2 = avma;
       affgr(a,tleft); t=READ_EXPR(code,tleft);
       if (cplx)
       {
@@ -1444,7 +1441,7 @@ rectplothin(GEN a, GEN b, GEN code, long prec, ulong flags,
         xleft = gtodouble(gel(t,1));
         yleft = gtodouble(gel(t,2));
       }
-      for (i=0; i<testpoints-1; i++)
+      for (i=0; i<testpoints-1; i++, avma = av2)
       {
         if (i) { affrr(tright,tleft); xleft = xright; yleft = yright; }
         addrrz(tleft,dx,tright);
@@ -1456,15 +1453,8 @@ rectplothin(GEN a, GEN b, GEN code, long prec, ulong flags,
             if (lg(t) != 2) pari_err(e_MISC,"inconsistent data in rectplothin");
             t = gel(t, 1);
           }
-          switch(typ(t)) {
-            case t_INT: case t_REAL: case t_FRAC:
-              xright = gtodouble(t);
-              yright = 0.; break;
-            case t_COMPLEX:
-              xright = gtodouble(gel(t,1));
-              yright = gtodouble(gel(t,2)); break;
-            default: pari_err(e_MISC,"inconsistent data in rectplothin");
-          }
+          xright = gtodouble(real_i(t));
+          yright = gtodouble(imag_i(t));
         }
         else
         {
@@ -1477,7 +1467,6 @@ rectplothin(GEN a, GEN b, GEN code, long prec, ulong flags,
         Appendy(&pl[0],&pl[1],yleft);
 
         param_recursion(pl,code, tleft,xleft,yleft, tright,xright,yright, 0);
-        avma = av2;
       }
       Appendx(&pl[0],&pl[0],xright);
       Appendy(&pl[0],&pl[1],yright);
@@ -1485,10 +1474,10 @@ rectplothin(GEN a, GEN b, GEN code, long prec, ulong flags,
     else /* single_c */
     {
       GEN xleft = cgetr(prec), xright = cgetr(prec);
-      av2 = avma;
+      pari_sp av2 = avma;
       affgr(a,xleft);
       yleft = gtodouble(READ_EXPR(code,xleft));
-      for (i=0; i<testpoints-1; i++)
+      for (i=0; i<testpoints-1; i++, avma = av2)
       {
         addrrz(xleft,dx,xright);
         yright = gtodouble(READ_EXPR(code,xright));
@@ -1497,7 +1486,6 @@ rectplothin(GEN a, GEN b, GEN code, long prec, ulong flags,
         Appendy(&pl[0],&pl[1],yleft);
 
         single_recursion(pl,code,xleft,yleft,xright,yright,0);
-        avma = av2;
         affrr(xright,xleft); yleft = yright;
       }
       Appendx(&pl[0],&pl[0],rtodbl(xright));
@@ -1506,6 +1494,7 @@ rectplothin(GEN a, GEN b, GEN code, long prec, ulong flags,
   }
   else /* non-recursive plot */
   {
+    pari_sp av2 = avma;
     if (single_c)
       for (i=0; i<testpoints; i++, affrr(addrr(x,dx), x), avma = av2)
       {
@@ -1521,19 +1510,9 @@ rectplothin(GEN a, GEN b, GEN code, long prec, ulong flags,
         t = READ_EXPR(code,x);
         if (typ(t) != t_VEC)
         { /* cplx */
-          switch(typ(t)) {
-            case t_INT:        case t_REAL: case t_FRAC:
-              Appendx(&pl[0], &pl[0], gtodouble(t));
-              Appendy(&pl[0], &pl[1], 0.);
-              continue;
-
-            case t_COMPLEX:
-              Appendx(&pl[0], &pl[0], gtodouble(gel(t,1)));
-              Appendy(&pl[0], &pl[1], gtodouble(gel(t,2)));
-              continue;
-          }
-          pari_err(e_MISC,"inconsistent data in rectplothin");
-          return NULL; /* not reached */
+          Appendx(&pl[0], &pl[0], gtodouble(real_i(t)));
+          Appendy(&pl[0], &pl[1], gtodouble(imag_i(t)));
+          continue;
         }
         if (lg(t)!=nl+1) pari_err(e_MISC,"inconsistent data in rectplothin");
         k = 0;
