@@ -41,7 +41,7 @@ long rectpoint_itype = 0, rectline_itype  = 0;
 const long STRINGRECT = NUMRECT-2, DRAWRECT = NUMRECT-1;
 
 const long PLOTH_NUMPOINTS = 1000, PARAM_NUMPOINTS = 1500, RECUR_NUMPOINTS = 8;
-const long RECUR_MAXDEPTH = 10, PARAMR_MAXDEPTH = 10;
+const long RECUR_MAXDEPTH = 10;
 const double RECUR_PREC = 0.001;
 
 const long DEFAULT_COLOR = 1, AXIS_COLOR = 2;
@@ -116,6 +116,17 @@ static GEN
 READ_EXPR(GEN code, GEN x) {
   if (typ(code)!=t_CLOSURE) return gsubst(code,0,x);
   set_lex(-1, x); return closure_evalgen(code);
+}
+/* as READ_EXPR, but make sure that result is a vector */
+static GEN
+READ_EXPR_VEC(GEN code, GEN x) {
+  GEN z;
+  if (typ(code)!=t_CLOSURE)
+    z = gsubst(code,0,x);
+  else
+  { set_lex(-1, x); z = closure_evalgen(code); }
+  if (typ(z) != t_VEC) z = mkvec(z);
+  return z;
 }
 
 void
@@ -1140,6 +1151,56 @@ Appendy(dblPointList *f, dblPointList *l,double y)
   else if (y > f->ybig) f->ybig=y;
 }
 
+static void
+get_xy(long cplx, GEN t, double *x, double *y)
+{
+  if (cplx)
+  {
+    if (lg(t) != 2) pari_err(e_MISC,"inconsistent data in get_xy");
+    *x = gtodouble( real_i(gel(t,1)) );
+    *y = gtodouble( imag_i(gel(t,1)) );
+  }
+  else
+  {
+    if (lg(t) != 3) pari_err(e_MISC,"inconsistent data in get_xy");
+    *x = gtodouble( gel(t,1) );
+    *y = gtodouble( gel(t,2) );
+  }
+}
+/* t a t_VEC, get next (x,y) coordinate starting at index *i [update i] */
+static void
+get_xy_from_vec(long cplx, GEN t, long *i, double *x, double *y)
+{
+  if (cplx)
+  {
+    GEN z = gel(t,(*i)++);
+    *x = gtodouble( real_i(z) );
+    *y = gtodouble( imag_i(z) );
+  }
+  else
+  {
+    *x = gtodouble( gel(t, (*i)++) );
+    *y = gtodouble( gel(t, (*i)++) );
+  }
+}
+/* X,Y t_VEC, get next (x,y) coordinate starting at index i
+ * Y ignored if (cplx) */
+static void
+get_xy_from_vec2(long cplx, GEN X, GEN Y, long i, double *x, double *y)
+{
+  if (cplx)
+  {
+    GEN z = gel(X,i);
+    *x = gtodouble( real_i(z) );
+    *y = gtodouble( imag_i(z) );
+  }
+  else
+  {
+    *x = gtodouble( gel(X, i) );
+    *y = gtodouble( gel(Y, i) );
+  }
+}
+
 /* Convert data from GEN to double before we call rectplothrawin */
 static dblPointList*
 gtodblList(GEN data, long flags)
@@ -1147,10 +1208,10 @@ gtodblList(GEN data, long flags)
   dblPointList *l;
   double xsml,xbig,ysml,ybig;
   long tx=typ(data), ty, nl=lg(data)-1, lx1,lx;
-  register long i,j,u,v;
+  long i, j;
   long param=(flags & (PLOT_PARAMETRIC|PLOT_COMPLEX));
   long cplx=(flags & PLOT_COMPLEX);
-  GEN x,y;
+  GEN x, y;
 
   if (! is_vec_t(tx)) pari_err_TYPE("gtodblList",data);
   if (!nl) return NULL;
@@ -1161,37 +1222,29 @@ gtodblList(GEN data, long flags)
   l = (dblPointList*) pari_malloc((cplx ? 2*nl:nl)*sizeof(dblPointList));
   for (i=0; i<nl-1; i+=2)
   {
-    u = i+1;
-    x = gel(data,u);   tx = typ(x); lx = lg(x);
+    dblPointList *LX = l + i, *LY = l + (i+1);
+    x = gel(data,i+1);   tx = typ(x); lx = lg(x);
     if (!is_vec_t(tx)) pari_err_TYPE("gtodblList",x);
     if (cplx)
       y = NULL;
     else
     {
-      y = gel(data,u+1); ty = typ(y);
+      y = gel(data,i+2); ty = typ(y);
       if (!is_vec_t(ty)) pari_err_TYPE("gtodblList",y);
       if (lg(y) != lx || (!param && lx != lx1)) pari_err_DIM("gtodblList");
     }
 
     lx--;
-    l[i].d = (double*) pari_malloc(lx*sizeof(double));
-    l[u].d = (double*) pari_malloc(lx*sizeof(double));
-    for (j=0; j<lx; j=v)
+    LX->d = (double*) pari_malloc(lx*sizeof(double));
+    LY->d = (double*) pari_malloc(lx*sizeof(double));
+    for (j=1; j<=lx; j++)
     {
-      v = j+1;
-      if (cplx)
-      {
-        GEN z = gel(x,v);
-        l[i].d[j] = gtodouble(real_i(z));
-        l[u].d[j] = gtodouble(imag_i(z));
-      }
-      else
-      {
-        l[i].d[j] = gtodouble(gel(x,v));
-        l[u].d[j] = gtodouble(gel(y,v));
-      }
+      double xx, yy;
+      get_xy_from_vec2(cplx, x,y, j, &xx,&yy);
+      LX->d[j-1] = xx;
+      LY->d[j-1] = yy;
     }
-    l[i].nb = l[u].nb = lx;
+    LX->nb = LY->nb = lx;
   }
 
   /* Now compute extremas */
@@ -1206,14 +1259,14 @@ gtodblList(GEN data, long flags)
 
     for (i=0; i < l[0].nb; i+=2)
     {
-      u = i+1;
-      for (j=0; j < l[u].nb; j++)
+      dblPointList *LX = l + i, *LY = l + (i+1);
+      for (j=0; j < LY->nb; j++)
       {
-        if      (l[i].d[j] < xsml) xsml = l[i].d[j];
-        else if (l[i].d[j] > xbig) xbig = l[i].d[j];
+        if      (LX->d[j] < xsml) xsml = LX->d[j];
+        else if (LX->d[j] > xbig) xbig = LX->d[j];
 
-        if      (l[u].d[j] < ysml) ysml = l[u].d[j];
-        else if (l[u].d[j] > ybig) ybig = l[u].d[j];
+        if      (LY->d[j] < ysml) ysml = LY->d[j];
+        else if (LY->d[j] > ybig) ybig = LY->d[j];
       }
     }
   }
@@ -1242,6 +1295,10 @@ gtodblList(GEN data, long flags)
   return l;
 }
 
+/* (x+y)/2 */
+static GEN
+rmiddle(GEN x, GEN y) { GEN z = addrr(x,y); shiftr_inplace(z,-1); return z; }
+
 static void
 single_recursion(dblPointList *pl,GEN code,GEN xleft,double yleft,
   GEN xright,double yright,long depth)
@@ -1252,7 +1309,7 @@ single_recursion(dblPointList *pl,GEN code,GEN xleft,double yleft,
 
   if (depth==RECUR_MAXDEPTH) return;
 
-  xx = addrr(xleft,xright); shiftr_inplace(xx, -1);
+  xx = rmiddle(xleft,xright);
   yy = gtodouble(READ_EXPR(code,xx));
 
   if (dy && fabs(yleft+yright-2*yy)< dy*RECUR_PREC) return;
@@ -1266,7 +1323,7 @@ single_recursion(dblPointList *pl,GEN code,GEN xleft,double yleft,
 }
 
 static void
-param_recursion(dblPointList *pl,GEN code,GEN tleft,double xleft,
+param_recursion(long cplx, dblPointList *pl,GEN code,GEN tleft,double xleft,
   double yleft, GEN tright,double xright,double yright, long depth)
 {
   GEN tt, p1;
@@ -1274,38 +1331,20 @@ param_recursion(dblPointList *pl,GEN code,GEN tleft,double xleft,
   double xx, dy=pl[0].ybig - pl[0].ysml;
   double yy, dx=pl[0].xbig - pl[0].xsml;
 
-  if (depth==PARAMR_MAXDEPTH) return;
+  if (depth==RECUR_MAXDEPTH) return;
 
-  tt = addrr(tleft,tright); shiftr_inplace(tt, -1);
-  p1 = READ_EXPR(code,tt);
-  if (typ(p1)==t_VEC)
-  {
-    if (lg(p1) == 2)
-    { /* cplx */
-      p1 = gel(p1,1);
-      xx = gtodouble(real_i(p1));
-      yy = gtodouble(imag_i(p1));
-    }
-    else
-    {
-      xx = gtodouble(gel(p1,1));
-      yy = gtodouble(gel(p1,2));
-    }
-  }
-  else
-  {
-    xx = gtodouble(real_i(p1));
-    yy = gtodouble(imag_i(p1));
-  }
+  tt = rmiddle(tleft,tright);
+  p1 = READ_EXPR_VEC(code,tt);
+  get_xy(cplx, p1, &xx,&yy);
 
   if (dx && dy && fabs(xleft+xright-2*xx) < dx*RECUR_PREC
                && fabs(yleft+yright-2*yy) < dy*RECUR_PREC) return;
-  param_recursion(pl,code, tleft,xleft,yleft, tt,xx,yy, depth+1);
+  param_recursion(cplx, pl,code, tleft,xleft,yleft, tt,xx,yy, depth+1);
 
   Appendx(&pl[0],&pl[0],xx);
   Appendy(&pl[0],&pl[1],yy);
 
-  param_recursion(pl,code, tt,xx,yy, tright,xright,yright, depth+1);
+  param_recursion(cplx, pl,code, tt,xx,yy, tright,xright,yright, depth+1);
   avma = av;
 }
 
@@ -1325,25 +1364,21 @@ rectplothin(GEN a, GEN b, GEN code, long prec, ulong flags,
   pari_sp av = avma;
   double xsml,xbig,ysml,ybig,fx,fy;
 
+  sig = gcmp(b,a); if (!sig) return NULL;
+  if (sig<0) swap(a, b);
+
   if (!testpoints)
   {
     if (recur) testpoints = RECUR_NUMPOINTS;
     else       testpoints = param? PARAM_NUMPOINTS : PLOTH_NUMPOINTS;
   }
-  if (recur)
-    nbpoints = testpoints << (param? PARAMR_MAXDEPTH : RECUR_MAXDEPTH);
-  else
-    nbpoints = testpoints;
-
-  sig = gcmp(b,a); if (!sig) return NULL;
-  if (sig<0) swap(a, b);
-  dx = divru(gtofp(gsub(b,a),prec), testpoints-1);
-
   x = gtofp(a, prec);
   if (typ(code) == t_CLOSURE) push_lex(x, code);
-  t=READ_EXPR(code,x); tx=typ(t);
+  t = cplx? READ_EXPR_VEC(code,x)
+          : READ_EXPR(code,x);
+  tx = typ(t);
   /* nc = nb of curves; nl = nb of coord. lists */
-  if (!is_matvec_t(tx) && !cplx)
+  if (!is_matvec_t(tx))
   {
     xsml = gtodouble(a);
     xbig = gtodouble(b);
@@ -1354,49 +1389,32 @@ rectplothin(GEN a, GEN b, GEN code, long prec, ulong flags,
   }
   else
   {
-    if (tx != t_VEC) {
-      if (!cplx) pari_err(e_MISC,"not a row vector in ploth");
-      nc = nl = 1;
+    if (tx != t_VEC) pari_err_TYPE("ploth [not a row vector]",t);
+    nl = lg(t)-1;
+    if (!nl) { avma=av; return NULL; }
+    if (cplx)
+      nc = nl;
+    else if (param) {
+      nc = nl/2;
+      if (odd(nl))
+        pari_err_TYPE("ploth [parametric ploc with odd # of components]",t);
     } else {
-      nl = lg(t)-1;
-      if (!nl) { avma=av; return NULL; }
-      if (param && !cplx) {
-        nc = nl/2;
-        if (odd(nl))
-          pari_err(e_MISC, "parametric plot requires an even number of components");
-      } else {
-        nc = nl; if (!cplx) nl++;
-      }
+      nc = nl;
+      nl++;
     }
-    if (recur && nc > 1) pari_err(e_MISC,"multi-curves cannot be plot recursively");
+    if (recur && nc > 1)
+      pari_err(e_MISC,"multi-curves cannot be plot recursively");
     single_c=0;
 
     if (param)
     {
-      if (cplx)
+      i = 1;
+      get_xy_from_vec(cplx,t, &i, &fx,&fy);
+      xbig = xsml = fx;
+      ybig = ysml = fy;
+      while (i<=nl)
       {
-        GEN z = (typ(t) == t_VEC)? gel(t,1): t;
-        xbig = xsml = gtodouble(real_i(z));
-        ybig = ysml = gtodouble(imag_i(z));
-      }
-      else
-      {
-        xbig = xsml = gtodouble(gel(t,1));
-        ybig = ysml = gtodouble(gel(t,2));
-      }
-      for (i=2+!cplx; i<=nl; i++)
-      {
-        if (cplx)
-        {
-          GEN z = gel(t,i);
-          fx = gtodouble(real_i(z));
-          fy = gtodouble(imag_i(z));
-        }
-        else
-        {
-          fx = gtodouble(gel(t,i)); i++;
-          fy = gtodouble(gel(t,i));
-        }
+        get_xy_from_vec(cplx,t, &i, &fx,&fy);
         if (xsml>fx) xsml=fx; else if (xbig<fx) xbig=fx;
         if (ysml>fy) ysml=fy; else if (ybig<fy) ybig=fy;
       }
@@ -1408,6 +1426,7 @@ rectplothin(GEN a, GEN b, GEN code, long prec, ulong flags,
     }
   }
 
+  nbpoints = recur? testpoints << RECUR_MAXDEPTH: testpoints;
   pl=(dblPointList*) pari_malloc((cplx?2*nl:nl)*sizeof(dblPointList));
   for (i = 0; i < nl; i++)
   {
@@ -1421,6 +1440,7 @@ rectplothin(GEN a, GEN b, GEN code, long prec, ulong flags,
   }
   pl[0].xsml=xsml; pl[0].ysml=ysml; pl[0].xbig=xbig; pl[0].ybig=ybig;
 
+  dx = divru(gtofp(gsub(b,a),prec), testpoints-1);
   if (recur) /* recursive plot */
   {
     double yleft, yright = 0;
@@ -1429,44 +1449,20 @@ rectplothin(GEN a, GEN b, GEN code, long prec, ulong flags,
       GEN tleft = cgetr(prec), tright = cgetr(prec);
       double xleft, xright = 0;
       pari_sp av2 = avma;
-      affgr(a,tleft); t=READ_EXPR(code,tleft);
-      if (cplx)
-      {
-        if (typ(t)==t_VEC) t = gel(t, 1);
-        xleft = gtodouble(real_i(t));
-        yleft = gtodouble(imag_i(t));
-      }
-      else
-      {
-        xleft = gtodouble(gel(t,1));
-        yleft = gtodouble(gel(t,2));
-      }
+      affgr(a,tleft);
+      t = cplx? READ_EXPR_VEC(code,tleft)
+              : READ_EXPR(code,tleft);
+      get_xy(cplx,t, &xleft,&yleft);
       for (i=0; i<testpoints-1; i++, avma = av2)
       {
         if (i) { affrr(tright,tleft); xleft = xright; yleft = yright; }
         addrrz(tleft,dx,tright);
-        t = READ_EXPR(code,tright);
-        if (cplx)
-        {
-          if (typ(t) == t_VEC)
-          {
-            if (lg(t) != 2) pari_err(e_MISC,"inconsistent data in rectplothin");
-            t = gel(t, 1);
-          }
-          xright = gtodouble(real_i(t));
-          yright = gtodouble(imag_i(t));
-        }
-        else
-        {
-          if (lg(t) != 3) pari_err(e_MISC,"inconsistent data in rectplothin");
-          xright = gtodouble(gel(t,1));
-          yright = gtodouble(gel(t,2));
-        }
-
+        t = cplx? READ_EXPR_VEC(code,tright)
+                : READ_EXPR(code,tright);
+        get_xy(cplx,t, &xright,&yright);
         Appendx(&pl[0],&pl[0],xleft);
         Appendy(&pl[0],&pl[1],yleft);
-
-        param_recursion(pl,code, tleft,xleft,yleft, tright,xright,yright, 0);
+        param_recursion(cplx, pl,code, tleft,xleft,yleft, tright,xright,yright, 0);
       }
       Appendx(&pl[0],&pl[0],xright);
       Appendy(&pl[0],&pl[1],yright);
@@ -1507,28 +1503,18 @@ rectplothin(GEN a, GEN b, GEN code, long prec, ulong flags,
       for (i=0; i<testpoints; i++, affrr(addrr(x,dx), x), avma = av2)
       {
         long k;
-        t = READ_EXPR(code,x);
-        if (typ(t) != t_VEC)
-        { /* cplx */
-          Appendx(&pl[0], &pl[0], gtodouble(real_i(t)));
-          Appendy(&pl[0], &pl[1], gtodouble(imag_i(t)));
-          continue;
-        }
+        t = cplx? READ_EXPR_VEC(code,x)
+                : READ_EXPR(code,x);
         if (lg(t)!=nl+1) pari_err(e_MISC,"inconsistent data in rectplothin");
-        k = 0;
-        if (cplx)
-          for (j=1; j<=nl; j++)
-          {
-            GEN z = gel(t,j);
-            Appendx(&pl[0], &pl[k++], gtodouble(real_i(z)));
-            Appendy(&pl[0], &pl[k++], gtodouble(imag_i(z)));
-          }
-        else
-          for (j=1; j<=nl; j++)
-          {
-            Appendx(&pl[0], &pl[k++], gtodouble(gel(t,j))); j++;
-            Appendy(&pl[0], &pl[k++], gtodouble(gel(t,j)));
-          }
+        k = 0; j = 1;
+        while (j <= nl)
+        {
+          double xx, yy;
+          get_xy_from_vec(cplx, t, &j, &xx, &yy);
+          Appendx(&pl[0], &pl[k++], xx);
+          Appendy(&pl[0], &pl[k++], yy);
+
+        }
       }
     }
     else /* plothmult */
