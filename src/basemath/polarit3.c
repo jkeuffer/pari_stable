@@ -3293,3 +3293,68 @@ ffinit(GEN p, long n, long v)
   pari_sp av = avma;
   return gerepileupto(av, FpX_to_mod(init_Fq_i(p, n, v), p));
 }
+
+GEN
+ffnbirred(GEN p, long n)
+{
+  pari_sp av = avma;
+  long j;
+  GEN s = gen_0, dk, pd;
+  dk = divisorsu(n);
+  for (j = 1; j < lg(dk); ++j)
+  {
+    long d = dk[j];
+    long m = moebius(utoi(d));
+    if (!m) continue;
+    pd = powiu(p, n/d);
+    s = m>0 ? addii(s, pd): subii(s,pd);
+  }
+  return gerepileuptoint(av, divis(s, n));
+}
+
+GEN
+ffsumnbirred(GEN p, long n)
+{
+  pari_sp av = avma;
+  long i,j;
+  GEN v,q, t = gen_0;
+  v = cgetg(n+1,t_VECSMALL); v[1] = 1;
+  q = cgetg(n+1,t_VEC); gel(q,1) = p;
+  for(i=2; i<=n; i++)
+  {
+    v[i] = moebius(utoi(i));
+    gel(q,i) = mulii(gel(q,i-1), p);
+  }
+  for(i=1; i<=n; i++)
+  {
+    GEN s = gen_0;
+    GEN dk = divisorsu(i);
+    for (j = 1; j < lg(dk); ++j)
+    {
+      long d = dk[j], m = v[d];
+      if (!m) continue;
+      s = m>0 ? addii(s, gel(q, i/d)): subii(s, gel(q, i/d));
+    }
+    t = addii(t, divis(s, i));
+  }
+  return gerepileuptoint(av, t);
+}
+
+GEN
+ffnbirred0(GEN p, long n, long flag)
+{
+  if (typ(p) != t_INT)
+    pari_err_TYPE("ffnbirred", p);
+  if (n <= 0)
+    pari_err_TYPE("ffnbirred [degree <= 0]", stoi(n));
+  switch(flag)
+  {
+    case 0:
+      return ffnbirred(p, n);
+    case 1:
+      return ffsumnbirred(p, n);
+    default:
+      pari_err_FLAG("ffnbirred");
+  }
+  return NULL; /* NOT REACHED */
+}
