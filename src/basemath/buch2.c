@@ -580,6 +580,44 @@ check_prime_dec(GRHcheck_t *S, long np, GEN nf, GEN P, GEN D, GEN invhr)
   S->nprimes = np;
 }
 
+static long
+nthideal(GRHcheck_t *S, GEN nf, GEN D, long n, GEN invhr)
+{
+  pari_sp av = avma;
+  byteptr delta = diffptr + 1;
+  GEN P = nf_get_pol(nf), vecN = const_vecsmall(n, LONG_MAX);
+  long i, j, k, l, p = 2, res, N = poldegree(P, -1);
+  for (i = 0; ; i++)
+  {
+    GRHprime_t *pr;
+    GEN ns, fs;
+    check_prime_dec(S, i+1, nf, P, D, invhr);
+    pr = S->primes + i;
+    fs = gel(pr->dec, 1);
+    if (fs[1] == N) goto INERT;
+    ns = gel(pr->dec, 2);
+    j = lg(fs);
+    while (--j > 0)
+    {
+      GEN Np = powuu(p, fs[j]);
+      long sNp;
+      if (is_bigint(Np)) continue;
+      sNp = itos(Np);
+      for (k = 1; k <= n; k++) if (vecN[k] > sNp) break;
+      if (k > n) continue;
+      for (l = k+ns[j]; l <= n; l++) vecN[l] = vecN[l-ns[j]];
+      for (l = 0; l < ns[j] && k+l <= n; l++) vecN[k+l] = sNp;
+      while (l <= k) vecN[l++] = sNp;
+    }
+INERT:
+    NEXT_PRIME_VIADIFF(p, delta);
+    if (p > vecN[n]) break;
+  }
+  res = vecN[n];
+  avma = av;
+  return res;
+}
+
 
 /* Compute FB, LV, iLP + KC*. Reset perm
  * n2: bound for norm of tested prime ideals (includes be_honest())
@@ -658,12 +696,12 @@ FBgen(FB_t *F, GEN nf, GEN D, long N, long C2, long C1, GEN invhr, GRHcheck_t *S
 static int
 GRHchk(GEN nf, GEN D, GEN P, long N, GRHcheck_t *S, GEN invhr, long LIMC)
 {
-  long i, np = uprimepi(LIMC), count;
+  long i, np = uprimepi(LIMC);
   double logC = log(LIMC), SA = 0, SB = 0;
   byteptr delta;
   ulong p;
   check_prime_dec(S, np, nf, P, D, invhr);
-  p = 0; count = 0; delta = diffptr;
+  p = 0; delta = diffptr;
   for (i = 0; i <= np; i++)
   {
     GRHprime_t *pr = S->primes+i;
@@ -671,7 +709,6 @@ GRHchk(GEN nf, GEN D, GEN P, long N, GRHcheck_t *S, GEN invhr, long LIMC)
     double logCslogp = logC/pr->logp;
     long j = lg(fs), lim = (long)logCslogp;
     NEXT_PRIME_VIADIFF(p, delta);
-    if (fs[1] == N && N <= lim) count--; /* Inert prime */
     while (--j)
     {
       long f = fs[j], M, nb;
@@ -689,10 +726,9 @@ GRHchk(GEN nf, GEN D, GEN P, long N, GRHcheck_t *S, GEN invhr, long LIMC)
       nb = coeff(dec, j, 2);
       SA += nb * A;
       SB += nb * B;
-      count += nb;
     }
   }
-  return count >= N && GRHok(S, logC, SA, SB);
+  return GRHok(S, logC, SA, SB);
 }
 
 /*  SMOOTH IDEALS */
@@ -3676,7 +3712,7 @@ Buchall_param(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long
   GEN res, L, invhr, B, C, C0, lambda, dep, clg1, clg2, Vbase;
   GEN auts, cyclic;
   const char *precpb = NULL;
-  int FIRST = 1;
+  int FIRST = 1, class1 = 0;
   RELCACHE_t cache;
   FB_t F;
   GRHcheck_t GRHcheck;
@@ -3725,14 +3761,11 @@ Buchall_param(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long
               mulri(gsqrt(D,DEFAULTPREC), gel(zu,1)));
   cache.base = NULL; F.subFB = NULL; F.LP = NULL;
   init_GRHcheck(&GRHcheck, N, R1, LOGD);
-  LIMC0 = maxss((long)(cbach2*LOGD2), 20);
-  if (LIMC0 < 3 * N) LIMC0 = 3 * N;
+  high = low = LIMC0 = maxss((long)(cbach2*LOGD2), 1);
   LIMCMAX = (long)(12.*LOGD2);
-  low = LIMC0;
-  /* XXX 100 and 1000 below to ensure a good enough approximation of residue */
-  high = expi(D) < 16 ? 100 : 1000;
-  if (high < low) high = low;
   Dp = gmul(D, nf_get_index(nf));
+  /* XXX 25 and 200 below to ensure a good enough approximation of residue */
+  check_prime_dec(&GRHcheck, expi(D) < 16 ? 25 : 200, nf, P, Dp, invhr);
   while (!GRHchk(nf, Dp, P, N, &GRHcheck, invhr, high))
   {
     low = high;
@@ -3751,8 +3784,12 @@ Buchall_param(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long
   else
     LIMC2 = high;
   if (LIMC2 > LIMCMAX) LIMC2 = LIMCMAX;
-  LIMC0 = maxss((long)(cbach*LOGD2), 20);
+  if (DEBUGLEVEL) err_printf("LIMC2 = %ld\n", LIMC2);
+  if (LIMC2 < nthideal(&GRHcheck, nf, Dp, 1, invhr)) class1 = 1;
+  if (DEBUGLEVEL && class1) err_printf("Class 1\n", LIMC2);
+  LIMC0 = (long)(cbach*LOGD2);
   av = avma; LIMC = cbach ? LIMC0 : LIMC2;
+  LIMC = maxss(LIMC, nthideal(&GRHcheck, nf, Dp, N, invhr));
   if (DEBUGLEVEL) timer_printf(&T, "computing Bach constant");
 
 START:

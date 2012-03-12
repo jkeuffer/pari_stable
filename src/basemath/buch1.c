@@ -352,15 +352,28 @@ is_bad(GEN D, ulong p)
   avma = av; return r;
 }
 
+static long
+nthidealquad(GEN D, long n)
+{
+  byteptr delta = diffptr;
+  long p = 0;
+  while (n > 0)
+  {
+    NEXT_PRIME_VIADIFF(p, delta);
+    if (!is_bad(D, (ulong)p) && krois(D, p) >= 0) n--;
+  }
+  return p;
+}
+
 static int
 quadGRHchk(GEN D, GRHcheck_t *S, GEN invhr, long LIMC, long minSFB)
 {
-  long i, np = uprimepi(LIMC), count;
+  long i, np = uprimepi(LIMC);
   double logC = log(LIMC), SA = 0, SB = 0;
   byteptr delta;
   ulong p;
   check_prime_quad(S, np, D, invhr);
-  p = 0; count = 0; delta = diffptr;
+  p = 0; delta = diffptr;
   for (i = 0; i <= np; i++)
   {
     GRHprime_t *pr = S->primes+i;
@@ -385,9 +398,8 @@ quadGRHchk(GEN D, GRHcheck_t *S, GEN invhr, long LIMC, long minSFB)
       B *= (1 - pow(q, M)*(M+1 - M*q)) * inv1_q * inv1_q;
     }
     if ((long)pr->dec>0) { SA += 2*A;SB += 2*B; } else { SA += A; SB += B; }
-    if ((long)pr->dec>=0 && umodiu(D,(ulong)p) && !is_bad(D,(ulong)p)) count++;
   }
-  return count > minSFB && GRHok(S, logC, SA, SB);
+  return GRHok(S, logC, SA, SB);
 }
 
 /* create B->FB, B->numFB; set B->badprim. Return L(kro_D, 1) */
@@ -982,12 +994,10 @@ Buchquad(GEN D, double cbach, double cbach2, long prec)
   BQ.powsubFB = BQ.subFB = NULL;
   minSFB = (expi(D) > 15)? 3: 2;
   init_GRHcheck(&GRHcheck, 2, BQ.PRECREG? 2: 0, LOGD);
-  LIMC0 = maxss((long)(cbach2*LOGD2), 20);
+  high = low = LIMC0 = maxss((long)(cbach2*LOGD2), 1);
   LIMCMAX = (long)(6.*LOGD2);
-  low = LIMC0;
-  /* XXX 100 and 1000 below to ensure a good enough approximation of residue */
-  high = expi(D) < 16 ? 100 : 1000;
-  if (high < low) high = low;
+  /* XXX 25 and 200 below to ensure a good enough approximation of residue */
+  check_prime_quad(&GRHcheck, expi(D) < 16 ? 25 : 200, D, invhr);
   while (!quadGRHchk(D, &GRHcheck, invhr, high, minSFB))
   {
     low = high;
@@ -1006,8 +1016,9 @@ Buchquad(GEN D, double cbach, double cbach2, long prec)
   else
     LIMC2 = high;
   if (LIMC2 > LIMCMAX) LIMC2 = LIMCMAX;
-  LIMC0 = maxss((long)(cbach*LOGD2), 20);
+  LIMC0 = (long)(cbach*LOGD2);
   LIMC = cbach ? LIMC0 : LIMC2;
+  LIMC = maxss(LIMC, nthidealquad(D, 2));
 
 /* LIMC = Max(cbach*(log D)^2, exp(sqrt(log D loglog D) / 8)) */
 START:
