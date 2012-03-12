@@ -1380,12 +1380,12 @@ rectplothin(GEN a, GEN b, GEN code, long prec, ulong flags,
   /* nc = nb of curves; nl = nb of coord. lists */
   if (!is_matvec_t(tx))
   {
+    if (param && !cplx)
+      pari_err_TYPE("ploth [not a t_VEC with PLOT_PARAMETRIC]", t);
     xsml = gtodouble(a);
     xbig = gtodouble(b);
     ysml = ybig = gtodouble(t);
-    nc=1; nl=2;
-    if (param) pari_warn(warner,"flag PLOT_PARAMETRIC ignored");
-    single_c=1; param=0;
+    nc=1; nl=2; single_c=1;
   }
   else
   {
