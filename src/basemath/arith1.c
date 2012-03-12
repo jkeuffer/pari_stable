@@ -1109,6 +1109,7 @@ Z_isanypower(GEN x, GEN *pty)
       *pty = gerepileuptoint(av, y);
       return k;
     }
+    if (pty) togglesign_safe(pty);
   }
   if (pty) *pty = gerepilecopy(av, *pty); else avma = av;
   return k;
