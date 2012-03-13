@@ -1433,6 +1433,7 @@ GEN     elllseries(GEN e, GEN s, GEN A, long prec);
 GEN     elllocalred(GEN e, GEN p1);
 GEN     elllog(GEN e, GEN a, GEN g, GEN o);
 GEN     ellminimalmodel(GEN E, GEN *ptv);
+GEN     ellomega_real(GEN x, long prec);
 GEN     ellorder(GEN e, GEN p, GEN o);
 GEN     ellordinate(GEN e, GEN x, long prec);
 GEN     ellrandom(GEN e);

@@ -245,30 +245,6 @@ new_coords(GEN e, GEN x, GEN e1, GEN *pta, GEN *ptb, int flag, long prec)
   return gmul2n(gadd(p1, gsqrt(gsub(gsqr(p1), gmul2n(gmul(a,x),2)),prec)), -1);
 }
 
-/* a1, b1 are non-0 t_REALs */
-static GEN
-do_agm(GEN *ptx, GEN a1, GEN b1)
-{
-  const long s = signe(b1), l = minss(realprec(a1), realprec(b1)), G = 6 - prec2nbits(l);
-  GEN p1, a, b, x;
-
-  x = gmul2n(subrr(a1,b1),-2);
-  if (!signe(x)) pari_err_PREC("ellinit");
-  for(;;)
-  {
-    GEN d;
-    a = a1; b = b1;
-    b1 = sqrtr(mulrr(a,b)); setsigne(b1, s);
-    a1 = gmul2n(addrr(addrr(a,b), gmul2n(b1,1)),-2);
-    d = subrr(a1,b1);
-    if (!signe(d)) break;
-    p1 = sqrtr( divrr(addrr(x,d),x) );
-    x = mulrr(x, sqrr(addsr(1,p1)));
-    shiftr_inplace(x, -2);
-    if (expo(d) <= G + expo(b1)) break;
-  }
-  *ptx = x; return ginv(gmul2n(a1,2));
-}
 /* a1, b1 are t_PADICs */
 static GEN
 do_padic_agm(GEN *ptx, GEN a1, GEN b1, GEN p)
@@ -399,7 +375,7 @@ base_ring(GEN x, GEN *pp, long *prec)
 GEN
 ellinit_real(GEN x, long prec)
 {
-  GEN y, D, R, T, w, a1, b1, x1, u2, q, pi2, aw1, w1, w2;
+  GEN y, D, R, T, w;
   long PREC, e;
 
   y = cgetg(20,t_VEC);
@@ -418,48 +394,15 @@ ellinit_real(GEN x, long prec)
   R = cleanroots(RHSpol(y), PREC);
   /* sort roots in decreasing order */
   if (gsigne(D) > 0) gen_sort_inplace(R, NULL, &invcmp, NULL);
+  else if (signe(gmael(R,2,2)) < 0) swap(gel(R,2), gel(R,3));
   gel(y,14) = R;
-
-  (void)new_coords(y, NULL, gel(R,1), &a1, &b1, 0, 0);
-  u2 = do_agm(&x1,a1,b1); /* 1/4M */
-
-  pi2 = Pi2n(1, prec);
-  aw1 = mulrr(pi2, sqrtr_abs(u2));
-  w1 = (signe(u2) < 0)? aw1: mkcomplex(gen_0,aw1);
-  w = addsr(1, invr(shiftr(mulrr(u2,x1),1)));
-  q = sqrtr( subrs(sqrr(w), 1) ); /* real or pure imaginary */
-  /* same formula, split in two branches for efficiency */
-  if (typ(q) == t_REAL) {
-    GEN t, aw1t, aux;
-    q = (signe(w) > 0)? addrr(w, q): subrr(w, q);
-    /* if |q| > 1, we should have replaced it by 1/q. Instead, we change
-     * the sign of log(q) */
-    t = divrr(logr_abs(q), pi2); setsigne(t, -1);
-    /* t = log|q|/2Pi, |q|<1 */
-    /* w2 = w1 I log(q)/2Pi = I w1 t [- w1/2 if q < 0] */
-    aw1t = mulrr(aw1,t); /* < 0 */
-    aux = (signe(q) < 0)? negr(shiftr(aw1,-1)): gen_0;
-    if (typ(w1) == t_COMPLEX)
-      w2 = mkcomplex(negr(aw1t), aux);
-    else
-      w2 = mkcomplex(aux, aw1t);
-  } else { /* FIXME: I believe this can't happen */
-    GEN t;
-    if (signe(w) < 0) togglesign(q);
-    q = mkcomplex(w, q);
-    t = mulcxI(gdiv(glog(q,prec), pi2));
-    /* we want -t to belong to Poincare's half plane */
-    if (signe(gel(t,2)) > 0) t = gneg(t);
-    w2 = gmul(w1, t);
-  }
-  if (typ(w1) == t_COMPLEX) w1 = shiftr(gel(w2,1), 1);
-
-  gel(y,15) = w1; /* > 0 */
-  gel(y,16) = w2;
-  T = elleta(mkvec2(w1,w2), prec);
+  w = ellomega_real(y, prec);
+  gel(y,15) = gel(w,1);
+  gel(y,16) = gel(w,2);
+  T = elleta(w, prec);
   gel(y,17) = gel(T,1);
   gel(y,18) = gel(T,2);
-  gel(y,19) = absr(mulrr(w1, gel(w2,2)));
+  gel(y,19) = absr(mulrr(gel(w,1), gmael(w,2,2)));
   return y;
 }
 
@@ -1179,6 +1122,46 @@ powell(GEN e, GEN z, GEN n)
   }
   pari_err_TYPE("powell (non integral, non CM exponent)",n);
   return NULL; /* not reached */
+}
+
+/********************************************************************/
+/**                                                                **/
+/**                       Periods                                  **/
+/**                                                                **/
+/********************************************************************/
+
+/* References:
+  The complex AGM, periods of elliptic curves over C and complex elliptic logarithms
+  John E. Cremona, Thotsaphon Thongjunthug, arXiv:1011.0914
+*/
+
+static GEN
+ellomegareal_agm(GEN a, GEN b, GEN c, long prec)
+{
+  retmkvec2(gdiv(mppi(prec),agm(a, c, prec)),
+            gdiv(gneg(PiI2n(0,prec)),agm(b, c, prec)));
+}
+
+GEN
+ellomega_real(GEN E, long prec)
+{
+  pari_sp av = avma;
+  GEN roots = ell_get_roots(E), D = ell_get_disc(E);
+  GEN e1=gel(roots,1), e2=gel(roots,2), e3=gel(roots,3);
+  if (signe(D)>0)
+  {
+    GEN a = gsqrt(gsub(e1,e2),prec);
+    GEN b = gsqrt(gsub(e2,e3),prec);
+    GEN c = gsqrt(gsub(e1,e3),prec);
+    return gerepileupto(av, ellomegareal_agm(a,b,c,prec));
+  }
+  else
+  {
+    GEN z = gsqrt(gsub(e1,e3),prec); /* This assumes imag(e3)<0, so that b > 0*/
+    GEN a = gel(z,1), b = gel(z,2), c = gabs(z, prec);
+    z = ellomegareal_agm(a,b,c,prec);
+    return gerepilecopy(av, mkvec2(gel(z,1),gmul2n(gadd(gel(z,1),gel(z,2)),-1)));
+  }
 }
 
 /********************************************************************/
