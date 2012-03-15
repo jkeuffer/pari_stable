@@ -1376,6 +1376,46 @@ Flx_is_squarefree(GEN z, ulong p)
   avma = av; return res;
 }
 
+static long
+Flx_is_smooth_squarefree(GEN f, long r, ulong p)
+{
+  pari_sp av = avma;
+  long i;
+  GEN sx = polx_Flx(f[1]), a = sx;
+  for(i=1;;i++)
+  {
+    if (degpol(f)<=r) {avma = av; return 1;}
+    a = Flxq_pow(Flx_rem(a,f,p),utoi(p),f,p);
+    if (zv_equal(a, sx)) {avma = av; return 1;}
+    if (i==r) {avma = av; return 0;}
+    f = Flx_div(f, Flx_gcd(Flx_sub(a,sx,p),f,p),p);
+  }
+}
+
+static long
+Flx_is_l_pow(GEN x, ulong p)
+{
+  ulong i, lx = lgpol(x);
+  for (i=1; i<lx; i++)
+    if (x[i+2] && i%p) return 0;
+  return 1;
+}
+
+int
+Flx_is_smooth(GEN g, long r, ulong p)
+{
+  GEN f = gen_0;
+  while (1)
+  {
+    f = Flx_gcd(g, Flx_deriv(g, p), p);
+    if (!Flx_is_smooth_squarefree(Flx_div(g, f, p), r, p))
+      return 0;
+    if (degpol(f)==0) return 1;
+    g = Flx_is_l_pow(f,p) ? Flx_deflate(f, p): f;
+  }
+  return 0;
+}
+
 static GEN
 Flx_extgcd_basecase(GEN a, GEN b, ulong p, GEN *ptu, GEN *ptv)
 {

@@ -120,6 +120,7 @@ GEN     Flx_halfgcd(GEN a, GEN b, ulong p);
 GEN     Flx_inflate(GEN x0, long d);
 GEN     Flx_invMontgomery(GEN T, ulong p);
 int     Flx_is_squarefree(GEN z, ulong p);
+int     Flx_is_smooth(GEN g, long r, ulong p);
 GEN     Flx_mul(GEN x, GEN y, ulong p);
 GEN     Flx_neg(GEN x, ulong p);
 GEN     Flx_neg_inplace(GEN x, ulong p);
