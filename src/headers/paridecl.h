@@ -49,6 +49,8 @@ GEN     F2m_to_Flm(GEN z);
 GEN     F2m_to_ZM(GEN z);
 ulong   F2v_dotproduct(GEN x, GEN y);
 void    F2v_add_inplace(GEN x, GEN y);
+GEN     F2x_F2xq_eval(GEN Q, GEN x, GEN T);
+GEN     F2x_F2xqV_eval(GEN P, GEN V, GEN T);
 GEN     F2x_1_add(GEN y);
 GEN     F2x_add(GEN x, GEN y);
 long    F2x_degree(GEN x);

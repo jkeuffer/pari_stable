@@ -679,6 +679,63 @@ F2xq_matrix_pow(GEN y, long n, long m, GEN P)
   return F2xV_to_F2m(F2xq_powers(y,m-1,P),n);
 }
 
+static GEN
+F2xq_eval_powers(GEN P, GEN V, long a, long n)
+{
+  long i;
+  GEN z = F2x_coeff(P,a) ? pol1_F2x(P[1]): pol0_F2x(P[1]);
+  for (i=1; i<=n; i++)
+   if (F2x_coeff(P,a+i))
+     z = F2x_add(z, gel(V,i+1));
+  return z;
+}
+
+GEN
+F2x_F2xqV_eval(GEN P, GEN V, GEN T)
+{
+  pari_sp av = avma, btop;
+  long l = lg(V)-1, d = F2x_degree(P);
+  GEN z, u;
+
+  if (d < 0) return pol0_F2x(T[1]);
+  if (d < l)
+  {
+    z = F2xq_eval_powers(P,V,0,d);
+    return gerepileupto(av, z);
+  }
+  if (l<=1) pari_err(e_MISC,"powers is only [] or [1] in F2x_F2xqV_eval");
+  d -= l;
+  btop = avma;
+  z = F2xq_eval_powers(P,V,d+1,l-1);
+  while (d >= l-1)
+  {
+    d -= l-1;
+    u = F2xq_eval_powers(P,V,d+1,l-2);
+    z = F2x_add(u, F2xq_mul(z,gel(V,l),T));
+    z = gerepileupto(btop, z);
+  }
+  u = F2xq_eval_powers(P,V,0,d);
+  z = F2x_add(u, F2xq_mul(z,gel(V,d+2),T));
+  if (DEBUGLEVEL>=8)
+  {
+    long cnt = 1 + (degpol(P) - l) / (l-1);
+    err_printf("F2x_F2xqV_eval: %ld F2xq_mul [%ld]\n", cnt, l-1);
+  }
+  return gerepileupto(av, z);
+}
+
+GEN
+F2x_F2xq_eval(GEN Q, GEN x, GEN T)
+{
+  pari_sp av = avma;
+  GEN z;
+  long d = F2x_degree(Q), rtd;
+  if (d < 0) return pol0_F2x(Q[1]);
+  rtd = (long) sqrt((double)d);
+  z = F2x_F2xqV_eval(Q, F2xq_powers(x,rtd,T), T);
+  return gerepileupto(av, z);
+}
+
 ulong
 F2xq_trace(GEN x, GEN T)
 {
