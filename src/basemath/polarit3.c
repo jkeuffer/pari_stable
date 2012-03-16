@@ -271,186 +271,6 @@ FpXV_FpC_mul(GEN V, GEN W, GEN p)
   return gerepileupto(av, FpX_red(z,p));
 }
 
-/* Return optimal parameter l for the evaluation of n/m polynomials of degree d
-   Fractional values can be used if the evaluations are done with different
-   accuracies, and thus have different weights.
- */
-long
-brent_kung_optpow(long d, long n, long m)
-{
-  long p, r;
-  long pold=1, rold=n*(d-1);
-  for(p=2; p<=d; p++)
-  {
-    r = m*(p-1) + n*((d-1)/p);
-    if (r<rold) { pold=p; rold=r; }
-  }
-  return pold;
-}
-
-/*Close to FpXV_FpC_mul*/
-static GEN
-FpXQ_eval_powers(GEN P, GEN V, long a, long n, GEN p)
-{
-  pari_sp av = avma;
-  GEN z = scalar_ZX_shallow(gel(P,2+a), varn(P)); /* V[1] = 1 */
-  long i;
-  for (i=1; i<=n; i++)
-  {
-    z = ZX_add(z, ZX_Z_mul(gel(V,i+1),gel(P,2+a+i)));
-    if ((i & 7) == 0) z = gerepileupto(av, z);
-  }
-  return FpX_red(z, p);
-}
-
-/* Brent & Kung
- * (Fast algorithms for manipulating formal power series, JACM 25:581-595, 1978)
- *
- * V as output by FpXQ_powers(x,l,T,p). For optimal performance, l is as given
- * by brent_kung_optpow */
-GEN
-FpX_FpXQV_eval(GEN P, GEN V, GEN T, GEN p)
-{
-  pari_sp av = avma;
-  long l = lg(V)-1, d = degpol(P);
-  GEN z, u;
-
-  if (d < 0) return pol_0(varn(T));
-  if (d < l)
-  {
-    z = FpXQ_eval_powers(P,V,0,d,p);
-    return gerepileupto(av, z);
-  }
-  if (l<=1) pari_err(e_MISC,"powers is only [] or [1] in FpX_FpXQV_eval");
-  d -= l;
-  z = FpXQ_eval_powers(P,V,d+1,l-1,p);
-  while (d >= l-1)
-  {
-    d -= l-1;
-    u = FpXQ_eval_powers(P,V,d+1,l-2,p);
-    z = FpX_add(u, FpXQ_mul(z,gel(V,l),T,p), p);
-    z = gerepileupto(av, z);
-  }
-  u = FpXQ_eval_powers(P,V,0,d,p);
-  z = FpX_add(u, FpXQ_mul(z,gel(V,d+2),T,p), p);
-  if (DEBUGLEVEL>=8)
-  {
-    long cnt = 1 + (degpol(P) - l) / (l-1);
-    err_printf("FpX_FpXQV_eval: %ld FpXQ_mul [%ld]\n", cnt, l-1);
-  }
-  return gerepileupto(av, z);
-}
-
-static GEN
-Flxq_eval_powers(GEN P, GEN V, long a, long n, ulong p)
-{
-  GEN z = Fl_to_Flx(P[2+a], P[1]);
-  long i;
-  for (i=1; i<=n; i++) z = Flx_add(z, Flx_Fl_mul(gel(V,i+1),P[2+a+i], p), p);
-  return z;
-}
-
-GEN
-Flx_FlxqV_eval(GEN P, GEN V, GEN T, ulong p)
-{
-  pari_sp av = avma, btop;
-  long l = lg(V)-1, d = degpol(P);
-  GEN z, u;
-
-  if (d < 0) return pol0_Flx(T[1]);
-  if (d < l)
-  {
-    z = Flxq_eval_powers(P,V,0,d,p);
-    return gerepileupto(av, z);
-  }
-  if (l<=1) pari_err(e_MISC,"powers is only [] or [1] in Flx_FlxqV_eval");
-  d -= l;
-  btop = avma;
-  z = Flxq_eval_powers(P,V,d+1,l-1,p);
-  while (d >= l-1)
-  {
-    d -= l-1;
-    u = Flxq_eval_powers(P,V,d+1,l-2,p);
-    z = Flx_add(u, Flxq_mul(z,gel(V,l),T,p), p);
-    z = gerepileupto(btop, z);
-  }
-  u = Flxq_eval_powers(P,V,0,d,p);
-  z = Flx_add(u, Flxq_mul(z,gel(V,d+2),T,p), p);
-  if (DEBUGLEVEL>=8)
-  {
-    long cnt = 1 + (degpol(P) - l) / (l-1);
-    err_printf("Flx_FlxqV_eval: %ld Flxq_mul [%ld]\n", cnt, l-1);
-  }
-  return gerepileupto(av, z);
-}
-
-/* Q in Z[X] and x in Fp[X]/(T). Return a lift of Q(x) */
-GEN
-FpX_FpXQ_eval(GEN Q, GEN x, GEN T, GEN p)
-{
-  pari_sp av = avma;
-  GEN z;
-  long d = degpol(Q), rtd;
-  if (d < 0) return pol_0(varn(Q));
-  rtd = (long) sqrt((double)d);
-  z = FpX_FpXQV_eval(Q, FpXQ_powers(x,rtd,T,p), T,p);
-  return gerepileupto(av, z);
-}
-
-/* Q in Z[X] and x in Fp[X]/(T). Return a lift of Q(x) */
-GEN
-Flx_Flxq_eval(GEN Q, GEN x, GEN T, ulong p)
-{
-  pari_sp av = avma;
-  GEN z;
-  long d = degpol(Q), rtd;
-  if (d < 0) return pol0_Flx(Q[1]);
-  rtd = (long) sqrt((double)d);
-  z = Flx_FlxqV_eval(Q, Flxq_powers(x,rtd,T,p), T,p);
-  return gerepileupto(av, z);
-}
-
-GEN
-FpXQ_autpowers(GEN aut, long f, GEN T, GEN p)
-{
-  pari_sp av = avma;
-  long n = degpol(T);
-  long i, nautpow = brent_kung_optpow(n-1,f-2,1);
-  long v = varn(T);
-  GEN autpow = FpXQ_powers(aut, nautpow,T,p);
-  GEN V = cgetg(f + 2, t_VEC);
-  gel(V,1) = pol_x(v); if (f==0) return gerepileupto(av, V);
-  gel(V,2) = gcopy(aut);
-  for (i = 3; i <= f+1; i++)
-    gel(V,i) = FpX_FpXQV_eval(gel(V,i-1),autpow,T,p);
-  return gerepileupto(av, V);
-}
-
-GEN
-FqX_eval(GEN x, GEN y, GEN T, GEN p)
-{
-  pari_sp av;
-  GEN p1, r;
-  long j, i=lg(x)-1;
-  if (i<=2)
-    return (i==2)? Fq_red(gel(x,2), T, p): gen_0;
-  av=avma; p1=gel(x,i);
-  /* specific attention to sparse polynomials (see poleval)*/
-  /*You've guessed it! It's a copy-paste(tm)*/
-  for (i--; i>=2; i=j-1)
-  {
-    for (j=i; !signe(gel(x,j)); j--)
-      if (j==2)
-      {
-        if (i!=j) y = Fq_pow(y,utoipos(i-j+1), T, p);
-        return gerepileupto(av, gmul(p1,y));
-      }
-    r = (i==j)? y: Fq_pow(y, utoipos(i-j+1), T, p);
-    p1 = Fq_red(gadd(gmul(p1,r), gel(x,j)), T, p);
-  }
-  return gerepileupto(av, p1);
-}
-
 /*******************************************************************/
 /*                                                                 */
 /*                             FpXX                                */
@@ -618,6 +438,31 @@ FqX_normalize(GEN z, GEN T, GEN p)
   p1 = leading_term(z);
   if (lg(z) == 2 || gequal1(p1)) return z;
   return FqX_Fq_mul_to_monic(z, Fq_inv(p1,T,p), T,p);
+}
+
+GEN
+FqX_eval(GEN x, GEN y, GEN T, GEN p)
+{
+  pari_sp av;
+  GEN p1, r;
+  long j, i=lg(x)-1;
+  if (i<=2)
+    return (i==2)? Fq_red(gel(x,2), T, p): gen_0;
+  av=avma; p1=gel(x,i);
+  /* specific attention to sparse polynomials (see poleval)*/
+  /*You've guessed it! It's a copy-paste(tm)*/
+  for (i--; i>=2; i=j-1)
+  {
+    for (j=i; !signe(gel(x,j)); j--)
+      if (j==2)
+      {
+        if (i!=j) y = Fq_pow(y,utoipos(i-j+1), T, p);
+        return gerepileupto(av, gmul(p1,y));
+      }
+    r = (i==j)? y: Fq_pow(y, utoipos(i-j+1), T, p);
+    p1 = Fq_red(gadd(gmul(p1,r), gel(x,j)), T, p);
+  }
+  return gerepileupto(av, p1);
 }
 
 /* a X^d */

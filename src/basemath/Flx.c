@@ -1830,10 +1830,9 @@ Flxq_pow(GEN x, GEN n, GEN T, ulong p)
   return gerepileuptoleaf(av, y);
 }
 
-/* Inverse of x in Z/pZ[X]/(pol) or NULL if inverse doesn't exist
- * return lift(1 / (x mod (p,pol)))
+/* Inverse of x in Z/lZ[X]/(T) or NULL if inverse doesn't exist
  * not stack clean.
- * */
+ */
 GEN
 Flxq_invsafe(GEN x, GEN T, ulong p)
 {
@@ -1883,6 +1882,61 @@ GEN
 Flxq_matrix_pow(GEN y, long n, long m, GEN P, ulong l)
 {
   return FlxV_to_Flm(Flxq_powers(y,m-1,P,l),n);
+}
+
+static GEN
+Flxq_eval_powers(GEN P, GEN V, long a, long n, ulong p)
+{
+  GEN z = Fl_to_Flx(P[2+a], P[1]);
+  long i;
+  for (i=1; i<=n; i++) z = Flx_add(z, Flx_Fl_mul(gel(V,i+1),P[2+a+i], p), p);
+  return z;
+}
+
+GEN
+Flx_FlxqV_eval(GEN P, GEN V, GEN T, ulong p)
+{
+  pari_sp av = avma, btop;
+  long l = lg(V)-1, d = degpol(P);
+  GEN z, u;
+
+  if (d < 0) return pol0_Flx(T[1]);
+  if (d < l)
+  {
+    z = Flxq_eval_powers(P,V,0,d,p);
+    return gerepileupto(av, z);
+  }
+  if (l<=1) pari_err(e_MISC,"powers is only [] or [1] in Flx_FlxqV_eval");
+  d -= l;
+  btop = avma;
+  z = Flxq_eval_powers(P,V,d+1,l-1,p);
+  while (d >= l-1)
+  {
+    d -= l-1;
+    u = Flxq_eval_powers(P,V,d+1,l-2,p);
+    z = Flx_add(u, Flxq_mul(z,gel(V,l),T,p), p);
+    z = gerepileupto(btop, z);
+  }
+  u = Flxq_eval_powers(P,V,0,d,p);
+  z = Flx_add(u, Flxq_mul(z,gel(V,d+2),T,p), p);
+  if (DEBUGLEVEL>=8)
+  {
+    long cnt = 1 + (degpol(P) - l) / (l-1);
+    err_printf("Flx_FlxqV_eval: %ld Flxq_mul [%ld]\n", cnt, l-1);
+  }
+  return gerepileupto(av, z);
+}
+
+GEN
+Flx_Flxq_eval(GEN Q, GEN x, GEN T, ulong p)
+{
+  pari_sp av = avma;
+  GEN z;
+  long d = degpol(Q), rtd;
+  if (d < 0) return pol0_Flx(Q[1]);
+  rtd = (long) sqrt((double)d);
+  z = Flx_FlxqV_eval(Q, Flxq_powers(x,rtd,T,p), T,p);
+  return gerepileupto(av, z);
 }
 
 /* assume T irreducible mod p */
