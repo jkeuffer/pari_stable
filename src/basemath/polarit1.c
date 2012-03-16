@@ -1037,16 +1037,16 @@ Flx_factcantor_i(GEN f, ulong p, long flag)
   for(;;)
   {
     f2 = Flx_gcd(f,Flx_deriv(f,p), p);
-    if (flag > 1 && lg(f2) > 3) return NULL;
+    if (flag > 1 && degpol(f2) > 0) return NULL;
     g1 = Flx_div(f,f2,p);
     k = 0;
-    while (lg(g1)>3)
+    while (degpol(g1)>0)
     {
       long du,dg;
       GEN S;
       k++; if (k%p==0) { k++; f2 = Flx_div(f2,g1,p); }
       u = g1; g1 = Flx_gcd(f2,g1, p);
-      if (lg(g1)>3)
+      if (degpol(g1)>0)
       {
         u = Flx_div( u,g1,p);
         f2= Flx_div(f2,g1,p);
@@ -1152,16 +1152,16 @@ FpX_factcantor_i(GEN f, GEN pp, long flag)
   E = cgetg(d+1, t_VECSMALL);
   vf=varn(f); nbfact = 1;
   f2 = FpX_gcd(f,ZX_deriv(f), pp);
-  if (flag > 1 && lg(f2) > 3) return NULL;
+  if (flag > 1 && degpol(f2) > 0) return NULL;
   g1 = FpX_div(f,f2,pp);
   k = 0;
-  while (lg(g1)>3)
+  while (degpol(g1)>0)
   {
     long du,dg;
     GEN S;
     k++;
     u = g1; g1 = FpX_gcd(f2,g1, pp);
-    if (lg(g1)>3)
+    if (degpol(g1)>0)
     {
       u = FpX_div( u,g1,pp);
       f2= FpX_div(f2,g1,pp);
@@ -1470,7 +1470,7 @@ FpX_factor_i(GEN f, GEN pp)
     f2 = FpX_gcd(f,ZX_deriv(f), pp);
     g1 = lg(f2)==3? f: FpX_div(f,f2,pp); /* is squarefree */
     k = 0;
-    while (lg(g1)>3)
+    while (degpol(g1)>0)
     {
       k++; if (p && !(k%p)) { k++; f2 = FpX_div(f2,g1,pp); }
       u = g1;
