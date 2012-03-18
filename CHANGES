@@ -84,6 +84,7 @@ BA 68- pari_close did not restore GMP memory functions
    69- avoid outputing ANSI escape sequences to reset terminal state when
        unnecessary [#1289]
 BA 70- ellpointtoz was numerically unstable
+   71- issquarefree(0) => error [#1304]
 
   Changed
     1- mathnf: swapped flag 3 and 5.

@@ -3493,7 +3493,11 @@ moebius(GEN n)
 GEN
 gissquarefree(GEN x) { return map_proto_lG(issquarefree,x); }
 long
-Z_issquarefree(GEN n) { return moebius(n)? 1: 0; }
+Z_issquarefree(GEN n)
+{
+  if (!signe(n)) return 0;
+  return moebius(n)? 1: 0;
+}
 long
 issquarefree(GEN x)
 {
