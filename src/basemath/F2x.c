@@ -411,9 +411,9 @@ static GEN
 F2x_shift(GEN y, ulong d)
 {
   ulong db, dl=dvmduBIL(d, &db);
-  long i, ly = lg(y), lx = ly+dl+(!!db), ld = 2+db;
+  long i, ly = lg(y), lx = ly+dl+(!!db);
   GEN x = cgetg(lx, t_VECSMALL);
-  for(i=2; i<ld; i++) x[i] = 0;
+  x[1] = y[1]; for(i=0; i<dl; i++) x[i+2] = 0;
   if (db)
   {
     ulong dc=BITS_IN_LONG-db;
