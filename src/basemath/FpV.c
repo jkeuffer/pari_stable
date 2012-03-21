@@ -917,3 +917,15 @@ FpMs_FpCs_solve(GEN M, GEN A, long nbrow, GEN p)
   return ZpMs_ZpCs_solve(M, A, nbrow, p, 1);
 }
 
+GEN
+FpMs_FpCs_solve_safe(GEN M, GEN A, long nbrow, GEN p)
+{
+  CATCH(e_INTMOD)
+  {
+    if (DEBUGLEVEL)
+      pari_warn(warner,"FpMs_FpCs_solve_safe, impossible inverse %Ps", gel(global_err_data,2));
+    return NULL;
+  } TRY {
+    return ZpMs_ZpCs_solve(M, A, nbrow, p, 1);
+  } ENDCATCH
+}

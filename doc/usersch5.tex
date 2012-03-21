@@ -5390,6 +5390,10 @@ vector), the index of a column which is linearly dependent from the
 others as a \typ{VECSMALL} with a single component, or \kbd{NULL}
 (can happen if $B$ is not in the image of $M$).
 
+\fun{GEN}{FpMs_FpCs_solve_safe}{GEN M, GEN B, long nbrow, GEN p}
+as above, but in the event that $p$ is not a prime and an impossible division
+occurs, return \kbd{NULL}.
+
 \fun{GEN}{ZpMs_ZpCs_solve}{GEN M, GEN B, long nbrow, GEN p, long e}
 solve the equation $MX = B$, where $M$ is a sparse matrix and $B$ is a sparse
 vector, both over $\Z/p^e\Z$. Return either a solution as a \typ{COL} (dense

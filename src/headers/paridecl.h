@@ -314,6 +314,7 @@ GEN     FpM_red(GEN z, GEN p);
 GEN     FpM_to_mod(GEN z, GEN p);
 GEN     FpMs_FpC_mul(GEN M, GEN B, GEN p);
 GEN     FpMs_FpCs_solve(GEN M, GEN B, long nbrow, GEN p);
+GEN     FpMs_FpCs_solve_safe(GEN M, GEN A, long nbrow, GEN p);
 GEN     FpC_add(GEN x, GEN y, GEN p);
 GEN     FpC_sub(GEN x, GEN y, GEN p);
 GEN     FpV_add(GEN x, GEN y, GEN p);
