@@ -2364,7 +2364,7 @@ log_index(void* E, GEN a, GEN g, GEN ord)
   if (zv_equal(a,g)) return gen_1;
   if (!degpol(a) && !degpol(g)) return Fp_log(utoi(a[2]),utoi(g[2]),ord, utoi(f->p));
   if (typ(ord)!=t_INT || !BPSW_psp(ord)) return NULL;
-  if (degpol(f->T)<4) return NULL;
+  if (degpol(f->T)<4 || cmpiu(ord,1UL<<27)<0) return NULL;
   return Flxq_log_index(a,g,ord,f->T,f->p);
 }
 
