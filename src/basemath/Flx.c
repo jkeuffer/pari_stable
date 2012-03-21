@@ -2332,6 +2332,7 @@ Flxq_log_index(GEN a0, GEN b0, GEN m, GEN T0, ulong p)
     if (DEBUGLEVEL) timer_printf(&ti,"log element");
     av2 = avma;
     R = FpMs_FpCs_solve(M,A,rel.off+rel.nb*3,m);
+    if (!R) continue;
     if (typ(R) == t_COL)
     {
       GEN l = Fp_sub(FpV_dotproduct(zv_to_ZV(V), R, m), utoi(AV), m);

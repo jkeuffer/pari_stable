@@ -885,6 +885,7 @@ ZpMs_ZpCs_solve(GEN M, GEN A, long nbrow, GEN p, long e)
   pari_timer ti;
   if (DEBUGLEVEL) timer_start(&ti);
   RgMs_structelim(M, nbrow, gel(A, 1), &pcol, &prow);
+  if (!pcol) { avma = av; return NULL; }
   if (DEBUGLEVEL)
     timer_printf(&ti,"structured elimination (%ld -> %ld)",nbi,lg(pcol)-1);
   n = lg(pcol)-1;

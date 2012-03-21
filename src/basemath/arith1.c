@@ -2404,6 +2404,7 @@ Fp_log_index(GEN a, GEN b, GEN m, GEN p)
     if (DEBUGLEVEL) timer_printf(&ti,"log element");
     av2 = avma;
     R = FpMs_FpCs_solve(M, A, nbrow, m);
+    if (!R) continue;
     if (typ(R) == t_COL)
     {
       GEN l = Fp_sub(FpV_dotproduct(zv_to_ZV(V), R, m), stoi(AV), m);

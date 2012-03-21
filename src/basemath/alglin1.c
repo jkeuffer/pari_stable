@@ -3546,7 +3546,10 @@ RgMs_structelim(GEN M, long nbrow, GEN A, GEN *p_col, GEN *p_row)
       Wrow[F[j]]++;
   }
   for (j = 1; j < lA; ++j)
+  {
+    if (Wrow[A[j]] == 0) { *p_col=NULL; return; }
     Wrow[A[j]] = -1;
+  }
   for (i = 1; i <= nbrow; ++i)
     if (Wrow[i])
       rrow++;
