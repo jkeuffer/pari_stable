@@ -2002,7 +2002,7 @@ static long
 Flx_cindex(GEN P, ulong p)
 {
   long d = degpol(P), i;
-  ulong s = 0, p2 = p>>1;
+  ulong s = 0, p2 = (p-1)>>1;
   for (i = 0; i <= d; ++i)
   {
     long x = P[d-i+2];
@@ -2339,7 +2339,7 @@ Flxq_log_index(GEN a0, GEN b0, GEN m, GEN T0, ulong p)
       if (DEBUGLEVEL)
         err_printf("%lu test.,%lu total, complexity=O(x^%Ps)\n", rel.nbtest,e,
             gdiv(glog(utoi(e), DEFAULTPREC), glog(m, DEFAULTPREC)));
-      if (degpol(Flxq_mul(a, Flxq_pow(b,Fp_neg(l,m),T,p),T,p))!=0)
+      if (degpol(Flxq_mul(a0, Flxq_pow(b0,Fp_neg(l,m),T0,p),T0,p))!=0)
         pari_err_BUG("Flxq_log_index");
       return gerepileuptoint(av, l);
     }
