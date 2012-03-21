@@ -119,8 +119,11 @@ hash_insert(hashtable *h, void *k, void *v)
 hashentry *
 hash_search(hashtable *h, void *k)
 {
-  ulong hash = h->hash(k);
-  hashentry *e = h->table[ hash % h->len ];
+  ulong hash;
+  hashentry *e;
+  if (h->nb == 0) return NULL;
+  hash = h->hash(k);
+  e = h->table[ hash % h->len ];
   while (e)
   {
     if (hash == e->hash && h->eq(k, e->key)) return e;
@@ -164,7 +167,7 @@ hashtable *
 hashstr_import_static(hashentry *e, ulong size)
 {
   hashtable *h = hash_create(size, (ulong (*)(void *))hash_str, strequal, 0);
-  for ( ; e->key; e++) hash_link(h, e);
+  for ( ; e->key; e++) { hash_link(h, e); h->nb++; }
   return h;
 }
 
