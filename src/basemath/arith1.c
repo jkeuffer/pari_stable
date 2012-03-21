@@ -2403,7 +2403,7 @@ Fp_log_index(GEN a, GEN b, GEN m, GEN p)
     A = Fp_log_find_rel(b, prmax, C, p, &aa, &AV);
     if (DEBUGLEVEL) timer_printf(&ti,"log element");
     av2 = avma;
-    R = FpMs_FpCs_solve(M, A, nbrow, m);
+    R = FpMs_FpCs_solve_safe(M, A, nbrow, m);
     if (!R) continue;
     if (typ(R) == t_COL)
     {
@@ -2443,15 +2443,18 @@ Fp_easylog(void *E, GEN a, GEN g, GEN ord)
     if (!equalii(Fp_pow(g, t, p), a)) { avma = av; return cgetg(1, t_VEC); }
     avma = av2; return gerepileuptoint(av, t);
   }
-  if (typ(ord)==t_INT && expi(ord)>=27 && !dvdii(subis(p,1),sqri(ord))
-                                       && BPSW_psp(ord) && BPSW_psp(p))
+  if (typ(ord)==t_INT && expi(ord)>=27 && BPSW_psp(p))
     return Fp_log_index(a, g, ord, p);
   avma = av; return NULL; /* not easy */
 }
 
 GEN
 Fp_log(GEN a, GEN g, GEN ord, GEN p)
-{ return gen_PH_log(a,g,ord,(void*)p,&Fp_star, &Fp_easylog); }
+{
+  GEN v = dlog_get_ordfa(ord);
+  ord = mkvec2(gel(v,1),ZM_famat_limit(gel(v,2),int2n(27)));
+  return gen_PH_log(a,g,ord,(void*)p,&Fp_star, &Fp_easylog);
+}
 
 /* find x such that h = g^x mod N > 1, N = prod_{i <= l} P[i]^E[i], P[i] prime.
  * PHI[l] = eulerphi(N / P[l]^E[l]).   Destroys P/E */

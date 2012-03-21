@@ -2331,7 +2331,7 @@ Flxq_log_index(GEN a0, GEN b0, GEN m, GEN T0, ulong p)
     A = Flxq_log_find_rel(b, r, T, p, &aa, &AV);
     if (DEBUGLEVEL) timer_printf(&ti,"log element");
     av2 = avma;
-    R = FpMs_FpCs_solve(M,A,rel.off+rel.nb*3,m);
+    R = FpMs_FpCs_solve_safe(M,A,rel.off+rel.nb*3,m);
     if (!R) continue;
     if (typ(R) == t_COL)
     {
@@ -2357,14 +2357,13 @@ Flxq_log_index(GEN a0, GEN b0, GEN m, GEN T0, ulong p)
 }
 
 static GEN
-log_index(void* E, GEN a, GEN g, GEN ord)
+Flxq_easylog(void* E, GEN a, GEN g, GEN ord)
 {
   Flxq_muldata *f = (Flxq_muldata *)E;
   if (Flx_equal1(a)) return gen_0;
   if (zv_equal(a,g)) return gen_1;
   if (!degpol(a) && !degpol(g)) return Fp_log(utoi(a[2]),utoi(g[2]),ord, utoi(f->p));
-  if (typ(ord)!=t_INT || !BPSW_psp(ord)) return NULL;
-  if (degpol(f->T)<4 || cmpiu(ord,1UL<<27)<0) return NULL;
+  if (typ(ord)!=t_INT || degpol(f->T)<4 || cmpiu(ord,1UL<<27)<0) return NULL;
   return Flxq_log_index(a,g,ord,f->T,f->p);
 }
 
@@ -2372,10 +2371,10 @@ GEN
 Flxq_log(GEN a, GEN g, GEN ord, GEN T, ulong p)
 {
   Flxq_muldata E;
-  GEN z;
+  GEN v = dlog_get_ordfa(ord);
+  ord = mkvec2(gel(v,1),ZM_famat_limit(gel(v,2),int2n(27)));
   E.T=T; E.p=p;
-  z = gen_PH_log(a,g,ord,(void*)&E,&Flxq_star,log_index);
-  return z ? z: cgetg(1,t_VEC);
+  return gen_PH_log(a,g,ord,(void*)&E,&Flxq_star,Flxq_easylog);
 }
 
 GEN
