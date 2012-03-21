@@ -2163,8 +2163,9 @@ Flxq_log_find_rel(GEN b, long r, GEN T, ulong p, GEN *g, long *e)
       {
         GEN F = factorel(z, p);
         GEN G = factorel(gcoeff(M,1,1), p);
-        retmkmat2(vecsmall_concat(gel(F, 1),gel(G, 1)),
-                  vecsmall_concat(gel(F, 2),zv_neg(gel(G, 2))));
+        GEN z = mkmat2(vecsmall_concat(gel(F, 1),gel(G, 1)),
+                       vecsmall_concat(gel(F, 2),zv_neg(gel(G, 2))));
+        gerepileall(av,2,g,&z); return z;
       }
     }
     if (low_stack(lim, stack_lim(av,2)))
