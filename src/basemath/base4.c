@@ -1114,6 +1114,39 @@ famat_reduce(GEN fa)
   setlg(E, k); return mkmat2(G,E);
 }
 
+GEN
+ZM_famat_limit(GEN fa, GEN limit)
+{
+  pari_sp av;
+  GEN E, G, g, e, r;
+  long i, k, l, n, lG;
+
+  if (lg(fa) == 1) return fa;
+  g = gel(fa,1); l = lg(g);
+  e = gel(fa,2);
+  for(n=0, i=1; i<l; i++)
+    if (cmpii(gel(g,i),limit)<=0) n++;
+  lG = n<l-1 ? n+2 : n+1;
+  G = cgetg(lG, t_COL);
+  E = cgetg(lG, t_COL);
+  av = avma;
+  for (i=1, k=1, r = gen_1; i<l; i++)
+  {
+    if (cmpii(gel(g,i),limit)<=0)
+    {
+      gel(G,k) = gel(g,i);
+      gel(E,k) = gel(e,i);
+      k++;
+    } else r = mulii(r, powii(gel(g,i), gel(e,i)));
+  }
+  if (k<i)
+  {
+    gel(G, k) = gerepileuptoint(av, r);
+    gel(E, k) = gen_1;
+  }
+  return mkmat2(G,E);
+}
+
 /* assume pr has degree 1 and coprime to numerator(x) */
 static GEN
 nf_to_Fp_simple(GEN x, GEN modpr, GEN p)

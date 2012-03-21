@@ -541,6 +541,10 @@ regular algebraic numbers (not \var{famat}s) over a given number field:
 $g$ without repeated elements or 0 exponents, such that the expanded forms
 of $f$ and $g$ would be equal.
 
+\fun{GEN}{ZM_famat_limit}{GEN f, GEN limit} given a \var{famat} $f$ with \typ{INT} entries,
+returns a \var{famat} $g$ with all factors larger than \kbd{limit} multiplied out as
+the last entry (with exponent $1$).
+
 \fun{GEN}{famat_to_nf}{GEN nf, GEN f} You normally never want to do this !
 This is a simplified form of \tet{nffactorback}, where we do not check the
 user input for consistency.
