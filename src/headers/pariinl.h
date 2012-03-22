@@ -2283,11 +2283,11 @@ idealred(GEN nf, GEN I) { return idealred0(nf, I, NULL); }
 /*                              CLOSURES                           */
 /*                                                                 */
 /*******************************************************************/
-long closure_arity(GEN C)    { return C[1]; }
-const char *closure_codestr(GEN C)  { return GSTR(gel(C,2))-1; }
-GEN closure_get_code(GEN C)  { return gel(C,2); }
-GEN closure_get_oper(GEN C)  { return gel(C,3); }
-GEN closure_get_data(GEN C)  { return gel(C,4); }
-GEN closure_get_dbg(GEN C)   { return gel(C,5); }
-GEN closure_get_text(GEN C)  { return gel(C,6); }
-GEN closure_get_frame(GEN C) { return gel(C,7); }
+INLINE long closure_arity(GEN C)    { return C[1]; }
+INLINE const char *closure_codestr(GEN C)  { return GSTR(gel(C,2))-1; }
+INLINE GEN closure_get_code(GEN C)  { return gel(C,2); }
+INLINE GEN closure_get_oper(GEN C)  { return gel(C,3); }
+INLINE GEN closure_get_data(GEN C)  { return gel(C,4); }
+INLINE GEN closure_get_dbg(GEN C)   { return gel(C,5); }
+INLINE GEN closure_get_text(GEN C)  { return gel(C,6); }
+INLINE GEN closure_get_frame(GEN C) { return gel(C,7); }
