@@ -2373,7 +2373,7 @@ ellglobalred(GEN E)
   D  = ell_get_disc(e);
   P = gel(Z_factor(gcdii(c4,c6)),1);
   l = lg(P);
-  for (k = 1; k < l; k++) (long)Z_pvalrem(D, gel(P,k), &D);
+  for (k = 1; k < l; k++) (void)Z_pvalrem(D, gel(P,k), &D);
   if (!is_pm1(D)) P = shallowconcat(P, gel(Z_factor(absi(D)),1));
   l = lg(P); c = N = gen_1;
   for (k = 1; k < l; k++)
@@ -3962,7 +3962,7 @@ elltaniyama(GEN e, long prec)
         if (m) s2 = gadd(s2, gmulsg(m*(n+m), gmul(gel(X,m),gel(C,n-m))));
       s2 = gmul2n(s2,-1);
       s1 = gen_0;
-      for (m =- 1; m+m < n; m++) s1 = gadd(s1, gmul(gel(X,m),gel(X,n-m)));
+      for (m=-1; m+m < n; m++) s1 = gadd(s1, gmul(gel(X,m),gel(X,n-m)));
       s1 = gmul2n(s1, 1);
       if (m+m==n) s1 = gadd(s1, gsqr(gel(X,m)));
       /* ( (n+1)(n+2) - 12 ) X[n+2] = (6 s1 + s3 - s2) */
