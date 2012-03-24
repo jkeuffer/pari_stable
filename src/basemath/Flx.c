@@ -2005,7 +2005,7 @@ Flx_cindex(GEN P, ulong p)
   ulong s = 0, p2 = (p-1)>>1;
   for (i = 0; i <= d; ++i)
   {
-    long x = P[d-i+2];
+    ulong x = P[d-i+2];
     if (x<=p2) x = 2*x; else x = 1+2*(p-1-x);
     s = p*s+x;
   }

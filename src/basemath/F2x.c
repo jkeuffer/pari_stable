@@ -410,7 +410,7 @@ F2x_addshiftip(GEN x, GEN y, ulong d)
 static GEN
 F2x_shift(GEN y, ulong d)
 {
-  ulong db, dl=dvmduBIL(d, &db);
+  long db, dl=dvmdsBIL(d, &db);
   long i, ly = lg(y), lx = ly+dl+(!!db);
   GEN x = cgetg(lx, t_VECSMALL);
   x[1] = y[1]; for(i=0; i<dl; i++) x[i+2] = 0;
