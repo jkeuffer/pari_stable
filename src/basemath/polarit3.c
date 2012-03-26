@@ -882,12 +882,8 @@ GEN
 Fq_neg(GEN x, GEN T/*unused*/, GEN p)
 {
   (void)T;
-  switch(typ(x)==t_POL)
-  {
-    case 0: return Fp_neg(x,p);
-    case 1: return FpX_neg(x,p);
-  }
-  return NULL;
+  return (typ(x)==t_POL)? FpX_neg(x,p)
+                        : Fp_neg(x,p);
 }
 
 /* If T==NULL do not reduce*/
