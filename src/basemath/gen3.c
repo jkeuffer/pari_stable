@@ -1487,27 +1487,29 @@ gsubstvec(GEN e, GEN v, GEN r)
 {
   pari_sp ltop=avma;
   long i, j, l = lg(v);
-  GEN w,z;
+  GEN w, z, R;
   if ( !is_vec_t(typ(v)) ) pari_err_TYPE("substvec",v);
   if ( !is_vec_t(typ(r)) ) pari_err_TYPE("substvec",r);
   if (lg(r)!=l) pari_err_DIM("substvec");
   w = cgetg(l,t_VECSMALL);
   z = cgetg(l,t_VECSMALL);
+  R = cgetg(l,t_VEC);
   for(i=j=1;i<l;i++)
   {
-    GEN T = gel(v,i);
+    GEN T = gel(v,i), ri = gel(r,i);
     if (!gcmpX(T)) pari_err(e_MISC,"not a variable in substvec (%Ps)", T);
-    if (gvar(gel(r,i)) == NO_VARIABLE) /* no need to take precautions */
-      e = gsubst(e, varn(T), gel(r,i));
+    if (gvar(ri) == NO_VARIABLE) /* no need to take precautions */
+      e = gsubst(e, varn(T), ri);
     else
     {
-      w[j]=varn(T);
-      z[j]=fetch_var();
+      w[j] = varn(T);
+      z[j] = fetch_var();
+      gel(R,j) = ri;
       j++;
     }
   }
   for(i=1;i<j;i++) e = gsubst(e,w[i],pol_x(z[i]));
-  for(i=1;i<j;i++) e = gsubst(e,z[i],gel(r,i));
+  for(i=1;i<j;i++) e = gsubst(e,z[i],gel(R,i));
   for(i=1;i<j;i++) (void)delete_var();
   return gerepileupto(ltop,e);
 }

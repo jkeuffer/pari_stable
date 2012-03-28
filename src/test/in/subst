@@ -1,1 +1,2 @@
 subst(Y/X,X,x)
+substvec(x+y,[x,y],[1,x])
