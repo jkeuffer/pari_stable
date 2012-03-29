@@ -750,6 +750,7 @@ sub basic_subst {
 
   s/\\neq?(?![a-zA-Z])/ != /g;
   s/\\enspace(?![a-zA-Z])/ /g;
+  s/\\\*/ /g;
   s/\\times(?![a-zA-Z]) */ x /g;
   s/\\infty(?![a-zA-Z]) */ oo /g;
   s/ *\\(bmod|mod) */ mod /g;

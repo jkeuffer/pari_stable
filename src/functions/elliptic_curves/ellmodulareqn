@@ -2,12 +2,53 @@ Function: ellmodulareqn
 Section: elliptic_curves
 C-Name: ellmodulareqn
 Prototype: LDnDn
-Help: ellmodulareqn(l,{x},{y}): return a vector [eqn, t] where eqn is a modular
- equation of level l, for l<500, l prime. This requires the package seadata to
+Help: ellmodulareqn(N,{x},{y}): return a vector [eqn, t] where eqn is a modular
+ equation of level N, for N<500, N prime. This requires the package seadata to
  be installed.  The equation is either of canonical type (t=0) or of Atkin type
  (t=1)
 Doc: return a vector [\kbd{eqn},$t$] where \kbd{eqn} is a modular equation of
- level $l$, for $l<500$, $l$ prime. This requires the package seadata to be
+ level $N$, for $N<500$, $N$ prime. This requires the package seadata to be
  installed. The equation is either of canonical type ($t=0$) or of Atkin type
  ($t=1$).
+ This polynomial satisfy the following functional equation which allow to compute
+ the values of the classical modular polynomial of level $n$,
+ while being much smaller:
+
+ \item for canonical type:
+  $P(f(\tau),j(\tau)) = 0$, $P(N^s/f(\tau),j(N\*\tau)) = 0$.
+  where $s = 12/\gcd(12,N-1)$
+
+ \item for Atkin type:
+  $P(f(\tau),j(\tau)) = 0$, $P(f(\tau),j(N\*\tau)) = 0$.
+
+ where $j$ is the $j$-invariant and $f$ is a modular function (see below).
+
+ The following GP function returns the values of the classical modular polynomial
+ by eliminating $f(\tau)$ in the two equations:
+ \bprog
+ classicaleqn(N,X='X,Y='Y)=
+ {
+   my(E=ellmodulareqn(N),P=E[1]);
+   if (E[2] == 0,
+     my(s=12/gcd(12,N-1));
+     polresultant(subst(P,'y,X),x^(N+1)*substvec(P,['x,'y],[N^s/'x,Y]))
+                /N^(s*(2*N+1))*(-1)^(N+1)
+   ,
+     polresultant(subst(P,'y,X),subst(P,'y,Y))/(X-Y)^(N+1))
+ }
+ @eprog
+
+ More precisely, let $W_N(\tau)={{-1}\over{N\*\tau}}$ be the Atkin-Lehner
+ involution, the function $f$ also satisfy:
+
+ \item for canonical type:
+    $f(W_N(\tau)) = N^s/f(\tau)$
+
+ \item for Atkin type:
+    $f(W_N(\tau)) = f(\tau)$
+
+ and in both cases $j(W_N(\tau)) = j(N\*\tau)$.
+
+ Furthermore, for canonical type, if $\eta$ is the Dedekind's eta function
+ (with the $q^{1/24}$), $f(\tau) = N^s\*{{\eta(N\*\tau)}\over{\eta(\tau)}}^{2\*s}$.
 
