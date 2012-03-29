@@ -147,6 +147,7 @@ long    Flx_val(GEN x);
 long    Flx_valrem(GEN x, GEN *Z);
 GEN     FlxC_to_ZXC(GEN x);
 GEN     FlxM_to_ZXM(GEN z);
+GEN     FlxM_Flx_add_shallow(GEN x, GEN y, ulong p);
 GEN     FlxV_Flc_mul(GEN V, GEN W, ulong p);
 GEN     FlxV_to_Flm(GEN v, long n);
 GEN     FlxX_add(GEN P, GEN Q, ulong p);

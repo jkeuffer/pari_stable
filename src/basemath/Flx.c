@@ -146,6 +146,24 @@ FlxM_to_ZXM(GEN z)
   return x;
 }
 
+GEN
+FlxM_Flx_add_shallow(GEN x, GEN y, ulong p)
+{
+  long l = lg(x), i, j;
+  GEN z = cgetg(l,t_MAT);
+
+  if (l==1) return z;
+  if (l != lg(x[1])) pari_err_OP( "+", x, y);
+  for (i=1; i<l; i++)
+  {
+    GEN zi = cgetg(l,t_COL), xi = gel(x,i);
+    gel(z,i) = zi;
+    for (j=1; j<l; j++) gel(zi,j) = gel(xi,j);
+    gel(zi,i) = Flx_add(gel(zi,i), y, p);
+  }
+  return z;
+}
+
 /***********************************************************************/
 /**                                                                   **/
 /**          Conversion to Flx                                        **/

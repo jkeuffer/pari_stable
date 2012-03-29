@@ -694,6 +694,22 @@ find_kernel_power(GEN Eba4, GEN Eba6, GEN Eca4, GEN Eca6, ulong ell, struct meqn
 enum mod_type {MTpathological, MTAtkin, MTElkies, MTone_root, MTroots};
 
 static GEN
+Flxq_study_eqn(long ell, GEN q, GEN mpoly, GEN T, ulong p, long *pt_dG, long *pt_r)
+{
+  GEN XP = FlxqXQ_pow(pol_x(0), q, mpoly, T, p);
+  GEN G  = FlxqX_gcd(FlxX_sub(XP, pol_x(0), p), mpoly, T, p);
+  *pt_dG = degpol(G);
+  if (!*pt_dG)
+  {
+    GEN L = FlxqXQ_matrix_pow(XP, ell+1, ell+1, mpoly, T, p);
+    long s = ell + 1 - FlxqM_rank(FlxM_Flx_add_shallow(L, Fl_to_Flx(p-1, T[1]), p), T, p);
+    *pt_r = (ell + 1)/s;
+    return NULL;
+  }
+  return G;
+}
+
+static GEN
 Fp_study_eqn(long ell, GEN q, GEN mpoly, GEN p, long *pt_dG, long *pt_r)
 {
   GEN XP = FpXQ_pow(pol_x(0), q, mpoly, p);
@@ -713,6 +729,16 @@ static GEN
 Fq_study_eqn(long ell, GEN q, GEN mpoly, GEN T, GEN p, long *pt_dG, long *pt_r)
 {
   GEN G;
+  if (lgefint(p)==3)
+  {
+    ulong pp = p[2];
+    GEN Tp = ZX_to_Flx(T,pp);
+    GEN mpolyp = ZXX_to_FlxX(mpoly,pp,varn(Tp));
+    G = Flxq_study_eqn(ell, q, mpolyp, Tp, pp, pt_dG, pt_r);
+    if (!G) return NULL;
+    G = FlxX_to_ZXX(G);
+  }
+  else
   {
     GEN XP = FqXQ_pow(pol_x(0), q, mpoly, T, p);
     G  = FqX_gcd(FqX_sub(XP, pol_x(0), T, p), mpoly, T, p);
