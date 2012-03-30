@@ -411,3 +411,212 @@ Fp_ellgens(GEN a4, GEN a6, GEN ch, GEN D, GEN m, GEN p)
   }
   return gerepilecopy(av, P);
 }
+
+/* Not so fast arithmetic with points over elliptic curves over FpXQ */
+
+/***********************************************************************/
+/**                                                                   **/
+/**                              FpXQE                                  **/
+/**                                                                   **/
+/***********************************************************************/
+
+/* Theses functions deal with point over elliptic curves over FpXQ defined
+ * by an equation of the form y^2=x^3+a4*x+a6.
+ * Most of the time a6 is omitted since it can be recovered from any point
+ * on the curve.
+ */
+
+GEN
+FpXQE_changepoint(GEN x, GEN ch, GEN T, GEN p)
+{
+  pari_sp av = avma;
+  GEN p1,z,u,r,s,t,v,v2,v3;
+  if (ell_is_inf(x)) return x;
+  u = gel(ch,1); r = gel(ch,2);
+  s = gel(ch,3); t = gel(ch,4);
+  v = FpXQ_inv(u, T, p); v2 = FpXQ_sqr(v, T, p); v3 = FpXQ_mul(v,v2, T, p);
+  p1 = FpX_sub(gel(x,1),r, p);
+  z = cgetg(3,t_VEC);
+  gel(z,1) = FpXQ_mul(v2, p1, T, p);
+  gel(z,2) = FpXQ_mul(v3, FpX_sub(gel(x,2), FpX_add(FpXQ_mul(s,p1, T, p),t, p), p), T, p);
+  return gerepileupto(av, z);
+}
+
+GEN
+FpXQE_changepointinv(GEN x, GEN ch, GEN T, GEN p)
+{
+  GEN u, r, s, t, X, Y, u2, u3, u2X, z;
+  if (ell_is_inf(x)) return x;
+  X = gel(x,1); Y = gel(x,2);
+  u = gel(ch,1); r = gel(ch,2);
+  s = gel(ch,3); t = gel(ch,4);
+  u2 = FpXQ_sqr(u, T, p); u3 = FpXQ_mul(u,u2, T, p);
+  u2X = FpXQ_mul(u2,X, T, p);
+  z = cgetg(3, t_VEC);
+  gel(z,1) = FpX_add(u2X,r, p);
+  gel(z,2) = FpX_add(FpXQ_mul(u3,Y, T, p), FpX_add(FpXQ_mul(s,u2X, T, p), t, p), p);
+  return z;
+}
+
+static GEN
+FpXQE_dbl_slope(GEN P, GEN a4, GEN T, GEN p, GEN *slope)
+{
+  GEN x, y, Q;
+  if (ell_is_inf(P) || !signe(gel(P,2))) return ellinf();
+  x = gel(P,1); y = gel(P,2);
+  *slope = FpXQ_div(FpX_add(FpX_mulu(FpXQ_sqr(x, T, p), 3, p), a4, p),
+                            FpX_mulu(y, 2, p), T, p);
+  Q = cgetg(3,t_VEC);
+  gel(Q, 1) = FpX_sub(FpXQ_sqr(*slope, T, p), FpX_mulu(x, 2, p), p),
+  gel(Q, 2) = FpX_sub(FpXQ_mul(*slope, FpX_sub(x, gel(Q, 1), p), T, p), y, p);
+  return Q;
+}
+
+GEN
+FpXQE_dbl(GEN P, GEN a4, GEN T, GEN p)
+{
+  pari_sp av = avma;
+  GEN slope;
+  return gerepileupto(av, FpXQE_dbl_slope(P,a4,T,p,&slope));
+}
+
+static GEN
+FpXQE_add_slope(GEN P, GEN Q, GEN a4, GEN T, GEN p, GEN *slope)
+{
+  GEN Px, Py, Qx, Qy, R;
+  if (ell_is_inf(P)) return Q;
+  if (ell_is_inf(Q)) return P;
+  Px = gel(P,1); Py = gel(P,2);
+  Qx = gel(Q,1); Qy = gel(Q,2);
+  if (ZX_equal(Px, Qx))
+  {
+    if (ZX_equal(Py, Qy))
+      return FpXQE_dbl_slope(P, a4, T, p, slope);
+    else
+      return ellinf();
+  }
+  *slope = FpXQ_div(FpX_sub(Py, Qy, p), FpX_sub(Px, Qx, p), T, p);
+  R = cgetg(3,t_VEC);
+  gel(R, 1) = FpX_sub(FpX_sub(FpXQ_sqr(*slope, T, p), Px, p), Qx, p);
+  gel(R, 2) = FpX_sub(FpXQ_mul(*slope, FpX_sub(Px, gel(R, 1), p), T, p), Py, p);
+  return R;
+}
+
+GEN
+FpXQE_add(GEN P, GEN Q, GEN a4, GEN T, GEN p)
+{
+  pari_sp av = avma;
+  GEN slope;
+  return gerepileupto(av, FpXQE_add_slope(P,Q,a4,T,p,&slope));
+}
+
+static GEN
+FpXQE_neg_i(GEN P, GEN T, GEN p)
+{
+  if (ell_is_inf(P)) return P;
+  return mkvec2(gel(P,1), FpX_neg(gel(P,2), p));
+}
+
+GEN
+FpXQE_neg(GEN P, GEN T, GEN p)
+{
+  if (ell_is_inf(P)) return ellinf();
+  return mkvec2(gcopy(gel(P,1)), FpX_neg(gel(P,2), p));
+}
+
+GEN
+FpXQE_sub(GEN P, GEN Q, GEN a4, GEN T, GEN p)
+{
+  pari_sp av = avma;
+  GEN slope;
+  return gerepileupto(av, FpXQE_add_slope(P, FpXQE_neg_i(Q, T, p), a4, T, p, &slope));
+}
+
+struct _FpXQE
+{
+  GEN a4,a6;
+  GEN T,p;
+};
+
+static GEN
+_FpXQE_dbl(void *E, GEN P)
+{
+  struct _FpXQE *ell = (struct _FpXQE *) E;
+  return FpXQE_dbl(P, ell->a4, ell->T, ell->p);
+}
+
+static GEN
+_FpXQE_add(void *E, GEN P, GEN Q)
+{
+  struct _FpXQE *ell=(struct _FpXQE *) E;
+  return FpXQE_add(P, Q, ell->a4, ell->T, ell->p);
+}
+
+static GEN
+_FpXQE_mul(void *E, GEN P, GEN n)
+{
+  pari_sp av = avma;
+  struct _FpXQE *e=(struct _FpXQE *) E;
+  long s = signe(n);
+  if (!s || ell_is_inf(P)) return ellinf();
+  if (s<0) P = FpXQE_neg(P, e->T, e->p);
+  if (is_pm1(n)) return s>0? gcopy(P): P;
+  return gerepileupto(av, gen_pow(P, n, e, &_FpXQE_dbl, &_FpXQE_add));
+}
+
+GEN
+FpXQE_mul(GEN P, GEN n, GEN a4, GEN T, GEN p)
+{
+  struct _FpXQE E;
+  E.a4= a4; E.T = T; E.p = p;
+  return _FpXQE_mul(&E, P, n);
+}
+
+/* Finds a random non-singular point on E */
+
+GEN
+random_FpXQE(GEN a4, GEN a6, GEN T, GEN p)
+{
+  pari_sp ltop = avma;
+  GEN x, x2, y, rhs;
+  long v = varn(T), d = degpol(T);
+  do
+  {
+    avma= ltop;
+    x   = random_FpX(d,v,p); /*  x^3+a4*x+a6 = x*(x^2+a4)+a6  */
+    x2  = FpXQ_sqr(x, T, p);
+    rhs = FpX_add(FpXQ_mul(x, FpX_add(x2, a4, p), T, p), a6, p);
+    if (!signe(rhs) && !signe(FpX_add(FpX_mulu(x2,3,p), a4, p)))
+      continue;
+  } while (!FpXQ_issquare(rhs, T, p));
+  y = FpXQ_sqrt(rhs, T, p);
+  if (!y) pari_err_PRIME("random_FpE", p);
+  return gerepilecopy(ltop, mkvec2(x, y));
+}
+
+static GEN
+_FpXQE_rand(void *E)
+{
+  struct _FpXQE *e=(struct _FpXQE *) E;
+  return random_FpXQE(e->a4, e->a6, e->T, e->p);
+}
+
+static const struct bb_group FpXQE_group={_FpXQE_add,_FpXQE_mul,_FpXQE_rand,hash_GEN,ZXV_equal,ell_is_inf};
+
+GEN
+FpXQE_order(GEN z, GEN o, GEN a4, GEN T, GEN p)
+{
+  pari_sp av = avma;
+  struct _FpXQE e;
+  e.a4=a4; e.T=T; e.p=p;
+  return gerepileuptoint(av, gen_order(z, o, (void*)&e, &FpXQE_group));
+}
+
+GEN
+FpXQE_log(GEN a, GEN b, GEN o, GEN a4, GEN T, GEN p)
+{
+  pari_sp av = avma;
+  struct _FpXQE e;
+  e.a4=a4; e.T=T; e.p=p;
+  return gerepileuptoint(av, gen_PH_log(a, b, o, (void*)&e, &FpXQE_group));
+}

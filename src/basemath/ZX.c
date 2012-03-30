@@ -284,6 +284,16 @@ ZX_equal(GEN V, GEN W)
   return 1;
 }
 
+int
+ZXV_equal(GEN V, GEN W)
+{
+  long l = lg(V);
+  if (l!=lg(W)) return 0;
+  while (--l > 0)
+    if (!ZX_equal(gel(V,l), gel(W,l))) return 0;
+  return 1;
+}
+
 static long
 ZX_valspec(GEN x, long nx)
 {

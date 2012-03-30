@@ -236,6 +236,17 @@ GEN
 FpX_sqr(GEN x,GEN p) { return FpX_red(ZX_sqr(x), p); }
 
 GEN
+FpX_mulu(GEN y, ulong x,GEN p)
+{
+  GEN z;
+  long i, l;
+  if (!x) return zeropol(varn(y));
+  z = cgetg_copy(y, &l); z[1] = y[1];
+  for(i=2; i<l; i++) gel(z,i) = Fp_mulu(gel(y,i), x, p);
+  return z;
+}
+
+GEN
 FpX_Fp_mul(GEN y,GEN x,GEN p)
 {
   GEN z;
