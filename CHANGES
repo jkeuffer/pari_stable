@@ -209,7 +209,7 @@ BA 46- GP function ffnbirred
 BA 47- cubic sieve algorithm for Flxq_log
 BA 48- library functions F2x_F2xqV_eval, F2x_F2xq_eval
 BA 49- forqfvec()
-BA 50- library functions FqM_image, FqM_rank
+BA 50- library functions FqM_image, FqM_rank, FpXQXQ_powers, FpXQXQ_matrix_pow
 
   Removed
     1- dropped DOS support

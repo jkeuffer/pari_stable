@@ -3967,6 +3967,14 @@ returning \kbd{NULL} if \kbd{x} is not invertible.
 \fun{GEN}{FpXQXQ_pow}{GEN x, GEN n, GEN S, GEN T, GEN p}, \kbd{x} and
 \kbd{S} being \kbd{FpXQX}s, returns $\kbd{x}^\kbd{n}$ modulo \kbd{S}.
 
+\fun{GEN}{FpXQXQ_powers}{GEN x, long n, GEN S, GEN T, GEN p}, \kbd{x} and
+\kbd{S} being \kbd{FpXQX}s, returns $[\kbd{x}^0, \dots, \kbd{x}^\kbd{n}]$ as a
+\typ{VEC} of \kbd{FpXQXQ}s.
+
+\fun{GEN}{FpXQXQ_matrix_pow}{GEN x, long m, long n, GEN S, GEN T, GEN p}, as
+\kbd{FpXQXQ\_powers}$(x, n-1,S, T, p)$, but returns the powers as a an
+$m\times n$ matrix.
+
 \fun{GEN}{FqXQ_add}{GEN x, GEN y, GEN S, GEN T, GEN p}, \kbd{x}, \kbd{y} and
 \kbd{S} being \kbd{FqX}s, returns $\kbd{x} + \kbd{y}$ modulo \kbd{S}.
 

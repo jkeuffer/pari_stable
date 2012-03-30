@@ -844,6 +844,33 @@ FpXQXQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p)
   }
   return gerepileupto(ltop, y);
 }
+
+/* generates the list of powers of x of degree 0,1,2,...,l*/
+GEN
+FpXQXQ_powers(GEN x, long l, GEN S, GEN T, GEN p)
+{
+  GEN V=cgetg(l+2,t_VEC);
+  long i;
+  gel(V,1) = pol_1(varn(x)); if (l==0) return V;
+  gel(V,2) = gcopy(x);       if (l==1) return V;
+  gel(V,3) = FpXQXQ_sqr(x,S,T,p);
+  if ((degpol(x)<<1) < degpol(S)) {
+    for(i = 4; i < l+2; i++)
+      gel(V,i) = FpXQXQ_mul(gel(V,i-1),x,S,T,p);
+  } else { /* use squarings if degree(x) is large */
+    for(i = 4; i < l+2; i++)
+      gel(V,i) = odd(i)? FpXQXQ_sqr(gel(V, (i+1)>>1),S,T,p)
+                       : FpXQXQ_mul(gel(V, i-1),x,S,T,p);
+  }
+  return V;
+}
+
+GEN
+FpXQXQ_matrix_pow(GEN y, long n, long m, GEN S, GEN T, GEN p)
+{
+  return RgXV_to_RgM(FpXQXQ_powers(y,m-1,S,T,p),n);
+}
+
 /*******************************************************************/
 /*                                                                 */
 /*                             Fq                                  */
