@@ -537,31 +537,15 @@ Flx_Berlekamp_ker(GEN u, ulong l)
 }
 
 GEN
-FqX_Berlekamp_ker(GEN u, GEN T, GEN q, GEN p)
+FqX_Berlekamp_ker(GEN u, GEN q, GEN T, GEN p)
 {
   pari_sp ltop=avma;
   long j,N = degpol(u);
-  GEN v,w,Q,p1;
-  pari_timer Ti;
-  if (DEBUGLEVEL>=4) timer_start(&Ti);
-  Q = cgetg(N+1,t_MAT); gel(Q,1) = zerocol(N);
-  w = v = FpXQXQ_pow(pol_x(varn(u)), q, u, T, p);
-  if (DEBUGLEVEL>=4) timer_printf(&Ti, "FpXQXQ_pow");
-  for (j=2; j<=N; j++)
-  {
-    p1 = RgX_to_RgV(w, N);
-    gel(p1,j) = gaddgs(gel(p1,j), -1);
-    gel(Q,j) = p1;
-    if (j < N)
-    {
-      pari_sp av = avma;
-      w = gerepileupto(av, FpXQX_divrem(FpXQX_mul(w,v, T,p), u,T,p,ONLY_REM));
-    }
-  }
-  if (DEBUGLEVEL>=4) timer_printf(&Ti, "Berlekamp_matrix");
-  p1 = FqM_ker(Q,T,p);
-  if (DEBUGLEVEL>=4) timer_printf(&Ti, "Berlekamp_ker");
-  return gerepileupto(ltop,p1);
+  GEN XP = FpXQXQ_pow(pol_x(varn(u)),q,u,T,p);
+  GEN Q  = FpXQXQ_matrix_pow(XP,N,N,u,T,p);
+  for (j=1; j<=N; j++)
+    gcoeff(Q,j,j) = Fq_sub(gcoeff(Q,j,j), gen_1, T, p);
+  return gerepileupto(ltop, FqM_ker(Q,T,p));
 }
 
 GEN
@@ -750,7 +734,7 @@ FqX_nbfact(GEN u, GEN T, GEN p)
   pari_sp av = avma;
   GEN vker;
   if (!T) return FpX_nbfact(u, p);
-  vker = FqX_Berlekamp_ker(u, T, powiu(p, degpol(T)), p);
+  vker = FqX_Berlekamp_ker(u, powiu(p, degpol(T)), T, p);
   avma = av; return lg(vker)-1;
 }
 
@@ -1575,7 +1559,7 @@ FqX_split_Berlekamp(GEN *t, GEN q, GEN T, GEN p)
   long N = degpol(u), vu = varn(u), vT = varn(T), dT = degpol(T);
   long d, i, ir, L, la, lb;
 
-  vker = FqX_Berlekamp_ker(u,T,q,p);
+  vker = FqX_Berlekamp_ker(u,q,T,p);
   vker = RgM_to_RgXV(vker,vu);
   d = lg(vker)-1;
   qo2 = shifti(q, -1); /* (q-1) / 2 */
@@ -2834,7 +2818,7 @@ FqX_factor_i(GEN f, GEN T, GEN p)
       else
       {
 #if 0
-        lfact += FqX_split_Berlekamp(t+lfact, q, T, p);
+        lfact += FqX_split_Berlekamp(&gel(t,lfact), q, T, p);
 #else
         GEN P = FqX_split_Trager(gel(t,lfact), T, p);
         if (P) {
