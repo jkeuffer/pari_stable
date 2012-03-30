@@ -3089,6 +3089,32 @@ FpM_rank(GEN x, GEN p)
 }
 
 GEN
+FqM_image(GEN x, GEN T, GEN p)
+{
+  pari_sp av = avma;
+  GEN d, y;
+  long j, k, r;
+
+  d = FqM_gauss_pivot(x,T,p,&r);
+  if (!d) { avma = av; return gcopy(x); }
+  /* d left on stack for efficiency */
+  r = lg(x)-1 - r; /* = dim Im(x) */
+  y = cgetg(r+1,t_MAT);
+  for (j=k=1; j<=r; k++)
+    if (d[k]) gel(y,j++) = gcopy(gel(x,k));
+  return y;
+}
+
+long
+FqM_rank(GEN x, GEN T, GEN p)
+{
+  pari_sp av = avma;
+  long r;
+  (void)FqM_gauss_pivot(x,T,p,&r);
+  avma = av; return lg(x)-1 - r;
+}
+
+GEN
 F2m_image(GEN x)
 {
   pari_sp av = avma;

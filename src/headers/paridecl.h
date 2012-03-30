@@ -591,6 +591,8 @@ long    FpM_rank(GEN x, GEN p);
 GEN     FpM_suppl(GEN x, GEN p);
 GEN     FqM_gauss(GEN a, GEN b, GEN T, GEN p);
 GEN     FqM_ker(GEN x, GEN T, GEN p);
+GEN     FqM_image(GEN x, GEN T, GEN p);
+long    FqM_rank(GEN a, GEN T, GEN p);
 GEN     FqM_suppl(GEN x, GEN T, GEN p);
 GEN     QM_inv(GEN M, GEN dM);
 GEN     RgM_diagonal(GEN m);
