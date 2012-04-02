@@ -1,0 +1,21 @@
+Function: qfauto
+Section: linear_algebra
+C-Name: qfauto0
+Prototype: GDG
+Help: qfauto(G,{fl}): automorphism group of the positive definite quadratic form
+ G.
+Doc:
+ $G$ being a square and symmetric matrix with integer entries representing a
+ positive definite quadratic form, outputs the automorphism group of the form.
+
+ This implements an algorithm of Plesken and Souvignier, following closely
+ Souvignier own implementation.
+
+ The output is a two-components vector $[o,g]$ where $o$ is the group
+ order and $g$ is the list of generators (as a vector).
+
+ The interface of this function is experimental and will likely change in future
+ release.  See \kbd{qfisominit} for the meaning of \kbd{fl}.
+
+ Since this requires computing the minimal vectors, the computations can
+ become very lengthy as the dimension of $G$ grows.

@@ -1,0 +1,26 @@
+Function: qfisominit
+Section: linear_algebra
+C-Name: qfisominit0
+Prototype: GDG
+Help: qfisominit(x,{fl}): x being a square and symmetric matrix representing an
+ integral positive definite quadratic form, this function return a isom
+ structure allowing to compute isomorphisms between x and other quadratic form
+ faster.
+Doc:
+ $x$ being a square and symmetric matrix with integer entries representing a
+ positive definite quadratic form, return an \kbd{isom} structure allowing to
+ compute isomorphisms between $x$ and other quadratic forms faster.
+
+ The interface of this function is experimental and will likely change in future
+ release.
+
+ If present, the optional parameter \kbd{fl} must be a \typ{VEC} with two
+ components. It allows to specifiy the invariants used, which can make the
+ computation faster or slower. The components are
+
+ $\bullet$ \kbd{fl[1]} Depth of scalar product combination to use.
+
+ $\bullet$ \kbd{fl[2]} Maximum level of Bacher polynomials to use.
+
+ Since this function computes the minimal vectors, it can become very lengthy
+ as the dimension of $G$ grows.

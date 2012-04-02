@@ -70,6 +70,9 @@ BA 15- allow ellsearch(t_VEC) : search for curve with given name, in given
    16- option flag to mateigen: also return the eigenvalues
    17- [libpari] Z_lvalrem_stop, u_lvalrem_stop
    18- [libpari] ZX_rescale_lt
+BA 19- Port of the program ISOM by Bernt Souvignier for computation of
+       automorphisms and isomorphisms of lattices.
+       New GP functions qfauto, qfisom, qfisominit, qfautoexport
 
   Changed
     1- gp --primelimit lim (gp -p lim) is deprecated. Use the generic form

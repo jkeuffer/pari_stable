@@ -2974,6 +2974,13 @@ int     uisprime(ulong n);
 ulong   uprime(long n);
 ulong   uprimepi(ulong n);
 
+/* qfisom.c */
+
+GEN     qfauto0(GEN g, GEN flags);
+GEN     qfautoexport(GEN g, long flag);
+GEN     qfisom0(GEN g, GEN h, GEN flags);
+GEN     qfisominit0(GEN g, GEN flags);
+
 /* random.c */
 
 GEN     genrand(GEN N);

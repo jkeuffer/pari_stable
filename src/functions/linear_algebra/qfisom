@@ -1,0 +1,22 @@
+Function: qfisom
+Section: linear_algebra
+C-Name: qfisom0
+Prototype: GGDG
+Help: qfisom(G,H,{fl}): find an isomorphism between the integral positive definite
+ quadratic forms G and H if it exists. G can also be given by an isom structure
+ which is preferable if several forms need to be compared to G.
+Doc:
+ $G$ being a square and symmetric matrix with
+ integer entries representing a positive definite quadratic form, outputs the
+ automorphism group of the form.
+
+ G can also be given by an isom structure which is preferable if several forms
+ need to be compared to G.
+
+ This implements an algorithm of Plesken and Souvignier, following closely
+ Souvignier own implementation.
+
+ See \kbd{qfisominit} for the meaning of \kbd{fl}.
+
+ Since this requires computing the minimal vectors, the computations can
+ become very lengthy as the dimension of $G$ grows.
