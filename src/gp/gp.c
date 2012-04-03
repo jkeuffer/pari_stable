@@ -1335,6 +1335,7 @@ static const char *DFT_INPROMPT = "";
 
 static char Prompt[MAX_PROMPT_LEN], Prompt_cont[MAX_PROMPT_LEN];
 
+#ifndef _WIN32
 /* if prompt is coloured, we must tell readline to ignore the
  * corresponding ANSI escape sequences */
 static void
@@ -1342,26 +1343,20 @@ brace_color(char *s, int c, int force)
 {
   if (disable_color || (gp_colors[c] == c_NONE && !force)) return;
 #ifdef RL_PROMPT_START_IGNORE
-  if (GP_DATA->use_readline)
+  if (GP_DATA->use_readline) {
     *s++ = RL_PROMPT_START_IGNORE;
-#endif
-  term_get_color(s, c);
-#ifdef RL_PROMPT_START_IGNORE
-  if (GP_DATA->use_readline)
-  {
-    s+=strlen(s);
+    term_get_color(s, c);
+    s += strlen(s);
     *s++ = RL_PROMPT_END_IGNORE;
     *s = 0;
-  }
+  } else
 #endif
+    term_get_color(s, c);
 }
 
 static void
 color_prompt(char *buf, const char *prompt)
 {
-#ifdef _WIN32
-  strcpy(buf,prompt);
-#else
   char *s = buf;
   *s = 0;
   /* escape sequences bug readline, so use special bracing (if available) */
@@ -1369,8 +1364,11 @@ color_prompt(char *buf, const char *prompt)
   s += strlen(s); strcpy(s, prompt);
   s += strlen(s);
   brace_color(s, c_INPUT, 1);
-#endif
 }
+#else
+static void
+color_prompt(char *buf, const char *prompt) { strcpy(buf,prompt); }
+#endif
 
 static const char *
 expand_prompt(char *buf, const char *prompt, filtre_t *F)
