@@ -1293,7 +1293,7 @@ ellheegner(GEN E)
   }
   heegner_find_disc(&pointsf, &ind, E, N, heegner_indexmult(E, wtor, tam, prec), prec);
   ymin = gsqrt(gel(pointsf, 1), prec);
-  if (DEBUGLEVEL == 0) err_printf("N = %Ps, ymin*N = %Ps\n",N,gmul(ymin,N));
+  if (DEBUGLEVEL == 1) err_printf("N = %Ps, ymin*N = %Ps\n",N,gmul(ymin,N));
   pts = gel(pointsf, 2);
   D = gel(pointsf, 3);
   vDi = gsqrt(negi(D), prec);
