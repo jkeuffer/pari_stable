@@ -851,8 +851,9 @@ qfb_mult(GEN Q, GEN M)
   return qfi(W1, W2, W3);
 }
 
+#ifdef DEBUG
 static void
-best_point(GEN Q, GEN NQ, GEN f, GEN *u, GEN *v)
+best_point_old(GEN Q, GEN NQ, GEN f, GEN *u, GEN *v)
 {
   long n, k;
   GEN U, c, d;
@@ -883,6 +884,132 @@ best_point(GEN Q, GEN NQ, GEN f, GEN *u, GEN *v)
         return;
     }
   }
+}
+/* q(x,y) = ax^2 + bxy + cy^2 */
+static GEN
+qfb_eval(GEN q, GEN x, GEN y)
+{
+  GEN a = gel(q,1), b = gel(q,2), c = gel(q,3);
+  GEN x2 = sqri(x), y2 = sqri(y), xy = mulii(x,y);
+  return addii(addii(mulii(a, x2), mulii(b,xy)), mulii(c, y2));
+}
+#endif
+
+static long
+nexti(long i) { return i>0 ? -i : 1-i; }
+
+/* q0 + i q1 + i^2 q2 */
+static GEN
+qfmin_eval(GEN q0, GEN q1, GEN q2, long i)
+{ return addii(mulis(addii(mulis(q2, i), q1), i), q0); }
+
+/* assume a > 0, return gcd(a,b,c) */
+static ulong
+gcduii(ulong a, GEN b, GEN c)
+{
+  ulong d = a;
+  d = ugcd(umodiu(b, d), d );
+  if (d == 1) return 1;
+  d = ugcd(umodiu(c, d), d );
+  return d;
+}
+
+static void
+best_point(GEN Q, GEN NQ, GEN f, GEN *pu, GEN *pv)
+{
+  GEN a = mulii(NQ, gel(f,3)), b = negi(gel(f,2)), c = diviiexact(gel(f,1), NQ);
+  GEN D = absi( qfb_disc(f) );
+  GEN U, qr = redimagsl2(qfi(a,b,c), &U);
+  GEN A = gel(qr,1), B = gel(qr,2), A2 = shifti(A,1), AA4 = sqri(A2);
+  GEN V, best;
+  long y;
+
+  /* 4A qr(x,y) = (2A x + By)^2 + D y^2
+   * Write x = x0(y) + i, where x0 is an integer minimum
+   * (the smallest in case of tie) of x-> qr(x,y), for given y.
+   * 4A qr(x,y) = ((2A x0 + By)^2 + Dy^2) + 4A i (2A x0 + By) + 4A^2 i^2
+   *            = q0(y) + q1(y) i + q2 i^2
+   * Loop through (x,y), y>0 by (roughly) increasing values of qr(x,y) */
+
+  /* We must test whether [X,Y]~ := U * [x,y]~ satisfy (X NQ, Y Q) = 1
+   * This is equivalent to (X,Y) = 1 (note that (X,Y) = (x,y)), and
+   * (X, Q) = (Y, NQ) = 1.
+   * We have U * [x0+i, y]~ = U * [x0,y]~ + i U[,1] =: V0 + i U[,1] */
+
+  /* try [1,0]~ = first minimum */
+  V = gel(U,1); /* U *[1,0]~ */
+  *pu = gel(V,1);
+  *pv = gel(V,2);
+  if (is_pm1(gcdii(*pu, Q)) && is_pm1(gcdii(*pv, NQ))) return;
+
+  /* try [0,1]~ = second minimum */
+  V = gel(U,2); /* U *[0,1]~ */
+  *pu = gel(V,1);
+  *pv = gel(V,2);
+  if (is_pm1(gcdii(*pu, Q)) && is_pm1(gcdii(*pv, NQ))) return;
+
+  /* (X,Y) = (1, \pm1) always works. Try to do better now */
+  best = subii(addii(a, c), absi(b));
+  *pu = gen_1;
+  *pv = signe(b) < 0? gen_1: gen_m1;
+
+  for (y = 1;; y++)
+  {
+    GEN Dy2, r, By, x0, q0, q1, V0;
+    long i;
+    if (y > 1)
+    {
+      if (gcduii(y, gcoeff(U,1,1),  Q) != 1) continue;
+      if (gcduii(y, gcoeff(U,2,1), NQ) != 1) continue;
+    }
+    Dy2 = mulii(D, sqru(y));
+    if (cmpii(Dy2, best) >= 0) break; /* we won't improve. STOP */
+    By = muliu(B,y), x0 = truedvmdii(negi(By), A2, &r);
+    if (cmpii(r, A) >= 0) { x0 = subis(x0,1); r = subii(r, A2); }
+    /* (2A x + By)^2 + Dy^2, minimal at x = x0. Assume A2 > 0 */
+    /* r = 2A x0 + By */
+    q0 = addii(sqri(r), Dy2); /* minimal value for this y, at x0 */
+    if (cmpii(q0, best) >= 0) continue; /* we won't improve for this y */
+    q1 = shifti(mulii(A2, r), 1);
+
+    V0 = ZM_ZC_mul(U, mkcol2(x0, utoipos(y)));
+    for (i = 0;; i = nexti(i))
+    {
+      pari_sp av2 = avma;
+      GEN x, N = qfmin_eval(q0, q1, AA4, i);
+      if (cmpii(N , best) >= 0) break;
+      x = addis(x0, i);
+      if (ugcd(umodiu(x, y), y) == 1)
+      {
+        GEN u, v;
+        V = ZC_add(V0, ZC_z_mul(gel(U,1), i)); /* [X, Y] */
+        u = gel(V,1);
+        v = gel(V,2);
+        if (is_pm1(gcdii(u, Q)) && is_pm1(gcdii(v, NQ)))
+        {
+          *pu = u;
+          *pv = v;
+          best = N; break;
+        }
+      }
+      avma = av2;
+    }
+  }
+#ifdef DEBUG
+  {
+    GEN oldu, oldv, F = qfi(a,b,c);
+    best_point_old(Q, NQ, f, &oldu, &oldv);
+    if (!equalii(oldu, *pu) || !equalii(oldv, *pv))
+    {
+      if (!equali1(gcdii(mulii(*pu, NQ), mulii(*pv, Q))))
+        pari_err_BUG(e_MISC,"best_point (gcd)");
+      pari_printf("-----> %Ps,%Ps,%Ps,      %Ps (%Ps)< %Ps (%Ps)\n",
+                  Q,NQ,f,
+                  mkvec2(*pu,*pv),   qfb_eval(F, *pu,*pv),
+                  mkvec2(oldu,oldv), qfb_eval(F, oldu, oldv));
+    }
+  }
+#endif
 }
 
 static GEN
@@ -1166,7 +1293,7 @@ ellheegner(GEN E)
   }
   heegner_find_disc(&pointsf, &ind, E, N, heegner_indexmult(E, wtor, tam, prec), prec);
   ymin = gsqrt(gel(pointsf, 1), prec);
-  if (DEBUGLEVEL) err_printf("N = %Ps, ymin*N = %Ps\n",N,gmul(ymin,N));
+  if (DEBUGLEVEL == 0) err_printf("N = %Ps, ymin*N = %Ps\n",N,gmul(ymin,N));
   pts = gel(pointsf, 2);
   D = gel(pointsf, 3);
   vDi = gsqrt(negi(D), prec);
