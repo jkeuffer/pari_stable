@@ -1002,11 +1002,13 @@ best_point(GEN Q, GEN NQ, GEN f, GEN *pu, GEN *pv)
     if (!equalii(oldu, *pu) || !equalii(oldv, *pv))
     {
       if (!equali1(gcdii(mulii(*pu, NQ), mulii(*pv, Q))))
-        pari_err_BUG(e_MISC,"best_point (gcd)");
-      pari_printf("-----> %Ps,%Ps,%Ps,      %Ps (%Ps)< %Ps (%Ps)\n",
-                  Q,NQ,f,
-                  mkvec2(*pu,*pv),   qfb_eval(F, *pu,*pv),
-                  mkvec2(oldu,oldv), qfb_eval(F, oldu, oldv));
+        pari_err_BUG("best_point (gcd)");
+      if (cmpii(qfb_eval(F, *pu,*pv), qfb_eval(F, oldu, oldv)) > 0)
+      {
+        pari_warn(warner, "%Ps,%Ps,%Ps, %Ps > %Ps",
+                          Q,NQ,f, mkvec2(*pu,*pv), mkvec2(oldu,oldv));
+        pari_err_BUG("best_point (too large)");
+      }
     }
   }
 #endif
