@@ -3269,6 +3269,7 @@ INLINE GEN    mkmat(GEN x);
 INLINE GEN    mkmat2(GEN x, GEN y);
 INLINE GEN    mkmatcopy(GEN x);
 INLINE GEN    mkpolmod(GEN x, GEN y);
+INLINE GEN    mkqfi(GEN x, GEN y, GEN z);
 INLINE GEN    mkquad(GEN n, GEN x, GEN y);
 INLINE GEN    mkrfrac(GEN x, GEN y);
 INLINE GEN    mkvec(GEN x);

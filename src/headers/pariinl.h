@@ -104,6 +104,10 @@ mkvecsmall3(long x,long y,long z) { GEN v = cgetg(4, t_VECSMALL);
 INLINE GEN
 mkvecsmall4(long x,long y,long z,long t) { GEN v = cgetg(5, t_VECSMALL);
   v[1]=x; v[2]=y; v[3]=z; v[4]=t; return v; }
+
+INLINE GEN
+mkqfi(GEN x, GEN y, GEN z)
+{ GEN v=cgetg(4,t_QFI); gel(v,1)=x; gel(v,2)=y; gel(v,3)=z; return v; }
 /* vec */
 INLINE GEN
 mkvec(GEN x) { retmkvec(x); }

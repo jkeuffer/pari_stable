@@ -683,37 +683,25 @@ listedisc(GEN fa4N, GEN badp, long d)
   avma = av; return v;
 }
 
-/* L = vector of [q1,q2] or [q1,q2,q2'];
- * len = lg(L) */
+/* L = vector of [q1,q2] or [q1,q2,q2']
+ * cd = (b^2 - D)/(4N) */
 static void
-remplirliste(GEN N, GEN D, GEN b, GEN d, GEN L, long *s)
+remplirliste(GEN N, GEN b, GEN c, GEN d, GEN L, long *s)
 {
   long k, l = lg(L);
-  GEN add, frm, frm2, V2, V = cgetg(4, t_QFI);
-  gel(V, 1) = mulii(d, N);
-  gel(V, 2) = b;
-  gel(V, 3) = diviiexact(subii(sqri(b), D), mulii(mulsi(4, N), d));
-  frm = redimag(V);
+  GEN add, frm2, a = mulii(d, N), V = mkqfi(a,b,c), frm = redimag(V);
   for (k = 1; k < l; ++k)
   {
-    GEN Lk = gel(L,k);
-    GEN Lk1 = gel(Lk, 1);
-    if (gequal(frm, gel(Lk,2)))
-    {
-      if (cmpii(gel(V,1), gel(Lk1,1)) < 0) gel(Lk,1) = V;
-      return;
-    }
-    if (lg(Lk) == 4 && gequal(frm, gel(Lk,3)))
-    {
-      if (cmpii(gel(V,1), gel(Lk1,1)) < 0) gel(Lk,1) = V;
-      return;
-    }
+    GEN Lk = gel(L,k), Lk1 = gel(Lk, 1);
+    long i;
+    for (i = 2; i < lg(Lk); i++)
+      if (gequal(frm, gel(Lk,i)))
+      {
+        if (cmpii(a, gel(Lk1,1)) < 0) gel(Lk,1) = V;
+        return;
+      }
   }
-  V2 = cgetg(4, t_QFI);
-  gel(V2, 1) = d;
-  gel(V2, 2) = negi(b);
-  gel(V2, 3) = mulii(gel(V, 3), N);
-  frm2 = redimag(V2);
+  frm2 = redimag( mkqfi(d, negi(b), mulii(c,N)) );
   add = gequal(frm, frm2)? mkvec2(V,frm): mkvec3(V,frm,frm2);
   vectrunc_append(L, add);
   *s += lg(add) - 2;
@@ -741,16 +729,20 @@ listeheegner(GEN N, GEN faN4, GEN D)
   GEN b = Zn_sqrt(D, faN4);
   long h = itos(gel(quadclassunit0(D, 0, NULL, DEFAULTPREC), 1));
   GEN LISTE = vectrunc_init(h+1);
-  long k1, i, s = 0;
-  for (k1=0;  ;k1++)
+  long k, s = 0;
+  for (k = 0; k < kmin || s < h; k++)
   {
-    GEN bk1 =  addii(b, mulsi(2*k1, N));
-    GEN di = divisors( diviiexact(subii(sqri(bk1), D), mulsi(4, N)) );
-    for (i = 1; i < lg(di); i++)
-      remplirliste(N, D, bk1, gel(di, i), LISTE, &s);
-    if (k1 < kmin) continue;
-    if (s==h) return gerepileupto(av, listepoints(LISTE));
+    GEN bk = addii(b, mulsi(2*k, N));
+    GEN C = diviiexact(shifti(subii(sqri(bk), D), -2), N);
+    GEN div = divisors(C);
+    long i, l = lg(div);
+    for (i = 1; i < l; i++)
+    {
+      GEN d = gel(div, i), c = gel(div, l-i); /* cd = C */
+      remplirliste(N, bk, c, d, LISTE, &s);
+    }
   }
+  return gerepileupto(av, listepoints(LISTE));
 }
 
 /* P a t_INT or t_FRAC, return its logarithmic height */
