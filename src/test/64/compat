@@ -921,7 +921,7 @@ Vecsmall([7097366681807012798, 1052849639680933018, 6908772592309264402, 511
 ? getstack()
 200
 ? globalred(acurve)
-[37, [1, -1, 2, 2], 1]
+[37, [1, -1, 2, 2], 1, mat([37, 1])]
 ? getstack()
 200
 ? hclassno(2000003)
@@ -2648,6 +2648,6 @@ mod(391, 3120), mod(2081, 3120)]]
 ? getstack()
 200
 ? getheap()
-[599, 99851]
+[599, 99865]
 ? print("Total time spent: ",gettime);
-Total time spent: 192
+Total time spent: 180

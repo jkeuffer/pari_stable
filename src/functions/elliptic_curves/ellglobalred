@@ -2,18 +2,25 @@ Function: ellglobalred
 Section: elliptic_curves
 C-Name: ellglobalred
 Prototype: G
-Help: ellglobalred(E): E being an elliptic curve, returns [N,[u,r,s,t],c],
+Help: ellglobalred(E): E being an elliptic curve, returns [N,[u,r,s,t],c, faN],
  where N is the conductor of E, [u,r,s,t] leads to the standard model for E,
- and c is the product of the local Tamagawa numbers c_p.
+ c is the product of the local Tamagawa numbers c_p, and faN is factor(N).
 Description:
  (gen):gen        ellglobalred($1)
 Doc:
  calculates the arithmetic conductor, the global
  minimal model of $E$ and the global \idx{Tamagawa number} $c$.
  $E$ must be a \var{smallell} as output by \kbd{ellinit}, \emph{and is supposed
- to have all its coefficients $a_i$ in} $\Q$. The result is a 3 component
- vector $[N,v,c]$. $N$ is the arithmetic conductor of the curve. $v$ gives the
- coordinate change for $E$ over $\Q$ to the minimal integral model (see
- \tet{ellminimalmodel}). Finally $c$ is the product of the local Tamagawa
- numbers $c_p$, a quantity which enters in the \idx{Birch and Swinnerton-Dyer
- conjecture}.\sidx{minimal model}
+ to have all its coefficients $a_i$ in} $\Q$. The result is a
+ vector $[N,v,c,F]$, where
+
+ \item $N$ is the arithmetic conductor of the curve,
+
+ \item $v$ gives the coordinate change for $E$ over $\Q$ to the minimal
+ integral model (see \tet{ellminimalmodel}),
+
+ \item $c$ is the product of the local Tamagawa numbers $c_p$, a quantity
+ which enters in the \idx{Birch and Swinnerton-Dyer
+ conjecture},\sidx{minimal model}
+
+ \item $F$ is the factorization of $N$ over $\Z$.

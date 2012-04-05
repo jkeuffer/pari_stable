@@ -2352,17 +2352,17 @@ ellminimalmodel(GEN E, GEN *ptv)
 /* Reduction of a rational curve E to its standard minimal model
  * (a1,a3 = 0 or 1, a2 = -1, 0 or 1).
  *
- * Return [N, [u,r,s,t], c], where
+ * Return [N, [u,r,s,t], c, fa], where
  *   N = arithmetic conductor of E
  *   c = product of the local Tamagawa numbers cp
- *   [u, r, s, t] = the change of variable reducing E to its minimal model,
- *     with u > 0 */
+ *   [u, r, s, t] = change of variable E -> minimal model, with u > 0
+ *   fa = factorization of N */
 GEN
 ellglobalred(GEN E)
 {
-  long k, l;
+  long k, l, iN;
   pari_sp av = avma;
-  GEN c, P, N, v, v0, e, c4, c6, D;
+  GEN c, P, NP, NE, Nfa, v, v0, e, c4, c6, D;
 
   v0 = ellintegralmodel(E);
   e = ell_to_small(E);
@@ -2375,18 +2375,27 @@ ellglobalred(GEN E)
   l = lg(P);
   for (k = 1; k < l; k++) (void)Z_pvalrem(D, gel(P,k), &D);
   if (!is_pm1(D)) P = shallowconcat(P, gel(Z_factor(absi(D)),1));
-  l = lg(P); c = N = gen_1;
+  l = lg(P); c = gen_1;
+  iN = 1;
+  NP = cgetg(l, t_COL);
+  NE = cgetg(l, t_COL);
   for (k = 1; k < l; k++)
   {
-    GEN p = gel(P,k), q = localred(e, p, 0), w = gel(q,3);
-    N = mulii(N, powii(p, gel(q,1)));
+    GEN p = gel(P,k), q = localred(e, p, 0), ex = gel(q,1), w = gel(q,3);
+    if (signe(ex))
+    {
+      gel(NP, iN) = p;
+      gel(NE, iN) = ex; iN++;
+    }
     c = mulii(c, gel(q,4));
     if (!gequal1(gel(w,1)))
       cumule(&v, &e, gel(w,1), gel(w,2), gel(w,3), gel(w,4));
   }
+  setlg(NP, iN);
+  setlg(NE, iN); Nfa = mkmat2(NP, NE);
   standard_model(e, &v);
   if (v0) { gcumulev(&v0, v); v = v0; }
-  return gerepilecopy(av, mkvec3(N,v,c));
+  return gerepilecopy(av, mkvec4(factorback(Nfa),v,c,Nfa));
 }
 
 GEN
