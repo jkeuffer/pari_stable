@@ -1049,7 +1049,7 @@ lift_points(GEN ell, GEN N, GEN f)
       }
     }
   }
-  return mkvec2copy(tf, stoi(myatk(ell, Qf)));
+  return mkvec3(tf, stoi(myatk(ell, Qf)),yf);
 }
 
 /***************************/
@@ -1190,20 +1190,16 @@ heegner_find_point(GEN e, GEN ht, GEN N, GEN torsion, GEN z1, long k, long prec)
 static GEN
 process_points(GEN ell, GEN N, long D)
 {
-  GEN ymin;
   GEN LISTE = listeheegner(N, stoi(D));
   long k, l = lg(LISTE);
+  GEN ymin = qimag2(gmael(LISTE, 1, 1));
   for (k = 2; k<l; k++)
   {
     GEN rel = lift_points(ell, N, gmael(LISTE, k, 1));
     gmael(LISTE, k, 1) = gel(rel, 1);
     gmael(LISTE, k, 2) = gmul(gel(rel, 2), gmael(LISTE, k, 2));
-  }
-  ymin = qimag2(gmael(LISTE, 1, 1));
-  for (k = 2; k<l; k++)
-  {
-    GEN y = qimag2(gmael(LISTE, k, 1));
-    if (gcmp(y, ymin) < 0) ymin = y;
+    if (gcmp(gel(rel,3), ymin) < 0)
+      ymin = gel(rel,3);
   }
   return mkvec3(ymin,LISTE,stoi(D));
 }
