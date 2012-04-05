@@ -1430,6 +1430,7 @@ void    checksmallell(GEN e);
 void    checkellpt(GEN z);
 void    checkell5(GEN e);
 GEN     ell_to_small_red(GEN e, GEN *N);
+GEN     ell_to_small_redfa(GEN e, GEN *N, GEN *faN);
 GEN     ellap(GEN e, GEN p);
 GEN     ellchangecurve(GEN e, GEN ch);
 GEN     elldivpol(GEN e, long n, long v);

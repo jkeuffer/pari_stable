@@ -2405,6 +2405,14 @@ ell_to_small_red(GEN e, GEN *N)
   E = _coordch(E,gel(gr,2));
   *N = gel(gr,1); return E;
 }
+GEN
+ell_to_small_redfa(GEN e, GEN *N, GEN *faN)
+{
+  GEN E = ell_to_small(e), gr = ellglobalred(E);
+  E = _coordch(E,gel(gr,2));
+  *N = gel(gr,1);
+  *faN = gel(gr,4); return E;
+}
 
 /********************************************************************/
 /**                                                                **/
@@ -2667,17 +2675,21 @@ ellrootno_p(GEN e, GEN p, ulong ex)
 }
 
 long
-ellrootno_global(GEN e, GEN N)
+ellrootno_global(GEN e, GEN fa)
 {
-  long i, v, s = -1;
-  GEN fa, P, E;
+  GEN P = gel(fa,1), E = gel(fa,2);
+  long i, l = lg(P), s = -1;
 
-  v = Z_lvalrem(N, 2, &N); if (v) s *= ellrootno_2(e);
-  v = Z_lvalrem(N, 3, &N); if (v) s *= ellrootno_3(e);
-  fa = Z_factor(N);
-  P = gel(fa,1);
-  E = gel(fa,2);
-  for (i=1; i<lg(P); i++) s *= ellrootno_p(e, gel(P,i), itou(gel(E,i)));
+  for (i = 1; i < l; i++)
+  {
+    GEN p = gel(P,i);
+    switch(itou_or_0(p))
+    {
+      case 2: s *= ellrootno_2(e); break;
+      case 3: s *= ellrootno_3(e); break;
+      default: s *= ellrootno_p(e, p, itou(gel(E,i)));
+    }
+  }
   return s;
 }
 
@@ -2692,8 +2704,9 @@ ellrootno(GEN e, GEN p)
   checksmallell(e);
   if (!p || isint1(p))
   {
-    e = ell_to_small_red(e, &N);
-    s = ellrootno_global(e, N);
+    GEN faN;
+    e = ell_to_small_redfa(e, &N, &faN);
+    s = ellrootno_global(e, faN);
   }
   else
   {
@@ -3559,7 +3572,7 @@ elllseries(GEN e, GEN s, GEN A, long prec)
   pari_sp av = avma, av1, lim;
   ulong l, n;
   long eps, flun;
-  GEN z, cg, v, cga, cgb, s2, K, gs, N;
+  GEN z, cg, v, cga, cgb, s2, K, gs, N, faN;
 
   if (!A) A = gen_1;
   else
@@ -3571,8 +3584,8 @@ elllseries(GEN e, GEN s, GEN A, long prec)
   if (isint(s, &s) && signe(s) <= 0) { avma = av; return gen_0; }
   flun = gequal1(A) && gequal1(s);
   checksmallell(e);
-  e = ell_to_small_red(e, &N);
-  eps = ellrootno_global(e, N);
+  e = ell_to_small_redfa(e, &N, &faN);
+  eps = ellrootno_global(e, faN);
   if (flun && eps < 0) { avma = av; return real_0(prec); }
 
   gs = ggamma(s, prec);

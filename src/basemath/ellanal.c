@@ -440,10 +440,10 @@ ellL1_i(struct ellld *el, struct bg_data *bg, long r, GEN ap, long prec)
 static void
 init_el(struct ellld *el, GEN E, long *parity, long bitprec)
 {
-  GEN eX;
+  GEN eX, faN;
   long prec;
   checksmallell(E);
-  el->E = ell_to_small_red(E, &el->N);
+  el->E = ell_to_small_redfa(E, &el->N, &faN);
   prec = nbits2prec(bitprec+(expi(el->N)>>1));
   el->X = divrr(Pi2n(1, prec), sqrtr(itor(el->N, prec))); /* << 1 */
   eX = mpexp(el->X);
@@ -451,7 +451,7 @@ init_el(struct ellld *el, GEN E, long *parity, long bitprec)
   el->eX = eX;
   el->emX = invr(el->eX);
   el->epsbit = bitprec+1;
-  *parity = (ellrootno_global(el->E, el->N) > 0)? 0: 1; /* rank parity */
+  *parity = (ellrootno_global(el->E, faN) > 0)? 0: 1; /* rank parity */
 }
 
 static GEN
@@ -616,12 +616,12 @@ lambda1(GEN E, GEN p, long prec)
 }
 
 static GEN
-lambdalist(GEN E, GEN N, long prec)
+lambdalist(GEN E, GEN faN, long prec)
 {
   pari_sp ltop = avma;
   GEN res;
   long i, j, k, l, m, n;
-  GEN plist = gel(Z_factor(N), 1);
+  GEN plist = gel(faN, 1);
   long np = lg(plist);
   GEN dis = ell_get_disc(E);
   GEN v = cgetg(np, t_VEC);
@@ -731,12 +731,13 @@ listepoints(GEN L)
   return v;
 }
 
+/* faN4 = factor(4*N) */
 static GEN
-listeheegner(GEN N, GEN D)
+listeheegner(GEN N, GEN faN4, GEN D)
 {
   pari_sp av = avma;
   const long kmin = 30;
-  GEN b = Zn_sqrt(D, mulsi(4, N));
+  GEN b = Zn_sqrt(D, faN4);
   long h = itos(gel(quadclassunit0(D, 0, NULL, DEFAULTPREC), 1));
   GEN LISTE = vectrunc_init(h+1);
   long k1, i, s = 0;
@@ -1026,9 +1027,9 @@ best_lift(GEN N, GEN Q, GEN NQ, GEN f)
 }
 
 static GEN
-lift_points(GEN ell, GEN N, GEN f)
+lift_points(GEN ell, GEN N, GEN faN, GEN f)
 {
-  GEN div = divisors(N);
+  GEN div = divisors(faN);
   GEN tf = best_lift(N, gen_1, N, f);
   GEN yf = qimag2(tf);
   GEN Qf = gen_1;
@@ -1083,8 +1084,20 @@ heegner_indexmult(GEN E, long t, GEN tam, long prec)
   return gerepileupto(av, divrs(divir(tam, om), 4*t*t));
 }
 
+
+/* omega(gcd(D, N)), given faN = factor(N) */
+static long
+omega_N_D(GEN faN, GEN D)
+{
+  GEN P = gel(faN, 1);
+  long i, l = lg(P), w = 0;
+  for (i = 1; i < l; i++)
+    if (dvdii(D, gel(P,i))) w++;
+  return w;
+}
+
 static GEN
-heegner_indexmultD(GEN N, GEN a, GEN D, long prec)
+heegner_indexmultD(GEN faN, GEN a, GEN D, long prec)
 {
   pari_sp av = avma;
   GEN b, c;
@@ -1096,7 +1109,7 @@ heegner_indexmultD(GEN N, GEN a, GEN D, long prec)
     wd22 = 4;
   else
     wd22 = 1; /* (w(D)/2)^2 */
-  c = shifti(stoi(wd22), omega(gcdii(N, D))); /* (w(D)/2)^2*2^omega(gcd(D,N)) */
+  c = shifti(stoi(wd22), omega_N_D(faN,D)); /* (w(D)/2)^2 * 2^omega(gcd(D,N)) */
   return gerepileupto(av, mulri(mulrr(a, b), c));
 }
 
@@ -1163,9 +1176,9 @@ heegner_try_point(GEN E, GEN lambdas, GEN ht, GEN torsion, GEN z, long prec)
 }
 
 static GEN
-heegner_find_point(GEN e, GEN ht, GEN N, GEN torsion, GEN z1, long k, long prec)
+heegner_find_point(GEN e, GEN ht, GEN faN, GEN torsion, GEN z1, long k, long prec)
 {
-  GEN lambdas = lambdalist(e, N, prec);
+  GEN lambdas = lambdalist(e, faN, prec);
   pari_sp av = avma;
   long m;
   GEN Ore = gel(e, 15), Oim=gel(e, 16);
@@ -1187,15 +1200,16 @@ heegner_find_point(GEN e, GEN ht, GEN N, GEN torsion, GEN z1, long k, long prec)
   return NULL; /* NOT REACHED */
 }
 
+/* faN = factor(N), faN4 = factor(4*N) */
 static GEN
-process_points(GEN ell, GEN N, long D)
+process_points(GEN ell, GEN N, GEN faN, GEN faN4, long D)
 {
-  GEN LISTE = listeheegner(N, stoi(D));
+  GEN LISTE = listeheegner(N, faN4, stoi(D));
   long k, l = lg(LISTE);
   GEN ymin = qimag2(gmael(LISTE, 1, 1));
   for (k = 2; k<l; k++)
   {
-    GEN rel = lift_points(ell, N, gmael(LISTE, k, 1));
+    GEN rel = lift_points(ell, N, faN, gmael(LISTE, k, 1));
     gmael(LISTE, k, 1) = gel(rel, 1);
     gmael(LISTE, k, 2) = gmul(gel(rel, 2), gmael(LISTE, k, 2));
     if (gcmp(gel(rel,3), ymin) < 0)
@@ -1204,11 +1218,29 @@ process_points(GEN ell, GEN N, long D)
   return mkvec3(ymin,LISTE,stoi(D));
 }
 
+/* N > 1, fa = factor(N), return factor(4*N) */
+static GEN
+fa_shift2(GEN fa)
+{
+  GEN P = gel(fa,1), E = gel(fa,2);
+  if (equaliu(gcoeff(fa,1,1), 2))
+  {
+    E = shallowcopy(E);
+    gel(E,1) = addis(gel(E,1), 2);
+  }
+  else
+  {
+    P = shallowconcat(gen_2, P);
+    E = shallowconcat(gen_2, E);
+  }
+  return mkmat2(P, E);
+}
+
 static void
-heegner_find_disc(GEN *ppointsf, long *pind, GEN ell, GEN N, GEN indmult, long prec)
+heegner_find_disc(GEN *ppointsf, long *pind, GEN ell, GEN N, GEN faN, GEN indmult, long prec)
 {
   long d = 0;
-  GEN M = Z_factor(mulsi(4, N)), F = gel(M,1);
+  GEN M = fa_shift2(faN), F = gel(M,1);
   long k, s = smodis(N, 2) + 1,  lF = lg(F);
   GEN ap = cgetg(lF, t_VECSMALL);
   for (k = 1; k < lF; k++) ap[k] = equalis(ellap(ell, gel(F, k)), -1);
@@ -1220,12 +1252,12 @@ heegner_find_disc(GEN *ppointsf, long *pind, GEN ell, GEN N, GEN indmult, long p
       err_printf("List of discriminants...%Ps\n", listed);
     liste = cgetg(l, t_VEC);
     for (k = 1; k < l; ++k)
-      gel(liste, k) = process_points(ell, N, listed[k]);
+      gel(liste, k) = process_points(ell, N, faN, M, listed[k]);
     liste = vecsort0(liste, gen_1, 4);
     for (k = 1; k < l; ++k)
     {
       GEN P = gel(liste,k), D = gel(P,3);
-      GEN indmultD = heegner_indexmultD(N, indmult, D, prec);
+      GEN indmultD = heegner_indexmultD(faN, indmult, D, prec);
       GEN mulf = ltwist1(ell, D, 8+expo(indmultD));
       GEN indr = mulrr(indmultD, mulf);
       if (DEBUGLEVEL>=1) err_printf("Index^2 = %Ps\n", indr);
@@ -1261,13 +1293,13 @@ ellheegner(GEN E)
   long i,k,l;
   long bitprec=16, prec=nbits2prec(bitprec)+1;
   pari_timer T;
-  GEN red = ellglobalred(E), N = gel(red, 1), cb = gel(red,2);
+  GEN red = ellglobalred(E), N = gel(red, 1), cb = gel(red,2), faN = gel(red,4);
   GEN tam = signe(ell_get_disc(E))>0 ? shifti(gel(red,3),1):gel(red,3);
   GEN torsion = elltors(E);
   long wtor = itos( gel(torsion,1) );
 
   if (trivial_change(cb)) cb = NULL; else E = ellchangecurve(E, cb);
-  if (ellrootno(E, NULL) == 1)
+  if (ellrootno_global(E, faN) == 1)
     pari_err(e_MISC, "The curve has even analytic rank");
   w1 = gel(E,15); /* real period */
   while (1)
@@ -1289,7 +1321,7 @@ ellheegner(GEN E)
     E = ellinit(E, prec);
     w1 = gel(E,15);
   }
-  heegner_find_disc(&pointsf, &ind, E, N, heegner_indexmult(E, wtor, tam, prec), prec);
+  heegner_find_disc(&pointsf, &ind, E, N, faN, heegner_indexmult(E, wtor, tam, prec), prec);
   ymin = gsqrt(gel(pointsf, 1), prec);
   if (DEBUGLEVEL == 1) err_printf("N = %Ps, ymin*N = %Ps\n",N,gmul(ymin,N));
   pts = gel(pointsf, 2);
@@ -1309,7 +1341,7 @@ ellheegner(GEN E)
   if (DEBUGLEVEL) err_printf("z=%Ps\n", z);
   z = gsub(z, gmul(w1, ground(gdiv(z, w1))));
   lint = lg(gel(torsion, 2)) >= 2 ? cgcd(ind, itos(gmael(torsion, 2, 1))): 1;
-  P = heegner_find_point(E, ht, N, torsion, gmulsg(2*lint, z), lint*2*ind, prec);
+  P = heegner_find_point(E, ht, faN, torsion, gmulsg(2*lint, z), lint*2*ind, prec);
   if (DEBUGLEVEL)
     timer_printf(&T,"heegner_find_point");
   if (cb)
