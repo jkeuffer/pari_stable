@@ -655,29 +655,30 @@ lambdalist(GEN E, GEN faN, long prec)
 }
 
 static long
-testdisc(GEN ap, GEN M, long d, long s)
+testdisc(GEN badp, long d)
 {
-  long k, l1 = lg(M);
-  for (k = s; k < l1; ++k)
-    if (!ap[k] && umodui(-d, gel(M, k))==0) return 0;
+  long k, l = lg(badp);
+  for (k = 1; k < l; ++k)
+    if (d % badp[k] == 0) return 0;
   return 1;
 }
 
 static GEN
-listedisc(long s, GEN M, GEN ap, long d)
+listedisc(GEN fa4N, GEN badp, long d)
 {
   const long NBR_disc = 10;
   GEN v = cgetg(NBR_disc+1, t_VECSMALL);
   pari_sp av = avma;
-  GEN F = gel(M,1);
-  long j;
-  for (j = 1; j <= NBR_disc; ++j)
+  long j = 1;
+  for ( ;; d -= odd(d)? 1: 3)
   {
-    GEN dd;
-    do {
-      avma = av; d-=(d&1L)?1:3; dd = stoi(d);
-    } while(!Z_isfundamental(dd) || !Zn_issquare(dd, M) || !testdisc(ap, F, d, s));
-    v[j] = d;
+    GEN dd = stoi(d);
+    if (testdisc(badp, d) && Z_isfundamental(dd) && Zn_issquare(dd, fa4N))
+    {
+      v[j++] = d;
+      if (j > NBR_disc) break;
+    }
+    avma = av;
   }
   avma = av; return v;
 }
@@ -1236,23 +1237,39 @@ fa_shift2(GEN fa)
   return mkmat2(P, E);
 }
 
+/* P = prime divisors of N(E). Return the list of primes p in P, a_p != -1
+ * HACK: restrict to small primes since large ones won't divide our C-long
+ * discriminants */
+static GEN
+get_badp(GEN E, GEN P)
+{
+  long k, l = lg(P), ibadp = 1;
+  GEN badp = cgetg(l, t_VECSMALL);
+  for (k = 1; k < l; k++)
+  {
+    GEN p = gel(P,k);
+    long pp = itos_or_0(p);
+    if (!pp) break;
+    if (! equalim1(ellap(E,p))) badp[ibadp++] = pp;
+  }
+  setlg(badp, ibadp); return badp;
+}
+
 static void
 heegner_find_disc(GEN *ppointsf, long *pind, GEN ell, GEN N, GEN faN, GEN indmult, long prec)
 {
   long d = 0;
-  GEN M = fa_shift2(faN), F = gel(M,1);
-  long k, s = smodis(N, 2) + 1,  lF = lg(F);
-  GEN ap = cgetg(lF, t_VECSMALL);
-  for (k = 1; k < lF; k++) ap[k] = equalis(ellap(ell, gel(F, k)), -1);
+  GEN faN4 = fa_shift2(faN);
+  GEN badp = get_badp(ell, gel(faN, 1));
   for(;;)
   {
-    GEN liste, listed = listedisc(s, M, ap, d);
+    GEN liste, listed = listedisc(faN4, badp, d);
     long k, l = lg(listed);
     if (DEBUGLEVEL)
       err_printf("List of discriminants...%Ps\n", listed);
     liste = cgetg(l, t_VEC);
     for (k = 1; k < l; ++k)
-      gel(liste, k) = process_points(ell, N, faN, M, listed[k]);
+      gel(liste, k) = process_points(ell, N, faN, faN4, listed[k]);
     liste = vecsort0(liste, gen_1, 4);
     for (k = 1; k < l; ++k)
     {
