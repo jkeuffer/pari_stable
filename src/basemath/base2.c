@@ -599,8 +599,11 @@ nfmaxord(nfmaxord_t *S, GEN T, long flag, GEN fa)
   allbase_from_ordmax(S, ordmax, P, T);
 }
 
-/* d a t_INT, f a t_MAT factorisation sharing some prime divisors with d or
- * a prime */
+/* d a t_INT; f a t_MAT factorisation of some t_INT sharing some divisors
+ * with d, or a prime (t_INT). Return a factorization F of d: "primes"
+ * entries in f _may_ be composite, and are included as is in d. IF the last
+ * entry in f _is_ composite (BPSW_psp), also include the cofactor as is in
+ * F, otherwise include its factorization */
 static GEN
 update_fact(GEN d, GEN f)
 {
@@ -613,18 +616,19 @@ update_fact(GEN d, GEN f)
     default: pari_err_TYPE("nfbasis [factorization expected]",f);
   }
   l = lg(P);
-  if (l > 1 && is_pm1(gel(P,1))) P = vecslice(P, 2, --l);
+  if (l > 1 && is_pm1(gel(P,1))) P = vecslice(P, 2, --l); /* remove -1 */
   Q = cgetg(l,t_COL);
   E = cgetg(l,t_COL); iq = 1;
   for (i=1; i<l; i++)
   {
-    k = safe_Z_pvalrem(d, gel(P,i), &d);
-    if (k) { Q[iq] = P[i]; gel(E,iq) = utoipos(k); iq++; }
+    GEN p = gel(P,i);
+    k = safe_Z_pvalrem(d, p, &d);
+    if (k) { gel(Q,iq) = p; gel(E,iq) = utoipos(k); iq++; }
   }
   setlg(Q,iq);
   setlg(E,iq); fa = mkmat2(Q,E);
-  if (signe(d) < 0) d = negi(d);
   if (is_pm1(d)) return fa;
+  if (signe(d) < 0) d = negi(d);
   d = BPSW_psp(gel(P,l-1))? Z_factor(d): to_famat_shallow(d, gen_1);
   return merge_factor_i(d, fa);
 }
