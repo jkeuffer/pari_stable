@@ -7900,6 +7900,13 @@ but returns a \typ{STR}, not a malloc'ed string.
 performing tilde and environment expansion on the result. Returns a
 \typ{STR}, not a malloc'ed string.
 
+\fun{GEN}{gsprintf}{const char *fmt, ...} equivalent to
+\kbd{pari\_sprintf(fmt,...}, followed by \tet{strtoGENstr}. Returns a \typ{STR},
+not a malloc'ed string.
+
+\fun{GEN}{gvsprintf}{const char *fmt, va_list ap} variadic version of
+\tet{gsprintf}
+
 \section{Output}
 
 \subsec{Output contexts}
