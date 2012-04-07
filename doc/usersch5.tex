@@ -4508,6 +4508,9 @@ Mod(1,p)}, a \typ{COL} with \typ{INTMOD} coefficients.
 \fun{GEN}{FpV_to_mod}{GEN z, GEN p}, \kbd{z} a \kbd{ZV}. Returns \kbd{Vec(z) *
 Mod(1,p)}, a \typ{VEC} with \typ{INTMOD} coefficients.
 
+\fun{GEN}{FpVV_to_mod}{GEN z, GEN p}, \kbd{z} a \kbd{ZVV}. Returns \kbd{Vec(z) *
+Mod(1,p)}, a \typ{VEC} of \typ{VEC} with \typ{INTMOD} coefficients.
+
 \fun{GEN}{FpM_to_mod}{GEN z, GEN p}, \kbd{z} a \kbd{ZM}. Returns \kbd{z *
 Mod(1,p)}, with \typ{INTMOD} coefficients.
 
@@ -4946,6 +4949,8 @@ to get an \kbd{F2m} with \kbd{n} rows.
 
 Let $p$ a prime number and $E$ the elliptic curve given by the equation
 $E:y^2=x^3+a_4\*x+a_6$. A \kbd{FpE} is a point of $E(\F_p)$.
+Since an affine point and $a4$ determines an unique $a6$, most functions
+do not take $a6$ as an argument.
 
 \fun{GEN}{FpE_add}{GEN P, GEN Q, GEN a4, GEN p} returns the sum $P+Q$
 in the group $E(\F_p)$, where $E$ is defined by $E:y^2=x^3+a_4\*x+a_6$,
@@ -4958,6 +4963,10 @@ for any value of $a_6$ compatible with the points given.
 \fun{GEN}{FpE_neg}{GEN P, GEN p} returns $-P$.
 
 \fun{GEN}{FpE_mul}{GEN P, GEN n, GEN a4, GEN p} return $n.P$.
+
+\fun{GEN}{FpE_changepoint}{GEN P, GEN m, GEN a4, GEN p} returns the image
+$Q$ of the point $P$ on the curve $E:y^2=x^3+a_4\*x+a_6$ by the coordinate
+change $m$ (which is a $FpV$).
 
 \fun{GEN}{random_FpE}{GEN a4, GEN a6, GEN p} returns a random point on
 $E(\F_p)$, where $E$ is defined by $E:y^2=x^3+a_4\*x+a_6$.

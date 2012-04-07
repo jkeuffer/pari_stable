@@ -705,7 +705,6 @@ ellchangepointinv_Fp(GEN x, GEN ch, GEN p)
   return z;
 }
 
-
 static long
 ellexpo(GEN E)
 {
@@ -4226,17 +4225,17 @@ GEN
 ellorder(GEN e, GEN z, GEN o)
 {
   pari_sp av = avma;
-  GEN j;
+  GEN disc;
   checksmallell(e); checkellpt(z);
   if (ell_is_inf(z)) return gen_1;
-  j = ell_get_j(e);
-  if (is_rational_t(typ(j)) &&
+  disc = ell_get_disc(e);
+  if (is_rational_t(typ(disc)) &&
       is_rational_t(typ(gel(z,1))) && is_rational_t(typ(gel(z,2))))
     return utoi( _orderell(e, z) );
   if (!o)
   {
     GEN p=NULL;
-    if (Rg_is_Fp(j, &p) && RgV_is_FpV(z, &p) && p)
+    if (Rg_is_Fp(disc, &p) && RgV_is_FpV(z, &p) && p)
       o = subii(addis(p,1), ellap(e,p));
     else
       pari_err(e_MISC,"curve order required");
@@ -4684,19 +4683,111 @@ elltatepairing(GEN E, GEN P, GEN Q, GEN m)
   return ellmiller(E, P, Q, m);
 }
 
-GEN
-ellgroup(GEN E, GEN p)
+static GEN
+ellgen1_FpE(GEN N, GEN a4, GEN a6, GEN p)
+{
+  GEN F = mkvec2(N, Z_factor(N));
+  pari_sp av = avma;
+  while(1)
+  {
+    GEN P = random_FpE(a4, a6, p);
+    GEN s = FpE_order(P, F, a4, p);
+    if (equalii(s, N)) return P;
+    avma = av;
+  }
+}
+
+static GEN
+ellgen2_FpE(GEN d1, GEN d2, GEN m, GEN a4, GEN a6, GEN p)
+{
+  GEN N = mulii(d1,d2);
+  GEN F = mkvec2(N, Z_factor(N));
+  GEN dm = diviiexact(d1,m);
+  pari_sp av = avma;
+  while(1)
+  {
+    GEN P = random_FpE(a4, a6, p);
+    GEN s = FpE_order(P, F, a4, p);
+    if (equalii(s, d1))
+    {
+      GEN Q = random_FpE(a4, a6, p);
+      GEN z = FpE_weilpairing(FpE_mul(P, dm, a4, p),FpE_mul(Q, dm, a4, p), m, a4, p);
+      GEN d = Fp_order(z, F, p);
+      if (equalii(d, d2)) return mkvec2(P,Q);
+    }
+    avma = av;
+  }
+}
+
+static GEN
+ellgen(GEN E, GEN D, GEN m, GEN p)
+{
+  pari_sp av = avma;
+  if (cmpiu(p, 3)<=0)
+  {
+    ulong l = itou(p), r = lg(D)-1;
+    long a1 = Rg_to_Fl(ell_get_a1(E),l);
+    long a3 = Rg_to_Fl(ell_get_a3(E),l);
+    if (r==0) return cgetg(1,t_VEC);
+    if (l==2)
+    {
+      long a2 = Rg_to_Fl(ell_get_a2(E),l);
+      long a4 = Rg_to_Fl(ell_get_a4(E),l);
+      long a6 = Rg_to_Fl(ell_get_a6(E),l);
+      long m = a1|(a2<<1)|(a3<<2)|(a4<<3)|(a6<<4); /* r==0 : m==22 || m==28*/
+      if (m==29) retmkvec(mkvec2s(1,1));
+      if (m==19) retmkvec(mkvec2s(0,1));
+      if (m==9 || m==17 || m==20 || m==21 || m==30) retmkvec(mkvec2s(1,0));
+      retmkvec(mkvec2s(0,0));
+    } else
+    {
+      long b2 = Rg_to_Fl(ell_get_b2(E),l);
+      long b4 = Rg_to_Fl(ell_get_b4(E),l);
+      long b6 = Rg_to_Fl(ell_get_b6(E),l);
+      long T1 = (1+b2+2*b4+b6)%3;
+      long x,y;
+      if (r==2) /* [2,2] */
+        retmkvec2(mkvec2s(0,a3),mkvec2s(1,Fl_add(a1,a3,3)));
+      y = equaliu(gel(D,1),2)? 0 : 1;
+      if (equaliu(gel(D,1),6)) /* [6] */
+      {
+        long b8 = Rg_to_Fl(ell_get_b8(E),l);
+        x = (b6==1 && b8!=0) ? 0 : (T1==1 && (b2+b8)%3!=0) ? 1 : 2;
+      }
+      else /* [2],[3],[4],[5],[7] */
+        x = b6==y ? 0 : T1==y ? 1 : 2;
+      retmkvec(mkvec2s(x,(2*y+a1*x+a3)%3));
+    }
+  }
+  else
+  {
+    GEN e = ell_to_a4a6(E, p), a4 = gel(e, 1), a6 = gel(e, 2);
+    GEN P, R;
+    switch(lg(D)-1)
+    {
+    case 1:
+      P = ellgen1_FpE(gel(D,1), a4, a6, p);
+      R = mkvec( FpE_changepoint(P, gel(e,3), p));
+      break;
+    default:
+      P = ellgen2_FpE(gel(D,1), gel(D,2), m, a4, a6, p);
+      R = mkvec2( FpE_changepoint(gel(P,1), gel(e,3), p),
+          FpE_changepoint(gel(P,2), gel(e,3), p));
+      break;
+    }
+    return gerepilecopy(av, R);
+  }
+}
+
+static GEN
+ellgroup_m(GEN E, GEN p, GEN *pt_m)
 {
   pari_sp av = avma;
   GEN N, N0, N1, r, F, F1, e, a4, a6;
   long i, j, l1;
-  checksmallell(E);
-  if (!p)
-    p = get_p(E);
-  else
-    if (typ(p)!=t_INT) pari_err_TYPE("ellgroup",p);
   N = subii(addis(p, 1), ellap(E, p));
   r = gcdii(N, subis(p, 1));
+  if (equali1(N)) { avma = av; return cgetg(1,t_VEC); }
   if (is_pm1(r)) goto ellgroup_cyclic; /* Takes care of p=2 */
   if (equaliu(p, 3))
   { /* The only possible non-cyclic group is [2,2] which happens 9 times */
@@ -4726,6 +4817,7 @@ ellgroup(GEN E, GEN p)
   setlg(F[1],j); setlg(F[2],j);
   if (j==1) goto ellgroup_cyclic;
   N0 = factorback(F); N1 = diviiexact(N, N0);
+  F = mkvec2(N0, F);
   e = ell_to_a4a6(E, p); a4 = gel(e, 1); a6 = gel(e, 2);
   while(1)
   {
@@ -4744,11 +4836,38 @@ ellgroup(GEN E, GEN p)
     /* structure is [N/d, d] iff m d == N0. Note that N/d = N1 m */
     if (is_pm1(d) && equalii(m, N0)) goto ellgroup_cyclic;
     if (equalii(mulii(m, d), N0))
-      return gerepilecopy(av, mkvec2(mulii(N1,m), d));
+    {
+      if (pt_m) *pt_m = m;
+      return mkvec2(mulii(N1,m), d);
+    }
     avma = av2;
   }
 ellgroup_cyclic:
-  return gerepileupto(av, mkveccopy(N));
+  return mkvec(N);
+}
+
+GEN
+ellgroup(GEN E, GEN p)
+{
+  pari_sp av = avma;
+  return gerepilecopy(av, ellgroup_m(E, p, NULL));
+}
+
+GEN
+ellgroup0(GEN E, GEN p, long flag)
+{
+  pari_sp av = avma;
+  GEN G, F,m;
+  checksmallell(E);
+  if (!p)
+    p = get_p(E);
+  else
+    if (typ(p)!=t_INT) pari_err_TYPE("ellgroup",p);
+  if (flag==0) return ellgroup(E, p);
+  if (flag!=1) pari_err_FLAG("ellgroup");
+  G = ellgroup_m(E, p, &m);
+  F = FpVV_to_mod(ellgen(E,G,m,p),p);
+  return gerepilecopy(av, mkvec2(G,F));
 }
 
 static GEN

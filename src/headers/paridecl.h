@@ -204,6 +204,7 @@ GEN     random_Flx(long d1, long v, ulong p);
 /* FpE.c */
 
 GEN     FpE_add(GEN P, GEN Q, GEN a4, GEN p);
+GEN     FpE_changepoint(GEN x, GEN ch, GEN p);
 GEN     FpE_dbl(GEN P, GEN a4, GEN p);
 GEN     FpE_neg(GEN P, GEN p);
 GEN     FpE_order(GEN z, GEN o, GEN a4, GEN p);
@@ -323,6 +324,7 @@ GEN     FpV_dotproduct(GEN x, GEN y, GEN p);
 GEN     FpV_dotsquare(GEN x, GEN p);
 GEN     FpV_red(GEN z, GEN p);
 GEN     FpV_to_mod(GEN z, GEN p);
+GEN     FpVV_to_mod(GEN z, GEN p);
 GEN     FpX_to_mod(GEN z, GEN p);
 GEN     ZMs_ZC_mul(GEN M, GEN B);
 GEN     ZpMs_ZpCs_solve(GEN M, GEN B, long nbrow, GEN p, long e);
@@ -1438,6 +1440,7 @@ GEN     elleisnum(GEN om, long k, long flag, long prec);
 GEN     elleta(GEN om, long prec);
 GEN     ellglobalred(GEN e1);
 GEN     ellgroup(GEN E, GEN p);
+GEN     ellgroup0(GEN E, GEN p, long flag);
 GEN     ellheight0(GEN e, GEN a, long flag,long prec);
 GEN     ellheegner(GEN e);
 GEN     ellinit(GEN x, long prec);

@@ -2,8 +2,21 @@ default(realprecision,38);
 ellap(ellinit([1,0,1,4,-6]), 2)
 ellap(ellinit([0,17]), 2)
 ellap(ellinit([0, 0, 1, -1, 0]),2486246173)
-for(x=10,63,p=nextprime(2^x);E=ellinit([0,0,1,2,3]);print(p,":",ellgroup(E,p)))
-
+{
+  my(p,E,F,G,g);
+  for(x=10,63,
+    p=nextprime(2^x);E=ellinit([0,0,1,2,3]);
+    G = ellgroup(E,p,1); g = G[2][1];
+    if(!ellisoncurve(E,g) || ellorder(E,g)!=G[1][1], error("ellgroup"));
+    print(p,":",ellgroup(E,p)));
+  for(p=2,3,
+    forvec(v=vector(5,i,[0,p-1]),
+      E=ellinit(v*Mod(1,p)); if(E==0, next);
+      G=ellgroup(E,p,1); g=G[2];
+      F=vector(#g,i, if(ellisoncurve(E,g[i]),ellorder(E,g[i]),0));
+      if (F!=G[1],
+        print("error:",v,":",F,":",G))))
+}
 a=ffgen(ffinit(2,8),'a); E=ellinit([a,1,0,0,1]);
 P=[a^3,ellordinate(E,a^3)[1]]; Q=ellpow(E,P,113);
 e=elllog(E,P,Q,242)

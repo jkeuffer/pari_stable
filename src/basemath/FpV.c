@@ -640,6 +640,23 @@ FpM_to_mod(GEN z, GEN p)
   return x;
 }
 
+GEN
+FpVV_to_mod(GEN z, GEN p)
+{
+  long i, j, m, l = lg(z);
+  GEN  x = cgetg(l,t_VEC), y, zi;
+  if (l == 1) return x;
+  m = lg(gel(z,1));
+  p = icopy(p);
+  for (i=1; i<l; i++)
+  {
+    gel(x,i) = cgetg(m,t_VEC);
+    y = gel(x,i); zi= gel(z,i);
+    for (j=1; j<m; j++) gel(y,j) = to_intmod(gel(zi,j), p);
+  }
+  return x;
+}
+
 /* z in Z^n, return z * Mod(1,p), normalized*/
 GEN
 FpXQC_to_mod(GEN z, GEN T, GEN p)

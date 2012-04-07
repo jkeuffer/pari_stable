@@ -31,6 +31,22 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
  */
 
 GEN
+FpE_changepoint(GEN x, GEN ch, GEN p)
+{
+  pari_sp av = avma;
+  GEN p1,z,u,r,s,t,v,v2,v3;
+  if (ell_is_inf(x)) return x;
+  u = gel(ch,1); r = gel(ch,2);
+  s = gel(ch,3); t = gel(ch,4);
+  v = Fp_inv(u, p); v2 = Fp_sqr(v,p); v3 = Fp_mul(v,v2,p);
+  p1 = Fp_sub(gel(x,1),r,p);
+  z = cgetg(3,t_VEC);
+  gel(z,1) = Fp_mul(v2, p1, p);
+  gel(z,2) = Fp_mul(v3, Fp_sub(gel(x,2), Fp_add(Fp_mul(s,p1, p),t, p),p),p);
+  return gerepileupto(av, z);
+}
+
+GEN
 FpE_dbl(GEN P, GEN a4, GEN p)
 {
   pari_sp ltop = avma;
