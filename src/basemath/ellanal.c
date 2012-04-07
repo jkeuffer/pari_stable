@@ -1116,9 +1116,9 @@ is_tors(GEN E, GEN torsion, GEN P)
   Q = gmael(torsion,3,1);
   if (!odd(a))
   {
+    if (a==2) return gequal(P,Q);
     P = addell(E,P,P);
     if (ell_is_inf(P)) return 1;
-    if (a==2) return 0;
     Q = addell(E,Q,Q);
     a >>=1;
   }
