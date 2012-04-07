@@ -1597,6 +1597,7 @@ ellwpnum_all(SL2_red *T, GEN z, long flall, long prec0)
   q = expIxy(pi2, T->Tau, prec);
   u = expIxy(pi2, z, prec);
   u1= gsubsg(1,u); u2 = gsqr(u1);
+  if (gcmp0(u2)) return NULL; /* possible if loss of accuracy */
   y = gadd(mkfrac(gen_1, utoipos(12)), gdiv(u,u2));
   if (flall) yp = gdiv(gadd(gen_1,u), gmul(u1,u2));
   toadd = (long)ceil(9.065*gtodouble(imag_i(z)));
