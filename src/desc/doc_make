@@ -1,15 +1,21 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -w
 use PARI::822;
 
 PARI::822::read(\%funcs, "pari.desc");
 
 open (FILE, "../../doc/usersFUNCS.tex") || die;
+for (keys %funcs)
+{ 
+  my ($s) = $funcs{$_}->{Section};
+  next if (!$s);
+  push(@{$Fun_by_sec{$s}}, $_);
+}
 while (<FILE>)
 {
   if (/^% *SECTION *: *(.*) */)
   {
     my ($sec) = $1;
-    for ( sort grep { $funcs{$_}->{Section} eq $sec } keys %funcs ) {
+    for ( sort @{$Fun_by_sec{$sec}} ) {
       my ($fun) = $funcs{$_};
       my ($doc) = $fun->{Doc};
       next if (!defined($doc));
