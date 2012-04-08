@@ -62,7 +62,7 @@ $dumb_pod=1, $ARGV[0] = '-to_pod' if @ARGV && $ARGV[0] eq '-to_dumb_pod';
 &to_pod() if @ARGV == 2 && $ARGV[0] eq '-to_pod';
 
 &options(); &init();
-if ($#ARGV < 0) { &treat($_); cleanexit(); }
+if ($#ARGV < 0) { &treat(""); cleanexit(); }
 
 &pretex() if (!$detex);
 for (@ARGV) { &treat($_); }
