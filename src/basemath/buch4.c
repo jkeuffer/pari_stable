@@ -570,7 +570,7 @@ static GEN
 make_unit(GEN nf, GEN bnfS, GEN *px)
 {
   long lB, cH, i, ls;
-  GEN den, gen, S, v, p1, xp, xb, N, HB, perm;
+  GEN den, gen, S, v, p1, xp, xb, N, N0, HB, perm;
 
   if (gequal0(*px)) return NULL;
   S = gel(bnfS,6); ls = lg(S);
@@ -592,16 +592,17 @@ make_unit(GEN nf, GEN bnfS, GEN *px)
   cH = lg(HB[1]) - 1;
   lB = lg(HB) - cH;
   v = const_vecsmall(ls-1, 0);
+  N0 = N;
   for (i=1; i<ls; i++)
   {
-    GEN P = gel(S,i);
-    if ( Z_pvalrem(N, pr_get_p(P), &N) )
+    GEN P = gel(S,i), p = pr_get_p(P);
+    if ( remii(N, p) == gen_0 )
     {
       v[i] = nfval(nf,xb,P);
-      if (is_pm1(N)) break;
+      (void)Z_pvalrem(N0, p, &N0);
     }
   }
-  if (!is_pm1(N)) return NULL;
+  if (!is_pm1(N0)) return NULL;
   /* here, x = S v */
   p1 = vecpermute(v, perm);
   v = ZM_zc_mul(HB, p1);
