@@ -479,7 +479,7 @@ bnfsunit(GEN bnf,GEN S,long prec)
   GEN p1,nf,gen,M,U,H;
   GEN sunit,card,sreg,res,pow;
 
-  if (typ(S) != t_VEC) pari_err_TYPE("bnfsunit",S);
+  if (!is_vec_t(typ(S))) pari_err_TYPE("bnfsunit",S);
   bnf = checkbnf(bnf);
   nf = bnf_get_nf(bnf);
   gen = bnf_get_gen(bnf);
@@ -591,12 +591,17 @@ make_unit(GEN nf, GEN bnfS, GEN *px)
   den  = gel(p1,3);
   cH = lg(HB[1]) - 1;
   lB = lg(HB) - cH;
-  v = cgetg(ls, t_VECSMALL);
+  v = const_vecsmall(ls-1, 0);
   for (i=1; i<ls; i++)
   {
     GEN P = gel(S,i);
-    v[i] = (remii(N, pr_get_p(P)) == gen_0)? nfval(nf,xb,P): 0;
+    if ( Z_pvalrem(N, pr_get_p(P), &N) )
+    {
+      v[i] = nfval(nf,xb,P);
+      if (is_pm1(N)) break;
+    }
   }
+  if (!is_pm1(N)) return NULL;
   /* here, x = S v */
   p1 = vecpermute(v, perm);
   v = ZM_zc_mul(HB, p1);
