@@ -41,3 +41,4 @@ bnf=bnfinit(x^3-2); S=bnfsunit(bnf,idealfactor(bnf,2*3*5*7)[,1]);
 bnfissunit(bnf,S,x)
 bnfissunit(bnf,S,x+2)
 bnfissunit(bnf,S,x+100)
+bnfisunit(bnf, x+100)

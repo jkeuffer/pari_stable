@@ -155,11 +155,23 @@ nftrace(GEN nf, GEN x)
                        : gmulgs(x, nf_get_degree(nf));
   return gerepileupto(av, x);
 }
+/* assume nf is a genuine nf, fa a famat */
+static GEN
+famat_norm(GEN nf, GEN fa)
+{
+  pari_sp av = avma;
+  GEN g = gel(fa,1), e = gel(fa,2), N = gen_1;
+  long i, l = lg(g);
+  for (i = 1; i < l; i++)
+    N = gmul(N, powgi(nfnorm(nf, gel(g,i)), gel(e,i)));
+  return gerepileupto(av, N);
+}
 GEN
 nfnorm(GEN nf, GEN x)
 {
   pari_sp av = avma;
   nf = checknf(nf);
+  if (typ(x) == t_MAT) return famat_norm(nf, x);
   x = nf_to_scalar_or_alg(nf, x);
   x = (typ(x) == t_POL)? RgXQ_norm(x, nf_get_pol(nf))
                        : gpowgs(x, nf_get_degree(nf));

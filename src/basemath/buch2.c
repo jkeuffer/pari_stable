@@ -1962,6 +1962,11 @@ bnfisunit(GEN bnf,GEN x)
       if (gexpo(logN) > -20)
       { /* precision problem ? */
         if (typ(logN) != t_REAL) { avma = av; return cgetg(1,t_COL); } /*no*/
+        if (i == 1)
+        {
+          GEN N = nfnorm(nf, x);
+          if (!is_pm1(N)) { avma = av; return cgetg(1, t_COL); }
+        }
       }
       else
       {
