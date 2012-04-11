@@ -3,5 +3,17 @@ Class: gp
 Section: programming/control
 C-Name: dbg_err
 Prototype:
-Help: dbg_err({n=1}): (break loop) return the error data the current error, if any.
-Doc: (In the break loop) return the error data the current error, if any.
+Help: dbg_err(): (break loop) return the error data of the current error, if any.
+Doc: In the break loop, return the error data of the current error, if any.
+ See \tet{iferr} for details about error data.  Compare:
+ \bprog
+ ? iferr(1/(Mod(2,17526861262310417)^(11!)-1),E,Vec(E))
+ %1 = ["e_INTMOD",Mod(39916801,17526861262310417)]
+ ? 1/(Mod(2,17526861262310417)^(11!)-1)
+ ***   at top-level: 1/(Mod(2,175268612623
+ ***                  ^--------------------
+ *** _/_: impossible inverse modulo: Mod(39916801,17526861262310417).
+ ***   Break loop: type 'break' to go back to GP
+ break> Vec(dbg_err())
+ ["e_INTMOD",Mod(39916801,17526861262310417)]
+ @eprog
