@@ -928,16 +928,6 @@ separation(GEN cnt)
   return best_i;
 }
 
-/* chinese(Mod(a,A), tr), A,tr.mod coprime */
-static GEN
-crt(GEN A, GEN a, GEN tr)
-{
-  GEN v = cgetg(3, t_INTMOD), AB = mulii(A, gel(tr, 1));
-  gel(v,1) = AB;
-  gel(v,2) = Z_chinese_coprime(a, gel(tr, 2), A, gel(tr, 1), AB);
-  return v;
-}
-
 /* x VEC defined modulo P (= *P), y VECSMALL modulo q, (q,P) = 1. */
 /* Update in place:
  *   x to vector mod q P congruent to x mod P (resp. y mod q). */
@@ -1292,6 +1282,19 @@ match_and_sort(GEN compile_atkin, GEN Mu, GEN u, GEN a4, GEN a6, GEN p)
   return NULL; /* not reached */
 }
 
+static GEN
+get_bound_bsgs(long lp)
+{
+  GEN B;
+  if (lp <= 160)
+    B = divru(powru(dbltor(1.048), lp), 9);
+  else if (lp <= 192)
+    B = divrr(powru(dbltor(1.052), lp), dbltor(16.65));
+  else
+    B = mulrr(powru(dbltor(1.035), minss(lp,307)), dbltor(1.35));
+  return mulru(B, 1000000);
+}
+
 /* E is an elliptic curve defined over Z or over Fp in ellinit format, defined
  * by the equation E: y^2 + a1*x*y + a2*y = x^3 + a2*x^2 + a4*x + a6
  * p is a prime number
@@ -1303,9 +1306,9 @@ ellsea(GEN E, GEN p, long smallfact)
 {
   const long MAX_ATKIN = 21;
   pari_sp ltop = avma, btop, st_lim;
-  long i, nb_atkin, lp, M;
-  GEN res, cat;
-  GEN compile_atkin, tr, bound, bound_bsgs, champ;
+  long i, nb_atkin, lp;
+  GEN res, cat, TR, TR_mod;
+  GEN compile_atkin, bound, bound_bsgs, champ;
   GEN prod_atkin = gen_1, max_traces = gen_0;
   GEN a4 = modii(mulis(Rg_to_Fp(gel(E,10), p), -27), p);
   GEN a6 = modii(mulis(Rg_to_Fp(gel(E,11), p), -54), p);
@@ -1319,75 +1322,78 @@ ellsea(GEN E, GEN p, long smallfact)
   switch(FpX_nbroots(mkpoln(4, gen_1, gen_0, a4, a6), p))
   {
     case 3: /* bonus time: 4 | #E(Fp) = p+1 - a_p */
-      i = mod4(p)+1; if (i == 4) i = 0;
-      tr = mkintmodu(i, 4);
-      break;
+      i = mod4(p)+1; if (i > 2) i -= 4;
+      TR_mod = utoipos(4);
+      TR = stoi(i); break;
     case 1:
-      tr = mkintmod(gen_0, gen_2);
-      break;
+      TR_mod = gen_2;
+      TR = gen_0; break;
     default : /* 0 */
-      tr = mkintmod(gen_1, gen_2);
-      break;
+      TR_mod = gen_2;
+      TR = gen_1; break;
   }
-  if (smallfact==1 && gel(tr,2) != gen_1)
+  if (smallfact && !mpodd(TR))
   {
     if (DEBUGLEVEL) err_printf("Aborting: #E(Fp) divisible by 2\n");
     avma = ltop; return gen_0;
   }
 
   /* compile_atkin is a vector containing informations about Atkin primes,
-   *   informations about Elkies primes lie in tr. */
+   * informations about Elkies primes lie in Mod(TR, TR_mod). */
   bound = sqrti(shifti(p, 4));
-  M = 1000000;
   lp = bit_prec(p) - bfffo(*int_MSW(p));
-  if (lp <= 160)
-    bound_bsgs = mulru(divru(powru(dbltor(1.048), lp), 9), M);
-  else if (lp <= 192)
-    bound_bsgs = mulru(divrr(powru(dbltor(1.052), lp), dbltor(16.65)), M);
-  else if (lp <= 306)
-    bound_bsgs = mulru(mulrr(powru(dbltor(1.035), lp), dbltor(1.35)), M);
-  else
-    bound_bsgs = mulru(mulrr(powru(dbltor(1.035), 307), dbltor(1.35)), M);
+  bound_bsgs = get_bound_bsgs(lp);
   compile_atkin = zerovec(MAX_ATKIN); nb_atkin = 0;
   btop = avma; st_lim = stack_lim(btop, 1);
   while (1)
   {
-    long kt = 1;
-    GEN ellkt, trace_mod;
+    long ellkt, kt = 1, nbtrace;
+    GEN trace_mod;
     NEXT_PRIME_VIADIFF(ell, primepointer);
     trace_mod = find_trace(a4, a6, ell, p, &kt, smallfact);
     if (trace_mod==gen_0) pari_err(e_MISC,"not enough modular polynomials");
     if (!trace_mod) continue;
-    ellkt = powuu(ell, kt);
-    if (lg(trace_mod) == 2)
+
+    nbtrace = lg(trace_mod) - 1;
+    ellkt = (long)upowuu(ell, kt);
+    if (nbtrace == 1)
     {
-      if (smallfact && ell>smallfact && dvdiu(addis(p, 1 - trace_mod[1]), ell))
-      {
-        if (DEBUGLEVEL) err_printf("\nAborting: #E(Fp) divisible by %ld\n",ell);
-        avma = ltop; return gen_0;
+      long ap_mod_ellkt = trace_mod[1];
+      GEN q;
+      if (smallfact && ell > smallfact)
+      { /* does ell divide p + 1 - ap ? */
+        long card_mod_ell = (smodis(p, ell) + 1 - ap_mod_ellkt) % ell ;
+        if (!card_mod_ell)
+        {
+          if (DEBUGLEVEL)
+            err_printf("\nAborting: #E(Fp) divisible by %ld\n",ell);
+          avma = ltop; return gen_0;
+        }
       }
-      tr = crt(ellkt, stoi(trace_mod[1]), tr);
+      q = muliu(TR_mod, ellkt);
+      (void)Z_incremental_CRT(&TR, ap_mod_ellkt, TR_mod, q, ellkt);
+      TR_mod = q;
     }
     else
     {
-      add_atkin(compile_atkin, mkvec2(ellkt, trace_mod), &nb_atkin);
+      add_atkin(compile_atkin, mkvec2(utoipos(ellkt), trace_mod), &nb_atkin);
       prod_atkin = value(-1, compile_atkin, nb_atkin);
     }
-    if (cmpii(mulii(gel(tr, 1), prod_atkin), bound) > 0)
+    if (cmpii(mulii(TR_mod, prod_atkin), bound) > 0)
     {
       GEN bound_tr;
-      if (!nb_atkin) return gerepileuptoint(ltop, centerlift(tr));
+      if (!nb_atkin) return gerepileuptoint(ltop, TR);
       bound_tr = mulrr(bound_bsgs, dbltor(bound_gr));
       bound_gr *= growth_factor;
       if (signe(max_traces))
       {
-        max_traces = truedivii(mulis(max_traces,2*(lg(trace_mod)-1)), ellkt);
+        max_traces = divis(mulis(max_traces,2*nbtrace), ellkt);
         if (DEBUGLEVEL>=3)
           err_printf("At least %Ps remaining possibilities.\n",max_traces);
       }
       if (cmpir(max_traces, bound_tr) < 0)
       {
-        GEN bound_atkin = truedivii(bound, gel(tr, 1));
+        GEN bound_atkin = truedivii(bound, TR_mod);
         champ = champion(compile_atkin, nb_atkin, bound_atkin);
         max_traces = gel(champ,2);
         if (cmpir(max_traces, bound_tr) < 0) break;
@@ -1396,11 +1402,11 @@ ellsea(GEN E, GEN p, long smallfact)
       }
     }
     if (low_stack(st_lim, stack_lim(btop, 1)))
-      gerepileall(btop, 4, &tr, &compile_atkin, &max_traces, &prod_atkin);
+      gerepileall(btop,5, &TR,&TR_mod, &compile_atkin, &max_traces, &prod_atkin);
   }
   cat = shallowextract(compile_atkin, gel(champ, 1));
   if (DEBUGLEVEL)
     err_printf("Match and sort for %Ps possibilities.\n",gel(champ, 2));
-  res = match_and_sort(cat, gel(tr,1), gel(tr,2), a4,a6,p);
+  res = match_and_sort(cat, TR_mod, TR, a4,a6,p);
   return gerepileuptoint(ltop, subii(addis(p, 1), res));
 }
