@@ -1332,7 +1332,7 @@ ellsea(GEN E, GEN p, long smallfact)
       TR_mod = gen_2;
       TR = gen_1; break;
   }
-  if (smallfact && !mpodd(TR))
+  if (smallfact == 1 && !mpodd(TR))
   {
     if (DEBUGLEVEL) err_printf("Aborting: #E(Fp) divisible by 2\n");
     avma = ltop; return gen_0;

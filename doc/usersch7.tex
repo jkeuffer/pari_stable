@@ -141,9 +141,10 @@ computing it modulo $\ell$ for many small $\ell$; it is called by
 return \kbd{gen\_0} (an impossible cardinality) if one of the small primes
 $\ell>s$ divides the curve order. For cryptographic applications, where one is
 usually interested in curves of prime order, setting $s=1$ efficiently weeds
-out most uninteresting curves (if curves of order twice a prime are acceptable
-set $s=2$); there is no guarantee that the resulting cardinality is prime, only
-that it has no small prime divisor larger than $s$.
+out most uninteresting curves; if curves of order a power of $2$ times a
+prime are acceptable, set $s=2$. There is no guarantee that the resulting
+cardinality is prime, only that it has no small prime divisor larger than
+$s$.
 
 \section{Other curves}
 
