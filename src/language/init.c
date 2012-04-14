@@ -1640,8 +1640,10 @@ taille0_nolist(GEN x)
   }
 }
 
-long
-gsizeword(GEN x)
+/* How many words do we need to allocate to copy x ? t_LIST is a special case
+ * since list_data() is malloc'ed later, in list_internal_copy() */
+static long
+words_to_allocate(GEN x)
 {
   long i,n,lx, tx = typ(x);
   switch(tx)
@@ -1654,9 +1656,19 @@ gsizeword(GEN x)
     case t_LIST: return 3;
     default:
       n = lx = lg(x);
-      for (i=lontyp[tx]; i<lx; i++) n += gsizeword(gel(x,i));
+      for (i=lontyp[tx]; i<lx; i++) n += words_to_allocate(gel(x,i));
       return n;
   }
+}
+
+long
+gsizeword(GEN x)
+{
+  GEN L;
+  if (typ(x) != t_LIST) return words_to_allocate(x);
+  /* For t_LIST, return the actual list size, words_to_allocate() is always 3 */
+  L = list_data(x);
+  return L? 3 + words_to_allocate(L): 3;
 }
 long
 gsizebyte(GEN x) { return gsizeword(x) * sizeof(long); }
@@ -1690,7 +1702,7 @@ copy_bin_canon(GEN x)
 GEN
 gclone(GEN x)
 {
-  long i,lx,tx = typ(x), t = gsizeword(x);
+  long i,lx,tx = typ(x), t = words_to_allocate(x);
   GEN y = newblock(t);
   switch(tx)
   { /* non recursive types */
