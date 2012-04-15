@@ -156,6 +156,8 @@ BA 48- agm now returns the optimal AGM
        (exuberant-ctags)-based etags. Both tag files (emacs / vi) contain
        the same tags now.
    50- ellglobalred(E) now also returns the conductor factorization [4th compo]
+   51- library functions *_incremental_CRT no longer need the product of the
+       moduli, instead they compute it and update the running modulus.
 
   Added
     1- mathnf for matrices over K[X] [#41]

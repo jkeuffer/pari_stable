@@ -462,13 +462,11 @@ ZM_charpoly(GEN M)
     }
     else
     {
-      GEN qp = muliu(q, p);
-      int stable = ZX_incremental_CRT(&H, Hp, q,qp, p);
+      int stable = ZX_incremental_CRT(&H, Hp, &q,p);
       if (DEBUGLEVEL>5)
         timer_printf(&T, "charpoly mod %lu (stable=%ld), bound = 2^%ld\n",
-                     p, stable, expi(qp));
-      if (stable && expi(qp) > bit) break;
-      q = qp;
+                     p, stable, expi(q));
+      if (stable && expi(q) > bit) break;
     }
   }
   return gerepilecopy(av, H);

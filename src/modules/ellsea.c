@@ -1370,9 +1370,7 @@ ellsea(GEN E, GEN p, long smallfact)
           avma = ltop; return gen_0;
         }
       }
-      q = muliu(TR_mod, ellkt);
-      (void)Z_incremental_CRT(&TR, ap_mod_ellkt, TR_mod, q, ellkt);
-      TR_mod = q;
+      (void)Z_incremental_CRT(&TR, ap_mod_ellkt, &TR_mod, ellkt);
     }
     else
     {

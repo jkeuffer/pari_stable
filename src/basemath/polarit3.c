@@ -1842,9 +1842,9 @@ ZM_init_CRT(GEN Hp, ulong p)
 }
 
 int
-Z_incremental_CRT(GEN *H, ulong Hp, GEN q, GEN qp, ulong p)
+Z_incremental_CRT(GEN *H, ulong Hp, GEN *ptq, ulong p)
 {
-  GEN h, lim = shifti(qp,-1);
+  GEN h, q = *ptq, qp = muliu(q,p), lim = shifti(qp,-1);
   ulong qinv = Fl_inv(umodiu(q,p), p);
   int stable = 1;
   h = Fl_chinese_coprime(*H,Hp,q,p,qinv,qp);
@@ -1853,11 +1853,11 @@ Z_incremental_CRT(GEN *H, ulong Hp, GEN q, GEN qp, ulong p)
     if (cmpii(h,lim) > 0) h = subii(h,qp);
     *H = h; stable = 0;
   }
-  return stable;
+  *ptq = qp; return stable;
 }
 
-int
-ZX_incremental_CRT(GEN *ptH, GEN Hp, GEN q, GEN qp, ulong p)
+static int
+ZX_incremental_CRT_raw(GEN *ptH, GEN Hp, GEN q, GEN qp, ulong p)
 {
   GEN H = *ptH, h, lim = shifti(qp,-1);
   ulong qinv = Fl_inv(umodiu(q,p), p);
@@ -1891,9 +1891,17 @@ ZX_incremental_CRT(GEN *ptH, GEN Hp, GEN q, GEN qp, ulong p)
 }
 
 int
-ZM_incremental_CRT(GEN *pH, GEN Hp, GEN q, GEN qp, ulong p)
+ZX_incremental_CRT(GEN *ptH, GEN Hp, GEN *ptq, ulong p)
 {
-  GEN h, H = *pH, lim = shifti(qp,-1);
+  GEN q = *ptq, qp = muliu(q,p);
+  int stable = ZX_incremental_CRT_raw(ptH, Hp, q, qp, p);
+  *ptq = qp; return stable;
+}
+
+int
+ZM_incremental_CRT(GEN *pH, GEN Hp, GEN *ptq, ulong p)
+{
+  GEN h, H = *pH, q = *ptq, qp = muliu(q, p), lim = shifti(qp,-1);
   ulong qinv = Fl_inv(umodiu(q,p), p);
   long i,j, l = lg(H), m = lg(H[1]);
   int stable = 1;
@@ -1907,7 +1915,7 @@ ZM_incremental_CRT(GEN *pH, GEN Hp, GEN q, GEN qp, ulong p)
         gcoeff(H,i,j) = h; stable = 0;
       }
     }
-  return stable;
+  *ptq = qp; return stable;
 }
 
 /* record the degrees of Euclidean remainders (make them as large as
@@ -2646,13 +2654,15 @@ INIT:
     }
     else
     {
-      GEN qp = muliu(q,p);
-      stable = ZX_incremental_CRT(&H, Hp, q,qp, p);
       if (LERS) {
-        stable &= ZX_incremental_CRT(&H0,H0p, q,qp, p);
-        stable &= ZX_incremental_CRT(&H1,H1p, q,qp, p);
+        GEN qp = muliu(q,p);
+        stable  = ZX_incremental_CRT_raw(&H, Hp, q,qp, p)
+                & ZX_incremental_CRT_raw(&H0,H0p, q,qp, p)
+                & ZX_incremental_CRT_raw(&H1,H1p, q,qp, p);
+        q = qp;
       }
-      q = qp;
+      else
+        stable = ZX_incremental_CRT(&H, Hp, &q, p);
     }
     /* could make it probabilistic for H ? [e.g if stable twice, etc]
      * Probabilistic anyway for H0, H1 */
@@ -2847,11 +2857,7 @@ ZX_resultant_all(GEN A, GEN B, GEN dB, ulong bound)
       H = Z_init_CRT(Hp, p);
     }
     else /* could make it probabilistic ??? [e.g if stable twice, etc] */
-    {
-      GEN qp = muliu(q,p);
-      stable = Z_incremental_CRT(&H, Hp, q,qp, p);
-      q = qp;
-    }
+      stable = Z_incremental_CRT(&H, Hp, &q, p);
     if (DEBUGLEVEL>5)
       err_printf("resultant mod %ld (bound 2^%ld, stable = %d)\n",p,expi(q),stable);
     if (stable && (ulong)expi(q) >= bound) break; /* DONE */
@@ -2983,8 +2989,8 @@ QXQ_inv(GEN A, GEN B)
     }
     if (DEBUGLEVEL>5) err_printf("QXQ_inv: mod %ld (bound 2^%ld)", p,expi(q));
     qp = muliu(q,p);
-    stable = ZX_incremental_CRT(&U, Up, q,qp, p);
-    stable&= ZX_incremental_CRT(&V, Vp, q,qp, p);
+    stable = ZX_incremental_CRT_raw(&U, Up, q,qp, p)
+           & ZX_incremental_CRT_raw(&V, Vp, q,qp, p);
     if (stable)
     { /* all stable: check divisibility */
       GEN res = ZX_add(ZX_mul(A,U), ZX_mul(B,V));

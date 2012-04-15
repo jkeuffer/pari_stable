@@ -4589,12 +4589,12 @@ correct.
 $[0, p-1]$, returns the centered representative \kbd{H} congruent to \kbd{Hp}
 modulo \kbd{p}.
 
-\fun{int}{Z_incremental_CRT}{GEN *H, ulong Hp, GEN q, GEN qp, ulong p}
-given a \typ{INT} \kbd{*H}, centered modulo \kbd{q}, a new pair $(\kbd{Hp},
-\kbd{p})$ with \kbd{p} coprime to \kbd{q}, and the product $\kbd{qp} = \kbd{p}
-\cdot \kbd{q}$, this function updates \kbd{*H} so that it also becomes
-congruent to $(\kbd{Hp}, \kbd{p})$. It returns $1$ if the new value is equal
-to the old one, and $0$ otherwise.
+\fun{int}{Z_incremental_CRT}{GEN *H, ulong Hp, GEN *q, ulong p}
+given a \typ{INT} \kbd{*H}, centered modulo \kbd{*q}, a new pair $(\kbd{Hp},
+\kbd{p})$ with \kbd{p} coprime to \kbd{q}, this function updates \kbd{*H} so
+that it also becomes congruent to $(\kbd{Hp}, \kbd{p})$, and \kbd{*q} to the
+product$\kbd{qp} = \kbd{p} \cdot \kbd{*q}$. It returns $1$ if the new value
+is equal to the old one, and $0$ otherwise.
 
 \fun{GEN}{chinese1_coprime_Z}{GEN v} an alternative divide-and-conquer
 implementation: $v$ is a vector of \typ{INTMOD} with pairwise coprime moduli.
@@ -4610,14 +4610,14 @@ dimension $> 0$. The original \kbd{*H} is destroyed.
 
 \fun{GEN}{ZM_init_CRT}{GEN Hp, ulong p}
 
-\fun{int}{ZM_incremental_CRT}{GEN *H, GEN Hp, GEN q, GEN qp, ulong p}
+\fun{int}{ZM_incremental_CRT}{GEN *H, GEN Hp, GEN *q, ulong p}
 
 As above for $H$ a \kbd{ZX}: note that the degree may increase or decrease.
 The original \kbd{*H} is destroyed.
 
 \fun{GEN}{ZX_init_CRT}{GEN Hp, ulong p, long v}
 
-\fun{int}{ZX_incremental_CRT}{GEN *H, GEN Hp, GEN q, GEN qp, ulong p}
+\fun{int}{ZX_incremental_CRT}{GEN *H, GEN Hp, GEN *q, ulong p}
 
 \subsec{Rational reconstruction}
 

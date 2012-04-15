@@ -1091,7 +1091,7 @@ maxnorm(GEN p)
 GEN
 ZX_gcd_all(GEN A, GEN B, GEN *Anew)
 {
-  GEN R, a, b, q, qp, H, Hp, g, Ag, Bg;
+  GEN R, a, b, q, H, Hp, g, Ag, Bg;
   long m, n, valX, valA, vA = varn(A);
   ulong p;
   pari_sp ltop, av, avlim;
@@ -1152,10 +1152,8 @@ ZX_gcd_all(GEN A, GEN B, GEN *Anew)
       gerepileall(av, 3, &H, &q, &Hp);
     }
 
-    qp = muliu(q,p);
-    if (!ZX_incremental_CRT(&H, Hp, q, qp, p)) { q = qp; continue; }
+    if (!ZX_incremental_CRT(&H, Hp, &q, p)) continue;
     /* H stable: check divisibility */
-    q = qp;
     if (!ZX_divides(Bg, H)) continue;
     R = ZX_divides(Ag, H);
     if (!R) continue;

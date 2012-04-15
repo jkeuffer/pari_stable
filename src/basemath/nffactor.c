@@ -155,7 +155,7 @@ GEN
 nfgcd_all(GEN P, GEN Q, GEN T, GEN den, GEN *Pnew)
 {
   pari_sp btop, st_lim, ltop = avma;
-  GEN lP, lQ, M, dsol, R, bo, sol, mod = NULL, nmod;
+  GEN lP, lQ, M, dsol, R, bo, sol, mod = NULL;
   long vP = varn(P), vT = varn(T), dT = degpol(T), dM = 0, dR;
   ulong p;
   byteptr primepointer;
@@ -194,9 +194,7 @@ nfgcd_all(GEN P, GEN Q, GEN T, GEN den, GEN *Pnew)
       gerepileall(btop, 2, &M, &mod);
     }
 
-    nmod = muliu(mod, p);
-    ZM_incremental_CRT(&M,R,mod,nmod,p);
-    mod = nmod;
+    (void)ZM_incremental_CRT(&M,R, &mod,p);
     /* I suspect it must be better to take amax > bmax*/
     bo = sqrti(shifti(mod, -1));
     if ((sol = FpM_ratlift(M, mod, bo, bo, den)) == NULL) continue;

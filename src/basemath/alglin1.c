@@ -1531,11 +1531,7 @@ ZM_inv(GEN M, GEN dM)
       q = utoipos(p);
     }
     else
-    {
-      GEN qp = muliu(q,p);
-      stable = ZM_incremental_CRT(&H, Hp, q,qp, p);
-      q = qp;
-    }
+      stable = ZM_incremental_CRT(&H, Hp, &q, p);
     if (DEBUGLEVEL>5) err_printf("inverse mod %ld (stable=%ld)\n", p,stable);
     if (stable) {/* DONE ? */
       if (dM != gen_1)
@@ -4011,16 +4007,13 @@ ZM_det_i(GEN a, long n)
   q = utoipos(p);
   while (cmpii(q, h) <= 0)
   {
-    GEN qp;
     NEXT_PRIME_VIADIFF_CHECK(p,d);
     Dp = umodiu(D, p);
     if (!Dp) continue;
     av2 = avma;
     compp = Fl_div(Flm_det(ZM_to_Flm(a, p), p), Dp, p);
     avma = av2;
-    qp = muliu(q, p);
-    (void) Z_incremental_CRT(&comp, compp, q, qp, p);
-    q = qp;
+    (void) Z_incremental_CRT(&comp, compp, &q, p);
   }
   return gerepileuptoint(av, mulii(comp, D));
 }
