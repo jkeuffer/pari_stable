@@ -1359,7 +1359,6 @@ ellsea(GEN E, GEN p, long smallfact)
     if (nbtrace == 1)
     {
       long ap_mod_ellkt = trace_mod[1];
-      GEN q;
       if (smallfact && ell > smallfact)
       { /* does ell divide p + 1 - ap ? */
         long card_mod_ell = (smodis(p, ell) + 1 - ap_mod_ellkt) % ell ;
