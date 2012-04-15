@@ -1161,7 +1161,7 @@ doellomega_real(GEN E, long prec)
   pari_sp av = avma;
   GEN roots = ell_rootsprec(E,prec), D = ell_get_disc(E);
   GEN e1=gel(roots,1), e2=gel(roots,2), e3=gel(roots,3);
-  if (signe(D)>0)
+  if (gsigne(D)>0)
   {
     GEN a = gsqrt(gsub(e1,e2),prec);
     GEN b = gsqrt(gsub(e2,e3),prec);
