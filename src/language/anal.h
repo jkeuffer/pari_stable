@@ -59,10 +59,7 @@ struct node_loc
   const char *start,*end;
 };
 
-union token_value {
-  int val;
-  GEN gen;
-};
+union token_value { long val; };
 
 int pari_lex(union token_value *yylval, struct node_loc *yylloc, char **lex);
 int pari_parse(char **lex);
