@@ -2738,7 +2738,7 @@ ellrootno(GEN e, GEN p)
 
 /* compute a_2 */
 static long
-a2(GEN e)
+cardmod2(GEN e)
 { /* solve y(1 + a1x + a3) = x (1 + a2 + a4) + a6 */
   ulong a1 = Rg_to_Fl(ell_get_a1(e), 2);
   ulong a2 = Rg_to_Fl(ell_get_a2(e), 2);
@@ -2750,13 +2750,13 @@ a2(GEN e)
   else if (!a6) N += 2; /* x = 0, y arbitrary */
   if ((a3 ^ a1) == 0) N++; /* x = 1, y = 0 or 1 */
   else if (a2 ^ a4 ^ a6) N += 2; /* x = 1, y arbitrary */
-  return 3 - N;
+  return N;
 }
 /* a_p using Jacobi sums */
 static long
 ap_jacobi(GEN e, ulong p)
 {
-  if (p == 2) return a2(e);
+  if (p == 2) return 3 - cardmod2(e);
   else
   {
     ulong i;
@@ -3325,17 +3325,10 @@ static GEN
 ap_bad_red(GEN e, GEN p)
 {
   pari_sp av = avma;
-  GEN c6 = ell_get_c6(e);
+  GEN c6;
   long s;
-  if (equaliu(p, 2))
-  {
-    long c;
-    if (!signe(c6)) return gen_0;
-    c = mod8(c6);
-    if (!odd(c)) return gen_0;
-    return (c == 3 || c == 5)? gen_m1: gen_1;
-  }
-  c6 = Rg_to_Fp(c6, p);
+  if (equaliu(p, 2)) return stoi(3 - cardmod2(e));
+  c6 = Rg_to_Fp(ell_get_c6(e), p);
   s = kronecker(c6, p);
   if (mod4(p) == 3) s = -s;
   avma = av; return stoi(s);
@@ -4683,16 +4676,20 @@ elltatepairing(GEN E, GEN P, GEN Q, GEN m)
   return ellmiller(E, P, Q, m);
 }
 
+/* if (singular), avoid the singular point */
 static GEN
-ellgen1_FpE(GEN N, GEN a4, GEN a6, GEN p)
+ellgen1_FpE(GEN N, GEN a4, GEN a6, GEN p, int singular)
 {
   GEN F = mkvec2(N, Z_factor(N));
   pari_sp av = avma;
   while(1)
   {
     GEN P = random_FpE(a4, a6, p);
-    GEN s = FpE_order(P, F, a4, p);
-    if (equalii(s, N)) return P;
+    if (!singular || signe( gel(P,2) )) /* avoid singular point */
+    {
+      GEN s = FpE_order(P, F, a4, p);
+      if (equalii(s, N)) return P;
+    }
     avma = av;
   }
 }
@@ -4719,6 +4716,8 @@ ellgen2_FpE(GEN d1, GEN d2, GEN m, GEN a4, GEN a6, GEN p)
   }
 }
 
+/* D = [d_1, ..., d_r ] the elementary divisors for E(Fp), r = 0,1,2.
+ * d_r | ... | d_1 */
 static GEN
 ellgen(GEN E, GEN D, GEN m, GEN p)
 {
@@ -4734,20 +4733,27 @@ ellgen(GEN E, GEN D, GEN m, GEN p)
       long a2 = Rg_to_Fl(ell_get_a2(E),l);
       long a4 = Rg_to_Fl(ell_get_a4(E),l);
       long a6 = Rg_to_Fl(ell_get_a6(E),l);
-      long m = a1|(a2<<1)|(a3<<2)|(a4<<3)|(a6<<4); /* r==0 : m==22 || m==28*/
-      if (m==29) retmkvec(mkvec2s(1,1));
-      if (m==19) retmkvec(mkvec2s(0,1));
-      if (m==9 || m==17 || m==20 || m==21 || m==30) retmkvec(mkvec2s(1,0));
-      retmkvec(mkvec2s(0,0));
+      switch(a1|(a2<<1)|(a3<<2)|(a4<<3)|(a6<<4))
+      { /* r==0 : 22, 23, 25, 28, 31 */
+        case 18: case 29:
+          retmkvec(mkvec2s(1,1));
+        case 19: case 24: case 26:
+          retmkvec(mkvec2s(0,1));
+        case 9: case 16: case 17: case 20: case 21: case 27: case 30:
+          retmkvec(mkvec2s(1,0));
+        default:
+          retmkvec(mkvec2s(0,0));
+      }
     } else
-    {
+    { /* y^2 = 4x^3 + b2 x^2 + 2b4 x + b6 */
       long b2 = Rg_to_Fl(ell_get_b2(E),l);
       long b4 = Rg_to_Fl(ell_get_b4(E),l);
       long b6 = Rg_to_Fl(ell_get_b6(E),l);
-      long T1 = (1+b2+2*b4+b6)%3;
+      long T1 = (1+b2+2*b4+b6)%3; /* RHS(1) */
       long x,y;
       if (r==2) /* [2,2] */
         retmkvec2(mkvec2s(0,a3),mkvec2s(1,Fl_add(a1,a3,3)));
+      /* cyclic, order d_1 */
       y = equaliu(gel(D,1),2)? 0 : 1;
       if (equaliu(gel(D,1),6)) /* [6] */
       {
@@ -4755,27 +4761,35 @@ ellgen(GEN E, GEN D, GEN m, GEN p)
         x = (b6==1 && b8!=0) ? 0 : (T1==1 && (b2+b8)%3!=0) ? 1 : 2;
       }
       else /* [2],[3],[4],[5],[7] */
-        x = b6==y ? 0 : T1==y ? 1 : 2;
+      { /* Avoid [x,y] singular, iff b2 x + b4 = 0 = y. */
+        if (y == 1)
+          x = (b6==1) ? 0 : (T1==1) ? 1 : 2;
+        else
+          x = (b6==0 && b4) ? 0 : (T1==0 && (b2 + b4) % 3) ? 1 : 2;
+      }
       retmkvec(mkvec2s(x,(2*y+a1*x+a3)%3));
     }
   }
   else
   {
     GEN e = ell_to_a4a6(E, p), a4 = gel(e, 1), a6 = gel(e, 2);
-    GEN P, R;
+    GEN P;
     switch(lg(D)-1)
     {
-    case 1:
-      P = ellgen1_FpE(gel(D,1), a4, a6, p);
-      R = mkvec( FpE_changepoint(P, gel(e,3), p));
-      break;
-    default:
-      P = ellgen2_FpE(gel(D,1), gel(D,2), m, a4, a6, p);
-      R = mkvec2( FpE_changepoint(gel(P,1), gel(e,3), p),
-          FpE_changepoint(gel(P,2), gel(e,3), p));
+    case 1: {
+      GEN disc = Rg_to_Fp(ell_get_disc(E), p);
+      P = ellgen1_FpE(gel(D,1), a4, a6, p, signe(disc) == 0);
+      P = FpE_changepoint(P, gel(e,3), p);
+      P = mkvec(P);
       break;
     }
-    return gerepilecopy(av, R);
+    default:
+      P = ellgen2_FpE(gel(D,1), gel(D,2), m, a4, a6, p);
+      gel(P,1) = FpE_changepoint(gel(P,1), gel(e,3), p);
+      gel(P,2) = FpE_changepoint(gel(P,2), gel(e,3), p);
+      break;
+    }
+    return gerepilecopy(av, P);
   }
 }
 
@@ -4783,11 +4797,18 @@ static GEN
 ellgroup_m(GEN E, GEN p, GEN *pt_m)
 {
   pari_sp av = avma;
-  GEN N, N0, N1, r, F, F1, e, a4, a6;
+  GEN N, N0, N1, r, F, F1, e, a4, a6, D;
   long i, j, l1;
   N = subii(addis(p, 1), ellap(E, p));
-  r = gcdii(N, subis(p, 1));
+  D = Rg_to_Fp(ell_get_disc(E), p);
+  if (!signe(D))
+  {
+    N = subis(N, 1); /* remove singular point */
+    if (equali1(N)) { avma = av; return cgetg(1,t_VEC); }
+    goto ellgroup_cyclic;
+  }
   if (equali1(N)) { avma = av; return cgetg(1,t_VEC); }
+  r = gcdii(N, subis(p, 1));
   if (is_pm1(r)) goto ellgroup_cyclic; /* Takes care of p=2 */
   if (equaliu(p, 3))
   { /* The only possible non-cyclic group is [2,2] which happens 9 times */
@@ -4867,7 +4888,7 @@ ellgroup0(GEN E, GEN p, long flag)
   if (flag!=1) pari_err_FLAG("ellgroup");
   G = ellgroup_m(E, p, &m);
   F = FpVV_to_mod(ellgen(E,G,m,p),p);
-  return gerepilecopy(av, mkvec2(G,F));
+  return gerepilecopy(av, mkvec3(ZV_prod(G),G,F));
 }
 
 static GEN

@@ -87,6 +87,8 @@ BA 70- ellpointtoz was numerically unstable
    71- issquarefree(0) => error [#1304]
    72- sizebyte(t_LIST) returned the size of the wrapper type, not the list
        itself [#1307]
+   73- ellgroup(E over Q, p) now returns the structure of the group of
+       non-singular points, when the curve has bad reduction at p.
 
   Changed
     1- mathnf: swapped flag 3 and 5.

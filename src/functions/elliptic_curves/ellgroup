@@ -3,21 +3,27 @@ Section: elliptic_curves
 C-Name: ellgroup0
 Prototype: GDGD0,L,
 Help: ellgroup(E,{p},{flag}): computes the structure of the group E(Fp)
- Assume the equation is minimal at p. If flag is $1$, return also generators.
+ Assume the equation is minimal at p. If flag is 1, return also generators.
 Doc: computes the structure of the group $E(\F_p) \sim \Z/d_1\Z \times
  \Z/d_2\Z$, with $d_2\mid d_1$. The prime $p$ may be omitted if the curve
  was defined over $\F_p$ (\typ{INTMOD} coefficients) or $\Q_p$ (\typ{PADIC}
  coefficients). Otherwise the curve must be defined over $\Q$, and $p$ must
  be explicitly given. Over $\Q$ or $\Q_p$, the equation is assumed to be
- minimal at $p$.
+ minimal at $p$; in this case, the reduction is allowed to be singular, and
+ we return the structure of the group of non-singular points.
  If the flag is $0$ (default), return $[d_1]$ or $[d_1, d_2]$, if $d_2>1$.
- If the flag is $1$, and $d2=1$, return $[[d_1],[P]]$ where $P$ is a generator.
- If the flag is $1$, and $d2=2$, return $[[d_1,d_2],[P,Q]]$ where $P$ is of order $d_1$
- and $[P,Q]$ generates the curve.
+ If the flag is $1$, return a triple $[h,\var{cyc},\var{gen}]$, where
+ $h$ is the curve cardinality, \var{cyc} gives the group structure as a
+ product of cyclic groups (as per $\fl = 0$). More precisely, if $d_2 > 1$,
+ the output is $[d_1d_2, [d_1,d_2],[P,Q]]$ where $P$ is
+ of order $d_1$ and $[P,Q]$ generates the curve; \emph{but} it is not
+ guaranteed that
+ $Q$ has order $d_2$ (which in the worst case needs an expensive discrete log
+ computation), only that \kbd{ellweilpairing(E, P, Q, d1)} has order $d_2$.
  \bprog
  ? E = ellinit([0,1]);  \\ y^2 = x^3 + 0.x + 1, defined over Q
  ? ellgroup(E, 3)  \\ 3 necessary here
- %2 = [4]    \\ cyclic
+ %2 = [3]    \\ cyclic. N.B. The reduction mod 3 is singular!
  ? ellgroup(E, 7)
  %3 = [6, 2] \\ non-cyclic
 
@@ -32,4 +38,5 @@ Doc: computes the structure of the group $E(\F_p) \sim \Z/d_1\Z \times
     *** ellgroup: inconsistent moduli in Rg_to_Fp:
       11
       13
+ ? ellgroup(E, 7, 1)
  @eprog

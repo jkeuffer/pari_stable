@@ -2,20 +2,27 @@ default(realprecision,38);
 ellap(ellinit([1,0,1,4,-6]), 2)
 ellap(ellinit([0,17]), 2)
 ellap(ellinit([0, 0, 1, -1, 0]),2486246173)
+
+testgroup(v,p)=
+{ my(E,F,G,g);
+  E=ellinit(v, 1); if(!E, next);
+  E[13] = Mod(0,p); E *= Mod(1,p);/*allow singular curves*/
+  G=ellgroup(E,p,1); if (G.no == 1, return);
+  g=G.gen; if (!ellisoncurve(E,g), error(E, G));
+  F=vector(#g,i, ellorder(E,g[i],G.no));
+  if ((p <= 3 && F!=G.cyc) || (p > 3 && F[1] != G.cyc[1]),
+    print("error:",v,":",F,":",G));
+}
 {
-  my(p,E,F,G,g);
   for(x=10,63,
-    p=nextprime(2^x);E=ellinit([0,0,1,2,3]);
-    G = ellgroup(E,p,1); g = G[2][1];
-    if(!ellisoncurve(E,g) || ellorder(E,g)!=G[1][1], error("ellgroup"));
+    my(p,E,G,g);
+    p=nextprime(2^x);E=ellinit([0,0,1,2,3],1);
+    G = ellgroup(E,p,1); if (!ellisoncurve(E,G.gen), error(E));
+    if(ellorder(E,G.gen[1])!=G.cyc[1], error(E));
     print(p,":",ellgroup(E,p)));
   for(p=2,3,
-    forvec(v=vector(5,i,[0,p-1]),
-      E=ellinit(v*Mod(1,p)); if(E==0, next);
-      G=ellgroup(E,p,1); g=G[2];
-      F=vector(#g,i, if(ellisoncurve(E,g[i]),ellorder(E,g[i]),0));
-      if (F!=G[1],
-        print("error:",v,":",F,":",G))))
+    forvec(v=vector(5,i,[0,p-1]), testgroup(v,p)));
+  forvec(v=vector(2,i,[0,4]), testgroup(v,5));
 }
 a=ffgen(ffinit(2,8),'a); E=ellinit([a,1,0,0,1]);
 P=[a^3,ellordinate(E,a^3)[1]]; Q=ellpow(E,P,113);
