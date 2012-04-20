@@ -205,6 +205,7 @@ GEN     random_Flx(long d1, long v, ulong p);
 
 GEN     FpE_add(GEN P, GEN Q, GEN a4, GEN p);
 GEN     FpE_changepoint(GEN x, GEN ch, GEN p);
+GEN     FpE_changepointinv(GEN x, GEN ch, GEN p);
 GEN     FpE_dbl(GEN P, GEN a4, GEN p);
 GEN     FpE_neg(GEN P, GEN p);
 GEN     FpE_order(GEN z, GEN o, GEN a4, GEN p);

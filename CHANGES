@@ -217,8 +217,8 @@ BA 47- cubic sieve algorithm for Flxq_log
 BA 48- library functions F2x_F2xqV_eval, F2x_F2xq_eval
 BA 49- forqfvec()
 BA 50- library functions FqM_image, FqM_rank, FpXQXQ_powers, FpXQXQ_matrix_pow
-BA 51- ellgroup(,,1): also return the generators.
-BA 52- library functions FpVV_to_mod, FpE_changepoint
+BA 51- ellgroup(,,1): also return the generators
+BA 52- library functions FpVV_to_mod, FpE_changepoint, FpE_changepointinv
 BA 53- GP syntax [a..b] : [a,a+1,...,b]
 BA 54- GP syntax [a(x)|x<-b,c(x)] : apply(a,select(c,b))
 BA 55- GP syntax M[a..b,^c] : vecextract(M,"a..b","^c")

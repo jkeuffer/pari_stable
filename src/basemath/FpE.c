@@ -47,6 +47,22 @@ FpE_changepoint(GEN x, GEN ch, GEN p)
 }
 
 GEN
+FpE_changepointinv(GEN x, GEN ch, GEN p)
+{
+  GEN u, r, s, t, X, Y, u2, u3, u2X, z;
+  if (ell_is_inf(x)) return x;
+  X = gel(x,1); Y = gel(x,2);
+  u = gel(ch,1); r = gel(ch,2);
+  s = gel(ch,3); t = gel(ch,4);
+  u2 = Fp_sqr(u, p); u3 = Fp_mul(u,u2,p);
+  u2X = Fp_mul(u2,X, p);
+  z = cgetg(3, t_VEC);
+  gel(z,1) = Fp_add(u2X,r,p);
+  gel(z,2) = Fp_add(Fp_mul(u3,Y,p), Fp_add(Fp_mul(s,u2X,p), t, p), p);
+  return z;
+}
+
+GEN
 FpE_dbl(GEN P, GEN a4, GEN p)
 {
   pari_sp ltop = avma;

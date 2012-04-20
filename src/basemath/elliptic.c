@@ -686,25 +686,6 @@ ellchangepointinv(GEN x, GEN ch)
   return gerepilecopy(av,y);
 }
 
-static GEN
-ellchangepointinv_Fp(GEN x, GEN ch, GEN p)
-{
-  GEN u, r, s, t, X, Y, u2, u3, u2X, z;
-  if (ell_is_inf(x)) return x;
-  X = gel(x,1);
-  Y = gel(x,2);
-  u = gel(ch,1);
-  r = gel(ch,2);
-  s = gel(ch,3);
-  t = gel(ch,4);
-  u2 = Fp_sqr(u, p); u3 = Fp_mul(u,u2,p);
-  u2X = Fp_mul(u2,X, p);
-  z = cgetg(3, t_VEC);
-  gel(z,1) = Fp_add(u2X,r,p);
-  gel(z,2) = Fp_add(Fp_mul(u3,Y,p), Fp_add(Fp_mul(s,u2X,p), t, p), p);
-  return z;
-}
-
 static long
 ellexpo(GEN E)
 {
@@ -4197,7 +4178,7 @@ _orderell(GEN E, GEN P)
   p = utoipos(pp);
   tmp = ell_to_a4a6(E, p);
   a4 = gel(tmp, 1);
-  Pp = ellchangepointinv_Fp(RgV_to_FpV(P, p), gel(tmp,3), p);
+  Pp = FpE_changepointinv(RgV_to_FpV(P, p), gel(tmp,3), p);
 
   /* check whether the order of Pp on Ep is <= 12 */
   for (Q = FpE_dbl(Pp, a4, p), k = 2;
@@ -4644,8 +4625,8 @@ ellweilpairing(GEN E, GEN P, GEN Q, GEN m)
   {
     GEN p = gel(ellj, 1);
     GEN S = ell_to_a4a6(E, p);
-    GEN z = FpE_weilpairing(RgV_to_FpV(ellchangepointinv(P,gel(S,3)),p),
-                            RgV_to_FpV(ellchangepointinv(Q,gel(S,3)),p),m,gel(S,1),p);
+    GEN z = FpE_weilpairing(FpE_changepointinv(RgV_to_FpV(P,p),gel(S,3),p),
+                            FpE_changepointinv(RgV_to_FpV(Q,p),gel(S,3),p),m,gel(S,1),p);
     return gerepileupto(ltop, Fp_to_mod(z, p));
   }
   num    = ellmiller(E, P, Q, m);
@@ -4669,8 +4650,8 @@ elltatepairing(GEN E, GEN P, GEN Q, GEN m)
     pari_sp ltop = avma;
     GEN p = gel(ellj, 1);
     GEN S = ell_to_a4a6(E, p);
-    GEN z = FpE_tatepairing(RgV_to_FpV(ellchangepointinv(P,gel(S,3)),p),
-                            RgV_to_FpV(ellchangepointinv(Q,gel(S,3)),p),m,gel(S,1),p);
+    GEN z = FpE_tatepairing(FpE_changepointinv(RgV_to_FpV(P,p),gel(S,3),p),
+                            FpE_changepointinv(RgV_to_FpV(Q,p),gel(S,3),p),m,gel(S,1),p);
     return gerepileupto(ltop, Fp_to_mod(z, p));
   }
   return ellmiller(E, P, Q, m);

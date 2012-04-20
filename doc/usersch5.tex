@@ -4968,6 +4968,10 @@ for any value of $a_6$ compatible with the points given.
 $Q$ of the point $P$ on the curve $E:y^2=x^3+a_4\*x+a_6$ by the coordinate
 change $m$ (which is a $FpV$).
 
+\fun{GEN}{FpE_changepointinv}{GEN P, GEN m, GEN a4, GEN p} returns the image
+$Q$ on the curve $E:y^2=x^3+a_4\*x+a_6$ of the point $P$ by the inverse of the
+coordinate change $m$ (which is a $FpV$).
+
 \fun{GEN}{random_FpE}{GEN a4, GEN a6, GEN p} returns a random point on
 $E(\F_p)$, where $E$ is defined by $E:y^2=x^3+a_4\*x+a_6$.
 
