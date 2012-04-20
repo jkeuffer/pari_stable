@@ -1840,30 +1840,43 @@ agm1r_abs(GEN x)
   affrr_fixlg(a1,y); avma = av; return y;
 }
 
+struct agmcx_gap_t { long L, ex, cnt; } agmcx_gap_t;
+
+/* return 0 if we must stop the AGM loop (a=b or a ~ b), 1 otherwise */
 static int
-agmcx_gap(GEN a, GEN b, long L)
+agmcx_gap(GEN a, GEN b, struct agmcx_gap_t *S)
 {
   GEN d = gsub(b, a);
-  return (!gequal0(d) && gexpo(d) - gexpo(b) >= L);
+  long ex = S->ex;
+  S->ex = gexpo(d);
+  if (gequal0(d) || S->ex - gexpo(b) < S->L) return 0;
+  /* if (S->ex >= ex) we're no longer making progress; twice in a row */
+  if (S->ex < ex) S->cnt = 0;
+  else
+    if (S->cnt++) return 0;
+  return 1;
 }
 static GEN
 agm1cx(GEN x, long prec)
 {
+  struct agmcx_gap_t S;
   GEN a1, b1;
   pari_sp av = avma;
-  long L, l = precision(x), rotate=0;
+  long l = precision(x), rotate = 0;
   if (!l) l = prec;
-  L = 5-prec2nbits(l);
+  S.L = 1-prec2nbits(l);
+  S.cnt = 0;
+  S.ex = LONG_MAX;
   a1 = gtofp(gmul2n(gadd(real_1(l), x), -1), l); /* avoid loss of accuracy */
-  if (gsigne(greal(x))<0)
+  if (gsigne(real_i(x))<0)
   { /* We rotate by +/-Pi/2, so that the choice of the principal square
        root gives the optimal AGM. So a1 = +/-I*a1, b1=sqrt(-x). */
-    if (gsigne(gimag(x))<0) { a1=mulcxI(a1);  rotate=-1; }
-    else                    { a1=mulcxmI(a1); rotate=1; }
+    if (gsigne(imag_i(x))<0) { a1=mulcxI(a1);  rotate=-1; }
+    else                     { a1=mulcxmI(a1); rotate=1; }
     x = gneg(x);
   }
   b1 = gsqrt(x, prec);
-  while (agmcx_gap(a1,b1,L))
+  while (agmcx_gap(a1,b1,&S))
   {
     GEN a = a1;
     a1 = gmul2n(gadd(a,b1),-1);
@@ -2084,17 +2097,17 @@ logr_abs(GEN X)
   affrr_fixlg(y, z); avma = ltop; return z;
 }
 
-/* assume Im(q) != 0 */
+/* assume Im(q) != 0 and precision(q) >= prec. Compute log(q) with accuracy
+ * prec [disregard input accuracy] */
 GEN
 logagmcx(GEN q, long prec)
 {
-  GEN z, y, Q, a, b;
+  GEN z = cgetc(prec), y, Q, a, b;
   long lim, e, ea, eb;
-  pari_sp av;
+  pari_sp av = avma;
   int neg = 0;
 
-  e = precision(q); if (e > prec) prec = e;
-  z = cgetc(prec); av = avma; incrprec(prec);
+  incrprec(prec);
   if (gsigne(gel(q,1)) < 0) { q = gneg(q); neg = 1; }
   lim = prec2nbits(prec) >> 1;
   Q = gtofp(q, prec);
@@ -2201,6 +2214,7 @@ glog(GEN x, long prec)
 {
   pari_sp av, tetpil;
   GEN y, p1;
+  long l;
 
   switch(typ(x))
   {
@@ -2216,6 +2230,7 @@ glog(GEN x, long prec)
 
     case t_COMPLEX:
       if (ismpzero(gel(x,2))) return glog(gel(x,1), prec);
+      l = precision(x); if (l > prec) prec = l;
       if (prec >= LOGAGMCX_LIMIT) return logagmcx(x, prec);
       y = cgetg(3,t_COMPLEX);
       gel(y,2) = garg(x,prec);
