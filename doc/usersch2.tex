@@ -646,16 +646,47 @@ and enclosed between brackets ``\kbd{[}$\,$'' and ``$\,$\kbd{]}'',
 e.g.~\kbd{[1,2,3]}. To enter a column vector, type the vector horizontally,
 and add a tilde ``\til'' to transpose. \kbd{[ ]} yields the empty (row)
 vector. The function \tet{Vec} can be used to transform any object into a
-vector (see Chapter~3).
+vector (see Chapter~3). The construction $[i..j]$, where $i \leq j$ are two
+integers returns the vector $[i, i+1,\dots, j-1, j]$
+\bprog
+? [1,2,3]
+%1 = [1, 2, 3]
+? [-2..3]
+%2 = [-2, -1, 0, 1, 2, 3]
+@eprog
 
-If the variable $x$ contains a (row or column) vector, $x[m]$ refers to its
-$m$-th entry. You can assign a result to $x[m]$ (i.e.~write something like
-$x[k]=\var{expr}$).
+Let the variable $v$ contain a (row or column) vector:
+
+\item \kbd{v[m]} refers to its $m$-th entry; you can assign any value to
+\kbd{v[m]},  i.e.~write something like $v[m]=\var{expr}$.
+
+\item \kbd{v[i..j]}, where $i \leq j$, returns the vector slice containing
+elements $v[i],\dots, v[j]$; you can \emph{not} assign a result to
+\kbd{v[i..j]}.
+
+\item \kbd{v[\pow i]} returns the vector whose $i$-th entry has been removed;
+you can \emph{not} assign a result to \kbd{v[\pow i]}.
+
+\noindent In the last two constructions \kbd{v[i..j]} and \kbd{v[\pow i]},
+$i$ and $j$ are allowed to be negative integers, in which case, we start
+counting from the end of the vector: e.g., $-1$ is the index of the last
+element.
+\bprog
+? v = [1,2,3,4];
+? v[2..4]
+%2 = [2, 3, 4]
+? v[^3]
+%3 = [1, 2, 4]
+? v[^-1]
+%3 = [1, 2, 3]
+? v[-3..-1]
+%4 = [2, 3, 4]
+@eprog
 
 \subsec{Matrices (\typ{MAT})}%
 \sidx{matrix}\kbdsidx{t_MAT}
-To enter a matrix, type the components line by line, the components being
-separated by commas ``\kbd{,}'', the lines by semicolons ``\kbd{;}'', and
+To enter a matrix, type the components row by row, the components being
+separated by commas ``\kbd{,}'', the rows by semicolons ``\kbd{;}'', and
 everything enclosed in brackets ``\kbd{[}$\,$'' and ``$\,$\kbd{]}'', e.g.
 \kbd{[x,y; z,t; u,v]}. \kbd{[;]} yields an empty ($0 \times 0$) matrix. The
 function \tet{Mat} transforms any object into a matrix, and \tet{matrix}
@@ -671,16 +702,57 @@ creates matrices whose $(i,j)$-th entry is described by a function $f(i,j)$:
 [5 6]
 @eprog
 
-If \kbd{M} is a matrix, \kbd{M[i,j]} refers to its $(i,j)$-th entry,
-\kbd{M[i,]} to its $i$-th row, and
-\kbd{M[,j]} to its $j$-th column; but \kbd{M[i]} is meaningless and triggers
-an error. You can assign a result to \kbd{M[i,j]}, \kbd{M[i,]} or
-\kbd{M[,j]}, provided that the expression is a row or column vector of the
-right dimension in the latter two cases. This process is recursive, so if
-\kbd{M}
-is a matrix of matrices of \dots, an expression such as \kbd{M[1,1][,3][4] =
-1} is perfectly valid (and actually identical to \kbd{M[1,1][4,3] = 1}),
-assuming that all matrices along the way have compatible dimensions.
+\noindent Let the variable $M$ contain a matrix, and let $i,j,k,l$ denote
+four
+integers:
+
+\item \kbd{M[i,j]} refers to its $(i,j)$-th entry; you can assign any result
+to \kbd{M[i,j]}.
+
+\item \kbd{M[i,]} refers to its $i$-th row; you can assign a \typ{VEC}
+of the right dimension to \kbd{M[i,]}.
+
+\item \kbd{M[,j]} refers to its $j$-th column; you can assign a \typ{COL}
+of the right dimension do \kbd{M[,j]}.
+
+\noindent \emph{But} \kbd{M[i]} is meaningless and triggers an error. The
+``range'' notation $i..j$ is available as for vectors :
+
+\item \kbd{M[i..j, k..l]}, $i\leq j$, $k\leq l$, returns the submatrix built
+from the rows $i$ to $j$ and columns $k$ to $l$ of $M$; you can \emph{not}
+assign to \kbd{M[i..j, j..l]}.
+
+\item \kbd{M[i..j,]} returns the submatrix built from the rows $i$ to
+$j$ of $M$; you can \emph{not} assign to \kbd{M[i..j, ]}.
+
+\item \kbd{M[,i..j]} returns the submatrix built from the columns $i$ to
+$j$ of $M$; you can \emph{not} assign to \kbd{M[,i..j]}.
+
+\bprog
+? M = [1,2,3;4,5,6;7,8,9];
+? M[1..2, 2..3]
+%2 =
+[2 3]
+
+[5 6]
+? M[1..2,]
+%3 =
+[1 2 3]
+
+[4 5 6]
+? M[,2..3]
+%4 =
+[2 3]
+
+[5 6]
+
+[8 9]
+@eprog
+
+All this is recursive, so if \kbd{M} is a matrix of matrices of \dots, an
+expression such as \kbd{M[1,1][,3][4] = 1} is perfectly valid (and actually
+identical to \kbd{M[1,1][4,3] = 1}), assuming that all matrices along the way
+have compatible dimensions.
 
 \misctitle{Technical note (design flaw)} Matrices are internally represented
 as a vector of columns. All matrices with $0$ columns are thus represented
