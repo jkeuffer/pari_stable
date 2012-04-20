@@ -1298,6 +1298,11 @@ mul_rfrac_scal(GEN n, GEN d, GEN x)
 
   switch(typ(x))
   {
+    case t_PADIC:
+      n = gmul(n, x);
+      d = gcvtop(d, gel(x,2), signe(gel(x,4))? precp(x): 1);
+      return gerepileupto(av, gdiv(n,d));
+
     case t_INTMOD: case t_POLMOD:
       n = gmul(n, x);
       d = gmul(d, gmodulo(gen_1, gel(x,1)));
