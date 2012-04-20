@@ -88,6 +88,12 @@ ell_realroot(GEN e) { return gmael(e,14,1); }
 static GEN
 ell_realrootprec(GEN e, long prec) { return gel(ell_rootsprec(e,prec),1); }
 
+static int
+ell_is_FpE(GEN E, GEN P, GEN *pp)
+{
+  return Rg_is_Fp(ell_get_disc(E),pp) && RgV_is_FpV(P,pp);
+}
+
 /* x^3 + a2 x^2 + a4 x + a6 */
 static GEN
 ellRHS(GEN e, GEN x)
@@ -961,13 +967,24 @@ _sqr(void *e, GEN x) { return addell((GEN)e, x, x); }
 static GEN
 _mul(void *e, GEN x, GEN y) { return addell((GEN)e, x, y); }
 
+static GEN
+ellpow_modp(GEN e, GEN P, GEN n, GEN p)
+{
+  GEN v = ell_to_a4a6(e, p), a4 = gel(v,1), m = gel(v,3);
+  GEN Pp = FpE_changepointinv(RgV_to_FpV(P,p), m, p);
+  GEN Qp = FpE_mul(Pp, n, a4, p);
+  return FpV_to_mod(FpE_changepoint(Qp, m, p), p);
+}
+
 /* [n] z, n integral */
 static GEN
 ellpow_Z(GEN e, GEN z, GEN n)
 {
   long s;
-
+  GEN p=NULL;
   if (ell_is_inf(z)) return ellinf();
+  if (ell_is_FpE(e,z,&p) && p && cmpiu(p,3)>0)
+    return ellpow_modp(e, z, n, p);
   s = signe(n);
   if (!s) return ellinf();
   if (s < 0) z = invell(e,z);
@@ -3366,11 +3383,11 @@ easy_ap(GEN E, GEN p)
 static GEN
 get_p(GEN e)
 {
-  GEN j = ell_get_j(e);
-  switch(typ(j))
+  GEN disc = ell_get_disc(e);
+  switch(typ(disc))
   {
-    case t_INTMOD: return gel(j,1);
-    case t_PADIC: return gel(j,2);
+    case t_INTMOD: return gel(disc,1);
+    case t_PADIC: return gel(disc,2);
   }
   pari_err(e_MISC,"cannot determine the prime p in elliptic curve function");
   return NULL; /*notreached*/
@@ -4209,7 +4226,7 @@ ellorder(GEN e, GEN z, GEN o)
   if (!o)
   {
     GEN p=NULL;
-    if (Rg_is_Fp(disc, &p) && RgV_is_FpV(z, &p) && p)
+    if (ell_is_FpE(e, z, &p) && p)
       o = subii(addis(p,1), ellap(e,p));
     else
       pari_err(e_MISC,"curve order required");
@@ -4615,15 +4632,13 @@ GEN
 ellweilpairing(GEN E, GEN P, GEN Q, GEN m)
 {
   pari_sp ltop = avma;
-  GEN num, denom, result;
-  GEN ellj = ell_get_j(E);
+  GEN num, denom, result, p=NULL;
   checksmallell(E); checkellpt(P); checkellpt(Q);
   if (typ(m)!=t_INT) pari_err_TYPE("ellweilpairing",m);
   if (ell_is_inf(P) || ell_is_inf(Q) || gequal(P,Q))
-    return gpowgs(ellj, 0);
-  if (typ(ellj)==t_INTMOD)
+    return gpowgs(ell_get_disc(E), 0);
+  if (ell_is_FpE(E, P, &p) && RgV_is_FpV(Q, &p) && p && cmpiu(p,3)>0)
   {
-    GEN p = gel(ellj, 1);
     GEN S = ell_to_a4a6(E, p);
     GEN z = FpE_weilpairing(FpE_changepointinv(RgV_to_FpV(P,p),gel(S,3),p),
                             FpE_changepointinv(RgV_to_FpV(Q,p),gel(S,3),p),m,gel(S,1),p);
@@ -4640,15 +4655,14 @@ ellweilpairing(GEN E, GEN P, GEN Q, GEN m)
 GEN
 elltatepairing(GEN E, GEN P, GEN Q, GEN m)
 {
-  GEN ellj = ell_get_j(E);
+  GEN p=NULL;
   checksmallell(E); checkellpt(P); checkellpt(Q);
   if (typ(m)!=t_INT) pari_err_TYPE("elltatepairing",m);
   if (ell_is_inf(P) || ell_is_inf(Q))
-    return gpowgs(ellj, 0);
-  if (typ(ellj)==t_INTMOD)
+    return gpowgs(ell_get_disc(E), 0);
+  if (ell_is_FpE(E, P, &p) && RgV_is_FpV(Q, &p) && p && cmpiu(p,3)>0)
   {
     pari_sp ltop = avma;
-    GEN p = gel(ellj, 1);
     GEN S = ell_to_a4a6(E, p);
     GEN z = FpE_tatepairing(FpE_changepointinv(RgV_to_FpV(P,p),gel(S,3),p),
                             FpE_changepointinv(RgV_to_FpV(Q,p),gel(S,3),p),m,gel(S,1),p);
