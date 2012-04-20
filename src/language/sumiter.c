@@ -855,10 +855,12 @@ GEN
 vecexpr0(GEN vec, GEN code, GEN pred)
 {
   if (!is_matvec_t(typ(vec))) pari_err_TYPE("[_|_<-_,_]",vec);
-  if (pred)
+  if (pred && code)
     EXPR_WRAP(code,genselapply((void*)pred,&gp_evalbool,EXPR_ARGUPTO,vec))
-  else
+  else if (code)
     EXPR_WRAP(code,genapply(EXPR_ARGUPTO,vec))
+  else
+    EXPR_WRAP(pred,genselect(EXPR_ARGBOOL,vec))
 }
 
 GEN
