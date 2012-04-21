@@ -37,7 +37,7 @@ Doc: the function has two different behaviors according to whether $n$ is presen
 
  If $n$ is present, the function creates a new object equal to $x$ with a new
  ``precision'' $n$. (This never changes the type of the result. In particular
- it is not possible to use it to obtain a polynomial from a power series; tor
+ it is not possible to use it to obtain a polynomial from a power series; for
  that, see \tet{truncate}.) Now the meaning of precision is different from the
  above (floating point accuracy), and depends on the type of $x$:
 
