@@ -106,16 +106,17 @@ static long
 prec0(long e) { return (e < 0)? nbits2prec(-e): 2; }
 static long
 precREAL(GEN x) { return signe(x) ? realprec(x): prec0(expo(x)); }
-/* t t_REAL, s an exact non-complex type. Return precision(|t| + |s|) */
+/* x t_REAL, y an exact non-complex type. Return precision(|x| + |y|) */
 static long
-precrealexact(GEN t, GEN s) {
-  long l, e = gexpo(s);
-  if (e == -(long)HIGHEXPOBIT) return precREAL(t);
-  if (e < 0) e = 0;
-  e -= expo(t);
-  if (!signe(t)) return prec0(-e);
-  l = realprec(t);
-  return (e > 0)? l + nbits2extraprec(e): l;
+precrealexact(GEN x, GEN y)
+{
+  long lx, ey = gexpo(y), ex, e;
+  if (ey == -(long)HIGHEXPOBIT) return precREAL(x);
+  ex = expo(x);
+  e = ey - ex;
+  if (!signe(x)) return prec0((e >= 0)? -e: ex);
+  lx = realprec(x);
+  return (e > 0)? lx + nbits2extraprec(e): lx;
 }
 static long
 precCOMPLEX(GEN z)
