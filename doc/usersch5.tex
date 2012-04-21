@@ -7494,7 +7494,7 @@ otherwise.
 returns $1$ if \kbd{x} is a $K$-th power, and $0$ otherwise. If \kbd{x} is
 indeed a $K$-th power, set \kbd{pt} to its $K$-th root.
 
-\fun{GEN}{FF_sqrtn}{GEN a, GEN n, GEN *zetan} returns an \kbd{n}-th root of
+\fun{GEN}{FF_sqrtn}{GEN a, GEN n, GEN *zn} returns an \kbd{n}-th root of
 $\kbd{a}$ if it exist. If \kbd{zn} is non-\kbd{NULL} set it to a primitive
 \kbd{n}-th root of the unity.
 
@@ -8811,8 +8811,8 @@ the vector \kbd{x}.
 \fun{GEN}{vecvecsmall_indexsort}{GEN x} performs an indirect lexicographic sorting of the components of the vector \kbd{x} and return a permutation stored in a \typ{VECSMALL}.
 
 \fun{long}{vecvecsmall_search}{GEN x, GEN y, long flag} \kbd{x} being a sorted
-vecvecsmall and \kbd{y} a \typ{VECSMALL}, search \kbd{y} inside \kbd{x}. \kbd{fla} has the same meaning as for \kbd{setsearch}.
-
+vecvecsmall and \kbd{y} a \typ{VECSMALL}, search \kbd{y} inside \kbd{x}.
+\kbd{flag} has the same meaning as for \kbd{setsearch}.
 
 \newpage
 \chapter{Functions related to the GP interpreter}
