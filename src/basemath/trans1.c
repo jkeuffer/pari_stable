@@ -2344,7 +2344,7 @@ mpsc1(GEN x, long *ptmod8)
   B = b/6 + BITS_IN_LONG + (BITS_IN_LONG*BITS_IN_LONG/2)/ b;
   d = a/2.; m = (long)(d + sqrt(d*d + B)); /* >= 0 ,*/
   if (m < (-a) * 0.1) m = 0; /* not worth it */
-  L = l + nbits2nlong(m);
+  L = l + nbits2extraprec(m);
 
   b += m;
   d = 2.0 * (m-dbllog2r(x)-1/LOG2); /* ~ 2( - log_2 Y - 1/log(2) ) */
