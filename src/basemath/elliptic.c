@@ -1189,49 +1189,6 @@ ellomega_real(GEN E, long prec)
 /**                       ELLIPTIC FUNCTIONS                       **/
 /**                                                                **/
 /********************************************************************/
-static int
-agmcx_gap(GEN a, GEN b, long L)
-{
-  GEN d = gsub(b, a);
-  return (!gequal0(d) && gexpo(d) - gexpo(b) >= L);
-}
-
-GEN
-zellagmcx(GEN a0, GEN b0, GEN r, GEN t, long prec)
-{
-  pari_sp av = avma;
-  GEN x = gdiv(a0, b0);
-  GEN a1, b1;
-  long L, l = precision(x), rotate=0;
-  if (!l) l = prec;
-  L = 5-prec2nbits(l);
-  a1 = gtofp(gmul2n(gadd(real_1(l), x), -1), l); /* avoid loss of accuracy */
-  r = gsqrt(gdiv(gmul(a1,gaddgs(r, 1)),gadd(gmulsg(1, r), x )), prec);
-  if (gsigne(greal(x))<0)
-  { /* We rotate by +/-Pi/2, so that the choice of the principal square
-       root gives the optimal AGM. So a1 = +/-I*a1, b1=sqrt(-x). */
-    if (gsigne(gimag(x))<0) { a1=mulcxI(a1);  rotate=-1; }
-    else                    { a1=mulcxmI(a1); rotate=1; }
-    x = gneg(x);
-  }
-  b1 = gsqrt(x, prec);
-  t = gmul(r, t);
-  while (agmcx_gap(a1,b1,L))
-  {
-    GEN a = a1, b = b1;
-    a1 = gmul2n(gadd(a,b),-1);
-    b1 = gsqrt(gmul(a,b), prec);
-    r = gsqrt(gdiv(gmul(a1,gaddgs(r, 1)),gadd(gmul(b, r), a )), prec);
-    t = gmul(r, t);
-  }
-  if (rotate) a1 = rotate>0 ? mulcxI(a1):mulcxmI(a1);
-  a1 = gmul(a1, b0);
-  t = gatan(gdiv(a1,t), prec);
-  /* send t to the fundamental domain if necessary */
-  if (gsigne(greal(t))<0) t = gadd(t, mppi(prec));
-  return gerepileupto(av,gdiv(t,a1));
-}
-
 static GEN
 zell_closest_0(GEN om, GEN x0, GEN e1, GEN e2, GEN e3)
 {

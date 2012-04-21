@@ -1842,6 +1842,30 @@ agm1r_abs(GEN x)
 
 struct agmcx_gap_t { long L, ex, cnt; } agmcx_gap_t;
 
+static void
+agmcx_init(GEN x, long *prec, struct agmcx_gap_t *S)
+{
+  long l = precision(x);
+  if (l) *prec = l;
+  S->L = 1-prec2nbits(*prec);
+  S->cnt = 0;
+  S->ex = LONG_MAX;
+}
+
+static long
+agmcx_a_b(GEN x, GEN *a1, GEN *b1, long prec)
+{
+  long rotate = 0;
+  if (gsigne(real_i(x))<0)
+  { /* Rotate by +/-Pi/2, so that the choice of the principal square
+     * root gives the optimal AGM. So a1 = +/-I*a1, b1=sqrt(-x). */
+    if (gsigne(imag_i(x))<0) { *a1=mulcxI(*a1);  rotate=-1; }
+    else                     { *a1=mulcxmI(*a1); rotate=1; }
+    x = gneg(x);
+  }
+  *b1 = gsqrt(x, prec);
+  return rotate;
+}
 /* return 0 if we must stop the AGM loop (a=b or a ~ b), 1 otherwise */
 static int
 agmcx_gap(GEN a, GEN b, struct agmcx_gap_t *S)
@@ -1862,20 +1886,10 @@ agm1cx(GEN x, long prec)
   struct agmcx_gap_t S;
   GEN a1, b1;
   pari_sp av = avma;
-  long l = precision(x), rotate = 0;
-  if (!l) l = prec;
-  S.L = 1-prec2nbits(l);
-  S.cnt = 0;
-  S.ex = LONG_MAX;
-  a1 = gtofp(gmul2n(gadd(real_1(l), x), -1), l); /* avoid loss of accuracy */
-  if (gsigne(real_i(x))<0)
-  { /* We rotate by +/-Pi/2, so that the choice of the principal square
-       root gives the optimal AGM. So a1 = +/-I*a1, b1=sqrt(-x). */
-    if (gsigne(imag_i(x))<0) { a1=mulcxI(a1);  rotate=-1; }
-    else                     { a1=mulcxmI(a1); rotate=1; }
-    x = gneg(x);
-  }
-  b1 = gsqrt(x, prec);
+  long rotate;
+  agmcx_init(x, &prec, &S);
+  a1 = gtofp(gmul2n(gadd(real_1(prec), x), -1), prec);
+  rotate = agmcx_a_b(x, &a1, &b1, prec);
   while (agmcx_gap(a1,b1,&S))
   {
     GEN a = a1;
@@ -1884,6 +1898,34 @@ agm1cx(GEN x, long prec)
   }
   if (rotate) a1 = rotate>0 ? mulcxI(a1):mulcxmI(a1);
   return gerepilecopy(av,a1);
+}
+
+GEN
+zellagmcx(GEN a0, GEN b0, GEN r, GEN t, long prec)
+{
+  struct agmcx_gap_t S;
+  pari_sp av = avma;
+  GEN x = gdiv(a0, b0), a1, b1;
+  long rotate;
+  agmcx_init(x, &prec, &S);
+  a1 = gtofp(gmul2n(gadd(real_1(prec), x), -1), prec);
+  r = gsqrt(gdiv(gmul(a1,gaddgs(r, 1)),gadd(r, x)), prec);
+  t = gmul(r, t);
+  rotate = agmcx_a_b(x, &a1, &b1, prec);
+  while (agmcx_gap(a1,b1,&S))
+  {
+    GEN a = a1, b = b1;
+    a1 = gmul2n(gadd(a,b),-1);
+    b1 = gsqrt(gmul(a,b), prec);
+    r = gsqrt(gdiv(gmul(a1,gaddgs(r, 1)),gadd(gmul(b, r), a )), prec);
+    t = gmul(r, t);
+  }
+  if (rotate) a1 = rotate>0 ? mulcxI(a1):mulcxmI(a1);
+  a1 = gmul(a1, b0);
+  t = gatan(gdiv(a1,t), prec);
+  /* send t to the fundamental domain if necessary */
+  if (gsigne(real_i(t))<0) t = gadd(t, mppi(prec));
+  return gerepileupto(av,gdiv(t,a1));
 }
 
 /* agm(1,x) */
@@ -1904,8 +1946,7 @@ agm1(GEN x, long prec)
     case t_REAL: return signe(x) > 0? agm1r_abs(x): agm1cx(x, prec);
 
     case t_COMPLEX:
-      if (gequal0(gel(x,2)) && gsigne(gel(x,1)) > 0)
-        return agm1(gel(x,1), prec);
+      if (gequal0(gel(x,2))) return agm1(gel(x,1), prec);
       return agm1cx(x, prec);
 
     case t_PADIC:

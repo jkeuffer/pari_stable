@@ -121,7 +121,6 @@ ulong xgcduu(ulong d, ulong d1, int f, ulong* v, ulong* v1, long *s);
 ulong xxgcduu(ulong d, ulong d1, int f, ulong* u, ulong* u1, ulong* v, ulong* v1, long *s);
 GEN   divgunu(GEN x, ulong i);
 GEN   divrunu(GEN x, ulong i);
-GEN   logagmcx(GEN q, long prec);
 GEN   muliispec(GEN x, GEN y, long nx, long ny);
 GEN   red_montgomery(GEN T, GEN N, ulong inv);
 GEN   sqrispec(GEN x, long nx);
@@ -664,10 +663,12 @@ GEN     znstar_small(GEN zn);
 
 /* trans1.c */
 
+GEN     logagmcx(GEN q, long prec);
 void    pari_init_floats(void);
 void    pari_close_floats(void);
 GEN     rootsof1complex(GEN n, long prec);
 GEN     rootsof1padic(GEN n, GEN y);
+GEN     zellagmcx(GEN a0, GEN b0, GEN r, GEN t, long prec);
 
 /* trans2.c */
 
