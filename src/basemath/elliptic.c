@@ -4091,23 +4091,29 @@ _cmp(GEN x, GEN y)
 
 static const struct bb_group ell_group={_mul,_pow,NULL,_hash,_cmp,ell_is_inf};
 
+static GEN
+elllog_modp(GEN e, GEN P, GEN Q, GEN o, GEN p)
+{
+  GEN v = ell_to_a4a6(e, p), a4 = gel(v,1), m = gel(v,3);
+  GEN Pp = FpE_changepointinv(RgV_to_FpV(P,p), m, p);
+  GEN Qp = FpE_changepointinv(RgV_to_FpV(Q,p), m, p);
+  return FpE_log(Pp, Qp, o, a4, p);
+}
+
 GEN
 elllog(GEN e, GEN a, GEN g, GEN o)
 {
   pari_sp av = avma;
-  GEN j, z;
+  GEN z, p=NULL;
   checksmallell(e); checkellpt(a); checkellpt(g);
-  j = ell_get_j(e);
-  switch(typ(j))
+  if (ell_is_FpE(e, a, &p) && RgV_is_FpV(g, &p) && p)
   {
-    case t_INTMOD:
-      if (!o) { GEN p = gel(j,1); o = subii(addis(p,1), ellap(e,p)); }
-      break;
-    case t_FFELT:
-      if (!o) pari_err(e_MISC,"curve order required over a finite field");
-      break;
-    default: pari_err_IMPL("elllog over infinite fields");
+    if (!o) o = subii(addis(p,1), ellap(e,p));
+    if (cmpiu(p,3) > 0)
+      return gerepileuptoint(av, elllog_modp(e,a,g,o,p));
   }
+  else if (!o)
+    pari_err(e_MISC,"group order required for non-prime finite field");
   z = gen_PH_log(a,g,o, (void*)e,&ell_group,NULL);
   return gerepileupto(av, z? z: cgetg(1,t_VEC));
 }

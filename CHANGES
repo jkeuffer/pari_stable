@@ -222,6 +222,7 @@ BA 52- library functions FpVV_to_mod, FpE_changepoint, FpE_changepointinv
 BA 53- GP syntax [a..b] : [a,a+1,...,b]
 BA 54- GP syntax [a(x)|x<-b,c(x)] : apply(a,select(c,b))
 BA 55- GP syntax M[a..b,^c] : vecextract(M,"a..b","^c")
+BA 56- GP function FpE_log
 
   Removed
     1- dropped DOS support

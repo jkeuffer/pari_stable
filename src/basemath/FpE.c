@@ -189,7 +189,13 @@ FpE_cmp(GEN x, GEN y)
   return lexcmp(x,y);
 }
 
-static const struct bb_group FpE_group={_FpE_add,_FpE_mul,NULL,NULL,FpE_cmp,ell_is_inf};
+static ulong
+FpE_hash(GEN P)
+{
+  return signe(gel(P,1))?mod2BIL(gel(P,1)):0;
+}
+
+static const struct bb_group FpE_group={_FpE_add,_FpE_mul,NULL,FpE_hash,FpE_cmp,ell_is_inf};
 
 GEN
 FpE_order(GEN z, GEN o, GEN a4, GEN p)
@@ -199,6 +205,16 @@ FpE_order(GEN z, GEN o, GEN a4, GEN p)
   e.a4=a4;
   e.p=p;
   return gerepileuptoint(av, gen_order(z, o, (void*)&e, &FpE_group));
+}
+
+GEN
+FpE_log(GEN a, GEN b, GEN o, GEN a4, GEN p)
+{
+  pari_sp av = avma;
+  struct _FpE e;
+  e.a4=a4;
+  e.p=p;
+  return gerepileuptoint(av, gen_PH_log(a, b, o, (void*)&e, &FpE_group, NULL));
 }
 
 /***********************************************************************/

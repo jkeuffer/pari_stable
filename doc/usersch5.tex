@@ -3762,7 +3762,7 @@ whose coefficients are \typ{INT}s, reduce them to \kbd{FpXQ}s.
 \fun{GEN}{FpXQ_pow}{GEN x, GEN n, GEN T, GEN p} computes $\kbd{x}^\kbd{n}$.
 
 \fun{GEN}{FpXQ_log}{GEN a, GEN g, GEN ord, GEN T, GEN p} Let \kbd{g} be of
-order \kbd{ord} in the finite field $\F_p[X]/(T)$. Return $e$ such that
+order \kbd{ord} in the finite field $\F_p[X]/(T)$, return $e$ such that
 $a^e=g$. If $e$ does not exists, the result is currently undefined. Assumes
 that \kbd{T} is irreducible mod \kbd{p}.
 
@@ -4978,6 +4978,10 @@ $E(\F_p)$, where $E$ is defined by $E:y^2=x^3+a_4\*x+a_6$.
 \fun{GEN}{FpE_order}{GEN P, GEN o, GEN a4, GEN p} returns the order of $P$ in
 the group $E(\F_p)$, where $o$ is a multiple of the order of $P$, or its
 factorization.
+
+\fun{GEN}{FpE_log}{GEN P, GEN G, GEN o, GEN a4, GEN p} Let \kbd{G} be a
+point of order \kbd{o}, return $e$ such that $e.P=G$. If $e$ does not exists,
+the result is currently undefined.
 
 \fun{GEN}{FpE_tatepairing}{GEN P, GEN Q, GEN m, GEN a4, GEN p} returns the
 reduced Tate pairing of the point of $m$-torsion $P$ and the point $Q$.
