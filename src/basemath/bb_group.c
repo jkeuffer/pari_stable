@@ -202,7 +202,7 @@ gen_Pollard_log(GEN x, GEN g, GEN q, void *E, const struct bb_group *grp)
   if (!imax) imax = ULONG_MAX;
   do {
  rho_restart:
-    A = B = mkvec3(grp->pow(E,g,gen_0),gen_0,gen_0);
+    A = B = mkvec3(x,gen_1,gen_0);
     i=0;
     do {
       if (i>imax)
