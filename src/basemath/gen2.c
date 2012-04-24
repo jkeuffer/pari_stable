@@ -668,8 +668,21 @@ gcmpsg(long s, GEN y)
   return 0; /* not reached */
 }
 
+static int lexcmpsg(long x, GEN y);
+static int lexcmpgs(GEN x, long y) { return -lexcmpsg(y,x); }
+/* lexcmp(stoi(x),y), y t_VEC/t_COL/t_MAT */
 static int
-lexcmp_scal_vec(GEN x, GEN y)
+lexcmp_s_matvec(long x, GEN y)
+{
+  int fl;
+  if (lg(y)==1) return 1;
+  fl = lexcmpsg(x,gel(y,1));
+  if (fl) return fl;
+  return -1;
+}
+/* x a scalar, y a t_VEC/t_COL/t_MAT */
+static int
+lexcmp_scal_matvec(GEN x, GEN y)
 {
   int fl;
   if (lg(y)==1) return 1;
@@ -677,41 +690,22 @@ lexcmp_scal_vec(GEN x, GEN y)
   if (fl) return fl;
   return -1;
 }
-
+/* x a scalar, y a t_VECSMALL */
 static int
-lexcmp_vec_mat(GEN x, GEN y)
+lexcmp_scal_vecsmall(GEN x, GEN y)
 {
-  if (lg(x)==1) return -1;
-  return lexcmp_scal_vec(x,y);
+  int fl;
+  if (lg(y)==1) return 1;
+  fl = lexcmpgs(x, y[1]);
+  if (fl) return fl;
+  return -1;
 }
 
-/* as gcmp for vector/matrices, using lexicographic ordering on components */
-int
-lexcmp(GEN x, GEN y)
+/* tx = ty = t_MAT, or x and y are both vect_t */
+static int
+lexcmp_similar(GEN x, GEN y)
 {
-  const long tx=typ(x), ty=typ(y);
-  long lx,ly,l,i;
-
-  if (!is_matvec_t(tx))
-  {
-    if (!is_matvec_t(ty)) return gcmp(x,y);
-    return  lexcmp_scal_vec(x,y);
-  }
-  if (!is_matvec_t(ty))
-    return -lexcmp_scal_vec(y,x);
-
-  /* x and y are matvec_t */
-  if (ty==t_MAT)
-  {
-    if (tx != t_MAT)
-      return lexcmp_vec_mat(x,y);
-  }
-  else if (tx==t_MAT)
-    return -lexcmp_vec_mat(y,x);
-
-  /* tx = ty = t_MAT, or x and y are both vect_t */
-  lx = lg(x);
-  ly = lg(y); l = minss(lx,ly);
+  long i, lx = lg(x), ly = lg(y), l = minss(lx,ly);
   for (i=1; i<l; i++)
   {
     int fl = lexcmp(gel(x,i),gel(y,i));
@@ -719,6 +713,111 @@ lexcmp(GEN x, GEN y)
   }
   if (lx == ly) return 0;
   return (lx < ly)? -1 : 1;
+}
+/* x a t_VECSMALL, y a t_VEC/t_COL ~ lexcmp_similar */
+static int
+lexcmp_vecsmall_vec(GEN x, GEN y)
+{
+  long i, lx = lg(x), ly = lg(y), l = minss(lx,ly);
+  for (i=1; i<l; i++)
+  {
+    int fl = lexcmpsg(x[i], gel(y,i));
+    if (fl) return fl;
+  }
+  if (lx == ly) return 0;
+  return (lx < ly)? -1 : 1;
+}
+
+/* x t_VEC/t_COL, y t_MAT */
+static int
+lexcmp_vec_mat(GEN x, GEN y)
+{
+  int fl;
+  if (lg(x)==1) return -1;
+  if (lg(y)==1) return 1;
+  fl = lexcmp_similar(x,gel(y,1));
+  if (fl) return fl;
+  return -1;
+}
+/* x t_VECSMALl, y t_MAT ~ lexcmp_vec_mat */
+static int
+lexcmp_vecsmall_mat(GEN x, GEN y)
+{
+  int fl;
+  if (lg(x)==1) return -1;
+  if (lg(y)==1) return 1;
+  fl = lexcmp_vecsmall_vec(x, gel(y,1));
+  if (fl) return fl;
+  return -1;
+}
+
+/* x a t_VECSMALL, not y */
+static int
+lexcmp_vecsmall_other(GEN x, GEN y, long ty)
+{
+  switch(ty)
+  {
+    case t_MAT: return lexcmp_vecsmall_mat(x, y);
+    case t_VEC:
+    case t_COL: return lexcmp_vecsmall_vec(x, y);
+    default: return -lexcmp_scal_vecsmall(y, x); /*y scalar*/
+  }
+}
+
+/* lexcmp(stoi(s), y) */
+static int
+lexcmpsg(long x, GEN y)
+{
+  const long ty = typ(y);
+  if (ty == t_INT) return cmpsi(x,y); /* shortcut */
+  if (ty == t_VECSMALL)
+  { /* ~ lexcmp_scal_matvec */
+    if (lg(y)==1) return 1;
+    return (x > y[1])? 1: -1;
+  }
+  if (is_matvec_t(ty)) return lexcmp_s_matvec(x,y);
+  return gcmpsg(x,y);
+}
+
+/* as gcmp for vector/matrices, using lexicographic ordering on components */
+int
+lexcmp(GEN x, GEN y)
+{
+  const long tx = typ(x), ty = typ(y);
+  if (tx == ty)
+  { /* shortcut */
+    switch(tx)
+    {
+      case t_MAT:
+      case t_VEC:
+      case t_COL:
+        return lexcmp_similar(x,y);
+      case t_VECSMALL:
+        return vecsmall_lexcmp(x,y);
+      default:
+        return gcmp(x,y);
+    }
+  }
+  if (tx == t_VECSMALL)
+    return lexcmp_vecsmall_other(x,y,ty);
+  if (ty == t_VECSMALL)
+    return -lexcmp_vecsmall_other(y,x,tx);
+
+  if (!is_matvec_t(tx))
+  {
+    if (!is_matvec_t(ty)) return gcmp(x,y);
+    return  lexcmp_scal_matvec(x,y);
+  }
+  if (!is_matvec_t(ty))
+    return -lexcmp_scal_matvec(y,x);
+
+  /* x and y are matvec_t, not both t_MAT */
+  if (ty==t_MAT)
+    return lexcmp_vec_mat(x,y);
+  else if (tx==t_MAT)
+    return -lexcmp_vec_mat(y,x);
+  else
+    return lexcmp_similar(x,y);
 }
 
 /*****************************************************************/
