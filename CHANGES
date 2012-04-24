@@ -89,6 +89,8 @@ BA 70- ellpointtoz was numerically unstable
        itself [#1307]
    73- ellgroup(E over Q, p) now returns the structure of the group of
        non-singular points, when the curve has bad reduction at p.
+   74- factor_proven not taken into account in factor(n), where n is a
+       BPSW-pseudoprime
 
   Changed
     1- mathnf: swapped flag 3 and 5.
@@ -160,6 +162,8 @@ BA 48- agm now returns the optimal AGM
    50- ellglobalred(E) now also returns the conductor factorization [4th compo]
    51- library functions *_incremental_CRT no longer need the product of the
        moduli, instead they compute it and update the running modulus.
+   52- factor_proven now affects all the factoring machinery, as documented, i.e
+       also multiplicative function (moebius, sumdiv,...)
 
   Added
     1- mathnf for matrices over K[X] [#41]

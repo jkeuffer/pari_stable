@@ -2619,23 +2619,27 @@ ifac_resort(GEN *partial, GEN *where)
   return 0;
 }
 
+/* Let x be a t_INT known not to have small divisors (< 2^14). Return 0 if x
+ * is a proven composite. Return 1 if we believe it to be prime (fully proven
+ * prime if factor_proven is set).  */
+static int
+lazy_isprime(GEN x)
+{
+  if (!BPSW_psp_nosmalldiv(x)) return 0; /* composite */
+  if (factor_proven && ! BPSW_isprime(x))
+  {
+    pari_warn(warner,
+              "IFAC: pseudo-prime %Ps\n\tis not prime. PLEASE REPORT!\n", x);
+    return 0;
+  }
+  return 1;
+}
+
 static int
 ifac_isprime(GEN x)
 {
-  int res = 0;
-  if (!BPSW_psp_nosmalldiv(VALUE(x)))
-    CLASS(x) = gen_0; /* composite */
-  else if (factor_proven && ! BPSW_isprime(VALUE(x)))
-  {
-    pari_warn(warner, "IFAC: pseudo-prime %Ps\n\tis not prime. PLEASE REPORT!\n",
-              VALUE(x));
-    CLASS(x) = gen_0;
-  }
-  else
-  {
-    CLASS(x) = gen_1; /* prime (not proven if factor_proven = 0) */
-    res = 1;
-  }
+  int res = lazy_isprime(VALUE(x));
+  CLASS(x) = res? gen_1: gen_0;
   if (DEBUGLEVEL>2) ifac_factor_dbg(x);
   return res;
 }
@@ -3322,7 +3326,7 @@ ifac_sumdivk(GEN n, long k)
   }
 }
 
-/* where to stop trial dividing in factorization */
+/* Where to stop trial dividing in factorization. Guaranteed >= 2^14 */
 static ulong
 tridiv_bound(GEN n)
 {
@@ -3484,7 +3488,7 @@ moebius(GEN n)
       if (is_pm1(n)) { avma = av; return s; }
     }
   }
-  if (BPSW_psp_nosmalldiv(n)) { avma=av; return -s; }
+  if (lazy_isprime(n)) { avma=av; return -s; }
   /* large composite without small factors */
   v = ifac_moebius(n);
   avma = av; return (s<0 ? -v : v); /* correct also if v==0 */
@@ -3552,7 +3556,7 @@ omega(GEN n)
       if (is_pm1(n)) { avma = av; return nb; }
     }
   }
-  if (BPSW_psp_nosmalldiv(n)) { avma = av; return nb+1; }
+  if (lazy_isprime(n)) { avma = av; return nb+1; }
   /* large composite without small factors */
   nb += ifac_omega(n);
   avma = av; return nb;
@@ -3594,7 +3598,7 @@ bigomega(GEN n)
       if (is_pm1(n)) { avma = av; return nb; }
     }
   }
-  if (BPSW_psp_nosmalldiv(n)) { avma = av; return nb+1; }
+  if (lazy_isprime(n)) { avma = av; return nb+1; }
   nb += ifac_bigomega(n);
   avma = av; return nb;
 }
@@ -3680,7 +3684,7 @@ eulerphi(GEN n)
       if (is_pm1(n)) return gerepileuptoint(av,m);
     }
   }
-  if (BPSW_psp_nosmalldiv(n)) return gerepileuptoint(av, mulii(m, addis(n,-1)));
+  if (lazy_isprime(n)) return gerepileuptoint(av, mulii(m, addis(n,-1)));
   m = mulii(m, ifac_totient(n));
   return gerepileuptoint(av,m);
 }
@@ -3727,7 +3731,7 @@ numbdiv(GEN n)
       if (is_pm1(n)) return gerepileuptoint(av,m);
     }
   }
-  if(BPSW_psp_nosmalldiv(n)) return gerepileuptoint(av, shifti(m,1));
+  if(lazy_isprime(n)) return gerepileuptoint(av, shifti(m,1));
   m = mulii(m, ifac_numdiv(n));
   return gerepileuptoint(av,m);
 }
@@ -3779,7 +3783,7 @@ sumdiv(GEN n)
       if (is_pm1(n)) return gerepileuptoint(av,m);
     }
   }
-  if(BPSW_psp_nosmalldiv(n)) { m = euler_sumdiv(m, n, 1); goto end; }
+  if(lazy_isprime(n)) { m = euler_sumdiv(m, n, 1); goto end; }
   m = mulii(m, ifac_sumdivk(n, 1));
 end:
   return gerepileuptoint(av,m);
@@ -3838,7 +3842,7 @@ sumdivk(GEN n, long k)
       if (is_pm1(n)) goto fin;
     }
   }
-  if (BPSW_psp_nosmalldiv(n)) { m = euler_sumdivk(m, n, 1, k); goto fin; }
+  if (lazy_isprime(n)) { m = euler_sumdivk(m, n, 1, k); goto fin; }
   m = mulii(m, ifac_sumdivk(n, k));
  fin:
   if (k1 < 0) m = gdiv(m, powiu(n1,k));
@@ -4004,7 +4008,7 @@ ifactor(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
   }
 
   /* test primality */
-  if (BPSW_psp_nosmalldiv(n)) { STOREi(&nb, n, 1); return aux_end(n,nb); }
+  if (lazy_isprime(n)) { STOREi(&nb, n, 1); return aux_end(n,nb); }
 
   /* now we have a large composite */
   if (ifac_break && (*ifac_break)(n,NULL,NULL,state)) /*initialize ifac_break*/
