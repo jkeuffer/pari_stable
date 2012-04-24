@@ -1,12 +1,10 @@
 #!@perl@
-
-# $Id$
-#
+# Original version by Ilya Zakharevich. Minor updates by the PARI group
 # Features:
 #      % at the end of a line followed by \n\n is recognized as end of 
 #      paragraph :-(
 #
-# Change log is at bottom.
+# Original change log is at bottom.
 #
 # Options:
 #	linelength=75		# Cut at this line
@@ -20,12 +18,28 @@
 #	noindent		# assume \noindent everywhere
 #	ignorefonts		# make math fonts (\mathfrak etc) into NOPs
 #	scissors		# Symbol to emit when a long line is cut
-
-eval 'require "newgetopt.pl";
-  &NGetOpt("linelength=i","maxdef=i","debug=i","by_par", "TeX",
-	   "ragged", "noindent", "ignorefonts", "scissors=s", "noflush")'
-    || warn "Errors during parsing command line options" .
-	($@ ? ": $@" : '') . ".\n";
+$@ = '';
+$opt_TeX      = 1;
+$opt_noindent = 1;
+$opt_ragged   = 1;
+$opt_by_par   = 1;
+eval '
+  use Getopt::Long;
+  &GetOptions(
+    "linelength=i" => \$opt_linelength,
+    "maxdef=i" => \$opt_maxdef,
+    "debug=i" => \$opt_debug,
+    "by_par" => \$opt_by_par,
+    "TeX" => \$opt_TeX,
+    "ragged" => \$opt_ragged,
+    "noindent" => \$opt_noindent,
+    "ignorefonts" => \$opt_ignorefonts,
+    "scissors=s" => \$opt_scissors,
+    "noflush" => \$opt_noflush)
+';
+if ($@ && $@ !~ /Getopt\/Long/) {
+  warn "Errors while parsing command line options $@\n";
+}
 $linelength= $opt_linelength || 75;
 $maxdef= $opt_maxdef || 10000;
 $debug=$opt_debug;
