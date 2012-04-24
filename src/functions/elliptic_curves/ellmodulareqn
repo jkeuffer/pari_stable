@@ -7,48 +7,54 @@ Help: ellmodulareqn(N,{x},{y}): return a vector [eqn, t] where eqn is a modular
  be installed.  The equation is either of canonical type (t=0) or of Atkin type
  (t=1)
 Doc: return a vector [\kbd{eqn},$t$] where \kbd{eqn} is a modular equation of
- level $N$, for $N<500$, $N$ prime. This requires the package seadata to be
- installed. The equation is either of canonical type ($t=0$) or of Atkin type
- ($t=1$).
- This polynomial satisfy the following functional equation which allow to compute
- the values of the classical modular polynomial of level $n$,
- while being much smaller:
+ level $N$, i.e.~a bivariate polynomial with integer coefficients; $t$
+ indicates the type of this equation: either \emph{canonical} ($t = 0$) or
+ \emph{Atkin} ($t = 1$). This function currently requires the package
+ \kbd{seadata} to be installed and is limited to $N<500$, $N$ prime.
+
+ Let $j$ be the $j$-invariant function. The polynomial \kbd{eqn} satisfies
+ the following functional equation, which allows to compute the values of the
+ classical modular polynomial $\Phi_N$ of prime level $N$, such that
+ $\Phi_N(j(\tau), j(N\tau)) = 0$, while being much smaller than the latter:
 
  \item for canonical type:
-  $P(f(\tau),j(\tau)) = 0$, $P(N^s/f(\tau),j(N\*\tau)) = 0$.
-  where $s = 12/\gcd(12,N-1)$
+  $P(f(\tau),j(\tau)) = P(N^s/f(\tau),j(N\*\tau)) = 0$,
+  where $s = 12/\gcd(12,N-1)$;
 
  \item for Atkin type:
-  $P(f(\tau),j(\tau)) = 0$, $P(f(\tau),j(N\*\tau)) = 0$.
+  $P(f(\tau),j(\tau)) = P(f(\tau),j(N\*\tau)) = 0$.
 
- where $j$ is the $j$-invariant and $f$ is a modular function (see below).
+ \noindent In both cases, $f$ is a suitable modular function (see below).
 
- The following GP function returns the values of the classical modular polynomial
- by eliminating $f(\tau)$ in the two equations:
+ The following GP function returns values of the classical modular
+ polynomial by eliminating $f(\tau)$ in the above two equations:
  \bprog
- classicaleqn(N,X='X,Y='Y)=
+ classicaleqn(N, X='X, Y='Y)=
  {
-   my(E=ellmodulareqn(N),P=E[1]);
-   if (E[2] == 0,
-     my(s=12/gcd(12,N-1));
-     polresultant(subst(P,'y,X),x^(N+1)*substvec(P,['x,'y],[N^s/'x,Y]))
-                /N^(s*(2*N+1))*(-1)^(N+1)
+   my(E=ellmodulareqn(N), P=E[1], t=E[2], Q, d);
+   if (t == 0,
+     my(s = 12/gcd(12,N-1));
+     Q = 'x^(N+1) * substvec(P,['x,'y],[N^s/'x,Y]);
+     d = N^(s*(2*N+1)) * (-1)^(N+1);
    ,
-     polresultant(subst(P,'y,X),subst(P,'y,Y))/(X-Y)^(N+1))
+     Q = subst(P,'y,Y)
+     d = (X-Y)^(N+1));
+   polresultant(subst(P,'y,X), Q) / d;
  }
  @eprog
 
  More precisely, let $W_N(\tau)={{-1}\over{N\*\tau}}$ be the Atkin-Lehner
- involution, the function $f$ also satisfy:
+ involution; we have $j(W_N(\tau)) = j(N\*\tau)$ and the function $f$ also
+ satisfies:
 
  \item for canonical type:
-    $f(W_N(\tau)) = N^s/f(\tau)$
+    $f(W_N(\tau)) = N^s/f(\tau)$;
 
  \item for Atkin type:
-    $f(W_N(\tau)) = f(\tau)$
+    $f(W_N(\tau)) = f(\tau)$.
 
- and in both cases $j(W_N(\tau)) = j(N\*\tau)$.
-
- Furthermore, for canonical type, if $\eta$ is the Dedekind's eta function
- (with the $q^{1/24}$), $f(\tau) = N^s\*{{\eta(N\*\tau)}\over{\eta(\tau)}}^{2\*s}$.
-
+ \noindent Furthermore, for an equation of canonical type, $f$ is the standard
+ $\eta$-quotient
+ $$f(\tau) = N^s \* \big(\eta(N\*\tau) / \eta(\tau) \big)^{2\*s},$$
+ where $\eta$ is Dedekind's eta function, which is invariant under
+ $\Gamma_0(N)$.
