@@ -82,7 +82,7 @@ typedef unsigned long pari_ulong;
 #define VALPBITS    ((1UL<<VALPnumBITS)-1)
 #define VARNBITS    (MAXVARN<<VARNSHIFT)
 #define MAXVARN     ((1UL<<VARNnumBITS)-1)
-#define NO_VARIABLE (2147483647) /* > MAXVARN */
+#define NO_VARIABLE (2147483647L) /* > MAXVARN */
 
 #define HIGHEXPOBIT (1UL<<(EXPOnumBITS-1))
 #define HIGHVALPBIT (1UL<<(VALPnumBITS-1))
