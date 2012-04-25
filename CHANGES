@@ -228,6 +228,7 @@ BA 53- GP syntax [a..b] : [a,a+1,...,b]
 BA 54- GP syntax [a(x)|x<-b,c(x)] : apply(a,select(c,b))
 BA 55- GP syntax M[a..b,^c] : vecextract(M,"a..b","^c")
 BA 56- GP function FpE_log
+   57- select(f, v, 1) for indirect selection
 
   Removed
     1- dropped DOS support

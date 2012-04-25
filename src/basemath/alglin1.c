@@ -415,45 +415,61 @@ vecrangess(long a, long b)
 }
 
 GEN
-genselect(void *E, long (*f)(void* E, GEN x), GEN A)
+genindexselect(void *E, long (*f)(void* E, GEN x), GEN A)
 {
-  long i, l, nb = 0, t = typ(A);
-  GEN B, v;/* v left on stack for efficiency */
-  pari_sp av;
-  if (t == t_LIST)
-  {
-    GEN L;
-    A = list_data(A);
-    if (!A) return listcreate();
-    L = cgetg(3, t_LIST);
-    l = lg(A); v = cgetg(l, t_VECSMALL); av = avma;
-    for (i = 1; i < l; i++) {
-      if (f(E, gel(A,i))) v[++nb] = i;
-      avma = av;
-    }
-    B = cgetg(nb+1, t_VEC);
-    for (i = 1; i <= nb; i++) gel(B, i) = gcopy(gel(A,v[i]));
-    list_nmax(L) = nb;
-    list_data(L) = B; return L;
-  }
-  else
-    if (!is_matvec_t(t)) pari_err_TYPE("select",A);
-
-  l = lg(A); v = cgetg(l, t_VECSMALL); av = avma;
+  long l = lg(A), i, lv = 1;
+  GEN v = cgetg(l, t_VECSMALL);
+  pari_sp av = avma;
   for (i = 1; i < l; i++) {
-    if (f(E, gel(A,i))) v[++nb] = i;
+    if (f(E, gel(A,i))) v[lv++] = i;
     avma = av;
   }
-  B = cgetg(nb+1, t);
-  for (i = 1; i <= nb; i++) gel(B, i) = gcopy(gel(A,v[i]));
+  fixlg(v, lv); return v;
+}
+static GEN
+extract_copy(GEN A, GEN v)
+{
+  long i, l = lg(v);
+  GEN B = cgetg(l, typ(A));
+  for (i = 1; i < l; i++) gel(B,i) = gcopy(gel(A,v[i]));
   return B;
+}
+GEN
+genselect(void *E, long (*f)(void* E, GEN x), GEN A)
+{
+  GEN v;/* v left on stack for efficiency */
+  switch(typ(A))
+  {
+    case t_LIST:
+    {
+      GEN L, B;
+      A = list_data(A);
+      if (!A) return listcreate();
+      L = cgetg(3, t_LIST);
+      v = genindexselect(E, f, A);
+      B = extract_copy(A, v);
+      list_nmax(L) = lg(B)-1;
+      list_data(L) = B; return L;
+    }
+    case t_VEC: case t_COL: case t_MAT:
+      v = genindexselect(E, f, A);
+      return extract_copy(A, v);
+  }
+  pari_err_TYPE("select",A);
+  return NULL; /*not reached*/
 }
 
 GEN
-select0(GEN f, GEN x)
+select0(GEN f, GEN x, long flag)
 {
   if (typ(f) != t_CLOSURE || closure_arity(f) < 1) pari_err_TYPE("select", f);
-  return genselect((void *) f, gp_callbool, x);
+  switch(flag)
+  {
+    case 0: return genselect((void *) f, gp_callbool, x);
+    case 1: return genindexselect((void *) f, gp_callbool, x);
+    default: pari_err_FLAG("select");
+             return NULL;/*not reached*/
+  }
 }
 
 GEN
