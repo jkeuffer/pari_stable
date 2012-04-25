@@ -1238,16 +1238,19 @@ arguments)\cr
 
 \noindent$\bullet$ Optional arguments and default values:
 %
+\+& \kbd{E*} & any number of expressions, possibly 0 (see \kbd{E})\cr
 \+& \kbd{s*} & any number of strings, possibly 0 (see \kbd{s})\cr
 \+& \kbd{D\var{xxx}} &  argument can be omitted and has a default value\cr
 
+The \kbd{E*} code reads all remaining arguments in closure context and passes
+them as a single \typ{VEC}.
 The \kbd{s*} code reads all remaining arguments in
-\tev{string context} (see \secref{se:strings}), and sends a
-(\kbd{NULL}-terminated) list of \kbd{GEN*} pointing to these. The automatic
-concatenation rules in string context are implemented so that adjacent strings
+\tev{string context} (see \secref{se:strings}), and passes the list of
+strings as a single \typ{VEC}.  The automatic concatenation rules in string
+context are implemented so that adjacent strings
 are read as different arguments, as if they had been comma-separated. For
 instance, if the remaining argument sequence is: \kbd{"xx" 1, "yy"}, the
-\kbd{s*} atom sends a \kbd{GEN *g = \obr \&a, \&b, \&c, NULL\cbr}, where
+\kbd{s*} atom sends \kbd{[a, b, c]}, where
 $a$, $b$, $c$ are \kbd{GEN}s of type \typ{STR} (content \kbd{"xx"}),
 \typ{INT} (equal to $1$) and \typ{STR} (content \kbd{"yy"}).
 
@@ -1272,7 +1275,7 @@ special notations are available:
 
 \+&\kbd{DV}& optional \kbd{*entree}, send \kbd{NULL} if argument omitted.\cr
 
-\+&\kbd{DI}& optional closure, send \kbd{NULL} if argument omitted.\cr
+\+&\kbd{DI}, \kbd{DE}& optional closure, send \kbd{NULL} if argument omitted.\cr
 
 \+&\kbd{Dn}& optional variable number, $-1$ if omitted.\cr
 

@@ -2152,6 +2152,7 @@ pari_version(void)
  *  s  expanded string. Example: Pi"x"2 yields "3.142x2".
  *     The unquoted components can be of any pari type (converted according to
  *     the current output format)
+ *  E* any number of E
  *  s* any number of strings (see s)
  *  M  Mnemonic or a flag (converted to a long); description follows
  *         after \n at the end of the argument description

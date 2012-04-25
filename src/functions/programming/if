@@ -1,9 +1,3 @@
-Function: _void_if
-C-Name: ifpari_void
-Section: programming/internals
-Prototype: vGDIDI
-Help: internal variant of if() that does not return a value.
-
 Function: if
 Section: programming/control
 C-Name: ifpari
@@ -33,3 +27,15 @@ Doc: evaluates the expression sequence \var{seq1} if $a$ is non-zero, otherwise
  Recall that functions such as \kbd{break} and \kbd{next} operate on
  \emph{loops} (such as \kbd{for$xxx$}, \kbd{while}, \kbd{until}). The \kbd{if}
  statement is \emph{not} a loop (obviously!).
+
+Function: _void_if
+C-Name: ifpari_void
+Section: programming/internals
+Prototype: vGDIDI
+Help: internal variant of if() that does not return a value.
+
+Function: _multi_if
+C-Name: ifpari_multi
+Section: programming/internals
+Prototype: GE*
+Help: internal variant of if() that allowmore than 3 arguments.

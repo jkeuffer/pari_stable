@@ -241,7 +241,7 @@ check_proto(const char *code)
     case '&':
     case 'C':
     case 'G':
-    case 'I': case 'E':
+    case 'I':
     case 'L':
     case 'M':
     case 'P':
@@ -253,6 +253,7 @@ check_proto(const char *code)
     case 'x':
       arity++;
       break;
+    case 'E':
     case 's':
       if (*s == '*') s++;
       arity++;
@@ -989,6 +990,18 @@ ifpari_void(GEN g, GEN a/*closure*/, GEN b/*closure*/)
   {
     if(a) closure_evalvoid(a);
   }
+}
+
+GEN
+ifpari_multi(GEN g, GEN a/*closure*/)
+{
+  long i, nb = lg(a)-1;
+  if (!gequal0(g)) /* false */
+    return closure_evalgen(gel(a,1));
+  for(i=2;i<nb;i+=2)
+    if (!gequal0(closure_evalgen(gel(a,i))))
+      return closure_evalgen(gel(a,i+1));
+  return i<=nb? closure_evalgen(gel(a,i)): gnil;
 }
 
 GEN

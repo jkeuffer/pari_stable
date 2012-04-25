@@ -466,6 +466,7 @@ parseproto(char const **q, char *c, const char *str)
       *c=*p;
     *q=p+1;
     return PPstd;
+  case 'E':
   case 's':
     if (p[1]=='*')
     {
@@ -915,6 +916,39 @@ compileuserfunc(entree *ep, long n, int mode)
   compilecall(n, mode);
 }
 
+static GEN
+compilefuncinline(long c, long a, long flag, long isif, long lev, long *ev)
+{
+  struct codepos pos;
+  int type=c=='I'?Gvoid:Ggen;
+  long rflag=c=='I'?0:FLsurvive;
+  if (isif && (flag&FLreturn)) rflag|=FLreturn;
+  getcodepos(&pos);
+  if (lev)
+  {
+    long i;
+    GEN vep=cgetg(lev+1,t_VECSMALL);
+    GEN varg=cgetg(lev+1,t_VECSMALL);
+    for(i=0;i<lev;i++)
+    {
+      entree *ve;
+      if (ev[i]<0)
+        compile_err("missing variable name", tree[a].str-1);
+      ve = getvar(ev[i]);
+      vep[i+1]=(long)ve;
+      varg[i+1]=ev[i];
+      var_push(ve,Lmy);
+    }
+    checkdups(varg,vep);
+    frame_push(vep);
+  }
+  if (tree[a].f==Fnoarg)
+    compilecast(a,Gvoid,type);
+  else
+    compilenode(a,type,rflag);
+  return getclosure(&pos);
+}
+
 static void
 compilefunc(entree *ep, long n, int mode, long flag)
 {
@@ -951,8 +985,13 @@ compilefunc(entree *ep, long n, int mode, long flag)
   {
     nb=2; lnc=2; lnl=2; arg=mkvecsmall2(x,y);
   }
-  else if (is_func_named(x,"if") && mode==Gvoid)
-    ep=is_entry("_void_if");
+  else if (is_func_named(x,"if"))
+  {
+    if (nb>=4)
+      ep=is_entry("_multi_if");
+    else if (mode==Gvoid)
+      ep=is_entry("_void_if");
+  }
   else if (is_func_named(x,"return") && (flag&FLreturn) && nb<=1)
   {
     if (nb==0) op_push(OCpushgnil,0,n);
@@ -1180,35 +1219,9 @@ compilefunc(entree *ep, long n, int mode, long flag)
         case 'I':
         case 'E':
           {
-            struct codepos pos;
-            long a=arg[j++];
-            int type=c=='I'?Gvoid:Ggen;
-            long rflag=c=='I'?0:FLsurvive;
-            if (is_func_named(x,"if") && (flag&FLreturn)) rflag|=FLreturn;
-            getcodepos(&pos);
-            if (lev)
-            {
-              long i;
-              GEN vep=cgetg(lev+1,t_VECSMALL);
-              GEN varg=cgetg(lev+1,t_VECSMALL);
-              for(i=0;i<lev;i++)
-              {
-                entree *ve;
-                if (ev[i]<0)
-                  compile_err("missing variable name", tree[a].str-1);
-                ve = getvar(ev[i]);
-                vep[i+1]=(long)ve;
-                varg[i+1]=ev[i];
-                var_push(ve,Lmy);
-              }
-              checkdups(varg,vep);
-              frame_push(vep);
-            }
-            if (tree[a].f==Fnoarg)
-              compilecast(a,Gvoid,type);
-            else
-              compilenode(a,type,rflag);
-            op_push(OCpushgen, data_push(getclosure(&pos)),a);
+            long a = arg[j++];
+            GEN  d = compilefuncinline(c, a, flag, is_func_named(x,"if"), lev, ev);
+            op_push(OCpushgen, data_push(d), a);
             break;
           }
         case 'V':
@@ -1339,6 +1352,16 @@ compilefunc(entree *ep, long n, int mode, long flag)
       case PPstar:
         switch(c)
         {
+        case 'E':
+          {
+            long k, n=nb+1-j;
+            GEN g=cgetg(n+1,t_VEC);
+            for(k=1; k<=n; k++)
+              gel(g, k) = compilefuncinline(c, arg[j+k-1], flag, 1, lev, ev);
+            op_push(OCpushgen, data_push(g), arg[j]);
+            j=nb+1;
+            break;
+          }
         case 's':
           {
             long n=nb+1-j;
@@ -1547,6 +1570,7 @@ genclosure(entree *ep, const char *loc, long  nbdata, int check)
     case PPstar:
       switch(c)
       {
+      case 'E':
       case 's':
         return NULL;
       default:
@@ -2021,6 +2045,18 @@ optimizefunc(entree *ep, long n)
       case PPstar:
         switch(c)
         {
+        case 'E':
+          {
+            long n=nb+1-j;
+            long k;
+            for(k=1;k<=n;k++)
+            {
+              optimizenode(arg[j+k-1]);
+              fl &= tree[arg[j+k-1]].flags;
+            }
+            j=nb+1;
+            break;
+          }
         case 's':
           {
             long n=nb+1-j;
