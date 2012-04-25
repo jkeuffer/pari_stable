@@ -668,6 +668,18 @@ gcmpsg(long s, GEN y)
   return 0; /* not reached */
 }
 
+static long
+roughtype(GEN x)
+{
+  switch(typ(x))
+  {
+    case t_MAT: return t_MAT;
+    case t_VEC: case t_COL: return t_VEC;
+    case t_VECSMALL: return t_VECSMALL;
+    default: return t_INT;
+  }
+}
+
 static int lexcmpsg(long x, GEN y);
 static int lexcmpgs(GEN x, long y) { return -lexcmpsg(y,x); }
 /* lexcmp(stoi(x),y), y t_VEC/t_COL/t_MAT */
@@ -758,8 +770,7 @@ lexcmp_vecsmall_other(GEN x, GEN y, long ty)
   switch(ty)
   {
     case t_MAT: return lexcmp_vecsmall_mat(x, y);
-    case t_VEC:
-    case t_COL: return lexcmp_vecsmall_vec(x, y);
+    case t_VEC: return lexcmp_vecsmall_vec(x, y);
     default: return -lexcmp_scal_vecsmall(y, x); /*y scalar*/
   }
 }
@@ -768,56 +779,42 @@ lexcmp_vecsmall_other(GEN x, GEN y, long ty)
 static int
 lexcmpsg(long x, GEN y)
 {
-  const long ty = typ(y);
-  if (ty == t_INT) return cmpsi(x,y); /* shortcut */
-  if (ty == t_VECSMALL)
-  { /* ~ lexcmp_scal_matvec */
-    if (lg(y)==1) return 1;
-    return (x > y[1])? 1: -1;
+  switch(roughtype(y))
+  {
+    case t_MAT:
+    case t_VEC:
+      return lexcmp_s_matvec(x,y);
+    case t_VECSMALL: /* ~ lexcmp_scal_matvec */
+      if (lg(y)==1) return 1;
+      return (x > y[1])? 1: -1;
+    default: return gcmpsg(x,y);
   }
-  if (is_matvec_t(ty)) return lexcmp_s_matvec(x,y);
-  return gcmpsg(x,y);
 }
 
 /* as gcmp for vector/matrices, using lexicographic ordering on components */
 int
 lexcmp(GEN x, GEN y)
 {
-  const long tx = typ(x), ty = typ(y);
+  const long tx = roughtype(x), ty = roughtype(y);
   if (tx == ty)
-  { /* shortcut */
     switch(tx)
     {
       case t_MAT:
       case t_VEC:
-      case t_COL:
         return lexcmp_similar(x,y);
       case t_VECSMALL:
         return vecsmall_lexcmp(x,y);
       default:
         return gcmp(x,y);
     }
-  }
-  if (tx == t_VECSMALL)
-    return lexcmp_vecsmall_other(x,y,ty);
-  if (ty == t_VECSMALL)
-    return -lexcmp_vecsmall_other(y,x,tx);
+  if (tx == t_VECSMALL) return  lexcmp_vecsmall_other(x,y,ty);
+  if (ty == t_VECSMALL) return -lexcmp_vecsmall_other(y,x,tx);
 
-  if (!is_matvec_t(tx))
-  {
-    if (!is_matvec_t(ty)) return gcmp(x,y);
-    return  lexcmp_scal_matvec(x,y);
-  }
-  if (!is_matvec_t(ty))
-    return -lexcmp_scal_matvec(y,x);
+  if (tx == t_INT) return  lexcmp_scal_matvec(x,y); /*scalar*/
+  if (ty == t_INT) return -lexcmp_scal_matvec(y,x);
 
-  /* x and y are matvec_t, not both t_MAT */
-  if (ty==t_MAT)
-    return lexcmp_vec_mat(x,y);
-  else if (tx==t_MAT)
-    return -lexcmp_vec_mat(y,x);
-  else
-    return lexcmp_similar(x,y);
+  if (ty==t_MAT) return  lexcmp_vec_mat(x,y);
+  /*tx==t_MAT*/  return -lexcmp_vec_mat(y,x);
 }
 
 /*****************************************************************/
