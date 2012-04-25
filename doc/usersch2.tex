@@ -683,6 +683,49 @@ element.
 %4 = [2, 3, 4]
 @eprog
 
+\misctitle{Remark} \tet{vector} is the standard constructor for row vectors
+ whose $i$-th entry is given by a simple function of $i$; \tet{vectorv}
+ is similar for column vectors:
+ \bprog
+ ? vector(10, i, i^2+1)
+ %1 = [2, 5, 10, 17, 26, 37, 50, 65, 82, 101]
+ @eprog
+ The functions \tet{Vec} and \tet{Col} convert objects to row and column
+vectors respectively (as well as \tet{Vecrev} and \tet{Colrev}, which revert
+the indexing):
+ \bprog
+ ? T = poltchebi(5)   \\ 5-th Chebyshev polynomial
+ %1 = 16*x^5 - 20*x^3 + 5*x
+ ? Vec(T)
+ %2 = [16, 0, -20, 0, 5, 0]  \\ coefficients of T
+ ? Vecrev(T)
+ %3 = [0, 5, 0, -20, 0, 16]  \\ ... in reverse order
+ @eprog
+
+\misctitle{Remark} For $v$ a \typ{VEC}, \typ{COL}, \typ{LIST} or \typ{MAT},
+ the alternative set-notations
+ \bprog
+ [g(x) | x <- v, f(x)]
+ [x <- v, f(x)]
+ [g(x) | x <- v]
+ @eprog\noindent
+ are available as shortcuts for
+ \bprog
+ apply(g, select(f, Vec(v)))
+ select(Vec(v), f)
+ apply(g, Vec(v))
+ @eprog\noindent respectively, and may serve as \typ{VEC} constructors:
+ \bprog
+ ? [ p <- primes(10), isprime(p+2) ]
+ %2 = [3, 5, 11, 17, 29]
+ @eprog\noindent returns the primes $p$ (among the first 10 primes) such
+ that $(p, p+2)$ is a twin pair;
+ \bprog
+ ? [ p^2 | p <- primes(10), p % 4 == 1 ]
+ %1 = [25, 169, 289, 841]
+ @eprog\noindent returns the squares of the primes congruent to $1$ modulo $4$,
+ where $p$ runs among the first 10 primes.
+
 \subsec{Matrices (\typ{MAT})}%
 \sidx{matrix}\kbdsidx{t_MAT}
 To enter a matrix, type the components row by row, the components being

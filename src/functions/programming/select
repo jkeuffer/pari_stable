@@ -25,8 +25,26 @@ Doc: We first describe the default behaviour, when $\fl$ is 0 or omitted.
  selects columns instead of entries, and returns the matrix whose columns are
  the selected ones.
 
- If $\fl = 1$, this function returns instead the \emph{indices} of those
- elements, and not the elements themselves (indirect selection):
+ \misctitle{Remark} For $v$ a \typ{VEC}, \typ{COL}, \typ{LIST} or \typ{MAT},
+ the alternative set-notations
+ \bprog
+ [g(x) | x <- v, f(x)]
+ [x <- v, f(x)]
+ [g(x) | x <- v]
+ @eprog\noindent
+ are available as shortcuts for
+ \bprog
+ apply(g, select(f, Vec(v)))
+ select(Vec(v), f)
+ apply(g, Vec(v))
+ @eprog\noindent respectively:
+ \bprog
+ ? [ x <- vector(50,i,i^2+1), isprime(x) ]
+ %1 = [2, 5, 17, 37, 101, 197, 257, 401, 577, 677, 1297, 1601]
+ @eprog
+
+ \noindent If $\fl = 1$, this function returns instead the \emph{indices} of
+ the selected elements, and not the elements themselves (indirect selection):
  \bprog
  ? V = vector(50,i,i^2+1);
  ? select(x->isprime(x), V, 1)

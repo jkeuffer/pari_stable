@@ -434,6 +434,14 @@ extract_copy(GEN A, GEN v)
   for (i = 1; i < l; i++) gel(B,i) = gcopy(gel(A,v[i]));
   return B;
 }
+/* as genselect, but treat A [ t_VEC,t_COL, or t_MAT] as a t_VEC */
+GEN
+vecselect(void *E, long (*f)(void* E, GEN x), GEN A)
+{
+  GEN v = genindexselect(E, f, A);
+  A = extract_copy(A, v); settyp(A, t_VEC);
+  return A;
+}
 GEN
 genselect(void *E, long (*f)(void* E, GEN x), GEN A)
 {
@@ -472,6 +480,15 @@ select0(GEN f, GEN x, long flag)
   }
 }
 
+/* as genapply, but treat A [ t_VEC,t_COL, or t_MAT] as a t_VEC */
+GEN
+vecapply(void *E, GEN (*f)(void* E, GEN x), GEN x)
+{
+  long i, lx;
+  GEN y = cgetg_copy(x, &lx);
+  for (i = 1; i < lx; i++) gel(y,i) = f(E, gel(x,i));
+  settyp(y, t_VEC); return y;
+}
 GEN
 genapply(void *E, GEN (*f)(void* E, GEN x), GEN x)
 {
@@ -519,7 +536,7 @@ apply0(GEN f, GEN x)
 }
 
 GEN
-genselapply(void *Epred, long (*pred)(void* E, GEN x), void *Efun, GEN (*fun)(void* E, GEN x), GEN A)
+vecselapply(void *Epred, long (*pred)(void* E, GEN x), void *Efun, GEN (*fun)(void* E, GEN x), GEN A)
 {
   GEN y;
   long i, l = lg(A), nb=1;

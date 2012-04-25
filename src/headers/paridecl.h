@@ -628,7 +628,6 @@ GEN     gaussmodulo(GEN M, GEN D, GEN Y);
 GEN     gaussmodulo2(GEN M, GEN D, GEN Y);
 GEN     genapply(void *E, GEN (*f)(void *E, GEN x), GEN A);
 GEN     genindexselect(void *E, long (*f)(void *E, GEN x), GEN A);
-GEN     genselapply(void *Epred, long (*pred)(void* E, GEN x), void *Efun, GEN (*fun)(void* E, GEN x), GEN A);
 GEN     genselect(void *E, long (*f)(void *E, GEN x), GEN A);
 GEN     gtomat(GEN x);
 GEN     gtrans(GEN x);
@@ -653,8 +652,11 @@ GEN     shallowextract(GEN x, GEN L);
 GEN     shallowtrans(GEN x);
 GEN     split_realimag(GEN x, long r1, long r2);
 GEN     suppl(GEN x);
+GEN     vecapply(void *E, GEN (*f)(void* E, GEN x), GEN x);
 GEN     vecrange(GEN a, GEN b);
 GEN     vecrangess(long a, long b);
+GEN     vecselapply(void *Epred, long (*pred)(void* E, GEN x), void *Efun, GEN (*fun)(void* E, GEN x), GEN A);
+GEN     vecselect(void *E, long (*f)(void* E, GEN x), GEN A);
 GEN     vecslice0(GEN A, long y1, long y2);
 
 /* alglin2.c */

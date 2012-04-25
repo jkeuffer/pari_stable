@@ -854,13 +854,23 @@ copyupto(GEN z, GEN t)
 GEN
 vecexpr0(GEN vec, GEN code, GEN pred)
 {
-  if (!is_matvec_t(typ(vec))) pari_err_TYPE("[_|_<-_,_]",vec);
+  switch(typ(vec))
+  {
+    case t_LIST:
+    {
+      vec = list_data(vec);
+      if (!vec) return cgetg(1, t_VEC);
+      break;
+    }
+    case t_VEC: case t_COL: case t_MAT: break;
+    default: pari_err_TYPE("[_|_<-_,_]",vec);
+  }
   if (pred && code)
-    EXPR_WRAP(code,genselapply((void*)pred,&gp_evalbool,EXPR_ARGUPTO,vec))
+    EXPR_WRAP(code,vecselapply((void*)pred,&gp_evalbool,EXPR_ARGUPTO,vec))
   else if (code)
-    EXPR_WRAP(code,genapply(EXPR_ARGUPTO,vec))
+    EXPR_WRAP(code,vecapply(EXPR_ARGUPTO,vec))
   else
-    EXPR_WRAP(pred,genselect(EXPR_ARGBOOL,vec))
+    EXPR_WRAP(pred,vecselect(EXPR_ARGBOOL,vec))
 }
 
 GEN

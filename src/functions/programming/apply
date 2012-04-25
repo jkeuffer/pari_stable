@@ -33,5 +33,23 @@ Doc: Apply the \typ{CLOSURE} \kbd{f} to the entries of \kbd{A}. If \kbd{A}
  ? apply(lift, L);
  %2 = List([1, 2])
  @eprog
+ \misctitle{Remark} For $v$ a \typ{VEC}, \typ{COL}, \typ{LIST} or \typ{MAT},
+ the alternative set-notations
+ \bprog
+ [g(x) | x <- v, f(x)]
+ [x <- v, f(x)]
+ [g(x) | x <- v]
+ @eprog\noindent
+ are available as shortcuts for
+ \bprog
+ apply(g, select(f, Vec(v)))
+ select(Vec(v), f)
+ apply(g, Vec(v))
+ @eprog\noindent respectively:
+ \bprog
+ ? L = List([Mod(1,3), Mod(2,4)]);
+ ? [ lift(x) | x<-L ]
+ %2 = [1, 2]
+ @eprog
 
  \synt{genapply}{void *E, GEN (*fun)(void*,GEN), GEN a}.
