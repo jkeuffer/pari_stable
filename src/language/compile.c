@@ -602,11 +602,9 @@ ctxmvar(void)
 }
 
 INLINE int
-is_func_named(long x, const char *s)
+is_func_named(entree *ep, const char *s)
 {
-  if (tree[x].x!=CSTentry) return 0;
-  if (strlen(s)!=tree[x].len) return 0;
-  return !strncmp(tree[x].str, s, tree[x].len);
+  return !strcmp(ep->name, s);
 }
 
 INLINE int
@@ -985,21 +983,21 @@ compilefunc(entree *ep, long n, int mode, long flag)
   {
     nb=2; lnc=2; lnl=2; arg=mkvecsmall2(x,y);
   }
-  else if (is_func_named(x,"if"))
+  else if (is_func_named(ep,"if"))
   {
     if (nb>=4)
       ep=is_entry("_multi_if");
     else if (mode==Gvoid)
       ep=is_entry("_void_if");
   }
-  else if (is_func_named(x,"return") && (flag&FLreturn) && nb<=1)
+  else if (is_func_named(ep,"return") && (flag&FLreturn) && nb<=1)
   {
     if (nb==0) op_push(OCpushgnil,0,n);
     else compilenode(arg[1],Ggen,FLsurvive|FLreturn);
     avma=ltop;
     return;
   }
-  else if (is_func_named(x,"my"))
+  else if (is_func_named(ep,"my"))
   {
     long lgarg;
     GEN vep = cgetg_copy(arg, &lgarg);
@@ -1031,7 +1029,7 @@ compilefunc(entree *ep, long n, int mode, long flag)
     avma=ltop;
     return;
   }
-  else if (is_func_named(x,"local"))
+  else if (is_func_named(ep,"local"))
   {
     long lgarg;
     long i;
@@ -1060,7 +1058,7 @@ compilefunc(entree *ep, long n, int mode, long flag)
     return;
   }
   /*We generate dummy code for global() for compatibility with gp2c*/
-  else if (is_func_named(x,"global"))
+  else if (is_func_named(ep,"global"))
   {
     long i;
     for (i=1;i<=nb;i++)
@@ -1085,7 +1083,7 @@ compilefunc(entree *ep, long n, int mode, long flag)
     avma=ltop;
     return;
   }
-  else if (is_func_named(x,"O") || (compatible==OLDALL && is_func_named(x,"o")))
+  else if (is_func_named(ep,"O") || (compatible==OLDALL && is_func_named(ep,"o")))
   {
     if (nb!=1)
       compile_err("wrong number of arguments", tree[n].str+tree[n].len-1);
@@ -1220,7 +1218,7 @@ compilefunc(entree *ep, long n, int mode, long flag)
         case 'E':
           {
             long a = arg[j++];
-            GEN  d = compilefuncinline(c, a, flag, is_func_named(x,"if"), lev, ev);
+            GEN  d = compilefuncinline(c, a, flag, is_func_named(ep,"if"), lev, ev);
             op_push(OCpushgen, data_push(d), a);
             break;
           }
