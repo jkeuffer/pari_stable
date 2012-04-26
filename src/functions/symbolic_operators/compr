@@ -5,6 +5,6 @@ Prototype: GVDEDE
 Help: [a(x)|x<-b,c(x)] = apply(a,select(c,b))
 Wrapper: (,,G,bG)
 Description:
- (gen,,closure):gen         genapply(${3 cookie}, ${3 wrapper}, $1)
- (gen,,,closure):gen        genselect(${4 cookie}, ${4 wrapper}, $1)
- (gen,,closure,closure):gen genselapply(${4 cookie}, ${4 wrapper}, ${3 cookie}, ${3 wrapper}, $1)
+ (gen,,closure):gen         vecapply(${3 cookie}, ${3 wrapper}, $1)
+ (gen,,,closure):gen        vecselect(${4 cookie}, ${4 wrapper}, $1)
+ (gen,,closure,closure):gen vecselapply(${4 cookie}, ${4 wrapper}, ${3 cookie}, ${3 wrapper}, $1)
