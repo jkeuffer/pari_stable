@@ -128,6 +128,7 @@ expr: KINTEGER %prec INT  {$$=newintnode(&@1);}
     | matrix            {$$=$1;}
     | compr             {$$=$1;}
     | definition        {$$=$1;}
+    | matrix '=' expr {$$=newnode(Fassign,$1,$3,&@$);}
     | lvalue '=' expr {$$=newnode(Fassign,$1,$3,&@$);}
     | lvalue "++"     {$$=newopcall(OPpp,$1,-1,&@$);}
     | lvalue "--"     {$$=newopcall(OPss,$1,-1,&@$);}

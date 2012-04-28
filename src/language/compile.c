@@ -1646,6 +1646,15 @@ closurefunc(entree *ep, long n, long mode)
   avma=ltop;
 }
 
+INLINE void
+compilestore(long vn, entree *ep, long n)
+{
+  if (vn)
+    op_push(OCstorelex,vn,n);
+  else
+    op_push(OCstoredyn,(long)ep,n);
+}
+
 static void
 compilenode(long n, int mode, long flag)
 {
@@ -1668,29 +1677,33 @@ compilenode(long n, int mode, long flag)
     return;
   case Fassign:
     x = detag(x);
-    if (tree[x].f==Fentry)
+    if (tree[x].f==Fvec && tree[x].x>=0)
+    {
+      GEN vars = listtogen(tree[x].x,Fmatrixelts);
+      long i, l = lg(vars)-1;
+      compilenode(y,Ggen,mode==Gvoid?FLnocopy:0);
+      op_push(OCdup,mode==Gvoid?l-1:l,x);
+      for(i=1; i<=l; i++)
+      {
+        entree *ep=getvar(vars[i]);
+        long vn=getmvar(ep);
+        op_push(OCpushlong,i,vars[i]);
+        op_push(OCcompo1,Ggen,vars[i]);
+        compilestore(vn,ep,n);
+      }
+      if (mode!=Gvoid)
+        compilecast(n,Ggen,mode);
+    }
+    else if (tree[x].f==Fentry)
     {
       entree *ep=getvar(x);
       long vn=getmvar(ep);
-      compilenode(y,Ggen,FLnocopy);
-      if (vn)
-        op_push(OCstorelex,vn,n);
-      else
-        op_push(OCstoredyn,(long)ep,n);
+      compilenode(y,Ggen,mode==Gvoid?FLnocopy:0);
       if (mode!=Gvoid)
-      {
-        if (vn)
-        {
-          op_push(OCpushlex,vn,n);
-          copyifclone(n,mode,flag,FLnocopy|FLnocopylex);
-        }
-        else
-        {
-          op_push(OCpushdyn,(long)ep,n);
-          copyifclone(n,mode,flag,FLnocopy);
-        }
+        op_push(OCdup,1,n);
+      compilestore(vn,ep,n);
+      if (mode!=Gvoid)
         compilecast(n,Ggen,mode);
-      }
     }
     else
       compilefunc(is_entry("_=_"),n,mode,0);

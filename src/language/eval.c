@@ -1264,6 +1264,14 @@ closure_eval(GEN C)
     case OCpop:
       sp-=operand;
       break;
+    case OCdup:
+      {
+        long i, s=st[sp-1];
+        st_alloc(operand);
+        for(i=1;i<=operand;i++)
+          st[sp++]=s;
+      }
+      break;
     }
   }
   if (0)
@@ -1716,6 +1724,9 @@ closure_disassemble(GEN C)
     case OCpop:
       pari_printf("pop\t\t%ld\n",operand);
       break;
+    case OCdup:
+      pari_printf("dup\t\t%ld\n",operand);
+      break;
     case OCavma:
       pari_printf("avma\n",operand);
       break;
@@ -1780,6 +1791,7 @@ opcode_need_relink(op_code opcode)
   case OCmat:
   case OCnewframe:
   case OCsaveframe:
+  case OCdup:
   case OCpop:
   case OCavma:
   case OCgerepile:
