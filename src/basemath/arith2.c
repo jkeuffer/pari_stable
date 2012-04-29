@@ -842,7 +842,7 @@ core2partial(GEN n, long all)
   if (typ(n) != t_INT) pari_err_TYPE("core2partial",n);
   return gerepilecopy(av, core2fa(Z_factor_limit(n,all)));
 }
-GEN
+static GEN
 core2_i(GEN n)
 {
   GEN f = core(n);
