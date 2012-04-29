@@ -843,19 +843,14 @@ core2partial(GEN n, long all)
   return gerepilecopy(av, core2fa(Z_factor_limit(n,all)));
 }
 GEN
-core(GEN n)
+core2_i(GEN n)
 {
-  pari_sp av = avma;
-  if (typ(n) != t_INT) pari_err_TYPE("core",n);
-  return gerepileuptoint(av, corefa(Z_factor(n)));
+  GEN f = core(n);
+  if (!signe(f)) return mkvec2(gen_0, gen_1);
+  return mkvec2(f, sqrtint(diviiexact(n, f)));
 }
 GEN
-core2(GEN n)
-{
-  pari_sp av = avma;
-  if (typ(n) != t_INT) pari_err_TYPE("core",n);
-  return gerepilecopy(av, core2fa(Z_factor(n)));
-}
+core2(GEN n) { pari_sp av = avma; return gerepilecopy(av, core2_i(n)); }
 
 GEN
 core0(GEN n,long flag) { return flag? core2(n): core(n); }
@@ -881,7 +876,7 @@ GEN
 coredisc2(GEN n)
 {
   pari_sp av = avma;
-  GEN y = core2(n);
+  GEN y = core2_i(n);
   GEN c = gel(y,1), f = gel(y,2);
   if (_mod4(c)<=1) return y;
   y = cgetg(3,t_VEC);

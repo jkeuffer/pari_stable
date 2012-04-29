@@ -4,7 +4,7 @@ a = 2*3*5*7;
 
 sigma2(x) = sigma(x, 2);
 sigma3(x) = sigma(x, 3);
-fun = [moebius, omega, bigomega, eulerphi, numdiv, sigma, sigma2, sigma3];
+fun = [ispowerful, moebius, core, omega, bigomega, eulerphi, numdiv, sigma, sigma2, sigma3];
 
 vec(n) = vector(#fun, i, fun[i](n));
 args = [a, a*p, a*p*q, a*p^2*q];

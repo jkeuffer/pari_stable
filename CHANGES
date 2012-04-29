@@ -91,6 +91,7 @@ BA 70- ellpointtoz was numerically unstable
        non-singular points, when the curve has bad reduction at p.
    74- factor_proven not taken into account in factor(n), where n is a
        BPSW-pseudoprime
+   75- core(5*(huge composite)^2) was very slow [#1305]
 
   Changed
     1- mathnf: swapped flag 3 and 5.

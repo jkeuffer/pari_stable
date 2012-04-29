@@ -867,7 +867,6 @@ GEN     Z_factor_until(GEN n, GEN limit);
 GEN     Z_smoothen(GEN N, GEN L, GEN *pP, GEN *pe);
 long    bigomega(GEN n);
 GEN     boundfact(GEN n, ulong lim);
-GEN     core(GEN n);
 GEN     corepartial(GEN n, long l);
 GEN     core0(GEN n,long flag);
 GEN     core2(GEN n);
@@ -1981,6 +1980,8 @@ GEN     smithclean(GEN z);
 
 /* ifactor1.c */
 
+ulong   coreu(ulong n);
+GEN     core(GEN n);
 GEN     gnextprime(GEN n);
 GEN     gprecprime(GEN n);
 int     is_357_power(GEN x, GEN *pt, ulong *mask);

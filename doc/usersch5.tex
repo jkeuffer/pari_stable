@@ -2671,7 +2671,7 @@ found and their exponents, as \typ{VECSMALL}s. Neither memory-clean, nor
 suitable for \tet{gerepileupto}.
 
 \fun{GEN}{core}{GEN n} unique squarefree integer $d$ dividing $n$ such that
-$n/d$ is a square.
+$n/d$ is a square. The core of $0$ is defined to be $0$.
 
 \fun{GEN}{core2}{GEN n} return $[d,f]$ with $d$ squarefree and $n = df^2$.
 
@@ -2966,6 +2966,9 @@ $$f( f(x_1,\kbd{NULL}), f(x_2,\kbd{NULL}) ),$$
 where $x_1$, $x_2$ are the two halves of $x$.
 
 \subsec{Miscellaneous arithmetic functions}
+
+\fun{ulong}{coreu}{ulong n}, unique squarefree integer $d$ dividing $n$ such
+that $n/d$ is a square.
 
 \fun{ulong}{eulerphiu}{ulong n}, Euler's totient function of $n$.
 

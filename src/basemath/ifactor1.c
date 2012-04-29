@@ -3187,7 +3187,7 @@ ifac_moebius(GEN n)
   }
 }
 static int
-ifac_ispowerfull(GEN n)
+ifac_ispowerful(GEN n)
 {
   pari_sp av = avma, lim = stack_lim(av,1);
   GEN part = ifac_start(n, 0);
@@ -3196,9 +3196,23 @@ ifac_ispowerfull(GEN n)
     GEN here = ifac_find(part, part);
     if (!here || Z_isanypower(VALUE(here),NULL)) { avma = av; return 1; }
     here = ifac_main(&part);
-    if (here == gen_1) { avma = av; return 1; }
     if (equali1(EXPON(here))) { avma = av; return 0; }
     ifac_memcheck(av, lim, &part, &here);
+  }
+}
+static GEN
+ifac_core(GEN n)
+{
+  GEN m = gen_1, c = cgeti(lgefint(n));
+  pari_sp av = avma, lim = stack_lim(av,1);
+  GEN part = ifac_start(n, 0);
+  for(;;)
+  {
+    GEN here = ifac_find(part, part);
+    if (!here || Z_issquare(VALUE(here))) return m;
+    here = ifac_main(&part);
+    if (mod2(EXPON(here))) m = mulii(m, VALUE(here));
+    ifac_memcheck_extra(av, lim, &part, &here, &m,c);
   }
 }
 
@@ -3251,7 +3265,7 @@ ifac_totient(GEN n)
   {
     ulong v;
     GEN p, here = ifac_main(&part);
-    if (here == gen_1) { avma = av; affii(m, phi); return phi; }
+    if (here == gen_1) return m;
     p = VALUE(here);
     v = itou(EXPON(here));
     m = euler_totient(m, p, v);
@@ -3269,7 +3283,7 @@ ifac_numdiv(GEN n)
   for(;;)
   {
     GEN here = ifac_main(&part);
-    if (here == gen_1) { avma = av; affii(m, tau); return tau; }
+    if (here == gen_1) return m;
     m = muliu(m, 1 + itou(EXPON(here)));
     ifac_memcheck_extra(av, lim, &part, &here, &m,tau);
   }
@@ -3309,7 +3323,7 @@ ifac_sumdivk(GEN n, long k)
   {
     long v;
     GEN p, here = ifac_main(&part);
-    if (here == gen_1) { avma = av; affii(m, S); return S; }
+    if (here == gen_1) return m;
 
     p = VALUE(here);
     v = itos(EXPON(here));
@@ -3525,8 +3539,74 @@ ispowerful(GEN n)
   }
   if (lazy_isprime(n)) { avma=av; return 0; }
   /* large composite without small factors */
-  v = ifac_ispowerfull(n);
+  v = ifac_ispowerful(n);
   avma = av; return v;
+}
+
+ulong
+coreu(ulong n)
+{
+  if (n == 0) return 0;
+  else
+  {
+    pari_sp av = avma;
+    GEN f = factoru(n), P = gel(f,1), E = gel(f,2);
+    long i, l = lg(P), m = 1;
+
+    avma = av;
+    for (i = 1; i < l; i++)
+    {
+      ulong p = P[i], e = E[i];
+      if (e & 1) m *= p;
+    }
+    return m;
+  }
+}
+GEN
+core(GEN n)
+{
+  byteptr d = diffptr;
+  pari_sp av = avma;
+  GEN m;
+  ulong p, lim;
+  long i, l, v;
+
+  if (typ(n) != t_INT) pari_err_TYPE("core",n);
+  switch(lgefint(n))
+  {
+    case 2: return gen_0;
+    case 3: return utoipos(coreu(n[2]));
+  }
+
+  n = absi(n); m = gen_1;
+  lim = tridiv_bound(n);
+  p = 0;
+  while (p < lim)
+  {
+    int stop;
+    if (!*d) break;
+    NEXT_PRIME_VIADIFF(p,d);
+    v = Z_lvalrem_stop(n, p, &stop);
+    if (v)
+    {
+      if (v & 1) m = muliu(m, p);
+      if (stop) return gerepileuptoint(av, m);
+    }
+  }
+  l = lg(primetab);
+  for (i = 1; i < l; i++)
+  {
+    GEN q = gel(primetab,i);
+    v = Z_pvalrem(n, q, &n);
+    if (v)
+    {
+      if (v & 1) m = mulii(m, q);
+      if (is_pm1(n)) return gerepileuptoint(av, m);
+    }
+  }
+  if (lazy_isprime(n)) { m = mulii(m, n); return gerepileuptoint(av, m); }
+  /* large composite without small factors */
+  return gerepileuptoint(av, mulii(m, ifac_core(n)));
 }
 
 GEN
@@ -3640,40 +3720,28 @@ bigomega(GEN n)
 
 GEN
 geulerphi(GEN n) { return map_proto_G(eulerphi,n); }
+
+/* assume n != 0 */
 ulong
 eulerphiu(ulong n)
 {
-  byteptr d = diffptr+1;
-  pari_sp av;
-  ulong p, lim, m;
-  long v;
+  pari_sp av = avma;
+  GEN f = factoru(n), P = gel(f,1), E = gel(f,2);
+  long i, m = 1, l = lg(P);
 
-  if (n == 1) return 1;
-  v = vals(n); n >>= v;
-  m = v > 1 ? 1UL << (v-1) : 1;
-  if (n == 1) return m;
-
-  lim = utridiv_bound(n);
-  p = 2;
-  while (p < lim)
+  avma = av;
+  for (i = 1; i < l; i++)
   {
-    int stop;
-    if (!*d) break;
-    NEXT_PRIME_VIADIFF(p,d);
-    v = u_lvalrem_stop(&n, p, &stop);
-    if (v) {
-      m *= p-1;
-      if (v > 1) m *= upowuu(p, v-1);
-    }
-    if (stop) {
-      if (n != 1) m *= n-1;
-      return m;
+    ulong p = P[i], e = E[i];
+    if (p == 2)
+    { if (e > 1) m <<= e-1; } /*optimized*/
+    else
+    {
+      m *= (p-1);
+      if (e > 1) m *= upowuu(p, e-1);
     }
   }
-  if (uisprime_nosmalldiv(n)) return m*(n-1);
-  av = avma;
-  m *= itou( ifac_totient(utoipos(n)) );
-  avma = av; return m;
+  return m;
 }
 GEN
 eulerphi(GEN n)
