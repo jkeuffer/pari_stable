@@ -2145,21 +2145,20 @@ is_pth_power(GEN x, GEN *pt, ulong *curexp, ulong cutoffbits)
  *  - ifac_decomp()  [ to be called by Z_factor_limit() ]: puts a succession of
  *  prime divisor / exponent pairs onto the stack, unsorted.
  *
- *  - For each of the arithmetic functions, there is a 'contributor'
- *  ifac_xxx, to be called on any large composite cofactor left over after
- *  trial division by small primes: xxx is one of moebius, issquarefree,
- *  totient, omega, bigomega, numdiv,  sumdiv, sumdivk.
+ *  - Many arithmetic functions have a 'contributor' ifac_xxx, to be called on
+ *  any large composite cofactor left over after trial division by small
+ *  primes: xxx is one of moebius, issquarefree, totient, etc.
  *
  * We never test whether the input number is prime or composite, since
  * presumably it will have come out of the small factors finder stage
  * (which doesn't really exist yet but which will test the left-over
  * cofactor for primality once it does). */
 
-/* The data structure in which we preserve whatever we know at any given
- * time about our number N is kept on the PARI stack, and updated as needed.
+/* The data structure in which we preserve whatever we know about our number N
+ * is kept on the PARI stack, and updated as needed.
  * This makes the machinery re-entrant, and avoids memory leaks when a lengthy
  * factorization is interrupted. We try to keep the whole affair connected,
- * and the parent object is always be older than its children.  This may in
+ * and the parent object is always older than its children.  This may in
  * rare cases lead to some extra copying around, and knowing what is garbage
  * at any given time is not trivial. See below for examples how to do it right.
  * (Connectedness is destroyed if callers of ifac_main() create stuff on the
@@ -2168,9 +2167,8 @@ is_pth_power(GEN x, GEN *pt, ulong *curexp, ulong cutoffbits)
  * collecting garbage.)
  * A t_INT may well have > 10^6 distinct prime factors larger than 2^16. Since
  * we need not find factors in order of increasing size, we must be prepared to
- * drag a very large amount of data around (although this will _very_ rarely
- * happen for random input!).  We start with a small structure and extend it
- * when necessary. */
+ * drag a very large amount of data around.  We start with a small structure
+ * and extend it when necessary. */
 
 /* The idea of the algorithm is:
  * Let N0 be whatever is currently left of N after dividing off all the
@@ -2179,9 +2177,8 @@ is_pth_power(GEN x, GEN *pt, ulong *curexp, ulong cutoffbits)
  * (1) N0 = \prod_i P_i^{e_i} * \prod_j Q_j^{f_j} * \prod_k C_k^{g_k}
  * where the P_i and Q_j are distinct primes, each C_k is known composite,
  * none of the P_i divides any C_k, and we also know the total ordering
- * of all the P_i, Q_j and C_k  (in particular, we will never try to divide
- * a C_k by a larger Q_j).  Some of the C_k may have common factors, although
- * this will not often be the case.
+ * of all the P_i, Q_j and C_k; in particular, we will never try to divide
+ * a C_k by a larger Q_j.  Some of the C_k may have common factors.
  *
  * Caveat implementor:  Taking gcds among C_k's is very likely to cost at
  * least as much time as dividing off any primes as we find them, and book-
@@ -2199,15 +2196,14 @@ is_pth_power(GEN x, GEN *pt, ulong *curexp, ulong cutoffbits)
  * or 0, depending on the function). In all other cases, ifac_main() iterates
  * the following steps until we have a P_1 in the smallest position.
  *
- * When the smallest item is C_1  (as it is initially):
+ * When the smallest item is C_1, as it is initially:
  * (3.1) Crack C_1 into a nontrivial product  U_1 * U_2  by whatever method
  * comes to mind for this size. (U for 'unknown'.)  Cracking will detect
  * perfect powers, so we may instead see a power of some U_1 here, or even
- * something of the form U_1^k*U_2^k. (Of course the exponent already attached
- * to C_1 is taken into account in the following.)
- * (3.2) If we have U_1*U_2, sort the two factors; convert to U_1^2 if they
- * happen to be equal (which they shouldn't -- squares are caught in stage 3.1).
- * Note that U_1 and U_2 are smaller than anything else in our list.
+ * something of the form U_1^k*U_2^k; of course the exponent already attached
+ * to C_1 is taken into account in the following.
+ * (3.2) If we have U_1*U_2, sort the two factors (distinct: squares are caught
+ * in stage 3.1). N.B. U_1 and U_2 are smaller than anything else in our list.
  * (3.3) Check U_1 and U_2 for primality, and flag them accordingly.
  * (3.4) Iterate.
  *
@@ -2224,7 +2220,7 @@ is_pth_power(GEN x, GEN *pt, ulong *curexp, ulong cutoffbits)
  * therefore happens before the primality test). Since this may produce one or
  * more elements smaller than the P_1 we just confirmed, we may have to repeat
  * the iteration.
- * A little trick avoids some Q_1 instances: just after the sweep classifying
+ * A trick avoids some Q_1 instances: just after the sweep classifying
  * all current unknowns as either composites or primes, we do another downward
  * sweep beginning with the largest current factor and stopping just above the
  * largest current composite.  Every Q_j we pass is turned into a P_i.
@@ -2263,92 +2259,18 @@ is_pth_power(GEN x, GEN *pt, ulong *curexp, ulong cutoffbits)
  * out the GEN pointer, and sometimes do an itos, whatever is more con-
  * venient for the task at hand. */
 
-/*** Overview and forward declarations: ***/
+/*** Overview ***/
 
 /* The '*where' argument in the following points into *partial at the first of
  * the three fields of the first occupied slot.  It's there because the caller
  * would already know where 'here' is, so we don't want to search for it again.
  * We do not preserve this from one user-interface call to the next. */
 
-static GEN ifac_find(GEN partial, GEN where);
-/* Return GEN pointing at the first nonempty slot strictly behind the current
- * *where, or NULL if such doesn't exist.  Can be used to skip a range of
- * vacant slots, or to initialize *where in the first place (pass partial in
- * both args). */
-
-static void ifac_realloc(GEN *partial, GEN *where, long new_lg);
-/* Move to a larger main vector, updating *where if it points into it, and
- * *partial in any case. Can be used as a specialized gcopy before
- * a gerepileupto() (pass 0 as the new length). Normally, one would pass
- * new_lg=1 to let this function guess the new size.  To be used sparingly. */
-
-static long ifac_crack(GEN *partial, GEN *where);
-/* Split the first (composite) entry.  There _must_ already be room for another
- * factor below *where, and *where is updated.  Factor and cofactor are inserted
- * in the correct order, updating *where, or factor^k is inserted if such should
- * be the case  (leaving *where unchanged). The factor or factors are set to
- * unknown, and inherit the exponent (or a multiple thereof) of its/their
- * ancestor.  Returns number of factors written into the structure  (normally 2,
- * but 1 if a factor equalled its cofactor, and may be more than 1 if a
- * factoring engine returned a vector of factors instead of a single factor).
- * Can reallocate the data structure in the vector-of-factors case, not in the
- * most common single-factor case. */
-
-static long ifac_insert_multiplet(GEN *partial, GEN *where, GEN facvec);
-/* Gets called to complete ifac_crack()'s job when a factoring engine splits
- * the current factor into a product of three or more new factors. Makes room
- * for them if necessary, sorts them, gives them the right exponents and class.
- * Also returns the number of factors actually written, which may be less than
- * the number of components in facvec if there are duplicates.--- Vectors of
- * factors  (cf pollardbrent()) actually contain 'slots' of three GENs per
- * factor with the three fields interpreted as in our partial factorization
- * data structure.  Thus 'engines' can tell us what they already happen to
- * know about factors being prime or composite and/or appearing to a power
- * larger than the first */
-
-static long ifac_divide(GEN *partial, GEN *where);
-/* Divide all current composites by first (prime, class Q) entry, updating its
- * exponent, and turning it into a finished prime (class P).  Return 1 if any
- * such divisions succeeded  (in Moebius mode, the update may then not have
- * been completed), or 0 if none of them succeeded.  Doesn't modify *where. */
-
-static long ifac_sort_one(GEN *partial, GEN *where, GEN washere);
-/* re-sort one (typically unknown) entry from washere to a new position,
- * rotating intervening entries upward to fill the vacant space. If the new
- * position is the same as the old one, or the new value of the entry coincides
- * with a value already occupying a lower slot, then we just add exponents (and
- * use the 'more known' class, and return 1 immediately when in Moebius mode).
- * Slots between *where and washere must be in sorted order, so a sweep using
- * this to re-sort several unknowns must proceed upward, see ifac_resort().
- * Return 1 if we see an exponent > 1 (in Moebius mode without completing the
- * update), 0 otherwise. */
-
-static long ifac_resort(GEN *partial, GEN *where);
-/* sort all current unknowns downward to where they belong. Sweeps in the
- * upward direction. Not needed after ifac_crack(), only when ifac_divide()
- * returned true. May update *where. Returns 1 when an ifac_sort_one() call
- * does so to indicate a repeated factor, or 0 if all such calls returned 0 */
-
-static void ifac_defrag(GEN *partial, GEN *where);
-/* defragment: collect and squeeze out any unoccupied slots above *where
- * during a downward sweep. Unoccupied slots arise when a composite factor
- * dissolves completely whilst dividing off a prime, or when ifac_resort()
- * spots a coincidence and merges two factors. *where is updated */
-
-static void ifac_whoiswho(GEN *partial, GEN *where, long after_crack);
-/* determine primality or compositeness of all current unknowns, and set
- * class Q primes to finished (class P) if everything larger is already
- * known to be prime.  When after_crack is nonnegative, only look at the
- * first after_crack things in the list (do nothing when it's zero) */
-
-static GEN ifac_main(GEN *partial);
-/* main loop:  iterate until smallest entry is a finished prime;  returns
- * a 'where' pointer, or gen_1 if nothing left, or gen_0 in Moebius mode if
- * we aren't squarefree */
-
 /* In the most common cases, control flows from the user interface to
  * ifac_main() and then to a succession of ifac_crack()s and ifac_divide()s,
  * with (typically) none of the latter finding anything. */
+
+static long ifac_insert_multiplet(GEN *partial, GEN *where, GEN facvec);
 
 #define LAST(x) x+lg(x)-3
 #define FIRST(x) x+3
@@ -2439,6 +2361,10 @@ static GEN
 ifac_start(GEN n, int moebius)
 { return ifac_start_hint(n,moebius,decomp_default_hint); }
 
+/* Return GEN pointing at the first nonempty slot strictly behind the current
+ * *where, or NULL if such doesn't exist.  Can be used to skip a range of
+ * vacant slots, or to initialize *where in the first place (pass partial in
+ * both args). */
 static GEN
 ifac_find(GEN partial, GEN where)
 {
@@ -2452,7 +2378,10 @@ ifac_find(GEN partial, GEN where)
   return NULL;
 }
 
-/* simple defragmenter */
+/* Defragment: collect and squeeze out any unoccupied slots above *where
+ * during a downward sweep. Unoccupied slots arise when a composite factor
+ * dissolves completely whilst dividing off a prime, or when ifac_resort()
+ * spots a coincidence and merges two factors. *where is updated */
 static void
 ifac_defrag(GEN *partial, GEN *where)
 {
@@ -2469,13 +2398,17 @@ ifac_defrag(GEN *partial, GEN *where)
   while ((scan_new -= 3) > *partial) INIT0(scan_new); /* erase junk */
 }
 
-/* and complex version combined with reallocation.  If new_lg is 0, use the old
- * length, so this acts just like gcopy except that the 'where' pointer is
- * carried along; if it is 1, we make an educated guess. Exception:  If new_lg
- * is 0, the vector is full to the brim, and the first entry is composite, we
- * make it longer to avoid being called again a microsecond later. It is safe
- * to call this with NULL for the where argument;  if it doesn't point anywhere
- * within the old structure, it is left alone */
+/* Move to a larger main vector, updating *where if it points into it, and
+ * *partial in any case. Can be used as a specialized gcopy before
+ * a gerepileupto() (pass 0 as the new length). Normally, one would pass
+ * new_lg=1 to let this function guess the new size.  To be used sparingly.
+ * Complex version of ifac_defrag(), combined with reallocation.  If new_lg
+ * is 0, use the old length, so this acts just like gcopy except that the
+ * 'where' pointer is carried along; if it is 1, we make an educated guess.
+ * Exception:  If new_lg is 0, the vector is full to the brim, and the first
+ * entry is composite, we make it longer to avoid being called again a
+ * microsecond later. It is safe to call this with NULL for the where argument;
+ * if it doesn't point anywhere within the old structure, it is left alone */
 static void
 ifac_realloc(GEN *partial, GEN *where, long new_lg)
 {
@@ -2518,7 +2451,16 @@ ifac_realloc(GEN *partial, GEN *where, long new_lg)
   *partial = newpart;
 }
 
-/* Bubble-sort-of-thing sort. Won't be exercised frequently, so this is ok */
+/* Re-sort one (typically unknown) entry from washere to a new position,
+ * rotating intervening entries upward to fill the vacant space. If the new
+ * position is the same as the old one, or the new value of the entry coincides
+ * with a value already occupying a lower slot, then we just add exponents (and
+ * use the 'more known' class, and return 1 immediately when in Moebius mode).
+ * Slots between *where and washere must be in sorted order, so a sweep using
+ * this to re-sort several unknowns must proceed upward, see ifac_resort().
+ * Return 1 if we see an exponent > 1 (in Moebius mode without completing the
+ * update), 0 otherwise.
+ * Bubble-sort-of-thing sort. Won't be exercised frequently, so this is ok */
 static long
 ifac_sort_one(GEN *partial, GEN *where, GEN washere)
 {
@@ -2605,8 +2547,10 @@ ifac_sort_one(GEN *partial, GEN *where, GEN washere)
   return 0;
 }
 
-/* the following loop around the former doesn't need to check moebius_mode
- * because ifac_sort_one() never returns 1 in normal mode */
+/* Sort all current unknowns downward to where they belong. Sweeps in the
+ * upward direction. Not needed after ifac_crack(), only when ifac_divide()
+ * returned true. May update *where. Returns 1 when an ifac_sort_one() call
+ * does so to indicate a repeated factor, or 0 if all such calls returned 0 */
 static long
 ifac_resort(GEN *partial, GEN *where)
 {
@@ -2644,7 +2588,10 @@ ifac_isprime(GEN x)
   return res;
 }
 
-/* sweep downward so we can with luck turn some Qs into Ps */
+/* Determine primality or compositeness of all current unknowns, and set
+ * class Q primes to finished (class P) if everything larger is already
+ * known to be prime.  When after_crack >= 0, only look at the
+ * first after_crack things in the list (do nothing when it's 0) */
 static void
 ifac_whoiswho(GEN *partial, GEN *where, long after_crack)
 {
@@ -2687,7 +2634,11 @@ ifac_whoiswho(GEN *partial, GEN *where, long after_crack)
   }
 }
 
-/* Here we normally do not check that the first entry is a not-finished
+/* Divide all current composites by first (prime, class Q) entry, updating its
+ * exponent, and turning it into a finished prime (class P).  Return 1 if any
+ * such divisions succeeded  (in Moebius mode, the update may then not have
+ * been completed), or 0 if none of them succeeded.  Doesn't modify *where.
+ * Here we normally do not check that the first entry is a not-finished
  * prime.  Stack management: we may allocate a new exponent */
 static long
 ifac_divide(GEN *partial, GEN *where)
@@ -2770,7 +2721,20 @@ update_pow(GEN where, GEN factor, long exp, pari_sp *av)
  *  prime.  */
 #define get_hint(partial) (itos(HINT(*partial)) & 15)
 
-/* stack housekeeping:  this routine may create one or more objects  (a new
+/* Split the first (composite) entry.  There _must_ already be room for another
+ * factor below *where, and *where is updated. Two cases:
+ * - entry = factor^k is a pure power: factor^k is inserted, leaving *where
+ *   unchanged;
+ * - entry = factor * cofactor (coprime): both factors are inserted in the
+ *   correct order, updating *where
+ * The inserted factors class is set to unknown, they inherit the exponent
+ * (or a multiple thereof) of their ancestor.
+ *
+ * Returns number of factors written into the structure, normally 2 (1 if pure
+ * power, maybe > 2 if a factoring engine returned a vector of factors instead
+ * of a single factor). Can reallocate the data structure in the
+ * vector-of-factors case, not in the most common single-factor case.
+ * Stack housekeeping:  this routine may create one or more objects  (a new
  * factor, or possibly several, and perhaps one or more new exponents > 2) */
 static long
 ifac_crack(GEN *partial, GEN *where)
@@ -2909,7 +2873,17 @@ ifac_crack(GEN *partial, GEN *where)
   return 2;
 }
 
-/* Don't collect garbage.  No diagnostics: the factoring engine should have
+/* Gets called to complete ifac_crack()'s job when a factoring engine splits
+ * the current factor into a product of three or more new factors. Makes room
+ * for them if necessary, sorts them, gives them the right exponents and class.
+ * Also returns the number of factors actually written, which may be less than
+ * the number of components in facvec if there are duplicates.--- Vectors of
+ * factors  (cf pollardbrent()) actually contain 'slots' of three GENs per
+ * factor with the three fields interpreted as in our partial factorization
+ * data structure.  Thus 'engines' can tell us what they already happen to
+ * know about factors being prime or composite and/or appearing to a power
+ * larger than the first.
+ * Don't collect garbage.  No diagnostics: the factoring engine should have
  * printed what it found. facvec contains slots of three components per factor;
  * repeated factors are allowed  (and their classes shouldn't contradict each
  * other whereas their exponents will be added up) */
@@ -2999,6 +2973,9 @@ ifac_insert_multiplet(GEN *partial, GEN *where, GEN facvec)
   return k;
 }
 
+/* main loop:  iterate until smallest entry is a finished prime;  returns
+ * a 'where' pointer, or gen_1 if nothing left, or gen_0 in Moebius mode if
+ * we aren't squarefree */
 static GEN
 ifac_main(GEN *partial)
 {
