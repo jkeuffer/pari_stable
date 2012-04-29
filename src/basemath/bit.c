@@ -425,3 +425,74 @@ gbitnegimply(GEN x, GEN y)
   }
   return gerepileuptoint(ltop,z);
 }
+
+INLINE long
+hamming_word(ulong w)
+{
+#if 0
+  return __builtin_popcountl(w);
+#endif
+  static long byte_weight[] = {
+    0,1,1,2,1,2,2,3,1,2,2,3,2,3,3,4,1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,5,
+    1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,5,2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,
+    1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,5,2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,
+    2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,3,4,4,5,4,5,5,6,4,5,5,6,5,6,6,7,
+    1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,5,2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,
+    2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,3,4,4,5,4,5,5,6,4,5,5,6,5,6,6,7,
+    2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,3,4,4,5,4,5,5,6,4,5,5,6,5,6,6,7,
+    3,4,4,5,4,5,5,6,4,5,5,6,5,6,6,7,4,5,5,6,5,6,6,7,5,6,6,7,6,7,7,8
+  };
+  long sum = 0;
+  while (w) { sum += byte_weight[w & 255]; w >>= 8; }
+  return sum;
+}
+
+/* number of non-zero entries among x[a], ..., x[b] */
+static long
+hamming_slice(GEN x, long a, long b)
+{
+  long i, nb = 0;
+  for (i = a; i <= b; i++)
+    if (!gcmp0(gel(x,i))) nb++;
+  return nb;
+}
+static long
+hamming_mat(GEN x)
+{
+  long i, lx = lg(x), nb = 0;
+  for (i = 1; i < lx; i++) nb += hamming(gel(x,i));
+  return nb;
+}
+static long
+hamming_vecsmall(GEN x)
+{
+  long i, lx = lg(x), nb = 0;
+  for (i = 1; i < lx; i++)
+    if (x[i]) nb++;
+  return nb;
+}
+static long
+hamming_int(GEN n)
+{
+  long lx = lgefint(n), i, sum;
+  if (lx == 2) return 0;
+  sum = hamming_word(n[2]);
+  for (i = 3; i < lx; i++) sum += hamming_word(n[i]);
+  return sum;
+}
+
+long
+hamming(GEN n)
+{
+  switch(typ(n))
+  {
+    case t_INT: return hamming_int(n);
+    case t_VEC:
+    case t_COL: return hamming_slice(n, 1, lg(n)-1);
+    case t_POL: return hamming_slice(n, 2, lg(n)-1);
+    case t_VECSMALL: return hamming_vecsmall(n);
+    case t_MAT: return hamming_mat(n);
+  }
+  pari_err_TYPE("hamming", n);
+  return 0;/*notreached*/
+}

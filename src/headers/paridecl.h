@@ -1285,6 +1285,7 @@ GEN     gbitnegimply(GEN x, GEN y);
 GEN     gbitor(GEN x, GEN y);
 GEN     gbittest(GEN x, long n);
 GEN     gbitxor(GEN x, GEN y);
+long    hamming(GEN n);
 GEN     ibitand(GEN x, GEN y);
 GEN     ibitnegimply(GEN x, GEN y);
 GEN     ibitor(GEN x, GEN y);

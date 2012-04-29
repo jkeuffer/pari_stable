@@ -1,0 +1,26 @@
+hamming(15)
+hamming(x^100 + 2*x + 1)
+hamming([Mod(1,2), 2, Mod(0,3)])
+hamming(Vecsmall([0,1,2,3]))
+hamming(matid(100))
+N = 2^128+2^64+1;
+[bittest(N, i) | i<-[60..70]]
+{
+  args = [0, 3, -3, 2^65-1, N, -N];
+  funs = [bitand, bitnegimply, bitor, bitxor];
+  for (a=1,#funs,
+    my (f = funs[a]);
+    print("#", f);
+    for (i=1,#args,
+      for (j=i,#args,
+        my(u=args[i], v=args[j]);
+        print([u,v,f(u,v)])
+      )
+    )
+  );
+  print("#bitneg");
+  for (i=1, #args,
+    my (u=args[i]);
+    print([u, bitneg(u,65),bitneg(u)])
+  )
+}
