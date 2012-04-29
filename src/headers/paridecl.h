@@ -1985,6 +1985,7 @@ GEN     gnextprime(GEN n);
 GEN     gprecprime(GEN n);
 int     is_357_power(GEN x, GEN *pt, ulong *mask);
 int     is_pth_power(GEN x, GEN *pt, ulong *curexp, ulong cutoffbits);
+long    ispowerful(GEN n);
 GEN     nextprime(GEN n);
 GEN     precprime(GEN n);
 ulong   unextprime(ulong n);

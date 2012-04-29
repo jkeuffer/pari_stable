@@ -3209,6 +3209,21 @@ ifac_moebius(GEN n)
     ifac_memcheck(av, lim, &part, &here);
   }
 }
+static int
+ifac_ispowerfull(GEN n)
+{
+  pari_sp av = avma, lim = stack_lim(av,1);
+  GEN part = ifac_start(n, 0);
+  for(;;)
+  {
+    GEN here = ifac_find(part, part);
+    if (!here || Z_isanypower(VALUE(here),NULL)) { avma = av; return 1; }
+    here = ifac_main(&part);
+    if (here == gen_1) { avma = av; return 1; }
+    if (equali1(EXPON(here))) { avma = av; return 0; }
+    ifac_memcheck(av, lim, &part, &here);
+  }
+}
 
 static long
 ifac_omega(GEN n)
@@ -3492,6 +3507,49 @@ moebius(GEN n)
   /* large composite without small factors */
   v = ifac_moebius(n);
   avma = av; return (s<0 ? -v : v); /* correct also if v==0 */
+}
+
+long
+ispowerful(GEN n)
+{
+  byteptr d = diffptr+1; /* point at 3 - 2 */
+  pari_sp av = avma;
+  ulong p, lim;
+  long i, l, v;
+
+  if (typ(n) != t_INT) pari_err_TYPE("ispowerful",n);
+  if (!signe(n) || is_pm1(n)) return 1;
+
+  if (mod4(n) == 2) return 0;
+  n = shifti(n, -vali(n)); setabssign(n);
+  lim = tridiv_bound(n);
+  p = 2;
+  while (p < lim)
+  {
+    int stop;
+    if (!*d) break;
+    NEXT_PRIME_VIADIFF(p,d);
+    v = Z_lvalrem_stop(n, p, &stop);
+    if (v)
+    {
+      if (v == 1) { avma = av; return 0; }
+      if (stop) { avma = av; return is_pm1(n); }
+    }
+  }
+  l = lg(primetab);
+  for (i = 1; i < l; i++)
+  {
+    v = Z_pvalrem(n, gel(primetab,i), &n);
+    if (v)
+    {
+      if (v == 1) { avma = av; return 0; }
+      if (is_pm1(n)) { avma = av; return 1; }
+    }
+  }
+  if (lazy_isprime(n)) { avma=av; return 0; }
+  /* large composite without small factors */
+  v = ifac_ispowerfull(n);
+  avma = av; return v;
 }
 
 GEN

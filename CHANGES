@@ -230,6 +230,7 @@ BA 55- GP syntax M[a..b,^c] : vecextract(M,"a..b","^c")
 BA 56- GP function FpE_log
    57- select(f, v, 1) for indirect selection
    58- hamming() function [initial implementation CG]
+   59- ispowerful() function
 
   Removed
     1- dropped DOS support
