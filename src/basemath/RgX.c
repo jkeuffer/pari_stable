@@ -163,6 +163,30 @@ RgX_unscale(GEN P, GEN h)
   }
   return Q;
 }
+/* P a ZX, h a t_INT. Return P(h * x), not memory clean; optimize for h = -1 */
+GEN
+ZX_unscale(GEN P, GEN h)
+{
+  long i, l = lg(P);
+  GEN hi = gen_1, Q = cgetg(l, t_POL);
+  Q[1] = P[1];
+  if (l == 2) return Q;
+  gel(Q,2) = gel(P,2);
+  if (equalim1(h))
+    for (i=3; i<l; i++)
+    {
+      gel(Q,i) = negi(gel(P,i));
+      if (++i == l) break;
+      gel(Q,i) = gel(P,i);
+    }
+  else
+    for (i=3; i<l; i++)
+    {
+      hi = mulii(hi,h);
+      gel(Q,i) = mulii(gel(P,i), hi);
+    }
+  return Q;
+}
 
 GEN
 RgXV_unscale(GEN v, GEN h)

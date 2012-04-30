@@ -307,21 +307,76 @@ cook_square(GEN P, long nP)
 static GEN
 graeffe(GEN p)
 {
-  GEN p0, p1, s0, s1, t;
-  long n = degpol(p), n0, n1, i, ns1;
+  GEN p0, p1, s0, s1;
+  long n = degpol(p), n0, n1, i;
 
   if (!n) return gcopy(p);
-  n0 = (n>>1)+1; n1 = n+1 - n0;
-  p0 = new_chunk(n0); for (i=0; i<n0; i++) p0[i] = p[2+(i<<1)];
-  p1 = new_chunk(n1); for (i=0; i<n1; i++) p1[i] = p[3+(i<<1)];
-
+  n0 = (n>>1)+1; n1 = n+1 - n0; /* n1 <= n0 <= n1+1 */
+  p0 = new_chunk(n0);
+  p1 = new_chunk(n1);
+  for (i=0; i<n1; i++)
+  {
+    p0[i] = p[2+(i<<1)];
+    p1[i] = p[3+(i<<1)];
+  }
+  if (n1 != n0)
+    p0[i] = p[2+(i<<1)];
   s0 = cook_square(p0, n0);
-  s1 = cook_square(p1, n1); ns1 = degpol(s1);
-  t = cgetg(ns1+4, t_POL);
-  t[1] = evalsigne(1)|evalvarn(0);
-  gel(t,2) = gen_0;
-  for (i=0; i<=ns1; i++) gel(t,3+i) = gneg(gel(s1,2+i));
-  return gadd(s0,t); /* now t contains -x * s1 */
+  s1 = cook_square(p1, n1);
+  return RgX_sub(s0, RgX_shift_shallow(s1,1));
+}
+GEN
+ZX_graeffe(GEN p)
+{
+  pari_sp av = avma;
+  GEN p0, p1, s0, s1;
+  long n = degpol(p);
+
+  if (!n) return ZX_copy(p);
+  RgX_even_odd(p, &p0, &p1);
+  /* p = p0(x^2) + x p1(x^2) */
+  s0 = ZX_sqr(p0);
+  s1 = ZX_sqr(p1);
+  return gerepileupto(av, ZX_sub(s0, RgX_shift_shallow(s1,1)));
+}
+GEN
+polgraeffe(GEN p)
+{
+  pari_sp av = avma;
+  GEN p0, p1, s0, s1;
+  long n = degpol(p);
+
+  if (typ(p) != t_POL) pari_err_TYPE("polgraeffe",p);
+  n = degpol(p);
+  if (!n) return gcopy(p);
+  RgX_even_odd(p, &p0, &p1);
+  /* p = p0(x^2) + x p1(x^2) */
+  s0 = RgX_sqr(p0);
+  s1 = RgX_sqr(p1);
+  return gerepileupto(av, RgX_sub(s0, RgX_shift_shallow(s1,1)));
+}
+
+/* write p(X) = e(X^2) + Xo(X^2), shallow function */
+void
+RgX_even_odd(GEN p, GEN *pe, GEN *po)
+{
+  long n = degpol(p), v = varn(p), n0, n1, i;
+  GEN p0, p1;
+
+  if (n <= 0) { *pe = gcopy(p); *po = zeropol(v); return; }
+
+  n0 = (n>>1)+1; n1 = n+1 - n0; /* n1 <= n0 <= n1+1 */
+  p0 = cgetg(n0+2, t_POL); p0[1] = evalvarn(v)|evalsigne(1);
+  p1 = cgetg(n1+2, t_POL); p1[1] = evalvarn(v)|evalsigne(1);
+  for (i=0; i<n1; i++)
+  {
+    p0[2+i] = p[2+(i<<1)];
+    p1[2+i] = p[3+(i<<1)];
+  }
+  if (n1 != n0)
+    p0[2+i] = p[2+(i<<1)];
+  *pe = normalizepol(p0);
+  *po = normalizepol(p1);
 }
 
 /********************************************************************/

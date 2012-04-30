@@ -457,6 +457,7 @@ GEN     RgX_to_RgV(GEN x, long N);
 GEN     RgX_translate(GEN P, GEN c);
 GEN     RgX_unscale(GEN P, GEN h);
 GEN     Rg_RgX_sub(GEN x, GEN y);
+GEN     ZX_unscale(GEN P, GEN h);
 
 /* ZV.c */
 
@@ -2592,8 +2593,11 @@ void    setrand(GEN seed);
 
 /* rootpol.c */
 
+void    RgX_even_odd(GEN p, GEN *pe, GEN *po);
+GEN     ZX_graeffe(GEN p);
 GEN     cleanroots(GEN x,long l);
 int     isrealappr(GEN x, long l);
+GEN     polgraeffe(GEN p);
 GEN     roots(GEN x,long l);
 GEN     roots0(GEN x,long flag,long l);
 
