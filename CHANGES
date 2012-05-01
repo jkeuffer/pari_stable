@@ -233,6 +233,7 @@ BA 56- GP function FpE_log
    58- hamming() function [initial implementation CG]
    59- ispowerful() function
    60- polgraeffe() function
+   61- functions poliscyclo(), poliscycloprod(), polcyclofactors()
 
   Removed
     1- dropped DOS support

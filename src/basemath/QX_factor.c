@@ -1187,3 +1187,216 @@ QX_gcd(GEN A0, GEN B0)
   if (isint1(a)) avma = av2; else D = RgX_Rg_mul(D, a);
   return gerepileupto(av, D);
 }
+
+/*****************************************************************************
+ * Variants of the Bradford-Davenport algorithm: look for cyclotomic         *
+ * factors, and decide whether a ZX is cyclotomic or a product of cyclotomic *
+ *****************************************************************************/
+static GEN
+BD_deg1(GEN f)
+{
+  GEN a, b;
+  f = Q_primpart(f);
+  b = gel(f,2);
+  a = gel(f,3); /* f = ax + b */
+  if (!is_pm1(a) || !is_pm1(b)) return NULL;
+  if (signe(a) < 0) f = ZX_neg(f);
+  return f;
+}
+
+/* f a squarefree ZX; not divisible by any Phi_n, n even */
+static GEN
+BD_odd(GEN f)
+{
+  while(degpol(f) > 1)
+  {
+    GEN f1 = ZX_graeffe(f); /* contain all cyclotomic divisors of f */
+    if (ZX_equal(f1, f)) return f; /* product of cyclotomics */
+    f = ZX_gcd(f, f1);
+  }
+  if (degpol(f) == 1) return BD_deg1(f);
+  return NULL; /* no cyclotomic divisor */
+}
+
+/* Bradford-Davenport algorithm.
+ * f a squarefree ZX of degree > 0, return NULL or a vector of coprime
+ * cyclotomic factors of f [ possibly reducible ] */
+static GEN
+BD(GEN f)
+{
+  GEN G = cgetg(1, t_VEC), Gs = NULL, Gp = NULL, Gi = NULL;
+  GEN fs2, fp, f2, f1;
+  if (degpol(f) == 1)
+  {
+    f = BD_deg1(f);
+    if (f) f = mkvec(f);
+    return f;
+  }
+  f1 = ZX_graeffe(f); /* has at most square factors */
+  if (ZX_equal(f1, f)) return mkvec(f); /* product of Phi_n, n odd */
+
+  fs2 = ZX_gcd_all(f1, ZX_deriv(f1), &f2); /* fs2 squarefree */
+  if (degpol(fs2))
+  { /* fs contains all Phi_n | f, 4 | n; and only those */
+    /* In that case, Graeffe(Phi_n) = Phi_{n/2}^2, and Phi_n = Phi_{n/2}(x^2) */
+    GEN fs = RgX_inflate(fs2, 2);
+    (void)ZX_gcd_all(f, fs, &f); /* remove those Phi_n | f, 4 | n */
+    Gs = BD(fs2);
+    if (Gs)
+    {
+      long i;
+      for (i = lg(Gs)-1; i; i--) gel(Gs,i) = RgX_inflate(gel(Gs,i), 2);
+      /* prod Gs[i] is the product of all Phi_n | f, 4 | n */
+      G = Gs;
+    }
+    /* f2 = f1 / fs2 */
+    f1 = RgX_div(f2, fs2); /* f1 / fs2^2 */
+  }
+  fp = ZX_gcd(f, f1); /* contains all Phi_n | f, n odd; and only those */
+  if (degpol(fp))
+  {
+    Gp = BD_odd(fp);
+    /* Gp is the product of all Phi_n | f, n odd */
+    if (Gp) G = shallowconcat(G, Gp);
+    f = RgX_div(f, fp);
+  }
+  if (degpol(f))
+  { /* contains all Phi_n originally dividing f, n = 2 mod 4; and only those */
+    /* In that case, Graeffe(Phi_n) = Phi_{n/2}, and Phi_n = Phi_{n/2}(-x) */
+    Gi = BD_odd(ZX_unscale(f, gen_m1));
+    if (Gi)
+    {
+      if (degpol(Gi) == 1)
+        Gi = deg1pol_shallow(gen_1, gen_1, varn(f)); /* Phi_2 */
+      else
+        Gi = ZX_unscale(Gi, gen_m1);
+      /* Gi is the product of all Phi_n | f, n = 2 mod 4 */
+      G = shallowconcat(G, Gi);
+    }
+  }
+  if (lg(G) == 1) G = NULL;
+  return G;
+}
+
+/* Let f be a non-zero QX, return the (squarefree) product of cyclotomic
+ * divisors of f */
+GEN
+polcyclofactors(GEN f)
+{
+  pari_sp av = avma;
+  if (typ(f) != t_POL) pari_err_TYPE("polcyclofactors",f);
+  (void)RgX_valrem(f, &f);
+  f = Q_primpart(f);
+  if (!RgX_is_ZX(f) || !signe(f)) pari_err_TYPE("polcyclofactors",f);
+  if (degpol(f))
+  {
+    (void)ZX_gcd_all(f, ZX_deriv(f), &f);
+    f = BD(f);
+    if (f) return gerepilecopy(av, f);
+  }
+  avma = av; return cgetg(1,t_VEC);
+}
+
+/* return t*x mod T(x), T a monic ZX. Assume deg(t) < deg(T) */
+static GEN
+ZXQ_mul_by_X(GEN t, GEN T)
+{
+  GEN lt;
+  t = RgX_shift_shallow(t, 1);
+  if (degpol(t) < degpol(T)) return t;
+  lt = leading_term(t);
+  if (is_pm1(lt)) return signe(lt) > 0 ? ZX_sub(t, T): ZX_add(t, T);
+  return ZX_sub(t, ZX_Z_mul(T, leading_term(t)));
+}
+/* f a product of Phi_n, all n odd; deg f > 1. Is it irreducible ? */
+static long
+BD_odd_iscyclo(GEN f)
+{
+  pari_sp av, lim;
+  long d, e, n, bound;
+  GEN t;
+  f = RgX_deflate_max(f, &e);
+  av = avma; lim = stack_lim(av,1);
+  /* The original f is cyclotomic (= Phi_{ne}) iff the present one is Phi_n,
+   * where all prime dividing e also divide n. If current f is Phi_n,
+   * then n is odd and squarefree */
+  d = degpol(f); /* = phi(n) */
+  /* Let e > 0, g multiplicative such that
+       g(p) = p / (p-1)^(1+e) < 1 iff p < (p-1)^(1+e)
+     For all squarefree odd n, we have g(n) < C, hence n < C phi(n)^(1+e), where
+       C = \prod_{p odd | p > (p-1)^(1+e)} g(p)
+     For e = 1/10,   we obtain p = 3, 5 and C < 1.523
+     For e = 1/100,  we obtain p = 3, 5, ..., 29 and C < 2.573
+     In fact, for n <= 10^7 odd & squarefree, we have n < 2.92 * phi(n)
+     By the above, n<10^7 covers all d <= (10^7/2.573)^(1/(1+1/100)) < 3344391.
+  */
+  if (d <= 3344391)
+    bound = (long)(2.92 * d);
+  else
+    bound = (long)(2.573 * pow(d,1.01));
+  /* IF f = Phi_n, n squarefree odd, then n <= bound */
+  t = monomial(gen_1, d-1, varn(f));
+  for (n = d; n <= bound; n++)
+  {
+    t = ZXQ_mul_by_X(t, f);
+    /* t = (X mod f(X))^d */
+    if (degpol(t) == 0) break;
+    if (low_stack(lim, stack_lim(av,1)))
+    {
+      if(DEBUGMEM>1) pari_warn(warnmem,"BD_odd_iscyclo");
+      t = gerepilecopy(av, t);
+    }
+  }
+  if (n > bound || eulerphiu(n) != d) return 0;
+
+  if (e > 1) return (ucoprime_part(e, n) == 1)? e * n : 0;
+  return n;
+}
+
+/* Checks if f, monic squarefree ZX with |constant coeff| = 1, is a cyclotomic
+ * polynomial. Returns n if f = Phi_n, and 0 otherwise */
+static long
+BD_iscyclo(GEN f)
+{
+  pari_sp av = avma;
+  GEN f2, fn, f1;
+
+  if (degpol(f) == 1) return isint1(gel(f,2))? 2: 1;
+  f1 = ZX_graeffe(f);
+  /* f = product of Phi_n, n odd */
+  if (ZX_equal(f, f1)) { avma = av; return BD_odd_iscyclo(f); }
+
+  fn = ZX_unscale(f, gen_m1); /* f(-x) */
+  /* f = product of Phi_n, n = 2 mod 4 */
+  if (ZX_equal(f1, fn)) return 2*BD_odd_iscyclo(fn);
+
+  if (gissquareall(f1, &f2) == gen_1) return 2*BD_iscyclo(f2);
+  avma = av; return 0;
+}
+long
+poliscyclo(GEN f)
+{
+  pari_sp av = avma;
+  long d = degpol(f);
+  if (typ(f) != t_POL) pari_err_TYPE("poliscyclo", f);
+  if (!RgX_is_ZX(f)) return 0;
+  if (!equali1(leading_term(f)) || !is_pm1(constant_term(f))) return 0;
+  if (d < 2) return signe(constant_term(f)) > 0? 2: 1;
+  if (degpol(ZX_gcd(f, ZX_deriv(f)))) { avma = av; return 0; }
+  return BD_iscyclo(f);
+}
+
+long
+poliscycloprod(GEN f)
+{
+  pari_sp av = avma;
+  long i, d = degpol(f);
+  if (typ(f) != t_POL) pari_err_TYPE("poliscycloprod",f);
+  if (!RgX_is_ZX(f)) return 0;
+  if (!equali1(leading_term(f)) || !is_pm1(constant_term(f))) return 0;
+  if (d < 2) return (d == 1);
+  (void)ZX_gcd_all(f, ZX_deriv(f), &f);
+  f = BD(f); if (!f) return 0;
+  for (i = lg(f)-1; i; i--) d -= degpol(gel(f,i));
+  avma = av; return d == 0;
+}

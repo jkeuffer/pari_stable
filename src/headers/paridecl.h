@@ -2385,6 +2385,9 @@ GEN     QX_factor(GEN x);
 GEN     ZX_factor(GEN x);
 long    ZX_is_irred(GEN x);
 GEN     ZX_squff(GEN f, GEN *ex);
+GEN     polcyclofactors(GEN f);
+long    poliscyclo(GEN f);
+long    poliscycloprod(GEN f);
 
 /* polarit2.c */
 
