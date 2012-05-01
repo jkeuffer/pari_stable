@@ -1177,24 +1177,36 @@ gsqrt(GEN x, long prec)
       gel(y,2) = p1; return y;
 
     case t_COMPLEX:
-      if (isrationalzero(gel(x,2))) return gsqrt(gel(x,1), prec);
+    { /* (u+iv)^2 = a+ib <=> u^2+v^2 = sqrt(a^2+b^2), u^2-v^2=a, 2uv=b */
+      GEN a = gel(x,1), b = gel(x,2), u, v;
+      if (isrationalzero(b)) return gsqrt(a, prec);
       y = cgetg(3,t_COMPLEX); av = avma;
 
-      p1 = gsqrt(cxnorm(x), prec);
+      p1 = cxnorm(x);
       if (typ(p1) == t_INTMOD) pari_err_IMPL("sqrt(complex of t_INTMODs)");
-      if (!signe(p1)) { gel(y,1) = gel(y,2) = sqrtr(p1); return y; }
-      if (gsigne(gel(x,1)) < 0)
+      p1 = gsqrt(p1, prec); /* t_REAL */
+      if (!signe(p1))
+        u = v = gerepileuptoleaf(av, sqrtr(p1));
+      else if (gsigne(a) < 0)
       {
-        p1 = sqrtr( gmul2n(gsub(p1,gel(x,1)), -1) );
-        if (gsigne(gel(x,2)) < 0) togglesign(p1);
-        gel(y,2) = gerepileuptoleaf(av, p1); av = avma;
-        gel(y,1) = gerepileuptoleaf(av, gdiv(gel(x,2), gmul2n(p1,1)));
+        p1 = sqrtr( gmul2n(gsub(p1,a), -1) );
+        if (gsigne(b) < 0) togglesign(p1);
+        v = gerepileuptoleaf(av, p1); av = avma;
+        if (!signe(p1)) /* possible if a = 0 */
+          u = v;
+        else
+          u = gerepileuptoleaf(av, gdiv(b, shiftr(v,1)));
       } else {
-        p1 = sqrtr( gmul2n(gadd(p1,gel(x,1)), -1) );
-        gel(y,1) = gerepileuptoleaf(av, p1); av = avma;
-        gel(y,2) = gerepileuptoleaf(av, gdiv(gel(x,2), gmul2n(p1,1)));
+        p1 = sqrtr( gmul2n(gadd(p1,a), -1) );
+        u = gerepileuptoleaf(av, p1); av = avma;
+        if (!signe(p1)) /* possible if a = 0 */
+          v = u;
+        else
+          v = gerepileuptoleaf(av, gdiv(b, shiftr(u,1)));
       }
-      return y;
+      gel(y,1) = u;
+      gel(y,2) = v; return y;
+    }
 
     case t_PADIC:
       return Qp_sqrt(x);
