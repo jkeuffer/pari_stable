@@ -84,8 +84,8 @@ static const long PREVENT_LLL_IN_RND_REL = 1;
 /* random relations */
 static const long MINSFB = 3;
 static const long SFB_MAX = 3;
-static const long MAXDEPSIZESFB = 50;
-static const long MAXDEPSFB = 5;
+static const long DEPSIZESFBBASE = 2200;
+static const long DEPSFBDIV = 10;
 /* add_rel_i */
 static const ulong mod_p = 27449UL;
 /* be_honest */
@@ -3667,6 +3667,7 @@ Buchall_param(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long
   pari_timer T;
   pari_sp av0 = avma, av, av2;
   long PRECREG, N, R1, R2, RU, low, high, LIMC0, LIMC, LIMC2, LIMCMAX, zc, i;
+  long MAXDEPSIZESFB, MAXDEPSFB;
   long nreldep, sfb_trials, need, old_need, precdouble = 0, precadd = 0;
   long done_small, small_fail, fail_limit, squash_index;
   double lim, drc, LOGD, LOGD2;
@@ -3782,6 +3783,8 @@ START:
   cache.basis = zero_Flm_copy(F.KC,F.KC);
   small_multiplier = zero_Flv(F.KC);
   F.id2 = zerovec(F.KC);
+  MAXDEPSIZESFB = (long)sqrt(LIMC + DEPSIZESFBBASE);
+  MAXDEPSFB = MAXDEPSIZESFB / DEPSFBDIV;
   done_small = 0; small_fail = 0; squash_index = 0;
   fail_limit = F.KC + 1;
   R = NULL; A = NULL;
