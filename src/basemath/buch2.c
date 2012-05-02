@@ -3724,6 +3724,26 @@ trim_list(FB_t *F)
   return gerepileuptoleaf(av, idx);
 }
 
+static void
+try_elt(RELCACHE_t *cache, FB_t *F, GEN nf, GEN x, FACT *fact)
+{
+  GEN R, Nx;
+  long nz, tx = typ(x);
+
+  if (tx == t_INT || tx == t_FRAC) return;
+  if (tx != t_COL) x = algtobasis(nf, x);
+  if (RgV_isscalar(x)) return;
+  x = Q_primpart(x);
+  Nx = nfnorm(nf, x);
+  setabssign(Nx);
+  if (!can_factor(F, nf, NULL, x, Nx, fact)) return;
+
+  /* smooth element */
+  R = set_fact(F, fact, NULL, &nz);
+  /* make sure we get maximal rank first, then allow all relations */
+  (void) add_rel(cache, F, R, nz, x, 0);
+}
+
 GEN
 Buchall_param(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long prec)
 {
@@ -3734,7 +3754,7 @@ Buchall_param(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long
   long nreldep, sfb_trials, need, old_need, precdouble = 0, precadd = 0;
   long done_small, small_fail, fail_limit, squash_index;
   double lim, drc, LOGD, LOGD2;
-  GEN zu, nf, D, Dp, A, W, R, h, PERM, fu = NULL /*-Wall*/;
+  GEN computed = NULL, zu, nf, D, Dp, A, W, R, h, PERM, fu = NULL /*-Wall*/;
   GEN small_multiplier;
   GEN res, L, invhr, B, C, C0, lambda, dep, clg1, clg2, Vbase;
   GEN auts, cyclic;
@@ -3821,8 +3841,18 @@ START:
   if (!FIRST) LIMC = check_LIMC(LIMC,LIMCMAX);
   if (DEBUGLEVEL && LIMC > LIMC0)
     err_printf("%s*** Bach constant: %f\n", FIRST?"":"\n", LIMC/LOGD2);
+  if (cache.base)
+  {
+    REL_t *rel;
+    for (i = 1, rel = cache.base + 1; rel < cache.last; rel++)
+      if (rel->m) i++;
+    computed = cgetg(i, t_VEC);
+    for (i = 1, rel = cache.base + 1; rel < cache.last; rel++)
+      if (rel->m) gel(computed, i++) = rel->m;
+    computed = gclone(computed);
+    delete_cache(&cache);
+  }
   FIRST = 0; avma = av;
-  if (cache.base) delete_cache(&cache);
   if (F.LP) delete_FB(&F);
   if (LIMC2 < LIMC) LIMC2 = LIMC;
   if (DEBUGLEVEL) { err_printf("LIMC = %ld, LIMC2 = %ld\n",LIMC,LIMC2); }
@@ -3858,6 +3888,20 @@ START:
 
   W = NULL; zc = 0;
   sfb_trials = nreldep = 0;
+
+  if (computed)
+  {
+    for (i = 1; i < lg(computed); i++)
+      try_elt(&cache, &F, nf, gel(computed, i), fact);
+    if (isclone(computed)) gunclone(computed);
+    if (DEBUGLEVEL && i > 1)
+    {
+      err_printf("\n");
+      timer_printf(&T, "including already computed relations");
+    }
+    need = 0;
+  }
+
   do
   {
     do
