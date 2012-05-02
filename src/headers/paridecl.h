@@ -542,6 +542,7 @@ GEN     ZX_add(GEN x, GEN y);
 GEN     ZX_copy(GEN x);
 GEN     ZX_deriv(GEN x);
 int     ZX_equal(GEN V, GEN W);
+GEN     ZX_eval1(GEN x);
 long    ZX_max_lg(GEN x);
 GEN     ZX_mul(GEN x, GEN y);
 GEN     ZX_mulspec(GEN a, GEN b, long na, long nb);

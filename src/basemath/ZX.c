@@ -584,3 +584,21 @@ ZX_rem(GEN x, GEN y)
   if (!sx) (void)ZX_renormalize(rem, lr);
   return gerepileupto(av0,rem);
 }
+
+/* return x(1) */
+GEN
+ZX_eval1(GEN x)
+{
+  pari_sp av = avma;
+  long i = lg(x)-1;
+  GEN s;
+  if (i < 2) return gen_0;
+  s = gel(x,i); i--;
+  if (i == 1) return icopy(s);
+  for ( ; i>=2; i--)
+  {
+    GEN c = gel(x,i);
+    if (signe(c)) s = addii(s, c);
+  }
+  return gerepileuptoint(av,s);
+}

@@ -1192,16 +1192,13 @@ QX_gcd(GEN A0, GEN B0)
  * Variants of the Bradford-Davenport algorithm: look for cyclotomic         *
  * factors, and decide whether a ZX is cyclotomic or a product of cyclotomic *
  *****************************************************************************/
+/* f of degree 1, return a cyclotomic factor (Phi_1 or Phi_2) or NULL */
 static GEN
 BD_deg1(GEN f)
 {
-  GEN a, b;
-  f = Q_primpart(f);
-  b = gel(f,2);
-  a = gel(f,3); /* f = ax + b */
-  if (!is_pm1(a) || !is_pm1(b)) return NULL;
-  if (signe(a) < 0) f = ZX_neg(f);
-  return f;
+  GEN a = gel(f,3), b = gel(f,2); /* f = ax + b */
+  if (!absi_equal(a,b)) return NULL;
+  return polcyclo((signe(a) == signe(b))? 2: 1, varn(f));
 }
 
 /* f a squarefree ZX; not divisible by any Phi_n, n even */
@@ -1218,22 +1215,40 @@ BD_odd(GEN f)
   return NULL; /* no cyclotomic divisor */
 }
 
+static GEN
+myconcat(GEN v, GEN x)
+{
+  if (typ(x) != t_VEC) x = mkvec(x);
+  if (!v) return x;
+  return shallowconcat(v, x);
+}
+
 /* Bradford-Davenport algorithm.
  * f a squarefree ZX of degree > 0, return NULL or a vector of coprime
  * cyclotomic factors of f [ possibly reducible ] */
 static GEN
 BD(GEN f)
 {
-  GEN G = cgetg(1, t_VEC), Gs = NULL, Gp = NULL, Gi = NULL;
-  GEN fs2, fp, f2, f1;
-  if (degpol(f) == 1)
+  GEN G = NULL, Gs = NULL, Gp = NULL, Gi = NULL;
+  GEN fs2, fp, f2, f1, fe, fo, fe1, fo1;
+  RgX_even_odd(f, &fe, &fo);
+  fe1 = ZX_eval1(fe);
+  fo1 = ZX_eval1(fo);
+  if (absi_equal(fe1, fo1)) /* f(1) = 0 or f(-1) = 0 */
   {
-    f = BD_deg1(f);
-    if (f) f = mkvec(f);
-    return f;
+    long i, v = varn(f);
+    if (!signe(fe1))
+      G = mkvec2(polcyclo(1, v), polcyclo(2, v)); /* both 0 */
+    else if (signe(fe1) == signe(fo1))
+      G = mkvec(polcyclo(2, v)); /*f(-1) = 0*/
+    else
+      G = mkvec(polcyclo(1, v)); /*f(1) = 0*/
+    for (i = lg(G)-1; i; i--) f = RgX_div(f, gel(G,i));
   }
+  /* f no longer divisible by Phi_1 or Phi_2 */
+  if (degpol(f) <= 1) return G;
   f1 = ZX_graeffe(f); /* has at most square factors */
-  if (ZX_equal(f1, f)) return mkvec(f); /* product of Phi_n, n odd */
+  if (ZX_equal(f1, f)) return myconcat(G,f); /* f = product of Phi_n, n odd */
 
   fs2 = ZX_gcd_all(f1, ZX_deriv(f1), &f2); /* fs2 squarefree */
   if (degpol(fs2))
@@ -1247,34 +1262,31 @@ BD(GEN f)
       long i;
       for (i = lg(Gs)-1; i; i--) gel(Gs,i) = RgX_inflate(gel(Gs,i), 2);
       /* prod Gs[i] is the product of all Phi_n | f, 4 | n */
-      G = Gs;
+      G = myconcat(G, Gs);
     }
     /* f2 = f1 / fs2 */
     f1 = RgX_div(f2, fs2); /* f1 / fs2^2 */
   }
-  fp = ZX_gcd(f, f1); /* contains all Phi_n | f, n odd; and only those */
+  fp = ZX_gcd(f, f1); /* contains all Phi_n | f, n > 1 odd; and only those */
   if (degpol(fp))
   {
     Gp = BD_odd(fp);
     /* Gp is the product of all Phi_n | f, n odd */
-    if (Gp) G = shallowconcat(G, Gp);
+    if (Gp) G = myconcat(G, Gp);
     f = RgX_div(f, fp);
   }
   if (degpol(f))
-  { /* contains all Phi_n originally dividing f, n = 2 mod 4; and only those */
-    /* In that case, Graeffe(Phi_n) = Phi_{n/2}, and Phi_n = Phi_{n/2}(-x) */
+  { /* contains all Phi_n originally dividing f, n = 2 mod 4, n > 2;
+     * and only those
+     * In that case, Graeffe(Phi_n) = Phi_{n/2}, and Phi_n = Phi_{n/2}(-x) */
     Gi = BD_odd(ZX_unscale(f, gen_m1));
     if (Gi)
-    {
-      if (degpol(Gi) == 1)
-        Gi = deg1pol_shallow(gen_1, gen_1, varn(f)); /* Phi_2 */
-      else
-        Gi = ZX_unscale(Gi, gen_m1);
+    { /* N.B. Phi_2 does not divide f */
+      Gi = ZX_unscale(Gi, gen_m1);
       /* Gi is the product of all Phi_n | f, n = 2 mod 4 */
-      G = shallowconcat(G, Gi);
+      G = myconcat(G, Gi);
     }
   }
-  if (lg(G) == 1) G = NULL;
   return G;
 }
 
@@ -1370,7 +1382,14 @@ BD_iscyclo(GEN f)
   /* f = product of Phi_n, n = 2 mod 4 */
   if (ZX_equal(f1, fn)) return 2*BD_odd_iscyclo(fn);
 
-  if (gissquareall(f1, &f2) == gen_1) return 2*BD_iscyclo(f2);
+  if (gissquareall(f1, &f2) == gen_1)
+  {
+    GEN lt = leading_term(f2);
+    long c;
+    if (signe(lt) < 0) f2 = ZX_neg(f2);
+    c = BD_iscyclo(f2);
+    return odd(c)? 0: 2*c;
+  }
   avma = av; return 0;
 }
 long

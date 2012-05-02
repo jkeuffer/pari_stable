@@ -373,9 +373,14 @@ polcyclo(long n, long v)
   pari_sp av=avma;
   GEN T, P;
 
-  if (n <= 0) pari_err(e_MISC, "argument must be positive in polcyclo");
   if (v<0) v = 0;
-  if (n == 1) return deg1pol_shallow(gen_1, gen_m1, v);
+  if (n < 3)
+    switch(n)
+    {
+      case 1: return deg1pol_shallow(gen_1, gen_m1, v);
+      case 2: return deg1pol_shallow(gen_1, gen_1, v);
+      default: pari_err(e_MISC, "argument must be positive in polcyclo");
+    }
   P = gel(factoru(n), 1); l = lg(P);
   s = P[1]; T = polcyclo_prime(s, v);
   for (i = 2; i < l; i++)

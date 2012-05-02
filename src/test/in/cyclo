@@ -1,0 +1,15 @@
+for (i=1,100, if (poliscyclo(polcyclo(i)) != i, error(i)))
+for (i=1,100, if (!poliscycloprod(x^i-1), error(i)))
+poliscyclo(polcyclo(10^5))
+poliscyclo(polcyclo(12345))
+{
+  for (i=1,10,
+    f = polcyclo(i);
+    for(j=i+1,10,
+      g = f*polcyclo(j);
+      if (poliscyclo(g), error("is ", [i,j]));
+      if (!poliscycloprod(g), error("prod ", [i,j]));
+      print (polcyclofactors(g))
+    )
+  );
+}
