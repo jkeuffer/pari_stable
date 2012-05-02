@@ -92,6 +92,7 @@ BA 70- ellpointtoz was numerically unstable
    74- factor_proven not taken into account in factor(n), where n is a
        BPSW-pseudoprime
    75- core(5*(huge composite)^2) was very slow [#1305]
+   76- sqrt(0.E-97-1.12-97*I) -> div by 0 [#1309]
 
   Changed
     1- mathnf: swapped flag 3 and 5.
