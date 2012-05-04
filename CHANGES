@@ -237,6 +237,7 @@ BA 56- GP function FpE_log
    61- functions poliscyclo(), poliscycloprod(), polcyclofactors()
    62- function setbinop(f,X,Y) = { f(x,y), x in X, y in Y }
    63- libpari function moebiusu()
+   64- ѕumdigits() function
 
   Removed
     1- dropped DOS support
