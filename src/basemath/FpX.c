@@ -513,7 +513,7 @@ FpX_gcd_basecase(GEN a, GEN b, GEN p)
 GEN
 FpX_gcd(GEN x, GEN y, GEN p)
 {
-  pari_sp av = avma, av0;
+  pari_sp av = avma;
   if (lgefint(p)==3)
   {
     ulong pp = p[2];
@@ -523,9 +523,9 @@ FpX_gcd(GEN x, GEN y, GEN p)
     x = Flx_gcd(x,y, pp);
     avma = av; return Flx_to_ZX(x);
   }
-  x = FpX_red(x, p); av0 = avma;
+  x = FpX_red(x, p);
   y = FpX_red(y, p);
-  if (!signe(y)) { avma = av0; return x; }
+  if (!signe(x)) return gerepileupto(av, y);
   while (lg(y)>FpX_GCD_LIMIT)
   {
     GEN c;

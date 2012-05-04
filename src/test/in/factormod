@@ -1,0 +1,1 @@
+print(lift(factorcantor(x^1024+1,12289)))

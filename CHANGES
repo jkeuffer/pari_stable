@@ -93,6 +93,7 @@ BA 70- ellpointtoz was numerically unstable
        BPSW-pseudoprime
    75- core(5*(huge composite)^2) was very slow [#1305]
    76- sqrt(0.E-97-1.12-97*I) -> div by 0 [#1309]
+BA 77- FpX_gcd(0,x) -> div by 0
 
   Changed
     1- mathnf: swapped flag 3 and 5.

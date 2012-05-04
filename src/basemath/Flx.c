@@ -1345,7 +1345,7 @@ GEN
 Flx_gcd(GEN x, GEN y, ulong p)
 {
   pari_sp av = avma, lim = stack_lim(av,2);
-  if (!lgpol(y)) { return vecsmall_copy(x); }
+  if (!lgpol(x)) return vecsmall_copy(y);
   while (lg(y)>Flx_GCD_LIMIT)
   {
     GEN c;
