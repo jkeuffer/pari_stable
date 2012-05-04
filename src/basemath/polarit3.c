@@ -3178,7 +3178,7 @@ ffnbirred(GEN p, long n)
   for (j = 1; j < lg(dk); ++j)
   {
     long d = dk[j];
-    long m = moebius(utoi(d));
+    long m = moebiusu(d);
     if (!m) continue;
     pd = powiu(p, n/d);
     s = m>0 ? addii(s, pd): subii(s,pd);
@@ -3196,7 +3196,7 @@ ffsumnbirred(GEN p, long n)
   q = cgetg(n+1,t_VEC); gel(q,1) = p;
   for(i=2; i<=n; i++)
   {
-    v[i] = moebius(utoi(i));
+    v[i] = moebiusu(i);
     gel(q,i) = mulii(gel(q,i-1), p);
   }
   for(i=1; i<=n; i++)

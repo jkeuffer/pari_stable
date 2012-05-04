@@ -3368,6 +3368,19 @@ ifac_factoru(GEN n, GEN P, GEN E, long *pi)
     INIT0(here);
   }
 }
+static long
+ifac_moebiusu(GEN n)
+{
+  GEN part = ifac_start(n, 1);
+  long s = 1;
+  for(;;)
+  {
+    GEN here = ifac_main(&part);
+    if (here == gen_1) return s;
+    if (here == gen_0) return 0;
+    s = -s;
+  }
+}
 
 /* Factor n and output [p,e] where
  * p, e are vecsmall with n = prod{p[i]^e[i]} */
@@ -3448,14 +3461,77 @@ END:
   return f;
 }
 
-GEN
-gmoebius(GEN n) { return map_proto_lG(moebius,n); }
-
 INLINE void
 chk_arith(GEN n) {
   if (typ(n) != t_INT) pari_err_TYPE("arithmetic function",n);
   if (!signe(n)) pari_err(e_MISC, "zero argument in an arithmetic function");
 }
+
+long
+moebiusu(ulong n)
+{
+  byteptr d = diffptr+1;
+  ulong p, lim;
+  long s, v, test_prime;
+
+  switch(n)
+  {
+    case 0: chk_arith(gen_0);/*error*/
+    case 1: return  1;
+    case 2: return -1;
+  }
+  v = vals(n);
+  if (v == 0)
+    s = 1;
+  else
+  {
+    if (v > 1) return 0;
+    n >>= 1;
+    s = -1;
+  }
+  lim = utridiv_bound(n);
+  p = 2;
+  while (p <= 661)
+  {
+    int stop;
+    if (!*d) break;
+    NEXT_PRIME_VIADIFF(p,d);
+    v = u_lvalrem_stop(&n, p, &stop);
+    if (v) {
+      if (v > 1) return 0;
+      s = -s;
+    }
+    if (stop) return n == 1? s: -s;
+  }
+  /* tiny integers without small factors are often primes */
+  test_prime = 0;
+  if (uisprime_nosmalldiv(n)) return -s;
+  while (p < lim)
+  {
+    int stop;
+    if (!*d) break;
+    NEXT_PRIME_VIADIFF(p,d);
+    v = u_lvalrem_stop(&n, p, &stop);
+    if (v) {
+      if (v > 1) return 0;
+      test_prime = 1;
+      s = -s;
+    }
+    if (stop) return n == 1? s: -s;
+  }
+  if (test_prime && uisprime_nosmalldiv(n)) return -s;
+  else
+  {
+    pari_sp av = avma;
+    long t = ifac_moebiusu(utoipos(n));
+    avma = av;
+    if (t == 0) return 0;
+    return (s == t)? 1: -1;
+  }
+}
+
+GEN
+gmoebius(GEN n) { return map_proto_lG(moebius,n); }
 
 long
 moebius(GEN n)
@@ -3465,8 +3541,8 @@ moebius(GEN n)
   ulong p, lim;
   long i, l, s, v;
 
-  chk_arith(n); if (is_pm1(n)) return 1;
-  if (equaliu(n, 2)) return -1;
+  chk_arith(n);
+  if (lgefint(n) == 3) return moebiusu(n[2]);
   p = mod4(n); if (!p) return 0;
   if (p == 2) { s = -1; n = shifti(n, -1); } else { s = 1; n = icopy(n); }
   setabssign(n);
