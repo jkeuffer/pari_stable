@@ -55,6 +55,34 @@ addsi_sign(long x, GEN y, long sy)
   z = subiuspec(y+2,x, ly-2);
   setsigne(z,sy); return z;
 }
+GEN
+addui_sign(ulong x, GEN y, long sy)
+{
+  long ly;
+  GEN z;
+
+  if (!x) return icopy_sign(y, sy);
+  if (!sy) return utoipos(x);
+  if (sy == 1) return adduispec(x,y+2, lgefint(y)-2);
+  ly=lgefint(y);
+  if (ly==3)
+  {
+    const long t = y[2];
+    if (x == t) return gen_0;
+    z=cgeti(3);
+    if (x < t) {
+      z[1] = evalsigne(-1) | evallgefint(3);
+      z[2] = t - x;
+    }
+    else {
+      z[1] = evalsigne(1) | evallgefint(3);
+      z[2] = x - t;
+    }
+    return z;
+  }
+  z = subiuspec(y+2,x, ly-2);
+  setsigne(z,-1); return z;
+}
 
 /* return gen_0 when the sign is 0 */
 GEN

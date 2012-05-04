@@ -528,7 +528,11 @@ subri(GEN x, GEN y) { return addir_sign(y, -signe(y), x, signe(x)); }
 INLINE GEN
 addsi(long x, GEN y) { return addsi_sign(x, y, signe(y)); }
 INLINE GEN
+addui(ulong x, GEN y) { return addui_sign(x, y, signe(y)); }
+INLINE GEN
 subsi(long x, GEN y) { return addsi_sign(x, y, -signe(y)); }
+INLINE GEN
+subui(ulong x, GEN y) { return addui_sign(x, y, -signe(y)); }
 
 /*******************************************************************/
 /*                                                                 */
@@ -906,8 +910,12 @@ addri(GEN x, GEN y) { return addir(y,x); }
 INLINE GEN
 addis(GEN x, long s) { return addsi(s,x); }
 INLINE GEN
+addiu(GEN x, ulong s) { return addui(s,x); }
+INLINE GEN
 addrs(GEN x, long s) { return addsr(s,x); }
 
+INLINE GEN
+subiu(GEN x, long y) { GEN z = subui(y, x); togglesign(z); return z; }
 INLINE GEN
 subis(GEN x, long y) { return addsi(-y,x); }
 INLINE GEN

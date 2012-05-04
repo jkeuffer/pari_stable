@@ -967,15 +967,15 @@ sumdigits(GEN n)
   }
   else /* Huge. Overflows ulong */
   {
-    const long L = LONG_MAX / 81; /* LONG_MAX, not ULONG_MAX */
+    const long L = (long)(ULONG_MAX / 81);
     GEN S = gen_0;
     while (l > L)
     {
-      S = addis(S, sumdigits_block(res, L));
+      S = addiu(S, sumdigits_block(res, L));
       res += L; l -= L;
     }
     if (l)
-      S = addis(S, sumdigits_block(res, l));
+      S = addiu(S, sumdigits_block(res, l));
     return gerepileuptoint(av, S);
   }
 }

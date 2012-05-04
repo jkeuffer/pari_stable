@@ -2270,9 +2270,17 @@ is $0$.
 \fun{long}{expu}{ulong x} assuming $x > 0$, returns the binary exponent of
 the real number equal to $x$. This is a special case of \kbd{gexpo}.
 
-\fun{GEN}{adduu}{ulong x, ulong y} adds \kbd{x} by \kbd{y}.
+\fun{GEN}{adduu}{ulong x, ulong y}
 
-\fun{GEN}{subuu}{ulong x, ulong y} subtracts \kbd{x} by \kbd{y}.
+\fun{GEN}{addiu}{GEN x, ulong y}
+
+\fun{GEN}{addui}{ulong x, GEN y} adds \kbd{x} and \kbd{y}.
+
+\fun{GEN}{subuu}{ulong x, ulong y}
+
+\fun{GEN}{subiu}{GEN x, ulong y}
+
+\fun{GEN}{subui}{ulong x, GEN y} subtracts \kbd{x} by \kbd{y}.
 
 \fun{GEN}{muluu}{ulong x, ulong y} multiplies \kbd{x} by \kbd{y}.
 
@@ -2339,6 +2347,9 @@ and \kbd{sy}.
 and $y$ as if their signs were \kbd{sx} and \kbd{sy}.
 
 \fun{GEN}{addsi_sign}{long x, GEN y, long sy} add $x$ and the \typ{INT} $y$
+as if its sign was \kbd{sy}.
+
+\fun{GEN}{addui_sign}{ulong x, GEN y, long sy} add $x$ and the \typ{INT} $y$
 as if its sign was \kbd{sy}.
 
 \subsec{Exact division and divisibility}
