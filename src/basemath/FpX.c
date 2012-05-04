@@ -440,10 +440,8 @@ FpX_FpXM_qmul(GEN q, GEN M, GEN p)
 static GEN
 matid2_FpXM(long v)
 {
-  GEN m = cgetg(3, t_MAT);
-  gel(m,1) = mkcol2(pol_1(v),pol_0(v));
-  gel(m,2) = mkcol2(pol_0(v),pol_1(v));
-  return m;
+  retmkmat2(mkcol2(pol_1(v),pol_0(v)),
+            mkcol2(pol_0(v),pol_1(v)));
 }
 
 static GEN

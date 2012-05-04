@@ -1276,10 +1276,8 @@ Flx_FlxM_qmul(GEN q, GEN M, ulong p)
 static GEN
 matid2_FlxM(long v)
 {
-  GEN m = cgetg(3, t_MAT);
-  gel(m,1) = mkcol2(pol1_Flx(v),pol0_Flx(v));
-  gel(m,2) = mkcol2(pol0_Flx(v),pol1_Flx(v));
-  return m;
+  return mkmat2(mkcol2(pol1_Flx(v),pol0_Flx(v)),
+                mkcol2(pol0_Flx(v),pol1_Flx(v)));
 }
 
 static GEN
