@@ -823,6 +823,18 @@ uprime(long n)
 GEN
 prime(long n) { return utoipos(uprime(n)); }
 
+/* random b-bit prime */
+GEN
+randomprime(long b)
+{
+  pari_sp av = avma;
+  GEN B, p;
+  if (b < 2) pari_err(e_MISC,"length too small in randomprime");
+  B = int2n(b - 1);
+  p = nextprime(addii(B, randomi(B)));
+  return gerepileuptoint(av, p);
+}
+
 ulong
 uprimepi(ulong n)
 {

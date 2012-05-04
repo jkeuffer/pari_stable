@@ -1,0 +1,8 @@
+Function: randomprime
+Section: number_theoretical
+C-Name: randomprime
+Prototype: L
+Help: randomprime(b): returns nextprime(x), where x is a uniformly
+ distributed b-bit integer.
+Doc: returns \kbd{nextprime(x)}, where $x$ is a uniformly distributed $b$-bit
+ integer.

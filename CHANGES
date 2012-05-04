@@ -239,6 +239,7 @@ BA 56- GP function FpE_log
    63- libpari function moebiusu()
    64- ѕumdigits() function
    65- libpari function addiu, addui, subiu, subui
+   66- randomprime() function
 
   Removed
     1- dropped DOS support
