@@ -1810,3 +1810,20 @@ setminus(GEN x, GEN y)
   if (typ(y) != t_VEC) pari_err_TYPE("setminus",y);
   return gen_setminus(x,y,cmp_universal);
 }
+
+GEN
+setbinop(GEN f, GEN x, GEN y)
+{
+  pari_sp av = avma;
+  long i, j, k = 1, lx = lg(x), ly = lg(y);
+  GEN z;
+  if (typ(f) != t_CLOSURE || closure_arity(f) != 2)
+    pari_err_TYPE("setbinop [function needs exactly 2 arguments]",f);
+  if (typ(x) != t_VEC) pari_err_TYPE("setbinop", x);
+  if (typ(y) != t_VEC) pari_err_TYPE("setbinop", y);
+  z = cgetg((lx-1)*(ly-1) + 1, t_VEC);
+  for (i = 1; i < lx; i++)
+    for (j = 1; j < ly; j++)
+      gel(z, k++) = closure_callgen2(f, gel(x,i),gel(y,j));
+  return gerepileupto(av, gtoset(z));
+}

@@ -235,6 +235,7 @@ BA 56- GP function FpE_log
    59- ispowerful() function
    60- polgraeffe() function
    61- functions poliscyclo(), poliscycloprod(), polcyclofactors()
+   62- function setbinop(f,X,Y) = { f(x,y), x in X, y in Y }
 
   Removed
     1- dropped DOS support
