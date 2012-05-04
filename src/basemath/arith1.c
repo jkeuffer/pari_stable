@@ -404,6 +404,17 @@ uissquareall(ulong A, ulong *sqrtA)
   }
   return 0;
 }
+long
+uissquare(ulong A)
+{
+  if (!A) return 1;
+  if (carremod(A))
+  {
+    ulong a = usqrtsafe(A);
+    if (a * a == A) return 1;
+  }
+  return 0;
+}
 
 long
 Z_issquareall(GEN x, GEN *pt)

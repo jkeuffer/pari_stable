@@ -854,6 +854,7 @@ GEN     rootsof1u_Fp(ulong n, GEN p);
 ulong   rootsof1_Fl(ulong n, ulong p);
 GEN     sqrtint(GEN a);
 GEN     mulu_interval(ulong a, ulong b);
+long    uissquare(ulong A);
 long    uissquareall(ulong A, ulong *sqrtA);
 GEN     znorder(GEN x, GEN o);
 GEN     znlog(GEN x, GEN g, GEN o);

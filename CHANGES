@@ -238,7 +238,7 @@ BA 56- GP function FpE_log
    62- function setbinop(f,X,Y) = { f(x,y), x in X, y in Y }
    63- libpari function moebiusu()
    64- ѕumdigits() function
-   65- libpari function addiu, addui, subiu, subui
+   65- libpari function addiu, addui, subiu, subui, uissquare
    66- randomprime() function
 
   Removed
