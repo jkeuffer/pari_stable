@@ -825,14 +825,36 @@ prime(long n) { return utoipos(uprime(n)); }
 
 /* random b-bit prime */
 GEN
-randomprime(long b)
+randomprime(GEN N)
 {
-  pari_sp av = avma;
-  GEN B, p;
-  if (b < 2) pari_err(e_MISC,"length too small in randomprime");
-  B = int2n(b - 1);
-  p = nextprime(addii(B, randomi(B)));
-  return gerepileuptoint(av, p);
+  pari_sp av = avma, av2;
+  GEN a, b, d;
+  if (!N) return utoipos(uprecprime(2 + random_bits(31)));
+  switch(typ(N))
+  {
+    case t_INT: a = gen_2; b = N; break; /* between 2 and N-1 */
+    case t_VEC:
+      if (lg(N) == 3) {
+        a = gel(N,1); if (typ(a) != t_INT) a = gceil(a);
+        b = gel(N,2); if (typ(b) != t_INT) b = gceil(b);
+        if (typ(a) == t_INT && typ(b) == t_INT)
+        {
+          if (cmpiu(a, 2) < 0) a = gen_2;
+          break;
+        }
+      } /*fall through*/
+    default: pari_err_TYPE("randomprime", N);
+  }
+  d = subii(b,a);
+  if (signe(d) < 0) pari_err_TYPE("randomprime([a,b]) (a > b)", N);
+  if (typ(N) != t_INT) d = addis(d,1);
+  av2 = avma;
+  for (;;)
+  {
+    GEN p = precprime(addii(a, randomi(d)));
+    if (cmpii(p, a) >= 0) return gerepileuptoint(av, p);
+    avma = av2;
+  }
 }
 
 ulong

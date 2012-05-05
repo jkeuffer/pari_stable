@@ -210,6 +210,17 @@ genrand(GEN N)
       if (signe(N)==0) return pol_0(varn(N));
       return polrandom(N);
     case t_VEC:
+      if (lg(N) == 3)
+      {
+        pari_sp av = avma;
+        GEN a = gel(N,1), b = gel(N,2), d;
+        if (typ(a) != t_INT) a = gceil(a);
+        if (typ(b) != t_INT) b = gfloor(b);
+        if (typ(a) != t_INT || typ(b) != t_INT) pari_err_TYPE("random", N);
+        d = subii(b,a);
+        if (signe(d) < 0) pari_err_TYPE("random([a,b]) (a > b)", N);
+        return gerepileuptoint(av, addii(a, randomi(addis(d,1))));
+      }
       return ellrandom(N);
     default:
       pari_err_TYPE("genrand",N);

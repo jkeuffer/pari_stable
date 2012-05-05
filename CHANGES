@@ -239,7 +239,7 @@ BA 56- GP function FpE_log
    63- libpari function moebiusu()
    64- ѕumdigits() function
    65- libpari function addiu, addui, subiu, subui, uissquare
-   66- randomprime() function
+   66- randomprime() function. Allow random([a,b])  (return n, a <= n <= b)
 
   Removed
     1- dropped DOS support

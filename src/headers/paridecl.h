@@ -2585,7 +2585,7 @@ GEN     prime(long n);
 GEN     primepi(GEN x);
 GEN     primes(long n);
 GEN     primes_zv(long m);
-GEN     randomprime(long b);
+GEN     randomprime(GEN N);
 GEN     removeprimes(GEN primes);
 int     uisprime(ulong n);
 ulong   uprime(long n);
