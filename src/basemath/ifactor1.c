@@ -3379,6 +3379,7 @@ ifac_moebiusu(GEN n)
     if (here == gen_1) return s;
     if (here == gen_0) return 0;
     s = -s;
+    INIT0(here);
   }
 }
 
