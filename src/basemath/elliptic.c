@@ -2329,7 +2329,7 @@ ellglobalred(GEN E)
   P = gel(Z_factor(gcdii(c4,c6)),1);
   l = lg(P);
   for (k = 1; k < l; k++) (void)Z_pvalrem(D, gel(P,k), &D);
-  if (!is_pm1(D)) P = shallowconcat(P, gel(Z_factor(absi(D)),1));
+  if (!is_pm1(D)) P = ZV_sort( shallowconcat(P, gel(Z_factor(absi(D)),1)) );
   l = lg(P); c = gen_1;
   iN = 1;
   NP = cgetg(l, t_COL);
