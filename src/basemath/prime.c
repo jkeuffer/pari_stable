@@ -829,7 +829,12 @@ randomprime(GEN N)
 {
   pari_sp av = avma, av2;
   GEN a, b, d;
-  if (!N) return utoipos(uprecprime(2 + random_bits(31)));
+  if (!N)
+    for(;;)
+    {
+      ulong p = random_bits(31);
+      if (uisprime(p)) return utoipos(p);
+    }
   switch(typ(N))
   {
     case t_INT: a = gen_2; b = N; break; /* between 2 and N-1 */
@@ -844,6 +849,7 @@ randomprime(GEN N)
         }
       } /*fall through*/
     default: pari_err_TYPE("randomprime", N);
+             return NULL; /*notreached*/
   }
   d = subii(b,a);
   if (signe(d) < 0) pari_err_TYPE("randomprime([a,b]) (a > b)", N);
@@ -851,8 +857,8 @@ randomprime(GEN N)
   av2 = avma;
   for (;;)
   {
-    GEN p = precprime(addii(a, randomi(d)));
-    if (cmpii(p, a) >= 0) return gerepileuptoint(av, p);
+    GEN p = addii(a, randomi(d));
+    if (BPSW_psp(p)) return gerepileuptoint(av, p);
     avma = av2;
   }
 }
