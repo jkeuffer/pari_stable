@@ -1313,7 +1313,14 @@ Flx_halfgcd(GEN x, GEN y, ulong p)
 {
   pari_sp av;
   GEN M,q,r;
-  if (degpol(y)<degpol(x)) return Flx_halfgcd_i(x,y,p);
+  long lx=lgpol(x), ly=lgpol(y);
+  if (!lx)
+  {
+      long v = x[1];
+      retmkmat2(mkcol2(pol0_Flx(v),pol1_Flx(v)),
+                mkcol2(pol1_Flx(v),pol0_Flx(v)));
+  }
+  if (ly < lx) return Flx_halfgcd_i(x,y,p);
   av = avma;
   q = Flx_divrem(y,x,p,&r);
   M = Flx_halfgcd_i(x,r,p);

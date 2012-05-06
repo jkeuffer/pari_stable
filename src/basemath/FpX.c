@@ -484,6 +484,12 @@ FpX_halfgcd(GEN x, GEN y, GEN p)
   }
   else
   {
+    if (!signe(x))
+    {
+      long v = varn(x);
+      retmkmat2(mkcol2(pol_0(v),pol_1(v)),
+                mkcol2(pol_1(v),pol_0(v)));
+    }
     if (degpol(y)<degpol(x)) return FpX_halfgcd_i(x,y,p);
     q = FpX_divrem(y,x,p,&r);
     M = FpX_halfgcd_i(x,r,p);
