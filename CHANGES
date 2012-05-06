@@ -241,6 +241,7 @@ BA 56- GP function FpE_log
    64- ѕumdigits() function
    65- libpari function addiu, addui, subiu, subui, uissquare
    66- randomprime() function. Allow random([a,b])  (return n, a <= n <= b)
+   67- ispolygonal() function
 
   Removed
     1- dropped DOS support

@@ -821,6 +821,7 @@ GEN     fibo(long n);
 GEN     gboundcf(GEN x, long k);
 GEN     gcf2(GEN b, GEN x);
 GEN     gcf(GEN x);
+long    ispolygonal(GEN x, GEN S, GEN *N);
 ulong   pgener_Fl_local(ulong p, GEN L);
 ulong   pgener_Fl(ulong p);
 GEN     pgener_Fp_local(GEN p, GEN L);

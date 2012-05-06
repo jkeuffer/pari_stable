@@ -740,6 +740,43 @@ gissquare(GEN x)
   return NULL; /* not reached */
 }
 
+long
+ispolygonal(GEN x, GEN S, GEN *N)
+{
+  pari_sp av = avma;
+  GEN D, d, n;
+  if (typ(x) != t_INT) pari_err_TYPE("ispolygonal", x);
+  if (typ(S) != t_INT || cmpiu(S,3) < 0) pari_err_TYPE("ispolygonal", S);
+  if (signe(x) < 0) return 0;
+  if (signe(x) == 0) { if (N) *N = gen_0; return 1; }
+  if (is_pm1(x)) { if (N) *N = gen_1; return 1; }
+  /* n = (sqrt( (8s - 16) x + (s-4)^2 ) + s - 4) / 2(s - 2) */
+  if (cmpiu(S, 1<<16) < 0) /* common case ! */
+  {
+    ulong s = S[2], r;
+    if (s == 4) return Z_issquareall(x, N);
+    if (s == 3)
+      D = addiu(shifti(x, 3), 1);
+    else
+      D = addiu(mului(8*s - 16, x), (s-4)*(s-4));
+    if (!Z_issquareall(D, &d)) { avma = av; return 0; }
+    d = addiu(d, s - 4);
+    n = diviu_rem(d, 2*s - 4, &r);
+    if (r) { avma = av; return 0; }
+  }
+  else
+  {
+    GEN r, S_2 = subiu(S,2), S_4 = subiu(S,4);
+    D = addii(mulii(shifti(S_2,3), x), sqri(S_4));
+    if (!Z_issquareall(D, &d)) { avma = av; return 0; }
+    d = addii(d, S_4);
+    n = dvmdii(shifti(d,-1), S_2, &r);
+    if (r != gen_0) { avma = av; return 0; }
+  }
+  if (N) *N = gerepileuptoint(av, n); else avma = av;
+  return 1;
+}
+
 /*********************************************************************/
 /**                                                                 **/
 /**                        PERFECT POWER                            **/
