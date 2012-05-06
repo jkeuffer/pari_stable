@@ -2,8 +2,8 @@ Function: randomprime
 Section: number_theoretical
 C-Name: randomprime
 Prototype: DG
-Help: randomprime({N = 2^{31}): returns a prime between 2 and N.
+Help: randomprime({N = 2^31}): returns a prime between 2 and N.
 Doc: returns a prime between $2$ and $N$. A \typ{VEC} $N = [a,b]$ is also
  allowed, with $a < b$ in which case a prime $a \leq p \leq b$ is returned;
- if no prime exist in the interval, the function will run into an infinite
+ if no prime exists in the interval, the function will run into an infinite
  loop.
