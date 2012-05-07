@@ -844,6 +844,12 @@ closure_eval(GEN C)
     case OCstorelex:
       changelex(operand,gel(st,--sp));
       break;
+    case OCstoreptr:
+      {
+        gp_pointer *g = &ptrs[--rp];
+        change_compo(&(g->c), gel(st,--sp));
+        break;
+      }
     case OCstackgen:
       {
         GEN z = gerepileupto(st[sp-2],gel(st,sp-1));
@@ -1568,6 +1574,9 @@ closure_disassemble(GEN C)
     case OCstorelex:
       pari_printf("storelex\t%ld\n",operand);
       break;
+    case OCstoreptr:
+      pari_printf("storeptr\n");
+      break;
     case OCsimpleptrdyn:
       {
         entree *ep = (entree *)operand;
@@ -1758,6 +1767,7 @@ opcode_need_relink(op_code opcode)
   case OCpushstoi:
   case OCpushlex:
   case OCstorelex:
+  case OCstoreptr:
   case OCsimpleptrlex:
   case OCnewptrlex:
   case OCpushptr:

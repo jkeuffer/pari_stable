@@ -1691,28 +1691,41 @@ compilenode(long n, int mode, long flag)
       op_push(OCdup,mode==Gvoid?l-1:l,x);
       for(i=1; i<=l; i++)
       {
-        entree *ep=getvar(vars[i]);
+        long a = detag(vars[i]);
+        entree *ep=getlvalue(a);
         long vn=getmvar(ep);
-        op_push(OCpushlong,i,vars[i]);
-        op_push(OCcompo1,Ggen,vars[i]);
-        compilestore(vn,ep,n);
+        op_push(OCpushlong,i,a);
+        op_push(OCcompo1,Ggen,a);
+        if (tree[a].f==Fentry)
+          compilestore(vn,ep,n);
+        else
+        {
+          compilenewptr(vn,ep,n);
+          compilelvalue(a);
+          op_push(OCstoreptr,0,a);
+        }
       }
       if (mode!=Gvoid)
         compilecast(n,Ggen,mode);
     }
-    else if (tree[x].f==Fentry)
+    else
     {
-      entree *ep=getvar(x);
+      entree *ep=getlvalue(x);
       long vn=getmvar(ep);
       compilenode(y,Ggen,mode==Gvoid?FLnocopy:0);
       if (mode!=Gvoid)
         op_push(OCdup,1,n);
-      compilestore(vn,ep,n);
+      if (tree[x].f==Fentry)
+        compilestore(vn,ep,n);
+      else
+      {
+        compilenewptr(vn,ep,n);
+        compilelvalue(x);
+        op_push(OCstoreptr,0,x);
+      }
       if (mode!=Gvoid)
         compilecast(n,Ggen,mode);
     }
-    else
-      compilefunc(is_entry("_=_"),n,mode,0);
     return;
   case Fconst:
     {
