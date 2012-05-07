@@ -684,6 +684,24 @@ getlvalue(long n)
   return getvar(n);
 }
 
+INLINE void
+compilestore(long vn, entree *ep, long n)
+{
+  if (vn)
+    op_push(OCstorelex,vn,n);
+  else
+    op_push(OCstoredyn,(long)ep,n);
+}
+
+INLINE void
+compilenewptr(long vn, entree *ep, long n)
+{
+  if (vn)
+    op_push(OCnewptrlex,vn,n);
+  else
+    op_push(OCnewptrdyn,(long)ep,n);
+}
+
 static void
 compilelvalue(long n)
 {
@@ -1204,10 +1222,7 @@ compilefunc(entree *ep, long n, int mode, long flag)
             }
             else
             {
-              if (vn)
-                op_push(OCnewptrlex, vn,n);
-              else
-                op_push(OCnewptrdyn, (long)ep,n);
+              compilenewptr(vn,ep,n);
               compilelvalue(a);
               op_push(OCpushptr, 0,n);
             }
@@ -1644,15 +1659,6 @@ closurefunc(entree *ep, long n, long mode)
   op_push(OCpushgen, data_push(C), n);
   compilecast(n,Gclosure,mode);
   avma=ltop;
-}
-
-INLINE void
-compilestore(long vn, entree *ep, long n)
-{
-  if (vn)
-    op_push(OCstorelex,vn,n);
-  else
-    op_push(OCstoredyn,(long)ep,n);
 }
 
 static void
