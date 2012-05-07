@@ -37,7 +37,7 @@ Doc: return a vector [\kbd{eqn},$t$] where \kbd{eqn} is a modular equation of
      Q = 'x^(N+1) * substvec(P,['x,'y],[N^s/'x,Y]);
      d = N^(s*(2*N+1)) * (-1)^(N+1);
    ,
-     Q = subst(P,'y,Y)
+     Q = subst(P,'y,Y);
      d = (X-Y)^(N+1));
    polresultant(subst(P,'y,X), Q) / d;
  }
