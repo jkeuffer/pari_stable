@@ -2125,11 +2125,19 @@ gpolylog(long m, GEN x, long prec)
       if (m==1) return gerepileupto(av, gneg( glog(gsub(gen_1,y),prec) ));
       if (gequal0(y)) return gerepilecopy(av, y);
       v = valp(y);
-      if (v <= 0) pari_err_IMPL("polylog around a!=0");
-      n = (lg(y)-3 + v) / v;
-      a = zeroser(varn(y), lg(y)-2);
-      for (i=n; i>=1; i--)
-        a = gmul(y, gadd(a, powis(utoipos(i),-m)));
+      if (v < 0) pari_err_NEGVAL("gpolylog");
+      if (v > 0) {
+        n = (lg(y)-3 + v) / v;
+        a = zeroser(varn(y), lg(y)-2);
+        for (i=n; i>=1; i--)
+          a = gmul(y, gadd(a, powis(utoipos(i),-m)));
+      } else { /* v == 0 */
+        long vy = varn(y);
+        GEN a0 = polcoeff0(y, 0, -1), yprimeovery = gdiv(derivser(y), y);
+        a = gneg( glog(gsub(gen_1,y), prec) );
+        for (i=2; i<=m; i++)
+          a = gadd(gpolylog(i, a0, prec), integ(gmul(yprimeovery, a), vy));
+      }
       return gerepileupto(av, a);
 
     case t_VEC: case t_COL: case t_MAT:
