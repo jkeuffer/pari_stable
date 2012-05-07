@@ -888,9 +888,10 @@ primes(long m)
 {
   byteptr p = diffptr;
   ulong prime = 0;
-  long n = (m < 0)? 0: m;
+  long n = m;
   GEN y, z;
 
+  if (n < 0)  pari_err_TYPE("primes [negative dimension]", stoi(m));
   z = y = cgetg(n+1,t_VEC);
   while (n--)
   {
