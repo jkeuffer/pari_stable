@@ -460,7 +460,7 @@ static long
 hamming_mat(GEN x)
 {
   long i, lx = lg(x), nb = 0;
-  for (i = 1; i < lx; i++) nb += hamming(gel(x,i));
+  for (i = 1; i < lx; i++) nb += hammingweight(gel(x,i));
   return nb;
 }
 static long
@@ -482,7 +482,7 @@ hamming_int(GEN n)
 }
 
 long
-hamming(GEN n)
+hammingweight(GEN n)
 {
   switch(typ(n))
   {
@@ -493,6 +493,6 @@ hamming(GEN n)
     case t_VECSMALL: return hamming_vecsmall(n);
     case t_MAT: return hamming_mat(n);
   }
-  pari_err_TYPE("hamming", n);
+  pari_err_TYPE("hammingweight", n);
   return 0;/*notreached*/
 }

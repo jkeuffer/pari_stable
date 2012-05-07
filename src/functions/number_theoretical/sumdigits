@@ -8,4 +8,4 @@ Doc: sum of (decimal) digits in the integer $n$.
  ? sumdigits(123456789)
  %1 = 45
  @eprog\noindent Other bases that 10 are not supported. Note that the sum of
- bits in $n$ is returned by \tet{hamming}.
+ bits in $n$ is returned by \tet{hammingweight}.

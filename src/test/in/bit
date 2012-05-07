@@ -1,8 +1,8 @@
-hamming(15)
-hamming(x^100 + 2*x + 1)
-hamming([Mod(1,2), 2, Mod(0,3)])
-hamming(Vecsmall([0,1,2,3]))
-hamming(matid(100))
+hammingweight(15)
+hammingweight(x^100 + 2*x + 1)
+hammingweight([Mod(1,2), 2, Mod(0,3)])
+hammingweight(Vecsmall([0,1,2,3]))
+hammingweight(matid(100))
 N = 2^128+2^64+1;
 [bittest(N, i) | i<-[60..70]]
 {
