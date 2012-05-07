@@ -947,7 +947,7 @@ compilefunc(entree *ep, long n, int mode, long flag)
       str=tree[n].str;
     while(*str==')') str++;
   }
-  if (tree[n].f==Faffect)
+  if (tree[n].f==Fassign)
   {
     nb=2; lnc=2; lnl=2; arg=mkvecsmall2(x,y);
   }
@@ -971,7 +971,7 @@ compilefunc(entree *ep, long n, int mode, long flag)
       for(i=1;i<=nb;i++)
       {
         long a=arg[i];
-        vep[i]=(long)getvar(tree[a].f==Faffect?tree[a].x:a);
+        vep[i]=(long)getvar(tree[a].f==Fassign?tree[a].x:a);
         var_push(NULL,Lmy);
       }
       checkdups(arg,vep);
@@ -980,7 +980,7 @@ compilefunc(entree *ep, long n, int mode, long flag)
       for (i=1;i<=nb;i++)
       {
         long a=arg[i];
-        if (tree[a].f==Faffect && !is_node_zero(tree[a].y))
+        if (tree[a].f==Fassign && !is_node_zero(tree[a].y))
         {
           compilenode(tree[a].y,Ggen,FLnocopy);
           op_push(OCstorelex,-nb+i-1,a);
@@ -1002,7 +1002,7 @@ compilefunc(entree *ep, long n, int mode, long flag)
       entree *en;
       long a=arg[i];
       op_code op=OClocalvar0;
-      if (tree[a].f==Faffect)
+      if (tree[a].f==Fassign)
       {
         if (!is_node_zero(tree[a].y))
         {
@@ -1028,7 +1028,7 @@ compilefunc(entree *ep, long n, int mode, long flag)
     {
       long a=arg[i];
       long en;
-      if (tree[a].f==Faffect)
+      if (tree[a].f==Fassign)
       {
         compilenode(tree[a].y,Ggen,0);
         a=tree[a].x;
@@ -1644,7 +1644,7 @@ compilenode(long n, int mode, long flag)
     if (mode==Ggen && !(flag&FLnocopy))
       op_push(OCcopy,0,n);
     return;
-  case Faffect:
+  case Fassign:
     x = detag(x);
     if (tree[x].f==Fentry)
     {
@@ -1776,7 +1776,7 @@ compilenode(long n, int mode, long flag)
         for(i=1;i<=nb;i++)
         {
           long a=arg[i];
-          vep[i]=(long)getvar(tree[a].f==Faffect?tree[a].x:a);
+          vep[i]=(long)getvar(tree[a].f==Fassign?tree[a].x:a);
           var_push(NULL,Lmy);
         }
         checkdups(arg,vep);
@@ -1785,7 +1785,7 @@ compilenode(long n, int mode, long flag)
         for (i=1;i<=nb;i++)
         {
           long a=arg[i];
-          if (tree[a].f==Faffect)
+          if (tree[a].f==Fassign)
           {
             struct codepos lpos;
             getcodepos(&lpos);
@@ -1997,7 +1997,7 @@ optimizefunc(entree *ep, long n)
         case '=':
           {
             long a=arg[j++], y=tree[a].y;
-            if (tree[a].f!=Faffect)
+            if (tree[a].f!=Fassign)
               compile_err("expected character: '=' instead of",
                   tree[a].str+tree[a].len);
             optimizenode(y);
@@ -2081,7 +2081,7 @@ optimizenode(long n)
   case Fmatcoeff:
     optimizematcoeff(n);
     break;
-  case Faffect:
+  case Fassign:
     optimizenode(x);
     optimizenode(y);
     tree[n].flags=0;

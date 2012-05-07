@@ -192,7 +192,7 @@ newfunc(CSTtype t, struct node_loc *func, long args, long code,
                    struct node_loc *loc)
 {
   long name=newnode(Fentry,newconst(t,func),-1,func);
-  return newnode(Faffect,name,newnode(Flambda,args,code,loc),loc);
+  return newnode(Fassign,name,newnode(Flambda,args,code,loc),loc);
 }
 
 

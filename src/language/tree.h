@@ -16,7 +16,7 @@ BEGINEXTERN
 
 typedef enum {Fseq,
               Fmatrix,Frange,
-              Faffect,
+              Fassign,
               Fmatcoeff,
               Fmatrixelts,Fmatrixlines,
               Fmat,Fvec,Fnoarg,
