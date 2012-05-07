@@ -84,7 +84,7 @@ static const long PREVENT_LLL_IN_RND_REL = 1;
 /* random relations */
 static const long MINSFB = 3;
 static const long SFB_MAX = 3;
-static const long DEPSIZESFBBASE = 2200;
+static const long DEPSIZESFBMULT = 16;
 static const long DEPSFBDIV = 10;
 /* add_rel_i */
 static const ulong mod_p = 27449UL;
@@ -3783,7 +3783,7 @@ START:
   cache.basis = zero_Flm_copy(F.KC,F.KC);
   small_multiplier = zero_Flv(F.KC);
   F.id2 = zerovec(F.KC);
-  MAXDEPSIZESFB = (long)sqrt(LIMC + DEPSIZESFBBASE);
+  MAXDEPSIZESFB = (lg(F.subFB) - 1) * DEPSIZESFBMULT;
   MAXDEPSFB = MAXDEPSIZESFB / DEPSFBDIV;
   done_small = 0; small_fail = 0; squash_index = 0;
   fail_limit = F.KC + 1;
@@ -3886,6 +3886,8 @@ START:
         if (F.sfb_chg && !subFB_change(&F)) goto START;
         if (F.newpow) {
           powFBgen(&cache, &F, nf, auts);
+          MAXDEPSIZESFB = (lg(F.subFB) - 1) * DEPSIZESFBMULT;
+          MAXDEPSFB = MAXDEPSIZESFB / DEPSFBDIV;
           if (DEBUGLEVEL) timer_printf(&T, "powFBgen");
         }
         if (!F.sfb_chg) rnd_rel(&cache, &F, nf, fact);
