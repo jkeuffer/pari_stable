@@ -2015,7 +2015,7 @@ rootsof1(GEN nf)
   nflift_t L;
   GEN fa, LP, LE, C0, z, prim_root, disc;
   pari_timer ti;
-  long i, l, nbguessed, nbroots, nfdegree;
+  long i, l, nbguessed, nbroots, nfdegree, phi, exp = 0;
   pari_sp av;
 
   nf = checknf(nf);
@@ -2054,8 +2054,59 @@ rootsof1(GEN nf)
     timer_printf(&ti, "adding ramification conditions [guess = %ld]", nbguessed);
   if (nbguessed == 2) return trivroots();
 
-  /* Step 2 : choose a prime ideal for local lifting */
+  /* Step 1.5 : test if nf.pol == subst(polcyclo(nbguessed), x, \pm x+c) */
   av = avma;
+  for (i = phi = 1; i < l; i++)
+  {
+    long p = LP[i];
+    phi *= p-1;
+    phi *= upowuu(p, LE[i]-1);
+    if (LE[i] > 1) exp = 1;
+  }
+  if (phi == nfdegree)
+  {
+    GEN elt, subleading, quo, T1, T = nf_get_pol(nf);
+    long r, m;
+    subleading = gel(T, nfdegree + 1); /* nfdegree-1 th coeff */
+    quo = divis_rem(subleading, nfdegree, &r);
+    /* The phi-1 th coefficient of polcyclo(nbguessed) is \pm1 if nbguessed is
+     * square free, and 0 otherwise. */
+    if (exp)
+    { if (r) goto NOCYCLO; }
+    else
+    {
+      if (r < -1)
+      {
+        r += nfdegree;
+        quo = subiu(quo, 1);
+      }
+      else if (r == nfdegree-1)
+      {
+        r = -1;
+        quo = addiu(quo, 1);
+      }
+      if (r != 1 && r != -1) goto NOCYCLO;
+    }
+    if (signe(quo)) /* presumably Phi_nbguessed(quo \pm x) */
+      T = RgX_translate(T, negi(quo));
+    if (exp) T = RgX_deflate_max(T, &m);
+    /* presumably Phi_core(nbguessed)(\pm x), cyclotomic iff original T was */
+    T1 = ZX_graeffe(T);
+    if (ZX_equal(T, T1)) /* T = Phi_n, n odd */
+      elt = deg1pol_shallow(gen_m1, negi(quo), varn(T));
+    else if (ZX_equal(T1, ZX_unscale(T, gen_m1))) /* T = Phi_{2n}, nodd */
+      elt = deg1pol_shallow(gen_1, quo, varn(T));
+    else goto NOCYCLO;
+    if (DEBUGLEVEL>2)
+      msgTIMER(&ti, "checking for cyclotomic polynomial [yes]");
+    return gerepilecopy(av, mkvec2(utoipos(nbguessed), elt));
+NOCYCLO:
+    avma = av;
+  }
+  if (DEBUGLEVEL>2)
+    msgTIMER(&ti, "checking for cyclotomic polynomial [no]");
+
+  /* Step 2 : choose a prime ideal for local lifting */
   P.L = &L; nf_pick_prime_for_units(nf, &P);
   if (DEBUGLEVEL>2)
     timer_printf(&ti, "choosing prime %Ps, degree %ld",

@@ -168,6 +168,8 @@ BA 48- agm now returns the optimal AGM
    52- factor_proven now affects all the factoring machinery, as documented, i.e
        also multiplicative function (moebius, sumdiv,...)
    53- allow t_VECSMALL in lex()
+   54- nfrootsof1(K) check whether K.pol is a translate of a cyclotomic pol.
+       [initial patch LGr, #1175]
 
   Added
     1- mathnf for matrices over K[X] [#41]
