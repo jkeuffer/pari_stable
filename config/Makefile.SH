@@ -345,7 +345,9 @@ clean: cleanall
 .headers: $HEADERS
 	@sleep 3; touch \$@
 
-install: install-lib-$dft install-include install-bin install-man install-misc install-doc install-examples install-cfg install-data
+install-nodata: install-lib-$dft install-include install-bin install-man install-misc install-doc install-examples install-cfg
+
+install: install-nodata install-data
 
 install-include:
 	-mkdir -p \$(INCLUDEDIR)/pari
