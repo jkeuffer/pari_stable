@@ -253,6 +253,7 @@ BA 56- GP function FpE_log
 BA 71- PARI function FlxqX_nbroots
 BA 72- PARI function zv_search
 BA 73- GP syntax: multiif if(a==1,b,a==2,c,default).
+BA 74- GP syntax: multi assignement: [a,b,c]=V -> a=V[1];b=V[2];c=V[3]
 
   Removed
     1- dropped DOS support

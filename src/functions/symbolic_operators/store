@@ -1,5 +1,0 @@
-Function: _=_
-C-Name: gstore
-Prototype: m&G
-Section: symbolic_operators
-Help: x=y: store value y in variable x.

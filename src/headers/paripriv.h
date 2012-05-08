@@ -76,7 +76,6 @@ GEN  gmode(GEN *x, GEN y);
 GEN  gmule(GEN *x, GEN y);
 GEN  gshiftle(GEN *x, long n);
 GEN  gshiftre(GEN *x, long n);
-GEN  gstore(GEN *x, GEN y);
 GEN  gsube(GEN *x, GEN y);
 GEN  gsub1e(GEN *x);
 GEN  gshift_right(GEN x, long n);

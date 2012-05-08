@@ -181,7 +181,6 @@ entree oldfonctions[]={
 {"_<=_",0,(void*)gle,13,"GG","_<=_"},
 {"_<_",0,(void*)glt,13,"GG","_<_"},
 {"_==_",0,(void*)geq,13,"GG","_==_"},
-{"_=_",0,(void*)gstore,13,"&G","x=y: store value y in variable x."},
 {"_>=_",0,(void*)gge,13,"GG","_>=_"},
 {"_>>=_",0,(void*)gshiftre,13,"&L","_>>=_"},
 {"_>>_",0,(void*)gshift_right,13,"GL","x>>y"},

@@ -1026,13 +1026,6 @@ orpari(GEN a, GEN b/*closure*/)
   return gequal0(g)?gen_0:gen_1;
 }
 
-GEN
-gstore(GEN *x, GEN y)
-{
-  *x=y;
-  return *x;
-}
-
 GEN gmule(GEN *x, GEN y)
 {
   *x=gmul(*x,y);
