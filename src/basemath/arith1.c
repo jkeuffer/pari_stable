@@ -2660,11 +2660,42 @@ isfund(GEN x) {
 GEN
 gisfundamental(GEN x) { return map_proto_lG(isfund,x); }
 
+/* x fundamental ? */
+long
+uposisfundamental(ulong x)
+{
+  ulong r = x & 15; /* x mod 16 */
+  if (!r) return 0;
+  switch(r & 3)
+  { /* x mod 4 */
+    case 0: return (r == 4)? 0: uissquarefree(x >> 2);
+    case 1: return uissquarefree(x);
+    default: return 0;
+  }
+}
+/* -x fundamental ? */
+long
+unegisfundamental(ulong x)
+{
+  ulong r = x & 15; /* x mod 16 */
+  if (!r) return 0;
+  switch(r & 3)
+  { /* x mod 4 */
+    case 0: return (r == 12)? 0: uissquarefree(x >> 2);
+    case 3: return uissquarefree(x);
+    default: return 0;
+  }
+}
 long
 Z_isfundamental(GEN x)
 {
   long r;
-  if (!signe(x)) return 0;
+  switch(lgefint(x))
+  {
+    case 2: return 0;
+    case 3: return signe(x) < 0? unegisfundamental(x[2])
+                               : uposisfundamental(x[2]);
+  }
   r = mod16(x);
   if (!r) return 0;
   if ((r & 3) == 0)

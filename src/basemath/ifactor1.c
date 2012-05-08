@@ -3689,9 +3689,19 @@ core(GEN n)
 GEN
 gissquarefree(GEN x) { return map_proto_lG(issquarefree,x); }
 long
+uissquarefree(ulong n)
+{
+  if (!n) return 0;
+  return moebiusu(n)? 1: 0;
+}
+long
 Z_issquarefree(GEN n)
 {
-  if (!signe(n)) return 0;
+  switch(lgefint(n))
+  {
+    case 2: return 0;
+    case 3: return uissquarefree(n[2]);
+  }
   return moebius(n)? 1: 0;
 }
 long
