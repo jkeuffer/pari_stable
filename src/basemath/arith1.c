@@ -352,6 +352,107 @@ znstar(GEN N)
 
 /*********************************************************************/
 /**                                                                 **/
+/**                     INVERSE TOTIENT FUNCTION                    **/
+/**                                                                 **/
+/*********************************************************************/
+/* N t_INT, L a ZV containing all prime divisors of N, and possibly other
+ * primes. Return factor(N) */
+GEN
+Z_factor_listP(GEN N, GEN L)
+{
+  long i, k, l = lg(L);
+  GEN P = cgetg(l, t_COL), E = cgetg(l, t_COL);
+  for (i = k = 1; i < l; i++)
+  {
+    GEN p = gel(L,i);
+    long v = Z_pvalrem(N, p, &N);
+    if (v)
+    {
+      gel(P,k) = p;
+      gel(E,k) = utoipos(v);
+      k++;
+    }
+  }
+  setlg(P, k);
+  setlg(E, k); return mkmat2(P,E);
+}
+
+/* look for x such that phi(x) = n, p | x => p > m (if m = NULL: no condition).
+ * L is a list of primes containing all prime divisors of n. */
+static long
+istotient_i(GEN n, GEN m, GEN L, GEN *px)
+{
+  pari_sp av = avma, av2;
+  GEN k, D;
+  long i, v;
+  if (m && mod2(n))
+  {
+    if (!equali1(n)) return 0;
+    if (px) *px = gen_1;
+    return 1;
+  }
+  D = divisors(Z_factor_listP(shifti(n, -1), L));
+  /* loop through primes p > m, d = p-1 | n */
+  av2 = avma;
+  if (!m)
+  { /* special case p = 2, d = 1 */
+    k = n;
+    for (v = 1;; v++) {
+      if (istotient_i(k, gen_2, L, px)) {
+        if (px) *px = shifti(*px, v);
+        return 1;
+      }
+      if (mod2(k)) break;
+      k = shifti(k,-1);
+    }
+    avma = av2;
+  }
+  for (i = 1; i < lg(D); ++i)
+  {
+    GEN p, d = shifti(gel(D, i), 1); /* even divisors of n */
+    if (m && cmpii(d, m) < 0) continue;
+    p = addiu(d, 1);
+    if (!isprime(p)) continue;
+    k = diviiexact(n, d);
+    for (v = 1;; v++) {
+      GEN r;
+      if (istotient_i(k, p, L, px)) {
+        if (px) *px = mulii(*px, powiu(p, v));
+        return 1;
+      }
+      k = dvmdii(k, p, &r);
+      if (r != gen_0) break;
+    }
+    avma = av2;
+  }
+  avma = av; return 0;
+}
+
+/* find x such that phi(x) = n */
+long
+istotient(GEN n, GEN *px)
+{
+  pari_sp av = avma;
+  if (typ(n) != t_INT) pari_err_TYPE("istotient", n);
+  if (signe(n) < 1) return 0;
+  if (mod2(n))
+  {
+    if (!equali1(n)) return 0;
+    if (px) *px = gen_1;
+    return 1;
+  }
+  if (istotient_i(n, NULL, gel(Z_factor(n), 1), px))
+  {
+    if (!px) avma = av;
+    else
+      *px = gerepileuptoint(av, *px);
+    return 1;
+  }
+  avma = av; return 0;
+}
+
+/*********************************************************************/
+/**                                                                 **/
 /**                     INTEGRAL SQUARE ROOT                        **/
 /**                                                                 **/
 /*********************************************************************/

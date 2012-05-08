@@ -899,6 +899,7 @@ byteptr initprimes(ulong maxnum);
 void    initprimetable(ulong maxnum);
 ulong   init_primepointer(ulong a, ulong p, byteptr *ptr);
 long    issquarefree(GEN x);
+long    istotient(GEN n, GEN *px);
 long    uissquarefree(ulong n);
 ulong   maxprime(void);
 void    maxprime_check(ulong c);

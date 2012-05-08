@@ -14,3 +14,8 @@ znlog(6,Mod(2,7),znorder(Mod(2,7)))
 znlog(3,Mod(3,8),znorder(Mod(3,8)))
 znlog(5,Mod(2,401))
 
+{
+for (i = 1,10^4,
+  d = eulerphi(i);
+  if (!istotient(d, &n) || eulerphi(n) != d, error(i)))
+}
