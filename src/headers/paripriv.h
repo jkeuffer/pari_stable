@@ -38,6 +38,12 @@ typedef ulong *uGEN;
 GEN ellheightoo(GEN e, GEN z, long prec);
 void ellprint(GEN e);
 
+/* binary splitting */
+struct abpq { GEN *a, *b, *p, *q; };
+struct abpq_res { GEN P, Q, B, T; };
+void abpq_init(struct abpq *A, long n);
+void abpq_sum(struct abpq_res *r, long n1, long n2, struct abpq *A);
+
 /* generic */
 GEN trans_fix_arg(long *prec, GEN *s0, GEN *sig, pari_sp *av, GEN *res);
 GEN transc(GEN (*f) (GEN, long), GEN x, long prec);

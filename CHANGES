@@ -244,6 +244,7 @@ BA 56- GP function FpE_log
    67- ispolygonal() function
    68- libpari functions uissquarefree, uposisfundamental, unegisfundamental
    69- istotient() function
+   70- implement Haible/Papanikolaou binary splitting
 
   Removed
     1- dropped DOS support

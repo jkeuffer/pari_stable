@@ -47,6 +47,89 @@ pari_close_floats(void)
 }
 
 /********************************************************************/
+/**                   GENERIC BINARY SPLITTING                     **/
+/**                    (Haible, Papanikolaou)                      **/
+/********************************************************************/
+void
+abpq_init(struct abpq *A, long n)
+{
+  A->a = (GEN*)new_chunk(n+1);
+  A->b = (GEN*)new_chunk(n+1);
+  A->p = (GEN*)new_chunk(n+1);
+  A->q = (GEN*)new_chunk(n+1);
+}
+static GEN
+mulii3(GEN a, GEN b, GEN c) { return mulii(mulii(a,b),c); }
+static GEN
+mulii4(GEN a, GEN b, GEN c, GEN d) { return mulii(mulii(a,b),mulii(c,d)); }
+
+/* T_{n1,n1+1}, given P = p[n1]p[n1+1] */
+static GEN
+T2(struct abpq *A, long n1, GEN P)
+{
+  GEN u1 = mulii4(A->a[n1], A->p[n1], A->b[n1+1], A->q[n1+1]);
+  GEN u2 = mulii3(A->b[n1],A->a[n1+1], P);
+  return addii(u1, u2);
+}
+
+/* assume n2 > n1. Compute sum_{n1 <= n < n2} a/b(n) p/q(n1)... p/q(n) */
+void
+abpq_sum(struct abpq_res *r, long n1, long n2, struct abpq *A)
+{
+  struct abpq_res L, R;
+  GEN u1, u2;
+  pari_sp av;
+  long n;
+  switch(n2 - n1)
+  {
+    GEN b, p, q;
+    case 1:
+      r->P = A->p[n1];
+      r->Q = A->q[n1];
+      r->B = A->b[n1];
+      r->T = mulii(A->a[n1], A->p[n1]);
+      return;
+    case 2:
+      r->P = mulii(A->p[n1], A->p[n1+1]);
+      r->Q = mulii(A->q[n1], A->q[n1+1]);
+      r->B = mulii(A->b[n1], A->b[n1+1]);
+      av = avma;
+      r->T = gerepileuptoint(av, T2(A, n1, r->P));
+      return;
+
+    case 3:
+      p = mulii(A->p[n1+1], A->p[n1+2]);
+      q = mulii(A->q[n1+1], A->q[n1+2]);
+      b = mulii(A->b[n1+1], A->b[n1+2]);
+      r->P = mulii(A->p[n1], p);
+      r->Q = mulii(A->q[n1], q);
+      r->B = mulii(A->b[n1], b);
+      av = avma;
+      u1 = mulii3(b, q, A->a[n1]);
+      u2 = mulii(A->b[n1], T2(A, n1+1, p));
+      r->T = gerepileuptoint(av, mulii(A->p[n1], addii(u1, u2)));
+      return;
+  }
+
+  av = avma;
+  n = (n1 + n2) >> 1;
+  abpq_sum(&L, n1, n, A);
+  abpq_sum(&R, n, n2, A);
+
+  r->P = mulii(L.P, R.P);
+  r->Q = mulii(L.Q, R.Q);
+  r->B = mulii(L.B, R.B);
+  u1 = mulii3(R.B,R.Q,L.T);
+  u2 = mulii3(L.B,L.P,R.T);
+  r->T = addii(u1,u2);
+  avma = av;
+  r->P = icopy(r->P);
+  r->Q = icopy(r->Q);
+  r->B = icopy(r->B);
+  r->T = icopy(r->T);
+}
+
+/********************************************************************/
 /**                                                                **/
 /**                               PI                               **/
 /**                                                                **/
@@ -244,26 +327,37 @@ mpeuler(long prec) { return rtor(consteuler(prec), prec); }
 /**                       CATALAN CONSTANT                         **/
 /**                                                                **/
 /********************************************************************/
-
+/* 8G = 3\sum_{n>=0} 1/(binomial(2n,n)(2n+1)^2) + Pi log(2+sqrt(3)) */
 static GEN
-catalaneval(void *sqp, GEN a)
+catalan(long prec)
 {
-  GEN sq = (GEN)sqp; /* (2a-1)^2 */
-  affii(addii(sq, shifti(a, 3)), sq); /* (2a+1)^2 */
-  return mkfrac(mpodd(a)? gen_m1: gen_1, sq);
+  long i, nmax = bit_accuracy(prec) >> 1;
+  struct abpq_res R;
+  struct abpq A;
+  GEN u, v;
+  abpq_init(&A, nmax);
+  A.a[0] = A.b[0] = A.p[0] = A.q[0] = gen_1;
+  for (i = 1; i <= nmax; i++)
+  {
+    A.a[i] = gen_1;
+    A.b[i] = utoipos((i<<1)+1);
+    A.p[i] = utoipos(i);
+    A.q[i] = utoipos((i<<2)+2);
+  }
+  abpq_sum(&R, 0, nmax, &A);
+  u = mulur(3, rdivii(R.T, mulii(R.B,R.Q),prec));
+  v = mulrr(mppi(prec), logr_abs(addrs(sqrtr_abs(utor(3,prec)), 2)));
+  u = addrr(u, v); shiftr_inplace(u, -3);
+  return u;
 }
 
-/* sumalt(n=0, (-1)^n/(2*n+1)^2)
- * N.B. faster than Broadhurst's formula from arXiv:math/9803067v1 */
 GEN
 constcatalan(long prec)
 {
   pari_sp av = avma;
-  GEN sq, tmp;
+  GEN tmp;
   if (gcatalan && realprec(gcatalan) >= prec) return gcatalan;
-  incrprec(prec);
-  sq = cgeti(prec); affsi(1, sq);
-  tmp = gclone(sumalt((void *)sq, catalaneval, gen_0, prec));
+  tmp = gclone(catalan(prec));
   swap(gcatalan,tmp); /*Protect against SIGINT*/
   if (tmp) gunclone(tmp);
   avma = av; return gcatalan;
