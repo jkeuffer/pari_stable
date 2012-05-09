@@ -847,7 +847,8 @@ ispolygonal(GEN x, GEN S, GEN *N)
   pari_sp av = avma;
   GEN D, d, n;
   if (typ(x) != t_INT) pari_err_TYPE("ispolygonal", x);
-  if (typ(S) != t_INT || cmpiu(S,3) < 0) pari_err_TYPE("ispolygonal", S);
+  if (typ(S) != t_INT) pari_err_TYPE("ispolygonal", S);
+  if (cmpiu(S,3) < 0) pari_err(e_MISC,"s < 3 in ispolygonal");
   if (signe(x) < 0) return 0;
   if (signe(x) == 0) { if (N) *N = gen_0; return 1; }
   if (is_pm1(x)) { if (N) *N = gen_1; return 1; }
@@ -861,7 +862,10 @@ ispolygonal(GEN x, GEN S, GEN *N)
     else
       D = addiu(mului(8*s - 16, x), (s-4)*(s-4));
     if (!Z_issquareall(D, &d)) { avma = av; return 0; }
-    d = addiu(d, s - 4);
+    if (s == 3)
+      d = subiu(d, 1);
+    else
+      d = addiu(d, s - 4);
     n = diviu_rem(d, 2*s - 4, &r);
     if (r) { avma = av; return 0; }
   }
