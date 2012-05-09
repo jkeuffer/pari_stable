@@ -13,3 +13,5 @@ poliscyclo(polcyclo(12345))
     )
   );
 }
+poliscycloprod((x-1)^2)
+poliscycloprod((x+1)^2*(x-1))

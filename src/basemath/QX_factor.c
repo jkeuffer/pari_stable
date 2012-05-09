@@ -1414,7 +1414,11 @@ poliscycloprod(GEN f)
   if (!RgX_is_ZX(f)) return 0;
   if (!equali1(leading_term(f)) || !is_pm1(constant_term(f))) return 0;
   if (d < 2) return (d == 1);
-  (void)ZX_gcd_all(f, ZX_deriv(f), &f);
+  if ( degpol(ZX_gcd_all(f, ZX_deriv(f), &f)) )
+  {
+    d = degpol(f);
+    if (d == 1) return 1;
+  }
   f = BD(f); if (!f) return 0;
   for (i = lg(f)-1; i; i--) d -= degpol(gel(f,i));
   avma = av; return d == 0;
