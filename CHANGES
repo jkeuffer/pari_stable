@@ -240,7 +240,7 @@ BA 56- GP function FpE_log
    61- functions poliscyclo(), poliscycloprod(), polcyclofactors()
    62- function setbinop(f,X,Y) = { f(x,y), x in X, y in Y }
    63- libpari function moebiusu()
-   64- ѕumdigits() function
+   64- sumdigits() function
    65- libpari functions addiu, addui, subiu, subui, uissquare
    66- randomprime() function. Allow random([a,b])  (return n, a <= n <= b)
    67- ispolygonal() function
