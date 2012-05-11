@@ -122,6 +122,13 @@ cgetg_copy(GEN x, long *plx) {
   y[0] = x[0] & (TYPBITS|LGBITS); return y;
 }
 INLINE GEN
+cgetg_block(long x, long y)
+{
+  GEN z = newblock((size_t)x);
+  z[0] = evaltyp(y) | evallg(x);
+  return z;
+}
+INLINE GEN
 cgetg(long x, long y)
 {
   GEN z = new_chunk((size_t)x);
@@ -147,6 +154,13 @@ cgetineg(long x)
 {
   GEN z = cgeti(x);
   z[1] = evalsigne(-1) | evallgefint(x);
+  return z;
+}
+INLINE GEN
+cgetr_block(long x)
+{
+  GEN z = newblock((size_t)x);
+  z[0] = evaltyp(t_REAL) | evallg(x);
   return z;
 }
 INLINE GEN

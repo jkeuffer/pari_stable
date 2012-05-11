@@ -134,6 +134,14 @@ abpq_sum(struct abpq_res *r, long n1, long n2, struct abpq *A)
 /**                               PI                               **/
 /**                                                                **/
 /********************************************************************/
+/* replace *old clone by new. Protect agains SIGINT */
+static void
+swap_clone(GEN *old, GEN new)
+{
+  GEN tmp = *old;
+  *old = new;
+  if (tmp) gunclone(tmp);
+}
 #if 0
 /* Ramanujan's formula:
  *                         ----
@@ -197,8 +205,7 @@ constpi(long prec)
 
   if (gpi && realprec(gpi) >= prec) return gpi;
 
-  av = avma; tmppi = newblock(prec);
-  *tmppi = evaltyp(t_REAL) | evallg(prec);
+  av = avma; tmppi = cgetr_block(prec);
   G = - prec2nbits(prec);
   incrprec(prec);
 
@@ -220,8 +227,7 @@ constpi(long prec)
   }
   shiftr_inplace(C, 2);
   affrr(divrr(sqrr(addrr(A,B)), C), tmppi);
-  swap(gpi,tmppi); /*Protect against SIGINT*/
-  if (tmppi) gunclone(tmppi);
+  swap_clone(&gpi, tmppi);
   avma = av;  return gpi;
 }
 
@@ -264,8 +270,7 @@ consteuler(long prec)
 
   if (geuler && realprec(geuler) >= prec) return geuler;
 
-  av1 = avma; tmpeuler = newblock(prec);
-  *tmpeuler = evaltyp(t_REAL) | evallg(prec);
+  av1 = avma; tmpeuler = cgetr_block(prec);
 
   incrprec(prec);
 
@@ -314,8 +319,7 @@ consteuler(long prec)
     }
   }
   divrrz(u,v,tmpeuler);
-  swap(geuler,tmpeuler); /*Protect against SIGINT*/
-  if (tmpeuler) gunclone(tmpeuler);
+  swap_clone(&geuler,tmpeuler);
   avma = av1; return geuler;
 }
 
@@ -358,8 +362,7 @@ constcatalan(long prec)
   GEN tmp;
   if (gcatalan && realprec(gcatalan) >= prec) return gcatalan;
   tmp = gclone(catalan(prec));
-  swap(gcatalan,tmp); /*Protect against SIGINT*/
-  if (tmp) gunclone(tmp);
+  swap_clone(&gcatalan,tmp);
   avma = av; return gcatalan;
 }
 
@@ -2119,15 +2122,13 @@ constlog2(long prec)
 
   if (glog2 && realprec(glog2) >= prec) return glog2;
 
-  tmplog2 = newblock(prec);
-  *tmplog2 = evaltyp(t_REAL) | evallg(prec);
+  tmplog2 = cgetr_block(prec);
   av = avma;
   l = prec+EXTRAPRECWORD;
   n = prec2nbits(l) >> 1;
   y = divrr(Pi2n(-1, prec), agm1r_abs( real2n(2 - n, l) ));
   affrr(divru(y,n), tmplog2);
-  swap(glog2,tmplog2); /*Protect against SIGINT*/
-  if (tmplog2) gunclone(tmplog2);
+  swap_clone(&glog2,tmplog2);
   avma = av; return glog2;
 }
 
