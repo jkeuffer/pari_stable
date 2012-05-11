@@ -5046,11 +5046,11 @@ for any value of $a_6$ compatible with the points given.
 
 \fun{GEN}{FpE_changepoint}{GEN P, GEN m, GEN a4, GEN p} returns the image
 $Q$ of the point $P$ on the curve $E:y^2=x^3+a_4\*x+a_6$ by the coordinate
-change $m$ (which is a $FpV$).
+change $m$ (which is a \kbd{FpV}).
 
 \fun{GEN}{FpE_changepointinv}{GEN P, GEN m, GEN a4, GEN p} returns the image
 $Q$ on the curve $E:y^2=x^3+a_4\*x+a_6$ of the point $P$ by the inverse of the
-coordinate change $m$ (which is a $FpV$).
+coordinate change $m$ (which is a \kbd{FpV}).
 
 \fun{GEN}{random_FpE}{GEN a4, GEN a6, GEN p} returns a random point on
 $E(\F_p)$, where $E$ is defined by $E:y^2=x^3+a_4\*x+a_6$.
@@ -5067,6 +5067,45 @@ the result is currently undefined.
 reduced Tate pairing of the point of $m$-torsion $P$ and the point $Q$.
 
 \fun{GEN}{FpE_weilpairing}{GEN Q, GEN Q, GEN m, GEN a4, GEN p} returns the
+Weil pairing of the points of $m$-torsion $P$ and $Q$.
+
+\subsec{\kbd{FlxqE}}
+Let $p$ a prime \kbd{ulong}, $T$ an irreducible \kbd{Flx} mod $p$, and $E$ the
+elliptic curve given by the equation $E:y^2=x^3+a_4\*x+a_6$ with $a_4$ and $a_6$
+being \kbd{Flx} in $\F_p[X]/(T)$.  A \kbd{FlxqE} is a point of $E(\F_p[X]/(T))$.
+
+\fun{GEN}{FlxqE_changepoint}{GEN P, GEN m, GEN a4, GEN T, ulong p} returns the image
+$Q$ of the point $P$ on the curve $E:y^2=x^3+a_4\*x+a_6$ by the coordinate
+change $m$ (which is a \kbd{FlxqV}).
+
+\fun{GEN}{FlxqE_changepointinv}{GEN P, GEN m, GEN a4, GEN T, ulong p} returns the image
+$Q$ on the curve $E:y^2=x^3+a_4\*x+a_6$ of the point $P$ by the inverse of the
+coordinate change $m$ (which is a \kbd{FlxqV}).
+
+\fun{GEN}{FlxqE_add}{GEN P, GEN Q, GEN a4, GEN T, ulong p}
+
+\fun{GEN}{FlxqE_sub}{GEN P, GEN Q, GEN a4, GEN T, ulong p}
+
+\fun{GEN}{FlxqE_dbl}{GEN P, GEN a4, GEN T, ulong p}
+
+\fun{GEN}{FlxqE_neg}{GEN P, GEN T, ulong p}
+
+\fun{GEN}{FlxqE_mul}{GEN P, GEN n, GEN a4, GEN T, ulong p}
+
+\fun{GEN}{random_FlxqE}{GEN a4, GEN a6, GEN T, ulong p}
+
+\fun{GEN}{FlxqE_order}{GEN P, GEN o, GEN a4, GEN T, ulong p} returns the order of $P$ in
+the group $E(\F_p)$, where $o$ is a multiple of the order of $P$, or its
+factorization.
+
+\fun{GEN}{FlxqE_log}{GEN P, GEN G, GEN o, GEN a4, GEN T, ulong p} Let \kbd{G} be a
+point of order \kbd{o}, return $e$ such that $e.P=G$. If $e$ does not exists,
+the result is currently undefined.
+
+\fun{GEN}{FlxqE_tatepairing}{GEN P, GEN Q, GEN m, GEN a4, GEN T, ulong p} returns the
+reduced Tate pairing of the point of $m$-torsion $P$ and the point $Q$.
+
+\fun{GEN}{FlxqE_weilpairing}{GEN Q, GEN Q, GEN m, GEN a4, GEN T, ulong p} returns the
 Weil pairing of the points of $m$-torsion $P$ and $Q$.
 
 \section{Integral, rational and generic linear algebra}

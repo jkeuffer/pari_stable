@@ -203,6 +203,22 @@ GEN     gener_Flxq(GEN T, ulong p, GEN *o);
 GEN     pol1_FlxX(long v, long sv);
 GEN     random_Flx(long d1, long v, ulong p);
 
+/* FlxqE.c */
+
+GEN     Flxq_ellap(GEN a4, GEN a6, GEN T, ulong p);
+GEN     FlxqE_add(GEN P, GEN Q, GEN a4, GEN T, ulong p);
+GEN     FlxqE_changepoint(GEN x, GEN ch, GEN T, ulong p);
+GEN     FlxqE_changepointinv(GEN x, GEN ch, GEN T, ulong p);
+GEN     FlxqE_dbl(GEN P, GEN a4, GEN T, ulong p);
+GEN     FlxqE_log(GEN a, GEN b, GEN o, GEN a4, GEN T, ulong p);
+GEN     FlxqE_mul(GEN P, GEN n, GEN a4, GEN T, ulong p);
+GEN     FlxqE_neg(GEN P, GEN T, ulong p);
+GEN     FlxqE_order(GEN z, GEN o, GEN a4, GEN T, ulong p);
+GEN     FlxqE_sub(GEN P, GEN Q, GEN a4, GEN T, ulong p);
+GEN     FlxqE_tatepairing(GEN t, GEN s, GEN m, GEN a4, GEN T, ulong p);
+GEN     FlxqE_weilpairing(GEN t, GEN s, GEN m, GEN a4, GEN T, ulong p);
+GEN     random_FlxqE(GEN a4, GEN a6, GEN T, ulong p);
+
 /* FpE.c */
 
 GEN     FpE_add(GEN P, GEN Q, GEN a4, GEN p);
