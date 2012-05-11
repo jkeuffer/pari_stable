@@ -62,44 +62,56 @@ FpE_changepointinv(GEN x, GEN ch, GEN p)
   return z;
 }
 
+static GEN
+FpE_dbl_slope(GEN P, GEN a4, GEN p, GEN *slope)
+{
+  GEN x, y, Q;
+  if (ell_is_inf(P) || !signe(gel(P,2))) return ellinf();
+  x = gel(P,1); y = gel(P,2);
+  *slope = Fp_div(Fp_add(Fp_mulu(Fp_sqr(x,p), 3, p), a4, p),
+                  Fp_mulu(y, 2, p), p);
+  Q = cgetg(3,t_VEC);
+  gel(Q, 1) = Fp_sub(Fp_sqr(*slope, p), Fp_mulu(x, 2, p), p),
+  gel(Q, 2) = Fp_sub(Fp_mul(*slope, Fp_sub(x, gel(Q, 1), p), p), y, p);
+  return Q;
+}
+
 GEN
 FpE_dbl(GEN P, GEN a4, GEN p)
 {
-  pari_sp ltop = avma;
-  GEN lambda, C, D, x = gel(P,1), y = gel(P,2);
-  if (ell_is_inf(P) || !signe(y)) return ellinf();
-  lambda = Fp_div(Fp_add(Fp_mulu(Fp_sqr(x,p), 3, p), a4, p),
-                  Fp_mulu(y, 2, p), p);
-  C = Fp_sub(Fp_sqr(lambda, p), Fp_mulu(x, 2, p), p);
-  D = Fp_sub(Fp_mul(lambda, Fp_sub(x, C, p), p), y, p);
-  return gerepilecopy(ltop, mkvec2(C,D));
+  pari_sp av = avma;
+  GEN slope;
+  return gerepileupto(av, FpE_dbl_slope(P,a4,p,&slope));
 }
 
 static GEN
-FpE_add_i(GEN P, GEN Q, GEN a4, GEN p)
+FpE_add_slope(GEN P, GEN Q, GEN a4, GEN p, GEN *slope)
 {
-  GEN Px = gel(P,1), Py = gel(P,2);
-  GEN Qx = gel(Q,1), Qy = gel(Q,2), lambda, C, D;
+  GEN Px, Py, Qx, Qy, R;
   if (ell_is_inf(P)) return Q;
   if (ell_is_inf(Q)) return P;
+  Px = gel(P,1); Py = gel(P,2);
+  Qx = gel(Q,1); Qy = gel(Q,2);
   if (equalii(Px, Qx))
   {
     if (equalii(Py, Qy))
-      return FpE_dbl(P, a4, p);
+      return FpE_dbl_slope(P, a4, p, slope);
     else
       return mkvec(gen_0);
   }
-  lambda = Fp_div(Fp_sub(Py, Qy, p), Fp_sub(Px, Qx, p), p);
-  C = Fp_sub(Fp_sub(Fp_sqr(lambda, p), Px, p), Qx, p);
-  D = Fp_sub(Fp_mul(lambda, Fp_sub(Px, C, p), p), Py, p);
-  return mkvec2(C,D);
+  *slope = Fp_div(Fp_sub(Py, Qy, p), Fp_sub(Px, Qx, p), p);
+  R = cgetg(3,t_VEC);
+  gel(R, 1) = Fp_sub(Fp_sub(Fp_sqr(*slope, p), Px, p), Qx, p);
+  gel(R, 2) = Fp_sub(Fp_mul(*slope, Fp_sub(Px, gel(R, 1), p), p), Py, p);
+  return R;
 }
 
 GEN
 FpE_add(GEN P, GEN Q, GEN a4, GEN p)
 {
   pari_sp av = avma;
-  return gerepilecopy(av, FpE_add_i(P,Q,a4,p));
+  GEN slope;
+  return gerepileupto(av, FpE_add_slope(P,Q,a4,p,&slope));
 }
 
 static GEN
@@ -120,8 +132,8 @@ GEN
 FpE_sub(GEN P, GEN Q, GEN a4, GEN p)
 {
   pari_sp av = avma;
-  GEN z  = FpE_add_i(P, FpE_neg_i(Q, p), a4, p);
-  return gerepilecopy(av, z);
+  GEN slope;
+  return gerepileupto(av, FpE_add_slope(P, FpE_neg_i(Q, p), a4, p, &slope));
 }
 
 struct _FpE
@@ -240,34 +252,21 @@ FpE_vert(GEN P, GEN Q, GEN p)
 static GEN
 FpE_tangent_update(GEN R, GEN Q, GEN a4, GEN p, GEN *pt_R)
 {
-  GEN x1, y1;
   if (ell_is_inf(R))
   {
     *pt_R = ellinf();
     return gen_1;
   }
-  x1 = gel(R, 1);
-  y1 = gel(R, 2);
-
-  if (signe(y1) == 0)
+  else if (signe(gel(R,2)) == 0)
   {
-    GEN v = FpE_vert(R, Q, p);
     *pt_R = ellinf();
-    return v;
+    return FpE_vert(R, Q, p);
   } else {
-    GEN _2_x1    = mului(2, x1);
-    GEN _2_y1    = mului(2, y1);
-    GEN _sqrx1   = Fp_sqr(x1,p);
-    GEN _3_sqrx1 = mului(3, _sqrx1);
-    GEN slope = Fp_div(addii(_3_sqrx1, a4), _2_y1, p);
-    GEN x3 = Fp_sub(sqri(slope), _2_x1, p);
-    GEN y3 = Fp_neg(addii(y1, mulii(slope, subii(x3, x1))), p);
-    GEN tmp1 = Fp_add(gel(Q, 1), Fp_neg(x1, p), p);
-    GEN tmp2 = Fp_add(Fp_mul(tmp1, slope, p), y1, p);
-    GEN line = Fp_sub(gel(Q, 2), tmp2, p);
-
-    *pt_R = mkvec2(x3, y3);
-    return line;
+    GEN slope, tmp1, tmp2;
+    *pt_R = FpE_dbl_slope(R, a4, p, &slope);
+    tmp1 = Fp_add(gel(Q, 1), Fp_neg(gel(R, 1), p), p);
+    tmp2 = Fp_add(Fp_mul(tmp1, slope, p), gel(R,2), p);
+    return Fp_sub(gel(Q, 2), tmp2, p);
   }
 }
 
@@ -283,26 +282,20 @@ FpE_chord_update(GEN R, GEN P, GEN Q, GEN a4, GEN p, GEN *pt_R)
     *pt_R = ellinf();
     return gen_1;
   }
-  if (equalii(gel(P, 1), gel(R, 1)))
+  else if (equalii(gel(P, 1), gel(R, 1)))
   {
     if (equalii(gel(P, 2), subii(p, gel(R, 2))))
     {
-      GEN v = FpE_vert(R, Q, p);
       *pt_R = ellinf();
-      return v;
+      return FpE_vert(R, Q, p);
     } else
       return FpE_tangent_update(R, Q, a4, p, pt_R);
   } else {
-    GEN x1 = gel(R, 1), y1 = gel(R, 2);
-    GEN x2 = gel(P, 1), y2 = gel(P, 2);
-    GEN slope = Fp_div(subii(y2, y1), subii(x2, x1), p);
-    GEN x3 = Fp_sub(subii(gsqr(slope), x1), x2, p);
-    GEN y3 = Fp_neg(addii(y1, mulii(slope, subii(x3, x1))), p);
-    GEN tmp1 = Fp_mul(Fp_add(gel(Q, 1), Fp_neg(x1, p), p), slope, p);
-    GEN tmp2 = Fp_add(tmp1, y1, p);
-    GEN line = Fp_sub(gel(Q, 2), tmp2, p);
-    *pt_R = mkvec2(x3, y3);
-    return line;
+    GEN slope, tmp1, tmp2;
+    *pt_R = FpE_add_slope(P, R, a4, p, &slope);
+    tmp1  = Fp_mul(Fp_add(gel(Q, 1), Fp_neg(gel(R, 1), p), p), slope, p);
+    tmp2  = Fp_add(tmp1, gel(R, 2), p);
+    return Fp_sub(gel(Q, 2), tmp2, p);
   }
 }
 
