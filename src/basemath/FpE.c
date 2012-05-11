@@ -284,12 +284,12 @@ FpE_chord_update(GEN R, GEN P, GEN Q, GEN a4, GEN p, GEN *pt_R)
   }
   else if (equalii(gel(P, 1), gel(R, 1)))
   {
-    if (equalii(gel(P, 2), subii(p, gel(R, 2))))
-    {
+    if (equalii(gel(P, 2), gel(R, 2)))
+      return FpE_tangent_update(R, Q, a4, p, pt_R);
+    else {
       *pt_R = ellinf();
       return FpE_vert(R, Q, p);
-    } else
-      return FpE_tangent_update(R, Q, a4, p, pt_R);
+    }
   } else {
     GEN slope, tmp1, tmp2;
     *pt_R = FpE_add_slope(P, R, a4, p, &slope);
