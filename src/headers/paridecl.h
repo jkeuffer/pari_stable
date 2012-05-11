@@ -2942,6 +2942,7 @@ INLINE GEN    rdivis(GEN x, long y, long prec);
 INLINE GEN    rdivsi(long x, GEN y, long prec);
 INLINE GEN    rdivss(long x, long y, long prec);
 INLINE GEN    real2n(long n, long prec);
+INLINE GEN    real_m2n(long n, long prec);
 INLINE GEN    real_0(long prec);
 INLINE GEN    real_0_bit(long bitprec);
 INLINE GEN    real_1(long prec);

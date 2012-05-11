@@ -170,6 +170,9 @@ BA 48- agm now returns the optimal AGM
    53- allow t_VECSMALL in lex()
    54- nfrootsof1(K) check whether K.pol is a translate of a cyclotomic pol.
        [initial patch LGr, #1175]
+   55- format of cached Bernoulli table: now a t_VEC of t_FRAC / t_REALs.
+       Removed bern() macro. The new data must be accessed using bernfrac /
+       bernreal.
 
   Added
     1- mathnf for matrices over K[X] [#41]

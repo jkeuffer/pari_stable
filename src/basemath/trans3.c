@@ -1265,16 +1265,53 @@ szeta_odd(long k, long prec)
   return gerepileuptoleaf(av, y);
 }
 
-/* assume k > 0 even. Return B_k */
-static GEN
-single_bern(long k, long prec)
+static int
+bernreal_use_zeta(long k, long prec)
 {
-  GEN B;
-  if (OK_bern(k >> 1, prec)) B = bernreal(k, prec);
-  else if (k * (log(k) - 2.83) > prec2nbits_mul(prec, LOG2))
-    B = bernreal_using_zeta(k, NULL, prec);
+  if (bernzone && (k>>1)+1 < lg(bernzone))
+  {
+    GEN B = gel(bernzone,(k>>1)+1);
+    if (typ(B) != t_REAL || realprec(B) >= prec) return 0;
+  }
+  return (k * (log(k) - 2.83) > prec2nbits_mul(prec, LOG2));
+}
+
+/* Return B_n */
+GEN
+bernreal(long n, long prec)
+{
+  GEN B, storeB;
+  long k;
+  if (n <= 1)
+    switch(n)
+    {
+      case 1: return real_m2n(-1,prec); /*-1/2*/
+      case 0: return real_1(prec);
+      default: return real_0(prec);
+    }
+  if (odd(n)) return real_0(prec);
+
+  k = n >> 1;
+  if (!bernzone && k < 100) mpbern(k, prec);
+  if (bernzone && k < lg(bernzone))
+  {
+    B = gel(bernzone,k);
+    if (typ(B) != t_REAL || realprec(B) >= prec) return gtofp(B, prec);
+  }
+  /* not cached, must compute */
+  if (n * log(n) > prec2nbits_mul(prec, LOG2))
+    B = storeB = bernreal_using_zeta(n, NULL, prec);
   else
-    B = fractor(bernfrac(k), prec);
+  {
+    storeB = bernfrac_using_zeta(n);
+    B = fractor(storeB, prec);
+  }
+  if (bernzone && k < lg(bernzone))
+  {
+    GEN old = gel(bernzone, k);
+    gel(bernzone, k) = gclone(storeB);
+    gunclone(old);
+  }
   return B;
 }
 
@@ -1294,18 +1331,17 @@ szeta(long k, long prec)
     if ((ulong)k == (HIGHBIT | 1))
       pari_err_OVERFLOW("zeta [large negative argument]");
     k = 1-k;
-    y = single_bern(k, prec); togglesign(y);
+    y = bernreal(k, prec); togglesign(y);
     return gerepileuptoleaf(av, divru(y, k));
   }
   if (k > prec2nbits(prec)+1) return real_1(prec);
   if ((k&1) == 0)
   {
-    if (!OK_bern(k >> 1, prec)
-        && (k * (log(k) - 2.83) > prec2nbits_mul(prec, LOG2)))
-      y = invr( inv_szeta_euler(k, 0, prec) ); /* would use zeta above */
+    if (bernreal_use_zeta(k, prec))
+      y = invr( inv_szeta_euler(k, 0, prec) );
     else
     {
-      y = mulrr(powru(Pi2n(1, prec), k), single_bern(k, prec));
+      y = mulrr(powru(Pi2n(1, prec), k), bernreal(k, prec));
       y = divrr(y, mpfactr(k,prec));
       setsigne(y, 1);
       shiftr_inplace(y, -1);
@@ -2015,31 +2051,36 @@ polylogP(long m, GEN x, long prec)
   if (gequal1(x) && m>=2) return m2? szeta(m,prec): gen_0;
   av = avma; l = precision(x);
   if (!l) { l = prec; x = gtofp(x,l); }
-  mpbern(m>>1, l);
   p1 = logabs(x);
-  k = signe(p1);
-  if (k > 0) { x = ginv(x); fl = !m2; } else fl = 0;
+  if (signe(p1) > 0) { x = ginv(x); fl = !m2; setsigne(p1, -1); } else fl = 0;
   /* |x| <= 1 */
-  if (k > 0) setsigne(p1, -1);
-  shiftr_inplace(p1, 1); /* 2log|x| <= 0 */
-
   y = polylog(m,x,l);
   y = m2? real_i(y): imag_i(y);
-
   if (m==1)
-    y = gadd(y, gmul2n(p1,-2));
-  else
   {
-    GEN p2 = gen_1;
-    for (k=1; k<m; k++)
+    shiftr_inplace(p1, -1); /* log |x| / 2 */
+    y = gadd(y, p1);
+  }
+  else
+  { /* m >= 2, \sum_{0 <= k <= m} 2^k B_k/k! (log |x|)^k Li_{m-k}(x),
+       with Li_0(x) := -1/2 */
+    GEN u, t;
+    t = polylog(m-1,x,l);
+    u = gneg_i(p1); /* u = 2 B1 log |x| */
+    y = gadd(y, gmul(u, m2?real_i(t):imag_i(t)));
+    if (m > 2)
     {
-      p2 = gdivgs(gmul(p2,p1),k);
-      if (!(k&1) || k==1)
+      GEN p2;
+      shiftr_inplace(p1, 1); /* p1 = 2log|x| <= 0 */
+      mpbern(m>>1, l);
+      p1 = sqrr(p1);
+      p2 = shiftr(p1,-1);
+      for (k=2; k<m; k+=2)
       {
-        GEN u, t = polylog(m-k,x,l);
-        if (k!=1) u = gmul(p2, bern(k>>1));
-        else      u = gneg_i(gmul2n(p2,-1));
-        /* u = p2*B_k */
+        if (k > 2) p2 = divgunu(gmul(p2,p1),k-1);
+        /* p2 = 2^k/k! log^k |x|*/
+        t = polylog(m-k,x,l);
+        u = gmul(p2, bernreal(k, prec));
         y = gadd(y, gmul(u, m2?real_i(t):imag_i(t)));
       }
     }

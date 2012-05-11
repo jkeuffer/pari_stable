@@ -13,6 +13,9 @@ This file lists the incompatible changes between Version 2.x and older versions
   - renamed all libpari error codes [ pari_err() arguments ]
   - ellwp0(): remove precdl argument
   - rename stackmalloc -> stack_malloc
+  - format of cached Bernoulli table: now a t_VEC of t_FRAC / t_REALs.
+    Removed bern() macro. The new data must be accessed using bernfrac /
+    bernreal.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.4 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

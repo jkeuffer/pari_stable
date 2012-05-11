@@ -136,7 +136,6 @@ ulong *convi(GEN x, long *l);
 
 int approx_0(GEN x, GEN y);
 GEN bernfrac_using_zeta(long n);
-int OK_bern(long nb, long prec);
 
 /* powers */
 GEN    rpowuu(ulong a, ulong n, long prec);

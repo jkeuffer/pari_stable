@@ -736,118 +736,122 @@ gath(GEN x, long prec)
 /**               CACHE BERNOULLI NUMBERS B_2k                     **/
 /**                                                                **/
 /********************************************************************/
-/* is B_{2k} precomputed at precision >= prec ? */
-int
-OK_bern(long k, long prec)
-{
-  return (bernzone && bernzone[1] >= k && bernzone[2] >= prec);
-}
-
-static GEN
-BERN(GEN B, long i) { return (B + 3 + i*B[2]); }
-
-/* compute B_0,B_2,...,B_2*nb */
+static const long BERN_MINNB = 5;
+/* compute B_2,...,B_2*nb */
 void
 mpbern(long nb, long prec)
 {
-  long n, l, c0;
-  pari_sp av;
+  const pari_sp av = avma;
+  long n, n_is_small = 1;
   GEN B;
   pari_timer T;
 
   incrprec(prec); /* compute one more word of accuracy than required */
-  if (OK_bern(nb, prec)) return;
-  if (nb < 0) nb = 0;
-  l = 3 + prec*(nb+1);
-  B = newblock(l);
-  B[0] = evaltyp(t_STR) | evallg(l); /* dummy non-recursive type */
-  B[1] = nb;
-  B[2] = prec;
-
-  c0 = evaltyp(t_REAL) | evallg(prec);
-  for (n = 0; n <= nb; n++) BERN(B, n)[0] = c0;
-  av = avma;
-  affur(1, BERN(B,0));
-  n = 1;
-  if (bernzone && bernzone[2] >= prec) /* don't recompute known Bernoulli */
-    for (; n <= bernzone[1]; n++) affrr(bern(n), BERN(B,n));
+  if (nb < BERN_MINNB) nb = BERN_MINNB;
+  if (bernzone)
+  { /* don't recompute known Bernoulli */
+    long i, N = minss(lg(bernzone)-1, nb+1);
+    /* skip B_0, ..., B_10, always included as t_FRAC */
+    for (n = BERN_MINNB+1; n <= N; n++)
+    {
+      GEN c = gel(bernzone,n);
+      if (typ(c) == t_REAL && realprec(c) < prec) break;
+    }
+    if (n > N) return;
+    B = cgetg_block(nb+1, t_VEC);
+    for (i = 1; i <= n; i++) gel(B,i) = gel(bernzone,i);
+  }
+  else
+  {
+    B = cgetg_block(nb+1, t_VEC);
+    gel(B,1) = gclone(mkfrac(gen_1, utoipos(6)));
+    gel(B,2) = gclone(mkfrac(gen_m1, utoipos(30)));
+    gel(B,3) = gclone(mkfrac(gen_1, utoipos(42)));
+    gel(B,4) = gel(B,2);
+    gel(B,5) = gclone(mkfrac(utoipos(5), utoipos(66)));
+    n = BERN_MINNB;
+  }
+  avma = av;
   if (DEBUGLEVEL) {
-    err_printf("caching Bernoulli numbers 2*%ld to 2*%ld, prec = %ld\n",
-               n,nb,prec);
+    err_printf("caching Bernoulli numbers 2 to 2*%ld, prec = %ld\n",
+               nb,prec);
     timer_start(&T);
   }
 
-  if (n == 1 && nb > 0)
-  {
-    affrr(divru(real_1(prec), 6), BERN(B,1)); /* B2 = 1/6 */
-    n = 2;
-  }
   /* B_{2n} = (2n-1) / (4n+2) -
    * sum_{a = 1}^{n-1} (2n)...(2n+2-2a) / (2...(2a-1)2a) B_{2a} */
-  for (   ; n <= nb; n++, avma = av)
-  { /* n > 1 */
-#ifdef LONG_IS_64BIT
-    const ulong mul_overflow = 3037000500;
-#else
-    const ulong mul_overflow = 46341;
-#endif
-    ulong u = 8, v = 5, a = n-1, b = 2*n-3;
-    GEN S = BERN(B,a);
-
-    for (;;)
-    { /* b = 2a-1, u = 2v-2, 2a + v = 2n+3 */
-      if (a == 1) { S = mulri(S, muluu(u,v)); break; } /* a=b=1, v=2n+1, u=4n */
-      /* beware overflow */
-      S = (v <= mul_overflow)? mulru(S, u*v): mulri(S, muluu(u,v));
-      S = (a <= mul_overflow)? divru(S, a*b): divri(S, muluu(a,b));
-      u += 4; v += 2; a--; b -= 2;
-      S = addrr(BERN(B,a), S);
-      if ((a & 127) == 0) { GEN S0=S; S = BERN(B,n); affrr(S0, S); avma = av; }
+  n_is_small = 1;
+  for (n++; n <= nb; n++, avma = av)
+  {
+    GEN S;
+    if (bernzone)
+    {
+      GEN old = gel(bernzone,n);
+      if (typ(old) != t_REAL || realprec(old) >= prec)
+      {
+        gel(B,n) = old;
+        continue;
+      }
     }
-    S = divru(subsr(2*n, S), 2*n+1);
-    shiftr_inplace(S, - 2*n);
-    affrr(S, BERN(B,n)); /* S = B_2n */
+    /* Not cached, must compute */
+    /* huge accuracy ? May as well compute exactly */
+    if (n_is_small && 2*n * log(2*n) < prec2nbits_mul(prec, LOG2))
+      S = bernfrac_using_zeta(2*n);
+    else
+    {
+#ifdef LONG_IS_64BIT
+      const ulong mul_overflow = 3037000500;
+#else
+      const ulong mul_overflow = 46341;
+#endif
+      ulong u = 8, v = 5, a = n-1, b = 2*n-3;
+      n_is_small = 0;
+      S = gel(B,a); /* B_2a */
+      if (typ(S) != t_REAL) S = fractor(S, prec);
+      for (;;)
+      { /* b = 2a-1, u = 2v-2, 2a + v = 2n+3 */
+        if (a == 1) { S = mulri(S, muluu(u,v)); break; } /* a=b=1, v=2n+1, u=4n */
+        /* beware overflow */
+        S = (v <= mul_overflow)? mulru(S, u*v): mulri(S, muluu(u,v));
+        S = (a <= mul_overflow)? divru(S, a*b): divri(S, muluu(a,b));
+        u += 4; v += 2; a--; b -= 2;
+        S = gadd(gel(B,a), S);
+        if ((a & 127) == 0) S = gerepileuptoleaf(av, S);
+      }
+      S = divru(subsr(2*n, S), 2*n+1);
+      shiftr_inplace(S, -2*n);
+    }
+    gel(B,n) = gclone(S); /* S = B_2n */
   }
   if (DEBUGLEVEL) timer_printf(&T, "Bernoulli");
-  if (bernzone) killblock(bernzone);
-  avma = av; bernzone = B;
-}
-
-GEN
-bernreal(long n, long prec)
-{
-  GEN B;
-
-  if (n==1) { B = real2n(-1, prec); setsigne(B, -1); return B; }
-  if (n<0 || n&1) return gen_0;
-  n >>= 1; mpbern(n+1,prec);
-  return rtor(bern(n), prec);
-}
-
-static GEN
-B2(void){ GEN z = cgetg(3, t_FRAC);
-  gel(z,1) = gen_1;
-  gel(z,2) = utoipos(6); return z;
-}
-static GEN
-B4(void) { GEN z = cgetg(3, t_FRAC);
-  gel(z,1) = gen_m1;
-  gel(z,2) = utoipos(30); return z;
-}
-
-GEN
-bernfrac(long k)
-{
-  if (k < 6) switch(k)
-  {
-    case 0: return gen_1;
-    case 1: return mkfrac(gen_m1, gen_2);
-    case 2: return B2();
-    case 4: return B4();
-    default: return gen_0;
+  swap(B, bernzone);
+  if (B)
+  { /* kill old non-reused values */
+    for (n = lg(B)-1; n; n--)
+      if (gel(B,n) != gel(bernzone,n)) gunclone(gel(B,n));
+    killblock(B);
   }
-  if (k & 1) return gen_0;
-  return bernfrac_using_zeta(k);
+  avma = av;
+}
+
+GEN
+bernfrac(long n)
+{
+  long k;
+  if (odd(n)) return gen_0;
+  if (n == 0) return gen_1;
+  if (n == 1) return mkfrac(gen_m1,gen_2);
+  if (!bernzone && n < BERN_MINNB*2) mpbern(BERN_MINNB, 0);
+  k = n >> 1;
+  if (k < lg(bernzone))
+  {
+    GEN B = gel(bernzone, k), C;
+    if (typ(B) != t_REAL) return B;
+    C = bernfrac_using_zeta(n);
+    gel(bernzone, k) = gclone(C);
+    gunclone(B); return C;
+  }
+  return bernfrac_using_zeta(n);
 }
 
 /* mpbern as exact fractions */
@@ -884,10 +888,8 @@ bernvec(long nb)
   GEN y = cgetg(nb+2, t_VEC), z = y + 1;
   long i;
   if (nb < 20) return bernvec_old(nb);
-  for (i = nb; i > 2; i--) gel(z,i) = bernfrac_using_zeta(i << 1);
-  gel(y,3) = B4();
-  gel(y,2) = B2();
-  gel(y,1) = gen_1; return y;
+  for (i = nb; i; i--) gel(z,i) = bernfrac(i << 1);
+  return y;
 }
 
 /********************************************************************/

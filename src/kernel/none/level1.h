@@ -348,6 +348,8 @@ real_m1(long prec) {
 INLINE GEN
 real2n(long n, long prec) { GEN z = real_1(prec); setexpo(z, n); return z; }
 INLINE GEN
+real_m2n(long n, long prec) { GEN z = real_m1(prec); setexpo(z, n); return z; }
+INLINE GEN
 stor(long s, long prec) { GEN z = cgetr(prec); affsr(s,z); return z; }
 INLINE GEN
 utor(ulong s, long prec){ GEN z = cgetr(prec); affur(s,z); return z; }

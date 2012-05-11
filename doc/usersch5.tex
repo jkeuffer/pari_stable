@@ -7651,17 +7651,18 @@ at precision \kbd{prec}.
 \fun{GEN}{constlog2}{long prec} precomputes $\log(2)$ at precision
 \kbd{prec}.
 
-\fun{void}{mpbern}{long n, long prec} precomputes the even \idx{Bernoulli}
-numbers $B_0,\dots,B_{2n-2}$ as \typ{REAL}s of precision \kbd{prec}.
+\fun{void}{mpbern}{long n, long prec} precomputes the $n$ even
+\idx{Bernoulli} numbers $B_2,\dots,B_{2n}$ as \typ{FRAC} or \typ{REAL}s of
+precision \kbd{prec}. For any $2 \leq k \leq 2n$, if a floating point
+approximation of $B_k$ to accuracy \kbd{prec} is enough to reconstruct it
+exactly, a \typ{FRAC} is stored; otherwise a \typ{REAL} at the requested
+accuracy. No more than $n$ Bernoulli numbers will ever be stored (by
+\tet{bernfrac} or \tet{bernreal}), unless a subsequent call to \kbd{mpbern}
+increases the cache.
 
-\fun{GEN}{bern}{long i} is a macro returning the \idx{Bernoulli} number
-$B_{2i}$ at precision \kbd{prec}, assuming that \kbd{mpbern(n, prec)} was
-called previously with $n > i$. The macro does not check whether
-$0 \leq i < n$. If cached Bernoullis were initialized to a larger accuracy
-than desired, use e.g.~\kbd{rtor(bern(i), prec)}.
-
-The following functions use cached data if \kbd{prec} is not too large;
-otherwise the newly computed data replaces the old cache.
+The following functions use cached data if \kbd{prec} is smaller than the
+precision of the cached value; otherwise the newly computed data replaces the
+old cache.
 
 \fun{GEN}{mppi}{long prec} returns $\pi$ at precision \kbd{prec}.
 
@@ -7680,7 +7681,17 @@ precision \kbd{prec}.
 
 \fun{GEN}{mplog2}{long prec} returns $\log 2$ at precision \kbd{prec}.
 
+\fun{GEN}{bernreal}{long i, long prec} returns the \idx{Bernoulli} number
+$B_i$ as a \typ{REAL} at precision \kbd{prec}. If \kbd{mpbern(n,
+p)} was called previously with $n \geq i$ and $p \geq \kbd{prec}$, then
+the cached value is (converted to a \typ{REAL} of accuracy \kbd{prec} then)
+returned. Otherwise, the missing value is computed. In the latter case,
+if $n \geq i$, the cached table is updated.
 
+\fun{GEN}{bernfrac}{long i} returns the \idx{Bernoulli} number $B_i$ as a
+rational number (\typ{FRAC} or \typ{INT}). If a cached table includes $B_i$
+as a rational number, the latter is returned. Otherwise, the missing value is
+computed. In the latter case, the cached Bernoulli table may be updated.
 
 \section{Permutations }
 

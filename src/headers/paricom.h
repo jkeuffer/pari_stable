@@ -104,8 +104,6 @@ enum {
 #  define log2(x) (log((double)(x))/LOG2)
 #endif
 
-#define bern(i)       (bernzone + 3 + (i)*bernzone[2])
-
 #define ONLY_REM ((GEN*)0x1L)
 #define ONLY_DIVIDES ((GEN*)0x2L)
 
