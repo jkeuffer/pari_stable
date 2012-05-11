@@ -194,7 +194,7 @@ hashstr_dbg(hashtable *h)
 /********************************************************************/
 
 INLINE ulong
-compound(ulong h, ulong a) { return (h << 1) ^ a; }
+compound(ulong h, ulong a) { return (h << 5) + (h>>2) + a; }
 ulong
 hash_GEN(GEN x)
 {
