@@ -330,7 +330,7 @@ extract0(GEN x, GEN l1, GEN l2)
   return y;
 }
 
-long
+static long
 vecslice_parse_arg(long lA, long *y1, long *y2, long *skip)
 {
   *skip=0;
