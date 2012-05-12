@@ -2352,6 +2352,7 @@ int     Flx_is_irred(GEN f, ulong p);
 long    Flx_nbfact(GEN z, ulong p);
 GEN     Flx_nbfact_by_degree(GEN z, long *nb, ulong p);
 long    Flx_nbroots(GEN f, ulong p);
+long    FlxqX_nbroots(GEN f, GEN T, ulong p);
 GEN     FpX_degfact(GEN f, GEN p);
 int     FpX_is_irred(GEN f, GEN p);
 int     FpX_is_totally_split(GEN f, GEN p);
