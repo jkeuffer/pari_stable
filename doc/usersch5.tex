@@ -2700,6 +2700,10 @@ cofactor is $\pm 1$. \kbd{*P} and \kbd{*E} contain the list of prime divisors
 found and their exponents, as \typ{VECSMALL}s. Neither memory-clean, nor
 suitable for \tet{gerepileupto}.
 
+\fun{GEN}{Z_factor_listP}{GEN N, GEN L} given a \typ{INT} $N$, a vector or
+primes $L$ containing all prime divisors of $N$ (and possibly others). Return
+\kbd{factor(N)}. Neither memory-clean, nor suitable for \tet{gerepileupto}.
+
 \fun{GEN}{core}{GEN n} unique squarefree integer $d$ dividing $n$ such that
 $n/d$ is a square. The core of $0$ is defined to be $0$.
 
@@ -4940,6 +4944,8 @@ Multiply a multiprecision object by a single-precision one.
 
 \fun{GEN}{ZC_z_mul}{GEN x, long y}
 
+\fun{GEN}{ZM_nm_mul}{GEN x, GEN y} the entries of $y$ are \kbd{ulong}s.
+
 \subsubsec{Miscellaneous involving Fl}
 
 \fun{GEN}{Fl_to_Flx}{ulong x, long evx} converts a \kbd{unsigned long} to a
@@ -5167,6 +5173,11 @@ compatible dimensions).
 
 \fun{GEN}{ZM_neg}{GEN x} returns $-\kbd{x}$.
 
+\fun{void}{ZM_togglesign}{GEN x} negates \kbd{x} in place, by toggling the
+sign of its integer components. Universal constants \kbd{gen\_1},
+\kbd{gen\_m1}, \kbd{gen\_2} and \kbd{gen\_m2} are handled specially and will
+not be corrupted. (We use \tet{togglesign_safe}.)
+
 \fun{GEN}{ZM_mul}{GEN x, GEN y} multiplies \kbd{x} and \kbd{y} (assumed to
 have compatible dimensions).
 
@@ -5202,6 +5213,8 @@ underlying \tet{detint}.
 
 \fun{GEN}{ZM_charpoly}{GEN M} returns the characteristic polynomial (in
 variable $0$) of the \kbd{ZM} $M$.
+
+\fun{GEN}{ZM_imagecompl}{GEN x} returns \kbd{matimagecompl(x)}.
 
 \fun{long}{ZM_max_lg}{GEN x} returns the effective length of the longest
 entry in $x$.
@@ -6633,6 +6646,9 @@ scalar matrix whose diagonal is set to shallow copies of the scalar \kbd{x}.
 
 \fun{GEN}{diagonal_shallow}{GEN x} returns a diagonal matrix whose diagonal
 is given by the vector $x$. Shallow function.
+
+\fun{GEN}{scalarpol_shallow}{GEN a, long v} returns the degree 0
+\typ{POL} $a \kbd{pol\_x}(v)^0$.
 
 \fun{GEN}{deg1pol_shallow}{GEN a, GEN b,long v} returns the degree 1
 \typ{POL} $a + b \kbd{pol\_x}(v)$
