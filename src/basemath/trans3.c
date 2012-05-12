@@ -1154,14 +1154,14 @@ GEN
 bernfrac_using_zeta(long n)
 {
   pari_sp av = avma;
-  GEN iz, a, d, D = divisors(utoipos( n/2 ));
+  GEN iz, a, d, D = divisorsu(n >> 1);
   long i, prec, l = lg(D);
   double t, u;
 
   d = utoipos(6); /* 2 * 3 */
   for (i = 2; i < l; i++) /* skip 1 */
   { /* Clausen - von Staudt */
-    ulong p = 2*itou(gel(D,i)) + 1;
+    ulong p = 2*D[i] + 1;
     if (uisprime(p)) d = muliu(d, p);
   }
   /* 1.712086 = ??? */
