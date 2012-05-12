@@ -134,12 +134,12 @@ abpq_sum(struct abpq_res *r, long n1, long n2, struct abpq *A)
 /**                               PI                               **/
 /**                                                                **/
 /********************************************************************/
-/* replace *old clone by new. Protect agains SIGINT */
+/* replace *old clone by c. Protect against SIGINT */
 static void
-swap_clone(GEN *old, GEN new)
+swap_clone(GEN *old, GEN c)
 {
   GEN tmp = *old;
-  *old = new;
+  *old = c;
   if (tmp) gunclone(tmp);
 }
 #if 0
