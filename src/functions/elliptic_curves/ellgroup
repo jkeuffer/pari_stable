@@ -40,3 +40,5 @@ Doc: computes the structure of the group $E(\F_p) \sim \Z/d_1\Z \times
       13
  ? ellgroup(E, 7, 1)
  @eprog
+Variant: Also available is \fun{GEN}{ellgroup}{GEN E, GEN p}, corresponding
+ to \fl = 0.
