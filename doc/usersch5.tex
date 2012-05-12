@@ -3017,6 +3017,9 @@ that $n/d$ is a square.
 \fun{long}{uissquarefree}{ulong n} returns $1$ if \kbd{n}
 is square-free, and $0$ otherwise.
 
+\fun{ulong}{uissquarefree_fact}{GEN fa} returns \kbd{uissquarefree(n)}, where
+\kbd{fa} is \kbd{factoru(n)}.
+
 \fun{long}{uposisfundamental}{ulong x} return $1$ is $x$ is a fundamental
 discriminant, and $0$ otherwise.
 
@@ -4945,6 +4948,8 @@ Multiply a multiprecision object by a single-precision one.
 \fun{GEN}{ZC_z_mul}{GEN x, long y}
 
 \fun{GEN}{ZM_nm_mul}{GEN x, GEN y} the entries of $y$ are \kbd{ulong}s.
+
+\fun{GEN}{nm_Z_mul}{GEN y, GEN c} the entries of $y$ are \kbd{ulong}s.
 
 \subsubsec{Miscellaneous involving Fl}
 
