@@ -960,7 +960,7 @@ sumdigits(GEN n)
     case 3: return utoipos(sumdigitsu(n[2]));
   }
   res = convi(n, &l);
-  if (l < ULONG_MAX / 81)
+  if ((ulong)l < ULONG_MAX / 81)
   {
     s = sumdigits_block(res, l);
     avma = av; return utoipos(s);

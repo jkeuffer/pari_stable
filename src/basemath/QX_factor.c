@@ -1359,7 +1359,7 @@ BD_odd_iscyclo(GEN f)
       t = gerepilecopy(av, t);
     }
   }
-  if (n > bound || eulerphiu(n) != d) return 0;
+  if (n > bound || eulerphiu(n) != (ulong)d) return 0;
 
   if (e > 1) return (ucoprime_part(e, n) == 1)? e * n : 0;
   return n;
