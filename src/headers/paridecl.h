@@ -902,6 +902,7 @@ ulong   init_primepointer(ulong a, ulong p, byteptr *ptr);
 long    issquarefree(GEN x);
 long    istotient(GEN n, GEN *px);
 long    uissquarefree(ulong n);
+long    uissquarefree_fact(GEN f);
 ulong   maxprime(void);
 void    maxprime_check(ulong c);
 long    moebius(GEN n);
@@ -912,6 +913,7 @@ ulong   sumdigitsu(ulong n);
 GEN     sumdiv(GEN n);
 GEN     sumdivk(GEN n,long k);
 ulong   eulerphiu(ulong n);
+ulong   eulerphiu_fact(GEN f);
 GEN     Z_factor(GEN n);
 
 /* DedekZeta.c */
@@ -2961,6 +2963,7 @@ INLINE GEN    rtor(GEN x, long prec);
 INLINE long   sdivsi(long x, GEN y);
 INLINE long   sdivsi_rem(long x, GEN y, long *rem);
 INLINE long   sdivss_rem(long x, long y, long *rem);
+INLINE long   udivuu_rem(ulong x, ulong y, ulong *r);
 INLINE void   setabssign(GEN x);
 INLINE void   shift_left(GEN z2, GEN z1, long min, long M, ulong f,  ulong sh);
 INLINE void   shift_right(GEN z2, GEN z1, long min, long M, ulong f, ulong sh);

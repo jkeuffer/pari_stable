@@ -2005,6 +2005,47 @@ guess_roots(GEN nf)
   avma = av; return itos(nbroots);
 }
 
+/* T(x) an irreducible ZX. Is it of the form Phi_n(c \pm x) ?
+ * Return NULL if not, and a root of 1 of maximal order in Z[x]/(T) otherwise
+ *
+ * N.B. Set n_squarefree = 1 if n is squarefree, and 0 otherwise.
+ * This last parameter is inconvenient, but it allows a cheap
+ * stringent test. (n guessed from guess_roots())*/
+static GEN
+ZXirred_is_cyclo_translate(GEN T, long n_squarefree)
+{
+  long r, m, d = degpol(T);
+  GEN T1, c = divis_rem(gel(T, d+1), d, &r); /* d-1 th coeff divisible by d ? */
+  /* The trace coefficient of polcyclo(n) is \pm1 if n is square free, and 0
+   * otherwise. */
+  if (!n_squarefree)
+  { if (r) return NULL; }
+  else
+  {
+    if (r < -1)
+    {
+      r += d;
+      c = subiu(c, 1);
+    }
+    else if (r == d-1)
+    {
+      r = -1;
+      c = addiu(c, 1);
+    }
+    if (r != 1 && r != -1) return NULL;
+  }
+  if (signe(c)) /* presumably Phi_guess(c \pm x) */
+    T = RgX_translate(T, negi(c));
+  if (!n_squarefree) T = RgX_deflate_max(T, &m);
+  /* presumably Phi_core(guess)(\pm x), cyclotomic iff original T was */
+  T1 = ZX_graeffe(T);
+  if (ZX_equal(T, T1)) /* T = Phi_n, n odd */
+    return deg1pol_shallow(gen_m1, negi(c), varn(T));
+  else if (ZX_equal(T1, ZX_unscale(T, gen_m1))) /* T = Phi_{2n}, nodd */
+    return deg1pol_shallow(gen_1, c, varn(T));
+  return NULL;
+}
+
 static GEN
 trivroots(void) { return mkvec2(gen_2, gen_m1); }
 /* Number of roots of unity in number field [nf]. */
@@ -2015,7 +2056,7 @@ rootsof1(GEN nf)
   nflift_t L;
   GEN fa, LP, LE, C0, z, prim_root, disc;
   pari_timer ti;
-  long i, l, nbguessed, nbroots, nfdegree, phi, exp = 0;
+  long i, l, nbguessed, nbroots, nfdegree;
   pari_sp av;
 
   nf = checknf(nf);
@@ -2038,69 +2079,34 @@ rootsof1(GEN nf)
     long p = LP[i];
     /* Cheap test: can Q(zeta_{2p}) be a subset of K ? */
     if (p == 2)
-    { /* check that 2 | n and v_p(disc K) >= n/2 */
-      if (!odd(nfdegree) && vali(disc) >= nfdegree / 2) continue;
+    { /* 2 | n and v_p(disc K) >= n/2 ? */
       if (LE[i] == 1) continue;
+      if (!odd(nfdegree) && vali(disc) >= nfdegree / 2) continue;
     }
     else
-    { /* check that p-1 | n and v_p(disc K) >= (p-2) n/(p-1) */
-      long v = Z_lval(disc, p);
-      if (nfdegree % (p-1) == 0 && v >= nfdegree/(p-1) * (p-2)) continue;
+    { /* p-1 | n and v_p(disc K) >= (p-2) n/(p-1) ? */
+      ulong r, q = udivuu_rem(nfdegree, p-1, &r);
+      if (r == 0 && Z_lval(disc, p) >= q * (p-2)) continue;
     }
     nbguessed /= upowuu(p, LE[i]);
     LE[i] = 0;
   }
   if (DEBUGLEVEL>2)
-    timer_printf(&ti, "adding ramification conditions [guess = %ld]", nbguessed);
+    timer_printf(&ti, "after ramification conditions [guess = %ld]", nbguessed);
   if (nbguessed == 2) return trivroots();
+  av = avma;
 
   /* Step 1.5 : test if nf.pol == subst(polcyclo(nbguessed), x, \pm x+c) */
-  av = avma;
-  for (i = phi = 1; i < l; i++)
+  if (eulerphiu_fact(fa) == nfdegree)
   {
-    long p = LP[i];
-    phi *= p-1;
-    phi *= upowuu(p, LE[i]-1);
-    if (LE[i] > 1) exp = 1;
-  }
-  if (phi == nfdegree)
-  {
-    GEN elt, subleading, quo, T1, T = nf_get_pol(nf);
-    long r, m;
-    subleading = gel(T, nfdegree + 1); /* nfdegree-1 th coeff */
-    quo = divis_rem(subleading, nfdegree, &r);
-    /* The phi-1 th coefficient of polcyclo(nbguessed) is \pm1 if nbguessed is
-     * square free, and 0 otherwise. */
-    if (exp)
-    { if (r) goto NOCYCLO; }
-    else
+    GEN elt = ZXirred_is_cyclo_translate(nf_get_pol(nf),
+                                         uissquarefree_fact(fa));
+    if (elt)
     {
-      if (r < -1)
-      {
-        r += nfdegree;
-        quo = subiu(quo, 1);
-      }
-      else if (r == nfdegree-1)
-      {
-        r = -1;
-        quo = addiu(quo, 1);
-      }
-      if (r != 1 && r != -1) goto NOCYCLO;
+      if (DEBUGLEVEL>2)
+        msgTIMER(&ti, "checking for cyclotomic polynomial [yes]");
+      return gerepilecopy(av, mkvec2(utoipos(nbguessed), elt));
     }
-    if (signe(quo)) /* presumably Phi_nbguessed(quo \pm x) */
-      T = RgX_translate(T, negi(quo));
-    if (exp) T = RgX_deflate_max(T, &m);
-    /* presumably Phi_core(nbguessed)(\pm x), cyclotomic iff original T was */
-    T1 = ZX_graeffe(T);
-    if (ZX_equal(T, T1)) /* T = Phi_n, n odd */
-      elt = deg1pol_shallow(gen_m1, negi(quo), varn(T));
-    else if (ZX_equal(T1, ZX_unscale(T, gen_m1))) /* T = Phi_{2n}, nodd */
-      elt = deg1pol_shallow(gen_1, quo, varn(T));
-    else goto NOCYCLO;
-    if (DEBUGLEVEL>2)
-      msgTIMER(&ti, "checking for cyclotomic polynomial [yes]");
-    return gerepilecopy(av, mkvec2(utoipos(nbguessed), elt));
-NOCYCLO:
     avma = av;
   }
   if (DEBUGLEVEL>2)

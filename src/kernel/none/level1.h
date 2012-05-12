@@ -603,6 +603,12 @@ sdivss_rem(long x, long y, long *r)
 }
 INLINE GEN
 divss_rem(long x, long y, long *r) { return stoi(sdivss_rem(x,y,r)); }
+INLINE long
+udivuu_rem(ulong x, ulong y, ulong *r)
+{
+  if (!y) pari_err(e_INV);
+  *r = x % y; return x / y;
+}
 
 INLINE ulong
 udivui_rem(ulong x, GEN y, ulong *r)

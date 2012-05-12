@@ -3689,6 +3689,15 @@ core(GEN n)
 GEN
 gissquarefree(GEN x) { return map_proto_lG(issquarefree,x); }
 long
+uissquarefree_fact(GEN f)
+{
+  GEN E = gel(f,2);
+  long i, l = lg(E);
+  for (i = 1; i < l; i++)
+    if (E[i] > 1) return 0;
+  return 1;
+}
+long
 uissquarefree(ulong n)
 {
   if (!n) return 0;
@@ -3808,20 +3817,18 @@ bigomega(GEN n)
 GEN
 geulerphi(GEN n) { return map_proto_G(eulerphi,n); }
 
-/* assume n != 0 */
+/* assume f = factoru(n), possibly with 0 exponents. Return phi(n) */
 ulong
-eulerphiu(ulong n)
+eulerphiu_fact(GEN f)
 {
-  pari_sp av = avma;
-  GEN f = factoru(n), P = gel(f,1), E = gel(f,2);
+  GEN P = gel(f,1), E = gel(f,2);
   long i, m = 1, l = lg(P);
-
-  avma = av;
   for (i = 1; i < l; i++)
   {
     ulong p = P[i], e = E[i];
+    if (!e) continue;
     if (p == 2)
-    { if (e > 1) m <<= e-1; } /*optimized*/
+    { if (e > 1) m <<= e-1; }
     else
     {
       m *= (p-1);
@@ -3829,6 +3836,14 @@ eulerphiu(ulong n)
     }
   }
   return m;
+}
+/* assume n != 0 */
+ulong
+eulerphiu(ulong n)
+{
+  pari_sp av = avma;
+  GEN f = factoru(n);
+  avma = av; return eulerphiu_fact(f);
 }
 GEN
 eulerphi(GEN n)
