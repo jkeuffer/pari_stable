@@ -2453,8 +2453,12 @@ and remainder of the \typ{INT}~\kbd{x} by the \kbd{long}~\kbd{s}. As
 and remainder of \emph{absolute value} of the \typ{INT}~\kbd{x} by the
 \kbd{ulong}~\kbd{s}. As \kbd{sdivss\_rem} otherwise.
 
-\fun{ulong}{udivui_rem}{ulong s, GEN y, ulong *rem}
-computes the Euclidean quotient and remainder of the $x$ by $y$. As
+\fun{ulong}{udivui_rem}{ulong x, GEN y, ulong *rem}
+computes the Euclidean quotient and remainder of $x$ by $y$. As
+\kbd{sdivss\_rem} otherwise.
+
+\fun{ulong}{udivuu_rem}{ulong x, ulong y, ulong *rem}
+computes the Euclidean quotient and remainder of $x$ by $y$. As
 \kbd{sdivss\_rem} otherwise.
 
 \fun{GEN}{divsi_rem}{long s, GEN y, long *r} computes the Euclidean quotient
@@ -2581,6 +2585,9 @@ $n$ is indeed a square, set \kbd{sqrtn} to its integer square root.
 Uses a fast congruence test mod $64\times 63\times 65\times 11$ before
 computing an integer square root.
 
+\fun{long}{uissquare}{ulong n} as \kbd{Z\_issquare},
+for an \kbd{ulong} operand \kbd{n}.
+
 \fun{long}{uissquareall}{ulong n, ulong *sqrtn} as \kbd{Z\_issquareall},
 for an \kbd{ulong} operand \kbd{n}.
 
@@ -2654,7 +2661,7 @@ matrix all of whose entries are positive integers.
 \fun{long}{Z_issmooth}{GEN n, ulong lim} returns $1$ if all the
 prime factors of the \typ{INT} \kbd{n} are less or equal to $lim$.
 
-\fun{long}{Z_issquarefree}{GEN x} returns $1$ if the \typ{INT} \kbd{n}
+\fun{long}{Z_issquarefree}{GEN n} returns $1$ if the \typ{INT} \kbd{n}
 is square-free, and $0$ otherwise.
 
 \fun{long}{Z_isfundamental}{GEN x} returns $1$ if the \typ{INT} \kbd{x}
@@ -2986,10 +2993,24 @@ that $n/d$ is a square.
 
 \fun{ulong}{eulerphiu}{ulong n}, Euler's totient function of $n$.
 
+\fun{ulong}{eulerphiu_fact}{GEN fa}, Euler's totient function of the
+\kbd{ulong} $n$, where \kbd{fa} is \kbd{factoru(n)}.
+
 \fun{long}{moebiusu}{ulong n}, Moebius $\mu$-function of $n$.
 
 \fun{GEN}{divisorsu}{ulong n}, returns the divisors of $n$ in a
 \typ{VECSMALL}, sorted by increasing order.
+
+\fun{long}{uissquarefree}{ulong n} returns $1$ if \kbd{n}
+is square-free, and $0$ otherwise.
+
+\fun{long}{uposisfundamental}{ulong x} return $1$ is $x$ is a fundamental
+discriminant, and $0$ otherwise.
+
+\fun{long}{unegisfundamental}{ulong x} return $1$ is $-x$ is a fundamental
+discriminant, and $0$ otherwise.
+
+\fun{ulong}{sumdigitsu}{ulong n} returns the sum of decimal digits of $u$.
 
 \fun{GEN}{hilbertii}{GEN x, GEN y, GEN p}, returns the Hilbert symbol
 $(x,y)$ at the prime $p$ (\kbd{NULL} for the place at infinity); $x$ and $y$
