@@ -397,7 +397,7 @@ vecrange(GEN a, GEN b)
   a = setloop(a);
   y = cgetg(l+1, t_VEC);
   for (i=1; i<=l; incloop(a), i++)
-    gel(y,i) = gcopy(a);
+    gel(y,i) = icopy(a);
   return y;
 }
 
