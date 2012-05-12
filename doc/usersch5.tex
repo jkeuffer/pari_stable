@@ -749,7 +749,10 @@ particular there is no need to \kbd{free} individually all variables thus
 allocated: a simple \kbd{avma = oldavma} might be enough. On the other hand,
 beware that this is not permanent independent storage, but part of the stack.
 
-\noindent Objects allocated through these last two functions cannot be
+\fun{char*}{stack_calloc}{size_t n} as \kbd{stack\_malloc}, setting the memory
+to zero.
+
+\noindent Objects allocated through these last three functions cannot be
 \kbd{gerepile}'d, since they are not yet valid \kbd{GEN}s: their codewords
 must be filled first.
 
@@ -6533,6 +6536,12 @@ equal to \kbd{[x,y,z,t]}.
 
 \fun{GEN}{mkvec5}{GEN a1, GEN a2, GEN a3, GEN a4, GEN a5} creates the
 5-dimensional \typ{VEC} equal to $[a_1,a_2,a_3,a_4,a_5]$.
+
+\fun{GEN}{mkqfi}{GEN x, GEN y, GEN z} creates \typ{QFI} equal
+to \kbd{Qfb(x,y,z)}, assuming that $y^2 - 4xz < 0$.
+
+\fun{GEN}{mkerr}{long n} returns a \typ{ERROR} with error code $n$
+(\kbd{enum err\_list}).
 
 \smallskip
 
