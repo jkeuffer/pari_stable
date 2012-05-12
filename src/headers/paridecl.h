@@ -869,6 +869,7 @@ GEN     znstar(GEN x);
 
 long    Z_issquarefree(GEN x);
 GEN     Z_factor_limit(GEN n, ulong all);
+GEN     Z_factor_listP(GEN N, GEN L);
 GEN     Z_factor_until(GEN n, GEN limit);
 GEN     Z_smoothen(GEN N, GEN L, GEN *pP, GEN *pe);
 long    bigomega(GEN n);
@@ -907,6 +908,7 @@ long    moebius(GEN n);
 GEN     numbdiv(GEN n);
 long    omega(GEN n);
 GEN     sumdigits(GEN n);
+ulong   sumdigitsu(ulong n);
 GEN     sumdiv(GEN n);
 GEN     sumdivk(GEN n,long k);
 ulong   eulerphiu(ulong n);
