@@ -578,6 +578,18 @@ FqX_split_part(GEN f, GEN T, GEN p)
   return FqX_gcd(z, f, T, p);
 }
 
+static GEN
+FlxqX_split_part(GEN f, GEN T, ulong p)
+{
+  long n = degpol(f);
+  GEN z, X = pol_x(varn(f));
+  if (n <= 1) return f;
+  f = FlxqX_red(f, T, p);
+  z = FlxqXQ_pow(X, powuu(p, degpol(T)), f, T, p);
+  z = FlxX_sub(z, X , p);
+  return FlxqX_gcd(z, f, T, p);
+}
+
 /* Compute the number of roots in Fq without counting multiplicity
  * return -1 for 0 polynomial. lc(f) must be prime to p. */
 long
@@ -596,6 +608,13 @@ FqX_nbroots(GEN f, GEN T, GEN p)
   avma = av; return degpol(z);
 }
 
+long
+FlxqX_nbroots(GEN f, GEN T, ulong p)
+{
+  pari_sp av = avma;
+  GEN z = FlxqX_split_part(f, T, p);
+  avma = av; return degpol(z);
+}
 int
 FpX_is_totally_split(GEN f, GEN p)
 {
