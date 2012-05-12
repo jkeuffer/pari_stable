@@ -4967,9 +4967,11 @@ to get an \kbd{F2m} with \kbd{n} rows.
 \subsec{\kbd{FpE}}
 
 Let $p$ a prime number and $E$ the elliptic curve given by the equation
-$E:y^2=x^3+a_4\*x+a_6$. A \kbd{FpE} is a point of $E(\F_p)$.
-Since an affine point and $a4$ determines an unique $a6$, most functions
-do not take $a6$ as an argument.
+$E:y^2=x^3+a_4\*x+a_6$, with $a_4$ and $a_6$ in $\F_p$. A \kbd{FpE} is a point of
+$E(\F_p)$.  Since an affine point and $a_4$ determine an unique $a6$, most
+functions do not take $a_6$ as an argument.
+A \kbd{FpE} is either the point at infinity (\kbd{ellinf()}) or a $FpV$ whith two
+components. The parameters $a_4$ and $a_6$ are given as \typ{INT}s when required.
 
 \fun{GEN}{FpE_add}{GEN P, GEN Q, GEN a4, GEN p} returns the sum $P+Q$
 in the group $E(\F_p)$, where $E$ is defined by $E:y^2=x^3+a_4\*x+a_6$,
