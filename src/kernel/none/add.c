@@ -67,7 +67,7 @@ addui_sign(ulong x, GEN y, long sy)
   ly=lgefint(y);
   if (ly==3)
   {
-    const long t = y[2];
+    const ulong t = y[2];
     if (x == t) return gen_0;
     z=cgeti(3);
     if (x < t) {
