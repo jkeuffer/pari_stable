@@ -1537,6 +1537,9 @@ gen_search(GEN T, GEN x, long flag, void *data, int (*cmp)(void*,GEN,GEN))
 long
 ZV_search(GEN x, GEN y) { return tablesearch(x, y, cmpii); }
 
+long
+zv_search(GEN x, long y) { return tablesearch(x, (GEN)y, cmp_small); }
+
 /********************************************************************/
 /**                   COMPARISON FUNCTIONS                         **/
 /********************************************************************/

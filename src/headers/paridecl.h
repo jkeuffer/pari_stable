@@ -1218,6 +1218,12 @@ GEN     zncoppersmith(GEN P0, GEN N, GEN X, GEN B) ;
 /* bibli2.c */
 
 GEN     QXQ_reverse(GEN a, GEN T);
+GEN     RgXQ_reverse(GEN a, GEN T);
+GEN     ZV_indexsort(GEN L);
+long    ZV_search(GEN x, GEN y);
+GEN     ZV_sort(GEN L);
+GEN     ZV_sort_uniq(GEN L);
+GEN     ZV_union_shallow(GEN x, GEN y);
 GEN     binomial(GEN x, long k);
 GEN     binomialuu(ulong n, ulong k);
 int     cmp_nodata(void *data, GEN x, GEN y);
@@ -1253,7 +1259,6 @@ GEN     mathilbert(long n);
 GEN     matqpascal(long n, GEN q);
 GEN     merge_factor(GEN fx, GEN fy, void *data, int (*cmp)(void *,GEN,GEN));
 GEN     modreverse(GEN x);
-GEN     RgXQ_reverse(GEN a, GEN T);
 GEN     numtoperm(long n, GEN x);
 GEN     permtonum(GEN x);
 GEN     polhermite(long n, long v);
@@ -1282,11 +1287,7 @@ GEN     vecbinome(long n);
 long    vecsearch(GEN v, GEN x, GEN k);
 GEN     vecsort(GEN x, GEN k);
 GEN     vecsort0(GEN x, GEN k, long flag);
-GEN     ZV_indexsort(GEN L);
-long    ZV_search(GEN x, GEN y);
-GEN     ZV_sort(GEN L);
-GEN     ZV_sort_uniq(GEN L);
-GEN     ZV_union_shallow(GEN x, GEN y);
+long    zv_search(GEN x, long y);
 
 /* bit.c */
 

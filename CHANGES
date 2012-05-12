@@ -251,6 +251,7 @@ BA 56- GP function FpE_log
    69- istotient() function
    70- implement Haible/Papanikolaou binary splitting
 BA 71- PARI function FlxqX_nbroots
+BA 72- PARI function zv_search
 
   Removed
     1- dropped DOS support

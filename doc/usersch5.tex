@@ -5261,6 +5261,9 @@ and $0$ otherwise.
 \fun{int}{zv_equal}{GEN x, GEN y} returns $1$ if the two \kbd{zv} are equal
 and $0$ otherwise.
 
+\fun{long}{ZV_search}{GEN L, long y} look for $y$ in the sorted
+\kbd{zv} $L$. Return an index $i$ such that $L[i] = y$, and  $0$ otherwise.
+
 \fun{GEN}{zv_copy}{GEN x} as \kbd{Flv\_copy}.
 
 \fun{GEN}{zm_transpose}{GEN x} as \kbd{Flm\_transpose}.
