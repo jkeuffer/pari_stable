@@ -577,9 +577,8 @@ RgX_is_monomial(GEN x)
 INLINE int
 RgV_is_ZV(GEN x)
 {
-  long i, h = lg(x);
-  if (h == 1) return 1;
-  for (i = h-1; i > 0; i--)
+  long i;
+  for (i = lg(x)-1; i > 0; i--)
     if (typ(gel(x,i)) != t_INT) return 0;
   return 1;
 }

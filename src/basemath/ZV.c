@@ -27,8 +27,7 @@ check_ZV(GEN x, long l)
 void
 RgV_check_ZV(GEN A, const char *s)
 {
-  if (!check_ZV(A, lg(A)))
-    pari_err_TYPE(stack_strcat(s," [integer vector]"), A);
+  if (!RgV_is_ZV(A)) pari_err_TYPE(stack_strcat(s," [integer vector]"), A);
 }
 void
 RgM_check_ZM(GEN A, const char *s)
