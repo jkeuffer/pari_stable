@@ -136,7 +136,7 @@ BA 28- more usable form of alarm(s, code): evaluate code, aborting after s
    29- [non-Unix systems] the name of the preferences file is now "gprc.txt"
        (it remains ".gprc" on Unix systems)
    30- also look for the preferences file in PARI's "datadir"
-   31- removed rootsold() code : polroots(x, 1) is now treated as polroots(x)
+   31- removed rootsold() code : polroots(x, 1) is no longer accepted
    32- rewrite ellan using C-longs + new function anellsmall()
    33- renamed all libpari error codes [ pari_err() arguments ]
    34- allow t_VECSMALL in vecextract

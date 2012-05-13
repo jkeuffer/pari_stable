@@ -546,7 +546,7 @@ rootmod2(x,p)=polrootsmod(x,p,1);
 rootpadic(x,p,r)=polrootspadic(x,p,r);
 roots(x)=polroots(x);
 rootsof1(nf)=nfrootsof1(nf);
-rootsold(x)=polroots(x,1);
+rootsold(x)=;
 round
 rounderror(x)=round(x,&e);
 rpoint(w,dx,dy)=plotrpoint(w,dx,dy);

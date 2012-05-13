@@ -2620,7 +2620,6 @@ GEN     cleanroots(GEN x,long l);
 int     isrealappr(GEN x, long l);
 GEN     polgraeffe(GEN p);
 GEN     roots(GEN x,long l);
-GEN     roots0(GEN x,long flag,long l);
 
 /* polsubcyclo.c */
 

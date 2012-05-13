@@ -2117,16 +2117,3 @@ roots(GEN p, long l) { return roots_aux(p,l, 0); }
 /* clean up roots. If root is real replace it by its real part */
 GEN
 cleanroots(GEN p, long l) { return roots_aux(p,l, 1); }
-
-GEN
-roots0(GEN p, long flag,long l)
-{
-  switch(flag)
-  {
-    case 0: return roots(p,l);
-    case 1: pari_warn(warner, "deprecated flag = 1 in polroots");
-            return roots(p,l);
-    default: pari_err_FLAG("polroots");
-  }
-  return NULL; /* not reached */
-}

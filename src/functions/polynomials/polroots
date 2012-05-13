@@ -1,7 +1,7 @@
 Function: polroots
 Section: polynomials
-C-Name: roots0
-Prototype: GD0,L,p
+C-Name: roots
+Prototype: Gp
 Help: polroots(x): complex roots of the polynomial x using
  Schonhage's method, as modified by Gourdon.
 Doc: complex roots of the polynomial
@@ -14,9 +14,6 @@ Doc: complex roots of the polynomial
  root-finding algorithm, due to and originally implemented by X.~Gourdon.
  Barring bugs, it is guaranteed to converge and to give the roots to the
  required accuracy.
-
- %\syn{NO}
- The library syntax is \fun{GEN}{roots}{GEN x, long prec}. Also available is
- \fun{GEN}{cleanroots}{GEN x, long prec} which ensures that real roots of
- real polynomials are returned as \typ{REAL} (instead of \typ{COMPLEX}s with
- 0 imaginary part).
+Variant: Also available is \fun{GEN}{cleanroots}{GEN x, long prec} which
+ ensures that real roots of real polynomials are returned as \typ{REAL}
+ (instead of \typ{COMPLEX}s with 0 imaginary part).
