@@ -2301,10 +2301,10 @@ Zp_teichmuller(GEN x, GEN p, long e, GEN pe)
   GEN q, z, p1;
   pari_sp av;
   ulong mask;
-  if (equaliu(p,2)) return (mod4(x) & 2)? addsi(-1,pe): gen_1;
+  if (equaliu(p,2)) return (mod4(x) & 2)? subiu(pe,1): gen_1;
   if (e == 1) return icopy(x);
   av = avma;
-  p1 = addsi(-1, p);
+  p1 = subiu(p, 1);
   mask = quadratic_prec_mask(e);
   q = p; z = remii(x, p);
   while (mask > 1)

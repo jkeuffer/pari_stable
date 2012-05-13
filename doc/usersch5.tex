@@ -4733,6 +4733,12 @@ $a,b,n,p$ be \typ{INT}s, with $n,p > 1$, and $p$ coprime to $n$,
 such that $a^n \equiv b \mod p$. Returns a \typ{INT} $A$ such that
 $A^n \equiv b \mod p^e$. Special case of \tet{ZpX_liftroot}.
 
+\fun{GEN}{Zp_teichmuller}{GEN x, GEN p, long e, GEN pe} for $p$ an odd prime,
+$x$ a \typ{INT} coprime to $p$, and $pe = p^e$, returns the $(p-1)$-th root of
+$1$ congruent to $x$ modulo $p$, modulo $p^e$. For convenience, $p = 2$ is
+also allowed and we return $1$ ($x$ is $1$ mod $4$) or $2^e - 1$ ($x$ is $3$
+mod $4$).
+
 \fun{GEN}{ZpXQ_sqrtnlift}{GEN b, GEN n, GEN a, GEN T, GEN p, long e} let
 $n,p$ be \typ{INT}s, with $n,p > 1$ and $p$ coprime to $n$, and $a,b$
 be \kbd{Fq}s (modulo $T$) such that $a^n \equiv b \mod (p,T)$.
