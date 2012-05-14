@@ -1,10 +1,10 @@
 {
   u=v=p=q=1;
-  for (k=1, 1000,
-    w = u+v; u = v; v = w;
-    p *= w; q = lcm(q,w);
+  for (k=1, 2000,
+    [u,v] = [v,u+v];
+    p *= v; q = lcm(q,v);
     if (k%50 == 0,
-      print(k " " log(p)/log(q))
+      print(k, " ", log(p)/log(q))
     )
   )
 }
