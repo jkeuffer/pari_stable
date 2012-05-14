@@ -1187,7 +1187,7 @@ match_and_sort(GEN compile_atkin, GEN Mu, GEN u, GEN a4, GEN a6, GEN p)
   pari_sp av1, av2;
   GEN baby, giant, SgMb, Mb, Mg, den, Sg, dec_inf, div, pp1 = addis(p,1);
   GEN P, Pb, Pg, point, diff, pre, table, table_ind;
-  long best_i, i, lbaby, lgiant, lp = lg(p), k = lg(compile_atkin)-1;
+  long best_i, i, lbaby, lgiant, k = lg(compile_atkin)-1;
 
   if (k == 1)
   { /*only one Atkin prime, check the cardinality with random points */
@@ -1240,39 +1240,44 @@ match_and_sort(GEN compile_atkin, GEN Mu, GEN u, GEN a4, GEN a6, GEN p)
 
   /*Now we compute the table of babies, this table contains only the */
   /*lifted x-coordinate of the points in order to use less memory */
-  table = cgetg(lbaby, t_VEC);
-  for (i = 1; i < lbaby; i++) gel(table,i) = cgeti(lp);
+  table = cgetg(lbaby, t_VECSMALL);
   av1 = avma;
   /* (p+1 - u - Mu*Mb*Sg) P - (baby[1]) Pb */
   point = FpE_mul(P, subii(subii(pp1, u), mulii(Mu, addii(SgMb, mulii(Mg, gel(baby,1))))), a4, p);
-  affii(gel(point,1), gel(table, 1));
+  table[1] = hash_GEN(gel(point,1));
   for (i = 2; i < lbaby; i++)
   {
     GEN d = subii(gel(baby, i), gel(baby, i-1));
     point = FpE_sub(point, gel(pre, ZV_search(diff, d)), a4, p);
-    affii(gel(point,1), gel(table, i));
-    point = gerepilecopy(av1, point);
+    table[i] = hash_GEN(gel(point,1));
+    if ((i & 0xff) == 0) point = gerepileupto(av1, point);
   }
   /* Precomputations for giants */
   pre = BSGS_pre(&diff, giant, Pg, a4, p);
 
   /* Look for a collision among the x-coordinates */
-  gen_sort_inplace(table, (void*)&cmpii, &cmp_nodata, &table_ind);
+  table_ind = vecsmall_indexsort(table);
+  table = perm_mul(table,table_ind);
+
   av1 = avma;
   point = FpE_mul(Pg, gel(giant, 1), a4, p);
   for (i = 1; i < lgiant; i++)
   {
     GEN d;
-    long s = ZV_search(table, gel(point, 1));
+    long s = zv_search(table, hash_GEN(gel(point, 1)));
     if (s) {
       GEN B = gel(baby,table_ind[s]), G = gel(giant,i);
       GEN GMb = mulii(G, Mb), BMg = mulii(B, Mg);
+      GEN Be = subii(subii(pp1, u), mulii(Mu, addii(SgMb, BMg)));
+      GEN Bp = FpE_mul(P, Be, a4, p);
       /* p+1 - u - Mu (Sg Mb + GIANT Mb + BABY Mg) */
-      GEN card = subii(subii(pp1, u), mulii(Mu, addii(SgMb, addii(GMb, BMg))));
-      card = mkvec2(card, addii(card, mulii(mulsi(2,Mu), GMb)));
-      return choose_card(card, a4, a6, p);
+      if (equalii(gel(Bp,1),gel(point,1)))
+      {
+        GEN card = subii(Be, mulii(Mu, GMb));
+        card = mkvec2(card, addii(card, mulii(mulsi(2,Mu), GMb)));
+        return choose_card(card, a4, a6, p);
+      }
     }
-
     d = subii(gel(giant, i+1), gel(giant, i));
     point = FpE_add(point, gel(pre, ZV_search(diff, d)), a4, p);
     if ((i & 0xff) == 0) point = gerepilecopy(av1, point);
