@@ -4634,20 +4634,16 @@ elltatepairing(GEN E, GEN P, GEN Q, GEN m)
   return ellmiller(E, P, Q, m);
 }
 
-/* if (singular), avoid the singular point */
 static GEN
-ellgen1_FpE(GEN N, GEN a4, GEN a6, GEN p, int singular)
+ellgen1_FpE(GEN N, GEN a4, GEN a6, GEN p)
 {
   GEN F = mkvec2(N, Z_factor(N));
   pari_sp av = avma;
   while(1)
   {
-    GEN P = random_FpE(a4, a6, p);
-    if (!singular || signe( gel(P,2) )) /* avoid singular point */
-    {
-      GEN s = FpE_order(P, F, a4, p);
-      if (equalii(s, N)) return P;
-    }
+    GEN P = random_FpE(a4, a6, p); /* non-singular */
+    GEN s = FpE_order(P, F, a4, p);
+    if (equalii(s, N)) return P;
     avma = av;
   }
 }
@@ -4734,13 +4730,11 @@ ellgen(GEN E, GEN D, GEN m, GEN p)
     GEN P;
     switch(lg(D)-1)
     {
-    case 1: {
-      GEN disc = Rg_to_Fp(ell_get_disc(E), p);
-      P = ellgen1_FpE(gel(D,1), a4, a6, p, signe(disc) == 0);
+    case 1:
+      P = ellgen1_FpE(gel(D,1), a4, a6, p);
       P = FpE_changepoint(P, gel(e,3), p);
       P = mkvec(P);
       break;
-    }
     default:
       P = ellgen2_FpE(gel(D,1), gel(D,2), m, a4, a6, p);
       gel(P,1) = FpE_changepoint(gel(P,1), gel(e,3), p);

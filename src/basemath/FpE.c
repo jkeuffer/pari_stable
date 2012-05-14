@@ -176,20 +176,30 @@ FpE_mul(GEN P, GEN n, GEN a4, GEN p)
   return _FpE_mul(&E, P, n);
 }
 
-/* Finds a random point on E */
+/* Finds a random point on E. Assume that p > 3; do not assume that E is
+ * non-singular */
 GEN
 random_FpE(GEN a4, GEN a6, GEN p)
 {
   pari_sp ltop = avma;
-  GEN x, y, rhs;
+  GEN x, x2, y, rhs;
   do
   {
     avma= ltop;
     x   = randomi(p); /*  x^3+a4*x+a6 = x*(x^2+a4)+a6  */
-    rhs = Fp_add(Fp_mul(x, Fp_add(Fp_sqr(x, p), a4, p), p), a6, p);
+    x2  = Fp_sqr(x, p);
+    rhs = Fp_add(Fp_mul(x, Fp_add(x2, a4, p), p), a6, p);
   } while (kronecker(rhs, p) < 0);
   y = Fp_sqrt(rhs, p);
   if (!y) pari_err_PRIME("random_FpE", p);
+  if (!signe(y))
+  { /* check that [x,y] is non-singular! */
+    if (!signe(Fp_add(mului(3,x2), a4, p)))
+    { /* singular */
+      avma = ltop;
+      return random_FpE(a4, a6, p);
+    }
+  }
   return gerepilecopy(ltop, mkvec2(x, y));
 }
 
