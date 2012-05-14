@@ -934,6 +934,7 @@ void    checkbid(GEN bid);
 GEN     checkbnf(GEN bnf);
 void    checkbnr(GEN bnr);
 void    checkbnrgen(GEN bnr);
+void    checkclgp(GEN v);
 void    checksqmat(GEN x, long N);
 GEN     checknf(GEN nf);
 GEN     checknfelt_mod(GEN nf, GEN x, const char *s);

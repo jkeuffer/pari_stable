@@ -375,18 +375,16 @@ GEN
 member_no(GEN x) /* number of elements of a group (of type clgp) */
 {
   pari_sp av = avma;
-  GEN clg = member_clgp(x);
-  if (typ(clg)!=t_VEC || (lg(clg)!=3 && lg(clg)!=4)) member_err("no",x);
-  avma = av; return gel(clg,1);
+  x = member_clgp(x); checkclgp(x);
+  avma = av; return gel(x,1);
 }
 
 GEN
 member_cyc(GEN x) /* cyclic decomposition (SNF) of a group (of type clgp) */
 {
   pari_sp av = avma;
-  GEN clg = member_clgp(x);
-  if (typ(clg)!=t_VEC || (lg(clg)!=3 && lg(clg)!=4)) member_err("cyc",x);
-  avma = av; return gel(clg,2);
+  x = member_clgp(x); checkclgp(x);
+  avma = av; return gel(x,2);
 }
 
 /* SNF generators of a group (of type clgp), or generators of a prime
@@ -401,11 +399,9 @@ member_gen(GEN x)
   (void)get_nf(x,&t);
   if (t == typ_GAL) return gal_get_gen(x);
   av = avma;
-  x = member_clgp(x);
-  if (typ(x)!=t_VEC || lg(x)!=4) member_err("gen",x);
-  avma = av;
-  if (typ(x[1]) == t_COL) return gel(x,2); /* from bnfisprincipal */
-  return gel(x,3);
+  x = member_clgp(x); checkclgp(x);
+  if (lg(x)!=4) member_err("gen",x);
+  avma = av; return gel(x,3);
 }
 GEN
 member_group(GEN x)

@@ -105,6 +105,19 @@ checkbid(GEN bid)
 {
   if (!checkbid_i(bid)) pari_err_TYPE("checkbid",bid);
 }
+void
+checkclgp(GEN v)
+{
+  if (typ(v) == t_VEC) switch(lg(v))
+  {
+    case 4: if (typ(gel(v,3)) != t_VEC) break;
+    case 3: if (typ(gel(v,2)) != t_VEC) break;
+            if (typ(gel(v,1)) != t_INT) break;
+            return;/*OK*/
+    default: break;
+  }
+  pari_err_TYPE("checkclgp",v);
+}
 
 void
 checkprid(GEN id)
