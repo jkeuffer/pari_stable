@@ -220,7 +220,7 @@ random_Flx(long d1, long vs, ulong p)
   return Flx_renormalize(y,d);
 }
 
-GEN
+static GEN
 Flx_addspec(GEN x, GEN y, ulong p, long lx, long ly)
 {
   long i,lz;
@@ -264,7 +264,7 @@ Flx_Fl_add(GEN y, ulong x, ulong p)
   return z;
 }
 
-GEN
+static GEN
 Flx_subspec(GEN x, GEN y, ulong p, long lx, long ly)
 {
   long i,lz;
@@ -306,7 +306,7 @@ Flx_sub(GEN x, GEN y, ulong p)
   z[1]=x[1]; return Flx_renormalize(z, lz);
 }
 
-GEN
+static GEN
 Flx_negspec(GEN x, ulong p, long l)
 {
   long i;
@@ -389,7 +389,7 @@ Flx_normalize(GEN z, ulong p)
 }
 
 /* return (x * X^d) + y. Assume d > 0, x > 0 and y >= 0 */
-GEN
+static GEN
 Flx_addshift(GEN x, GEN y, ulong p, long d)
 {
   GEN xd,yd,zd = (GEN)avma;
@@ -589,7 +589,7 @@ Flx_mulspec_mulii_inflate(GEN x, GEN y, long N, ulong p, long nx, long ny)
  * b+2 were sent instead. na, nb = number of terms of a, b.
  * Only c, c0, c1, c2 are genuine GEN.
  */
-GEN
+static GEN
 Flx_mulspec(GEN a, GEN b, ulong p, long na, long nb)
 {
   GEN a0,c,c0;
@@ -735,7 +735,7 @@ Flx_sqrspec_sqri_inflate(GEN x, long N, ulong p, long nx)
   return gerepileupto(av, Z_mod2BIL_Flx(z, N, (nx-1)*2, p));
 }
 
-GEN
+static GEN
 Flx_sqrspec(GEN a, ulong p, long na)
 {
   GEN a0, c, c0;
@@ -806,6 +806,26 @@ Flx_pow(GEN x, long n, ulong p)
     m >>= 1; if (!m) return y;
     z = Flx_sqr(z, p);
   }
+}
+
+static GEN
+Flx_recipspec(GEN x, long l, long n)
+{
+  long i;
+  GEN z=cgetg(n+2,t_VECSMALL)+2;
+  for(i=0; i<l; i++)
+    z[n-i-1] = x[i];
+  for(   ; i<n; i++)
+    z[n-i-1] = 0;
+  return Flx_renormalize(z-2,n+2);
+}
+
+GEN
+Flx_recip(GEN x)
+{
+  GEN z=Flx_recipspec(x+2,lgpol(x),lgpol(x));
+  z[1]=x[1];
+  return z;
 }
 
 /*
@@ -1151,26 +1171,6 @@ Flx_valrem(GEN x, GEN *Z)
   y = cgetg(l, t_VECSMALL); y[1] = x[1];
   for (i=2; i<l; i++) y[i] = x[i+v];
   *Z = y; return v;
-}
-
-GEN
-Flx_recipspec(GEN x, long l, long n)
-{
-  long i;
-  GEN z=cgetg(n+2,t_VECSMALL)+2;
-  for(i=0; i<l; i++)
-    z[n-i-1] = x[i];
-  for(   ; i<n; i++)
-    z[n-i-1] = 0;
-  return Flx_renormalize(z-2,n+2);
-}
-
-GEN
-Flx_recip(GEN x)
-{
-  GEN z=Flx_recipspec(x+2,lgpol(x),lgpol(x));
-  z[1]=x[1];
-  return z;
 }
 
 GEN
@@ -1670,7 +1670,7 @@ Flx_div_by_X_x(GEN a, ulong x, ulong p, ulong *rem)
 }
 
 /* u P(X) + v P(-X) */
-GEN
+static GEN
 Flx_even_odd_comb(GEN P, ulong u, ulong v, ulong p)
 {
   long i, l = lg(P);
@@ -2697,7 +2697,7 @@ FlxX_swap(GEN x, long n, long ws)
   return FlxX_renormalize(y,ly);
 }
 
-GEN
+static GEN
 zxX_to_Kronecker_spec(GEN P, long lp, GEN Q)
 { /* P(X) = sum Pi(Y) * X^i, return P( Y^(2n-1) ) */
   long i, j, k, l, N = (degpol(Q)<<1) + 1;
@@ -2735,7 +2735,7 @@ FlxX_add(GEN x, GEN y, ulong p)
   return FlxX_renormalize(z, lz);
 }
 
-GEN
+static GEN
 FlxX_subspec(GEN x, GEN y, ulong p, long lx, long ly)
 {
   long i,lz;
@@ -2817,7 +2817,7 @@ FlxX_shift(GEN a, long n)
   return b;
 }
 
-GEN
+static GEN
 FlxX_recipspec(GEN x, long l, long n, long vs)
 {
   long i;
@@ -2871,7 +2871,7 @@ FlxqX_red(GEN z, GEN T, ulong p)
   return FlxX_renormalize(res,l);
 }
 
-GEN
+static GEN
 FlxqX_mulspec(GEN x, GEN y, GEN T, ulong p, long lx, long ly)
 {
   pari_sp ltop=avma;

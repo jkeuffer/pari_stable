@@ -150,6 +150,8 @@ GEN     FlxM_to_ZXM(GEN z);
 GEN     FlxV_Flc_mul(GEN V, GEN W, ulong p);
 GEN     FlxV_to_Flm(GEN v, long n);
 GEN     FlxX_add(GEN P, GEN Q, ulong p);
+GEN     FlxX_sub(GEN P, GEN Q, ulong p);
+GEN     FlxX_swap(GEN x, long n, long ws);
 GEN     FlxX_renormalize(GEN x, long lx);
 GEN     FlxX_shift(GEN a, long n);
 GEN     FlxX_to_Flm(GEN v, long n);

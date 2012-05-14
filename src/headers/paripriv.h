@@ -418,23 +418,9 @@ char *file_getline(Buffer *b, char **s0, input_method *IM);
 
 /* Flx.c */
 
-GEN     FlxX_recipspec(GEN x, long l, long n, long vs);
-GEN     FlxX_sub(GEN x, GEN y, ulong p);
-GEN     FlxX_subspec(GEN x, GEN y, ulong p, long lx, long ly);
-GEN     FlxX_swap(GEN x, long n, long ws);
 GEN     zxX_to_Kronecker(GEN P, GEN Q);
-GEN     zxX_to_Kronecker_spec(GEN P, long lp, GEN Q);
-GEN     Flx_addshift(GEN x, GEN y, ulong p, long d);
-GEN     Flx_addspec(GEN x, GEN y, ulong p, long lx, long ly);
-GEN     Flx_even_odd_comb(GEN P, ulong u, ulong v, ulong p);
-GEN     Flx_mulspec(GEN a, GEN b, ulong p, long na, long nb);
-GEN     Flx_negspec(GEN x, ulong p, long l);
-GEN     Flx_recipspec(GEN x, long l, long n);
-GEN     Flx_sqrspec(GEN a, ulong p, long na);
-GEN     Flx_subspec(GEN x, GEN y, ulong p, long lx, long ly);
 GEN     Kronecker_to_FlxqX(GEN z, GEN T, ulong p);
 GEN     FlxqX_invMontgomery(GEN T, GEN Q, ulong p);
-GEN     FlxqX_mulspec(GEN x, GEN y, GEN T, ulong p, long lx, long ly);
 GEN     FlxqX_rem_Montgomery(GEN x, GEN mg, GEN T, GEN Q, ulong p);
 
 /* Qfb.c */
