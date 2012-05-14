@@ -1,7 +1,7 @@
 Function: rnfconductor
 Section: number_fields
 C-Name: rnfconductor
-Prototype: GGD0,L,
+Prototype: GG
 Help: rnfconductor(bnf,pol): conductor of the Abelian extension
  of bnf defined by pol. The result is [conductor,rayclassgroup,subgroup],
  where conductor is the conductor itself, rayclassgroup the structure of the

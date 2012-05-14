@@ -1555,10 +1555,9 @@ rnfisabelian(GEN nf, GEN pol)
 /* Given bnf and polrel defining an abelian relative extension, compute the
  * corresponding conductor and congruence subgroup. Return
  * [[ideal,arch],[hm,cyc,gen],group] where [ideal,arch] is the conductor, and
- * [hm,cyc,gen] is the corresponding ray class group.
- * If flag != 0, check that the extension is abelian */
+ * [hm,cyc,gen] is the corresponding ray class group. */
 GEN
-rnfconductor(GEN bnf, GEN polrel, long flag)
+rnfconductor(GEN bnf, GEN polrel)
 {
   pari_sp av = avma;
   GEN nf, module, bnr, group, den, D;
@@ -1567,9 +1566,6 @@ rnfconductor(GEN bnf, GEN polrel, long flag)
   if (typ(polrel) != t_POL) pari_err_TYPE("rnfconductor",polrel);
   den = Q_denom( RgX_to_nfX(nf, polrel) );
   if (!is_pm1(den)) polrel = RgX_rescale(polrel, den);
-  if (flag)
-    pari_warn(warner,"Deprecatd 'flag' argument in rnfconductor. Use rnfisabelian");
-
   (void)rnfallbase(nf,&polrel, &D, NULL, NULL);
   module = mkvec2(D, const_vec(nf_get_r1(nf), gen_1));
   bnr   = Buchray(bnf,module,nf_INIT | nf_GEN);
