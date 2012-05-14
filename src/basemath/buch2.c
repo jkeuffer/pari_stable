@@ -530,7 +530,7 @@ check_prime_dec(GRHcheck_t *S, long np, GEN nf, GEN P, GEN D, GEN invhr)
     long j, k, l, n;
     GRHprime_t *pr = S->primes + i;
     GEN dec, a = NULL, b = NULL;
-    NEXT_PRIME_VIADIFF(p, delta);
+    NEXT_PRIME_VIADIFF_CHECK(p, delta);
     pr->logp = log(p);
     if (umodiu(D, p))
       dec = FpX_degfact(P, utoipos(p));
