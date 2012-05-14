@@ -110,5 +110,7 @@ enum {
 #define DIFFPTR_SKIP        255                /* Skip these entries */
 #define NEXT_PRIME_VIADIFF(p,d)         STMT_START \
   { while (*(d) == DIFFPTR_SKIP) (p) += *(d)++; (p) += *(d)++; } STMT_END
+#define PREC_PRIME_VIADIFF(p,d)         STMT_START \
+  { (d)--; while (*(d) == DIFFPTR_SKIP) (p) -= *(d)--; (p) -= *(d); } STMT_END
 #define NEXT_PRIME_VIADIFF_CHECK(p,d)  STMT_START \
   { if (!*(d)) pari_err_MAXPRIME(0); NEXT_PRIME_VIADIFF(p,d); } STMT_END

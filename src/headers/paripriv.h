@@ -566,6 +566,8 @@ long    BPSW_psp_nosmalldiv(GEN N);
 int     Fl_MR_Jaeschke(ulong n, long k);
 int     MR_Jaeschke(GEN n, long k);
 long    isanypower_nosmalldiv(GEN N, GEN *px);
+void    prime_table_closest_p(ulong n, byteptr *pd, ulong *pp, ulong *pn);
+void    prime_table_find_n(ulong N, byteptr *pd, ulong *pp);
 int     uisprime_nosmalldiv(ulong n);
 
 /* init.c */

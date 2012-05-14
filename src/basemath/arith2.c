@@ -383,8 +383,7 @@ sieve_chunk(byteptr known_primes, ulong s, byteptr data, ulong count)
 }
 
 /* Here's the workhorse.  This is recursive, although normally the first
-   recursive call will bottom out and invoke initprimes1() at once.
-   (Not static;  might conceivably be useful to someone in library mode) */
+   recursive call will bottom out and invoke initprimes1() at once. */
 static byteptr
 initprimes0_i(ulong maxnum, long *lenp, ulong *lastp, byteptr p1)
 {
@@ -504,15 +503,10 @@ initprimes0(ulong maxnum, long *lenp, ulong *lastp)
   byteptr p1 = initprimes0_i(maxnum, lenp, lastp, (byteptr)pari_malloc(size));
   return (byteptr) pari_realloc(p1, *lenp);
 }
-#if 0 /* not yet... GN */
 /* The diffptr table will contain at least 6548 entries (up to and including
    the 6547th prime, 65557, and the terminal null byte), because the isprime/
    small-factor-extraction machinery wants to depend on everything up to 65539
    being in the table, and we might as well go to a multiple of 4 Bytes.--GN */
-
-void
-init_tinyprimes_tridiv(byteptr p);      /* in ifactor2.c */
-#endif
 
 ulong
 maxprime(void) { return diffptr ? _maxprime : 0; }
@@ -530,7 +524,7 @@ ulong
 init_primepointer(ulong a, ulong p, byteptr *ptr)
 {
   byteptr diff = *ptr;
-  if (a <= 0) a = 2;
+  if (a < 2) a = 2;
   maxprime_check((ulong)a);
   while (a > p) NEXT_PRIME_VIADIFF(p,diff);
   *ptr = diff; return p;
@@ -538,19 +532,12 @@ init_primepointer(ulong a, ulong p, byteptr *ptr)
 
 static byteptr
 initprimes_i(ulong maxnum, long *lenp, ulong *lastp)
-{
-  byteptr p;
-  /* The algorithm must see the next prime beyond maxnum, whence the +512. */
+{ /* The algorithm must see the next prime beyond maxnum, whence the +512. */
   ulong maxnum1 = ((maxnum<65302?65302:maxnum)+512ul);
 
   if ((maxnum>>1) > LONG_MAX - 1024)
     pari_err_OVERFLOW("initprimes [primelimit]");
-  p = initprimes0(maxnum1, lenp, lastp);
-#if 0 /* not yet... GN */
-  static int build_the_tables = 1;
-  if (build_the_tables) { init_tinyprimes_tridiv(p); build_the_tables=0; }
-#endif
-  return p;
+  return initprimes0(maxnum1, lenp, lastp);
 }
 
 byteptr

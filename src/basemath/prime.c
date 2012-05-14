@@ -775,50 +775,122 @@ isprime(GEN x) { return BPSW_psp(x) && BPSW_isprime(x); }
 /**                                                                   **/
 /***********************************************************************/
 
+static struct {
+  long p, n, off;
+} prime_table[] = {
+  {           0,          0,          0},
+  {        7919,       1000,       1000},
+  {       17389,       2000,       2000},
+  {       27449,       3000,       3000},
+  {       37813,       4000,       4000},
+  {       48611,       5000,       5000},
+  {       59359,       6000,       6000},
+  {       70657,       7000,       7000},
+  {       81799,       8000,       8000},
+  {       93179,       9000,       9000},
+  {      104729,      10000,      10000},
+  {      224737,      20000,      20000},
+  {      350377,      30000,      30000},
+  {      479909,      40000,      40000},
+  {      611953,      50000,      50000},
+  {      746773,      60000,      60000},
+  {      882377,      70000,      70000},
+  {     1020379,      80000,      80000},
+  {     1159523,      90000,      90000},
+  {     1299709,     100000,     100000},
+  {     2750159,     200000,     200000},
+  {     7368787,     500000,     500000},
+  {    15485863,    1000000,    1000000},
+  {    32452843,    2000000,    2000000},
+  {    86028121,    5000000,    5000000},
+  {   179424673,   10000000,   10000000},
+  {   373587883,   20000000,   20000000},
+  {   982451653,   50000000,   50000003},
+  {  2038074743,  100000000,  100000027},
+  {  4000000483,  189961831,  189961927},
+  {  4222234741,  200000000,  200000115},
+#if BITS_IN_LONG == 64
+  { 11037271757,  500000000,  500000668},
+  { 22801763489, 1000000000, 1000002238},
+  { 47055833459, 2000000000, 2000007086},
+  {122430513841, 5000000000, 5000030752},
+  {200000000507, 8007105083, 8007169454},
+#endif
+};
+static const int prime_table_len = sizeof(prime_table)/sizeof(prime_table[0]);
+
+/* use something close to Dusart's bound */
+static void
+pari_err_Dusart(long m)
+{ pari_err_MAXPRIME((ulong)(m*( log((double)m*log((double)m))-0.948 ))); }
+/* find prime closest to n in prime_table. */
+void
+prime_table_closest_p(ulong n, byteptr *pd, ulong *pp, ulong *pn)
+{
+  ulong i, maxp = maxprime();
+  for (i = 1; i < prime_table_len; i++)
+  {
+    ulong p = prime_table[i].p;
+    if (p > maxp) { i--; break; }
+    if (p > n)
+    {
+      ulong u = n - prime_table[i-1].p;
+      if (p - n > u) i--;
+      break;
+    }
+  }
+  if (i == prime_table_len) i = prime_table_len - 1;
+  *pn = prime_table[i].n;
+  *pp = prime_table[i].p;
+  *pd = diffptr+prime_table[i].off;
+}
+/* find the N-th prime */
+void
+prime_table_find_n(ulong N, byteptr *pd, ulong *pp)
+{
+  byteptr d;
+  ulong i, n, p, maxp = maxprime();
+  for (i = 1; i < prime_table_len; i++)
+  {
+    n = prime_table[i].n;
+    if (prime_table[i].p > maxp) { i--; break; }
+    if (n > N)
+    {
+      ulong u = N - prime_table[i-1].n;
+      if (n - N > u) i--;
+      break;
+    }
+  }
+  if (i == prime_table_len) i = prime_table_len - 1;
+  p = prime_table[i].p;
+  n = prime_table[i].n;
+  d = diffptr + prime_table[i].off;
+  if (n > N)
+  {
+    n -= N;
+    do { n--; PREC_PRIME_VIADIFF(p,d); } while (n) ;
+  }
+  else if (n < N)
+  {
+    n = N-n;
+    do {
+      if (!*d) pari_err_Dusart(N);
+      n--; NEXT_PRIME_VIADIFF(p,d);
+    } while (n) ;
+  }
+  *pp = p;
+  *pd = d;
+}
+
 /* assume all primes up to 59359 are precomputed */
 ulong
-uprime(long n)
+uprime(long N)
 {
-  byteptr p;
-  ulong prime;
-
-  if (n <= 0) pari_err(e_MISC, "n-th prime meaningless if n = %ld",n);
-  if (n < 1000) {
-    p = diffptr;
-    prime = 0;
-  } else if (n < 2000) {
-    n -= 1000; p = diffptr+1000;
-    prime = 7919;
-  } else if (n < 3000) {
-    n -= 2000; p = diffptr+2000;
-    prime = 17389;
-  } else if (n < 4000) {
-    n -= 3000; p = diffptr+3000;
-    prime = 27449;
-  } else if (n < 5000) {
-    n -= 4000; p = diffptr+4000;
-    prime = 37813;
-  } else if (n < 6000) {
-    n -= 5000; p = diffptr+5000;
-    prime = 48611;
-  } else if (n < 10000 || maxprime() < 500000) {
-    n -= 6000; p = diffptr+6000;
-    prime = 59359;
-  } else if (n < 20000) {
-    n -= 10000; p = diffptr+10000;
-    prime = 104729;
-  } else if (n < 30000) {
-    n -= 20000; p = diffptr+20000;
-    prime = 224737;
-  } else if (n < 40000) {
-    n -= 30000; p = diffptr+30000;
-    prime = 350377;
-  } else {
-    n -= 40000; p = diffptr+40000;
-    prime = 479909;
-  }
-  while (n--) NEXT_PRIME_VIADIFF_CHECK(prime,p);
-  return prime;
+  byteptr d;
+  ulong p;
+  if (N <= 0) pari_err(e_MISC, "n-th prime meaningless if n = %ld",N);
+  prime_table_find_n(N, &d, &p);
+  return p;
 }
 GEN
 prime(long n) { return utoipos(uprime(n)); }
@@ -866,11 +938,21 @@ randomprime(GEN N)
 ulong
 uprimepi(ulong n)
 {
-  byteptr p = diffptr+1;
-  ulong prime = 2, res = 0;
+  byteptr d;
+  ulong p, res;
   maxprime_check(n);
-  while (prime < n) { res++; NEXT_PRIME_VIADIFF(prime,p); }
-  return prime == n? res+1: res;
+  prime_table_closest_p(n, &d, &p, &res);
+  if (p < n)
+  {
+    do { res++; NEXT_PRIME_VIADIFF(p,d); } while (p < n);
+    return p == n? res: res-1;
+  }
+  else if (p == n) return res;
+  else
+  {
+    do { res--; PREC_PRIME_VIADIFF(p,d); } while (p > n) ;
+    return res;
+  }
 }
 
 GEN
@@ -896,8 +978,7 @@ primes(long m)
   while (n--)
   {
     NEXT_PRIME_VIADIFF(prime,p);
-    if (!*p) /* use something close to Dusart's bound */
-      maxprime_check((ulong)(m*( log((double)m*log((double)m))-0.948 )));
+    if (!*p) pari_err_Dusart(m);
     gel(++z, 0) = utoipos(prime);
   }
   return y;
@@ -914,8 +995,7 @@ primes_zv(long m)
   while (n--)
   {
     NEXT_PRIME_VIADIFF(prime,p);
-    if (!*p) /* use something close to Dusart's bound */
-      maxprime_check((ulong)(m*( log((double)m*log((double)m))-0.948 )));
+    if (!*p) pari_err_Dusart(m);
     *++z = prime;
   }
   return y;
