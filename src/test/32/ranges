@@ -135,4 +135,6 @@
 
 [15 20 25]
 
-Total time spent: 4
+[1, [2, 2]]
+[3, [1, 4]]
+Total time spent: 0
