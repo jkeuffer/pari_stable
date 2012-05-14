@@ -3621,6 +3621,9 @@ The following functions implement arithmetic operations between \kbd{FpX}
 and \kbd{Fp} operands, the result being of type \kbd{FpX}. The integer
 \kbd{p} need not be prime.
 
+\fun{GEN}{Z_to_FpX}{GEN x, GEN p, long v} converts a \typ{INT} to a scalar
+polynomial in variable $v$, reduced modulo $p$.
+
 \fun{GEN}{FpX_Fp_add}{GEN y, GEN x, GEN p} add the \kbd{Fp}~\kbd{x} to the
 \kbd{FpX}~\kbd{y}.
 

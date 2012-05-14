@@ -35,6 +35,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
  * compatible.
  */
 
+GEN
+Z_to_FpX(GEN a, GEN p, long v)
+{
+  pari_sp av = avma;
+  GEN z = cgetg(3, t_POL);
+  GEN x = modii(a, p);
+  if (!signe(x)) { avma =av; return pol_0(v); }
+  z[1] = evalsigne(1) | evalvarn(v);
+  gel(z,2) = x; return z;
+}
+
 /* z in Z[X], return lift(z * Mod(1,p)), normalized*/
 GEN
 FpX_red(GEN z, GEN p)

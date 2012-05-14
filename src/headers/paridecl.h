@@ -280,6 +280,7 @@ GEN     FpXV_prod(GEN V, GEN p);
 GEN     FpXV_red(GEN z, GEN p);
 int     Fq_issquare(GEN x, GEN T, GEN p);
 GEN     FqV_inv(GEN x, GEN T, GEN p);
+GEN     Z_to_FpX(GEN a, GEN p, long v);
 long    brent_kung_optpow(long d, long n, long m);
 GEN     gener_FpXQ(GEN T, GEN p, GEN *o);
 GEN     random_FpX(long d, long v, GEN p);
