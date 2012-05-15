@@ -1,0 +1,10 @@
+v = [2,3,2^32-1,2^64-1,10^20];
+f(p)=(a*Mod(1,p)) * (b*Mod(1,p));
+g(p)=sqr(a*Mod(1,p));
+test()=
+{
+  for (i=1,#v,print(i, ": ", f(v[i])));
+  for (i=1,#v,print(i, ": ", g(v[i])));
+}
+a=polcyclo(10); b=polcyclo(5); test();
+a=[1,2;3,4]; b=[-1,2;-4,2]; test();
