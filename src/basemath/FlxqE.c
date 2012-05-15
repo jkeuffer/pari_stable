@@ -139,7 +139,7 @@ FlxqE_sub(GEN P, GEN Q, GEN a4, GEN T, ulong p)
 
 struct _FlxqE
 {
-  GEN a4;
+  GEN a4, a6;
   GEN T;
   ulong p;
 };
@@ -178,21 +178,31 @@ FlxqE_mul(GEN P, GEN n, GEN a4, GEN T, ulong p)
   return _FlxqE_mul(&E, P, n);
 }
 
-/* Finds a random point on E */
+/* Finds a random non-singular point on E */
 GEN
 random_FlxqE(GEN a4, GEN a6, GEN T, ulong p)
 {
   pari_sp ltop = avma;
-  GEN x, y, rhs;
+  GEN x, x2, y, rhs;
   do
   {
     avma= ltop;
     x   = random_Flx(degpol(T),T[1],p); /*  x^3+a4*x+a6 = x*(x^2+a4)+a6  */
-    rhs = Flx_add(Flxq_mul(x, Flx_add(Flxq_sqr(x, T, p), a4, p), T, p), a6, p);
+    x2  = Flxq_sqr(x, T, p);
+    rhs = Flx_add(Flxq_mul(x, Flx_add(x2, a4, p), T, p), a6, p);
+    if (!lgpol(rhs) && !lgpol(Flx_add(Flx_Fl_mul(x2, 3, p), a4, p)))
+      continue;
   } while (!Flxq_issquare(rhs, T, p));
   y = Flxq_sqrtn(rhs, gen_2, T, p, NULL);
   if (!y) pari_err_PRIME("random_FlxqE", T);
   return gerepilecopy(ltop, mkvec2(x, y));
+}
+
+static GEN
+_FlxqE_rand(void *E)
+{
+  struct _FlxqE *ell=(struct _FlxqE *) E;
+  return random_FlxqE(ell->a4, ell->a6, ell->T, ell->p);
 }
 
 static int
@@ -203,7 +213,7 @@ FlxqE_cmp(GEN x, GEN y)
   return vecsmall_lexcmp(x,y);
 }
 
-static const struct bb_group FlxqE_group={_FlxqE_add,_FlxqE_mul,NULL,hash_GEN,FlxqE_cmp,ell_is_inf};
+static const struct bb_group FlxqE_group={_FlxqE_add,_FlxqE_mul,_FlxqE_rand,hash_GEN,FlxqE_cmp,ell_is_inf};
 
 GEN
 FlxqE_order(GEN z, GEN o, GEN a4, GEN T, ulong p)

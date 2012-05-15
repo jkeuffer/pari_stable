@@ -295,6 +295,10 @@ returns $[o,F]$, where $o$ is the order of $x$ and $F$ is the factorization
 of $o$. If $N$ is not \kbd{NULL} it is a multiple of the order, as a
 \typ{INT} or a factorization matrix.
 
+\fun{GEN}{gen_gener}{GEN o, void *E, const struct bb_group *grp}
+returns a random generator of the group, assuming it is of order exactly
+$o$ (which can be given by a factorization matrix).
+
 \section{Public functions useless outside of GP context}
 
 These functions implement GP functionality for which the C language or

@@ -138,7 +138,7 @@ FpE_sub(GEN P, GEN Q, GEN a4, GEN p)
 
 struct _FpE
 {
-  GEN a4;
+  GEN a4,a6;
   GEN p;
 };
 
@@ -176,8 +176,8 @@ FpE_mul(GEN P, GEN n, GEN a4, GEN p)
   return _FpE_mul(&E, P, n);
 }
 
-/* Finds a random point on E. Assume that p > 3; do not assume that E is
- * non-singular */
+/* Finds a random non-singular point on E */
+
 GEN
 random_FpE(GEN a4, GEN a6, GEN p)
 {
@@ -189,18 +189,19 @@ random_FpE(GEN a4, GEN a6, GEN p)
     x   = randomi(p); /*  x^3+a4*x+a6 = x*(x^2+a4)+a6  */
     x2  = Fp_sqr(x, p);
     rhs = Fp_add(Fp_mul(x, Fp_add(x2, a4, p), p), a6, p);
+    if (!signe(rhs) && !signe(Fp_add(mului(3,x2),a4,p)))
+      continue;
   } while (kronecker(rhs, p) < 0);
   y = Fp_sqrt(rhs, p);
   if (!y) pari_err_PRIME("random_FpE", p);
-  if (!signe(y))
-  { /* check that [x,y] is non-singular! */
-    if (!signe(Fp_add(mului(3,x2), a4, p)))
-    { /* singular */
-      avma = ltop;
-      return random_FpE(a4, a6, p);
-    }
-  }
   return gerepilecopy(ltop, mkvec2(x, y));
+}
+
+static GEN
+_FpE_rand(void *E)
+{
+  struct _FpE *e=(struct _FpE *) E;
+  return random_FpE(e->a4, e->a6, e->p);
 }
 
 static int
@@ -217,7 +218,7 @@ FpE_hash(GEN P)
   return signe(gel(P,1))?mod2BIL(gel(P,1)):0;
 }
 
-static const struct bb_group FpE_group={_FpE_add,_FpE_mul,NULL,FpE_hash,FpE_cmp,ell_is_inf};
+static const struct bb_group FpE_group={_FpE_add,_FpE_mul,_FpE_rand,FpE_hash,FpE_cmp,ell_is_inf};
 
 GEN
 FpE_order(GEN z, GEN o, GEN a4, GEN p)

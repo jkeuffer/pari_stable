@@ -487,7 +487,7 @@ gen_factored_order(GEN a, GEN o, void *E, const struct bb_group *grp)
 /*                          n-th ROOT                              */
 /*                                                                 */
 /*******************************************************************/
-/* Assume l is prime. Return a non l-th power and set *zeta to an element
+/* Assume l is prime. Return a generator of the l-th Sylow and set *zeta to an element
  * of order l.
  *
  * q = l^e*r, e>=1, (r,l)=1
@@ -510,6 +510,31 @@ gen_lgener(GEN l, long e, GEN r,GEN *zeta, void *E, const struct bb_group *grp)
     if (i==e) break;
   }
   *zeta = m; return m1;
+}
+
+/* Let G be a cyclic group of order o>1. Returns a (random) generator */
+
+GEN
+gen_gener(GEN o, void *E, const struct bb_group *grp)
+{
+  GEN F = dlog_get_ordfa(o);
+  GEN N = gel(F,1), pr = gel(F,2), z = NULL;
+  long i, lpr = lg(pr);
+  pari_sp av = avma, lim = stack_lim(av,2);
+  for (i = 1; i < lpr; i++)
+  {
+    GEN l = gcoeff(pr,i,1);
+    long e = itos(gcoeff(pr,i,2));
+    GEN r = diviiexact(N,powis(l,e));
+    GEN zetan, zl = gen_lgener(l,e,r,&zetan,E,grp);
+    z = i==1 ? zl: grp->mul(E,z, zl);
+    if (low_stack(lim, stack_lim(av,2)))
+    { /* n can have lots of prime factors*/
+      if(DEBUGMEM>1) pari_warn(warnmem,"gen_Shanks_sqrtn");
+      z = gerepileupto(av, z);
+    }
+  }
+  return gerepileupto(av, z);
 }
 
 /* solve x^l = a , l prime in G of order q.
