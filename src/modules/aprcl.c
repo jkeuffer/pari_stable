@@ -474,12 +474,9 @@ get_jac(Cache *C, ulong q, long pk, GEN tabg)
 static GEN
 get_jac2(GEN N, ulong q, long k, GEN *j2q, GEN *j3q)
 {
-  GEN jpq, vpk, T;
+  GEN jpq, vpk, T = computetabdl(q);
   ulong x, pk, i, qs2;
 
-  if (k == 1) return NULL;
-
-  T = computetabdl(q);
   /* could store T[x+1] + T[x] + qs2 (cf compute_g).
    * Recompute instead, saving half the memory. */
   pk = 1UL << k;;

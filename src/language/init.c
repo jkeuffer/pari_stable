@@ -35,7 +35,7 @@ const double LOG2_10 = 3.321928094887362;  /* log_2(10) */
 
 GEN     gnil, gen_0, gen_1, gen_m1, gen_2, gen_m2, ghalf;
 
-static const long readonly_constants[] = {
+static const ulong readonly_constants[] = {
   evaltyp(t_INT) | _evallg(2),  /* gen_0 */
   evallgefint(2),
   evaltyp(t_INT) | _evallg(2),  /* gnil */

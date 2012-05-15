@@ -2086,7 +2086,7 @@ rootsof1(GEN nf)
     else
     { /* p-1 | n and v_p(disc K) >= (p-2) n/(p-1) ? */
       ulong r, q = udivuu_rem(nfdegree, p-1, &r);
-      if (r == 0 && Z_lval(disc, p) >= q * (p-2)) continue;
+      if (r == 0 && (ulong)Z_lval(disc, p) >= q * (p-2)) continue;
     }
     nbguessed /= upowuu(p, LE[i]);
     LE[i] = 0;
@@ -2097,7 +2097,7 @@ rootsof1(GEN nf)
   av = avma;
 
   /* Step 1.5 : test if nf.pol == subst(polcyclo(nbguessed), x, \pm x+c) */
-  if (eulerphiu_fact(fa) == nfdegree)
+  if (eulerphiu_fact(fa) == (ulong)nfdegree)
   {
     GEN elt = ZXirred_is_cyclo_translate(nf_get_pol(nf),
                                          uissquarefree_fact(fa));
