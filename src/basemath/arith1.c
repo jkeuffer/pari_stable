@@ -2490,20 +2490,66 @@ opt_param(GEN x, long prec)
   return zbrent((void*)glog(x,prec), _psi, gen_2, x, prec);
 }
 
+struct Fp_log_data
+{
+  GEN p; /* modulo     */
+  GEN b; /* log basis  */
+  GEN m; /* order of b */
+  GEN g; /* current element to test for friability */
+  long e; /* log of current element */
+  GEN C; /* square root of p */
+  GEN M; /* sparse relation matrix */
+  long nbrow; /* number of row of M */
+  long prmax; /* max entry in M */
+  GEN V; /* discrete logs of the columns of M */
+};
+
+static GEN
+Fp_log_stage2(struct Fp_log_data *s, GEN *aa, long *AV)
+{
+  pari_sp av;
+  pari_timer ti;
+  GEN A, R;
+  long k;
+  timer_start(&ti);
+  A = Fp_log_find_rel(s->b, s->prmax, s->C, s->p, aa, AV);
+  if (DEBUGLEVEL) timer_printf(&ti,"log element");
+  av = avma;
+  R = FpMs_FpCs_solve_safe(s->M, A, s->nbrow, s->m);
+  if (!R) return NULL;
+  if (typ(R) == t_COL)
+    return Fp_sub(FpV_dotproduct(zv_to_ZV(s->V), R, s->m), stoi(*AV), s->m);
+  k = R[1];
+  if (DEBUGLEVEL) err_printf("changing col %ld\n", k);
+  avma = av;
+  gel(s->M, k) = Fp_log_find_rel(s->b, s->prmax, s->C, s->p, &s->g, &s->e);
+  s->V[k] = s->e;
+  return NULL;
+}
+
 static GEN
 Fp_log_index(GEN a, GEN b, GEN m, GEN p)
 {
   pari_sp av = avma, av2;
-  long i, nbi, nbrow, e, AV;
-  GEN g, aa, pr, sz;
-  GEN M, V, A;
+  long i, nbi, AV, BV;
+  GEN aa, bb, pr, sz, l;
   pari_timer ti;
   struct Fp_log_rel r;
-  GEN c, C = sqrtremi(p, &c), Ci, ci;
-  ulong prmax;
+  struct Fp_log_data s;
+  GEN c, Ci, ci;
   ulong bnds = itou(roundr_safe(opt_param(sqrti(p),DEFAULTPREC)));
   ulong bnd = 4*bnds;
   if (cmpii(sqru(bnds),m)>=0) return NULL;
+  if (!is_pm1(gcdii(m,diviiexact(subis(p,1),m))))
+  {
+    GEN d = coprime_part(subis(p,1), m);
+    s.b = Fp_pow(pgener_Fp(p), d, p);
+    s.m = diviiexact(subis(p,1), d);
+  } else
+  {
+    s.b = b;
+    s.m = m;
+  }
   nbi = uprimepi(bnd);
   if (nbi<=1) return NULL;
   if (DEBUGLEVEL)
@@ -2512,7 +2558,9 @@ Fp_log_index(GEN a, GEN b, GEN m, GEN p)
     timer_start(&ti);
   }
   pr = primes_zv(nbi);
-  prmax = pr[nbi];
+  s.p = p;
+  s.prmax = pr[nbi];
+  s.C = sqrtremi(p, &c);
   av2 = avma;
   Ci = cgetg(nbi+1,t_VECSMALL);
   ci = cgetg(nbi+1,t_VECSMALL);
@@ -2520,7 +2568,7 @@ Fp_log_index(GEN a, GEN b, GEN m, GEN p)
   for (i = 1; i <= nbi; ++i)
   {
     ulong lp = pr[i];
-    Ci[i] = umodiu(C, lp);
+    Ci[i] = umodiu(s.C, lp);
     ci[i] = umodiu(c, lp);
     sz[i] = expu(lp);
   }
@@ -2528,51 +2576,43 @@ Fp_log_index(GEN a, GEN b, GEN m, GEN p)
   r.nbmax = 6*nbi;
   r.rel = cgetg(r.nbmax+1,t_VEC);
   r.sieve = cgetg(r.nbmax+2,t_VECSMALL)+1;
-  r.prmax = prmax;
-  g = gen_1; e = 0;
-  gel(r.rel,++r.nbrel) = Fp_log_find_rel(b, prmax, C, p, &g, &e);
+  r.prmax = s.prmax;
+  s.g = gen_1; s.e = 0;
+  gel(r.rel,++r.nbrel) = Fp_log_find_rel(s.b, s.prmax, s.C, p, &s.g, &s.e);
   if (DEBUGLEVEL) timer_printf(&ti,"log generator");
   for(i=0; r.nbrel < r.nbmax; i++)
   {
-    Fp_log_sieve_h(&r, C, c, Ci, ci, i, pr, sz);
+    Fp_log_sieve_h(&r, s.C, c, Ci, ci, i, pr, sz);
     if (DEBUGLEVEL && (i&127)==0)
       err_printf("%ld%% ",100*r.nbrel/(r.nbmax));
   }
-  nbrow = prmax+i;
+  s.nbrow = s.prmax+i;
   if (DEBUGLEVEL)
   {
-    err_printf("\n"); timer_printf(&ti," %ld relations, %ld generators", r.nbrel, nbi+i);
+    err_printf("\n");
+    timer_printf(&ti," %ld relations, %ld generators", r.nbrel, nbi+i);
   }
-  setlg(r.rel,r.nbrel+1); M = r.rel;
-  gerepileall(av2, 2, &M, &g);
-  V = const_vecsmall(r.nbrel,0);
-  V[1] = e;
-  AV = 0; aa=a;
+  setlg(r.rel,r.nbrel+1); s.M = r.rel;
+  gerepileall(av2, 2, &s.M, &s.g);
+  s.V = const_vecsmall(r.nbrel,0);
+  s.V[1] = s.e;
+  AV = 0; aa=a; BV = 0; bb=b; l=NULL;
   while (1)
   {
-    pari_sp av2;
-    GEN R;
-    timer_start(&ti);
-    A = Fp_log_find_rel(b, prmax, C, p, &aa, &AV);
-    if (DEBUGLEVEL) timer_printf(&ti,"log element");
-    av2 = avma;
-    R = FpMs_FpCs_solve_safe(M, A, nbrow, m);
-    if (!R) continue;
-    if (typ(R) == t_COL)
+    if (!l)
     {
-      GEN l = Fp_sub(FpV_dotproduct(zv_to_ZV(V), R, m), stoi(AV), m);
-      if (!equalii(a,Fp_pow(b,l,p))) pari_err_BUG("Fp_log_index");
-      return gerepileuptoint(av, l);
+      l = Fp_log_stage2(&s, &aa, &AV);
+      if (!l) continue;
     }
-    else
+    if (b!=s.b)
     {
-      long k = R[1];
-      avma = av2;
-      if (DEBUGLEVEL)
-        err_printf("changing col %ld\n", k);
-      gel(M, k) = Fp_log_find_rel(b, prmax, C, p, &g, &e);
-      V[k] = e;
+      GEN d, lb = Fp_log_stage2(&s, &bb, &BV);
+      if (!lb) continue;
+      d = gcdii(l,lb);
+      l = Fp_div(diviiexact(l, d) ,diviiexact(lb, d), m);
     }
+    if (!equalii(a,Fp_pow(b,l,p))) pari_err_BUG("Fp_log_index");
+    return gerepileuptoint(av, l);
   }
 }
 
