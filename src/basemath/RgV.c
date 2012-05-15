@@ -355,14 +355,20 @@ is_modular_mul(GEN a, GEN b, GEN *z)
 {
   GEN p1 = NULL, p2 = NULL, p;
   if (!RgM_is_FpM(a, &p1) || !p1) return 0;
-  if (b && (!RgM_is_FpM(b, &p2) || !p2)) return 0;
+  if (!RgM_is_FpM(b, &p2) || !p2) return 0;
   p = gcdii(p1, p2);
   a = RgM_to_FpM(a, p);
-  if (b)
-    b = RgM_to_FpM(b, p);
-  else
-    b = a;
+  b = RgM_to_FpM(b, p);
   *z = FpM_to_mod(FpM_mul(a, b, p), p);
+  return 1;
+}
+static int
+is_modular_sqr(GEN a, GEN *z)
+{
+  GEN p = NULL;
+  if (!RgM_is_FpM(a, &p) || !p) return 0;
+  a = RgM_to_FpM(a, p);
+  *z = FpM_to_mod(FpM_mul(a, a, p), p);
   return 1;
 }
 
@@ -389,7 +395,7 @@ RgM_sqr(GEN x)
   GEN z;
   if (lx == 1) return cgetg(1, t_MAT);
   if (lx != lg(x[1])) pari_err_OP("operation 'RgM_mul'", x,x);
-  if (is_modular_mul(x,NULL,&z)) return gerepileupto(av, z);
+  if (is_modular_sqr(x,&z)) return gerepileupto(av, z);
   z = cgetg(lx, t_MAT);
   for (j=1; j<lx; j++) gel(z,j) = RgM_RgC_mul_i(x, gel(x,j), lx, lx);
   return z;
