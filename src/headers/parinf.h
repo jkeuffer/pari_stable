@@ -78,6 +78,7 @@ struct bb_group
   ulong (*hash)(GEN);
   int   (*cmp)(GEN, GEN);
   int   (*equal1)(GEN);
+  GEN   (*easylog)(void *E, GEN, GEN, GEN);
 };
 /* qfr3 / qfr5 */
 struct qfr_data { GEN D, sqrtD, isqrtD; };

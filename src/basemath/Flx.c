@@ -1989,16 +1989,6 @@ _Flxq_hash(GEN x)
   return h;
 }
 
-static const struct bb_group Flxq_star={_Flxq_mul,_Flxq_pow,_Flxq_rand,_Flxq_hash,vecsmall_lexcmp,Flx_equal1};
-
-GEN
-Flxq_order(GEN a, GEN ord, GEN T, ulong p)
-{
-  Flxq_muldata E;
-  E.T=T; E.p=p;
-  return gen_order(a,ord,(void*)&E,&Flxq_star);
-}
-
 /* Let [ be the following order on Fp: 0 [ p-1 [ 1 [ p-2 [ 2 .. [ p\2
 and [[ the lexicographic extension of [ to Fp[T]. Compute the
 isomorphism (Fp[X], [[) -> (N,<) on P */
@@ -2373,6 +2363,17 @@ Flxq_easylog(void* E, GEN a, GEN g, GEN ord)
   return Flxq_log_index(a,g,ord,f->T,f->p);
 }
 
+static const struct bb_group Flxq_star={_Flxq_mul,_Flxq_pow,_Flxq_rand,_Flxq_hash,vecsmall_lexcmp,Flx_equal1,Flxq_easylog};
+
+GEN
+Flxq_order(GEN a, GEN ord, GEN T, ulong p)
+{
+  Flxq_muldata E;
+  E.T=T; E.p=p;
+  return gen_order(a,ord,(void*)&E,&Flxq_star);
+}
+
+
 GEN
 Flxq_log(GEN a, GEN g, GEN ord, GEN T, ulong p)
 {
@@ -2380,7 +2381,7 @@ Flxq_log(GEN a, GEN g, GEN ord, GEN T, ulong p)
   GEN v = dlog_get_ordfa(ord);
   ord = mkvec2(gel(v,1),ZM_famat_limit(gel(v,2),int2n(27)));
   E.T=T; E.p=p;
-  return gen_PH_log(a,g,ord,(void*)&E,&Flxq_star,Flxq_easylog);
+  return gen_PH_log(a,g,ord,(void*)&E,&Flxq_star);
 }
 
 GEN

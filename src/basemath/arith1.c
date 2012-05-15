@@ -2274,8 +2274,10 @@ _Fp_pow(void *E, GEN x, GEN n) { return Fp_pow(x,n,(GEN)E); }
 static GEN
 _Fp_rand(void *E) { return addis(randomi(subis((GEN)E,1)),1); }
 
+static GEN Fp_easylog(void *E, GEN a, GEN g, GEN ord);
+
 static const struct bb_group Fp_star={_Fp_mul,_Fp_pow,_Fp_rand,mod2BIL,
-                                      cmpii,gequal1};
+                                      cmpii,gequal1,Fp_easylog};
 
 /*********************************************************************/
 /**                                                                 **/
@@ -2646,7 +2648,7 @@ Fp_log(GEN a, GEN g, GEN ord, GEN p)
 {
   GEN v = dlog_get_ordfa(ord);
   ord = mkvec2(gel(v,1),ZM_famat_limit(gel(v,2),int2n(27)));
-  return gen_PH_log(a,g,ord,(void*)p,&Fp_star, &Fp_easylog);
+  return gen_PH_log(a,g,ord,(void*)p,&Fp_star);
 }
 
 /* find x such that h = g^x mod N > 1, N = prod_{i <= l} P[i]^E[i], P[i] prime.

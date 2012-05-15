@@ -218,7 +218,7 @@ FpE_hash(GEN P)
   return signe(gel(P,1))?mod2BIL(gel(P,1)):0;
 }
 
-static const struct bb_group FpE_group={_FpE_add,_FpE_mul,_FpE_rand,FpE_hash,FpE_cmp,ell_is_inf};
+static const struct bb_group FpE_group={_FpE_add,_FpE_mul,_FpE_rand,FpE_hash,FpE_cmp,ell_is_inf,NULL};
 
 GEN
 FpE_order(GEN z, GEN o, GEN a4, GEN p)
@@ -237,7 +237,7 @@ FpE_log(GEN a, GEN b, GEN o, GEN a4, GEN p)
   struct _FpE e;
   e.a4=a4;
   e.p=p;
-  return gerepileuptoint(av, gen_PH_log(a, b, o, (void*)&e, &FpE_group, NULL));
+  return gerepileuptoint(av, gen_PH_log(a, b, o, (void*)&e, &FpE_group));
 }
 
 /***********************************************************************/

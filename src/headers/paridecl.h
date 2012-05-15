@@ -1213,7 +1213,7 @@ GEN     rnfinit(GEN nf,GEN pol);
 
 GEN dlog_get_ordfa(GEN o);
 GEN dlog_get_ord(GEN o);
-GEN gen_PH_log(GEN a, GEN g, GEN ord, void *E, const struct bb_group *grp, GEN easy(void *E, GEN, GEN, GEN));
+GEN gen_PH_log(GEN a, GEN g, GEN ord, void *E, const struct bb_group *grp);
 GEN gen_Shanks_sqrtn(GEN a, GEN n, GEN q, GEN *zetan, void *E, const struct bb_group *grp);
 GEN gen_gener(GEN o, void *E, const struct bb_group *grp);
 GEN gen_ellgens(GEN d1, GEN d2, GEN m, void *E, const struct bb_group *grp,
@@ -1222,7 +1222,7 @@ GEN gen_ellgroup(GEN N, GEN F, GEN *pt_m, void *E, const struct bb_group *grp,
                  GEN pairorder(void *E, GEN P, GEN Q, GEN m, GEN F));
 GEN gen_factored_order(GEN a, GEN o, void *E, const struct bb_group *grp);
 GEN gen_order(GEN x, GEN o, void *E, const struct bb_group *grp);
-GEN gen_plog(GEN x,GEN g0,GEN q, void *E, const struct bb_group *grp, GEN easy(void*E, GEN, GEN, GEN));
+GEN gen_plog(GEN x,GEN g0,GEN q, void *E, const struct bb_group *grp);
 GEN gen_pow(GEN x, GEN n, void *E, GEN (*sqr)(void*,GEN),
                                    GEN (*mul)(void*,GEN,GEN));
 GEN gen_powu(GEN x, ulong n, void *E, GEN (*sqr)(void*,GEN),

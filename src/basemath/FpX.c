@@ -1416,7 +1416,15 @@ _FpXQ_rand(void *data)
   return z;
 }
 
-static const struct bb_group FpXQ_star={_FpXQ_mul,_FpXQ_pow,_FpXQ_rand,_FpXQ_hash,cmp_RgX,gequal1};
+static GEN
+_FpXQ_easylog(void *E, GEN a, GEN g, GEN ord)
+{
+  FpX_muldata *s=(FpX_muldata*) E;
+  if (degpol(a)) return NULL;
+  return Fp_FpXQ_log(constant_term(a),g,ord,s->T,s->p);
+}
+
+static const struct bb_group FpXQ_star={_FpXQ_mul,_FpXQ_pow,_FpXQ_rand,_FpXQ_hash,cmp_RgX,gequal1,_FpXQ_easylog};
 
 GEN
 FpXQ_order(GEN a, GEN ord, GEN T, GEN p)
@@ -1436,14 +1444,6 @@ FpXQ_order(GEN a, GEN ord, GEN T, GEN p)
   }
 }
 
-static GEN
-_FpXQ_easylog(void *E, GEN a, GEN g, GEN ord)
-{
-  FpX_muldata *s=(FpX_muldata*) E;
-  if (degpol(a)) return NULL;
-  return Fp_FpXQ_log(constant_term(a),g,ord,s->T,s->p);
-}
-
 GEN
 FpXQ_log(GEN a, GEN g, GEN ord, GEN T, GEN p)
 {
@@ -1459,7 +1459,7 @@ FpXQ_log(GEN a, GEN g, GEN ord, GEN T, GEN p)
     FpX_muldata s;
     GEN z;
     s.T=T; s.p=p;
-    z = gen_PH_log(a,g,ord, (void*)&s,&FpXQ_star,_FpXQ_easylog);
+    z = gen_PH_log(a,g,ord, (void*)&s,&FpXQ_star);
     return z? z: cgetg(1,t_VEC);
   }
 }

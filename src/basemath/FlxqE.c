@@ -213,7 +213,7 @@ FlxqE_cmp(GEN x, GEN y)
   return vecsmall_lexcmp(x,y);
 }
 
-static const struct bb_group FlxqE_group={_FlxqE_add,_FlxqE_mul,_FlxqE_rand,hash_GEN,FlxqE_cmp,ell_is_inf};
+static const struct bb_group FlxqE_group={_FlxqE_add,_FlxqE_mul,_FlxqE_rand,hash_GEN,FlxqE_cmp,ell_is_inf, NULL};
 
 GEN
 FlxqE_order(GEN z, GEN o, GEN a4, GEN T, ulong p)
@@ -230,7 +230,7 @@ FlxqE_log(GEN a, GEN b, GEN o, GEN a4, GEN T, ulong p)
   pari_sp av = avma;
   struct _FlxqE e;
   e.a4=a4; e.T=T; e.p=p;
-  return gerepileuptoint(av, gen_PH_log(a, b, o, (void*)&e, &FlxqE_group, NULL));
+  return gerepileuptoint(av, gen_PH_log(a, b, o, (void*)&e, &FlxqE_group));
 }
 
 /***********************************************************************/

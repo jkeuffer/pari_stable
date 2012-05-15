@@ -796,7 +796,7 @@ _F2xq_hash(GEN x)
   return x[2];
 }
 
-static const struct bb_group F2xq_star={_F2xq_mul,_F2xq_pow,_F2xq_rand,_F2xq_hash,vecsmall_lexcmp,F2x_equal1};
+static const struct bb_group F2xq_star={_F2xq_mul,_F2xq_pow,_F2xq_rand,_F2xq_hash,vecsmall_lexcmp,F2x_equal1,NULL};
 
 GEN
 F2xq_order(GEN a, GEN ord, GEN T)
@@ -807,7 +807,7 @@ F2xq_order(GEN a, GEN ord, GEN T)
 GEN
 F2xq_log(GEN a, GEN g, GEN ord, GEN T)
 {
-  GEN z = gen_PH_log(a,g,ord,(void*)T,&F2xq_star,NULL);
+  GEN z = gen_PH_log(a,g,ord,(void*)T,&F2xq_star);
   return z? z: cgetg(1,t_VEC);
 }
 

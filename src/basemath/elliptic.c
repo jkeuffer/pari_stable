@@ -4114,7 +4114,7 @@ elllog(GEN e, GEN a, GEN g, GEN o)
   }
   else if (!o)
     pari_err(e_MISC,"group order required for non-prime finite field");
-  z = gen_PH_log(a,g,o, (void*)e,&ell_group,NULL);
+  z = gen_PH_log(a,g,o, (void*)e,&ell_group);
   return gerepileupto(av, z? z: cgetg(1,t_VEC));
 }
 

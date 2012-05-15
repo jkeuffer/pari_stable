@@ -220,22 +220,30 @@ available to handle group elements:
     {
       GEN (*mul)(void*, GEN, GEN);
       GEN (*pow)(void*, GEN, GEN);
+      ulong (*hash)(GEN);
       GEN (*rand)(void*);
       int (*cmp)(GEN, GEN);
       int (*equal1)(GEN);
+      GEN   (*easylog)(void *E, GEN, GEN, GEN);
     };
 @eprog
 \kbd{mul(E,x,y)} returns the product $xy$.
 
 \kbd{pow(E,x,n)} returns $x^n$ ($n$ integer, possibly negative or zero).
 
+\kbd{hash(x)} returns a hash value for $x$ (\kbd{hash\_GEN} is suitable for this field).
+
 \kbd{rand(E)} returns a random element in the group.
 
 \kbd{cmp(x,y)} implements a total ordering on the group elements
-(return value $-1$, $0$ or $1$).
+(return value $-1$, $0$ or $1$) (\kbd{universal\_cmp} is suitable for this field).
 
 \kbd{equal1(x)} returns one if $x$ is the neutral element in the group,
 and zero otherwise.
+
+\kbd{easylog(E,a,g,o)} (optional) returns either NULL or the discrete logarithm
+$n$ such that $g^n=a$, the element $g$ being of order $o$. This provides a
+short-cut in situation where a better algorithm than the generic one is known.
 
 A group is thus described by a \kbd{const bb\_struct} as above and auxiliary
 data typecast to \kbd{void*}. The following functions operate on black-box
@@ -256,8 +264,7 @@ integer $k$ such that $g^k = x$. This requires $O(\sqrt{N})$ group operations
 in average and $O(1)$ storage. Will enter an infinite loop if there are no
 solutions.
 
-\fun{GEN}{gen_plog}{GEN x, GEN g, GEN N, void *E, const struct bb_group,
-    GEN easy(void*, GEN, GEN, GEN)} \hbadness 10000
+\fun{GEN}{gen_plog}{GEN x, GEN g, GEN N, void *E, const struct bb_group}
 Assuming that $g$ has prime order $N$, compute an integer $k$ such that
 $g^k = x$, using either \kbd{gen\_Shanks\_log} or \kbd{gen\_Pollard\_log}.
 Return \kbd{cgetg(1, t\_VEC)} if there are no solutions.
@@ -267,9 +274,6 @@ return value is not \kbd{NULL}, return it. For instance this is used over
 $\F_q^*$ to compute the discrete log of elements belonging to the prime
 field.
 
-\misctitle{FIXME} More generally, one should compute the minimal polynomial
-of $x$ and restrict to its field of definition.
-
 \fun{GEN}{gen_Shanks_sqrtn}{GEN a, GEN n, GEN N, GEN *zetan, void *E, const
 struct bb_group *grp} \hbadness 10000 returns one solution of $x^n = a$ in a
 black-box cyclic group of order $N$. Return \kbd{NULL} if no solution exists.
@@ -278,7 +282,7 @@ If \kbd{zetan} is not \kbd{NULL} it is set to an element of exact order $n$.
 This function uses \kbd{gen\_plog} for all prime divisors of $\gcd(n,N)$.
 
 \fun{GEN}{gen_PH_log}{GEN a, GEN g, GEN N, void *E, const struct bb_group
-*grp, GEN easy(void *E, GEN, GEN, GEN)} \hbadness 10000
+*grp}
 Generic Pohlig-Hellman algorithm. Assuming that $g$ has order $N$, compute
 an integer $k$ such that $g^k = x$. Return \kbd{cgetg(1, t\_VEC)} if there
 are no solutions. This calls \tet{gen_plog} repeatedly for all prime divisors

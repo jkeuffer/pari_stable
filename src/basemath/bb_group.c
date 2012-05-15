@@ -275,12 +275,11 @@ gen_Shanks_log(GEN x, GEN g0,GEN q, void *E, const struct bb_group *grp)
 
 /*Generic discrete logarithme in a group of prime order p*/
 GEN
-gen_plog(GEN x, GEN g, GEN p, void *E, const struct bb_group *grp,
-    GEN easy(void*E, GEN, GEN, GEN))
+gen_plog(GEN x, GEN g, GEN p, void *E, const struct bb_group *grp)
 {
-  if (easy)
+  if (grp->easylog)
   {
-    GEN e = easy(E, x, g, p);
+    GEN e = grp->easylog(E, x, g, p);
     if (e) return e;
   }
   if (grp->equal1(x)) return gen_0;
@@ -331,12 +330,11 @@ dlog_get_ord(GEN o)
   return NULL; /* not reached */
 }
 
-/* easy() is an optional trapdoor function that catch easy logarithms*/
+/* grp->easylog() is an optional trapdoor function that catch easy logarithms*/
 /* Generic Pohlig-Hellman discrete logarithm*/
 /* smallest integer n such that g^n=a. Assume g has order ord */
 GEN
-gen_PH_log(GEN a, GEN g, GEN ord, void *E, const struct bb_group *grp,
-    GEN easy(void *E, GEN, GEN, GEN))
+gen_PH_log(GEN a, GEN g, GEN ord, void *E, const struct bb_group *grp)
 {
   pari_sp av = avma;
   GEN v,t0,a0,b,q,g_q,n_q,ginv0,qj,ginv;
@@ -345,9 +343,9 @@ gen_PH_log(GEN a, GEN g, GEN ord, void *E, const struct bb_group *grp,
 
   if (grp->cmp(g, a)==0) /* frequent special case */
     return grp->equal1(g)? gen_0: gen_1;
-  if (easy)
+  if (grp->easylog)
   {
-    GEN e = easy(E, a, g, ord);
+    GEN e = grp->easylog(E, a, g, ord);
     if (e) return e;
   }
   v = dlog_get_ordfa(ord);
@@ -379,7 +377,7 @@ gen_PH_log(GEN a, GEN g, GEN ord, void *E, const struct bb_group *grp,
       if (j == 0 && !grp->equal1(grp->pow(E,b,q))) {
         avma = av; return cgetg(1, t_VEC);
       }
-      b = gen_plog(b, g_q, q, E, grp, easy);
+      b = gen_plog(b, g_q, q, E, grp);
       if (typ(b) != t_INT) { avma = av; return cgetg(1, t_VEC); }
       n_q = addii(n_q, mulii(b, gel(qj,j)));
       if (j == e-1) break;
@@ -563,7 +561,7 @@ gen_Shanks_sqrtl(GEN a, GEN l, GEN q,long e, GEN r, GEN y, GEN m,void *E, const 
       k++;
     } while(!grp->equal1(p1));
     if (k==e) { avma = av; return NULL; }
-    dl = gen_plog(z,m,l,E,grp,NULL);
+    dl = gen_plog(z,m,l,E,grp);
     if (typ(dl) != t_INT) { avma = av; return NULL; }
     dl = negi(dl);
     p1 = grp->pow(E,y, Fp_mul(dl,powiu(l,e-k-1),q));
