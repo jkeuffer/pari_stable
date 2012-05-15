@@ -2397,6 +2397,12 @@ Flxq_sqrtn(GEN a, GEN n, GEN T, ulong p, GEN *zeta)
   return gen_Shanks_sqrtn(a,n,addis(powuu(p,degpol(T)),-1),zeta,(void*)&E,&Flxq_star);
 }
 
+GEN
+Flxq_sqrt(GEN a, GEN T, ulong p)
+{
+  return Flxq_sqrtn(a, gen_2, T, p, NULL);
+}
+
 ulong
 Flxq_norm(GEN x, GEN T, ulong p)
 {

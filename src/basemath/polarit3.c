@@ -981,7 +981,7 @@ GEN
 Fq_sqrt(GEN x, GEN T, GEN p)
 {
   if (typ(x) == t_POL)
-    return FpXQ_sqrtn(x,gen_2,T,p,NULL);
+    return FpXQ_sqrt(x,T,p);
   else
     return Fp_sqrt(x,p);
   return NULL;

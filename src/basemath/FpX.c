@@ -1499,6 +1499,12 @@ FpXQ_sqrtn(GEN a, GEN n, GEN T, GEN p, GEN *zeta)
 }
 
 GEN
+FpXQ_sqrt(GEN a, GEN T, GEN p)
+{
+  return FpXQ_sqrtn(a, gen_2, T, p, NULL);
+}
+
+GEN
 FpXQ_norm(GEN x, GEN T, GEN p)
 {
   pari_sp av = avma;

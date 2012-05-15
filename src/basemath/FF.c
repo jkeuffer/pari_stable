@@ -552,13 +552,13 @@ FF_sqrt(GEN x)
   switch (x[1])
   {
   case t_FF_FpXQ:
-    r = FpXQ_sqrtn(gel(x,2),gen_2,T,p,NULL);
+    r = FpXQ_sqrt(gel(x,2),T,p);
     break;
   case t_FF_F2xq:
     r = F2xq_sqrt(gel(x,2),T);
     break;
   default:
-    r = Flxq_sqrtn(gel(x,2),gen_2,T,pp,NULL);
+    r = Flxq_sqrt(gel(x,2),T,pp);
   }
   if (!r) pari_err_SQRTN("FF_sqrt",x);
   return _mkFF(x, y, r);

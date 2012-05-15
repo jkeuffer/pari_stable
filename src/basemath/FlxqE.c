@@ -193,7 +193,7 @@ random_FlxqE(GEN a4, GEN a6, GEN T, ulong p)
     if (!lgpol(rhs) && !lgpol(Flx_add(Flx_Fl_mul(x2, 3, p), a4, p)))
       continue;
   } while (!Flxq_issquare(rhs, T, p));
-  y = Flxq_sqrtn(rhs, gen_2, T, p, NULL);
+  y = Flxq_sqrt(rhs, T, p);
   if (!y) pari_err_PRIME("random_FlxqE", T);
   return gerepilecopy(ltop, mkvec2(x, y));
 }
