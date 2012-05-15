@@ -1268,10 +1268,17 @@ gsqrt(GEN x, long prec)
     case t_REAL: return sqrtr(x);
 
     case t_INTMOD:
-      y = cgetg(3,t_INTMOD); gel(y,1) = icopy(gel(x,1));
-      p1 = Fp_sqrt(gel(x,2),gel(y,1));
-      if (!p1) pari_err_SQRTN("gsqrt",x);
+    {
+      GEN p = gel(x,1);
+      y = cgetg(3,t_INTMOD); gel(y,1) = icopy(p);
+      p1 = Fp_sqrt(gel(x,2),p);
+      if (!p1)
+      {
+        if (!BPSW_psp(p)) pari_err_PRIME("sqrt [modulus]",p);
+        pari_err_SQRTN("gsqrt",x);
+      }
       gel(y,2) = p1; return y;
+    }
 
     case t_COMPLEX:
     { /* (u+iv)^2 = a+ib <=> u^2+v^2 = sqrt(a^2+b^2), u^2-v^2=a, 2uv=b */
@@ -1536,16 +1543,20 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
   switch(tx)
   {
   case t_INTMOD:
-    z = gen_0;
-    y = cgetg(3,t_INTMOD);  gel(y,1) = icopy(gel(x,1));
-    if (zetan) { z = cgetg(3,t_INTMOD); gel(z,1) = gel(y,1); }
-    gel(y,2) = Fp_sqrtn(gel(x,2),n,gel(x,1),zetan);
-    if (!y[2]) {
-      if (zetan) {avma=av; return gen_0;}
-      pari_err_SQRTN("gsqrtn",x);
+    {
+      GEN p = gel(x,1);
+      z = gen_0;
+      y = cgetg(3,t_INTMOD);  gel(y,1) = icopy(p);
+      if (zetan) { z = cgetg(3,t_INTMOD); gel(z,1) = gel(y,1); }
+      gel(y,2) = Fp_sqrtn(gel(x,2),n,p,zetan);
+      if (!y[2]) {
+        if (zetan) {avma=av; return gen_0;}
+        if (!BPSW_psp(p)) pari_err_PRIME("sqrtn [modulus]",p);
+        pari_err_SQRTN("gsqrtn",x);
+      }
+      if (zetan) { gel(z,2) = *zetan; *zetan = z; }
+      return y;
     }
-    if (zetan) { gel(z,2) = *zetan; *zetan = z; }
-    return y;
 
   case t_PADIC:
     y = Qp_sqrtn(x,n,zetan);
