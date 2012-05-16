@@ -638,12 +638,14 @@ imag_relations(struct buch_quad *B, long need, long *pc, ulong LIMC, GEN mat)
         for (i=1; i<lgsub; i++) col[B->subFB[i]] += -fpd[i]-ex[i];
         add_fact(B, col, form2); col[fpd[-2]]--;
       }
+      if (DEBUGLEVEL) err_printf(" %ldP",s);
     }
     else
     {
       col = gel(mat,++s);
       for (i=1; i<lgsub; i++) col[B->subFB[i]] = -ex[i];
       add_fact(B, col, form);
+      if (DEBUGLEVEL) err_printf(" %ld",s);
     }
     col[current]--;
     if (++current > B->KC) current = 1;
