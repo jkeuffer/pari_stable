@@ -1030,7 +1030,7 @@ START:
                                  vecpermute(BQ.FB, BQ.subFB));
     nsubFB = lg(BQ.subFB) - 1;
   }
-  while (!nsubFB);
+  while (nsubFB < (expi(D) > 15 ? 3 : 2));
   BQ.powsubFB = powsubFBquad(&BQ,CBUCH+1);
   if (DEBUGLEVEL) timer_printf(&T, "powsubFBquad");
   BQ.limhash = (LIMC & HIGHMASK)? (HIGHBIT>>1): LIMC*LIMC;
