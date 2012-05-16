@@ -388,3 +388,40 @@ FpE_tatepairing(GEN P, GEN Q, GEN m, GEN a4, GEN p)
     return gen_1;
   return FpE_Miller(P, Q, m, a4, p);
 }
+
+static GEN
+_FpE_pairorder(void *E, GEN P, GEN Q, GEN m, GEN F)
+{
+  struct _FpE *e = (struct _FpE *) E;
+  return  Fp_order(FpE_weilpairing(P,Q,m,e->a4,e->p), F, e->p);
+}
+
+GEN
+Fp_ellgroup(GEN a4, GEN a6, GEN N, GEN p, GEN *pt_m)
+{
+  struct _FpE e;
+  e.a4=a4; e.a6=a6; e.p=p;
+  return gen_ellgroup(N, subis(p, 1), pt_m, (void*)&e, &FpE_group, _FpE_pairorder);
+}
+
+GEN
+Fp_ellgens(GEN a4, GEN a6, GEN ch, GEN D, GEN m, GEN p)
+{
+  GEN P;
+  pari_sp av = avma;
+  struct _FpE e;
+  e.a4=a4; e.a6=a6; e.p=p;
+  switch(lg(D)-1)
+  {
+  case 1:
+    P = gen_gener(gel(D,1), (void*)&e, &FpE_group);
+    P = mkvec(FpE_changepoint(P, ch, p));
+    break;
+  default:
+    P = gen_ellgens(gel(D,1), gel(D,2), m, (void*)&e, &FpE_group, _FpE_pairorder);
+    gel(P,1) = FpE_changepoint(gel(P,1), ch, p);
+    gel(P,2) = FpE_changepoint(gel(P,2), ch, p);
+    break;
+  }
+  return gerepilecopy(av, P);
+}

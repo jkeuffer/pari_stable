@@ -519,7 +519,7 @@ gen_gener(GEN o, void *E, const struct bb_group *grp)
 {
   GEN F = dlog_get_ordfa(o);
   GEN N = gel(F,1), pr = gel(F,2), z = NULL;
-  long i, lpr = lg(pr);
+  long i, lpr = lg(gel(pr,1));
   pari_sp av = avma, lim = stack_lim(av,2);
   for (i = 1; i < lpr; i++)
   {
@@ -645,3 +645,83 @@ gen_Shanks_sqrtn(GEN a, GEN n, GEN q, GEN *zetan, void *E, const struct bb_group
   return a;
 }
 
+/*******************************************************************/
+/*                                                                 */
+/*               structure of groups with pairing                  */
+/*                                                                 */
+/*******************************************************************/
+
+static GEN
+ellgroup_d2(GEN N, GEN d)
+{
+  GEN r = gcdii(N, d);
+  GEN F1 = gel(Z_factor(r), 1);
+  long i, j, l1 = lg(F1);
+  GEN F = cgetg(3, t_MAT);
+  gel(F,1) = cgetg(l1, t_COL);
+  gel(F,2) = cgetg(l1, t_COL);
+  for (i = 1, j = 1; i < l1; ++i)
+  {
+    long v = Z_pval(N, gel(F1, i));
+    if (v<=1) continue;
+    gcoeff(F, j  , 1) = gel(F1, i);
+    gcoeff(F, j++, 2) = stoi(v);
+  }
+  setlg(F[1],j); setlg(F[2],j);
+  return j==1 ? NULL : mkvec2(factorback(F), F);
+}
+
+GEN
+gen_ellgroup(GEN N, GEN d, GEN *pt_m, void *E, const struct bb_group *grp,
+             GEN pairorder(void *E, GEN P, GEN Q, GEN m, GEN F))
+{
+  pari_sp av = avma;
+  GEN N0, N1, F = ellgroup_d2(N, d);
+  if (!F) {avma = av; return mkveccopy(N);}
+  N0 = gel(F,1); N1 = diviiexact(N, N0);
+  while(1)
+  {
+    pari_sp av2 = avma;
+    GEN P, Q, d, s, t, m;
+
+    P = grp->pow(E,grp->rand(E), N1);
+    s = gen_order(P, F, E, grp); if (equalii(s, N0)) {avma = av; return mkveccopy(N);}
+
+    Q = grp->pow(E,grp->rand(E), N1);
+    t = gen_order(Q, F, E, grp); if (equalii(t, N0)) {avma = av; return mkveccopy(N);}
+
+    m = lcmii(s, t);
+    d = pairorder(E, P, Q, m, F);
+    /* structure is [N/d, d] iff m d == N0. Note that N/d = N1 m */
+    if (is_pm1(d) && equalii(m, N0)) {avma = av; return mkveccopy(N);}
+    if (equalii(mulii(m, d), N0))
+    {
+      GEN g = mkvec2(mulii(N1,m), d);
+      if (pt_m) *pt_m = m;
+      gerepileall(av,pt_m?2:1,&g,pt_m);
+      return g;
+    }
+    avma = av2;
+  }
+}
+
+GEN
+gen_ellgens(GEN d1, GEN d2, GEN m, void *E, const struct bb_group *grp,
+             GEN pairorder(void *E, GEN P, GEN Q, GEN m, GEN F))
+{
+  GEN F = mkvec2(d1, Z_factor(d1));
+  GEN dm = diviiexact(d1,m);
+  pari_sp av = avma;
+  while(1)
+  {
+    GEN P = grp->rand(E);
+    GEN s = gen_order(P, F, E, grp);
+    if (equalii(s, d1))
+    {
+      GEN Q = grp->rand(E);
+      GEN d = pairorder(E, grp->pow(E, P, dm), grp->pow(E, Q, dm), m, F);
+      if (equalii(d, d2)) return mkvec2(P,Q);
+    }
+    avma = av;
+  }
+}

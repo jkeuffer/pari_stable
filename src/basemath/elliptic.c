@@ -4634,42 +4634,6 @@ elltatepairing(GEN E, GEN P, GEN Q, GEN m)
   return ellmiller(E, P, Q, m);
 }
 
-static GEN
-ellgen1_FpE(GEN N, GEN a4, GEN a6, GEN p)
-{
-  GEN F = mkvec2(N, Z_factor(N));
-  pari_sp av = avma;
-  while(1)
-  {
-    GEN P = random_FpE(a4, a6, p); /* non-singular */
-    GEN s = FpE_order(P, F, a4, p);
-    if (equalii(s, N)) return P;
-    avma = av;
-  }
-}
-
-static GEN
-ellgen2_FpE(GEN d1, GEN d2, GEN m, GEN a4, GEN a6, GEN p)
-{
-  GEN N = mulii(d1,d2);
-  GEN F = mkvec2(N, Z_factor(N));
-  GEN dm = diviiexact(d1,m);
-  pari_sp av = avma;
-  while(1)
-  {
-    GEN P = random_FpE(a4, a6, p);
-    GEN s = FpE_order(P, F, a4, p);
-    if (equalii(s, d1))
-    {
-      GEN Q = random_FpE(a4, a6, p);
-      GEN z = FpE_weilpairing(FpE_mul(P, dm, a4, p),FpE_mul(Q, dm, a4, p), m, a4, p);
-      GEN d = Fp_order(z, F, p);
-      if (equalii(d, d2)) return mkvec2(P,Q);
-    }
-    avma = av;
-  }
-}
-
 /* D = [d_1, ..., d_r ] the elementary divisors for E(Fp), r = 0,1,2.
  * d_r | ... | d_1 */
 static GEN
@@ -4727,96 +4691,40 @@ ellgen(GEN E, GEN D, GEN m, GEN p)
   else
   {
     GEN e = ell_to_a4a6(E, p), a4 = gel(e, 1), a6 = gel(e, 2);
-    GEN P;
-    switch(lg(D)-1)
-    {
-    case 1:
-      P = ellgen1_FpE(gel(D,1), a4, a6, p);
-      P = FpE_changepoint(P, gel(e,3), p);
-      P = mkvec(P);
-      break;
-    default:
-      P = ellgen2_FpE(gel(D,1), gel(D,2), m, a4, a6, p);
-      gel(P,1) = FpE_changepoint(gel(P,1), gel(e,3), p);
-      gel(P,2) = FpE_changepoint(gel(P,2), gel(e,3), p);
-      break;
-    }
-    return gerepilecopy(av, P);
+    return gerepileupto(av, Fp_ellgens(a4,a6,gel(e,3),D,m,p));
   }
 }
 
 static GEN
 ellgroup_m(GEN E, GEN p, GEN *pt_m)
 {
-  pari_sp av = avma;
-  GEN N, N0, N1, r, F, F1, e, a4, a6, D;
-  long i, j, l1;
-  N = subii(addis(p, 1), ellap(E, p));
-  D = Rg_to_Fp(ell_get_disc(E), p);
+  GEN e, a4, a6;
+  GEN N = subii(addis(p, 1), ellap(E, p));
+  GEN D = Rg_to_Fp(ell_get_disc(E), p);
   if (!signe(D))
   {
     N = subis(N, 1); /* remove singular point */
-    if (equali1(N)) { avma = av; return cgetg(1,t_VEC); }
-    goto ellgroup_cyclic;
+    if (equali1(N)) return cgetg(1,t_VEC);
+    return mkvec(N);
   }
-  if (equali1(N)) { avma = av; return cgetg(1,t_VEC); }
-  r = gcdii(N, subis(p, 1));
-  if (is_pm1(r)) goto ellgroup_cyclic; /* Takes care of p=2 */
+  if (equali1(N)) return cgetg(1,t_VEC);
+  if (equaliu(p, 2)) return mkvec(N); /* Takes care of p=2 */
   if (equaliu(p, 3))
   { /* The only possible non-cyclic group is [2,2] which happens 9 times */
     ulong b2, b4, b6;
-    if (!equaliu(N, 4)) goto ellgroup_cyclic;
+    if (!equaliu(N, 4)) return mkvec(N);
     /* If the group is not cyclic, T = 4x^3 + b2 x^2 + 2b4 x + b6
      * must have 3 roots else 1 root. Test T(0) = T(1) = 0 mod 3 */
     b6 = Rg_to_Fl(ell_get_b6(E), 3);
-    if (b6) goto ellgroup_cyclic;
+    if (b6) return mkvec(N);
     /* b6 = T(0) = 0 mod 3. Test T(1) */
     b2 = Rg_to_Fl(ell_get_b2(E), 3);
     b4 = Rg_to_Fl(ell_get_b4(E), 3);
-    if ((1 + b2 + (b4<<1)) % 3) goto ellgroup_cyclic;
-    return gerepileupto(av, mkvec2s(2, 2));
+    if ((1 + b2 + (b4<<1)) % 3) return mkvec(N);
+    return mkvec2s(2, 2);
   } /* Now assume p > 3 */
-  F1 = gel(Z_factor(r), 1); l1 = lg(F1);
-  F = cgetg(3, t_MAT);
-  gel(F,1) = cgetg(l1, t_COL);
-  gel(F,2) = cgetg(l1, t_COL);
-  for (i = 1, j = 1; i < l1; ++i)
-  {
-    long v = Z_pval(N, gel(F1, i));
-    if (v <=1) continue;
-    gcoeff(F, j  , 1) = gel(F1, i);
-    gcoeff(F, j++, 2) = stoi(v);
-  }
-  setlg(F[1],j); setlg(F[2],j);
-  if (j==1) goto ellgroup_cyclic;
-  N0 = factorback(F); N1 = diviiexact(N, N0);
-  F = mkvec2(N0, F);
   e = ell_to_a4a6(E, p); a4 = gel(e, 1); a6 = gel(e, 2);
-  while(1)
-  {
-    pari_sp av2 = avma;
-    GEN P, Q, d, s, t, m, z;
-
-    P = FpE_mul(random_FpE(a4,a6,p), N1, a4, p);
-    s = FpE_order(P, F, a4, p); if (equalii(s, N0)) goto ellgroup_cyclic;
-
-    Q = FpE_mul(random_FpE(a4,a6,p), N1, a4, p);
-    t = FpE_order(Q, F, a4, p); if (equalii(t, N0)) goto ellgroup_cyclic;
-
-    m = lcmii(s, t);
-    z = FpE_weilpairing(P, Q, m, a4, p);
-    d = Fp_order(z, F, p);
-    /* structure is [N/d, d] iff m d == N0. Note that N/d = N1 m */
-    if (is_pm1(d) && equalii(m, N0)) goto ellgroup_cyclic;
-    if (equalii(mulii(m, d), N0))
-    {
-      if (pt_m) *pt_m = m;
-      return mkvec2(mulii(N1,m), d);
-    }
-    avma = av2;
-  }
-ellgroup_cyclic:
-  return mkvec(N);
+  return Fp_ellgroup(a4,a6,N,p,pt_m);
 }
 
 GEN

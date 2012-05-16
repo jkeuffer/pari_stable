@@ -386,7 +386,50 @@ FlxqE_tatepairing(GEN P, GEN Q, GEN m, GEN a4, GEN T, ulong p)
   return FlxqE_Miller(P, Q, m, a4, T, p);
 }
 
-/********************/
+static GEN
+_FlxqE_pairorder(void *E, GEN P, GEN Q, GEN m, GEN F)
+{
+  struct _FlxqE *e = (struct _FlxqE *) E;
+  return  Flxq_order(FlxqE_weilpairing(P,Q,m,e->a4,e->T,e->p), F, e->T, e->p);
+}
+
+GEN
+Flxq_ellgroup(GEN a4, GEN a6, GEN N, GEN T, ulong p, GEN *pt_m)
+{
+  struct _FlxqE e;
+  GEN q = powuu(p, degpol(T));
+  e.a4=a4; e.a6=a6; e.T=T; e.p=p;
+  return gen_ellgroup(N, subis(q,1), pt_m, (void*)&e, &FlxqE_group, _FlxqE_pairorder);
+}
+
+GEN
+Flxq_ellgens(GEN a4, GEN a6, GEN ch, GEN D, GEN m, GEN T, ulong p)
+{
+  GEN P;
+  pari_sp av = avma;
+  struct _FlxqE e;
+  e.a4=a4; e.a6=a6; e.T=T; e.p=p;
+  switch(lg(D)-1)
+  {
+  case 1:
+    P = gen_gener(gel(D,1), (void*)&e, &FlxqE_group);
+    P = mkvec(FlxqE_changepoint(P, ch, T, p));
+    break;
+  default:
+    P = gen_ellgens(gel(D,1), gel(D,2), m, (void*)&e, &FlxqE_group, _FlxqE_pairorder);
+    gel(P,1) = FlxqE_changepoint(gel(P,1), ch, T, p);
+    gel(P,2) = FlxqE_changepoint(gel(P,2), ch, T, p);
+    break;
+  }
+  return gerepilecopy(av, P);
+}
+
+
+/***************************************************************************/
+/*                                                                         */
+/*                          Shanks Mestre                                  */
+/*                                                                         */
+/***************************************************************************/
 
 /* Return the lift of a (mod b), which is closest to h */
 static GEN

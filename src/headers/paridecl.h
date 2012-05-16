@@ -207,6 +207,8 @@ GEN     random_Flx(long d1, long v, ulong p);
 /* FlxqE.c */
 
 GEN     Flxq_ellap(GEN a4, GEN a6, GEN T, ulong p);
+GEN     Flxq_ellgens(GEN a4, GEN a6, GEN ch, GEN D, GEN m, GEN T, ulong p);
+GEN     Flxq_ellgroup(GEN a4, GEN a6, GEN N, GEN T, ulong p, GEN *pt_m);
 GEN     FlxqE_add(GEN P, GEN Q, GEN a4, GEN T, ulong p);
 GEN     FlxqE_changepoint(GEN x, GEN ch, GEN T, ulong p);
 GEN     FlxqE_changepointinv(GEN x, GEN ch, GEN T, ulong p);
@@ -222,6 +224,8 @@ GEN     random_FlxqE(GEN a4, GEN a6, GEN T, ulong p);
 
 /* FpE.c */
 
+GEN     Fp_ellgens(GEN a4, GEN a6, GEN ch, GEN D, GEN m, GEN p);
+GEN     Fp_ellgroup(GEN a4, GEN a6, GEN N, GEN p, GEN *pt_m);
 GEN     FpE_add(GEN P, GEN Q, GEN a4, GEN p);
 GEN     FpE_changepoint(GEN x, GEN ch, GEN p);
 GEN     FpE_changepointinv(GEN x, GEN ch, GEN p);
@@ -1212,6 +1216,10 @@ GEN dlog_get_ord(GEN o);
 GEN gen_PH_log(GEN a, GEN g, GEN ord, void *E, const struct bb_group *grp, GEN easy(void *E, GEN, GEN, GEN));
 GEN gen_Shanks_sqrtn(GEN a, GEN n, GEN q, GEN *zetan, void *E, const struct bb_group *grp);
 GEN gen_gener(GEN o, void *E, const struct bb_group *grp);
+GEN gen_ellgens(GEN d1, GEN d2, GEN m, void *E, const struct bb_group *grp,
+                 GEN pairorder(void *E, GEN P, GEN Q, GEN m, GEN F));
+GEN gen_ellgroup(GEN N, GEN F, GEN *pt_m, void *E, const struct bb_group *grp,
+                 GEN pairorder(void *E, GEN P, GEN Q, GEN m, GEN F));
 GEN gen_factored_order(GEN a, GEN o, void *E, const struct bb_group *grp);
 GEN gen_order(GEN x, GEN o, void *E, const struct bb_group *grp);
 GEN gen_plog(GEN x,GEN g0,GEN q, void *E, const struct bb_group *grp, GEN easy(void*E, GEN, GEN, GEN));
