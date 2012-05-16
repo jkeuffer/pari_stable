@@ -11,7 +11,7 @@ ANY WARRANTY WHATSOEVER.
 
 Check the License for details. You should have received a copy of it, along
 with the package; see the file 'COPYING'. If not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
 #define mael2(m,x1,x2)          (((GEN*)   (m))[x1][x2])
 #define mael3(m,x1,x2,x3)       (((GEN**)  (m))[x1][x2][x3])

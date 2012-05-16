@@ -12,7 +12,7 @@ ANY WARRANTY WHATSOEVER.
 
 Check the License for details. You should have received a copy of it, along
 with the package; see the file 'COPYING'. If not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
 /* This file originally adapted from gmp-3.1.1 (from T. Granlund), files
  * longlong.h and gmp-e_IMPL.h
