@@ -106,7 +106,11 @@ ellmodulareqn(long ell, long vx, long vy)
   res = cgetg(3, t_VEC);
   if (!get_modular_eqn(&meqn, ell, vx, vy))
     pari_err(e_MISC,"modular equation of level %ld is not available", ell);
-  gel(res,1) = meqn.eq; gel(res,2) = stoi(meqn.type=='A');
+  else
+  {
+    gel(res,1) = meqn.eq;
+    gel(res,2) = stoi(meqn.type=='A');
+  }
   return res;
 }
 
