@@ -5029,7 +5029,7 @@ vector of polynomials with \typ{INT} coefficients (repeated calls to
 to get an \kbd{F2m} with \kbd{n} rows.
 
 \section{Arithmetic on elliptic curve over a finite field in simple form}
-\subsec{\kbd{FpE}}
+\subsec{Elliptic curves over $\F_p$, $p>3$}
 
 Let $p$ a prime number and $E$ the elliptic curve given by the equation
 $E:y^2=x^3+a_4\*x+a_6$, with $a_4$ and $a_6$ in $\F_p$. A \kbd{FpE} is a point of
@@ -5037,6 +5037,17 @@ $E(\F_p)$.  Since an affine point and $a_4$ determine an unique $a6$, most
 functions do not take $a_6$ as an argument.
 A \kbd{FpE} is either the point at infinity (\kbd{ellinf()}) or a $FpV$ whith two
 components. The parameters $a_4$ and $a_6$ are given as \typ{INT}s when required.
+
+\fun{GEN}{Fp_ellgroup}{GEN a4, GEN a6, GEN N, GEN p, GEN *pt_m}
+Return the group structure $D$ of the curve $E:y^2=x^3+a_4\*x+a_6$ over
+$F_p$, which is assumed to be of order $N$ and set $*pt_m=m$.
+
+\fun{GEN}{Fp_ellgens}{GEN a4, GEN a6, GEN ch, GEN D, GEN m, GEN p}
+Returns generators of the curve $E:y^2=x^3+a_4\*x+a_6$ over
+$F_p$ with the base change \kbd{ch} (see \kbd{FpE_changepoint}),
+where $D$ and $m$ are as returned by \kbd{Fp_ellgroup}.
+
+\subsec{\kbd{FpE}}
 
 \fun{GEN}{FpE_add}{GEN P, GEN Q, GEN a4, GEN p} returns the sum $P+Q$
 in the group $E(\F_p)$, where $E$ is defined by $E:y^2=x^3+a_4\*x+a_6$,
