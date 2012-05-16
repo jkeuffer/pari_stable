@@ -1687,7 +1687,7 @@ compilenode(long n, int mode, long flag)
     {
       GEN vars = listtogen(tree[x].x,Fmatrixelts);
       long i, l = lg(vars)-1;
-      compilenode(y,Ggen,mode==Gvoid?FLnocopy:0);
+      compilenode(y,Ggen,mode==Gvoid?FLnocopy:flag&FLsurvive);
       op_push(OCdup,mode==Gvoid?l-1:l,x);
       for(i=1; i<=l; i++)
       {
@@ -1712,7 +1712,7 @@ compilenode(long n, int mode, long flag)
     {
       entree *ep=getlvalue(x);
       long vn=getmvar(ep);
-      compilenode(y,Ggen,mode==Gvoid?FLnocopy:0);
+      compilenode(y,Ggen,mode==Gvoid?FLnocopy:flag&FLsurvive);
       if (mode!=Gvoid)
         op_push(OCdup,1,n);
       if (tree[x].f==Fentry)
