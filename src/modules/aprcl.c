@@ -496,15 +496,13 @@ get_jac2(GEN N, ulong q, long k, GEN *j2q, GEN *j3q)
     for (x=1; x<=8; x++) v8[x] = 0;
     for (x=2; x<=qs2; x++) v8[ ((3*T[x]+T[x-1]+qs2)&7) + 1 ]++;
     for (   ; x<=q-1; x++) v8[ ((3*T[q-x]+T[q-x+1]-3*qs2)&7) + 1 ]++;
-    *j2q = RgX_inflate(gsqr(u_red_cyclo2n_ip(v8,3)), pk>>3);
+    *j2q = RgX_inflate(ZX_sqr(u_red_cyclo2n_ip(v8,3)), pk>>3);
     *j2q = red_cyclo2n_ip(*j2q, k);
   }
-  else *j2q = NULL;
-
   for (i=1; i<=pk; i++) vpk[i] = 0;
   for (x=2; x<=qs2; x++) vpk[ (2*T[x]+T[x-1]+qs2)%pk + 1 ]++;
   for (   ; x<=q-1; x++) vpk[ (2*T[q-x]+T[q-x+1]-2*qs2)%pk + 1 ]++;
-  *j3q = gmul(jpq, u_red_cyclo2n_ip(vpk,k));
+  *j3q = ZX_mul(jpq, u_red_cyclo2n_ip(vpk,k));
   *j3q = red_cyclo2n_ip(*j3q, k);
   return jpq;
 }
@@ -821,7 +819,7 @@ step4b(Cache *C, Red *R, ulong q, long k)
 {
   const long pk = 1L << k;
   long ind;
-  GEN s1, s2, s3, j2q, j3q;
+  GEN s1, s2, s3, j2q = NULL, j3q = NULL;
 
   (void)get_jac2(R->N,q,k, &j2q,&j3q);
 
