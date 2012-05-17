@@ -1005,6 +1005,7 @@ Buchquad(GEN D, double cbach, double cbach2, long prec)
     LIMC2 = LIMC0;
   else
     LIMC2 = high;
+  if (LIMC2 > LIMCMAX) LIMC2 = LIMCMAX;
   LIMC0 = maxss((long)(cbach*LOGD2), 20);
   LIMC = cbach ? LIMC0 : LIMC2;
 

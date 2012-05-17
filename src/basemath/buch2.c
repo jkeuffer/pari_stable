@@ -3748,6 +3748,7 @@ Buchall_param(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long
     LIMC2 = LIMC0;
   else
     LIMC2 = high;
+  if (LIMC2 > LIMCMAX) LIMC2 = LIMCMAX;
   LIMC0 = maxss((long)(cbach*LOGD2), 20);
   av = avma; LIMC = cbach ? LIMC0 : LIMC2;
   if (DEBUGLEVEL) timer_printf(&T, "computing Bach constant");
