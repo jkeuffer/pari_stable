@@ -838,12 +838,12 @@ GEN
 bernfrac(long n)
 {
   long k;
-  if (odd(n)) return gen_0;
   if (n == 0) return gen_1;
   if (n == 1) return mkfrac(gen_m1,gen_2);
-  if (!bernzone && n < BERN_MINNB*2) mpbern(BERN_MINNB, 0);
+  if (odd(n)) return gen_0;
   k = n >> 1;
-  if (k < lg(bernzone))
+  if (!bernzone && k <= BERN_MINNB) mpbern(BERN_MINNB, 0);
+  if (bernzone && k < lg(bernzone))
   {
     GEN B = gel(bernzone, k), C;
     if (typ(B) != t_REAL) return B;
