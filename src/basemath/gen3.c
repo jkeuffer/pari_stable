@@ -1842,6 +1842,17 @@ triv_integ(GEN x, long v)
 }
 
 GEN
+RgX_integ(GEN x)
+{
+  long i, lx = lg(x);
+  GEN y;
+  if (lx == 2) return gcopy(x);
+  y = cgetg(lx+1, t_POL); y[1] = x[1]; gel(y,2) = gen_0;
+  for (i=3; i<=lx; i++) gel(y,i) = gdivgs(gel(x,i-1),i-2);
+  return y;
+}
+
+GEN
 integ(GEN x, long v)
 {
   long lx, tx, e, i, vx, n;
@@ -1865,16 +1876,15 @@ integ(GEN x, long v)
   switch(tx)
   {
     case t_POL:
-      vx = varn(x); lx = lg(x);
+      vx = varn(x);
+      if (v == vx) return RgX_integ(x);
+      lx = lg(x);
       if (lx == 2) {
         if (varncmp(vx, v) < 0) v = vx;
         return zeropol(v);
       }
       if (varncmp(vx, v) > 0) return deg1pol(x, gen_0, v);
-      if (varncmp(vx, v) < 0) return triv_integ(x,v);
-      y = cgetg(lx+1, t_POL); y[1] = x[1]; gel(y,2) = gen_0;
-      for (i=3; i<=lx; i++) gel(y,i) = gdivgs(gel(x,i-1),i-2);
-      return y;
+      return triv_integ(x,v);
 
     case t_SER:
       lx = lg(x); vx = varn(x); e = valp(x);

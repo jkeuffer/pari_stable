@@ -6029,6 +6029,9 @@ coefficients are $0$ using \kbd{gequal0}.
 \fun{GEN}{RgX_deriv}{GEN x} returns the derivative of \kbd{x} with respect to
 its main variable.
 
+\fun{GEN}{RgX_integ}{GEN x} returns the primitive of \kbd{x} vanishing at
+$0$, with respect to its main variable.
+
 \fun{GEN}{RgX_gcd}{GEN x, GEN y} returns the GCD of \kbd{x} and \kbd{y},
 assumed to be \typ{POL}s in the same variable.
 
@@ -7812,7 +7815,7 @@ approximation of $B_k$ to accuracy \kbd{prec} is enough to reconstruct it
 exactly, a \typ{FRAC} is stored; otherwise a \typ{REAL} at the requested
 accuracy. No more than $n$ Bernoulli numbers will ever be stored (by
 \tet{bernfrac} or \tet{bernreal}), unless a subsequent call to \kbd{mpbern}
-increases the cache.
+increases the cache. If \kbd{prec} is $0$, the $B_k$ are computed exactly.
 
 The following functions use cached data if \kbd{prec} is smaller than the
 precision of the cached value; otherwise the newly computed data replaces the

@@ -1853,6 +1853,7 @@ GEN     RgX_RgM_eval(GEN x, GEN y);
 GEN     RgX_RgM_eval_col(GEN x, GEN M, long c);
 GEN     RgX_RgMV_eval(GEN x, GEN y);
 GEN     RgX_deflate_max(GEN x0, long *m);
+GEN     RgX_integ(GEN x);
 GEN     ceil_safe(GEN x);
 GEN     ceilr(GEN x);
 GEN     centerlift(GEN x);
@@ -2755,6 +2756,7 @@ ulong   upowuu(ulong p, ulong k);
 
 GEN     Qp_gamma(GEN x);
 GEN     bernfrac(long n);
+GEN     bernpol(long k, long v);
 GEN     bernreal(long n, long prec);
 GEN     gach(GEN x, long prec);
 GEN     gacos(GEN x, long prec);
@@ -2772,6 +2774,7 @@ GEN     gsh(GEN x, long prec);
 GEN     gth(GEN x, long prec);
 void    mpbern(long nomb, long prec);
 GEN     mpfactr(long n, long prec);
+GEN     sumformal(GEN T, long v);
 
 /* trans3.c */
 

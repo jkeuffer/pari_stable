@@ -737,7 +737,7 @@ gath(GEN x, long prec)
 /**                                                                **/
 /********************************************************************/
 static const long BERN_MINNB = 5;
-/* compute B_2,...,B_2*nb */
+/* compute B_2,...,B_2*nb. If prec = 0, compute exactly */
 void
 mpbern(long nb, long prec)
 {
@@ -746,7 +746,8 @@ mpbern(long nb, long prec)
   GEN B;
   pari_timer T;
 
-  incrprec(prec); /* compute one more word of accuracy than required */
+  /* one more word of accuracy than required */
+  if (prec) incrprec(prec); else prec = LONG_MAX; /* oo */
   if (nb < BERN_MINNB) nb = BERN_MINNB;
   if (bernzone)
   { /* don't recompute known Bernoulli */
@@ -755,6 +756,7 @@ mpbern(long nb, long prec)
     for (n = BERN_MINNB+1; n <= N; n++)
     {
       GEN c = gel(bernzone,n);
+      /* also stop if prec = oo */
       if (typ(c) == t_REAL && realprec(c) < prec) break;
     }
     if (n > N) return;
@@ -774,7 +776,7 @@ mpbern(long nb, long prec)
   avma = av;
   if (DEBUGLEVEL) {
     err_printf("caching Bernoulli numbers 2 to 2*%ld, prec = %ld\n",
-               nb,prec);
+               nb, prec == LONG_MAX? 0: prec);
     timer_start(&T);
   }
 
@@ -795,7 +797,8 @@ mpbern(long nb, long prec)
     }
     /* Not cached, must compute */
     /* huge accuracy ? May as well compute exactly */
-    if (n_is_small && 2*n * log(2*n) < prec2nbits_mul(prec, LOG2))
+    if (n_is_small && (prec == LONG_MAX ||
+                       2*n * log(2*n) < prec2nbits_mul(prec, LOG2)))
       S = bernfrac_using_zeta(2*n);
     else
     {
@@ -890,6 +893,67 @@ bernvec(long nb)
   if (nb < 20) return bernvec_old(nb);
   for (i = nb; i; i--) gel(z,i) = bernfrac(i << 1);
   return y;
+}
+
+/* x := pol_x(v); B_k(x) = \sum_{i=0}^k binomial(k, i) B_i x^{k-i} */
+static GEN
+bernpol_i(long k, long v)
+{
+  GEN B, C;
+  long i;
+  if (v < 0) v = 0;
+  if (k < 0) pari_err_TYPE("bernpol [negative index]", stoi(k));
+  mpbern(k >> 1, 0); /* cache B_2, ..., B_2[k/2] */
+  C = vecbinome(k);
+  B = cgetg(k + 3, t_POL);
+  for (i = 0; i <= k; ++i) gel(B, k-i+2) = gmul(gel(C,i+1), bernfrac(i));
+  B[1] = evalsigne(1) | evalvarn(v);
+  return B;
+}
+GEN
+bernpol(long k, long v) {
+  pari_sp av = avma;
+  return gerepileupto(av, bernpol_i(k, v));
+}
+/* x := pol_x(v); return 1^e + ... + x^e = x^e + (B_{e+1}(x) - B_{e+1})/(e+1) */
+static GEN
+faulhaber(long e, long v)
+{
+  GEN B;
+  if (e == 0) return pol_x(v);
+  B = RgX_integ(bernpol_i(e, v)); /* (B_{e+1}(x) - B_{e+1}) / (e+1) */
+  gel(B,e+2) = gaddgs(gel(B,e+2), 1); /* add x^e, in place */
+  return B;
+}
+/* sum_v T(v), T a polynomial expression in v */
+GEN
+sumformal(GEN T, long v)
+{
+  pari_sp av = avma, av2, lim;
+  long i, t, d;
+  GEN R;
+
+  T = simplify_shallow(T);
+  t = typ(T);
+  if (is_scalar_t(t))
+    return gerepileupto(av, monomialcopy(T, 1, v < 0? 0: v));
+  if (t != t_POL) pari_err_TYPE("sumformal [not a t_POL]", T);
+  if (v < 0) v = varn(T);
+  av2 = avma; lim = stack_lim(av2,3);
+  R = gen_0;
+  d = poldegree(T,v);
+  for (i = d; i >= 0; i--)
+  {
+    GEN c = polcoeff0(T, i, v);
+    if (gcmp0(c)) continue;
+    R = gadd(R, gmul(c, faulhaber(i, v)));
+    if (low_stack(lim,stack_lim(av2,3)))
+    {
+      if(DEBUGMEM>1) pari_warn(warnmem,"sumformal, i = %ld/%ld", i,d);
+      R = gerepileupto(av2, R);
+    }
+  }
+  return gerepileupto(av, R);
 }
 
 /********************************************************************/
