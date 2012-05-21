@@ -923,7 +923,7 @@ GEN     gsumdiv(GEN n);
 GEN     gsumdivk(GEN n,long k);
 byteptr initprimes(ulong maxnum);
 void    initprimetable(ulong maxnum);
-ulong   init_primepointer(ulong a, ulong p, byteptr *ptr);
+ulong   init_primepointer(ulong a, byteptr *pd);
 long    issquarefree(GEN x);
 long    istotient(GEN n, GEN *px);
 long    uissquarefree(ulong n);

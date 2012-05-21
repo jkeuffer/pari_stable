@@ -1493,8 +1493,8 @@ nf_deg1_prime(GEN nf)
   GEN bad = mulii(nf_get_disc(nf), nf_get_index(nf));
   GEN T = nf_get_pol(nf), p, z;
   long degnf = degpol(T);
-  byteptr pt = diffptr;
-  ulong pp = init_primepointer(degnf, 0, &pt);
+  byteptr pt;
+  ulong pp = init_primepointer(degnf, &pt);
   for(;;)
   {
     pari_sp av = avma;

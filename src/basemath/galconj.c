@@ -1200,8 +1200,8 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l)
   plift = 0;
   nbtest = 0;
   nbmax = 8+(n>>1);
-  pp = primepointer = diffptr;
-  p = init_primepointer(n*maxss(expu(n)-3, 2), 0, &primepointer);
+  pp = diffptr;
+  p = init_primepointer(n*maxss(expu(n)-3, 2), &primepointer);
   av = avma;
   while (!plift || (nbtest < nbmax && (nbtest <=8 || order < (n>>1)))
                 || (n == 24 && O[6] == 0 && O[4] == 0)
@@ -1266,7 +1266,7 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l)
   if (calcul_l && O[1] <= linf)
   {
     pari_sp av2 = avma;
-    p = init_primepointer(linf+1, p, &primepointer);
+    p = init_primepointer(linf+1, &primepointer);
     for(;; avma = av2) /*find a totally split prime l*/
     {
       GEN Tp = ZX_to_Flx(T, p);
@@ -2237,14 +2237,14 @@ numberofconjugates(GEN T, long pinit)
 {
   pari_sp av = avma;
   long p, c, nbtest = 0, n = degpol(T), nbmax = (n < 10)? 20: (n<<1) + 1;
-  byteptr diff = diffptr;
+  byteptr diff;
 
 #if 0
   c = sturm(T); c = ugcd(c, n - c); /* too costly: finite primes are cheaper */
 #else
   c = n;
 #endif
-  p = init_primepointer(pinit, 0, &diff);
+  p = init_primepointer(pinit, &diff);
   for (; nbtest < nbmax && c > 1; avma = av)
   {
     GEN L, Tp = ZX_to_Flx(T,p);

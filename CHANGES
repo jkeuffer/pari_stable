@@ -173,6 +173,10 @@ BA 48- agm now returns the optimal AGM
    55- format of cached Bernoulli table: now a t_VEC of t_FRAC / t_REALs.
        Removed bern() macro. The new data must be accessed using bernfrac /
        bernreal.
+   56- [libpari] simplify init_primepointer(n, p, &pd) interface
+       => init_primepointer(n, &pd). Remove argument 'p', ignore the previous
+       value of pd [ remove assumption that it pointed into a prime table ]
+       and always set pd to a pointer into the private prime table.
 
   Added
     1- mathnf for matrices over K[X] [#41]

@@ -188,14 +188,8 @@ update_p(byteptr *ptr, ulong prime[])
   if (typ(z) == t_INT) a = 1; else { z = gceil(z); a = 0; }
   if (lgefint(z) > 3) { prime[2] = ULONG_MAX; /* = infinity */ return; }
   a += itou(z); c = prime[2];
-  if (c < a)
-    prime[2] = init_primepointer(a, c, ptr); /* increased */
-  else if (c > a)
-  { /* lowered, reset p */
-    *ptr = diffptr;
-    prime[2] = init_primepointer(a, 0, ptr);
-  }
-  set_lex(-1,(GEN)prime);
+  if (c != a) prime[2] = init_primepointer(a, ptr);
+  set_lex(-1, (GEN)prime);
 }
 
 static byteptr
@@ -216,7 +210,7 @@ prime_loop_init(GEN ga, GEN gb, ulong *a, ulong *b, ulong *p)
   *a = itou(ga);
   *b = itou(gb); if (*a > *b) return NULL;
   maxprime_check(*b);
-  *p = init_primepointer(*a, 0, &d); return d;
+  *p = init_primepointer(*a, &d); return d;
 }
 
 void

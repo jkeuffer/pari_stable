@@ -2031,10 +2031,10 @@ in the \kbd{pari\_init} call.
 differences for $p < maxp$) and assign it to \kbd{diffptr}. You should refrain
 from changing \kbd{diffptr} and call this function instead.
 
-\fun{ulong}{init_primepointer}{ulong a, ulong p, byteptr *ptr}
-assume \kbd{*ptr} is inside of a \kbd{diffptr} containing the successive
-differences between primes, and $p$ is the current prime (up to \kbd{*ptr}
-excluded). Returns return the smallest prime $\geq a$, and update \kbd{ptr}.
+\fun{ulong}{init_primepointer}{ulong a, byteptr *pd}
+returns the smallest prime $p \geq a$, and sets \kbd{*pd} to the proper offset
+of \kbd{diffptr} so that \kbd{NEXT\_PRIME\_VIADIFF(p, *pd)} correctly
+returns \kbd{unextprime(p + 1)}.
 
 \subsec{Numerical analysis}
 

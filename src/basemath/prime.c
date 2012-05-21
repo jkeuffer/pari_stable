@@ -935,24 +935,40 @@ randomprime(GEN N)
   }
 }
 
-ulong
-uprimepi(ulong n)
+/* set *pp = nextprime(a) = p
+ *     *pd so that NEXT_PRIME_VIADIFF(d, p) = nextprime(p+1)
+ *     *pn so that p = the n-th prime
+ * error if nextprime(a) is out of primetable bounds */
+void
+prime_table_next_p(ulong a, byteptr *pd, ulong *pp, ulong *pn)
 {
   byteptr d;
-  ulong p, res;
-  maxprime_check(n);
-  prime_table_closest_p(n, &d, &p, &res);
-  if (p < n)
+  ulong p, n;
+  prime_table_closest_p(a, &d, &p, &n);
+  if (p < a)
   {
-    do { res++; NEXT_PRIME_VIADIFF(p,d); } while (p < n);
-    return p == n? res: res-1;
+    do {
+      if (!*d) pari_err_MAXPRIME(a);
+      n++; NEXT_PRIME_VIADIFF(p,d);
+    } while (p < a);
   }
-  else if (p == n) return res;
-  else
+  else if (p != a)
   {
-    do { res--; PREC_PRIME_VIADIFF(p,d); } while (p > n) ;
-    return res;
+    do { n--; PREC_PRIME_VIADIFF(p,d); } while (p > a) ;
+    if (p < a) { NEXT_PRIME_VIADIFF(p,d); n++; }
   }
+  *pn = n;
+  *pp = p;
+  *pd = d;
+}
+
+ulong
+uprimepi(ulong a)
+{
+  byteptr d;
+  ulong p, n;
+  prime_table_next_p(a, &d, &p, &n);
+  return p == a? n: n-1;
 }
 
 GEN

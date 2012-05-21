@@ -16,6 +16,10 @@ This file lists the incompatible changes between Version 2.x and older versions
   - format of cached Bernoulli table: now a t_VEC of t_FRAC / t_REALs.
     Removed bern() macro. The new data must be accessed using bernfrac /
     bernreal.
+  - simplify init_primepointer(n, p, &pd) interface
+    => init_primepointer(n, &pd). Remove argument 'p', ignore the previous
+    value of pd [ remove assumption that it pointed into a prime table ]
+    and always set pd to a pointer into the private prime table.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.4 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
