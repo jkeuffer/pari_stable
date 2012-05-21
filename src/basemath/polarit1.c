@@ -567,7 +567,7 @@ FpX_split_part(GEN f, GEN p)
 }
 
 static GEN
-FqX_split_part(GEN f, GEN T, GEN p)
+FpXQX_split_part(GEN f, GEN T, GEN p)
 {
   long n = degpol(f);
   GEN z, X = pol_x(varn(f));
@@ -575,7 +575,7 @@ FqX_split_part(GEN f, GEN T, GEN p)
   f = FpXQX_red(f, T, p);
   z = FpXQXQ_pow(X, powiu(p, degpol(T)), f, T, p);
   z = FpXX_sub(z, X , p);
-  return FqX_gcd(z, f, T, p);
+  return FpXQX_gcd(z, f, T, p);
 }
 
 static GEN
@@ -601,11 +601,17 @@ FpX_nbroots(GEN f, GEN p)
 }
 
 long
-FqX_nbroots(GEN f, GEN T, GEN p)
+FpXQX_nbroots(GEN f, GEN T, GEN p)
 {
   pari_sp av = avma;
-  GEN z = FqX_split_part(f, T, p);
+  GEN z = FpXQX_split_part(f, T, p);
   avma = av; return degpol(z);
+}
+
+long
+FqX_nbroots(GEN f, GEN T, GEN p)
+{
+  return T ? FpXQX_nbroots(f, T, p): FpX_nbroots(f, p);
 }
 
 long
@@ -748,13 +754,17 @@ FpX_nbfact(GEN u, GEN p)
 }
 
 long
-FqX_nbfact(GEN u, GEN T, GEN p)
+FpXQX_nbfact(GEN u, GEN T, GEN p)
 {
   pari_sp av = avma;
-  GEN vker;
-  if (!T) return FpX_nbfact(u, p);
-  vker = FqX_Berlekamp_ker(u, powiu(p, degpol(T)), T, p);
+  GEN vker = FqX_Berlekamp_ker(u, powiu(p, degpol(T)), T, p);
   avma = av; return lg(vker)-1;
+}
+
+long
+FqX_nbfact(GEN u, GEN T, GEN p)
+{
+  return T ? FpX_nbfact(u, p): FpXQX_nbfact(u, T, p);
 }
 
 /************************************************************/

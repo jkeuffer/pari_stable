@@ -2396,6 +2396,8 @@ long    FpX_nbroots(GEN f, GEN p);
 GEN     FpX_oneroot(GEN f, GEN p);
 GEN     FpX_roots(GEN f, GEN p);
 GEN     FpX_rootsff(GEN P, GEN p, GEN T);
+long    FpXQX_nbfact(GEN u, GEN T, GEN p);
+long    FpXQX_nbroots(GEN f, GEN T, GEN p);
 GEN     FqX_deriv(GEN f, GEN T, GEN p);
 GEN     FqX_factor(GEN x, GEN T, GEN p);
 long    FqX_is_squarefree(GEN P, GEN T, GEN p);

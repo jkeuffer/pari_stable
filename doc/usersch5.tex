@@ -4126,11 +4126,15 @@ map in $\F_p[X]/(P)$ (resp.~$\F_p[X]/(Q)$).
 inverse automorphism of \kbd{S}, in the same format, i.e.~an \kbd{FpX}~$H$
 such that $H(\kbd{S}) \equiv X$ modulo $(\kbd{T}, \kbd{p})$.
 
-\fun{long}{FqX_nbfact}{GEN u, GEN T, GEN p}.
+\fun{long}{FpXQX_nbfact}{GEN u, GEN T, GEN p}.
 Assumes \kbd{p} is prime and \kbd{T} irreducible in $\F_p[X]$.
 
-\fun{long}{FqX_nbroots}{GEN f, GEN T, GEN p}
+\fun{long}{FqX_nbfact}{GEN u, GEN T, GEN p} as above but accept \kbd{T=NULL}.
+
+\fun{long}{FpXQX_nbroots}{GEN f, GEN T, GEN p}
 Assumes \kbd{p} is prime and \kbd{T} irreducible in $\F_p[X]$.
+
+\fun{long}{FqX_nbroots}{GEN f, GEN T, GEN p} as above but accept \kbd{T=NULL}.
 
 \subsec{\kbd{Flx}} Let \kbd{p} an understood \kbd{ulong}, assumed to be
 prime, to be given the the function arguments; an \kbd{Fl} is an \kbd{ulong}
