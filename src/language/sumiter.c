@@ -177,21 +177,6 @@ forstep(GEN a, GEN b, GEN s, GEN code)
   pop_lex(1); avma = av0;
 }
 
-/* value changed during the loop, replace by the first prime whose
-   value is strictly larger than new value */
-static void
-update_p(byteptr *ptr, ulong prime[])
-{
-  GEN z = get_lex(-1);
-  ulong a, c;
-
-  if (typ(z) == t_INT) a = 1; else { z = gceil(z); a = 0; }
-  if (lgefint(z) > 3) { prime[2] = ULONG_MAX; /* = infinity */ return; }
-  a += itou(z); c = prime[2];
-  if (c != a) prime[2] = init_primepointer(a, ptr);
-  set_lex(-1, (GEN)prime);
-}
-
 static byteptr
 prime_loop_init(GEN ga, GEN gb, ulong *a, ulong *b, ulong *p)
 {
@@ -229,10 +214,10 @@ forprime(GEN ga, GEN gb, GEN code)
   while (prime[2] < b)
   {
     closure_evalvoid(code); if (loop_break()) break;
-    if (get_lex(-1) == (GEN) prime)
-      NEXT_PRIME_VIADIFF(prime[2], d);
-    else
-      update_p(&d, prime);
+    /* p changed in 'code', complain */
+    if (get_lex(-1) != (GEN) prime)
+      pari_err(e_MISC,"prime index read-only: was changed to %Ps", get_lex(-1));
+    NEXT_PRIME_VIADIFF(prime[2], d);
     avma = av;
   }
   /* if b = P --> *d = 0 now and the loop wouldn't end if it read 'while

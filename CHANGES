@@ -177,6 +177,12 @@ BA 48- agm now returns the optimal AGM
        => init_primepointer(n, &pd). Remove argument 'p', ignore the previous
        value of pd [ remove assumption that it pointed into a prime table ]
        and always set pd to a pointer into the private prime table.
+   57- forprime loop: no longer allow to modify the loop index
+       ? forprime(p = 2, 10, p = [])
+        ***   at top-level: forprime(p=2,10,p=[])
+        ***                                   ^---
+        ***   prime index read-only: was changed to [].
+
 
   Added
     1- mathnf for matrices over K[X] [#41]

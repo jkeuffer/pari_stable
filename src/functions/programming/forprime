@@ -14,26 +14,23 @@ Function: forprime
 Section: programming/control
 C-Name: forprime
 Prototype: vV=GGI
-Help: forprime(X=a,b,seq): the sequence is evaluated, X running over the
+Help: forprime(p=a,b,seq): the sequence is evaluated, p running over the
  primes between a and b.
 Doc: evaluates \var{seq},
- where the formal variable $X$ ranges over the prime numbers between $a$ to
- $b$ (including $a$ and $b$ if they are prime). More precisely, the value of
- $X$ is incremented to the smallest prime strictly larger than $X$ at the end
- of each iteration. Nothing is done if $a>b$. Note that $a$ and $b$ must be in
- $\R$.
-
+ where the formal variable $p$ ranges over the prime numbers between the real
+ numbers $a$ to $b$ (including $a$ and $b$ if they are prime). More precisely,
+ the value of
+ $p$ is incremented to \kbd{nextprime($p$ + 1)}, the smallest prime strictly
+ larger than $p$, at the end of each iteration. Nothing is done if $a>b$.
  \bprog
- f(N) =
- {
-   forprime(p = 2, N,
-     print(p);
-     if (p == 3, p = 6);
-   )
- }
- ? f(12)
- 2
- 3
+ ? forprime(p = 4, 10, print(p))
+ 5
  7
- 11
+ @eprog\noindent
+ Note that the value of $p$ cannot be modified within \var{seq}:
+ \bprog
+ ? forprime(p = 2, 10, p = [])
+  ***   at top-level: forprime(p=2,10,p=[])
+  ***                                   ^---
+  ***   prime index read-only: was changed to [].
  @eprog
