@@ -2975,7 +2975,7 @@ FlxqX_divrem(GEN x, GEN y, GEN T, ulong p, GEN *pr)
       if (pr == ONLY_REM) return pol_0(vx);
       *pr = pol_0(vx);
     }
-    if (Flx_equal1(lead)) return vecsmall_copy(x);
+    if (Flx_equal1(lead)) return gcopy(x);
     av0 = avma;
     return gerepileupto(av0,FlxqX_Flxq_mul(x,Flxq_inv(lead,T,p),T,p));
   }
@@ -3185,8 +3185,8 @@ FlxqX_safegcd(GEN P, GEN Q, GEN T, ulong p)
 {
   pari_sp btop, ltop = avma, st_lim;
   GEN U;
-  if (!signe(P)) return vecsmall_copy(Q);
-  if (!signe(Q)) return vecsmall_copy(P);
+  if (!signe(P)) return gcopy(Q);
+  if (!signe(Q)) return gcopy(P);
   btop = avma; st_lim = stack_lim(btop, 1);
   for(;;)
   {
