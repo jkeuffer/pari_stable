@@ -97,7 +97,7 @@ FpE_add_slope(GEN P, GEN Q, GEN a4, GEN p, GEN *slope)
     if (equalii(Py, Qy))
       return FpE_dbl_slope(P, a4, p, slope);
     else
-      return mkvec(gen_0);
+      return ellinf();
   }
   *slope = Fp_div(Fp_sub(Py, Qy, p), Fp_sub(Px, Qx, p), p);
   R = cgetg(3,t_VEC);
