@@ -365,7 +365,7 @@ Flx_shift(GEN a, long n)
 {
   long i, l = lg(a);
   GEN  b;
-  if (l==2 || !n) return vecsmall_copy(a);
+  if (l==2 || !n) return Flx_copy(a);
   if (l+n<=2) return pol0_Flx(a[1]);
   b = cgetg(l+n, t_VECSMALL);
   b[1] = a[1];
@@ -956,7 +956,7 @@ Flx_rem_Montgomery(GEN x, GEN mg, GEN T, ulong p)
   long lt = degpol(T); /*We discard the leading term*/
   long ld, lm, lT, lmg;
   if (l<=lt)
-    return vecsmall_copy(x);
+    return Flx_copy(x);
   (void)new_chunk(lt+2);
   ld = l-lt;
   lm = minss(ld, lgpol(mg));
@@ -984,7 +984,7 @@ Flx_rem_basecase(GEN x, GEN y, ulong p)
 
   dy = degpol(y); if (!dy) return pol0_Flx(x[1]);
   dx = degpol(x);
-  dz = dx-dy; if (dz < 0) return vecsmall_copy(x);
+  dz = dx-dy; if (dz < 0) return Flx_copy(x);
   x += 2; y += 2;
   inv = y[dy];
   if (inv != 1UL) inv = Fl_inv(inv,p);
@@ -1071,7 +1071,7 @@ Flx_divrem(GEN x, GEN y, ulong p, GEN *pr)
   if (!dy)
   {
     if (pr && pr != ONLY_DIVIDES) *pr = pol0_Flx(sv);
-    if (y[2] == 1UL) return vecsmall_copy(x);
+    if (y[2] == 1UL) return Flx_copy(x);
     return Flx_Fl_mul(x, Fl_inv(y[2], p), p);
   }
   dx = degpol(x);
@@ -1079,7 +1079,7 @@ Flx_divrem(GEN x, GEN y, ulong p, GEN *pr)
   if (dz < 0)
   {
     q = pol0_Flx(sv);
-    if (pr && pr != ONLY_DIVIDES) *pr = vecsmall_copy(x);
+    if (pr && pr != ONLY_DIVIDES) *pr = Flx_copy(x);
     return q;
   }
   x += 2;
@@ -1192,7 +1192,7 @@ Flx_deflate(GEN x0, long d)
 {
   GEN z, y, x;
   long i,id, dy, dx = degpol(x0);
-  if (d <= 1) return vecsmall_copy(x0);
+  if (d <= 1) return Flx_copy(x0);
   if (dx < 0) return pol0_Flx(x0[1]);
   dy = dx/d;
   y = cgetg(dy+3, t_VECSMALL); y[1] = x0[1];
@@ -1352,7 +1352,7 @@ GEN
 Flx_gcd(GEN x, GEN y, ulong p)
 {
   pari_sp av = avma, lim = stack_lim(av,2);
-  if (!lgpol(x)) return vecsmall_copy(y);
+  if (!lgpol(x)) return Flx_copy(y);
   while (lg(y)>Flx_GCD_LIMIT)
   {
     GEN c;
@@ -1797,7 +1797,7 @@ Flxq_powu(GEN x, ulong n, GEN T, ulong p)
   switch(n)
   {
     case 0: return pol1_Flx(T[1]);
-    case 1: return vecsmall_copy(x);
+    case 1: return Flx_copy(x);
     case 2: return Flxq_sqr(x, T, p);
   }
   D.T = T; D.p = p;
@@ -1822,7 +1822,7 @@ Flxq_pow(GEN x, GEN n, GEN T, ulong p)
   if (!s) return pol1_Flx(T[1]);
   if (s < 0)
     x = Flxq_inv(x,T,p);
-  if (is_pm1(n)) return s < 0 ? x : vecsmall_copy(x);
+  if (is_pm1(n)) return s < 0 ? x : Flx_copy(x);
   D.T = T;
   D.p = p;
   if (lg(T) >= Flx_POW_MONTGOMERY_LIMIT)
@@ -1871,7 +1871,7 @@ Flxq_powers(GEN x, long l, GEN T, ulong p)
   GEN V = cgetg(l+2,t_VEC);
   long i, v = T[1];
   gel(V,1) = pol1_Flx(v);  if (l==0) return V;
-  gel(V,2) = vecsmall_copy(x); if (l==1) return V;
+  gel(V,2) = Flx_copy(x); if (l==1) return V;
   gel(V,3) = Flxq_sqr_mg(x,mg,T,p);
   if ((degpol(x)<<1) < degpol(T))
     for(i = 4; i < l+2; i++)
@@ -2457,7 +2457,7 @@ Flxq_conjvec(GEN x, GEN T, ulong p)
 {
   long i, l = lgpol(T);
   GEN z = cgetg(l,t_COL);
-  gel(z,1) = vecsmall_copy(x);
+  gel(z,1) = Flx_copy(x);
   for (i=2; i<l; i++) gel(z,i) = Flxq_powu(gel(z,i-1), p, T, p);
   return z;
 }
@@ -2738,7 +2738,7 @@ FlxX_add(GEN x, GEN y, ulong p)
   if (ly>lx) swapspec(x,y, lx,ly);
   lz = lx; z = cgetg(lz, t_POL); z[1]=x[1];
   for (i=2; i<ly; i++) gel(z,i) = Flx_add(gel(x,i), gel(y,i), p);
-  for (   ; i<lx; i++) gel(z,i) = vecsmall_copy(gel(x,i));
+  for (   ; i<lx; i++) gel(z,i) = Flx_copy(gel(x,i));
   return FlxX_renormalize(z, lz);
 }
 
@@ -2752,7 +2752,7 @@ FlxX_subspec(GEN x, GEN y, ulong p, long lx, long ly)
   {
     lz = lx+2; z = cgetg(lz, t_POL)+2;
     for (i=0; i<ly; i++) gel(z,i) = Flx_sub(gel(x,i),gel(y,i),p);
-    for (   ; i<lx; i++) gel(z,i) = vecsmall_copy(gel(x,i));
+    for (   ; i<lx; i++) gel(z,i) = Flx_copy(gel(x,i));
   }
   else
   {
@@ -2775,7 +2775,7 @@ FlxX_sub(GEN x, GEN y, ulong p)
   {
     z[1] = x[1];
     for (i=2; i<ly; i++) gel(z,i) = Flx_sub(gel(x,i),gel(y,i),p);
-    for (   ; i<lx; i++) gel(z,i) = vecsmall_copy(gel(x,i));
+    for (   ; i<lx; i++) gel(z,i) = Flx_copy(gel(x,i));
     if (lx==ly) z = FlxX_renormalize(z, lz);
   }
   else
@@ -2830,7 +2830,7 @@ FlxX_recipspec(GEN x, long l, long n, long vs)
   long i;
   GEN z=cgetg(n+2,t_POL)+2;
   for(i=0; i<l; i++)
-    gel(z,n-i-1) = vecsmall_copy(gel(x,i));
+    gel(z,n-i-1) = Flx_copy(gel(x,i));
   for(   ; i<n; i++)
     gel(z,n-i-1) = pol0_Flx(vs);
   return FlxX_renormalize(z-2,n+2);
