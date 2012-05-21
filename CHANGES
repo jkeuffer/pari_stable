@@ -182,7 +182,7 @@ BA 48- agm now returns the optimal AGM
         ***   at top-level: forprime(p=2,10,p=[])
         ***                                   ^---
         ***   prime index read-only: was changed to [].
-
+   58- faster forparii() [ for() with t_INT lower bound ]
 
   Added
     1- mathnf for matrices over K[X] [#41]

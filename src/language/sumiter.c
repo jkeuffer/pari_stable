@@ -74,13 +74,18 @@ forparii(GEN a, GEN b, GEN code)
     closure_evalvoid(code); if (loop_break()) break;
     if (cmpii(a,b) >= 0) break;
     a = get_lex(-1);
-    a = a==aa? incloop(a): gaddgs(a,1);
-    if (low_stack(lim, stack_lim(av,1)))
-    {
-      if (DEBUGMEM>1) pari_warn(warnmem,"forparii");
-      a = gerepileupto(av,a);
+    if (a == aa)
+      a = incloop(a);
+    else
+    { /* 'code' modified a ! Be careful (and slow) from now on */
+      a = gaddgs(a,1);
+      if (low_stack(lim, stack_lim(av,1)))
+      {
+        if (DEBUGMEM>1) pari_warn(warnmem,"forparii");
+        a = gerepileupto(av,a);
+      }
+      set_lex(-1,a);
     }
-    set_lex(-1,a);
   }
   pop_lex(1);  avma = av0;
 }
