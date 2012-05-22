@@ -1268,18 +1268,24 @@ match_and_sort(GEN compile_atkin, GEN Mu, GEN u, GEN a4, GEN a6, GEN p)
   for (i = 1; i < lgiant; i++)
   {
     GEN d;
-    long s = zv_search(table, hash_GEN(gel(point, 1)));
-    if (s) {
-      GEN B = gel(baby,table_ind[s]), G = gel(giant,i);
-      GEN GMb = mulii(G, Mb), BMg = mulii(B, Mg);
-      GEN Be = subii(subii(pp1, u), mulii(Mu, addii(SgMb, BMg)));
-      GEN Bp = FpE_mul(P, Be, a4, p);
-      /* p+1 - u - Mu (Sg Mb + GIANT Mb + BABY Mg) */
-      if (equalii(gel(Bp,1),gel(point,1)))
+    ulong h = hash_GEN(gel(point, 1));
+    long s = zv_search(table, h);
+    if (s)
+    {
+      while (table[s] == h && s) s--;
+      for (s++; table[s] == h && s < lbaby; s++)
       {
-        GEN card = subii(Be, mulii(Mu, GMb));
-        card = mkvec2(card, addii(card, mulii(mulsi(2,Mu), GMb)));
-        return choose_card(card, a4, a6, p);
+        GEN B = gel(baby,table_ind[s]), G = gel(giant,i);
+        GEN GMb = mulii(G, Mb), BMg = mulii(B, Mg);
+        GEN Be = subii(subii(pp1, u), mulii(Mu, addii(SgMb, BMg)));
+        GEN Bp = FpE_mul(P, Be, a4, p);
+        /* p+1 - u - Mu (Sg Mb + GIANT Mb + BABY Mg) */
+        if (equalii(gel(Bp,1),gel(point,1)))
+        {
+          GEN card = subii(Be, mulii(Mu, GMb));
+          card = mkvec2(card, addii(card, mulii(mulsi(2,Mu), GMb)));
+          return choose_card(card, a4, a6, p);
+        }
       }
     }
     d = subii(gel(giant, i+1), gel(giant, i));
