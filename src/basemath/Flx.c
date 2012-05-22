@@ -1812,41 +1812,41 @@ Flxq_sqr_mg(GEN y,GEN mg,GEN T,ulong p)
   return Flx_rem_Barrett(z, mg, T, p);
 }
 
-typedef struct {
+struct _Flxq {
   GEN mg;
   GEN T;
   ulong p;
-} Flxq_muldata;
+};
 
 static GEN
 _sqr_Barrett(void *data, GEN x)
 {
-  Flxq_muldata *D = (Flxq_muldata*)data;
+  struct _Flxq *D = (struct _Flxq*)data;
   return Flxq_sqr_mg(x,D->mg, D->T, D->p);
 }
 static GEN
 _mul_Barrett(void *data, GEN x, GEN y)
 {
-  Flxq_muldata *D = (Flxq_muldata*)data;
+  struct _Flxq *D = (struct _Flxq*)data;
   return Flxq_mul_mg(x,y,D->mg, D->T, D->p);
 }
 
 static GEN
 _Flxq_sqr(void *data, GEN x)
 {
-  Flxq_muldata *D = (Flxq_muldata*)data;
+  struct _Flxq *D = (struct _Flxq*)data;
   return Flxq_sqr(x, D->T, D->p);
 }
 static GEN
 _Flxq_mul(void *data, GEN x, GEN y)
 {
-  Flxq_muldata *D = (Flxq_muldata*)data;
+  struct _Flxq *D = (struct _Flxq*)data;
   return Flxq_mul(x,y, D->T, D->p);
 }
 static GEN
 _Flxq_one(void *data)
 {
-  Flxq_muldata *D = (Flxq_muldata*)data;
+  struct _Flxq *D = (struct _Flxq*)data;
   return pol1_Flx(D->T[1]);
 }
 
@@ -1855,7 +1855,7 @@ GEN
 Flxq_powu(GEN x, ulong n, GEN T, ulong p)
 {
   pari_sp av = avma;
-  Flxq_muldata D;
+  struct _Flxq D;
   GEN y;
   switch(n)
   {
@@ -1879,7 +1879,7 @@ GEN
 Flxq_pow(GEN x, GEN n, GEN T, ulong p)
 {
   pari_sp av = avma;
-  Flxq_muldata D;
+  struct _Flxq D;
   GEN y;
   long s = signe(n);
   if (!s) return pol1_Flx(T[1]);
@@ -1930,7 +1930,7 @@ Flxq_div(GEN x,GEN y,GEN T,ulong p)
 GEN
 Flxq_powers(GEN x, long l, GEN T, ulong p)
 {
-  Flxq_muldata D;
+  struct _Flxq D;
   int use_sqr = (degpol(x)<<1)>=degpol(T);
   D.T = T; D.p = p;
   if (l>2 && lg(T) >= Flx_POW_BARRETT_LIMIT)
@@ -2020,7 +2020,7 @@ Flxq_issquare(GEN x, GEN T, ulong p)
 static GEN
 _Flxq_pow(void *data, GEN x, GEN n)
 {
-  Flxq_muldata *D = (Flxq_muldata*)data;
+  struct _Flxq *D = (struct _Flxq*)data;
   return Flxq_pow(x,n, D->T, D->p);
 }
 
@@ -2028,7 +2028,7 @@ static GEN
 _Flxq_rand(void *data)
 {
   pari_sp av=avma;
-  Flxq_muldata *D = (Flxq_muldata*)data;
+  struct _Flxq *D = (struct _Flxq*)data;
   GEN z;
   do
   {
@@ -2404,7 +2404,7 @@ Flxq_log_index(GEN a0, GEN b0, GEN m, GEN T0, ulong p)
 static GEN
 Flxq_easylog(void* E, GEN a, GEN g, GEN ord)
 {
-  Flxq_muldata *f = (Flxq_muldata *)E;
+  struct _Flxq *f = (struct _Flxq *)E;
   if (Flx_equal1(a)) return gen_0;
   if (zv_equal(a,g)) return gen_1;
   if (!degpol(a) && !degpol(g)) return Fp_log(utoi(a[2]),utoi(g[2]),ord, utoi(f->p));
@@ -2417,7 +2417,7 @@ static const struct bb_group Flxq_star={_Flxq_mul,_Flxq_pow,_Flxq_rand,hash_GEN,
 GEN
 Flxq_order(GEN a, GEN ord, GEN T, ulong p)
 {
-  Flxq_muldata E;
+  struct _Flxq E;
   E.T=T; E.p=p;
   return gen_order(a,ord,(void*)&E,&Flxq_star);
 }
@@ -2426,7 +2426,7 @@ Flxq_order(GEN a, GEN ord, GEN T, ulong p)
 GEN
 Flxq_log(GEN a, GEN g, GEN ord, GEN T, ulong p)
 {
-  Flxq_muldata E;
+  struct _Flxq E;
   GEN v = dlog_get_ordfa(ord);
   ord = mkvec2(gel(v,1),ZM_famat_limit(gel(v,2),int2n(27)));
   E.T=T; E.p=p;
@@ -2436,7 +2436,7 @@ Flxq_log(GEN a, GEN g, GEN ord, GEN T, ulong p)
 GEN
 Flxq_sqrtn(GEN a, GEN n, GEN T, ulong p, GEN *zeta)
 {
-  Flxq_muldata E;
+  struct _Flxq E;
   if (!lgpol(a))
   {
     if (zeta)
@@ -2578,6 +2578,52 @@ gener_Flxq(GEN T, ulong p, GEN *po)
     gerepileall(av0, 2, &g, po);
   }
   return g;
+}
+
+static GEN
+_Flxq_red(void *E, GEN x)
+{ struct _Flxq *s = (struct _Flxq *)E;
+  return Flx_rem(x, s->T, s->p); }
+
+static GEN
+_Flxq_add(void *E, GEN x, GEN y)
+{ struct _Flxq *s = (struct _Flxq *)E;
+  return Flx_add(x,y,s->p); }
+
+static GEN
+_Flxq_neg(void *E, GEN x)
+{ struct _Flxq *s = (struct _Flxq *)E;
+  return Flx_neg(x,s->p); }
+
+static GEN
+_Flxq_rmul(void *E, GEN x, GEN y)
+{ struct _Flxq *s = (struct _Flxq *)E;
+  return Flx_mul(x,y,s->p); }
+
+static GEN
+_Flxq_inv(void *E, GEN x)
+{ struct _Flxq *s = (struct _Flxq *)E;
+  return Flxq_inv(x,s->T,s->p); }
+
+static int
+_Flxq_equal0(GEN x) { return lgpol(x)==0; }
+
+static GEN
+_Flxq_s(void *E, long x)
+{ struct _Flxq *s = (struct _Flxq *)E;
+  ulong u = x<0 ? s->p+x: x;
+  return Fl_to_Flx(u, s->T[1]);
+}
+
+static const struct bb_field Flxq_field={_Flxq_red,_Flxq_add,_Flxq_rmul,_Flxq_neg,
+                                         _Flxq_inv,_Flxq_equal0,_Flxq_s};
+
+const struct bb_field *get_Flxq_field(void **E, GEN T, ulong p)
+{
+  GEN z = new_chunk(sizeof(struct _Flxq));
+  struct _Flxq *e = (struct _Flxq *) z;
+  e->T = T; e->p  = p; *E = (void*)e;
+  return &Flxq_field;
 }
 
 /***********************************************************************/

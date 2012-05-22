@@ -2279,6 +2279,35 @@ static GEN Fp_easylog(void *E, GEN a, GEN g, GEN ord);
 static const struct bb_group Fp_star={_Fp_mul,_Fp_pow,_Fp_rand,hash_GEN,
                                       equalii,equali1,Fp_easylog};
 
+static GEN
+_Fp_red(void *E, GEN x) { return Fp_red(x, (GEN)E); }
+
+static GEN
+_Fp_add(void *E, GEN x, GEN y) { (void) E; return addii(x,y); }
+
+static GEN
+_Fp_neg(void *E, GEN x) { (void) E; return negi(x); }
+
+static GEN
+_Fp_rmul(void *E, GEN x, GEN y) { (void) E; return mulii(x,y); }
+
+static GEN
+_Fp_inv(void *E, GEN x) { return Fp_inv(x,(GEN)E); }
+
+static int
+_Fp_equal0(GEN x) { return signe(x)==0; }
+
+static GEN
+_Fp_s(void *E, long x) { (void) E; return stoi(x); }
+
+const struct bb_field Fp_field={_Fp_red,_Fp_add,_Fp_rmul,_Fp_neg,
+                                        _Fp_inv,_Fp_equal0,_Fp_s};
+
+const struct bb_field *get_Fp_field(void **E, GEN p)
+{
+  *E = (void*)p; return &Fp_field;
+}
+
 /*********************************************************************/
 /**                                                                 **/
 /**               ORDER of INTEGERMOD x  in  (Z/nZ)*                **/

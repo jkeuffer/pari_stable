@@ -1056,6 +1056,69 @@ Fq_sqrt(GEN x, GEN T, GEN p)
   return NULL;
 }
 
+struct _Fq_field
+{
+  GEN T, p;
+};
+
+static GEN
+_Fq_red(void *E, GEN x)
+{ struct _Fq_field *s = (struct _Fq_field *)E;
+  return Fq_red(x, s->T, s->p);
+}
+
+static GEN
+_Fq_add(void *E, GEN x, GEN y)
+{
+  (void) E;
+  switch((typ(x)==t_POL)|((typ(y)==t_POL)<<1))
+  {
+    case 0: return addii(x,y);
+    case 1: return ZX_Z_add(x,y);
+    case 2: return ZX_Z_add(y,x);
+    default: return ZX_add(x,y);
+  }
+}
+
+static GEN
+_Fq_neg(void *E, GEN x) { (void) E; return typ(x)==t_POL?ZX_neg(x):negi(x); }
+
+static GEN
+_Fq_mul(void *E, GEN x, GEN y)
+{
+  (void) E;
+  switch((typ(x)==t_POL)|((typ(y)==t_POL)<<1))
+  {
+    case 0: return mulii(x,y);
+    case 1: return ZX_Z_mul(x,y);
+    case 2: return ZX_Z_mul(y,x);
+    default: return ZX_mul(x,y);
+  }
+}
+
+static GEN
+_Fq_inv(void *E, GEN x)
+{ struct _Fq_field *s = (struct _Fq_field *)E;
+  return Fq_inv(x,s->T,s->p);
+}
+
+static int
+_Fq_equal0(GEN x) { return signe(x)==0; }
+
+static GEN
+_Fq_s(void *E, long x) { (void) E; return stoi(x); }
+
+static const struct bb_field Fq_field={_Fq_red,_Fq_add,_Fq_mul,_Fq_neg,
+                                       _Fq_inv,_Fq_equal0,_Fq_s};
+
+const struct bb_field *get_Fq_field(void **E, GEN T, GEN p)
+{
+  GEN z = new_chunk(sizeof(struct _Fq_field));
+  struct _Fq_field *e = (struct _Fq_field *) z;
+  e->T = T; e->p  = p; *E = (void*)e;
+  return &Fq_field;
+}
+
 /*******************************************************************/
 /*                                                                 */
 /*                             Fq[X]                               */
