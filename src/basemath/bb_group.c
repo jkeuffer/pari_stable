@@ -236,37 +236,49 @@ gen_Shanks_log(GEN x, GEN g0,GEN q, void *E, const struct bb_group *grp)
 {
   pari_sp av=avma,av1,lim;
   long lbaby,i,k;
-  GEN p1,smalltable,giant,perm,v,g0inv;
+  GEN p1,table,giant,perm,g0inv;
   p1 = sqrti(q);
   if (cmpiu(p1,LGBITS) >= 0)
     pari_err_OVERFLOW("gen_Shanks_log() [order too large]");
-  lbaby = itos(p1)+1; smalltable = cgetg(lbaby+1,t_VEC);
+  lbaby = itos(p1)+1; table = cgetg(lbaby+1,t_VECSMALL);
   g0inv = grp->pow(E,g0,gen_m1);
-
+  av1 = avma; lim=stack_lim(av1,2);
   for (p1=x, i=1;;i++)
   {
-    av1 = avma;
     if (grp->equal1(p1)) { avma = av; return stoi(i-1); }
-    gel(smalltable,i) = p1; if (i==lbaby) break;
-    p1 = gerepileupto(av1, grp->mul(E,p1,g0inv));
+    table[i] = grp->hash(p1); if (i==lbaby) break;
+    p1 = grp->mul(E,p1,g0inv);
+    if (low_stack(lim, stack_lim(av1,2)))
+    {
+      if(DEBUGMEM>1) pari_warn(warnmem,"gen_Shanks_log, baby = %ld", i);
+      p1 = gerepileupto(av1, p1);
+    }
   }
-  p1 = giant = grp->mul(E,x,grp->pow(E, p1, gen_m1));
-  gen_sort_inplace(smalltable, (void*)grp->cmp, &cmp_nodata, &perm);
+  p1 = giant = gerepileupto(av1, grp->mul(E,x,grp->pow(E, p1, gen_m1)));
+  perm = vecsmall_indexsort(table);
+  table = perm_mul(table,perm);
 
-  av1 = avma; lim=stack_lim(av1,2);
   for (k=1; k<= lbaby; k++)
   {
-    i=tablesearch(smalltable,p1,grp->cmp);
+    ulong h = grp->hash(p1);
+    long i = zv_search(table, h);
     if (i)
     {
-      v=addis(mulss(lbaby-1,k),perm[i]);
-      return gerepileuptoint(av,addsi(-1,v));
+      while (table[i] == h && i) i--;
+      for (i++; table[i] == h && i <= lbaby; i++)
+      {
+        GEN v=addis(mulss(lbaby-1,k),perm[i]-1);
+        if (!grp->cmp(grp->pow(E,g0,v),x))
+          return gerepileuptoint(av,v);
+        else if (DEBUGLEVEL)
+          err_printf("gen_Shanks_log: false positive, giant = %ld: %lu: %Ps\n", k,h,p1);
+      }
     }
     p1 = grp->mul(E,p1,giant);
 
     if (low_stack(lim, stack_lim(av1,2)))
     {
-      if(DEBUGMEM>1) pari_warn(warnmem,"gen_Shanks_log, k = %ld", k);
+      if(DEBUGMEM>1) pari_warn(warnmem,"gen_Shanks_log, giant = %ld", k);
       p1 = gerepileupto(av1, p1);
     }
   }
@@ -284,7 +296,7 @@ gen_plog(GEN x, GEN g, GEN p, void *E, const struct bb_group *grp)
   }
   if (grp->equal1(x)) return gen_0;
   if (!grp->cmp(x,g)) return gen_1;
-  if (grp->hash==NULL || expi(p)<32) return gen_Shanks_log(x,g,p,E,grp);
+  if (expi(p)<32) return gen_Shanks_log(x,g,p,E,grp);
   return gen_Pollard_log(x, g, p, E, grp);
 }
 
